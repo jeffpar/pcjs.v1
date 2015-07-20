@@ -438,8 +438,8 @@ X86CPU.CYCLES_80286 = {
 };
 
 /*
- * TODO: Except for the cycle counts at the end of this table (ie, those marked "unique to the 80386"), all these
- * values were simply copied from the 80286 table and still need to be modified and verified.
+ * TODO: All these values were simply copied from the 80286 table and still need to be modified and verified.
+ * Cycle counts for 80386-only instructions are hard-coded in their respective handlers, since those counts don't vary.
  */
 X86CPU.CYCLES_80386 = {
     nWordCyclePenalty:          0,
@@ -554,25 +554,7 @@ X86CPU.CYCLES_80386 = {
     nOpCyclesTestMI:            6,
     nOpCyclesXchgRR:            3,
     nOpCyclesXchgRM:            5,
-    nOpCyclesXLAT:              5,
-    /*
-     * Cycle counts unique to the 80386
-     */
-    nOpCyclesBitScan:           11,
-    nOpCyclesBitSetR:           6,
-    nOpCyclesBitSetM:           8,
-    nOpCyclesBitSetMExtra:      5,      // extra cycle cost for non-immediate BTC/BTR/BTS opcodes
-    nOpCyclesBitTestR:          3,
-    nOpCyclesBitTestM:          6,
-    nOpCyclesBitTestMExtra:     6,      // extra cycle cost for non-immediate BT opcode
-    nOpCyclesIMulR:             9,
-    nOpCyclesIMulM:             12,
-    nOpCyclesMovXR:             3,
-    nOpCyclesMovXM:             6,
-    nOpCyclesSetR:              4,
-    nOpCyclesSetM:              5,
-    nOpCyclesShiftDR:           3,
-    nOpCyclesShiftDM:           7
+    nOpCyclesXLAT:              5
 };
 
 /**
@@ -723,6 +705,7 @@ X86CPU.prototype.enablePageBlocks = function()
         }
     }
     this.aBlocksPaged = [];
+    this.stopCPU();
 };
 
 /**
@@ -1349,6 +1332,25 @@ X86CPU.prototype.resetRegs = function()
      * Now that all the segment registers have been created, it's safe to set the current addressing mode.
      */
     this.setProtMode();
+};
+
+/**
+ * setAddrSize(size)
+ *
+ * This is used by opcodes that require a particular ADDRESS size, which we enforce by
+ * internally simulating an ADDRESS size override, if needed.
+ *
+ * @this {X86CPU}
+ * @param {number} size (2 for 2-byte/16-bit operands, or 4 for 4-byte/32-bit operands)
+ */
+X86CPU.prototype.setAddrSize = function(size)
+{
+    if (this.addrSize != size) {
+        this.opPrefixes |= X86.OPFLAG.ADDRSIZE;
+        this.addrSize = size;
+        this.addrMask = (size == 2? 0xffff : (0xffffffff|0));
+        this.updateAddrSize();
+    }
 };
 
 /**

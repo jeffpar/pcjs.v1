@@ -380,21 +380,44 @@ testROM:
     ;
 	movzx	eax,byte [0xfffff]
 	cmp	eax,0x00000080
-	jne	error
+	jne	near error
     ;
     ; Test moving a word to a 32-bit register with zero-extension
     ;
 	movzx	eax,word [0xffffe]
 	cmp	eax,0x000080fc
-	jne	error
+	jne	near error
+    ;
+    ; More assorted ZX and SX tests
+    ;
+    	mov	esp,0x40000
+    	mov	edx,[esp]		; save word at scratch address 0x40000
+    	add	esp,4
+    	push	-128			; NASM refuses to use opcode 0x6A ("PUSH imm8")
+    	pop	ebx			; verify EBX == 0xFFFFFF80
+    	and	ebx,0xff		; verify EBX == 0x00000080
+    	movsx	bx,bl			; verify EBX == 0x0000FF80
+    	movsx	ebx,bx			; verify EBX == 0xFFFFFF80
+    	movzx	bx,bl			; verify EBX == 0xFFFF0080
+    	movzx	ebx,bl			; verify EBX == 0x00000080
+    	not	ebx			; verify EBX == 0xFFFFFF7F
+    	movsx	bx,bl			; verify EBX == 0xFFFF007F
+    	movsx	ebx,bl			; verify EBX == 0x0000007F
+    	not	ebx			; verify EBX == 0xFFFFFF80
+    	movzx	ebx,bx			; verify EBX == 0x0000FF80
+    	movzx	bx,bl			; verify EBX == 0x00000080
+    	movsx	bx,bl
+    	neg	bx
+    	neg	bx
+    	movsx	ebx,bx
+    	neg	ebx
+    	neg	ebx
     ;
     ; Test assorted 32-bit addressing modes
     ;
-    	mov	ax,SSEG_PROT32		; we're not going to use the stack, but we want SS != DS for the next tests
+    	mov	ax,SSEG_PROT32		; we want SS != DS for the next tests
     	mov	ss,ax
-    	sub	esp,esp
 
-    	mov	edx,[0x40000]		; save word at scratch address 0x40000
     	mov	eax,0x11223344
     	mov	[0x40000],eax		; store a known word at the scratch address
 

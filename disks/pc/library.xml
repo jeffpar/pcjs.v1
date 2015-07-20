@@ -34,6 +34,7 @@
 		<manifest ref="/disks/pc/windows/1.03a/manifest.xml" disk="*"/>
 		<manifest ref="/disks/pc/windows/1.04/manifest.xml" disk="*"/>
 		<manifest ref="/disks/pc/windows/2.03/manifest.xml" disk="*"/>
+		<manifest ref="/disks/pc/windows/3.00/manifest.xml" disk="*"/>
 		<manifest ref="/disks/pc/windows/win95/build499/manifest.xml" disk="*"/>
 		<manifest ref="/disks/pc/minix/1.1/manifest.xml" disk="*"/>
 		<manifest ref="/disks/pc/unix/ibm/pcix/manifest.xml" disk="*"/>

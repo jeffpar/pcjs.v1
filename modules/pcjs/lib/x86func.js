@@ -226,7 +226,7 @@ X86.fnBSF = function BSF(dst, src)
             n++;                // TODO: Determine if n should be incremented before the bailout for an accurate cycle count
         }
     }
-    this.nStepCycles -= this.cycleCounts.nOpCyclesBitScan + n * 3;
+    this.nStepCycles -= 11 + n * 3;
     return dst;
 };
 
@@ -263,7 +263,7 @@ X86.fnBSR = function BSR(dst, src)
         }
 
     }
-    this.nStepCycles -= this.cycleCounts.nOpCyclesBitScan + n * 3;
+    this.nStepCycles -= 11 + n * 3;
     return dst;
 };
 
@@ -278,7 +278,7 @@ X86.fnBSR = function BSR(dst, src)
 X86.fnBT = function BT(dst, src)
 {
     if (dst & (1 << (src & 0x1f))) this.setCF(); else this.clearCF();
-    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesBitTestR : this.cycleCounts.nOpCyclesBitTestM);
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? 3 : 6);
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;
 };
@@ -295,7 +295,7 @@ X86.fnBTC = function BTC(dst, src)
 {
     var bit = 1 << (src & 0x1f);
     if (dst & bit) this.setCF(); else this.clearCF();
-    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesBitSetR : this.cycleCounts.nOpCyclesBitSetM);
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? 6 : 8);
     return dst ^ bit;
 };
 
@@ -311,7 +311,7 @@ X86.fnBTR = function BTR(dst, src)
 {
     var bit = 1 << (src & 0x1f);
     if (dst & bit) this.setCF(); else this.clearCF();
-    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesBitSetR : this.cycleCounts.nOpCyclesBitSetM);
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? 6 : 8);
     return dst & ~bit;
 };
 
@@ -327,7 +327,7 @@ X86.fnBTS = function BTS(dst, src)
 {
     var bit = 1 << (src & 0x1f);
     if (dst & bit) this.setCF(); else this.clearCF();
-    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesBitSetR : this.cycleCounts.nOpCyclesBitSetM);
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? 6 : 8);
     return dst | bit;
 };
 
@@ -1118,7 +1118,7 @@ X86.fnIMULrw = function IMULrw(dst, src)
         this.clearCF(); this.clearOF();
     }
     result &= 0xffff;
-    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesIMulR : this.cycleCounts.nOpCyclesIMulM);
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? 9 : 12);
     return result;
 };
 
@@ -1139,7 +1139,7 @@ X86.fnIMULrd = function IMULrd(dst, src)
         this.clearCF(); this.clearOF();
     }
     result |= 0;
-    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesIMulR : this.cycleCounts.nOpCyclesIMulM);
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? 9 : 12);
     return result;
 };
 
@@ -2438,7 +2438,7 @@ X86.fnSETcc = function SETcc(fnSet)
 {
     this.opFlags |= X86.OPFLAG.NOREAD;
     this.aOpModMemByte[this.getIPByte()].call(this, fnSet);
-    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesSetR : this.cycleCounts.nOpCyclesSetM);
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? 4 : 5);
 };
 
 /**

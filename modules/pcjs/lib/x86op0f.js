@@ -200,29 +200,23 @@ X86.opCLTS = function CLTS()
  *
  * op=0x0F,0x20 (MOV reg,creg)
  *
- * NOTE: Since the ModRM decoders deal only with general-purpose registers, we must move
- * the appropriate control register into a special variable (regXX), which our helper function
- * (fnMOVxx) will use to replace the decoder's src operand.
+ * NOTE: Since this instruction uses only 32-bit general-purpose registers, our ModRM decoders
+ * are going to be more hindrance than help, so we fully decode and execute the instruction ourselves.
  *
- * From PCMag_Prog_TechRef, p.476: "The 80386 executes the MOV to/from control registers (CRn)
- * regardless of the setting of the MOD field.  The MOD field should be set to 0b11, but an early
- * 80386 documentation error indicated that the MOD field value was a don't care.  Early versions
- * of the 80486 detect a MOD != 0b11 as an illegal opcode.  This was changed in later versions to
- * ignore the value of MOD.  Assemblers that generate MOD != 0b11 for these instructions will fail
- * on some 80486s."
+ * From PCMag_Prog_TechRef, p.476: "The 80386 executes the MOV to/from control registers (CRn) regardless
+ * of the setting of the MOD field.  The MOD field should be set to 0b11, but an early 80386 documentation
+ * error indicated that the MOD field value was a don't care.  Early versions of the 80486 detect
+ * a MOD != 0b11 as an illegal opcode.  This was changed in later versions to ignore the value of MOD.
+ * Assemblers that generate MOD != 0b11 for these instructions will fail on some 80486s."
+ *
+ * And in fact, the Compaq DeskPro 386 ROM BIOS executes this instruction with MOD set to 0b00, so we have
+ * to ignore it.
  *
  * @this {X86CPU}
  */
 X86.opMOVrc = function MOVrc()
 {
-    /*
-     * We address the MOD field problem (see above) by coercing it to 0b11 (0xc0), regardless.
-     *
-     * TODO: One issue not clearly addressed is if, when an assembler/compiler generated a bogus MOD value,
-     * it also generated the additional displacement bytes, if any, that would typically accompany such a MOD
-     * value.  I assume not.
-     */
-    var bModRM = this.getIPByte() | 0xc0;
+    var bModRM = this.getIPByte();
 
     if (this.segCS.cpl) {
         /*
@@ -233,35 +227,54 @@ X86.opMOVrc = function MOVrc()
         return;
     }
 
-    var reg = (bModRM & 0x38) >> 3;
-    switch(reg) {
+    var reg;
+    switch((bModRM & 0x38) >> 3) {
     case 0x0:
-        this.regXX = this.regCR0;
-        break;
-    case 0x1:
-        this.regXX = this.regCR1;
+        reg = this.regCR0;
         break;
     case 0x2:
-        this.regXX = this.regCR2;
+        reg = this.regCR2;
         break;
     case 0x3:
-        this.regXX = this.regCR3;
+        reg = this.regCR3;
         break;
     default:
         X86.opUndefined.call(this);
         return;
     }
+
+    switch(bModRM & 0x7) {
+    case 0x0:
+        this.regEAX = reg;
+        break;
+    case 0x1:
+        this.regECX = reg;
+        break;
+    case 0x2:
+        this.regEDX = reg;
+        break;
+    case 0x3:
+        this.regEBX = reg;
+        break;
+    case 0x4:
+        this.regESP = reg;
+        break;
+    case 0x5:
+        this.regEBP = reg;
+        break;
+    case 0x6:
+        this.regESI = reg;
+        break;
+    case 0x7:
+        this.regEDI = reg;
+        break;
+    }
+
+    this.nStepCycles -= 6;
+
     /*
-     * Like other MOV operations, the destination does not need to be read, just written;
-     * however, it's moot, because we've already restricted this opcode to registers only.
-     *
-     *      this.opFlags |= X86.OPFLAG.NOREAD;
-     *
-     * Another issue, however, is that this instruction always assumes a 32-bit OPERAND size,
-     * so we must call setDataSize(4) first.
+     * TODO: Implement BACKTRACK for this instruction....
      */
-    this.setDataSize(4);
-    this.aOpModRegWord[bModRM].call(this, X86.fnMOVxx);
 };
 
 /**
@@ -269,30 +282,23 @@ X86.opMOVrc = function MOVrc()
  *
  * op=0x0F,0x22 (MOV creg,reg)
  *
- * NOTE: Since the ModRM decoders deal only with general-purpose registers, we have to make a note
- * of which general-purpose register will be overwritten, so that we can restore it after moving the
- * modified value to the correct control register.
+ * NOTE: Since this instruction uses only 32-bit general-purpose registers, our ModRM decoders
+ * are going to be more hindrance than help, so we fully decode and execute the instruction ourselves.
  *
- * From PCMag_Prog_TechRef, p.476: "The 80386 executes the MOV to/from control registers (CRn)
- * regardless of the setting of the MOD field.  The MOD field should be set to 0b11, but an early
- * 80386 documentation error indicated that the MOD field value was a don't care.  Early versions
- * of the 80486 detect a MOD != 0b11 as an illegal opcode.  This was changed in later versions to
- * ignore the value of MOD.  Assemblers that generate MOD != 0b11 for these instructions will fail
- * on some 80486s."
+ * From PCMag_Prog_TechRef, p.476: "The 80386 executes the MOV to/from control registers (CRn) regardless
+ * of the setting of the MOD field.  The MOD field should be set to 0b11, but an early 80386 documentation
+ * error indicated that the MOD field value was a don't care.  Early versions of the 80486 detect
+ * a MOD != 0b11 as an illegal opcode.  This was changed in later versions to ignore the value of MOD.
+ * Assemblers that generate MOD != 0b11 for these instructions will fail on some 80486s."
+ *
+ * And in fact, the Compaq DeskPro 386 ROM BIOS executes this instruction with MOD set to 0b00, so we have
+ * to ignore it.
  *
  * @this {X86CPU}
  */
 X86.opMOVcr = function MOVcr()
 {
-    var temp;
-    /*
-     * We address the MOD field problem (see above) by coercing it to 0b11 (0xc0), regardless.
-     *
-     * TODO: One issue not clearly addressed is if, when an assembler/compiler generated a bogus MOD value,
-     * it also generated the additional displacement bytes, if any, that would typically accompany such a MOD
-     * value.  I assume not.
-     */
-    var bModRM = this.getIPByte() | 0xc0;
+    var bModRM = this.getIPByte();
 
     if (this.segCS.cpl) {
         /*
@@ -303,51 +309,55 @@ X86.opMOVcr = function MOVcr()
         return;
     }
 
-    var reg = (bModRM & 0x38) >> 3;
-    switch(reg) {
+    var reg;
+    switch(bModRM & 0x7) {
     case 0x0:
-        temp = this.regEAX;
+        reg = this.regEAX;
         break;
     case 0x1:
-        temp = this.regECX; // TODO: Is setting CR1 actually allowed on an 80386?
+        reg = this.regECX;
         break;
     case 0x2:
-        temp = this.regEDX;
+        reg = this.regEDX;
         break;
     case 0x3:
-        temp = this.regEBX;
+        reg = this.regEBX;
+        break;
+    case 0x4:
+        reg = this.regESP;
+        break;
+    case 0x5:
+        reg = this.regEBP;
+        break;
+    case 0x6:
+        reg = this.regESI;
+        break;
+    case 0x7:
+        reg = this.regEDI;
+        break;
+    }
+
+    switch((bModRM & 0x38) >> 3) {
+    case 0x0:
+        X86.fnLCR0.call(this, reg);
+        this.nStepCycles -= 10;
+        break;
+    case 0x2:
+        this.regCR2 = reg;
+        this.nStepCycles -= 4;
+        break;
+    case 0x3:
+        X86.fnLCR3.call(this, reg);
+        this.nStepCycles -= 5;
         break;
     default:
-        X86.opInvalid.call(this);
+        X86.opUndefined.call(this);
         return;
     }
 
     /*
-     * This instruction always assumes a 32-bit OPERAND size, so we must call setDataSize(4) first.
+     * TODO: Implement BACKTRACK for this instruction....
      */
-    this.setDataSize(4);
-    this.aOpModRegWord[bModRM].call(this, X86.fnMOV);
-
-    switch(reg) {
-    case 0x0:
-        reg = this.regEAX;
-        this.regEAX = temp;
-        X86.fnLCR0.call(this, reg);
-        break;
-    case 0x1:
-        this.regCR1 = this.regECX;
-        this.regECX = temp;
-        break;
-    case 0x2:
-        this.regCR2 = this.regEDX;
-        this.regEDX = temp;
-        break;
-    case 0x3:
-        reg = this.regEBX;
-        this.regEBX = temp;
-        X86.fnLCR3.call(this, reg);
-        break;
-    }
 };
 
 /*
@@ -883,7 +893,7 @@ X86.opPOPFS = function POPFS()
 X86.opBT = function BT()
 {
     this.aOpModMemWord[this.getIPByte()].call(this, X86.fnBT);
-    if (this.regEA !== X86.ADDR_INVALID) this.nStepCycles -= this.cycleCounts.nOpCyclesBitTestMExtra;
+    if (this.regEA !== X86.ADDR_INVALID) this.nStepCycles -= 6;
 };
 
 /**
@@ -896,7 +906,7 @@ X86.opBT = function BT()
 X86.opSHLDn = function SHLDn()
 {
     this.aOpModMemWord[this.getIPByte()].call(this, this.dataSize == 2? X86.fnSHLDwi : X86.fnSHLDdi);
-    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesShiftDR : this.cycleCounts.nOpCyclesShiftDM);
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? 3 : 7);
 };
 
 /**
@@ -909,7 +919,7 @@ X86.opSHLDn = function SHLDn()
 X86.opSHLDcl = function SHLDcl()
 {
     this.aOpModMemWord[this.getIPByte()].call(this, this.dataSize == 2? X86.fnSHLDwCL : X86.fnSHLDdCL);
-    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesShiftDR : this.cycleCounts.nOpCyclesShiftDM);
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? 3 : 7);
 };
 
 /**
@@ -948,7 +958,7 @@ X86.opPOPGS = function POPGS()
 X86.opBTS = function BTS()
 {
     this.aOpModMemWord[this.getIPByte()].call(this, X86.fnBTS);
-    if (this.regEA !== X86.ADDR_INVALID) this.nStepCycles -= this.cycleCounts.nOpCyclesBitSetMExtra;
+    if (this.regEA !== X86.ADDR_INVALID) this.nStepCycles -= 5;
 };
 
 /**
@@ -961,7 +971,7 @@ X86.opBTS = function BTS()
 X86.opSHRDn = function SHRDn()
 {
     this.aOpModMemWord[this.getIPByte()].call(this, this.dataSize == 2? X86.fnSHRDwi : X86.fnSHRDdi);
-    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesShiftDR : this.cycleCounts.nOpCyclesShiftDM);
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? 3 : 7);
 };
 
 /**
@@ -974,7 +984,7 @@ X86.opSHRDn = function SHRDn()
 X86.opSHRDcl = function SHRDcl()
 {
     this.aOpModMemWord[this.getIPByte()].call(this, this.dataSize == 2? X86.fnSHRDwCL : X86.fnSHRDdCL);
-    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesShiftDR : this.cycleCounts.nOpCyclesShiftDM);
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? 3 : 7);
 };
 
 /**
@@ -1013,7 +1023,7 @@ X86.opLSS = function LSS()
 X86.opBTR = function BTR()
 {
     this.aOpModMemWord[this.getIPByte()].call(this, X86.fnBTR);
-    if (this.regEA !== X86.ADDR_INVALID) this.nStepCycles -= this.cycleCounts.nOpCyclesBitSetMExtra;
+    if (this.regEA !== X86.ADDR_INVALID) this.nStepCycles -= 5;
 };
 
 /**
@@ -1113,7 +1123,7 @@ X86.opMOVZXb = function MOVZXb()
         this.regEBX = temp;
         break;
     }
-    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesMovXR : this.cycleCounts.nOpCyclesMovXM);
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? 3 : 6);
 };
 
 /**
@@ -1154,7 +1164,7 @@ X86.opMOVZXw = function MOVZXw()
         this.regEDI = (this.regEDI & 0xffff);
         break;
     }
-    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesMovXR : this.cycleCounts.nOpCyclesMovXM);
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? 3 : 6);
 };
 
 /**
@@ -1177,7 +1187,7 @@ X86.opGRP8 = function GRP8()
 X86.opBTC = function BTC()
 {
     this.aOpModMemWord[this.getIPByte()].call(this, X86.fnBTC);
-    if (this.regEA !== X86.ADDR_INVALID) this.nStepCycles -= this.cycleCounts.nOpCyclesBitSetMExtra;
+    if (this.regEA !== X86.ADDR_INVALID) this.nStepCycles -= 5;
 };
 
 /**
@@ -1273,7 +1283,7 @@ X86.opMOVSXb = function MOVSXb()
         this.regEBX = temp;
         break;
     }
-    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesMovXR : this.cycleCounts.nOpCyclesMovXM);
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? 3 : 6);
 };
 
 /**
@@ -1314,7 +1324,7 @@ X86.opMOVSXw = function MOVSXw()
         this.regEDI = ((this.regEDI << 16) >> 16);
         break;
     }
-    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesMovXR : this.cycleCounts.nOpCyclesMovXM);
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? 3 : 6);
 };
 
 X86.aOps0F = new Array(256);
@@ -1333,14 +1343,26 @@ X86.aOps0F[0x06] = X86.opCLTS;
 X86.aOps0F[0x0B] = X86.opInvalid;
 
 /*
- * NOTE: Any other opcode slots NOT explicitly initialized above with either a dedicated function OR opInvalid()
- * will be set to opUndefined() when initProcessor() finalizes the opcode tables.  If the processor is an 80386,
- * initProcessor() will also incorporate all the handlers listed below in aOps0F386.
+ * The following 0x0F opcodes are of no consequence to us, since they were all introduced post-80386;
+ * 0x0F,0xA6 and 0x0F,0xA7 were introduced on some 80486 processors (and then deprecated), while 0x0F,0xB0
+ * and 0x0F,0xB1 were introduced on 80586 (aka Pentium) processors.
  *
- * A call to opUndefined() implies something serious has occurred that merits our attention (eg, perhaps someone
- * is using an undocumented opcode that we haven't implemented yet), whereas a call to opInvalid() may or may not.
+ *      CMPXCHG r/m8,reg8           ; 0F B0 /r          [PENT]
+ *      CMPXCHG r/m16,reg16         ; o16 0F B1 /r      [PENT]
+ *      CMPXCHG r/m32,reg32         ; o32 0F B1 /r      [PENT]
+ *      CMPXCHG486 r/m8,reg8        ; 0F A6 /r          [486,UNDOC]
+ *      CMPXCHG486 r/m16,reg16      ; o16 0F A7 /r      [486,UNDOC]
+ *      CMPXCHG486 r/m32,reg32      ; o32 0F A7 /r      [486,UNDOC]
  *
- * For example, when Windows initializes in protected-mode, it sets a DPMI exception handler for UD_FAULT and
+ * So why are we even mentioning them here? Only because some software (eg, Windows 3.00) attempts to execute
+ * 0x0F,0xA6, so we need to explicitly mark it as invalid.  TODO: Purely out of curiosity, I would like to
+ * eventually learn *why* Windows 3.00 does this; is it hoping to use the CMPXCHG486 opcode, or is it performing
+ * a CPU/stepping check to detect/work-around some errata, or....?
+ */
+X86.aOps0F[0xA6] = X86.opInvalid;
+
+/*
+ * When Windows 95 Setup initializes in protected-mode, it sets a DPMI exception handler for UD_FAULT and
  * then attempts to generate that exception with undefined opcode 0x0F,0xFF.  Apparently, whoever wrote that code
  * (davidw?) didn't get the Intel memo regarding the preferred invalid opcode (0x0F,0x0B, aka UD2), or perhaps Intel
  * hadn't written that memo yet -- although if that's the case, then Intel should have followed Microsoft's lead and
@@ -1349,6 +1371,15 @@ X86.aOps0F[0x0B] = X86.opInvalid;
  * In any case, this means we need to explicitly set the handler for that opcode to opInvalid(), too.
  */
 X86.aOps0F[0xFF] = X86.opInvalid;
+
+/*
+ * NOTE: Any other opcode slots NOT explicitly initialized above with either a dedicated function OR opInvalid()
+ * will be set to opUndefined() when initProcessor() finalizes the opcode tables.  If the processor is an 80386,
+ * initProcessor() will also incorporate all the handlers listed below in aOps0F386.
+ *
+ * A call to opUndefined() implies something serious has occurred that merits our attention (eg, perhaps someone
+ * is using an undocumented opcode that we haven't implemented yet), whereas a call to opInvalid() may or may not.
+ */
 
 if (I386) {
     X86.aOps0F386 = [];

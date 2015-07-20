@@ -453,10 +453,10 @@ if (DEBUGGER) {
     Debugger.TYPE_IMPREG    = 0x0060;   //     implicit register in TYPE_IREG
     Debugger.TYPE_IMPSEG    = 0x0070;   //     implicit segment register in TYPE_IREG
     Debugger.TYPE_MODRM     = 0x0080;   // (E) standard ModRM decoding
-    Debugger.TYPE_MEM       = 0x0090;   // (M) ModRM refers to memory only
-    Debugger.TYPE_REG       = 0x00A0;   // (G) standard Reg decoding
-    Debugger.TYPE_SEGREG    = 0x00B0;   // (S) Reg selects segment register
-    Debugger.TYPE_MODREG    = 0x00C0;   // (R) Mod refers to register only
+    Debugger.TYPE_MODMEM    = 0x0090;   // (M) ModRM refers to memory only
+    Debugger.TYPE_MODREG    = 0x00A0;   // (R) ModRM refers to register only
+    Debugger.TYPE_REG       = 0x00B0;   // (G) standard Reg decoding
+    Debugger.TYPE_SEGREG    = 0x00C0;   // (S) Reg selects segment register
     Debugger.TYPE_CTLREG    = 0x00D0;   // (C) Reg selects control register
     Debugger.TYPE_DBGREG    = 0x00E0;   // (D) Reg selects debug register
     Debugger.TYPE_TSTREG    = 0x00F0;   // (T) Reg selects test register
@@ -779,7 +779,7 @@ if (DEBUGGER) {
     /* 0x8A */ [Debugger.INS.MOV,   Debugger.TYPE_REG    | Debugger.TYPE_BYTE  | Debugger.TYPE_OUT,  Debugger.TYPE_MODRM  | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
     /* 0x8B */ [Debugger.INS.MOV,   Debugger.TYPE_REG    | Debugger.TYPE_VWORD | Debugger.TYPE_OUT,  Debugger.TYPE_MODRM  | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
     /* 0x8C */ [Debugger.INS.MOV,   Debugger.TYPE_MODRM  | Debugger.TYPE_VWORD | Debugger.TYPE_OUT,  Debugger.TYPE_SEGREG | Debugger.TYPE_WORD  | Debugger.TYPE_IN],
-    /* 0x8D */ [Debugger.INS.LEA,   Debugger.TYPE_REG    | Debugger.TYPE_VWORD | Debugger.TYPE_OUT,  Debugger.TYPE_MEM    | Debugger.TYPE_VWORD],
+    /* 0x8D */ [Debugger.INS.LEA,   Debugger.TYPE_REG    | Debugger.TYPE_VWORD | Debugger.TYPE_OUT,  Debugger.TYPE_MODMEM | Debugger.TYPE_VWORD],
     /* 0x8E */ [Debugger.INS.MOV,   Debugger.TYPE_SEGREG | Debugger.TYPE_WORD  | Debugger.TYPE_OUT,  Debugger.TYPE_MODRM  | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
     /* 0x8F */ [Debugger.INS.POP,   Debugger.TYPE_MODRM  | Debugger.TYPE_VWORD | Debugger.TYPE_OUT],
 
@@ -841,10 +841,10 @@ if (DEBUGGER) {
     /* 0xC1 */ [Debugger.INS.GRP2W, Debugger.TYPE_MODRM  | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH | Debugger.TYPE_80186, Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
     /* 0xC2 */ [Debugger.INS.RET,   Debugger.TYPE_IMM    | Debugger.TYPE_WORD  | Debugger.TYPE_IN],
     /* 0xC3 */ [Debugger.INS.RET],
-    /* 0xC4 */ [Debugger.INS.LES,   Debugger.TYPE_REG    | Debugger.TYPE_VWORD | Debugger.TYPE_OUT, Debugger.TYPE_MEM | Debugger.TYPE_SEGP  | Debugger.TYPE_IN],
-    /* 0xC5 */ [Debugger.INS.LDS,   Debugger.TYPE_REG    | Debugger.TYPE_VWORD | Debugger.TYPE_OUT, Debugger.TYPE_MEM | Debugger.TYPE_SEGP  | Debugger.TYPE_IN],
-    /* 0xC6 */ [Debugger.INS.MOV,   Debugger.TYPE_MODRM  | Debugger.TYPE_BYTE  | Debugger.TYPE_OUT, Debugger.TYPE_IMM | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
-    /* 0xC7 */ [Debugger.INS.MOV,   Debugger.TYPE_MODRM  | Debugger.TYPE_VWORD | Debugger.TYPE_OUT, Debugger.TYPE_IMM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
+    /* 0xC4 */ [Debugger.INS.LES,   Debugger.TYPE_REG    | Debugger.TYPE_VWORD | Debugger.TYPE_OUT, Debugger.TYPE_MODMEM | Debugger.TYPE_SEGP  | Debugger.TYPE_IN],
+    /* 0xC5 */ [Debugger.INS.LDS,   Debugger.TYPE_REG    | Debugger.TYPE_VWORD | Debugger.TYPE_OUT, Debugger.TYPE_MODMEM | Debugger.TYPE_SEGP  | Debugger.TYPE_IN],
+    /* 0xC6 */ [Debugger.INS.MOV,   Debugger.TYPE_MODRM  | Debugger.TYPE_BYTE  | Debugger.TYPE_OUT, Debugger.TYPE_IMM    | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
+    /* 0xC7 */ [Debugger.INS.MOV,   Debugger.TYPE_MODRM  | Debugger.TYPE_VWORD | Debugger.TYPE_OUT, Debugger.TYPE_IMM    | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
 
     /* 0xC8 */ [Debugger.INS.ENTER, Debugger.TYPE_IMM    | Debugger.TYPE_WORD  | Debugger.TYPE_IN | Debugger.TYPE_80286,  Debugger.TYPE_IMM   | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
     /* 0xC9 */ [Debugger.INS.LEAVE, Debugger.TYPE_NONE   | Debugger.TYPE_80286],
@@ -913,12 +913,12 @@ if (DEBUGGER) {
     Debugger.aaOp0FDescs = {
         0x00: [Debugger.INS.GRP6,   Debugger.TYPE_MODRM  | Debugger.TYPE_WORD  | Debugger.TYPE_BOTH],
         0x01: [Debugger.INS.GRP7,   Debugger.TYPE_MODRM  | Debugger.TYPE_WORD  | Debugger.TYPE_BOTH],
-        0x02: [Debugger.INS.LAR,    Debugger.TYPE_REG    | Debugger.TYPE_WORD  | Debugger.TYPE_OUT  | Debugger.TYPE_80286, Debugger.TYPE_MEM    | Debugger.TYPE_WORD | Debugger.TYPE_IN],
-        0x03: [Debugger.INS.LSL,    Debugger.TYPE_REG    | Debugger.TYPE_WORD  | Debugger.TYPE_OUT  | Debugger.TYPE_80286, Debugger.TYPE_MEM    | Debugger.TYPE_WORD | Debugger.TYPE_IN],
+        0x02: [Debugger.INS.LAR,    Debugger.TYPE_REG    | Debugger.TYPE_WORD  | Debugger.TYPE_OUT  | Debugger.TYPE_80286, Debugger.TYPE_MODMEM | Debugger.TYPE_WORD | Debugger.TYPE_IN],
+        0x03: [Debugger.INS.LSL,    Debugger.TYPE_REG    | Debugger.TYPE_WORD  | Debugger.TYPE_OUT  | Debugger.TYPE_80286, Debugger.TYPE_MODMEM | Debugger.TYPE_WORD | Debugger.TYPE_IN],
         0x05: [Debugger.INS.LOADALL,Debugger.TYPE_80286],
         0x06: [Debugger.INS.CLTS,   Debugger.TYPE_80286],
-        0x20: [Debugger.INS.MOV,    Debugger.TYPE_REG    | Debugger.TYPE_DWORD | Debugger.TYPE_OUT  | Debugger.TYPE_80386, Debugger.TYPE_CTLREG | Debugger.TYPE_DWORD | Debugger.TYPE_IN],
-        0x22: [Debugger.INS.MOV,    Debugger.TYPE_CTLREG | Debugger.TYPE_DWORD | Debugger.TYPE_OUT  | Debugger.TYPE_80386, Debugger.TYPE_REG    | Debugger.TYPE_DWORD | Debugger.TYPE_IN],
+        0x20: [Debugger.INS.MOV,    Debugger.TYPE_MODREG | Debugger.TYPE_DWORD | Debugger.TYPE_OUT  | Debugger.TYPE_80386, Debugger.TYPE_CTLREG | Debugger.TYPE_DWORD | Debugger.TYPE_IN],
+        0x22: [Debugger.INS.MOV,    Debugger.TYPE_CTLREG | Debugger.TYPE_DWORD | Debugger.TYPE_OUT  | Debugger.TYPE_80386, Debugger.TYPE_MODREG | Debugger.TYPE_DWORD | Debugger.TYPE_IN],
         0x80: [Debugger.INS.JO,     Debugger.TYPE_IMMREL | Debugger.TYPE_VWORD | Debugger.TYPE_IN   | Debugger.TYPE_80386],
         0x81: [Debugger.INS.JNO,    Debugger.TYPE_IMMREL | Debugger.TYPE_VWORD | Debugger.TYPE_IN   | Debugger.TYPE_80386],
         0x82: [Debugger.INS.JC,     Debugger.TYPE_IMMREL | Debugger.TYPE_VWORD | Debugger.TYPE_IN   | Debugger.TYPE_80386],
@@ -962,10 +962,10 @@ if (DEBUGGER) {
         0xAC: [Debugger.INS.SHRD,   Debugger.TYPE_MODRM  | Debugger.TYPE_VWORD | Debugger.TYPE_OUT  | Debugger.TYPE_80386, Debugger.TYPE_REG    | Debugger.TYPE_VWORD | Debugger.TYPE_IN, Debugger.TYPE_IMM    | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
         0xAD: [Debugger.INS.SHRD,   Debugger.TYPE_MODRM  | Debugger.TYPE_VWORD | Debugger.TYPE_OUT  | Debugger.TYPE_80386, Debugger.TYPE_REG    | Debugger.TYPE_VWORD | Debugger.TYPE_IN, Debugger.TYPE_IMPREG | Debugger.TYPE_CL   | Debugger.TYPE_IN],
         0xAF: [Debugger.INS.IMUL,   Debugger.TYPE_MODRM  | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH | Debugger.TYPE_80386, Debugger.TYPE_REG    | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
-        0xB2: [Debugger.INS.LSS,    Debugger.TYPE_REG    | Debugger.TYPE_VWORD | Debugger.TYPE_OUT,                        Debugger.TYPE_MEM    | Debugger.TYPE_SEGP  | Debugger.TYPE_IN],
+        0xB2: [Debugger.INS.LSS,    Debugger.TYPE_REG    | Debugger.TYPE_VWORD | Debugger.TYPE_OUT,                        Debugger.TYPE_MODMEM | Debugger.TYPE_SEGP  | Debugger.TYPE_IN],
         0xB3: [Debugger.INS.BTR,    Debugger.TYPE_MODRM  | Debugger.TYPE_VWORD | Debugger.TYPE_OUT  | Debugger.TYPE_80386, Debugger.TYPE_REG    | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
-        0xB4: [Debugger.INS.LFS,    Debugger.TYPE_REG    | Debugger.TYPE_VWORD | Debugger.TYPE_OUT,                        Debugger.TYPE_MEM    | Debugger.TYPE_SEGP  | Debugger.TYPE_IN],
-        0xB5: [Debugger.INS.LGS,    Debugger.TYPE_REG    | Debugger.TYPE_VWORD | Debugger.TYPE_OUT,                        Debugger.TYPE_MEM    | Debugger.TYPE_SEGP  | Debugger.TYPE_IN],
+        0xB4: [Debugger.INS.LFS,    Debugger.TYPE_REG    | Debugger.TYPE_VWORD | Debugger.TYPE_OUT,                        Debugger.TYPE_MODMEM | Debugger.TYPE_SEGP  | Debugger.TYPE_IN],
+        0xB5: [Debugger.INS.LGS,    Debugger.TYPE_REG    | Debugger.TYPE_VWORD | Debugger.TYPE_OUT,                        Debugger.TYPE_MODMEM | Debugger.TYPE_SEGP  | Debugger.TYPE_IN],
         0xB6: [Debugger.INS.MOVZX,  Debugger.TYPE_REG    | Debugger.TYPE_VWORD | Debugger.TYPE_OUT  | Debugger.TYPE_80386, Debugger.TYPE_MODRM  | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
         0xB7: [Debugger.INS.MOVZX,  Debugger.TYPE_REG    | Debugger.TYPE_DWORD | Debugger.TYPE_OUT  | Debugger.TYPE_80386, Debugger.TYPE_MODRM  | Debugger.TYPE_WORD  | Debugger.TYPE_IN],
         0xBA: [Debugger.INS.GRP8,   Debugger.TYPE_MODRM  | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH | Debugger.TYPE_80386, Debugger.TYPE_IMM    | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
@@ -1703,7 +1703,7 @@ if (DEBUGGER) {
     Debugger.prototype.hexOffset = function(off, sel, fAddr32)
     {
         if (sel != null) {
-            return str.toHex(sel, 4) + ":" + str.toHex(off, (off & (0xffff0000|0)) || fAddr32? 8 : 4);
+            return str.toHex(sel, 4) + ":" + str.toHex(off, (off & ~0xffff) || fAddr32? 8 : 4);
         }
         return str.toHex(off);
     };
@@ -1899,7 +1899,7 @@ if (DEBUGGER) {
         if (fGate) {
             sDump = "seg=" + str.toHexWord(seg.base & 0xffff) + " off=" + str.toHexWord(seg.limit);
         } else {
-            sDump = "base=" + str.toHex(seg.base, this.cchAddr) + " limit=" + str.toHex(seg.limit, (seg.limit & ~0xffff)? 8 : 4);
+            sDump = "base=" + str.toHex(seg.base, this.cchAddr) + " limit=" + this.getLimitString(seg.limit);
         }
         /*
          * When we dump the EXT word, we mask off the LIMIT1619 and BASE2431 bits, because those have already
@@ -2981,23 +2981,23 @@ if (DEBUGGER) {
     };
 
     /**
-     * addBreakpoint(aBreak, dbgAddr, fTempBreak)
+     * addBreakpoint(aBreak, dbgAddr, fTemp)
      *
      * @this {Debugger}
      * @param {Array} aBreak
      * @param {{DbgAddr}} dbgAddr
-     * @param {boolean} [fTempBreak]
+     * @param {boolean} [fTemp]
      * @return {boolean} true if breakpoint added, false if already exists
      */
-    Debugger.prototype.addBreakpoint = function(aBreak, dbgAddr, fTempBreak)
+    Debugger.prototype.addBreakpoint = function(aBreak, dbgAddr, fTemp)
     {
         if (!this.findBreakpoint(aBreak, dbgAddr)) {
-            dbgAddr.fTempBreak = fTempBreak;
+            dbgAddr.fTempBreak = fTemp;
             aBreak.push(dbgAddr);
             if (aBreak != this.aBreakExec) {
                 this.bus.addMemBreak(this.getAddr(dbgAddr), aBreak == this.aBreakWrite);
             }
-            if (fTempBreak) {
+            if (fTemp) {
                 /*
                  * Force temporary breakpoints to be interpreted as linear breakpoints
                  * (hence the assertion that there IS a linear address stored in dbgAddr);
@@ -3008,7 +3008,7 @@ if (DEBUGGER) {
             } else {
                 this.println("breakpoint enabled: " + this.hexAddr(dbgAddr) + " (" + aBreak[0] + ")");
             }
-            this.historyInit();
+            if (!fTemp) this.historyInit();
             return true;
         }
         return false;
@@ -3304,11 +3304,29 @@ if (DEBUGGER) {
                 if (bModRM < 0) {
                     bModRM = this.getByte(dbgAddr, 1);
                 }
-                if (typeMode >= Debugger.TYPE_REG) {
-                    sOperand = this.getRegOperand((bModRM >> 3) & 0x7, type, dbgAddr);
+                if (typeMode < Debugger.TYPE_MODREG) {
+                    /*
+                     * This test also encompasses TYPE_MODMEM, which is basically the inverse of the case
+                     * below (ie, only Mod values *other* than 11 are allowed); however, I believe that in
+                     * some cases that's merely a convention, and that if you try to execute an instruction
+                     * like "LEA AX,BX", it will actually do something (on some if not all processors), so
+                     * there's probably some diagnostic value in allowing those cases to be disassembled.
+                     */
+                    sOperand = this.getModRMOperand(bModRM, type, dbgAddr);
+                }
+                else if (typeMode == Debugger.TYPE_MODREG) {
+                    /*
+                     * TYPE_MODREG instructions assume that Mod is 11 (only certain early 80486 steppings
+                     * actually *required* that Mod contain 11) and always treat RM as a register (which we
+                     * could also simulate by setting Mod to 11 and letting getModRMOperand() do its thing).
+                     */
+                    sOperand = this.getRegOperand(bModRM & 0x7, type, dbgAddr);
                 }
                 else {
-                    sOperand = this.getModRMOperand(bModRM, type, dbgAddr);
+                    /*
+                     * All the remaining cases are Reg-centric; getRegOperand() will figure out which case.
+                     */
+                    sOperand = this.getRegOperand((bModRM >> 3) & 0x7, type, dbgAddr);
                 }
             }
             else if (typeMode == Debugger.TYPE_ONE) {
@@ -3648,6 +3666,18 @@ if (DEBUGGER) {
     };
 
     /**
+     * getLimitString(l)
+     *
+     * @this {Debugger}
+     * @param {number} l
+     * @return {string}
+     */
+    Debugger.prototype.getLimitString = function(l)
+    {
+        return str.toHex(l, (l & ~0xffff)? 8 : 4);
+    };
+
+    /**
      * getRegString(iReg)
      *
      * @this {Debugger}
@@ -3672,7 +3702,7 @@ if (DEBUGGER) {
      */
     Debugger.prototype.getSegString = function(seg, fProt)
     {
-        return seg.sName + '=' + str.toHex(seg.sel, 4) + (fProt? '[' + str.toHex(seg.base, this.cchAddr) + ',' + str.toHex(seg.limit, (seg.limit & ~0xffff)? 8 : 4) + ']' : "");
+        return seg.sName + '=' + str.toHex(seg.sel, 4) + (fProt? '[' + str.toHex(seg.base, this.cchAddr) + ',' + this.getLimitString(seg.limit) + ']' : "");
     };
 
     /**
@@ -4950,7 +4980,7 @@ if (DEBUGGER) {
                 }
                 var fValid = false;
                 var w = str.parseInt(sValue, 16);
-                if (!isNaN(w)) {
+                if (w !== undefined) {
                     fValid = true;
                     var sRegMatch = sReg.toUpperCase();
                     if (sRegMatch.charAt(0) == 'E' && this.cchReg <= 4) {
@@ -5110,12 +5140,14 @@ if (DEBUGGER) {
                                         break;
                                     case "CR0":
                                         this.cpu.regCR0 = w;
+                                        X86.fnLCR0.call(this.cpu, w);
                                         break;
                                     case "CR2":
                                         this.cpu.regCR2 = w;
                                         break;
                                     case "CR3":
                                         this.cpu.regCR3 = w;
+                                        X86.fnLCR3.call(this.cpu, w);
                                         break;
                                     /*
                                      * TODO: Add support for DR0-DR7 and TR6-TR7.
