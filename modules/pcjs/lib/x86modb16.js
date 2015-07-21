@@ -1,5 +1,5 @@
 /**
- * @fileoverview Implements PCjs 8086 mode-byte decoding.
+ * @fileoverview Implements PCjs 80386 ModRegRM byte decoders with 16-bit addressing.
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @version 1.0
  * Created 2012-Sep-05
