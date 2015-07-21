@@ -554,7 +554,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
                 }
                 fGate = false;
             }
-            else if (type == X86.DESC.ACC.TYPE.TSS) {
+            else if (type == X86.DESC.ACC.TYPE.TSS286) {
                 if (!this.switchTSS(sel, fCall)) {
                     base = addrDesc = X86.ADDR_INVALID;
                     break;
@@ -567,13 +567,13 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
                 nFaultError = sel;
                 if (rpl < this.cpl) rpl = this.cpl;     // set RPL to max(RPL,CPL) for call gates
             }
-            else if (type == X86.DESC.ACC.TYPE.GATE_INT) {
+            else if (type == X86.DESC.ACC.TYPE.GATE286_INT) {
                 fGate = true;
                 regPSMask = ~(X86.PS.NT | X86.PS.TF | X86.PS.IF);
                 nFaultError = sel | X86.ERRCODE.EXT;
                 cpu.assert(!(acc & 0x1f));
             }
-            else if (type == X86.DESC.ACC.TYPE.GATE_TRAP) {
+            else if (type == X86.DESC.ACC.TYPE.GATE286_TRAP) {
                 fGate = true;
                 regPSMask = ~(X86.PS.NT | X86.PS.TF);
                 nFaultError = sel | X86.ERRCODE.EXT;
@@ -618,7 +618,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
                             regSP += 2;
                         }
                         addrTSS = cpu.segTSS.base;
-                        offSP = (this.cpl << 2) + X86.TSS.CPL0_SP;
+                        offSP = (this.cpl << 2) + X86.TSS286.CPL0_SP;
                         offSS = offSP + 2;
                         regSSPrev = cpu.getSS();
                         regSPPrev = cpu.getSP();
@@ -692,7 +692,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
             }
         }
         else if (this.id == X86Seg.ID.TSS) {
-            if (!selMasked || type != X86.DESC.ACC.TYPE.TSS && type != X86.DESC.ACC.TYPE.TSS_BUSY) {
+            if (!selMasked || type != X86.DESC.ACC.TYPE.TSS286 && type != X86.DESC.ACC.TYPE.TSS286_BUSY) {
                 if (!fSuppress) X86.fnFault.call(cpu, X86.EXCEPTION.TS_FAULT, sel, true);
                 base = addrDesc = X86.ADDR_INVALID;
                 break;
@@ -702,7 +702,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
             /*
              * For LSL, we must support any descriptor marked X86.DESC.ACC.TYPE.SEG, as well as TSS and LDT descriptors.
              */
-            if (!(type & X86.DESC.ACC.TYPE.SEG) && type > X86.DESC.ACC.TYPE.TSS_BUSY) {
+            if (!(type & X86.DESC.ACC.TYPE.SEG) && type > X86.DESC.ACC.TYPE.TSS286_BUSY) {
                 base = addrDesc = X86.ADDR_INVALID;
                 break;
             }
@@ -761,11 +761,11 @@ X86Seg.prototype.switchTSS = function switchTSS(selNew, fNest)
         /*
          * TODO: Verify that it is (always) correct to require that the BUSY bit be currently set.
          */
-        if (cpu.segTSS.type != X86.DESC.ACC.TYPE.TSS_BUSY) {
+        if (cpu.segTSS.type != X86.DESC.ACC.TYPE.TSS286_BUSY) {
             X86.fnFault.call(cpu, X86.EXCEPTION.TS_FAULT, selNew, true);
             return false;
         }
-        cpu.setShort(cpu.segTSS.addrDesc + X86.DESC.ACC.OFFSET, (cpu.segTSS.acc & ~X86.DESC.ACC.TYPE.TSS_BUSY) | X86.DESC.ACC.TYPE.TSS);
+        cpu.setShort(cpu.segTSS.addrDesc + X86.DESC.ACC.OFFSET, (cpu.segTSS.acc & ~X86.DESC.ACC.TYPE.TSS286_BUSY) | X86.DESC.ACC.TYPE.TSS286);
     }
 
     if (cpu.segTSS.load(selNew) === X86.ADDR_INVALID) {
@@ -777,66 +777,66 @@ X86Seg.prototype.switchTSS = function switchTSS(selNew, fNest)
         this.dbg.message((fNest? "Task switch" : "Task return") + ": TR " + str.toHexWord(selOld) + " (%" + str.toHex(addrOld, 6) + "), new TR " + str.toHexWord(selNew) + " (%" + str.toHex(addrNew, 6) + ")");
     }
     if (fNest === false) {
-        if (cpu.segTSS.type != X86.DESC.ACC.TYPE.TSS_BUSY) {
+        if (cpu.segTSS.type != X86.DESC.ACC.TYPE.TSS286_BUSY) {
             X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, selNew, true);
             return false;
         }
     } else {
-        if (cpu.segTSS.type == X86.DESC.ACC.TYPE.TSS_BUSY) {
+        if (cpu.segTSS.type == X86.DESC.ACC.TYPE.TSS286_BUSY) {
             X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, selNew, true);
             return false;
         }
-        cpu.setShort(cpu.segTSS.addrDesc + X86.DESC.ACC.OFFSET, cpu.segTSS.acc |= X86.DESC.ACC.TYPE.TSS_BUSY);
-        cpu.segTSS.type = X86.DESC.ACC.TYPE.TSS_BUSY;
+        cpu.setShort(cpu.segTSS.addrDesc + X86.DESC.ACC.OFFSET, cpu.segTSS.acc |= X86.DESC.ACC.TYPE.TSS286_BUSY);
+        cpu.segTSS.type = X86.DESC.ACC.TYPE.TSS286_BUSY;
     }
 
     /*
      * Update the old TSS
      */
-    cpu.setShort(addrOld + X86.TSS.TASK_IP, cpu.getIP());
-    cpu.setShort(addrOld + X86.TSS.TASK_PS, cpu.getPS());
-    cpu.setShort(addrOld + X86.TSS.TASK_AX, cpu.regEAX);
-    cpu.setShort(addrOld + X86.TSS.TASK_CX, cpu.regECX);
-    cpu.setShort(addrOld + X86.TSS.TASK_DX, cpu.regEDX);
-    cpu.setShort(addrOld + X86.TSS.TASK_BX, cpu.regEBX);
-    cpu.setShort(addrOld + X86.TSS.TASK_SP, cpu.getSP());
-    cpu.setShort(addrOld + X86.TSS.TASK_BP, cpu.regEBP);
-    cpu.setShort(addrOld + X86.TSS.TASK_SI, cpu.regESI);
-    cpu.setShort(addrOld + X86.TSS.TASK_DI, cpu.regEDI);
-    cpu.setShort(addrOld + X86.TSS.TASK_ES, cpu.segES.sel);
-    cpu.setShort(addrOld + X86.TSS.TASK_CS, cpu.segCS.sel);
-    cpu.setShort(addrOld + X86.TSS.TASK_SS, cpu.segSS.sel);
-    cpu.setShort(addrOld + X86.TSS.TASK_DS, cpu.segDS.sel);
+    cpu.setShort(addrOld + X86.TSS286.TASK_IP, cpu.getIP());
+    cpu.setShort(addrOld + X86.TSS286.TASK_PS, cpu.getPS());
+    cpu.setShort(addrOld + X86.TSS286.TASK_AX, cpu.regEAX);
+    cpu.setShort(addrOld + X86.TSS286.TASK_CX, cpu.regECX);
+    cpu.setShort(addrOld + X86.TSS286.TASK_DX, cpu.regEDX);
+    cpu.setShort(addrOld + X86.TSS286.TASK_BX, cpu.regEBX);
+    cpu.setShort(addrOld + X86.TSS286.TASK_SP, cpu.getSP());
+    cpu.setShort(addrOld + X86.TSS286.TASK_BP, cpu.regEBP);
+    cpu.setShort(addrOld + X86.TSS286.TASK_SI, cpu.regESI);
+    cpu.setShort(addrOld + X86.TSS286.TASK_DI, cpu.regEDI);
+    cpu.setShort(addrOld + X86.TSS286.TASK_ES, cpu.segES.sel);
+    cpu.setShort(addrOld + X86.TSS286.TASK_CS, cpu.segCS.sel);
+    cpu.setShort(addrOld + X86.TSS286.TASK_SS, cpu.segSS.sel);
+    cpu.setShort(addrOld + X86.TSS286.TASK_DS, cpu.segDS.sel);
 
     /*
      * Reload all registers from the new TSS; it's important to reload the LDTR sooner
      * rather than later, so that as segment registers are reloaded, any LDT selectors will
      * will be located in the correct table.
      */
-    cpu.segLDT.load(cpu.getShort(addrNew + X86.TSS.TASK_LDT));
-    cpu.setPS(cpu.getShort(addrNew + X86.TSS.TASK_PS) | (fNest? X86.PS.NT : 0));
+    cpu.segLDT.load(cpu.getShort(addrNew + X86.TSS286.TASK_LDT));
+    cpu.setPS(cpu.getShort(addrNew + X86.TSS286.TASK_PS) | (fNest? X86.PS.NT : 0));
     cpu.assert(!fNest || !!(cpu.regPS & X86.PS.NT));
-    cpu.regEAX = cpu.getShort(addrNew + X86.TSS.TASK_AX);
-    cpu.regECX = cpu.getShort(addrNew + X86.TSS.TASK_CX);
-    cpu.regEDX = cpu.getShort(addrNew + X86.TSS.TASK_DX);
-    cpu.regEBX = cpu.getShort(addrNew + X86.TSS.TASK_BX);
-    cpu.regEBP = cpu.getShort(addrNew + X86.TSS.TASK_BP);
-    cpu.regESI = cpu.getShort(addrNew + X86.TSS.TASK_SI);
-    cpu.regEDI = cpu.getShort(addrNew + X86.TSS.TASK_DI);
-    cpu.segES.load(cpu.getShort(addrNew + X86.TSS.TASK_ES));
-    cpu.segDS.load(cpu.getShort(addrNew + X86.TSS.TASK_DS));
-    cpu.setCSIP(cpu.getShort(addrNew + X86.TSS.TASK_IP), cpu.getShort(addrNew + X86.TSS.TASK_CS));
+    cpu.regEAX = cpu.getShort(addrNew + X86.TSS286.TASK_AX);
+    cpu.regECX = cpu.getShort(addrNew + X86.TSS286.TASK_CX);
+    cpu.regEDX = cpu.getShort(addrNew + X86.TSS286.TASK_DX);
+    cpu.regEBX = cpu.getShort(addrNew + X86.TSS286.TASK_BX);
+    cpu.regEBP = cpu.getShort(addrNew + X86.TSS286.TASK_BP);
+    cpu.regESI = cpu.getShort(addrNew + X86.TSS286.TASK_SI);
+    cpu.regEDI = cpu.getShort(addrNew + X86.TSS286.TASK_DI);
+    cpu.segES.load(cpu.getShort(addrNew + X86.TSS286.TASK_ES));
+    cpu.segDS.load(cpu.getShort(addrNew + X86.TSS286.TASK_DS));
+    cpu.setCSIP(cpu.getShort(addrNew + X86.TSS286.TASK_IP), cpu.getShort(addrNew + X86.TSS286.TASK_CS));
 
-    var offSS = X86.TSS.TASK_SS;
-    var offSP = X86.TSS.TASK_SP;
+    var offSS = X86.TSS286.TASK_SS;
+    var offSP = X86.TSS286.TASK_SP;
     if (this.cpl < cplOld) {
-        offSP = (this.cpl << 2) + X86.TSS.CPL0_SP;
+        offSP = (this.cpl << 2) + X86.TSS286.CPL0_SP;
         offSS = offSP + 2;
     }
     cpu.setSS(cpu.getShort(addrNew + offSS), true);
     cpu.setSP(cpu.getShort(addrNew + offSP));
 
-    if (fNest) cpu.setShort(addrNew + X86.TSS.PREV_TSS, selOld);
+    if (fNest) cpu.setShort(addrNew + X86.TSS286.PREV_TSS, selOld);
 
     cpu.regCR0 |= X86.CR0.MSW.TS;
     return true;

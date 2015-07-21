@@ -1821,6 +1821,21 @@ if (DEBUGGER) {
         }
     };
 
+    Debugger.SYSDESCS = {
+        0x0100: ["tss286",       false],
+        0x0200: ["ldt",          false],
+        0x0300: ["busy tss286",  false],
+        0x0400: ["call gate",    true],
+        0x0500: ["task gate",    true],
+        0x0600: ["int gate286",  true],
+        0x0700: ["trap gate286", true],
+        0x0900: ["tss386",       false],
+        0x0B00: ["busy tss386",  false],
+        0x0C00: ["call gate386", true],
+        0x0E00: ["int gate386",  true],
+        0x0F00: ["trap gate386", true]
+    };
+
     /**
      * dumpDesc(s)
      *
@@ -1862,34 +1877,10 @@ if (DEBUGGER) {
             if (seg.type & X86.DESC.ACC.TYPE.ACCESSED) sType += ",accessed";
         }
         else {
-            switch(seg.type) {
-            case X86.DESC.ACC.TYPE.TSS:
-                sType = "tss";
-                break;
-            case X86.DESC.ACC.TYPE.LDT:
-                sType = "ldt";
-                break;
-            case X86.DESC.ACC.TYPE.TSS_BUSY:
-                sType = "busy tss";
-                break;
-            case X86.DESC.ACC.TYPE.GATE_CALL:
-                sType = "call gate";
-                fGate = true;
-                break;
-            case X86.DESC.ACC.TYPE.GATE_TASK:
-                sType = "task gate";
-                fGate = true;
-                break;
-            case X86.DESC.ACC.TYPE.GATE_INT:
-                sType = "int gate";
-                fGate = true;
-                break;
-            case X86.DESC.ACC.TYPE.GATE_TRAP:
-                sType = "trap gate";
-                fGate = true;
-                break;
-            default:
-                break;
+            var sysDesc = Debugger.SYSDESCS[seg.type];
+            if (sysDesc) {
+                sType = sysDesc[0];
+                fGate = sysDesc[1];
             }
         }
 

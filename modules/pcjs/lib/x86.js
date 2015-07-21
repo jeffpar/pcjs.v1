@@ -91,8 +91,8 @@ var X86 = {
             MP:     0x0002, // monitor processor extension (ie, coprocessor)
             EM:     0x0004, // emulate processor extension
             TS:     0x0008, // task switch indicator
-            ON:     0xfff0, // on the 80286, these bits are always on (TODO: Verify)
-            MASK:   0xffff  // these are the only (MSW) bits that the 80286 can access (within CR0)
+            ON:     0xFFF0, // on the 80286, these bits are always on (TODO: Verify)
+            MASK:   0xFFFF  // these are the only (MSW) bits that the 80286 can access (within CR0)
         },
         ET: 0x00000010,     // coprocessor type (80287 or 80387); always 1 on post-80386 CPUs
         PG: 0x80000000|0    // 0: paging disabled
@@ -100,7 +100,7 @@ var X86 = {
     SEL: {
         RPL:    0x0003,     // requested privilege level (0-3)
         LDT:    0x0004,     // table indicator (0: GDT, 1: LDT)
-        MASK:   0xfff8      // table index
+        MASK:   0xFFF8      // table index
     },
     DESC: {                 // Descriptor Table Entry
         LIMIT: {            // LIMIT bits 0-15 (or OFFSET if this is an INTERRUPT or TRAP gate)
@@ -111,12 +111,12 @@ var X86 = {
         },
         ACC: {              // bit definitions for the access word (offset 0x4)
             OFFSET:     0x4,
-            BASE1623:                       0x00ff,     // (not used if this a TASK, INTERRUPT or TRAP gate; bits 0-5 are parm count for CALL gates)
+            BASE1623:                       0x00FF,     // (not used if this a TASK, INTERRUPT or TRAP gate; bits 0-5 are parm count for CALL gates)
             TYPE: {
                 OFFSET: 0x5,
-                MASK:                       0x1f00,
+                MASK:                       0x1F00,
                 SEG:                        0x1000,
-                NONSEG:                     0x0f00,
+                NONSEG:                     0x0F00,
                 /*
                  * The following bits apply only when SEG is set
                  */
@@ -130,21 +130,26 @@ var X86 = {
                  * The following are all the possible (valid) types (well, except for the variations
                  * of DATA and CODE where the ACCESSED bit (0x0100) may also be set)
                  */
-                TSS:                        0x0100,
+                TSS286:                     0x0100,
                 LDT:                        0x0200,
-                TSS_BUSY:                   0x0300,
+                TSS286_BUSY:                0x0300,
                 GATE_CALL:                  0x0400,
                 GATE_TASK:                  0x0500,
-                GATE_INT:                   0x0600,
-                GATE_TRAP:                  0x0700,
+                GATE286_INT:                0x0600,
+                GATE286_TRAP:               0x0700,
+                TSS386:                     0x0900,     // 80386 and up
+                TSS386_BUSY:                0x0B00,     // 80386 and up
+                GATE386_CALL:               0x0C00,     // 80386 and up
+                GATE386_INT:                0x0E00,     // 80386 and up
+                GATE386_TRAP:               0x0F00,     // 80386 and up
                 DATA_READONLY:              0x1000,
                 DATA_WRITABLE:              0x1200,
                 DATA_EXPDOWN_READONLY:      0x1400,
                 DATA_EXPDOWN_WRITABLE:      0x1600,
                 CODE_EXECONLY:              0x1800,
-                CODE_READABLE:              0x1a00,
-                CODE_CONFORMING:            0x1c00,
-                CODE_CONFORMING_READABLE:   0x1e00
+                CODE_READABLE:              0x1A00,
+                CODE_CONFORMING:            0x1C00,
+                CODE_CONFORMING_READABLE:   0x1E00
             },
             DPL: {
                 MASK:                       0x6000,
@@ -155,7 +160,7 @@ var X86 = {
         },
         EXT: {              // descriptor extension word (reserved on the 80286; "must be zero")
             OFFSET:     0x6,
-            LIMIT1619:                      0x000f,
+            LIMIT1619:                      0x000F,
             AVAIL:                          0x0010,     // NOTE: set in various descriptors in OS/2
             /*
              * The BIG bit is known as the D bit for code segments; when set, all addresses and operands
@@ -167,52 +172,80 @@ var X86 = {
              */
             BIG:                            0x0040,     // clear if default operand/address size is 16-bit, set if 32-bit
             LIMITPAGES:                     0x0080,     // clear if limit granularity is bytes, set if limit granularity is 4Kb pages
-            BASE2431:                       0xff00
+            BASE2431:                       0xFF00
         },
         INVALID: 0          // use X86.DESC.INVALID for invalid DESC values
     },
     LADDR: {                // linear address
         PDE: {              // index of page directory entry
-            MASK:   0xffc00000|0,
+            MASK:   0xFFC00000|0,
             SHIFT:  20      // (addr & DIR.MASK) >>> DIR.SHIFT yields a page directory offset (ie, index * 4)
         },
         PTE: {              // index of page table entry
-            MASK:   0x003ff000,
+            MASK:   0x003FF000,
             SHIFT:  10      // (addr & PAGE.MASK) >>> PAGE.SHIFT yields a page table offset (ie, index * 4)
         },
-        OFFSET:     0x00000fff
+        OFFSET:     0x00000FFF
     },
     PTE: {
-        FRAME:      0xfffff000|0,
+        FRAME:      0xFFFFF000|0,
         DIRTY:      0x00000040,         // page has been modified
         ACCESSED:   0x00000020,         // page has been accessed
         USER:       0x00000004,         // set for user level (CPL 3), clear for supervisor level (CPL 0-2)
         READWRITE:  0x00000002,         // set for read/write, clear for read-only (affects CPL 3 only)
         PRESENT:    0x00000001          // set for present page, clear for not-present page
     },
-    TSS: {
+    TSS286: {
         PREV_TSS:   0x00,
         CPL0_SP:    0x02,   // start of values altered by task switches
         CPL0_SS:    0x04,
         CPL1_SP:    0x06,
         CPL1_SS:    0x08,
-        CPL2_SP:    0x0a,
-        CPL2_SS:    0x0c,
-        TASK_IP:    0x0e,
+        CPL2_SP:    0x0A,
+        CPL2_SS:    0x0C,
+        TASK_IP:    0x0E,
         TASK_PS:    0x10,
         TASK_AX:    0x12,
         TASK_CX:    0x14,
         TASK_DX:    0x16,
         TASK_BX:    0x18,
-        TASK_SP:    0x1a,
-        TASK_BP:    0x1c,
-        TASK_SI:    0x1e,
+        TASK_SP:    0x1A,
+        TASK_BP:    0x1C,
+        TASK_SI:    0x1E,
         TASK_DI:    0x20,
         TASK_ES:    0x22,
         TASK_CS:    0x24,
         TASK_SS:    0x26,
         TASK_DS:    0x28,   // end of values altered by task switches
-        TASK_LDT:   0x2a
+        TASK_LDT:   0x2A
+    },
+    TSS386: {
+        PREV_TSS:   0x00,
+        CPL0_ESP:   0x04,   // start of values altered by task switches
+        CPL0_SS:    0x08,
+        CPL1_ESP:   0x0c,
+        CPL1_SS:    0x10,
+        CPL2_ESP:   0x14,
+        CPL2_SS:    0x18,
+        TASK_CR3:   0x1C,   // (not in TSS286)
+        TASK_EIP:   0x20,
+        TASK_PS:    0x24,
+        TASK_EAX:   0x28,
+        TASK_ECX:   0x2C,
+        TASK_EDX:   0x30,
+        TASK_EBX:   0x34,
+        TASK_ESP:   0x38,
+        TASK_EBP:   0x3C,
+        TASK_ESI:   0x40,
+        TASK_EDI:   0x44,
+        TASK_ES:    0x48,
+        TASK_CS:    0x4C,
+        TASK_SS:    0x50,
+        TASK_DS:    0x54,
+        TASK_FS:    0x58,   // (not in TSS286)
+        TASK_GS:    0x5C,   // (not in TSS286) end of values altered by task switches
+        TASK_LDT:   0x60,
+        TASK_IOPM:  0x64    // (not in TSS286)
     },
     /*
      * Processor Exception Interrupts
@@ -260,7 +293,7 @@ var X86 = {
         EXT:        0x0001,
         IDT:        0x0002,
         LDT:        0x0004,
-        MASK:       0xfff8      // index of corresponding entry in GDT, LDT or IDT
+        MASK:       0xFFF8      // index of corresponding entry in GDT, LDT or IDT
     },
     RESULT: {
         /*

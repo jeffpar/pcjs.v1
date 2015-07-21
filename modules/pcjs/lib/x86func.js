@@ -1244,7 +1244,7 @@ X86.fnIRET = function IRET()
     if (this.regCR0 & X86.CR0.MSW.PE) {
         if (this.regPS & X86.PS.NT) {
             var addrNew = this.segTSS.base;
-            var sel = this.getShort(addrNew + X86.TSS.PREV_TSS);
+            var sel = this.getShort(addrNew + X86.TSS286.PREV_TSS);
             this.segCS.switchTSS(sel, false);
             return;
         }
@@ -1651,7 +1651,7 @@ X86.fnLTR = function LTR(dst, src)
     this.opFlags |= X86.OPFLAG.NOWRITE;
     if (this.segTSS.load(dst) !== X86.ADDR_INVALID) {
         this.setShort(this.segTSS.addrDesc + X86.DESC.ACC.OFFSET, this.segTSS.acc |= X86.DESC.ACC.TYPE.LDT);
-        this.segTSS.type = X86.DESC.ACC.TYPE.TSS_BUSY;
+        this.segTSS.type = X86.DESC.ACC.TYPE.TSS286_BUSY;
     }
     this.nStepCycles -= (17 + (this.regEA === X86.ADDR_INVALID? 0 : 2));
     return dst;
