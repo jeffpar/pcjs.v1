@@ -1394,8 +1394,8 @@ X86CPU.prototype.updateAddrSize = function()
 /**
  * setDataSize(size)
  *
- * This is used by opcodes that require a particular OPERAND size, which we enforce by
- * internally simulating an OPERAND size override, if needed.
+ * This is used by opcodes that require a particular OPERAND size, which we enforce by internally
+ * simulating an OPERAND size override, if needed.
  *
  * @this {X86CPU}
  * @param {number} size (2 for 2-byte/16-bit operands, or 4 for 4-byte/32-bit operands)

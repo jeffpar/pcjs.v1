@@ -2061,8 +2061,8 @@ if (DEBUGGER) {
      */
     Debugger.prototype.getRegIndex = function(sReg, off) {
         off = off || 0;
-        var i = usr.indexOf(Debugger.REGS, sReg.substr(off, 2).toUpperCase());
-        if (i < 0 && sReg.length > 2) i = usr.indexOf(Debugger.REGS, sReg.substr(off, 3).toUpperCase());
+        var i = usr.indexOf(Debugger.REGS, sReg.substr(off, 3).toUpperCase());
+        if (i < 0) i = usr.indexOf(Debugger.REGS, sReg.substr(off, 2).toUpperCase());
         return i;
     };
 

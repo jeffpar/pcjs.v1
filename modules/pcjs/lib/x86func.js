@@ -1244,6 +1244,9 @@ X86.fnIRET = function IRET()
     if (this.regCR0 & X86.CR0.MSW.PE) {
         if (this.regPS & X86.PS.NT) {
             var addrNew = this.segTSS.base;
+            /*
+             * Fortunately, X86.TSS286.PREV_TSS and X86.TSS386.PREV_TSS are at the same TSS offset.
+             */
             var sel = this.getShort(addrNew + X86.TSS286.PREV_TSS);
             this.segCS.switchTSS(sel, false);
             return;
@@ -1650,8 +1653,8 @@ X86.fnLTR = function LTR(dst, src)
 {
     this.opFlags |= X86.OPFLAG.NOWRITE;
     if (this.segTSS.load(dst) !== X86.ADDR_INVALID) {
-        this.setShort(this.segTSS.addrDesc + X86.DESC.ACC.OFFSET, this.segTSS.acc |= X86.DESC.ACC.TYPE.LDT);
-        this.segTSS.type = X86.DESC.ACC.TYPE.TSS286_BUSY;
+        this.setShort(this.segTSS.addrDesc + X86.DESC.ACC.OFFSET, this.segTSS.acc |= X86.DESC.ACC.TSS_BUSY);
+        this.segTSS.type |= X86.DESC.ACC.TSS_BUSY;
     }
     this.nStepCycles -= (17 + (this.regEA === X86.ADDR_INVALID? 0 : 2));
     return dst;
@@ -3724,10 +3727,10 @@ X86.fnFaultMessage = function(nFault, nError, fHalt)
      * However, the foregoing notwithstanding, if MESSAGE.HALT is enabled along with all the other required
      * MESSAGE bits, then we want to halt regardless.
      *
-     * TODO: Eventually remove the code below that halts on all MODEL_80386 GP_FAULTs; this is just to make it
-     * easier to catch bad faults on DeskPro 386 configurations.
+     * TODO: Eventually remove the code below that halts on all MODEL_80386 GP_FAULTs and PG_FAULTs; this is
+     * just to make it easier to catch bad faults on DeskPro 386 configurations.
      */
-    if (DEBUGGER && this.model == X86.MODEL_80386 && nFault == X86.EXCEPTION.GP_FAULT || this.messageEnabled(bitsMessage | Messages.HALT)) {
+    if (DEBUGGER && this.model == X86.MODEL_80386 && (nFault == X86.EXCEPTION.GP_FAULT || nFault == X86.EXCEPTION.PG_FAULT) || this.messageEnabled(bitsMessage | Messages.HALT)) {
         fHalt = true;
     }
 

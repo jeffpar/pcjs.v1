@@ -39,6 +39,20 @@ if (typeof module !== 'undefined') {
     var X86         = require("./x86");
 }
 
+/*
+ * NOTE: The protected-mode support in this module was initially added for 80286 support, and is
+ * currently being upgraded for 80386 support.  In a perfect world, all 80386-related support would
+ * be disabled/skipped whenever the processor is merely an 80286.  And in fact, that's the case
+ * with some of the early changes (eg, skipping X86.DESC.EXT.BASE2431 and X86.DESC.EXT.LIMIT1619
+ * fields unless the processor is an 80386).
+ *
+ * However, the reality is that I won't always be that strict, either because I'm lazy or because
+ * any 80286 code you're likely to run probably won't attempt to use descriptor types or other features
+ * unique to the 80386 anyway, so the extra paranoia may not be worth the effort.
+ *
+ * But still, we should all want to live in a perfect world.  Someday.
+ */
+
 /**
  * @class X86Seg
  * @property {number} sel
@@ -415,7 +429,7 @@ X86Seg.prototype.checkWriteProtDisallowed = function checkWriteProtDisallowed(of
  * @this {X86Seg}
  * @param {number} sel (protected-mode only)
  * @param {boolean} [fGDT] is true if sel must be in the GDT
- * @return {number} acc field from descriptor, or X86.DESC.ACC.INVALID if error
+ * @return {number} ACC field from descriptor, or X86.DESC.ACC.INVALID if error
  */
 X86Seg.prototype.loadAcc = function(sel, fGDT)
 {
@@ -505,6 +519,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
     var selMasked = sel & X86.SEL.MASK;
 
     if (I386 && cpu.model >= X86.MODEL_80386) {
+        var limitOrig = limit;
         base |= (ext & X86.DESC.EXT.BASE2431) << 16;
         limit |= (ext & X86.DESC.EXT.LIMIT1619) << 16;
         if (ext & X86.DESC.EXT.LIMITPAGES) limit = (limit << 12) | 0xfff;
@@ -512,7 +527,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
 
     while (true) {
 
-        var selCode, cplPrev, addrTSS, offSP, offSS, regSPPrev, regSSPrev;
+        var fGate, selCode, cplPrev, addrTSS, offSP, offSS, regSPPrev, regSSPrev;
 
         /*
          * TODO: Consider moving the following chunks of code into worker functions for each X86Seg.ID;
@@ -521,7 +536,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
         if (this.id == X86Seg.ID.CODE) {
             this.fStackSwitch = false;
             var fCall = this.fCall;
-            var fGate, regPSMask, nFaultError, regSP;
+            var regPSMask, nFaultError, regSP;
             var rpl = sel & X86.SEL.RPL;
             var dpl = (acc & X86.DESC.ACC.DPL.MASK) >> X86.DESC.ACC.DPL.SHIFT;
 
@@ -547,33 +562,34 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
                         base = addrDesc = X86.ADDR_INVALID;
                         break;
                     }
-                    regSP = cpu.popWord();
-                    cpu.setSS(cpu.popWord(), true);
-                    cpu.setSP(regSP);
                     this.fStackSwitch = true;
+                    /*
+                     * NOTE: We defer the actual stack switch to the end of this function, after we've called
+                     * updateMode(), to ensure that the stack operations occur with the correct size information.
+                     */
                 }
                 fGate = false;
             }
-            else if (type == X86.DESC.ACC.TYPE.TSS286) {
+            else if (type == X86.DESC.ACC.TYPE.TSS286 || type == X86.DESC.ACC.TYPE.TSS386) {
                 if (!this.switchTSS(sel, fCall)) {
                     base = addrDesc = X86.ADDR_INVALID;
                     break;
                 }
                 return this.base;
             }
-            else if (type == X86.DESC.ACC.TYPE.GATE_CALL) {
+            else if (type == X86.DESC.ACC.TYPE.GATE_CALL || type == X86.DESC.ACC.TYPE.GATE386_CALL) {
                 fGate = true;
                 regPSMask = ~0;
                 nFaultError = sel;
                 if (rpl < this.cpl) rpl = this.cpl;     // set RPL to max(RPL,CPL) for call gates
             }
-            else if (type == X86.DESC.ACC.TYPE.GATE286_INT) {
+            else if (type == X86.DESC.ACC.TYPE.GATE286_INT || type == X86.DESC.ACC.TYPE.GATE386_INT) {
                 fGate = true;
                 regPSMask = ~(X86.PS.NT | X86.PS.TF | X86.PS.IF);
                 nFaultError = sel | X86.ERRCODE.EXT;
                 cpu.assert(!(acc & 0x1f));
             }
-            else if (type == X86.DESC.ACC.TYPE.GATE286_TRAP) {
+            else if (type == X86.DESC.ACC.TYPE.GATE286_TRAP || type == X86.DESC.ACC.TYPE.GATE386_TRAP) {
                 fGate = true;
                 regPSMask = ~(X86.PS.NT | X86.PS.TF);
                 nFaultError = sel | X86.ERRCODE.EXT;
@@ -590,15 +606,23 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
                 /*
                  * Note that since GATE_INT/GATE_TRAP descriptors should appear in the IDT only, that means sel
                  * will actually be nIDT * 8, which means the rpl will always be zero; additionally, the nWords
-                 * portion of acc should always be zero, but that's really dependent on the descriptor being properly
+                 * portion of ACC should always be zero, but that's really dependent on the descriptor being properly
                  * set (which we assert above).
                  */
-                selCode = base & 0xffff;
                 if (rpl <= dpl) {
                     /*
                      * TODO: Verify the PRESENT bit of the gate descriptor, and issue NP_FAULT as appropriate.
                      */
                     cplPrev = this.cpl;
+                    /*
+                     * For gates, there is no "base" and "limit", but rather "selector" and "offset"; the selector
+                     * is located where the first 16 bits of base are normally stored, and the offset comes from the
+                     * original limit and ext fields.
+                     */
+                    selCode = base & 0xffff;
+                    if (I386 && (type & X86.DESC.ACC.NONSEG_386)) {
+                        limit = limitOrig | (ext << 16);
+                    }
                     if (this.load(selCode, true) === X86.ADDR_INVALID) {
                         cpu.assert(false);
                         base = addrDesc = X86.ADDR_INVALID;
@@ -611,6 +635,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
                             base = addrDesc = X86.ADDR_INVALID;
                             break;
                         }
+                        cpu.resetSizes();
                         regSP = cpu.getSP();
                         var i = 0, nWords = (acc & 0x1f);
                         while (nWords--) {
@@ -618,12 +643,19 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
                             regSP += 2;
                         }
                         addrTSS = cpu.segTSS.base;
-                        offSP = (this.cpl << 2) + X86.TSS286.CPL0_SP;
-                        offSS = offSP + 2;
                         regSSPrev = cpu.getSS();
                         regSPPrev = cpu.getSP();
-                        cpu.setSS(cpu.getShort(addrTSS + offSS), true);
-                        cpu.setSP(cpu.getShort(addrTSS + offSP));
+                        if (!I386 || !(type & X86.DESC.ACC.NONSEG_386)) {
+                            offSP = (this.cpl << 2) + X86.TSS286.CPL0_SP;
+                            offSS = offSP + 2;
+                            cpu.setSS(cpu.getShort(addrTSS + offSS), true);
+                            cpu.setSP(cpu.getShort(addrTSS + offSP));
+                        } else {
+                            offSP = (this.cpl << 2) + X86.TSS386.CPL0_ESP;
+                            offSS = offSP + 4;
+                            cpu.setSS(cpu.getShort(addrTSS + offSS), true);
+                            cpu.setSP(cpu.getLong(addrTSS + offSP));
+                        }
                         cpu.pushWord(regSSPrev);
                         cpu.pushWord(regSPPrev);
                         while (i) cpu.pushWord(this.awParms[--i]);
@@ -653,7 +685,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
                 }
                 if (type < X86.DESC.ACC.TYPE.SEG || (type & (X86.DESC.ACC.TYPE.CODE | X86.DESC.ACC.TYPE.READABLE)) == X86.DESC.ACC.TYPE.CODE) {
                     /*
-                     * OS/2 1.0 triggers this "Empty Descriptor" GP_FAULT multiple times during boot; eg:
+                     * OS/2 1.0 triggers this "Empty Descriptor" GP_FAULT multiple times during boot; for example:
                      *
                      *      Fault 0D (002F) on opcode 0x8E at 3190:3A05 (%112625)
                      *      stopped (11315208 ops, 41813627 cycles, 498270 ms, 83918 hz)
@@ -662,7 +694,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
                      *      CS=3190[10EC20,B89F] IP=3A05 V0 D0 I1 T0 S0 Z1 A0 P1 C0 PS=3246 MS=FFF3
                      *      LD=0028[174BC0,003F] GD=[11A4E0,490F] ID=[11F61A,03FF]  TR=0010 A20=ON
                      *      3190:3A05 8E4604        MOV      ES,[BP+04]
-                     *      0038:0ABE  002F  19C0  0000  067C - 07FC  0AD2  0010  C420   /.....|....... .
+                     *      0038:0ABE  002F  19C0  0000  067C - 07FC  0AD2  0010  C420
                      *      dumpDesc(002F): %174BE8
                      *      base=000000 limit=0000 dpl=00 type=00 (undefined)
                      *
@@ -671,7 +703,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
                      * simply needed to be "faulted" into memory, I would have expected OS/2 to build a descriptor
                      * with the PRESENT bit clear, and rely on NP_FAULT rather than GP_FAULT, but maybe this was simpler.
                      *
-                     * Anyway, because of this, if acc is zero, we won't set fHalt on this GP_FAULT.
+                     * So, if the ACC field is zero, we won't set the last fnFault() parameter (fHalt) to true.
                      */
                     if (!fSuppress) X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel, !!acc);
                     base = addrDesc = X86.ADDR_INVALID;
@@ -692,8 +724,9 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
             }
         }
         else if (this.id == X86Seg.ID.TSS) {
-            if (!selMasked || type != X86.DESC.ACC.TYPE.TSS286 && type != X86.DESC.ACC.TYPE.TSS286_BUSY) {
-                if (!fSuppress) X86.fnFault.call(cpu, X86.EXCEPTION.TS_FAULT, sel, true);
+            var typeTSS = type & ~X86.DESC.ACC.TSS_BUSY;
+            if (!selMasked || typeTSS != X86.DESC.ACC.TYPE.TSS286 && typeTSS != X86.DESC.ACC.TYPE.TSS386) {
+                if (!fSuppress) X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel, true);
                 base = addrDesc = X86.ADDR_INVALID;
                 break;
             }
@@ -702,11 +735,12 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
             /*
              * For LSL, we must support any descriptor marked X86.DESC.ACC.TYPE.SEG, as well as TSS and LDT descriptors.
              */
-            if (!(type & X86.DESC.ACC.TYPE.SEG) && type > X86.DESC.ACC.TYPE.TSS286_BUSY) {
+            if (!(type & X86.DESC.ACC.TYPE.SEG) && type > X86.DESC.ACC.TYPE.TSS286_BUSY && type != X86.DESC.ACC.TYPE.TSS386 && type != X86.DESC.ACC.TYPE.TSS386_BUSY) {
                 base = addrDesc = X86.ADDR_INVALID;
                 break;
             }
         }
+
         this.sel = sel;
         this.base = base;
         this.limit = limit;
@@ -716,6 +750,16 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
         this.ext = ext;
         this.addrDesc = addrDesc;
         this.updateMode(true);
+
+        if (fGate === false && this.fStackSwitch) {
+            /*
+             * NOTE: This is the deferred stack switch we mentioned above.
+             */
+            cpu.resetSizes();
+            regSP = cpu.popWord();
+            cpu.setSS(cpu.popWord(), true);
+            cpu.setSP(regSP);
+        }
         break;
     }
     if (!fSuppress) this.messageSeg(sel, base, limit, type, ext);
@@ -741,7 +785,8 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
  * Of course, that all could have been avoided if IBM had heeded Intel's advice and not used Intel-reserved IDT
  * entries for PC interrupts.
  *
- * TODO: Add 80386 TSS support (including CR3 support).
+ * TODO: Add TSS validity checks and appropriate generation of TS_FAULT exceptions; note that the only rudimentary
+ * checks we currently perform are of the GP_FAULT variety.
  *
  * @this {X86Seg}
  * @param {number} selNew
@@ -753,19 +798,22 @@ X86Seg.prototype.switchTSS = function switchTSS(selNew, fNest)
     var cpu = this.cpu;
     cpu.assert(this === cpu.segCS);
 
-    var addrOld = cpu.segTSS.base;
     var cplOld = this.cpl;
     var selOld = cpu.segTSS.sel;
+    var addrOld = cpu.segTSS.base;
 
     if (!fNest) {
         /*
          * TODO: Verify that it is (always) correct to require that the BUSY bit be currently set.
          */
-        if (cpu.segTSS.type != X86.DESC.ACC.TYPE.TSS286_BUSY) {
-            X86.fnFault.call(cpu, X86.EXCEPTION.TS_FAULT, selNew, true);
+        if (!(cpu.segTSS.type & X86.DESC.ACC.TSS_BUSY)) {
+            X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, selNew, true);
             return false;
         }
-        cpu.setShort(cpu.segTSS.addrDesc + X86.DESC.ACC.OFFSET, (cpu.segTSS.acc & ~X86.DESC.ACC.TYPE.TSS286_BUSY) | X86.DESC.ACC.TYPE.TSS286);
+        /*
+         * TODO: Should I be more paranoid about writing our cached ACC value back into the descriptor?
+         */
+        cpu.setShort(cpu.segTSS.addrDesc + X86.DESC.ACC.OFFSET, cpu.segTSS.acc &= ~X86.DESC.ACC.TSS_BUSY);
     }
 
     if (cpu.segTSS.load(selNew) === X86.ADDR_INVALID) {
@@ -776,66 +824,119 @@ X86Seg.prototype.switchTSS = function switchTSS(selNew, fNest)
     if (DEBUG && DEBUGGER && this.dbg && this.dbg.messageEnabled(Messages.TSS)) {
         this.dbg.message((fNest? "Task switch" : "Task return") + ": TR " + str.toHexWord(selOld) + " (%" + str.toHex(addrOld, 6) + "), new TR " + str.toHexWord(selNew) + " (%" + str.toHex(addrNew, 6) + ")");
     }
-    if (fNest === false) {
-        if (cpu.segTSS.type != X86.DESC.ACC.TYPE.TSS286_BUSY) {
+
+    if (fNest !== false) {
+        if (cpu.segTSS.type & X86.DESC.ACC.TSS_BUSY) {
             X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, selNew, true);
             return false;
         }
-    } else {
-        if (cpu.segTSS.type == X86.DESC.ACC.TYPE.TSS286_BUSY) {
-            X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, selNew, true);
-            return false;
-        }
-        cpu.setShort(cpu.segTSS.addrDesc + X86.DESC.ACC.OFFSET, cpu.segTSS.acc |= X86.DESC.ACC.TYPE.TSS286_BUSY);
-        cpu.segTSS.type = X86.DESC.ACC.TYPE.TSS286_BUSY;
+        cpu.setShort(cpu.segTSS.addrDesc + X86.DESC.ACC.OFFSET, cpu.segTSS.acc |= X86.DESC.ACC.TSS_BUSY);
     }
+
+    /*
+     * Now that we're done checking the TSS_BUSY bit in the TYPE field (which is a subset of the ACC field),
+     * sync any changes made above in the ACC field to the TYPE field.
+     */
+    cpu.segTSS.type = (cpu.segTSS.type & ~X86.DESC.ACC.TSS_BUSY) | (cpu.segTSS.acc & X86.DESC.ACC.TSS_BUSY);
 
     /*
      * Update the old TSS
      */
-    cpu.setShort(addrOld + X86.TSS286.TASK_IP, cpu.getIP());
-    cpu.setShort(addrOld + X86.TSS286.TASK_PS, cpu.getPS());
-    cpu.setShort(addrOld + X86.TSS286.TASK_AX, cpu.regEAX);
-    cpu.setShort(addrOld + X86.TSS286.TASK_CX, cpu.regECX);
-    cpu.setShort(addrOld + X86.TSS286.TASK_DX, cpu.regEDX);
-    cpu.setShort(addrOld + X86.TSS286.TASK_BX, cpu.regEBX);
-    cpu.setShort(addrOld + X86.TSS286.TASK_SP, cpu.getSP());
-    cpu.setShort(addrOld + X86.TSS286.TASK_BP, cpu.regEBP);
-    cpu.setShort(addrOld + X86.TSS286.TASK_SI, cpu.regESI);
-    cpu.setShort(addrOld + X86.TSS286.TASK_DI, cpu.regEDI);
-    cpu.setShort(addrOld + X86.TSS286.TASK_ES, cpu.segES.sel);
-    cpu.setShort(addrOld + X86.TSS286.TASK_CS, cpu.segCS.sel);
-    cpu.setShort(addrOld + X86.TSS286.TASK_SS, cpu.segSS.sel);
-    cpu.setShort(addrOld + X86.TSS286.TASK_DS, cpu.segDS.sel);
+    var offSS, offSP;
+    if (cpu.segTSS.type == X86.DESC.ACC.TYPE.TSS286 || cpu.segTSS.type == X86.DESC.ACC.TYPE.TSS286_BUSY) {
+        cpu.setShort(addrOld + X86.TSS286.TASK_IP, cpu.getIP());
+        cpu.setShort(addrOld + X86.TSS286.TASK_PS, cpu.getPS());
+        cpu.setShort(addrOld + X86.TSS286.TASK_AX, cpu.regEAX);
+        cpu.setShort(addrOld + X86.TSS286.TASK_CX, cpu.regECX);
+        cpu.setShort(addrOld + X86.TSS286.TASK_DX, cpu.regEDX);
+        cpu.setShort(addrOld + X86.TSS286.TASK_BX, cpu.regEBX);
+        cpu.setShort(addrOld + X86.TSS286.TASK_SP, cpu.getSP());
+        cpu.setShort(addrOld + X86.TSS286.TASK_BP, cpu.regEBP);
+        cpu.setShort(addrOld + X86.TSS286.TASK_SI, cpu.regESI);
+        cpu.setShort(addrOld + X86.TSS286.TASK_DI, cpu.regEDI);
+        cpu.setShort(addrOld + X86.TSS286.TASK_ES, cpu.segES.sel);
+        cpu.setShort(addrOld + X86.TSS286.TASK_CS, cpu.segCS.sel);
+        cpu.setShort(addrOld + X86.TSS286.TASK_SS, cpu.segSS.sel);
+        cpu.setShort(addrOld + X86.TSS286.TASK_DS, cpu.segDS.sel);
+        /*
+         * Reload all registers from the new TSS; it's important to reload the LDTR sooner
+         * rather than later, so that as segment registers are reloaded, any LDT selectors will
+         * will be located in the correct table.
+         */
+        cpu.segLDT.load(cpu.getShort(addrNew + X86.TSS286.TASK_LDT));
+        cpu.setPS(cpu.getShort(addrNew + X86.TSS286.TASK_PS) | (fNest? X86.PS.NT : 0));
+        cpu.assert(!fNest || !!(cpu.regPS & X86.PS.NT));
+        cpu.regEAX = cpu.getShort(addrNew + X86.TSS286.TASK_AX);
+        cpu.regECX = cpu.getShort(addrNew + X86.TSS286.TASK_CX);
+        cpu.regEDX = cpu.getShort(addrNew + X86.TSS286.TASK_DX);
+        cpu.regEBX = cpu.getShort(addrNew + X86.TSS286.TASK_BX);
+        cpu.regEBP = cpu.getShort(addrNew + X86.TSS286.TASK_BP);
+        cpu.regESI = cpu.getShort(addrNew + X86.TSS286.TASK_SI);
+        cpu.regEDI = cpu.getShort(addrNew + X86.TSS286.TASK_DI);
+        cpu.segES.load(cpu.getShort(addrNew + X86.TSS286.TASK_ES));
+        cpu.segDS.load(cpu.getShort(addrNew + X86.TSS286.TASK_DS));
+        cpu.setCSIP(cpu.getShort(addrNew + X86.TSS286.TASK_IP), cpu.getShort(addrNew + X86.TSS286.TASK_CS));
+        offSS = X86.TSS286.TASK_SS;
+        offSP = X86.TSS286.TASK_SP;
+        if (this.cpl < cplOld) {
+            offSP = (this.cpl << 2) + X86.TSS286.CPL0_SP;
+            offSS = offSP + 2;
+        }
+        cpu.setSS(cpu.getShort(addrNew + offSS), true);
+        cpu.setSP(cpu.getShort(addrNew + offSP));
+    } else {
+        cpu.assert(cpu.segTSS.type == X86.DESC.ACC.TYPE.TSS386 || cpu.segTSS.type == X86.DESC.ACC.TYPE.TSS386_BUSY);
+        cpu.setLong(addrOld + X86.TSS386.TASK_CR3, cpu.regCR3);
+        cpu.setLong(addrOld + X86.TSS386.TASK_EIP, cpu.getIP());
+        cpu.setLong(addrOld + X86.TSS386.TASK_PS,  cpu.getPS());
+        cpu.setLong(addrOld + X86.TSS386.TASK_EAX, cpu.regEAX);
+        cpu.setLong(addrOld + X86.TSS386.TASK_ECX, cpu.regECX);
+        cpu.setLong(addrOld + X86.TSS386.TASK_EDX, cpu.regEDX);
+        cpu.setLong(addrOld + X86.TSS386.TASK_EBX, cpu.regEBX);
+        cpu.setLong(addrOld + X86.TSS386.TASK_ESP, cpu.getSP());
+        cpu.setLong(addrOld + X86.TSS386.TASK_EBP, cpu.regEBP);
+        cpu.setLong(addrOld + X86.TSS386.TASK_ESI, cpu.regESI);
+        cpu.setLong(addrOld + X86.TSS386.TASK_EDI, cpu.regEDI);
+        cpu.setLong(addrOld + X86.TSS386.TASK_ES,  cpu.segES.sel);
+        cpu.setLong(addrOld + X86.TSS386.TASK_CS,  cpu.segCS.sel);
+        cpu.setLong(addrOld + X86.TSS386.TASK_SS,  cpu.segSS.sel);
+        cpu.setLong(addrOld + X86.TSS386.TASK_DS,  cpu.segDS.sel);
+        cpu.setLong(addrOld + X86.TSS386.TASK_FS,  cpu.segFS.sel);
+        cpu.setLong(addrOld + X86.TSS386.TASK_GS,  cpu.segGS.sel);
+        /*
+         * Reload all registers from the new TSS; it's important to reload the LDTR sooner
+         * rather than later, so that as segment registers are reloaded, any LDT selectors will
+         * will be located in the correct table.
+         */
+        X86.fnLCR3.call(cpu, cpu.getLong(addrNew + X86.TSS386.TASK_CR3));
+        cpu.segLDT.load(cpu.getShort(addrNew + X86.TSS386.TASK_LDT));
+        cpu.setPS(cpu.getLong(addrNew + X86.TSS386.TASK_PS) | (fNest? X86.PS.NT : 0));
+        cpu.assert(!fNest || !!(cpu.regPS & X86.PS.NT));
+        cpu.regEAX = cpu.getLong(addrNew + X86.TSS386.TASK_EAX);
+        cpu.regECX = cpu.getLong(addrNew + X86.TSS386.TASK_ECX);
+        cpu.regEDX = cpu.getLong(addrNew + X86.TSS386.TASK_EDX);
+        cpu.regEBX = cpu.getLong(addrNew + X86.TSS386.TASK_EBX);
+        cpu.regEBP = cpu.getLong(addrNew + X86.TSS386.TASK_EBP);
+        cpu.regESI = cpu.getLong(addrNew + X86.TSS386.TASK_ESI);
+        cpu.regEDI = cpu.getLong(addrNew + X86.TSS386.TASK_EDI);
+        cpu.segES.load(cpu.getShort(addrNew + X86.TSS386.TASK_ES));
+        cpu.segDS.load(cpu.getShort(addrNew + X86.TSS386.TASK_DS));
+        cpu.segFS.load(cpu.getShort(addrNew + X86.TSS386.TASK_FS));
+        cpu.segGS.load(cpu.getShort(addrNew + X86.TSS386.TASK_GS));
+        cpu.setCSIP(cpu.getLong(addrNew + X86.TSS386.TASK_EIP), cpu.getShort(addrNew + X86.TSS386.TASK_CS));
+        offSS = X86.TSS386.TASK_SS;
+        offSP = X86.TSS386.TASK_ESP;
+        if (this.cpl < cplOld) {
+            offSP = (this.cpl << 2) + X86.TSS386.CPL0_ESP;
+            offSS = offSP + 4;
+        }
+        cpu.setSS(cpu.getShort(addrNew + offSS), true);
+        cpu.setSP(cpu.getLong(addrNew + offSP));
+    }
 
     /*
-     * Reload all registers from the new TSS; it's important to reload the LDTR sooner
-     * rather than later, so that as segment registers are reloaded, any LDT selectors will
-     * will be located in the correct table.
+     * Fortunately, X86.TSS286.PREV_TSS and X86.TSS386.PREV_TSS are at the same TSS offset.
      */
-    cpu.segLDT.load(cpu.getShort(addrNew + X86.TSS286.TASK_LDT));
-    cpu.setPS(cpu.getShort(addrNew + X86.TSS286.TASK_PS) | (fNest? X86.PS.NT : 0));
-    cpu.assert(!fNest || !!(cpu.regPS & X86.PS.NT));
-    cpu.regEAX = cpu.getShort(addrNew + X86.TSS286.TASK_AX);
-    cpu.regECX = cpu.getShort(addrNew + X86.TSS286.TASK_CX);
-    cpu.regEDX = cpu.getShort(addrNew + X86.TSS286.TASK_DX);
-    cpu.regEBX = cpu.getShort(addrNew + X86.TSS286.TASK_BX);
-    cpu.regEBP = cpu.getShort(addrNew + X86.TSS286.TASK_BP);
-    cpu.regESI = cpu.getShort(addrNew + X86.TSS286.TASK_SI);
-    cpu.regEDI = cpu.getShort(addrNew + X86.TSS286.TASK_DI);
-    cpu.segES.load(cpu.getShort(addrNew + X86.TSS286.TASK_ES));
-    cpu.segDS.load(cpu.getShort(addrNew + X86.TSS286.TASK_DS));
-    cpu.setCSIP(cpu.getShort(addrNew + X86.TSS286.TASK_IP), cpu.getShort(addrNew + X86.TSS286.TASK_CS));
-
-    var offSS = X86.TSS286.TASK_SS;
-    var offSP = X86.TSS286.TASK_SP;
-    if (this.cpl < cplOld) {
-        offSP = (this.cpl << 2) + X86.TSS286.CPL0_SP;
-        offSS = offSP + 2;
-    }
-    cpu.setSS(cpu.getShort(addrNew + offSS), true);
-    cpu.setSP(cpu.getShort(addrNew + offSP));
-
     if (fNest) cpu.setShort(addrNew + X86.TSS286.PREV_TSS, selOld);
 
     cpu.regCR0 |= X86.CR0.MSW.TS;
@@ -854,7 +955,7 @@ X86Seg.prototype.switchTSS = function switchTSS(selNew, fNest)
  * callers, we allow them to specify 32-bit bases, which we then truncate to 24 bits as needed.
  *
  * WARNING: Since the CPU must maintain regLIP as the sum of the CS base and the current IP, all calls
- * to segCS.setBase() need to go through setCSBase().
+ * to segCS.setBase() need to go through cpu.setCSBase().
  *
  * @this {X86Seg}
  * @param {number} addr
@@ -870,7 +971,8 @@ X86Seg.prototype.setBase = function(addr)
  * save()
  *
  * Early versions of PCjs saved only segment selectors, since that's all that mattered in real-mode;
- * newer versions need to save/restore all the "defining" properties of the X86Seg object.
+ * newer versions need to save/restore all the "core" properties of the X86Seg object (ie, properties other
+ * than those that updateMode() will take care of restoring later).
  *
  * @this {X86Seg}
  * @return {Array}
@@ -900,7 +1002,8 @@ X86Seg.prototype.save = function()
  * restore(a)
  *
  * Early versions of PCjs saved only segment selectors, since that's all that mattered in real-mode;
- * newer versions need to save/restore all the "defining" properties of the X86Seg object.
+ * newer versions need to save/restore all the "core" properties of the X86Seg object (ie, properties other
+ * than those that updateMode() will take care of restoring later).
  *
  * @this {X86Seg}
  * @param {Array|number} a

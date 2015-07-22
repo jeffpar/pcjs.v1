@@ -151,6 +151,11 @@ var X86 = {
                 CODE_CONFORMING:            0x1C00,
                 CODE_CONFORMING_READABLE:   0x1E00
             },
+            /*
+             * Assorted ACC bits within NONSEG values
+             */
+            TSS_BUSY:                       0x0200,
+            NONSEG_386:                     0x0800,     // 80386 and up
             DPL: {
                 MASK:                       0x6000,
                 SHIFT:                      13
