@@ -1233,6 +1233,7 @@ X86CPU.prototype.resetRegs = function()
         this.aRegTR = new Array(8);     // Test Registers TR0-TR7
         this.segFS = new X86Seg(this, X86Seg.ID.DATA,  "FS");
         this.segGS = new X86Seg(this, X86Seg.ID.DATA,  "GS");
+        this.disablePageBlocks();
     }
 
     this.segNULL = new X86Seg(this, X86Seg.ID.NULL,  "NULL");

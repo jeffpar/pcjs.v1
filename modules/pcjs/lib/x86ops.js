@@ -3204,9 +3204,11 @@ X86.opGRP2wn = function GRP2wn()
  */
 X86.opRETn = function RETn()
 {
-    var n = this.getIPShort() << (this.dataSize >> 2);
+    var n = this.getIPShort();
     var newIP = this.popWord();
-    if (DEBUG) this.printMessage(" returning to " + str.toHex(this.segCS.sel, 4) + ':' + str.toHex(newIP, this.dataSize << 1), this.bitsMessage, true);
+
+    // if (DEBUG) this.printMessage(" returning to " + str.toHex(this.segCS.sel, 4) + ':' + str.toHex(newIP, this.dataSize << 1), this.bitsMessage, true);
+
     this.setIP(newIP);
     if (n) this.setSP(this.getSP() + n);            // TODO: optimize
     this.nStepCycles -= this.cycleCounts.nOpCyclesRetn;
@@ -3220,7 +3222,9 @@ X86.opRETn = function RETn()
 X86.opRET = function RET()
 {
     var newIP = this.popWord();
-    if (DEBUG) this.printMessage(" returning to " + str.toHex(this.segCS.sel, 4) + ':' + str.toHex(newIP, this.dataSize << 1), this.bitsMessage, true);
+
+    // if (DEBUG) this.printMessage(" returning to " + str.toHex(this.segCS.sel, 4) + ':' + str.toHex(newIP, this.dataSize << 1), this.bitsMessage, true);
+
     this.setIP(newIP);
     this.nStepCycles -= this.cycleCounts.nOpCyclesRet;
 };
@@ -3700,7 +3704,9 @@ X86.opCALL = function CALL()
     var disp = this.getIPWord();
     var oldIP = this.getIP();
     var newIP = oldIP + disp;
-    if (DEBUG) this.printMessage("calling " + str.toHex(newIP, this.dataSize << 1), this.bitsMessage, true);
+
+    // if (DEBUG) this.printMessage("calling " + str.toHex(newIP, this.dataSize << 1), this.bitsMessage, true);
+
     this.pushWord(oldIP);
     this.setIP(newIP);
     this.nStepCycles -= this.cycleCounts.nOpCyclesCall;

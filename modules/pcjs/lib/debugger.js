@@ -3407,7 +3407,7 @@ if (DEBUGGER) {
         }
 
         if (sComment && fNonPrefix) {
-            sLine = str.pad(sLine, dbgAddrIns.fAddr32? 68 : 56) + ';' + sComment;
+            sLine = str.pad(sLine, dbgAddrIns.fAddr32? 74 : 56) + ';' + sComment;
             if (!this.cpu.aFlags.fChecksum) {
                 sLine += (nSequence != null? '=' + nSequence.toString() : "");
             } else {
@@ -3444,7 +3444,7 @@ if (DEBUGGER) {
             }
             break;
         case Debugger.TYPE_SBYTE:
-            sOperand = str.toHex((this.getByte(dbgAddr, 1) << 24) >> 24, 4);
+            sOperand = str.toHex((this.getByte(dbgAddr, 1) << 24) >> 24, dbgAddr.fData32? 8: 4);
             break;
         case Debugger.TYPE_VWORD:
         case Debugger.TYPE_2WORD:
@@ -3888,15 +3888,15 @@ if (DEBUGGER) {
             var iColon = sAddr.indexOf(":");
             if (iColon < 0) {
                 if (sel != null) {
-                    off = this.parseValue(sAddr);
+                    off = this.parseExpression(sAddr);
                     addr = null;
                 } else {
-                    addr = this.parseValue(sAddr);
+                    addr = this.parseExpression(sAddr);
                 }
             }
             else {
-                sel = this.parseValue(sAddr.substring(0, iColon));
-                off = this.parseValue(sAddr.substring(iColon + 1));
+                sel = this.parseExpression(sAddr.substring(0, iColon));
+                off = this.parseExpression(sAddr.substring(iColon + 1));
                 addr = null;
             }
         }
@@ -4413,7 +4413,7 @@ if (DEBUGGER) {
     {
         var sParm = sCmd.charAt(1);
         if (!sParm || sParm == "?") {
-            this.println("\nbreakpoint commands:");
+            this.println("breakpoint commands:");
             this.println("\tbi [p]\ttoggle break on input port [p]");
             this.println("\tbo [p]\ttoggle break on output port [p]");
             this.println("\tbp [a]\tset exec breakpoint at addr [a]");
@@ -4521,7 +4521,7 @@ if (DEBUGGER) {
                 }
             }
             sDumpers += ",state,symbols";
-            this.println("\ndump commands:");
+            this.println("dump commands:");
             this.println("\tdb [a] [#]    dump # bytes at address a");
             this.println("\tdw [a] [#]    dump # words at address a");
             this.println("\tdd [a] [#]    dump # dwords at address a");
@@ -4598,7 +4598,7 @@ if (DEBUGGER) {
                     }
                     sChars += (b >= 32 && b < 128? String.fromCharCode(b) : ".");
                 }
-                if (sDump) sDump += "\n";
+                if (sDump) sDump += '\n';
                 sDump += sAddr + "  " + sData + " " + sChars;
             }
         }
@@ -4641,7 +4641,7 @@ if (DEBUGGER) {
     Debugger.prototype.doFreqs = function(sParm)
     {
         if (sParm == "?") {
-            this.println("\nfrequency commands:");
+            this.println("frequency commands:");
             this.println("\tclear\tclear all frequency counts");
             return;
         }
@@ -4733,7 +4733,7 @@ if (DEBUGGER) {
                          *
                          *      this.println(s);
                          */
-                        sDump += (sDump? "\n" : "") + s;
+                        sDump += (sDump? '\n' : "") + s;
                         cLines--;
                     }
                     if (i >= this.aTraceBuffer.length)
@@ -4774,7 +4774,7 @@ if (DEBUGGER) {
     Debugger.prototype.doInput = function(sPort)
     {
         if (!sPort || sPort == "?") {
-            this.println("\ninput commands:");
+            this.println("input commands:");
             this.println("\ti [p]\tread port [p]");
             /*
              * TODO: Regarding this warning, consider adding an "unchecked" version of
@@ -4850,7 +4850,7 @@ if (DEBUGGER) {
     Debugger.prototype.doLoad = function(asArgs)
     {
         if (asArgs[0] == 'l' && asArgs[1] === undefined || asArgs[1] == "?") {
-            this.println("\nlist/load commands:");
+            this.println("list/load commands:");
             this.println("\tl [address] [drive #] [sector #] [# sectors]");
             this.println("\tln [address] lists symbol(s) nearest to address");
             return;
@@ -4996,7 +4996,7 @@ if (DEBUGGER) {
                 var bitMessage = Debugger.MESSAGES[m];
                 var fEnabled = !!(this.bitsMessage & bitMessage);
                 if (fCriteria !== null && fCriteria != fEnabled) continue;
-                if (sCategories) sCategories += ",";
+                if (sCategories) sCategories += ',';
                 if (!(++n % 10)) sCategories += "\n\t";     // jshint ignore:line
                 if (m == "key") m = "keys";
                 sCategories += m;
@@ -5004,7 +5004,7 @@ if (DEBUGGER) {
         }
 
         if (sCategory === undefined) {
-            this.println("\nmessage commands:\n\tm [category] [on|off]\tturn categories on/off");
+            this.println("message commands:\n\tm [category] [on|off]\tturn categories on/off");
         }
 
         this.println((fCriteria !== null? (fCriteria? "messages on:  " : "messages off: ") : "message categories:\n\t") + (sCategories || "none"));
@@ -5021,7 +5021,7 @@ if (DEBUGGER) {
     Debugger.prototype.doExecOptions = function(asArgs)
     {
         if (asArgs[1] === undefined || asArgs[1] == "?") {
-            this.println("\nexecution options:");
+            this.println("execution options:");
             this.println("\tcs int #\tset checksum cycle interval to #");
             this.println("\tcs start #\tset checksum cycle start count to #");
             this.println("\tcs stop #\tset checksum cycle stop count to #");
@@ -5073,7 +5073,7 @@ if (DEBUGGER) {
     Debugger.prototype.doOutput = function(sPort, sByte)
     {
         if (!sPort || sPort == "?") {
-            this.println("\noutput commands:");
+            this.println("output commands:");
             this.println("\to [p] [b]\twrite byte [b] to port [p]");
             /*
              * TODO: Regarding this warning, consider adding an "unchecked" version of
@@ -5104,7 +5104,7 @@ if (DEBUGGER) {
     Debugger.prototype.doRegisters = function(asArgs, fCompact)
     {
         if (asArgs && asArgs[1] == "?") {
-            this.println("\nregister commands:");
+            this.println("register commands:");
             this.println("\tr\t\tdisplay all registers");
             this.println("\tr [target=#]\tmodify target register");
             this.println("supported targets:");
@@ -5324,12 +5324,12 @@ if (DEBUGGER) {
                     return;
                 }
                 this.cpu.updateCPU();
-                this.println("\nupdated registers:");
+                this.println("updated registers:");
                 fCompact = true;
             }
         }
 
-        this.println((fCompact? '' : '\n') + this.getRegDump(fProt));
+        this.println(this.getRegDump(fProt));
 
         if (fIns) {
             this.dbgAddrNextCode = this.newAddr(this.cpu.getIP(), this.cpu.getCS());
@@ -5654,8 +5654,6 @@ if (DEBUGGER) {
             n = -1;
         }
 
-        var fBlank = (dbgAddr.off != this.dbgAddrNextCode.off);
-
         var cLines = 0;
         this.initAddrSize(dbgAddr, true);
 
@@ -5669,12 +5667,9 @@ if (DEBUGGER) {
 
             if (aSymbol[0]) {
                 var sLabel = aSymbol[0] + ":";
-                fBlank = false;
                 if (aSymbol[2]) sLabel += " " + aSymbol[2];
                 this.println(sLabel);
             }
-
-            if (fBlank) this.println();
 
             if (aSymbol[3]) {
                 sComment = aSymbol[3];
@@ -5693,7 +5688,6 @@ if (DEBUGGER) {
             this.println(sIns);
             this.dbgAddrNextCode = dbgAddr;
             cb -= dbgAddr.addr - addr;
-            fBlank = false;
             cLines++;
         }
     };
@@ -5752,6 +5746,9 @@ if (DEBUGGER) {
                     sCmd = '?';
                 }
             }
+            else {
+                this.println(">> " + sCmd);
+            }
 
             sCmd = sCmd.toLowerCase();
 
@@ -5766,7 +5763,7 @@ if (DEBUGGER) {
                 }
                 else {
                     /*
-                     * Process any "whole" commands here first (eg, "debug", "nodebug", "reset", etc.)
+                     * Process any "whole word" commands here first (eg, "debug", "nodebug", "reset", etc.)
                      *
                      * For all other commands, if they lack a space between the command and argument portions,
                      * insert a space before the first non-alpha character, so that split() will have the desired effect.

@@ -341,7 +341,8 @@ X86.fnBTS = function BTS(dst, src)
  */
 X86.fnCALLw = function CALLw(dst, src)
 {
-    if (DEBUG) this.printMessage("calling " + str.toHex(dst, this.dataSize << 1), this.bitsMessage, true);
+    // if (DEBUG) this.printMessage("calling " + str.toHex(dst, this.dataSize << 1), this.bitsMessage, true);
+
     this.pushWord(this.getIP());
     this.setIP(dst);
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesCallWR : this.cycleCounts.nOpCyclesCallWM);
@@ -361,7 +362,8 @@ X86.fnCALLw = function CALLw(dst, src)
  */
 X86.fnCALLF = function CALLF(off, sel)
 {
-    if (DEBUG) this.printMessage("calling " + str.toHex(sel, 4) + ':' + str.toHex(off, this.dataSize << 1), this.bitsMessage, true);
+    // if (DEBUG) this.printMessage("calling " + str.toHex(sel, 4) + ':' + str.toHex(off, this.dataSize << 1), this.bitsMessage, true);
+
     var oldCS = this.getCS();
     var oldIP = this.getIP();
     if (this.setCSIP(off, sel, true) != null) {
@@ -1256,7 +1258,9 @@ X86.fnIRET = function IRET()
     var newIP = this.popWord();
     var newCS = this.popWord();
     var newPS = this.popWord();
-    if (DEBUG) this.printMessage(" returning to " + str.toHex(newCS, 4) + ':' + str.toHex(newIP, this.dataSize << 1), this.bitsMessage, true);
+
+    // if (DEBUG) this.printMessage(" returning to " + str.toHex(newCS, 4) + ':' + str.toHex(newIP, this.dataSize << 1), this.bitsMessage, true);
+
     if (this.setCSIP(newIP, newCS, false) != null) {
         this.setPS(newPS, cpl);
         if (MAXDEBUG && this.cIntReturn) this.checkIntReturn(this.regLIP);
@@ -2149,9 +2153,9 @@ X86.fnRETF = function RETF(n)
 {
     var newIP = this.popWord();
     var newCS = this.popWord();
-    if (DEBUG) this.printMessage(" returning to " + str.toHex(newCS, 4) + ':' + str.toHex(newIP, this.dataSize << 1), this.bitsMessage, true);
 
-    n <<= (this.dataSize >> 2);
+    // if (DEBUG) this.printMessage(" returning to " + str.toHex(newCS, 4) + ':' + str.toHex(newIP, this.dataSize << 1), this.bitsMessage, true);
+
     if (n) this.setSP(this.getSP() + n);            // TODO: optimize
 
     if (this.setCSIP(newIP, newCS, false)) {        // returns true if a stack switch occurred

@@ -80,7 +80,9 @@ var X86 = {
          SHIFT: 12
         },
         NT:     0x4000,     // bit 14: Nested Task flag (always set on 8086/80186, clear on 80286 reset)
-        BIT15:  0x8000      // bit 15: reserved (always set on 8086/80186, clear otherwise)
+        BIT15:  0x8000,     // bit 15: reserved (always set on 8086/80186, clear otherwise)
+        RF:    0x10000,     // bit 16: Resume Flag (temporarily disables debug exceptions; 80386 only)
+        VM:    0x20000      // bit 17: Virtual 8086 Mode (80386 only)
     },
     CR0: {
         /*
