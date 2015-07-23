@@ -40,7 +40,7 @@ var X86ModW16 = {};
 
 X86ModW16.aOpModReg = [
     /**
-     * opMod16RegWord00(fn): mod=00 (src:mem)  reg=000 (dst:AX)  r/m=000 (BX+SI)
+     * opMod16RegWord00(fn): mod=00 (src:mem)  reg=000 (dst:EAX)  r/m=000 (BX+SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -54,7 +54,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
-     * opMod16RegWord01(fn): mod=00 (src:mem)  reg=000 (dst:AX)  r/m=001 (BX+DI)
+     * opMod16RegWord01(fn): mod=00 (src:mem)  reg=000 (dst:EAX)  r/m=001 (BX+DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -68,7 +68,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
-     * opMod16RegWord02(fn): mod=00 (src:mem)  reg=000 (dst:AX)  r/m=010 (BP+SI)
+     * opMod16RegWord02(fn): mod=00 (src:mem)  reg=000 (dst:EAX)  r/m=010 (BP+SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -82,7 +82,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
-     * opMod16RegWord03(fn): mod=00 (src:mem)  reg=000 (dst:AX)  r/m=011 (BP+DI)
+     * opMod16RegWord03(fn): mod=00 (src:mem)  reg=000 (dst:EAX)  r/m=011 (BP+DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -96,7 +96,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
-     * opMod16RegWord04(fn): mod=00 (src:mem)  reg=000 (dst:AX)  r/m=100 (SI)
+     * opMod16RegWord04(fn): mod=00 (src:mem)  reg=000 (dst:EAX)  r/m=100 (SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -110,7 +110,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
-     * opMod16RegWord05(fn): mod=00 (src:mem)  reg=000 (dst:AX)  r/m=101 (DI)
+     * opMod16RegWord05(fn): mod=00 (src:mem)  reg=000 (dst:EAX)  r/m=101 (DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -124,7 +124,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
-     * opMod16RegWord06(fn): mod=00 (src:mem)  reg=000 (dst:AX)  r/m=110 (d16)
+     * opMod16RegWord06(fn): mod=00 (src:mem)  reg=000 (dst:EAX)  r/m=110 (d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -138,7 +138,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesDisp;
     },
     /**
-     * opMod16RegWord07(fn): mod=00 (src:mem)  reg=000 (dst:AX)  r/m=111 (BX)
+     * opMod16RegWord07(fn): mod=00 (src:mem)  reg=000 (dst:EAX)  r/m=111 (BX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -152,7 +152,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
-     * opMod16RegWord08(fn): mod=00 (src:mem)  reg=001 (dst:CX)  r/m=000 (BX+SI)
+     * opMod16RegWord08(fn): mod=00 (src:mem)  reg=001 (dst:ECX)  r/m=000 (BX+SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -166,7 +166,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
-     * opMod16RegWord09(fn): mod=00 (src:mem)  reg=001 (dst:CX)  r/m=001 (BX+DI)
+     * opMod16RegWord09(fn): mod=00 (src:mem)  reg=001 (dst:ECX)  r/m=001 (BX+DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -180,7 +180,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
-     * opMod16RegWord0A(fn): mod=00 (src:mem)  reg=001 (dst:CX)  r/m=010 (BP+SI)
+     * opMod16RegWord0A(fn): mod=00 (src:mem)  reg=001 (dst:ECX)  r/m=010 (BP+SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -194,7 +194,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
-     * opMod16RegWord0B(fn): mod=00 (src:mem)  reg=001 (dst:CX)  r/m=011 (BP+DI)
+     * opMod16RegWord0B(fn): mod=00 (src:mem)  reg=001 (dst:ECX)  r/m=011 (BP+DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -208,7 +208,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
-     * opMod16RegWord0C(fn): mod=00 (src:mem)  reg=001 (dst:CX)  r/m=100 (SI)
+     * opMod16RegWord0C(fn): mod=00 (src:mem)  reg=001 (dst:ECX)  r/m=100 (SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -222,7 +222,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
-     * opMod16RegWord0D(fn): mod=00 (src:mem)  reg=001 (dst:CX)  r/m=101 (DI)
+     * opMod16RegWord0D(fn): mod=00 (src:mem)  reg=001 (dst:ECX)  r/m=101 (DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -236,7 +236,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
-     * opMod16RegWord0E(fn): mod=00 (src:mem)  reg=001 (dst:CX)  r/m=110 (d16)
+     * opMod16RegWord0E(fn): mod=00 (src:mem)  reg=001 (dst:ECX)  r/m=110 (d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -250,7 +250,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesDisp;
     },
     /**
-     * opMod16RegWord0F(fn): mod=00 (src:mem)  reg=001 (dst:CX)  r/m=111 (BX)
+     * opMod16RegWord0F(fn): mod=00 (src:mem)  reg=001 (dst:ECX)  r/m=111 (BX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -264,7 +264,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
-     * opMod16RegWord10(fn): mod=00 (src:mem)  reg=010 (dst:DX)  r/m=000 (BX+SI)
+     * opMod16RegWord10(fn): mod=00 (src:mem)  reg=010 (dst:EDX)  r/m=000 (BX+SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -278,7 +278,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
-     * opMod16RegWord11(fn): mod=00 (src:mem)  reg=010 (dst:DX)  r/m=001 (BX+DI)
+     * opMod16RegWord11(fn): mod=00 (src:mem)  reg=010 (dst:EDX)  r/m=001 (BX+DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -292,7 +292,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
-     * opMod16RegWord12(fn): mod=00 (src:mem)  reg=010 (dst:DX)  r/m=010 (BP+SI)
+     * opMod16RegWord12(fn): mod=00 (src:mem)  reg=010 (dst:EDX)  r/m=010 (BP+SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -306,7 +306,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
-     * opMod16RegWord13(fn): mod=00 (src:mem)  reg=010 (dst:DX)  r/m=011 (BP+DI)
+     * opMod16RegWord13(fn): mod=00 (src:mem)  reg=010 (dst:EDX)  r/m=011 (BP+DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -320,7 +320,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
-     * opMod16RegWord14(fn): mod=00 (src:mem)  reg=010 (dst:DX)  r/m=100 (SI)
+     * opMod16RegWord14(fn): mod=00 (src:mem)  reg=010 (dst:EDX)  r/m=100 (SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -334,7 +334,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
-     * opMod16RegWord15(fn): mod=00 (src:mem)  reg=010 (dst:DX)  r/m=101 (DI)
+     * opMod16RegWord15(fn): mod=00 (src:mem)  reg=010 (dst:EDX)  r/m=101 (DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -348,7 +348,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
-     * opMod16RegWord16(fn): mod=00 (src:mem)  reg=010 (dst:DX)  r/m=110 (d16)
+     * opMod16RegWord16(fn): mod=00 (src:mem)  reg=010 (dst:EDX)  r/m=110 (d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -362,7 +362,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesDisp;
     },
     /**
-     * opMod16RegWord17(fn): mod=00 (src:mem)  reg=010 (dst:DX)  r/m=111 (BX)
+     * opMod16RegWord17(fn): mod=00 (src:mem)  reg=010 (dst:EDX)  r/m=111 (BX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -376,7 +376,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
-     * opMod16RegWord18(fn): mod=00 (src:mem)  reg=011 (dst:BX)  r/m=000 (BX+SI)
+     * opMod16RegWord18(fn): mod=00 (src:mem)  reg=011 (dst:EBX)  r/m=000 (BX+SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -390,7 +390,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
-     * opMod16RegWord19(fn): mod=00 (src:mem)  reg=011 (dst:BX)  r/m=001 (BX+DI)
+     * opMod16RegWord19(fn): mod=00 (src:mem)  reg=011 (dst:EBX)  r/m=001 (BX+DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -404,7 +404,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
-     * opMod16RegWord1A(fn): mod=00 (src:mem)  reg=011 (dst:BX)  r/m=010 (BP+SI)
+     * opMod16RegWord1A(fn): mod=00 (src:mem)  reg=011 (dst:EBX)  r/m=010 (BP+SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -418,7 +418,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
-     * opMod16RegWord1B(fn): mod=00 (src:mem)  reg=011 (dst:BX)  r/m=011 (BP+DI)
+     * opMod16RegWord1B(fn): mod=00 (src:mem)  reg=011 (dst:EBX)  r/m=011 (BP+DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -432,7 +432,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
-     * opMod16RegWord1C(fn): mod=00 (src:mem)  reg=011 (dst:BX)  r/m=100 (SI)
+     * opMod16RegWord1C(fn): mod=00 (src:mem)  reg=011 (dst:EBX)  r/m=100 (SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -446,7 +446,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
-     * opMod16RegWord1D(fn): mod=00 (src:mem)  reg=011 (dst:BX)  r/m=101 (DI)
+     * opMod16RegWord1D(fn): mod=00 (src:mem)  reg=011 (dst:EBX)  r/m=101 (DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -460,7 +460,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
-     * opMod16RegWord1E(fn): mod=00 (src:mem)  reg=011 (dst:BX)  r/m=110 (d16)
+     * opMod16RegWord1E(fn): mod=00 (src:mem)  reg=011 (dst:EBX)  r/m=110 (d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -474,7 +474,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesDisp;
     },
     /**
-     * opMod16RegWord1F(fn): mod=00 (src:mem)  reg=011 (dst:BX)  r/m=111 (BX)
+     * opMod16RegWord1F(fn): mod=00 (src:mem)  reg=011 (dst:EBX)  r/m=111 (BX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -488,7 +488,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
-     * opMod16RegWord20(fn): mod=00 (src:mem)  reg=100 (dst:SP)  r/m=000 (BX+SI)
+     * opMod16RegWord20(fn): mod=00 (src:mem)  reg=100 (dst:ESP)  r/m=000 (BX+SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -499,7 +499,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
-     * opMod16RegWord21(fn): mod=00 (src:mem)  reg=100 (dst:SP)  r/m=001 (BX+DI)
+     * opMod16RegWord21(fn): mod=00 (src:mem)  reg=100 (dst:ESP)  r/m=001 (BX+DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -510,7 +510,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
-     * opMod16RegWord22(fn): mod=00 (src:mem)  reg=100 (dst:SP)  r/m=010 (BP+SI)
+     * opMod16RegWord22(fn): mod=00 (src:mem)  reg=100 (dst:ESP)  r/m=010 (BP+SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -521,7 +521,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
-     * opMod16RegWord23(fn): mod=00 (src:mem)  reg=100 (dst:SP)  r/m=011 (BP+DI)
+     * opMod16RegWord23(fn): mod=00 (src:mem)  reg=100 (dst:ESP)  r/m=011 (BP+DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -532,7 +532,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
-     * opMod16RegWord24(fn): mod=00 (src:mem)  reg=100 (dst:SP)  r/m=100 (SI)
+     * opMod16RegWord24(fn): mod=00 (src:mem)  reg=100 (dst:ESP)  r/m=100 (SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -543,7 +543,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
-     * opMod16RegWord25(fn): mod=00 (src:mem)  reg=100 (dst:SP)  r/m=101 (DI)
+     * opMod16RegWord25(fn): mod=00 (src:mem)  reg=100 (dst:ESP)  r/m=101 (DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -554,7 +554,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
-     * opMod16RegWord26(fn): mod=00 (src:mem)  reg=100 (dst:SP)  r/m=110 (d16)
+     * opMod16RegWord26(fn): mod=00 (src:mem)  reg=100 (dst:ESP)  r/m=110 (d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -565,7 +565,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesDisp;
     },
     /**
-     * opMod16RegWord27(fn): mod=00 (src:mem)  reg=100 (dst:SP)  r/m=111 (BX)
+     * opMod16RegWord27(fn): mod=00 (src:mem)  reg=100 (dst:ESP)  r/m=111 (BX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -576,7 +576,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
-     * opMod16RegWord28(fn): mod=00 (src:mem)  reg=101 (dst:BP)  r/m=000 (BX+SI)
+     * opMod16RegWord28(fn): mod=00 (src:mem)  reg=101 (dst:EBP)  r/m=000 (BX+SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -590,7 +590,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
-     * opMod16RegWord29(fn): mod=00 (src:mem)  reg=101 (dst:BP)  r/m=001 (BX+DI)
+     * opMod16RegWord29(fn): mod=00 (src:mem)  reg=101 (dst:EBP)  r/m=001 (BX+DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -604,7 +604,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
-     * opMod16RegWord2A(fn): mod=00 (src:mem)  reg=101 (dst:BP)  r/m=010 (BP+SI)
+     * opMod16RegWord2A(fn): mod=00 (src:mem)  reg=101 (dst:EBP)  r/m=010 (BP+SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -618,7 +618,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
-     * opMod16RegWord2B(fn): mod=00 (src:mem)  reg=101 (dst:BP)  r/m=011 (BP+DI)
+     * opMod16RegWord2B(fn): mod=00 (src:mem)  reg=101 (dst:EBP)  r/m=011 (BP+DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -632,7 +632,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
-     * opMod16RegWord2C(fn): mod=00 (src:mem)  reg=101 (dst:BP)  r/m=100 (SI)
+     * opMod16RegWord2C(fn): mod=00 (src:mem)  reg=101 (dst:EBP)  r/m=100 (SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -646,7 +646,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
-     * opMod16RegWord2D(fn): mod=00 (src:mem)  reg=101 (dst:BP)  r/m=101 (DI)
+     * opMod16RegWord2D(fn): mod=00 (src:mem)  reg=101 (dst:EBP)  r/m=101 (DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -660,7 +660,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
-     * opMod16RegWord2E(fn): mod=00 (src:mem)  reg=101 (dst:BP)  r/m=110 (d16)
+     * opMod16RegWord2E(fn): mod=00 (src:mem)  reg=101 (dst:EBP)  r/m=110 (d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -674,7 +674,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesDisp;
     },
     /**
-     * opMod16RegWord2F(fn): mod=00 (src:mem)  reg=101 (dst:BP)  r/m=111 (BX)
+     * opMod16RegWord2F(fn): mod=00 (src:mem)  reg=101 (dst:EBP)  r/m=111 (BX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -688,7 +688,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
-     * opMod16RegWord30(fn): mod=00 (src:mem)  reg=110 (dst:SI)  r/m=000 (BX+SI)
+     * opMod16RegWord30(fn): mod=00 (src:mem)  reg=110 (dst:ESI)  r/m=000 (BX+SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -702,7 +702,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
-     * opMod16RegWord31(fn): mod=00 (src:mem)  reg=110 (dst:SI)  r/m=001 (BX+DI)
+     * opMod16RegWord31(fn): mod=00 (src:mem)  reg=110 (dst:ESI)  r/m=001 (BX+DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -716,7 +716,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
-     * opMod16RegWord32(fn): mod=00 (src:mem)  reg=110 (dst:SI)  r/m=010 (BP+SI)
+     * opMod16RegWord32(fn): mod=00 (src:mem)  reg=110 (dst:ESI)  r/m=010 (BP+SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -730,7 +730,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
-     * opMod16RegWord33(fn): mod=00 (src:mem)  reg=110 (dst:SI)  r/m=011 (BP+DI)
+     * opMod16RegWord33(fn): mod=00 (src:mem)  reg=110 (dst:ESI)  r/m=011 (BP+DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -744,7 +744,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
-     * opMod16RegWord34(fn): mod=00 (src:mem)  reg=110 (dst:SI)  r/m=100 (SI)
+     * opMod16RegWord34(fn): mod=00 (src:mem)  reg=110 (dst:ESI)  r/m=100 (SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -758,7 +758,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
-     * opMod16RegWord35(fn): mod=00 (src:mem)  reg=110 (dst:SI)  r/m=101 (DI)
+     * opMod16RegWord35(fn): mod=00 (src:mem)  reg=110 (dst:ESI)  r/m=101 (DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -772,7 +772,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
-     * opMod16RegWord36(fn): mod=00 (src:mem)  reg=110 (dst:SI)  r/m=110 (d16)
+     * opMod16RegWord36(fn): mod=00 (src:mem)  reg=110 (dst:ESI)  r/m=110 (d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -786,7 +786,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesDisp;
     },
     /**
-     * opMod16RegWord37(fn): mod=00 (src:mem)  reg=110 (dst:SI)  r/m=111 (BX)
+     * opMod16RegWord37(fn): mod=00 (src:mem)  reg=110 (dst:ESI)  r/m=111 (BX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -800,7 +800,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
-     * opMod16RegWord38(fn): mod=00 (src:mem)  reg=111 (dst:DI)  r/m=000 (BX+SI)
+     * opMod16RegWord38(fn): mod=00 (src:mem)  reg=111 (dst:EDI)  r/m=000 (BX+SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -814,7 +814,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
-     * opMod16RegWord39(fn): mod=00 (src:mem)  reg=111 (dst:DI)  r/m=001 (BX+DI)
+     * opMod16RegWord39(fn): mod=00 (src:mem)  reg=111 (dst:EDI)  r/m=001 (BX+DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -828,7 +828,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
-     * opMod16RegWord3A(fn): mod=00 (src:mem)  reg=111 (dst:DI)  r/m=010 (BP+SI)
+     * opMod16RegWord3A(fn): mod=00 (src:mem)  reg=111 (dst:EDI)  r/m=010 (BP+SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -842,7 +842,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
-     * opMod16RegWord3B(fn): mod=00 (src:mem)  reg=111 (dst:DI)  r/m=011 (BP+DI)
+     * opMod16RegWord3B(fn): mod=00 (src:mem)  reg=111 (dst:EDI)  r/m=011 (BP+DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -856,7 +856,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
-     * opMod16RegWord3C(fn): mod=00 (src:mem)  reg=111 (dst:DI)  r/m=100 (SI)
+     * opMod16RegWord3C(fn): mod=00 (src:mem)  reg=111 (dst:EDI)  r/m=100 (SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -870,7 +870,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
-     * opMod16RegWord3D(fn): mod=00 (src:mem)  reg=111 (dst:DI)  r/m=101 (DI)
+     * opMod16RegWord3D(fn): mod=00 (src:mem)  reg=111 (dst:EDI)  r/m=101 (DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -884,7 +884,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
-     * opMod16RegWord3E(fn): mod=00 (src:mem)  reg=111 (dst:DI)  r/m=110 (d16)
+     * opMod16RegWord3E(fn): mod=00 (src:mem)  reg=111 (dst:EDI)  r/m=110 (d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -898,7 +898,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesDisp;
     },
     /**
-     * opMod16RegWord3F(fn): mod=00 (src:mem)  reg=111 (dst:DI)  r/m=111 (BX)
+     * opMod16RegWord3F(fn): mod=00 (src:mem)  reg=111 (dst:EDI)  r/m=111 (BX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -912,7 +912,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
-     * opMod16RegWord40(fn): mod=01 (src:mem+d8)  reg=000 (dst:AX)  r/m=000 (BX+SI+d8)
+     * opMod16RegWord40(fn): mod=01 (src:mem+d8)  reg=000 (dst:EAX)  r/m=000 (BX+SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -926,7 +926,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
-     * opMod16RegWord41(fn): mod=01 (src:mem+d8)  reg=000 (dst:AX)  r/m=001 (BX+DI+d8)
+     * opMod16RegWord41(fn): mod=01 (src:mem+d8)  reg=000 (dst:EAX)  r/m=001 (BX+DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -940,7 +940,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opMod16RegWord42(fn): mod=01 (src:mem+d8)  reg=000 (dst:AX)  r/m=010 (BP+SI+d8)
+     * opMod16RegWord42(fn): mod=01 (src:mem+d8)  reg=000 (dst:EAX)  r/m=010 (BP+SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -954,7 +954,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opMod16RegWord43(fn): mod=01 (src:mem+d8)  reg=000 (dst:AX)  r/m=011 (BP+DI+d8)
+     * opMod16RegWord43(fn): mod=01 (src:mem+d8)  reg=000 (dst:EAX)  r/m=011 (BP+DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -968,7 +968,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
-     * opMod16RegWord44(fn): mod=01 (src:mem+d8)  reg=000 (dst:AX)  r/m=100 (SI+d8)
+     * opMod16RegWord44(fn): mod=01 (src:mem+d8)  reg=000 (dst:EAX)  r/m=100 (SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -982,7 +982,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16RegWord45(fn): mod=01 (src:mem+d8)  reg=000 (dst:AX)  r/m=101 (DI+d8)
+     * opMod16RegWord45(fn): mod=01 (src:mem+d8)  reg=000 (dst:EAX)  r/m=101 (DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -996,7 +996,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16RegWord46(fn): mod=01 (src:mem+d8)  reg=000 (dst:AX)  r/m=110 (BP+d8)
+     * opMod16RegWord46(fn): mod=01 (src:mem+d8)  reg=000 (dst:EAX)  r/m=110 (BP+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1010,7 +1010,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16RegWord47(fn): mod=01 (src:mem+d8)  reg=000 (dst:AX)  r/m=111 (BX+d8)
+     * opMod16RegWord47(fn): mod=01 (src:mem+d8)  reg=000 (dst:EAX)  r/m=111 (BX+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1024,7 +1024,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16RegWord48(fn): mod=01 (src:mem+d8)  reg=001 (dst:CX)  r/m=000 (BX+SI+d8)
+     * opMod16RegWord48(fn): mod=01 (src:mem+d8)  reg=001 (dst:ECX)  r/m=000 (BX+SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1038,7 +1038,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
-     * opMod16RegWord49(fn): mod=01 (src:mem+d8)  reg=001 (dst:CX)  r/m=001 (BX+DI+d8)
+     * opMod16RegWord49(fn): mod=01 (src:mem+d8)  reg=001 (dst:ECX)  r/m=001 (BX+DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1052,7 +1052,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opMod16RegWord4A(fn): mod=01 (src:mem+d8)  reg=001 (dst:CX)  r/m=010 (BP+SI+d8)
+     * opMod16RegWord4A(fn): mod=01 (src:mem+d8)  reg=001 (dst:ECX)  r/m=010 (BP+SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1066,7 +1066,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opMod16RegWord4B(fn): mod=01 (src:mem+d8)  reg=001 (dst:CX)  r/m=011 (BP+DI+d8)
+     * opMod16RegWord4B(fn): mod=01 (src:mem+d8)  reg=001 (dst:ECX)  r/m=011 (BP+DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1080,7 +1080,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
-     * opMod16RegWord4C(fn): mod=01 (src:mem+d8)  reg=001 (dst:CX)  r/m=100 (SI+d8)
+     * opMod16RegWord4C(fn): mod=01 (src:mem+d8)  reg=001 (dst:ECX)  r/m=100 (SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1094,7 +1094,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16RegWord4D(fn): mod=01 (src:mem+d8)  reg=001 (dst:CX)  r/m=101 (DI+d8)
+     * opMod16RegWord4D(fn): mod=01 (src:mem+d8)  reg=001 (dst:ECX)  r/m=101 (DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1108,7 +1108,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16RegWord4E(fn): mod=01 (src:mem+d8)  reg=001 (dst:CX)  r/m=110 (BP+d8)
+     * opMod16RegWord4E(fn): mod=01 (src:mem+d8)  reg=001 (dst:ECX)  r/m=110 (BP+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1122,7 +1122,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16RegWord4F(fn): mod=01 (src:mem+d8)  reg=001 (dst:CX)  r/m=111 (BX+d8)
+     * opMod16RegWord4F(fn): mod=01 (src:mem+d8)  reg=001 (dst:ECX)  r/m=111 (BX+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1136,7 +1136,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16RegWord50(fn): mod=01 (src:mem+d8)  reg=010 (dst:DX)  r/m=000 (BX+SI+d8)
+     * opMod16RegWord50(fn): mod=01 (src:mem+d8)  reg=010 (dst:EDX)  r/m=000 (BX+SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1150,7 +1150,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
-     * opMod16RegWord51(fn): mod=01 (src:mem+d8)  reg=010 (dst:DX)  r/m=001 (BX+DI+d8)
+     * opMod16RegWord51(fn): mod=01 (src:mem+d8)  reg=010 (dst:EDX)  r/m=001 (BX+DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1164,7 +1164,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opMod16RegWord52(fn): mod=01 (src:mem+d8)  reg=010 (dst:DX)  r/m=010 (BP+SI+d8)
+     * opMod16RegWord52(fn): mod=01 (src:mem+d8)  reg=010 (dst:EDX)  r/m=010 (BP+SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1178,7 +1178,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opMod16RegWord53(fn): mod=01 (src:mem+d8)  reg=010 (dst:DX)  r/m=011 (BP+DI+d8)
+     * opMod16RegWord53(fn): mod=01 (src:mem+d8)  reg=010 (dst:EDX)  r/m=011 (BP+DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1192,7 +1192,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
-     * opMod16RegWord54(fn): mod=01 (src:mem+d8)  reg=010 (dst:DX)  r/m=100 (SI+d8)
+     * opMod16RegWord54(fn): mod=01 (src:mem+d8)  reg=010 (dst:EDX)  r/m=100 (SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1206,7 +1206,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16RegWord55(fn): mod=01 (src:mem+d8)  reg=010 (dst:DX)  r/m=101 (DI+d8)
+     * opMod16RegWord55(fn): mod=01 (src:mem+d8)  reg=010 (dst:EDX)  r/m=101 (DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1220,7 +1220,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16RegWord56(fn): mod=01 (src:mem+d8)  reg=010 (dst:DX)  r/m=110 (BP+d8)
+     * opMod16RegWord56(fn): mod=01 (src:mem+d8)  reg=010 (dst:EDX)  r/m=110 (BP+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1234,7 +1234,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16RegWord57(fn): mod=01 (src:mem+d8)  reg=010 (dst:DX)  r/m=111 (BX+d8)
+     * opMod16RegWord57(fn): mod=01 (src:mem+d8)  reg=010 (dst:EDX)  r/m=111 (BX+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1248,7 +1248,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16RegWord58(fn): mod=01 (src:mem+d8)  reg=011 (dst:BX)  r/m=000 (BX+SI+d8)
+     * opMod16RegWord58(fn): mod=01 (src:mem+d8)  reg=011 (dst:EBX)  r/m=000 (BX+SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1262,7 +1262,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
-     * opMod16RegWord59(fn): mod=01 (src:mem+d8)  reg=011 (dst:BX)  r/m=001 (BX+DI+d8)
+     * opMod16RegWord59(fn): mod=01 (src:mem+d8)  reg=011 (dst:EBX)  r/m=001 (BX+DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1276,7 +1276,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opMod16RegWord5A(fn): mod=01 (src:mem+d8)  reg=011 (dst:BX)  r/m=010 (BP+SI+d8)
+     * opMod16RegWord5A(fn): mod=01 (src:mem+d8)  reg=011 (dst:EBX)  r/m=010 (BP+SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1290,7 +1290,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opMod16RegWord5B(fn): mod=01 (src:mem+d8)  reg=011 (dst:BX)  r/m=011 (BP+DI+d8)
+     * opMod16RegWord5B(fn): mod=01 (src:mem+d8)  reg=011 (dst:EBX)  r/m=011 (BP+DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1304,7 +1304,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
-     * opMod16RegWord5C(fn): mod=01 (src:mem+d8)  reg=011 (dst:BX)  r/m=100 (SI+d8)
+     * opMod16RegWord5C(fn): mod=01 (src:mem+d8)  reg=011 (dst:EBX)  r/m=100 (SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1318,7 +1318,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16RegWord5D(fn): mod=01 (src:mem+d8)  reg=011 (dst:BX)  r/m=101 (DI+d8)
+     * opMod16RegWord5D(fn): mod=01 (src:mem+d8)  reg=011 (dst:EBX)  r/m=101 (DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1332,7 +1332,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16RegWord5E(fn): mod=01 (src:mem+d8)  reg=011 (dst:BX)  r/m=110 (BP+d8)
+     * opMod16RegWord5E(fn): mod=01 (src:mem+d8)  reg=011 (dst:EBX)  r/m=110 (BP+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1346,7 +1346,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16RegWord5F(fn): mod=01 (src:mem+d8)  reg=011 (dst:BX)  r/m=111 (BX+d8)
+     * opMod16RegWord5F(fn): mod=01 (src:mem+d8)  reg=011 (dst:EBX)  r/m=111 (BX+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1360,7 +1360,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16RegWord60(fn): mod=01 (src:mem+d8)  reg=100 (dst:SP)  r/m=000 (BX+SI+d8)
+     * opMod16RegWord60(fn): mod=01 (src:mem+d8)  reg=100 (dst:ESP)  r/m=000 (BX+SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1371,7 +1371,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
-     * opMod16RegWord61(fn): mod=01 (src:mem+d8)  reg=100 (dst:SP)  r/m=001 (BX+DI+d8)
+     * opMod16RegWord61(fn): mod=01 (src:mem+d8)  reg=100 (dst:ESP)  r/m=001 (BX+DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1382,7 +1382,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opMod16RegWord62(fn): mod=01 (src:mem+d8)  reg=100 (dst:SP)  r/m=010 (BP+SI+d8)
+     * opMod16RegWord62(fn): mod=01 (src:mem+d8)  reg=100 (dst:ESP)  r/m=010 (BP+SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1393,7 +1393,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opMod16RegWord63(fn): mod=01 (src:mem+d8)  reg=100 (dst:SP)  r/m=011 (BP+DI+d8)
+     * opMod16RegWord63(fn): mod=01 (src:mem+d8)  reg=100 (dst:ESP)  r/m=011 (BP+DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1404,7 +1404,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
-     * opMod16RegWord64(fn): mod=01 (src:mem+d8)  reg=100 (dst:SP)  r/m=100 (SI+d8)
+     * opMod16RegWord64(fn): mod=01 (src:mem+d8)  reg=100 (dst:ESP)  r/m=100 (SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1415,7 +1415,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16RegWord65(fn): mod=01 (src:mem+d8)  reg=100 (dst:SP)  r/m=101 (DI+d8)
+     * opMod16RegWord65(fn): mod=01 (src:mem+d8)  reg=100 (dst:ESP)  r/m=101 (DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1426,7 +1426,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16RegWord66(fn): mod=01 (src:mem+d8)  reg=100 (dst:SP)  r/m=110 (BP+d8)
+     * opMod16RegWord66(fn): mod=01 (src:mem+d8)  reg=100 (dst:ESP)  r/m=110 (BP+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1437,7 +1437,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16RegWord67(fn): mod=01 (src:mem+d8)  reg=100 (dst:SP)  r/m=111 (BX+d8)
+     * opMod16RegWord67(fn): mod=01 (src:mem+d8)  reg=100 (dst:ESP)  r/m=111 (BX+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1448,7 +1448,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16RegWord68(fn): mod=01 (src:mem+d8)  reg=101 (dst:BP)  r/m=000 (BX+SI+d8)
+     * opMod16RegWord68(fn): mod=01 (src:mem+d8)  reg=101 (dst:EBP)  r/m=000 (BX+SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1462,7 +1462,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
-     * opMod16RegWord69(fn): mod=01 (src:mem+d8)  reg=101 (dst:BP)  r/m=001 (BX+DI+d8)
+     * opMod16RegWord69(fn): mod=01 (src:mem+d8)  reg=101 (dst:EBP)  r/m=001 (BX+DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1476,7 +1476,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opMod16RegWord6A(fn): mod=01 (src:mem+d8)  reg=101 (dst:BP)  r/m=010 (BP+SI+d8)
+     * opMod16RegWord6A(fn): mod=01 (src:mem+d8)  reg=101 (dst:EBP)  r/m=010 (BP+SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1490,7 +1490,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opMod16RegWord6B(fn): mod=01 (src:mem+d8)  reg=101 (dst:BP)  r/m=011 (BP+DI+d8)
+     * opMod16RegWord6B(fn): mod=01 (src:mem+d8)  reg=101 (dst:EBP)  r/m=011 (BP+DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1504,7 +1504,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
-     * opMod16RegWord6C(fn): mod=01 (src:mem+d8)  reg=101 (dst:BP)  r/m=100 (SI+d8)
+     * opMod16RegWord6C(fn): mod=01 (src:mem+d8)  reg=101 (dst:EBP)  r/m=100 (SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1518,7 +1518,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16RegWord6D(fn): mod=01 (src:mem+d8)  reg=101 (dst:BP)  r/m=101 (DI+d8)
+     * opMod16RegWord6D(fn): mod=01 (src:mem+d8)  reg=101 (dst:EBP)  r/m=101 (DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1532,7 +1532,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16RegWord6E(fn): mod=01 (src:mem+d8)  reg=101 (dst:BP)  r/m=110 (BP+d8)
+     * opMod16RegWord6E(fn): mod=01 (src:mem+d8)  reg=101 (dst:EBP)  r/m=110 (BP+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1546,7 +1546,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16RegWord6F(fn): mod=01 (src:mem+d8)  reg=101 (dst:BP)  r/m=111 (BX+d8)
+     * opMod16RegWord6F(fn): mod=01 (src:mem+d8)  reg=101 (dst:EBP)  r/m=111 (BX+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1560,7 +1560,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16RegWord70(fn): mod=01 (src:mem+d8)  reg=110 (dst:SI)  r/m=000 (BX+SI+d8)
+     * opMod16RegWord70(fn): mod=01 (src:mem+d8)  reg=110 (dst:ESI)  r/m=000 (BX+SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1574,7 +1574,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
-     * opMod16RegWord71(fn): mod=01 (src:mem+d8)  reg=110 (dst:SI)  r/m=001 (BX+DI+d8)
+     * opMod16RegWord71(fn): mod=01 (src:mem+d8)  reg=110 (dst:ESI)  r/m=001 (BX+DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1588,7 +1588,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opMod16RegWord72(fn): mod=01 (src:mem+d8)  reg=110 (dst:SI)  r/m=010 (BP+SI+d8)
+     * opMod16RegWord72(fn): mod=01 (src:mem+d8)  reg=110 (dst:ESI)  r/m=010 (BP+SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1602,7 +1602,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opMod16RegWord73(fn): mod=01 (src:mem+d8)  reg=110 (dst:SI)  r/m=011 (BP+DI+d8)
+     * opMod16RegWord73(fn): mod=01 (src:mem+d8)  reg=110 (dst:ESI)  r/m=011 (BP+DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1616,7 +1616,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
-     * opMod16RegWord74(fn): mod=01 (src:mem+d8)  reg=110 (dst:SI)  r/m=100 (SI+d8)
+     * opMod16RegWord74(fn): mod=01 (src:mem+d8)  reg=110 (dst:ESI)  r/m=100 (SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1630,7 +1630,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16RegWord75(fn): mod=01 (src:mem+d8)  reg=110 (dst:SI)  r/m=101 (DI+d8)
+     * opMod16RegWord75(fn): mod=01 (src:mem+d8)  reg=110 (dst:ESI)  r/m=101 (DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1644,7 +1644,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16RegWord76(fn): mod=01 (src:mem+d8)  reg=110 (dst:SI)  r/m=110 (BP+d8)
+     * opMod16RegWord76(fn): mod=01 (src:mem+d8)  reg=110 (dst:ESI)  r/m=110 (BP+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1658,7 +1658,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16RegWord77(fn): mod=01 (src:mem+d8)  reg=110 (dst:SI)  r/m=111 (BX+d8)
+     * opMod16RegWord77(fn): mod=01 (src:mem+d8)  reg=110 (dst:ESI)  r/m=111 (BX+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1672,7 +1672,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16RegWord78(fn): mod=01 (src:mem+d8)  reg=111 (dst:DI)  r/m=000 (BX+SI+d8)
+     * opMod16RegWord78(fn): mod=01 (src:mem+d8)  reg=111 (dst:EDI)  r/m=000 (BX+SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1686,7 +1686,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
-     * opMod16RegWord79(fn): mod=01 (src:mem+d8)  reg=111 (dst:DI)  r/m=001 (BX+DI+d8)
+     * opMod16RegWord79(fn): mod=01 (src:mem+d8)  reg=111 (dst:EDI)  r/m=001 (BX+DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1700,7 +1700,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opMod16RegWord7A(fn): mod=01 (src:mem+d8)  reg=111 (dst:DI)  r/m=010 (BP+SI+d8)
+     * opMod16RegWord7A(fn): mod=01 (src:mem+d8)  reg=111 (dst:EDI)  r/m=010 (BP+SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1714,7 +1714,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opMod16RegWord7B(fn): mod=01 (src:mem+d8)  reg=111 (dst:DI)  r/m=011 (BP+DI+d8)
+     * opMod16RegWord7B(fn): mod=01 (src:mem+d8)  reg=111 (dst:EDI)  r/m=011 (BP+DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1728,7 +1728,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
-     * opMod16RegWord7C(fn): mod=01 (src:mem+d8)  reg=111 (dst:DI)  r/m=100 (SI+d8)
+     * opMod16RegWord7C(fn): mod=01 (src:mem+d8)  reg=111 (dst:EDI)  r/m=100 (SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1742,7 +1742,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16RegWord7D(fn): mod=01 (src:mem+d8)  reg=111 (dst:DI)  r/m=101 (DI+d8)
+     * opMod16RegWord7D(fn): mod=01 (src:mem+d8)  reg=111 (dst:EDI)  r/m=101 (DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1756,7 +1756,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16RegWord7E(fn): mod=01 (src:mem+d8)  reg=111 (dst:DI)  r/m=110 (BP+d8)
+     * opMod16RegWord7E(fn): mod=01 (src:mem+d8)  reg=111 (dst:EDI)  r/m=110 (BP+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1770,7 +1770,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16RegWord7F(fn): mod=01 (src:mem+d8)  reg=111 (dst:DI)  r/m=111 (BX+d8)
+     * opMod16RegWord7F(fn): mod=01 (src:mem+d8)  reg=111 (dst:EDI)  r/m=111 (BX+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1784,7 +1784,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16RegWord80(fn): mod=10 (src:mem+d16)  reg=000 (dst:AX)  r/m=000 (BX+SI+d16)
+     * opMod16RegWord80(fn): mod=10 (src:mem+d16)  reg=000 (dst:EAX)  r/m=000 (BX+SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1798,7 +1798,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
-     * opMod16RegWord81(fn): mod=10 (src:mem+d16)  reg=000 (dst:AX)  r/m=001 (BX+DI+d16)
+     * opMod16RegWord81(fn): mod=10 (src:mem+d16)  reg=000 (dst:EAX)  r/m=001 (BX+DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1812,7 +1812,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opMod16RegWord82(fn): mod=10 (src:mem+d16)  reg=000 (dst:AX)  r/m=010 (BP+SI+d16)
+     * opMod16RegWord82(fn): mod=10 (src:mem+d16)  reg=000 (dst:EAX)  r/m=010 (BP+SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1826,7 +1826,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opMod16RegWord83(fn): mod=10 (src:mem+d16)  reg=000 (dst:AX)  r/m=011 (BP+DI+d16)
+     * opMod16RegWord83(fn): mod=10 (src:mem+d16)  reg=000 (dst:EAX)  r/m=011 (BP+DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1840,7 +1840,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
-     * opMod16RegWord84(fn): mod=10 (src:mem+d16)  reg=000 (dst:AX)  r/m=100 (SI+d16)
+     * opMod16RegWord84(fn): mod=10 (src:mem+d16)  reg=000 (dst:EAX)  r/m=100 (SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1854,7 +1854,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16RegWord85(fn): mod=10 (src:mem+d16)  reg=000 (dst:AX)  r/m=101 (DI+d16)
+     * opMod16RegWord85(fn): mod=10 (src:mem+d16)  reg=000 (dst:EAX)  r/m=101 (DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1868,7 +1868,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16RegWord86(fn): mod=10 (src:mem+d16)  reg=000 (dst:AX)  r/m=110 (BP+d16)
+     * opMod16RegWord86(fn): mod=10 (src:mem+d16)  reg=000 (dst:EAX)  r/m=110 (BP+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1882,7 +1882,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16RegWord87(fn): mod=10 (src:mem+d16)  reg=000 (dst:AX)  r/m=111 (BX+d16)
+     * opMod16RegWord87(fn): mod=10 (src:mem+d16)  reg=000 (dst:EAX)  r/m=111 (BX+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1896,7 +1896,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16RegWord88(fn): mod=10 (src:mem+d16)  reg=001 (dst:CX)  r/m=000 (BX+SI+d16)
+     * opMod16RegWord88(fn): mod=10 (src:mem+d16)  reg=001 (dst:ECX)  r/m=000 (BX+SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1910,7 +1910,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
-     * opMod16RegWord89(fn): mod=10 (src:mem+d16)  reg=001 (dst:CX)  r/m=001 (BX+DI+d16)
+     * opMod16RegWord89(fn): mod=10 (src:mem+d16)  reg=001 (dst:ECX)  r/m=001 (BX+DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1924,7 +1924,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opMod16RegWord8A(fn): mod=10 (src:mem+d16)  reg=001 (dst:CX)  r/m=010 (BP+SI+d16)
+     * opMod16RegWord8A(fn): mod=10 (src:mem+d16)  reg=001 (dst:ECX)  r/m=010 (BP+SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1938,7 +1938,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opMod16RegWord8B(fn): mod=10 (src:mem+d16)  reg=001 (dst:CX)  r/m=011 (BP+DI+d16)
+     * opMod16RegWord8B(fn): mod=10 (src:mem+d16)  reg=001 (dst:ECX)  r/m=011 (BP+DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1952,7 +1952,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
-     * opMod16RegWord8C(fn): mod=10 (src:mem+d16)  reg=001 (dst:CX)  r/m=100 (SI+d16)
+     * opMod16RegWord8C(fn): mod=10 (src:mem+d16)  reg=001 (dst:ECX)  r/m=100 (SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1966,7 +1966,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16RegWord8D(fn): mod=10 (src:mem+d16)  reg=001 (dst:CX)  r/m=101 (DI+d16)
+     * opMod16RegWord8D(fn): mod=10 (src:mem+d16)  reg=001 (dst:ECX)  r/m=101 (DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1980,7 +1980,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16RegWord8E(fn): mod=10 (src:mem+d16)  reg=001 (dst:CX)  r/m=110 (BP+d16)
+     * opMod16RegWord8E(fn): mod=10 (src:mem+d16)  reg=001 (dst:ECX)  r/m=110 (BP+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -1994,7 +1994,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16RegWord8F(fn): mod=10 (src:mem+d16)  reg=001 (dst:CX)  r/m=111 (BX+d16)
+     * opMod16RegWord8F(fn): mod=10 (src:mem+d16)  reg=001 (dst:ECX)  r/m=111 (BX+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2008,7 +2008,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16RegWord90(fn): mod=10 (src:mem+d16)  reg=010 (dst:DX)  r/m=000 (BX+SI+d16)
+     * opMod16RegWord90(fn): mod=10 (src:mem+d16)  reg=010 (dst:EDX)  r/m=000 (BX+SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2022,7 +2022,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
-     * opMod16RegWord91(fn): mod=10 (src:mem+d16)  reg=010 (dst:DX)  r/m=001 (BX+DI+d16)
+     * opMod16RegWord91(fn): mod=10 (src:mem+d16)  reg=010 (dst:EDX)  r/m=001 (BX+DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2036,7 +2036,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opMod16RegWord92(fn): mod=10 (src:mem+d16)  reg=010 (dst:DX)  r/m=010 (BP+SI+d16)
+     * opMod16RegWord92(fn): mod=10 (src:mem+d16)  reg=010 (dst:EDX)  r/m=010 (BP+SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2050,7 +2050,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opMod16RegWord93(fn): mod=10 (src:mem+d16)  reg=010 (dst:DX)  r/m=011 (BP+DI+d16)
+     * opMod16RegWord93(fn): mod=10 (src:mem+d16)  reg=010 (dst:EDX)  r/m=011 (BP+DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2064,7 +2064,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
-     * opMod16RegWord94(fn): mod=10 (src:mem+d16)  reg=010 (dst:DX)  r/m=100 (SI+d16)
+     * opMod16RegWord94(fn): mod=10 (src:mem+d16)  reg=010 (dst:EDX)  r/m=100 (SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2078,7 +2078,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16RegWord95(fn): mod=10 (src:mem+d16)  reg=010 (dst:DX)  r/m=101 (DI+d16)
+     * opMod16RegWord95(fn): mod=10 (src:mem+d16)  reg=010 (dst:EDX)  r/m=101 (DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2092,7 +2092,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16RegWord96(fn): mod=10 (src:mem+d16)  reg=010 (dst:DX)  r/m=110 (BP+d16)
+     * opMod16RegWord96(fn): mod=10 (src:mem+d16)  reg=010 (dst:EDX)  r/m=110 (BP+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2106,7 +2106,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16RegWord97(fn): mod=10 (src:mem+d16)  reg=010 (dst:DX)  r/m=111 (BX+d16)
+     * opMod16RegWord97(fn): mod=10 (src:mem+d16)  reg=010 (dst:EDX)  r/m=111 (BX+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2120,7 +2120,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16RegWord98(fn): mod=10 (src:mem+d16)  reg=011 (dst:BX)  r/m=000 (BX+SI+d16)
+     * opMod16RegWord98(fn): mod=10 (src:mem+d16)  reg=011 (dst:EBX)  r/m=000 (BX+SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2134,7 +2134,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
-     * opMod16RegWord99(fn): mod=10 (src:mem+d16)  reg=011 (dst:BX)  r/m=001 (BX+DI+d16)
+     * opMod16RegWord99(fn): mod=10 (src:mem+d16)  reg=011 (dst:EBX)  r/m=001 (BX+DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2148,7 +2148,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opMod16RegWord9A(fn): mod=10 (src:mem+d16)  reg=011 (dst:BX)  r/m=010 (BP+SI+d16)
+     * opMod16RegWord9A(fn): mod=10 (src:mem+d16)  reg=011 (dst:EBX)  r/m=010 (BP+SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2162,7 +2162,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opMod16RegWord9B(fn): mod=10 (src:mem+d16)  reg=011 (dst:BX)  r/m=011 (BP+DI+d16)
+     * opMod16RegWord9B(fn): mod=10 (src:mem+d16)  reg=011 (dst:EBX)  r/m=011 (BP+DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2176,7 +2176,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
-     * opMod16RegWord9C(fn): mod=10 (src:mem+d16)  reg=011 (dst:BX)  r/m=100 (SI+d16)
+     * opMod16RegWord9C(fn): mod=10 (src:mem+d16)  reg=011 (dst:EBX)  r/m=100 (SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2190,7 +2190,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16RegWord9D(fn): mod=10 (src:mem+d16)  reg=011 (dst:BX)  r/m=101 (DI+d16)
+     * opMod16RegWord9D(fn): mod=10 (src:mem+d16)  reg=011 (dst:EBX)  r/m=101 (DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2204,7 +2204,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16RegWord9E(fn): mod=10 (src:mem+d16)  reg=011 (dst:BX)  r/m=110 (BP+d16)
+     * opMod16RegWord9E(fn): mod=10 (src:mem+d16)  reg=011 (dst:EBX)  r/m=110 (BP+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2218,7 +2218,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16RegWord9F(fn): mod=10 (src:mem+d16)  reg=011 (dst:BX)  r/m=111 (BX+d16)
+     * opMod16RegWord9F(fn): mod=10 (src:mem+d16)  reg=011 (dst:EBX)  r/m=111 (BX+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2232,7 +2232,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16RegWordA0(fn): mod=10 (src:mem+d16)  reg=100 (dst:SP)  r/m=000 (BX+SI+d16)
+     * opMod16RegWordA0(fn): mod=10 (src:mem+d16)  reg=100 (dst:ESP)  r/m=000 (BX+SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2243,7 +2243,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
-     * opMod16RegWordA1(fn): mod=10 (src:mem+d16)  reg=100 (dst:SP)  r/m=001 (BX+DI+d16)
+     * opMod16RegWordA1(fn): mod=10 (src:mem+d16)  reg=100 (dst:ESP)  r/m=001 (BX+DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2254,7 +2254,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opMod16RegWordA2(fn): mod=10 (src:mem+d16)  reg=100 (dst:SP)  r/m=010 (BP+SI+d16)
+     * opMod16RegWordA2(fn): mod=10 (src:mem+d16)  reg=100 (dst:ESP)  r/m=010 (BP+SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2265,7 +2265,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opMod16RegWordA3(fn): mod=10 (src:mem+d16)  reg=100 (dst:SP)  r/m=011 (BP+DI+d16)
+     * opMod16RegWordA3(fn): mod=10 (src:mem+d16)  reg=100 (dst:ESP)  r/m=011 (BP+DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2276,7 +2276,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
-     * opMod16RegWordA4(fn): mod=10 (src:mem+d16)  reg=100 (dst:SP)  r/m=100 (SI+d16)
+     * opMod16RegWordA4(fn): mod=10 (src:mem+d16)  reg=100 (dst:ESP)  r/m=100 (SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2287,7 +2287,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16RegWordA5(fn): mod=10 (src:mem+d16)  reg=100 (dst:SP)  r/m=101 (DI+d16)
+     * opMod16RegWordA5(fn): mod=10 (src:mem+d16)  reg=100 (dst:ESP)  r/m=101 (DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2298,7 +2298,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16RegWordA6(fn): mod=10 (src:mem+d16)  reg=100 (dst:SP)  r/m=110 (BP+d16)
+     * opMod16RegWordA6(fn): mod=10 (src:mem+d16)  reg=100 (dst:ESP)  r/m=110 (BP+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2309,7 +2309,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16RegWordA7(fn): mod=10 (src:mem+d16)  reg=100 (dst:SP)  r/m=111 (BX+d16)
+     * opMod16RegWordA7(fn): mod=10 (src:mem+d16)  reg=100 (dst:ESP)  r/m=111 (BX+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2320,7 +2320,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16RegWordA8(fn): mod=10 (src:mem+d16)  reg=101 (dst:BP)  r/m=000 (BX+SI+d16)
+     * opMod16RegWordA8(fn): mod=10 (src:mem+d16)  reg=101 (dst:EBP)  r/m=000 (BX+SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2334,7 +2334,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
-     * opMod16RegWordA9(fn): mod=10 (src:mem+d16)  reg=101 (dst:BP)  r/m=001 (BX+DI+d16)
+     * opMod16RegWordA9(fn): mod=10 (src:mem+d16)  reg=101 (dst:EBP)  r/m=001 (BX+DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2348,7 +2348,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opMod16RegWordAA(fn): mod=10 (src:mem+d16)  reg=101 (dst:BP)  r/m=010 (BP+SI+d16)
+     * opMod16RegWordAA(fn): mod=10 (src:mem+d16)  reg=101 (dst:EBP)  r/m=010 (BP+SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2362,7 +2362,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opMod16RegWordAB(fn): mod=10 (src:mem+d16)  reg=101 (dst:BP)  r/m=011 (BP+DI+d16)
+     * opMod16RegWordAB(fn): mod=10 (src:mem+d16)  reg=101 (dst:EBP)  r/m=011 (BP+DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2376,7 +2376,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
-     * opMod16RegWordAC(fn): mod=10 (src:mem+d16)  reg=101 (dst:BP)  r/m=100 (SI+d16)
+     * opMod16RegWordAC(fn): mod=10 (src:mem+d16)  reg=101 (dst:EBP)  r/m=100 (SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2390,7 +2390,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16RegWordAD(fn): mod=10 (src:mem+d16)  reg=101 (dst:BP)  r/m=101 (DI+d16)
+     * opMod16RegWordAD(fn): mod=10 (src:mem+d16)  reg=101 (dst:EBP)  r/m=101 (DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2404,7 +2404,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16RegWordAE(fn): mod=10 (src:mem+d16)  reg=101 (dst:BP)  r/m=110 (BP+d16)
+     * opMod16RegWordAE(fn): mod=10 (src:mem+d16)  reg=101 (dst:EBP)  r/m=110 (BP+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2418,7 +2418,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16RegWordAF(fn): mod=10 (src:mem+d16)  reg=101 (dst:BP)  r/m=111 (BX+d16)
+     * opMod16RegWordAF(fn): mod=10 (src:mem+d16)  reg=101 (dst:EBP)  r/m=111 (BX+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2432,7 +2432,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16RegWordB0(fn): mod=10 (src:mem+d16)  reg=110 (dst:SI)  r/m=000 (BX+SI+d16)
+     * opMod16RegWordB0(fn): mod=10 (src:mem+d16)  reg=110 (dst:ESI)  r/m=000 (BX+SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2446,7 +2446,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
-     * opMod16RegWordB1(fn): mod=10 (src:mem+d16)  reg=110 (dst:SI)  r/m=001 (BX+DI+d16)
+     * opMod16RegWordB1(fn): mod=10 (src:mem+d16)  reg=110 (dst:ESI)  r/m=001 (BX+DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2460,7 +2460,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opMod16RegWordB2(fn): mod=10 (src:mem+d16)  reg=110 (dst:SI)  r/m=010 (BP+SI+d16)
+     * opMod16RegWordB2(fn): mod=10 (src:mem+d16)  reg=110 (dst:ESI)  r/m=010 (BP+SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2474,7 +2474,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opMod16RegWordB3(fn): mod=10 (src:mem+d16)  reg=110 (dst:SI)  r/m=011 (BP+DI+d16)
+     * opMod16RegWordB3(fn): mod=10 (src:mem+d16)  reg=110 (dst:ESI)  r/m=011 (BP+DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2488,7 +2488,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
-     * opMod16RegWordB4(fn): mod=10 (src:mem+d16)  reg=110 (dst:SI)  r/m=100 (SI+d16)
+     * opMod16RegWordB4(fn): mod=10 (src:mem+d16)  reg=110 (dst:ESI)  r/m=100 (SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2502,7 +2502,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16RegWordB5(fn): mod=10 (src:mem+d16)  reg=110 (dst:SI)  r/m=101 (DI+d16)
+     * opMod16RegWordB5(fn): mod=10 (src:mem+d16)  reg=110 (dst:ESI)  r/m=101 (DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2516,7 +2516,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16RegWordB6(fn): mod=10 (src:mem+d16)  reg=110 (dst:SI)  r/m=110 (BP+d16)
+     * opMod16RegWordB6(fn): mod=10 (src:mem+d16)  reg=110 (dst:ESI)  r/m=110 (BP+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2530,7 +2530,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16RegWordB7(fn): mod=10 (src:mem+d16)  reg=110 (dst:SI)  r/m=111 (BX+d16)
+     * opMod16RegWordB7(fn): mod=10 (src:mem+d16)  reg=110 (dst:ESI)  r/m=111 (BX+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2544,7 +2544,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16RegWordB8(fn): mod=10 (src:mem+d16)  reg=111 (dst:DI)  r/m=000 (BX+SI+d16)
+     * opMod16RegWordB8(fn): mod=10 (src:mem+d16)  reg=111 (dst:EDI)  r/m=000 (BX+SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2558,7 +2558,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
-     * opMod16RegWordB9(fn): mod=10 (src:mem+d16)  reg=111 (dst:DI)  r/m=001 (BX+DI+d16)
+     * opMod16RegWordB9(fn): mod=10 (src:mem+d16)  reg=111 (dst:EDI)  r/m=001 (BX+DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2572,7 +2572,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opMod16RegWordBA(fn): mod=10 (src:mem+d16)  reg=111 (dst:DI)  r/m=010 (BP+SI+d16)
+     * opMod16RegWordBA(fn): mod=10 (src:mem+d16)  reg=111 (dst:EDI)  r/m=010 (BP+SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2586,7 +2586,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opMod16RegWordBB(fn): mod=10 (src:mem+d16)  reg=111 (dst:DI)  r/m=011 (BP+DI+d16)
+     * opMod16RegWordBB(fn): mod=10 (src:mem+d16)  reg=111 (dst:EDI)  r/m=011 (BP+DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2600,7 +2600,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
-     * opMod16RegWordBC(fn): mod=10 (src:mem+d16)  reg=111 (dst:DI)  r/m=100 (SI+d16)
+     * opMod16RegWordBC(fn): mod=10 (src:mem+d16)  reg=111 (dst:EDI)  r/m=100 (SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2614,7 +2614,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16RegWordBD(fn): mod=10 (src:mem+d16)  reg=111 (dst:DI)  r/m=101 (DI+d16)
+     * opMod16RegWordBD(fn): mod=10 (src:mem+d16)  reg=111 (dst:EDI)  r/m=101 (DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2628,7 +2628,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16RegWordBE(fn): mod=10 (src:mem+d16)  reg=111 (dst:DI)  r/m=110 (BP+d16)
+     * opMod16RegWordBE(fn): mod=10 (src:mem+d16)  reg=111 (dst:EDI)  r/m=110 (BP+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2642,7 +2642,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16RegWordBF(fn): mod=10 (src:mem+d16)  reg=111 (dst:DI)  r/m=111 (BX+d16)
+     * opMod16RegWordBF(fn): mod=10 (src:mem+d16)  reg=111 (dst:EDI)  r/m=111 (BX+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2656,7 +2656,7 @@ X86ModW16.aOpModReg = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16RegWordC0(fn): mod=11 (src:reg)  reg=000 (dst:AX)  r/m=000 (AX)
+     * opMod16RegWordC0(fn): mod=11 (src:reg)  reg=000 (dst:EAX)  r/m=000 (AX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2666,7 +2666,7 @@ X86ModW16.aOpModReg = [
         this.regEAX = (this.regEAX & ~this.dataMask) | w;
     },
     /**
-     * opMod16RegWordC1(fn): mod=11 (src:reg)  reg=000 (dst:AX)  r/m=001 (CX)
+     * opMod16RegWordC1(fn): mod=11 (src:reg)  reg=000 (dst:EAX)  r/m=001 (CX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2679,7 +2679,7 @@ X86ModW16.aOpModReg = [
         }
     },
     /**
-     * opMod16RegWordC2(fn): mod=11 (src:reg)  reg=000 (dst:AX)  r/m=010 (DX)
+     * opMod16RegWordC2(fn): mod=11 (src:reg)  reg=000 (dst:EAX)  r/m=010 (DX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2692,7 +2692,7 @@ X86ModW16.aOpModReg = [
         }
     },
     /**
-     * opMod16RegWordC3(fn): mod=11 (src:reg)  reg=000 (dst:AX)  r/m=011 (BX)
+     * opMod16RegWordC3(fn): mod=11 (src:reg)  reg=000 (dst:EAX)  r/m=011 (BX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2705,7 +2705,7 @@ X86ModW16.aOpModReg = [
         }
     },
     /**
-     * opMod16RegWordC4(fn): mod=11 (src:reg)  reg=000 (dst:AX)  r/m=100 (SP)
+     * opMod16RegWordC4(fn): mod=11 (src:reg)  reg=000 (dst:EAX)  r/m=100 (SP)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2718,7 +2718,7 @@ X86ModW16.aOpModReg = [
         }
     },
     /**
-     * opMod16RegWordC5(fn): mod=11 (src:reg)  reg=000 (dst:AX)  r/m=101 (BP)
+     * opMod16RegWordC5(fn): mod=11 (src:reg)  reg=000 (dst:EAX)  r/m=101 (BP)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2731,7 +2731,7 @@ X86ModW16.aOpModReg = [
         }
     },
     /**
-     * opMod16RegWordC6(fn): mod=11 (src:reg)  reg=000 (dst:AX)  r/m=110 (SI)
+     * opMod16RegWordC6(fn): mod=11 (src:reg)  reg=000 (dst:EAX)  r/m=110 (SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2744,7 +2744,7 @@ X86ModW16.aOpModReg = [
         }
     },
     /**
-     * opMod16RegWordC7(fn): mod=11 (src:reg)  reg=000 (dst:AX)  r/m=111 (DI)
+     * opMod16RegWordC7(fn): mod=11 (src:reg)  reg=000 (dst:EAX)  r/m=111 (DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2757,7 +2757,7 @@ X86ModW16.aOpModReg = [
         }
     },
     /**
-     * opMod16RegWordC8(fn): mod=11 (src:reg)  reg=001 (dst:CX)  r/m=000 (AX)
+     * opMod16RegWordC8(fn): mod=11 (src:reg)  reg=001 (dst:ECX)  r/m=000 (AX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2770,7 +2770,7 @@ X86ModW16.aOpModReg = [
         }
     },
     /**
-     * opMod16RegWordC9(fn): mod=11 (src:reg)  reg=001 (dst:CX)  r/m=001 (CX)
+     * opMod16RegWordC9(fn): mod=11 (src:reg)  reg=001 (dst:ECX)  r/m=001 (CX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2780,7 +2780,7 @@ X86ModW16.aOpModReg = [
         this.regECX = (this.regECX & ~this.dataMask) | w;
     },
     /**
-     * opMod16RegWordCA(fn): mod=11 (src:reg)  reg=001 (dst:CX)  r/m=010 (DX)
+     * opMod16RegWordCA(fn): mod=11 (src:reg)  reg=001 (dst:ECX)  r/m=010 (DX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2793,7 +2793,7 @@ X86ModW16.aOpModReg = [
         }
     },
     /**
-     * opMod16RegWordCB(fn): mod=11 (src:reg)  reg=001 (dst:CX)  r/m=011 (BX)
+     * opMod16RegWordCB(fn): mod=11 (src:reg)  reg=001 (dst:ECX)  r/m=011 (BX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2806,7 +2806,7 @@ X86ModW16.aOpModReg = [
         }
     },
     /**
-     * opMod16RegWordCC(fn): mod=11 (src:reg)  reg=001 (dst:CX)  r/m=100 (SP)
+     * opMod16RegWordCC(fn): mod=11 (src:reg)  reg=001 (dst:ECX)  r/m=100 (SP)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2819,7 +2819,7 @@ X86ModW16.aOpModReg = [
         }
     },
     /**
-     * opMod16RegWordCD(fn): mod=11 (src:reg)  reg=001 (dst:CX)  r/m=101 (BP)
+     * opMod16RegWordCD(fn): mod=11 (src:reg)  reg=001 (dst:ECX)  r/m=101 (BP)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2832,7 +2832,7 @@ X86ModW16.aOpModReg = [
         }
     },
     /**
-     * opMod16RegWordCE(fn): mod=11 (src:reg)  reg=001 (dst:CX)  r/m=110 (SI)
+     * opMod16RegWordCE(fn): mod=11 (src:reg)  reg=001 (dst:ECX)  r/m=110 (SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2845,7 +2845,7 @@ X86ModW16.aOpModReg = [
         }
     },
     /**
-     * opMod16RegWordCF(fn): mod=11 (src:reg)  reg=001 (dst:CX)  r/m=111 (DI)
+     * opMod16RegWordCF(fn): mod=11 (src:reg)  reg=001 (dst:ECX)  r/m=111 (DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2858,7 +2858,7 @@ X86ModW16.aOpModReg = [
         }
     },
     /**
-     * opMod16RegWordD0(fn): mod=11 (src:reg)  reg=010 (dst:DX)  r/m=000 (AX)
+     * opMod16RegWordD0(fn): mod=11 (src:reg)  reg=010 (dst:EDX)  r/m=000 (AX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2871,7 +2871,7 @@ X86ModW16.aOpModReg = [
         }
     },
     /**
-     * opMod16RegWordD1(fn): mod=11 (src:reg)  reg=010 (dst:DX)  r/m=001 (CX)
+     * opMod16RegWordD1(fn): mod=11 (src:reg)  reg=010 (dst:EDX)  r/m=001 (CX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2884,7 +2884,7 @@ X86ModW16.aOpModReg = [
         }
     },
     /**
-     * opMod16RegWordD2(fn): mod=11 (src:reg)  reg=010 (dst:DX)  r/m=010 (DX)
+     * opMod16RegWordD2(fn): mod=11 (src:reg)  reg=010 (dst:EDX)  r/m=010 (DX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2894,7 +2894,7 @@ X86ModW16.aOpModReg = [
         this.regEDX = (this.regEDX & ~this.dataMask) | w;
     },
     /**
-     * opMod16RegWordD3(fn): mod=11 (src:reg)  reg=010 (dst:DX)  r/m=011 (BX)
+     * opMod16RegWordD3(fn): mod=11 (src:reg)  reg=010 (dst:EDX)  r/m=011 (BX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2907,7 +2907,7 @@ X86ModW16.aOpModReg = [
         }
     },
     /**
-     * opMod16RegWordD4(fn): mod=11 (src:reg)  reg=010 (dst:DX)  r/m=100 (SP)
+     * opMod16RegWordD4(fn): mod=11 (src:reg)  reg=010 (dst:EDX)  r/m=100 (SP)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2920,7 +2920,7 @@ X86ModW16.aOpModReg = [
         }
     },
     /**
-     * opMod16RegWordD5(fn): mod=11 (src:reg)  reg=010 (dst:DX)  r/m=101 (BP)
+     * opMod16RegWordD5(fn): mod=11 (src:reg)  reg=010 (dst:EDX)  r/m=101 (BP)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2933,7 +2933,7 @@ X86ModW16.aOpModReg = [
         }
     },
     /**
-     * opMod16RegWordD6(fn): mod=11 (src:reg)  reg=010 (dst:DX)  r/m=110 (SI)
+     * opMod16RegWordD6(fn): mod=11 (src:reg)  reg=010 (dst:EDX)  r/m=110 (SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2946,7 +2946,7 @@ X86ModW16.aOpModReg = [
         }
     },
     /**
-     * opMod16RegWordD7(fn): mod=11 (src:reg)  reg=010 (dst:DX)  r/m=111 (DI)
+     * opMod16RegWordD7(fn): mod=11 (src:reg)  reg=010 (dst:EDX)  r/m=111 (DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2959,7 +2959,7 @@ X86ModW16.aOpModReg = [
         }
     },
     /**
-     * opMod16RegWordD8(fn): mod=11 (src:reg)  reg=011 (dst:BX)  r/m=000 (AX)
+     * opMod16RegWordD8(fn): mod=11 (src:reg)  reg=011 (dst:EBX)  r/m=000 (AX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2972,7 +2972,7 @@ X86ModW16.aOpModReg = [
         }
     },
     /**
-     * opMod16RegWordD9(fn): mod=11 (src:reg)  reg=011 (dst:BX)  r/m=001 (CX)
+     * opMod16RegWordD9(fn): mod=11 (src:reg)  reg=011 (dst:EBX)  r/m=001 (CX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2985,7 +2985,7 @@ X86ModW16.aOpModReg = [
         }
     },
     /**
-     * opMod16RegWordDA(fn): mod=11 (src:reg)  reg=011 (dst:BX)  r/m=010 (DX)
+     * opMod16RegWordDA(fn): mod=11 (src:reg)  reg=011 (dst:EBX)  r/m=010 (DX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -2998,7 +2998,7 @@ X86ModW16.aOpModReg = [
         }
     },
     /**
-     * opMod16RegWordDB(fn): mod=11 (src:reg)  reg=011 (dst:BX)  r/m=011 (BX)
+     * opMod16RegWordDB(fn): mod=11 (src:reg)  reg=011 (dst:EBX)  r/m=011 (BX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3008,7 +3008,7 @@ X86ModW16.aOpModReg = [
         this.regEBX = (this.regEBX & ~this.dataMask) | w;
     },
     /**
-     * opMod16RegWordDC(fn): mod=11 (src:reg)  reg=011 (dst:BX)  r/m=100 (SP)
+     * opMod16RegWordDC(fn): mod=11 (src:reg)  reg=011 (dst:EBX)  r/m=100 (SP)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3021,7 +3021,7 @@ X86ModW16.aOpModReg = [
         }
     },
     /**
-     * opMod16RegWordDD(fn): mod=11 (src:reg)  reg=011 (dst:BX)  r/m=101 (BP)
+     * opMod16RegWordDD(fn): mod=11 (src:reg)  reg=011 (dst:EBX)  r/m=101 (BP)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3034,7 +3034,7 @@ X86ModW16.aOpModReg = [
         }
     },
     /**
-     * opMod16RegWordDE(fn): mod=11 (src:reg)  reg=011 (dst:BX)  r/m=110 (SI)
+     * opMod16RegWordDE(fn): mod=11 (src:reg)  reg=011 (dst:EBX)  r/m=110 (SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3047,7 +3047,7 @@ X86ModW16.aOpModReg = [
         }
     },
     /**
-     * opMod16RegWordDF(fn): mod=11 (src:reg)  reg=011 (dst:BX)  r/m=111 (DI)
+     * opMod16RegWordDF(fn): mod=11 (src:reg)  reg=011 (dst:EBX)  r/m=111 (DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3060,7 +3060,7 @@ X86ModW16.aOpModReg = [
         }
     },
     /**
-     * opMod16RegWordE0(fn): mod=11 (src:reg)  reg=100 (dst:SP)  r/m=000 (AX)
+     * opMod16RegWordE0(fn): mod=11 (src:reg)  reg=100 (dst:ESP)  r/m=000 (AX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3070,7 +3070,7 @@ X86ModW16.aOpModReg = [
         this.setSP((this.getSP() & ~this.dataMask) | w);
     },
     /**
-     * opMod16RegWordE1(fn): mod=11 (src:reg)  reg=100 (dst:SP)  r/m=001 (CX)
+     * opMod16RegWordE1(fn): mod=11 (src:reg)  reg=100 (dst:ESP)  r/m=001 (CX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3080,7 +3080,7 @@ X86ModW16.aOpModReg = [
         this.setSP((this.getSP() & ~this.dataMask) | w);
     },
     /**
-     * opMod16RegWordE2(fn): mod=11 (src:reg)  reg=100 (dst:SP)  r/m=010 (DX)
+     * opMod16RegWordE2(fn): mod=11 (src:reg)  reg=100 (dst:ESP)  r/m=010 (DX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3090,7 +3090,7 @@ X86ModW16.aOpModReg = [
         this.setSP((this.getSP() & ~this.dataMask) | w);
     },
     /**
-     * opMod16RegWordE3(fn): mod=11 (src:reg)  reg=100 (dst:SP)  r/m=011 (BX)
+     * opMod16RegWordE3(fn): mod=11 (src:reg)  reg=100 (dst:ESP)  r/m=011 (BX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3100,7 +3100,7 @@ X86ModW16.aOpModReg = [
         this.setSP((this.getSP() & ~this.dataMask) | w);
     },
     /**
-     * opMod16RegWordE4(fn): mod=11 (src:reg)  reg=100 (dst:SP)  r/m=100 (SP)
+     * opMod16RegWordE4(fn): mod=11 (src:reg)  reg=100 (dst:ESP)  r/m=100 (SP)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3110,7 +3110,7 @@ X86ModW16.aOpModReg = [
         this.setSP((this.getSP() & ~this.dataMask) | w);
     },
     /**
-     * opMod16RegWordE5(fn): mod=11 (src:reg)  reg=100 (dst:SP)  r/m=101 (BP)
+     * opMod16RegWordE5(fn): mod=11 (src:reg)  reg=100 (dst:ESP)  r/m=101 (BP)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3120,7 +3120,7 @@ X86ModW16.aOpModReg = [
         this.setSP((this.getSP() & ~this.dataMask) | w);
     },
     /**
-     * opMod16RegWordE6(fn): mod=11 (src:reg)  reg=100 (dst:SP)  r/m=110 (SI)
+     * opMod16RegWordE6(fn): mod=11 (src:reg)  reg=100 (dst:ESP)  r/m=110 (SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3130,7 +3130,7 @@ X86ModW16.aOpModReg = [
         this.setSP((this.getSP() & ~this.dataMask) | w);
     },
     /**
-     * opMod16RegWordE7(fn): mod=11 (src:reg)  reg=100 (dst:SP)  r/m=111 (DI)
+     * opMod16RegWordE7(fn): mod=11 (src:reg)  reg=100 (dst:ESP)  r/m=111 (DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3140,7 +3140,7 @@ X86ModW16.aOpModReg = [
         this.setSP((this.getSP() & ~this.dataMask) | w);
     },
     /**
-     * opMod16RegWordE8(fn): mod=11 (src:reg)  reg=101 (dst:BP)  r/m=000 (AX)
+     * opMod16RegWordE8(fn): mod=11 (src:reg)  reg=101 (dst:EBP)  r/m=000 (AX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3153,7 +3153,7 @@ X86ModW16.aOpModReg = [
         }
     },
     /**
-     * opMod16RegWordE9(fn): mod=11 (src:reg)  reg=101 (dst:BP)  r/m=001 (CX)
+     * opMod16RegWordE9(fn): mod=11 (src:reg)  reg=101 (dst:EBP)  r/m=001 (CX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3166,7 +3166,7 @@ X86ModW16.aOpModReg = [
         }
     },
     /**
-     * opMod16RegWordEA(fn): mod=11 (src:reg)  reg=101 (dst:BP)  r/m=010 (DX)
+     * opMod16RegWordEA(fn): mod=11 (src:reg)  reg=101 (dst:EBP)  r/m=010 (DX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3179,7 +3179,7 @@ X86ModW16.aOpModReg = [
         }
     },
     /**
-     * opMod16RegWordEB(fn): mod=11 (src:reg)  reg=101 (dst:BP)  r/m=011 (BX)
+     * opMod16RegWordEB(fn): mod=11 (src:reg)  reg=101 (dst:EBP)  r/m=011 (BX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3192,7 +3192,7 @@ X86ModW16.aOpModReg = [
         }
     },
     /**
-     * opMod16RegWordEC(fn): mod=11 (src:reg)  reg=101 (dst:BP)  r/m=100 (SP)
+     * opMod16RegWordEC(fn): mod=11 (src:reg)  reg=101 (dst:EBP)  r/m=100 (SP)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3205,7 +3205,7 @@ X86ModW16.aOpModReg = [
         }
     },
     /**
-     * opMod16RegWordED(fn): mod=11 (src:reg)  reg=101 (dst:BP)  r/m=101 (BP)
+     * opMod16RegWordED(fn): mod=11 (src:reg)  reg=101 (dst:EBP)  r/m=101 (BP)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3215,7 +3215,7 @@ X86ModW16.aOpModReg = [
         this.regEBP = (this.regEBP & ~this.dataMask) | w;
     },
     /**
-     * opMod16RegWordEE(fn): mod=11 (src:reg)  reg=101 (dst:BP)  r/m=110 (SI)
+     * opMod16RegWordEE(fn): mod=11 (src:reg)  reg=101 (dst:EBP)  r/m=110 (SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3228,7 +3228,7 @@ X86ModW16.aOpModReg = [
         }
     },
     /**
-     * opMod16RegWordEF(fn): mod=11 (src:reg)  reg=101 (dst:BP)  r/m=111 (DI)
+     * opMod16RegWordEF(fn): mod=11 (src:reg)  reg=101 (dst:EBP)  r/m=111 (DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3241,7 +3241,7 @@ X86ModW16.aOpModReg = [
         }
     },
     /**
-     * opMod16RegWordF0(fn): mod=11 (src:reg)  reg=110 (dst:SI)  r/m=000 (AX)
+     * opMod16RegWordF0(fn): mod=11 (src:reg)  reg=110 (dst:ESI)  r/m=000 (AX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3254,7 +3254,7 @@ X86ModW16.aOpModReg = [
         }
     },
     /**
-     * opMod16RegWordF1(fn): mod=11 (src:reg)  reg=110 (dst:SI)  r/m=001 (CX)
+     * opMod16RegWordF1(fn): mod=11 (src:reg)  reg=110 (dst:ESI)  r/m=001 (CX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3267,7 +3267,7 @@ X86ModW16.aOpModReg = [
         }
     },
     /**
-     * opMod16RegWordF2(fn): mod=11 (src:reg)  reg=110 (dst:SI)  r/m=010 (DX)
+     * opMod16RegWordF2(fn): mod=11 (src:reg)  reg=110 (dst:ESI)  r/m=010 (DX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3280,7 +3280,7 @@ X86ModW16.aOpModReg = [
         }
     },
     /**
-     * opMod16RegWordF3(fn): mod=11 (src:reg)  reg=110 (dst:SI)  r/m=011 (BX)
+     * opMod16RegWordF3(fn): mod=11 (src:reg)  reg=110 (dst:ESI)  r/m=011 (BX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3293,7 +3293,7 @@ X86ModW16.aOpModReg = [
         }
     },
     /**
-     * opMod16RegWordF4(fn): mod=11 (src:reg)  reg=110 (dst:SI)  r/m=100 (SP)
+     * opMod16RegWordF4(fn): mod=11 (src:reg)  reg=110 (dst:ESI)  r/m=100 (SP)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3306,7 +3306,7 @@ X86ModW16.aOpModReg = [
         }
     },
     /**
-     * opMod16RegWordF5(fn): mod=11 (src:reg)  reg=110 (dst:SI)  r/m=101 (BP)
+     * opMod16RegWordF5(fn): mod=11 (src:reg)  reg=110 (dst:ESI)  r/m=101 (BP)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3319,7 +3319,7 @@ X86ModW16.aOpModReg = [
         }
     },
     /**
-     * opMod16RegWordF6(fn): mod=11 (src:reg)  reg=110 (dst:SI)  r/m=110 (SI)
+     * opMod16RegWordF6(fn): mod=11 (src:reg)  reg=110 (dst:ESI)  r/m=110 (SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3329,7 +3329,7 @@ X86ModW16.aOpModReg = [
         this.regESI = (this.regESI & ~this.dataMask) | w;
     },
     /**
-     * opMod16RegWordF7(fn): mod=11 (src:reg)  reg=110 (dst:SI)  r/m=111 (DI)
+     * opMod16RegWordF7(fn): mod=11 (src:reg)  reg=110 (dst:ESI)  r/m=111 (DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3342,7 +3342,7 @@ X86ModW16.aOpModReg = [
         }
     },
     /**
-     * opMod16RegWordF8(fn): mod=11 (src:reg)  reg=111 (dst:DI)  r/m=000 (AX)
+     * opMod16RegWordF8(fn): mod=11 (src:reg)  reg=111 (dst:EDI)  r/m=000 (AX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3355,7 +3355,7 @@ X86ModW16.aOpModReg = [
         }
     },
     /**
-     * opMod16RegWordF9(fn): mod=11 (src:reg)  reg=111 (dst:DI)  r/m=001 (CX)
+     * opMod16RegWordF9(fn): mod=11 (src:reg)  reg=111 (dst:EDI)  r/m=001 (CX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3368,7 +3368,7 @@ X86ModW16.aOpModReg = [
         }
     },
     /**
-     * opMod16RegWordFA(fn): mod=11 (src:reg)  reg=111 (dst:DI)  r/m=010 (DX)
+     * opMod16RegWordFA(fn): mod=11 (src:reg)  reg=111 (dst:EDI)  r/m=010 (DX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3381,7 +3381,7 @@ X86ModW16.aOpModReg = [
         }
     },
     /**
-     * opMod16RegWordFB(fn): mod=11 (src:reg)  reg=111 (dst:DI)  r/m=011 (BX)
+     * opMod16RegWordFB(fn): mod=11 (src:reg)  reg=111 (dst:EDI)  r/m=011 (BX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3394,7 +3394,7 @@ X86ModW16.aOpModReg = [
         }
     },
     /**
-     * opMod16RegWordFC(fn): mod=11 (src:reg)  reg=111 (dst:DI)  r/m=100 (SP)
+     * opMod16RegWordFC(fn): mod=11 (src:reg)  reg=111 (dst:EDI)  r/m=100 (SP)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3407,7 +3407,7 @@ X86ModW16.aOpModReg = [
         }
     },
     /**
-     * opMod16RegWordFD(fn): mod=11 (src:reg)  reg=111 (dst:DI)  r/m=101 (BP)
+     * opMod16RegWordFD(fn): mod=11 (src:reg)  reg=111 (dst:EDI)  r/m=101 (BP)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3420,7 +3420,7 @@ X86ModW16.aOpModReg = [
         }
     },
     /**
-     * opMod16RegWordFE(fn): mod=11 (src:reg)  reg=111 (dst:DI)  r/m=110 (SI)
+     * opMod16RegWordFE(fn): mod=11 (src:reg)  reg=111 (dst:EDI)  r/m=110 (SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3433,7 +3433,7 @@ X86ModW16.aOpModReg = [
         }
     },
     /**
-     * opMod16RegWordFF(fn): mod=11 (src:reg)  reg=111 (dst:DI)  r/m=111 (DI)
+     * opMod16RegWordFF(fn): mod=11 (src:reg)  reg=111 (dst:EDI)  r/m=111 (DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3446,7 +3446,7 @@ X86ModW16.aOpModReg = [
 
 X86ModW16.aOpModMem = [
     /**
-     * opMod16MemWord00(fn): mod=00 (dst:mem)  reg=000 (src:AX)  r/m=000 (BX+SI)
+     * opMod16MemWord00(fn): mod=00 (dst:mem)  reg=000 (src:EAX)  r/m=000 (BX+SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3460,7 +3460,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
-     * opMod16MemWord01(fn): mod=00 (dst:mem)  reg=000 (src:AX)  r/m=001 (BX+DI)
+     * opMod16MemWord01(fn): mod=00 (dst:mem)  reg=000 (src:EAX)  r/m=001 (BX+DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3474,7 +3474,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
-     * opMod16MemWord02(fn): mod=00 (dst:mem)  reg=000 (src:AX)  r/m=010 (BP+SI)
+     * opMod16MemWord02(fn): mod=00 (dst:mem)  reg=000 (src:EAX)  r/m=010 (BP+SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3488,7 +3488,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
-     * opMod16MemWord03(fn): mod=00 (dst:mem)  reg=000 (src:AX)  r/m=011 (BP+DI)
+     * opMod16MemWord03(fn): mod=00 (dst:mem)  reg=000 (src:EAX)  r/m=011 (BP+DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3502,7 +3502,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
-     * opMod16MemWord04(fn): mod=00 (dst:mem)  reg=000 (src:AX)  r/m=100 (SI)
+     * opMod16MemWord04(fn): mod=00 (dst:mem)  reg=000 (src:EAX)  r/m=100 (SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3516,7 +3516,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
-     * opMod16MemWord05(fn): mod=00 (dst:mem)  reg=000 (src:AX)  r/m=101 (DI)
+     * opMod16MemWord05(fn): mod=00 (dst:mem)  reg=000 (src:EAX)  r/m=101 (DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3530,7 +3530,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
-     * opMod16MemWord06(fn): mod=00 (dst:mem)  reg=000 (src:AX)  r/m=110 (d16)
+     * opMod16MemWord06(fn): mod=00 (dst:mem)  reg=000 (src:EAX)  r/m=110 (d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3544,7 +3544,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesDisp;
     },
     /**
-     * opMod16MemWord07(fn): mod=00 (dst:mem)  reg=000 (src:AX)  r/m=111 (BX)
+     * opMod16MemWord07(fn): mod=00 (dst:mem)  reg=000 (src:EAX)  r/m=111 (BX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3558,7 +3558,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
-     * opMod16MemWord08(fn): mod=00 (dst:mem)  reg=001 (src:CX)  r/m=000 (BX+SI)
+     * opMod16MemWord08(fn): mod=00 (dst:mem)  reg=001 (src:ECX)  r/m=000 (BX+SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3572,7 +3572,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
-     * opMod16MemWord09(fn): mod=00 (dst:mem)  reg=001 (src:CX)  r/m=001 (BX+DI)
+     * opMod16MemWord09(fn): mod=00 (dst:mem)  reg=001 (src:ECX)  r/m=001 (BX+DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3586,7 +3586,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
-     * opMod16MemWord0A(fn): mod=00 (dst:mem)  reg=001 (src:CX)  r/m=010 (BP+SI)
+     * opMod16MemWord0A(fn): mod=00 (dst:mem)  reg=001 (src:ECX)  r/m=010 (BP+SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3600,7 +3600,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
-     * opMod16MemWord0B(fn): mod=00 (dst:mem)  reg=001 (src:CX)  r/m=011 (BP+DI)
+     * opMod16MemWord0B(fn): mod=00 (dst:mem)  reg=001 (src:ECX)  r/m=011 (BP+DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3614,7 +3614,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
-     * opMod16MemWord0C(fn): mod=00 (dst:mem)  reg=001 (src:CX)  r/m=100 (SI)
+     * opMod16MemWord0C(fn): mod=00 (dst:mem)  reg=001 (src:ECX)  r/m=100 (SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3628,7 +3628,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
-     * opMod16MemWord0D(fn): mod=00 (dst:mem)  reg=001 (src:CX)  r/m=101 (DI)
+     * opMod16MemWord0D(fn): mod=00 (dst:mem)  reg=001 (src:ECX)  r/m=101 (DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3642,7 +3642,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
-     * opMod16MemWord0E(fn): mod=00 (dst:mem)  reg=001 (src:CX)  r/m=110 (d16)
+     * opMod16MemWord0E(fn): mod=00 (dst:mem)  reg=001 (src:ECX)  r/m=110 (d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3656,7 +3656,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesDisp;
     },
     /**
-     * opMod16MemWord0F(fn): mod=00 (dst:mem)  reg=001 (src:CX)  r/m=111 (BX)
+     * opMod16MemWord0F(fn): mod=00 (dst:mem)  reg=001 (src:ECX)  r/m=111 (BX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3670,7 +3670,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
-     * opMod16MemWord10(fn): mod=00 (dst:mem)  reg=010 (src:DX)  r/m=000 (BX+SI)
+     * opMod16MemWord10(fn): mod=00 (dst:mem)  reg=010 (src:EDX)  r/m=000 (BX+SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3684,7 +3684,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
-     * opMod16MemWord11(fn): mod=00 (dst:mem)  reg=010 (src:DX)  r/m=001 (BX+DI)
+     * opMod16MemWord11(fn): mod=00 (dst:mem)  reg=010 (src:EDX)  r/m=001 (BX+DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3698,7 +3698,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
-     * opMod16MemWord12(fn): mod=00 (dst:mem)  reg=010 (src:DX)  r/m=010 (BP+SI)
+     * opMod16MemWord12(fn): mod=00 (dst:mem)  reg=010 (src:EDX)  r/m=010 (BP+SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3712,7 +3712,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
-     * opMod16MemWord13(fn): mod=00 (dst:mem)  reg=010 (src:DX)  r/m=011 (BP+DI)
+     * opMod16MemWord13(fn): mod=00 (dst:mem)  reg=010 (src:EDX)  r/m=011 (BP+DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3726,7 +3726,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
-     * opMod16MemWord14(fn): mod=00 (dst:mem)  reg=010 (src:DX)  r/m=100 (SI)
+     * opMod16MemWord14(fn): mod=00 (dst:mem)  reg=010 (src:EDX)  r/m=100 (SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3740,7 +3740,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
-     * opMod16MemWord15(fn): mod=00 (dst:mem)  reg=010 (src:DX)  r/m=101 (DI)
+     * opMod16MemWord15(fn): mod=00 (dst:mem)  reg=010 (src:EDX)  r/m=101 (DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3754,7 +3754,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
-     * opMod16MemWord16(fn): mod=00 (dst:mem)  reg=010 (src:DX)  r/m=110 (d16)
+     * opMod16MemWord16(fn): mod=00 (dst:mem)  reg=010 (src:EDX)  r/m=110 (d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3768,7 +3768,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesDisp;
     },
     /**
-     * opMod16MemWord17(fn): mod=00 (dst:mem)  reg=010 (src:DX)  r/m=111 (BX)
+     * opMod16MemWord17(fn): mod=00 (dst:mem)  reg=010 (src:EDX)  r/m=111 (BX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3782,7 +3782,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
-     * opMod16MemWord18(fn): mod=00 (dst:mem)  reg=011 (src:BX)  r/m=000 (BX+SI)
+     * opMod16MemWord18(fn): mod=00 (dst:mem)  reg=011 (src:EBX)  r/m=000 (BX+SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3796,7 +3796,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
-     * opMod16MemWord19(fn): mod=00 (dst:mem)  reg=011 (src:BX)  r/m=001 (BX+DI)
+     * opMod16MemWord19(fn): mod=00 (dst:mem)  reg=011 (src:EBX)  r/m=001 (BX+DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3810,7 +3810,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
-     * opMod16MemWord1A(fn): mod=00 (dst:mem)  reg=011 (src:BX)  r/m=010 (BP+SI)
+     * opMod16MemWord1A(fn): mod=00 (dst:mem)  reg=011 (src:EBX)  r/m=010 (BP+SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3824,7 +3824,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
-     * opMod16MemWord1B(fn): mod=00 (dst:mem)  reg=011 (src:BX)  r/m=011 (BP+DI)
+     * opMod16MemWord1B(fn): mod=00 (dst:mem)  reg=011 (src:EBX)  r/m=011 (BP+DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3838,7 +3838,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
-     * opMod16MemWord1C(fn): mod=00 (dst:mem)  reg=011 (src:BX)  r/m=100 (SI)
+     * opMod16MemWord1C(fn): mod=00 (dst:mem)  reg=011 (src:EBX)  r/m=100 (SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3852,7 +3852,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
-     * opMod16MemWord1D(fn): mod=00 (dst:mem)  reg=011 (src:BX)  r/m=101 (DI)
+     * opMod16MemWord1D(fn): mod=00 (dst:mem)  reg=011 (src:EBX)  r/m=101 (DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3866,7 +3866,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
-     * opMod16MemWord1E(fn): mod=00 (dst:mem)  reg=011 (src:BX)  r/m=110 (d16)
+     * opMod16MemWord1E(fn): mod=00 (dst:mem)  reg=011 (src:EBX)  r/m=110 (d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3880,7 +3880,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesDisp;
     },
     /**
-     * opMod16MemWord1F(fn): mod=00 (dst:mem)  reg=011 (src:BX)  r/m=111 (BX)
+     * opMod16MemWord1F(fn): mod=00 (dst:mem)  reg=011 (src:EBX)  r/m=111 (BX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3894,7 +3894,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
-     * opMod16MemWord20(fn): mod=00 (dst:mem)  reg=100 (src:SP)  r/m=000 (BX+SI)
+     * opMod16MemWord20(fn): mod=00 (dst:mem)  reg=100 (src:ESP)  r/m=000 (BX+SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3908,7 +3908,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
-     * opMod16MemWord21(fn): mod=00 (dst:mem)  reg=100 (src:SP)  r/m=001 (BX+DI)
+     * opMod16MemWord21(fn): mod=00 (dst:mem)  reg=100 (src:ESP)  r/m=001 (BX+DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3922,7 +3922,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
-     * opMod16MemWord22(fn): mod=00 (dst:mem)  reg=100 (src:SP)  r/m=010 (BP+SI)
+     * opMod16MemWord22(fn): mod=00 (dst:mem)  reg=100 (src:ESP)  r/m=010 (BP+SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3936,7 +3936,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
-     * opMod16MemWord23(fn): mod=00 (dst:mem)  reg=100 (src:SP)  r/m=011 (BP+DI)
+     * opMod16MemWord23(fn): mod=00 (dst:mem)  reg=100 (src:ESP)  r/m=011 (BP+DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3950,7 +3950,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
-     * opMod16MemWord24(fn): mod=00 (dst:mem)  reg=100 (src:SP)  r/m=100 (SI)
+     * opMod16MemWord24(fn): mod=00 (dst:mem)  reg=100 (src:ESP)  r/m=100 (SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3964,7 +3964,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
-     * opMod16MemWord25(fn): mod=00 (dst:mem)  reg=100 (src:SP)  r/m=101 (DI)
+     * opMod16MemWord25(fn): mod=00 (dst:mem)  reg=100 (src:ESP)  r/m=101 (DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3978,7 +3978,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
-     * opMod16MemWord26(fn): mod=00 (dst:mem)  reg=100 (src:SP)  r/m=110 (d16)
+     * opMod16MemWord26(fn): mod=00 (dst:mem)  reg=100 (src:ESP)  r/m=110 (d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -3992,7 +3992,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesDisp;
     },
     /**
-     * opMod16MemWord27(fn): mod=00 (dst:mem)  reg=100 (src:SP)  r/m=111 (BX)
+     * opMod16MemWord27(fn): mod=00 (dst:mem)  reg=100 (src:ESP)  r/m=111 (BX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4006,7 +4006,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
-     * opMod16MemWord28(fn): mod=00 (dst:mem)  reg=101 (src:BP)  r/m=000 (BX+SI)
+     * opMod16MemWord28(fn): mod=00 (dst:mem)  reg=101 (src:EBP)  r/m=000 (BX+SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4020,7 +4020,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
-     * opMod16MemWord29(fn): mod=00 (dst:mem)  reg=101 (src:BP)  r/m=001 (BX+DI)
+     * opMod16MemWord29(fn): mod=00 (dst:mem)  reg=101 (src:EBP)  r/m=001 (BX+DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4034,7 +4034,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
-     * opMod16MemWord2A(fn): mod=00 (dst:mem)  reg=101 (src:BP)  r/m=010 (BP+SI)
+     * opMod16MemWord2A(fn): mod=00 (dst:mem)  reg=101 (src:EBP)  r/m=010 (BP+SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4048,7 +4048,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
-     * opMod16MemWord2B(fn): mod=00 (dst:mem)  reg=101 (src:BP)  r/m=011 (BP+DI)
+     * opMod16MemWord2B(fn): mod=00 (dst:mem)  reg=101 (src:EBP)  r/m=011 (BP+DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4062,7 +4062,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
-     * opMod16MemWord2C(fn): mod=00 (dst:mem)  reg=101 (src:BP)  r/m=100 (SI)
+     * opMod16MemWord2C(fn): mod=00 (dst:mem)  reg=101 (src:EBP)  r/m=100 (SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4076,7 +4076,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
-     * opMod16MemWord2D(fn): mod=00 (dst:mem)  reg=101 (src:BP)  r/m=101 (DI)
+     * opMod16MemWord2D(fn): mod=00 (dst:mem)  reg=101 (src:EBP)  r/m=101 (DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4090,7 +4090,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
-     * opMod16MemWord2E(fn): mod=00 (dst:mem)  reg=101 (src:BP)  r/m=110 (d16)
+     * opMod16MemWord2E(fn): mod=00 (dst:mem)  reg=101 (src:EBP)  r/m=110 (d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4104,7 +4104,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesDisp;
     },
     /**
-     * opMod16MemWord2F(fn): mod=00 (dst:mem)  reg=101 (src:BP)  r/m=111 (BX)
+     * opMod16MemWord2F(fn): mod=00 (dst:mem)  reg=101 (src:EBP)  r/m=111 (BX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4118,7 +4118,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
-     * opMod16MemWord30(fn): mod=00 (dst:mem)  reg=110 (src:SI)  r/m=000 (BX+SI)
+     * opMod16MemWord30(fn): mod=00 (dst:mem)  reg=110 (src:ESI)  r/m=000 (BX+SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4132,7 +4132,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
-     * opMod16MemWord31(fn): mod=00 (dst:mem)  reg=110 (src:SI)  r/m=001 (BX+DI)
+     * opMod16MemWord31(fn): mod=00 (dst:mem)  reg=110 (src:ESI)  r/m=001 (BX+DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4146,7 +4146,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
-     * opMod16MemWord32(fn): mod=00 (dst:mem)  reg=110 (src:SI)  r/m=010 (BP+SI)
+     * opMod16MemWord32(fn): mod=00 (dst:mem)  reg=110 (src:ESI)  r/m=010 (BP+SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4160,7 +4160,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
-     * opMod16MemWord33(fn): mod=00 (dst:mem)  reg=110 (src:SI)  r/m=011 (BP+DI)
+     * opMod16MemWord33(fn): mod=00 (dst:mem)  reg=110 (src:ESI)  r/m=011 (BP+DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4174,7 +4174,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
-     * opMod16MemWord34(fn): mod=00 (dst:mem)  reg=110 (src:SI)  r/m=100 (SI)
+     * opMod16MemWord34(fn): mod=00 (dst:mem)  reg=110 (src:ESI)  r/m=100 (SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4188,7 +4188,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
-     * opMod16MemWord35(fn): mod=00 (dst:mem)  reg=110 (src:SI)  r/m=101 (DI)
+     * opMod16MemWord35(fn): mod=00 (dst:mem)  reg=110 (src:ESI)  r/m=101 (DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4202,7 +4202,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
-     * opMod16MemWord36(fn): mod=00 (dst:mem)  reg=110 (src:SI)  r/m=110 (d16)
+     * opMod16MemWord36(fn): mod=00 (dst:mem)  reg=110 (src:ESI)  r/m=110 (d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4216,7 +4216,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesDisp;
     },
     /**
-     * opMod16MemWord37(fn): mod=00 (dst:mem)  reg=110 (src:SI)  r/m=111 (BX)
+     * opMod16MemWord37(fn): mod=00 (dst:mem)  reg=110 (src:ESI)  r/m=111 (BX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4230,7 +4230,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
-     * opMod16MemWord38(fn): mod=00 (dst:mem)  reg=111 (src:DI)  r/m=000 (BX+SI)
+     * opMod16MemWord38(fn): mod=00 (dst:mem)  reg=111 (src:EDI)  r/m=000 (BX+SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4244,7 +4244,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
-     * opMod16MemWord39(fn): mod=00 (dst:mem)  reg=111 (src:DI)  r/m=001 (BX+DI)
+     * opMod16MemWord39(fn): mod=00 (dst:mem)  reg=111 (src:EDI)  r/m=001 (BX+DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4258,7 +4258,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
-     * opMod16MemWord3A(fn): mod=00 (dst:mem)  reg=111 (src:DI)  r/m=010 (BP+SI)
+     * opMod16MemWord3A(fn): mod=00 (dst:mem)  reg=111 (src:EDI)  r/m=010 (BP+SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4272,7 +4272,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
-     * opMod16MemWord3B(fn): mod=00 (dst:mem)  reg=111 (src:DI)  r/m=011 (BP+DI)
+     * opMod16MemWord3B(fn): mod=00 (dst:mem)  reg=111 (src:EDI)  r/m=011 (BP+DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4286,7 +4286,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
-     * opMod16MemWord3C(fn): mod=00 (dst:mem)  reg=111 (src:DI)  r/m=100 (SI)
+     * opMod16MemWord3C(fn): mod=00 (dst:mem)  reg=111 (src:EDI)  r/m=100 (SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4300,7 +4300,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
-     * opMod16MemWord3D(fn): mod=00 (dst:mem)  reg=111 (src:DI)  r/m=101 (DI)
+     * opMod16MemWord3D(fn): mod=00 (dst:mem)  reg=111 (src:EDI)  r/m=101 (DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4314,7 +4314,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
-     * opMod16MemWord3E(fn): mod=00 (dst:mem)  reg=111 (src:DI)  r/m=110 (d16)
+     * opMod16MemWord3E(fn): mod=00 (dst:mem)  reg=111 (src:EDI)  r/m=110 (d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4328,7 +4328,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesDisp;
     },
     /**
-     * opMod16MemWord3F(fn): mod=00 (dst:mem)  reg=111 (src:DI)  r/m=111 (BX)
+     * opMod16MemWord3F(fn): mod=00 (dst:mem)  reg=111 (src:EDI)  r/m=111 (BX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4342,7 +4342,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
-     * opMod16MemWord40(fn): mod=01 (dst:mem+d8)  reg=000 (src:AX)  r/m=000 (BX+SI+d8)
+     * opMod16MemWord40(fn): mod=01 (dst:mem+d8)  reg=000 (src:EAX)  r/m=000 (BX+SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4356,7 +4356,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
-     * opMod16MemWord41(fn): mod=01 (dst:mem+d8)  reg=000 (src:AX)  r/m=001 (BX+DI+d8)
+     * opMod16MemWord41(fn): mod=01 (dst:mem+d8)  reg=000 (src:EAX)  r/m=001 (BX+DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4370,7 +4370,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opMod16MemWord42(fn): mod=01 (dst:mem+d8)  reg=000 (src:AX)  r/m=010 (BP+SI+d8)
+     * opMod16MemWord42(fn): mod=01 (dst:mem+d8)  reg=000 (src:EAX)  r/m=010 (BP+SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4384,7 +4384,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opMod16MemWord43(fn): mod=01 (dst:mem+d8)  reg=000 (src:AX)  r/m=011 (BP+DI+d8)
+     * opMod16MemWord43(fn): mod=01 (dst:mem+d8)  reg=000 (src:EAX)  r/m=011 (BP+DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4398,7 +4398,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
-     * opMod16MemWord44(fn): mod=01 (dst:mem+d8)  reg=000 (src:AX)  r/m=100 (SI+d8)
+     * opMod16MemWord44(fn): mod=01 (dst:mem+d8)  reg=000 (src:EAX)  r/m=100 (SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4412,7 +4412,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16MemWord45(fn): mod=01 (dst:mem+d8)  reg=000 (src:AX)  r/m=101 (DI+d8)
+     * opMod16MemWord45(fn): mod=01 (dst:mem+d8)  reg=000 (src:EAX)  r/m=101 (DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4426,7 +4426,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16MemWord46(fn): mod=01 (dst:mem+d8)  reg=000 (src:AX)  r/m=110 (BP+d8)
+     * opMod16MemWord46(fn): mod=01 (dst:mem+d8)  reg=000 (src:EAX)  r/m=110 (BP+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4440,7 +4440,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16MemWord47(fn): mod=01 (dst:mem+d8)  reg=000 (src:AX)  r/m=111 (BX+d8)
+     * opMod16MemWord47(fn): mod=01 (dst:mem+d8)  reg=000 (src:EAX)  r/m=111 (BX+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4454,7 +4454,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16MemWord48(fn): mod=01 (dst:mem+d8)  reg=001 (src:CX)  r/m=000 (BX+SI+d8)
+     * opMod16MemWord48(fn): mod=01 (dst:mem+d8)  reg=001 (src:ECX)  r/m=000 (BX+SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4468,7 +4468,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
-     * opMod16MemWord49(fn): mod=01 (dst:mem+d8)  reg=001 (src:CX)  r/m=001 (BX+DI+d8)
+     * opMod16MemWord49(fn): mod=01 (dst:mem+d8)  reg=001 (src:ECX)  r/m=001 (BX+DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4482,7 +4482,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opMod16MemWord4A(fn): mod=01 (dst:mem+d8)  reg=001 (src:CX)  r/m=010 (BP+SI+d8)
+     * opMod16MemWord4A(fn): mod=01 (dst:mem+d8)  reg=001 (src:ECX)  r/m=010 (BP+SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4496,7 +4496,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opMod16MemWord4B(fn): mod=01 (dst:mem+d8)  reg=001 (src:CX)  r/m=011 (BP+DI+d8)
+     * opMod16MemWord4B(fn): mod=01 (dst:mem+d8)  reg=001 (src:ECX)  r/m=011 (BP+DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4510,7 +4510,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
-     * opMod16MemWord4C(fn): mod=01 (dst:mem+d8)  reg=001 (src:CX)  r/m=100 (SI+d8)
+     * opMod16MemWord4C(fn): mod=01 (dst:mem+d8)  reg=001 (src:ECX)  r/m=100 (SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4524,7 +4524,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16MemWord4D(fn): mod=01 (dst:mem+d8)  reg=001 (src:CX)  r/m=101 (DI+d8)
+     * opMod16MemWord4D(fn): mod=01 (dst:mem+d8)  reg=001 (src:ECX)  r/m=101 (DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4538,7 +4538,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16MemWord4E(fn): mod=01 (dst:mem+d8)  reg=001 (src:CX)  r/m=110 (BP+d8)
+     * opMod16MemWord4E(fn): mod=01 (dst:mem+d8)  reg=001 (src:ECX)  r/m=110 (BP+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4552,7 +4552,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16MemWord4F(fn): mod=01 (dst:mem+d8)  reg=001 (src:CX)  r/m=111 (BX+d8)
+     * opMod16MemWord4F(fn): mod=01 (dst:mem+d8)  reg=001 (src:ECX)  r/m=111 (BX+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4566,7 +4566,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16MemWord50(fn): mod=01 (dst:mem+d8)  reg=010 (src:DX)  r/m=000 (BX+SI+d8)
+     * opMod16MemWord50(fn): mod=01 (dst:mem+d8)  reg=010 (src:EDX)  r/m=000 (BX+SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4580,7 +4580,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
-     * opMod16MemWord51(fn): mod=01 (dst:mem+d8)  reg=010 (src:DX)  r/m=001 (BX+DI+d8)
+     * opMod16MemWord51(fn): mod=01 (dst:mem+d8)  reg=010 (src:EDX)  r/m=001 (BX+DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4594,7 +4594,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opMod16MemWord52(fn): mod=01 (dst:mem+d8)  reg=010 (src:DX)  r/m=010 (BP+SI+d8)
+     * opMod16MemWord52(fn): mod=01 (dst:mem+d8)  reg=010 (src:EDX)  r/m=010 (BP+SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4608,7 +4608,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opMod16MemWord53(fn): mod=01 (dst:mem+d8)  reg=010 (src:DX)  r/m=011 (BP+DI+d8)
+     * opMod16MemWord53(fn): mod=01 (dst:mem+d8)  reg=010 (src:EDX)  r/m=011 (BP+DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4622,7 +4622,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
-     * opMod16MemWord54(fn): mod=01 (dst:mem+d8)  reg=010 (src:DX)  r/m=100 (SI+d8)
+     * opMod16MemWord54(fn): mod=01 (dst:mem+d8)  reg=010 (src:EDX)  r/m=100 (SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4636,7 +4636,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16MemWord55(fn): mod=01 (dst:mem+d8)  reg=010 (src:DX)  r/m=101 (DI+d8)
+     * opMod16MemWord55(fn): mod=01 (dst:mem+d8)  reg=010 (src:EDX)  r/m=101 (DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4650,7 +4650,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16MemWord56(fn): mod=01 (dst:mem+d8)  reg=010 (src:DX)  r/m=110 (BP+d8)
+     * opMod16MemWord56(fn): mod=01 (dst:mem+d8)  reg=010 (src:EDX)  r/m=110 (BP+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4664,7 +4664,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16MemWord57(fn): mod=01 (dst:mem+d8)  reg=010 (src:DX)  r/m=111 (BX+d8)
+     * opMod16MemWord57(fn): mod=01 (dst:mem+d8)  reg=010 (src:EDX)  r/m=111 (BX+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4678,7 +4678,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16MemWord58(fn): mod=01 (dst:mem+d8)  reg=011 (src:BX)  r/m=000 (BX+SI+d8)
+     * opMod16MemWord58(fn): mod=01 (dst:mem+d8)  reg=011 (src:EBX)  r/m=000 (BX+SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4692,7 +4692,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
-     * opMod16MemWord59(fn): mod=01 (dst:mem+d8)  reg=011 (src:BX)  r/m=001 (BX+DI+d8)
+     * opMod16MemWord59(fn): mod=01 (dst:mem+d8)  reg=011 (src:EBX)  r/m=001 (BX+DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4706,7 +4706,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opMod16MemWord5A(fn): mod=01 (dst:mem+d8)  reg=011 (src:BX)  r/m=010 (BP+SI+d8)
+     * opMod16MemWord5A(fn): mod=01 (dst:mem+d8)  reg=011 (src:EBX)  r/m=010 (BP+SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4720,7 +4720,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opMod16MemWord5B(fn): mod=01 (dst:mem+d8)  reg=011 (src:BX)  r/m=011 (BP+DI+d8)
+     * opMod16MemWord5B(fn): mod=01 (dst:mem+d8)  reg=011 (src:EBX)  r/m=011 (BP+DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4734,7 +4734,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
-     * opMod16MemWord5C(fn): mod=01 (dst:mem+d8)  reg=011 (src:BX)  r/m=100 (SI+d8)
+     * opMod16MemWord5C(fn): mod=01 (dst:mem+d8)  reg=011 (src:EBX)  r/m=100 (SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4748,7 +4748,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16MemWord5D(fn): mod=01 (dst:mem+d8)  reg=011 (src:BX)  r/m=101 (DI+d8)
+     * opMod16MemWord5D(fn): mod=01 (dst:mem+d8)  reg=011 (src:EBX)  r/m=101 (DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4762,7 +4762,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16MemWord5E(fn): mod=01 (dst:mem+d8)  reg=011 (src:BX)  r/m=110 (BP+d8)
+     * opMod16MemWord5E(fn): mod=01 (dst:mem+d8)  reg=011 (src:EBX)  r/m=110 (BP+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4776,7 +4776,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16MemWord5F(fn): mod=01 (dst:mem+d8)  reg=011 (src:BX)  r/m=111 (BX+d8)
+     * opMod16MemWord5F(fn): mod=01 (dst:mem+d8)  reg=011 (src:EBX)  r/m=111 (BX+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4790,7 +4790,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16MemWord60(fn): mod=01 (dst:mem+d8)  reg=100 (src:SP)  r/m=000 (BX+SI+d8)
+     * opMod16MemWord60(fn): mod=01 (dst:mem+d8)  reg=100 (src:ESP)  r/m=000 (BX+SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4804,7 +4804,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
-     * opMod16MemWord61(fn): mod=01 (dst:mem+d8)  reg=100 (src:SP)  r/m=001 (BX+DI+d8)
+     * opMod16MemWord61(fn): mod=01 (dst:mem+d8)  reg=100 (src:ESP)  r/m=001 (BX+DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4818,7 +4818,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opMod16MemWord62(fn): mod=01 (dst:mem+d8)  reg=100 (src:SP)  r/m=010 (BP+SI+d8)
+     * opMod16MemWord62(fn): mod=01 (dst:mem+d8)  reg=100 (src:ESP)  r/m=010 (BP+SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4832,7 +4832,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opMod16MemWord63(fn): mod=01 (dst:mem+d8)  reg=100 (src:SP)  r/m=011 (BP+DI+d8)
+     * opMod16MemWord63(fn): mod=01 (dst:mem+d8)  reg=100 (src:ESP)  r/m=011 (BP+DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4846,7 +4846,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
-     * opMod16MemWord64(fn): mod=01 (dst:mem+d8)  reg=100 (src:SP)  r/m=100 (SI+d8)
+     * opMod16MemWord64(fn): mod=01 (dst:mem+d8)  reg=100 (src:ESP)  r/m=100 (SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4860,7 +4860,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16MemWord65(fn): mod=01 (dst:mem+d8)  reg=100 (src:SP)  r/m=101 (DI+d8)
+     * opMod16MemWord65(fn): mod=01 (dst:mem+d8)  reg=100 (src:ESP)  r/m=101 (DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4874,7 +4874,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16MemWord66(fn): mod=01 (dst:mem+d8)  reg=100 (src:SP)  r/m=110 (BP+d8)
+     * opMod16MemWord66(fn): mod=01 (dst:mem+d8)  reg=100 (src:ESP)  r/m=110 (BP+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4888,7 +4888,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16MemWord67(fn): mod=01 (dst:mem+d8)  reg=100 (src:SP)  r/m=111 (BX+d8)
+     * opMod16MemWord67(fn): mod=01 (dst:mem+d8)  reg=100 (src:ESP)  r/m=111 (BX+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4902,7 +4902,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16MemWord68(fn): mod=01 (dst:mem+d8)  reg=101 (src:BP)  r/m=000 (BX+SI+d8)
+     * opMod16MemWord68(fn): mod=01 (dst:mem+d8)  reg=101 (src:EBP)  r/m=000 (BX+SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4916,7 +4916,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
-     * opMod16MemWord69(fn): mod=01 (dst:mem+d8)  reg=101 (src:BP)  r/m=001 (BX+DI+d8)
+     * opMod16MemWord69(fn): mod=01 (dst:mem+d8)  reg=101 (src:EBP)  r/m=001 (BX+DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4930,7 +4930,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opMod16MemWord6A(fn): mod=01 (dst:mem+d8)  reg=101 (src:BP)  r/m=010 (BP+SI+d8)
+     * opMod16MemWord6A(fn): mod=01 (dst:mem+d8)  reg=101 (src:EBP)  r/m=010 (BP+SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4944,7 +4944,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opMod16MemWord6B(fn): mod=01 (dst:mem+d8)  reg=101 (src:BP)  r/m=011 (BP+DI+d8)
+     * opMod16MemWord6B(fn): mod=01 (dst:mem+d8)  reg=101 (src:EBP)  r/m=011 (BP+DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4958,7 +4958,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
-     * opMod16MemWord6C(fn): mod=01 (dst:mem+d8)  reg=101 (src:BP)  r/m=100 (SI+d8)
+     * opMod16MemWord6C(fn): mod=01 (dst:mem+d8)  reg=101 (src:EBP)  r/m=100 (SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4972,7 +4972,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16MemWord6D(fn): mod=01 (dst:mem+d8)  reg=101 (src:BP)  r/m=101 (DI+d8)
+     * opMod16MemWord6D(fn): mod=01 (dst:mem+d8)  reg=101 (src:EBP)  r/m=101 (DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -4986,7 +4986,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16MemWord6E(fn): mod=01 (dst:mem+d8)  reg=101 (src:BP)  r/m=110 (BP+d8)
+     * opMod16MemWord6E(fn): mod=01 (dst:mem+d8)  reg=101 (src:EBP)  r/m=110 (BP+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5000,7 +5000,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16MemWord6F(fn): mod=01 (dst:mem+d8)  reg=101 (src:BP)  r/m=111 (BX+d8)
+     * opMod16MemWord6F(fn): mod=01 (dst:mem+d8)  reg=101 (src:EBP)  r/m=111 (BX+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5014,7 +5014,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16MemWord70(fn): mod=01 (dst:mem+d8)  reg=110 (src:SI)  r/m=000 (BX+SI+d8)
+     * opMod16MemWord70(fn): mod=01 (dst:mem+d8)  reg=110 (src:ESI)  r/m=000 (BX+SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5028,7 +5028,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
-     * opMod16MemWord71(fn): mod=01 (dst:mem+d8)  reg=110 (src:SI)  r/m=001 (BX+DI+d8)
+     * opMod16MemWord71(fn): mod=01 (dst:mem+d8)  reg=110 (src:ESI)  r/m=001 (BX+DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5042,7 +5042,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opMod16MemWord72(fn): mod=01 (dst:mem+d8)  reg=110 (src:SI)  r/m=010 (BP+SI+d8)
+     * opMod16MemWord72(fn): mod=01 (dst:mem+d8)  reg=110 (src:ESI)  r/m=010 (BP+SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5056,7 +5056,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opMod16MemWord73(fn): mod=01 (dst:mem+d8)  reg=110 (src:SI)  r/m=011 (BP+DI+d8)
+     * opMod16MemWord73(fn): mod=01 (dst:mem+d8)  reg=110 (src:ESI)  r/m=011 (BP+DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5070,7 +5070,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
-     * opMod16MemWord74(fn): mod=01 (dst:mem+d8)  reg=110 (src:SI)  r/m=100 (SI+d8)
+     * opMod16MemWord74(fn): mod=01 (dst:mem+d8)  reg=110 (src:ESI)  r/m=100 (SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5084,7 +5084,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16MemWord75(fn): mod=01 (dst:mem+d8)  reg=110 (src:SI)  r/m=101 (DI+d8)
+     * opMod16MemWord75(fn): mod=01 (dst:mem+d8)  reg=110 (src:ESI)  r/m=101 (DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5098,7 +5098,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16MemWord76(fn): mod=01 (dst:mem+d8)  reg=110 (src:SI)  r/m=110 (BP+d8)
+     * opMod16MemWord76(fn): mod=01 (dst:mem+d8)  reg=110 (src:ESI)  r/m=110 (BP+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5112,7 +5112,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16MemWord77(fn): mod=01 (dst:mem+d8)  reg=110 (src:SI)  r/m=111 (BX+d8)
+     * opMod16MemWord77(fn): mod=01 (dst:mem+d8)  reg=110 (src:ESI)  r/m=111 (BX+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5126,7 +5126,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16MemWord78(fn): mod=01 (dst:mem+d8)  reg=111 (src:DI)  r/m=000 (BX+SI+d8)
+     * opMod16MemWord78(fn): mod=01 (dst:mem+d8)  reg=111 (src:EDI)  r/m=000 (BX+SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5140,7 +5140,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
-     * opMod16MemWord79(fn): mod=01 (dst:mem+d8)  reg=111 (src:DI)  r/m=001 (BX+DI+d8)
+     * opMod16MemWord79(fn): mod=01 (dst:mem+d8)  reg=111 (src:EDI)  r/m=001 (BX+DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5154,7 +5154,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opMod16MemWord7A(fn): mod=01 (dst:mem+d8)  reg=111 (src:DI)  r/m=010 (BP+SI+d8)
+     * opMod16MemWord7A(fn): mod=01 (dst:mem+d8)  reg=111 (src:EDI)  r/m=010 (BP+SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5168,7 +5168,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opMod16MemWord7B(fn): mod=01 (dst:mem+d8)  reg=111 (src:DI)  r/m=011 (BP+DI+d8)
+     * opMod16MemWord7B(fn): mod=01 (dst:mem+d8)  reg=111 (src:EDI)  r/m=011 (BP+DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5182,7 +5182,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
-     * opMod16MemWord7C(fn): mod=01 (dst:mem+d8)  reg=111 (src:DI)  r/m=100 (SI+d8)
+     * opMod16MemWord7C(fn): mod=01 (dst:mem+d8)  reg=111 (src:EDI)  r/m=100 (SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5196,7 +5196,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16MemWord7D(fn): mod=01 (dst:mem+d8)  reg=111 (src:DI)  r/m=101 (DI+d8)
+     * opMod16MemWord7D(fn): mod=01 (dst:mem+d8)  reg=111 (src:EDI)  r/m=101 (DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5210,7 +5210,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16MemWord7E(fn): mod=01 (dst:mem+d8)  reg=111 (src:DI)  r/m=110 (BP+d8)
+     * opMod16MemWord7E(fn): mod=01 (dst:mem+d8)  reg=111 (src:EDI)  r/m=110 (BP+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5224,7 +5224,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16MemWord7F(fn): mod=01 (dst:mem+d8)  reg=111 (src:DI)  r/m=111 (BX+d8)
+     * opMod16MemWord7F(fn): mod=01 (dst:mem+d8)  reg=111 (src:EDI)  r/m=111 (BX+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5238,7 +5238,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16MemWord80(fn): mod=10 (dst:mem+d16)  reg=000 (src:AX)  r/m=000 (BX+SI+d16)
+     * opMod16MemWord80(fn): mod=10 (dst:mem+d16)  reg=000 (src:EAX)  r/m=000 (BX+SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5252,7 +5252,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
-     * opMod16MemWord81(fn): mod=10 (dst:mem+d16)  reg=000 (src:AX)  r/m=001 (BX+DI+d16)
+     * opMod16MemWord81(fn): mod=10 (dst:mem+d16)  reg=000 (src:EAX)  r/m=001 (BX+DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5266,7 +5266,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opMod16MemWord82(fn): mod=10 (dst:mem+d16)  reg=000 (src:AX)  r/m=010 (BP+SI+d16)
+     * opMod16MemWord82(fn): mod=10 (dst:mem+d16)  reg=000 (src:EAX)  r/m=010 (BP+SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5280,7 +5280,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opMod16MemWord83(fn): mod=10 (dst:mem+d16)  reg=000 (src:AX)  r/m=011 (BP+DI+d16)
+     * opMod16MemWord83(fn): mod=10 (dst:mem+d16)  reg=000 (src:EAX)  r/m=011 (BP+DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5294,7 +5294,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
-     * opMod16MemWord84(fn): mod=10 (dst:mem+d16)  reg=000 (src:AX)  r/m=100 (SI+d16)
+     * opMod16MemWord84(fn): mod=10 (dst:mem+d16)  reg=000 (src:EAX)  r/m=100 (SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5308,7 +5308,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16MemWord85(fn): mod=10 (dst:mem+d16)  reg=000 (src:AX)  r/m=101 (DI+d16)
+     * opMod16MemWord85(fn): mod=10 (dst:mem+d16)  reg=000 (src:EAX)  r/m=101 (DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5322,7 +5322,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16MemWord86(fn): mod=10 (dst:mem+d16)  reg=000 (src:AX)  r/m=110 (BP+d16)
+     * opMod16MemWord86(fn): mod=10 (dst:mem+d16)  reg=000 (src:EAX)  r/m=110 (BP+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5336,7 +5336,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16MemWord87(fn): mod=10 (dst:mem+d16)  reg=000 (src:AX)  r/m=111 (BX+d16)
+     * opMod16MemWord87(fn): mod=10 (dst:mem+d16)  reg=000 (src:EAX)  r/m=111 (BX+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5350,7 +5350,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16MemWord88(fn): mod=10 (dst:mem+d16)  reg=001 (src:CX)  r/m=000 (BX+SI+d16)
+     * opMod16MemWord88(fn): mod=10 (dst:mem+d16)  reg=001 (src:ECX)  r/m=000 (BX+SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5364,7 +5364,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
-     * opMod16MemWord89(fn): mod=10 (dst:mem+d16)  reg=001 (src:CX)  r/m=001 (BX+DI+d16)
+     * opMod16MemWord89(fn): mod=10 (dst:mem+d16)  reg=001 (src:ECX)  r/m=001 (BX+DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5378,7 +5378,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opMod16MemWord8A(fn): mod=10 (dst:mem+d16)  reg=001 (src:CX)  r/m=010 (BP+SI+d16)
+     * opMod16MemWord8A(fn): mod=10 (dst:mem+d16)  reg=001 (src:ECX)  r/m=010 (BP+SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5392,7 +5392,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opMod16MemWord8B(fn): mod=10 (dst:mem+d16)  reg=001 (src:CX)  r/m=011 (BP+DI+d16)
+     * opMod16MemWord8B(fn): mod=10 (dst:mem+d16)  reg=001 (src:ECX)  r/m=011 (BP+DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5406,7 +5406,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
-     * opMod16MemWord8C(fn): mod=10 (dst:mem+d16)  reg=001 (src:CX)  r/m=100 (SI+d16)
+     * opMod16MemWord8C(fn): mod=10 (dst:mem+d16)  reg=001 (src:ECX)  r/m=100 (SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5420,7 +5420,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16MemWord8D(fn): mod=10 (dst:mem+d16)  reg=001 (src:CX)  r/m=101 (DI+d16)
+     * opMod16MemWord8D(fn): mod=10 (dst:mem+d16)  reg=001 (src:ECX)  r/m=101 (DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5434,7 +5434,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16MemWord8E(fn): mod=10 (dst:mem+d16)  reg=001 (src:CX)  r/m=110 (BP+d16)
+     * opMod16MemWord8E(fn): mod=10 (dst:mem+d16)  reg=001 (src:ECX)  r/m=110 (BP+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5448,7 +5448,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16MemWord8F(fn): mod=10 (dst:mem+d16)  reg=001 (src:CX)  r/m=111 (BX+d16)
+     * opMod16MemWord8F(fn): mod=10 (dst:mem+d16)  reg=001 (src:ECX)  r/m=111 (BX+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5462,7 +5462,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16MemWord90(fn): mod=10 (dst:mem+d16)  reg=010 (src:DX)  r/m=000 (BX+SI+d16)
+     * opMod16MemWord90(fn): mod=10 (dst:mem+d16)  reg=010 (src:EDX)  r/m=000 (BX+SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5476,7 +5476,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
-     * opMod16MemWord91(fn): mod=10 (dst:mem+d16)  reg=010 (src:DX)  r/m=001 (BX+DI+d16)
+     * opMod16MemWord91(fn): mod=10 (dst:mem+d16)  reg=010 (src:EDX)  r/m=001 (BX+DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5490,7 +5490,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opMod16MemWord92(fn): mod=10 (dst:mem+d16)  reg=010 (src:DX)  r/m=010 (BP+SI+d16)
+     * opMod16MemWord92(fn): mod=10 (dst:mem+d16)  reg=010 (src:EDX)  r/m=010 (BP+SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5504,7 +5504,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opMod16MemWord93(fn): mod=10 (dst:mem+d16)  reg=010 (src:DX)  r/m=011 (BP+DI+d16)
+     * opMod16MemWord93(fn): mod=10 (dst:mem+d16)  reg=010 (src:EDX)  r/m=011 (BP+DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5518,7 +5518,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
-     * opMod16MemWord94(fn): mod=10 (dst:mem+d16)  reg=010 (src:DX)  r/m=100 (SI+d16)
+     * opMod16MemWord94(fn): mod=10 (dst:mem+d16)  reg=010 (src:EDX)  r/m=100 (SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5532,7 +5532,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16MemWord95(fn): mod=10 (dst:mem+d16)  reg=010 (src:DX)  r/m=101 (DI+d16)
+     * opMod16MemWord95(fn): mod=10 (dst:mem+d16)  reg=010 (src:EDX)  r/m=101 (DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5546,7 +5546,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16MemWord96(fn): mod=10 (dst:mem+d16)  reg=010 (src:DX)  r/m=110 (BP+d16)
+     * opMod16MemWord96(fn): mod=10 (dst:mem+d16)  reg=010 (src:EDX)  r/m=110 (BP+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5560,7 +5560,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16MemWord97(fn): mod=10 (dst:mem+d16)  reg=010 (src:DX)  r/m=111 (BX+d16)
+     * opMod16MemWord97(fn): mod=10 (dst:mem+d16)  reg=010 (src:EDX)  r/m=111 (BX+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5574,7 +5574,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16MemWord98(fn): mod=10 (dst:mem+d16)  reg=011 (src:BX)  r/m=000 (BX+SI+d16)
+     * opMod16MemWord98(fn): mod=10 (dst:mem+d16)  reg=011 (src:EBX)  r/m=000 (BX+SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5588,7 +5588,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
-     * opMod16MemWord99(fn): mod=10 (dst:mem+d16)  reg=011 (src:BX)  r/m=001 (BX+DI+d16)
+     * opMod16MemWord99(fn): mod=10 (dst:mem+d16)  reg=011 (src:EBX)  r/m=001 (BX+DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5602,7 +5602,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opMod16MemWord9A(fn): mod=10 (dst:mem+d16)  reg=011 (src:BX)  r/m=010 (BP+SI+d16)
+     * opMod16MemWord9A(fn): mod=10 (dst:mem+d16)  reg=011 (src:EBX)  r/m=010 (BP+SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5616,7 +5616,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opMod16MemWord9B(fn): mod=10 (dst:mem+d16)  reg=011 (src:BX)  r/m=011 (BP+DI+d16)
+     * opMod16MemWord9B(fn): mod=10 (dst:mem+d16)  reg=011 (src:EBX)  r/m=011 (BP+DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5630,7 +5630,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
-     * opMod16MemWord9C(fn): mod=10 (dst:mem+d16)  reg=011 (src:BX)  r/m=100 (SI+d16)
+     * opMod16MemWord9C(fn): mod=10 (dst:mem+d16)  reg=011 (src:EBX)  r/m=100 (SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5644,7 +5644,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16MemWord9D(fn): mod=10 (dst:mem+d16)  reg=011 (src:BX)  r/m=101 (DI+d16)
+     * opMod16MemWord9D(fn): mod=10 (dst:mem+d16)  reg=011 (src:EBX)  r/m=101 (DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5658,7 +5658,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16MemWord9E(fn): mod=10 (dst:mem+d16)  reg=011 (src:BX)  r/m=110 (BP+d16)
+     * opMod16MemWord9E(fn): mod=10 (dst:mem+d16)  reg=011 (src:EBX)  r/m=110 (BP+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5672,7 +5672,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16MemWord9F(fn): mod=10 (dst:mem+d16)  reg=011 (src:BX)  r/m=111 (BX+d16)
+     * opMod16MemWord9F(fn): mod=10 (dst:mem+d16)  reg=011 (src:EBX)  r/m=111 (BX+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5686,7 +5686,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16MemWordA0(fn): mod=10 (dst:mem+d16)  reg=100 (src:SP)  r/m=000 (BX+SI+d16)
+     * opMod16MemWordA0(fn): mod=10 (dst:mem+d16)  reg=100 (src:ESP)  r/m=000 (BX+SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5700,7 +5700,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
-     * opMod16MemWordA1(fn): mod=10 (dst:mem+d16)  reg=100 (src:SP)  r/m=001 (BX+DI+d16)
+     * opMod16MemWordA1(fn): mod=10 (dst:mem+d16)  reg=100 (src:ESP)  r/m=001 (BX+DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5714,7 +5714,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opMod16MemWordA2(fn): mod=10 (dst:mem+d16)  reg=100 (src:SP)  r/m=010 (BP+SI+d16)
+     * opMod16MemWordA2(fn): mod=10 (dst:mem+d16)  reg=100 (src:ESP)  r/m=010 (BP+SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5728,7 +5728,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opMod16MemWordA3(fn): mod=10 (dst:mem+d16)  reg=100 (src:SP)  r/m=011 (BP+DI+d16)
+     * opMod16MemWordA3(fn): mod=10 (dst:mem+d16)  reg=100 (src:ESP)  r/m=011 (BP+DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5742,7 +5742,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
-     * opMod16MemWordA4(fn): mod=10 (dst:mem+d16)  reg=100 (src:SP)  r/m=100 (SI+d16)
+     * opMod16MemWordA4(fn): mod=10 (dst:mem+d16)  reg=100 (src:ESP)  r/m=100 (SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5756,7 +5756,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16MemWordA5(fn): mod=10 (dst:mem+d16)  reg=100 (src:SP)  r/m=101 (DI+d16)
+     * opMod16MemWordA5(fn): mod=10 (dst:mem+d16)  reg=100 (src:ESP)  r/m=101 (DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5770,7 +5770,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16MemWordA6(fn): mod=10 (dst:mem+d16)  reg=100 (src:SP)  r/m=110 (BP+d16)
+     * opMod16MemWordA6(fn): mod=10 (dst:mem+d16)  reg=100 (src:ESP)  r/m=110 (BP+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5784,7 +5784,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16MemWordA7(fn): mod=10 (dst:mem+d16)  reg=100 (src:SP)  r/m=111 (BX+d16)
+     * opMod16MemWordA7(fn): mod=10 (dst:mem+d16)  reg=100 (src:ESP)  r/m=111 (BX+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5798,7 +5798,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16MemWordA8(fn): mod=10 (dst:mem+d16)  reg=101 (src:BP)  r/m=000 (BX+SI+d16)
+     * opMod16MemWordA8(fn): mod=10 (dst:mem+d16)  reg=101 (src:EBP)  r/m=000 (BX+SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5812,7 +5812,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
-     * opMod16MemWordA9(fn): mod=10 (dst:mem+d16)  reg=101 (src:BP)  r/m=001 (BX+DI+d16)
+     * opMod16MemWordA9(fn): mod=10 (dst:mem+d16)  reg=101 (src:EBP)  r/m=001 (BX+DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5826,7 +5826,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opMod16MemWordAA(fn): mod=10 (dst:mem+d16)  reg=101 (src:BP)  r/m=010 (BP+SI+d16)
+     * opMod16MemWordAA(fn): mod=10 (dst:mem+d16)  reg=101 (src:EBP)  r/m=010 (BP+SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5840,7 +5840,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opMod16MemWordAB(fn): mod=10 (dst:mem+d16)  reg=101 (src:BP)  r/m=011 (BP+DI+d16)
+     * opMod16MemWordAB(fn): mod=10 (dst:mem+d16)  reg=101 (src:EBP)  r/m=011 (BP+DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5854,7 +5854,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
-     * opMod16MemWordAC(fn): mod=10 (dst:mem+d16)  reg=101 (src:BP)  r/m=100 (SI+d16)
+     * opMod16MemWordAC(fn): mod=10 (dst:mem+d16)  reg=101 (src:EBP)  r/m=100 (SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5868,7 +5868,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16MemWordAD(fn): mod=10 (dst:mem+d16)  reg=101 (src:BP)  r/m=101 (DI+d16)
+     * opMod16MemWordAD(fn): mod=10 (dst:mem+d16)  reg=101 (src:EBP)  r/m=101 (DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5882,7 +5882,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16MemWordAE(fn): mod=10 (dst:mem+d16)  reg=101 (src:BP)  r/m=110 (BP+d16)
+     * opMod16MemWordAE(fn): mod=10 (dst:mem+d16)  reg=101 (src:EBP)  r/m=110 (BP+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5896,7 +5896,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16MemWordAF(fn): mod=10 (dst:mem+d16)  reg=101 (src:BP)  r/m=111 (BX+d16)
+     * opMod16MemWordAF(fn): mod=10 (dst:mem+d16)  reg=101 (src:EBP)  r/m=111 (BX+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5910,7 +5910,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16MemWordB0(fn): mod=10 (dst:mem+d16)  reg=110 (src:SI)  r/m=000 (BX+SI+d16)
+     * opMod16MemWordB0(fn): mod=10 (dst:mem+d16)  reg=110 (src:ESI)  r/m=000 (BX+SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5924,7 +5924,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
-     * opMod16MemWordB1(fn): mod=10 (dst:mem+d16)  reg=110 (src:SI)  r/m=001 (BX+DI+d16)
+     * opMod16MemWordB1(fn): mod=10 (dst:mem+d16)  reg=110 (src:ESI)  r/m=001 (BX+DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5938,7 +5938,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opMod16MemWordB2(fn): mod=10 (dst:mem+d16)  reg=110 (src:SI)  r/m=010 (BP+SI+d16)
+     * opMod16MemWordB2(fn): mod=10 (dst:mem+d16)  reg=110 (src:ESI)  r/m=010 (BP+SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5952,7 +5952,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opMod16MemWordB3(fn): mod=10 (dst:mem+d16)  reg=110 (src:SI)  r/m=011 (BP+DI+d16)
+     * opMod16MemWordB3(fn): mod=10 (dst:mem+d16)  reg=110 (src:ESI)  r/m=011 (BP+DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5966,7 +5966,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
-     * opMod16MemWordB4(fn): mod=10 (dst:mem+d16)  reg=110 (src:SI)  r/m=100 (SI+d16)
+     * opMod16MemWordB4(fn): mod=10 (dst:mem+d16)  reg=110 (src:ESI)  r/m=100 (SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5980,7 +5980,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16MemWordB5(fn): mod=10 (dst:mem+d16)  reg=110 (src:SI)  r/m=101 (DI+d16)
+     * opMod16MemWordB5(fn): mod=10 (dst:mem+d16)  reg=110 (src:ESI)  r/m=101 (DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -5994,7 +5994,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16MemWordB6(fn): mod=10 (dst:mem+d16)  reg=110 (src:SI)  r/m=110 (BP+d16)
+     * opMod16MemWordB6(fn): mod=10 (dst:mem+d16)  reg=110 (src:ESI)  r/m=110 (BP+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -6008,7 +6008,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16MemWordB7(fn): mod=10 (dst:mem+d16)  reg=110 (src:SI)  r/m=111 (BX+d16)
+     * opMod16MemWordB7(fn): mod=10 (dst:mem+d16)  reg=110 (src:ESI)  r/m=111 (BX+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -6022,7 +6022,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16MemWordB8(fn): mod=10 (dst:mem+d16)  reg=111 (src:DI)  r/m=000 (BX+SI+d16)
+     * opMod16MemWordB8(fn): mod=10 (dst:mem+d16)  reg=111 (src:EDI)  r/m=000 (BX+SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -6036,7 +6036,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
-     * opMod16MemWordB9(fn): mod=10 (dst:mem+d16)  reg=111 (src:DI)  r/m=001 (BX+DI+d16)
+     * opMod16MemWordB9(fn): mod=10 (dst:mem+d16)  reg=111 (src:EDI)  r/m=001 (BX+DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -6050,7 +6050,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opMod16MemWordBA(fn): mod=10 (dst:mem+d16)  reg=111 (src:DI)  r/m=010 (BP+SI+d16)
+     * opMod16MemWordBA(fn): mod=10 (dst:mem+d16)  reg=111 (src:EDI)  r/m=010 (BP+SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -6064,7 +6064,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opMod16MemWordBB(fn): mod=10 (dst:mem+d16)  reg=111 (src:DI)  r/m=011 (BP+DI+d16)
+     * opMod16MemWordBB(fn): mod=10 (dst:mem+d16)  reg=111 (src:EDI)  r/m=011 (BP+DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -6078,7 +6078,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
-     * opMod16MemWordBC(fn): mod=10 (dst:mem+d16)  reg=111 (src:DI)  r/m=100 (SI+d16)
+     * opMod16MemWordBC(fn): mod=10 (dst:mem+d16)  reg=111 (src:EDI)  r/m=100 (SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -6092,7 +6092,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16MemWordBD(fn): mod=10 (dst:mem+d16)  reg=111 (src:DI)  r/m=101 (DI+d16)
+     * opMod16MemWordBD(fn): mod=10 (dst:mem+d16)  reg=111 (src:EDI)  r/m=101 (DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -6106,7 +6106,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16MemWordBE(fn): mod=10 (dst:mem+d16)  reg=111 (src:DI)  r/m=110 (BP+d16)
+     * opMod16MemWordBE(fn): mod=10 (dst:mem+d16)  reg=111 (src:EDI)  r/m=110 (BP+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
@@ -6120,7 +6120,7 @@ X86ModW16.aOpModMem = [
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
-     * opMod16MemWordBF(fn): mod=10 (dst:mem+d16)  reg=111 (src:DI)  r/m=111 (BX+d16)
+     * opMod16MemWordBF(fn): mod=10 (dst:mem+d16)  reg=111 (src:EDI)  r/m=111 (BX+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)

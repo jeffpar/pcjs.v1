@@ -106,7 +106,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB05(mod) {
-        return (mod? ((this.segData = this.segStack), this.regEBP) : this.getIPWord()) + this.regEAX;
+        return (mod? ((this.segData = this.segStack), this.regEBP) : this.getIPAddr()) + this.regEAX;
     },
     /**
      * opModSIB06(): scale=00 (1)  index=000 (EAX)  base=110 (ESI)
@@ -179,7 +179,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB0D(mod) {
-        return (mod? ((this.segData = this.segStack), this.regEBP) : this.getIPWord()) + this.regECX;
+        return (mod? ((this.segData = this.segStack), this.regEBP) : this.getIPAddr()) + this.regECX;
     },
     /**
      * opModSIB0E(): scale=00 (1)  index=001 (ECX)  base=110 (ESI)
@@ -252,7 +252,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB15(mod) {
-        return (mod? ((this.segData = this.segStack), this.regEBP) : this.getIPWord()) + this.regEDX;
+        return (mod? ((this.segData = this.segStack), this.regEBP) : this.getIPAddr()) + this.regEDX;
     },
     /**
      * opModSIB16(): scale=00 (1)  index=010 (EDX)  base=110 (ESI)
@@ -325,7 +325,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB1D(mod) {
-        return (mod? ((this.segData = this.segStack), this.regEBP) : this.getIPWord()) + this.regEBX;
+        return (mod? ((this.segData = this.segStack), this.regEBP) : this.getIPAddr()) + this.regEBX;
     },
     /**
      * opModSIB1E(): scale=00 (1)  index=011 (EBX)  base=110 (ESI)
@@ -398,7 +398,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB25(mod) {
-        return (mod? ((this.segData = this.segStack), this.regEBP) : this.getIPWord());
+        return (mod? ((this.segData = this.segStack), this.regEBP) : this.getIPAddr());
     },
     /**
      * opModSIB26(): scale=00 (1)  index=100 (none)  base=110 (ESI)
@@ -471,7 +471,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB2D(mod) {
-        return (mod? ((this.segData = this.segStack), this.regEBP) : this.getIPWord()) + this.regEBP;
+        return (mod? ((this.segData = this.segStack), this.regEBP) : this.getIPAddr()) + this.regEBP;
     },
     /**
      * opModSIB2E(): scale=00 (1)  index=101 (EBP)  base=110 (ESI)
@@ -544,7 +544,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB35(mod) {
-        return (mod? ((this.segData = this.segStack), this.regEBP) : this.getIPWord()) + this.regESI;
+        return (mod? ((this.segData = this.segStack), this.regEBP) : this.getIPAddr()) + this.regESI;
     },
     /**
      * opModSIB36(): scale=00 (1)  index=110 (ESI)  base=110 (ESI)
@@ -617,7 +617,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB3D(mod) {
-        return (mod? ((this.segData = this.segStack), this.regEBP) : this.getIPWord()) + this.regEDI;
+        return (mod? ((this.segData = this.segStack), this.regEBP) : this.getIPAddr()) + this.regEDI;
     },
     /**
      * opModSIB3E(): scale=00 (1)  index=111 (EDI)  base=110 (ESI)
@@ -690,7 +690,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB45(mod) {
-        return (mod? ((this.segData = this.segStack), this.regEBP) : this.getIPWord()) + (this.regEAX << 1);
+        return (mod? ((this.segData = this.segStack), this.regEBP) : this.getIPAddr()) + (this.regEAX << 1);
     },
     /**
      * opModSIB46(): scale=01 (2)  index=000 (EAX)  base=110 (ESI)
@@ -763,7 +763,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB4D(mod) {
-        return (mod? ((this.segData = this.segStack), this.regEBP) : this.getIPWord()) + (this.regECX << 1);
+        return (mod? ((this.segData = this.segStack), this.regEBP) : this.getIPAddr()) + (this.regECX << 1);
     },
     /**
      * opModSIB4E(): scale=01 (2)  index=001 (ECX)  base=110 (ESI)
@@ -836,7 +836,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB55(mod) {
-        return (mod? ((this.segData = this.segStack), this.regEBP) : this.getIPWord()) + (this.regEDX << 1);
+        return (mod? ((this.segData = this.segStack), this.regEBP) : this.getIPAddr()) + (this.regEDX << 1);
     },
     /**
      * opModSIB56(): scale=01 (2)  index=010 (EDX)  base=110 (ESI)
@@ -909,7 +909,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB5D(mod) {
-        return (mod? ((this.segData = this.segStack), this.regEBP) : this.getIPWord()) + (this.regEBX << 1);
+        return (mod? ((this.segData = this.segStack), this.regEBP) : this.getIPAddr()) + (this.regEBX << 1);
     },
     /**
      * opModSIB5E(): scale=01 (2)  index=011 (EBX)  base=110 (ESI)
@@ -982,7 +982,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB65(mod) {
-        return (mod? ((this.segData = this.segStack), this.regEBP) : this.getIPWord());
+        return (mod? ((this.segData = this.segStack), this.regEBP) : this.getIPAddr());
     },
     /**
      * opModSIB66(): scale=01 (2)  index=100 (none)  base=110 (ESI)
@@ -1055,7 +1055,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB6D(mod) {
-        return (mod? ((this.segData = this.segStack), this.regEBP) : this.getIPWord()) + (this.regEBP << 1);
+        return (mod? ((this.segData = this.segStack), this.regEBP) : this.getIPAddr()) + (this.regEBP << 1);
     },
     /**
      * opModSIB6E(): scale=01 (2)  index=101 (EBP)  base=110 (ESI)
@@ -1128,7 +1128,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB75(mod) {
-        return (mod? ((this.segData = this.segStack), this.regEBP) : this.getIPWord()) + (this.regESI << 1);
+        return (mod? ((this.segData = this.segStack), this.regEBP) : this.getIPAddr()) + (this.regESI << 1);
     },
     /**
      * opModSIB76(): scale=01 (2)  index=110 (ESI)  base=110 (ESI)
@@ -1201,7 +1201,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB7D(mod) {
-        return (mod? ((this.segData = this.segStack), this.regEBP) : this.getIPWord()) + (this.regEDI << 1);
+        return (mod? ((this.segData = this.segStack), this.regEBP) : this.getIPAddr()) + (this.regEDI << 1);
     },
     /**
      * opModSIB7E(): scale=01 (2)  index=111 (EDI)  base=110 (ESI)
@@ -1274,7 +1274,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB85(mod) {
-        return (mod? ((this.segData = this.segStack), this.regEBP) : this.getIPWord()) + (this.regEAX << 2);
+        return (mod? ((this.segData = this.segStack), this.regEBP) : this.getIPAddr()) + (this.regEAX << 2);
     },
     /**
      * opModSIB86(): scale=10 (4)  index=000 (EAX)  base=110 (ESI)
@@ -1347,7 +1347,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB8D(mod) {
-        return (mod? ((this.segData = this.segStack), this.regEBP) : this.getIPWord()) + (this.regECX << 2);
+        return (mod? ((this.segData = this.segStack), this.regEBP) : this.getIPAddr()) + (this.regECX << 2);
     },
     /**
      * opModSIB8E(): scale=10 (4)  index=001 (ECX)  base=110 (ESI)
@@ -1420,7 +1420,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB95(mod) {
-        return (mod? ((this.segData = this.segStack), this.regEBP) : this.getIPWord()) + (this.regEDX << 2);
+        return (mod? ((this.segData = this.segStack), this.regEBP) : this.getIPAddr()) + (this.regEDX << 2);
     },
     /**
      * opModSIB96(): scale=10 (4)  index=010 (EDX)  base=110 (ESI)
@@ -1493,7 +1493,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB9D(mod) {
-        return (mod? ((this.segData = this.segStack), this.regEBP) : this.getIPWord()) + (this.regEBX << 2);
+        return (mod? ((this.segData = this.segStack), this.regEBP) : this.getIPAddr()) + (this.regEBX << 2);
     },
     /**
      * opModSIB9E(): scale=10 (4)  index=011 (EBX)  base=110 (ESI)
@@ -1566,7 +1566,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIBA5(mod) {
-        return (mod? ((this.segData = this.segStack), this.regEBP) : this.getIPWord());
+        return (mod? ((this.segData = this.segStack), this.regEBP) : this.getIPAddr());
     },
     /**
      * opModSIBA6(): scale=10 (4)  index=100 (none)  base=110 (ESI)
@@ -1639,7 +1639,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIBAD(mod) {
-        return (mod? ((this.segData = this.segStack), this.regEBP) : this.getIPWord()) + (this.regEBP << 2);
+        return (mod? ((this.segData = this.segStack), this.regEBP) : this.getIPAddr()) + (this.regEBP << 2);
     },
     /**
      * opModSIBAE(): scale=10 (4)  index=101 (EBP)  base=110 (ESI)
@@ -1712,7 +1712,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIBB5(mod) {
-        return (mod? ((this.segData = this.segStack), this.regEBP) : this.getIPWord()) + (this.regESI << 2);
+        return (mod? ((this.segData = this.segStack), this.regEBP) : this.getIPAddr()) + (this.regESI << 2);
     },
     /**
      * opModSIBB6(): scale=10 (4)  index=110 (ESI)  base=110 (ESI)
@@ -1785,7 +1785,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIBBD(mod) {
-        return (mod? ((this.segData = this.segStack), this.regEBP) : this.getIPWord()) + (this.regEDI << 2);
+        return (mod? ((this.segData = this.segStack), this.regEBP) : this.getIPAddr()) + (this.regEDI << 2);
     },
     /**
      * opModSIBBE(): scale=10 (4)  index=111 (EDI)  base=110 (ESI)
@@ -1858,7 +1858,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIBC5(mod) {
-        return (mod? ((this.segData = this.segStack), this.regEBP) : this.getIPWord()) + (this.regEAX << 3);
+        return (mod? ((this.segData = this.segStack), this.regEBP) : this.getIPAddr()) + (this.regEAX << 3);
     },
     /**
      * opModSIBC6(): scale=11 (8)  index=000 (EAX)  base=110 (ESI)
@@ -1931,7 +1931,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIBCD(mod) {
-        return (mod? ((this.segData = this.segStack), this.regEBP) : this.getIPWord()) + (this.regECX << 3);
+        return (mod? ((this.segData = this.segStack), this.regEBP) : this.getIPAddr()) + (this.regECX << 3);
     },
     /**
      * opModSIBCE(): scale=11 (8)  index=001 (ECX)  base=110 (ESI)
@@ -2004,7 +2004,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIBD5(mod) {
-        return (mod? ((this.segData = this.segStack), this.regEBP) : this.getIPWord()) + (this.regEDX << 3);
+        return (mod? ((this.segData = this.segStack), this.regEBP) : this.getIPAddr()) + (this.regEDX << 3);
     },
     /**
      * opModSIBD6(): scale=11 (8)  index=010 (EDX)  base=110 (ESI)
@@ -2077,7 +2077,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIBDD(mod) {
-        return (mod? ((this.segData = this.segStack), this.regEBP) : this.getIPWord()) + (this.regEBX << 3);
+        return (mod? ((this.segData = this.segStack), this.regEBP) : this.getIPAddr()) + (this.regEBX << 3);
     },
     /**
      * opModSIBDE(): scale=11 (8)  index=011 (EBX)  base=110 (ESI)
@@ -2150,7 +2150,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIBE5(mod) {
-        return (mod? ((this.segData = this.segStack), this.regEBP) : this.getIPWord());
+        return (mod? ((this.segData = this.segStack), this.regEBP) : this.getIPAddr());
     },
     /**
      * opModSIBE6(): scale=11 (8)  index=100 (none)  base=110 (ESI)
@@ -2223,7 +2223,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIBED(mod) {
-        return (mod? ((this.segData = this.segStack), this.regEBP) : this.getIPWord()) + (this.regEBP << 3);
+        return (mod? ((this.segData = this.segStack), this.regEBP) : this.getIPAddr()) + (this.regEBP << 3);
     },
     /**
      * opModSIBEE(): scale=11 (8)  index=101 (EBP)  base=110 (ESI)
@@ -2296,7 +2296,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIBF5(mod) {
-        return (mod? ((this.segData = this.segStack), this.regEBP) : this.getIPWord()) + (this.regESI << 3);
+        return (mod? ((this.segData = this.segStack), this.regEBP) : this.getIPAddr()) + (this.regESI << 3);
     },
     /**
      * opModSIBF6(): scale=11 (8)  index=110 (ESI)  base=110 (ESI)
@@ -2369,7 +2369,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIBFD(mod) {
-        return (mod? ((this.segData = this.segStack), this.regEBP) : this.getIPWord()) + (this.regEDI << 3);
+        return (mod? ((this.segData = this.segStack), this.regEBP) : this.getIPAddr()) + (this.regEDI << 3);
     },
     /**
      * opModSIBFE(): scale=11 (8)  index=111 (EDI)  base=110 (ESI)

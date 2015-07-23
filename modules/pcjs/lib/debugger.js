@@ -70,7 +70,7 @@ if (DEBUGGER) {
  * @property {number|null|undefined} addr (linear address, if any)
  * @property {boolean|undefined} fData32 (true if 32-bit operand size in effect)
  * @property {boolean|undefined} fAddr32 (true if 32-bit address size in effect)
- * @property {boolean|undefined} fOverride (true if any overrides were processed with this address)
+ * @property {number|undefined} cOverrides (non-zero if any overrides were processed with this address)
  * @property {boolean|undefined} fComplete (true if a complete instruction was processed with this address)
  * @property {boolean|undefined} fTempBreak (true if this is a temporary breakpoint address)
  */
@@ -242,7 +242,7 @@ if (DEBUGGER) {
     };
 
     Debugger.COMMANDS = {
-        '?':     "help",
+        '?':     "help/print",
         'a [#]': "assemble",
         'b [#]': "breakpoint",
         'c':     "clear output",
@@ -1637,7 +1637,7 @@ if (DEBUGGER) {
      */
     Debugger.prototype.packAddr = function(dbgAddr)
     {
-        return [dbgAddr.off, dbgAddr.sel, dbgAddr.addr, dbgAddr.fTempBreak, dbgAddr.fData32, dbgAddr.fAddr32, dbgAddr.fOverride, dbgAddr.fComplete];
+        return [dbgAddr.off, dbgAddr.sel, dbgAddr.addr, dbgAddr.fTempBreak, dbgAddr.fData32, dbgAddr.fAddr32, dbgAddr.cOverrides, dbgAddr.fComplete];
     };
 
     /**
@@ -1649,7 +1649,7 @@ if (DEBUGGER) {
      */
     Debugger.prototype.unpackAddr = function(aAddr)
     {
-        return {off: aAddr[0], sel: aAddr[1], addr: aAddr[2], fTempBreak: aAddr[3], fData32: aAddr[4], fAddr32: aAddr[5], fOverride: aAddr[6], fComplete: aAddr[7]};
+        return {off: aAddr[0], sel: aAddr[1], addr: aAddr[2], fTempBreak: aAddr[3], fData32: aAddr[4], fAddr32: aAddr[5], cOverrides: aAddr[6], fComplete: aAddr[7]};
     };
 
     /**
@@ -1936,7 +1936,18 @@ if (DEBUGGER) {
             if (sCount !== undefined) {
                 this.println(n + " instructions earlier:");
             }
-            this.nSuppressBreaks++;
+            /*
+             * TODO: The following is necessary to prevent dumpHistory() from causing additional (or worse, recursive)
+             * faults due to segmented addresses that are no longer valid, but the only alternative is to dramatically
+             * increase the amount of memory used to store instruction history (eg, storing copies of all the instruction
+             * bytes alongside the execution addresses).
+             *
+             * For now, we're living dangerously, so that our history dumps actually work.
+             *
+             *      this.nSuppressBreaks++;
+             *
+             * If you re-enable this protection, be sure to re-enable the decrement below, too.
+             */
             var fData32 = null, fAddr32 = null;
             while (cLines > 0 && iHistory != this.iOpcodeHistory) {
                 var dbgAddr = aHistory[iHistory++];
@@ -1948,13 +1959,13 @@ if (DEBUGGER) {
                 dbgAddr = this.newAddr(dbgAddr.off, dbgAddr.sel, dbgAddr.addr, fData32 == null? dbgAddr.fData32 : fData32, fAddr32 == null? dbgAddr.fAddr32 : fAddr32);
                 this.println(this.getInstruction(dbgAddr, "history", n--));
                 /*
-                 * If there was an OPERAND or ADDRESS override on the previous instruction, getInstruction()
-                 * will have automatically disassembled the next instruction, so skip one more history entry.
+                 * If there were OPERAND or ADDRESS overrides on the previous instruction, getInstruction()
+                 * will have automatically disassembled additional bytes, so skip additional history entries.
                  */
-                if (!dbgAddr.fOverride) {
+                if (!dbgAddr.cOverrides) {
                     fData32 = fAddr32 = null;
                 } else {
-                    iHistory++; cLines--; n--;
+                    iHistory += dbgAddr.cOverrides; cLines -= dbgAddr.cOverrides; n -= dbgAddr.cOverrides;
                     fData32 = dbgAddr.fData32; fAddr32 = dbgAddr.fAddr32;
                 }
                 if (iHistory >= aHistory.length) iHistory = 0;
@@ -1962,7 +1973,11 @@ if (DEBUGGER) {
                 cHistory++;
                 cLines--;
             }
-            this.nSuppressBreaks--;
+            /*
+             * See comments above.
+             *
+             *      this.nSuppressBreaks--;
+             */
         }
         if (!cHistory) {
             this.println("no " + sMore + "history available");
@@ -2012,7 +2027,7 @@ if (DEBUGGER) {
      * messageInit(sEnable)
      *
      * @this {Debugger}
-     * @param {string|undefined} sEnable contains zero or more message categories to enable, separated by '|' or ';'
+     * @param {string|undefined} sEnable contains zero or more message categories to enable, separated by '|'
      */
     Debugger.prototype.messageInit = function(sEnable)
     {
@@ -2020,7 +2035,7 @@ if (DEBUGGER) {
         this.bitsMessage = this.bitsWarning = Messages.WARN;
         this.sMessagePrev = null;
         this.afnDumpers = [];
-        var aEnable = this.parseCommand(sEnable.replace("keys","key").replace("kbd","keyboard"));
+        var aEnable = this.parseCommand(sEnable.replace("keys","key").replace("kbd","keyboard"), false, '|');
         if (aEnable.length) {
             for (var m in Debugger.MESSAGES) {
                 if (usr.indexOf(aEnable, m) >= 0) {
@@ -3383,7 +3398,7 @@ if (DEBUGGER) {
             } while (dbgAddrIns.addr != dbgAddr.addr);
         }
 
-        sLine += str.pad(sBytes, dbgAddrIns.fAddr32? 22 : 16);
+        sLine += str.pad(sBytes, dbgAddrIns.fAddr32? 24 : 16);
         sLine += str.pad(sOpcode, 8);
         if (sOperands) sLine += " " + sOperands;
 
@@ -3392,7 +3407,7 @@ if (DEBUGGER) {
         }
 
         if (sComment && fNonPrefix) {
-            sLine = str.pad(sLine, dbgAddrIns.fAddr32? 66 : 56) + ';' + sComment;
+            sLine = str.pad(sLine, dbgAddrIns.fAddr32? 68 : 56) + ';' + sComment;
             if (!this.cpu.aFlags.fChecksum) {
                 sLine += (nSequence != null? '=' + nSequence.toString() : "");
             } else {
@@ -3401,7 +3416,7 @@ if (DEBUGGER) {
             }
         }
 
-        this.initAddrSize(dbgAddr, fNonPrefix, fDataPrefix || fAddrPrefix);
+        this.initAddrSize(dbgAddr, fNonPrefix, (fDataPrefix? 1 : 0) + (fAddrPrefix? 1 : 0));
         return sLine;
     };
 
@@ -3500,6 +3515,9 @@ if (DEBUGGER) {
         var bIndex = (bSIB >> 3) & 0x7;
         var bBase = bSIB & 0x7;
         var sOperand = "";
+        /*
+         * Unless bMod is zero AND bBase is 5, there's always a base register.
+         */
         if (bMod || bBase != 5) {
             sOperand = Debugger.RMS[bBase + 8];
         }
@@ -3507,6 +3525,13 @@ if (DEBUGGER) {
             if (sOperand) sOperand += '+';
             sOperand += Debugger.RMS[bIndex + 8];
             if (bScale) sOperand += '*' + (0x1 << bScale);
+        }
+        /*
+         * If bMod is zero AND bBase is 5, there's a 32-bit displacement instead of a base register.
+         */
+        if (!bMod && bBase == 5) {
+            if (sOperand) sOperand += '+';
+            sOperand += str.toHex(this.getLong(dbgAddr, 4));
         }
         return sOperand;
     };
@@ -3879,6 +3904,133 @@ if (DEBUGGER) {
         dbgAddr = this.newAddr(off, sel, addr);
         this.checkLimit(dbgAddr);
         return dbgAddr;
+    };
+
+    Debugger.aBinOpPrecedence = {
+        '|':    0,      // bitwise OR
+        '^':    1,      // bitwise XOR
+        '&':    2,      // bitwise AND
+        '-':    4,      // subtraction
+        '+':    4,      // addition
+        '%':    5,      // remainder
+        '/':    5,      // division
+        '*':    5       // multiplication
+    };
+
+    /**
+     * evalExpression(aVals, aOps, cOps)
+     *
+     * @this {Debugger}
+     * @param {Array.<number>} aVals
+     * @param {Array.<string>} aOps
+     * @param {number} [cOps] (default is all)
+     * @return {boolean} true if successful, false if error
+     */
+    Debugger.prototype.evalExpression = function(aVals, aOps, cOps)
+    {
+        cOps = cOps || -1;
+        while (cOps-- && aOps.length) {
+            var chOp = aOps.pop();
+            if (aVals.length < 2) return false;
+            var valNew;
+            var val2 = aVals.pop();
+            var val1 = aVals.pop();
+            switch(chOp) {
+            case '+':
+                valNew = val1 + val2;
+                break;
+            case '-':
+                valNew = val1 - val2;
+                break;
+            case '*':
+                valNew = val1 * val2;
+                break;
+            case '/':
+                if (!val2) return false;
+                valNew = val1 / val2;
+                break;
+            case '%':
+                if (!val2) return false;
+                valNew = val1 % val2;
+                break;
+            case '&':
+                valNew = val1 & val2;
+                break;
+            case '^':
+                valNew = val1 ^ val2;
+                break;
+            case '|':
+                valNew = val1 | val2;
+                break;
+            default:
+                return false;
+            }
+            aVals.push(valNew|0);
+        }
+        return true;
+    };
+
+    /**
+     * parseExpression(sExp, fPrint)
+     *
+     * A quick-and-dirty expression parser.  It takes an expression like:
+     *
+     *      EDX+EDX*4+12345678
+     *
+     * and builds value (aVals) and "binop" operator (aOps) stacks:
+     *
+     *      EDX         +
+     *      EDX         *
+     *      4           +
+     *      ...
+     *
+     * We pop 1 "binop" and 2 values whenever a "binop" of lower priority than its predecessor is encountered,
+     * evaluate and push the result.
+     *
+     * @this {Debugger}
+     * @param {string|undefined} sExp
+     * @param {boolean} [fPrint] is true to print all resolved values
+     * @return {number|undefined} numeric value, or undefined if sExp contains any undefined or invalid values
+     */
+    Debugger.prototype.parseExpression = function(sExp, fPrint)
+    {
+        var value;
+        var fError = false;
+        var sExpOrig = sExp;
+        var aVals = [], aOps = [];
+        var asValues = sExp.split(/[|^&+%\/*-]/);       // RegExp of "binops" only (unary and others saved for a rainy day)
+        for (var i = 0; i < asValues.length; i++) {
+            var sValue = asValues[i];
+            var s = str.trim(asValues[i]);
+            if (!s) {
+                fError = true;
+                break;
+            }
+            var v = this.parseValue(s);
+            if (v === undefined) {
+                fError = true;
+                break;
+            }
+            aVals.push(v);
+            var chOp = sExp.substr(sValue.length, 1);
+            if (!chOp) break;
+            this.assert(Debugger.aBinOpPrecedence[chOp] != null);
+            if (aOps.length && Debugger.aBinOpPrecedence[chOp] < Debugger.aBinOpPrecedence[aOps[aOps.length-1]]) {
+                this.evalExpression(aVals, aOps, 1);
+            }
+            aOps.push(chOp);
+            sExp = sExp.substr(sValue.length + 1);
+        }
+        if (!this.evalExpression(aVals, aOps) || aVals.length != 1) {
+            fError = true;
+        }
+        if (!fError) {
+            value = aVals.pop();
+            if (fPrint) this.println(sExpOrig + "=" + value + " (" + str.toHexLong(value) + ")");
+        } else {
+            if (fPrint) this.println("error parsing '" + sExpOrig + "' at character " + (sExpOrig.length - sExp.length));
+        }
+        return value;
     };
 
     /**
@@ -5425,19 +5577,19 @@ if (DEBUGGER) {
     };
 
     /**
-     * initAddrSize(dbgAddr, fNonPrefix, fOverride)
+     * initAddrSize(dbgAddr, fNonPrefix, cOverrides)
      *
      * @this {Debugger}
      * @param {{DbgAddr}} dbgAddr
      * @param {boolean} fNonPrefix
-     * @param {boolean} [fOverride]
+     * @param {number} [cOverrides]
      */
-    Debugger.prototype.initAddrSize = function(dbgAddr, fNonPrefix, fOverride)
+    Debugger.prototype.initAddrSize = function(dbgAddr, fNonPrefix, cOverrides)
     {
         /*
-         * Use fOverride to record whether we previously processed any OPERAND or ADDRESS overrides.
+         * Use cOverrides to record whether we previously processed any OPERAND or ADDRESS overrides.
          */
-        dbgAddr.fOverride = fOverride;
+        dbgAddr.cOverrides = cOverrides;
         /*
          * For proper disassembly of instructions preceded by an OPERAND (0x66) size prefix, we set
          * dbgAddr.fData32 to true whenever the operand size is 32-bit; similarly, for an ADDRESS (0x67)
@@ -5547,14 +5699,15 @@ if (DEBUGGER) {
     };
 
     /**
-     * parseCommand(sCmd, fSave)
+     * parseCommand(sCmd, fSave, chSep)
      *
      * @this {Debugger}
      * @param {string|undefined} sCmd
      * @param {boolean} [fSave] is true to save the command, false if not
+     * @param {string} [chSep] is the command separator character (default is ';')
      * @return {Array.<string>}
      */
-    Debugger.prototype.parseCommand = function(sCmd, fSave)
+    Debugger.prototype.parseCommand = function(sCmd, fSave, chSep)
     {
         if (fSave) {
             if (!sCmd) {
@@ -5570,7 +5723,7 @@ if (DEBUGGER) {
                 this.iPrevCmd--;
             }
         }
-        var a = (sCmd? sCmd.split(sCmd.indexOf('|') >= 0? '|' : ';') : ['']);
+        var a = (sCmd? sCmd.split(chSep || ';') : ['']);
         for (var s in a) {
             a[s] = str.trim(a[s]);
         }
@@ -5643,8 +5796,8 @@ if (DEBUGGER) {
                         ch0 = sCmd.charAt(0);
                         for (i = 1; i < sCmd.length; i++) {
                             ch = sCmd.charAt(i);
-                            if (ch == " ") break;
-                            if (ch0 == "r" || ch < "a" || ch > "z") {
+                            if (ch == ' ') break;
+                            if (ch0 == '?' || ch0 == 'r' || ch < 'a' || ch > 'z') {
                                 sCmd = sCmd.substring(0, i) + " " + sCmd.substring(i);
                                 break;
                             }
@@ -5712,6 +5865,10 @@ if (DEBUGGER) {
                     this.doExecOptions(asArgs);
                     break;
                 case "?":
+                    if (asArgs[1]) {
+                        this.parseExpression(asArgs[1], true);
+                        break;
+                    }
                     this.doHelp();
                     break;
                 case "n":
