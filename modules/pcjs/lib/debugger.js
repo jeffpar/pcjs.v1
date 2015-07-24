@@ -4026,7 +4026,7 @@ if (DEBUGGER) {
         }
         if (!fError) {
             value = aVals.pop();
-            if (fPrint) this.println(sExpOrig + "=" + value + " (" + str.toHexLong(value) + ")");
+            if (fPrint) this.println(sExpOrig + "=" + str.toHex(value) + "h  bin=" + str.toBinBytes(value) + "  dec=" + value + '.');
         } else {
             if (fPrint) this.println("error parsing '" + sExpOrig + "' at character " + (sExpOrig.length - sExp.length));
         }

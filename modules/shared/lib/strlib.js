@@ -95,6 +95,60 @@ str.parseInt = function(s, base)
 };
 
 /**
+ * toBin(n, cch)
+ *
+ * Converts an integer to binary, with the specified number of digits (up to the default of 32).
+ *
+ * @param {number|null|undefined} n is a 32-bit value
+ * @param {number} [cch] is the desired number of binary digits (32 is both the default and the maximum)
+ * @return {string} the binary representation of n
+ */
+str.toBin = function(n, cch)
+{
+    var s = "";
+    if (cch === undefined) {
+        cch = 32;
+        s = "b";
+    } else {
+        if (cch > 32) cch = 32;
+    }
+    /*
+     * An initial "falsey" check for null takes care of both null and undefined;
+     * we can't rely entirely on isNaN(), because isNaN(null) returns false, oddly enough.
+     */
+    if (n == null || isNaN(n)) {
+        while (cch-- > 0) s = '?' + s;
+    } else {
+        while (cch-- > 0) {
+            s = ((n & 0x1)? '1' : '0') + s;
+            n >>= 1;
+        }
+    }
+    return s;
+};
+
+/**
+ * toBinBytes(n, cb)
+ *
+ * Converts an integer to binary, with the specified number of bytes (up to the default of 4).
+ *
+ * @param {number|null|undefined} n is a 32-bit value
+ * @param {number} [cb] is the desired number of binary bytes (4 is both the default and the maximum)
+ * @return {string} the binary representation of n
+ */
+str.toBinBytes = function(n, cb)
+{
+    var s = "";
+    if (!cb || cb > 4) cb = 4;
+    for (var i = 0; i < cb; i++) {
+        if (s) s = ',' + s;
+        s = str.toBin(n & 0xff, 8) + 'b' + s;
+        n >>= 8;
+    }
+    return s;
+};
+
+/**
  * toHex(n, cch)
  *
  * Converts an integer to hex, with the specified number of digits (up to the default of 8).
