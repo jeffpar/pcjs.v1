@@ -91,6 +91,11 @@ function X86Seg(cpu, id, sName, fProt)
     this.addrDesc = X86.ADDR_INVALID;
     this.dataSize = this.addrSize = 2;
     this.dataMask = this.addrMask = 0xffff;
+
+    this.loadV86 = this.loadReal;
+    this.checkReadV86 = this.checkReadReal;
+    this.checkWriteV86 = this.checkWriteReal;
+
     /*
      * The following properties are used for CODE segments only (ie, segCS); if the process of loading
      * CS also requires a stack switch, then fStackSwitch will be set to true; additionally, if the stack
@@ -242,7 +247,7 @@ X86Seg.prototype.loadIDTReal = function loadIDTReal(nIDT)
      *
      *      "[T]he 80286 will shut down if the SP = 1, 3, or 5 before executing the INT or INTO instruction--due to lack of stack space"
      *
-     * TODO: Verify that 80286 real-mode actually enforces the above.  See http://localhost:8088/pubs/pc/reference/intel/80286/progref/#page-260
+     * TODO: Verify that 80286 real-mode actually enforces the above.  See http://www.pcjs.org/pubs/pc/reference/intel/80286/progref/#page-260
      */
     var addrIDT = cpu.addrIDT + (nIDT << 2);
     var off = cpu.getShort(addrIDT);
@@ -536,7 +541,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
         if (this.id == X86Seg.ID.CODE) {
             this.fStackSwitch = false;
             var fCall = this.fCall;
-            var regPSMask, nFaultError, regSP;
+            var regPSClear, nFaultError, regSP;
             var rpl = sel & X86.SEL.RPL;
             var dpl = (acc & X86.DESC.ACC.DPL.MASK) >> X86.DESC.ACC.DPL.SHIFT;
 
@@ -579,19 +584,19 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
             }
             else if (type == X86.DESC.ACC.TYPE.GATE_CALL || type == X86.DESC.ACC.TYPE.GATE386_CALL) {
                 fGate = true;
-                regPSMask = ~0;
+                regPSClear = 0;
                 nFaultError = sel;
                 if (rpl < this.cpl) rpl = this.cpl;     // set RPL to max(RPL,CPL) for call gates
             }
             else if (type == X86.DESC.ACC.TYPE.GATE286_INT || type == X86.DESC.ACC.TYPE.GATE386_INT) {
                 fGate = true;
-                regPSMask = ~(X86.PS.NT | X86.PS.TF | X86.PS.IF);
+                regPSClear = (X86.PS.NT | X86.PS.TF | X86.PS.IF);
                 nFaultError = sel | X86.ERRCODE.EXT;
                 cpu.assert(!(acc & 0x1f));
             }
             else if (type == X86.DESC.ACC.TYPE.GATE286_TRAP || type == X86.DESC.ACC.TYPE.GATE386_TRAP) {
                 fGate = true;
-                regPSMask = ~(X86.PS.NT | X86.PS.TF);
+                regPSClear = (X86.PS.NT | X86.PS.TF);
                 nFaultError = sel | X86.ERRCODE.EXT;
                 cpu.assert(!(acc & 0x1f));
             }
@@ -614,6 +619,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
                      * TODO: Verify the PRESENT bit of the gate descriptor, and issue NP_FAULT as appropriate.
                      */
                     cplPrev = this.cpl;
+
                     /*
                      * For gates, there is no "base" and "limit", but rather "selector" and "offset"; the selector
                      * is located where the first 16 bits of base are normally stored, and the offset comes from the
@@ -623,11 +629,24 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
                     if (I386 && (type & X86.DESC.ACC.NONSEG_386)) {
                         limit = limitOrig | (ext << 16);
                     }
+
+                    /*
+                     * At a minimum, we need to clear X86.PS.VM now, so that the following load will initialize the
+                     * new code segment properly.
+                     */
+                    var regPS = cpu.regPS;
+                    cpu.regPS &= ~regPSClear;
+                    if (cpu.regPS & X86.PS.VM) {
+                        cpu.regPS &= ~X86.PS.VM;
+                        cpu.setProtMode(true, false);
+                    }
+
                     if (this.load(selCode, true) === X86.ADDR_INVALID) {
                         cpu.assert(false);
                         base = addrDesc = X86.ADDR_INVALID;
                         break;
                     }
+
                     cpu.regEIP = limit;
                     if (this.cpl < cplPrev) {
                         if (fCall !== true) {
@@ -655,13 +674,22 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
                             offSS = offSP + 4;
                             cpu.setSS(cpu.getShort(addrTSS + offSS), true);
                             cpu.setSP(cpu.getLong(addrTSS + offSP));
+                            if (regPS & X86.PS.VM) {
+                                cpu.pushWord(cpu.segGS.sel);
+                                cpu.setGS(0);
+                                cpu.pushWord(cpu.segFS.sel);
+                                cpu.setFS(0);
+                                cpu.pushWord(cpu.segDS.sel);
+                                cpu.setDS(0);
+                                cpu.pushWord(cpu.segES.sel);
+                                cpu.setES(0);
+                            }
                         }
                         cpu.pushWord(regSSPrev);
                         cpu.pushWord(regSPPrev);
                         while (i) cpu.pushWord(this.awParms[--i]);
                         this.fStackSwitch = true;
                     }
-                    cpu.regPS &= regPSMask;
                     return this.base;
                 }
                 cpu.assert(false);
@@ -729,6 +757,14 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
                 if (!fSuppress) X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel, true);
                 base = addrDesc = X86.ADDR_INVALID;
                 break;
+            }
+            /*
+             * For more efficient IOPM lookups, we cache the starting linear address in segTSS.addrIOPM, and the
+             * last valid address in segTSS.addrIOPMLimit.
+             */
+            if (typeTSS == X86.DESC.ACC.TYPE.TSS386) {
+                this.addrIOPM = (base + cpu.getShort(base + X86.TSS386.TASK_IOPM))|0;
+                this.addrIOPMLimit = (base + this.limit)|0;
             }
         }
         else if (this.id == X86Seg.ID.OTHER) {
@@ -935,7 +971,7 @@ X86Seg.prototype.switchTSS = function switchTSS(selNew, fNest)
     }
 
     /*
-     * Fortunately, X86.TSS286.PREV_TSS and X86.TSS386.PREV_TSS are at the same TSS offset.
+     * Fortunately, X86.TSS286.PREV_TSS and X86.TSS386.PREV_TSS refer to the same TSS offset.
      */
     if (fNest) cpu.setShort(addrNew + X86.TSS286.PREV_TSS, selOld);
 
@@ -1032,7 +1068,7 @@ X86Seg.prototype.restore = function(a)
 };
 
 /**
- * updateMode(fLoad, fProt)
+ * updateMode(fLoad, fProt, fV86)
  *
  * Ensures that the segment register's access (ie, load and check methods) matches the specified (or current)
  * operating mode (real or protected).
@@ -1040,9 +1076,9 @@ X86Seg.prototype.restore = function(a)
  * @this {X86Seg}
  * @param {boolean} [fLoad] true if the segment was just (re)loaded, false if not
  * @param {boolean} [fProt] true for protected-mode access, false for real-mode access, undefined for current mode
- * @return {boolean}
+ * @param {boolean} [fV86] true for V86-mode access, false for protected-mode access, undefined for current mode
  */
-X86Seg.prototype.updateMode = function(fLoad, fProt)
+X86Seg.prototype.updateMode = function(fLoad, fProt, fV86)
 {
     if (fProt === undefined) {
         fProt = !!(this.cpu.regCR0 & X86.CR0.MSW.PE);
@@ -1060,6 +1096,30 @@ X86Seg.prototype.updateMode = function(fLoad, fProt)
         this.loadIDT = this.loadIDTProt;
         this.checkRead = this.checkReadProt;
         this.checkWrite = this.checkWriteProt;
+
+        if (fV86 === undefined) {
+            fV86 = !!(this.cpu.regPS & X86.PS.VM);
+        }
+
+        if (fV86) {
+            this.load = this.loadV86;
+            this.checkRead = this.checkReadV86;
+            this.checkWrite = this.checkWriteV86;
+            /*
+             * One important feature of V86-mode (as compared to real-mode) are that other segment attributes
+             * (eg, limit, operand size, address size, etc) ARE updated, whereas in real-mode, segment attributes
+             * remain set to whatever was in effect in protected-mode.
+             */
+            this.cpl = this.dpl = 3;
+            this.dataSize = this.addrSize = 2;
+            this.dataMask = this.addrMask = 0xffff;
+            this.limit = 0xffff;
+            this.offMax = this.limit + 1;
+            this.addrSize = this.dataSize;
+            this.addrDesc = X86.ADDR_INVALID;
+            this.fStackSwitch = false;
+            return;
+        }
 
         /*
          * TODO: For null GDT selectors, should we rely on the descriptor being invalid, or should we assume that
@@ -1134,6 +1194,12 @@ X86Seg.prototype.updateMode = function(fLoad, fProt)
             this.addrMask = this.dataMask;
         }
     } else {
+        /*
+         * One important feature of real-mode (as compared to V86-mode) are that other segment attributes
+         * (eg, limit, operand size, address size, etc) are NOT updated, enabling features like "big real-mode"
+         * (aka "unreal mode"), which is used by system software like HIMEM.SYS to access extended memory from
+         * real-mode.
+         */
         this.load = this.loadReal;
         this.loadIDT = this.loadIDTReal;
         this.checkRead = this.checkReadReal;
@@ -1142,7 +1208,6 @@ X86Seg.prototype.updateMode = function(fLoad, fProt)
         this.addrDesc = X86.ADDR_INVALID;
         this.fStackSwitch = false;
     }
-    return fProt;
 };
 
 /**

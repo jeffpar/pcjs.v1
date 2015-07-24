@@ -73,6 +73,13 @@ X86.opGRP7 = function GRP7()
  */
 X86.opLAR = function LAR()
 {
+    /*
+     * TODO: Consider swapping out this function whenever setProtMode() changes the mode to real-mode or V86-mode.
+     */
+    if (!(this.regCR0 & X86.CR0.MSW.PE) || I386 && (this.regPS & X86.PS.VM)) {
+        X86.opInvalid.call(this);
+        return;
+    }
     this.aOpModRegWord[this.getIPByte()].call(this, X86.fnLAR);
 };
 
@@ -85,6 +92,13 @@ X86.opLAR = function LAR()
  */
 X86.opLSL = function LSL()
 {
+    /*
+     * TODO: Consider swapping out this function whenever setProtMode() changes the mode to real-mode or V86-mode.
+     */
+    if (!(this.regCR0 & X86.CR0.MSW.PE) || I386 && (this.regPS & X86.PS.VM)) {
+        X86.opInvalid.call(this);
+        return;
+    }
     this.aOpModRegWord[this.getIPByte()].call(this, X86.fnLSL);
 };
 
@@ -187,6 +201,9 @@ X86.opLOADALL = function LOADALL()
  */
 X86.opCLTS = function CLTS()
 {
+    /*
+     * NOTE: The following code shouldn't need to test for X86.PS.VM because V86-mode is CPL 3.
+     */
     if (this.segCS.cpl) {
         X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
         return;
@@ -216,18 +233,19 @@ X86.opCLTS = function CLTS()
  */
 X86.opMOVrc = function MOVrc()
 {
-    var bModRM = this.getIPByte();
-
+    /*
+     * NOTE: The following code shouldn't need to test for X86.PS.VM because V86-mode is CPL 3.
+     */
     if (this.segCS.cpl) {
         /*
          * You're not allowed to read control registers if the current privilege level is not zero
-         * (TODO: I'm issuing this AFTER fetching the ModRM byte, but I assume it makes no difference).
          */
         X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
         return;
     }
 
     var reg;
+    var bModRM = this.getIPByte();
     switch((bModRM & 0x38) >> 3) {
     case 0x0:
         reg = this.regCR0;
@@ -298,18 +316,19 @@ X86.opMOVrc = function MOVrc()
  */
 X86.opMOVcr = function MOVcr()
 {
-    var bModRM = this.getIPByte();
-
+    /*
+     * NOTE: The following code shouldn't need to test for X86.PS.VM because V86-mode is CPL 3.
+     */
     if (this.segCS.cpl) {
         /*
          * You're not allowed to write control registers if the current privilege level is not zero
-         * (TODO: I'm issuing this AFTER fetching the ModRM byte, but I assume it makes no difference).
          */
         X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
         return;
     }
 
     var reg;
+    var bModRM = this.getIPByte();
     switch(bModRM & 0x7) {
     case 0x0:
         reg = this.regEAX;

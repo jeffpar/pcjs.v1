@@ -1662,7 +1662,7 @@ if (DEBUGGER) {
     {
         if (dbgAddr.sel != null) {
             var seg = this.getSegment(dbgAddr.sel);
-            if (!seg || dbgAddr.off > seg.limit) {
+            if (!seg || (dbgAddr.off >>> 0) >= seg.offMax) {
                 /*
                  * TODO: This automatic wrap-to-zero is OK for normal segments, but for expand-down segments, not so much.
                  */
@@ -1777,7 +1777,7 @@ if (DEBUGGER) {
         }
     };
 
-    Debugger.aTSSFields = {
+    Debugger.TSS286 = {
         "PREV_TSS":     0x00,
         "CPL0_SP":      0x02,
         "CPL0_SS":      0x04,
@@ -1800,6 +1800,35 @@ if (DEBUGGER) {
         "TASK_SS":      0x26,
         "TASK_DS":      0x28,
         "TASK_LDT":     0x2a
+    };
+
+    Debugger.TSS386 = {
+        "PREV_TSS":     0x00,
+        "CPL0_ESP":     0x04,
+        "CPL0_SS":      0x08,
+        "CPL1_ESP":     0x0c,
+        "CPL1_SS":      0x10,
+        "CPL2_ESP":     0x14,
+        "CPL2_SS":      0x18,
+        "TASK_CR3":     0x1C,
+        "TASK_EIP":     0x20,
+        "TASK_PS":      0x24,
+        "TASK_EAX":     0x28,
+        "TASK_ECX":     0x2C,
+        "TASK_EDX":     0x30,
+        "TASK_EBX":     0x34,
+        "TASK_ESP":     0x38,
+        "TASK_EBP":     0x3C,
+        "TASK_ESI":     0x40,
+        "TASK_EDI":     0x44,
+        "TASK_ES":      0x48,
+        "TASK_CS":      0x4C,
+        "TASK_SS":      0x50,
+        "TASK_DS":      0x54,
+        "TASK_FS":      0x58,
+        "TASK_GS":      0x5C,
+        "TASK_LDT":     0x60,
+        "TASK_IOPM":    0x64
     };
 
     /**
@@ -2011,15 +2040,34 @@ if (DEBUGGER) {
         if (!seg) return;
 
         var sDump = "";
-        for (var sField in Debugger.aTSSFields) {
-            var off = Debugger.aTSSFields[sField];
-            var ch = (sField.length < 8? ' ' : '');
-            var addr = seg.base + off;
-            var w = this.cpu.probeAddr(addr) | (this.cpu.probeAddr(addr + 1) << 8);
+        var type = seg.type & ~X86.DESC.ACC.TSS_BUSY;
+        var cch = (type == X86.DESC.ACC.TYPE.TSS286? 4 : 8);
+        var aTSSFields = (type == X86.DESC.ACC.TYPE.TSS286? Debugger.TSS286 : Debugger.TSS386);
+        var off, addr, v;
+        for (var sField in aTSSFields) {
+            off = aTSSFields[sField];
+            addr = seg.base + off;
+            v = this.cpu.probeAddr(addr) | (this.cpu.probeAddr(addr + 1) << 8);
+            if (type == X86.DESC.ACC.TYPE.TSS386) {
+                v |= (this.cpu.probeAddr(addr + 2) << 16) | (this.cpu.probeAddr(addr + 3) << 24);
+            }
             if (sDump) sDump += '\n';
-            sDump += str.toHexWord(off) + " " + sField + ": " + ch + str.toHexWord(w);
+            sDump += str.toHexWord(off) + ' ' + str.pad(sField + ':', 11) + str.toHex(v, cch);
         }
-
+        if (type == X86.DESC.ACC.TYPE.TSS386) {
+            var iPort = 0;
+            off = (v >>> 16);
+            /*
+             * We arbitrarily cut the IOPM dump off at port 0x3FF, because we're not interested in anything above that.
+             */
+            while (off < seg.offMax && iPort < 0x3ff) {
+                addr = seg.base + off;
+                v = this.cpu.probeAddr(addr) | (this.cpu.probeAddr(addr + 1) << 8);
+                sDump += "\nports " + str.toHexWord(iPort) + '-' + str.toHexWord(iPort+15) + ": " + str.toBinBytes(v, 2);
+                iPort += 16;
+                off += 2;
+            }
+        }
         this.println(sDump);
     };
 
@@ -3841,7 +3889,7 @@ if (DEBUGGER) {
     };
 
     /**
-     * parseAddr(sAddr, type)
+     * parseAddr(sAddr, type, fNoChecks)
      *
      * As discussed above, dbgAddr variables contain one or more of: off, sel, and addr.  They represent
      * a segmented address (sel:off) when sel is defined or a linear address (addr) when sel is undefined
@@ -3865,9 +3913,10 @@ if (DEBUGGER) {
      * @this {Debugger}
      * @param {string|undefined} sAddr
      * @param {number|undefined} [type] is the address segment type, in case sAddr doesn't specify a segment
+     * @param {boolean} [fNoChecks] (eg, true when setting breakpoints that may not be valid now, but will be later)
      * @return {{DbgAddr}}
      */
-    Debugger.prototype.parseAddr = function(sAddr, type)
+    Debugger.prototype.parseAddr = function(sAddr, type, fNoChecks)
     {
         var dbgAddr;
         var dbgAddrNext = (type === Debugger.ADDR_CODE? this.dbgAddrNextCode : this.dbgAddrNextData);
@@ -3902,7 +3951,7 @@ if (DEBUGGER) {
         }
 
         dbgAddr = this.newAddr(off, sel, addr);
-        this.checkLimit(dbgAddr);
+        if (!fNoChecks) this.checkLimit(dbgAddr);
         return dbgAddr;
     };
 
@@ -3998,7 +4047,7 @@ if (DEBUGGER) {
         var fError = false;
         var sExpOrig = sExp;
         var aVals = [], aOps = [];
-        var asValues = sExp.split(/[|^&+%\/*-]/);       // RegExp of "binops" only (unary and others saved for a rainy day)
+        var asValues = sExp.split(/[|^&+%\/*-]/);       // RegExp of "binops" only (unary and other "ops" saved for a rainy day)
         for (var i = 0; i < asValues.length; i++) {
             var sValue = asValues[i];
             var s = str.trim(asValues[i]);
@@ -4026,7 +4075,7 @@ if (DEBUGGER) {
         }
         if (!fError) {
             value = aVals.pop();
-            if (fPrint) this.println(sExpOrig + "=" + str.toHex(value) + "h  bin=" + str.toBinBytes(value) + "  dec=" + value + '.');
+            if (fPrint) this.println(sExpOrig + '=' + str.toHex(value) + "h (" + value + ". " + str.toBinBytes(value) + ')');
         } else {
             if (fPrint) this.println("error parsing '" + sExpOrig + "' at character " + (sExpOrig.length - sExp.length));
         }
@@ -4405,6 +4454,10 @@ if (DEBUGGER) {
      * These two new commands operate as toggles so that if "*" is used to trap all input (or output),
      * you can also use these commands to NOT trap specific ports.
      *
+     * TODO: Update the "bl" command to include any/all I/O breakpoints, and the "bc" command to
+     * clear them.  Because "bi" and "bo" commands are piggy-backing on Bus functions, those breakpoints
+     * are outside the realm of what "bl" and "bc" are aware of.
+     *
      * @this {Debugger}
      * @param {string} sCmd
      * @param {string} [sAddr]
@@ -4437,7 +4490,7 @@ if (DEBUGGER) {
         }
         var dbgAddr = {};
         if (sAddr != "*") {
-            dbgAddr = this.parseAddr(sAddr, Debugger.ADDR_CODE);
+            dbgAddr = this.parseAddr(sAddr, Debugger.ADDR_CODE, true);
             if (dbgAddr.off == null) return;
         }
         sAddr = (dbgAddr.off == null? sAddr : str.toHexWord(dbgAddr.off));
@@ -5747,7 +5800,11 @@ if (DEBUGGER) {
                 }
             }
             else {
-                this.println(">> " + sCmd);
+                var sPrompt = ">> ";
+                if (this.cpu.regCR0 & X86.CR0.MSW.PE) {
+                    sPrompt = (this.cpu.regPS & X86.PS.VM)? "-- " : "## ";
+                }
+                this.println(sPrompt + sCmd);
             }
 
             sCmd = sCmd.toLowerCase();

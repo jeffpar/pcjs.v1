@@ -42,13 +42,14 @@ var str = {};
  * So use this function to validate the entire string.
  *
  * @param {string} s is the string representation of some number
- * @param {number} [base] is the radix of the number represented above (only 10 and 16 are supported)
+ * @param {number} [base] is the radix of the number represented above (only 2, 10 and 16 are supported)
  * @return {boolean} true if valid, false if invalid (or the specified base isn't supported)
  */
 str.isValidInt = function(s, base)
 {
     if (!base || base == 10) return s.match(/^[0-9]+$/) !== null;
     if (base == 16) return s.match(/^[0-9a-f]+$/i) !== null;
+    if (base == 2) return s.match(/^[01]+$/i) !== null;
     return false;
 };
 
@@ -56,8 +57,11 @@ str.isValidInt = function(s, base)
  * parseInt(s, base)
  *
  * This is a wrapper around the built-in parseInt() function, which recognizes certain prefixes (eg,
- * '$' or "0x" for hex) and suffixes (eg, 'h' for hex or '.' for decimal), and then calls isValidInt()
- * to ensure we don't get partial values (see isValidInt() for details).
+ * '$' or "0x" for hex) and suffixes (eg, 'h' for hex, or '.' for decimal), and then calls isValidInt()
+ * to ensure we don't convert strings that contain partial values (see isValidInt() for details).
+ *
+ * We don't support multiple prefix/suffix combinations, nor do we support the "0b" prefix (or "b" suffix)
+ * for binary, because 1) it's not commonly used, and 2) it conflicts with valid hex sequences.
  *
  * @param {string} s is the string representation of some number
  * @param {number} [base] is the default radix to use (default is 16); can be overridden by prefixes/suffixes
@@ -84,7 +88,7 @@ str.parseInt = function(s, base)
                 base = 10;
                 chSuffix = null;
             }
-            if (chSuffix === null) s = s.substr(0, s.length-1);
+            if (chSuffix == null) s = s.substr(0, s.length-1);
         }
         var v;
         if (str.isValidInt(s, base) && !isNaN(v = parseInt(s, base))) {
@@ -108,13 +112,16 @@ str.toBin = function(n, cch)
     var s = "";
     if (cch === undefined) {
         cch = 32;
-        s = "b";
     } else {
         if (cch > 32) cch = 32;
     }
     /*
      * An initial "falsey" check for null takes care of both null and undefined;
      * we can't rely entirely on isNaN(), because isNaN(null) returns false, oddly enough.
+     *
+     * Alternatively, we could mask and shift n regardless of whether it's null/undefined/NaN,
+     * since JavaScript coerces such operands to zero, but I think there's "value" in seeing those
+     * values displayed differently.
      */
     if (n == null || isNaN(n)) {
         while (cch-- > 0) s = '?' + s;
@@ -155,8 +162,8 @@ str.toBinBytes = function(n, cb)
  *
  * You might be tempted to use the built-in n.toString(16) instead, but it doesn't zero-pad and it
  * doesn't properly convert negative values; for example, if n is -2147483647, then n.toString(16)
- * will return "-7fffffff" instead of "80000001".  Moreover, if n is undefined, n.toString() will throw
- * an exception, whereas toHex() will simply return '?' characters.
+ * will return "-7fffffff" instead of "80000001".  Moreover, if n is undefined, n.toString() will
+ * throw an exception, whereas this function will return '?' characters.
  *
  * NOTE: The following work-around (adapted from code found on StackOverflow) would be another solution,
  * taking care of negative values, zero-padding, and upper-casing, but not null/undefined/NaN values:
@@ -180,6 +187,10 @@ str.toHex = function(n, cch)
     /*
      * An initial "falsey" check for null takes care of both null and undefined;
      * we can't rely entirely on isNaN(), because isNaN(null) returns false, oddly enough.
+     *
+     * Alternatively, we could mask and shift n regardless of whether it's null/undefined/NaN,
+     * since JavaScript coerces such operands to zero, but I think there's "value" in seeing those
+     * values displayed differently.
      */
     if (n == null || isNaN(n)) {
         while (cch-- > 0) s = '?' + s;

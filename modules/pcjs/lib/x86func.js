@@ -142,6 +142,28 @@ X86.fnANDw = function ANDw(dst, src)
  */
 X86.fnARPL = function ARPL(dst, src)
 {
+    /*
+     * ARPL is one of several protected-mode instructions that are meaningless and not allowed in either real-mode
+     * or V86-mode; others include LAR, LSL, VERR and VERW.  More meaningful but potentially harmful protected-mode
+     * instructions that ARE allowed in real-mode but NOT in V86-mode include LIDT, LGDT, LMSW, CLTS, HLT, and
+     * control register MOV instructions.
+     *
+     * ARPL is somewhat more noteworthy because enhanced-mode Windows (going back to at least Windows 3.00, and
+     * possibly even the earliest versions of Windows/386) selected the ARPL opcode as a controlled means of exiting
+     * V86-mode via its UD_FAULT exception.  Windows would use the same ARPL for all controlled exits, using different
+     * segment:offset pointers to the ARPL to differentiate them.  ARPL was probably chosen because it could trigger
+     * a UD_FAULT with a single byte (0x63); any subsequent address bytes would be irrelevant.
+     *
+     * TODO: You may have noticed that setProtMode() already swaps out a 0x0F opcode dispatch table for another based
+     * on the mode, because none of the "GRP6" 0x0F opcodes (eg, SLDT, STR, LLDT, LTR, VERR and VERW) are allowed in
+     * real-mode, and it was easy to swap all those handlers in/out with a single update.  We've extended that particular
+     * swap to include V86-mode as well, but we might want to consider swapping out more opcode handlers in a similar
+     * fashion, instead of using these in-line mode tests.
+     */
+    if (!(this.regCR0 & X86.CR0.MSW.PE) || I386 && (this.regPS & X86.PS.VM)) {
+        X86.opInvalid.call(this);
+        return dst;
+    }
     this.nStepCycles -= (10 + (this.regEA === X86.ADDR_INVALID? 0 : 1));
     if ((dst & X86.SEL.RPL) < (src & X86.SEL.RPL)) {
         dst = (dst & ~X86.SEL.RPL) | (src & X86.SEL.RPL);
@@ -1247,7 +1269,7 @@ X86.fnIRET = function IRET()
         if (this.regPS & X86.PS.NT) {
             var addrNew = this.segTSS.base;
             /*
-             * Fortunately, X86.TSS286.PREV_TSS and X86.TSS386.PREV_TSS are at the same TSS offset.
+             * Fortunately, X86.TSS286.PREV_TSS and X86.TSS386.PREV_TSS refer to the same TSS offset.
              */
             var sel = this.getShort(addrNew + X86.TSS286.PREV_TSS);
             this.segCS.switchTSS(sel, false);
@@ -1258,6 +1280,51 @@ X86.fnIRET = function IRET()
     var newIP = this.popWord();
     var newCS = this.popWord();
     var newPS = this.popWord();
+
+    if (I386) {
+        if (this.regPS & X86.PS.VM) {
+            /*
+             * On the 80386, in V86-mode, RF is the only defined EFLAGS bit above bit 15 that may be changed by IRETD.
+             * This is less restrictive than POPFD, which cannot change ANY bits above bit 15; see opPOPF() for details.
+             */
+            newPS = (newPS & (0xffff | X86.PS.RF)) | (this.regPS & ~(0xffff | X86.PS.RF));
+        }
+        else {
+            if (newPS & X86.PS.VM) {
+                this.assert(!!(this.regCR0 & X86.CR0.MSW.PE));
+                /*
+                 * We have to assume that a full V86-mode interrupt frame was on the protected-mode stack; namely:
+                 *
+                 *      GS
+                 *      FS
+                 *      DS
+                 *      ES
+                 *      SS
+                 *      ESP
+                 *      EFLAGS
+                 *      CS
+                 *      EIP
+                 *
+                 * We've already popped EIP, CS, and EFLAGS into newIP, newCS and newPS, respectively, so we must now
+                 * pop the rest, while we're still in protected-mode, before the switch to V86-mode alters the current
+                 * operand size (among other things).
+                 */
+                var newSP = this.popWord();
+                var newSS = this.popWord();
+                var newES = this.popWord();
+                var newDS = this.popWord();
+                var newFS = this.popWord();
+                var newGS = this.popWord();
+                this.setProtMode(true, true);       // flip the switch to V86-mode now
+                this.setSS(newSS);
+                this.setSP(newSP);
+                this.setES(newES);
+                this.setDS(newDS);
+                this.setFS(newFS);
+                this.setGS(newGS);
+            }
+        }
+    }
 
     // if (DEBUG) this.printMessage(" returning to " + str.toHex(newCS, 4) + ':' + str.toHex(newIP, this.dataSize << 1), this.bitsMessage, true);
 
@@ -1478,7 +1545,10 @@ X86.fnLFS = function LFS(dst, src)
  */
 X86.fnLGDT = function LGDT(dst, src)
 {
-    if (this.regEA === X86.ADDR_INVALID) {
+    /*
+     * TODO: Consider swapping out this function whenever setProtMode() changes the mode to V86-mode.
+     */
+    if (this.regEA === X86.ADDR_INVALID || I386 && (this.regPS & X86.PS.VM)) {
         X86.opInvalid.call(this);
     } else {
         /*
@@ -1537,7 +1607,10 @@ X86.fnLGS = function LGS(dst, src)
  */
 X86.fnLIDT = function LIDT(dst, src)
 {
-    if (this.regEA === X86.ADDR_INVALID) {
+    /*
+     * TODO: Consider swapping out this function whenever setProtMode() changes the mode to V86-mode.
+     */
+    if (this.regEA === X86.ADDR_INVALID || I386 && (this.regPS & X86.PS.VM)) {
         X86.opInvalid.call(this);
     } else {
         /*
@@ -1586,9 +1659,16 @@ X86.fnLLDT = function LLDT(dst, src) {
  */
 X86.fnLMSW = function LMSW(dst, src)
 {
-    this.setMSW(dst);
-    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? 3 : 6);
-    this.opFlags |= X86.OPFLAG.NOWRITE;
+    /*
+     * TODO: Consider swapping out this function whenever setProtMode() changes the mode to V86-mode.
+     */
+    if (I386 && (this.regPS & X86.PS.VM)) {
+        X86.opInvalid.call(this);
+    } else {
+        this.setMSW(dst);
+        this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? 3 : 6);
+        this.opFlags |= X86.OPFLAG.NOWRITE;
+    }
     return dst;
 };
 
@@ -3640,7 +3720,10 @@ X86.fnFault = function(nFault, nError, fHalt, nCycles)
         fDispatch = false;
     }
 
-    if (fDispatch) X86.fnINT.call(this, this.nFault = nFault, nError, nCycles || 0);
+    if (fDispatch) {
+        this.nFault = nFault;
+        X86.fnINT.call(this, nFault, nError, nCycles || 0);
+    }
 
     /*
      * Since this fault is likely being issued in the context of an instruction that hasn't finished
@@ -3652,7 +3735,7 @@ X86.fnFault = function(nFault, nError, fHalt, nCycles)
      * opPUSHA(): if a GP fault occurs on any PUSH other than the last, a subsequent PUSH is likely to
      * cause another fault, which we will misinterpret as a double-fault.
      *
-     * TODO: Throw a special JavaScript exception that cpu.js must intercept and quietly ignore.
+     * TODO: Throw a special JavaScript exception that cpu.js must intercept and quietly redirect.
      */
     this.opFlags |= (X86.OPFLAG.NOREAD | X86.OPFLAG.NOWRITE);
 };
@@ -3714,6 +3797,15 @@ X86.fnFaultMessage = function(nFault, nError, fHalt)
      * When a triple fault shows up, nFault is -1; it displays as 0xff only because we use toHexByte().
      */
     if (bOpcode == X86.OPCODE.INT3 && !this.addrIDTLimit) {
+        fHalt = false;
+        bitsMessage |= Messages.CPU;
+    }
+
+    /*
+     * Windows 3.00 (and other versions of enhanced-mode Windows) use an ARPL in V86-mode to switch out
+     * of V86-mode; we don't need to report the UD_FAULT by default.
+     */
+    if (bOpcode == X86.OPCODE.ARPL && (this.regPS & X86.PS.VM)) {
         fHalt = false;
         bitsMessage |= Messages.CPU;
     }

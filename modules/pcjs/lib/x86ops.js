@@ -1502,12 +1502,17 @@ X86.opINSb = function INSb()
     }
 
     if (nReps--) {
-        var b = this.bus.checkPortInputNotify(this.regEDX & 0xffff, this.regLIP - nDelta - 1);
+        var port = this.regEDX & 0xffff;
+        if (!this.checkIOPM(port, 1)) {
+            X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
+            return;
+        }
+        var b = this.bus.checkPortInputNotify(port, this.regLIP - nDelta - 1);
         if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiIO;
         this.setSOByte(this.segES, this.regEDI & this.addrMask, b);
         this.regEDI = (this.regEDI & ~this.addrMask) | ((this.regEDI + ((this.regPS & X86.PS.DF)? -1 : 1)) & this.addrMask);
-        this.nStepCycles -= nCycles;
         this.regECX = (this.regECX & ~this.addrMask) | ((this.regECX - nDelta) & this.addrMask);
+        this.nStepCycles -= nCycles;
         if (nReps) {
             if (BUGS_8086) {
                 this.rewindIP(-2);              // this instruction does not support multiple overrides
@@ -1550,8 +1555,13 @@ X86.opINSw = function INSw()
     if (nReps--) {
         var addrFrom = this.regLIP - nDelta - 1;
         var w = 0, shift = 0;
+        var port = this.regEDX & 0xffff;
+        if (!this.checkIOPM(port, 1)) {
+            X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
+            return;
+        }
         for (var n = 0; n < this.dataSize; n++) {
-            w |= this.bus.checkPortInputNotify(this.regEDX & 0xffff, addrFrom) << shift;
+            w |= this.bus.checkPortInputNotify(port, addrFrom) << shift;
             shift += 8;
             if (BACKTRACK) {
                 if (!n) {
@@ -1563,8 +1573,8 @@ X86.opINSw = function INSw()
         }
         this.setSOWord(this.segES, this.regEDI & this.addrMask, w);
         this.regEDI = (this.regEDI & ~this.addrMask) | ((this.regEDI + ((this.regPS & X86.PS.DF)? -this.dataSize : this.dataSize)) & this.addrMask);
-        this.nStepCycles -= nCycles;
         this.regECX = (this.regECX & ~this.addrMask) | ((this.regECX - nDelta) & this.addrMask);
+        this.nStepCycles -= nCycles;
         if (nReps) {
             if (BUGS_8086) {
                 this.rewindIP(-2);              // this instruction does not support multiple overrides
@@ -1604,12 +1614,17 @@ X86.opOUTSb = function OUTSb()
         if (this.opPrefixes & X86.OPFLAG.REPEAT) nCycles = 4;
     }
     if (nReps--) {
+        var port = this.regEDX & 0xffff;
+        if (!this.checkIOPM(port, 1)) {
+            X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
+            return;
+        }
         var b = this.getSOByte(this.segDS, this.regESI & this.addrMask);
-        this.regESI = (this.regESI & ~this.addrMask) | ((this.regESI + ((this.regPS & X86.PS.DF)? -1 : 1)) & this.addrMask);
-        this.nStepCycles -= nCycles;
         if (BACKTRACK) this.backTrack.btiIO = this.backTrack.btiMemLo;
-        this.bus.checkPortOutputNotify(this.regEDX & 0xffff, b, this.regLIP - nDelta - 1);
+        this.bus.checkPortOutputNotify(port, b, this.regLIP - nDelta - 1);
+        this.regESI = (this.regESI & ~this.addrMask) | ((this.regESI + ((this.regPS & X86.PS.DF)? -1 : 1)) & this.addrMask);
         this.regECX = (this.regECX & ~this.addrMask) | ((this.regECX - nDelta) & this.addrMask);
+        this.nStepCycles -= nCycles;
         if (nReps) {
             if (BUGS_8086) {
                 this.rewindIP(-2);              // this instruction does not support multiple overrides
@@ -1650,9 +1665,12 @@ X86.opOUTSw = function OUTSw()
     }
     if (nReps--) {
         var w = this.getSOWord(this.segDS, this.regESI & this.addrMask);
-        this.regESI = (this.regESI & ~this.addrMask) | ((this.regESI + ((this.regPS & X86.PS.DF)? -this.dataSize : this.dataSize)) & this.addrMask);
-        this.nStepCycles -= nCycles;
         var addrFrom = this.regLIP - nDelta - 1, shift = 0;
+        var port = this.regEDX & 0xffff;
+        if (!this.checkIOPM(port, 1)) {
+            X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
+            return;
+        }
         for (var n = 0; n < this.dataSize; n++) {
             if (BACKTRACK) {
                 if (!n) {
@@ -1661,10 +1679,12 @@ X86.opOUTSw = function OUTSw()
                     this.backTrack.btiIO = this.backTrack.btiMemHi;
                 }
             }
-            this.bus.checkPortOutputNotify(this.regEDX & 0xffff, (w >> shift) & 0xff, addrFrom);
+            this.bus.checkPortOutputNotify(port, (w >> shift) & 0xff, addrFrom);
             shift += 8;
         }
+        this.regESI = (this.regESI & ~this.addrMask) | ((this.regESI + ((this.regPS & X86.PS.DF)? -this.dataSize : this.dataSize)) & this.addrMask);
         this.regECX = (this.regECX & ~this.addrMask) | ((this.regECX - nDelta) & this.addrMask);
+        this.nStepCycles -= nCycles;
         if (nReps) {
             if (BUGS_8086) {
                 this.rewindIP(-2);              // this instruction does not support multiple overrides
@@ -2458,7 +2478,19 @@ X86.opPUSHF = function PUSHF()
  */
 X86.opPOPF = function POPF()
 {
-    this.setPS(this.popWord());
+    /*
+     * TODO: Consider swapping out this function whenever setProtMode() changes the mode to V86-mode.
+     */
+    if (I386 && (this.regPS & X86.PS.VM) && this.nIOPL < 3) {
+        X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
+        return;
+    }
+    /*
+     * On the 80386, regardless of mode, VM and RF (the only defined EFLAGS bit above bit 15) are never changed by POPFD.
+     */
+    var newPS = this.popWord();
+    if (I386) newPS = (newPS & 0xffff) | (this.regPS & ~0xffff);
+    this.setPS(newPS);
     /*
      * NOTE: I'm assuming that neither POPF nor IRET are required to set NOINTR like STI does.
      */
@@ -3354,6 +3386,13 @@ X86.opRETF = function RETF()
 X86.opINT3 = function INT3()
 {
     /*
+     * TODO: Consider swapping out this function whenever setProtMode() changes the mode to V86-mode.
+     */
+    if (I386 && (this.regPS & X86.PS.VM) && this.nIOPL < 3) {
+        X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
+        return;
+    }
+    /*
      * To give our own Debugger the ability to stop execution on INT3, I thought about treating this as
      * a fault rather than an interrupt, in order to leverage the existing Debugger logic inside fnFault()
      * processing, but that has the unwanted side-effect of rewinding EIP to the INT3 prior to issuing
@@ -3389,6 +3428,13 @@ X86.opINT3 = function INT3()
  */
 X86.opINTn = function INTn()
 {
+    /*
+     * TODO: Consider swapping out this function whenever setProtMode() changes the mode to V86-mode.
+     */
+    if (I386 && (this.regPS & X86.PS.VM) && this.nIOPL < 3) {
+        X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
+        return;
+    }
     var nInt = this.getIPByte();
     if (this.checkIntNotify(nInt)) {
         X86.fnINT.call(this, nInt, null, 0);
@@ -3405,6 +3451,13 @@ X86.opINTn = function INTn()
 X86.opINTO = function INTO()
 {
     if (this.getOF()) {
+        /*
+         * TODO: Consider swapping out this function whenever setProtMode() changes the mode to V86-mode.
+         */
+        if (I386 && (this.regPS & X86.PS.VM) && this.nIOPL < 3) {
+            X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
+            return;
+        }
         X86.fnINT.call(this, X86.EXCEPTION.OVERFLOW, null, this.cycleCounts.nOpCyclesIntOD);
         return;
     }
@@ -3639,6 +3692,10 @@ X86.opJCXZ = function JCXZ()
 X86.opINb = function INb()
 {
     var port = this.getIPByte();
+    if (!this.checkIOPM(port, 1)) {
+        X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
+        return;
+    }
     this.regEAX = (this.regEAX & ~0xff) | this.bus.checkPortInputNotify(port, this.regLIP - 2);
     if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiIO;
     this.nStepCycles -= this.cycleCounts.nOpCyclesInP;
@@ -3652,6 +3709,10 @@ X86.opINb = function INb()
 X86.opINw = function INw()
 {
     var port = this.getIPByte();
+    if (!this.checkIOPM(port, 2)) {
+        X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
+        return;
+    }
     this.regEAX = this.bus.checkPortInputNotify(port, this.regLIP - 2);
     if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiIO;
     /*
@@ -3672,6 +3733,10 @@ X86.opINw = function INw()
 X86.opOUTb = function OUTb()
 {
     var port = this.getIPByte();
+    if (!this.checkIOPM(port, 1)) {
+        X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
+        return;
+    }
     this.bus.checkPortOutputNotify(port, this.regEAX & 0xff, this.regLIP - 2);
     this.nStepCycles -= this.cycleCounts.nOpCyclesOutP;
 };
@@ -3684,6 +3749,10 @@ X86.opOUTb = function OUTb()
 X86.opOUTw = function OUTw()
 {
     var port = this.getIPByte();
+    if (!this.checkIOPM(port, 2)) {
+        X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
+        return;
+    }
     this.bus.checkPortOutputNotify(port, this.regEAX & 0xff, this.regLIP - 2);
     /*
      * TODO: Specs are clear that bits 8-15 of the port address for the FIRST byte of I/O will be zero, but
@@ -3754,7 +3823,12 @@ X86.opJMPs = function JMPs()
  */
 X86.opINDXb = function INDXb()
 {
-    this.regEAX = (this.regEAX & ~0xff) | this.bus.checkPortInputNotify(this.regEDX & 0xffff, this.regLIP - 1);
+    var port = this.regEDX & 0xffff;
+    if (!this.checkIOPM(port, 1)) {
+        X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
+        return;
+    }
+    this.regEAX = (this.regEAX & ~0xff) | this.bus.checkPortInputNotify(port, this.regLIP - 1);
     if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiIO;
     this.nStepCycles -= this.cycleCounts.nOpCyclesInDX;
 };
@@ -3766,9 +3840,14 @@ X86.opINDXb = function INDXb()
  */
 X86.opINDXw = function INDXw()
 {
-    this.regEAX = this.bus.checkPortInputNotify(this.regEDX & 0xffff, this.regLIP - 1);
+    var port = this.regEDX & 0xffff;
+    if (!this.checkIOPM(port, 2)) {
+        X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
+        return;
+    }
+    this.regEAX = this.bus.checkPortInputNotify(port, this.regLIP - 1);
     if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiIO;
-    this.regEAX |= (this.bus.checkPortInputNotify((this.regEDX + 1) & 0xffff, this.regLIP - 1) << 8);
+    this.regEAX |= (this.bus.checkPortInputNotify((port + 1) & 0xffff, this.regLIP - 1) << 8);
     if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiIO;
     this.nStepCycles -= this.cycleCounts.nOpCyclesInDX;
 };
@@ -3780,8 +3859,13 @@ X86.opINDXw = function INDXw()
  */
 X86.opOUTDXb = function OUTDXb()
 {
+    var port = this.regEDX & 0xffff;
+    if (!this.checkIOPM(port, 1)) {
+        X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
+        return;
+    }
     if (BACKTRACK) this.backTrack.btiIO = this.backTrack.btiAL;
-    this.bus.checkPortOutputNotify(this.regEDX & 0xffff, this.regEAX & 0xff, this.regLIP - 1);
+    this.bus.checkPortOutputNotify(port, this.regEAX & 0xff, this.regLIP - 1);
     this.nStepCycles -= this.cycleCounts.nOpCyclesOutDX;
 };
 
@@ -3792,10 +3876,15 @@ X86.opOUTDXb = function OUTDXb()
  */
 X86.opOUTDXw = function OUTDXw()
 {
+    var port = this.regEDX & 0xffff;
+    if (!this.checkIOPM(port, 2)) {
+        X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
+        return;
+    }
     if (BACKTRACK) this.backTrack.btiIO = this.backTrack.btiAL;
-    this.bus.checkPortOutputNotify(this.regEDX & 0xffff, this.regEAX & 0xff, this.regLIP - 1);
+    this.bus.checkPortOutputNotify(port, this.regEAX & 0xff, this.regLIP - 1);
     if (BACKTRACK) this.backTrack.btiIO = this.backTrack.btiAH;
-    this.bus.checkPortOutputNotify((this.regEDX + 1) & 0xffff, this.regEAX >> 8, this.regLIP - 1);
+    this.bus.checkPortOutputNotify((port + 1) & 0xffff, this.regEAX >> 8, this.regLIP - 1);
     this.nStepCycles -= this.cycleCounts.nOpCyclesOutDX;
 };
 
@@ -3863,6 +3952,13 @@ X86.opREPZ = function REPZ()
  */
 X86.opHLT = function HLT()
 {
+    /*
+     * TODO: Consider swapping out this function whenever setProtMode() changes the mode to V86-mode.
+     */
+    if (I386 && (this.regPS & X86.PS.VM)) {
+        X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
+        return;
+    }
     /*
      * The CPU is never REALLY halted by a HLT instruction; instead, by setting X86.INTFLAG.HALT,
      * we are signalling to stepCPU() that it's free to end the current burst AND that it should not

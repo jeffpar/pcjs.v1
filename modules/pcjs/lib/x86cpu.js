@@ -1070,6 +1070,7 @@ X86CPU.prototype.initProcessor = function()
                  * nested-task weirdness in real-mode.
                  */
                 this.PS_CLEAR_RM = X86.PS.NT;
+                this.PS_DIRECT |= X86.PS.RF | X86.PS.VM;
                 this.aOps[X86.OPCODE.FS] = X86.opFS;        // 0x64
                 this.aOps[X86.OPCODE.GS] = X86.opGS;        // 0x65
                 this.aOps[X86.OPCODE.OS] = X86.opOS;        // 0x66
@@ -1596,7 +1597,7 @@ X86CPU.prototype.checkIntReturn = function(addr)
 };
 
 /**
- * setProtMode(fProt)
+ * setProtMode(fProt, fV86)
  *
  * Update any opcode handlers that operate significantly differently in real-mode vs. protected-mode, and
  * notify all the segment registers about the mode change as well -- but only those that are "bi-modal"; internal
@@ -1609,23 +1610,27 @@ X86CPU.prototype.checkIntReturn = function(addr)
  *
  * @this {X86CPU}
  * @param {boolean} [fProt] (use the current MSW PE bit if not specified)
+ * @param {boolean} [fV86] true if the X86.PS.VM (V86-mode) flag is set (or is about to be)
  */
-X86CPU.prototype.setProtMode = function(fProt)
+X86CPU.prototype.setProtMode = function(fProt, fV86)
 {
     if (fProt === undefined) {
         fProt = !!(this.regCR0 & X86.CR0.MSW.PE);
     }
-    if (!fProt != !(this.regCR0 & X86.CR0.MSW.PE) && this.messageEnabled()) {
-        this.printMessage("CPU switching to " + (fProt? "protected" : "real") + "-mode", this.bitsMessage, true);
+    if (fV86 === undefined) {
+        fV86 = !!(this.regPS & X86.PS.VM);
     }
-    this.aOpGrp6 = (fProt? X86.aOpGrp6Prot : X86.aOpGrp6Real);
-    this.segCS.updateMode();
-    this.segDS.updateMode();
-    this.segSS.updateMode();
-    this.segES.updateMode();
+    if (!fProt != !(this.regCR0 & X86.CR0.MSW.PE) && this.messageEnabled()) {
+        this.printMessage("CPU switching to " + (fProt? (fV86? "v86" : "protected") : "real") + "-mode", this.bitsMessage, true);
+    }
+    this.aOpGrp6 = (fProt && !fV86? X86.aOpGrp6Prot : X86.aOpGrp6Real);
+    this.segCS.updateMode(false, fProt, fV86);
+    this.segDS.updateMode(false, fProt, fV86);
+    this.segSS.updateMode(false, fProt, fV86);
+    this.segES.updateMode(false, fProt, fV86);
     if (I386 && this.model >= X86.MODEL_80386) {
-        this.segFS.updateMode();
-        this.segGS.updateMode();
+        this.segFS.updateMode(false, fProt, fV86);
+        this.segGS.updateMode(false, fProt, fV86);
         this.resetSizes();
     }
 };
@@ -2738,6 +2743,31 @@ X86CPU.prototype.setPS = function(regPS, cpl)
         this.intFlags |= X86.INTFLAG.TRAP;
         this.opFlags |= X86.OPFLAG.NOINTR;
     }
+};
+
+/**
+ * checkIOPM(port, nPorts)
+ *
+ * @this {X86CPU}
+ * @param {number} port (0x0000 to 0xffff)
+ * @param {number} nPorts (1 to 4)
+ * @return {boolean} true if allowed, false if not
+ */
+X86CPU.prototype.checkIOPM = function(port, nPorts)
+{
+    var bitsPorts = 0;
+    if (I386 && (this.regCR0 & X86.CR0.MSW.PE) && this.segCS.cpl > this.nIOPL && this.segTSS.addrIOPM) {
+        var offIOPM = port >>> 3;
+        var addrIOPM = this.segTSS.addrIOPM + offIOPM;
+        bitsPorts = ((1 << nPorts) - 1) << (port & 0x7);
+        while (bitsPorts && addrIOPM <= this.segTSS.addrIOPMLimit) {
+            var bits = this.getByte(addrIOPM);
+            if (bits & bitsPorts) break;
+            bitsPorts >>>= 8;
+            addrIOPM++;
+        }
+    }
+    return !bitsPorts;
 };
 
 /**
