@@ -1503,13 +1503,11 @@ X86.opINSb = function INSb()
 
     if (nReps--) {
         var port = this.regEDX & 0xffff;
-        if (!this.checkIOPM(port, 1)) {
-            X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
-            return;
-        }
+        if (!this.checkIOPM(port, 1)) return;
         var b = this.bus.checkPortInputNotify(port, this.regLIP - nDelta - 1);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiIO;
         this.setSOByte(this.segES, this.regEDI & this.addrMask, b);
+        if (this.opFlags & X86.OPFLAG.FAULT) return;
+        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiIO;
         this.regEDI = (this.regEDI & ~this.addrMask) | ((this.regEDI + ((this.regPS & X86.PS.DF)? -1 : 1)) & this.addrMask);
         this.regECX = (this.regECX & ~this.addrMask) | ((this.regECX - nDelta) & this.addrMask);
         this.nStepCycles -= nCycles;
@@ -1556,10 +1554,7 @@ X86.opINSw = function INSw()
         var addrFrom = this.regLIP - nDelta - 1;
         var w = 0, shift = 0;
         var port = this.regEDX & 0xffff;
-        if (!this.checkIOPM(port, 1)) {
-            X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
-            return;
-        }
+        if (!this.checkIOPM(port, 1)) return;
         for (var n = 0; n < this.dataSize; n++) {
             w |= this.bus.checkPortInputNotify(port, addrFrom) << shift;
             shift += 8;
@@ -1572,6 +1567,7 @@ X86.opINSw = function INSw()
             }
         }
         this.setSOWord(this.segES, this.regEDI & this.addrMask, w);
+        if (this.opFlags & X86.OPFLAG.FAULT) return;
         this.regEDI = (this.regEDI & ~this.addrMask) | ((this.regEDI + ((this.regPS & X86.PS.DF)? -this.dataSize : this.dataSize)) & this.addrMask);
         this.regECX = (this.regECX & ~this.addrMask) | ((this.regECX - nDelta) & this.addrMask);
         this.nStepCycles -= nCycles;
@@ -1615,11 +1611,9 @@ X86.opOUTSb = function OUTSb()
     }
     if (nReps--) {
         var port = this.regEDX & 0xffff;
-        if (!this.checkIOPM(port, 1)) {
-            X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
-            return;
-        }
+        if (!this.checkIOPM(port, 1)) return;
         var b = this.getSOByte(this.segDS, this.regESI & this.addrMask);
+        if (this.opFlags & X86.OPFLAG.FAULT) return;
         if (BACKTRACK) this.backTrack.btiIO = this.backTrack.btiMemLo;
         this.bus.checkPortOutputNotify(port, b, this.regLIP - nDelta - 1);
         this.regESI = (this.regESI & ~this.addrMask) | ((this.regESI + ((this.regPS & X86.PS.DF)? -1 : 1)) & this.addrMask);
@@ -1665,12 +1659,10 @@ X86.opOUTSw = function OUTSw()
     }
     if (nReps--) {
         var w = this.getSOWord(this.segDS, this.regESI & this.addrMask);
+        if (this.opFlags & X86.OPFLAG.FAULT) return;
         var addrFrom = this.regLIP - nDelta - 1, shift = 0;
         var port = this.regEDX & 0xffff;
-        if (!this.checkIOPM(port, 1)) {
-            X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
-            return;
-        }
+        if (!this.checkIOPM(port, 1)) return;
         for (var n = 0; n < this.dataSize; n++) {
             if (BACKTRACK) {
                 if (!n) {
@@ -2609,8 +2601,9 @@ X86.opMOVSb = function MOVSb()
         if (!(this.opPrefixes & X86.OPFLAG.REPEAT)) this.nStepCycles -= this.cycleCounts.nOpCyclesMovSr0;
     }
     if (nReps--) {
-        var nInc = ((this.regPS & X86.PS.DF)? -1 : 1);
         this.setSOByte(this.segES, this.regEDI & this.addrMask, this.getSOByte(this.segData, this.regESI & this.addrMask));
+        if (this.opFlags & X86.OPFLAG.FAULT) return;
+        var nInc = ((this.regPS & X86.PS.DF)? -1 : 1);
         this.regESI = (this.regESI & ~this.addrMask) | ((this.regESI + nInc) & this.addrMask);
         this.regEDI = (this.regEDI & ~this.addrMask) | ((this.regEDI + nInc) & this.addrMask);
         this.nStepCycles -= nCycles;
@@ -2644,8 +2637,9 @@ X86.opMOVSw = function MOVSw()
         if (!(this.opPrefixes & X86.OPFLAG.REPEAT)) this.nStepCycles -= this.cycleCounts.nOpCyclesMovSr0;
     }
     if (nReps--) {
-        var nInc = ((this.regPS & X86.PS.DF)? -this.dataSize : this.dataSize);
         this.setSOWord(this.segES, this.regEDI & this.addrMask, this.getSOWord(this.segData, this.regESI & this.addrMask));
+        if (this.opFlags & X86.OPFLAG.FAULT) return;
+        var nInc = ((this.regPS & X86.PS.DF)? -this.dataSize : this.dataSize);
         this.regESI = (this.regESI & ~this.addrMask) | ((this.regESI + nInc) & this.addrMask);
         this.regEDI = (this.regEDI & ~this.addrMask) | ((this.regEDI + nInc) & this.addrMask);
         this.nStepCycles -= nCycles;
@@ -2679,17 +2673,18 @@ X86.opCMPSb = function CMPSb()
         if (!(this.opPrefixes & X86.OPFLAG.REPEAT)) this.nStepCycles -= this.cycleCounts.nOpCyclesCmpSr0;
     }
     if (nReps--) {
-        var nInc = ((this.regPS & X86.PS.DF)? -1 : 1);
         var bDst = this.getEAByte(this.segData, this.regESI & this.addrMask);
         var bSrc = this.modEAByte(this.segES, this.regEDI & this.addrMask);
+        if (this.opFlags & X86.OPFLAG.FAULT) return;
         X86.fnCMPb.call(this, bDst, bSrc);
+        var nInc = ((this.regPS & X86.PS.DF)? -1 : 1);
         this.regESI = (this.regESI & ~this.addrMask) | ((this.regESI + nInc) & this.addrMask);
         this.regEDI = (this.regEDI & ~this.addrMask) | ((this.regEDI + nInc) & this.addrMask);
+        this.regECX = (this.regECX & ~this.addrMask) | ((this.regECX - nDelta) & this.addrMask);
         /*
          * NOTE: As long as we're calling fnCMPb(), all our cycle times must be reduced by nOpCyclesArithRM
          */
         this.nStepCycles -= nCycles - this.cycleCounts.nOpCyclesArithRM;
-        this.regECX = (this.regECX & ~this.addrMask) | ((this.regECX - nDelta) & this.addrMask);
         /*
          * Repetition continues while ZF matches bit 0 of the REP prefix.  getZF() returns 0x40 if ZF is
          * set, and OP_REPZ (which represents the REP prefix whose bit 0 is set) is 0x40 as well, so when those
@@ -2724,17 +2719,18 @@ X86.opCMPSw = function CMPSw()
         if (!(this.opPrefixes & X86.OPFLAG.REPEAT)) this.nStepCycles -= this.cycleCounts.nOpCyclesCmpSr0;
     }
     if (nReps--) {
-        var nInc = ((this.regPS & X86.PS.DF)? -this.dataSize : this.dataSize);
         var wDst = this.getEAWord(this.segData, this.regESI & this.addrMask);
         var wSrc = this.modEAWord(this.segES, this.regEDI & this.addrMask);
+        if (this.opFlags & X86.OPFLAG.FAULT) return;
         X86.fnCMPw.call(this, wDst, wSrc);
+        var nInc = ((this.regPS & X86.PS.DF)? -this.dataSize : this.dataSize);
         this.regESI = (this.regESI & ~this.addrMask) | ((this.regESI + nInc) & this.addrMask);
         this.regEDI = (this.regEDI & ~this.addrMask) | ((this.regEDI + nInc) & this.addrMask);
+        this.regECX = (this.regECX & ~this.addrMask) | ((this.regECX - nDelta) & this.addrMask);
         /*
          * NOTE: As long as we're calling fnCMPw(), all our cycle times must be reduced by nOpCyclesArithRM
          */
         this.nStepCycles -= nCycles - this.cycleCounts.nOpCyclesArithRM;
-        this.regECX = (this.regECX & ~this.addrMask) | ((this.regECX - nDelta) & this.addrMask);
         /*
          * Repetition continues while ZF matches bit 0 of the REP prefix.  getZF() returns 0x40 if ZF is
          * set, and OP_REPZ (which represents the REP prefix whose bit 0 is set) is 0x40 as well, so when those
@@ -2793,11 +2789,12 @@ X86.opSTOSb = function STOSb()
         if (!(this.opPrefixes & X86.OPFLAG.REPEAT)) this.nStepCycles -= this.cycleCounts.nOpCyclesStoSr0;
     }
     if (nReps--) {
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiAL;
         this.setSOByte(this.segES, this.regEDI & this.addrMask, this.regEAX);
+        if (this.opFlags & X86.OPFLAG.FAULT) return;
+        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiAL;
         this.regEDI = (this.regEDI & ~this.addrMask) | ((this.regEDI + ((this.regPS & X86.PS.DF)? -1 : 1)) & this.addrMask);
-        this.nStepCycles -= nCycles;
         this.regECX = (this.regECX & ~this.addrMask) | ((this.regECX - nDelta) & this.addrMask);
+        this.nStepCycles -= nCycles;
         if (nReps) {
             if (BUGS_8086) {
                 this.rewindIP(-2);              // this instruction does not support multiple overrides
@@ -2829,17 +2826,14 @@ X86.opSTOSw = function STOSw()
         if (!(this.opPrefixes & X86.OPFLAG.REPEAT)) this.nStepCycles -= this.cycleCounts.nOpCyclesStoSr0;
     }
     if (nReps--) {
-        /*
-         * NOTE: Storing a word imposes another 4-cycle penalty on the 8088, so consider that
-         * if you think the cycle times here are too high.
-         */
+        this.setSOWord(this.segES, this.regEDI & this.addrMask, this.regEAX);
+        if (this.opFlags & X86.OPFLAG.FAULT) return;
         if (BACKTRACK) {
             this.backTrack.btiMemLo = this.backTrack.btiAL; this.backTrack.btiMemHi = this.backTrack.btiAH;
         }
-        this.setSOWord(this.segES, this.regEDI & this.addrMask, this.regEAX);
         this.regEDI = (this.regEDI & ~this.addrMask) | ((this.regEDI + ((this.regPS & X86.PS.DF)? -this.dataSize : this.dataSize)) & this.addrMask);
-        this.nStepCycles -= nCycles;
         this.regECX = (this.regECX & ~this.addrMask) | ((this.regECX - nDelta) & this.addrMask);
+        this.nStepCycles -= nCycles;
         if (nReps) {
             if (BUGS_8086) {
                 this.rewindIP(-2);              // this instruction does not support multiple overrides
@@ -2869,11 +2863,13 @@ X86.opLODSb = function LODSb()
         if (!(this.opPrefixes & X86.OPFLAG.REPEAT)) this.nStepCycles -= this.cycleCounts.nOpCyclesLodSr0;
     }
     if (nReps--) {
-        this.regEAX = (this.regEAX & ~0xff) | this.getSOByte(this.segData, this.regESI & this.addrMask);
+        var b = this.getSOByte(this.segData, this.regESI & this.addrMask);
+        if (this.opFlags & X86.OPFLAG.FAULT) return;
+        this.regEAX = (this.regEAX & ~0xff) | b;
         if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMemLo;
         this.regESI = (this.regESI & ~this.addrMask) | ((this.regESI + ((this.regPS & X86.PS.DF)? -1 : 1)) & this.addrMask);
-        this.nStepCycles -= nCycles;
         this.regECX = (this.regECX & ~this.addrMask) | ((this.regECX - nDelta) & this.addrMask);
+        this.nStepCycles -= nCycles;
         if (nReps) {
             if (BUGS_8086) {
                 this.rewindIP(((this.opPrefixes & X86.OPFLAG.SEG)? -3 : -2));
@@ -2903,13 +2899,15 @@ X86.opLODSw = function LODSw()
         if (!(this.opPrefixes & X86.OPFLAG.REPEAT)) this.nStepCycles -= this.cycleCounts.nOpCyclesLodSr0;
     }
     if (nReps--) {
-        this.regEAX = (this.regEAX & ~this.dataMask) | this.getSOWord(this.segData, this.regESI & this.addrMask);
+        var w = this.getSOWord(this.segData, this.regESI & this.addrMask);
+        if (this.opFlags & X86.OPFLAG.FAULT) return;
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
         }
         this.regESI = (this.regESI & ~this.addrMask) | ((this.regESI + ((this.regPS & X86.PS.DF)? -this.dataSize : this.dataSize)) & this.addrMask);
-        this.nStepCycles -= nCycles;
         this.regECX = (this.regECX & ~this.addrMask) | ((this.regECX - nDelta) & this.addrMask);
+        this.nStepCycles -= nCycles;
         if (nReps) {
             if (BUGS_8086) {
                 this.rewindIP(((this.opPrefixes & X86.OPFLAG.SEG)? -3 : -2));
@@ -2940,12 +2938,13 @@ X86.opSCASb = function SCASb()
     }
     if (nReps--) {
         X86.fnCMPb.call(this, this.regEAX & 0xff, this.modEAByte(this.segES, this.regEDI & this.addrMask));
+        if (this.opFlags & X86.OPFLAG.FAULT) return;
         this.regEDI = (this.regEDI & ~this.addrMask) | ((this.regEDI + ((this.regPS & X86.PS.DF)? -1 : 1)) & this.addrMask);
+        this.regECX = (this.regECX & ~this.addrMask) | ((this.regECX - nDelta) & this.addrMask);
         /*
          * NOTE: As long as we're calling fnCMPb(), all our cycle times must be reduced by nOpCyclesArithRM
          */
         this.nStepCycles -= nCycles - this.cycleCounts.nOpCyclesArithRM;
-        this.regECX = (this.regECX & ~this.addrMask) | ((this.regECX - nDelta) & this.addrMask);
         /*
          * Repetition continues while ZF matches bit 0 of the REP prefix.  getZF() returns 0x40 if ZF is
          * set, and OP_REPZ (which represents the REP prefix whose bit 0 is set) is 0x40 as well, so when those
@@ -2981,12 +2980,13 @@ X86.opSCASw = function SCASw()
     }
     if (nReps--) {
         X86.fnCMPw.call(this, this.regEAX & this.dataMask, this.modEAWord(this.segES, this.regEDI & this.addrMask));
+        if (this.opFlags & X86.OPFLAG.FAULT) return;
         this.regEDI = (this.regEDI & ~this.addrMask) | ((this.regEDI + ((this.regPS & X86.PS.DF)? -this.dataSize : this.dataSize)) & this.addrMask);
+        this.regECX = (this.regECX & ~this.addrMask) | ((this.regECX - nDelta) & this.addrMask);
         /*
          * NOTE: As long as we're calling fnCMPw(), all our cycle times must be reduced by nOpCyclesArithRM
          */
         this.nStepCycles -= nCycles - this.cycleCounts.nOpCyclesArithRM;
-        this.regECX = (this.regECX & ~this.addrMask) | ((this.regECX - nDelta) & this.addrMask);
         /*
          * Repetition continues while ZF matches bit 0 of the REP prefix.  getZF() returns 0x40 if ZF is
          * set, and OP_REPZ (which represents the REP prefix whose bit 0 is set) is 0x40 as well, so when those
@@ -3692,10 +3692,7 @@ X86.opJCXZ = function JCXZ()
 X86.opINb = function INb()
 {
     var port = this.getIPByte();
-    if (!this.checkIOPM(port, 1)) {
-        X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
-        return;
-    }
+    if (!this.checkIOPM(port, 1)) return;
     this.regEAX = (this.regEAX & ~0xff) | this.bus.checkPortInputNotify(port, this.regLIP - 2);
     if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiIO;
     this.nStepCycles -= this.cycleCounts.nOpCyclesInP;
@@ -3709,10 +3706,7 @@ X86.opINb = function INb()
 X86.opINw = function INw()
 {
     var port = this.getIPByte();
-    if (!this.checkIOPM(port, 2)) {
-        X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
-        return;
-    }
+    if (!this.checkIOPM(port, 2)) return;
     this.regEAX = this.bus.checkPortInputNotify(port, this.regLIP - 2);
     if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiIO;
     /*
@@ -3733,10 +3727,7 @@ X86.opINw = function INw()
 X86.opOUTb = function OUTb()
 {
     var port = this.getIPByte();
-    if (!this.checkIOPM(port, 1)) {
-        X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
-        return;
-    }
+    if (!this.checkIOPM(port, 1)) return;
     this.bus.checkPortOutputNotify(port, this.regEAX & 0xff, this.regLIP - 2);
     this.nStepCycles -= this.cycleCounts.nOpCyclesOutP;
 };
@@ -3749,10 +3740,7 @@ X86.opOUTb = function OUTb()
 X86.opOUTw = function OUTw()
 {
     var port = this.getIPByte();
-    if (!this.checkIOPM(port, 2)) {
-        X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
-        return;
-    }
+    if (!this.checkIOPM(port, 2)) return;
     this.bus.checkPortOutputNotify(port, this.regEAX & 0xff, this.regLIP - 2);
     /*
      * TODO: Specs are clear that bits 8-15 of the port address for the FIRST byte of I/O will be zero, but
@@ -3824,10 +3812,7 @@ X86.opJMPs = function JMPs()
 X86.opINDXb = function INDXb()
 {
     var port = this.regEDX & 0xffff;
-    if (!this.checkIOPM(port, 1)) {
-        X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
-        return;
-    }
+    if (!this.checkIOPM(port, 1)) return;
     this.regEAX = (this.regEAX & ~0xff) | this.bus.checkPortInputNotify(port, this.regLIP - 1);
     if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiIO;
     this.nStepCycles -= this.cycleCounts.nOpCyclesInDX;
@@ -3841,10 +3826,7 @@ X86.opINDXb = function INDXb()
 X86.opINDXw = function INDXw()
 {
     var port = this.regEDX & 0xffff;
-    if (!this.checkIOPM(port, 2)) {
-        X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
-        return;
-    }
+    if (!this.checkIOPM(port, 2)) return;
     this.regEAX = this.bus.checkPortInputNotify(port, this.regLIP - 1);
     if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiIO;
     this.regEAX |= (this.bus.checkPortInputNotify((port + 1) & 0xffff, this.regLIP - 1) << 8);
@@ -3860,10 +3842,7 @@ X86.opINDXw = function INDXw()
 X86.opOUTDXb = function OUTDXb()
 {
     var port = this.regEDX & 0xffff;
-    if (!this.checkIOPM(port, 1)) {
-        X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
-        return;
-    }
+    if (!this.checkIOPM(port, 1)) return;
     if (BACKTRACK) this.backTrack.btiIO = this.backTrack.btiAL;
     this.bus.checkPortOutputNotify(port, this.regEAX & 0xff, this.regLIP - 1);
     this.nStepCycles -= this.cycleCounts.nOpCyclesOutDX;
@@ -3877,10 +3856,7 @@ X86.opOUTDXb = function OUTDXb()
 X86.opOUTDXw = function OUTDXw()
 {
     var port = this.regEDX & 0xffff;
-    if (!this.checkIOPM(port, 2)) {
-        X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
-        return;
-    }
+    if (!this.checkIOPM(port, 2)) return;
     if (BACKTRACK) this.backTrack.btiIO = this.backTrack.btiAL;
     this.bus.checkPortOutputNotify(port, this.regEAX & 0xff, this.regLIP - 1);
     if (BACKTRACK) this.backTrack.btiIO = this.backTrack.btiAH;

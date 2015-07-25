@@ -491,13 +491,11 @@ Memory.prototype = {
      * @return {Memory}
      */
     getPageBlock: function(addr, fWrite) {
-        var block = this.cpu.mapPageBlock(addr, fWrite);
         /*
-         * If mapPageBlock() fails -- which can easily happen if the page is not present or has insufficient
-         * privileges -- then a fault will be triggered and block will be null.  We still have to return a block,
-         * but it will be our old "unpaged" self.
+         * Even when mapPageBlock() fails (ie, when the page is not present or has insufficient privileges), it
+         * will trigger a fault (since we don't set fSuppress), but it will still return a block (ie, an empty block).
          */
-        return block || this;
+        return this.cpu.mapPageBlock(addr, fWrite);
     },
     /**
      * setPhysBlock(blockPhys, blockPDE, offPDE, blockPTE, offPTE)

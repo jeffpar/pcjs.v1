@@ -3679,11 +3679,13 @@ X86.fnSrcNone = function SrcNone()
  * @this {X86CPU}
  * @param {number} nFault
  * @param {number} [nError] (if omitted, no error code will be pushed)
- * @param {boolean} [fHalt] will halt the CPU if true *and* a Debugger is loaded
+ * @param {boolean} [fHalt] true to halt the CPU (if the Debugger is loaded), false to not, undefined if "it depends"
  * @param {number} [nCycles] cycle count to pass through to fnINT(), if any
  */
 X86.fnFault = function(nFault, nError, fHalt, nCycles)
 {
+    this.opFlags |= X86.OPFLAG.FAULT;
+
     if (!this.aFlags.fComplete) {
         this.printMessage("Fault " + str.toHexByte(nFault) + " blocked by Debugger", Messages.WARN);
         this.setIP(this.opLIP - this.segCS.base);
@@ -3774,7 +3776,7 @@ X86.fnPageFault = function(addr, fPresent, fWrite)
  * @this {X86CPU}
  * @param {number} nFault
  * @param {number} [nError] (if omitted, no error code will be reported)
- * @param {boolean} [fHalt] true if the CPU should always be halted, false if "it depends"
+ * @param {boolean} [fHalt] true to halt the CPU (if the Debugger is loaded), false to not, undefined if "it depends"
  * @return {boolean|undefined} true to block the fault (often desirable when fHalt is true), otherwise dispatch it
  */
 X86.fnFaultMessage = function(nFault, nError, fHalt)
@@ -3798,15 +3800,31 @@ X86.fnFaultMessage = function(nFault, nError, fHalt)
      */
     if (bOpcode == X86.OPCODE.INT3 && !this.addrIDTLimit) {
         fHalt = false;
-        bitsMessage |= Messages.CPU;
     }
 
     /*
-     * Windows 3.00 (and other versions of enhanced-mode Windows) use an ARPL in V86-mode to switch out
-     * of V86-mode; we don't need to report the UD_FAULT by default.
+     * There are a number of V86-mode exceptions we don't need to know about.  For starters, Windows 3.00
+     * (and other versions of enhanced-mode Windows) use an ARPL in V86-mode to switch out of V86-mode, so
+     * we can ignore those UD_FAULTs.
+     *
+     * Ditto for software interrupts, which will generate a GP_FAULT when the interrupt number (eg, 0x6D)
+     * exceeds the protected-mode IDT's limit (eg, a limit of 0x2FF yields a maximum interrupt number of 0x5F).
+     * Windows doesn't really care if its IDT is too small, because no matter what, it has to simulate all
+     * software interrupts in V86-mode (they will also generate a GP_FAULT if IOPL < 3, and even if IOPL == 3,
+     * only the protected-mode IDT handler gets to run).
      */
-    if (bOpcode == X86.OPCODE.ARPL && (this.regPS & X86.PS.VM)) {
-        fHalt = false;
+    if ((this.regPS & X86.PS.VM)) {
+        if (nFault == X86.EXCEPTION.UD_FAULT && bOpcode == X86.OPCODE.ARPL ||
+            nFault == X86.EXCEPTION.GP_FAULT && bOpcode == X86.OPCODE.INTN) {
+            fHalt = false;
+        }
+    }
+
+    /*
+     * If fHalt has been explicitly set to false, we also take that as a cue to disable fault messages
+     * (which you can override by turning on CPU messages).
+     */
+    if (fHalt === false) {
         bitsMessage |= Messages.CPU;
     }
 
@@ -3822,16 +3840,13 @@ X86.fnFaultMessage = function(nFault, nError, fHalt)
     /*
      * However, the foregoing notwithstanding, if MESSAGE.HALT is enabled along with all the other required
      * MESSAGE bits, then we want to halt regardless.
-     *
-     * TODO: Eventually remove the code below that halts on all MODEL_80386 GP_FAULTs and PG_FAULTs; this is
-     * just to make it easier to catch bad faults on DeskPro 386 configurations.
      */
-    if (DEBUGGER && this.model == X86.MODEL_80386 && (nFault == X86.EXCEPTION.GP_FAULT || nFault == X86.EXCEPTION.PG_FAULT) || this.messageEnabled(bitsMessage | Messages.HALT)) {
+    if (this.messageEnabled(bitsMessage | Messages.HALT)) {
         fHalt = true;
     }
 
     if (this.messageEnabled(bitsMessage) || fHalt) {
-        var sMessage = (fHalt? '\n' : '') + "Fault " + str.toHexByte(nFault) + (nError != null? " (" + str.toHexWord(nError) + ")" : "") + " on opcode " + str.toHexByte(bOpcode) + " at " + this.dbg.hexOffset(this.getIP(), this.getCS()) + " (%" + str.toHex(this.regLIP, 6) + ")";
+        var sMessage = "Fault " + str.toHexByte(nFault) + (nError != null? " (" + str.toHexWord(nError) + ")" : "") + " on opcode " + str.toHexByte(bOpcode) + " at " + this.dbg.hexOffset(this.getIP(), this.getCS()) + " (%" + str.toHex(this.regLIP, 6) + ")";
         var fRunning = this.aFlags.fRunning;
         if (this.printMessage(sMessage, bitsMessage)) {
             if (fHalt) {

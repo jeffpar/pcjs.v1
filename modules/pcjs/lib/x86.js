@@ -382,6 +382,7 @@ var X86 = {
         NOREAD:     0x0001,
         NOWRITE:    0x0002,
         NOINTR:     0x0004,     // indicates a segreg has been set, or a prefix, or an STI (delay INTR acknowledgement)
+        FAULT:      0x0008,     // indicates a fault occurred during the current instruction
         SEG:        0x0010,     // segment override
         LOCK:       0x0020,     // lock prefix
         REPZ:       0x0040,     // repeat while Z (NOTE: this value MUST match PS.ZF; see opCMPSb/opCMPSw/opSCASb/opSCASw)
@@ -440,7 +441,7 @@ var X86 = {
         SCASB:      0xAE,       // opSCASb()
         SCASW:      0xAF,       // opSCASw()
         INT3:       0xCC,       // opINT3()
-        INTn:       0xCD,       // opINTn()
+        INTN:       0xCD,       // opINTn()
         INTO:       0xCE,       // opINTO()
         LOOPNZ:     0xE0,       // opLOOPNZ()
         LOOPZ:      0xE1,       // opLOOPZ()

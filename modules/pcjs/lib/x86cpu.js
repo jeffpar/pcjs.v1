@@ -677,7 +677,7 @@ X86CPU.prototype.setAddressMask = function(nBusMask)
  * of the Bus block array, to simulate paging.  Whenever the CPU turns paging off, disablePageBlocks()
  * must be called to restore our copy of the Bus block array to its original (physical) mapping.
  *
- * This also requires PAGEBLOCKS be enabled, ensuring that the Bus is configured with a 4Kb block size.
+ * This also requires PAGEBLOCKS be enabled, to ensure the Bus is configured with a 4Kb block size.
  *
  * The first time this function is called, aMemBlocks and aBusBlocks are identical, so aMemBlocks is
  * reinitialized with special UNPAGED Memory blocks that know how to perform page directory/page table
@@ -690,7 +690,7 @@ X86CPU.prototype.setAddressMask = function(nBusMask)
 X86CPU.prototype.enablePageBlocks = function()
 {
     if (!PAGEBLOCKS) {
-        this.setError("PAGEBLOCK support required");
+        this.setError("PAGEBLOCKS support required");
         return;
     }
     if (this.aMemBlocks === this.aBusBlocks) {
@@ -699,6 +699,11 @@ X86CPU.prototype.enablePageBlocks = function()
         for (var iBlock = 0; iBlock < this.nBlockTotal; iBlock++) {
             this.aMemBlocks[iBlock] = this.blockUnpaged;
         }
+        /*
+         * We also need a special "empty" Memory block that mapPageBlock() can pass back to callers
+         * whenever a valid block cannot be found for an UNPAGED block.
+         */
+        this.memEmpty = new Memory();
     } else {
         for (var i = 0; i < this.aBlocksPaged.length; i++) {
             this.aMemBlocks[this.aBlocksPaged[i]] = this.blockUnpaged;
@@ -708,7 +713,7 @@ X86CPU.prototype.enablePageBlocks = function()
 };
 
 /**
- * mapPageBlock(addr, fWrite)
+ * mapPageBlock(addr, fWrite, fSuppress)
  *
  * Locate the corresponding physical PDE, PTE and memory blocks for the given linear address, and then
  * upgrade the block from an UNPAGED Memory block to a new PAGED Memory block; all future accesses to
@@ -737,7 +742,7 @@ X86CPU.prototype.enablePageBlocks = function()
  * @param {number} addr is a linear address
  * @param {boolean} fWrite (true if called for a write, false if for a read)
  * @param {boolean} [fSuppress] (true if any faults, remapping, etc should be suppressed)
- * @return {Memory|null}
+ * @return {Memory}
  */
 X86CPU.prototype.mapPageBlock = function(addr, fWrite, fSuppress)
 {
@@ -753,12 +758,12 @@ X86CPU.prototype.mapPageBlock = function(addr, fWrite, fSuppress)
 
     if (!(pde & X86.PTE.PRESENT)) {
         if (!fSuppress) X86.fnPageFault.call(this, addr, false, fWrite);
-        return null;
+        return this.memEmpty;
     }
 
     if (!(pde & X86.PTE.USER) && this.segCS.cpl == 3) {
         if (!fSuppress) X86.fnPageFault.call(this, addr, true, fWrite);
-        return null;
+        return this.memEmpty;
     }
 
     var offPTE = (addr & X86.LADDR.PTE.MASK) >>> X86.LADDR.PTE.SHIFT;
@@ -773,12 +778,12 @@ X86CPU.prototype.mapPageBlock = function(addr, fWrite, fSuppress)
 
     if (!(pte & X86.PTE.PRESENT) && !fSuppress) {
         if (!fSuppress) X86.fnPageFault.call(this, addr, false, fWrite);
-        return null;
+        return this.memEmpty;
     }
 
     if (!(pte & X86.PTE.USER) && this.segCS.cpl == 3) {
         if (!fSuppress) X86.fnPageFault.call(this, addr, true, fWrite);
-        return null;
+        return this.memEmpty;
     }
 
     var addrPhys = (pte & X86.PTE.FRAME) + (addr & X86.LADDR.OFFSET);
@@ -816,6 +821,7 @@ X86CPU.prototype.disablePageBlocks = function()
         this.aMemBlocks = this.aBusBlocks;
         this.blockUnpaged = null;
         this.aBlocksPaged = null;
+        this.memEmpty = null;
     }
 };
 
@@ -2756,7 +2762,7 @@ X86CPU.prototype.setPS = function(regPS, cpl)
 X86CPU.prototype.checkIOPM = function(port, nPorts)
 {
     var bitsPorts = 0;
-    if (I386 && (this.regCR0 & X86.CR0.MSW.PE) && this.segCS.cpl > this.nIOPL && this.segTSS.addrIOPM) {
+    if (I386 && (this.regCR0 & X86.CR0.MSW.PE) && (this.segCS.cpl > this.nIOPL || (this.regPS & X86.PS.VM)) && this.segTSS.addrIOPM) {
         var offIOPM = port >>> 3;
         var addrIOPM = this.segTSS.addrIOPM + offIOPM;
         bitsPorts = ((1 << nPorts) - 1) << (port & 0x7);
@@ -2767,7 +2773,12 @@ X86CPU.prototype.checkIOPM = function(port, nPorts)
             addrIOPM++;
         }
     }
-    return !bitsPorts;
+    if (bitsPorts) {
+        if (this.messageEnabled(Messages.PORT)) this.printMessage("checkIOPM(" + str.toHexWord(port) + "," + nPorts + "): trapped", true, true);
+        X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0, false);
+        return false;
+    }
+    return true;
 };
 
 /**

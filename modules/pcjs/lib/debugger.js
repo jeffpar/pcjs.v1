@@ -1316,6 +1316,7 @@ if (DEBUGGER) {
         }
 
         this.messageDump(Messages.BUS,  function onDumpBus(s)  { dbg.dumpBus(s); });
+        this.messageDump(Messages.MEM,  function onDumpMem(s)  { dbg.dumpMem(s); });
         this.messageDump(Messages.DESC, function onDumpDesc(s) { dbg.dumpDesc(s); });
         this.messageDump(Messages.TSS,  function onDumpTSS(s)  { dbg.dumpTSS(s); });
         this.messageDump(Messages.DOS,  function onDumpDOS(s)  { dbg.dumpDOS(s); });
@@ -1695,8 +1696,8 @@ if (DEBUGGER) {
      * hexOffset(off, sel, fAddr32)
      *
      * @this {Debugger}
-     * @param {number|null} [off]
-     * @param {number|null} [sel]
+     * @param {number|null|undefined} [off]
+     * @param {number|null|undefined} [sel]
      * @param {boolean} [fAddr32] is true for 32-bit ADDRESS size
      * @return {string} the hex representation of off (or sel:off)
      */
@@ -1723,7 +1724,7 @@ if (DEBUGGER) {
     /**
      * getSZ(dbgAddr, cchMax)
      *
-     * Get zero-terminated (aka "ASCIIZ") string from dbgAddr.  It also stops at the first '$', in case this is
+     * Gets zero-terminated (aka "ASCIIZ") string from dbgAddr.  It also stops at the first '$', in case this is
      * a '$'-terminated string -- mainly because I'm lazy and didn't feel like writing a separate get() function.
      * Yes, a zero-terminated string containing a '$' will be prematurely terminated, and no, I don't care.
      *
@@ -1745,35 +1746,34 @@ if (DEBUGGER) {
     };
 
     /**
-     * dumpDOS(s)
+     * dumpDOS(sMCB)
      *
-     * This dumps DOS MCBs (Memory Control Blocks).
+     * Dumps DOS MCBs (Memory Control Blocks).
+     *
+     * TODO: Add some code to detect the running version of DOS (if any) and locate the first MCB automatically.
      *
      * @this {Debugger}
-     * @param {string} [s]
+     * @param {string} [sMCB]
      */
-    Debugger.prototype.dumpDOS = function(s)
+    Debugger.prototype.dumpDOS = function(sMCB)
     {
-        if (!s) {
-            this.println("no MCB");
+        var mcb;
+        if (sMCB) {
+            mcb = this.parseValue(sMCB);
+        }
+        if (mcb === undefined) {
+            this.println("invalid MCB");
             return;
         }
-
-        this.println("dumpDOS(" + s + ")");
-
-        /*
-         * If s is provided and str.parseInt(s) succeeds, then we assume it represents a starting
-         * MCB (Memory Control Block) segment, and we dump the corresponding blocks.
-         */
-        var sel = this.parseValue(s);
-        while (sel) {
-            var dbgAddr = this.newAddr(0, sel);
+        this.println("dumpMCB(" + str.toHexWord(mcb) + ")");
+        while (mcb) {
+            var dbgAddr = this.newAddr(0, mcb);
             var bSig = this.getByte(dbgAddr, 1);
             var wPID = this.getShort(dbgAddr, 2);
             var wParas = this.getShort(dbgAddr, 5);
             if (bSig != 0x4D && bSig != 0x5A) break;
-            this.println(this.hexOffset(0, sel) + ": '" + String.fromCharCode(bSig) + "' PID=" + str.toHexWord(wPID) + " LEN=" + str.toHexWord(wParas) + ' "' + this.getSZ(dbgAddr, 8) + '"');
-            sel += 1 + wParas;
+            this.println(this.hexOffset(0, mcb) + ": '" + String.fromCharCode(bSig) + "' PID=" + str.toHexWord(wPID) + " LEN=" + str.toHexWord(wParas) + ' "' + this.getSZ(dbgAddr, 8) + '"');
+            mcb += 1 + wParas;
         }
     };
 
@@ -1832,22 +1832,63 @@ if (DEBUGGER) {
     };
 
     /**
-     * dumpBus(s)
-     *
-     * This dumps Bus allocations.
+     * dumpBlocks(aBlocks, sAddr)
      *
      * @this {Debugger}
-     * @param {string} [s]
+     * @param {Array} aBlocks
+     * @param {string} [sAddr] (optional block address)
      */
-    Debugger.prototype.dumpBus = function(s)
+    Debugger.prototype.dumpBlocks = function(aBlocks, sAddr)
     {
+        var i = 0, n = aBlocks.length;
+
         this.println("id       physaddr   blkaddr   used    size    type");
         this.println("-------- ---------  --------  ------  ------  ----");
-        for (var i = 0; i < this.cpu.aMemBlocks.length; i++) {
-            var block = this.cpu.aBusBlocks[i];
+
+        if (sAddr) {
+            var addr = this.parseValue(sAddr);
+            if (addr !== undefined) {
+                i = addr >>> this.cpu.nBlockShift;
+                n = 1;
+            }
+        }
+        while (n--) {
+            var block = aBlocks[i];
             if (block.type === Memory.TYPE.NONE) continue;
             this.println(str.toHex(block.id) + " %" + str.toHex(i << this.cpu.nBlockShift) + ": " + str.toHex(block.addr) + "  " + str.toHexWord(block.used) + "  " + str.toHexWord(block.size) + "  " + Memory.TYPE.NAMES[block.type]);
+            i++;
         }
+    };
+
+    /**
+     * dumpBus(sAddr)
+     *
+     * Dumps Bus allocations.
+     *
+     * @this {Debugger}
+     * @param {string} [sAddr] (optional block address)
+     */
+    Debugger.prototype.dumpBus = function(sAddr)
+    {
+        this.dumpBlocks(this.cpu.aBusBlocks, sAddr);
+    };
+
+    /**
+     * dumpMem(sAddr)
+     *
+     * Dumps page allocations.
+     *
+     * @this {Debugger}
+     * @param {string} [sAddr] (optional block address)
+     */
+    Debugger.prototype.dumpMem = function(sAddr)
+    {
+        var aBlocks = this.cpu.aMemBlocks;
+        if (aBlocks === this.cpu.aBusBlocks) {
+            this.println("paging not enabled");
+            return;
+        }
+        this.dumpBlocks(aBlocks, sAddr);
     };
 
     Debugger.SYSDESCS = {
@@ -1868,7 +1909,7 @@ if (DEBUGGER) {
     /**
      * dumpDesc(s)
      *
-     * This dumps a descriptor for the given selector.
+     * Dumps a descriptor for the given selector.
      *
      * @this {Debugger}
      * @param {string} [s]
@@ -2058,12 +2099,12 @@ if (DEBUGGER) {
             var iPort = 0;
             off = (v >>> 16);
             /*
-             * We arbitrarily cut the IOPM dump off at port 0x3FF, because we're not interested in anything above that.
+             * We arbitrarily cut the IOPM dump off at port 0x3FF; we're not currently interested in anything above that.
              */
             while (off < seg.offMax && iPort < 0x3ff) {
                 addr = seg.base + off;
                 v = this.cpu.probeAddr(addr) | (this.cpu.probeAddr(addr + 1) << 8);
-                sDump += "\nports " + str.toHexWord(iPort) + '-' + str.toHexWord(iPort+15) + ": " + str.toBinBytes(v, 2);
+                sDump += "\n" + str.toHexWord(off) + " ports " + str.toHexWord(iPort) + '-' + str.toHexWord(iPort+15) + ": " + str.toBinBytes(v, 2);
                 iPort += 16;
                 off += 2;
             }
@@ -2615,7 +2656,7 @@ if (DEBUGGER) {
          */
         if (fUpdateCPU !== false) this.cpu.updateCPU();
 
-        this.updateStatus(fRegs || false, false);
+        this.updateStatus(fRegs || false);
         return (this.nCycles > 0);
     };
 
@@ -2631,16 +2672,14 @@ if (DEBUGGER) {
     };
 
     /**
-     * updateStatus(fRegs, fCompact)
+     * updateStatus(fRegs)
      *
      * @this {Debugger}
      * @param {boolean} [fRegs] (default is true)
-     * @param {boolean} [fCompact] (default is true)
      */
-    Debugger.prototype.updateStatus = function(fRegs, fCompact)
+    Debugger.prototype.updateStatus = function(fRegs)
     {
         if (fRegs === undefined) fRegs = true;
-        if (fCompact === undefined) fCompact = true;
 
         this.dbgAddrNextCode = this.newAddr(this.cpu.getIP(), this.cpu.getCS());
         /*
@@ -2651,7 +2690,7 @@ if (DEBUGGER) {
         if (!fRegs || this.fProcStep == 1)
             this.doUnassemble();
         else {
-            this.doRegisters(null, fCompact);
+            this.doRegisters(null);
         }
     };
 
@@ -2862,7 +2901,7 @@ if (DEBUGGER) {
                 }
                 this.println(sStopped);
             }
-            this.updateStatus(true, this.fProcStep != 2);
+            this.updateStatus(true);
             this.setFocus();
             this.clearTempBreakpoint(this.cpu.regLIP);
         }
@@ -3053,6 +3092,8 @@ if (DEBUGGER) {
      */
     Debugger.prototype.addBreakpoint = function(aBreak, dbgAddr, fTemp)
     {
+        var fSuccess = false;
+        this.nSuppressBreaks++;
         if (!this.findBreakpoint(aBreak, dbgAddr)) {
             dbgAddr.fTempBreak = fTemp;
             aBreak.push(dbgAddr);
@@ -3071,9 +3112,10 @@ if (DEBUGGER) {
                 this.println("breakpoint enabled: " + this.hexAddr(dbgAddr) + " (" + aBreak[0] + ")");
             }
             if (!fTemp) this.historyInit();
-            return true;
+            fSuccess = true;
         }
-        return false;
+        this.nSuppressBreaks--;
+        return fSuccess;
     };
 
     /**
@@ -3091,7 +3133,8 @@ if (DEBUGGER) {
         var addr = this.mapBreakpoint(this.getAddr(dbgAddr));
         for (var i = 1; i < aBreak.length; i++) {
             var dbgAddrBreak = aBreak[i];
-            if (addr == this.mapBreakpoint(this.getAddr(dbgAddrBreak))) {
+            if (addr != X86.ADDR_INVALID && addr == this.mapBreakpoint(this.getAddr(dbgAddrBreak)) ||
+                addr == X86.ADDR_INVALID && dbgAddr.sel == dbgAddrBreak.sel && dbgAddr.off == dbgAddrBreak.off) {
                 fFound = true;
                 if (fRemove) {
                     aBreak.splice(i, 1);
@@ -3206,8 +3249,10 @@ if (DEBUGGER) {
          * because any CS-based breakpoint you set immediately after a CPU reset will have a physical address
          * in the top 16Mb, yet after the first inter-segment JMP, you will be running in the first 1Mb.
          */
-        var mask = (this.maskAddr & ~0xffff);
-        if ((addr & mask) == mask) addr &= 0x000fffff;
+        if (addr != X86.ADDR_INVALID) {
+            var mask = (this.maskAddr & ~0xffff);
+            if ((addr & mask) == mask) addr &= 0x000fffff;
+        }
         return addr;
     };
 
@@ -5148,13 +5193,12 @@ if (DEBUGGER) {
     };
 
     /**
-     * doRegisters(asArgs, fCompact)
+     * doRegisters(asArgs)
      *
      * @this {Debugger}
      * @param {Array.<string>} [asArgs]
-     * @param {boolean} [fCompact]
      */
-    Debugger.prototype.doRegisters = function(asArgs, fCompact)
+    Debugger.prototype.doRegisters = function(asArgs)
     {
         if (asArgs && asArgs[1] == "?") {
             this.println("register commands:");
@@ -5378,7 +5422,6 @@ if (DEBUGGER) {
                 }
                 this.cpu.updateCPU();
                 this.println("updated registers:");
-                fCompact = true;
             }
         }
 
@@ -5448,7 +5491,7 @@ if (DEBUGGER) {
                     this.fProcStep = fProcStep;
                     this.incAddr(dbgAddr, 1);
                     break;
-                case X86.OPCODE.INTn:
+                case X86.OPCODE.INTN:
                 case X86.OPCODE.LOOPNZ:
                 case X86.OPCODE.LOOPZ:
                 case X86.OPCODE.LOOP:

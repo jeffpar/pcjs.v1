@@ -60,6 +60,7 @@ if (typeof module !== 'undefined') {
  * @property {number} base (in protected-mode, this comes from descriptor word 0x2)
  * @property {number} acc (in protected-mode, this comes from descriptor word 0x4; bits 0-7 supplement base bits 16-23)
  * @property {number} ext (in protected-mode, this is descriptor word 0x6, 80386 only; supplements limit bits 16-19 and base bits 24-31)
+ * @property {number} type (this is a subset of acc, using X86.DESC.ACC.TYPE.MASK)
  *
  * TODO: Determine what good, if any, these class annotations are for either an IDE like WebStorm or a tool like
  * the Closure Compiler.  More importantly, what good do they do at runtime?  Is it better to simply ensure that all
@@ -763,7 +764,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
              * last valid address in segTSS.addrIOPMLimit.
              */
             if (typeTSS == X86.DESC.ACC.TYPE.TSS386) {
-                this.addrIOPM = (base + cpu.getShort(base + X86.TSS386.TASK_IOPM))|0;
+                this.addrIOPM = (base + cpu.getShort(base + X86.TSS386.TASK_IOPM + 2))|0;
                 this.addrIOPMLimit = (base + this.limit)|0;
             }
         }
