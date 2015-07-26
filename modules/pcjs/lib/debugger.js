@@ -2945,8 +2945,8 @@ if (DEBUGGER) {
             /*
              * Halt if running with interrupts disabled and IOPL < CPL, because that's likely an error
              */
-            if (!(this.cpu.regPS & X86.PS.IF) && this.cpu.nIOPL < this.cpu.segCS.cpl) {
-                this.printMessage("interrupts disabled at IOPL " + this.cpu.nIOPL + " and CPL " + this.cpu.segCS.cpl, true);
+            if (!(this.cpu.regPS & X86.PS.IF) && this.cpu.nIOPL < this.cpu.nCPL) {
+                this.printMessage("interrupts disabled at IOPL " + this.cpu.nIOPL + " and CPL " + this.cpu.nCPL, true);
                 return true;
             }
         }

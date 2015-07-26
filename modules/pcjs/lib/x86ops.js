@@ -2453,18 +2453,38 @@ X86.opWAIT = function WAIT()
 };
 
 /**
- * op=0x9C (PUSHF)
+ * op=0x9C (PUSHF/PUSHFD)
  *
  * @this {X86CPU}
  */
 X86.opPUSHF = function PUSHF()
 {
-    this.pushWord(this.getPS());
+    /*
+     * TODO: Consider swapping out this function whenever setProtMode() changes the mode to V86-mode.
+     */
+    var regPS = this.getPS();
+    if (I386) {
+        if ((regPS & X86.PS.VM) && this.nIOPL < 3) {
+            X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
+            return;
+        }
+        /*
+         * It doesn't matter whether this is PUSHF or PUSHFD: the VM and RF flags are never pushed, so
+         * we can always clear them.
+         *
+         * This does, however, beg the question: how does code running in V86-mode detect that's in V86-mode
+         * and not real-mode?  By using the SMSW instruction and checking the PE (protected-mode enabled) bit.
+         * The SMSW instruction returns a subset of the CR0 bits, and unlike the MOV reg,CR0 instruction, is
+         * allowed in V86-mode.
+         */
+        regPS &= ~(X86.PS.VM | X86.PS.RF);
+    }
+    this.pushWord(regPS);
     this.nStepCycles -= this.cycleCounts.nOpCyclesPushReg;
 };
 
 /**
- * op=0x9D (POPF)
+ * op=0x9D (POPF/POPFD)
  *
  * @this {X86CPU}
  */
@@ -2478,7 +2498,7 @@ X86.opPOPF = function POPF()
         return;
     }
     /*
-     * On the 80386, regardless of mode, VM and RF (the only defined EFLAGS bit above bit 15) are never changed by POPFD.
+     * Regardless of mode, VM and RF (the only defined EFLAGS bit above bit 15) are never changed by POPFD.
      */
     var newPS = this.popWord();
     if (I386) newPS = (newPS & 0xffff) | (this.regPS & ~0xffff);
@@ -3471,6 +3491,13 @@ X86.opINTO = function INTO()
  */
 X86.opIRET = function IRET()
 {
+    /*
+     * TODO: Consider swapping out this function whenever setProtMode() changes the mode to V86-mode.
+     */
+    if (I386 && (this.regPS & X86.PS.VM) && this.nIOPL < 3) {
+        X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
+        return;
+    }
     X86.fnIRET.call(this);
 };
 
@@ -4058,6 +4085,14 @@ X86.opSTC = function STC()
  */
 X86.opCLI = function CLI()
 {
+    /*
+     * The following code should be sufficient for all modes, because in real-mode, CPL is always zero,
+     * and in V86-mode, CPL is always 3.
+     */
+    if (this.nCPL > this.nIOPL) {
+        X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
+        return;
+    }
     this.clearIF();
     this.nStepCycles -= this.cycleCounts.nOpCyclesCLI;   // CLI takes LONGER on an 80286
 };
@@ -4069,6 +4104,14 @@ X86.opCLI = function CLI()
  */
 X86.opSTI = function STI()
 {
+    /*
+     * The following code should be sufficient for all modes, because in real-mode, CPL is always zero,
+     * and in V86-mode, CPL is always 3.
+     */
+    if (this.nCPL > this.nIOPL) {
+        X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
+        return;
+    }
     this.setIF();
     this.opFlags |= X86.OPFLAG.NOINTR;
     this.nStepCycles -= 2;                          // STI takes 2 cycles on all CPUs

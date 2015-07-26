@@ -145,9 +145,9 @@ X86.opLSL = function LSL()
  */
 X86.opLOADALL = function LOADALL()
 {
-    if (this.segCS.cpl) {
+    if (this.nCPL) {
         /*
-         * You're not allowed to use LOADALL if the current privilege level is something other than zero.
+         * To use LOADALL, CPL must be zero.
          */
         X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0, true);
         return;
@@ -202,9 +202,9 @@ X86.opLOADALL = function LOADALL()
 X86.opCLTS = function CLTS()
 {
     /*
-     * NOTE: The following code shouldn't need to test for X86.PS.VM because V86-mode is CPL 3.
+     * NOTE: The following code shouldn't need to also test X86.PS.VM, because V86-mode is CPL 3.
      */
-    if (this.segCS.cpl) {
+    if (this.nCPL) {
         X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
         return;
     }
@@ -234,9 +234,9 @@ X86.opCLTS = function CLTS()
 X86.opMOVrc = function MOVrc()
 {
     /*
-     * NOTE: The following code shouldn't need to test for X86.PS.VM because V86-mode is CPL 3.
+     * NOTE: The following code shouldn't need to also test X86.PS.VM, because V86-mode is CPL 3.
      */
-    if (this.segCS.cpl) {
+    if (this.nCPL) {
         /*
          * You're not allowed to read control registers if the current privilege level is not zero
          */
@@ -317,9 +317,9 @@ X86.opMOVrc = function MOVrc()
 X86.opMOVcr = function MOVcr()
 {
     /*
-     * NOTE: The following code shouldn't need to test for X86.PS.VM because V86-mode is CPL 3.
+     * NOTE: The following code shouldn't need to also test X86.PS.VM, because V86-mode is CPL 3.
      */
-    if (this.segCS.cpl) {
+    if (this.nCPL) {
         /*
          * You're not allowed to write control registers if the current privilege level is not zero
          */

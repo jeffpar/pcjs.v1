@@ -1247,9 +1247,14 @@ X86.fnINT = function INT(nIDT, nError, nCycles)
         this.pushWord(oldIP);
         if (nError != null) this.pushWord(nError);
         this.nFault = -1;
+
+        /*
+         * TODO: Should this code be factored into a setLIP() function? The other primary client would be setCSIP().
+         */
+        if (I386) this.resetSizes();
         this.regLIP = addr;
         this.regLIPLimit = (this.segCS.base + this.segCS.limit)|0;
-        if (I386) this.resetSizes();
+        this.nCPL = this.segCS.cpl;             // cache the current CPL where it's more convenient
         if (PREFETCH) this.flushPrefetch(this.regLIP);
     }
 };
@@ -1265,6 +1270,7 @@ X86.fnIRET = function IRET()
      * TODO: We assess a fixed cycle cost up front, because at the moment, switchTSS() doesn't assess anything.
      */
     this.nStepCycles -= this.cycleCounts.nOpCyclesIRet;
+
     if (this.regCR0 & X86.CR0.MSW.PE) {
         if (this.regPS & X86.PS.NT) {
             var addrNew = this.segTSS.base;
@@ -1276,7 +1282,8 @@ X86.fnIRET = function IRET()
             return;
         }
     }
-    var cpl = this.segCS.cpl;
+
+    var cpl = this.nCPL;
     var newIP = this.popWord();
     var newCS = this.popWord();
     var newPS = this.popWord();
@@ -1390,7 +1397,7 @@ X86.fnLAR = function LAR(dst, src)
      */
     this.clearZF();
     if (this.segVER.load(src, true) !== X86.ADDR_INVALID) {
-        if (this.segVER.dpl >= this.segCS.cpl && this.segVER.dpl >= (src & X86.SEL.RPL)) {
+        if (this.segVER.dpl >= this.nCPL && this.segVER.dpl >= (src & X86.SEL.RPL)) {
             this.setZF();
             dst = this.segVER.acc & ~X86.DESC.ACC.BASE1623;
             if (this.dataSize > 2) {
@@ -1695,7 +1702,7 @@ X86.fnLSL = function LSL(dst, src)
      */
     if ((src & X86.SEL.MASK) && this.segVER.load(src, true) !== X86.ADDR_INVALID) {
         var fConforming = ((this.segVER.acc & X86.DESC.ACC.TYPE.CODE_CONFORMING) == X86.DESC.ACC.TYPE.CODE_CONFORMING);
-        if ((fConforming || this.segVER.dpl >= this.segCS.cpl) && this.segVER.dpl >= (src & X86.SEL.RPL)) {
+        if ((fConforming || this.segVER.dpl >= this.nCPL) && this.segVER.dpl >= (src & X86.SEL.RPL)) {
             this.setZF();
             return this.segVER.limit;
         }
@@ -2256,11 +2263,11 @@ X86.fnRETF = function RETF(n)
          * it safe and using CODE_CONFORMING instead of CODE_CONFORMING_READABLE.  Also, for the record, I've not
          * seen this situation occur yet (eg, in OS/2 1.0).
          */
-        if ((this.segDS.sel & X86.SEL.MASK) && this.segDS.dpl < this.segCS.cpl && (this.segDS.acc & X86.DESC.ACC.TYPE.CODE_CONFORMING) != X86.DESC.ACC.TYPE.CODE_CONFORMING) {
+        if ((this.segDS.sel & X86.SEL.MASK) && this.segDS.dpl < this.nCPL && (this.segDS.acc & X86.DESC.ACC.TYPE.CODE_CONFORMING) != X86.DESC.ACC.TYPE.CODE_CONFORMING) {
             this.assert(false);         // I'm not asserting this is bad, I just want to see it in action
             this.segDS.load(0);
         }
-        if ((this.segES.sel & X86.SEL.MASK) && this.segES.dpl < this.segCS.cpl && (this.segES.acc & X86.DESC.ACC.TYPE.CODE_CONFORMING) != X86.DESC.ACC.TYPE.CODE_CONFORMING) {
+        if ((this.segES.sel & X86.SEL.MASK) && this.segES.dpl < this.nCPL && (this.segES.acc & X86.DESC.ACC.TYPE.CODE_CONFORMING) != X86.DESC.ACC.TYPE.CODE_CONFORMING) {
             this.assert(false);         // I'm not asserting this is bad, I just want to see it in action
             this.segES.load(0);
         }
@@ -3352,7 +3359,7 @@ X86.fnVERR = function VERR(dst, src)
              * Otherwise, DPL must be greater than or equal to (have less or the same privilege as) both the
              * current privilege level and the selector's RPL.
              */
-            if (this.segVER.dpl >= this.segCS.cpl && this.segVER.dpl >= (dst & X86.SEL.RPL) ||
+            if (this.segVER.dpl >= this.nCPL && this.segVER.dpl >= (dst & X86.SEL.RPL) ||
                 (this.segVER.acc & X86.DESC.ACC.TYPE.CODE_CONFORMING) == X86.DESC.ACC.TYPE.CODE_CONFORMING) {
                 this.setZF();
                 return dst;
@@ -3390,7 +3397,7 @@ X86.fnVERW = function VERW(dst, src)
              * DPL must be greater than or equal to (have less or the same privilege as) both the current
              * privilege level and the selector's RPL.
              */
-            if (this.segVER.dpl >= this.segCS.cpl && this.segVER.dpl >= (dst & X86.SEL.RPL)) {
+            if (this.segVER.dpl >= this.nCPL && this.segVER.dpl >= (dst & X86.SEL.RPL)) {
                 this.setZF();
                 return dst;
             }
@@ -3758,7 +3765,7 @@ X86.fnPageFault = function(addr, fPresent, fWrite)
     var nError = 0;
     if (fPresent) nError |= X86.PTE.PRESENT;
     if (fWrite) nError |= X86.PTE.READWRITE;
-    if (this.segCS.cpl == 3) nError |= X86.PTE.USER;
+    if (this.nCPL == 3) nError |= X86.PTE.USER;
     X86.fnFault.call(this, X86.EXCEPTION.PG_FAULT, nError);
 };
 

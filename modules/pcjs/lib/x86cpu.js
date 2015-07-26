@@ -761,7 +761,7 @@ X86CPU.prototype.mapPageBlock = function(addr, fWrite, fSuppress)
         return this.memEmpty;
     }
 
-    if (!(pde & X86.PTE.USER) && this.segCS.cpl == 3) {
+    if (!(pde & X86.PTE.USER) && this.nCPL == 3) {
         if (!fSuppress) X86.fnPageFault.call(this, addr, true, fWrite);
         return this.memEmpty;
     }
@@ -781,7 +781,7 @@ X86CPU.prototype.mapPageBlock = function(addr, fWrite, fSuppress)
         return this.memEmpty;
     }
 
-    if (!(pte & X86.PTE.USER) && this.segCS.cpl == 3) {
+    if (!(pte & X86.PTE.USER) && this.nCPL == 3) {
         if (!fSuppress) X86.fnPageFault.call(this, addr, true, fWrite);
         return this.memEmpty;
     }
@@ -1263,7 +1263,7 @@ X86CPU.prototype.resetRegs = function()
      */
     this.intFlags = X86.INTFLAG.NONE;
 
-    this.setCSIP(0, 0xffff);    // this should be called before the first setPS() call
+    this.setCSIP(0, 0xffff);    // this should be called before the first setPS() call, in part so that CPL will be set
 
     if (!I386) this.resetSizes();
 
@@ -1331,7 +1331,7 @@ X86CPU.prototype.resetRegs = function()
 
     /*
      * This resets the Processor Status flags (regPS), along with all the internal "result registers";
-     * we've taken care to ensure that both segCS.cpl and nIOPL are initialized before this first setPS() call.
+     * we've taken care to ensure that both CPL and IOPL are initialized before this first setPS() call.
      */
     this.setPS(0);
 
@@ -1846,12 +1846,8 @@ X86CPU.prototype.getCS = function()
  */
 X86CPU.prototype.setCS = function(sel)
 {
-    var regEIP = this.getIP();
-    this.regLIP = (this.segCS.load(sel) + regEIP)|0;
-    this.regLIPLimit = (this.segCS.base + this.segCS.limit)|0;
-    if (I386) this.resetSizes();
+    this.setCSIP(this.getIP(), sel);
     if (!BUGS_8086) this.opFlags |= this.OPFLAG_NOINTR_8086;
-    if (PREFETCH) this.flushPrefetch(this.regLIP);
 };
 
 /**
@@ -2044,10 +2040,16 @@ X86CPU.prototype.setCSIP = function(off, sel, fCall)
     this.regEIP = off;
     var base = this.segCS.load(sel);
     if (base !== X86.ADDR_INVALID) {
+
+        /*
+         * TODO: Should this code be factored into a setLIP() function? The other primary client would be fnINT().
+         */
+        if (I386) this.resetSizes();
         this.regLIP = (base + (this.regEIP & (I386? this.dataMask : 0xffff)))|0;
         this.regLIPLimit = (base + this.segCS.limit)|0;
-        if (I386) this.resetSizes();
+        this.nCPL = this.segCS.cpl;             // cache the current CPL where it's more convenient
         if (PREFETCH) this.flushPrefetch(this.regLIP);
+
         return this.segCS.fStackSwitch;
     }
     return null;
@@ -2713,7 +2715,7 @@ X86CPU.prototype.setPS = function(regPS, cpl)
      * So, if the CPU is an 80286, we zero incoming bits 12-14 in real-mode (bit 15 is never allowed to
      * be modified, so there's no need to mask it).  And if the CPU is an 80386, we zero only bit 14 (PS.NT),
      * allowing the IOPL bits to change; however, that should not affect any real-mode operations, since
-     * segCS.cpl will always be zero, making the IOPL setting irrelevant.
+     * CPL will always be zero, making IOPL irrelevant.
      *
      * It's still an open question whether an 80386 should also clear the Nested Task (PS.NT) flag in
      * real-mode; if not, then initProcessor() should set PS_CLEAR_RM to zero.
@@ -2724,7 +2726,7 @@ X86CPU.prototype.setPS = function(regPS, cpl)
      * There are some cases (eg, an IRET returning to a less privileged code segment) where the CPL
      * we compare against should come from the outgoing code segment, so if the caller provided it, use it.
      */
-    if (cpl === undefined) cpl = this.segCS.cpl;
+    if (cpl === undefined) cpl = this.nCPL;
 
     /*
      * Since PS.IOPL and PS.IF are part of PS_DIRECT, we need to take care of any 80286-specific behaviors
@@ -2762,7 +2764,7 @@ X86CPU.prototype.setPS = function(regPS, cpl)
 X86CPU.prototype.checkIOPM = function(port, nPorts)
 {
     var bitsPorts = 0;
-    if (I386 && (this.regCR0 & X86.CR0.MSW.PE) && (this.segCS.cpl > this.nIOPL || (this.regPS & X86.PS.VM)) && this.segTSS.addrIOPM) {
+    if (I386 && (this.regCR0 & X86.CR0.MSW.PE) && (this.nCPL > this.nIOPL || (this.regPS & X86.PS.VM)) && this.segTSS.addrIOPM) {
         var offIOPM = port >>> 3;
         var addrIOPM = this.segTSS.addrIOPM + offIOPM;
         bitsPorts = ((1 << nPorts) - 1) << (port & 0x7);
