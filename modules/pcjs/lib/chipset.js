@@ -3163,7 +3163,9 @@ ChipSet.prototype.outPICLo = function(iPIC, bOut, addrFrom)
              * TODO: Support EOI commands with automatic rotation (eg, ChipSet.PIC_LO.OCW2_EOI_ROT and ChipSet.PIC_LO.OCW2_EOI_ROTSPEC)
              */
             if (bOCW2 & ChipSet.PIC_LO.OCW2_SET_ROTAUTO) {
-                this.notice("PIC" + iPIC + '(' + str.toHexByte(pic.port) + "): unsupported OCW2 rotate command: " + str.toHexByte(bOut));
+                if (this.messageEnabled(/*Messages.PIC | */Messages.WARN)) {
+                    this.printMessage("PIC" + iPIC + '(' + str.toHexByte(pic.port) + "): unsupported OCW2 rotate command " + str.toHexByte(bOut), true, true);
+                }
             }
         }
         else  if (bOCW2 == ChipSet.PIC_LO.OCW2_SET_PRI) {
@@ -3176,7 +3178,9 @@ ChipSet.prototype.outPICLo = function(iPIC, bOut, addrFrom)
             /*
              * TODO: Remaining commands to support: ChipSet.PIC_LO.OCW2_SET_ROTAUTO and ChipSet.PIC_LO.OCW2_CLR_ROTAUTO
              */
-            this.notice("PIC" + iPIC + '(' + str.toHexByte(pic.port) + "): unsupported OCW2 automatic EOI command: " + str.toHexByte(bOut));
+            if (this.messageEnabled(/*Messages.PIC | */Messages.WARN)) {
+                this.printMessage("PIC" + iPIC + '(' + str.toHexByte(pic.port) + "): unsupported OCW2 automatic EOI command " + str.toHexByte(bOut), true, true);
+            }
         }
     } else {
         /*
@@ -3186,7 +3190,9 @@ ChipSet.prototype.outPICLo = function(iPIC, bOut, addrFrom)
          * that's unfortunate, because I don't support them yet.
          */
         if (bOut & (ChipSet.PIC_LO.OCW3_POLL_CMD | ChipSet.PIC_LO.OCW3_SMM_CMD)) {
-            this.notice("PIC" + iPIC + '(' + str.toHexByte(pic.port) + "): unsupported OCW3 command: " + str.toHexByte(bOut));
+            if (this.messageEnabled(/*Messages.PIC | */Messages.WARN)) {
+                this.printMessage("PIC" + iPIC + '(' + str.toHexByte(pic.port) + "): unsupported OCW3 command " + str.toHexByte(bOut), true, true);
+            }
         }
         pic.bOCW3 = bOut;
     }

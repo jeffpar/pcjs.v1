@@ -786,7 +786,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
         this.type = type;
         this.ext = ext;
         this.addrDesc = addrDesc;
-        this.updateMode(true);
+        this.updateMode(true, true, false);
 
         if (fGate === false && this.fStackSwitch) {
             /*
@@ -1194,21 +1194,21 @@ X86Seg.prototype.updateMode = function(fLoad, fProt, fV86)
             this.addrSize = this.dataSize;
             this.addrMask = this.dataMask;
         }
-    } else {
-        /*
-         * One important feature of real-mode (as compared to V86-mode) are that other segment attributes
-         * (eg, limit, operand size, address size, etc) are NOT updated, enabling features like "big real-mode"
-         * (aka "unreal mode"), which is used by system software like HIMEM.SYS to access extended memory from
-         * real-mode.
-         */
-        this.load = this.loadReal;
-        this.loadIDT = this.loadIDTReal;
-        this.checkRead = this.checkReadReal;
-        this.checkWrite = this.checkWriteReal;
-        this.cpl = this.dpl = 0;
-        this.addrDesc = X86.ADDR_INVALID;
-        this.fStackSwitch = false;
+        return;
     }
+    /*
+     * One important feature of real-mode (as compared to V86-mode) are that other segment attributes
+     * (eg, limit, operand size, address size, etc) are NOT updated, enabling features like "big real-mode"
+     * (aka "unreal mode"), which is used by system software like HIMEM.SYS to access extended memory from
+     * real-mode.
+     */
+    this.load = this.loadReal;
+    this.loadIDT = this.loadIDTReal;
+    this.checkRead = this.checkReadReal;
+    this.checkWrite = this.checkWriteReal;
+    this.cpl = this.dpl = 0;
+    this.addrDesc = X86.ADDR_INVALID;
+    this.fStackSwitch = false;
 };
 
 /**
