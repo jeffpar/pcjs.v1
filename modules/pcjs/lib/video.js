@@ -1773,6 +1773,9 @@ Card.ACCESS.writeByteMode0 = function writeByteMode0(off, b, addr)
         this.adw[idw] = dw;
         this.fDirty = true;
     }
+    if (DEBUG && this.controller.video.messageEnabled(Messages.MEM | Messages.VIDEO)) {
+        this.controller.video.printMessage("writeByteMode0(" + str.toHexLong(addr) + "): " + str.toHexByte(b) + " -> " + str.toHexLong(dw));
+    }
 };
 
 /**
@@ -1823,6 +1826,9 @@ Card.ACCESS.writeByteMode0Chain4 = function writeByteMode0Chain4(off, b, addr)
         this.adw[idw] = dw;
         this.fDirty = true;
     }
+    if (DEBUG && this.controller.video.messageEnabled(Messages.MEM | Messages.VIDEO)) {
+        this.controller.video.printMessage("writeByteMode0Chain4(" + str.toHexLong(addr) + "): " + str.toHexByte(b) + " -> " + str.toHexLong(dw));
+    }
 };
 
 /**
@@ -1849,6 +1855,9 @@ Card.ACCESS.writeByteMode0EvenOdd = function writeByteMode0EvenOdd(off, b, addr)
         this.adw[idw] = dw;
         this.fDirty = true;
     }
+    if (DEBUG && this.controller.video.messageEnabled(Messages.MEM | Messages.VIDEO)) {
+        this.controller.video.printMessage("writeByteMode0EvenOdd(" + str.toHexLong(addr) + "): " + str.toHexByte(b) + " -> " + str.toHexLong(dw));
+    }
 };
 
 /**
@@ -1870,6 +1879,9 @@ Card.ACCESS.writeByteMode0Rot = function writeByteMode0Rot(off, b, addr)
     if (this.adw[idw] != dw) {
         this.adw[idw] = dw;
         this.fDirty = true;
+    }
+    if (DEBUG && this.controller.video.messageEnabled(Messages.MEM | Messages.VIDEO)) {
+        this.controller.video.printMessage("writeByteMode0Rot(" + str.toHexLong(addr) + "): " + str.toHexByte(b) + " -> " + str.toHexLong(dw));
     }
 };
 
@@ -1894,6 +1906,9 @@ Card.ACCESS.writeByteMode0And = function writeByteMode0And(off, b, addr)
         this.adw[idw] = dw;
         this.fDirty = true;
     }
+    if (DEBUG && this.controller.video.messageEnabled(Messages.MEM | Messages.VIDEO)) {
+        this.controller.video.printMessage("writeByteMode0And(" + str.toHexLong(addr) + "): " + str.toHexByte(b) + " -> " + str.toHexLong(dw));
+    }
 };
 
 /**
@@ -1916,6 +1931,9 @@ Card.ACCESS.writeByteMode0Or = function writeByteMode0Or(off, b, addr)
     if (this.adw[idw] != dw) {
         this.adw[idw] = dw;
         this.fDirty = true;
+    }
+    if (DEBUG && this.controller.video.messageEnabled(Messages.MEM | Messages.VIDEO)) {
+        this.controller.video.printMessage("writeByteMode0Or(" + str.toHexLong(addr) + "): " + str.toHexByte(b) + " -> " + str.toHexLong(dw));
     }
 };
 
@@ -1940,6 +1958,9 @@ Card.ACCESS.writeByteMode0Xor = function writeByteMode0Xor(off, b, addr)
         this.adw[idw] = dw;
         this.fDirty = true;
     }
+    if (DEBUG && this.controller.video.messageEnabled(Messages.MEM | Messages.VIDEO)) {
+        this.controller.video.printMessage("writeByteMode0Xor(" + str.toHexLong(addr) + "): " + str.toHexByte(b) + " -> " + str.toHexLong(dw));
+    }
 };
 
 /**
@@ -1957,6 +1978,9 @@ Card.ACCESS.writeByteMode1 = function writeByteMode1(off, b, addr)
     if (this.adw[idw] != dw) {
         this.adw[idw] = dw;
         this.fDirty = true;
+    }
+    if (DEBUG && this.controller.video.messageEnabled(Messages.MEM | Messages.VIDEO)) {
+        this.controller.video.printMessage("writeByteMode1(" + str.toHexLong(addr) + "): " + str.toHexLong(dw));
     }
 };
 
@@ -1986,6 +2010,9 @@ Card.ACCESS.writeByteMode1EvenOdd = function writeByteMode1EvenOdd(off, b, addr)
         this.adw[idw] = dw;
         this.fDirty = true;
     }
+    if (DEBUG && this.controller.video.messageEnabled(Messages.MEM | Messages.VIDEO)) {
+        this.controller.video.printMessage("writeByteMode1EvenOdd(" + str.toHexLong(addr) + "): " + str.toHexByte(dw));
+    }
 };
 
 /**
@@ -2005,6 +2032,9 @@ Card.ACCESS.writeByteMode2 = function writeByteMode2(off, b, addr)
     if (this.adw[idw] != dw) {
         this.adw[idw] = dw;
         this.fDirty = true;
+    }
+    if (DEBUG && this.controller.video.messageEnabled(Messages.MEM | Messages.VIDEO)) {
+        this.controller.video.printMessage("writeByteMode2(" + str.toHexLong(addr) + "): " + str.toHexByte(b) + " -> " + str.toHexLong(dw));
     }
 };
 
@@ -2027,6 +2057,9 @@ Card.ACCESS.writeByteMode2And = function writeByteMode2And(off, b, addr)
         this.adw[idw] = dw;
         this.fDirty = true;
     }
+    if (DEBUG && this.controller.video.messageEnabled(Messages.MEM | Messages.VIDEO)) {
+        this.controller.video.printMessage("writeByteMode2And(" + str.toHexLong(addr) + "): " + str.toHexByte(b) + " -> " + str.toHexLong(dw));
+    }
 };
 
 /**
@@ -2048,6 +2081,9 @@ Card.ACCESS.writeByteMode2Or = function writeByteMode2Or(off, b, addr)
         this.adw[idw] = dw;
         this.fDirty = true;
     }
+    if (DEBUG && this.controller.video.messageEnabled(Messages.MEM | Messages.VIDEO)) {
+        this.controller.video.printMessage("writeByteMode2Or(" + str.toHexLong(addr) + "): " + str.toHexByte(b) + " -> " + str.toHexLong(dw));
+    }
 };
 
 /**
@@ -2068,6 +2104,9 @@ Card.ACCESS.writeByteMode2Xor = function writeByteMode2Xor(off, b, addr)
     if (this.adw[idw] != dw) {
         this.adw[idw] = dw;
         this.fDirty = true;
+    }
+    if (DEBUG && this.controller.video.messageEnabled(Messages.MEM | Messages.VIDEO)) {
+        this.controller.video.printMessage("writeByteMode2Xor(" + str.toHexLong(addr) + "): " + str.toHexByte(b) + " -> " + str.toHexLong(dw));
     }
 };
 
@@ -2096,6 +2135,9 @@ Card.ACCESS.writeByteMode3 = function writeByteMode3(off, b, addr)
     if (this.adw[idw] != dw) {
         this.adw[idw] = dw;
         this.fDirty = true;
+    }
+    if (DEBUG && this.controller.video.messageEnabled(Messages.MEM | Messages.VIDEO)) {
+        this.controller.video.printMessage("writeByteMode3(" + str.toHexLong(addr) + "): " + str.toHexByte(b) + " -> " + str.toHexLong(dw));
     }
 };
 
@@ -4255,7 +4297,7 @@ Video.prototype.setAccess = function(nAccess)
     var card = this.cardActive;
     if (card && nAccess != null && nAccess != card.nAccess) {
 
-        if (DEBUG && this.messageEnabled()) {
+        if (MAXDEBUG && this.messageEnabled()) {
             this.printMessage("setAccess(" + str.toHexWord(nAccess) + ")");
         }
 

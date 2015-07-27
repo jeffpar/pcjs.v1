@@ -5492,6 +5492,17 @@ if (DEBUGGER) {
     };
 
     /**
+     * doPrint(sCmd)
+     *
+     * @this {Debugger}
+     * @param {string} sCmd
+     */
+    Debugger.prototype.doPrint = function(sCmd)
+    {
+        this.parseExpression(sCmd, true);
+    };
+
+    /**
      * doProcStep(sCmd)
      *
      * @this {Debugger}
@@ -5890,6 +5901,9 @@ if (DEBUGGER) {
                 this.println(sPrompt + sCmd);
             }
 
+            var ch = sCmd.charAt(0);
+            if (ch == '"' || ch == "'") return true;
+
             sCmd = sCmd.toLowerCase();
 
             /*
@@ -6003,7 +6017,7 @@ if (DEBUGGER) {
                     break;
                 case "?":
                     if (asArgs[1]) {
-                        this.parseExpression(asArgs[1], true);
+                        this.doPrint(asArgs[1]);
                         break;
                     }
                     this.doHelp();
