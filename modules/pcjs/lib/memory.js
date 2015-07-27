@@ -390,14 +390,15 @@ Memory.prototype = {
         return false;
     },
     /**
-     * setAccess(afn)
+     * setAccess(afn, fDirect)
      *
      * If no function table is specified, a default is selected based on the Memory type.
      *
      * @this {Memory}
      * @param {Array.<function()>} [afn] function table
+     * @param {boolean} [fDirect]
      */
-    setAccess: function(afn) {
+    setAccess: function(afn, fDirect) {
         if (!afn) {
             if (this.type == Memory.TYPE.UNPAGED) {
                 afn = Memory.afnUnpaged;
@@ -409,8 +410,8 @@ Memory.prototype = {
                 afn = Memory.afnNone;
             }
         }
-        this.setReadAccess(afn, true);
-        this.setWriteAccess(afn, true);
+        this.setReadAccess(afn, fDirect);
+        this.setWriteAccess(afn, fDirect);
     },
     /**
      * setReadAccess(afn, fDirect)
@@ -420,10 +421,13 @@ Memory.prototype = {
      * @param {boolean} [fDirect]
      */
     setReadAccess: function(afn, fDirect) {
-        this.readByte = afn[0] || this.readNone;
-        this.readShort = afn[1] || this.readShortDefault;
-        this.readLong = afn[2] || this.readLongDefault;
-        if (fDirect) {
+        var afnChecked = this.cReadBreakpoints? Memory.afnChecked : afn;
+        if (!fDirect) {
+            this.readByte = afnChecked[0] || this.readNone;
+            this.readShort = afnChecked[1] || this.readShortDefault;
+            this.readLong = afnChecked[2] || this.readLongDefault;
+        }
+        if (fDirect || fDirect === undefined) {
             this.readByteDirect = afn[0] || this.readNone;
             this.readShortDirect = afn[1] || this.readShortDefault;
             this.readLongDirect = afn[2] || this.readLongDefault;
@@ -437,10 +441,13 @@ Memory.prototype = {
      * @param {boolean} [fDirect]
      */
     setWriteAccess: function(afn, fDirect) {
-        this.writeByte = !this.fReadOnly && afn[3] || this.writeNone;
-        this.writeShort = !this.fReadOnly && afn[4] || this.writeShortDefault;
-        this.writeLong = !this.fReadOnly && afn[5] || this.writeLongDefault;
-        if (fDirect) {
+        var afnChecked = this.cWriteBreakpoints? Memory.afnChecked : afn;
+        if (!fDirect) {
+            this.writeByte = !this.fReadOnly && afnChecked[3] || this.writeNone;
+            this.writeShort = !this.fReadOnly && afnChecked[4] || this.writeShortDefault;
+            this.writeLong = !this.fReadOnly && afnChecked[5] || this.writeLongDefault;
+        }
+        if (fDirect || fDirect === undefined) {
             this.writeByteDirect = afn[3] || this.writeNone;
             this.writeShortDirect = afn[4] || this.writeShortDefault;
             this.writeLongDirect = afn[5] || this.writeLongDefault;
@@ -463,8 +470,8 @@ Memory.prototype = {
      */
     resetWriteAccess: function() {
         this.writeByte = this.fReadOnly? this.writeNone : this.writeByteDirect;
-        this.writeShort = this.fReadOnly? this.writeNone : this.writeShortDirect;
-        this.writeLong = this.fReadOnly? this.writeNone : this.writeLongDirect;
+        this.writeShort = this.fReadOnly? this.writeShortDefault : this.writeShortDirect;
+        this.writeLong = this.fReadOnly? this.writeLongDefault : this.writeLongDirect;
     },
     /**
      * setDebugger(dbg, addr, size)
@@ -527,13 +534,13 @@ Memory.prototype = {
         if (DEBUGGER && this.dbg) {
             if (!fWrite) {
                 if (this.cReadBreakpoints++ === 0) {
-                    this.setReadAccess(Memory.afnChecked);
+                    this.setReadAccess(Memory.afnChecked, false);
                 }
                 if (DEBUG) this.dbg.println("read breakpoint added to memory block " + str.toHex(this.addr));
             }
             else {
                 if (this.cWriteBreakpoints++ === 0) {
-                    this.setWriteAccess(Memory.afnChecked);
+                    this.setWriteAccess(Memory.afnChecked, false);
                 }
                 if (DEBUG) this.dbg.println("write breakpoint added to memory block " + str.toHex(this.addr));
             }
