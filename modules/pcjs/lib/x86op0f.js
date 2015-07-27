@@ -103,7 +103,7 @@ X86.opLSL = function LSL()
 };
 
 /**
- * opLOADALL()
+ * opLOADALL286()
  *
  * op=0x0F,0x05 (LOADALL)
  *
@@ -138,12 +138,12 @@ X86.opLSL = function LSL()
  *          85A-85F                        IDTR
  *          860-865                        TSS descriptor cache
  *
- * Oddly, the above document gives two contradictory cycle counts for LOADALL: 190 and 195.  I'll go with 195, for
- * no particular reason.
+ * Oddly, the above document gives two contradictory cycle counts for LOADALL: 190 and 195.  I'll go with 195, since
+ * the PCMag_Prog_TechRef mentions that time as well.
  *
  * @this {X86CPU}
  */
-X86.opLOADALL = function LOADALL()
+X86.opLOADALL286 = function LOADALL286()
 {
     if (this.nCPL) {
         /*
@@ -213,20 +213,120 @@ X86.opCLTS = function CLTS()
 };
 
 /**
+ * opLOADALL386()
+ *
+ * op=0x0F,0x07 (LOADALL ES:[EDI])
+ *
+ * Excerpt from Intel Internal Correspondence on "386 LOADALL Instruction" (undated):
+ *
+ *      1.5. 386 LOADALL Memory Format
+ *
+ *      The following tables define the LOADALL memory format. The LOADALL instruction uses a 512-byte block of
+ *      memory, where the lowest addressed byte is given in ES:[(E)DI]. The area above offset CC hex is used for
+ *      processor dependent registers (temporaries, invisible registers). These are loaded into the processor,
+ *      but will not affect normal program execution. All values in the memory area are read from a four byte field,
+ *      to keep the memory format DWORD aligned, but it is possible to locate memory area at a non-aligned address.
+ *      In this case, the execution time of LOADALL will DOUBLE For this reason, the memory dump area should always
+ *      be DWORD aligned.
+ *
+ *         Offset         Register
+ *          0x00            CR0
+ *          0x04            EFLAGS
+ *          0x08            EIP
+ *          0x0C            EDI
+ *          0x10            ESI
+ *          0x14            EBP
+ *          0x18            ESP
+ *          0x1C            EBX
+ *          0x20            EDX
+ *          0x24            ECX
+ *          0x28            EAX
+ *          0x2C            DR6
+ *          0x30            DR7
+ *          0x34            TR (TSS Selector--Word)
+ *          0x38            LDTR (LDT Selector--Word)
+ *          0x3C            GS
+ *          0x40            FS
+ *          0x44            DS
+ *          0x48            SS
+ *          0x4C            CS
+ *          0x50            ES
+ *          0x54            TSS (AR)
+ *          0x58            TSS (BASE)
+ *          0x5C            TSS (LIMIT)
+ *          0x60            IDT (AR)
+ *          0x64            IDT (BASE)
+ *          0x68            IDT (LIMIT)
+ *          0x6C            GDT (AR)
+ *          0x70            GDT (BASE)
+ *          0x74            GDT (LIMIT)
+ *          0x78            LDT (AR)
+ *          0x7C            LDT (BASE)
+ *          0x80            LDT (LIMIT)
+ *          0x84            GS (AR)
+ *          0x88            GS (BASE)
+ *          0x8C            GS (LIMIT)
+ *          0x90            FS (AR)
+ *          0x94            FS (BASE)
+ *          0x98            FS (LIMIT)
+ *          0x9C            DS (AR)
+ *          0xA0            DS (BASE)
+ *          0xA4            DS (LIMIT)
+ *          0xA8            SS (AR)
+ *          0xAC            SS (BASE)
+ *          0xB0            SS (LIMIT)
+ *          0xB4            CS (AR)
+ *          0xB8            CS (BASE)
+ *          0xBC            CS (LIMIT)
+ *          0xC0            ES (AR)
+ *          0xC4            ES (BASE)
+ *          0xC8            ES (LIMIT)
+ *
+ *      Each descriptor entry consists of 3 pieces:
+ *
+ *          AR
+ *          BASE
+ *          LIMIT
+ *
+ *      The AR part has the same format as the second dword of a segment descriptor except that only the AR byte (bits 8-15)
+ *      and the G and B/D bits (bits 23 and 22) are used. All other bits in the AR field are ignored. The BASE and LIMIT parts
+ *      contain full 32-bit values, fully expanded and unscrambled from the 386 descriptor. In particular, the LIMIT field
+ *      loaded for a page granular segment gives a byte granular limit, so should contain the page limit*4096 plus 4095.
+ *
+ * @this {X86CPU}
+ */
+X86.opLOADALL386 = function LOADALL386()
+{
+    if (this.nCPL) {
+        /*
+         * To use LOADALL, CPL must be zero.
+         */
+        X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0, true);
+        return;
+    }
+    /*
+     * TODO: Implement
+     */
+    X86.opUndefined.call(this);
+
+    this.nStepCycles -= 100;            // I've not seen a documented time for the 80386 LOADALL, so we'll make a guess
+};
+
+/**
  * opMOVrc()
  *
- * op=0x0F,0x20 (MOV reg,creg)
+ * op=0x0F,0x20 (MOV reg,ctlreg)
  *
  * NOTE: Since this instruction uses only 32-bit general-purpose registers, our ModRM decoders
  * are going to be more hindrance than help, so we fully decode and execute the instruction ourselves.
  *
  * From PCMag_Prog_TechRef, p.476: "The 80386 executes the MOV to/from control registers (CRn) regardless
- * of the setting of the MOD field.  The MOD field should be set to 0b11, but an early 80386 documentation
+ * of the setting of the MOD field.  The MOD field should be set to 11, but an early 80386 documentation
  * error indicated that the MOD field value was a don't care.  Early versions of the 80486 detect
- * a MOD != 0b11 as an illegal opcode.  This was changed in later versions to ignore the value of MOD.
- * Assemblers that generate MOD != 0b11 for these instructions will fail on some 80486s."
+ * a MOD != 11 as an illegal opcode.  This was changed in later versions to ignore the value of MOD.
+ * Assemblers that generate MOD != 11 for these instructions will fail on some 80486s."
  *
- * And in fact, the Compaq DeskPro 386 ROM BIOS executes this instruction with MOD set to 0b00, so we have
+ * And in fact, the Compaq DeskPro 386 ROM BIOS executes this instruction with MOD set to 00, so we have
  * to ignore it.
  *
  * @this {X86CPU}
@@ -261,32 +361,7 @@ X86.opMOVrc = function MOVrc()
         return;
     }
 
-    switch(bModRM & 0x7) {
-    case 0x0:
-        this.regEAX = reg;
-        break;
-    case 0x1:
-        this.regECX = reg;
-        break;
-    case 0x2:
-        this.regEDX = reg;
-        break;
-    case 0x3:
-        this.regEBX = reg;
-        break;
-    case 0x4:
-        this.regESP = reg;
-        break;
-    case 0x5:
-        this.regEBP = reg;
-        break;
-    case 0x6:
-        this.regESI = reg;
-        break;
-    case 0x7:
-        this.regEDI = reg;
-        break;
-    }
+    this.setReg(bModRM & 0x7, reg);
 
     this.nStepCycles -= 6;
 
@@ -296,20 +371,60 @@ X86.opMOVrc = function MOVrc()
 };
 
 /**
+ * opMOVrd()
+ *
+ * op=0x0F,0x21 (MOV reg,dbgreg)
+ *
+ * NOTE: Since this instruction uses only 32-bit general-purpose registers, our ModRM decoders
+ * are going to be more hindrance than help, so we fully decode and execute the instruction ourselves.
+ *
+ * @this {X86CPU}
+ */
+X86.opMOVrd = function MOVrd()
+{
+    /*
+     * NOTE: The following code shouldn't need to also test X86.PS.VM, because V86-mode is CPL 3.
+     */
+    if (this.nCPL) {
+        /*
+         * You're not allowed to read control registers if the current privilege level is not zero
+         */
+        X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
+        return;
+    }
+
+    var bModRM = this.getIPByte();
+    var iSrc = (bModRM & 0x38) >> 3;
+
+    if (iSrc == 4 || iSrc == 5) {
+        X86.opUndefined.call(this);
+        return;
+    }
+
+    this.setReg(bModRM & 0x7, this.regDRn[iSrc]);
+
+    this.nStepCycles -= 22;
+
+    /*
+     * TODO: Implement BACKTRACK for this instruction....
+     */
+};
+
+/**
  * opMOVcr()
  *
- * op=0x0F,0x22 (MOV creg,reg)
+ * op=0x0F,0x22 (MOV ctlreg,reg)
  *
  * NOTE: Since this instruction uses only 32-bit general-purpose registers, our ModRM decoders
  * are going to be more hindrance than help, so we fully decode and execute the instruction ourselves.
  *
  * From PCMag_Prog_TechRef, p.476: "The 80386 executes the MOV to/from control registers (CRn) regardless
- * of the setting of the MOD field.  The MOD field should be set to 0b11, but an early 80386 documentation
+ * of the setting of the MOD field.  The MOD field should be set to 11, but an early 80386 documentation
  * error indicated that the MOD field value was a don't care.  Early versions of the 80486 detect
- * a MOD != 0b11 as an illegal opcode.  This was changed in later versions to ignore the value of MOD.
- * Assemblers that generate MOD != 0b11 for these instructions will fail on some 80486s."
+ * a MOD != 11 as an illegal opcode.  This was changed in later versions to ignore the value of MOD.
+ * Assemblers that generate MOD != 11 for these instructions will fail on some 80486s."
  *
- * And in fact, the Compaq DeskPro 386 ROM BIOS executes this instruction with MOD set to 0b00, so we have
+ * And in fact, the Compaq DeskPro 386 ROM BIOS executes this instruction with MOD set to 00, so we have
  * to ignore it.
  *
  * @this {X86CPU}
@@ -327,34 +442,9 @@ X86.opMOVcr = function MOVcr()
         return;
     }
 
-    var reg;
     var bModRM = this.getIPByte();
-    switch(bModRM & 0x7) {
-    case 0x0:
-        reg = this.regEAX;
-        break;
-    case 0x1:
-        reg = this.regECX;
-        break;
-    case 0x2:
-        reg = this.regEDX;
-        break;
-    case 0x3:
-        reg = this.regEBX;
-        break;
-    case 0x4:
-        reg = this.regESP;
-        break;
-    case 0x5:
-        reg = this.regEBP;
-        break;
-    case 0x6:
-        reg = this.regESI;
-        break;
-    case 0x7:
-        reg = this.regEDI;
-        break;
-    }
+
+    var reg = this.getReg(bModRM & 0x7);
 
     switch((bModRM & 0x38) >> 3) {
     case 0x0:
@@ -373,6 +463,132 @@ X86.opMOVcr = function MOVcr()
         X86.opUndefined.call(this);
         return;
     }
+
+    /*
+     * TODO: Implement BACKTRACK for this instruction....
+     */
+};
+
+/**
+ * opMOVdr()
+ *
+ * op=0x0F,0x23 (MOV dbgreg,reg)
+ *
+ * NOTE: Since this instruction uses only 32-bit general-purpose registers, our ModRM decoders
+ * are going to be more hindrance than help, so we fully decode and execute the instruction ourselves.
+ *
+ * @this {X86CPU}
+ */
+X86.opMOVdr = function MOVdr()
+{
+    /*
+     * NOTE: The following code shouldn't need to also test X86.PS.VM, because V86-mode is CPL 3.
+     */
+    if (this.nCPL) {
+        /*
+         * You're not allowed to write control registers if the current privilege level is not zero
+         */
+        X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
+        return;
+    }
+
+    var bModRM = this.getIPByte();
+    var iDst = (bModRM & 0x38) >> 3;
+
+    if (iDst == 4 || iDst == 5) {
+        X86.opUndefined.call(this);
+        return;
+    }
+
+    /*
+     * TODO: Do something with the Debug registers....
+     */
+    this.regDRn[iDst] = this.getReg(bModRM & 0x7);
+
+    this.nStepCycles -= (iDst < 4? 22 : 14);
+
+    /*
+     * TODO: Implement BACKTRACK for this instruction....
+     */
+};
+
+/**
+ * opMOVrt()
+ *
+ * op=0x0F,0x24 (MOV reg,tstreg)
+ *
+ * NOTE: Since this instruction uses only 32-bit general-purpose registers, our ModRM decoders
+ * are going to be more hindrance than help, so we fully decode and execute the instruction ourselves.
+ *
+ * @this {X86CPU}
+ */
+X86.opMOVrt = function MOVrt()
+{
+    /*
+     * NOTE: The following code shouldn't need to also test X86.PS.VM, because V86-mode is CPL 3.
+     */
+    if (this.nCPL) {
+        /*
+         * You're not allowed to read control registers if the current privilege level is not zero
+         */
+        X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
+        return;
+    }
+
+    var bModRM = this.getIPByte();
+    var iSrc = (bModRM & 0x38) >> 3;
+
+    if (iSrc < 6) {
+        X86.opUndefined.call(this);
+        return;
+    }
+
+    this.setReg(bModRM & 0x7, this.regTRn[iSrc]);
+
+    this.nStepCycles -= 12;
+
+    /*
+     * TODO: Implement BACKTRACK for this instruction....
+     */
+};
+
+/**
+ * opMOVtr()
+ *
+ * op=0x0F,0x26 (MOV tstreg,reg)
+ *
+ * NOTE: Since this instruction uses only 32-bit general-purpose registers, our ModRM decoders
+ * are going to be more hindrance than help, so we fully decode and execute the instruction ourselves.
+ *
+ * @this {X86CPU}
+ */
+X86.opMOVtr = function MOVtr()
+{
+    /*
+     * NOTE: The following code shouldn't need to also test X86.PS.VM, because V86-mode is CPL 3.
+     */
+    if (this.nCPL) {
+        /*
+         * You're not allowed to write control registers if the current privilege level is not zero
+         */
+        X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
+        return;
+    }
+
+    var bModRM = this.getIPByte();
+    var iDst = (bModRM & 0x38) >> 3;
+
+    if (iDst < 6) {
+        X86.opUndefined.call(this);
+        return;
+    }
+
+    /*
+     * TODO: Do something with the Test registers....
+     */
+    this.regTRn[iDst] = this.getReg(bModRM & 0x7);
+
+    this.nStepCycles -= 12;
 
     /*
      * TODO: Implement BACKTRACK for this instruction....
@@ -1352,7 +1568,7 @@ X86.aOps0F[0x00] = X86.opGRP6;
 X86.aOps0F[0x01] = X86.opGRP7;
 X86.aOps0F[0x02] = X86.opLAR;
 X86.aOps0F[0x03] = X86.opLSL;
-X86.aOps0F[0x05] = X86.opLOADALL;
+X86.aOps0F[0x05] = X86.opLOADALL286;
 X86.aOps0F[0x06] = X86.opCLTS;
 
 /*
@@ -1402,8 +1618,14 @@ X86.aOps0F[0xFF] = X86.opInvalid;
 
 if (I386) {
     X86.aOps0F386 = [];
+    X86.aOps0F386[0x05] = X86.opInvalid;        // the 80286 LOADALL opcode is invalid on the 80386
+    X86.aOps0F386[0x07] = X86.opLOADALL386;
     X86.aOps0F386[0x20] = X86.opMOVrc;
+    X86.aOps0F386[0x21] = X86.opMOVrd;
     X86.aOps0F386[0x22] = X86.opMOVcr;
+    X86.aOps0F386[0x23] = X86.opMOVdr;
+    X86.aOps0F386[0x24] = X86.opMOVrt;
+    X86.aOps0F386[0x26] = X86.opMOVtr;
     X86.aOps0F386[0x80] = X86.opJOw;
     X86.aOps0F386[0x81] = X86.opJNOw;
     X86.aOps0F386[0x82] = X86.opJCw;

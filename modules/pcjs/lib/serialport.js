@@ -168,10 +168,10 @@ SerialPort.DL_DEFAULT       = 0x180;    // we select an arbitrary default Diviso
  * SerialPort interrupts by passing a hard-coded delay to setIRR().  The setIRR() delay does not ensure any
  * particular baud rate, it simply gives the underlying Interrupt Service Routine (ISR) some breathing room.
  *
- * The Microsoft Windows 1.01 serial mouse driver ISR issues an EOI before it has safely exited, relying solely
- * on the fact that a 1200 baud serial device would not normally interrupt frequently enough to blow the stack.
- * However, in PCjs, all you have to do is enable Debugger messages on every serial interrupt and mouse event,
- * eg:
+ * The Microsoft Windows 1.01 serial mouse driver ISR issues an EOI before it has safely exited, presumably
+ * relying on the fact that a 1200 baud serial device would not normally interrupt frequently enough to blow
+ * the stack.  However, in PCjs, all you have to do is enable Debugger messages on every serial interrupt
+ * and mouse event, eg:
  *
  *      m serial on;m pic on;m mouse on
  *
@@ -179,8 +179,9 @@ SerialPort.DL_DEFAULT       = 0x180;    // we select an arbitrary default Diviso
  * display the current stack pointer, which you can watch drop to zero and then wrap around, no doubt trampling
  * lots of code and data along the way.
  *
- * This problem can also occur without being forced by the Debugger; eg, whenever the physical machine's mouse is
- * configured for a high interrupt rate.
+ * This problem could also occur without being forced by the Debugger; eg, if your physical machine's mouse was
+ * configured for a high interrupt rate, and your browser generated mouse events at a comparable rate, then you
+ * could blow the simulation's stack.
  */
 
 /*

@@ -1104,6 +1104,82 @@ X86CPU.prototype.reset = function()
 };
 
 /**
+ * getReg(i)
+ *
+ * @this {X86CPU}
+ * @param {number} i (0-7)
+ * @return {number}
+ */
+X86CPU.prototype.getReg = function(i)
+{
+    var reg;
+    switch(i) {
+    case 0x0:
+        reg = this.regEAX;
+        break;
+    case 0x1:
+        reg = this.regECX;
+        break;
+    case 0x2:
+        reg = this.regEDX;
+        break;
+    case 0x3:
+        reg = this.regEBX;
+        break;
+    case 0x4:
+        reg = this.regESP;
+        break;
+    case 0x5:
+        reg = this.regEBP;
+        break;
+    case 0x6:
+        reg = this.regESI;
+        break;
+    case 0x7:
+        reg = this.regEDI;
+        break;
+    }
+    return reg;
+};
+
+/**
+ * setReg(i, reg)
+ *
+ * @this {X86CPU}
+ * @param {number} i (0-7)
+ * @param {number} reg
+ */
+X86CPU.prototype.setReg = function(i, reg)
+{
+    switch(i) {
+    case 0x0:
+        this.regEAX = reg;
+        break;
+    case 0x1:
+        this.regECX = reg;
+        break;
+    case 0x2:
+        this.regEDX = reg;
+        break;
+    case 0x3:
+        this.regEBX = reg;
+        break;
+    case 0x4:
+        this.regESP = reg;
+        break;
+    case 0x5:
+        this.regEBP = reg;
+        break;
+    case 0x6:
+        this.regESI = reg;
+        break;
+    case 0x7:
+        this.regEDI = reg;
+        break;
+    }
+};
+
+/**
  * resetRegs()
  *
  * According to "The 8086 Book", p.7-5, a RESET signal initializes the following registers:
@@ -1236,8 +1312,8 @@ X86CPU.prototype.resetRegs = function()
         this.regCR1 = 0;                // reserved
         this.regCR2 = 0;                // page fault linear address (PFLA)
         this.regCR3 = 0;                // page directory base register (PDBR)
-        this.aRegDR = new Array(8);     // Debug Registers DR0-DR7
-        this.aRegTR = new Array(8);     // Test Registers TR0-TR7
+        this.regDRn = [0,0,0,0,null,null,0,0];              // Debug Registers DR0-DR7 (DR4-DR5 are undefined)
+        this.regTRn = [null,null,null,null,null,null,0,0];  // Test Registers TR0-TR7 (TR0-TR5 are undefined)
         this.segFS = new X86Seg(this, X86Seg.ID.DATA,  "FS");
         this.segGS = new X86Seg(this, X86Seg.ID.DATA,  "GS");
         this.disablePageBlocks();
@@ -1666,8 +1742,8 @@ X86CPU.prototype.saveProtMode = function()
             a.push(this.regCR1);
             a.push(this.regCR2);
             a.push(this.regCR3);
-            a.push(this.aRegDR);
-            a.push(this.aRegTR);
+            a.push(this.regDRn);
+            a.push(this.regTRn);
         }
         return a;
     }
@@ -1697,8 +1773,8 @@ X86CPU.prototype.restoreProtMode = function(a)
             this.regCR1 = a[8];
             this.regCR2 = a[9];
             this.regCR3 = a[10];
-            this.aRegDR = a[11];
-            this.aRegTR = a[12];
+            this.regDRn = a[11];
+            this.regTRn = a[12];
         }
         this.setProtMode();
     }

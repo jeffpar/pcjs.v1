@@ -2139,6 +2139,10 @@ Disk.prototype.toJSON = function()
      */
     s = s.replace(/,"[^"]*":([0-9]+|true|false)/gm, "");
     s = s.replace(/(sector|length|data|pattern):/gm, "\"$1\":");
+    /*
+     * Last but not least, insert line breaks after every object definition, to ease the pain on text editors.
+     */
+    s = s.replace(/},/gm, "},\n");
     return s;
 };
 

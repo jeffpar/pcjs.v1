@@ -3694,7 +3694,7 @@ X86.fnFault = function(nFault, nError, fHalt, nCycles)
     this.opFlags |= X86.OPFLAG.FAULT;
 
     if (!this.aFlags.fComplete) {
-        this.printMessage("Fault " + str.toHexByte(nFault) + " blocked by Debugger", Messages.WARN);
+        this.printMessage("Fault " + str.toHexByte(nFault) + " blocked by PCjs", Messages.WARN);
         this.setIP(this.opLIP - this.segCS.base);
         return;
     }

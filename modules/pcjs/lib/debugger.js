@@ -375,13 +375,24 @@ if (DEBUGGER) {
     Debugger.REG_CR1 = 0x21;
     Debugger.REG_CR2 = 0x22;
     Debugger.REG_CR3 = 0x23;
+    Debugger.REG_DR0 = 0x28;
+    Debugger.REG_DR1 = 0x29;
+    Debugger.REG_DR2 = 0x2A;
+    Debugger.REG_DR3 = 0x2B;
+    Debugger.REG_DR6 = 0x2E;
+    Debugger.REG_DR7 = 0x2F;
+    Debugger.REG_TR0 = 0x30;
+    Debugger.REG_TR6 = 0x36;
+    Debugger.REG_TR7 = 0x37;
 
     Debugger.REGS = [
         "AL",  "CL",  "DL",  "BL",  "AH",  "CH",  "DH",  "BH",
         "AX",  "CX",  "DX",  "BX",  "SP",  "BP",  "SI",  "DI",
         "ES",  "CS",  "SS",  "DS",  "FS",  "GS",  "IP",  "PS",
         "EAX", "ECX", "EDX", "EBX", "ESP", "EBP", "ESI", "EDI",
-        "CR0", "CR1", "CR2", "CR3"
+        "CR0", "CR1", "CR2", "CR3", null,  null,  null,  null,  // register names used with TYPE_CTLREG
+        "DR0", "DR1", "DR2", "DR3", null,  null,  "DR6", "DR7", // register names used with TYPE_DBGREG
+        null,  null,  null,  null,  null,  null,  "TR6", "TR7"  // register names used with TYPE_TSTREG
     ];
 
     Debugger.REG_ES         = 0x00;     // bits 0-1 are standard SegReg encodings
@@ -919,7 +930,11 @@ if (DEBUGGER) {
         0x05: [Debugger.INS.LOADALL,Debugger.TYPE_80286],
         0x06: [Debugger.INS.CLTS,   Debugger.TYPE_80286],
         0x20: [Debugger.INS.MOV,    Debugger.TYPE_MODREG | Debugger.TYPE_DWORD | Debugger.TYPE_OUT  | Debugger.TYPE_80386, Debugger.TYPE_CTLREG | Debugger.TYPE_DWORD | Debugger.TYPE_IN],
+        0x21: [Debugger.INS.MOV,    Debugger.TYPE_MODREG | Debugger.TYPE_DWORD | Debugger.TYPE_OUT  | Debugger.TYPE_80386, Debugger.TYPE_DBGREG | Debugger.TYPE_DWORD | Debugger.TYPE_IN],
         0x22: [Debugger.INS.MOV,    Debugger.TYPE_CTLREG | Debugger.TYPE_DWORD | Debugger.TYPE_OUT  | Debugger.TYPE_80386, Debugger.TYPE_MODREG | Debugger.TYPE_DWORD | Debugger.TYPE_IN],
+        0x23: [Debugger.INS.MOV,    Debugger.TYPE_DBGREG | Debugger.TYPE_DWORD | Debugger.TYPE_OUT  | Debugger.TYPE_80386, Debugger.TYPE_MODREG | Debugger.TYPE_DWORD | Debugger.TYPE_IN],
+        0x24: [Debugger.INS.MOV,    Debugger.TYPE_MODREG | Debugger.TYPE_DWORD | Debugger.TYPE_OUT  | Debugger.TYPE_80386, Debugger.TYPE_TSTREG | Debugger.TYPE_DWORD | Debugger.TYPE_IN],
+        0x26: [Debugger.INS.MOV,    Debugger.TYPE_TSTREG | Debugger.TYPE_DWORD | Debugger.TYPE_OUT  | Debugger.TYPE_80386, Debugger.TYPE_MODREG | Debugger.TYPE_DWORD | Debugger.TYPE_IN],
         0x80: [Debugger.INS.JO,     Debugger.TYPE_IMMREL | Debugger.TYPE_VWORD | Debugger.TYPE_IN   | Debugger.TYPE_80386],
         0x81: [Debugger.INS.JNO,    Debugger.TYPE_IMMREL | Debugger.TYPE_VWORD | Debugger.TYPE_IN   | Debugger.TYPE_80386],
         0x82: [Debugger.INS.JC,     Debugger.TYPE_IMMREL | Debugger.TYPE_VWORD | Debugger.TYPE_IN   | Debugger.TYPE_80386],
@@ -3509,7 +3524,7 @@ if (DEBUGGER) {
                 break;
             }
             if (sOperands.length > 0) sOperands += ",";
-            sOperands += sOperand;
+            sOperands += (sOperand || "???");
         }
 
         var sLine = this.hexAddr(dbgAddrIns) + " ";
@@ -3607,6 +3622,12 @@ if (DEBUGGER) {
         }
         else if (typeMode == Debugger.TYPE_CTLREG) {
             bReg += Debugger.REG_CR0;
+        }
+        else if (typeMode == Debugger.TYPE_DBGREG) {
+            bReg += Debugger.REG_DR0;
+        }
+        else if (typeMode == Debugger.TYPE_TSTREG) {
+            bReg += Debugger.REG_TR0;
         }
         else {
             var typeSize = type & Debugger.TYPE_SIZE;
@@ -5935,7 +5956,7 @@ if (DEBUGGER) {
                         }
                     }
 
-                    var ch, ch0, i;
+                    var ch0, i;
                     switch (sCmd) {
                     case "reset":
                         if (this.cmp) this.cmp.reset();
