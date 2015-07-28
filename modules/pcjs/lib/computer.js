@@ -1241,6 +1241,11 @@ Computer.prototype.getComponentByType = function(sType, componentPrev)
  */
 Computer.init = function()
 {
+    /*
+     * In DEBUG builds, embedMachine() may have set DEBUG_APPVERSION.
+     */
+    if (DEBUG && DEBUG_APPVERSION) Computer.sAppVer = DEBUG_APPVERSION;
+
     var aeMachines = Component.getElementsByClass(window.document, PCJSCLASS + "-machine");
 
     for (var iMachine = 0; iMachine < aeMachines.length; iMachine++) {

@@ -128,6 +128,13 @@ function parseXML(sXML, sXMLFile, idMachine, sStateFile, fResolve, display, done
             sXML = sXML.replace(/(<machine[^>]*\sid=)(['"]).*?\2/, "$1$2" + idMachine + "$2" + (sStateFile? " state=$2" + sStateFile + "$2" : "") + (sURL? " url=$2" + sURL + "$2" : ""));
         }
         /*
+         * DEBUG-only kludge to replace the version number template in the XSL file (which we assume we're reading,
+         * since fResolve is false) with any APPVERSION we extracted from the XML file (see corresponding kludge below).
+         */
+        if (DEBUG && !fResolve && DEBUG_APPVERSION) {
+            sXML = sXML.replace(/<xsl:variable name="APPVERSION">1.x.x<\/xsl:variable>/, '<xsl:variable name="APPVERSION">' + DEBUG_APPVERSION + '</xsl:variable>');
+        }
+        /*
          * If the resource we requested is not really an XML file (or the file didn't exist and the server simply returned
          * a message like "Cannot GET /devices/pc/machine/5150/cga/64kb/donkey/machine.xml"), we'd like to display a more
          * meaningful message, because the XML DOM parsers will blithely return a document that contains nothing useful; eg:
@@ -338,6 +345,14 @@ function embedMachine(sName, sVersion, idElement, sXMLFile, sXSLFile, sStateFile
                 if (!xml) {
                     displayError(sXML);
                     return;
+                }
+                /*
+                 * DEBUG-only kludge to extract the version number from the stylesheet path in the machine XML file;
+                 * we don't need this code in COMPILED (non-DEBUG) releases, because APPVERSION is hard-coded into them.
+                 */
+                if (DEBUG) {
+                    var aMatch = sXML.match(/<\?xml-stylesheet[^>]* href=(['"])[^'"]*?\/([0-9.]*)\/([^'"]*)\1/);
+                    if (aMatch && APPVERSION == "1.x.x") DEBUG_APPVERSION = aMatch[2];
                 }
                 var transformXML = function(sXSL, xsl) {
                     if (!xsl) {
