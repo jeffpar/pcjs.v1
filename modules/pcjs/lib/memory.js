@@ -617,7 +617,7 @@ Memory.prototype = {
      * @return {number}
      */
     readShortDefault: function readShortDefault(off, addr) {
-        return this.readByte(off, addr) | (this.readByte(off + 1, addr) << 8);
+        return this.readByte(off++, addr++) | (this.readByte(off, addr) << 8);
     },
     /**
      * readLongDefault(off, addr)
@@ -628,7 +628,7 @@ Memory.prototype = {
      * @return {number}
      */
     readLongDefault: function readLongDefault(off, addr) {
-        return this.readByte(off, addr) | (this.readByte(off + 1, addr) << 8) | (this.readByte(off + 2, addr) << 16) | (this.readByte(off + 3, addr) << 24);
+        return this.readByte(off++, addr++) | (this.readByte(off++, addr++) << 8) | (this.readByte(off++, addr++) << 16) | (this.readByte(off, addr) << 24);
     },
     /**
      * writeShortDefault(off, w, addr)
@@ -640,8 +640,8 @@ Memory.prototype = {
      */
     writeShortDefault: function writeShortDefault(off, w, addr) {
         // DEBUG: Component.assert(!(w & ~0xffff));
-        this.writeByte(off, w & 0xff, addr);
-        this.writeByte(off + 1, w >> 8, addr);
+        this.writeByte(off++, w & 0xff, addr++);
+        this.writeByte(off, w >> 8, addr);
     },
     /**
      * writeLongDefault(off, w, addr)
@@ -652,10 +652,10 @@ Memory.prototype = {
      * @param {number} addr
      */
     writeLongDefault: function writeLongDefault(off, w, addr) {
-        this.writeByte(off, w & 0xff, addr);
-        this.writeByte(off + 1, (w >> 8) & 0xff, addr);
-        this.writeByte(off + 2, (w >> 16) & 0xff, addr);
-        this.writeByte(off + 3, (w >>> 24), addr);
+        this.writeByte(off++, w & 0xff, addr++);
+        this.writeByte(off++, (w >> 8) & 0xff, addr++);
+        this.writeByte(off++, (w >> 16) & 0xff, addr++);
+        this.writeByte(off, (w >>> 24), addr);
     },
     /**
      * readByteMemory(off, addr)
