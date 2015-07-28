@@ -551,7 +551,7 @@ Bus.prototype.setMemoryAccess = function(addr, size, afn)
             if (!block.controller) {
                 return this.reportError(5, addr, size);
             }
-            block.setAccess(afn);
+            block.setAccess(afn, true);
             size -= this.nBlockSize;
             iBlock++;
         }

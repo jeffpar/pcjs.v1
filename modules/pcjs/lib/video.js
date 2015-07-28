@@ -1599,10 +1599,10 @@ if (DEBUGGER) Card.GRC.REGS = ["SRESET","ESRESET","COLORCMP","DATAROT","READMAP"
  */
 
 /*
- * Values returned by getAccess(); the high byte describes the read mode, and the low byte describes the write mode.
+ * Values returned by getCardAccess(); the high byte describes the read mode, and the low byte describes the write mode.
  *
- * V2 should never appear in any values used by getAccess() or setAccess()/setMemoryAccess(); the sole purpose of V2 is
- * to distinguish newer (V2) access values from older (V1) access values in saved contexts.  It's set when the context
+ * V2 should never appear in any values used by getCardAccess() or setCardAccess(); the sole purpose of V2 is to
+ * distinguish newer (V2) access values from older (V1) access values in saved contexts.  It's set when the context
  * is saved, and cleared when the context is restored.  Thus, if V2 is not set on restore, we assume we're dealing with
  * a V1 value, so we run it through the V1 table (below) to produce a V2 value.  Hopefully at some point V1 contexts
  * can be deprecated, and the V2 bit can be eliminated/repurposed.
@@ -1693,7 +1693,7 @@ Card.ACCESS.readByteMode0Chain4 = function readByteMode0Chain4(off, addr)
 Card.ACCESS.readByteMode0EvenOdd = function readByteMode0EvenOdd(off, addr)
 {
     /*
-     * TODO: As discussed in getAccess(), we need to run some tests on real EGA/VGA hardware to determine
+     * TODO: As discussed in getCardAccess(), we need to run some tests on real EGA/VGA hardware to determine
      * exactly what gets latched (ie, from which address) when EVENODD is in effect.  Whatever we learn may
      * also dictate a special EVENODD function for READ.MODE1 as well.
      */
@@ -1759,7 +1759,7 @@ Card.ACCESS.readByteMode1 = function readByteMode1(off, addr)
  *
  * @this {Memory}
  * @param {number} off
- * @param {number} b (which should already be pre-masked to 8 bits; see Bus.prototype.setByteDirect)
+ * @param {number} b (which should already be pre-masked to 8 bits; see cpu.setByte())
  * @param {number} [addr]
  */
 Card.ACCESS.writeByteMode0 = function writeByteMode0(off, b, addr)
@@ -1810,7 +1810,7 @@ Card.ACCESS.writeByteMode0 = function writeByteMode0(off, b, addr)
  *
  * @this {Memory}
  * @param {number} off
- * @param {number} b (which should already be pre-masked to 8 bits; see Bus.prototype.setByteDirect)
+ * @param {number} b (which should already be pre-masked to 8 bits; see cpu.setByte())
  * @param {number} [addr]
  */
 Card.ACCESS.writeByteMode0Chain4 = function writeByteMode0Chain4(off, b, addr)
@@ -1836,7 +1836,7 @@ Card.ACCESS.writeByteMode0Chain4 = function writeByteMode0Chain4(off, b, addr)
  *
  * @this {Memory}
  * @param {number} off
- * @param {number} b (which should already be pre-masked to 8 bits; see Bus.prototype.setByteDirect)
+ * @param {number} b (which should already be pre-masked to 8 bits; see cpu.setByte())
  * @param {number} [addr]
  */
 Card.ACCESS.writeByteMode0EvenOdd = function writeByteMode0EvenOdd(off, b, addr)
@@ -1865,7 +1865,7 @@ Card.ACCESS.writeByteMode0EvenOdd = function writeByteMode0EvenOdd(off, b, addr)
  *
  * @this {Memory}
  * @param {number} off
- * @param {number} b (which should already be pre-masked to 8 bits; see Bus.prototype.setByteDirect)
+ * @param {number} b (which should already be pre-masked to 8 bits; see cpu.setByte())
  * @param {number} [addr]
  */
 Card.ACCESS.writeByteMode0Rot = function writeByteMode0Rot(off, b, addr)
@@ -1890,7 +1890,7 @@ Card.ACCESS.writeByteMode0Rot = function writeByteMode0Rot(off, b, addr)
  *
  * @this {Memory}
  * @param {number} off
- * @param {number} b (which should already be pre-masked to 8 bits; see Bus.prototype.setByteDirect)
+ * @param {number} b (which should already be pre-masked to 8 bits; see cpu.setByte())
  * @param {number} [addr]
  */
 Card.ACCESS.writeByteMode0And = function writeByteMode0And(off, b, addr)
@@ -1916,7 +1916,7 @@ Card.ACCESS.writeByteMode0And = function writeByteMode0And(off, b, addr)
  *
  * @this {Memory}
  * @param {number} off
- * @param {number} b (which should already be pre-masked to 8 bits; see Bus.prototype.setByteDirect)
+ * @param {number} b (which should already be pre-masked to 8 bits; see cpu.setByte())
  * @param {number} [addr]
  */
 Card.ACCESS.writeByteMode0Or = function writeByteMode0Or(off, b, addr)
@@ -1942,7 +1942,7 @@ Card.ACCESS.writeByteMode0Or = function writeByteMode0Or(off, b, addr)
  *
  * @this {Memory}
  * @param {number} off
- * @param {number} b (which should already be pre-masked to 8 bits; see Bus.prototype.setByteDirect)
+ * @param {number} b (which should already be pre-masked to 8 bits; see cpu.setByte())
  * @param {number} [addr]
  */
 Card.ACCESS.writeByteMode0Xor = function writeByteMode0Xor(off, b, addr)
@@ -1995,7 +1995,7 @@ Card.ACCESS.writeByteMode1 = function writeByteMode1(off, b, addr)
 Card.ACCESS.writeByteMode1EvenOdd = function writeByteMode1EvenOdd(off, b, addr)
 {
     /*
-     * TODO: As discussed in getAccess(), we need to run some tests on real EGA/VGA hardware to
+     * TODO: As discussed in getCardAccess(), we need to run some tests on real EGA/VGA hardware to
      * determine exactly where latches are written (ie, to which address) when EVENODD is in effect.
      */
     off += this.offset;
@@ -2020,7 +2020,7 @@ Card.ACCESS.writeByteMode1EvenOdd = function writeByteMode1EvenOdd(off, b, addr)
  *
  * @this {Memory}
  * @param {number} off
- * @param {number} b (which should already be pre-masked to 8 bits; see Bus.prototype.setByteDirect)
+ * @param {number} b (which should already be pre-masked to 8 bits; see cpu.setByte())
  * @param {number} [addr]
  */
 Card.ACCESS.writeByteMode2 = function writeByteMode2(off, b, addr)
@@ -2043,7 +2043,7 @@ Card.ACCESS.writeByteMode2 = function writeByteMode2(off, b, addr)
  *
  * @this {Memory}
  * @param {number} off
- * @param {number} b (which should already be pre-masked to 8 bits; see Bus.prototype.setByteDirect)
+ * @param {number} b (which should already be pre-masked to 8 bits; see cpu.setByte())
  * @param {number} [addr]
  */
 Card.ACCESS.writeByteMode2And = function writeByteMode2And(off, b, addr)
@@ -2067,7 +2067,7 @@ Card.ACCESS.writeByteMode2And = function writeByteMode2And(off, b, addr)
  *
  * @this {Memory}
  * @param {number} off
- * @param {number} b (which should already be pre-masked to 8 bits; see Bus.prototype.setByteDirect)
+ * @param {number} b (which should already be pre-masked to 8 bits; see cpu.setByte())
  * @param {number} [addr]
  */
 Card.ACCESS.writeByteMode2Or = function writeByteMode2Or(off, b, addr)
@@ -2091,7 +2091,7 @@ Card.ACCESS.writeByteMode2Or = function writeByteMode2Or(off, b, addr)
  *
  * @this {Memory}
  * @param {number} off
- * @param {number} b (which should already be pre-masked to 8 bits; see Bus.prototype.setByteDirect)
+ * @param {number} b (which should already be pre-masked to 8 bits; see cpu.setByte())
  * @param {number} [addr]
  */
 Card.ACCESS.writeByteMode2Xor = function writeByteMode2Xor(off, b, addr)
@@ -2121,7 +2121,7 @@ Card.ACCESS.writeByteMode2Xor = function writeByteMode2Xor(off, b, addr)
  *
  * @this {Memory}
  * @param {number} off
- * @param {number} b (which should already be pre-masked to 8 bits; see Bus.prototype.setByteDirect)
+ * @param {number} b (which should already be pre-masked to 8 bits; see cpu.setByte())
  * @param {number} [addr]
  */
 Card.ACCESS.writeByteMode3 = function writeByteMode3(off, b, addr)
@@ -2142,7 +2142,7 @@ Card.ACCESS.writeByteMode3 = function writeByteMode3(off, b, addr)
 };
 
 /*
- * Mappings from getAccess() values to access functions above
+ * Mappings from getCardAccess() values to access functions above
  */
 Card.ACCESS.afn = [];
 
@@ -2528,6 +2528,9 @@ Card.prototype.getMemoryBuffer = function(addr)
 /**
  * getMemoryAccess()
  *
+ * WARNING: This is a public method, whereas most Card methods are private to the Video component;
+ * because a Card also acts as a Memory controller, it must provide getMemoryAccess() to the Memory component.
+ *
  * Return the last set of memory access functions recorded by setMemoryAccess().
  *
  * @this {Card}
@@ -2541,7 +2544,7 @@ Card.prototype.getMemoryAccess = function()
 /**
  * setMemoryAccess(nAccess)
  *
- * This transforms the memory access value that getAccess() returns into the best available set of
+ * This transforms the memory access value that getCardAccess() returns into the best available set of
  * memory access functions, which are then returned via getMemoryAccess() to any memory blocks we allocate
  * or modify.
  *
@@ -2564,7 +2567,7 @@ Card.prototype.setMemoryAccess = function(nAccess)
                  * clears SEQ.MEMMODE.SEQUENTIAL, we will briefly be in an "odd" (unsupported) state.
                  *
                  * This didn't used to occur when we relied on the GRC.MODE register instead of the SEQ.MEMMODE for
-                 * determining the EVENODD state.  But, as explained in getAccess(), we've run into inconsistencies in
+                 * determining the EVENODD state.  But, as explained in getCardAccess(), we've run into inconsistencies in
                  * how GRC.MODE.EVENODD is programmed, so we must live with this warning.
                  *
                  * The ultimate solution is to provide a EVENODD handler for READ.MODE1, since there is the remote
@@ -2589,7 +2592,7 @@ Card.prototype.setMemoryAccess = function(nAccess)
                  * clears SEQ.MEMMODE.SEQUENTIAL, we will briefly be in an "odd" (unsupported) state.
                  *
                  * This didn't used to occur when we relied on the GRC.MODE register instead of the SEQ.MEMMODE for
-                 * determining the EVENODD state.  But, as explained in getAccess(), we've run into inconsistencies in
+                 * determining the EVENODD state.  But, as explained in getCardAccess(), we've run into inconsistencies in
                  * how GRC.MODE.EVENODD is programmed, so we must live with this warning.
                  *
                  * The ultimate solution is to provide EVENODD handlers for all modes other than WRITE.MODE0, since there
@@ -4170,12 +4173,12 @@ Video.prototype.removeCursor = function()
 };
 
 /**
- * getAccess()
+ * getCardAccess()
  *
  * @this {Video}
  * @return {number|undefined} current memory access setting, or undefined if unknown
  */
-Video.prototype.getAccess = function()
+Video.prototype.getCardAccess = function()
 {
     var nAccess;
     var card = this.cardActive;
@@ -4234,7 +4237,7 @@ Video.prototype.getAccess = function()
             break;
         default:
             if (DEBUG && this.messageEnabled()) {
-                this.printMessage("getAccess(): invalid GRC mode (" + str.toHexByte(regGRCMode) + ")");
+                this.printMessage("getCardAccess(): invalid GRC mode (" + str.toHexByte(regGRCMode) + ")");
             }
             break;
         }
@@ -4287,18 +4290,18 @@ Video.prototype.getAccess = function()
 };
 
 /**
- * setAccess(nAccess)
+ * setCardAccess(nAccess)
  *
  * @this {Video}
  * @param {number|undefined} nAccess (one of the Card.ACCESS.* constants)
  */
-Video.prototype.setAccess = function(nAccess)
+Video.prototype.setCardAccess = function(nAccess)
 {
     var card = this.cardActive;
     if (card && nAccess != null && nAccess != card.nAccess) {
 
         if (MAXDEBUG && this.messageEnabled()) {
-            this.printMessage("setAccess(" + str.toHexWord(nAccess) + ")");
+            this.printMessage("setCardAccess(" + str.toHexWord(nAccess) + ")");
         }
 
         card.setMemoryAccess(nAccess);
@@ -4622,7 +4625,7 @@ Video.prototype.checkMode = function(fForce)
                     }
                 }
 
-                nAccess = this.getAccess();
+                nAccess = this.getCardAccess();
             }
         }
         else if (card.regMode & Card.CGA.MODE.VIDEO_ENABLE) {
@@ -4642,19 +4645,19 @@ Video.prototype.checkMode = function(fForce)
     }
 
     /*
-     * NOTE: If setMode() remaps the video memory, that will trigger calls to getMemoryAccess() to also update the
+     * NOTE: If setMode() remaps the video memory, that will trigger calls to setCardAccess() to also update the
      * memory's access functions.  However, if the memory access setting (nAccess) is about to change as well, those
-     * changes will be moot until the setAccess() call that follows.  Basically, whenever both memory mapping AND access
-     * functions are changing, the memory will be in an inconsistent state until both setMode() and setAccess() are
-     * finished.
+     * changes will be moot until the setCardAccess() call that follows.  Basically, whenever both memory mapping AND
+     * access functions are changing, the memory will be in an inconsistent state until both setMode() and setCardAccess()
+     * are finished.
      *
-     * The setMode() call takes precedence; if we called setAccess() first, it might attempt to modify memory access
+     * The setMode() call takes precedence; if we called setCardAccess() first, it might attempt to modify memory access
      * functions based on the card's addrBuffer setting, and if that doesn't match what's currently mapped, assertions
      * will be triggered (probably not fatal, but it would defeat the point of the assertions).
      */
     if (!this.setMode(nMode, fForce)) return false;
 
-    this.setAccess(nAccess);
+    this.setCardAccess(nAccess);
 
     return true;
 };
@@ -5902,7 +5905,7 @@ Video.prototype.outSEQData = function(port, bOut, addrFrom)
         this.cardEGA.nSeqMapMask = Video.aEGAByteToDW[bOut & Card.SEQ.MAPMASK.MAPS];
         break;
     case Card.SEQ.MEMMODE.INDX:
-        this.setAccess(this.getAccess());
+        this.setCardAccess(this.getCardAccess());
         break;
     default:
         break;
@@ -6192,7 +6195,7 @@ Video.prototype.outGRCData = function(port, bOut, addrFrom)
         break;
     case Card.GRC.DATAROT.INDX:
     case Card.GRC.MODE.INDX:
-        this.setAccess(this.getAccess());
+        this.setCardAccess(this.getCardAccess());
         break;
     case Card.GRC.READMAP.INDX:
         this.cardEGA.nReadMapShift = (bOut & Card.GRC.READMAP.NUM) << 3;

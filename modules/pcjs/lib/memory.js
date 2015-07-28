@@ -421,11 +421,10 @@ Memory.prototype = {
      * @param {boolean} [fDirect]
      */
     setReadAccess: function(afn, fDirect) {
-        var afnChecked = this.cReadBreakpoints? Memory.afnChecked : afn;
-        if (!fDirect) {
-            this.readByte = afnChecked[0] || this.readNone;
-            this.readShort = afnChecked[1] || this.readShortDefault;
-            this.readLong = afnChecked[2] || this.readLongDefault;
+        if (!fDirect || !this.cReadBreakpoints) {
+            this.readByte = afn[0] || this.readNone;
+            this.readShort = afn[1] || this.readShortDefault;
+            this.readLong = afn[2] || this.readLongDefault;
         }
         if (fDirect || fDirect === undefined) {
             this.readByteDirect = afn[0] || this.readNone;
@@ -441,11 +440,10 @@ Memory.prototype = {
      * @param {boolean} [fDirect]
      */
     setWriteAccess: function(afn, fDirect) {
-        var afnChecked = this.cWriteBreakpoints? Memory.afnChecked : afn;
-        if (!fDirect) {
-            this.writeByte = !this.fReadOnly && afnChecked[3] || this.writeNone;
-            this.writeShort = !this.fReadOnly && afnChecked[4] || this.writeShortDefault;
-            this.writeLong = !this.fReadOnly && afnChecked[5] || this.writeLongDefault;
+        if (!fDirect || !this.cWriteBreakpoints) {
+            this.writeByte = !this.fReadOnly && afn[3] || this.writeNone;
+            this.writeShort = !this.fReadOnly && afn[4] || this.writeShortDefault;
+            this.writeLong = !this.fReadOnly && afn[5] || this.writeLongDefault;
         }
         if (fDirect || fDirect === undefined) {
             this.writeByteDirect = afn[3] || this.writeNone;
