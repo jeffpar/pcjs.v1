@@ -151,13 +151,23 @@ function parseXML(sXML, sXMLFile, idMachine, sStateFile, fResolve, display, done
         var xmlDoc = null;
         if (sXML.charAt(0) == '<') {
             try {
-                if (window.ActiveXObject || "ActiveXObject" in window) {        // second test is required for IE11 on Windows 8.1
-                    /*
-                     * Another hack for MSIE, which fails to properly load XSL documents containing a <!DOCTYPE [...]> tag.
-                     */
-                    if (!fResolve) {
-                        sXML = sXML.replace(/<!DOCTYPE(.|[\r\n])*]>\s*/g, "");
-                    }
+                /*
+                 * Another hack for MSIE, which fails to load XSL documents containing a <!DOCTYPE [...]> tag.
+                 *
+                 * This is also why the XSLTProcessor 'transformToFragment' method in Microsoft Edge silently failed,
+                 * so I had pull this hack out of the "ActiveXObject" code.  And rather than add yet-another Microsoft
+                 * browser check, I'm going to try doing this across the board, and hope that none of the other XSLT
+                 * processors fail *without* the DOCTYPE tag.
+                 */
+                if (!fResolve) {
+                    sXML = sXML.replace(/<!DOCTYPE(.|[\r\n])*]>\s*/g, "");
+                }
+                /*
+                 * Beginning with Microsoft Edge and the corresponding release of Windows 10, all the
+                 * 'ActiveXObject' crud has gone away; but of course, this code must remain in place if
+                 * we want to continue supporting older Internet Explorer browsers (ie, back to IE9).
+                 */
+                if (window.ActiveXObject || 'ActiveXObject' in window) {                // second test is required for IE11 on Windows 8.1
                     xmlDoc = new window.ActiveXObject("Microsoft.XMLDOM");
                     xmlDoc.async = false;
                     xmlDoc['loadXML'](sXML);
@@ -374,7 +384,12 @@ function embedMachine(sName, sVersion, idElement, sXMLFile, sXSLFile, sStateFile
                          * embeddable HTML (and is the most common cause of failure at this final stage).
                          */
                         displayMessage("Processing " + sXMLFile + "...");
-                        if (window.ActiveXObject || "ActiveXObject" in window) {        // second test is required for IE11 on Windows 8.1
+                        /*
+                         * Beginning with Microsoft Edge and the corresponding release of Windows 10, all the
+                         * 'ActiveXObject' crud has gone away; but of course, this code must remain in place if
+                         * we want to continue supporting older Internet Explorer browsers (ie, back to IE9).
+                         */
+                        if (window.ActiveXObject || 'ActiveXObject' in window) {        // second test is required for IE11 on Windows 8.1
                             var sFragment = xml['transformNode'](xsl);
                             if (sFragment) {
                                 eMachine.outerHTML = sFragment;
