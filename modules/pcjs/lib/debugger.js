@@ -384,6 +384,7 @@ if (DEBUGGER) {
     Debugger.REG_TR0 = 0x30;
     Debugger.REG_TR6 = 0x36;
     Debugger.REG_TR7 = 0x37;
+    Debugger.REG_EIP = 0x38;
 
     Debugger.REGS = [
         "AL",  "CL",  "DL",  "BL",  "AH",  "CH",  "DH",  "BH",
@@ -392,7 +393,8 @@ if (DEBUGGER) {
         "EAX", "ECX", "EDX", "EBX", "ESP", "EBP", "ESI", "EDI",
         "CR0", "CR1", "CR2", "CR3", null,  null,  null,  null,  // register names used with TYPE_CTLREG
         "DR0", "DR1", "DR2", "DR3", null,  null,  "DR6", "DR7", // register names used with TYPE_DBGREG
-        null,  null,  null,  null,  null,  null,  "TR6", "TR7"  // register names used with TYPE_TSTREG
+        null,  null,  null,  null,  null,  null,  "TR6", "TR7", // register names used with TYPE_TSTREG
+        "EIP"
     ];
 
     Debugger.REG_ES         = 0x00;     // bits 0-1 are standard SegReg encodings
@@ -2276,7 +2278,7 @@ if (DEBUGGER) {
                 n = cpu.regEDI;  cch = 4;
                 break;
             case Debugger.REG_IP:
-                n = cpu.getIP(); cch = this.cchReg;
+                n = cpu.getIP(); cch = 4;
                 break;
             case Debugger.REG_PS:
                 n = cpu.getPS(); cch = this.cchReg;
@@ -2343,6 +2345,9 @@ if (DEBUGGER) {
                         break;
                     case Debugger.REG_SEG + Debugger.REG_GS:
                         n = cpu.getGS(); cch = 4;
+                        break;
+                    case Debugger.REG_EIP:
+                        n = cpu.getIP(); cch = 8;
                         break;
                     }
                 }
@@ -5290,7 +5295,7 @@ if (DEBUGGER) {
                     return;
                 }
                 var fValid = false;
-                var w = str.parseInt(sValue, 16);
+                var w = this.parseExpression(sValue);
                 if (w !== undefined) {
                     fValid = true;
                     var sRegMatch = sReg.toUpperCase();
@@ -5361,6 +5366,7 @@ if (DEBUGGER) {
                         this.dbgAddrNextCode = this.newAddr(this.cpu.getIP(), this.cpu.getCS());
                         break;
                     case "IP":
+                    case "EIP":
                      // fIns = true;
                         this.cpu.setIP(w);
                         this.dbgAddrNextCode = this.newAddr(this.cpu.getIP(), this.cpu.getCS());
