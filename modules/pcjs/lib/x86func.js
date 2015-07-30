@@ -3437,6 +3437,7 @@ X86.fnXCHGrb = function XCHGRb(dst, src)
         /*
          * Decode which register was src
          */
+        this.assert(!(dst & ~0xff));            // confirm that dst contains only 8 bits
         switch (this.bModRM & 0x7) {
         case 0x0:       // AL
             this.regEAX = (this.regEAX & ~0xff) | dst;
@@ -3451,16 +3452,16 @@ X86.fnXCHGrb = function XCHGRb(dst, src)
             this.regEBX = (this.regEBX & ~0xff) | dst;
             break;
         case 0x4:       // AH
-            this.regEAX = (this.regEAX & 0xff) | (dst << 8);
+            this.regEAX = (this.regEAX & ~0xff00) | (dst << 8);
             break;
         case 0x5:       // CH
-            this.regECX = (this.regECX & 0xff) | (dst << 8);
+            this.regECX = (this.regECX & ~0xff00) | (dst << 8);
             break;
         case 0x6:       // DH
-            this.regEDX = (this.regEDX & 0xff) | (dst << 8);
+            this.regEDX = (this.regEDX & ~0xff00) | (dst << 8);
             break;
         case 0x7:       // BH
-            this.regEBX = (this.regEBX & 0xff) | (dst << 8);
+            this.regEBX = (this.regEBX & ~0xff00) | (dst << 8);
             break;
         default:
             break;      // there IS no other case, but JavaScript inspections don't know that
@@ -3501,30 +3502,31 @@ X86.fnXCHGrw = function XCHGRw(dst, src)
         /*
          * Decode which register was src
          */
+        this.assert(!(dst & ~this.dataMask));   // confirm that dst contains only 16 or 32 bits
         switch (this.bModRM & 0x7) {
-        case 0x0:       // AX
-            this.regEAX = dst;
+        case 0x0:       // [E]AX
+            this.regEAX = (this.regEAX & ~this.dataMask) | dst;
             break;
-        case 0x1:       // CX
-            this.regECX = dst;
+        case 0x1:       // [E]CX
+            this.regECX = (this.regECX & ~this.dataMask) | dst;
             break;
-        case 0x2:       // DX
-            this.regEDX = dst;
+        case 0x2:       // [E]DX
+            this.regEDX = (this.regEDX & ~this.dataMask) | dst;
             break;
-        case 0x3:       // BX
-            this.regEBX = dst;
+        case 0x3:       // [E]BX
+            this.regEBX = (this.regEBX & ~this.dataMask) | dst;
             break;
-        case 0x4:       // SP
-            this.setSP(dst);
+        case 0x4:       // [E]SP
+            this.setSP((this.getSP() & ~this.dataMask) | dst);
             break;
-        case 0x5:       // BP
-            this.regEBP = dst;
+        case 0x5:       // [E]BP
+            this.regEBP = (this.regEBX & ~this.dataMask) | dst;
             break;
-        case 0x6:       // SI
-            this.regESI = dst;
+        case 0x6:       // [E]SI
+            this.regESI = (this.regESI & ~this.dataMask) | dst;
             break;
-        case 0x7:       // DI
-            this.regEDI = dst;
+        case 0x7:       // [E]DI
+            this.regEDI = (this.regEDI & ~this.dataMask) | dst;
             break;
         default:
             break;      // there IS no other case, but JavaScript inspections don't know that

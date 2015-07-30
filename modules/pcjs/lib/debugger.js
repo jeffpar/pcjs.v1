@@ -1709,12 +1709,15 @@ if (DEBUGGER) {
     {
         if (dbgAddr.sel != null) {
             var seg = this.getSegment(dbgAddr.sel, dbgAddr.fProt);
-            if (seg && (dbgAddr.off >>> 0) >= seg.offMax) {
-                /*
-                 * TODO: This automatic wrap-to-zero is OK for normal segments, but for expand-down segments, not so much.
-                 */
-                dbgAddr.off = 0;
-                dbgAddr.addr = null;
+            if (seg) {
+                dbgAddr.off &= seg.addrMask;
+                if ((dbgAddr.off >>> 0) >= seg.offMax) {
+                    /*
+                     * TODO: This automatic wrap-to-zero is OK for normal segments, but for expand-down segments, not so much.
+                     */
+                    dbgAddr.off = 0;
+                    dbgAddr.addr = null;
+                }
             }
         }
     };
@@ -3468,7 +3471,7 @@ if (DEBUGGER) {
                      * like "LEA AX,BX", it will actually do something (on some if not all processors), so
                      * there's probably some diagnostic value in allowing those cases to be disassembled.
                      */
-                    sOperand = this.getModRMOperand(bModRM, type, dbgAddr);
+                    sOperand = this.getModRMOperand(bModRM, type, cOperands, dbgAddr);
                 }
                 else if (typeMode == Debugger.TYPE_MODREG) {
                     /*
@@ -3685,15 +3688,16 @@ if (DEBUGGER) {
     };
 
     /**
-     * getModRMOperand(bModRM, type, dbgAddr)
+     * getModRMOperand(bModRM, type, cOperands, dbgAddr)
      *
      * @this {Debugger}
      * @param {number} bModRM
      * @param {number} type
+     * @param {number} cOperands (if 1, memory operands are prefixed with the size; otherwise, size can be inferred)
      * @param {{DbgAddr}} dbgAddr
      * @return {string} operand
      */
-    Debugger.prototype.getModRMOperand = function(bModRM, type, dbgAddr)
+    Debugger.prototype.getModRMOperand = function(bModRM, type, cOperands, dbgAddr)
     {
         var sOperand = "";
         var bMod = bModRM >> 6;
@@ -3733,7 +3737,28 @@ if (DEBUGGER) {
                 }
             }
             sOperand = "[" + sOperand + "]";
-            if ((type & Debugger.TYPE_SIZE) == Debugger.TYPE_FARP) sOperand = "FAR " + sOperand;
+            if (cOperands == 1) {
+                var sPrefix = "";
+                type &= Debugger.TYPE_SIZE;
+                if (type == Debugger.TYPE_VWORD) {
+                    type = (dbgAddr.fData32? Debugger.TYPE_DWORD : Debugger.TYPE_WORD);
+                }
+                switch(type) {
+                case Debugger.TYPE_FARP:
+                    sPrefix = "FAR";
+                    break;
+                case Debugger.TYPE_BYTE:
+                    sPrefix = "BYTE";
+                    break;
+                case Debugger.TYPE_WORD:
+                    sPrefix = "WORD";
+                    break;
+                case Debugger.TYPE_DWORD:
+                    sPrefix = "DWORD";
+                    break;
+                }
+                if (sPrefix) sOperand = sPrefix + ' ' + sOperand;
+            }
         }
         else {
             sOperand = this.getRegOperand(bRM, type, dbgAddr);
