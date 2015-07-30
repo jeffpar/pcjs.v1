@@ -128,11 +128,11 @@ function parseXML(sXML, sXMLFile, idMachine, sStateFile, fResolve, display, done
             sXML = sXML.replace(/(<machine[^>]*\sid=)(['"]).*?\2/, "$1$2" + idMachine + "$2" + (sStateFile? " state=$2" + sStateFile + "$2" : "") + (sURL? " url=$2" + sURL + "$2" : ""));
         }
         /*
-         * DEBUG-only kludge to replace the version number template in the XSL file (which we assume we're reading,
-         * since fResolve is false) with any APPVERSION we extracted from the XML file (see corresponding kludge below).
+         * Non-COMPILED kludge to replace the version number template in the XSL file (which we assume we're reading,
+         * since fResolve is false) with whatever XMLVERSION we extracted from the XML file (see corresponding kludge below).
          */
-        if (DEBUG && !fResolve && DEBUG_APPVERSION) {
-            sXML = sXML.replace(/<xsl:variable name="APPVERSION">1.x.x<\/xsl:variable>/, '<xsl:variable name="APPVERSION">' + DEBUG_APPVERSION + '</xsl:variable>');
+        if (!COMPILED && !fResolve && XMLVERSION) {
+            sXML = sXML.replace(/<xsl:variable name="APPVERSION">1.x.x<\/xsl:variable>/, '<xsl:variable name="APPVERSION">' + XMLVERSION + '</xsl:variable>');
         }
         /*
          * If the resource we requested is not really an XML file (or the file didn't exist and the server simply returned
@@ -357,12 +357,12 @@ function embedMachine(sName, sVersion, idElement, sXMLFile, sXSLFile, sStateFile
                     return;
                 }
                 /*
-                 * DEBUG-only kludge to extract the version number from the stylesheet path in the machine XML file;
+                 * Non-COMPILED kludge to extract the version number from the stylesheet path in the machine XML file;
                  * we don't need this code in COMPILED (non-DEBUG) releases, because APPVERSION is hard-coded into them.
                  */
-                if (DEBUG) {
+                if (!COMPILED) {
                     var aMatch = sXML.match(/<\?xml-stylesheet[^>]* href=(['"])[^'"]*?\/([0-9.]*)\/([^'"]*)\1/);
-                    if (aMatch && APPVERSION == "1.x.x") DEBUG_APPVERSION = aMatch[2];
+                    if (aMatch) XMLVERSION = aMatch[2];
                 }
                 var transformXML = function(sXSL, xsl) {
                     if (!xsl) {

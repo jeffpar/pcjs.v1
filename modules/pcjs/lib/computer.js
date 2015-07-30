@@ -1242,9 +1242,9 @@ Computer.prototype.getComponentByType = function(sType, componentPrev)
 Computer.init = function()
 {
     /*
-     * In DEBUG builds, embedMachine() may have set DEBUG_APPVERSION.
+     * In non-COMPILED builds, embedMachine() may have set XMLVERSION.
      */
-    if (DEBUG && DEBUG_APPVERSION) Computer.sAppVer = DEBUG_APPVERSION;
+    if (!COMPILED && XMLVERSION) Computer.sAppVer = XMLVERSION;
 
     var aeMachines = Component.getElementsByClass(window.document, PCJSCLASS + "-machine");
 

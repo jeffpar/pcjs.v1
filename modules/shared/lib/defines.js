@@ -42,7 +42,7 @@ var APPNAME = "";               // this @define is overridden by the Closure Com
  */
 var APPVERSION = "1.x.x";       // this @define is overridden by the Closure Compiler with the version in package.json
 
-var DEBUG_APPVERSION = null;    // this is set in DEBUG builds by embedMachine() if a version number was found in the machine XML
+var XMLVERSION = null;          // this is set in non-COMPILED builds by embedMachine() if a version number was found in the machine XML
 
 /**
  * @define {string}
