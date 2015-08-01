@@ -566,14 +566,14 @@ Memory.prototype = {
                 this.resetReadAccess();
                 if (DEBUG && this.dbg) this.dbg.println("all read breakpoints removed from memory block " + str.toHex(this.addr));
             }
-            if (DEBUG && this.dbg) this.dbg.assert(this.cReadBreakpoints >= 0);
+            Component.assert(this.cReadBreakpoints >= 0);
         }
         else {
             if (--this.cWriteBreakpoints === 0) {
                 this.resetWriteAccess();
                 if (DEBUG && this.dbg) this.dbg.println("all write breakpoints removed from memory block " + str.toHex(this.addr));
             }
-            if (DEBUG && this.dbg) this.dbg.assert(this.cWriteBreakpoints >= 0);
+            Component.assert(this.cWriteBreakpoints >= 0);
         }
     },
     /**
