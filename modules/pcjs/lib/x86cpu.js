@@ -1312,8 +1312,8 @@ X86CPU.prototype.resetRegs = function()
         this.regCR1 = 0;                // reserved
         this.regCR2 = 0;                // page fault linear address (PFLA)
         this.regCR3 = 0;                // page directory base register (PDBR)
-        this.regDRn = [0,0,0,0,null,null,0,0];              // Debug Registers DR0-DR7 (DR4-DR5 are undefined)
-        this.regTRn = [null,null,null,null,null,null,0,0];  // Test Registers TR0-TR7 (TR0-TR5 are undefined)
+        this.regDR  = [0,0,0,0,null,null,0,0];              // Debug Registers DR0-DR7 (DR4-DR5 are undefined)
+        this.regTR  = [null,null,null,null,null,null,0,0];  // Test Registers TR0-TR7 (TR0-TR5 are undefined)
         this.segFS = new X86Seg(this, X86Seg.ID.DATA,  "FS");
         this.segGS = new X86Seg(this, X86Seg.ID.DATA,  "GS");
         this.disablePageBlocks();
@@ -1679,6 +1679,79 @@ X86CPU.prototype.checkIntReturn = function(addr)
 };
 
 /**
+ * addMemCheck(addr, fWrite)
+ *
+ * These functions provide Debug register functionality by leveraging the same Memory block-based breakpoint
+ * support originally created for our built-in Debugger.  Only minimal changes were required to the Memory
+ * component, by adding additional checkMemoryException() call-outs to the "checked" Memory access functions.
+ *
+ * Note that those call-outs occur only AFTER our own Debugger (if present) has checked the address and has
+ * passed on it, because we want our own Debugger's breakpoints to take precedence over any breakpoints that
+ * the emulated machine may have enabled.
+ *
+ * @this {X86CPU}
+ * @param {number} addr
+ * @param {boolean} fWrite is true for a memory write check, false for a memory read check
+ */
+X86CPU.prototype.addMemCheck = function(addr, fWrite)
+{
+    var iBlock = addr >>> this.nBlockShift;
+    this.aMemBlocks[iBlock].addBreakpoint(addr & this.nBlockLimit, fWrite);
+};
+
+/**
+ * removeMemCheck(addr, fWrite)
+ *
+ * @this {X86CPU}
+ * @param {number} addr
+ * @param {boolean} fWrite is true for a memory write check, false for a memory read check
+ */
+X86CPU.prototype.removeMemCheck = function(addr, fWrite)
+{
+    var iBlock = addr >>> this.nBlockShift;
+    this.aMemBlocks[iBlock].removeBreakpoint(addr & this.nBlockLimit, fWrite);
+};
+
+/**
+ * checkMemoryException(addr, nb, fWrite)
+ *
+ * This "check" function is called by a Memory block to inform us that a memory read or write is occurring,
+ * giving us the opportunity look for a matching "read" or "write" breakpoint enabled in one of the DRn registers.
+ *
+ * TODO: This currently does not discriminate between data reads and execution reads.  When we switch to a true
+ * "prefetch" model, that would also be a good time to include a signal to this function that any "read" accesses
+ * are  actually "exec" accesses.
+ *
+ * @this {X86CPU}
+ * @param {number} addr
+ * @param {number} nb (# of bytes)
+ * @param {boolean|null} [fWrite] (false if read, true if write, null if exec)
+ */
+X86CPU.prototype.checkMemoryException = function(addr, nb, fWrite)
+{
+    if (this.regDR[7] & X86.DR7.ENABLE) {
+        var regDR7 = this.regDR[7];
+        var bitsEnabled = X86.DR7.L0 | X86.DR7.G0;
+        var bitsRWMask = 0x00030000;
+        var bitsRWRequired = (fWrite? 0x00010000 : (fWrite == false? 0x00030000 : 0));
+        var bitsLENMask = 0x000C0000;
+        var bitsLENRequired = (nb == 1? 0x00000000 : (nb == 2? 0x00040000 : 0x000C000));
+        for (var i = 0; i < 4; i++) {
+            if ((regDR7 & bitsEnabled) && (regDR7 & bitsRWMask) == bitsRWRequired) {
+                if ((regDR7 & bitsLENMask) == bitsLENRequired && addr == this.regDR[i]) {
+                    this.regDR[6] |= (1 << i);
+                    X86.fnFault.call(this, X86.EXCEPTION.DEBUG);
+                    return;
+                }
+            }
+            bitsEnabled <<= 2;
+            bitsRWMask <<= 2; bitsRWRequired <<= 2;
+            bitsLENMask <<= 2; bitsLENRequired <<= 2;
+        }
+    }
+};
+
+/**
  * setProtMode(fProt, fV86)
  *
  * Update any opcode handlers that operate significantly differently in real-mode vs. protected-mode, and
@@ -1742,8 +1815,8 @@ X86CPU.prototype.saveProtMode = function()
             a.push(this.regCR1);
             a.push(this.regCR2);
             a.push(this.regCR3);
-            a.push(this.regDRn);
-            a.push(this.regTRn);
+            a.push(this.regDR);
+            a.push(this.regTR);
         }
         return a;
     }
@@ -1773,8 +1846,8 @@ X86CPU.prototype.restoreProtMode = function(a)
             this.regCR1 = a[8];
             this.regCR2 = a[9];
             this.regCR3 = a[10];
-            this.regDRn = a[11];
-            this.regTRn = a[12];
+            this.regDR  = a[11];
+            this.regTR  = a[12];
         }
         this.setProtMode();
     }
@@ -3832,7 +3905,7 @@ X86CPU.prototype.checkINTR = function()
             case 1:
                 if ((this.intFlags & X86.INTFLAG.TRAP)) {
                     this.intFlags &= ~X86.INTFLAG.TRAP;
-                    X86.fnINT.call(this, X86.EXCEPTION.TRAP, null, 11);
+                    X86.fnINT.call(this, X86.EXCEPTION.DEBUG, null, 11);
                     return true;
                 }
                 break;

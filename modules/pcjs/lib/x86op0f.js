@@ -401,7 +401,7 @@ X86.opMOVrd = function MOVrd()
         return;
     }
 
-    this.setReg(bModRM & 0x7, this.regDRn[iSrc]);
+    this.setReg(bModRM & 0x7, this.regDR[iSrc]);
 
     this.nStepCycles -= 22;
 
@@ -443,7 +443,6 @@ X86.opMOVcr = function MOVcr()
     }
 
     var bModRM = this.getIPByte();
-
     var reg = this.getReg(bModRM & 0x7);
 
     switch((bModRM & 0x38) >> 3) {
@@ -499,14 +498,36 @@ X86.opMOVdr = function MOVdr()
         X86.opUndefined.call(this);
         return;
     }
+    var regDR = this.getReg(bModRM & 0x7);
 
-    /*
-     * TODO: Do something with the Debug registers....
-     */
-    this.regDRn[iDst] = this.getReg(bModRM & 0x7);
-
+    if (iDst == 7) {
+        var regDR7 = this.regDR[7];
+        if ((regDR ^ regDR7) & X86.DR7.ENABLE) {
+            /*
+             * We need to check changes to the Debug Control Register (DR7); specifically, if any of
+             * DR0-DR3 are transitioning from disabled to enabled, or vice versa, then we need to call
+             * addMemCheck(), or removeMemCheck(), as appropriate.
+             */
+            var bitsEnabled = X86.DR7.L0 | X86.DR7.G0;
+            var bitsRWMask = 0x00030000;
+            for (var i = 0; i < 4; i++) {
+                var fEnabled = (regDR & bitsEnabled);
+                if (!fEnabled != !(regDR7 & bitsEnabled)) {
+                    var bitsRW = (regDR & bitsRWMask) >> (i << 1);
+                    var fWrite = !!(bitsRW & 0x00010000);
+                    if (fEnabled) {
+                        this.addMemCheck(this.regDR[i], fWrite);
+                    } else {
+                        this.removeMemCheck(this.regDR[i], fWrite);
+                    }
+                }
+                bitsEnabled <<= 2;
+                bitsRWMask <<= 2;
+            }
+        }
+    }
+    this.regDR[iDst] = regDR;
     this.nStepCycles -= (iDst < 4? 22 : 14);
-
     /*
      * TODO: Implement BACKTRACK for this instruction....
      */
@@ -542,9 +563,7 @@ X86.opMOVrt = function MOVrt()
         X86.opUndefined.call(this);
         return;
     }
-
-    this.setReg(bModRM & 0x7, this.regTRn[iSrc]);
-
+    this.setReg(bModRM & 0x7, this.regTR[iSrc]);
     this.nStepCycles -= 12;
 
     /*
@@ -586,7 +605,7 @@ X86.opMOVtr = function MOVtr()
     /*
      * TODO: Do something with the Test registers....
      */
-    this.regTRn[iDst] = this.getReg(bModRM & 0x7);
+    this.regTR[iDst] = this.getReg(bModRM & 0x7);
 
     this.nStepCycles -= 12;
 

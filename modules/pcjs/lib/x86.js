@@ -99,6 +99,36 @@ var X86 = {
         ET: 0x00000010,     // coprocessor type (80287 or 80387); always 1 on post-80386 CPUs
         PG: 0x80000000|0    // 0: paging disabled
     },
+    DR7: {                  // Debug Control Register
+        L0:     0x00000001,
+        G0:     0x00000002,
+        L1:     0x00000004,
+        G1:     0x00000008,
+        L2:     0x00000010,
+        G2:     0x00000020,
+        L3:     0x00000040,
+        G3:     0x00000080,
+        ENABLE: 0x000000FF,
+        LE:     0x00000100,
+        GE:     0x00000200,
+        RW0:    0x00030000, // 00: exec-only  01: write-only  10: undefined  11: read/write-only
+        LEN0:   0x000C0000, // 00: one-byte,  01: two-byte,   10: undefined  11: four-byte
+        RW1:    0x00300000, // 00: exec-only  01: write-only  10: undefined  11: read/write-only
+        LEN1:   0x00C00000, // 00: one-byte,  01: two-byte,   10: undefined  11: four-byte
+        RW2:    0x03000000, // 00: exec-only  01: write-only  10: undefined  11: read/write-only
+        LEN2:   0x0C000000, // 00: one-byte,  01: two-byte,   10: undefined  11: four-byte
+        RW3:    0x30000000, // 00: exec-only  01: write-only  10: undefined  11: read/write-only
+        LEN3:   0xC0000000|0// 00: one-byte,  01: two-byte,   10: undefined  11: four-byte
+    },
+    DR6: {                  // Debug Status Register
+        B0:     0x00000001,
+        B1:     0x00000002,
+        B2:     0x00000004,
+        B3:     0x00000008,
+        BD:     0x00002000, // set if the next instruction will read or write one of the eight debug registers and ICE-386 is also using them
+        BS:     0x00004000, // set if the debug handler is entered due to the TF (trap flag) bit set in the EFLAGS register
+        BT:     0x00008000  // set before entering the DEBUG handler if a task switch has occurred and the T-bit of the new TSS is set
+    },
     SEL: {
         RPL:    0x0003,     // requested privilege level (0-3)
         LDT:    0x0004,     // table indicator (0: GDT, 1: LDT)
@@ -280,7 +310,7 @@ var X86 = {
      */
     EXCEPTION: {
         DIV_ERR:    0x00,       // Divide Error Interrupt
-        TRAP:       0x01,       // Single Step (aka Trap) Interrupt
+        DEBUG:      0x01,       // Debug (aka Single Step Trap) Interrupt
         NMI:        0x02,       // Non-Maskable Interrupt
         BREAKPOINT: 0x03,       // Breakpoint Interrupt
         OVERFLOW:   0x04,       // INTO Overflow Interrupt (FYI, return address does NOT point to offending instruction)

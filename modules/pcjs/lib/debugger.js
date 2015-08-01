@@ -1512,15 +1512,15 @@ if (DEBUGGER) {
     };
 
     /**
-     * getAddr(dbgAddr, fWrite, cb)
+     * getAddr(dbgAddr, fWrite, nb)
      *
      * @this {Debugger}
      * @param {{DbgAddr}} dbgAddr
      * @param {boolean} [fWrite]
-     * @param {number} [cb] is number of bytes to check (1, 2 or 4); default is 1
+     * @param {number} [nb] is number of bytes to check (1, 2 or 4); default is 1
      * @return {number} is the corresponding linear address, or X86.ADDR_INVALID
      */
-    Debugger.prototype.getAddr = function(dbgAddr, fWrite, cb)
+    Debugger.prototype.getAddr = function(dbgAddr, fWrite, nb)
     {
         /*
          * Some addresses (eg, breakpoint addresses) save their original linear address in dbgAddr.addr,
@@ -1534,9 +1534,9 @@ if (DEBUGGER) {
             var seg = this.getSegment(dbgAddr.sel, dbgAddr.fProt);
             if (seg) {
                 if (!fWrite) {
-                    addr = seg.checkRead(dbgAddr.off, cb || 1, true);
+                    addr = seg.checkRead(dbgAddr.off, nb || 1, true);
                 } else {
-                    addr = seg.checkWrite(dbgAddr.off, cb || 1, true);
+                    addr = seg.checkWrite(dbgAddr.off, nb || 1, true);
                 }
                 dbgAddr.addr = addr;
             }
@@ -2990,7 +2990,7 @@ if (DEBUGGER) {
     Debugger.prototype.checkInstruction = function(addr, nState)
     {
         if (nState > 0) {
-            if (this.checkBreakpoint(addr, this.aBreakExec)) {
+            if (this.checkBreakpoint(addr, 1, this.aBreakExec)) {
                 return true;
             }
             /*
@@ -3027,18 +3027,19 @@ if (DEBUGGER) {
     };
 
     /**
-     * checkMemoryRead(addr)
+     * checkMemoryRead(addr, nb)
      *
      * This "check" function is called by a Memory block to inform us that a memory read occurred, giving us an
      * opportunity to track the read if we want, and look for a matching "read" breakpoint, if any.
      *
      * @this {Debugger}
      * @param {number} addr
+     * @param {number} [nb] (# of bytes; default is 1)
      * @return {boolean} true if breakpoint hit, false if not
      */
-    Debugger.prototype.checkMemoryRead = function(addr)
+    Debugger.prototype.checkMemoryRead = function(addr, nb)
     {
-        if (this.checkBreakpoint(addr, this.aBreakRead)) {
+        if (this.checkBreakpoint(addr, nb || 1, this.aBreakRead)) {
             this.stopCPU(true);
             return true;
         }
@@ -3046,18 +3047,19 @@ if (DEBUGGER) {
     };
 
     /**
-     * checkMemoryWrite(addr)
+     * checkMemoryWrite(addr, nb)
      *
      * This "check" function is called by a Memory block to inform us that a memory write occurred, giving us an
      * opportunity to track the write if we want, and look for a matching "write" breakpoint, if any.
      *
      * @this {Debugger}
      * @param {number} addr
+     * @param {number} [nb] (# of bytes; default is 1)
      * @return {boolean} true if breakpoint hit, false if not
      */
-    Debugger.prototype.checkMemoryWrite = function(addr)
+    Debugger.prototype.checkMemoryWrite = function(addr, nb)
     {
-        if (this.checkBreakpoint(addr, this.aBreakWrite)) {
+        if (this.checkBreakpoint(addr, nb || 1, this.aBreakWrite)) {
             this.stopCPU(true);
             return true;
         }
@@ -3271,7 +3273,7 @@ if (DEBUGGER) {
     Debugger.prototype.clearTempBreakpoint = function(addr)
     {
         if (addr !== undefined) {
-            this.checkBreakpoint(addr, this.aBreakExec, true);
+            this.checkBreakpoint(addr, 1, this.aBreakExec, true);
             this.fProcStep = 0;
         } else {
             for (var i = 1; i < this.aBreakExec.length; i++) {
@@ -3309,15 +3311,16 @@ if (DEBUGGER) {
     };
 
     /**
-     * checkBreakpoint(addr, aBreak, fTemp)
+     * checkBreakpoint(addr, nb, aBreak, fTemp)
      *
      * @this {Debugger}
      * @param {number} addr
+     * @param {number} nb (# of bytes)
      * @param {Array} aBreak
      * @param {boolean} [fTemp]
      * @return {boolean} true if breakpoint has been hit, false if not
      */
-    Debugger.prototype.checkBreakpoint = function(addr, aBreak, fTemp)
+    Debugger.prototype.checkBreakpoint = function(addr, nb, aBreak, fTemp)
     {
         /*
          * Time to check for execution breakpoints; note that this should be done BEFORE updating frequency
@@ -3361,13 +3364,20 @@ if (DEBUGGER) {
                  * If you want to create a real-mode breakpoint that will break regardless of mode,
                  * use the physical address of the real-mode memory location instead.
                  */
-                if (addr == this.mapBreakpoint(this.getAddr(dbgAddrBreak))) {
-                    if (dbgAddrBreak.fTempBreak) {
-                        this.findBreakpoint(aBreak, dbgAddrBreak, true);
-                    } else if (!fTemp) {
-                        this.println("breakpoint hit: " + this.hexAddr(dbgAddrBreak) + " (" + aBreak[0] + ")");
+                var addrBreak = this.mapBreakpoint(this.getAddr(dbgAddrBreak));
+                for (var n = 0; n < nb; n++) {
+                    if (addr == addrBreak) {
+                        if (dbgAddrBreak.fTempBreak) {
+                            this.findBreakpoint(aBreak, dbgAddrBreak, true);
+                        } else if (!fTemp) {
+                            this.println("breakpoint hit: " + this.hexAddr(dbgAddrBreak) + " (" + aBreak[0] + ")");
+                        }
+                        fBreak = true;
+                        break;
                     }
-                    fBreak = true;
+                    addrBreak++;
+                    addr++;
+                    n++;
                 }
             }
         }

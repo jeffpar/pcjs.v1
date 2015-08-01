@@ -3827,6 +3827,10 @@ X86.fnFaultMessage = function(nFault, nError, fHalt)
             nFault == X86.EXCEPTION.GP_FAULT && bOpcode == X86.OPCODE.INTN) {
             fHalt = false;
         }
+    } else {
+        if (nFault == X86.EXCEPTION.NP_FAULT && bOpcode == 0x8E) {
+            fHalt = true;
+        }
     }
 
     /*

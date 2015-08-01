@@ -795,17 +795,25 @@ Memory.prototype = {
     /**
      * readByteChecked(off, addr)
      *
+     * TODO: Considering adding an assert that "this.addr + off === addr", and consider using that fact to eliminate
+     * the extra 'addr' parameter.
+     *
      * @this {Memory}
      * @param {number} off
      * @param {number} addr
      * @return {number}
      */
     readByteChecked: function readByteChecked(off, addr) {
-        if (DEBUGGER && this.dbg) this.dbg.checkMemoryRead(addr);
+        if (!DEBUGGER || !this.dbg || !this.dbg.checkMemoryRead(addr)) {
+            if (I386) this.cpu.checkMemoryException(addr, 1, false);
+        }
         return this.readByteDirect(off, addr);
     },
     /**
      * readShortChecked(off, addr)
+     *
+     * TODO: Considering adding an assert that "this.addr + off === addr", and consider using that fact to eliminate
+     * the extra 'addr' parameter.
      *
      * @this {Memory}
      * @param {number} off
@@ -813,14 +821,16 @@ Memory.prototype = {
      * @return {number}
      */
     readShortChecked: function readShortChecked(off, addr) {
-        if (DEBUGGER && this.dbg) {
-            this.dbg.checkMemoryRead(addr) ||
-            this.dbg.checkMemoryRead(addr + 1);
+        if (!DEBUGGER || !this.dbg && !this.dbg.checkMemoryRead(addr, 2)) {
+            if (I386) this.cpu.checkMemoryException(addr, 2, false);
         }
         return this.readShortDirect(off, addr);
     },
     /**
      * readLongChecked(off, addr)
+     *
+     * TODO: Considering adding an assert that "this.addr + off === addr", and consider using that fact to eliminate
+     * the extra 'addr' parameter.
      *
      * @this {Memory}
      * @param {number} off
@@ -828,16 +838,16 @@ Memory.prototype = {
      * @return {number}
      */
     readLongChecked: function readLongChecked(off, addr) {
-        if (DEBUGGER && this.dbg) {
-            this.dbg.checkMemoryRead(addr) ||
-            this.dbg.checkMemoryRead(addr + 1) ||
-            this.dbg.checkMemoryRead(addr + 2) ||
-            this.dbg.checkMemoryRead(addr + 3);
+        if (!DEBUGGER || !this.dbg || !this.dbg.checkMemoryRead(addr, 4)) {
+            if (I386) this.cpu.checkMemoryException(addr, 4, false);
         }
         return this.readLongDirect(off, addr);
     },
     /**
      * writeByteChecked(off, b, addr)
+     *
+     * TODO: Considering adding an assert that "this.addr + off === addr", and consider using that fact to eliminate
+     * the extra 'addr' parameter.
      *
      * @this {Memory}
      * @param {number} off
@@ -845,11 +855,16 @@ Memory.prototype = {
      * @param {number} b
      */
     writeByteChecked: function writeByteChecked(off, b, addr) {
-        if (DEBUGGER && this.dbg) this.dbg.checkMemoryWrite(addr);
+        if (!DEBUGGER || !this.dbg || !this.dbg.checkMemoryWrite(addr)) {
+            if (I386) this.cpu.checkMemoryException(addr, 1, true);
+        }
         if (this.fReadOnly) this.writeNone(off, b, addr); else this.writeByteDirect(off, b, addr);
     },
     /**
      * writeShortChecked(off, w, addr)
+     *
+     * TODO: Considering adding an assert that "this.addr + off === addr", and consider using that fact to eliminate
+     * the extra 'addr' parameter.
      *
      * @this {Memory}
      * @param {number} off
@@ -857,14 +872,16 @@ Memory.prototype = {
      * @param {number} w
      */
     writeShortChecked: function writeShortChecked(off, w, addr) {
-        if (DEBUGGER && this.dbg) {
-            this.dbg.checkMemoryWrite(addr) ||
-            this.dbg.checkMemoryWrite(addr + 1);
+        if (!DEBUGGER || !this.dbg && !this.dbg.checkMemoryWrite(addr, 2)) {
+            if (I386) this.cpu.checkMemoryException(addr, 2, true);
         }
         if (this.fReadOnly) this.writeNone(off, w, addr); else this.writeShortDirect(off, w, addr);
     },
     /**
      * writeLongChecked(off, l, addr)
+     *
+     * TODO: Considering adding an assert that "this.addr + off === addr", and consider using that fact to eliminate
+     * the extra 'addr' parameter.
      *
      * @this {Memory}
      * @param {number} off
@@ -872,11 +889,8 @@ Memory.prototype = {
      * @param {number} addr
      */
     writeLongChecked: function writeLongChecked(off, l, addr) {
-        if (DEBUGGER && this.dbg) {
-            this.dbg.checkMemoryWrite(this.addr + off) ||
-            this.dbg.checkMemoryWrite(this.addr + off + 1) ||
-            this.dbg.checkMemoryWrite(this.addr + off + 2) ||
-            this.dbg.checkMemoryWrite(this.addr + off + 3);
+        if (!DEBUGGER || !this.dbg || !this.dbg.checkMemoryWrite(addr, 4)) {
+            if (I386) this.cpu.checkMemoryException(addr, 4, true);
         }
         if (this.fReadOnly) this.writeNone(off, l, addr); else this.writeLongDirect(off, l, addr);
     },
