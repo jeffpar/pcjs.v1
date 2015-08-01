@@ -11,7 +11,7 @@
 	<video ref="/devices/pc/video/ibm/cga/ibm-cga-960.xml"/>
 	<keyboard ref="/devices/pc/keyboard/keyboard-us83.xml"/>
 	<panel ref="/devices/pc/panel/wide.xml"/>
-	<fdc ref="/disks/pc/samples.xml" width="280px"/>
+	<fdc ref="/disks/pc/library.xml" width="320px"/>
 	<chipset id="chipset" model="5150" sw1="01001001" sw2="10100000" pos="left" padleft="8px" padbottom="8px">
 		<control type="switches" label="SW1" binding="sw1" left="0px"/>
 		<control type="switches" label="SW2" binding="sw2" left="0px"/>

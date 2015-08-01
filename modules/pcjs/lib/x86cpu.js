@@ -1696,7 +1696,7 @@ X86CPU.prototype.checkIntReturn = function(addr)
 X86CPU.prototype.addMemCheck = function(addr, fWrite)
 {
     var iBlock = addr >>> this.nBlockShift;
-    this.aMemBlocks[iBlock].addBreakpoint(addr & this.nBlockLimit, fWrite);
+    this.aMemBlocks[iBlock].addBreakpoint(addr & this.nBlockLimit, fWrite, this);
 };
 
 /**

@@ -522,51 +522,58 @@ Memory.prototype = {
         this.bitPTEAccessed = blockPhys? Memory.adjustEndian(X86.PTE.ACCESSED) : 0;
     },
     /**
-     * addBreakpoint(off, fWrite)
+     * addBreakpoint(off, fWrite, cpu)
+     *
+     * NOTE: Some Memory blocks already require access to the CPU (eg, UNPAGED blocks that need to call cpu.mapPageBlock()),
+     * while others require access only if the CPU has set a read or write breakpoint in one of its Debug registers; the latter
+     * case is handled here by virtue of the cpu parameter.
      *
      * @this {Memory}
      * @param {number} off
      * @param {boolean} fWrite
+     * @param {X86CPU} [cpu] (required for breakpoints set by the CPU, as opposed to the Debugger)
      */
-    addBreakpoint: function(off, fWrite) {
-        if (DEBUGGER && this.dbg) {
-            if (!fWrite) {
-                if (this.cReadBreakpoints++ === 0) {
-                    this.setReadAccess(Memory.afnChecked, false);
-                }
-                if (DEBUG) this.dbg.println("read breakpoint added to memory block " + str.toHex(this.addr));
+    addBreakpoint: function(off, fWrite, cpu) {
+        if (!fWrite) {
+            if (this.cReadBreakpoints++ === 0) {
+                if (cpu) this.cpu = cpu;
+                this.setReadAccess(Memory.afnChecked, false);
             }
-            else {
-                if (this.cWriteBreakpoints++ === 0) {
-                    this.setWriteAccess(Memory.afnChecked, false);
-                }
-                if (DEBUG) this.dbg.println("write breakpoint added to memory block " + str.toHex(this.addr));
+            if (DEBUG && this.dbg) this.dbg.println("read breakpoint added to memory block " + str.toHex(this.addr));
+        }
+        else {
+            if (this.cWriteBreakpoints++ === 0) {
+                if (cpu) this.cpu = cpu;
+                this.setWriteAccess(Memory.afnChecked, false);
             }
+            if (DEBUG && this.dbg) this.dbg.println("write breakpoint added to memory block " + str.toHex(this.addr));
         }
     },
     /**
      * removeBreakpoint(off, fWrite)
+     *
+     * NOTE: If this Memory block is not an UNPAGED block that might need to call cpu.mapPageBlock()), and it no longer
+     * has any read or write breakpoints associated with it, then it no longer needs a CPU reference.  However, the latter
+     * is a moot point, because the "checked" memory access functions should be swapped out when this function is done.
      *
      * @this {Memory}
      * @param {number} off
      * @param {boolean} fWrite
      */
     removeBreakpoint: function(off, fWrite) {
-        if (DEBUGGER && this.dbg) {
-            if (!fWrite) {
-                if (--this.cReadBreakpoints === 0) {
-                    this.resetReadAccess();
-                    if (DEBUG) this.dbg.println("all read breakpoints removed from memory block " + str.toHex(this.addr));
-                }
-                this.dbg.assert(this.cReadBreakpoints >= 0);
+        if (!fWrite) {
+            if (--this.cReadBreakpoints === 0) {
+                this.resetReadAccess();
+                if (DEBUG && this.dbg) this.dbg.println("all read breakpoints removed from memory block " + str.toHex(this.addr));
             }
-            else {
-                if (--this.cWriteBreakpoints === 0) {
-                    this.resetWriteAccess();
-                    if (DEBUG) this.dbg.println("all write breakpoints removed from memory block " + str.toHex(this.addr));
-                }
-                this.dbg.assert(this.cWriteBreakpoints >= 0);
+            if (DEBUG && this.dbg) this.dbg.assert(this.cReadBreakpoints >= 0);
+        }
+        else {
+            if (--this.cWriteBreakpoints === 0) {
+                this.resetWriteAccess();
+                if (DEBUG && this.dbg) this.dbg.println("all write breakpoints removed from memory block " + str.toHex(this.addr));
             }
+            if (DEBUG && this.dbg) this.dbg.assert(this.cWriteBreakpoints >= 0);
         }
     },
     /**
@@ -805,7 +812,7 @@ Memory.prototype = {
      */
     readByteChecked: function readByteChecked(off, addr) {
         if (!DEBUGGER || !this.dbg || !this.dbg.checkMemoryRead(addr)) {
-            if (I386) this.cpu.checkMemoryException(addr, 1, false);
+            if (I386 && this.cpu) this.cpu.checkMemoryException(addr, 1, false);
         }
         return this.readByteDirect(off, addr);
     },
@@ -821,8 +828,8 @@ Memory.prototype = {
      * @return {number}
      */
     readShortChecked: function readShortChecked(off, addr) {
-        if (!DEBUGGER || !this.dbg && !this.dbg.checkMemoryRead(addr, 2)) {
-            if (I386) this.cpu.checkMemoryException(addr, 2, false);
+        if (!DEBUGGER || !this.dbg || !this.dbg.checkMemoryRead(addr, 2)) {
+            if (I386 && this.cpu) this.cpu.checkMemoryException(addr, 2, false);
         }
         return this.readShortDirect(off, addr);
     },
@@ -839,7 +846,7 @@ Memory.prototype = {
      */
     readLongChecked: function readLongChecked(off, addr) {
         if (!DEBUGGER || !this.dbg || !this.dbg.checkMemoryRead(addr, 4)) {
-            if (I386) this.cpu.checkMemoryException(addr, 4, false);
+            if (I386 && this.cpu) this.cpu.checkMemoryException(addr, 4, false);
         }
         return this.readLongDirect(off, addr);
     },
@@ -856,7 +863,7 @@ Memory.prototype = {
      */
     writeByteChecked: function writeByteChecked(off, b, addr) {
         if (!DEBUGGER || !this.dbg || !this.dbg.checkMemoryWrite(addr)) {
-            if (I386) this.cpu.checkMemoryException(addr, 1, true);
+            if (I386 && this.cpu) this.cpu.checkMemoryException(addr, 1, true);
         }
         if (this.fReadOnly) this.writeNone(off, b, addr); else this.writeByteDirect(off, b, addr);
     },
@@ -872,8 +879,8 @@ Memory.prototype = {
      * @param {number} w
      */
     writeShortChecked: function writeShortChecked(off, w, addr) {
-        if (!DEBUGGER || !this.dbg && !this.dbg.checkMemoryWrite(addr, 2)) {
-            if (I386) this.cpu.checkMemoryException(addr, 2, true);
+        if (!DEBUGGER || !this.dbg || !this.dbg.checkMemoryWrite(addr, 2)) {
+            if (I386 && this.cpu) this.cpu.checkMemoryException(addr, 2, true);
         }
         if (this.fReadOnly) this.writeNone(off, w, addr); else this.writeShortDirect(off, w, addr);
     },
@@ -890,7 +897,7 @@ Memory.prototype = {
      */
     writeLongChecked: function writeLongChecked(off, l, addr) {
         if (!DEBUGGER || !this.dbg || !this.dbg.checkMemoryWrite(addr, 4)) {
-            if (I386) this.cpu.checkMemoryException(addr, 4, true);
+            if (I386 && this.cpu) this.cpu.checkMemoryException(addr, 4, true);
         }
         if (this.fReadOnly) this.writeNone(off, l, addr); else this.writeLongDirect(off, l, addr);
     },

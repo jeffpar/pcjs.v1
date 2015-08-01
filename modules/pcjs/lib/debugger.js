@@ -1484,9 +1484,8 @@ if (DEBUGGER) {
     Debugger.prototype.getSegment = function(sel, fProt)
     {
         var fProtMode = this.getProtMode();
-        if (fProt === undefined) {
-            fProt = fProtMode;
-        }
+        if (fProt === undefined) fProt = fProtMode;
+
         if (fProt == fProtMode) {
             if (sel === this.cpu.getCS()) return this.cpu.segCS;
             if (sel === this.cpu.getDS()) return this.cpu.segDS;
@@ -1496,8 +1495,13 @@ if (DEBUGGER) {
                 if (sel === this.cpu.getFS()) return this.cpu.segFS;
                 if (sel === this.cpu.getGS()) return this.cpu.segGS;
             }
+            /*
+             * Even if nSuppressBreaks is set, we'll allow the call if we're in real-mode, because
+             * a loadReal() request using segDebugger should generally be safe.
+             */
+            if (this.nSuppressBreaks && fProt || !this.segDebugger) return null;
         }
-        if (this.nSuppressBreaks || !this.segDebugger) return null;
+
         /*
          * Note the load() function's fSuppress parameter, which the Debugger should ALWAYS set to true
          * to avoid triggering a fault.  Unfortunately, when paging is enabled, there's still the risk of
@@ -3160,8 +3164,7 @@ if (DEBUGGER) {
                  * (hence the assertion that there IS a linear address stored in dbgAddr);
                  * this allows us to step over calls or interrupts that change the processor mode
                  */
-                dbgAddr.sel = null;
-                this.assert(dbgAddr.addr);
+                if (dbgAddr.addr) dbgAddr.sel = null;
             } else {
                 this.println("breakpoint enabled: " + this.hexAddr(dbgAddr) + " (" + aBreak[0] + ")");
             }
@@ -3366,7 +3369,7 @@ if (DEBUGGER) {
                  */
                 var addrBreak = this.mapBreakpoint(this.getAddr(dbgAddrBreak));
                 for (var n = 0; n < nb; n++) {
-                    if (addr == addrBreak) {
+                    if (addr + n == addrBreak) {
                         if (dbgAddrBreak.fTempBreak) {
                             this.findBreakpoint(aBreak, dbgAddrBreak, true);
                         } else if (!fTemp) {
@@ -3376,7 +3379,6 @@ if (DEBUGGER) {
                         break;
                     }
                     addrBreak++;
-                    addr++;
                     n++;
                 }
             }

@@ -309,7 +309,7 @@ X86.opLOADALL386 = function LOADALL386()
      */
     X86.opUndefined.call(this);
 
-    this.nStepCycles -= 100;            // I've not seen a documented time for the 80386 LOADALL, so we'll make a guess
+    this.nStepCycles -= 100;            // TODO: I've not seen a documented time for the 80386 LOADALL; update this random guess
 };
 
 /**
@@ -366,7 +366,7 @@ X86.opMOVrc = function MOVrc()
     this.nStepCycles -= 6;
 
     /*
-     * TODO: Implement BACKTRACK for this instruction....
+     * TODO: Implement BACKTRACK for this instruction (although Control registers are not likely to be a conduit for much interesting data).
      */
 };
 
@@ -406,7 +406,7 @@ X86.opMOVrd = function MOVrd()
     this.nStepCycles -= 22;
 
     /*
-     * TODO: Implement BACKTRACK for this instruction....
+     * TODO: Implement BACKTRACK for this instruction (although Debug registers are not likely to be a conduit for much interesting data).
      */
 };
 
@@ -464,7 +464,7 @@ X86.opMOVcr = function MOVcr()
     }
 
     /*
-     * TODO: Implement BACKTRACK for this instruction....
+     * TODO: Implement BACKTRACK for this instruction (although Control registers are not likely to be a conduit for much interesting data).
      */
 };
 
@@ -529,7 +529,7 @@ X86.opMOVdr = function MOVdr()
     this.regDR[iDst] = regDR;
     this.nStepCycles -= (iDst < 4? 22 : 14);
     /*
-     * TODO: Implement BACKTRACK for this instruction....
+     * TODO: Implement BACKTRACK for this instruction (although Debug registers are not likely to be a conduit for much interesting data).
      */
 };
 
@@ -567,7 +567,7 @@ X86.opMOVrt = function MOVrt()
     this.nStepCycles -= 12;
 
     /*
-     * TODO: Implement BACKTRACK for this instruction....
+     * TODO: Implement BACKTRACK for this instruction (although Test registers are not likely to be a conduit for much interesting data).
      */
 };
 
@@ -603,14 +603,14 @@ X86.opMOVtr = function MOVtr()
     }
 
     /*
-     * TODO: Do something with the Test registers....
+     * TODO: Do something useful with the Test registers.
      */
     this.regTR[iDst] = this.getReg(bModRM & 0x7);
 
     this.nStepCycles -= 12;
 
     /*
-     * TODO: Implement BACKTRACK for this instruction....
+     * TODO: Implement BACKTRACK for this instruction (although Test registers are not likely to be a conduit for much interesting data).
      */
 };
 
