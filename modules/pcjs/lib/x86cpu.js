@@ -1683,7 +1683,7 @@ X86CPU.prototype.checkIntReturn = function(addr)
  *
  * These functions provide Debug register functionality by leveraging the same Memory block-based breakpoint
  * support originally created for our built-in Debugger.  Only minimal changes were required to the Memory
- * component, by adding additional checkMemoryException() call-outs to the "checked" Memory access functions.
+ * component, by adding additional checkMemoryException() call-outs from the "checked" Memory access functions.
  *
  * Note that those call-outs occur only AFTER our own Debugger (if present) has checked the address and has
  * passed on it, because we want our own Debugger's breakpoints to take precedence over any breakpoints that
@@ -1713,14 +1713,66 @@ X86CPU.prototype.removeMemCheck = function(addr, fWrite)
 };
 
 /**
+ * checkDebugRegisters(fEnable)
+ *
+ * opMOVdr() simplifies its life by doing work ONLY if the contents of a Debug register is actually changing.
+ *
+ * Whenever a single register is about to change, it calls this function with fEnable set to false to REMOVE any
+ * active checks, then updates the Debug register, then calls us again with fEnable set to true to (re)ADD active
+ * checks.
+ *
+ * @this {X86CPU}
+ * @param {boolean} fEnable
+ */
+X86CPU.prototype.checkDebugRegisters = function(fEnable)
+{
+    /*
+     * We use a constant mask for the enable bits (X86.DR7.L0 | X86.DR7.G0) and shift our copy of regDR7
+     * right 2 bits after each Debug register check.
+     *
+     * Similarly, we make a copy of regDR7 in bitsDR7 and shift the latter right 4 bits at a time, so that
+     * the RW and LEN bits for the next Debug register are always in positions 1-0 and 3-2, respectively.
+     */
+    var regDR7 = this.regDR[7];
+    var bitsDR7 = regDR7 >> 16;
+
+    for (var i = 0; i < 4; i++) {
+        if (regDR7 & (X86.DR7.L0 | X86.DR7.G0)) {
+            /*
+             * We look only to the low bit of the RW field to determine if we should be watching for a write.
+             * FYI, if the low bit is clear but the high bit is set, that's "undefined"; we treat it as a read.
+             */
+            var fWrite = !!(bitsDR7 & 0x1);
+            /*
+             * The address in regDR[i] should already be masked with ~0x1 for 2-byte accesses (LEN == 0x1) or
+             * with ~0x3 for 4-byte accesses (LEN == 0x3), but if the client forgets, the hardware supposedly
+             * enforces it, so that's what we do here, too.
+             *
+             * FYI, if LEN is set to the "undefined" value of (0x2), we still apply a mask to the address, albeit
+             * a nonsensical mask of ~0x2 or 0xfffffffd.  That's how we define that particular "undefined" LEN.
+             */
+            var addr = this.regDR[i];
+            var len = ((bitsDR7 >> 2) & 0x3);
+            addr &= ~len;       // NOTE: if LEN == 0x0, we don't need to mask, but ~0x0 is equivalent to no mask
+            if (fEnable) {
+                this.addMemCheck(addr, fWrite);
+            } else {
+                this.removeMemCheck(addr, fWrite);
+            }
+        }
+        regDR7 >>= 2; bitsDR7 >>= 4;
+    }
+};
+
+/**
  * checkMemoryException(addr, nb, fWrite)
  *
  * This "check" function is called by a Memory block to inform us that a memory read or write is occurring,
  * giving us the opportunity look for a matching "read" or "write" breakpoint enabled in one of the DRn registers.
  *
  * TODO: This currently does not discriminate between data reads and execution reads.  When we switch to a true
- * "prefetch" model, that would also be a good time to include a signal to this function that any "read" accesses
- * are  actually "exec" accesses.
+ * "prefetch" model, that would also be a good time to include a signal to this function which "read" accesses are
+ * are actually "exec" accesses.
  *
  * @this {X86CPU}
  * @param {number} addr
@@ -1729,24 +1781,45 @@ X86CPU.prototype.removeMemCheck = function(addr, fWrite)
  */
 X86CPU.prototype.checkMemoryException = function(addr, nb, fWrite)
 {
-    if (this.regDR[7] & X86.DR7.ENABLE) {
+    /*
+     * NOTE: We're preventing redundant X86.EXCEPTION.DEBUG exceptions for a single instruction by checking
+     * X86.OPFLAG.DEBUG.  I decided not to rely on the generic X86.OPFLAG.FAULT, because if an instruction
+     * first triggers a DIFFERENT exception which then triggers a DEBUG exception (eg, because a Debug register
+     * was set on the IDT entry of the first exception), that we'd actually like to see the DEBUG exception,
+     * as opposed to, say, a double fault.  TODO: Determine if that SHOULD generate a double-fault.
+     */
+    if (!(this.opFlags & X86.OPFLAG.FAULT) && (this.regDR[7] & X86.DR7.ENABLE)) {
+        nb--;
+        /*
+         * We use a constant mask for the enable bits (X86.DR7.L0 | X86.DR7.G0) and shift our copy of regDR7
+         * right 2 bits after each Debug register check.
+         *
+         * Similarly, we make a copy of regDR7 in bitsDR7 and shift the latter right 4 bits at a time, so that
+         * the RW and LEN bits for the next Debug register are always in positions 1-0 and 3-2, respectively.
+         */
         var regDR7 = this.regDR[7];
-        var bitsEnabled = X86.DR7.L0 | X86.DR7.G0;
-        var bitsRWMask = 0x00030000;
-        var bitsRWRequired = (fWrite? 0x00010000 : (fWrite == false? 0x00030000 : 0));
-        var bitsLENMask = 0x000C0000;
-        var bitsLENRequired = (nb == 1? 0x00000000 : (nb == 2? 0x00040000 : 0x000C000));
+        var bitsDR7 = regDR7 >> 16;
+
+        var bitsRWMask = X86.DR7.RW0 >> 16;
+        var bitsRWRequired = (fWrite? 0x1 : (fWrite == false? 0x3 : 0x0));
+
         for (var i = 0; i < 4; i++) {
-            if ((regDR7 & bitsEnabled) && (regDR7 & bitsRWMask) == bitsRWRequired) {
-                if ((regDR7 & bitsLENMask) == bitsLENRequired && addr == this.regDR[i]) {
+            if ((regDR7 & (X86.DR7.L0 | X86.DR7.G0)) && (bitsDR7 & bitsRWMask) == bitsRWRequired) {
+                /*
+                 * NOTE: We reduced nb from 1-4 to 0-3 above, so we don't need to add 1 to len either.
+                 */
+                var len = (bitsDR7 >> 2);
+                /*
+                 * Time to determine if addr through addr + nb overlaps regDR[i] through regDR[i] + len.
+                 */
+                if (addr + nb >= this.regDR[i] && addr <= this.regDR[i] + len) {
                     this.regDR[6] |= (1 << i);
+                    this.opFlags |= X86.OPFLAG.DEBUG;
                     X86.fnFault.call(this, X86.EXCEPTION.DEBUG);
                     return;
                 }
             }
-            bitsEnabled <<= 2;
-            bitsRWMask <<= 2; bitsRWRequired <<= 2;
-            bitsLENMask <<= 2; bitsLENRequired <<= 2;
+            regDR7 >>= 2; bitsDR7 >>= 4;
         }
     }
 };

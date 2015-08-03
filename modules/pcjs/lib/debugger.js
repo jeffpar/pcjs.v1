@@ -1662,6 +1662,10 @@ if (DEBUGGER) {
     /**
      * newAddr(off, sel, addr, fProt, fData32, fAddr32)
      *
+     * NOTES: If 'off' is undefined, it may be because parseExpression() was unable to parse the given value,
+     * in which case we need to make sure that 'off' passes through as undefined, so that callers can test for
+     * "dbgAddr.off == null" to detect invalid addresses.
+     *
      * @this {Debugger}
      * @param {number|null|undefined} [off] (default is zero)
      * @param {number|null|undefined} [sel] (default is undefined)
@@ -2406,9 +2410,11 @@ if (DEBUGGER) {
         while ((i = s.indexOf('$', i)) >= 0) {
             sAddr = s.substr(i+1, 9);
             dbgAddr = this.parseAddr(sAddr);
-            sReplace = sAddr + ' "' + this.getSZ(dbgAddr) + '"';
-            s = s.replace('$' + sAddr, sReplace);
-            i += sReplace.length;
+            if (dbgAddr) {
+                sReplace = sAddr + ' "' + this.getSZ(dbgAddr) + '"';
+                s = s.replace('$' + sAddr, sReplace);
+                i += sReplace.length;
+            }
         }
         /*
          * Replace every ^XXXX:XXXX, where XXXX:XXXX is a segmented address, with the FCB filename stored at that address.
@@ -2417,10 +2423,12 @@ if (DEBUGGER) {
         while ((i = s.indexOf('^', i)) >= 0) {
             sAddr = s.substr(i+1, 9);
             dbgAddr = this.parseAddr(sAddr);
-            this.incAddr(dbgAddr);
-            sReplace = sAddr + ' "' + this.getSZ(dbgAddr, 11) + '"';
-            s = s.replace('^' + sAddr, sReplace);
-            i += sReplace.length;
+            if (dbgAddr) {
+                this.incAddr(dbgAddr);
+                sReplace = sAddr + ' "' + this.getSZ(dbgAddr, 11) + '"';
+                s = s.replace('^' + sAddr, sReplace);
+                i += sReplace.length;
+            }
         }
         return s;
     };
@@ -4049,7 +4057,7 @@ if (DEBUGGER) {
      * @param {string|undefined} sAddr
      * @param {number|undefined} [type] is the address segment type, in case sAddr doesn't specify a segment
      * @param {boolean} [fNoChecks] (eg, true when setting breakpoints that may not be valid now, but will be later)
-     * @return {{DbgAddr}}
+     * @return {{DbgAddr}|null|undefined}
      */
     Debugger.prototype.parseAddr = function(sAddr, type, fNoChecks)
     {
@@ -4076,6 +4084,7 @@ if (DEBUGGER) {
                     addr = null;
                 } else {
                     addr = this.parseExpression(sAddr);
+                    if (addr == null) off = null;
                 }
             }
             else {
@@ -4085,8 +4094,10 @@ if (DEBUGGER) {
             }
         }
 
-        dbgAddr = this.newAddr(off, sel, addr);
-        if (!fNoChecks) this.checkLimit(dbgAddr);
+        if (off != null) {
+            dbgAddr = this.newAddr(off, sel, addr);
+            if (!fNoChecks) this.checkLimit(dbgAddr);
+        }
         return dbgAddr;
     };
 
@@ -4548,7 +4559,7 @@ if (DEBUGGER) {
     Debugger.prototype.doAssemble = function(asArgs)
     {
         var dbgAddr = this.parseAddr(asArgs[1], Debugger.ADDR_CODE);
-        if (dbgAddr.off == null) return;
+        if (!dbgAddr) return;
 
         this.dbgAddrAssemble = dbgAddr;
         if (asArgs[2] === undefined) {
@@ -4626,7 +4637,7 @@ if (DEBUGGER) {
         var dbgAddr = {};
         if (sAddr != "*") {
             dbgAddr = this.parseAddr(sAddr, Debugger.ADDR_CODE, true);
-            if (dbgAddr.off == null) return;
+            if (!dbgAddr) return;
         }
 
         /*
@@ -4767,7 +4778,7 @@ if (DEBUGGER) {
             }
         }
         var dbgAddr = this.parseAddr(sAddr, Debugger.ADDR_DATA);
-        if (dbgAddr.off == null || dbgAddr.sel == null && dbgAddr.addr == null) return;
+        if (!dbgAddr) return;
 
         var sDump = "";
         if (BACKTRACK && sCmd == "di") {
@@ -4821,7 +4832,8 @@ if (DEBUGGER) {
             return;
         }
         var dbgAddr = this.parseAddr(sAddr, Debugger.ADDR_DATA);
-        if (dbgAddr.off == null) return;
+        if (!dbgAddr) return;
+
         for (var i = 2; i < asArgs.length; i++) {
             var b = str.parseInt(asArgs[i], 16);
             if (b === undefined) {
@@ -5004,8 +5016,7 @@ if (DEBUGGER) {
     Debugger.prototype.doList = function(sSymbol)
     {
         var dbgAddr = this.parseAddr(sSymbol, Debugger.ADDR_CODE);
-
-        if (dbgAddr.off == null && dbgAddr.addr == null) return;
+        if (!dbgAddr) return;
 
         var addr = this.getAddr(dbgAddr);
         sSymbol = sSymbol? (sSymbol + ": ") : "";
@@ -5064,7 +5075,9 @@ if (DEBUGGER) {
 
         var fJSON = (asArgs[1] == "json");
         var iDrive, iSector = 0, nSectors = 0;
+
         var dbgAddr = (fJSON? {} : this.parseAddr(asArgs[1], Debugger.ADDR_DATA));
+        if (!dbgAddr) return;
 
         iDrive = this.parseValue(asArgs[2], "drive #");
         if (iDrive === undefined) return;
@@ -5086,7 +5099,7 @@ if (DEBUGGER) {
          * drive and its disk are inseparable; it's certainly possible that its disk object may be empty at
          * this point, but that will only affect whether the read succeeds or not.
          */
-        var dc = this.fdc;
+        var dc = this   .fdc;
         if (iDrive >= 2 && this.hdc) {
             iDrive -= 2;
             dc = this.hdc;
@@ -5547,7 +5560,7 @@ if (DEBUGGER) {
     {
         if (sAddr !== undefined) {
             var dbgAddr = this.parseAddr(sAddr, Debugger.ADDR_CODE);
-            if (dbgAddr.off == null) return;
+            if (!dbgAddr) return;
             this.setTempBreakpoint(dbgAddr);
         }
         if (!this.runCPU(true)) {
@@ -5841,7 +5854,7 @@ if (DEBUGGER) {
     Debugger.prototype.doUnassemble = function(sAddr, sAddrEnd, n)
     {
         var dbgAddr = this.parseAddr(sAddr, Debugger.ADDR_CODE);
-        if (dbgAddr.off == null) return;
+        if (!dbgAddr) return;
 
         if (n === undefined) n = 1;
         var dbgAddrEnd = this.newAddr(this.maskReg, dbgAddr.sel, this.bus.nBusLimit);
@@ -5850,7 +5863,7 @@ if (DEBUGGER) {
         if (sAddrEnd !== undefined) {
 
             dbgAddrEnd = this.parseAddr(sAddrEnd, Debugger.ADDR_CODE);
-            if (dbgAddrEnd.off == null || dbgAddrEnd.off < dbgAddr.off) return;
+            if (!dbgAddrEnd || dbgAddrEnd.off < dbgAddr.off) return;
 
             cb = dbgAddrEnd.off - dbgAddr.off;
             if (!DEBUG && cb > 0x100) {

@@ -108,7 +108,7 @@ function Memory(addr, used, size, type, controller, cpu)
     this.type = type || Memory.TYPE.NONE;
     this.fReadOnly = (type == Memory.TYPE.ROM);
     this.controller = null;
-    this.cpu = cpu;
+    this.cpu = cpu;     // If a CPU reference is provided, then this must be an UNPAGED Memory block allocation
     this.fDirty = this.fDirtyEver = false;
     this.setPhysBlock();
 
@@ -490,6 +490,8 @@ Memory.prototype = {
     /**
      * getPageBlock(addr, fWrite)
      *
+     * Called for UNPAGED Memory blocks only.
+     *
      * @this {Memory}
      * @param {number} addr
      * @param {boolean} fWrite (true if called for a write, false if for a read)
@@ -526,7 +528,7 @@ Memory.prototype = {
      *
      * NOTE: Some Memory blocks already require access to the CPU (eg, UNPAGED blocks that need to call cpu.mapPageBlock()),
      * while others require access only if the CPU has set a read or write breakpoint in one of its Debug registers; the latter
-     * case is handled here by virtue of the cpu parameter.
+     * case is handled here by virtue of the CPU parameter.
      *
      * @this {Memory}
      * @param {number} off
@@ -552,9 +554,15 @@ Memory.prototype = {
     /**
      * removeBreakpoint(off, fWrite)
      *
-     * NOTE: If this Memory block is not an UNPAGED block that might need to call cpu.mapPageBlock()), and it no longer
-     * has any read or write breakpoints associated with it, then it no longer needs a CPU reference.  However, the latter
-     * is a moot point, because the "checked" memory access functions should be swapped out when this function is done.
+     * NOTE: If this Memory block is not an UNPAGED block that might need to call cpu.mapPageBlock()), and it no
+     * longer has any read or write breakpoints associated with it, then it no longer needs a CPU reference.  The
+     * existence of a CPU reference only impacts the performance of the "checked" memory access functions, so it's
+     * not critical to eliminate it, but we do it anyway, in case the "checked" functions become re-enabled later
+     * (eg, by the Debugger -- yeah, the Debugger, which is why eliminating it isn't critical).
+     *
+     * TODO: Another option would be to count CPU references separately from Debugger references, so that when the
+     * former goes to zero, we can unconditionally remove the CPU reference; UNPAGED blocks would automatically
+     * increment that reference count, so their CPU reference would never go away.
      *
      * @this {Memory}
      * @param {number} off
@@ -575,6 +583,7 @@ Memory.prototype = {
             }
             Component.assert(this.cWriteBreakpoints >= 0);
         }
+        if (!this.cReadBreakpoints && !this.cWriteBreakpoints && this.type != Memory.TYPE.UNPAGED) this.cpu = null;
     },
     /**
      * readNone(off)

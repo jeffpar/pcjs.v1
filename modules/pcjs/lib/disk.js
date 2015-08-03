@@ -2142,7 +2142,7 @@ Disk.prototype.toJSON = function()
     /*
      * Last but not least, insert line breaks after every object definition, to ease the pain on text editors.
      */
-    s = s.replace(/},/gm, "},\n");
+    s = s.replace(/([\]}]),/gm, "$1,\n");
     return s;
 };
 

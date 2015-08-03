@@ -3693,6 +3693,13 @@ X86.fnSrcNone = function SrcNone()
  */
 X86.fnFault = function(nFault, nError, fHalt, nCycles)
 {
+    /*
+     * This flag is used by selected opcodes to provide an early exit if X86.OPFLAG.FAULT is set, in some cases
+     * making it possible for an instruction to be restarted (eg, opINSw()), and in other cases preventing a redundant
+     * fault from being generated.  However, to prevent multiple X86.EXCEPTION.DEBUG exceptions on a single instruction,
+     * checkMemoryException() currently relies on its own OPFLAG.DEBUG, on the theory that we should be allowed to see
+     * DEBUG exceptions triggered by other exceptions.
+     */
     this.opFlags |= X86.OPFLAG.FAULT;
 
     if (!this.aFlags.fComplete) {

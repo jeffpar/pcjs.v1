@@ -338,7 +338,7 @@ X86.opMOVrc = function MOVrc()
      */
     if (this.nCPL) {
         /*
-         * You're not allowed to read control registers if the current privilege level is not zero
+         * You're not allowed to read control registers if the current privilege level is not zero.
          */
         X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
         return;
@@ -366,7 +366,7 @@ X86.opMOVrc = function MOVrc()
     this.nStepCycles -= 6;
 
     /*
-     * TODO: Implement BACKTRACK for this instruction (although Control registers are not likely to be a conduit for much interesting data).
+     * TODO: Implement BACKTRACK for this instruction (although Control registers are not likely to be a conduit for interesting data).
      */
 };
 
@@ -387,7 +387,7 @@ X86.opMOVrd = function MOVrd()
      */
     if (this.nCPL) {
         /*
-         * You're not allowed to read control registers if the current privilege level is not zero
+         * You're not allowed to read control registers if the current privilege level is not zero.
          */
         X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
         return;
@@ -406,7 +406,7 @@ X86.opMOVrd = function MOVrd()
     this.nStepCycles -= 22;
 
     /*
-     * TODO: Implement BACKTRACK for this instruction (although Debug registers are not likely to be a conduit for much interesting data).
+     * TODO: Implement BACKTRACK for this instruction (although Debug registers are not likely to be a conduit for interesting data).
      */
 };
 
@@ -436,7 +436,7 @@ X86.opMOVcr = function MOVcr()
      */
     if (this.nCPL) {
         /*
-         * You're not allowed to write control registers if the current privilege level is not zero
+         * You're not allowed to write control registers if the current privilege level is not zero.
          */
         X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
         return;
@@ -464,7 +464,7 @@ X86.opMOVcr = function MOVcr()
     }
 
     /*
-     * TODO: Implement BACKTRACK for this instruction (although Control registers are not likely to be a conduit for much interesting data).
+     * TODO: Implement BACKTRACK for this instruction (although Control registers are not likely to be a conduit for interesting data).
      */
 };
 
@@ -485,7 +485,7 @@ X86.opMOVdr = function MOVdr()
      */
     if (this.nCPL) {
         /*
-         * You're not allowed to write control registers if the current privilege level is not zero
+         * You're not allowed to write control registers if the current privilege level is not zero.
          */
         X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
         return;
@@ -498,38 +498,18 @@ X86.opMOVdr = function MOVdr()
         X86.opUndefined.call(this);
         return;
     }
+
     var regDR = this.getReg(bModRM & 0x7);
 
-    if (iDst == 7) {
-        var regDR7 = this.regDR[7];
-        if ((regDR ^ regDR7) & X86.DR7.ENABLE) {
-            /*
-             * We need to check changes to the Debug Control Register (DR7); specifically, if any of
-             * DR0-DR3 are transitioning from disabled to enabled, or vice versa, then we need to call
-             * addMemCheck(), or removeMemCheck(), as appropriate.
-             */
-            var bitsEnabled = X86.DR7.L0 | X86.DR7.G0;
-            var bitsRWMask = 0x00030000;
-            for (var i = 0; i < 4; i++) {
-                var fEnabled = (regDR & bitsEnabled);
-                if (!fEnabled != !(regDR7 & bitsEnabled)) {
-                    var bitsRW = (regDR & bitsRWMask) >> (i << 1);
-                    var fWrite = !!(bitsRW & 0x00010000);
-                    if (fEnabled) {
-                        this.addMemCheck(this.regDR[i], fWrite);
-                    } else {
-                        this.removeMemCheck(this.regDR[i], fWrite);
-                    }
-                }
-                bitsEnabled <<= 2;
-                bitsRWMask <<= 2;
-            }
-        }
+    if (regDR != this.regDR[iDst]) {
+        this.checkDebugRegisters(false);
+        this.regDR[iDst] = regDR;
+        this.checkDebugRegisters(true);
     }
-    this.regDR[iDst] = regDR;
+
     this.nStepCycles -= (iDst < 4? 22 : 14);
     /*
-     * TODO: Implement BACKTRACK for this instruction (although Debug registers are not likely to be a conduit for much interesting data).
+     * TODO: Implement BACKTRACK for this instruction (although Debug registers are not likely to be a conduit for interesting data).
      */
 };
 
@@ -550,7 +530,7 @@ X86.opMOVrt = function MOVrt()
      */
     if (this.nCPL) {
         /*
-         * You're not allowed to read control registers if the current privilege level is not zero
+         * You're not allowed to read control registers if the current privilege level is not zero.
          */
         X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
         return;
@@ -567,7 +547,7 @@ X86.opMOVrt = function MOVrt()
     this.nStepCycles -= 12;
 
     /*
-     * TODO: Implement BACKTRACK for this instruction (although Test registers are not likely to be a conduit for much interesting data).
+     * TODO: Implement BACKTRACK for this instruction (although Test registers are not likely to be a conduit for interesting data).
      */
 };
 
@@ -588,7 +568,7 @@ X86.opMOVtr = function MOVtr()
      */
     if (this.nCPL) {
         /*
-         * You're not allowed to write control registers if the current privilege level is not zero
+         * You're not allowed to write control registers if the current privilege level is not zero.
          */
         X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
         return;
@@ -610,7 +590,7 @@ X86.opMOVtr = function MOVtr()
     this.nStepCycles -= 12;
 
     /*
-     * TODO: Implement BACKTRACK for this instruction (although Test registers are not likely to be a conduit for much interesting data).
+     * TODO: Implement BACKTRACK for this instruction (although Test registers are not likely to be a conduit for interesting data).
      */
 };
 

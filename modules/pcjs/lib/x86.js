@@ -409,18 +409,19 @@ var X86 = {
      * Bit values for opFlags, which are all reset to zero prior to each instruction
      */
     OPFLAG: {
-        NOREAD:     0x0001,
-        NOWRITE:    0x0002,
-        NOINTR:     0x0004,     // indicates a segreg has been set, or a prefix, or an STI (delay INTR acknowledgement)
-        FAULT:      0x0008,     // indicates a fault occurred during the current instruction
+        NOREAD:     0x0001,     // disable memory reads for the remainder of the current instruction
+        NOWRITE:    0x0002,     // disable memory writes for the remainder of the current instruction
+        NOINTR:     0x0004,     // a segreg has been set, or a prefix, or an STI (delay INTR acknowledgement)
         SEG:        0x0010,     // segment override
         LOCK:       0x0020,     // lock prefix
         REPZ:       0x0040,     // repeat while Z (NOTE: this value MUST match PS.ZF; see opCMPSb/opCMPSw/opSCASb/opSCASw)
         REPNZ:      0x0080,     // repeat while NZ
-        REPEAT:     0x0100,     // indicates that an instruction is being repeated (ie, some iteration AFTER the first)
+        REPEAT:     0x0100,     // an instruction is being repeated (ie, some iteration AFTER the first)
         PUSHSP:     0x0200,     // the SP register is potentially being referenced by a PUSH SP opcode, adjustment may be required
-        DATASIZE:   0x1000,     // data size override
-        ADDRSIZE:   0x2000      // address size override
+        DATASIZE:   0x0400,     // data size override
+        ADDRSIZE:   0x0800,     // address size override
+        FAULT:      0x1000,     // a fault occurred during the current instruction
+        DEBUG:      0x2000      // a DEBUG exception occurred during the current instruction
     },
     /*
      * Bit values for intFlags
