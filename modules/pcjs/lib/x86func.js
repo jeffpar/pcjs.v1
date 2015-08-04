@@ -3694,13 +3694,19 @@ X86.fnSrcNone = function SrcNone()
 X86.fnFault = function(nFault, nError, fHalt, nCycles)
 {
     /*
-     * This flag is used by selected opcodes to provide an early exit if X86.OPFLAG.FAULT is set, in some cases
-     * making it possible for an instruction to be restarted (eg, opINSw()), and in other cases preventing a redundant
-     * fault from being generated.  However, to prevent multiple X86.EXCEPTION.DEBUG exceptions on a single instruction,
-     * checkMemoryException() currently relies on its own OPFLAG.DEBUG, on the theory that we should be allowed to see
-     * DEBUG exceptions triggered by other exceptions.
+     * X86.OPFLAG.FAULT flag is used by selected opcodes to provide an early exit, restore register(s), or whatever is
+     * needed to help ensure instruction restartability; there is currently no mechanism for snapping and restoring all
+     * registers for any instruction that might fault, so it's every opcode for themselves....
+     *
+     * X86.EXCEPTION.DEBUG exceptions set their own special flag, X86.OPFLAG.DEBUG, to prevent redundant DEBUG exceptions,
+     * so we don't need to set OPFLAG.FAULT in that case, because a DEBUG exception doesn't actually prevent an instruction
+     * from executing.
      */
-    this.opFlags |= X86.OPFLAG.FAULT;
+    if (nFault == X86.EXCEPTION.DEBUG) {
+        this.opFlags |= X86.OPFLAG.DEBUG;
+    } else {
+        this.opFlags |= X86.OPFLAG.FAULT;
+    }
 
     if (!this.aFlags.fComplete) {
         this.printMessage("Fault " + str.toHexByte(nFault) + " blocked by PCjs", Messages.WARN);

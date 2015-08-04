@@ -1785,10 +1785,10 @@ X86CPU.prototype.checkMemoryException = function(addr, nb, fWrite)
      * NOTE: We're preventing redundant X86.EXCEPTION.DEBUG exceptions for a single instruction by checking
      * X86.OPFLAG.DEBUG.  I decided not to rely on the generic X86.OPFLAG.FAULT, because if an instruction
      * first triggers a DIFFERENT exception which then triggers a DEBUG exception (eg, because a Debug register
-     * was set on the IDT entry of the first exception), that we'd actually like to see the DEBUG exception,
-     * as opposed to, say, a double fault.  TODO: Determine if that SHOULD generate a double-fault.
+     * was set on the IDT entry of the first exception), then presumably we'd like to see that DEBUG exception,
+     * as opposed to, say, a double fault.  TODO: Determine whether that SHOULD generate a double-fault.
      */
-    if (!(this.opFlags & X86.OPFLAG.FAULT) && (this.regDR[7] & X86.DR7.ENABLE)) {
+    if (!(this.opFlags & X86.OPFLAG.DEBUG) && (this.regDR[7] & X86.DR7.ENABLE)) {
         nb--;
         /*
          * We use a constant mask for the enable bits (X86.DR7.L0 | X86.DR7.G0) and shift our copy of regDR7
@@ -1814,7 +1814,6 @@ X86CPU.prototype.checkMemoryException = function(addr, nb, fWrite)
                  */
                 if (addr + nb >= this.regDR[i] && addr <= this.regDR[i] + len) {
                     this.regDR[6] |= (1 << i);
-                    this.opFlags |= X86.OPFLAG.DEBUG;
                     X86.fnFault.call(this, X86.EXCEPTION.DEBUG);
                     return;
                 }
@@ -1884,7 +1883,7 @@ X86CPU.prototype.saveProtMode = function()
             this.segTSS.save(),
             this.nIOPL
         ];
-        if (I386) {
+        if (I386 && this.model >= X86.MODEL_80386) {
             a.push(this.regCR1);
             a.push(this.regCR2);
             a.push(this.regCR3);
@@ -3978,6 +3977,7 @@ X86CPU.prototype.checkINTR = function()
             case 1:
                 if ((this.intFlags & X86.INTFLAG.TRAP)) {
                     this.intFlags &= ~X86.INTFLAG.TRAP;
+                    if (I386 && this.model >= X86.MODEL_80386) this.regDR[6] |= X86.DR6.BS;
                     X86.fnINT.call(this, X86.EXCEPTION.DEBUG, null, 11);
                     return true;
                 }
