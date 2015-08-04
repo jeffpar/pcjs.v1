@@ -3747,6 +3747,11 @@ X86.fnFault = function(nFault, nError, fHalt, nCycles)
     if (fDispatch) {
         this.nFault = nFault;
         X86.fnINT.call(this, nFault, nError, nCycles || 0);
+        /*
+         * REP'eated instructions that want to rewind regLIP to opLIP used to screw up this dispatch,
+         * so now we slip the new regLIP into opLIP, effectively turning their action into a no-op.
+         */
+        this.opLIP = this.regLIP;
     }
 
     /*
@@ -3841,7 +3846,7 @@ X86.fnFaultMessage = function(nFault, nError, fHalt)
             fHalt = false;
         }
     } else {
-        if (nFault == X86.EXCEPTION.NP_FAULT && bOpcode == 0x8E) {
+        if (MAXDEBUG && nFault == X86.EXCEPTION.NP_FAULT && bOpcode == 0x8E) {
             fHalt = true;
         }
     }
