@@ -557,8 +557,7 @@ Memory.prototype = {
      * NOTE: If this Memory block is not an UNPAGED block that might need to call cpu.mapPageBlock()), and it no
      * longer has any read or write breakpoints associated with it, then it no longer needs a CPU reference.  The
      * existence of a CPU reference only impacts the performance of the "checked" memory access functions, so it's
-     * not critical to eliminate it, but we do it anyway, in case the "checked" functions become re-enabled later
-     * (eg, by the Debugger -- yeah, the Debugger, which is why eliminating it isn't critical).
+     * not critical to eliminate it.
      *
      * TODO: Another option would be to count CPU references separately from Debugger references, so that when the
      * former goes to zero, we can unconditionally remove the CPU reference; UNPAGED blocks would automatically
@@ -583,7 +582,6 @@ Memory.prototype = {
             }
             Component.assert(this.cWriteBreakpoints >= 0);
         }
-        if (!this.cReadBreakpoints && !this.cWriteBreakpoints && this.type != Memory.TYPE.UNPAGED) this.cpu = null;
     },
     /**
      * readNone(off)
