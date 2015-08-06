@@ -3235,36 +3235,6 @@ if (DEBUGGER) {
     };
 
     /**
-     * redoBreakpoints()
-     *
-     * This function is for the Memory component: whenever the Bus allocates a new Memory block, it calls
-     * the block's setDebugger() method, which clears the memory block's breakpoint counts.  setDebugger(),
-     * in turn, must call this function to re-apply any existing breakpoints to that block.
-     *
-     * This ensures that, even if a memory region is remapped (which creates new Memory blocks in the process),
-     * any breakpoints that were previously applied to that region will still work.
-     *
-     * @this {Debugger}
-     * @param {number} addr of memory block
-     * @param {number} size of memory block
-     * @param {Array} [aBreak]
-     */
-    Debugger.prototype.redoBreakpoints = function(addr, size, aBreak)
-    {
-        if (aBreak === undefined) {
-            this.redoBreakpoints(addr, size, this.aBreakRead);
-            this.redoBreakpoints(addr, size, this.aBreakWrite);
-            return;
-        }
-        for (var i = 1; i < aBreak.length; i++) {
-            var addrBreak = this.getAddr(aBreak[i]);
-            if (addrBreak >= addr && addrBreak < addr + size) {
-                this.bus.addMemBreak(addrBreak, aBreak == this.aBreakWrite);
-            }
-        }
-    };
-
-    /**
      * setTempBreakpoint(dbgAddr)
      *
      * @this {Debugger}

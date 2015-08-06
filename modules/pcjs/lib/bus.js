@@ -394,12 +394,12 @@ Bus.prototype.addMemory = function(addr, size, type, controller)
             }
             return this.reportError(1, addr, size);
         }
-        block = this.aMemBlocks[iBlock++] = new Memory(addr, sizeBlock, this.nBlockSize, type, controller);
-        if (DEBUGGER && this.dbg) {
-            block.setDebugger(this.dbg, addr, this.nBlockSize);
-        }
-        size -= sizeBlock;
+        var blockOld = this.aMemBlocks[iBlock];
+        var blockNew = new Memory(addr, sizeBlock, this.nBlockSize, type, controller);
+        blockNew.copyBreakpoints(blockOld, this.dbg);
+        this.aMemBlocks[iBlock++] = blockNew;
         addr = addrBlock + this.nBlockSize;
+        size -= sizeBlock;
     }
     if (size > 0) {
         return this.reportError(2, addr, size);
@@ -563,7 +563,7 @@ Bus.prototype.setMemoryAccess = function(addr, size, afn)
 /**
  * removeMemory(addr, size)
  *
- * Replaces every block in the specified address range with empty Memory blocks that will ignore all reads/writes.
+ * Replaces every block in the specified address range with empty Memory blocks that ignore all reads/writes.
  *
  * TODO: Update the removeMemory() interface to reflect the relaxed requirements of the addMemory() interface.
  *
@@ -577,11 +577,11 @@ Bus.prototype.removeMemory = function(addr, size)
     if (!(addr & this.nBlockLimit) && size && !(size & this.nBlockLimit)) {
         var iBlock = addr >>> this.nBlockShift;
         while (size > 0) {
+            var blockOld = this.aMemBlocks[iBlock];
+            var blockNew = new Memory(addr);
+            blockNew.copyBreakpoints(blockOld, this.dbg);
+            this.aMemBlocks[iBlock++] = blockNew;
             addr = iBlock * this.nBlockSize;
-            var block = this.aMemBlocks[iBlock++] = new Memory(addr);
-            if (DEBUGGER && this.dbg) {
-                block.setDebugger(this.dbg, addr, this.nBlockSize);
-            }
             size -= this.nBlockSize;
         }
         return true;
@@ -633,10 +633,7 @@ Bus.prototype.setMemoryBlocks = function(addr, size, aBlocks, type)
         if (!block) break;
         if (type !== undefined) {
             var blockNew = new Memory(addr);
-            if (DEBUGGER && this.dbg) {
-                blockNew.setDebugger(this.dbg, addr, this.nBlockSize);
-            }
-            blockNew.clone(block, type);
+            blockNew.clone(block, type, this.dbg);
             block = blockNew;
         }
         this.aMemBlocks[iBlock++] = block;

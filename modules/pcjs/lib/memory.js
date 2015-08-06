@@ -110,6 +110,7 @@ function Memory(addr, used, size, type, controller, cpu)
     this.controller = null;
     this.cpu = cpu;     // If a CPU reference is provided, then this must be an UNPAGED Memory block allocation
     this.fDirty = this.fDirtyEver = false;
+    this.cReadBreakpoints = this.cWriteBreakpoints = 0;
     this.setPhysBlock();
 
     if (BACKTRACK) {
@@ -265,8 +266,9 @@ Memory.prototype = {
      * @this {Memory}
      * @param {Memory} mem
      * @param {number} [type]
+     * @param {Debugger} [dbg]
      */
-    clone: function(mem, type) {
+    clone: function(mem, type, dbg) {
         /*
          * Original memory block IDs are even; cloned memory block IDs are odd;
          * the original ID of the current block is lost, but that's OK, since it was presumably
@@ -279,6 +281,7 @@ Memory.prototype = {
             this.type = type;
             this.fReadOnly = (type == Memory.TYPE.ROM);
         }
+        this.dbg = dbg;
         if (TYPEDARRAYS) {
             this.buffer = mem.buffer;
             this.dv = mem.dv;
@@ -472,22 +475,6 @@ Memory.prototype = {
         this.writeLong = this.fReadOnly? this.writeLongDefault : this.writeLongDirect;
     },
     /**
-     * setDebugger(dbg, addr, size)
-     *
-     * @this {Memory}
-     * @param {Debugger} dbg
-     * @param {number} addr of block
-     * @param {number} size of block
-     */
-    setDebugger: function(dbg, addr, size) {
-        if (DEBUGGER) {
-            this.dbg = dbg;
-            this.cReadBreakpoints = this.cWriteBreakpoints = 0;
-            Component.assert(this.dbg);
-            this.dbg.redoBreakpoints(addr, size);
-        }
-    },
-    /**
      * getPageBlock(addr, fWrite)
      *
      * Called for UNPAGED Memory blocks only.
@@ -559,8 +546,8 @@ Memory.prototype = {
      * existence of a CPU reference only impacts the performance of the "checked" memory access functions, so it's
      * not critical to eliminate it.
      *
-     * TODO: Another option would be to count CPU references separately from Debugger references, so that when the
-     * former goes to zero, we can unconditionally remove the CPU reference; UNPAGED blocks would automatically
+     * TODO: Another option would be to count CPU references separately from Debugger references, so that when
+     * the former goes to zero, we can unconditionally remove the CPU reference; UNPAGED blocks would automatically
      * increment that reference count, so their CPU reference would never go away.
      *
      * @this {Memory}
@@ -581,6 +568,25 @@ Memory.prototype = {
                 if (DEBUG && this.dbg) this.dbg.println("all write breakpoints removed from memory block " + str.toHex(this.addr));
             }
             Component.assert(this.cWriteBreakpoints >= 0);
+        }
+    },
+    /**
+     * copyBreakpoints(mem)
+     *
+     * @this {Memory}
+     * @param {Memory|undefined} mem (outgoing Memory block to copy breakpoints from, if any)
+     * @param {Debugger} [dbg]
+     */
+    copyBreakpoints: function(mem, dbg) {
+        if (mem) {
+            if (dbg) this.dbg = dbg;
+            if (mem.cpu) this.cpu = mem.cpu;
+            if ((this.cReadBreakpoints = mem.cReadBreakpoints)) {
+                this.setReadAccess(Memory.afnChecked, false);
+            }
+            if ((this.cWriteBreakpoints = mem.cWriteBreakpoints)) {
+                this.setWriteAccess(Memory.afnChecked, false);
+            }
         }
     },
     /**
