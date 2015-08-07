@@ -336,23 +336,32 @@ SerialPort.prototype.setBinding = function(sHTMLType, sBinding, control)
         control.onkeydown = function onKeyDownSerial(event) {
             /*
              * This is required in addition to onkeypress, because it's the only way to prevent
-             * BACKSPACE from being interpreted by the browser as a "Back" operation.
+             * BACKSPACE (keyCode 8) from being interpreted by the browser as a "Back" operation;
+             * moreover, not all browsers generate an onkeypress notification for BACKSPACE.
              */
             event = event || window.event;
             var keyCode = event.keyCode;
             if (keyCode === 8) {
                 if (event.preventDefault) event.preventDefault();
                 serial.sendRBR([keyCode]);
+                return true;
             }
         };
         control.onkeypress = function onKeyPressSerial(event) {
             /*
              * Browser-independent keyCode extraction (refer to keyPress() and the other key
              * event handlers in keyboard.js).
+             *
+             * The additional check for SPACE (keyCode 32) and subsequent preventDefault() call
+             * prevents SPACE from bubbling up to the document event handlers, where its default
+             * behavior is typically to scroll the entire page -- a real nuisance.
              */
             event = event || window.event;
             var keyCode = event.which || event.keyCode;
             serial.sendRBR([keyCode]);
+            if (keyCode == 32) {
+                if (event.preventDefault) event.preventDefault();
+            }
         };
         return true;
 

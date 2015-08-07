@@ -528,14 +528,18 @@ Memory.prototype = {
                 if (cpu) this.cpu = cpu;
                 this.setReadAccess(Memory.afnChecked, false);
             }
-            if (DEBUG && this.dbg) this.dbg.println("read breakpoint added to memory block " + str.toHex(this.addr));
+            if (DEBUG && this.dbg && this.dbg.messageEnabled(Messages.MEM)) {
+                this.dbg.printMessage("read breakpoint added to memory block " + str.toHex(this.addr), true);
+            }
         }
         else {
             if (this.cWriteBreakpoints++ === 0) {
                 if (cpu) this.cpu = cpu;
                 this.setWriteAccess(Memory.afnChecked, false);
             }
-            if (DEBUG && this.dbg) this.dbg.println("write breakpoint added to memory block " + str.toHex(this.addr));
+            if (DEBUG && this.dbg && this.dbg.messageEnabled(Messages.MEM)) {
+                this.dbg.printMessage("write breakpoint added to memory block " + str.toHex(this.addr), true);
+            }
         }
     },
     /**
@@ -558,14 +562,18 @@ Memory.prototype = {
         if (!fWrite) {
             if (--this.cReadBreakpoints === 0) {
                 this.resetReadAccess();
-                if (DEBUG && this.dbg) this.dbg.println("all read breakpoints removed from memory block " + str.toHex(this.addr));
+                if (DEBUG && this.dbg && this.dbg.messageEnabled(Messages.MEM)) {
+                    this.dbg.printMessage("all read breakpoints removed from memory block " + str.toHex(this.addr), true);
+                }
             }
             Component.assert(this.cReadBreakpoints >= 0);
         }
         else {
             if (--this.cWriteBreakpoints === 0) {
                 this.resetWriteAccess();
-                if (DEBUG && this.dbg) this.dbg.println("all write breakpoints removed from memory block " + str.toHex(this.addr));
+                if (DEBUG && this.dbg && this.dbg.messageEnabled(Messages.MEM)) {
+                    this.dbg.printMessage("all write breakpoints removed from memory block " + str.toHex(this.addr), true);
+                }
             }
             Component.assert(this.cWriteBreakpoints >= 0);
         }
@@ -1105,9 +1113,8 @@ Memory.prototype = {
     readShortLittleEndian: function readShortLittleEndian(off, addr) {
         // DEBUG: Component.assert(off >= 0 && off < this.size - 1);
         /*
-         * TODO: It remains to be seen if there's any advantage to checking the offset
-         * for an aligned read vs. always reading the bytes separately; it seems a safe bet
-         * for longs, but it's less clear for shorts.
+         * TODO: It remains to be seen if there's any advantage to checking the offset for an aligned read
+         * vs. always reading the bytes separately; it seems a safe bet for longs, but it's less clear for shorts.
          */
         return (off & 0x1)? (this.ab[off] | (this.ab[off+1] << 8)) : this.aw[off >> 1];
     },
@@ -1134,9 +1141,8 @@ Memory.prototype = {
     readLongLittleEndian: function readLongLittleEndian(off, addr) {
         // DEBUG: Component.assert(off >= 0 && off < this.size - 3);
         /*
-         * TODO: It remains to be seen if there's any advantage to checking the offset
-         * for an aligned read vs. always reading the bytes separately; it seems a safe bet
-         * for longs, but it's less clear for shorts.
+         * TODO: It remains to be seen if there's any advantage to checking the offset for an aligned read
+         * vs. always reading the bytes separately; it seems a safe bet for longs, but it's less clear for shorts.
          */
         return (off & 0x3)? (this.ab[off] | (this.ab[off+1] << 8) | (this.ab[off+2] << 16) | (this.ab[off+3] << 24)) : this.adw[off >> 2];
     },
@@ -1190,9 +1196,8 @@ Memory.prototype = {
     writeShortLittleEndian: function writeShortLittleEndian(off, w, addr) {
         // DEBUG: Component.assert(off >= 0 && off < this.size - 1);
         /*
-         * TODO: It remains to be seen if there's any advantage to checking the offset
-         * for an aligned write vs. always writing the bytes separately; it seems a safe bet
-         * for longs, but it's less clear for shorts.
+         * TODO: It remains to be seen if there's any advantage to checking the offset for an aligned write
+         * vs. always writing the bytes separately; it seems a safe bet for longs, but it's less clear for shorts.
          */
         if (off & 0x1) {
             this.ab[off] = w;
@@ -1226,9 +1231,8 @@ Memory.prototype = {
     writeLongLittleEndian: function writeLongLittleEndian(off, l, addr) {
         // DEBUG: Component.assert(off >= 0 && off < this.size - 3);
         /*
-         * TODO: It remains to be seen if there's any advantage to checking the offset
-         * for an aligned write vs. always writing the bytes separately; it seems a safe bet
-         * for longs, but it's less clear for shorts.
+         * TODO: It remains to be seen if there's any advantage to checking the offset for an aligned write
+         * vs. always writing the bytes separately; it seems a safe bet for longs, but it's less clear for shorts.
          */
         if (off & 0x3) {
             this.ab[off] = l;

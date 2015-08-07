@@ -3831,14 +3831,14 @@ X86.fnFaultMessage = function(nFault, nError, fHalt)
 
     /*
      * There are a number of V86-mode exceptions we don't need to know about.  For starters, Windows 3.00
-     * (and other versions of enhanced-mode Windows) use an ARPL in V86-mode to switch out of V86-mode, so
-     * we can ignore those UD_FAULTs.
+     * (and other versions of enhanced-mode Windows) use an ARPL to switch out of V86-mode, so we can ignore
+     * those UD_FAULTs.
      *
      * Ditto for software interrupts, which will generate a GP_FAULT when the interrupt number (eg, 0x6D)
-     * exceeds the protected-mode IDT's limit (eg, a limit of 0x2FF yields a maximum interrupt number of 0x5F).
-     * Windows doesn't really care if its IDT is too small, because no matter what, it has to simulate all
-     * software interrupts in V86-mode (they will also generate a GP_FAULT if IOPL < 3, and even if IOPL == 3,
-     * only the protected-mode IDT handler gets to run).
+     * exceeds the protected-mode IDT's limit (eg, a limit of 0x2FF corresponds to a maximum interrupt number
+     * of 0x5F).  Windows doesn't really care if its IDT is too small, because it has to simulate all software
+     * interrupts in V86-mode regardless (they generate a GP_FAULT if IOPL < 3, and even when IOPL == 3, only
+     * the protected-mode IDT handler gets to run).
      */
     if ((this.regPS & X86.PS.VM)) {
         if (nFault == X86.EXCEPTION.UD_FAULT && bOpcode == X86.OPCODE.ARPL ||
@@ -3846,7 +3846,7 @@ X86.fnFaultMessage = function(nFault, nError, fHalt)
             fHalt = false;
         }
     } else {
-        if (MAXDEBUG && nFault == X86.EXCEPTION.NP_FAULT && bOpcode == 0x8E) {
+        if (nFault == X86.EXCEPTION.GP_FAULT && this.model == X86.MODEL_80386 /* || nFault == X86.EXCEPTION.NP_FAULT && bOpcode == 0x8E */) {
             fHalt = true;
         }
     }
