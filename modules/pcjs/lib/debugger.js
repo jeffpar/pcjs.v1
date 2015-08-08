@@ -1712,22 +1712,19 @@ if (DEBUGGER) {
      *
      * @this {Debugger}
      * @param {{DbgAddr}} dbgAddr
+     * @return {boolean}
      */
     Debugger.prototype.checkLimit = function(dbgAddr)
     {
         if (dbgAddr.sel != null) {
             var seg = this.getSegment(dbgAddr.sel, dbgAddr.fProt);
             if (seg) {
-                dbgAddr.off &= seg.addrMask;
-                if ((dbgAddr.off >>> 0) >= seg.offMax) {
-                    /*
-                     * TODO: This automatic wrap-to-zero is OK for normal segments, but for expand-down segments, not so much.
-                     */
-                    dbgAddr.off = 0;
-                    dbgAddr.addr = null;
-                }
+                var off = dbgAddr.off & seg.addrMask;
+                if ((off >>> 0) >= seg.offMax) return false;
+                dbgAddr.off = off;
             }
         }
+        return true;
     };
 
     /**
@@ -1745,7 +1742,10 @@ if (DEBUGGER) {
         }
         if (dbgAddr.sel != null) {
             dbgAddr.off += inc;
-            this.checkLimit(dbgAddr);
+            if (!this.checkLimit(dbgAddr)) {
+                dbgAddr.off = 0;
+                dbgAddr.addr = null;
+            }
         }
     };
 
@@ -4045,7 +4045,7 @@ if (DEBUGGER) {
             }
 
             dbgAddr = this.findSymbolAddr(sAddr);
-            if (dbgAddr && dbgAddr.off != null) return dbgAddr;
+            if (dbgAddr) return dbgAddr;
 
             var iColon = sAddr.indexOf(":");
             if (iColon < 0) {
@@ -4066,7 +4066,10 @@ if (DEBUGGER) {
 
         if (off != null) {
             dbgAddr = this.newAddr(off, sel, addr);
-            if (!fNoChecks) this.checkLimit(dbgAddr);
+            if (!fNoChecks && !this.checkLimit(dbgAddr)) {
+                this.println("invalid offset: " + this.hexAddr(dbgAddr));
+                dbgAddr = null;
+            }
         }
         return dbgAddr;
     };
@@ -4372,13 +4375,12 @@ if (DEBUGGER) {
      *
      * @this {Debugger}
      * @param {string} sSymbol
-     * @return {{DbgAddr}|null} a valid dbgAddr if a valid symbol, an empty dbgAddr if an unknown symbol, or null if not a symbol
+     * @return {{DbgAddr}|undefined}
      */
     Debugger.prototype.findSymbolAddr = function(sSymbol)
     {
-        var dbgAddr = null;
+        var dbgAddr;
         if (sSymbol.match(/^[a-z_][a-z0-9_]*$/i)) {
-            dbgAddr = {};
             var sUpperCase = sSymbol.toUpperCase();
             for (var i = 0; i < this.aSymbolTable.length; i++) {
                 var addr = this.aSymbolTable[i][0];
@@ -4395,10 +4397,7 @@ if (DEBUGGER) {
                          */
                         var sel = symbol['s'];
                         if (sel === undefined) sel = addr >>> 4;
-                        // dbgAddr = this.newAddr(off, sel);
-                        dbgAddr.off = off;
-                        dbgAddr.sel = sel;
-                        if (symbol['p'] !== undefined) dbgAddr.addr = symbol['p'];
+                        dbgAddr = this.newAddr(off, sel, symbol['p']);
                     }
                     /*
                      * The symbol matched, but it wasn't for an address (no "o" offset), and there's no point

@@ -568,11 +568,15 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
                         base = addrDesc = X86.ADDR_INVALID;
                         break;
                     }
-                    this.fStackSwitch = true;
                     /*
-                     * NOTE: We defer the actual stack switch to the end of this function, after we've called
-                     * updateMode(), to ensure that the stack operations occur with the correct size information.
+                     * It's critical that any stack switch occur with the operand size in effect at the time of
+                     * the current instruction, BEFORE any calls to updateMode() and resetSizes(), otherwise the
+                     * operand size (or operand override) in effect on an instruction like IRETD will be ignored.
                      */
+                    regSP = cpu.popWord();
+                    cpu.setSS(cpu.popWord(), true);
+                    cpu.setSP(regSP);
+                    this.fStackSwitch = true;
                 }
                 fGate = false;
             }
@@ -787,16 +791,6 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
         this.ext = ext;
         this.addrDesc = addrDesc;
         this.updateMode(true, true, false);
-
-        if (fGate === false && this.fStackSwitch) {
-            /*
-             * NOTE: This is the deferred stack switch we mentioned above.
-             */
-            cpu.resetSizes();
-            regSP = cpu.popWord();
-            cpu.setSS(cpu.popWord(), true);
-            cpu.setSP(regSP);
-        }
         break;
     }
     if (!fSuppress) this.messageSeg(sel, base, limit, type, ext);
