@@ -814,9 +814,9 @@ if (DEBUGGER) {
     {
         this.nextAddr = this.cpu.regPC;
         if (fStep || this.fStepOver)
-            this.doIns();
+            this.doUnassemble();
         else
-            this.doRegs();
+            this.doRegisters();
     };
 
     /**
@@ -997,7 +997,7 @@ if (DEBUGGER) {
     };
 
     /**
-     * getByte() should be used for all memory reads performed by the Debugger (eg, doDump, doIns),
+     * getByte() should be used for all memory reads performed by the Debugger (eg, doDump, doUnassemble),
      * to insure that the CPU is properly notified (and by extension, any device that's registered a
      * notification handler with the CPU).
      *
@@ -1236,7 +1236,7 @@ if (DEBUGGER) {
      * @param {number} [nIns] is an associated instruction number, or 0 (or undefined) if none
      * @return {string}
      */
-    C1PDebugger.prototype.getIns = function(addr, nIns)
+    C1PDebugger.prototype.getInstruction = function(addr, nIns)
     {
         var sLine = str.toHex(addr, 4);
         var bOpCode = this.getByte(addr++);
@@ -1301,11 +1301,13 @@ if (DEBUGGER) {
     };
 
     /**
-     * parseIns(sCode, sOperand, addr) generally requires an exact match of both the operation code
-     * (sCode) and mode operand (sOperand) against the aOpCodes[] and aOpModes[] arrays, respectively;
-     * however, the regular expression built from aOpModes and stored in regexOpModes does relax the matching
-     * criteria slightly; ie, a 4-digit hex value ("nnnn") will be satisfied with either 3 or 4 digits, and
-     * similarly, a 2-digit hex address (nn) will be satisified with either 1 or 2 digits.
+     * parseInstruction(sCode, sOperand, addr)
+     *
+     * This generally requires an exact match of both the operation code (sCode) and mode operand (sOperand)
+     * against the aOpCodes[] and aOpModes[] arrays, respectively; however, the regular expression built from
+     * aOpModes and stored in regexOpModes does relax the matching criteria slightly; ie, a 4-digit hex value
+     * ("nnnn") will be satisfied with either 3 or 4 digits, and similarly, a 2-digit hex address (nn) will
+     * be satisified with either 1 or 2 digits.
      *
      * Note that this function does not actually store the instruction into memory, even though it requires
      * a target address (addr); that parameter is currently needed ONLY for "branch" instructions, because in
@@ -1344,7 +1346,7 @@ if (DEBUGGER) {
      * @param {number} addr of memory where this instruction is being assembled
      * @return {Array.<number>} of opcode bytes; if the instruction can't be parsed, the array will be empty
      */
-    C1PDebugger.prototype.parseIns = function(sCode, sOperand, addr)
+    C1PDebugger.prototype.parseInstruction = function(sCode, sOperand, addr)
     {
         var aOpBytes = [];
         if (sCode !== undefined) {
@@ -1581,13 +1583,13 @@ if (DEBUGGER) {
             this.cpu.update();
             return;
         }
-        var aOpBytes = this.parseIns(asArgs[2], asArgs[3], this.addrAssembleNext);
+        var aOpBytes = this.parseInstruction(asArgs[2], asArgs[3], this.addrAssembleNext);
         if (aOpBytes.length) {
             for (var i=0; i < aOpBytes.length; i++) {
                 // this.println(str.toHexWord(this.addrAssembleNext) + ": " + str.toHexByte(aOpBytes[i]));
                 this.setByte(this.addrAssembleNext+i, aOpBytes[i]);
             }
-            this.println(this.getIns(this.addrAssembleNext));
+            this.println(this.getInstruction(this.addrAssembleNext));
             this.addrAssembleNext += aOpBytes.length;
         }
     };
@@ -1816,7 +1818,7 @@ if (DEBUGGER) {
             while (cLines && iHistory != this.iStepHistory) {
                 var addr = aHistory[iHistory];
                 if (addr < 0) break;
-                this.println(this.getIns(addr, nIns++));
+                this.println(this.getInstruction(addr, nIns++));
                 if (++iHistory == aHistory.length) iHistory = 0;
                 cLines--;
                 n--;
@@ -1863,7 +1865,7 @@ if (DEBUGGER) {
      * @param {string} [sAddrEnd]
      * @param {number} [n]
      */
-    C1PDebugger.prototype.doIns = function(sAddr, sAddrEnd, n)
+    C1PDebugger.prototype.doUnassemble = function(sAddr, sAddrEnd, n)
     {
         var addr = this.getUserAddr(sAddr);
         if (addr === undefined)
@@ -1893,7 +1895,7 @@ if (DEBUGGER) {
             this.println();
 
         while (n-- && addr < addrEnd) {
-            var sIns = this.getIns(addr, this.isBusy(false) || this.fStepOver? this.cIns : 0);
+            var sIns = this.getInstruction(addr, this.isBusy(false) || this.fStepOver? this.cIns : 0);
             this.println(sIns);
             this.nextAddr = addr = this.nextIns;
         }
@@ -1966,7 +1968,7 @@ if (DEBUGGER) {
      * @this {C1PDebugger}
      * @param {Array.<string>} [asArgs]
      */
-    C1PDebugger.prototype.doRegs = function(asArgs)
+    C1PDebugger.prototype.doRegisters = function(asArgs)
     {
         if (asArgs && asArgs[1] == "?") {
             this.println("\nregister commands:");
@@ -2044,7 +2046,7 @@ if (DEBUGGER) {
             this.cpu.update();
         }
         this.println(this.getRegs());
-        if (fIns) this.doIns(str.toHex(this.nextAddr = this.cpu.regPC, 4));
+        if (fIns) this.doUnassemble(str.toHex(this.nextAddr = this.cpu.regPC, 4));
     };
 
     /**
@@ -2157,7 +2159,7 @@ if (DEBUGGER) {
                 dbg.doHistory(asArgs[1]);
                 break;
             case "r":
-                dbg.doRegs(asArgs);
+                dbg.doRegisters(asArgs);
                 break;
             case "s":
                 dbg.doStep();
@@ -2166,7 +2168,7 @@ if (DEBUGGER) {
                 dbg.doTrace(asArgs[1]);
                 break;
             case "u":
-                dbg.doIns(asArgs[1], asArgs[2], 8);
+                dbg.doUnassemble(asArgs[1], asArgs[2], 8);
                 break;
             case "?":
             case "help":

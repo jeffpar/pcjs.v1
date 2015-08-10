@@ -3779,42 +3779,7 @@ if (DEBUGGER) {
     /**
      * parseInstruction(sOp, sOperand, addr)
      *
-     * This generally requires an exact match of both the operation code (sOp) and mode operand
-     * (sOperand) against the aOps[] and aOpMods[] arrays, respectively; however, the regular
-     * expression built from aOpMods and stored in regexOpModes does relax the matching criteria
-     * slightly; ie, a 4-digit hex value ("nnnn") will be satisfied with either 3 or 4 digits, and
-     * similarly, a 2-digit hex address (nn) will be satisfied with either 1 or 2 digits.
-     *
-     * Note that this function does not actually store the instruction into memory, even though it requires
-     * a target address (addr); that parameter is currently needed ONLY for "branch" instructions, because in
-     * order to calculate the branch displacement, it needs to know where the instruction will ultimately be
-     * stored, relative to its target address.
-     *
-     * Another handy feature of this function is its ability to display all available modes for a particular
-     * operation. For example, while in "assemble mode", if one types:
-     *
-     *      ldy?
-     *
-     * the Debugger will display:
-     *
-     *      supported opcodes:
-     *           A0: LDY nn
-     *           A4: LDY [nn]
-     *           AC: LDY [nnnn]
-     *           B4: LDY [nn+X]
-     *           BC: LDY [nnnn+X]
-     *
-     * Use of a trailing "?" on any opcode will display all variations of that opcode; no instruction will be
-     * assembled, and the operand parameter, if any, will be ignored.
-     *
-     * Although this function is capable of reporting numerous errors, roughly half of them indicate internal
-     * consistency errors, not user errors; the former should really be asserts, but I'm not comfortable bombing
-     * out because of my error as opposed to their error.  The only errors a user should expect to see:
-     *
-     *      "unknown operation":    sOp is not a valid operation (per aOps)
-     *      "unknown operand":      sOperand is not a valid operand (per aOpMods)
-     *      "unknown instruction":  the combination of sOp + sOperand does not exist (per aaOpDescs)
-     *      "branch out of range":  the branch address, relative to addr, is too far away
+     * TODO: Unimplemented.  See parseInstruction() in modules/c1pjs/lib/debugger.js for a working implementation.
      *
      * @this {Debugger}
      * @param {string} sOp
