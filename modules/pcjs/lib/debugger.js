@@ -545,8 +545,8 @@ if (DEBUGGER) {
         "rtc":      Messages.RTC,
         "8042":     Messages.C8042,
         "chipset":  Messages.CHIPSET,   // ie, anything else in ChipSet besides DMA, PIC, TIMER, CMOS, RTC and 8042
-        "keyboard": Messages.KEYBOARD,
-        "key":      Messages.KEYS,      // using "keys" instead of "key" causes an unfortunate JavaScript property collision
+        "keyboard": Messages.KEYBOARD,  // "kbd" is also allowed as shorthand for "keyboard"; see doMessages()
+        "key":      Messages.KEYS,      // using "key" instead of "keys", since the latter is a method on JavasScript objects
         "video":    Messages.VIDEO,
         "fdc":      Messages.FDC,
         "hdc":      Messages.HDC,
@@ -798,17 +798,17 @@ if (DEBUGGER) {
     /* 0x8F */ [Debugger.INS.POP,   Debugger.TYPE_MODRM  | Debugger.TYPE_VWORD | Debugger.TYPE_OUT],
 
     /* 0x90 */ [Debugger.INS.NOP],
-    /* 0x91 */ [Debugger.INS.XCHG,  Debugger.TYPE_AX     | Debugger.TYPE_BOTH, Debugger.TYPE_CX | Debugger.TYPE_BOTH],
-    /* 0x92 */ [Debugger.INS.XCHG,  Debugger.TYPE_AX     | Debugger.TYPE_BOTH, Debugger.TYPE_DX | Debugger.TYPE_BOTH],
-    /* 0x93 */ [Debugger.INS.XCHG,  Debugger.TYPE_AX     | Debugger.TYPE_BOTH, Debugger.TYPE_BX | Debugger.TYPE_BOTH],
-    /* 0x94 */ [Debugger.INS.XCHG,  Debugger.TYPE_AX     | Debugger.TYPE_BOTH, Debugger.TYPE_SP | Debugger.TYPE_BOTH],
-    /* 0x95 */ [Debugger.INS.XCHG,  Debugger.TYPE_AX     | Debugger.TYPE_BOTH, Debugger.TYPE_BP | Debugger.TYPE_BOTH],
-    /* 0x96 */ [Debugger.INS.XCHG,  Debugger.TYPE_AX     | Debugger.TYPE_BOTH, Debugger.TYPE_SI | Debugger.TYPE_BOTH],
-    /* 0x97 */ [Debugger.INS.XCHG,  Debugger.TYPE_AX     | Debugger.TYPE_BOTH, Debugger.TYPE_DI | Debugger.TYPE_BOTH],
+    /* 0x91 */ [Debugger.INS.XCHG,  Debugger.TYPE_AX     | Debugger.TYPE_BOTH,   Debugger.TYPE_CX | Debugger.TYPE_BOTH],
+    /* 0x92 */ [Debugger.INS.XCHG,  Debugger.TYPE_AX     | Debugger.TYPE_BOTH,   Debugger.TYPE_DX | Debugger.TYPE_BOTH],
+    /* 0x93 */ [Debugger.INS.XCHG,  Debugger.TYPE_AX     | Debugger.TYPE_BOTH,   Debugger.TYPE_BX | Debugger.TYPE_BOTH],
+    /* 0x94 */ [Debugger.INS.XCHG,  Debugger.TYPE_AX     | Debugger.TYPE_BOTH,   Debugger.TYPE_SP | Debugger.TYPE_BOTH],
+    /* 0x95 */ [Debugger.INS.XCHG,  Debugger.TYPE_AX     | Debugger.TYPE_BOTH,   Debugger.TYPE_BP | Debugger.TYPE_BOTH],
+    /* 0x96 */ [Debugger.INS.XCHG,  Debugger.TYPE_AX     | Debugger.TYPE_BOTH,   Debugger.TYPE_SI | Debugger.TYPE_BOTH],
+    /* 0x97 */ [Debugger.INS.XCHG,  Debugger.TYPE_AX     | Debugger.TYPE_BOTH,   Debugger.TYPE_DI | Debugger.TYPE_BOTH],
 
     /* 0x98 */ [Debugger.INS.CBW],
     /* 0x99 */ [Debugger.INS.CWD],
-    /* 0x9A */ [Debugger.INS.CALL,  Debugger.TYPE_IMM    | Debugger.TYPE_FARP | Debugger.TYPE_IN],
+    /* 0x9A */ [Debugger.INS.CALL,  Debugger.TYPE_IMM    | Debugger.TYPE_FARP |  Debugger.TYPE_IN],
     /* 0x9B */ [Debugger.INS.WAIT],
     /* 0x9C */ [Debugger.INS.PUSHF],
     /* 0x9D */ [Debugger.INS.POPF],
@@ -833,23 +833,23 @@ if (DEBUGGER) {
     /* 0xAE */ [Debugger.INS.SCASB, Debugger.TYPE_AL     | Debugger.TYPE_IN,     Debugger.TYPE_ESDI | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
     /* 0xAF */ [Debugger.INS.SCASW, Debugger.TYPE_AX     | Debugger.TYPE_IN,     Debugger.TYPE_ESDI | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
 
-    /* 0xB0 */ [Debugger.INS.MOV,   Debugger.TYPE_AL     | Debugger.TYPE_OUT, Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
-    /* 0xB1 */ [Debugger.INS.MOV,   Debugger.TYPE_CL     | Debugger.TYPE_OUT, Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
-    /* 0xB2 */ [Debugger.INS.MOV,   Debugger.TYPE_DL     | Debugger.TYPE_OUT, Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
-    /* 0xB3 */ [Debugger.INS.MOV,   Debugger.TYPE_BL     | Debugger.TYPE_OUT, Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
-    /* 0xB4 */ [Debugger.INS.MOV,   Debugger.TYPE_AH     | Debugger.TYPE_OUT, Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
-    /* 0xB5 */ [Debugger.INS.MOV,   Debugger.TYPE_CH     | Debugger.TYPE_OUT, Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
-    /* 0xB6 */ [Debugger.INS.MOV,   Debugger.TYPE_DH     | Debugger.TYPE_OUT, Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
-    /* 0xB7 */ [Debugger.INS.MOV,   Debugger.TYPE_BH     | Debugger.TYPE_OUT, Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
+    /* 0xB0 */ [Debugger.INS.MOV,   Debugger.TYPE_AL     | Debugger.TYPE_OUT,    Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
+    /* 0xB1 */ [Debugger.INS.MOV,   Debugger.TYPE_CL     | Debugger.TYPE_OUT,    Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
+    /* 0xB2 */ [Debugger.INS.MOV,   Debugger.TYPE_DL     | Debugger.TYPE_OUT,    Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
+    /* 0xB3 */ [Debugger.INS.MOV,   Debugger.TYPE_BL     | Debugger.TYPE_OUT,    Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
+    /* 0xB4 */ [Debugger.INS.MOV,   Debugger.TYPE_AH     | Debugger.TYPE_OUT,    Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
+    /* 0xB5 */ [Debugger.INS.MOV,   Debugger.TYPE_CH     | Debugger.TYPE_OUT,    Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
+    /* 0xB6 */ [Debugger.INS.MOV,   Debugger.TYPE_DH     | Debugger.TYPE_OUT,    Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
+    /* 0xB7 */ [Debugger.INS.MOV,   Debugger.TYPE_BH     | Debugger.TYPE_OUT,    Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
 
-    /* 0xB8 */ [Debugger.INS.MOV,   Debugger.TYPE_AX     | Debugger.TYPE_OUT, Debugger.TYPE_IMM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
-    /* 0xB9 */ [Debugger.INS.MOV,   Debugger.TYPE_CX     | Debugger.TYPE_OUT, Debugger.TYPE_IMM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
-    /* 0xBA */ [Debugger.INS.MOV,   Debugger.TYPE_DX     | Debugger.TYPE_OUT, Debugger.TYPE_IMM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
-    /* 0xBB */ [Debugger.INS.MOV,   Debugger.TYPE_BX     | Debugger.TYPE_OUT, Debugger.TYPE_IMM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
-    /* 0xBC */ [Debugger.INS.MOV,   Debugger.TYPE_SP     | Debugger.TYPE_OUT, Debugger.TYPE_IMM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
-    /* 0xBD */ [Debugger.INS.MOV,   Debugger.TYPE_BP     | Debugger.TYPE_OUT, Debugger.TYPE_IMM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
-    /* 0xBE */ [Debugger.INS.MOV,   Debugger.TYPE_SI     | Debugger.TYPE_OUT, Debugger.TYPE_IMM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
-    /* 0xBF */ [Debugger.INS.MOV,   Debugger.TYPE_DI     | Debugger.TYPE_OUT, Debugger.TYPE_IMM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
+    /* 0xB8 */ [Debugger.INS.MOV,   Debugger.TYPE_AX     | Debugger.TYPE_OUT,    Debugger.TYPE_IMM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
+    /* 0xB9 */ [Debugger.INS.MOV,   Debugger.TYPE_CX     | Debugger.TYPE_OUT,    Debugger.TYPE_IMM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
+    /* 0xBA */ [Debugger.INS.MOV,   Debugger.TYPE_DX     | Debugger.TYPE_OUT,    Debugger.TYPE_IMM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
+    /* 0xBB */ [Debugger.INS.MOV,   Debugger.TYPE_BX     | Debugger.TYPE_OUT,    Debugger.TYPE_IMM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
+    /* 0xBC */ [Debugger.INS.MOV,   Debugger.TYPE_SP     | Debugger.TYPE_OUT,    Debugger.TYPE_IMM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
+    /* 0xBD */ [Debugger.INS.MOV,   Debugger.TYPE_BP     | Debugger.TYPE_OUT,    Debugger.TYPE_IMM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
+    /* 0xBE */ [Debugger.INS.MOV,   Debugger.TYPE_SI     | Debugger.TYPE_OUT,    Debugger.TYPE_IMM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
+    /* 0xBF */ [Debugger.INS.MOV,   Debugger.TYPE_DI     | Debugger.TYPE_OUT,    Debugger.TYPE_IMM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
 
     /* 0xC0 */ [Debugger.INS.GRP2B, Debugger.TYPE_MODRM  | Debugger.TYPE_BYTE  | Debugger.TYPE_BOTH | Debugger.TYPE_80186, Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
     /* 0xC1 */ [Debugger.INS.GRP2W, Debugger.TYPE_MODRM  | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH | Debugger.TYPE_80186, Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
@@ -1174,6 +1174,15 @@ if (DEBUGGER) {
       ]
     ];
 
+    /*
+     * See replaceRegs() for the rules governing how register contents are replaced in the strings below.  Replacements
+     * occur in the following order:
+     *
+     *      Replace every %XX (or %XXX), where XX (or XXX) is a register, with the register's value.
+     *      Replace every #XX, where XX is a hex byte value, with the corresponding ASCII character (if printable).
+     *      Replace every $XXXX:XXXX, where XXXX:XXXX is a segmented address, with the zero-terminated string at that address.
+     *      Replace every ^XXXX:XXXX, where XXXX:XXXX is a segmented address, with the FCB filename stored at that address.
+     */
     Debugger.INT_FUNCS = {
         0x13: {
             0x00: "disk reset",
@@ -1662,17 +1671,13 @@ if (DEBUGGER) {
     /**
      * newAddr(off, sel, addr, fProt, fData32, fAddr32)
      *
-     * NOTES: If 'off' is undefined, it may be because parseExpression() was unable to parse the given value,
-     * in which case we need to make sure that 'off' passes through as undefined, so that callers can test for
-     * "dbgAddr.off == null" to detect invalid addresses.
-     *
      * @this {Debugger}
      * @param {number|null|undefined} [off] (default is zero)
      * @param {number|null|undefined} [sel] (default is undefined)
      * @param {number|null|undefined} [addr] (default is undefined)
      * @param {boolean} [fProt] (default is the current CPU mode)
-     * @param {boolean} [fData32] (default is false)
-     * @param {boolean} [fAddr32] (default is false)
+     * @param {boolean} [fData32] (default is the current CPU operand size)
+     * @param {boolean} [fAddr32] (default is the current CPU address size)
      * @return {{DbgAddr}}
      */
     Debugger.prototype.newAddr = function(off, sel, addr, fProt, fData32, fAddr32)
@@ -2181,6 +2186,10 @@ if (DEBUGGER) {
         this.bitsMessage = this.bitsWarning = Messages.WARN;
         this.sMessagePrev = null;
         this.afnDumpers = [];
+        /*
+         * Internally, we use "key" instead of "keys", since the latter is a method on JavasScript objects,
+         * but externally, we allow the user to specify "keys"; "kbd" is also allowed as shorthand for "keyboard".
+         */
         var aEnable = this.parseCommand(sEnable.replace("keys","key").replace("kbd","keyboard"), false, '|');
         if (aEnable.length) {
             for (var m in Debugger.MESSAGES) {
@@ -2977,7 +2986,8 @@ if (DEBUGGER) {
      *
      * Originally, this returned true even when there were only read and/or write breakpoints, but those breakpoints
      * no longer require the intervention of checkInstruction(); the Bus component automatically swaps in/out appropriate
-     * functions to deal with those breakpoints in the appropriate memory blocks.  So I've simplified the test below.
+     * "checked" Memory access functions to deal with those breakpoints in the corresponding Memory blocks.  So I've
+     * simplified the test below.
      *
      * @this {Debugger}
      * @param {boolean} [fRelease] is true for release criteria only; default is false (any criteria)
@@ -3044,6 +3054,11 @@ if (DEBUGGER) {
      * This "check" function is called by a Memory block to inform us that a memory read occurred, giving us an
      * opportunity to track the read if we want, and look for a matching "read" breakpoint, if any.
      *
+     * In the "old days", it would be an error for this call to fail to find a matching Debugger breakpoint, but now
+     * Memory blocks have no idea whether the Debugger or the machine's Debug register(s) triggered this "checked" read.
+     *
+     * If we return true, we "trump" the machine's Debug register(s); false allows normal Debug register processing.
+     *
      * @this {Debugger}
      * @param {number} addr
      * @param {number} [nb] (# of bytes; default is 1)
@@ -3063,6 +3078,11 @@ if (DEBUGGER) {
      *
      * This "check" function is called by a Memory block to inform us that a memory write occurred, giving us an
      * opportunity to track the write if we want, and look for a matching "write" breakpoint, if any.
+     *
+     * In the "old days", it would be an error for this call to fail to find a matching Debugger breakpoint, but now
+     * Memory blocks have no idea whether the Debugger or the machine's Debug register(s) triggered this "checked" write.
+     *
+     * If we return true, we "trump" the machine's Debug register(s); false allows normal Debug register processing.
      *
      * @this {Debugger}
      * @param {number} addr
@@ -3170,7 +3190,7 @@ if (DEBUGGER) {
                 /*
                  * Force temporary breakpoints to be interpreted as linear breakpoints
                  * (hence the assertion that there IS a linear address stored in dbgAddr);
-                 * this allows us to step over calls or interrupts that change the processor mode
+                 * this allows us to step over calls or interrupts that change the processor mode.
                  */
                 if (dbgAddr.addr) dbgAddr.sel = null;
             } else {
@@ -4145,15 +4165,19 @@ if (DEBUGGER) {
      *
      *      EDX+EDX*4+12345678
      *
-     * and builds value (aVals) and "binop" operator (aOps) stacks:
+     * and builds a value stack in aVals and a "binop" (binary operator) stack in aOps:
      *
+     *      aVals       aOps
+     *      -----       ----
      *      EDX         +
      *      EDX         *
      *      4           +
      *      ...
      *
-     * We pop 1 "binop" and 2 values whenever a "binop" of lower priority than its predecessor is encountered,
-     * evaluate and push the result.
+     * We pop 1 "binop" from aOps and 2 values from aVals whenever a "binop" of lower priority than its
+     * predecessor is encountered, evaluate, and push the result back onto aVals.
+     *
+     * Unary operators like '~' and ternary operators like '?:' are not supported; neither are parentheses.
      *
      * @this {Debugger}
      * @param {string|undefined} sExp
@@ -4166,7 +4190,7 @@ if (DEBUGGER) {
         var fError = false;
         var sExpOrig = sExp;
         var aVals = [], aOps = [];
-        var asValues = sExp.split(/[|^&+%\/*-]/);       // RegExp of "binops" only (unary and other "ops" saved for a rainy day)
+        var asValues = sExp.split(/[|^&+%\/*-]/);       // RegExp of "binops" only (other "ops" saved for a rainy day)
         for (var i = 0; i < asValues.length; i++) {
             var sValue = asValues[i];
             var s = str.trim(asValues[i]);
@@ -4291,7 +4315,7 @@ if (DEBUGGER) {
      *
      * We guarantee the elements of aOffsetPairs are in offset order, because we build it using binaryInsert();
      * it's quite likely that the MAP file already ordered all its symbols in offset order, but since they're
-     * hand-edited files, we can't assume that.  This insures that findSymbolAtAddr()'s binarySearch() will operate
+     * hand-edited files, we can't assume that.  This ensures that findSymbolAtAddr()'s binarySearch() will operate
      * properly.
      *
      * @this {Debugger}
@@ -4678,7 +4702,7 @@ if (DEBUGGER) {
      * whether dumping bytes or words.
      *
      * Also, unlike sAddr, sLen is interpreted as a decimal number, unless a radix specifier is included (eg, "0x100");
-     * sLen also supports the DEBUG.COM-style syntax of a preceding "l" (eg, "l16").
+     * sLen also supports the DEBUG.COM-style syntax of a preceding 'l' (eg, "l16").
      *
      * @this {Debugger}
      * @param {string} sCmd
@@ -4701,10 +4725,11 @@ if (DEBUGGER) {
             this.println("\tdb [a] [#]    dump # bytes at address a");
             this.println("\tdw [a] [#]    dump # words at address a");
             this.println("\tdd [a] [#]    dump # dwords at address a");
-            this.println("\tdh [#] [#]    dump # instructions prior");
+            this.println("\tdh [#] [#]    dump # instructions from history");
             if (BACKTRACK) {
                 this.println("\tdi [a]        dump backtrack info at address a");
             }
+            this.println("\tds [#]        dump selector # descriptor info");
             if (sDumpers.length) this.println("dump extensions:\n\t" + sDumpers);
             return;
         }
@@ -5065,8 +5090,9 @@ if (DEBUGGER) {
          * and readByte().  We also rely on the disk property to determine whether the drive is "loaded".
          *
          * In the case of the HDC, if the drive is valid, then by definition it is also "loaded", since an HDC
-         * drive and its disk are inseparable; it's certainly possible that its disk object may be empty at
-         * this point, but that will only affect whether the read succeeds or not.
+         * drive and its disk are inseparable; it's certainly possible that the disk object may be empty at
+         * this point (ie, if the disk is uninitialized and unformatted), but that will only affect whether the
+         * read succeeds or not.
          */
         var dc = this   .fdc;
         if (iDrive >= 2 && this.hdc) {
@@ -5143,6 +5169,10 @@ if (DEBUGGER) {
                 fCriteria = false;
                 sCategory = null;
             } else {
+                /*
+                 * Internally, we use "key" instead of "keys", since the latter is a method on JavasScript objects,
+                 * but externally, we allow the user to specify "keys"; "kbd" is also allowed as shorthand for "keyboard".
+                 */
                 if (sCategory == "keys") sCategory = "key";
                 if (sCategory == "kbd") sCategory = "keyboard";
                 for (m in Debugger.MESSAGES) {
@@ -5181,6 +5211,10 @@ if (DEBUGGER) {
                 if (fCriteria !== null && fCriteria != fEnabled) continue;
                 if (sCategories) sCategories += ',';
                 if (!(++n % 10)) sCategories += "\n\t";     // jshint ignore:line
+                /*
+                 * Internally, we use "key" instead of "keys", since the latter is a method on JavasScript objects,
+                 * but externally, we allow the user to specify "keys".
+                 */
                 if (m == "key") m = "keys";
                 sCategories += m;
             }
