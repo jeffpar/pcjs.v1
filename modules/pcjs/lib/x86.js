@@ -60,6 +60,48 @@ var X86 = {
     ADDR_INVALID:   -1,
 
     /*
+     * Processor Exception Interrupts
+     *
+     * Of the following exceptions, all are designed to be restartable, except for 0x08 and 0x09 (and 0x0D
+     * after an attempt to write to a read-only segment).
+     *
+     * Error codes are pushed onto the stack for 0x08 (always 0) and 0x0A through 0x0D.
+     *
+     * Priority: Instruction exception, TRAP, NMI, Processor Extension Segment Overrun, and finally INTR.
+     *
+     * All exceptions can also occur in real-mode, except where noted.  A GP_FAULT in real-mode can be triggered
+     * by "any memory reference instruction that attempts to reference [a] 16-bit word at offset 0FFFFH".
+     *
+     * Interrupts beyond 0x10 (up through 0x1F) are reserved for future exceptions.
+     *
+     * Implementation Detail: For any opcode we know must generate a UD_FAULT interrupt, we invoke opInvalid(),
+     * NOT opUndefined().  UD_FAULT is for INVALID opcodes, Intel's choice of term "undefined" notwithstanding.
+     *
+     * We reserve the term "undefined" for opcodes that require more investigation, and we invoke opUndefined()
+     * ONLY until an opcode's behavior has finally been defined, at which point it becomes either valid or invalid.
+     * The term "illegal" seems completely superfluous; we don't need a third way of describing invalid opcodes.
+     *
+     * The term "undocumented" should be limited to operations that are valid but Intel simply never documented.
+     */
+    EXCEPTION: {
+        DIV_ERR:    0x00,       // Divide Error Interrupt
+        DEBUG:      0x01,       // Debug (aka Single Step Trap) Interrupt
+        NMI:        0x02,       // Non-Maskable Interrupt
+        BREAKPOINT: 0x03,       // Breakpoint Interrupt
+        OVERFLOW:   0x04,       // INTO Overflow Interrupt (FYI, return address does NOT point to offending instruction)
+        BOUND_ERR:  0x05,       // BOUND Error Interrupt
+        UD_FAULT:   0x06,       // Invalid (aka Undefined or Illegal) Opcode (see implementation detail above)
+        NM_FAULT:   0x07,       // No Math Unit Available (see ESC or WAIT)
+        DF_FAULT:   0x08,       // Double Fault (see LIDT)
+        MP_FAULT:   0x09,       // Math Unit Protection Fault (see ESC)
+        TS_FAULT:   0x0A,       // Invalid Task State Segment Fault (protected-mode only)
+        NP_FAULT:   0x0B,       // Not Present Fault (protected-mode only)
+        SS_FAULT:   0x0C,       // Stack Fault (protected-mode only)
+        GP_FAULT:   0x0D,       // General Protection Fault
+        PG_FAULT:   0x0E,       // Page Fault
+        MF_FAULT:   0x10        // Math Fault (see ESC or WAIT)
+    },
+    /*
      * Processor Status flag definitions (stored in regPS)
      */
     PS: {
@@ -283,48 +325,6 @@ var X86 = {
         TASK_GS:    0x5C,   // (not in TSS286) end of values altered by task switches
         TASK_LDT:   0x60,
         TASK_IOPM:  0x64    // (not in TSS286)
-    },
-    /*
-     * Processor Exception Interrupts
-     *
-     * Of the following exceptions, all are designed to be restartable, except for 0x08 and 0x09 (and 0x0D
-     * after an attempt to write to a read-only segment).
-     *
-     * Error codes are pushed onto the stack for 0x08 (always 0) and 0x0A through 0x0D.
-     *
-     * Priority: Instruction exception, TRAP, NMI, Processor Extension Segment Overrun, and finally INTR.
-     *
-     * All exceptions can also occur in real-mode, except where noted.  A GP_FAULT in real-mode can be triggered
-     * by "any memory reference instruction that attempts to reference [a] 16-bit word at offset 0FFFFH".
-     *
-     * Interrupts beyond 0x10 (up through 0x1F) are reserved for future exceptions.
-     *
-     * Implementation Detail: For any opcode we know must generate a UD_FAULT interrupt, we invoke opInvalid(),
-     * NOT opUndefined().  UD_FAULT is for INVALID opcodes, Intel's choice of term "undefined" notwithstanding.
-     *
-     * We reserve the term "undefined" for opcodes that require more investigation, and we invoke opUndefined()
-     * ONLY until an opcode's behavior has finally been defined, at which point it becomes either valid or invalid.
-     * The term "illegal" seems completely superfluous; we don't need a third way of describing invalid opcodes.
-     *
-     * The term "undocumented" should be limited to operations that are valid but Intel simply never documented.
-     */
-    EXCEPTION: {
-        DIV_ERR:    0x00,       // Divide Error Interrupt
-        DEBUG:      0x01,       // Debug (aka Single Step Trap) Interrupt
-        NMI:        0x02,       // Non-Maskable Interrupt
-        BREAKPOINT: 0x03,       // Breakpoint Interrupt
-        OVERFLOW:   0x04,       // INTO Overflow Interrupt (FYI, return address does NOT point to offending instruction)
-        BOUND_ERR:  0x05,       // BOUND Error Interrupt
-        UD_FAULT:   0x06,       // Invalid (aka Undefined or Illegal) Opcode (see implementation detail above)
-        NM_FAULT:   0x07,       // No Math Unit Available (see ESC or WAIT)
-        DF_FAULT:   0x08,       // Double Fault (see LIDT)
-        MP_FAULT:   0x09,       // Math Unit Protection Fault (see ESC)
-        TS_FAULT:   0x0A,       // Invalid Task State Segment Fault (protected-mode only)
-        NP_FAULT:   0x0B,       // Not Present Fault (protected-mode only)
-        SS_FAULT:   0x0C,       // Stack Fault (protected-mode only)
-        GP_FAULT:   0x0D,       // General Protection Fault
-        PG_FAULT:   0x0E,       // Page Fault
-        MF_FAULT:   0x10        // Math Fault (see ESC or WAIT)
     },
     ERRCODE: {
         EXT:        0x0001,

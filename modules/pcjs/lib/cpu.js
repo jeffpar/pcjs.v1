@@ -792,18 +792,23 @@ CPU.prototype.getSpeedTarget = function()
  * @this {CPU}
  * @param {number} [nMultiplier] is the new proposed multiplier (reverts to 1 if the target was too high)
  * @param {boolean} [fOnClick] is true if called from a click handler that might have stolen focus
+ * @return {boolean} true if successful, false if not
  * @desc Whenever the speed is changed, the running cycle count and corresponding start time must be reset,
  * so that the next effective speed calculation obtains sensible results.  In fact, when runCPU() initially calls
  * setSpeed() with no parameters, that's all this function does (it doesn't change the current speed setting).
  */
 CPU.prototype.setSpeed = function(nMultiplier, fOnClick)
 {
+    var fSuccess = false;
     if (nMultiplier !== undefined) {
         /*
-         * If we couldn't reach at least 80% (0.8) of the current target speed,
-         * then revert the multiplier back to one.
+         * If we haven't reached 80% (0.8) of the current target speed, revert to a multiplier of one (1).
          */
-        if (this.aCounts.mhz / this.aCounts.mhzTarget < 0.8) nMultiplier = 1;
+        if (this.aCounts.mhz / this.aCounts.mhzTarget < 0.8) {
+            nMultiplier = 1;
+        } else {
+            fSuccess = true;
+        }
         this.aCounts.nCyclesMultiplier = nMultiplier;
         var mhz = this.aCounts.mhzDefault * this.aCounts.nCyclesMultiplier;
         if (this.aCounts.mhzTarget != mhz) {
@@ -820,6 +825,7 @@ CPU.prototype.setSpeed = function(nMultiplier, fOnClick)
     this.aCounts.msStartRun = usr.getTime();
     this.aCounts.msEndThisRun = 0;
     this.calcCycles();
+    return fSuccess;
 };
 
 /**

@@ -3846,7 +3846,7 @@ X86.fnFaultMessage = function(nFault, nError, fHalt)
             fHalt = false;
         }
     } else {
-        if (nFault == X86.EXCEPTION.GP_FAULT && this.model == X86.MODEL_80386 /* || nFault == X86.EXCEPTION.NP_FAULT && bOpcode == 0x8E */) {
+        if (nFault == X86.EXCEPTION.SS_FAULT || nFault == X86.EXCEPTION.GP_FAULT && this.model == X86.MODEL_80386 /* || nFault == X86.EXCEPTION.NP_FAULT && bOpcode == 0x8E */) {
             fHalt = true;
         }
     }
