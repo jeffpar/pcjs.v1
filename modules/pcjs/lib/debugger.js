@@ -167,6 +167,21 @@ function Debugger(parmsDbg)
         this.aSymbolTable = [];
 
         /*
+         * aVariables is an Object with properties that grows as setVariable() assigns more variables;
+         * each property corresponds to one variable, where the property name is the variable name (ie,
+         * a string beginning with a letter or underscore, followed by zero or more additional letters,
+         * digits, or underscores) and the property value is the variable's numeric value.  See doLet()
+         * and setVariable() for details.
+         *
+         * Note that parseValue(), through its reliance on str.parseInt(), assumes a default base of 16
+         * if no base is explicitly indicated (eg, a trailing decimal period), and if you define variable
+         * names containing exclusively hex alpha characters (a-f), those variables will take precedence
+         * over the corresponding hex values.  In other words, if you define variables "a" and "b", you
+         * will no longer be able to simply type "a" or "b" to specify the numeric values 10 or 11.
+         */
+        this.aVariables = {};
+
+        /*
          * clearBreakpoints() initializes the breakpoints lists: aBreakExec is a list of addresses
          * to halt on whenever attempting to execute an instruction at the corresponding address,
          * and aBreakRead and aBreakWrite are lists of addresses to halt on whenever a read or write,
@@ -269,7 +284,10 @@ if (DEBUGGER) {
         't [#]': "step instruction(s)",
         'u [#]': "unassemble",
         'x':     "execution options",
-        'reset': "reset computer",
+        'if':    "eval expression",
+        'let':   "assign expression",
+        'print': "print expression",
+        'reset': "reset machine",
         'ver':   "display version"
     };
 
@@ -2244,144 +2262,204 @@ if (DEBUGGER) {
     };
 
     /**
-     * getRegValue(iReg)
+     * getRegString(iReg)
      *
      * @this {Debugger}
      * @param {number} iReg
      * @return {string}
      */
+    Debugger.prototype.getRegString = function(iReg) {
+        var cch = 0;
+        var n = this.getRegValue(iReg);
+        if (n !== undefined) {
+            switch(iReg) {
+            case Debugger.REG_AL:
+            case Debugger.REG_CL:
+            case Debugger.REG_DL:
+            case Debugger.REG_BL:
+            case Debugger.REG_AH:
+            case Debugger.REG_CH:
+            case Debugger.REG_DH:
+            case Debugger.REG_BH:
+                cch = 2;
+                break;
+            case Debugger.REG_AX:
+            case Debugger.REG_CX:
+            case Debugger.REG_DX:
+            case Debugger.REG_BX:
+            case Debugger.REG_SP:
+            case Debugger.REG_BP:
+            case Debugger.REG_SI:
+            case Debugger.REG_DI:
+            case Debugger.REG_IP:
+            case Debugger.REG_SEG + Debugger.REG_ES:
+            case Debugger.REG_SEG + Debugger.REG_CS:
+            case Debugger.REG_SEG + Debugger.REG_SS:
+            case Debugger.REG_SEG + Debugger.REG_DS:
+            case Debugger.REG_SEG + Debugger.REG_FS:
+            case Debugger.REG_SEG + Debugger.REG_GS:
+                cch = 4;
+                break;
+            case Debugger.REG_EAX:
+            case Debugger.REG_ECX:
+            case Debugger.REG_EDX:
+            case Debugger.REG_EBX:
+            case Debugger.REG_ESP:
+            case Debugger.REG_EBP:
+            case Debugger.REG_ESI:
+            case Debugger.REG_EDI:
+            case Debugger.REG_CR0:
+            case Debugger.REG_CR1:
+            case Debugger.REG_CR2:
+            case Debugger.REG_CR3:
+            case Debugger.REG_EIP:
+                cch = 8;
+                break;
+            case Debugger.REG_PS:
+                cch = this.cchReg;
+                break;
+            }
+        }
+        return cch? str.toHex(n, cch) : "??";
+    };
+
+    /**
+     * getRegValue(iReg)
+     *
+     * @this {Debugger}
+     * @param {number} iReg
+     * @return {number|undefined}
+     */
     Debugger.prototype.getRegValue = function(iReg) {
-        var s = "??";
+        var n;
         if (iReg >= 0) {
-            var n, cch;
             var cpu = this.cpu;
             switch(iReg) {
             case Debugger.REG_AL:
-                n = cpu.regEAX;  cch = 2;
+                n = cpu.regEAX;
                 break;
             case Debugger.REG_CL:
-                n = cpu.regECX;  cch = 2;
+                n = cpu.regECX;
                 break;
             case Debugger.REG_DL:
-                n = cpu.regEDX;  cch = 2;
+                n = cpu.regEDX;
                 break;
             case Debugger.REG_BL:
-                n = cpu.regEBX;  cch = 2;
+                n = cpu.regEBX;
                 break;
             case Debugger.REG_AH:
-                n = cpu.regEAX >> 8; cch = 2;
+                n = cpu.regEAX >> 8;
                 break;
             case Debugger.REG_CH:
-                n = cpu.regECX >> 8; cch = 2;
+                n = cpu.regECX >> 8;
                 break;
             case Debugger.REG_DH:
-                n = cpu.regEDX >> 8; cch = 2;
+                n = cpu.regEDX >> 8;
                 break;
             case Debugger.REG_BH:
-                n = cpu.regEBX >> 8; cch = 2;
+                n = cpu.regEBX >> 8;
                 break;
             case Debugger.REG_AX:
-                n = cpu.regEAX;  cch = 4;
+                n = cpu.regEAX;
                 break;
             case Debugger.REG_CX:
-                n = cpu.regECX;  cch = 4;
+                n = cpu.regECX;
                 break;
             case Debugger.REG_DX:
-                n = cpu.regEDX;  cch = 4;
+                n = cpu.regEDX;
                 break;
             case Debugger.REG_BX:
-                n = cpu.regEBX;  cch = 4;
+                n = cpu.regEBX;
                 break;
             case Debugger.REG_SP:
-                n = cpu.getSP(); cch = 4;
+                n = cpu.getSP();
                 break;
             case Debugger.REG_BP:
-                n = cpu.regEBP;  cch = 4;
+                n = cpu.regEBP;
                 break;
             case Debugger.REG_SI:
-                n = cpu.regESI;  cch = 4;
+                n = cpu.regESI;
                 break;
             case Debugger.REG_DI:
-                n = cpu.regEDI;  cch = 4;
+                n = cpu.regEDI;
                 break;
             case Debugger.REG_IP:
-                n = cpu.getIP(); cch = 4;
+                n = cpu.getIP();
                 break;
             case Debugger.REG_PS:
-                n = cpu.getPS(); cch = this.cchReg;
+                n = cpu.getPS();
                 break;
             case Debugger.REG_SEG + Debugger.REG_ES:
-                n = cpu.getES(); cch = 4;
+                n = cpu.getES();
                 break;
             case Debugger.REG_SEG + Debugger.REG_CS:
-                n = cpu.getCS(); cch = 4;
+                n = cpu.getCS();
                 break;
             case Debugger.REG_SEG + Debugger.REG_SS:
-                n = cpu.getSS(); cch = 4;
+                n = cpu.getSS();
                 break;
             case Debugger.REG_SEG + Debugger.REG_DS:
-                n = cpu.getDS(); cch = 4;
+                n = cpu.getDS();
                 break;
-            }
-            if (!cch) {
+            default:
                 if (this.cpu.model == X86.MODEL_80286) {
                     if (iReg == Debugger.REG_CR0) {
-                        n = cpu.regCR0;  cch = 4;
+                        n = cpu.regCR0;
                     }
                 }
                 else if (I386 && this.cpu.model >= X86.MODEL_80386) {
                     switch(iReg) {
                     case Debugger.REG_EAX:
-                        n = cpu.regEAX;  cch = 8;
+                        n = cpu.regEAX;
                         break;
                     case Debugger.REG_ECX:
-                        n = cpu.regECX;  cch = 8;
+                        n = cpu.regECX;
                         break;
                     case Debugger.REG_EDX:
-                        n = cpu.regEDX;  cch = 8;
+                        n = cpu.regEDX;
                         break;
                     case Debugger.REG_EBX:
-                        n = cpu.regEBX;  cch = 8;
+                        n = cpu.regEBX;
                         break;
                     case Debugger.REG_ESP:
-                        n = cpu.getSP(); cch = 8;
+                        n = cpu.getSP();
                         break;
                     case Debugger.REG_EBP:
-                        n = cpu.regEBP;  cch = 8;
+                        n = cpu.regEBP;
                         break;
                     case Debugger.REG_ESI:
-                        n = cpu.regESI;  cch = 8;
+                        n = cpu.regESI;
                         break;
                     case Debugger.REG_EDI:
-                        n = cpu.regEDI;  cch = 8;
+                        n = cpu.regEDI;
                         break;
                     case Debugger.REG_CR0:
-                        n = cpu.regCR0;  cch = 8;
+                        n = cpu.regCR0;
                         break;
                     case Debugger.REG_CR1:
-                        n = cpu.regCR1;  cch = 8;
+                        n = cpu.regCR1;
                         break;
                     case Debugger.REG_CR2:
-                        n = cpu.regCR2;  cch = 8;
+                        n = cpu.regCR2;
                         break;
                     case Debugger.REG_CR3:
-                        n = cpu.regCR3;  cch = 8;
+                        n = cpu.regCR3;
                         break;
                     case Debugger.REG_SEG + Debugger.REG_FS:
-                        n = cpu.getFS(); cch = 4;
+                        n = cpu.getFS();
                         break;
                     case Debugger.REG_SEG + Debugger.REG_GS:
-                        n = cpu.getGS(); cch = 4;
+                        n = cpu.getGS();
                         break;
                     case Debugger.REG_EIP:
-                        n = cpu.getIP(); cch = 8;
+                        n = cpu.getIP();
                         break;
                     }
                 }
+                break;
             }
-            if (cch) s = str.toHex(n, cch);
         }
-        return s;
+        return n;
     };
 
     /**
@@ -2400,7 +2478,7 @@ if (DEBUGGER) {
         while ((i = s.indexOf('%', i)) >= 0) {
             var iReg = this.getRegIndex(s, i + 1);
             if (iReg >= 0) {
-                s = s.substr(0, i) + this.getRegValue(iReg) + s.substr(i + 1 + Debugger.REGS[iReg].length);
+                s = s.substr(0, i) + this.getRegString(iReg) + s.substr(i + 1 + Debugger.REGS[iReg].length);
             }
             i++;
         }
@@ -2485,28 +2563,34 @@ if (DEBUGGER) {
     };
 
     /**
-     * messageInt(nInt, addr)
+     * messageInt(nInt, addr, fForce)
      *
      * @this {Debugger}
      * @param {number} nInt
      * @param {number} addr (LIP after the "INT n" instruction has been fetched but not dispatched)
+     * @param {boolean} [fForce] (true if the message should be forced)
      * @return {boolean} true if message generated (which in turn triggers addIntReturn() inside checkIntNotify()), false if not
      */
-    Debugger.prototype.messageInt = function(nInt, addr)
+    Debugger.prototype.messageInt = function(nInt, addr, fForce)
     {
-        var AH = this.cpu.regEAX >> 8;
-        var fMessage = this.messageEnabled(Messages.CPU) && nInt != 0x28 && nInt != 0x2A;
-        var nCategory = Debugger.INT_MESSAGES[nInt];
-        if (nCategory) {
-            if (this.messageEnabled(nCategory)) {
-                fMessage = true;
-            } else {
-                fMessage = (nCategory == Messages.FDC && this.messageEnabled(nCategory = Messages.HDC));
+        var fMessage, AH, DL;
+        if (fForce) {
+            fMessage = true;
+        } else {
+            fMessage = this.messageEnabled(Messages.CPU) && nInt != Interrupts.DOS_IDLE.VECTOR /* 0x28 */ && nInt != Interrupts.DOS_NETBIOS.VECTOR /* 0x2A */;
+            var nCategory = Debugger.INT_MESSAGES[nInt];
+            if (nCategory) {
+                if (this.messageEnabled(nCategory)) {
+                    fMessage = true;
+                } else {
+                    fMessage = (nCategory == Messages.FDC && this.messageEnabled(nCategory = Messages.HDC));
+                }
             }
         }
         if (fMessage) {
-            var DL = this.cpu.regEDX & 0xff;
-            if (nInt == Interrupts.DOS.VECTOR && AH == 0x0b ||
+            AH = this.cpu.regEAX >> 8;
+            DL = this.cpu.regEDX & 0xff;
+            if (nInt == Interrupts.DOS.VECTOR /* 0x21 */ && AH == 0x0b ||
                 nCategory == Messages.FDC && DL >= 0x80 || nCategory == Messages.HDC && DL < 0x80) {
                 fMessage = false;
             }
@@ -3838,13 +3922,13 @@ if (DEBUGGER) {
     };
 
     /**
-     * getFlagStr(sFlag)
+     * getFlagOutput(sFlag)
      *
      * @this {Debugger}
      * @param {string} sFlag
      * @return {string} value of flag
      */
-    Debugger.prototype.getFlagStr = function(sFlag)
+    Debugger.prototype.getFlagOutput = function(sFlag)
     {
         var b;
         switch (sFlag) {
@@ -3895,35 +3979,35 @@ if (DEBUGGER) {
     };
 
     /**
-     * getRegString(iReg)
+     * getRegOutput(iReg)
      *
      * @this {Debugger}
      * @param {number} iReg
      * @return {string}
      */
-    Debugger.prototype.getRegString = function(iReg)
+    Debugger.prototype.getRegOutput = function(iReg)
     {
         if (iReg >= Debugger.REG_AX && iReg <= Debugger.REG_DI && this.cchReg > 4) iReg += Debugger.REG_EAX - Debugger.REG_AX;
         var sReg = Debugger.REGS[iReg];
         if (iReg == Debugger.REG_CR0 && this.cpu.model == X86.MODEL_80286) sReg = "MS";
-        return sReg + '=' + this.getRegValue(iReg) + ' ';
+        return sReg + '=' + this.getRegString(iReg) + ' ';
     };
 
     /**
-     * getSegString(seg, fProt)
+     * getSegOutput(seg, fProt)
      *
      * @this {Debugger}
      * @param {X86Seg} seg
      * @param {boolean} [fProt]
      * @return {string}
      */
-    Debugger.prototype.getSegString = function(seg, fProt)
+    Debugger.prototype.getSegOutput = function(seg, fProt)
     {
         return seg.sName + '=' + str.toHex(seg.sel, 4) + (fProt? '[' + str.toHex(seg.base, this.cchAddr) + ',' + this.getLimitString(seg.limit) + ']' : "");
     };
 
     /**
-     * getDTRString(sName, sel, addr, addrLimit)
+     * getDTROutput(sName, sel, addr, addrLimit)
      *
      * @this {Debugger}
      * @param {string} sName
@@ -3932,7 +4016,7 @@ if (DEBUGGER) {
      * @param {number} addrLimit
      * @return {string}
      */
-    Debugger.prototype.getDTRString = function(sName, sel, addr, addrLimit)
+    Debugger.prototype.getDTROutput = function(sName, sel, addr, addrLimit)
     {
         return sName + '=' + (sel != null? str.toHex(sel, 4) : "") + '[' + str.toHex(addr, this.cchAddr) + ',' + str.toHex(addrLimit - addr, 4) + ']';
     };
@@ -3985,17 +4069,17 @@ if (DEBUGGER) {
     {
         var s;
         if (fProt === undefined) fProt = this.getProtMode();
-        s = this.getRegString(Debugger.REG_AX) +
-            this.getRegString(Debugger.REG_BX) +
-            this.getRegString(Debugger.REG_CX) +
-            this.getRegString(Debugger.REG_DX) + (this.cchReg > 4? '\n' : '') +
-            this.getRegString(Debugger.REG_SP) +
-            this.getRegString(Debugger.REG_BP) +
-            this.getRegString(Debugger.REG_SI) +
-            this.getRegString(Debugger.REG_DI) + '\n' +
-            this.getSegString(this.cpu.segSS, fProt) + ' ' +
-            this.getSegString(this.cpu.segDS, fProt) + ' ' +
-            this.getSegString(this.cpu.segES, fProt) + ' ';
+        s = this.getRegOutput(Debugger.REG_AX) +
+            this.getRegOutput(Debugger.REG_BX) +
+            this.getRegOutput(Debugger.REG_CX) +
+            this.getRegOutput(Debugger.REG_DX) + (this.cchReg > 4? '\n' : '') +
+            this.getRegOutput(Debugger.REG_SP) +
+            this.getRegOutput(Debugger.REG_BP) +
+            this.getRegOutput(Debugger.REG_SI) +
+            this.getRegOutput(Debugger.REG_DI) + '\n' +
+            this.getSegOutput(this.cpu.segSS, fProt) + ' ' +
+            this.getSegOutput(this.cpu.segDS, fProt) + ' ' +
+            this.getSegOutput(this.cpu.segES, fProt) + ' ';
         if (fProt) {
             var sTR = "TR=" + str.toHex(this.cpu.segTSS.sel, 4);
             var sA20 = "A20=" + (this.bus.getA20()? "ON " : "OFF ");
@@ -4003,29 +4087,29 @@ if (DEBUGGER) {
                 sTR = '\n' + sTR;
                 s += sA20; sA20 = '';
             }
-            s += '\n' + this.getSegString(this.cpu.segCS, fProt) + ' ';
+            s += '\n' + this.getSegOutput(this.cpu.segCS, fProt) + ' ';
             if (I386 && this.cpu.model >= X86.MODEL_80386) {
                 sA20 += '\n';
-                s += this.getSegString(this.cpu.segFS, fProt) + ' ' +
-                     this.getSegString(this.cpu.segGS, fProt) + '\n';
+                s += this.getSegOutput(this.cpu.segFS, fProt) + ' ' +
+                     this.getSegOutput(this.cpu.segGS, fProt) + '\n';
             }
-            s += this.getDTRString("LD", this.cpu.segLDT.sel, this.cpu.segLDT.base, this.cpu.segLDT.base + this.cpu.segLDT.limit) + ' ' +
-                 this.getDTRString("GD", null, this.cpu.addrGDT, this.cpu.addrGDTLimit) + ' ' +
-                 this.getDTRString("ID", null, this.cpu.addrIDT, this.cpu.addrIDTLimit) + ' ';
+            s += this.getDTROutput("LD", this.cpu.segLDT.sel, this.cpu.segLDT.base, this.cpu.segLDT.base + this.cpu.segLDT.limit) + ' ' +
+                 this.getDTROutput("GD", null, this.cpu.addrGDT, this.cpu.addrGDTLimit) + ' ' +
+                 this.getDTROutput("ID", null, this.cpu.addrIDT, this.cpu.addrIDTLimit) + ' ';
             s += sTR + ' ' + sA20;
-            s += this.getRegString(Debugger.REG_CR0);
+            s += this.getRegOutput(Debugger.REG_CR0);
             if (I386 && this.cpu.model >= X86.MODEL_80386) {
-                s += this.getRegString(Debugger.REG_CR2) + this.getRegString(Debugger.REG_CR3);
+                s += this.getRegOutput(Debugger.REG_CR2) + this.getRegOutput(Debugger.REG_CR3);
             }
         } else {
             if (I386 && this.cpu.model >= X86.MODEL_80386) {
-                s += this.getSegString(this.cpu.segFS, fProt) + ' ' +
-                     this.getSegString(this.cpu.segGS, fProt) + ' ';
+                s += this.getSegOutput(this.cpu.segFS, fProt) + ' ' +
+                     this.getSegOutput(this.cpu.segGS, fProt) + ' ';
             }
         }
-        s += this.getRegString(Debugger.REG_PS) +
-             this.getFlagStr('V') + this.getFlagStr('D') + this.getFlagStr('I') + this.getFlagStr('T') +
-             this.getFlagStr('S') + this.getFlagStr('Z') + this.getFlagStr('A') + this.getFlagStr('P') + this.getFlagStr('C');
+        s += this.getRegOutput(Debugger.REG_PS) +
+             this.getFlagOutput('V') + this.getFlagOutput('D') + this.getFlagOutput('I') + this.getFlagOutput('T') +
+             this.getFlagOutput('S') + this.getFlagOutput('Z') + this.getFlagOutput('A') + this.getFlagOutput('P') + this.getFlagOutput('C');
         return s;
     };
 
@@ -4282,7 +4366,7 @@ if (DEBUGGER) {
         }
         if (!fError) {
             value = aVals.pop();
-            if (fPrint) this.println(sExpOrig + '=' + str.toHex(value) + "h (" + value + ". " + str.toBinBytes(value) + ')');
+            if (fPrint) this.printValue(null, value);
         } else {
             if (fPrint) this.println("error parsing '" + sExpOrig + "' at character " + (sExpOrig.length - sExp.length));
         }
@@ -4302,13 +4386,95 @@ if (DEBUGGER) {
         var value;
         if (sValue !== undefined) {
             var iReg = this.getRegIndex(sValue);
-            if (iReg >= 0) sValue = this.getRegValue(iReg);
-            value = str.parseInt(sValue);
+            if (iReg >= 0) {
+                value = this.getRegValue(iReg);
+            } else {
+                value = this.getVariable(sValue);
+                if (value === undefined) {
+                    value = str.parseInt(sValue);
+                }
+            }
             if (value === undefined) this.println("invalid " + (sName? sName : "value") + ": " + sValue);
         } else {
             this.println("missing " + (sName || "value"));
         }
         return value;
+    };
+
+    /**
+     * printValue(sVar, value)
+     *
+     * @this {Debugger}
+     * @param {string|null} sVar
+     * @param {number|undefined} value
+     * @return {boolean} true if value defined, false if not
+     */
+    Debugger.prototype.printValue = function(sVar, value)
+    {
+        var sValue;
+        var fDefined = false;
+        if (value !== undefined) {
+            fDefined = true;
+            sValue = str.toHexLong(value) + " (" + value + ')'; /* + str.toBinBytes(value) */
+        }
+        sVar = (sVar != null? (sVar + ": ") : "");
+        this.println(sVar + sValue);
+        return fDefined;
+    };
+
+    /**
+     * printVariable(sVar)
+     *
+     * @this {Debugger}
+     * @param {string} [sVar]
+     * @return {boolean} true if all value(s) defined, false if not
+     */
+    Debugger.prototype.printVariable = function(sVar)
+    {
+        if (sVar) {
+            return this.printValue(sVar, this.aVariables[sVar]);
+        }
+        var cVariables = 0;
+        for (sVar in this.aVariables) {
+            this.printValue(sVar, this.aVariables[sVar]);
+            cVariables++;
+        }
+        return cVariables > 0;
+    };
+
+    /**
+     * delVariable(sVar)
+     *
+     * @this {Debugger}
+     * @param {string} sVar
+     */
+    Debugger.prototype.delVariable = function(sVar)
+    {
+        delete this.aVariables[sVar];
+    };
+
+    /**
+     * getVariable(sVar)
+     *
+     * @this {Debugger}
+     * @param {string} sVar
+     * @return {number|undefined}
+     */
+    Debugger.prototype.getVariable = function(sVar)
+    {
+        return this.aVariables[sVar];
+    };
+
+    /**
+     * setVariable(sVar, value)
+     *
+     * @this {Debugger}
+     * @param {string} sVar
+     * @param {number} value
+     */
+    Debugger.prototype.setVariable = function(sVar, value)
+    {
+        this.aVariables[sVar] = value;
     };
 
     /**
@@ -4801,7 +4967,7 @@ if (DEBUGGER) {
             if (BACKTRACK) {
                 this.println("\tdi [a]        dump backtrack info at address a");
             }
-            this.println("\tds [#]        dump selector # descriptor info");
+            this.println("\tds [#]        dump descriptor info for selector #");
             if (sDumpers.length) this.println("dump extensions:\n\t" + sDumpers);
             return;
         }
@@ -4812,7 +4978,7 @@ if (DEBUGGER) {
         var cLines = 0;
         if (sLen) {
             if (sLen.charAt(0) == 'l') sLen = sLen.substr(1);
-            cLines = +sLen;
+            cLines = str.parseInt(sLen, 10);
         }
         if (sCmd == 'd') {
             sCmd = this.sCmdDumpPrev || "db";
@@ -4825,6 +4991,16 @@ if (DEBUGGER) {
         }
         if (sCmd == "dh") {
             this.dumpHistory(sAddr, cLines);
+            return;
+        }
+        if (sCmd == "dos") {
+            /*
+             * The "dos" command is an undocumented command that's useful any time we're inside an internal
+             * DOS dispatch function where the registers are substantially the same as the corresponding INT 0x21;
+             * "m int on; m dos on" produces the same output, but only when an actual INT 0x21 instruction is used.
+             * Issuing this command at any other time should also be OK, but the results will be meaningless.
+             */
+            this.messageInt(Interrupts.DOS.VECTOR, this.cpu.regLIP, true);
             return;
         }
         if (sCmd == "ds") {     // transform a "ds" command into a "d desc" command
@@ -5088,6 +5264,46 @@ if (DEBUGGER) {
             var bIn = this.bus.checkPortInputNotify(port);
             this.println(str.toHexWord(port) + ": " + str.toHexByte(bIn));
         }
+    };
+
+    /**
+     * doLet(sCmd)
+     *
+     * The command must be of the form "{variable} = [{expression}]", where expression may contain constants,
+     * operators, registers, symbols, other variables, or nothing at all; in the latter case, the variable, if
+     * any, is deleted.
+     *
+     * Other supported shorthand: "let" with no parameters prints the values of all variables, and "let {variable}"
+     * prints the value of the specified variable.
+     *
+     * @this {Debugger}
+     * @param {string} sCmd
+     * @return {boolean} true if valid "let" assignment, false if not
+     */
+    Debugger.prototype.doLet = function(sCmd)
+    {
+        var a = sCmd.match(/^\s*([A-Z_]?[A-Z0-9_]*)\s*(=?)\s*(.*)$/i);
+        if (a) {
+            if (!a[1]) {
+                if (!this.printVariable()) this.println("no variables");
+                return true;    // it's not considered an error to print an empty list of variables
+            }
+            if (!a[2]) {
+                return this.printVariable(a[1]);
+            }
+            if (!a[3]) {
+                this.delVariable(a[1]);
+                return true;    // it's not considered an error to delete a variable that didn't exist
+            }
+            var v = this.parseExpression(a[3]);
+            if (v !== undefined) {
+                this.setVariable(a[1], v);
+                return true;
+            }
+            return false;
+        }
+        this.println("invalid assignment:" + sCmd);
+        return false;
     };
 
     /**
@@ -5686,6 +5902,9 @@ if (DEBUGGER) {
     /**
      * doPrint(sCmd)
      *
+     * If the string to print is a quoted string, then we run it through replaceRegs(), so that
+     * you can take advantage of all the special replacement options used for software interrupt logging.
+     *
      * @this {Debugger}
      * @param {string} sCmd
      */
@@ -6164,6 +6383,12 @@ if (DEBUGGER) {
                     this.doStackTrace();
                     break;
                 case 'l':
+                    if (asArgs[0] == "let") {
+                        if (!this.doLet(sCmd.substr(3))) {
+                            result = false;
+                        }
+                        break;
+                    }
                     this.shiftArgs(asArgs);
                     this.doLoad(asArgs);
                     break;
@@ -6174,6 +6399,10 @@ if (DEBUGGER) {
                     this.doOutput(asArgs[1], asArgs[2]);
                     break;
                 case 'p':
+                    if (asArgs[0] == "print") {
+                        this.doPrint(sCmd.substr(5));
+                        break;
+                    }
                     this.doProcStep(asArgs[0]);
                     break;
                 case 'r':

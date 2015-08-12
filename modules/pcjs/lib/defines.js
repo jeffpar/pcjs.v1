@@ -90,7 +90,7 @@ var TYPEDARRAYS = (typeof ArrayBuffer !== 'undefined');
  * we'll have to rethink that choice OR provide a Debugger command that dynamically enables/disables as much of
  * the backtracking support as possible.
  */
-var BACKTRACK = false; // !COMPILED;
+var BACKTRACK = !COMPILED;
 
 /**
  * @define {boolean}

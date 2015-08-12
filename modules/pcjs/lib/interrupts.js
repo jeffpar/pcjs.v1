@@ -70,6 +70,12 @@ var Interrupts = {
     DOS: {
         VECTOR: 0x21
     },
+    DOS_IDLE: {
+        VECTOR: 0x28
+    },
+    DOS_NETBIOS: {
+        VECTOR: 0x2A
+    },
     MOUSE: {
         VECTOR: 0x33
     }
