@@ -63,6 +63,7 @@ if (DEBUGGER) {
  *      fComplete       true if a complete instruction was processed with this address
  *      fTempBreak      true if this is a temporary breakpoint address
  *      sCmd            set for breakpoint addresses if there's an associated command string
+ *      aCmds           preprocessed commands (from sCmd)
  *
  * @typedef {{
  *      off:(number|null|undefined),
@@ -167,7 +168,7 @@ function Debugger(parmsDbg)
         this.aSymbolTable = [];
 
         /*
-         * aVariables is an Object with properties that grows as setVariable() assigns more variables;
+         * aVariables is an object with properties that grows as setVariable() assigns more variables;
          * each property corresponds to one variable, where the property name is the variable name (ie,
          * a string beginning with a letter or underscore, followed by zero or more additional letters,
          * digits, or underscores) and the property value is the variable's numeric value.  See doLet()
@@ -177,7 +178,7 @@ function Debugger(parmsDbg)
          * if no base is explicitly indicated (eg, a trailing decimal period), and if you define variable
          * names containing exclusively hex alpha characters (a-f), those variables will take precedence
          * over the corresponding hex values.  In other words, if you define variables "a" and "b", you
-         * will no longer be able to simply type "a" or "b" to specify the numeric values 10 or 11.
+         * will no longer be able to simply type "a" or "b" to specify the decimal values 10 or 11.
          */
         this.aVariables = {};
 
@@ -267,7 +268,7 @@ if (DEBUGGER) {
     Debugger.COMMANDS = {
         '?':     "help/print",
         'a [#]': "assemble",
-        'b [#]': "breakpoint",
+        'b [#]': "breakpoint",          // multiple variations (use b? to list them)
         'c':     "clear output",
         'd [#]': "dump memory",
         'e [#]': "edit memory",
@@ -279,9 +280,9 @@ if (DEBUGGER) {
         'l':     "load sector(s)",
         'm':     "messages",
         'o [#]': "output port #",
-        'p':     "step over",
+        'p':     "step over",           // other variations: pr (step and dump registers)
         'r':     "dump/set registers",
-        't [#]': "step instruction(s)",
+        't [#]': "trace",               // other variations: tr (trace and dump registers)
         'u [#]': "unassemble",
         'x':     "execution options",
         'if':    "eval expression",
@@ -2072,7 +2073,7 @@ if (DEBUGGER) {
         var iHistory = this.iOpcodeHistory;
         var aHistory = this.aOpcodeHistory;
         if (aHistory.length) {
-            var n = (sCount === undefined? this.nextHistory : +sCount);
+            var n = (sCount === undefined? this.nextHistory : +sCount); // warning: decimal instead of hex conversion
             if (isNaN(n))
                 n = cLines;
             else
@@ -2814,7 +2815,7 @@ if (DEBUGGER) {
 
         /*
          * Because we called cpu.stepCPU() and not cpu.runCPU(), we must nudge the cpu's update code,
-         * and then update our own state.  Normally, the only time fUpdateCPU will be false is when doStep()
+         * and then update our own state.  Normally, the only time fUpdateCPU will be false is when doTrace()
          * is calling us in a loop, in which case it will perform its own updateCPU() when it's done.
          */
         if (fUpdateCPU !== false) this.cpu.updateCPU();
@@ -2846,11 +2847,11 @@ if (DEBUGGER) {
 
         this.dbgAddrNextCode = this.newAddr(this.cpu.getIP(), this.cpu.getCS());
         /*
-         * this.fProcStep used to be a simple boolean, but now it's 0 (or undefined)
+         * this.nStep used to be a simple boolean, but now it's 0 (or undefined)
          * if inactive, 1 if stepping over an instruction without a register dump, or 2
          * if stepping over an instruction with a register dump.
          */
-        if (!fRegs || this.fProcStep == 1)
+        if (!fRegs || this.nStep == 1)
             this.doUnassemble();
         else {
             this.doRegisters(null);
@@ -3005,7 +3006,7 @@ if (DEBUGGER) {
      */
     Debugger.prototype.start = function(ms, nCycles)
     {
-        if (!this.fProcStep) this.println("running");
+        if (!this.nStep) this.println("running");
         this.aFlags.fRunning = true;
         this.msStart = ms;
         this.nCyclesStart = nCycles;
@@ -3025,7 +3026,7 @@ if (DEBUGGER) {
         if (this.aFlags.fRunning) {
             this.aFlags.fRunning = false;
             this.nCycles = nCycles - this.nCyclesStart;
-            if (!this.fProcStep) {
+            if (!this.nStep) {
                 var sStopped = "stopped";
                 if (this.nCycles) {
                     var msTotal = ms - this.msStart;
@@ -3378,7 +3379,7 @@ if (DEBUGGER) {
     {
         if (addr !== undefined) {
             this.checkBreakpoint(addr, 1, this.aBreakExec, true);
-            this.fProcStep = 0;
+            this.nStep = 0;
         } else {
             for (var i = 1; i < this.aBreakExec.length; i++) {
                 var dbgAddrBreak = this.aBreakExec[i];
@@ -4378,10 +4379,11 @@ if (DEBUGGER) {
      *
      * @this {Debugger}
      * @param {string|undefined} sValue
-     * @param {string} [sName] is the name of the value, if any
+     * @param {string|null} [sName] is the name of the value, if any
+     * @param {boolean} [fQuiet]
      * @return {number|undefined} numeric value, or undefined if sValue is either undefined or invalid
      */
-    Debugger.prototype.parseValue = function(sValue, sName)
+    Debugger.prototype.parseValue = function(sValue, sName, fQuiet)
     {
         var value;
         if (sValue !== undefined) {
@@ -4390,13 +4392,11 @@ if (DEBUGGER) {
                 value = this.getRegValue(iReg);
             } else {
                 value = this.getVariable(sValue);
-                if (value === undefined) {
-                    value = str.parseInt(sValue);
-                }
+                if (value === undefined) value = str.parseInt(sValue);
             }
-            if (value === undefined) this.println("invalid " + (sName? sName : "value") + ": " + sValue);
+            if (value === undefined && !fQuiet) this.println("invalid " + (sName? sName : "value") + ": " + sValue);
         } else {
-            this.println("missing " + (sName || "value"));
+            if (!fQuiet) this.println("missing " + (sName || "value"));
         }
         return value;
     };
@@ -4965,7 +4965,7 @@ if (DEBUGGER) {
             this.println("\tdd [a] [#]    dump # dwords at address a");
             this.println("\tdh [#] [#]    dump # instructions from history");
             if (BACKTRACK) {
-                this.println("\tdi [a]        dump backtrack info at address a");
+                this.println("\tdi [a]        dump backtrack info for address a");
             }
             this.println("\tds [#]        dump descriptor info for selector #");
             if (sDumpers.length) this.println("dump extensions:\n\t" + sDumpers);
@@ -5204,7 +5204,7 @@ if (DEBUGGER) {
             var fPrint = false;
             if (sCategory == "DUMP") {
                 var sDump = "";
-                var cLines = (sEnable === undefined? -1 : +sEnable);
+                var cLines = (sEnable === undefined? -1 : +sEnable);    // warning: decimal instead of hex conversion
                 var i = this.iTraceBuffer;
                 do {
                     var s = this.aTraceBuffer[i++];
@@ -5562,7 +5562,7 @@ if (DEBUGGER) {
         switch (asArgs[1]) {
         case "cs":
             var nCycles;
-            if (asArgs[3] !== undefined) nCycles = +asArgs[3];
+            if (asArgs[3] !== undefined) nCycles = +asArgs[3];          // warning: decimal instead of hex conversion
             switch (asArgs[2]) {
                 case "int":
                     this.cpu.aCounts.nCyclesChecksumInterval = nCycles;
@@ -5929,21 +5929,21 @@ if (DEBUGGER) {
     };
 
     /**
-     * doProcStep(sCmd)
+     * doStep(sCmd)
      *
      * @this {Debugger}
      * @param {string} [sCmd] "p" or "pr"
      */
-    Debugger.prototype.doProcStep = function(sCmd)
+    Debugger.prototype.doStep = function(sCmd)
     {
         var fCallStep = true;
         var fRegs = (sCmd == "pr"? 1 : 0);
         /*
-         * Set up the value for this.fProcStep (ie, 1 or 2) depending on whether the user wants
+         * Set up the value for this.nStep (ie, 1 or 2) depending on whether the user wants
          * a subsequent register dump ("pr") or not ("p").
          */
-        var fProcStep = 1 + fRegs;
-        if (!this.fProcStep) {
+        var nStep = 1 + fRegs;
+        if (!this.nStep) {
             var fPrefix;
             var fRepeat = false;
             var dbgAddr = this.newAddr(this.cpu.getIP(), this.cpu.getCS());
@@ -5965,25 +5965,25 @@ if (DEBUGGER) {
                     break;
                 case X86.OPCODE.INT3:
                 case X86.OPCODE.INTO:
-                    this.fProcStep = fProcStep;
+                    this.nStep = nStep;
                     this.incAddr(dbgAddr, 1);
                     break;
                 case X86.OPCODE.INTN:
                 case X86.OPCODE.LOOPNZ:
                 case X86.OPCODE.LOOPZ:
                 case X86.OPCODE.LOOP:
-                    this.fProcStep = fProcStep;
+                    this.nStep = nStep;
                     this.incAddr(dbgAddr, 2);
                     break;
                 case X86.OPCODE.CALL:
                     if (fCallStep) {
-                        this.fProcStep = fProcStep;
+                        this.nStep = nStep;
                         this.incAddr(dbgAddr, 3);
                     }
                     break;
                 case X86.OPCODE.CALLF:
                     if (fCallStep) {
-                        this.fProcStep = fProcStep;
+                        this.nStep = nStep;
                         this.incAddr(dbgAddr, 5);
                     }
                     break;
@@ -5991,7 +5991,7 @@ if (DEBUGGER) {
                     if (fCallStep) {
                         var w = this.getWord(dbgAddr) & X86.OPCODE.CALLMASK;
                         if (w == X86.OPCODE.CALLW || w == X86.OPCODE.CALLFDW) {
-                            this.fProcStep = fProcStep;
+                            this.nStep = nStep;
                             this.getInstruction(dbgAddr);       // advance dbgAddr past this variable-length CALL
                         }
                     }
@@ -6016,7 +6016,7 @@ if (DEBUGGER) {
                 case X86.OPCODE.SCASB:
                 case X86.OPCODE.SCASW:
                     if (fRepeat) {
-                        this.fProcStep = fProcStep;
+                        this.nStep = nStep;
                         this.incAddr(dbgAddr, 1);
                     }
                     break;
@@ -6025,19 +6025,19 @@ if (DEBUGGER) {
                 }
             } while (fPrefix);
 
-            if (this.fProcStep) {
+            if (this.nStep) {
                 this.setTempBreakpoint(dbgAddr);
                 if (!this.runCPU()) {
                     this.cpu.setFocus();
-                    this.fProcStep = 0;
+                    this.nStep = 0;
                 }
                 /*
                  * A successful run will ultimately call stop(), which will in turn call clearTempBreakpoint(),
-                 * which will clear fProcStep, so there's your assurance that fProcStep will be reset.  Now we may
+                 * which will clear nStep, so there's your assurance that nStep will be reset.  Now we may
                  * have stopped for reasons unrelated to the temporary breakpoint, but that's OK.
                  */
             } else {
-                this.doStep(fRegs? "tr" : "t");
+                this.doTrace(fRegs? "tr" : "t");
             }
         } else {
             this.println("step in progress");
@@ -6120,17 +6120,17 @@ if (DEBUGGER) {
     };
 
     /**
-     * doStep(sCmd, sCount)
+     * doTrace(sCmd, sCount)
      *
      * @this {Debugger}
      * @param {string} [sCmd] "t" or "tr"
      * @param {string} [sCount] # of instructions to step
      */
-    Debugger.prototype.doStep = function(sCmd, sCount)
+    Debugger.prototype.doTrace = function(sCmd, sCount)
     {
         var dbg = this;
         var fRegs = (sCmd == "tr");
-        var count = (sCount != null? +sCount : 1);
+        var count = this.parseValue(sCount, null, true) || 1;
         var nCycles = (count == 1? 0 : 1);
         web.onCountRepeat(
             count,
@@ -6234,7 +6234,7 @@ if (DEBUGGER) {
 
             var bOpcode = this.getByte(dbgAddr);
             var addr = dbgAddr.addr;
-            var nSequence = (this.isBusy(false) || this.fProcStep)? this.nCycles : null;
+            var nSequence = (this.isBusy(false) || this.nStep)? this.nCycles : null;
             var sComment = (nSequence != null? "cycles" : null);
             var aSymbol = this.findSymbolAtAddr(dbgAddr);
 
@@ -6412,7 +6412,7 @@ if (DEBUGGER) {
                         this.doPrint(sCmd.substr(5));
                         break;
                     }
-                    this.doProcStep(asArgs[0]);
+                    this.doStep(asArgs[0]);
                     break;
                 case 'r':
                     if (asArgs[0] == "reset") {
@@ -6424,13 +6424,13 @@ if (DEBUGGER) {
                     break;
                 case 't':
                     this.shiftArgs(asArgs);
-                    this.doStep(asArgs[0], asArgs[1]);
+                    this.doTrace(asArgs[0], asArgs[1]);
                     break;
                 case 'u':
                     this.doUnassemble(asArgs[1], asArgs[2], 8);
                     break;
                 case 'v':
-                    this.println((APPNAME || "PCjs") + " version " + APPVERSION + " (" + this.cpu.model + (COMPILED? ",RELEASE" : (DEBUG? ",DEBUG" : ",NODEBUG")) + (PREFETCH? ",PREFETCH" : ",NOPREFETCH") + (TYPEDARRAYS? ",TYPEDARRAYS" : (FATARRAYS? ",FATARRAYS" : ",LONGARRAYS")) + (BACKTRACK? ",BACKTRACK" : ",NOBACKTRACK") + ')');
+                    this.println((APPNAME || "PCjs") + " version " + (XMLVERSION || APPVERSION) + " (" + this.cpu.model + (COMPILED? ",RELEASE" : (DEBUG? ",DEBUG" : ",NODEBUG")) + (PREFETCH? ",PREFETCH" : ",NOPREFETCH") + (TYPEDARRAYS? ",TYPEDARRAYS" : (FATARRAYS? ",FATARRAYS" : ",LONGARRAYS")) + (BACKTRACK? ",BACKTRACK" : ",NOBACKTRACK") + ')');
                     break;
                 case 'x':
                     this.shiftArgs(asArgs);
