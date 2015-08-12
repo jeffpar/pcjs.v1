@@ -5152,19 +5152,28 @@ if (DEBUGGER) {
     };
 
     /**
-     * doIf(sCmd)
+     * doIf(sCmd, fQuiet)
+     *
+     * NOTE: Don't forget that the default base for all numeric constants is 16, so when you evaluate an
+     * expression like "a==10", it will compare the value of the variable "a" to 0x10; use a trailing period
+     * (eg, "10.") if you really intend decimal.
+     *
+     * Also, if no variable named "a" exists, "a" will evaluate to 0x0A, so the expression "a==10" becomes
+     * "0x0A==0x10" (false), whereas the expression "a==10." becomes "0x0A==0x0A" (true).
      *
      * @this {Debugger}
      * @param {string} sCmd
+     * @param {boolean} [fQuiet]
      * @return {boolean} true if expression is non-zero, false if zero (or undefined due to a parse error)
      */
-    Debugger.prototype.doIf = function(sCmd)
+    Debugger.prototype.doIf = function(sCmd, fQuiet)
     {
         sCmd = str.trim(sCmd);
         if (!this.parseExpression(sCmd)) {
-            this.println("false condition: " + sCmd);
+            this.println("false: " + sCmd);
             return false;
         }
+        if (!fQuiet) this.println("true: " + sCmd);
         return true;
     };
 
@@ -6372,7 +6381,7 @@ if (DEBUGGER) {
                     break;
                 case 'i':
                     if (asArgs[0] == "if") {
-                        if (!this.doIf(sCmd.substr(2))) {
+                        if (!this.doIf(sCmd.substr(2), fQuiet)) {
                             result = false;
                         }
                         break;
