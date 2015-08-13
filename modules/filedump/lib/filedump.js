@@ -44,9 +44,9 @@ var DumpAPI = require("../../shared/lib/dumpapi");
  * FileDump()
  *
  * TODO: Consider adding a "map" option that allows the user to supply a MAP filename (via a "map" API parameter
- * or a "--map" command-line option), which in turn triggers a call to loadMap().  Note that loadMap() will need
- * to be a bit more general and use a worker function that calls either net.getFile() or fs.readFile(), similar
- * to what our loadFile() function already does.
+ * or a "--map" command-line option), which in turn triggers a call to loadMap().  Note that loadMap() will need to
+ * be a bit more general and use a worker function that calls either net.getFile() or fs.readFile(), similar to
+ * what the loadFile() function already does.
  *
  * @constructor
  * @param {string|undefined} sFormat should be one of "json"|"data"|"hex"|"bytes"|"rom" (see the FORMAT constants)
@@ -54,7 +54,7 @@ var DumpAPI = require("../../shared/lib/dumpapi");
  * @param {boolean|string|undefined} fDecimal forces decimal output if not undefined
  * @param {number|string|undefined} offDump
  * @param {number|string|undefined} nWidthDump
- * @param {string} [sServerRoot]
+ * @param {string} [sServerRoot] (if omitted, we assume local operation)
  */
 function FileDump(sFormat, fComments, fDecimal, offDump, nWidthDump, sServerRoot)
 {
@@ -67,6 +67,7 @@ function FileDump(sFormat, fComments, fDecimal, offDump, nWidthDump, sServerRoot
     this.fDecimal = fDecimal;
     this.offDump = +offDump || 0;
     this.nWidthDump = +nWidthDump || 16;
+    this.fLocal = !sServerRoot;
     this.sServerRoot = sServerRoot || process.cwd();
     this.buf = null;
     /*
@@ -135,7 +136,7 @@ FileDump.CLI = function()
     var args = proc.getArgs();
 
     if (!args.argc) {
-        console.log("usage: filedump --file=({path}|{URL}) [--merge=({path}|{url})] [--format=(json|data|hex|bytes|rom)] [--comments] [--decimal] [--output={path}] [--overwrite]");
+        console.log("usage: filedump --file=({path}|{URL}) [--merge=({path}|{url})] [--format=(json|data|hex|bytes|rom)] [--comments] [--decimal] [--offset={number}] [--width={number}] [--output={path}] [--overwrite]");
         return;
     }
 
@@ -147,7 +148,6 @@ FileDump.CLI = function()
     }
 
     var sOutputFile = argv['output'];
-    if (sOutputFile && sOutputFile.charAt(0) != '/') sOutputFile = path.join(process.cwd(), sOutputFile);
     var fOverwrite = argv['overwrite'];
 
     var sFormat = FileDump.validateFormat(argv['format']);
@@ -229,8 +229,8 @@ FileDump.validateFormat = function(sFormat)
  * loadFile(sFile, iStart, nSkip, done)
  *
  * This used to be part of the FileDump constructor, but I felt it would be safer to separate
- * object creation from any I/O that the object may perform, to ensure that a callback can never
- * be called before the caller has actually received the newly created object.
+ * object creation from any I/O, ensuring that the callback will not be invoked until the caller
+ * has received the FileDump object.
  *
  * @this {FileDump}
  * @param {string} sFile
@@ -245,7 +245,7 @@ FileDump.prototype.loadFile = function(sFile, iStart, nSkip, done)
     var sExt = str.getExtension(sFile);
     var options = {encoding: sExt == DumpAPI.FORMAT.JSON || sExt == DumpAPI.FORMAT.HEX? "utf8" : null};
 
-    var sFilePath = net.isRemote(sFile)? sFile : path.join(this.sServerRoot, sFile);
+    var sFilePath = (this.fLocal || net.isRemote(sFile))? sFile : path.join(this.sServerRoot, sFile);
 
     if (!this.sFilePath) this.sFilePath = sFilePath;
     if (this.fDebug) console.log("loadFile(" + sFilePath + "," + iStart + "," + nSkip + ")");
@@ -464,15 +464,15 @@ FileDump.prototype.dumpBuffer = function(sKey, buf, len, cbItem, offDump, nWidth
 };
 
 /**
- * loadMap(sFilePath, done)
+ * loadMap(sMapFile, done)
  *
  * NOTE: Since ".map" files are an internal construct, I support only local map files (for now)
  *
  * @this {FileDump}
- * @param {string} sFilePath
+ * @param {string} sMapFile
  * @param {function(Error,string)} done
  */
-FileDump.prototype.loadMap = function(sFilePath, done)
+FileDump.prototype.loadMap = function(sMapFile, done)
 {
     /*
      * The HEX format doesn't support MAP files, because old HEX clients expect an Array of bytes,
@@ -484,10 +484,14 @@ FileDump.prototype.loadMap = function(sFilePath, done)
             this.json = '"bytes":' + this.json;
         }
         var obj = this;
-        var sMapPath = sFilePath.replace(/\.(rom|json)$/, ".map");
-        if (str.endsWith(sMapPath, ".map")) {
-            var sMapFile = path.basename(sMapPath);
-            fs.readFile(sMapPath, {encoding: "utf8"}, function(err, str) {
+
+        sMapFile = sMapFile.replace(/\.(rom|json)$/, ".map");
+
+        if (str.endsWith(sMapFile, ".map")) {
+
+            var sMapName = path.basename(sMapFile);
+
+            fs.readFile(sMapFile, {encoding: "utf8"}, function(err, str) {
                 var sMapData = null;
                 if (err) {
                     /*
@@ -612,7 +616,7 @@ FileDump.prototype.loadMap = function(sFilePath, done)
                                 nBias = parseInt(sValue, 16);
                                 continue;
                             default:
-                                done(new Error("unrecognized symbol type (" + sType + ") in MAP file: " + sMapFile), null);
+                                done(new Error("unrecognized symbol type (" + sType + ") in MAP file: " + sMapName), null);
                                 return;
                             }
                             if (sID != sSymbol) {
@@ -624,7 +628,7 @@ FileDump.prototype.loadMap = function(sFilePath, done)
                             aSymbols[sID] = aValue;
                             continue;
                         }
-                        done(new Error("unrecognized line (" + s + ") in MAP file: " + sMapFile), null);
+                        done(new Error("unrecognized line (" + s + ") in MAP file: " + sMapName), null);
                         return;
                     }
                     sMapData = JSON.stringify(aSymbols);
@@ -692,6 +696,9 @@ FileDump.prototype.convertToJSON = function(done)
  */
 FileDump.prototype.convertToFile = function(sOutputFile, fOverwrite)
 {
+    if (sOutputFile && !this.fLocal) {
+        sOutputFile = path.join(this.sServerRoot, sOutputFile);
+    }
     if (this.sFormat != DumpAPI.FORMAT.ROM) {
         var obj = this;
         this.buildJSON();

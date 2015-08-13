@@ -270,7 +270,7 @@ if (DEBUGGER) {
         'a [#]': "assemble",
         'b [#]': "breakpoint",          // multiple variations (use b? to list them)
         'c':     "clear output",
-        'd [#]': "dump memory",
+        'd [#]': "dump memory",         // additional syntax: d [#] [l#], where l# is a number of bytes to dump
         'e [#]': "edit memory",
         'f':     "frequencies",
         'g [#]': "go [to #]",
@@ -2337,55 +2337,55 @@ if (DEBUGGER) {
             var cpu = this.cpu;
             switch(iReg) {
             case Debugger.REG_AL:
-                n = cpu.regEAX;
+                n = cpu.regEAX & 0xff;
                 break;
             case Debugger.REG_CL:
-                n = cpu.regECX;
+                n = cpu.regECX & 0xff;
                 break;
             case Debugger.REG_DL:
-                n = cpu.regEDX;
+                n = cpu.regEDX & 0xff;
                 break;
             case Debugger.REG_BL:
-                n = cpu.regEBX;
+                n = cpu.regEBX & 0xff;
                 break;
             case Debugger.REG_AH:
-                n = cpu.regEAX >> 8;
+                n = (cpu.regEAX >> 8) & 0xff;
                 break;
             case Debugger.REG_CH:
-                n = cpu.regECX >> 8;
+                n = (cpu.regECX >> 8) & 0xff;
                 break;
             case Debugger.REG_DH:
-                n = cpu.regEDX >> 8;
+                n = (cpu.regEDX >> 8) & 0xff;
                 break;
             case Debugger.REG_BH:
-                n = cpu.regEBX >> 8;
+                n = (cpu.regEBX >> 8) & 0xff;
                 break;
             case Debugger.REG_AX:
-                n = cpu.regEAX;
+                n = cpu.regEAX & 0xffff;
                 break;
             case Debugger.REG_CX:
-                n = cpu.regECX;
+                n = cpu.regECX & 0xffff;
                 break;
             case Debugger.REG_DX:
-                n = cpu.regEDX;
+                n = cpu.regEDX & 0xffff;
                 break;
             case Debugger.REG_BX:
-                n = cpu.regEBX;
+                n = cpu.regEBX & 0xffff;
                 break;
             case Debugger.REG_SP:
-                n = cpu.getSP();
+                n = cpu.getSP() & 0xffff;
                 break;
             case Debugger.REG_BP:
-                n = cpu.regEBP;
+                n = cpu.regEBP & 0xffff;
                 break;
             case Debugger.REG_SI:
-                n = cpu.regESI;
+                n = cpu.regESI & 0xffff;
                 break;
             case Debugger.REG_DI:
-                n = cpu.regEDI;
+                n = cpu.regEDI & 0xffff;
                 break;
             case Debugger.REG_IP:
-                n = cpu.getIP();
+                n = cpu.getIP() & 0xffff;
                 break;
             case Debugger.REG_PS:
                 n = cpu.getPS();
@@ -3271,39 +3271,59 @@ if (DEBUGGER) {
     {
         var fSuccess = false;
         this.nSuppressBreaks++;
-        if (!this.findBreakpoint(aBreak, dbgAddr)) {
-            dbgAddr.fTempBreak = fTempBreak;
-            aBreak.push(dbgAddr);
-            if (aBreak != this.aBreakExec) {
-                this.bus.addMemBreak(this.getAddr(dbgAddr), aBreak == this.aBreakWrite);
-            }
-            if (fTempBreak) {
-                /*
-                 * Force temporary breakpoints to be interpreted as linear breakpoints
-                 * (hence the assertion that there IS a linear address stored in dbgAddr);
-                 * this allows us to step over calls or interrupts that change the processor mode.
-                 */
-                if (dbgAddr.addr) dbgAddr.sel = null;
-            } else {
-                this.printBreakpoint(aBreak, aBreak.length-1);
-            }
-            if (!fTempBreak) this.historyInit();
+
+        /*
+         * We need to allow a temporary breakpoint at an address where they may already be a breakpoint.
+         */
+        if (fTempBreak || !this.findBreakpoint(aBreak, dbgAddr)) {
+
             fSuccess = true;
+
+            if (aBreak != this.aBreakExec) {
+                var addr = this.getAddr(dbgAddr);
+                if (addr == X86.ADDR_INVALID) {
+                    fSuccess = false;
+                } else {
+                    this.bus.addMemBreak(addr, aBreak == this.aBreakWrite);
+                    /*
+                     * Force memory breakpoints to use their linear address, by zapping the selector.
+                     */
+                    dbgAddr.sel = null;
+                }
+            }
+
+            if (fSuccess) {
+                aBreak.push(dbgAddr);
+                if (fTempBreak) {
+                    /*
+                     * Force temporary breakpoints to use their linear address, if one is available, by zapping
+                     * the selector; this allows us to step over calls or interrupts that change the processor mode.
+                     * TODO: Unfortunately, this will fail to trigger a "step" over a call in segment that moves
+                     * during the call; consider alternatives.
+                     */
+                    if (dbgAddr.addr != null) dbgAddr.sel = null;
+                    dbgAddr.fTempBreak = true;
+                }
+                else {
+                    this.printBreakpoint(aBreak, aBreak.length-1);
+                    this.historyInit();
+                }
+            }
         }
+
         this.nSuppressBreaks--;
         return fSuccess;
     };
 
     /**
-     * findBreakpoint(aBreak, dbgAddr, fRemove)
+     * findBreakpoint(aBreak, dbgAddr, fRemove, fTempBreak)
      *
-     * @this {Debugger}
-     * @param {Array} aBreak
      * @param {DbgAddr} dbgAddr
      * @param {boolean} [fRemove]
+     * @param {boolean} [fTempBreak]
      * @return {boolean} true if found, false if not
      */
-    Debugger.prototype.findBreakpoint = function(aBreak, dbgAddr, fRemove)
+    Debugger.prototype.findBreakpoint = function(aBreak, dbgAddr, fRemove, fTempBreak)
     {
         var fFound = false;
         var addr = this.mapBreakpoint(this.getAddr(dbgAddr));
@@ -3311,18 +3331,22 @@ if (DEBUGGER) {
             var dbgAddrBreak = aBreak[i];
             if (addr != X86.ADDR_INVALID && addr == this.mapBreakpoint(this.getAddr(dbgAddrBreak)) ||
                 addr == X86.ADDR_INVALID && dbgAddr.sel == dbgAddrBreak.sel && dbgAddr.off == dbgAddrBreak.off) {
-                fFound = true;
-                if (fRemove) {
-                    aBreak.splice(i, 1);
-                    if (aBreak != this.aBreakExec) {
-                        this.bus.removeMemBreak(addr, aBreak == this.aBreakWrite);
+                if (!fTempBreak || dbgAddrBreak.fTempBreak) {
+                    fFound = true;
+                    if (fRemove) {
+                        if (!dbgAddrBreak.fTempBreak) {
+                            this.printBreakpoint(aBreak, i, "cleared");
+                        }
+                        aBreak.splice(i, 1);
+                        if (aBreak != this.aBreakExec) {
+                            this.bus.removeMemBreak(addr, aBreak == this.aBreakWrite);
+                        }
+                        this.historyInit();
+                        break;
                     }
-                    if (!dbgAddrBreak.fTempBreak) this.println("breakpoint cleared: " + this.hexAddr(dbgAddrBreak) + " (" + aBreak[0] + ')');
-                    this.historyInit();
+                    this.printBreakpoint(aBreak, i, "exists");
                     break;
                 }
-                this.println("breakpoint exists: " + this.hexAddr(dbgAddrBreak) + " (" + aBreak[0] + ')');
-                break;
             }
         }
         return fFound;
@@ -3351,11 +3375,12 @@ if (DEBUGGER) {
      * @this {Debugger}
      * @param {Array} aBreak
      * @param {number} i
+     * @param {string} [sAction]
      */
-    Debugger.prototype.printBreakpoint = function(aBreak, i)
+    Debugger.prototype.printBreakpoint = function(aBreak, i, sAction)
     {
         var dbgAddr = aBreak[i];
-        this.println("breakpoint enabled: " + this.hexAddr(dbgAddr) + " (" + aBreak[0] + ')' + (dbgAddr.sCmd? (' "' + dbgAddr.sCmd + '"') : ''));
+        this.println("breakpoint " + (sAction || "enabled") + ": " + this.hexAddr(dbgAddr) + " (" + aBreak[0] + ')' + (dbgAddr.sCmd? (' "' + dbgAddr.sCmd + '"') : ''));
     };
 
     /**
@@ -3384,7 +3409,7 @@ if (DEBUGGER) {
             for (var i = 1; i < this.aBreakExec.length; i++) {
                 var dbgAddrBreak = this.aBreakExec[i];
                 if (dbgAddrBreak.fTempBreak) {
-                    if (!this.findBreakpoint(this.aBreakExec, dbgAddrBreak, true)) break;
+                    if (!this.findBreakpoint(this.aBreakExec, dbgAddrBreak, true, true)) break;
                     i = 0;
                 }
             }
@@ -3477,7 +3502,7 @@ if (DEBUGGER) {
                         var a;
                         fBreak = true;
                         if (dbgAddrBreak.fTempBreak) {
-                            this.findBreakpoint(aBreak, dbgAddrBreak, true);
+                            this.findBreakpoint(aBreak, dbgAddrBreak, true, true);
                             fTempBreak = true;
                         }
                         else if (a = dbgAddrBreak.aCmds) {
@@ -3488,21 +3513,37 @@ if (DEBUGGER) {
                              * if you want the breakpoint to stop execution.
                              *
                              * Another useful command is "if", which will return false if the expression is false,
-                             * forcing us to set fBreak to true and skip the rest of the commands.
+                             * at which point we'll jump ahead to the next "else" command, and if there isn't an "else",
+                             * we abort.
                              */
                             fBreak = false;
-                            for (var s in a) {
-                                if (!this.doCommand(a[s], true)) {
-                                    fBreak = true;
-                                    break;
+                            for (var j = 0; j < a.length; j++) {
+                                if (!this.doCommand(a[j], true)) {
+                                    if (a[j].indexOf("if")) {
+                                        fBreak = true;          // the failed command wasn't "if", so abort
+                                        break;
+                                    }
+                                    var k = j + 1;
+                                    for (; k < a.length; k++) {
+                                        if (!a[k].indexOf("else")) break;
+                                        j++;
+                                    }
+                                    if (k == a.length) {        // couldn't find an "else" after the "if", so abort
+                                        fBreak = true;
+                                        break;
+                                    }
+                                    /*
+                                     * If we're still here, we'll execute the "else" command (which is just a no-op),
+                                     * followed by any remaining commands.
+                                     */
                                 }
                             }
                             if (!this.cpu.isRunning()) fBreak = true;
                         }
-                        if (fBreak && !fTempBreak) {
-                            this.println("breakpoint hit: " + this.hexAddr(dbgAddrBreak) + " (" + aBreak[0] + ')');
+                        if (fBreak) {
+                            if (!fTempBreak) this.printBreakpoint(aBreak, i, "hit");
+                            break;
                         }
-                        break;
                     }
                     addrBreak++;
                     n++;
@@ -4872,6 +4913,7 @@ if (DEBUGGER) {
         dbgAddr.fProt = undefined;
 
         sAddr = (dbgAddr.off == null? sAddr : str.toHexWord(dbgAddr.off));
+
         if (sParm == 'c') {
             if (dbgAddr.off == null) {
                 this.clearBreakpoints();
@@ -4887,15 +4929,19 @@ if (DEBUGGER) {
             this.println("breakpoint missing: " + this.hexAddr(dbgAddr));
             return;
         }
+
         if (sParm == 'i') {
             this.println("breakpoint " + (this.bus.addPortInputBreak(dbgAddr.off)? "enabled" : "cleared") + ": port " + sAddr + " (input)");
             return;
         }
+
         if (sParm == 'o') {
             this.println("breakpoint " + (this.bus.addPortOutputBreak(dbgAddr.off)? "enabled" : "cleared") + ": port " + sAddr + " (output)");
             return;
         }
+
         if (dbgAddr.off == null) return;
+
         if (sOptions) {
             var a = sOptions.match(/(['"])(.*?)\1/);
             if (a) {
@@ -4939,9 +4985,6 @@ if (DEBUGGER) {
      * because we always display whole lines.  If sLen is omitted/undefined, then we default to 8 lines, regardless
      * whether dumping bytes or words.
      *
-     * Also, unlike sAddr, sLen is interpreted as a decimal number, unless a radix specifier is included (eg, "0x100");
-     * sLen also supports the DEBUG.COM-style syntax of a preceding 'l' (eg, "l16").
-     *
      * @this {Debugger}
      * @param {string} sCmd
      * @param {string|undefined} sAddr
@@ -4971,26 +5014,32 @@ if (DEBUGGER) {
             if (sDumpers.length) this.println("dump extensions:\n\t" + sDumpers);
             return;
         }
+
         if (sAddr == "symbols") {
             this.dumpSymbols();
             return;
         }
-        var cLines = 0;
+
+        var cb = 0;
         if (sLen) {
             if (sLen.charAt(0) == 'l') sLen = sLen.substr(1);
-            cLines = str.parseInt(sLen, 10);
+            cb = this.parseValue(sLen) >>> 0;   // negative lengths not allowed
+            if (cb > 0x10000) cb = 0x10000;     // prevent bad user (or register) input from producing excessive output
         }
+
         if (sCmd == 'd') {
             sCmd = this.sCmdDumpPrev || "db";
         } else {
             this.sCmdDumpPrev = sCmd;
         }
+
         if (sAddr == "state") {
             this.println(this.cmp.powerOff(true));
             return;
         }
+
         if (sCmd == "dh") {
-            this.dumpHistory(sAddr, cLines);
+            this.dumpHistory(sAddr, cb);
             return;
         }
         if (sCmd == "dos") {
@@ -5003,11 +5052,13 @@ if (DEBUGGER) {
             this.messageInt(Interrupts.DOS.VECTOR, this.cpu.regLIP, true);
             return;
         }
+
         if (sCmd == "ds") {     // transform a "ds" command into a "d desc" command
             sCmd = 'd';
             sLen = sAddr;
             sAddr = "desc";
         }
+
         for (m in Debugger.MESSAGES) {
             if (sAddr == m) {
                 var fnDumper = this.afnDumpers[m];
@@ -5019,6 +5070,7 @@ if (DEBUGGER) {
                 return;
             }
         }
+
         var dbgAddr = this.parseAddr(sAddr, Debugger.ADDR_DATA);
         if (!dbgAddr) return;
 
@@ -5030,14 +5082,8 @@ if (DEBUGGER) {
             sDump += sInfo || "no information";
         }
         else {
-            var cBytes = (sCmd == "dd"? 4 : (sCmd == "dw"? 2 : 1));
-            var cNumbers = (16 / cBytes)|0;
-            if (!cLines) {
-                cLines = 8;
-            } else {
-                cLines = ((cLines + cNumbers - 1) / cNumbers)|0;
-                if (!cLines) cLines = 1;
-            }
+            var cLines = (((cb || 256) + 15) >> 4) || 1;
+            var size = (sCmd == "dd"? 4 : (sCmd == "dw"? 2 : 1));
             for (var iLine = 0; iLine < cLines; iLine++) {
                 var data = 0, iByte = 0;
                 var sData = "", sChars = "";
@@ -5045,9 +5091,9 @@ if (DEBUGGER) {
                 for (var i = 0; i < 16; i++) {
                     var b = this.getByte(dbgAddr, 1);
                     data |= (b << (iByte++ << 3));
-                    if (iByte == cBytes) {
-                        sData += str.toHex(data, cBytes * 2);
-                        sData += (cBytes == 1? (i == 7? '-' : ' ') : "  ");
+                    if (iByte == size) {
+                        sData += str.toHex(data, size * 2);
+                        sData += (size == 1? (i == 7? '-' : ' ') : "  ");
                         data = iByte = 0;
                     }
                     sChars += (b >= 32 && b < 128? String.fromCharCode(b) : '.');
@@ -5056,6 +5102,7 @@ if (DEBUGGER) {
                 sDump += sAddr + "  " + sData + ' ' + sChars;
             }
         }
+
         if (sDump) this.println(sDump);
         this.dbgAddrNextData = dbgAddr;
     };
@@ -5170,7 +5217,7 @@ if (DEBUGGER) {
     {
         sCmd = str.trim(sCmd);
         if (!this.parseExpression(sCmd)) {
-            this.println("false: " + sCmd);
+            if (!fQuiet) this.println("false: " + sCmd);
             return false;
         }
         if (!fQuiet) this.println("true: " + sCmd);
@@ -6296,7 +6343,7 @@ if (DEBUGGER) {
                 a = [sCmd];
             } else {
                 a = sCmd.split(chSep || ';');
-                for (var s in a) a[s] = str.trim(a[s]);
+                for (var i = 0; i < a.length; i++) a[i] = str.trim(a[i]);
             }
         }
         return a;
@@ -6368,6 +6415,7 @@ if (DEBUGGER) {
                     this.doDump(asArgs[0], asArgs[1], asArgs[2]);
                     break;
                 case 'e':
+                    if (asArgs[0] == "else") break;
                     this.doEdit(asArgs);
                     break;
                 case 'f':

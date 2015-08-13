@@ -755,7 +755,7 @@ HTTPAPI.processDumpAPI = function(req, res)
             if (req.query[DumpAPI.QUERY.DECIMAL]) {
                 fDecimal = (req.query[DumpAPI.QUERY.DECIMAL] == "true");
             }
-            var file = new FileDump(sFormat, fComments, fDecimal, sServerRoot);
+            var file = new FileDump(sFormat, fComments, fDecimal, 0, 0, sServerRoot);
             file.loadFile(sFile, 0, 0, function(err) {
                 HTTPAPI.dumpFile(err, file, res);
             });
