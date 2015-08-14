@@ -112,16 +112,16 @@ parentheses, assignment operators, and unary or ternary operators, are not suppo
 
 This test machine below has been updated to load WDEB386.EXE prior to starting B:SETUP.EXE, if you prefer using
 WDEB386.  Make sure the machine is running (ie, click the **Run** button, or use the PCjs Debugger "g" command),
-and then click on the Debugger *output* window to give it focus and press CTRL-C to trigger WDEB386.
+and then click on the Debugger *output* control to give it focus and press CTRL-C to trigger WDEB386.
 
-The Debugger *input* field is used exclusively for PCjs Debugger commands, whereas the *output* window combines
+The Debugger *input* field is used exclusively for PCjs Debugger commands, whereas the *output* textarea combines
 all Debugger output *and* WDEB386 COM2 serial port I/O.  You can even use the PCjs Debugger to debug
-the WDEB386 debugger; just make sure the appropriate window has focus before typing a command.
+the WDEB386 debugger; just make sure the appropriate text control has focus before typing a command.
 
 To help reduce confusion, the PCjs Debugger displays a double-character command prefix, to differentiate its commands
 from WDEB386's single-character command prompt -- but it's still easy to get confused.
 
-A quick recap of those PCjs Debugger command prefixes (which you won't see until AFTER you've typed a PCjs command):
+A quick recap of those command prefixes (which you won't see until AFTER you've typed a PCjs command):
 
  * `>>` indicates real-mode
  * `##` indicates protected-mode
