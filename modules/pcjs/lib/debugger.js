@@ -3318,6 +3318,8 @@ if (DEBUGGER) {
     /**
      * findBreakpoint(aBreak, dbgAddr, fRemove, fTempBreak)
      *
+     * @this {Debugger}
+     * @param {Array} aBreak
      * @param {DbgAddr} dbgAddr
      * @param {boolean} [fRemove]
      * @param {boolean} [fTempBreak]

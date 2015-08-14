@@ -46,11 +46,12 @@ if (typeof module !== 'undefined') {
  *
  * The RAM component expects the following (parmsRAM) properties:
  *
- *      addr: starting physical address of RAM
- *      size: amount of RAM, in bytes (optional)
+ *      addr: starting physical address of RAM (default is 0)
+ *      size: amount of RAM, in bytes (default is 0, which means defer to motherboard switch settings)
+ *      test: true (default) means don't interfere with any BIOS memory tests, false means "fake a warm boot"
  *
- * NOTE: We make a note of the specified size, but no memory is initially allocated
- * for the RAM until the Computer component calls powerUp().
+ * NOTE: We make a note of the specified size, but no memory is initially allocated for the RAM until the
+ * Computer component calls powerUp().
  *
  * @constructor
  * @extends Component
@@ -99,7 +100,7 @@ RAM.prototype.powerUp = function(data, fRepower)
 {
     if (!fRepower) {
         /*
-         * The Computer powers up the CPU last, at which point the X86 state is restored,
+         * The Computer powers up the CPU last, at which point X86CPU state is restored,
          * which includes the Bus state, and since we use the Bus to allocate all our memory,
          * memory contents are already restored for us, so we don't need the usual restore
          * logic.  We just need to call reset(), to allocate memory for the RAM.
@@ -125,7 +126,7 @@ RAM.prototype.powerUp = function(data, fRepower)
 RAM.prototype.powerDown = function(fSave, fShutdown)
 {
     /*
-     * The Computer powers down the CPU first, at which point the X86 state is saved,
+     * The Computer powers down the CPU first, at which point X86CPU state is saved,
      * which includes the Bus state, and since we use the Bus component to allocate all
      * our memory, memory contents are already saved for us, so we don't need the usual
      * save logic.
@@ -199,7 +200,7 @@ RAM.prototype.reset = function()
             if (COMPAQ386) {
                 if (this.idComponent == "ramCPQ") {
                     this.controller = new CompaqController(this);
-                    this.bus.addMemory(CompaqController.ADDR, 1, Memory.TYPE.CTRL, this.controller);
+                    this.bus.addMemory(CompaqController.ADDR, 4, Memory.TYPE.CTRL, this.controller);
                 }
             }
         }
@@ -297,10 +298,10 @@ RAM.init = function()
  * To emulate the memory-mapped registers at 0x80C00000, the RAM component allocates a block at that
  * address using this custom controller once it sees an allocation for "ramCPQ".
  *
- * Later, when the addressibility of "ramCPQ" memory is altered, we record the blocks in all the
+ * Later, when the addressability of "ramCPQ" memory is altered, we record the blocks in all the
  * memory slots spanning 0x000E0000-0x000FFFFF, and then update those slots with the blocks from
- * 0x00FE0000-0x00FFFFFF.  Note that only the top 128Kb of "ramCPQ" addressibility is affected; the
- * rest of that memory, ranging anywhere from 256Kb to 640Kb, remains addressible at its original
+ * 0x00FE0000-0x00FFFFFF.  Note that only the top 128Kb of "ramCPQ" addressability is affected; the
+ * rest of that memory, ranging anywhere from 256Kb to 640Kb, remains addressable at its original
  * location.  Compaq's CEMM and VDISK utilities were generally the only software able to access that
  * remaining memory (what Compaq refers to as "Compaq Built-in Memory").
  *
@@ -415,6 +416,12 @@ CompaqController.RAMSETUP = {
 /**
  * readByte(off, addr)
  *
+ * NOTE: Even though we asked bus.addMemory() for only 4 bytes, corresponding to the 4 memory-mapped register
+ * locations we must manage, we're at the mercy of the Bus component's physical block allocation granularity,
+ * which, on 80386-based machines, is fixed at 4K (the same as the 80386 page size, to simplify emulation of paging).
+ *
+ * So we must allow for requests outside that 4-byte range.
+ *
  * @this {Memory}
  * @param {number} off (relative to 0x80C00000)
  * @param {number} [addr]
@@ -431,6 +438,12 @@ CompaqController.readByte = function readCompaqControllerByte(off, addr)
 
 /**
  * writeByte(off, b, addr)
+ *
+ * NOTE: Even though we asked bus.addMemory() for only 4 bytes, corresponding to the 4 memory-mapped register
+ * locations we must manage, we're at the mercy of the Bus component's physical memory allocation granularity,
+ * which, on 80386-based machines, is fixed at 4K (the same as the 80386 page size, to simplify emulation of paging).
+ *
+ * So we must allow for requests outside that 4-byte range.
  *
  * @this {Memory}
  * @param {number} off (relative to 0x80C00000)
@@ -489,6 +502,10 @@ CompaqController.prototype.restore = function(data)
  */
 CompaqController.prototype.getByte = function(off)
 {
+    /*
+     * Offsets 0-3 correspond to reads from 0x80C00000-0x80C00003; anything outside that range
+     * returns our standard non-responsive value of 0xff.
+     */
     var b = 0xff;
     if (off < 0x02) {
         b = (off & 0x1)? (this.wSettings >> 8) : (this.wSettings & 0xff);
@@ -508,10 +525,10 @@ CompaqController.prototype.getByte = function(off)
  */
 CompaqController.prototype.setByte = function(off, b)
 {
-    /*
-     * Check for write to 0x80C00000
-     */
     if (!off) {
+        /*
+         * This is a write to 0x80C00000
+         */
         if (b != (this.wMappings & 0xff)) {
             var bus = this.ram.bus;
             if (!(b & CompaqController.MAPPINGS.UNMAPPED)) {
@@ -537,10 +554,10 @@ CompaqController.prototype.setByte = function(off, b)
             this.wMappings = (this.wMappings & ~0xff) | b;
         }
     }
-    /*
-     * Check for write to 0x80C00002
-     */
     else if (off == 0x2) {
+        /*
+         * This is a write to 0x80C00002
+         */
         this.wRAMSetup = (this.wRAMSetup & ~0xff) | b;
     }
 };
