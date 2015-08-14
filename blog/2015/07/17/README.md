@@ -59,7 +59,7 @@ Then I ran into a couple of Windows 95 oddities.  First, some kernel initializat
 executed an invalid opcode (0x0F,0xFF) and expected its DPMI exception (0x06) handler to field the exception; that was
 fixed by flagging the opcode as genuinely invalid.
 
-> ** SIDEBAR **
+> SIDEBAR
 
 > By default, PCjs marks opcodes as invalid *only* if they have been confirmed invalid.  PCjs considers the vast
 majority of unused/undocumented opcodes to be merely "undefined" until I've seen them in the wild.  An instruction will
