@@ -88,7 +88,7 @@ Update for August 13, 2015
 ---
 
 PCjs v1.18.8 has made a little more progress running Windows 95 Setup, but CAB decompression still fails almost
-immediately.  To monitor DOS calls until the first 36-byte read of PRECOPY1.CAB, set the following breakpoints and
+immediately.  To monitor DOS calls until the first 36-byte read of PRECOPY1.CAB, try the following breakpoints and
 start the machine, using the PCjs Debugger *input* field next to the **Enter** button:
 
 	bp 1ED4:16B4 "let fn=ah;dos;if fn!=3f||cx!=24"
@@ -99,20 +99,33 @@ In the current machine, `1ED4:16B4` is the DOS INT 0x21 entry point and `FDC8:42
 The first breakpoint sets an internal variable, `fn`, to the value of the **AH** register on entry, so that the second
 breakpoint can check the value on exit.
 
-The `di` command dumps PCjs BACKTRACK(tm) information, to help you visually confirm which INT 0x21
-calls are reading PRECOPY1.CAB.  The `if` command evaluates an expression, and if the result is non-zero ("true"),
-all subsequent commands are executed, up to to any `else` command; expressions may contain the usual variety of
-arithmetic, bitwise and logical binary operators, using the same precedence as JavaScript; parentheses and nested
-`if` commands are not supported.  If the expression is zero ("false"), then only commands after the `else` command
-will be executed, and if there is no `else` command, execution stops.
+Regarding the other Debugger commands shown above, the `dos` command describes the current DOS operation
+(alternatively, you could use the `m int on; m dos on` commands to turn on DOS interrupt messages).  The `di`
+command dumps PCjs BACKTRACK(tm) information, to help you visually confirm which INT 0x21 calls are reading
+PRECOPY1.CAB.  Finally, the `if` command evaluates the given expression, and if the result is non-zero ("true"),
+all subsequent commands are executed, up to to any `else` command; otherwise, only commands after the `else`
+command will be executed, and if there is no `else` command, execution will stop.
 
-This test machine has also been updated to load WDEB386.EXE prior to starting B:SETUP.EXE, if you prefer using
+Debugger expressions may contain the usual variety of arithmetic, bitwise and logical binary operators, and they
+are evaluated using traditional operator precedence (ie, the same as C or JavaScript); any other operators, such as
+parentheses, assignment operators, and unary or ternary operators, are not supported in expressions.
+
+This test machine below has been updated to load WDEB386.EXE prior to starting B:SETUP.EXE, if you prefer using
 WDEB386.  Make sure the machine is running (ie, click the **Run** button, or use the PCjs Debugger "g" command),
 and then click on the Debugger *output* window to give it focus and press CTRL-C to trigger WDEB386.
 
 The Debugger *input* field is used exclusively for PCjs Debugger commands, whereas the *output* window combines
 all Debugger output *and* WDEB386 COM2 serial port I/O.  You can even use the PCjs Debugger to debug
 the WDEB386 debugger; just make sure the appropriate window has focus before typing a command.
+
+To help reduce confusion, the PCjs Debugger displays a double-character command prefix, to differentiate its commands
+from WDEB386's single-character command prompt -- but it's still easy to get confused.
+
+A quick recap of those PCjs Debugger command prefixes (which you won't see until AFTER you've typed a PCjs command):
+
+ * `>>` indicates real-mode
+ * `##` indicates protected-mode
+ * `--` indicates V86-mode
 
 80386 Debug register (DR0-DR7) support was recently added, so even WDEB386 read/write breakpoints should work now. 
 
