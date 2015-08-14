@@ -338,30 +338,38 @@ SerialPort.prototype.setBinding = function(sHTMLType, sBinding, control)
              * This is required in addition to onkeypress, because it's the only way to prevent
              * BACKSPACE (keyCode 8) from being interpreted by the browser as a "Back" operation;
              * moreover, not all browsers generate an onkeypress notification for BACKSPACE.
+             *
+             * A related problem exists for Ctrl-key combinations in most Windows-based browsers
+             * (eg, IE, Edge, Chrome for Windows, etc), because keys like Ctrl-C and Ctrl-S have
+             * special meanings (eg, Copy, Save).  To the extent the browser will allow it, we
+             * attempt to disable that default behavior when this control receives an onkeydown
+             * event for one of those keys (which is probably the only event the browser will generate).
              */
             event = event || window.event;
             var keyCode = event.keyCode;
-            if (keyCode === 8) {
+            if (keyCode === 0x08 || keyCode >= 0x41 && keyCode <= 0x5A && (event.ctrlKey || event.metaKey)) {
                 if (event.preventDefault) event.preventDefault();
+                if (keyCode > 0x40) keyCode -= 0x40;
                 serial.sendRBR([keyCode]);
-                return true;
             }
+            return true;
         };
         control.onkeypress = function onKeyPressSerial(event) {
             /*
              * Browser-independent keyCode extraction (refer to keyPress() and the other key
              * event handlers in keyboard.js).
              *
-             * The additional check for SPACE (keyCode 32) and subsequent preventDefault() call
+             * The additional check for SPACE (keyCode 0x20) and subsequent preventDefault() call
              * prevents SPACE from bubbling up to the document event handlers, where its default
              * behavior is typically to scroll the entire page -- a real nuisance.
              */
             event = event || window.event;
             var keyCode = event.which || event.keyCode;
             serial.sendRBR([keyCode]);
-            if (keyCode == 32) {
+            if (keyCode == 0x20) {
                 if (event.preventDefault) event.preventDefault();
             }
+            return true;
         };
         return true;
 
