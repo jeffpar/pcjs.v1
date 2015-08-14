@@ -1981,21 +1981,30 @@ X86CPU.prototype.restore = function(data)
     this.setPS(a[6]);
 
     /*
-     * It's important to call setCSIP(), both to ensure that the CPU's linear IP register (regLIP) is updated
-     * properly AND to ensure the CPU's default ADDRESS and OPERAND sizes are set properly.
+     * The introduction of protected-mode requires us to restore memory contents sooner than we used to
+     * (ie, before we load any segment registers).
      */
-    this.setCSIP(a[0], this.segCS.sel);
+    var fRestored = false;
 
-    /*
-     * It's also important to call setSP(), so that the linear SP register (regLSP) will be updated properly;
-     * we also need to call setSS(), to ensure that the lower and upper stack limits are properly initialized.
-     */
-    this.setSP(regESP);
-    this.setSS(this.segSS.sel);
+    if (this.bus.restoreMemory(data[4])) {
+        /*
+         * It's important to call setCSIP(), both to ensure that the CPU's linear IP register (regLIP) is updated
+         * properly AND to ensure the CPU's default ADDRESS and OPERAND sizes are set properly.
+         */
+        this.setCSIP(a[0], this.segCS.sel);
 
-    if (I386 && this.model >= X86.MODEL_80386) {
-        this.segFS.restore(a[7]);
-        this.segGS.restore(a[8]);
+        /*
+         * It's also important to call setSP(), so that the linear SP register (regLSP) will be updated properly;
+         * we also need to call setSS(), to ensure that the lower and upper stack limits are properly initialized.
+         */
+        this.setSP(regESP);
+        this.setSS(this.segSS.sel);
+
+        if (I386 && this.model >= X86.MODEL_80386) {
+            this.segFS.restore(a[7]);
+            this.segGS.restore(a[8]);
+        }
+        fRestored = true;
     }
 
     a = data[2];
@@ -2010,7 +2019,8 @@ X86CPU.prototype.restore = function(data)
     a = data[3];                // a[0] was previously nBurstDivisor (no longer used)
     this.nTotalCycles = a[1];
     this.setSpeed(a[2]);        // if we're restoring an old state that doesn't contain a value from getSpeed(), that's OK; setSpeed() checks for an undefined value
-    return this.bus.restoreMemory(data[4]);
+
+    return fRestored;
 };
 
 /**

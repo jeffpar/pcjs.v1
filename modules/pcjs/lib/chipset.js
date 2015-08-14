@@ -1728,10 +1728,10 @@ ChipSet.prototype.updateCMOSChecksum = function()
 /**
  * save()
  *
+ * This implements save support for the ChipSet component.
+ *
  * @this {ChipSet}
  * @return {Object}
- *
- * This implements save support for the ChipSet component.
  */
 ChipSet.prototype.save = function()
 {
@@ -1752,11 +1752,11 @@ ChipSet.prototype.save = function()
 /**
  * restore(data)
  *
+ * This implements restore support for the ChipSet component.
+ *
  * @this {ChipSet}
  * @param {Object} data
  * @return {boolean} true if successful, false if failure
- *
- * This implements restore support for the ChipSet component.
  */
 ChipSet.prototype.restore = function(data)
 {

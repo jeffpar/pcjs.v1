@@ -1,8 +1,9 @@
 Windows 95
 ---
 
-This week was the 20th anniversary of Windows 95 RTM ("Release To Manufacturing").  So I decided to throw a
-PCjs party and try running Windows 95 Setup inside a PCjs machine for the first time.  Sadly, it immediately failed:
+This week (July 14, 2015) was the 20th anniversary of Windows 95 RTM ("Release To Manufacturing").  So I decided to
+throw a PCjs party and try running Windows 95 Setup inside a PCjs machine for the first time.  Sadly, it immediately
+failed:
 
 	Please wait while Setup initializes.
 	Windows requires a computer with an 80386 processor or higher.
@@ -78,15 +79,44 @@ completion.  If you want to give it a spin yourself, start the machine below (cl
 finished booting, run SETUP from drive B, where the first Windows 95 diskette is already loaded.
 
 If, when it crashes (and it will), you're interested in examining the instructions that were executed prior to the
-crash, use the "m int on" Debugger command prior to starting the machine.  That will trigger allocation of the instruction
-history buffer, which you can then dump at any time using the Debugger's "dh" command.
+crash, you can dump the instruction history buffer using the Debugger's "dh" command.
 
 NOTE: The diskette images contain a pre-release version of Windows 95, as I don't currently have the RTM version on
 diskette.
 
-To be continued....
+Update for August 13, 2015
+---
 
-[Embedded DeskPro 386](/devices/pc/machine/compaq/deskpro386/vga/4096kb/machine.xml "PCjs:deskpro386-vga-4096k::uncompiled:debugger")
+PCjs v1.18.8 has made a little more progress running Windows 95 Setup, but CAB decompression still fails almost
+immediately.  To monitor DOS calls until the first 36-byte read of PRECOPY1.CAB, set the following breakpoints and
+start the machine, using the PCjs Debugger *input* field next to the **Enter** button:
+
+	bp 1ED4:16B4 "let fn=ah;dos;if fn!=3f||cx!=24"
+	bp FDC8:422A "if fn==3f;di ds:dx;db ds:dx lcx;h;else"
+	g
+
+In the current machine, `1ED4:16B4` is the DOS INT 0x21 entry point and `FDC8:422A` is the corresponding IRET.
+The first breakpoint sets an internal variable, `fn`, to the value of the **AH** register on entry, so that the second
+breakpoint can check the value on exit.
+
+The `di` command dumps PCjs BACKTRACK(tm) information, to help you visually confirm which INT 0x21
+calls are reading PRECOPY1.CAB.  The `if` command evaluates an expression, and if the result is non-zero ("true"),
+all subsequent commands are executed, up to to any `else` command; expressions may contain the usual variety of
+arithmetic, bitwise and logical binary operators, using the same precedence as JavaScript; parentheses and nested
+`if` commands are not supported.  If the expression is zero ("false"), then only commands after the `else` command
+will be executed, and if there is no `else` command, execution stops.
+
+This test machine has also been updated to load WDEB386.EXE prior to starting B:SETUP.EXE, if you prefer using
+WDEB386.  Make sure the machine is running (ie, click the **Run** button, or use the PCjs Debugger "g" command),
+and then click on the Debugger *output* window to give it focus and press CTRL-C to trigger WDEB386.
+
+The Debugger *input* field is used exclusively for PCjs Debugger commands, whereas the *output* window combines
+all Debugger output *and* WDEB386 COM2 serial port I/O.  You can even use the PCjs Debugger to debug
+the WDEB386 debugger; just make sure the appropriate window has focus before typing a command.
+
+80386 Debug register (DR0-DR7) support was recently added, so even WDEB386 read/write breakpoints should work now. 
+
+[Embedded DeskPro 386](/devices/pc/machine/compaq/deskpro386/vga/4096kb/machine.xml "PCjs:deskpro386::uncompiled:debugger")
 
 *[@jeffpar](http://twitter.com/jeffpar)*  
 *July 17, 2015*

@@ -38,6 +38,7 @@ if (typeof module !== 'undefined') {
     var Component   = require("../../shared/lib/component");
     var Memory      = require("./memory");
     var ROM         = require("./rom");
+    var State       = require("./state");
 }
 
 /**
@@ -103,13 +104,12 @@ RAM.prototype.powerUp = function(data, fRepower)
          * memory contents are already restored for us, so we don't need the usual restore
          * logic.  We just need to call reset(), to allocate memory for the RAM.
          *
-        if (!data || !this.restore) {
-            this.reset();
-        } else {
-            if (!this.restore(data)) return false;
-        }
+         * The only exception is when there's a custom Memory controller (eg, CompaqController).
          */
         this.reset();
+        if (data && this.controller) {
+            if (!this.restore(data)) return false;
+        }
     }
     return true;
 };
@@ -130,9 +130,9 @@ RAM.prototype.powerDown = function(fSave, fShutdown)
      * our memory, memory contents are already saved for us, so we don't need the usual
      * save logic.
      *
-    return fSave && this.save ? this.save() : true;
+     * The only exception is when there's a custom Memory controller (eg, CompaqController).
      */
-    return true;
+    return (fSave && this.controller)? this.save() : true;
 };
 
 /**
@@ -223,6 +223,36 @@ RAM.prototype.reset = function()
     } else {
         Component.error("No RAM allocated");
     }
+};
+
+/**
+ * save()
+ *
+ * This implements save support for the RAM component.
+ *
+ * @this {RAM}
+ * @return {Object}
+ */
+RAM.prototype.save = function()
+{
+    var state = new State(this);
+    if (this.controller) state.set(0, this.controller.save());
+    return state.data();
+};
+
+/**
+ * restore(data)
+ *
+ * This implements restore support for the RAM component.
+ *
+ * @this {RAM}
+ * @param {Object} data
+ * @return {boolean} true if successful, false if failure
+ */
+RAM.prototype.restore = function(data)
+{
+    if (this.controller) return this.controller.restore(data[0]);
+    return true;
 };
 
 /**
@@ -392,16 +422,9 @@ CompaqController.RAMSETUP = {
  */
 CompaqController.readByte = function readCompaqControllerByte(off, addr)
 {
-    var b = 0xff;
-    if (off < 0x02) {
-        b = (off & 0x1)? (this.controller.wSettings >> 8) : (this.controller.wSettings & 0xff);
-    }
-    else if (off < 0x4) {
-        b = (off & 0x1)? (this.controller.wRAMSetup >> 8) : (this.controller.wRAMSetup & 0xff);
-    }
+    var b = this.controller.getByte(off);
     if (DEBUG) {
         this.controller.ram.printMessage("CompaqController.readByte(" + str.toHexWord(off) + ") returned " + str.toHexByte(b), 0, true);
-        if (MAXDEBUG && DEBUGGER && off >= 0x2) this.dbg.stopCPU();
     }
     return b;
 };
@@ -416,17 +439,84 @@ CompaqController.readByte = function readCompaqControllerByte(off, addr)
  */
 CompaqController.writeByte = function writeCompaqControllerByte(off, b, addr)
 {
-    var controller = this.controller;
+    this.controller.setByte(off, b);
+    /*
+     * All bits in 0x80C00001 and 0x80C00003 are reserved, so we can simply ignore those writes.
+     */
+    if (DEBUG) {
+        this.controller.ram.printMessage("CompaqController.writeByte(" + str.toHexWord(off) + "," + str.toHexByte(b) + ")", 0, true);
+    }
+};
 
+CompaqController.BUFFER = [null, 0];
+CompaqController.ACCESS = [CompaqController.readByte, null, null, CompaqController.writeByte, null, null];
+
+/**
+ * save()
+ *
+ * This implements save support for the CompaqController component.
+ *
+ * @this {CompaqController}
+ * @return {Array}
+ */
+CompaqController.prototype.save = function()
+{
+    return [this.wMappings, this.wRAMSetup];
+};
+
+/**
+ * restore(data)
+ *
+ * This implements restore support for the CompaqController component.
+ *
+ * @this {CompaqController}
+ * @param {Object} data
+ * @return {boolean} true if successful, false if failure
+ */
+CompaqController.prototype.restore = function(data)
+{
+    this.setByte(0, data[0] & 0xff);
+    this.setByte(2, data[1] & 0xff);
+    return true;
+};
+
+/**
+ * getByte(off)
+ *
+ * @this {CompaqController}
+ * @param {number} off
+ * @return {number}
+ */
+CompaqController.prototype.getByte = function(off)
+{
+    var b = 0xff;
+    if (off < 0x02) {
+        b = (off & 0x1)? (this.wSettings >> 8) : (this.wSettings & 0xff);
+    }
+    else if (off < 0x4) {
+        b = (off & 0x1)? (this.wRAMSetup >> 8) : (this.wRAMSetup & 0xff);
+    }
+    return b;
+};
+
+/**
+ * setByte(off, b)
+ *
+ * @this {CompaqController}
+ * @param {number} off (relative to 0x80C00000)
+ * @param {number} b
+ */
+CompaqController.prototype.setByte = function(off, b)
+{
     /*
      * Check for write to 0x80C00000
      */
     if (!off) {
-        if (b != (controller.wMappings & 0xff)) {
-            var bus = controller.ram.bus;
+        if (b != (this.wMappings & 0xff)) {
+            var bus = this.ram.bus;
             if (!(b & CompaqController.MAPPINGS.UNMAPPED)) {
-                if (!controller.aBlocksDst) {
-                    controller.aBlocksDst = bus.getMemoryBlocks(CompaqController.MAP_DST, CompaqController.MAP_SIZE);
+                if (!this.aBlocksDst) {
+                    this.aBlocksDst = bus.getMemoryBlocks(CompaqController.MAP_DST, CompaqController.MAP_SIZE);
                 }
                 /*
                  * You might think that the next three lines could ALSO be moved to the preceding IF,
@@ -439,32 +529,21 @@ CompaqController.writeByte = function writeCompaqControllerByte(off, b, addr)
                 bus.setMemoryBlocks(CompaqController.MAP_DST, CompaqController.MAP_SIZE, aBlocks, type);
             }
             else {
-                if (controller.aBlocksDst) {
-                    bus.setMemoryBlocks(CompaqController.MAP_DST, CompaqController.MAP_SIZE, controller.aBlocksDst);
-                    controller.aBlocksDst = null;
+                if (this.aBlocksDst) {
+                    bus.setMemoryBlocks(CompaqController.MAP_DST, CompaqController.MAP_SIZE, this.aBlocksDst);
+                    this.aBlocksDst = null;
                 }
             }
-            controller.wMappings = (controller.wMappings & ~0xff) | b;
-            if (MAXDEBUG && DEBUGGER) this.dbg.stopCPU();
+            this.wMappings = (this.wMappings & ~0xff) | b;
         }
     }
     /*
      * Check for write to 0x80C00002
      */
     else if (off == 0x2) {
-        controller.wRAMSetup = (controller.wRAMSetup & ~0xff) | b;
-        if (MAXDEBUG && DEBUGGER) this.dbg.stopCPU();
-    }
-    /*
-     * All bits in 0x80C00001 and 0x80C00003 are reserved, so we can simply ignore those writes.
-     */
-    if (DEBUG) {
-        this.controller.ram.printMessage("CompaqController.writeByte(" + str.toHexWord(off) + "," + str.toHexByte(b) + ")", 0, true);
+        this.wRAMSetup = (this.wRAMSetup & ~0xff) | b;
     }
 };
-
-CompaqController.BUFFER = [null, 0];
-CompaqController.ACCESS = [CompaqController.readByte, null, null, CompaqController.writeByte, null, null];
 
 /**
  * getMemoryBuffer(addr)

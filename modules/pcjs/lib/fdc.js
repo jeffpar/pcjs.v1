@@ -40,7 +40,6 @@ if (typeof module !== 'undefined') {
     var Messages    = require("./messages");
     var ChipSet     = require("./chipset");
     var Disk        = require("./disk");
-    var Computer    = require("./computer");
     var State       = require("./state");
 }
 
