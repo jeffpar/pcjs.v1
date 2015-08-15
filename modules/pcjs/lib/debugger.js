@@ -2980,17 +2980,7 @@ if (DEBUGGER) {
             this.aPrevCmds = data[i][0];
             if (typeof this.aPrevCmds == "string") this.aPrevCmds = [this.aPrevCmds];
             this.fAssemble = data[i][1];
-            if (!this.bitsMessage) {
-                /*
-                 * It's actually kind of annoying that a restored (or predefined) state will trump my initial state,
-                 * at least in situations where I've changed the initial state, if I want to diagnose something.
-                 * Perhaps I should save/restore both the initial and current bitsMessageEnabled, and if the initial
-                 * values don't agree, then leave the current value alone.
-                 *
-                 * But, it's much easier to just leave bitsMessageEnabled alone whenever it already contains set bits.
-                 */
-                this.bitsMessage = data[i][2];
-            }
+            this.bitsMessage |= data[i][2];     // keep our current message bits set, and simply "add" any extra bits defined by the saved state
         }
         return true;
     };
@@ -4981,18 +4971,19 @@ if (DEBUGGER) {
     };
 
     /**
-     * doDump(sCmd, sAddr, sLen)
+     * doDump(sCmd, sAddr, sLen, sBytes)
      *
-     * While sLen is interpreted as a number of bytes or words, it's converted to the appropriate number of lines,
-     * because we always display whole lines.  If sLen is omitted/undefined, then we default to 8 lines, regardless
-     * whether dumping bytes or words.
+     * sLen is interpreted as a number of bytes, in hex, which we convert to the appropriate number of lines,
+     * because we always display whole lines.  If sLen is omitted/undefined, sLen defaults to 0x80 (128.) bytes,
+     * which normally translates to 8 lines.
      *
      * @this {Debugger}
      * @param {string} sCmd
      * @param {string|undefined} sAddr
-     * @param {string|undefined} sLen (if present, it can be preceded by an 'l', which we simply ignore)
+     * @param {string|undefined} [sLen] (# of bytes to dump, in hex; default is 0x80)
+     * @param {string|undefined} [sBytes] (this is checked only if sLen was an 'l', in honor of old DEBUG.COM syntax)
      */
-    Debugger.prototype.doDump = function(sCmd, sAddr, sLen)
+    Debugger.prototype.doDump = function(sCmd, sAddr, sLen, sBytes)
     {
         var m;
         if (sAddr == '?') {
@@ -5022,9 +5013,11 @@ if (DEBUGGER) {
             return;
         }
 
-        var cb = 0;
+        var cb = 0;                             // 0 is not a default; 0 triggers the appropriate defaults below
         if (sLen) {
-            if (sLen.charAt(0) == 'l') sLen = sLen.substr(1);
+            if (sLen.charAt(0) == 'l') {
+                sLen = sLen.substr(1) || sBytes;
+            }
             cb = this.parseValue(sLen) >>> 0;   // negative lengths not allowed
             if (cb > 0x10000) cb = 0x10000;     // prevent bad user (or register) input from producing excessive output
         }
@@ -5084,7 +5077,7 @@ if (DEBUGGER) {
             sDump += sInfo || "no information";
         }
         else {
-            var cLines = (((cb || 256) + 15) >> 4) || 1;
+            var cLines = (((cb || 128) + 15) >> 4) || 1;
             var size = (sCmd == "dd"? 4 : (sCmd == "dw"? 2 : 1));
             for (var iLine = 0; iLine < cLines; iLine++) {
                 var data = 0, iByte = 0;
@@ -6414,7 +6407,7 @@ if (DEBUGGER) {
                         break;
                     }
                     this.shiftArgs(asArgs);
-                    this.doDump(asArgs[0], asArgs[1], asArgs[2]);
+                    this.doDump(asArgs[0], asArgs[1], asArgs[2], asArgs[3]);
                     break;
                 case 'e':
                     if (asArgs[0] == "else") break;

@@ -2892,7 +2892,7 @@ ChipSet.prototype.advanceDMA = function(channel, fInit)
                 channel.sAddrDebug = str.toHex(addr >> 4, 4) + ":" + str.toHex(addr & 0xf, 4);
                 if (this.messageEnabled(this.messageBitsDMA(iDMAChannel)) && channel.type != ChipSet.DMA_MODE.TYPE_WRITE) {
                     this.printMessage("advanceDMA(" + iDMAChannel + ") transferring " + channel.cbDebug + " bytes from " + channel.sAddrDebug, true);
-                    this.dbg.doDump("db", channel.sAddrDebug, "l" + channel.cbDebug);
+                    this.dbg.doDump("db", channel.sAddrDebug, 'l', channel.cbDebug);
                 }
             }
             if (channel.type == ChipSet.DMA_MODE.TYPE_WRITE) {
@@ -3007,7 +3007,7 @@ ChipSet.prototype.updateDMA = function(channel)
 
     if (DEBUG && this.messageEnabled(this.messageBitsDMA(iDMAChannel)) && channel.type == ChipSet.DMA_MODE.TYPE_WRITE && channel.sAddrDebug) {
         this.printMessage("updateDMA(" + iDMAChannel + ") transferred " + channel.cbDebug + " bytes to " + channel.sAddrDebug, true);
-        this.dbg.doDump("db", channel.sAddrDebug, "l" + channel.cbDebug);
+        this.dbg.doDump("db", channel.sAddrDebug, 'l', channel.cbDebug);
     }
 
     if (channel.done) {
