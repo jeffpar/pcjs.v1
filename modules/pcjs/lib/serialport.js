@@ -330,8 +330,6 @@ SerialPort.prototype.setBinding = function(sHTMLType, sBinding, control)
         /*
          * By establishing an onkeypress handler here, we make it possible for DOS commands like
          * "CTTY COM1" to more or less work (use "CTTY CON" to restore control to the DOS console).
-         *
-         * WARNING: This isn't really a supported feature yet; very much a work-in-progress.
          */
         control.onkeydown = function onKeyDownSerial(event) {
             /*
@@ -343,11 +341,11 @@ SerialPort.prototype.setBinding = function(sHTMLType, sBinding, control)
              * (eg, IE, Edge, Chrome for Windows, etc), because keys like Ctrl-C and Ctrl-S have
              * special meanings (eg, Copy, Save).  To the extent the browser will allow it, we
              * attempt to disable that default behavior when this control receives an onkeydown
-             * event for one of those keys (which is probably the only event the browser will generate).
+             * event for one of those keys (probably the only event the browser generates for them).
              */
             event = event || window.event;
             var keyCode = event.keyCode;
-            if (keyCode === 0x08 || keyCode >= 0x41 && keyCode <= 0x5A && (event.ctrlKey || event.metaKey)) {
+            if (keyCode === 0x08 || event.ctrlKey && keyCode >= 0x41 && keyCode <= 0x5A) {
                 if (event.preventDefault) event.preventDefault();
                 if (keyCode > 0x40) keyCode -= 0x40;
                 serial.sendRBR([keyCode]);
