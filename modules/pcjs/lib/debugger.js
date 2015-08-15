@@ -1554,7 +1554,7 @@ if (DEBUGGER) {
      * getAddr(dbgAddr, fWrite, nb)
      *
      * @this {Debugger}
-     * @param {DbgAddr} dbgAddr
+     * @param {DbgAddr|null|undefined} dbgAddr
      * @param {boolean} [fWrite]
      * @param {number} [nb] is number of bytes to check (1, 2 or 4); default is 1
      * @return {number} is the corresponding linear address, or X86.ADDR_INVALID
@@ -1567,17 +1567,19 @@ if (DEBUGGER) {
          * whose linear address must always be (re)calculated based on current machine state (mode, active
          * descriptor tables, etc).
          */
-        var addr = dbgAddr.addr;
+        var addr = dbgAddr && dbgAddr.addr;
         if (addr == null) {
             addr = X86.ADDR_INVALID;
-            var seg = this.getSegment(dbgAddr.sel, dbgAddr.fProt);
-            if (seg) {
-                if (!fWrite) {
-                    addr = seg.checkRead(dbgAddr.off, nb || 1, true);
-                } else {
-                    addr = seg.checkWrite(dbgAddr.off, nb || 1, true);
+            if (dbgAddr) {
+                var seg = this.getSegment(dbgAddr.sel, dbgAddr.fProt);
+                if (seg) {
+                    if (!fWrite) {
+                        addr = seg.checkRead(dbgAddr.off, nb || 1, true);
+                    } else {
+                        addr = seg.checkWrite(dbgAddr.off, nb || 1, true);
+                    }
+                    dbgAddr.addr = addr;
                 }
-                dbgAddr.addr = addr;
             }
         }
         return addr;
@@ -1930,16 +1932,19 @@ if (DEBUGGER) {
     {
         var i = 0, n = aBlocks.length;
 
+        if (sAddr) {
+            var addr = this.getAddr(this.parseAddr(sAddr));
+            if (addr == X86.ADDR_INVALID) {
+                this.println("invalid address: " + sAddr);
+                return;
+            }
+            i = addr >>> this.cpu.nBlockShift;
+            n = 1;
+        }
+
         this.println("id       physaddr   blkaddr   used    size    type");
         this.println("-------- ---------  --------  ------  ------  ----");
 
-        if (sAddr) {
-            var addr = this.parseValue(sAddr);
-            if (addr !== undefined) {
-                i = addr >>> this.cpu.nBlockShift;
-                n = 1;
-            }
-        }
         while (n--) {
             var block = aBlocks[i];
             if (block.type === Memory.TYPE.NONE) continue;
@@ -3537,8 +3542,6 @@ if (DEBUGGER) {
                             break;
                         }
                     }
-                    addrBreak++;
-                    n++;
                 }
             }
         }
@@ -4986,6 +4989,7 @@ if (DEBUGGER) {
     Debugger.prototype.doDump = function(sCmd, sAddr, sLen, sBytes)
     {
         var m;
+
         if (sAddr == '?') {
             var sDumpers = "";
             for (m in Debugger.MESSAGES) {
@@ -5008,9 +5012,46 @@ if (DEBUGGER) {
             return;
         }
 
+        if (sAddr == "state") {
+            this.println(this.cmp.powerOff(true));
+            return;
+        }
+
         if (sAddr == "symbols") {
             this.dumpSymbols();
             return;
+        }
+
+        if (sCmd == "dos") {
+            /*
+             * The "dos" command is an undocumented command that's useful any time we're inside an internal
+             * DOS dispatch function where the registers are substantially the same as the corresponding INT 0x21;
+             * "m int on; m dos on" produces the same output, but only when an actual INT 0x21 instruction is used.
+             * Issuing this command at any other time should also be OK, but the results will be meaningless.
+             *
+             * NOTE: This is different from the "d dos" command, which invokes dumpDos() to dump DOS memory blocks,
+             * and is handled by one of the registered dumper functions below.
+             */
+            this.messageInt(Interrupts.DOS.VECTOR, this.cpu.regLIP, true);
+            return;
+        }
+
+        if (sCmd == "ds") {                     // transform a "ds" command into a "d desc" command
+            sCmd = 'd';
+            sLen = sAddr;
+            sAddr = "desc";
+        }
+
+        for (m in Debugger.MESSAGES) {
+            if (sAddr == m) {
+                var fnDumper = this.afnDumpers[m];
+                if (fnDumper) {
+                    fnDumper(sLen);
+                } else {
+                    this.println("no dump registered for " + sAddr);
+                }
+                return;
+            }
         }
 
         var cb = 0;                             // 0 is not a default; 0 triggers the appropriate defaults below
@@ -5028,42 +5069,9 @@ if (DEBUGGER) {
             this.sCmdDumpPrev = sCmd;
         }
 
-        if (sAddr == "state") {
-            this.println(this.cmp.powerOff(true));
-            return;
-        }
-
         if (sCmd == "dh") {
             this.dumpHistory(sAddr, cb);
             return;
-        }
-        if (sCmd == "dos") {
-            /*
-             * The "dos" command is an undocumented command that's useful any time we're inside an internal
-             * DOS dispatch function where the registers are substantially the same as the corresponding INT 0x21;
-             * "m int on; m dos on" produces the same output, but only when an actual INT 0x21 instruction is used.
-             * Issuing this command at any other time should also be OK, but the results will be meaningless.
-             */
-            this.messageInt(Interrupts.DOS.VECTOR, this.cpu.regLIP, true);
-            return;
-        }
-
-        if (sCmd == "ds") {     // transform a "ds" command into a "d desc" command
-            sCmd = 'd';
-            sLen = sAddr;
-            sAddr = "desc";
-        }
-
-        for (m in Debugger.MESSAGES) {
-            if (sAddr == m) {
-                var fnDumper = this.afnDumpers[m];
-                if (fnDumper) {
-                    fnDumper(sLen);
-                } else {
-                    this.println("no dump registered for " + sAddr);
-                }
-                return;
-            }
         }
 
         var dbgAddr = this.parseAddr(sAddr, Debugger.ADDR_DATA);

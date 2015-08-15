@@ -98,10 +98,10 @@ X86.opADDALb = function ADDALb()
 {
     this.regEAX = (this.regEAX & ~0xff) | X86.fnADDb.call(this, this.regEAX & 0xff, this.getIPByte());
     /*
-     * NOTE: Whenever the result is "blended" value (eg, of btiAL and btiMemLo), a new bti should be
+     * NOTE: Whenever the result is "blended" value (eg, of btiAL and btiMem0), a new bti should be
      * allocated to reflect that fact; however, I'm leaving "perfect" BACKTRACK support for another day.
      */
-    if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMemLo;
+    if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMem0;
     this.nStepCycles--;         // in the absence of any EA calculations, we need deduct only one more cycle
 };
 
@@ -114,7 +114,7 @@ X86.opADDAX = function ADDAX()
 {
     this.regEAX = (this.regEAX & ~this.dataMask) | X86.fnADDw.call(this, this.regEAX & this.dataMask, this.getIPWord());
     if (BACKTRACK) {
-        this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
+        this.backTrack.btiAL = this.backTrack.btiMem0; this.backTrack.btiAH = this.backTrack.btiMem1;
     }
     this.nStepCycles--;         // in the absence of any EA calculations, we need deduct only one more cycle
 };
@@ -189,7 +189,7 @@ X86.opORrw = function ORrw()
 X86.opORALb = function ORALb()
 {
     this.regEAX = (this.regEAX & ~0xff) | X86.fnORb.call(this, this.regEAX & 0xff, this.getIPByte());
-    if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMemLo;
+    if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMem0;
     this.nStepCycles--;         // in the absence of any EA calculations, we need deduct only one more cycle
 };
 
@@ -202,7 +202,7 @@ X86.opORAX = function ORAX()
 {
     this.regEAX = (this.regEAX & ~this.dataMask) | X86.fnORw.call(this, this.regEAX & this.dataMask, this.getIPWord());
     if (BACKTRACK) {
-        this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
+        this.backTrack.btiAL = this.backTrack.btiMem0; this.backTrack.btiAH = this.backTrack.btiMem1;
     }
     this.nStepCycles--;         // in the absence of any EA calculations, we need deduct only one more cycle
 };
@@ -287,7 +287,7 @@ X86.opADCrw = function ADCrw()
 X86.opADCALb = function ADCALb()
 {
     this.regEAX = (this.regEAX & ~0xff) | X86.fnADCb.call(this, this.regEAX & 0xff, this.getIPByte());
-    if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMemLo;
+    if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMem0;
     this.nStepCycles--;         // in the absence of any EA calculations, we need deduct only one more cycle
 };
 
@@ -300,7 +300,7 @@ X86.opADCAX = function ADCAX()
 {
     this.regEAX = (this.regEAX & ~this.dataMask) | X86.fnADCw.call(this, this.regEAX & this.dataMask, this.getIPWord());
     if (BACKTRACK) {
-        this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
+        this.backTrack.btiAL = this.backTrack.btiMem0; this.backTrack.btiAH = this.backTrack.btiMem1;
     }
     this.nStepCycles--;         // in the absence of any EA calculations, we need deduct only one more cycle
 };
@@ -375,7 +375,7 @@ X86.opSBBrw = function SBBrw()
 X86.opSBBALb = function SBBALb()
 {
     this.regEAX = (this.regEAX & ~0xff) | X86.fnSBBb.call(this, this.regEAX & 0xff, this.getIPByte());
-    if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMemLo;
+    if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMem0;
     this.nStepCycles--;         // in the absence of any EA calculations, we need deduct only one more cycle
 };
 
@@ -388,7 +388,7 @@ X86.opSBBAX = function SBBAX()
 {
     this.regEAX = (this.regEAX & ~this.dataMask) | X86.fnSBBw.call(this, this.regEAX & this.dataMask, this.getIPWord());
     if (BACKTRACK) {
-        this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
+        this.backTrack.btiAL = this.backTrack.btiMem0; this.backTrack.btiAH = this.backTrack.btiMem1;
     }
     this.nStepCycles--;         // in the absence of any EA calculations, we need deduct only one more cycle
 };
@@ -463,7 +463,7 @@ X86.opANDrw = function ANDrw()
 X86.opANDAL = function ANDAL()
 {
     this.regEAX = (this.regEAX & ~0xff) | X86.fnANDb.call(this, this.regEAX & 0xff, this.getIPByte());
-    if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMemLo;
+    if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMem0;
     this.nStepCycles--;         // in the absence of any EA calculations, we need deduct only one more cycle
 };
 
@@ -476,7 +476,7 @@ X86.opANDAX = function ANDAX()
 {
     this.regEAX = (this.regEAX & ~this.dataMask) | X86.fnANDw.call(this, this.regEAX & this.dataMask, this.getIPWord());
     if (BACKTRACK) {
-        this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
+        this.backTrack.btiAL = this.backTrack.btiMem0; this.backTrack.btiAH = this.backTrack.btiMem1;
     }
     this.nStepCycles--;         // in the absence of any EA calculations, we need deduct only one more cycle
 };
@@ -571,7 +571,7 @@ X86.opSUBrw = function SUBrw()
 X86.opSUBALb = function SUBALb()
 {
     this.regEAX = (this.regEAX & ~0xff) | X86.fnSUBb.call(this, this.regEAX & 0xff, this.getIPByte());
-    if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMemLo;
+    if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMem0;
     this.nStepCycles--;         // in the absence of any EA calculations, we need deduct only one more cycle
 };
 
@@ -584,7 +584,7 @@ X86.opSUBAX = function SUBAX()
 {
     this.regEAX = (this.regEAX & ~this.dataMask) | X86.fnSUBw.call(this, this.regEAX & this.dataMask, this.getIPWord());
     if (BACKTRACK) {
-        this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
+        this.backTrack.btiAL = this.backTrack.btiMem0; this.backTrack.btiAH = this.backTrack.btiMem1;
     }
     this.nStepCycles--;         // in the absence of any EA calculations, we need deduct only one more cycle
 };
@@ -679,7 +679,7 @@ X86.opXORrw = function XORrw()
 X86.opXORALb = function XORALb()
 {
     this.regEAX = (this.regEAX & ~0xff) | X86.fnXORb.call(this, this.regEAX & 0xff, this.getIPByte());
-    if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMemLo;
+    if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMem0;
     this.nStepCycles--;         // in the absence of any EA calculations, we need deduct only one more cycle
 };
 
@@ -692,7 +692,7 @@ X86.opXORAX = function XORAX()
 {
     this.regEAX = (this.regEAX & ~this.dataMask) | X86.fnXORw.call(this, this.regEAX & this.dataMask, this.getIPWord());
     if (BACKTRACK) {
-        this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
+        this.backTrack.btiAL = this.backTrack.btiMem0; this.backTrack.btiAH = this.backTrack.btiMem1;
     }
     this.nStepCycles--;         // in the absence of any EA calculations, we need deduct only one more cycle
 };
@@ -1005,7 +1005,7 @@ X86.opDECDI = function DECDI()
 X86.opPUSHAX = function PUSHAX()
 {
     if (BACKTRACK) {
-        this.backTrack.btiMemLo = this.backTrack.btiAL; this.backTrack.btiMemHi = this.backTrack.btiAH;
+        this.backTrack.btiMem0 = this.backTrack.btiAL; this.backTrack.btiMem1 = this.backTrack.btiAH;
     }
     this.pushWord(this.regEAX & this.dataMask);
     this.nStepCycles -= this.cycleCounts.nOpCyclesPushReg;
@@ -1019,7 +1019,7 @@ X86.opPUSHAX = function PUSHAX()
 X86.opPUSHCX = function PUSHCX()
 {
     if (BACKTRACK) {
-        this.backTrack.btiMemLo = this.backTrack.btiCL; this.backTrack.btiMemHi = this.backTrack.btiCH;
+        this.backTrack.btiMem0 = this.backTrack.btiCL; this.backTrack.btiMem1 = this.backTrack.btiCH;
     }
     this.pushWord(this.regECX & this.dataMask);
     this.nStepCycles -= this.cycleCounts.nOpCyclesPushReg;
@@ -1033,7 +1033,7 @@ X86.opPUSHCX = function PUSHCX()
 X86.opPUSHDX = function PUSHDX()
 {
     if (BACKTRACK) {
-        this.backTrack.btiMemLo = this.backTrack.btiDL; this.backTrack.btiMemHi = this.backTrack.btiDH;
+        this.backTrack.btiMem0 = this.backTrack.btiDL; this.backTrack.btiMem1 = this.backTrack.btiDH;
     }
     this.pushWord(this.regEDX & this.dataMask);
     this.nStepCycles -= this.cycleCounts.nOpCyclesPushReg;
@@ -1047,7 +1047,7 @@ X86.opPUSHDX = function PUSHDX()
 X86.opPUSHBX = function PUSHBX()
 {
     if (BACKTRACK) {
-        this.backTrack.btiMemLo = this.backTrack.btiBL; this.backTrack.btiMemHi = this.backTrack.btiBH;
+        this.backTrack.btiMem0 = this.backTrack.btiBL; this.backTrack.btiMem1 = this.backTrack.btiBH;
     }
     this.pushWord(this.regEBX & this.dataMask);
     this.nStepCycles -= this.cycleCounts.nOpCyclesPushReg;
@@ -1084,7 +1084,7 @@ X86.opPUSHSP = function PUSHSP()
 X86.opPUSHBP = function PUSHBP()
 {
     if (BACKTRACK) {
-        this.backTrack.btiMemLo = this.backTrack.btiBPLo; this.backTrack.btiMemHi = this.backTrack.btiBPHi;
+        this.backTrack.btiMem0 = this.backTrack.btiBPLo; this.backTrack.btiMem1 = this.backTrack.btiBPHi;
     }
     this.pushWord(this.regEBP & this.dataMask);
     this.nStepCycles -= this.cycleCounts.nOpCyclesPushReg;
@@ -1098,7 +1098,7 @@ X86.opPUSHBP = function PUSHBP()
 X86.opPUSHSI = function PUSHSI()
 {
     if (BACKTRACK) {
-        this.backTrack.btiMemLo = this.backTrack.btiSILo; this.backTrack.btiMemHi = this.backTrack.btiSIHi;
+        this.backTrack.btiMem0 = this.backTrack.btiSILo; this.backTrack.btiMem1 = this.backTrack.btiSIHi;
     }
     this.pushWord(this.regESI & this.dataMask);
     this.nStepCycles -= this.cycleCounts.nOpCyclesPushReg;
@@ -1112,7 +1112,7 @@ X86.opPUSHSI = function PUSHSI()
 X86.opPUSHDI = function PUSHDI()
 {
     if (BACKTRACK) {
-        this.backTrack.btiMemLo = this.backTrack.btiDILo; this.backTrack.btiMemHi = this.backTrack.btiDIHi;
+        this.backTrack.btiMem0 = this.backTrack.btiDILo; this.backTrack.btiMem1 = this.backTrack.btiDIHi;
     }
     this.pushWord(this.regEDI & this.dataMask);
     this.nStepCycles -= this.cycleCounts.nOpCyclesPushReg;
@@ -1127,7 +1127,7 @@ X86.opPOPAX = function POPAX()
 {
     this.regEAX = (this.regEAX & ~this.dataMask) | this.popWord();
     if (BACKTRACK) {
-        this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
+        this.backTrack.btiAL = this.backTrack.btiMem0; this.backTrack.btiAH = this.backTrack.btiMem1;
     }
     this.nStepCycles -= this.cycleCounts.nOpCyclesPopReg;
 };
@@ -1141,7 +1141,7 @@ X86.opPOPCX = function POPCX()
 {
     this.regECX = (this.regECX & ~this.dataMask) | this.popWord();
     if (BACKTRACK) {
-        this.backTrack.btiCL = this.backTrack.btiMemLo; this.backTrack.btiCH = this.backTrack.btiMemHi;
+        this.backTrack.btiCL = this.backTrack.btiMem0; this.backTrack.btiCH = this.backTrack.btiMem1;
     }
     this.nStepCycles -= this.cycleCounts.nOpCyclesPopReg;
 };
@@ -1155,7 +1155,7 @@ X86.opPOPDX = function POPDX()
 {
     this.regEDX = (this.regEDX & ~this.dataMask) | this.popWord();
     if (BACKTRACK) {
-        this.backTrack.btiDL = this.backTrack.btiMemLo; this.backTrack.btiDH = this.backTrack.btiMemHi;
+        this.backTrack.btiDL = this.backTrack.btiMem0; this.backTrack.btiDH = this.backTrack.btiMem1;
     }
     this.nStepCycles -= this.cycleCounts.nOpCyclesPopReg;
 };
@@ -1169,7 +1169,7 @@ X86.opPOPBX = function POPBX()
 {
     this.regEBX = (this.regEBX & ~this.dataMask) | this.popWord();
     if (BACKTRACK) {
-        this.backTrack.btiBL = this.backTrack.btiMemLo; this.backTrack.btiBH = this.backTrack.btiMemHi;
+        this.backTrack.btiBL = this.backTrack.btiMem0; this.backTrack.btiBH = this.backTrack.btiMem1;
     }
     this.nStepCycles -= this.cycleCounts.nOpCyclesPopReg;
 };
@@ -1194,7 +1194,7 @@ X86.opPOPBP = function POPBP()
 {
     this.regEBP = (this.regEBP & ~this.dataMask) | this.popWord();
     if (BACKTRACK) {
-        this.backTrack.btiBPLo = this.backTrack.btiMemLo; this.backTrack.btiBPHi = this.backTrack.btiMemHi;
+        this.backTrack.btiBPLo = this.backTrack.btiMem0; this.backTrack.btiBPHi = this.backTrack.btiMem1;
     }
     this.nStepCycles -= this.cycleCounts.nOpCyclesPopReg;
 };
@@ -1208,7 +1208,7 @@ X86.opPOPSI = function POPSI()
 {
     this.regESI = (this.regESI & ~this.dataMask) | this.popWord();
     if (BACKTRACK) {
-        this.backTrack.btiSILo = this.backTrack.btiMemLo; this.backTrack.btiSIHi = this.backTrack.btiMemHi;
+        this.backTrack.btiSILo = this.backTrack.btiMem0; this.backTrack.btiSIHi = this.backTrack.btiMem1;
     }
     this.nStepCycles -= this.cycleCounts.nOpCyclesPopReg;
 };
@@ -1222,7 +1222,7 @@ X86.opPOPDI = function POPDI()
 {
     this.regEDI = (this.regEDI & ~this.dataMask) | this.popWord();
     if (BACKTRACK) {
-        this.backTrack.btiDILo = this.backTrack.btiMemLo; this.backTrack.btiDIHi = this.backTrack.btiMemHi;
+        this.backTrack.btiDILo = this.backTrack.btiMem0; this.backTrack.btiDIHi = this.backTrack.btiMem1;
     }
     this.nStepCycles -= this.cycleCounts.nOpCyclesPopReg;
 };
@@ -1239,32 +1239,32 @@ X86.opPUSHA = function PUSHA()
      */
     var temp = this.getSP() & this.dataMask;
     if (BACKTRACK) {
-        this.backTrack.btiMemLo = this.backTrack.btiAL; this.backTrack.btiMemHi = this.backTrack.btiAH;
+        this.backTrack.btiMem0 = this.backTrack.btiAL; this.backTrack.btiMem1 = this.backTrack.btiAH;
     }
     this.pushWord(this.regEAX & this.dataMask);
     if (BACKTRACK) {
-        this.backTrack.btiMemLo = this.backTrack.btiCL; this.backTrack.btiMemHi = this.backTrack.btiCH;
+        this.backTrack.btiMem0 = this.backTrack.btiCL; this.backTrack.btiMem1 = this.backTrack.btiCH;
     }
     this.pushWord(this.regECX & this.dataMask);
     if (BACKTRACK) {
-        this.backTrack.btiMemLo = this.backTrack.btiDL; this.backTrack.btiMemHi = this.backTrack.btiDH;
+        this.backTrack.btiMem0 = this.backTrack.btiDL; this.backTrack.btiMem1 = this.backTrack.btiDH;
     }
     this.pushWord(this.regEDX & this.dataMask);
     if (BACKTRACK) {
-        this.backTrack.btiMemLo = this.backTrack.btiBL; this.backTrack.btiMemHi = this.backTrack.btiBH;
+        this.backTrack.btiMem0 = this.backTrack.btiBL; this.backTrack.btiMem1 = this.backTrack.btiBH;
     }
     this.pushWord(this.regEBX & this.dataMask);
     this.pushWord(temp);
     if (BACKTRACK) {
-        this.backTrack.btiMemLo = this.backTrack.btiBPLo; this.backTrack.btiMemHi = this.backTrack.btiBPHi;
+        this.backTrack.btiMem0 = this.backTrack.btiBPLo; this.backTrack.btiMem1 = this.backTrack.btiBPHi;
     }
     this.pushWord(this.regEBP & this.dataMask);
     if (BACKTRACK) {
-        this.backTrack.btiMemLo = this.backTrack.btiSILo; this.backTrack.btiMemHi = this.backTrack.btiSIHi;
+        this.backTrack.btiMem0 = this.backTrack.btiSILo; this.backTrack.btiMem1 = this.backTrack.btiSIHi;
     }
     this.pushWord(this.regESI & this.dataMask);
     if (BACKTRACK) {
-        this.backTrack.btiMemLo = this.backTrack.btiDILo; this.backTrack.btiMemHi = this.backTrack.btiDIHi;
+        this.backTrack.btiMem0 = this.backTrack.btiDILo; this.backTrack.btiMem1 = this.backTrack.btiDIHi;
     }
     this.pushWord(this.regEDI & this.dataMask);
     this.nStepCycles -= this.cycleCounts.nOpCyclesPushAll;
@@ -1279,15 +1279,15 @@ X86.opPOPA = function POPA()
 {
     this.regEDI = (this.regEDI & ~this.dataMask) | this.popWord();
     if (BACKTRACK) {
-        this.backTrack.btiDILo = this.backTrack.btiMemLo; this.backTrack.btiDIHi = this.backTrack.btiMemHi;
+        this.backTrack.btiDILo = this.backTrack.btiMem0; this.backTrack.btiDIHi = this.backTrack.btiMem1;
     }
     this.regESI = (this.regESI & ~this.dataMask) | this.popWord();
     if (BACKTRACK) {
-        this.backTrack.btiSILo = this.backTrack.btiMemLo; this.backTrack.btiSIHi = this.backTrack.btiMemHi;
+        this.backTrack.btiSILo = this.backTrack.btiMem0; this.backTrack.btiSIHi = this.backTrack.btiMem1;
     }
     this.regEBP = (this.regEBP & ~this.dataMask) | this.popWord();
     if (BACKTRACK) {
-        this.backTrack.btiBPLo = this.backTrack.btiMemLo; this.backTrack.btiBPHi = this.backTrack.btiMemHi;
+        this.backTrack.btiBPLo = this.backTrack.btiMem0; this.backTrack.btiBPHi = this.backTrack.btiMem1;
     }
     /*
      * TODO: regLSP needs to be pre-bounds-checked against regLSPLimit at the start
@@ -1296,19 +1296,19 @@ X86.opPOPA = function POPA()
     // this.regLSP += (I386? this.dataSize : 2);
     this.regEBX = (this.regEBX & ~this.dataMask) | this.popWord();
     if (BACKTRACK) {
-        this.backTrack.btiBL = this.backTrack.btiMemLo; this.backTrack.btiBH = this.backTrack.btiMemHi;
+        this.backTrack.btiBL = this.backTrack.btiMem0; this.backTrack.btiBH = this.backTrack.btiMem1;
     }
     this.regEDX = (this.regEDX & ~this.dataMask) | this.popWord();
     if (BACKTRACK) {
-        this.backTrack.btiDL = this.backTrack.btiMemLo; this.backTrack.btiDH = this.backTrack.btiMemHi;
+        this.backTrack.btiDL = this.backTrack.btiMem0; this.backTrack.btiDH = this.backTrack.btiMem1;
     }
     this.regECX = (this.regECX & ~this.dataMask) | this.popWord();
     if (BACKTRACK) {
-        this.backTrack.btiCL = this.backTrack.btiMemLo; this.backTrack.btiCH = this.backTrack.btiMemHi;
+        this.backTrack.btiCL = this.backTrack.btiMem0; this.backTrack.btiCH = this.backTrack.btiMem1;
     }
     this.regEAX = (this.regEAX & ~this.dataMask) | this.popWord();
     if (BACKTRACK) {
-        this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
+        this.backTrack.btiAL = this.backTrack.btiMem0; this.backTrack.btiAH = this.backTrack.btiMem1;
     }
     this.nStepCycles -= this.cycleCounts.nOpCyclesPopAll;
 };
@@ -1458,7 +1458,7 @@ X86.opIMULn = function IMULn()
  */
 X86.opPUSH8 = function PUSH8()
 {
-    if (BACKTRACK) this.backTrack.btiMemHi = 0;
+    if (BACKTRACK) this.backTrack.btiMem1 = 0;
     this.pushWord(this.getIPDisp());
     this.nStepCycles -= this.cycleCounts.nOpCyclesPushReg;
 };
@@ -1507,7 +1507,7 @@ X86.opINSb = function INSb()
         var b = this.bus.checkPortInputNotify(port, this.regLIP - nDelta - 1);
         this.setSOByte(this.segES, this.regEDI & this.addrMask, b);
         if (this.opFlags & X86.OPFLAG.FAULT) return;
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiIO;
+        if (BACKTRACK) this.backTrack.btiMem0 = this.backTrack.btiIO;
         this.regEDI = (this.regEDI & ~this.addrMask) | ((this.regEDI + ((this.regPS & X86.PS.DF)? -1 : 1)) & this.addrMask);
         this.regECX = (this.regECX & ~this.addrMask) | ((this.regECX - nDelta) & this.addrMask);
         this.nStepCycles -= nCycles;
@@ -1560,9 +1560,9 @@ X86.opINSw = function INSw()
             shift += 8;
             if (BACKTRACK) {
                 if (!n) {
-                    this.backTrack.btiMemLo = this.backTrack.btiIO;
+                    this.backTrack.btiMem0 = this.backTrack.btiIO;
                 } else if (n == 1) {
-                    this.backTrack.btiMemHi = this.backTrack.btiIO;
+                    this.backTrack.btiMem1 = this.backTrack.btiIO;
                 }
             }
         }
@@ -1614,7 +1614,7 @@ X86.opOUTSb = function OUTSb()
         if (!this.checkIOPM(port, 1)) return;
         var b = this.getSOByte(this.segDS, this.regESI & this.addrMask);
         if (this.opFlags & X86.OPFLAG.FAULT) return;
-        if (BACKTRACK) this.backTrack.btiIO = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiIO = this.backTrack.btiMem0;
         this.bus.checkPortOutputNotify(port, b, this.regLIP - nDelta - 1);
         this.regESI = (this.regESI & ~this.addrMask) | ((this.regESI + ((this.regPS & X86.PS.DF)? -1 : 1)) & this.addrMask);
         this.regECX = (this.regECX & ~this.addrMask) | ((this.regECX - nDelta) & this.addrMask);
@@ -1666,9 +1666,9 @@ X86.opOUTSw = function OUTSw()
         for (var n = 0; n < this.dataSize; n++) {
             if (BACKTRACK) {
                 if (!n) {
-                    this.backTrack.btiIO = this.backTrack.btiMemLo;
+                    this.backTrack.btiIO = this.backTrack.btiMem0;
                 } else if (n == 1) {
-                    this.backTrack.btiIO = this.backTrack.btiMemHi;
+                    this.backTrack.btiIO = this.backTrack.btiMem1;
                 }
             }
             this.bus.checkPortOutputNotify(port, (w >> shift) & 0xff, addrFrom);
@@ -2554,7 +2554,7 @@ X86.opLAHF = function LAHF()
 X86.opMOVALm = function MOVALm()
 {
     this.regEAX = (this.regEAX & ~0xff) | this.getSOByte(this.segData, this.getIPAddr());
-    if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMemLo;
+    if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMem0;
     this.nStepCycles -= this.cycleCounts.nOpCyclesMovAM;
 };
 
@@ -2567,7 +2567,7 @@ X86.opMOVAXm = function MOVAXm()
 {
     this.regEAX = (this.regEAX & ~this.dataMask) | this.getSOWord(this.segData, this.getIPAddr());
     if (BACKTRACK) {
-        this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
+        this.backTrack.btiAL = this.backTrack.btiMem0; this.backTrack.btiAH = this.backTrack.btiMem1;
     }
     this.nStepCycles -= this.cycleCounts.nOpCyclesMovAM;
 };
@@ -2579,7 +2579,7 @@ X86.opMOVAXm = function MOVAXm()
  */
 X86.opMOVmAL = function MOVmAL()
 {
-    if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiAL;
+    if (BACKTRACK) this.backTrack.btiMem0 = this.backTrack.btiAL;
     /*
      * setSOByte() truncates the value as appropriate
      */
@@ -2595,7 +2595,7 @@ X86.opMOVmAL = function MOVmAL()
 X86.opMOVmAX = function MOVmAX()
 {
     if (BACKTRACK) {
-        this.backTrack.btiMemLo = this.backTrack.btiAL; this.backTrack.btiMemHi = this.backTrack.btiAH;
+        this.backTrack.btiMem0 = this.backTrack.btiAL; this.backTrack.btiMem1 = this.backTrack.btiAH;
     }
     /*
      * setSOWord() truncates the value as appropriate
@@ -2811,7 +2811,7 @@ X86.opSTOSb = function STOSb()
     if (nReps--) {
         this.setSOByte(this.segES, this.regEDI & this.addrMask, this.regEAX);
         if (this.opFlags & X86.OPFLAG.FAULT) return;
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiAL;
+        if (BACKTRACK) this.backTrack.btiMem0 = this.backTrack.btiAL;
         this.regEDI = (this.regEDI & ~this.addrMask) | ((this.regEDI + ((this.regPS & X86.PS.DF)? -1 : 1)) & this.addrMask);
         this.regECX = (this.regECX & ~this.addrMask) | ((this.regECX - nDelta) & this.addrMask);
         this.nStepCycles -= nCycles;
@@ -2849,7 +2849,7 @@ X86.opSTOSw = function STOSw()
         this.setSOWord(this.segES, this.regEDI & this.addrMask, this.regEAX);
         if (this.opFlags & X86.OPFLAG.FAULT) return;
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiAL; this.backTrack.btiMemHi = this.backTrack.btiAH;
+            this.backTrack.btiMem0 = this.backTrack.btiAL; this.backTrack.btiMem1 = this.backTrack.btiAH;
         }
         this.regEDI = (this.regEDI & ~this.addrMask) | ((this.regEDI + ((this.regPS & X86.PS.DF)? -this.dataSize : this.dataSize)) & this.addrMask);
         this.regECX = (this.regECX & ~this.addrMask) | ((this.regECX - nDelta) & this.addrMask);
@@ -2886,7 +2886,7 @@ X86.opLODSb = function LODSb()
         var b = this.getSOByte(this.segData, this.regESI & this.addrMask);
         if (this.opFlags & X86.OPFLAG.FAULT) return;
         this.regEAX = (this.regEAX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMem0;
         this.regESI = (this.regESI & ~this.addrMask) | ((this.regESI + ((this.regPS & X86.PS.DF)? -1 : 1)) & this.addrMask);
         this.regECX = (this.regECX & ~this.addrMask) | ((this.regECX - nDelta) & this.addrMask);
         this.nStepCycles -= nCycles;
@@ -2923,7 +2923,7 @@ X86.opLODSw = function LODSw()
         if (this.opFlags & X86.OPFLAG.FAULT) return;
         this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
-            this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
+            this.backTrack.btiAL = this.backTrack.btiMem0; this.backTrack.btiAH = this.backTrack.btiMem1;
         }
         this.regESI = (this.regESI & ~this.addrMask) | ((this.regESI + ((this.regPS & X86.PS.DF)? -this.dataSize : this.dataSize)) & this.addrMask);
         this.regECX = (this.regECX & ~this.addrMask) | ((this.regECX - nDelta) & this.addrMask);
@@ -3032,7 +3032,7 @@ X86.opSCASw = function SCASw()
 X86.opMOVALb = function MOVALb()
 {
     this.regEAX = (this.regEAX & ~0xff) | this.getIPByte();
-    if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMemLo;
+    if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMem0;
     this.nStepCycles -= this.cycleCounts.nOpCyclesLAHF;
 };
 
@@ -3044,7 +3044,7 @@ X86.opMOVALb = function MOVALb()
 X86.opMOVCLb = function MOVCLb()
 {
     this.regECX = (this.regECX & ~0xff) | this.getIPByte();
-    if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiMemLo;
+    if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiMem0;
     this.nStepCycles -= this.cycleCounts.nOpCyclesLAHF;
 };
 
@@ -3056,7 +3056,7 @@ X86.opMOVCLb = function MOVCLb()
 X86.opMOVDLb = function MOVDLb()
 {
     this.regEDX = (this.regEDX & ~0xff) | this.getIPByte();
-    if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiMemLo;
+    if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiMem0;
     this.nStepCycles -= this.cycleCounts.nOpCyclesLAHF;
 };
 
@@ -3068,7 +3068,7 @@ X86.opMOVDLb = function MOVDLb()
 X86.opMOVBLb = function MOVBLb()
 {
     this.regEBX = (this.regEBX & ~0xff) | this.getIPByte();
-    if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiMemLo;
+    if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiMem0;
     this.nStepCycles -= this.cycleCounts.nOpCyclesLAHF;
 };
 
@@ -3080,7 +3080,7 @@ X86.opMOVBLb = function MOVBLb()
 X86.opMOVAHb = function MOVAHb()
 {
     this.regEAX = (this.regEAX & 0xff) | (this.getIPByte() << 8);
-    if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiMemLo;
+    if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiMem0;
     this.nStepCycles -= this.cycleCounts.nOpCyclesLAHF;
 };
 
@@ -3092,7 +3092,7 @@ X86.opMOVAHb = function MOVAHb()
 X86.opMOVCHb = function MOVCHb()
 {
     this.regECX = (this.regECX & 0xff) | (this.getIPByte() << 8);
-    if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiMemLo;
+    if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiMem0;
     this.nStepCycles -= this.cycleCounts.nOpCyclesLAHF;
 };
 
@@ -3104,7 +3104,7 @@ X86.opMOVCHb = function MOVCHb()
 X86.opMOVDHb = function MOVDHb()
 {
     this.regEDX = (this.regEDX & 0xff) | (this.getIPByte() << 8);
-    if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiMemLo;
+    if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiMem0;
     this.nStepCycles -= this.cycleCounts.nOpCyclesLAHF;
 };
 
@@ -3116,7 +3116,7 @@ X86.opMOVDHb = function MOVDHb()
 X86.opMOVBHb = function MOVBHb()
 {
     this.regEBX = (this.regEBX & 0xff) | (this.getIPByte() << 8);
-    if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiMemLo;
+    if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiMem0;
     this.nStepCycles -= this.cycleCounts.nOpCyclesLAHF;
 };
 
@@ -3129,7 +3129,7 @@ X86.opMOVAX = function MOVAX()
 {
     this.regEAX = (this.regEAX & ~this.dataMask) | this.getIPWord();
     if (BACKTRACK) {
-        this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
+        this.backTrack.btiAL = this.backTrack.btiMem0; this.backTrack.btiAH = this.backTrack.btiMem1;
     }
     this.nStepCycles -= this.cycleCounts.nOpCyclesLAHF;
 };
@@ -3143,7 +3143,7 @@ X86.opMOVCX = function MOVCX()
 {
     this.regECX = (this.regECX & ~this.dataMask) | this.getIPWord();
     if (BACKTRACK) {
-        this.backTrack.btiCL = this.backTrack.btiMemLo; this.backTrack.btiCH = this.backTrack.btiMemHi;
+        this.backTrack.btiCL = this.backTrack.btiMem0; this.backTrack.btiCH = this.backTrack.btiMem1;
     }
     this.nStepCycles -= this.cycleCounts.nOpCyclesLAHF;
 };
@@ -3157,7 +3157,7 @@ X86.opMOVDX = function MOVDX()
 {
     this.regEDX = (this.regEDX & ~this.dataMask) | this.getIPWord();
     if (BACKTRACK) {
-        this.backTrack.btiDL = this.backTrack.btiMemLo; this.backTrack.btiDH = this.backTrack.btiMemHi;
+        this.backTrack.btiDL = this.backTrack.btiMem0; this.backTrack.btiDH = this.backTrack.btiMem1;
     }
     this.nStepCycles -= this.cycleCounts.nOpCyclesLAHF;
 };
@@ -3171,7 +3171,7 @@ X86.opMOVBX = function MOVBX()
 {
     this.regEBX = (this.regEBX & ~this.dataMask) | this.getIPWord();
     if (BACKTRACK) {
-        this.backTrack.btiBL = this.backTrack.btiMemLo; this.backTrack.btiBH = this.backTrack.btiMemHi;
+        this.backTrack.btiBL = this.backTrack.btiMem0; this.backTrack.btiBH = this.backTrack.btiMem1;
     }
     this.nStepCycles -= this.cycleCounts.nOpCyclesLAHF;
 };
@@ -3196,7 +3196,7 @@ X86.opMOVBP = function MOVBP()
 {
     this.regEBP = (this.regEBP & ~this.dataMask) | this.getIPWord();
     if (BACKTRACK) {
-        this.backTrack.btiBPLo = this.backTrack.btiMemLo; this.backTrack.btiBPHi = this.backTrack.btiMemHi;
+        this.backTrack.btiBPLo = this.backTrack.btiMem0; this.backTrack.btiBPHi = this.backTrack.btiMem1;
     }
     this.nStepCycles -= this.cycleCounts.nOpCyclesLAHF;
 };
@@ -3210,7 +3210,7 @@ X86.opMOVSI = function MOVSI()
 {
     this.regESI = (this.regESI & ~this.dataMask) | this.getIPWord();
     if (BACKTRACK) {
-        this.backTrack.btiSILo = this.backTrack.btiMemLo; this.backTrack.btiSIHi = this.backTrack.btiMemHi;
+        this.backTrack.btiSILo = this.backTrack.btiMem0; this.backTrack.btiSIHi = this.backTrack.btiMem1;
     }
     this.nStepCycles -= this.cycleCounts.nOpCyclesLAHF;
 };
@@ -3224,7 +3224,7 @@ X86.opMOVDI = function MOVDI()
 {
     this.regEDI = (this.regEDI & ~this.dataMask) | this.getIPWord();
     if (BACKTRACK) {
-        this.backTrack.btiDILo = this.backTrack.btiMemLo; this.backTrack.btiDIHi = this.backTrack.btiMemHi;
+        this.backTrack.btiDILo = this.backTrack.btiMem0; this.backTrack.btiDIHi = this.backTrack.btiMem1;
     }
     this.nStepCycles -= this.cycleCounts.nOpCyclesLAHF;
 };

@@ -1369,8 +1369,10 @@ X86CPU.prototype.resetRegs = function()
             btiSIHi:    0,
             btiDILo:    0,
             btiDIHi:    0,
-            btiMemLo:   0,
-            btiMemHi:   0,
+            btiMem0:    0,
+            btiMem1:    0,
+            btiMem2:    0,
+            btiMem3:    0,
             btiEALo:    0,
             btiEAHi:    0,
             btiIO:      0
@@ -3128,7 +3130,7 @@ X86CPU.prototype.probeAddr = function(addr)
  */
 X86CPU.prototype.getByte = function getByte(addr)
 {
-    if (BACKTRACK) this.backTrack.btiMemLo = this.bus.readBackTrack(addr);
+    if (BACKTRACK) this.backTrack.btiMem0 = this.bus.readBackTrack(addr);
     return this.aMemBlocks[(addr & this.nMemMask) >>> this.nBlockShift].readByte(addr & this.nBlockLimit, addr);
 };
 
@@ -3153,8 +3155,8 @@ X86CPU.prototype.getShort = function getShort(addr)
     this.nStepCycles -= this.cycleCounts.nWordCyclePenalty;
 
     if (BACKTRACK) {
-        this.backTrack.btiMemLo = this.bus.readBackTrack(addr);
-        this.backTrack.btiMemHi = this.bus.readBackTrack(addr + 1);
+        this.backTrack.btiMem0 = this.bus.readBackTrack(addr);
+        this.backTrack.btiMem1 = this.bus.readBackTrack(addr + 1);
     }
     if (off < this.nBlockLimit) {
         return this.aMemBlocks[iBlock].readShort(off, addr);
@@ -3177,8 +3179,10 @@ X86CPU.prototype.getLong = function getLong(addr)
     var off = addr & this.nBlockLimit;
     var iBlock = (addr & this.nMemMask) >>> this.nBlockShift;
     if (BACKTRACK) {
-        this.backTrack.btiMemLo = this.bus.readBackTrack(addr);
-        this.backTrack.btiMemHi = this.bus.readBackTrack(addr + 1);
+        this.backTrack.btiMem0 = this.bus.readBackTrack(addr);
+        this.backTrack.btiMem1 = this.bus.readBackTrack(addr + 1);
+        this.backTrack.btiMem2 = this.bus.readBackTrack(addr + 2);
+        this.backTrack.btiMem3 = this.bus.readBackTrack(addr + 3);
     }
     if (off < this.nBlockLimit - 2) {
         return this.aMemBlocks[iBlock].readLong(off, addr);
@@ -3199,7 +3203,7 @@ X86CPU.prototype.getLong = function getLong(addr)
  */
 X86CPU.prototype.setByte = function setByte(addr, b)
 {
-    if (BACKTRACK) this.bus.writeBackTrack(addr, this.backTrack.btiMemLo);
+    if (BACKTRACK) this.bus.writeBackTrack(addr, this.backTrack.btiMem0);
     this.aMemBlocks[(addr & this.nMemMask) >>> this.nBlockShift].writeByte(addr & this.nBlockLimit, b & 0xff, addr);
 };
 
@@ -3224,8 +3228,8 @@ X86CPU.prototype.setShort = function setShort(addr, w)
     this.nStepCycles -= this.cycleCounts.nWordCyclePenalty;
 
     if (BACKTRACK) {
-        this.bus.writeBackTrack(addr, this.backTrack.btiMemLo);
-        this.bus.writeBackTrack(addr + 1, this.backTrack.btiMemHi);
+        this.bus.writeBackTrack(addr, this.backTrack.btiMem0);
+        this.bus.writeBackTrack(addr + 1, this.backTrack.btiMem1);
     }
     if (off < this.nBlockLimit) {
         this.aMemBlocks[iBlock].writeShort(off, w & 0xffff, addr);
@@ -3252,8 +3256,10 @@ X86CPU.prototype.setLong = function setLong(addr, l)
     this.nStepCycles -= this.cycleCounts.nWordCyclePenalty;
 
     if (BACKTRACK) {
-        this.bus.writeBackTrack(addr, this.backTrack.btiMemLo);
-        this.bus.writeBackTrack(addr + 1, this.backTrack.btiMemHi);
+        this.bus.writeBackTrack(addr, this.backTrack.btiMem0);
+        this.bus.writeBackTrack(addr + 1, this.backTrack.btiMem1);
+        this.bus.writeBackTrack(addr + 2, this.backTrack.btiMem2);
+        this.bus.writeBackTrack(addr + 3, this.backTrack.btiMem3);
     }
     if (off < this.nBlockLimit - 2) {
         this.aMemBlocks[iBlock].writeLong(off, l, addr);
@@ -3283,7 +3289,7 @@ X86CPU.prototype.getEAByte = function(seg, off)
     this.regEA = seg.checkRead(this.offEA = off, 1);
     if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
     var b = this.getByte(this.regEA);
-    if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiMemLo;
+    if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiMem0;
     return b;
 };
 
@@ -3326,8 +3332,8 @@ X86CPU.prototype.getEAWord = function(seg, off)
     if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
     var w = this.getWord(this.regEA);
     if (BACKTRACK) {
-        this.backTrack.btiEALo = this.backTrack.btiMemLo;
-        this.backTrack.btiEAHi = this.backTrack.btiMemHi;
+        this.backTrack.btiEALo = this.backTrack.btiMem0;
+        this.backTrack.btiEAHi = this.backTrack.btiMem1;
     }
     return w;
 };
@@ -3370,7 +3376,7 @@ X86CPU.prototype.modEAByte = function(seg, off)
     this.regEAWrite = this.regEA = seg.checkRead(this.offEA = off, 1);
     if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
     var b = this.getByte(this.regEA);
-    if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiMemLo;
+    if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiMem0;
     return b;
 };
 
@@ -3413,8 +3419,8 @@ X86CPU.prototype.modEAWord = function(seg, off)
     if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
     var w = this.getWord(this.regEA);
     if (BACKTRACK) {
-        this.backTrack.btiEALo = this.backTrack.btiMemLo;
-        this.backTrack.btiEAHi = this.backTrack.btiMemHi;
+        this.backTrack.btiEALo = this.backTrack.btiMem0;
+        this.backTrack.btiEAHi = this.backTrack.btiMem1;
     }
     return w;
 };
@@ -3452,7 +3458,7 @@ X86CPU.prototype.modEAWordStack = function(off)
 X86CPU.prototype.setEAByte = function(b)
 {
     if (this.opFlags & X86.OPFLAG.NOWRITE) return;
-    if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiEALo;
+    if (BACKTRACK) this.backTrack.btiMem0 = this.backTrack.btiEALo;
     this.setByte(this.segEA.checkWrite(this.offEA, 1), b);
 };
 
@@ -3466,8 +3472,8 @@ X86CPU.prototype.setEAWord = function(w)
 {
     if (this.opFlags & X86.OPFLAG.NOWRITE) return;
     if (BACKTRACK) {
-        this.backTrack.btiMemLo = this.backTrack.btiEALo;
-        this.backTrack.btiMemHi = this.backTrack.btiEAHi;
+        this.backTrack.btiMem0 = this.backTrack.btiEALo;
+        this.backTrack.btiMem1 = this.backTrack.btiEAHi;
     }
     if (!I386) {
         this.setShort(this.segEA.checkWrite(this.offEA, 2), w);
@@ -3710,7 +3716,7 @@ X86CPU.prototype.advancePrefetch = function(inc)
 X86CPU.prototype.getIPByte = function()
 {
     var b = (PREFETCH? this.getBytePrefetch(this.regLIP) : this.getByte(this.regLIP));
-    if (BACKTRACK) this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMemLo);
+    if (BACKTRACK) this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMem0);
     this.advanceIP(1);
     return b;
 };
@@ -3725,8 +3731,8 @@ X86CPU.prototype.getIPShort = function()
 {
     var w = (PREFETCH? this.getShortPrefetch(this.regLIP) : this.getShort(this.regLIP));
     if (BACKTRACK) {
-        this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMemLo);
-        this.bus.updateBackTrackCode(this.regLIP + 1, this.backTrack.btiMemHi);
+        this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMem0);
+        this.bus.updateBackTrackCode(this.regLIP + 1, this.backTrack.btiMem1);
     }
     this.advanceIP(2);
     return w;
@@ -3742,8 +3748,10 @@ X86CPU.prototype.getIPLong = function()
 {
     var l = (PREFETCH? this.getLongPrefetch(this.regLIP) : this.getLong(this.regLIP));
     if (BACKTRACK) {
-        this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMemLo);
-        this.bus.updateBackTrackCode(this.regLIP + 1, this.backTrack.btiMemHi);
+        this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMem0);
+        this.bus.updateBackTrackCode(this.regLIP + 1, this.backTrack.btiMem1);
+        this.bus.updateBackTrackCode(this.regLIP + 2, this.backTrack.btiMem2);
+        this.bus.updateBackTrackCode(this.regLIP + 3, this.backTrack.btiMem3);
     }
     this.advanceIP(4);
     return l;
@@ -3762,8 +3770,8 @@ X86CPU.prototype.getIPAddr = function()
      */
     var w = this.getAddr(this.regLIP);
     if (BACKTRACK) {
-        this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMemLo);
-        this.bus.updateBackTrackCode(this.regLIP + 1, this.backTrack.btiMemHi);
+        this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMem0);
+        this.bus.updateBackTrackCode(this.regLIP + 1, this.backTrack.btiMem1);
     }
     this.advanceIP(this.addrSize);
     return w;
@@ -3779,8 +3787,8 @@ X86CPU.prototype.getIPWord = function()
 {
     var w = (PREFETCH? this.getWordPrefetch(this.regLIP) : this.getWord(this.regLIP));
     if (BACKTRACK) {
-        this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMemLo);
-        this.bus.updateBackTrackCode(this.regLIP + 1, this.backTrack.btiMemHi);
+        this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMem0);
+        this.bus.updateBackTrackCode(this.regLIP + 1, this.backTrack.btiMem1);
     }
     this.advanceIP(this.dataSize);
     return w;
@@ -3795,7 +3803,7 @@ X86CPU.prototype.getIPWord = function()
 X86CPU.prototype.getIPDisp = function()
 {
     var w = ((PREFETCH? this.getBytePrefetch(this.regLIP) : this.getByte(this.regLIP)) << 24) >> 24;
-    if (BACKTRACK) this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMemLo);
+    if (BACKTRACK) this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMem0);
     this.advanceIP(1);
     return w;
 };
@@ -3810,7 +3818,7 @@ X86CPU.prototype.getIPDisp = function()
 X86CPU.prototype.getSIBAddr = function(mod)
 {
     var b = PREFETCH? this.getBytePrefetch(this.regLIP) : this.getByte(this.regLIP);
-    if (BACKTRACK) this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMemLo);
+    if (BACKTRACK) this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMem0);
     this.advanceIP(1);
     return X86ModSIB.aOpModSIB[b].call(this, mod);
 };

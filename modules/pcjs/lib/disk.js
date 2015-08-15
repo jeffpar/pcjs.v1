@@ -190,7 +190,7 @@ if (typeof module !== 'undefined') {
  */
 function Disk(controller, drive, mode)
 {
-    Component.call(this, "Disk", {'id': controller.idMachine + ".disk" + (++Disk.nDisks)}, Disk, Messages.DISK);
+    Component.call(this, "Disk", {'id': controller.idMachine + ".disk" + str.toHex(++Disk.nDisks, 4)}, Disk, Messages.DISK);
 
     /*
      * Route all non-Debugger messages (eg, notice() and println() calls) through
@@ -678,7 +678,7 @@ Disk.prototype.doneLoad = function(sDiskFile, sDiskData, nErrorCode, sDiskPath)
                 this.printMessage('doneLoad("' + sDiskFile + '","' + sDiskPath + '")');
             }
             this.fRemote = true;
-            this.buildFileTable();
+            if (BACKTRACK) this.buildFileTable();
             disk = this;
         } else {
             this.controller.notice('Unable to connect to disk "' + sDiskPath + '" (error ' + nErrorCode + ': ' + sDiskData + ')', fPrintOnly);
@@ -868,7 +868,7 @@ Disk.prototype.doneLoad = function(sDiskFile, sDiskData, nErrorCode, sDiskPath)
                 }
                 this.aDiskData = aDiskData;
                 this.dwChecksum = dwChecksum;
-                this.buildFileTable();
+                if (BACKTRACK) this.buildFileTable();
                 disk = this;
             }
         } catch (e) {
@@ -901,7 +901,27 @@ Disk.prototype.doneLoad = function(sDiskFile, sDiskData, nErrorCode, sDiskPath)
 Disk.prototype.buildFileTable = function()
 {
     if (BACKTRACK) {
+
         var i, off, dir = {};
+
+        if (this.aFileTable) {
+            /*
+             * In order for buildFileTable() to rebuild an existing table (eg, after deltas have been
+             * applied), we need to zap any and all existing file table references in the sector data.
+             */
+            var aDiskData = this.aDiskData;
+            for (var iCylinder = 0; iCylinder < aDiskData.length; iCylinder++) {
+                for (var iHead = 0; iHead < aDiskData[iCylinder].length; iHead++) {
+                    for (var iSector = 0; iSector < aDiskData[iCylinder][iHead].length; iSector++) {
+                        var sector = aDiskData[iCylinder][iHead][iSector];
+                        if (sector) {
+                            delete sector['file'];
+                            delete sector.offFile;
+                        }
+                    }
+                }
+            }
+        }
 
         this.aFileTable = [];
 
@@ -2096,6 +2116,10 @@ Disk.prototype.restore = function(deltas)
         if (DEBUG && this.messageEnabled()) {
             this.printMessage('restore("' + this.sDiskName + '"): restored ' + nChanges + ' change(s)');
         }
+        /*
+         * Last but not least, rebuild the disk's file table if BACKTRACK support is enabled.
+         */
+        if (BACKTRACK) this.buildFileTable();
     }
     return nChanges;
 };
