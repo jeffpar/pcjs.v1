@@ -169,6 +169,11 @@ Component.subclass(Mouse);
 
 Mouse.ID_SERIAL = 0x4D;
 
+Mouse.BUTTON = {
+    LEFT:   0,
+    RIGHT:  2
+};
+
 /**
  * initBus(cmp, bus, cpu, dbg)
  *
@@ -430,21 +435,21 @@ Mouse.prototype.captureMouse = function(control)
         control.addEventListener(
             'mousemove',
             function onMouseMove(event) {
-                mouse.moveMouse(event);
+                mouse.processMouseEvent(event);
             },
             false               // we'll specify false for the 'useCapture' parameter for now...
         );
         control.addEventListener(
             'mousedown',
             function onMouseDown(event) {
-                mouse.clickMouse(event.button, true);
+                mouse.processMouseEvent(event, true);
             },
             false               // we'll specify false for the 'useCapture' parameter for now...
         );
         control.addEventListener(
             'mouseup',
             function onMouseUp(event) {
-                mouse.clickMouse(event.button, false);
+                mouse.processMouseEvent(event, false);
             },
             false               // we'll specify false for the 'useCapture' parameter for now...
         );
@@ -485,59 +490,15 @@ Mouse.prototype.releaseMouse = function(control)
 };
 
 /**
- * moveMouse(event)
- *
- * MouseEvent objects contain, among other things, the following properties:
- *
- *      clientX
- *      clientY
- *
- * I've selected the above properties because they're widely supported, not because I need
- * client-area coordinates.  In fact, layerX and layerY are probably closer to what I really want,
- * but I don't think they're available in all browsers.  screenX and screenY would work as well.
- *
- * This is because all we care about are deltas.  We record clientX and clientY (as xMouse and yMouse)
- * merely to calculate xDelta and yDelta.
+ * processMouseEvent(event, fDown)
  *
  * @this {Mouse}
- * @param {Object} event object from a 'mousemove' event (specifically, a MouseEvent object)
+ * @param {Object} event object from a 'mousemove', 'mousedown' or 'mouseup' event (specifically, a MouseEvent object)
+ * @param {boolean} [fDown] (undefined if neither a down nor up event)
  */
-Mouse.prototype.moveMouse = function(event)
+Mouse.prototype.processMouseEvent = function(event, fDown)
 {
-    if (this.isActive()) {
-        if (this.xMouse < 0 || this.yMouse < 0) {
-            this.xMouse = event.clientX;
-            this.yMouse = event.clientY;
-        }
-        if (this.fLocked) {
-            this.xDelta = event['movementX'] || event['mozMovementX'] || event['webkitMovementX'] || 0;
-            this.yDelta = event['movementY'] || event['mozMovementY'] || event['webkitMovementY'] || 0;
-        } else {
-            this.xDelta = event.clientX - this.xMouse;
-            this.yDelta = event.clientY - this.yMouse;
-        }
-        if (this.xDelta || this.yDelta) {
-            /*
-             * As sendPacket() indicates, any x and y coordinates we supply are for diagnostic purposes only.
-             * sendPacket() only cares about the xDelta and yDelta properties, which it then zeroes on completion.
-             */
-            this.sendPacket(null, event.clientX, event.clientY);
-        }
-        this.xMouse = event.clientX;
-        this.yMouse = event.clientY;
-    }
-};
-
-/**
- * clickMouse(iButton, fDown)
- *
- * @this {Mouse}
- * @param {number} iButton is 0 for fButton1 (the LEFT button), 2 for fButton2 (the RIGHT button)
- * @param {boolean} fDown
- */
-Mouse.prototype.clickMouse = function(iButton, fDown)
-{
-    if (this.isActive()) {
+    if (fDown !== undefined) {
         if (this.fLocked === false) {
             /*
              * If there's no support for automatic pointer locking in the Video component, then notifyPointerActive()
@@ -547,15 +508,58 @@ Mouse.prototype.clickMouse = function(iButton, fDown)
                 this.fLocked = null;
             }
         }
+        this.clickMouse(event.button, fDown);
+    } else {
+        /*
+         * MouseEvent objects contain, among other things, the following properties:
+         *
+         *      clientX
+         *      clientY
+         *
+         * I've selected the above properties because they're widely supported, not because I need
+         * client-area coordinates.  In fact, layerX and layerY are probably closer to what I really want,
+         * but I don't think they're available in all browsers.  screenX and screenY would work as well.
+         *
+         * This is because all we care about are deltas.  We record clientX and clientY (as xMouse and yMouse)
+         * merely to calculate xDelta and yDelta.
+         */
+        var xDelta, yDelta;
+        if (this.xMouse < 0 || this.yMouse < 0) {
+            this.xMouse = event.clientX;
+            this.yMouse = event.clientY;
+        }
+        if (this.fLocked) {
+            xDelta = event['movementX'] || event['mozMovementX'] || event['webkitMovementX'] || 0;
+            yDelta = event['movementY'] || event['mozMovementY'] || event['webkitMovementY'] || 0;
+        } else {
+            xDelta = event.clientX - this.xMouse;
+            yDelta = event.clientY - this.yMouse;
+        }
+        this.xMouse = event.clientX;
+        this.yMouse = event.clientY;
+        this.moveMouse(xDelta, yDelta, this.xMouse, this.yMouse);
+    }
+};
+
+/**
+ * clickMouse(iButton, fDown)
+ *
+ * @this {Mouse}
+ * @param {number} iButton is Mouse.BUTTON.LEFT (0) for fButton1, Mouse.BUTTON.RIGHT (2) for fButton2
+ * @param {boolean} fDown
+ */
+Mouse.prototype.clickMouse = function(iButton, fDown)
+{
+    if (this.isActive()) {
         var sDiag = DEBUGGER? ("mouse button" + iButton + ' ' + (fDown? "dn" : "up")) : null;
         switch (iButton) {
-        case 0:
+        case Mouse.BUTTON.LEFT:
             if (this.fButton1 != fDown) {
                 this.fButton1 = fDown;
                 this.sendPacket(sDiag);
             }
             break;
-        case 2:
+        case Mouse.BUTTON.RIGHT:
             if (this.fButton2 != fDown) {
                 this.fButton2 = fDown;
                 this.sendPacket(sDiag);
@@ -563,6 +567,31 @@ Mouse.prototype.clickMouse = function(iButton, fDown)
             break;
         default:
             break;
+        }
+    }
+};
+
+/**
+ * moveMouse(xDelta, yDelta, xDiag, yDiag)
+ *
+ * @this {Mouse}
+ * @param {number} xDelta
+ * @param {number} yDelta
+ * @param {number} [xDiag]
+ * @param {number} [yDiag]
+ */
+Mouse.prototype.moveMouse = function(xDelta, yDelta, xDiag, yDiag)
+{
+    if (this.isActive()) {
+        if (xDelta || yDelta) {
+            /*
+             * As sendPacket() indicates, any x and y coordinates we supply are for diagnostic purposes only.
+             * sendPacket() only cares about the xDelta and yDelta properties we provide above, which it then zeroes
+             * on completion.
+             */
+            this.xDelta = xDelta;
+            this.yDelta = yDelta;
+            this.sendPacket(null, xDiag, yDiag);
         }
     }
 };

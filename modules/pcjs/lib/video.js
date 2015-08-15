@@ -41,6 +41,7 @@ if (typeof module !== 'undefined') {
     var Messages    = require("./messages");
     var ChipSet     = require("./chipset");
     var Keyboard    = require("./keyboard");
+    var Mouse       = require("./mouse");
     var State       = require("./state");
 }
 
@@ -59,6 +60,7 @@ if (typeof module !== 'undefined') {
  *      charRows: number of character rows
  *      fontROM: path to .rom file (or a JSON representation) that defines the character set
  *      screenColor: background color of the screen canvas (default is black)
+ *      touchScreen: string specifying desired touch-screen support (default is ''); see initBus()
  *      autoLock: true to (attempt to) automatically lock the mouse to the canvas (default is false)
  *
  * An EGA may specify the following additional properties:
@@ -144,12 +146,16 @@ function Video(parmsVideo, canvas, context, textarea, container)
     this.fScaleFont = parmsVideo['scale'];
     this.fDoubleFont = Math.round(this.cxScreen / this.nColsDefault) >= 12;
 
-    this.fTouchScreen = parmsVideo['touchScreen'];
-
     this.canvasScreen = canvas;
     this.contextScreen = context;
     this.textareaScreen = textarea;
     this.inputScreen = textarea || canvas || null;
+
+    /*
+     * initBus() will determine touch-screen support; for now, just record values and set defaults.
+     */
+    this.sTouchScreen = parmsVideo['touchScreen'];
+    this.nTouchConfig = Video.TOUCH.NONE;
 
     /*
      * If a Mouse exists, we'll be notified when it requests our canvas, and we make a note of it
@@ -2644,6 +2650,15 @@ Video.cardSpecs[Video.CARD.CGA] = ["CGA", Card.CGA.CRTC.INDX.PORT, 0xB8000, 0x04
 Video.cardSpecs[Video.CARD.EGA] = ["EGA", Card.CGA.CRTC.INDX.PORT, 0xB8000, 0x04000, 0x10000, ChipSet.MONITOR.EGACOLOR];
 Video.cardSpecs[Video.CARD.VGA] = ["VGA", Card.CGA.CRTC.INDX.PORT, 0xB8000, 0x04000, 0x40000, ChipSet.MONITOR.VGACOLOR];
 
+/*
+ * Values for nTouchConfig; a value will be selected based on the sTouchScreen configuration parameter.
+ */
+Video.TOUCH = {
+    NONE:       0,
+    KEYGRID:    1,
+    MOUSE:      2
+};
+
 /**
  * initBus(cmp, bus, cpu, dbg)
  *
@@ -2723,7 +2738,18 @@ Video.prototype.initBus = function(cmp, bus, cpu, dbg)
         if (this.nCard == Video.CARD.EGA) this.bEGASwitches = this.chipset.parseSwitches(this.sSwitches, this.bEGASwitches);
     }
 
-    if (this.kbd && this.fTouchScreen) this.captureTouch();
+    /*
+     * The default value for the 'touchScreen' parameter is an empty string; machine configs must explicitly
+     * select one of the following values, via the 'touchscreen' attribute in the <video> element, to enable any
+     * touch-screen support.
+     */
+    if (this.sTouchScreen == "mouse") {
+        this.mouse = cmp.getComponentByType("Mouse");
+        if (this.mouse) this.captureTouch(Video.TOUCH.MOUSE);
+    }
+    else if (this.sTouchScreen == "keygrid") {
+        if (this.kbd) this.captureTouch(Video.TOUCH.KEYGRID);
+    }
 };
 
 /**
@@ -2915,13 +2941,13 @@ Video.prototype.lockPointer = function(fLock)
         if (fLock) {
             if (this.inputScreen.lockPointer) {
                 this.inputScreen.lockPointer();
-                this.mouse.notifyPointerLocked(true);
+                if (this.mouse) this.mouse.notifyPointerLocked(true);
                 fSuccess = true;
             }
         } else {
             if (this.inputScreen.unlockPointer) {
                 this.inputScreen.unlockPointer();
-                this.mouse.notifyPointerLocked(false);
+                if (this.mouse) this.mouse.notifyPointerLocked(false);
                 fSuccess = true;
             }
         }
@@ -2962,16 +2988,17 @@ Video.prototype.notifyPointerLocked = function(fLocked)
 };
 
 /**
- * captureTouch()
+ * captureTouch(nTouchConfig)
  *
  * @this {Video}
+ * @param {number} nTouchConfig (must be one of the supported Video.TOUCH values)
  */
-Video.prototype.captureTouch = function()
+Video.prototype.captureTouch = function(nTouchConfig)
 {
     var control = this.inputScreen;
     if (control) {
         var video = this;
-        if (!this.fCaptured) {
+        if (!this.nTouchConfig) {
             control.addEventListener(
                 'touchstart',
                 function onTouchStart(event) { video.onTouchStart(event); },
@@ -3009,7 +3036,8 @@ Video.prototype.captureTouch = function()
                  */
             }
             // this.log("touch events captured");
-            this.fCaptured = true;
+            this.nTouchConfig = nTouchConfig;
+            this.xTouch = this.yTouch = this.timeTouch = -1;
         }
     }
 };
@@ -3066,7 +3094,7 @@ Video.prototype.onTouchStart = function(event)
 Video.prototype.onTouchMove = function(event)
 {
     if (DEBUG) this.printMessage("onTouchMove()");
-    this.processTouchEvent(event, false);
+    this.processTouchEvent(event);
 };
 
 /**
@@ -3078,17 +3106,29 @@ Video.prototype.onTouchMove = function(event)
 Video.prototype.onTouchEnd = function(event)
 {
     if (DEBUG) this.printMessage("onTouchEnd()");
+    this.processTouchEvent(event, false);
 };
 
 /**
  * processTouchEvent(event, fStart)
  *
+ * If nTouchConfig is non-zero, touch event handlers are installed, which pass their events to this function.
+ *
+ * What we do with those events here depends on the value of nTouchConfig.  Originally, the only supported
+ * configuration was the experimental conversion of touch events into arrow keys, based on an invisible grid
+ * that divided the screen into thirds; that configuration is now identified as Video.TOUCH.KEYGRID.
+ *
+ * The new preferred configuration is Video.TOUCH.MOUSE, which does little more than allow you to "push" the
+ * simulated mouse around.  If Video.TOUCH.MOUSE is enabled, it's already been confirmed the machine has a mouse.
+ *
  * @this {Video}
  * @param {Event} event object from a 'touch' event
- * @param {boolean} fStart if this is a 'touchstart' event
+ * @param {boolean} [fStart] (true if 'touchstart', false if 'touchend', undefined if 'touchmove')
  */
 Video.prototype.processTouchEvent = function(event, fStart)
 {
+    var xTouch, yTouch;
+
     // if (!event) event = window.event;
     /*
      * My thinking here is that if the canvas does NOT yet have focus, then we should actually SKIP
@@ -3133,34 +3173,73 @@ Video.prototype.processTouchEvent = function(event, fStart)
      * @name Event
      * @property {Array} targetTouches
      */
-    var xTouch, yTouch;
-    if (!event.targetTouches) {
+    if (!event.targetTouches || !event.targetTouches.length) {
         xTouch = event.pageX;
         yTouch = event.pageY;
     } else {
         xTouch = event.targetTouches[0].pageX;
         yTouch = event.targetTouches[0].pageY;
     }
+
     xTouch = ((xTouch - xTouchOffset) * xScale);
     yTouch = ((yTouch - yTouchOffset) * yScale);
-    var xThird = (xTouch / (this.cxScreen / 3)) | 0;
-    var yThird = (yTouch / (this.cyScreen / 3)) | 0;
 
-    /*
-     * At this point, xThird and yThird should both be one of 0, 1 or 2, indicating which horizontal and vertical
-     * third of the virtual screen the touch event occurred.
-     */
-    if (/* xThird == 1 && */ yThird != 1) {
-        if (!yThird) {
-            this.kbd.addActiveKey(Keyboard.CLICKCODES.UP, true);
-        } else {
-            this.kbd.addActiveKey(Keyboard.CLICKCODES.DOWN, true);
+    if (this.nTouchConfig == Video.TOUCH.KEYGRID) {
+
+        var xThird = (xTouch / (this.cxScreen / 3)) | 0;
+        var yThird = (yTouch / (this.cyScreen / 3)) | 0;
+
+        /*
+         * At this point, xThird and yThird should both be one of 0, 1 or 2, indicating which horizontal and vertical
+         * third of the virtual screen the touch event occurred.
+         */
+        if (/* xThird == 1 && */ yThird != 1) {
+            if (!yThird) {
+                this.kbd.addActiveKey(Keyboard.CLICKCODES.UP, true);
+            } else {
+                this.kbd.addActiveKey(Keyboard.CLICKCODES.DOWN, true);
+            }
+        } else if (/* yThird == 1 && */ xThird != 1) {
+            if (!xThird) {
+                this.kbd.addActiveKey(Keyboard.CLICKCODES.LEFT, true);
+            } else {
+                this.kbd.addActiveKey(Keyboard.CLICKCODES.RIGHT, true);
+            }
         }
-    } else if (/* yThird == 1 && */ xThird != 1) {
-        if (!xThird) {
-            this.kbd.addActiveKey(Keyboard.CLICKCODES.LEFT, true);
-        } else {
-            this.kbd.addActiveKey(Keyboard.CLICKCODES.RIGHT, true);
+    } else {
+        if (this.mouse) {
+            if (fStart === true) {
+                this.timeTouch = event.timeStamp;
+            }
+            if (fStart === false) {
+                var timeDelta = event.timeStamp - this.timeTouch;
+                this.println("processTouchEvent(false," + timeDelta + ")");
+                /*
+                 * NOTE: 200ms is merely my initial stab at a reasonable number of milliseconds to interpret a
+                 * start/end touch sequence as a "tap"; I also make no note of any intervening move events (ie,
+                 * events where fStart is undefined), and perhaps I should....
+                 */
+                if (timeDelta < 200) {
+                    this.mouse.clickMouse(Mouse.BUTTON.LEFT, true);
+                    this.mouse.clickMouse(Mouse.BUTTON.LEFT, false);
+                    return;
+                }
+            }
+            /*
+             * This 'touchmove" code mimics the 'mousemove' event processing in processMouseEvent() in mouse.js, with
+             * one important difference: every time touching "restarts", we need to reset the variables used to calculate
+             * the deltas, so that the mere act of lifting and replacing your finger doesn't generate a delta by itself.
+             */
+            if (fStart || this.xTouch < 0 || this.yTouch < 0) {
+                this.xTouch = xTouch;
+                this.yTouch = yTouch;
+            }
+            var xDelta = Math.round(xTouch - this.xTouch);
+            var yDelta = Math.round(yTouch - this.yTouch);
+            this.xTouch = xTouch;
+            this.yTouch = yTouch;
+            // this.println("moveMouse(" + xDelta + "," + yDelta + ")");
+            this.mouse.moveMouse(xDelta, yDelta, this.xTouch, this.yTouch);
         }
     }
 };

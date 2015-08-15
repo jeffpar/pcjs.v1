@@ -9,8 +9,8 @@ It was added to the [JavaScript Machines](/docs/about/) project in Fall 2012, an
 * [C1Pjs](/docs/c1pjs/), a simulation of the OSI Challenger 1P (circa 1978)
 
 All the simulations are written entirely in JavaScript.  No Flash, Java or other plugins are required.
-Supported browsers include recent versions of Internet Explorer (v9.0 or later), Safari, Chrome, Firefox and various
-mobile browsers.
+Supported browsers include modern versions of Chrome, Safari, Firefox, Internet Explorer (v9.0 and up), Edge,
+and assorted mobile browsers.
 
 [Embedded IBM PC](/devices/pc/machine/5150/mda/64kb/ "PCjs:ibm5150")
 
