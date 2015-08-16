@@ -1358,7 +1358,7 @@ if (DEBUGGER) {
         /*
          * Allocate a special segment "register" for our own use, whenever a requested selector is not currently loaded
          */
-        this.segDebugger = new X86Seg(this.cpu, X86Seg.ID.DEBUG, "DBG");
+        this.segDebugger = new X86Seg(this.cpu, X86Seg.ID.DBG, "DBG");
 
         this.aaOpDescs = Debugger.aaOpDescs;
         if (this.cpu.model >= X86.MODEL_80186) {
@@ -1531,21 +1531,16 @@ if (DEBUGGER) {
                 if (sel === this.cpu.getGS()) return this.cpu.segGS;
             }
             /*
-             * Even if nSuppressBreaks is set, we'll allow the call if we're in real-mode, because
-             * a loadReal() request using segDebugger should generally be safe.
+             * Even if nSuppressBreaks is set, we'll allow the call in real-mode,
+             * because a loadReal() request using segDebugger should generally be safe.
              */
             if (this.nSuppressBreaks && fProt || !this.segDebugger) return null;
         }
 
-        /*
-         * Note the load() function's fSuppress parameter, which the Debugger should ALWAYS set to true
-         * to avoid triggering a fault.  Unfortunately, when paging is enabled, there's still the risk of
-         * triggering a page fault that will alter the machine's state, so be careful.
-         */
         if (!fProt) {
-            this.segDebugger.loadReal(sel, true);
+            this.segDebugger.loadReal(sel);
         } else {
-            this.segDebugger.loadProt(sel, true);
+            this.segDebugger.loadProt(sel);
         }
         return this.segDebugger;
     };
@@ -1574,9 +1569,9 @@ if (DEBUGGER) {
                 var seg = this.getSegment(dbgAddr.sel, dbgAddr.fProt);
                 if (seg) {
                     if (!fWrite) {
-                        addr = seg.checkRead(dbgAddr.off, nb || 1, true);
+                        addr = seg.checkReadDebugger(dbgAddr.off || 0, nb || 1);
                     } else {
-                        addr = seg.checkWrite(dbgAddr.off, nb || 1, true);
+                        addr = seg.checkWriteDebugger(dbgAddr.off || 0, nb || 1);
                     }
                     dbgAddr.addr = addr;
                 }
@@ -3265,7 +3260,8 @@ if (DEBUGGER) {
     Debugger.prototype.addBreakpoint = function(aBreak, dbgAddr, fTempBreak)
     {
         var fSuccess = false;
-        this.nSuppressBreaks++;
+
+        // this.nSuppressBreaks++;
 
         /*
          * We need to allow a temporary breakpoint at an address where they may already be a breakpoint.
@@ -3277,6 +3273,7 @@ if (DEBUGGER) {
             if (aBreak != this.aBreakExec) {
                 var addr = this.getAddr(dbgAddr);
                 if (addr == X86.ADDR_INVALID) {
+                    this.println("invalid address: " + this.hexAddr(dbgAddr));
                     fSuccess = false;
                 } else {
                     this.bus.addMemBreak(addr, aBreak == this.aBreakWrite);
@@ -3306,7 +3303,8 @@ if (DEBUGGER) {
             }
         }
 
-        this.nSuppressBreaks--;
+        // this.nSuppressBreaks--;
+
         return fSuccess;
     };
 
@@ -3454,6 +3452,7 @@ if (DEBUGGER) {
          * or history data (see checkInstruction), since we might not actually execute the current instruction.
          */
         var fBreak = false;
+
         if (!this.nSuppressBreaks++) {
 
             addr = this.mapBreakpoint(addr);
@@ -3545,7 +3544,9 @@ if (DEBUGGER) {
                 }
             }
         }
+
         this.nSuppressBreaks--;
+
         return fBreak;
     };
 
@@ -5791,6 +5792,11 @@ if (DEBUGGER) {
                     case "DI":
                         this.cpu.regEDI = (this.cpu.regEDI & ~0xffff) | (w & 0xffff);
                         break;
+                    /*
+                     * DANGER: For any of the segment loads below, by going through the normal CPU
+                     * segment load procedure, you run the risk of generating a fault in the machine
+                     * if you're not careful.  So, um, be careful.
+                     */
                     case "DS":
                         this.cpu.setDS(w);
                         break;
@@ -5852,7 +5858,12 @@ if (DEBUGGER) {
                                 this.cpu.setMSW(w);
                                 break;
                             case "TR":
-                                if (this.cpu.segTSS.load(w, true) === X86.ADDR_INVALID) {
+                                /*
+                                 * DANGER: Like any of the segment loads above, by going through the normal CPU
+                                 * segment load procedure, you run the risk of generating a fault in the machine
+                                 * if you're not careful.  So, um, be careful.
+                                 */
+                                if (this.cpu.segTSS.load(w) === X86.ADDR_INVALID) {
                                     fValid = false;
                                 }
                                 break;
@@ -5889,6 +5900,11 @@ if (DEBUGGER) {
                                     case "EDI":
                                         this.cpu.regEDI = w;
                                         break;
+                                    /*
+                                     * DANGER: For any of the segment loads below, by going through the normal CPU
+                                     * segment load procedure, you run the risk of generating a fault in the machine
+                                     * if you're not careful.  So, um, be careful.
+                                     */
                                     case "FS":
                                         this.cpu.setFS(w);
                                         break;

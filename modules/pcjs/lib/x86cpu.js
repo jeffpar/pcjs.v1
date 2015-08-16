@@ -1400,9 +1400,9 @@ X86CPU.prototype.resetRegs = function()
          * TODO: Verify what the 80286 actually sets addrGDT and addrGDTLimit to on reset (or if it leaves them alone).
          */
         this.addrGDT = 0; this.addrGDTLimit = 0xffff;                   // GDTR
-        this.segLDT = new X86Seg(this, X86Seg.ID.LDT,   "LDT", true);   // LDTR
-        this.segTSS = new X86Seg(this, X86Seg.ID.TSS,   "TSS", true);   // TR
-        this.segVER = new X86Seg(this, X86Seg.ID.OTHER, "VER", true);   // a scratch segment register for VERR and VERW instructions
+        this.segLDT = new X86Seg(this, X86Seg.ID.LDT, "LDT", true);     // LDTR
+        this.segTSS = new X86Seg(this, X86Seg.ID.TSS, "TSS", true);     // TR
+        this.segVER = new X86Seg(this, X86Seg.ID.VER, "VER", true);     // a scratch segment register for VERR and VERW instructions
         this.setCSIP(0xfff0, 0xf000);                   // on an 80286 or 80386, the default CS:IP is 0xF000:0xFFF0 instead of 0xFFFF:0x0000
         this.setCSBase(0xffff0000|0);                   // on an 80286 or 80386, all CS base address bits above bit 15 must be set
     }

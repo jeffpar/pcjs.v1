@@ -131,21 +131,20 @@ X86Seg.ID = {
     STACK:  3,          // "SS"
     TSS:    4,          // "TSS"
     LDT:    5,          // "LDT"
-    OTHER:  6,          // "VER"
-    DEBUG:  7           // "DBG"
+    VER:    6,          // "VER"
+    DBG:    7           // "DBG"
 };
 
 /**
- * loadReal(sel, fSuppress)
+ * loadReal(sel)
  *
  * The default segment load() function for real-mode.
  *
  * @this {X86Seg}
  * @param {number} sel
- * @param {boolean} [fSuppress] is true to suppress any errors
  * @return {number} base address of selected segment, or ADDR_INVALID if error (TODO: No error conditions yet)
  */
-X86Seg.prototype.loadReal = function loadReal(sel, fSuppress)
+X86Seg.prototype.loadReal = function loadReal(sel)
 {
     this.sel = sel & 0xffff;
     /*
@@ -159,7 +158,7 @@ X86Seg.prototype.loadReal = function loadReal(sel, fSuppress)
 };
 
 /**
- * loadProt(sel, fSuppress)
+ * loadProt(sel)
  *
  * This replaces the segment's default load() function whenever the segment is notified via updateMode() by the
  * CPU's setProtMode() that the processor is now in protected-mode.
@@ -178,10 +177,9 @@ X86Seg.prototype.loadReal = function loadReal(sel, fSuppress)
  *
  * @this {X86Seg}
  * @param {number} sel
- * @param {boolean} [fSuppress] is true to suppress any errors, cycle assessment, etc
  * @return {number} base address of selected segment, or ADDR_INVALID if error
  */
-X86Seg.prototype.loadProt = function loadProt(sel, fSuppress)
+X86Seg.prototype.loadProt = function loadProt(sel)
 {
     var addrDT;
     var addrDTLimit;
@@ -204,11 +202,10 @@ X86Seg.prototype.loadProt = function loadProt(sel, fSuppress)
      * The ROM BIOS POST executes some test code in protected-mode without properly initializing the LDT,
      * which has no bearing on the ROM's own code, because it never loads any LDT selectors, but if at the same
      * time our Debugger attempts to validate a selector in one of its breakpoints, that could cause some
-     * grief here.  We avoid that grief by 1) relying on the Debugger setting fSuppress to true, and 2) skipping
-     * segment lookup if the descriptor table being referenced is zero.  Both tests are required, because
-     * there's nothing in the design of the CPU that prevents the GDT or LDT being at linear address zero.
+     * grief here.  We avoid that grief by skipping segment lookup if the descriptor table being referenced is zero
+     * AND the Debugger's ID.DBG segment register is being used.
      */
-    if (!fSuppress || addrDT) {
+    if (addrDT || this.id != X86Seg.ID.DBG) {
         var addrDesc = (addrDT + (sel & X86.SEL.MASK))|0;
         if ((addrDTLimit - addrDesc)|0 >= 7) {
             /*
@@ -217,10 +214,10 @@ X86Seg.prototype.loadProt = function loadProt(sel, fSuppress)
              * starting with a 15-cycle difference.  Obviously the difference will vary with the instruction,
              * and will be much greater whenever the load fails.
              */
-            if (!fSuppress) cpu.nStepCycles -= 15;
-            return this.loadDesc8(addrDesc, sel, fSuppress);
+            if (this.id != X86Seg.ID.DBG) cpu.nStepCycles -= 15;
+            return this.loadDesc8(addrDesc, sel);
         }
-        if (!fSuppress) {
+        if (this.id < X86Seg.ID.VER) {
             X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel);
         }
     }
@@ -278,7 +275,7 @@ X86Seg.prototype.loadIDTProt = function loadIDTProt(nIDT)
 };
 
 /**
- * checkReadReal(off, cb, fSuppress)
+ * checkReadReal(off, cb)
  *
  * TODO: Invoke X86.fnFault.call(this.cpu, X86.EXCEPTION.GP_FAULT) if off+cb is beyond offMax on 80186 and up;
  * also, determine whether fnFault() call should include an error code, since this is happening in real-mode.
@@ -286,16 +283,15 @@ X86Seg.prototype.loadIDTProt = function loadIDTProt(nIDT)
  * @this {X86Seg}
  * @param {number} off is a segment-relative offset
  * @param {number} cb is number of bytes to check (1, 2 or 4)
- * @param {boolean} [fSuppress] is true to suppress any errors
  * @return {number} corresponding linear address if valid, or ADDR_INVALID if error (TODO: No error conditions yet)
  */
-X86Seg.prototype.checkReadReal = function checkReadReal(off, cb, fSuppress)
+X86Seg.prototype.checkReadReal = function checkReadReal(off, cb)
 {
     return (this.base + off)|0;
 };
 
 /**
- * checkWriteReal(off, cb, fSuppress)
+ * checkWriteReal(off, cb)
  *
  * TODO: Invoke X86.fnFault.call(this.cpu, X86.EXCEPTION.GP_FAULT) if off+cb is beyond offMax on 80186 and up;
  * also, determine whether fnFault() call should include an error code, since this is happening in real-mode.
@@ -303,24 +299,22 @@ X86Seg.prototype.checkReadReal = function checkReadReal(off, cb, fSuppress)
  * @this {X86Seg}
  * @param {number} off is a segment-relative offset
  * @param {number} cb is number of bytes to check (1, 2 or 4)
- * @param {boolean} [fSuppress] is true to suppress any errors
  * @return {number} corresponding linear address if valid, or ADDR_INVALID if error (TODO: No error conditions yet)
  */
-X86Seg.prototype.checkWriteReal = function checkWriteReal(off, cb, fSuppress)
+X86Seg.prototype.checkWriteReal = function checkWriteReal(off, cb)
 {
     return (this.base + off)|0;
 };
 
 /**
- * checkReadProt(off, cb, fSuppress)
+ * checkReadProt(off, cb)
  *
  * @this {X86Seg}
  * @param {number} off is a segment-relative offset
  * @param {number} cb is number of bytes to check (1, 2 or 4)
- * @param {boolean} [fSuppress] is true to suppress any errors
  * @return {number} corresponding linear address if valid, or ADDR_INVALID if not
  */
-X86Seg.prototype.checkReadProt = function checkReadProt(off, cb, fSuppress)
+X86Seg.prototype.checkReadProt = function checkReadProt(off, cb)
 {
     /*
      * Since off could be a 32-bit value with the sign bit (bit 31) set, we must convert
@@ -329,19 +323,18 @@ X86Seg.prototype.checkReadProt = function checkReadProt(off, cb, fSuppress)
     if ((off >>> 0) + cb <= this.offMax) {
         return (this.base + off)|0;
     }
-    return this.checkReadProtDisallowed(off, cb, fSuppress);
+    return this.checkReadProtDisallowed(off, cb);
 };
 
 /**
- * checkReadProtDown(off, cb, fSuppress)
+ * checkReadProtDown(off, cb)
  *
  * @this {X86Seg}
  * @param {number} off is a segment-relative offset
  * @param {number} cb is number of bytes to check (1, 2 or 4)
- * @param {boolean} [fSuppress] is true to suppress any errors
  * @return {number} corresponding linear address if valid, ADDR_INVALID if not
  */
-X86Seg.prototype.checkReadProtDown = function checkReadProtDown(off, cb, fSuppress)
+X86Seg.prototype.checkReadProtDown = function checkReadProtDown(off, cb)
 {
     /*
      * Since off could be a 32-bit value with the sign bit (bit 31) set, we must convert
@@ -350,81 +343,117 @@ X86Seg.prototype.checkReadProtDown = function checkReadProtDown(off, cb, fSuppre
     if ((off >>> 0) + cb > this.offMax) {
         return (this.base + off)|0;
     }
-    return this.checkReadProtDisallowed(off, cb, fSuppress);
+    return this.checkReadProtDisallowed(off, cb);
 };
 
 /**
- * checkReadProtDisallowed(off, cb, fSuppress)
+ * checkReadProtDisallowed(off, cb)
  *
  * @this {X86Seg}
  * @param {number} off is a segment-relative offset
  * @param {number} cb is number of bytes to check (1, 2 or 4)
- * @param {boolean} [fSuppress] is true to suppress any errors
  * @return {number} corresponding linear address if valid, ADDR_INVALID if not
  */
-X86Seg.prototype.checkReadProtDisallowed = function checkReadProtDisallowed(off, cb, fSuppress)
+X86Seg.prototype.checkReadProtDisallowed = function checkReadProtDisallowed(off, cb)
 {
-    if (!fSuppress) {
-        X86.fnFault.call(this.cpu, X86.EXCEPTION.GP_FAULT, 0);
+    X86.fnFault.call(this.cpu, X86.EXCEPTION.GP_FAULT, 0);
+    return X86.ADDR_INVALID;
+};
+
+/**
+ * checkWriteProt(off, cb)
+ *
+ * @this {X86Seg}
+ * @param {number} off is a segment-relative offset
+ * @param {number} cb is number of bytes to check (1, 2 or 4)
+ * @return {number} corresponding linear address if valid, ADDR_INVALID if not
+ */
+X86Seg.prototype.checkWriteProt = function checkWriteProt(off, cb)
+{
+    /*
+     * Since off could be a 32-bit value with the sign bit (bit 31) set, we must convert
+     * it to an unsigned value using ">>>"; offMax was already converted at segment load time.
+     */
+    if ((off >>> 0) + cb <= this.offMax) {
+        return (this.base + off)|0;
+    }
+    return this.checkWriteProtDisallowed(off, cb);
+};
+
+/**
+ * checkWriteProtDown(off, cb)
+ *
+ * @this {X86Seg}
+ * @param {number} off is a segment-relative offset
+ * @param {number} cb is number of bytes to check (1, 2 or 4)
+ * @return {number} corresponding linear address if valid, ADDR_INVALID if not
+ */
+X86Seg.prototype.checkWriteProtDown = function checkWriteProtDown(off, cb)
+{
+    /*
+     * Since off could be a 32-bit value with the sign bit (bit 31) set, we must convert
+     * it to an unsigned value using ">>>"; offMax was already converted at segment load time.
+     */
+    if ((off >>> 0) + cb > this.offMax) {
+        return (this.base + off)|0;
+    }
+    return this.checkWriteProtDisallowed(off, cb);
+};
+
+/**
+ * checkWriteProtDisallowed(off, cb)
+ *
+ * @this {X86Seg}
+ * @param {number} off is a segment-relative offset
+ * @param {number} cb is number of bytes to check (1, 2 or 4)
+ * @return {number} corresponding linear address if valid, ADDR_INVALID if not
+ */
+X86Seg.prototype.checkWriteProtDisallowed = function checkWriteProtDisallowed(off, cb)
+{
+    X86.fnFault.call(this.cpu, X86.EXCEPTION.GP_FAULT, 0);
+    return X86.ADDR_INVALID;
+};
+
+/**
+ * checkReadDebugger(off, cb)
+ *
+ * @this {X86Seg}
+ * @param {number} off is a segment-relative offset
+ * @param {number} cb is number of bytes to check (1, 2 or 4)
+ * @return {number} corresponding linear address if valid, or ADDR_INVALID if error
+ */
+X86Seg.prototype.checkReadDebugger = function checkReadDebugger(off, cb)
+{
+    /*
+     * The Debugger doesn't have separate "check" interfaces for real and protected mode,
+     * since it's not performance-critical.  If addrDesc is invalid, then we assume real mode.
+     */
+    if (DEBUGGER) {
+        if (this.addrDesc === X86.ADDR_INVALID || (off >>> 0) + cb <= this.offMax) {
+            return (this.base + off)|0;
+        }
     }
     return X86.ADDR_INVALID;
 };
 
 /**
- * checkWriteProt(off, cb, fSuppress)
+ * checkWriteDebugger(off, cb)
  *
  * @this {X86Seg}
  * @param {number} off is a segment-relative offset
  * @param {number} cb is number of bytes to check (1, 2 or 4)
- * @param {boolean} [fSuppress] is true to suppress any errors
- * @return {number} corresponding linear address if valid, ADDR_INVALID if not
+ * @return {number} corresponding linear address if valid, or ADDR_INVALID if error
  */
-X86Seg.prototype.checkWriteProt = function checkWriteProt(off, cb, fSuppress)
+X86Seg.prototype.checkWriteDebugger = function checkWriteDebugger(off, cb)
 {
     /*
-     * Since off could be a 32-bit value with the sign bit (bit 31) set, we must convert
-     * it to an unsigned value using ">>>"; offMax was already converted at segment load time.
+     * The Debugger doesn't have separate "check" interfaces for real and protected mode,
+     * since it's not performance-critical.  If addrDesc is invalid, then we assume real mode.
      */
-    if ((off >>> 0) + cb <= this.offMax) {
-        return (this.base + off)|0;
-    }
-    return this.checkWriteProtDisallowed(off, cb, fSuppress);
-};
-
-/**
- * checkWriteProtDown(off, cb, fSuppress)
- *
- * @this {X86Seg}
- * @param {number} off is a segment-relative offset
- * @param {number} cb is number of bytes to check (1, 2 or 4)
- * @param {boolean} [fSuppress] is true to suppress any errors
- * @return {number} corresponding linear address if valid, ADDR_INVALID if not
- */
-X86Seg.prototype.checkWriteProtDown = function checkWriteProtDown(off, cb, fSuppress)
-{
-    /*
-     * Since off could be a 32-bit value with the sign bit (bit 31) set, we must convert
-     * it to an unsigned value using ">>>"; offMax was already converted at segment load time.
-     */
-    if ((off >>> 0) + cb > this.offMax) {
-        return (this.base + off)|0;
-    }
-    return this.checkWriteProtDisallowed(off, cb, fSuppress);
-};
-
-/**
- * checkWriteProtDisallowed(off, cb, fSuppress)
- *
- * @this {X86Seg}
- * @param {number} off is a segment-relative offset
- * @param {number} cb is number of bytes to check (1, 2 or 4)
- * @param {boolean} [fSuppress] is true to suppress any errors
- * @return {number} corresponding linear address if valid, ADDR_INVALID if not
- */
-X86Seg.prototype.checkWriteProtDisallowed = function checkWriteProtDisallowed(off, cb, fSuppress)
-{
-    if (!fSuppress) {
-        X86.fnFault.call(this.cpu, X86.EXCEPTION.GP_FAULT, 0);
+    if (DEBUGGER) {
+        if (this.addrDesc === X86.ADDR_INVALID || (off >>> 0) + cb <= this.offMax) {
+            return (this.base + off)|0;
+        }
     }
     return X86.ADDR_INVALID;
 };
@@ -491,13 +520,13 @@ X86Seg.prototype.loadDesc6 = function(addrDesc, sel)
     this.addrDesc = addrDesc;
     this.updateMode(true);
 
-    this.messageSeg(sel, base, limit, this.type);
+    if (DEBUG) this.messageSeg(sel, base, limit, this.type);
 
     return base;
 };
 
 /**
- * loadDesc8(addrDesc, sel, fSuppress)
+ * loadDesc8(addrDesc, sel)
  *
  * Used to load a protected-mode selector that refers to an 8-byte "descriptor table" (GDT, LDT, IDT) entry:
  *
@@ -511,10 +540,9 @@ X86Seg.prototype.loadDesc6 = function(addrDesc, sel)
  * @this {X86Seg}
  * @param {number} addrDesc is the descriptor address
  * @param {number} sel is the associated selector, or nIDT*8 if IDT descriptor
- * @param {boolean} [fSuppress] is true to suppress any errors, cycle assessment, etc
  * @return {number} base address of selected segment, or ADDR_INVALID if error
  */
-X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
+X86Seg.prototype.loadDesc8 = function(addrDesc, sel)
 {
     var cpu = this.cpu;
     var limit = cpu.getShort(addrDesc + X86.DESC.LIMIT.OFFSET);
@@ -547,7 +575,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
             var dpl = (acc & X86.DESC.ACC.DPL.MASK) >> X86.DESC.ACC.DPL.SHIFT;
 
             if (selMasked && !(acc & X86.DESC.ACC.PRESENT)) {
-                if (!fSuppress) X86.fnFault.call(cpu, X86.EXCEPTION.NP_FAULT, sel);
+                if (this.id < X86Seg.ID.VER) X86.fnFault.call(cpu, X86.EXCEPTION.NP_FAULT, sel);
                 base = addrDesc = X86.ADDR_INVALID;
                 break;
             }
@@ -698,13 +726,13 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
                     return this.base;
                 }
                 cpu.assert(false);
-                if (!fSuppress) X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, nFaultError, true);
+                if (this.id < X86Seg.ID.VER) X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, nFaultError, true);
                 base = addrDesc = X86.ADDR_INVALID;
                 break;
             }
             else if (fGate !== false) {
                 cpu.assert(false);
-                if (!fSuppress) X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel, true);
+                if (this.id < X86Seg.ID.VER) X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel, true);
                 base = addrDesc = X86.ADDR_INVALID;
                 break;
             }
@@ -712,7 +740,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
         else if (this.id == X86Seg.ID.DATA) {
             if (selMasked) {
                 if (!(acc & X86.DESC.ACC.PRESENT)) {
-                    if (!fSuppress) X86.fnFault.call(cpu, X86.EXCEPTION.NP_FAULT, sel);
+                    if (this.id < X86Seg.ID.VER) X86.fnFault.call(cpu, X86.EXCEPTION.NP_FAULT, sel);
                     base = addrDesc = X86.ADDR_INVALID;
                     break;
                 }
@@ -738,7 +766,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
                      *
                      * So, if the ACC field is zero, we won't set the last fnFault() parameter (fHalt) to true.
                      */
-                    if (!fSuppress) X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel, !!acc);
+                    if (this.id < X86Seg.ID.VER) X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel, !!acc);
                     base = addrDesc = X86.ADDR_INVALID;
                     break;
                 }
@@ -746,12 +774,12 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
         }
         else if (this.id == X86Seg.ID.STACK) {
             if (!(acc & X86.DESC.ACC.PRESENT)) {
-                if (!fSuppress) X86.fnFault.call(cpu, X86.EXCEPTION.SS_FAULT, sel);
+                if (this.id < X86Seg.ID.VER) X86.fnFault.call(cpu, X86.EXCEPTION.SS_FAULT, sel);
                 base = addrDesc = X86.ADDR_INVALID;
                 break;
             }
             if (!selMasked || type < X86.DESC.ACC.TYPE.SEG || (type & (X86.DESC.ACC.TYPE.CODE | X86.DESC.ACC.TYPE.WRITABLE)) != X86.DESC.ACC.TYPE.WRITABLE) {
-                if (!fSuppress) X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel, true);
+                if (this.id < X86Seg.ID.VER) X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel, true);
                 base = addrDesc = X86.ADDR_INVALID;
                 break;
             }
@@ -759,7 +787,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
         else if (this.id == X86Seg.ID.TSS) {
             var typeTSS = type & ~X86.DESC.ACC.TSS_BUSY;
             if (!selMasked || typeTSS != X86.DESC.ACC.TYPE.TSS286 && typeTSS != X86.DESC.ACC.TYPE.TSS386) {
-                if (!fSuppress) X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel, true);
+                if (this.id < X86Seg.ID.VER) X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel, true);
                 base = addrDesc = X86.ADDR_INVALID;
                 break;
             }
@@ -772,7 +800,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
                 this.addrIOPMLimit = (base + this.limit)|0;
             }
         }
-        else if (this.id == X86Seg.ID.OTHER) {
+        else if (this.id == X86Seg.ID.VER) {
             /*
              * For LSL, we must support any descriptor marked X86.DESC.ACC.TYPE.SEG, as well as TSS and LDT descriptors.
              */
@@ -781,6 +809,9 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
                 break;
             }
         }
+        /*
+         * The only other case should be X86Seg.ID.DBG, for which we do nothing.
+         */
 
         this.sel = sel;
         this.base = base;
@@ -793,7 +824,9 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
         this.updateMode(true, true, false);
         break;
     }
-    if (!fSuppress) this.messageSeg(sel, base, limit, type, ext);
+
+    if (DEBUG) this.messageSeg(sel, base, limit, type, ext);
+
     return base;
 };
 
@@ -1218,7 +1251,7 @@ X86Seg.prototype.updateMode = function(fLoad, fProt, fV86)
 X86Seg.prototype.messageSeg = function(sel, base, limit, type, ext)
 {
     if (DEBUG) {
-        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(Messages.SEG)) {
+        if (DEBUGGER && this.id != X86Seg.ID.DBG && this.dbg && this.dbg.messageEnabled(Messages.SEG)) {
             var ch = (this.sName.length < 3? " " : "");
             var sDPL = " dpl=" + this.dpl;
             if (this.id == X86Seg.ID.CODE) sDPL += " cpl=" + this.cpl;

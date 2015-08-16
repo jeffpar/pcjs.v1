@@ -1396,7 +1396,7 @@ X86.fnLAR = function LAR(dst, src)
      * if we need a special check for them.
      */
     this.clearZF();
-    if (this.segVER.load(src, true) !== X86.ADDR_INVALID) {
+    if (this.segVER.load(src) !== X86.ADDR_INVALID) {
         if (this.segVER.dpl >= this.nCPL && this.segVER.dpl >= (src & X86.SEL.RPL)) {
             this.setZF();
             dst = this.segVER.acc & ~X86.DESC.ACC.BASE1623;
@@ -1700,7 +1700,7 @@ X86.fnLSL = function LSL(dst, src)
      * TODO: LSL is explicitly documented as ALSO requiring a non-null selector, so we check X86.SEL.MASK;
      * are there any other instructions that were, um, less explicit but also require a non-null selector?
      */
-    if ((src & X86.SEL.MASK) && this.segVER.load(src, true) !== X86.ADDR_INVALID) {
+    if ((src & X86.SEL.MASK) && this.segVER.load(src) !== X86.ADDR_INVALID) {
         var fConforming = ((this.segVER.acc & X86.DESC.ACC.TYPE.CODE_CONFORMING) == X86.DESC.ACC.TYPE.CODE_CONFORMING);
         if ((fConforming || this.segVER.dpl >= this.nCPL) && this.segVER.dpl >= (src & X86.SEL.RPL)) {
             this.setZF();
@@ -3346,7 +3346,7 @@ X86.fnVERR = function VERR(dst, src)
      * descriptor table or the descriptor is not for a segment.
      */
     this.nStepCycles -= (14 + (this.regEA === X86.ADDR_INVALID? 0 : 2));
-    if (this.segVER.load(dst, true) !== X86.ADDR_INVALID) {
+    if (this.segVER.load(dst) !== X86.ADDR_INVALID) {
         /*
          * Verify that this is a readable segment; that is, of these four combinations (code+readable,
          * code+nonreadable, data+writable, date+nonwritable), make sure we're not the second combination.
@@ -3388,7 +3388,7 @@ X86.fnVERW = function VERW(dst, src)
      * descriptor table or the descriptor is not for a segment.
      */
     this.nStepCycles -= (14 + (this.regEA === X86.ADDR_INVALID? 0 : 2));
-    if (this.segVER.load(dst, true) !== X86.ADDR_INVALID) {
+    if (this.segVER.load(dst) !== X86.ADDR_INVALID) {
         /*
          * Verify that this is a writable data segment
          */
