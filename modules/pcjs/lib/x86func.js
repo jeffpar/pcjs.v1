@@ -1217,13 +1217,12 @@ X86.fnINCw = function INCw(dst, src)
 /**
  * fnINT(nIDT, nError, nCycles)
  *
- * NOTE: We no longer use setCSIP(), because it always loads the new CS using segCS.load(), which
- * only knows how to load GDT and LDT descriptors, whereas interrupts must use setCS.loadIDT(), which
- * deals exclusively with IDT descriptors.
+ * NOTE: We no longer use setCSIP(), because it always loads the new CS using segCS.load(), which only knows
+ * how to load GDT and LDT descriptors, whereas interrupts must use setCS.loadIDT(), which deals exclusively
+ * with IDT descriptors.
  *
- * This means we must take care to replicate critical features of setCSIP(); ie, setting segCS.fCall
- * BEFORE calling loadIDT(), and updating regLIP and regLIPLimit, resetting default operand and address sizes,
- * and flushing the prefetch queue AFTER calling loadIDT().
+ * This means we must take care to replicate critical features of setCSIP(); ie, updating regLIP and regLIPLimit,
+ * resetting default operand and address sizes, and flushing the prefetch queue AFTER calling loadIDT().
  *
  * @this {X86CPU}
  * @param {number} nIDT
@@ -1236,7 +1235,6 @@ X86.fnINT = function INT(nIDT, nError, nCycles)
      * TODO: We assess the cycle cost up front, because otherwise, if loadIDT() fails, no cost may be assessed.
      */
     this.nStepCycles -= this.cycleCounts.nOpCyclesInt + nCycles;
-    this.segCS.fCall = true;
     var oldPS = this.getPS();
     var oldCS = this.getCS();
     var oldIP = this.getIP();

@@ -2257,12 +2257,11 @@ X86CPU.prototype.setIP = function(off)
  * @this {X86CPU}
  * @param {number} off
  * @param {number} sel
- * @param {boolean} [fCall] is true if CALLF in progress, false if RETF/IRET in progress, null/undefined otherwise
+ * @param {boolean} [fCall] is true if CALLF in progress, false if RETF/IRET in progress, undefined otherwise
  * @return {boolean|null} true if a stack switch occurred; the only opcode that really needs to pay attention is opRETFn()
  */
 X86CPU.prototype.setCSIP = function(off, sel, fCall)
 {
-    this.segCS.fCall = fCall;
     /*
      * We break this operation into the following discrete steps (eg, set IP, load CS, and then update IP) so
      * that segCS.load(sel) has the ability to modify IP when sel refers to a gate (call, interrupt, trap, etc).
@@ -2271,9 +2270,8 @@ X86CPU.prototype.setCSIP = function(off, sel, fCall)
      * internal instruction pointer.  Callers that need the real IP must call getIP().
      */
     this.regEIP = off;
-    var base = this.segCS.load(sel);
+    var base = this.segCS.loadCode(sel, fCall);
     if (base !== X86.ADDR_INVALID) {
-
         /*
          * TODO: Should this code be factored into a setLIP() function? The other primary client would be fnINT().
          */
@@ -2282,7 +2280,6 @@ X86CPU.prototype.setCSIP = function(off, sel, fCall)
         this.regLIPLimit = (base + this.segCS.limit)|0;
         this.nCPL = this.segCS.cpl;             // cache the current CPL where it's more convenient
         if (PREFETCH) this.flushPrefetch(this.regLIP);
-
         return this.segCS.fStackSwitch;
     }
     return null;

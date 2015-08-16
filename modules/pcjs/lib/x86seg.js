@@ -46,11 +46,11 @@ if (typeof module !== 'undefined') {
  * with some of the early changes (eg, skipping X86.DESC.EXT.BASE2431 and X86.DESC.EXT.LIMIT1619
  * fields unless the processor is an 80386).
  *
- * However, the reality is that I won't always be that strict, either because I'm lazy or because
- * any 80286 code you're likely to run probably won't attempt to use descriptor types or other features
- * unique to the 80386 anyway, so the extra paranoia may not be worth the effort.
- *
- * But still, we should all want to live in a perfect world.  Someday.
+ * However, the reality is that I won't always be that strict, either because I'm lazy or I don't
+ * want to risk a run-time performance hit or (more pragmatically) because any 80286 code you're likely
+ * to run probably won't attempt to use descriptor types or other features unique to the 80386 anyway,
+ * so the extra paranoia may not be worth the effort.  Ultimately, I would like to see the code tailor
+ * itself to the current CPU model, generally with model-specific functions, but that's a lot of work.
  */
 
 /**
@@ -64,7 +64,9 @@ if (typeof module !== 'undefined') {
  *
  * TODO: Determine what good, if any, these class annotations are for either an IDE like WebStorm or a tool like
  * the Closure Compiler.  More importantly, what good do they do at runtime?  Is it better to simply ensure that all
- * object properties are explicitly initialized in the constructor, and document them there instead?
+ * object properties are explicitly initialized in the constructor, and document them there instead?  I started by
+ * listing only what might be considered "public" properties above, in an effort to eliminate WebStorm inspection
+ * warnings, but it didn't seem to help, so I stopped.
  */
 
 /**
@@ -104,23 +106,18 @@ function X86Seg(cpu, id, sName, fProt)
      * the old stack, they will be copied to awParms, and then once the stack is switched, the parameters
      * will be pushed from awParms onto the new stack.
      *
-     * The typical ways of loading a new segment into CS are JMPF, CALLF (or INT), and RETF (or IRET);
-     * prior to calling segCS.load(), each of those operations must first set segCS.fCall to one of null,
-     * true, or false, respectively.
+     * The typical ways of loading a new segment into CS are JMPF, CALLF (or INT), and RETF (or IRET),
+     * via CPU functions setCSIP() and fnINT(), which use segCS.loadCode() and segCS.loadIDT(), respectively.
      *
-     * It's critical that fCall be properly set prior to calling segCS.load(); fCall === null means NO
-     * privilege level transition may occur, fCall === true allows a stack switch and a privilege transition
-     * to a numerically lower privilege, and fCall === false allows a stack restore and a privilege transition
-     * to a numerically greater privilege.
+     * loadCode() requires an fCall value: null means NO privilege level transition may occur, true
+     * allows a stack switch and a privilege transition to a numerically lower privilege, and false allows
+     * a stack restore and a privilege transition to a numerically greater privilege.
      *
-     * As long as setCSIP() or fnINT() are used for all CS changes, fCall is set automatically.
-     *
-     * TODO: Consider making fCall a parameter to load(), instead of a property that must be set prior to
-     * calling load(); the downside is that such a parameter is meaningless for segments other than segCS.
+     * loadIDT() sets fCall to true unconditionally in protected-mode (fCall has no meaning in real-mode).
      */
-    this.awParms = (this.id == X86Seg.ID.CODE? new Array(32) : []);
     this.fCall = null;
     this.fStackSwitch = false;
+    this.awParms = (this.id == X86Seg.ID.CODE? new Array(32) : []);
     this.updateMode(true, fProt);
 }
 
@@ -133,6 +130,22 @@ X86Seg.ID = {
     LDT:    5,          // "LDT"
     VER:    6,          // "VER"
     DBG:    7           // "DBG"
+};
+
+/**
+ * loadCode(sel, fCall)
+ *
+ * A simple wrapper function that encapsulates setting the fCall property for segCS loads.
+ *
+ * @this {X86Seg}
+ * @param {number} sel
+ * @param {boolean|undefined} fCall is true if CALLF in progress, false if RETF/IRET in progress, undefined otherwise
+ * @return {number} base address of selected segment, or ADDR_INVALID if error
+ */
+X86Seg.prototype.loadCode = function loadCode(sel, fCall)
+{
+    this.fCall = fCall;
+    return this.load(sel);
 };
 
 /**
@@ -268,6 +281,7 @@ X86Seg.prototype.loadIDTProt = function loadIDTProt(nIDT)
     nIDT <<= 3;
     var addrDesc = (cpu.addrIDT + nIDT)|0;
     if (((cpu.addrIDTLimit - addrDesc)|0) >= 7) {
+        this.fCall = true;
         return this.loadDesc8(addrDesc, nIDT) + cpu.regEIP;
     }
     X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, nIDT | X86.ERRCODE.IDT | X86.ERRCODE.EXT, true);
@@ -1010,9 +1024,8 @@ X86Seg.prototype.switchTSS = function switchTSS(selNew, fNest)
 /**
  * setBase(addr)
  *
- * This is used in unusual situations where the base must be set independently; normally, the base
- * is set according to the selector provided to load(), but there are a few cases where setBase()
- * is required.
+ * This is used in unusual situations where the base must be set independently; normally, the base is
+ * set according to the selector provided to load(), but there are a few cases where setBase() is required.
  *
  * For example, in resetRegs(), the real-mode CS selector must be reset to 0xF000 for an 80286 or 80386,
  * but the CS base must be set to 0x00FF0000 or 0xFFFF0000, respectively.  To simplify life for setBase()
