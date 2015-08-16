@@ -2500,9 +2500,9 @@ Card.prototype.dumpCard = function()
  *
  * For example, assuming a VGA frame buffer with 640x480 pixels spread across 38400 (0x9600) memory
  * locations, the following 3 commands will dump a vertical swath of bits from plane 0 that is 24
- * rows tall and 8 columns wide, from roughly the center of the screen (0x4B00 + 0x28).
+ * rows tall and 8 columns wide, from roughly the center of the screen (0x4B00 + 0x28 - 2).
  *
- *      d video 4b28w8p0
+ *      d video 4b26w8p0
  *      d video w8p0
  *      d video w8p0
  *
