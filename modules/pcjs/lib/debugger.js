@@ -287,6 +287,7 @@ if (DEBUGGER) {
         'x':     "execution options",
         'if':    "eval expression",
         'let':   "assign expression",
+        'mouse': "mouse action",        // syntax: mouse {action} {delta} (eg, mouse x 10, mouse click 0, etc)
         'print': "print expression",
         'reset': "reset machine",
         'ver':   "display version"
@@ -1350,6 +1351,7 @@ if (DEBUGGER) {
         this.cmp = cmp;
         this.fdc = cmp.getComponentByType("FDC");
         this.hdc = cmp.getComponentByType("HDC");
+        this.mouse = cmp.getComponentByType("Mouse");
         if (MAXDEBUG) this.chipset = cmp.getComponentByType("ChipSet");
 
         this.cchAddr = bus.getWidth() >> 2;
@@ -5595,6 +5597,47 @@ if (DEBUGGER) {
     };
 
     /**
+     * doMouse(sAction, sDelta)
+     *
+     * When using the "click" action, specify 0 for Mouse.BUTTON.LEFT or 2 for Mouse.BUTTON.RIGHT.
+     *
+     * @this {Debugger}
+     * @param {string} sAction
+     * @param {string} sDelta
+     */
+    Debugger.prototype.doMouse = function(sAction, sDelta)
+    {
+        if (this.mouse) {
+            var xDelta = 0, yDelta = 0;
+            var sign = 1;
+            if (sDelta.charAt(0) == '-') {
+                sign = -1;
+                sDelta = sDelta.substr(1);
+            }
+            var n = this.parseValue(sDelta, sAction);
+            if (n === undefined) return;
+            n = (n * sign)|0;
+            switch(sAction) {
+            case "x":
+                this.mouse.moveMouse(n, 0);
+                break;
+            case "y":
+                this.mouse.moveMouse(0, n);
+                break;
+            case "click":
+                this.mouse.clickMouse(n, true);
+                this.mouse.clickMouse(n, false);
+                break;
+            default:
+                this.println("unknown action: " + sAction);
+                break;
+            }
+            return;
+        }
+        this.println("no mouse");
+    };
+
+    /**
      * doExecOptions(asArgs)
      *
      * @this {Debugger}
@@ -6469,6 +6512,10 @@ if (DEBUGGER) {
                     this.doLoad(asArgs);
                     break;
                 case 'm':
+                    if (asArgs[0] == "mouse") {
+                        this.doMouse(asArgs[1], asArgs[2]);
+                        break;
+                    }
                     this.doMessages(asArgs);
                     break;
                 case 'o':
