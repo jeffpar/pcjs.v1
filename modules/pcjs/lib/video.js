@@ -2486,7 +2486,27 @@ Card.prototype.dumpCard = function()
 };
 
 /**
- * dumpBuffer()
+ * dumpBuffer(sParm)
+ *
+ * Rather than requiring sParm to ALWAYS be a frame buffer address OR a frame buffer offset,
+ * we'll just make a guess as to what the user intended and support BOTH; basically if the value
+ * is less than the frame buffer address, we'll assume it's an offset.
+ *
+ * Also, we allow some special options to be encoded in sParm: if it contains 'w' followed by a
+ * a number (1-8), then we print only that number of memory locations per row, and then adjust
+ * the starting address of the next row by the width of the screen, so that the dump reflects a
+ * rectangular chunk of the video buffer.  And, if sParm contains 'p' followed by a number (0-3),
+ * when we display only the bits from that plane for each memory location, in binary instead of hex.
+ *
+ * For example, assuming a VGA frame buffer with 640x480 pixels spread across 38400 (0x9600) memory
+ * locations, the following 3 commands will dump a vertical swath of bits from plane 0 that is 24
+ * rows tall and 8 columns wide, from roughly the center of the screen (0x4B00 + 0x28).
+ *
+ *      d video 4b28w8p0
+ *      d video w8p0
+ *      d video w8p0
+ *
+ * TODO: Make these options more general-purpose (it currently assumes a standard VGA planar layout).
  *
  * @this {Card}
  * @param {string} sParm
@@ -2498,16 +2518,41 @@ Card.prototype.dumpBuffer = function(sParm)
             this.dbg.println("no buffer");
             return;
         }
-        var idw = str.parseInt(sParm);
-        idw = (idw !== undefined? idw - this.addrBuffer : (this.prevDump || 0));
-        if (idw < 0) idw = 0;
+        var fColAdjust = false;
+        var i, idw, w = 8, p = -1;
+
+        var a = sParm.split(/([wp])/);
+        for (i = 0; i < a.length; i++) {
+            if (!i) {
+                if (a[0].length) {
+                    idw = str.parseInt(a[0]);
+                }
+            } else {
+                var j = str.parseInt(a[i+1]);
+                if (a[i] == 'w') {
+                    if (j >= 1 && j <= 8) {
+                        w = j;
+                        fColAdjust = true;
+                    }
+                } else {
+                    if (j >= 0 && j <= 3) p = j;
+                }
+                i++;
+            }
+        }
+        if (idw === undefined) {
+            idw = this.prevDump || 0;
+        } else if (idw >= this.addrBuffer) {
+            idw -= this.addrBuffer;
+        }
         var cLines = 8, sDump = "";
         for (var iLine = 0; iLine < cLines; iLine++) {
             var sData = str.toHex(this.addrBuffer + idw) + ":";
-            for (var i = 0; i < 8 && idw < this.adwMemory.length; i++) {
+            for (i = 0; i < w && idw < this.adwMemory.length; i++) {
                 var dw = this.adwMemory[idw++];
-                sData += " " + str.toHex(dw);
+                sData += ' ' + ((p < 0)? str.toHex(dw) : str.toBin((dw >> (p << 3)), 8));
             }
+            if (fColAdjust) idw += (this.video.nCols >> 3) - w;
             if (sDump) sDump += "\n";
             sDump += sData;
         }
