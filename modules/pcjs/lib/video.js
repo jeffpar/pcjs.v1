@@ -2495,28 +2495,34 @@ Card.prototype.dumpVideoCard = function()
  * Also, we allow some special options to be encoded in sParm: 'l' followed by a number means
  * print that many rows of data.  'n' followed by a number (1-8) means print only that number of
  * memory locations per row, and then adjust the starting address of the next row by the number
- * of bytes per row (or whatever is specified by 'w' option) so that the dump reflects a rectangular
- * chunk of the video buffer.  And, if sParm contains 'p' followed by a number (0-3), when we
- * display only the bits from that plane for each memory location, in binary instead of hex.
+ * of bytes per row (or whatever is specified by the 'w' option) so that the dump reflects a
+ * rectangular chunk of video data.  Finally, if sParm contains 'p' followed by a number (0-3),
+ * we display only the bits from that plane for each memory location, in binary instead of hex.
  *
- * For example, assuming a VGA frame buffer with 640x480 pixels spread across 38400 (0x9600) memory
- * locations, the following 3 commands will dump a vertical swath of bits from plane 0 that is 24
- * rows tall and 8 columns wide, from roughly the center of the screen (0x4B00 + 0x28 - 2).
+ * For example, assuming a standard VGA frame buffer with 640x480 pixels across 38400 (0x9600) memory
+ * locations, the following command will dump a vertical swath of bits from plane 0 that is 32 (0x20)
+ * rows tall and 8 columns wide, from roughly the center of the screen (0x4B00 + 0x28 - 2 = 0x4B26).
  *
- *      d video 4b26n8p0
+ *      d video 4b26l20n8p0
+ *
+ * Subsequent commands that omit a starting address or offset will continue where the last dump
+ * left off; eg:
+ *
  *      d video n8p0
- *      d video n8p0
  *
- * To dump the first chunk of off-screen memory starting at 0x9600, where the Windows VGA driver
- * typically stores a copy of the video memory containing the current mouse pointer:
+ * To dump a chunk of off-screen memory starting at 0x9600, where the Windows VGA driver typically
+ * stores a copy of the video memory containing the current mouse pointer:
  *
- *      d video 9600l20n5p0w5
+ *      d video 9600l20n5w5p0
  *
- * Alternatively, you can use decimal values:
+ * Alternatively, you could use decimal values:
  *
- *      d video 9600l32.n5.p0.w5.
+ *      d video 9600l32.n5.w5.p0.
  *
- * TODO: Make these options more general-purpose (it currently assumes a standard VGA planar layout).
+ * NOTE: If these commands look suspiciously like weird Hayes modem command strings, trust me,
+ * that is ENTIRELY coincidental (but mildly amusing).
+ *
+ * TODO: Make these options more general-purpose (it currently assumes a conventional VGA planar layout).
  *
  * @this {Card}
  * @param {string} sParm
