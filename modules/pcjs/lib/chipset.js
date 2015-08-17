@@ -3890,7 +3890,7 @@ ChipSet.prototype.updateTimer = function(iTimer, fCycleReset)
                     count = countInit;
                 }
                 timer.countStart[0] = count & 0xff;
-                timer.countStart[1] = count >> 8;
+                timer.countStart[1] = (count >> 8) & 0xff;
                 timer.nCyclesStart = nCycles;
                 if (!iTimer && timer.fOUT) {
                     fFired = true;
@@ -3929,7 +3929,7 @@ ChipSet.prototype.updateTimer = function(iTimer, fCycleReset)
                     this.acTimer0Counts.push([count, nCycles, nCycleDelta]);
                 }
                 timer.countStart[0] = count & 0xff;
-                timer.countStart[1] = count >> 8;
+                timer.countStart[1] = (count >> 8) & 0xff;
                 timer.nCyclesStart = nCycles;
                 if (!iTimer && timer.fOUT) {
                     fFired = true;
@@ -3944,7 +3944,7 @@ ChipSet.prototype.updateTimer = function(iTimer, fCycleReset)
         }
 
         timer.countCurrent[0] = count & 0xff;
-        timer.countCurrent[1] = count >> 8;
+        timer.countCurrent[1] = (count >> 8) & 0xff;
         if (fCycleReset) this.nCyclesStart = 0;
     }
     return timer;

@@ -2435,11 +2435,11 @@ Card.prototype.dumpRegs = function(sName, iReg, aRegs, asRegs)
 };
 
 /**
- * dumpCard()
+ * dumpVideoCard()
  *
  * @this {Card}
  */
-Card.prototype.dumpCard = function()
+Card.prototype.dumpVideoCard = function()
 {
     if (DEBUGGER) {
         /*
@@ -2486,42 +2486,52 @@ Card.prototype.dumpCard = function()
 };
 
 /**
- * dumpBuffer(sParm)
+ * dumpVideoBuffer(sParm)
  *
  * Rather than requiring sParm to ALWAYS be a frame buffer address OR a frame buffer offset,
  * we'll just make a guess as to what the user intended and support BOTH; basically if the value
  * is less than the frame buffer address, we'll assume it's an offset.
  *
- * Also, we allow some special options to be encoded in sParm: if it contains 'w' followed by a
- * a number (1-8), then we print only that number of memory locations per row, and then adjust
- * the starting address of the next row by the width of the screen, so that the dump reflects a
- * rectangular chunk of the video buffer.  And, if sParm contains 'p' followed by a number (0-3),
- * when we display only the bits from that plane for each memory location, in binary instead of hex.
+ * Also, we allow some special options to be encoded in sParm: 'l' followed by a number means
+ * print that many rows of data.  'n' followed by a number (1-8) means print only that number of
+ * memory locations per row, and then adjust the starting address of the next row by the number
+ * of bytes per row (or whatever is specified by 'w' option) so that the dump reflects a rectangular
+ * chunk of the video buffer.  And, if sParm contains 'p' followed by a number (0-3), when we
+ * display only the bits from that plane for each memory location, in binary instead of hex.
  *
  * For example, assuming a VGA frame buffer with 640x480 pixels spread across 38400 (0x9600) memory
  * locations, the following 3 commands will dump a vertical swath of bits from plane 0 that is 24
  * rows tall and 8 columns wide, from roughly the center of the screen (0x4B00 + 0x28 - 2).
  *
- *      d video 4b26w8p0
- *      d video w8p0
- *      d video w8p0
+ *      d video 4b26n8p0
+ *      d video n8p0
+ *      d video n8p0
+ *
+ * To dump the first chunk of off-screen memory starting at 0x9600, where the Windows VGA driver
+ * typically stores a copy of the video memory containing the current mouse pointer:
+ *
+ *      d video 9600l20n5p0w5
+ *
+ * Alternatively, you can use decimal values:
+ *
+ *      d video 9600l32.n5.p0.w5.
  *
  * TODO: Make these options more general-purpose (it currently assumes a standard VGA planar layout).
  *
  * @this {Card}
  * @param {string} sParm
  */
-Card.prototype.dumpBuffer = function(sParm)
+Card.prototype.dumpVideoBuffer = function(sParm)
 {
     if (DEBUGGER) {
         if (!this.adwMemory) {
             this.dbg.println("no buffer");
             return;
         }
-        var fColAdjust = false;
-        var i, idw, w = 8, p = -1;
+        var i, idw, fColAdjust = false;
+        var l = 8, n = 8, p = -1, w = this.video.nCols >> 3;
 
-        var a = sParm.split(/([wp])/);
+        var a = sParm.split(/([lnpw])/);
         for (i = 0; i < a.length; i++) {
             if (!i) {
                 if (a[0].length) {
@@ -2529,13 +2539,20 @@ Card.prototype.dumpBuffer = function(sParm)
                 }
             } else {
                 var j = str.parseInt(a[i+1]);
-                if (a[i] == 'w') {
+                if (a[i] == 'l') {
+                    l = j;
+                }
+                else if (a[i] == 'n') {
                     if (j >= 1 && j <= 8) {
-                        w = j;
+                        n = j;
                         fColAdjust = true;
                     }
-                } else {
+                }
+                else if (a[i] == 'p') {
                     if (j >= 0 && j <= 3) p = j;
+                }
+                else if (a[i] == 'w') {
+                    if (j < w) w = j;
                 }
                 i++;
             }
@@ -2545,14 +2562,14 @@ Card.prototype.dumpBuffer = function(sParm)
         } else if (idw >= this.addrBuffer) {
             idw -= this.addrBuffer;
         }
-        var cLines = 8, sDump = "";
-        for (var iLine = 0; iLine < cLines; iLine++) {
+        var sDump = "";
+        for (i = 0; i < l; i++) {
             var sData = str.toHex(this.addrBuffer + idw) + ":";
-            for (i = 0; i < w && idw < this.adwMemory.length; i++) {
+            for (j = 0; j < n && idw < this.adwMemory.length; j++) {
                 var dw = this.adwMemory[idw++];
                 sData += ' ' + ((p < 0)? str.toHex(dw) : str.toBin((dw >> (p << 3)), 8));
             }
-            if (fColAdjust) idw += (this.video.nCols >> 3) - w;
+            if (fColAdjust) idw += w - n;
             if (sDump) sDump += "\n";
             sDump += sData;
         }
@@ -6709,11 +6726,11 @@ Video.prototype.dumpVideo = function(sParm)
             return;
         }
         if (sParm) {
-            this.cardActive.dumpBuffer(sParm);
+            this.cardActive.dumpVideoBuffer(sParm);
             return;
         }
         this.dbg.println("BIOSMODE: " + str.toHexByte(this.nMode));
-        this.cardActive.dumpCard();
+        this.cardActive.dumpVideoCard();
     }
 };
 

@@ -3774,7 +3774,7 @@ X86.opOUTw = function OUTw()
      * what about the SECOND byte?  If the port is 0xff, will the SECOND byte of I/O use port 0x00 or 0x100?
      * Our code (below) assumes the latter.  Mask (port + 1) with 0xff if it turns out the former is true.
      */
-    this.bus.checkPortOutputNotify(port + 1, this.regEAX >> 8, this.regLIP - 2);
+    this.bus.checkPortOutputNotify(port + 1, (this.regEAX >> 8) & 0xff, this.regLIP - 2);
     this.nStepCycles -= this.cycleCounts.nOpCyclesOutP;
 };
 
@@ -3887,7 +3887,7 @@ X86.opOUTDXw = function OUTDXw()
     if (BACKTRACK) this.backTrack.btiIO = this.backTrack.btiAL;
     this.bus.checkPortOutputNotify(port, this.regEAX & 0xff, this.regLIP - 1);
     if (BACKTRACK) this.backTrack.btiIO = this.backTrack.btiAH;
-    this.bus.checkPortOutputNotify((port + 1) & 0xffff, this.regEAX >> 8, this.regLIP - 1);
+    this.bus.checkPortOutputNotify((port + 1) & 0xffff, (this.regEAX >> 8) & 0xff, this.regLIP - 1);
     this.nStepCycles -= this.cycleCounts.nOpCyclesOutDX;
 };
 

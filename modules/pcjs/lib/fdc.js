@@ -1890,7 +1890,7 @@ FDC.prototype.doCmd = function()
         n = 0;
         drive.resCode = FDC.REG_DATA.RES.NONE;
         if (drive.disk && (drive.sector = drive.disk.seek(drive.bCylinder, drive.bHead, drive.bSector))) {
-            n = drive.sector.length;
+            n = (drive.sector.length >> 8);
         } else {
             /*
              * TODO: Determine the appropriate response code(s) for the possible errors that can occur here.
@@ -2089,6 +2089,7 @@ FDC.prototype.pushResult = function(bResult, name)
     if (DEBUG && this.messageEnabled(Messages.PORT | Messages.FDC)) {
         this.printMessage("FDC.RES[" + (name || this.regDataTotal) + "]: " + str.toHexByte(bResult), true);
     }
+    this.assert(!(bResult & ~0xff));
     this.regDataArray[this.regDataTotal++] = bResult;
 };
 
