@@ -1890,7 +1890,7 @@ FDC.prototype.doCmd = function()
         n = 0;
         drive.resCode = FDC.REG_DATA.RES.NONE;
         if (drive.disk && (drive.sector = drive.disk.seek(drive.bCylinder, drive.bHead, drive.bSector))) {
-            n = (drive.sector.length >> 8);
+            n = (drive.sector['length'] >> 8);
         } else {
             /*
              * TODO: Determine the appropriate response code(s) for the possible errors that can occur here.

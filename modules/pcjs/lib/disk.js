@@ -229,16 +229,479 @@ function Disk(controller, drive, mode)
 }
 
 /**
- * @typedef {{
- *  sPath:  string,
- *  sName:  string,
- *  bAttr:  number,
- *  cbSize: number,
- *  apba:   Array.<number>,
- *  disk:   Disk
- * }}
+ * The default number of milliseconds to wait before writing a dirty sector back to a remote disk image
+ *
+ * @const {number}
  */
-var FileInfo;
+Disk.REMOTE_WRITE_DELAY = 2000;         // 2-second delay
+
+/*
+ * A global disk count, used to form unique Disk component IDs (totally optional; for debugging purposes only)
+ */
+Disk.nDisks = 0;
+
+Component.subclass(Disk);
+
+/**
+ * FileInfo(disk, sPath, sName, bAttr, cbSize, apba)
+ *
+ * To the basic file information below, loadSymbols() may also add:
+ *
+ *      sModule
+ *      sDescription
+ *      aSegments[]
+ *
+ * which is indexed by 1-based segment numbers, where each aSegments[] element is an object
+ * containing:
+ *
+ *      offStart (file-relative offset of start of segment data)
+ *      offEnd (file-relative offset of end of segment data)
+ *      aEntries[]
+ *
+ * where aEntries is an array indexed by 1-based ordinals, where each aEntries[] element contains:
+ *
+ *      [offset, symbol]
+ *
+ * where offset is relative to the segment's offStart value, and symbol is a string describing the
+ * entry.
+ *
+ * There will always be an offset at index 0 of an aEntries[] element, but some error or incomplete
+ * symbolic information could result in a missing symbol at index 1, because symbol name processing is
+ * separate from entry table processing.
+ *
+ * @constructor
+ * @param {Disk} disk
+ * @param {string} sPath
+ * @param {string} sName
+ * @param {number} bAttr
+ * @param {number} cbSize
+ * @param {Array.<number>} apba
+ */
+function FileInfo(disk, sPath, sName, bAttr, cbSize, apba)
+{
+    this.disk = disk;
+    this.sPath = sPath;
+    this.sName = sName;
+    this.bAttr = bAttr;
+    this.cbSize = cbSize;
+    this.apba = apba;
+}
+
+/*
+ * Original (aka "Old") Executable MS-DOS File Format
+ *
+ * Relocation entries are pairs of 16-bit words:
+ *
+ *      wOffset
+ *      wSegment
+ *
+ * I've noticed that a "PKLITE" EXE may have a oeRelocOffset of 0x52, where the word at 0x001C is 0x210F and the
+ * bytes from 0x001E through 0x0051 are:
+ *
+ *      "PKLITE Copr. 1990-92 PKWARE Inc. All Rights Reserved"
+ *
+ * Other EXEs have a oeRelocOffset of 0x1E, which begs the question: what is the word at 0x001C typically used for?
+ *
+ * It was not uncommon for there to be wasted space in the header; even an EXE with, say, 20 (0x14) entries would
+ * likely have a wHeaderParas value of 0x20, which is 512 (0x200) bytes.  The desire, no doubt, was to align the
+ * start of the EXE segment(s) to a traditional sector boundary.
+ */
+FileInfo.OE = {
+    SIG:            0x5A4D,
+    oeSignature:    [0x0000, 2],        // "MZ" (0x4D,0x5A)
+    oeLastBytes:    [0x0002, 2],        // 0-511 (0 means the entire last block is used)
+    oeBlocks:       [0x0004, 2],        // number of blocks in the file
+    oeRelocEntries: [0x0006, 2],        // number of relocation entries in the header
+    oeHeaderParas:  [0x0008, 2],        // number of (16-byte) paragraphs in the header
+    oeExtraParas:   [0x000A, 2],        // minimum number of additional paragraphs required at load-time
+    oeMaxParas:     [0x000C, 2],        // maximum number of additional paragraphs required at load-time
+    oeSSRel:        [0x000E, 2],        // relative value of SS
+    oeSPInit:       [0x0010, 2],        // initial value of SP
+    oeChecksum:     [0x0012, 2],        // checksum if non-zero (sum of all words, including this, should be zero)
+    oeIPInit:       [0x0014, 2],        // initial value of IP
+    oeCSRel:        [0x0016, 2],        // relative value of CS
+    oeRelocOffset:  [0x0018, 2],        // offset of first relocation item
+    oeOverlay:      [0x001A, 2],        // overlay number (normally zero, implying main program)
+    /*
+     * The following fields are accommodated by the NE format, but they were actually defined by "the DOS 4.0 group"
+     * as extensions to the OE format.
+     */
+    oeDOS40Bits:    [0x0020, 2],        // DOS 4.0 behavior bits
+    oeUnusedBits:   [0x0022, 2],        // unused behavior bits
+    /*
+     * If oeRelocOffset (0x0018) is 0x40, then the file is considered an NE (New Executable) MS-DOS file, and
+     * the offset of the NE header (from the start of the file) is a 32-bit value stored at 0x003C.  Note that early
+     * versions of Windows (aka "DOS 2.0 Windows") originally defined the NE header offset as a 16-bit value stored
+     * at 0x003E.  And before that, it may have been a 16-bit value stored at 0x0024, which would have been immediately
+     * after the "behavior bits" fields shown above).
+     */
+    oeNEHeader:     [0x003C, 4],        // offset from start of file to NE header
+    NE_SIG:         0x40
+};
+
+/*
+ * New Executable MS-DOS File Format
+ *
+ * Unless otherwise specified, all *Offset fields are relative to the start of the NE header, and all *Size fields
+ * are in bytes.
+ */
+FileInfo.NE = {
+    SIG:            0x454E,
+    neSignature:    [0x0000, 2],        // "NE" (0x4E,0x45)
+    neLinkerVer:    [0x0002, 2],        // (low byte is version, high byte is revision)
+    neETOffset:     [0x0004, 2],        // Entry Table offset
+    neETSize:       [0x0006, 2],        // Entry Table size
+    neChecksum:     [0x0008, 4],        // checksum (sum of all DWORDs in the file, excluding this one)
+    neFlags:        [0x000C, 2],
+    neDataSeg:      [0x000E, 2],
+    neHeapSize:     [0x0010, 2],
+    neStackSize:    [0x0012, 2],
+    neCSIP:         [0x0014, 4],
+    neSSSP:         [0x0018, 4],
+    neSTEntries:    [0x001C, 2],        // Segment Table entries
+    neMRTEntries:   [0x001E, 2],        // Module Reference Table entries
+    neNRNTSize:     [0x0020, 2],        // Non-Resident Name Table size
+    neSTOffset:     [0x0022, 2],        // Segment Table offset
+    neRTOffset:     [0x0024, 2],        // Resource Table offset
+    neRNTOffset:    [0x0026, 2],        // Resident Name Table offset
+    neMRTOffset:    [0x0028, 2],        // Module Reference Table offset
+    neINTOffset:    [0x002A, 2],        // Imported Names Table offset
+    neNRNTOffset:   [0x002C, 4],        // Non-Resident Name Table offset (relative to start of file)
+    neETMovable:    [0x0030, 2],        // number of movable entries in the Entry Table
+    neSegOffShift:  [0x0032, 2],        // logical sector alignment shift count, log(base 2) of the segment sector size (default 9)
+    /*
+     * Fields after this point are post "DOS 2.0 Windows"...
+     */
+    neRTEntries:    [0x0034, 2],        // Resource Table entries
+    neEXEType:      [0x0036, 1]         // executable type (0x02 for Windows)
+    /*
+     * 0x37 through 0x3F is reserved.
+     */
+};
+
+/**
+ * loadValue(offset, length)
+ *
+ * @this {FileInfo}
+ * @param {number} offset
+ * @param {number} [length] (1, 2 or 4 bytes; default is 2)
+ * @return {number|undefined}
+ */
+FileInfo.prototype.loadValue = function(offset, length)
+{
+    var l;
+    length = length || 2;
+    var iSector = offset >> 9;
+    var offSector = offset & 0x1ff;
+    var sector = this.disk.getSector(this.apba[iSector]);
+    if (sector) {
+        /*
+         * If the read is wholly contained within a sector, read it with one call.
+         */
+        if (offSector + length <= sector['length']) {
+            return this.disk.getSectorData(sector, offSector, length);
+        }
+        /*
+         * The spans a sector boundary, so we just call ourselves one byte at a time.
+         */
+        l = 0;
+        var shift = 0;
+        while (length--) {
+            l |= this.loadValue(offset++, 1) << shift;
+            shift += 8;
+        }
+    }
+    return l;
+};
+
+/**
+ * loadString(offset, length)
+ *
+ * @this {FileInfo}
+ * @param {number} offset
+ * @param {number} [length] (if omitted, then string must be zero-terminated)
+ * @return {string}
+ */
+FileInfo.prototype.loadString = function(offset, length)
+{
+    var s = "";
+    if (!length) length = -1;
+    while (length--) {
+        var b = this.loadValue(offset++, 1);
+        if (!b) break;
+        s += String.fromCharCode(b);
+    }
+    return s;
+};
+
+/**
+ * loadField(aField, offset)
+ *
+ * @this {FileInfo}
+ * @param {Array.<number>} aField
+ * @param {number} [offset] (0 if not specified)
+ * @return {number|undefined}
+ */
+FileInfo.prototype.loadField = function(aField, offset)
+{
+    return this.loadValue(aField[0] + (offset || 0), aField[1]);
+};
+
+/**
+ * loadSegmentTable(offEntries, nEntries, nSegOffShift)
+ *
+ * @this {FileInfo}
+ * @param {number} offEntries
+ * @param {number} nEntries
+ * @param {number} nSegOffShift
+ */
+FileInfo.prototype.loadSegmentTable = function(offEntries, nEntries, nSegOffShift)
+{
+    /*
+     * Read the Segment Table entries now.
+     */
+    var iSegment = 1;
+    this.aSegments = [];
+    this.aOrdinals = [];                // this is an optional array for quick ordinal-to-segment lookup
+
+    if (MAXDEBUG) this.disk.println("loadSegmentTable(" + this.sPath + "," + str.toHexLong(offEntries) + "," + str.toHexWord(nEntries) + ")");
+
+    while (nEntries--) {
+        var offSegment = this.loadValue(offEntries) << nSegOffShift;
+        if (offSegment) {
+            var lenSegment = this.loadValue(offEntries + 2) || 0x10000;       // 0 means 64K
+
+            if (MAXDEBUG) this.disk.println("segment " + iSegment + ": offStart=" + str.toHexLong(offSegment) + " offEnd=" + str.toHexLong(offSegment + lenSegment));
+
+            this.aSegments[iSegment++] = {offStart: offSegment, offEnd: offSegment + lenSegment - 1, aEntries: []};
+        }
+        offEntries += 8;
+    }
+};
+
+/**
+ * loadEntryTable(offEntries, offEntriesEnd)
+ *
+ * @this {FileInfo}
+ * @param {number} offEntries
+ * @param {number} offEntriesEnd
+ */
+FileInfo.prototype.loadEntryTable = function(offEntries, offEntriesEnd)
+{
+    var iOrdinal = 1;
+
+    if (MAXDEBUG) this.disk.println("loadEntryTable(" + str.toHexLong(offEntries) + "," + str.toHexLong(offEntriesEnd) + ")");
+
+    while (offEntries < offEntriesEnd) {
+
+        var w = this.loadValue(offEntries);
+        var bEntries = w & 0xff;
+        if (!bEntries) break;
+        var bSegment = w >> 8, iSegment;
+
+        if (MAXDEBUG) this.disk.println("bundle for segment " + bSegment + ": " + bEntries + " entries @" + str.toHex(offEntries));
+
+        offEntries += 2;
+
+        /*
+         * bSegment 0x00 means all the entries spanned by bEntries are unused, so move on.
+         */
+        if (!bSegment) {
+            iOrdinal += bEntries;
+            continue;
+        }
+        while (bEntries--) {
+            /*
+             * bSegment 0x01-0xFE means the next 3 bytes describe a fixed segment entry; the next
+             * byte contains flags indicating exported (0x1) and/or global/shared (0x2) data, and the
+             * next word is the offset within the segment.
+             */
+            var offEntry;
+            var offDebug = offEntries;
+            var bFlags = this.loadValue(offEntries, 1);
+
+            if (bSegment <= 0xFE) {
+                iSegment = bSegment;
+                offEntry = this.loadValue(offEntries + 1);
+                offEntries += 3;
+            } else {
+                /*
+                 * bSegment 0xFF means a movable segment entry, which is 6 bytes long: flags byte (which
+                 * we've already read), an INT 0x3F (0xCD,0x3F), a 1-byte segment number, and a 2-byte offset.
+                 */
+                iSegment = this.loadValue(offEntries + 3, 1);
+                offEntry = this.loadValue(offEntries + 4);
+                offEntries += 6;
+            }
+            if (!this.aSegments[iSegment]) {
+                if (MAXDEBUG) this.disk.println("invalid segment: " + iSegment);
+                break;
+            }
+            this.aSegments[iSegment].aEntries[iOrdinal] = [offEntry];
+
+            if (MAXDEBUG) this.disk.println("ordinal " + iOrdinal + ": segment=" + iSegment + " offset=" + str.toHexLong(offEntry) + " @" + str.toHex(offDebug));
+
+            this.aOrdinals[iOrdinal] = iSegment;
+            iOrdinal++;
+        }
+    }
+};
+
+/**
+ * loadNameTable(aField, offset)
+ *
+ * NOTE: If offset is omitted, we assume we're reading the Resident Name Table, and therefore
+ * the first name is the module name; otherwise, we assume it is the Non-Resident Name Table, and
+ * that the first name is the module description.
+ *
+ * @this {FileInfo}
+ * @param {number} offEntries
+ * @param {number} [offEntriesEnd] (if omitted, then the table must be null-terminated)
+ */
+FileInfo.prototype.loadNameTable = function(offEntries, offEntriesEnd)
+{
+    var cNames = 0;
+
+    if (MAXDEBUG) this.disk.println("loadNameTable(" + str.toHexLong(offEntries) + (offEntriesEnd? ("," + str.toHexLong(offEntriesEnd)) : "") + ")");
+
+    while (!offEntriesEnd || offEntries < offEntriesEnd) {
+
+        var offDebug = offEntries;
+        var bLength = this.loadValue(offEntries, 1);
+        if (!bLength) break;
+
+        var sSymbol = this.loadString(offEntries + 1, bLength);
+        if (!sSymbol) break;                // an error must have occurred (this is not a natural way to end)
+        offEntries += 1 + bLength;
+
+        if (!cNames) {
+            if (!offEntriesEnd) {
+                this.sModule = sSymbol;
+            } else {
+                this.sDescription = sSymbol;
+            }
+        }
+        else {
+            var iOrdinal = this.loadValue(offEntries);
+            var iSegment = this.aOrdinals[iOrdinal];
+            if (iSegment !== undefined) {
+                var aEntries = this.aSegments[iSegment].aEntries[iOrdinal];
+                this.disk.assert(aEntries && aEntries.length == 1);
+                aEntries.push(sSymbol);
+                if (MAXDEBUG) this.disk.println("segment " + iSegment + " offset " + str.toHexWord(aEntries[0]) + " ordinal " + iOrdinal + ": " + sSymbol + " @" + str.toHex(offDebug));
+            } else {
+                if (MAXDEBUG) this.disk.println(this.sPath + ": cannot find ordinal " + iOrdinal + " @" + str.toHex(offDebug));
+            }
+        }
+        offEntries += 2;
+        cNames++;
+    }
+};
+
+/**
+ * loadSymbols()
+ *
+ * For files with NE headers, extract all available symbolic information from the file.
+ *
+ * @this {FileInfo}
+ */
+FileInfo.prototype.loadSymbols = function()
+{
+    if (!str.endsWith(this.sName, ".EXE") && !str.endsWith(this.sName, ".DLL") && !str.endsWith(this.sName, ".DRV")) {
+        return;
+    }
+
+    if (this.loadField(FileInfo.OE.oeSignature) != FileInfo.OE.SIG) {
+        return;
+    }
+
+    if (this.loadField(FileInfo.OE.oeRelocOffset) != FileInfo.OE.NE_SIG) {
+        return;
+    }
+
+    var offNEHeader = this.loadField(FileInfo.OE.oeNEHeader);
+    if (this.loadField(FileInfo.NE.neSignature, offNEHeader) != FileInfo.NE.SIG) {
+        return;
+    }
+
+    var nEntries = this.loadField(FileInfo.NE.neSTEntries, offNEHeader);
+    var offEntries = this.loadField(FileInfo.NE.neSTOffset, offNEHeader);
+    var nSegOffShift = this.loadField(FileInfo.NE.neSegOffShift, offNEHeader);
+
+    if (offEntries && nEntries) {
+        this.loadSegmentTable(offEntries + offNEHeader, nEntries, nSegOffShift || 0);
+    }
+
+    offEntries = this.loadField(FileInfo.NE.neETOffset, offNEHeader);
+    var cbEntries = this.loadField(FileInfo.NE.neETSize, offNEHeader);
+    if (offEntries && cbEntries) {
+        this.loadEntryTable(offEntries += offNEHeader, offEntries + cbEntries);
+    }
+
+    /*
+     * Time to walk the Resident Name Table and update the corresponding ordinals.
+     */
+    offEntries = this.loadField(FileInfo.NE.neRNTOffset, offNEHeader);
+    if (offEntries) {
+        this.loadNameTable(offEntries + offNEHeader);
+    }
+
+    /*
+     * Ditto for the Non-Resident Name Table, which for some reason, uses a file-relative offset rather than
+     * an NE header-relative offset, and which is both sized AND null-terminated; we check both terminating
+     * conditions to be safe.
+     */
+    offEntries = this.loadField(FileInfo.NE.neNRNTOffset, offNEHeader);
+    cbEntries = this.loadField(FileInfo.NE.neNRNTSize, offNEHeader);
+    if (offEntries && cbEntries) {
+        this.loadNameTable(offEntries, offEntries + cbEntries);
+    }
+};
+
+/**
+ * getSymbol(off, fNearest)
+ *
+ * @this {FileInfo}
+ * @param {number} off (offset relative to start of file)
+ * @param {boolean} [fNearest] (true to return nearest symbol if a segment with symbols is found)
+ * @return {string} symbol corresponding to file offset (of the file name + offset if no symbol found)
+ */
+FileInfo.prototype.getSymbol = function(off, fNearest)
+{
+    var sSymbol = null;
+    if (this.aSegments) {
+        for (var iSegment in this.aSegments) {
+            var segment = this.aSegments[iSegment];
+            if (off >= segment.offStart && off <= segment.offEnd) {
+                /*
+                 * This is the one and only segment we need to check, so we can make off segment-relative now.
+                 */
+                off -= segment.offStart;
+                /*
+                 * To support fNearest, save the entry where (off - entry[0]) yields the smallest positive result.
+                 */
+                var cbNearest = off, entryNearest;
+                for (var iEntry in segment.aEntries) {
+                    var entry = segment.aEntries[iEntry];
+                    var cb = off - entry[0];
+                    if (!cb) {
+                        sSymbol = this.sModule + '!' + entry[1];
+                        break;
+                    }
+                    if (fNearest && cb > 0 && cb < cbNearest) {
+                        entryNearest = entry;
+                        cbNearest = cb;
+                    }
+                }
+                if (!sSymbol && entryNearest) {
+                    sSymbol = this.sModule + '!' + entryNearest[1] + "+" + str.toHexWord(cbNearest);
+                }
+                break;
+            }
+        }
+    }
+    return sSymbol || this.sName + '[' + str.toHexLong(off) + ']';
+};
 
 /**
  * Every Sector object (once loaded and fully parsed) should have ALL of the following named properties:
@@ -292,20 +755,6 @@ var SectorData;
  * @property {boolean} 4 contains fAsync
  * @property {function(nErrorCode:number,fAsync:boolean)} 5 contains done
  */
-
-/**
- * The default number of milliseconds to wait before writing a dirty sector back to a remote disk image
- *
- * @const {number}
- */
-Disk.REMOTE_WRITE_DELAY = 2000;         // 2-second delay
-
-/*
- * A global disk count, used to form unique Disk component IDs
- */
-Disk.nDisks = 0;
-
-Component.subclass(Disk);
 
 /**
  * initBus(cmp, bus, cpu, dbg)
@@ -885,8 +1334,14 @@ Disk.prototype.doneLoad = function(sDiskFile, sDiskData, nErrorCode, sDiskPath)
 /**
  * buildFileTable()
  *
- * This function builds a complete file table from the (first) FAT volume found on the current disk, and
- * then updates all the sector objects to point back to the corresponding file.  Used for BACKTRACK support.
+ * This function builds (or rebuilds) a complete file table from the (first) FAT volume found on the current
+ * disk, and then updates all the sector objects to point back to the corresponding file.  Used for BACKTRACK
+ * support, and like BACKTRACK support, this is an expensive operation, in terms of both time and memory, so
+ * it should only be called when a disk is mounted or has been modified (eg, by applying deltas from a saved
+ * machine state).
+ *
+ * More recently, the FileInfo objects in the table have been enhanced to include debugging information if
+ * the file is an EXE or DLL, which we determine merely by checking the file extension.
  *
  * Note that while most of the methods in this module use CHS-style parameters, because our primary clients
  * are old disk controllers that deal exclusively with cylinder/head/sector values, here we use 0-based
@@ -897,14 +1352,15 @@ Disk.prototype.doneLoad = function(sDiskFile, sDiskData, nErrorCode, sDiskPath)
  * of PCjs, what we call PBA numbers are what those controllers would later call LBA numbers.
  *
  * @this {Disk}
+ * @return {Array.<FileInfo>|undefined}
  */
 Disk.prototype.buildFileTable = function()
 {
     if (BACKTRACK) {
 
-        var i, off, dir = {};
+        var i, off, dir = {}, iSector;
 
-        if (this.aFileTable) {
+        if (this.aFileTable && this.aFileTable.length) {
             /*
              * In order for buildFileTable() to rebuild an existing table (eg, after deltas have been
              * applied), we need to zap any and all existing file table references in the sector data.
@@ -912,7 +1368,7 @@ Disk.prototype.buildFileTable = function()
             var aDiskData = this.aDiskData;
             for (var iCylinder = 0; iCylinder < aDiskData.length; iCylinder++) {
                 for (var iHead = 0; iHead < aDiskData[iCylinder].length; iHead++) {
-                    for (var iSector = 0; iSector < aDiskData[iCylinder][iHead].length; iSector++) {
+                    for (iSector = 0; iSector < aDiskData[iCylinder][iHead].length; iSector++) {
                         var sector = aDiskData[iCylinder][iHead][iSector];
                         if (sector) {
                             delete sector['file'];
@@ -1071,12 +1527,14 @@ Disk.prototype.buildFileTable = function()
         for (i = 0; i < this.aFileTable.length; i++) {
             var file = this.aFileTable[i];
             off = 0;
-            for (var iSector = 0; iSector < file.apba.length; iSector++) {
+            for (iSector = 0; iSector < file.apba.length; iSector++) {
                 this.updateSector(file, file.apba[iSector], off);
                 off += this.cbSector;
             }
+            file.loadSymbols();
         }
     }
+    return this.aFileTable;
 };
 
 /**
@@ -1090,6 +1548,7 @@ Disk.prototype.buildFileTable = function()
  */
 Disk.prototype.getDir = function(dir, sDisk, sDir, apba)
 {
+    var file;
     var iStart = this.aFileTable.length;
     var nEntriesPerSector = (dir.cbSector / DiskAPI.DIRENT.LENGTH) | 0;
 
@@ -1110,14 +1569,15 @@ Disk.prototype.getDir = function(dir, sDisk, sDir, apba)
                 this.printMessage('"' + sPath + '" size=' + dir.cbSize + ' cluster=' + dir.iCluster + ' sectors=' + JSON.stringify(dir.apba));
                 if (dir.apba.length) this.printMessage(this.dumpSector(this.getSector(dir.apba[0]), dir.apba[0], sPath));
             }
-            this.aFileTable.push({sPath: sPath, sName: dir.sName, bAttr: dir.bAttr, cbSize: dir.cbSize, apba: dir.apba, disk: this});
+            file = new FileInfo(this, sPath, dir.sName, dir.bAttr, dir.cbSize, dir.apba);
+            this.aFileTable.push(file);
         }
     }
 
     var iEnd = this.aFileTable.length;
 
     for (var i = iStart; i < iEnd; i++) {
-        var file = this.aFileTable[i];
+        file = this.aFileTable[i];
         if (file.bAttr & DiskAPI.ATTR.SUBDIR && file.apba.length) this.getDir(dir, sDisk, sDir + "\\" + file.sName, file.apba);
     }
 };
@@ -1316,6 +1776,8 @@ Disk.prototype.updateSector = function(file, pba, off)
 /**
  * getSectorData(sector, off, len)
  *
+ * WARNING: This function is restricted to reading data contained ENTIRELY within the specified sector.
+ *
  * NOTE: Yes, this function is not the most efficient way to read a byte/word/dword value from within a sector,
  * but given the different states a sector may be in, it's certainly the simplest and safest, and since this is
  * only used by buildFileTable() and its progeny, it's not clear that we need to be superfast anyway.
@@ -1344,6 +1806,8 @@ Disk.prototype.getSectorData = function(sector, off, len)
 
 /**
  * getSectorString(sector, off, len)
+ *
+ * WARNING: This function is restricted to reading a string contained ENTIRELY within the specified sector.
  *
  * @this {Disk}
  * @param {Object} sector

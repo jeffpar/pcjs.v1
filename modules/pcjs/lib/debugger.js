@@ -3689,8 +3689,9 @@ if (DEBUGGER) {
                     disp = this.getWord(dbgAddr, true);
                 }
                 offset = (dbgAddr.off + disp) & (dbgAddr.fData32? -1 : 0xffff);
+                sOperand = str.toHex(offset, dbgAddr.fData32? 8: 4);
                 var aSymbol = this.findSymbolAtAddr(this.newAddr(offset, dbgAddr.sel));
-                sOperand = aSymbol[0] || str.toHex(offset, dbgAddr.fData32? 8: 4);
+                if (aSymbol[0]) sOperand += " (" + aSymbol[0] + ")";
             }
             else if (typeMode == Debugger.TYPE_IMPREG) {
                 sOperand = this.getRegOperand((type & Debugger.TYPE_IREG) >> 8, type, dbgAddr);
@@ -3754,6 +3755,7 @@ if (DEBUGGER) {
     {
         var sOperand = ' ';
         var typeSize = type & Debugger.TYPE_SIZE;
+
         switch (typeSize) {
         case Debugger.TYPE_BYTE:
             /*
@@ -3779,7 +3781,10 @@ if (DEBUGGER) {
             sOperand = str.toHex(this.getShort(dbgAddr, 2), 4);
             break;
         case Debugger.TYPE_FARP:
-            sOperand = this.hexAddr(this.newAddr(this.getWord(dbgAddr, true), this.getShort(dbgAddr, 2), null, dbgAddr.fProt, dbgAddr.fData32, dbgAddr.fAddr32));
+            dbgAddr = this.newAddr(this.getWord(dbgAddr, true), this.getShort(dbgAddr, 2), null, dbgAddr.fProt, dbgAddr.fData32, dbgAddr.fAddr32);
+            sOperand = this.hexAddr(dbgAddr);
+            var aSymbol = this.findSymbolAtAddr(dbgAddr);
+            if (aSymbol[0]) sOperand += " (" + aSymbol[0] + ")";
             break;
         default:
             sOperand = "imm(" + str.toHexWord(type) + ')';
@@ -4714,7 +4719,7 @@ if (DEBUGGER) {
      * @this {Debugger}
      * @param {DbgAddr} dbgAddr
      * @param {boolean} [fNearest]
-     * @return {Array|null} where [0] == symbol name, [1] == symbol value, [2] == any annotation, and [3] == any associated comment
+     * @return {Array} where [0] == symbol name, [1] == symbol value, [2] == any annotation, and [3] == any associated comment
      */
     Debugger.prototype.findSymbolAtAddr = function(dbgAddr, fNearest)
     {
@@ -4740,6 +4745,13 @@ if (DEBUGGER) {
                     this.returnSymbol(iTable, result, aSymbol);
                 }
                 break;
+            }
+        }
+        if (!aSymbol.length) {
+            var sSymbol = this.bus.getSymbol(addr, true);
+            if (sSymbol) {
+                aSymbol.push(sSymbol);
+                aSymbol.push(addr);
             }
         }
         return aSymbol;
@@ -5084,7 +5096,7 @@ if (DEBUGGER) {
         if (BACKTRACK && sCmd == "di") {
             var addr = this.getAddr(dbgAddr);
             sDump += '%' + str.toHex(addr) + ": ";
-            var sInfo = this.bus.getBackTrackInfoFromAddr(addr);
+            var sInfo = this.bus.getSymbol(addr, true);
             sDump += sInfo || "no information";
         }
         else {
@@ -6221,7 +6233,7 @@ if (DEBUGGER) {
                 }
             }
             if (!sCall) break;
-            sCall = str.pad(sCall, 50) + ";stack=" + this.hexAddr(dbgAddrStack) + " return=" + this.hexAddr(dbgAddrCall);
+            sCall = str.pad(sCall, 50) + "  ;stack=" + this.hexAddr(dbgAddrStack) + " return=" + this.hexAddr(dbgAddrCall);
             this.println(sCall);
             cFrames++;
         }
@@ -6347,10 +6359,12 @@ if (DEBUGGER) {
             var sComment = (nSequence != null? "cycles" : null);
             var aSymbol = this.findSymbolAtAddr(dbgAddr);
 
-            if (aSymbol[0]) {
-                var sLabel = aSymbol[0] + ':';
-                if (aSymbol[2]) sLabel += ' ' + aSymbol[2];
-                this.println(sLabel);
+            if (aSymbol[0] && n) {
+                if (!cLines && n || aSymbol[0].indexOf('+') < 0) {
+                    var sLabel = aSymbol[0] + ':';
+                    if (aSymbol[2]) sLabel += ' ' + aSymbol[2];
+                    this.println(sLabel);
+                }
             }
 
             if (aSymbol[3]) {
@@ -6453,7 +6467,7 @@ if (DEBUGGER) {
                     sCmd = "a " + this.hexAddr(this.dbgAddrAssemble) + ' ' + sCmd;
                 }
 
-                var asArgs = sCmd.split(' ');
+                var asArgs = sCmd.replace(/ +/g, ' ').split(' ');
                 var ch0 = asArgs[0].charAt(0).toLowerCase();
 
                 switch (ch0) {

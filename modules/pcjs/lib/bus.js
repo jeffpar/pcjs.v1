@@ -1131,13 +1131,15 @@ Bus.prototype.getBackTrackObjectFromAddr = function(addr)
 };
 
 /**
- * getBackTrackInfo(bti)
+ * getBackTrackInfo(bti, fSymbol, fNearest)
  *
  * @this {Bus}
  * @param {number} bti
+ * @param {boolean} [fSymbol] (true to return only symbol)
+ * @param {boolean} [fNearest] (true to return nearest symbol)
  * @return {string|null}
  */
-Bus.prototype.getBackTrackInfo = function(bti)
+Bus.prototype.getBackTrackInfo = function(bti, fSymbol, fNearest)
 {
     if (BACKTRACK) {
         var bto = this.getBackTrackObject(bti);
@@ -1146,9 +1148,11 @@ Bus.prototype.getBackTrackInfo = function(bti)
             var file = bto.obj.file;
             if (file) {
                 this.assert(!bto.off);
-                return file.sName + '[' + str.toHexLong(bto.obj.offFile + off) + ']';
+                return file.getSymbol(bto.obj.offFile + off, fNearest);
             }
-            return bto.obj.idComponent + '[' + str.toHexLong(bto.off + off) + ']';
+            if (!fSymbol || fNearest) {
+                return bto.obj.idComponent + '+' + str.toHexLong(bto.off + off);
+            }
         }
     }
     return null;
@@ -1164,6 +1168,19 @@ Bus.prototype.getBackTrackInfo = function(bti)
 Bus.prototype.getBackTrackInfoFromAddr = function(addr)
 {
     return BACKTRACK? this.getBackTrackInfo(this.readBackTrack(addr)) : null;
+};
+
+/**
+ * getSymbol(addr, fNearest)
+ *
+ * @this {Bus}
+ * @param {number} addr
+ * @param {boolean} [fNearest] (true to return nearest symbol)
+ * @return {string|null}
+ */
+Bus.prototype.getSymbol = function(addr, fNearest)
+{
+    return BACKTRACK? this.getBackTrackInfo(this.readBackTrack(addr), true, fNearest) : null;
 };
 
 /**
