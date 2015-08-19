@@ -3253,6 +3253,24 @@ if (DEBUGGER) {
     /**
      * addBreakpoint(aBreak, dbgAddr, fTempBreak)
      *
+     * In case you haven't already figured this out, all our breakpoint commands use the address
+     * to identify a breakpoint, not some randomly assigned breakpoint index like other debuggers;
+     * see doBreak() for details.
+     *
+     * This has a few implications, one being that you CANNOT set more than one kind of breakpoint
+     * on a single address.  In practice, that's rarely a problem, because you can almost always
+     * set a different breakpoint on a neighboring address.
+     *
+     * Also, there is one exception to the "one address, one breakpoint" rule, and that involves
+     * temporary breakpoints (ie, one-time execution breakpoints that either a "p" or "g" command
+     * can create to step over a chunk of code).  Those breakpoints automatically clear themselves,
+     * so there usually isn't any need to refer to them using breakpoint commands.
+     *
+     * TODO: Consider supporting the more "traditional" breakpoint index syntax; the current
+     * address-based syntax was implemented solely for expediency and orthogonality.  At the same
+     * time, also consider a more WDEB386-like syntax, where "br" is used to set a variety of
+     * access breakpoints using modifiers like "r1", "r2", "w1", "w2, etc.
+     *
      * @this {Debugger}
      * @param {Array} aBreak
      * @param {DbgAddr} dbgAddr
@@ -3261,47 +3279,51 @@ if (DEBUGGER) {
      */
     Debugger.prototype.addBreakpoint = function(aBreak, dbgAddr, fTempBreak)
     {
-        var fSuccess = false;
+        var fSuccess = true;
 
         // this.nSuppressBreaks++;
 
         /*
-         * We need to allow a temporary breakpoint at an address where they may already be a breakpoint.
+         * Instead of complaining that a breakpoint already exists (as we used to do), we now
+         * allow breakpoints to be re-set; this makes it easier to update any commands that may
+         * be associated with the breakpoint.
+         *
+         * The only exception: we DO allow a temporary breakpoint at an address where there may
+         * already be a breakpoint, so that you can easily step ("p" or "g") over such addresses.
          */
-        if (fTempBreak || !this.findBreakpoint(aBreak, dbgAddr)) {
+        if (!fTempBreak) {
+            this.findBreakpoint(aBreak, dbgAddr, true, false, true);
+        }
 
-            fSuccess = true;
-
-            if (aBreak != this.aBreakExec) {
-                var addr = this.getAddr(dbgAddr);
-                if (addr == X86.ADDR_INVALID) {
-                    this.println("invalid address: " + this.hexAddr(dbgAddr));
-                    fSuccess = false;
-                } else {
-                    this.bus.addMemBreak(addr, aBreak == this.aBreakWrite);
-                    /*
-                     * Force memory breakpoints to use their linear address, by zapping the selector.
-                     */
-                    dbgAddr.sel = null;
-                }
+        if (aBreak != this.aBreakExec) {
+            var addr = this.getAddr(dbgAddr);
+            if (addr == X86.ADDR_INVALID) {
+                this.println("invalid address: " + this.hexAddr(dbgAddr));
+                fSuccess = false;
+            } else {
+                this.bus.addMemBreak(addr, aBreak == this.aBreakWrite);
+                /*
+                 * Force memory breakpoints to use their linear address, by zapping the selector.
+                 */
+                dbgAddr.sel = null;
             }
+        }
 
-            if (fSuccess) {
-                aBreak.push(dbgAddr);
-                if (fTempBreak) {
-                    /*
-                     * Force temporary breakpoints to use their linear address, if one is available, by zapping
-                     * the selector; this allows us to step over calls or interrupts that change the processor mode.
-                     * TODO: Unfortunately, this will fail to trigger a "step" over a call in segment that moves
-                     * during the call; consider alternatives.
-                     */
-                    if (dbgAddr.addr != null) dbgAddr.sel = null;
-                    dbgAddr.fTempBreak = true;
-                }
-                else {
-                    this.printBreakpoint(aBreak, aBreak.length-1);
-                    this.historyInit();
-                }
+        if (fSuccess) {
+            aBreak.push(dbgAddr);
+            if (fTempBreak) {
+                /*
+                 * Force temporary breakpoints to use their linear address, if one is available, by zapping
+                 * the selector; this allows us to step over calls or interrupts that change the processor mode.
+                 * TODO: Unfortunately, this will fail to trigger a "step" over a call in segment that moves
+                 * during the call; consider alternatives.
+                 */
+                if (dbgAddr.addr != null) dbgAddr.sel = null;
+                dbgAddr.fTempBreak = true;
+            }
+            else {
+                this.printBreakpoint(aBreak, aBreak.length-1);
+                this.historyInit();
             }
         }
 
@@ -3311,16 +3333,17 @@ if (DEBUGGER) {
     };
 
     /**
-     * findBreakpoint(aBreak, dbgAddr, fRemove, fTempBreak)
+     * findBreakpoint(aBreak, dbgAddr, fRemove, fTempBreak, fQuiet)
      *
      * @this {Debugger}
      * @param {Array} aBreak
      * @param {DbgAddr} dbgAddr
      * @param {boolean} [fRemove]
      * @param {boolean} [fTempBreak]
+     * @param {boolean} [fQuiet]
      * @return {boolean} true if found, false if not
      */
-    Debugger.prototype.findBreakpoint = function(aBreak, dbgAddr, fRemove, fTempBreak)
+    Debugger.prototype.findBreakpoint = function(aBreak, dbgAddr, fRemove, fTempBreak, fQuiet)
     {
         var fFound = false;
         var addr = this.mapBreakpoint(this.getAddr(dbgAddr));
@@ -3332,7 +3355,7 @@ if (DEBUGGER) {
                     fFound = true;
                     if (fRemove) {
                         if (!dbgAddrBreak.fTempBreak) {
-                            this.printBreakpoint(aBreak, i, "cleared");
+                            if (!fQuiet) this.printBreakpoint(aBreak, i, "cleared");
                         }
                         aBreak.splice(i, 1);
                         if (aBreak != this.aBreakExec) {
@@ -3341,7 +3364,7 @@ if (DEBUGGER) {
                         this.historyInit();
                         break;
                     }
-                    this.printBreakpoint(aBreak, i, "exists");
+                    if (!fQuiet) this.printBreakpoint(aBreak, i, "exists");
                     break;
                 }
             }
@@ -4876,7 +4899,7 @@ if (DEBUGGER) {
      *
      * TODO: Update the "bl" command to include any/all I/O breakpoints, and the "bc" command to
      * clear them.  Because "bi" and "bo" commands are piggy-backing on Bus functions, those breakpoints
-     * are outside the realm of what "bl" and "bc" are aware of.
+     * are currently outside the realm of what the "bl" and "bc" commands are aware of.
      *
      * @this {Debugger}
      * @param {string} sCmd
@@ -6415,11 +6438,42 @@ if (DEBUGGER) {
         }
         var a = [];
         if (sCmd) {
-            if (sCmd.indexOf('"') >= 0) {
-                a = [sCmd];
-            } else {
-                a = sCmd.split(chSep || ';');
-                for (var i = 0; i < a.length; i++) a[i] = str.trim(a[i]);
+            /*
+             * With the introduction of breakpoint commands (ie, quoted command sequences
+             * associated with a breakpoint), we can no longer perform simplistic splitting.
+             *
+             *      a = sCmd.split(chSep || ';');
+             *      for (var i = 0; i < a.length; i++) a[i] = str.trim(a[i]);
+             *
+             * We may now split on semi-colons ONLY if they are outside a quoted sequence.
+             */
+            var iPrev = 0;
+            var chQuote = null;
+            chSep = chSep || ';';
+            /*
+             * NOTE: Processing charAt() up to and INCLUDING length is not a typo; we're taking
+             * advantage of the fact that charAt() with an invalid index returns an empty string,
+             * allowing us to use the same substring() call to capture the final portion of sCmd.
+             *
+             * In a sense, it allows us to pretend that the string ends with a zero terminator.
+             */
+            for (var i = 0; i <= sCmd.length; i++) {
+                var ch = sCmd.charAt(i);
+                if (ch == '"' || ch == "'") {
+                    if (!chQuote) {
+                        chQuote = ch;
+                    } else if (ch == chQuote) {
+                        chQuote = null;
+                    }
+                }
+                else if (ch == chSep && !chQuote || !ch) {
+                    /*
+                     * Recall that substring() accepts starting (inclusive) and ending (exclusive)
+                     * indexes, whereas substr() accepts a starting index and a length.  We need the former.
+                     */
+                    a.push(str.trim(sCmd.substring(iPrev, i)));
+                    iPrev = i + 1;
+                }
             }
         }
         return a;

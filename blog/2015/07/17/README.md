@@ -88,12 +88,27 @@ Update for August 13, 2015
 ---
 
 PCjs v1.18.8 has made a little more progress running Windows 95 Setup, but CAB decompression still fails almost
-immediately.  To monitor DOS calls until the first 36-byte read of PRECOPY1.CAB, try the following breakpoints and
-start the machine, using the PCjs Debugger *input* field next to the **Enter** button:
+immediately.  To monitor DOS calls until the first 36-byte read of PRECOPY1.CAB, try setting the following
+breakpoint and then starting the machine, using the PCjs Debugger *input* field next to the **Enter** button:
 
+	m dos off
 	bp 1ED4:16B4 "let fn=ah;dos;if fn!=3f||cx!=24"
-	bp FDC8:422A "if fn==3f;di ds:dx;db ds:dx lcx;h;else"
 	g
+
+Alternatively, you can hard-code those commands into the Debugger component of the machine.xml file; eg:
+
+	<debugger id="debugger" messages="fault|tss|int" commands='m dos off;bp 1ED4:16B4 "let fn=ah;dos;if fn!=3f||cx!=24"'/>
+
+Once the 36-byte read is hit, you'll probably want to stop on the next instruction that examine those bytes,
+by using a memory read breakpoint:
+
+	br ds:dx
+	
+and you also might want to change the first breakpoint to stop on *any* file read, and add a second breakpoint
+to dump the initial contents of those reads:
+
+	bp 1ED4:16B4 "let fn=ah;dos;if fn!=3f"
+	bp FDC8:422A "if fn==3f;di ds:dx;db ds:dx;h;else"
 
 In the current machine, `1ED4:16B4` is the DOS INT 0x21 entry point and `FDC8:422A` is the corresponding IRET.
 The first breakpoint sets an internal variable, `fn`, to the value of the **AH** register on entry, so that the second

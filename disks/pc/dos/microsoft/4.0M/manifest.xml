@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.18.9/manifest.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.19.1/manifest.xsl"?>
 <manifest type="software">
 	<title>MS-DOS</title>
 	<version>4.0M</version>
