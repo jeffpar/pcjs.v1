@@ -4362,7 +4362,7 @@ if (DEBUGGER) {
      *
      * @this {Debugger}
      * @param {DbgAddr} dbgAddr
-     * @param {string} sOptions
+     * @param {string} [sOptions]
      */
     Debugger.prototype.parseAddrOptions = function(dbgAddr, sOptions)
     {
