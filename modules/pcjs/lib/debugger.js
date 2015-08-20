@@ -2541,6 +2541,12 @@ if (DEBUGGER) {
      */
     Debugger.prototype.replaceRegs = function(s) {
         /*
+         * Replace any references first; this means that register references inside the reference
+         * do NOT need to be prefixed with '%'.
+         */
+        s = this.parseReference(s);
+
+        /*
          * Replace every %XX (or %XXX), where XX (or XXX) is a register, with the register's value.
          */
         var i = 0;
@@ -4460,55 +4466,87 @@ if (DEBUGGER) {
      */
     Debugger.prototype.parseExpression = function(sExp, fPrint)
     {
-        var i = 0, value;
-        var fError = false;
-        var sExpOrig = sExp;
-        var aVals = [], aOps = [];
-        /*
-         * All browsers (including, I believe, IE9 and up) support the following idiosyncrasy of a regexp split():
-         * when the regexp uses a capturing pattern, the resulting array will include entries for all the pattern
-         * matches along with the non-matches.  This effectively means that, in the set of expressions that we
-         * support, all even entries in asValues will contain "values" and all odd entries will contain "operators".
-         *
-         * And although I tried to list the supported operators in "precedential" order, bitwise operators must
-         * be out-of-order so that we don't mistakenly match either '>' or '<' when they're part of '>>' or '<<'.
-         */
-        var regExp = /(\|\||&&|\||^|&|!=|==|>=|>>>|>>|>|<=|<<|<|-|\+|%|\/|\*)/;
-        var asValues = sExp.split(regExp);
-        while (i < asValues.length) {
-            var sValue = asValues[i++];
-            var cchValue = sValue.length;
-            var s = str.trim(sValue);
-            if (!s) {
+        var value;
+
+        if (sExp) {
+            sExp = this.parseReference(sExp);
+
+            var i = 0;
+            var fError = false;
+            var sExpOrig = sExp;
+            var aVals = [], aOps = [];
+            /*
+             * All browsers (including, I believe, IE9 and up) support the following idiosyncrasy of a regexp split():
+             * when the regexp uses a capturing pattern, the resulting array will include entries for all the pattern
+             * matches along with the non-matches.  This effectively means that, in the set of expressions that we
+             * support, all even entries in asValues will contain "values" and all odd entries will contain "operators".
+             *
+             * And although I tried to list the supported operators in "precedential" order, bitwise operators must
+             * be out-of-order so that we don't mistakenly match either '>' or '<' when they're part of '>>' or '<<'.
+             */
+            var regExp = /(\|\||&&|\||^|&|!=|==|>=|>>>|>>|>|<=|<<|<|-|\+|%|\/|\*)/;
+            var asValues = sExp.split(regExp);
+            while (i < asValues.length) {
+                var sValue = asValues[i++];
+                var cchValue = sValue.length;
+                var s = str.trim(sValue);
+                if (!s) {
+                    fError = true;
+                    break;
+                }
+                var v = this.parseValue(s, null, fPrint === false);
+                if (v === undefined) {
+                    fError = true;
+                    fPrint = false;
+                    break;
+                }
+                aVals.push(v);
+                if (i == asValues.length) break;
+                var sOp = asValues[i++], cchOp = sOp.length;
+                this.assert(Debugger.aBinOpPrecedence[sOp] != null);
+                if (aOps.length && Debugger.aBinOpPrecedence[sOp] < Debugger.aBinOpPrecedence[aOps[aOps.length-1]]) {
+                    this.evalExpression(aVals, aOps, 1);
+                }
+                aOps.push(sOp);
+                sExp = sExp.substr(cchValue + cchOp);
+            }
+            if (!this.evalExpression(aVals, aOps) || aVals.length != 1) {
                 fError = true;
-                break;
             }
-            var v = this.parseValue(s, null, fPrint === false);
-            if (v === undefined) {
-                fError = true;
-                fPrint = false;
-                break;
+            if (!fError) {
+                value = aVals.pop();
+                if (fPrint) this.printValue(null, value);
+            } else {
+                if (fPrint) this.println("error parsing '" + sExpOrig + "' at character " + (sExpOrig.length - sExp.length));
             }
-            aVals.push(v);
-            if (i == asValues.length) break;
-            var sOp = asValues[i++], cchOp = sOp.length;
-            this.assert(Debugger.aBinOpPrecedence[sOp] != null);
-            if (aOps.length && Debugger.aBinOpPrecedence[sOp] < Debugger.aBinOpPrecedence[aOps[aOps.length-1]]) {
-                this.evalExpression(aVals, aOps, 1);
-            }
-            aOps.push(sOp);
-            sExp = sExp.substr(cchValue + cchOp);
-        }
-        if (!this.evalExpression(aVals, aOps) || aVals.length != 1) {
-            fError = true;
-        }
-        if (!fError) {
-            value = aVals.pop();
-            if (fPrint) this.printValue(null, value);
-        } else {
-            if (fPrint) this.println("error parsing '" + sExpOrig + "' at character " + (sExpOrig.length - sExp.length));
         }
         return value;
+    };
+
+    /**
+     * parseReference(sValue)
+     *
+     * Returns the given string with any "{expression}" sequences replaced with the value of the expression,
+     * and any "[address]" references replaced with the contents of the address.  Expressions are parsed BEFORE
+     * addresses.
+     *
+     * @this {Debugger}
+     * @param {string} sValue
+     * @return {string}
+     */
+    Debugger.prototype.parseReference = function(sValue)
+    {
+        var a;
+        while (a = sValue.match(/\{(.*)\}/)) {
+            var value = this.parseExpression(a[1]);
+            sValue = sValue.replace('{' + a[1] + '}', value != null? str.toHex(value) : "undefined");
+        }
+        while (a = sValue.match(/\[(.*)\]/)) {
+            var sAddr = this.parseReference(a[1]);      // take care of any inner references, too
+            var dbgAddr = this.parseAddr(sAddr);
+            sValue = sValue.replace('[' + a[1] + ']', dbgAddr? str.toHex(this.getWord(dbgAddr), dbgAddr.fData32? 8 : 4) : "undefined");
+        }
+        return sValue;
     };
 
     /**
