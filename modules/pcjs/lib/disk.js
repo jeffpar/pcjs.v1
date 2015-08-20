@@ -477,6 +477,29 @@ FileInfo.prototype.loadSegmentTable = function(offEntries, nEntries, nSegOffShif
         }
         offEntries += 8;
     }
+    /*
+     * Although not documented (at least not in any of the early Windows "New Executable" documents I've seen),
+     * the Entry Table may also contain entries whose bSegment field is 0xFE, which doesn't correspond to a valid
+     * segment number.  That pseudo-segment number appears to be reserved for constants.  Here are some examples
+     * from a 3.1-vintage KRNL386.EXE:
+     *
+     *      cannot find segment 254 (offset 0xF000) for symbol __ROMBIOS with ordinal 173
+     *      cannot find segment 254 (offset 0x0000) for symbol __0000H with ordinal 183
+     *      cannot find segment 254 (offset 0x0040) for symbol __0040H with ordinal 193
+     *      cannot find segment 254 (offset 0x0008) for symbol __AHINCR with ordinal 114
+     *      cannot find segment 254 (offset 0x0003) for symbol __AHSHIFT with ordinal 113
+     *      cannot find segment 254 (offset 0xA000) for symbol __A000H with ordinal 174
+     *      cannot find segment 254 (offset 0xB000) for symbol __B000H with ordinal 181
+     *      cannot find segment 254 (offset 0xC000) for symbol __C000H with ordinal 195
+     *      cannot find segment 254 (offset 0xB800) for symbol __B800H with ordinal 182
+     *      cannot find segment 254 (offset 0xD000) for symbol __D000H with ordinal 179
+     *      cannot find segment 254 (offset 0xE000) for symbol __E000H with ordinal 190
+     *      cannot find segment 254 (offset 0xF000) for symbol __F000H with ordinal 194
+     *      cannot find segment 254 (offset 0x0001) for symbol __WINFLAGS with ordinal 178
+     *
+     * The simplest way to handle those Entry Table entries is creating an additional (fake) aSegments table entry.
+     */
+    this.aSegments[0xFE] = {offStart: 0, offEnd: 0, aEntries: []};
 };
 
 /**
@@ -535,13 +558,11 @@ FileInfo.prototype.loadEntryTable = function(offEntries, offEntriesEnd)
             }
             if (!this.aSegments[iSegment]) {
                 if (MAXDEBUG) this.disk.println("invalid segment: " + iSegment);
-                break;
+            } else {
+                this.aSegments[iSegment].aEntries[iOrdinal] = [offEntry];
+                if (MAXDEBUG) this.disk.println("ordinal " + iOrdinal + ": segment=" + iSegment + " offset=" + str.toHexLong(offEntry) + " @" + str.toHex(offDebug));
             }
-            this.aSegments[iSegment].aEntries[iOrdinal] = [offEntry];
-
-            if (MAXDEBUG) this.disk.println("ordinal " + iOrdinal + ": segment=" + iSegment + " offset=" + str.toHexLong(offEntry) + " @" + str.toHex(offDebug));
-
-            this.aOrdinals[iOrdinal] = iSegment;
+            this.aOrdinals[iOrdinal] = [iSegment, offEntry];
             iOrdinal++;
         }
     }
@@ -571,7 +592,7 @@ FileInfo.prototype.loadNameTable = function(offEntries, offEntriesEnd)
         if (!bLength) break;
 
         var sSymbol = this.loadString(offEntries + 1, bLength);
-        if (!sSymbol) break;                // an error must have occurred (this is not a natural way to end)
+        if (!sSymbol) break;                    // an error must have occurred (this is not a natural way to end)
         offEntries += 1 + bLength;
 
         if (!cNames) {
@@ -583,14 +604,19 @@ FileInfo.prototype.loadNameTable = function(offEntries, offEntriesEnd)
         }
         else {
             var iOrdinal = this.loadValue(offEntries);
-            var iSegment = this.aOrdinals[iOrdinal];
-            if (iSegment !== undefined) {
-                var aEntries = this.aSegments[iSegment].aEntries[iOrdinal];
-                this.disk.assert(aEntries && aEntries.length == 1);
-                aEntries.push(sSymbol);
-                if (MAXDEBUG) this.disk.println("segment " + iSegment + " offset " + str.toHexWord(aEntries[0]) + " ordinal " + iOrdinal + ": " + sSymbol + " @" + str.toHex(offDebug));
+            var tuple = this.aOrdinals[iOrdinal];
+            if (tuple) {
+                var iSegment = tuple[0];        // tuple[0] is the segment number and tuple[1] is the corresponding offEntry
+                if (this.aSegments[iSegment]) {
+                    var aEntries = this.aSegments[iSegment].aEntries[iOrdinal];
+                    this.disk.assert(aEntries && aEntries.length == 1);
+                    aEntries.push(sSymbol);
+                    if (MAXDEBUG) this.disk.println("segment " + iSegment + " offset " + str.toHexWord(aEntries[0]) + " ordinal " + iOrdinal + ": " + sSymbol + " @" + str.toHex(offDebug));
+                } else {
+                    if (MAXDEBUG) this.disk.println(this.sPath + ": cannot find segment " + iSegment + " (offset " + str.toHexWord(tuple[1]) + ") for symbol " + sSymbol + " with ordinal " + iOrdinal + " @" + str.toHex(offDebug));
+                }
             } else {
-                if (MAXDEBUG) this.disk.println(this.sPath + ": cannot find ordinal " + iOrdinal + " @" + str.toHex(offDebug));
+                if (MAXDEBUG) this.disk.println(this.sPath + ": cannot find ordinal " + iOrdinal + " for symbol " + sSymbol + " @" + str.toHex(offDebug));
             }
         }
         offEntries += 2;
@@ -700,7 +726,7 @@ FileInfo.prototype.getSymbol = function(off, fNearest)
             }
         }
     }
-    return sSymbol || this.sName + '[' + str.toHexLong(off) + ']';
+    return sSymbol || this.sName + '+' + str.toHexLong(off);
 };
 
 /**
@@ -1535,6 +1561,40 @@ Disk.prototype.buildFileTable = function()
         }
     }
     return this.aFileTable;
+};
+
+/**
+ * getSymbolInfo(sSymbol)
+ *
+ * For all whole or partial symbol matches, return them in an Array of entries:
+ *
+ *      [symbol, file name, segment number, segment offset, segment size].
+ *
+ * TODO: This function has many limitations (ie, slow, case-sensitive), but it gets the job done for now.
+ *
+ * @this {Disk}
+ * @param {string} sSymbol
+ * @return {Array}
+ */
+Disk.prototype.getSymbolInfo = function(sSymbol)
+{
+    var aInfo = [];
+    if (this.aFileTable) {
+        var sSymbolUpper = sSymbol.toUpperCase();
+        for (var iFile = 0; iFile < this.aFileTable.length; iFile++) {
+            var file = this.aFileTable[iFile];
+            for (var iSegment in file.aSegments) {
+                var segment = file.aSegments[iSegment];
+                for (var iEntry in segment.aEntries) {
+                    var entry = segment.aEntries[iEntry];
+                    if (entry[1] && entry[1].indexOf(sSymbolUpper) >= 0) {
+                        aInfo.push([entry[1], file.sName, iSegment, entry[0], segment.offEnd - segment.offStart]);
+                    }
+                }
+            }
+        }
+    }
+    return aInfo;
 };
 
 /**

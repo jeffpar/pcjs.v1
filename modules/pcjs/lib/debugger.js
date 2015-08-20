@@ -113,7 +113,7 @@ function Debugger(parmsDbg)
          * call and simply represents the number of cycles performed by the last run of instructions.
          */
         this.nCycles = -1;
-        this.cInstructions = -1;
+        this.cOpcodes = -1;
 
         /*
          * Default number of hex chars in a register and a linear address (ie, for real-mode);
@@ -627,7 +627,7 @@ if (DEBUGGER) {
     };
 
     Debugger.TRACE_LIMIT = 100000;
-    Debugger.HISTORY_LIMIT = 100000;
+    Debugger.HISTORY_LIMIT = DEBUG? 100000 : 10000;
 
     /*
      * Opcode 0x0F has a distinguished history:
@@ -1964,6 +1964,39 @@ if (DEBUGGER) {
     };
 
     /**
+     * dumpInfo(sAddr)
+     *
+     * @this {Debugger}
+     * @param {string|undefined} sAddr
+     */
+    Debugger.prototype.dumpInfo = function(sAddr)
+    {
+        var sInfo = "no information";
+        if (BACKTRACK) {
+            var dbgAddr = this.parseAddr(sAddr, Debugger.ADDR_CODE, true, true);
+            if (dbgAddr) {
+                var addr = this.getAddr(dbgAddr);
+                sInfo = '%' + str.toHex(addr) + ": " + (this.bus.getSymbol(addr, true) || sInfo);
+            } else {
+                var component, componentPrev = null;
+                while (component = this.cmp.getComponentByType("Disk", componentPrev)) {
+                    var aInfo = component.getSymbolInfo(sAddr);
+                    if (aInfo.length) {
+                        sInfo = "";
+                        for (var i in aInfo) {
+                            var a = aInfo[i];
+                            if (sInfo) sInfo += '\n';
+                            sInfo += a[0] + ": " + a[1] + ' ' + str.toHex(a[2], 4) + ':' + str.toHex(a[3], 4) + " len " + str.toHexWord(a[4]);
+                        }
+                    }
+                    componentPrev = component;
+                }
+            }
+        }
+        return sInfo;
+    };
+
+    /**
      * dumpMem(sAddr)
      *
      * Dumps page allocations.
@@ -2061,41 +2094,61 @@ if (DEBUGGER) {
     };
 
     /**
-     * dumpHistory(sCount, cLines)
+     * dumpHistory(sPrev, sLines)
+     *
+     * If sLines is not a number, it can be a instruction filter.  However, for the moment, the only
+     * supported filter is "call", which filters the history buffer for all CALL and RET instructions
+     * from the specified previous point forward.
      *
      * @this {Debugger}
-     * @param {string} [sCount] is the number of instructions to rewind to (default is 10)
-     * @param {number} [cLines] is the number of instructions to print (default is, again, 10)
+     * @param {string} [sPrev] is a (decimal) number of instructions to rewind to (default is 10)
+     * @param {string} [sLines] is a (decimal) number of instructions to print (default is, again, 10)
      */
-    Debugger.prototype.dumpHistory = function(sCount, cLines)
+    Debugger.prototype.dumpHistory = function(sPrev, sLines)
     {
         var sMore = "";
-        cLines = cLines || 10;
         var cHistory = 0;
         var iHistory = this.iOpcodeHistory;
         var aHistory = this.aOpcodeHistory;
+
         if (aHistory.length) {
-            var n = (sCount === undefined? this.nextHistory : +sCount); // warning: decimal instead of hex conversion
-            if (isNaN(n))
-                n = cLines;
-            else
+            var nPrev = +sPrev || this.nextHistory;
+            var nLines = +sLines || 10;
+
+            if (isNaN(nPrev)) {
+                nPrev = nLines;
+            } else {
                 sMore = "more ";
-            if (n > aHistory.length) {
-                this.println("note: only " + aHistory.length + " available");
-                n = aHistory.length;
             }
-            iHistory -= n;
+
+            if (nPrev > aHistory.length) {
+                this.println("note: only " + aHistory.length + " available");
+                nPrev = aHistory.length;
+            }
+
+            iHistory -= nPrev;
             if (iHistory < 0) {
-                if (aHistory[aHistory.length - 1][1] != null) {
-                    iHistory += aHistory.length;
-                } else {
-                    n = iHistory + n;
+                /*
+                 * If the dbgAddr of the last aHistory element contains a valid selector, wrap around.
+                 */
+                if (aHistory[aHistory.length - 1].sel == null) {
+                    nPrev = iHistory + nPrev;
                     iHistory = 0;
+                } else {
+                    iHistory += aHistory.length;
                 }
             }
-            if (sCount !== undefined) {
-                this.println(n + " instructions earlier:");
+
+            var aFilters = [];
+            if (sLines == "call") {
+                nLines = 100000;
+                aFilters = ["CALL"];
             }
+
+            if (sPrev !== undefined) {
+                this.println(nPrev + " instructions earlier:");
+            }
+
             /*
              * TODO: The following is necessary to prevent dumpHistory() from causing additional (or worse, recursive)
              * faults due to segmented addresses that are no longer valid, but the only alternative is to dramatically
@@ -2109,15 +2162,22 @@ if (DEBUGGER) {
              * If you re-enable this protection, be sure to re-enable the decrement below, too.
              */
             var fData32 = null, fAddr32 = null;
-            while (cLines > 0 && iHistory != this.iOpcodeHistory) {
+
+            while (nLines > 0 && iHistory != this.iOpcodeHistory) {
+
                 var dbgAddr = aHistory[iHistory++];
                 if (dbgAddr.sel == null) break;
+
                 /*
                  * We must create a new dbgAddr from the address in aHistory, because dbgAddr was
                  * a reference, not a copy, and we don't want getInstruction() modifying the original.
                  */
                 dbgAddr = this.newAddr(dbgAddr.off, dbgAddr.sel, dbgAddr.addr, dbgAddr.fProt, fData32 == null? dbgAddr.fData32 : fData32, fAddr32 == null? dbgAddr.fAddr32 : fAddr32);
-                this.println(this.getInstruction(dbgAddr, "history", n--));
+                var sInstruction = this.getInstruction(dbgAddr, "history", nPrev--);
+                if (!aFilters.length || sInstruction.indexOf(aFilters[0]) >= 0) {
+                    this.println(sInstruction);
+                }
+
                 /*
                  * If there were OPERAND or ADDRESS overrides on the previous instruction, getInstruction()
                  * will have automatically disassembled additional bytes, so skip additional history entries.
@@ -2125,13 +2185,14 @@ if (DEBUGGER) {
                 if (!dbgAddr.cOverrides) {
                     fData32 = fAddr32 = null;
                 } else {
-                    iHistory += dbgAddr.cOverrides; cLines -= dbgAddr.cOverrides; n -= dbgAddr.cOverrides;
+                    iHistory += dbgAddr.cOverrides; nLines -= dbgAddr.cOverrides; nPrev -= dbgAddr.cOverrides;
                     fData32 = dbgAddr.fData32; fAddr32 = dbgAddr.fAddr32;
                 }
+
                 if (iHistory >= aHistory.length) iHistory = 0;
-                this.nextHistory = n;
+                this.nextHistory = nPrev;
                 cHistory++;
-                cLines--;
+                nLines--;
             }
             /*
              * See comments above.
@@ -2139,6 +2200,7 @@ if (DEBUGGER) {
              *      this.nSuppressBreaks--;
              */
         }
+
         if (!cHistory) {
             this.println("no " + sMore + "history available");
             this.nextHistory = undefined;
@@ -2258,9 +2320,14 @@ if (DEBUGGER) {
      * @return {number} register index, or -1 if not found
      */
     Debugger.prototype.getRegIndex = function(sReg, off) {
-        off = off || 0;
-        var i = usr.indexOf(Debugger.REGS, sReg.substr(off, 3).toUpperCase());
-        if (i < 0) i = usr.indexOf(Debugger.REGS, sReg.substr(off, 2).toUpperCase());
+        var i;
+        sReg = sReg.toUpperCase();
+        if (off == null) {
+            i = usr.indexOf(Debugger.REGS, sReg);
+        } else {
+            i = usr.indexOf(Debugger.REGS, sReg.substr(off, 3));
+            if (i < 0) i = usr.indexOf(Debugger.REGS, sReg.substr(off, 2));
+        }
         return i;
     };
 
@@ -2806,7 +2873,7 @@ if (DEBUGGER) {
                     this.nCycles += nCyclesStep;
                     this.cpu.addCycles(nCyclesStep, true);
                     this.cpu.updateChecksum(nCyclesStep);
-                    this.cInstructions++;
+                    this.cOpcodes++;
                 }
             }
             catch (e) {
@@ -2933,7 +3000,7 @@ if (DEBUGGER) {
     Debugger.prototype.reset = function(fQuiet)
     {
         this.historyInit();
-        this.cInstructions = 0;
+        this.cOpcodes = 0;
         this.sMessagePrev = null;
         this.nCycles = 0;
         this.dbgAddrNextCode = this.newAddr(this.cpu.getIP(), this.cpu.getCS());
@@ -3025,8 +3092,8 @@ if (DEBUGGER) {
                     var nCyclesPerSecond = (msTotal > 0? Math.round(this.nCycles * 1000 / msTotal) : 0);
                     sStopped += " (";
                     if (this.checksEnabled()) {
-                        sStopped += this.cInstructions + " ops, ";
-                        this.cInstructions = 0;     // remove this line if you want to maintain a longer total
+                        sStopped += this.cOpcodes + " opcodes, ";
+                        this.cOpcodes = 0;      // remove this line if you want to maintain a longer total
                     }
                     sStopped += this.nCycles + " cycles, " + msTotal + " ms, " + nCyclesPerSecond + " hz)";
                     if (MAXDEBUG && this.chipset) {
@@ -3114,7 +3181,7 @@ if (DEBUGGER) {
          * well, OK, and a few other things now, like enabling Messages.INT messages.
          */
         if (nState >= 0 && this.aaOpcodeCounts.length) {
-            this.cInstructions++;
+            this.cOpcodes++;
             var bOpcode = this.cpu.probeAddr(addr);
             if (bOpcode != null) {
                 this.aaOpcodeCounts[bOpcode][1]++;
@@ -3713,7 +3780,7 @@ if (DEBUGGER) {
                 }
                 offset = (dbgAddr.off + disp) & (dbgAddr.fData32? -1 : 0xffff);
                 sOperand = str.toHex(offset, dbgAddr.fData32? 8: 4);
-                var aSymbol = this.findSymbolAtAddr(this.newAddr(offset, dbgAddr.sel));
+                var aSymbol = this.findSymbol(this.newAddr(offset, dbgAddr.sel));
                 if (aSymbol[0]) sOperand += " (" + aSymbol[0] + ")";
             }
             else if (typeMode == Debugger.TYPE_IMPREG) {
@@ -3806,7 +3873,7 @@ if (DEBUGGER) {
         case Debugger.TYPE_FARP:
             dbgAddr = this.newAddr(this.getWord(dbgAddr, true), this.getShort(dbgAddr, 2), null, dbgAddr.fProt, dbgAddr.fData32, dbgAddr.fAddr32);
             sOperand = this.hexAddr(dbgAddr);
-            var aSymbol = this.findSymbolAtAddr(dbgAddr);
+            var aSymbol = this.findSymbol(dbgAddr);
             if (aSymbol[0]) sOperand += " (" + aSymbol[0] + ")";
             break;
         default:
@@ -4182,7 +4249,7 @@ if (DEBUGGER) {
     };
 
     /**
-     * parseAddr(sAddr, type, fNoChecks)
+     * parseAddr(sAddr, type, fNoChecks, fQuiet)
      *
      * As discussed above, dbgAddr variables contain one or more of: off, sel, and addr.  They represent
      * a segmented address (sel:off) when sel is defined or a linear address (addr) when sel is undefined
@@ -4207,13 +4274,16 @@ if (DEBUGGER) {
      * @param {string|undefined} sAddr
      * @param {number|undefined} [type] is the address segment type, in case sAddr doesn't specify a segment
      * @param {boolean} [fNoChecks] (eg, true when setting breakpoints that may not be valid now, but will be later)
+     * @param {boolean} [fQuiet]
      * @return {DbgAddr|null|undefined}
      */
-    Debugger.prototype.parseAddr = function(sAddr, type, fNoChecks)
+    Debugger.prototype.parseAddr = function(sAddr, type, fNoChecks, fQuiet)
     {
-        var dbgAddr;
+        var dbgAddr, fPrint;
         var dbgAddrNext = (type === Debugger.ADDR_CODE? this.dbgAddrNextCode : this.dbgAddrNextData);
         var off = dbgAddrNext.off, sel = dbgAddrNext.sel, addr = dbgAddrNext.addr;
+
+        if (fQuiet) fPrint = false;
 
         if (sAddr !== undefined) {
 
@@ -4230,16 +4300,16 @@ if (DEBUGGER) {
             var iColon = sAddr.indexOf(':');
             if (iColon < 0) {
                 if (sel != null) {
-                    off = this.parseExpression(sAddr);
+                    off = this.parseExpression(sAddr, fPrint);
                     addr = null;
                 } else {
-                    addr = this.parseExpression(sAddr);
+                    addr = this.parseExpression(sAddr, fPrint);
                     if (addr == null) off = null;
                 }
             }
             else {
-                sel = this.parseExpression(sAddr.substring(0, iColon));
-                off = this.parseExpression(sAddr.substring(iColon + 1));
+                sel = this.parseExpression(sAddr.substring(0, iColon), fPrint);
+                off = this.parseExpression(sAddr.substring(iColon + 1), fPrint);
                 addr = null;
             }
         }
@@ -4385,7 +4455,7 @@ if (DEBUGGER) {
      *
      * @this {Debugger}
      * @param {string|undefined} sExp
-     * @param {boolean} [fPrint] is true to print all resolved values
+     * @param {boolean} [fPrint] is true to print all resolved values, false for quiet parsing
      * @return {number|undefined} numeric value, or undefined if sExp contains any undefined or invalid values
      */
     Debugger.prototype.parseExpression = function(sExp, fPrint)
@@ -4413,7 +4483,7 @@ if (DEBUGGER) {
                 fError = true;
                 break;
             }
-            var v = this.parseValue(s);
+            var v = this.parseValue(s, null, fPrint === false);
             if (v === undefined) {
                 fError = true;
                 fPrint = false;
@@ -4442,7 +4512,7 @@ if (DEBUGGER) {
     };
 
     /**
-     * parseValue(sValue, sName)
+     * parseValue(sValue, sName, fQuiet)
      *
      * @this {Debugger}
      * @param {string|undefined} sValue
@@ -4603,16 +4673,16 @@ if (DEBUGGER) {
      *
      *      [addr, size, aSymbols, aOffsetPairs]
      *
-     * There are two basic symbol operations: findSymbolAddr(), which takes a string and attempts to match it
-     * to a non-anonymous symbol with a matching offset ('o') property, and findSymbolAtAddr(), which takes an
-     * address and finds the symbol, if any, at that address.
+     * There are two basic symbol operations: findSymbol(), which takes an address and finds the symbol, if any,
+     * at that address, and findSymbolAddr(), which takes a string and attempts to match it to a non-anonymous
+     * symbol with a matching offset ('o') property.
      *
-     * To implement findSymbolAtAddr() efficiently, addSymbols() creates an array of [offset, sSymbol] pairs
+     * To implement findSymbol() efficiently, addSymbols() creates an array of [offset, sSymbol] pairs
      * (aOffsetPairs), one pair for each symbol that corresponds to an offset within the specified address space.
      *
      * We guarantee the elements of aOffsetPairs are in offset order, because we build it using binaryInsert();
      * it's quite likely that the MAP file already ordered all its symbols in offset order, but since they're
-     * hand-edited files, we can't assume that.  This ensures that findSymbolAtAddr()'s binarySearch() will operate
+     * hand-edited files, we can't assume that.  This ensures that findSymbol()'s binarySearch() will operate
      * properly.
      *
      * @this {Debugger}
@@ -4690,6 +4760,55 @@ if (DEBUGGER) {
     };
 
     /**
+     * findSymbol(dbgAddr, fNearest)
+     *
+     * Search aSymbolTable for dbgAddr, and return an Array for the corresponding symbol (empty if not found).
+     *
+     * If fNearest is true, and no exact match was found, then the Array returned will contain TWO sets of
+     * entries: [0]-[3] will refer to closest preceding symbol, and [4]-[7] will refer to the closest subsequent symbol.
+     *
+     * @this {Debugger}
+     * @param {DbgAddr} dbgAddr
+     * @param {boolean} [fNearest]
+     * @return {Array} where [0] == symbol name, [1] == symbol value, [2] == any annotation, and [3] == any associated comment
+     */
+    Debugger.prototype.findSymbol = function(dbgAddr, fNearest)
+    {
+        var aSymbol = [];
+        var addr = this.getAddr(dbgAddr);
+        for (var iTable = 0; iTable < this.aSymbolTable.length; iTable++) {
+            var addrSymbol = this.aSymbolTable[iTable][0];
+            var sizeSymbol = this.aSymbolTable[iTable][1];
+            if (addr >= addrSymbol && addr < addrSymbol + sizeSymbol) {
+                var offset = dbgAddr.off;
+                var aOffsetPairs = this.aSymbolTable[iTable][3];
+                var fnComparePairs = function(p1, p2)
+                {
+                    return p1[0] > p2[0]? 1 : p1[0] < p2[0]? -1 : 0;
+                };
+                var result = usr.binarySearch(aOffsetPairs, [offset], fnComparePairs);
+                if (result >= 0) {
+                    this.returnSymbol(iTable, result, aSymbol);
+                }
+                else if (fNearest) {
+                    result = ~result;
+                    this.returnSymbol(iTable, result-1, aSymbol);
+                    this.returnSymbol(iTable, result, aSymbol);
+                }
+                break;
+            }
+        }
+        if (!aSymbol.length) {
+            var sSymbol = this.bus.getSymbol(addr, true);
+            if (sSymbol) {
+                aSymbol.push(sSymbol);
+                aSymbol.push(addr);
+            }
+        }
+        return aSymbol;
+    };
+
+    /**
      * findSymbolAddr(sSymbol)
      *
      * Search aSymbolTable for sSymbol, and if found, return a dbgAddr (same as parseAddr())
@@ -4732,58 +4851,9 @@ if (DEBUGGER) {
     };
 
     /**
-     * findSymbolAtAddr(dbgAddr, fNearest)
-     *
-     * Search aSymbolTable for dbgAddr, and return an Array for the corresponding symbol (empty if not found).
-     *
-     * If fNearest is true, and no exact match was found, then the Array returned will contain TWO sets of
-     * entries: [0]-[3] will refer to closest preceding symbol, and [4]-[7] will refer to the closest subsequent symbol.
-     *
-     * @this {Debugger}
-     * @param {DbgAddr} dbgAddr
-     * @param {boolean} [fNearest]
-     * @return {Array} where [0] == symbol name, [1] == symbol value, [2] == any annotation, and [3] == any associated comment
-     */
-    Debugger.prototype.findSymbolAtAddr = function(dbgAddr, fNearest)
-    {
-        var aSymbol = [];
-        var addr = this.getAddr(dbgAddr);
-        for (var iTable = 0; iTable < this.aSymbolTable.length; iTable++) {
-            var addrSymbol = this.aSymbolTable[iTable][0];
-            var sizeSymbol = this.aSymbolTable[iTable][1];
-            if (addr >= addrSymbol && addr < addrSymbol + sizeSymbol) {
-                var offset = dbgAddr.off;
-                var aOffsetPairs = this.aSymbolTable[iTable][3];
-                var fnComparePairs = function(p1, p2)
-                {
-                    return p1[0] > p2[0]? 1 : p1[0] < p2[0]? -1 : 0;
-                };
-                var result = usr.binarySearch(aOffsetPairs, [offset], fnComparePairs);
-                if (result >= 0) {
-                    this.returnSymbol(iTable, result, aSymbol);
-                }
-                else if (fNearest) {
-                    result = ~result;
-                    this.returnSymbol(iTable, result-1, aSymbol);
-                    this.returnSymbol(iTable, result, aSymbol);
-                }
-                break;
-            }
-        }
-        if (!aSymbol.length) {
-            var sSymbol = this.bus.getSymbol(addr, true);
-            if (sSymbol) {
-                aSymbol.push(sSymbol);
-                aSymbol.push(addr);
-            }
-        }
-        return aSymbol;
-    };
-
-    /**
      * returnSymbol(iTable, iOffset, aSymbol)
      *
-     * Helper function for findSymbolAtAddr().
+     * Helper function for findSymbol().
      *
      * @param {number} iTable
      * @param {number} iOffset
@@ -5108,40 +5178,38 @@ if (DEBUGGER) {
         }
 
         if (sCmd == "dh") {
-            this.dumpHistory(sAddr, cb);
+            this.dumpHistory(sAddr, sLen);
+            return;
+        }
+
+        if (sCmd == "di") {
+            var sInfo = this.dumpInfo(sAddr);
+            this.println(sInfo);
             return;
         }
 
         var dbgAddr = this.parseAddr(sAddr, Debugger.ADDR_DATA);
-        if (!dbgAddr) return;
+        if (!dbgAddr || dbgAddr.sel == null && dbgAddr.addr == null) return;
 
         var sDump = "";
-        if (BACKTRACK && sCmd == "di") {
-            var addr = this.getAddr(dbgAddr);
-            sDump += '%' + str.toHex(addr) + ": ";
-            var sInfo = this.bus.getSymbol(addr, true);
-            sDump += sInfo || "no information";
-        }
-        else {
-            var cLines = (((cb || 128) + 15) >> 4) || 1;
-            var size = (sCmd == "dd"? 4 : (sCmd == "dw"? 2 : 1));
-            for (var iLine = 0; iLine < cLines; iLine++) {
-                var data = 0, iByte = 0;
-                var sData = "", sChars = "";
-                sAddr = this.hexAddr(dbgAddr);
-                for (var i = 0; i < 16; i++) {
-                    var b = this.getByte(dbgAddr, 1);
-                    data |= (b << (iByte++ << 3));
-                    if (iByte == size) {
-                        sData += str.toHex(data, size * 2);
-                        sData += (size == 1? (i == 7? '-' : ' ') : "  ");
-                        data = iByte = 0;
-                    }
-                    sChars += (b >= 32 && b < 128? String.fromCharCode(b) : '.');
+        var cLines = (((cb || 128) + 15) >> 4) || 1;
+        var size = (sCmd == "dd"? 4 : (sCmd == "dw"? 2 : 1));
+        for (var iLine = 0; iLine < cLines; iLine++) {
+            var data = 0, iByte = 0;
+            var sData = "", sChars = "";
+            sAddr = this.hexAddr(dbgAddr);
+            for (var i = 0; i < 16; i++) {
+                var b = this.getByte(dbgAddr, 1);
+                data |= (b << (iByte++ << 3));
+                if (iByte == size) {
+                    sData += str.toHex(data, size * 2);
+                    sData += (size == 1? (i == 7? '-' : ' ') : "  ");
+                    data = iByte = 0;
                 }
-                if (sDump) sDump += '\n';
-                sDump += sAddr + "  " + sData + ' ' + sChars;
+                sChars += (b >= 32 && b < 128? String.fromCharCode(b) : '.');
             }
+            if (sDump) sDump += '\n';
+            sDump += sAddr + "  " + sData + ' ' + sChars;
         }
 
         if (sDump) this.println(sDump);
@@ -5418,7 +5486,7 @@ if (DEBUGGER) {
         sSymbol = sSymbol? (sSymbol + ": ") : "";
         this.println(sSymbol + this.hexAddr(dbgAddr) + " (%" + str.toHex(addr, this.cchAddr) + ')');
 
-        var aSymbol = this.findSymbolAtAddr(dbgAddr, true);
+        var aSymbol = this.findSymbol(dbgAddr, true);
         if (aSymbol.length) {
             var nDelta, sDelta;
             if (aSymbol[0]) {
@@ -5496,7 +5564,7 @@ if (DEBUGGER) {
          * this point (ie, if the disk is uninitialized and unformatted), but that will only affect whether the
          * read succeeds or not.
          */
-        var dc = this   .fdc;
+        var dc = this.fdc;
         if (iDrive >= 2 && this.hdc) {
             iDrive -= 2;
             dc = this.hdc;
@@ -6380,7 +6448,7 @@ if (DEBUGGER) {
             var addr = dbgAddr.addr;
             var nSequence = (this.isBusy(false) || this.nStep)? this.nCycles : null;
             var sComment = (nSequence != null? "cycles" : null);
-            var aSymbol = this.findSymbolAtAddr(dbgAddr);
+            var aSymbol = this.findSymbol(dbgAddr);
 
             if (aSymbol[0] && n) {
                 if (!cLines && n || aSymbol[0].indexOf('+') < 0) {
@@ -6395,7 +6463,7 @@ if (DEBUGGER) {
                 nSequence = null;
             }
 
-            var sIns = this.getInstruction(dbgAddr, sComment, nSequence);
+            var sInstruction = this.getInstruction(dbgAddr, sComment, nSequence);
 
             /*
              * If getInstruction() reported that it did not yet process a complete instruction (via dbgAddr.fComplete),
@@ -6404,7 +6472,7 @@ if (DEBUGGER) {
              */
             if (!dbgAddr.fComplete && !n) n++;
 
-            this.println(sIns);
+            this.println(sInstruction);
             this.dbgAddrNextCode = dbgAddr;
             cb -= dbgAddr.addr - addr;
             cLines++;
