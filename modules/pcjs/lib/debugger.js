@@ -4459,6 +4459,13 @@ if (DEBUGGER) {
      *
      * Unary operators like '~' and ternary operators like '?:' are not supported; neither are parentheses.
      *
+     * However, parseReference() now makes it possible to write parenthetical-style sub-expressions by using
+     * {...} (braces), as well as address references by using [...] (brackets).
+     *
+     * Why am I using braces instead of parentheses for sub-expressions?  Because parseReference() serves
+     * multiple purposes, the other being reference replacement in message strings passing through replaceRegs(),
+     * and I didn't want parentheses taking on a new meaning in message strings.
+     *
      * @this {Debugger}
      * @param {string|undefined} sExp
      * @param {boolean} [fPrint] is true to print all resolved values, false for quiet parsing
@@ -4469,6 +4476,9 @@ if (DEBUGGER) {
         var value;
 
         if (sExp) {
+            /*
+             * First process (and eliminate) any references, aka sub-expressions.
+             */
             sExp = this.parseReference(sExp);
 
             var i = 0;
