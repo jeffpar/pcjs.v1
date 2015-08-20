@@ -3327,22 +3327,49 @@ if (DEBUGGER) {
      * addBreakpoint(aBreak, dbgAddr, fTempBreak)
      *
      * In case you haven't already figured this out, all our breakpoint commands use the address
-     * to identify a breakpoint, not some randomly assigned breakpoint index like other debuggers;
+     * to identify a breakpoint, not an incrementally assigned breakpoint index like other debuggers;
      * see doBreak() for details.
      *
      * This has a few implications, one being that you CANNOT set more than one kind of breakpoint
-     * on a single address.  In practice, that's rarely a problem, because you can almost always
-     * set a different breakpoint on a neighboring address.
+     * on a single address.  In practice, that's rarely a problem, because you can almost always set
+     * a different breakpoint on a neighboring address.
      *
      * Also, there is one exception to the "one address, one breakpoint" rule, and that involves
      * temporary breakpoints (ie, one-time execution breakpoints that either a "p" or "g" command
-     * can create to step over a chunk of code).  Those breakpoints automatically clear themselves,
+     * may create to step over a chunk of code).  Those breakpoints automatically clear themselves,
      * so there usually isn't any need to refer to them using breakpoint commands.
      *
      * TODO: Consider supporting the more "traditional" breakpoint index syntax; the current
-     * address-based syntax was implemented solely for expediency and orthogonality.  At the same
-     * time, also consider a more WDEB386-like syntax, where "br" is used to set a variety of
-     * access breakpoints using modifiers like "r1", "r2", "w1", "w2, etc.
+     * address-based syntax was implemented solely for expediency and consistency.  At the same time,
+     * also consider a more WDEB386-like syntax, where "br" is used to set a variety of access
+     * breakpoints using modifiers like "r1", "r2", "w1", "w2, etc.
+     *
+     * EXAMPLE: Here's an example of our powerful new breakpoint command capabilities:
+     *
+     *      bp 0397:022B "?'GlobalAlloc(wFlags:[ss:sp+8],dwBytes:[ss:sp+6][ss:sp+4])';g [ss:sp+2]:[ss:sp] '?ax;if ax'"
+     *
+     * The above breakpoint will display a pleasing "GlobalAlloc()" string containing the current
+     * stack parameters, and will briefly stop execution on the return to print the result in AX,
+     * halting the CPU whenever AX is zero (the default behavior of "if" whenever the expression is
+     * false is to look for an "else" and automatically halt when there is no "else").
+     *
+     * How do you figure out where the code for GlobalAlloc is in the first place?  You need to have
+     * BACKTRACK support enabled (which currently means running the non-COMPILED version), so that as
+     * the Disk component loads disk images, it will automatically extract symbolic information from all
+     * "NE" (New Executable) binaries on those disks, which the Debugger's "di" command can then search
+     * for you; eg:
+     *
+     *      ## di globalalloc
+     *      GLOBALALLOC: KRNL386.EXE 0001:022B len 0xC570
+     *
+     * And then you just need to do a bit more sleuthing to find the right CODE segment.  If you have
+     * WDEB386.EXE loaded inside the machine, it's a little easier, because WDEB386 displays notifications
+     * like:
+     *
+     *      KERNEL!undefined code(0001)=#0397 len 0000C580
+     *
+     * as segments are being loaded.  TODO: Consider adding our own INT 0x41 support, so that even when
+     * WDEB386.EXE isn't loaded, the PCjs Debugger can provide some of those same notifications.
      *
      * @this {Debugger}
      * @param {Array} aBreak
@@ -3599,7 +3626,7 @@ if (DEBUGGER) {
                             this.findBreakpoint(aBreak, dbgAddrBreak, true, true);
                             fTempBreak = true;
                         }
-                        else if (a = dbgAddrBreak.aCmds) {
+                        if (a = dbgAddrBreak.aCmds) {
                             /*
                              * When one or more commands are attached to a breakpoint, we don't halt by default.
                              * Instead, we set fBreak to true only if, at the completion of all the commands, the
@@ -4330,6 +4357,23 @@ if (DEBUGGER) {
         return dbgAddr;
     };
 
+    /**
+     * parseAddrOptions(dbdAddr, sOptions)
+     *
+     * @this {Debugger}
+     * @param {DbgAddr} dbgAddr
+     * @param {string} sOptions
+     */
+    Debugger.prototype.parseAddrOptions = function(dbgAddr, sOptions)
+    {
+        if (sOptions) {
+            var a = sOptions.match(/(['"])(.*?)\1/);
+            if (a) {
+                dbgAddr.aCmds = this.parseCommand(dbgAddr.sCmd = a[2]);
+            }
+        }
+    };
+
     Debugger.aBinOpPrecedence = {
         '||':   0,      // logical OR
         '&&':   1,      // logical AND
@@ -4538,7 +4582,8 @@ if (DEBUGGER) {
      *
      * Returns the given string with any "{expression}" sequences replaced with the value of the expression,
      * and any "[address]" references replaced with the contents of the address.  Expressions are parsed BEFORE
-     * addresses.
+     * addresses.  Owing to this function's simplistic parsing, nested braces/brackets are not supported
+     * (define intermediate variables if needed).
      *
      * @this {Debugger}
      * @param {string} sValue
@@ -4547,11 +4592,11 @@ if (DEBUGGER) {
     Debugger.prototype.parseReference = function(sValue)
     {
         var a;
-        while (a = sValue.match(/\{(.*)\}/)) {
+        while (a = sValue.match(/\{(.*?)\}/)) {
             var value = this.parseExpression(a[1]);
             sValue = sValue.replace('{' + a[1] + '}', value != null? str.toHex(value) : "undefined");
         }
-        while (a = sValue.match(/\[(.*)\]/)) {
+        while (a = sValue.match(/\[(.*?)\]/)) {
             var sAddr = this.parseReference(a[1]);      // take care of any inner references, too
             var dbgAddr = this.parseAddr(sAddr);
             sValue = sValue.replace('[' + a[1] + ']', dbgAddr? str.toHex(this.getWord(dbgAddr), dbgAddr.fData32? 8 : 4) : "undefined");
@@ -5093,13 +5138,8 @@ if (DEBUGGER) {
 
         if (dbgAddr.off == null) return;
 
-        if (sOptions) {
-            var a = sOptions.match(/(['"])(.*?)\1/);
-            if (a) {
-                dbgAddr.sCmd = a[2];
-                dbgAddr.aCmds = this.parseCommand(dbgAddr.sCmd);
-            }
-        }
+        this.parseAddrOptions(dbgAddr, sOptions);
+
         if (sParm == 'p') {
             this.addBreakpoint(this.aBreakExec, dbgAddr);
             return;
@@ -6151,19 +6191,27 @@ if (DEBUGGER) {
     };
 
     /**
-     * doRun(sAddr)
+     * doRun(sAddr, sOptions, fQuiet)
+     *
+     * NOTE: We assume that whenever we're being called with fQuiet set to true, that we're being
+     * called in the context of checkBreakpoint(), and therefore the CPU is already running, and
+     * therefore we can skip the runCPU() call -- because if we don't, then breakpoint commands that
+     * include the "g" command will produce unwanted "noise".
      *
      * @this {Debugger}
      * @param {string} sAddr
+     * @param {string} [sOptions]
+     * @param {boolean} [fQuiet]
      */
-    Debugger.prototype.doRun = function(sAddr)
+    Debugger.prototype.doRun = function(sAddr, sOptions, fQuiet)
     {
         if (sAddr !== undefined) {
-            var dbgAddr = this.parseAddr(sAddr, Debugger.ADDR_CODE);
+            var dbgAddr = this.parseAddr(this.parseReference(sAddr), Debugger.ADDR_CODE);
             if (!dbgAddr) return;
+            this.parseAddrOptions(dbgAddr, sOptions);
             this.setTempBreakpoint(dbgAddr);
         }
-        if (!this.runCPU(true)) {
+        if (!fQuiet && !this.runCPU(true)) {
             this.println('cpu busy, "g" command ignored');
         }
     };
@@ -6668,7 +6716,7 @@ if (DEBUGGER) {
                     this.doFreqs(asArgs[1]);
                     break;
                 case 'g':
-                    this.doRun(asArgs[1]);
+                    this.doRun(asArgs[1], sCmd, fQuiet);
                     break;
                 case 'h':
                     this.doHalt(fQuiet);
