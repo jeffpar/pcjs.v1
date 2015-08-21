@@ -3079,7 +3079,7 @@ X86.opMOVBLb = function MOVBLb()
  */
 X86.opMOVAHb = function MOVAHb()
 {
-    this.regEAX = (this.regEAX & 0xff) | (this.getIPByte() << 8);
+    this.regEAX = (this.regEAX & ~0xff00) | (this.getIPByte() << 8);
     if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiMem0;
     this.nStepCycles -= this.cycleCounts.nOpCyclesLAHF;
 };
@@ -3091,7 +3091,7 @@ X86.opMOVAHb = function MOVAHb()
  */
 X86.opMOVCHb = function MOVCHb()
 {
-    this.regECX = (this.regECX & 0xff) | (this.getIPByte() << 8);
+    this.regECX = (this.regECX & ~0xff00) | (this.getIPByte() << 8);
     if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiMem0;
     this.nStepCycles -= this.cycleCounts.nOpCyclesLAHF;
 };
@@ -3103,7 +3103,7 @@ X86.opMOVCHb = function MOVCHb()
  */
 X86.opMOVDHb = function MOVDHb()
 {
-    this.regEDX = (this.regEDX & 0xff) | (this.getIPByte() << 8);
+    this.regEDX = (this.regEDX & ~0xff00) | (this.getIPByte() << 8);
     if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiMem0;
     this.nStepCycles -= this.cycleCounts.nOpCyclesLAHF;
 };
@@ -3115,7 +3115,7 @@ X86.opMOVDHb = function MOVDHb()
  */
 X86.opMOVBHb = function MOVBHb()
 {
-    this.regEBX = (this.regEBX & 0xff) | (this.getIPByte() << 8);
+    this.regEBX = (this.regEBX & ~0xff00) | (this.getIPByte() << 8);
     if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiMem0;
     this.nStepCycles -= this.cycleCounts.nOpCyclesLAHF;
 };

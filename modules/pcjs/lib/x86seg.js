@@ -1194,6 +1194,26 @@ X86Seg.prototype.updateMode = function(fLoad, fProt, fV86)
                 if (this.checkWrite == this.checkWriteProt) this.checkWrite = this.checkWriteProtDown;
                 this.fExpDown = true;
             }
+            if (fLoad && this.id < X86Seg.ID.VER) {
+                /*
+                 * We must update the descriptor's ACCESSED bit whenever the segment is "accessed" (ie,
+                 * loaded); unlike the ACCESSED and DIRTY bits in PTEs, a descriptor ACCESSED bit is only
+                 * updated on loads, not on every memory access.
+                 *
+                 * We compute address of the descriptor byte containing the ACCESSED bit (offset 0x5);
+                 * note that it's perfectly normal for addrDesc to occasionally be invalid (eg, when the CPU
+                 * is creating protected-mode-only segment registers like LDT and TSS, or when the CPU has
+                 * transitioned from real-mode to protected-mode and new selector(s) have not been loaded yet).
+                 *
+                 * TODO: Note I do NOT update the ACCESSED bit for null GDT selectors, because I assume the
+                 * hardware does not update it either.  In fact, I've seen code that uses the null GDT descriptor
+                 * for other purposes, on the assumption that that descriptor is completely unused.
+                 */
+                if ((this.sel & ~X86.SEL.RPL) && this.addrDesc !== X86.ADDR_INVALID) {
+                    var addrType = this.addrDesc + X86.DESC.ACC.TYPE.OFFSET;
+                    this.cpu.setByte(addrType, this.cpu.getByte(addrType) | (X86.DESC.ACC.TYPE.ACCESSED >> 8));
+                }
+            }
         }
         /*
          * TODO: For non-SEG descriptors, are there other checks or functions we should establish?
@@ -1204,24 +1224,6 @@ X86Seg.prototype.updateMode = function(fLoad, fProt, fV86)
          * we're updating segment registers as part of a mode change.
          */
         if (fLoad) {
-            /*
-             * We must update the descriptor's ACCESSED bit whenever the segment is "accessed" (ie,
-             * loaded); unlike the ACCESSED and DIRTY bits in PTEs, a descriptor ACCESSED bit is only
-             * updated on loads, not on every memory access.
-             *
-             * We compute address of the descriptor byte containing the ACCESSED bit (offset 0x5);
-             * note that it's perfectly normal for addrDesc to occasionally be invalid (eg, when the CPU
-             * is creating protected-mode-only segment registers like LDT and TSS, or when the CPU has
-             * transitioned from real-mode to protected-mode and new selector(s) have not been loaded yet).
-             *
-             * TODO: Note I do NOT update the ACCESSED bit for null GDT selectors, because I assume the
-             * hardware does not update it either.  In fact, I've seen code that uses the null GDT descriptor
-             * for other purposes, on the assumption that that descriptor is completely unused.
-             */
-            if ((this.sel & ~X86.SEL.RPL) && this.addrDesc !== X86.ADDR_INVALID) {
-                var addrType = this.addrDesc + X86.DESC.ACC.TYPE.OFFSET;
-                this.cpu.setByte(addrType, this.cpu.getByte(addrType) | (X86.DESC.ACC.TYPE.ACCESSED >> 8));
-            }
             this.cpl = this.sel & X86.SEL.RPL;
             this.dpl = (this.acc & X86.DESC.ACC.DPL.MASK) >> X86.DESC.ACC.DPL.SHIFT;
             if (this.cpu.model < X86.MODEL_80386 || !(this.ext & X86.DESC.EXT.BIG)) {

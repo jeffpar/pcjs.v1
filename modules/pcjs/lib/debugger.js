@@ -1538,13 +1538,15 @@ if (DEBUGGER) {
              */
             if (this.nSuppressBreaks && fProt || !this.segDebugger) return null;
         }
-
+        var seg = this.segDebugger;
         if (!fProt) {
-            this.segDebugger.loadReal(sel);
+            seg.loadReal(sel);
+            seg.limit = 0xffff;         // although an ACTUAL real-mode segment load would not modify the limit,
+            seg.offMax = 0x10000;       // proper segDebugger operation requires that we update the limit ourselves
         } else {
-            this.segDebugger.loadProt(sel);
+            seg.loadProt(sel);
         }
-        return this.segDebugger;
+        return seg;
     };
 
     /**
@@ -2929,7 +2931,7 @@ if (DEBUGGER) {
         if (!fRegs || this.nStep == 1)
             this.doUnassemble();
         else {
-            this.doRegisters(null);
+            this.doRegisters();
         }
     };
 
@@ -3841,6 +3843,7 @@ if (DEBUGGER) {
         if (dbgAddrIns.addr != X86.ADDR_INVALID && dbgAddr.addr != X86.ADDR_INVALID) {
             do {
                 sBytes += str.toHex(this.getByte(dbgAddrIns, 1), 2);
+                if (dbgAddrIns.addr == null) break;
             } while (dbgAddrIns.addr != dbgAddr.addr);
         }
 
