@@ -627,7 +627,7 @@ if (DEBUGGER) {
     };
 
     Debugger.TRACE_LIMIT = 100000;
-    Debugger.HISTORY_LIMIT = DEBUG? 100000 : 10000;
+    Debugger.HISTORY_LIMIT = DEBUG? 100000 : 1000;
 
     /*
      * Opcode 0x0F has a distinguished history:

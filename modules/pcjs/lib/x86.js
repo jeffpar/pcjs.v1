@@ -330,7 +330,7 @@ var X86 = {
         EXT:        0x0001,
         IDT:        0x0002,
         LDT:        0x0004,
-        MASK:       0xFFF8      // index of corresponding entry in GDT, LDT or IDT
+        SELMASK:    0xFFFC
     },
     RESULT: {
         /*

@@ -2228,14 +2228,35 @@ X86.fnRCRd = function RCRd(dst, src)
 /**
  * fnRETF(n)
  *
- * For protected-mode, this function must be prepared to pop any arguments off the current stack AND
- * whatever stack we may have switched to (setCSIP() returns true only when a stack switch has occurred).
+ * For protected-mode, this function must pop any arguments off the current stack AND whatever stack
+ * we may have switched to; setCSIP() returns true if a stack switch occurred, false if not, and null
+ * if an error occurred.
+ *
+ * Take a look at our counterpart, fnCALLF():
+ *
+ *      if (this.setCSIP(off, sel, true) != null) {
+ *          this.pushWord(oldCS);
+ *          this.pushWord(oldIP);
+ *      }
+ *
+ * That code makes opCALLF() restartable, because it doesn't modify the stack unless setCSIP() succeeds.
+ *
+ * Here, our task is a little more complicated, because 1) it's not convenient to defer our stack
+ * operations (it's much simpler to perform them BEFORE the setCSIP() call rather than AFTER); 2) we
+ * have to deal with an additional stack adjustment value (n); and 3) if setCSIP() triggers a fault
+ * (eg, NP_FAULT), fnFault() must be able to do the rewinding, which happens BEFORE setCSIP() returns.
+ *
+ * The current hack to make the stack "rewindable" involves copying regLSP to opLSP, similar to what we do
+ * for EIP (ie, by copying regLIP into opLIP prior to executing every opcode).  However, I don't really want
+ * to snapshot more data inside the opcode loop, so my compromise is to set opLSP only within "problematic"
+ * instructions (like this one), and set it back to X86.ADDR_INVALID when we're done.
  *
  * @this {X86CPU}
  * @param {number} n
  */
 X86.fnRETF = function RETF(n)
 {
+    this.opLSP = this.regLSP;
     var newIP = this.popWord();
     var newCS = this.popWord();
 
@@ -2246,12 +2267,12 @@ X86.fnRETF = function RETF(n)
     if (this.setCSIP(newIP, newCS, false)) {        // returns true if a stack switch occurred
         /*
          * Fool me once, shame on... whatever.  If setCSIP() indicates a stack switch occurred,
-         * make sure we're in protected mode, because automatic stack switches can't occur in real mode,
-         * and adjusting SP again under those circumstances will likely cause great harm.
+         * make sure we're in protected mode, because automatic stack switches can't occur in real mode.
          */
         this.assert(!!(this.regCR0 & X86.CR0.MSW.PE));
 
         if (n) this.setSP(this.getSP() + n);        // TODO: optimize
+
         /*
          * As per Intel documentation: "If any of [the DS or ES] registers refer to segments whose DPL is
          * less than the new CPL (excluding conforming code segments), the segment register is loaded with
@@ -2261,15 +2282,14 @@ X86.fnRETF = function RETF(n)
          * it safe and using CODE_CONFORMING instead of CODE_CONFORMING_READABLE.  Also, for the record, I've not
          * seen this situation occur yet (eg, in OS/2 1.0).
          */
-        if ((this.segDS.sel & X86.SEL.MASK) && this.segDS.dpl < this.nCPL && (this.segDS.acc & X86.DESC.ACC.TYPE.CODE_CONFORMING) != X86.DESC.ACC.TYPE.CODE_CONFORMING) {
-            this.assert(false);         // I'm not asserting this is bad, I just want to see it in action
-            this.segDS.load(0);
-        }
-        if ((this.segES.sel & X86.SEL.MASK) && this.segES.dpl < this.nCPL && (this.segES.acc & X86.DESC.ACC.TYPE.CODE_CONFORMING) != X86.DESC.ACC.TYPE.CODE_CONFORMING) {
-            this.assert(false);         // I'm not asserting this is bad, I just want to see it in action
-            this.segES.load(0);
+        this.zeroSeg(this.segDS);
+        this.zeroSeg(this.segES);
+        if (I386 && this.model >= X86.MODEL_80386) {
+            this.zeroSeg(this.segFS);
+            this.zeroSeg(this.segGS);
         }
     }
+    this.opLSP = X86.ADDR_INVALID;
     if (MAXDEBUG && n == 2 && this.cIntReturn) this.checkIntReturn(this.regLIP);
 };
 
@@ -3693,12 +3713,15 @@ X86.fnFault = function(nFault, nError, fHalt, nCycles)
 {
     /*
      * X86.OPFLAG.FAULT flag is used by selected opcodes to provide an early exit, restore register(s), or whatever is
-     * needed to help ensure instruction restartability; there is currently no mechanism for snapping and restoring all
-     * registers for any instruction that might fault, so it's every opcode for themselves....
+     * needed to help ensure instruction restartability; there is currently no general-purpose mechanism for snapping
+     * and restoring all registers for any instruction that might fault, so it's every opcode for themselves.
      *
      * X86.EXCEPTION.DEBUG exceptions set their own special flag, X86.OPFLAG.DEBUG, to prevent redundant DEBUG exceptions,
      * so we don't need to set OPFLAG.FAULT in that case, because a DEBUG exception doesn't actually prevent an instruction
      * from executing.
+     *
+     * TODO: Review the restartability of all our opcode handlers, starting with those that affect the segment registers
+     * and then moving on to the rest, and determine whether we really need a general-purpose solution instead.
      */
     if (nFault == X86.EXCEPTION.DEBUG) {
         this.opFlags |= X86.OPFLAG.DEBUG;
@@ -3719,6 +3742,10 @@ X86.fnFault = function(nFault, nError, fHalt, nCycles)
              * Single-fault (error code is passed through, and the responsible instruction is restartable)
              */
             this.setIP(this.opLIP - this.segCS.base);
+            if (this.opLSP != X86.ADDR_INVALID) {
+                this.setSP((this.regESP & ~this.segSS.addrMask) | (this.opLSP - this.segSS.base));
+                this.opLSP = X86.ADDR_INVALID;
+            }
             fDispatch = true;
         } else if (this.nFault != X86.EXCEPTION.DF_FAULT) {
             /*

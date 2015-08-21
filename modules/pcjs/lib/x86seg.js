@@ -231,7 +231,7 @@ X86Seg.prototype.loadProt = function loadProt(sel)
             return this.loadDesc8(addrDesc, sel);
         }
         if (this.id < X86Seg.ID.VER) {
-            X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel);
+            X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel & X86.ERRCODE.SELMASK);
         }
     }
     return X86.ADDR_INVALID;
@@ -282,9 +282,9 @@ X86Seg.prototype.loadIDTProt = function loadIDTProt(nIDT)
     var addrDesc = (cpu.addrIDT + nIDT)|0;
     if (((cpu.addrIDTLimit - addrDesc)|0) >= 7) {
         this.fCall = true;
-        return this.loadDesc8(addrDesc, nIDT) + cpu.regEIP;
+        return this.loadDesc8(addrDesc, nIDT, true) + cpu.regEIP;
     }
-    X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, nIDT | X86.ERRCODE.IDT | X86.ERRCODE.EXT, true);
+    X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, nIDT | X86.ERRCODE.IDT, true);
     return X86.ADDR_INVALID;
 };
 
@@ -499,7 +499,7 @@ X86Seg.prototype.loadAcc = function(sel, fGDT)
             return cpu.getShort(addrDesc + X86.DESC.ACC.OFFSET);
         }
     }
-    X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel);
+    X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel & X86.ERRCODE.SELMASK);
     return X86.DESC.ACC.INVALID;
 };
 
@@ -540,7 +540,7 @@ X86Seg.prototype.loadDesc6 = function(addrDesc, sel)
 };
 
 /**
- * loadDesc8(addrDesc, sel)
+ * loadDesc8(addrDesc, sel, fIDT)
  *
  * Used to load a protected-mode selector that refers to an 8-byte "descriptor table" (GDT, LDT, IDT) entry:
  *
@@ -554,9 +554,10 @@ X86Seg.prototype.loadDesc6 = function(addrDesc, sel)
  * @this {X86Seg}
  * @param {number} addrDesc is the descriptor address
  * @param {number} sel is the associated selector, or nIDT*8 if IDT descriptor
+ * @param {boolean} [fIDT] is true if sel refers to the IDT (only affects error handling)
  * @return {number} base address of selected segment, or ADDR_INVALID if error
  */
-X86Seg.prototype.loadDesc8 = function(addrDesc, sel)
+X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fIDT)
 {
     var cpu = this.cpu;
     var limit = cpu.getShort(addrDesc + X86.DESC.LIMIT.OFFSET);
@@ -584,12 +585,12 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel)
         if (this.id == X86Seg.ID.CODE) {
             this.fStackSwitch = false;
             var fCall = this.fCall;
-            var regPSClear, nFaultError, regSP;
+            var regPSClear, regSP;
             var rpl = sel & X86.SEL.RPL;
             var dpl = (acc & X86.DESC.ACC.DPL.MASK) >> X86.DESC.ACC.DPL.SHIFT;
 
             if (selMasked && !(acc & X86.DESC.ACC.PRESENT)) {
-                if (this.id < X86Seg.ID.VER) X86.fnFault.call(cpu, X86.EXCEPTION.NP_FAULT, sel);
+                if (this.id < X86Seg.ID.VER) X86.fnFault.call(cpu, X86.EXCEPTION.NP_FAULT, sel & X86.ERRCODE.SELMASK);
                 base = addrDesc = X86.ADDR_INVALID;
                 break;
             }
@@ -632,19 +633,16 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel)
             else if (type == X86.DESC.ACC.TYPE.GATE_CALL || type == X86.DESC.ACC.TYPE.GATE386_CALL) {
                 fGate = true;
                 regPSClear = 0;
-                nFaultError = sel;
                 if (rpl < this.cpl) rpl = this.cpl;     // set RPL to max(RPL,CPL) for call gates
             }
             else if (type == X86.DESC.ACC.TYPE.GATE286_INT || type == X86.DESC.ACC.TYPE.GATE386_INT) {
                 fGate = true;
                 regPSClear = (X86.PS.NT | X86.PS.TF | X86.PS.IF);
-                nFaultError = sel | X86.ERRCODE.EXT;
                 cpu.assert(!(acc & 0x1f));
             }
             else if (type == X86.DESC.ACC.TYPE.GATE286_TRAP || type == X86.DESC.ACC.TYPE.GATE386_TRAP) {
                 fGate = true;
                 regPSClear = (X86.PS.NT | X86.PS.TF);
-                nFaultError = sel | X86.ERRCODE.EXT;
                 cpu.assert(!(acc & 0x1f));
             }
             else if (type == X86.DESC.ACC.TYPE.GATE_TASK) {
@@ -722,6 +720,10 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel)
                             cpu.setSS(cpu.getShort(addrTSS + offSS), true);
                             cpu.setSP(cpu.getLong(addrTSS + offSP));
                             if (regPS & X86.PS.VM) {
+                                /*
+                                 * segFS amd segGS exist only on 80386 machines
+                                 */
+                                cpu.assert(I386 && cpu.model >= X86.MODEL_80386);
                                 cpu.pushWord(cpu.segGS.sel);
                                 cpu.setGS(0);
                                 cpu.pushWord(cpu.segFS.sel);
@@ -739,14 +741,10 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel)
                     }
                     return this.base;
                 }
-                cpu.assert(false);
-                if (this.id < X86Seg.ID.VER) X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, nFaultError, true);
-                base = addrDesc = X86.ADDR_INVALID;
-                break;
             }
-            else if (fGate !== false) {
+            if (fGate !== false) {
                 cpu.assert(false);
-                if (this.id < X86Seg.ID.VER) X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel, true);
+                if (this.id < X86Seg.ID.VER) X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, (sel & X86.ERRCODE.SELMASK) | (fIDT? X86.ERRCODE.IDT : 0), true);
                 base = addrDesc = X86.ADDR_INVALID;
                 break;
             }
@@ -754,7 +752,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel)
         else if (this.id == X86Seg.ID.DATA) {
             if (selMasked) {
                 if (!(acc & X86.DESC.ACC.PRESENT)) {
-                    if (this.id < X86Seg.ID.VER) X86.fnFault.call(cpu, X86.EXCEPTION.NP_FAULT, sel);
+                    if (this.id < X86Seg.ID.VER) X86.fnFault.call(cpu, X86.EXCEPTION.NP_FAULT, sel & X86.ERRCODE.SELMASK);
                     base = addrDesc = X86.ADDR_INVALID;
                     break;
                 }
@@ -780,7 +778,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel)
                      *
                      * So, if the ACC field is zero, we won't set the last fnFault() parameter (fHalt) to true.
                      */
-                    if (this.id < X86Seg.ID.VER) X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel, !!acc);
+                    if (this.id < X86Seg.ID.VER) X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel & X86.ERRCODE.SELMASK, !!acc);
                     base = addrDesc = X86.ADDR_INVALID;
                     break;
                 }
@@ -788,12 +786,12 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel)
         }
         else if (this.id == X86Seg.ID.STACK) {
             if (!(acc & X86.DESC.ACC.PRESENT)) {
-                if (this.id < X86Seg.ID.VER) X86.fnFault.call(cpu, X86.EXCEPTION.SS_FAULT, sel);
+                if (this.id < X86Seg.ID.VER) X86.fnFault.call(cpu, X86.EXCEPTION.SS_FAULT, sel & X86.ERRCODE.SELMASK);
                 base = addrDesc = X86.ADDR_INVALID;
                 break;
             }
             if (!selMasked || type < X86.DESC.ACC.TYPE.SEG || (type & (X86.DESC.ACC.TYPE.CODE | X86.DESC.ACC.TYPE.WRITABLE)) != X86.DESC.ACC.TYPE.WRITABLE) {
-                if (this.id < X86Seg.ID.VER) X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel, true);
+                if (this.id < X86Seg.ID.VER) X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel & X86.ERRCODE.SELMASK, true);
                 base = addrDesc = X86.ADDR_INVALID;
                 break;
             }
@@ -801,7 +799,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel)
         else if (this.id == X86Seg.ID.TSS) {
             var typeTSS = type & ~X86.DESC.ACC.TSS_BUSY;
             if (!selMasked || typeTSS != X86.DESC.ACC.TYPE.TSS286 && typeTSS != X86.DESC.ACC.TYPE.TSS386) {
-                if (this.id < X86Seg.ID.VER) X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel, true);
+                if (this.id < X86Seg.ID.VER) X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel & X86.ERRCODE.SELMASK, true);
                 base = addrDesc = X86.ADDR_INVALID;
                 break;
             }
@@ -885,7 +883,7 @@ X86Seg.prototype.switchTSS = function switchTSS(selNew, fNest)
          * TODO: Verify that it is (always) correct to require that the BUSY bit be currently set.
          */
         if (!(cpu.segTSS.type & X86.DESC.ACC.TSS_BUSY)) {
-            X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, selNew, true);
+            X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, selNew & X86.ERRCODE.SELMASK, true);
             return false;
         }
         /*
@@ -905,7 +903,7 @@ X86Seg.prototype.switchTSS = function switchTSS(selNew, fNest)
 
     if (fNest !== false) {
         if (cpu.segTSS.type & X86.DESC.ACC.TSS_BUSY) {
-            X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, selNew, true);
+            X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, selNew & X86.ERRCODE.SELMASK, true);
             return false;
         }
         cpu.setShort(cpu.segTSS.addrDesc + X86.DESC.ACC.OFFSET, cpu.segTSS.acc |= X86.DESC.ACC.TSS_BUSY);
@@ -979,8 +977,14 @@ X86Seg.prototype.switchTSS = function switchTSS(selNew, fNest)
         cpu.setLong(addrOld + X86.TSS386.TASK_CS,  cpu.segCS.sel);
         cpu.setLong(addrOld + X86.TSS386.TASK_SS,  cpu.segSS.sel);
         cpu.setLong(addrOld + X86.TSS386.TASK_DS,  cpu.segDS.sel);
+
+        /*
+         * segFS amd segGS exist only on 80386 machines
+         */
+        cpu.assert(I386 && cpu.model >= X86.MODEL_80386);
         cpu.setLong(addrOld + X86.TSS386.TASK_FS,  cpu.segFS.sel);
         cpu.setLong(addrOld + X86.TSS386.TASK_GS,  cpu.segGS.sel);
+
         /*
          * Reload all registers from the new TSS; it's important to reload the LDTR sooner
          * rather than later, so that as segment registers are reloaded, any LDT selectors will
@@ -999,8 +1003,14 @@ X86Seg.prototype.switchTSS = function switchTSS(selNew, fNest)
         cpu.regEDI = cpu.getLong(addrNew + X86.TSS386.TASK_EDI);
         cpu.segES.load(cpu.getShort(addrNew + X86.TSS386.TASK_ES));
         cpu.segDS.load(cpu.getShort(addrNew + X86.TSS386.TASK_DS));
+
+        /*
+         * segFS amd segGS exist only on 80386 machines
+         */
+        cpu.assert(I386 && cpu.model >= X86.MODEL_80386);
         cpu.segFS.load(cpu.getShort(addrNew + X86.TSS386.TASK_FS));
         cpu.segGS.load(cpu.getShort(addrNew + X86.TSS386.TASK_GS));
+
         cpu.setCSIP(cpu.getLong(addrNew + X86.TSS386.TASK_EIP), cpu.getShort(addrNew + X86.TSS386.TASK_CS));
         offSS = X86.TSS386.TASK_SS;
         offSP = X86.TSS386.TASK_ESP;

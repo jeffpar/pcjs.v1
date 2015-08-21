@@ -1127,7 +1127,7 @@ X86CPU.prototype.getReg = function(i)
         reg = this.regEBX;
         break;
     case 0x4:
-        reg = this.regESP;
+        reg = this.getSP();
         break;
     case 0x5:
         reg = this.regEBP;
@@ -1165,7 +1165,7 @@ X86CPU.prototype.setReg = function(i, reg)
         this.regEBX = reg;
         break;
     case 0x4:
-        this.regESP = reg;
+        this.setSP(reg);
         break;
     case 0x5:
         this.regEBP = reg;
@@ -1296,6 +1296,13 @@ X86CPU.prototype.resetRegs = function()
     this.nFault = -1;
 
     /*
+     * These are used to snapshot regLIP and regLSP, to help make instructions restartable;
+     * currently opLIP is updated prior to every instruction, but opLSP is updated only for
+     * "problematic" instructions (eg, RETF) and should otherwise remain set to X86.ADDR_INVALID.
+     */
+    this.opLIP = this.opLSP = X86.ADDR_INVALID;
+
+    /*
      * Segment registers used to be defined as separate variables (eg, regCS and regCS0 stored the segment
      * number and base linear address, respectively), but segment registers are now defined as X86Seg objects.
      */
@@ -1417,6 +1424,21 @@ X86CPU.prototype.resetRegs = function()
      * Now that all the segment registers have been created, it's safe to set the current addressing mode.
      */
     this.setProtMode();
+};
+
+/**
+ * zeroSeg(seg)
+ *
+ * Helper to zero a segment register as privilege transitions require.
+ *
+ * @this {X86CPU}
+ * @param {X86Seg} seg
+ */
+X86CPU.prototype.zeroSeg = function(seg)
+{
+    if ((seg.sel & X86.SEL.MASK) && seg.dpl < this.nCPL && (seg.acc & X86.DESC.ACC.TYPE.CODE_CONFORMING) != X86.DESC.ACC.TYPE.CODE_CONFORMING) {
+        seg.load(0);
+    }
 };
 
 /**
