@@ -84,7 +84,7 @@ crash, you can dump the instruction history buffer using the Debugger's "dh" com
 NOTE: The diskette images contain a pre-release version of Windows 95, as I don't currently have the RTM version on
 diskette.
 
-Update for August 13, 2015
+August 13, 2015 Update
 ---
 
 PCjs v1.18.8 has made a little more progress running Windows 95 Setup, but CAB decompression still fails almost
@@ -144,7 +144,32 @@ A quick recap of those command prefixes (which you won't see until AFTER you've 
 
 80386 Debug register (DR0-DR7) support was recently added, so even WDEB386 read/write breakpoints should work now. 
 
+August 21, 2015 Update
+---
+
+PCjs v1.19.1 has finally solved a number of nagging bugs.  The CAB decompression code itself was running
+fine; it would crash after loading a 32-bit value into EAX *and* a timer interrupt occurred.  A path
+through the interrupt handler was trashing the upper bits of EAX.  The culprit: any of the MOV instructions
+that move an immediate value into one of the "high" 8-bit registers (AH, BH, CH, or DH).  Those instructions
+were failing to preserve the upper 16 bits of the entire register.  Further proof that the most exasperating
+bugs sometimes have the most mundane causes.
+
+Also recently fixed: the annoying VGA video glitch that would occur whenever the mouse was moved, improper
+updates to the ACCESSED bit in a selector's descriptor table entry, improper error codes when a selector load
+generated a fault, and the RETF instruction's failure to properly restart when the return address referred
+to a not-present segment.
+
+The next problem appears to be timer-related.  When Windows 95 Setup begins its hardware analysis, it
+gets "stuck" in code that's reading and writing timer ports (0x40 and 0x43).  Turning on timer port messages
+with the `"m port on;m timer on"` Debugger commands reveals that the problem maybe an unsupported timer
+command:
+
+	chipset.outPort(0x0043,PIT1_CTRL,0xD2) @1847:DD02
+	PIT1_CTRL: Read-Back command not supported (yet)
+
+To be continued....
+
 [Embedded DeskPro 386](/devices/pc/machine/compaq/deskpro386/vga/4096kb/machine.xml "PCjs:deskpro386::uncompiled:debugger")
 
 *[@jeffpar](http://twitter.com/jeffpar)*  
-*July 17, 2015*
+*July 17, 2015* (updated August 13 and August 21, 2015)
