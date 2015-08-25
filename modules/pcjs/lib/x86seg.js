@@ -626,6 +626,10 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fProbe)
 
         var fGate, selCode, cplOld, addrTSS, offSP, lenSP, regSPPrev, regSSPrev, regPSClear, regSP;
 
+        /*
+         * TODO: As discussed below for X86Seg.ID.DATA, it's likely that testing the PRESENT bit should
+         * be performed *after* checking the other, more serious potential problems.
+         */
         if (selMasked && !(acc & X86.DESC.ACC.PRESENT)) {
             if (this.id < X86Seg.ID.VER) X86.fnFault.call(cpu, X86.EXCEPTION.NP_FAULT, sel & X86.ERRCODE.SELMASK);
             return X86.ADDR_INVALID;
@@ -818,31 +822,50 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fProbe)
 
     case X86Seg.ID.DATA:
         if (selMasked) {
-            if (!(acc & X86.DESC.ACC.PRESENT)) {
-                /*
-                 * OS/2 1.0 faults on segments with "empty descriptors" multiple times during boot; for example:
-                 *
-                 *      Fault 0x0B (0x002C) on opcode 0x8E at 3190:3A05 (%112625)
-                 *      AX=0000 BX=0970 CX=0300 DX=0300 SP=0ABE BP=0ABA SI=0000 DI=001A
-                 *      SS=0038[175CE0,0B5F] DS=19C0[177300,2C5F] ES=001F[1743A0,07FF] A20=ON
-                 *      CS=3190[10EC20,B89F] LD=0028[174BC0,003F] GD=[11A4E0,490F] ID=[11F61A,03FF]
-                 *      TR=0010 MS=0000FFF3 PS=3256 V0 D0 I1 T0 S0 Z1 A1 P1 C0
-                 *      3190:3A05 8E4604          MOV      ES,[BP+04]
-                 *      ## dw ss:bp+4 l1
-                 *      0038:0ABE  002F  19C0  0000  067C  07FC  0AD2  0010  C420   /.....|....... .
-                 *      ## ds 2f
-                 *      dumpDesc(0x002F): %174BE8
-                 *      base=000000 limit=0000 type=0x00 (undefined) ext=0x0000 dpl=0x00
-                 *
-                 * Before I added the X86.DESC.ACC.PRESENT check, I used to (incorrectly) dispatch this as a GP_FAULT,
-                 * but OS/2 still appeared to handle the fault OK.  However, this condition is now properly handled as
-                 * an NP_FAULT.
-                 */
-                if (this.id < X86Seg.ID.VER) X86.fnFault.call(cpu, X86.EXCEPTION.NP_FAULT, sel & X86.ERRCODE.SELMASK);
-                return X86.ADDR_INVALID;
-            }
+            /*
+             * OS/2 1.0 faults on segments with "empty descriptors" multiple times during boot; for example:
+             *
+             *      Fault 0x0B (0x002C) on opcode 0x8E at 3190:3A05 (%112625)
+             *      AX=0000 BX=0970 CX=0300 DX=0300 SP=0ABE BP=0ABA SI=0000 DI=001A
+             *      SS=0038[175CE0,0B5F] DS=19C0[177300,2C5F] ES=001F[1743A0,07FF] A20=ON
+             *      CS=3190[10EC20,B89F] LD=0028[174BC0,003F] GD=[11A4E0,490F] ID=[11F61A,03FF]
+             *      TR=0010 MS=0000FFF3 PS=3256 V0 D0 I1 T0 S0 Z1 A1 P1 C0
+             *      3190:3A05 8E4604          MOV      ES,[BP+04]
+             *      ## dw ss:bp+4 l1
+             *      0038:0ABE  002F  19C0  0000  067C  07FC  0AD2  0010  C420   /.....|....... .
+             *      ## ds 2f
+             *      dumpDesc(0x002F): %174BE8
+             *      base=000000 limit=0000 type=0x00 (undefined) ext=0x0000 dpl=0x00
+             *
+             * And Windows 95 Setup, during the "Analyzing Your Computer" phase, will fault on an attempt to load
+             * a GDT selector of type LDT (why it does this is a mystery I've not yet investigated):
+             *
+             *      Fault 0x0D (0x26F0) on opcode 0x8E @039F:039B (%199E9B)
+             *      EAX=0000149F EBX=00000100 ECX=000026F3 EDX=0020149F
+             *      ESP=0000AA34 EBP=0000AA3C ESI=000026E7 EDI=00000080
+             *      SS=155F[002AC9D0,C0BF] DS=149F[0031B470,9B1F] ES=0237[000C0000,FFFF]
+             *      CS=039F[00199B00,2ABF] FS=0000[00000000,0000] GS=0000[00000000,0000]
+             *      LD=0038[00FA4C50,FFEF] GD=[00FA0800,011F] ID=[00FA0000,07FF] TR=0088 A20=ON
+             *      CR0=0000FFF1 CR2=00000000 CR3=00000000 PS=00003246 V0 D0 I1 T0 S0 Z1 A0 P1 C0
+             *      039F:039B 8EC1            MOV      ES,CX
+             *      ## ds cx
+             *      dumpDesc(0x26F3): %00FA2EF0
+             *      base=0006C726 limit=0000 type=0x02 (ldt,not present) ext=0x0000 dpl=0x00
+             *
+             * In both cases, the segment type is not valid for the target segment register *and* the PRESENT bit
+             * is clear.  OS/2 didn't seem to care whether I reported NP_FAULT or GP_FAULT, but Windows 95 definitely
+             * cares: it will resolve the fault only if a GP_FAULT is reported.  And Intel's 80386 Programmers Reference
+             * suggests that, yes, NP_FAULT checks are supposed to come *after* GP_FAULT checks.
+             */
             if (type < X86.DESC.ACC.TYPE.SEG || (type & (X86.DESC.ACC.TYPE.CODE | X86.DESC.ACC.TYPE.READABLE)) == X86.DESC.ACC.TYPE.CODE) {
                 if (this.id < X86Seg.ID.VER) X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel & X86.ERRCODE.SELMASK, true);
+                return X86.ADDR_INVALID;
+            }
+            /*
+             * TODO: This would be a good place to perform some additional access rights checks, too.
+             */
+            if (!(acc & X86.DESC.ACC.PRESENT)) {
+                if (this.id < X86Seg.ID.VER) X86.fnFault.call(cpu, X86.EXCEPTION.NP_FAULT, sel & X86.ERRCODE.SELMASK);
                 return X86.ADDR_INVALID;
             }
         }
