@@ -1264,79 +1264,77 @@ X86.fnINT = function INT(nIDT, nError, nCycles)
  */
 X86.fnIRET = function IRET()
 {
-    /*
-     * TODO: We assess a fixed cycle cost up front, because at the moment, switchTSS() doesn't assess anything.
-     */
+    this.opLSP = this.regLSP;
     this.nStepCycles -= this.cycleCounts.nOpCyclesIRet;
 
-    if (this.regCR0 & X86.CR0.MSW.PE) {
-        if (this.regPS & X86.PS.NT) {
-            var addrNew = this.segTSS.base;
-            /*
-             * Fortunately, X86.TSS286.PREV_TSS and X86.TSS386.PREV_TSS refer to the same TSS offset.
-             */
-            var sel = this.getShort(addrNew + X86.TSS286.PREV_TSS);
-            this.segCS.switchTSS(sel, false);
-            return;
-        }
+    if ((this.regCR0 & X86.CR0.MSW.PE) && (this.regPS & X86.PS.NT)) {
+        var addrNew = this.segTSS.base;
+        /*
+         * Fortunately, X86.TSS286.PREV_TSS and X86.TSS386.PREV_TSS refer to the same TSS offset.
+         * TODO: Update switchTS() to assess a cycle cost; currently, all we assess is what's shown above.
+         */
+        var sel = this.getShort(addrNew + X86.TSS286.PREV_TSS);
+        this.segCS.switchTSS(sel, false);
     }
+    else {
+        var cpl = this.nCPL;
+        var newIP = this.popWord();
+        var newCS = this.popWord();
+        var newPS = this.popWord();
 
-    var cpl = this.nCPL;
-    var newIP = this.popWord();
-    var newCS = this.popWord();
-    var newPS = this.popWord();
-
-    if (I386) {
-        if (this.regPS & X86.PS.VM) {
-            /*
-             * On the 80386, in V86-mode, RF is the only defined EFLAGS bit above bit 15 that may be changed by IRETD.
-             * This is less restrictive than POPFD, which cannot change ANY bits above bit 15; see opPOPF() for details.
-             */
-            newPS = (newPS & (0xffff | X86.PS.RF)) | (this.regPS & ~(0xffff | X86.PS.RF));
-        }
-        else {
-            if (newPS & X86.PS.VM) {
-                this.assert(!!(this.regCR0 & X86.CR0.MSW.PE));
+        if (I386) {
+            if (this.regPS & X86.PS.VM) {
                 /*
-                 * We have to assume that a full V86-mode interrupt frame was on the protected-mode stack; namely:
-                 *
-                 *      GS
-                 *      FS
-                 *      DS
-                 *      ES
-                 *      SS
-                 *      ESP
-                 *      EFLAGS
-                 *      CS
-                 *      EIP
-                 *
-                 * We've already popped EIP, CS, and EFLAGS into newIP, newCS and newPS, respectively, so we must now
-                 * pop the rest, while we're still in protected-mode, before the switch to V86-mode alters the current
-                 * operand size (among other things).
+                 * On the 80386, in V86-mode, RF is the only defined EFLAGS bit above bit 15 that may be changed by IRETD.
+                 * This is less restrictive than POPFD, which cannot change ANY bits above bit 15; see opPOPF() for details.
                  */
-                var newSP = this.popWord();
-                var newSS = this.popWord();
-                var newES = this.popWord();
-                var newDS = this.popWord();
-                var newFS = this.popWord();
-                var newGS = this.popWord();
-                this.setProtMode(true, true);       // flip the switch to V86-mode now
-                this.setSS(newSS);
-                this.setSP(newSP);
-                this.setES(newES);
-                this.setDS(newDS);
-                this.setFS(newFS);
-                this.setGS(newGS);
+                newPS = (newPS & (0xffff | X86.PS.RF)) | (this.regPS & ~(0xffff | X86.PS.RF));
+            }
+            else {
+                if (newPS & X86.PS.VM) {
+                    this.assert(!!(this.regCR0 & X86.CR0.MSW.PE));
+                    /*
+                     * We have to assume that a full V86-mode interrupt frame was on the protected-mode stack; namely:
+                     *
+                     *      GS
+                     *      FS
+                     *      DS
+                     *      ES
+                     *      SS
+                     *      ESP
+                     *      EFLAGS
+                     *      CS
+                     *      EIP
+                     *
+                     * We've already popped EIP, CS, and EFLAGS into newIP, newCS and newPS, respectively, so we must now
+                     * pop the rest, while we're still in protected-mode, before the switch to V86-mode alters the current
+                     * operand size (among other things).
+                     */
+                    var newSP = this.popWord();
+                    var newSS = this.popWord();
+                    var newES = this.popWord();
+                    var newDS = this.popWord();
+                    var newFS = this.popWord();
+                    var newGS = this.popWord();
+                    this.setProtMode(true, true);       // flip the switch to V86-mode now
+                    this.setSS(newSS);
+                    this.setSP(newSP);
+                    this.setES(newES);
+                    this.setDS(newDS);
+                    this.setFS(newFS);
+                    this.setGS(newGS);
+                }
             }
         }
-    }
 
-    // if (DEBUG) this.printMessage(" returning to " + str.toHex(newCS, 4) + ':' + str.toHex(newIP, this.dataSize << 1), this.bitsMessage, true);
+        // if (DEBUG) this.printMessage(" returning to " + str.toHex(newCS, 4) + ':' + str.toHex(newIP, this.dataSize << 1), this.bitsMessage, true);
 
-    if (this.setCSIP(newIP, newCS, false) != null) {
-        this.setPS(newPS, cpl);
-        if (MAXDEBUG && this.cIntReturn) this.checkIntReturn(this.regLIP);
+        if (this.setCSIP(newIP, newCS, false) != null) {
+            this.setPS(newPS, cpl);
+            if (MAXDEBUG && this.cIntReturn) this.checkIntReturn(this.regLIP);
+        }
     }
+    this.opLSP = X86.ADDR_INVALID;
 };
 
 /**
@@ -2239,17 +2237,18 @@ X86.fnRCRd = function RCRd(dst, src)
  *          this.pushWord(oldIP);
  *      }
  *
- * That code makes opCALLF() restartable, because it doesn't modify the stack unless setCSIP() succeeds.
+ * That code is inherently restartable, because it doesn't modify the stack unless setCSIP() succeeds.
  *
  * Here, our task is a little more complicated, because 1) it's not convenient to defer our stack
- * operations (it's much simpler to perform them BEFORE the setCSIP() call rather than AFTER); 2) we
- * have to deal with an additional stack adjustment value (n); and 3) if setCSIP() triggers a fault
- * (eg, NP_FAULT), fnFault() must be able to do the rewinding, which happens BEFORE setCSIP() returns.
+ * operations until AFTER setCSIP(); 2) we have to deal with an additional stack adjustment value (n);
+ * and 3) if setCSIP() triggers a fault (eg, NP_FAULT), fnFault() must be able to do the rewinding,
+ * which happens BEFORE setCSIP() returns.
  *
  * The current hack to make the stack "rewindable" involves copying regLSP to opLSP, similar to what we do
- * for EIP (ie, by copying regLIP into opLIP prior to executing every opcode).  However, I don't really want
- * to snapshot more data inside the opcode loop, so my compromise is to set opLSP only within "problematic"
- * instructions (like this one), and set it back to X86.ADDR_INVALID when we're done.
+ * for EIP (ie, by copying regLIP into opLIP prior to executing every opcode), so that fnFault() can rewind
+ * ESP as needed.  And since I don't really want to snapshot more data inside the opcode loop, my compromise
+ * is to set opLSP only within instructions (like this one) that read/write the stack, and then reset opLSP
+ * back to X86.ADDR_INVALID when we're done.
  *
  * @this {X86CPU}
  * @param {number} n
@@ -2289,8 +2288,8 @@ X86.fnRETF = function RETF(n)
             this.zeroSeg(this.segGS);
         }
     }
-    this.opLSP = X86.ADDR_INVALID;
     if (MAXDEBUG && n == 2 && this.cIntReturn) this.checkIntReturn(this.regLIP);
+    this.opLSP = X86.ADDR_INVALID;
 };
 
 /**
@@ -3773,7 +3772,7 @@ X86.fnFault = function(nFault, nError, fHalt, nCycles)
         this.nFault = nFault;
         X86.fnINT.call(this, nFault, nError, nCycles || 0);
         /*
-         * REP'eated instructions that want to rewind regLIP to opLIP used to screw up this dispatch,
+         * REP'eated instructions that rewind regLIP to opLIP used to screw up this dispatch,
          * so now we slip the new regLIP into opLIP, effectively turning their action into a no-op.
          */
         this.opLIP = this.regLIP;
@@ -3871,7 +3870,7 @@ X86.fnFaultMessage = function(nFault, nError, fHalt)
             fHalt = false;
         }
     } else {
-        if (nFault == X86.EXCEPTION.SS_FAULT || nFault == X86.EXCEPTION.PG_FAULT || nFault == X86.EXCEPTION.GP_FAULT && this.model == X86.MODEL_80386 /* || nFault == X86.EXCEPTION.NP_FAULT && bOpcode == 0x8E */) {
+        if (nFault == X86.EXCEPTION.PG_FAULT || nFault == X86.EXCEPTION.GP_FAULT && this.model == X86.MODEL_80386 /* || nFault == X86.EXCEPTION.NP_FAULT && bOpcode == 0x8E */) {
             fHalt = true;
         }
     }
@@ -3902,9 +3901,9 @@ X86.fnFaultMessage = function(nFault, nError, fHalt)
     }
 
     if (this.messageEnabled(bitsMessage) || fHalt) {
-        var sMessage = "Fault " + str.toHexByte(nFault) + (nError != null? " (" + str.toHexWord(nError) + ")" : "") + " on opcode " + str.toHexByte(bOpcode) + " at " + this.dbg.hexOffset(this.getIP(), this.getCS()) + " (%" + str.toHex(this.regLIP, 6) + ")";
+        var sMessage = "Fault " + str.toHexByte(nFault) + (nError != null? " (" + str.toHexWord(nError) + ")" : "") + " on opcode " + str.toHexByte(bOpcode);
         var fRunning = this.aFlags.fRunning;
-        if (this.printMessage(sMessage, bitsMessage)) {
+        if (this.printMessage(sMessage, fHalt || bitsMessage, true)) {
             if (fHalt) {
                 /*
                  * By setting fHalt to fRunning (which is true while running but false while single-stepping),
@@ -3919,8 +3918,8 @@ X86.fnFaultMessage = function(nFault, nError, fHalt)
             }
         } else {
             /*
-             * If printMessage() returned false, then messageEnabled() must have returned false as well, which
-             * means that fHalt must be true.  Which means we should shut the machine down.
+             * If printMessage() returned false, then there's no Debugger, which means that messageEnabled() must have
+             * returned false as well, which means that fHalt must be true.  Which means we should shut the machine down.
              */
             this.assert(fHalt);
             this.notice(sMessage);

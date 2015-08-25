@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.19.1/manifest.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.19.2/manifest.xsl"?>
 <manifest type="software">
 	<title>Microsoft Windows 3.00</title>
 	<disk id="disk01" size="737280" chs="80:2:9" img="static/720K/WIN300-DISK1.img" href="/disks/pc/windows/3.00/720K/WIN300-DISK1.json" md5="e885338cbefa095c6b2c403d03085cba" md5json="f6efc1eb0d6abd697fe09d2de7efc0c2">

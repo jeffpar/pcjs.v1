@@ -100,6 +100,13 @@ function X86Seg(cpu, id, sName, fProt)
     this.checkWriteV86 = this.checkWriteReal;
 
     /*
+     * Preallocated object for "probed" segment loads
+     */
+    this.probe = {
+        sel: 0, base: 0, limit: 0, acc: 0, type: 0, ext: 0, addrDesc: X86.ADDR_INVALID
+    };
+
+    /*
      * The following properties are used for CODE segments only (ie, segCS); if the process of loading
      * CS also requires a stack switch, then fStackSwitch will be set to true; additionally, if the stack
      * switch was the result of a CALL (ie, fCall is true) and one or more (up to 32) parameters are on
@@ -140,7 +147,7 @@ X86Seg.ID = {
  * @this {X86Seg}
  * @param {number} sel
  * @param {boolean|undefined} fCall is true if CALLF in progress, false if RETF/IRET in progress, undefined otherwise
- * @return {number} base address of selected segment, or ADDR_INVALID if error
+ * @return {number} base address of selected segment, or X86.ADDR_INVALID if error
  */
 X86Seg.prototype.loadCode = function loadCode(sel, fCall)
 {
@@ -149,15 +156,16 @@ X86Seg.prototype.loadCode = function loadCode(sel, fCall)
 };
 
 /**
- * loadReal(sel)
+ * loadReal(sel, fProbe)
  *
  * The default segment load() function for real-mode.
  *
  * @this {X86Seg}
  * @param {number} sel
- * @return {number} base address of selected segment, or ADDR_INVALID if error (TODO: No error conditions yet)
+ * @param {boolean} [fProbe] (here only to make the function signatures of loadReal() and loadProt() match)
+ * @return {number} base address of selected segment
  */
-X86Seg.prototype.loadReal = function loadReal(sel)
+X86Seg.prototype.loadReal = function loadReal(sel, fProbe)
 {
     this.sel = sel & 0xffff;
     /*
@@ -171,7 +179,7 @@ X86Seg.prototype.loadReal = function loadReal(sel)
 };
 
 /**
- * loadProt(sel)
+ * loadProt(sel, fProbe)
  *
  * This replaces the segment's default load() function whenever the segment is notified via updateMode() by the
  * CPU's setProtMode() that the processor is now in protected-mode.
@@ -190,9 +198,10 @@ X86Seg.prototype.loadReal = function loadReal(sel)
  *
  * @this {X86Seg}
  * @param {number} sel
- * @return {number} base address of selected segment, or ADDR_INVALID if error
+ * @param {boolean} [fProbe]
+ * @return {number} base address of selected segment, or X86.ADDR_INVALID if error
  */
-X86Seg.prototype.loadProt = function loadProt(sel)
+X86Seg.prototype.loadProt = function loadProt(sel, fProbe)
 {
     var addrDT;
     var addrDTLimit;
@@ -228,7 +237,7 @@ X86Seg.prototype.loadProt = function loadProt(sel)
              * and will be much greater whenever the load fails.
              */
             if (this.id != X86Seg.ID.DBG) cpu.nStepCycles -= 15;
-            return this.loadDesc8(addrDesc, sel);
+            return this.loadDesc8(addrDesc, sel, fProbe);
         }
         if (this.id < X86Seg.ID.VER) {
             X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel & X86.ERRCODE.SELMASK);
@@ -242,7 +251,7 @@ X86Seg.prototype.loadProt = function loadProt(sel)
  *
  * @this {X86Seg}
  * @param {number} nIDT
- * @return {number} address from selected vector, or ADDR_INVALID if error (TODO: No error conditions yet)
+ * @return {number} address from selected vector
  */
 X86Seg.prototype.loadIDTReal = function loadIDTReal(nIDT)
 {
@@ -271,7 +280,7 @@ X86Seg.prototype.loadIDTReal = function loadIDTReal(nIDT)
  *
  * @this {X86Seg}
  * @param {number} nIDT
- * @return {number} address from selected vector, or ADDR_INVALID if error (TODO: No error conditions yet)
+ * @return {number} address from selected vector, or X86.ADDR_INVALID if error
  */
 X86Seg.prototype.loadIDTProt = function loadIDTProt(nIDT)
 {
@@ -282,7 +291,7 @@ X86Seg.prototype.loadIDTProt = function loadIDTProt(nIDT)
     var addrDesc = (cpu.addrIDT + nIDT)|0;
     if (((cpu.addrIDTLimit - addrDesc)|0) >= 7) {
         this.fCall = true;
-        return this.loadDesc8(addrDesc, nIDT, true) + cpu.regEIP;
+        return this.loadDesc8(addrDesc, nIDT) + cpu.regEIP;
     }
     X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, nIDT | X86.ERRCODE.IDT, true);
     return X86.ADDR_INVALID;
@@ -297,7 +306,7 @@ X86Seg.prototype.loadIDTProt = function loadIDTProt(nIDT)
  * @this {X86Seg}
  * @param {number} off is a segment-relative offset
  * @param {number} cb is number of bytes to check (1, 2 or 4)
- * @return {number} corresponding linear address if valid, or ADDR_INVALID if error (TODO: No error conditions yet)
+ * @return {number} corresponding linear address if valid, or X86.ADDR_INVALID if error (TODO: No error conditions yet)
  */
 X86Seg.prototype.checkReadReal = function checkReadReal(off, cb)
 {
@@ -313,7 +322,7 @@ X86Seg.prototype.checkReadReal = function checkReadReal(off, cb)
  * @this {X86Seg}
  * @param {number} off is a segment-relative offset
  * @param {number} cb is number of bytes to check (1, 2 or 4)
- * @return {number} corresponding linear address if valid, or ADDR_INVALID if error (TODO: No error conditions yet)
+ * @return {number} corresponding linear address if valid, or X86.ADDR_INVALID if error (TODO: No error conditions yet)
  */
 X86Seg.prototype.checkWriteReal = function checkWriteReal(off, cb)
 {
@@ -326,7 +335,7 @@ X86Seg.prototype.checkWriteReal = function checkWriteReal(off, cb)
  * @this {X86Seg}
  * @param {number} off is a segment-relative offset
  * @param {number} cb is number of bytes to check (1, 2 or 4)
- * @return {number} corresponding linear address if valid, or ADDR_INVALID if not
+ * @return {number} corresponding linear address if valid, or X86.ADDR_INVALID if not
  */
 X86Seg.prototype.checkReadProt = function checkReadProt(off, cb)
 {
@@ -346,7 +355,7 @@ X86Seg.prototype.checkReadProt = function checkReadProt(off, cb)
  * @this {X86Seg}
  * @param {number} off is a segment-relative offset
  * @param {number} cb is number of bytes to check (1, 2 or 4)
- * @return {number} corresponding linear address if valid, ADDR_INVALID if not
+ * @return {number} corresponding linear address if valid, X86.ADDR_INVALID if not
  */
 X86Seg.prototype.checkReadProtDown = function checkReadProtDown(off, cb)
 {
@@ -366,7 +375,7 @@ X86Seg.prototype.checkReadProtDown = function checkReadProtDown(off, cb)
  * @this {X86Seg}
  * @param {number} off is a segment-relative offset
  * @param {number} cb is number of bytes to check (1, 2 or 4)
- * @return {number} corresponding linear address if valid, ADDR_INVALID if not
+ * @return {number} corresponding linear address if valid, X86.ADDR_INVALID if not
  */
 X86Seg.prototype.checkReadProtDisallowed = function checkReadProtDisallowed(off, cb)
 {
@@ -380,7 +389,7 @@ X86Seg.prototype.checkReadProtDisallowed = function checkReadProtDisallowed(off,
  * @this {X86Seg}
  * @param {number} off is a segment-relative offset
  * @param {number} cb is number of bytes to check (1, 2 or 4)
- * @return {number} corresponding linear address if valid, ADDR_INVALID if not
+ * @return {number} corresponding linear address if valid, X86.ADDR_INVALID if not
  */
 X86Seg.prototype.checkWriteProt = function checkWriteProt(off, cb)
 {
@@ -400,7 +409,7 @@ X86Seg.prototype.checkWriteProt = function checkWriteProt(off, cb)
  * @this {X86Seg}
  * @param {number} off is a segment-relative offset
  * @param {number} cb is number of bytes to check (1, 2 or 4)
- * @return {number} corresponding linear address if valid, ADDR_INVALID if not
+ * @return {number} corresponding linear address if valid, X86.ADDR_INVALID if not
  */
 X86Seg.prototype.checkWriteProtDown = function checkWriteProtDown(off, cb)
 {
@@ -420,7 +429,7 @@ X86Seg.prototype.checkWriteProtDown = function checkWriteProtDown(off, cb)
  * @this {X86Seg}
  * @param {number} off is a segment-relative offset
  * @param {number} cb is number of bytes to check (1, 2 or 4)
- * @return {number} corresponding linear address if valid, ADDR_INVALID if not
+ * @return {number} corresponding linear address if valid, X86.ADDR_INVALID if not
  */
 X86Seg.prototype.checkWriteProtDisallowed = function checkWriteProtDisallowed(off, cb)
 {
@@ -434,7 +443,7 @@ X86Seg.prototype.checkWriteProtDisallowed = function checkWriteProtDisallowed(of
  * @this {X86Seg}
  * @param {number} off is a segment-relative offset
  * @param {number} cb is number of bytes to check (1, 2 or 4)
- * @return {number} corresponding linear address if valid, or ADDR_INVALID if error
+ * @return {number} corresponding linear address if valid, or X86.ADDR_INVALID if error
  */
 X86Seg.prototype.checkReadDebugger = function checkReadDebugger(off, cb)
 {
@@ -456,7 +465,7 @@ X86Seg.prototype.checkReadDebugger = function checkReadDebugger(off, cb)
  * @this {X86Seg}
  * @param {number} off is a segment-relative offset
  * @param {number} cb is number of bytes to check (1, 2 or 4)
- * @return {number} corresponding linear address if valid, or ADDR_INVALID if error
+ * @return {number} corresponding linear address if valid, or X86.ADDR_INVALID if error
  */
 X86Seg.prototype.checkWriteDebugger = function checkWriteDebugger(off, cb)
 {
@@ -540,7 +549,7 @@ X86Seg.prototype.loadDesc6 = function(addrDesc, sel)
 };
 
 /**
- * loadDesc8(addrDesc, sel, fIDT)
+ * loadDesc8(addrDesc, sel, fProbe)
  *
  * Used to load a protected-mode selector that refers to an 8-byte "descriptor table" (GDT, LDT, IDT) entry:
  *
@@ -551,15 +560,47 @@ X86Seg.prototype.loadDesc6 = function(addrDesc, sel)
  *
  * See X86.DESC for offset and bit definitions.
  *
+ * When fProbe is set, this function will not modify the X86Seg object; it will still generate a fault if any of
+ * the usual error conditions are detected (and return X86.ADDR_INVALID), but in the success case, it merely stashes
+ * all descriptor values it reads in the X86Seg's "probe" object.  If the caller ultimately decides to propagate
+ * those "probed" values to the X86Seg object, it must then call loadProbe().
+ *
  * @this {X86Seg}
  * @param {number} addrDesc is the descriptor address
  * @param {number} sel is the associated selector, or nIDT*8 if IDT descriptor
- * @param {boolean} [fIDT] is true if sel refers to the IDT (only affects error handling)
- * @return {number} base address of selected segment, or ADDR_INVALID if error
+ * @param {boolean} [fProbe] (true if this is a probe)
+ * @return {number} base address of selected segment, or X86.ADDR_INVALID if error
  */
-X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fIDT)
+X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fProbe)
 {
     var cpu = this.cpu;
+
+    /*
+     * If the previous load was a successful "probed" load of the same segment, then we simply load
+     * up all the cached descriptor values from that probe and return.
+     */
+    if (!fProbe && sel === this.probe.sel) {
+        this.sel = sel;
+        this.base = this.probe.base;
+        this.limit = this.probe.limit;
+        this.offMax = (this.probe.limit >>> 0) + 1;
+        this.acc = this.probe.acc;
+        this.type = this.probe.type;
+        this.ext = this.probe.ext;
+        this.addrDesc = this.probe.addrDesc;
+        this.probe.sel = 0;
+        this.updateMode(true, true, false);
+        return this.base;
+    }
+
+    /*
+     * Any other load, probed or otherwise, should "flush" the probe cache, by setting probe.sel to zero.
+     */
+    this.probe.sel = 0;
+
+    /*
+     * Load the descriptor from memory.
+     */
     var limit = cpu.getShort(addrDesc + X86.DESC.LIMIT.OFFSET);
     var acc = cpu.getShort(addrDesc + X86.DESC.ACC.OFFSET);
     var type = (acc & X86.DESC.ACC.TYPE.MASK);
@@ -574,257 +615,291 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fIDT)
         if (ext & X86.DESC.EXT.LIMITPAGES) limit = (limit << 12) | 0xfff;
     }
 
-    while (true) {
+    switch (this.id) {
 
-        var fGate, selCode, cplPrev, addrTSS, offSP, offSS, regSPPrev, regSSPrev;
+    case X86Seg.ID.CODE:
+
+        this.fStackSwitch = false;
+        var fCall = this.fCall;
+        var rpl = sel & X86.SEL.RPL;
+        var dpl = (acc & X86.DESC.ACC.DPL.MASK) >> X86.DESC.ACC.DPL.SHIFT;
+
+        var fGate, selCode, cplOld, addrTSS, offSP, lenSP, regSPPrev, regSSPrev, regPSClear, regSP;
+
+        if (selMasked && !(acc & X86.DESC.ACC.PRESENT)) {
+            if (this.id < X86Seg.ID.VER) X86.fnFault.call(cpu, X86.EXCEPTION.NP_FAULT, sel & X86.ERRCODE.SELMASK);
+            return X86.ADDR_INVALID;
+        }
 
         /*
-         * TODO: Consider moving the following chunks of code into worker functions for each X86Seg.ID;
-         * however, it's not clear that these tests are more costly than making additional function calls.
+         * Since we are X86Seg.ID.CODE, we can use this.cpl instead of the more generic cpu.segCS.cpl
          */
-        if (this.id == X86Seg.ID.CODE) {
-            this.fStackSwitch = false;
-            var fCall = this.fCall;
-            var regPSClear, regSP;
-            var rpl = sel & X86.SEL.RPL;
-            var dpl = (acc & X86.DESC.ACC.DPL.MASK) >> X86.DESC.ACC.DPL.SHIFT;
-
-            if (selMasked && !(acc & X86.DESC.ACC.PRESENT)) {
-                if (this.id < X86Seg.ID.VER) X86.fnFault.call(cpu, X86.EXCEPTION.NP_FAULT, sel & X86.ERRCODE.SELMASK);
-                base = addrDesc = X86.ADDR_INVALID;
-                break;
+        if (type >= X86.DESC.ACC.TYPE.CODE_EXECONLY) {
+            rpl = sel & X86.SEL.RPL;
+            if (rpl > this.cpl) {
+                /*
+                 * If fCall is false, then we must have a RETF to a less privileged segment, which is OK.
+                 *
+                 * Otherwise, we must be dealing with a CALLF or JMPF to a less privileged segment, in which
+                 * case either DPL == CPL *or* the new segment is conforming and DPL <= CPL.
+                 */
+                if (fCall !== false && !(dpl == this.cpl || (type & X86.DESC.ACC.TYPE.CONFORMING) && dpl <= this.cpl)) {
+                    return X86.ADDR_INVALID;
+                }
+                /*
+                 * It's critical that any stack switch occur with the operand size in effect at the time of
+                 * the current instruction, BEFORE any calls to updateMode() and resetSizes(), otherwise the
+                 * operand size (or operand override) in effect on an instruction like IRETD will be ignored.
+                 */
+                regSP = cpu.popWord();
+                cpu.setSS(cpu.popWord(), true);
+                cpu.setSP(regSP);
+                this.fStackSwitch = true;
             }
+            fGate = false;
+        }
+        else if (type == X86.DESC.ACC.TYPE.TSS286 || type == X86.DESC.ACC.TYPE.TSS386) {
+            if (!this.switchTSS(sel, fCall)) {
+                return X86.ADDR_INVALID;
+            }
+            return this.base;
+        }
+        else if (type == X86.DESC.ACC.TYPE.GATE_CALL || type == X86.DESC.ACC.TYPE.GATE386_CALL) {
+            fGate = true;
+            regPSClear = 0;
+            if (rpl < this.cpl) rpl = this.cpl;     // set RPL to max(RPL,CPL) for call gates
+        }
+        else if (type == X86.DESC.ACC.TYPE.GATE286_INT || type == X86.DESC.ACC.TYPE.GATE386_INT) {
+            fGate = true;
+            regPSClear = (X86.PS.NT | X86.PS.TF | X86.PS.IF);
+            cpu.assert(!(acc & 0x1f));
+        }
+        else if (type == X86.DESC.ACC.TYPE.GATE286_TRAP || type == X86.DESC.ACC.TYPE.GATE386_TRAP) {
+            fGate = true;
+            regPSClear = (X86.PS.NT | X86.PS.TF);
+            cpu.assert(!(acc & 0x1f));
+        }
+        else if (type == X86.DESC.ACC.TYPE.GATE_TASK) {
+            if (!this.switchTSS(base & 0xffff, fCall)) {
+                return X86.ADDR_INVALID;
+            }
+            return this.base;
+        }
 
+        if (fGate) {
             /*
-             * Since we are X86Seg.ID.CODE, we can use this.cpl instead of the more generic cpu.segCS.cpl
+             * Note that since GATE_INT/GATE_TRAP descriptors should appear in the IDT only, that means sel
+             * will actually be nIDT * 8, which means the rpl will always be zero; additionally, the nWords
+             * portion of ACC should always be zero, but that's really dependent on the descriptor being properly
+             * set (which we assert above).
              */
-            if (type >= X86.DESC.ACC.TYPE.CODE_EXECONLY) {
-                rpl = sel & X86.SEL.RPL;
-                if (rpl > this.cpl) {
+            if (rpl <= dpl) {
+                /*
+                 * TODO: Verify the PRESENT bit of the gate descriptor, and issue NP_FAULT as appropriate.
+                 */
+                cplOld = this.cpl;
+
+                /*
+                 * For gates, there is no "base" and "limit", but rather "selector" and "offset"; the selector
+                 * is located where the first 16 bits of base are normally stored, and the offset comes from the
+                 * original limit and ext fields.
+                 */
+                selCode = base & 0xffff;
+                if (I386 && (type & X86.DESC.ACC.NONSEG_386)) {
+                    limit = limitOrig | (ext << 16);
+                }
+
+                /*
+                 * At a minimum, we need to clear X86.PS.VM now, so that the following load will initialize the
+                 * new code segment properly.
+                 */
+                var regPS = cpu.regPS;
+                cpu.regPS &= ~regPSClear;
+                if (cpu.regPS & X86.PS.VM) {
                     /*
-                     * If fCall is false, then we must have a RETF to a less privileged segment, which is OK.
-                     *
-                     * Otherwise, we must be dealing with a CALLF or JMPF to a less privileged segment, in which
-                     * case either DPL == CPL *or* the new segment is conforming and DPL <= CPL.
+                     * TODO: This seems a bit suspect in retrospect (ie, altering CPU flags before we know whether
+                     * the load() will succeed or generate a fault).  Take another look.
                      */
-                    if (fCall !== false && !(dpl == this.cpl || (type & X86.DESC.ACC.TYPE.CONFORMING) && dpl <= this.cpl)) {
-                        base = addrDesc = X86.ADDR_INVALID;
-                        break;
+                    cpu.assert(false);
+                    cpu.regPS &= ~X86.PS.VM;
+                    cpu.setProtMode(true, false);
+                }
+
+                var cplNew = (selCode & X86.SEL.RPL), selStack = 0, offStack = 0;
+
+                /*
+                 * If a stack switch is required, we must perform "probed" loads of both the new selCode
+                 * and selStack segments, so that if either probe fails, a fault will be generated while the
+                 * old code segment is still loaded.
+                 */
+                if (cplNew < cplOld) {
+                    if (this.loadProt(selCode, true) === X86.ADDR_INVALID) {
+                        return X86.ADDR_INVALID;
+                    }
+                    addrTSS = cpu.segTSS.base;
+                    if (!I386 || !(type & X86.DESC.ACC.NONSEG_386)) {
+                        offSP = (cplNew << 2) + X86.TSS286.CPL0_SP;
+                        lenSP = 2;
+                        cpu.assert(!(regPS & X86.PS.VM));
+                    } else {
+                        offSP = (cplNew << 2) + X86.TSS386.CPL0_ESP;
+                        lenSP = 4;
+                    }
+                    selStack = cpu.getShort(addrTSS + offSP + lenSP);
+                    if (cpu.segSS.loadProt(selStack, true) === X86.ADDR_INVALID) {
+                        return X86.ADDR_INVALID;
                     }
                     /*
-                     * It's critical that any stack switch occur with the operand size in effect at the time of
-                     * the current instruction, BEFORE any calls to updateMode() and resetSizes(), otherwise the
-                     * operand size (or operand override) in effect on an instruction like IRETD will be ignored.
+                     * Both probes succeeded, so we can proceed with "normal" loads for both selCode and
+                     * selStack (which should automatically use the values cached by the "probed" loads above).
                      */
-                    regSP = cpu.popWord();
-                    cpu.setSS(cpu.popWord(), true);
-                    cpu.setSP(regSP);
+                    offStack = (lenSP == 2)? cpu.getShort(addrTSS + offSP) : cpu.getLong(addrTSS + offSP);
+                }
+
+                if (this.loadProt(selCode) === X86.ADDR_INVALID) {
+                    return X86.ADDR_INVALID;
+                }
+
+                cpu.regEIP = limit;
+                cpu.assert(this.cpl == cplNew);
+
+                if (this.cpl < cplOld) {
+                    if (fCall !== true) {
+                        cpu.assert(false);
+                        return X86.ADDR_INVALID;
+                    }
+
+                    regSP = cpu.getSP();
+                    var i = 0, nWords = (acc & 0x1f);
+                    while (nWords--) {
+                        this.awParms[i++] = cpu.getSOWord(cpu.segSS, regSP);
+                        regSP += 2;
+                    }
+
+                    regSSPrev = cpu.getSS();
+                    regSPPrev = cpu.getSP();
+
+                    cpu.setSS(selStack, true);
+                    cpu.setSP(offStack);
+
+                    /*
+                     * This call to resetSizes() used to appear before the parameter copying above, but
+                     * anything that was pushed on the old stack would have been pushed with the old sizes.
+                     */
+                    cpu.resetSizes();
+
+                    if (regPS & X86.PS.VM) {
+                        cpu.assert(I386 && cpu.model >= X86.MODEL_80386);
+                        cpu.pushWord(cpu.segGS.sel);
+                        cpu.setGS(0);
+                        cpu.pushWord(cpu.segFS.sel);
+                        cpu.setFS(0);
+                        cpu.pushWord(cpu.segDS.sel);
+                        cpu.setDS(0);
+                        cpu.pushWord(cpu.segES.sel);
+                        cpu.setES(0);
+                    }
+                    cpu.pushWord(regSSPrev);
+                    cpu.pushWord(regSPPrev);
+                    while (i) cpu.pushWord(this.awParms[--i]);
                     this.fStackSwitch = true;
                 }
-                fGate = false;
-            }
-            else if (type == X86.DESC.ACC.TYPE.TSS286 || type == X86.DESC.ACC.TYPE.TSS386) {
-                if (!this.switchTSS(sel, fCall)) {
-                    base = addrDesc = X86.ADDR_INVALID;
-                    break;
-                }
                 return this.base;
             }
-            else if (type == X86.DESC.ACC.TYPE.GATE_CALL || type == X86.DESC.ACC.TYPE.GATE386_CALL) {
-                fGate = true;
-                regPSClear = 0;
-                if (rpl < this.cpl) rpl = this.cpl;     // set RPL to max(RPL,CPL) for call gates
-            }
-            else if (type == X86.DESC.ACC.TYPE.GATE286_INT || type == X86.DESC.ACC.TYPE.GATE386_INT) {
-                fGate = true;
-                regPSClear = (X86.PS.NT | X86.PS.TF | X86.PS.IF);
-                cpu.assert(!(acc & 0x1f));
-            }
-            else if (type == X86.DESC.ACC.TYPE.GATE286_TRAP || type == X86.DESC.ACC.TYPE.GATE386_TRAP) {
-                fGate = true;
-                regPSClear = (X86.PS.NT | X86.PS.TF);
-                cpu.assert(!(acc & 0x1f));
-            }
-            else if (type == X86.DESC.ACC.TYPE.GATE_TASK) {
-                if (!this.switchTSS(base & 0xffff, fCall)) {
-                    base = addrDesc = X86.ADDR_INVALID;
-                    break;
-                }
-                return this.base;
-            }
-            if (fGate) {
-                /*
-                 * Note that since GATE_INT/GATE_TRAP descriptors should appear in the IDT only, that means sel
-                 * will actually be nIDT * 8, which means the rpl will always be zero; additionally, the nWords
-                 * portion of ACC should always be zero, but that's really dependent on the descriptor being properly
-                 * set (which we assert above).
-                 */
-                if (rpl <= dpl) {
-                    /*
-                     * TODO: Verify the PRESENT bit of the gate descriptor, and issue NP_FAULT as appropriate.
-                     */
-                    cplPrev = this.cpl;
-
-                    /*
-                     * For gates, there is no "base" and "limit", but rather "selector" and "offset"; the selector
-                     * is located where the first 16 bits of base are normally stored, and the offset comes from the
-                     * original limit and ext fields.
-                     */
-                    selCode = base & 0xffff;
-                    if (I386 && (type & X86.DESC.ACC.NONSEG_386)) {
-                        limit = limitOrig | (ext << 16);
-                    }
-
-                    /*
-                     * At a minimum, we need to clear X86.PS.VM now, so that the following load will initialize the
-                     * new code segment properly.
-                     */
-                    var regPS = cpu.regPS;
-                    cpu.regPS &= ~regPSClear;
-                    if (cpu.regPS & X86.PS.VM) {
-                        cpu.regPS &= ~X86.PS.VM;
-                        cpu.setProtMode(true, false);
-                    }
-
-                    if (this.load(selCode, true) === X86.ADDR_INVALID) {
-                        cpu.assert(false);
-                        base = addrDesc = X86.ADDR_INVALID;
-                        break;
-                    }
-
-                    cpu.regEIP = limit;
-                    if (this.cpl < cplPrev) {
-                        if (fCall !== true) {
-                            cpu.assert(false);
-                            base = addrDesc = X86.ADDR_INVALID;
-                            break;
-                        }
-                        cpu.resetSizes();
-                        regSP = cpu.getSP();
-                        var i = 0, nWords = (acc & 0x1f);
-                        while (nWords--) {
-                            this.awParms[i++] = cpu.getSOWord(cpu.segSS, regSP);
-                            regSP += 2;
-                        }
-                        addrTSS = cpu.segTSS.base;
-                        regSSPrev = cpu.getSS();
-                        regSPPrev = cpu.getSP();
-                        if (!I386 || !(type & X86.DESC.ACC.NONSEG_386)) {
-                            offSP = (this.cpl << 2) + X86.TSS286.CPL0_SP;
-                            offSS = offSP + 2;
-                            cpu.setSS(cpu.getShort(addrTSS + offSS), true);
-                            cpu.setSP(cpu.getShort(addrTSS + offSP));
-                        } else {
-                            offSP = (this.cpl << 2) + X86.TSS386.CPL0_ESP;
-                            offSS = offSP + 4;
-                            cpu.setSS(cpu.getShort(addrTSS + offSS), true);
-                            cpu.setSP(cpu.getLong(addrTSS + offSP));
-                            if (regPS & X86.PS.VM) {
-                                /*
-                                 * segFS amd segGS exist only on 80386 machines
-                                 */
-                                cpu.assert(I386 && cpu.model >= X86.MODEL_80386);
-                                cpu.pushWord(cpu.segGS.sel);
-                                cpu.setGS(0);
-                                cpu.pushWord(cpu.segFS.sel);
-                                cpu.setFS(0);
-                                cpu.pushWord(cpu.segDS.sel);
-                                cpu.setDS(0);
-                                cpu.pushWord(cpu.segES.sel);
-                                cpu.setES(0);
-                            }
-                        }
-                        cpu.pushWord(regSSPrev);
-                        cpu.pushWord(regSPPrev);
-                        while (i) cpu.pushWord(this.awParms[--i]);
-                        this.fStackSwitch = true;
-                    }
-                    return this.base;
-                }
-            }
-            if (fGate !== false) {
-                cpu.assert(false);
-                if (this.id < X86Seg.ID.VER) X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, (sel & X86.ERRCODE.SELMASK) | (fIDT? X86.ERRCODE.IDT : 0), true);
-                base = addrDesc = X86.ADDR_INVALID;
-                break;
-            }
         }
-        else if (this.id == X86Seg.ID.DATA) {
-            if (selMasked) {
-                if (!(acc & X86.DESC.ACC.PRESENT)) {
-                    if (this.id < X86Seg.ID.VER) X86.fnFault.call(cpu, X86.EXCEPTION.NP_FAULT, sel & X86.ERRCODE.SELMASK);
-                    base = addrDesc = X86.ADDR_INVALID;
-                    break;
-                }
-                if (type < X86.DESC.ACC.TYPE.SEG || (type & (X86.DESC.ACC.TYPE.CODE | X86.DESC.ACC.TYPE.READABLE)) == X86.DESC.ACC.TYPE.CODE) {
-                    /*
-                     * OS/2 1.0 triggers this "Empty Descriptor" GP_FAULT multiple times during boot; for example:
-                     *
-                     *      Fault 0D (002F) on opcode 0x8E at 3190:3A05 (%112625)
-                     *      stopped (11315208 ops, 41813627 cycles, 498270 ms, 83918 hz)
-                     *      AX=0000 BX=0970 CX=0300 DX=0300 SP=0ABE BP=0ABA SI=0000 DI=001A
-                     *      DS=19C0[177300,2C5F] ES=001F[1743A0,07FF] SS=0038[175CE0,0B5F]
-                     *      CS=3190[10EC20,B89F] IP=3A05 V0 D0 I1 T0 S0 Z1 A0 P1 C0 PS=3246 MS=FFF3
-                     *      LD=0028[174BC0,003F] GD=[11A4E0,490F] ID=[11F61A,03FF]  TR=0010 A20=ON
-                     *      3190:3A05 8E4604        MOV      ES,[BP+04]
-                     *      0038:0ABE  002F  19C0  0000  067C - 07FC  0AD2  0010  C420
-                     *      dumpDesc(002F): %174BE8
-                     *      base=000000 limit=0000 dpl=00 type=00 (undefined)
-                     *
-                     * If we allow the GP fault to be dispatched, it recovers, so until I'm able to investigate this
-                     * further, I'm going to assume this is normal behavior.  If the segment (0x002F in the example)
-                     * simply needed to be "faulted" into memory, I would have expected OS/2 to build a descriptor
-                     * with the PRESENT bit clear, and rely on NP_FAULT rather than GP_FAULT, but maybe this was simpler.
-                     *
-                     * So, if the ACC field is zero, we won't set the last fnFault() parameter (fHalt) to true.
-                     */
-                    if (this.id < X86Seg.ID.VER) X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel & X86.ERRCODE.SELMASK, !!acc);
-                    base = addrDesc = X86.ADDR_INVALID;
-                    break;
-                }
-            }
+
+        if (fGate !== false) {
+            var nError = sel & X86.ERRCODE.SELMASK;
+            if (addrDesc >= cpu.addrIDT && addrDesc < cpu.addrIDTLimit) nError |= X86.ERRCODE.IDT;
+            if (this.id < X86Seg.ID.VER) X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, nError, true);
+            return X86.ADDR_INVALID;
         }
-        else if (this.id == X86Seg.ID.STACK) {
+        break;
+
+    case X86Seg.ID.DATA:
+        if (selMasked) {
             if (!(acc & X86.DESC.ACC.PRESENT)) {
-                if (this.id < X86Seg.ID.VER) X86.fnFault.call(cpu, X86.EXCEPTION.SS_FAULT, sel & X86.ERRCODE.SELMASK);
-                base = addrDesc = X86.ADDR_INVALID;
-                break;
+                /*
+                 * OS/2 1.0 faults on segments with "empty descriptors" multiple times during boot; for example:
+                 *
+                 *      Fault 0x0B (0x002C) on opcode 0x8E at 3190:3A05 (%112625)
+                 *      AX=0000 BX=0970 CX=0300 DX=0300 SP=0ABE BP=0ABA SI=0000 DI=001A
+                 *      SS=0038[175CE0,0B5F] DS=19C0[177300,2C5F] ES=001F[1743A0,07FF] A20=ON
+                 *      CS=3190[10EC20,B89F] LD=0028[174BC0,003F] GD=[11A4E0,490F] ID=[11F61A,03FF]
+                 *      TR=0010 MS=0000FFF3 PS=3256 V0 D0 I1 T0 S0 Z1 A1 P1 C0
+                 *      3190:3A05 8E4604          MOV      ES,[BP+04]
+                 *      ## dw ss:bp+4 l1
+                 *      0038:0ABE  002F  19C0  0000  067C  07FC  0AD2  0010  C420   /.....|....... .
+                 *      ## ds 2f
+                 *      dumpDesc(0x002F): %174BE8
+                 *      base=000000 limit=0000 type=0x00 (undefined) ext=0x0000 dpl=0x00
+                 *
+                 * Before I added the X86.DESC.ACC.PRESENT check, I used to (incorrectly) dispatch this as a GP_FAULT,
+                 * but OS/2 still appeared to handle the fault OK.  However, this condition is now properly handled as
+                 * an NP_FAULT.
+                 */
+                if (this.id < X86Seg.ID.VER) X86.fnFault.call(cpu, X86.EXCEPTION.NP_FAULT, sel & X86.ERRCODE.SELMASK);
+                return X86.ADDR_INVALID;
             }
-            if (!selMasked || type < X86.DESC.ACC.TYPE.SEG || (type & (X86.DESC.ACC.TYPE.CODE | X86.DESC.ACC.TYPE.WRITABLE)) != X86.DESC.ACC.TYPE.WRITABLE) {
+            if (type < X86.DESC.ACC.TYPE.SEG || (type & (X86.DESC.ACC.TYPE.CODE | X86.DESC.ACC.TYPE.READABLE)) == X86.DESC.ACC.TYPE.CODE) {
                 if (this.id < X86Seg.ID.VER) X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel & X86.ERRCODE.SELMASK, true);
-                base = addrDesc = X86.ADDR_INVALID;
-                break;
+                return X86.ADDR_INVALID;
             }
         }
-        else if (this.id == X86Seg.ID.TSS) {
-            var typeTSS = type & ~X86.DESC.ACC.TSS_BUSY;
-            if (!selMasked || typeTSS != X86.DESC.ACC.TYPE.TSS286 && typeTSS != X86.DESC.ACC.TYPE.TSS386) {
-                if (this.id < X86Seg.ID.VER) X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel & X86.ERRCODE.SELMASK, true);
-                base = addrDesc = X86.ADDR_INVALID;
-                break;
-            }
-            /*
-             * For more efficient IOPM lookups, we cache the starting linear address in segTSS.addrIOPM, and the
-             * last valid address in segTSS.addrIOPMLimit.
-             */
-            if (typeTSS == X86.DESC.ACC.TYPE.TSS386) {
-                this.addrIOPM = (base + cpu.getShort(base + X86.TSS386.TASK_IOPM + 2))|0;
-                this.addrIOPMLimit = (base + this.limit)|0;
-            }
+        break;
+
+    case X86Seg.ID.STACK:
+        if (!(acc & X86.DESC.ACC.PRESENT)) {
+            if (this.id < X86Seg.ID.VER) X86.fnFault.call(cpu, X86.EXCEPTION.SS_FAULT, sel & X86.ERRCODE.SELMASK);
+            return X86.ADDR_INVALID;
         }
-        else if (this.id == X86Seg.ID.VER) {
-            /*
-             * For LSL, we must support any descriptor marked X86.DESC.ACC.TYPE.SEG, as well as TSS and LDT descriptors.
-             */
-            if (!(type & X86.DESC.ACC.TYPE.SEG) && type > X86.DESC.ACC.TYPE.TSS286_BUSY && type != X86.DESC.ACC.TYPE.TSS386 && type != X86.DESC.ACC.TYPE.TSS386_BUSY) {
-                base = addrDesc = X86.ADDR_INVALID;
-                break;
-            }
+        if (!selMasked || type < X86.DESC.ACC.TYPE.SEG || (type & (X86.DESC.ACC.TYPE.CODE | X86.DESC.ACC.TYPE.WRITABLE)) != X86.DESC.ACC.TYPE.WRITABLE) {
+            if (this.id < X86Seg.ID.VER) X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel & X86.ERRCODE.SELMASK, true);
+            return X86.ADDR_INVALID;
         }
+        break;
+
+    case X86Seg.ID.TSS:
+        var typeTSS = type & ~X86.DESC.ACC.TSS_BUSY;
+        if (!selMasked || typeTSS != X86.DESC.ACC.TYPE.TSS286 && typeTSS != X86.DESC.ACC.TYPE.TSS386) {
+            if (this.id < X86Seg.ID.VER) X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel & X86.ERRCODE.SELMASK, true);
+            return X86.ADDR_INVALID;
+        }
+        /*
+         * For more efficient IOPM lookups, we cache the starting linear address in segTSS.addrIOPM, and the
+         * last valid address in segTSS.addrIOPMLimit.
+         */
+        if (typeTSS == X86.DESC.ACC.TYPE.TSS386) {
+            this.addrIOPM = (base + cpu.getShort(base + X86.TSS386.TASK_IOPM + 2))|0;
+            this.addrIOPMLimit = (base + this.limit)|0;
+        }
+        break;
+
+    case X86Seg.ID.VER:
+        /*
+         * For LSL, we must support any descriptor marked X86.DESC.ACC.TYPE.SEG, as well as TSS and LDT descriptors.
+         */
+        if (!(type & X86.DESC.ACC.TYPE.SEG) && type > X86.DESC.ACC.TYPE.TSS286_BUSY && type != X86.DESC.ACC.TYPE.TSS386 && type != X86.DESC.ACC.TYPE.TSS386_BUSY) {
+            return X86.ADDR_INVALID;
+        }
+        break;
+
+    default:
         /*
          * The only other case should be X86Seg.ID.DBG, for which we do nothing.
          */
+        break;
+    }
 
+    if (fProbe) {
+        this.probe.sel = sel;
+        this.probe.base = base;
+        this.probe.limit = limit;
+        this.probe.acc = acc;
+        this.probe.type = type;
+        this.probe.ext = ext;
+        this.probe.addrDesc = addrDesc;
+    } else {
         this.sel = sel;
         this.base = base;
         this.limit = limit;
@@ -833,8 +908,22 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fIDT)
         this.type = type;
         this.ext = ext;
         this.addrDesc = addrDesc;
+        /*
+         * A quick recap of what updateMode(fLoad=true, fProt=true, fV86=false) actually updates next:
+         *
+         *      cpl
+         *      dpl
+         *      dataSize
+         *      dataMask
+         *      addrSize
+         *      addrMask
+         *      fExpDown
+         *      load()
+         *      loadIDT()
+         *      checkRead()
+         *      checkWrite()
+         */
         this.updateMode(true, true, false);
-        break;
     }
 
     if (DEBUG) this.messageSeg(sel, base, limit, type, ext);
@@ -861,8 +950,8 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fIDT)
  * Of course, that all could have been avoided if IBM had heeded Intel's advice and not used Intel-reserved IDT
  * entries for PC interrupts.
  *
- * TODO: Add TSS validity checks and appropriate generation of TS_FAULT exceptions; note that the only rudimentary
- * checks we currently perform are of the GP_FAULT variety.
+ * TODO: Add TSS validity checks and appropriate generation of TS_FAULT exceptions; the only rudimentary checks
+ * we currently perform are of the GP_FAULT variety.
  *
  * @this {X86Seg}
  * @param {number} selNew
@@ -979,7 +1068,7 @@ X86Seg.prototype.switchTSS = function switchTSS(selNew, fNest)
         cpu.setLong(addrOld + X86.TSS386.TASK_DS,  cpu.segDS.sel);
 
         /*
-         * segFS amd segGS exist only on 80386 machines
+         * segFS and segGS exist only on 80386 machines
          */
         cpu.assert(I386 && cpu.model >= X86.MODEL_80386);
         cpu.setLong(addrOld + X86.TSS386.TASK_FS,  cpu.segFS.sel);
@@ -1005,7 +1094,7 @@ X86Seg.prototype.switchTSS = function switchTSS(selNew, fNest)
         cpu.segDS.load(cpu.getShort(addrNew + X86.TSS386.TASK_DS));
 
         /*
-         * segFS amd segGS exist only on 80386 machines
+         * segFS and segGS exist only on 80386 machines
          */
         cpu.assert(I386 && cpu.model >= X86.MODEL_80386);
         cpu.segFS.load(cpu.getShort(addrNew + X86.TSS386.TASK_FS));

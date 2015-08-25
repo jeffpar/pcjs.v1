@@ -548,7 +548,7 @@ ChipSet.IRQ = {
  * TIMER1, and TIMER2.  For machines with a second PIT (eg, the DeskPro 386), we refer
  * to those additional counters as TIMER3, TIMER4, and TIMER5.
  *
- * In addition, if there's a need to refer to a specfic PIT, use PIT0 for the first PIT
+ * In addition, if there's a need to refer to a specific PIT, use PIT0 for the first PIT
  * and PIT1 for the second.  This mirrors how we refer to multiple DMA controllers
  * (eg, DMA0 and DMA1) and multiple PICs (eg, PIC0 and PIC1).
  *
@@ -590,7 +590,15 @@ ChipSet.PIT_CTRL = {
     SC_CTR0:            0x00,
     SC_CTR1:            0x40,
     SC_CTR2:            0x80,
-    SC_BACK:            0xC0
+    SC_BACK:            0xC0,
+    SC_SHIFT:           6,
+    RB_CTR0:            0x02,
+    RB_CTR1:            0x04,
+    RB_CTR2:            0x08,
+    RB_STATUS:          0x10,   // if this bit is CLEAR, then latch the current status of the selected counter(s)
+    RB_COUNTS:          0x20,   // if this bit is CLEAR, then latch the current count(s) of the selected counter(s)
+    RB_NULL:            0x40,   // bit set in Read-Back status byte if the counter has not been "fully loaded" yet
+    RB_OUT:             0x80    // bit set in Read-Back status byte if fOUT is true
 };
 
 ChipSet.TIMER_TICKS_PER_SEC = 1193181;
@@ -1052,8 +1060,8 @@ ChipSet.prototype.initBus = function(cmp, bus, cpu, dbg)
             dbg.messageDump(Messages.PIC, function onDumpPIC() {
                 chipset.dumpPIC();
             });
-            dbg.messageDump(Messages.TIMER, function onDumpTimer() {
-                chipset.dumpTimer();
+            dbg.messageDump(Messages.TIMER, function onDumpTimer(sParm) {
+                chipset.dumpTimer(sParm);
             });
             dbg.messageDump(Messages.CMOS, function onDumpCMOS() {
                 chipset.dumpCMOS();
@@ -2042,7 +2050,7 @@ ChipSet.prototype.initTimer = function(iTimer, aState)
             countLatched: [0,0]
         };
     }
-    var a = aState && aState.length == 13? aState : ChipSet.aTimerInit;
+    var a = aState && aState.length >= 13? aState : ChipSet.aTimerInit;
     timer.countInit[0] = a[0][0]; timer.countInit[1] = a[0][1];
     timer.countStart[0] = a[1][0]; timer.countStart[1] = a[1][1];
     timer.countCurrent[0] = a[2][0]; timer.countCurrent[1] = a[2][1];
@@ -2053,9 +2061,11 @@ ChipSet.prototype.initTimer = function(iTimer, aState)
     timer.countIndex = a[7];
     timer.countBytes = a[8];
     timer.fOUT = a[9];
-    timer.fLatched = a[10];
+    timer.fCountLatched = a[10];
     timer.fCounting = a[11];
     timer.nCyclesStart = a[12];
+    timer.bStatus = a[13] || 0;
+    timer.fStatusLatched = a[14] || false;
     this.aTimers[iTimer] = timer;
 };
 
@@ -2081,9 +2091,11 @@ ChipSet.prototype.saveTimers = function()
             timer.countIndex,
             timer.countBytes,
             timer.fOUT,
-            timer.fLatched,
+            timer.fCountLatched,
             timer.fCounting,
-            timer.nCyclesStart
+            timer.nCyclesStart,
+            timer.bStatus,
+            timer.fStatusLatched
         ];
     }
     return data;
@@ -2332,14 +2344,19 @@ ChipSet.prototype.dumpPIC = function()
 };
 
 /**
- * dumpTimer()
+ * dumpTimer(sParm)
+ *
+ * Use "d timer" to dump all timers, or "d timer n" to dump only timer n.
  *
  * @this {ChipSet}
+ * @param {string} [sParm]
  */
-ChipSet.prototype.dumpTimer = function()
+ChipSet.prototype.dumpTimer = function(sParm)
 {
     if (DEBUGGER) {
+        var nTimer = (sParm? +sParm : null);
         for (var iTimer = 0; iTimer < this.aTimers.length; iTimer++) {
+            if (nTimer != null && iTimer != nTimer) continue;
             this.updateTimer(iTimer);
             var timer = this.aTimers[iTimer];
             var sDump = "TIMER" + iTimer + ":";
@@ -2349,7 +2366,7 @@ ChipSet.prototype.dumpTimer = function()
                     count |= (timer.countCurrent[i] << (i * 8));
                 }
             }
-            sDump += " mode=" + timer.mode + " bytes=" + timer.countBytes + " count=" + str.toHexWord(count);
+            sDump += " mode=" + (timer.mode >> 1) + " bytes=" + timer.countBytes + " count=" + str.toHexWord(count);
             this.dbg.println(sDump);
         }
     }
@@ -3467,12 +3484,26 @@ ChipSet.prototype.inTimer = function(iTimer, port, addrFrom)
 {
     var b;
     var timer = this.aTimers[iTimer];
-    if (timer.countIndex == timer.countBytes) this.resetTimerIndex(iTimer);
-    if (timer.fLatched) {
-        return timer.countLatched[timer.countIndex++];
+
+    if (timer.fStatusLatched) {
+        b = timer.bStatus;
+        timer.fStatusLatched = false;
     }
-    this.updateTimer(iTimer);
-    b = timer.countCurrent[timer.countIndex++];
+    else {
+        if (timer.countIndex == timer.countBytes) {
+            this.resetTimerIndex(iTimer);
+        }
+        if (timer.fCountLatched) {
+            b = timer.countLatched[timer.countIndex++];
+            if (timer.countIndex == timer.countBytes) {
+                timer.fCountLatched = false
+            }
+        }
+        else {
+            this.updateTimer(iTimer);
+            b = timer.countCurrent[timer.countIndex++];
+        }
+    }
     if (this.messageEnabled(Messages.TIMER | Messages.PORT)) {
         this.printMessageIO(port, null, addrFrom, "TIMER" + iTimer, b, true);
     }
@@ -3502,16 +3533,22 @@ ChipSet.prototype.outTimer = function(iTimer, port, bOut, addrFrom)
     if (this.messageEnabled(Messages.TIMER | Messages.PORT)) {
         this.printMessageIO(port, bOut, addrFrom, "TIMER" + iTimer, null, true);
     }
+
     var timer = this.aTimers[iTimer];
-    if (timer.countIndex == timer.countBytes) this.resetTimerIndex(iTimer);
+
+    if (timer.countIndex == timer.countBytes) {
+        this.resetTimerIndex(iTimer);
+    }
+
     timer.countInit[timer.countIndex++] = bOut;
+
     if (timer.countIndex == timer.countBytes) {
         /*
          * In general, writing a new count to a timer that's already counting isn't supposed to affect the current
          * count, with the notable exceptions of MODE0 and MODE4.
          */
         if (!timer.fCounting || timer.mode == ChipSet.PIT_CTRL.MODE0 || timer.mode == ChipSet.PIT_CTRL.MODE4) {
-            timer.fLatched = false;
+            timer.fCountLatched = false;
             timer.countCurrent[0] = timer.countStart[0] = timer.countInit[0];
             timer.countCurrent[1] = timer.countStart[1] = timer.countInit[1];
             timer.nCyclesStart = this.cpu.getCycles(this.fScaleTimers);
@@ -3552,8 +3589,11 @@ ChipSet.prototype.outTimer = function(iTimer, port, bOut, addrFrom)
 ChipSet.prototype.inPIT1Ctrl = function(port, addrFrom)
 {
     this.printMessageIO(port, null, addrFrom, "PIT1_CTRL", null, Messages.TIMER);
-    if (DEBUG) this.printMessage("PIT1_CTRL: Read-Back command not supported (yet)", Messages.TIMER);
-    return null;
+    /*
+     * NOTE: Even though reads to port 0x43 are undefined (I think), I'm going to "define" it
+     * as returning the last value written, purely for the Debugger's benefit.
+     */
+    return this.bPIT1Ctrl;
 };
 
 /**
@@ -3568,23 +3608,53 @@ ChipSet.prototype.outPIT1Ctrl = function(port, bOut, addrFrom)
 {
     this.bPIT1Ctrl = bOut;
     this.printMessageIO(port, bOut, addrFrom, "PIT1_CTRL", null, Messages.TIMER);
+
     /*
-     * Extract the SC (Select Counter) bits
+     * Extract the SC (Select Counter) bits.
      */
-    var iTimer = (bOut & ChipSet.PIT_CTRL.SC) >> 6;
-    if (iTimer == 0x3) {
-        if (DEBUG) this.printMessage("PIT1_CTRL: Read-Back command not supported (yet)", Messages.TIMER);
+    var iTimer = (bOut & ChipSet.PIT_CTRL.SC);
+
+    /*
+     * Check for the Read-Back command and process as needed.
+     */
+    if (iTimer == ChipSet.PIT_CTRL.SC_BACK) {
+        if (!(bOut & ChipSet.PIT_CTRL.RB_STATUS)) {
+            for (iTimer = 0; iTimer <= 2; iTimer++) {
+                if (bOut & (ChipSet.PIT_CTRL.RB_CTR0 << iTimer)) {
+                    this.latchTimerStatus(iTimer);
+                }
+            }
+        }
+        if (!(bOut & ChipSet.PIT_CTRL.RB_COUNTS)) {
+            for (iTimer = 0; iTimer <= 2; iTimer++) {
+                if (bOut & (ChipSet.PIT_CTRL.RB_CTR0 << iTimer)) {
+                    this.latchTimerCount(iTimer);
+                }
+            }
+        }
         return;
     }
+
     /*
-     * Extract the BCD, MODE, and RW bits, which we simply store as-is (see setTimerMode)
+     * Convert the SC (Select Counter) bits into an iTimer index (0-2).
+     */
+    iTimer >>= ChipSet.PIT_CTRL.SC_SHIFT;
+
+    /*
+     * Extract BCD (bit 0), MODE (bits 1-3), and RW (bits 4-5), which we simply store as-is (see setTimerMode).
      */
     var bcd = (bOut & ChipSet.PIT_CTRL.BCD);
     var mode = (bOut & ChipSet.PIT_CTRL.MODE);
     var rw = (bOut & ChipSet.PIT_CTRL.RW);
-    if (!rw) {
-        this.latchTimer(iTimer);
-    } else {
+
+    if (rw == ChipSet.PIT_CTRL.RW_LATCH) {
+        /*
+         * Of all the RW bit combinations, this is the only one that "countermands" normal control register
+         * processing (the BCD and MODE bits are "don't care").
+         */
+        this.latchTimerCount(iTimer);
+    }
+    else {
         this.setTimerMode(iTimer, bcd, mode, rw);
 
         /*
@@ -3692,30 +3762,46 @@ ChipSet.prototype.getTimerCycleLimit = function(iTimer, nCycles)
 };
 
 /**
- * latchTimer(iTimer)
+ * latchTimerCount(iTimer)
  *
  * @this {ChipSet}
  * @param {number} iTimer
  */
-ChipSet.prototype.latchTimer = function(iTimer)
+ChipSet.prototype.latchTimerCount = function(iTimer)
 {
     /*
-     * Update the timer's current count
+     * Update the timer's current count.
      */
     this.updateTimer(iTimer);
 
     /*
-     * Now we can latch it
+     * Now we can latch it.
      */
     var timer = this.aTimers[iTimer];
     timer.countLatched[0] = timer.countCurrent[0];
     timer.countLatched[1] = timer.countCurrent[1];
-    timer.fLatched = true;
+    timer.fCountLatched = true;
 
     /*
-     * VERIFY: That a latch request resets the timer index
+     * VERIFY: That a latch request resets the timer index.
      */
     this.resetTimerIndex(iTimer);
+};
+
+/**
+ * latchTimerStatus(iTimer)
+ *
+ * @this {ChipSet}
+ * @param {number} iTimer
+ */
+ChipSet.prototype.latchTimerStatus = function(iTimer)
+{
+    var timer = this.aTimers[iTimer];
+    if (!timer.fStatusLatched) {
+        this.updateTimer(iTimer);
+        timer.bStatus = timer.bcd | timer.mode | timer.rw | (timer.countIndex < timer.countBytes? ChipSet.PIT_CTRL.RB_NULL : 0) | (timer.fOUT? ChipSet.PIT_CTRL.RB_OUT : 0);
+        timer.fStatusLatched = true;
+    }
 };
 
 /**
@@ -3740,8 +3826,9 @@ ChipSet.prototype.setTimerMode = function(iTimer, bcd, mode, rw)
     timer.countCurrent = [0, 0];
     timer.countLatched = [0, 0];
     timer.fOUT = false;
-    timer.fLatched = false;
+    timer.fCountLatched = false;
     timer.fCounting = false;
+    timer.fStatusLatched = false;
     this.resetTimerIndex(iTimer);
 };
 

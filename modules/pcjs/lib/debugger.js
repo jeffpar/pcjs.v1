@@ -2615,7 +2615,7 @@ if (DEBUGGER) {
     Debugger.prototype.message = function(sMessage, fAddress)
     {
         if (fAddress) {
-            sMessage += " @" + this.hexOffset(this.cpu.getIP(), this.cpu.getCS());
+            sMessage += " @" + this.hexOffset(this.cpu.getIP(), this.cpu.getCS()) + " (%" + str.toHex(this.cpu.regLIP, 6) + ")";
         }
 
         if (this.sMessagePrev && sMessage == this.sMessagePrev) return;
@@ -5236,33 +5236,23 @@ if (DEBUGGER) {
         }
 
         if (sCmd == "ds") {                     // transform a "ds" command into a "d desc" command
-            sCmd = 'd';
+            sCmd = "d";
             sLen = sAddr;
             sAddr = "desc";
         }
 
-        for (m in Debugger.MESSAGES) {
-            if (sAddr == m) {
-                var fnDumper = this.afnDumpers[m];
-                if (fnDumper) {
-                    fnDumper(sLen);
-                } else {
-                    this.println("no dump registered for " + sAddr);
-                }
-                return;
-            }
-        }
-
-        var cb = 0;                             // 0 is not a default; 0 triggers the appropriate defaults below
-        if (sLen) {
-            if (sLen.charAt(0) == 'l') {
-                sLen = sLen.substr(1) || sBytes;
-            }
-            cb = this.parseValue(sLen) >>> 0;   // negative lengths not allowed
-            if (cb > 0x10000) cb = 0x10000;     // prevent bad user (or register) input from producing excessive output
-        }
-
         if (sCmd == 'd') {
+            for (m in Debugger.MESSAGES) {
+                if (sAddr == m) {
+                    var fnDumper = this.afnDumpers[m];
+                    if (fnDumper) {
+                        fnDumper(sLen);
+                    } else {
+                        this.println("no dump registered for " + sAddr);
+                    }
+                    return;
+                }
+            }
             sCmd = this.sCmdDumpPrev || "db";
         } else {
             this.sCmdDumpPrev = sCmd;
@@ -5281,6 +5271,15 @@ if (DEBUGGER) {
 
         var dbgAddr = this.parseAddr(sAddr, Debugger.ADDR_DATA);
         if (!dbgAddr || dbgAddr.sel == null && dbgAddr.addr == null) return;
+
+        var cb = 0;                             // 0 is not a default; it triggers the appropriate default below
+        if (sLen) {
+            if (sLen.charAt(0) == 'l') {
+                sLen = sLen.substr(1) || sBytes;
+            }
+            cb = this.parseValue(sLen) >>> 0;   // negative lengths not allowed
+            if (cb > 0x10000) cb = 0x10000;     // prevent bad user (or register) input from producing excessive output
+        }
 
         var sDump = "";
         var cLines = (((cb || 128) + 15) >> 4) || 1;

@@ -6722,7 +6722,7 @@ Video.prototype.inCardStatus = function(card, addrFrom)
  * dumpVideo(sParm)
  *
  * @this {Video}
- * @param {string|undefined} sParm
+ * @param {string} [sParm]
  */
 Video.prototype.dumpVideo = function(sParm)
 {

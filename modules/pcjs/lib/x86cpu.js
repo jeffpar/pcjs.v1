@@ -1294,11 +1294,10 @@ X86CPU.prototype.resetRegs = function()
      * or a triple-fault (ie, a processor reset).
      */
     this.nFault = -1;
-
     /*
      * These are used to snapshot regLIP and regLSP, to help make instructions restartable;
-     * currently opLIP is updated prior to every instruction, but opLSP is updated only for
-     * "problematic" instructions (eg, RETF) and should otherwise remain set to X86.ADDR_INVALID.
+     * currently opLIP is updated prior to every instruction, but opLSP is updated only for instructions
+     * that read/write the stack (eg, RETF) and should otherwise remain set to X86.ADDR_INVALID.
      */
     this.opLIP = this.opLSP = X86.ADDR_INVALID;
 
@@ -2098,11 +2097,15 @@ X86CPU.prototype.getCS = function()
  *
  * @this {X86CPU}
  * @param {number} sel
+ * @return {boolean}
  */
 X86CPU.prototype.setCS = function(sel)
 {
-    this.setCSIP(this.getIP(), sel);
-    if (!BUGS_8086) this.opFlags |= this.OPFLAG_NOINTR_8086;
+    if (this.setCSIP(this.getIP(), sel) != null) {
+        if (!BUGS_8086) this.opFlags |= this.OPFLAG_NOINTR_8086;
+        return true;
+    }
+    return false;
 };
 
 /**
@@ -2124,8 +2127,11 @@ X86CPU.prototype.getDS = function()
  */
 X86CPU.prototype.setDS = function(sel)
 {
-    this.segDS.load(sel);
-    if (!BUGS_8086) this.opFlags |= this.OPFLAG_NOINTR_8086;
+    if (this.segDS.load(sel) !== X86.ADDR_INVALID) {
+        if (!BUGS_8086) this.opFlags |= this.OPFLAG_NOINTR_8086;
+        return true;
+    }
+    return false;
 };
 
 /**
@@ -2145,19 +2151,25 @@ X86CPU.prototype.getSS = function()
  * @this {X86CPU}
  * @param {number} sel
  * @param {boolean} [fInterruptable]
+ * @return {boolean}
  */
 X86CPU.prototype.setSS = function(sel, fInterruptable)
 {
     var regESP = this.getSP();
-    this.regLSP = (this.segSS.load(sel) + regESP)|0;
-    if (this.segSS.fExpDown) {
-        this.regLSPLimit = (this.segSS.base + this.segSS.addrMask)|0;
-        this.regLSPLimitLow = (this.segSS.base + this.segSS.limit)|0;
-    } else {
-        this.regLSPLimit = (this.segSS.base + this.segSS.limit)|0;
-        this.regLSPLimitLow = this.segSS.base;
+    var regLSP = this.segSS.load(sel);
+    if (regLSP !== X86.ADDR_INVALID) {
+        this.regLSP = (regLSP + regESP)|0;
+        if (this.segSS.fExpDown) {
+            this.regLSPLimit = (this.segSS.base + this.segSS.addrMask)|0;
+            this.regLSPLimitLow = (this.segSS.base + this.segSS.limit)|0;
+        } else {
+            this.regLSPLimit = (this.segSS.base + this.segSS.limit)|0;
+            this.regLSPLimitLow = this.segSS.base;
+        }
+        if (!BUGS_8086 && !fInterruptable) this.opFlags |= X86.OPFLAG.NOINTR;
+        return true;
     }
-    if (!BUGS_8086 && !fInterruptable) this.opFlags |= X86.OPFLAG.NOINTR;
+    return false;
 };
 
 /**
@@ -2176,11 +2188,15 @@ X86CPU.prototype.getES = function()
  *
  * @this {X86CPU}
  * @param {number} sel
+ * @return {boolean}
  */
 X86CPU.prototype.setES = function(sel)
 {
-    this.segES.load(sel);
-    if (!BUGS_8086) this.opFlags |= this.OPFLAG_NOINTR_8086;
+    if (this.segES.load(sel) !== X86.ADDR_INVALID) {
+        if (!BUGS_8086) this.opFlags |= this.OPFLAG_NOINTR_8086;
+        return true;
+    }
+    return false;
 };
 
 /**
@@ -2203,10 +2219,11 @@ X86CPU.prototype.getFS = function()
  *
  * @this {X86CPU}
  * @param {number} sel
+ * @return {boolean}
  */
 X86CPU.prototype.setFS = function(sel)
 {
-    this.segFS.load(sel);
+    return this.segFS.load(sel) !== X86.ADDR_INVALID;
 };
 
 /**
@@ -2229,10 +2246,11 @@ X86CPU.prototype.getGS = function()
  *
  * @this {X86CPU}
  * @param {number} sel
+ * @return {boolean}
  */
 X86CPU.prototype.setGS = function(sel)
 {
-    this.segGS.load(sel);
+    return this.segGS.load(sel) !== X86.ADDR_INVALID;
 };
 
 /**

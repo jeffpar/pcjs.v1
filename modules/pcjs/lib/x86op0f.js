@@ -1113,8 +1113,10 @@ X86.opPUSHFS = function PUSHFS()
  */
 X86.opPOPFS = function POPFS()
 {
+    this.opLSP = this.regLSP;
     this.setFS(this.popWord());
     this.nStepCycles -= this.cycleCounts.nOpCyclesPopReg;
+    this.opLSP = X86.ADDR_INVALID;
 };
 
 /**
@@ -1178,8 +1180,10 @@ X86.opPUSHGS = function PUSHGS()
  */
 X86.opPOPGS = function POPGS()
 {
+    this.opLSP = this.regLSP;
     this.setGS(this.popWord());
     this.nStepCycles -= this.cycleCounts.nOpCyclesPopReg;
+    this.opLSP = X86.ADDR_INVALID;
 };
 
 /**

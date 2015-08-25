@@ -137,8 +137,10 @@ X86.opPUSHES = function PUSHES()
  */
 X86.opPOPES = function POPES()
 {
+    this.opLSP = this.regLSP;
     this.setES(this.popWord());
     this.nStepCycles -= this.cycleCounts.nOpCyclesPopReg;
+    this.opLSP = X86.ADDR_INVALID;
 };
 
 /**
@@ -323,8 +325,10 @@ X86.opPUSHSS = function PUSHSS()
  */
 X86.opPOPSS = function POPSS()
 {
+    this.opLSP = this.regLSP;
     this.setSS(this.popWord());
     this.nStepCycles -= this.cycleCounts.nOpCyclesPopReg;
+    this.opLSP = X86.ADDR_INVALID;
 };
 
 /**
@@ -411,8 +415,10 @@ X86.opPUSHDS = function PUSHDS()
  */
 X86.opPOPDS = function POPDS()
 {
+    this.opLSP = this.regLSP;
     this.setDS(this.popWord());
     this.nStepCycles -= this.cycleCounts.nOpCyclesPopReg;
+    this.opLSP = X86.ADDR_INVALID;
 };
 
 /**
