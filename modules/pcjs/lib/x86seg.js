@@ -54,6 +54,8 @@ if (typeof module !== 'undefined') {
  */
 
 /**
+ * X86Seg "public" properties
+ *
  * @class X86Seg
  * @property {number} sel
  * @property {number} limit (in protected-mode, this comes from descriptor word 0x0)
@@ -563,10 +565,17 @@ X86Seg.prototype.loadDesc6 = function(addrDesc, sel)
  *
  * See X86.DESC for offset and bit definitions.
  *
- * When fProbe is set, this function will not modify the X86Seg object; it will still generate a fault if any of
- * the usual error conditions are detected (and return X86.ADDR_INVALID), but in the success case, it merely stashes
- * all descriptor values it reads in the X86Seg's "probe" object.  If the caller ultimately decides to propagate
- * those "probed" values to the X86Seg object, it must then call loadProbe().
+ * When fProbe is set, we do NOT modify the public properties of the X86Seg object (see class X86Seg above).
+ * We will generate a fault if any of the usual error conditions are detected (and return X86.ADDR_INVALID), but
+ * otherwise, we merely stash all the descriptor values it reads in the X86Seg's private "probe" object.
+ *
+ * Probed loads allow us to deal with complex segment load operations (ie, those involving an implied stack-switch
+ * or task-switch), by allowing us to probe all the new selectors and generate the necessary faults before modifying
+ * any segment registers; if all the probes succeed, then all the loads can proceed.
+ *
+ * The next non-probed load of a probed selector will move those probed descriptor values into the X86Seg object,
+ * saving us from having to reload and reparse the descriptor.  However, if a different selector is loaded between
+ * the probed and non-probed loads, the probed data is tossed.
  *
  * @this {X86Seg}
  * @param {number} addrDesc is the descriptor address
@@ -580,7 +589,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fProbe)
 
     /*
      * If the previous load was a successful "probed" load of the same segment, then we simply load
-     * up all the cached descriptor values from that probe and return.
+     * up all the cached descriptor values from the probe and return.
      */
     if (!fProbe && sel === this.probe.sel) {
         this.sel = sel;
@@ -859,9 +868,9 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fProbe)
              *      base=0006C726 limit=0000 type=0x02 (ldt,not present) ext=0x0000 dpl=0x00
              *
              * In both cases, the segment type is not valid for the target segment register *and* the PRESENT bit
-             * is clear.  OS/2 didn't seem to care whether I reported NP_FAULT or GP_FAULT, but Windows 95 definitely
+             * is clear.  OS/2 doesn't seem to care whether I report an NP_FAULT or GP_FAULT, but Windows 95 definitely
              * cares: it will resolve the fault only if a GP_FAULT is reported.  And Intel's 80386 Programmers Reference
-             * suggests that, yes, NP_FAULT checks are supposed to come *after* GP_FAULT checks.
+             * implies that, yes, NP_FAULT checks are supposed to be performed *after* GP_FAULT checks.
              */
             if (type < X86.DESC.ACC.TYPE.SEG || (type & (X86.DESC.ACC.TYPE.CODE | X86.DESC.ACC.TYPE.READABLE)) == X86.DESC.ACC.TYPE.CODE) {
                 if (this.id < X86Seg.ID.VER) X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel & X86.ERRCODE.SELMASK);
@@ -1266,8 +1275,8 @@ X86Seg.prototype.updateMode = function(fLoad, fProt, fV86)
     }
 
     /*
-     * The following properties are used for STACK segments only (ie, segSS); we want to make it easier
-     * for setSS() to set stack lower and upper limits, which requires knowing whether or not the segment is
+     * The fExpDown property is used for STACK segments only (ie, segSS); we want to make it easier for
+     * setSS() to set stack lower and upper limits, which requires knowing whether or not the segment is
      * marked as EXPDOWN.
      */
     this.fExpDown = false;
