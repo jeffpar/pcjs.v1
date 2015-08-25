@@ -293,6 +293,9 @@ X86Seg.prototype.loadIDTProt = function loadIDTProt(nIDT)
         this.fCall = true;
         return this.loadDesc8(addrDesc, nIDT) + cpu.regEIP;
     }
+    /*
+     * TODO: Remove fHalt=true from this fnFault() call once this code path has been tested.
+     */
     X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, nIDT | X86.ERRCODE.IDT, true);
     return X86.ADDR_INVALID;
 };
@@ -815,6 +818,9 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fProbe)
         if (fGate !== false) {
             var nError = sel & X86.ERRCODE.SELMASK;
             if (addrDesc >= cpu.addrIDT && addrDesc < cpu.addrIDTLimit) nError |= X86.ERRCODE.IDT;
+            /*
+             * TODO: Remove fHalt=true from this fnFault() call once this code path has been tested.
+             */
             if (this.id < X86Seg.ID.VER) X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, nError, true);
             return X86.ADDR_INVALID;
         }
@@ -858,7 +864,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fProbe)
              * suggests that, yes, NP_FAULT checks are supposed to come *after* GP_FAULT checks.
              */
             if (type < X86.DESC.ACC.TYPE.SEG || (type & (X86.DESC.ACC.TYPE.CODE | X86.DESC.ACC.TYPE.READABLE)) == X86.DESC.ACC.TYPE.CODE) {
-                if (this.id < X86Seg.ID.VER) X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel & X86.ERRCODE.SELMASK, true);
+                if (this.id < X86Seg.ID.VER) X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel & X86.ERRCODE.SELMASK);
                 return X86.ADDR_INVALID;
             }
             /*
@@ -877,6 +883,9 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fProbe)
             return X86.ADDR_INVALID;
         }
         if (!selMasked || type < X86.DESC.ACC.TYPE.SEG || (type & (X86.DESC.ACC.TYPE.CODE | X86.DESC.ACC.TYPE.WRITABLE)) != X86.DESC.ACC.TYPE.WRITABLE) {
+            /*
+             * TODO: Remove fHalt=true from this fnFault() call once this code path has been tested.
+             */
             if (this.id < X86Seg.ID.VER) X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel & X86.ERRCODE.SELMASK, true);
             return X86.ADDR_INVALID;
         }
@@ -885,6 +894,9 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fProbe)
     case X86Seg.ID.TSS:
         var typeTSS = type & ~X86.DESC.ACC.TSS_BUSY;
         if (!selMasked || typeTSS != X86.DESC.ACC.TYPE.TSS286 && typeTSS != X86.DESC.ACC.TYPE.TSS386) {
+            /*
+             * TODO: Remove fHalt=true from this fnFault() call once this code path has been tested.
+             */
             if (this.id < X86Seg.ID.VER) X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel & X86.ERRCODE.SELMASK, true);
             return X86.ADDR_INVALID;
         }
@@ -995,6 +1007,9 @@ X86Seg.prototype.switchTSS = function switchTSS(selNew, fNest)
          * TODO: Verify that it is (always) correct to require that the BUSY bit be currently set.
          */
         if (!(cpu.segTSS.type & X86.DESC.ACC.TSS_BUSY)) {
+            /*
+             * TODO: Remove fHalt=true from this fnFault() call once this code path has been tested.
+             */
             X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, selNew & X86.ERRCODE.SELMASK, true);
             return false;
         }
@@ -1015,6 +1030,9 @@ X86Seg.prototype.switchTSS = function switchTSS(selNew, fNest)
 
     if (fNest !== false) {
         if (cpu.segTSS.type & X86.DESC.ACC.TSS_BUSY) {
+            /*
+             * TODO: Remove fHalt=true from this fnFault() call once this code path has been tested.
+             */
             X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, selNew & X86.ERRCODE.SELMASK, true);
             return false;
         }
