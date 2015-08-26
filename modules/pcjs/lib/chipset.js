@@ -1067,7 +1067,7 @@ ChipSet.prototype.initBus = function(cmp, bus, cpu, dbg)
                 chipset.dumpCMOS();
             });
         }
-        cpu.addIntNotify(Interrupts.RTC.VECTOR, this, this.intBIOSRTC);
+        cpu.addIntNotify(Interrupts.RTC, this, this.intBIOSRTC);
     }
 };
 
@@ -4961,7 +4961,7 @@ ChipSet.prototype.outCoprocReset = function(port, bOut, addrFrom)
 ChipSet.prototype.intBIOSRTC = function(addr)
 {
     if (DEBUGGER) {
-        if (this.messageEnabled(Messages.RTC) && this.dbg.messageInt(Interrupts.RTC.VECTOR, addr)) {
+        if (this.messageEnabled(Messages.RTC) && this.dbg.messageInt(Interrupts.RTC, addr)) {
             /*
              * By computing AH now, we get the incoming AH value; if we computed it below, along with
              * the rest of the register values, we'd get the outgoing AH value, which is not what we want.
@@ -4980,7 +4980,7 @@ ChipSet.prototype.intBIOSRTC = function(addr)
                     } else if (AH == 0x04 || AH == 0x05) {
                         sResult = " CX(year)=" + str.toHexWord(chipset.cpu.regECX) + " DH(month)=" + str.toHexByte(DH) + " DL(day)=" + str.toHexByte(DL);
                     }
-                    chipset.dbg.messageIntReturn(Interrupts.RTC.VECTOR, nLevel, nCycles, sResult);
+                    chipset.dbg.messageIntReturn(Interrupts.RTC, nLevel, nCycles, sResult);
                 };
             }(this, this.cpu.getCycles()));
         }

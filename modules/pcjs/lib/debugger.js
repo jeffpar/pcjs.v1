@@ -1201,140 +1201,6 @@ if (DEBUGGER) {
       ]
     ];
 
-    /*
-     * See replaceRegs() for the rules governing how register contents are replaced in the strings below.  Replacements
-     * occur in the following order:
-     *
-     *      Replace every %XX (or %XXX), where XX (or XXX) is a register, with the register's value.
-     *      Replace every #XX, where XX is a hex byte value, with the corresponding ASCII character (if printable).
-     *      Replace every $XXXX:XXXX, where XXXX:XXXX is a segmented address, with the zero-terminated string at that address.
-     *      Replace every ^XXXX:XXXX, where XXXX:XXXX is a segmented address, with the FCB filename stored at that address.
-     */
-    Debugger.INT_FUNCS = {
-        0x13: {
-            0x00: "disk reset",
-            0x01: "get status",
-            0x02: "read drive %DL (%CH:%DH:%CL,%AL) into %ES:%BX",
-            0x03: "write drive %DL (%CH:%DH:%CL,%AL) from %ES:%BX",
-            0x04: "verify drive %DL (%CH:%DH:%CL,%AL)",
-            0x05: "format drive %DL using %ES:%BX",
-            0x08: "read drive %DL parameters into %ES:%DI",
-            0x15: "get drive %DL DASD type",
-            0x16: "get drive %DL change line status",
-            0x17: "set drive %DL DASD type",
-            0x18: "set drive %DL media type"
-        },
-        0x15: {
-            0x80: "open device",
-            0x81: "close device",
-            0x82: "program termination",
-            0x83: "wait %CX:%DXus for event",
-            0x84: "joystick support",
-            0x85: "SYSREQ pressed",
-            0x86: "wait %CX:%DXus",
-            0x87: "move block (%CX words)",
-            0x88: "get extended memory size",
-            0x89: "processor to virtual mode",
-            0x90: "device busy loop",
-            0x91: "interrupt complete flag set"
-        },
-        0x21: {
-            0x00: "terminate program",
-            0x01: "read character (AL) from stdin with echo",
-            0x02: "write character #%DL to stdout",
-            0x03: "read character (AL) from stdaux",                                // eg, COM1
-            0x04: "write character #%DL to stdaux",                                 // eg, COM1
-            0x05: "write character #%DL to stdprn",                                 // eg, LPT1
-            0x06: "direct console output (input if %DL=FF)",
-            0x07: "direct console input without echo",
-            0x08: "read character (AL) from stdin without echo",
-            0x09: "write string $%DS:%DX to stdout",
-            0x0A: "buffered input (DS:DX)",                                         // byte 0 is maximum chars, byte 1 is number of previous characters, byte 2 is number of characters read
-            0x0B: "get stdin status",
-            0x0C: "flush buffer and read stdin",                                    // AL is a function # (0x01, 0x06, 0x07, 0x08, or 0x0A)
-            0x0D: "disk reset",
-            0x0E: "select default drive %DL",                                       // returns # of available drives in AL
-            0x0F: "open file using FCB ^%DS:%DX",                                   // DS:DX -> unopened File Control Block
-            0x10: "close file using FCB ^%DS:%DX",
-            0x11: "find first matching file using FCB ^%DS:%DX",
-            0x12: "find next matching file using FCB ^%DS:%DX",
-            0x13: "delete file using FCB ^%DS:%DX",
-            0x14: "sequential read from file using FCB ^%DS:%DX",
-            0x15: "sequential write to file using FCB ^%DS:%DX",
-            0x16: "create or truncate file using FCB ^%DS:%DX",
-            0x17: "rename file using FCB ^%DS:%DX",
-            0x19: "get current default drive (AL)",
-            0x1A: "set disk transfer area (DTA=%DS:%DX)",
-            0x1B: "get allocation information for default drive",
-            0x1C: "get allocation information for specific drive %DL",
-            0x1F: "get drive parameter block for default drive",
-            0x21: "read random record from file using FCB ^%DS:%DX",
-            0x22: "write random record to file using FCB ^%DS:%DX",
-            0x23: "get file size using FCB ^%DS:%DX",
-            0x24: "set random record number for FCB ^%DS:%DX",
-            0x25: "set address %DS:%DX of interrupt vector %AL",
-            0x26: "create new PSP at segment %DX",
-            0x27: "random block read from file using FCB ^%DS:%DX",
-            0x28: "random block write to file using FCB ^%DS:%DX",
-            0x29: "parse filename $%DS:%SI into FCB %ES:%DI using %AL",
-            0x2A: "get system date (year=CX, mon=DH, day=DL)",
-            0x2B: "set system date (year=%CX, mon=%DH, day=%DL)",
-            0x2C: "get system time (hour=CH, min=CL, sec=DH, 100ths=DL)",
-            0x2D: "set system time (hour=%CH, min=%CL, sec=%DH, 100ths=%DL)",
-            0x2E: "set verify flag %AL",
-            0x2F: "get disk transfer area (DTA=ES:BX)",                             // DOS 2.00+
-            0x30: "get DOS version (AL=major, AH=minor)",
-            0x31: "terminate and stay resident",
-            0x32: "get drive parameter block (DPB=DS:BX) for drive %DL",
-            0x33: "extended break check",
-            0x34: "get address (ES:BX) of InDOS flag",
-            0x35: "get address (ES:BX) of interrupt vector %AL",
-            0x36: "get free disk space of drive %DL",
-            0x37: "get(0)/set(1) switch character %DL (%AL)",
-            0x38: "get country-specific information",
-            0x39: "create subdirectory $%DS:%DX",
-            0x3A: "remove subdirectory $%DS:%DX",
-            0x3B: "set current directory $%DS:%DX",
-            0x3C: "create or truncate file $%DS:%DX with attributes %CX",
-            0x3D: "open file $%DS:%DX with mode %AL",
-            0x3E: "close file %BX",
-            0x3F: "read %CX bytes from file %BX into buffer %DS:%DX",
-            0x40: "write %CX bytes to file %BX from buffer %DS:%DX",
-            0x41: "delete file $%DS:%DX",
-            0x42: "set position %CX:%DX of file %BX relative to %AL",
-            0x43: "get(0)/set(1) attributes %CX of file $%DS:%DX (%AL)",
-            0x44: "get device information (IOCTL)",
-            0x45: "duplicate file handle %BX",
-            0x46: "force file handle %CX to duplicate file handle %BX",
-            0x47: "get current directory (DS:SI) for drive %DL",
-            0x48: "allocate memory segment with %BX paragraphs",
-            0x49: "free memory segment %ES",
-            0x4A: "resize memory segment %ES to %BX paragraphs",
-            0x4B: "load program $%DS:%DX using parameter block %ES:%BX",
-            0x4C: "terminate with return code %AL",
-            0x4D: "get return code (AL)",
-            0x4E: "find first matching file $%DS:%DX with attributes %CX",
-            0x4F: "find next matching file",
-            0x50: "set current PSP %BX",
-            0x51: "get current PSP (bx)",
-            0x52: "get system variables (ES:BX)",
-            0x53: "translate BPB %DS:%SI to DPB (ES:BP)",
-            0x54: "get verify flag (AL)",
-            0x55: "create child PSP at segment %DX",
-            0x56: "rename file $%DS:%DX to $%ES:%DI",
-            0x57: "get(0)/set(1) file %BX date %DX and time %CX (%AL)",
-            0x58: "get(0)/set(1) memory allocation strategy (%AL)",                 // DOS 2.11+
-            0x59: "get extended error information",                                 // DOS 3.00+
-            0x5A: "create temporary file $%DS:%DX with attributes %CX",             // DOS 3.00+
-            0x5B: "create file $%DS:%DX with attributes %CX",                       // DOS 3.00+ (doesn't truncate existing files like 0x3C)
-            0x5C: "lock(0)/unlock(1) file %BX region %CX:%DX length %SI:%DI (%AL)", // DOS 3.00+
-            0x5D: "critical error information (%AL)",                               // DOS 3.00+ (undocumented)
-            0x60: "get fully-qualified filename from $%DS:%SI",                     // DOS 3.00+ (undocumented)
-            0x63: "get lead byte table (%AL)",                                      // DOS 2.25 and 3.20+
-            0x6C: "extended open file $%DS:%SI"                                     // DOS 4.00+
-        }
-    };
-
     /**
      * initBus(bus, cpu, dbg)
      *
@@ -2655,7 +2521,7 @@ if (DEBUGGER) {
         if (fForce) {
             fMessage = true;
         } else {
-            fMessage = this.messageEnabled(Messages.CPU) && nInt != Interrupts.DOS_IDLE.VECTOR /* 0x28 */ && nInt != Interrupts.DOS_NETBIOS.VECTOR /* 0x2A */;
+            fMessage = this.messageEnabled(Messages.CPU) && nInt != Interrupts.DOS_IDLE /* 0x28 */ && nInt != Interrupts.DOS_NETBIOS /* 0x2A */;
             var nCategory = Debugger.INT_MESSAGES[nInt];
             if (nCategory) {
                 if (this.messageEnabled(nCategory)) {
@@ -2666,15 +2532,15 @@ if (DEBUGGER) {
             }
         }
         if (fMessage) {
-            AH = this.cpu.regEAX >> 8;
+            AH = (this.cpu.regEAX >> 8) & 0xff;
             DL = this.cpu.regEDX & 0xff;
-            if (nInt == Interrupts.DOS.VECTOR /* 0x21 */ && AH == 0x0b ||
+            if (nInt == Interrupts.DOS /* 0x21 */ && AH == 0x0b ||
                 nCategory == Messages.FDC && DL >= 0x80 || nCategory == Messages.HDC && DL < 0x80) {
                 fMessage = false;
             }
         }
         if (fMessage) {
-            var aFuncs = Debugger.INT_FUNCS[nInt];
+            var aFuncs = Interrupts.FUNCS[nInt];
             var sFunc = (aFuncs && aFuncs[AH]) || "";
             if (sFunc) sFunc = ' ' + this.replaceRegs(sFunc);
             /*
@@ -5231,7 +5097,7 @@ if (DEBUGGER) {
              * NOTE: This is different from the "d dos" command, which invokes dumpDos() to dump DOS memory blocks,
              * and is handled by one of the registered dumper functions below.
              */
-            this.messageInt(Interrupts.DOS.VECTOR, this.cpu.regLIP, true);
+            this.messageInt(Interrupts.DOS, this.cpu.regLIP, true);
             return;
         }
 

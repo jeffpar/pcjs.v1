@@ -16,6 +16,7 @@
 		<manifest ref="/disks/pc/dos/ibm/6.10/manifest.xml" disk="*"/>
 		<manifest ref="/disks/pc/dos/ibm/7.00/manifest.xml" disk="*"/>
 		<manifest ref="/disks/pc/dos/microsoft/3.20/manifest.xml" disk="*"/>
+		<manifest ref="/disks/pc/dos/microsoft/3.21/manifest.xml" disk="*"/>
 		<manifest ref="/disks/pc/dos/microsoft/3.30/manifest.xml" disk="*"/>
 		<manifest ref="/disks/pc/dos/microsoft/3.31/manifest.xml" disk="*"/>
 		<manifest ref="/disks/pc/dos/microsoft/4.0M/manifest.xml" disk="*"/>
