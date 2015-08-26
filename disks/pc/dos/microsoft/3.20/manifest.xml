@@ -6,7 +6,7 @@
 	<type>DOS</type>
 	<category>Operating System</category>
 	<author>Microsoft</author>
-	<releaseDate>January 1986</releaseDate>
+	<releaseDate>July 7, 1986</releaseDate>
 	<disk id="disk01" size="368640" chs="40:2:9" img="static/MSDOS320-DISK1.img" href="/disks/pc/dos/microsoft/3.20/MSDOS320-DISK1.json" md5="5d5d9c79890228fce53ab9d191e94e77" md5json="3d9263e37cba3ca91b917ae4af5c8056">
 		<name>MS-DOS 3.20 (Disk 1)</name>
 	</disk>
