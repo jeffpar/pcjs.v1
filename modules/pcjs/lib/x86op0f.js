@@ -1141,7 +1141,7 @@ X86.opBT = function BT()
  */
 X86.opSHLDn = function SHLDn()
 {
-    this.aOpModMemWord[this.getIPByte()].call(this, this.dataSize == 2? X86.fnSHLDwi : X86.fnSHLDdi);
+    this.aOpModMemWord[this.getIPByte()].call(this, this.sizeData == 2? X86.fnSHLDwi : X86.fnSHLDdi);
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? 3 : 7);
 };
 
@@ -1154,7 +1154,7 @@ X86.opSHLDn = function SHLDn()
  */
 X86.opSHLDcl = function SHLDcl()
 {
-    this.aOpModMemWord[this.getIPByte()].call(this, this.dataSize == 2? X86.fnSHLDwCL : X86.fnSHLDdCL);
+    this.aOpModMemWord[this.getIPByte()].call(this, this.sizeData == 2? X86.fnSHLDwCL : X86.fnSHLDdCL);
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? 3 : 7);
 };
 
@@ -1208,7 +1208,7 @@ X86.opBTS = function BTS()
  */
 X86.opSHRDn = function SHRDn()
 {
-    this.aOpModMemWord[this.getIPByte()].call(this, this.dataSize == 2? X86.fnSHRDwi : X86.fnSHRDdi);
+    this.aOpModMemWord[this.getIPByte()].call(this, this.sizeData == 2? X86.fnSHRDwi : X86.fnSHRDdi);
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? 3 : 7);
 };
 
@@ -1221,7 +1221,7 @@ X86.opSHRDn = function SHRDn()
  */
 X86.opSHRDcl = function SHRDcl()
 {
-    this.aOpModMemWord[this.getIPByte()].call(this, this.dataSize == 2? X86.fnSHRDwCL : X86.fnSHRDdCL);
+    this.aOpModMemWord[this.getIPByte()].call(this, this.sizeData == 2? X86.fnSHRDwCL : X86.fnSHRDdCL);
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? 3 : 7);
 };
 
@@ -1234,7 +1234,7 @@ X86.opSHRDcl = function SHRDcl()
  */
 X86.opIMUL = function IMUL()
 {
-    this.aOpModRegWord[this.getIPByte()].call(this, this.dataSize == 2? X86.fnIMULrw : X86.fnIMULrd);
+    this.aOpModRegWord[this.getIPByte()].call(this, this.sizeData == 2? X86.fnIMULrw : X86.fnIMULrd);
 };
 
 /**
@@ -1333,31 +1333,31 @@ X86.opMOVZXb = function MOVZXb()
     this.aOpModRegByte[bModRM].call(this, X86.fnMOVX);
     switch(reg) {
     case 0x0:
-        this.regEAX = (this.regEAX & ~this.dataMask) | (this.regEAX & 0xff);
+        this.regEAX = (this.regEAX & ~this.maskData) | (this.regEAX & 0xff);
         break;
     case 0x1:
-        this.regECX = (this.regECX & ~this.dataMask) | (this.regECX & 0xff);
+        this.regECX = (this.regECX & ~this.maskData) | (this.regECX & 0xff);
         break;
     case 0x2:
-        this.regEDX = (this.regEDX & ~this.dataMask) | (this.regEDX & 0xff);
+        this.regEDX = (this.regEDX & ~this.maskData) | (this.regEDX & 0xff);
         break;
     case 0x3:
-        this.regEBX = (this.regEBX & ~this.dataMask) | (this.regEBX & 0xff);
+        this.regEBX = (this.regEBX & ~this.maskData) | (this.regEBX & 0xff);
         break;
     case 0x4:
-        this.regESP = (this.regESP & ~this.dataMask) | ((this.regEAX >> 8) & 0xff);
+        this.regESP = (this.regESP & ~this.maskData) | ((this.regEAX >> 8) & 0xff);
         this.regEAX = temp;
         break;
     case 0x5:
-        this.regEBP = (this.regEBP & ~this.dataMask) | ((this.regECX >> 8) & 0xff);
+        this.regEBP = (this.regEBP & ~this.maskData) | ((this.regECX >> 8) & 0xff);
         this.regECX = temp;
         break;
     case 0x6:
-        this.regESI = (this.regESI & ~this.dataMask) | ((this.regEDX >> 8) & 0xff);
+        this.regESI = (this.regESI & ~this.maskData) | ((this.regEDX >> 8) & 0xff);
         this.regEDX = temp;
         break;
     case 0x7:
-        this.regEDI = (this.regEDI & ~this.dataMask) | ((this.regEBX >> 8) & 0xff);
+        this.regEDI = (this.regEDI & ~this.maskData) | ((this.regEBX >> 8) & 0xff);
         this.regEBX = temp;
         break;
     }
@@ -1493,31 +1493,31 @@ X86.opMOVSXb = function MOVSXb()
     this.aOpModRegByte[bModRM].call(this, X86.fnMOVX);
     switch(reg) {
     case 0x0:
-        this.regEAX = (this.regEAX & ~this.dataMask) | ((((this.regEAX & 0xff) << 24) >> 24) & this.dataMask);
+        this.regEAX = (this.regEAX & ~this.maskData) | ((((this.regEAX & 0xff) << 24) >> 24) & this.maskData);
         break;
     case 0x1:
-        this.regECX = (this.regECX & ~this.dataMask) | ((((this.regECX & 0xff) << 24) >> 24) & this.dataMask);
+        this.regECX = (this.regECX & ~this.maskData) | ((((this.regECX & 0xff) << 24) >> 24) & this.maskData);
         break;
     case 0x2:
-        this.regEDX = (this.regEDX & ~this.dataMask) | ((((this.regEDX & 0xff) << 24) >> 24) & this.dataMask);
+        this.regEDX = (this.regEDX & ~this.maskData) | ((((this.regEDX & 0xff) << 24) >> 24) & this.maskData);
         break;
     case 0x3:
-        this.regEBX = (this.regEBX & ~this.dataMask) | ((((this.regEBX & 0xff) << 24) >> 24) & this.dataMask);
+        this.regEBX = (this.regEBX & ~this.maskData) | ((((this.regEBX & 0xff) << 24) >> 24) & this.maskData);
         break;
     case 0x4:
-        this.regESP = (this.regESP & ~this.dataMask) | (((this.regEAX << 16) >> 24) & this.dataMask);
+        this.regESP = (this.regESP & ~this.maskData) | (((this.regEAX << 16) >> 24) & this.maskData);
         this.regEAX = temp;
         break;
     case 0x5:
-        this.regEBP = (this.regEBP & ~this.dataMask) | (((this.regECX << 16) >> 24) & this.dataMask);
+        this.regEBP = (this.regEBP & ~this.maskData) | (((this.regECX << 16) >> 24) & this.maskData);
         this.regECX = temp;
         break;
     case 0x6:
-        this.regESI = (this.regESI & ~this.dataMask) | (((this.regEDX << 16) >> 24) & this.dataMask);
+        this.regESI = (this.regESI & ~this.maskData) | (((this.regEDX << 16) >> 24) & this.maskData);
         this.regEDX = temp;
         break;
     case 0x7:
-        this.regEDI = (this.regEDI & ~this.dataMask) | (((this.regEBX << 16) >> 24) & this.dataMask);
+        this.regEDI = (this.regEDI & ~this.maskData) | (((this.regEBX << 16) >> 24) & this.maskData);
         this.regEBX = temp;
         break;
     }

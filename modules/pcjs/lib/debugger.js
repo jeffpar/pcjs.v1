@@ -1576,8 +1576,8 @@ if (DEBUGGER) {
     Debugger.prototype.newAddr = function(off, sel, addr, fProt, fData32, fAddr32)
     {
         if (fProt === undefined) fProt = this.getProtMode();
-        if (fData32 === undefined) fData32 = (this.cpu && this.cpu.segCS.dataSize == 4);
-        if (fAddr32 === undefined) fAddr32 = (this.cpu && this.cpu.segCS.addrSize == 4);
+        if (fData32 === undefined) fData32 = (this.cpu && this.cpu.segCS.sizeData == 4);
+        if (fAddr32 === undefined) fAddr32 = (this.cpu && this.cpu.segCS.sizeAddr == 4);
         return {off: off || 0, sel: sel, addr: addr, fProt: fProt || false, fTempBreak: false, fData32: fData32 || false, fAddr32: fAddr32 || false};
     };
 
@@ -1617,7 +1617,7 @@ if (DEBUGGER) {
         if (dbgAddr.sel != null) {
             var seg = this.getSegment(dbgAddr.sel, dbgAddr.fProt);
             if (seg) {
-                var off = dbgAddr.off & seg.addrMask;
+                var off = dbgAddr.off & seg.maskAddr;
                 if ((off >>> 0) >= seg.offMax) return false;
                 dbgAddr.off = off;
             }
@@ -3064,8 +3064,8 @@ if (DEBUGGER) {
                 dbgAddr.sel = this.cpu.getCS();
                 dbgAddr.addr = addr;
                 dbgAddr.fProt = this.getProtMode();
-                dbgAddr.fData32 = (this.cpu && this.cpu.segCS.dataSize == 4);
-                dbgAddr.fAddr32 = (this.cpu && this.cpu.segCS.addrSize == 4);
+                dbgAddr.fData32 = (this.cpu && this.cpu.segCS.sizeData == 4);
+                dbgAddr.fAddr32 = (this.cpu && this.cpu.segCS.sizeAddr == 4);
                 if (++this.iOpcodeHistory == this.aOpcodeHistory.length) this.iOpcodeHistory = 0;
             }
         }
@@ -6346,8 +6346,8 @@ if (DEBUGGER) {
          * both fields must be set to match the size of the current code segment.
          */
         if (fNonPrefix) {
-            dbgAddr.fData32 = (this.cpu.segCS.dataSize == 4);
-            dbgAddr.fAddr32 = (this.cpu.segCS.addrSize == 4);
+            dbgAddr.fData32 = (this.cpu.segCS.sizeData == 4);
+            dbgAddr.fAddr32 = (this.cpu.segCS.sizeAddr == 4);
         }
         /*
          * We also use dbgAddr.fComplete to record whether the caller (ie, getInstruction()) is reporting that

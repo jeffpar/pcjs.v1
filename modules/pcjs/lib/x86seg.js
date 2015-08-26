@@ -94,8 +94,8 @@ function X86Seg(cpu, id, sName, fProt)
     this.ext = 0;
     this.cpl = this.dpl = 0;
     this.addrDesc = X86.ADDR_INVALID;
-    this.dataSize = this.addrSize = 2;
-    this.dataMask = this.addrMask = 0xffff;
+    this.sizeData = this.sizeAddr = 2;
+    this.maskData = this.maskAddr = 0xffff;
 
     this.loadV86 = this.loadReal;
     this.checkReadV86 = this.checkReadReal;
@@ -1215,10 +1215,10 @@ X86Seg.prototype.save = function()
         this.cpl,
         this.dpl,
         this.addrDesc,
-        this.addrSize,
-        this.addrMask,
-        this.dataSize,
-        this.dataMask,
+        this.sizeAddr,
+        this.maskAddr,
+        this.sizeData,
+        this.maskData,
         this.type,
         this.offMax
     ];
@@ -1248,10 +1248,10 @@ X86Seg.prototype.restore = function(a)
         this.cpl      = a[6];
         this.dpl      = a[7];
         this.addrDesc = a[8];
-        this.addrSize = a[9]  || 2;
-        this.addrMask = a[10] || 0xffff;
-        this.dataSize = a[11] || 2;
-        this.dataMask = a[12] || 0xffff;
+        this.sizeAddr = a[9]  || 2;
+        this.maskAddr = a[10] || 0xffff;
+        this.sizeData = a[11] || 2;
+        this.maskData = a[12] || 0xffff;
         this.type     = a[13] || (this.acc & X86.DESC.ACC.TYPE.MASK);
         this.offMax   = a[14] || (this.limit >>> 0) + 1;
     }
@@ -1301,11 +1301,11 @@ X86Seg.prototype.updateMode = function(fLoad, fProt, fV86)
              * remain set to whatever was in effect in protected-mode.
              */
             this.cpl = this.dpl = 3;
-            this.dataSize = this.addrSize = 2;
-            this.dataMask = this.addrMask = 0xffff;
+            this.sizeData = this.sizeAddr = 2;
+            this.maskData = this.maskAddr = 0xffff;
             this.limit = 0xffff;
             this.offMax = this.limit + 1;
-            this.addrSize = this.dataSize;
+            this.sizeAddr = this.sizeData;
             this.addrDesc = X86.ADDR_INVALID;
             this.fStackSwitch = false;
             return;
@@ -1376,14 +1376,14 @@ X86Seg.prototype.updateMode = function(fLoad, fProt, fV86)
             this.cpl = this.sel & X86.SEL.RPL;
             this.dpl = (this.acc & X86.DESC.ACC.DPL.MASK) >> X86.DESC.ACC.DPL.SHIFT;
             if (this.cpu.model < X86.MODEL_80386 || !(this.ext & X86.DESC.EXT.BIG)) {
-                this.dataSize = 2;
-                this.dataMask = 0xffff;
+                this.sizeData = 2;
+                this.maskData = 0xffff;
             } else {
-                this.dataSize = 4;
-                this.dataMask = (0xffffffff|0);
+                this.sizeData = 4;
+                this.maskData = (0xffffffff|0);
             }
-            this.addrSize = this.dataSize;
-            this.addrMask = this.dataMask;
+            this.sizeAddr = this.sizeData;
+            this.maskAddr = this.maskData;
         }
         return;
     }

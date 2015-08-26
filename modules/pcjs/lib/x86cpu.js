@@ -201,6 +201,17 @@ function X86CPU(parmsCPU)
      * so that if/when we call restore(), it will have something to fill in.
      */
     this.resetRegs();
+
+    /*
+     * Register frames have proven to be a useful tool for catching register corruption bugs (eg, LOOP instructions
+     * improperly zeroing the high bits of ECX), but they shouldn't be enabled by default, because the associated
+     * functions (pushRegFrame() and popRegFrame()) can produce false positives, and weeding those out is a nuisance.
+     *
+     * In a perfect world, every time we IRET'ed to the CS:EIP where a hardware interrupt was injected, we could
+     * assume that the current register values will ALWAYS match the original register values (ie, at the time
+     * of injection).  But we can't assume that; there's too much clever code out there.
+     */
+    // if (DEBUG) this.aRegFrames = [];
 }
 
 Component.subclass(X86CPU, CPU);
@@ -1451,10 +1462,10 @@ X86CPU.prototype.zeroSeg = function(seg)
  */
 X86CPU.prototype.setAddrSize = function(size)
 {
-    if (this.addrSize != size) {
+    if (this.sizeAddr != size) {
         this.opPrefixes |= X86.OPFLAG.ADDRSIZE;
-        this.addrSize = size;
-        this.addrMask = (size == 2? 0xffff : (0xffffffff|0));
+        this.sizeAddr = size;
+        this.maskAddr = (size == 2? 0xffff : (0xffffffff|0));
         this.updateAddrSize();
     }
 };
@@ -1463,7 +1474,7 @@ X86CPU.prototype.setAddrSize = function(size)
  * updateAddrSize()
  *
  * Select the appropriate ModRM dispatch tables, based on the current ADDRESS size (addrSize), which
- * is based foremost on segCS.addrSize, but can also be overridden by an ADDRESS size instruction prefix.
+ * is based foremost on segCS.sizeAddr, but can also be overridden by an ADDRESS size instruction prefix.
  *
  * @this {X86CPU}
  */
@@ -1478,7 +1489,7 @@ X86CPU.prototype.updateAddrSize = function()
         this.aOpModMemWord = X86ModW.aOpModMem;
         this.aOpModGrpWord = X86ModW.aOpModGrp;
     } else {
-        if (this.addrSize == 2) {
+        if (this.sizeAddr == 2) {
             this.getAddr = this.getShort;
             this.aOpModRegByte = X86ModB16.aOpModReg;
             this.aOpModMemByte = X86ModB16.aOpModMem;
@@ -1509,10 +1520,10 @@ X86CPU.prototype.updateAddrSize = function()
  */
 X86CPU.prototype.setDataSize = function(size)
 {
-    if (this.dataSize != size) {
+    if (this.sizeData != size) {
         this.opPrefixes |= X86.OPFLAG.DATASIZE;
-        this.dataSize = size;
-        this.dataMask = (size == 2? 0xffff : (0xffffffff|0));
+        this.sizeData = size;
+        this.maskData = (size == 2? 0xffff : (0xffffffff|0));
         this.updateDataSize();
     }
 };
@@ -1524,12 +1535,12 @@ X86CPU.prototype.setDataSize = function(size)
  */
 X86CPU.prototype.updateDataSize = function()
 {
-    if (this.dataSize == 2) {
-        this.dataType = X86.RESULT.WORD;
+    if (this.sizeData == 2) {
+        this.typeData = X86.RESULT.WORD;
         this.getWord = this.getShort;
         this.setWord = this.setShort;
     } else {
-        this.dataType = X86.RESULT.DWORD;
+        this.typeData = X86.RESULT.DWORD;
         this.getWord = this.getLong;
         this.setWord = this.setLong;
     }
@@ -1547,15 +1558,15 @@ X86CPU.prototype.resetSizes = function()
      * masks for isolating the (src) bits of an address and clearing the (dst) bits of an address.  Like the
      * OPERAND size properties, these are reset to their segCS counterparts at the start of every new instruction.
      */
-    this.addrSize = this.segCS.addrSize;
-    this.addrMask = this.segCS.addrMask;
+    this.sizeAddr = this.segCS.sizeAddr;
+    this.maskAddr = this.segCS.maskAddr;
 
     /*
      * It's also worth noting that instructions that implicitly use the stack also rely on STACK size,
      * which is based on the BIG bit of the last descriptor loaded into SS; use the following segSS properties:
      *
-     *      segSS.addrSize      (2 or 4)
-     *      segSS.addrMask      (0xffff or 0xffffffff)
+     *      segSS.sizeAddr      (2 or 4)
+     *      segSS.maskAddr      (0xffff or 0xffffffff)
      *
      * As there is no STACK size instruction prefix override, there's no need to propagate these segSS properties
      * to separate X86CPU properties, as we do for the OPERAND size and ADDRESS size properties.
@@ -1568,8 +1579,8 @@ X86CPU.prototype.resetSizes = function()
      * for isolating the (src) bits of an OPERAND and clearing the (dst) bits of an OPERAND.  These are reset to
      * their segCS counterparts at the start of every new instruction, but are also set here for documentation purposes.
      */
-    this.dataSize = this.segCS.dataSize;
-    this.dataMask = this.segCS.dataMask;
+    this.sizeData = this.segCS.sizeData;
+    this.maskData = this.segCS.maskData;
 
     this.updateDataSize();
 
@@ -2160,7 +2171,7 @@ X86CPU.prototype.setSS = function(sel, fInterruptable)
     if (regLSP !== X86.ADDR_INVALID) {
         this.regLSP = (regLSP + regESP)|0;
         if (this.segSS.fExpDown) {
-            this.regLSPLimit = (this.segSS.base + this.segSS.addrMask)|0;
+            this.regLSPLimit = (this.segSS.base + this.segSS.maskAddr)|0;
             this.regLSPLimitLow = (this.segSS.base + this.segSS.limit)|0;
         } else {
             this.regLSPLimit = (this.segSS.base + this.segSS.limit)|0;
@@ -2278,7 +2289,7 @@ X86CPU.prototype.getIP = function()
  */
 X86CPU.prototype.setIP = function(off)
 {
-    this.regLIP = (this.segCS.base + (off & (I386? this.dataMask : 0xffff)))|0;
+    this.regLIP = (this.segCS.base + (off & (I386? this.maskData : 0xffff)))|0;
     if (PREFETCH) this.flushPrefetch(this.regLIP);
 };
 
@@ -2316,7 +2327,7 @@ X86CPU.prototype.setCSIP = function(off, sel, fCall)
          * TODO: Should this code be factored into a setLIP() function? The other primary client would be fnINT().
          */
         if (I386) this.resetSizes();
-        this.regLIP = (base + (this.regEIP & (I386? this.dataMask : 0xffff)))|0;
+        this.regLIP = (base + (this.regEIP & (I386? this.maskData : 0xffff)))|0;
         this.regLIPLimit = (base + this.segCS.limit)|0;
         this.nCPL = this.segCS.cpl;             // cache the current CPL where it's more convenient
         if (PREFETCH) this.flushPrefetch(this.regLIP);
@@ -2379,7 +2390,7 @@ X86CPU.prototype.advanceIP = function(inc)
          * There's no such thing as a GP fault on the 8086/8088, and I'm assuming that, on newer
          * processors, when the segment limit is set to the maximum, it's OK for IP to wrap.
          */
-        if (this.model <= X86.MODEL_8088 || this.segCS.limit == this.segCS.addrMask) {
+        if (this.model <= X86.MODEL_8088 || this.segCS.limit == this.segCS.maskAddr) {
             this.setIP(this.regLIP - this.segCS.base);
         } else if (off < -1) {          // fudge factor
             X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
@@ -2414,8 +2425,8 @@ X86CPU.prototype.rewindIP = function(dec)
 X86CPU.prototype.getSP = function()
 {
     if (I386) {
-        // assert(!((this.regLSP - this.segSS.base) & ~this.segSS.addrMask));
-        return (this.regESP & ~this.segSS.addrMask) | (this.regLSP - this.segSS.base);
+        // assert(!((this.regLSP - this.segSS.base) & ~this.segSS.maskAddr));
+        return (this.regESP & ~this.segSS.maskAddr) | (this.regLSP - this.segSS.base);
     }
     return (this.regLSP - this.segSS.base)|0;
 };
@@ -2430,7 +2441,7 @@ X86CPU.prototype.setSP = function(off)
 {
     if (I386) {
         this.regESP = off;
-        this.regLSP = (this.segSS.base + (off & this.segSS.addrMask))|0;
+        this.regLSP = (this.segSS.base + (off & this.segSS.maskAddr))|0;
     } else {
         this.regLSP = (this.segSS.base + off)|0;
     }
@@ -3339,7 +3350,7 @@ X86CPU.prototype.getEAByte = function(seg, off)
  */
 X86CPU.prototype.getEAByteData = function(off)
 {
-    return this.getEAByte(this.segData, off & (I386? this.addrMask : 0xffff));
+    return this.getEAByte(this.segData, off & (I386? this.maskAddr : 0xffff));
 };
 
 /**
@@ -3351,7 +3362,7 @@ X86CPU.prototype.getEAByteData = function(off)
  */
 X86CPU.prototype.getEAByteStack = function(off)
 {
-    return this.getEAByte(this.segStack, off & (I386? this.addrMask : 0xffff));
+    return this.getEAByte(this.segStack, off & (I386? this.maskAddr : 0xffff));
 };
 
 /**
@@ -3365,7 +3376,7 @@ X86CPU.prototype.getEAByteStack = function(off)
 X86CPU.prototype.getEAWord = function(seg, off)
 {
     this.segEA = seg;
-    this.regEA = seg.checkRead(this.offEA = off, (I386? this.dataSize : 2));
+    this.regEA = seg.checkRead(this.offEA = off, (I386? this.sizeData : 2));
     if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
     var w = this.getWord(this.regEA);
     if (BACKTRACK) {
@@ -3384,7 +3395,7 @@ X86CPU.prototype.getEAWord = function(seg, off)
  */
 X86CPU.prototype.getEAWordData = function(off)
 {
-    return this.getEAWord(this.segData, off & (I386? this.addrMask : 0xffff));
+    return this.getEAWord(this.segData, off & (I386? this.maskAddr : 0xffff));
 };
 
 /**
@@ -3396,7 +3407,7 @@ X86CPU.prototype.getEAWordData = function(off)
  */
 X86CPU.prototype.getEAWordStack = function(off)
 {
-    return this.getEAWord(this.segStack, off & (I386? this.addrMask : 0xffff));
+    return this.getEAWord(this.segStack, off & (I386? this.maskAddr : 0xffff));
 };
 
 /**
@@ -3426,7 +3437,7 @@ X86CPU.prototype.modEAByte = function(seg, off)
  */
 X86CPU.prototype.modEAByteData = function(off)
 {
-    return this.modEAByte(this.segData, off & (I386? this.addrMask : 0xffff));
+    return this.modEAByte(this.segData, off & (I386? this.maskAddr : 0xffff));
 };
 
 /**
@@ -3438,7 +3449,7 @@ X86CPU.prototype.modEAByteData = function(off)
  */
 X86CPU.prototype.modEAByteStack = function(off)
 {
-    return this.modEAByte(this.segStack, off & (I386? this.addrMask : 0xffff));
+    return this.modEAByte(this.segStack, off & (I386? this.maskAddr : 0xffff));
 };
 
 /**
@@ -3452,7 +3463,7 @@ X86CPU.prototype.modEAByteStack = function(off)
 X86CPU.prototype.modEAWord = function(seg, off)
 {
     this.segEA = seg;
-    this.regEAWrite = this.regEA = seg.checkRead(this.offEA = off, (I386? this.dataSize : 2));
+    this.regEAWrite = this.regEA = seg.checkRead(this.offEA = off, (I386? this.sizeData : 2));
     if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
     var w = this.getWord(this.regEA);
     if (BACKTRACK) {
@@ -3471,7 +3482,7 @@ X86CPU.prototype.modEAWord = function(seg, off)
  */
 X86CPU.prototype.modEAWordData = function(off)
 {
-    return this.modEAWord(this.segData, off & (I386? this.addrMask : 0xffff));
+    return this.modEAWord(this.segData, off & (I386? this.maskAddr : 0xffff));
 };
 
 /**
@@ -3483,7 +3494,7 @@ X86CPU.prototype.modEAWordData = function(off)
  */
 X86CPU.prototype.modEAWordStack = function(off)
 {
-    return this.modEAWord(this.segStack, off & (I386? this.addrMask : 0xffff));
+    return this.modEAWord(this.segStack, off & (I386? this.maskAddr : 0xffff));
 };
 
 /**
@@ -3515,7 +3526,7 @@ X86CPU.prototype.setEAWord = function(w)
     if (!I386) {
         this.setShort(this.segEA.checkWrite(this.offEA, 2), w);
     } else {
-        this.setWord(this.segEA.checkWrite(this.offEA, this.dataSize), w);
+        this.setWord(this.segEA.checkWrite(this.offEA, this.sizeData), w);
     }
 };
 
@@ -3549,7 +3560,7 @@ X86CPU.prototype.getSOWord = function(seg, off)
     if (!I386) {
         return this.getShort(seg.checkRead(off, 2));
     } else {
-        return this.getWord(seg.checkRead(off, this.dataSize));
+        return this.getWord(seg.checkRead(off, this.sizeData));
     }
 };
 
@@ -3583,7 +3594,7 @@ X86CPU.prototype.setSOWord = function(seg, off, w)
     if (!I386) {
         this.setShort(seg.checkWrite(off, 2), w);
     } else {
-        this.setWord(seg.checkWrite(off, this.dataSize), w);
+        this.setWord(seg.checkWrite(off, this.sizeData), w);
     }
 };
 
@@ -3675,7 +3686,7 @@ X86CPU.prototype.getLongPrefetch = function(addr)
  */
 X86CPU.prototype.getWordPrefetch = function(addr)
 {
-    return (I386 && this.dataSize == 4? this.getLongPrefetch(addr) : this.getShortPrefetch(addr));
+    return (I386 && this.sizeData == 4? this.getLongPrefetch(addr) : this.getShortPrefetch(addr));
 };
 
 /**
@@ -3810,7 +3821,7 @@ X86CPU.prototype.getIPAddr = function()
         this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMem0);
         this.bus.updateBackTrackCode(this.regLIP + 1, this.backTrack.btiMem1);
     }
-    this.advanceIP(this.addrSize);
+    this.advanceIP(this.sizeAddr);
     return w;
 };
 
@@ -3827,7 +3838,7 @@ X86CPU.prototype.getIPWord = function()
         this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMem0);
         this.bus.updateBackTrackCode(this.regLIP + 1, this.backTrack.btiMem1);
     }
-    this.advanceIP(this.dataSize);
+    this.advanceIP(this.sizeData);
     return w;
 };
 
@@ -3869,7 +3880,7 @@ X86CPU.prototype.getSIBAddr = function(mod)
 X86CPU.prototype.popWord = function()
 {
     var w = this.getWord(this.regLSP);
-    this.regLSP = (this.regLSP + (I386? this.dataSize : 2))|0;
+    this.regLSP = (this.regLSP + (I386? this.sizeData : 2))|0;
     /*
      * Properly comparing regLSP to regLSPLimit would normally require coercing both to unsigned
      * (ie, floating-point) values.  But instead, we do a subtraction, (regLSPLimit - regLSP), and
@@ -3886,8 +3897,8 @@ X86CPU.prototype.popWord = function()
          * There's no such thing as an SS fault on the 8086/8088, and I'm assuming that, on newer
          * processors, when the stack segment limit is set to the maximum, it's OK for the stack to wrap.
          */
-        if (this.model <= X86.MODEL_8088 || !this.segSS.fExpDown && this.segSS.limit == this.segSS.addrMask || this.segSS.fExpDown && !this.segSS.limit) {
-            this.setSP((this.regLSP - this.segSS.base) & this.segSS.addrMask);
+        if (this.model <= X86.MODEL_8088 || !this.segSS.fExpDown && this.segSS.limit == this.segSS.maskAddr || this.segSS.fExpDown && !this.segSS.limit) {
+            this.setSP((this.regLSP - this.segSS.base) & this.segSS.maskAddr);
         } else if (off < -1) {          // fudge factor
             X86.fnFault.call(this, X86.EXCEPTION.SS_FAULT, 0);
         }
@@ -3908,12 +3919,12 @@ X86CPU.prototype.pushWord = function(w)
      * thus sign-extending the byte as appropriate.  And since sign-extension necessarily affects the entire 32-bit
      * value, this assertion could fail when dataMask is 16 bits.
      *
-     *      this.assert((w & this.dataMask) == w);
+     *      this.assert((w & this.maskData) == w);
      *
      * setWord() calls setShort() or setLong() as appropriate, and setShort() truncates incoming values, so the fact
      * that any incoming signed values will not be truncated to 16 bits should not be a concern.
      */
-    this.regLSP = (this.regLSP - (I386? this.dataSize : 2))|0;
+    this.regLSP = (this.regLSP - (I386? this.sizeData : 2))|0;
     /*
      * Properly comparing regLSP to regLSPLimitLow would normally require coercing both to unsigned
      * (ie, floating-point) values.  But instead, we do a subtraction, (regLSP - regLSPLimitLow), and
@@ -3925,8 +3936,8 @@ X86CPU.prototype.pushWord = function(w)
          * There's no such thing as an SS fault on the 8086/8088, and I'm assuming that, on newer
          * processors, when the stack segment limit is set to the maximum, it's OK for the stack to wrap.
          */
-        if (this.model <= X86.MODEL_8088 || !this.segSS.fExpDown && this.segSS.limit == this.segSS.addrMask || this.segSS.fExpDown && !this.segSS.limit) {
-            this.setSP((this.regLSP - this.segSS.base) & this.segSS.addrMask);
+        if (this.model <= X86.MODEL_8088 || !this.segSS.fExpDown && this.segSS.limit == this.segSS.maskAddr || this.segSS.fExpDown && !this.segSS.limit) {
+            this.setSP((this.regLSP - this.segSS.base) & this.segSS.maskAddr);
         } else {
             X86.fnFault.call(this, X86.EXCEPTION.SS_FAULT, 0);
         }
@@ -3950,6 +3961,71 @@ X86CPU.prototype.pushWord = function(w)
         } else {
             this.intFlags &= ~X86.INTFLAG.DMA;
         }
+    }
+};
+ */
+
+
+/**
+ * newRegFrame()
+ *
+ * @this {X86CPU}
+ * @return {Array}
+ *
+X86CPU.prototype.newRegFrame = function()
+{
+    return [this.getIP(), this.segCS.sel, this.segDS.sel, this.segES.sel, this.segSS.sel,
+            this.regEAX, this.regEBX, this.regECX, this.regEDX, this.regESI, this.regEDI, this.regEBP, this.getSP(),
+            this.dbg? this.dbg.cOpcodes : 0];
+};
+ */
+
+/**
+ * pushRegFrame()
+ *
+ * Call this immediately before injecting a hardware interrupt.  Subsequent IRET instructions will check the most
+ * recent frame to verify that all registers have been restored to their original values.
+ *
+ * @this {X86CPU}
+ *
+X86CPU.prototype.pushRegFrame = function()
+{
+    this.aRegFrames.push(this.newRegFrame());
+    if (this.aRegFrames.length > 10) {
+        this.println("frame overflow");
+        this.stopCPU();
+    }
+};
+ */
+
+/**
+ * popRegFrame()
+ *
+ * Call this immediately after an IRET.  If EIP and CS match the most recent frame, check the rest of the registers.
+ *
+ * @this {X86CPU}
+ *
+X86CPU.prototype.popRegFrame = function()
+{
+    if (this.aRegFrames.length) {
+        var a = this.aRegFrames[this.aRegFrames.length-1];
+        if (a[1] !== this.segCS.sel || a[0] !== this.getIP()) {
+            return;
+        }
+        var fMatch = true;
+        var b = this.newRegFrame(), i;
+        for (i = 2; i < a.length-2; i++) {
+            if (a[i] !== b[i]) {
+                this.println("frame mismatch at " + i + ": original=" + str.toHex(a[i]) + ", current=" + str.toHex(b[i]));
+                fMatch = false;
+                this.stopCPU();
+            }
+        }
+        if (!fMatch) {
+            i++;
+            this.println("opcode delta: " + (b[i] - a[i]));
+        }
+        this.aRegFrames.pop();
     }
 };
  */
@@ -4023,6 +4099,7 @@ X86CPU.prototype.checkINTR = function()
                         this.intFlags &= ~X86.INTFLAG.INTR;
                         if (nIDT >= 0) {
                             this.intFlags &= ~X86.INTFLAG.HALT;
+                            // if (DEBUG) this.pushRegFrame();  // the corresponding popRegFrame() is in opIRET()
                             X86.fnINT.call(this, nIDT, null, 11);
                             return true;
                         }
@@ -4383,7 +4460,6 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
                 this.fillPrefetch(nSpareCycles >> 2);   // for every 4 spare cycles, fetch 1 instruction byte
             }
         }
-
         if (DEBUG) {
             //
             // Make sure that every instruction is assessing a cycle cost, and that the cost is a net positive.
