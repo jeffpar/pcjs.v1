@@ -102,8 +102,18 @@ if (fLogging) {
     HTMLOut.setOptions({'logfile': streamLog});
     app.use(express.logger({ format: 'default', stream: streamLog }));
 }
-app.use(express.json({limit: '4mb'}));
-app.use(express.urlencoded({limit: '4mb'}));
+
+/*
+ * To be able to save states for machines with large states, I have to rely on server-side
+ * state API support (see processUserAPI() in httpapi.js in the HTMLOut module), because there
+ * don't seem to be any good client-side solutions (localStorage is notoriously limited, and
+ * "data:" URLs crash the browser if they're too large).  However, I don't want to jack up the
+ * server upload limits too high on a "production" server, so I set a higher limit only for
+ * "debug" servers).
+ */
+app.use(express.json({limit: fDebug? '128mb' : '4mb'}));
+app.use(express.urlencoded({limit: fDebug? '128mb' : '4mb'}));
+
 app.use(HTMLOut.filter);
 app.use(express.compress());
 

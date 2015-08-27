@@ -1605,6 +1605,9 @@ X86CPU.prototype.getChecksum = function()
  *
  * Add an software interrupt notification handler to the CPU's list of such handlers.
  *
+ * TODO: Consider adding removeIntNotify().  Example use case: if the Debugger's intWindowsDebugger() function
+ * detects that an INT 0x41 client is loaded, it would be quite happy to uninstall itself.
+ *
  * @this {X86CPU}
  * @param {number} nInt
  * @param {Component} component
@@ -1645,10 +1648,12 @@ X86CPU.prototype.checkIntNotify = function(nInt)
      * The enabling of INT messages is one of the criteria that's also included in the Debugger's checksEnabled()
      * function, and therefore included in fDebugCheck, so for maximum speed, we check fDebugCheck first.
      *
-     * NOTE: By wrapping this in MAXDEBUG, we're effectively eliminating the need for any checkIntReturn() calls;
-     * onIntReturn() generates a lot of noise, via dbg.messageIntReturn(), and because there's no way to be be sure
-     * we'll catch the return (or for some interrupts, *whether* they will return), it's safer to disable this
-     * feature unless you really want it.
+     * NOTE: We've added MAXDEBUG to the test below, because onIntReturn() generates a lot of noise, via
+     * dbg.messageIntReturn(), and because there's no way to be sure we'll catch the return (or for some interrupts,
+     * *whether* they will return), so it's safer to disable this feature unless you really want it.
+     *
+     * For most purposes, just having dbg.messageInt(), and the Debugger's ability to selectively turn categories
+     * of messages on and off, is good enough.
      */
     if (DEBUGGER && this.aFlags.fDebugCheck) {
         if (this.messageEnabled(Messages.INT) && this.dbg.messageInt(nInt, this.regLIP) && MAXDEBUG) {

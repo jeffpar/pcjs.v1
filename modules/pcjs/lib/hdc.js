@@ -598,7 +598,7 @@ HDC.prototype.powerUp = function(data, fRepower)
  * powerDown(fSave, fShutdown)
  *
  * @this {HDC}
- * @param {boolean} fSave
+ * @param {boolean} [fSave]
  * @param {boolean} [fShutdown]
  * @return {Object|boolean}
  */

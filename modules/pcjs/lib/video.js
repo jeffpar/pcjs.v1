@@ -3339,7 +3339,7 @@ Video.prototype.powerUp = function(data, fRepower)
  * buffer contents, and blocking all further updates to the display.
  *
  * @this {Video}
- * @param {boolean} fSave
+ * @param {boolean} [fSave]
  * @param {boolean} [fShutdown]
  * @return {Object|boolean} component state if fSave; otherwise, true if successful, false if failure
  */

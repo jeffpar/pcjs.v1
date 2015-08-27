@@ -868,7 +868,7 @@ Disk.prototype.donePowerUp = function(drive, disk, sDiskName, sDiskPath)
  * exist, and even after it was created, it didn't originally receive powerDown() notifications.
  *
  * @this {Disk}
- * @param {boolean} fSave
+ * @param {boolean} [fSave]
  * @param {boolean} [fShutdown]
  * @return {Object|boolean}
  */

@@ -1247,8 +1247,132 @@ if (DEBUGGER) {
         this.messageDump(Messages.TSS,  function onDumpTSS(s)  { dbg.dumpTSS(s); });
         this.messageDump(Messages.DOS,  function onDumpDOS(s)  { dbg.dumpDOS(s); });
 
+        this.fWinDbg = this.dbgAddrWinDbg = null;
+        this.cpu.addIntNotify(Interrupts.WINDBG.VECTOR, this, this.intWindowsDebugger);
+
+        if (Interrupts.WINDBGRM.ENABLED) {
+            this.fWinDbgRM = null;
+            this.cpu.addIntNotify(Interrupts.WINDBGRM.VECTOR, this, this.intWindowsDebuggerRM);
+        }
+
         this.setReady();
     };
+
+    /**
+     * intWindowsDebugger()
+     *
+     * @this {Debugger}
+     * @param {number} addr
+     * @return {boolean} true to proceed with the INT 0x41 software interrupt, false to skip
+     */
+    Debugger.prototype.intWindowsDebugger = function(addr)
+    {
+        if (this.fWinDbg === false) return true;
+
+        var seg, limit;
+        var cpu = this.cpu;
+        var AX = cpu.regEAX & 0xffff;
+        var BX = cpu.regEBX & 0xffff;
+        var CX = cpu.regECX & 0xffff;
+        var DX = cpu.regEDX & 0xffff;
+        var SI = cpu.regESI & 0xffff;
+        var DI = cpu.regEDI & 0xffff;
+        var ES = cpu.segES.sel;
+
+        if (!this.fWinDbg) {
+            if (AX == Interrupts.WINDBG.IS_LOADED) {
+                /*
+                 * We're only going to respond to this function if no one else did, in which case,
+                 * we'll set fWinDbg to true and handle additional notifications.
+                 */
+                cpu.addIntReturn(addr, function(dbg) {
+                    return function onInt41Return(nLevel) {
+                        if ((cpu.regEAX & 0xffff) != Interrupts.WINDBG.LOADED) {
+                            cpu.regEAX = (cpu.regEAX & ~0xffff) | Interrupts.WINDBG.LOADED;
+                            dbg.println("INT 0x41 processing enabled");
+                            dbg.dbgAddrWinDbg = dbg.newAddr();
+                            dbg.fWinDbg = true;
+                        } else {
+                            dbg.println("INT 0x41 processing disabled");
+                            dbg.fWinDbg = false;
+                        }
+                    };
+                }(this));
+            }
+            return true;
+        }
+
+        switch(AX) {
+        case Interrupts.WINDBG.IS_LOADED:
+            cpu.regEAX = (cpu.regEAX & ~0xffff) | Interrupts.WINDBG.LOADED;
+            break;
+
+        case Interrupts.WINDBG.LOAD_SEG:
+            /*
+             * The output should completely mimic WDEB386....
+             */
+            limit = (seg = this.getSegment(CX))? seg.limit : 0;
+            this.println(this.getSZ(this.setAddr(this.dbgAddrWinDbg, DI, ES)) + "!undefined " + ((SI & 0x1)? "data" : "code") + '(' + str.toHex(BX+1, 4) + ")=#" + str.toHex(CX, 4) + " len " + str.toHex(limit+1));
+            break;
+
+        default:
+            this.println("INT 0x41: " + str.toHexWord(AX));
+            break;
+        }
+
+        return true;
+    };
+
+    if (Interrupts.WINDBGRM.ENABLED) {
+        /**
+         * intWindowsDebuggerRM()
+         *
+         * @this {Debugger}
+         * @param {number} addr
+         * @return {boolean} true to proceed with the INT 0x68 software interrupt, false to skip
+         */
+        Debugger.prototype.intWindowsDebuggerRM = function(addr)
+        {
+            if (this.fWinDbgRM === false) return true;
+
+            var cpu = this.cpu;
+            var AH = this.cpu.regEAX & 0xff;
+
+            if (!this.fWinDbgRM) {
+                if (AH == Interrupts.WINDBGRM.IS_LOADED) {
+                    /*
+                     * We're only going to respond to this function if no one else did, in which case,
+                     * we'll set fWinDbgRM to true and handle additional notifications.
+                     */
+                    cpu.addIntReturn(addr, function(dbg) {
+                        return function onInt68Return(nLevel) {
+                            if ((cpu.regEAX & 0xffff) != Interrupts.WINDBGRM.LOADED) {
+                                cpu.regEAX = (cpu.regEAX & ~0xffff) | Interrupts.WINDBGRM.LOADED;
+                                dbg.println("INT 0x68 processing enabled");
+                                dbg.fWinDbgRM = true;
+                            } else {
+                                dbg.println("INT 0x68 processing disabled");
+                                dbg.fWinDbgRM = false;
+                            }
+                        };
+                    }(this));
+                }
+                return true;
+            }
+
+            switch(AH) {
+            case Interrupts.WINDBGRM.IS_LOADED:
+                cpu.regEAX = (cpu.regEAX & ~0xffff) | Interrupts.WINDBGRM.LOADED;
+                break;
+
+            default:
+                this.println("INT 0x68: " + str.toHexByte(AH));
+                break;
+            }
+
+            return true;
+        };
+    }
 
     /**
      * setBinding(sHTMLType, sBinding, control)
@@ -1575,10 +1699,32 @@ if (DEBUGGER) {
      */
     Debugger.prototype.newAddr = function(off, sel, addr, fProt, fData32, fAddr32)
     {
-        if (fProt === undefined) fProt = this.getProtMode();
-        if (fData32 === undefined) fData32 = (this.cpu && this.cpu.segCS.sizeData == 4);
-        if (fAddr32 === undefined) fAddr32 = (this.cpu && this.cpu.segCS.sizeAddr == 4);
-        return {off: off || 0, sel: sel, addr: addr, fProt: fProt || false, fTempBreak: false, fData32: fData32 || false, fAddr32: fAddr32 || false};
+        return this.setAddr({}, off, sel, addr, fProt, fData32, fAddr32);
+    };
+
+    /**
+     * setAddr(dbgAddr, off, sel, addr, fProt, fData32, fAddr32)
+     *
+     * @this {Debugger}
+     * @param {DbgAddr} dbgAddr
+     * @param {number|null|undefined} [off] (default is zero)
+     * @param {number|null|undefined} [sel] (default is undefined)
+     * @param {number|null|undefined} [addr] (default is undefined)
+     * @param {boolean} [fProt] (default is the current CPU mode)
+     * @param {boolean} [fData32] (default is the current CPU operand size)
+     * @param {boolean} [fAddr32] (default is the current CPU address size)
+     * @return {DbgAddr}
+     */
+    Debugger.prototype.setAddr = function(dbgAddr, off, sel, addr, fProt, fData32, fAddr32)
+    {
+        dbgAddr.off = off || 0;
+        dbgAddr.sel = sel;
+        dbgAddr.addr = addr;
+        dbgAddr.fProt = (fProt == null)? this.getProtMode() : fProt;
+        dbgAddr.fData32 = (fData32 == null)? (this.cpu && this.cpu.segCS.sizeData == 4) : fData32;
+        dbgAddr.fAddr32 = (fAddr32 == null)? (this.cpu && this.cpu.segCS.sizeAddr == 4) : fAddr32;
+        dbgAddr.fTempBreak = false;
+        return dbgAddr;
     };
 
     /**
@@ -1694,8 +1840,8 @@ if (DEBUGGER) {
         cchMax = cchMax || 256;
         while (s.length < cchMax) {
             var b = this.getByte(dbgAddr, 1);
-            if (!b || b == 0x24) break;
-            s += (b >= 32 && b < 128? String.fromCharCode(b) : '.');
+            if (!b || b == 0x24 || b >= 127) break;
+            s += (b >= 32? String.fromCharCode(b) : '.');
         }
         return s;
     };
@@ -2853,7 +2999,7 @@ if (DEBUGGER) {
      * powerDown(fSave, fShutdown)
      *
      * @this {Debugger}
-     * @param {boolean} fSave
+     * @param {boolean} [fSave]
      * @param {boolean} [fShutdown]
      * @return {Object|boolean}
      */
@@ -3704,8 +3850,8 @@ if (DEBUGGER) {
             sOperands += (sOperand || "???");
         }
 
-        var sLine = this.hexAddr(dbgAddrIns) + ' ';
         var sBytes = "";
+        var sLine = this.hexAddr(dbgAddrIns) + ' ';
         if (dbgAddrIns.addr != X86.ADDR_INVALID && dbgAddr.addr != X86.ADDR_INVALID) {
             do {
                 sBytes += str.toHex(this.getByte(dbgAddrIns, 1), 2);
@@ -5078,7 +5224,23 @@ if (DEBUGGER) {
         }
 
         if (sAddr == "state") {
-            this.println(this.cmp.powerOff(true));
+            var s = this.cmp.powerOff(true);
+            if (sLen == "console") {
+                /*
+                 * Console buffers are notoriously small, and even the following code, which breaks the
+                 * data into parts (eg, "d state console 1", "d state console 2", etc) just isn't that helpful.
+                 *
+                 *      var nPart = +sBytes;
+                 *      if (nPart) s = s.substr(1000000 * (nPart-1), 1000000);
+                 *
+                 * So, the best way to capture a large machine state is to run your own local server and use
+                 * server-side storage.  Take a look at the "Save" binding in computer.js, which binds an HTML
+                 * control to the computer.powerOff() and computer.saveServerState() functions.
+                 */
+                console.log(s);
+            } else {
+                this.println(s);
+            }
             return;
         }
 
@@ -5803,12 +5965,13 @@ if (DEBUGGER) {
     };
 
     /**
-     * doRegisters(asArgs)
+     * doRegisters(asArgs, fInstruction)
      *
      * @this {Debugger}
      * @param {Array.<string>} [asArgs]
+     * @param {boolean} [fInstruction] (default is true)
      */
-    Debugger.prototype.doRegisters = function(asArgs)
+    Debugger.prototype.doRegisters = function(asArgs, fInstruction)
     {
         if (asArgs && asArgs[1] == '?') {
             this.println("register commands:");
@@ -5817,13 +5980,16 @@ if (DEBUGGER) {
             this.println("\trx [#]\tset flag or register x to [#]");
             return;
         }
-        var fIns = true, fProt;
+
+        var fProt;
+        if (fInstruction == null) fInstruction = true;
+
         if (asArgs != null && asArgs.length > 1) {
             var sReg = asArgs[1];
             if (sReg == 'p') {
                 fProt = (this.cpu.model >= X86.MODEL_80286);
             } else {
-             // fIns = false;
+             // fInstruction = false;
                 var sValue = null;
                 var i = sReg.indexOf('=');
                 if (i > 0) {
@@ -5909,13 +6075,13 @@ if (DEBUGGER) {
                         this.cpu.setSS(w);
                         break;
                     case "CS":
-                     // fIns = true;
+                     // fInstruction = true;
                         this.cpu.setCS(w);
                         this.dbgAddrNextCode = this.newAddr(this.cpu.getIP(), this.cpu.getCS());
                         break;
                     case "IP":
                     case "EIP":
-                     // fIns = true;
+                     // fInstruction = true;
                         this.cpu.setIP(w);
                         this.dbgAddrNextCode = this.newAddr(this.cpu.getIP(), this.cpu.getCS());
                         break;
@@ -6052,7 +6218,7 @@ if (DEBUGGER) {
 
         this.println(this.getRegDump(fProt));
 
-        if (fIns) {
+        if (fInstruction) {
             this.dbgAddrNextCode = this.newAddr(this.cpu.getIP(), this.cpu.getCS());
             this.doUnassemble(this.hexAddr(this.dbgAddrNextCode));
         }

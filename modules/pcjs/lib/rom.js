@@ -202,7 +202,7 @@ ROM.prototype.powerUp = function(data, fRepower)
  * created, above and beyond those symbols we automatically loaded, if any, along with the ROM).
  *
  * @this {ROM}
- * @param {boolean} fSave
+ * @param {boolean} [fSave]
  * @param {boolean} [fShutdown]
  * @return {Object|boolean} component state if fSave; otherwise, true if successful, false if failure
  */

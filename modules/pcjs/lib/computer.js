@@ -766,9 +766,9 @@ Computer.prototype.powerReport = function(stateComputer)
  * which doesn't seem like a huge problem.
  *
  * @this {Computer}
- * @param {boolean} fSave
+ * @param {boolean} [fSave] is true to request a saved state
  * @param {boolean} [fShutdown] is true if the machine is being shut down
- * @return {string|null} string representing the captured state (or null if error)
+ * @return {string|null} string representing the saved state (or null if error)
  */
 Computer.prototype.powerOff = function(fSave, fShutdown)
 {
@@ -966,7 +966,14 @@ Computer.prototype.setBinding = function(sHTMLType, sBinding, control)
             control.onclick = function onClickSave() {
                 var sUserID = computer.queryUserID(true);
                 if (sUserID) {
-                    var fSave = !!(computer.resume && !computer.sResumePath);
+                    /*
+                     * I modified the test to include a check for sStatePath so that I could save new states
+                     * for machines with existing states; otherwise, I'd have no (easy) way of capturing and
+                     * updating their state.  Making the machine (even temporarily) resumable would have been
+                     * one work-around, but it's not appropriate for some machines, as their state is simply
+                     * too large (for localStorage anyway, which is the default storage solution).
+                     */
+                    var fSave = !!(computer.resume && !computer.sResumePath || computer.sStatePath);
                     var sState = computer.powerOff(fSave);
                     if (fSave) {
                         computer.saveServerState(sUserID, sState);
@@ -974,6 +981,19 @@ Computer.prototype.setBinding = function(sHTMLType, sBinding, control)
                         computer.notice("Resume disabled, machine state not saved");
                     }
                 }
+                /*
+                 * This seemed like a handy alternative, but it turned out to be a no-go, at least for large states:
+                 *
+                 *      var sState = computer.powerOff(true);
+                 *      if (sState) {
+                 *          sState = "data:text/json;charset=utf-8," + encodeURIComponent(sState);
+                 *          window.open(sState);
+                 *      }
+                 *
+                 * Perhaps if I embedded the data in a link on the current page instead; eg:
+                 *
+                 *      $('<a href="' + sState + '" download="state.json">Download</a>').appendTo('#container');
+                 */
             };
             return true;
         case "reset":

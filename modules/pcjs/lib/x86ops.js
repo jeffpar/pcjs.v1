@@ -3486,6 +3486,10 @@ X86.opINTn = function INTn()
         return;
     }
     var nInt = this.getIPByte();
+    /*
+     * checkIntNotify() checks for any notification handlers registered via addIntNotify(), calls them,
+     * and returns false ONLY if a notification handler returned false (ie, requesting the interrupt be skipped).
+     */
     if (this.checkIntNotify(nInt)) {
         X86.fnINT.call(this, nInt, null, 0);
         return;

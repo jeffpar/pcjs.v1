@@ -1325,7 +1325,7 @@ X86.fnIRET = function IRET()
 
         if (this.setCSIP(newIP, newCS, false) != null) {
             this.setPS(newPS, cpl);
-            if (MAXDEBUG && this.cIntReturn) this.checkIntReturn(this.regLIP);
+            if (this.cIntReturn) this.checkIntReturn(this.regLIP);
         }
     }
     this.opLSP = X86.ADDR_INVALID;
@@ -2280,7 +2280,7 @@ X86.fnRETF = function RETF(n)
             this.zeroSeg(this.segGS);
         }
     }
-    if (MAXDEBUG && n == 2 && this.cIntReturn) this.checkIntReturn(this.regLIP);
+    if (n == 2 && this.cIntReturn) this.checkIntReturn(this.regLIP);
     this.opLSP = X86.ADDR_INVALID;
 };
 
@@ -3376,6 +3376,7 @@ X86.fnVERR = function VERR(dst, src)
         }
     }
     this.clearZF();
+    if (this.sizeData > 2 || this.sizeAddr > 2) this.stopCPU();
     return dst;
 };
 
@@ -3413,6 +3414,7 @@ X86.fnVERW = function VERW(dst, src)
         }
     }
     this.clearZF();
+    if (this.sizeData > 2 || this.sizeAddr > 2) this.stopCPU();
     return dst;
 };
 

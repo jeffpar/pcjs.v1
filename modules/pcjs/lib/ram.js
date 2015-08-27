@@ -119,7 +119,7 @@ RAM.prototype.powerUp = function(data, fRepower)
  * powerDown(fSave, fShutdown)
  *
  * @this {RAM}
- * @param {boolean} fSave
+ * @param {boolean} [fSave]
  * @param {boolean} [fShutdown]
  * @return {Object|boolean} component state if fSave; otherwise, true if successful, false if failure
  */

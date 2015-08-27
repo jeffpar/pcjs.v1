@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.19.2/machine.xsl"?>
 <machine id="deskpro386" class="pc" border="1" pos="center" background="#FAEBD7">
-	<computer id="deskpro386-vga-4096k" name="Compaq DeskPro 386" buswidth="32" state="/devices/pc/machine/compaq/deskpro386/vga/4096kb/state.json"/>
+	<computer id="deskpro386-vga-4096k" name="Compaq DeskPro 386" buswidth="32"/>
 	<cpu id="cpu386" model="80386" autostart="false"/>
 	<ram id="ramLow" addr="0x00000" test="false" size="0xa0000" comment="ROM BIOS memory test has been disabled"/>
 	<ram id="ramCPQ" addr="0xfa0000" size="0x60000" comment="Compaq memory at 0xFA0000"/>
@@ -10,7 +10,7 @@
 	<rom id="romBIOS" addr="0xf8000" size="0x8000" alias="[0xf0000,0xffff0000,0xffff8000]" file="/devices/pc/bios/compaq/deskpro386/1988-01-28/1988-01-28.json"/>
 	<video ref="/devices/pc/video/ibm/vga/ibm-vga-lockfs.xml"/>
 	<keyboard id="keyboard"/>
-	<fdc ref="/disks/pc/library.xml" automount='{B: {name: "Win95 Build 499 (Disk 1)", path: "/disks/pc/windows/win95/build499/WIN95-DISK01.json"}}'/>
+	<fdc ref="/disks/pc/library.xml" automount='{B: {name: "Windows 95 (Disk 1)", path: "/disks/pc/windows/win95/4.00.950/WIN95-DISK01.json"}}'/>
 	<debugger id="debugger" messages="" commands=''/>
 	<panel ref="/devices/pc/panel/wide386.xml"/>
 	<hdc id="hdcAT" type="at" drives='[{name:"68Mb Hard Disk",type:4,path:"http://static.pcjs.org/devices/pc/machine/compaq/deskpro386/vga/4096kb/WDEB386-68Mb.json"}]'/>

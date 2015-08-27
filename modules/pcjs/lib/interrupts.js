@@ -59,7 +59,19 @@ var Interrupts = {
     DOS_IDLE:   0x28,
     DOS_NETBIOS:0x2A,
     MOUSE:      0x33,
-    FUNCS:      {}
+    WINDBG:     {                   // Windows Debugger (eg, WDEB386) protected-mode interface
+        VECTOR:     0x41,
+        IS_LOADED:  0x004F,         // AX command
+        LOADED:     0xF386,         // returned in AX if Windows Debugger loaded
+        LOAD_SEG:   0x0050          // SI==0 if code, 1 if data; BX==segnum-1; CX==selector; DX==data instance; ES:[E]DI->module name
+    },
+    WINDBGRM:     {                 // Windows Debugger (eg, WDEB386) real-mode interface
+        VECTOR:     0x68,
+        IS_LOADED:  0x43,           // AH command
+        LOADED:     0xF386,         // returned in AX if Windows Debugger loaded
+        ENABLED:    false           // support for WINDBGRM interrupts is NOT enabled by default
+    },
+    FUNCS:      {}                  // filled in only if DEBUGGER is true
 };
 
 if (DEBUGGER) {
@@ -87,7 +99,7 @@ if (DEBUGGER) {
         0x16: "get drive %DL change line status",
         0x17: "set drive %DL DASD type",
         0x18: "set drive %DL media type"
-    },
+    };
     Interrupts.FUNCS[Interrupts.CASSETTE] = {
         0x80: "open device",
         0x81: "close device",
@@ -196,6 +208,9 @@ if (DEBUGGER) {
         0x60: "get fully-qualified filename from $%DS:%SI",                     // DOS 3.00+ (undocumented)
         0x63: "get lead byte table (%AL)",                                      // DOS 2.25 and 3.20+
         0x6C: "extended open file $%DS:%SI"                                     // DOS 4.00+
+    };
+    Interrupts.FUNCS[Interrupts.WINDBG.VECTOR] = {
+        0x004F: "check debugger loaded"         // WINDBG.IS_LOADED returns WINDBG.LOADED (0xF386) if debugger loaded
     };
 }
 
