@@ -59,13 +59,13 @@ var Interrupts = {
     DOS_IDLE:   0x28,
     DOS_NETBIOS:0x2A,
     MOUSE:      0x33,
-    WINDBG:     {                   // Windows Debugger (eg, WDEB386) protected-mode interface
+    WINDBG:     {                   // Windows Debugger protected-mode interface
         VECTOR:     0x41,
         IS_LOADED:  0x004F,         // AX command
         LOADED:     0xF386,         // returned in AX if Windows Debugger loaded
-        LOAD_SEG:   0x0050          // SI==0 if code, 1 if data; BX==segnum-1; CX==selector; DX==data instance; ES:[E]DI->module name
+        LOAD_SEG:   0x0050          // SI==0 if code, 1 if data; BX==segnum-1; CX==selector; ES:[E]DI->module name
     },
-    WINDBGRM:     {                 // Windows Debugger (eg, WDEB386) real-mode interface
+    WINDBGRM:     {                 // Windows Debugger real-mode interface
         VECTOR:     0x68,
         IS_LOADED:  0x43,           // AH command
         LOADED:     0xF386,         // returned in AX if Windows Debugger loaded

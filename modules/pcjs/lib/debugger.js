@@ -1261,6 +1261,8 @@ if (DEBUGGER) {
     /**
      * intWindowsDebugger()
      *
+     * This intercepts calls to the Windows Debugger protected-mode interface (INT 0x41).
+     *
      * @this {Debugger}
      * @param {number} addr
      * @return {boolean} true to proceed with the INT 0x41 software interrupt, false to skip
@@ -1309,14 +1311,14 @@ if (DEBUGGER) {
 
         case Interrupts.WINDBG.LOAD_SEG:
             /*
-             * The output should completely mimic WDEB386....
+             * The following output should completely mimic WDEB386....
              */
             limit = (seg = this.getSegment(CX))? seg.limit : 0;
             this.println(this.getSZ(this.setAddr(this.dbgAddrWinDbg, DI, ES)) + "!undefined " + ((SI & 0x1)? "data" : "code") + '(' + str.toHex(BX+1, 4) + ")=#" + str.toHex(CX, 4) + " len " + str.toHex(limit+1));
             break;
 
         default:
-            this.println("INT 0x41: " + str.toHexWord(AX));
+            // this.println("INT 0x41: " + str.toHexWord(AX));
             break;
         }
 
@@ -1326,6 +1328,8 @@ if (DEBUGGER) {
     if (Interrupts.WINDBGRM.ENABLED) {
         /**
          * intWindowsDebuggerRM()
+         *
+         * This intercepts calls to the Windows Debugger real-mode interface (INT 0x68).
          *
          * @this {Debugger}
          * @param {number} addr
@@ -1498,7 +1502,7 @@ if (DEBUGGER) {
      * getSegment(sel, fProt)
      *
      * If the selector matches that of any of the CPU segment registers, then return the CPU's segment
-     * register, instead of creating our own dummy segment register.  This makes it possible for us to
+     * register, instead of using our own segDebugger segment register.  This makes it possible for us to
      * see what the CPU is seeing at certain critical junctures, such as after an LMSW instruction has
      * switched the processor from real to protected mode.  Actually loading the selector from the GDT/LDT
      * should be done only as a last resort.
@@ -1545,7 +1549,7 @@ if (DEBUGGER) {
      * @this {Debugger}
      * @param {DbgAddr|null|undefined} dbgAddr
      * @param {boolean} [fWrite]
-     * @param {number} [nb] is number of bytes to check (1, 2 or 4); default is 1
+     * @param {number} [nb] number of bytes to check (1, 2 or 4); default is 1
      * @return {number} is the corresponding linear address, or X86.ADDR_INVALID
      */
     Debugger.prototype.getAddr = function(dbgAddr, fWrite, nb)
@@ -1688,6 +1692,8 @@ if (DEBUGGER) {
     /**
      * newAddr(off, sel, addr, fProt, fData32, fAddr32)
      *
+     * Returns a NEW DbgAddr object, initialized with specified values and/or defaults.
+     *
      * @this {Debugger}
      * @param {number|null|undefined} [off] (default is zero)
      * @param {number|null|undefined} [sel] (default is undefined)
@@ -1705,6 +1711,8 @@ if (DEBUGGER) {
     /**
      * setAddr(dbgAddr, off, sel, addr, fProt, fData32, fAddr32)
      *
+     * Updates an EXISTING DbgAddr object, initialized with specified values and/or defaults.
+     *
      * @this {Debugger}
      * @param {DbgAddr} dbgAddr
      * @param {number|null|undefined} [off] (default is zero)
@@ -1720,15 +1728,17 @@ if (DEBUGGER) {
         dbgAddr.off = off || 0;
         dbgAddr.sel = sel;
         dbgAddr.addr = addr;
-        dbgAddr.fProt = (fProt == null)? this.getProtMode() : fProt;
-        dbgAddr.fData32 = (fData32 == null)? (this.cpu && this.cpu.segCS.sizeData == 4) : fData32;
-        dbgAddr.fAddr32 = (fAddr32 == null)? (this.cpu && this.cpu.segCS.sizeAddr == 4) : fAddr32;
+        dbgAddr.fProt = (fProt != null)? fProt : this.getProtMode();
+        dbgAddr.fData32 = (fData32 != null)? fData32 : (this.cpu && this.cpu.segCS.sizeData == 4);
+        dbgAddr.fAddr32 = (fAddr32 != null)? fAddr32 : (this.cpu && this.cpu.segCS.sizeAddr == 4);
         dbgAddr.fTempBreak = false;
         return dbgAddr;
     };
 
     /**
      * packAddr(dbgAddr)
+     *
+     * Packs a DbgAddr object into an Array suitable for saving in a machine state object.
      *
      * @this {Debugger}
      * @param {DbgAddr} dbgAddr
@@ -1742,6 +1752,8 @@ if (DEBUGGER) {
     /**
      * unpackAddr(aAddr)
      *
+     * Unpacks a DbgAddr object from an Array created by packAddr() and restored from a saved machine state.
+     *
      * @this {Debugger}
      * @param {Array} aAddr
      * @return {DbgAddr}
@@ -1753,6 +1765,8 @@ if (DEBUGGER) {
 
     /**
      * checkLimit(dbgAddr)
+     *
+     * Used by incAddr() and parseAddr() to ensure that the (updated) dbgAddr offset is within segment bounds.
      *
      * @this {Debugger}
      * @param {DbgAddr} dbgAddr
@@ -1851,7 +1865,7 @@ if (DEBUGGER) {
      *
      * Dumps DOS MCBs (Memory Control Blocks).
      *
-     * TODO: Add some code to detect the running version of DOS (if any) and locate the first MCB automatically.
+     * TODO: Add some code to detect the current version of DOS (if any) and locate the first MCB automatically.
      *
      * @this {Debugger}
      * @param {string} [sMCB]
@@ -1876,60 +1890,6 @@ if (DEBUGGER) {
             this.println(this.hexOffset(0, mcb) + ": '" + String.fromCharCode(bSig) + "' PID=" + str.toHexWord(wPID) + " LEN=" + str.toHexWord(wParas) + ' "' + this.getSZ(dbgAddr, 8) + '"');
             mcb += 1 + wParas;
         }
-    };
-
-    Debugger.TSS286 = {
-        "PREV_TSS":     0x00,
-        "CPL0_SP":      0x02,
-        "CPL0_SS":      0x04,
-        "CPL1_SP":      0x06,
-        "CPL1_SS":      0x08,
-        "CPL2_SP":      0x0a,
-        "CPL2_SS":      0x0c,
-        "TASK_IP":      0x0e,
-        "TASK_PS":      0x10,
-        "TASK_AX":      0x12,
-        "TASK_CX":      0x14,
-        "TASK_DX":      0x16,
-        "TASK_BX":      0x18,
-        "TASK_SP":      0x1a,
-        "TASK_BP":      0x1c,
-        "TASK_SI":      0x1e,
-        "TASK_DI":      0x20,
-        "TASK_ES":      0x22,
-        "TASK_CS":      0x24,
-        "TASK_SS":      0x26,
-        "TASK_DS":      0x28,
-        "TASK_LDT":     0x2a
-    };
-
-    Debugger.TSS386 = {
-        "PREV_TSS":     0x00,
-        "CPL0_ESP":     0x04,
-        "CPL0_SS":      0x08,
-        "CPL1_ESP":     0x0c,
-        "CPL1_SS":      0x10,
-        "CPL2_ESP":     0x14,
-        "CPL2_SS":      0x18,
-        "TASK_CR3":     0x1C,
-        "TASK_EIP":     0x20,
-        "TASK_PS":      0x24,
-        "TASK_EAX":     0x28,
-        "TASK_ECX":     0x2C,
-        "TASK_EDX":     0x30,
-        "TASK_EBX":     0x34,
-        "TASK_ESP":     0x38,
-        "TASK_EBP":     0x3C,
-        "TASK_ESI":     0x40,
-        "TASK_EDI":     0x44,
-        "TASK_ES":      0x48,
-        "TASK_CS":      0x4C,
-        "TASK_SS":      0x50,
-        "TASK_DS":      0x54,
-        "TASK_FS":      0x58,
-        "TASK_GS":      0x5C,
-        "TASK_LDT":     0x60,
-        "TASK_IOPM":    0x64
     };
 
     /**
@@ -2219,6 +2179,62 @@ if (DEBUGGER) {
             this.println("no " + sMore + "history available");
             this.nextHistory = undefined;
         }
+    };
+
+    /*
+     * TSS field names and offsets used by dumpTSS()
+     */
+    Debugger.TSS286 = {
+        "PREV_TSS":     0x00,
+        "CPL0_SP":      0x02,
+        "CPL0_SS":      0x04,
+        "CPL1_SP":      0x06,
+        "CPL1_SS":      0x08,
+        "CPL2_SP":      0x0a,
+        "CPL2_SS":      0x0c,
+        "TASK_IP":      0x0e,
+        "TASK_PS":      0x10,
+        "TASK_AX":      0x12,
+        "TASK_CX":      0x14,
+        "TASK_DX":      0x16,
+        "TASK_BX":      0x18,
+        "TASK_SP":      0x1a,
+        "TASK_BP":      0x1c,
+        "TASK_SI":      0x1e,
+        "TASK_DI":      0x20,
+        "TASK_ES":      0x22,
+        "TASK_CS":      0x24,
+        "TASK_SS":      0x26,
+        "TASK_DS":      0x28,
+        "TASK_LDT":     0x2a
+    };
+    Debugger.TSS386 = {
+        "PREV_TSS":     0x00,
+        "CPL0_ESP":     0x04,
+        "CPL0_SS":      0x08,
+        "CPL1_ESP":     0x0c,
+        "CPL1_SS":      0x10,
+        "CPL2_ESP":     0x14,
+        "CPL2_SS":      0x18,
+        "TASK_CR3":     0x1C,
+        "TASK_EIP":     0x20,
+        "TASK_PS":      0x24,
+        "TASK_EAX":     0x28,
+        "TASK_ECX":     0x2C,
+        "TASK_EDX":     0x30,
+        "TASK_EBX":     0x34,
+        "TASK_ESP":     0x38,
+        "TASK_EBP":     0x3C,
+        "TASK_ESI":     0x40,
+        "TASK_EDI":     0x44,
+        "TASK_ES":      0x48,
+        "TASK_CS":      0x4C,
+        "TASK_SS":      0x50,
+        "TASK_DS":      0x54,
+        "TASK_FS":      0x58,
+        "TASK_GS":      0x5C,
+        "TASK_LDT":     0x60,
+        "TASK_IOPM":    0x64
     };
 
     /**
@@ -3206,12 +3222,7 @@ if (DEBUGGER) {
             if (bOpcode != null) {
                 this.aaOpcodeCounts[bOpcode][1]++;
                 var dbgAddr = this.aOpcodeHistory[this.iOpcodeHistory];
-                dbgAddr.off = this.cpu.getIP();
-                dbgAddr.sel = this.cpu.getCS();
-                dbgAddr.addr = addr;
-                dbgAddr.fProt = this.getProtMode();
-                dbgAddr.fData32 = (this.cpu && this.cpu.segCS.sizeData == 4);
-                dbgAddr.fAddr32 = (this.cpu && this.cpu.segCS.sizeAddr == 4);
+                this.setAddr(dbgAddr, this.cpu.getIP(), this.cpu.getCS());
                 if (++this.iOpcodeHistory == this.aOpcodeHistory.length) this.iOpcodeHistory = 0;
             }
         }
@@ -3355,10 +3366,10 @@ if (DEBUGGER) {
      *
      * TODO: Consider supporting the more "traditional" breakpoint index syntax; the current
      * address-based syntax was implemented solely for expediency and consistency.  At the same time,
-     * also consider a more WDEB386-like syntax, where "br" is used to set a variety of access
-     * breakpoints using modifiers like "r1", "r2", "w1", "w2, etc.
+     * also consider a more WDEB386-like syntax, where "br" is used to set a variety of access-specific
+     * breakpoints, using modifiers like "r1", "r2", "w1", "w2, etc.
      *
-     * EXAMPLE: Here's an example of our powerful new breakpoint command capabilities:
+     * Here's an example of our powerful new breakpoint command capabilities:
      *
      *      bp 0397:022B "?'GlobalAlloc(wFlags:[ss:sp+8],dwBytes:[ss:sp+6][ss:sp+4])';g [ss:sp+2]:[ss:sp] '?ax;if ax'"
      *
@@ -3376,14 +3387,14 @@ if (DEBUGGER) {
      *      ## di globalalloc
      *      GLOBALALLOC: KRNL386.EXE 0001:022B len 0xC570
      *
-     * And then you just need to do a bit more sleuthing to find the right CODE segment.  If you have
-     * WDEB386.EXE loaded inside the machine, it's a little easier, because WDEB386 displays notifications
-     * like:
+     * And then you just need to do a bit more sleuthing to find the right CODE segment.  And that just
+     * got easier, now that the PCjs Debugger mimics portions of the Windows Debugger INT 0x41 interface;
+     * see intWindowsDebugger() for details.  So even if you neglect to run WDEB386.EXE /E inside the
+     * machine before running Windows, you should still see notifications like:
      *
      *      KERNEL!undefined code(0001)=#0397 len 0000C580
      *
-     * as segments are being loaded.  TODO: Consider adding our own INT 0x41 support, so that even when
-     * WDEB386.EXE isn't loaded, the PCjs Debugger can provide some of those same notifications.
+     * in the PCjs Debugger output window, as segments are being loaded by the Windows kernel.
      *
      * @this {Debugger}
      * @param {Array} aBreak
@@ -3429,8 +3440,9 @@ if (DEBUGGER) {
                 /*
                  * Force temporary breakpoints to use their linear address, if one is available, by zapping
                  * the selector; this allows us to step over calls or interrupts that change the processor mode.
-                 * TODO: Unfortunately, this will fail to trigger a "step" over a call in segment that moves
-                 * during the call; consider alternatives.
+                 *
+                 * TODO: Unfortunately, this will fail to "step" over a call in segment that moves during the call;
+                 * consider alternatives.
                  */
                 if (dbgAddr.addr != null) dbgAddr.sel = null;
                 dbgAddr.fTempBreak = true;
