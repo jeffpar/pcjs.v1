@@ -1,8 +1,30 @@
 MS-DOS 3.20
 ---
 
-The MS-DOS 3.20 floppies in the PCjs collection had a printed date of `March 21, 1986` (see the photo below).
-However, all the files on Disks 1 and 2 are timestamped `7-07-86 12:00p`.
+The MS-DOS 3.20 floppies in the PCjs collection are the only known non-OEM disk images available online.
+All other known disk images are OEM releases (eg, HP, Zenith, Data General, Seiko Epson, etc.) and can
+be found on sites like [WinWorld](https://winworldpc.com/product/ms-dos/320).
+
+Disks 3 and 4 contained a printed date of `March 21, 1986` (see the photo below), which is consistent with
+the file timestamps (`2-14-86` and `3-14-86`) on those disks.  However, all the files on Disks 1 and 2 are
+timestamped `7-07-86`.  Apparently, the Programmer's Reference files were finalized several months in advance
+of the final MS-DOS 3.20 binaries.
+
+Based on the dates of the binaries, **July 7, 1986** is considered the release date of MS-DOS 3.20.
+
+NOTE: Disks 1 and 2 are restored versions of the original disks, since the original disks had been slightly
+modified for personal use.  The disks should be complete, and all files should be genuine and in the original
+order.  As proof, the following data from Disk 1:
+
+	00013db0  0d 0a 0d 0a 4d 69 63 72  6f 73 6f 66 74 28 52 29  |....Microsoft(R)|
+	00013dc0  20 4d 53 2d 44 4f 53 28  52 29 20 20 56 65 72 73  | MS-DOS(R)  Vers|
+	00013dd0  69 6f 6e 20 33 2e 32 30  0d 0a 20 20 20 20 20 20  |ion 3.20..      |
+	00013de0  20 20 20 20 20 20 20 28  43 29 43 6f 70 79 72 69  |       (C)Copyri|
+	00013df0  67 68 74 20 4d 69 63 72  6f 73 6f 66 74 20 43 6f  |ght Microsoft Co|
+	00013e00  72 70 20 31 39 38 31 2d  31 39 38 36 0d 0a 0d 0a  |rp 1981-1986....|
+
+matches the data listed at [16bitos.com](http://16bitos.com/320ms.htm), as do the MD5 checksums of IO.SYS,
+MSDODS.SYS and COMMAND.COM.
 
 Surprisingly Bad Bug in MS-DOS 3.20
 ---
