@@ -1,9 +1,9 @@
 MS-DOS 3.20
 ---
 
-The MS-DOS 3.20 floppies in the PCjs collection are the only known non-OEM disk images available online.
-All other known disk images are OEM releases (eg, HP, Zenith, Data General, Seiko Epson, etc.) and can
-be found on sites like [WinWorld](https://winworldpc.com/product/ms-dos/320).
+The MS-DOS 3.20 disks in the PCjs collection are the only known non-OEM copies of that release
+available online.  All other known MS-DOS 3.20 disk images are OEM releases (eg, HP, Zenith, Data General,
+Seiko Epson, etc.) and can be found on sites like [WinWorld](https://winworldpc.com/product/ms-dos/320).
 
 Disks 3 and 4 contained a printed date of `March 21, 1986` (see the photo below), which is consistent with
 the file timestamps (`2-14-86` and `3-14-86`) on those disks.  However, all the files on Disks 1 and 2 are
@@ -67,9 +67,9 @@ the machine more or less unusable.
 Starting with the IBM PC Model 5160, Video BIOS function 0x0E ignores BH and always use the current page.
 
 Microsoft must not have tested MS-DOS 3.20 on any 5150 machines, or if they did, those machines must have contained
-upgraded video cards, such as the EGA, which provided their own Video BIOS.  This bug was fixed in MS-DOS 3.21,
+upgraded video cards, such as an EGA, which provided their own Video BIOS.  This bug was fixed in MS-DOS 3.21,
 but that release apparently wasn't made available until almost a year later (MS-DOS 3.21 files are timestamped
-`5-01-87 12:00a`).
+`5-01-87`).
 
 MS-DOS 3.20 Photos
 ---
