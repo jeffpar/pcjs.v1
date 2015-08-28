@@ -3376,7 +3376,7 @@ X86.fnVERR = function VERR(dst, src)
         }
     }
     this.clearZF();
-    if (this.sizeData > 2 || this.sizeAddr > 2) this.stopCPU();
+    if (DEBUG && (this.sizeData > 2 || this.sizeAddr > 2)) this.stopCPU();
     return dst;
 };
 
@@ -3414,7 +3414,7 @@ X86.fnVERW = function VERW(dst, src)
         }
     }
     this.clearZF();
-    if (this.sizeData > 2 || this.sizeAddr > 2) this.stopCPU();
+    if (DEBUG && (this.sizeData > 2 || this.sizeAddr > 2)) this.stopCPU();
     return dst;
 };
 
