@@ -480,17 +480,18 @@ CPU.prototype.updateStatus = function(fForce)
 };
 
 /**
- * updateVideo()
+ * updateVideo(fForce)
  *
  * Any high-frequency updates should be performed here.  Avoid DOM updates, since updateVideo() can be called up to
  * 60 times per second (see VIDEO_UPDATES_PER_SECOND).
  *
  * @this {CPU}
+ * @param {boolean} [fForce] (true to force a video update)
  */
-CPU.prototype.updateVideo = function()
+CPU.prototype.updateVideo = function(fForce)
 {
     for (var i = 0; i < this.aVideo.length; i++) {
-        this.aVideo[i].updateScreen();
+        this.aVideo[i].updateScreen(fForce);
     }
     if (this.cmp && this.cmp.panel) this.cmp.panel.updateAnimation();
 };
@@ -1122,7 +1123,7 @@ CPU.prototype.stopCPU = function(fComplete)
 };
 
 /**
- * updateCPU()
+ * updateCPU(fForce)
  *
  * This used to be performed at the end of every stepCPU(), but runCPU() -- which relies upon
  * stepCPU() -- needed to have more control over when these updates are performed.  However, for
@@ -1130,10 +1131,11 @@ CPU.prototype.stopCPU = function(fComplete)
  * provides the old behavior.
  *
  * @this {CPU}
+ * @param {boolean} [fForce] (true to force a video update; used by the Debugger)
  */
-CPU.prototype.updateCPU = function()
+CPU.prototype.updateCPU = function(fForce)
 {
-    this.updateVideo();
+    this.updateVideo(fForce);
     this.updateStatus();
 };
 

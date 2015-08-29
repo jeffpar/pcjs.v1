@@ -1248,11 +1248,11 @@ if (DEBUGGER) {
         this.messageDump(Messages.DOS,  function onDumpDOS(s)  { dbg.dumpDOS(s); });
 
         this.fWinDbg = this.dbgAddrWinDbg = null;
-        this.cpu.addIntNotify(Interrupts.WINDBG.VECTOR, this, this.intWindowsDebugger);
+        this.cpu.addIntNotify(Interrupts.WINDBG.VECTOR, this.intWindowsDebugger.bind(this));
 
         if (Interrupts.WINDBGRM.ENABLED) {
             this.fWinDbgRM = null;
-            this.cpu.addIntNotify(Interrupts.WINDBGRM.VECTOR, this, this.intWindowsDebuggerRM);
+            this.cpu.addIntNotify(Interrupts.WINDBGRM.VECTOR, this.intWindowsDebuggerRM.bind(this));
         }
 
         this.setReady();
@@ -1370,7 +1370,7 @@ if (DEBUGGER) {
                 break;
 
             default:
-                this.println("INT 0x68: " + str.toHexByte(AH));
+                // this.println("INT 0x68: " + str.toHexByte(AH));
                 break;
             }
 
@@ -1667,7 +1667,7 @@ if (DEBUGGER) {
         if (addr !== X86.ADDR_INVALID) {
             this.cpu.setByte(addr, b);
             if (inc) this.incAddr(dbgAddr, inc);
-            this.cpu.updateCPU();
+            this.cpu.updateCPU(true);           // we set fForce to true in case video memory was the target
         }
     };
 
@@ -1685,7 +1685,7 @@ if (DEBUGGER) {
         if (addr !== X86.ADDR_INVALID) {
             this.cpu.setShort(addr, w);
             if (inc) this.incAddr(dbgAddr, inc);
-            this.cpu.updateCPU();
+            this.cpu.updateCPU(true);           // we set fForce to true in case video memory was the target
         }
     };
 
@@ -5231,7 +5231,7 @@ if (DEBUGGER) {
                 this.println("\tdi [a]        dump backtrack info for address a");
             }
             this.println("\tds [#]        dump descriptor info for selector #");
-            if (sDumpers.length) this.println("dump extensions:\n\t" + sDumpers);
+            if (sDumpers.length) this.println("dump extension commands:\n\t" + sDumpers);
             return;
         }
 
@@ -5354,22 +5354,41 @@ if (DEBUGGER) {
      */
     Debugger.prototype.doEdit = function(asArgs)
     {
+        var size = 1;
+        var mask = 0xff;
+        var fnGet = this.getByte;
+        var fnSet = this.setByte;
+        if (asArgs[0] == "ew") {
+            size = 2;
+            mask = 0xffff;
+            fnGet = this.getShort;
+            fnSet = this.setShort;
+        }
+        var cch = size << 1;
+
         var sAddr = asArgs[1];
-        if (sAddr === undefined) {
-            this.println("missing address");
+        if (sAddr == null) {
+            this.println("edit memory commands:");
+            this.println("\teb [a] [...]  edit bytes at address a");
+            this.println("\tew [a] [...]  edit words at address a");
             return;
         }
+
         var dbgAddr = this.parseAddr(sAddr, Debugger.ADDR_DATA);
         if (!dbgAddr) return;
 
         for (var i = 2; i < asArgs.length; i++) {
-            var b = str.parseInt(asArgs[i], 16);
-            if (b === undefined) {
-                this.println("unrecognized value: " + str.toHexByte(b));
+            var vNew = this.parseExpression(asArgs[i]);
+            if (vNew === undefined) {
+                this.println("unrecognized value: " + asArgs[i]);
                 break;
             }
-            this.println("setting " + this.hexAddr(dbgAddr) + " to " + str.toHexByte(b));
-            this.setByte(dbgAddr, b, 1);
+            if (vNew & ~mask) {
+                this.println("warning: " + str.toHex(vNew) + " exceeds " + size + "-byte value");
+            }
+            var vOld = fnGet.call(this, dbgAddr);
+            this.println("changing " + this.hexAddr(dbgAddr) + " from 0x" + str.toHex(vOld, cch) + " to 0x" + str.toHex(vNew, cch));
+            fnSet.call(this, dbgAddr, vNew, size);
         }
     };
 

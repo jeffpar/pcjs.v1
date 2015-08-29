@@ -137,8 +137,7 @@ function Bus(parmsBus, cpu, dbg)
      * Lists of I/O notification functions: aPortInputNotify and aPortOutputNotify are arrays, indexed by
      * port, of sub-arrays which contain:
      *
-     *      [0]: registered component
-     *      [1]: registered function to call for every I/O access
+     *      [0]: registered function to call for every I/O access
      *
      * The registered function is called with the port address, and if the access was triggered by the CPU,
      * the linear instruction pointer (LIP) at the point of access.
@@ -148,10 +147,10 @@ function Bus(parmsBus, cpu, dbg)
      * of chained functions across multiple components, but I doubt that will be necessary here.
      *
      * UPDATE: The Debugger now piggy-backs on these arrays to indicate ports for which it wants notification
-     * of I/O.  In those cases, the registered component/function elements may or may not be set, but the following
-     * additional element will be set:
+     * of I/O.  In those cases, the registered component/function elements may or may not be set, but the
+     * following additional element will be set:
      *
-     *      [2]: true to break on I/O, false to ignore I/O
+     *      [1]: true to break on I/O, false to ignore I/O
      *
      * The false case is important if fPortInputBreakAll and/or fPortOutputBreakAll is set, because it allows the
      * Debugger to selectively ignore specific ports.
@@ -1316,33 +1315,32 @@ Bus.prototype.addPortInputBreak = function(port)
         return this.fPortInputBreakAll;
     }
     if (this.aPortInputNotify[port] === undefined) {
-        this.aPortInputNotify[port] = [null, null, false];
+        this.aPortInputNotify[port] = [null, false];
     }
-    this.aPortInputNotify[port][2] = !this.aPortInputNotify[port][2];
-    return this.aPortInputNotify[port][2];
+    this.aPortInputNotify[port][1] = !this.aPortInputNotify[port][1];
+    return this.aPortInputNotify[port][1];
 };
 
 /**
- * addPortInputNotify(start, end, component, fn)
+ * addPortInputNotify(start, end, fn)
  *
  * Add a port input-notification handler to the list of such handlers.
  *
  * @this {Bus}
  * @param {number} start port address
  * @param {number} end port address
- * @param {Component} component
  * @param {function(number,number)} fn is called with the port and LIP values at the time of the input
  */
-Bus.prototype.addPortInputNotify = function(start, end, component, fn)
+Bus.prototype.addPortInputNotify = function(start, end, fn)
 {
     if (fn !== undefined) {
         for (var port = start; port <= end; port++) {
             if (this.aPortInputNotify[port] !== undefined) {
-                Component.warning("Input port " + str.toHexWord(port) + " registered by " + this.aPortInputNotify[port][0].id + ", ignoring " + component.id);
+                Component.warning("Input port " + str.toHexWord(port) + " already registered");
                 continue;
             }
-            this.aPortInputNotify[port] = [component, fn, false, false];
-            if (MAXDEBUG) this.log("addPortInputNotify(" + str.toHexWord(port) + "," + component.id + ")");
+            this.aPortInputNotify[port] = [fn, false];
+            if (MAXDEBUG) this.log("addPortInputNotify(" + str.toHexWord(port) + ")");
         }
     }
 };
@@ -1361,7 +1359,7 @@ Bus.prototype.addPortInputTable = function(component, table, offset)
 {
     if (offset === undefined) offset = 0;
     for (var port in table) {
-        this.addPortInputNotify(+port + offset, +port + offset, component, table[port]);
+        this.addPortInputNotify(+port + offset, +port + offset, table[port].bind(component));
     }
 };
 
@@ -1373,7 +1371,7 @@ Bus.prototype.addPortInputTable = function(component, table, offset)
  * @param {number} [addrLIP] is the LIP value at the time of the input
  * @return {number} simulated port value (0xff if none)
  *
- * NOTE: It seems that at least parts of the ROM BIOS (like the RS-232 probes around F000:E5D7 in the 5150 BIOS)
+ * NOTE: It seems that parts of the ROM BIOS (like the RS-232 probes around F000:E5D7 in the 5150 BIOS)
  * assume that ports for non-existent hardware return 0xff rather than 0x00, hence my new default (0xff) below.
  */
 Bus.prototype.checkPortInputNotify = function(port, addrLIP)
@@ -1385,14 +1383,14 @@ Bus.prototype.checkPortInputNotify = function(port, addrLIP)
         this.cpu.backTrack.btiIO = 0;
     }
     if (aNotify !== undefined) {
-        if (aNotify[1]) {
-            var b = aNotify[1].call(aNotify[0], port, addrLIP);
+        if (aNotify[0]) {
+            var b = aNotify[0]( port, addrLIP);
             if (b !== undefined) {
                 this.assert(!(b & ~0xff));
                 bIn = b;
             }
         }
-        if (DEBUGGER && this.dbg && this.fPortInputBreakAll != aNotify[2]) {
+        if (DEBUGGER && this.dbg && this.fPortInputBreakAll != aNotify[1]) {
             this.dbg.checkPortInput(port, bIn);
         }
     }
@@ -1406,21 +1404,19 @@ Bus.prototype.checkPortInputNotify = function(port, addrLIP)
 };
 
 /**
- * removePortInputNotify(start, end, component, fn)
+ * removePortInputNotify(start, end)
  *
- * Remove a port input-notification handler from the list of such handlers (to be ENABLED later if needed)
+ * Remove port input-notification handler(s) (to be ENABLED later if needed)
  *
  * @this {Bus}
  * @param {number} start address
  * @param {number} end address
- * @param {Component} component
- * @param {function(number,number)} fn of previously added handler
  *
-Bus.prototype.removePortInputNotify = function(start, end, component, fn)
+Bus.prototype.removePortInputNotify = function(start, end)
  {
     for (var port = start; port < end; port++) {
-        if (this.aPortInputNotify[port] && this.aPortInputNotify[port][0] == component && this.aPortInputNotify[port][1] == fn) {
-            this.aPortInputNotify[port] = undefined;
+        if (this.aPortInputNotify[port]) {
+            delete this.aPortInputNotify[port];
         }
     }
 };
@@ -1440,33 +1436,32 @@ Bus.prototype.addPortOutputBreak = function(port)
         return this.fPortOutputBreakAll;
     }
     if (this.aPortOutputNotify[port] === undefined) {
-        this.aPortOutputNotify[port] = [null, null, false];
+        this.aPortOutputNotify[port] = [null, false];
     }
-    this.aPortOutputNotify[port][2] = !this.aPortOutputNotify[port][2];
-    return this.aPortOutputNotify[port][2];
+    this.aPortOutputNotify[port][1] = !this.aPortOutputNotify[port][1];
+    return this.aPortOutputNotify[port][1];
 };
 
 /**
- * addPortOutputNotify(start, end, component, fn)
+ * addPortOutputNotify(start, end, fn)
  *
  * Add a port output-notification handler to the list of such handlers.
  *
  * @this {Bus}
  * @param {number} start port address
  * @param {number} end port address
- * @param {Component} component
  * @param {function(number,number)} fn is called with the port and LIP values at the time of the output
  */
-Bus.prototype.addPortOutputNotify = function(start, end, component, fn)
+Bus.prototype.addPortOutputNotify = function(start, end, fn)
 {
     if (fn !== undefined) {
         for (var port = start; port <= end; port++) {
             if (this.aPortOutputNotify[port] !== undefined) {
-                Component.warning("Output port " + str.toHexWord(port) + " registered by " + this.aPortOutputNotify[port][0].id + ", ignoring " + component.id);
+                Component.warning("Output port " + str.toHexWord(port) + " already registered");
                 continue;
             }
-            this.aPortOutputNotify[port] = [component, fn, false, false];
-            if (MAXDEBUG) this.log("addPortOutputNotify(" + str.toHexWord(port) + "," + component.id + ")");
+            this.aPortOutputNotify[port] = [fn, false];
+            if (MAXDEBUG) this.log("addPortOutputNotify(" + str.toHexWord(port) + ")");
         }
     }
 };
@@ -1485,7 +1480,7 @@ Bus.prototype.addPortOutputTable = function(component, table, offset)
 {
     if (offset === undefined) offset = 0;
     for (var port in table) {
-        this.addPortOutputNotify(+port + offset, +port + offset, component, table[port]);
+        this.addPortOutputNotify(+port + offset, +port + offset, table[port].bind(component));
     }
 };
 
@@ -1501,11 +1496,11 @@ Bus.prototype.checkPortOutputNotify = function(port, bOut, addrLIP)
 {
     var aNotify = this.aPortOutputNotify[port];
     if (aNotify !== undefined) {
-        if (aNotify[1]) {
+        if (aNotify[0]) {
             this.assert(!(bOut & ~0xff));
-            aNotify[1].call(aNotify[0], port, bOut, addrLIP);
+            aNotify[0](port, bOut, addrLIP);
         }
-        if (DEBUGGER && this.dbg && this.fPortOutputBreakAll != aNotify[2]) {
+        if (DEBUGGER && this.dbg && this.fPortOutputBreakAll != aNotify[1]) {
             this.dbg.checkPortOutput(port, bOut);
         }
     }
@@ -1518,21 +1513,19 @@ Bus.prototype.checkPortOutputNotify = function(port, bOut, addrLIP)
 };
 
 /**
- * removePortOutputNotify(start, end, component, fn)
+ * removePortOutputNotify(start, end)
  *
- * Remove a port output-notification handler from the list of such handlers (to be ENABLED later if needed)
+ * Remove port output-notification handler(s) (to be ENABLED later if needed)
  *
  * @this {Bus}
  * @param {number} start address
  * @param {number} end address
- * @param {Component} component
- * @param {function(number,number)} fn of previously added handler
  *
-Bus.prototype.removePortOutputNotify = function(start, end, component, fn)
+Bus.prototype.removePortOutputNotify = function(start, end)
  {
     for (var port = start; port < end; port++) {
-        if (this.aPortOutputNotify[port] && this.aPortOutputNotify[port][0] == component && this.aPortOutputNotify[port][1] == fn) {
-            this.aPortOutputNotify[port] = undefined;
+        if (this.aPortOutputNotify[port]) {
+            delete this.aPortOutputNotify[port];
         }
     }
 };

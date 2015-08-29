@@ -1601,7 +1601,7 @@ X86CPU.prototype.getChecksum = function()
 };
 
 /**
- * addIntNotify(nInt, component, fn)
+ * addIntNotify(nInt, fn)
  *
  * Add an software interrupt notification handler to the CPU's list of such handlers.
  *
@@ -1610,18 +1610,14 @@ X86CPU.prototype.getChecksum = function()
  *
  * @this {X86CPU}
  * @param {number} nInt
- * @param {Component} component
  * @param {function(number)} fn is called with the LIP value following the software interrupt
  */
-X86CPU.prototype.addIntNotify = function(nInt, component, fn)
+X86CPU.prototype.addIntNotify = function(nInt, fn)
 {
-    if (fn !== undefined) {
-        if (this.aIntNotify[nInt] === undefined) {
-            this.aIntNotify[nInt] = [];
-        }
-        this.aIntNotify[nInt].push([component, fn]);
-        if (MAXDEBUG) this.log("addIntNotify(" + str.toHexWord(nInt) + "," + component.id + ")");
+    if (this.aIntNotify[nInt] === undefined) {
+        this.aIntNotify[nInt] = [];
     }
+    this.aIntNotify[nInt].push(fn);
 };
 
 /**
@@ -1639,7 +1635,7 @@ X86CPU.prototype.checkIntNotify = function(nInt)
     var aNotify = this.aIntNotify[nInt];
     if (aNotify !== undefined) {
         for (var i = 0; i < aNotify.length; i++) {
-            if (!aNotify[i][1].call(aNotify[i][0], this.regLIP)) {
+            if (!aNotify[i](this.regLIP)) {
                 return false;
             }
         }

@@ -1067,7 +1067,7 @@ ChipSet.prototype.initBus = function(cmp, bus, cpu, dbg)
                 chipset.dumpCMOS();
             });
         }
-        cpu.addIntNotify(Interrupts.RTC, this, this.intBIOSRTC);
+        cpu.addIntNotify(Interrupts.RTC, this.intBIOSRTC.bind(this));
     }
 };
 

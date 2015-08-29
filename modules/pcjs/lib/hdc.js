@@ -550,8 +550,8 @@ HDC.prototype.initBus = function(cmp, bus, cpu, dbg)
     bus.addPortInputTable(this, this.fATC? HDC.aATCPortInput : HDC.aXTCPortInput);
     bus.addPortOutputTable(this, this.fATC? HDC.aATCPortOutput : HDC.aXTCPortOutput);
 
-    cpu.addIntNotify(HDC.BIOS.INT_DISK, this, this.intBIOSDisk);
-    cpu.addIntNotify(HDC.BIOS.INT_DISKETTE, this, this.intBIOSDiskette);
+    cpu.addIntNotify(HDC.BIOS.INT_DISK, this.intBIOSDisk.bind(this));
+    cpu.addIntNotify(HDC.BIOS.INT_DISKETTE, this.intBIOSDiskette.bind(this));
 
     /*
      * The following code used to be performed in the HDC constructor, but now we need to wait for information
