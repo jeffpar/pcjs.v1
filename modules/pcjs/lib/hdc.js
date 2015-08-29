@@ -683,6 +683,10 @@ HDC.prototype.initController = function(data, fHard)
     var i = 0;
     var fSuccess = true;
 
+    /*
+     * TODO: This is used to re-select the controller's active drive whenever the machine is restored, but alas,
+     * we currently only update it and save it for the ATC, not the XTC.
+     */
     this.iDrive = -1;
 
     /*
