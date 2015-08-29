@@ -4299,6 +4299,7 @@ ChipSet.prototype.out8042InBuffData = function(port, bOut, addrFrom)
     this.printMessageIO(port, bOut, addrFrom, "8042_INBUF.DATA", null, Messages.C8042);
 
     if (this.b8042Status & ChipSet.KBC.STATUS.CMD_FLAG) {
+
         switch (this.b8042InBuff) {
 
         case ChipSet.KBC.CMD.WRITE_CMD:
@@ -4652,6 +4653,10 @@ ChipSet.prototype.set8042OutBuff = function(b, fNoDelay)
 
 /**
  * set8042OutPort(b)
+ *
+ * When ChipSet.KBC.CMD.WRITE_OUTPORT (0xD1) is written to port 0x64, the next byte written to port 0x60 comes here,
+ * to the KBC's OUTPORT.  One of the most important bits in the OUTPORT is the A20_ON bit (0x02): set it to turn A20 on,
+ * clear it to turn A20 off.
  *
  * @this {ChipSet}
  * @param {number} b

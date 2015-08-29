@@ -5186,7 +5186,7 @@ if (DEBUGGER) {
      * doClear(sCmd)
      *
      * @this {Debugger}
-     * @param {string} sCmd (eg, "cls" or "clear")
+     * @param {string} [sCmd] (eg, "cls" or "clear")
      */
     Debugger.prototype.doClear = function(sCmd)
     {
@@ -5251,6 +5251,7 @@ if (DEBUGGER) {
                  */
                 console.log(s);
             } else {
+                this.doClear();
                 this.println(s);
             }
             return;
@@ -5728,6 +5729,7 @@ if (DEBUGGER) {
                          * "biggest" being that the large disk images really need to be compressed first, because they
                          * get "inflated" with use.  See the dump() method in the Disk component for more details.
                          */
+                        this.doClear();
                         this.println(drive.disk.toJSON());
                         return;
                     }

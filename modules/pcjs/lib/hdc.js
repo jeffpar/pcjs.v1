@@ -683,6 +683,8 @@ HDC.prototype.initController = function(data, fHard)
     var i = 0;
     var fSuccess = true;
 
+    this.iDrive = -1;
+
     /*
      * At this point, it's worth calling into question my decision to NOT split the HDC component into separate XTC
      * and ATC components, given all the differences, and given that I'm about to write some "if (ATC) else (XTC) ..."
@@ -702,7 +704,7 @@ HDC.prototype.initController = function(data, fHard)
          * or vice versa), we're under no obligation to use the same number of registers, or save/restore format, etc,
          * as the original XT controller.
          */
-        if (data == null) data = [0, 0, 0, 0, 0, 0, 0, 0, HDC.ATC.STATUS.READY, 0];
+        if (data == null) data = [0, 0, 0, 0, 0, 0, 0, HDC.ATC.STATUS.READY, 0, [0, -1]];
         this.regError   = data[i++];
         this.regWPreC   = data[i++];
         this.regSecCnt  = data[i++];
@@ -713,6 +715,11 @@ HDC.prototype.initController = function(data, fHard)
         this.regStatus  = data[i++];
         this.regCommand = data[i++];
         this.regFDR     = data[i++];
+        if (typeof this.regFDR == "object") {
+            var a = this.regFDR;
+            this.regFDR = a[0];
+            this.iDrive = a[1];
+        }
         /*
          * Additional state is maintained by the Drive object (eg, abSector, ibSector)
          */
@@ -763,6 +770,11 @@ HDC.prototype.initController = function(data, fHard)
             this.regConfig |= (drive.type & 0x3) << ((1 - iDrive) << 1);
         }
     }
+
+    if (this.iDrive >= 0) {
+        this.drive = this.aDrives[this.iDrive];
+    }
+
     if (DEBUG && this.messageEnabled()) {
         this.printMessage("HDC initialized for " + this.aDrives.length + " drive(s)");
     }
@@ -789,7 +801,7 @@ HDC.prototype.saveController = function()
         data[i++] = this.regDrvHd;
         data[i++] = this.regStatus;
         data[i++] = this.regCommand;
-        data[i++] = this.regFDR;
+        data[i++] = [this.regFDR, this.iDrive];
     } else {
         data[i++] = this.regConfig;
         data[i++] = this.regStatus;
@@ -1841,6 +1853,7 @@ HDC.prototype.doATC = function()
     var nSector = this.regSecNum;
     var nSectors = this.regSecCnt || 256;
 
+    this.iDrive = -1;
     this.drive = null;
     this.regError = HDC.ATC.ERROR.NONE;
     this.regStatus = HDC.ATC.STATUS.READY | HDC.ATC.STATUS.SEEK_OK;
@@ -1869,6 +1882,7 @@ HDC.prototype.doATC = function()
         drive.sector = null;
         drive.ibSector = 0;
         drive.errorCode = 0;
+        this.iDrive = iDrive;
         this.drive = drive;
     }
 

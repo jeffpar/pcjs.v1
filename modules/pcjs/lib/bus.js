@@ -1185,7 +1185,7 @@ Bus.prototype.getSymbol = function(addr, fNearest)
 /**
  * saveMemory()
  *
- * The only memory blocks we save are those marked as dirty; most likely all of RAM will have been marked dirty,
+ * The only memory blocks we save are those marked as dirty, but most likely all of RAM will have been marked dirty,
  * and even if our dirty-memory flags were as smart as our dirty-sector flags (ie, were set only when a write changed
  * what was already there), it's unlikely that would reduce the number of RAM blocks we must save/restore.  At least
  * all the ROM blocks should be clean (except in the unlikely event that the Debugger was used to modify them).
@@ -1214,6 +1214,15 @@ Bus.prototype.saveMemory = function()
 {
     var i = 0;
     var a = [];
+
+    /*
+     * A quick-and-dirty work-around for 32-bit bus machines, to ensure that all blocks in the 2nd Mb are
+     * mapped in before we save.  We do this by forcing A20 on, and then turning it back off again before we
+     * leave.
+     */
+    var fA20 = this.getA20();
+    if (!fA20) this.setA20(true);
+
     for (var iBlock = 0; iBlock < this.nBlockTotal; iBlock++) {
         var block = this.aMemBlocks[iBlock];
         /*
@@ -1226,7 +1235,10 @@ Bus.prototype.saveMemory = function()
             a[i++] = State.compress(block.save());
         }
     }
-    a[i] = this.getA20();
+
+    if (!fA20) this.setA20(false);
+    a[i] = fA20;
+
     return a;
 };
 
