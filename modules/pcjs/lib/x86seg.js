@@ -687,12 +687,12 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fProbe)
         }
         else if (type == X86.DESC.ACC.TYPE.GATE286_INT || type == X86.DESC.ACC.TYPE.GATE386_INT) {
             fGate = true;
-            regPSClear = (X86.PS.NT | X86.PS.TF | X86.PS.IF);
+            regPSClear = (X86.PS.VM | X86.PS.NT | X86.PS.TF | X86.PS.IF);
             cpu.assert(!(acc & 0x1f));
         }
         else if (type == X86.DESC.ACC.TYPE.GATE286_TRAP || type == X86.DESC.ACC.TYPE.GATE386_TRAP) {
             fGate = true;
-            regPSClear = (X86.PS.NT | X86.PS.TF);
+            regPSClear = (X86.PS.VM | X86.PS.NT | X86.PS.TF);
             cpu.assert(!(acc & 0x1f));
         }
         else if (type == X86.DESC.ACC.TYPE.GATE_TASK) {
@@ -725,22 +725,6 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fProbe)
                     limit = limitOrig | (ext << 16);
                 }
 
-                /*
-                 * At a minimum, we need to clear X86.PS.VM now, so that the following load will initialize the
-                 * new code segment properly.
-                 */
-                var regPS = cpu.regPS;
-                cpu.regPS &= ~regPSClear;
-                if (cpu.regPS & X86.PS.VM) {
-                    /*
-                     * TODO: This seems a bit suspect in retrospect (ie, altering CPU flags before we know whether
-                     * the load() will succeed or generate a fault).  Take another look.
-                     */
-                    cpu.assert(false);
-                    cpu.regPS &= ~X86.PS.VM;
-                    cpu.setProtMode(true, false);
-                }
-
                 var cplNew = (selCode & X86.SEL.RPL), selStack = 0, offStack = 0;
 
                 /*
@@ -770,6 +754,15 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fProbe)
                      * selStack (which should automatically use the values cached by the "probed" loads above).
                      */
                     offStack = (lenSP == 2)? cpu.getShort(addrTSS + offSP) : cpu.getLong(addrTSS + offSP);
+                }
+
+                /*
+                 * Now that we're past all the probes, it should be safe to clear all flags that need clearing.
+                 */
+                var regPS = cpu.regPS;
+                cpu.regPS &= ~regPSClear;
+                if (regPS & X86.PS.VM) {
+                    cpu.setProtMode(true, false);
                 }
 
                 if (this.loadProt(selCode) === X86.ADDR_INVALID) {

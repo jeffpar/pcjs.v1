@@ -63,13 +63,18 @@ var Interrupts = {
         VECTOR:     0x41,
         IS_LOADED:  0x004F,         // AX command
         LOADED:     0xF386,         // returned in AX if Windows Debugger loaded
-        LOAD_SEG:   0x0050          // SI==0 if code, 1 if data; BX==segnum-1; CX==selector; ES:[E]DI->module name
+        LOAD_SEG:   0x0050,         // SI==0 if code, 1 if data; BX==segnum-1; CX==selector; ES:[E]DI->module name
+        ENABLED:    true            // support for WINDBGRM interrupts can be disabled
     },
     WINDBGRM:     {                 // Windows Debugger real-mode interface
         VECTOR:     0x68,
         IS_LOADED:  0x43,           // AH command
         LOADED:     0xF386,         // returned in AX if Windows Debugger loaded
-        ENABLED:    false           // support for WINDBGRM interrupts is NOT enabled by default
+        LOAD_SEG:   0x50,           // AL=segment type, ES:DI->D386_Device_Params
+        /*
+         * This must be disabled until we're able to respond intelligently to requests like D386_Prepare_PMode (0x44)
+         */
+        ENABLED:    false           // support for WINDBGRM interrupts can be disabled
     },
     FUNCS:      {}                  // filled in only if DEBUGGER is true
 };

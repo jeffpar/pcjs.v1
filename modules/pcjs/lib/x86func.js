@@ -376,6 +376,15 @@ X86.fnCALLw = function CALLw(dst, src)
  * For protected-mode, this function must attempt to load the new code segment first, because if the new segment
  * requires a change in privilege level, the return address must be pushed on the NEW stack, not the current stack.
  *
+ * Also, we rely on a new function, pushData(), instead of pushWord(), to accommodate the outgoing segment size,
+ * which may differ from the incoming segment.  For example, when a 32-bit code segment performs a 16:32 call to a
+ * 16-bit code segment, we must push 32-bit segment and offset values.
+ *
+ * TODO: Since setCSIP() already informs the segCS load() function when it's making a call, the load() function
+ * could automatically push the old CS and IP values *before* segCS is updated (which would be a better time to do
+ * this); unfortunately, load() is also used by loadIDT(), and loadIDT() has different requirements (eg, pushing
+ * flags first), so it's not a trivial change.
+ *
  * @this {X86CPU}
  * @param {number} off
  * @param {number} sel
@@ -384,9 +393,10 @@ X86.fnCALLF = function CALLF(off, sel)
 {
     var oldCS = this.getCS();
     var oldIP = this.getIP();
+    var oldSize = this.segCS.sizeData;
     if (this.setCSIP(off, sel, true) != null) {
-        this.pushWord(oldCS);
-        this.pushWord(oldIP);
+        this.pushData(oldCS, oldSize);
+        this.pushData(oldIP, oldSize);
     }
 };
 
@@ -1241,7 +1251,6 @@ X86.fnINT = function INT(nIDT, nError, nCycles)
         this.pushWord(oldIP);
         if (nError != null) this.pushWord(nError);
         this.nFault = -1;
-
         /*
          * TODO: Should this code be factored into a setLIP() function? The other primary client would be setCSIP().
          */

@@ -520,8 +520,18 @@ Video.MODE = {
     VGA_640X480_MONO:   0x11,   // mapped at A000:0000, mono,  2bpp, planar
     VGA_640X480:        0x12,   // mapped at A000:0000, color, 4bpp, planar
     VGA_320X200:        0x13,   // mapped at A000:0000, color, 8bpp, linear
-    VGA_320X240:        0x78,   // mapped at A000:0000, color, 8bpp, planar ("Mode X")
-    VGA_320X400:        0x7A,   // mapped at A000:0000, color, 8bpp, planar
+    /*
+     * The remaining mode identifiers are for internal use only; there is no correlation with any
+     * publicly defined BIOS modes, and overlap with any third-party mode numbers is purely coincidental.
+     */
+    VGA_320X240:        0x14,   // mapped at A000:0000, color, 8bpp, planar ("Mode X")
+    VGA_320X400:        0x15,   // mapped at A000:0000, color, 8bpp, planar
+    /*
+     * Here's where we might assign additional identifiers to certain unique combinations, like the
+     * fTextGraphicsHybrid 320x400 mode that Windows 95 uses (ie, when the buffer is mapped to B800:0000
+     * instead of A000:0000 and is configured for text mode access, but graphics are still being displayed
+     * from the second half of video memory).
+     */
     UNKNOWN:            0xFF
 };
 
@@ -733,8 +743,8 @@ Video.FONT = {
  * and it might not always be the best fit.
  */
 Video.aModeParms = [];                                                                              // Mode
-Video.aModeParms[Video.MODE.CGA_40X25]          = [ 40,  25,  1,   0, Video.FONT.CGA];              // 0x00
-Video.aModeParms[Video.MODE.CGA_80X25]          = [ 80,  25,  1,   0, Video.FONT.CGA];              // 0x02
+Video.aModeParms[Video.MODE.CGA_40X25]          = [ 40,  25,  1,   0, Video.FONT.CGA];              // 0x01
+Video.aModeParms[Video.MODE.CGA_80X25]          = [ 80,  25,  1,   0, Video.FONT.CGA];              // 0x03
 Video.aModeParms[Video.MODE.CGA_320X200]        = [320, 200,  8, 192];                              // 0x04
 Video.aModeParms[Video.MODE.CGA_640X200]        = [640, 200, 16, 192];                              // 0x06
 Video.aModeParms[Video.MODE.MDA_80X25]          = [ 80,  25,  1,   0, Video.FONT.MDA];              // 0x07
@@ -745,11 +755,11 @@ Video.aModeParms[Video.MODE.EGA_640X350]        = [640, 350,  8];               
 Video.aModeParms[Video.MODE.VGA_640X480_MONO]   = [640, 480,  8];                                   // 0x11
 Video.aModeParms[Video.MODE.VGA_640X480]        = [640, 480,  8];                                   // 0x12
 Video.aModeParms[Video.MODE.VGA_320X200]        = [320, 200,  1];                                   // 0x13
-Video.aModeParms[Video.MODE.VGA_320X240]        = [320, 240,  4];                                   // 0x78
-Video.aModeParms[Video.MODE.VGA_320X400]        = [320, 400,  4];                                   // 0x7A
+Video.aModeParms[Video.MODE.VGA_320X240]        = [320, 240,  4];                                   // 0x14
+Video.aModeParms[Video.MODE.VGA_320X400]        = [320, 400,  4];                                   // 0x15
 
-Video.aModeParms[Video.MODE.CGA_40X25_BW]       = Video.aModeParms[Video.MODE.CGA_40X25];           // 0x01
-Video.aModeParms[Video.MODE.CGA_80X25_BW]       = Video.aModeParms[Video.MODE.CGA_80X25];           // 0x03
+Video.aModeParms[Video.MODE.CGA_40X25_BW]       = Video.aModeParms[Video.MODE.CGA_40X25];           // 0x00
+Video.aModeParms[Video.MODE.CGA_80X25_BW]       = Video.aModeParms[Video.MODE.CGA_80X25];           // 0x02
 Video.aModeParms[Video.MODE.CGA_320X200_BW]     = Video.aModeParms[Video.MODE.CGA_320X200];         // 0x05
 
 /*
@@ -3887,9 +3897,8 @@ Video.prototype.setFontData = function(abFontData, aFontOffsets, cxFontChar)
  * Calls to buildFonts() should not be expensive though: the underlying createFont() function rebuilds a font only
  * if its color has actually changed.
  *
- * TODO: We should avoid rebuilding fonts when palette registers change in graphics modes.  More importantly, our
- * font code is still written with the assumption that, like the MDA/CGA, the underlying font data never changes.
- * The EGA, however, stores its fonts in plane 2, which means fonts are dynamic; this needs to be fixed.
+ * TODO: Our font code is still written with the assumption that, like the MDA/CGA, the underlying font data never
+ * changes.  The EGA, however, stores its fonts in plane 2, which means fonts are dynamic; this needs to be fixed.
  *
  * Supporting dynamic EGA fonts should not be hard though.  We can get rid of abFontData and simply build a
  * temporary snapshot of all the font bytes in plane 2 of the EGA's video buffer (adwMemory), and pass that on to
@@ -3901,16 +3910,21 @@ Video.prototype.setFontData = function(abFontData, aFontOffsets, cxFontChar)
  * for 43-line mode, and so on).
  *
  * @this {Video}
+ * @param {boolean} [fRebuild] (true if this is a rebuild, not an initial build)
  * @return {boolean} true if any or all fonts were (re)built, false if nothing changed
  */
-Video.prototype.buildFonts = function()
+Video.prototype.buildFonts = function(fRebuild)
 {
     var fChanges = false;
 
     /*
-     * There's no point building any fonts if this is a non-windowed (eg, command-line) environment OR no font data was loaded.
+     * There's no point building fonts if this is a non-windowed (command-line) environment
+     * OR no font data is available (OR this is a rebuild AND we're currently in a graphics mode).
+     *
+     * In other words, build fonts if this IS a windowed environment AND font data is available
+     * AND this is not a rebuild, OR it IS a rebuild but we're in a graphics mode (ie, nFont is zero).
      */
-    if (window && this.abFontData) {
+    if (window && this.abFontData && (!fRebuild || this.nFont)) {
 
         var offSplit = 0x0000;
         var cxChar = this.cxFontChar? this.cxFontChar : 8;
@@ -4254,7 +4268,7 @@ Video.prototype.checkCursor = function()
      */
     var iCellCursor = (this.cardActive.regCRTData[Card.CRTC.CURSOR_ADDR_LO] + ((this.cardActive.regCRTData[Card.CRTC.CURSOR_ADDR_HI] & Card.CRTC.ADDR_HI_MASK) << 8));
     if (this.iCellCursor != iCellCursor) {
-        if (DEBUG && this.messageEnabled()) {
+        if (MAXDEBUG && this.messageEnabled()) {
             this.printMessage("checkCursor(): cursor moved from " + this.iCellCursor + " to " + iCellCursor);
         }
         this.removeCursor();
@@ -4309,7 +4323,7 @@ Video.prototype.removeCursor = function()
                      */
                     this.updateChar(col, row, data);
                 }
-                if (DEBUG && this.messageEnabled()) {
+                if (MAXDEBUG && this.messageEnabled()) {
                     this.printMessage("removeCursor(): removed from " + row + "," + col);
                 }
                 this.aCellCache[this.iCellCursor] = data;
@@ -4466,6 +4480,8 @@ Video.prototype.setCardAccess = function(nAccess)
 
 /**
  * setDimensions()
+ *
+ * This is the workhorse of setMode()
  *
  * @this {Video}
  */
@@ -4652,7 +4668,7 @@ Video.prototype.setDimensions = function()
  * checkMode(fForce)
  *
  * Called whenever the MDA/CGA's mode register (eg, Card.MDA.MODE.PORT, Card.CGA.MODE.PORT) is updated,
- * or whenever the EGA's GRC Misc register is updated, or when we've just finished a restore().
+ * or whenever the EGA/VGA's GRC.MISC register is updated, or when we've just finished a restore().
  *
  * @this {Video}
  * @param {boolean} [fForce] is used to force a mode update, if we recognize the current mode
@@ -4723,55 +4739,81 @@ Video.prototype.checkMode = function(fForce)
                  * so that as support is added for even more modes (eg, "Mode X" variations, monochrome modes, etc), it
                  * doesn't get totally out of control.
                  */
-                var fSEQDotClock = (card.regSEQData[Card.SEQ.CLOCKING.INDX] & Card.SEQ.CLOCKING.DOTCLOCK);
-                var nCRTCVertTotal = card.regCRTData[Card.CRTC.EGA.VTOTAL];
+                var fSEQDotClock, nCRTCVertTotal, nCRTCMaxScan;
+                var regGRCMode = card.regGRCData[Card.GRC.MODE.INDX];
+
+                /*
+                 * This text/graphics hybrid test detects the way Windows 95 reprograms the VGA on boot (ie, switching
+                 * to graphics mode 0x13 (320x200) without disturbing the text buffer contents, then reprogramming it
+                 * to enable graphics mode 0x15 (320x400), then drawing a logo in the 2nd half of the video memory, and
+                 * finally reprogramming regGRCMode and regGRCMisc to move the frame buffer back to its original text mode
+                 * location.
+                 */
+                var fTextGraphicsHybrid = (regGRCMode & (Card.GRC.MODE.COLOR256 | Card.GRC.MODE.EVENODD)) == (Card.GRC.MODE.COLOR256 | Card.GRC.MODE.EVENODD);
+                if (fTextGraphicsHybrid) {
+                    /*
+                     * When fTextGraphicsHybrid is true, we should be at the end of the above process, so addrBuffer
+                     * will have changed.  Since we don't (yet) assign a special mode to that configuration, we must at
+                     * least set fForce to true, so that setMode() will notice the buffer address change and remap it.
+                     */
+                    if (card.addrBuffer != this.addrBuffer || card.sizeBuffer != this.sizeBuffer) {
+                        fForce = true;
+                    }
+                }
+
+                fSEQDotClock = (card.regSEQData[Card.SEQ.CLOCKING.INDX] & Card.SEQ.CLOCKING.DOTCLOCK);
+                nCRTCVertTotal = card.regCRTData[Card.CRTC.EGA.VTOTAL];
                 nCRTCVertTotal |= ((card.regCRTData[Card.CRTC.EGA.OVERFLOW.INDX] & Card.CRTC.EGA.OVERFLOW.VTOTAL_BIT8)? 0x100 : 0);
                 if (card.nCard == Video.CARD.VGA) {
                     nCRTCVertTotal |= ((card.regCRTData[Card.CRTC.EGA.OVERFLOW.INDX] & Card.CRTC.EGA.OVERFLOW.VTOTAL_BIT9)? 0x200 : 0);
                 }
-                var nCRTCMaxScan = card.regCRTData[Card.CRTC.EGA.MAX_SCAN.INDX];
+                nCRTCMaxScan = card.regCRTData[Card.CRTC.EGA.MAX_SCAN.INDX];
 
                 if (nMode != Video.MODE.UNKNOWN) {
                     if (!(regGRCMisc & Card.GRC.MISC.GRAPHICS)) {
-                        if (fSEQDotClock) nMode -= 2;
+                        /*
+                         * Here's where we handle text modes; since nMode will have been assigned a default
+                         * of either 0x02 or 0x03, convert that to either 0x05 or 0x04 if we're in a low-res
+                         * graphics mode, 0x06 otherwise.
+                         */
+                        nMode -= (fSEQDotClock? 2 : 0);
+                    }
+                    else if (card.addrBuffer != 0xA0000 && !fTextGraphicsHybrid) {
+                        /*
+                         * Here's where we handle CGA graphics modes; since nMode will have been assigned a
+                         * default of either 0x02 or 0x03, convert that to either 0x05 or 0x04 if we're in a
+                         * low-res graphics mode, 0x06 otherwise.
+                         */
+                        nMode = fSEQDotClock? (7 - nMode) : Video.MODE.CGA_640X200;
                     } else {
-                        if (card.addrBuffer == 0xB8000) {
-                            /*
-                             * Since nMode will have been assigned a default of either 0x02 or 0x03, convert that to
-                             * either 0x05 or 0x04 if we're in a low-res graphics mode, 0x06 otherwise.
-                             */
-                            nMode = fSEQDotClock? (7 - nMode) : Video.MODE.CGA_640X200;
-                        } else {
-                            /*
-                             * card.addrBuffer must be 0xA0000, so we need to discriminate among modes 0x0D and up;
-                             * we've already defaulted to either 0x0F or 0x10.  If COLOR256 is set, then select mode
-                             * 0x13 (or greater), else if 200-to-400 scan-line conversion is in effect, select either
-                             * mode 0x0D or 0x0E, else if VGA resolution is set, select either mode 0x11 or 0x12.
-                             */
-                            if (card.regGRCData[Card.GRC.MODE.INDX] & Card.GRC.MODE.COLOR256) {
-                                if (nCRTCMaxScan & Card.CRTC.EGA.MAX_SCAN.SCAN_LINE) {
-                                    if (card.regCRTData[Card.CRTC.EGA.VDISP_END] <= 0x8F) {
-                                        nMode = Video.MODE.VGA_320X200;
-                                    }
-                                    else { /* (card.regCRTData[Card.CRTC.EGA.VDISP_END] == 0xDF) */
-                                        nMode = Video.MODE.VGA_320X240;
-                                    }
-                                } else {
-                                    nMode = Video.MODE.VGA_320X400;
+                        /*
+                         * Here's where we handle EGA/VGA graphics modes, discriminating among modes 0x0D and up;
+                         * we've already defaulted to either 0x0F or 0x10.  If COLOR256 is set, then select mode
+                         * 0x13 (or greater), else if 200-to-400 scan-line conversion is in effect, select either
+                         * mode 0x0D or 0x0E, else if VGA resolution is set, select either mode 0x11 or 0x12.
+                         */
+                        if (card.regGRCData[Card.GRC.MODE.INDX] & Card.GRC.MODE.COLOR256) {
+                            if (nCRTCMaxScan & Card.CRTC.EGA.MAX_SCAN.SCAN_LINE) {
+                                if (card.regCRTData[Card.CRTC.EGA.VDISP_END] <= 0x8F) {
+                                    nMode = Video.MODE.VGA_320X200;
                                 }
+                                else { /* (card.regCRTData[Card.CRTC.EGA.VDISP_END] == 0xDF) */
+                                    nMode = Video.MODE.VGA_320X240;
+                                }
+                            } else {
+                                nMode = Video.MODE.VGA_320X400;
                             }
-                            else if (nCRTCMaxScan & Card.CRTC.EGA.MAX_SCAN.CONVERT400) {
-                                nMode = (fSEQDotClock? Video.MODE.EGA_320X200 : Video.MODE.EGA_640X200);
-                            } else if (nCRTCVertTotal > 500) {
-                                nMode = (this.nMonitorType == ChipSet.MONITOR.MONO? Video.MODE.VGA_640X480_MONO : Video.MODE.VGA_640X480);
-                            }
-                            if (DEBUG && this.messageEnabled()) {
-                                this.printMessage("checkMode(): nCRTCVertTotal=" + nCRTCVertTotal + ", mode=" + str.toHexByte(nMode));
-                            }
+                        }
+                        else if (nCRTCMaxScan & Card.CRTC.EGA.MAX_SCAN.CONVERT400) {
+                            nMode = (fSEQDotClock? Video.MODE.EGA_320X200 : Video.MODE.EGA_640X200);
+                        } else if (nCRTCVertTotal > 500) {
+                            nMode = (this.nMonitorType == ChipSet.MONITOR.MONO? Video.MODE.VGA_640X480_MONO : Video.MODE.VGA_640X480);
+                        }
+                        if (DEBUG && this.messageEnabled()) {
+                            this.printMessage("checkMode(): nCRTCVertTotal=" + nCRTCVertTotal + ", mode=" + str.toHexByte(nMode));
                         }
                     }
                 }
-
                 nAccess = this.getCardAccess();
             }
         }
@@ -4812,8 +4854,8 @@ Video.prototype.checkMode = function(fForce)
 /**
  * setMode(nMode, fForce)
  *
- * Set fForce to true to update the mode regardless of previous mode, or false to perform a normal update
- * that bypasses updateScreen() but still calls initCellCache().
+ * Set fForce to true to update the mode regardless of previous mode, or false to perform
+ * a normal update that bypasses updateScreen() but still calls initCellCache().
  *
  * @this {Video}
  * @param {number|null} nMode
@@ -4825,7 +4867,7 @@ Video.prototype.setMode = function(nMode, fForce)
     if (nMode != null && (nMode != this.nMode || fForce)) {
 
         if (DEBUG && this.messageEnabled()) {
-            this.printMessage("setMode(" + str.toHexByte(nMode) + (fForce? ",force" : "") + ")");
+            this.printMessage("setMode(" + str.toHexByte(nMode) + (fForce? ",force" : "") + ")", true, true);
         }
 
         this.cUpdates = 0;      // count updateScreen() calls as a means of driving blink updates
@@ -5162,12 +5204,28 @@ Video.prototype.updateScreen = function(fForce)
 
     /*
      * Calculate the VISIBLE start of screen memory (addrScreen), not merely the PHYSICAL start,
-     * as well as the extent of it (cbScreen) and use those values for all addressing operations
-     * to follow.  FYI, in these calculations, offScreen does not refer to "off-screen" memory,
-     * but rather the "offset" of the start of visible screen memory.
+     * as well as the extent of it (cbScreen) and use those values for all addressing operations to follow.
+     * FYI, in these calculations, offScreen does not refer to "off-screen" memory, but rather the "offset"
+     * of the start of visible screen memory.
      */
-    var addrScreen = card.addrBuffer;
-    var addrScreenLimit = addrScreen + card.sizeBuffer;
+    var addrBuffer = this.addrBuffer;
+    var addrScreen = addrBuffer;
+    var addrScreenLimit = addrScreen + this.sizeBuffer;
+
+    /*
+     * HACK: To deal with the fTextGraphicsHybrid 320x400 mode that Windows 95 uses (ie, when the buffer
+     * is mapped to B800:0000 instead of A000:0000 and is configured for text mode access, but graphics are
+     * still being displayed from the second half of video memory), we must ignore the programmed address.
+     *
+     * In that case, the hard-coded address range below isn't actually active either, but it doesn't matter;
+     * we just have to get through the rest of this function and make it to the updateScreenGraphicsVGA() call,
+     * which will draw from our video buffer (adwMemory) directly; these addresses are only used for bounds
+     * checking.
+     */
+    if (this.nMode >= Video.MODE.VGA_320X200) {
+        addrBuffer = addrScreen = 0xA0000;
+        addrScreenLimit = addrScreen + 0x10000;
+    }
 
     /*
      * HACK: The CRTC's START_ADDR_HI and START_ADDR_LO registers are supposed to be "latched" into
@@ -5190,7 +5248,6 @@ Video.prototype.updateScreen = function(fForce)
 
     /*
      * Any screen (aka "page") offset must be doubled for text modes, due to the attribute bytes.
-     *
      * TODO: Come up with a more robust method of deciding when any screen offset should be doubled.
      */
     if (this.nFont) offScreen <<= 1;
@@ -5259,13 +5316,22 @@ Video.prototype.updateScreen = function(fForce)
         }
     }
     else if (this.cbSplit) {
+        /*
+         * All CGA graphics modes have the goofy split-buffer layout, hence the simple test above.
+         */
         this.updateScreenGraphicsCGA(addrScreen, addrScreenLimit);
     }
     else if (!this.fColor256) {
-        this.updateScreenGraphicsEGA(addrScreen, addrScreenLimit);
+        /*
+         * All EGA graphics modes are taken care of here, including all 16-color VGA graphics modes.
+         */
+        this.updateScreenGraphicsEGA(addrBuffer, addrScreen, addrScreenLimit);
     }
     else {
-        this.updateScreenGraphicsVGA(addrScreen, addrScreenLimit);
+        /*
+         * Finally, all 256-color VGA modes are processed here.
+         */
+        this.updateScreenGraphicsVGA(addrBuffer, addrScreen, addrScreenLimit);
     }
 };
 
@@ -5422,14 +5488,15 @@ Video.prototype.updateScreenGraphicsCGA = function(addrScreen, addrScreenLimit)
 };
 
 /**
- * updateScreenGraphicsEGA(addrScreen, addrScreenLimit)
+ * updateScreenGraphicsEGA(addrBuffer, addrScreen, addrScreenLimit)
  *
  * TODO: Add support for blinking graphics (ATC.MODE.BLINK_ENABLE)
  *
- * @param addrScreen
- * @param addrScreenLimit
+ * @param {number} addrBuffer
+ * @param {number} addrScreen
+ * @param {number} addrScreenLimit
  */
-Video.prototype.updateScreenGraphicsEGA = function(addrScreen, addrScreenLimit)
+Video.prototype.updateScreenGraphicsEGA = function(addrBuffer, addrScreen, addrScreenLimit)
 {
     var addr, data;
 
@@ -5450,7 +5517,7 @@ Video.prototype.updateScreenGraphicsEGA = function(addrScreen, addrScreenLimit)
     var nRowAdjust = (this.nColsLogical > this.nCols? ((this.nColsLogical - this.nCols - iPixelFirst) >> 3) : 0);
 
     while (addr < addrScreenLimit) {
-        var idw = addr++ - this.addrBuffer;
+        var idw = addr++ - addrBuffer;
         this.assert(idw >= 0 && idw < adwMemory.length);
         data = adwMemory[idw];
 
@@ -5541,7 +5608,7 @@ Video.prototype.updateScreenGraphicsEGA = function(addrScreen, addrScreenLimit)
 };
 
 /**
- * updateScreenGraphicsVGA(addrScreen, addrScreenLimit)
+ * updateScreenGraphicsVGA(addrBuffer, addrScreen, addrScreenLimit)
  *
  * This function name is a slight misnomer: updateScreenGraphicsEGA() takes care of all the 4bpp video modes
  * (first introduced by the EGA and later expanded by the VGA), where each pixel's bits are spread across the 4
@@ -5551,10 +5618,11 @@ Video.prototype.updateScreenGraphicsEGA = function(addrScreen, addrScreenLimit)
  *
  * TODO: Add support for blinking graphics (ATC.MODE.BLINK_ENABLE)
  *
- * @param addrScreen
- * @param addrScreenLimit
+ * @param {number} addrBuffer
+ * @param {number} addrScreen
+ * @param {number} addrScreenLimit
  */
-Video.prototype.updateScreenGraphicsVGA = function(addrScreen, addrScreenLimit)
+Video.prototype.updateScreenGraphicsVGA = function(addrBuffer, addrScreen, addrScreenLimit)
 {
     var addr, data;
 
@@ -5576,7 +5644,7 @@ Video.prototype.updateScreenGraphicsVGA = function(addrScreen, addrScreenLimit)
     var nRowAdjust = (this.nColsLogical > this.nCols? ((this.nColsLogical - this.nCols - iPixelFirst) >> 3) : 0);
 
     while (addr < addrScreenLimit) {
-        var idw = addr - this.addrBuffer;
+        var idw = addr - addrBuffer;
         this.assert(idw >= 0 && idw < adwMemory.length);
         data = adwMemory[idw];
 
@@ -5849,7 +5917,7 @@ Video.prototype.outATC = function(port, bOut, addrFrom)
         this.printMessageIO(port, bOut, addrFrom, "ATC.INDX");
         card.fATCData = true;
         if ((bOut & Card.ATC.INDX_PAL_ENABLE) && !fPalEnabled) {
-            if (!this.buildFonts()) {
+            if (!this.buildFonts(true)) {
                 if (DEBUG && (!addrFrom || this.messageEnabled())) {
                     this.printMessage("outATC(" + str.toHexByte(bOut) + "): no font changes required");
                 }
@@ -5860,9 +5928,31 @@ Video.prototype.outATC = function(port, bOut, addrFrom)
                 this.updateScreen(true);
             }
         }
+        else {
+            /*
+             * TODO: We need a screen blanking function, suitable for any mode, when INDX_PAL_ENABLE transitions off.
+             * powerDown() might like to use such a function, too.  updateScreen() already disables any further screen
+             * updates while INDX_PAL_ENABLE is clear (except when fForce is true), but that's all we currently do.
+             *
+             *      if (!(bOut & Card.ATC.INDX_PAL_ENABLE) && fPalEnabled) this.blankScreen();
+             *
+             * However, there also needs to be a delay, because when the IBM VGA BIOS changes the mode, it updates
+             * the ATC palette registers in such a way that INDX_PAL_ENABLE is constantly toggled; here's one iteration:
+             *
+             *      C000:2B39 EC              IN       AL,DX
+             *      C000:2B3A B2C0            MOV      DL,C0
+             *      C000:2B3C 8BC3            MOV      AX,BX
+             *      C000:2B3E 86C4            XCHG     AL,AH
+             *      C000:2B40 EE              OUT      DX,AL    <-- this ATC index value does NOT contain 0x20
+             *      C000:2B41 86C4            XCHG     AL,AH
+             *      C000:2B43 EE              OUT      DX,AL
+             *      C000:2B44 B020            MOV      AL,20
+             *      C000:2B46 EE              OUT      DX,AL    <-- this ATC index value obviously DOES contain 0x20
+             */
+        }
         /*
-         * HACK: offStartAddr is supposed to be "latched" ONLY at the start of every VRETRACE interval,
-         * but other "triggers" are helpful; see updateScreen() for details.
+         * HACK: offStartAddr is supposed to be "latched" ONLY at the start of every VRETRACE interval, but
+         * other "triggers" are helpful; see updateScreen() for details.
          */
         card.offStartAddr = ((card.regCRTData[Card.CRTC.START_ADDR_HI] << 8) + card.regCRTData[Card.CRTC.START_ADDR_LO])|0;
         card.nVertPeriodsStartAddr = 0;

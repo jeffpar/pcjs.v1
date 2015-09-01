@@ -1635,7 +1635,7 @@ X86CPU.prototype.checkIntNotify = function(nInt)
     var aNotify = this.aIntNotify[nInt];
     if (aNotify !== undefined) {
         for (var i = 0; i < aNotify.length; i++) {
-            if (!aNotify[i](this.regLIP)) {
+            if (!aNotify[i](aNotify[i][0], this.regLIP)) {
                 return false;
             }
         }
@@ -3905,6 +3905,40 @@ X86CPU.prototype.popWord = function()
         }
     }
     return w;
+};
+
+/**
+ * pushData(d, size)
+ *
+ * @this {X86CPU}
+ * @param {number} d is the data to push at current SP; SP decreased by size
+ * @param {number} size is the size of the data to push (must be either 2 or 4)
+ */
+X86CPU.prototype.pushData = function(d, size)
+{
+    this.regLSP = (this.regLSP - size)|0;
+    /*
+     * Properly comparing regLSP to regLSPLimitLow would normally require coercing both to unsigned
+     * (ie, floating-point) values.  But instead, we do a subtraction, (regLSP - regLSPLimitLow), and
+     * if the result is negative, we need only be concerned if the signs of both numbers are the same
+     * (ie, the sign of their XOR'ed union is positive).
+     */
+    if (((this.regLSP - this.regLSPLimitLow)|0) < 0 && (this.regLSPLimitLow ^ this.regLSP) >= 0) {
+        /*
+         * There's no such thing as an SS fault on the 8086/8088, and I'm assuming that, on newer
+         * processors, when the stack segment limit is set to the maximum, it's OK for the stack to wrap.
+         */
+        if (this.model <= X86.MODEL_8088 || !this.segSS.fExpDown && this.segSS.limit == this.segSS.maskAddr || this.segSS.fExpDown && !this.segSS.limit) {
+            this.setSP((this.regLSP - this.segSS.base) & this.segSS.maskAddr);
+        } else {
+            X86.fnFault.call(this, X86.EXCEPTION.SS_FAULT, 0);
+        }
+    }
+    if (size == 2) {
+        this.setShort(this.regLSP, d);
+    } else {
+        this.setLong(this.regLSP, d);
+    }
 };
 
 /**
