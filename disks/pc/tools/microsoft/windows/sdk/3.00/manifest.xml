@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.19.3/manifest.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.19.4/manifest.xsl"?>
 <manifest type="software">
 	<title>Windows 3.0 SDK</title>
 	<disk id="disk01" size="737280" chs="80:2:9" img="static/WIN30SDK_DISK01.img" href="/disks/pc/tools/microsoft/windows/sdk/3.00/WIN30SDK_DISK01.json" md5="3eb1f6df549dd454b65fb869a606e010" md5json="6a85939ac71c91d76b9fe39407464de2">
