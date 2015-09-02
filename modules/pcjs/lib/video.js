@@ -1158,34 +1158,34 @@ Card.CRTC = {
         HRETRACE_END:       0x05,
         VTOTAL:             0x06,
         OVERFLOW: {
-        INDX:               0x07,
-        VTOTAL_BIT8:        0x01,       // bit 8 of register 0x06
-        VDISP_END_BIT8:     0x02,       // bit 8 of register 0x12
-        VRETRACE_START_BIT8:0x04,       // bit 8 of register 0x10
-        VBLANK_START_BIT8:  0x08,       // bit 8 of register 0x15
-        LINE_COMPARE_BIT8:  0x10,       // bit 8 of register 0x18
-        CURSOR_START_BIT8:  0x20,       // bit 8 of register 0x0A (EGA only)
-        VTOTAL_BIT9:        0x20,       // bit 9 of register 0x06 (VGA only)
-        VDISP_END_BIT9:     0x40,       // bit 9 of register 0x12 (VGA only, unused on EGA)
-        VRETRACE_START_BIT9:0x80        // bit 9 of register 0x10 (VGA only, unused on EGA)
+            INDX:               0x07,
+            VTOTAL_BIT8:        0x01,   // bit 8 of register 0x06
+            VDISP_END_BIT8:     0x02,   // bit 8 of register 0x12
+            VRETRACE_START_BIT8:0x04,   // bit 8 of register 0x10
+            VBLANK_START_BIT8:  0x08,   // bit 8 of register 0x15
+            LINE_COMPARE_BIT8:  0x10,   // bit 8 of register 0x18
+            CURSOR_START_BIT8:  0x20,   // bit 8 of register 0x0A (EGA only)
+            VTOTAL_BIT9:        0x20,   // bit 9 of register 0x06 (VGA only)
+            VDISP_END_BIT9:     0x40,   // bit 9 of register 0x12 (VGA only, unused on EGA)
+            VRETRACE_START_BIT9:0x80    // bit 9 of register 0x10 (VGA only, unused on EGA)
         },
         PRESET_SCAN:        0x08,
         /*
          * NOTE: EGA/VGA CRTC registers 0x09-0x0F are the same as the MDA/CGA CRTC registers defined above
          */
         MAX_SCAN: {
-        INDX:               0x09,
-        SCAN_LINE:          0x1f,
-        VBLANK_START_BIT9:  0x20,
-        LINE_COMPARE_BIT9:  0x40,
-        CONVERT400:         0x80        // 200-to-400 scan-line conversion is in effect
+            INDX:               0x09,
+            SCAN_LINE:          0x1f,
+            VBLANK_START_BIT9:  0x20,   // (VGA only)
+            LINE_COMPARE_BIT9:  0x40,   // (VGA only)
+            CONVERT400:         0x80    // 200-to-400 scan-line conversion is in effect (VGA only)
         },
         CURSOR_START: {
             INDX:           0x0A,
             MASK:           0x1F,
-            BLINKON:        0x00,       // (supposedly, 0x04 has the same effect as 0x00)
-            BLINKOFF:       0x20,       // if blinking is disabled, the cursor is effectively hidden
-            BLINKFAST:      0x60        // default is 1/16 of the frame rate; this switches to 1/32 of the frame rate
+            BLINKON:        0x00,       // (VGA only; supposedly, 0x04 has the same effect as 0x00)
+            BLINKOFF:       0x20,       // if blinking is disabled, the cursor is effectively hidden (VGA only)
+            BLINKFAST:      0x60        // default is 1/16 of the frame rate; this switches to 1/32 of the frame rate (VGA only)
         },
         CURSOR_END: {
             INDX:           0x0B,
@@ -1208,8 +1208,8 @@ Card.CRTC = {
         UNDERLINE: {
             INDX:           0x14,
             ROWSCAN:        0x1f,
-            COUNTBY4:       0x20,
-            DWORD:          0x40
+            COUNTBY4:       0x20,       // (VGA only)
+            DWORD:          0x40        // (VGA only)
         },
         VBLANK_START:       0x15,
         VBLANK_END:         0x16,
@@ -4804,9 +4804,9 @@ Video.prototype.checkMode = function(fForce)
                                 nMode = Video.MODE.VGA_320X400;
                             }
                         }
-                        else if (nCRTCMaxScan & Card.CRTC.EGA.MAX_SCAN.CONVERT400) {
+                        else if ((nCRTCMaxScan & Card.CRTC.EGA.MAX_SCAN.CONVERT400) || nCRTCVertTotal < 350) {
                             nMode = (fSEQDotClock? Video.MODE.EGA_320X200 : Video.MODE.EGA_640X200);
-                        } else if (nCRTCVertTotal > 500) {
+                        } else if (nCRTCVertTotal >= 480) {
                             nMode = (this.nMonitorType == ChipSet.MONITOR.MONO? Video.MODE.VGA_640X480_MONO : Video.MODE.VGA_640X480);
                         }
                         if (DEBUG && this.messageEnabled()) {
@@ -4925,14 +4925,9 @@ Video.prototype.setMode = function(nMode, fForce)
                 return false;
             }
         }
-
         this.setDimensions();
-
-        if (fForce !== false) {
-            this.updateScreen(true);
-        } else {
-            this.invalidateScreen(true);
-        }
+        this.invalidateScreen(true);
+        this.updateScreen();
     }
     return true;
 };
