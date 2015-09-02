@@ -6421,8 +6421,8 @@ if (DEBUGGER) {
             this.parseAddrOptions(dbgAddr, sOptions);
             this.setTempBreakpoint(dbgAddr);
         }
-        if (!fQuiet && !this.runCPU(true)) {
-            this.println('cpu busy or unavailable, command ignored');
+        if (!this.runCPU(true)) {
+            if (!fQuiet) this.println("cpu busy or unavailable, run command ignored");
         }
     };
 
