@@ -2475,17 +2475,23 @@ X86.opPUSHF = function PUSHF()
     var regPS = this.getPS();
     if (I386) {
         if ((regPS & X86.PS.VM) && this.nIOPL < 3) {
+            if (DEBUG) this.printMessage("PUSHF in v86-mode (IOPL < 3)", this.bitsMessage, true);
             X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
             return;
         }
         /*
          * It doesn't matter whether this is PUSHF or PUSHFD: the VM and RF flags are never pushed, so
-         * we can always clear them.
+         * we should always clear them.  NOTE: This contradicts what the "INTEL 80386 PROGRAMMER'S REFERENCE
+         * MANUAL 1986" says on page 81 (which we assume is wrong):
+         *
+         *      SYSTEMS FLAGS (INCLUDING THE IOPL FIELD, AND THE VM, RF, AND IF FLAGS) ARE PUSHED AND ARE
+         *      VISIBLE TO APPLICATIONS PROGRAMS. HOWEVER, WHEN AN APPLICATIONS PROGRAM POPS THE FLAGS,
+         *      THESE ITEMS ARE NOT CHANGED, REGARDLESS OF THE VALUES POPPED INTO THEM.
          *
          * This does, however, beg the question: how does code running in V86-mode detect that's in V86-mode
          * and not real-mode?  By using the SMSW instruction and checking the PE (protected-mode enabled) bit.
          * The SMSW instruction returns a subset of the CR0 bits, and unlike the MOV reg,CR0 instruction, is
-         * allowed in V86-mode.
+         * allowed in V86-mode.  See fnSMSW() for more information.
          */
         regPS &= ~(X86.PS.VM | X86.PS.RF);
     }
@@ -2504,6 +2510,7 @@ X86.opPOPF = function POPF()
      * TODO: Consider swapping out this function whenever setProtMode() changes the mode to V86-mode.
      */
     if (I386 && (this.regPS & X86.PS.VM) && this.nIOPL < 3) {
+        if (DEBUG) this.printMessage("POPF in v86-mode (IOPL < 3)", this.bitsMessage, true);
         X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
         return;
     }
@@ -3439,6 +3446,7 @@ X86.opINT3 = function INT3()
      * TODO: Consider swapping out this function whenever setProtMode() changes the mode to V86-mode.
      */
     if (I386 && (this.regPS & X86.PS.VM) && this.nIOPL < 3) {
+        if (DEBUG) this.printMessage("INT 0x03 in v86-mode (IOPL < 3)", this.bitsMessage, true);
         X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
         return;
     }
@@ -3478,14 +3486,15 @@ X86.opINT3 = function INT3()
  */
 X86.opINTn = function INTn()
 {
+    var nInt = this.getIPByte();
     /*
      * TODO: Consider swapping out this function whenever setProtMode() changes the mode to V86-mode.
      */
     if (I386 && (this.regPS & X86.PS.VM) && this.nIOPL < 3) {
+        if (DEBUG && this.messageEnabled()) this.printMessage("INT " + str.toHexByte(nInt) + " in v86-mode (IOPL < 3)", true, true);
         X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
         return;
     }
-    var nInt = this.getIPByte();
     /*
      * checkIntNotify() checks for any notification handlers registered via addIntNotify(), calls them,
      * and returns false ONLY if a notification handler returned false (ie, requesting the interrupt be skipped).
@@ -3509,6 +3518,7 @@ X86.opINTO = function INTO()
          * TODO: Consider swapping out this function whenever setProtMode() changes the mode to V86-mode.
          */
         if (I386 && (this.regPS & X86.PS.VM) && this.nIOPL < 3) {
+            if (DEBUG) this.printMessage("INTO in v86-mode (IOPL < 3)", this.bitsMessage, true);
             X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
             return;
         }
@@ -3529,6 +3539,7 @@ X86.opIRET = function IRET()
      * TODO: Consider swapping out this function whenever setProtMode() changes the mode to V86-mode.
      */
     if (I386 && (this.regPS & X86.PS.VM) && this.nIOPL < 3) {
+        if (DEBUG) this.printMessage("IRET in v86-mode (IOPL < 3)", this.bitsMessage, true);
         X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
         return;
     }
@@ -4131,6 +4142,7 @@ X86.opCLI = function CLI()
      * and in V86-mode, CPL is always 3.
      */
     if (this.nCPL > this.nIOPL) {
+        if (DEBUG && (this.regPS & X86.PS.VM)) this.printMessage("CLI in v86-mode (IOPL < 3)", this.bitsMessage, true);
         X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
         return;
     }
@@ -4150,6 +4162,7 @@ X86.opSTI = function STI()
      * and in V86-mode, CPL is always 3.
      */
     if (this.nCPL > this.nIOPL) {
+        if (DEBUG && (this.regPS & X86.PS.VM)) this.printMessage("STI in v86-mode (IOPL < 3)", this.bitsMessage, true);
         X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
         return;
     }

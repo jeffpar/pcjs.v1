@@ -37,6 +37,7 @@ if (typeof module !== 'undefined') {
     var web         = require("../../shared/lib/weblib");
     var DiskAPI     = require("../../shared/lib/diskapi");
     var Component   = require("../../shared/lib/component");
+    var Interrupts  = require("./interrupts");
     var Messages    = require("./messages");
     var ChipSet     = require("./chipset");
     var Disk        = require("./disk");
@@ -470,44 +471,6 @@ if (DEBUG) {
     };
 }
 
-/*
- * HDC BIOS interrupts, functions, and other parameters
- *
- * When the HDC BIOS overwrites the ROM BIOS INT 0x13 address, it saves the original INT 0x13 address
- * in the INT 0x40 vector.
- */
-HDC.BIOS = {
-    INT_DISK:       0x13,
-    INT_DISKETTE:   0x40
-};
-
-/*
- * NOTE: These are useful values for reference, but they're not actually used for anything at the moment.
- */
-HDC.BIOS.DISK_CMD = {
-    RESET:          0x00,
-    GET_STATUS:     0x01,
-    READ_SECTORS:   0x02,
-    WRITE_SECTORS:  0x03,
-    VERIFY_SECTORS: 0x04,
-    FORMAT_TRK:     0x05,
-    FORMAT_BAD:     0x06,
-    FORMAT_DRIVE:   0x07,
-    GET_DRIVEPARMS: 0x08,
-    SET_DRIVEPARMS: 0x09,
-    READ_LONG:      0x0A,
-    WRITE_LONG:     0x0B,
-    SEEK:           0x0C,
-    ALT_RESET:      0x0D,
-    READ_BUFFER:    0x0E,
-    WRITE_BUFFER:   0x0F,
-    TEST_READY:     0x10,
-    RECALIBRATE:    0x11,
-    RAM_DIAGNOSTIC: 0x12,
-    DRV_DIAGNOSTIC: 0x13,
-    CTL_DIAGNOSTIC: 0x14
-};
-
 /**
  * setBinding(sHTMLType, sBinding, control)
  *
@@ -550,8 +513,8 @@ HDC.prototype.initBus = function(cmp, bus, cpu, dbg)
     bus.addPortInputTable(this, this.fATC? HDC.aATCPortInput : HDC.aXTCPortInput);
     bus.addPortOutputTable(this, this.fATC? HDC.aATCPortOutput : HDC.aXTCPortOutput);
 
-    cpu.addIntNotify(HDC.BIOS.INT_DISK, this.intBIOSDisk.bind(this));
-    cpu.addIntNotify(HDC.BIOS.INT_DISKETTE, this.intBIOSDiskette.bind(this));
+    cpu.addIntNotify(Interrupts.DISK, this.intBIOSDisk.bind(this));
+    cpu.addIntNotify(Interrupts.ALT_DISK, this.intBIOSDiskette.bind(this));
 
     /*
      * The following code used to be performed in the HDC constructor, but now we need to wait for information

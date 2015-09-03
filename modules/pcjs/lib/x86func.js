@@ -3225,6 +3225,11 @@ X86.fnSLDT = function SLDT(dst, src)
 /**
  * fnSMSW(dst, src)
  *
+ * TODO: I've seen a claim that SMSW can be used with an operand size override to obtain the entire CR0.
+ * I don't dispute that, and since I don't mask the return value, that should be possible here; however, it
+ * should still be confirmed on real hardware at some point.  Note that this differs from LMSW, which is
+ * REQUIRED to mask the source operand.
+ *
  * op=0x0F,0x01,reg=0x4 (GRP7:SMSW)
  *
  * @this {X86CPU}

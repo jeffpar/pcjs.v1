@@ -54,11 +54,13 @@ var Interrupts = {
     CASSETTE:   0x15,
     KBD:        0x16,
     RTC:        0x1A,
-    TIMER_TICK: 0x1C,
+    ALT_TIMER:  0x1C,               // invoked by the BIOS timer interrupt handler (vector 0x08)
     DOS:        0x21,
     DOS_IDLE:   0x28,
     DOS_NETBIOS:0x2A,
     MOUSE:      0x33,
+    ALT_DISK:   0x40,               // HDC BIOS saves original FDC BIOS vector here
+    ALT_VIDEO:  0x6D,               // IBM VGA BIOS saves original video BIOS vector here
     WINDBG:     {                   // Windows Debugger protected-mode interface
         VECTOR:     0x41,
         IS_LOADED:  0x004F,         // AX command
@@ -104,6 +106,33 @@ if (DEBUGGER) {
         0x16: "get drive %DL change line status",
         0x17: "set drive %DL DASD type",
         0x18: "set drive %DL media type"
+        /*
+         * Here's an additional function reference, previously in the HDC component, but moved here
+         * because our components are hardware emulations, not BIOS emulations, so this information is
+         * really only of interest to the Debugger (or the casual observer).
+         *
+         *      RESET:          0x00,
+         *      GET_STATUS:     0x01,
+         *      READ_SECTORS:   0x02,
+         *      WRITE_SECTORS:  0x03,
+         *      VERIFY_SECTORS: 0x04,
+         *      FORMAT_TRK:     0x05,
+         *      FORMAT_BAD:     0x06,
+         *      FORMAT_DRIVE:   0x07,
+         *      GET_DRIVEPARMS: 0x08,
+         *      SET_DRIVEPARMS: 0x09,
+         *      READ_LONG:      0x0A,
+         *      WRITE_LONG:     0x0B,
+         *      SEEK:           0x0C,
+         *      ALT_RESET:      0x0D,
+         *      READ_BUFFER:    0x0E,
+         *      WRITE_BUFFER:   0x0F,
+         *      TEST_READY:     0x10,
+         *      RECALIBRATE:    0x11,
+         *      RAM_DIAGNOSTIC: 0x12,
+         *      DRV_DIAGNOSTIC: 0x13,
+         *      CTL_DIAGNOSTIC: 0x14
+         */
     };
     Interrupts.FUNCS[Interrupts.CASSETTE] = {
         0x80: "open device",

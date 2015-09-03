@@ -225,11 +225,11 @@ X86Seg.prototype.loadProt = function loadProt(sel, fProbe)
     /*
      * The ROM BIOS POST executes some test code in protected-mode without properly initializing the LDT,
      * which has no bearing on the ROM's own code, because it never loads any LDT selectors, but if at the same
-     * time our Debugger attempts to validate a selector in one of its breakpoints, that could cause some
-     * grief here.  We avoid that grief by skipping segment lookup if the descriptor table being referenced is zero
-     * AND the Debugger's ID.DBG segment register is being used.
+     * time our Debugger attempts to validate a selector in one of its breakpoints, that could cause some grief.
+     *
+     * Fortunately, the Debugger now has its own interface, probeDesc(), so that should no longer be a concern.
      */
-    if (addrDT || this.id != X86Seg.ID.DBG) {
+    if (addrDT) {
         var addrDesc = (addrDT + (sel & X86.SEL.MASK))|0;
         if ((addrDTLimit - addrDesc)|0 >= 7) {
             /*
@@ -238,7 +238,7 @@ X86Seg.prototype.loadProt = function loadProt(sel, fProbe)
              * starting with a 15-cycle difference.  Obviously the difference will vary with the instruction,
              * and will be much greater whenever the load fails.
              */
-            if (this.id != X86Seg.ID.DBG) cpu.nStepCycles -= 15;
+            cpu.nStepCycles -= 15;
             return this.loadDesc8(addrDesc, sel, fProbe);
         }
         if (this.id < X86Seg.ID.VER) {
@@ -740,7 +740,6 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fProbe)
                     if (!I386 || !(type & X86.DESC.ACC.NONSEG_386)) {
                         offSP = (cplNew << 2) + X86.TSS286.CPL0_SP;
                         lenSP = 2;
-                        cpu.assert(!(regPS & X86.PS.VM));
                     } else {
                         offSP = (cplNew << 2) + X86.TSS386.CPL0_ESP;
                         lenSP = 4;
@@ -923,8 +922,9 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fProbe)
 
     default:
         /*
-         * The only other case should be X86Seg.ID.DBG, for which we do nothing.
+         * The only other case used to be X86Seg.ID.DBG, but the Debugger uses probeDesc() now, so we should never get here.
          */
+        cpu.assert(false);
         break;
     }
 
@@ -946,7 +946,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fProbe)
         this.ext = ext;
         this.addrDesc = addrDesc;
         /*
-         * A quick recap of what updateMode(fLoad=true, fProt=true, fV86=false) actually updates next:
+         * A quick recap of what updateMode(fLoad=true, fProt=true, fV86=false) actually updates:
          *
          *      cpl
          *      dpl
@@ -966,6 +966,64 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fProbe)
     if (DEBUG) this.messageSeg(sel, base, limit, type, ext);
 
     return base;
+};
+
+/**
+ * probeDesc(sel)
+ *
+ * This is a neutered version of loadProt() designed for the Debugger.
+ *
+ * @this {X86Seg}
+ * @param {number} sel
+ * @return {number} base address of selected segment, or X86.ADDR_INVALID if error
+ */
+X86Seg.prototype.probeDesc = function(sel)
+{
+    var addrDT;
+    var addrDTLimit;
+    var cpu = this.cpu;
+
+    sel &= 0xffff;
+
+    if (!(sel & X86.SEL.LDT)) {
+        addrDT = cpu.addrGDT;
+        addrDTLimit = cpu.addrGDTLimit;
+    } else {
+        addrDT = cpu.segLDT.base;
+        addrDTLimit = (addrDT + cpu.segLDT.limit)|0;
+    }
+
+    var addrDesc = (addrDT + (sel & X86.SEL.MASK))|0;
+
+    if ((addrDTLimit - addrDesc)|0 >= 7) {
+
+        /*
+         * Load the descriptor from memory using probeAddr().
+         */
+        var limit = cpu.probeAddr(addrDesc + X86.DESC.LIMIT.OFFSET, 2);
+        var acc = cpu.probeAddr(addrDesc + X86.DESC.ACC.OFFSET, 2);
+        var type = (acc & X86.DESC.ACC.TYPE.MASK);
+        var base = cpu.probeAddr(addrDesc + X86.DESC.BASE.OFFSET, 2) | ((acc & X86.DESC.ACC.BASE1623) << 16);
+        var ext = cpu.probeAddr(addrDesc + X86.DESC.EXT.OFFSET, 2);
+
+        if (I386 && cpu.model >= X86.MODEL_80386) {
+            base |= (ext & X86.DESC.EXT.BASE2431) << 16;
+            limit |= (ext & X86.DESC.EXT.LIMIT1619) << 16;
+            if (ext & X86.DESC.EXT.LIMITPAGES) limit = (limit << 12) | 0xfff;
+        }
+
+        this.sel = sel;
+        this.base = base;
+        this.limit = limit;
+        this.offMax = (limit >>> 0) + 1;
+        this.acc = acc;
+        this.type = type;
+        this.ext = ext;
+        this.addrDesc = addrDesc;
+        this.updateMode(true, true, false);
+        return base;
+    }
+    return X86.ADDR_INVALID;
 };
 
 /**
@@ -1408,7 +1466,7 @@ X86Seg.prototype.updateMode = function(fLoad, fProt, fV86)
 X86Seg.prototype.messageSeg = function(sel, base, limit, type, ext)
 {
     if (DEBUG) {
-        if (DEBUGGER && this.id != X86Seg.ID.DBG && this.dbg && this.dbg.messageEnabled(Messages.SEG)) {
+        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(Messages.SEG)) {
             var ch = (this.sName.length < 3? " " : "");
             var sDPL = " dpl=" + this.dpl;
             if (this.id == X86Seg.ID.CODE) sDPL += " cpl=" + this.cpl;

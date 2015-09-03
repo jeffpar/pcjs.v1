@@ -1060,8 +1060,8 @@ ChipSet.prototype.initBus = function(cmp, bus, cpu, dbg)
             dbg.messageDump(Messages.PIC, function onDumpPIC() {
                 chipset.dumpPIC();
             });
-            dbg.messageDump(Messages.TIMER, function onDumpTimer(sParm) {
-                chipset.dumpTimer(sParm);
+            dbg.messageDump(Messages.TIMER, function onDumpTimer(asArgs) {
+                chipset.dumpTimer(asArgs);
             });
             dbg.messageDump(Messages.CMOS, function onDumpCMOS() {
                 chipset.dumpCMOS();
@@ -2344,16 +2344,17 @@ ChipSet.prototype.dumpPIC = function()
 };
 
 /**
- * dumpTimer(sParm)
+ * dumpTimer(asArgs)
  *
  * Use "d timer" to dump all timers, or "d timer n" to dump only timer n.
  *
  * @this {ChipSet}
- * @param {string} [sParm]
+ * @param {Array.<string>} asArgs
  */
-ChipSet.prototype.dumpTimer = function(sParm)
+ChipSet.prototype.dumpTimer = function(asArgs)
 {
     if (DEBUGGER) {
+        var sParm = asArgs[0];
         var nTimer = (sParm? +sParm : null);
         for (var iTimer = 0; iTimer < this.aTimers.length; iTimer++) {
             if (nTimer != null && iTimer != nTimer) continue;
@@ -2909,7 +2910,7 @@ ChipSet.prototype.advanceDMA = function(channel, fInit)
                 channel.sAddrDebug = str.toHex(addr >> 4, 4) + ":" + str.toHex(addr & 0xf, 4);
                 if (this.messageEnabled(this.messageBitsDMA(iDMAChannel)) && channel.type != ChipSet.DMA_MODE.TYPE_WRITE) {
                     this.printMessage("advanceDMA(" + iDMAChannel + ") transferring " + channel.cbDebug + " bytes from " + channel.sAddrDebug, true);
-                    this.dbg.doDump("db", channel.sAddrDebug, 'l', channel.cbDebug);
+                    this.dbg.doDump(["db", channel.sAddrDebug, 'l', channel.cbDebug]);
                 }
             }
             if (channel.type == ChipSet.DMA_MODE.TYPE_WRITE) {
@@ -3024,7 +3025,7 @@ ChipSet.prototype.updateDMA = function(channel)
 
     if (DEBUG && this.messageEnabled(this.messageBitsDMA(iDMAChannel)) && channel.type == ChipSet.DMA_MODE.TYPE_WRITE && channel.sAddrDebug) {
         this.printMessage("updateDMA(" + iDMAChannel + ") transferred " + channel.cbDebug + " bytes to " + channel.sAddrDebug, true);
-        this.dbg.doDump("db", channel.sAddrDebug, 'l', channel.cbDebug);
+        this.dbg.doDump(["db", channel.sAddrDebug, 'l', channel.cbDebug]);
     }
 
     if (channel.done) {
@@ -3172,7 +3173,7 @@ ChipSet.prototype.outPICLo = function(iPIC, bOut, addrFrom)
                 this.checkIRR();
             } else {
                 if (DEBUG && this.messageEnabled(Messages.PIC | Messages.WARN)) {
-                    this.printMessage("outPIC" + iPIC + '(' + str.toHexByte(pic.port) + "): unexpected EOI command, IRQ " + nIRQ + " not in service", true);
+                    this.printMessage("outPIC" + iPIC + '(' + str.toHexByte(pic.port) + "): unexpected EOI command, IRQ " + nIRQ + " not in service", true, true);
                     if (!SAMPLER && MAXDEBUG) this.dbg.stopCPU();
                 }
             }
@@ -4966,7 +4967,7 @@ ChipSet.prototype.outCoprocReset = function(port, bOut, addrFrom)
 ChipSet.prototype.intBIOSRTC = function(addr)
 {
     if (DEBUGGER) {
-        if (this.messageEnabled(Messages.RTC) && this.dbg.messageInt(Interrupts.RTC, addr)) {
+        if (this.messageEnabled(Messages.INT) && this.dbg.messageInt(Interrupts.RTC, addr)) {
             /*
              * By computing AH now, we get the incoming AH value; if we computed it below, along with
              * the rest of the register values, we'd get the outgoing AH value, which is not what we want.

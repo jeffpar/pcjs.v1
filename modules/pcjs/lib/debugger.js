@@ -259,11 +259,18 @@ if (DEBUGGER) {
         0x13:       Messages.FDC,
         0x15:       Messages.CHIPSET,
         0x16:       Messages.KEYBOARD,
-     // 0x1a:       Messages.RTC,       // ChipSet contains its own custom messageInt() handler for the RTC
-        0x1c:       Messages.TIMER,
+     // 0x1A:       Messages.RTC,       // ChipSet contains its own custom messageInt() handler for the RTC
+        0x1C:       Messages.TIMER,
         0x21:       Messages.DOS,
         0x33:       Messages.MOUSE
     };
+
+    /*
+     * Information regarding "annoying" interrupts (which aren't annoying so much as too frequent);
+     * note that some of these can still be enabled if you really want them (eg, RTC can be turned on
+     * with RTC messages, ALT_TIMER with TIMER messages, etc).
+     */
+    Debugger.INT_ANNOYING = [Interrupts.RTC, Interrupts.ALT_TIMER, Interrupts.DOS_IDLE, Interrupts.DOS_NETBIOS, Interrupts.ALT_VIDEO];
 
     Debugger.COMMANDS = {
         '?':     "help/print",
@@ -1258,11 +1265,11 @@ if (DEBUGGER) {
             }
         }
 
-        this.messageDump(Messages.BUS,  function onDumpBus(s)  { dbg.dumpBus(s); });
-        this.messageDump(Messages.MEM,  function onDumpMem(s)  { dbg.dumpMem(s); });
-        this.messageDump(Messages.DESC, function onDumpDesc(s) { dbg.dumpDesc(s); });
-        this.messageDump(Messages.TSS,  function onDumpTSS(s)  { dbg.dumpTSS(s); });
-        this.messageDump(Messages.DOS,  function onDumpDOS(s)  { dbg.dumpDOS(s); });
+        this.messageDump(Messages.BUS,  function onDumpBus(asArgs)  { dbg.dumpBus(asArgs); });
+        this.messageDump(Messages.MEM,  function onDumpMem(asArgs)  { dbg.dumpMem(asArgs); });
+        this.messageDump(Messages.DESC, function onDumpDesc(asArgs) { dbg.dumpDesc(asArgs); });
+        this.messageDump(Messages.TSS,  function onDumpTSS(asArgs)  { dbg.dumpTSS(asArgs); });
+        this.messageDump(Messages.DOS,  function onDumpDOS(asArgs)  { dbg.dumpDOS(asArgs); });
 
         if (Interrupts.WINDBG.ENABLED) {
             this.fWinDbg = null;
@@ -1633,7 +1640,7 @@ if (DEBUGGER) {
             seg.limit = 0xffff;         // although an ACTUAL real-mode segment load would not modify the limit,
             seg.offMax = 0x10000;       // proper segDebugger operation requires that we update the limit ourselves
         } else {
-            seg.loadProt(sel);
+            seg.probeDesc(sel);
         }
         return seg;
     };
@@ -1659,6 +1666,9 @@ if (DEBUGGER) {
         if (addr == null) {
             addr = X86.ADDR_INVALID;
             if (dbgAddr) {
+                /*
+                 * TODO: We should try to cache the seg inside dbgAddr, to avoid unnecessary calls to getSegment().
+                 */
                 var seg = this.getSegment(dbgAddr.sel, dbgAddr.type);
                 if (seg) {
                     if (!fWrite) {
@@ -1987,18 +1997,19 @@ if (DEBUGGER) {
     };
 
     /**
-     * dumpDOS(sMCB)
+     * dumpDOS(asArgs)
      *
      * Dumps DOS MCBs (Memory Control Blocks).
      *
      * TODO: Add some code to detect the current version of DOS (if any) and locate the first MCB automatically.
      *
      * @this {Debugger}
-     * @param {string} [sMCB]
+     * @param {Array.<string>} asArgs
      */
-    Debugger.prototype.dumpDOS = function(sMCB)
+    Debugger.prototype.dumpDOS = function(asArgs)
     {
         var mcb;
+        var sMCB = asArgs[0];
         if (sMCB) {
             mcb = this.parseValue(sMCB);
         }
@@ -2044,35 +2055,37 @@ if (DEBUGGER) {
 
         while (n--) {
             var block = aBlocks[i];
-            if (block.type === Memory.TYPE.NONE) continue;
-            this.println(str.toHex(block.id) + " %" + str.toHex(i << this.cpu.nBlockShift) + ": " + str.toHex(block.addr) + "  " + str.toHexWord(block.used) + "  " + str.toHexWord(block.size) + "  " + Memory.TYPE.NAMES[block.type]);
+            if (block.type !== Memory.TYPE.NONE) {
+                this.println(str.toHex(block.id) + " %" + str.toHex(i << this.cpu.nBlockShift) + ": " + str.toHex(block.addr) + "  " + str.toHexWord(block.used) + "  " + str.toHexWord(block.size) + "  " + Memory.TYPE.NAMES[block.type]);
+            }
             i++;
         }
     };
 
     /**
-     * dumpBus(sAddr)
+     * dumpBus(asArgs)
      *
      * Dumps Bus allocations.
      *
      * @this {Debugger}
-     * @param {string} [sAddr] (optional block address)
+     * @param {Array.<string>} asArgs (asArgs[0] is an optional block address)
      */
-    Debugger.prototype.dumpBus = function(sAddr)
+    Debugger.prototype.dumpBus = function(asArgs)
     {
-        this.dumpBlocks(this.cpu.aBusBlocks, sAddr);
+        this.dumpBlocks(this.cpu.aBusBlocks, asArgs[0]);
     };
 
     /**
-     * dumpInfo(sAddr)
+     * dumpInfo(asArgs)
      *
      * @this {Debugger}
-     * @param {string|undefined} sAddr
+     * @param {Array.<string>} asArgs
      */
-    Debugger.prototype.dumpInfo = function(sAddr)
+    Debugger.prototype.dumpInfo = function(asArgs)
     {
         var sInfo = "no information";
         if (BACKTRACK) {
+            var sAddr = asArgs[0];
             var dbgAddr = this.parseAddr(sAddr, Debugger.ADDR.CODE, true, true);
             if (dbgAddr) {
                 var addr = this.getAddr(dbgAddr);
@@ -2097,21 +2110,21 @@ if (DEBUGGER) {
     };
 
     /**
-     * dumpMem(sAddr)
+     * dumpMem(asArgs)
      *
      * Dumps page allocations.
      *
      * @this {Debugger}
-     * @param {string} [sAddr] (optional block address)
+     * @param {Array.<string>} asArgs (asArgs[0] is an optional block address)
      */
-    Debugger.prototype.dumpMem = function(sAddr)
+    Debugger.prototype.dumpMem = function(asArgs)
     {
         var aBlocks = this.cpu.aMemBlocks;
         if (aBlocks === this.cpu.aBusBlocks) {
             this.println("paging not enabled");
             return;
         }
-        this.dumpBlocks(aBlocks, sAddr);
+        this.dumpBlocks(aBlocks, asArgs[0]);
     };
 
     Debugger.SYSDESCS = {
@@ -2130,23 +2143,25 @@ if (DEBUGGER) {
     };
 
     /**
-     * dumpDesc(s)
+     * dumpDesc(asArgs)
      *
      * Dumps a descriptor for the given selector.
      *
      * @this {Debugger}
-     * @param {string} [s]
+     * @param {Array.<string>} asArgs
      */
-    Debugger.prototype.dumpDesc = function(s)
+    Debugger.prototype.dumpDesc = function(asArgs)
     {
-        if (!s) {
+        var sSel = asArgs[0];
+
+        if (!sSel) {
             this.println("no selector");
             return;
         }
 
-        var sel = this.parseValue(s);
+        var sel = this.parseValue(sSel);
         if (sel === undefined) {
-            this.println("invalid selector: " + s);
+            this.println("invalid selector: " + sSel);
             return;
         }
 
@@ -2360,22 +2375,24 @@ if (DEBUGGER) {
     };
 
     /**
-     * dumpTSS(s)
+     * dumpTSS(asArgs)
      *
      * This dumps a TSS using the given selector.  If none is specified, the current TR is used.
      *
      * @this {Debugger}
-     * @param {string} [s]
+     * @param {Array.<string>} asArgs
      */
-    Debugger.prototype.dumpTSS = function(s)
+    Debugger.prototype.dumpTSS = function(asArgs)
     {
         var seg;
-        if (!s) {
+        var sSel = asArgs[0];
+
+        if (!sSel) {
             seg = this.cpu.segTSS;
         } else {
-            var sel = this.parseValue(s);
+            var sel = this.parseValue(sSel);
             if (sel === undefined) {
-                this.println("invalid task selector: " + s);
+                this.println("invalid task selector: " + sSel);
                 return;
             }
             seg = this.getSegment(sel, Debugger.ADDR.PROT);
@@ -2449,7 +2466,7 @@ if (DEBUGGER) {
      *
      * @this {Debugger}
      * @param {number} bitMessage is one Messages category flag
-     * @param {function(string)} fnDumper is a function the Debugger can use to dump data for that category
+     * @param {function(Array.<string>)} fnDumper is a function the Debugger can use to dump data for that category
      * @return {boolean} true if successfully registered, false if not
      */
     Debugger.prototype.messageDump = function(bitMessage, fnDumper)
@@ -2765,7 +2782,7 @@ if (DEBUGGER) {
     Debugger.prototype.message = function(sMessage, fAddress)
     {
         if (fAddress) {
-            sMessage += " @" + this.hexOffset(this.cpu.getIP(), this.cpu.getCS()) + " (%" + str.toHex(this.cpu.regLIP, 6) + ")";
+            sMessage += " @" + this.hexOffset(this.cpu.getIP(), this.cpu.getCS()) + " (%" + str.toHex(this.cpu.regLIP) + ")";
         }
 
         if (this.sMessagePrev && sMessage == this.sMessagePrev) return;
@@ -2801,17 +2818,39 @@ if (DEBUGGER) {
      */
     Debugger.prototype.messageInt = function(nInt, addr, fForce)
     {
-        var fMessage, AH, DL;
-        if (fForce) {
-            fMessage = true;
-        } else {
-            fMessage = this.messageEnabled(Messages.CPU) && nInt != Interrupts.DOS_IDLE /* 0x28 */ && nInt != Interrupts.DOS_NETBIOS /* 0x2A */;
-            var nCategory = Debugger.INT_MESSAGES[nInt];
-            if (nCategory) {
-                if (this.messageEnabled(nCategory)) {
-                    fMessage = true;
-                } else {
-                    fMessage = (nCategory == Messages.FDC && this.messageEnabled(nCategory = Messages.HDC));
+        var AH, DL;
+        var fMessage = fForce;
+
+        /*
+         * We currently arrive here only because the CPU has already determined that INT messages are enabled,
+         * or because the ChipSet's RTC interrupt handler has already determined that INT messages are enabled.
+         *
+         * But software interrupts are very common, so we generally require additional categories to be enabled;
+         * unless the caller has set fForce, we check those additional categories now.
+         */
+        if (!fMessage) {
+            /*
+             * Display all software interrupts if CPU messages are enabled (and it's not an "annoying" interrupt);
+             * note that in some cases, even "annoying" interrupts can be turned with an extra message category.
+             */
+            fMessage = this.messageEnabled(Messages.CPU) && Debugger.INT_ANNOYING.indexOf(nInt) < 0;
+            if (!fMessage) {
+                /*
+                 * Alternatively, display this software interrupt if its corresponding message category is enabled.
+                 */
+                var nCategory = Debugger.INT_MESSAGES[nInt];
+                if (nCategory) {
+                    if (this.messageEnabled(nCategory)) {
+                        fMessage = true;
+                    } else {
+                        /*
+                         * Alternatively, display this FDC interrupt if HDC messages are enabled (since they share
+                         * a common software interrupt).  Normally, an HDC BIOS will copy the original DISK (0x13)
+                         * vector to the ALT_DISK (0x40) vector, but it's a nuisance having to check different
+                         * interrupts in different configurations for the same frickin' functionality, so we don't.
+                         */
+                        fMessage = (nCategory == Messages.FDC && this.messageEnabled(nCategory = Messages.HDC));
+                    }
                 }
             }
         }
@@ -3890,7 +3929,7 @@ if (DEBUGGER) {
         }
 
         var typeCPU = null;
-        var fNonPrefix = true;
+        var fComplete = true;
 
         for (var iOperand = 1; iOperand <= cOperands; iOperand++) {
 
@@ -3906,7 +3945,7 @@ if (DEBUGGER) {
                 continue;
             }
             if (typeSize == Debugger.TYPE_PREFIX) {
-                fNonPrefix = false;
+                fComplete = false;
                 continue;
             }
             var typeMode = type & Debugger.TYPE_MODE;
@@ -4004,7 +4043,7 @@ if (DEBUGGER) {
             sComment = Debugger.CPUS[typeCPU] + " CPU only";
         }
 
-        if (sComment && fNonPrefix) {
+        if (sComment && fComplete) {
             sLine = str.pad(sLine, dbgAddrIns.fAddr32? 74 : 56) + ';' + sComment;
             if (!this.cpu.aFlags.fChecksum) {
                 sLine += (nSequence != null? '=' + nSequence.toString() : "");
@@ -4014,7 +4053,7 @@ if (DEBUGGER) {
             }
         }
 
-        this.initAddrSize(dbgAddr, fNonPrefix, cOverrides);
+        this.initAddrSize(dbgAddr, fComplete, cOverrides);
         return sLine;
     };
 
@@ -5340,21 +5379,22 @@ if (DEBUGGER) {
     };
 
     /**
-     * doDump(sCmd, sAddr, sLen, sBytes)
+     * doDump(asArgs)
      *
-     * sLen is interpreted as a number of bytes, in hex, which we convert to the appropriate number of lines,
-     * because we always display whole lines.  If sLen is omitted/undefined, sLen defaults to 0x80 (128.) bytes,
-     * which normally translates to 8 lines.
+     * The length parameter is interpreted as a number of bytes, in hex, which we convert to the appropriate number
+     * of lines, because we always display whole lines.  If the length is omitted/undefined, it defaults to 0x80 (128.)
+     * bytes, which normally translates to 8 lines.
      *
      * @this {Debugger}
-     * @param {string} sCmd
-     * @param {string|undefined} sAddr
-     * @param {string|undefined} [sLen] (# of bytes to dump, in hex; default is 0x80)
-     * @param {string|undefined} [sBytes] (this is checked only if sLen was an 'l', in honor of old DEBUG.COM syntax)
+     * @param {Array.<string>} asArgs (formerly sCmd, [sAddr], [sLen] and [sBytes])
      */
-    Debugger.prototype.doDump = function(sCmd, sAddr, sLen, sBytes)
+    Debugger.prototype.doDump = function(asArgs)
     {
         var m;
+        var sCmd = asArgs[0];
+        var sAddr = asArgs[1];
+        var sLen = asArgs[2];
+        var sBytes = asArgs[3];
 
         if (sAddr == '?') {
             var sDumpers = "";
@@ -5420,9 +5460,8 @@ if (DEBUGGER) {
         }
 
         if (sCmd == "ds") {                     // transform a "ds" command into a "d desc" command
-            sCmd = "d";
-            sLen = sAddr;
-            sAddr = "desc";
+            sCmd = 'd';
+            asArgs = [sCmd, "desc", sAddr];
         }
 
         if (sCmd == 'd') {
@@ -5430,7 +5469,9 @@ if (DEBUGGER) {
                 if (sAddr == m) {
                     var fnDumper = this.afnDumpers[m];
                     if (fnDumper) {
-                        fnDumper(sLen);
+                        asArgs.shift();
+                        asArgs.shift();
+                        fnDumper(asArgs);
                     } else {
                         this.println("no dump registered for " + sAddr);
                     }
@@ -5448,7 +5489,8 @@ if (DEBUGGER) {
         }
 
         if (sCmd == "di") {
-            var sInfo = this.dumpInfo(sAddr);
+            asArgs.shift();
+            var sInfo = this.dumpInfo(asArgs);
             this.println(sInfo);
             return;
         }
@@ -6403,11 +6445,6 @@ if (DEBUGGER) {
     /**
      * doRun(sAddr, sOptions, fQuiet)
      *
-     * NOTE: We assume that whenever we're being called with fQuiet set to true, that we're being
-     * called in the context of checkBreakpoint(), and therefore the CPU is already running, and
-     * therefore we can skip the runCPU() call -- because if we don't, then breakpoint commands that
-     * include the "g" command will produce unwanted "noise".
-     *
      * @this {Debugger}
      * @param {string} sAddr
      * @param {string} [sOptions]
@@ -6668,36 +6705,38 @@ if (DEBUGGER) {
     };
 
     /**
-     * initAddrSize(dbgAddr, fNonPrefix, cOverrides)
+     * initAddrSize(dbgAddr, fComplete, cOverrides)
      *
      * @this {Debugger}
      * @param {DbgAddr} dbgAddr
-     * @param {boolean} fNonPrefix
+     * @param {boolean} fComplete
      * @param {number} [cOverrides]
      */
-    Debugger.prototype.initAddrSize = function(dbgAddr, fNonPrefix, cOverrides)
+    Debugger.prototype.initAddrSize = function(dbgAddr, fComplete, cOverrides)
     {
         /*
-         * Use cOverrides to record whether we previously processed any OPERAND or ADDRESS overrides.
+         * We use dbgAddr.fComplete to record whether or not the caller (ie, getInstruction())
+         * processed a complete instruction.
          */
-        dbgAddr.cOverrides = cOverrides || 0;
+        dbgAddr.fComplete = fComplete;
         /*
          * For proper disassembly of instructions preceded by an OPERAND (0x66) size prefix, we set
          * dbgAddr.fData32 to true whenever the operand size is 32-bit; similarly, for an ADDRESS (0x67)
-         * size prefix, we set dbgAddr.fAddr32 to true whenever the address size is 32-bit.  Initially,
-         * both fields must be set to match the size of the current code segment.
+         * size prefix, we set dbgAddr.fAddr32 to true whenever the address size is 32-bit.
+         *
+         * Initially (and every time we've processed a complete instruction), both fields must be
+         * set to their original value.
          */
-        if (fNonPrefix) {
+        if (fComplete) {
             if (dbgAddr.fData32Orig != null) dbgAddr.fData32 = dbgAddr.fData32Orig;
             if (dbgAddr.fAddr32Orig != null) dbgAddr.fAddr32 = dbgAddr.fAddr32Orig;
             dbgAddr.fData32Orig = dbgAddr.fData32;
             dbgAddr.fAddr32Orig = dbgAddr.fAddr32;
         }
         /*
-         * We also use dbgAddr.fComplete to record whether the caller (ie, getInstruction()) is reporting that
-         * it processed a complete instruction (ie, a non-prefix) or not.
+         * Use cOverrides to record whether we previously processed any OPERAND or ADDRESS overrides.
          */
-        dbgAddr.fComplete = fNonPrefix;
+        dbgAddr.cOverrides = cOverrides || 0;
     };
 
     /**
@@ -6727,10 +6766,10 @@ if (DEBUGGER) {
 
         if (n === undefined) n = 1;
 
-        var dbgAddrEnd, cb = 0x100;
+        var cb = 0x100;
         if (sAddrEnd !== undefined) {
 
-            dbgAddrEnd = this.parseAddr(sAddrEnd, Debugger.ADDR.CODE);
+            var dbgAddrEnd = this.parseAddr(sAddrEnd, Debugger.ADDR.CODE);
             if (!dbgAddrEnd || dbgAddrEnd.off < dbgAddr.off) return;
 
             cb = dbgAddrEnd.off - dbgAddr.off;
@@ -6744,9 +6783,6 @@ if (DEBUGGER) {
                 return;
             }
             n = -1;
-        }
-        else {
-            dbgAddrEnd = this.newAddr(this.maskReg, dbgAddr.sel, this.bus.nBusLimit, dbgAddr.type, dbgAddr.fData32, dbgAddr.fAddr32);
         }
 
         var cLines = 0;
@@ -6925,7 +6961,7 @@ if (DEBUGGER) {
                         break;
                     }
                     this.shiftArgs(asArgs);
-                    this.doDump(asArgs[0], asArgs[1], asArgs[2], asArgs[3]);
+                    this.doDump(asArgs);
                     break;
                 case 'e':
                     if (asArgs[0] == "else") break;

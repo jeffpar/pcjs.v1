@@ -132,10 +132,9 @@ function X86CPU(parmsCPU)
 
     /*
      * List of software interrupt notification functions: aIntNotify is an array, indexed by
-     * interrupt number, of 2-element sub-arrays that, in turn, contain:
+     * interrupt number, where each element contains:
      *
-     *      [0]: registered component
-     *      [1]: registered function to call for every software interrupt
+     *      registered function to call for every software interrupt
      *
      * The registered function is called with the linear address (LIP) following the software interrupt;
      * if any function returns false, the software interrupt will be skipped (presumed to be emulated),
@@ -1068,7 +1067,7 @@ X86CPU.prototype.initProcessor = function()
             this.PS_SET = X86.PS.BIT1;      // on the 80286, only BIT1 of Processor Status (flags) is always set
             this.PS_DIRECT |= X86.PS.IOPL.MASK | X86.PS.NT;
 
-            this.OPFLAG_NOINTR_8086 = 0;    // used with instructions that should *not* set NOINTR on an 80286 (eg, non-SS segment loads)
+            this.OPFLAG_NOINTR_8086 = 0;    // for instructions that do *not* set NOINTR on an 80286 (eg, non-SS segment loads)
 
             this.aOps[0x0F] = X86.op0F;
             this.aOps0F = X86.aOps0F.slice();
@@ -1080,13 +1079,7 @@ X86CPU.prototype.initProcessor = function()
 
             if (I386 && this.model >= X86.MODEL_80386) {
                 var bOpcode;
-                /*
-                 * TODO: Determine if the Nested Task (PS.NT) flag should really be cleared in real-mode on an 80386
-                 * (we already know based on the OS/2 CPU test discussed in setPS() that it can't be set in real-mode
-                 * on an 80286); for now, we assume that it should remain clear on all CPUs, to avoid any unexpected
-                 * nested-task weirdness in real-mode.
-                 */
-                this.PS_CLEAR_RM = X86.PS.NT;
+                this.PS_CLEAR_RM = 0;       // NOTE: This allows the 80386 to modify X86.PS.NT in real-mode (which is presumably OK)
                 this.PS_DIRECT |= X86.PS.RF | X86.PS.VM;
                 this.aOps[X86.OPCODE.FS] = X86.opFS;        // 0x64
                 this.aOps[X86.OPCODE.GS] = X86.opGS;        // 0x65
@@ -1635,7 +1628,7 @@ X86CPU.prototype.checkIntNotify = function(nInt)
     var aNotify = this.aIntNotify[nInt];
     if (aNotify !== undefined) {
         for (var i = 0; i < aNotify.length; i++) {
-            if (!aNotify[i](aNotify[i][0], this.regLIP)) {
+            if (!aNotify[i](this.regLIP)) {
                 return false;
             }
         }
@@ -1882,7 +1875,7 @@ X86CPU.prototype.setProtMode = function(fProt, fV86)
     if (fV86 === undefined) {
         fV86 = !!(this.regPS & X86.PS.VM);
     }
-    if (!fProt != !(this.regCR0 & X86.CR0.MSW.PE) && this.messageEnabled()) {
+    if (DEBUG && (!fProt != !(this.regCR0 & X86.CR0.MSW.PE) || fV86 != !!(this.regPS & X86.PS.VM)) && this.messageEnabled()) {
         this.printMessage("CPU switching to " + (fProt? (fV86? "v86" : "protected") : "real") + "-mode", this.bitsMessage, true);
     }
     this.aOpGrp6 = (fProt && !fV86? X86.aOpGrp6Prot : X86.aOpGrp6Real);
@@ -2994,13 +2987,10 @@ X86CPU.prototype.setPS = function(regPS, cpl)
      * pops 0xF000 into the flags is able to set *any* of flag bits 12-15: if it can, then OS/2 declares
      * the CPU an 80386.
      *
-     * So, if the CPU is an 80286, we zero incoming bits 12-14 in real-mode (bit 15 is never allowed to
-     * be modified, so there's no need to mask it).  And if the CPU is an 80386, we zero only bit 14 (PS.NT),
-     * allowing the IOPL bits to change; however, that should not affect any real-mode operations, since
-     * CPL will always be zero, making IOPL irrelevant.
-     *
-     * It's still an open question whether an 80386 should also clear the Nested Task (PS.NT) flag in
-     * real-mode; if not, then initProcessor() should set PS_CLEAR_RM to zero.
+     * So, if the CPU is an 80286, we clear incoming bits 12-14 in real-mode (bit 15 is never allowed to
+     * be modified, so there's no need to mask it).  And if the CPU is an 80386, no bits are automatically
+     * cleared in real-mode (PS_CLEAR_RM is zero); although that allows the IOPL bits to change, it doesn't
+     * affect real-mode operation, since CPL is always zero, making IOPL irrelevant.
      */
     if (!(this.regCR0 & X86.CR0.MSW.PE)) regPS &= ~this.PS_CLEAR_RM;
 
@@ -3147,24 +3137,40 @@ X86CPU.prototype.setBinding = function(sHTMLType, sBinding, control)
 };
 
 /**
- * probeAddr(addr)
+ * probeAddr(addr, size)
  *
  * Used by the Debugger to probe addresses without risk of triggering a page fault, and by internal
  * functions, like fnFaultMessage(), that also need to avoid triggering faults, since they're not part
  * of standard CPU operation.
  *
+ * NOTE: If the size parameter is used, then the caller is required to provide a valid size (1, 2 or 4)
+ * and ensure that the data is contained entirely with the requested block.
+ *
  * @this {X86CPU}
  * @param {number} addr is a linear address
+ * @param {number} [size] is a length (default is 1)
  * @return {number|null} byte (8-bit) value at that address, or null if invalid
  */
-X86CPU.prototype.probeAddr = function(addr)
+X86CPU.prototype.probeAddr = function(addr, size)
 {
     var block = this.aMemBlocks[(addr & this.nMemMask) >>> this.nBlockShift];
-    if (block.type == Memory.TYPE.UNPAGED) {
-        block = this.mapPageBlock(addr, false, true);
-        if (!block) return null;
+    if (block) {
+        if (block.type == Memory.TYPE.UNPAGED) {
+            block = this.mapPageBlock(addr, false, true);
+        }
     }
-    return block.readByteDirect(addr & this.nBlockLimit, addr);
+    if (block) {
+        var off = addr & this.nBlockLimit;
+        switch(size) {
+        default:
+            return block.readByteDirect(off, addr);
+        case 2:
+            return block.readShortDirect(off, addr);
+        case 4:
+            return block.readLongDirect(off, addr);
+        }
+    }
+    return null;
 };
 
 /**
