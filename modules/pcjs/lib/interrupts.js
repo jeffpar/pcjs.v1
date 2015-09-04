@@ -66,6 +66,7 @@ var Interrupts = {
         IS_LOADED:  0x004F,         // DS_DebLoaded
         LOADED:     0xF386,         // DS_DebPresent (returned in AX if Windows Debugger loaded)
         LOAD_SEG:   0x0050,         // DS_LoadSeg (SI==0 if code, 1 if data; BX==segnum-1; CX==selector; ES:[E]DI->module name)
+        LOAD_SEG32: 0x0150,         // DS_LoadSeg_32 (SI==0 if code, 1 if data; DX:EBX->D386_Device_Params)
         ENABLED:    true            // support for WINDBG interrupts can be disabled (but NOT if WINDBGRM is enabled)
     },
     WINDBGRM:     {                 // Windows Debugger real-mode interface

@@ -1350,13 +1350,23 @@ if (DEBUGGER) {
                 break;
 
             case Interrupts.WINDBG.LOAD_SEG:
-                /*
-                 * The following output should completely mimic WDEB386....
-                 */
-                sModule = this.getSZ(this.newAddr(DI, ES));
-                limit = (seg = this.getSegment(CX))? seg.limit : 0;
                 if (this.fWinDbg) {
-                    this.println(sModule + "!undefined " + ((SI & 0x1)? "data" : "code") + '(' + str.toHex(BX+1, 4) + ")=#" + str.toHex(CX, 4) + " len " + str.toHex(limit+1));
+                    sModule = this.getSZ(this.newAddr(DI, ES));
+                    limit = (seg = this.getSegment(CX))? seg.limit : 0;
+                    this.println(sModule + "!undefined " + (!(SI & 0x1)? "code" : "data") + '(' + str.toHex(BX+1, 4) + ")=#" + str.toHex(CX, 4) + " len " + str.toHex(limit+1));
+                    return false;
+                }
+                break;
+
+            case Interrupts.WINDBG.LOAD_SEG32:
+                /*
+                 *  SI == segment type:
+                 *      0x0     code selector
+                 *      0x1     data selector
+                 *  DX:EBX -> D386_Device_Params structure (see dumpD386DeviceParms() for details)
+                 */
+                if (this.fWinDbg) {
+                    this.println(this.dumpD386DeviceParms(this.newAddr(cpu.regEBX, DX), !SI));
                     return false;
                 }
                 break;
@@ -1370,6 +1380,35 @@ if (DEBUGGER) {
             }
 
             return true;
+        };
+
+        /**
+         * dumpD386DeviceParms(dbgAddr, fCode)
+         *
+         *  dbgAddr -> D386_Device_Params structure:
+         *      DD_logical_seg  dw  ?   ; logical segment # from map
+         *      DD_actual_sel   dw  ?   ; actual selector value
+         *      DD_base         dd  ?   ; linear address offset for start of segment
+         *      DD_length       dd  ?   ; actual length of segment
+         *      DD_name         df  ?   ; 16:32 ptr to null terminated device name
+         *      DD_sym_name     df  ?   ; 16:32 ptr to null terminated symbolic module name (i.e. Win386)
+         *      DD_alias_sel    dw  ?   ; alias selector value (0 = none)
+         *
+         * @this {Debugger}
+         * @param {DbgAddr} dbgAddr
+         * @param {boolean} fCode
+         * @return {string}
+         */
+        Debugger.prototype.dumpD386DeviceParms = function(dbgAddr, fCode)
+        {
+            var nSeg = this.getShort(dbgAddr, 2);
+            var sel = this.getShort(dbgAddr, 2);
+            var off = this.getLong(dbgAddr, 4);
+            var len = this.getLong(dbgAddr, 4);
+            var dbgAddrDevice = this.newAddr(this.getLong(dbgAddr, 4), this.getShort(dbgAddr, 2));
+            var dbgAddrModule = this.newAddr(this.getLong(dbgAddr, 4), this.getShort(dbgAddr, 2));
+            var selAlias = this.getShort(dbgAddr, 2) || sel;
+            return this.getSZ(dbgAddrModule) + '!' + this.getSZ(dbgAddrDevice) + "!undefined " + (fCode? "code" : "data") + '(' + str.toHex(nSeg, 4) + ")=" + str.toHex(selAlias, 4) + ':' + str.toHex(off) + " len " + str.toHex(len);
         };
     }
 
@@ -1464,25 +1503,10 @@ if (DEBUGGER) {
                      *  AL == segment type:
                      *      0x80    device driver code seg
 				     *      0x81    device driver data seg
-                     *  ES:DI -> D386_Device_Params structure:
-                     *      DD_logical_seg  dw  ?   ; logical segment # from map
-                     *      DD_actual_sel   dw  ?   ; actual selector value
-                     *      DD_base         dd  ?   ; linear address offset for start of segment
-                     *      DD_length       dd  ?   ; actual length of segment
-                     *      DD_name         df  ?   ; 16:32 ptr to null terminated device name
-                     *      DD_sym_name     df  ?   ; 16:32 ptr to null terminated symbolic module name (i.e. Win386)
-                     *      DD_alias_sel    dw  ?   ; alias selector value (0 = none)
+                     *  ES:DI -> D386_Device_Params structure (see dumpD386DeviceParms() for details)
                      */
-                    dbgAddr = this.newAddr(DI, ES);
-                    var nSeg = this.getShort(dbgAddr, 2);
-                    var sel = this.getShort(dbgAddr, 2);
-                    var off = this.getLong(dbgAddr, 4);
-                    var len = this.getLong(dbgAddr, 4);
-                    var dbgAddrDevice = this.newAddr(this.getLong(dbgAddr, 4), this.getShort(dbgAddr, 2));
-                    var dbgAddrModule = this.newAddr(this.getLong(dbgAddr, 4), this.getShort(dbgAddr, 2));
-                    var selAlias = this.getShort(dbgAddr, 2) || sel;
                     if (this.fWinDbgRM) {
-                        this.println(this.getSZ(dbgAddrModule) + '!' + this.getSZ(dbgAddrDevice) + "!undefined " + ((AL & 0x1)? "data" : "code") + '(' + str.toHex(nSeg, 4) + ")=" + str.toHex(selAlias, 4) + ':' + str.toHex(off) + " len " + str.toHex(len));
+                        this.println(this.dumpD386DeviceParms(this.newAddr(DI, ES), !(AL & 0x1)));
                     }
                 }
                 if (this.fWinDbgRM) {
