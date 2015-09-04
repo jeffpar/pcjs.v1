@@ -124,10 +124,14 @@ function X86Seg(cpu, id, sName, fProt)
      *
      * loadIDT() sets fCall to true unconditionally in protected-mode (fCall has no meaning in real-mode).
      */
-    this.fCall = null;
-    this.fStackSwitch = false;
-    this.sizeFrame = 2;         // must be set by all loadIDT() calls so that callers know the proper frame size
-    this.awParms = (this.id == X86Seg.ID.CODE? new Array(32) : []);
+    if (this.id == X86Seg.ID.CODE) {
+        this.offIP = 0;
+        this.fCall = null;
+        this.fStackSwitch = false;
+        this.sizeFrame = 2;     // must be set by all loadIDT() calls so that callers know the proper frame size
+        this.awParms = new Array(32);
+        this.aCallBreaks = [];
+    }
     this.updateMode(true, fProt);
 }
 
@@ -142,18 +146,41 @@ X86Seg.ID = {
     DBG:    7           // "DBG"
 };
 
+X86Seg.CALLBREAK_SEL = 0x0001;
+
 /**
- * loadCode(sel, fCall)
+ * addCallBreak(fn)
  *
- * A simple wrapper function that encapsulates setting the fCall property for segCS loads.
+ * Returns a "call break" address in an [off, sel] array.  The given function, fn(), is called
+ * whenever that address is called, and if fn() returns false, then the call is skipped.  Otherwise,
+ * the call is performed (ie, the old CS:[E]IP is pushed on the stack, and CS:[E]IP is set to the
+ * "call break" address.  Which is probably a bad idea, so your function should probably always
+ * return false.  Just sayin'.
  *
  * @this {X86Seg}
+ * @param {function()} fn
+ * @return {Array.<number>} containing offset and selector of call-break address
+ */
+X86Seg.prototype.addCallBreak = function(fn)
+{
+    this.aCallBreaks.push(fn);
+    return [this.aCallBreaks.length, X86Seg.CALLBREAK_SEL];
+};
+
+/**
+ * loadCode(off, sel, fCall)
+ *
+ * A simple wrapper function that encapsulates setting offIP and fCall for segCS loads.
+ *
+ * @this {X86Seg}
+ * @param {number} off
  * @param {number} sel
  * @param {boolean|undefined} fCall is true if CALLF in progress, false if RETF/IRET in progress, undefined otherwise
  * @return {number} base address of selected segment, or X86.ADDR_INVALID if error
  */
-X86Seg.prototype.loadCode = function loadCode(sel, fCall)
+X86Seg.prototype.loadCode = function loadCode(off, sel, fCall)
 {
+    this.offIP = off;
     this.fCall = fCall;
     return this.load(sel);
 };
@@ -295,7 +322,7 @@ X86Seg.prototype.loadIDTProt = function loadIDTProt(nIDT)
     var addrDesc = (cpu.addrIDT + nIDT)|0;
     if (((cpu.addrIDTLimit - addrDesc)|0) >= 7) {
         this.fCall = true;
-        return this.loadDesc8(addrDesc, nIDT) + cpu.regEIP;
+        return this.loadDesc8(addrDesc, nIDT) + this.offIP;
     }
     /*
      * TODO: Remove fHalt=true from this fnFault() call once this code path has been tested.
@@ -637,6 +664,35 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fProbe)
         this.sizeFrame = this.sizeData;
 
         var fCall = this.fCall;
+
+        /*
+         * This special bit of code is currently used only by the Debugger, when it needs to inject
+         * a 16:32 callback address into the machine that it can intercept calls to.  We call these
+         * "call break" addresses, because they're like private breakpoints that only operate when
+         * a particular address is called; specifically, an address with selector 0x0001 and an offset
+         * that forms an index (1-based) into the aCallBreaks function table.
+         *
+         * In protected-mode, 0x0001 is an invalid code selector (a null selector with an RPL of 1),
+         * and while it's not inconceivable that an operating system might use such a selector for
+         * some strange purpose, I've not seen such an operating system.  And in any case, those
+         * operating systems are not likely to trigger the Debugger's call to addCallBreak(), so no
+         * call breaks will be generated, and this code will never execute.
+         *
+         * TODO: If we ever need this to be mode-independent, it can be moved somewhere where it will
+         * trigger for both real and protected-mode code segment loads, because CALLBREAK_SEL (0x0001)
+         * is also a very unlikely real-mode CS value (but again, not inconceivable).  I think this is
+         * a reasonable solution, and it's likely the best we can do without injecting code into the
+         * machine that we could address -- and even then, it would not be a mode-independent address.
+         */
+        if (fCall && sel == X86Seg.CALLBREAK_SEL && this.aCallBreaks.length) {
+            var iBreak = this.offIP - 1;
+            var fnCallBreak = this.aCallBreaks[iBreak];
+            cpu.assert(fnCallBreak);
+            if (fnCallBreak && !fnCallBreak()) {
+                return X86.ADDR_INVALID;
+            }
+        }
+
         var rpl = sel & X86.SEL.RPL;
         var dpl = (acc & X86.DESC.ACC.DPL.MASK) >> X86.DESC.ACC.DPL.SHIFT;
 
@@ -789,7 +845,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fProbe)
 
                 this.sizeFrame = sizeGate;
 
-                cpu.regEIP = limit;
+                this.offIP = limit;
                 cpu.assert(this.cpl == cplNew);
 
                 if (this.cpl < cplOld) {
@@ -943,9 +999,12 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fProbe)
 
     default:
         /*
-         * The only other case used to be X86Seg.ID.DBG, but the Debugger uses probeDesc() now, so we should never get here.
+         * The only other cases are:
+          *
+          *     X86Seg.ID.NULL, X86Seg.ID.LDT, and X86Seg.ID.DBG
+          *
+          * which correspond to segNULL, segLDT and segDebugger; however, segLDT is the only one that might require further validation (TODO: Investigate).
          */
-        cpu.assert(false);
         break;
     }
 

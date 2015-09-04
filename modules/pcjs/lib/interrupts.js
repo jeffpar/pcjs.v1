@@ -62,21 +62,19 @@ var Interrupts = {
     ALT_DISK:   0x40,               // HDC BIOS saves original FDC BIOS vector here
     ALT_VIDEO:  0x6D,               // IBM VGA BIOS saves original video BIOS vector here
     WINDBG:     {                   // Windows Debugger protected-mode interface
-        VECTOR:     0x41,
-        IS_LOADED:  0x004F,         // AX command
-        LOADED:     0xF386,         // returned in AX if Windows Debugger loaded
-        LOAD_SEG:   0x0050,         // SI==0 if code, 1 if data; BX==segnum-1; CX==selector; ES:[E]DI->module name
-        ENABLED:    true            // support for WINDBGRM interrupts can be disabled
+        VECTOR:     0x41,           // (AX==command)
+        IS_LOADED:  0x004F,         // DS_DebLoaded
+        LOADED:     0xF386,         // DS_DebPresent (returned in AX if Windows Debugger loaded)
+        LOAD_SEG:   0x0050,         // DS_LoadSeg (SI==0 if code, 1 if data; BX==segnum-1; CX==selector; ES:[E]DI->module name)
+        ENABLED:    true            // support for WINDBG interrupts can be disabled (but NOT if WINDBGRM is enabled)
     },
     WINDBGRM:     {                 // Windows Debugger real-mode interface
-        VECTOR:     0x68,
-        IS_LOADED:  0x43,           // AH command
-        LOADED:     0xF386,         // returned in AX if Windows Debugger loaded
-        LOAD_SEG:   0x50,           // AL=segment type, ES:DI->D386_Device_Params
-        /*
-         * This must be disabled until we're able to respond intelligently to requests like D386_Prepare_PMode (0x44)
-         */
-        ENABLED:    false           // support for WINDBGRM interrupts can be disabled
+        VECTOR:     0x68,           // (AH==command)
+        IS_LOADED:  0x43,           // D386_Identify
+        LOADED:     0xF386,         // D386_Id (returned in AX if Windows Debugger loaded)
+        PREP_PMODE: 0x44,           // D386_Prepare_PMode (must return a 16:32 address in ES:EDI to a "PMinit" handler)
+        LOAD_SEG:   0x50,           // D386_Load_Segment (AL=segment type, ES:DI->D386_Device_Params)
+        ENABLED:    true            // support for WINDBGRM interrupts can be disabled
     },
     FUNCS:      {}                  // filled in only if DEBUGGER is true
 };

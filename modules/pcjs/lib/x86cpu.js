@@ -2310,18 +2310,14 @@ X86CPU.prototype.setCSIP = function(off, sel, fCall)
     /*
      * We break this operation into the following discrete steps (eg, set IP, load CS, and then update IP) so
      * that segCS.load(sel) has the ability to modify IP when sel refers to a gate (call, interrupt, trap, etc).
-     *
-     * NOTE: regEIP acts merely as a conduit for the IP, if any, that segCS.load() may load; regLIP is still our
-     * internal instruction pointer.  Callers that need the real IP must call getIP().
      */
-    this.regEIP = off;
-    var base = this.segCS.loadCode(sel, fCall);
+    var base = this.segCS.loadCode(off, sel, fCall);
     if (base !== X86.ADDR_INVALID) {
         /*
          * TODO: Should this code be factored into a setLIP() function? The other primary client would be fnINT().
          */
         if (I386) this.resetSizes();
-        this.regLIP = (base + (this.regEIP & (I386? this.maskData : 0xffff)))|0;
+        this.regLIP = (base + (this.segCS.offIP & (I386? this.maskData : 0xffff)))|0;
         this.regLIPLimit = (base + this.segCS.limit)|0;
         this.nCPL = this.segCS.cpl;             // cache the current CPL where it's more convenient
         if (PREFETCH) this.flushPrefetch(this.regLIP);

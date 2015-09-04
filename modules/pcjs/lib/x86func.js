@@ -369,21 +369,29 @@ X86.fnBTMem = function BTMem(dst, src)
     if (this.regEA === X86.ADDR_INVALID) {
         return X86.fnBT.call(this, dst, src);
     }
-    var offByte = src >>> 3;
-    if (offByte >= this.sizeData) {
+
+    /*
+     * TODO: Consider a worker function that performs the following block of code for: BT, BTC, BTR, and BTS.
+     * It's somewhat inconvenient, because it needs to provide two results: an updated src AND an updated dst.
+     */
+    if ((src >>> 3) >= this.sizeData) {
         /*
-         * offByte is src divided by 8, but now we need src divided by 16 or 32, according to the OPERAND size,
+         * We just divided src by 8, but now we need to divide src by 16 or 32, according to the OPERAND size,
          * which means shifting it right by either 4 or 5 bits.  That gives us a short or long INDEX, which we then
-         * multiply by the OPERAND size to obtain to the corresponding short or long OFFSET that we add to regEA.
+         * multiply by the OPERAND size to obtain to the corresponding short or long OFFSET that we must add to
+         * the original EA offset.
          */
         var i = src >>> (this.sizeData == 2? 4 : 5);
-        dst = this.getWord(this.regEA += i * this.sizeData);
+        dst = this.getEAWord(this.segEA, this.offEA + i * this.sizeData);
     }
     /*
-     * Now we convert src from a bit index into a bit mask.
+     * Now we convert src from a bit index to a bit mask.
      */
     src = 1 << (src & (this.sizeData == 2? 0xf : 0x1f));
     if (dst & src) this.setCF(); else this.clearCF();
+    /*
+     * End of common code block
+     */
 
     this.nStepCycles -= 6;
     this.opFlags |= X86.OPFLAG.NOWRITE;
@@ -406,18 +414,19 @@ X86.fnBTCMem = function BTCMem(dst, src)
     if (this.regEA === X86.ADDR_INVALID) {
         return X86.fnBTC.call(this, dst, src);
     }
-    var offByte = src >>> 3;
-    if (offByte >= this.sizeData) {
+
+    if ((src >>> 3) >= this.sizeData) {
         /*
-         * offByte is src divided by 8, but now we need src divided by 16 or 32, according to the OPERAND size,
+         * We just divided src by 8, but now we need to divide src by 16 or 32, according to the OPERAND size,
          * which means shifting it right by either 4 or 5 bits.  That gives us a short or long INDEX, which we then
-         * multiply by the OPERAND size to obtain to the corresponding short or long OFFSET that we add to regEA.
+         * multiply by the OPERAND size to obtain to the corresponding short or long OFFSET that we must add to
+         * the original EA offset.
          */
         var i = src >>> (this.sizeData == 2? 4 : 5);
-        dst = this.getWord(this.regEA += i * this.sizeData);
+        dst = this.getEAWord(this.segEA, this.offEA + i * this.sizeData);
     }
     /*
-     * Now we convert src from a bit index into a bit mask.
+     * Now we convert src from a bit index to a bit mask.
      */
     src = 1 << (src & (this.sizeData == 2? 0xf : 0x1f));
     if (dst & src) this.setCF(); else this.clearCF();
@@ -442,18 +451,19 @@ X86.fnBTRMem = function BTRMem(dst, src)
     if (this.regEA === X86.ADDR_INVALID) {
         return X86.fnBTR.call(this, dst, src);
     }
-    var offByte = src >>> 3;
-    if (offByte >= this.sizeData) {
+
+    if ((src >>> 3) >= this.sizeData) {
         /*
-         * offByte is src divided by 8, but now we need src divided by 16 or 32, according to the OPERAND size,
+         * We just divided src by 8, but now we need to divide src by 16 or 32, according to the OPERAND size,
          * which means shifting it right by either 4 or 5 bits.  That gives us a short or long INDEX, which we then
-         * multiply by the OPERAND size to obtain to the corresponding short or long OFFSET that we add to regEA.
+         * multiply by the OPERAND size to obtain to the corresponding short or long OFFSET that we must add to
+         * the original EA offset.
          */
         var i = src >>> (this.sizeData == 2? 4 : 5);
-        dst = this.getWord(this.regEA += i * this.sizeData);
+        dst = this.getEAWord(this.segEA, this.offEA + i * this.sizeData);
     }
     /*
-     * Now we convert src from a bit index into a bit mask.
+     * Now we convert src from a bit index to a bit mask.
      */
     src = 1 << (src & (this.sizeData == 2? 0xf : 0x1f));
     if (dst & src) this.setCF(); else this.clearCF();
@@ -478,18 +488,19 @@ X86.fnBTSMem = function BTSMem(dst, src)
     if (this.regEA === X86.ADDR_INVALID) {
         return X86.fnBTS.call(this, dst, src);
     }
-    var offByte = src >>> 3;
-    if (offByte >= this.sizeData) {
+
+    if ((src >>> 3) >= this.sizeData) {
         /*
-         * offByte is src divided by 8, but now we need src divided by 16 or 32, according to the OPERAND size,
+         * We just divided src by 8, but now we need to divide src by 16 or 32, according to the OPERAND size,
          * which means shifting it right by either 4 or 5 bits.  That gives us a short or long INDEX, which we then
-         * multiply by the OPERAND size to obtain to the corresponding short or long OFFSET that we add to regEA.
+         * multiply by the OPERAND size to obtain to the corresponding short or long OFFSET that we must add to
+         * the original EA offset.
          */
         var i = src >>> (this.sizeData == 2? 4 : 5);
-        dst = this.getWord(this.regEA += i * this.sizeData);
+        dst = this.getEAWord(this.segEA, this.offEA + i * this.sizeData);
     }
     /*
-     * Now we convert src from a bit index into a bit mask.
+     * Now we convert src from a bit index to a bit mask.
      */
     src = 1 << (src & (this.sizeData == 2? 0xf : 0x1f));
     if (dst & src) this.setCF(); else this.clearCF();

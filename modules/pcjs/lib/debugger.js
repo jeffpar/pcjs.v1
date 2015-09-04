@@ -1271,7 +1271,7 @@ if (DEBUGGER) {
         this.messageDump(Messages.TSS,  function onDumpTSS(asArgs)  { dbg.dumpTSS(asArgs); });
         this.messageDump(Messages.DOS,  function onDumpDOS(asArgs)  { dbg.dumpDOS(asArgs); });
 
-        if (Interrupts.WINDBG.ENABLED) {
+        if (Interrupts.WINDBG.ENABLED || Interrupts.WINDBGRM.ENABLED) {
             this.fWinDbg = null;
             this.cpu.addIntNotify(Interrupts.WINDBG.VECTOR, this.intWindowsDebugger.bind(this));
         }
@@ -1283,11 +1283,20 @@ if (DEBUGGER) {
         this.setReady();
     };
 
-    if (Interrupts.WINDBG.ENABLED) {
+    if (Interrupts.WINDBG.ENABLED || Interrupts.WINDBGRM.ENABLED) {
         /**
          * intWindowsDebugger()
          *
          * This intercepts calls to the Windows Debugger protected-mode interface (INT 0x41).
+         *
+         * It's enabled if Interrupts.WINDBG.ENABLED is true, but it must ALSO be enabled if
+         * Interrupts.WINDBGRM.ENABLED is true, because if the latter decides to respond to
+         * requests, then we must start responding, too, because Windows assumes that the former
+         * is installed whenever it detects the latter.
+         *
+         * Which is also why intWindowsDebuggerRM() will also set this.fWinDbg to true: we MUST
+         * return false for all INT 0x41 requests, so that all requests are consumed, since there's
+         * no guarantee that a valid interrupt handler exists inside the machine.
          *
          * @this {Debugger}
          * @param {number} addr
@@ -1328,10 +1337,15 @@ if (DEBUGGER) {
                 return true;
             }
 
+            /*
+             * NOTE: If this.fWinDbg is true, then all cases should return false, because we're taking full
+             * responsibility for all requests (don't assume there's valid interrupt handler inside the machine).
+             */
             switch(AX) {
             case Interrupts.WINDBG.IS_LOADED:
                 if (this.fWinDbg) {
                     cpu.regEAX = (cpu.regEAX & ~0xffff) | Interrupts.WINDBG.LOADED;
+                    return false;
                 }
                 break;
 
@@ -1341,14 +1355,16 @@ if (DEBUGGER) {
                  */
                 sModule = this.getSZ(this.newAddr(DI, ES));
                 limit = (seg = this.getSegment(CX))? seg.limit : 0;
-                if (!this.fWinDbg) {
+                if (this.fWinDbg) {
                     this.println(sModule + "!undefined " + ((SI & 0x1)? "data" : "code") + '(' + str.toHex(BX+1, 4) + ")=#" + str.toHex(CX, 4) + " len " + str.toHex(limit+1));
+                    return false;
                 }
                 break;
 
             default:
                 if (this.fWinDbg) {
                     this.println("INT 0x41: " + str.toHexWord(AX));
+                    return false;
                 }
                 break;
             }
@@ -1387,7 +1403,11 @@ if (DEBUGGER) {
                             if ((cpu.regEAX & 0xffff) != Interrupts.WINDBGRM.LOADED) {
                                 cpu.regEAX = (cpu.regEAX & ~0xffff) | Interrupts.WINDBGRM.LOADED;
                                 dbg.println("INT 0x68 handling enabled");
-                                dbg.fWinDbgRM = true;
+                                /*
+                                 * If we turn on INT 0x68 handling, we must also turn on INT 0x41 handling,
+                                 * because Windows assumes that the latter handler exists whenever the former does.
+                                 */
+                                dbg.fWinDbg = dbg.fWinDbgRM = true;
                             } else {
                                 dbg.println("INT 0x68 monitoring enabled");
                                 dbg.fWinDbgRM = false;
@@ -1402,8 +1422,19 @@ if (DEBUGGER) {
             case Interrupts.WINDBGRM.IS_LOADED:
                 if (this.fWinDbgRM) {
                     cpu.regEAX = (cpu.regEAX & ~0xffff) | Interrupts.WINDBGRM.LOADED;
+                    return false;
                 }
                 break;
+
+            case Interrupts.WINDBGRM.PREP_PMODE:
+                if (this.fWinDbgRM) {
+                    var a = cpu.segCS.addCallBreak(this.callWindowsDebuggerPMInit.bind(this));
+                    if (a) {
+                        cpu.regEDI = a[0];
+                        cpu.setES(a[1]);
+                    }
+                }
+                return false;
 
             case Interrupts.WINDBGRM.LOAD_SEG:
                 if (AL == 0x20) {
@@ -1450,22 +1481,80 @@ if (DEBUGGER) {
                     var dbgAddrDevice = this.newAddr(this.getLong(dbgAddr, 4), this.getShort(dbgAddr, 2));
                     var dbgAddrModule = this.newAddr(this.getLong(dbgAddr, 4), this.getShort(dbgAddr, 2));
                     var selAlias = this.getShort(dbgAddr, 2) || sel;
-                    if (!this.fWinDbgRM) {
-                        this.log(this.getSZ(dbgAddrModule) + '!' + this.getSZ(dbgAddrDevice) + "!undefined " + ((AL & 0x1)? "data" : "code") + '(' + str.toHex(nSeg, 4) + ")=" + str.toHex(selAlias, 4) + ':' + str.toHex(off) + " len " + str.toHex(len));
+                    if (this.fWinDbgRM) {
+                        this.println(this.getSZ(dbgAddrModule) + '!' + this.getSZ(dbgAddrDevice) + "!undefined " + ((AL & 0x1)? "data" : "code") + '(' + str.toHex(nSeg, 4) + ")=" + str.toHex(selAlias, 4) + ':' + str.toHex(off) + " len " + str.toHex(len));
                     }
                 }
-                cpu.regEAX = (cpu.regEAX & ~0xff) | 0x01;
+                if (this.fWinDbgRM) {
+                    cpu.regEAX = (cpu.regEAX & ~0xff) | 0x01;
+                    return false;
+                }
                 break;
 
             default:
                 if (this.fWinDbgRM) {
-                    this.log("INT 0x68: " + str.toHexByte(AH));
+                    this.println("INT 0x68: " + str.toHexByte(AH));
+                    return false;
                 }
                 break;
             }
 
             return true;
         };
+
+        /**
+         * callWindowsDebuggerPMInit()
+         *
+         * This intercepts calls to the Windows Debugger "PMInit" interface; eg:
+         *
+         *      AL = function code
+         *
+         *          0 - initialize IDT
+         *              ES:EDI points to protected mode IDT
+         *
+         *          1 - initialize page checking
+         *              BX = physical selector
+         *              ECX = linear bias
+         *
+         *          2 - specify that debug queries are supported
+         *
+         *          3 - initialize spare PTE
+         *              EBX = linear address of spare PTE
+         *              EDX = linear address the PTE represents
+         *
+         *          4 - set Enter/Exit VMM routine address
+         *              EBX = Enter VMM routine address
+         *              ECX = Exit VMM routine address
+         *              EDX = $_Debug_Out_Service address
+         *              ESI = $_Trace_Out_Service address
+         *              The VMM enter/exit routines must return with a retfd
+         *
+         *          5 - get debugger size/physical address
+         *              returns: AL = 0 (don't call AL = 1)
+         *              ECX = size in bytes
+         *              ESI = starting physical code/data address
+         *
+         *          6 - set debugger base/initialize spare PTE
+         *              EBX = linear address of spare PTE
+         *              EDX = linear address the PTE represents
+         *              ESI = starting linear address of debug code/data
+         *
+         *          7 - enable memory context functions
+         *
+         * @this {Debugger}
+         * @return {boolean} (must always return false to skip the call, because the call is using a CALLBREAK address)
+         */
+        Debugger.prototype.callWindowsDebuggerPMInit = function()
+        {
+            var cpu = this.cpu;
+            var AL = cpu.regEAX & 0xff;
+            this.println("INT 0x68 callback: " + str.toHexByte(AL));
+            if (AL == 5) {
+                cpu.regECX = cpu.regESI = 0;            // our in-machine debugger footprint is zero
+                cpu.regEAX = (cpu.regEAX & ~0xff) | 0x01;
+            }
+            return false;
+        }
     }
 
     /**
