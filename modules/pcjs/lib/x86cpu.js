@@ -3922,6 +3922,7 @@ X86CPU.prototype.popWord = function()
  */
 X86CPU.prototype.pushData = function(d, size)
 {
+    this.assert(size == 2 || size == 4);
     this.regLSP = (this.regLSP - size)|0;
     /*
      * Properly comparing regLSP to regLSPLimitLow would normally require coercing both to unsigned

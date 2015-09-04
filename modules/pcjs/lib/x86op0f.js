@@ -1128,7 +1128,7 @@ X86.opPOPFS = function POPFS()
  */
 X86.opBT = function BT()
 {
-    this.aOpModMemWord[this.getIPByte()].call(this, X86.fnBT);
+    this.aOpModMemWord[this.getIPByte()].call(this, X86.fnBTMem);
     if (this.regEA !== X86.ADDR_INVALID) this.nStepCycles -= 6;
 };
 
@@ -1195,7 +1195,7 @@ X86.opPOPGS = function POPGS()
  */
 X86.opBTS = function BTS()
 {
-    this.aOpModMemWord[this.getIPByte()].call(this, X86.fnBTS);
+    this.aOpModMemWord[this.getIPByte()].call(this, X86.fnBTSMem);
     if (this.regEA !== X86.ADDR_INVALID) this.nStepCycles -= 5;
 };
 
@@ -1260,7 +1260,7 @@ X86.opLSS = function LSS()
  */
 X86.opBTR = function BTR()
 {
-    this.aOpModMemWord[this.getIPByte()].call(this, X86.fnBTR);
+    this.aOpModMemWord[this.getIPByte()].call(this, X86.fnBTRMem);
     if (this.regEA !== X86.ADDR_INVALID) this.nStepCycles -= 5;
 };
 
@@ -1424,7 +1424,7 @@ X86.opGRP8 = function GRP8()
  */
 X86.opBTC = function BTC()
 {
-    this.aOpModMemWord[this.getIPByte()].call(this, X86.fnBTC);
+    this.aOpModMemWord[this.getIPByte()].call(this, X86.fnBTCMem);
     if (this.regEA !== X86.ADDR_INVALID) this.nStepCycles -= 5;
 };
 
@@ -1602,8 +1602,8 @@ X86.aOps0F[0xA6] = X86.opInvalid;
 /*
  * When Windows 95 Setup initializes in protected-mode, it sets a DPMI exception handler for UD_FAULT and
  * then attempts to generate that exception with undefined opcode 0x0F,0xFF.  Apparently, whoever wrote that code
- * (davidw?) didn't get the Intel memo regarding the preferred invalid opcode (0x0F,0x0B, aka UD2), or perhaps Intel
- * hadn't written that memo yet -- although if that's the case, then Intel should have followed Microsoft's lead and
+ * didn't get the Intel memo regarding the preferred invalid opcode (0x0F,0x0B, aka UD2), or perhaps Intel hadn't
+ * written that memo yet -- although if that's the case, then Intel should have followed Microsoft's lead and
  * selected 0x0F,0xFF instead of 0x0F,0x0B.
  *
  * In any case, this means we need to explicitly set the handler for that opcode to opInvalid(), too.

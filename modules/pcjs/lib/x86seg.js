@@ -126,6 +126,7 @@ function X86Seg(cpu, id, sName, fProt)
      */
     this.fCall = null;
     this.fStackSwitch = false;
+    this.sizeFrame = 2;         // must be set by all loadIDT() calls so that callers know the proper frame size
     this.awParms = (this.id == X86Seg.ID.CODE? new Array(32) : []);
     this.updateMode(true, fProt);
 }
@@ -273,6 +274,7 @@ X86Seg.prototype.loadIDTReal = function loadIDTReal(nIDT)
      */
     var addrIDT = cpu.addrIDT + (nIDT << 2);
     var off = cpu.getShort(addrIDT);
+    this.sizeFrame = 2;
     cpu.regPS &= ~(X86.PS.TF | X86.PS.IF);
     return (this.load(cpu.getShort(addrIDT + 2)) + off)|0;
 };
@@ -632,11 +634,13 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fProbe)
     case X86Seg.ID.CODE:
 
         this.fStackSwitch = false;
+        this.sizeFrame = this.sizeData;
+
         var fCall = this.fCall;
         var rpl = sel & X86.SEL.RPL;
         var dpl = (acc & X86.DESC.ACC.DPL.MASK) >> X86.DESC.ACC.DPL.SHIFT;
 
-        var fGate, selCode, cplOld, addrTSS, offSP, lenSP, regSPPrev, regSSPrev, regPSClear, regSP;
+        var sizeGate, selCode, cplOld, addrTSS, offSP, lenSP, regSPPrev, regSSPrev, regPSClear, regSP;
 
         /*
          * TODO: As discussed below for X86Seg.ID.DATA, it's likely that testing the PRESENT bit should
@@ -672,7 +676,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fProbe)
                 cpu.setSP(regSP);
                 this.fStackSwitch = true;
             }
-            fGate = false;
+            sizeGate = 0;
         }
         else if (type == X86.DESC.ACC.TYPE.TSS286 || type == X86.DESC.ACC.TYPE.TSS386) {
             if (!this.switchTSS(sel, fCall)) {
@@ -680,18 +684,33 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fProbe)
             }
             return this.base;
         }
-        else if (type == X86.DESC.ACC.TYPE.GATE_CALL || type == X86.DESC.ACC.TYPE.GATE386_CALL) {
-            fGate = true;
+        else if (type == X86.DESC.ACC.TYPE.GATE_CALL) {
+            sizeGate = 2;
             regPSClear = 0;
             if (rpl < this.cpl) rpl = this.cpl;     // set RPL to max(RPL,CPL) for call gates
         }
-        else if (type == X86.DESC.ACC.TYPE.GATE286_INT || type == X86.DESC.ACC.TYPE.GATE386_INT) {
-            fGate = true;
+        else if (type == X86.DESC.ACC.TYPE.GATE386_CALL) {
+            sizeGate = 4;
+            regPSClear = 0;
+            if (rpl < this.cpl) rpl = this.cpl;     // set RPL to max(RPL,CPL) for call gates
+        }
+        else if (type == X86.DESC.ACC.TYPE.GATE286_INT) {
+            sizeGate = 2;
             regPSClear = (X86.PS.VM | X86.PS.NT | X86.PS.TF | X86.PS.IF);
             cpu.assert(!(acc & 0x1f));
         }
-        else if (type == X86.DESC.ACC.TYPE.GATE286_TRAP || type == X86.DESC.ACC.TYPE.GATE386_TRAP) {
-            fGate = true;
+        else if (type == X86.DESC.ACC.TYPE.GATE386_INT) {
+            sizeGate = 4;
+            regPSClear = (X86.PS.VM | X86.PS.NT | X86.PS.TF | X86.PS.IF);
+            cpu.assert(!(acc & 0x1f));
+        }
+        else if (type == X86.DESC.ACC.TYPE.GATE286_TRAP) {
+            sizeGate = 2;
+            regPSClear = (X86.PS.VM | X86.PS.NT | X86.PS.TF);
+            cpu.assert(!(acc & 0x1f));
+        }
+        else if (type == X86.DESC.ACC.TYPE.GATE386_TRAP) {
+            sizeGate = 4;
             regPSClear = (X86.PS.VM | X86.PS.NT | X86.PS.TF);
             cpu.assert(!(acc & 0x1f));
         }
@@ -702,7 +721,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fProbe)
             return this.base;
         }
 
-        if (fGate) {
+        if (sizeGate) {
             /*
              * Note that since GATE_INT/GATE_TRAP descriptors should appear in the IDT only, that means sel
              * will actually be nIDT * 8, which means the rpl will always be zero; additionally, the nWords
@@ -768,6 +787,8 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fProbe)
                     return X86.ADDR_INVALID;
                 }
 
+                this.sizeFrame = sizeGate;
+
                 cpu.regEIP = limit;
                 cpu.assert(this.cpl == cplNew);
 
@@ -816,7 +837,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fProbe)
             }
         }
 
-        if (fGate !== false) {
+        if (sizeGate !== 0) {
             var nError = sel & X86.ERRCODE.SELMASK;
             if (addrDesc >= cpu.addrIDT && addrDesc < cpu.addrIDTLimit) nError |= X86.ERRCODE.IDT;
             /*

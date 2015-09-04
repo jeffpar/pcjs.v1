@@ -3365,7 +3365,7 @@ if (DEBUGGER) {
             /*
              * Halt if running with interrupts disabled and IOPL < CPL, because that's likely an error
              */
-            if (!(this.cpu.regPS & X86.PS.IF) && this.cpu.nIOPL < this.cpu.nCPL) {
+            if (MAXDEBUG && !(this.cpu.regPS & X86.PS.IF) && this.cpu.nIOPL < this.cpu.nCPL) {
                 this.printMessage("interrupts disabled at IOPL " + this.cpu.nIOPL + " and CPL " + this.cpu.nCPL, true);
                 return true;
             }
@@ -6930,6 +6930,8 @@ if (DEBUGGER) {
 
             var ch = sCmd.charAt(0);
             if (ch == '"' || ch == "'") return true;
+
+            this.sMessagePrev = null;
 
             /*
              * I've relaxed the !isBusy() requirement, to maximize our ability to issue Debugger commands externally.

@@ -354,6 +354,151 @@ X86.fnBTS = function BTS(dst, src)
 };
 
 /**
+ * fnBTMem(dst, src)
+ *
+ * In this form of BT, src is a register operand, which is NOT truncated to mod 32 if dst is a memory operand;
+ * however, if dst is also a register operand, then we defer to the simpler function, fnBT().
+ *
+ * @this {X86CPU}
+ * @param {number} dst
+ * @param {number} src
+ * @return {number}
+ */
+X86.fnBTMem = function BTMem(dst, src)
+{
+    if (this.regEA === X86.ADDR_INVALID) {
+        return X86.fnBT.call(this, dst, src);
+    }
+    var offByte = src >>> 3;
+    if (offByte >= this.sizeData) {
+        /*
+         * offByte is src divided by 8, but now we need src divided by 16 or 32, according to the OPERAND size,
+         * which means shifting it right by either 4 or 5 bits.  That gives us a short or long INDEX, which we then
+         * multiply by the OPERAND size to obtain to the corresponding short or long OFFSET that we add to regEA.
+         */
+        var i = src >>> (this.sizeData == 2? 4 : 5);
+        dst = this.getWord(this.regEA += i * this.sizeData);
+    }
+    /*
+     * Now we convert src from a bit index into a bit mask.
+     */
+    src = 1 << (src & (this.sizeData == 2? 0xf : 0x1f));
+    if (dst & src) this.setCF(); else this.clearCF();
+
+    this.nStepCycles -= 6;
+    this.opFlags |= X86.OPFLAG.NOWRITE;
+    return dst;
+};
+
+/**
+ * fnBTCMem(dst, src)
+ *
+ * In this form of BTC, src is a register operand, which is NOT truncated to mod 32 if dst is a memory operand;
+ * however, if dst is also a register operand, then we defer to the simpler function, fnBTC().
+ *
+ * @this {X86CPU}
+ * @param {number} dst
+ * @param {number} src
+ * @return {number}
+ */
+X86.fnBTCMem = function BTCMem(dst, src)
+{
+    if (this.regEA === X86.ADDR_INVALID) {
+        return X86.fnBTC.call(this, dst, src);
+    }
+    var offByte = src >>> 3;
+    if (offByte >= this.sizeData) {
+        /*
+         * offByte is src divided by 8, but now we need src divided by 16 or 32, according to the OPERAND size,
+         * which means shifting it right by either 4 or 5 bits.  That gives us a short or long INDEX, which we then
+         * multiply by the OPERAND size to obtain to the corresponding short or long OFFSET that we add to regEA.
+         */
+        var i = src >>> (this.sizeData == 2? 4 : 5);
+        dst = this.getWord(this.regEA += i * this.sizeData);
+    }
+    /*
+     * Now we convert src from a bit index into a bit mask.
+     */
+    src = 1 << (src & (this.sizeData == 2? 0xf : 0x1f));
+    if (dst & src) this.setCF(); else this.clearCF();
+
+    this.nStepCycles -= 8;
+    return dst ^ src;
+};
+
+/**
+ * fnBTRMem(dst, src)
+ *
+ * In this form of BTR, src is a register operand, which is NOT truncated to mod 32 if dst is a memory operand;
+ * however, if dst is also a register operand, then we defer to the simpler function, fnBTR().
+ *
+ * @this {X86CPU}
+ * @param {number} dst
+ * @param {number} src
+ * @return {number}
+ */
+X86.fnBTRMem = function BTRMem(dst, src)
+{
+    if (this.regEA === X86.ADDR_INVALID) {
+        return X86.fnBTR.call(this, dst, src);
+    }
+    var offByte = src >>> 3;
+    if (offByte >= this.sizeData) {
+        /*
+         * offByte is src divided by 8, but now we need src divided by 16 or 32, according to the OPERAND size,
+         * which means shifting it right by either 4 or 5 bits.  That gives us a short or long INDEX, which we then
+         * multiply by the OPERAND size to obtain to the corresponding short or long OFFSET that we add to regEA.
+         */
+        var i = src >>> (this.sizeData == 2? 4 : 5);
+        dst = this.getWord(this.regEA += i * this.sizeData);
+    }
+    /*
+     * Now we convert src from a bit index into a bit mask.
+     */
+    src = 1 << (src & (this.sizeData == 2? 0xf : 0x1f));
+    if (dst & src) this.setCF(); else this.clearCF();
+
+    this.nStepCycles -= 8;
+    return dst & ~src;
+};
+
+/**
+ * fnBTSMem(dst, src)
+ *
+ * In this form of BTS, src is a register operand, which is NOT truncated to mod 32 if dst is a memory operand;
+ * however, if dst is also a register operand, then we defer to the simpler function, fnBTS().
+ *
+ * @this {X86CPU}
+ * @param {number} dst
+ * @param {number} src
+ * @return {number}
+ */
+X86.fnBTSMem = function BTSMem(dst, src)
+{
+    if (this.regEA === X86.ADDR_INVALID) {
+        return X86.fnBTS.call(this, dst, src);
+    }
+    var offByte = src >>> 3;
+    if (offByte >= this.sizeData) {
+        /*
+         * offByte is src divided by 8, but now we need src divided by 16 or 32, according to the OPERAND size,
+         * which means shifting it right by either 4 or 5 bits.  That gives us a short or long INDEX, which we then
+         * multiply by the OPERAND size to obtain to the corresponding short or long OFFSET that we add to regEA.
+         */
+        var i = src >>> (this.sizeData == 2? 4 : 5);
+        dst = this.getWord(this.regEA += i * this.sizeData);
+    }
+    /*
+     * Now we convert src from a bit index into a bit mask.
+     */
+    src = 1 << (src & (this.sizeData == 2? 0xf : 0x1f));
+    if (dst & src) this.setCF(); else this.clearCF();
+
+    this.nStepCycles -= 8;
+    return dst | src;
+};
+
+/**
  * fnCALLw(dst, src)
  *
  * @this {X86CPU}
@@ -1246,10 +1391,11 @@ X86.fnINT = function INT(nIDT, nError, nCycles)
     var oldIP = this.getIP();
     var addr = this.segCS.loadIDT(nIDT);
     if (addr !== X86.ADDR_INVALID) {
-        this.pushWord(oldPS);
-        this.pushWord(oldCS);
-        this.pushWord(oldIP);
-        if (nError != null) this.pushWord(nError);
+        var size = this.segCS.sizeFrame;
+        this.pushData(oldPS, size);
+        this.pushData(oldCS, size);
+        this.pushData(oldIP, size);
+        if (nError != null) this.pushData(nError, size);
         this.nFault = -1;
         /*
          * TODO: Should this code be factored into a setLIP() function? The other primary client would be setCSIP().
