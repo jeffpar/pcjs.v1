@@ -1432,14 +1432,16 @@ if (DEBUGGER) {
             var ES = cpu.segES.sel;
 
             if (this.fWinDbgRM == null) {
-                /*
-                 * It looks like IFSHLP.SYS issues a preliminary INT 0x68 before Windows 95 gets rolling,
-                 * and the Windows Debugger would not have had a chance to load yet, so we need to ignore
-                 * that call; the easiest way to do that is see if the real-mode segment in the INT 0x68
-                 * vector points to ROM (it's also possible the vector was not initialized, but IFSHLP.SYS
-                 * tries to be smart and skip the INT 0x68 in that case, so that's not a concern).
-                 */
-                if (AH == Interrupts.WINDBGRM.IS_LOADED && cpu.getShort(0x68*4+2) != 0xF000) {
+                if (AH == Interrupts.WINDBGRM.IS_LOADED) {
+                    /*
+                     * It looks like IFSHLP.SYS issues a preliminary INT 0x68 before Windows 95 gets rolling,
+                     * and the Windows Debugger will not have had a chance to load yet, so we need to ignore
+                     * that call.  We detect IFSHLP.SYS by looking for "IFS$" in the caller's code segment,
+                     * where the IFSHLP device driver header is located.
+                     */
+                    if (cpu.getLong((cpu.segCS.sel << 4) + 0xA) == 0x24534649) {
+                        return true;
+                    }
                     /*
                      * We're only going to respond to this function if no one else did, in which case,
                      * we'll set fWinDbgRM to true and handle additional notifications.
