@@ -1439,7 +1439,15 @@ if (DEBUGGER) {
                      * that call.  We detect IFSHLP.SYS by looking for "IFS$" in the caller's code segment,
                      * where the IFSHLP device driver header is located.
                      */
-                    if (cpu.getLong((cpu.segCS.sel << 4) + 0xA) == 0x24534649) {
+                    if (cpu.getLong((cpu.segCS.sel << 4) + 0x0A) == 0x24534649) {
+                        if (DEBUG) this.println("Ignoring INT 0x68 from IFSHLP.SYS");
+                        return true;
+                    }
+                    /*
+                     * Ditto for WDEB386 itself, which presumably wants to avoid loading on top of another copy.
+                     */
+                    if (cpu.getLong((cpu.segCS.sel << 4) + 0x5F) == 0x42454457) {
+                        if (DEBUG) this.println("Ignoring INT 0x68 from WDEB386.EXE");
                         return true;
                     }
                     /*
