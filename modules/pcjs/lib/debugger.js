@@ -2262,6 +2262,9 @@ if (DEBUGGER) {
         this.dumpBlocks(aBlocks, asArgs[0]);
     };
 
+    /*
+     * Table of system (non-segment) descriptors, including indicators of which ones are gates.
+     */
     Debugger.SYSDESCS = {
         0x0100: ["tss286",       false],
         0x0200: ["ldt",          false],

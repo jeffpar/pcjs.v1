@@ -292,6 +292,9 @@ X86.fnBSR = function BSR(dst, src)
 /**
  * fnBT(dst, src)
  *
+ * In this form of BT, src is an immediate operand (OR dst is register operand); immediate operands
+ * are supposed to be masked with either 0xf or 0x1f for 16-bit or 32-bit operands, respectively.
+ *
  * @this {X86CPU}
  * @param {number} dst
  * @param {number} src
@@ -299,7 +302,8 @@ X86.fnBSR = function BSR(dst, src)
  */
 X86.fnBT = function BT(dst, src)
 {
-    if (dst & (1 << (src & 0x1f))) this.setCF(); else this.clearCF();
+    var bit = 1 << (src & (this.sizeData == 2? 0xf : 0x1f));
+    if (dst & bit) this.setCF(); else this.clearCF();
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? 3 : 6);
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;
@@ -308,6 +312,9 @@ X86.fnBT = function BT(dst, src)
 /**
  * fnBTC(dst, src)
  *
+ * In this form of BTC, src is an immediate operand (OR dst is register operand); immediate operands
+ * are supposed to be masked with either 0xf or 0x1f for 16-bit or 32-bit operands, respectively.
+ *
  * @this {X86CPU}
  * @param {number} dst
  * @param {number} src
@@ -315,7 +322,7 @@ X86.fnBT = function BT(dst, src)
  */
 X86.fnBTC = function BTC(dst, src)
 {
-    var bit = 1 << (src & 0x1f);
+    var bit = 1 << (src & (this.sizeData == 2? 0xf : 0x1f));
     if (dst & bit) this.setCF(); else this.clearCF();
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? 6 : 8);
     return dst ^ bit;
@@ -324,6 +331,9 @@ X86.fnBTC = function BTC(dst, src)
 /**
  * fnBTR(dst, src)
  *
+ * In this form of BTR, src is an immediate operand (OR dst is register operand); immediate operands
+ * are supposed to be masked with either 0xf or 0x1f for 16-bit or 32-bit operands, respectively.
+ *
  * @this {X86CPU}
  * @param {number} dst
  * @param {number} src
@@ -331,7 +341,7 @@ X86.fnBTC = function BTC(dst, src)
  */
 X86.fnBTR = function BTR(dst, src)
 {
-    var bit = 1 << (src & 0x1f);
+    var bit = 1 << (src & (this.sizeData == 2? 0xf : 0x1f));
     if (dst & bit) this.setCF(); else this.clearCF();
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? 6 : 8);
     return dst & ~bit;
@@ -340,6 +350,9 @@ X86.fnBTR = function BTR(dst, src)
 /**
  * fnBTS(dst, src)
  *
+ * In this form of BTS, src is an immediate operand (OR dst is register operand); immediate operands
+ * are supposed to be masked with either 0xf or 0x1f for 16-bit or 32-bit operands, respectively.
+ *
  * @this {X86CPU}
  * @param {number} dst
  * @param {number} src
@@ -347,7 +360,7 @@ X86.fnBTR = function BTR(dst, src)
  */
 X86.fnBTS = function BTS(dst, src)
 {
-    var bit = 1 << (src & 0x1f);
+    var bit = 1 << (src & (this.sizeData == 2? 0xf : 0x1f));
     if (dst & bit) this.setCF(); else this.clearCF();
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? 6 : 8);
     return dst | bit;
@@ -356,7 +369,7 @@ X86.fnBTS = function BTS(dst, src)
 /**
  * fnBTMem(dst, src)
  *
- * In this form of BT, src is a register operand, which is NOT truncated to mod 32 if dst is a memory operand;
+ * In this form of BT, src is a register operand, which is NOT truncated if dst is a memory operand;
  * however, if dst is also a register operand, then we defer to the simpler function, fnBT().
  *
  * @this {X86CPU}
@@ -373,15 +386,19 @@ X86.fnBTMem = function BTMem(dst, src)
     /*
      * TODO: Consider a worker function that performs the following block of code for: BT, BTC, BTR, and BTS.
      * It's somewhat inconvenient, because it needs to provide two results: an updated src AND an updated dst.
+     *
+     * src is usually positive BUT can also be negative (as the IA32 spec says: "The offset operand then selects
+     * a bit position within the range −231 to 231 − 1 for a register offset and 0 to 31 for an immediate offset.")
      */
-    if ((src >>> 3) >= this.sizeData) {
+    var max = this.sizeData << 3;
+    if (src >= max || src < -max) {
         /*
          * We just divided src by 8, but now we need to divide src by 16 or 32, according to the OPERAND size,
          * which means shifting it right by either 4 or 5 bits.  That gives us a short or long INDEX, which we then
          * multiply by the OPERAND size to obtain to the corresponding short or long OFFSET that we must add to
          * the original EA offset.
          */
-        var i = src >>> (this.sizeData == 2? 4 : 5);
+        var i = src >> (this.sizeData == 2? 4 : 5);
         dst = this.getEAWord(this.segEA, this.offEA + i * this.sizeData);
     }
     /*
@@ -401,7 +418,7 @@ X86.fnBTMem = function BTMem(dst, src)
 /**
  * fnBTCMem(dst, src)
  *
- * In this form of BTC, src is a register operand, which is NOT truncated to mod 32 if dst is a memory operand;
+ * In this form of BTC, src is a register operand, which is NOT truncated if dst is a memory operand;
  * however, if dst is also a register operand, then we defer to the simpler function, fnBTC().
  *
  * @this {X86CPU}
@@ -415,14 +432,19 @@ X86.fnBTCMem = function BTCMem(dst, src)
         return X86.fnBTC.call(this, dst, src);
     }
 
-    if ((src >>> 3) >= this.sizeData) {
+    /*
+     * src is usually positive BUT can also be negative (as the IA32 spec says: "The offset operand then selects
+     * a bit position within the range −231 to 231 − 1 for a register offset and 0 to 31 for an immediate offset.")
+     */
+    var max = this.sizeData << 3;
+    if (src >= max || src < -max) {
         /*
          * We just divided src by 8, but now we need to divide src by 16 or 32, according to the OPERAND size,
          * which means shifting it right by either 4 or 5 bits.  That gives us a short or long INDEX, which we then
          * multiply by the OPERAND size to obtain to the corresponding short or long OFFSET that we must add to
          * the original EA offset.
          */
-        var i = src >>> (this.sizeData == 2? 4 : 5);
+        var i = src >> (this.sizeData == 2? 4 : 5);
         dst = this.getEAWord(this.segEA, this.offEA + i * this.sizeData);
     }
     /*
@@ -438,7 +460,7 @@ X86.fnBTCMem = function BTCMem(dst, src)
 /**
  * fnBTRMem(dst, src)
  *
- * In this form of BTR, src is a register operand, which is NOT truncated to mod 32 if dst is a memory operand;
+ * In this form of BTR, src is a register operand, which is NOT truncated if dst is a memory operand;
  * however, if dst is also a register operand, then we defer to the simpler function, fnBTR().
  *
  * @this {X86CPU}
@@ -452,14 +474,19 @@ X86.fnBTRMem = function BTRMem(dst, src)
         return X86.fnBTR.call(this, dst, src);
     }
 
-    if ((src >>> 3) >= this.sizeData) {
+    /*
+     * src is usually positive BUT can also be negative (as the IA32 spec says: "The offset operand then selects
+     * a bit position within the range −231 to 231 − 1 for a register offset and 0 to 31 for an immediate offset.")
+     */
+    var max = this.sizeData << 3;
+    if (src >= max || src < -max) {
         /*
          * We just divided src by 8, but now we need to divide src by 16 or 32, according to the OPERAND size,
          * which means shifting it right by either 4 or 5 bits.  That gives us a short or long INDEX, which we then
          * multiply by the OPERAND size to obtain to the corresponding short or long OFFSET that we must add to
          * the original EA offset.
          */
-        var i = src >>> (this.sizeData == 2? 4 : 5);
+        var i = src >> (this.sizeData == 2? 4 : 5);
         dst = this.getEAWord(this.segEA, this.offEA + i * this.sizeData);
     }
     /*
@@ -475,7 +502,7 @@ X86.fnBTRMem = function BTRMem(dst, src)
 /**
  * fnBTSMem(dst, src)
  *
- * In this form of BTS, src is a register operand, which is NOT truncated to mod 32 if dst is a memory operand;
+ * In this form of BTS, src is a register operand, which is NOT truncated if dst is a memory operand;
  * however, if dst is also a register operand, then we defer to the simpler function, fnBTS().
  *
  * @this {X86CPU}
@@ -489,14 +516,19 @@ X86.fnBTSMem = function BTSMem(dst, src)
         return X86.fnBTS.call(this, dst, src);
     }
 
-    if ((src >>> 3) >= this.sizeData) {
+    /*
+     * src is usually positive BUT can also be negative (as the IA32 spec says: "The offset operand then selects
+     * a bit position within the range −231 to 231 − 1 for a register offset and 0 to 31 for an immediate offset.")
+     */
+    var max = this.sizeData << 3;
+    if (src >= max || src < -max) {
         /*
          * We just divided src by 8, but now we need to divide src by 16 or 32, according to the OPERAND size,
          * which means shifting it right by either 4 or 5 bits.  That gives us a short or long INDEX, which we then
          * multiply by the OPERAND size to obtain to the corresponding short or long OFFSET that we must add to
          * the original EA offset.
          */
-        var i = src >>> (this.sizeData == 2? 4 : 5);
+        var i = src >> (this.sizeData == 2? 4 : 5);
         dst = this.getEAWord(this.segEA, this.offEA + i * this.sizeData);
     }
     /*
@@ -3093,7 +3125,7 @@ X86.fnSHLDw = function SHLDw(dst, src, count)
             count -= 16;
         }
         var carry = dst << (count - 1);
-        dst = ((carry << 1) | (src >> (16 - count))) & 0xffff;
+        dst = ((carry << 1) | (src >>> (16 - count))) & 0xffff;
         this.setLogicResult(dst, X86.RESULT.WORD, carry & X86.RESULT.WORD);
     }
     return dst;
@@ -3112,7 +3144,7 @@ X86.fnSHLDd = function SHLDd(dst, src, count)
 {
     if (count) {
         var carry = dst << (count - 1);
-        dst = (carry << 1) | (src >> (32 - count));
+        dst = (carry << 1) | (src >>> (32 - count));
         this.setLogicResult(dst, X86.RESULT.DWORD, carry & X86.RESULT.DWORD);
     }
     return dst;
@@ -3243,8 +3275,8 @@ X86.fnSHRDw = function SHRDw(dst, src, count)
             dst = src;
             count -= 16;
         }
-        var carry = dst >> (count - 1);
-        dst = ((carry >> 1) | (src << (16 - count))) & 0xffff;
+        var carry = dst >>> (count - 1);
+        dst = ((carry >>> 1) | (src << (16 - count))) & 0xffff;
         this.setLogicResult(dst, X86.RESULT.WORD, carry & 0x1);
     }
     return dst;
@@ -3262,8 +3294,8 @@ X86.fnSHRDw = function SHRDw(dst, src, count)
 X86.fnSHRDd = function SHRDd(dst, src, count)
 {
     if (count) {
-        var carry = dst >> (count - 1);
-        dst = (carry >> 1) | (src << (32 - count));
+        var carry = dst >>> (count - 1);
+        dst = (carry >>> 1) | (src << (32 - count));
         this.setLogicResult(dst, X86.RESULT.DWORD, carry & 0x1);
     }
     return dst;
