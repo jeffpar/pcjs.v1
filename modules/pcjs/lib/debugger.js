@@ -171,7 +171,7 @@ function Debugger(parmsDbg)
          * aVariables is an object with properties that grows as setVariable() assigns more variables;
          * each property corresponds to one variable, where the property name is the variable name (ie,
          * a string beginning with a letter or underscore, followed by zero or more additional letters,
-         * digits, or underscores) and the property value is the variable's numeric value.  See doLet()
+         * digits, or underscores) and the property value is the variable's numeric value.  See doSet()
          * and setVariable() for details.
          *
          * Note that parseValue(), through its reliance on str.parseInt(), assumes a default base of 16
@@ -293,10 +293,10 @@ if (DEBUGGER) {
         'u [#]': "unassemble",
         'x':     "execution options",
         'if':    "eval expression",
-        'let':   "assign expression",
         'mouse': "mouse action",        // syntax: mouse {action} {delta} (eg, mouse x 10, mouse click 0, etc)
         'print': "print expression",
         'reset': "reset machine",
+        'set':   "assign expression",
         'ver':   "display version"
     };
 
@@ -5075,29 +5075,29 @@ if (DEBUGGER) {
      *
      * For example:
      *      {
-     *          "HF_PORT": {
-     *              "v":800
+     *          'HF_PORT': {
+     *              'v':800
      *          },
-     *          "HDISK_INT": {
-     *              "b":4, "s":0, "o":52
+     *          'HDISK_INT': {
+     *              'b':4, 's':0, 'o':52
      *          },
-     *          "ORG_VECTOR": {
-     *              "b":4, "s":0, "o":76
+     *          'ORG_VECTOR': {
+     *              'b':4, 's':0, 'o':76
      *          },
-     *          "CMD_BLOCK": {
-     *              "b":1, "s":64, "o":66
+     *          'CMD_BLOCK': {
+     *              'b':1, 's':64, 'o':66
      *          },
-     *          "DISK_SETUP": {
-     *              "o":3
+     *          'DISK_SETUP': {
+     *              'o':3
      *          },
-     *          ".40": {
-     *              "o":40, "a":"MOV AX,WORD PTR ORG_VECTOR ;GET DISKETTE VECTOR"
+     *          '.40': {
+     *              'o':40, 'a':"MOV AX,WORD PTR ORG_VECTOR ;GET DISKETTE VECTOR"
      *          }
      *      }
      *
      * If a symbol only has an offset, then that offset value can be assigned to the symbol property directly:
      *
-     *          "DISK_SETUP": 3
+     *          'DISK_SETUP': 3
      *
      * The last property is an example of an "anonymous" entry, for offsets where there is no associated symbol.
      * Such entries are identified by a period followed by a unique number (usually the offset of the entry), and
@@ -5772,8 +5772,8 @@ if (DEBUGGER) {
     /**
      * doIf(sCmd, fQuiet)
      *
-     * NOTE: Don't forget that the default base for all numeric constants is 16, so when you evaluate an
-     * expression like "a==10", it will compare the value of the variable "a" to 0x10; use a trailing period
+     * NOTE: Don't forget that the default base for all numeric constants is 16 (hex), so when you evaluate
+     * an expression like "a==10", it will compare the value of the variable "a" to 0x10; use a trailing period
      * (eg, "10.") if you really intend decimal.
      *
      * Also, if no variable named "a" exists, "a" will evaluate to 0x0A, so the expression "a==10" becomes
@@ -5894,20 +5894,20 @@ if (DEBUGGER) {
     };
 
     /**
-     * doLet(sCmd)
+     * doSet(sCmd)
      *
      * The command must be of the form "{variable} = [{expression}]", where expression may contain constants,
      * operators, registers, symbols, other variables, or nothing at all; in the latter case, the variable, if
      * any, is deleted.
      *
-     * Other supported shorthand: "let" with no parameters prints the values of all variables, and "let {variable}"
+     * Other supported shorthand: "set" with no parameters prints the values of all variables, and "set {variable}"
      * prints the value of the specified variable.
      *
      * @this {Debugger}
      * @param {string} sCmd
-     * @return {boolean} true if valid "let" assignment, false if not
+     * @return {boolean} true if valid "set" assignment, false if not
      */
-    Debugger.prototype.doLet = function(sCmd)
+    Debugger.prototype.doSet = function(sCmd)
     {
         var a = sCmd.match(/^\s*([A-Z_]?[A-Z0-9_]*)\s*(=?)\s*(.*)$/i);
         if (a) {
@@ -7118,12 +7118,6 @@ if (DEBUGGER) {
                     this.doStackTrace();
                     break;
                 case 'l':
-                    if (asArgs[0] == "let") {
-                        if (!this.doLet(sCmd.substr(3))) {
-                            result = false;
-                        }
-                        break;
-                    }
                     this.shiftArgs(asArgs);
                     this.doLoad(asArgs);
                     break;
@@ -7151,6 +7145,13 @@ if (DEBUGGER) {
                     }
                     this.shiftArgs(asArgs);
                     this.doRegisters(asArgs);
+                    break;
+                case 's':
+                    if (asArgs[0] == "set") {
+                        if (!this.doSet(sCmd.substr(3))) {
+                            result = false;
+                        }
+                    }
                     break;
                 case 't':
                     this.shiftArgs(asArgs);
