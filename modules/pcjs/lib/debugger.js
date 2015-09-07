@@ -5583,6 +5583,17 @@ if (DEBUGGER) {
             return;
         }
 
+        if (sCmd == "disk") {
+            /*
+             * The "disk" command is an undocumented command that's useful any time we're inside an internal
+             * DOS dispatch function where the registers are substantially the same as the corresponding INT 0x13;
+             * "m int on; m disk on" produces the same output, but only when an actual INT 0x13 instruction is used.
+             * Issuing this command at any other time should also be OK, but the results will be meaningless.
+             */
+            this.messageInt(Interrupts.DISK, this.cpu.regLIP, true);
+            return;
+        }
+
         if (sCmd == "dos") {
             /*
              * The "dos" command is an undocumented command that's useful any time we're inside an internal
