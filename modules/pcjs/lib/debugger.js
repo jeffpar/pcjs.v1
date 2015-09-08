@@ -2626,7 +2626,8 @@ if (DEBUGGER) {
      * @param {number} [off] optional offset into sReg
      * @return {number} register index, or -1 if not found
      */
-    Debugger.prototype.getRegIndex = function(sReg, off) {
+    Debugger.prototype.getRegIndex = function(sReg, off)
+    {
         var i;
         sReg = sReg.toUpperCase();
         if (off == null) {
@@ -2645,7 +2646,8 @@ if (DEBUGGER) {
      * @param {number} iReg
      * @return {string}
      */
-    Debugger.prototype.getRegString = function(iReg) {
+    Debugger.prototype.getRegString = function(iReg)
+    {
         var cch = 0;
         var n = this.getRegValue(iReg);
         if (n !== undefined) {
@@ -2707,7 +2709,8 @@ if (DEBUGGER) {
      * @param {number} iReg
      * @return {number|undefined}
      */
-    Debugger.prototype.getRegValue = function(iReg) {
+    Debugger.prototype.getRegValue = function(iReg)
+    {
         var n;
         if (iReg >= 0) {
             var cpu = this.cpu;
@@ -2846,7 +2849,8 @@ if (DEBUGGER) {
      * @param {string} s
      * @return {string}
      */
-    Debugger.prototype.replaceRegs = function(s) {
+    Debugger.prototype.replaceRegs = function(s)
+    {
         /*
          * Replace any references first; this means that register references inside the reference
          * do NOT need to be prefixed with '%'.
@@ -4656,6 +4660,8 @@ if (DEBUGGER) {
 
         if (sAddr !== undefined) {
 
+            sAddr = this.parseReference(sAddr);
+
             var ch = sAddr.charAt(0);
             var iColon = sAddr.indexOf(':');
 
@@ -5608,12 +5614,24 @@ if (DEBUGGER) {
             return;
         }
 
-        if (sCmd == "ds") {                     // transform a "ds" command into a "d desc" command
+        /*
+         * Transform a "ds" command into a "d desc" command
+         */
+        if (sCmd == "ds") {
             sCmd = 'd';
             asArgs = [sCmd, "desc", sAddr];
         }
 
         if (sCmd == 'd') {
+            /*
+             * Transform a "d disk" command into a "l json" command
+             */
+            if (sAddr == "disk") {
+                asArgs[0] = "l";
+                asArgs[1] = "json";
+                this.doLoad(asArgs);
+                return;
+            }
             for (m in Debugger.MESSAGES) {
                 if (sAddr == m) {
                     var fnDumper = this.afnDumpers[m];
@@ -6000,9 +6018,13 @@ if (DEBUGGER) {
      * The only optional parameter is the last, which defaults to 1 sector if not specified.
      *
      * As a quick-and-dirty way of getting the current contents of a disk image as a JSON dump
-     * (which you can then save as .json disk image file), I also allow this command format:
+     * (which you can then save as .json disk image file), I also support this command:
      *
      *      l json [drive #]
+     *
+     * which is aliased to this command:
+     *
+     *      d disk [drive #]
      *
      * @this {Debugger}
      * @param {Array.<string>} asArgs
@@ -6602,7 +6624,7 @@ if (DEBUGGER) {
     Debugger.prototype.doRun = function(sAddr, sOptions, fQuiet)
     {
         if (sAddr !== undefined) {
-            var dbgAddr = this.parseAddr(this.parseReference(sAddr), Debugger.ADDR.CODE);
+            var dbgAddr = this.parseAddr(sAddr, Debugger.ADDR.CODE);
             if (!dbgAddr) return;
             this.parseAddrOptions(dbgAddr, sOptions);
             this.setTempBreakpoint(dbgAddr);
