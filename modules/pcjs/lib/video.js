@@ -5575,6 +5575,12 @@ Video.prototype.updateScreenGraphicsEGA = function(addrBuffer, addrScreen, addrS
                  * and in the array that are outside the signed 32-bit range, potentially triggering floating-point.
                  *
                  *      if (dwPixel < 0) dwPixel += 0x100000000;
+                 *
+                 * An even simpler solution would be to use the unsigned right-shift operator:
+                 *
+                 *      dwPixel >>> 0
+                 *
+                 * but again, all that does is produce a value outside the signed 32-bit range, which is sub-optimal.
                  */
                 this.assert(Video.aEGADWToByte[dwPixel] !== undefined);
                 /*

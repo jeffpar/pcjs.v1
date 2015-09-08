@@ -155,13 +155,14 @@ function Debugger(parmsDbg)
         this.dbgAddrAssemble = this.newAddr();
 
         /*
-         * aSymbolTable is an array of 4-element arrays, one per ROM or other chunk of address space.
-         * Each 4-element arrays contains:
+         * aSymbolTable is an array of 5-element arrays, one per ROM or other chunk of address space.
+         * Each 5-element arrays contains:
          *
-         *      [0]: addr
-         *      [1]: size
-         *      [2]: aSymbols
-         *      [3]: aOffsetPairs
+         *      [0]: sel
+         *      [1]: addr
+         *      [2]: len
+         *      [3]: aSymbols
+         *      [4]: aOffsetPairs
          *
          * See addSymbols() for more details, since that's how callers add sets of symbols to the table.
          */
@@ -293,6 +294,7 @@ if (DEBUGGER) {
         'u [#]': "unassemble",
         'x':     "execution options",
         'if':    "eval expression",
+        "ln":    "list nearest symbol(s)",
         'mouse': "mouse action",        // syntax: mouse {action} {delta} (eg, mouse x 10, mouse click 0, etc)
         'print': "print expression",
         'reset': "reset machine",
@@ -1285,6 +1287,71 @@ if (DEBUGGER) {
 
     if (Interrupts.WINDBG.ENABLED || Interrupts.WINDBGRM.ENABLED) {
         /**
+         * addSegmentInfo(dbgAddr, nSeg, sel, fCode, fPrint)
+         *
+         * @this {Debugger}
+         * @param {DbgAddr} dbgAddr (address of module name)
+         * @param {number} nSeg (logical segment number)
+         * @param {number} sel (current selector)
+         * @param {boolean} fCode (true if code segment, false if data segment)
+         * @param {boolean} [fPrint]
+         */
+        Debugger.prototype.addSegmentInfo = function(dbgAddr, nSeg, sel, fCode, fPrint)
+        {
+            var sModule = this.getSZ(dbgAddr);
+            var seg = this.getSegment(sel);
+            var len = seg? seg.limit + 1 : 0;
+            var sSection = (fCode? "_CODE" : "_DATA") + str.toHex(nSeg, 2);
+            if (fPrint) {
+                this.println(sModule + "!undefined " + (fCode? "code" : "data") + '(' + str.toHex(nSeg, 4) + ")=#" + str.toHex(sel, 4) + " len " + str.toHex(len));
+            }
+            var aSymbols = {};
+            var off = 0;
+            aSymbols[sModule + sSection] = off;
+            this.addSymbols(sel, off, len, aSymbols);
+        };
+
+        /**
+         * addSectionInfo(dbgAddr, fCode, fPrint)
+         *
+         *  dbgAddr -> D386_Device_Params structure:
+         *      DD_logical_seg  dw  ?   ; logical segment # from map
+         *      DD_actual_sel   dw  ?   ; actual selector value
+         *      DD_base         dd  ?   ; linear address offset for start of segment
+         *      DD_length       dd  ?   ; actual length of segment
+         *      DD_name         df  ?   ; 16:32 ptr to null terminated device name
+         *      DD_sym_name     df  ?   ; 16:32 ptr to null terminated symbolic module name (i.e. Win386)
+         *      DD_alias_sel    dw  ?   ; alias selector value (0 = none)
+         *
+         * @this {Debugger}
+         * @param {DbgAddr} dbgAddr (address of D386_Device_Params)
+         * @param {boolean} fCode (true if code section, false if data section)
+         * @param {boolean} [fPrint]
+         */
+        Debugger.prototype.addSectionInfo = function(dbgAddr, fCode, fPrint)
+        {
+            var nSeg = this.getShort(dbgAddr, 2);
+            var sel = this.getShort(dbgAddr, 2);
+            var off = this.getLong(dbgAddr, 4);
+            var len = this.getLong(dbgAddr, 4);
+            var dbgAddrDevice = this.newAddr(this.getLong(dbgAddr, 4), this.getShort(dbgAddr, 2));
+            var dbgAddrModule = this.newAddr(this.getLong(dbgAddr, 4), this.getShort(dbgAddr, 2));
+            sel = this.getShort(dbgAddr, 2) || sel;
+            var sModule = this.getSZ(dbgAddrModule).toUpperCase();
+            var sDevice = this.getSZ(dbgAddrDevice).toUpperCase();
+            var sSection = (fCode? "_CODE" : "_DATA") + str.toHex(nSeg, 2);
+            if (fPrint) {
+                /*
+                 * Mimic WDEB386 output
+                 */
+                this.println(sModule + '!' + sDevice + "!undefined " + (fCode? "code" : "data") + '(' + str.toHex(nSeg, 4) + ")=" + str.toHex(sel, 4) + ':' + str.toHex(off) + " len " + str.toHex(len));
+            }
+            var aSymbols = {};
+            aSymbols[sDevice + sSection] = off;
+            this.addSymbols(sel, off, len, aSymbols);
+        };
+
+        /**
          * intWindowsDebugger()
          *
          * This intercepts calls to the Windows Debugger protected-mode interface (INT 0x41).
@@ -1345,17 +1412,11 @@ if (DEBUGGER) {
             case Interrupts.WINDBG.IS_LOADED:
                 if (this.fWinDbg) {
                     cpu.regEAX = (cpu.regEAX & ~0xffff) | Interrupts.WINDBG.LOADED;
-                    return false;
                 }
                 break;
 
             case Interrupts.WINDBG.LOAD_SEG:
-                if (this.fWinDbg) {
-                    sModule = this.getSZ(this.newAddr(DI, ES));
-                    limit = (seg = this.getSegment(CX))? seg.limit : 0;
-                    this.println(sModule + "!undefined " + (!(SI & 0x1)? "code" : "data") + '(' + str.toHex(BX+1, 4) + ")=#" + str.toHex(CX, 4) + " len " + str.toHex(limit+1));
-                    return false;
-                }
+                this.addSegmentInfo(this.newAddr(DI, ES), BX+1, CX, !(SI & 0x1), this.fWinDbg);
                 break;
 
             case Interrupts.WINDBG.LOAD_SEG32:
@@ -1363,52 +1424,19 @@ if (DEBUGGER) {
                  *  SI == segment type:
                  *      0x0     code selector
                  *      0x1     data selector
-                 *  DX:EBX -> D386_Device_Params structure (see dumpD386DeviceParms() for details)
+                 *  DX:EBX -> D386_Device_Params structure (see addSectionInfo() for details)
                  */
-                if (this.fWinDbg) {
-                    this.println(this.dumpD386DeviceParms(this.newAddr(cpu.regEBX, DX), !SI));
-                    return false;
-                }
+                this.addSectionInfo(this.newAddr(cpu.regEBX, DX), !SI, this.fWinDbg);
                 break;
 
             default:
                 if (this.fWinDbg) {
                     this.println("INT 0x41: " + str.toHexWord(AX));
-                    return false;
                 }
                 break;
             }
 
-            return true;
-        };
-
-        /**
-         * dumpD386DeviceParms(dbgAddr, fCode)
-         *
-         *  dbgAddr -> D386_Device_Params structure:
-         *      DD_logical_seg  dw  ?   ; logical segment # from map
-         *      DD_actual_sel   dw  ?   ; actual selector value
-         *      DD_base         dd  ?   ; linear address offset for start of segment
-         *      DD_length       dd  ?   ; actual length of segment
-         *      DD_name         df  ?   ; 16:32 ptr to null terminated device name
-         *      DD_sym_name     df  ?   ; 16:32 ptr to null terminated symbolic module name (i.e. Win386)
-         *      DD_alias_sel    dw  ?   ; alias selector value (0 = none)
-         *
-         * @this {Debugger}
-         * @param {DbgAddr} dbgAddr
-         * @param {boolean} fCode
-         * @return {string}
-         */
-        Debugger.prototype.dumpD386DeviceParms = function(dbgAddr, fCode)
-        {
-            var nSeg = this.getShort(dbgAddr, 2);
-            var sel = this.getShort(dbgAddr, 2);
-            var off = this.getLong(dbgAddr, 4);
-            var len = this.getLong(dbgAddr, 4);
-            var dbgAddrDevice = this.newAddr(this.getLong(dbgAddr, 4), this.getShort(dbgAddr, 2));
-            var dbgAddrModule = this.newAddr(this.getLong(dbgAddr, 4), this.getShort(dbgAddr, 2));
-            var selAlias = this.getShort(dbgAddr, 2) || sel;
-            return this.getSZ(dbgAddrModule) + '!' + this.getSZ(dbgAddrDevice) + "!undefined " + (fCode? "code" : "data") + '(' + str.toHex(nSeg, 4) + ")=" + str.toHex(selAlias, 4) + ':' + str.toHex(off) + " len " + str.toHex(len);
+            return !this.fWinDbg;
         };
     }
 
@@ -1482,7 +1510,6 @@ if (DEBUGGER) {
             case Interrupts.WINDBGRM.IS_LOADED:
                 if (this.fWinDbgRM) {
                     cpu.regEAX = (cpu.regEAX & ~0xffff) | Interrupts.WINDBGRM.LOADED;
-                    return false;
                 }
                 break;
 
@@ -1493,7 +1520,6 @@ if (DEBUGGER) {
                         cpu.regEDI = a[0];
                         cpu.setES(a[1]);
                     }
-                    return false;
                 }
                 break;
 
@@ -1525,27 +1551,23 @@ if (DEBUGGER) {
                      *  AL == segment type:
                      *      0x80    device driver code seg
 				     *      0x81    device driver data seg
-                     *  ES:DI -> D386_Device_Params structure (see dumpD386DeviceParms() for details)
+                     *  ES:DI -> D386_Device_Params structure (see addSectionInfo() for details)
                      */
-                    if (this.fWinDbgRM) {
-                        this.println(this.dumpD386DeviceParms(this.newAddr(DI, ES), !(AL & 0x1)));
-                    }
+                    this.addSectionInfo(this.newAddr(DI, ES), !(AL & 0x1), this.fWinDbgRM);
                 }
                 if (this.fWinDbgRM) {
                     cpu.regEAX = (cpu.regEAX & ~0xff) | 0x01;
-                    return false;
                 }
                 break;
 
             default:
                 if (this.fWinDbgRM) {
                     this.println("INT 0x68: " + str.toHexByte(AH));
-                    return false;
                 }
                 break;
             }
 
-            return true;
+            return !this.fWinDbgRM;
         };
 
         /**
@@ -2056,6 +2078,120 @@ if (DEBUGGER) {
     };
 
     /**
+     * parseAddr(sAddr, type, fNoChecks, fPrint)
+     *
+     * As discussed above, dbgAddr variables contain one or more of: off, sel, and addr.  They represent
+     * a segmented address (sel:off) when sel is defined or a linear address (addr) when sel is undefined
+     * (or null).
+     *
+     * To create a segmented address, specify two values separated by ':'; for a linear address, use
+     * a '%' prefix.  We check for ':' after '%', so if for some strange reason you specify both, the
+     * address will be treated as segmented, not linear.
+     *
+     * The '%' syntax is similar to that used by the Windows 80386 kernel debugger (wdeb386) for linear
+     * addresses.  If/when we add support for processors with page tables, we will likely adopt the same
+     * convention for linear addresses and provide a different syntax (eg, "%%") physical memory references.
+     *
+     * Address evaluation and validation (eg, range checks) are no longer performed at this stage.  That's
+     * done later, by getAddr(), which returns X86.ADDR_INVALID for invalid segments, out-of-range offsets,
+     * etc.  The Debugger's low-level get/set memory functions verify all getAddr() results, but even if an
+     * invalid address is passed through to the Bus memory interfaces, the address will simply be masked with
+     * Bus.nBusLimit; in the case of X86.ADDR_INVALID, that will generally refer to the top of the physical
+     * address space.
+     *
+     * @this {Debugger}
+     * @param {string|undefined} sAddr
+     * @param {number|undefined} [type] is either CODE or DATA, in case sAddr doesn't specify a segment
+     * @param {boolean} [fNoChecks] (eg, true when setting breakpoints that may not be valid now, but will be later)
+     * @param {boolean} [fPrint]
+     * @return {DbgAddr|null|undefined}
+     */
+    Debugger.prototype.parseAddr = function(sAddr, type, fNoChecks, fPrint)
+    {
+        var dbgAddr;
+        var dbgAddrNext = (type === Debugger.ADDR.CODE? this.dbgAddrNextCode : this.dbgAddrNextData);
+
+        var off = dbgAddrNext.off, sel = dbgAddrNext.sel, addr = dbgAddrNext.addr;
+
+        type = fNoChecks? Debugger.ADDR.NONE : dbgAddrNext.type;
+
+        if (sAddr !== undefined) {
+
+            sAddr = this.parseReference(sAddr);
+
+            var ch = sAddr.charAt(0);
+            var iColon = sAddr.indexOf(':');
+
+            switch(ch) {
+            case '&':
+                type = Debugger.ADDR.REAL;
+                break;
+            case '#':
+                type = Debugger.ADDR.PROT;
+                break;
+            case '%':
+                type = Debugger.ADDR.LINEAR;
+                off = addr = 0;
+                sel = null;             // we still have code that relies on this crutch, instead of the type field
+                break;
+            default:
+                if (iColon >= 0) type = Debugger.ADDR.NONE;
+                ch = '';
+                break;
+            }
+
+            if (ch) {
+                sAddr = sAddr.substr(1);
+                iColon--;
+            }
+
+            dbgAddr = this.findSymbolAddr(sAddr);
+            if (dbgAddr) return dbgAddr;
+
+            if (iColon < 0) {
+                if (sel != null) {
+                    off = this.parseExpression(sAddr, fPrint);
+                    addr = null;
+                } else {
+                    addr = this.parseExpression(sAddr, fPrint);
+                    if (addr == null) off = null;
+                }
+            }
+            else {
+                sel = this.parseExpression(sAddr.substring(0, iColon), fPrint);
+                off = this.parseExpression(sAddr.substring(iColon + 1), fPrint);
+                addr = null;
+            }
+        }
+
+        if (off != null) {
+            dbgAddr = this.newAddr(off, sel, addr, type);
+            if (!fNoChecks && !this.checkLimit(dbgAddr, true)) {
+                this.println("invalid offset: " + this.hexAddr(dbgAddr));
+                dbgAddr = null;
+            }
+        }
+        return dbgAddr;
+    };
+
+    /**
+     * parseAddrOptions(dbdAddr, sOptions)
+     *
+     * @this {Debugger}
+     * @param {DbgAddr} dbgAddr
+     * @param {string} [sOptions]
+     */
+    Debugger.prototype.parseAddrOptions = function(dbgAddr, sOptions)
+    {
+        if (sOptions) {
+            var a = sOptions.match(/(['"])(.*?)\1/);
+            if (a) {
+                dbgAddr.aCmds = this.parseCommand(dbgAddr.sCmd = a[2]);
+            }
+        }
+    };
+
+    /**
      * incAddr(dbgAddr, inc)
      *
      * @this {Debugger}
@@ -2221,7 +2357,7 @@ if (DEBUGGER) {
         var sInfo = "no information";
         if (BACKTRACK) {
             var sAddr = asArgs[0];
-            var dbgAddr = this.parseAddr(sAddr, Debugger.ADDR.CODE, true, true);
+            var dbgAddr = this.parseAddr(sAddr, Debugger.ADDR.CODE, true, false);
             if (dbgAddr) {
                 var addr = this.getAddr(dbgAddr);
                 sInfo = '%' + str.toHex(addr) + ": " + (this.bus.getSymbol(addr, true) || sInfo);
@@ -4075,7 +4211,7 @@ if (DEBUGGER) {
 
         for (var iOperand = 1; iOperand <= cOperands; iOperand++) {
 
-            var disp, offset, cch;
+            var disp, off, cch;
             var sOperand = "";
             var type = aOpDesc[iOperand];
             if (type === undefined) continue;
@@ -4129,12 +4265,12 @@ if (DEBUGGER) {
             else if (typeMode == Debugger.TYPE_IMMOFF) {
                 if (!dbgAddr.fAddr32) {
                     cch = 4;
-                    offset = this.getShort(dbgAddr, 2);
+                    off = this.getShort(dbgAddr, 2);
                 } else {
                     cch = 8;
-                    offset = this.getLong(dbgAddr, 4);
+                    off = this.getLong(dbgAddr, 4);
                 }
-                sOperand = '[' + str.toHex(offset, cch) + ']';
+                sOperand = '[' + str.toHex(off, cch) + ']';
             }
             else if (typeMode == Debugger.TYPE_IMMREL) {
                 if (typeSize == Debugger.TYPE_BYTE) {
@@ -4143,9 +4279,9 @@ if (DEBUGGER) {
                 else {
                     disp = this.getWord(dbgAddr, true);
                 }
-                offset = (dbgAddr.off + disp) & (dbgAddr.fData32? -1 : 0xffff);
-                sOperand = str.toHex(offset, dbgAddr.fData32? 8: 4);
-                var aSymbol = this.findSymbol(this.newAddr(offset, dbgAddr.sel));
+                off = (dbgAddr.off + disp) & (dbgAddr.fData32? -1 : 0xffff);
+                sOperand = str.toHex(off, dbgAddr.fData32? 8: 4);
+                var aSymbol = this.findSymbol(this.newAddr(off, dbgAddr.sel));
                 if (aSymbol[0]) sOperand += " (" + aSymbol[0] + ")";
             }
             else if (typeMode == Debugger.TYPE_IMPREG) {
@@ -4618,122 +4754,6 @@ if (DEBUGGER) {
         return s;
     };
 
-    /**
-     * parseAddr(sAddr, type, fNoChecks, fQuiet)
-     *
-     * As discussed above, dbgAddr variables contain one or more of: off, sel, and addr.  They represent
-     * a segmented address (sel:off) when sel is defined or a linear address (addr) when sel is undefined
-     * (or null).
-     *
-     * To create a segmented address, specify two values separated by ':'; for a linear address, use
-     * a '%' prefix.  We check for ':' after '%', so if for some strange reason you specify both, the
-     * address will be treated as segmented, not linear.
-     *
-     * The '%' syntax is similar to that used by the Windows 80386 kernel debugger (wdeb386) for linear
-     * addresses.  If/when we add support for processors with page tables, we will likely adopt the same
-     * convention for linear addresses and provide a different syntax (eg, "%%") physical memory references.
-     *
-     * Address evaluation and validation (eg, range checks) are no longer performed at this stage.  That's
-     * done later, by getAddr(), which returns X86.ADDR_INVALID for invalid segments, out-of-range offsets,
-     * etc.  The Debugger's low-level get/set memory functions verify all getAddr() results, but even if an
-     * invalid address is passed through to the Bus memory interfaces, the address will simply be masked with
-     * Bus.nBusLimit; in the case of X86.ADDR_INVALID, that will generally refer to the top of the physical
-     * address space.
-     *
-     * @this {Debugger}
-     * @param {string|undefined} sAddr
-     * @param {number|undefined} [type] is either CODE or DATA, in case sAddr doesn't specify a segment
-     * @param {boolean} [fNoChecks] (eg, true when setting breakpoints that may not be valid now, but will be later)
-     * @param {boolean} [fQuiet]
-     * @return {DbgAddr|null|undefined}
-     */
-    Debugger.prototype.parseAddr = function(sAddr, type, fNoChecks, fQuiet)
-    {
-        var dbgAddr, fPrint;
-        var dbgAddrNext = (type === Debugger.ADDR.CODE? this.dbgAddrNextCode : this.dbgAddrNextData);
-
-        var off = dbgAddrNext.off, sel = dbgAddrNext.sel, addr = dbgAddrNext.addr;
-
-        type = fNoChecks? Debugger.ADDR.NONE : dbgAddrNext.type;
-
-        if (fQuiet) fPrint = false;
-
-        if (sAddr !== undefined) {
-
-            sAddr = this.parseReference(sAddr);
-
-            var ch = sAddr.charAt(0);
-            var iColon = sAddr.indexOf(':');
-
-            switch(ch) {
-            case '&':
-                type = Debugger.ADDR.REAL;
-                break;
-            case '#':
-                type = Debugger.ADDR.PROT;
-                break;
-            case '%':
-                type = Debugger.ADDR.LINEAR;
-                off = addr = 0;
-                sel = null;             // we still have code that relies on this crutch, instead of the type field
-                break;
-            default:
-                if (iColon >= 0) type = Debugger.ADDR.NONE;
-                ch = '';
-                break;
-            }
-
-            if (ch) {
-                sAddr = sAddr.substr(1);
-                iColon--;
-            }
-
-            dbgAddr = this.findSymbolAddr(sAddr);
-            if (dbgAddr) return dbgAddr;
-
-            if (iColon < 0) {
-                if (sel != null) {
-                    off = this.parseExpression(sAddr, fPrint);
-                    addr = null;
-                } else {
-                    addr = this.parseExpression(sAddr, fPrint);
-                    if (addr == null) off = null;
-                }
-            }
-            else {
-                sel = this.parseExpression(sAddr.substring(0, iColon), fPrint);
-                off = this.parseExpression(sAddr.substring(iColon + 1), fPrint);
-                addr = null;
-            }
-        }
-
-        if (off != null) {
-            dbgAddr = this.newAddr(off, sel, addr, type);
-            if (!fNoChecks && !this.checkLimit(dbgAddr, true)) {
-                this.println("invalid offset: " + this.hexAddr(dbgAddr));
-                dbgAddr = null;
-            }
-        }
-        return dbgAddr;
-    };
-
-    /**
-     * parseAddrOptions(dbdAddr, sOptions)
-     *
-     * @this {Debugger}
-     * @param {DbgAddr} dbgAddr
-     * @param {string} [sOptions]
-     */
-    Debugger.prototype.parseAddrOptions = function(dbgAddr, sOptions)
-    {
-        if (sOptions) {
-            var a = sOptions.match(/(['"])(.*?)\1/);
-            if (a) {
-                dbgAddr.aCmds = this.parseCommand(dbgAddr.sCmd = a[2]);
-            }
-        }
-    };
-
     Debugger.aBinOpPrecedence = {
         '||':   0,      // logical OR
         '&&':   1,      // logical AND
@@ -5068,7 +5088,20 @@ if (DEBUGGER) {
     };
 
     /**
-     * addSymbols(addr, size, aSymbols)
+     * comparePairs(p1, p2)
+     *
+     * @this {Debugger}
+     * @param {number|string|Array|Object} p1
+     * @param {number|string|Array|Object} p2
+     * @return {number}
+     */
+    Debugger.prototype.comparePairs = function(p1, p2)
+    {
+        return p1[0] > p2[0]? 1 : p1[0] < p2[0]? -1 : 0;
+    };
+
+    /**
+     * addSymbols(sel, addr, len, aSymbols)
      *
      * As filedump.js (formerly convrom.php) explains, aSymbols is a JSON-encoded object whose properties consist
      * of all the symbols (in upper-case), and the values of those properties are objects containing any or all of
@@ -5124,7 +5157,7 @@ if (DEBUGGER) {
      * We add all these entries to our internal symbol table, which is an array of 4-element arrays, each of which
      * look like:
      *
-     *      [addr, size, aSymbols, aOffsetPairs]
+     *      [sel, addr, len, aSymbols, aOffsetPairs]
      *
      * There are two basic symbol operations: findSymbol(), which takes an address and finds the symbol, if any,
      * at that address, and findSymbolAddr(), which takes a string and attempts to match it to a non-anonymous
@@ -5139,29 +5172,27 @@ if (DEBUGGER) {
      * properly.
      *
      * @this {Debugger}
-     * @param {number} addr is the physical address of the region where the given symbols are located
-     * @param {number} size is the size of the region, in bytes
-     * @param {Object} aSymbols is the collection of symbols (the format of this object is described below)
+     * @param {number} sel (the default segment/selector for all symbols in this group)
+     * @param {number} addr (the physical address of the region where the given symbols are located)
+     * @param {number} len (the size of the region, in bytes)
+     * @param {Object} aSymbols (collection of symbols in this group; the format of this collection is described below)
      */
-    Debugger.prototype.addSymbols = function(addr, size, aSymbols)
+    Debugger.prototype.addSymbols = function(sel, addr, len, aSymbols)
     {
         var dbgAddr = {};
         var aOffsetPairs = [];
-        var fnComparePairs = function(p1, p2) {
-            return p1[0] > p2[0]? 1 : p1[0] < p2[0]? -1 : 0;
-        };
         for (var sSymbol in aSymbols) {
             var symbol = aSymbols[sSymbol];
             if (typeof symbol == "number") {
                 aSymbols[sSymbol] = symbol = {'o': symbol};
             }
             var off = symbol['o'];
-            var sel = symbol['s'];
+            var selSymbol = symbol['s'];
             var sAnnotation = symbol['a'];
             if (off !== undefined) {
-                if (sel !== undefined) {
+                if (selSymbol !== undefined) {
                     dbgAddr.off = off;
-                    dbgAddr.sel = sel;
+                    dbgAddr.sel = selSymbol;
                     dbgAddr.addr = null;
                     /*
                      * getAddr() computes the corresponding physical address and saves it in dbgAddr.addr.
@@ -5177,11 +5208,11 @@ if (DEBUGGER) {
                     }
                     symbol['p'] = dbgAddr.addr;
                 }
-                usr.binaryInsert(aOffsetPairs, [off, sSymbol], fnComparePairs);
+                usr.binaryInsert(aOffsetPairs, [off >>> 0, sSymbol], this.comparePairs);
             }
             if (sAnnotation) symbol['a'] = sAnnotation.replace(/''/g, "\"");
         }
-        this.aSymbolTable.push([addr, size, aSymbols, aOffsetPairs]);
+        this.aSymbolTable.push([sel, addr, len, aSymbols, aOffsetPairs]);
     };
 
     /**
@@ -5195,19 +5226,20 @@ if (DEBUGGER) {
     Debugger.prototype.dumpSymbols = function()
     {
         for (var i = 0; i < this.aSymbolTable.length; i++) {
-            var addr = this.aSymbolTable[i][0];
-          //var size = this.aSymbolTable[i][1];
-            var aSymbols = this.aSymbolTable[i][2];
+            var sel = this.aSymbolTable[i][0];
+            var addr = this.aSymbolTable[i][1];
+          //var len = this.aSymbolTable[i][2];
+            var aSymbols = this.aSymbolTable[i][3];
             for (var sSymbol in aSymbols) {
                 if (sSymbol.charAt(0) == '.') continue;
                 var symbol = aSymbols[sSymbol];
                 var off = symbol['o'];
                 if (off === undefined) continue;
-                var sel = symbol['s'];
-                if (sel === undefined) sel = (addr >>> 4);
+                var selSym = symbol['s'];
+                if (selSym === undefined) selSym = sel;
                 var sSymbolOrig = aSymbols[sSymbol]['l'];
                 if (sSymbolOrig) sSymbol = sSymbolOrig;
-                this.println(this.hexOffset(off, sel) + ' ' + sSymbol);
+                this.println(this.hexOffset(off, selSym) + ' ' + sSymbol);
             }
         }
     };
@@ -5228,34 +5260,33 @@ if (DEBUGGER) {
     Debugger.prototype.findSymbol = function(dbgAddr, fNearest)
     {
         var aSymbol = [];
-        var addr = this.getAddr(dbgAddr);
+        var addrSymbol = this.getAddr(dbgAddr) >>> 0;
         for (var iTable = 0; iTable < this.aSymbolTable.length; iTable++) {
-            var addrSymbol = this.aSymbolTable[iTable][0];
-            var sizeSymbol = this.aSymbolTable[iTable][1];
-            if (addr >= addrSymbol && addr < addrSymbol + sizeSymbol) {
-                var offset = dbgAddr.off;
-                var aOffsetPairs = this.aSymbolTable[iTable][3];
-                var fnComparePairs = function(p1, p2)
-                {
-                    return p1[0] > p2[0]? 1 : p1[0] < p2[0]? -1 : 0;
-                };
-                var result = usr.binarySearch(aOffsetPairs, [offset], fnComparePairs);
-                if (result >= 0) {
-                    this.returnSymbol(iTable, result, aSymbol);
+            var sel = this.aSymbolTable[iTable][0];
+            var addr = this.aSymbolTable[iTable][1] >>> 0;
+            var len = this.aSymbolTable[iTable][2];
+            if (sel == dbgAddr.sel || (sel == 0x28 || sel == 0x30) && (dbgAddr.sel == 0x28 || dbgAddr.sel == 0x30)) {
+                if (addrSymbol >= addr && addrSymbol < addr + len) {
+                    var off = dbgAddr.off >>> 0;
+                    var aOffsetPairs = this.aSymbolTable[iTable][4];
+                    var result = usr.binarySearch(aOffsetPairs, [off], this.comparePairs);
+                    if (result >= 0) {
+                        this.returnSymbol(iTable, result, aSymbol);
+                    }
+                    else if (fNearest) {
+                        result = ~result;
+                        this.returnSymbol(iTable, result-1, aSymbol);
+                        this.returnSymbol(iTable, result, aSymbol);
+                    }
+                    break;
                 }
-                else if (fNearest) {
-                    result = ~result;
-                    this.returnSymbol(iTable, result-1, aSymbol);
-                    this.returnSymbol(iTable, result, aSymbol);
-                }
-                break;
             }
         }
         if (!aSymbol.length) {
-            var sSymbol = this.bus.getSymbol(addr, true);
+            var sSymbol = this.bus.getSymbol(addrSymbol, true);
             if (sSymbol) {
                 aSymbol.push(sSymbol);
-                aSymbol.push(addr);
+                aSymbol.push(addrSymbol);
             }
         }
         return aSymbol;
@@ -5276,21 +5307,23 @@ if (DEBUGGER) {
         if (sSymbol.match(/^[a-z_][a-z0-9_]*$/i)) {
             var sUpperCase = sSymbol.toUpperCase();
             for (var i = 0; i < this.aSymbolTable.length; i++) {
-                var addr = this.aSymbolTable[i][0];
-                //var size = this.aSymbolTable[i][1];
-                var aSymbols = this.aSymbolTable[i][2];
+                var sel = this.aSymbolTable[i][0];
+                var addr = this.aSymbolTable[i][1];
+                //var len = this.aSymbolTable[i][2];
+                var aSymbols = this.aSymbolTable[i][3];
                 var symbol = aSymbols[sUpperCase];
                 if (symbol !== undefined) {
                     var off = symbol['o'];
                     if (off !== undefined) {
                         /*
                          * We assume that every ROM is ORG'ed at 0x0000, and therefore unless the symbol has an
-                         * explicitly-defined segment, we return the segment as "addr >>> 4".  Down the road, we may
-                         * want/need to support a special symbol entry (eg, ".ORG") that defines an alternate origin.
+                         * explicitly-defined segment, we return the segment associated with the entire group; for
+                         * a ROM, that segment is normally "addrROM >>> 4".  Down the road, we may want/need to
+                         * support a special symbol entry (eg, ".ORG") that defines an alternate origin.
                          */
-                        var sel = symbol['s'];
-                        if (sel === undefined) sel = addr >>> 4;
-                        dbgAddr = this.newAddr(off, sel, symbol['p']);
+                        var selSym = symbol['s'];
+                        if (selSym === undefined) selSym = sel;
+                        dbgAddr = this.newAddr(off, selSym, symbol['p']);
                     }
                     /*
                      * The symbol matched, but it wasn't for an address (no 'o' offset), and there's no point
@@ -5315,14 +5348,14 @@ if (DEBUGGER) {
     Debugger.prototype.returnSymbol = function(iTable, iOffset, aSymbol)
     {
         var symbol = {};
-        var aOffsetPairs = this.aSymbolTable[iTable][3];
+        var aOffsetPairs = this.aSymbolTable[iTable][4];
         var offset = 0, sSymbol = null;
         if (iOffset >= 0 && iOffset < aOffsetPairs.length) {
             offset = aOffsetPairs[iOffset][0];
             sSymbol = aOffsetPairs[iOffset][1];
         }
         if (sSymbol) {
-            symbol = this.aSymbolTable[iTable][2][sSymbol];
+            symbol = this.aSymbolTable[iTable][3][sSymbol];
             sSymbol = (sSymbol.charAt(0) == '.'? null : (symbol['l'] || sSymbol));
         }
         aSymbol.push(sSymbol);
@@ -5974,38 +6007,49 @@ if (DEBUGGER) {
     };
 
     /**
-     * doList(sSymbol)
+     * doList(sAddr, fPrint)
      *
      * @this {Debugger}
-     * @param {string} sSymbol
+     * @param {string} sAddr
+     * @param {boolean} [fPrint]
+     * @return {string|null}
      */
-    Debugger.prototype.doList = function(sSymbol)
+    Debugger.prototype.doList = function(sAddr, fPrint)
     {
-        var dbgAddr = this.parseAddr(sSymbol, Debugger.ADDR.CODE);
-        if (!dbgAddr) return;
+        var sSymbol = null;
 
-        var addr = this.getAddr(dbgAddr);
-        sSymbol = sSymbol? (sSymbol + ": ") : "";
-        this.println(sSymbol + this.hexAddr(dbgAddr) + " (%" + str.toHex(addr, this.cchAddr) + ')');
+        var dbgAddr = this.parseAddr(sAddr, Debugger.ADDR.CODE);
+        if (dbgAddr) {
 
-        var aSymbol = this.findSymbol(dbgAddr, true);
-        if (aSymbol.length) {
-            var nDelta, sDelta;
-            if (aSymbol[0]) {
-                sDelta = "";
-                nDelta = dbgAddr.off - aSymbol[1];
-                if (nDelta) sDelta = " + " + str.toHexWord(nDelta);
-                this.println(aSymbol[0] + " (" + this.hexOffset(aSymbol[1], dbgAddr.sel) + ')' + sDelta);
+            var addr = this.getAddr(dbgAddr);
+            if (MAXDEBUG && fPrint) {
+                this.println(this.hexAddr(dbgAddr) + " (%" + str.toHex(addr, this.cchAddr) + ')');
             }
-            if (aSymbol.length > 4 && aSymbol[4]) {
-                sDelta = "";
-                nDelta = aSymbol[5] - dbgAddr.off;
-                if (nDelta) sDelta = " - " + str.toHexWord(nDelta);
-                this.println(aSymbol[4] + " (" + this.hexOffset(aSymbol[5], dbgAddr.sel) + ')' + sDelta);
+
+            var aSymbol = this.findSymbol(dbgAddr, true);
+            if (aSymbol.length) {
+                var nDelta, sDelta, s;
+                if (aSymbol[0]) {
+                    sDelta = "";
+                    nDelta = dbgAddr.off - aSymbol[1];
+                    if (nDelta) sDelta = " + " + str.toHexWord(nDelta);
+                    s = aSymbol[0] + " (" + this.hexOffset(aSymbol[1], dbgAddr.sel) + ')' + sDelta;
+                    if (fPrint) this.println(s);
+                    sSymbol = s;
+                }
+                if (aSymbol.length > 4 && aSymbol[4]) {
+                    sDelta = "";
+                    nDelta = aSymbol[5] - dbgAddr.off;
+                    if (nDelta) sDelta = " - " + str.toHexWord(nDelta);
+                    s = aSymbol[4] + " (" + this.hexOffset(aSymbol[5], dbgAddr.sel) + ')' + sDelta;
+                    if (fPrint) this.println(s);
+                    if (!sSymbol) sSymbol = s;
+                }
+            } else {
+                if (fPrint) this.println("no symbols");
             }
-        } else {
-            this.println("no symbols");
         }
+        return sSymbol;
     };
 
     /**
@@ -6034,12 +6078,6 @@ if (DEBUGGER) {
         if (!asArgs[1] || asArgs[1] == '?') {
             this.println("list/load commands:");
             this.println("\tl [address] [drive #] [sector #] [# sectors]");
-            this.println("\tln [address] lists symbol(s) nearest to address");
-            return;
-        }
-
-        if (asArgs[0] == "ln") {
-            this.doList(asArgs[1]);
             return;
         }
 
@@ -6800,11 +6838,15 @@ if (DEBUGGER) {
     };
 
     /**
-     * doStackTrace()
+     * doStackTrace(sCmd, sAddr)
+     *
+     * Use "k" for a normal stack trace and "ks" for a stack trace with symbolic info.
      *
      * @this {Debugger}
+     * @param {string} [sCmd]
+     * @param {string} [sAddr] (not used yet)
      */
-    Debugger.prototype.doStackTrace = function()
+    Debugger.prototype.doStackTrace = function(sCmd, sAddr)
     {
         var nFrames = 10, cFrames = 0;
         var selCode = this.cpu.segCS.sel;
@@ -6822,9 +6864,7 @@ if (DEBUGGER) {
                 if (dbgAddrStack.addr == null || !cTests--) break;
                 dbgAddrCall.sel = selCode;
                 sCall = this.getCall(dbgAddrCall);
-                if (sCall) {
-                    break;
-                }
+                if (sCall) break;
                 dbgAddrCall.sel = this.getWord(dbgAddrStack);
                 sCall = this.getCall(dbgAddrCall, true);
                 if (sCall) {
@@ -6838,7 +6878,12 @@ if (DEBUGGER) {
                 }
             }
             if (!sCall) break;
-            sCall = str.pad(sCall, 50) + "  ;stack=" + this.hexAddr(dbgAddrStack) + " return=" + this.hexAddr(dbgAddrCall);
+            var sSymbol = null;
+            if (sCmd == "ks") {
+                var a = sCall.match(/[0-9A-F]+$/);
+                if (a) sSymbol = this.doList(a[0]);
+            }
+            sCall = str.pad(sCall, 50) + "  ;" + (sSymbol || "stack=" + this.hexAddr(dbgAddrStack) + " return=" + this.hexAddr(dbgAddrCall));
             this.println(sCall);
             cFrames++;
         }
@@ -7159,9 +7204,13 @@ if (DEBUGGER) {
                     this.doInput(asArgs[1]);
                     break;
                 case 'k':
-                    this.doStackTrace();
+                    this.doStackTrace(asArgs[0], asArgs[1]);
                     break;
                 case 'l':
+                    if (asArgs[0] == "ln") {
+                        this.doList(asArgs[1], true);
+                        break;
+                    }
                     this.shiftArgs(asArgs);
                     this.doLoad(asArgs);
                     break;
