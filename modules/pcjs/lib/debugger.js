@@ -6848,11 +6848,19 @@ if (DEBUGGER) {
      */
     Debugger.prototype.doStackTrace = function(sCmd, sAddr)
     {
+        if (sAddr == '?') {
+            this.println("stack trace commands:");
+            this.println("\tk\tshow frame addresses");
+            this.println("\tks\tshow symbol information");
+            return;
+        }
+
         var nFrames = 10, cFrames = 0;
         var selCode = this.cpu.segCS.sel;
         var dbgAddrCall = this.newAddr();
         var dbgAddrStack = this.newAddr(this.cpu.getSP(), this.cpu.getSS());
         this.println("stack trace for " + this.hexAddr(dbgAddrStack));
+
         while (cFrames < nFrames) {
             var sCall = null, cTests = 256;
             while ((dbgAddrStack.off >>> 0) < (this.cpu.regLSPLimit >>> 0)) {
@@ -7204,6 +7212,7 @@ if (DEBUGGER) {
                     this.doInput(asArgs[1]);
                     break;
                 case 'k':
+                    this.shiftArgs(asArgs);
                     this.doStackTrace(asArgs[0], asArgs[1]);
                     break;
                 case 'l':
