@@ -3022,14 +3022,15 @@ X86CPU.prototype.setPS = function(regPS, cpl)
 };
 
 /**
- * checkIOPM(port, nPorts)
+ * checkIOPM(port, nPorts, fInput)
  *
  * @this {X86CPU}
  * @param {number} port (0x0000 to 0xffff)
  * @param {number} nPorts (1 to 4)
+ * @param {boolean} [fInput] (true if input, false if output; output assumed if not specified)
  * @return {boolean} true if allowed, false if not
  */
-X86CPU.prototype.checkIOPM = function(port, nPorts)
+X86CPU.prototype.checkIOPM = function(port, nPorts, fInput)
 {
     var bitsPorts = 0;
     if (I386 && (this.regCR0 & X86.CR0.MSW.PE) && (this.nCPL > this.nIOPL || (this.regPS & X86.PS.VM)) && this.segTSS.addrIOPM) {
@@ -3044,7 +3045,7 @@ X86CPU.prototype.checkIOPM = function(port, nPorts)
         }
     }
     if (bitsPorts) {
-        if (this.messageEnabled(Messages.PORT)) this.printMessage("checkIOPM(" + str.toHexWord(port) + "," + nPorts + "): trapped", true, true);
+        if (this.messageEnabled(Messages.PORT)) this.printMessage("checkIOPM(" + str.toHexWord(port) + "," + nPorts + "," + (fInput? "input" : "output") + "): trapped", true, true);
         X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0, false);
         return false;
     }

@@ -160,6 +160,13 @@ function Bus(parmsBus, cpu, dbg)
     this.fPortInputBreakAll = this.fPortOutputBreakAll = false;
 
     /*
+     * By default, all I/O ports are 1 byte wide; ports that are wider must add themselves to one or both of
+     * these lists, using addPortInputWidth() and/or addPortOutputWidth().
+     */
+    this.aPortInputWidth = [];
+    this.aPortOutputWidth = [];
+
+    /*
      * Allocate empty Memory blocks to span the entire physical address space.
      */
     this.initMemory();
@@ -1376,43 +1383,84 @@ Bus.prototype.addPortInputTable = function(component, table, offset)
 };
 
 /**
- * checkPortInputNotify(port, addrLIP)
+ * addPortInputWidth(port, size)
+ *
+ * By default, all input ports are 1 byte wide; ports that are wider must call this function.
  *
  * @this {Bus}
  * @param {number} port
+ * @param {number} size (1, 2 or 4)
+ */
+Bus.prototype.addPortInputWidth = function(port, size)
+{
+    this.aPortInputWidth[port] = size;
+};
+
+/**
+ * checkPortInputNotify(port, size, addrLIP)
+ *
+ * @this {Bus}
+ * @param {number} port
+ * @param {number} size (1, 2 or 4)
  * @param {number} [addrLIP] is the LIP value at the time of the input
- * @return {number} simulated port value (0xff if none)
+ * @return {number} simulated port data
  *
  * NOTE: It seems that parts of the ROM BIOS (like the RS-232 probes around F000:E5D7 in the 5150 BIOS)
  * assume that ports for non-existent hardware return 0xff rather than 0x00, hence my new default (0xff) below.
  */
-Bus.prototype.checkPortInputNotify = function(port, addrLIP)
+Bus.prototype.checkPortInputNotify = function(port, size, addrLIP)
 {
-    var bIn = 0xff;
-    var aNotify = this.aPortInputNotify[port];
+    var data = 0, shift = 0;
 
-    if (BACKTRACK) {
-        this.cpu.backTrack.btiIO = 0;
-    }
-    if (aNotify !== undefined) {
-        if (aNotify[0]) {
-            var b = aNotify[0]( port, addrLIP);
-            if (b !== undefined) {
-                this.assert(!(b & ~0xff));
-                bIn = b;
+    while (size > 0) {
+
+        var aNotify = this.aPortInputNotify[port];
+        var sizePort = this.aPortInputWidth[port] || 1;
+        var maskPort = (sizePort == 1? 0xff : (sizePort == 2? 0xffff : -1));
+        var dataPort = maskPort;
+
+        /*
+         * TODO: We need to decide what to do about 8-bit I/O to a 16-bit port
+         * (ditto for 16-bit I/O to a 32-bit port).  We probably should pass the
+         * size through to the aNotify[0] handler, and let it decide what to do,
+         * but I don't feel like changing all the I/O handlers right now.  The
+         * good news, at least, is that the 8-bit handlers would not have to do
+         * anything special.  This assert will warn us if this is a pressing need.
+         */
+        this.assert(size >= sizePort);
+
+        if (BACKTRACK) {
+            this.cpu.backTrack.btiIO = 0;
+        }
+
+        if (aNotify !== undefined) {
+            if (aNotify[0]) {
+                dataPort = aNotify[0](port, addrLIP);
+                if (dataPort === undefined) {
+                    dataPort = maskPort;
+                } else {
+                    dataPort &= maskPort;
+                }
+            }
+            if (DEBUGGER && this.dbg && this.fPortInputBreakAll != aNotify[1]) {
+                this.dbg.checkPortInput(port, size, dataPort);
             }
         }
-        if (DEBUGGER && this.dbg && this.fPortInputBreakAll != aNotify[1]) {
-            this.dbg.checkPortInput(port, bIn);
+        else {
+            if (DEBUGGER && this.dbg) {
+                this.dbg.messageIO(this, port, null, addrLIP);
+                if (this.fPortInputBreakAll) this.dbg.checkPortInput(port, size, dataPort);
+            }
         }
+
+        data |= dataPort << shift;
+        shift += (sizePort << 3);
+        port += sizePort;
+        size -= sizePort;
     }
-    else {
-        if (DEBUGGER && this.dbg) {
-            this.dbg.messageIO(this, port, null, addrLIP);
-            if (this.fPortInputBreakAll) this.dbg.checkPortInput(port, bIn);
-        }
-    }
-    return bIn;
+
+    this.assert(!size);
+    return data;
 };
 
 /**
@@ -1497,31 +1545,69 @@ Bus.prototype.addPortOutputTable = function(component, table, offset)
 };
 
 /**
- * checkPortOutputNotify(port, bOut, addrLIP)
+ * addPortOutputWidth(port, size)
+ *
+ * By default, all output ports are 1 byte wide; ports that are wider must call this function.
  *
  * @this {Bus}
  * @param {number} port
- * @param {number} bOut
+ * @param {number} size (1, 2 or 4)
+ */
+Bus.prototype.addPortOutputWidth = function(port, size)
+{
+    this.aPortOutputWidth[port] = size;
+};
+
+/**
+ * checkPortOutputNotify(port, size, data, addrLIP)
+ *
+ * @this {Bus}
+ * @param {number} port
+ * @param {number} size
+ * @param {number} data
  * @param {number} [addrLIP] is the LIP value at the time of the output
  */
-Bus.prototype.checkPortOutputNotify = function(port, bOut, addrLIP)
+Bus.prototype.checkPortOutputNotify = function(port, size, data, addrLIP)
 {
-    var aNotify = this.aPortOutputNotify[port];
-    if (aNotify !== undefined) {
-        if (aNotify[0]) {
-            this.assert(!(bOut & ~0xff));
-            aNotify[0](port, bOut, addrLIP);
+    var shift = 0;
+
+    while (size > 0) {
+
+        var aNotify = this.aPortOutputNotify[port];
+        var sizePort = this.aPortOutputWidth[port] || 1;
+        var maskPort = (sizePort == 1? 0xff : (sizePort == 2? 0xffff : -1));
+        var dataPort = (data >>>= shift) & maskPort;
+
+        /*
+         * TODO: We need to decide what to do about 8-bit I/O to a 16-bit port
+         * (ditto for 16-bit I/O to a 32-bit port).  We probably should pass the
+         * size through to the aNotify[0] handler, and let it decide what to do,
+         * but I don't feel like changing all the I/O handlers right now.  The
+         * good news, at least, is that the 8-bit handlers would not have to do
+         * anything special.  This assert will warn us if this is a pressing need.
+         */
+        this.assert(size >= sizePort);
+
+        if (aNotify !== undefined) {
+            if (aNotify[0]) {
+                aNotify[0](port, dataPort, addrLIP);
+            }
+            if (DEBUGGER && this.dbg && this.fPortOutputBreakAll != aNotify[1]) {
+                this.dbg.checkPortOutput(port, size, dataPort);
+            }
         }
-        if (DEBUGGER && this.dbg && this.fPortOutputBreakAll != aNotify[1]) {
-            this.dbg.checkPortOutput(port, bOut);
+        else {
+            if (DEBUGGER && this.dbg) {
+                this.dbg.messageIO(this, port, dataPort, addrLIP);
+                if (this.fPortOutputBreakAll) this.dbg.checkPortOutput(port, size, dataPort);
+            }
         }
+
+        shift += (sizePort << 3);
+        port += sizePort;
+        size -= sizePort;
     }
-    else {
-        if (DEBUGGER && this.dbg) {
-            this.dbg.messageIO(this, port, bOut, addrLIP);
-            if (this.fPortOutputBreakAll) this.dbg.checkPortOutput(port, bOut);
-        }
-    }
+    this.assert(!size);
 };
 
 /**

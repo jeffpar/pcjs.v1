@@ -1726,7 +1726,7 @@ FDC.prototype.outFDCData = function(port, bOut, addrFrom)
     }
     if (DEBUG && this.messageEnabled()) {
         this.printMessage("unsupported FDC command: " + str.toHexByte(bCmd));
-        this.dbg.stopCPU();
+        if (MAXDEBUG) this.dbg.stopCPU();
     }
 };
 
@@ -1954,8 +1954,8 @@ FDC.prototype.doCmd = function()
 
     default:
         if (DEBUG && this.messageEnabled()) {
-            this.printMessage("FDC operation unsupported (command=" + str.toHexByte(bCmd) + ")");
-            this.dbg.stopCPU();
+            this.printMessage("unsupported FDC operation: " + str.toHexByte(bCmd));
+            if (MAXDEBUG) this.dbg.stopCPU();
         }
         break;
     }

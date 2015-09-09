@@ -513,6 +513,11 @@ HDC.prototype.initBus = function(cmp, bus, cpu, dbg)
     bus.addPortInputTable(this, this.fATC? HDC.aATCPortInput : HDC.aXTCPortInput);
     bus.addPortOutputTable(this, this.fATC? HDC.aATCPortOutput : HDC.aXTCPortOutput);
 
+    if (this.fATC) {
+        bus.addPortInputWidth(HDC.ATC.DATA.PORT, 2);
+        bus.addPortOutputWidth(HDC.ATC.DATA.PORT, 2);
+    }
+
     cpu.addIntNotify(Interrupts.DISK, this.intBIOSDisk.bind(this));
     cpu.addIntNotify(Interrupts.ALT_DISK, this.intBIOSDiskette.bind(this));
 
@@ -1371,14 +1376,14 @@ HDC.prototype.outXTCNoise = function(port, bOut, addrFrom)
 };
 
 /**
- * inATCData(port, addrFrom)
+ * inATCByte(port, addrFrom)
  *
  * @this {HDC}
  * @param {number} port (0x1F0)
  * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  * @return {number} simulated port value
  */
-HDC.prototype.inATCData = function(port, addrFrom)
+HDC.prototype.inATCByte = function(port, addrFrom)
 {
     var bIn = -1;
 
@@ -1429,7 +1434,7 @@ HDC.prototype.inATCData = function(port, addrFrom)
                 this.regSecCnt = (this.regSecCnt - 1) & 0xff;
                 /*
                  * TODO: If the WITH_ECC bit is set in the READ_DATA command, then we need to support "stuffing" 4
-                 * additional bytes into the inATCData() stream.  And we must first set DATA_REQ in the STATUS register.
+                 * additional bytes into the inATCByte() stream.  And we must first set DATA_REQ in the STATUS register.
                  */
                 if (this.drive.nBytes >= this.drive.cbSector) {
                     /*
@@ -1454,7 +1459,7 @@ HDC.prototype.inATCData = function(port, addrFrom)
                              */
                             hdc.regStatus = HDC.ATC.STATUS.ERROR;
                             hdc.regError = HDC.ATC.ERROR.NO_CHS;
-                            if (DEBUG) hdc.printMessage("HDC.inATCData(): read failed");
+                            if (DEBUG) hdc.printMessage("HDC.inATCByte(): read failed");
                         }
                     }, false);
                 } else {
@@ -1468,14 +1473,29 @@ HDC.prototype.inATCData = function(port, addrFrom)
 };
 
 /**
- * outATCData(port, bOut, addrFrom)
+ * inATCData(port, addrFrom)
+ *
+ * Wrapper around inATCByte() to treat this as a 16-bit port; see addPortInputWidth(HDC.ATC.DATA.PORT, 2).
+ *
+ * @this {HDC}
+ * @param {number} port (0x1F0)
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
+ * @return {number} simulated port data
+ */
+HDC.prototype.inATCData = function(port, addrFrom)
+{
+    return this.inATCByte(port, addrFrom) | (this.inATCByte(port, addrFrom) << 8);
+};
+
+/**
+ * outATCByte(port, bOut, addrFrom)
  *
  * @this {HDC}
  * @param {number} port (0x1F0)
  * @param {number} bOut
  * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
  */
-HDC.prototype.outATCData = function(port, bOut, addrFrom)
+HDC.prototype.outATCByte = function(port, bOut, addrFrom)
 {
     if (this.drive) {
         if (this.drive.nBytes >= this.drive.cbSector) {
@@ -1487,7 +1507,7 @@ HDC.prototype.outATCData = function(port, bOut, addrFrom)
                 this.regStatus = HDC.ATC.STATUS.ERROR;
                 this.regError = HDC.ATC.ERROR.NO_CHS;
                 if (DEBUG && this.messageEnabled()) {
-                    this.printMessage("HDC.outATCData(" + str.toHexByte(bOut) + "): write failed");
+                    this.printMessage("HDC.outATCByte(" + str.toHexByte(bOut) + "): write failed");
                 }
             }
             else if (this.drive.ibSector == 1 || this.drive.ibSector == this.drive.cbSector) {
@@ -1519,7 +1539,7 @@ HDC.prototype.outATCData = function(port, bOut, addrFrom)
              * TODO: What to do about unexpected writes? The number of bytes has exceeded what the command specified.
              */
             if (DEBUG && this.messageEnabled()) {
-                this.printMessage("HDC.outATCData(" + str.toHexByte(bOut) + "): write exceeds count (" + this.drive.nBytes + ")");
+                this.printMessage("HDC.outATCByte(" + str.toHexByte(bOut) + "): write exceeds count (" + this.drive.nBytes + ")");
             }
         }
     } else {
@@ -1527,9 +1547,25 @@ HDC.prototype.outATCData = function(port, bOut, addrFrom)
          * TODO: What to do about unexpected writes? No command was specified.
          */
         if (DEBUG && this.messageEnabled()) {
-            this.printMessage("HDC.outATCData(" + str.toHexByte(bOut) + "): write without command");
+            this.printMessage("HDC.outATCByte(" + str.toHexByte(bOut) + "): write without command");
         }
     }
+};
+
+/**
+ * outATCData(port, data, addrFrom)
+ *
+ * Wrapper around outATCByte() to treat this as a 16-bit port; see addPortOutputWidth(HDC.ATC.DATA.PORT, 2)
+ *
+ * @this {HDC}
+ * @param {number} port (0x1F0)
+ * @param {number} data
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
+ */
+HDC.prototype.outATCData = function(port, data, addrFrom)
+{
+    this.outATCByte(port, data & 0xff, addrFrom);
+    this.outATCByte(port, (data >> 8) & 0xff, addrFrom);
 };
 
 /**
@@ -1839,7 +1875,7 @@ HDC.prototype.doATC = function()
         bCmd = (bCmd >= HDC.ATC.COMMAND.DIAGNOSE? bCmd : (bCmd & HDC.ATC.COMMAND.MASK));
         /*
          * Since the ATC doesn't use DMA, we must now set some additional Drive state for the benefit of any
-         * follow-up I/O instructions.  For example, any subsequent inATCData() and outATCData() calls need to
+         * follow-up I/O instructions.  For example, any subsequent inATCByte() and outATCByte() calls need to
          * know which drive to talk to ("this.drive"), to issue their own readData() and writeData() calls.
          *
          * The XTC didn't need this, because it used doDMARead(), doDMAWrite(), doDMAFormat() helper functions,
@@ -1873,14 +1909,14 @@ HDC.prototype.doATC = function()
         /*
          * We're using a call to readData() that disables auto-increment, so that once we've got the first
          * byte of the next sector, we can signal an interrupt without also consuming the first byte, allowing
-         * inATCData() to begin with that byte.
+         * inATCByte() to begin with that byte.
          */
         hdc.regStatus = HDC.ATC.STATUS.BUSY;
         this.readData(drive, function onATCReadDataFirst(b, fAsync) {
             if (b >= 0 && hdc.chipset) {
                 hdc.setATCIRR();
                 /*
-                 * Bytes from the requested sector(s) will now be delivered via inATCData().
+                 * Bytes from the requested sector(s) will now be delivered via inATCByte().
                  *
                  * FYI, I'm taking a shotgun approach to these status bits: I need to clear STATUS.BUSY and
                  * set STATUS.DATA_REQ, because otherwise CompaqDeskPro386 reads will fail, and I need to set
@@ -1952,7 +1988,7 @@ HDC.prototype.doATC = function()
     default:
         if (DEBUG && this.messageEnabled()) {
             this.printMessage("HDC.doATC(" + str.toHexByte(this.regCommand) + "): " + (bCmd < 0? ("invalid drive (" + iDrive + ")") : "unsupported operation"));
-            if (bCmd >= 0) this.dbg.stopCPU();
+            if (MAXDEBUG && bCmd >= 0) this.dbg.stopCPU();
         }
         break;
     }
@@ -2155,7 +2191,7 @@ HDC.prototype.doXTC = function()
             this.beginResult(HDC.XTC.DATA.STATUS.ERROR | bDrive);
             if (DEBUG && this.messageEnabled()) {
                 this.printMessage("HDC.doXTC(" + str.toHexByte(bCmdOrig) + "): " + (bCmd < 0? ("invalid drive (" + iDrive + ")") : "unsupported operation"));
-                if (bCmd >= 0) this.dbg.stopCPU();
+                if (MAXDEBUG && bCmd >= 0) this.dbg.stopCPU();
             }
             break;
         }

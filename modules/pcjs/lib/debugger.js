@@ -953,10 +953,10 @@ if (DEBUGGER) {
     /* 0xE9 */ [Debugger.INS.JMP,   Debugger.TYPE_IMMREL | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
     /* 0xEA */ [Debugger.INS.JMP,   Debugger.TYPE_IMM    | Debugger.TYPE_FARP  | Debugger.TYPE_IN],
     /* 0xEB */ [Debugger.INS.JMP,   Debugger.TYPE_IMMREL | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
-    /* 0xEC */ [Debugger.INS.IN,    Debugger.TYPE_AL     | Debugger.TYPE_OUT,    Debugger.TYPE_DX | Debugger.TYPE_IN],
-    /* 0xED */ [Debugger.INS.IN,    Debugger.TYPE_AX     | Debugger.TYPE_OUT,    Debugger.TYPE_DX | Debugger.TYPE_IN],
-    /* 0xEE */ [Debugger.INS.OUT,   Debugger.TYPE_DX     | Debugger.TYPE_IN,     Debugger.TYPE_AL | Debugger.TYPE_IN],
-    /* 0xEF */ [Debugger.INS.OUT,   Debugger.TYPE_DX     | Debugger.TYPE_IN,     Debugger.TYPE_AX | Debugger.TYPE_IN],
+    /* 0xEC */ [Debugger.INS.IN,    Debugger.TYPE_AL     | Debugger.TYPE_OUT,    Debugger.TYPE_DX | Debugger.TYPE_WORD  | Debugger.TYPE_IN],
+    /* 0xED */ [Debugger.INS.IN,    Debugger.TYPE_AX     | Debugger.TYPE_OUT,    Debugger.TYPE_DX | Debugger.TYPE_WORD  | Debugger.TYPE_IN],
+    /* 0xEE */ [Debugger.INS.OUT,   Debugger.TYPE_DX     | Debugger.TYPE_WORD  | Debugger.TYPE_IN,  Debugger.TYPE_AL    | Debugger.TYPE_IN],
+    /* 0xEF */ [Debugger.INS.OUT,   Debugger.TYPE_DX     | Debugger.TYPE_WORD  | Debugger.TYPE_IN,  Debugger.TYPE_AX    | Debugger.TYPE_IN],
 
     /* 0xF0 */ [Debugger.INS.LOCK,  Debugger.TYPE_PREFIX],
     /* 0xF1 */ [Debugger.INS.NONE],
@@ -3254,7 +3254,7 @@ if (DEBUGGER) {
      */
     Debugger.prototype.init = function()
     {
-        this.println("Type ? for list of debugger commands");
+        this.println("Type ? for help with PCjs Debugger commands");
         this.updateStatus();
         if (this.sInitCommands) {
             var a = this.parseCommand(this.sInitCommands);
@@ -3719,41 +3719,43 @@ if (DEBUGGER) {
     };
 
     /**
-     * checkPortInput(port, bIn)
+     * checkPortInput(port, size, data)
      *
      * This "check" function is called by the Bus component to inform us that port input occurred.
      *
      * @this {Debugger}
      * @param {number} port
-     * @param {number} bIn
+     * @param {number} size
+     * @param {number} data
      * @return {boolean} true if breakpoint hit, false if not
      */
-    Debugger.prototype.checkPortInput = function(port, bIn)
+    Debugger.prototype.checkPortInput = function(port, size, data)
     {
         /*
          * We trust that the Bus component won't call us unless we told it to, so we halt unconditionally
          */
-        this.println("break on input from port " + str.toHexWord(port) + ": " + str.toHexByte(bIn));
+        this.println("break on input from port " + str.toHexWord(port) + ": " + str.toHex(data));
         this.stopCPU(true);
         return true;
     };
 
     /**
-     * checkPortOutput(port, bOut)
+     * checkPortOutput(port, size, data)
      *
      * This "check" function is called by the Bus component to inform us that port output occurred.
      *
      * @this {Debugger}
      * @param {number} port
-     * @param {number} bOut
+     * @param {number} size
+     * @param {number} data
      * @return {boolean} true if breakpoint hit, false if not
      */
-    Debugger.prototype.checkPortOutput = function(port, bOut)
+    Debugger.prototype.checkPortOutput = function(port, size, data)
     {
         /*
          * We trust that the Bus component won't call us unless we told it to, so we halt unconditionally
          */
-        this.println("break on output to port " + str.toHexWord(port) + ": " + str.toHexByte(bOut));
+        this.println("break on output to port " + str.toHexWord(port) + ": " + str.toHex(data));
         this.stopCPU(true);
         return true;
     };
@@ -5940,6 +5942,8 @@ if (DEBUGGER) {
     /**
      * doInput(sPort)
      *
+     * Simulate a 1-byte port input operation.
+     *
      * @this {Debugger}
      * @param {string|undefined} sPort
      */
@@ -5961,7 +5965,7 @@ if (DEBUGGER) {
         }
         var port = this.parseValue(sPort);
         if (port !== undefined) {
-            var bIn = this.bus.checkPortInputNotify(port);
+            var bIn = this.bus.checkPortInputNotify(port, 1);
             this.println(str.toHexWord(port) + ": " + str.toHexByte(bIn));
         }
     };
@@ -6341,6 +6345,8 @@ if (DEBUGGER) {
     /**
      * doOutput(sPort, sByte)
      *
+     * Simulate a 1-byte port output operation.
+     *
      * @this {Debugger}
      * @param {string|undefined} sPort
      * @param {string|undefined} sByte (string representation of 1 byte)
@@ -6364,30 +6370,8 @@ if (DEBUGGER) {
         var port = this.parseValue(sPort, "port #");
         var bOut = this.parseValue(sByte);
         if (port !== undefined && bOut !== undefined) {
-            this.bus.checkPortOutputNotify(port, bOut);
+            this.bus.checkPortOutputNotify(port, 1, bOut);
             this.println(str.toHexWord(port) + ": " + str.toHexByte(bOut));
-        }
-    };
-
-    /**
-     * shiftArgs(asArgs)
-     *
-     * @this {Debugger}
-     * @param {Array.<string>} [asArgs]
-     */
-    Debugger.prototype.shiftArgs = function(asArgs)
-    {
-        if (asArgs && asArgs.length) {
-            var s0 = asArgs[0];
-            var ch0 = s0.charAt(0);
-            for (var i = 1; i < s0.length; i++) {
-                var ch = s0.charAt(i);
-                if (ch0 == '?' || ch0 == 'r' || ch < 'a' || ch > 'z') {
-                    asArgs[0] = s0.substr(i);
-                    asArgs.unshift(s0.substr(0, i));
-                    break;
-                }
-            }
         }
     };
 
@@ -7123,6 +7107,31 @@ if (DEBUGGER) {
     };
 
     /**
+     * shiftArgs(asArgs)
+     *
+     * This is used with commands (eg, "b") that have suffixed variations (eg, "bp", "br", "bw");
+     * we extract the suffix from the command and insert it into the argument array as a separate element.
+     *
+     * @this {Debugger}
+     * @param {Array.<string>} [asArgs]
+     */
+    Debugger.prototype.shiftArgs = function(asArgs)
+    {
+        if (asArgs && asArgs.length) {
+            var s0 = asArgs[0];
+            var ch0 = s0.charAt(0);
+            for (var i = 1; i < s0.length; i++) {
+                var ch = s0.charAt(i);
+                if (ch0 == '?' || ch0 == 'r' || ch < 'a' || ch > 'z') {
+                    asArgs[0] = s0.substr(i);
+                    asArgs.unshift(s0.substr(0, i));
+                    break;
+                }
+            }
+        }
+    };
+
+    /**
      * doCommand(sCmd, fQuiet)
      *
      * @this {Debugger}
@@ -7155,6 +7164,9 @@ if (DEBUGGER) {
             var ch = sCmd.charAt(0);
             if (ch == '"' || ch == "'") return true;
 
+            /*
+             * Zap the previous message buffer to ensure the new command's output is not tossed out as a repeat.
+             */
             this.sMessagePrev = null;
 
             /*
