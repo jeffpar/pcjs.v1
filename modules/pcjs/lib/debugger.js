@@ -1267,11 +1267,11 @@ if (DEBUGGER) {
             }
         }
 
-        this.messageDump(Messages.BUS,  function onDumpBus(asArgs)  { dbg.dumpBus(asArgs); });
-        this.messageDump(Messages.MEM,  function onDumpMem(asArgs)  { dbg.dumpMem(asArgs); });
-        this.messageDump(Messages.DESC, function onDumpDesc(asArgs) { dbg.dumpDesc(asArgs); });
-        this.messageDump(Messages.TSS,  function onDumpTSS(asArgs)  { dbg.dumpTSS(asArgs); });
-        this.messageDump(Messages.DOS,  function onDumpDOS(asArgs)  { dbg.dumpDOS(asArgs); });
+        this.messageDump(Messages.BUS,  function onDumpBus(asArgs) { dbg.dumpBus(asArgs); });
+        this.messageDump(Messages.MEM,  function onDumpMem(asArgs) { dbg.dumpMem(asArgs); });
+        this.messageDump(Messages.DESC, function onDumpSel(asArgs) { dbg.dumpSel(asArgs); });
+        this.messageDump(Messages.TSS,  function onDumpTSS(asArgs) { dbg.dumpTSS(asArgs); });
+        this.messageDump(Messages.DOS,  function onDumpDOS(asArgs) { dbg.dumpDOS(asArgs); });
 
         if (Interrupts.WINDBG.ENABLED || Interrupts.WINDBGRM.ENABLED) {
             this.fWinDbg = null;
@@ -2066,7 +2066,16 @@ if (DEBUGGER) {
             var seg = this.getSegment(dbgAddr.sel, dbgAddr.type);
             if (seg) {
                 var off = dbgAddr.off & seg.maskAddr;
-                if ((off >>> 0) >= seg.offMax) return false;
+                if (!seg.fExpDown) {
+                    if ((off >>> 0) >= seg.offMax) {
+                        return false;
+                    }
+                }
+                else {
+                    if ((off >>> 0) < seg.offMax) {
+                        return false;
+                    }
+                }
                 if (fUpdate) {
                     dbgAddr.off = off;
                     dbgAddr.fData32 = (seg.sizeData == 4);
@@ -2301,13 +2310,14 @@ if (DEBUGGER) {
     };
 
     /**
-     * dumpBlocks(aBlocks, sAddr)
+     * dumpBlocks(aBlocks, sAddr, fLinear)
      *
      * @this {Debugger}
      * @param {Array} aBlocks
      * @param {string} [sAddr] (optional block address)
+     * @param {boolean} [fLinear] (true if linear, physical otherwise)
      */
-    Debugger.prototype.dumpBlocks = function(aBlocks, sAddr)
+    Debugger.prototype.dumpBlocks = function(aBlocks, sAddr, fLinear)
     {
         var i = 0, n = aBlocks.length;
 
@@ -2321,13 +2331,27 @@ if (DEBUGGER) {
             n = 1;
         }
 
-        this.println("id       physaddr   blkaddr   used    size    type");
+        this.println("blkid    " + (fLinear? "linear  " : "physical") + "   blkaddr   used    size    type");
         this.println("-------- ---------  --------  ------  ------  ----");
 
+        var typePrev = -1, cPrev = 0;
         while (n--) {
             var block = aBlocks[i];
-            if (block.type !== Memory.TYPE.NONE) {
-                this.println(str.toHex(block.id) + " %" + str.toHex(i << this.cpu.nBlockShift) + ": " + str.toHex(block.addr) + "  " + str.toHexWord(block.used) + "  " + str.toHexWord(block.size) + "  " + Memory.TYPE.NAMES[block.type]);
+            if (block.type == typePrev) {
+                if (!cPrev++) this.println("...");
+            } else {
+                typePrev = block.type;
+                var sType = Memory.TYPE.NAMES[typePrev];
+                if (typePrev == Memory.TYPE.PAGED) {
+                    block = block.blockPhys;
+                    this.assert(block);
+                    sType += " -> " + Memory.TYPE.NAMES[block.type];
+                }
+                if (block) {
+                    this.println(str.toHex(block.id) + " %" + str.toHex(i << this.cpu.nBlockShift) + ": " + str.toHex(block.addr) + "  " + str.toHexWord(block.used) + "  " + str.toHexWord(block.size) + "  " + sType);
+                }
+                if (typePrev != Memory.TYPE.NONE && typePrev != Memory.TYPE.UNPAGED) typePrev = -1;
+                cPrev = 0;
             }
             i++;
         }
@@ -2344,6 +2368,19 @@ if (DEBUGGER) {
     Debugger.prototype.dumpBus = function(asArgs)
     {
         this.dumpBlocks(this.cpu.aBusBlocks, asArgs[0]);
+    };
+
+    /**
+     * dumpMem(asArgs)
+     *
+     * Dumps page allocations.
+     *
+     * @this {Debugger}
+     * @param {Array.<string>} asArgs (asArgs[0] is an optional block address)
+     */
+    Debugger.prototype.dumpMem = function(asArgs)
+    {
+        this.dumpBlocks(this.cpu.aMemBlocks, asArgs[0], this.cpu.aMemBlocks !== this.cpu.aBusBlocks);
     };
 
     /**
@@ -2380,24 +2417,6 @@ if (DEBUGGER) {
         return sInfo;
     };
 
-    /**
-     * dumpMem(asArgs)
-     *
-     * Dumps page allocations.
-     *
-     * @this {Debugger}
-     * @param {Array.<string>} asArgs (asArgs[0] is an optional block address)
-     */
-    Debugger.prototype.dumpMem = function(asArgs)
-    {
-        var aBlocks = this.cpu.aMemBlocks;
-        if (aBlocks === this.cpu.aBusBlocks) {
-            this.println("paging not enabled");
-            return;
-        }
-        this.dumpBlocks(aBlocks, asArgs[0]);
-    };
-
     /*
      * Table of system (non-segment) descriptors, including indicators of which ones are gates.
      */
@@ -2417,14 +2436,14 @@ if (DEBUGGER) {
     };
 
     /**
-     * dumpDesc(asArgs)
+     * dumpSel(asArgs)
      *
      * Dumps a descriptor for the given selector.
      *
      * @this {Debugger}
      * @param {Array.<string>} asArgs
      */
-    Debugger.prototype.dumpDesc = function(asArgs)
+    Debugger.prototype.dumpSel = function(asArgs)
     {
         var sSel = asArgs[0];
 
@@ -2440,7 +2459,7 @@ if (DEBUGGER) {
         }
 
         var seg = this.getSegment(sel, Debugger.ADDR.PROT);
-        this.println("dumpDesc(" + str.toHexWord(seg? seg.sel : sel) + "): %" + str.toHex(seg? seg.addrDesc : null, this.cchAddr));
+        this.println("dumpSel(" + str.toHexWord(seg? seg.sel : sel) + "): %" + str.toHex(seg? seg.addrDesc : null, this.cchAddr));
         if (!seg) return;
 
         var sType;
@@ -3768,19 +3787,19 @@ if (DEBUGGER) {
     Debugger.prototype.clearBreakpoints = function()
     {
         var i;
-        this.aBreakExec = ["exec"];
+        this.aBreakExec = ["bp"];
         if (this.aBreakRead !== undefined) {
             for (i = 1; i < this.aBreakRead.length; i++) {
                 this.bus.removeMemBreak(this.getAddr(this.aBreakRead[i]), false);
             }
         }
-        this.aBreakRead = ["read"];
+        this.aBreakRead = ["br"];
         if (this.aBreakWrite !== undefined) {
             for (i = 1; i < this.aBreakWrite.length; i++) {
                 this.bus.removeMemBreak(this.getAddr(this.aBreakWrite[i]), true);
             }
         }
-        this.aBreakWrite = ["write"];
+        this.aBreakWrite = ["bw"];
         /*
          * nSuppressBreaks ensures we can't get into an infinite loop where a breakpoint lookup requires
          * reading a segment descriptor via getSegment(), and that triggers more memory reads, which triggers
@@ -3955,7 +3974,7 @@ if (DEBUGGER) {
     };
 
     /**
-     * printBreakpoint(aBreak, i)
+     * printBreakpoint(aBreak, i, sAction)
      *
      * TODO: We may need to start printing linear addresses also (if any), because segmented address can be ambiguous.
      *
@@ -3967,7 +3986,7 @@ if (DEBUGGER) {
     Debugger.prototype.printBreakpoint = function(aBreak, i, sAction)
     {
         var dbgAddr = aBreak[i];
-        this.println("breakpoint " + (sAction || "enabled") + ": " + this.hexAddr(dbgAddr) + " (" + aBreak[0] + ')' + (dbgAddr.sCmd? (' "' + dbgAddr.sCmd + '"') : ''));
+        this.println(aBreak[0] + ' ' + this.hexAddr(dbgAddr) + (sAction? (' ' + sAction) : (dbgAddr.sCmd? (' "' + dbgAddr.sCmd + '"') : '')));
     };
 
     /**
@@ -5650,7 +5669,7 @@ if (DEBUGGER) {
         }
 
         /*
-         * Transform a "ds" command into a "d desc" command
+         * Transform a "ds" command into a "d desc" command (simply as shorthand)
          */
         if (sCmd == "ds") {
             sCmd = 'd';
@@ -5659,7 +5678,7 @@ if (DEBUGGER) {
 
         if (sCmd == 'd') {
             /*
-             * Transform a "d disk" command into a "l json" command
+             * Transform a "d disk" command into a "l json" command (alternatively, register a dumper for "disk")
              */
             if (sAddr == "disk") {
                 asArgs[0] = "l";
@@ -5668,7 +5687,7 @@ if (DEBUGGER) {
                 return;
             }
             for (m in Debugger.MESSAGES) {
-                if (sAddr == m) {
+                if (asArgs[1] == m) {
                     var fnDumper = this.afnDumpers[m];
                     if (fnDumper) {
                         asArgs.shift();
@@ -5680,7 +5699,7 @@ if (DEBUGGER) {
                     return;
                 }
             }
-            sCmd = this.sCmdDumpPrev || "db";
+            if (!sAddr) sCmd = this.sCmdDumpPrev || "db";
         } else {
             this.sCmdDumpPrev = sCmd;
         }

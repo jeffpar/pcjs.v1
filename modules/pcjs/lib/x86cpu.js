@@ -786,7 +786,7 @@ X86CPU.prototype.mapPageBlock = function(addr, fWrite, fSuppress)
     var blockPTE = this.aBusBlocks[(addrPTE & this.nBusMask) >>> this.nBlockShift];
     var pte = blockPTE.readLong(offPTE);
 
-    if (!(pte & X86.PTE.PRESENT) && !fSuppress) {
+    if (!(pte & X86.PTE.PRESENT)) {
         if (!fSuppress) X86.fnPageFault.call(this, addr, false, fWrite);
         return this.memEmpty;
     }
@@ -1293,11 +1293,21 @@ X86CPU.prototype.resetRegs = function()
     this.resultDst = this.resultSrc = this.resultArith = this.resultLogic = 0;
 
     /*
-     * This is set by fnFault() and reset (to -1) by resetRegs() and opIRET(); its initial purpose is to
-     * "help" fnFault() determine when a nested fault should be converted into either a double-fault (DF_FAULT)
+     * nFault is set by fnFault() and reset (to -1) by resetRegs() and opIRET().  Its initial purpose is to
+     * help fnFault() determine when a nested fault should be converted into either a double-fault (DF_FAULT)
      * or a triple-fault (ie, a processor reset).
+     *
+     * It has since evolved into another important role: helping segCS.loadIDT() know when an exception
+     * is occurring, as opposed to a software interrupt (eg, INT3, INT n or INTO).  The former must set nFault
+     * to the corresponding fault #, whereas the latter must set it to -1, so that if the IDT contains a gate
+     * whose DPL < CPL, a GP fault will be generated instead.
+     *
+     * The former always call fnFault(), so that happens automatically.  The latter call fnINT(), so they must
+     * set nFault manually.  There are also intermediate cases, like hardware interrupts, which call fnINT()
+     * after manually setting nFault to the IDT #.
      */
     this.nFault = -1;
+
     /*
      * These are used to snapshot regLIP and regLSP, to help make instructions restartable;
      * currently opLIP is updated prior to every instruction, but opLSP is updated only for instructions
@@ -2352,6 +2362,18 @@ X86CPU.prototype.advanceIP = function(inc)
 {
     // DEBUG: this.assert(inc > 0);
 
+    /*
+     * TODO: This is a crude work-around to deal with certain instructions that CMP, MOV, etc,
+     * immediate operands to/from memory, because if the memory access triggered a fault, we can't
+     * permit the rest of the instruction decoding to modify IP, because that'll just screw up
+     * the fault dispatch.
+     *
+     * Ultimately, I'm probably going to have to bite the bullet and throw real JavaScript exceptions
+     * to halt instructions in their tracks, but I'm going to stick with this more limited strategy
+     * for now.
+     */
+    if (this.opFlags & X86.OPFLAG.FAULT) return;
+
     this.regLIP = (this.regLIP + inc)|0;
     /*
      * Properly comparing regLIP to regLIPLimit would normally require coercing both to unsigned
@@ -3213,7 +3235,11 @@ X86CPU.prototype.getShort = function getShort(addr)
     if (off < this.nBlockLimit) {
         return this.aMemBlocks[iBlock].readShort(off, addr);
     }
-    return this.aMemBlocks[iBlock].readByte(off, addr) | (this.aMemBlocks[(iBlock + 1) & this.nBlockMask].readByte(0, addr + 1) << 8);
+    var w = this.aMemBlocks[iBlock].readByte(off, addr);
+    if (!(this.opFlags & X86.OPFLAG.FAULT)) {
+        w |= this.aMemBlocks[(iBlock + 1) & this.nBlockMask].readByte(0, addr + 1) << 8;
+    }
+    return w;
 };
 
 /**
@@ -3239,8 +3265,25 @@ X86CPU.prototype.getLong = function getLong(addr)
     if (off < this.nBlockLimit - 2) {
         return this.aMemBlocks[iBlock].readLong(off, addr);
     }
-    var nShift = (off & 0x3) << 3;
-    return (this.aMemBlocks[iBlock].readLong(off & ~0x3, addr) >>> nShift) | (this.aMemBlocks[(iBlock + 1) & this.nBlockMask].readLong(0, addr + 3) << (32 - nShift));
+    /*
+     * I think the previous version of this function tried to be too clever (ie, reading the last
+     * long in the current block and the first long in the next block and masking/combining the results),
+     * which may have also created some undesirable side-effects for custom memory controllers.
+     * This simpler (and probably more reliable) approach is to simply read the long as individual bytes.
+     */
+    var l = 0;
+    var cb = 4, nShift = 0;
+    var cbBlock = 4 - (off & 0x3);    // (off & 0x3) will be 1, 2 or 3, so cbBlock will be 3, 2, or 1
+    while (cb--) {
+        l |= (this.aMemBlocks[iBlock].readByte(off++, addr++) << nShift);
+        if (this.opFlags & X86.OPFLAG.FAULT) break;
+        if (!--cbBlock) {
+            iBlock = (iBlock + 1) & this.nBlockMask;
+            off = 0;
+        }
+        nShift += 8;
+    }
+    return l;
 };
 
 /**
@@ -3288,6 +3331,7 @@ X86CPU.prototype.setShort = function setShort(addr, w)
         return;
     }
     this.aMemBlocks[iBlock++].writeByte(off, w & 0xff, addr);
+    if (this.opFlags & X86.OPFLAG.FAULT) return;
     this.aMemBlocks[iBlock & this.nBlockMask].writeByte(0, (w >> 8) & 0xff, addr + 1);
 };
 
@@ -3317,14 +3361,23 @@ X86CPU.prototype.setLong = function setLong(addr, l)
         this.aMemBlocks[iBlock].writeLong(off, l, addr);
         return;
     }
-    var lPrev, nShift = (off & 0x3) << 3;
-    off &= ~0x3;
-    lPrev = this.aMemBlocks[iBlock].readLong(off, addr);
-    this.aMemBlocks[iBlock].writeLong(off, (lPrev & ~(-1 << nShift)) | (l << nShift), addr);
-    iBlock = (iBlock + 1) & this.nBlockMask;
-    addr += 3;
-    lPrev = this.aMemBlocks[iBlock].readLong(0, addr);
-    this.aMemBlocks[iBlock].writeLong(0, (lPrev & (-1 << nShift)) | (l >>> (32 - nShift)), addr);
+    /*
+     * I think the previous version of this function tried to be too clever (ie, reading and rewriting
+     * the last long in the current block, and then reading and rewriting the first long in the next
+     * block), which may have also created some undesirable side-effects for custom memory controllers.
+     * This simpler (and probably more reliable) approach is to simply write the long as individual bytes.
+     */
+    var cb = 4;
+    var cbBlock = 4 - (off & 0x3);    // (off & 0x3) will be 1, 2 or 3, so cbBlock will be 3, 2, or 1
+    while (cb--) {
+        this.aMemBlocks[iBlock].writeByte(off++, l & 0xff, addr++);
+        if (this.opFlags & X86.OPFLAG.FAULT) return;
+        if (!--cbBlock) {
+            iBlock = (iBlock + 1) & this.nBlockMask;
+            off = 0;
+        }
+        l >>>= 8;
+    }
 };
 
 /**
@@ -4139,7 +4192,7 @@ X86CPU.prototype.checkINTR = function()
                         if (nIDT >= 0) {
                             this.intFlags &= ~X86.INTFLAG.HALT;
                             // if (DEBUG) this.pushRegFrame();  // the corresponding popRegFrame() is in opIRET()
-                            X86.fnINT.call(this, nIDT, null, 11);
+                            X86.fnINT.call(this, this.nFault = nIDT, null, 11);
                             return true;
                         }
                     }
@@ -4149,7 +4202,12 @@ X86CPU.prototype.checkINTR = function()
                 if ((this.intFlags & X86.INTFLAG.TRAP)) {
                     this.intFlags &= ~X86.INTFLAG.TRAP;
                     if (I386 && this.model >= X86.MODEL_80386) this.regDR[6] |= X86.DR6.BS;
-                    X86.fnINT.call(this, X86.EXCEPTION.DEBUG, null, 11);
+                    /*
+                     * TODO: Perhaps we should call fnFault() instead; eg:
+                     *
+                     *      X86.fnFault.call(this, X86.EXCEPTION.DEBUG, null, false, 11);
+                     */
+                    X86.fnINT.call(this, this.nFault = X86.EXCEPTION.DEBUG, null, 11);
                     return true;
                 }
                 break;

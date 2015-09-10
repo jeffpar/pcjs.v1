@@ -322,12 +322,11 @@ X86Seg.prototype.loadIDTProt = function loadIDTProt(nIDT)
     var addrDesc = (cpu.addrIDT + nIDT)|0;
     if (((cpu.addrIDTLimit - addrDesc)|0) >= 7) {
         this.fCall = true;
-        return this.loadDesc8(addrDesc, nIDT) + this.offIP;
+        var addr = this.loadDesc8(addrDesc, nIDT);
+        if (addr !== X86.ADDR_INVALID) addr += this.offIP;
+        return addr;
     }
-    /*
-     * TODO: Remove fHalt=true from this fnFault() call once this code path has been tested.
-     */
-    X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, nIDT | X86.ERRCODE.IDT, true);
+    X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, nIDT | X86.ERRCODE.IDT);
     return X86.ADDR_INVALID;
 };
 
@@ -484,9 +483,13 @@ X86Seg.prototype.checkReadDebugger = function checkReadDebugger(off, cb)
     /*
      * The Debugger doesn't have separate "check" interfaces for real and protected mode,
      * since it's not performance-critical.  If addrDesc is invalid, then we assume real mode.
+     *
+     * TODO: This doesn't actually check the segment for readability.
      */
     if (DEBUGGER) {
-        if (this.addrDesc === X86.ADDR_INVALID || (off >>> 0) + cb <= this.offMax) {
+        if (this.addrDesc === X86.ADDR_INVALID ||
+            this.fExpDown && (off >>> 0) + cb > this.offMax ||
+            !this.fExpDown && (off >>> 0) + cb <= this.offMax) {
             return (this.base + off)|0;
         }
     }
@@ -506,9 +509,13 @@ X86Seg.prototype.checkWriteDebugger = function checkWriteDebugger(off, cb)
     /*
      * The Debugger doesn't have separate "check" interfaces for real and protected mode,
      * since it's not performance-critical.  If addrDesc is invalid, then we assume real mode.
+     *
+     * TODO: This doesn't actually check the segment for writability.
      */
     if (DEBUGGER) {
-        if (this.addrDesc === X86.ADDR_INVALID || (off >>> 0) + cb <= this.offMax) {
+        if (this.addrDesc === X86.ADDR_INVALID ||
+            this.fExpDown && (off >>> 0) + cb > this.offMax ||
+            !this.fExpDown && (off >>> 0) + cb <= this.offMax) {
             return (this.base + off)|0;
         }
     }
@@ -696,7 +703,8 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fProbe)
         var rpl = sel & X86.SEL.RPL;
         var dpl = (acc & X86.DESC.ACC.DPL.MASK) >> X86.DESC.ACC.DPL.SHIFT;
 
-        var sizeGate, selCode, cplOld, addrTSS, offSP, lenSP, regSPPrev, regSSPrev, regPSClear, regSP;
+        var sizeGate, selCode, cplOld, fIDT;
+        var addrTSS, offSP, lenSP, regSPPrev, regSSPrev, regPSClear, regSP;
 
         /*
          * TODO: As discussed below for X86Seg.ID.DATA, it's likely that testing the PRESENT bit should
@@ -784,16 +792,21 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fProbe)
              * portion of ACC should always be zero, but that's really dependent on the descriptor being properly
              * set (which we assert above).
              */
-            if (rpl <= dpl) {
-                /*
-                 * TODO: Verify the PRESENT bit of the gate descriptor, and issue NP_FAULT as appropriate.
-                 */
-                cplOld = this.cpl;
+            cplOld = this.cpl;
+            fIDT = (addrDesc == cpu.addrIDT + sel);
+
+            /*
+             * Software interrupts (where fIDT is true and cpu.nFault < 0) require an additional test: if DPL < CPL,
+             * then we must fall into the GP_FAULT code at the end of this case.
+             */
+            if (rpl <= dpl && (!fIDT || cpu.nFault >= 0 || cplOld <= dpl))  {
 
                 /*
                  * For gates, there is no "base" and "limit", but rather "selector" and "offset"; the selector
                  * is located where the first 16 bits of base are normally stored, and the offset comes from the
                  * original limit and ext fields.
+                 *
+                 * TODO: Verify the PRESENT bit of the gate descriptor, and issue NP_FAULT as appropriate.
                  */
                 selCode = base & 0xffff;
                 if (I386 && (type & X86.DESC.ACC.NONSEG_386)) {
@@ -894,12 +907,8 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fProbe)
         }
 
         if (sizeGate !== 0) {
-            var nError = sel & X86.ERRCODE.SELMASK;
-            if (addrDesc >= cpu.addrIDT && addrDesc < cpu.addrIDTLimit) nError |= X86.ERRCODE.IDT;
-            /*
-             * TODO: Remove fHalt=true from this fnFault() call once this code path has been tested.
-             */
-            if (this.id < X86Seg.ID.VER) X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, nError, true);
+            var nError = (sel & X86.ERRCODE.SELMASK) | (fIDT? X86.ERRCODE.IDT : 0);
+            if (this.id < X86Seg.ID.VER) X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, nError);
             return X86.ADDR_INVALID;
         }
         break;

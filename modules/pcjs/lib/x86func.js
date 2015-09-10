@@ -142,28 +142,6 @@ X86.fnANDw = function ANDw(dst, src)
  */
 X86.fnARPL = function ARPL(dst, src)
 {
-    /*
-     * ARPL is one of several protected-mode instructions that are meaningless and not allowed in either real-mode
-     * or V86-mode; others include LAR, LSL, VERR and VERW.  More meaningful but potentially harmful protected-mode
-     * instructions that ARE allowed in real-mode but NOT in V86-mode include LIDT, LGDT, LMSW, CLTS, HLT, and
-     * control register MOV instructions.
-     *
-     * ARPL is somewhat more noteworthy because enhanced-mode Windows (going back to at least Windows 3.00, and
-     * possibly even the earliest versions of Windows/386) selected the ARPL opcode as a controlled means of exiting
-     * V86-mode via its UD_FAULT exception.  Windows would use the same ARPL for all controlled exits, using different
-     * segment:offset pointers to the ARPL to differentiate them.  ARPL was probably chosen because it could trigger
-     * a UD_FAULT with a single byte (0x63); any subsequent address bytes would be irrelevant.
-     *
-     * TODO: You may have noticed that setProtMode() already swaps out a 0x0F opcode dispatch table for another based
-     * on the mode, because none of the "GRP6" 0x0F opcodes (eg, SLDT, STR, LLDT, LTR, VERR and VERW) are allowed in
-     * real-mode, and it was easy to swap all those handlers in/out with a single update.  We've extended that particular
-     * swap to include V86-mode as well, but we might want to consider swapping out more opcode handlers in a similar
-     * fashion, instead of using these in-line mode tests.
-     */
-    if (!(this.regCR0 & X86.CR0.MSW.PE) || I386 && (this.regPS & X86.PS.VM)) {
-        X86.opInvalid.call(this);
-        return dst;
-    }
     this.nStepCycles -= (10 + (this.regEA === X86.ADDR_INVALID? 0 : 1));
     if ((dst & X86.SEL.RPL) < (src & X86.SEL.RPL)) {
         dst = (dst & ~X86.SEL.RPL) | (src & X86.SEL.RPL);
@@ -205,12 +183,15 @@ X86.fnBOUND = function BOUND(dst, src)
     this.nStepCycles -= this.cycleCounts.nOpCyclesBound;
     if (wIndex < wLower || wIndex > wUpper) {
         /*
-         * The INT 0x05 handler must be called with CS:IP pointing to the BOUND instruction.
+         * The INT 0x05 handler must be called with CS:IP pointing to the BOUND instruction, which
+         * fnFault() takes care of.  TODO: Determine whether this should be treated like a fault, or like
+         * a software interrupt, with an explicit call to fnINT() and nFault = -1, like opINT3(), opINTn()
+          * and opINTO().
          *
-         * TODO: Determine the cycle cost when a BOUND exception is triggered, over and above nCyclesBound.
+         * TODO: Determine the cycle cost when a BOUND exception is triggered, over and above nCyclesBound,
+         * and then call X86.fnFault(X86.EXCEPTION.BOUND_ERR, null, false, nCycles).
          */
-        this.setIP(this.opLIP - this.segCS.base);
-        X86.fnINT.call(this, X86.EXCEPTION.BOUND_ERR, null, 0);
+        X86.fnFault.call(this, X86.EXCEPTION.BOUND_ERR);
     }
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;
@@ -1841,7 +1822,8 @@ X86.fnLIDT = function LIDT(dst, src)
  * @param {number} src (null)
  * @return {number}
  */
-X86.fnLLDT = function LLDT(dst, src) {
+X86.fnLLDT = function LLDT(dst, src)
+{
     this.opFlags |= X86.OPFLAG.NOWRITE;
     this.segLDT.load(dst);
     this.nStepCycles -= (17 + (this.regEA === X86.ADDR_INVALID? 0 : 2));
@@ -3844,32 +3826,31 @@ X86.fnGRPUndefined = function GRPUndefined(dst, src)
  */
 X86.fnDIVOverflow = function DIVOverflow()
 {
-    this.setIP(this.opLIP - this.segCS.base);
     /*
      * TODO: Determine the proper cycle cost.
      */
-    X86.fnINT.call(this, X86.EXCEPTION.DIV_ERR, null, 2);
+    X86.fnFault.call(this, X86.EXCEPTION.DIV_ERR, null, false, 2);
 };
 
 /**
- * fnSrcCount1()
+ * fnSRCCount1()
  *
  * @this {X86CPU}
  * @return {number}
  */
-X86.fnSrcCount1 = function SrcCount1()
+X86.fnSRCCount1 = function SRCCount1()
 {
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? 2 : this.cycleCounts.nOpCyclesShift1M);
     return 1;
 };
 
 /**
- * fnSrcCountCL()
+ * fnSRCCountCL()
  *
  * @this {X86CPU}
  * @return {number}
  */
-X86.fnSrcCountCL = function SrcCountCL()
+X86.fnSRCCountCL = function SRCCountCL()
 {
     var count = this.regECX & 0xff;
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesShiftCR : this.cycleCounts.nOpCyclesShiftCM) + (count << this.cycleCounts.nOpCyclesShiftCS);
@@ -3877,12 +3858,12 @@ X86.fnSrcCountCL = function SrcCountCL()
 };
 
 /**
- * fnSrcCountN()
+ * fnSRCCountN()
  *
  * @this {X86CPU}
  * @return {number}
  */
-X86.fnSrcCountN = function SrcCountN()
+X86.fnSRCCountN = function SRCCountN()
 {
     var count = this.getIPByte();
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesShiftCR : this.cycleCounts.nOpCyclesShiftCM) + (count << this.cycleCounts.nOpCyclesShiftCS);
@@ -3890,14 +3871,29 @@ X86.fnSrcCountN = function SrcCountN()
 };
 
 /**
- * fnSrcNone()
+ * fnSRCNone()
  *
  * @this {X86CPU}
  * @return {number|null}
  */
-X86.fnSrcNone = function SrcNone()
+X86.fnSRCNone = function SRCNone()
 {
     return null;
+};
+
+/**
+ * fnSRCxx()
+ *
+ * This is used by opPOPmw(), because the actual pop must occur BEFORE the effective address (EA)
+ * calculation.  So opPOPmw() does the pop, saves the popped value in regXX, and this passes src function
+ * to the EA worker.
+ *
+ * @this {X86CPU}
+ * @return {number} regXX
+ */
+X86.fnSRCxx = function SRCxx()
+{
+    return this.regXX;
 };
 
 /**
@@ -3907,38 +3903,22 @@ X86.fnSrcNone = function SrcNone()
  *
  * @this {X86CPU}
  * @param {number} nFault
- * @param {number} [nError] (if omitted, no error code will be pushed)
- * @param {boolean} [fHalt] true to halt the CPU (if the Debugger is loaded), false to not, undefined if "it depends"
+ * @param {number|null} [nError] (if omitted, no error code will be pushed)
+ * @param {boolean} [fHalt] (true to halt the CPU, false to not, undefined if "it depends")
  * @param {number} [nCycles] cycle count to pass through to fnINT(), if any
  */
 X86.fnFault = function(nFault, nError, fHalt, nCycles)
 {
-    /*
-     * X86.OPFLAG.FAULT flag is used by selected opcodes to provide an early exit, restore register(s), or whatever is
-     * needed to help ensure instruction restartability; there is currently no general-purpose mechanism for snapping
-     * and restoring all registers for any instruction that might fault, so it's every opcode for themselves.
-     *
-     * X86.EXCEPTION.DEBUG exceptions set their own special flag, X86.OPFLAG.DEBUG, to prevent redundant DEBUG exceptions,
-     * so we don't need to set OPFLAG.FAULT in that case, because a DEBUG exception doesn't actually prevent an instruction
-     * from executing.
-     *
-     * TODO: Review the restartability of all our opcode handlers, starting with those that affect the segment registers
-     * and then moving on to the rest, and determine whether we really need a general-purpose solution instead.
-     */
-    if (nFault == X86.EXCEPTION.DEBUG) {
-        this.opFlags |= X86.OPFLAG.DEBUG;
-    } else {
-        this.opFlags |= X86.OPFLAG.FAULT;
-    }
+    var fDispatch = null;
 
     if (!this.aFlags.fComplete) {
-        this.printMessage("Fault " + str.toHexByte(nFault) + " blocked by PCjs", Messages.WARN);
+        /*
+         * Prior to each new burst of instructions, stepCPU() sets fComplete to true, and the only (normal) way
+         * for fComplete to become false is through stopCPU(), which isn't ordinarily called, except by the Debugger.
+         */
         this.setIP(this.opLIP - this.segCS.base);
-        return;
     }
-
-    var fDispatch = false;
-    if (this.model >= X86.MODEL_80186) {
+    else if (this.model >= X86.MODEL_80186) {
         if (this.nFault < 0) {
             /*
              * Single-fault (error code is passed through, and the responsible instruction is restartable)
@@ -3949,21 +3929,22 @@ X86.fnFault = function(nFault, nError, fHalt, nCycles)
                 this.opLSP = X86.ADDR_INVALID;
             }
             fDispatch = true;
-        } else if (this.nFault != X86.EXCEPTION.DF_FAULT) {
+        }
+        else if (this.nFault != X86.EXCEPTION.DF_FAULT) {
             /*
              * Double-fault (error code is always zero, and the responsible instruction is not restartable)
              */
-            nError = 0;
-            nFault = X86.EXCEPTION.DF_FAULT;
+            nError = 0; nFault = X86.EXCEPTION.DF_FAULT;
             fDispatch = true;
-        } else {
+        }
+        else {
             /*
              * Triple-fault (usually referred to in Intel literature as a "shutdown", but at least on the 80286,
              * it's actually a "reset")
              */
-            X86.fnFaultMessage.call(this, -1, 0, fHalt);
+            nFault = -1; nError = 0;
             this.resetRegs();
-            return;
+            fHalt = false;
         }
     }
 
@@ -3972,28 +3953,49 @@ X86.fnFault = function(nFault, nError, fHalt, nCycles)
     }
 
     if (fDispatch) {
+
         this.nFault = nFault;
         X86.fnINT.call(this, nFault, nError, nCycles || 0);
+
         /*
          * REP'eated instructions that rewind regLIP to opLIP used to screw up this dispatch,
          * so now we slip the new regLIP into opLIP, effectively turning their action into a no-op.
          */
         this.opLIP = this.regLIP;
-    }
 
-    /*
-     * Since this fault is likely being issued in the context of an instruction that hasn't finished
-     * executing, and since we currently don't do anything to interrupt that execution (eg, throw a
-     * JavaScript exception), we should shut off all further reads/writes for the current instruction.
-     *
-     * That's easy for any EA-based memory accesses: simply set both the NOREAD and NOWRITE flags.
-     * However, there are also direct, non-EA-based memory accesses to consider.  A perfect example is
-     * opPUSHA(): if a GP fault occurs on any PUSH other than the last, a subsequent PUSH is likely to
-     * cause another fault, which we will misinterpret as a double-fault.
-     *
-     * TODO: Throw a special JavaScript exception that cpu.js must intercept and quietly redirect.
-     */
-    this.opFlags |= (X86.OPFLAG.NOREAD | X86.OPFLAG.NOWRITE);
+        /*
+         * X86.OPFLAG.FAULT flag is used by selected opcodes to provide an early exit, restore register(s), or whatever is
+         * needed to help ensure instruction restartability; there is currently no general-purpose mechanism for snapping
+         * and restoring all registers for any instruction that might fault, so it's every opcode for themselves.
+         *
+         * X86.EXCEPTION.DEBUG exceptions set their own special flag, X86.OPFLAG.DEBUG, to prevent redundant DEBUG exceptions,
+         * so we don't need to set OPFLAG.FAULT in that case, because a DEBUG exception doesn't actually prevent an instruction
+         * from executing (and therefore doesn't need to be restarted).
+         *
+         * TODO: Review the restartability of all our opcode handlers, starting with those that affect the segment registers
+         * and then moving on to the rest, and determine whether we really need a general-purpose solution instead.
+         */
+        if (nFault == X86.EXCEPTION.DEBUG) {
+            this.opFlags |= X86.OPFLAG.DEBUG;
+        } else if (nFault >= 0) {
+            this.opFlags |= X86.OPFLAG.FAULT;
+        }
+
+        /*
+         * Since this fault is likely being issued in the context of an instruction that hasn't finished
+         * executing, and since we currently don't do anything to interrupt that execution (eg, throw a
+         * JavaScript exception), we should shut off all further reads/writes for the current instruction.
+         *
+         * That's easy for any EA-based memory accesses: simply set both the NOREAD and NOWRITE flags.
+         * However, there are also direct, non-EA-based memory accesses to consider.  A perfect example is
+         * opPUSHA(): if a GP fault occurs on any PUSH other than the last, a subsequent PUSH is likely to
+         * cause another fault, which we will misinterpret as a double-fault -- unless the handler for
+         * such an opcode checks this.opFlags for X86.OPFLAG.FAULT after each step of the operation.
+         *
+         * TODO: Throw a special JavaScript exception that cpu.js must intercept and quietly redirect.
+         */
+        this.opFlags |= (X86.OPFLAG.NOREAD | X86.OPFLAG.NOWRITE);
+    }
 };
 
 /**
@@ -4017,7 +4019,7 @@ X86.fnPageFault = function(addr, fPresent, fWrite)
 };
 
 /**
- * fnFaultMessage()
+ * fnFaultMessage(nFault, nError, fHalt)
  *
  * Aside from giving the Debugger an opportunity to report every fault, this also gives us the ability to
  * halt exception processing in tracks: return true to prevent the fault handler from being dispatched.
@@ -4029,8 +4031,8 @@ X86.fnPageFault = function(addr, fPresent, fWrite)
  *
  * @this {X86CPU}
  * @param {number} nFault
- * @param {number} [nError] (if omitted, no error code will be reported)
- * @param {boolean} [fHalt] true to halt the CPU (if the Debugger is loaded), false to not, undefined if "it depends"
+ * @param {number|null} [nError] (if omitted, no error code will be reported)
+ * @param {boolean} [fHalt] (true to halt the CPU, false to not, undefined if "it depends")
  * @return {boolean|undefined} true to block the fault (often desirable when fHalt is true), otherwise dispatch it
  */
 X86.fnFaultMessage = function(nFault, nError, fHalt)
@@ -4073,11 +4075,9 @@ X86.fnFaultMessage = function(nFault, nError, fHalt)
             fHalt = false;
         }
     }
- // else {
- //     if (nFault == X86.EXCEPTION.PG_FAULT || nFault == X86.EXCEPTION.GP_FAULT && this.model == X86.MODEL_80386 /* || nFault == X86.EXCEPTION.NP_FAULT && bOpcode == 0x8E */) {
- //         fHalt = true;
- //     }
- // }
+    if (nFault == X86.EXCEPTION.PG_FAULT && bOpcode == X86.OPCODE.IRET) {
+        fHalt = true;
+    }
 
     /*
      * If fHalt has been explicitly set to false, we also take that as a cue to disable fault messages
@@ -4091,6 +4091,10 @@ X86.fnFaultMessage = function(nFault, nError, fHalt)
      * Similarly, the PC AT ROM BIOS deliberately generates a couple of GP faults as part of the POST
      * (Power-On Self Test); we don't want to ignore those, but we don't want to halt on them either.  We
      * detect those faults by virtue of the LIP being in the range 0x0F0000 to 0x0FFFFF.
+     *
+     * TODO: Be aware that this test can trigger false positives, such as when a V86-mode ARPL is hit; eg:
+     *
+     *      &FD82:22F7 6338            ARPL     [BX+SI],DI
      */
     if (this.regLIP >= 0x0F0000 && this.regLIP <= 0x0FFFFF) {
         fHalt = false;
@@ -4105,8 +4109,11 @@ X86.fnFaultMessage = function(nFault, nError, fHalt)
     }
 
     if (this.messageEnabled(bitsMessage) || fHalt) {
-        var sMessage = "Fault " + str.toHexByte(nFault) + (nError != null? " (" + str.toHexWord(nError) + ")" : "") + " on opcode " + str.toHexByte(bOpcode);
+
         var fRunning = this.aFlags.fRunning;
+        var sMessage = "Fault " + str.toHexByte(nFault) + (nError != null? " (" + str.toHexWord(nError) + ")" : "") + " on opcode " + str.toHexByte(bOpcode);
+        if (fHalt && fRunning) sMessage += " (blocked by PCjs Debugger)";
+
         if (this.printMessage(sMessage, fHalt || bitsMessage, true)) {
             if (fHalt) {
                 /*

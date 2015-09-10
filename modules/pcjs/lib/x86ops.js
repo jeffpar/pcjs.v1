@@ -1336,6 +1336,31 @@ X86.opBOUND = function BOUND()
  */
 X86.opARPL = function ARPL()
 {
+    /*
+     * ARPL is one of several protected-mode instructions that are meaningless and not allowed in either real-mode
+     * or V86-mode; others include LAR, LSL, VERR and VERW.  More meaningful but potentially harmful protected-mode
+     * instructions that ARE allowed in real-mode but NOT in V86-mode include LIDT, LGDT, LMSW, CLTS, HLT, and
+     * control register MOV instructions.
+     *
+     * ARPL is somewhat more noteworthy because enhanced-mode Windows (going back to at least Windows 3.00, and
+     * possibly even the earliest versions of Windows/386) selected the ARPL opcode as a controlled means of exiting
+     * V86-mode via the UD_FAULT exception.  Windows would use the same ARPL for all controlled exits, using different
+     * segment:offset pointers to the ARPL to differentiate them.  ARPL was probably chosen because it could trigger
+     * a UD_FAULT with a single byte (0x63); any subsequent address bytes would be irrelevant.
+     *
+     * Which is WHY we must perform the CPU mode tests below rather than in the fnARPL() worker; otherwise we could
+     * generate additional (bogus) faults, based on the address of the first operand.
+     *
+     * TODO: You may have noticed that setProtMode() already swaps out a 0x0F opcode dispatch table for another based
+     * on the mode, because none of the "GRP6" 0x0F opcodes (eg, SLDT, STR, LLDT, LTR, VERR and VERW) are allowed in
+     * real-mode, and it was easy to swap all those handlers in/out with a single update.  We've extended that particular
+     * swap to include V86-mode as well, but we might want to consider swapping out more opcode handlers in a similar
+     * fashion, instead of using these in-line mode tests.
+     */
+    if (!(this.regCR0 & X86.CR0.MSW.PE) || I386 && (this.regPS & X86.PS.VM)) {
+        X86.opInvalid.call(this);
+        return;
+    }
     this.aOpModMemWord[this.getIPByte()].call(this, X86.fnARPL);
 };
 
@@ -2119,7 +2144,7 @@ X86.opMOVwsr = function MOVwsr()
             break;
         }
         X86.opInvalid.call(this);
-        break;
+        return;
     case 0x5:
         if (I386 && this.model >= X86.MODEL_80386) {
             this.regXX = this.segGS.sel;
@@ -2128,7 +2153,7 @@ X86.opMOVwsr = function MOVwsr()
         /* falls through */
     default:
         X86.opInvalid.call(this);
-        break;
+        return;
     }
     /*
      * Like other MOV operations, the destination does not need to be read, just written.
@@ -2255,7 +2280,22 @@ X86.opPOPmw = function POPmw()
      * Like other MOV operations, the destination does not need to be read, just written.
      */
     this.opFlags |= X86.OPFLAG.NOREAD;
-    this.aOpModGrpWord[this.getIPByte()].call(this, X86.aOpGrpPOPw, this.popWord);
+    /*
+     * A "clever" instruction like this:
+     *
+     *      #0117:651C 67668F442408    POP      DWORD [ESP+08]
+     *
+     * pops the DWORD from the top of the stack and places it at ESP+08, where ESP is the value
+     * AFTER the pop, not before.  We used to (incorrectly) pass "popWord" as the fnSrc parameter
+     * below; we now pop the word first, saving it in regXX, and then pass "fnSRCxx" as fnSrc,
+     * which simply returns the contents of regXX.
+     *
+     * Also, in case you're wondering, fnPUSHw() (in aOpGrp4w) is the complement to this instruction,
+     * but it doesn't require a similar work-around, because a push from memory accesses that memory
+     * BEFORE the push, which occurs through our normal ModRM processing.
+     */
+    this.regXX = this.popWord();
+    this.aOpModGrpWord[this.getIPByte()].call(this, X86.aOpGrpPOPw, X86.fnSRCxx);
 };
 
 /**
@@ -3258,7 +3298,7 @@ X86.opMOVDI = function MOVDI()
  */
 X86.opGRP2bn = function GRP2bn()
 {
-    this.aOpModGrpByte[this.getIPByte()].call(this, X86.aOpGrp2b, X86.fnSrcCountN);
+    this.aOpModGrpByte[this.getIPByte()].call(this, X86.aOpGrp2b, X86.fnSRCCountN);
 };
 
 /**
@@ -3268,7 +3308,7 @@ X86.opGRP2bn = function GRP2bn()
  */
 X86.opGRP2wn = function GRP2wn()
 {
-    this.aOpModGrpWord[this.getIPByte()].call(this, this.sizeData == 2? X86.aOpGrp2w : X86.aOpGrp2d, X86.fnSrcCountN);
+    this.aOpModGrpWord[this.getIPByte()].call(this, this.sizeData == 2? X86.aOpGrp2w : X86.aOpGrp2d, X86.fnSRCCountN);
 };
 
 /**
@@ -3461,6 +3501,7 @@ X86.opINT3 = function INT3()
      * function to stop execution on INT3 whenever both the INT and HALT message bits are set; a simple "g"
      * command allows you to continue.
      */
+    this.nFault = -1;
     X86.fnINT.call(this, X86.EXCEPTION.BREAKPOINT, null, this.cycleCounts.nOpCyclesInt3D);
 };
 
@@ -3485,6 +3526,7 @@ X86.opINTn = function INTn()
      * and returns false ONLY if a notification handler returned false (ie, requesting the interrupt be skipped).
      */
     if (this.checkIntNotify(nInt)) {
+        this.nFault = -1;
         X86.fnINT.call(this, nInt, null, 0);
         return;
     }
@@ -3507,6 +3549,7 @@ X86.opINTO = function INTO()
             X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
             return;
         }
+        this.nFault = -1;
         X86.fnINT.call(this, X86.EXCEPTION.OVERFLOW, null, this.cycleCounts.nOpCyclesIntOD);
         return;
     }
@@ -3539,7 +3582,7 @@ X86.opIRET = function IRET()
  */
 X86.opGRP2b1 = function GRP2b1()
 {
-    this.aOpModGrpByte[this.getIPByte()].call(this, X86.aOpGrp2b, X86.fnSrcCount1);
+    this.aOpModGrpByte[this.getIPByte()].call(this, X86.aOpGrp2b, X86.fnSRCCount1);
 };
 
 /**
@@ -3549,7 +3592,7 @@ X86.opGRP2b1 = function GRP2b1()
  */
 X86.opGRP2w1 = function GRP2w1()
 {
-    this.aOpModGrpWord[this.getIPByte()].call(this, this.sizeData == 2? X86.aOpGrp2w : X86.aOpGrp2d, X86.fnSrcCount1);
+    this.aOpModGrpWord[this.getIPByte()].call(this, this.sizeData == 2? X86.aOpGrp2w : X86.aOpGrp2d, X86.fnSRCCount1);
 };
 
 /**
@@ -3559,7 +3602,7 @@ X86.opGRP2w1 = function GRP2w1()
  */
 X86.opGRP2bCL = function GRP2bCL()
 {
-    this.aOpModGrpByte[this.getIPByte()].call(this, X86.aOpGrp2b, X86.fnSrcCountCL);
+    this.aOpModGrpByte[this.getIPByte()].call(this, X86.aOpGrp2b, X86.fnSRCCountCL);
 };
 
 /**
@@ -3569,7 +3612,7 @@ X86.opGRP2bCL = function GRP2bCL()
  */
 X86.opGRP2wCL = function GRP2wCL()
 {
-    this.aOpModGrpWord[this.getIPByte()].call(this, this.sizeData == 2? X86.aOpGrp2w : X86.aOpGrp2d, X86.fnSrcCountCL);
+    this.aOpModGrpWord[this.getIPByte()].call(this, this.sizeData == 2? X86.aOpGrp2w : X86.aOpGrp2d, X86.fnSRCCountCL);
 };
 
 /**
@@ -4052,7 +4095,7 @@ X86.opCMC = function CMC()
 X86.opGRP3b = function GRP3b()
 {
     this.fMDSet = false;
-    this.aOpModGrpByte[this.getIPByte()].call(this, X86.aOpGrp3b, X86.fnSrcNone);
+    this.aOpModGrpByte[this.getIPByte()].call(this, X86.aOpGrp3b, X86.fnSRCNone);
     if (this.fMDSet) this.regEAX = (this.regEAX & ~this.maskData) | (this.regMDLo & this.maskData);
 };
 
@@ -4078,7 +4121,7 @@ X86.opGRP3b = function GRP3b()
 X86.opGRP3w = function GRP3w()
 {
     this.fMDSet = false;
-    this.aOpModGrpWord[this.getIPByte()].call(this, X86.aOpGrp3w, X86.fnSrcNone);
+    this.aOpModGrpWord[this.getIPByte()].call(this, X86.aOpGrp3w, X86.fnSRCNone);
     if (this.fMDSet) {
         this.regEAX = (this.regEAX & ~this.maskData) | (this.regMDLo & this.maskData);
         this.regEDX = (this.regEDX & ~this.maskData) | (this.regMDHi & this.maskData);
@@ -4177,7 +4220,7 @@ X86.opSTD = function STD()
  */
 X86.opGRP4b = function GRP4b()
 {
-    this.aOpModGrpByte[this.getIPByte()].call(this, X86.aOpGrp4b, X86.fnSrcNone);
+    this.aOpModGrpByte[this.getIPByte()].call(this, X86.aOpGrp4b, X86.fnSRCNone);
 };
 
 /**
@@ -4187,7 +4230,7 @@ X86.opGRP4b = function GRP4b()
  */
 X86.opGRP4w = function GRP4w()
 {
-    this.aOpModGrpWord[this.getIPByte()].call(this, X86.aOpGrp4w, X86.fnSrcNone);
+    this.aOpModGrpWord[this.getIPByte()].call(this, X86.aOpGrp4w, X86.fnSRCNone);
 };
 
 /**

@@ -729,8 +729,24 @@ Bus.prototype.getLong = function(addr)
     if (off < this.nBlockLimit - 2) {
         return this.aMemBlocks[iBlock].readLong(off, addr);
     }
-    var nShift = (off & 0x3) << 3;
-    return (this.aMemBlocks[iBlock].readLong(off & ~0x3, addr) >>> nShift) | (this.aMemBlocks[(iBlock + 1) & this.nBlockMask].readLong(0, addr + 3) << (32 - nShift));
+    /*
+     * I think the previous version of this function tried to be too clever (ie, reading the last
+     * long in the current block and the first long in the next block and masking/combining the results),
+     * which may have also created some undesirable side-effects for custom memory controllers.
+     * This simpler (and probably more reliable) approach is to simply read the long as individual bytes.
+     */
+    var l = 0;
+    var cb = 4, nShift = 0;
+    var cbBlock = 4 - (off & 0x3);    // (off & 0x3) will be 1, 2 or 3, so cbBlock will be 3, 2, or 1
+    while (cb--) {
+        l |= (this.aMemBlocks[iBlock].readByte(off++, addr++) << nShift);
+        if (!--cbBlock) {
+            iBlock = (iBlock + 1) & this.nBlockMask;
+            off = 0;
+        }
+        nShift += 8;
+    }
+    return l;
 };
 
 /**
@@ -749,8 +765,24 @@ Bus.prototype.getLongDirect = function(addr)
     if (off < this.nBlockLimit - 2) {
         return this.aMemBlocks[iBlock].readLongDirect(off, addr);
     }
-    var nShift = (off & 0x3) << 3;
-    return (this.aMemBlocks[iBlock].readLongDirect(off & ~0x3, addr) >>> nShift) | (this.aMemBlocks[(iBlock + 1) & this.nBlockMask].readLongDirect(0, addr + 3) << (32 - nShift));
+    /*
+     * I think the previous version of this function tried to be too clever (ie, reading the last
+     * long in the current block and the first long in the next block and masking/combining the results),
+     * which may have also created some undesirable side-effects for custom memory controllers.
+     * This simpler (and probably more reliable) approach is to simply read the long as individual bytes.
+     */
+    var l = 0;
+    var cb = 4, nShift = 0;
+    var cbBlock = 4 - (off & 0x3);    // (off & 0x3) will be 1, 2 or 3, so cbBlock will be 3, 2, or 1
+    while (cb--) {
+        l |= (this.aMemBlocks[iBlock].readByteDirect(off++, addr++) << nShift);
+        if (!--cbBlock) {
+            iBlock = (iBlock + 1) & this.nBlockMask;
+            off = 0;
+        }
+        nShift += 8;
+    }
+    return l;
 };
 
 /**
@@ -842,14 +874,22 @@ Bus.prototype.setLong = function(addr, l)
         this.aMemBlocks[iBlock].writeLong(off, l);
         return;
     }
-    var lPrev, nShift = (off & 0x3) << 3;
-    off &= ~0x3;
-    lPrev = this.aMemBlocks[iBlock].readLong(off, addr);
-    this.aMemBlocks[iBlock].writeLong(off, (lPrev & ~((0xffffffff|0) << nShift)) | (l << nShift), addr);
-    iBlock = (iBlock + 1) & this.nBlockMask;
-    addr += 3;
-    lPrev = this.aMemBlocks[iBlock].readLong(0, addr);
-    this.aMemBlocks[iBlock].writeLong(0, (lPrev & ((0xffffffff|0) << nShift)) | (l >>> (32 - nShift)), addr);
+    /*
+     * I think the previous version of this function tried to be too clever (ie, reading and rewriting
+     * the last long in the current block, and then reading and rewriting the first long in the next
+     * block), which may have also created some undesirable side-effects for custom memory controllers.
+     * This simpler (and probably more reliable) approach is to simply write the long as individual bytes.
+     */
+    var cb = 4;
+    var cbBlock = 4 - (off & 0x3);    // (off & 0x3) will be 1, 2 or 3, so cbBlock will be 3, 2, or 1
+    while (cb--) {
+        this.aMemBlocks[iBlock].writeByte(off++, l & 0xff, addr++);
+        if (!--cbBlock) {
+            iBlock = (iBlock + 1) & this.nBlockMask;
+            off = 0;
+        }
+        l >>>= 8;
+    }
 };
 
 /**
@@ -870,14 +910,22 @@ Bus.prototype.setLongDirect = function(addr, l)
         this.aMemBlocks[iBlock].writeLongDirect(off, l, addr);
         return;
     }
-    var lPrev, nShift = (off & 0x3) << 3;
-    off &= ~0x3;
-    lPrev = this.aMemBlocks[iBlock].readLongDirect(off, addr);
-    this.aMemBlocks[iBlock].writeLongDirect(off, (lPrev & ~((0xffffffff|0) << nShift)) | (l << nShift), addr);
-    iBlock = (iBlock + 1) & this.nBlockMask;
-    addr += 3;
-    lPrev = this.aMemBlocks[iBlock].readLongDirect(0, addr);
-    this.aMemBlocks[iBlock].writeLongDirect(0, (lPrev & ((0xffffffff|0) << nShift)) | (l >>> (32 - nShift)), addr);
+    /*
+     * I think the previous version of this function tried to be too clever (ie, reading and rewriting
+     * the last long in the current block, and then reading and rewriting the first long in the next
+     * block), which may have also created some undesirable side-effects for custom memory controllers.
+     * This simpler (and probably more reliable) approach is to simply write the long as individual bytes.
+     */
+    var cb = 4;
+    var cbBlock = 4 - (off & 0x3);    // (off & 0x3) will be 1, 2 or 3, so cbBlock will be 3, 2, or 1
+    while (cb--) {
+        this.aMemBlocks[iBlock].writeByteDirect(off++, l & 0xff, addr++);
+        if (!--cbBlock) {
+            iBlock = (iBlock + 1) & this.nBlockMask;
+            off = 0;
+        }
+        l >>>= 8;
+    }
 };
 
 /**

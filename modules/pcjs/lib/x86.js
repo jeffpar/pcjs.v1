@@ -474,6 +474,7 @@ var X86 = {
         INT3:       0xCC,       // opINT3()
         INTN:       0xCD,       // opINTn()
         INTO:       0xCE,       // opINTO()
+        IRET:       0xCF,       // opIRET()
         LOOPNZ:     0xE0,       // opLOOPNZ()
         LOOPZ:      0xE1,       // opLOOPZ()
         LOOP:       0xE2,       // opLOOP()
