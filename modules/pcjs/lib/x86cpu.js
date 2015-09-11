@@ -2173,7 +2173,20 @@ X86CPU.prototype.setSS = function(sel, fInterruptable)
     var regESP = this.getSP();
     var regLSP = this.segSS.load(sel);
     if (regLSP !== X86.ADDR_INVALID) {
-        this.regLSP = (regLSP + regESP)|0;
+        /*
+         * The safest way to update regLSP after a potential change to segSS.base is to call setSP()
+         * with the original stack pointer retrieved above via getSP().  When I tried to be clever and
+         * do this instead:
+         *
+         *      this.regLSP = (regLSP + regESP)|0;
+         *
+         * 16-bit stacks began inadvertently using ESP instead of SP.  The moral: don't be needlessly clever.
+         *
+         * Sprinkle the following assert throughout stack operations to catch that bug in the future:
+         *
+         *      this.assert(!((this.regLSP - this.segSS.base) & ~this.segSS.maskAddr));
+         */
+        this.setSP(regESP);
         if (this.segSS.fExpDown) {
             this.regLSPLimit = (this.segSS.base + this.segSS.maskAddr)|0;
             this.regLSPLimitLow = (this.segSS.base + this.segSS.limit)|0;

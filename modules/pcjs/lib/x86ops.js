@@ -126,6 +126,11 @@ X86.opADDAX = function ADDAX()
  */
 X86.opPUSHES = function PUSHES()
 {
+    /*
+     * TODO: Reportedly, when the OPERAND size is 32 bits, the 80386 will decrement the stack pointer by 4,
+     * write the selector into the 2 lower bytes, and leave the 2 upper bytes untouched, whereas we will write
+     * a 32-bit value, effectively zeroing the 2 upper bytes.  Need to confirm this.
+     */
     this.pushWord(this.segES.sel);
     this.nStepCycles -= this.cycleCounts.nOpCyclesPushSeg;
 };
@@ -137,6 +142,9 @@ X86.opPUSHES = function PUSHES()
  */
 X86.opPOPES = function POPES()
 {
+    /*
+     * As discussed in fnRETF(), we temporarily set opLSP around operations that fnFault() may need to restart.
+     */
     this.opLSP = this.regLSP;
     this.setES(this.popWord());
     this.nStepCycles -= this.cycleCounts.nOpCyclesPopReg;
@@ -216,6 +224,11 @@ X86.opORAX = function ORAX()
  */
 X86.opPUSHCS = function PUSHCS()
 {
+    /*
+     * TODO: Reportedly, when the OPERAND size is 32 bits, the 80386 will decrement the stack pointer by 4,
+     * write the selector into the 2 lower bytes, and leave the 2 upper bytes untouched, whereas we will write
+     * a 32-bit value, effectively zeroing the 2 upper bytes.  Need to confirm this.
+     */
     this.pushWord(this.segCS.sel);
     this.nStepCycles -= this.cycleCounts.nOpCyclesPushSeg;
 };
@@ -314,6 +327,11 @@ X86.opADCAX = function ADCAX()
  */
 X86.opPUSHSS = function PUSHSS()
 {
+    /*
+     * TODO: Reportedly, when the OPERAND size is 32 bits, the 80386 will decrement the stack pointer by 4,
+     * write the selector into the 2 lower bytes, and leave the 2 upper bytes untouched, whereas we will write
+     * a 32-bit value, effectively zeroing the 2 upper bytes.  Need to confirm this.
+     */
     this.pushWord(this.segSS.sel);
     this.nStepCycles -= this.cycleCounts.nOpCyclesPushSeg;
 };
@@ -325,6 +343,9 @@ X86.opPUSHSS = function PUSHSS()
  */
 X86.opPOPSS = function POPSS()
 {
+    /*
+     * As discussed in fnRETF(), we temporarily set opLSP around operations that fnFault() may need to restart.
+     */
     this.opLSP = this.regLSP;
     this.setSS(this.popWord());
     this.nStepCycles -= this.cycleCounts.nOpCyclesPopReg;
@@ -404,6 +425,11 @@ X86.opSBBAX = function SBBAX()
  */
 X86.opPUSHDS = function PUSHDS()
 {
+    /*
+     * TODO: Reportedly, when the OPERAND size is 32 bits, the 80386 will decrement the stack pointer by 4,
+     * write the selector into the 2 lower bytes, and leave the 2 upper bytes untouched, whereas we will write
+     * a 32-bit value, effectively zeroing the 2 upper bytes.  Need to confirm this.
+     */
     this.pushWord(this.segDS.sel);
     this.nStepCycles -= this.cycleCounts.nOpCyclesPushSeg;
 };
@@ -415,6 +441,9 @@ X86.opPUSHDS = function PUSHDS()
  */
 X86.opPOPDS = function POPDS()
 {
+    /*
+     * As discussed in fnRETF(), we temporarily set opLSP around operations that fnFault() may need to restart.
+     */
     this.opLSP = this.regLSP;
     this.setDS(this.popWord());
     this.nStepCycles -= this.cycleCounts.nOpCyclesPopReg;

@@ -1100,6 +1100,11 @@ X86.opSETNLE = function SETNLE()
  */
 X86.opPUSHFS = function PUSHFS()
 {
+    /*
+     * TODO: Reportedly, when the OPERAND size is 32 bits, the 80386 will decrement the stack pointer by 4,
+     * write the selector into the 2 lower bytes, and leave the 2 upper bytes untouched, whereas we will write
+     * a 32-bit value, effectively zeroing the 2 upper bytes.  Need to confirm this.
+     */
     this.pushWord(this.segFS.sel);
     this.nStepCycles -= this.cycleCounts.nOpCyclesPushSeg;
 };
@@ -1167,6 +1172,11 @@ X86.opSHLDcl = function SHLDcl()
  */
 X86.opPUSHGS = function PUSHGS()
 {
+    /*
+     * TODO: Reportedly, when the OPERAND size is 32 bits, the 80386 will decrement the stack pointer by 4,
+     * write the selector into the 2 lower bytes, and leave the 2 upper bytes untouched, whereas we will write
+     * a 32-bit value, effectively zeroing the 2 upper bytes.  Need to confirm this.
+     */
     this.pushWord(this.segGS.sel);
     this.nStepCycles -= this.cycleCounts.nOpCyclesPushSeg;
 };

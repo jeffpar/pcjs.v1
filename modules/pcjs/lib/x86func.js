@@ -1439,7 +1439,11 @@ X86.fnINT = function INT(nIDT, nError, nCycles)
  */
 X86.fnIRET = function IRET()
 {
+    /*
+     * As discussed in fnRETF(), we temporarily set opLSP around operations that fnFault() may need to restart.
+     */
     this.opLSP = this.regLSP;
+
     this.nStepCycles -= this.cycleCounts.nOpCyclesIRet;
 
     if ((this.regCR0 & X86.CR0.MSW.PE) && (this.regPS & X86.PS.NT)) {
@@ -2436,6 +2440,7 @@ X86.fnRCRd = function RCRd(dst, src)
 X86.fnRETF = function RETF(n)
 {
     this.opLSP = this.regLSP;
+
     var newIP = this.popWord();
     var newCS = this.popWord();
 
@@ -3916,13 +3921,17 @@ X86.fnFault = function(nFault, nError, fHalt, nCycles)
          * Prior to each new burst of instructions, stepCPU() sets fComplete to true, and the only (normal) way
          * for fComplete to become false is through stopCPU(), which isn't ordinarily called, except by the Debugger.
          */
+        this.resetSizes();
         this.setIP(this.opLIP - this.segCS.base);
     }
     else if (this.model >= X86.MODEL_80186) {
         if (this.nFault < 0) {
             /*
-             * Single-fault (error code is passed through, and the responsible instruction is restartable)
+             * Single-fault (error code is passed through, and the responsible instruction is restartable;
+             * the call to resetSizes() is critical, otherwise setIP() may update IP with the wrong size if
+             * the current instruction contains an OPERAND size override).
              */
+            this.resetSizes();
             this.setIP(this.opLIP - this.segCS.base);
             if (this.opLSP != X86.ADDR_INVALID) {
                 this.setSP((this.regESP & ~this.segSS.maskAddr) | (this.opLSP - this.segSS.base));
