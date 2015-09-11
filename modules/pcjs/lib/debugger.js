@@ -3370,9 +3370,12 @@ if (DEBUGGER) {
                     this.cOpcodes++;
                 }
             }
-            catch (e) {
-                this.nCycles = 0;
-                this.cpu.setError(e.stack || e.message);
+            catch(exception) {
+                if (typeof exception != "number") {
+                    var e = exception;
+                    this.nCycles = 0;
+                    this.cpu.setError(e.stack || e.message);
+                }
             }
         } while (this.cpu.opFlags & X86.OPFLAG_PREFIXES);
 

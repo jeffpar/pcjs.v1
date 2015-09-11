@@ -1538,7 +1538,12 @@ X86.opINSb = function INSb()
         if (!this.checkIOPM(port, 1, true)) return;
         var b = this.bus.checkPortInputNotify(port, 1, this.regLIP - nDelta - 1);
         this.setSOByte(this.segES, this.regEDI & maskAddr, b);
+
+        /*
+         * TODO: Remove this once we've done enough testing of fnFault() throwing exceptions
+         */
         if (this.opFlags & X86.OPFLAG.FAULT) return;
+
         if (BACKTRACK) this.backTrack.btiMem0 = this.backTrack.btiIO;
         this.regEDI = (this.regEDI & ~maskAddr) | ((this.regEDI + ((this.regPS & X86.PS.DF)? -1 : 1)) & maskAddr);
         this.regECX = (this.regECX & ~maskAddr) | ((this.regECX - nDelta) & maskAddr);
@@ -1592,7 +1597,12 @@ X86.opINSw = function INSw()
             this.backTrack.btiMem1 = this.backTrack.btiIO;
         }
         this.setSOWord(this.segES, this.regEDI & maskAddr, w);
+
+        /*
+         * TODO: Remove this once we've done enough testing of fnFault() throwing exceptions
+         */
         if (this.opFlags & X86.OPFLAG.FAULT) return;
+
         this.regEDI = (this.regEDI & ~maskAddr) | ((this.regEDI + ((this.regPS & X86.PS.DF)? -this.sizeData : this.sizeData)) & maskAddr);
         this.regECX = (this.regECX & ~maskAddr) | ((this.regECX - nDelta) & maskAddr);
         this.nStepCycles -= nCycles;
@@ -1639,7 +1649,12 @@ X86.opOUTSb = function OUTSb()
         var port = this.regEDX & 0xffff;
         if (!this.checkIOPM(port, 1, false)) return;
         var b = this.getSOByte(this.segDS, this.regESI & maskAddr);
+
+        /*
+         * TODO: Remove this once we've done enough testing of fnFault() throwing exceptions
+         */
         if (this.opFlags & X86.OPFLAG.FAULT) return;
+
         if (BACKTRACK) this.backTrack.btiIO = this.backTrack.btiMem0;
         this.bus.checkPortOutputNotify(port, 1, b, this.regLIP - nDelta - 1);
         this.regESI = (this.regESI & ~maskAddr) | ((this.regESI + ((this.regPS & X86.PS.DF)? -1 : 1)) & maskAddr);
@@ -1686,7 +1701,12 @@ X86.opOUTSw = function OUTSw()
     }
     if (nReps--) {
         var w = this.getSOWord(this.segDS, this.regESI & maskAddr);
+
+        /*
+         * TODO: Remove this once we've done enough testing of fnFault() throwing exceptions
+         */
         if (this.opFlags & X86.OPFLAG.FAULT) return;
+
         var port = this.regEDX & 0xffff;
         if (!this.checkIOPM(port, this.sizeData, false)) return;
         if (BACKTRACK) {
@@ -2185,7 +2205,7 @@ X86.opLEA = function LEA()
  */
 X86.opMOVsrw = function MOVsrw()
 {
-    var temp;
+    var temp, sel;
     var bModRM = this.getIPByte();
     var reg = (bModRM & 0x38) >> 3;
     switch(reg) {
@@ -2227,44 +2247,52 @@ X86.opMOVsrw = function MOVsrw()
     this.aOpModRegWord[bModRM].call(this, X86.fnMOV);
     switch (reg) {
     case 0x0:
-        this.setES(this.regEAX);
+        sel = this.regEAX;
         this.regEAX = temp;
+        this.setES(sel);
         break;
     case 0x1:
-        this.setCS(this.regECX);
+        sel = this.regECX;
         this.regECX = temp;
+        this.setCS(sel);
         break;
     case 0x2:
-        this.setSS(this.regEDX);
+        sel = this.regEDX;
         this.regEDX = temp;
+        this.setSS(sel);
         break;
     case 0x3:
-        this.setDS(this.regEBX);
+        sel = this.regEBX;
         this.regEBX = temp;
+        this.setDS(sel);
         break;
     case 0x4:
-        if (I386 && this.model >= X86.MODEL_80386) {
-            this.setFS(this.getSP());
-        } else {
-            this.setES(this.getSP());
-        }
+        sel = this.getSP();
         this.setSP(temp);
+        if (I386 && this.model >= X86.MODEL_80386) {
+            this.setFS(sel);
+        } else {
+            this.setES(sel);
+        }
         break;
     case 0x5:
-        if (I386 && this.model >= X86.MODEL_80386) {
-            this.setGS(this.regEBP);
-        } else {
-            this.setCS(this.regEBP);
-        }
+        sel = this.regEBP;
         this.regEBP = temp;
+        if (I386 && this.model >= X86.MODEL_80386) {
+            this.setGS(sel);
+        } else {
+            this.setCS(sel);
+        }
         break;
     case 0x6:
-        this.setSS(this.regESI);
+        sel = this.regESI;
         this.regESI = temp;
+        this.setSS(sel);
         break;
     case 0x7:
-        this.setDS(this.regEDI);
+        sel = this.regEDI;
         this.regEDI = temp;
+        this.setDS(sel);
         break;
     }
 };
@@ -2666,7 +2694,12 @@ X86.opMOVSb = function MOVSb()
     }
     if (nReps--) {
         this.setSOByte(this.segES, this.regEDI & maskAddr, this.getSOByte(this.segData, this.regESI & maskAddr));
+
+        /*
+         * TODO: Remove this once we've done enough testing of fnFault() throwing exceptions
+         */
         if (this.opFlags & X86.OPFLAG.FAULT) return;
+
         var nInc = ((this.regPS & X86.PS.DF)? -1 : 1);
         this.regESI = (this.regESI & ~maskAddr) | ((this.regESI + nInc) & maskAddr);
         this.regEDI = (this.regEDI & ~maskAddr) | ((this.regEDI + nInc) & maskAddr);
@@ -2704,7 +2737,12 @@ X86.opMOVSw = function MOVSw()
     }
     if (nReps--) {
         this.setSOWord(this.segES, this.regEDI & maskAddr, this.getSOWord(this.segData, this.regESI & maskAddr));
+
+        /*
+         * TODO: Remove this once we've done enough testing of fnFault() throwing exceptions
+         */
         if (this.opFlags & X86.OPFLAG.FAULT) return;
+
         var nInc = ((this.regPS & X86.PS.DF)? -this.sizeData : this.sizeData);
         this.regESI = (this.regESI & ~maskAddr) | ((this.regESI + nInc) & maskAddr);
         this.regEDI = (this.regEDI & ~maskAddr) | ((this.regEDI + nInc) & maskAddr);
@@ -2743,7 +2781,12 @@ X86.opCMPSb = function CMPSb()
     if (nReps--) {
         var bDst = this.getEAByte(this.segData, this.regESI & maskAddr);
         var bSrc = this.modEAByte(this.segES, this.regEDI & maskAddr);
+
+        /*
+         * TODO: Remove this once we've done enough testing of fnFault() throwing exceptions
+         */
         if (this.opFlags & X86.OPFLAG.FAULT) return;
+
         X86.fnCMPb.call(this, bDst, bSrc);
         var nInc = ((this.regPS & X86.PS.DF)? -1 : 1);
         this.regESI = (this.regESI & ~maskAddr) | ((this.regESI + nInc) & maskAddr);
@@ -2791,7 +2834,12 @@ X86.opCMPSw = function CMPSw()
     if (nReps--) {
         var wDst = this.getEAWord(this.segData, this.regESI & maskAddr);
         var wSrc = this.modEAWord(this.segES, this.regEDI & maskAddr);
+
+        /*
+         * TODO: Remove this once we've done enough testing of fnFault() throwing exceptions
+         */
         if (this.opFlags & X86.OPFLAG.FAULT) return;
+
         X86.fnCMPw.call(this, wDst, wSrc);
         var nInc = ((this.regPS & X86.PS.DF)? -this.sizeData : this.sizeData);
         this.regESI = (this.regESI & ~maskAddr) | ((this.regESI + nInc) & maskAddr);
@@ -2862,7 +2910,12 @@ X86.opSTOSb = function STOSb()
     }
     if (nReps--) {
         this.setSOByte(this.segES, this.regEDI & maskAddr, this.regEAX);
+
+        /*
+         * TODO: Remove this once we've done enough testing of fnFault() throwing exceptions
+         */
         if (this.opFlags & X86.OPFLAG.FAULT) return;
+
         if (BACKTRACK) this.backTrack.btiMem0 = this.backTrack.btiAL;
         this.regEDI = (this.regEDI & ~maskAddr) | ((this.regEDI + ((this.regPS & X86.PS.DF)? -1 : 1)) & maskAddr);
         this.regECX = (this.regECX & ~maskAddr) | ((this.regECX - nDelta) & maskAddr);
@@ -2901,7 +2954,12 @@ X86.opSTOSw = function STOSw()
     }
     if (nReps--) {
         this.setSOWord(this.segES, this.regEDI & maskAddr, this.regEAX);
+
+        /*
+         * TODO: Remove this once we've done enough testing of fnFault() throwing exceptions
+         */
         if (this.opFlags & X86.OPFLAG.FAULT) return;
+
         if (BACKTRACK) {
             this.backTrack.btiMem0 = this.backTrack.btiAL; this.backTrack.btiMem1 = this.backTrack.btiAH;
         }
@@ -2940,7 +2998,12 @@ X86.opLODSb = function LODSb()
     }
     if (nReps--) {
         var b = this.getSOByte(this.segData, this.regESI & maskAddr);
+
+        /*
+         * TODO: Remove this once we've done enough testing of fnFault() throwing exceptions
+         */
         if (this.opFlags & X86.OPFLAG.FAULT) return;
+
         this.regEAX = (this.regEAX & ~0xff) | b;
         if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMem0;
         this.regESI = (this.regESI & ~maskAddr) | ((this.regESI + ((this.regPS & X86.PS.DF)? -1 : 1)) & maskAddr);
@@ -2978,7 +3041,12 @@ X86.opLODSw = function LODSw()
     }
     if (nReps--) {
         var w = this.getSOWord(this.segData, this.regESI & maskAddr);
+
+        /*
+         * TODO: Remove this once we've done enough testing of fnFault() throwing exceptions
+         */
         if (this.opFlags & X86.OPFLAG.FAULT) return;
+
         this.regEAX = (this.regEAX & ~this.maskData) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiMem0; this.backTrack.btiAH = this.backTrack.btiMem1;
@@ -3018,7 +3086,12 @@ X86.opSCASb = function SCASb()
     }
     if (nReps--) {
         X86.fnCMPb.call(this, this.regEAX & 0xff, this.modEAByte(this.segES, this.regEDI & maskAddr));
+
+        /*
+         * TODO: Remove this once we've done enough testing of fnFault() throwing exceptions
+         */
         if (this.opFlags & X86.OPFLAG.FAULT) return;
+
         this.regEDI = (this.regEDI & ~maskAddr) | ((this.regEDI + ((this.regPS & X86.PS.DF)? -1 : 1)) & maskAddr);
         this.regECX = (this.regECX & ~maskAddr) | ((this.regECX - nDelta) & maskAddr);
         /*
@@ -3062,7 +3135,12 @@ X86.opSCASw = function SCASw()
     }
     if (nReps--) {
         X86.fnCMPw.call(this, this.regEAX & this.maskData, this.modEAWord(this.segES, this.regEDI & maskAddr));
+
+        /*
+         * TODO: Remove this once we've done enough testing of fnFault() throwing exceptions
+         */
         if (this.opFlags & X86.OPFLAG.FAULT) return;
+
         this.regEDI = (this.regEDI & ~maskAddr) | ((this.regEDI + ((this.regPS & X86.PS.DF)? -this.sizeData : this.sizeData)) & maskAddr);
         this.regECX = (this.regECX & ~maskAddr) | ((this.regECX - nDelta) & maskAddr);
         /*

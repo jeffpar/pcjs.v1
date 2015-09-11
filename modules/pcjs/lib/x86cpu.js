@@ -2362,18 +2362,6 @@ X86CPU.prototype.advanceIP = function(inc)
 {
     // DEBUG: this.assert(inc > 0);
 
-    /*
-     * TODO: This is a crude work-around to deal with certain instructions that CMP, MOV, etc,
-     * immediate operands to/from memory, because if the memory access triggered a fault, we can't
-     * permit the rest of the instruction decoding to modify IP, because that'll just screw up
-     * the fault dispatch.
-     *
-     * Ultimately, I'm probably going to have to bite the bullet and throw real JavaScript exceptions
-     * to halt instructions in their tracks, but I'm going to stick with this more limited strategy
-     * for now.
-     */
-    if (this.opFlags & X86.OPFLAG.FAULT) return;
-
     this.regLIP = (this.regLIP + inc)|0;
     /*
      * Properly comparing regLIP to regLIPLimit would normally require coercing both to unsigned

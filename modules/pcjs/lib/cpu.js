@@ -1010,7 +1010,13 @@ CPU.prototype.runCPU = function(fOnClick)
              * nCyclesPerBurst is how many cycles we WANT to run on each iteration of stepCPU(), but it may run
              * significantly less (or slightly more, since we can't execute partial instructions).
              */
-            this.stepCPU(nCyclesPerBurst);
+            try {
+                this.stepCPU(nCyclesPerBurst);
+            }
+            catch(exception) {
+                if (typeof exception != "number") throw exception;
+                if (MAXDEBUG) this.println("CPU exception " + str.toHexByte(exception));
+            }
 
             /*
              * nBurstCycles, less any remaining nStepCycles, is how many cycles stepCPU() ACTUALLY ran (nCycles).

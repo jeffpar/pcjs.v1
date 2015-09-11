@@ -3964,27 +3964,25 @@ X86.fnFault = function(nFault, nError, fHalt, nCycles)
         this.opLIP = this.regLIP;
 
         /*
-         * X86.OPFLAG.FAULT flag is used by selected opcodes to provide an early exit, restore register(s), or whatever is
-         * needed to help ensure instruction restartability; there is currently no general-purpose mechanism for snapping
-         * and restoring all registers for any instruction that might fault, so it's every opcode for themselves.
+         * X86.OPFLAG.FAULT flag is used by selected opcodes to provide an early exit, restore register(s),
+         * or whatever is needed to help ensure instruction restartability; there is currently no general
+         * mechanism for snapping and restoring all registers for any instruction that might fault.
          *
-         * X86.EXCEPTION.DEBUG exceptions set their own special flag, X86.OPFLAG.DEBUG, to prevent redundant DEBUG exceptions,
-         * so we don't need to set OPFLAG.FAULT in that case, because a DEBUG exception doesn't actually prevent an instruction
-         * from executing (and therefore doesn't need to be restarted).
-         *
-         * TODO: Review the restartability of all our opcode handlers, starting with those that affect the segment registers
-         * and then moving on to the rest, and determine whether we really need a general-purpose solution instead.
+         * X86.EXCEPTION.DEBUG exceptions set their own special flag, X86.OPFLAG.DEBUG, to prevent redundant
+         * DEBUG exceptions, so we don't need to set OPFLAG.FAULT in that case, because a DEBUG exception
+         * doesn't actually prevent an instruction from executing (and therefore doesn't need to be restarted).
          */
         if (nFault == X86.EXCEPTION.DEBUG) {
             this.opFlags |= X86.OPFLAG.DEBUG;
-        } else if (nFault >= 0) {
+        } else {
+            this.assert(nFault >= 0);
             this.opFlags |= X86.OPFLAG.FAULT;
         }
 
         /*
          * Since this fault is likely being issued in the context of an instruction that hasn't finished
-         * executing, and since we currently don't do anything to interrupt that execution (eg, throw a
-         * JavaScript exception), we should shut off all further reads/writes for the current instruction.
+         * executing, if we don't do anything to interrupt that execution (eg, throw a JavaScript exception),
+         * then we would need to shut off all further reads/writes for the current instruction.
          *
          * That's easy for any EA-based memory accesses: simply set both the NOREAD and NOWRITE flags.
          * However, there are also direct, non-EA-based memory accesses to consider.  A perfect example is
@@ -3992,9 +3990,12 @@ X86.fnFault = function(nFault, nError, fHalt, nCycles)
          * cause another fault, which we will misinterpret as a double-fault -- unless the handler for
          * such an opcode checks this.opFlags for X86.OPFLAG.FAULT after each step of the operation.
          *
-         * TODO: Throw a special JavaScript exception that cpu.js must intercept and quietly redirect.
+         *      this.opFlags |= (X86.OPFLAG.NOREAD | X86.OPFLAG.NOWRITE);
+         *
+         * Fortunately, we now throw an exception that terminates the current instruction, so the above hack
+         * should no longer be necessary.
          */
-        this.opFlags |= (X86.OPFLAG.NOREAD | X86.OPFLAG.NOWRITE);
+        throw nFault;
     }
 };
 
