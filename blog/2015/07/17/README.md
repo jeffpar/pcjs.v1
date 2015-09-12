@@ -179,9 +179,8 @@ September 12, 2015 Update
 Lots of bugs have been squashed in the past few weeks -- not enough to finish setting up Windows 95, but it's getting
 closer.  More details on recent releases can be found [here](https://github.com/jeffpar/pcjs/releases).
 
-The machine below has been reconfigured with a hard disk image containing all the Windows 95 SETUP files.  The machine
-is at the point where Windows 95 SETUP has just rebooted.  Click the "Run" button to start the machine.  A breakpoint has
-already been set in the Debugger that will stop at an address where things appear to go downhill.
+The machine below has been reconfigured with a hard disk image containing all the Windows 95 Setup files.  The machine
+is at the point where Windows 95 SETUP has just rebooted.  Click the "Run" button to start the machine.
 
 [Embedded DeskPro 386](/devices/pc/machine/compaq/deskpro386/vga/4096kb/machine.xml "PCjs:deskpro386:::debugger")
 
