@@ -84,6 +84,8 @@ crash, you can dump the instruction history buffer using the Debugger's "dh" com
 NOTE: The diskette images contain a pre-release version of Windows 95, as I don't currently have the RTM version on
 diskette.
 
+---
+
 August 13, 2015 Update
 ---
 
@@ -92,12 +94,12 @@ immediately.  To monitor DOS calls until the first 36-byte read of PRECOPY1.CAB,
 breakpoint and then starting the machine, using the PCjs Debugger *input* field next to the **Enter** button:
 
 	m dos off
-	bp 1ED4:16B4 "let fn=ah;dos;if fn!=3f||cx!=24"
+	bp 1ED4:16B4 "set fn=ah;dos;if fn!=3f||cx!=24"
 	g
 
 Alternatively, you can hard-code those commands into the Debugger component of the machine.xml file; eg:
 
-	<debugger id="debugger" messages="fault|tss|int" commands='m dos off;bp 1ED4:16B4 "let fn=ah;dos;if fn!=3f||cx!=24"'/>
+	<debugger id="debugger" messages="fault|tss|int" commands='m dos off;bp 1ED4:16B4 "set fn=ah;dos;if fn!=3f||cx!=24"'/>
 
 Once the 36-byte read is hit, you'll probably want to stop on the next instruction that examine those bytes,
 by using a memory read breakpoint:
@@ -107,12 +109,12 @@ by using a memory read breakpoint:
 and you also might want to change the first breakpoint to stop on *any* file read, and add a second breakpoint
 to dump the initial contents of those reads:
 
-	bp 1ED4:16B4 "let fn=ah;dos;if fn!=3f"
+	bp 1ED4:16B4 "set fn=ah;dos;if fn!=3f"
 	bp FDC8:422A "if fn==3f;di ds:dx;db ds:dx;h;else"
 
 In the current machine, `1ED4:16B4` is the DOS INT 0x21 entry point and `FDC8:422A` is the corresponding IRET.
-The first breakpoint sets an internal variable, `fn`, to the value of the **AH** register on entry, so that the second
-breakpoint can check the value on exit.
+The first breakpoint sets an internal variable, `fn`, to the value of the **AH** register on entry, so that the
+second breakpoint can check the value on exit.
 
 Regarding the other Debugger commands shown above, the `dos` command describes the current DOS operation
 (alternatively, you could use the `m int on; m dos on` commands to turn on DOS interrupt messages).  The `di`
@@ -144,6 +146,8 @@ A quick recap of those command prefixes (which you won't see until AFTER you've 
 
 80386 Debug register (DR0-DR7) support was recently added, so even WDEB386 read/write breakpoints should work now. 
 
+---
+
 August 21, 2015 Update
 ---
 
@@ -167,9 +171,19 @@ command:
 	chipset.outPort(0x0043,PIT1_CTRL,0xD2) @1847:DD02
 	PIT1_CTRL: Read-Back command not supported (yet)
 
-To be continued....
+---
 
-[Embedded DeskPro 386](/devices/pc/machine/compaq/deskpro386/vga/4096kb/machine.xml "PCjs:deskpro386::uncompiled:debugger")
+September 12, 2015 Update
+---
+
+Lots of bugs have been squashed in the past few weeks -- not enough to finish setting up Windows 95, but it's getting
+closer.  More details on recent releases can be found [here](https://github.com/jeffpar/pcjs/releases).
+
+The machine below has been reconfigured with a hard disk image containing all the Windows 95 SETUP files.  The machine
+is at the point where Windows 95 SETUP has just rebooted.  Click the "Run" button to start the machine.  A breakpoint has
+already been set in the Debugger that will stop at an address where things appear to go downhill.
+
+[Embedded DeskPro 386](/devices/pc/machine/compaq/deskpro386/vga/4096kb/machine.xml "PCjs:deskpro386:::debugger")
 
 *[@jeffpar](http://twitter.com/jeffpar)*  
-*July 17, 2015* (updated August 13 and August 21, 2015)
+*July 17, 2015 (updated September 12, 2015)*
