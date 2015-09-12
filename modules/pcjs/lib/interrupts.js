@@ -61,7 +61,10 @@ var Interrupts = {
     MOUSE:      0x33,
     ALT_DISK:   0x40,               // HDC BIOS saves original FDC BIOS vector here
     ALT_VIDEO:  0x6D,               // IBM VGA BIOS saves original video BIOS vector here
-    WINDBG:     {                   // Windows Debugger protected-mode interface
+    WINCB: {
+        VECTOR:     0x30            // Windows PM call-back interface (aka Transfer Space Fault)
+    },
+    WINDBG: {                       // Windows Debugger protected-mode interface
         VECTOR:     0x41,           // (AX==command)
         IS_LOADED:  0x004F,         // DS_DebLoaded
         LOADED:     0xF386,         // DS_DebPresent (returned in AX if Windows Debugger loaded)
@@ -69,7 +72,7 @@ var Interrupts = {
         LOAD_SEG32: 0x0150,         // DS_LoadSeg_32 (SI==0 if code, 1 if data; DX:EBX->D386_Device_Params)
         ENABLED:    true            // support for WINDBG interrupts can be disabled (but NOT if WINDBGRM is enabled)
     },
-    WINDBGRM:     {                 // Windows Debugger real-mode interface
+    WINDBGRM: {                     // Windows Debugger real-mode interface
         VECTOR:     0x68,           // (AH==command)
         IS_LOADED:  0x43,           // D386_Identify
         LOADED:     0xF386,         // D386_Id (returned in AX if Windows Debugger loaded)
@@ -77,7 +80,7 @@ var Interrupts = {
         LOAD_SEG:   0x50,           // D386_Load_Segment (AL=segment type, ES:DI->D386_Device_Params)
         ENABLED:    true            // support for WINDBGRM interrupts can be disabled
     },
-    FUNCS:      {}                  // filled in only if DEBUGGER is true
+    FUNCS: {}                       // filled in only if DEBUGGER is true
 };
 
 if (DEBUGGER) {

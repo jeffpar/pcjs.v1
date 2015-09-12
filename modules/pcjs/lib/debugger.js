@@ -1275,6 +1275,7 @@ if (DEBUGGER) {
 
         if (Interrupts.WINDBG.ENABLED || Interrupts.WINDBGRM.ENABLED) {
             this.fWinDbg = null;
+            this.cpu.addIntNotify(Interrupts.WINCB.VECTOR, this.intWindowsCallBack.bind(this));
             this.cpu.addIntNotify(Interrupts.WINDBG.VECTOR, this.intWindowsDebugger.bind(this));
         }
         if (Interrupts.WINDBGRM.ENABLED) {
@@ -1336,19 +1337,68 @@ if (DEBUGGER) {
             var len = this.getLong(dbgAddr, 4);
             var dbgAddrDevice = this.newAddr(this.getLong(dbgAddr, 4), this.getShort(dbgAddr, 2));
             var dbgAddrModule = this.newAddr(this.getLong(dbgAddr, 4), this.getShort(dbgAddr, 2));
-            sel = this.getShort(dbgAddr, 2) || sel;
+            // sel = this.getShort(dbgAddr, 2) || sel;
             var sModule = this.getSZ(dbgAddrModule).toUpperCase();
             var sDevice = this.getSZ(dbgAddrDevice).toUpperCase();
             var sSection = (fCode? "_CODE" : "_DATA") + str.toHex(nSeg, 2);
             if (fPrint) {
                 /*
-                 * Mimic WDEB386 output
+                 * Mimics WDEB386 output, except that WDEB386 only displays a linear address, omitting the selector.
                  */
                 this.println(sModule + '!' + sDevice + "!undefined " + (fCode? "code" : "data") + '(' + str.toHex(nSeg, 4) + ")=" + str.toHex(sel, 4) + ':' + str.toHex(off) + " len " + str.toHex(len));
             }
             var aSymbols = {};
             aSymbols[sDevice + sSection] = off;
             this.addSymbols(sel, off, len, aSymbols);
+        };
+
+        /**
+         * intWindowsCallBack()
+         *
+         * This intercepts calls to Windows callback addresses, which use INT 0x30 (aka Transfer Space Fault).
+         *
+         * We're only interested in one particular callback: the one specifying VW32_Int41Dispatch (0x002A002A)
+         * in EAX.
+         *
+         * At the time that INT 0x30 occurs, a far 32-bit call has been made, preceded by a near 32-bit call,
+         * preceded by a 32-bit push of the Windows Debugger function # that would normally be in EAX if this had
+         * been an actual INT 0x41.
+         *
+         * NOTE: Regardless whether we're "handling" INT 0x41 or merely "monitoring" INT 0x41, as far as THIS
+         * interrupt is concerned, we always let the system process it, because execution never continues at the
+         * instruction following an INT 0x30; in fact, execution doesn't even continue after the far 32-bit call
+         * (even though the kernel places a "RET 4" after that call).  So, rather than recreate all that automatic
+         * address popping, we let the system do it for us, since it's designed to work whether a debugger (eg,
+         * WDEB386's Debug VXD) is installed or not.
+         *
+         * @this {Debugger}
+         * @param {number} addr
+         * @return {boolean} true to proceed with the INT 0x30 software interrupt
+         */
+        Debugger.prototype.intWindowsCallBack = function(addr)
+        {
+            var cpu = this.cpu;
+
+            if (this.fWinDbg != null && cpu.regEAX == 0x002A002A) {
+
+                var DX = cpu.regEDX & 0xffff;
+                var SI = cpu.regESI & 0xffff;
+                var dbgAddr = this.newAddr(cpu.getSP() + 0x0C, cpu.getSS());
+                var EAX = this.getLong(dbgAddr);
+
+                switch(EAX) {
+                case Interrupts.WINDBG.LOAD_SEG32:
+                    /*
+                     *  SI == segment type:
+                     *      0x0     code selector
+                     *      0x1     data selector
+                     *  DX:EBX -> D386_Device_Params structure (see addSectionInfo() for details)
+                     */
+                    this.addSectionInfo(this.newAddr(cpu.regEBX, DX), !SI, this.fWinDbg);
+                    break;
+                }
+            }
+            return true;
         };
 
         /**
@@ -1430,7 +1480,7 @@ if (DEBUGGER) {
                 break;
 
             default:
-                if (this.fWinDbg) {
+                if (MAXDEBUG && this.fWinDbg) {
                     this.println("INT 0x41: " + str.toHexWord(AX));
                 }
                 break;
@@ -1561,7 +1611,7 @@ if (DEBUGGER) {
                 break;
 
             default:
-                if (this.fWinDbgRM) {
+                if (MAXDEBUG && this.fWinDbgRM) {
                     this.println("INT 0x68: " + str.toHexByte(AH));
                 }
                 break;
@@ -1616,7 +1666,7 @@ if (DEBUGGER) {
         {
             var cpu = this.cpu;
             var AL = cpu.regEAX & 0xff;
-            this.println("INT 0x68 callback: " + str.toHexByte(AL));
+            if (MAXDEBUG) this.println("INT 0x68 callback: " + str.toHexByte(AL));
             if (AL == 5) {
                 cpu.regECX = cpu.regESI = 0;            // our in-machine debugger footprint is zero
                 cpu.regEAX = (cpu.regEAX & ~0xff) | 0x01;

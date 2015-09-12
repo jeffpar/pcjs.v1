@@ -562,7 +562,7 @@ X86.fnCALLF = function CALLF(off, sel)
 {
     var oldCS = this.getCS();
     var oldIP = this.getIP();
-    var oldSize = this.segCS.sizeData;
+    var oldSize = (I386? this.sizeData : 2);
     if (this.setCSIP(off, sel, true) != null) {
         this.pushData(oldCS, oldSize);
         this.pushData(oldIP, oldSize);
@@ -1415,6 +1415,10 @@ X86.fnINT = function INT(nIDT, nError, nCycles)
     var oldIP = this.getIP();
     var addr = this.segCS.loadIDT(nIDT);
     if (addr !== X86.ADDR_INVALID) {
+        /*
+         * TODO: Harmonize this with the code in fnCALLF(), which relies on the OPERAND size in
+         * effect at the time of the call, NOT the size of the new segCS.
+         */
         var size = this.segCS.sizeFrame;
         this.pushData(oldPS, size);
         this.pushData(oldCS, size);

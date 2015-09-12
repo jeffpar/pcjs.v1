@@ -2461,6 +2461,7 @@ Card.prototype.dumpVideoCard = function()
             this.dumpRegs(" GRC", this.regGRCIndx, this.regGRCData, this.asGRCRegs);
             this.dumpRegs(" SEQ", this.regSEQIndx, this.regSEQData, this.asSEQRegs);
             this.dumpRegs(" ATC", this.regATCIndx, this.regATCData, this.asATCRegs);
+            this.dumpRegs("   ATCINDX", this.regATCIndx);
             this.dbg.println("   ATCDATA: " + this.fATCData);
             this.dumpRegs("      FEAT", this.regFeat);
             this.dumpRegs("      MISC", this.regMisc);
@@ -5894,20 +5895,44 @@ Video.prototype.outFeat = function(port, bOut, addrFrom)
 };
 
 /**
- * inATC(port, addrFrom)
+ * inATCIndx(port, addrFrom)
+ *
+ * Technically, port 0x3C0 is readable only on a VGA, but we allow reads on an EGA as well,
+ * primarily for debugging purposes.  Moreover, ATC port reads do NOT toggle the ATC address/data
+ * flip-flop; only writes have that effect.
  *
  * @this {Video}
  * @param {number} port (0x3C0)
  * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  * @return {number}
  */
-Video.prototype.inATC = function(port, addrFrom)
+Video.prototype.inATCIndx = function(port, addrFrom)
 {
-    var b = this.cardEGA.fATCData? this.cardEGA.regATCData[this.cardEGA.regATCIndx & Card.ATC.INDX_MASK] : this.cardEGA.regATCIndx;
+    var b = this.cardEGA.regATCIndx;
     if (!addrFrom || this.messageEnabled()) {
-        this.printMessageIO(Card.ATC.PORT, null, addrFrom, "ATC." + (this.cardEGA.fATCData? this.cardEGA.asATCRegs[this.cardEGA.regATCIndx & Card.ATC.INDX_MASK] : "INDX"), b);
+        this.printMessageIO(Card.ATC.PORT, null, addrFrom, "ATC.INDX", b);
     }
-    this.cardEGA.fATCData = !this.cardEGA.fATCData;
+    return b;
+};
+
+/**
+ * inATCData(port, addrFrom)
+ *
+ * Technically, port 0x3C0 is readable only on a VGA, but we allow reads on an EGA as well,
+ * primarily for debugging purposes.  Moreover, ATC port reads do NOT toggle the ATC address/data
+ * flip-flop; only writes have that effect.
+ *
+ * @this {Video}
+ * @param {number} port (0x3C1)
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
+ * @return {number}
+ */
+Video.prototype.inATCData = function(port, addrFrom)
+{
+    var b = this.cardEGA.regATCData[this.cardEGA.regATCIndx & Card.ATC.INDX_MASK];
+    if (!addrFrom || this.messageEnabled()) {
+        this.printMessageIO(Card.ATC.PORT, null, addrFrom, "ATC." + this.cardEGA.asATCRegs[this.cardEGA.regATCIndx & Card.ATC.INDX_MASK], b);
+    }
     return b;
 };
 
@@ -6880,8 +6905,8 @@ Video.aCGAPortOutput = {
 };
 
 Video.aEGAPortInput = {
-    0x3C0: Video.prototype.inATC,               // technically, only readable on a VGA, but I want the Debugger to be able to read this, too
-    0x3C1: Video.prototype.inATC,               // technically, only readable on a VGA, but I want the Debugger to be able to read this, too
+    0x3C0: Video.prototype.inATCIndx,           // technically, only readable on a VGA, but I want the Debugger to be able to read this, too
+    0x3C1: Video.prototype.inATCData,           // technically, only readable on a VGA, but I want the Debugger to be able to read this, too
     0x3C2: Video.prototype.inStatus0,
     0x3C4: Video.prototype.inSEQIndx,           // technically, only readable on a VGA, but I want the Debugger to be able to read this, too
     0x3C5: Video.prototype.inSEQData,           // technically, only readable on a VGA, but I want the Debugger to be able to read this, too
@@ -6892,7 +6917,7 @@ Video.aEGAPortInput = {
 /*
  * WARNING: Unlike the EGA, a standard VGA does not support writes to 0x3C1, but it's easier for me to leave that
  * ability in place, treating the VGA as a superset of the EGA as much as possible; will any code break because word
- * I/O to port 0x3C0 actually works?  Possibly, but highly unlikely.
+ * OUTs to port 0x3C0 (and/or byte OUTs to port 0x3C1) actually work?  Possibly, but highly unlikely.
  */
 Video.aEGAPortOutput = {
     0x3BA: Video.prototype.outFeat,
