@@ -5966,7 +5966,7 @@ Video.prototype.outATC = function(port, bOut, addrFrom)
         }
         else {
             /*
-             * TODO: We need a screen blanking function, suitable for any mode, when INDX_PAL_ENABLE transitions off.
+             * TODO: We might want a screen blanking function, suitable for any mode, when INDX_PAL_ENABLE is cleared.
              * powerDown() might like to use such a function, too.  updateScreen() already disables any further screen
              * updates while INDX_PAL_ENABLE is clear (except when fForce is true), but that's all we currently do.
              *
@@ -5984,6 +5984,9 @@ Video.prototype.outATC = function(port, bOut, addrFrom)
              *      C000:2B43 EE              OUT      DX,AL
              *      C000:2B44 B020            MOV      AL,20
              *      C000:2B46 EE              OUT      DX,AL    <-- this ATC index value obviously DOES contain 0x20
+             *
+             * I'm not sure there are any situations where deliberately flickering the screen is a good thing -- unless
+             * someone REALLY wants to recreate the ugly flickering scroll of a CGA...?
              */
         }
         /*

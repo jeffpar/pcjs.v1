@@ -1118,6 +1118,9 @@ X86.opPUSHFS = function PUSHFS()
  */
 X86.opPOPFS = function POPFS()
 {
+    /*
+     * Any operation that modifies the stack before loading a new segment must snapshot regLSP first.
+     */
     this.opLSP = this.regLSP;
     this.setFS(this.popWord());
     this.nStepCycles -= this.cycleCounts.nOpCyclesPopReg;
@@ -1190,6 +1193,9 @@ X86.opPUSHGS = function PUSHGS()
  */
 X86.opPOPGS = function POPGS()
 {
+    /*
+     * Any operation that modifies the stack before loading a new segment must snapshot regLSP first.
+     */
     this.opLSP = this.regLSP;
     this.setGS(this.popWord());
     this.nStepCycles -= this.cycleCounts.nOpCyclesPopReg;

@@ -294,6 +294,7 @@ var BusInfo;
 Bus.prototype.initMemory = function()
 {
     var block = new Memory();
+    block.copyBreakpoints(this.dbg);
     this.aMemBlocks = new Array(this.nBlockTotal);
     for (var iBlock = 0; iBlock < this.nBlockTotal; iBlock++) {
         this.aMemBlocks[iBlock] = block;
@@ -402,7 +403,7 @@ Bus.prototype.addMemory = function(addr, size, type, controller)
         }
         var blockOld = this.aMemBlocks[iBlock];
         var blockNew = new Memory(addr, sizeBlock, this.nBlockSize, type, controller);
-        blockNew.copyBreakpoints(blockOld, this.dbg);
+        blockNew.copyBreakpoints(this.dbg, blockOld);
         this.aMemBlocks[iBlock++] = blockNew;
         addr = addrBlock + this.nBlockSize;
         size -= sizeBlock;
@@ -585,7 +586,7 @@ Bus.prototype.removeMemory = function(addr, size)
         while (size > 0) {
             var blockOld = this.aMemBlocks[iBlock];
             var blockNew = new Memory(addr);
-            blockNew.copyBreakpoints(blockOld, this.dbg);
+            blockNew.copyBreakpoints(this.dbg, blockOld);
             this.aMemBlocks[iBlock++] = blockNew;
             addr = iBlock * this.nBlockSize;
             size -= this.nBlockSize;
@@ -976,6 +977,24 @@ Bus.prototype.addBackTrackObject = function(obj, bto, off)
                  *      this.assert(slot < cbtObjects);
                  */
             }
+            /*
+             *  I hit the following error after running in a machine with lots of disk activity:
+             *
+             *      Error: assertion failure in deskpro386.bus
+             *      at Bus.Component.assert (http://pcjs:8088/modules/shared/lib/component.js:732:31)
+             *      at Bus.addBackTrackObject (http://pcjs:8088/modules/pcjs/lib/bus.js:980:18)
+             *      at onATCReadData (http://pcjs:8088/modules/pcjs/lib/hdc.js:1410:35)
+             *      at HDC.readData (http://pcjs:8088/modules/pcjs/lib/hdc.js:2573:23)
+             *      at HDC.inATCByte (http://pcjs:8088/modules/pcjs/lib/hdc.js:1398:20)
+             *      at HDC.inATCData (http://pcjs:8088/modules/pcjs/lib/hdc.js:1487:17)
+             *      at Bus.checkPortInputNotify (http://pcjs:8088/modules/pcjs/lib/bus.js:1457:38)
+             *      at X86CPU.INSw (http://pcjs:8088/modules/pcjs/lib/x86ops.js:1640:26)
+             *      at X86CPU.stepCPU (http://pcjs:8088/modules/pcjs/lib/x86cpu.js:4637:37)
+             *      at X86CPU.CPU.runCPU (http://pcjs:8088/modules/pcjs/lib/cpu.js:1014:22)
+             *
+             * TODO: Investigate.  For now, BACKTRACK is completely disabled (in part because it also needs
+             * to be revamped for machines with paging enabled).
+             */
             this.assert(slot < Bus.BACKTRACK.SLOT_MAX);
             this.ibtLastAlloc = slot;
             bto.slot = slot + 1;
@@ -1336,36 +1355,6 @@ Bus.prototype.restoreMemory = function(a)
     }
     if (a[i] !== undefined) this.setA20(a[i]);
     return true;
-};
-
-/**
- * addMemBreak(addr, fWrite)
- *
- * @this {Bus}
- * @param {number} addr
- * @param {boolean} fWrite is true for a memory write breakpoint, false for a memory read breakpoint
- */
-Bus.prototype.addMemBreak = function(addr, fWrite)
-{
-    if (DEBUGGER) {
-        var iBlock = addr >>> this.nBlockShift;
-        this.aMemBlocks[iBlock].addBreakpoint(addr & this.nBlockLimit, fWrite);
-    }
-};
-
-/**
- * removeMemBreak(addr, fWrite)
- *
- * @this {Bus}
- * @param {number} addr
- * @param {boolean} fWrite is true for a memory write breakpoint, false for a memory read breakpoint
- */
-Bus.prototype.removeMemBreak = function(addr, fWrite)
-{
-    if (DEBUGGER) {
-        var iBlock = addr >>> this.nBlockShift;
-        this.aMemBlocks[iBlock].removeBreakpoint(addr & this.nBlockLimit, fWrite);
-    }
 };
 
 /**

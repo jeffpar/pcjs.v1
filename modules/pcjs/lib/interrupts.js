@@ -68,8 +68,27 @@ var Interrupts = {
         VECTOR:     0x41,           // (AX==command)
         IS_LOADED:  0x004F,         // DS_DebLoaded
         LOADED:     0xF386,         // DS_DebPresent (returned in AX if Windows Debugger loaded)
-        LOAD_SEG:   0x0050,         // DS_LoadSeg (SI==0 if code, 1 if data; BX==segnum-1; CX==selector; ES:[E]DI->module name)
-        LOAD_SEG32: 0x0150,         // DS_LoadSeg_32 (SI==0 if code, 1 if data; DX:EBX->D386_Device_Params)
+        LOADSEG:    0x0050,         // DS_LoadSeg (SI==0 if code, 1 if data; BX==segnum-1; CX==selector; ES:[E]DI->module name)
+        FREESEG:    0x0052,         // DS_FreeSeg (BX==segment)
+        KRNLVARS:   0x005A,         // DS_Kernel_Vars
+        RELSEG:     0x005C,         // DS_ReleaseSeg (same as DS_FreeSeg but "restores any breakpoints first")
+        LOADHIGH:   0x005D,         // D386_LoadCodeDataHigh
+        LOADDLL:    0x0064,         // DS_LOADDLL
+        DELMODULE:  0x0065,         // DS_DELMODULE
+        REGDOTCMD:  0x0070,         // DS_RegisterDotCommand
+        CHECKFAULT: 0x007F,         // DS_CheckFault (BX==fault #, CX==fault type; return AX=0 to handle fault normally)
+        TRAPFAULT:  0x0083,         // DS_TrapFault (BX==fault #, CX==faulting CS, EDX==faulting EIP, ESI==fault error, EDI==fault flags)
+        FAULTTYPE: {
+            V86:    0x0001,
+            PM:     0x0002,
+            RING0:  0x0004,
+            FIRST:  0x0008,
+            LAST:   0x0010
+        },
+        GETSYMBOL:  0x008D,         // DS_GetSymbol (DS:ESI->symbol; return AX=0 if success, 1 if not found, 2 if memory not loaded yet)
+        LOADSEG32:  0x0150,         // DS_LoadSeg_32 (SI==0 if code, 1 if data; DX:EBX->D386_Device_Params)
+        FREESEG32:  0x0152,         // DS_FreeSeg_32 (BX==segment, DX:EDI->module name)
+        CONDBP:     0xF001,         // DS_CondBP (break here if WDEB386 was run with /B; ESI -> string to display)
         ENABLED:    true            // support for WINDBG interrupts can be disabled (but NOT if WINDBGRM is enabled)
     },
     WINDBGRM: {                     // Windows Debugger real-mode interface
@@ -77,7 +96,9 @@ var Interrupts = {
         IS_LOADED:  0x43,           // D386_Identify
         LOADED:     0xF386,         // D386_Id (returned in AX if Windows Debugger loaded)
         PREP_PMODE: 0x44,           // D386_Prepare_PMode (must return a 16:32 address in ES:EDI to a "PMinit" handler)
-        LOAD_SEG:   0x50,           // D386_Load_Segment (AL=segment type, ES:DI->D386_Device_Params)
+        FREESEG:    0x48,           // D386_Free_Segment (BX==real-mode segment)
+        REMOVESEGS: 0x4F,           // D386_Remove_Segs (remove any undefined segments from the named module at ES:DI)
+        LOADSEG:    0x50,           // D386_Load_Segment (AL=segment type, ES:DI->D386_Device_Params)
         ENABLED:    true            // support for WINDBGRM interrupts can be disabled
     },
     FUNCS: {}                       // filled in only if DEBUGGER is true

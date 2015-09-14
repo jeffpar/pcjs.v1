@@ -108,10 +108,10 @@ function Memory(addr, used, size, type, controller, cpu)
     this.type = type || Memory.TYPE.NONE;
     this.fReadOnly = (type == Memory.TYPE.ROM);
     this.controller = null;
-    this.cpu = cpu;     // If a CPU reference is provided, then this must be an UNPAGED Memory block allocation
+    this.cpu = cpu;             // if a CPU reference is provided, then this must be an UNPAGED Memory block allocation
     this.fDirty = this.fDirtyEver = false;
-    this.cReadBreakpoints = this.cWriteBreakpoints = 0;
     this.setPhysBlock();
+    this.copyBreakpoints();     // initialize the block's Debugger info (eg, breakpoint totals); the caller will reinitialize
 
     if (BACKTRACK) {
         if (!size || controller) {
@@ -281,7 +281,6 @@ Memory.prototype = {
             this.type = type;
             this.fReadOnly = (type == Memory.TYPE.ROM);
         }
-        this.dbg = dbg;
         if (TYPEDARRAYS) {
             this.buffer = mem.buffer;
             this.dv = mem.dv;
@@ -297,6 +296,7 @@ Memory.prototype = {
             }
             this.setAccess(Memory.afnMemory);
         }
+        this.copyBreakpoints(dbg, mem);
     },
     /**
      * save()
@@ -579,15 +579,16 @@ Memory.prototype = {
         }
     },
     /**
-     * copyBreakpoints(mem)
+     * copyBreakpoints(dbg, mem)
      *
      * @this {Memory}
-     * @param {Memory|undefined} mem (outgoing Memory block to copy breakpoints from, if any)
      * @param {Debugger} [dbg]
+     * @param {Memory} [mem] (outgoing Memory block to copy breakpoints from, if any)
      */
-    copyBreakpoints: function(mem, dbg) {
+    copyBreakpoints: function(dbg, mem) {
+        this.dbg = dbg;
+        this.cReadBreakpoints = this.cWriteBreakpoints = 0;
         if (mem) {
-            if (dbg) this.dbg = dbg;
             if (mem.cpu) this.cpu = mem.cpu;
             if ((this.cReadBreakpoints = mem.cReadBreakpoints)) {
                 this.setReadAccess(Memory.afnChecked, false);

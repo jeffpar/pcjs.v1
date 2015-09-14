@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.19.5/machine.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.19.6/machine.xsl"?>
 <machine id="deskpro386" class="pc" border="1" pos="center" background="#FAEBD7">
 	<computer id="deskpro386-vga-4096k" name="Compaq DeskPro 386" buswidth="32" state="/devices/pc/machine/compaq/deskpro386/vga/4096kb/state.json"/>
 	<cpu id="cpu386" model="80386" autostart="false"/>
@@ -11,7 +11,7 @@
 	<video ref="/devices/pc/video/ibm/vga/ibm-vga-lockfs.xml"/>
 	<keyboard id="keyboard"/>
 	<fdc ref="/disks/pc/library.xml" automount=''/>
-	<debugger id="debugger" messages="" commands='m int off;m hdc off;print "Use ""bp #0137:00000009"" to debug the next problem"'/>
+	<debugger id="debugger" messages="" commands='m int off;m hdc off'/>
 	<panel ref="/devices/pc/panel/wide386.xml"/>
 	<hdc id="hdcAT" type="at" drives='[{name:"68Mb Hard Disk",type:4,path:"http://static.pcjs.org/devices/pc/machine/compaq/deskpro386/vga/4096kb/WIN95-FBOOT.json"}]'/>
 	<chipset id="chipset" model="deskpro386" floppies="[1200,1200]" monitor="vga"/>

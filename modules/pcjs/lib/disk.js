@@ -265,6 +265,13 @@ Component.subclass(Disk);
  * where offset is relative to the segment's offStart value, and symbol is a string describing the
  * entry.
  *
+ * NOTE: Although aEntries uses a format similar to the Debugger's aOffsetPairs, they are not
+ * interchangeable data structures, because ours is ordered by ordinal, whereas aOffsetPairs is
+ * ordered by offset.  We provide an interface, getModuleInfo(), to the Debugger that converts
+ * our data into an intermediate array, aSymbols, which the Debugger then uses to build aOffsetPairs.
+ * It would be nice to avoid building that intermediate representation, but it's a side-effect of
+ * the Debugger's earlier support for JSON-encoded MAP files.
+ *
  * There will always be an offset at index 0 of an aEntries[] element, but some error or incomplete
  * symbolic information could result in a missing symbol at index 1, because symbol name processing is
  * separate from entry table processing.
@@ -707,8 +714,8 @@ FileInfo.prototype.getSymbol = function(off, fNearest)
                  * To support fNearest, save the entry where (off - entry[0]) yields the smallest positive result.
                  */
                 var cbNearest = off, entryNearest;
-                for (var iEntry in segment.aEntries) {
-                    var entry = segment.aEntries[iEntry];
+                for (var iOrdinal in segment.aEntries) {
+                    var entry = segment.aEntries[iOrdinal];
                     var cb = off - entry[0];
                     if (!cb) {
                         sSymbol = this.sModule + '!' + entry[1];
@@ -1153,7 +1160,7 @@ Disk.prototype.doneLoad = function(sDiskFile, sDiskData, nErrorCode, sDiskPath)
                 this.printMessage('doneLoad("' + sDiskFile + '","' + sDiskPath + '")');
             }
             this.fRemote = true;
-            if (BACKTRACK) this.buildFileTable();
+            if (BACKTRACK || SYMBOLS) this.buildFileTable();
             disk = this;
         } else {
             this.controller.notice('Unable to connect to disk "' + sDiskPath + '" (error ' + nErrorCode + ': ' + sDiskData + ')', fPrintOnly);
@@ -1343,7 +1350,7 @@ Disk.prototype.doneLoad = function(sDiskFile, sDiskData, nErrorCode, sDiskPath)
                 }
                 this.aDiskData = aDiskData;
                 this.dwChecksum = dwChecksum;
-                if (BACKTRACK) this.buildFileTable();
+                if (BACKTRACK || SYMBOLS) this.buildFileTable();
                 disk = this;
             }
         } catch (e) {
@@ -1362,9 +1369,8 @@ Disk.prototype.doneLoad = function(sDiskFile, sDiskData, nErrorCode, sDiskPath)
  *
  * This function builds (or rebuilds) a complete file table from the (first) FAT volume found on the current
  * disk, and then updates all the sector objects to point back to the corresponding file.  Used for BACKTRACK
- * support, and like BACKTRACK support, this is an expensive operation, in terms of both time and memory, so
- * it should only be called when a disk is mounted or has been modified (eg, by applying deltas from a saved
- * machine state).
+ * and SYMBOLS support.  Because this is an expensive operation, in terms of both time and memory, it should
+ * only be called when a disk is mounted or has been modified (eg, by applying deltas from a saved machine state).
  *
  * More recently, the FileInfo objects in the table have been enhanced to include debugging information if
  * the file is an EXE or DLL, which we determine merely by checking the file extension.
@@ -1382,7 +1388,7 @@ Disk.prototype.doneLoad = function(sDiskFile, sDiskData, nErrorCode, sDiskPath)
  */
 Disk.prototype.buildFileTable = function()
 {
-    if (BACKTRACK) {
+    if (BACKTRACK || SYMBOLS) {
 
         var i, off, dir = {}, iSector;
 
@@ -1564,6 +1570,38 @@ Disk.prototype.buildFileTable = function()
 };
 
 /**
+ * getModuleInfo(sModule, nSegment)
+ *
+ * If the given module and segment number is found, we return an Array of symbol offsets, indexed by symbol name.
+ *
+ * @this {Disk}
+ * @param {string} sModule
+ * @param {number} nSegment
+ * @return {Array}
+ */
+Disk.prototype.getModuleInfo = function(sModule, nSegment)
+{
+    var aSymbols = [];
+    if (SYMBOLS && this.aFileTable) {
+        for (var iFile = 0; iFile < this.aFileTable.length; iFile++) {
+            var file = this.aFileTable[iFile];
+            if (file.sModule != sModule) continue;
+            var segment = file.aSegments[nSegment];
+            if (!segment) continue;
+            for (var iOrdinal in segment.aEntries) {
+                var entry = segment.aEntries[iOrdinal];
+                /*
+                 * entry[1] is the symbol name, which becomes the index, and entry[0] is the offset.
+                 */
+                aSymbols[entry[1]] = entry[0];
+            }
+            break;
+        }
+    }
+    return aSymbols;
+};
+
+/**
  * getSymbolInfo(sSymbol)
  *
  * For all whole or partial symbol matches, return them in an Array of entries:
@@ -1579,14 +1617,14 @@ Disk.prototype.buildFileTable = function()
 Disk.prototype.getSymbolInfo = function(sSymbol)
 {
     var aInfo = [];
-    if (this.aFileTable) {
+    if (SYMBOLS && this.aFileTable) {
         var sSymbolUpper = sSymbol.toUpperCase();
         for (var iFile = 0; iFile < this.aFileTable.length; iFile++) {
             var file = this.aFileTable[iFile];
             for (var iSegment in file.aSegments) {
                 var segment = file.aSegments[iSegment];
-                for (var iEntry in segment.aEntries) {
-                    var entry = segment.aEntries[iEntry];
+                for (var iOrdinal in segment.aEntries) {
+                    var entry = segment.aEntries[iOrdinal];
                     if (entry[1] && entry[1].indexOf(sSymbolUpper) >= 0) {
                         aInfo.push([entry[1], file.sName, iSegment, entry[0], segment.offEnd - segment.offStart]);
                     }
@@ -2641,9 +2679,9 @@ Disk.prototype.restore = function(deltas)
             this.printMessage('restore("' + this.sDiskName + '"): restored ' + nChanges + ' change(s)');
         }
         /*
-         * Last but not least, rebuild the disk's file table if BACKTRACK support is enabled.
+         * Last but not least, rebuild the disk's file table if BACKTRACK or SYMBOLS support is enabled.
          */
-        if (BACKTRACK) this.buildFileTable();
+        if (BACKTRACK || SYMBOLS) this.buildFileTable();
     }
     return nChanges;
 };

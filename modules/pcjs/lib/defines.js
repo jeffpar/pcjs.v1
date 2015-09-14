@@ -89,8 +89,19 @@ var TYPEDARRAYS = (typeof ArrayBuffer !== 'undefined');
  * match the DEBUGGER setting -- unless it slows down machines using the built-in Debugger too much, in which case
  * we'll have to rethink that choice OR provide a Debugger command that dynamically enables/disables as much of
  * the backtracking support as possible.
+ *
+ * TODO: BACKTRACK support is currently completely disabled until we have a chance to investigate the problem
+ * discussed in Bus.addBackTrackObject().
  */
-var BACKTRACK = !COMPILED;
+var BACKTRACK = false;
+
+/**
+ * @define {boolean}
+ *
+ * SYMBOLS enables automatic symbol generation from known DLL, EXE and VXD file formats.  It's currently
+ * enabled whenever DEBUGGER support is enabled.
+ */
+var SYMBOLS = DEBUGGER;
 
 /**
  * @define {boolean}
@@ -150,6 +161,7 @@ if (typeof module !== 'undefined') {
     global.FATARRAYS = FATARRAYS;
     global.TYPEDARRAYS = TYPEDARRAYS;
     global.BACKTRACK = BACKTRACK;
+    global.SYMBOLS = SYMBOLS;
     global.SAMPLER = SAMPLER;
     global.BUGS_8086 = BUGS_8086;
     global.I386 = I386;

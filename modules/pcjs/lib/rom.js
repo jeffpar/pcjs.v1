@@ -182,7 +182,7 @@ ROM.prototype.powerUp = function(data, fRepower)
 {
     if (this.aSymbols) {
         if (this.dbg) {
-            this.dbg.addSymbols(this.addrROM >>> 4, this.addrROM, this.sizeROM, this.aSymbols);
+            this.dbg.addSymbols(this.id, 0, this.addrROM >>> 4, 0, this.addrROM, this.sizeROM, this.aSymbols);
         }
         /*
          * Our only role in the handling of symbols is to hand them off to the Debugger at our

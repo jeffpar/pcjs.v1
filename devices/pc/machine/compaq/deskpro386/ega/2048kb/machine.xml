@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.19.5/machine.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.19.6/machine.xsl"?>
 <machine id="deskpro386" class="pc" border="1" pos="center" background="#FAEBD7">
 	<computer id="deskpro386-ega-2048k" name="Compaq DeskPro 386" buswidth="32"/>
 	<cpu id="cpu386" model="80386" autostart="false"/>

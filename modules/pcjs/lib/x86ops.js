@@ -143,7 +143,7 @@ X86.opPUSHES = function PUSHES()
 X86.opPOPES = function POPES()
 {
     /*
-     * As discussed in fnRETF(), we temporarily set opLSP around operations that fnFault() may need to restart.
+     * Any operation that modifies the stack before loading a new segment must snapshot regLSP first.
      */
     this.opLSP = this.regLSP;
     this.setES(this.popWord());
@@ -240,6 +240,9 @@ X86.opPUSHCS = function PUSHCS()
  */
 X86.opPOPCS = function POPCS()
 {
+    /*
+     * Because this is an 8088-only operation, we don't have to worry about taking a snapshot of regLSP first.
+     */
     this.setCS(this.popWord());
     this.nStepCycles -= this.cycleCounts.nOpCyclesPopReg;
 };
@@ -344,7 +347,7 @@ X86.opPUSHSS = function PUSHSS()
 X86.opPOPSS = function POPSS()
 {
     /*
-     * As discussed in fnRETF(), we temporarily set opLSP around operations that fnFault() may need to restart.
+     * Any operation that modifies the stack before loading a new segment must snapshot regLSP first.
      */
     this.opLSP = this.regLSP;
     this.setSS(this.popWord());
@@ -442,7 +445,7 @@ X86.opPUSHDS = function PUSHDS()
 X86.opPOPDS = function POPDS()
 {
     /*
-     * As discussed in fnRETF(), we temporarily set opLSP around operations that fnFault() may need to restart.
+     * Any operation that modifies the stack before loading a new segment must snapshot regLSP first.
      */
     this.opLSP = this.regLSP;
     this.setDS(this.popWord());
@@ -1270,6 +1273,11 @@ X86.opPOPDI = function POPDI()
 X86.opPUSHA = function PUSHA()
 {
     /*
+     * Any operation that performs multiple stack modifications must snapshot regLSP first.
+     */
+    this.opLSP = this.regLSP;
+
+    /*
      * TODO: regLSP needs to be pre-bounds-checked against regLSPLimitLow
      */
     var temp = this.getSP() & this.maskData;
@@ -1303,6 +1311,8 @@ X86.opPUSHA = function PUSHA()
     }
     this.pushWord(this.regEDI & this.maskData);
     this.nStepCycles -= this.cycleCounts.nOpCyclesPushAll;
+
+    this.opLSP = X86.ADDR_INVALID;
 };
 
 /**
@@ -1312,6 +1322,11 @@ X86.opPUSHA = function PUSHA()
  */
 X86.opPOPA = function POPA()
 {
+    /*
+     * Any operation that performs multiple stack modifications must snapshot regLSP first.
+     */
+    this.opLSP = this.regLSP;
+
     this.regEDI = (this.regEDI & ~this.maskData) | this.popWord();
     if (BACKTRACK) {
         this.backTrack.btiDILo = this.backTrack.btiMem0; this.backTrack.btiDIHi = this.backTrack.btiMem1;
@@ -1346,6 +1361,8 @@ X86.opPOPA = function POPA()
         this.backTrack.btiAL = this.backTrack.btiMem0; this.backTrack.btiAH = this.backTrack.btiMem1;
     }
     this.nStepCycles -= this.cycleCounts.nOpCyclesPopAll;
+
+    this.opLSP = X86.ADDR_INVALID;
 };
 
 /**
@@ -3427,9 +3444,6 @@ X86.opRETn = function RETn()
 {
     var n = this.getIPShort();
     var newIP = this.popWord();
-
-    // if (DEBUG) this.printMessage(" returning to " + str.toHex(this.segCS.sel, 4) + ':' + str.toHex(newIP, this.sizeData << 1), this.bitsMessage, true);
-
     this.setIP(newIP);
     if (n) this.setSP(this.getSP() + n);            // TODO: optimize
     this.nStepCycles -= this.cycleCounts.nOpCyclesRetn;
@@ -3443,9 +3457,6 @@ X86.opRETn = function RETn()
 X86.opRET = function RET()
 {
     var newIP = this.popWord();
-
-    // if (DEBUG) this.printMessage(" returning to " + str.toHex(this.segCS.sel, 4) + ':' + str.toHex(newIP, this.sizeData << 1), this.bitsMessage, true);
-
     this.setIP(newIP);
     this.nStepCycles -= this.cycleCounts.nOpCyclesRet;
 };
@@ -3509,6 +3520,11 @@ X86.opMOVw = function MOVw()
  */
 X86.opENTER = function ENTER()
 {
+    /*
+     * Any operation that performs multiple stack modifications must snapshot regLSP first.
+     */
+    this.opLSP = this.regLSP;
+
     var wLocal = this.getIPShort();
     var bLevel = this.getIPByte() & 0x1f;
     /*
@@ -3528,6 +3544,8 @@ X86.opENTER = function ENTER()
     }
     this.regEBP = (this.regEBP & ~this.maskData) | wFrame;
     this.setSP((this.getSP() & ~this.segSS.maskAddr) | ((this.getSP() - wLocal) & this.segSS.maskAddr));
+
+    this.opLSP = X86.ADDR_INVALID;
 };
 
 /**
@@ -3537,12 +3555,20 @@ X86.opENTER = function ENTER()
  */
 X86.opLEAVE = function LEAVE()
 {
+    /*
+     * Any operation that performs multiple stack modifications must snapshot regLSP first.
+     */
+    this.opLSP = this.regLSP;
+
     this.setSP((this.getSP() & ~this.segSS.maskAddr) | (this.regEBP & this.segSS.maskAddr));
+
     this.regEBP = (this.regEBP & ~this.maskData) | (this.popWord() & this.maskData);
     /*
      * NOTE: 5 is the cycle time for the 80286; the 80186/80188 has a cycle time of 8.  TODO: Fix this someday.
      */
     this.nStepCycles -= 5;
+
+    this.opLSP = X86.ADDR_INVALID;
 };
 
 /**
@@ -3965,9 +3991,6 @@ X86.opCALL = function CALL()
     var disp = this.getIPWord();
     var oldIP = this.getIP();
     var newIP = oldIP + disp;
-
-    // if (DEBUG) this.printMessage("calling " + str.toHex(newIP, this.sizeData << 1), this.bitsMessage, true);
-
     this.pushWord(oldIP);
     this.setIP(newIP);
     this.nStepCycles -= this.cycleCounts.nOpCyclesCall;

@@ -681,6 +681,81 @@ X86CPU.prototype.setAddressMask = function(nBusMask)
 };
 
 /**
+ * addMemBreak(addr, fWrite, fLinear)
+ *
+ * NOTE: addMemBreak() could be merged with addMemCheck(), but the new merged interface would
+ * have to provide one additional parameter indicating whether the Debugger or the CPU is the client.
+ *
+ * @this {X86CPU}
+ * @param {number} addr
+ * @param {boolean} fWrite is true for a memory write breakpoint, false for a memory read breakpoint
+ * @param {boolean} [fLinear] (true for linear breakpoint, false for physical)
+ */
+X86CPU.prototype.addMemBreak = function(addr, fWrite, fLinear)
+{
+    if (DEBUGGER) {
+        var iBlock = addr >>> this.nBlockShift;
+        var aBlocks = (fLinear? this.aMemBlocks : this.aBusBlocks);
+        aBlocks[iBlock].addBreakpoint(addr & this.nBlockLimit, fWrite);
+    }
+};
+
+/**
+ * removeMemBreak(addr, fWrite, fLinear)
+ *
+ * NOTE: removeMemBreak() could be merged with removeMemCheck(), but the new merged interface would
+ * have to provide one additional parameter indicating whether the Debugger or the CPU is the client.
+ *
+ * @this {X86CPU}
+ * @param {number} addr
+ * @param {boolean} fWrite is true for a memory write breakpoint, false for a memory read breakpoint
+ * @param {boolean} [fLinear] (true for linear breakpoint, false for physical)
+ */
+X86CPU.prototype.removeMemBreak = function(addr, fWrite, fLinear)
+{
+    if (DEBUGGER) {
+        var iBlock = addr >>> this.nBlockShift;
+        var aBlocks = (fLinear? this.aMemBlocks : this.aBusBlocks);
+        aBlocks[iBlock].removeBreakpoint(addr & this.nBlockLimit, fWrite);
+    }
+};
+
+/**
+ * addMemCheck(addr, fWrite)
+ *
+ * These functions provide Debug register functionality to the CPU by leveraging the same Memory block-based
+ * breakpoint support originally created for our built-in Debugger.  Only minimal changes were required to the
+ * Memory component, by adding additional checkMemoryException() call-outs from the "checked" Memory access
+ * functions.
+ *
+ * Note that those call-outs occur only AFTER our own Debugger (if present) has checked the address and has
+ * passed on it, because we want our own Debugger's breakpoints to take precedence over any breakpoints that
+ * the emulated machine may have enabled.
+ *
+ * @this {X86CPU}
+ * @param {number} addr
+ * @param {boolean} fWrite is true for a memory write check, false for a memory read check
+ */
+X86CPU.prototype.addMemCheck = function(addr, fWrite)
+{
+    var iBlock = addr >>> this.nBlockShift;
+    this.aMemBlocks[iBlock].addBreakpoint(addr & this.nBlockLimit, fWrite, this);
+};
+
+/**
+ * removeMemCheck(addr, fWrite)
+ *
+ * @this {X86CPU}
+ * @param {number} addr
+ * @param {boolean} fWrite is true for a memory write check, false for a memory read check
+ */
+X86CPU.prototype.removeMemCheck = function(addr, fWrite)
+{
+    var iBlock = addr >>> this.nBlockShift;
+    this.aMemBlocks[iBlock].removeBreakpoint(addr & this.nBlockLimit, fWrite);
+};
+
+/**
  * enablePageBlocks()
  *
  * Whenever the CPU turns on paging and/or updates CR3, this function is called to update our copy
@@ -705,7 +780,28 @@ X86CPU.prototype.enablePageBlocks = function()
     }
     if (this.aMemBlocks === this.aBusBlocks) {
         this.aMemBlocks = new Array(this.nBlockTotal);
+        /*
+         * TODO: Currently we allocate only one UNPAGED block for the entire linear address space;
+         * only when a block is touched and becomes PAGED do we allocate a dedicated Memory block
+         * for that slot.  One potential downside to using a single UNPAGED block, however, is that
+         * it will accumulate all breakpoints for all UNPAGED blocks, requiring copyBreakpoints() to
+         * do extra work to figure out which breakpoints should be copied (ie, removed) from the
+         * outgoing block -- which it can't currently do, because blocks only keep track of the total
+         * number of breakpoints, not the actual breakpoint addresses.
+         *
+         * So, Memory blocks either need to start maintaining their own breakpoint address lists,
+         * or we need to allocate separate (empty) UNPAGED blocks for every slot.  I've not tackled
+         * this yet, because it's largely just a debugging issue.
+         *
+         * Notice that when we call copyBreakpoints() here, it's merely to initialize the new block;
+         * we make no attempt to copy any breakpoints from physical blocks to linear blocks, although
+         * perhaps we should.  The plan for our Debugger is to maintain separate physical and linear
+         * breakpoint address lists, but what about CPU Debug registers?  If the CPU sets the Debug
+         * registers, then enables paging, do all the previous Debug register addresses automatically
+         * become linear addresses?  I'm guessing they do.
+         */
         this.blockUnpaged = new Memory(null, 0, 0, Memory.TYPE.UNPAGED, null, this);
+        this.blockUnpaged.copyBreakpoints(this.dbg);
         for (var iBlock = 0; iBlock < this.nBlockTotal; iBlock++) {
             this.aMemBlocks[iBlock] = this.blockUnpaged;
         }
@@ -803,6 +899,9 @@ X86CPU.prototype.mapPageBlock = function(addr, fWrite, fSuppress)
     var blockPhys = this.aBusBlocks[(addrPhys & this.nBusMask) >>> this.nBlockShift];
     if (fSuppress) return blockPhys;
 
+    var iBlock = addr >>> this.nBlockShift;
+    var block = this.aMemBlocks[iBlock];
+
     /*
      * So we have the block containing the physical memory corresponding to the given linear address.
      *
@@ -811,9 +910,10 @@ X86CPU.prototype.mapPageBlock = function(addr, fWrite, fSuppress)
     var addrPage = addr & ~X86.LADDR.OFFSET;
     var blockPage = new Memory(addrPage, 0, 0, Memory.TYPE.PAGED);
     blockPage.setPhysBlock(blockPhys, blockPDE, offPDE, blockPTE, offPTE);
+    blockPage.copyBreakpoints(this.dbg, block);
 
-    var iBlock = addr >>> this.nBlockShift;
     this.aMemBlocks[iBlock] = blockPage;
+
     this.aBlocksPaged.push(iBlock);
     return blockPage;
 };
@@ -1714,40 +1814,6 @@ X86CPU.prototype.checkIntReturn = function(addr)
         fn(--this.cIntReturn);
         delete this.aIntReturn[addr];
     }
-};
-
-/**
- * addMemCheck(addr, fWrite)
- *
- * These functions provide Debug register functionality by leveraging the same Memory block-based breakpoint
- * support originally created for our built-in Debugger.  Only minimal changes were required to the Memory
- * component, by adding additional checkMemoryException() call-outs from the "checked" Memory access functions.
- *
- * Note that those call-outs occur only AFTER our own Debugger (if present) has checked the address and has
- * passed on it, because we want our own Debugger's breakpoints to take precedence over any breakpoints that
- * the emulated machine may have enabled.
- *
- * @this {X86CPU}
- * @param {number} addr
- * @param {boolean} fWrite is true for a memory write check, false for a memory read check
- */
-X86CPU.prototype.addMemCheck = function(addr, fWrite)
-{
-    var iBlock = addr >>> this.nBlockShift;
-    this.aMemBlocks[iBlock].addBreakpoint(addr & this.nBlockLimit, fWrite, this);
-};
-
-/**
- * removeMemCheck(addr, fWrite)
- *
- * @this {X86CPU}
- * @param {number} addr
- * @param {boolean} fWrite is true for a memory write check, false for a memory read check
- */
-X86CPU.prototype.removeMemCheck = function(addr, fWrite)
-{
-    var iBlock = addr >>> this.nBlockShift;
-    this.aMemBlocks[iBlock].removeBreakpoint(addr & this.nBlockLimit, fWrite);
 };
 
 /**
@@ -3938,7 +4004,9 @@ X86CPU.prototype.getSIBAddr = function(mod)
 X86CPU.prototype.popWord = function()
 {
     var w = this.getWord(this.regLSP);
+
     this.regLSP = (this.regLSP + (I386? this.sizeData : 2))|0;
+
     /*
      * Properly comparing regLSP to regLSPLimit would normally require coercing both to unsigned
      * (ie, floating-point) values.  But instead, we do a subtraction, (regLSPLimit - regLSP), and
@@ -3974,29 +4042,39 @@ X86CPU.prototype.popWord = function()
 X86CPU.prototype.pushData = function(d, size)
 {
     this.assert(size == 2 || size == 4);
-    this.regLSP = (this.regLSP - size)|0;
+
+    var regLSP = (this.regLSP - size)|0;
+
     /*
      * Properly comparing regLSP to regLSPLimitLow would normally require coercing both to unsigned
      * (ie, floating-point) values.  But instead, we do a subtraction, (regLSP - regLSPLimitLow), and
      * if the result is negative, we need only be concerned if the signs of both numbers are the same
      * (ie, the sign of their XOR'ed union is positive).
      */
-    if (((this.regLSP - this.regLSPLimitLow)|0) < 0 && (this.regLSPLimitLow ^ this.regLSP) >= 0) {
+    if (((regLSP - this.regLSPLimitLow)|0) < 0 && (this.regLSPLimitLow ^ regLSP) >= 0) {
         /*
          * There's no such thing as an SS fault on the 8086/8088, and I'm assuming that, on newer
          * processors, when the stack segment limit is set to the maximum, it's OK for the stack to wrap.
          */
         if (this.model <= X86.MODEL_8088 || !this.segSS.fExpDown && this.segSS.limit == this.segSS.maskAddr || this.segSS.fExpDown && !this.segSS.limit) {
-            this.setSP((this.regLSP - this.segSS.base) & this.segSS.maskAddr);
+            this.setSP((regLSP - this.segSS.base) & this.segSS.maskAddr);
+            regLSP = this.regLSP;
         } else {
             X86.fnFault.call(this, X86.EXCEPTION.SS_FAULT, 0);
         }
     }
+
     if (size == 2) {
-        this.setShort(this.regLSP, d);
+        this.setShort(regLSP, d);
     } else {
-        this.setLong(this.regLSP, d);
+        this.setLong(regLSP, d);
     }
+
+    /*
+     * We update this.regLSP at the end to make life simpler for opcode handlers that perform only one
+     * pushWord() operation, relieving them from having to snapshot this.regLSP into this.opLSP needlessly.
+     */
+    this.regLSP = regLSP;
 };
 
 /**
@@ -4017,25 +4095,34 @@ X86CPU.prototype.pushWord = function(w)
      * setWord() calls setShort() or setLong() as appropriate, and setShort() truncates incoming values, so the fact
      * that any incoming signed values will not be truncated to 16 bits should not be a concern.
      */
-    this.regLSP = (this.regLSP - (I386? this.sizeData : 2))|0;
+    var regLSP = (this.regLSP - (I386? this.sizeData : 2))|0;
+
     /*
      * Properly comparing regLSP to regLSPLimitLow would normally require coercing both to unsigned
      * (ie, floating-point) values.  But instead, we do a subtraction, (regLSP - regLSPLimitLow), and
      * if the result is negative, we need only be concerned if the signs of both numbers are the same
      * (ie, the sign of their XOR'ed union is positive).
      */
-    if (((this.regLSP - this.regLSPLimitLow)|0) < 0 && (this.regLSPLimitLow ^ this.regLSP) >= 0) {
+    if (((regLSP - this.regLSPLimitLow)|0) < 0 && (this.regLSPLimitLow ^ regLSP) >= 0) {
         /*
          * There's no such thing as an SS fault on the 8086/8088, and I'm assuming that, on newer
          * processors, when the stack segment limit is set to the maximum, it's OK for the stack to wrap.
          */
         if (this.model <= X86.MODEL_8088 || !this.segSS.fExpDown && this.segSS.limit == this.segSS.maskAddr || this.segSS.fExpDown && !this.segSS.limit) {
-            this.setSP((this.regLSP - this.segSS.base) & this.segSS.maskAddr);
+            this.setSP((regLSP - this.segSS.base) & this.segSS.maskAddr);
+            regLSP = this.regLSP;
         } else {
             X86.fnFault.call(this, X86.EXCEPTION.SS_FAULT, 0);
         }
     }
-    this.setWord(this.regLSP, w);
+
+    this.setWord(regLSP, w);
+
+    /*
+     * We update this.regLSP at the end to make life simpler for opcode handlers that perform only one
+     * pushWord() operation, relieving them from having to snapshot this.regLSP into this.opLSP needlessly.
+     */
+    this.regLSP = regLSP;
 };
 
 /**

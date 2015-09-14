@@ -155,14 +155,18 @@ function Debugger(parmsDbg)
         this.dbgAddrAssemble = this.newAddr();
 
         /*
-         * aSymbolTable is an array of 5-element arrays, one per ROM or other chunk of address space.
-         * Each 5-element arrays contains:
+         * aSymbolTable is an array of SymbolTable objects, one per ROM or other chunk of address space.
          *
-         *      [0]: sel
-         *      [1]: addr
-         *      [2]: len
-         *      [3]: aSymbols
-         *      [4]: aOffsetPairs
+         * Each SymbolTable object contains the following properties:
+         *
+         *      sModule
+         *      nSegment
+         *      sel
+         *      off
+         *      addr (physical address, if any; eg, if symbols are for a ROM)
+         *      len
+         *      aSymbols
+         *      aOffsetPairs
          *
          * See addSymbols() for more details, since that's how callers add sets of symbols to the table.
          */
@@ -1288,28 +1292,47 @@ if (DEBUGGER) {
 
     if (Interrupts.WINDBG.ENABLED || Interrupts.WINDBGRM.ENABLED) {
         /**
-         * addSegmentInfo(dbgAddr, nSeg, sel, fCode, fPrint)
+         * addSegmentInfo(dbgAddr, nSegment, sel, fCode, fPrint)
          *
          * @this {Debugger}
          * @param {DbgAddr} dbgAddr (address of module name)
-         * @param {number} nSeg (logical segment number)
+         * @param {number} nSegment (logical segment number)
          * @param {number} sel (current selector)
          * @param {boolean} fCode (true if code segment, false if data segment)
          * @param {boolean} [fPrint]
          */
-        Debugger.prototype.addSegmentInfo = function(dbgAddr, nSeg, sel, fCode, fPrint)
+        Debugger.prototype.addSegmentInfo = function(dbgAddr, nSegment, sel, fCode, fPrint)
         {
             var sModule = this.getSZ(dbgAddr);
             var seg = this.getSegment(sel);
             var len = seg? seg.limit + 1 : 0;
-            var sSection = (fCode? "_CODE" : "_DATA") + str.toHex(nSeg, 2);
+            var sSection = (fCode? "_CODE" : "_DATA") + str.toHex(nSegment, 2);
             if (fPrint) {
-                this.println(sModule + "!undefined " + (fCode? "code" : "data") + '(' + str.toHex(nSeg, 4) + ")=#" + str.toHex(sel, 4) + " len " + str.toHex(len));
+                this.println(sModule + ' ' + (fCode? "code" : "data") + '(' + str.toHex(nSegment, 4) + ")=#" + str.toHex(sel, 4) + " len " + str.toHex(len));
             }
-            var aSymbols = {};
             var off = 0;
+            var aSymbols = this.findModuleInfo(sModule, nSegment);
             aSymbols[sModule + sSection] = off;
-            this.addSymbols(sel, off, len, aSymbols);
+            this.addSymbols(sModule, nSegment, sel, off, null, len, aSymbols);
+        };
+
+        /**
+         * removeSegmentInfo(sel, fPrint)
+         *
+         * @this {Debugger}
+         * @param {number} sel
+         * @param {boolean} [fPrint]
+         */
+        Debugger.prototype.removeSegmentInfo = function(sel, fPrint)
+        {
+            var sModuleRemoved = this.removeSymbols(null, sel);
+            if (fPrint) {
+                if (sModuleRemoved) {
+                    this.println(sModuleRemoved + " #" + str.toHex(sel, 4) + " removed");
+                } else {
+                    this.println("unable to remove module for segment #" + str.toHex(sel, 4));
+                }
+            }
         };
 
         /**
@@ -1320,8 +1343,8 @@ if (DEBUGGER) {
          *      DD_actual_sel   dw  ?   ; actual selector value
          *      DD_base         dd  ?   ; linear address offset for start of segment
          *      DD_length       dd  ?   ; actual length of segment
-         *      DD_name         df  ?   ; 16:32 ptr to null terminated device name
-         *      DD_sym_name     df  ?   ; 16:32 ptr to null terminated symbolic module name (i.e. Win386)
+         *      DD_name         df  ?   ; 16:32 ptr to null terminated module name
+         *      DD_sym_name     df  ?   ; 16:32 ptr to null terminated parent name (eg, "DOS386")
          *      DD_alias_sel    dw  ?   ; alias selector value (0 = none)
          *
          * @this {Debugger}
@@ -1331,34 +1354,63 @@ if (DEBUGGER) {
          */
         Debugger.prototype.addSectionInfo = function(dbgAddr, fCode, fPrint)
         {
-            var nSeg = this.getShort(dbgAddr, 2);
+            var nSegment = this.getShort(dbgAddr, 2);
             var sel = this.getShort(dbgAddr, 2);
             var off = this.getLong(dbgAddr, 4);
             var len = this.getLong(dbgAddr, 4);
-            var dbgAddrDevice = this.newAddr(this.getLong(dbgAddr, 4), this.getShort(dbgAddr, 2));
             var dbgAddrModule = this.newAddr(this.getLong(dbgAddr, 4), this.getShort(dbgAddr, 2));
+            var dbgAddrParent = this.newAddr(this.getLong(dbgAddr, 4), this.getShort(dbgAddr, 2));
             // sel = this.getShort(dbgAddr, 2) || sel;
+            var sParent = this.getSZ(dbgAddrParent).toUpperCase();
             var sModule = this.getSZ(dbgAddrModule).toUpperCase();
-            var sDevice = this.getSZ(dbgAddrDevice).toUpperCase();
-            var sSection = (fCode? "_CODE" : "_DATA") + str.toHex(nSeg, 2);
+            if (sParent == sModule) {
+                sParent = "";
+            } else {
+                sParent += '!';
+            }
+            var sSection = (fCode? "_CODE" : "_DATA") + str.toHex(nSegment, 2);
             if (fPrint) {
                 /*
                  * Mimics WDEB386 output, except that WDEB386 only displays a linear address, omitting the selector.
                  */
-                this.println(sModule + '!' + sDevice + "!undefined " + (fCode? "code" : "data") + '(' + str.toHex(nSeg, 4) + ")=" + str.toHex(sel, 4) + ':' + str.toHex(off) + " len " + str.toHex(len));
+                this.println(sParent + sModule + ' ' + (fCode? "code" : "data") + '(' + str.toHex(nSegment, 4) + ")=" + str.toHex(sel, 4) + ':' + str.toHex(off) + " len " + str.toHex(len));
             }
-            var aSymbols = {};
-            aSymbols[sDevice + sSection] = off;
-            this.addSymbols(sel, off, len, aSymbols);
+            /*
+             * TODO: Add support for 32-bit symbols; findModuleInfo() relies on Disk.getModuleInfo(), and the Disk
+             * component doesn't yet know how to parse 32-bit executables.
+             */
+            var aSymbols = this.findModuleInfo(sModule, nSegment);
+            aSymbols[sModule + sSection] = off;
+            this.addSymbols(sModule, nSegment, sel, off, null, len, aSymbols);
+        };
+
+        /**
+         * removeSectionInfo(nSegment, dbgAddr, fPrint)
+         *
+         * @this {Debugger}
+         * @param {DbgAddr} dbgAddr (address of module)
+         * @param {boolean} [fPrint]
+         */
+        Debugger.prototype.removeSectionInfo = function(nSegment, dbgAddr, fPrint)
+        {
+            var sModule = this.getSZ(dbgAddr).toUpperCase();
+            var sModuleRemoved = this.removeSymbols(sModule, nSegment);
+            if (fPrint) {
+                if (sModuleRemoved) {
+                    this.println(sModule + ' ' + str.toHex(nSegment, 4) + " removed");
+                } else {
+                    this.println("unable to remove " + sModule + " for section " + str.toHex(nSegment, 4));
+                }
+            }
         };
 
         /**
          * intWindowsCallBack()
          *
-         * This intercepts calls to Windows callback addresses, which use INT 0x30 (aka Transfer Space Fault).
+         * This intercepts calls to Windows callback addresses, which use INT 0x30 (aka Transfer Space Faults).
          *
-         * We're only interested in one particular callback: the one specifying VW32_Int41Dispatch (0x002A002A)
-         * in EAX.
+         * We're only interested in one particular callback: the VW32_Int41Dispatch (0x002A002A) that KERNEL32
+         * issues as 32-bit executable sections are loaded.
          *
          * At the time that INT 0x30 occurs, a far 32-bit call has been made, preceded by a near 32-bit call,
          * preceded by a 32-bit push of the Windows Debugger function # that would normally be in EAX if this had
@@ -1369,7 +1421,12 @@ if (DEBUGGER) {
          * instruction following an INT 0x30; in fact, execution doesn't even continue after the far 32-bit call
          * (even though the kernel places a "RET 4" after that call).  So, rather than recreate all that automatic
          * address popping, we let the system do it for us, since it's designed to work whether a debugger (eg,
-         * WDEB386's Debug VXD) is installed or not.
+         * WDEB386's DEBUG VxD) is installed or not.
+         *
+         * TODO: Consider "consuming" all VW32_Int41Dispatch callbacks, because the Windows 95 kernel goes to
+         * great effort to pass those requests on to the DEBUG VxD, which end up going nowhere when the VxD isn't
+         * loaded (to load it, you must either run WDEB386.EXE or install it via your SYSTEM.INI).  Regrettably,
+         * Windows 95 assumes that if WDEB386 support is present, then a DEBUG VxD must be present as well.
          *
          * @this {Debugger}
          * @param {number} addr
@@ -1387,7 +1444,7 @@ if (DEBUGGER) {
                 var EAX = this.getLong(dbgAddr);
 
                 switch(EAX) {
-                case Interrupts.WINDBG.LOAD_SEG32:
+                case Interrupts.WINDBG.LOADSEG32:
                     /*
                      *  SI == segment type:
                      *      0x0     code selector
@@ -1462,14 +1519,60 @@ if (DEBUGGER) {
             case Interrupts.WINDBG.IS_LOADED:
                 if (this.fWinDbg) {
                     cpu.regEAX = (cpu.regEAX & ~0xffff) | Interrupts.WINDBG.LOADED;
+                    this.println("INT 0x41 handling enabled");
                 }
                 break;
 
-            case Interrupts.WINDBG.LOAD_SEG:
+            case Interrupts.WINDBG.LOADSEG:
                 this.addSegmentInfo(this.newAddr(DI, ES), BX+1, CX, !(SI & 0x1), this.fWinDbg);
                 break;
 
-            case Interrupts.WINDBG.LOAD_SEG32:
+            case Interrupts.WINDBG.FREESEG:
+                this.removeSegmentInfo(BX);
+                break;
+
+            case Interrupts.WINDBG.KRNLVARS:
+                /*
+				 *  BX = version number of this data (0x3A0)
+				 *  DX:CX points to:
+				 *      WORD    hGlobalHeap     ****
+				 *      WORD    pGlobalHeap     ****
+				 *      WORD    hExeHead        ****
+				 *      WORD    hExeSweep
+				 *      WORD    topPDB
+				 *      WORD    headPDB
+				 *      WORD    topsizePDB
+				 *      WORD    headTDB         ****
+				 *      WORD    curTDB          ****
+				 *      WORD    loadTDB
+				 *      WORD    LockTDB
+				 *      WORD    SelTableLen     ****
+				 *      DWORD   SelTableStart   ****
+                 */
+                break;
+
+            case Interrupts.WINDBG.RELSEG:
+            case Interrupts.WINDBG.LOADDLL:
+            case Interrupts.WINDBG.DELMODULE:
+                /*
+                 * TODO: Figure out what to do with these notifications, if anything
+                 */
+                break;
+
+            case Interrupts.WINDBG.REGDOTCMD:
+            case Interrupts.WINDBG.CONDBP:
+            case Interrupts.WINDBG.LOADHIGH:
+                break;
+
+            case Interrupts.WINDBG.GETSYMBOL:
+                if (this.fWinDbg) cpu.regEAX = (cpu.regEAX & ~0xffff)|1;        // AX == 1 means not found
+                break;
+
+            case Interrupts.WINDBG.CHECKFAULT:
+                if (this.fWinDbg) cpu.regEAX = (cpu.regEAX & ~0xffff)|0;        // AX == 0 means handle fault normally
+                break;
+
+            case Interrupts.WINDBG.LOADSEG32:
                 /*
                  *  SI == segment type:
                  *      0x0     code selector
@@ -1479,8 +1582,16 @@ if (DEBUGGER) {
                 this.addSectionInfo(this.newAddr(cpu.regEBX, DX), !SI, this.fWinDbg);
                 break;
 
+            case Interrupts.WINDBG.FREESEG32:
+                /*
+                 *  BX == segment number
+                 *  DX:EDI -> module name
+                 */
+                this.removeSectionInfo(BX, this.newAddr(cpu.regEDI, DX));
+                break;
+
             default:
-                if (MAXDEBUG && this.fWinDbg) {
+                if (DEBUG && this.fWinDbg) {
                     this.println("INT 0x41: " + str.toHexWord(AX));
                 }
                 break;
@@ -1506,6 +1617,9 @@ if (DEBUGGER) {
             var cpu = this.cpu;
             var AL = cpu.regEAX & 0xff;
             var AH = (cpu.regEAX >> 8) & 0xff;
+            var BX = cpu.regEBX & 0xffff;
+            var CX = cpu.regECX & 0xffff;
+            var DX = cpu.regEDX & 0xffff;
             var DI = cpu.regEDI & 0xffff;
             var ES = cpu.segES.sel;
 
@@ -1573,13 +1687,25 @@ if (DEBUGGER) {
                 }
                 break;
 
-            case Interrupts.WINDBGRM.LOAD_SEG:
+            case Interrupts.WINDBGRM.FREESEG:
+                this.removeSegmentInfo(BX);
+                break;
+
+            case Interrupts.WINDBGRM.REMOVESEGS:
+                /*
+                 * TODO: This probably just signals the end of module loading; nothing is required, but we should
+                 * clean up whatever we can....
+                 */
+                break;
+
+            case Interrupts.WINDBGRM.LOADSEG:
                 if (AL == 0x20) {
                     /*
                      *  Real-mode EXE
                      *  CX == paragraph
                      *  ES:DI -> module name
                      */
+                    this.addSegmentInfo(this.newAddr(DI, ES), 0, CX, true, this.fWinDbgRM);
                 }
                 else if (AL < 0x80) {
                     /*
@@ -1595,6 +1721,7 @@ if (DEBUGGER) {
                      *  DX == actual selector (if 0x40 or 0x41)
                      *  ES:DI -> module name
                      */
+                    this.addSegmentInfo(this.newAddr(DI, ES), BX+1, (AL & 0x40)? DX : CX, !(AL & 0x1), this.fWinDbgRM);
                 }
                 else {
                     /*
@@ -1611,7 +1738,7 @@ if (DEBUGGER) {
                 break;
 
             default:
-                if (MAXDEBUG && this.fWinDbgRM) {
+                if (DEBUG && this.fWinDbgRM) {
                     this.println("INT 0x68: " + str.toHexByte(AH));
                 }
                 break;
@@ -2777,6 +2904,30 @@ if (DEBUGGER) {
     };
 
     /**
+     * findModuleInfo(sModule, nSegment)
+     *
+     * Since we're not sure what Disk the module was loaded from, we have to check all of them.
+     *
+     * @this {Debugger}
+     * @param {string} sModule
+     * @param {number} nSegment
+     * @return {Array}
+     */
+    Debugger.prototype.findModuleInfo = function(sModule, nSegment)
+    {
+        var aSymbols = [];
+        if (SYMBOLS) {
+            var component, componentPrev = null;
+            while (component = this.cmp.getComponentByType("Disk", componentPrev)) {
+                aSymbols = component.getModuleInfo(sModule, nSegment);
+                if (aSymbols.length) break;
+                componentPrev = component;
+            }
+        }
+        return aSymbols;
+    };
+
+    /**
      * messageInit(sEnable)
      *
      * @this {Debugger}
@@ -3841,15 +3992,21 @@ if (DEBUGGER) {
     {
         var i;
         this.aBreakExec = ["bp"];
+        /*
+         * TODO: Each read breakpoint needs to keep track of whether it's linear or physical.
+         */
         if (this.aBreakRead !== undefined) {
             for (i = 1; i < this.aBreakRead.length; i++) {
-                this.bus.removeMemBreak(this.getAddr(this.aBreakRead[i]), false);
+                this.cpu.removeMemBreak(this.getAddr(this.aBreakRead[i]), false, true);
             }
         }
         this.aBreakRead = ["br"];
+        /*
+         * TODO: Each write breakpoint needs to keep track of whether it's linear or physical.
+         */
         if (this.aBreakWrite !== undefined) {
             for (i = 1; i < this.aBreakWrite.length; i++) {
-                this.bus.removeMemBreak(this.getAddr(this.aBreakWrite[i]), true);
+                this.cpu.removeMemBreak(this.getAddr(this.aBreakWrite[i]), true, true);
             }
         }
         this.aBreakWrite = ["bw"];
@@ -3939,7 +4096,10 @@ if (DEBUGGER) {
                 this.println("invalid address: " + this.hexAddr(dbgAddr));
                 fSuccess = false;
             } else {
-                this.bus.addMemBreak(addr, aBreak == this.aBreakWrite);
+                /*
+                 * TODO: Add some UI that allows a physical address (fLinear is currently hard-coded to true)
+                 */
+                this.cpu.addMemBreak(addr, aBreak == this.aBreakWrite, true);
                 /*
                  * Force memory breakpoints to use their linear address, by zapping the selector.
                  */
@@ -3998,7 +4158,10 @@ if (DEBUGGER) {
                         }
                         aBreak.splice(i, 1);
                         if (aBreak != this.aBreakExec) {
-                            this.bus.removeMemBreak(addr, aBreak == this.aBreakWrite);
+                            /*
+                             * TODO: Add some UI that allows a physical address (fLinear is currently hard-coded to true)
+                             */
+                            this.cpu.removeMemBreak(addr, aBreak == this.aBreakWrite, true);
                         }
                         this.historyInit();
                         break;
@@ -5175,7 +5338,7 @@ if (DEBUGGER) {
     };
 
     /**
-     * addSymbols(sel, addr, len, aSymbols)
+     * addSymbols(sModule, nSegment, sel, off, addr, len, aSymbols)
      *
      * As filedump.js (formerly convrom.php) explains, aSymbols is a JSON-encoded object whose properties consist
      * of all the symbols (in upper-case), and the values of those properties are objects containing any or all of
@@ -5231,7 +5394,7 @@ if (DEBUGGER) {
      * We add all these entries to our internal symbol table, which is an array of 4-element arrays, each of which
      * look like:
      *
-     *      [sel, addr, len, aSymbols, aOffsetPairs]
+     *      [sel, off, addr, len, aSymbols, aOffsetPairs]
      *
      * There are two basic symbol operations: findSymbol(), which takes an address and finds the symbol, if any,
      * at that address, and findSymbolAddr(), which takes a string and attempts to match it to a non-anonymous
@@ -5246,12 +5409,15 @@ if (DEBUGGER) {
      * properly.
      *
      * @this {Debugger}
+     * @param {string|null} sModule
+     * @param {number} nSegment (zero if undefined)
      * @param {number} sel (the default segment/selector for all symbols in this group)
-     * @param {number} addr (the physical address of the region where the given symbols are located)
+     * @param {number} off (from the base of the given selector)
+     * @param {number|null} addr (physical address where the symbols are located, if the memory is physical; eg, ROM)
      * @param {number} len (the size of the region, in bytes)
      * @param {Object} aSymbols (collection of symbols in this group; the format of this collection is described below)
      */
-    Debugger.prototype.addSymbols = function(sel, addr, len, aSymbols)
+    Debugger.prototype.addSymbols = function(sModule, nSegment, sel, off, addr, len, aSymbols)
     {
         var dbgAddr = {};
         var aOffsetPairs = [];
@@ -5260,12 +5426,12 @@ if (DEBUGGER) {
             if (typeof symbol == "number") {
                 aSymbols[sSymbol] = symbol = {'o': symbol};
             }
-            var off = symbol['o'];
+            var offSymbol = symbol['o'];
             var selSymbol = symbol['s'];
             var sAnnotation = symbol['a'];
-            if (off !== undefined) {
+            if (offSymbol !== undefined) {
                 if (selSymbol !== undefined) {
-                    dbgAddr.off = off;
+                    dbgAddr.off = offSymbol;
                     dbgAddr.sel = selSymbol;
                     dbgAddr.addr = null;
                     /*
@@ -5282,11 +5448,44 @@ if (DEBUGGER) {
                     }
                     symbol['p'] = dbgAddr.addr;
                 }
-                usr.binaryInsert(aOffsetPairs, [off >>> 0, sSymbol], this.comparePairs);
+                usr.binaryInsert(aOffsetPairs, [offSymbol >>> 0, sSymbol], this.comparePairs);
             }
             if (sAnnotation) symbol['a'] = sAnnotation.replace(/''/g, "\"");
         }
-        this.aSymbolTable.push([sel, addr, len, aSymbols, aOffsetPairs]);
+        var symbolTable = {
+            sModule: sModule,
+            nSegment: nSegment,
+            sel: sel,
+            off: off,
+            addr: addr,
+            len: len,
+            aSymbols: aSymbols,
+            aOffsetPairs: aOffsetPairs
+        };
+        this.aSymbolTable.push(symbolTable);
+    };
+
+    /**
+     * removeSymbols(sModule, nSegment)
+     *
+     * @this {Debugger}
+     * @param {string|null} sModule
+     * @param {number} [nSegment] (segment # if sModule set, selector if sModule clear)
+     * @return {string|null} name of the module removed, or null if no module was found
+     */
+    Debugger.prototype.removeSymbols = function(sModule, nSegment)
+    {
+        var sModuleRemoved = null;
+        for (var iTable = 0; iTable < this.aSymbolTable.length; iTable++) {
+            var symbolTable = this.aSymbolTable[iTable];
+            if (sModule && symbolTable.sModule != sModule) continue;
+            if (sModule && nSegment == symbolTable.nSegment || !sModule && nSegment == symbolTable.sel) {
+                sModuleRemoved = symbolTable.sModule;
+                this.aSymbolTable.splice(iTable, 1);
+                break;
+            }
+        }
+        return sModuleRemoved;
     };
 
     /**
@@ -5299,21 +5498,18 @@ if (DEBUGGER) {
      */
     Debugger.prototype.dumpSymbols = function()
     {
-        for (var i = 0; i < this.aSymbolTable.length; i++) {
-            var sel = this.aSymbolTable[i][0];
-            var addr = this.aSymbolTable[i][1];
-          //var len = this.aSymbolTable[i][2];
-            var aSymbols = this.aSymbolTable[i][3];
-            for (var sSymbol in aSymbols) {
+        for (var iTable = 0; iTable < this.aSymbolTable.length; iTable++) {
+            var symbolTable = this.aSymbolTable[iTable];
+            for (var sSymbol in symbolTable.aSymbols) {
                 if (sSymbol.charAt(0) == '.') continue;
-                var symbol = aSymbols[sSymbol];
-                var off = symbol['o'];
-                if (off === undefined) continue;
-                var selSym = symbol['s'];
-                if (selSym === undefined) selSym = sel;
-                var sSymbolOrig = aSymbols[sSymbol]['l'];
+                var symbol = symbolTable.aSymbols[sSymbol];
+                var offSymbol = symbol['o'];
+                if (offSymbol === undefined) continue;
+                var selSymbol = symbol['s'];
+                if (selSymbol === undefined) selSymbol = symbolTable.sel;
+                var sSymbolOrig = symbolTable.aSymbols[sSymbol]['l'];
                 if (sSymbolOrig) sSymbol = sSymbolOrig;
-                this.println(this.hexOffset(off, selSym) + ' ' + sSymbol);
+                this.println(this.hexOffset(offSymbol, selSymbol) + ' ' + sSymbol);
             }
         }
     };
@@ -5334,26 +5530,27 @@ if (DEBUGGER) {
     Debugger.prototype.findSymbol = function(dbgAddr, fNearest)
     {
         var aSymbol = [];
+        var offSymbol = dbgAddr.off >>> 0;
         var addrSymbol = this.getAddr(dbgAddr) >>> 0;
         for (var iTable = 0; iTable < this.aSymbolTable.length; iTable++) {
-            var sel = this.aSymbolTable[iTable][0];
-            var addr = this.aSymbolTable[iTable][1] >>> 0;
-            var len = this.aSymbolTable[iTable][2];
-            if (sel == dbgAddr.sel || (sel == 0x28 || sel == 0x30) && (dbgAddr.sel == 0x28 || dbgAddr.sel == 0x30)) {
-                if (addrSymbol >= addr && addrSymbol < addr + len) {
-                    var off = dbgAddr.off >>> 0;
-                    var aOffsetPairs = this.aSymbolTable[iTable][4];
-                    var result = usr.binarySearch(aOffsetPairs, [off], this.comparePairs);
-                    if (result >= 0) {
-                        this.returnSymbol(iTable, result, aSymbol);
-                    }
-                    else if (fNearest) {
-                        result = ~result;
-                        this.returnSymbol(iTable, result-1, aSymbol);
-                        this.returnSymbol(iTable, result, aSymbol);
-                    }
-                    break;
+            var symbolTable = this.aSymbolTable[iTable];
+            var sel = symbolTable.sel;
+            var off = symbolTable.off >>> 0;
+            var addr = symbolTable.addr;
+            if (addr != null) addr >>>= 0;
+            var len = symbolTable.len;
+            if (sel == 0x30) sel = 0x28;        // TODO: Remove this hack once we're able to differentiate Windows 95 ring 0 code and data
+            if (sel == dbgAddr.sel && offSymbol >= off && offSymbol < off + len || addr != null && addrSymbol >= addr && addrSymbol < addr + len) {
+                var result = usr.binarySearch(symbolTable.aOffsetPairs, [offSymbol], this.comparePairs);
+                if (result >= 0) {
+                    this.returnSymbol(iTable, result, aSymbol);
                 }
+                else if (fNearest) {
+                    result = ~result;
+                    this.returnSymbol(iTable, result-1, aSymbol);
+                    this.returnSymbol(iTable, result, aSymbol);
+                }
+                break;
             }
         }
         if (!aSymbol.length) {
@@ -5380,24 +5577,21 @@ if (DEBUGGER) {
         var dbgAddr;
         if (sSymbol.match(/^[a-z_][a-z0-9_]*$/i)) {
             var sUpperCase = sSymbol.toUpperCase();
-            for (var i = 0; i < this.aSymbolTable.length; i++) {
-                var sel = this.aSymbolTable[i][0];
-                var addr = this.aSymbolTable[i][1];
-                //var len = this.aSymbolTable[i][2];
-                var aSymbols = this.aSymbolTable[i][3];
-                var symbol = aSymbols[sUpperCase];
+            for (var iTable = 0; iTable < this.aSymbolTable.length; iTable++) {
+                var symbolTable = this.aSymbolTable[iTable];
+                var symbol = symbolTable.aSymbols[sUpperCase];
                 if (symbol !== undefined) {
-                    var off = symbol['o'];
-                    if (off !== undefined) {
+                    var offSymbol = symbol['o'];
+                    if (offSymbol !== undefined) {
                         /*
                          * We assume that every ROM is ORG'ed at 0x0000, and therefore unless the symbol has an
                          * explicitly-defined segment, we return the segment associated with the entire group; for
                          * a ROM, that segment is normally "addrROM >>> 4".  Down the road, we may want/need to
                          * support a special symbol entry (eg, ".ORG") that defines an alternate origin.
                          */
-                        var selSym = symbol['s'];
-                        if (selSym === undefined) selSym = sel;
-                        dbgAddr = this.newAddr(off, selSym, symbol['p']);
+                        var selSymbol = symbol['s'];
+                        if (selSymbol === undefined) selSymbol = symbolTable.sel;
+                        dbgAddr = this.newAddr(offSymbol, selSymbol, symbol['p']);
                     }
                     /*
                      * The symbol matched, but it wasn't for an address (no 'o' offset), and there's no point
@@ -5422,14 +5616,14 @@ if (DEBUGGER) {
     Debugger.prototype.returnSymbol = function(iTable, iOffset, aSymbol)
     {
         var symbol = {};
-        var aOffsetPairs = this.aSymbolTable[iTable][4];
+        var aOffsetPairs = this.aSymbolTable[iTable].aOffsetPairs;
         var offset = 0, sSymbol = null;
         if (iOffset >= 0 && iOffset < aOffsetPairs.length) {
             offset = aOffsetPairs[iOffset][0];
             sSymbol = aOffsetPairs[iOffset][1];
         }
         if (sSymbol) {
-            symbol = this.aSymbolTable[iTable][3][sSymbol];
+            symbol = this.aSymbolTable[iTable].aSymbols[sSymbol];
             sSymbol = (sSymbol.charAt(0) == '.'? null : (symbol['l'] || sSymbol));
         }
         aSymbol.push(sSymbol);

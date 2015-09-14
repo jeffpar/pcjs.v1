@@ -560,6 +560,13 @@ X86.fnCALLw = function CALLw(dst, src)
  */
 X86.fnCALLF = function CALLF(off, sel)
 {
+    /*
+     * Originally, we would snapshot regLSP into opLSP because setCSIP() could trigger a segment fault,
+     * but additionally, the stack segment could trigger either a segment fault or a page fault; indeed,
+     * any operation that performs multiple stack modifications must take this precaution and snapshot regLSP.
+     */
+    this.opLSP = this.regLSP;
+
     var oldCS = this.getCS();
     var oldIP = this.getIP();
     var oldSize = (I386? this.sizeData : 2);
@@ -567,6 +574,8 @@ X86.fnCALLF = function CALLF(off, sel)
         this.pushData(oldCS, oldSize);
         this.pushData(oldIP, oldSize);
     }
+
+    this.opLSP = X86.ADDR_INVALID;
 };
 
 /**
@@ -582,9 +591,18 @@ X86.fnCALLFdw = function CALLFdw(dst, src)
     if (this.regEA === X86.ADDR_INVALID) {
         return X86.fnGRPUndefined.call(this, dst, src);
     }
+    /*
+     * Originally, we would snapshot regLSP into opLSP because fnCALLF() could trigger a segment fault,
+     * but additionally, the stack segment could trigger either a segment fault or a page fault; indeed,
+     * any operation that performs multiple stack modifications must take this precaution and snapshot regLSP.
+     */
+    this.opLSP = this.regLSP;
+
     X86.fnCALLF.call(this, dst, this.getShort(this.regEA + this.sizeData));
     this.nStepCycles -= this.cycleCounts.nOpCyclesCallDM;
     this.opFlags |= X86.OPFLAG.NOWRITE;
+
+    this.opLSP = X86.ADDR_INVALID;
     return dst;
 };
 
@@ -1444,7 +1462,9 @@ X86.fnINT = function INT(nIDT, nError, nCycles)
 X86.fnIRET = function IRET()
 {
     /*
-     * As discussed in fnRETF(), we temporarily set opLSP around operations that fnFault() may need to restart.
+     * Originally, we would snapshot regLSP into opLSP because newCS could trigger a segment fault,
+     * but additionally, the stack segment could trigger either a segment fault or a page fault; indeed,
+     * any operation that performs multiple stack modifications must take this precaution and snapshot regLSP.
      */
     this.opLSP = this.regLSP;
 
@@ -1515,6 +1535,7 @@ X86.fnIRET = function IRET()
             if (this.cIntReturn) this.checkIntReturn(this.regLIP);
         }
     }
+
     this.opLSP = X86.ADDR_INVALID;
 };
 
@@ -2418,31 +2439,16 @@ X86.fnRCRd = function RCRd(dst, src)
  * we may have switched to; setCSIP() returns true if a stack switch occurred, false if not, and null
  * if an error occurred.
  *
- * Take a look at our counterpart, fnCALLF():
- *
- *      if (this.setCSIP(off, sel, true) != null) {
- *          this.pushWord(oldCS);
- *          this.pushWord(oldIP);
- *      }
- *
- * That code is inherently restartable, because it doesn't modify the stack unless setCSIP() succeeds.
- *
- * Here, our task is a little more complicated, because 1) it's not convenient to defer our stack
- * operations until AFTER setCSIP(); 2) we have to deal with an additional stack adjustment value (n);
- * and 3) if setCSIP() triggers a fault (eg, NP_FAULT), fnFault() must be able to do the rewinding,
- * which happens BEFORE setCSIP() returns.
- *
- * The current hack to make the stack "rewindable" involves copying regLSP to opLSP, similar to what we do
- * for EIP (ie, by copying regLIP into opLIP prior to executing every opcode), so that fnFault() can rewind
- * ESP as needed.  And since I don't really want to snapshot more data inside the opcode loop, my compromise
- * is to set opLSP only within instructions (like this one) that read/write the stack, and then reset opLSP
- * back to X86.ADDR_INVALID when we're done.
- *
  * @this {X86CPU}
  * @param {number} n
  */
 X86.fnRETF = function RETF(n)
 {
+    /*
+     * Originally, we would snapshot regLSP into opLSP because newCS could trigger a segment fault,
+     * but additionally, the stack segment could trigger either a segment fault or a page fault; indeed,
+     * any operation that performs multiple stack modifications must take this precaution and snapshot regLSP.
+     */
     this.opLSP = this.regLSP;
 
     var newIP = this.popWord();
@@ -2476,6 +2482,7 @@ X86.fnRETF = function RETF(n)
         }
     }
     if (n == 2 && this.cIntReturn) this.checkIntReturn(this.regLIP);
+
     this.opLSP = X86.ADDR_INVALID;
 };
 
