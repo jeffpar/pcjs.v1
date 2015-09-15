@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.19.6/manifest.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.19.7/manifest.xsl"?>
 <manifest type="software">
 	<title>Turbo Pascal</title>
 	<disk id="disk01" size="368640" chs="40:2:9" img="static/TURBO30.img" href="/disks/pc/tools/borland/pascal/3.0/TURBO30.json" md5="b1243614e885cb2a16047cff1adcb00b" md5json="672b78ada3c22756676b71fdf83c23af">
