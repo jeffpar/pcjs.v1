@@ -155,9 +155,8 @@ function Debugger(parmsDbg)
         this.dbgAddrAssemble = this.newAddr();
 
         /*
-         * aSymbolTable is an array of SymbolTable objects, one per ROM or other chunk of address space.
-         *
-         * Each SymbolTable object contains the following properties:
+         * aSymbolTable is an array of SymbolTable objects, one per ROM or other chunk of address space,
+         * where each object contains the following properties:
          *
          *      sModule
          *      nSegment
@@ -166,7 +165,7 @@ function Debugger(parmsDbg)
          *      addr (physical address, if any; eg, if symbols are for a ROM)
          *      len
          *      aSymbols
-         *      aOffsetPairs
+         *      aOffsets
          *
          * See addSymbols() for more details, since that's how callers add sets of symbols to the table.
          */
@@ -1388,6 +1387,7 @@ if (DEBUGGER) {
          * removeSectionInfo(nSegment, dbgAddr, fPrint)
          *
          * @this {Debugger}
+         * @param {number} nSegment (logical segment number)
          * @param {DbgAddr} dbgAddr (address of module)
          * @param {boolean} [fPrint]
          */
@@ -1425,7 +1425,7 @@ if (DEBUGGER) {
          *
          * TODO: Consider "consuming" all VW32_Int41Dispatch callbacks, because the Windows 95 kernel goes to
          * great effort to pass those requests on to the DEBUG VxD, which end up going nowhere when the VxD isn't
-         * loaded (to load it, you must either run WDEB386.EXE or install it via your SYSTEM.INI).  Regrettably,
+         * loaded (to load it, you must either run WDEB386.EXE or install the VxD via SYSTEM.INI).  Regrettably,
          * Windows 95 assumes that if WDEB386 support is present, then a DEBUG VxD must be present as well.
          *
          * @this {Debugger}
@@ -1487,8 +1487,6 @@ if (DEBUGGER) {
             var DI = cpu.regEDI & 0xffff;
             var ES = cpu.segES.sel;
 
-            var seg, limit, sModule;
-
             if (this.fWinDbg == null) {
                 if (AX == Interrupts.WINDBG.IS_LOADED) {
                     /*
@@ -1516,22 +1514,22 @@ if (DEBUGGER) {
              * responsibility for all requests (don't assume there's valid interrupt handler inside the machine).
              */
             switch(AX) {
-            case Interrupts.WINDBG.IS_LOADED:
+            case Interrupts.WINDBG.IS_LOADED:           // 0x004F
                 if (this.fWinDbg) {
                     cpu.regEAX = (cpu.regEAX & ~0xffff) | Interrupts.WINDBG.LOADED;
                     this.println("INT 0x41 handling enabled");
                 }
                 break;
 
-            case Interrupts.WINDBG.LOADSEG:
+            case Interrupts.WINDBG.LOADSEG:             // 0x0050
                 this.addSegmentInfo(this.newAddr(DI, ES), BX+1, CX, !(SI & 0x1), this.fWinDbg);
                 break;
 
-            case Interrupts.WINDBG.FREESEG:
+            case Interrupts.WINDBG.FREESEG:             // 0x0052
                 this.removeSegmentInfo(BX);
                 break;
 
-            case Interrupts.WINDBG.KRNLVARS:
+            case Interrupts.WINDBG.KRNLVARS:            // 0x005A
                 /*
 				 *  BX = version number of this data (0x3A0)
 				 *  DX:CX points to:
@@ -1551,28 +1549,40 @@ if (DEBUGGER) {
                  */
                 break;
 
-            case Interrupts.WINDBG.RELSEG:
-            case Interrupts.WINDBG.LOADDLL:
-            case Interrupts.WINDBG.DELMODULE:
+            case Interrupts.WINDBG.RELSEG:              // 0x005C
+            case Interrupts.WINDBG.LOADDLL:             // 0x0064
+            case Interrupts.WINDBG.DELMODULE:           // 0x0065
                 /*
                  * TODO: Figure out what to do with these notifications, if anything
                  */
                 break;
 
-            case Interrupts.WINDBG.REGDOTCMD:
-            case Interrupts.WINDBG.CONDBP:
-            case Interrupts.WINDBG.LOADHIGH:
+            case Interrupts.WINDBG.LOADHIGH:            // 0x005D
+            case Interrupts.WINDBG.REGDOTCMD:           // 0x0070
+            case Interrupts.WINDBG.CONDBP:              // 0xF001
                 break;
 
-            case Interrupts.WINDBG.GETSYMBOL:
-                if (this.fWinDbg) cpu.regEAX = (cpu.regEAX & ~0xffff)|1;        // AX == 1 means not found
-                break;
-
-            case Interrupts.WINDBG.CHECKFAULT:
+            case Interrupts.WINDBG.CHECKFAULT:          // 0x007F
                 if (this.fWinDbg) cpu.regEAX = (cpu.regEAX & ~0xffff)|0;        // AX == 0 means handle fault normally
                 break;
 
-            case Interrupts.WINDBG.LOADSEG32:
+            case Interrupts.WINDBG.TRAPFAULT:           // 0x0083
+                /*
+                 * Ordinarily (I think), since we're responding with AX=0 to all CHECKFAULT notifications,
+                 * all TRAPFAULT notifications should be withheld; however, one exception may be if the user
+                 * is presented with a fault dialog containing a "Debug" button, and the user clicks it....
+                 *
+                 * So for now, we'll allocate a temporary breakpoint at the reported fault address whenever
+                 * this notification comes through.
+                 */
+                this.addBreakpoint(this.aBreakExec, this.newAddr(cpu.regEDX, CX), true);
+                break;
+
+            case Interrupts.WINDBG.GETSYMBOL:           // 0x008D
+                if (this.fWinDbg) cpu.regEAX = (cpu.regEAX & ~0xffff)|1;        // AX == 1 means not found
+                break;
+
+            case Interrupts.WINDBG.LOADSEG32:           // 0x0150
                 /*
                  *  SI == segment type:
                  *      0x0     code selector
@@ -1582,7 +1592,7 @@ if (DEBUGGER) {
                 this.addSectionInfo(this.newAddr(cpu.regEBX, DX), !SI, this.fWinDbg);
                 break;
 
-            case Interrupts.WINDBG.FREESEG32:
+            case Interrupts.WINDBG.FREESEG32:           // 0x0152
                 /*
                  *  BX == segment number
                  *  DX:EDI -> module name
@@ -1671,13 +1681,13 @@ if (DEBUGGER) {
              * responsibility for all requests (don't assume there's valid interrupt handler inside the machine).
              */
             switch(AH) {
-            case Interrupts.WINDBGRM.IS_LOADED:
+            case Interrupts.WINDBGRM.IS_LOADED:         // 0x43
                 if (this.fWinDbgRM) {
                     cpu.regEAX = (cpu.regEAX & ~0xffff) | Interrupts.WINDBGRM.LOADED;
                 }
                 break;
 
-            case Interrupts.WINDBGRM.PREP_PMODE:
+            case Interrupts.WINDBGRM.PREP_PMODE:        // 0x44
                 if (this.fWinDbgRM) {
                     var a = cpu.segCS.addCallBreak(this.callWindowsDebuggerPMInit.bind(this));
                     if (a) {
@@ -1687,18 +1697,18 @@ if (DEBUGGER) {
                 }
                 break;
 
-            case Interrupts.WINDBGRM.FREESEG:
+            case Interrupts.WINDBGRM.FREESEG:           // 0x48
                 this.removeSegmentInfo(BX);
                 break;
 
-            case Interrupts.WINDBGRM.REMOVESEGS:
+            case Interrupts.WINDBGRM.REMOVESEGS:        // 0x4F
                 /*
                  * TODO: This probably just signals the end of module loading; nothing is required, but we should
                  * clean up whatever we can....
                  */
                 break;
 
-            case Interrupts.WINDBGRM.LOADSEG:
+            case Interrupts.WINDBGRM.LOADSEG:           // 0x50
                 if (AL == 0x20) {
                     /*
                      *  Real-mode EXE
@@ -5394,18 +5404,18 @@ if (DEBUGGER) {
      * We add all these entries to our internal symbol table, which is an array of 4-element arrays, each of which
      * look like:
      *
-     *      [sel, off, addr, len, aSymbols, aOffsetPairs]
+     *      [sel, off, addr, len, aSymbols, aOffsets]
      *
      * There are two basic symbol operations: findSymbol(), which takes an address and finds the symbol, if any,
      * at that address, and findSymbolAddr(), which takes a string and attempts to match it to a non-anonymous
      * symbol with a matching offset ('o') property.
      *
      * To implement findSymbol() efficiently, addSymbols() creates an array of [offset, sSymbol] pairs
-     * (aOffsetPairs), one pair for each symbol that corresponds to an offset within the specified address space.
+     * (aOffsets), one pair for each symbol that corresponds to an offset within the specified address space.
      *
-     * We guarantee the elements of aOffsetPairs are in offset order, because we build it using binaryInsert();
+     * We guarantee the elements of aOffsets are in offset order, because we build it using binaryInsert();
      * it's quite likely that the MAP file already ordered all its symbols in offset order, but since they're
-     * hand-edited files, we can't assume that.  This ensures that findSymbol()'s binarySearch() will operate
+     * hand-edited files, we can't assume that, and we need to ensure that findSymbol()'s binarySearch() operates
      * properly.
      *
      * @this {Debugger}
@@ -5420,7 +5430,7 @@ if (DEBUGGER) {
     Debugger.prototype.addSymbols = function(sModule, nSegment, sel, off, addr, len, aSymbols)
     {
         var dbgAddr = {};
-        var aOffsetPairs = [];
+        var aOffsets = [];
         for (var sSymbol in aSymbols) {
             var symbol = aSymbols[sSymbol];
             if (typeof symbol == "number") {
@@ -5448,7 +5458,7 @@ if (DEBUGGER) {
                     }
                     symbol['p'] = dbgAddr.addr;
                 }
-                usr.binaryInsert(aOffsetPairs, [offSymbol >>> 0, sSymbol], this.comparePairs);
+                usr.binaryInsert(aOffsets, [offSymbol >>> 0, sSymbol], this.comparePairs);
             }
             if (sAnnotation) symbol['a'] = sAnnotation.replace(/''/g, "\"");
         }
@@ -5460,7 +5470,7 @@ if (DEBUGGER) {
             addr: addr,
             len: len,
             aSymbols: aSymbols,
-            aOffsetPairs: aOffsetPairs
+            aOffsets: aOffsets
         };
         this.aSymbolTable.push(symbolTable);
     };
@@ -5541,7 +5551,7 @@ if (DEBUGGER) {
             var len = symbolTable.len;
             if (sel == 0x30) sel = 0x28;        // TODO: Remove this hack once we're able to differentiate Windows 95 ring 0 code and data
             if (sel == dbgAddr.sel && offSymbol >= off && offSymbol < off + len || addr != null && addrSymbol >= addr && addrSymbol < addr + len) {
-                var result = usr.binarySearch(symbolTable.aOffsetPairs, [offSymbol], this.comparePairs);
+                var result = usr.binarySearch(symbolTable.aOffsets, [offSymbol], this.comparePairs);
                 if (result >= 0) {
                     this.returnSymbol(iTable, result, aSymbol);
                 }
@@ -5616,11 +5626,11 @@ if (DEBUGGER) {
     Debugger.prototype.returnSymbol = function(iTable, iOffset, aSymbol)
     {
         var symbol = {};
-        var aOffsetPairs = this.aSymbolTable[iTable].aOffsetPairs;
+        var aOffsets = this.aSymbolTable[iTable].aOffsets;
         var offset = 0, sSymbol = null;
-        if (iOffset >= 0 && iOffset < aOffsetPairs.length) {
-            offset = aOffsetPairs[iOffset][0];
-            sSymbol = aOffsetPairs[iOffset][1];
+        if (iOffset >= 0 && iOffset < aOffsets.length) {
+            offset = aOffsets[iOffset][0];
+            sSymbol = aOffsets[iOffset][1];
         }
         if (sSymbol) {
             symbol = this.aSymbolTable[iTable].aSymbols[sSymbol];

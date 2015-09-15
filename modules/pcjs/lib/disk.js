@@ -265,10 +265,10 @@ Component.subclass(Disk);
  * where offset is relative to the segment's offStart value, and symbol is a string describing the
  * entry.
  *
- * NOTE: Although aEntries uses a format similar to the Debugger's aOffsetPairs, they are not
- * interchangeable data structures, because ours is ordered by ordinal, whereas aOffsetPairs is
+ * NOTE: Although aEntries arrays are similar to the Debugger's aOffsets arrays, they are not
+ * interchangeable data structures, because ours is ordered by ordinal, whereas aOffsets is
  * ordered by offset.  We provide an interface, getModuleInfo(), to the Debugger that converts
- * our data into an intermediate array, aSymbols, which the Debugger then uses to build aOffsetPairs.
+ * our data into an intermediate array, aSymbols, which the Debugger then uses to build aOffsets.
  * It would be nice to avoid building that intermediate representation, but it's a side-effect of
  * the Debugger's earlier support for JSON-encoded MAP files.
  *
