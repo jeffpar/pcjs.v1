@@ -7547,14 +7547,13 @@ if (DEBUGGER) {
         var result = true;
 
         try {
-            if (!sCmd.length) {
+            if (!sCmd.length || sCmd == "end") {
                 if (this.fAssemble) {
                     this.println("ended assemble @" + this.hexAddr(this.dbgAddrAssemble));
                     this.dbgAddrNextCode = this.dbgAddrAssemble;
                     this.fAssemble = false;
-                } else {
-                    sCmd = '?';
                 }
+                sCmd = "";
             }
             else if (!fQuiet) {
                 var sPrompt = ">> ";
