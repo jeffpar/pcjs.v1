@@ -1272,6 +1272,7 @@ if (DEBUGGER) {
 
         if (Interrupts.WINDBG.ENABLED || Interrupts.WINDBGRM.ENABLED) {
             this.fWinDbg = null;
+            this.fIgnoreNextCheckFault = false;
             this.cpu.addIntNotify(Interrupts.WINCB.VECTOR, this.intWindowsCallBack.bind(this));
             this.cpu.addIntNotify(Interrupts.WINDBG.VECTOR, this.intWindowsDebugger.bind(this));
         }
@@ -1561,25 +1562,30 @@ if (DEBUGGER) {
                 break;
 
             case Interrupts.WINDBG.CHECKFAULT:          // 0x007F
-                /*
-                 * TODO: We need some UI to control our response to CHECKFAULT notifications.  For now, it's hard-coded.
-                 */
-                if (DEBUG) this.println("CHECKFAULT: fault=" + str.toHexWord(BX) + " type=" + str.toHexWord(CX));
-                if (this.fWinDbg) cpu.regEAX = (cpu.regEAX & ~0xffff)|1;        // AX == 0 means handle fault normally, 1 means issue TRAPFAULT
+                if (this.fWinDbg) {
+                    /*
+                     * AX == 0 means handle fault normally, 1 means issue TRAPFAULT
+                     */
+                    cpu.regEAX = (cpu.regEAX & ~0xffff) | (this.fIgnoreNextCheckFault? 0 : 1);
+                    if (DEBUG) this.println("INT 0x41 CHECKFAULT: fault=" + str.toHexWord(BX) + " type=" + str.toHexWord(CX) + " trapped=" + !this.fIgnoreNextCheckFault);
+                }
                 break;
 
             case Interrupts.WINDBG.TRAPFAULT:           // 0x0083
                 /*
-                 * Ordinarily (I think), if we respond with AX=0 to all CHECKFAULT notifications, then
-                 * all TRAPFAULT notifications should be withheld; however, one exception may be if the user
-                 * is presented with a fault dialog containing a "Debug" button, and the user clicks it....
+                 * If we responded with AX == 1 to a preceding CHECKFAULT notification, then we should receive the
+                 * following TRAPFAULT notification; additionally, a TRAPFAULT notification may be issued without
+                 * any CHECKFAULT warning if the user was presented with a fault dialog containing a "Debug" button,
+                 * and the user clicked it.
                  *
-                 * Regardless, whenever we receive this notification, we'll allocate a temporary breakpoint
-                 * at the reported fault address.
+                 * Regardless, whenever we receive this notification, we allocate a temporary breakpoint at the
+                 * reported fault address.
                  */
-                dbgAddr = this.newAddr(cpu.regEDX, CX);
-                this.println("TRAPFAULT: fault=" + str.toHexWord(BX) + " error=" + str.toHexLong(cpu.regESI) + " addr=" + this.hexAddr(dbgAddr));
-                this.addBreakpoint(this.aBreakExec, dbgAddr, true);
+                if (this.fWinDbg) {
+                    dbgAddr = this.newAddr(cpu.regEDX, CX);
+                    this.println("INT 0x41 TRAPFAULT: fault=" + str.toHexWord(BX) + " error=" + str.toHexLong(cpu.regESI) + " addr=" + this.hexAddr(dbgAddr));
+                    this.addBreakpoint(this.aBreakExec, dbgAddr, true);
+                }
                 break;
 
             case Interrupts.WINDBG.GETSYMBOL:           // 0x008D
@@ -1610,6 +1616,11 @@ if (DEBUGGER) {
                 }
                 break;
             }
+
+            /*
+             * Let's try to limit the scope of any "gt" command by resetting this flag after any INT 0x41
+             */
+            this.fIgnoreNextCheckFault = false;
 
             return !this.fWinDbg;
         };
@@ -4229,7 +4240,7 @@ if (DEBUGGER) {
                 dbgAddr.fTempBreak = true;
             }
             else {
-                this.printBreakpoint(aBreak, aBreak.length-1);
+                this.printBreakpoint(aBreak, aBreak.length-1, "set");
                 this.historyInit();
             }
         }
@@ -6767,7 +6778,7 @@ if (DEBUGGER) {
      *
      * @this {Debugger}
      * @param {Array.<string>} [asArgs]
-     * @param {boolean} [fInstruction] (default is true)
+     * @param {boolean} [fInstruction] (true to include the current instruction; default is true)
      */
     Debugger.prototype.doRegisters = function(asArgs, fInstruction)
     {
@@ -7023,15 +7034,19 @@ if (DEBUGGER) {
     };
 
     /**
-     * doRun(sAddr, sOptions, fQuiet)
+     * doRun(sCmd, sAddr, sOptions, fQuiet)
      *
      * @this {Debugger}
-     * @param {string} sAddr
-     * @param {string} [sOptions]
+     * @param {string} sCmd
+     * @param {string|undefined} [sAddr]
+     * @param {string} [sOptions] (the rest of the breakpoint command-line)
      * @param {boolean} [fQuiet]
      */
-    Debugger.prototype.doRun = function(sAddr, sOptions, fQuiet)
+    Debugger.prototype.doRun = function(sCmd, sAddr, sOptions, fQuiet)
     {
+        if (sCmd == "gt") {
+            this.fIgnoreNextCheckFault = true;
+        }
         if (sAddr !== undefined) {
             var dbgAddr = this.parseAddr(sAddr, true);
             if (!dbgAddr) return;
@@ -7496,11 +7511,11 @@ if (DEBUGGER) {
     /**
      * shiftArgs(asArgs)
      *
-     * This is used with commands (eg, "b") that have suffixed variations (eg, "bp", "br", "bw");
-     * we extract the suffix from the command and insert it into the argument array as a separate element.
+     * Used with any command (eg, "r") that allows but doesn't require whitespace between command and first argument.
      *
      * @this {Debugger}
      * @param {Array.<string>} [asArgs]
+     * @return {Array.<string>}
      */
     Debugger.prototype.shiftArgs = function(asArgs)
     {
@@ -7516,6 +7531,7 @@ if (DEBUGGER) {
                 }
             }
         }
+        return asArgs;
     };
 
     /**
@@ -7565,27 +7581,24 @@ if (DEBUGGER) {
                     sCmd = "a " + this.hexAddr(this.dbgAddrAssemble) + ' ' + sCmd;
                 }
 
-                var asArgs = sCmd.replace(/ +/g, ' ').split(' ');
-                var ch0 = asArgs[0].charAt(0).toLowerCase();
+                var asArgs = this.shiftArgs(sCmd.replace(/ +/g, ' ').split(' '));
 
-                switch (ch0) {
+                switch (asArgs[0].charAt(0)) {
                 case 'a':
                     this.doAssemble(asArgs);
                     break;
                 case 'b':
-                    this.shiftArgs(asArgs);
                     this.doBreak(asArgs[0], asArgs[1], sCmd);
                     break;
                 case 'c':
                     this.doClear(asArgs[0]);
                     break;
                 case 'd':
-                    if (!COMPILED && asArgs[0] == "debug") {
+                    if (!COMPILED && sCmd == "debug") {
                         window.DEBUG = true;
                         this.println("DEBUG checks on");
                         break;
                     }
-                    this.shiftArgs(asArgs);
                     this.doDump(asArgs);
                     break;
                 case 'e':
@@ -7596,7 +7609,7 @@ if (DEBUGGER) {
                     this.doFreqs(asArgs[1]);
                     break;
                 case 'g':
-                    this.doRun(asArgs[1], sCmd, fQuiet);
+                    this.doRun(asArgs[0], asArgs[1], sCmd, fQuiet);
                     break;
                 case 'h':
                     this.doHalt(fQuiet);
@@ -7611,7 +7624,6 @@ if (DEBUGGER) {
                     this.doInput(asArgs[1]);
                     break;
                 case 'k':
-                    this.shiftArgs(asArgs);
                     this.doStackTrace(asArgs[0], asArgs[1]);
                     break;
                 case 'l':
@@ -7619,7 +7631,6 @@ if (DEBUGGER) {
                         this.doList(asArgs[1], true);
                         break;
                     }
-                    this.shiftArgs(asArgs);
                     this.doLoad(asArgs);
                     break;
                 case 'm':
@@ -7640,11 +7651,10 @@ if (DEBUGGER) {
                     this.doStep(asArgs[0]);
                     break;
                 case 'r':
-                    if (asArgs[0] == "reset") {
+                    if (sCmd == "reset") {
                         if (this.cmp) this.cmp.reset();
                         break;
                     }
-                    this.shiftArgs(asArgs);
                     this.doRegisters(asArgs);
                     break;
                 case 's':
@@ -7655,7 +7665,6 @@ if (DEBUGGER) {
                     }
                     break;
                 case 't':
-                    this.shiftArgs(asArgs);
                     this.doTrace(asArgs[0], asArgs[1]);
                     break;
                 case 'u':
@@ -7665,11 +7674,9 @@ if (DEBUGGER) {
                     this.println((APPNAME || "PCjs") + " version " + (XMLVERSION || APPVERSION) + " (" + this.cpu.model + (COMPILED? ",RELEASE" : (DEBUG? ",DEBUG" : ",NODEBUG")) + (PREFETCH? ",PREFETCH" : ",NOPREFETCH") + (TYPEDARRAYS? ",TYPEDARRAYS" : (FATARRAYS? ",FATARRAYS" : ",LONGARRAYS")) + (BACKTRACK? ",BACKTRACK" : ",NOBACKTRACK") + ')');
                     break;
                 case 'x':
-                    this.shiftArgs(asArgs);
                     this.doExecOptions(asArgs);
                     break;
                 case '?':
-                    this.shiftArgs(asArgs);
                     if (asArgs[1]) {
                         this.doPrint(sCmd.substr(1));
                         break;
@@ -7677,7 +7684,7 @@ if (DEBUGGER) {
                     this.doHelp();
                     break;
                 case 'n':
-                    if (!COMPILED && asArgs[0] == "nodebug") {
+                    if (!COMPILED && sCmd == "nodebug") {
                         window.DEBUG = false;
                         this.println("DEBUG checks off");
                         break;
