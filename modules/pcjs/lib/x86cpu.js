@@ -686,6 +686,8 @@ X86CPU.prototype.setAddressMask = function(nBusMask)
  * NOTE: addMemBreak() could be merged with addMemCheck(), but the new merged interface would
  * have to provide one additional parameter indicating whether the Debugger or the CPU is the client.
  *
+ * For now, this is simply a DEBUGGER-only interface.
+ *
  * @this {X86CPU}
  * @param {number} addr
  * @param {boolean} fWrite is true for a memory write breakpoint, false for a memory read breakpoint
@@ -705,6 +707,8 @@ X86CPU.prototype.addMemBreak = function(addr, fWrite, fLinear)
  *
  * NOTE: removeMemBreak() could be merged with removeMemCheck(), but the new merged interface would
  * have to provide one additional parameter indicating whether the Debugger or the CPU is the client.
+ *
+ * For now, this is simply a DEBUGGER-only interface.
  *
  * @this {X86CPU}
  * @param {number} addr
@@ -811,6 +815,12 @@ X86CPU.prototype.enablePageBlocks = function()
          */
         this.memEmpty = new Memory();
     } else {
+        /*
+         * Our equivalent of a TLB flush.  NOTE: We do not attempt to simulate an actual TLB; our
+         * aMemBlocks array will "cache" as many pages (ie, allow as many PAGED block) as there are
+         * entries in the array.  I'm assuming we won't run into any system software that relies on
+         * a constrained TLB -- at least not from the 80386 era, which is all we're emulating.
+         */
         for (var i = 0; i < this.aBlocksPaged.length; i++) {
             this.aMemBlocks[this.aBlocksPaged[i]] = this.blockUnpaged;
         }
@@ -3223,7 +3233,7 @@ X86CPU.prototype.setBinding = function(sHTMLType, sBinding, control)
 };
 
 /**
- * probeAddr(addr, size)
+ * probeAddr(addr, size, fLinear)
  *
  * Used by the Debugger to probe addresses without risk of triggering a page fault, and by internal
  * functions, like fnFaultMessage(), that also need to avoid triggering faults, since they're not part
@@ -3235,15 +3245,15 @@ X86CPU.prototype.setBinding = function(sHTMLType, sBinding, control)
  * @this {X86CPU}
  * @param {number} addr is a linear address
  * @param {number} [size] is a length (default is 1)
+ * @param {boolean} [fLinear] (true for linear probe, false for physical; linear is the default)
  * @return {number|null} byte (8-bit) value at that address, or null if invalid
  */
-X86CPU.prototype.probeAddr = function(addr, size)
+X86CPU.prototype.probeAddr = function(addr, size, fLinear)
 {
-    var block = this.aMemBlocks[(addr & this.nMemMask) >>> this.nBlockShift];
-    if (block) {
-        if (block.type == Memory.TYPE.UNPAGED) {
-            block = this.mapPageBlock(addr, false, true);
-        }
+    var aBlocks = fLinear === false? this.aBusBlocks : this.aMemBlocks;
+    var block = aBlocks[(addr & this.nMemMask) >>> this.nBlockShift];
+    if (block && block.type == Memory.TYPE.UNPAGED) {
+        block = this.mapPageBlock(addr, false, true);
     }
     if (block) {
         var off = addr & this.nBlockLimit;

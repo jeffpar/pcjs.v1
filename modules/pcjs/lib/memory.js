@@ -619,7 +619,7 @@ Memory.prototype = {
      * @return {number}
      */
     readNone: function readNone(off, addr) {
-        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(Messages.MEM) /* && !off */) {
+        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(Messages.CPU | Messages.MEM) /* && !off */) {
             this.dbg.message("attempt to read invalid block %" + str.toHex(this.addr), true);
         }
         return 0xff;
@@ -633,7 +633,7 @@ Memory.prototype = {
      * @param {number} addr
      */
     writeNone: function writeNone(off, v, addr) {
-        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(Messages.MEM) /* && !off */) {
+        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(Messages.CPU | Messages.MEM) /* && !off */) {
             this.dbg.message("attempt to write " + str.toHexWord(v) + " to invalid block %" + str.toHex(this.addr), true);
         }
     },

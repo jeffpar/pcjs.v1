@@ -155,7 +155,7 @@ X86Seg.CALLBREAK_SEL = 0x0001;
  * whenever that address is called, and if fn() returns false, then the call is skipped.  Otherwise,
  * the call is performed (ie, the old CS:[E]IP is pushed on the stack, and CS:[E]IP is set to the
  * "call break" address.  Which is probably a bad idea, so your function should probably always
- * return false.  Just sayin'.
+ * return false.  Just sayin'.  TODO: Should probably just force all "call break" calls to be skipped.
  *
  * @this {X86Seg}
  * @param {function()} fn
