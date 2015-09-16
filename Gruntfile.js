@@ -171,7 +171,7 @@ module.exports = function(grunt) {
                     banner: '"use strict";\n\n',
                     process: function(src, filepath) {
                         return "// " + filepath + "\n\n" +
-                            src.replace(/(^|\n)[ \t]*(['"])use strict\2;?\s*/g, '$1').replace(/[ \t]*if\s*\(typeof\s+(module|APP_PCJS)\s*!==\s*(['"])undefined\2\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '').replace(/[ \t]*[A-Za-z_][A-Za-z0-9_\.]*\.assert\([^\n]*\);[^\n]*/g, '');
+                            src.replace(/(^|\n)[ \t]*(['"])use strict\2;?\s*/g, '$1').replace(/[ \t]*if\s*\(NODE\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '').replace(/[ \t]*if\s*\(typeof\s+(module|APP_PCJS)\s*!==\s*(['"])undefined\2\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '').replace(/[ \t]*[A-Za-z_][A-Za-z0-9_\.]*\.assert\([^\n]*\);[^\n]*/g, '');
                     }
                 }
             },
@@ -182,7 +182,7 @@ module.exports = function(grunt) {
                     banner: '"use strict";\n\n',
                     process: function(src, filepath) {
                         return "// " + filepath + "\n\n" +
-                            src.replace(/(^|\n)[ \t]*(['"])use strict\2;?\s*/g, '$1').replace(/[ \t]*if\s*\(typeof\s+(module|APP_PCJS)\s*!==\s*(['"])undefined\2\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '').replace(/[ \t]*[A-Za-z_][A-Za-z0-9_\.]*\.assert\([^\n]*\);[^\n]*/g, '');
+                            src.replace(/(^|\n)[ \t]*(['"])use strict\2;?\s*/g, '$1').replace(/[ \t]*if\s*\(NODE\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '').replace(/[ \t]*if\s*\(typeof\s+(module|APP_PCJS)\s*!==\s*(['"])undefined\2\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '').replace(/[ \t]*[A-Za-z_][A-Za-z0-9_\.]*\.assert\([^\n]*\);[^\n]*/g, '');
                     }
                 }
             }
@@ -437,8 +437,9 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks("grunt-newer");
     grunt.loadNpmTasks("grunt-run");
     grunt.loadNpmTasks("grunt-text-replace");
-
+    
     grunt.loadTasks("modules/grunts/manifester/tasks");
+    
     grunt.loadTasks("modules/grunts/prepjs/tasks");
 
     grunt.registerTask("preCompiler", grunt.option("rebuild")? ["concat:tmp-c1pjs", "concat:tmp-pcjs"] : ["newer:concat:tmp-c1pjs", "newer:concat:tmp-pcjs"]);

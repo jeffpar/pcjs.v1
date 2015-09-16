@@ -32,7 +32,7 @@
 
 "use strict";
 
-if (typeof module !== 'undefined') {
+if (NODE) {
     var str         = require("../../shared/lib/strlib");
     var web         = require("../../shared/lib/weblib");
     var Component   = require("../../shared/lib/component");
@@ -48,11 +48,11 @@ if (typeof module !== 'undefined') {
 if (!I386) {
     /*
      * These are the original ModRM decoders, which were simpler and faster because they could treat all
-     * word instructions as 16-bit, assume bits 15-31 of all registers were always zero, and use masking
+     * word instructions as 16-bit, assume bits 16-31 of all registers were always zero, and use masking
      * constants instead of variables.  If I386 is enabled, these decoders are not used, and the compiler
      * will eliminate them from the compiled code.
      */
-    if (typeof module !== 'undefined') {
+    if (NODE) {
         var X86ModB     = require("./x86modb");
         var X86ModW     = require("./x86modw");
     }
@@ -61,7 +61,7 @@ if (!I386) {
      * These are the more general-purpose ModRM decoders, required for I386 support.  The current addressing
      * mode (16-bit or 32-bit) dynamically selects the appropriate set of decoders.
      */
-    if (typeof module !== 'undefined') {
+    if (NODE) {
         var X86ModB16   = require("./x86modb16");
         var X86ModW16   = require("./x86modw16");
         var X86ModB32   = require("./x86modb32");
@@ -4698,4 +4698,4 @@ X86CPU.init = function()
  */
 web.onInit(X86CPU.init);
 
-if (typeof module !== 'undefined') module.exports = X86CPU;
+if (NODE) module.exports = X86CPU;

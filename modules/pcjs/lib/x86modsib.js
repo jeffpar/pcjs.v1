@@ -32,7 +32,7 @@
 
 "use strict";
 
-if (typeof module !== 'undefined') {
+if (NODE) {
     var X86         = require("./x86");
 }
 
@@ -2391,4 +2391,4 @@ X86ModSIB.aOpModSIB = [
     }
 ];
 
-if (typeof module !== 'undefined') module.exports = X86ModSIB;
+if (NODE) module.exports = X86ModSIB;

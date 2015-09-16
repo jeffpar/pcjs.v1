@@ -37,6 +37,7 @@
 var path = require("path");
 var fs = require("fs");
 var repl = require("repl");
+var defines = require("../../shared/lib/defines");
 var str = require("../../shared/lib/strlib");
 var proc = require("../../shared/lib/proclib");
 

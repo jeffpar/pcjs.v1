@@ -316,4 +316,4 @@ usr.indexOf = function(a, t, i)
     return -1;
 };
 
-if (typeof module !== 'undefined') module.exports = usr;
+if (NODE) module.exports = usr;

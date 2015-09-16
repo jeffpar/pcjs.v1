@@ -4,7 +4,7 @@
  *
  * Copyright (c) 2014 jeffpar
  * Licensed under the MIT license.
- * 
+ *
  * TODO: Update this header with our standard header and fix all the JSHint warnings
  */
 
@@ -18,6 +18,7 @@ var async = require("async");
 var parseXML = require("xml2js").parseString;   // see: https://github.com/Leonidas-from-XIV/node-xml2js
 var unzip = require("unzip");
 var util = require("util");
+var defines = require("../../../shared/lib/defines");
 var net = require("../../../shared/lib/netlib");
 
 module.exports = function (grunt) {
@@ -27,7 +28,7 @@ module.exports = function (grunt) {
      * creation: http://gruntjs.com/creating-tasks
      */
     grunt.registerMultiTask('manifester', 'manifest.xml processor', function() {
-        
+
         /*
          * Merge task-specific and/or target-specific options with these defaults
          *
@@ -40,7 +41,7 @@ module.exports = function (grunt) {
          */
         var asManifests = [];
         var doneGrunt = this.async();
-        
+
         /*
          * Iterate over all specified file groups
          */
@@ -66,7 +67,7 @@ module.exports = function (grunt) {
         });
 
         async.each(asManifests, function processXML(sManifestFile, doneAsync) {
-            var sManifestXML = grunt.file.read(sManifestFile); 
+            var sManifestXML = grunt.file.read(sManifestFile);
             parseXML(sManifestXML, function doneParseXML(err, xml) {
                 var cCallbacks = 0;
                 if (xml.manifest) {
@@ -129,6 +130,6 @@ module.exports = function (grunt) {
         }, function(err) {
             doneGrunt();
         });
-        
+
     });
 };

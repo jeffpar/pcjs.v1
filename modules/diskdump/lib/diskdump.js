@@ -41,6 +41,7 @@ var path    = require("path");
 var http    = require("http");
 var mkdirp  = require("mkdirp");
 var crypto  = require("crypto");
+var defines = require("../../shared/lib/defines");
 var net     = require("../../shared/lib/netlib");
 var proc    = require("../../shared/lib/proclib");
 var str     = require("../../shared/lib/strlib");

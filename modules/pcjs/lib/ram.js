@@ -32,7 +32,7 @@
 
 "use strict";
 
-if (typeof module !== 'undefined') {
+if (NODE) {
     var str         = require("../../shared/lib/strlib");
     var web         = require("../../shared/lib/weblib");
     var Component   = require("../../shared/lib/component");
@@ -590,4 +590,4 @@ CompaqController.prototype.getMemoryAccess = function()
  */
 web.onInit(RAM.init);
 
-if (typeof module !== 'undefined') module.exports = RAM;
+if (NODE) module.exports = RAM;

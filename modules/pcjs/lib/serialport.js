@@ -32,7 +32,7 @@
 
 "use strict";
 
-if (typeof module !== 'undefined') {
+if (NODE) {
     var web         = require("../../shared/lib/weblib");
     var Component   = require("../../shared/lib/component");
     var Messages    = require("./messages");
@@ -837,4 +837,4 @@ SerialPort.init = function()
  */
 web.onInit(SerialPort.init);
 
-if (typeof module !== 'undefined') module.exports = SerialPort;
+if (NODE) module.exports = SerialPort;

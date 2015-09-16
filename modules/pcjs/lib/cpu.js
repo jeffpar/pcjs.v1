@@ -32,7 +32,7 @@
 
 "use strict";
 
-if (typeof module !== 'undefined') {
+if (NODE) {
     var str         = require("../../shared/lib/strlib");
     var usr         = require("../../shared/lib/usrlib");
     var Component   = require("../../shared/lib/component");
@@ -1167,4 +1167,4 @@ CPU.prototype.yieldCPU = function()
     this.updateCPU();
 };
 
-if (typeof module !== 'undefined') module.exports = CPU;
+if (NODE) module.exports = CPU;

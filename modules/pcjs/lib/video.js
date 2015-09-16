@@ -32,7 +32,7 @@
 
 "use strict";
 
-if (typeof module !== 'undefined') {
+if (NODE) {
     var str         = require("../../shared/lib/strlib");
     var web         = require("../../shared/lib/weblib");
     var DumpAPI     = require("../../shared/lib/dumpapi");
@@ -7061,4 +7061,4 @@ Video.init = function()
  */
 web.onInit(Video.init);
 
-if (typeof module !== 'undefined') module.exports = Video;
+if (NODE) module.exports = Video;

@@ -87,4 +87,4 @@ proc.getArgs = function() {
     return {argc: argc, argv: argv};
 };
 
-if (typeof module !== 'undefined') module.exports = proc;
+if (NODE) module.exports = proc;

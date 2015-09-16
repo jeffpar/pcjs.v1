@@ -39,6 +39,7 @@ var glob = require("glob");
  * @property {function(string)} sync
  */
 var HTTPAPI = require("./httpapi");
+var defines = require("../../shared/lib/defines");
 var DumpAPI = require("../../shared/lib/dumpapi");
 var MarkOut = require("../../markout");
 var net     = require("../../shared/lib/netlib");

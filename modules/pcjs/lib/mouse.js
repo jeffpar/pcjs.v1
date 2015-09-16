@@ -32,7 +32,7 @@
 
 "use strict";
 
-if (typeof module !== 'undefined') {
+if (NODE) {
     var str         = require("../../shared/lib/strlib");
     var web         = require("../../shared/lib/weblib");
     var Component   = require("../../shared/lib/component");
@@ -731,4 +731,4 @@ Mouse.init = function()
  */
 web.onInit(Mouse.init);
 
-if (typeof module !== 'undefined') module.exports = Mouse;
+if (NODE) module.exports = Mouse;

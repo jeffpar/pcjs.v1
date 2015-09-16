@@ -215,4 +215,4 @@ DiskAPI.ATTR = {
     ARCHIVE:        0x20        // PC-DOS 2.0 and up
 };
 
-if (typeof module !== 'undefined') module.exports = DiskAPI;
+if (NODE) module.exports = DiskAPI;

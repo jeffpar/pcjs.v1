@@ -154,7 +154,7 @@ var COMPAQ386 = true;
  */
 var PAGEBLOCKS = I386;
 
-if (typeof module !== 'undefined') {
+if (NODE) {
     global.PCJSCLASS = PCJSCLASS;
     global.DEBUGGER = DEBUGGER;
     global.PREFETCH = PREFETCH;

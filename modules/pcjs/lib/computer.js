@@ -65,7 +65,7 @@
 
 "use strict";
 
-if (typeof module !== 'undefined') {
+if (NODE) {
     var str         = require("../../shared/lib/strlib");
     var usr         = require("../../shared/lib/usrlib");
     var web         = require("../../shared/lib/weblib");
@@ -1399,4 +1399,4 @@ web.onInit(Computer.init);
 web.onShow(Computer.show);
 web.onExit(Computer.exit);
 
-if (typeof module !== 'undefined') module.exports = Computer;
+if (NODE) module.exports = Computer;

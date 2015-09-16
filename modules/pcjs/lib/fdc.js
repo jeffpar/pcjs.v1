@@ -32,7 +32,7 @@
 
 "use strict";
 
-if (typeof module !== 'undefined') {
+if (NODE) {
     var str         = require("../../shared/lib/strlib");
     var web         = require("../../shared/lib/weblib");
     var DiskAPI     = require("../../shared/lib/diskapi");
@@ -2499,4 +2499,4 @@ FDC.init = function() {
  */
 web.onInit(FDC.init);
 
-if (typeof module !== 'undefined') module.exports = FDC;
+if (NODE) module.exports = FDC;

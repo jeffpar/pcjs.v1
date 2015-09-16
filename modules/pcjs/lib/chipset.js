@@ -32,7 +32,7 @@
 
 "use strict";
 
-if (typeof module !== 'undefined') {
+if (NODE) {
     var str         = require("../../shared/lib/strlib");
     var usr         = require("../../shared/lib/usrlib");
     var web         = require("../../shared/lib/weblib");
@@ -5293,4 +5293,4 @@ ChipSet.init = function()
  */
 web.onInit(ChipSet.init);
 
-if (typeof module !== 'undefined') module.exports = ChipSet;
+if (NODE) module.exports = ChipSet;

@@ -32,7 +32,7 @@
 
 "use strict";
 
-if (typeof module !== 'undefined') {
+if (NODE) {
     var X86         = require("./x86");
 }
 
@@ -9330,4 +9330,4 @@ X86ModW32.aOpModGrp = [
     }
 ];
 
-if (typeof module !== 'undefined') module.exports = X86ModW32;
+if (NODE) module.exports = X86ModW32;

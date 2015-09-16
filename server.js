@@ -51,6 +51,7 @@ var http     = require("http");
 var express  = require("express");
 var slash    = require("express-slash");
 
+var defines  = require("./modules/shared/lib/defines");
 var proclib  = require("./modules/shared/lib/proclib");
 var args     = proclib.getArgs();
 

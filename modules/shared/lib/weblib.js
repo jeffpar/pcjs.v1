@@ -118,7 +118,7 @@
 
 /* global window: true, setTimeout: false, clearTimeout: false, SITEHOST: false */
 
-if (typeof module !== 'undefined') {
+if (NODE) {
     var Component;
     require("./defines");
     var str = require("./strlib");
@@ -147,7 +147,7 @@ var web = {};
  */
 web.log = function(s, type)
 {
-    if (typeof module !== 'undefined') {
+    if (NODE) {
         if (!Component) Component = require("./component");
     }
     Component.log(s, type);
@@ -164,7 +164,7 @@ web.log = function(s, type)
  */
 web.notice = function(s, fPrintOnly, id)
 {
-    if (typeof module !== 'undefined') {
+    if (NODE) {
         if (!Component) Component = require("./component");
     }
     Component.notice(s, fPrintOnly, id);
@@ -191,7 +191,7 @@ web.notice = function(s, fPrintOnly, id)
 web.loadResource = function(sURL, fAsync, data, componentNotify, fnNotify, pNotify)
 {
     fAsync = !!fAsync;          // ensure that fAsync is a valid boolean (Internet Explorer xmlHTTP functions insist on it)
-    if (typeof module !== 'undefined') {
+    if (NODE) {
         /*
          * We don't even need to load Component, because we can't use any of the code below
          * within Node anyway.  Instead, we must hand this request off to our network library.
@@ -816,4 +816,4 @@ web.onPageEvent('onload', function onPageLoad() { web.fPageReady = true; web.doP
 web.onPageEvent('onpageshow', function onPageShow() { web.doPageEvent(web.aPageEventHandlers['show']); });
 web.onPageEvent(web.isUserAgent("Opera") || web.isUserAgent("iOS")? 'onunload' : 'onbeforeunload', function onPageUnload() { web.doPageEvent(web.aPageEventHandlers['exit']); });
 
-if (typeof module !== 'undefined') module.exports = web;
+if (NODE) module.exports = web;

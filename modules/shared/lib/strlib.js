@@ -402,4 +402,4 @@ str.trim = function(s)
     return s.replace(/^\s+|\s+$/g, "");
 };
 
-if (typeof module !== 'undefined') module.exports = str;
+if (NODE) module.exports = str;

@@ -33,7 +33,7 @@
 "use strict";
 
 if (DEBUGGER) {
-    if (typeof module !== 'undefined') {
+    if (NODE) {
         var str         = require("../../shared/lib/strlib");
         var usr         = require("../../shared/lib/usrlib");
         var web         = require("../../shared/lib/weblib");
@@ -1567,7 +1567,7 @@ if (DEBUGGER) {
                      * AX == 0 means handle fault normally, 1 means issue TRAPFAULT
                      */
                     cpu.regEAX = (cpu.regEAX & ~0xffff) | (this.fIgnoreNextCheckFault? 0 : 1);
-                    if (DEBUG) this.println("INT 0x41 CHECKFAULT: fault=" + str.toHexWord(BX) + " type=" + str.toHexWord(CX) + " trapped=" + !this.fIgnoreNextCheckFault);
+                    if (DEBUG) this.println("INT 0x41 CHECKFAULT: fault=" + str.toHexWord(BX) + " type=" + str.toHexWord(CX) + " trap=" + !this.fIgnoreNextCheckFault);
                 }
                 break;
 
@@ -7514,7 +7514,7 @@ if (DEBUGGER) {
      * Used with any command (eg, "r") that allows but doesn't require whitespace between command and first argument.
      *
      * @this {Debugger}
-     * @param {Array.<string>} [asArgs]
+     * @param {Array.<string>} asArgs
      * @return {Array.<string>}
      */
     Debugger.prototype.shiftArgs = function(asArgs)
@@ -7730,4 +7730,4 @@ if (DEBUGGER) {
 
 }   // endif DEBUGGER
 
-if (typeof module !== 'undefined') module.exports = Debugger;
+if (NODE) module.exports = Debugger;

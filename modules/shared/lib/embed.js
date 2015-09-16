@@ -34,7 +34,7 @@
 
 /* global window: true, XSLTProcessor: false, APPNAME: false, APPVERSION: false, DEBUG: true */
 
-if (typeof module !== 'undefined') {
+if (NODE) {
     var Component;
     var str = require("./strlib");
     var web = require("./weblib");

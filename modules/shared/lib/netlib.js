@@ -36,7 +36,7 @@
 
 var net = {};
 
-if (typeof module !== 'undefined') {
+if (NODE) {
     var sServerRoot;
     var fs = require("fs");
     var http = require("http");
@@ -396,4 +396,4 @@ net.loadResource = function(sURL, fAsync, data, componentNotify, fnNotify, pNoti
     return [nErrorCode, sResponse];
 };
 
-if (typeof module !== 'undefined') module.exports = net;
+if (NODE) module.exports = net;

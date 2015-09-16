@@ -70,4 +70,4 @@ var UserAPI = {
     }
 };
 
-if (typeof module !== 'undefined') module.exports = UserAPI;
+if (NODE) module.exports = UserAPI;

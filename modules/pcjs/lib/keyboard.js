@@ -32,7 +32,7 @@
 
 "use strict";
 
-if (typeof module !== 'undefined') {
+if (NODE) {
     var str         = require("../../shared/lib/strlib");
     var web         = require("../../shared/lib/weblib");
     var Component   = require("../../shared/lib/component");
@@ -2253,4 +2253,4 @@ Keyboard.init = function()
  */
 web.onInit(Keyboard.init);
 
-if (typeof module !== 'undefined') module.exports = Keyboard;
+if (NODE) module.exports = Keyboard;

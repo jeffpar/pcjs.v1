@@ -53,7 +53,7 @@
 
 /* global window: true, DEBUG: true */
 
-if (typeof module !== 'undefined') {
+if (NODE) {
     require("./defines");
     var usr = require("./usrlib");
     var web = require("./weblib");
@@ -997,4 +997,4 @@ Component.prototype = {
     }
 };
 
-if (typeof module !== 'undefined') module.exports = Component;
+if (NODE) module.exports = Component;

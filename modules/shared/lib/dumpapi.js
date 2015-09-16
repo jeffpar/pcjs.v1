@@ -82,4 +82,4 @@ var DumpAPI = {
 DumpAPI.asDiskCommands = [DumpAPI.QUERY.DIR, DumpAPI.QUERY.DISK, DumpAPI.QUERY.PATH];
 DumpAPI.asFileCommands = [DumpAPI.QUERY.FILE];
 
-if (typeof module !== 'undefined') module.exports = DumpAPI;
+if (NODE) module.exports = DumpAPI;

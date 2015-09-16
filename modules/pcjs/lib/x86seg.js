@@ -32,7 +32,7 @@
 
 "use strict";
 
-if (typeof module !== 'undefined') {
+if (NODE) {
     var str         = require("../../shared/lib/strlib");
     var Messages    = require("./messages");
     var Memory      = require("./memory");
@@ -1565,4 +1565,4 @@ X86Seg.prototype.messageSeg = function(sel, base, limit, type, ext)
     }
 };
 
-if (typeof module !== 'undefined') module.exports = X86Seg;
+if (NODE) module.exports = X86Seg;

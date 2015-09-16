@@ -32,7 +32,7 @@
 
 "use strict";
 
-if (typeof module !== 'undefined') {
+if (NODE) {
     var str         = require("../../shared/lib/strlib");
     var Component   = require("../../shared/lib/component");
     var Messages    = require("./messages");
@@ -1334,4 +1334,4 @@ if (TYPEDARRAYS) {
     Memory.afnLittleEndian  = [Memory.prototype.readByteLittleEndian, Memory.prototype.readShortLittleEndian, Memory.prototype.readLongLittleEndian, Memory.prototype.writeByteLittleEndian, Memory.prototype.writeShortLittleEndian, Memory.prototype.writeLongLittleEndian];
 }
 
-if (typeof module !== 'undefined') module.exports = Memory;
+if (NODE) module.exports = Memory;

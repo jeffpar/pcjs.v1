@@ -32,7 +32,7 @@
 
 "use strict";
 
-if (typeof module !== 'undefined') {
+if (NODE) {
     var str         = require("../../shared/lib/strlib");
     var web         = require("../../shared/lib/weblib");
     var DumpAPI     = require("../../shared/lib/dumpapi");
@@ -419,4 +419,4 @@ ROM.init = function()
  */
 web.onInit(ROM.init);
 
-if (typeof module !== 'undefined') module.exports = ROM;
+if (NODE) module.exports = ROM;

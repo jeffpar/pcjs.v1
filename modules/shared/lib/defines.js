@@ -64,7 +64,15 @@ var DEBUG = true;               // this @define is overridden by the Closure Com
  */
 var MAXDEBUG = false;           // this @define is overridden by the Closure Compiler (to false) to remove MAXDEBUG-only code
 
+/*
+ * NODE should be true if we're running under NodeJS (eg, command-line), false if not (eg, web browser)
+ */
+var NODE = false;
 if (typeof module !== 'undefined') {
+    NODE = true;
+}
+
+if (NODE) {
     global.window = false;      // provides an alternative "if (typeof window === 'undefined')" (ie, "if (window) ...")
     global.APPNAME = APPNAME;
     global.APPVERSION = APPVERSION;
@@ -72,6 +80,7 @@ if (typeof module !== 'undefined') {
     global.COMPILED = COMPILED;
     global.DEBUG = DEBUG;
     global.MAXDEBUG = MAXDEBUG;
+    global.NODE = NODE;
     /*
      * TODO: When we're "required" by Node, should we return anything via module.exports?
      */
