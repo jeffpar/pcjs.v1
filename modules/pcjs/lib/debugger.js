@@ -1583,7 +1583,7 @@ if (DEBUGGER) {
                  */
                 if (this.fWinDbg) {
                     dbgAddr = this.newAddr(cpu.regEDX, CX);
-                    this.println("INT 0x41 TRAPFAULT: fault=" + str.toHexWord(BX) + " error=" + str.toHexLong(cpu.regESI) + " addr=" + this.hexAddr(dbgAddr));
+                    this.println("INT 0x41 TRAPFAULT: fault=" + str.toHexWord(BX) + " error=" + str.toHexLong(cpu.regESI) + " addr=" + this.toHexAddr(dbgAddr));
                     this.addBreakpoint(this.aBreakExec, dbgAddr, true);
                 }
                 break;
@@ -2393,7 +2393,7 @@ if (DEBUGGER) {
         if (off != null) {
             dbgAddr = this.newAddr(off, sel, addr, type);
             if (!fNoChecks && !this.checkLimit(dbgAddr, true)) {
-                this.println("invalid offset: " + this.hexAddr(dbgAddr));
+                this.println("invalid offset: " + this.toHexAddr(dbgAddr));
                 dbgAddr = null;
             }
         }
@@ -2440,7 +2440,7 @@ if (DEBUGGER) {
     };
 
     /**
-     * hexOffset(off, sel, fAddr32)
+     * toHexOffset(off, sel, fAddr32)
      *
      * @this {Debugger}
      * @param {number|null|undefined} [off]
@@ -2448,7 +2448,7 @@ if (DEBUGGER) {
      * @param {boolean} [fAddr32] is true for 32-bit ADDRESS size
      * @return {string} the hex representation of off (or sel:off)
      */
-    Debugger.prototype.hexOffset = function(off, sel, fAddr32)
+    Debugger.prototype.toHexOffset = function(off, sel, fAddr32)
     {
         if (sel != null) {
             return str.toHex(sel, 4) + ':' + str.toHex(off, (off & ~0xffff) || fAddr32? 8 : 4);
@@ -2457,16 +2457,16 @@ if (DEBUGGER) {
     };
 
     /**
-     * hexAddr(dbgAddr)
+     * toHexAddr(dbgAddr)
      *
      * @this {Debugger}
      * @param {DbgAddr} dbgAddr
      * @return {string} the hex representation of the address
      */
-    Debugger.prototype.hexAddr = function(dbgAddr)
+    Debugger.prototype.toHexAddr = function(dbgAddr)
     {
         var ch = this.getAddrPrefix(dbgAddr);
-        return dbgAddr.sel == null? (ch + str.toHex(dbgAddr.addr)) : (ch + this.hexOffset(dbgAddr.off, dbgAddr.sel, dbgAddr.fAddr32));
+        return dbgAddr.sel == null? (ch + str.toHex(dbgAddr.addr)) : (ch + this.toHexOffset(dbgAddr.off, dbgAddr.sel, dbgAddr.fAddr32));
     };
 
     /**
@@ -2521,7 +2521,7 @@ if (DEBUGGER) {
             var wPID = this.getShort(dbgAddr, 2);
             var wParas = this.getShort(dbgAddr, 5);
             if (bSig != 0x4D && bSig != 0x5A) break;
-            this.println(this.hexOffset(0, mcb) + ": '" + String.fromCharCode(bSig) + "' PID=" + str.toHexWord(wPID) + " LEN=" + str.toHexWord(wParas) + ' "' + this.getSZ(dbgAddr, 8) + '"');
+            this.println(this.toHexOffset(0, mcb) + ": '" + String.fromCharCode(bSig) + "' PID=" + str.toHexWord(wPID) + " LEN=" + str.toHexWord(wParas) + ' "' + this.getSZ(dbgAddr, 8) + '"');
             mcb += 1 + wParas;
         }
     };
@@ -3403,8 +3403,8 @@ if (DEBUGGER) {
      */
     Debugger.prototype.message = function(sMessage, fAddress)
     {
-        if (fAddress) {
-            sMessage += " at " + this.hexOffset(this.cpu.getIP(), this.cpu.getCS()) + " (%" + str.toHex(this.cpu.regLIP) + ")";
+        if (fAddress) { //foo
+            sMessage += " at " + this.toHexAddr(this.newAddr(this.cpu.getIP(), this.cpu.getCS())) + " (%" + str.toHex(this.cpu.regLIP) + ")";
         }
 
         if (this.sMessagePrev && sMessage == this.sMessagePrev) return;
@@ -3494,7 +3494,7 @@ if (DEBUGGER) {
              * checkIntNotify() at the moment.
              */
             addr -= 2;
-            this.message("INT " + str.toHexByte(nInt) + ": AH=" + str.toHexByte(AH) + " @" + this.hexOffset(addr - this.cpu.segCS.base, this.cpu.getCS()) + sFunc);
+            this.message("INT " + str.toHexByte(nInt) + ": AH=" + str.toHexByte(AH) + " at " + this.toHexOffset(addr - this.cpu.segCS.base, this.cpu.getCS()) + sFunc);
         }
         return fMessage;
     };
@@ -3534,7 +3534,7 @@ if (DEBUGGER) {
                 selFrom = this.cpu.getCS();
                 addrFrom -= this.cpu.segCS.base;
             }
-            this.message(component.idComponent + '.' + (bOut != null? "outPort" : "inPort") + '(' + str.toHexWord(port) + ',' + (name? name : "unknown") + (bOut != null? ',' + str.toHexByte(bOut) : "") + ')' + (bIn != null? (": " + str.toHexByte(bIn)) : "") + (addrFrom != null? (" @" + this.hexOffset(addrFrom, selFrom)) : ""));
+            this.message(component.idComponent + '.' + (bOut != null? "outPort" : "inPort") + '(' + str.toHexWord(port) + ',' + (name? name : "unknown") + (bOut != null? ',' + str.toHexByte(bOut) : "") + ')' + (bIn != null? (": " + str.toHexByte(bIn)) : "") + (addrFrom != null? (" at " + this.toHexOffset(addrFrom, selFrom)) : ""));
         }
     };
 
@@ -3573,7 +3573,7 @@ if (DEBUGGER) {
             if (this.traceEnabled !== undefined && this.traceEnabled[prop]) {
                 var trace = Debugger.TRACE[prop];
                 var len = (trace.size >> 2);
-                var s = this.hexOffset(this.cpu.opLIP - this.cpu.segCS.base, this.cpu.getCS()) + ' ' + Debugger.INS_NAMES[trace.ins] + '(' + str.toHex(dst, len) + ',' + str.toHex(src, len) + ',' + (flagsIn === null? '-' : str.toHexWord(flagsIn)) + ") " + str.toHex(resultLo, len) + ',' + (flagsOut === null? '-' : str.toHexWord(flagsOut));
+                var s = this.toHexOffset(this.cpu.opLIP - this.cpu.segCS.base, this.cpu.getCS()) + ' ' + Debugger.INS_NAMES[trace.ins] + '(' + str.toHex(dst, len) + ',' + str.toHex(src, len) + ',' + (flagsIn === null? '-' : str.toHexWord(flagsIn)) + ") " + str.toHex(resultLo, len) + ',' + (flagsOut === null? '-' : str.toHexWord(flagsOut));
                 if (!this.aTraceBuffer.length) this.aTraceBuffer = new Array(Debugger.TRACE_LIMIT);
                 this.aTraceBuffer[this.iTraceBuffer++] = s;
                 if (this.iTraceBuffer >= this.aTraceBuffer.length) {
@@ -4215,7 +4215,7 @@ if (DEBUGGER) {
         if (aBreak != this.aBreakExec) {
             var addr = this.getAddr(dbgAddr);
             if (addr == X86.ADDR_INVALID) {
-                this.println("invalid address: " + this.hexAddr(dbgAddr));
+                this.println("invalid address: " + this.toHexAddr(dbgAddr));
                 fSuccess = false;
             } else {
                 this.cpu.addMemBreak(addr, aBreak == this.aBreakWrite, dbgAddr.type != Debugger.ADDRTYPE.PHYSICAL);
@@ -4318,7 +4318,7 @@ if (DEBUGGER) {
     Debugger.prototype.printBreakpoint = function(aBreak, i, sAction)
     {
         var dbgAddr = aBreak[i];
-        this.println(aBreak[0] + ' ' + this.hexAddr(dbgAddr) + (sAction? (' ' + sAction) : (dbgAddr.sCmd? (' "' + dbgAddr.sCmd + '"') : '')));
+        this.println(aBreak[0] + ' ' + this.toHexAddr(dbgAddr) + (sAction? (' ' + sAction) : (dbgAddr.sCmd? (' "' + dbgAddr.sCmd + '"') : '')));
     };
 
     /**
@@ -4658,7 +4658,7 @@ if (DEBUGGER) {
         }
 
         var sBytes = "";
-        var sLine = this.hexAddr(dbgAddrIns) + ' ';
+        var sLine = this.toHexAddr(dbgAddrIns) + ' ';
         if (dbgAddrIns.addr != X86.ADDR_INVALID && dbgAddr.addr != X86.ADDR_INVALID) {
             do {
                 sBytes += str.toHex(this.getByte(dbgAddrIns, 1), 2);
@@ -4727,7 +4727,7 @@ if (DEBUGGER) {
             break;
         case Debugger.TYPE_FARP:
             dbgAddr = this.newAddr(this.getWord(dbgAddr, true), this.getShort(dbgAddr, 2), null, dbgAddr.type, dbgAddr.fData32, dbgAddr.fAddr32);
-            sOperand = this.hexAddr(dbgAddr);
+            sOperand = this.toHexAddr(dbgAddr);
             var aSymbol = this.findSymbol(dbgAddr);
             if (aSymbol[0]) sOperand += " (" + aSymbol[0] + ")";
             break;
@@ -5326,12 +5326,13 @@ if (DEBUGGER) {
     {
         var a;
         while (a = sValue.match(/\{(.*?)\}/)) {
+            if (a[1].indexOf('{') >= 0) break;          // unsupported nested brace(s)
             var value = this.parseExpression(a[1]);
             sValue = sValue.replace('{' + a[1] + '}', value != null? str.toHex(value) : "undefined");
         }
         while (a = sValue.match(/\[(.*?)\]/)) {
-            var sAddr = this.parseReference(a[1]);      // take care of any inner references, too
-            var dbgAddr = this.parseAddr(sAddr);
+            if (a[1].indexOf('[') >= 0) break;          // unsupported nested bracket(s)
+            var dbgAddr = this.parseAddr(a[1]);
             sValue = sValue.replace('[' + a[1] + ']', dbgAddr? str.toHex(this.getWord(dbgAddr), dbgAddr.fData32? 8 : 4) : "undefined");
         }
         return sValue;
@@ -5625,7 +5626,7 @@ if (DEBUGGER) {
                 if (selSymbol === undefined) selSymbol = symbolTable.sel;
                 var sSymbolOrig = symbolTable.aSymbols[sSymbol]['l'];
                 if (sSymbolOrig) sSymbol = sSymbolOrig;
-                this.println(this.hexOffset(offSymbol, selSymbol) + ' ' + sSymbol);
+                this.println(this.toHexOffset(offSymbol, selSymbol) + ' ' + sSymbol);
             }
         }
     };
@@ -5800,7 +5801,7 @@ if (DEBUGGER) {
 
         this.dbgAddrAssemble = dbgAddr;
         if (asArgs[2] === undefined) {
-            this.println("begin assemble @" + this.hexAddr(dbgAddr));
+            this.println("begin assemble at " + this.toHexAddr(dbgAddr));
             this.fAssemble = true;
             this.cpu.updateCPU();
             return;
@@ -5892,7 +5893,7 @@ if (DEBUGGER) {
                 return;
             if (this.findBreakpoint(this.aBreakWrite, dbgAddr, true))
                 return;
-            this.println("breakpoint missing: " + this.hexAddr(dbgAddr));
+            this.println("breakpoint missing: " + this.toHexAddr(dbgAddr));
             return;
         }
 
@@ -6113,7 +6114,7 @@ if (DEBUGGER) {
         for (var iLine = 0; iLine < cLines; iLine++) {
             var data = 0, iByte = 0;
             var sData = "", sChars = "";
-            sAddr = this.hexAddr(dbgAddr);
+            sAddr = this.toHexAddr(dbgAddr);
             for (var i = 0; i < 16; i++) {
                 var b = this.getByte(dbgAddr, 1);
                 data |= (b << (iByte++ << 3));
@@ -6173,7 +6174,7 @@ if (DEBUGGER) {
                 this.println("warning: " + str.toHex(vNew) + " exceeds " + size + "-byte value");
             }
             var vOld = fnGet.call(this, dbgAddr);
-            this.println("changing " + this.hexAddr(dbgAddr) + " from 0x" + str.toHex(vOld, cch) + " to 0x" + str.toHex(vNew, cch));
+            this.println("changing " + this.toHexAddr(dbgAddr) + " from 0x" + str.toHex(vOld, cch) + " to 0x" + str.toHex(vNew, cch));
             fnSet.call(this, dbgAddr, vNew, size);
         }
     };
@@ -6425,7 +6426,7 @@ if (DEBUGGER) {
 
             var addr = this.getAddr(dbgAddr);
             if (MAXDEBUG && fPrint) {
-                this.println(this.hexAddr(dbgAddr) + " (%" + str.toHex(addr, this.cchAddr) + ')');
+                this.println(this.toHexAddr(dbgAddr) + " (%" + str.toHex(addr, this.cchAddr) + ')');
             }
 
             var aSymbol = this.findSymbol(dbgAddr, true);
@@ -6435,7 +6436,7 @@ if (DEBUGGER) {
                     sDelta = "";
                     nDelta = dbgAddr.off - aSymbol[1];
                     if (nDelta) sDelta = " + " + str.toHexWord(nDelta);
-                    s = aSymbol[0] + " (" + this.hexOffset(aSymbol[1], dbgAddr.sel) + ')' + sDelta;
+                    s = aSymbol[0] + " (" + this.toHexOffset(aSymbol[1], dbgAddr.sel) + ')' + sDelta;
                     if (fPrint) this.println(s);
                     sSymbol = s;
                 }
@@ -6443,7 +6444,7 @@ if (DEBUGGER) {
                     sDelta = "";
                     nDelta = aSymbol[5] - dbgAddr.off;
                     if (nDelta) sDelta = " - " + str.toHexWord(nDelta);
-                    s = aSymbol[4] + " (" + this.hexOffset(aSymbol[5], dbgAddr.sel) + ')' + sDelta;
+                    s = aSymbol[4] + " (" + this.toHexOffset(aSymbol[5], dbgAddr.sel) + ')' + sDelta;
                     if (fPrint) this.println(s);
                     if (!sSymbol) sSymbol = s;
                 }
@@ -6532,12 +6533,12 @@ if (DEBUGGER) {
                     if (dc.seekDrive(drive, iSector, nSectors)) {
                         var cb = 0;
                         var fAbort = false;
-                        var sAddr = this.hexAddr(dbgAddr);
+                        var sAddr = this.toHexAddr(dbgAddr);
                         while (!fAbort && drive.nBytes-- > 0) {
                             (function(dbg, dbgAddrCur) {
                                 dc.readByte(drive, function(b, fAsync) {
                                     if (b < 0) {
-                                        dbg.println("out of data at address " + dbg.hexAddr(dbgAddrCur));
+                                        dbg.println("out of data at address " + dbg.toHexAddr(dbgAddrCur));
                                         fAbort = true;
                                         return;
                                     }
@@ -7029,7 +7030,7 @@ if (DEBUGGER) {
 
         if (fInstruction) {
             this.dbgAddrNextCode = this.newAddr(this.cpu.getIP(), this.cpu.getCS());
-            this.doUnassemble(this.hexAddr(this.dbgAddrNextCode));
+            this.doUnassemble(this.toHexAddr(this.dbgAddrNextCode));
         }
     };
 
@@ -7061,7 +7062,7 @@ if (DEBUGGER) {
     /**
      * doPrint(sCmd)
      *
-     * If the string to print is a quoted string, then we run it through replaceRegs(), so that
+     * NOTE: If the string to print is a quoted string, then we run it through replaceRegs(), so that
      * you can take advantage of all the special replacement options used for software interrupt logging.
      *
      * @this {Debugger}
@@ -7071,10 +7072,10 @@ if (DEBUGGER) {
     {
         sCmd = str.trim(sCmd);
         var a = sCmd.match(/^(['"])(.*?)\1$/);
-        if (a) {
-            this.println(this.replaceRegs(a[2]));
-        } else {
+        if (!a) {
             this.parseExpression(sCmd, true);
+        } else {
+            this.println(this.replaceRegs(a[2]));
         }
     };
 
@@ -7245,7 +7246,7 @@ if (DEBUGGER) {
         var selCode = this.cpu.segCS.sel;
         var dbgAddrCall = this.newAddr();
         var dbgAddrStack = this.newAddr(this.cpu.getSP(), this.cpu.getSS());
-        this.println("stack trace for " + this.hexAddr(dbgAddrStack));
+        this.println("stack trace for " + this.toHexAddr(dbgAddrStack));
 
         while (cFrames < nFrames) {
             var sCall = null, cTests = 256;
@@ -7277,7 +7278,7 @@ if (DEBUGGER) {
                 var a = sCall.match(/[0-9A-F]+$/);
                 if (a) sSymbol = this.doList(a[0]);
             }
-            sCall = str.pad(sCall, 50) + "  ;" + (sSymbol || "stack=" + this.hexAddr(dbgAddrStack) + " return=" + this.hexAddr(dbgAddrCall));
+            sCall = str.pad(sCall, 50) + "  ;" + (sSymbol || "stack=" + this.toHexAddr(dbgAddrStack) + " return=" + this.toHexAddr(dbgAddrCall));
             this.println(sCall);
             cFrames++;
         }
@@ -7549,7 +7550,7 @@ if (DEBUGGER) {
         try {
             if (!sCmd.length || sCmd == "end") {
                 if (this.fAssemble) {
-                    this.println("ended assemble @" + this.hexAddr(this.dbgAddrAssemble));
+                    this.println("ended assemble at " + this.toHexAddr(this.dbgAddrAssemble));
                     this.dbgAddrNextCode = this.dbgAddrAssemble;
                     this.fAssemble = false;
                 }
@@ -7577,7 +7578,7 @@ if (DEBUGGER) {
             if (this.isReady() /* && !this.isBusy(true) */ && sCmd.length > 0) {
 
                 if (this.fAssemble) {
-                    sCmd = "a " + this.hexAddr(this.dbgAddrAssemble) + ' ' + sCmd;
+                    sCmd = "a " + this.toHexAddr(this.dbgAddrAssemble) + ' ' + sCmd;
                 }
 
                 var asArgs = this.shiftArgs(sCmd.replace(/ +/g, ' ').split(' '));

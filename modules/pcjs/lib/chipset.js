@@ -3167,7 +3167,7 @@ ChipSet.prototype.outPICLo = function(iPIC, bOut, addrFrom)
             var nIRQ = (nIRL == null? undefined : pic.nIRQBase + nIRL);
             if (pic.bISR & bIREnd) {
                 if (DEBUG && this.messageEnabled(this.messageBitsIRQ(nIRQ))) {
-                    this.printMessage("outPIC" + iPIC + '(' + str.toHexByte(pic.port) + "): IRQ " + nIRQ + " ending @" + this.dbg.hexOffset(this.cpu.getIP(), this.cpu.getCS()) + " stack=" + this.dbg.hexOffset(this.cpu.getSP(), this.cpu.getSS()), true);
+                    this.printMessage("outPIC" + iPIC + '(' + str.toHexByte(pic.port) + "): IRQ " + nIRQ + " ending @" + this.dbg.toHexOffset(this.cpu.getIP(), this.cpu.getCS()) + " stack=" + this.dbg.toHexOffset(this.cpu.getSP(), this.cpu.getSS()), true);
                 }
                 pic.bISR &= ~bIREnd;
                 this.checkIRR();
@@ -3454,7 +3454,7 @@ ChipSet.prototype.getIRRVector = function(iPIC)
 
                     var nIRQ = pic.nIRQBase + nIRL;
                     if (DEBUG && this.messageEnabled(this.messageBitsIRQ(nIRQ))) {
-                        this.printMessage("getIRRVector(): IRQ " + nIRQ + " interrupting @" + this.dbg.hexOffset(this.cpu.getIP(), this.cpu.getCS()) + " stack=" + this.dbg.hexOffset(this.cpu.getSP(), this.cpu.getSS()), true);
+                        this.printMessage("getIRRVector(): IRQ " + nIRQ + " interrupting stack " + this.dbg.toHexOffset(this.cpu.getSP(), this.cpu.getSS()), true, true);
                     }
                     if (MAXDEBUG && DEBUGGER) {
                         this.acInterrupts[nIRQ]++;
