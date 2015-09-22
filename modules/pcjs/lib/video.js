@@ -4964,27 +4964,28 @@ Video.prototype.setPixel = function(imageData, x, y, rgb)
 };
 
 /**
- * initCellCache(fNew)
+ * initCellCache()
  *
- * Invalidates the contents of our internal cell cache.
+ * Initializes the contents of our internal cell cache.
+ *
+ * TODO: Consider changing this to a cache of RGB values, so that when the buffer is merely being color-cycled,
+ * we don't have to update the entire screen.  This will also allow invalidateScreen() to honor the fModified flag,
+ * bypassing initCellCache() when it is false.
  *
  * @this {Video}
- * @param {boolean} [fNew] is true to reallocate/resize the cell cache; in any case, it's still reinitialized
  */
-Video.prototype.initCellCache = function(fNew)
+Video.prototype.initCellCache = function()
 {
     this.cBlinkVisible = -1;                // invalidate the visible blinking character count, to force updateScreen() to recount
     this.fCellCacheValid = false;
-    if (fNew) {
-        var nCells = this.nCellCache;
-        if (this.aCellCache === undefined || this.aCellCache.length != nCells) {
-            this.aCellCache = new Array(nCells);
-        }
+    var nCells = this.nCellCache;
+    if (this.aCellCache === undefined || this.aCellCache.length != nCells) {
+        this.aCellCache = new Array(nCells);
     }
 };
 
 /**
- * invalidateScreen(fNew)
+ * invalidateScreen(fModified)
  *
  * Ensure that the next updateScreen() will update every cell; intended for situations where the entire screen needs
  * to be redrawn, even though the underlying data in the video buffer has not changed (and therefore cleanMemory() will
@@ -4993,12 +4994,12 @@ Video.prototype.initCellCache = function(fNew)
  * For example, when the palette is being cycled, the screen is being panned, the page is being flipped, etc.
  *
  * @this {Video}
- * @param {boolean} [fNew] is passed through to initCellCache; typically true when a new mode has been set.
+ * @param {boolean} [fModified] (true if the buffer may have been modified, false if only color(s) may have changed)
  */
-Video.prototype.invalidateScreen = function(fNew)
+Video.prototype.invalidateScreen = function(fModified)
 {
-    this.fRGBValid = false;
-    this.initCellCache(fNew);
+    if (!fModified) this.fRGBValid = false;
+    this.initCellCache();
 };
 
 /**
@@ -5183,7 +5184,7 @@ Video.prototype.updateScreen = function(fForce)
     if (!fEnabled && !fForce) return;
 
     if (fForce) {
-        this.initCellCache(true);
+        this.initCellCache();
     }
     else {
         /*
@@ -5667,22 +5668,8 @@ Video.prototype.updateScreenGraphicsVGA = function(addrBuffer, addrScreen, addrS
 
         if (iPixelFirst) {
             /*
-             * Notice that we're not using the cell cache when panning is active, because the cached cell data no
-             * longer aligns with the data we're pulling out of the video buffer, and it's not clear that the effort
-             * to realign the data and make a valid cache comparison would save enough work to make it worthwhile.
+             * TODO: Implement support for 8bpp panning
              */
-            if (!x) {
-                data <<= iPixelFirst;
-                nPixels -= iPixelFirst;
-                /*
-                 * This is as good a place as any to invalidate the cell cache when panning is active; this ensures
-                 * we don't rely on stale cache contents once panning stops.
-                 */
-                this.fCellCacheValid = false;
-            } else {
-                iPixel = this.nCols - x;
-                if (nPixels > iPixel) nPixels = iPixel;
-            }
         } else {
             this.assert(iCell < this.aCellCache.length);
             if (this.fCellCacheValid && data === this.aCellCache[iCell]) {
@@ -5697,9 +5684,8 @@ Video.prototype.updateScreenGraphicsVGA = function(addrBuffer, addrScreen, addrS
         if (nPixels) {
             if (x < xDirty) xDirty = x;
             for (iPixel = 0; iPixel < nPixels; iPixel++) {
-                var bPixel = data & 0xff;
-                this.setPixel(this.imageScreenBuffer, x++, y, aPixelColors[bPixel]);
-                data >>>= 8;
+                this.setPixel(this.imageScreenBuffer, x++, y, aPixelColors[data & 0xff]);
+                data >>= 8;
             }
             if (x > xMaxDirty) xMaxDirty = x;
             if (y < yDirty) yDirty = y;
@@ -6004,7 +5990,7 @@ Video.prototype.outATC = function(port, bOut, addrFrom)
                     this.printMessageIO(port, bOut, addrFrom, "ATC." + card.asATCRegs[iReg]);
                 }
                 card.regATCData[iReg] = bOut;
-                this.invalidateScreen();
+                this.invalidateScreen(false);
             }
         }
     }
@@ -6315,7 +6301,7 @@ Video.prototype.outDACData = function(port, bOut, addrFrom)
     var dwNew = (dw & ~(0x3f << this.cardEGA.regDACShift)) | ((bOut & 0x3f) << this.cardEGA.regDACShift);
     if (dw !== dwNew) {
         this.cardEGA.regDACData[this.cardEGA.regDACAddr] = dwNew;
-        this.invalidateScreen();
+        this.invalidateScreen(false);
     }
     this.cardEGA.regDACShift += 6;
     if (this.cardEGA.regDACShift > 12) {
@@ -6600,11 +6586,7 @@ Video.prototype.outCGAColor = function(port, bOut, addrFrom)
     }
     if (this.cardColor.regColor !== bOut) {
         this.cardColor.regColor = bOut;
-        /*
-         * When this color register changes, it can automatically change the appearance of any number of cells, so we make
-         * a special call to initCellCache() to invalidate every cell, forcing all cells to be redrawn on the next updateScreen().
-         */
-        this.initCellCache();
+        this.invalidateScreen(false);
     }
 };
 
