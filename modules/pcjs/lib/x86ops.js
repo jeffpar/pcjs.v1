@@ -2056,6 +2056,10 @@ X86.opGRP1w = function GRP1w()
 /**
  * op=0x83 (GRP1 word,disp)
  *
+ * WARNING: This passes getIPDisp() as the fnSrc parameter, which returns a 32-bit signed value,
+ * so the worker functions (ie, the functions listed in aOpGrp1w[]) MUST mask their result with maskData,
+ * to avoid setting bits beyond the current operand size.
+ *
  * @this {X86CPU}
  */
 X86.opGRP1sw = function GRP1sw()

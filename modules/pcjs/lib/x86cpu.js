@@ -3980,7 +3980,7 @@ X86CPU.prototype.getIPWord = function()
  * getIPDisp()
  *
  * @this {X86CPU}
- * @return {number} sign-extended value from the byte at the current IP; IP advanced by 1
+ * @return {number} sign-extended (32-bit) value from the byte at the current IP; IP advanced by 1
  */
 X86CPU.prototype.getIPDisp = function()
 {

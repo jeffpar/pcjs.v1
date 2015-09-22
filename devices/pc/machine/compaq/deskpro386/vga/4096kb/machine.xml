@@ -2,7 +2,7 @@
 <?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.19.7/machine.xsl"?>
 <machine id="deskpro386" class="pc" border="1" pos="center" background="#FAEBD7">
 	<computer id="deskpro386-vga-4096k" name="Compaq DeskPro 386" buswidth="32" state="/devices/pc/machine/compaq/deskpro386/vga/4096kb/state.json"/>
-	<cpu id="cpu386" model="80386" autostart="false"/>
+	<cpu id="cpu386" model="80386"/>
 	<ram id="ramLow" addr="0x00000" test="false" size="0xa0000" comment="ROM BIOS memory test has been disabled"/>
 	<ram id="ramCPQ" addr="0xfa0000" size="0x60000" comment="Compaq memory at 0xFA0000"/>
 	<ram id="ramExt" addr="0x100000" size="0x300000" comment="Extended memory at 0x100000"/>
@@ -11,9 +11,9 @@
 	<video ref="/devices/pc/video/ibm/vga/ibm-vga-lockfs.xml"/>
 	<keyboard id="keyboard"/>
 	<fdc ref="/disks/pc/library.xml" automount=''/>
-	<debugger id="debugger" messages="" commands='m int off;m hdc off'/>
+	<debugger id="debugger" messages="" commands='g'/>
 	<panel ref="/devices/pc/panel/wide386.xml"/>
-	<hdc id="hdcAT" type="at" drives='[{name:"68Mb Hard Disk",type:4,path:"http://static.pcjs.org/devices/pc/machine/compaq/deskpro386/vga/4096kb/WIN95-FBOOT.json"}]'/>
+	<hdc id="hdcAT" type="at" drives='[{name:"68Mb Hard Disk",type:4,path:"http://static.pcjs.org/devices/pc/machine/compaq/deskpro386/vga/4096kb/WIN95-68Mb.json"}]'/>
 	<chipset id="chipset" model="deskpro386" floppies="[1200,1200]" monitor="vga"/>
 	<serial id="com1" adapter="1"/>
 	<serial id="com2" adapter="2" binding="print"/>

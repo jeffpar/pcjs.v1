@@ -511,6 +511,17 @@ Memory.prototype = {
         this.bitPTEAccessed = blockPhys? Memory.adjustEndian(X86.PTE.ACCESSED) : 0;
     },
     /**
+     * printAddr(sMessage)
+     *
+     * @this {Memory}
+     * @param {string} sMessage
+     */
+    printAddr: function(sMessage) {
+        if (DEBUG && this.dbg && this.dbg.messageEnabled(Messages.MEM)) {
+            this.dbg.printMessage(sMessage + ' ' + (this.addr != null? ('%' + str.toHex(this.addr)) : '#' + this.id), true);
+        }
+    },
+    /**
      * addBreakpoint(off, fWrite, cpu)
      *
      * NOTE: Some Memory blocks already require access to the CPU (eg, UNPAGED blocks that need to call cpu.mapPageBlock()),
@@ -528,18 +539,14 @@ Memory.prototype = {
                 if (cpu) this.cpu = cpu;
                 this.setReadAccess(Memory.afnChecked, false);
             }
-            if (DEBUG && this.dbg && this.dbg.messageEnabled(Messages.MEM)) {
-                this.dbg.printMessage("read breakpoint added to memory block " + str.toHex(this.addr), true);
-            }
+            if (DEBUG) this.printAddr("read breakpoint added to memory block");
         }
         else {
             if (this.cWriteBreakpoints++ === 0) {
                 if (cpu) this.cpu = cpu;
                 this.setWriteAccess(Memory.afnChecked, false);
             }
-            if (DEBUG && this.dbg && this.dbg.messageEnabled(Messages.MEM)) {
-                this.dbg.printMessage("write breakpoint added to memory block " + str.toHex(this.addr), true);
-            }
+            if (DEBUG) this.printAddr("write breakpoint added to memory block");
         }
     },
     /**
@@ -562,18 +569,14 @@ Memory.prototype = {
         if (!fWrite) {
             if (--this.cReadBreakpoints === 0) {
                 this.resetReadAccess();
-                if (DEBUG && this.dbg && this.dbg.messageEnabled(Messages.MEM)) {
-                    this.dbg.printMessage("all read breakpoints removed from memory block " + str.toHex(this.addr), true);
-                }
+                if (DEBUG) this.printAddr("all read breakpoints removed from memory block");
             }
             Component.assert(this.cReadBreakpoints >= 0);
         }
         else {
             if (--this.cWriteBreakpoints === 0) {
                 this.resetWriteAccess();
-                if (DEBUG && this.dbg && this.dbg.messageEnabled(Messages.MEM)) {
-                    this.dbg.printMessage("all write breakpoints removed from memory block " + str.toHex(this.addr), true);
-                }
+                if (DEBUG) this.printAddr("all write breakpoints removed from memory block");
             }
             Component.assert(this.cWriteBreakpoints >= 0);
         }

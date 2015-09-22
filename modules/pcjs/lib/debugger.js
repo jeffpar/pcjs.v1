@@ -162,7 +162,7 @@ function Debugger(parmsDbg)
          *      nSegment
          *      sel
          *      off
-         *      addr (physical address, if any; eg, if symbols are for a ROM)
+         *      addr (physical address, if any; eg, symbols for a ROM)
          *      len
          *      aSymbols
          *      aOffsets
@@ -856,8 +856,8 @@ if (DEBUGGER) {
     /* 0x96 */ [Debugger.INS.XCHG,  Debugger.TYPE_AX     | Debugger.TYPE_BOTH,   Debugger.TYPE_SI | Debugger.TYPE_BOTH],
     /* 0x97 */ [Debugger.INS.XCHG,  Debugger.TYPE_AX     | Debugger.TYPE_BOTH,   Debugger.TYPE_DI | Debugger.TYPE_BOTH],
 
-    /* 0x98 */ [Debugger.INS.CBW],
-    /* 0x99 */ [Debugger.INS.CWD],
+    /* 0x98 */ [Debugger.INS.CBW],  // TODO: CWDE [sign-extend AX into EAX (instead of AL into AX) when operand size is 32 bits]
+    /* 0x99 */ [Debugger.INS.CWD],  // TODO: CDQ [sign-extend EAX into EDX:EAX (instead of AX into DX:AX) when operand size is 32 bits]
     /* 0x9A */ [Debugger.INS.CALL,  Debugger.TYPE_IMM    | Debugger.TYPE_FARP |  Debugger.TYPE_IN],
     /* 0x9B */ [Debugger.INS.WAIT],
     /* 0x9C */ [Debugger.INS.PUSHF],
@@ -1272,6 +1272,7 @@ if (DEBUGGER) {
 
         if (Interrupts.WINDBG.ENABLED || Interrupts.WINDBGRM.ENABLED) {
             this.fWinDbg = null;
+            this.cTrapFaults = 0;
             this.fIgnoreNextCheckFault = false;
             this.cpu.addIntNotify(Interrupts.WINCB.VECTOR, this.intWindowsCallBack.bind(this));
             this.cpu.addIntNotify(Interrupts.WINDBG.VECTOR, this.intWindowsDebugger.bind(this));
@@ -1493,10 +1494,13 @@ if (DEBUGGER) {
                         return function onInt41Return(nLevel) {
                             if ((cpu.regEAX & 0xffff) != Interrupts.WINDBG.LOADED) {
                                 cpu.regEAX = (cpu.regEAX & ~0xffff) | Interrupts.WINDBG.LOADED;
-                                dbg.println("INT 0x41 handling enabled");
+                                /*
+                                 * TODO: We need a DEBUGGER message category; using the MEM category for now.
+                                 */
+                                dbg.printMessage("INT 0x41 handling enabled", Messages.MEM);
                                 dbg.fWinDbg = true;
                             } else {
-                                dbg.println("INT 0x41 monitoring enabled");
+                                dbg.printMessage("INT 0x41 monitoring enabled", Messages.MEM);
                                 dbg.fWinDbg = false;
                             }
                         };
@@ -1513,7 +1517,7 @@ if (DEBUGGER) {
             case Interrupts.WINDBG.IS_LOADED:           // 0x004F
                 if (this.fWinDbg) {
                     cpu.regEAX = (cpu.regEAX & ~0xffff) | Interrupts.WINDBG.LOADED;
-                    this.println("INT 0x41 handling enabled");
+                    this.printMessage("INT 0x41 handling enabled", Messages.MEM);
                 }
                 break;
 
@@ -1583,8 +1587,16 @@ if (DEBUGGER) {
                  */
                 if (this.fWinDbg) {
                     dbgAddr = this.newAddr(cpu.regEDX, CX);
-                    this.println("INT 0x41 TRAPFAULT: fault=" + str.toHexWord(BX) + " error=" + str.toHexLong(cpu.regESI) + " addr=" + this.toHexAddr(dbgAddr));
-                    this.addBreakpoint(this.aBreakExec, dbgAddr, true);
+                    if (!this.cTrapFaults++) {
+                        this.println("INT 0x41 TRAPFAULT: fault=" + str.toHexWord(BX) + " error=" + str.toHexLong(cpu.regESI) + " addr=" + this.toHexAddr(dbgAddr));
+                        this.addBreakpoint(this.aBreakExec, dbgAddr, true);
+                        this.historyInit(true);         // temporary breakpoints don't normally trigger history, but in this case, we want it to
+                    } else {
+                        this.println("TRAPFAULT failed");
+                        this.findBreakpoint(this.aBreakExec, dbgAddr, true, true, true);
+                        this.cTrapFaults = 0;
+                        this.stopCPU();
+                    }
                 }
                 break;
 
@@ -1675,14 +1687,14 @@ if (DEBUGGER) {
                         return function onInt68Return(nLevel) {
                             if ((cpu.regEAX & 0xffff) != Interrupts.WINDBGRM.LOADED) {
                                 cpu.regEAX = (cpu.regEAX & ~0xffff) | Interrupts.WINDBGRM.LOADED;
-                                dbg.println("INT 0x68 handling enabled");
+                                dbg.printMessage("INT 0x68 handling enabled", Messages.MEM);
                                 /*
                                  * If we turn on INT 0x68 handling, we must also turn on INT 0x41 handling,
                                  * because Windows assumes that the latter handler exists whenever the former does.
                                  */
                                 dbg.fWinDbg = dbg.fWinDbgRM = true;
                             } else {
-                                dbg.println("INT 0x68 monitoring enabled");
+                                dbg.printMessage("INT 0x68 monitoring enabled", Messages.MEM);
                                 dbg.fWinDbgRM = false;
                             }
                         };
@@ -3608,7 +3620,7 @@ if (DEBUGGER) {
     };
 
     /**
-     * historyInit()
+     * historyInit(fQuiet)
      *
      * This function is intended to be called by the constructor, reset(), addBreakpoint(), findBreakpoint()
      * and any other function that changes the checksEnabled() criteria used to decide whether checkInstruction()
@@ -3618,12 +3630,15 @@ if (DEBUGGER) {
      * and if the arrays are no longer needed, then deallocate them.
      *
      * @this {Debugger}
+     * @param {boolean} [fQuiet]
      */
-    Debugger.prototype.historyInit = function()
+    Debugger.prototype.historyInit = function(fQuiet)
     {
         var i;
         if (!this.checksEnabled()) {
-            if (this.aOpcodeHistory && this.aOpcodeHistory.length) this.println("instruction history buffer freed");
+            if (this.aOpcodeHistory && this.aOpcodeHistory.length && !fQuiet) {
+                this.println("instruction history buffer freed");
+            }
             this.iOpcodeHistory = 0;
             this.aOpcodeHistory = [];
             this.aaOpcodeCounts = [];
@@ -3639,7 +3654,9 @@ if (DEBUGGER) {
                 this.aOpcodeHistory[i] = this.newAddr();
             }
             this.iOpcodeHistory = 0;
-            this.println("instruction history buffer allocated");
+            if (!fQuiet) {
+                this.println("instruction history buffer allocated");
+            }
         }
         if (!this.aaOpcodeCounts || !this.aaOpcodeCounts.length) {
             this.aaOpcodeCounts = new Array(256);
@@ -4272,14 +4289,20 @@ if (DEBUGGER) {
                 if (!fTempBreak || dbgAddrBreak.fTempBreak) {
                     fFound = true;
                     if (fRemove) {
-                        if (!dbgAddrBreak.fTempBreak) {
-                            if (!fQuiet) this.printBreakpoint(aBreak, i, "cleared");
+                        if (!dbgAddrBreak.fTempBreak && !fQuiet) {
+                            this.printBreakpoint(aBreak, i, "cleared");
                         }
                         aBreak.splice(i, 1);
                         if (aBreak != this.aBreakExec) {
                             this.cpu.removeMemBreak(addr, aBreak == this.aBreakWrite, dbgAddrBreak.type != Debugger.ADDRTYPE.PHYSICAL);
                         }
-                        this.historyInit();
+                        /*
+                         * We'll mirror the logic in addBreakpoint() and leave the history buffer alone if this
+                         * was a temporary breakpoint.
+                         */
+                        if (!dbgAddrBreak.fTempBreak) {
+                            this.historyInit();
+                        }
                         break;
                     }
                     if (!fQuiet) this.printBreakpoint(aBreak, i, "exists");

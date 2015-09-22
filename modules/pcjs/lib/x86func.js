@@ -46,7 +46,7 @@ if (NODE) {
  * @param {number} src
  * @return {number}
  */
-X86.fnADCb = function ADCb(dst, src)
+X86.fnADCb = function(dst, src)
 {
     var b = (dst + src + this.getCarry())|0;
     this.setArithResult(dst, src, b, X86.RESULT.BYTE | X86.RESULT.ALL);
@@ -62,7 +62,7 @@ X86.fnADCb = function ADCb(dst, src)
  * @param {number} src
  * @return {number}
  */
-X86.fnADCw = function ADCw(dst, src)
+X86.fnADCw = function(dst, src)
 {
     var w = (dst + src + this.getCarry())|0;
     this.setArithResult(dst, src, w, this.typeData | X86.RESULT.ALL);
@@ -78,7 +78,7 @@ X86.fnADCw = function ADCw(dst, src)
  * @param {number} src
  * @return {number}
  */
-X86.fnADDb = function ADDb(dst, src)
+X86.fnADDb = function(dst, src)
 {
     var b = (dst + src)|0;
     this.setArithResult(dst, src, b, X86.RESULT.BYTE | X86.RESULT.ALL);
@@ -94,7 +94,7 @@ X86.fnADDb = function ADDb(dst, src)
  * @param {number} src
  * @return {number}
  */
-X86.fnADDw = function ADDw(dst, src)
+X86.fnADDw = function(dst, src)
 {
     var w = (dst + src)|0;
     this.setArithResult(dst, src, w, this.typeData | X86.RESULT.ALL);
@@ -110,7 +110,7 @@ X86.fnADDw = function ADDw(dst, src)
  * @param {number} src
  * @return {number}
  */
-X86.fnANDb = function ANDb(dst, src)
+X86.fnANDb = function(dst, src)
 {
     var b = dst & src;
     this.setLogicResult(b, X86.RESULT.BYTE);
@@ -126,10 +126,10 @@ X86.fnANDb = function ANDb(dst, src)
  * @param {number} src
  * @return {number}
  */
-X86.fnANDw = function ANDw(dst, src)
+X86.fnANDw = function(dst, src)
 {
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesArithRR : this.cycleCounts.nOpCyclesArithRM) : this.cycleCounts.nOpCyclesArithMR);
-    return this.setLogicResult(dst & src, this.typeData);
+    return this.setLogicResult(dst & src, this.typeData) & this.maskData;
 };
 
 /**
@@ -140,7 +140,7 @@ X86.fnANDw = function ANDw(dst, src)
  * @param {number} src
  * @return {number}
  */
-X86.fnARPL = function ARPL(dst, src)
+X86.fnARPL = function(dst, src)
 {
     this.nStepCycles -= (10 + (this.regEA === X86.ADDR_INVALID? 0 : 1));
     if ((dst & X86.SEL.RPL) < (src & X86.SEL.RPL)) {
@@ -160,7 +160,7 @@ X86.fnARPL = function ARPL(dst, src)
  * @param {number} src
  * @return {number}
  */
-X86.fnBOUND = function BOUND(dst, src)
+X86.fnBOUND = function(dst, src)
 {
     if (this.regEA === X86.ADDR_INVALID) {
         /*
@@ -212,7 +212,7 @@ X86.fnBOUND = function BOUND(dst, src)
  * @param {number} src
  * @return {number}
  */
-X86.fnBSF = function BSF(dst, src)
+X86.fnBSF = function(dst, src)
 {
     var n = 0;
     if (!src) {
@@ -248,7 +248,7 @@ X86.fnBSF = function BSF(dst, src)
  * @param {number} src
  * @return {number}
  */
-X86.fnBSR = function BSR(dst, src)
+X86.fnBSR = function(dst, src)
 {
     var n = 0;
     if (!src) {
@@ -281,7 +281,7 @@ X86.fnBSR = function BSR(dst, src)
  * @param {number} src
  * @return {number}
  */
-X86.fnBT = function BT(dst, src)
+X86.fnBT = function(dst, src)
 {
     var bit = 1 << (src & (this.sizeData == 2? 0xf : 0x1f));
     if (dst & bit) this.setCF(); else this.clearCF();
@@ -301,7 +301,7 @@ X86.fnBT = function BT(dst, src)
  * @param {number} src
  * @return {number}
  */
-X86.fnBTC = function BTC(dst, src)
+X86.fnBTC = function(dst, src)
 {
     var bit = 1 << (src & (this.sizeData == 2? 0xf : 0x1f));
     if (dst & bit) this.setCF(); else this.clearCF();
@@ -320,7 +320,7 @@ X86.fnBTC = function BTC(dst, src)
  * @param {number} src
  * @return {number}
  */
-X86.fnBTR = function BTR(dst, src)
+X86.fnBTR = function(dst, src)
 {
     var bit = 1 << (src & (this.sizeData == 2? 0xf : 0x1f));
     if (dst & bit) this.setCF(); else this.clearCF();
@@ -339,7 +339,7 @@ X86.fnBTR = function BTR(dst, src)
  * @param {number} src
  * @return {number}
  */
-X86.fnBTS = function BTS(dst, src)
+X86.fnBTS = function(dst, src)
 {
     var bit = 1 << (src & (this.sizeData == 2? 0xf : 0x1f));
     if (dst & bit) this.setCF(); else this.clearCF();
@@ -358,7 +358,7 @@ X86.fnBTS = function BTS(dst, src)
  * @param {number} src
  * @return {number}
  */
-X86.fnBTMem = function BTMem(dst, src)
+X86.fnBTMem = function(dst, src)
 {
     if (this.regEA === X86.ADDR_INVALID) {
         return X86.fnBT.call(this, dst, src);
@@ -407,7 +407,7 @@ X86.fnBTMem = function BTMem(dst, src)
  * @param {number} src
  * @return {number}
  */
-X86.fnBTCMem = function BTCMem(dst, src)
+X86.fnBTCMem = function(dst, src)
 {
     if (this.regEA === X86.ADDR_INVALID) {
         return X86.fnBTC.call(this, dst, src);
@@ -449,7 +449,7 @@ X86.fnBTCMem = function BTCMem(dst, src)
  * @param {number} src
  * @return {number}
  */
-X86.fnBTRMem = function BTRMem(dst, src)
+X86.fnBTRMem = function(dst, src)
 {
     if (this.regEA === X86.ADDR_INVALID) {
         return X86.fnBTR.call(this, dst, src);
@@ -491,7 +491,7 @@ X86.fnBTRMem = function BTRMem(dst, src)
  * @param {number} src
  * @return {number}
  */
-X86.fnBTSMem = function BTSMem(dst, src)
+X86.fnBTSMem = function(dst, src)
 {
     if (this.regEA === X86.ADDR_INVALID) {
         return X86.fnBTS.call(this, dst, src);
@@ -530,7 +530,7 @@ X86.fnBTSMem = function BTSMem(dst, src)
  * @param {number} src (null)
  * @return {number}
  */
-X86.fnCALLw = function CALLw(dst, src)
+X86.fnCALLw = function(dst, src)
 {
     this.pushWord(this.getIP());
     this.setIP(dst);
@@ -558,7 +558,7 @@ X86.fnCALLw = function CALLw(dst, src)
  * @param {number} off
  * @param {number} sel
  */
-X86.fnCALLF = function CALLF(off, sel)
+X86.fnCALLF = function(off, sel)
 {
     /*
      * Originally, we would snapshot regLSP into opLSP because setCSIP() could trigger a segment fault,
@@ -586,7 +586,7 @@ X86.fnCALLF = function CALLF(off, sel)
  * @param {number} src (null)
  * @return {number}
  */
-X86.fnCALLFdw = function CALLFdw(dst, src)
+X86.fnCALLFdw = function(dst, src)
 {
     if (this.regEA === X86.ADDR_INVALID) {
         return X86.fnGRPUndefined.call(this, dst, src);
@@ -614,7 +614,7 @@ X86.fnCALLFdw = function CALLFdw(dst, src)
  * @param {number} src
  * @return {number} dst unchanged
  */
-X86.fnCMPb = function CMPb(dst, src)
+X86.fnCMPb = function(dst, src)
 {
     var b = (dst - src)|0;
     this.setArithResult(dst, src, b, X86.RESULT.BYTE | X86.RESULT.ALL, true);
@@ -631,7 +631,7 @@ X86.fnCMPb = function CMPb(dst, src)
  * @param {number} src
  * @return {number} dst unchanged
  */
-X86.fnCMPw = function CMPw(dst, src)
+X86.fnCMPw = function(dst, src)
 {
     var w = (dst - src)|0;
     this.setArithResult(dst, src, w, this.typeData | X86.RESULT.ALL, true);
@@ -648,7 +648,7 @@ X86.fnCMPw = function CMPw(dst, src)
  * @param {number} src (null)
  * @return {number}
  */
-X86.fnDECb = function DECb(dst, src)
+X86.fnDECb = function(dst, src)
 {
     var b = (dst - 1)|0;
     this.setArithResult(dst, 1, b, X86.RESULT.BYTE | X86.RESULT.NOTCF, true);
@@ -663,7 +663,7 @@ X86.fnDECb = function DECb(dst, src)
  * @param {number} w
  * @return {number}
  */
-X86.fnDECr = function DECr(w)
+X86.fnDECr = function(w)
 {
     var result = (w - 1)|0;
     this.setArithResult(w, 1, result, this.typeData | X86.RESULT.NOTCF, true);
@@ -679,7 +679,7 @@ X86.fnDECr = function DECr(w)
  * @param {number} src (null)
  * @return {number}
  */
-X86.fnDECw = function DECw(dst, src)
+X86.fnDECw = function(dst, src)
 {
     var w = (dst - 1)|0;
     this.setArithResult(dst, 1, w, this.typeData | X86.RESULT.NOTCF, true);
@@ -693,7 +693,7 @@ X86.fnDECw = function DECw(dst, src)
  * @param {number} lo
  * @param {number} hi
  */
-X86.fnSet64 = function Set64(lo, hi)
+X86.fnSet64 = function(lo, hi)
 {
     return [lo >>> 0, hi >>> 0];
 };
@@ -706,7 +706,7 @@ X86.fnSet64 = function Set64(lo, hi)
  * @param {Array} dst is a 64-bit value
  * @param {Array} src is a 64-bit value
  */
-X86.fnAdd64 = function Add64(dst, src)
+X86.fnAdd64 = function(dst, src)
 {
     dst[0] += src[0];
     dst[1] += src[1];
@@ -725,7 +725,7 @@ X86.fnAdd64 = function Add64(dst, src)
  * @param {Array} src is a 64-bit value
  * @return {number} > 0 if dst > src, == 0 if dst == src, < 0 if dst < src
  */
-X86.fnCmp64 = function Cmp64(dst, src)
+X86.fnCmp64 = function(dst, src)
 {
     var result = dst[1] - src[1];
     if (!result) result = dst[0] - src[0];
@@ -740,7 +740,7 @@ X86.fnCmp64 = function Cmp64(dst, src)
  * @param {Array} dst is a 64-bit value
  * @param {Array} src is a 64-bit value
  */
-X86.fnSub64 = function Sub64(dst, src)
+X86.fnSub64 = function(dst, src)
 {
     dst[0] -= src[0];
     dst[1] -= src[1];
@@ -757,7 +757,7 @@ X86.fnSub64 = function Sub64(dst, src)
  *
  * @param {Array} dst is a 64-bit value
  */
-X86.fnShr64 = function Shr64(dst)
+X86.fnShr64 = function(dst)
 {
     dst[0] >>>= 1;
     if (dst[1] & 0x1) {
@@ -780,7 +780,7 @@ X86.fnShr64 = function Shr64(dst)
  * @param {number} dstHi (high 32-bit portion of dividend)
  * @param {number} src (32-bit divisor)
  */
-X86.fnDIV32 = function DIV32(dstLo, dstHi, src)
+X86.fnDIV32 = function(dstLo, dstHi, src)
 {
     this.fMDSet = false;
 
@@ -826,7 +826,7 @@ X86.fnDIV32 = function DIV32(dstLo, dstHi, src)
  * @param {number} dstHi (high 32-bit portion of dividend)
  * @param {number} src (32-bit divisor)
  */
-X86.fnIDIV32 = function IDIV32(dstLo, dstHi, src)
+X86.fnIDIV32 = function(dstLo, dstHi, src)
 {
     var fNegLo = false, fNegHi = false;
     if (src < 0) {
@@ -853,7 +853,7 @@ X86.fnIDIV32 = function IDIV32(dstLo, dstHi, src)
  * @param {number} src (null; AX is the implied src)
  * @return {number} (we return dst unchanged, since it's actually AX that's modified)
  */
-X86.fnDIVb = function DIVb(dst, src)
+X86.fnDIVb = function(dst, src)
 {
     /*
      * Detect zero divisor
@@ -895,7 +895,7 @@ X86.fnDIVb = function DIVb(dst, src)
  * @param {number} src (null; DX:AX or EDX:EAX is the implied src)
  * @return {number} (we return dst unchanged, since it's actually DX:AX that's modified)
  */
-X86.fnDIVw = function DIVw(dst, src)
+X86.fnDIVw = function(dst, src)
 {
     if (this.sizeData == 2) {
         /*
@@ -958,7 +958,7 @@ X86.fnDIVw = function DIVw(dst, src)
  * @param {number} src
  * @return {number} dst unchanged
  */
-X86.fnESC = function ESC(dst, src)
+X86.fnESC = function(dst, src)
 {
     return dst;
 };
@@ -971,7 +971,7 @@ X86.fnESC = function ESC(dst, src)
  * @param {number} src (null; AX is the implied src)
  * @return {number} (we return dst unchanged, since it's actually AX that's modified)
  */
-X86.fnIDIVb = function IDIVb(dst, src)
+X86.fnIDIVb = function(dst, src)
 {
     /*
      * Detect zero divisor
@@ -1024,7 +1024,7 @@ X86.fnIDIVb = function IDIVb(dst, src)
  * @param {number} src (null; DX:AX or EDX:EAX is the implied src)
  * @return {number} (we return dst unchanged, since it's actually DX:AX that's modified)
  */
-X86.fnIDIVw = function IDIVw(dst, src)
+X86.fnIDIVw = function(dst, src)
 {
     if (this.sizeData == 2) {
         /*
@@ -1104,7 +1104,7 @@ X86.fnIDIVw = function IDIVw(dst, src)
  * @param {number} src
  * @return {number}
  */
-X86.fnIMUL8 = function IMUL8(dst, src)
+X86.fnIMUL8 = function(dst, src)
 {
     dst = this.getIPDisp();
     var result = (((src << 16) >> 16) * dst)|0;
@@ -1148,7 +1148,7 @@ X86.fnIMUL8 = function IMUL8(dst, src)
  * @param {number} src (null; AL is the implied src)
  * @return {number} (we return dst unchanged, since it's actually AX that's modified)
  */
-X86.fnIMULb = function IMULb(dst, src)
+X86.fnIMULb = function(dst, src)
 {
     var result = ((((src = this.regEAX) << 24) >> 24) * ((dst << 24) >> 24))|0;
 
@@ -1191,7 +1191,7 @@ X86.fnIMULb = function IMULb(dst, src)
  * @param {number} src
  * @return {number}
  */
-X86.fnIMULn = function IMULn(dst, src)
+X86.fnIMULn = function(dst, src)
 {
     var fOverflow, result;
     dst = this.getIPWord();
@@ -1238,7 +1238,7 @@ X86.fnIMULn = function IMULn(dst, src)
  * @param {number} dst (any 32-bit number, treated as signed)
  * @param {number} src (any 32-bit number, treated as signed)
  */
-X86.fnIMUL32 = function IMUL32(dst, src)
+X86.fnIMUL32 = function(dst, src)
 {
     var fNeg = false;
     if (src < 0) {
@@ -1279,7 +1279,7 @@ X86.fnIMUL32 = function IMUL32(dst, src)
  * @param {number} src (null; AX or EAX is the implied src)
  * @return {number} (we return dst unchanged, since it's actually DX:AX that's modified)
  */
-X86.fnIMULw = function IMULw(dst, src)
+X86.fnIMULw = function(dst, src)
 {
     var fOverflow;
     if (this.sizeData == 2) {
@@ -1326,7 +1326,7 @@ X86.fnIMULw = function IMULw(dst, src)
  * @param {number} src
  * @return {number}
  */
-X86.fnIMULrw = function IMULrw(dst, src)
+X86.fnIMULrw = function(dst, src)
 {
     var result = (((dst << 16) >> 16) * ((src << 16) >> 16))|0;
     if (result > 32767 || result < -32768) {
@@ -1347,7 +1347,7 @@ X86.fnIMULrw = function IMULrw(dst, src)
  * @param {number} src
  * @return {number}
  */
-X86.fnIMULrd = function IMULrd(dst, src)
+X86.fnIMULrd = function(dst, src)
 {
     var result = dst * src;
     if (result > 2147483647 || result < -2147483648) {
@@ -1368,7 +1368,7 @@ X86.fnIMULrd = function IMULrd(dst, src)
  * @param {number} src (null)
  * @return {number}
  */
-X86.fnINCb = function INCb(dst, src)
+X86.fnINCb = function(dst, src)
 {
     var b = (dst + 1)|0;
     this.setArithResult(dst, 1, b, X86.RESULT.BYTE | X86.RESULT.NOTCF);
@@ -1383,7 +1383,7 @@ X86.fnINCb = function INCb(dst, src)
  * @param {number} w
  * @return {number}
  */
-X86.fnINCr = function INCr(w)
+X86.fnINCr = function(w)
 {
     var result = (w + 1)|0;
     this.setArithResult(w, 1, result, this.typeData | X86.RESULT.NOTCF);
@@ -1399,7 +1399,7 @@ X86.fnINCr = function INCr(w)
  * @param {number} src (null)
  * @return {number}
  */
-X86.fnINCw = function INCw(dst, src)
+X86.fnINCw = function(dst, src)
 {
     var w = (dst + 1)|0;
     this.setArithResult(dst, 1, w, this.typeData | X86.RESULT.NOTCF);
@@ -1422,7 +1422,7 @@ X86.fnINCw = function INCw(dst, src)
  * @param {number|null|undefined} nError
  * @param {number} nCycles (in addition to the default of nOpCyclesInt)
  */
-X86.fnINT = function INT(nIDT, nError, nCycles)
+X86.fnINT = function(nIDT, nError, nCycles)
 {
     /*
      * TODO: We assess the cycle cost up front, because otherwise, if loadIDT() fails, no cost may be assessed.
@@ -1459,7 +1459,7 @@ X86.fnINT = function INT(nIDT, nError, nCycles)
  *
  * @this {X86CPU}
  */
-X86.fnIRET = function IRET()
+X86.fnIRET = function()
 {
     /*
      * Originally, we would snapshot regLSP into opLSP because newCS could trigger a segment fault,
@@ -1547,7 +1547,7 @@ X86.fnIRET = function IRET()
  * @param {number} src (null)
  * @return {number}
  */
-X86.fnJMPw = function JMPw(dst, src)
+X86.fnJMPw = function(dst, src)
 {
     this.setIP(dst);
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesJmpWR : this.cycleCounts.nOpCyclesJmpWM);
@@ -1563,7 +1563,7 @@ X86.fnJMPw = function JMPw(dst, src)
  * @param {number} src (null)
  * @return {number}
  */
-X86.fnJMPFdw = function JMPFdw(dst, src)
+X86.fnJMPFdw = function(dst, src)
 {
     if (this.regEA === X86.ADDR_INVALID) {
         return X86.fnGRPUndefined.call(this, dst, src);
@@ -1583,7 +1583,7 @@ X86.fnJMPFdw = function JMPFdw(dst, src)
  * @param {number} src
  * @return {number}
  */
-X86.fnLAR = function LAR(dst, src)
+X86.fnLAR = function(dst, src)
 {
     this.nStepCycles -= (14 + (this.regEA === X86.ADDR_INVALID? 0 : 2));
     /*
@@ -1616,7 +1616,7 @@ X86.fnLAR = function LAR(dst, src)
  * @this {X86CPU}
  * @param {number} l
  */
-X86.fnLCR0 = function LCR0(l)
+X86.fnLCR0 = function(l)
 {
     this.regCR0 = l;
     this.setProtMode();
@@ -1635,7 +1635,7 @@ X86.fnLCR0 = function LCR0(l)
  * @this {X86CPU}
  * @param {number} l
  */
-X86.fnLCR3 = function LCR3(l)
+X86.fnLCR3 = function(l)
 {
     this.regCR3 = l;
     /*
@@ -1654,7 +1654,7 @@ X86.fnLCR3 = function LCR3(l)
  * @param {number} src
  * @return {number}
  */
-X86.fnLDS = function LDS(dst, src)
+X86.fnLDS = function(dst, src)
 {
     if (this.regEA === X86.ADDR_INVALID) {
         X86.opUndefined.call(this);
@@ -1673,7 +1673,7 @@ X86.fnLDS = function LDS(dst, src)
  * @param {number} src
  * @return {number}
  */
-X86.fnLEA = function LEA(dst, src)
+X86.fnLEA = function(dst, src)
 {
     /*
      * TODO: Until I bite the bullet and choose a truly invalid value for X86.ADDR_INVALID (eg, null),
@@ -1706,7 +1706,7 @@ X86.fnLEA = function LEA(dst, src)
  * @param {number} src
  * @return {number}
  */
-X86.fnLES = function LES(dst, src)
+X86.fnLES = function(dst, src)
 {
     if (this.regEA === X86.ADDR_INVALID) {
         X86.opUndefined.call(this);
@@ -1725,7 +1725,7 @@ X86.fnLES = function LES(dst, src)
  * @param {number} src
  * @return {number}
  */
-X86.fnLFS = function LFS(dst, src)
+X86.fnLFS = function(dst, src)
 {
     if (this.regEA === X86.ADDR_INVALID) {
         X86.opUndefined.call(this);
@@ -1754,7 +1754,7 @@ X86.fnLFS = function LFS(dst, src)
  * @param {number} src (null)
  * @return {number}
  */
-X86.fnLGDT = function LGDT(dst, src)
+X86.fnLGDT = function(dst, src)
 {
     /*
      * TODO: Consider swapping out this function whenever setProtMode() changes the mode to V86-mode.
@@ -1787,7 +1787,7 @@ X86.fnLGDT = function LGDT(dst, src)
  * @param {number} src
  * @return {number}
  */
-X86.fnLGS = function LGS(dst, src)
+X86.fnLGS = function(dst, src)
 {
     if (this.regEA === X86.ADDR_INVALID) {
         X86.opUndefined.call(this);
@@ -1816,7 +1816,7 @@ X86.fnLGS = function LGS(dst, src)
  * @param {number} src (null)
  * @return {number}
  */
-X86.fnLIDT = function LIDT(dst, src)
+X86.fnLIDT = function(dst, src)
 {
     /*
      * TODO: Consider swapping out this function whenever setProtMode() changes the mode to V86-mode.
@@ -1851,7 +1851,7 @@ X86.fnLIDT = function LIDT(dst, src)
  * @param {number} src (null)
  * @return {number}
  */
-X86.fnLLDT = function LLDT(dst, src)
+X86.fnLLDT = function(dst, src)
 {
     this.opFlags |= X86.OPFLAG.NOWRITE;
     this.segLDT.load(dst);
@@ -1869,7 +1869,7 @@ X86.fnLLDT = function LLDT(dst, src)
  * @param {number} src (null)
  * @return {number}
  */
-X86.fnLMSW = function LMSW(dst, src)
+X86.fnLMSW = function(dst, src)
 {
     /*
      * TODO: Consider swapping out this function whenever setProtMode() changes the mode to V86-mode.
@@ -1892,7 +1892,7 @@ X86.fnLMSW = function LMSW(dst, src)
  * @param {number} src (the selector)
  * @return {number}
  */
-X86.fnLSL = function LSL(dst, src)
+X86.fnLSL = function(dst, src)
 {
     /*
      * TODO: Is this an invalid operation if regEAWrite is set?  dst is required to be a register.
@@ -1924,7 +1924,7 @@ X86.fnLSL = function LSL(dst, src)
  * @param {number} src
  * @return {number}
  */
-X86.fnLSS = function LSS(dst, src)
+X86.fnLSS = function(dst, src)
 {
     if (this.regEA === X86.ADDR_INVALID) {
         X86.opUndefined.call(this);
@@ -1945,7 +1945,7 @@ X86.fnLSS = function LSS(dst, src)
  * @param {number} src (null)
  * @return {number}
  */
-X86.fnLTR = function LTR(dst, src)
+X86.fnLTR = function(dst, src)
 {
     this.opFlags |= X86.OPFLAG.NOWRITE;
     if (this.segTSS.load(dst) !== X86.ADDR_INVALID) {
@@ -1964,7 +1964,7 @@ X86.fnLTR = function LTR(dst, src)
  * @param {number} src (new value)
  * @return {number} dst (updated value, from src)
  */
-X86.fnMOV = function MOV(dst, src)
+X86.fnMOV = function(dst, src)
 {
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesMovRR : this.cycleCounts.nOpCyclesMovRM) : this.cycleCounts.nOpCyclesMovMR);
     return src;
@@ -1978,7 +1978,7 @@ X86.fnMOV = function MOV(dst, src)
  * @param {number} src (new value)
  * @return {number} dst (updated value, from src)
  */
-X86.fnMOVX = function MOVX(dst, src)
+X86.fnMOVX = function(dst, src)
 {
     return src;
 };
@@ -1991,7 +1991,7 @@ X86.fnMOVX = function MOVX(dst, src)
  * @param {number} src (new value)
  * @return {number} dst (updated value, from src)
  */
-X86.fnMOVn = function MOVn(dst, src)
+X86.fnMOVn = function(dst, src)
 {
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesMovRI : this.cycleCounts.nOpCyclesMovMI);
     return src;
@@ -2005,7 +2005,7 @@ X86.fnMOVn = function MOVn(dst, src)
  * @param {number} src (new value)
  * @return {number} dst (src is overridden, replaced with regXX, as specified by opMOVwsr() or opMOVrc())
  */
-X86.fnMOVxx = function MOVxx(dst, src)
+X86.fnMOVxx = function(dst, src)
 {
     if (this.regEAWrite !== X86.ADDR_INVALID) {
         /*
@@ -2026,7 +2026,7 @@ X86.fnMOVxx = function MOVxx(dst, src)
  * @param {number} src (null)
  * @return {number} (we return dst unchanged, since it's actually AX that's modified)
  */
-X86.fnMULb = function MULb(dst, src)
+X86.fnMULb = function(dst, src)
 {
     this.fMDSet = true;
     this.regMDLo = ((src = this.regEAX & 0xff) * dst) & 0xffff;
@@ -2066,7 +2066,7 @@ X86.fnMULb = function MULb(dst, src)
  * @param {number} dst (any 32-bit number, treated as unsigned)
  * @param {number} src (any 32-bit number, treated as unsigned)
  */
-X86.fnMUL32 = function MUL32(dst, src)
+X86.fnMUL32 = function(dst, src)
 {
     var srcLo = src & 0xffff;
     var srcHi = src >>> 16;
@@ -2094,7 +2094,7 @@ X86.fnMUL32 = function MUL32(dst, src)
  * @param {number} src (null; AX or EAX is the implied src)
  * @return {number} (we return dst unchanged, since it's actually DX:AX that's modified)
  */
-X86.fnMULw = function MULw(dst, src)
+X86.fnMULw = function(dst, src)
 {
     if (this.sizeData == 2) {
         src = this.regEAX & 0xffff;
@@ -2138,7 +2138,7 @@ X86.fnMULw = function MULw(dst, src)
  * @param {number} src (null)
  * @return {number}
  */
-X86.fnNEGb = function NEGb(dst, src)
+X86.fnNEGb = function(dst, src)
 {
     var b = (-dst)|0;
     this.setArithResult(0, dst, b, X86.RESULT.BYTE | X86.RESULT.ALL, true);
@@ -2154,7 +2154,7 @@ X86.fnNEGb = function NEGb(dst, src)
  * @param {number} src (null)
  * @return {number}
  */
-X86.fnNEGw = function NEGw(dst, src)
+X86.fnNEGw = function(dst, src)
 {
     var w = (-dst)|0;
     this.setArithResult(0, dst, w, this.typeData | X86.RESULT.ALL, true);
@@ -2170,7 +2170,7 @@ X86.fnNEGw = function NEGw(dst, src)
  * @param {number} src (null)
  * @return {number}
  */
-X86.fnNOTb = function NOTb(dst, src)
+X86.fnNOTb = function(dst, src)
 {
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesNegR : this.cycleCounts.nOpCyclesNegM);
     return dst ^ 0xff;
@@ -2184,7 +2184,7 @@ X86.fnNOTb = function NOTb(dst, src)
  * @param {number} src (null)
  * @return {number}
  */
-X86.fnNOTw = function NOTw(dst, src)
+X86.fnNOTw = function(dst, src)
 {
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesNegR : this.cycleCounts.nOpCyclesNegM);
     return dst ^ this.maskData;
@@ -2198,7 +2198,7 @@ X86.fnNOTw = function NOTw(dst, src)
  * @param {number} src
  * @return {number}
  */
-X86.fnORb = function ORb(dst, src)
+X86.fnORb = function(dst, src)
 {
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesArithRR : this.cycleCounts.nOpCyclesArithRM) : this.cycleCounts.nOpCyclesArithMR);
     return this.setLogicResult(dst | src, X86.RESULT.BYTE);
@@ -2212,10 +2212,10 @@ X86.fnORb = function ORb(dst, src)
  * @param {number} src
  * @return {number}
  */
-X86.fnORw = function ORw(dst, src)
+X86.fnORw = function(dst, src)
 {
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesArithRR : this.cycleCounts.nOpCyclesArithRM) : this.cycleCounts.nOpCyclesArithMR);
-    return this.setLogicResult(dst | src, this.typeData);
+    return this.setLogicResult(dst | src, this.typeData) & this.maskData;
 };
 
 /**
@@ -2226,7 +2226,7 @@ X86.fnORw = function ORw(dst, src)
  * @param {number} src (new value)
  * @return {number} dst (updated value, from src)
  */
-X86.fnPOPw = function POPw(dst, src)
+X86.fnPOPw = function(dst, src)
 {
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesPopReg : this.cycleCounts.nOpCyclesPopMem);
     return src;
@@ -2240,7 +2240,7 @@ X86.fnPOPw = function POPw(dst, src)
  * @param {number} src (null)
  * @return {number}
  */
-X86.fnPUSHw = function PUSHw(dst, src)
+X86.fnPUSHw = function(dst, src)
 {
     var w = dst;
     if (this.opFlags & X86.OPFLAG.PUSHSP) {
@@ -2272,7 +2272,7 @@ X86.fnPUSHw = function PUSHw(dst, src)
  * @param {number} src (1 or CL)
  * @return {number}
  */
-X86.fnRCLb = function RCLb(dst, src)
+X86.fnRCLb = function(dst, src)
 {
     var result = dst;
     var flagsIn = (DEBUG? this.getPS() : 0);
@@ -2300,7 +2300,7 @@ X86.fnRCLb = function RCLb(dst, src)
  * @param {number} src (1 or CL)
  * @return {number}
  */
-X86.fnRCLw = function RCLw(dst, src)
+X86.fnRCLw = function(dst, src)
 {
     var result = dst;
     var flagsIn = (DEBUG? this.getPS() : 0);
@@ -2328,7 +2328,7 @@ X86.fnRCLw = function RCLw(dst, src)
  * @param {number} src (1 or CL)
  * @return {number}
  */
-X86.fnRCLd = function RCLd(dst, src)
+X86.fnRCLd = function(dst, src)
 {
     var result = dst;
     var flagsIn = (DEBUG? this.getPS() : 0);
@@ -2356,7 +2356,7 @@ X86.fnRCLd = function RCLd(dst, src)
  * @param {number} src (1 or CL)
  * @return {number}
  */
-X86.fnRCRb = function RCRb(dst, src)
+X86.fnRCRb = function(dst, src)
 {
     var result = dst;
     var flagsIn = (DEBUG? this.getPS() : 0);
@@ -2384,7 +2384,7 @@ X86.fnRCRb = function RCRb(dst, src)
  * @param {number} src (1 or CL)
  * @return {number}
  */
-X86.fnRCRw = function RCRw(dst, src)
+X86.fnRCRw = function(dst, src)
 {
     var result = dst;
     var flagsIn = (DEBUG? this.getPS() : 0);
@@ -2412,7 +2412,7 @@ X86.fnRCRw = function RCRw(dst, src)
  * @param {number} src (1 or CL)
  * @return {number}
  */
-X86.fnRCRd = function RCRd(dst, src)
+X86.fnRCRd = function(dst, src)
 {
     var result = dst;
     var flagsIn = (DEBUG? this.getPS() : 0);
@@ -2442,7 +2442,7 @@ X86.fnRCRd = function RCRd(dst, src)
  * @this {X86CPU}
  * @param {number} n
  */
-X86.fnRETF = function RETF(n)
+X86.fnRETF = function(n)
 {
     /*
      * Originally, we would snapshot regLSP into opLSP because newCS could trigger a segment fault,
@@ -2494,7 +2494,7 @@ X86.fnRETF = function RETF(n)
  * @param {number} src (1 or CL)
  * @return {number}
  */
-X86.fnROLb = function ROLb(dst, src)
+X86.fnROLb = function(dst, src)
 {
     var result = dst;
     var flagsIn = (DEBUG? this.getPS() : 0);
@@ -2522,7 +2522,7 @@ X86.fnROLb = function ROLb(dst, src)
  * @param {number} src (1 or CL)
  * @return {number}
  */
-X86.fnROLw = function ROLw(dst, src)
+X86.fnROLw = function(dst, src)
 {
     var result = dst;
     var flagsIn = (DEBUG? this.getPS() : 0);
@@ -2550,7 +2550,7 @@ X86.fnROLw = function ROLw(dst, src)
  * @param {number} src (1 or CL)
  * @return {number}
  */
-X86.fnROLd = function ROLd(dst, src)
+X86.fnROLd = function(dst, src)
 {
     var result = dst;
     var flagsIn = (DEBUG? this.getPS() : 0);
@@ -2572,7 +2572,7 @@ X86.fnROLd = function ROLd(dst, src)
  * @param {number} src (1 or CL)
  * @return {number}
  */
-X86.fnRORb = function RORb(dst, src)
+X86.fnRORb = function(dst, src)
 {
     var result = dst;
     var flagsIn = (DEBUG? this.getPS() : 0);
@@ -2600,7 +2600,7 @@ X86.fnRORb = function RORb(dst, src)
  * @param {number} src (1 or CL)
  * @return {number}
  */
-X86.fnRORw = function RORw(dst, src)
+X86.fnRORw = function(dst, src)
 {
     var result = dst;
     var flagsIn = (DEBUG? this.getPS() : 0);
@@ -2628,7 +2628,7 @@ X86.fnRORw = function RORw(dst, src)
  * @param {number} src (1 or CL)
  * @return {number}
  */
-X86.fnRORd = function RORd(dst, src)
+X86.fnRORd = function(dst, src)
 {
     var result = dst;
     var flagsIn = (DEBUG? this.getPS() : 0);
@@ -2650,7 +2650,7 @@ X86.fnRORd = function RORd(dst, src)
  * @param {number} src (1 or CL, or an immediate byte for 80186/80188 and up)
  * @return {number}
  */
-X86.fnSARb = function SARb(dst, src)
+X86.fnSARb = function(dst, src)
 {
     var count = src & this.nShiftCountMask;
     if (count) {
@@ -2670,7 +2670,7 @@ X86.fnSARb = function SARb(dst, src)
  * @param {number} src (1 or CL, or an immediate byte for 80186/80188 and up)
  * @return {number}
  */
-X86.fnSARw = function SARw(dst, src)
+X86.fnSARw = function(dst, src)
 {
     var count = src & this.nShiftCountMask;
     if (count) {
@@ -2690,7 +2690,7 @@ X86.fnSARw = function SARw(dst, src)
  * @param {number} src (1 or CL, or an immediate byte for 80186/80188 and up)
  * @return {number}
  */
-X86.fnSARd = function SARd(dst, src)
+X86.fnSARd = function(dst, src)
 {
     var count = src & this.nShiftCountMask;
     if (count) {
@@ -2709,7 +2709,7 @@ X86.fnSARd = function SARd(dst, src)
  * @param {number} src
  * @return {number}
  */
-X86.fnSBBb = function SBBb(dst, src)
+X86.fnSBBb = function(dst, src)
 {
     var b = (dst - src - this.getCarry())|0;
     this.setArithResult(dst, src, b, X86.RESULT.BYTE | X86.RESULT.ALL, true);
@@ -2725,7 +2725,7 @@ X86.fnSBBb = function SBBb(dst, src)
  * @param {number} src
  * @return {number}
  */
-X86.fnSBBw = function SBBw(dst, src)
+X86.fnSBBw = function(dst, src)
 {
     var w = (dst - src - this.getCarry())|0;
     this.setArithResult(dst, src, w, this.typeData | X86.RESULT.ALL, true);
@@ -2739,7 +2739,7 @@ X86.fnSBBw = function SBBw(dst, src)
  * @this {X86CPU}
  * @param {function(number,number)} fnSet
  */
-X86.fnSETcc = function SETcc(fnSet)
+X86.fnSETcc = function(fnSet)
 {
     this.opFlags |= X86.OPFLAG.NOREAD;
     this.aOpModMemByte[this.getIPByte()].call(this, fnSet);
@@ -2754,7 +2754,7 @@ X86.fnSETcc = function SETcc(fnSet)
  * @param {number} src (ignored)
  * @return {number}
  */
-X86.fnSETO = function SETO(dst, src)
+X86.fnSETO = function(dst, src)
 {
     return (this.getOF()? 1 : 0);
 };
@@ -2767,7 +2767,7 @@ X86.fnSETO = function SETO(dst, src)
  * @param {number} src (ignored)
  * @return {number}
  */
-X86.fnSETNO = function SETNO(dst, src)
+X86.fnSETNO = function(dst, src)
 {
     return (this.getOF()? 0 : 1);
 };
@@ -2780,7 +2780,7 @@ X86.fnSETNO = function SETNO(dst, src)
  * @param {number} src (ignored)
  * @return {number}
  */
-X86.fnSETC = function SETC(dst, src)
+X86.fnSETC = function(dst, src)
 {
     return (this.getCF()? 1 : 0);
 };
@@ -2793,7 +2793,7 @@ X86.fnSETC = function SETC(dst, src)
  * @param {number} src (ignored)
  * @return {number}
  */
-X86.fnSETNC = function SETNC(dst, src)
+X86.fnSETNC = function(dst, src)
 {
     return (this.getCF()? 0 : 1);
 };
@@ -2806,7 +2806,7 @@ X86.fnSETNC = function SETNC(dst, src)
  * @param {number} src (ignored)
  * @return {number}
  */
-X86.fnSETZ = function SETZ(dst, src)
+X86.fnSETZ = function(dst, src)
 {
     return (this.getZF()? 1 : 0);
 };
@@ -2819,7 +2819,7 @@ X86.fnSETZ = function SETZ(dst, src)
  * @param {number} src (ignored)
  * @return {number}
  */
-X86.fnSETNZ = function SETNZ(dst, src)
+X86.fnSETNZ = function(dst, src)
 {
     return (this.getZF()? 0 : 1);
 };
@@ -2832,7 +2832,7 @@ X86.fnSETNZ = function SETNZ(dst, src)
  * @param {number} src (ignored)
  * @return {number}
  */
-X86.fnSETBE = function SETBE(dst, src)
+X86.fnSETBE = function(dst, src)
 {
     return (this.getCF() || this.getZF()? 1 : 0);
 };
@@ -2845,7 +2845,7 @@ X86.fnSETBE = function SETBE(dst, src)
  * @param {number} src (ignored)
  * @return {number}
  */
-X86.fnSETNBE = function SETNBE(dst, src)
+X86.fnSETNBE = function(dst, src)
 {
     return (this.getCF() || this.getZF()? 0 : 1);
 };
@@ -2858,7 +2858,7 @@ X86.fnSETNBE = function SETNBE(dst, src)
  * @param {number} src (ignored)
  * @return {number}
  */
-X86.fnSETS = function SETS(dst, src)
+X86.fnSETS = function(dst, src)
 {
     return (this.getSF()? 1 : 0);
 };
@@ -2871,7 +2871,7 @@ X86.fnSETS = function SETS(dst, src)
  * @param {number} src (ignored)
  * @return {number}
  */
-X86.fnSETNS = function SETNS(dst, src)
+X86.fnSETNS = function(dst, src)
 {
     return (this.getSF()? 0 : 1);
 };
@@ -2884,7 +2884,7 @@ X86.fnSETNS = function SETNS(dst, src)
  * @param {number} src (ignored)
  * @return {number}
  */
-X86.fnSETP = function SETP(dst, src)
+X86.fnSETP = function(dst, src)
 {
     return (this.getPF()? 1 : 0);
 };
@@ -2897,7 +2897,7 @@ X86.fnSETP = function SETP(dst, src)
  * @param {number} src (ignored)
  * @return {number}
  */
-X86.fnSETNP = function SETNP(dst, src)
+X86.fnSETNP = function(dst, src)
 {
     return (this.getPF()? 0 : 1);
 };
@@ -2910,7 +2910,7 @@ X86.fnSETNP = function SETNP(dst, src)
  * @param {number} src (ignored)
  * @return {number}
  */
-X86.fnSETL = function SETL(dst, src)
+X86.fnSETL = function(dst, src)
 {
     return (!this.getSF() != !this.getOF()? 1 : 0);
 };
@@ -2923,7 +2923,7 @@ X86.fnSETL = function SETL(dst, src)
  * @param {number} src (ignored)
  * @return {number}
  */
-X86.fnSETNL = function SETNL(dst, src)
+X86.fnSETNL = function(dst, src)
 {
     return (!this.getSF() != !this.getOF()? 0 : 1);
 };
@@ -2936,7 +2936,7 @@ X86.fnSETNL = function SETNL(dst, src)
  * @param {number} src (ignored)
  * @return {number}
  */
-X86.fnSETLE = function SETLE(dst, src)
+X86.fnSETLE = function(dst, src)
 {
     return (this.getZF() || !this.getSF() != !this.getOF()? 1 : 0);
 };
@@ -2949,7 +2949,7 @@ X86.fnSETLE = function SETLE(dst, src)
  * @param {number} src (ignored)
  * @return {number}
  */
-X86.fnSETNLE = function SETNLE(dst, src)
+X86.fnSETNLE = function(dst, src)
 {
     return (this.getZF() || !this.getSF() != !this.getOF()? 0 : 1);
 };
@@ -2964,7 +2964,7 @@ X86.fnSETNLE = function SETNLE(dst, src)
  * @param {number} src (null)
  * @return {number}
  */
-X86.fnSGDT = function SGDT(dst, src)
+X86.fnSGDT = function(dst, src)
 {
     if (this.regEA === X86.ADDR_INVALID) {
         X86.opInvalid.call(this);
@@ -3038,7 +3038,7 @@ X86.fnSGDT = function SGDT(dst, src)
  * @param {number} src (1 or CL, or an immediate byte for 80186/80188 and up)
  * @return {number}
  */
-X86.fnSHLb = function SHLb(dst, src)
+X86.fnSHLb = function(dst, src)
 {
     var result = dst;
     var flagsIn = (DEBUG? this.getPS() : 0);
@@ -3065,7 +3065,7 @@ X86.fnSHLb = function SHLb(dst, src)
  * @param {number} src (1 or CL, or an immediate byte for 80186/80188 and up)
  * @return {number}
  */
-X86.fnSHLw = function SHLw(dst, src)
+X86.fnSHLw = function(dst, src)
 {
     var result = dst;
     var flagsIn = (DEBUG? this.getPS() : 0);
@@ -3092,7 +3092,7 @@ X86.fnSHLw = function SHLw(dst, src)
  * @param {number} src (1 or CL, or an immediate byte for 80186/80188 and up)
  * @return {number}
  */
-X86.fnSHLd = function SHLd(dst, src)
+X86.fnSHLd = function(dst, src)
 {
     var result = dst;
     var flagsIn = (DEBUG? this.getPS() : 0);
@@ -3115,7 +3115,7 @@ X86.fnSHLd = function SHLd(dst, src)
  * @param {number} count (0-31)
  * @return {number}
  */
-X86.fnSHLDw = function SHLDw(dst, src, count)
+X86.fnSHLDw = function(dst, src, count)
 {
     if (count) {
         if (count > 16) {
@@ -3138,7 +3138,7 @@ X86.fnSHLDw = function SHLDw(dst, src, count)
  * @param {number} count
  * @return {number}
  */
-X86.fnSHLDd = function SHLDd(dst, src, count)
+X86.fnSHLDd = function(dst, src, count)
 {
     if (count) {
         var carry = dst << (count - 1);
@@ -3156,7 +3156,7 @@ X86.fnSHLDd = function SHLDd(dst, src, count)
  * @param {number} src
  * @return {number}
  */
-X86.fnSHLDwi = function SHLDwi(dst, src)
+X86.fnSHLDwi = function(dst, src)
 {
     return X86.fnSHLDw.call(this, dst, src, this.getIPByte());
 };
@@ -3169,7 +3169,7 @@ X86.fnSHLDwi = function SHLDwi(dst, src)
  * @param {number} src
  * @return {number}
  */
-X86.fnSHLDdi = function SHLDdi(dst, src)
+X86.fnSHLDdi = function(dst, src)
 {
     return X86.fnSHLDd.call(this, dst, src, this.getIPByte());
 };
@@ -3182,7 +3182,7 @@ X86.fnSHLDdi = function SHLDdi(dst, src)
  * @param {number} src
  * @return {number}
  */
-X86.fnSHLDwCL = function SHLDwCL(dst, src)
+X86.fnSHLDwCL = function(dst, src)
 {
     return X86.fnSHLDw.call(this, dst, src, this.regECX & 0x1f);
 };
@@ -3195,7 +3195,7 @@ X86.fnSHLDwCL = function SHLDwCL(dst, src)
  * @param {number} src
  * @return {number}
  */
-X86.fnSHLDdCL = function SHLDdCL(dst, src)
+X86.fnSHLDdCL = function(dst, src)
 {
     return X86.fnSHLDd.call(this, dst, src, this.regECX & 0x1f);
 };
@@ -3208,7 +3208,7 @@ X86.fnSHLDdCL = function SHLDdCL(dst, src)
  * @param {number} src (1 or CL, or an immediate byte for 80186/80188 and up)
  * @return {number}
  */
-X86.fnSHRb = function SHRb(dst, src)
+X86.fnSHRb = function(dst, src)
 {
     var count = src & this.nShiftCountMask;
     if (count) {
@@ -3227,7 +3227,7 @@ X86.fnSHRb = function SHRb(dst, src)
  * @param {number} src (1 or CL, or an immediate byte for 80186/80188 and up)
  * @return {number}
  */
-X86.fnSHRw = function SHRw(dst, src)
+X86.fnSHRw = function(dst, src)
 {
     var count = src & this.nShiftCountMask;
     if (count) {
@@ -3246,7 +3246,7 @@ X86.fnSHRw = function SHRw(dst, src)
  * @param {number} src (1 or CL, or an immediate byte for 80186/80188 and up)
  * @return {number}
  */
-X86.fnSHRd = function SHRd(dst, src)
+X86.fnSHRd = function(dst, src)
 {
     var count = src & this.nShiftCountMask;
     if (count) {
@@ -3266,7 +3266,7 @@ X86.fnSHRd = function SHRd(dst, src)
  * @param {number} count (0-31)
  * @return {number}
  */
-X86.fnSHRDw = function SHRDw(dst, src, count)
+X86.fnSHRDw = function(dst, src, count)
 {
     if (count) {
         if (count > 16) {
@@ -3289,7 +3289,7 @@ X86.fnSHRDw = function SHRDw(dst, src, count)
  * @param {number} count
  * @return {number}
  */
-X86.fnSHRDd = function SHRDd(dst, src, count)
+X86.fnSHRDd = function(dst, src, count)
 {
     if (count) {
         var carry = dst >>> (count - 1);
@@ -3307,7 +3307,7 @@ X86.fnSHRDd = function SHRDd(dst, src, count)
  * @param {number} src
  * @return {number}
  */
-X86.fnSHRDwi = function SHRDwi(dst, src)
+X86.fnSHRDwi = function(dst, src)
 {
     return X86.fnSHRDw.call(this, dst, src, this.getIPByte());
 };
@@ -3320,7 +3320,7 @@ X86.fnSHRDwi = function SHRDwi(dst, src)
  * @param {number} src
  * @return {number}
  */
-X86.fnSHRDdi = function SHRDdi(dst, src)
+X86.fnSHRDdi = function(dst, src)
 {
     return X86.fnSHRDd.call(this, dst, src, this.getIPByte());
 };
@@ -3333,7 +3333,7 @@ X86.fnSHRDdi = function SHRDdi(dst, src)
  * @param {number} src
  * @return {number}
  */
-X86.fnSHRDwCL = function SHRDwCL(dst, src)
+X86.fnSHRDwCL = function(dst, src)
 {
     return X86.fnSHRDw.call(this, dst, src, this.regECX & 0x1f);
 };
@@ -3346,7 +3346,7 @@ X86.fnSHRDwCL = function SHRDwCL(dst, src)
  * @param {number} src
  * @return {number}
  */
-X86.fnSHRDdCL = function SHRDdCL(dst, src)
+X86.fnSHRDdCL = function(dst, src)
 {
     return X86.fnSHRDd.call(this, dst, src, this.regECX & 0x1f);
 };
@@ -3361,7 +3361,7 @@ X86.fnSHRDdCL = function SHRDdCL(dst, src)
  * @param {number} src (null)
  * @return {number}
  */
-X86.fnSIDT = function SIDT(dst, src)
+X86.fnSIDT = function(dst, src)
 {
     if (this.regEA === X86.ADDR_INVALID) {
         X86.opInvalid.call(this);
@@ -3403,7 +3403,7 @@ X86.fnSIDT = function SIDT(dst, src)
  * @param {number} src (null)
  * @return {number}
  */
-X86.fnSLDT = function SLDT(dst, src)
+X86.fnSLDT = function(dst, src)
 {
     this.nStepCycles -= (2 + (this.regEA === X86.ADDR_INVALID? 0 : 1));
     return this.segLDT.sel;
@@ -3424,7 +3424,7 @@ X86.fnSLDT = function SLDT(dst, src)
  * @param {number} src (null)
  * @return {number}
  */
-X86.fnSMSW = function SMSW(dst, src)
+X86.fnSMSW = function(dst, src)
 {
     this.nStepCycles -= (2 + (this.regEA === X86.ADDR_INVALID? 0 : 1));
     return this.regCR0;
@@ -3440,7 +3440,7 @@ X86.fnSMSW = function SMSW(dst, src)
  * @param {number} src (null)
  * @return {number}
  */
-X86.fnSTR = function STR(dst, src)
+X86.fnSTR = function(dst, src)
 {
     this.nStepCycles -= (2 + (this.regEA === X86.ADDR_INVALID? 0 : 1));
     return this.segTSS.sel;
@@ -3454,7 +3454,7 @@ X86.fnSTR = function STR(dst, src)
  * @param {number} src
  * @return {number}
  */
-X86.fnSUBb = function SUBb(dst, src)
+X86.fnSUBb = function(dst, src)
 {
     var b = (dst - src)|0;
     this.setArithResult(dst, src, b, X86.RESULT.BYTE | X86.RESULT.ALL, true);
@@ -3470,7 +3470,7 @@ X86.fnSUBb = function SUBb(dst, src)
  * @param {number} src
  * @return {number}
  */
-X86.fnSUBw = function SUBw(dst, src)
+X86.fnSUBw = function(dst, src)
 {
     var w = (dst - src)|0;
     this.setArithResult(dst, src, w, this.typeData | X86.RESULT.ALL, true);
@@ -3486,7 +3486,7 @@ X86.fnSUBw = function SUBw(dst, src)
  * @param {number} src (null; we have to supply the source ourselves)
  * @return {number}
  */
-X86.fnTESTib = function TESTib(dst, src)
+X86.fnTESTib = function(dst, src)
 {
     src = this.getIPByte();
     this.setLogicResult(dst & src, X86.RESULT.BYTE);
@@ -3503,7 +3503,7 @@ X86.fnTESTib = function TESTib(dst, src)
  * @param {number} src (null; we have to supply the source ourselves)
  * @return {number}
  */
-X86.fnTESTiw = function TESTiw(dst, src)
+X86.fnTESTiw = function(dst, src)
 {
     src = this.getIPWord();
     this.setLogicResult(dst & src, this.typeData);
@@ -3520,7 +3520,7 @@ X86.fnTESTiw = function TESTiw(dst, src)
  * @param {number} src
  * @return {number}
  */
-X86.fnTESTb = function TESTb(dst, src)
+X86.fnTESTb = function(dst, src)
 {
     this.setLogicResult(dst & src, X86.RESULT.BYTE);
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesTestRR : this.cycleCounts.nOpCyclesTestRM) : this.cycleCounts.nOpCyclesTestRM);
@@ -3536,7 +3536,7 @@ X86.fnTESTb = function TESTb(dst, src)
  * @param {number} src
  * @return {number}
  */
-X86.fnTESTw = function TESTw(dst, src)
+X86.fnTESTw = function(dst, src)
 {
     this.setLogicResult(dst & src, this.typeData);
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesTestRR : this.cycleCounts.nOpCyclesTestRM) : this.cycleCounts.nOpCyclesTestRM);
@@ -3554,7 +3554,7 @@ X86.fnTESTw = function TESTw(dst, src)
  * @param {number} src (null)
  * @return {number}
  */
-X86.fnVERR = function VERR(dst, src)
+X86.fnVERR = function(dst, src)
 {
     this.opFlags |= X86.OPFLAG.NOWRITE;
     /*
@@ -3597,7 +3597,7 @@ X86.fnVERR = function VERR(dst, src)
  * @param {number} src (null)
  * @return {number}
  */
-X86.fnVERW = function VERW(dst, src)
+X86.fnVERW = function(dst, src)
 {
     this.opFlags |= X86.OPFLAG.NOWRITE;
     /*
@@ -3649,7 +3649,7 @@ X86.fnVERW = function VERW(dst, src)
  * @param {number} src
  * @return {number}
  */
-X86.fnXCHGrb = function XCHGRb(dst, src)
+X86.fnXCHGrb = function(dst, src)
 {
     if (this.regEA === X86.ADDR_INVALID) {
         /*
@@ -3714,7 +3714,7 @@ X86.fnXCHGrb = function XCHGRb(dst, src)
  * @param {number} src
  * @return {number}
  */
-X86.fnXCHGrw = function XCHGRw(dst, src)
+X86.fnXCHGrw = function(dst, src)
 {
     if (this.regEA === X86.ADDR_INVALID) {
         /*
@@ -3771,7 +3771,7 @@ X86.fnXCHGrw = function XCHGRw(dst, src)
  * @param {number} src
  * @return {number}
  */
-X86.fnXORb = function XORb(dst, src)
+X86.fnXORb = function(dst, src)
 {
     var b = dst ^ src;
     this.setLogicResult(b, X86.RESULT.BYTE);
@@ -3787,10 +3787,10 @@ X86.fnXORb = function XORb(dst, src)
  * @param {number} src
  * @return {number}
  */
-X86.fnXORw = function XORw(dst, src)
+X86.fnXORw = function(dst, src)
 {
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesArithRR : this.cycleCounts.nOpCyclesArithRM) : this.cycleCounts.nOpCyclesArithMR);
-    return this.setLogicResult(dst ^ src, this.typeData);
+    return this.setLogicResult(dst ^ src, this.typeData) & this.maskData;
 };
 
 /**
@@ -3801,7 +3801,7 @@ X86.fnXORw = function XORw(dst, src)
  * @param {number} src
  * @return {number}
  */
-X86.fnGRPFault = function GRPFault(dst, src)
+X86.fnGRPFault = function(dst, src)
 {
     X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
     return dst;
@@ -3815,7 +3815,7 @@ X86.fnGRPFault = function GRPFault(dst, src)
  * @param {number} src
  * @return {number}
  */
-X86.fnGRPInvalid = function GRPInvalid(dst, src)
+X86.fnGRPInvalid = function(dst, src)
 {
     X86.opInvalid.call(this);
     return dst;
@@ -3829,7 +3829,7 @@ X86.fnGRPInvalid = function GRPInvalid(dst, src)
  * @param {number} src
  * @return {number}
  */
-X86.fnGRPUndefined = function GRPUndefined(dst, src)
+X86.fnGRPUndefined = function(dst, src)
 {
     X86.opUndefined.call(this);
     return dst;
@@ -3840,7 +3840,7 @@ X86.fnGRPUndefined = function GRPUndefined(dst, src)
  *
  * @this {X86CPU}
  */
-X86.fnDIVOverflow = function DIVOverflow()
+X86.fnDIVOverflow = function()
 {
     /*
      * TODO: Determine the proper cycle cost.
@@ -3854,7 +3854,7 @@ X86.fnDIVOverflow = function DIVOverflow()
  * @this {X86CPU}
  * @return {number}
  */
-X86.fnSRCCount1 = function SRCCount1()
+X86.fnSRCCount1 = function()
 {
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? 2 : this.cycleCounts.nOpCyclesShift1M);
     return 1;
@@ -3866,7 +3866,7 @@ X86.fnSRCCount1 = function SRCCount1()
  * @this {X86CPU}
  * @return {number}
  */
-X86.fnSRCCountCL = function SRCCountCL()
+X86.fnSRCCountCL = function()
 {
     var count = this.regECX & 0xff;
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesShiftCR : this.cycleCounts.nOpCyclesShiftCM) + (count << this.cycleCounts.nOpCyclesShiftCS);
@@ -3879,7 +3879,7 @@ X86.fnSRCCountCL = function SRCCountCL()
  * @this {X86CPU}
  * @return {number}
  */
-X86.fnSRCCountN = function SRCCountN()
+X86.fnSRCCountN = function()
 {
     var count = this.getIPByte();
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesShiftCR : this.cycleCounts.nOpCyclesShiftCM) + (count << this.cycleCounts.nOpCyclesShiftCS);
@@ -3892,7 +3892,7 @@ X86.fnSRCCountN = function SRCCountN()
  * @this {X86CPU}
  * @return {number|null}
  */
-X86.fnSRCNone = function SRCNone()
+X86.fnSRCNone = function()
 {
     return null;
 };
@@ -3907,7 +3907,7 @@ X86.fnSRCNone = function SRCNone()
  * @this {X86CPU}
  * @return {number} regXX
  */
-X86.fnSRCxx = function SRCxx()
+X86.fnSRCxx = function()
 {
     return this.regXX;
 };
