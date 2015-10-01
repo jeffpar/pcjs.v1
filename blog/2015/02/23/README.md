@@ -869,9 +869,9 @@ Here's more information on the opcodes (IBTS and XBTS) that were removed from th
 	Instruction: IBTS base,bitoffset,len,sorc 
 	
 	Description: 
-	Write bit string length bits from 
-	[bits .. 0 ]	(lowest bits) to bitfield, 
-	defined by and bitsoffset from this base 
+	Write bit string length <len> bits from 
+	<sorc> [bits <len> .. 0 ]	(lowest bits) to bitfield, 
+	defined by <base> and bitsoffset <bitoffset> from this base 
 	to start of the field to write. String write from this start 
 	field bit to higher memory addresses or register bits. 
 	
@@ -897,12 +897,12 @@ Here's more information on the opcodes (IBTS and XBTS) that were removed from th
     Instruction: XBTS dest,base,bitoffset,len
 
     Description:
-    Write bit string length bits from bitfield, defined by
-    and bitsoffset from this base to start of
+    Write bit string length <len> bits from bitfield, defined by
+    <base> and bitsoffset <bitoffset> from this base to start of
     the field to read. String read from this start field bit to
     higher memory addresses or register bits.
-    And after it string placed to operand, lowest bit of
-    register or memory to bit 0 of .
+    And after it string placed to <dest> operand, lowest bit of
+    register or memory to bit 0 of <dest>.
 
     Note:   Use SHLD/SHRD instructions for extract bits strings.
     On 80386 steps B1+ this opcode generation INT 6,
