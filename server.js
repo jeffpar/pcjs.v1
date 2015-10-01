@@ -79,16 +79,6 @@ app.enable("strict routing");
 app.set('port', args.argv['port'] || process.env.PORT || 8088);
 
 /*
- * I already include the following in the <head> tag of my HTML documents:
- *
- *      <link rel="shortcut icon" href="/versions/images/current/favicon.ico" type="image/x-icon">
- *
- * and if remove that line, browsers stop displaying my favicon, so I'm not sure what the
- * following code is doing for me.  TODO: Find out!
- */
-app.use(express.favicon(path.join(sServerRoot, "./versions/images/current/favicon.ico")));
-
-/*
  * For more information about express.logger():
  *
  *      http://www.senchalabs.org/connect/logger.html
@@ -133,6 +123,8 @@ app.use(function(req, res, next) {
 });
 
 app.use(express.static(sServerRoot));
+/* Serve favicon at site root */
+app.use('/favicon.ico', express.static(path.join(sServerRoot, "versions/images/current/favicon.ico")));
 app.use(slash());
 
 var server = http.createServer(app).listen(app.get('port'), function() {
