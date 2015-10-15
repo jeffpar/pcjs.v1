@@ -233,18 +233,15 @@ function Debugger(parmsDbg)
          *      $('dw 0:0')
          *      $('h')
          *      ...
-         *
-         * WARNING: doCommand() expects the same conditions that parseCommand() imposes; ie, a trim and
-         * lower-case command string.
          */
         var dbg = this;
         if (window) {
             if (window['$'] === undefined) {
-                window['$'] = function(s) { return dbg.doCommand(s); };
+                window['$'] = function(s) { return dbg.doCommands(s); };
             }
         } else {
             if (global['$'] === undefined) {
-                global['$'] = function(s) { return dbg.doCommand(s); };
+                global['$'] = function(s) { return dbg.doCommands(s); };
             }
         }
 
@@ -1866,37 +1863,36 @@ if (DEBUGGER) {
              *      control.focus();
              */
             control.onkeydown = function onKeyDownDebugInput(event) {
-                var sInput;
+                var sCmds;
                 if (event.keyCode == Keyboard.KEYCODE.CR) {
-                    sInput = control.value;
+                    sCmds = control.value;
                     control.value = "";
-                    var a = dbg.parseCommand(sInput, true);
-                    for (var s in a) dbg.doCommand(a[s]);
+                    dbg.doCommands(sCmds, true);
                 }
                 else if (event.keyCode == Keyboard.KEYCODE.ESC) {
-                    control.value = sInput = "";
+                    control.value = sCmds = "";
                 }
                 else {
                     if (event.keyCode == Keyboard.KEYCODE.UP) {
                         if (dbg.iPrevCmd < dbg.aPrevCmds.length - 1) {
-                            sInput = dbg.aPrevCmds[++dbg.iPrevCmd];
+                            sCmds = dbg.aPrevCmds[++dbg.iPrevCmd];
                         }
                     }
                     else if (event.keyCode == Keyboard.KEYCODE.DOWN) {
                         if (dbg.iPrevCmd > 0) {
-                            sInput = dbg.aPrevCmds[--dbg.iPrevCmd];
+                            sCmds = dbg.aPrevCmds[--dbg.iPrevCmd];
                         } else {
-                            sInput = "";
+                            sCmds = "";
                             dbg.iPrevCmd = -1;
                         }
                     }
-                    if (sInput != null) {
-                        var cch = sInput.length;
-                        control.value = sInput;
+                    if (sCmds != null) {
+                        var cch = sCmds.length;
+                        control.value = sCmds;
                         control.setSelectionRange(cch, cch);
                     }
                 }
-                if (sInput != null && event.preventDefault) event.preventDefault();
+                if (sCmds != null && event.preventDefault) event.preventDefault();
             };
             return true;
 
@@ -1907,10 +1903,9 @@ if (DEBUGGER) {
                 500, 100,
                 function onClickDebugEnter(fRepeat) {
                     if (dbg.controlDebug) {
-                        var sInput = dbg.controlDebug.value;
+                        var sCmds = dbg.controlDebug.value;
                         dbg.controlDebug.value = "";
-                        var a = dbg.parseCommand(sInput, true);
-                        for (var s in a) dbg.doCommand(a[s]);
+                        dbg.doCommands(sCmds, true);
                         return true;
                     }
                     if (DEBUG) dbg.log("no debugger input buffer");
@@ -3613,9 +3608,9 @@ if (DEBUGGER) {
         this.println("Type ? for help with PCjs Debugger commands");
         this.updateStatus();
         if (this.sInitCommands) {
-            var a = this.parseCommand(this.sInitCommands);
+            var sCmds = this.sInitCommands;
             this.sInitCommands = null;
-            for (var s in a) this.doCommand(a[s]);
+            this.doCommands(sCmds);
         }
     };
 
@@ -7725,6 +7720,23 @@ if (DEBUGGER) {
             result = false;
         }
         return result;
+    };
+
+    /**
+     * doCommands(sCmds, fSave)
+     *
+     * @this {Debugger}
+     * @param {string} sCmds
+     * @param {boolean} [fSave]
+     * @return {boolean} true if all commands processed, false if not
+     */
+    Debugger.prototype.doCommands = function(sCmds, fSave)
+    {
+        var a = this.parseCommand(sCmds, fSave);
+        for (var s in a) {
+            if (!this.doCommand(a[s])) return false;
+        }
+        return true;
     };
 
     /**

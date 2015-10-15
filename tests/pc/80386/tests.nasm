@@ -79,7 +79,7 @@ SSEG_PROT32	equ	0x0028
 ;
 %assign	selDesc	0
 
-%macro	defDesc	1-5 none,0,0,0,0
+%macro	defDesc	1-5 0,0,0,0
 	%assign %1 selDesc
 	dw	(%3 & 0x0000ffff)
 	dw	(%2 & 0x0000ffff)
@@ -95,7 +95,7 @@ SSEG_PROT32	equ	0x0028
 ;
 ; The "setDesc" macro creates a descriptor, given a name (%1), base (%2), limit (%3), type (%4), and ext (%5)
 ;
-%macro	setDesc 1-5 none,0,0,0,0
+%macro	setDesc 1-5 0,0,0,0
 	%assign %1 selDesc
 	set	ebx,%2
 	set	ecx,%3
@@ -106,25 +106,25 @@ SSEG_PROT32	equ	0x0028
 %endmacro
 
 start:	nop
-    ;
-    ; Quick test of unsigned 32-bit multiplication and division
-    ;
+;
+; Quick test of unsigned 32-bit multiplication and division
+;
 	mov	eax,0x44332211
 	mov	ebx,eax
 	mov	ecx,0x88776655
 	mul	ecx
 	div	ecx
 	cmp	eax,ebx
-	jne	near exitErr		; apparently we have to tell NASM "near" because this is a forward reference
+	jne	near error		; apparently we have to tell NASM v0.98.40 "near" for all long forward references
 
 	xor	dx,dx
 	mov	ds,dx			; DS -> 0x0000
-    ;
-    ; Quick test of moving a segment register to a 32-bit register
-    ;
+;
+; Quick test of moving a segment register to a 32-bit register
+;
 	mov	eax,ds
 	test	eax,eax
-	jnz	near exitErr
+	jnz	near error
 
 	jmp	initGDT
 	times	32768 nop		; lots of NOPs to force a 16-bit conditional jump
@@ -155,10 +155,7 @@ storeDesc:
 addrGDT:dw	myGDTEnd - myGDT - 1	; 16-bit limit of myGDT
 	dw	myGDT, 0x000f		; 32-bit base address of myGDT
 
-;
-; TODO: Why do I need to provide a 2nd parameter for "defDesc NULL"? Is this a NASM 0.98.x bug?
-;
-myGDT:	defDesc	NULL,0			; the first descriptor in any descriptor table is always a dud (it corresponds to the null selector)
+myGDT:	defDesc	NULL			; the first descriptor in any descriptor table is always a dud (it corresponds to the null selector)
 	defDesc	CSEG_PROT16,0x000f0000,0x0000ffff,ACC_TYPE_CODE_READABLE,EXT_NONE
 	defDesc	CSEG_PROT32,0x000f0000,0x0000ffff,ACC_TYPE_CODE_READABLE,EXT_BIG
 	defDesc	DSEG_PROT16,0x00000000,0x000fffff,ACC_TYPE_DATA_WRITABLE,EXT_NONE
@@ -185,9 +182,9 @@ initGDT:
 	mov	word [RAM_RETF],toReal
 	mov	word [RAM_RETF+2],cs
     %else
-    ;
-    ; This code fixes the GDT and all our FAR jumps if we're running in RAM
-    ;
+;
+; This code fixes the GDT and all our FAR jumps if we're running in RAM
+;
     	xor	eax,eax
 	mov	ax,cs
 	shl	eax,4				; EAX == base address of the current CS
@@ -210,11 +207,11 @@ initGDT:
       %endif
 	mov	[cs:jmpStart+3],ax		; ditto for the FAR jump that returns us to the start of the image
     %endif
-    ;
-    ; Now we want to build a page directory and a page table, but we need two pages of
-    ; 4K-aligned physical memory.  We can use a hard-coded address (segment 0x100, corresponding
-    ; to physical address 0x1000) if we're running in ROM; otherwise, we ask DOS for some memory.
-    ;
+;
+; Now we want to build a page directory and a page table, but we need two pages of
+; 4K-aligned physical memory.  We can use a hard-coded address (segment 0x100, corresponding
+; to physical address 0x1000) if we're running in ROM; otherwise, we ask DOS for some memory.
+;
     	cmp	ax,CSEG_REAL
     	mov	ax,0x100			; default to the 2nd physical page in low memory
     	je	initPages
@@ -235,18 +232,14 @@ exitErrDOS:
 errDOSMem:
 	db     "Insufficient memory",CR,LF,'$'
 
-exitErr:nop
-	int3
-	jmp	exitErr
-
 allocPages:
 	mov	bx,0x2000			; 8K paragraphs == 128K bytes
 	mov	ah,DOS_ALLOC
 	int	INT_DOS
 	jc	errDOSMem
-    ;
-    ; AX == segment of 64K memory block
-    ;
+;
+; AX == segment of 64K memory block
+;
 initPages:
     	movzx	eax,ax
     	shl	eax,4
@@ -256,10 +249,10 @@ initPages:
     	shr	eax,4
     	mov	es,ax
     	xor	edi,edi
-    ;
-    ; Build a page directory at ES:EDI with only 1 valid PDE (the first one),
-    ; because we're not going to access any memory outside the first 1Mb (of the first 4Mb).
-    ;
+;
+; Build a page directory at ES:EDI with only 1 valid PDE (the first one),
+; because we're not going to access any memory outside the first 1Mb (of the first 4Mb).
+;
 	cld
 	mov	eax,esi
 	add	eax,0x1000			; EAX == page frame address (of the next page)
@@ -268,10 +261,10 @@ initPages:
     	mov	ecx,1024-1			; ECX == number of (remaining) PDEs to write
     	sub	eax,eax
 	rep	stosd
-    ;
-    ; Build a page table at EDI with 256 (out of 1024) valid PTEs, mapping the first 1Mb of the
-    ; first 4Mb as linear == physical.
-    ;
+;
+; Build a page table at EDI with 256 (out of 1024) valid PTEs, mapping the first 1Mb of the
+; first 4Mb as linear == physical.
+;
 	mov	eax,PTE_USER | PTE_READWRITE | PTE_PRESENT
     	mov	ecx,256				; ECX == number of PTEs to write
 initPT:	stosd
@@ -300,15 +293,15 @@ toProt32:
 	mov	ax,DSEG_PROT16
 	mov	ds,ax
 	mov	es,ax
-    ;
-    ; Of the 128Kb of scratch memory we allocated, we may have lost as much as 4Kb-1 rounding
-    ; up to the first physical 4Kb page; the next 8Kb (0x2000) was used for a page directory and a
-    ; single page table, leaving us with a minimum of 116Kb to play with, starting at ESI+0x2000.
-    ;
-    ; We'll set the top of our stack to ESI+0xe000.  This guarantees an ESP greater than 0xffff,
-    ; and so for the next few tests, with a 16-bit data segment in SS, we expect all pushes/pops
-    ; will occur at SP rather than ESP.
-    ;
+;
+; Of the 128Kb of scratch memory we allocated, we may have lost as much as 4Kb-1 rounding
+; up to the first physical 4Kb page; the next 8Kb (0x2000) was used for a page directory and a
+; single page table, leaving us with a minimum of 116Kb to play with, starting at ESI+0x2000.
+;
+; We'll set the top of our stack to ESI+0xe000.  This guarantees an ESP greater than 0xffff,
+; and so for the next few tests, with a 16-bit data segment in SS, we expect all pushes/pops
+; will occur at SP rather than ESP.
+;
 	add	esi,0x2000			; ESI -> bottom of scratch memory
 	mov	ss,ax
 	lea	esp,[esi+0xe000]		; set ESP to bottom of scratch + 56K
@@ -339,9 +332,9 @@ toProt32:
 	cmp	[ebp+2],ax
 	jne	near error
 	pop	ax
-    ;
-    ; Test moving a segment register to a 32-bit memory location
-    ;
+;
+; Test moving a segment register to a 32-bit memory location
+;
 	mov	edx,[0x0000]			; save the DWORD at 0x0000:0x0000 in EDX
 	or	eax,-1
 	mov	[0x0000],eax
@@ -354,104 +347,197 @@ toProt32:
 	cmp	eax,[0x0000]
 	jne	near error
 	mov	[0x0000],edx			; restore the DWORD at 0x0000:0x0000 from EDX
-	jmp	testROM
-
-    ;
-    ; The next few tests currently work only when running as a ROM image; they rely not only on
-    ; the contents of the last two bytes at the top of the first 1Mb, but also on their location,
-    ; because if the processor improperly reads beyond those bytes, a fault should occur.
-    ;
-testROM:
-
-    ;
-    ; Test moving a byte to a 32-bit register with sign-extension
-    ;
-	movsx	eax,byte [0xfffff]
+;
+; Test moving a byte to a 32-bit register with sign-extension
+;
+	movsx	eax,byte [cs:0xffff]
 	cmp	eax,0xffffff80
 	jne	near error
-    ;
-    ; Test moving a word to a 32-bit register with sign-extension
-    ;
-	movsx	eax,word [0xffffe]
+;
+; Test moving a word to a 32-bit register with sign-extension
+;
+	movsx	eax,word [cs:0xfffe]
 	cmp	eax,0xffff80fc
 	jne	near error
-    ;
-    ; Test moving a byte to a 32-bit register with zero-extension
-    ;
-	movzx	eax,byte [0xfffff]
+;
+; Test moving a byte to a 32-bit register with zero-extension
+;
+	movzx	eax,byte [cs:0xffff]
 	cmp	eax,0x00000080
 	jne	near error
-    ;
-    ; Test moving a word to a 32-bit register with zero-extension
-    ;
-	movzx	eax,word [0xffffe]
+;
+; Test moving a word to a 32-bit register with zero-extension
+;
+	movzx	eax,word [cs:0xfffe]
 	cmp	eax,0x000080fc
 	jne	near error
-    ;
-    ; More assorted ZX and SX tests
-    ;
+;
+; More assorted ZX and SX tests
+;
     	mov	esp,0x40000
-    	mov	edx,[esp]		; save word at scratch address 0x40000
+    	mov	edx,[esp]			; save word at scratch address 0x40000
     	add	esp,4
-    	push	-128			; NASM refuses to use opcode 0x6A ("PUSH imm8")
-    	pop	ebx			; verify EBX == 0xFFFFFF80
-    	and	ebx,0xff		; verify EBX == 0x00000080
-    	movsx	bx,bl			; verify EBX == 0x0000FF80
-    	movsx	ebx,bx			; verify EBX == 0xFFFFFF80
-    	movzx	bx,bl			; verify EBX == 0xFFFF0080
-    	movzx	ebx,bl			; verify EBX == 0x00000080
-    	not	ebx			; verify EBX == 0xFFFFFF7F
-    	movsx	bx,bl			; verify EBX == 0xFFFF007F
-    	movsx	ebx,bl			; verify EBX == 0x0000007F
-    	not	ebx			; verify EBX == 0xFFFFFF80
-    	movzx	ebx,bx			; verify EBX == 0x0000FF80
-    	movzx	bx,bl			; verify EBX == 0x00000080
+    	push	byte -128			; NASM refuses to use opcode 0x6A ("PUSH imm8") unless we specify "byte"
+    	pop	ebx				; verify EBX == 0xFFFFFF80
+    	cmp	ebx,0xFFFFFF80
+    	jne	near error
+    	and	ebx,0xff			; verify EBX == 0x00000080
+    	cmp	ebx,0x00000080
+    	jne	near error
+    	movsx	bx,bl				; verify EBX == 0x0000FF80
+    	cmp	ebx,0x0000FF80
+    	jne	near error
+    	movsx	ebx,bx				; verify EBX == 0xFFFFFF80
+    	cmp	ebx,0xFFFFFF80
+    	jne	near error
+    	movzx	bx,bl				; verify EBX == 0xFFFF0080
+    	cmp	ebx,0xFFFF0080
+    	jne	near error
+    	movzx	ebx,bl				; verify EBX == 0x00000080
+    	cmp	ebx,0x00000080
+    	jne	near error
+    	not	ebx				; verify EBX == 0xFFFFFF7F
+    	cmp	ebx,0xFFFFFF7F
+    	jne	near error
+    	movsx	bx,bl				; verify EBX == 0xFFFF007F
+    	cmp	ebx,0xFFFF007F
+    	jne	near error
+    	movsx	ebx,bl				; verify EBX == 0x0000007F
+    	cmp	ebx,0x0000007F
+    	jne	near error
+    	not	ebx				; verify EBX == 0xFFFFFF80
+    	cmp	ebx,0xFFFFFF80
+    	jne	near error
+    	movzx	ebx,bx				; verify EBX == 0x0000FF80
+    	cmp	ebx,0x0000FF80
+    	jne	near error
+    	movzx	bx,bl				; verify EBX == 0x00000080
+    	cmp	ebx,0x00000080
+    	jne	near error
     	movsx	bx,bl
     	neg	bx
     	neg	bx
+    	cmp	ebx,0x0000FF80
+    	jne	near error
     	movsx	ebx,bx
     	neg	ebx
     	neg	ebx
-    ;
-    ; Test assorted 32-bit addressing modes
-    ;
-    	mov	ax,SSEG_PROT32		; we want SS != DS for the next tests
+    	cmp	ebx,0xFFFFFF80
+    	jne	near error
+;
+; Test assorted 32-bit addressing modes
+;
+    	mov	ax,SSEG_PROT32			; we want SS != DS for the next tests
     	mov	ss,ax
 
     	mov	eax,0x11223344
-    	mov	[0x40000],eax		; store a known word at the scratch address
+    	mov	[0x40000],eax			; store a known word at the scratch address
 
-    	mov	ecx,0x40000		; now access that scratch address using various addressing modes
+    	mov	ecx,0x40000			; now access that scratch address using various addressing modes
     	cmp	[ecx],eax
-    	jne	error
+    	jne	near error
 
     	add	ecx,64
     	cmp	[ecx-64],eax
-    	jne	error
+    	jne	near error
     	sub	ecx,64
 
     	shr	ecx,1
     	cmp	[ecx+0x20000],eax
-    	jne	error
+    	jne	near error
 
     	cmp	[ecx+ecx],eax
-    	jne	error
+    	jne	near error
 
     	shr	ecx,1
     	cmp	[ecx+ecx*2+0x10000],eax
-    	jne	error
+    	jne	near error
 
     	cmp	[ecx*4],eax
-    	jne	error
+    	jne	near error
 
     	mov	ebp,ecx
     	cmp	[ebp+ecx*2+0x10000],eax
-    	je	error			; since SS != DS, this better be a mismatch
+    	je	near error			; since SS != DS, this better be a mismatch
 
-	mov	[0x40000],edx		; restore word at scratch address 0x40000
+	mov	[0x40000],edx			; restore word at scratch address 0x40000
+;
+; Now run a series of unverified opcode tests (verification will happen later, by comparing the output of the tests)
+;
+	mov	esi,tableOps			; ESI -> tableOps entry
+testOps:
+	movzx	ecx,byte [cs:esi]		; ECX == length of instruction sequence
+	jecxz	doneOps				; zero means we've reached the end of the table
+	movzx	ebx,byte [cs:esi+1]		; EBX == TYPE
+	shl	ebx,5				; EBX == type * 32
+	movzx	edx,byte [cs:esi+2]		; EDX == SIZE
+	lea	ebx,[cs:typeValues+ebx+edx*8]	; EBX -> values for type
+	add	esi,3				; ESI -> instruction sequence to test
+
+	push	ecx
+	mov	ecx,[cs:ebx]			; ECX == count of values for dst
+	mov	ebx,[cs:ebx+4]			; EBX -> values for dst
+	mov	ebp,ecx				; EBP == count of values for src
+	mov	edi,ebx				; EDI -> values for src
+testDst:
+	push	ebp
+	push	edi
+testSrc:
+	mov	eax,[cs:ebx]			; EAX == dst
+	mov	edx,[cs:edi]			; EDX == src
+	call	esi
+	add	edi,4				; EDI -> next src
+	dec	ebp				; decrement src count
+	jnz	testSrc
+
+	pop	edi				; ESI -> restored values for src
+	pop	ebp				; EBP == restored count of values for src
+	add	ebx,4				; EBX -> next dst
+	loop	testDst
+
+	pop	ecx
+	add	esi,ecx				; ESI -> next tableOps entry
+	jmp	testOps
+
+doneOps:
 	jmp	doneProt
 
-error:	nop
+TYPE_ARITH	equ	0
+
+SIZE_BYTE	equ	0
+SIZE_SHORT	equ	1
+SIZE_LONG	equ	2
+
+%macro	defOp	4
+    %ifidn %2,al
+	%assign size SIZE_BYTE
+    %elifidn %2,ax
+	%assign size SIZE_SHORT
+    %else
+	%assign size SIZE_LONG
+    %endif
+	db	%%end-%%beg,%4,size
+%%beg:	%1	%2,%3
+	ret
+%%end:
+%endmacro
+
+tableOps:
+	defOp	add,al,dl,TYPE_ARITH
+	defOp	add,ax,dx,TYPE_ARITH
+	defOp	add,eax,edx,TYPE_ARITH
+	db	0
+
+typeValues:
+	dd	9,arithValues,18,arithValues,27,arithValues,0,0
+
+arithValues:
+	dd	0x00,0x01,0x02,0x7E,0x7F,0x80,0x81,0xFE,0xFF
+	dd	0x0000,0x0001,0x0002,0x7FFE,0x7FFF,0x8000,0x8001,0xFFFE,0xFFFF
+	dd	0x00000000,0x00000001,0x00000002,0x7FFFFFFE,0x7FFFFFFF,0x80000000,0x80000001,0xFFFFFFFE,0xFFFFFFFF
+
+error:	int3
+	jmp	error
 
 doneProt:
 	mov	ax,DSEG_PROT16
@@ -459,16 +545,16 @@ doneProt:
 	sub	esp,esp
 
     %ifndef REAL32
-    ;
-    ; Return to real-mode now, after first loading CS with a 16-bit code segment
-    ;
+;
+; Return to real-mode now, after first loading CS with a 16-bit code segment
+;
 	jmp	CSEG_PROT16:toProt16
 toProt16:
 	bits	16
     %endif
 
 goReal:	mov	eax,cr0
-	and	eax,~(CR0_MSW_PE | CR0_PG)
+	and	eax,~(CR0_MSW_PE | CR0_PG) & 0xffffffff
 	mov	cr0,eax
 jmpReal:
 	jmp	CSEG_REAL:toReal
@@ -483,10 +569,11 @@ toReal:
 	cmp	ax,CSEG_REAL			; is CS equal to 0xf000?
 	je	near jmpStart			; yes, so loop around, only because we have nowhere else to go
 	int	INT_DOSEXIT			; no, so assume we're running under DOS and exit
-    ;
-    ; Fill the remaining space with NOPs until we get to target offset 0xFFF0.
-    ; Note that we subtract 0x100 from the target offset because we're ORG'ed at 0x100.
-    ;
+
+;
+; Fill the remaining space with NOPs until we get to target offset 0xFFF0.
+; Note that we subtract 0x100 from the target offset because we're ORG'ed at 0x100.
+;
 	times	0xfff0-0x100-($-$$) nop
 
 jmpStart:

@@ -297,7 +297,7 @@ function doCommand(sCmd)
     default:
         if (sCmd) {
             try {
-                if (dbg && !dbg.doCommand(sCmd, true)) {
+                if (dbg && !dbg.doCommands(sCmd, true)) {
                     sCmd = '(' + sCmd + ')';
                     result = eval(sCmd);        // jshint ignore:line
                 }
