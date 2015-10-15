@@ -1,40 +1,68 @@
 ;
-; This file is designed to run both as a test ROM and as a DOS COM file (hence the "org 0x100"),
-; which is why it has a ".com" extension instead of the more typical ".rom" extension.
+;   test386.nasm
+;   Copyright © 2012-2015 Jeff Parsons <Jeff@pcjs.org>
 ;
-; When used as a ROM, it should be installed at physical address 983296 (0xf0100) and aliased at
-; physical address 4294902016 (0xffff0100).  The jump at jmpStart should align with the CPU reset
-; address (%0xfffffff0), which will transfer control to 0xf000:0x0100.  From that point on,
-; all memory accesses should remain within the first 1Mb.
+;   This file is part of PCjs, which is part of the JavaScript Machines Project (aka JSMachines)
+;   at <http://jsmachines.net/> and <http://pcjs.org/>.
 ;
-; The code which attempts to update myGDT and addrGDT will have no effect when installed as a ROM,
-; which is fine, because those data structures are predefined with appropriate ROM-based addresses.
+;   PCjs is free software: you can redistribute it and/or modify it under the terms of the
+;   GNU General Public License as published by the Free Software Foundation, either version 3
+;   of the License, or (at your option) any later version.
 ;
-; See the machine definition file in /modules/pcjs/bin/romtests.json for a configuration that can
-; load this file as a ROM image.
+;   PCjs is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+;   even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;   GNU General Public License for more details.
 ;
-; REAL32 Notes
-; ------------
-; REAL32 is NOT enabled by default, because based on what I've seen in VirtualBox (and notes at
-; http://geezer.osdevbrasil.net/johnfine/segments.htm), if CS is loaded with a 32-bit code segment
-; while in protected-mode and we then return to real-mode, even if we immediately perform a FAR jump
-; with a real-mode CS, the base of CS will be updated, but all the other segment attributes, like
-; the 32-bit EXT_BIG attribute, remain unchanged.  As a result, the processor will crash as soon as
-; it starts executing 16-bit real-mode code, because it's being misinterpreted as 32-bit code, and
-; there doesn't appear to be anything you can do about it from real-mode.
+;   You should have received a copy of the GNU General Public License along with PCjs.  If not,
+;   see <http://www.gnu.org/licenses/gpl.html>.
 ;
-; The work-around: you MUST load CS with a 16-bit code segment BEFORE returning to real-mode.
+;   You are required to include the above copyright notice in every source code file of every
+;   copy or modified version of this work, and to display that copyright notice on every screen
+;   that loads or runs any version of this software (see Computer.sCopyright).
 ;
-; "Unreal mode" works by setting OTHER segment registers, like DS and ES, to 32-bit segments before
-; returning to real-mode -- just not CS.  SS probably shouldn't be set to a 32-bit segment either,
-; because that causes implicit pushes to use ESP instead of SP, even in real-mode.
+;   Some PCjs files also attempt to load external resource files, such as character-image files,
+;   ROM files, and disk image files. Those external resource files are not considered part of the
+;   PCjs program for purposes of the GNU General Public License, and the author does not claim
+;   any copyright as to their contents.
 ;
-; The code below ensures that, before returning to real-mode, all of CS, DS, ES, and SS contain
-; 16-bit protected-mode selectors; note, however, that my 16-bit protected-mode data descriptor uses
-; a full 20-bit limit, so DS, ES, and SS will still have a limit of 1Mb instead of the usual 64Kb,
-; even after returning to real-mode.  I use the larger limit because it's convenient to have access
-; to the first 1Mb in protected-mode, with or without a 32-bit data segment, and the larger data
-; segment limit shouldn't affect any 16-bit real-mode operations.
+;   Overview
+;   --------
+;   This file is designed to run both as a test ROM and as a DOS COM file (hence the "org 0x100"),
+;   which is why it has a ".com" extension instead of the more typical ".rom" extension.
+;
+;   When used as a ROM, it should be installed at physical address 983296 (0xf0100) and aliased at
+;   physical address 4294902016 (0xffff0100).  The jump at jmpStart should align with the CPU reset
+;   address (%0xfffffff0), which will transfer control to 0xf000:0x0100.  From that point on,
+;   all memory accesses should remain within the first 1Mb.
+;
+;   The code which attempts to update myGDT and addrGDT will have no effect when installed as a ROM,
+;   which is fine, because those data structures are predefined with appropriate ROM-based addresses.
+;
+;   See the machine definition file in /modules/pcjs/bin/romtests.json for a configuration that can
+;   load this file as a ROM image.
+;
+;   REAL32 Notes
+;   ------------
+;   REAL32 is NOT enabled by default, because based on what I've seen in VirtualBox (and notes at
+;   http://geezer.osdevbrasil.net/johnfine/segments.htm), if CS is loaded with a 32-bit code segment
+;   while in protected-mode and we then return to real-mode, even if we immediately perform a FAR jump
+;   with a real-mode CS, the base of CS will be updated, but all the other segment attributes, like
+;   the 32-bit EXT_BIG attribute, remain unchanged.  As a result, the processor will crash as soon as
+;   it starts executing 16-bit real-mode code, because it's being misinterpreted as 32-bit code, and
+;   there doesn't appear to be anything you can do about it from real-mode.
+;
+;   The work-around: you MUST load CS with a 16-bit code segment BEFORE returning to real-mode.
+;
+;   "Unreal mode" works by setting OTHER segment registers, like DS and ES, to 32-bit segments before
+;   returning to real-mode -- just not CS.  SS probably shouldn't be set to a 32-bit segment either,
+;   because that causes implicit pushes to use ESP instead of SP, even in real-mode.
+;
+;   The code below ensures that, before returning to real-mode, all of CS, DS, ES, and SS contain
+;   16-bit protected-mode selectors; note, however, that my 16-bit protected-mode data descriptor uses
+;   a full 20-bit limit, so DS, ES, and SS will still have a limit of 1Mb instead of the usual 64Kb,
+;   even after returning to real-mode.  I use the larger limit because it's convenient to have access
+;   to the first 1Mb in protected-mode, with or without a 32-bit data segment, and the larger data
+;   segment limit shouldn't affect any 16-bit real-mode operations.
 ;
 	cpu	386
 	org	0x100
@@ -49,7 +77,7 @@
 PAGING equ 1
 
 ;
-; If we built our data structures in RAM, we might use the first page of RAM (0x0000-0x0fff) like so:
+;   If we built our data structures in RAM, we might use the first page of RAM (0x0000-0x0fff) like so:
 ;
 ;	0x0000-0x03ff	Real-mode IDT (256*4)
 ;	0x0400-0x0bff	Prot-mode IDT (256*8)
@@ -59,8 +87,8 @@ PAGING equ 1
 ;	0x0d10-0x0d13	RAM_RETF (Real-mode return address)
 ;	0x0d14-0x0fff	reserved
 ;
-; And in the second page (0x1000-0x1fff), we might build a page directory, followed by a single page table
-; that allows us to map up to 4Mb (although we'd likely only create PTEs for the first 1Mb).
+;   And in the second page (0x1000-0x1fff), we might build a page directory, followed by a single page table
+;   that allows us to map up to 4Mb (although we'd likely only create PTEs for the first 1Mb).
 ;
 ;RAM_GDT	equ	0x0c00
 ;RAM_IDTR	equ	0x0d00
@@ -75,7 +103,7 @@ DSEG_PROT32	equ	0x0020
 SSEG_PROT32	equ	0x0028
 
 ;
-; The "defDesc" macro defines a descriptor, given a name (%1), base (%2), limit (%3), type (%4), and ext (%5)
+;   The "defDesc" macro defines a descriptor, given a name (%1), base (%2), limit (%3), type (%4), and ext (%5)
 ;
 %assign	selDesc	0
 
@@ -93,7 +121,7 @@ SSEG_PROT32	equ	0x0028
 %endmacro
 
 ;
-; The "setDesc" macro creates a descriptor, given a name (%1), base (%2), limit (%3), type (%4), and ext (%5)
+;   The "setDesc" macro creates a descriptor, given a name (%1), base (%2), limit (%3), type (%4), and ext (%5)
 ;
 %macro	setDesc 1-5 0,0,0,0
 	%assign %1 selDesc
@@ -107,7 +135,7 @@ SSEG_PROT32	equ	0x0028
 
 start:	nop
 ;
-; Quick test of unsigned 32-bit multiplication and division
+;   Quick test of unsigned 32-bit multiplication and division
 ;
 	mov	eax,0x44332211
 	mov	ebx,eax
@@ -120,7 +148,7 @@ start:	nop
 	xor	dx,dx
 	mov	ds,dx			; DS -> 0x0000
 ;
-; Quick test of moving a segment register to a 32-bit register
+;   Quick test of moving a segment register to a 32-bit register
 ;
 	mov	eax,ds
 	test	eax,eax
@@ -130,7 +158,7 @@ start:	nop
 	times	32768 nop		; lots of NOPs to force a 16-bit conditional jump
 
 ;
-; storeDesc(EBX=base, ECX=limit, DX=type, AX=ext, DI=address of descriptor)
+;   storeDesc(EBX=base, ECX=limit, DX=type, AX=ext, DI=address of descriptor)
 ;
 storeDesc:
 	cld
@@ -183,7 +211,7 @@ initGDT:
 	mov	word [RAM_RETF+2],cs
     %else
 ;
-; This code fixes the GDT and all our FAR jumps if we're running in RAM
+;   This code fixes the GDT and all our FAR jumps if we're running in RAM
 ;
     	xor	eax,eax
 	mov	ax,cs
@@ -208,9 +236,9 @@ initGDT:
 	mov	[cs:jmpStart+3],ax		; ditto for the FAR jump that returns us to the start of the image
     %endif
 ;
-; Now we want to build a page directory and a page table, but we need two pages of
-; 4K-aligned physical memory.  We can use a hard-coded address (segment 0x100, corresponding
-; to physical address 0x1000) if we're running in ROM; otherwise, we ask DOS for some memory.
+;   Now we want to build a page directory and a page table, but we need two pages of
+;   4K-aligned physical memory.  We can use a hard-coded address (segment 0x100, corresponding
+;   to physical address 0x1000) if we're running in ROM; otherwise, we ask DOS for some memory.
 ;
     	cmp	ax,CSEG_REAL
     	mov	ax,0x100			; default to the 2nd physical page in low memory
@@ -238,7 +266,7 @@ allocPages:
 	int	INT_DOS
 	jc	errDOSMem
 ;
-; AX == segment of 64K memory block
+;   AX == segment of 64K memory block
 ;
 initPages:
     	movzx	eax,ax
@@ -250,8 +278,8 @@ initPages:
     	mov	es,ax
     	xor	edi,edi
 ;
-; Build a page directory at ES:EDI with only 1 valid PDE (the first one),
-; because we're not going to access any memory outside the first 1Mb (of the first 4Mb).
+;   Build a page directory at ES:EDI with only 1 valid PDE (the first one),
+;   because we're not going to access any memory outside the first 1Mb (of the first 4Mb).
 ;
 	cld
 	mov	eax,esi
@@ -262,8 +290,8 @@ initPages:
     	sub	eax,eax
 	rep	stosd
 ;
-; Build a page table at EDI with 256 (out of 1024) valid PTEs, mapping the first 1Mb of the
-; first 4Mb as linear == physical.
+;   Build a page table at EDI with 256 (out of 1024) valid PTEs, mapping the first 1Mb of the
+;   first 4Mb as linear == physical.
 ;
 	mov	eax,PTE_USER | PTE_READWRITE | PTE_PRESENT
     	mov	ecx,256				; ECX == number of PTEs to write
@@ -294,13 +322,13 @@ toProt32:
 	mov	ds,ax
 	mov	es,ax
 ;
-; Of the 128Kb of scratch memory we allocated, we may have lost as much as 4Kb-1 rounding
-; up to the first physical 4Kb page; the next 8Kb (0x2000) was used for a page directory and a
-; single page table, leaving us with a minimum of 116Kb to play with, starting at ESI+0x2000.
+;   Of the 128Kb of scratch memory we allocated, we may have lost as much as 4Kb-1 rounding
+;   up to the first physical 4Kb page; the next 8Kb (0x2000) was used for a page directory and a
+;   single page table, leaving us with a minimum of 116Kb to play with, starting at ESI+0x2000.
 ;
-; We'll set the top of our stack to ESI+0xe000.  This guarantees an ESP greater than 0xffff,
-; and so for the next few tests, with a 16-bit data segment in SS, we expect all pushes/pops
-; will occur at SP rather than ESP.
+;   We'll set the top of our stack to ESI+0xe000.  This guarantees an ESP greater than 0xffff,
+;   and so for the next few tests, with a 16-bit data segment in SS, we expect all pushes/pops
+;   will occur at SP rather than ESP.
 ;
 	add	esi,0x2000			; ESI -> bottom of scratch memory
 	mov	ss,ax
@@ -333,7 +361,7 @@ toProt32:
 	jne	near error
 	pop	ax
 ;
-; Test moving a segment register to a 32-bit memory location
+;   Test moving a segment register to a 32-bit memory location
 ;
 	mov	edx,[0x0000]			; save the DWORD at 0x0000:0x0000 in EDX
 	or	eax,-1
@@ -348,31 +376,31 @@ toProt32:
 	jne	near error
 	mov	[0x0000],edx			; restore the DWORD at 0x0000:0x0000 from EDX
 ;
-; Test moving a byte to a 32-bit register with sign-extension
+;   Test moving a byte to a 32-bit register with sign-extension
 ;
 	movsx	eax,byte [cs:0xffff]
 	cmp	eax,0xffffff80
 	jne	near error
 ;
-; Test moving a word to a 32-bit register with sign-extension
+;   Test moving a word to a 32-bit register with sign-extension
 ;
 	movsx	eax,word [cs:0xfffe]
 	cmp	eax,0xffff80fc
 	jne	near error
 ;
-; Test moving a byte to a 32-bit register with zero-extension
+;   Test moving a byte to a 32-bit register with zero-extension
 ;
 	movzx	eax,byte [cs:0xffff]
 	cmp	eax,0x00000080
 	jne	near error
 ;
-; Test moving a word to a 32-bit register with zero-extension
+;   Test moving a word to a 32-bit register with zero-extension
 ;
 	movzx	eax,word [cs:0xfffe]
 	cmp	eax,0x000080fc
 	jne	near error
 ;
-; More assorted ZX and SX tests
+;   More assorted ZX and SX tests
 ;
     	mov	esp,0x40000
     	mov	edx,[esp]			; save word at scratch address 0x40000
@@ -425,7 +453,7 @@ toProt32:
     	cmp	ebx,0xFFFFFF80
     	jne	near error
 ;
-; Test assorted 32-bit addressing modes
+;   Test assorted 32-bit addressing modes
 ;
     	mov	ax,SSEG_PROT32			; we want SS != DS for the next tests
     	mov	ss,ax
@@ -462,8 +490,10 @@ toProt32:
 
 	mov	[0x40000],edx			; restore word at scratch address 0x40000
 ;
-; Now run a series of unverified opcode tests (verification will happen later, by comparing the output of the tests)
+;   Now run a series of unverified opcode tests (verification will happen later, by comparing the output of the tests)
 ;
+	int3
+	cld
 	mov	esi,tableOps			; ESI -> tableOps entry
 testOps:
 	movzx	ecx,byte [cs:esi]		; ECX == length of instruction sequence
@@ -472,8 +502,12 @@ testOps:
 	shl	ebx,5				; EBX == type * 32
 	movzx	edx,byte [cs:esi+2]		; EDX == SIZE
 	lea	ebx,[cs:typeValues+ebx+edx*8]	; EBX -> values for type
-	add	esi,3				; ESI -> instruction sequence to test
+	add	esi,3				; ESI -> instruction mnemonic
+skipOp:	cs lodsb
+	test	al,al
+	jnz	skipOp
 
+	xor	eax,eax				; set flags to known values prior tests
 	push	ecx
 	mov	ecx,[cs:ebx]			; ECX == count of values for dst
 	mov	ebx,[cs:ebx+4]			; EBX -> values for dst
@@ -482,17 +516,29 @@ testOps:
 testDst:
 	push	ebp
 	push	edi
+	pushfd
 testSrc:
 	mov	eax,[cs:ebx]			; EAX == dst
 	mov	edx,[cs:edi]			; EDX == src
-	call	esi
+	popfd
+	call	printOp
+	call	printEAX
+	call	printEDX
+	call	printPS
+	call	esi				; execute the instruction sequence
+	call	printEAX
+	call	printEDX
+	call	printPS
+	call	printEOL
+	pushfd
 	add	edi,4				; EDI -> next src
 	dec	ebp				; decrement src count
 	jnz	testSrc
 
+	popfd
 	pop	edi				; ESI -> restored values for src
 	pop	ebp				; EBP == restored count of values for src
-	add	ebx,4				; EBX -> next dst
+	lea	ebx,[ebx+4]			; EBX -> next dst (without modifying flags)
 	loop	testDst
 
 	pop	ecx
@@ -502,31 +548,177 @@ testSrc:
 doneOps:
 	jmp	doneProt
 
+;
+;   printOp(ESI -> instruction sequence)
+;
+;   Rewinds ESI to the start of the mnemonic preceding the instruction sequence and prints the mnemonic
+;
+;   Uses: None
+;
+printOp:
+	pushfd
+	pushad
+findOp:	dec	esi
+	mov	al,[cs:esi-1]
+	cmp	al,32
+	jae	findOp
+	call	printStr
+	mov	al,' '
+	call	printChar
+	popad
+	popfd
+	ret
+
+;
+;   printEAX()
+;
+;   Uses: None
+;
+printEAX:
+	pushfd
+	pushad
+	mov	esi,strEAX
+	call	printStr
+	mov	cl,8
+	call	printVal
+	popad
+	popfd
+	ret
+
+;
+;   printEDX()
+;
+;   Uses: None
+;
+printEDX:
+	pushfd
+	pushad
+	mov	esi,strEDX
+	call	printStr
+	mov	cl,8
+	mov	eax,edx
+	call	printVal
+	popad
+	popfd
+	ret
+
+;
+;   printPS()
+;
+;   Uses: None
+;
+printPS:
+	pushfd
+	pushad
+	pushfd
+	pop	eax
+	mov	esi,strPS
+	call	printStr
+	mov	cl,4
+	call	printVal
+	popad
+	popfd
+	ret
+
+;
+;   printEOL()
+;
+;   Uses: None
+;
+printEOL:
+	pushfd
+	pushad
+	mov	al,0x0d
+	call	printChar
+	mov	al,0x0a
+	call	printChar
+	popad
+	popfd
+	ret
+
+;
+;   printChar(AL)
+;
+;   Uses: None
+;
+printChar:
+	push	edx
+	mov	dx,0x2F8			; EDX -> COM2 I/O port
+	out	dx,al
+	pop	edx
+	ret
+
+;
+;   printStr(ESI -> zero-terminated string)
+;
+;   Uses: ESI, Flags
+;
+printStr:
+	push	eax
+psLoop:	cs lodsb
+	test	al,al
+	jz	psDone
+	call	printChar
+	jmp	psLoop
+psDone:	pop	eax
+	ret
+
+;
+;   printVal(EAX == value, CL == number of hex digits)
+;
+;   Uses: EAX, ECX, Flags
+;
+printVal:
+	shl	cl,2				; CL == number of bits (4 times the number of hex digits)
+	jz	pvDone
+pvLoop:	sub	cl,4
+	push	eax
+	shr	eax,cl
+	and	al,0x0f
+	add	al,'0'
+	cmp	al,'9'
+	jbe	pvOK
+	add	al,'A'-'0'-10
+pvOK:	call	printChar
+	pop	eax
+	test	cl,cl
+	jnz	pvLoop
+pvDone:	mov	al,' '
+	call	printChar
+	ret
+
 TYPE_ARITH	equ	0
 
 SIZE_BYTE	equ	0
 SIZE_SHORT	equ	1
 SIZE_LONG	equ	2
 
-%macro	defOp	4
-    %ifidn %2,al
+%macro	defOp	5
+    %ifidni %3,al
 	%assign size SIZE_BYTE
-    %elifidn %2,ax
+    %elifidni %3,ax
 	%assign size SIZE_SHORT
     %else
 	%assign size SIZE_LONG
     %endif
-	db	%%end-%%beg,%4,size
-%%beg:	%1	%2,%3
+	db	%%end-%%beg,%5,size
+%%name:	db	%1,0
+%%beg:	%2	%3,%4
 	ret
 %%end:
 %endmacro
 
+strEAX:	db	"EAX=",0
+strEDX:	db	"EDX=",0
+strPS:	db	"PS=",0
+
 tableOps:
-	defOp	add,al,dl,TYPE_ARITH
-	defOp	add,ax,dx,TYPE_ARITH
-	defOp	add,eax,edx,TYPE_ARITH
+	defOp	"ADD",ADD,AL,DL,TYPE_ARITH
+	defOp	"ADD",ADD,AX,DX,TYPE_ARITH
+	defOp	"ADD",ADD,EAX,EDX,TYPE_ARITH
 	db	0
+
+	align	4
 
 typeValues:
 	dd	9,arithValues,18,arithValues,27,arithValues,0,0
@@ -546,7 +738,7 @@ doneProt:
 
     %ifndef REAL32
 ;
-; Return to real-mode now, after first loading CS with a 16-bit code segment
+;   Return to real-mode now, after first loading CS with a 16-bit code segment
 ;
 	jmp	CSEG_PROT16:toProt16
 toProt16:
@@ -571,8 +763,8 @@ toReal:
 	int	INT_DOSEXIT			; no, so assume we're running under DOS and exit
 
 ;
-; Fill the remaining space with NOPs until we get to target offset 0xFFF0.
-; Note that we subtract 0x100 from the target offset because we're ORG'ed at 0x100.
+;   Fill the remaining space with NOPs until we get to target offset 0xFFF0.
+;   Note that we subtract 0x100 from the target offset because we're ORG'ed at 0x100.
 ;
 	times	0xfff0-0x100-($-$$) nop
 

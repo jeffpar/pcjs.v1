@@ -1,13 +1,16 @@
 {
+  "machine": {
+    "id": "pc386"
+  },
   "computer": {
-    "id": "pc386.computer",
+    "id": "computer",
     "name": "Compaq DeskPro 386",
     "resume": 0,
     "state": "",
     "busWidth": 32
   },
   "ram": [
-    { "id": "pc386.ramLow",
+    { "id": "ramLow",
       "name": "",
       "addr": 0,
       "size": 655360,
@@ -15,17 +18,17 @@
     }
   ],
   "rom": [
-    { "id": "pc386.romTests",
+    { "id": "test386",
       "name": "",
       "addr": 983296,
       "size": 65280,
       "alias": 4294902016,
-      "file": "/tests/pc/80386/tests.json",
+      "file": "/tests/pc/80386/test386.json",
       "notify": ""
     }
   ],
   "video": [
-    { "id": "pc386.videoMDA",
+    { "id": "videoMDA",
       "name": "Monochrome Display",
       "model": "",
       "mode": 7,
@@ -40,7 +43,7 @@
     }
   ],
   "cpu": {
-    "id": "pc386.cpu",
+    "id": "cpu",
     "name": "",
     "model": 80386,
     "clock": 0,
@@ -51,12 +54,12 @@
     "csStop": -1
   },
   "keyboard": {
-    "id": "pc386.keyboard",
+    "id": "keyboard",
     "name": "",
     "model": ""
   },
   "fdc": {
-    "id": "pc386.fdcNEC",
+    "id": "fdcNEC",
     "name": "",
     "autoMount": {
       "A": {
@@ -70,13 +73,18 @@
     }
   },
   "chipset": {
-    "id": "pc386.chipset",
+    "id": "chipset",
     "name": "",
     "model": "deskpro386",
     "sound": false
   },
+	"serialport": {
+    "id": "com2",
+    "adapter": 2,
+    "binding": "console"
+  },
   "debugger": {
-    "id": "pc386.debugger",
+    "id": "debugger",
     "name": "",
     "commands": "",
     "messages": ""

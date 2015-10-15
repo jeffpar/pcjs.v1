@@ -1,12 +1,15 @@
 {
+  "machine": {
+    "id": "ibm5150"
+  },
   "computer": {
-    "id": "ibm5150.pc-mda-64k",
+    "id": "pc-mda-64k",
     "name": "IBM PC",
     "resume": "1",
     "state": ""
   },
   "ram": [
-    { "id": "ibm5150.ramLow",
+    { "id": "ramLow",
       "name": "",
       "addr": 0x00000,
       "size": 0,
@@ -14,14 +17,14 @@
     }
   ],
   "rom": [
-    { "id": "ibm5150.romBASIC",
+    { "id": "romBASIC",
       "name": "",
       "addr": 0xf6000,
       "size": 0x08000,
       "file": "/devices/pc/basic/ibm-basic-1.00.json",
       "notify": ""
     },
-    { "id": "ibm5150.romBIOS",
+    { "id": "romBIOS",
       "name": "",
       "addr": 0xfe000,
       "size": 0x02000,
@@ -30,7 +33,7 @@
     }
   ],
   "video": [
-    { "id": "ibm5150.videoMDA",
+    { "id": "videoMDA",
       "name": "Monochrome Display",
       "model": "",
       "mode": 7,
@@ -45,7 +48,7 @@
     }
   ],
   "cpu": {
-    "id": "ibm5150.cpu8088",
+    "id": "cpu8088",
     "name": "",
     "model": 8088,
     "clock": 0,
@@ -56,12 +59,12 @@
     "csStop": -1
   },
   "keyboard": {
-    "id": "ibm5150.keyboard",
+    "id": "keyboard",
     "name": "",
     "model": ""
   },
   "fdc": {
-    "id": "ibm5150.fdcNEC",
+    "id": "fdcNEC",
     "name": "",
     "autoMount": {
       "A": {
@@ -75,7 +78,7 @@
     }
   },
   "chipset": {
-    "id": "ibm5150.chipset",
+    "id": "chipset",
     "name": "",
     "model": "5150",
     "sw1": "01000001",
@@ -83,7 +86,7 @@
     "sound": true
   },
   "debugger": {
-    "id": "ibm5150.debugger",
+    "id": "debugger",
     "name": "",
     "messages": ""
   },

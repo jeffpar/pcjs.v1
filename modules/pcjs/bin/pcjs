@@ -217,15 +217,32 @@ function loadMachine(sFile)
              * in the browser, by walking the list of PCjs components we loaded above and looking for
              * matches.
              */
+            var idMachine = "";
+            
+            /*
+             * 'machine' is a pseudo-component that is only used to define an ID for the entire machine;
+             * if it exists, then that ID is prepended to every component ID, just as our XSLT code would
+             * do for a machine XML file.  This relieves the JSON file from having to manually prepend
+             * a machine ID to every component ID itself.
+             * 
+             * This doesn't mean I anticipate a Node environment running multiple machines, as we do in
+             * a browser; it only means that I'm trying to make both environments operate similarly.
+             */
+            if (machine['machine']) {
+                idMachine = machine['machine']['id'];
+            }
+            
             for (i = 0; i < aComponents.length; i++) {
-                var parms = machine[aComponents[i].name];
+                
+                var component = aComponents[i];
+                var parms = machine[component.name];
                 /*
                  * If parms is undefined, it means there is no component with that name defined in the
                  * machine object (NOT that the component has no parms), and therefore we should skip it.
                  */
                 if (parms === undefined) continue;
                 /*
-                 * If parms is an Array, then we must create an object for each parms element;  and yes,
+                 * If parms is an Array, then we must create an object for each parms element; and yes,
                  * I'm relying on the fact that none of my parm objects use a "length" property, as a quick
                  * and dirty way of differentiating objects from arrays.
                  */
@@ -233,22 +250,27 @@ function loadMachine(sFile)
                 for (j = 0; j < aParms.length; j++) {
                     
                     var obj;
-                    if (fDebug) console.log("creating " + aComponents[i].name + "...");
-                    if (fDebug) console.log(aParms[j]);
+                    var parmsObj = aParms[j];
+                    if (idMachine) parmsObj['id'] = idMachine + '.' + parmsObj['id'];
                     
-                    if (aComponents[i].name == "cpu") {
-                        aParms[j]['autoStart'] = false;
+                    if (fDebug) {
+                        console.log("creating " + component.name + "...");
+                        console.log(parmsObj);
+                    }
+                    
+                    if (component.name == "cpu") {
+                        parmsObj['autoStart'] = false;
                     }
                     
                     try {
-                        obj = new aComponents[i].Create(aParms[j]);
+                        obj = new component.Create(parmsObj);
                     } catch(err) {
-                        console.log("error creating " + aComponents[i].name + ": " + err.message);
+                        console.log("error creating " + component.name + ": " + err.message);
                         continue;
                     }
                     
                     console.log(obj['id'] + " object created");
-                    aComponents[i].objects.push(obj);
+                    component.objects.push(obj);
                     
                     if (obj.type == "Debugger") {
                         dbg = obj;

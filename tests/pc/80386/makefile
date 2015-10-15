@@ -1,7 +1,7 @@
-all: tests.json
+all: test386.json
 
-tests.com: tests.nasm ../inc/dos.inc ../inc/misc.inc ../inc/x86.inc
-	nasm -i../inc/ -f bin tests.nasm -l tests.lst -o tests.com
+test386.com: test386.nasm ../inc/dos.inc ../inc/misc.inc ../inc/x86.inc
+	nasm -i../inc/ -f bin test386.nasm -l test386.lst -o test386.com
 
-tests.json: tests.com
-	node ../../../modules/filedump/bin/filedump --file=tests.com --output=tests.json --overwrite
+test386.json: test386.com
+	node ../../../modules/filedump/bin/filedump --file=test386.com --output=test386.json --overwrite

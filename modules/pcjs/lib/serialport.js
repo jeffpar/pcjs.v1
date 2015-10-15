@@ -33,6 +33,7 @@
 "use strict";
 
 if (NODE) {
+    var str         = require("../../shared/lib/strlib");
     var web         = require("../../shared/lib/weblib");
     var Component   = require("../../shared/lib/component");
     var Messages    = require("./messages");
@@ -79,9 +80,17 @@ function SerialPort(parmsSerial) {
         Component.warning("Unrecognized serial adapter #" + this.iAdapter);
         return;
     }
+    /**
+     * consoleOutput becomes a string that records serial port output if the 'binding' property is set to the
+     * reserved name "console".  Nothing is written to the console, however, until a linefeed (0x0A) is output
+     * or the string length reaches a threshold (currently, 1024 characters).
+     *
+     * @type {string|null}
+     */
+    this.consoleOutput = null;
 
     /**
-     * controlIOBuffer is a DOM element, if any, bound to the port (currently for output purposes only; see echoByte())
+     * controlIOBuffer is a DOM element, if any, bound to the port (currently used for output only; see echoByte()).
      *
      * @type {Object}
      */
@@ -89,7 +98,15 @@ function SerialPort(parmsSerial) {
 
     Component.call(this, "SerialPort", parmsSerial, SerialPort, Messages.SERIAL);
 
-    Component.bindExternalControl(this, parmsSerial['binding'], SerialPort.sIOBuffer);
+    var sBinding = parmsSerial['binding'];
+    if (sBinding == "console") {
+        this.consoleOutput = "";
+    } else {
+        /*
+         * NOTE: If sBinding is not the name of a valid Control Panel DOM element, this call does nothing.
+         */
+        Component.bindExternalControl(this, sBinding, SerialPort.sIOBuffer);
+    }
 }
 
 /*
@@ -784,6 +801,14 @@ SerialPort.prototype.echoByte = function(b)
                 this.controlIOBuffer.value += String.fromCharCode(b);
                 this.controlIOBuffer.scrollTop = this.controlIOBuffer.scrollHeight;
             }
+        }
+        return true;
+    }
+    if (this.consoleOutput != null) {
+        this.consoleOutput += String.fromCharCode(b);
+        if (b == 0x0A || this.consoleOutput.length >= 1024) {
+            this.println(str.trim(this.consoleOutput));
+            this.consoleOutput = "";
         }
         return true;
     }
