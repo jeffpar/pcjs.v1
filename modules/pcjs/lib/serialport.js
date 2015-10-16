@@ -202,7 +202,7 @@ SerialPort.DL_DEFAULT       = 0x180;    // we select an arbitrary default Diviso
  */
 
 /*
- * Receiver Buffer Register (RBR.REG, offset 0; eg, 0x3F8 or 0x2F8)
+ * Receiver Buffer Register (RBR.REG, offset 0; eg, 0x3F8 or 0x2F8) on read, Transmitter Holding Register on write
  */
 SerialPort.RBR = {REG: 0};              // (read)
 
@@ -805,10 +805,12 @@ SerialPort.prototype.echoByte = function(b)
         return true;
     }
     if (this.consoleOutput != null) {
-        this.consoleOutput += String.fromCharCode(b);
         if (b == 0x0A || this.consoleOutput.length >= 1024) {
-            this.println(str.trim(this.consoleOutput));
+            this.println(this.consoleOutput);
             this.consoleOutput = "";
+        }
+        if (b != 0x0A) {
+            this.consoleOutput += String.fromCharCode(b);
         }
         return true;
     }

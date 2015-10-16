@@ -7142,18 +7142,18 @@ if (DEBUGGER) {
                 case X86.OPCODE.LOOPZ:
                 case X86.OPCODE.LOOP:
                     this.nStep = nStep;
-                    this.incAddr(dbgAddr, 2);
+                    this.incAddr(dbgAddr, dbgAddr.fData32? 4 : 2);
                     break;
                 case X86.OPCODE.CALL:
                     if (fCallStep) {
                         this.nStep = nStep;
-                        this.incAddr(dbgAddr, 3);
+                        this.incAddr(dbgAddr, dbgAddr.fData32? 5 : 3);
                     }
                     break;
                 case X86.OPCODE.CALLF:
                     if (fCallStep) {
                         this.nStep = nStep;
-                        this.incAddr(dbgAddr, 5);
+                        this.incAddr(dbgAddr, dbgAddr.fData32? 7 : 5);
                     }
                     break;
                 case X86.OPCODE.GRP4W:
@@ -7202,8 +7202,8 @@ if (DEBUGGER) {
                 }
                 /*
                  * A successful run will ultimately call stop(), which will in turn call clearTempBreakpoint(),
-                 * which will clear nStep, so there's your assurance that nStep will be reset.  Now we may
-                 * have stopped for reasons unrelated to the temporary breakpoint, but that's OK.
+                 * which will clear nStep, so there's your assurance that nStep will be reset.  Now we may have
+                 * stopped for reasons unrelated to the temporary breakpoint, but that's OK.
                  */
             } else {
                 this.doTrace(fRegs? "tr" : "t");

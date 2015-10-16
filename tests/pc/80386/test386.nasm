@@ -27,7 +27,7 @@
 ;
 ;   Overview
 ;   --------
-;   This file is designed to run both as a test ROM and as a DOS COM file (hence the "org 0x100"),
+;   This file is designed to run both as a test ROM and as a DOS .COM file (hence the "org 0x100"),
 ;   which is why it has a ".com" extension instead of the more typical ".rom" extension.
 ;
 ;   When used as a ROM, it should be installed at physical address 983296 (0xf0100) and aliased at
@@ -90,10 +90,15 @@ PAGING equ 1
 ;   And in the second page (0x1000-0x1fff), we might build a page directory, followed by a single page table
 ;   that allows us to map up to 4Mb (although we'd likely only create PTEs for the first 1Mb).
 ;
+;   However, the code to do that is currently disabled (see %ifdef RAM_GDT), because it's just as easy to define
+;   the structures we need inside the .COM image and statically initialize them to the values assumed for ROM
+;   operation.  For RAM operation, we tweak the structures as needed; the tweaks have no effect when loaded in ROM.
+;
 ;RAM_GDT	equ	0x0c00
 ;RAM_IDTR	equ	0x0d00
 ;RAM_GDTR	equ	0x0d08
 ;RAM_RETF	equ	0x0d10
+;
 
 CSEG_REAL	equ	0xf000
 CSEG_PROT16	equ	0x0008
@@ -135,6 +140,12 @@ SSEG_PROT32	equ	0x0028
 
 start:	nop
 ;
+;   If we didn't CALL or PUSH anything on the stack AND we turned interrupts off, the top of our image would be
+;   safe, but if we're running in RAM, we do issue a few DOS calls before switching into protected-mode and onto
+;   a new stack, so we need to set SP to a safer location inside the .COM image.
+;
+	mov	sp,tempStack
+;
 ;   Quick test of unsigned 32-bit multiplication and division
 ;
 	mov	eax,0x44332211
@@ -155,8 +166,8 @@ start:	nop
 	jnz	near error
 
 	jmp	initGDT
-	times	32768 nop		; lots of NOPs to force a 16-bit conditional jump
-
+	times	32768 nop		; lots of NOPs to test generation of 16-bit conditional jumps
+tempStack:
 ;
 ;   storeDesc(EBX=base, ECX=limit, DX=type, AX=ext, DI=address of descriptor)
 ;
@@ -211,7 +222,7 @@ initGDT:
 	mov	word [RAM_RETF+2],cs
     %else
 ;
-;   This code fixes the GDT and all our FAR jumps if we're running in RAM
+;   This code fixes the GDT and all our far jumps if we're running in RAM
 ;
     	xor	eax,eax
 	mov	ax,cs
@@ -378,34 +389,34 @@ toProt32:
 ;
 ;   Test moving a byte to a 32-bit register with sign-extension
 ;
-	movsx	eax,byte [cs:0xffff]
+	movsx	eax,byte [cs:signedByte]
 	cmp	eax,0xffffff80
 	jne	near error
 ;
 ;   Test moving a word to a 32-bit register with sign-extension
 ;
-	movsx	eax,word [cs:0xfffe]
-	cmp	eax,0xffff80fc
+	movsx	eax,word [cs:signedWord]
+	cmp	eax,0xffff8080
 	jne	near error
 ;
 ;   Test moving a byte to a 32-bit register with zero-extension
 ;
-	movzx	eax,byte [cs:0xffff]
+	movzx	eax,byte [cs:signedByte]
 	cmp	eax,0x00000080
 	jne	near error
 ;
 ;   Test moving a word to a 32-bit register with zero-extension
 ;
-	movzx	eax,word [cs:0xfffe]
-	cmp	eax,0x000080fc
+	movzx	eax,word [cs:signedWord]
+	cmp	eax,0x00008080
 	jne	near error
 ;
-;   More assorted ZX and SX tests
+;   More assorted zero and sign-extension tests
 ;
     	mov	esp,0x40000
     	mov	edx,[esp]			; save word at scratch address 0x40000
     	add	esp,4
-    	push	byte -128			; NASM refuses to use opcode 0x6A ("PUSH imm8") unless we specify "byte"
+    	push	byte -128			; NASM will not use opcode 0x6A ("PUSH imm8") unless we specify "byte"
     	pop	ebx				; verify EBX == 0xFFFFFF80
     	cmp	ebx,0xFFFFFF80
     	jne	near error
@@ -492,27 +503,29 @@ toProt32:
 ;
 ;   Now run a series of unverified opcode tests (verification will happen later, by comparing the output of the tests)
 ;
-	int3
 	cld
 	mov	esi,tableOps			; ESI -> tableOps entry
 testOps:
 	movzx	ecx,byte [cs:esi]		; ECX == length of instruction sequence
-	jecxz	doneOps				; zero means we've reached the end of the table
+	test	ecx,ecx				; (must use JZ since there's no long version of JECXZ)
+	jz	near testDone			; zero means we've reached the end of the table
 	movzx	ebx,byte [cs:esi+1]		; EBX == TYPE
-	shl	ebx,5				; EBX == type * 32
+	shl	ebx,5				; EBX == TYPE * 32
 	movzx	edx,byte [cs:esi+2]		; EDX == SIZE
-	lea	ebx,[cs:typeValues+ebx+edx*8]	; EBX -> values for type
+	shl	edx,4				; EDX == SIZE * 16
+	lea	ebx,[cs:typeValues+ebx+edx]	; EBX -> values for type
 	add	esi,3				; ESI -> instruction mnemonic
-skipOp:	cs lodsb
+.skip:	cs lodsb
 	test	al,al
-	jnz	skipOp
+	jnz	.skip
 
-	xor	eax,eax				; set flags to known values prior tests
 	push	ecx
 	mov	ecx,[cs:ebx]			; ECX == count of values for dst
-	mov	ebx,[cs:ebx+4]			; EBX -> values for dst
-	mov	ebp,ecx				; EBP == count of values for src
-	mov	edi,ebx				; EDI -> values for src
+	mov	eax,[cs:ebx+4]			; EAX -> values for dst
+	mov	ebp,[cs:ebx+8]			; EBP == count of values for src
+	mov	edi,[cs:ebx+12]			; EDI -> values for src
+	xchg	ebx,eax				; EBX -> values for dst
+	sub	eax,eax				; set all ARITH flags to known values prior to tests
 testDst:
 	push	ebp
 	push	edi
@@ -545,7 +558,7 @@ testSrc:
 	add	esi,ecx				; ESI -> next tableOps entry
 	jmp	testOps
 
-doneOps:
+testDone:
 	jmp	doneProt
 
 ;
@@ -558,11 +571,15 @@ doneOps:
 printOp:
 	pushfd
 	pushad
-findOp:	dec	esi
+.findSize:
+	dec	esi
 	mov	al,[cs:esi-1]
 	cmp	al,32
-	jae	findOp
+	jae	.findSize
 	call	printStr
+	movzx	eax,al
+	mov	al,[cs:achSize+eax]
+	call	printChar
 	mov	al,' '
 	call	printChar
 	popad
@@ -603,7 +620,7 @@ printEDX:
 	ret
 
 ;
-;   printPS()
+;   printPS(ESI -> instruction sequence)
 ;
 ;   Uses: None
 ;
@@ -611,10 +628,18 @@ printPS:
 	pushfd
 	pushad
 	pushfd
-	pop	eax
+	pop	edx
+.findType:
+	dec	esi
+	mov	al,[cs:esi-1]
+	cmp	al,32
+	jae	.findType
+	movzx	eax,byte [cs:esi-2]
+	and	edx,[cs:typeMasks+eax*4]
 	mov	esi,strPS
 	call	printStr
 	mov	cl,4
+	mov	eax,edx
 	call	printVal
 	popad
 	popfd
@@ -626,14 +651,12 @@ printPS:
 ;   Uses: None
 ;
 printEOL:
-	pushfd
-	pushad
-	mov	al,0x0d
-	call	printChar
+	push	eax
+;	mov	al,0x0d
+;	call	printChar
 	mov	al,0x0a
 	call	printChar
-	popad
-	popfd
+	pop	eax
 	ret
 
 ;
@@ -642,10 +665,18 @@ printEOL:
 ;   Uses: None
 ;
 printChar:
+	pushfd
 	push	edx
-	mov	dx,0x2F8			; EDX -> COM2 I/O port
+	push	eax
+	mov	dx,0x2FD			; EDX == COM2 LSR (Line Status Register)
+.loop:	in	al,dx				;
+	test	al,0x20				; THR (Transmitter Holding Register) empty?
+	jz	.loop				; no
+	pop	eax
+	mov	dx,0x2F8			; EDX -> COM2 THR (Transmitter Holding Register)
 	out	dx,al
 	pop	edx
+	popfd
 	ret
 
 ;
@@ -655,12 +686,12 @@ printChar:
 ;
 printStr:
 	push	eax
-psLoop:	cs lodsb
+.loop:	cs lodsb
 	test	al,al
-	jz	psDone
+	jz	.done
 	call	printChar
-	jmp	psLoop
-psDone:	pop	eax
+	jmp	.loop
+.done:	pop	eax
 	ret
 
 ;
@@ -670,20 +701,20 @@ psDone:	pop	eax
 ;
 printVal:
 	shl	cl,2				; CL == number of bits (4 times the number of hex digits)
-	jz	pvDone
-pvLoop:	sub	cl,4
+	jz	.done
+.loop:	sub	cl,4
 	push	eax
 	shr	eax,cl
 	and	al,0x0f
 	add	al,'0'
 	cmp	al,'9'
-	jbe	pvOK
+	jbe	.digit
 	add	al,'A'-'0'-10
-pvOK:	call	printChar
+.digit:	call	printChar
 	pop	eax
 	test	cl,cl
-	jnz	pvLoop
-pvDone:	mov	al,' '
+	jnz	.loop
+.done:	mov	al,' '
 	call	printChar
 	ret
 
@@ -711,25 +742,36 @@ SIZE_LONG	equ	2
 strEAX:	db	"EAX=",0
 strEDX:	db	"EDX=",0
 strPS:	db	"PS=",0
+achSize	db	"BWD"
 
 tableOps:
-	defOp	"ADD",ADD,AL,DL,TYPE_ARITH
-	defOp	"ADD",ADD,AX,DX,TYPE_ARITH
-	defOp	"ADD",ADD,EAX,EDX,TYPE_ARITH
+	defOp	"ADD",add,al,dl,TYPE_ARITH
+	defOp	"ADD",add,ax,dx,TYPE_ARITH
+	defOp	"ADD",add,eax,edx,TYPE_ARITH
 	db	0
 
 	align	4
 
-typeValues:
-	dd	9,arithValues,18,arithValues,27,arithValues,0,0
+typeMasks:
+	dd	PS_ARITH
 
 arithValues:
-	dd	0x00,0x01,0x02,0x7E,0x7F,0x80,0x81,0xFE,0xFF
-	dd	0x0000,0x0001,0x0002,0x7FFE,0x7FFF,0x8000,0x8001,0xFFFE,0xFFFF
-	dd	0x00000000,0x00000001,0x00000002,0x7FFFFFFE,0x7FFFFFFF,0x80000000,0x80000001,0xFFFFFFFE,0xFFFFFFFF
+.bvals:	dd	0x00,0x01,0x02,0x7E,0x7F,0x80,0x81,0xFE,0xFF
+	ARITH_BYTES equ ($-.bvals)/4
 
-error:	int3
-	jmp	error
+.wvals:	dd	0x0000,0x0001,0x0002,0x7FFE,0x7FFF,0x8000,0x8001,0xFFFE,0xFFFF
+	ARITH_WORDS equ ($-.wvals)/4
+
+.dvals:	dd	0x00000000,0x00000001,0x00000002,0x7FFFFFFE,0x7FFFFFFF,0x80000000,0x80000001,0xFFFFFFFE,0xFFFFFFFF
+	ARITH_DWORDS equ ($-.dvals)/4
+
+typeValues:
+	dd	ARITH_BYTES,arithValues,ARITH_BYTES,arithValues
+	dd	ARITH_BYTES+ARITH_WORDS,arithValues,ARITH_BYTES+ARITH_WORDS,arithValues
+	dd	ARITH_BYTES+ARITH_WORDS+ARITH_DWORDS,arithValues,ARITH_BYTES+ARITH_WORDS+ARITH_DWORDS,arithValues
+	dd	0,0
+
+error:	jmp	error
 
 doneProt:
 	mov	ax,DSEG_PROT16
@@ -759,7 +801,7 @@ toReal:
 	mov	sp,0xfffe
 
 	cmp	ax,CSEG_REAL			; is CS equal to 0xf000?
-	je	near jmpStart			; yes, so loop around, only because we have nowhere else to go
+spin:	je	spin ; near jmpStart		; yes, so loop around, because we have nowhere else to go
 	int	INT_DOSEXIT			; no, so assume we're running under DOS and exit
 
 ;
@@ -768,10 +810,24 @@ toReal:
 ;
 	times	0xfff0-0x100-($-$$) nop
 
-jmpStart:
-	jmp	CSEG_REAL:start
+;
+;   Unfortunately, when PC-DOS 2.0 loads our .COM file, the last 4 bytes are not valid, in part because DOS must
+;   zero the last 2 bytes so that a near RET will return to the PSP's INT 0x20 and gracefully terminate the program.
+;   Newer versions of DOS simply refuse to load the file (the safest thing to do), claiming insufficient memory.
+;
+;   To avoid these loading issues, I now omit the last 4 bytes from image, and it will still work as a ROM image as
+;   long as jmpStart is at offset 0xFFF0.
+;
 
-	db	0x20
-	db	'04/04/15'
-	db	0xFC				; 0000FFFE  FC (Model ID byte)
-	db	0x80				; 0000FFFF  80 (normally, location of a checksum byte)
+jmpStart:
+	jmp	CSEG_REAL:start			; 0000FFF0
+signedWord:
+	db	0x80				; 0000FFF5  80
+signedByte:
+	db	0x80				; 0000FFF6  80
+signature:
+	db	'PCJS',0			; 0000FFF7  "PCJS",0
+;	db	0x00				; 0000FFFC  00
+;	db	0x00				; 0000FFFD  00
+;	db	0xFC				; 0000FFFE  FC (Model ID byte)
+;	db	0x00				; 0000FFFF  00 (normally a checksum byte)

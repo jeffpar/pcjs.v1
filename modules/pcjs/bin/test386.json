@@ -21,7 +21,7 @@
     { "id": "test386",
       "name": "",
       "addr": 983296,
-      "size": 65280,
+      "size": 65276,
       "alias": 4294902016,
       "file": "/tests/pc/80386/test386.json",
       "notify": ""
