@@ -510,7 +510,7 @@ testOps:
 	test	ecx,ecx				; (must use JZ since there's no long version of JECXZ)
 	jz	near testDone			; zero means we've reached the end of the table
 	movzx	ebx,byte [cs:esi+1]		; EBX == TYPE
-	shl	ebx,5				; EBX == TYPE * 32
+	shl	ebx,6				; EBX == TYPE * 64
 	movzx	edx,byte [cs:esi+2]		; EDX == SIZE
 	shl	edx,4				; EDX == SIZE * 16
 	lea	ebx,[cs:typeValues+ebx+edx]	; EBX -> values for type
@@ -719,6 +719,7 @@ printVal:
 	ret
 
 TYPE_ARITH	equ	0
+TYPE_LOGIC	equ	1
 
 SIZE_BYTE	equ	0
 SIZE_SHORT	equ	1
@@ -748,12 +749,34 @@ tableOps:
 	defOp	"ADD",add,al,dl,TYPE_ARITH
 	defOp	"ADD",add,ax,dx,TYPE_ARITH
 	defOp	"ADD",add,eax,edx,TYPE_ARITH
+	defOp	"OR",or,al,dl,TYPE_LOGIC
+	defOp	"OR",or,ax,dx,TYPE_LOGIC
+	defOp	"OR",or,eax,edx,TYPE_LOGIC
+	defOp	"ADC",adc,al,dl,TYPE_ARITH
+	defOp	"ADC",adc,ax,dx,TYPE_ARITH
+	defOp	"ADC",adc,eax,edx,TYPE_ARITH
+	defOp	"SBB",sbb,al,dl,TYPE_ARITH
+	defOp	"SBB",sbb,ax,dx,TYPE_ARITH
+	defOp	"SBB",sbb,eax,edx,TYPE_ARITH
+	defOp	"AND",and,al,dl,TYPE_LOGIC
+	defOp	"AND",and,ax,dx,TYPE_LOGIC
+	defOp	"AND",and,eax,edx,TYPE_LOGIC
+	defOp	"SUB",sub,al,dl,TYPE_ARITH
+	defOp	"SUB",sub,ax,dx,TYPE_ARITH
+	defOp	"SUB",sub,eax,edx,TYPE_ARITH
+	defOp	"XOR",xor,al,dl,TYPE_LOGIC
+	defOp	"XOR",xor,ax,dx,TYPE_LOGIC
+	defOp	"XOR",xor,eax,edx,TYPE_LOGIC
+	defOp	"CMP",cmp,al,dl,TYPE_ARITH
+	defOp	"CMP",cmp,ax,dx,TYPE_ARITH
+	defOp	"CMP",cmp,eax,edx,TYPE_ARITH
 	db	0
 
 	align	4
 
 typeMasks:
 	dd	PS_ARITH
+	dd	PS_LOGIC
 
 arithValues:
 .bvals:	dd	0x00,0x01,0x02,0x7E,0x7F,0x80,0x81,0xFE,0xFF
@@ -766,10 +789,20 @@ arithValues:
 	ARITH_DWORDS equ ($-.dvals)/4
 
 typeValues:
+	;
+	; Values for TYPE_ARITH
+	;
 	dd	ARITH_BYTES,arithValues,ARITH_BYTES,arithValues
 	dd	ARITH_BYTES+ARITH_WORDS,arithValues,ARITH_BYTES+ARITH_WORDS,arithValues
 	dd	ARITH_BYTES+ARITH_WORDS+ARITH_DWORDS,arithValues,ARITH_BYTES+ARITH_WORDS+ARITH_DWORDS,arithValues
-	dd	0,0
+	dd	0,0,0,0
+	;
+	; Values for TYPE_LOGIC (I'm using ARITH values for now)
+	;
+	dd	ARITH_BYTES,arithValues,ARITH_BYTES,arithValues
+	dd	ARITH_BYTES+ARITH_WORDS,arithValues,ARITH_BYTES+ARITH_WORDS,arithValues
+	dd	ARITH_BYTES+ARITH_WORDS+ARITH_DWORDS,arithValues,ARITH_BYTES+ARITH_WORDS+ARITH_DWORDS,arithValues
+	dd	0,0,0,0
 
 error:	jmp	error
 

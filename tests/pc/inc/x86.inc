@@ -11,6 +11,7 @@ PS_IF			equ	0x0200
 PS_DF			equ	0x0400
 PS_OF			equ	0x0800
 PS_ARITH		equ	(PS_CF | PS_PF | PS_AF | PS_ZF | PS_SF | PS_OF)
+PS_LOGIC		equ	(PS_CF | PS_PF | PS_ZF | PS_SF | PS_OF)
 
 CR0_MSW_PE		equ	0x0001
 CR0_PG			equ	0x80000000	; set if paging enabled
