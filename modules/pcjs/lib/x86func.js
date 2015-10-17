@@ -1140,9 +1140,6 @@ X86.fnIMUL8 = function(dst, src)
  * Example 3: 16 * -8 (0xf8) = -128 (0xff80): carry is clear (the sign bit *still* fits in the lower 8 bits)
  * Example 4: 16 * -16 (0xf0) = -256 (0xff00): carry is set (the sign bit no longer fits in the lower 8 bits)
  *
- * An earlier version of this function assumed it simply needed to check bit 7 of the result to determine carry,
- * which was completely broken.
- *
  * @this {X86CPU}
  * @param {number} dst
  * @param {number} src (null; AL is the implied src)
@@ -1195,6 +1192,7 @@ X86.fnIMULn = function(dst, src)
 {
     var fOverflow, result;
     dst = this.getIPWord();
+
     if (this.sizeData == 2) {
         result = (((src << 16) >> 16) * ((dst << 16) >> 16))|0;
         fOverflow = (result > 32767 || result < -32768);
@@ -1226,13 +1224,6 @@ X86.fnIMULn = function(dst, src)
  * fnIMUL32(dst, src)
  *
  * This sets regMDHi:regMDLo to the 64-bit result of dst * src, both of which are treated as signed.
- *
- * TODO: Some potential optimizations include:
- *
- *  1) Early outs if either parameter is zero, since the result will obviously be zero
- *  2) Using "normal" JavaScript multiplication if both parameters are >= -32768 && <= 32767
- *
- * Refer to: http://stackoverflow.com/questions/13597364/32-bit-signed-multiplication-with-a-64-bit-result-in-javascript
  *
  * @this {X86CPU}
  * @param {number} dst (any 32-bit number, treated as signed)
@@ -1270,9 +1261,6 @@ X86.fnIMUL32 = function(dst, src)
  * Example 2: 256 * 128 = 32768 (0x00008000): carry is set (the sign bit no longer fits in the lower 16 bits)
  * Example 3: 256 * -128 (0xff80) = -32768 (0xffff8000): carry is clear (the sign bit *still* fits in the lower 16 bits)
  * Example 4: 256 * -256 (0xff00) = -65536 (0xffff0000): carry is set (the sign bit no longer fits in the lower 16 bits)
- *
- * An earlier version of this function assumed it simply needed to check bit 15 of the result to determine carry,
- * which was completely broken.
  *
  * @this {X86CPU}
  * @param {number} dst
@@ -1321,6 +1309,9 @@ X86.fnIMULw = function(dst, src)
 /**
  * fnIMULrw(dst, src)
  *
+ * This function exists for 16-bit IMUL instructions that produce a 16-bit result instead of a 32-bit result
+ * (and don't implicitly use the accumulator).
+ *
  * @this {X86CPU}
  * @param {number} dst
  * @param {number} src
@@ -1328,6 +1319,10 @@ X86.fnIMULw = function(dst, src)
  */
 X86.fnIMULrw = function(dst, src)
 {
+    /*
+     * Unlike fnIMULrd() below, we can use normal JavaScript multiplication, because there's no danger of
+     * overflowing the floating-point result and losing accuracy in the bottom 16 bits.
+     */
     var result = (((dst << 16) >> 16) * ((src << 16) >> 16))|0;
     if (result > 32767 || result < -32768) {
         this.setCF(); this.setOF();
@@ -1342,6 +1337,9 @@ X86.fnIMULrw = function(dst, src)
 /**
  * fnIMULrd(dst, src)
  *
+ * This function exists for 32-bit IMUL instructions that produce a 32-bit result instead of a 64-bit result
+ * (and don't implicitly use the accumulator).
+ *
  * @this {X86CPU}
  * @param {number} dst
  * @param {number} src
@@ -1349,15 +1347,32 @@ X86.fnIMULrw = function(dst, src)
  */
 X86.fnIMULrd = function(dst, src)
 {
-    var result = dst * src;
-    if (result > 2147483647 || result < -2147483648) {
+    /*
+     * The following code works, but I've stopped using it because it produces different results from an actual CPU
+     * when overflow occurs; the bottom 32 bits of the result are still supposed to be accurate.
+     *
+     * And unfortunately, we cannot achieve that level of compatibility using normal JavaScript multiplication,
+     * because the result may be too large to fit in a JavaScript floating-point variable, which means we could lose
+     * accuracy in the bottom 32 bits, which would defeat what we're trying to achieve here.  So we must use the
+     * slower fnIMUL32() function.
+     *
+     *      var result = dst * src;
+     *      if (result > 2147483647 || result < -2147483648) {
+     *          this.setCF(); this.setOF();
+     *      } else {
+     *          this.clearCF(); this.clearOF();
+     *      }
+     *      result |= 0;
+     */
+    X86.fnIMUL32.call(this, dst, src);
+    var fOverflow = (this.regMDHi != (this.regMDLo >> 31));
+    if (fOverflow) {
         this.setCF(); this.setOF();
     } else {
         this.clearCF(); this.clearOF();
     }
-    result |= 0;
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? 9 : 12);
-    return result;
+    return this.regMDLo;
 };
 
 /**
@@ -2055,19 +2070,19 @@ X86.fnMULb = function(dst, src)
  *
  * This sets regMDHi:regMDLo to the 64-bit result of dst * src, both of which are treated as unsigned.
  *
- * TODO: Some potential optimizations include:
- *
- *  1) Early outs if either parameter is zero, since the result will obviously be zero
- *  2) Using "normal" JavaScript multiplication if both parameters are < 32767
- *
- * Refer to: http://stackoverflow.com/questions/13597364/32-bit-signed-multiplication-with-a-64-bit-result-in-javascript
- *
  * @this {X86CPU}
  * @param {number} dst (any 32-bit number, treated as unsigned)
  * @param {number} src (any 32-bit number, treated as unsigned)
  */
 X86.fnMUL32 = function(dst, src)
 {
+    if (!(dst & ~0xffff) && !(src & ~0xffff)) {
+        this.fMDSet = true;
+        this.regMDLo = (dst * src)|0;
+        this.regMDHi = 0;
+        return;
+    }
+
     var srcLo = src & 0xffff;
     var srcHi = src >>> 16;
     var dstLo = dst & 0xffff;

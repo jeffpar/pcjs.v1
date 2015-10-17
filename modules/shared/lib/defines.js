@@ -76,6 +76,7 @@ if (NODE) {
     global.window = false;      // provides an alternative "if (typeof window === 'undefined')" (ie, "if (window) ...")
     global.APPNAME = APPNAME;
     global.APPVERSION = APPVERSION;
+    global.XMLVERSION = XMLVERSION;
     global.SITEHOST = SITEHOST;
     global.COMPILED = COMPILED;
     global.DEBUG = DEBUG;

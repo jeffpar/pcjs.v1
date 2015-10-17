@@ -175,7 +175,7 @@ function Debugger(parmsDbg)
          * aVariables is an object with properties that grows as setVariable() assigns more variables;
          * each property corresponds to one variable, where the property name is the variable name (ie,
          * a string beginning with a letter or underscore, followed by zero or more additional letters,
-         * digits, or underscores) and the property value is the variable's numeric value.  See doSet()
+         * digits, or underscores) and the property value is the variable's numeric value.  See doVar()
          * and setVariable() for details.
          *
          * Note that parseValue(), through its reliance on str.parseInt(), assumes a default base of 16
@@ -284,22 +284,22 @@ if (DEBUGGER) {
         'g [#]': "go [to #]",
         'h':     "halt",
         'i [#]': "input port #",
+        'if':    "eval expression",
         'k':     "stack trace",
         'l':     "load sector(s)",
+        "ln":    "list nearest symbol(s)",
         'm':     "messages",
+        'mouse': "mouse action",        // syntax: mouse {action} {delta} (eg, mouse x 10, mouse click 0, etc)
         'o [#]': "output port #",
         'p':     "step over",           // other variations: pr (step and dump registers)
+        'print': "print expression",
         'r':     "dump/set registers",
+        'reset': "reset machine",
         't [#]': "trace",               // other variations: tr (trace and dump registers)
         'u [#]': "unassemble",
         'x':     "execution options",
-        'if':    "eval expression",
-        "ln":    "list nearest symbol(s)",
-        'mouse': "mouse action",        // syntax: mouse {action} {delta} (eg, mouse x 10, mouse click 0, etc)
-        'print': "print expression",
-        'reset': "reset machine",
-        'set':   "assign expression",
-        'ver':   "display version"
+        'v':     "print version",
+        'var':   "assign variable"
     };
 
     /*
@@ -5150,6 +5150,18 @@ if (DEBUGGER) {
     /**
      * evalExpression(aVals, aOps, cOps)
      *
+     * In Node, if you set a variable to 0x80000001; ie:
+     *
+     *      foo=0x80000001|0
+     *
+     * and then calculate foo*foo using "(foo*foo).toString(2)", the result is:
+     *
+     *      '11111111111111111111111111111100000000000000000000000000000000'
+     *
+     * which is slightly incorrect because it has overflowed JavaScript's floating-point precision.
+     *
+     * 0x80000001 in decimal is -2147483647, so the product is 4611686014132420609, which is 0x3FFFFFFF00000001.
+     *
      * @this {Debugger}
      * @param {Array.<number>} aVals
      * @param {Array.<string>} aOps
@@ -5397,7 +5409,7 @@ if (DEBUGGER) {
         var fDefined = false;
         if (value !== undefined) {
             fDefined = true;
-            sValue = str.toHexLong(value) + " (" + value + ')'; /* + str.toBinBytes(value) */
+            sValue = str.toHexLong(value) + " (" + value + '=' + str.toBinBytes(value) + ')';
         }
         sVar = (sVar != null? (sVar + ": ") : "");
         this.println(sVar + sValue);
@@ -6388,20 +6400,20 @@ if (DEBUGGER) {
     };
 
     /**
-     * doSet(sCmd)
+     * doVar(sCmd)
      *
      * The command must be of the form "{variable} = [{expression}]", where expression may contain constants,
      * operators, registers, symbols, other variables, or nothing at all; in the latter case, the variable, if
      * any, is deleted.
      *
-     * Other supported shorthand: "set" with no parameters prints the values of all variables, and "set {variable}"
+     * Other supported shorthand: "var" with no parameters prints the values of all variables, and "var {variable}"
      * prints the value of the specified variable.
      *
      * @this {Debugger}
      * @param {string} sCmd
-     * @return {boolean} true if valid "set" assignment, false if not
+     * @return {boolean} true if valid "var" assignment, false if not
      */
-    Debugger.prototype.doSet = function(sCmd)
+    Debugger.prototype.doVar = function(sCmd)
     {
         var a = sCmd.match(/^\s*([A-Z_]?[A-Z0-9_]*)\s*(=?)\s*(.*)$/i);
         if (a) {
@@ -7675,13 +7687,6 @@ if (DEBUGGER) {
                     }
                     this.doRegisters(asArgs);
                     break;
-                case 's':
-                    if (asArgs[0] == "set") {
-                        if (!this.doSet(sCmd.substr(3))) {
-                            result = false;
-                        }
-                    }
-                    break;
                 case 't':
                     this.doTrace(asArgs[0], asArgs[1]);
                     break;
@@ -7689,6 +7694,12 @@ if (DEBUGGER) {
                     this.doUnassemble(asArgs[1], asArgs[2], 8);
                     break;
                 case 'v':
+                    if (asArgs[0] == "var") {
+                        if (!this.doVar(sCmd.substr(3))) {
+                            result = false;
+                        }
+                        break;
+                    }
                     this.println((APPNAME || "PCjs") + " version " + (XMLVERSION || APPVERSION) + " (" + this.cpu.model + (COMPILED? ",RELEASE" : (DEBUG? ",DEBUG" : ",NODEBUG")) + (PREFETCH? ",PREFETCH" : ",NOPREFETCH") + (TYPEDARRAYS? ",TYPEDARRAYS" : (FATARRAYS? ",FATARRAYS" : ",LONGARRAYS")) + (BACKTRACK? ",BACKTRACK" : ",NOBACKTRACK") + ')');
                     break;
                 case 'x':
