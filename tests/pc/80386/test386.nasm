@@ -107,6 +107,18 @@ DSEG_PROT16	equ	0x0018
 DSEG_PROT32	equ	0x0020
 SSEG_PROT32	equ	0x0028
 
+OFF_INTDIVERR	equ	0xe000
+
+;
+;   The "defGate" macro defines an interrupt gate, given a selector (%1) and an offset (%2)
+;
+%macro	defGate	2
+	dw	(%2 & 0xffff)
+	dw	%1
+	dw	ACC_TYPE_GATE386_INT | ACC_PRESENT
+	dw	(%2 >> 16) & 0xffff
+%endmacro
+
 ;
 ;   The "defDesc" macro defines a descriptor, given a name (%1), base (%2), limit (%3), type (%4), and ext (%5)
 ;
@@ -205,6 +217,12 @@ myGDT:	defDesc	NULL			; the first descriptor in any descriptor table is always a
 	defDesc	SSEG_PROT32,0x00010000,0x000effff,ACC_TYPE_DATA_WRITABLE,EXT_BIG
 myGDTEnd:
 
+addrIDT:dw	myIDTEnd - myIDT - 1	; 16-bit limit of myIDT
+	dw	myIDT, 0x000f		; 32-bit base address of myIDT
+
+myIDT:	defGate	CSEG_PROT32,OFF_INTDIVERR
+myIDTEnd:
+
 initGDT:
     %ifdef RAM_GDT
 	set	edi,RAM_GDT
@@ -241,6 +259,9 @@ initGDT:
 	mov	eax,edx				; recover the base address of the current CS
 	add	eax,myGDT			; EAX == physical address of myGDT
 	mov	[cs:addrGDT+2],eax		; update the 32-bit base address of myGDT in addrGDT
+	mov	eax,edx				; recover the base address of the current CS again
+	add	eax,myIDT			; EAX == physical address of myIDT
+	mov	[cs:addrIDT+2],eax		; update the 32-bit base address of myIDT in addrIDT
 	mov	ax,cs
       %ifdef REAL32
 	mov	[cs:jmpReal+5],ax		; update the segment of the FAR jump that returns us to real-mode
@@ -318,6 +339,7 @@ initPT:	stosd
 
 goProt:
 	cli					; make sure interrupts are off now, since we've not initialized the IDT yet
+	o32 lidt [cs:addrIDT]
 	o32 lgdt [cs:addrGDT]
 	mov	cr3,esi
 	mov	eax,cr0
@@ -748,8 +770,10 @@ SIZE_LONG	equ	2
 %%beg:
     %ifidni %4,none
 	%2	%3
-    %else
+    %elifidni %5,none
 	%2	%3,%4
+    %else
+	%2	%3,%4,%5
     %endif
 	ret
 %%end:
@@ -758,6 +782,7 @@ SIZE_LONG	equ	2
 strEAX:	db	"EAX=",0
 strEDX:	db	"EDX=",0
 strPS:	db	"PS=",0
+strDE:	db	"#DE ",0			; when this is displayed, it indicates a Divide Error exception
 achSize	db	"BWD"
 
 tableOps:
@@ -796,6 +821,13 @@ tableOps:
 	defOp	"IMULA",imul,edx,none,none,TYPE_MULDIV
 	defOp	"IMUL",imul,ax,dx,none,TYPE_MULDIV
 	defOp	"IMUL",imul,eax,edx,none,TYPE_MULDIV
+	defOp	"IMUL8",imul,ax,dx,0x77,TYPE_ARITH1
+	defOp	"IMUL8",imul,ax,dx,-0x77,TYPE_ARITH1
+	defOp	"IMUL8",imul,eax,edx,0x77,TYPE_ARITH1
+	defOp	"IMUL8",imul,eax,edx,-0x77,TYPE_ARITH1
+	defOp	"IMUL16",imul,ax,0x777,none,TYPE_ARITH1
+	defOp	"IMUL32",imul,eax,0x777777,none,TYPE_ARITH1
+	defOp	"IDIVA",idiv,dl,none,none,TYPE_MULDIV
 	db	0
 
 	align	4
@@ -857,6 +889,23 @@ typeValues:
 	dd	0,0,0,0
 
 error:	jmp	error
+
+	times	OFF_INTDIVERR-0x100-($-$$) nop
+
+intDivErr:
+	push	esi
+	mov	esi,strDE
+	call	printStr
+	pop	esi
+;
+;   It's rather annoying that the 80386 treats #DE as a fault rather than a trap, leaving CS:EIP pointing to the
+;   faulting instruction.  So we must "patch" the EIP on the stack to point to a RET; it's easier to use our own RET
+;   rather than figuring out how long the DIV instruction is.
+;
+	mov	dword [esp],intDivRet
+	iretd
+intDivRet:
+	ret
 
 doneProt:
 	mov	ax,DSEG_PROT16

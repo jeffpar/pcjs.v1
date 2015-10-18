@@ -65,7 +65,7 @@ var X86 = {
      * Of the following exceptions, all are designed to be restartable, except for 0x08 and 0x09 (and 0x0D
      * after an attempt to write to a read-only segment).
      *
-     * Error codes are pushed onto the stack for 0x08 (always 0) and 0x0A through 0x0D.
+     * Error codes are pushed onto the stack for 0x08 (always 0) and 0x0A through 0x0E.
      *
      * Priority: Instruction exception, TRAP, NMI, Processor Extension Segment Overrun, and finally INTR.
      *
@@ -84,22 +84,22 @@ var X86 = {
      * The term "undocumented" should be limited to operations that are valid but Intel simply never documented.
      */
     EXCEPTION: {
-        DIV_ERR:    0x00,       // Divide Error Interrupt
-        DEBUG:      0x01,       // Debug (aka Single Step Trap) Interrupt
+        DE_EXC:     0x00,       // Divide Error Exception                   (#DE: fault, no error code)
+        DB_EXC:     0x01,       // Debug (aka Single Step Trap) Exception   (#DB: fault or trap)
         NMI:        0x02,       // Non-Maskable Interrupt
-        BREAKPOINT: 0x03,       // Breakpoint Interrupt
-        OVERFLOW:   0x04,       // INTO Overflow Interrupt (FYI, return address does NOT point to offending instruction)
-        BOUND_ERR:  0x05,       // BOUND Error Interrupt
-        UD_FAULT:   0x06,       // Invalid (aka Undefined or Illegal) Opcode (see implementation detail above)
-        NM_FAULT:   0x07,       // No Math Unit Available (see ESC or WAIT)
-        DF_FAULT:   0x08,       // Double Fault (see LIDT)
-        MP_FAULT:   0x09,       // Math Unit Protection Fault (see ESC)
-        TS_FAULT:   0x0A,       // Invalid Task State Segment Fault (protected-mode only)
-        NP_FAULT:   0x0B,       // Not Present Fault (protected-mode only)
-        SS_FAULT:   0x0C,       // Stack Fault (protected-mode only)
-        GP_FAULT:   0x0D,       // General Protection Fault
-        PG_FAULT:   0x0E,       // Page Fault
-        MF_FAULT:   0x10        // Math Fault (see ESC or WAIT)
+        BP_TRAP:    0x03,       // Breakpoint Exception                     (#BP: trap)
+        OF_TRAP:    0x04,       // INTO Overflow Exception                  (#OF: trap)
+        BR_FAULT:   0x05,       // BOUND Error Exception                    (#BR: fault, no error code)
+        UD_FAULT:   0x06,       // Invalid (aka Undefined/Illegal) Opcode   (#UD: fault, no error code)
+        NM_FAULT:   0x07,       // No Math Unit Available; see ESC or WAIT  (#NM: fault, no error code)
+        DF_FAULT:   0x08,       // Double Fault; see LIDT                   (#DF: fault, with error code)
+        MP_FAULT:   0x09,       // Math Unit Protection Fault; see ESC      (#MP: fault, no error code)
+        TS_FAULT:   0x0A,       // Invalid Task State Segment Fault         (#TS: fault, with error code; protected-mode only)
+        NP_FAULT:   0x0B,       // Not Present Fault                        (#NP: fault, with error code; protected-mode only)
+        SS_FAULT:   0x0C,       // Stack Fault                              (#SS: fault, with error code; protected-mode only)
+        GP_FAULT:   0x0D,       // General Protection Fault                 (#GP: fault, with error code)
+        PF_FAULT:   0x0E,       // Page Fault                               (#PF: fault, with error code)
+        MF_FAULT:   0x10        // Math Fault; see ESC or WAIT              (#MF: fault, no error code)
     },
     /*
      * Processor Status flag definitions (stored in regPS)
@@ -421,7 +421,7 @@ var X86 = {
         DATASIZE:   0x0400,     // data size override
         ADDRSIZE:   0x0800,     // address size override
         FAULT:      0x1000,     // a fault occurred during the current instruction
-        DEBUG:      0x2000      // a DEBUG exception occurred during the current instruction
+        DBEXC:      0x2000      // a DB_EXC exception occurred during the current instruction
     },
     /*
      * Bit values for intFlags

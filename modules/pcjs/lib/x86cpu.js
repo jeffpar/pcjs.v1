@@ -1403,7 +1403,7 @@ X86CPU.prototype.resetRegs = function()
     this.resultDst = this.resultSrc = this.resultArith = this.resultLogic = 0;
 
     /*
-     * nFault is set by fnFault() and reset (to -1) by resetRegs() and opIRET().  Its initial purpose is to
+     * nFault is set by fnFault() and reset (to -1) by resetRegs() and opIRET().  Its initial purpose was to
      * help fnFault() determine when a nested fault should be converted into either a double-fault (DF_FAULT)
      * or a triple-fault (ie, a processor reset).
      *
@@ -1412,9 +1412,9 @@ X86CPU.prototype.resetRegs = function()
      * to the corresponding fault #, whereas the latter must set it to -1, so that if the IDT contains a gate
      * whose DPL < CPL, a GP fault will be generated instead.
      *
-     * The former always call fnFault(), so that happens automatically.  The latter call fnINT(), so they must
-     * set nFault manually.  There are also intermediate cases, like hardware interrupts, which call fnINT()
-     * after manually setting nFault to the IDT #.
+     * The former always call fnFault(), and the latter call fnTrap(), so nFault is updated automatically.
+     * However, there are also intermediate cases, like hardware interrupts, which call fnINT() after manually
+     * setting nFault to the IDT #.  TODO: Review all those "intermediate" cases.
      */
     this.nFault = -1;
 
@@ -1896,13 +1896,13 @@ X86CPU.prototype.checkDebugRegisters = function(fEnable)
 X86CPU.prototype.checkMemoryException = function(addr, nb, fWrite)
 {
     /*
-     * NOTE: We're preventing redundant X86.EXCEPTION.DEBUG exceptions for a single instruction by checking
-     * X86.OPFLAG.DEBUG.  I decided not to rely on the generic X86.OPFLAG.FAULT, because if an instruction
+     * NOTE: We're preventing redundant X86.EXCEPTION.DB_EXC exceptions for a single instruction by checking
+     * X86.OPFLAG.DBEXC.  I decided not to rely on the generic X86.OPFLAG.FAULT, because if an instruction
      * first triggers a DIFFERENT exception which then triggers a DEBUG exception (eg, because a Debug register
      * was set on the IDT entry of the first exception), then presumably we'd like to see that DEBUG exception,
      * as opposed to, say, a double fault.  TODO: Determine whether that SHOULD generate a double-fault.
      */
-    if (!(this.opFlags & X86.OPFLAG.DEBUG) && (this.regDR[7] & X86.DR7.ENABLE)) {
+    if (!(this.opFlags & X86.OPFLAG.DBEXC) && (this.regDR[7] & X86.DR7.ENABLE)) {
         nb--;
         /*
          * We use a constant mask for the enable bits (X86.DR7.L0 | X86.DR7.G0) and shift our copy of regDR7
@@ -1928,7 +1928,13 @@ X86CPU.prototype.checkMemoryException = function(addr, nb, fWrite)
                  */
                 if (addr + nb >= this.regDR[i] && addr <= this.regDR[i] + len) {
                     this.regDR[6] |= (1 << i);
-                    X86.fnFault.call(this, X86.EXCEPTION.DEBUG);
+                    /*
+                     * Data access breakpoints are not faults; they must generate a trap at the end of the
+                     * instruction, so we use the X86.INTFLAG.TRAP flag to generate the X86.EXCEPTION.DB_EXC trap.
+                     *
+                     *      X86.fnFault.call(this, X86.EXCEPTION.DB_EXC);
+                     */
+                    this.intFlags |= X86.INTFLAG.TRAP;
                     return;
                 }
             }
@@ -3145,7 +3151,7 @@ X86CPU.prototype.checkIOPM = function(port, nPorts, fInput)
     }
     if (bitsPorts) {
         if (this.messageEnabled(Messages.PORT)) this.printMessage("checkIOPM(" + str.toHexWord(port) + "," + nPorts + "," + (fInput? "input" : "output") + "): trapped", true, true);
-        X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0, false);
+        X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
         return false;
     }
     return true;
@@ -4300,12 +4306,7 @@ X86CPU.prototype.checkINTR = function()
                 if ((this.intFlags & X86.INTFLAG.TRAP)) {
                     this.intFlags &= ~X86.INTFLAG.TRAP;
                     if (I386 && this.model >= X86.MODEL_80386) this.regDR[6] |= X86.DR6.BS;
-                    /*
-                     * TODO: Perhaps we should call fnFault() instead; eg:
-                     *
-                     *      X86.fnFault.call(this, X86.EXCEPTION.DEBUG, null, false, 11);
-                     */
-                    X86.fnINT.call(this, this.nFault = X86.EXCEPTION.DEBUG, null, 11);
+                    X86.fnINT.call(this, this.nFault = X86.EXCEPTION.DB_EXC, null, 11);
                     return true;
                 }
                 break;

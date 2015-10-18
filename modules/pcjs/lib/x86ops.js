@@ -3613,33 +3613,12 @@ X86.opINT3 = function INT3()
         return;
     }
     /*
-     * To give our own Debugger the ability to stop execution on INT3, I thought about treating this as
-     * a fault rather than an interrupt, in order to leverage the existing Debugger logic inside fnFault()
-     * processing, but that has the unwanted side-effect of rewinding EIP to the INT3 prior to issuing
-     * the interrupt, and the corresponding IRET takes us right back to the INT3.
-     *
-     *      X86.fnFault.call(this, X86.EXCEPTION.BREAKPOINT, null, false, this.cycleCounts.nOpCyclesInt3D);
-     *
-     * Then I had the idea of using the fnFaultMessage() function, in much the same way that fnFault()
-     * does for actual faults: if the user turned on the FAULT and HALT message bits, then fnFaultMessage()
-     * would tell us to halt; otherwise, we'd perform the normal fnINT() call.
-     *
-     *      if (X86.fnFaultMessage.call(this, X86.EXCEPTION.BREAKPOINT)) {
-     *          this.setIP(this.opLIP - this.segCS.base);
-     *          return;
-     *      }
-     *
-     * However, that makes it a little tedious to get past the INT3 (you have to use a Debugger command
-     * like "t;g"), and a somewhat confusing fault message is displayed; eg:
-     *
-     *      Fault 0x03 on opcode 0xB4 at 09CE:0155 (%009E35)
-     *
-     * The best solution was to leave this function alone, and change the Debugger's checkBreakpoint()
-     * function to stop execution on INT3 whenever both the INT and HALT message bits are set; a simple "g"
-     * command allows you to continue.
+     * Because INT3 is a trap, not a fault, we must use fnTrap() rather than fnFault().  Unfortunately, that
+     * means you can't rely on the Debugger logic instead fnFault() to conditionally stop execution on an INT3,
+     * so I've changed the Debugger's checkBreakpoint() function to stop execution on INT3 whenever both the
+     * INT and HALT message bits are set; a simple "g" command allows you to continue.
      */
-    this.nFault = -1;
-    X86.fnINT.call(this, X86.EXCEPTION.BREAKPOINT, null, this.cycleCounts.nOpCyclesInt3D);
+    X86.fnTrap.call(this, X86.EXCEPTION.BP_TRAP, this.cycleCounts.nOpCyclesInt3D);
 };
 
 /**
@@ -3663,8 +3642,7 @@ X86.opINTn = function INTn()
      * and returns false ONLY if a notification handler returned false (ie, requesting the interrupt be skipped).
      */
     if (this.checkIntNotify(nInt)) {
-        this.nFault = -1;
-        X86.fnINT.call(this, nInt, null, 0);
+        X86.fnTrap.call(this, nInt, 0);
         return;
     }
     this.nStepCycles--;     // we don't need to assess the full cost of nOpCyclesInt, but we need to assess something...
@@ -3686,8 +3664,7 @@ X86.opINTO = function INTO()
             X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
             return;
         }
-        this.nFault = -1;
-        X86.fnINT.call(this, X86.EXCEPTION.OVERFLOW, null, this.cycleCounts.nOpCyclesIntOD);
+        X86.fnTrap.call(this, X86.EXCEPTION.OF_TRAP, this.cycleCounts.nOpCyclesIntOD);
         return;
     }
     this.nStepCycles -= this.cycleCounts.nOpCyclesIntOFall;

@@ -149,7 +149,7 @@ X86.opLOADALL286 = function LOADALL286()
         /*
          * To use LOADALL, CPL must be zero.
          */
-        X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0, true);
+        X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0, 0, true);
         return;
     }
     this.setMSW(this.getShort(0x806));
@@ -301,7 +301,7 @@ X86.opLOADALL386 = function LOADALL386()
         /*
          * To use LOADALL, CPL must be zero.
          */
-        X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0, true);
+        X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0, 0, true);
         return;
     }
     /*

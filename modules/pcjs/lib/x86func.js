@@ -183,15 +183,12 @@ X86.fnBOUND = function(dst, src)
     this.nStepCycles -= this.cycleCounts.nOpCyclesBound;
     if (wIndex < wLower || wIndex > wUpper) {
         /*
-         * The INT 0x05 handler must be called with CS:IP pointing to the BOUND instruction, which
-         * fnFault() takes care of.  TODO: Determine whether this should be treated like a fault, or like
-         * a software interrupt, with an explicit call to fnINT() and nFault = -1, like opINT3(), opINTn()
-          * and opINTO().
+         * The INT 0x05 handler must be called with CS:IP pointing to the BOUND instruction.
          *
          * TODO: Determine the cycle cost when a BOUND exception is triggered, over and above nCyclesBound,
-         * and then call X86.fnFault(X86.EXCEPTION.BOUND_ERR, null, false, nCycles).
+         * and then call X86.fnFault(X86.EXCEPTION.BR_FAULT, null, nCycles).
          */
-        X86.fnFault.call(this, X86.EXCEPTION.BOUND_ERR);
+        X86.fnFault.call(this, X86.EXCEPTION.BR_FAULT);
     }
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;
@@ -1434,15 +1431,15 @@ X86.fnINCw = function(dst, src)
  *
  * @this {X86CPU}
  * @param {number} nIDT
- * @param {number|null|undefined} nError
- * @param {number} nCycles (in addition to the default of nOpCyclesInt)
+ * @param {number|null} [nError]
+ * @param {number} [nCycles] (in addition to the default of nOpCyclesInt)
  */
 X86.fnINT = function(nIDT, nError, nCycles)
 {
     /*
      * TODO: We assess the cycle cost up front, because otherwise, if loadIDT() fails, no cost may be assessed.
      */
-    this.nStepCycles -= this.cycleCounts.nOpCyclesInt + nCycles;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesInt + (nCycles || 0);
     var oldPS = this.getPS();
     var oldCS = this.getCS();
     var oldIP = this.getIP();
@@ -3858,9 +3855,19 @@ X86.fnGRPUndefined = function(dst, src)
 X86.fnDIVOverflow = function()
 {
     /*
+     * Divide error exceptions are traps on the 8086 and faults on later processors.  I question the value of that
+     * change, because it implies that someone might actually want to restart a failing divide.  The only reasonable
+     * explanation I can see for the change is to enable the exception handler to accurately record the address of
+     * the failing divide, which seems like a very minor benefit.  It doesn't change the fact that, on any processor,
+     * the exception handler's only reasonable recourse is to unwind execution to a safe point (or terminate the app).
+     *
      * TODO: Determine the proper cycle cost.
      */
-    X86.fnFault.call(this, X86.EXCEPTION.DIV_ERR, null, false, 2);
+    if (this.model == X86.MODEL_8086) {
+        X86.fnTrap.call(this, X86.EXCEPTION.DE_EXC, 2);
+    } else {
+        X86.fnFault.call(this, X86.EXCEPTION.DE_EXC, null, 2);
+    }
 };
 
 /**
@@ -3928,17 +3935,32 @@ X86.fnSRCxx = function()
 };
 
 /**
- * fnFault(nFault, nError, fHalt, nCycles)
+ * fnTrap(nIDT, nCycles)
  *
- * Helper to dispatch faults.
+ * Helper to dispatch traps (ie, exceptions that occur AFTER the instruction, with NO error code)
+ *
+ * @this {X86CPU}
+ * @param {number} nIDT
+ * @param {number} [nCycles] (number of cycles in addition to the default of nOpCyclesInt)
+ */
+X86.fnTrap = function(nIDT, nCycles)
+{
+    this.nFault = -1;
+    X86.fnINT.call(this, nIDT, null, nCycles);
+};
+
+/**
+ * fnFault(nFault, nError, nCycles, fHalt)
+ *
+ * Helper to dispatch faults (ie, exceptions that occur DURING an instruction and MAY generate an error code)
  *
  * @this {X86CPU}
  * @param {number} nFault
  * @param {number|null} [nError] (if omitted, no error code will be pushed)
- * @param {boolean} [fHalt] (true to halt the CPU, false to not, undefined if "it depends")
  * @param {number} [nCycles] cycle count to pass through to fnINT(), if any
+ * @param {boolean} [fHalt] (true to halt the CPU, false to not, undefined if "it depends")
  */
-X86.fnFault = function(nFault, nError, fHalt, nCycles)
+X86.fnFault = function(nFault, nError, nCycles, fHalt)
 {
     var fDispatch = null;
 
@@ -3990,7 +4012,7 @@ X86.fnFault = function(nFault, nError, fHalt, nCycles)
     if (fDispatch) {
 
         this.nFault = nFault;
-        X86.fnINT.call(this, nFault, nError, nCycles || 0);
+        X86.fnINT.call(this, nFault, nError, nCycles);
 
         /*
          * REP'eated instructions that rewind regLIP to opLIP used to screw up this dispatch,
@@ -4003,12 +4025,12 @@ X86.fnFault = function(nFault, nError, fHalt, nCycles)
          * or whatever is needed to help ensure instruction restartability; there is currently no general
          * mechanism for snapping and restoring all registers for any instruction that might fault.
          *
-         * X86.EXCEPTION.DEBUG exceptions set their own special flag, X86.OPFLAG.DEBUG, to prevent redundant
+         * X86.EXCEPTION.DB_EXC exceptions set their own special flag, X86.OPFLAG.DBEXC, to prevent redundant
          * DEBUG exceptions, so we don't need to set OPFLAG.FAULT in that case, because a DEBUG exception
          * doesn't actually prevent an instruction from executing (and therefore doesn't need to be restarted).
          */
-        if (nFault == X86.EXCEPTION.DEBUG) {
-            this.opFlags |= X86.OPFLAG.DEBUG;
+        if (nFault == X86.EXCEPTION.DB_EXC) {
+            this.opFlags |= X86.OPFLAG.DBEXC;
         } else {
             this.assert(nFault >= 0);
             this.opFlags |= X86.OPFLAG.FAULT;
@@ -4051,7 +4073,7 @@ X86.fnPageFault = function(addr, fPresent, fWrite)
     if (fPresent) nError |= X86.PTE.PRESENT;
     if (fWrite) nError |= X86.PTE.READWRITE;
     if (this.nCPL == 3) nError |= X86.PTE.USER;
-    X86.fnFault.call(this, X86.EXCEPTION.PG_FAULT, nError);
+    X86.fnFault.call(this, X86.EXCEPTION.PF_FAULT, nError);
 };
 
 /**
@@ -4111,7 +4133,7 @@ X86.fnFaultMessage = function(nFault, nError, fHalt)
             fHalt = false;
         }
     }
-    if (nFault == X86.EXCEPTION.PG_FAULT && bOpcode == X86.OPCODE.IRET) {
+    if (nFault == X86.EXCEPTION.PF_FAULT && bOpcode == X86.OPCODE.IRET) {
         fHalt = true;
     }
 

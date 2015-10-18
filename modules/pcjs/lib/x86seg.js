@@ -105,7 +105,7 @@ function X86Seg(cpu, id, sName, fProt)
      * Preallocated object for "probed" segment loads
      */
     this.probe = {
-        sel: 0, base: 0, limit: 0, acc: 0, type: 0, ext: 0, addrDesc: X86.ADDR_INVALID
+        sel: -1, base: 0, limit: 0, acc: 0, type: 0, ext: 0, addrDesc: X86.ADDR_INVALID
     };
 
     /*
@@ -636,15 +636,15 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fProbe)
         this.type = this.probe.type;
         this.ext = this.probe.ext;
         this.addrDesc = this.probe.addrDesc;
-        this.probe.sel = 0;
+        this.probe.sel = -1;
         this.updateMode(true, true, false);
         return this.base;
     }
 
     /*
-     * Any other load, probed or otherwise, should "flush" the probe cache, by setting probe.sel to zero.
+     * Any other load, probed or otherwise, should "flush" the probe cache, by setting probe.sel to -1.
      */
-    this.probe.sel = 0;
+    this.probe.sel = -1;
 
     /*
      * Load the descriptor from memory.
@@ -970,10 +970,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fProbe)
             return X86.ADDR_INVALID;
         }
         if (!selMasked || type < X86.DESC.ACC.TYPE.SEG || (type & (X86.DESC.ACC.TYPE.CODE | X86.DESC.ACC.TYPE.WRITABLE)) != X86.DESC.ACC.TYPE.WRITABLE) {
-            /*
-             * TODO: Remove fHalt=true from this fnFault() call once this code path has been tested.
-             */
-            if (this.id < X86Seg.ID.VER) X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel & X86.ERRCODE.SELMASK, true);
+            if (this.id < X86Seg.ID.VER) X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel & X86.ERRCODE.SELMASK);
             return X86.ADDR_INVALID;
         }
         break;
@@ -981,10 +978,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fProbe)
     case X86Seg.ID.TSS:
         var typeTSS = type & ~X86.DESC.ACC.TSS_BUSY;
         if (!selMasked || typeTSS != X86.DESC.ACC.TYPE.TSS286 && typeTSS != X86.DESC.ACC.TYPE.TSS386) {
-            /*
-             * TODO: Remove fHalt=true from this fnFault() call once this code path has been tested.
-             */
-            if (this.id < X86Seg.ID.VER) X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel & X86.ERRCODE.SELMASK, true);
+            if (this.id < X86Seg.ID.VER) X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel & X86.ERRCODE.SELMASK);
             return X86.ADDR_INVALID;
         }
         /*
@@ -1156,10 +1150,7 @@ X86Seg.prototype.switchTSS = function switchTSS(selNew, fNest)
          * TODO: Verify that it is (always) correct to require that the BUSY bit be currently set.
          */
         if (!(cpu.segTSS.type & X86.DESC.ACC.TSS_BUSY)) {
-            /*
-             * TODO: Remove fHalt=true from this fnFault() call once this code path has been tested.
-             */
-            X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, selNew & X86.ERRCODE.SELMASK, true);
+            X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, selNew & X86.ERRCODE.SELMASK);
             return false;
         }
         /*
@@ -1179,10 +1170,7 @@ X86Seg.prototype.switchTSS = function switchTSS(selNew, fNest)
 
     if (fNest !== false) {
         if (cpu.segTSS.type & X86.DESC.ACC.TSS_BUSY) {
-            /*
-             * TODO: Remove fHalt=true from this fnFault() call once this code path has been tested.
-             */
-            X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, selNew & X86.ERRCODE.SELMASK, true);
+            X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, selNew & X86.ERRCODE.SELMASK);
             return false;
         }
         cpu.setShort(cpu.segTSS.addrDesc + X86.DESC.ACC.OFFSET, cpu.segTSS.acc |= X86.DESC.ACC.TSS_BUSY);
