@@ -18,7 +18,6 @@
     "FATARRAYS": true,
     "TYPEDARRAYS": true,
     "BACKTRACK": true,
-    "SAMPLER": true,
     "BUGS_8086": true,
     "I386": true,
     "COMPAQ386": true,

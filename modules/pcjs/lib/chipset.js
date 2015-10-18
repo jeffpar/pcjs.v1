@@ -3174,7 +3174,7 @@ ChipSet.prototype.outPICLo = function(iPIC, bOut, addrFrom)
             } else {
                 if (DEBUG && this.messageEnabled(Messages.PIC | Messages.WARN)) {
                     this.printMessage("outPIC" + iPIC + '(' + str.toHexByte(pic.port) + "): unexpected EOI command, IRQ " + nIRQ + " not in service", true, true);
-                    if (!SAMPLER && MAXDEBUG) this.dbg.stopCPU();
+                    if (MAXDEBUG) this.dbg.stopCPU();
                 }
             }
             /*

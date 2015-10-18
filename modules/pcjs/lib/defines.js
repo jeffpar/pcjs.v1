@@ -106,17 +106,6 @@ var SYMBOLS = DEBUGGER;
 /**
  * @define {boolean}
  *
- * SAMPLER enables instruction sampling (a work-in-progress).  This was used briefly as an internal debugging aid,
- * to periodically record LIP values in a fixed-length sampling buffer, halting execution once the sampling buffer
- * was full, and then compare those sampled LIP values to corresponding LIP values on subsequent runs, to look
- * for deviations.  In theory, every run is supposed to be absolutely identical, even if you interrupt execution
- * with the Debugger or enable/disable different sets of messages, but in practice, that's hard to guarantee.
- */
-var SAMPLER = false;
-
-/**
- * @define {boolean}
- *
  * BUGS_8086 enables support for known 8086 bugs.  It's turned off by default, because 1) it adds overhead, and
  * 2) it's hard to imagine any software actually being dependent on any of the bugs covered by this (eg, the failure
  * to properly restart string instructions with multiple prefixes, or the failure to inhibit hardware interrupts
@@ -162,7 +151,6 @@ if (NODE) {
     global.TYPEDARRAYS = TYPEDARRAYS;
     global.BACKTRACK = BACKTRACK;
     global.SYMBOLS = SYMBOLS;
-    global.SAMPLER = SAMPLER;
     global.BUGS_8086 = BUGS_8086;
     global.I386 = I386;
     global.COMPAQ386 = COMPAQ386;

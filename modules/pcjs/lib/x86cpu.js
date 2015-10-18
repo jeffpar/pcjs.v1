@@ -181,36 +181,11 @@ function X86CPU(parmsCPU)
     this.nBusMask = this.nMemMask = 0;
     this.nBlockShift = this.nBlockSize = this.nBlockLimit = this.nBlockTotal = this.nBlockMask = 0;
 
-    if (SAMPLER) {
-        /*
-         * For now, we're just going to sample LIP values (well, LIP + cycle count)
-         */
-        this.nSamples = 50000;
-        this.nSampleFreq = 1000;
-        this.nSampleSkip = 0;
-        this.aSamples = new Array(this.nSamples);
-        for (var i = 0; i < this.nSamples; i++) this.aSamples[i] = -1;
-        this.iSampleNext = 0;
-        this.iSampleFreq = 0;
-        this.iSampleSkip = 0;
-    }
-
     /*
      * This initial resetRegs() call is important to create all the registers (eg, the X86Seg registers),
      * so that if/when we call restore(), it will have something to fill in.
      */
     this.resetRegs();
-
-    /*
-     * Register frames have proven to be a useful tool for catching register corruption bugs (eg, LOOP instructions
-     * improperly zeroing the high bits of ECX), but they shouldn't be enabled by default, because the associated
-     * functions (pushRegFrame() and popRegFrame()) can produce false positives, and weeding those out is a nuisance.
-     *
-     * In a perfect world, every time we IRET'ed to the CS:EIP where a hardware interrupt was injected, we could
-     * assume that the current register values will ALWAYS match the original register values (ie, at the time
-     * of injection).  But we can't assume that; there's too much clever code out there.
-     */
-    // if (DEBUG) this.aRegFrames = [];
 }
 
 Component.subclass(X86CPU, CPU);
@@ -1214,7 +1189,6 @@ X86CPU.prototype.reset = function()
     this.resetRegs();
     this.resetCycles();
     this.clearError();      // clear any fatal error/exception that setError() may have flagged
-    if (SAMPLER) this.iSampleNext = this.iSampleFreq = this.iSampleSkip = 0;
 };
 
 /**
@@ -4161,71 +4135,6 @@ X86CPU.prototype.pushWord = function(w)
 };
  */
 
-
-/**
- * newRegFrame()
- *
- * @this {X86CPU}
- * @return {Array}
- *
-X86CPU.prototype.newRegFrame = function()
-{
-    return [this.getIP(), this.segCS.sel, this.segDS.sel, this.segES.sel, this.segSS.sel,
-            this.regEAX, this.regEBX, this.regECX, this.regEDX, this.regESI, this.regEDI, this.regEBP, this.getSP(),
-            this.dbg? this.dbg.cOpcodes : 0];
-};
- */
-
-/**
- * pushRegFrame()
- *
- * Call this immediately before injecting a hardware interrupt.  Subsequent IRET instructions will check the most
- * recent frame to verify that all registers have been restored to their original values.
- *
- * @this {X86CPU}
- *
-X86CPU.prototype.pushRegFrame = function()
-{
-    this.aRegFrames.push(this.newRegFrame());
-    if (this.aRegFrames.length > 10) {
-        this.println("frame overflow");
-        this.stopCPU();
-    }
-};
- */
-
-/**
- * popRegFrame()
- *
- * Call this immediately after an IRET.  If EIP and CS match the most recent frame, check the rest of the registers.
- *
- * @this {X86CPU}
- *
-X86CPU.prototype.popRegFrame = function()
-{
-    if (this.aRegFrames.length) {
-        var a = this.aRegFrames[this.aRegFrames.length-1];
-        if (a[1] !== this.segCS.sel || a[0] !== this.getIP()) {
-            return;
-        }
-        var fMatch = true;
-        var b = this.newRegFrame(), i;
-        for (i = 2; i < a.length-2; i++) {
-            if (a[i] !== b[i]) {
-                this.println("frame mismatch at " + i + ": original=" + str.toHex(a[i]) + ", current=" + str.toHex(b[i]));
-                fMatch = false;
-                this.stopCPU();
-            }
-        }
-        if (!fMatch) {
-            i++;
-            this.println("opcode delta: " + (b[i] - a[i]));
-        }
-        this.aRegFrames.pop();
-    }
-};
- */
-
 /**
  * checkINTR()
  *
@@ -4295,7 +4204,6 @@ X86CPU.prototype.checkINTR = function()
                         this.intFlags &= ~X86.INTFLAG.INTR;
                         if (nIDT >= 0) {
                             this.intFlags &= ~X86.INTFLAG.HALT;
-                            // if (DEBUG) this.pushRegFrame();  // the corresponding popRegFrame() is in opIRET()
                             X86.fnINT.call(this, this.nFault = nIDT, null, 11);
                             return true;
                         }
@@ -4602,37 +4510,6 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
             }
             nDebugState = 1;
         }
-
-        /*
-         * SAMPLER:
-         *
-        if (SAMPLER) {
-            if (++this.iSampleFreq >= this.nSampleFreq) {
-                this.iSampleFreq = 0;
-                if (this.iSampleSkip < this.nSampleSkip) {
-                    this.iSampleSkip++;
-                } else {
-                    if (this.iSampleNext == this.nSamples) {
-                        this.println("sample buffer full");
-                        this.stopCPU();
-                        break;
-                    }
-                    var t = this.regLIP + this.getCycles();
-                    var n = this.aSamples[this.iSampleNext];
-                    if (n !== -1) {
-                        if (n !== t) {
-                            this.println("sample deviation at index " + this.iSampleNext + ": current LIP=" + str.toHex(this.regLIP));
-                            this.stopCPU();
-                            break;
-                        }
-                    } else {
-                        this.aSamples[this.iSampleNext] = t;
-                    }
-                    this.iSampleNext++;
-                }
-            }
-        }
-         */
 
         this.opFlags = 0;
 

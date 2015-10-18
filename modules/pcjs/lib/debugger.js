@@ -3416,7 +3416,7 @@ if (DEBUGGER) {
 
         if (this.sMessagePrev && sMessage == this.sMessagePrev) return;
 
-        if (!SAMPLER) this.println(sMessage);   // + " (" + this.cpu.getCycles() + " cycles)"
+        this.println(sMessage); // + " (" + this.cpu.getCycles() + " cycles)"
 
         this.sMessagePrev = sMessage;
 

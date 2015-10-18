@@ -3686,7 +3686,6 @@ X86.opIRET = function IRET()
         return;
     }
     X86.fnIRET.call(this);
-    // if (DEBUG) this.popRegFrame();
 };
 
 /**
