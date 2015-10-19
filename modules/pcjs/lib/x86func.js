@@ -558,21 +558,20 @@ X86.fnCALLw = function(dst, src)
 X86.fnCALLF = function(off, sel)
 {
     /*
-     * Originally, we would snapshot regLSP into opLSP because setCSIP() could trigger a segment fault,
-     * but additionally, the stack segment could trigger either a segment fault or a page fault; indeed,
-     * any operation that performs multiple stack modifications must take this precaution and snapshot regLSP.
+     * Since we always push the return address AFTER calling setCSIP(), and since either push could trigger
+     * fault (eg, segment fault, page fault, etc), we must not only snapshot regLSP into opLSP, but also the
+     * current CS into opCS, so that fnFault() can make this CALL restartable.
      */
+    this.opCS = this.getCS();
     this.opLSP = this.regLSP;
-
-    var oldCS = this.getCS();
     var oldIP = this.getIP();
     var oldSize = (I386? this.sizeData : 2);
     if (this.setCSIP(off, sel, true) != null) {
-        this.pushData(oldCS, oldSize);
+        this.pushData(this.opCS, oldSize);
         this.pushData(oldIP, oldSize);
     }
-
     this.opLSP = X86.ADDR_INVALID;
+    this.opCS = -1;
 };
 
 /**
@@ -768,7 +767,7 @@ X86.fnShr64 = function(dst)
  *
  * This sets regMDLo to dstHi:dstLo / src, and regMDHi to dstHi:dstLo % src; all inputs are treated as unsigned.
  *
- * If fMDset is not set, however, then there was a divide exception (ie, the divisor was either zero or too small).
+ * If fMDSet is not set, however, then there was a divide exception (ie, the divisor was either zero or too small).
  *
  * Refer to: http://lxr.linux.no/linux+v2.6.22/lib/div64.c
  *
@@ -799,8 +798,8 @@ X86.fnDIV32 = function(dstLo, dstHi, src)
             result += bit;
         }
         X86.fnShr64(div);
-        bit >>>= 1;
-    } while (bit);
+        bit /= 2;
+    } while (bit >= 1);
 
     this.assert(result <= 0xffffffff && !rem[1]);
 
@@ -814,7 +813,7 @@ X86.fnDIV32 = function(dstLo, dstHi, src)
  *
  * This sets regMDLo to dstHi:dstLo / src, and regMDHi to dstHi:dstLo % src; all inputs are treated as signed.
  *
- * If fMDset is not set, however, then there was a divide exception (ie, the divisor was either zero or too small).
+ * If fMDSet is not set, however, then there was a divide exception (ie, the divisor was either zero or too small).
  *
  * Refer to: http://lxr.linux.no/linux+v2.6.22/lib/div64.c
  *
@@ -3980,6 +3979,10 @@ X86.fnFault = function(nFault, nError, nCycles, fHalt)
              * the current instruction contains an OPERAND size override).
              */
             this.resetSizes();
+            if (this.opCS != -1) {
+                this.setCS(this.opCS);
+                this.opCS = -1;
+            }
             this.setIP(this.opLIP - this.segCS.base);
             if (this.opLSP != X86.ADDR_INVALID) {
                 this.setSP((this.regESP & ~this.segSS.maskAddr) | (this.opLSP - this.segSS.base));

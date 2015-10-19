@@ -1397,6 +1397,7 @@ X86CPU.prototype.resetRegs = function()
      * currently opLIP is updated prior to every instruction, but opLSP is updated only for instructions
      * that read/write the stack (eg, RETF) and should otherwise remain set to X86.ADDR_INVALID.
      */
+    this.opCS = -1;
     this.opLIP = this.opLSP = X86.ADDR_INVALID;
 
     /*

@@ -107,6 +107,9 @@ DSEG_PROT16	equ	0x0018
 DSEG_PROT32	equ	0x0020
 SSEG_PROT32	equ	0x0028
 
+;
+;   We set our exception handlers at fixed addresses to simplify interrupt gate descriptor initialization.
+;
 OFF_INTDIVERR	equ	0xe000
 
 ;
@@ -222,6 +225,10 @@ addrIDT:dw	myIDTEnd - myIDT - 1	; 16-bit limit of myIDT
 
 myIDT:	defGate	CSEG_PROT32,OFF_INTDIVERR
 myIDTEnd:
+
+addrIDTReal:
+	dw	0x3FF			; 16-bit limit of real-mode IDT
+	dd	0x00000000		; 32-bit base address of real-mode IDT
 
 initGDT:
     %ifdef RAM_GDT
@@ -746,7 +753,8 @@ printVal:
 TYPE_ARITH	equ	0
 TYPE_ARITH1	equ	1
 TYPE_LOGIC	equ	2
-TYPE_MULDIV	equ	3
+TYPE_MULTIPLY	equ	3
+TYPE_DIVIDE	equ	4
 
 SIZE_BYTE	equ	0
 SIZE_SHORT	equ	1
@@ -816,18 +824,32 @@ tableOps:
 	defOp	"DEC",dec,al,none,none,TYPE_ARITH1
 	defOp	"DEC",dec,ax,none,none,TYPE_ARITH1
 	defOp	"DEC",dec,eax,none,none,TYPE_ARITH1
-	defOp	"IMULA",imul,dl,none,none,TYPE_MULDIV
-	defOp	"IMULA",imul,dx,none,none,TYPE_MULDIV
-	defOp	"IMULA",imul,edx,none,none,TYPE_MULDIV
-	defOp	"IMUL",imul,ax,dx,none,TYPE_MULDIV
-	defOp	"IMUL",imul,eax,edx,none,TYPE_MULDIV
-	defOp	"IMUL8",imul,ax,dx,0x77,TYPE_ARITH1
-	defOp	"IMUL8",imul,ax,dx,-0x77,TYPE_ARITH1
-	defOp	"IMUL8",imul,eax,edx,0x77,TYPE_ARITH1
-	defOp	"IMUL8",imul,eax,edx,-0x77,TYPE_ARITH1
-	defOp	"IMUL16",imul,ax,0x777,none,TYPE_ARITH1
-	defOp	"IMUL32",imul,eax,0x777777,none,TYPE_ARITH1
-	defOp	"IDIVA",idiv,dl,none,none,TYPE_MULDIV
+	defOp	"MULA",mul,dl,none,none,TYPE_MULTIPLY
+	defOp	"MULA",mul,dx,none,none,TYPE_MULTIPLY
+	defOp	"MULA",mul,edx,none,none,TYPE_MULTIPLY
+	defOp	"IMULA",imul,dl,none,none,TYPE_MULTIPLY
+	defOp	"IMULA",imul,dx,none,none,TYPE_MULTIPLY
+	defOp	"IMULA",imul,edx,none,none,TYPE_MULTIPLY
+	defOp	"IMUL",imul,ax,dx,none,TYPE_MULTIPLY
+	defOp	"IMUL",imul,eax,edx,none,TYPE_MULTIPLY
+	defOp	"IMUL8",imul,ax,dx,0x77,TYPE_MULTIPLY
+	defOp	"IMUL8",imul,ax,dx,-0x77,TYPE_MULTIPLY
+	defOp	"IMUL8",imul,eax,edx,0x77,TYPE_MULTIPLY
+	defOp	"IMUL8",imul,eax,edx,-0x77,TYPE_MULTIPLY
+	defOp	"IMUL16",imul,ax,0x777,none,TYPE_MULTIPLY
+	defOp	"IMUL32",imul,eax,0x777777,none,TYPE_MULTIPLY
+	defOp	"DIVDL",div,dl,none,none,TYPE_DIVIDE
+	defOp	"DIVDX",div,dx,none,none,TYPE_DIVIDE
+	defOp	"DIVEDX",div,edx,none,none,TYPE_DIVIDE
+	defOp	"DIVAL",div,al,none,none,TYPE_DIVIDE
+	defOp	"DIVAX",div,ax,none,none,TYPE_DIVIDE
+	defOp	"DIVEAX",div,eax,none,none,TYPE_DIVIDE
+	defOp	"IDIVDL",idiv,dl,none,none,TYPE_DIVIDE
+	defOp	"IDIVDX",idiv,dx,none,none,TYPE_DIVIDE
+	defOp	"IDIVEDX",idiv,edx,none,none,TYPE_DIVIDE
+	defOp	"IDIVAL",idiv,al,none,none,TYPE_DIVIDE
+	defOp	"IDIVAX",idiv,ax,none,none,TYPE_DIVIDE
+	defOp	"IDIVEAX",idiv,eax,none,none,TYPE_DIVIDE
 	db	0
 
 	align	4
@@ -836,7 +858,8 @@ typeMasks:
 	dd	PS_ARITH
 	dd	PS_ARITH
 	dd	PS_LOGIC
-	dd	PS_MULDIV
+	dd	PS_MULTIPLY
+	dd	PS_DIVIDE
 
 arithValues:
 .bvals:	dd	0x00,0x01,0x02,0x7E,0x7F,0x80,0x81,0xFE,0xFF
@@ -881,7 +904,14 @@ typeValues:
 	dd	ARITH_BYTES+ARITH_WORDS+ARITH_DWORDS,arithValues,ARITH_BYTES+ARITH_WORDS+ARITH_DWORDS,arithValues
 	dd	0,0,0,0
 	;
-	; Values for TYPE_MULDIV (a superset of ARITH values)
+	; Values for TYPE_MULTIPLY (a superset of ARITH values)
+	;
+	dd	MULDIV_BYTES,muldivValues,MULDIV_BYTES,muldivValues
+	dd	MULDIV_BYTES+MULDIV_WORDS,muldivValues,MULDIV_BYTES+MULDIV_WORDS,muldivValues
+	dd	MULDIV_BYTES+MULDIV_WORDS+MULDIV_DWORDS,muldivValues,MULDIV_BYTES+MULDIV_WORDS+MULDIV_DWORDS,muldivValues
+	dd	0,0,0,0
+	;
+	; Values for TYPE_DIVIDE
 	;
 	dd	MULDIV_BYTES,muldivValues,MULDIV_BYTES,muldivValues
 	dd	MULDIV_BYTES+MULDIV_WORDS,muldivValues,MULDIV_BYTES+MULDIV_WORDS,muldivValues
@@ -899,8 +929,8 @@ intDivErr:
 	pop	esi
 ;
 ;   It's rather annoying that the 80386 treats #DE as a fault rather than a trap, leaving CS:EIP pointing to the
-;   faulting instruction.  So we must "patch" the EIP on the stack to point to a RET; it's easier to use our own RET
-;   rather than figuring out how long the DIV instruction is.
+;   faulting instruction instead of the RET we conveniently placed after it.  So, instead of trying to calculate where
+;   that RET is, we simply set EIP on the stack to point to our own RET.
 ;
 	mov	dword [esp],intDivRet
 	iretd
@@ -914,14 +944,16 @@ doneProt:
 
     %ifndef REAL32
 ;
-;   Return to real-mode now, after first loading CS with a 16-bit code segment
+;   Return to real-mode, after first resetting the IDTR and loading CS with a 16-bit code segment
 ;
+	o32 lidt [cs:addrIDTReal]
 	jmp	CSEG_PROT16:toProt16
 toProt16:
 	bits	16
     %endif
 
-goReal:	mov	eax,cr0
+goReal:
+	mov	eax,cr0
 	and	eax,~(CR0_MSW_PE | CR0_PG) & 0xffffffff
 	mov	cr0,eax
 jmpReal:

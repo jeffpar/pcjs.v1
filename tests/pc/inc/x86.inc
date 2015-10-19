@@ -12,7 +12,8 @@ PS_DF			equ	0x0400
 PS_OF			equ	0x0800
 PS_ARITH		equ	(PS_CF | PS_PF | PS_AF | PS_ZF | PS_SF | PS_OF)
 PS_LOGIC		equ	(PS_CF | PS_PF | PS_ZF | PS_SF | PS_OF)
-PS_MULDIV		equ	(PS_CF | PS_OF)
+PS_MULTIPLY		equ	(PS_CF | PS_OF)	; only CF and OF are "defined" following MUL or IMUL
+PS_DIVIDE		equ	0		; none of the Processor Status flags are "defined" following DIV or IDIV
 
 CR0_MSW_PE		equ	0x0001
 CR0_PG			equ	0x80000000	; set if paging enabled
