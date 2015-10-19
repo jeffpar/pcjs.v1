@@ -211,15 +211,15 @@ function Memory(addr, used, size, type, controller, cpu)
  *
  * Originally, the Debugger always went through the Bus interfaces, and could therefore modify ROMs as well,
  * but with the introduction of protected mode memory segmentation (and later paging), where logical and
- * phsycial addresses were no longer the same, that is no longer true.  For coherency, all Debugger memory
- * accesses now go through the X86Seg and X86CPU memory interfaces, so that the user sees the same segment
- * and page translation that the CPU sees.  However, the Debugger uses special "fSuppress" flags to prevent
- * those X86 interfaces from triggering segment and/or page faults when invalid or not-present segments
- * or pages are accessed.
+ * physical addresses were no longer the same, that is no longer true.  For coherency, all Debugger memory
+ * accesses now go through X86Seg and X86CPU memory interfaces, so that the user sees the same segment
+ * and page translation that the CPU sees.  However, the Debugger uses a special probeAddr() interface to
+ * read memory, along with a special "fSuppress" flag to mapPageBlock(), to prevent its memory accesses
+ * from triggering segment and/or page faults when invalid or not-present segments or pages are accessed.
  *
  * These types are not mutually exclusive.  For example, VIDEO memory could be allocated as RAM, with or
  * without a custom controller (the original Monochrome and CGA video cards used read/write storage that
- * was indistiguishable from RAM), and CTRL memory could be allocated as an empty block of any type, with
+ * was indistinguishable from RAM), and CTRL memory could be allocated as an empty block of any type, with
  * a custom controller.  A few types are required for certain features (eg, ROM is required if you want
  * read-only memory), but the larger purpose of these types is to help document the caller's intent and to
  * provide the Control Panel with the ability to highlight memory regions accordingly.
