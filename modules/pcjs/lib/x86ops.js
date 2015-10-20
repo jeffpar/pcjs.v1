@@ -49,12 +49,15 @@ X86.opADDmb = function ADDmb()
     var b = this.getIPByte();
     /*
      * Opcode bytes 0x00 0x00 are sufficiently uncommon that it's more likely we've started
-     * executing in the weeds, so we'll print a warning if you're in DEBUG mode, and optionally
-     * stop the CPU if a Debugger is available.
+     * executing in the weeds, so if you're in DEBUG mode, we'll print a warning and stop the
+     * CPU if a Debugger is available.
+     *
+     * Notice that we also test fRunning: this allows the Debugger to step over the instruction,
+     * because its trace ("t") command doesn't "run" the CPU; it merely "steps" the CPU.
      */
-    if (DEBUG && !b) {
+    if (DEBUG && !b && this.aFlags.fRunning) {
         this.printMessage("suspicious opcode: 0x00 0x00", DEBUGGER || this.bitsMessage);
-        if (DEBUGGER && this.dbg) this.stopCPU();
+        if (DEBUGGER && this.dbg) this.dbg.stopCPU();
     }
     this.aOpModMemByte[b].call(this, X86.fnADDb);
 };
@@ -4157,7 +4160,7 @@ X86.opHLT = function HLT()
      */
     if (DEBUGGER && this.dbg && this.messageEnabled(Messages.HALT)) {
         this.rewindIP(-1);      // this is purely for the Debugger's benefit, to show the HLT
-        this.stopCPU();
+        this.dbg.stopCPU();
         return;
     }
     /*

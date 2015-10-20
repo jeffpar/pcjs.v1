@@ -49,8 +49,8 @@ if (!I386) {
     /*
      * These are the original ModRM decoders, which were simpler and faster because they could treat all
      * word instructions as 16-bit, assume bits 16-31 of all registers were always zero, and use masking
-     * constants instead of variables.  If I386 is enabled, these decoders are not used, and the compiler
-     * will eliminate them from the compiled code.
+     * constants instead of variables.  If I386 is enabled, these decoders are not used, and the Closure
+     * Compiler will eliminate them from the compiled JavaScript code.
      */
     if (NODE) {
         var X86ModB     = require("./x86modb");
@@ -814,7 +814,7 @@ X86CPU.prototype.enablePageBlocks = function()
  * Note that since the incoming address (addr) is a linear address, we never need to mask it with nBusMask,
  * but all the intermediate (PDE, PTE) and final physical addresses we calculate should still be masked.
  *
- * Granted, nBusMask on a 32-bit bus is generally going to be 0xffffffff (-1), so making might seem like
+ * Granted, nBusMask on a 32-bit bus is generally going to be 0xffffffff (-1), so masking might seem like
  * a waste of time; however, if we decide to once again rely on nBusMask for emulating A20 wrap-around
  * (instead of changing the physical memory map to alias the 2nd Mb to the 1st Mb), then performing
  * consistent masking will be important.
@@ -993,9 +993,9 @@ X86CPU.prototype.disablePageBlocks = function()
  *      It is recommended that you add an interrupt handler to the 8086 software that is to be run on the 80286,
  *      which will treat these interrupts as invalid operations.
  *
- *      This additional software does not significantly effect the existing 8086 software because the interrupts
+ *      This additional software does not significantly effect [sic] the existing 8086 software because the interrupts
  *      do not normally occur and should not already have been used since they are in the interrupt group reserved
- *      by Intel. [Note to Intel: IBM caaaaaaan't hear you].
+ *      by Intel. [NOTE: IBM ignored Intel's admonishments.]
  *
  *   2. Do not Rely on 8086/8088 Instruction Clock Counts
  *
@@ -1035,7 +1035,7 @@ X86CPU.prototype.disablePageBlocks = function()
  *   8. Do not Rely on the Value Written by PUSH SP
  *
  *      The 80286 will push a different value on the stack for PUSH SP than the 8086/8088. If the value pushed is
- *      important [and when would it NOT be???], replace PUSH SP instructions with the following three instructions:
+ *      important [and when would it NOT be?], replace PUSH SP instructions with the following three instructions:
  *
  *          PUSH    BP
  *          MOV     BP,SP
@@ -1118,7 +1118,7 @@ X86CPU.prototype.initProcessor = function()
          * Instruction handlers that contain "hard-coded" 80286 cycle times include: opINSb, opINSw, opOUTSb,
          * opOUTSw, opENTER, and opLEAVE.
          */
-        this.aOps = X86.aOps.slice();       // make copies of aOps and others before modifying them
+        this.aOps = X86.aOps.slice();       // make copies of opcode tables before modifying
         this.aOpGrp4b = X86.aOpGrp4b.slice();
         this.aOpGrp4w = X86.aOpGrp4w.slice();
         this.nShiftCountMask = 0x1f;        // on newer processors, all shift counts are MOD 32
@@ -1326,8 +1326,8 @@ X86CPU.prototype.setReg = function(i, reg)
  * Similarly, regLSP mirrors the linear address corresponding to SS:SP, and therefore you must rely on getSP()
  * to read the current SP, and setSP() and setSS() to update SP and SS.
  *
- * The other segment registers, such as segDS and segES, have similar getters and setters, but they do not mirror
- * any segment:offset values in the same way that regLIP mirrors CS:IP, or that regLSP mirrors SS:SP.
+ * The other segment registers, such as segDS and segES, have similar getters and setters, but we do not mirror
+ * any other segment:offset values in the same way that regLIP mirrors CS:IP, or that regLSP mirrors SS:SP.
  *
  * @this {X86CPU}
  */
@@ -1366,7 +1366,7 @@ X86CPU.prototype.resetRegs = function()
      */
     this.regCR0 = X86.CR0.MSW.ON;
     this.addrIDT = 0; this.addrIDTLimit = 0x03FF;
-    this.regPS = this.nIOPL = 0;        // these should be set before the first setPS() call
+    this.regPS = this.nIOPL = 0;// these should be set before the first setPS() call
 
     /*
      * Define all the result registers that can be used to "cache" arithmetic and logical flags.
@@ -1395,14 +1395,18 @@ X86CPU.prototype.resetRegs = function()
     /*
      * These are used to snapshot regLIP and regLSP, to help make instructions restartable;
      * currently opLIP is updated prior to every instruction, but opLSP is updated only for instructions
-     * that read/write the stack (eg, RETF) and should otherwise remain set to X86.ADDR_INVALID.
+     * that modify the stack pointer (eg, RETF) and should otherwise remain set to X86.ADDR_INVALID.
+     *
+     * More recently, opCS was added to selectively snapshot an instruction's original CS in case an
+     * exception occurs accessing the stack after a new CS has been loaded, allowing the exception handler
+     * to recover the old CS and make instructions like CALLF restartable; otherwise, opCS should remain -1.
      */
     this.opCS = -1;
     this.opLIP = this.opLSP = X86.ADDR_INVALID;
 
     /*
-     * Segment registers used to be defined as separate variables (eg, regCS and regCS0 stored the segment
-     * number and base linear address, respectively), but segment registers are now defined as X86Seg objects.
+     * Segment registers used to be defined as separate selector and base variables (eg, regCS and regCS0),
+     * but now they are defined as X86Seg objects.
      */
     this.segCS     = new X86Seg(this, X86Seg.ID.CODE,  "CS");
     this.segDS     = new X86Seg(this, X86Seg.ID.DATA,  "DS");
@@ -1455,8 +1459,8 @@ X86CPU.prototype.resetRegs = function()
          * (and too difficult in protected-mode) to merit the overhead.  Ditto for SP, which can't really
          * be considered a general-purpose register.
          *
-         * Every time getByte() is called, btMemLo is filled with the matching backtrack info; similarly,
-         * every time getWord() is called, btMemLo and btMemHi are filled with the matching backtrack info
+         * Every time getByte() is called, btiMem0 is filled with the matching backtrack info; similarly,
+         * every time getWord() is called, btiMem0 and btiMem1 are filled with the matching backtrack info
          * for the low and high bytes, respectively.
          */
         this.backTrack = {
