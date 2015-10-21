@@ -1,4 +1,4 @@
-Some Success With Windows 95
+Success With Windows 95
 ---
 
 Today, the last serious bug preventing a successful boot of Windows 95 was fixed.  I won't bore you with
@@ -16,8 +16,7 @@ Windows 95 startup screen.
 
 The machine is still a bit finicky.  It easily gets confused about the state of its shift keys if you switch away
 from the browser and then back again.  And Explorer windows don't open in the correct view; for example, both
-**My Computer** and **Recycle Bin** open the same (incorrect) view.  And if you close an Explorer window, reopen it,
-and click around on the menus, a crash will likely result.
+**My Computer** and **Recycle Bin** open the same (incorrect) view.
 
 The adventure continues.
 
