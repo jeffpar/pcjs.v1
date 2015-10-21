@@ -4572,10 +4572,14 @@ if (DEBUGGER) {
         var sOpcode = Debugger.INS_NAMES[aOpDesc[0]];
         var cOperands = aOpDesc.length - 1;
         var sOperands = "";
+
         if (this.isStringIns(bOpcode)) {
             cOperands = 0;              // suppress display of operands for string instructions
             if (dbgAddr.fData32 && sOpcode.slice(-1) == 'W') sOpcode = sOpcode.slice(0, -1) + 'D';
         }
+        /*
+         * TODO: We need a similar fixup for POPF and POPA when OPERAND size is 4 (to make them POPFD and POPAD)
+         */
 
         var typeCPU = null;
         var fComplete = true;

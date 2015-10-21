@@ -1506,19 +1506,23 @@ X86.fnIRET = function()
             }
             else {
                 if (newPS & X86.PS.VM) {
-                    this.assert(!!(this.regCR0 & X86.CR0.MSW.PE));
+                    /*
+                     * As noted in loadDesc8(), where the V86-mode frame we're about to pop was originally pushed,
+                     * these frames ALWAYS contain 32-bit values, so make sure that sizeData reflects that.
+                     */
+                    this.assert(!!(this.regCR0 & X86.CR0.MSW.PE) && this.sizeData == 4);
                     /*
                      * We have to assume that a full V86-mode interrupt frame was on the protected-mode stack; namely:
                      *
-                     *      GS
-                     *      FS
-                     *      DS
-                     *      ES
-                     *      SS
-                     *      ESP
-                     *      EFLAGS
-                     *      CS
-                     *      EIP
+                     *      low:    EIP
+                     *              CS (padded to 32 bits)
+                     *              EFLAGS
+                     *              ESP
+                     *              SS (padded to 32 bits)
+                     *              ES (padded to 32 bits)
+                     *              DS (padded to 32 bits)
+                     *              FS (padded to 32 bits)
+                     *      high:   GS (padded to 32 bits)
                      *
                      * We've already popped EIP, CS, and EFLAGS into newIP, newCS and newPS, respectively, so we must now
                      * pop the rest, while we're still in protected-mode, before the switch to V86-mode alters the current

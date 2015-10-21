@@ -887,6 +887,22 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fProbe)
                     cpu.resetSizes();
 
                     if (regPS & X86.PS.VM) {
+                        /*
+                         * Frames coming from V86-mode ALWAYS contain 32-bit values, and look like this:
+                         *
+                         *      low:    EIP
+                         *              CS (padded to 32 bits)
+                         *              EFLAGS
+                         *              ESP
+                         *              SS (padded to 32 bits)
+                         *              ES (padded to 32 bits)
+                         *              DS (padded to 32 bits)
+                         *              FS (padded to 32 bits)
+                         *      high:   GS (padded to 32 bits)
+                         *
+                         * Our caller (eg, fnINT()) will take care of pushing the final bits (EFLAGS, CS, and EIP).
+                         */
+                        cpu.setDataSize(this.sizeFrame = 4);
                         cpu.assert(I386 && cpu.model >= X86.MODEL_80386);
                         cpu.pushWord(cpu.segGS.sel);
                         cpu.setGS(0);
