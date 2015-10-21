@@ -871,13 +871,6 @@ X86.fnDIVb = function(dst, src)
     this.fMDSet = true;
     this.regMDLo = (result & 0xff) | (((src % dst) & 0xff) << 8);
 
-    /*
-     * Multiply/divide instructions specify only a single operand, which the decoders pass to us
-     * via the dst parameter, so we set src to the other implied operand (either AX or DX:AX).
-     * However, src is technically an output, and dst is merely an input (which is why we must return
-     * dst unchanged). So, to make traceLog() more consistent, we reverse the order of dst and src.
-     */
-    if (DEBUG && DEBUGGER) this.traceLog('DIVb', src, dst, null, this.getPS(), this.regMDLo);
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesDivBR : this.cycleCounts.nOpCyclesDivBM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;
@@ -928,19 +921,6 @@ X86.fnDIVw = function(dst, src)
         this.regMDHi |= 0;
     }
 
-    /*
-     * Multiply/divide instructions specify only a single operand, which the decoders pass to us
-     * via the dst parameter, so we set src to the other implied operand (either AX or DX:AX).
-     * However, src is technically an output, and dst is merely an input (which is why we must return
-     * dst unchanged). So, to make traceLog() more consistent, we reverse the order of dst and src.
-     */
-    if (DEBUG && DEBUGGER) {
-        if (this.sizeData == 2) {
-            this.traceLog('DIVw', src, dst, null, this.getPS(), this.regMDLo | (this.regMDHi << 16));
-        } else {
-            this.traceLog('DIVd', src, dst, null, this.getPS(), this.regMDLo, this.regMDHi);
-        }
-    }
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesDivWR : this.cycleCounts.nOpCyclesDivWM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;
@@ -1000,13 +980,6 @@ X86.fnIDIVb = function(dst, src)
     this.fMDSet = true;
     this.regMDLo = (result & 0xff) | (((src % div) & 0xff) << 8);
 
-    /*
-     * Multiply/divide instructions specify only a single operand, which the decoders pass to us
-     * via the dst parameter, so we set src to the other implied operand (either AX or DX:AX).
-     * However, src is technically an output, and dst is merely an input (which is why we must return
-     * dst unchanged). So, to make traceLog() more consistent, we reverse the order of dst and src.
-     */
-    if (DEBUG && DEBUGGER) this.traceLog('IDIVb', src, dst, null, this.getPS(), this.regMDLo);
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesIDivBR : this.cycleCounts.nOpCyclesIDivBM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;
@@ -1065,19 +1038,6 @@ X86.fnIDIVw = function(dst, src)
         this.regMDHi |= 0;
     }
 
-    /*
-     * Multiply/divide instructions specify only a single operand, which the decoders pass to us
-     * via the dst parameter, so we set src to the other implied operand (either AX or DX:AX).
-     * However, src is technically an output, and dst is merely an input (which is why we must return
-     * dst unchanged). So, to make traceLog() more consistent, we reverse the order of dst and src.
-     */
-    if (DEBUG && DEBUGGER) {
-        if (this.sizeData == 2) {
-            this.traceLog('IDIVw', src, dst, null, this.getPS(), this.regMDLo | (this.regMDHi << 16));
-        } else {
-            this.traceLog('IDIVd', src, dst, null, this.getPS(), this.regMDLo, this.regMDHi);
-        }
-    }
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesIDivWR : this.cycleCounts.nOpCyclesIDivWM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;
@@ -1112,7 +1072,6 @@ X86.fnIMUL8 = function(dst, src)
     }
 
     result &= 0xffff;
-    if (DEBUG && DEBUGGER) this.traceLog('IMUL8', dst, src, null, this.getPS(), result);
 
     /*
      * NOTE: These are the cycle counts for the 80286; the 80186/80188 have slightly different values (ranges):
@@ -1153,14 +1112,6 @@ X86.fnIMULb = function(dst, src)
     } else {
         this.clearCF(); this.clearOF();
     }
-
-    /*
-     * Multiply/divide instructions specify only a single operand, which the decoders pass to us
-     * via the dst parameter, so we set src to the other implied operand (either AX or DX:AX).
-     * However, src is technically an output, and dst is merely an input (which is why we must return
-     * dst unchanged). So, to make traceLog() more consistent, we reverse the order of dst and src.
-     */
-    if (DEBUG && DEBUGGER) this.traceLog('IMULb', src, dst, null, this.getPS(), this.regMDLo);
 
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesIMulBR : this.cycleCounts.nOpCyclesIMulBM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
@@ -1205,7 +1156,6 @@ X86.fnIMULn = function(dst, src)
     }
 
     result &= this.maskData;
-    if (DEBUG && DEBUGGER) this.traceLog('IMULn', dst, src, null, this.getPS(), result);
 
     /*
      * NOTE: These are the cycle counts for the 80286; the 80186/80188 have slightly different values (ranges):
@@ -1284,19 +1234,6 @@ X86.fnIMULw = function(dst, src)
         this.clearCF(); this.clearOF();
     }
 
-    /*
-     * Multiply/divide instructions specify only a single operand, which the decoders pass to us
-     * via the dst parameter, so we set src to the other implied operand (either AX or DX:AX).
-     * However, src is technically an output, and dst is merely an input (which is why we must return
-     * dst unchanged). So, to make traceLog() more consistent, we reverse the order of dst and src.
-     */
-    if (DEBUG && DEBUGGER) {
-        if (this.sizeData == 2) {
-            this.traceLog('IMULw', src, dst, null, this.getPS(), this.regMDLo | (this.regMDHi << 16));
-        } else {
-            this.traceLog('IMULd', src, dst, null, this.getPS(), this.regMDLo, this.regMDHi);
-        }
-    }
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesIMulWR : this.cycleCounts.nOpCyclesIMulWM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;
@@ -2047,14 +1984,6 @@ X86.fnMULb = function(dst, src)
         this.clearCF(); this.clearOF();
     }
 
-    /*
-     * Multiply/divide instructions specify only a single operand, which the decoders pass to us
-     * via the dst parameter, so we set src to the other implied operand (either AX or DX:AX).
-     * However, src is technically an output, and dst is merely an input (which is why we must return
-     * dst unchanged). So, to make traceLog() more consistent, we reverse the order of dst and src.
-     */
-    if (DEBUG && DEBUGGER) this.traceLog('MULb', src, dst, null, this.getPS(), this.regMDLo);
-
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesMulBR : this.cycleCounts.nOpCyclesMulBM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;
@@ -2122,19 +2051,6 @@ X86.fnMULw = function(dst, src)
         this.clearCF(); this.clearOF();
     }
 
-    /*
-     * Multiply/divide instructions specify only a single operand, which the decoders pass to us
-     * via the dst parameter, so we set src to the other implied operand (either AX or DX:AX).
-     * However, src is technically an output, and dst is merely an input (which is why we must return
-     * dst unchanged). So, to make traceLog() more consistent, we reverse the order of dst and src.
-     */
-    if (DEBUG && DEBUGGER) {
-        if (this.sizeData == 2) {
-            this.traceLog('MULw', src, dst, null, this.getPS(), this.regMDLo | (this.regMDHi << 16));
-        } else {
-            this.traceLog('MULd', src, dst, null, this.getPS(), this.regMDLo, this.regMDHi);
-        }
-    }
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesMulWR : this.cycleCounts.nOpCyclesMulWM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;
@@ -2298,7 +2214,6 @@ X86.fnRCLb = function(dst, src)
         }
         this.setRotateResult(result, carry, X86.RESULT.BYTE);
     }
-    if (DEBUG && DEBUGGER) this.traceLog('RCLb', dst, src, flagsIn, this.getPS(), result);
     return result;
 };
 
@@ -2326,7 +2241,6 @@ X86.fnRCLw = function(dst, src)
         }
         this.setRotateResult(result, carry, X86.RESULT.WORD);
     }
-    if (DEBUG && DEBUGGER) this.traceLog('RCLw', dst, src, flagsIn, this.getPS(), result);
     return result;
 };
 
@@ -2354,7 +2268,6 @@ X86.fnRCLd = function(dst, src)
         carry = dst << (count - 1);
         this.setRotateResult(result, carry, X86.RESULT.DWORD);
     }
-    if (DEBUG && DEBUGGER) this.traceLog('RCLd', dst, src, flagsIn, this.getPS(), result);
     return result;
 };
 
@@ -2382,7 +2295,6 @@ X86.fnRCRb = function(dst, src)
         }
         this.setRotateResult(result, carry, X86.RESULT.BYTE);
     }
-    if (DEBUG && DEBUGGER) this.traceLog('RCRb', dst, src, flagsIn, this.getPS(), result);
     return result;
 };
 
@@ -2410,7 +2322,6 @@ X86.fnRCRw = function(dst, src)
         }
         this.setRotateResult(result, carry, X86.RESULT.WORD);
     }
-    if (DEBUG && DEBUGGER) this.traceLog('RCRw', dst, src, flagsIn, this.getPS(), result);
     return result;
 };
 
@@ -2438,7 +2349,6 @@ X86.fnRCRd = function(dst, src)
         carry = dst << (32 - count);
         this.setRotateResult(result, carry, X86.RESULT.DWORD);
     }
-    if (DEBUG && DEBUGGER) this.traceLog('RCRd', dst, src, flagsIn, this.getPS(), result);
     return result;
 };
 
@@ -2520,7 +2430,6 @@ X86.fnROLb = function(dst, src)
         }
         this.setRotateResult(result, carry, X86.RESULT.BYTE);
     }
-    if (DEBUG && DEBUGGER) this.traceLog('ROLb', dst, src, flagsIn, this.getPS(), result);
     return result;
 };
 
@@ -2548,7 +2457,6 @@ X86.fnROLw = function(dst, src)
         }
         this.setRotateResult(result, carry, X86.RESULT.WORD);
     }
-    if (DEBUG && DEBUGGER) this.traceLog('ROLw', dst, src, flagsIn, this.getPS(), result);
     return result;
 };
 
@@ -2570,7 +2478,6 @@ X86.fnROLd = function(dst, src)
         result = (dst << count) | (dst >>> (32 - count));
         this.setRotateResult(result, carry, X86.RESULT.DWORD);
     }
-    if (DEBUG && DEBUGGER) this.traceLog('ROLd', dst, src, flagsIn, this.getPS(), result);
     return result;
 };
 
@@ -2598,7 +2505,6 @@ X86.fnRORb = function(dst, src)
         }
         this.setRotateResult(result, carry, X86.RESULT.BYTE);
     }
-    if (DEBUG && DEBUGGER) this.traceLog('RORb', dst, src, flagsIn, this.getPS(), result);
     return result;
 };
 
@@ -2626,7 +2532,6 @@ X86.fnRORw = function(dst, src)
         }
         this.setRotateResult(result, carry, X86.RESULT.WORD);
     }
-    if (DEBUG && DEBUGGER) this.traceLog('RORw', dst, src, flagsIn, this.getPS(), result);
     return result;
 };
 
@@ -2648,7 +2553,6 @@ X86.fnRORd = function(dst, src)
         result = (dst >>> count) | carry;
         this.setRotateResult(result, carry, X86.RESULT.DWORD);
     }
-    if (DEBUG && DEBUGGER) this.traceLog('RORd', dst, src, flagsIn, this.getPS(), result);
     return result;
 };
 
@@ -3063,7 +2967,6 @@ X86.fnSHLb = function(dst, src)
         }
         this.setLogicResult(result, X86.RESULT.BYTE, carry & X86.RESULT.BYTE, (result ^ carry) & X86.RESULT.BYTE);
     }
-    if (DEBUG && DEBUGGER) this.traceLog('SHLb', dst, src, flagsIn, this.getPS(), result);
     return result;
 };
 
@@ -3090,7 +2993,6 @@ X86.fnSHLw = function(dst, src)
         }
         this.setLogicResult(result, X86.RESULT.WORD, carry & X86.RESULT.WORD, (result ^ carry) & X86.RESULT.WORD);
     }
-    if (DEBUG && DEBUGGER) this.traceLog('SHLw', dst, src, flagsIn, this.getPS(), result);
     return result;
 };
 
@@ -3112,7 +3014,6 @@ X86.fnSHLd = function(dst, src)
         result = (carry << 1);
         this.setLogicResult(result, X86.RESULT.DWORD, carry & X86.RESULT.DWORD, (result ^ carry) & X86.RESULT.DWORD);
     }
-    if (DEBUG && DEBUGGER) this.traceLog('SHLd', dst, src, flagsIn, this.getPS(), result);
     return result;
 };
 

@@ -3137,25 +3137,6 @@ X86CPU.prototype.checkIOPM = function(port, nPorts, fInput)
 };
 
 /**
- * traceLog(prop, dst, src, flagsIn, flagsOut, resultLo, resultHi)
- *
- * @this {X86CPU}
- * @param {string} prop
- * @param {number} dst
- * @param {number} src
- * @param {number|null} flagsIn
- * @param {number|null} flagsOut
- * @param {number} resultLo
- * @param {number} [resultHi]
- */
-X86CPU.prototype.traceLog = function(prop, dst, src, flagsIn, flagsOut, resultLo, resultHi)
-{
-    if (DEBUG && this.dbg) {
-        this.dbg.traceLog(prop, dst, src, flagsIn, flagsOut, resultLo, resultHi);
-    }
-};
-
-/**
  * setBinding(sHTMLType, sBinding, control)
  *
  * @this {X86CPU}

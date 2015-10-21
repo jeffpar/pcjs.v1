@@ -213,16 +213,6 @@ function Debugger(parmsDbg)
          */
         this.messageInit(parmsDbg['messages']);
 
-        /*
-         * The instruction trace buffer is a lightweight logging mechanism with minimal impact
-         * on the browser (unlike printing to either console.log or an HTML control, which can
-         * make the browser unusable if printing is too frequent).  The Debugger's info command
-         * ("n dump [#]") dumps this buffer.  Note that dumping too much at once can also bog
-         * things down, but by that point, you've presumably already captured the info you need
-         * and are willing to wait.
-         */
-        if (DEBUG) this.traceInit();
-
         this.sInitCommands = parmsDbg['commands'];
 
         /*
@@ -614,39 +604,6 @@ if (DEBUGGER) {
         "halt":     Messages.HALT
     };
 
-    /*
-     * Instruction trace categories supported by the traceLog() function.  The Debugger's info
-     * command ("n") is used to turn trace categories on and off, like so:
-     *
-     *      n shl on
-     *      n shl off
-     *      ...
-     *
-     * Note that there are usually multiple entries for each category (one for each supported operand size);
-     * all matching entries are enabled or disabled as a group.
-     */
-    Debugger.TRACE = {
-        ROLB:   {ins: Debugger.INS.ROL,  size: 8},
-        ROLW:   {ins: Debugger.INS.ROL,  size: 16},
-        RORB:   {ins: Debugger.INS.ROR,  size: 8},
-        RORW:   {ins: Debugger.INS.ROR,  size: 16},
-        RCLB:   {ins: Debugger.INS.RCL,  size: 8},
-        RCLW:   {ins: Debugger.INS.RCL,  size: 16},
-        RCRB:   {ins: Debugger.INS.RCR,  size: 8},
-        RCRW:   {ins: Debugger.INS.RCR,  size: 16},
-        SHLB:   {ins: Debugger.INS.SHL,  size: 8},
-        SHLW:   {ins: Debugger.INS.SHL,  size: 16},
-        MULB:   {ins: Debugger.INS.MUL,  size: 16}, // dst is 8-bit (AL), src is 8-bit (operand), result is 16-bit (AH:AL)
-        IMULB:  {ins: Debugger.INS.IMUL, size: 16}, // dst is 8-bit (AL), src is 8-bit (operand), result is 16-bit (AH:AL)
-        DIVB:   {ins: Debugger.INS.DIV,  size: 16}, // dst is 16-bit (AX), src is 8-bit (operand), result is 16-bit (AH:AL, remainder:quotient)
-        IDIVB:  {ins: Debugger.INS.IDIV, size: 16}, // dst is 16-bit (AX), src is 8-bit (operand), result is 16-bit (AH:AL, remainder:quotient)
-        MULW:   {ins: Debugger.INS.MUL,  size: 32}, // dst is 16-bit (AX), src is 16-bit (operand), result is 32-bit (DX:AX)
-        IMULW:  {ins: Debugger.INS.IMUL, size: 32}, // dst is 16-bit (AX), src is 16-bit (operand), result is 32-bit (DX:AX)
-        DIVW:   {ins: Debugger.INS.DIV,  size: 32}, // dst is 32-bit (DX:AX), src is 16-bit (operand), result is 32-bit (DX:AX, remainder:quotient)
-        IDIVW:  {ins: Debugger.INS.IDIV, size: 32}  // dst is 32-bit (DX:AX), src is 16-bit (operand), result is 32-bit (DX:AX, remainder:quotient)
-    };
-
-    Debugger.TRACE_LIMIT = 100000;
     Debugger.HISTORY_LIMIT = DEBUG? 100000 : 1000;
 
     /*
@@ -3546,59 +3503,6 @@ if (DEBUGGER) {
     };
 
     /**
-     * traceInit()
-     *
-     * @this {Debugger}
-     */
-    Debugger.prototype.traceInit = function()
-    {
-        if (DEBUG) {
-            this.traceEnabled = {};
-            for (var prop in Debugger.TRACE) {
-                this.traceEnabled[prop] = false;
-            }
-            this.iTraceBuffer = 0;
-            this.aTraceBuffer = [];     // we now defer TRACE_LIMIT allocation until the first traceLog() call
-        }
-    };
-
-    /**
-     * traceLog(prop, dst, src, flagsIn, flagsOut, resultLo, resultHi)
-     *
-     * @this {Debugger}
-     * @param {string} prop
-     * @param {number} dst
-     * @param {number} src
-     * @param {number|null} flagsIn
-     * @param {number|null} flagsOut
-     * @param {number} resultLo
-     * @param {number} [resultHi]
-     */
-    Debugger.prototype.traceLog = function(prop, dst, src, flagsIn, flagsOut, resultLo, resultHi)
-    {
-        if (DEBUG) {
-            if (this.traceEnabled !== undefined && this.traceEnabled[prop]) {
-                var trace = Debugger.TRACE[prop];
-                var len = (trace.size >> 2);
-                var s = this.toHexOffset(this.cpu.opLIP - this.cpu.segCS.base, this.cpu.getCS()) + ' ' + Debugger.INS_NAMES[trace.ins] + '(' + str.toHex(dst, len) + ',' + str.toHex(src, len) + ',' + (flagsIn === null? '-' : str.toHexWord(flagsIn)) + ") " + str.toHex(resultLo, len) + ',' + (flagsOut === null? '-' : str.toHexWord(flagsOut));
-                if (!this.aTraceBuffer.length) this.aTraceBuffer = new Array(Debugger.TRACE_LIMIT);
-                this.aTraceBuffer[this.iTraceBuffer++] = s;
-                if (this.iTraceBuffer >= this.aTraceBuffer.length) {
-                    /*
-                     * Instead of wrapping the buffer, we're going to turn all tracing off.
-                     *
-                     *      this.iTraceBuffer = 0;
-                     */
-                    for (prop in this.traceEnabled) {
-                        this.traceEnabled[prop] = false;
-                    }
-                    this.println("trace buffer full");
-                }
-            }
-        }
-    };
-
-    /**
      * init()
      *
      * @this {Debugger}
@@ -6306,15 +6210,6 @@ if (DEBUGGER) {
     /**
      * doInfo(asArgs)
      *
-     * Prints the contents of the Debugger's instruction trace buffer.
-     *
-     * Examples:
-     *
-     *      n shl
-     *      n shl on
-     *      n shl off
-     *      n dump 100
-     *
      * @this {Debugger}
      * @param {Array.<string>} asArgs
      * @return {boolean} true only if the instruction info command ("n") is supported
@@ -6322,51 +6217,11 @@ if (DEBUGGER) {
     Debugger.prototype.doInfo = function(asArgs)
     {
         if (DEBUG) {
-            var sCategory = asArgs[1];
-            if (sCategory !== undefined) {
-                sCategory = sCategory.toUpperCase();
-            }
-            var sEnable = asArgs[2];
-            var fPrint = false;
-            if (sCategory == "DUMP") {
-                var sDump = "";
-                var cLines = (sEnable === undefined? -1 : +sEnable);    // warning: decimal instead of hex conversion
-                var i = this.iTraceBuffer;
-                do {
-                    var s = this.aTraceBuffer[i++];
-                    if (s !== undefined) {
-                        /*
-                         * The browser is MUCH happier if we buffer all the lines for one single enormous print
-                         *
-                         *      this.println(s);
-                         */
-                        sDump += (sDump? '\n' : "") + s;
-                        cLines--;
-                    }
-                    if (i >= this.aTraceBuffer.length)
-                        i = 0;
-                } while (cLines && i != this.iTraceBuffer);
-                if (!sDump) sDump = "nothing to dump";
-                this.println(sDump);
-                this.println("msPerYield: " + this.cpu.aCounts.msPerYield);
-                this.println("nCyclesPerBurst: " + this.cpu.aCounts.nCyclesPerBurst);
-                this.println("nCyclesPerYield: " + this.cpu.aCounts.nCyclesPerYield);
-                this.println("nCyclesPerVideoUpdate: " + this.cpu.aCounts.nCyclesPerVideoUpdate);
-                this.println("nCyclesPerStatusUpdate: " + this.cpu.aCounts.nCyclesPerStatusUpdate);
-            } else {
-                var fEnable = (sEnable == "on");
-                for (var prop in this.traceEnabled) {
-                    var trace = Debugger.TRACE[prop];
-                    if (sCategory === undefined || sCategory == "ALL" || sCategory == Debugger.INS_NAMES[trace.ins]) {
-                        if (fEnable !== undefined) {
-                            this.traceEnabled[prop] = fEnable;
-                        }
-                        this.println(Debugger.INS_NAMES[trace.ins] + trace.size + ": " + (this.traceEnabled[prop]? "on" : "off"));
-                        fPrint = true;
-                    }
-                }
-                if (!fPrint) this.println("no match");
-            }
+            this.println("msPerYield: " + this.cpu.aCounts.msPerYield);
+            this.println("nCyclesPerBurst: " + this.cpu.aCounts.nCyclesPerBurst);
+            this.println("nCyclesPerYield: " + this.cpu.aCounts.nCyclesPerYield);
+            this.println("nCyclesPerVideoUpdate: " + this.cpu.aCounts.nCyclesPerVideoUpdate);
+            this.println("nCyclesPerStatusUpdate: " + this.cpu.aCounts.nCyclesPerStatusUpdate);
             return true;
         }
         return false;
