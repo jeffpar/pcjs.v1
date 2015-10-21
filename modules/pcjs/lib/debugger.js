@@ -340,7 +340,7 @@ if (DEBUGGER) {
         LODSB:  112, LODSW:  113, LOOP:   114, LOOPNZ: 115, LOOPZ:  116, LSL:    117, LSS:    118, LTR:    119,
         MOV:    120, MOVSB:  121, MOVSW:  122, MOVSX:  123, MOVZX:  124, MUL:    125, NEG:    126, NOP:    127,
         NOT:    128, OR:     129, OS:     130, OUT:    131, OUTS:   132, POP:    133, POPA:   134, POPF:   135,
-        PUSH:   136, PUSHA:  137, PUSHF:  138, RCL:    139, RCR:    140, REPNZ:  141, REPZ:   142, RET:    143,
+        PUSHF:  136, PUSHA:  137, PUSH:   138, RCL:    139, RCR:    140, REPNZ:  141, REPZ:   142, RET:    143,
         RETF:   144, ROL:    145, ROR:    146, SAHF:   147, SALC:   148, SAR:    149, SBB:    150, SCASB:  151,
         SCASW:  152, SETBE:  153, SETC:   154, SETG:   155, SETGE:  156, SETL:   157, SETLE:  158, SETNBE: 159,
         SETNC:  160, SETNO:  161, SETNP:  162, SETNS:  163, SETNZ:  164, SETO:   165, SETP:   166, SETS:   167,
@@ -373,7 +373,7 @@ if (DEBUGGER) {
         "LODSB",  "LODSW",  "LOOP",   "LOOPNZ", "LOOPZ",  "LSL",    "LSS",    "LTR",
         "MOV",    "MOVSB",  "MOVSW",  "MOVSX",  "MOVZX",  "MUL",    "NEG",    "NOP",
         "NOT",    "OR",     "OS:",    "OUT",    "OUTS",   "POP",    "POPA",   "POPF",
-        "PUSH",   "PUSHA",  "PUSHF",  "RCL",    "RCR",    "REPNZ",  "REPZ",   "RET",
+        "PUSHF",  "PUSHA",  "PUSH",   "RCL",    "RCR",    "REPNZ",  "REPZ",   "RET",
         "RETF",   "ROL",    "ROR",    "SAHF",   "SALC",   "SAR",    "SBB",    "SCASB",
         "SCASW",  "SETBE",  "SETC",   "SETG",   "SETGE",  "SETL",   "SETLE",  "SETNBE",
         "SETNC",  "SETNO",  "SETNP",  "SETNS",  "SETNZ",  "SETO",   "SETP",   "SETS",
@@ -4569,17 +4569,17 @@ if (DEBUGGER) {
             aOpDesc = Debugger.aaGrpDescs[iIns - Debugger.INS_NAMES.length][(bModRM >> 3) & 0x7];
         }
 
-        var sOpcode = Debugger.INS_NAMES[aOpDesc[0]];
+        var sOpcode = Debugger.INS_NAMES[iIns = aOpDesc[0]];
         var cOperands = aOpDesc.length - 1;
         var sOperands = "";
 
+        if (iIns >= Debugger.INS.POPA && iIns <= Debugger.INS.PUSHA && dbgAddr.fData32) {
+            sOpcode += 'D';             // transform POPA/POPF/PUSHF/PUSHA to POPAD/POPFD/PUSHFD/PUSHAD as appropriate
+        }
         if (this.isStringIns(bOpcode)) {
-            cOperands = 0;              // suppress display of operands for string instructions
+            cOperands = 0;              // suppress operands for string instructions, and add 'D' suffix as appropriate
             if (dbgAddr.fData32 && sOpcode.slice(-1) == 'W') sOpcode = sOpcode.slice(0, -1) + 'D';
         }
-        /*
-         * TODO: We need a similar fixup for POPF and POPA when OPERAND size is 4 (to make them POPFD and POPAD)
-         */
 
         var typeCPU = null;
         var fComplete = true;
