@@ -128,7 +128,6 @@ function X86Seg(cpu, id, sName, fProt)
         this.offIP = 0;
         this.fCall = null;
         this.fStackSwitch = false;
-        this.sizeFrame = 2;     // must be set by all loadIDT() calls so that callers know the proper frame size
         this.awParms = new Array(32);
         this.aCallBreaks = [];
     }
@@ -301,7 +300,6 @@ X86Seg.prototype.loadIDTReal = function loadIDTReal(nIDT)
      */
     var addrIDT = cpu.addrIDT + (nIDT << 2);
     var off = cpu.getShort(addrIDT);
-    this.sizeFrame = 2;
     cpu.regPS &= ~(X86.PS.TF | X86.PS.IF);
     return (this.load(cpu.getShort(addrIDT + 2)) + off)|0;
 };
@@ -667,10 +665,8 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fProbe)
 
     case X86Seg.ID.CODE:
 
-        this.fStackSwitch = false;
-        this.sizeFrame = this.sizeData;
-
         var fCall = this.fCall;
+        this.fStackSwitch = false;
 
         /*
          * This special bit of code is currently used only by the Debugger, when it needs to inject
@@ -856,7 +852,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fProbe)
                     return X86.ADDR_INVALID;
                 }
 
-                this.sizeFrame = sizeGate;
+                cpu.setDataSize(sizeGate);
 
                 this.offIP = limit;
                 cpu.assert(this.cpl == cplNew);
@@ -880,12 +876,6 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fProbe)
                     cpu.setSS(selStack, true);
                     cpu.setSP(offStack);
 
-                    /*
-                     * This call to resetSizes() used to appear before the parameter copying above, but
-                     * anything that was pushed on the old stack would have been pushed with the old sizes.
-                     */
-                    cpu.resetSizes();
-
                     if (regPS & X86.PS.VM) {
                         /*
                          * Frames coming from V86-mode ALWAYS contain 32-bit values, and look like this:
@@ -902,7 +892,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fProbe)
                          *
                          * Our caller (eg, fnINT()) will take care of pushing the final bits (EFLAGS, CS, and EIP).
                          */
-                        cpu.setDataSize(this.sizeFrame = 4);
+                        cpu.setDataSize(4);
                         cpu.assert(I386 && cpu.model >= X86.MODEL_80386);
                         cpu.pushWord(cpu.segGS.sel);
                         cpu.setGS(0);

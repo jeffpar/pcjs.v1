@@ -547,9 +547,9 @@ X86.fnCALLw = function(dst, src)
  * 16-bit code segment, we must push 32-bit segment and offset values.
  *
  * TODO: Since setCSIP() already informs the segCS load() function when it's making a call, the load() function
- * could automatically push the old CS and IP values *before* segCS is updated (which would be a better time to do
- * this); unfortunately, load() is also used by loadIDT(), and loadIDT() has different requirements (eg, pushing
- * flags first), so it's not a trivial change.
+ * could automatically push the old CS and IP values *before* segCS is updated -- which would be a better time to do
+ * those pushes AND eliminate the need for pushData().  Unfortunately, load() is also used by loadIDT(), and loadIDT()
+ * has different requirements (eg, pushing flags first), so it's not a trivial change.
  *
  * @this {X86CPU}
  * @param {number} off
@@ -560,7 +560,7 @@ X86.fnCALLF = function(off, sel)
     /*
      * Since we always push the return address AFTER calling setCSIP(), and since either push could trigger
      * fault (eg, segment fault, page fault, etc), we must not only snapshot regLSP into opLSP, but also the
-     * current CS into opCS, so that fnFault() can make this CALL restartable.
+     * current CS into opCS, so that fnFault() can always make CALLF restartable.
      */
     this.opCS = this.getCS();
     this.opLSP = this.regLSP;
@@ -1444,15 +1444,10 @@ X86.fnINT = function(nIDT, nError, nCycles)
     var oldIP = this.getIP();
     var addr = this.segCS.loadIDT(nIDT);
     if (addr !== X86.ADDR_INVALID) {
-        /*
-         * TODO: Harmonize this with the code in fnCALLF(), which relies on the OPERAND size in
-         * effect at the time of the call, NOT the size of the new segCS.
-         */
-        var size = this.segCS.sizeFrame;
-        this.pushData(oldPS, size);
-        this.pushData(oldCS, size);
-        this.pushData(oldIP, size);
-        if (nError != null) this.pushData(nError, size);
+        this.pushWord(oldPS);
+        this.pushWord(oldCS);
+        this.pushWord(oldIP);
+        if (nError != null) this.pushWord(nError);
         this.nFault = -1;
         /*
          * TODO: Should this code be factored into a setLIP() function? The other primary client would be setCSIP().
