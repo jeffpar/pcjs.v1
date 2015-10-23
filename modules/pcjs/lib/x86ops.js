@@ -2385,6 +2385,7 @@ X86.opPOPmw = function POPmw()
     this.regXX = this.popWord();
 
     this.aOpModGrpWord[this.getIPByte()].call(this, X86.aOpGrpPOPw, X86.fnSRCxx);
+
     this.opLSP = X86.ADDR_INVALID;
 };
 
