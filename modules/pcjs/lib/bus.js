@@ -252,6 +252,14 @@ if (BACKTRACK) {
     };
 }
 
+Bus.ERROR = {
+    ADD_MEM_INUSE:      1,
+    ADD_MEM_BADRANGE:   2,
+    SET_MEM_NOCTRL:     3,
+    SET_MEM_BADRANGE:   4,
+    REM_MEM_BADRANGE:   5
+};
+
 /**
  * @typedef {number}
  */
@@ -399,7 +407,7 @@ Bus.prototype.addMemory = function(addr, size, type, controller)
                     continue;
                 }
             }
-            return this.reportError(1, addr, size);
+            return this.reportError(Bus.ERROR.ADD_MEM_INUSE, addr, size);
         }
         var blockOld = this.aMemBlocks[iBlock];
         var blockNew = new Memory(addr, sizeBlock, this.nBlockSize, type, controller);
@@ -409,7 +417,7 @@ Bus.prototype.addMemory = function(addr, size, type, controller)
         size -= sizeBlock;
     }
     if (size > 0) {
-        return this.reportError(2, addr, size);
+        return this.reportError(Bus.ERROR.ADD_MEM_BADRANGE, addr, size);
     }
     return true;
 };
@@ -537,7 +545,7 @@ Bus.prototype.getWidth = function()
 };
 
 /**
- * setMemoryAccess(addr, size)
+ * setMemoryAccess(addr, size, afn, fQuiet)
  *
  * Updates the access functions in every block of the specified address range.  Since the only components
  * that should be dynamically modifying the memory access functions are those that use addMemory() with a custom
@@ -547,16 +555,17 @@ Bus.prototype.getWidth = function()
  * @param {number} addr
  * @param {number} size
  * @param {Array.<function()>} [afn]
+ * @param {boolean} [fQuiet] (true if any error should be quietly logged)
  * @return {boolean} true if successful, false if not
  */
-Bus.prototype.setMemoryAccess = function(addr, size, afn)
+Bus.prototype.setMemoryAccess = function(addr, size, afn, fQuiet)
 {
     if (!(addr & this.nBlockLimit) && size && !(size & this.nBlockLimit)) {
         var iBlock = addr >>> this.nBlockShift;
         while (size > 0) {
             var block = this.aMemBlocks[iBlock];
             if (!block.controller) {
-                return this.reportError(5, addr, size);
+                return this.reportError(Bus.ERROR.SET_MEM_NOCTRL, addr, size, fQuiet);
             }
             block.setAccess(afn, true);
             size -= this.nBlockSize;
@@ -564,7 +573,7 @@ Bus.prototype.setMemoryAccess = function(addr, size, afn)
         }
         return true;
     }
-    return this.reportError(3, addr, size);
+    return this.reportError(Bus.ERROR.SET_MEM_BADRANGE, addr, size);
 };
 
 /**
@@ -593,7 +602,7 @@ Bus.prototype.removeMemory = function(addr, size)
         }
         return true;
     }
-    return this.reportError(4, addr, size);
+    return this.reportError(Bus.ERROR.REM_MEM_BADRANGE, addr, size);
 };
 
 /**
@@ -1667,17 +1676,23 @@ Bus.prototype.removePortOutputNotify = function(start, end)
  */
 
 /**
- * reportError(op, addr, size)
+ * reportError(op, addr, size, fQuiet)
  *
  * @this {Bus}
  * @param {number} op
  * @param {number} addr
  * @param {number} size
+ * @param {boolean} [fQuiet] (true if any error should be quietly logged)
  * @return {boolean} false
  */
-Bus.prototype.reportError = function(op, addr, size)
+Bus.prototype.reportError = function(op, addr, size, fQuiet)
 {
-    Component.error("Memory block error (" + op + "," + str.toHex(addr) + "," + str.toHex(size) + ")");
+    var sError = "Memory block error (" + op + ": " + str.toHex(addr) + "," + str.toHex(size) + ")";
+    if (fQuiet) {
+        this.log(sError);
+    } else {
+        Component.error(sError);
+    }
     return false;
 };
 

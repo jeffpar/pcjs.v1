@@ -16,11 +16,12 @@ Windows 95 startup screen.
 
 The machine is still a bit finicky.  It easily gets confused about the state of its shift keys if you switch away
 from the browser and then back again.  And Explorer windows don't open in the correct view; for example, both
-**My Computer** and **Recycle Bin** open the same (incorrect) view.
+**My Computer** and **Recycle Bin** open the same (incorrect) view.  In short, there are still some serious bugs
+to be resolved, but booting has been achieved.
 
 The adventure continues.
 
-[Embedded DeskPro 386](/devices/pc/machine/compaq/deskpro386/vga/4096kb/machine.xml "PCjs:deskpro386:::debugger")
+[Embedded DeskPro 386](/devices/pc/machine/compaq/deskpro386/vga/4096kb/machine.xml "PCjs:deskpro386")
 
 *[@jeffpar](http://twitter.com/jeffpar)*  
 *September 21, 2015*
