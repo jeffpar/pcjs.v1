@@ -2361,6 +2361,13 @@ X86.opPOPmw = function POPmw()
      * Like other MOV operations, the destination does not need to be read, just written.
      */
     this.opFlags |= X86.OPFLAG.NOREAD;
+
+    /*
+     * If the word we're about to pop FROM the stack gets popped INTO a not-present page, this
+     * instruction will not be restartable unless we snapshot regLSP first.
+     */
+    this.opLSP = this.regLSP;
+
     /*
      * A "clever" instruction like this:
      *
@@ -2376,7 +2383,9 @@ X86.opPOPmw = function POPmw()
      * BEFORE the push, which occurs through our normal ModRM processing.
      */
     this.regXX = this.popWord();
+
     this.aOpModGrpWord[this.getIPByte()].call(this, X86.aOpGrpPOPw, X86.fnSRCxx);
+    this.opLSP = X86.ADDR_INVALID;
 };
 
 /**
