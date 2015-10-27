@@ -124,7 +124,7 @@ function X86Seg(cpu, id, sName, fProt)
      *
      * loadIDT() sets fCall to true unconditionally in protected-mode (fCall has no meaning in real-mode).
      */
-    if (this.id == X86Seg.ID.CODE) {
+    if (this.id == 1) {     // X86Seg.ID.CODE (don't use until it's defined, or the Closure Compiler won't inline it)
         this.offIP = 0;
         this.fCall = null;
         this.fStackSwitch = false;

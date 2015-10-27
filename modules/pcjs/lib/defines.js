@@ -57,7 +57,7 @@ var DEBUGGER = true;            // this @define is overridden by the Closure Com
  *
  * PREFETCH enables the use of a prefetch queue.
  */
-var PREFETCH = true;
+var PREFETCH = false;
 
 /**
  * @define {boolean}

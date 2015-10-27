@@ -2510,7 +2510,7 @@ if (DEBUGGER) {
 
         if (sAddr) {
             addr = this.getAddr(this.parseAddr(sAddr));
-            if (addr == X86.ADDR_INVALID) {
+            if (addr === X86.ADDR_INVALID) {
                 this.println("invalid address: " + sAddr);
                 return;
             }
@@ -2656,7 +2656,7 @@ if (DEBUGGER) {
         }
 
         var addr = this.getAddr(this.parseAddr(sAddr));
-        if (addr == X86.ADDR_INVALID) {
+        if (addr === X86.ADDR_INVALID) {
             this.println("invalid address: " + sAddr);
             return;
         }
@@ -4139,7 +4139,7 @@ if (DEBUGGER) {
 
         if (aBreak != this.aBreakExec) {
             var addr = this.getAddr(dbgAddr);
-            if (addr == X86.ADDR_INVALID) {
+            if (addr === X86.ADDR_INVALID) {
                 this.println("invalid address: " + this.toHexAddr(dbgAddr));
                 fSuccess = false;
             } else {
@@ -4192,8 +4192,8 @@ if (DEBUGGER) {
         var addr = this.mapBreakpoint(this.getAddr(dbgAddr));
         for (var i = 1; i < aBreak.length; i++) {
             var dbgAddrBreak = aBreak[i];
-            if (addr != X86.ADDR_INVALID && addr == this.mapBreakpoint(this.getAddr(dbgAddrBreak)) ||
-                addr == X86.ADDR_INVALID && dbgAddr.sel == dbgAddrBreak.sel && dbgAddr.off == dbgAddrBreak.off) {
+            if (addr !== X86.ADDR_INVALID && addr == this.mapBreakpoint(this.getAddr(dbgAddrBreak)) ||
+                addr === X86.ADDR_INVALID && dbgAddr.sel == dbgAddrBreak.sel && dbgAddr.off == dbgAddrBreak.off) {
                 if (!fTempBreak || dbgAddrBreak.fTempBreak) {
                     fFound = true;
                     if (fRemove) {
@@ -4302,7 +4302,7 @@ if (DEBUGGER) {
          * because any CS-based breakpoint you set immediately after a CPU reset will have a physical address
          * in the top 16Mb, yet after the first inter-segment JMP, you will be running in the first 1Mb.
          */
-        if (addr != X86.ADDR_INVALID) {
+        if (addr !== X86.ADDR_INVALID) {
             var mask = (this.maskAddr & ~0xffff);
             if ((addr & mask) == mask) addr &= 0x000fffff;
         }
@@ -4594,7 +4594,7 @@ if (DEBUGGER) {
 
         var sBytes = "";
         var sLine = this.toHexAddr(dbgAddrIns) + ' ';
-        if (dbgAddrIns.addr != X86.ADDR_INVALID && dbgAddr.addr != X86.ADDR_INVALID) {
+        if (dbgAddrIns.addr !== X86.ADDR_INVALID && dbgAddr.addr !== X86.ADDR_INVALID) {
             do {
                 sBytes += str.toHex(this.getByte(dbgAddrIns, 1), 2);
                 if (dbgAddrIns.addr == null) break;

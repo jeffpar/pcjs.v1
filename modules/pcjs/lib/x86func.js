@@ -3874,7 +3874,7 @@ X86.fnFault = function(nFault, nError, nCycles, fHalt)
                 this.opCS = -1;
             }
             this.setIP(this.opLIP - this.segCS.base);
-            if (this.opLSP != X86.ADDR_INVALID) {
+            if (this.opLSP !== X86.ADDR_INVALID) {
                 this.setSP((this.regESP & ~this.segSS.maskAddr) | (this.opLSP - this.segSS.base));
                 this.opLSP = X86.ADDR_INVALID;
             }
