@@ -56,10 +56,8 @@ var DEBUGGER = true;            // this @define is overridden by the Closure Com
  * @define {boolean}
  *
  * PREFETCH enables the use of a prefetch queue.
- *
- * See the Bus component for details.
  */
-var PREFETCH = false;
+var PREFETCH = true;
 
 /**
  * @define {boolean}

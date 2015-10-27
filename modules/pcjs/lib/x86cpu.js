@@ -88,8 +88,8 @@ if (!I386) {
  * This is a logical simulation, not a physical simulation, and performance is critical, second only
  * to the accuracy of the simulation when running real-world x86 software.  Consequently, it takes a
  * few liberties with the operation of the simulated hardware, especially with regard to timings,
- * little-used features, etc.  We do make an effort to maintain accurate instruction cycle counts,
- * but there are many other obstacles (eg, prefetch queue, wait states) to achieving perfect timings.
+ * little-used features, etc.  We do make an effort to maintain approximate instruction cycle counts,
+ * but there are many other obstacles (eg, prefetch queue, wait states) to achieving accurate timings.
  *
  * For example, our 8237 DMA controller performs all DMA transfers immediately, since internally
  * they are all memory-to-memory, and attempting to interleave DMA cycles with instruction execution
@@ -180,6 +180,11 @@ function X86CPU(parmsCPU)
     this.aBusBlocks = this.aMemBlocks = [];
     this.nBusMask = this.nMemMask = 0;
     this.nBlockShift = this.nBlockSize = this.nBlockLimit = this.nBlockTotal = this.nBlockMask = 0;
+
+    if (PREFETCH) {
+        this.cbPrefetch = 0;
+        this.adwPrefetch = null;
+    }
 
     /*
      * This initial resetRegs() call is important to create all the registers (eg, the X86Seg registers),
@@ -423,183 +428,53 @@ X86CPU.CYCLES_80286 = {
 };
 
 /*
- * TODO: All these values were simply copied from the 80286 table and still need to be modified and verified.
+ * TODO: All 80386 cycle counts are based on 80286 counts until I have time to hand-generate an 80386-specific table;
  * Cycle counts for 80386-only instructions are hard-coded in their respective handlers, since those counts don't vary.
  */
-X86CPU.CYCLES_80386 = {
-    nWordCyclePenalty:          0,
-    nEACyclesBase:              0,
-    nEACyclesDisp:              0,
-    nEACyclesBaseIndex:         0,
-    nEACyclesBaseIndexExtra:    0,
-    nEACyclesBaseDisp:          0,
-    nEACyclesBaseIndexDisp:     1,
-    nEACyclesBaseIndexDispExtra:1,
-    nOpCyclesAAA:               3,
-    nOpCyclesAAD:               14,
-    nOpCyclesAAM:               16,
-    nOpCyclesArithRR:           2,
-    nOpCyclesArithRM:           7,
-    nOpCyclesArithMR:           7,
-    nOpCyclesArithMID:          0,
-    nOpCyclesCall:              7,      // on the 80286, this ALSO includes the number of bytes in the target instruction
-    nOpCyclesCallF:             13,     // on the 80286, this ALSO includes the number of bytes in the target instruction
-    nOpCyclesCallWR:            7,      // on the 80286, this ALSO includes the number of bytes in the target instruction
-    nOpCyclesCallWM:            11,     // on the 80286, this ALSO includes the number of bytes in the target instruction
-    nOpCyclesCallDM:            16,     // on the 80286, this ALSO includes the number of bytes in the target instruction
-    nOpCyclesCLI:               3,
-    nOpCyclesCompareRM:         6,
-    nOpCyclesCWD:               2,
-    nOpCyclesBound:             13,
-    nOpCyclesInP:               5,
-    nOpCyclesInDX:              5,
-    nOpCyclesIncR:              2,
-    nOpCyclesIncM:              7,
-    nOpCyclesInt:               23,     // on the 80286, this ALSO includes the number of bytes in the target instruction
-    nOpCyclesInt3D:             0,
-    nOpCyclesIntOD:             1,
-    nOpCyclesIntOFall:          3,
-    nOpCyclesIRet:              17,     // on the 80286, this ALSO includes the number of bytes in the target instruction
-    nOpCyclesJmp:               7,      // on the 80286, this ALSO includes the number of bytes in the target instruction
-    nOpCyclesJmpF:              11,     // on the 80286, this ALSO includes the number of bytes in the target instruction
-    nOpCyclesJmpC:              7,      // on the 80286, this ALSO includes the number of bytes in the target instruction
-    nOpCyclesJmpCFall:          3,
-    nOpCyclesJmpWR:             7,      // on the 80286, this ALSO includes the number of bytes in the target instruction
-    nOpCyclesJmpWM:             11,     // on the 80286, this ALSO includes the number of bytes in the target instruction
-    nOpCyclesJmpDM:             15,     // on the 80286, this ALSO includes the number of bytes in the target instruction
-    nOpCyclesLAHF:              2,
-    nOpCyclesLEA:               3,
-    nOpCyclesLS:                7,
-    nOpCyclesLoop:              8,      // on the 80286, this ALSO includes the number of bytes in the target instruction
-    nOpCyclesLoopZ:             8,      // on the 80286, this ALSO includes the number of bytes in the target instruction
-    nOpCyclesLoopNZ:            8,      // on the 80286, this ALSO includes the number of bytes in the target instruction
-    nOpCyclesLoopFall:          4,
-    nOpCyclesLoopZFall:         4,
-    nOpCyclesMovRR:             2,      // this is actually the same as the 8086...
-    nOpCyclesMovRM:             3,
-    nOpCyclesMovMR:             5,
-    nOpCyclesMovRI:             2,
-    nOpCyclesMovMI:             3,
-    nOpCyclesMovAM:             5,      // this is actually slower than the MOD/RM form of MOV AX,mem (see nOpCyclesMovRM)
-    nOpCyclesMovMA:             3,
-    nOpCyclesDivBR:             14,
-    nOpCyclesDivWR:             22,
-    nOpCyclesDivBM:             17,
-    nOpCyclesDivWM:             25,
-    nOpCyclesIDivBR:            17,
-    nOpCyclesIDivWR:            25,
-    nOpCyclesIDivBM:            20,
-    nOpCyclesIDivWM:            28,
-    nOpCyclesMulBR:             13,
-    nOpCyclesMulWR:             21,
-    nOpCyclesMulBM:             16,
-    nOpCyclesMulWM:             24,
-    nOpCyclesIMulBR:            13,
-    nOpCyclesIMulWR:            21,
-    nOpCyclesIMulBM:            16,
-    nOpCyclesIMulWM:            24,
-    nOpCyclesNegR:              2,
-    nOpCyclesNegM:              7,
-    nOpCyclesOutP:              5,
-    nOpCyclesOutDX:             5,
-    nOpCyclesPopAll:            19,
-    nOpCyclesPopReg:            5,
-    nOpCyclesPopMem:            5,
-    nOpCyclesPushAll:           17,
-    nOpCyclesPushReg:           3,
-    nOpCyclesPushMem:           5,
-    nOpCyclesPushSeg:           3,
-    nOpCyclesPrefix:            0,
-    nOpCyclesCmpS:              8,
-    nOpCyclesCmpSr0:            5,
-    nOpCyclesCmpSrn:            9,
-    nOpCyclesLodS:              5,
-    nOpCyclesLodSr0:            5,
-    nOpCyclesLodSrn:            4,
-    nOpCyclesMovS:              5,
-    nOpCyclesMovSr0:            5,
-    nOpCyclesMovSrn:            4,
-    nOpCyclesScaS:              7,
-    nOpCyclesScaSr0:            5,
-    nOpCyclesScaSrn:            8,
-    nOpCyclesStoS:              3,
-    nOpCyclesStoSr0:            4,
-    nOpCyclesStoSrn:            3,
-    nOpCyclesRet:               11,     // on the 80286, this ALSO includes the number of bytes in the target instruction
-    nOpCyclesRetn:              11,     // on the 80286, this ALSO includes the number of bytes in the target instruction
-    nOpCyclesRetF:              15,     // on the 80286, this ALSO includes the number of bytes in the target instruction
-    nOpCyclesRetFn:             15,     // on the 80286, this ALSO includes the number of bytes in the target instruction
-    nOpCyclesShift1M:           7,
-    nOpCyclesShiftCR:           5,
-    nOpCyclesShiftCM:           8,
-    nOpCyclesShiftCS:           0,
-    nOpCyclesTestRR:            2,
-    nOpCyclesTestRM:            6,
-    nOpCyclesTestRI:            3,
-    nOpCyclesTestMI:            6,
-    nOpCyclesXchgRR:            3,
-    nOpCyclesXchgRM:            5,
-    nOpCyclesXLAT:              5
-};
+X86CPU.CYCLES_80386 = X86CPU.CYCLES_80286;
 
-/**
- * Memory Simulation Notes
- *
- * Memory accesses are currently hard-coded to simulate 8088 characteristics.
- * For example, every 16-bit memory access is assumed to require an additional 4 cycles
- * for the upper byte; on an 8086, that would be true only when the memory address was odd.
- *
- * Similarly, the effective prefetch queue size is 4 bytes (same as an 8088), although
- * that can easily be changed to 6 bytes if/when we decide to fully implement 8086 support
- * (see X86CPU.PREFETCH.QUEUE).  It's just not clear whether that support will be a goal.
- */
-X86CPU.PREFETCH = {
-    QUEUE:      4,
-    ARRAY:      8,              // smallest power-of-two > PREFETCH.QUEUE
-    MASK:       0x7             // (X86CPU.PREFETCH.ARRAY - 1)
-};
+if (PREFETCH) {
+    /*
+     * NOTE: X86CPU.PREFETCH.LENGTH must be set to a power of two, so that LENGTH - 1 will form a mask
+     * (IP_MASK) we can use to create a sliding prefetch window of LENGTH bytes.  We also zero the low
+     * 2 bits of IP_MASK so that the sliding window always starts on a 32-bit (long) boundary.  Finally,
+     * instead breaking breaking all the longs we prefetch into bytes, we simply store the longs as-is
+     * into every 4th element of the queue (the queue is sparse array).
+     */
+    X86CPU.PREFETCH = {
+        LENGTH:     16              // 16 generates a 16-byte prefetch queue consisting of 4 32-bit entries
+    };
+    X86CPU.PREFETCH.IP_MASK = ((X86CPU.PREFETCH.LENGTH - 1) & ~0x3);
+}
 
 /**
  * initMemory(aMemBlocks, nBlockShift)
  *
  * Notification from Bus.initMemory(), giving us direct access to the entire memory space
- * (aMemBlocks).
+ * (aMemBlocks).  Since the CPU must perform additional layers of address decoding depending
+ * on the mode (real-mode, protected-mode, paging), it's best if the CPU can avoid going
+ * through the Bus component for every memory access.
  *
- * We also initialize an instruction byte prefetch queue, aPrefetch, which is an N-element
- * array with slots that look like:
+ * We also initialize a 32-bit prefetch queue, containing dword-aligned values; the queue is
+ * an array of dwords indexed by a masked regLIP; for example, a queue of 4 dwords is indexed
+ * by "regLIP & 0xC"; we use a sparse array to avoid right-shifting the index, like so:
  *
- *      0:  [tag, b]    <-- iPrefetchTail
- *      1:  [tag, b]
- *      2:  [ -1, 0]    <-- iPrefetchHead  (eg, when cbPrefetchQueued == 2)
- *      ...
- *      7:  [ -1, 0]
+ *      0:  [dword]
+ *      4:  [dword]
+ *      8:  [dword]
+ *     12:  [dword]
  *
- * where tag is the linear address of the byte that's been prefetched, and b is the
- * value of the byte.  N is currently 8 (PREFETCH.ARRAY), but it can be any power-of-two
- * that is equal to or greater than (PREFETCH.QUEUE), the effective size of the prefetch
- * queue (6 on an 8086, 4 on an 8088; currently hard-coded to the latter).  All slots
- * are initialized to [-1, 0] when preallocating the prefetch queue, but those initial
- * values are quickly overwritten and never seen again.
+ * The actual regLIP mask is X86CPU.PREFETCH.IP_MASK; ie, (X86CPU.PREFETCH.LENGTH - 1) & ~0x3.
  *
- * iPrefetchTail is the index (0-7) of the next prefetched byte to be returned to the CPU,
- * and iPrefetchHead is the index (0-7) of the next slot to be filled.  The prefetch queue
- * is empty IFF the two indexes are equal and IFF cbPrefetchQueued is zero. cbPrefetchQueued
- * is simply the number of bytes between the tail and the head (from 0 to PREFETCH.QUEUE).
+ * On refilling, the queue is always filled to capacity, and cbPrefetch is set to its maximum
+ * value (eg, a value from 16 to 13, depending on whether "regLIP & 0x3" is 0, 1, 2 or 3).
  *
- * cbPrefetchValid indicates how many bytes behind iPrefetchHead are still valid, allowing us
- * to "rewind" the tail up to that many bytes.  For example, let's imagine that we prefetched
- * 2 bytes, and then we immediately consumed both bytes, leaving iPrefetchTail == iPrefetchHead
- * again; however, those previous 2 bytes are still valid, and if, for example, we wanted to
- * rewind the IP by 2 (which we might want to do in the case of a repeated string instruction),
- * we could rewind the prefetch queue tail as well.
+ * When a byte is requested from the queue, the dword is extracted from index "regLIP & 0xC"
+ * and then shifted by 0, 8, 16, or 24, depending on whether "regLIP & 0x3" is 0, 1, 2 or 3
+ * (ie, "(regLIP & 0x3) << 3").
  *
- * Corresponding to iPrefetchHead is addrPrefetchHead; both are incremented in lock-step.
- * Whenever the prefetch queue is flushed, it's typically because a new, non-incremental
- * regLIP has been set, so flushPrefetch() expects to receive that address.
- *
- * If the prefetch queue does not contain any (or enough) bytes to satisfy a getBytePrefetch()
- * or getShortPrefetch() request, we force the queue to be filled with the necessary number
- * of bytes first.
+ * TODO: Consider how/whether to simulate an effective prefetch queue size of 4 bytes for an 8088,
+ * 6 bytes for an 8086, 12 for an 80386, etc.
  *
  * @this {X86CPU}
  * @param {Array} aMemBlocks
@@ -620,12 +495,8 @@ X86CPU.prototype.initMemory = function(aMemBlocks, nBlockShift)
     this.nBlockTotal = aMemBlocks.length;
     this.nBlockMask = this.nBlockTotal - 1;
     if (PREFETCH) {
-        this.nBusCycles = 0;
-        this.aPrefetch = new Array(X86CPU.PREFETCH.ARRAY);
-        for (var i = 0; i < X86CPU.PREFETCH.ARRAY; i++) {
-            this.aPrefetch[i] = 0;
-        }
-        this.flushPrefetch(0);
+     // this.nBusCycles = 0;
+        this.adwPrefetch = new Array(X86CPU.PREFETCH.LENGTH);
     }
 };
 
@@ -785,8 +656,10 @@ X86CPU.prototype.enablePageBlocks = function()
             this.aMemBlocks[iBlock] = this.blockUnpaged;
         }
         /*
-         * We also need a special "empty" Memory block that mapPageBlock() can pass back to callers
-         * whenever a valid block cannot be found for an UNPAGED block.
+         * We also use a special "empty" Memory block that mapPageBlock() can pass back to callers
+         * whenever a valid block cannot be found for an UNPAGED block.  Under normal conditions,
+         * an invalid block will trigger a fault, so memEmpty will never actually be returned, but
+         * if the Debugger is suppressing faults or calling probeAddr(), returning memEmpty is helpful.
          */
         this.memEmpty = new Memory();
     } else {
@@ -821,13 +694,13 @@ X86CPU.prototype.enablePageBlocks = function()
  *
  * Also, addrPDE, addrPTE and addrPhys do not need any offsets added to them, because we immediately shift
  * the offset portion of those addresses out.  But for now, at least for debugging and documentation purposes,
- * my preference is to perform full address calculations.
+ * my preference is to include the offset in the address calculations.
  *
  * Besides, this should not be a performance-critical function; it's normally called only once per UNPAGED
  * page.  Obviously, if CR3 is constantly being updated, that will trigger repeated calls to enablePageBlocks(),
  * which will perform our equivalent of a TLB flush (ie, resetting all PAGED blocks back to UNPAGED blocks).
- * That would hurt our performance, but it would hurt performance on a real machine as well, so let's see
- * what real-world scenarios we run into.
+ * That would hurt our performance, but it would hurt performance on a real machine as well, so presumably
+ * CR3 updates will be minimal.
  *
  * @this {X86CPU}
  * @param {number} addr is a linear address
@@ -1448,10 +1321,6 @@ X86CPU.prototype.resetRegs = function()
      */
     this.intFlags = X86.INTFLAG.NONE;
 
-    this.setCSIP(0, 0xffff);    // this should be called before the first setPS() call, in part so that CPL will be set
-
-    if (!I386) this.resetSizes();
-
     if (BACKTRACK) {
         /*
          * Initialize the backtrack indexes for all registers to zero.  And while, yes, it IS possible
@@ -1489,23 +1358,28 @@ X86CPU.prototype.resetRegs = function()
     }
 
     /*
-     * Assorted 80286-specific registers.  The GDTR and IDTR registers are stored as the following pieces:
-     *
-     *      GDTR:   addrGDT (24 bits) and addrGDTLimit (24 bits)
-     *      IDTR:   addrIDT (24 bits) and addrIDTLimit (24 bits)
-     *
-     * while the LDTR and TR are stored as special segment registers: segLDT and segTSS.
-     *
-     * So, yes, our GDTR and IDTR "registers" differ from other segment registers in that we do NOT record
-     * the 16-bit limit specified by the LGDT or LIDT instructions; instead, we immediately calculate the limiting
-     * address, and record that instead.
-     *
-     * In addition to different CS:IP reset values, the CS base address must be set to the top of the 16Mb
-     * address space rather than the top of the first 1Mb (which is why the MODEL_5170 ROM must be addressable
-     * at both 0x0F0000 and 0xFF0000; see the ROM component's "alias" parameter).
+     * Set the initial CS:IP appropriate for the processor; this should be done before the first setPS() call,
+     * in part so that CPL will be set properly.
      */
-    if (this.model >= X86.MODEL_80286) {
+    if (this.model < X86.MODEL_80286) {
+        this.setCSIP(0, 0xffff);
+    } else {
         /*
+         * Assorted 80286-specific registers.  The GDTR and IDTR registers are stored as the following pieces:
+         *
+         *      GDTR:   addrGDT (24 bits) and addrGDTLimit (24 bits)
+         *      IDTR:   addrIDT (24 bits) and addrIDTLimit (24 bits)
+         *
+         * while the LDTR and TR are stored as special segment registers: segLDT and segTSS.
+         *
+         * So, yes, our GDTR and IDTR "registers" differ from other segment registers in that we do NOT record
+         * the 16-bit limit specified by the LGDT or LIDT instructions; instead, we immediately calculate the limiting
+         * address, and record that instead.
+         *
+         * In addition to different CS:IP reset values, the CS base address must be set to the top of the 16Mb
+         * address space rather than the top of the first 1Mb (which is why the MODEL_5170 ROM must be addressable
+         * at both 0x0F0000 and 0xFF0000; see the ROM component's "alias" parameter).
+         *
          * TODO: Verify what the 80286 actually sets addrGDT and addrGDTLimit to on reset (or if it leaves them alone).
          */
         this.addrGDT = 0; this.addrGDTLimit = 0xffff;                   // GDTR
@@ -1573,7 +1447,7 @@ X86CPU.prototype.setAddrSize = function(size)
 X86CPU.prototype.updateAddrSize = function()
 {
     if (!I386) {
-        this.getAddr = this.getShort;
+        this.getAddr = (PREFETCH? this.getShortPrefetch : this.getShort);
         this.aOpModRegByte = X86ModB.aOpModReg;
         this.aOpModMemByte = X86ModB.aOpModMem;
         this.aOpModGrpByte = X86ModB.aOpModGrp;
@@ -1582,7 +1456,7 @@ X86CPU.prototype.updateAddrSize = function()
         this.aOpModGrpWord = X86ModW.aOpModGrp;
     } else {
         if (this.sizeAddr == 2) {
-            this.getAddr = this.getShort;
+            this.getAddr = (PREFETCH? this.getShortPrefetch : this.getShort);
             this.aOpModRegByte = X86ModB16.aOpModReg;
             this.aOpModMemByte = X86ModB16.aOpModMem;
             this.aOpModGrpByte = X86ModB16.aOpModGrp;
@@ -1590,7 +1464,7 @@ X86CPU.prototype.updateAddrSize = function()
             this.aOpModMemWord = X86ModW16.aOpModMem;
             this.aOpModGrpWord = X86ModW16.aOpModGrp;
         } else {
-            this.getAddr = this.getLong;
+            this.getAddr = (PREFETCH? this.getLongPrefetch : this.getLong);
             this.aOpModRegByte = X86ModB32.aOpModReg;
             this.aOpModMemByte = X86ModB32.aOpModMem;
             this.aOpModGrpByte = X86ModB32.aOpModGrp;
@@ -1864,8 +1738,8 @@ X86CPU.prototype.checkDebugRegisters = function(fEnable)
  * giving us the opportunity look for a matching "read" or "write" breakpoint enabled in one of the DRn registers.
  *
  * TODO: This currently does not discriminate between data reads and execution reads.  When we switch to a true
- * "prefetch" model, that would also be a good time to include a signal to this function which "read" accesses are
- * are actually "exec" accesses.
+ * "prefetch" model, that would also be a good time to include a signal to this function indicating which "read"
+ * accesses are are actually "exec" accesses.
  *
  * @this {X86CPU}
  * @param {number} addr
@@ -2356,19 +2230,34 @@ X86CPU.prototype.getIP = function()
 /**
  * setIP(off)
  *
- * With the addition of flushPrefetch(), this function should only be called
- * for non-incremental IP updates; setIP(this.getIP()+1) is no longer appropriate.
- *
- * In fact, for performance reasons, it's preferable to increment regLIP yourself,
- * but you can also call advanceIP() if speed is not important.
- *
  * @this {X86CPU}
  * @param {number} off
  */
 X86CPU.prototype.setIP = function(off)
 {
     this.regLIP = (this.segCS.base + (off & (I386? this.maskData : 0xffff)))|0;
-    if (PREFETCH) this.flushPrefetch(this.regLIP);
+    if (PREFETCH) this.refillPrefetch();
+};
+
+/**
+ * setLIP(addr)
+ *
+ * @this {X86CPU}
+ * @param {number} addr
+ */
+X86CPU.prototype.setLIP = function(addr)
+{
+    this.regLIP = addr|0;
+    this.regLIPLimit = (this.segCS.base + this.segCS.limit)|0;
+    this.nCPL = this.segCS.cpl;             // cache the current CPL where it's more convenient
+    if (I386) this.resetSizes();
+    /*
+     * Here, we need to additionally test whether the prefetch buffer (adwPrefetch) has been allocated yet,
+     * because when resetRegs() is first called, the Bus hasn't been initialized yet, so there's nothing to fetch.
+     *
+     * We'll allocate the prefetch buffer when the Bus calls initMemory().
+     */
+    if (PREFETCH && this.adwPrefetch) this.refillPrefetch();
 };
 
 /**
@@ -2397,14 +2286,7 @@ X86CPU.prototype.setCSIP = function(off, sel, fCall)
      */
     var base = this.segCS.loadCode(off, sel, fCall);
     if (base !== X86.ADDR_INVALID) {
-        /*
-         * TODO: Should this code be factored into a setLIP() function? The other primary client would be fnINT().
-         */
-        if (I386) this.resetSizes();
-        this.regLIP = (base + (this.segCS.offIP & (I386? this.maskData : 0xffff)))|0;
-        this.regLIPLimit = (base + this.segCS.limit)|0;
-        this.nCPL = this.segCS.cpl;             // cache the current CPL where it's more convenient
-        if (PREFETCH) this.flushPrefetch(this.regLIP);
+        this.setLIP(base + (this.segCS.offIP & (I386? this.segCS.maskData : 0xffff)));
         return this.segCS.fStackSwitch;
     }
     return null;
@@ -2473,21 +2355,38 @@ X86CPU.prototype.advanceIP = function(inc)
 };
 
 /**
- * rewindIP(dec)
+ * resetIP(dec)
+ *
+ * This "rewinds" IP to the beginning of the current instruction (eg, an instruction with a REP prefix)
  *
  * @this {X86CPU}
  * @param {number} dec (negative)
  */
-X86CPU.prototype.rewindIP = function(dec)
+X86CPU.prototype.resetIP = function(dec)
 {
-    // DEBUG: this.assert(dec < 0);
-
-    this.regLIP = (this.regLIP + dec)|0;
-    /*
-     * Since rewindIP() is used only for discrete "intra-instruction" IP adjustments, there should be no need
-     * to perform all the same limit checks as advanceIP().
-     */
-    if (PREFETCH) this.advancePrefetch(dec);
+    if (BUGS_8086) {
+        this.regLIP = (this.regLIP + dec)|0;
+        /*
+         * This assertion is intended to fail if/when we encounter a "buggy" instruction (see BUGS_8086)
+         */
+        this.assert(this.regLIP == this.opLIP);
+    } else {
+        if (PREFETCH) {
+            this.cbPrefetch += this.regLIP - this.opLIP;
+            this.regLIP = this.opLIP;
+            /*
+             * If "rewinding" produces a prefetch total greater than the allocated amount, then we must have
+             * refilled the queue somewhere in the middle of the rewound instruction, so we need to refill the
+             * queue all over again; otherwise, the next repetition may fetch future data instead of past data.
+             *
+             * That's the bad news; the good news is that this extra refill should only hurt performance of the
+             * first repetition.
+             */
+            if (this.cbPrefetch > X86CPU.PREFETCH.LENGTH) this.refillPrefetch();
+        } else {
+            this.regLIP = this.opLIP;
+        }
+    }
 };
 
 /**
@@ -3202,11 +3101,11 @@ X86CPU.prototype.setBinding = function(sHTMLType, sBinding, control)
  * probeAddr(addr, size, fLinear)
  *
  * Used by the Debugger to probe addresses without risk of triggering a page fault, and by internal
- * functions, like fnFaultMessage(), that also need to avoid triggering faults, since they're not part
- * of standard CPU operation.
+ * functions, like fnFaultMessage(), that must also avoid triggering faults, since they're not part of
+ * standard CPU operation.
  *
  * NOTE: If the size parameter is used, then the caller is required to provide a valid size (1, 2 or 4)
- * and ensure that the data is contained entirely with the requested block.
+ * and ensure that the data is contained entirely with the requested block (which we assert below).
  *
  * @this {X86CPU}
  * @param {number} addr is a linear address
@@ -3223,6 +3122,7 @@ X86CPU.prototype.probeAddr = function(addr, size, fLinear)
     }
     if (block) {
         var off = addr & this.nBlockLimit;
+        this.assert(off + (size || 1) <= this.nBlockSize);
         switch(size) {
         default:
             return block.readByteDirect(off, addr);
@@ -3232,6 +3132,12 @@ X86CPU.prototype.probeAddr = function(addr, size, fLinear)
             return block.readLongDirect(off, addr);
         }
     }
+    /*
+     * Since the Bus component initializes all unused portions of physical address space with an empty
+     * block, we have also written mapPageBlock() to return an empty block (memEmpty) whenever there is
+     * no valid mapping.  So if we ever end up here, this may represent a hole that needs plugging.
+     */
+    this.assert(false);
     return null;
 };
 
@@ -3699,159 +3605,116 @@ X86CPU.prototype.setSOWord = function(seg, off, w)
 };
 
 /**
- * getBytePrefetch(addr)
- *
- * Return the next byte from the prefetch queue, prefetching it now if necessary.
+ * getBytePrefetch()
  *
  * @this {X86CPU}
- * @param {number} addr is a linear address
- * @return {number} byte (8-bit) value at that address
+ * @return {number} byte (8-bit) value at regLIP
  */
-X86CPU.prototype.getBytePrefetch = function(addr)
+X86CPU.prototype.getBytePrefetch = function()
 {
-    if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
-    var b;
-    if (!this.cbPrefetchQueued) {
-        if (MAXDEBUG) {
-            this.printMessage("  getBytePrefetch[" + this.iPrefetchTail + "]: filling");
-            this.assert(addr == this.addrPrefetchHead, "X86CPU.getBytePrefetch(" + str.toHex(addr) + "): invalid head address (" + str.toHex(this.addrPrefetchHead) + ")");
-            this.assert(this.iPrefetchTail == this.iPrefetchHead, "X86CPU.getBytePrefetch(" + str.toHex(addr) + "): head (" + this.iPrefetchHead + ") does not match tail (" + this.iPrefetchTail + ")");
-        }
-        this.fillPrefetch(1);
-        this.nBusCycles += 4;
-        /*
-         * This code effectively inlines this.fillPrefetch(1), but without queueing the byte, so it's an optimization
-         * with side-effects we may not want, and in any case, while it seemed to improve Safari's performance slightly,
-         * it did nothing for the oddball Chrome performance I'm seeing with PREFETCH enabled.
-         *
-         *      b = this.aMemBlocks[(addr & this.nMemMask) >>> this.nBlockShift].readByte(addr & this.nBlockLimit, addr);
-         *      this.nBusCycles += 4;
-         *      this.cbPrefetchValid = 0;
-         *      this.addrPrefetchHead = (addr + 1) & this.nMemMask;
-         *      return b;
-         */
+    if (!this.cbPrefetch) {
+        this.refillPrefetch();
+        if (!this.cbPrefetch) return this.getByte(this.regLIP);
     }
-    b = this.aPrefetch[this.iPrefetchTail] & 0xff;
-    if (MAXDEBUG) {
-        this.printMessage("  getBytePrefetch[" + this.iPrefetchTail + "]: " + str.toHex(addr) + ":" + str.toHexByte(b));
-        this.assert(addr == (this.aPrefetch[this.iPrefetchTail] >> 8), "X86CPU.getBytePrefetch(" + str.toHex(addr) + "): invalid tail address (" + str.toHex(this.aPrefetch[this.iPrefetchTail] >> 8) + ")");
-    }
-    this.iPrefetchTail = (this.iPrefetchTail + 1) & X86CPU.PREFETCH.MASK;
-    this.cbPrefetchQueued--;
+    var b = (this.adwPrefetch[this.regLIP & X86CPU.PREFETCH.IP_MASK] >> ((this.regLIP & 0x3) << 3)) & 0xff;
+    this.assert(b === this.getByte(this.regLIP));
+    this.cbPrefetch--;
     return b;
 };
 
 /**
- * getShortPrefetch(addr)
- *
- * Return the next short from the prefetch queue.  There are 3 cases to consider:
- *
- *  1) Both bytes have been prefetched; no bytes need be fetched from memory
- *  2) Only the low byte has been prefetched; the high byte must be fetched from memory
- *  3) Neither byte has been prefetched; both bytes must be fetched from memory
- *
- * However, since we want to mirror getBytePrefetch's behavior of fetching all bytes through
- * the prefetch queue, we're taking the easy way out and simply calling getBytePrefetch() twice.
+ * getShortPrefetch()
  *
  * @this {X86CPU}
- * @param {number} addr is a linear address
- * @return {number} short (16-bit) value at that address
+ * @return {number} short (16-bit) value at regLIP
  */
-X86CPU.prototype.getShortPrefetch = function(addr)
+X86CPU.prototype.getShortPrefetch = function()
 {
-    return this.getBytePrefetch(addr) | (this.getBytePrefetch(addr + 1) << 8);
-};
-
-/**
- * getLongPrefetch(addr)
- *
- * Return the next long from the prefetch queue.  Similar to getShortPrefetch(), we take the
- * easy way out and call getShortPrefetch() twice.
- *
- * @this {X86CPU}
- * @param {number} addr is a linear address
- * @return {number} long (32-bit) value at that address
- */
-X86CPU.prototype.getLongPrefetch = function(addr)
-{
-    return this.getShortPrefetch(addr) | (this.getShortPrefetch(addr + 2) << 16);
-};
-
-/**
- * getWordPrefetch(addr)
- *
- * @this {X86CPU}
- * @param {number} addr is a linear address
- * @return {number} short (16-bit) or long (32-bit value as appropriate
- */
-X86CPU.prototype.getWordPrefetch = function(addr)
-{
-    return (I386 && this.sizeData == 4? this.getLongPrefetch(addr) : this.getShortPrefetch(addr));
-};
-
-/**
- * fillPrefetch(n)
- *
- * Fill the prefetch queue with n instruction bytes.
- *
- * @this {X86CPU}
- * @param {number} n is the number of instruction bytes to fetch
- */
-X86CPU.prototype.fillPrefetch = function(n)
-{
-    while (n-- > 0 && this.cbPrefetchQueued < X86CPU.PREFETCH.QUEUE) {
-        var addr = this.addrPrefetchHead;
-        var b = this.aMemBlocks[(addr & this.nMemMask) >>> this.nBlockShift].readByte(addr & this.nBlockLimit, addr);
-        this.aPrefetch[this.iPrefetchHead] = b | (addr << 8);
-        if (MAXDEBUG) this.printMessage("     fillPrefetch[" + this.iPrefetchHead + "]: " + str.toHex(addr) + ":" + str.toHexByte(b));
-        this.addrPrefetchHead = (addr + 1) & this.nMemMask;
-        this.iPrefetchHead = (this.iPrefetchHead + 1) & X86CPU.PREFETCH.MASK;
-        this.cbPrefetchQueued++;
-        /*
-         * We could probably allow cbPrefetchValid to grow as large as X86CPU.PREFETCH.ARRAY-1, but I'm not
-         * sure there's any advantage to that; certainly the tiny values we expect to see from advancePrefetch()
-         * wouldn't justify that.
-         */
-        if (this.cbPrefetchValid < X86CPU.PREFETCH.QUEUE) this.cbPrefetchValid++;
+    if (this.cbPrefetch < 2) {
+        this.refillPrefetch();
+        if (this.cbPrefetch < 2) {
+            this.cbPrefetch = 0;
+            return this.getShort(this.regLIP);
+        }
     }
+    var shift = (this.regLIP & 0x3) << 3;
+    var w = (this.adwPrefetch[this.regLIP & X86CPU.PREFETCH.IP_MASK] >>> shift) & 0xffff;
+    if (shift > 16) w |= (this.adwPrefetch[(this.regLIP + 4) & X86CPU.PREFETCH.IP_MASK] & 0xff) << 8;
+    this.assert(w === this.getShort(this.regLIP));
+    this.cbPrefetch -= 2;
+    return w;
 };
 
 /**
- * flushPrefetch(addr)
- *
- * Empty the prefetch queue.
+ * getLongPrefetch()
  *
  * @this {X86CPU}
- * @param {number} addr is a linear address of the current program counter (regLIP)
+ * @return {number} long (32-bit) value at regLIP
  */
-X86CPU.prototype.flushPrefetch = function(addr)
+X86CPU.prototype.getLongPrefetch = function()
 {
-    this.addrPrefetchHead = addr;
-    this.iPrefetchTail = this.iPrefetchHead = this.cbPrefetchQueued = this.cbPrefetchValid = 0;
-    if (MAXDEBUG && addr !== undefined) this.printMessage("    flushPrefetch[-]: " + str.toHex(addr));
+    if (this.cbPrefetch < 4) {
+        this.refillPrefetch();
+        if (this.cbPrefetch < 4) {
+            this.cbPrefetch = 0;
+            return this.getLong(this.regLIP);
+        }
+    }
+    var shift = (this.regLIP & 0x3) << 3;
+    var l = (this.adwPrefetch[this.regLIP & X86CPU.PREFETCH.IP_MASK] >>> shift)|0;
+    if (shift) l |= this.adwPrefetch[(this.regLIP + 4) & X86CPU.PREFETCH.IP_MASK] << (32 - shift);
+    this.assert(l === this.getLong(this.regLIP));
+    this.cbPrefetch -= 4;
+    return l;
 };
 
 /**
- * advancePrefetch(inc)
- *
- * Advance the prefetch queue tail.  This is used, for example, in cases where the IP is rewound
- * to the start of a repeated string instruction (ie, a string instruction with a REP and possibly
- * other prefixes).
- *
- * If a negative increment takes us beyond what's still valid in the prefetch queue, or if a positive
- * increment takes us beyond what's been queued so far, then we simply flush the queue.
+ * getWordPrefetch()
  *
  * @this {X86CPU}
- * @param {number} inc (may be +/-)
+ * @return {number} short (16-bit) or long (32-bit) value as appropriate
  */
-X86CPU.prototype.advancePrefetch = function(inc)
+X86CPU.prototype.getWordPrefetch = function()
 {
-    if (inc < 0 && this.cbPrefetchQueued - inc <= this.cbPrefetchValid || inc > 0 && inc < this.cbPrefetchQueued) {
-        this.iPrefetchTail = (this.iPrefetchTail + inc) & X86CPU.PREFETCH.MASK;
-        this.cbPrefetchQueued -= inc;
+    return (I386 && this.sizeData == 4? this.getLongPrefetch() : this.getShortPrefetch());
+};
+
+/**
+ * refillPrefetch()
+ *
+ * This function is similar to probeAddr() in that must NOT trigger a fault, because prefetching
+ * inherently runs the risk of fetching more bytes that may actually be executed.  Also, to keep it
+ * simple, we limit prefetching to whatever bytes (if any) are available in the current page.  If the
+ * page is not present, or there are insufficient bytes in the current page to completely fill the
+ * queue, then the caller must request byte(s) "the old-fashioned way", to ensure proper fault handling.
+ *
+ * For example, if getShortPrefetch() finds there are only 0 or 1 bytes in the prefetch queue, and
+ * if it is unable to obtain any more bytes via refillPrefetch(), then getShortPrefetch() must call
+ * getShort(this.regLIP) (which is also what would be called if PREFETCH was disabled completely).
+ *
+ * @this {X86CPU}
+ */
+X86CPU.prototype.refillPrefetch = function()
+{
+    var aBlocks = this.aMemBlocks;
+    var regLIP = this.regLIP & ~0x3;
+    var block = aBlocks[(regLIP & this.nMemMask) >>> this.nBlockShift];
+    if (block && block.type == Memory.TYPE.UNPAGED) {
+        block = this.mapPageBlock(regLIP, false, true);
+        if (block === this.memEmpty) block = null;
+    }
+    if (block) {
+        var off = regLIP & this.nBlockLimit;
+        var cbMax = this.nBlockSize - off;
+        if (cbMax > X86CPU.PREFETCH.LENGTH) cbMax = X86CPU.PREFETCH.LENGTH;
+        for (var i = 0; i < cbMax; i += 4) {
+            this.adwPrefetch[regLIP & X86CPU.PREFETCH.IP_MASK] = block.readLongDirect(off, regLIP);
+            off += 4; regLIP += 4;
+        }
+        this.cbPrefetch = i - (this.regLIP & 0x3);
+     // this.nBusCycles += 4;
     } else {
-        this.flushPrefetch(this.regLIP);
-        if (MAXDEBUG) this.printMessage("advancePrefetch(" + inc + "): flushed");
+        this.cbPrefetch = 0;
     }
 };
 
@@ -3863,7 +3726,7 @@ X86CPU.prototype.advancePrefetch = function(inc)
  */
 X86CPU.prototype.getIPByte = function()
 {
-    var b = (PREFETCH? this.getBytePrefetch(this.regLIP) : this.getByte(this.regLIP));
+    var b = (PREFETCH? this.getBytePrefetch() : this.getByte(this.regLIP));
     if (BACKTRACK) this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMem0);
     this.advanceIP(1);
     return b;
@@ -3877,7 +3740,7 @@ X86CPU.prototype.getIPByte = function()
  */
 X86CPU.prototype.getIPShort = function()
 {
-    var w = (PREFETCH? this.getShortPrefetch(this.regLIP) : this.getShort(this.regLIP));
+    var w = (PREFETCH? this.getShortPrefetch() : this.getShort(this.regLIP));
     if (BACKTRACK) {
         this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMem0);
         this.bus.updateBackTrackCode(this.regLIP + 1, this.backTrack.btiMem1);
@@ -3894,7 +3757,7 @@ X86CPU.prototype.getIPShort = function()
  */
 X86CPU.prototype.getIPLong = function()
 {
-    var l = (PREFETCH? this.getLongPrefetch(this.regLIP) : this.getLong(this.regLIP));
+    var l = (PREFETCH? this.getLongPrefetch() : this.getLong(this.regLIP));
     if (BACKTRACK) {
         this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMem0);
         this.bus.updateBackTrackCode(this.regLIP + 1, this.backTrack.btiMem1);
@@ -3913,10 +3776,7 @@ X86CPU.prototype.getIPLong = function()
  */
 X86CPU.prototype.getIPAddr = function()
 {
-    /*
-     * TODO: Add PREFETCH support to this function
-     */
-    var w = this.getAddr(this.regLIP);
+    var w = (PREFETCH? this.getAddr() : this.getAddr(this.regLIP));
     if (BACKTRACK) {
         this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMem0);
         this.bus.updateBackTrackCode(this.regLIP + 1, this.backTrack.btiMem1);
@@ -3933,7 +3793,7 @@ X86CPU.prototype.getIPAddr = function()
  */
 X86CPU.prototype.getIPWord = function()
 {
-    var w = (PREFETCH? this.getWordPrefetch(this.regLIP) : this.getWord(this.regLIP));
+    var w = (PREFETCH? this.getWordPrefetch() : this.getWord(this.regLIP));
     if (BACKTRACK) {
         this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMem0);
         this.bus.updateBackTrackCode(this.regLIP + 1, this.backTrack.btiMem1);
@@ -3950,7 +3810,7 @@ X86CPU.prototype.getIPWord = function()
  */
 X86CPU.prototype.getIPDisp = function()
 {
-    var w = ((PREFETCH? this.getBytePrefetch(this.regLIP) : this.getByte(this.regLIP)) << 24) >> 24;
+    var w = ((PREFETCH? this.getBytePrefetch() : this.getByte(this.regLIP)) << 24) >> 24;
     if (BACKTRACK) this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMem0);
     this.advanceIP(1);
     return w;
@@ -3965,7 +3825,7 @@ X86CPU.prototype.getIPDisp = function()
  */
 X86CPU.prototype.getSIBAddr = function(mod)
 {
-    var b = PREFETCH? this.getBytePrefetch(this.regLIP) : this.getByte(this.regLIP);
+    var b = PREFETCH? this.getBytePrefetch() : this.getByte(this.regLIP);
     if (BACKTRACK) this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMem0);
     this.advanceIP(1);
     return X86ModSIB.aOpModSIB[b].call(this, mod);
@@ -4208,11 +4068,15 @@ X86CPU.prototype.checkINTR = function()
             iPriority = 1 - iPriority;
         }
     }
+    /*
+     * As long as the ChipSet component isn't calling setDMA(), we don't need to test INTFLAG.DMA...
+     *
     if (this.intFlags & X86.INTFLAG.DMA) {
         if (!this.chipset.checkDMA()) {
             this.intFlags &= ~X86.INTFLAG.DMA;
         }
     }
+     */
     return false;
 };
 
@@ -4500,8 +4364,6 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
         this.opFlags = 0;
 
         /*
-         * DEBUG || PREFETCH:
-         *
         if (DEBUG || PREFETCH) {
             this.nBusCycles = 0;
             this.nSnapCycles = this.nStepCycles;
@@ -4511,14 +4373,15 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
         this.aOps[this.getIPByte()].call(this);
 
         /*
-         * DEBUG || PREFETCH:
-         *
         if (PREFETCH) {
             var nSpareCycles = (this.nSnapCycles - this.nStepCycles) - this.nBusCycles;
             if (nSpareCycles >= 4) {
                 this.fillPrefetch(nSpareCycles >> 2);   // for every 4 spare cycles, fetch 1 instruction byte
             }
         }
+         */
+
+        /*
         if (DEBUG) {
             //
             // Make sure that every instruction is assessing a cycle cost, and that the cost is a net positive.

@@ -1598,12 +1598,7 @@ X86.opINSb = function INSb()
         this.regECX = (this.regECX & ~maskAddr) | ((this.regECX - nDelta) & maskAddr);
         this.nStepCycles -= nCycles;
         if (nReps) {
-            if (BUGS_8086) {
-                this.rewindIP(-2);              // this instruction does not support multiple overrides
-                this.assert(this.regLIP == this.opLIP);
-            } else {
-                this.regLIP = this.opLIP;
-            }
+            this.resetIP(-2);
             this.opFlags |= X86.OPFLAG.REPEAT;
         }
     }
@@ -1656,12 +1651,7 @@ X86.opINSw = function INSw()
         this.regECX = (this.regECX & ~maskAddr) | ((this.regECX - nDelta) & maskAddr);
         this.nStepCycles -= nCycles;
         if (nReps) {
-            if (BUGS_8086) {
-                this.rewindIP(-2);              // this instruction does not support multiple overrides
-                this.assert(this.regLIP == this.opLIP);
-            } else {
-                this.regLIP = this.opLIP;
-            }
+            this.resetIP(-2);
             this.opFlags |= X86.OPFLAG.REPEAT;
         }
     }
@@ -1710,12 +1700,7 @@ X86.opOUTSb = function OUTSb()
         this.regECX = (this.regECX & ~maskAddr) | ((this.regECX - nDelta) & maskAddr);
         this.nStepCycles -= nCycles;
         if (nReps) {
-            if (BUGS_8086) {
-                this.rewindIP(-2);              // this instruction does not support multiple overrides
-                this.assert(this.regLIP == this.opLIP);
-            } else {
-                this.regLIP = this.opLIP;
-            }
+            this.resetIP(-2);
             this.opFlags |= X86.OPFLAG.REPEAT;
         }
     }
@@ -1767,12 +1752,7 @@ X86.opOUTSw = function OUTSw()
         this.regECX = (this.regECX & ~maskAddr) | ((this.regECX - nDelta) & maskAddr);
         this.nStepCycles -= nCycles;
         if (nReps) {
-            if (BUGS_8086) {
-                this.rewindIP(-2);              // this instruction does not support multiple overrides
-                this.assert(this.regLIP == this.opLIP);
-            } else {
-                this.regLIP = this.opLIP;
-            }
+            this.resetIP(-2);
             this.opFlags |= X86.OPFLAG.REPEAT;
         }
     }
@@ -2769,12 +2749,7 @@ X86.opMOVSb = function MOVSb()
         this.nStepCycles -= nCycles;
         this.regECX = (this.regECX & ~maskAddr) | ((this.regECX - nDelta) & maskAddr);
         if (nReps) {
-            if (BUGS_8086) {
-                this.rewindIP(((this.opPrefixes & X86.OPFLAG.SEG)? -3 : -2));
-                this.assert(this.regLIP == this.opLIP);
-            } else {
-                this.regLIP = this.opLIP;
-            }
+            this.resetIP(((this.opPrefixes & X86.OPFLAG.SEG)? -3 : -2));
             this.opFlags |= X86.OPFLAG.REPEAT;
         }
     }
@@ -2812,12 +2787,7 @@ X86.opMOVSw = function MOVSw()
         this.nStepCycles -= nCycles;
         this.regECX = (this.regECX & ~maskAddr) | ((this.regECX - nDelta) & maskAddr);
         if (nReps) {
-            if (BUGS_8086) {
-                this.rewindIP(((this.opPrefixes & X86.OPFLAG.SEG)? -3 : -2));
-                this.assert(this.regLIP == this.opLIP);
-            } else {
-                this.regLIP = this.opLIP;
-            }
+            this.resetIP(((this.opPrefixes & X86.OPFLAG.SEG)? -3 : -2));
             this.opFlags |= X86.OPFLAG.REPEAT;
         }
     }
@@ -2865,12 +2835,7 @@ X86.opCMPSb = function CMPSb()
          * two values are equal, we must continue.
          */
         if (nReps && this.getZF() == (this.opPrefixes & X86.OPFLAG.REPZ)) {
-            if (BUGS_8086) {
-                this.rewindIP(((this.opPrefixes & X86.OPFLAG.SEG)? -3 : -2));
-                this.assert(this.regLIP == this.opLIP);
-            } else {
-                this.regLIP = this.opLIP;
-            }
+            this.resetIP(((this.opPrefixes & X86.OPFLAG.SEG)? -3 : -2));
             this.opFlags |= X86.OPFLAG.REPEAT;
         }
     }
@@ -2918,12 +2883,7 @@ X86.opCMPSw = function CMPSw()
          * two values are equal, we must continue.
          */
         if (nReps && this.getZF() == (this.opPrefixes & X86.OPFLAG.REPZ)) {
-            if (BUGS_8086) {
-                this.rewindIP(((this.opPrefixes & X86.OPFLAG.SEG)? -3 : -2));
-                this.assert(this.regLIP == this.opLIP);
-            } else {
-                this.regLIP = this.opLIP;
-            }
+            this.resetIP(((this.opPrefixes & X86.OPFLAG.SEG)? -3 : -2));
             this.opFlags |= X86.OPFLAG.REPEAT;
         }
     }
@@ -2984,12 +2944,7 @@ X86.opSTOSb = function STOSb()
         this.regECX = (this.regECX & ~maskAddr) | ((this.regECX - nDelta) & maskAddr);
         this.nStepCycles -= nCycles;
         if (nReps) {
-            if (BUGS_8086) {
-                this.rewindIP(-2);              // this instruction does not support multiple overrides
-                this.assert(this.regLIP == this.opLIP);
-            } else {
-                this.regLIP = this.opLIP;
-            }
+            this.resetIP(-2);
             this.opFlags |= X86.OPFLAG.REPEAT;
         }
     }
@@ -3030,12 +2985,7 @@ X86.opSTOSw = function STOSw()
         this.regECX = (this.regECX & ~maskAddr) | ((this.regECX - nDelta) & maskAddr);
         this.nStepCycles -= nCycles;
         if (nReps) {
-            if (BUGS_8086) {
-                this.rewindIP(-2);              // this instruction does not support multiple overrides
-                this.assert(this.regLIP == this.opLIP);
-            } else {
-                this.regLIP = this.opLIP;
-            }
+            this.resetIP(-2);
             this.opFlags |= X86.OPFLAG.REPEAT;
         }
     }
@@ -3073,12 +3023,7 @@ X86.opLODSb = function LODSb()
         this.regECX = (this.regECX & ~maskAddr) | ((this.regECX - nDelta) & maskAddr);
         this.nStepCycles -= nCycles;
         if (nReps) {
-            if (BUGS_8086) {
-                this.rewindIP(((this.opPrefixes & X86.OPFLAG.SEG)? -3 : -2));
-                this.assert(this.regLIP == this.opLIP);
-            } else {
-                this.regLIP = this.opLIP;
-            }
+            this.resetIP(((this.opPrefixes & X86.OPFLAG.SEG)? -3 : -2));
             this.opFlags |= X86.OPFLAG.REPEAT;
         }
     }
@@ -3118,12 +3063,7 @@ X86.opLODSw = function LODSw()
         this.regECX = (this.regECX & ~maskAddr) | ((this.regECX - nDelta) & maskAddr);
         this.nStepCycles -= nCycles;
         if (nReps) {
-            if (BUGS_8086) {
-                this.rewindIP(((this.opPrefixes & X86.OPFLAG.SEG)? -3 : -2));
-                this.assert(this.regLIP == this.opLIP);
-            } else {
-                this.regLIP = this.opLIP;
-            }
+            this.resetIP(((this.opPrefixes & X86.OPFLAG.SEG)? -3 : -2));
             this.opFlags |= X86.OPFLAG.REPEAT;
         }
     }
@@ -3167,12 +3107,7 @@ X86.opSCASb = function SCASb()
          * two values are equal, we must continue.
          */
         if (nReps && this.getZF() == (this.opPrefixes & X86.OPFLAG.REPZ)) {
-            if (BUGS_8086) {
-                this.rewindIP(-2);              // this instruction does not support multiple overrides
-                this.assert(this.regLIP == this.opLIP);
-            } else {
-                this.regLIP = this.opLIP;
-            }
+            this.resetIP(-2);
             this.opFlags |= X86.OPFLAG.REPEAT;
         }
     }
@@ -3216,12 +3151,7 @@ X86.opSCASw = function SCASw()
          * two values are equal, we must continue.
          */
         if (nReps && this.getZF() == (this.opPrefixes & X86.OPFLAG.REPZ)) {
-            if (BUGS_8086) {
-                this.rewindIP(-2);              // this instruction does not support multiple overrides
-                this.assert(this.regLIP == this.opLIP);
-            } else {
-                this.regLIP = this.opLIP;
-            }
+            this.resetIP(-2);
             this.opFlags |= X86.OPFLAG.REPEAT;
         }
     }
@@ -4169,7 +4099,7 @@ X86.opHLT = function HLT()
      * on the theory that whoever's using the Debugger would like to see HLTs.
      */
     if (DEBUGGER && this.dbg && this.messageEnabled(Messages.HALT)) {
-        this.rewindIP(-1);      // this is purely for the Debugger's benefit, to show the HLT
+        this.resetIP(-1);       // this is purely for the Debugger's benefit, to show the HLT
         this.dbg.stopCPU();
         return;
     }
@@ -4178,7 +4108,7 @@ X86.opHLT = function HLT()
      * in the water (we have no NMI generation mechanism at the moment).
      */
     if (!this.getIF()) {
-        if (DEBUGGER && this.dbg) this.rewindIP(-1);
+        if (DEBUGGER && this.dbg) this.resetIP(-1);
         this.stopCPU();
     }
 };

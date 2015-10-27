@@ -1362,9 +1362,6 @@ X86.fnINCw = function(dst, src)
  * how to load GDT and LDT descriptors, whereas interrupts must use setCS.loadIDT(), which deals exclusively
  * with IDT descriptors.
  *
- * This means we must take care to replicate critical features of setCSIP(); ie, updating regLIP and regLIPLimit,
- * resetting default operand and address sizes, and flushing the prefetch queue AFTER calling loadIDT().
- *
  * @this {X86CPU}
  * @param {number} nIDT
  * @param {number|null} [nError]
@@ -1386,14 +1383,7 @@ X86.fnINT = function(nIDT, nError, nCycles)
         this.pushWord(oldIP);
         if (nError != null) this.pushWord(nError);
         this.nFault = -1;
-        /*
-         * TODO: Should this code be factored into a setLIP() function? The other primary client would be setCSIP().
-         */
-        if (I386) this.resetSizes();
-        this.regLIP = addr;
-        this.regLIPLimit = (this.segCS.base + this.segCS.limit)|0;
-        this.nCPL = this.segCS.cpl;             // cache the current CPL where it's more convenient
-        if (PREFETCH) this.flushPrefetch(this.regLIP);
+        this.setLIP(addr);
     }
 };
 

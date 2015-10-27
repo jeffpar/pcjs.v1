@@ -201,6 +201,12 @@ function Debugger(parmsDbg)
         this.clearBreakpoints();
 
         /*
+         * The new "bn" command allows you to specify a number of instructions to execute and then stop;
+         * "bn 0" disables any outstanding count.
+         */
+        this.nBreakIns = 0;
+
+        /*
          * Execution history is allocated by historyInit() whenever checksEnabled() conditions change.
          * Execution history is updated whenever the CPU calls checkInstruction(), which will happen
          * only when checksEnabled() returns true (eg, whenever one or more breakpoints have been set).
@@ -3885,7 +3891,7 @@ if (DEBUGGER) {
      */
     Debugger.prototype.checksEnabled = function(fRelease)
     {
-        return ((DEBUG && !fRelease)? true : (this.aBreakExec.length > 1 || this.messageEnabled(Messages.INT) /* || this.aBreakRead.length > 1 || this.aBreakWrite.length > 1 */));
+        return ((DEBUG && !fRelease)? true : (this.aBreakExec.length > 1 || !!this.nBreakIns || this.messageEnabled(Messages.INT) /* || this.aBreakRead.length > 1 || this.aBreakWrite.length > 1 */));
     };
 
     /**
@@ -3902,6 +3908,9 @@ if (DEBUGGER) {
     Debugger.prototype.checkInstruction = function(addr, nState)
     {
         if (nState > 0) {
+            if (this.nBreakIns && !--this.nBreakIns) {
+                return true;
+            }
             if (this.checkBreakpoint(addr, 1, this.aBreakExec)) {
                 return true;
             }
@@ -5776,6 +5785,8 @@ if (DEBUGGER) {
      * These two new commands operate as toggles so that if "*" is used to trap all input (or output),
      * you can also use these commands to NOT trap specific ports.
      *
+     *      bn [n]  break after [n] instructions
+     *
      * TODO: Update the "bl" command to include any/all I/O breakpoints, and the "bc" command to
      * clear them.  Because "bi" and "bo" commands are piggy-backing on Bus functions, those breakpoints
      * are currently outside the realm of what the "bl" and "bc" commands are aware of.
@@ -5796,6 +5807,7 @@ if (DEBUGGER) {
             this.println("\tbw [a]\tset write breakpoint at addr [a]");
             this.println("\tbc [a]\tclear breakpoint at addr [a]");
             this.println("\tbl\tlist all breakpoints");
+            this.println("\tbn [n]\tbreak after [n] instruction(s)");
             return;
         }
         var sParm = sCmd.charAt(1);
@@ -5805,6 +5817,11 @@ if (DEBUGGER) {
             cBreaks += this.listBreakpoints(this.aBreakRead);
             cBreaks += this.listBreakpoints(this.aBreakWrite);
             if (!cBreaks) this.println("no breakpoints");
+            return;
+        }
+        if (sParm == 'n') {
+            this.nBreakIns = this.parseValue(sAddr);
+            this.println("break after " + this.nBreakIns + " instruction(s)");
             return;
         }
         if (sAddr === undefined) {
