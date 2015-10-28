@@ -34,7 +34,7 @@
 
 var X86 = {
     /*
-     * CPU model numbers
+     * CPU model numbers (supported)
      */
     MODEL_8086:     8086,
     MODEL_8088:     8088,
@@ -42,6 +42,12 @@ var X86 = {
     MODEL_80188:    80188,
     MODEL_80286:    80286,
     MODEL_80386:    80386,
+
+    /*
+     * CPU stepping identifiers (supported)
+     */
+    STEPPING_B1:    0xB1,       // our version of the B1 stepping also includes the infamous 32-bit multiplication bug
+    STEPPING_B2:    0xB2,       // this is an imaginary stepping that simply means "B1 without the 32-bit multiplication bug" (ie, a B1 with the "double sigma" stamp)
 
     /*
      * This constant is used to mark points in the code where the physical address being returned

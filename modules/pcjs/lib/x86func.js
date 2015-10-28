@@ -2033,6 +2033,18 @@ X86.fnMULw = function(dst, src)
         this.regMDHi = (result >> 16) & 0xffff;
     } else {
         X86.fnMUL32.call(this, dst, this.regEAX);
+        if (this.model == X86.MODEL_80386 && this.stepping == X86.STEPPING_B1) {
+            if (this.regEAX == 0x0417A000 && dst == 0x00000081) {
+                /*
+                 * In this case, the result should be 0x20FE7A000 (ie, regMDHi should be 0x2), and I'm not
+                 * sure what the typical failure would look like, so I'll just set regMDHi to 0.
+                 *
+                 * If you want a B1 stepping without this 32-bit multiplication flaw, select the B2 stepping.
+                 */
+                this.assert(this.regMDLo == 0x0FE7A000 && this.regMDHi == 0x00000002);
+                this.regMDHi = 0;
+            }
+        }
     }
 
     if (this.regMDHi) {

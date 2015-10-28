@@ -480,8 +480,7 @@ if (DEBUGGER) {
     Debugger.TYPE_OTHER     = 0xF000;   // "other" field
 
     /*
-     * TYPE_SIZE values.  Some of the values (eg, TYPE_WORDIB and TYPE_WORDIW)
-     * imply the presence of a third operand, for those weird cases....
+     * TYPE_SIZE values.
      */
     Debugger.TYPE_NONE      = 0x0000;   //     (all other TYPE fields ignored)
     Debugger.TYPE_BYTE      = 0x0001;   // (b) byte, regardless of operand size
@@ -493,8 +492,6 @@ if (DEBUGGER) {
     Debugger.TYPE_FARP      = 0x0007;   // (p) 32-bit or 48-bit pointer for JMP/CALL
     Debugger.TYPE_2WORD     = 0x0008;   // (a) two memory operands (BOUND only)
     Debugger.TYPE_DESC      = 0x0009;   // (s) 6 byte pseudo-descriptor
-    Debugger.TYPE_WORDIB    = 0x000A;   //     two source operands (eg, IMUL)
-    Debugger.TYPE_WORDIW    = 0x000B;   //     two source operands (eg, IMUL)
     Debugger.TYPE_PREFIX    = 0x000F;   //     (treat similarly to TYPE_NONE)
 
     /*
@@ -763,9 +760,9 @@ if (DEBUGGER) {
     /* 0x67 */ [Debugger.INS.AS,    Debugger.TYPE_PREFIX | Debugger.TYPE_80386],
 
     /* 0x68 */ [Debugger.INS.PUSH,  Debugger.TYPE_IMM    | Debugger.TYPE_VWORD | Debugger.TYPE_IN   | Debugger.TYPE_80286],
-    /* 0x69 */ [Debugger.INS.IMUL,  Debugger.TYPE_REG    | Debugger.TYPE_WORD  | Debugger.TYPE_BOTH | Debugger.TYPE_80286,   Debugger.TYPE_MODRM | Debugger.TYPE_WORDIW | Debugger.TYPE_IN],
+    /* 0x69 */ [Debugger.INS.IMUL,  Debugger.TYPE_REG    | Debugger.TYPE_WORD  | Debugger.TYPE_BOTH | Debugger.TYPE_80286,   Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_IN, Debugger.TYPE_IMM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
     /* 0x6A */ [Debugger.INS.PUSH,  Debugger.TYPE_IMM    | Debugger.TYPE_SBYTE | Debugger.TYPE_IN   | Debugger.TYPE_80286],
-    /* 0x6B */ [Debugger.INS.IMUL,  Debugger.TYPE_REG    | Debugger.TYPE_WORD  | Debugger.TYPE_BOTH | Debugger.TYPE_80286,   Debugger.TYPE_MODRM | Debugger.TYPE_WORDIB | Debugger.TYPE_IN],
+    /* 0x6B */ [Debugger.INS.IMUL,  Debugger.TYPE_REG    | Debugger.TYPE_WORD  | Debugger.TYPE_OUT  | Debugger.TYPE_80286,   Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_IN, Debugger.TYPE_IMM | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
     /* 0x6C */ [Debugger.INS.INS,   Debugger.TYPE_ESDI   | Debugger.TYPE_BYTE  | Debugger.TYPE_OUT  | Debugger.TYPE_80286,   Debugger.TYPE_DX    | Debugger.TYPE_IN],
     /* 0x6D */ [Debugger.INS.INS,   Debugger.TYPE_ESDI   | Debugger.TYPE_VWORD | Debugger.TYPE_OUT  | Debugger.TYPE_80286,   Debugger.TYPE_DX    | Debugger.TYPE_IN],
     /* 0x6E */ [Debugger.INS.OUTS,  Debugger.TYPE_DX     | Debugger.TYPE_IN    | Debugger.TYPE_80286,   Debugger.TYPE_DSSI | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],

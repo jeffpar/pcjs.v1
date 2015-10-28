@@ -126,10 +126,11 @@ version of the multiplication tests discussed in "[Early 80386 CPUs](/blog/2015/
 If any of the 65,536 identical multiplications return an incorrect result, Windows 95 displays the following
 message:
 
-	WARNING: The 80386 processor in this computer may not reliably execute 32-bit multiplication.
-	Windows may occasionally fail on this computer. You may want to replace your 80386 processor.
+	WARNING: The 80386 processor in this computer may not reliably execute 32-bit
+	multiplication.	Windows may occasionally fail on this computer.
 	
-    Press any key to continue...
+	You may want to replace your 80386 processor.
+    Press any key to continue...Press a key to continue
 
 A multiplication failure implies that the 80386 stepping is B1, because later steppings resolved the problem.
 

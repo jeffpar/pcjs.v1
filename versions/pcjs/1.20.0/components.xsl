@@ -520,6 +520,12 @@
 				<xsl:otherwise>8088</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
+		<xsl:variable name="stepping">
+			<xsl:choose>
+				<xsl:when test="@stepping"><xsl:value-of select="@stepping"/></xsl:when>
+				<xsl:otherwise></xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
 		<xsl:variable name="cycles">
 			<xsl:choose>
 				<xsl:when test="@cycles"><xsl:value-of select="@cycles"/></xsl:when>
@@ -559,7 +565,7 @@
 		<xsl:call-template name="component">
 			<xsl:with-param name="machine" select="$machine"/>
 			<xsl:with-param name="class" select="'cpu'"/>
-			<xsl:with-param name="parms">,model:<xsl:value-of select="$model"/>,cycles:<xsl:value-of select="$cycles"/>,multiplier:<xsl:value-of select="$multiplier"/>,autoStart:<xsl:value-of select="$autoStart"/>,csStart:<xsl:value-of select="$csStart"/>,csInterval:<xsl:value-of select="$csInterval"/>,csStop:<xsl:value-of select="$csStop"/></xsl:with-param>
+			<xsl:with-param name="parms">,model:<xsl:value-of select="$model"/>,stepping:'<xsl:value-of select="$stepping"/>',cycles:<xsl:value-of select="$cycles"/>,multiplier:<xsl:value-of select="$multiplier"/>,autoStart:<xsl:value-of select="$autoStart"/>,csStart:<xsl:value-of select="$csStart"/>,csInterval:<xsl:value-of select="$csInterval"/>,csStop:<xsl:value-of select="$csStop"/></xsl:with-param>
 		</xsl:call-template>
 	</xsl:template>
 

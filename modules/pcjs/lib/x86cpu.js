@@ -76,6 +76,7 @@ if (!I386) {
  * The X86CPU class uses the following (parmsCPU) properties:
  *
  *      model: a number (eg, 8088) that should match one of the X86.MODEL values
+ *      stepping: a string (eg, "B1") that should match one of the X86.STEPPING values
  *
  * This extends the CPU class and passes any remaining parmsCPU properties to the CPU class
  * constructor, along with a default speed (cycles per second) based on the specified (or default)
@@ -108,6 +109,9 @@ if (!I386) {
 function X86CPU(parmsCPU)
 {
     this.model = parmsCPU['model'] || X86.MODEL_8088;
+
+    var stepping = parmsCPU['stepping'];
+    this.stepping = (stepping? str.parseInt(stepping, 16) : 0);
 
     var nCyclesDefault = 0;
     switch(this.model) {
@@ -2884,6 +2888,12 @@ X86CPU.prototype.probeAddr = function(addr, size, fLinear)
     }
     if (block) {
         var off = addr & this.nBlockLimit;
+        /*
+         * TODO: We actually hit this assert in rare cases where the Debugger is disassembling
+         * an instruction straddling a page boundary that also references a short or long operand.
+         * The best solution is to change the Debugger's getShort(), getLong(), etc, functions to
+         * use getByte() internally, which in turn will never call probeAddr() with a size > 1.
+         */
         this.assert(off + (size || 1) <= this.nBlockSize);
         switch(size) {
         default:

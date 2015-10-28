@@ -1,5 +1,13 @@
 Overview
 ---
+
+WARNING: This utility is obsolete.  It has been superseded by [test386](/tests/pc/80386/),
+which, going forward, serves as our new model for instruction-level testing.  As a result,
+the **traceLog()** functionality mentioned below has been removed from the PCjs source code
+(but you can always dig it back up if you really want it).
+
+---
+
 TRACE.COM takes an instruction log, as recorded by the PCjs Debugger's traceLog() function, and
 "plays" the instructions back on another machine DOS-compatible 8086 machine, verifying that:
 

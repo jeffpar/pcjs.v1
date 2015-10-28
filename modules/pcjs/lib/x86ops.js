@@ -2940,8 +2940,27 @@ X86.opSTOSb = function STOSb()
         if (this.opFlags & X86.OPFLAG.FAULT) return;
 
         if (BACKTRACK) this.backTrack.btiMem0 = this.backTrack.btiAL;
-        this.regEDI = (this.regEDI & ~maskAddr) | ((this.regEDI + ((this.regPS & X86.PS.DF)? -1 : 1)) & maskAddr);
+
         this.regECX = (this.regECX & ~maskAddr) | ((this.regECX - nDelta) & maskAddr);
+
+        /*
+         * Implement 80386 B1 Errata #7 (to the extent that Windows 95 checks for the errata).  This
+         * isn't a rock-solid implementation of the errata (for example, the ADDRESS override on the next
+         * instruction, if it exists, may or may not be the first prefix byte), but it's close enough.
+         *
+         * Note that we carefully monkey with maskAddr only AFTER updating ECX, because this errata affects
+         * only EDI in the case of STOS.  The other instructions mentioned below monkey with different
+         * registers, so read the errata carefully.
+         *
+         * TODO: Extend this errata to STOSW, as well as MOVSB, MOVSW, INSB, and INSW.
+         */
+        if (this.model == X86.MODEL_80386 && this.stepping == X86.STEPPING_B1) {
+            if (!(this.opPrefixes & X86.OPFLAG.ADDRSIZE) != (this.getByte(this.regLIP) != X86.OPCODE.AS)) {
+                maskAddr ^= (0xffff0000|0);
+            }
+        }
+        this.regEDI = (this.regEDI & ~maskAddr) | ((this.regEDI + ((this.regPS & X86.PS.DF)? -1 : 1)) & maskAddr);
+
         this.nStepCycles -= nCycles;
         if (nReps) {
             this.resetIP(-2);
