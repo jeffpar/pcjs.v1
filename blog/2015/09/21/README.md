@@ -1,4 +1,4 @@
-Success With Windows 95
+Windows 95 In Your Web Browser
 ---
 
 Today, the last serious bug preventing a successful boot of Windows 95 was fixed.  I won't bore you with

@@ -221,13 +221,13 @@ a double sigma sign. All 80386s produced after the B1 stepping should be free of
 
 	; Perform various 16-bit and 32-bit multiply operations...
 	
-	K1      DD      41h                 ;memory-based constant 1
-	K2      DD      81h                 ;memory-based constant 2
+	K1      DD      41h                 ; memory-based constant 1
+	K2      DD      81h                 ; memory-based constant 2
 	
-			MOV     EAX,0042E8h         ;load EAX with operand
-			MUL     K1                  ;EAX = EAX * 41H
-			CMP     EAX,10FCE8h         ;check answer
-			JNE     fail                ;failure if not equal
+			MOV     EAX,0042E8h         ; load EAX with operand
+			MUL     K1                  ; EAX = EAX * 41H
+			CMP     EAX,10FCE8h         ; check answer
+			JNE     fail                ; failure if not equal
 	
 			MOV     EAX,085D00h
 			MUL     K1

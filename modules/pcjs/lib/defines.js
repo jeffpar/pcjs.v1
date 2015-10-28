@@ -55,7 +55,9 @@ var DEBUGGER = true;            // this @define is overridden by the Closure Com
 /**
  * @define {boolean}
  *
- * PREFETCH enables the use of a prefetch queue.
+ * PREFETCH enables the use of a prefetch queue.  As of v1.20.0, PREFETCH support has been updated and retested,
+ * but as currently implemented, it does not yield as much improvement as I'd hoped when paging is enabled, so PREFETCH
+ * is still off by default.
  */
 var PREFETCH = false;
 
@@ -71,7 +73,7 @@ var FATARRAYS = false;
 
 /**
  * TYPEDARRAYS enables use of typed arrays for Memory blocks.  This used to be a compile-time-only option, but I've
- * added Memory access functions for typed arrays (see Memory.afnTypedArray), so support can be enabled dynamically.
+ * added Memory access functions for typed arrays (see Memory.afnTypedArray), so support can be enabled dynamically now.
  *
  * See the Memory component for details.
  */
@@ -123,7 +125,7 @@ var I386 = true;
 /**
  * @define {boolean}
  *
- * COMPAQ386 enables Compaq DeskPro 386 support.
+ * COMPAQ386 enables Compaq DeskPro 386 support.  Requires I386 support as well (duh).
  */
 var COMPAQ386 = true;
 
@@ -133,7 +135,7 @@ var COMPAQ386 = true;
  * PAGEBLOCKS enables 80386 paging support with assistance from the Bus component.  This affects how the Bus component
  * defines physical memory parameters for a 32-bit bus.  With the 8086 and 80286 processors, the Bus component was free
  * to choose any block size for physical memory allocations that made sense for the bus width (eg, 4Kb blocks for a
- * 20-bit bus, or 16Kb blocks for 24-bit bus).
+ * 20-bit bus, or 16Kb blocks for a 24-bit bus).
  *
  * However, for the 80386 processor, it makes more sense to choose a block size that matches the page size (ie, 4Kb),
  * because then we have the option of altering the address-to-memory mapping for any block to match whatever page table
