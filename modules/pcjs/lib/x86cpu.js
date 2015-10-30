@@ -258,8 +258,7 @@ X86CPU.prototype.initMemory = function(aMemBlocks, nBlockShift)
      * will be altered if/when the CPU enables paging.  PAGEBLOCKS must be true when using Memory
      * blocks to simulate paging, ensuring that physical blocks and pages have the same size (4Kb).
      */
-    this.aBusBlocks = aMemBlocks;
-    this.aMemBlocks = aMemBlocks;
+    this.aBusBlocks = this.aMemBlocks = aMemBlocks;
     this.nBlockShift = nBlockShift;
     this.nBlockSize = 1 << this.nBlockShift;
     this.nBlockLimit = this.nBlockSize - 1;
@@ -556,7 +555,7 @@ X86CPU.prototype.mapPageBlock = function(addr, fWrite, fSuppress)
  */
 X86CPU.prototype.disablePageBlocks = function()
 {
-    if (this.aMemBlocks != this.aBusBlocks) {
+    if (this.aMemBlocks !== this.aBusBlocks) {
         this.aMemBlocks = this.aBusBlocks;
         this.blockUnpaged = null;
         this.aBlocksPaged = null;
@@ -1092,6 +1091,9 @@ X86CPU.prototype.resetRegs = function()
         this.regTR  = [null,null,null,null,null,null,0,0];  // Test Registers TR0-TR7 (TR0-TR5 are undefined)
         this.segFS = new X86Seg(this, X86Seg.ID.DATA,  "FS");
         this.segGS = new X86Seg(this, X86Seg.ID.DATA,  "GS");
+        /*
+         * Synchronize the fact that paging is initially disabled with our PAGEBLOCKS functions
+         */
         this.disablePageBlocks();
     }
 
