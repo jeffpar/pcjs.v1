@@ -1105,6 +1105,69 @@ X86.fnIMUL8 = function(dst, src)
 };
 
 /**
+ * fnIMULn(dst, src)
+ *
+ * 80286_and_80287_Programmers_Reference_Manual_1987.pdf, p.B-44 (p.254) notes that:
+ *
+ *      "The low 16 bits of the product of a 16-bit signed multiply are the same as those of an
+ *      unsigned multiply. The three operand IMUL instruction can be used for unsigned operands as well."
+ *
+ * However, we still sign-extend the operands before multiplying, making it easier to range-check the result.
+ *
+ * (80186/80188 and up)
+ *
+ * @this {X86CPU}
+ * @param {number} dst (not used)
+ * @param {number} src
+ * @return {number}
+ */
+X86.fnIMULn = function(dst, src)
+{
+    var result;
+    dst = this.getIPWord();
+
+    if (this.sizeData == 2) {
+        result = X86.fnIMULrw.call(this, dst, src);
+    } else {
+        result = X86.fnIMULrd.call(this, dst, src);
+    }
+
+    /*
+     * NOTE: The above functions already accounted for 80386 cycle counts, so we are simply accounting for the
+     * increased time on an 80286; the 80186/80188 have even larger values, but we'll worry about that another day.
+     */
+    if (this.model < X86.MODEL_80386) this.nStepCycles -= 12;
+    return result;
+};
+
+/**
+ * fnIMUL32(dst, src)
+ *
+ * This sets regMDHi:regMDLo to the 64-bit result of dst * src, both of which are treated as signed.
+ *
+ * @this {X86CPU}
+ * @param {number} dst (any 32-bit number, treated as signed)
+ * @param {number} src (any 32-bit number, treated as signed)
+ */
+X86.fnIMUL32 = function(dst, src)
+{
+    var fNeg = false;
+    if (src < 0) {
+        src = -src|0;
+        fNeg = !fNeg;
+    }
+    if (dst < 0) {
+        dst = -dst|0;
+        fNeg = !fNeg;
+    }
+    X86.fnMUL32.call(this, dst, src);
+    if (fNeg) {
+        this.regMDLo = (~this.regMDLo + 1)|0;
+        this.regMDHi = (~this.regMDHi + (this.regMDLo? 0 : 1))|0;
+    }
+};
+
+/**
  * fnIMULb(dst, src)
  *
  * This 16-bit multiplication must indicate when the upper 8 bits are simply a sign-extension of the
@@ -1141,81 +1204,6 @@ X86.fnIMULb = function(dst, src)
 };
 
 /**
- * fnIMULn(dst, src)
- *
- * 80286_and_80287_Programmers_Reference_Manual_1987.pdf, p.B-44 (p.254) notes that:
- *
- *      "The low 16 bits of the product of a 16-bit signed multiply are the same as those of an
- *      unsigned multiply. The three operand IMUL instruction can be used for unsigned operands as well."
- *
- * However, we still sign-extend the operands before multiplying, making it easier to range-check the result.
- *
- * (80186/80188 and up)
- *
- * @this {X86CPU}
- * @param {number} dst (not used)
- * @param {number} src
- * @return {number}
- */
-X86.fnIMULn = function(dst, src)
-{
-    var fOverflow, result;
-    dst = this.getIPWord();
-
-    if (this.sizeData == 2) {
-        result = (((src << 16) >> 16) * ((dst << 16) >> 16))|0;
-        fOverflow = (result > 32767 || result < -32768);
-    } else {
-        result = (src * dst);
-        fOverflow = (result > 2147483647 || result < -2147483648);
-        this.assert(fOverflow == (result != (result|0)));
-    }
-
-    if (fOverflow) {
-        this.setCF(); this.setOF();
-    } else {
-        this.clearCF(); this.clearOF();
-    }
-
-    result &= this.maskData;
-
-    /*
-     * NOTE: These are the cycle counts for the 80286; the 80186/80188 have slightly different values (ranges):
-     * 22-25 and 29-32 instead of 21 and 24, respectively.  However, accurate cycle counts for the 80186/80188 is
-     * not super-critical. TODO: Fix this someday.
-     */
-    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? 21 : 24);
-    return result;
-};
-
-/**
- * fnIMUL32(dst, src)
- *
- * This sets regMDHi:regMDLo to the 64-bit result of dst * src, both of which are treated as signed.
- *
- * @this {X86CPU}
- * @param {number} dst (any 32-bit number, treated as signed)
- * @param {number} src (any 32-bit number, treated as signed)
- */
-X86.fnIMUL32 = function(dst, src)
-{
-    var fNeg = false;
-    if (src < 0) {
-        src = -src|0;
-        fNeg = !fNeg;
-    }
-    if (dst < 0) {
-        dst = -dst|0;
-        fNeg = !fNeg;
-    }
-    X86.fnMUL32.call(this, dst, src);
-    if (fNeg) {
-        this.regMDLo = (~this.regMDLo + 1)|0;
-        this.regMDHi = (~this.regMDHi + (this.regMDLo? 0 : 1))|0;
-    }
-};
-
-/**
  * fnIMULw(dst, src)
  *
  * regMDHi:regMDLo = dst * regEAX
@@ -1233,7 +1221,7 @@ X86.fnIMUL32 = function(dst, src)
  * @this {X86CPU}
  * @param {number} dst
  * @param {number} src (null; AX or EAX is the implied src)
- * @return {number} (we return dst unchanged, since it's actually DX:AX that's modified)
+ * @return {number} (we return dst unchanged, since it's actually DX:AX or EDX:EAX that's modified)
  */
 X86.fnIMULw = function(dst, src)
 {

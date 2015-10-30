@@ -44,7 +44,7 @@ if (NODE) {
  *
  * @this {X86CPU}
  */
-X86.opADDmb = function ADDmb()
+X86.opADDmb = function()
 {
     var b = this.getIPByte();
     /*
@@ -67,7 +67,7 @@ X86.opADDmb = function ADDmb()
  *
  * @this {X86CPU}
  */
-X86.opADDmw = function ADDmw()
+X86.opADDmw = function()
 {
     this.aOpModMemWord[this.getIPByte()].call(this, X86.fnADDw);
 };
@@ -77,7 +77,7 @@ X86.opADDmw = function ADDmw()
  *
  * @this {X86CPU}
  */
-X86.opADDrb = function ADDrb()
+X86.opADDrb = function()
 {
     this.aOpModRegByte[this.getIPByte()].call(this, X86.fnADDb);
 };
@@ -87,7 +87,7 @@ X86.opADDrb = function ADDrb()
  *
  * @this {X86CPU}
  */
-X86.opADDrw = function ADDrw()
+X86.opADDrw = function()
 {
     this.aOpModRegWord[this.getIPByte()].call(this, X86.fnADDw);
 };
@@ -97,7 +97,7 @@ X86.opADDrw = function ADDrw()
  *
  * @this {X86CPU}
  */
-X86.opADDALb = function ADDALb()
+X86.opADDALb = function()
 {
     this.regEAX = (this.regEAX & ~0xff) | X86.fnADDb.call(this, this.regEAX & 0xff, this.getIPByte());
     /*
@@ -113,7 +113,7 @@ X86.opADDALb = function ADDALb()
  *
  * @this {X86CPU}
  */
-X86.opADDAX = function ADDAX()
+X86.opADDAX = function()
 {
     this.regEAX = (this.regEAX & ~this.maskData) | X86.fnADDw.call(this, this.regEAX & this.maskData, this.getIPWord());
     if (BACKTRACK) {
@@ -127,7 +127,7 @@ X86.opADDAX = function ADDAX()
  *
  * @this {X86CPU}
  */
-X86.opPUSHES = function PUSHES()
+X86.opPUSHES = function()
 {
     /*
      * TODO: Reportedly, when the OPERAND size is 32 bits, the 80386 will decrement the stack pointer by 4,
@@ -143,7 +143,7 @@ X86.opPUSHES = function PUSHES()
  *
  * @this {X86CPU}
  */
-X86.opPOPES = function POPES()
+X86.opPOPES = function()
 {
     /*
      * Any operation that modifies the stack before loading a new segment must snapshot regLSP first.
@@ -159,7 +159,7 @@ X86.opPOPES = function POPES()
  *
  * @this {X86CPU}
  */
-X86.opORmb = function ORmb()
+X86.opORmb = function()
 {
     this.aOpModMemByte[this.getIPByte()].call(this, X86.fnORb);
 };
@@ -169,7 +169,7 @@ X86.opORmb = function ORmb()
  *
  * @this {X86CPU}
  */
-X86.opORmw = function ORmw()
+X86.opORmw = function()
 {
     this.aOpModMemWord[this.getIPByte()].call(this, X86.fnORw);
 };
@@ -179,7 +179,7 @@ X86.opORmw = function ORmw()
  *
  * @this {X86CPU}
  */
-X86.opORrb = function ORrb()
+X86.opORrb = function()
 {
     this.aOpModRegByte[this.getIPByte()].call(this, X86.fnORb);
 };
@@ -189,7 +189,7 @@ X86.opORrb = function ORrb()
  *
  * @this {X86CPU}
  */
-X86.opORrw = function ORrw()
+X86.opORrw = function()
 {
     this.aOpModRegWord[this.getIPByte()].call(this, X86.fnORw);
 };
@@ -199,7 +199,7 @@ X86.opORrw = function ORrw()
  *
  * @this {X86CPU}
  */
-X86.opORALb = function ORALb()
+X86.opORALb = function()
 {
     this.regEAX = (this.regEAX & ~0xff) | X86.fnORb.call(this, this.regEAX & 0xff, this.getIPByte());
     if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMem0;
@@ -211,7 +211,7 @@ X86.opORALb = function ORALb()
  *
  * @this {X86CPU}
  */
-X86.opORAX = function ORAX()
+X86.opORAX = function()
 {
     this.regEAX = (this.regEAX & ~this.maskData) | X86.fnORw.call(this, this.regEAX & this.maskData, this.getIPWord());
     if (BACKTRACK) {
@@ -225,7 +225,7 @@ X86.opORAX = function ORAX()
  *
  * @this {X86CPU}
  */
-X86.opPUSHCS = function PUSHCS()
+X86.opPUSHCS = function()
 {
     /*
      * TODO: Reportedly, when the OPERAND size is 32 bits, the 80386 will decrement the stack pointer by 4,
@@ -241,7 +241,7 @@ X86.opPUSHCS = function PUSHCS()
  *
  * @this {X86CPU}
  */
-X86.opPOPCS = function POPCS()
+X86.opPOPCS = function()
 {
     /*
      * Because this is an 8088-only operation, we don't have to worry about taking a snapshot of regLSP first.
@@ -255,7 +255,7 @@ X86.opPOPCS = function POPCS()
  *
  * @this {X86CPU}
  */
-X86.op0F = function OP0F()
+X86.op0F = function()
 {
     this.aOps0F[this.getIPByte()].call(this);
 };
@@ -265,7 +265,7 @@ X86.op0F = function OP0F()
  *
  * @this {X86CPU}
  */
-X86.opADCmb = function ADCmb()
+X86.opADCmb = function()
 {
     this.aOpModMemByte[this.getIPByte()].call(this, X86.fnADCb);
 };
@@ -275,7 +275,7 @@ X86.opADCmb = function ADCmb()
  *
  * @this {X86CPU}
  */
-X86.opADCmw = function ADCmw()
+X86.opADCmw = function()
 {
     this.aOpModMemWord[this.getIPByte()].call(this, X86.fnADCw);
 };
@@ -285,7 +285,7 @@ X86.opADCmw = function ADCmw()
  *
  * @this {X86CPU}
  */
-X86.opADCrb = function ADCrb()
+X86.opADCrb = function()
 {
     this.aOpModRegByte[this.getIPByte()].call(this, X86.fnADCb);
 };
@@ -295,7 +295,7 @@ X86.opADCrb = function ADCrb()
  *
  * @this {X86CPU}
  */
-X86.opADCrw = function ADCrw()
+X86.opADCrw = function()
 {
     this.aOpModRegWord[this.getIPByte()].call(this, X86.fnADCw);
 };
@@ -305,7 +305,7 @@ X86.opADCrw = function ADCrw()
  *
  * @this {X86CPU}
  */
-X86.opADCALb = function ADCALb()
+X86.opADCALb = function()
 {
     this.regEAX = (this.regEAX & ~0xff) | X86.fnADCb.call(this, this.regEAX & 0xff, this.getIPByte());
     if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMem0;
@@ -317,7 +317,7 @@ X86.opADCALb = function ADCALb()
  *
  * @this {X86CPU}
  */
-X86.opADCAX = function ADCAX()
+X86.opADCAX = function()
 {
     this.regEAX = (this.regEAX & ~this.maskData) | X86.fnADCw.call(this, this.regEAX & this.maskData, this.getIPWord());
     if (BACKTRACK) {
@@ -331,7 +331,7 @@ X86.opADCAX = function ADCAX()
  *
  * @this {X86CPU}
  */
-X86.opPUSHSS = function PUSHSS()
+X86.opPUSHSS = function()
 {
     /*
      * TODO: Reportedly, when the OPERAND size is 32 bits, the 80386 will decrement the stack pointer by 4,
@@ -347,7 +347,7 @@ X86.opPUSHSS = function PUSHSS()
  *
  * @this {X86CPU}
  */
-X86.opPOPSS = function POPSS()
+X86.opPOPSS = function()
 {
     /*
      * Any operation that modifies the stack before loading a new segment must snapshot regLSP first.
@@ -363,7 +363,7 @@ X86.opPOPSS = function POPSS()
  *
  * @this {X86CPU}
  */
-X86.opSBBmb = function SBBmb()
+X86.opSBBmb = function()
 {
     this.aOpModMemByte[this.getIPByte()].call(this, X86.fnSBBb);
 };
@@ -373,7 +373,7 @@ X86.opSBBmb = function SBBmb()
  *
  * @this {X86CPU}
  */
-X86.opSBBmw = function SBBmw()
+X86.opSBBmw = function()
 {
     this.aOpModMemWord[this.getIPByte()].call(this, X86.fnSBBw);
 };
@@ -383,7 +383,7 @@ X86.opSBBmw = function SBBmw()
  *
  * @this {X86CPU}
  */
-X86.opSBBrb = function SBBrb()
+X86.opSBBrb = function()
 {
     this.aOpModRegByte[this.getIPByte()].call(this, X86.fnSBBb);
 };
@@ -393,7 +393,7 @@ X86.opSBBrb = function SBBrb()
  *
  * @this {X86CPU}
  */
-X86.opSBBrw = function SBBrw()
+X86.opSBBrw = function()
 {
     this.aOpModRegWord[this.getIPByte()].call(this, X86.fnSBBw);
 };
@@ -403,7 +403,7 @@ X86.opSBBrw = function SBBrw()
  *
  * @this {X86CPU}
  */
-X86.opSBBALb = function SBBALb()
+X86.opSBBALb = function()
 {
     this.regEAX = (this.regEAX & ~0xff) | X86.fnSBBb.call(this, this.regEAX & 0xff, this.getIPByte());
     if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMem0;
@@ -415,7 +415,7 @@ X86.opSBBALb = function SBBALb()
  *
  * @this {X86CPU}
  */
-X86.opSBBAX = function SBBAX()
+X86.opSBBAX = function()
 {
     this.regEAX = (this.regEAX & ~this.maskData) | X86.fnSBBw.call(this, this.regEAX & this.maskData, this.getIPWord());
     if (BACKTRACK) {
@@ -429,7 +429,7 @@ X86.opSBBAX = function SBBAX()
  *
  * @this {X86CPU}
  */
-X86.opPUSHDS = function PUSHDS()
+X86.opPUSHDS = function()
 {
     /*
      * TODO: Reportedly, when the OPERAND size is 32 bits, the 80386 will decrement the stack pointer by 4,
@@ -445,7 +445,7 @@ X86.opPUSHDS = function PUSHDS()
  *
  * @this {X86CPU}
  */
-X86.opPOPDS = function POPDS()
+X86.opPOPDS = function()
 {
     /*
      * Any operation that modifies the stack before loading a new segment must snapshot regLSP first.
@@ -461,7 +461,7 @@ X86.opPOPDS = function POPDS()
  *
  * @this {X86CPU}
  */
-X86.opANDmb = function ANDmb()
+X86.opANDmb = function()
 {
     this.aOpModMemByte[this.getIPByte()].call(this, X86.fnANDb);
 };
@@ -471,7 +471,7 @@ X86.opANDmb = function ANDmb()
  *
  * @this {X86CPU}
  */
-X86.opANDmw = function ANDmw()
+X86.opANDmw = function()
 {
     this.aOpModMemWord[this.getIPByte()].call(this, X86.fnANDw);
 };
@@ -481,7 +481,7 @@ X86.opANDmw = function ANDmw()
  *
  * @this {X86CPU}
  */
-X86.opANDrb = function ANDrb()
+X86.opANDrb = function()
 {
     this.aOpModRegByte[this.getIPByte()].call(this, X86.fnANDb);
 };
@@ -491,7 +491,7 @@ X86.opANDrb = function ANDrb()
  *
  * @this {X86CPU}
  */
-X86.opANDrw = function ANDrw()
+X86.opANDrw = function()
 {
     this.aOpModRegWord[this.getIPByte()].call(this, X86.fnANDw);
 };
@@ -501,7 +501,7 @@ X86.opANDrw = function ANDrw()
  *
  * @this {X86CPU}
  */
-X86.opANDAL = function ANDAL()
+X86.opANDAL = function()
 {
     this.regEAX = (this.regEAX & ~0xff) | X86.fnANDb.call(this, this.regEAX & 0xff, this.getIPByte());
     if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMem0;
@@ -513,7 +513,7 @@ X86.opANDAL = function ANDAL()
  *
  * @this {X86CPU}
  */
-X86.opANDAX = function ANDAX()
+X86.opANDAX = function()
 {
     this.regEAX = (this.regEAX & ~this.maskData) | X86.fnANDw.call(this, this.regEAX & this.maskData, this.getIPWord());
     if (BACKTRACK) {
@@ -527,7 +527,7 @@ X86.opANDAX = function ANDAX()
  *
  * @this {X86CPU}
  */
-X86.opES = function ES()
+X86.opES = function()
 {
     /*
      * NOTE: The fact that we're setting NOINTR along with SEG is really just for documentation purposes;
@@ -543,7 +543,7 @@ X86.opES = function ES()
  *
  * @this {X86CPU}
  */
-X86.opDAA = function DAA()
+X86.opDAA = function()
 {
     var AL = this.regEAX & 0xff;
     var AF = this.getAF();
@@ -569,7 +569,7 @@ X86.opDAA = function DAA()
  *
  * @this {X86CPU}
  */
-X86.opSUBmb = function SUBmb()
+X86.opSUBmb = function()
 {
     this.aOpModMemByte[this.getIPByte()].call(this, X86.fnSUBb);
 };
@@ -579,7 +579,7 @@ X86.opSUBmb = function SUBmb()
  *
  * @this {X86CPU}
  */
-X86.opSUBmw = function SUBmw()
+X86.opSUBmw = function()
 {
     this.aOpModMemWord[this.getIPByte()].call(this, X86.fnSUBw);
 };
@@ -589,7 +589,7 @@ X86.opSUBmw = function SUBmw()
  *
  * @this {X86CPU}
  */
-X86.opSUBrb = function SUBrb()
+X86.opSUBrb = function()
 {
     this.aOpModRegByte[this.getIPByte()].call(this, X86.fnSUBb);
 };
@@ -599,7 +599,7 @@ X86.opSUBrb = function SUBrb()
  *
  * @this {X86CPU}
  */
-X86.opSUBrw = function SUBrw()
+X86.opSUBrw = function()
 {
     this.aOpModRegWord[this.getIPByte()].call(this, X86.fnSUBw);
 };
@@ -609,7 +609,7 @@ X86.opSUBrw = function SUBrw()
  *
  * @this {X86CPU}
  */
-X86.opSUBALb = function SUBALb()
+X86.opSUBALb = function()
 {
     this.regEAX = (this.regEAX & ~0xff) | X86.fnSUBb.call(this, this.regEAX & 0xff, this.getIPByte());
     if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMem0;
@@ -621,7 +621,7 @@ X86.opSUBALb = function SUBALb()
  *
  * @this {X86CPU}
  */
-X86.opSUBAX = function SUBAX()
+X86.opSUBAX = function()
 {
     this.regEAX = (this.regEAX & ~this.maskData) | X86.fnSUBw.call(this, this.regEAX & this.maskData, this.getIPWord());
     if (BACKTRACK) {
@@ -635,7 +635,7 @@ X86.opSUBAX = function SUBAX()
  *
  * @this {X86CPU}
  */
-X86.opCS = function CS()
+X86.opCS = function()
 {
     /*
      * NOTE: The fact that we're setting NOINTR along with SEG is really just for documentation purposes;
@@ -651,7 +651,7 @@ X86.opCS = function CS()
  *
  * @this {X86CPU}
  */
-X86.opDAS = function DAS()
+X86.opDAS = function()
 {
     var AL = this.regEAX & 0xff;
     var AF = this.getAF();
@@ -677,7 +677,7 @@ X86.opDAS = function DAS()
  *
  * @this {X86CPU}
  */
-X86.opXORmb = function XORmb()
+X86.opXORmb = function()
 {
     this.aOpModMemByte[this.getIPByte()].call(this, X86.fnXORb);
 };
@@ -687,7 +687,7 @@ X86.opXORmb = function XORmb()
  *
  * @this {X86CPU}
  */
-X86.opXORmw = function XORmw()
+X86.opXORmw = function()
 {
     this.aOpModMemWord[this.getIPByte()].call(this, X86.fnXORw);
 };
@@ -697,7 +697,7 @@ X86.opXORmw = function XORmw()
  *
  * @this {X86CPU}
  */
-X86.opXORrb = function XORrb()
+X86.opXORrb = function()
 {
     this.aOpModRegByte[this.getIPByte()].call(this, X86.fnXORb);
 };
@@ -707,7 +707,7 @@ X86.opXORrb = function XORrb()
  *
  * @this {X86CPU}
  */
-X86.opXORrw = function XORrw()
+X86.opXORrw = function()
 {
     this.aOpModRegWord[this.getIPByte()].call(this, X86.fnXORw);
 };
@@ -717,7 +717,7 @@ X86.opXORrw = function XORrw()
  *
  * @this {X86CPU}
  */
-X86.opXORALb = function XORALb()
+X86.opXORALb = function()
 {
     this.regEAX = (this.regEAX & ~0xff) | X86.fnXORb.call(this, this.regEAX & 0xff, this.getIPByte());
     if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMem0;
@@ -729,7 +729,7 @@ X86.opXORALb = function XORALb()
  *
  * @this {X86CPU}
  */
-X86.opXORAX = function XORAX()
+X86.opXORAX = function()
 {
     this.regEAX = (this.regEAX & ~this.maskData) | X86.fnXORw.call(this, this.regEAX & this.maskData, this.getIPWord());
     if (BACKTRACK) {
@@ -743,7 +743,7 @@ X86.opXORAX = function XORAX()
  *
  * @this {X86CPU}
  */
-X86.opSS = function SS()
+X86.opSS = function()
 {
     /*
      * NOTE: The fact that we're setting NOINTR along with SEG is really just for documentation purposes;
@@ -759,7 +759,7 @@ X86.opSS = function SS()
  *
  * @this {X86CPU}
  */
-X86.opAAA = function AAA()
+X86.opAAA = function()
 {
     var CF, AF;
     var AL = this.regEAX & 0xff;
@@ -782,7 +782,7 @@ X86.opAAA = function AAA()
  *
  * @this {X86CPU}
  */
-X86.opCMPmb = function CMPmb()
+X86.opCMPmb = function()
 {
     this.aOpModMemByte[this.getIPByte()].call(this, X86.fnCMPb);
 };
@@ -792,7 +792,7 @@ X86.opCMPmb = function CMPmb()
  *
  * @this {X86CPU}
  */
-X86.opCMPmw = function CMPmw()
+X86.opCMPmw = function()
 {
     this.aOpModMemWord[this.getIPByte()].call(this, X86.fnCMPw);
 };
@@ -802,7 +802,7 @@ X86.opCMPmw = function CMPmw()
  *
  * @this {X86CPU}
  */
-X86.opCMPrb = function CMPrb()
+X86.opCMPrb = function()
 {
     this.aOpModRegByte[this.getIPByte()].call(this, X86.fnCMPb);
 };
@@ -812,7 +812,7 @@ X86.opCMPrb = function CMPrb()
  *
  * @this {X86CPU}
  */
-X86.opCMPrw = function CMPrw()
+X86.opCMPrw = function()
 {
     this.aOpModRegWord[this.getIPByte()].call(this, X86.fnCMPw);
 };
@@ -822,7 +822,7 @@ X86.opCMPrw = function CMPrw()
  *
  * @this {X86CPU}
  */
-X86.opCMPALb = function CMPALb()
+X86.opCMPALb = function()
 {
     X86.fnCMPb.call(this, this.regEAX & 0xff, this.getIPByte());
     this.nStepCycles--;         // in the absence of any EA calculations, we need deduct only one more cycle
@@ -833,7 +833,7 @@ X86.opCMPALb = function CMPALb()
  *
  * @this {X86CPU}
  */
-X86.opCMPAX = function CMPAX()
+X86.opCMPAX = function()
 {
     X86.fnCMPw.call(this, this.regEAX & this.maskData, this.getIPWord());
     this.nStepCycles--;         // in the absence of any EA calculations, we need deduct only one more cycle
@@ -844,7 +844,7 @@ X86.opCMPAX = function CMPAX()
  *
  * @this {X86CPU}
  */
-X86.opDS = function DS()
+X86.opDS = function()
 {
     /*
      * NOTE: The fact that we're setting NOINTR along with SEG is really just for documentation purposes;
@@ -860,7 +860,7 @@ X86.opDS = function DS()
  *
  * @this {X86CPU}
  */
-X86.opAAS = function AAS()
+X86.opAAS = function()
 {
     var CF, AF;
     var AL = this.regEAX & 0xff;
@@ -883,7 +883,7 @@ X86.opAAS = function AAS()
  *
  * @this {X86CPU}
  */
-X86.opINCAX = function INCAX()
+X86.opINCAX = function()
 {
     this.regEAX = X86.fnINCr.call(this, this.regEAX);
 };
@@ -893,7 +893,7 @@ X86.opINCAX = function INCAX()
  *
  * @this {X86CPU}
  */
-X86.opINCCX = function INCCX()
+X86.opINCCX = function()
 {
     this.regECX = X86.fnINCr.call(this, this.regECX);
 };
@@ -903,7 +903,7 @@ X86.opINCCX = function INCCX()
  *
  * @this {X86CPU}
  */
-X86.opINCDX = function INCDX()
+X86.opINCDX = function()
 {
     this.regEDX = X86.fnINCr.call(this, this.regEDX);
 };
@@ -913,7 +913,7 @@ X86.opINCDX = function INCDX()
  *
  * @this {X86CPU}
  */
-X86.opINCBX = function INCBX()
+X86.opINCBX = function()
 {
     this.regEBX = X86.fnINCr.call(this, this.regEBX);
 };
@@ -923,7 +923,7 @@ X86.opINCBX = function INCBX()
  *
  * @this {X86CPU}
  */
-X86.opINCSP = function INCSP()
+X86.opINCSP = function()
 {
     this.setSP(X86.fnINCr.call(this, this.getSP()));
 };
@@ -933,7 +933,7 @@ X86.opINCSP = function INCSP()
  *
  * @this {X86CPU}
  */
-X86.opINCBP = function INCBP()
+X86.opINCBP = function()
 {
     this.regEBP = X86.fnINCr.call(this, this.regEBP);
 };
@@ -943,7 +943,7 @@ X86.opINCBP = function INCBP()
  *
  * @this {X86CPU}
  */
-X86.opINCSI = function INCSI()
+X86.opINCSI = function()
 {
     this.regESI = X86.fnINCr.call(this, this.regESI);
 };
@@ -953,7 +953,7 @@ X86.opINCSI = function INCSI()
  *
  * @this {X86CPU}
  */
-X86.opINCDI = function INCDI()
+X86.opINCDI = function()
 {
     this.regEDI = X86.fnINCr.call(this, this.regEDI);
 };
@@ -963,7 +963,7 @@ X86.opINCDI = function INCDI()
  *
  * @this {X86CPU}
  */
-X86.opDECAX = function DECAX()
+X86.opDECAX = function()
 {
     this.regEAX = X86.fnDECr.call(this, this.regEAX);
 };
@@ -973,7 +973,7 @@ X86.opDECAX = function DECAX()
  *
  * @this {X86CPU}
  */
-X86.opDECCX = function DECCX()
+X86.opDECCX = function()
 {
     this.regECX = X86.fnDECr.call(this, this.regECX);
 };
@@ -983,7 +983,7 @@ X86.opDECCX = function DECCX()
  *
  * @this {X86CPU}
  */
-X86.opDECDX = function DECDX()
+X86.opDECDX = function()
 {
     this.regEDX = X86.fnDECr.call(this, this.regEDX);
 };
@@ -993,7 +993,7 @@ X86.opDECDX = function DECDX()
  *
  * @this {X86CPU}
  */
-X86.opDECBX = function DECBX()
+X86.opDECBX = function()
 {
     this.regEBX = X86.fnDECr.call(this, this.regEBX);
 };
@@ -1003,7 +1003,7 @@ X86.opDECBX = function DECBX()
  *
  * @this {X86CPU}
  */
-X86.opDECSP = function DECSP()
+X86.opDECSP = function()
 {
     this.setSP(X86.fnDECr.call(this, this.getSP()));
 };
@@ -1013,7 +1013,7 @@ X86.opDECSP = function DECSP()
  *
  * @this {X86CPU}
  */
-X86.opDECBP = function DECBP()
+X86.opDECBP = function()
 {
     this.regEBP = X86.fnDECr.call(this, this.regEBP);
 };
@@ -1023,7 +1023,7 @@ X86.opDECBP = function DECBP()
  *
  * @this {X86CPU}
  */
-X86.opDECSI = function DECSI()
+X86.opDECSI = function()
 {
     this.regESI = X86.fnDECr.call(this, this.regESI);
 };
@@ -1033,7 +1033,7 @@ X86.opDECSI = function DECSI()
  *
  * @this {X86CPU}
  */
-X86.opDECDI = function DECDI()
+X86.opDECDI = function()
 {
     this.regEDI = X86.fnDECr.call(this, this.regEDI);
 };
@@ -1043,7 +1043,7 @@ X86.opDECDI = function DECDI()
  *
  * @this {X86CPU}
  */
-X86.opPUSHAX = function PUSHAX()
+X86.opPUSHAX = function()
 {
     if (BACKTRACK) {
         this.backTrack.btiMem0 = this.backTrack.btiAL; this.backTrack.btiMem1 = this.backTrack.btiAH;
@@ -1057,7 +1057,7 @@ X86.opPUSHAX = function PUSHAX()
  *
  * @this {X86CPU}
  */
-X86.opPUSHCX = function PUSHCX()
+X86.opPUSHCX = function()
 {
     if (BACKTRACK) {
         this.backTrack.btiMem0 = this.backTrack.btiCL; this.backTrack.btiMem1 = this.backTrack.btiCH;
@@ -1071,7 +1071,7 @@ X86.opPUSHCX = function PUSHCX()
  *
  * @this {X86CPU}
  */
-X86.opPUSHDX = function PUSHDX()
+X86.opPUSHDX = function()
 {
     if (BACKTRACK) {
         this.backTrack.btiMem0 = this.backTrack.btiDL; this.backTrack.btiMem1 = this.backTrack.btiDH;
@@ -1085,7 +1085,7 @@ X86.opPUSHDX = function PUSHDX()
  *
  * @this {X86CPU}
  */
-X86.opPUSHBX = function PUSHBX()
+X86.opPUSHBX = function()
 {
     if (BACKTRACK) {
         this.backTrack.btiMem0 = this.backTrack.btiBL; this.backTrack.btiMem1 = this.backTrack.btiBH;
@@ -1099,7 +1099,7 @@ X86.opPUSHBX = function PUSHBX()
  *
  * @this {X86CPU}
  */
-X86.opPUSHSP_8086 = function PUSHSP_8086()
+X86.opPUSHSP_8086 = function()
 {
     var w = (this.getSP() - 2) & 0xffff;
     this.pushWord(w);
@@ -1111,7 +1111,7 @@ X86.opPUSHSP_8086 = function PUSHSP_8086()
  *
  * @this {X86CPU}
  */
-X86.opPUSHSP = function PUSHSP()
+X86.opPUSHSP = function()
 {
     this.pushWord(this.getSP() & this.maskData);
     this.nStepCycles -= this.cycleCounts.nOpCyclesPushReg;
@@ -1122,7 +1122,7 @@ X86.opPUSHSP = function PUSHSP()
  *
  * @this {X86CPU}
  */
-X86.opPUSHBP = function PUSHBP()
+X86.opPUSHBP = function()
 {
     if (BACKTRACK) {
         this.backTrack.btiMem0 = this.backTrack.btiBPLo; this.backTrack.btiMem1 = this.backTrack.btiBPHi;
@@ -1136,7 +1136,7 @@ X86.opPUSHBP = function PUSHBP()
  *
  * @this {X86CPU}
  */
-X86.opPUSHSI = function PUSHSI()
+X86.opPUSHSI = function()
 {
     if (BACKTRACK) {
         this.backTrack.btiMem0 = this.backTrack.btiSILo; this.backTrack.btiMem1 = this.backTrack.btiSIHi;
@@ -1150,7 +1150,7 @@ X86.opPUSHSI = function PUSHSI()
  *
  * @this {X86CPU}
  */
-X86.opPUSHDI = function PUSHDI()
+X86.opPUSHDI = function()
 {
     if (BACKTRACK) {
         this.backTrack.btiMem0 = this.backTrack.btiDILo; this.backTrack.btiMem1 = this.backTrack.btiDIHi;
@@ -1164,7 +1164,7 @@ X86.opPUSHDI = function PUSHDI()
  *
  * @this {X86CPU}
  */
-X86.opPOPAX = function POPAX()
+X86.opPOPAX = function()
 {
     this.regEAX = (this.regEAX & ~this.maskData) | this.popWord();
     if (BACKTRACK) {
@@ -1178,7 +1178,7 @@ X86.opPOPAX = function POPAX()
  *
  * @this {X86CPU}
  */
-X86.opPOPCX = function POPCX()
+X86.opPOPCX = function()
 {
     this.regECX = (this.regECX & ~this.maskData) | this.popWord();
     if (BACKTRACK) {
@@ -1192,7 +1192,7 @@ X86.opPOPCX = function POPCX()
  *
  * @this {X86CPU}
  */
-X86.opPOPDX = function POPDX()
+X86.opPOPDX = function()
 {
     this.regEDX = (this.regEDX & ~this.maskData) | this.popWord();
     if (BACKTRACK) {
@@ -1206,7 +1206,7 @@ X86.opPOPDX = function POPDX()
  *
  * @this {X86CPU}
  */
-X86.opPOPBX = function POPBX()
+X86.opPOPBX = function()
 {
     this.regEBX = (this.regEBX & ~this.maskData) | this.popWord();
     if (BACKTRACK) {
@@ -1220,7 +1220,7 @@ X86.opPOPBX = function POPBX()
  *
  * @this {X86CPU}
  */
-X86.opPOPSP = function POPSP()
+X86.opPOPSP = function()
 {
     this.setSP((this.getSP() & ~this.maskData) | this.popWord());
     this.nStepCycles -= this.cycleCounts.nOpCyclesPopReg;
@@ -1231,7 +1231,7 @@ X86.opPOPSP = function POPSP()
  *
  * @this {X86CPU}
  */
-X86.opPOPBP = function POPBP()
+X86.opPOPBP = function()
 {
     this.regEBP = (this.regEBP & ~this.maskData) | this.popWord();
     if (BACKTRACK) {
@@ -1245,7 +1245,7 @@ X86.opPOPBP = function POPBP()
  *
  * @this {X86CPU}
  */
-X86.opPOPSI = function POPSI()
+X86.opPOPSI = function()
 {
     this.regESI = (this.regESI & ~this.maskData) | this.popWord();
     if (BACKTRACK) {
@@ -1259,7 +1259,7 @@ X86.opPOPSI = function POPSI()
  *
  * @this {X86CPU}
  */
-X86.opPOPDI = function POPDI()
+X86.opPOPDI = function()
 {
     this.regEDI = (this.regEDI & ~this.maskData) | this.popWord();
     if (BACKTRACK) {
@@ -1273,7 +1273,7 @@ X86.opPOPDI = function POPDI()
  *
  * @this {X86CPU}
  */
-X86.opPUSHA = function PUSHA()
+X86.opPUSHA = function()
 {
     /*
      * Any operation that performs multiple stack modifications must snapshot regLSP first.
@@ -1323,7 +1323,7 @@ X86.opPUSHA = function PUSHA()
  *
  * @this {X86CPU}
  */
-X86.opPOPA = function POPA()
+X86.opPOPA = function()
 {
     /*
      * Any operation that performs multiple stack modifications must snapshot regLSP first.
@@ -1373,7 +1373,7 @@ X86.opPOPA = function POPA()
  *
  * @this {X86CPU}
  */
-X86.opBOUND = function BOUND()
+X86.opBOUND = function()
 {
     this.aOpModRegWord[this.getIPByte()].call(this, X86.fnBOUND);
 };
@@ -1383,7 +1383,7 @@ X86.opBOUND = function BOUND()
  *
  * @this {X86CPU}
  */
-X86.opARPL = function ARPL()
+X86.opARPL = function()
 {
     /*
      * ARPL is one of several protected-mode instructions that are meaningless and not allowed in either real-mode
@@ -1418,7 +1418,7 @@ X86.opARPL = function ARPL()
  *
  * @this {X86CPU}
  */
-X86.opFS = function FS()
+X86.opFS = function()
 {
     /*
      * NOTE: The fact that we're setting NOINTR along with SEG is really just for documentation purposes;
@@ -1434,7 +1434,7 @@ X86.opFS = function FS()
  *
  * @this {X86CPU}
  */
-X86.opGS = function GS()
+X86.opGS = function()
 {
     /*
      * NOTE: The fact that we're setting NOINTR along with SEG is really just for documentation purposes;
@@ -1452,7 +1452,7 @@ X86.opGS = function GS()
  *
  * @this {X86CPU}
  */
-X86.opOS = function OS()
+X86.opOS = function()
 {
     if (I386) {
         /*
@@ -1478,7 +1478,7 @@ X86.opOS = function OS()
  *
  * @this {X86CPU}
  */
-X86.opAS = function AS()
+X86.opAS = function()
 {
     if (I386) {
         /*
@@ -1515,7 +1515,7 @@ X86.opAS = function AS()
  *
  * @this {X86CPU}
  */
-X86.opPUSHn = function PUSHn()
+X86.opPUSHn = function()
 {
     this.pushWord(this.getIPWord());
     this.nStepCycles -= this.cycleCounts.nOpCyclesPushReg;
@@ -1526,7 +1526,7 @@ X86.opPUSHn = function PUSHn()
  *
  * @this {X86CPU}
  */
-X86.opIMULn = function IMULn()
+X86.opIMULn = function()
 {
     this.aOpModRegWord[this.getIPByte()].call(this, X86.fnIMULn);
 };
@@ -1536,7 +1536,7 @@ X86.opIMULn = function IMULn()
  *
  * @this {X86CPU}
  */
-X86.opPUSH8 = function PUSH8()
+X86.opPUSH8 = function()
 {
     if (BACKTRACK) this.backTrack.btiMem1 = 0;
     this.pushWord(this.getIPDisp());
@@ -1548,7 +1548,7 @@ X86.opPUSH8 = function PUSH8()
  *
  * @this {X86CPU}
  */
-X86.opIMUL8 = function IMUL8()
+X86.opIMUL8 = function()
 {
     this.aOpModRegWord[this.getIPByte()].call(this, X86.fnIMUL8);
 };
@@ -1560,7 +1560,7 @@ X86.opIMUL8 = function IMUL8()
  *
  * @this {X86CPU}
  */
-X86.opINSb = function INSb()
+X86.opINSb = function()
 {
     var nReps = 1;
     var nDelta = 0;
@@ -1611,7 +1611,7 @@ X86.opINSb = function INSb()
  *
  * @this {X86CPU}
  */
-X86.opINSw = function INSw()
+X86.opINSw = function()
 {
     var nReps = 1;
     var nDelta = 0;
@@ -1664,7 +1664,7 @@ X86.opINSw = function INSw()
  *
  * @this {X86CPU}
  */
-X86.opOUTSb = function OUTSb()
+X86.opOUTSb = function()
 {
     var nReps = 1;
     var nDelta = 0;
@@ -1713,7 +1713,7 @@ X86.opOUTSb = function OUTSb()
  *
  * @this {X86CPU}
  */
-X86.opOUTSw = function OUTSw()
+X86.opOUTSw = function()
 {
     var nReps = 1;
     var nDelta = 0;
@@ -1763,7 +1763,7 @@ X86.opOUTSw = function OUTSw()
  *
  * @this {X86CPU}
  */
-X86.opJO = function JO()
+X86.opJO = function()
 {
     var disp = this.getIPDisp();
     if (this.getOF()) {
@@ -1779,7 +1779,7 @@ X86.opJO = function JO()
  *
  * @this {X86CPU}
  */
-X86.opJNO = function JNO()
+X86.opJNO = function()
 {
     var disp = this.getIPDisp();
     if (!this.getOF()) {
@@ -1795,7 +1795,7 @@ X86.opJNO = function JNO()
  *
  * @this {X86CPU}
  */
-X86.opJC = function JC()
+X86.opJC = function()
 {
     var disp = this.getIPDisp();
     if (this.getCF()) {
@@ -1811,7 +1811,7 @@ X86.opJC = function JC()
  *
  * @this {X86CPU}
  */
-X86.opJNC = function JNC()
+X86.opJNC = function()
 {
     var disp = this.getIPDisp();
     if (!this.getCF()) {
@@ -1827,7 +1827,7 @@ X86.opJNC = function JNC()
  *
  * @this {X86CPU}
  */
-X86.opJZ = function JZ()
+X86.opJZ = function()
 {
     var disp = this.getIPDisp();
     if (this.getZF()) {
@@ -1843,7 +1843,7 @@ X86.opJZ = function JZ()
  *
  * @this {X86CPU}
  */
-X86.opJNZ = function JNZ()
+X86.opJNZ = function()
 {
     var disp = this.getIPDisp();
     if (!this.getZF()) {
@@ -1859,7 +1859,7 @@ X86.opJNZ = function JNZ()
  *
  * @this {X86CPU}
  */
-X86.opJBE = function JBE()
+X86.opJBE = function()
 {
     var disp = this.getIPDisp();
     if (this.getCF() || this.getZF()) {
@@ -1875,7 +1875,7 @@ X86.opJBE = function JBE()
  *
  * @this {X86CPU}
  */
-X86.opJNBE = function JNBE()
+X86.opJNBE = function()
 {
     var disp = this.getIPDisp();
     if (!this.getCF() && !this.getZF()) {
@@ -1891,7 +1891,7 @@ X86.opJNBE = function JNBE()
  *
  * @this {X86CPU}
  */
-X86.opJS = function JS()
+X86.opJS = function()
 {
     var disp = this.getIPDisp();
     if (this.getSF()) {
@@ -1907,7 +1907,7 @@ X86.opJS = function JS()
  *
  * @this {X86CPU}
  */
-X86.opJNS = function JNS()
+X86.opJNS = function()
 {
     var disp = this.getIPDisp();
     if (!this.getSF()) {
@@ -1923,7 +1923,7 @@ X86.opJNS = function JNS()
  *
  * @this {X86CPU}
  */
-X86.opJP = function JP()
+X86.opJP = function()
 {
     var disp = this.getIPDisp();
     if (this.getPF()) {
@@ -1939,7 +1939,7 @@ X86.opJP = function JP()
  *
  * @this {X86CPU}
  */
-X86.opJNP = function JNP()
+X86.opJNP = function()
 {
     var disp = this.getIPDisp();
     if (!this.getPF()) {
@@ -1955,7 +1955,7 @@ X86.opJNP = function JNP()
  *
  * @this {X86CPU}
  */
-X86.opJL = function JL()
+X86.opJL = function()
 {
     var disp = this.getIPDisp();
     if (!this.getSF() != !this.getOF()) {
@@ -1971,7 +1971,7 @@ X86.opJL = function JL()
  *
  * @this {X86CPU}
  */
-X86.opJNL = function JNL()
+X86.opJNL = function()
 {
     var disp = this.getIPDisp();
     if (!this.getSF() == !this.getOF()) {
@@ -1987,7 +1987,7 @@ X86.opJNL = function JNL()
  *
  * @this {X86CPU}
  */
-X86.opJLE = function JLE()
+X86.opJLE = function()
 {
     var disp = this.getIPDisp();
     if (this.getZF() || !this.getSF() != !this.getOF()) {
@@ -2003,7 +2003,7 @@ X86.opJLE = function JLE()
  *
  * @this {X86CPU}
  */
-X86.opJNLE = function JNLE()
+X86.opJNLE = function()
 {
     var disp = this.getIPDisp();
     if (!this.getZF() && !this.getSF() == !this.getOF()) {
@@ -2019,7 +2019,7 @@ X86.opJNLE = function JNLE()
  *
  * @this {X86CPU}
  */
-X86.opGRP1b = function GRP1b()
+X86.opGRP1b = function()
 {
     this.aOpModGrpByte[this.getIPByte()].call(this, X86.aOpGrp1b, this.getIPByte);
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? 1 : this.cycleCounts.nOpCyclesArithMID);
@@ -2030,7 +2030,7 @@ X86.opGRP1b = function GRP1b()
  *
  * @this {X86CPU}
  */
-X86.opGRP1w = function GRP1w()
+X86.opGRP1w = function()
 {
     this.aOpModGrpWord[this.getIPByte()].call(this, X86.aOpGrp1w, this.getIPWord);
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? 1 : this.cycleCounts.nOpCyclesArithMID);
@@ -2045,7 +2045,7 @@ X86.opGRP1w = function GRP1w()
  *
  * @this {X86CPU}
  */
-X86.opGRP1sw = function GRP1sw()
+X86.opGRP1sw = function()
 {
     this.aOpModGrpWord[this.getIPByte()].call(this, X86.aOpGrp1w, this.getIPDisp);
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? 1 : this.cycleCounts.nOpCyclesArithMID);
@@ -2056,7 +2056,7 @@ X86.opGRP1sw = function GRP1sw()
  *
  * @this {X86CPU}
  */
-X86.opTESTrb = function TESTrb()
+X86.opTESTrb = function()
 {
     this.aOpModMemByte[this.getIPByte()].call(this, X86.fnTESTb);
 };
@@ -2066,7 +2066,7 @@ X86.opTESTrb = function TESTrb()
  *
  * @this {X86CPU}
  */
-X86.opTESTrw = function TESTrw()
+X86.opTESTrw = function()
 {
     this.aOpModMemWord[this.getIPByte()].call(this, X86.fnTESTw);
 };
@@ -2079,7 +2079,7 @@ X86.opTESTrw = function TESTrw()
  *
  * @this {X86CPU}
  */
-X86.opXCHGrb = function XCHGrb()
+X86.opXCHGrb = function()
 {
     /*
      * If the second operand is a register, then the ModRegByte decoder must use separate "get" and
@@ -2112,7 +2112,7 @@ X86.opXCHGrb = function XCHGrb()
  *
  * @this {X86CPU}
  */
-X86.opXCHGrw = function XCHGrw()
+X86.opXCHGrw = function()
 {
     this.aOpModRegWord[this.bModRM = this.getIPByte()].call(this, X86.fnXCHGrw);
 };
@@ -2122,7 +2122,7 @@ X86.opXCHGrw = function XCHGrw()
  *
  * @this {X86CPU}
  */
-X86.opMOVmb = function MOVmb()
+X86.opMOVmb = function()
 {
     /*
      * Like other MOV operations, the destination does not need to be read, just written.
@@ -2136,7 +2136,7 @@ X86.opMOVmb = function MOVmb()
  *
  * @this {X86CPU}
  */
-X86.opMOVmw = function MOVmw()
+X86.opMOVmw = function()
 {
     /*
      * Like other MOV operations, the destination does not need to be read, just written.
@@ -2150,7 +2150,7 @@ X86.opMOVmw = function MOVmw()
  *
  * @this {X86CPU}
  */
-X86.opMOVrb = function MOVrb()
+X86.opMOVrb = function()
 {
     this.aOpModRegByte[this.getIPByte()].call(this, X86.fnMOV);
 };
@@ -2160,7 +2160,7 @@ X86.opMOVrb = function MOVrb()
  *
  * @this {X86CPU}
  */
-X86.opMOVrw = function MOVrw()
+X86.opMOVrw = function()
 {
     this.aOpModRegWord[this.getIPByte()].call(this, X86.fnMOV);
 };
@@ -2174,7 +2174,7 @@ X86.opMOVrw = function MOVrw()
  *
  * @this {X86CPU}
  */
-X86.opMOVwsr = function MOVwsr()
+X86.opMOVwsr = function()
 {
     var bModRM = this.getIPByte();
     var reg = (bModRM & 0x38) >> 3;
@@ -2220,7 +2220,7 @@ X86.opMOVwsr = function MOVwsr()
  *
  * @this {X86CPU}
  */
-X86.opLEA = function LEA()
+X86.opLEA = function()
 {
     this.opFlags |= X86.OPFLAG.NOREAD;
     this.segData = this.segStack = this.segNULL;    // we can't have the EA calculation, if any, "polluted" by segment arithmetic
@@ -2236,7 +2236,7 @@ X86.opLEA = function LEA()
  *
  * @this {X86CPU}
  */
-X86.opMOVsrw = function MOVsrw()
+X86.opMOVsrw = function()
 {
     var temp, sel;
     var bModRM = this.getIPByte();
@@ -2335,7 +2335,7 @@ X86.opMOVsrw = function MOVsrw()
  *
  * @this {X86CPU}
  */
-X86.opPOPmw = function POPmw()
+X86.opPOPmw = function()
 {
     /*
      * Like other MOV operations, the destination does not need to be read, just written.
@@ -2374,7 +2374,7 @@ X86.opPOPmw = function POPmw()
  *
  * @this {X86CPU}
  */
-X86.opNOP = function NOP()
+X86.opNOP = function()
 {
     this.nStepCycles -= 3;                          // this form of XCHG takes 3 cycles on all CPUs
 };
@@ -2384,7 +2384,7 @@ X86.opNOP = function NOP()
  *
  * @this {X86CPU}
  */
-X86.opXCHGCX = function XCHGCX()
+X86.opXCHGCX = function()
 {
     var temp = this.regEAX;
     this.regEAX = (I386? (this.regEAX & ~this.maskData) | (this.regECX & this.maskData) : this.regECX);
@@ -2401,7 +2401,7 @@ X86.opXCHGCX = function XCHGCX()
  *
  * @this {X86CPU}
  */
-X86.opXCHGDX = function XCHGDX()
+X86.opXCHGDX = function()
 {
     var temp = this.regEAX;
     this.regEAX = (I386? (this.regEAX & ~this.maskData) | (this.regEDX & this.maskData) : this.regEDX);
@@ -2418,7 +2418,7 @@ X86.opXCHGDX = function XCHGDX()
  *
  * @this {X86CPU}
  */
-X86.opXCHGBX = function XCHGBX()
+X86.opXCHGBX = function()
 {
     var temp = this.regEAX;
     this.regEAX = (I386? (this.regEAX & ~this.maskData) | (this.regEBX & this.maskData) : this.regEBX);
@@ -2435,7 +2435,7 @@ X86.opXCHGBX = function XCHGBX()
  *
  * @this {X86CPU}
  */
-X86.opXCHGSP = function XCHGSP()
+X86.opXCHGSP = function()
 {
     var temp = this.regEAX;
     var regESP = this.getSP();
@@ -2450,7 +2450,7 @@ X86.opXCHGSP = function XCHGSP()
  *
  * @this {X86CPU}
  */
-X86.opXCHGBP = function XCHGBP()
+X86.opXCHGBP = function()
 {
     var temp = this.regEAX;
     this.regEAX = (I386? (this.regEAX & ~this.maskData) | (this.regEBP & this.maskData) : this.regEBP);
@@ -2467,7 +2467,7 @@ X86.opXCHGBP = function XCHGBP()
  *
  * @this {X86CPU}
  */
-X86.opXCHGSI = function XCHGSI()
+X86.opXCHGSI = function()
 {
     var temp = this.regEAX;
     this.regEAX = (I386? (this.regEAX & ~this.maskData) | (this.regESI & this.maskData) : this.regESI);
@@ -2484,7 +2484,7 @@ X86.opXCHGSI = function XCHGSI()
  *
  * @this {X86CPU}
  */
-X86.opXCHGDI = function XCHGDI()
+X86.opXCHGDI = function()
 {
     var temp = this.regEAX;
     this.regEAX = (I386? (this.regEAX & ~this.maskData) | (this.regEDI & this.maskData) : this.regEDI);
@@ -2504,7 +2504,7 @@ X86.opXCHGDI = function XCHGDI()
  *
  * @this {X86CPU}
  */
-X86.opCBW = function CBW()
+X86.opCBW = function()
 {
     if (this.sizeData == 2) {   // CBW
         this.regEAX = (this.regEAX & ~0xffff) | (((this.regEAX << 24) >> 24) & 0xffff);
@@ -2524,7 +2524,7 @@ X86.opCBW = function CBW()
  *
  * @this {X86CPU}
  */
-X86.opCWD = function CWD()
+X86.opCWD = function()
 {
     if (this.sizeData == 2) {   // CWD
         this.regEDX = (this.regEDX & ~0xffff) | ((this.regEAX & 0x8000)? 0xffff : 0);
@@ -2541,7 +2541,7 @@ X86.opCWD = function CWD()
  *
  * @this {X86CPU}
  */
-X86.opCALLF = function CALLF()
+X86.opCALLF = function()
 {
     X86.fnCALLF.call(this, this.getIPWord(), this.getIPShort());
     this.nStepCycles -= this.cycleCounts.nOpCyclesCallF;
@@ -2552,7 +2552,7 @@ X86.opCALLF = function CALLF()
  *
  * @this {X86CPU}
  */
-X86.opWAIT = function WAIT()
+X86.opWAIT = function()
 {
     this.printMessage("WAIT not implemented");
     this.nStepCycles--;
@@ -2563,7 +2563,7 @@ X86.opWAIT = function WAIT()
  *
  * @this {X86CPU}
  */
-X86.opPUSHF = function PUSHF()
+X86.opPUSHF = function()
 {
     /*
      * TODO: Consider swapping out this function whenever setProtMode() changes the mode to V86-mode.
@@ -2600,7 +2600,7 @@ X86.opPUSHF = function PUSHF()
  *
  * @this {X86CPU}
  */
-X86.opPOPF = function POPF()
+X86.opPOPF = function()
 {
     /*
      * TODO: Consider swapping out this function whenever setProtMode() changes the mode to V86-mode.
@@ -2627,7 +2627,7 @@ X86.opPOPF = function POPF()
  *
  * @this {X86CPU}
  */
-X86.opSAHF = function SAHF()
+X86.opSAHF = function()
 {
     /*
      * NOTE: While it make seem more efficient to do this:
@@ -2653,7 +2653,7 @@ X86.opSAHF = function SAHF()
  *
  * @this {X86CPU}
  */
-X86.opLAHF = function LAHF()
+X86.opLAHF = function()
 {
     this.regEAX = (this.regEAX & ~0xff00) | (this.getPS() & X86.PS_SAHF) << 8;
     this.nStepCycles -= this.cycleCounts.nOpCyclesLAHF;
@@ -2664,7 +2664,7 @@ X86.opLAHF = function LAHF()
  *
  * @this {X86CPU}
  */
-X86.opMOVALm = function MOVALm()
+X86.opMOVALm = function()
 {
     this.regEAX = (this.regEAX & ~0xff) | this.getSOByte(this.segData, this.getIPAddr());
     if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMem0;
@@ -2676,7 +2676,7 @@ X86.opMOVALm = function MOVALm()
  *
  * @this {X86CPU}
  */
-X86.opMOVAXm = function MOVAXm()
+X86.opMOVAXm = function()
 {
     this.regEAX = (this.regEAX & ~this.maskData) | this.getSOWord(this.segData, this.getIPAddr());
     if (BACKTRACK) {
@@ -2690,7 +2690,7 @@ X86.opMOVAXm = function MOVAXm()
  *
  * @this {X86CPU}
  */
-X86.opMOVmAL = function MOVmAL()
+X86.opMOVmAL = function()
 {
     if (BACKTRACK) this.backTrack.btiMem0 = this.backTrack.btiAL;
     /*
@@ -2705,7 +2705,7 @@ X86.opMOVmAL = function MOVmAL()
  *
  * @this {X86CPU}
  */
-X86.opMOVmAX = function MOVmAX()
+X86.opMOVmAX = function()
 {
     if (BACKTRACK) {
         this.backTrack.btiMem0 = this.backTrack.btiAL; this.backTrack.btiMem1 = this.backTrack.btiAH;
@@ -2722,7 +2722,7 @@ X86.opMOVmAX = function MOVmAX()
  *
  * @this {X86CPU}
  */
-X86.opMOVSb = function MOVSb()
+X86.opMOVSb = function()
 {
     var nReps = 1;
     var nDelta = 0;
@@ -2760,7 +2760,7 @@ X86.opMOVSb = function MOVSb()
  *
  * @this {X86CPU}
  */
-X86.opMOVSw = function MOVSw()
+X86.opMOVSw = function()
 {
     var nReps = 1;
     var nDelta = 0;
@@ -2798,7 +2798,7 @@ X86.opMOVSw = function MOVSw()
  *
  * @this {X86CPU}
  */
-X86.opCMPSb = function CMPSb()
+X86.opCMPSb = function()
 {
     var nReps = 1;
     var nDelta = 0;
@@ -2846,7 +2846,7 @@ X86.opCMPSb = function CMPSb()
  *
  * @this {X86CPU}
  */
-X86.opCMPSw = function CMPSw()
+X86.opCMPSw = function()
 {
     var nReps = 1;
     var nDelta = 0;
@@ -2894,7 +2894,7 @@ X86.opCMPSw = function CMPSw()
  *
  * @this {X86CPU}
  */
-X86.opTESTALb = function TESTALb()
+X86.opTESTALb = function()
 {
     this.setLogicResult(this.regEAX & this.getIPByte(), X86.RESULT.BYTE);
     this.nStepCycles -= this.cycleCounts.nOpCyclesAAA;
@@ -2905,7 +2905,7 @@ X86.opTESTALb = function TESTALb()
  *
  * @this {X86CPU}
  */
-X86.opTESTAX = function TESTAX()
+X86.opTESTAX = function()
 {
     this.setLogicResult(this.regEAX & this.getIPWord(), this.typeData);
     this.nStepCycles -= this.cycleCounts.nOpCyclesAAA;
@@ -2918,7 +2918,7 @@ X86.opTESTAX = function TESTAX()
  *
  * @this {X86CPU}
  */
-X86.opSTOSb = function STOSb()
+X86.opSTOSb = function()
 {
     var nReps = 1;
     var nDelta = 0;
@@ -2977,7 +2977,7 @@ X86.opSTOSb = function STOSb()
  *
  * @this {X86CPU}
  */
-X86.opSTOSw = function STOSw()
+X86.opSTOSw = function()
 {
     var nReps = 1;
     var nDelta = 0;
@@ -3016,7 +3016,7 @@ X86.opSTOSw = function STOSw()
  *
  * @this {X86CPU}
  */
-X86.opLODSb = function LODSb()
+X86.opLODSb = function()
 {
     var nReps = 1;
     var nDelta = 0;
@@ -3054,7 +3054,7 @@ X86.opLODSb = function LODSb()
  *
  * @this {X86CPU}
  */
-X86.opLODSw = function LODSw()
+X86.opLODSw = function()
 {
     var nReps = 1;
     var nDelta = 0;
@@ -3094,7 +3094,7 @@ X86.opLODSw = function LODSw()
  *
  * @this {X86CPU}
  */
-X86.opSCASb = function SCASb()
+X86.opSCASb = function()
 {
     var nReps = 1;
     var nDelta = 0;
@@ -3138,7 +3138,7 @@ X86.opSCASb = function SCASb()
  *
  * @this {X86CPU}
  */
-X86.opSCASw = function SCASw()
+X86.opSCASw = function()
 {
     var nReps = 1;
     var nDelta = 0;
@@ -3182,7 +3182,7 @@ X86.opSCASw = function SCASw()
  *
  * @this {X86CPU}
  */
-X86.opMOVALb = function MOVALb()
+X86.opMOVALb = function()
 {
     this.regEAX = (this.regEAX & ~0xff) | this.getIPByte();
     if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMem0;
@@ -3194,7 +3194,7 @@ X86.opMOVALb = function MOVALb()
  *
  * @this {X86CPU}
  */
-X86.opMOVCLb = function MOVCLb()
+X86.opMOVCLb = function()
 {
     this.regECX = (this.regECX & ~0xff) | this.getIPByte();
     if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiMem0;
@@ -3206,7 +3206,7 @@ X86.opMOVCLb = function MOVCLb()
  *
  * @this {X86CPU}
  */
-X86.opMOVDLb = function MOVDLb()
+X86.opMOVDLb = function()
 {
     this.regEDX = (this.regEDX & ~0xff) | this.getIPByte();
     if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiMem0;
@@ -3218,7 +3218,7 @@ X86.opMOVDLb = function MOVDLb()
  *
  * @this {X86CPU}
  */
-X86.opMOVBLb = function MOVBLb()
+X86.opMOVBLb = function()
 {
     this.regEBX = (this.regEBX & ~0xff) | this.getIPByte();
     if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiMem0;
@@ -3230,7 +3230,7 @@ X86.opMOVBLb = function MOVBLb()
  *
  * @this {X86CPU}
  */
-X86.opMOVAHb = function MOVAHb()
+X86.opMOVAHb = function()
 {
     this.regEAX = (this.regEAX & ~0xff00) | (this.getIPByte() << 8);
     if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiMem0;
@@ -3242,7 +3242,7 @@ X86.opMOVAHb = function MOVAHb()
  *
  * @this {X86CPU}
  */
-X86.opMOVCHb = function MOVCHb()
+X86.opMOVCHb = function()
 {
     this.regECX = (this.regECX & ~0xff00) | (this.getIPByte() << 8);
     if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiMem0;
@@ -3254,7 +3254,7 @@ X86.opMOVCHb = function MOVCHb()
  *
  * @this {X86CPU}
  */
-X86.opMOVDHb = function MOVDHb()
+X86.opMOVDHb = function()
 {
     this.regEDX = (this.regEDX & ~0xff00) | (this.getIPByte() << 8);
     if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiMem0;
@@ -3266,7 +3266,7 @@ X86.opMOVDHb = function MOVDHb()
  *
  * @this {X86CPU}
  */
-X86.opMOVBHb = function MOVBHb()
+X86.opMOVBHb = function()
 {
     this.regEBX = (this.regEBX & ~0xff00) | (this.getIPByte() << 8);
     if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiMem0;
@@ -3278,7 +3278,7 @@ X86.opMOVBHb = function MOVBHb()
  *
  * @this {X86CPU}
  */
-X86.opMOVAX = function MOVAX()
+X86.opMOVAX = function()
 {
     this.regEAX = (this.regEAX & ~this.maskData) | this.getIPWord();
     if (BACKTRACK) {
@@ -3292,7 +3292,7 @@ X86.opMOVAX = function MOVAX()
  *
  * @this {X86CPU}
  */
-X86.opMOVCX = function MOVCX()
+X86.opMOVCX = function()
 {
     this.regECX = (this.regECX & ~this.maskData) | this.getIPWord();
     if (BACKTRACK) {
@@ -3306,7 +3306,7 @@ X86.opMOVCX = function MOVCX()
  *
  * @this {X86CPU}
  */
-X86.opMOVDX = function MOVDX()
+X86.opMOVDX = function()
 {
     this.regEDX = (this.regEDX & ~this.maskData) | this.getIPWord();
     if (BACKTRACK) {
@@ -3320,7 +3320,7 @@ X86.opMOVDX = function MOVDX()
  *
  * @this {X86CPU}
  */
-X86.opMOVBX = function MOVBX()
+X86.opMOVBX = function()
 {
     this.regEBX = (this.regEBX & ~this.maskData) | this.getIPWord();
     if (BACKTRACK) {
@@ -3334,7 +3334,7 @@ X86.opMOVBX = function MOVBX()
  *
  * @this {X86CPU}
  */
-X86.opMOVSP = function MOVSP()
+X86.opMOVSP = function()
 {
     this.setSP((this.getSP() & ~this.maskData) | this.getIPWord());
     this.nStepCycles -= this.cycleCounts.nOpCyclesLAHF;
@@ -3345,7 +3345,7 @@ X86.opMOVSP = function MOVSP()
  *
  * @this {X86CPU}
  */
-X86.opMOVBP = function MOVBP()
+X86.opMOVBP = function()
 {
     this.regEBP = (this.regEBP & ~this.maskData) | this.getIPWord();
     if (BACKTRACK) {
@@ -3359,7 +3359,7 @@ X86.opMOVBP = function MOVBP()
  *
  * @this {X86CPU}
  */
-X86.opMOVSI = function MOVSI()
+X86.opMOVSI = function()
 {
     this.regESI = (this.regESI & ~this.maskData) | this.getIPWord();
     if (BACKTRACK) {
@@ -3373,7 +3373,7 @@ X86.opMOVSI = function MOVSI()
  *
  * @this {X86CPU}
  */
-X86.opMOVDI = function MOVDI()
+X86.opMOVDI = function()
 {
     this.regEDI = (this.regEDI & ~this.maskData) | this.getIPWord();
     if (BACKTRACK) {
@@ -3387,7 +3387,7 @@ X86.opMOVDI = function MOVDI()
  *
  * @this {X86CPU}
  */
-X86.opGRP2bn = function GRP2bn()
+X86.opGRP2bn = function()
 {
     this.aOpModGrpByte[this.getIPByte()].call(this, X86.aOpGrp2b, X86.fnSRCCountN);
 };
@@ -3397,7 +3397,7 @@ X86.opGRP2bn = function GRP2bn()
  *
  * @this {X86CPU}
  */
-X86.opGRP2wn = function GRP2wn()
+X86.opGRP2wn = function()
 {
     this.aOpModGrpWord[this.getIPByte()].call(this, this.sizeData == 2? X86.aOpGrp2w : X86.aOpGrp2d, X86.fnSRCCountN);
 };
@@ -3407,7 +3407,7 @@ X86.opGRP2wn = function GRP2wn()
  *
  * @this {X86CPU}
  */
-X86.opRETn = function RETn()
+X86.opRETn = function()
 {
     var n = this.getIPShort();
     var newIP = this.popWord();
@@ -3421,7 +3421,7 @@ X86.opRETn = function RETn()
  *
  * @this {X86CPU}
  */
-X86.opRET = function RET()
+X86.opRET = function()
 {
     var newIP = this.popWord();
     this.setIP(newIP);
@@ -3435,7 +3435,7 @@ X86.opRET = function RET()
  *
  * @this {X86CPU}
  */
-X86.opLES = function LES()
+X86.opLES = function()
 {
     this.aOpModRegWord[this.getIPByte()].call(this, X86.fnLES);
 };
@@ -3447,7 +3447,7 @@ X86.opLES = function LES()
  *
  * @this {X86CPU}
  */
-X86.opLDS = function LDS()
+X86.opLDS = function()
 {
     this.aOpModRegWord[this.getIPByte()].call(this, X86.fnLDS);
 };
@@ -3457,7 +3457,7 @@ X86.opLDS = function LDS()
  *
  * @this {X86CPU}
  */
-X86.opMOVb = function MOVb()
+X86.opMOVb = function()
 {
     /*
      * Like other MOV operations, the destination does not need to be read, just written.
@@ -3471,7 +3471,7 @@ X86.opMOVb = function MOVb()
  *
  * @this {X86CPU}
  */
-X86.opMOVw = function MOVw()
+X86.opMOVw = function()
 {
     /*
      * Like other MOV operations, the destination does not need to be read, just written.
@@ -3485,7 +3485,7 @@ X86.opMOVw = function MOVw()
  *
  * @this {X86CPU}
  */
-X86.opENTER = function ENTER()
+X86.opENTER = function()
 {
     /*
      * Any operation that performs multiple stack modifications must snapshot regLSP first.
@@ -3520,7 +3520,7 @@ X86.opENTER = function ENTER()
  *
  * @this {X86CPU}
  */
-X86.opLEAVE = function LEAVE()
+X86.opLEAVE = function()
 {
     /*
      * Any operation that performs multiple stack modifications must snapshot regLSP first.
@@ -3543,7 +3543,7 @@ X86.opLEAVE = function LEAVE()
  *
  * @this {X86CPU}
  */
-X86.opRETFn = function RETFn()
+X86.opRETFn = function()
 {
     X86.fnRETF.call(this, this.getIPShort());
     this.nStepCycles -= this.cycleCounts.nOpCyclesRetFn;
@@ -3554,7 +3554,7 @@ X86.opRETFn = function RETFn()
  *
  * @this {X86CPU}
  */
-X86.opRETF = function RETF()
+X86.opRETF = function()
 {
     X86.fnRETF.call(this, 0);
     this.nStepCycles -= this.cycleCounts.nOpCyclesRetF;
@@ -3565,7 +3565,7 @@ X86.opRETF = function RETF()
  *
  * @this {X86CPU}
  */
-X86.opINT3 = function INT3()
+X86.opINT3 = function()
 {
     /*
      * TODO: Consider swapping out this function whenever setProtMode() changes the mode to V86-mode.
@@ -3589,7 +3589,7 @@ X86.opINT3 = function INT3()
  *
  * @this {X86CPU}
  */
-X86.opINTn = function INTn()
+X86.opINTn = function()
 {
     var nInt = this.getIPByte();
     /*
@@ -3616,7 +3616,7 @@ X86.opINTn = function INTn()
  *
  * @this {X86CPU}
  */
-X86.opINTO = function INTO()
+X86.opINTO = function()
 {
     if (this.getOF()) {
         /*
@@ -3638,7 +3638,7 @@ X86.opINTO = function INTO()
  *
  * @this {X86CPU}
  */
-X86.opIRET = function IRET()
+X86.opIRET = function()
 {
     /*
      * TODO: Consider swapping out this function whenever setProtMode() changes the mode to V86-mode.
@@ -3656,7 +3656,7 @@ X86.opIRET = function IRET()
  *
  * @this {X86CPU}
  */
-X86.opGRP2b1 = function GRP2b1()
+X86.opGRP2b1 = function()
 {
     this.aOpModGrpByte[this.getIPByte()].call(this, X86.aOpGrp2b, X86.fnSRCCount1);
 };
@@ -3666,7 +3666,7 @@ X86.opGRP2b1 = function GRP2b1()
  *
  * @this {X86CPU}
  */
-X86.opGRP2w1 = function GRP2w1()
+X86.opGRP2w1 = function()
 {
     this.aOpModGrpWord[this.getIPByte()].call(this, this.sizeData == 2? X86.aOpGrp2w : X86.aOpGrp2d, X86.fnSRCCount1);
 };
@@ -3676,7 +3676,7 @@ X86.opGRP2w1 = function GRP2w1()
  *
  * @this {X86CPU}
  */
-X86.opGRP2bCL = function GRP2bCL()
+X86.opGRP2bCL = function()
 {
     this.aOpModGrpByte[this.getIPByte()].call(this, X86.aOpGrp2b, X86.fnSRCCountCL);
 };
@@ -3686,7 +3686,7 @@ X86.opGRP2bCL = function GRP2bCL()
  *
  * @this {X86CPU}
  */
-X86.opGRP2wCL = function GRP2wCL()
+X86.opGRP2wCL = function()
 {
     this.aOpModGrpWord[this.getIPByte()].call(this, this.sizeData == 2? X86.aOpGrp2w : X86.aOpGrp2d, X86.fnSRCCountCL);
 };
@@ -3701,7 +3701,7 @@ X86.opGRP2wCL = function GRP2wCL()
  *
  * @this {X86CPU}
  */
-X86.opAAM = function AAM()
+X86.opAAM = function()
 {
     var bDivisor = this.getIPByte();
     if (!bDivisor) {
@@ -3729,7 +3729,7 @@ X86.opAAM = function AAM()
  *
  * @this {X86CPU}
  */
-X86.opAAD = function AAD()
+X86.opAAD = function()
 {
     var bMultiplier = this.getIPByte();
     this.regEAX = (this.regEAX & ~0xffff) | (((((this.regEAX >> 8) & 0xff) * bMultiplier) + this.regEAX) & 0xff);
@@ -3749,7 +3749,7 @@ X86.opAAD = function AAD()
  *
  * @this {X86CPU}
  */
-X86.opSALC = function SALC()
+X86.opSALC = function()
 {
     this.regEAX = (this.regEAX & ~0xff) | (this.getCF()? 0xFF : 0);
     this.nStepCycles -= 2;
@@ -3760,7 +3760,7 @@ X86.opSALC = function SALC()
  *
  * @this {X86CPU}
  */
-X86.opXLAT = function XLAT()
+X86.opXLAT = function()
 {
     /*
      * NOTE: I have no idea whether XLAT actually wraps the 16-bit address calculation;
@@ -3775,7 +3775,7 @@ X86.opXLAT = function XLAT()
  *
  * @this {X86CPU}
  */
-X86.opESC = function ESC()
+X86.opESC = function()
 {
     this.aOpModRegWord[this.getIPByte()].call(this, X86.fnESC);
     this.nStepCycles -= 8;      // TODO: Fix
@@ -3790,7 +3790,7 @@ X86.opESC = function ESC()
  *
  * @this {X86CPU}
  */
-X86.opLOOPNZ = function LOOPNZ()
+X86.opLOOPNZ = function()
 {
     var disp = this.getIPDisp();
     var n = (this.regECX - 1) & this.maskAddr;
@@ -3812,7 +3812,7 @@ X86.opLOOPNZ = function LOOPNZ()
  *
  * @this {X86CPU}
  */
-X86.opLOOPZ = function LOOPZ()
+X86.opLOOPZ = function()
 {
     var disp = this.getIPDisp();
     var n = (this.regECX - 1) & this.maskAddr;
@@ -3834,7 +3834,7 @@ X86.opLOOPZ = function LOOPZ()
  *
  * @this {X86CPU}
  */
-X86.opLOOP = function LOOP()
+X86.opLOOP = function()
 {
     var disp = this.getIPDisp();
     var n = (this.regECX - 1) & this.maskAddr;
@@ -3856,7 +3856,7 @@ X86.opLOOP = function LOOP()
  *
  * @this {X86CPU}
  */
-X86.opJCXZ = function JCXZ()
+X86.opJCXZ = function()
 {
     var disp = this.getIPDisp();
     if (!(this.regECX & this.maskAddr)) {
@@ -3872,7 +3872,7 @@ X86.opJCXZ = function JCXZ()
  *
  * @this {X86CPU}
  */
-X86.opINb = function INb()
+X86.opINb = function()
 {
     var port = this.getIPByte();
     if (!this.checkIOPM(port, 1, true)) return;
@@ -3886,7 +3886,7 @@ X86.opINb = function INb()
  *
  * @this {X86CPU}
  */
-X86.opINw = function INw()
+X86.opINw = function()
 {
     var port = this.getIPByte();
     if (!this.checkIOPM(port, this.sizeData, true)) return;
@@ -3903,7 +3903,7 @@ X86.opINw = function INw()
  *
  * @this {X86CPU}
  */
-X86.opOUTb = function OUTb()
+X86.opOUTb = function()
 {
     var port = this.getIPByte();
     if (!this.checkIOPM(port, 1, false)) return;
@@ -3916,7 +3916,7 @@ X86.opOUTb = function OUTb()
  *
  * @this {X86CPU}
  */
-X86.opOUTw = function OUTw()
+X86.opOUTw = function()
 {
     var port = this.getIPByte();
     if (!this.checkIOPM(port, this.sizeData, false)) return;
@@ -3929,7 +3929,7 @@ X86.opOUTw = function OUTw()
  *
  * @this {X86CPU}
  */
-X86.opCALL = function CALL()
+X86.opCALL = function()
 {
     var disp = this.getIPWord();
     var oldIP = this.getIP();
@@ -3944,7 +3944,7 @@ X86.opCALL = function CALL()
  *
  * @this {X86CPU}
  */
-X86.opJMP = function JMP()
+X86.opJMP = function()
 {
     var disp = this.getIPWord();
     this.setIP(this.getIP() + disp);
@@ -3956,7 +3956,7 @@ X86.opJMP = function JMP()
  *
  * @this {X86CPU}
  */
-X86.opJMPF = function JMPF()
+X86.opJMPF = function()
 {
     this.setCSIP(this.getIPWord(), this.getIPShort());
     this.nStepCycles -= this.cycleCounts.nOpCyclesJmpF;
@@ -3967,7 +3967,7 @@ X86.opJMPF = function JMPF()
  *
  * @this {X86CPU}
  */
-X86.opJMPs = function JMPs()
+X86.opJMPs = function()
 {
     var disp = this.getIPDisp();
     this.setIP(this.getIP() + disp);
@@ -3979,7 +3979,7 @@ X86.opJMPs = function JMPs()
  *
  * @this {X86CPU}
  */
-X86.opINDXb = function INDXb()
+X86.opINDXb = function()
 {
     var port = this.regEDX & 0xffff;
     if (!this.checkIOPM(port, 1, true)) return;
@@ -3993,7 +3993,7 @@ X86.opINDXb = function INDXb()
  *
  * @this {X86CPU}
  */
-X86.opINDXw = function INDXw()
+X86.opINDXw = function()
 {
     var port = this.regEDX & 0xffff;
     if (!this.checkIOPM(port, this.sizeData, true)) return;
@@ -4010,7 +4010,7 @@ X86.opINDXw = function INDXw()
  *
  * @this {X86CPU}
  */
-X86.opOUTDXb = function OUTDXb()
+X86.opOUTDXb = function()
 {
     var port = this.regEDX & 0xffff;
     if (!this.checkIOPM(port, 1, false)) return;
@@ -4024,7 +4024,7 @@ X86.opOUTDXb = function OUTDXb()
  *
  * @this {X86CPU}
  */
-X86.opOUTDXw = function OUTDXw()
+X86.opOUTDXw = function()
 {
     var port = this.regEDX & 0xffff;
     if (!this.checkIOPM(port, 2, false)) return;
@@ -4041,7 +4041,7 @@ X86.opOUTDXw = function OUTDXw()
  *
  * @this {X86CPU}
  */
-X86.opLOCK = function LOCK()
+X86.opLOCK = function()
 {
     /*
      * NOTE: The fact that we're setting NOINTR along with LOCK is really just for documentation purposes;
@@ -4058,7 +4058,7 @@ X86.opLOCK = function LOCK()
  *
  * @this {X86CPU}
  */
-X86.opINT1 = function INT1()
+X86.opINT1 = function()
 {
     X86.opUndefined.call(this);
 };
@@ -4068,7 +4068,7 @@ X86.opINT1 = function INT1()
  *
  * @this {X86CPU}
  */
-X86.opREPNZ = function REPNZ()
+X86.opREPNZ = function()
 {
     /*
      * NOTE: The fact that we're setting NOINTR along with REPNZ is really just for documentation purposes;
@@ -4083,7 +4083,7 @@ X86.opREPNZ = function REPNZ()
  *
  * @this {X86CPU}
  */
-X86.opREPZ = function REPZ()
+X86.opREPZ = function()
 {
     /*
      * NOTE: The fact that we're setting NOINTR along with REPZ is really just for documentation purposes;
@@ -4098,7 +4098,7 @@ X86.opREPZ = function REPZ()
  *
  * @this {X86CPU}
  */
-X86.opHLT = function HLT()
+X86.opHLT = function()
 {
     /*
      * TODO: Consider swapping out this function whenever setProtMode() changes the mode to V86-mode.
@@ -4138,7 +4138,7 @@ X86.opHLT = function HLT()
  *
  * @this {X86CPU}
  */
-X86.opCMC = function CMC()
+X86.opCMC = function()
 {
     if (this.getCF()) this.clearCF(); else this.setCF();
     this.nStepCycles -= 2;                          // CMC takes 2 cycles on all CPUs
@@ -4165,7 +4165,7 @@ X86.opCMC = function CMC()
  *
  * @this {X86CPU}
  */
-X86.opGRP3b = function GRP3b()
+X86.opGRP3b = function()
 {
     this.fMDSet = false;
     this.aOpModGrpByte[this.getIPByte()].call(this, X86.aOpGrp3b, X86.fnSRCNone);
@@ -4191,7 +4191,7 @@ X86.opGRP3b = function GRP3b()
  *
  * @this {X86CPU}
  */
-X86.opGRP3w = function GRP3w()
+X86.opGRP3w = function()
 {
     this.fMDSet = false;
     this.aOpModGrpWord[this.getIPByte()].call(this, X86.aOpGrp3w, X86.fnSRCNone);
@@ -4206,7 +4206,7 @@ X86.opGRP3w = function GRP3w()
  *
  * @this {X86CPU}
  */
-X86.opCLC = function CLC()
+X86.opCLC = function()
 {
     this.clearCF();
     this.nStepCycles -= 2;                          // CLC takes 2 cycles on all CPUs
@@ -4217,7 +4217,7 @@ X86.opCLC = function CLC()
  *
  * @this {X86CPU}
  */
-X86.opSTC = function STC()
+X86.opSTC = function()
 {
     this.setCF();
     this.nStepCycles -= 2;                          // STC takes 2 cycles on all CPUs
@@ -4228,7 +4228,7 @@ X86.opSTC = function STC()
  *
  * @this {X86CPU}
  */
-X86.opCLI = function CLI()
+X86.opCLI = function()
 {
     /*
      * The following code should be sufficient for all modes, because in real-mode, CPL is always zero,
@@ -4248,7 +4248,7 @@ X86.opCLI = function CLI()
  *
  * @this {X86CPU}
  */
-X86.opSTI = function STI()
+X86.opSTI = function()
 {
     /*
      * The following code should be sufficient for all modes, because in real-mode, CPL is always zero,
@@ -4269,7 +4269,7 @@ X86.opSTI = function STI()
  *
  * @this {X86CPU}
  */
-X86.opCLD = function CLD()
+X86.opCLD = function()
 {
     this.clearDF();
     this.nStepCycles -= 2;                          // CLD takes 2 cycles on all CPUs
@@ -4280,7 +4280,7 @@ X86.opCLD = function CLD()
  *
  * @this {X86CPU}
  */
-X86.opSTD = function STD()
+X86.opSTD = function()
 {
     this.setDF();
     this.nStepCycles -= 2;                          // STD takes 2 cycles on all CPUs
@@ -4291,7 +4291,7 @@ X86.opSTD = function STD()
  *
  * @this {X86CPU}
  */
-X86.opGRP4b = function GRP4b()
+X86.opGRP4b = function()
 {
     this.aOpModGrpByte[this.getIPByte()].call(this, X86.aOpGrp4b, X86.fnSRCNone);
 };
@@ -4301,7 +4301,7 @@ X86.opGRP4b = function GRP4b()
  *
  * @this {X86CPU}
  */
-X86.opGRP4w = function GRP4w()
+X86.opGRP4w = function()
 {
     this.aOpModGrpWord[this.getIPByte()].call(this, X86.aOpGrp4w, X86.fnSRCNone);
 };
@@ -4311,7 +4311,7 @@ X86.opGRP4w = function GRP4w()
  *
  * @this {X86CPU}
  */
-X86.opInvalid = function opInvalid()
+X86.opInvalid = function()
 {
     X86.fnFault.call(this, X86.EXCEPTION.UD_FAULT);
 };
@@ -4321,7 +4321,7 @@ X86.opInvalid = function opInvalid()
  *
  * @this {X86CPU}
  */
-X86.opUndefined = function opUndefined()
+X86.opUndefined = function()
 {
     this.setIP(this.opLIP - this.segCS.base);
     this.setError("Undefined opcode " + str.toHexByte(this.bus.getByteDirect(this.regLIP)) + " at " + str.toHexLong(this.regLIP));
@@ -4333,7 +4333,7 @@ X86.opUndefined = function opUndefined()
  *
  * @this {X86CPU}
  */
-X86.opTBD = function opTBD()
+X86.opTBD = function()
 {
     this.setIP(this.opLIP - this.segCS.base);
     this.printMessage("unimplemented 80386 opcode", true);
