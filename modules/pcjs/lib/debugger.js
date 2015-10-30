@@ -1207,7 +1207,7 @@ if (DEBUGGER) {
         this.maskAddr = bus.nBusLimit;
 
         /*
-         * Allocate a special segment "register" for our own use, whenever a requested selector is not currently loaded
+         * Allocate a special segment "register", for use whenever a requested selector is not currently loaded
          */
         this.segDebugger = new X86Seg(this.cpu, X86Seg.ID.DBG, "DBG");
 
@@ -1216,6 +1216,15 @@ if (DEBUGGER) {
             this.aaOpDescs = Debugger.aaOpDescs.slice();
             this.aaOpDescs[0x0F] = Debugger.aOpDescUndefined;
             if (this.cpu.model >= X86.MODEL_80286) {
+                /*
+                 * TODO: Consider whether the aOpDesc0F table should be split in two: one for 80286-only instructions,
+                 * and one for both 80286 and 80386.  For now, the Debugger is not as strict as the X86CPU is about
+                 * the instructions it supports for each type of CPU, in part because an 80286 machine could still be
+                 * presented with 80386-only code that is simply "skipped over" when then CPU doesn't support it.
+                 *
+                 * Obviously I'm not being entirely consistent, since I don't disassemble *any* 0x0F opcodes for any
+                 * pre-80286 CPUs.  But at least I'm being up front about it.
+                 */
                 this.aaOpDescs[0x0F] = Debugger.aOpDesc0F;
                 if (I386 && this.cpu.model >= X86.MODEL_80386) {
                     this.cchReg = 8;

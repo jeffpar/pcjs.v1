@@ -79,7 +79,7 @@ XBTS (Extract Bit String) instruction -- an instruction that existed only on B0 
 	&0654:12B9 33C0            XOR      AX,AX
 	&0654:12BB 8BD0            MOV      DX,AX
 	&0654:12BD B900FF          MOV      CX,FF00
-	&0654:12C0 0FA6CA          INVALID                  ; attempt to execute an XBTS instruction 
+	&0654:12C0 0FA6CA          XBTS     CX,DX,AX,CL     ; attempt to execute an XBTS instruction 
 	&0654:12C3 6658            POP      EAX
 	&0654:12C5 8BD0            MOV      DX,AX
 	&0654:12C7 66C1E810        SHR      EAX,10
