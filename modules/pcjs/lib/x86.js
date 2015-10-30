@@ -46,10 +46,15 @@ var X86 = {
     /*
      * 80386 CPU stepping identifiers (supported)
      */
-    STEPPING_80386_A0: (80386+0xA0),
-    STEPPING_80386_B0: (80386+0xB0),    // for now, the only B0 difference is support for XBTS
-    STEPPING_80386_B1: (80386+0xB1),    // our version of the B1 stepping also includes the infamous 32-bit multiplication bug
+    STEPPING_80386_A0: (80386+0xA0),    // we have very little information about this stepping...
+    STEPPING_80386_A1: (80386+0xA1),    // we know much more about the A1 stepping (see /blog/2015/02/23/README.md)
+    STEPPING_80386_B0: (80386+0xB0),    // for now, the only B0 difference in PCjs is support for XBTS and IBTS
+    STEPPING_80386_B1: (80386+0xB1),    // our implementation of the B1 stepping also includes the infamous 32-bit multiplication bug
     STEPPING_80386_B2: (80386+0xB2),    // this is an imaginary stepping that simply means "B1 without the 32-bit multiplication bug" (ie, a B1 with the "double sigma" stamp)
+    STEPPING_80386_C0: (80386+0xC0),    // this presumably fixed lots of B1 issues, but it seems to have been quickly superseded by the D0
+    STEPPING_80386_D0: (80386+0xD0),    // we don't have any detailed information (eg, errata) for these later steppings
+    STEPPING_80386_D1: (80386+0xD1),
+    STEPPING_80386_D2: (80386+0xD2),
 
     /*
      * This constant is used to mark points in the code where the physical address being returned

@@ -1064,7 +1064,26 @@ X86CPU.prototype.resetRegs = function()
     this.setSS(0);
 
     if (I386 && this.model >= X86.MODEL_80386) {
-        this.regEDX = 0x0304;           // Intel errata sheets indicate this is what an 80386-C0 reported
+        /*
+         * Here lies everything I currently know about 80386 stepping revision numbers...
+         */
+        switch(this.stepping) {
+        case X86.STEPPING_80386_B0:
+        case X86.STEPPING_80386_B1:
+            this.regEDX = 0x0303;
+            break;
+        case X86.STEPPING_80386_C0:
+            this.regEDX = 0x0304;
+            break;
+        case X86.STEPPING_80386_D0:
+            this.regEDX = 0x0305;
+            break;
+        case X86.STEPPING_80386_D1:
+        case X86.STEPPING_80386_D2:
+        default:
+            this.regEDX = 0x0308;       // in the absence of a specific stepping, default to the highest known revision
+            break;
+        }
         this.regCR0 = X86.CR0.ET;       // formerly MSW
         this.regCR1 = 0;                // reserved
         this.regCR2 = 0;                // page fault linear address (PFLA)
