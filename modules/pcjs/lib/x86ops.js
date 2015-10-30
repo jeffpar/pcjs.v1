@@ -2952,9 +2952,10 @@ X86.opSTOSb = function STOSb()
          * only EDI in the case of STOS.  The other instructions mentioned below monkey with different
          * registers, so read the errata carefully.
          *
-         * TODO: Extend this errata to STOSW, as well as MOVSB, MOVSW, INSB, and INSW.
+         * TODO: Extend this errata to STOSW, as well as MOVSB, MOVSW, INSB, and INSW.  Also, scope out the
+         * extent to which this errara also existed on earlier steppings.
          */
-        if (this.model == X86.MODEL_80386 && this.stepping == X86.STEPPING_B1) {
+        if (this.stepping == X86.STEPPING_80386_B1) {
             if (!(this.opPrefixes & X86.OPFLAG.ADDRSIZE) != (this.getByte(this.regLIP) != X86.OPCODE.AS)) {
                 maskAddr ^= (0xffff0000|0);
             }

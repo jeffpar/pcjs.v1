@@ -6,8 +6,7 @@ problems were fixed by a later stepping, seems virtually impossible at this late
 
 I won't make the attempt here, either.  Using information from various sources, I'll start with an overview
 of the steppings, including how each stepping was externally marked and internally identified, along with lists
-of associated errata, then move on to more detailed errata information (from Intel's own documents), and end
-with a summary of undocumented 80386 instructions.
+of associated errata, then move on to more detailed errata information, based on Intel's own documents.
 
 ### Steppings
 
@@ -866,23 +865,15 @@ Here's more information on the opcodes (IBTS and XBTS) that were removed from th
 	CPU: 80386 step A0-B0 only 
 	Type of Instruction: User 
 	
-	Instruction: IBTS base,bitoffset,len,sorc 
-	
-	Description: 
-	Write bit string length <len> bits from 
-	<sorc> [bits <len> .. 0 ]	(lowest bits) to bitfield, 
-	defined by <base> and bitsoffset <bitoffset> from this base 
-	to start of the field to write. String write from this start 
-	field bit to higher memory addresses or register bits. 
+	Instruction: IBTS base,bitoffset,len,src
 	
 	Flags Affected: None 
 	
 	CPU mode: RM,PM,VM 
 	
-	+++++++++++++++++++++++ 
-	Physical Form:	IBTS	r/m16,AX,CL,r16 
-	IBTS	r/m32,EAX,CL,r32 
-	COP (Code of Operation)	: 0FH A7H 
+	IBTS    r/m16,AX,CL,r16 
+	IBTS    r/m32,EAX,CL,r32 
+	COP (Code of Operation): 0FH A7H 
 	
 	Clocks:	IBTS 
 	80386:	12/19
@@ -894,29 +885,15 @@ Here's more information on the opcodes (IBTS and XBTS) that were removed from th
     CPU: 80386 step A0-B0 only
     Type of Instruction: User
 
-    Instruction: XBTS dest,base,bitoffset,len
-
-    Description:
-    Write bit string length <len> bits from bitfield, defined by
-    <base> and bitsoffset <bitoffset> from this base to start of
-    the field to read. String read from this start field bit to
-    higher memory addresses or register bits.
-    And after it string placed to <dest> operand, lowest bit of
-    register or memory to bit 0 of <dest>.
-
-    Note:   Use SHLD/SHRD instructions for extract bits strings.
-    On 80386 steps B1+ this opcode generation INT 6,
-    and on some of 486 other instruction replace this
-    instruction opcode.
+    Instruction: XBTS dst,base,bitoffset,len
 
     Flags Affected: None
 
     CPU mode: RM,PM,VM
 
-    +++++++++++++++++++++++
-    Physical Form:  XBTS    r16,r/m16,AX,CL
+    XBTS    r16,r/m16,AX,CL
     XBTS    r32,r/m32,EAX,CL
-    COP (Code of Operation) : 0FH A6H
+    COP (Code of Operation): 0FH A6H
 
     Clocks: XBTS
     80386:  6/13

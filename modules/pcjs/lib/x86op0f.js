@@ -1167,6 +1167,32 @@ X86.opSHLDcl = function SHLDcl()
 };
 
 /**
+ * opXBTS()
+ *
+ * op=0x0F,0xA6 (XBTS reg,mem/reg,[E]AX,CL)
+ *
+ * @this {X86CPU}
+ */
+X86.opXBTS = function XBTS()
+{
+    this.aOpModRegWord[this.getIPByte()].call(this, X86.fnXBTS);
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? 6 : 13);
+};
+
+/**
+ * opIBTS()
+ *
+ * op=0x0F,0xA7 (IBTS mem/reg,[E]AX,CL,reg)
+ *
+ * @this {X86CPU}
+ */
+X86.opIBTS = function IBTS()
+{
+    this.aOpModMemWord[this.getIPByte()].call(this, X86.fnIBTS);
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? 12 : 19);
+};
+
+/**
  * opPUSHGS()
  *
  * op=0x0F,0xA8 (PUSH GS)

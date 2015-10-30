@@ -110,8 +110,13 @@ function X86CPU(parmsCPU)
 {
     this.model = parmsCPU['model'] || X86.MODEL_8088;
 
+    /*
+     * We take the 'stepping' value, convert it to a hex value, and then add that to the model to provide
+     * a single value that's unique for any given CPU stepping.  If no stepping is provided, then stepping
+     * is equal to model.
+     */
     var stepping = parmsCPU['stepping'];
-    this.stepping = (stepping? str.parseInt(stepping, 16) : 0);
+    this.stepping = this.model + (stepping? str.parseInt(stepping, 16) : 0);
 
     var nCyclesDefault = 0;
     switch(this.model) {
@@ -811,6 +816,10 @@ X86CPU.prototype.initProcessor = function()
                 this.aOps[X86.OPCODE.AS] = X86.opAS;        // 0x67
                 for (bOpcode in X86.aOps0F386) {
                     this.aOps0F[+bOpcode] = X86.aOps0F386[bOpcode];
+                }
+                if (this.stepping >= X86.STEPPING_80386_A0 && this.stepping <= X86.STEPPING_80386_B0) {
+                    this.aOps0F[0xA6] = X86.opXBTS;
+                    this.aOps0F[0xA7] = X86.opIBTS;
                 }
             }
         }

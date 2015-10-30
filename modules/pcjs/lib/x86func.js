@@ -684,6 +684,28 @@ X86.fnDECw = function(dst, src)
 };
 
 /**
+ * fnIBTS(dst, src)
+ *
+ * As best I can determine, this function copies the specified bits from src (starting at bit 0 for CL
+ * bits) to dst (starting at bit offset in AX).  For register operands, that's simple enough.
+ *
+ * TODO: If dst refers to a memory location, then the bit index may refer to higher memory locations, just
+ * like the BT/BTC/BTR/BTS instructions.  For an instruction that no one was really able to use, except
+ * as a CPU stepping discriminator, that doesn't seem worth the effort.
+ *
+ * @this {X86CPU}
+ * @param {number} dst
+ * @param {number} src
+ * @return {number}
+ */
+X86.fnIBTS = function(dst, src)
+{
+    var shift = (this.regEAX & this.maskData);
+    var mask = ((1 << (this.regECX & 0x1f)) - 1);
+    return (dst & ~(mask << shift)) | ((src & mask) << shift);
+};
+
+/**
  * fnSet64(lo, hi)
  *
  * @param {number} lo
@@ -2033,11 +2055,11 @@ X86.fnMULw = function(dst, src)
         this.regMDHi = (result >> 16) & 0xffff;
     } else {
         X86.fnMUL32.call(this, dst, this.regEAX);
-        if (this.model == X86.MODEL_80386 && this.stepping == X86.STEPPING_B1) {
+        if (this.stepping == X86.STEPPING_80386_B1) {
             if (this.regEAX == 0x0417A000 && dst == 0x00000081) {
                 /*
-                 * In this case, the result should be 0x20FE7A000 (ie, regMDHi should be 0x2), and I'm not
-                 * sure what the typical failure would look like, so I'll just set regMDHi to 0.
+                 * Normally, the result should be 0x20FE7A000 (ie, regMDHi should be 0x2).
+                 * I'm not sure what a typical failure looked like, so I'll just set regMDHi to 0.
                  *
                  * If you want a B1 stepping without this 32-bit multiplication flaw, select the B2 stepping.
                  */
@@ -3536,6 +3558,30 @@ X86.fnVERW = function(dst, src)
     this.clearZF();
     if (DEBUG && (this.sizeData > 2 || this.sizeAddr > 2)) this.stopCPU();
     return dst;
+};
+
+/**
+ * fnXBTS(dst, src)
+ *
+ * As best I can determine, this function copies the specified bits from src (starting at the bit offset
+ * in AX, for the bit length in CL) to dst (starting at bit 0).  For register operands, that's simple enough.
+ *
+ * TODO: If src refers to a memory location, then the bit index may refer to higher memory locations, just
+ * like the BT/BTC/BTR/BTS instructions.  For an instruction that no one was really able to use, except
+ * as a CPU stepping discriminator, that doesn't seem worth the effort.
+ *
+ * @this {X86CPU}
+ * @param {number} dst
+ * @param {number} src
+ * @return {number}
+ */
+X86.fnXBTS = function(dst, src)
+{
+    /*
+     * Shift src right by the bit offset in [E]AX, then apply a mask equal to the number of bits in CL,
+     * then mask the resulting bit string with the current OPERAND size.
+     */
+    return ((src >> (this.regEAX & this.maskData)) & ((1 << (this.regECX & 0x1f)) - 1)) & this.maskData;
 };
 
 /**

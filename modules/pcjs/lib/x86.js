@@ -44,10 +44,12 @@ var X86 = {
     MODEL_80386:    80386,
 
     /*
-     * CPU stepping identifiers (supported)
+     * 80386 CPU stepping identifiers (supported)
      */
-    STEPPING_B1:    0xB1,       // our version of the B1 stepping also includes the infamous 32-bit multiplication bug
-    STEPPING_B2:    0xB2,       // this is an imaginary stepping that simply means "B1 without the 32-bit multiplication bug" (ie, a B1 with the "double sigma" stamp)
+    STEPPING_80386_A0: (80386+0xA0),
+    STEPPING_80386_B0: (80386+0xB0),    // for now, the only B0 difference is support for XBTS
+    STEPPING_80386_B1: (80386+0xB1),    // our version of the B1 stepping also includes the infamous 32-bit multiplication bug
+    STEPPING_80386_B2: (80386+0xB2),    // this is an imaginary stepping that simply means "B1 without the 32-bit multiplication bug" (ie, a B1 with the "double sigma" stamp)
 
     /*
      * This constant is used to mark points in the code where the physical address being returned
