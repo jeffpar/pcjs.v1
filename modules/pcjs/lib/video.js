@@ -3194,6 +3194,21 @@ Video.prototype.captureTouch = function(nTouchConfig)
             // this.log("touch events captured");
             this.nTouchConfig = nTouchConfig;
             this.xTouch = this.yTouch = this.timeTouch = -1;
+            /*
+             * As long as fTouchDefault is false, we call preventDefault() on every touch event, to prevent
+             * the page from moving/scrolling while the canvas is processing touch events.  However, there must
+             * also be exceptions to permit the soft keyboard to activate; see processTouchEvent() for details.
+             */
+            this.fTouchDefault = false;
+            /*
+             * I also need to come up with some rules for when the simulated mouse's primary button stays down.
+             * Let's try setting a timeout handler whenever a touchstart is received, which we'll immediately cancel
+             * as soon as a touchmove or touchend event is received, and if the timeout handler fires, we'll set
+             * fLongTouch to true.
+             */
+            this.hLongTouch = null;
+            this.fLongTouch = false;
+            this.onLongTouch = function onLongTouch() { video.startLongTouch(); };
         }
     }
 };
@@ -3286,15 +3301,6 @@ Video.prototype.processTouchEvent = function(event, fStart)
     var xTouch, yTouch;
 
     // if (!event) event = window.event;
-    /*
-     * My thinking here is that if the canvas does NOT yet have focus, then we should actually SKIP
-     * the usual preventDefault() call, so that everything the user has come to expect (eg, activation of
-     * the soft keyboard) will work as before.
-     *
-     * The process of touching the canvas means it should ultimately receive focus, and as long as it
-     * retains focus, preventDefault() will always be called.
-     */
-    if (this.fHasFocus) event.preventDefault();
 
     /*
      * Touch coordinates (that is, the pageX and pageY properties) are relative to the page, so to make
@@ -3311,6 +3317,7 @@ Video.prototype.processTouchEvent = function(event, fStart)
     var xTouchOffset = 0;
     var yTouchOffset = 0;
     var eCurrent = this.canvasScreen;
+
     do {
         if (!isNaN(eCurrent.offsetLeft)) {
             xTouchOffset += eCurrent.offsetLeft;
@@ -3364,17 +3371,47 @@ Video.prototype.processTouchEvent = function(event, fStart)
         }
     } else {
         if (this.mouse) {
+            /*
+             * As long as fTouchDefault is false, we call preventDefault() on every touch event, to keep
+             * the page stable.  However, we must allow some touch event(s) to perform their default action,
+             * otherwise the soft keyboard can never be activated.  So if a touchstart occurs at least 1/2
+             * second (500ms) after the last touchstart, with no intervening touchmove events, fTouchDefault
+             * is allowed to become true.
+             */
+            var fTouchDefault = this.fTouchDefault;
+            var timeDelta = event.timeStamp - this.timeTouch;
+
             if (fStart === true) {
+                this.fTouchDefault = (timeDelta > 500);
                 this.timeTouch = event.timeStamp;
+                this.hLongTouch = setTimeout(this.onLongTouch, 500);
+            } else {
+                if (this.hLongTouch != null) {
+                    clearTimeout(this.hLongTouch);
+                    this.hLongTouch = null;
+                }
             }
+            if (fStart === undefined) {
+                this.fTouchDefault = false;
+            }
+
+            if (DEBUG) {
+                this.log("processTouchEvent(" + (fStart? "touchStart" : (fStart === false? "touchEnd" : "touchMove")) + "," + timeDelta + "ms," + fTouchDefault + ")");
+            }
+
+            if (!fTouchDefault) {
+                event.preventDefault();
+            }
+
             if (fStart === false) {
-                var timeDelta = event.timeStamp - this.timeTouch;
-                this.println("processTouchEvent(false," + timeDelta + ")");
                 /*
                  * NOTE: 200ms is merely my initial stab at a reasonable number of milliseconds to interpret a
                  * start/end touch sequence as a "tap"; I also make no note of any intervening move events (ie,
                  * events where fStart is undefined), and perhaps I should....
                  */
+                if (this.endLongTouch()) {
+                    return;
+                }
                 if (timeDelta < 200) {
                     this.mouse.clickMouse(Mouse.BUTTON.LEFT, true);
                     this.mouse.clickMouse(Mouse.BUTTON.LEFT, false);
@@ -3398,6 +3435,33 @@ Video.prototype.processTouchEvent = function(event, fStart)
             this.mouse.moveMouse(xDelta, yDelta, this.xTouch, this.yTouch);
         }
     }
+};
+
+/**
+ * startLongTouch()
+ *
+ * @this {Video}
+ */
+Video.prototype.startLongTouch = function()
+{
+    this.fLongTouch = true;
+    this.mouse.clickMouse(Mouse.BUTTON.LEFT, true);
+};
+
+/**
+ * endLongTouch()
+ *
+ * @this {Video}
+ * @return {boolean} true if long touch was active, false if not
+ */
+Video.prototype.endLongTouch = function()
+{
+    if (this.fLongTouch) {
+        this.mouse.clickMouse(Mouse.BUTTON.LEFT, false);
+        this.fLongTouch = false;
+        return true;
+    }
+    return false;
 };
 
 /**

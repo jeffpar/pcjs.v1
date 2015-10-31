@@ -2948,14 +2948,14 @@ X86.opSTOSb = function()
          * isn't a rock-solid implementation of the errata (for example, the ADDRESS override on the next
          * instruction, if it exists, may or may not be the first prefix byte), but it's close enough.
          *
-         * Note that we carefully monkey with maskAddr only AFTER updating ECX, because this errata affects
-         * only EDI in the case of STOS.  The other instructions mentioned below monkey with different
-         * registers, so read the errata carefully.
+         * Note that we carefully alter with maskAddr only AFTER updating ECX, because this errata affects
+         * only EDI in the case of STOS.  The other instructions mentioned below trash different registers,
+         * so read the errata carefully.
          *
          * TODO: Extend this errata to STOSW, as well as MOVSB, MOVSW, INSB, and INSW.  Also, verify the
-         * extent to which this errata existed on earlier 80386 steppings (I'm currently assuming A0).
+         * extent to which this errata existed on earlier 80386 steppings (I'm currently assuming A0-B1).
          */
-        if (this.stepping >= X86.STEPPING_80386_A0 && this.stepping <= X86.STEPPING_80386_B1) {
+        if (this.stepping >= X86.STEPPING_80386_A0 && this.stepping <= X86.STEPPING_80386_B2) {
             if (!(this.opPrefixes & X86.OPFLAG.ADDRSIZE) != (this.getByte(this.regLIP) != X86.OPCODE.AS)) {
                 maskAddr ^= (0xffff0000|0);
             }
