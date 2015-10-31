@@ -793,6 +793,8 @@ strPS:	db	"PS=",0
 strDE:	db	"#DE ",0			; when this is displayed, it indicates a Divide Error exception
 achSize	db	"BWD"
 
+ALLOPS equ 1
+
 tableOps:
 	defOp	"ADD",add,al,dl,none,TYPE_ARITH
 	defOp	"ADD",add,ax,dx,none,TYPE_ARITH

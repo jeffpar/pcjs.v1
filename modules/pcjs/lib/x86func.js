@@ -911,14 +911,13 @@ X86.fnDIVw = function(dst, src)
          * to force JavaScript to create a floating-point value that won't suffer from 32-bit-math side-effects.
          */
         src = (this.regEDX & 0xffff) * 0x10000 + (this.regEAX & 0xffff);
-        var result = (src / dst)|0;
+        var result = (src / dst);
         if (result >= 0x10000) {
             X86.fnDIVOverflow.call(this);
             return dst;
         }
         this.regMDLo = (result & 0xffff);
         this.regMDHi = (src % dst) & 0xffff;
-        this.fMDSet = true;
     }
     else {
         if (!X86.fnDIV32.call(this, this.regEAX, this.regEDX, dst)) {
@@ -927,8 +926,9 @@ X86.fnDIVw = function(dst, src)
         }
         this.regMDLo |= 0;
         this.regMDHi |= 0;
-        this.fMDSet = true;
     }
+
+    this.fMDSet = true;
 
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesDivWR : this.cycleCounts.nOpCyclesDivWM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
@@ -1035,7 +1035,6 @@ X86.fnIDIVw = function(dst, src)
 
         this.regMDLo = (result & 0xffff);
         this.regMDHi = (src % div) & 0xffff;
-        this.fMDSet = true;
     }
     else {
         if (!X86.fnIDIV32.call(this, this.regEAX, this.regEDX, dst)) {
@@ -1044,8 +1043,9 @@ X86.fnIDIVw = function(dst, src)
         }
         this.regMDLo |= 0;
         this.regMDHi |= 0;
-        this.fMDSet = true;
     }
+
+    this.fMDSet = true;
 
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesIDivWR : this.cycleCounts.nOpCyclesIDivWM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
@@ -1171,13 +1171,14 @@ X86.fnIMULb = function(dst, src)
     var result = (((this.regEAX << 24) >> 24) * ((dst << 24) >> 24))|0;
 
     this.regMDLo = result & 0xffff;
-    this.fMDSet = true;
 
     if (result > 127 || result < -128) {
         this.setCF(); this.setOF();
     } else {
         this.clearCF(); this.clearOF();
     }
+
+    this.fMDSet = true;
 
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesIMulBR : this.cycleCounts.nOpCyclesIMulBM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
@@ -1212,7 +1213,6 @@ X86.fnIMULw = function(dst, src)
         var result = (((src << 16) >> 16) * ((dst << 16) >> 16))|0;
         this.regMDLo = result & 0xffff;
         this.regMDHi = (result >> 16) & 0xffff;
-        this.fMDSet = true;
         fOverflow = (result > 32767 || result < -32768);
     } else {
         X86.fnIMUL32.call(this, dst, this.regEAX);
@@ -1224,6 +1224,8 @@ X86.fnIMULw = function(dst, src)
     } else {
         this.clearCF(); this.clearOF();
     }
+
+    this.fMDSet = true;
 
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesIMulWR : this.cycleCounts.nOpCyclesIMulWM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
@@ -1957,13 +1959,14 @@ X86.fnMOVxx = function(dst, src)
 X86.fnMULb = function(dst, src)
 {
     this.regMDLo = ((this.regEAX & 0xff) * dst) & 0xffff;
-    this.fMDSet = true;
 
     if (this.regMDLo & 0xff00) {
         this.setCF(); this.setOF();
     } else {
         this.clearCF(); this.clearOF();
     }
+
+    this.fMDSet = true;
 
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesMulBR : this.cycleCounts.nOpCyclesMulBM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
@@ -1984,24 +1987,22 @@ X86.fnMUL32 = function(dst, src)
     if (!(dst & ~0xffff) && !(src & ~0xffff)) {
         this.regMDLo = (dst * src)|0;
         this.regMDHi = 0;
-        this.fMDSet = true;
-        return;
     }
+    else {
+        var srcLo = src & 0xffff;
+        var srcHi = src >>> 16;
+        var dstLo = dst & 0xffff;
+        var dstHi = dst >>> 16;
 
-    var srcLo = src & 0xffff;
-    var srcHi = src >>> 16;
-    var dstLo = dst & 0xffff;
-    var dstHi = dst >>> 16;
+        var mul00 = srcLo * dstLo;
+        var mul16 = ((mul00 >>> 16) + (srcHi * dstLo));
+        var mul32 = mul16 >>> 16;
+        mul16 = ((mul16 & 0xffff) + (srcLo * dstHi));
+        mul32 += ((mul16 >>> 16) + (srcHi * dstHi));
 
-    var mul00 = srcLo * dstLo;
-    var mul16 = ((mul00 >>> 16) + (srcHi * dstLo));
-    var mul32 = mul16 >>> 16;
-    mul16 = ((mul16 & 0xffff) + (srcLo * dstHi));
-    mul32 += ((mul16 >>> 16) + (srcHi * dstHi));
-
-    this.regMDLo = (mul16 << 16) | (mul00 & 0xffff);
-    this.regMDHi = mul32|0;
-    this.fMDSet = true;
+        this.regMDLo = (mul16 << 16) | (mul00 & 0xffff);
+        this.regMDHi = mul32|0;
+    }
 };
 
 /**
@@ -2021,14 +2022,13 @@ X86.fnMULw = function(dst, src)
         var result = (src * dst)|0;
         this.regMDLo = result & 0xffff;
         this.regMDHi = (result >> 16) & 0xffff;
-        this.fMDSet = true;
     } else {
         X86.fnMUL32.call(this, dst, this.regEAX);
         if (this.stepping == X86.STEPPING_80386_B1) {
             if (this.regEAX == 0x0417A000 && dst == 0x00000081) {
                 /*
                  * Normally, the result should be 0x20FE7A000 (ie, regMDHi should be 0x2).
-                 * I'm not sure what a typical failure looked like, so I'll just set regMDHi to 0.
+                 * I'm not sure what a typical B1 stepping failure looked like, so I'll set regMDHi to 0.
                  *
                  * If you want a B1 stepping without this 32-bit multiplication flaw, select the B2 stepping.
                  */
@@ -2043,6 +2043,8 @@ X86.fnMULw = function(dst, src)
     } else {
         this.clearCF(); this.clearOF();
     }
+
+    this.fMDSet = true;
 
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesMulWR : this.cycleCounts.nOpCyclesMulWM);
     this.opFlags |= X86.OPFLAG.NOWRITE;

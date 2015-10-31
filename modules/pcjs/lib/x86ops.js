@@ -4169,7 +4169,9 @@ X86.opGRP3b = function()
 {
     this.fMDSet = false;
     this.aOpModGrpByte[this.getIPByte()].call(this, X86.aOpGrp3b, X86.fnSRCNone);
-    if (this.fMDSet) this.regEAX = (this.regEAX & ~this.maskData) | (this.regMDLo & this.maskData);
+    if (this.fMDSet) {
+        this.regEAX = (this.regEAX & ~this.maskData) | (this.regMDLo & this.maskData);
+    }
 };
 
 /**
@@ -4184,7 +4186,7 @@ X86.opGRP3b = function()
  * return value back into AX or DX, undoing fnMULw's update of DX:AX.  And since fnMULw doesn't
  * know what the target is (only the target's value), it cannot easily work around the problem.
  *
- * A simple, albeit kludgey, solution is for fnMULw to always save its result in a special
+ * A simple, albeit kludgy, solution is for fnMULw to always save its result in a special
  * "register" (eg, regMDLo/regMDHi), which we will then put back into regEAX/regEDX if it's been
  * updated.  This also relieves us from having to decode any part of the ModRM byte, so maybe
  * it's not such a bad work-around after all.
