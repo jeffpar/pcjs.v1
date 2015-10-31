@@ -2952,8 +2952,8 @@ X86.opSTOSb = function()
          * only EDI in the case of STOS.  The other instructions mentioned below monkey with different
          * registers, so read the errata carefully.
          *
-         * TODO: Extend this errata to STOSW, as well as MOVSB, MOVSW, INSB, and INSW.  Also, scope out the
-         * extent to which this errara also existed on earlier steppings.
+         * TODO: Extend this errata to STOSW, as well as MOVSB, MOVSW, INSB, and INSW.  Also, verify the
+         * extent to which this errata existed on earlier 80386 steppings (I'm currently assuming A0).
          */
         if (this.stepping >= X86.STEPPING_80386_A0 && this.stepping <= X86.STEPPING_80386_B1) {
             if (!(this.opPrefixes & X86.OPFLAG.ADDRSIZE) != (this.getByte(this.regLIP) != X86.OPCODE.AS)) {
