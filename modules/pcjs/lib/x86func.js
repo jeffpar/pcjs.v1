@@ -684,28 +684,6 @@ X86.fnDECw = function(dst, src)
 };
 
 /**
- * fnIBTS(dst, src)
- *
- * As best I can determine, this function copies the specified bits from src (starting at bit 0 for CL
- * bits) to dst (starting at bit offset in AX).  For register operands, that's simple enough.
- *
- * TODO: If dst refers to a memory location, then the bit index may refer to higher memory locations, just
- * like the BT/BTC/BTR/BTS instructions.  For an instruction that no one was really able to use, except
- * as a CPU stepping discriminator, that doesn't seem worth the effort.
- *
- * @this {X86CPU}
- * @param {number} dst
- * @param {number} src
- * @return {number}
- */
-X86.fnIBTS = function(dst, src)
-{
-    var shift = (this.regEAX & this.maskData);
-    var mask = ((1 << (this.regECX & 0x1f)) - 1);
-    return (dst & ~(mask << shift)) | ((src & mask) << shift);
-};
-
-/**
  * fnSet64(lo, hi)
  *
  * @param {number} lo
@@ -789,21 +767,20 @@ X86.fnShr64 = function(dst)
  *
  * This sets regMDLo to dstHi:dstLo / src, and regMDHi to dstHi:dstLo % src; all inputs are treated as unsigned.
  *
- * If fMDSet is not set, however, then there was a divide exception (ie, the divisor was either zero or too small).
- *
  * Refer to: http://lxr.linux.no/linux+v2.6.22/lib/div64.c
  *
  * @this {X86CPU}
  * @param {number} dstLo (low 32-bit portion of dividend)
  * @param {number} dstHi (high 32-bit portion of dividend)
  * @param {number} src (32-bit divisor)
+ * @return {boolean} true if successful, false if overflow (ie, the divisor was either zero or too small)
  */
 X86.fnDIV32 = function(dstLo, dstHi, src)
 {
-    this.fMDSet = false;
-
     src >>>= 0;
-    if (!src || src <= (dstHi >>> 0)) return;
+    if (!src || src <= (dstHi >>> 0)) {
+        return false;
+    }
 
     var result = 0, bit = 1;
 
@@ -827,7 +804,7 @@ X86.fnDIV32 = function(dstLo, dstHi, src)
 
     this.regMDLo = result;              // result is the quotient, which callers expect in the low MD register
     this.regMDHi = rem[0];              // rem[0] is the remainder, which callers expect in the high MD register
-    this.fMDSet = true;
+    return true;
 };
 
 /**
@@ -835,32 +812,42 @@ X86.fnDIV32 = function(dstLo, dstHi, src)
  *
  * This sets regMDLo to dstHi:dstLo / src, and regMDHi to dstHi:dstLo % src; all inputs are treated as signed.
  *
- * If fMDSet is not set, however, then there was a divide exception (ie, the divisor was either zero or too small).
- *
  * Refer to: http://lxr.linux.no/linux+v2.6.22/lib/div64.c
  *
  * @this {X86CPU}
  * @param {number} dstLo (low 32-bit portion of dividend)
  * @param {number} dstHi (high 32-bit portion of dividend)
  * @param {number} src (32-bit divisor)
+ * @return {boolean} true if successful, false if overflow (ie, the divisor was either zero or too small)
  */
 X86.fnIDIV32 = function(dstLo, dstHi, src)
 {
-    var fNegLo = false, fNegHi = false;
+    var bNegLo = 0, bNegHi = 0;
+    /*
+     *      dividend    divisor       quotient    remainder
+     *        (dst)      (src)          (lo)         (hi)
+     *      --------    -------       --------    ---------
+     *         +           +     ->       +           +
+     *         +           -     ->       -           +
+     *         -           +     ->       -           -
+     *         -           -     ->       +           -
+     */
     if (src < 0) {
         src = -src|0;
-        fNegLo = !fNegLo;
+        bNegLo = 1 - bNegLo;
     }
     if (dstHi < 0) {
         dstLo = -dstLo|0;
         dstHi = (~dstHi + (dstLo? 0 : 1))|0;
-        fNegHi = true;
-        fNegLo = !fNegLo;
+        bNegHi = 1;
+        bNegLo = 1 - bNegLo;
     }
-    X86.fnDIV32.call(this, dstLo, dstHi, src);
-    if (this.regMDLo > 0x7fffffff) this.fMDSet = false;
-    if (fNegLo) this.regMDLo = -this.regMDLo;
-    if (fNegHi) this.regMDHi = -this.regMDHi;
+    if (!X86.fnDIV32.call(this, dstLo, dstHi, src) || this.regMDLo > 0x7fffffff+bNegLo || this.regMDHi > 0x7fffffff+bNegHi) {
+        return false;
+    }
+    if (bNegLo) this.regMDLo = -this.regMDLo;
+    if (bNegHi) this.regMDHi = -this.regMDHi;
+    return true;
 };
 
 /**
@@ -890,8 +877,8 @@ X86.fnDIVb = function(dst, src)
         return dst;
     }
 
-    this.fMDSet = true;
     this.regMDLo = (result & 0xff) | (((src % dst) & 0xff) << 8);
+    this.fMDSet = true;
 
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesDivBR : this.cycleCounts.nOpCyclesDivBM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
@@ -929,18 +916,18 @@ X86.fnDIVw = function(dst, src)
             X86.fnDIVOverflow.call(this);
             return dst;
         }
-        this.fMDSet = true;
         this.regMDLo = (result & 0xffff);
         this.regMDHi = (src % dst) & 0xffff;
+        this.fMDSet = true;
     }
     else {
-        X86.fnDIV32.call(this, this.regEAX, this.regEDX, dst);
-        if (!this.fMDSet) {
+        if (!X86.fnDIV32.call(this, this.regEAX, this.regEDX, dst)) {
             X86.fnDIVOverflow.call(this);
             return dst;
         }
         this.regMDLo |= 0;
         this.regMDHi |= 0;
+        this.fMDSet = true;
     }
 
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesDivWR : this.cycleCounts.nOpCyclesDivWM);
@@ -999,8 +986,8 @@ X86.fnIDIVb = function(dst, src)
         return dst;
     }
 
-    this.fMDSet = true;
     this.regMDLo = (result & 0xff) | (((src % div) & 0xff) << 8);
+    this.fMDSet = true;
 
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesIDivBR : this.cycleCounts.nOpCyclesIDivBM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
@@ -1046,18 +1033,18 @@ X86.fnIDIVw = function(dst, src)
             return dst;
         }
 
-        this.fMDSet = true;
         this.regMDLo = (result & 0xffff);
         this.regMDHi = (src % div) & 0xffff;
+        this.fMDSet = true;
     }
     else {
-        X86.fnIDIV32.call(this, this.regEAX, this.regEDX, dst);
-        if (!this.fMDSet) {
+        if (!X86.fnIDIV32.call(this, this.regEAX, this.regEDX, dst)) {
             X86.fnDIVOverflow.call(this);
             return dst;
         }
         this.regMDLo |= 0;
         this.regMDHi |= 0;
+        this.fMDSet = true;
     }
 
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesIDivWR : this.cycleCounts.nOpCyclesIDivWM);
@@ -1084,23 +1071,17 @@ X86.fnIDIVw = function(dst, src)
  */
 X86.fnIMUL8 = function(dst, src)
 {
-    dst = this.getIPDisp();
-    var result = (((src << 16) >> 16) * dst)|0;
-
-    if (result > 32767 || result < -32768) {
-        this.setCF(); this.setOF();
-    } else {
-        this.clearCF(); this.clearOF();
-    }
-
-    result &= 0xffff;
+    /*
+     * NOTE: getIPDisp() already sign-extends the dst parameter, so fnIMULrw() needlessly sign-extends it again;
+     * a small price to pay for a common function.
+     */
+    var result = X86.fnIMULrw.call(this, this.getIPDisp(), src);
 
     /*
-     * NOTE: These are the cycle counts for the 80286; the 80186/80188 have slightly different values (ranges):
-     * 22-25 and 29-32 instead of 21 and 24, respectively.  However, accurate cycle counts for the 80186/80188 is
-     * not super-critical. TODO: Fix this someday.
+     * NOTE: The above function already accounted for the 80386 cycle count, so we are simply accounting for the
+     * increased time on an 80286; the 80186/80188 have even larger values, but we'll worry about that another day.
      */
-    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? 21 : 24);
+    if (this.model < X86.MODEL_80386) this.nStepCycles -= 12;
     return result;
 };
 
@@ -1187,10 +1168,10 @@ X86.fnIMUL32 = function(dst, src)
  */
 X86.fnIMULb = function(dst, src)
 {
-    var result = ((((src = this.regEAX) << 24) >> 24) * ((dst << 24) >> 24))|0;
+    var result = (((this.regEAX << 24) >> 24) * ((dst << 24) >> 24))|0;
 
-    this.fMDSet = true;
     this.regMDLo = result & 0xffff;
+    this.fMDSet = true;
 
     if (result > 127 || result < -128) {
         this.setCF(); this.setOF();
@@ -1229,9 +1210,9 @@ X86.fnIMULw = function(dst, src)
     if (this.sizeData == 2) {
         src = this.regEAX & 0xffff;
         var result = (((src << 16) >> 16) * ((dst << 16) >> 16))|0;
-        this.fMDSet = true;
         this.regMDLo = result & 0xffff;
         this.regMDHi = (result >> 16) & 0xffff;
+        this.fMDSet = true;
         fOverflow = (result > 32767 || result < -32768);
     } else {
         X86.fnIMUL32.call(this, dst, this.regEAX);
@@ -1975,8 +1956,8 @@ X86.fnMOVxx = function(dst, src)
  */
 X86.fnMULb = function(dst, src)
 {
+    this.regMDLo = ((this.regEAX & 0xff) * dst) & 0xffff;
     this.fMDSet = true;
-    this.regMDLo = ((src = this.regEAX & 0xff) * dst) & 0xffff;
 
     if (this.regMDLo & 0xff00) {
         this.setCF(); this.setOF();
@@ -2001,9 +1982,9 @@ X86.fnMULb = function(dst, src)
 X86.fnMUL32 = function(dst, src)
 {
     if (!(dst & ~0xffff) && !(src & ~0xffff)) {
-        this.fMDSet = true;
         this.regMDLo = (dst * src)|0;
         this.regMDHi = 0;
+        this.fMDSet = true;
         return;
     }
 
@@ -2018,9 +1999,9 @@ X86.fnMUL32 = function(dst, src)
     mul16 = ((mul16 & 0xffff) + (srcLo * dstHi));
     mul32 += ((mul16 >>> 16) + (srcHi * dstHi));
 
-    this.fMDSet = true;
     this.regMDLo = (mul16 << 16) | (mul00 & 0xffff);
     this.regMDHi = mul32|0;
+    this.fMDSet = true;
 };
 
 /**
@@ -2038,9 +2019,9 @@ X86.fnMULw = function(dst, src)
     if (this.sizeData == 2) {
         src = this.regEAX & 0xffff;
         var result = (src * dst)|0;
-        this.fMDSet = true;
         this.regMDLo = result & 0xffff;
         this.regMDHi = (result >> 16) & 0xffff;
+        this.fMDSet = true;
     } else {
         X86.fnMUL32.call(this, dst, this.regEAX);
         if (this.stepping == X86.STEPPING_80386_B1) {
@@ -3546,6 +3527,28 @@ X86.fnVERW = function(dst, src)
     this.clearZF();
     if (DEBUG && (this.sizeData > 2 || this.sizeAddr > 2)) this.stopCPU();
     return dst;
+};
+
+/**
+ * fnIBTS(dst, src)
+ *
+ * As best I can determine, this function copies the specified bits from src (starting at bit 0 for CL
+ * bits) to dst (starting at bit offset in AX).  For register operands, that's simple enough.
+ *
+ * TODO: If dst refers to a memory location, then the bit index may refer to higher memory locations, just
+ * like the BT/BTC/BTR/BTS instructions.  For an instruction that no one was really able to use, except
+ * as a CPU stepping discriminator, that doesn't seem worth the effort.
+ *
+ * @this {X86CPU}
+ * @param {number} dst
+ * @param {number} src
+ * @return {number}
+ */
+X86.fnIBTS = function(dst, src)
+{
+    var shift = (this.regEAX & this.maskData);
+    var mask = ((1 << (this.regECX & 0x1f)) - 1);
+    return (dst & ~(mask << shift)) | ((src & mask) << shift);
 };
 
 /**

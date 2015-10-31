@@ -139,7 +139,7 @@ function CPU(parmsCPU, nCyclesDefault)
     this.aVideo = [];
 
     var cpu = this;
-    this.onRunTimeout = function() { cpu.runCPU(); };
+    this.onRunTimeout = function onRunTimeout() { cpu.runCPU(); };
 
     this.setReady();
 }
