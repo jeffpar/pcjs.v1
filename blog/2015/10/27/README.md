@@ -104,7 +104,7 @@ XBTS (Extract Bit String) instruction -- an instruction that existed only on B0 
 	&0654:12E8 CF              IRET    
 
 If the above function returns 0xB0, then the 80386 is a B0 or earlier stepping, so Windows 95 displays the
-following message and exits:
+following message and aborts:
 
 	Windows may not run correctly with the 80386 processor that is installed in this computer.
 	Upgrade your 80386 processor.
@@ -167,6 +167,41 @@ However, if you can get through SETUP, Windows 95 will still run on a B1 steppin
 Windows 95 using a newer 80386, and then later "downgraded" the CPU to a B1, Windows 95 would still run.  If your B1
 suffered from the multiplication flaw, you would see the 32-bit multiplication warning on start-up, but you could
 still continue to run, and if there was no multiplication problem, you would not see any message at all.
+
+---
+
+PCjs v1.20.0 now supports a "stepping" attribute on the &lt;cpu&gt; element, which you can use to simulate specific
+stepping behavior.  For example, a *machine.xml* file with the following CPU definition: 
+
+	<cpu id="cpu386" model="80386" stepping="b0"/>
+
+will cause Windows 95 to abort exactly as described as above.  Similarly, selecting a 80386 B1 stepping:
+
+	<cpu id="cpu386" model="80386" stepping="b1"/>
+
+will cause Windows 95 to display the 32-bit multiplication warning shown above (PCjs deliberately fails the exact
+multiplication test that Windows 95 performs).
+
+If you want to simulate a B1 stepping that does *not* have the 32-bit multiplication flaw, set the stepping to B2:
+
+	<cpu id="cpu386" model="80386" stepping="b2"/>
+
+B2 was not an actual 80386 stepping; it is a *pseudo-stepping* that provides a simple way of specifying a B1 80386 that
+passes all 32-bit multiplication tests.
+
+As previously discussed, Windows 95 SETUP will refuse to install on any "A" or "B" stepping, but if it's already been
+installed, it *will* start up.
+
+PCjs stepping support is extremely limited at this point.  Here's a summary:
+
+1. 80386 steppings A0-B0 provide *limited* support for the short-lived XBTS and IBTS instructions
+2. 80386 steppings A0-B1 enable [Errata #7](/blog/2015/02/23/) for STOSB (as tested by Windows 95; see above)
+3. 80386 stepping B1 enables 32-bit multiplication errors (as tested by Windows 95; see above)
+4. 80386 stepping B2 includes all supported B1 errata, but without 32-bit multiplication errors
+
+In addition, on 80386 reset, we set the CPU revision number in DX to the appropriate value for the specified stepping.
+
+Support for additional 80286 and 80386 errata may be added over time, as interesting scenarios or test cases are discovered.
 
 *[@jeffpar](http://twitter.com/jeffpar)*  
 *October 27, 2015*

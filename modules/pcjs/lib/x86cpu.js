@@ -957,7 +957,7 @@ X86CPU.prototype.setReg = function(i, reg)
  *
  * All other 80386 registers are undefined after a reset (ie, Intel did not document how or if they are set).
  *
- * We've elected to set DX to 0x0304 on a reset, which is consistent with a 80386-C0, since we have no desire to
+ * We've elected to set DX to 0x0308 on a reset, the highest known 80386 revision, since we have no desire to
  * try to emulate all the bugs in older (eg, B1) steppings -- at least not initially.  We leave stepping-accurate
  * emulation for another day.  It's also known that the B1 (and possibly B0) reported 0x0303 in DX, and that
  * the D0 stepping reported 0x0305; beyond that, it's not known exactly what revision numbers Intel used for all
@@ -1079,9 +1079,10 @@ X86CPU.prototype.resetRegs = function()
             break;
         case X86.STEPPING_80386_D1:
         case X86.STEPPING_80386_D2:
-        default:
-            this.regEDX = 0x0308;       // in the absence of a specific stepping, default to the highest known revision
+            this.regEDX = 0x0308;
             break;
+        default:
+            break;                      // in the absence of a specific stepping, we leave DX set to zero
         }
         this.regCR0 = X86.CR0.ET;       // formerly MSW
         this.regCR1 = 0;                // reserved

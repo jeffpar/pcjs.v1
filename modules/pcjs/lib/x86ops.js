@@ -2955,7 +2955,7 @@ X86.opSTOSb = function()
          * TODO: Extend this errata to STOSW, as well as MOVSB, MOVSW, INSB, and INSW.  Also, scope out the
          * extent to which this errara also existed on earlier steppings.
          */
-        if (this.stepping == X86.STEPPING_80386_B1) {
+        if (this.stepping >= X86.STEPPING_80386_A0 && this.stepping <= X86.STEPPING_80386_B1) {
             if (!(this.opPrefixes & X86.OPFLAG.ADDRSIZE) != (this.getByte(this.regLIP) != X86.OPCODE.AS)) {
                 maskAddr ^= (0xffff0000|0);
             }
@@ -4169,9 +4169,7 @@ X86.opGRP3b = function()
 {
     this.fMDSet = false;
     this.aOpModGrpByte[this.getIPByte()].call(this, X86.aOpGrp3b, X86.fnSRCNone);
-    if (this.fMDSet) {
-        this.regEAX = (this.regEAX & ~this.maskData) | (this.regMDLo & this.maskData);
-    }
+    if (this.fMDSet) this.regEAX = (this.regEAX & ~this.maskData) | (this.regMDLo & this.maskData);
 };
 
 /**
