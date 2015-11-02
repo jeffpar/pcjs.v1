@@ -2522,7 +2522,7 @@ X86ModW32.aOpModReg = [
         var w = fn.call(this, this.regEAX & this.maskData, this.getSP() & this.maskData);
         this.regEAX = (this.regEAX & ~this.maskData) | w;
         if (BACKTRACK) {
-            this.backTrack.btiAL = X86.BACKTRACK.SP_LO; this.backTrack.btiAH = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiAL = X86.BTINFO.SP_LO; this.backTrack.btiAH = X86.BTINFO.SP_HI;
         }
     },
     /**
@@ -2623,7 +2623,7 @@ X86ModW32.aOpModReg = [
         var w = fn.call(this, this.regECX & this.maskData, this.getSP() & this.maskData);
         this.regECX = (this.regECX & ~this.maskData) | w;
         if (BACKTRACK) {
-            this.backTrack.btiCL = X86.BACKTRACK.SP_LO; this.backTrack.btiCH = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiCL = X86.BTINFO.SP_LO; this.backTrack.btiCH = X86.BTINFO.SP_HI;
         }
     },
     /**
@@ -2724,7 +2724,7 @@ X86ModW32.aOpModReg = [
         var w = fn.call(this, this.regEDX & this.maskData, this.getSP() & this.maskData);
         this.regEDX = (this.regEDX & ~this.maskData) | w;
         if (BACKTRACK) {
-            this.backTrack.btiDL = X86.BACKTRACK.SP_LO; this.backTrack.btiDH = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiDL = X86.BTINFO.SP_LO; this.backTrack.btiDH = X86.BTINFO.SP_HI;
         }
     },
     /**
@@ -2825,7 +2825,7 @@ X86ModW32.aOpModReg = [
         var w = fn.call(this, this.regEBX & this.maskData, this.getSP() & this.maskData);
         this.regEBX = (this.regEBX & ~this.maskData) | w;
         if (BACKTRACK) {
-            this.backTrack.btiBL = X86.BACKTRACK.SP_LO; this.backTrack.btiBH = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiBL = X86.BTINFO.SP_LO; this.backTrack.btiBH = X86.BTINFO.SP_HI;
         }
     },
     /**
@@ -3009,7 +3009,7 @@ X86ModW32.aOpModReg = [
         var w = fn.call(this, this.regEBP & this.maskData, this.getSP() & this.maskData);
         this.regEBP = (this.regEBP & ~this.maskData) | w;
         if (BACKTRACK) {
-            this.backTrack.btiBPLo = X86.BACKTRACK.SP_LO; this.backTrack.btiBPHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiBPLo = X86.BTINFO.SP_LO; this.backTrack.btiBPHi = X86.BTINFO.SP_HI;
         }
     },
     /**
@@ -3110,7 +3110,7 @@ X86ModW32.aOpModReg = [
         var w = fn.call(this, this.regESI & this.maskData, this.getSP() & this.maskData);
         this.regESI = (this.regESI & ~this.maskData) | w;
         if (BACKTRACK) {
-            this.backTrack.btiSILo = X86.BACKTRACK.SP_LO; this.backTrack.btiSIHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiSILo = X86.BTINFO.SP_LO; this.backTrack.btiSIHi = X86.BTINFO.SP_HI;
         }
     },
     /**
@@ -3211,7 +3211,7 @@ X86ModW32.aOpModReg = [
         var w = fn.call(this, this.regEDI & this.maskData, this.getSP() & this.maskData);
         this.regEDI = (this.regEDI & ~this.maskData) | w;
         if (BACKTRACK) {
-            this.backTrack.btiDILo = X86.BACKTRACK.SP_LO; this.backTrack.btiDIHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiDILo = X86.BTINFO.SP_LO; this.backTrack.btiDIHi = X86.BTINFO.SP_HI;
         }
     },
     /**
@@ -3678,7 +3678,7 @@ X86ModW32.aOpModMem = [
     function opMod32MemWord20(fn) {
         var w = fn.call(this, this.modEAWordData(this.regEAX), this.getSP() & this.maskData);
         if (BACKTRACK) {
-            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BTINFO.SP_LO; this.backTrack.btiEAHi = X86.BTINFO.SP_HI;
         }
         this.setEAWord(w);
     },
@@ -3691,7 +3691,7 @@ X86ModW32.aOpModMem = [
     function opMod32MemWord21(fn) {
         var w = fn.call(this, this.modEAWordData(this.regECX), this.getSP() & this.maskData);
         if (BACKTRACK) {
-            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BTINFO.SP_LO; this.backTrack.btiEAHi = X86.BTINFO.SP_HI;
         }
         this.setEAWord(w);
     },
@@ -3704,7 +3704,7 @@ X86ModW32.aOpModMem = [
     function opMod32MemWord22(fn) {
         var w = fn.call(this, this.modEAWordData(this.regEDX), this.getSP() & this.maskData);
         if (BACKTRACK) {
-            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BTINFO.SP_LO; this.backTrack.btiEAHi = X86.BTINFO.SP_HI;
         }
         this.setEAWord(w);
     },
@@ -3717,7 +3717,7 @@ X86ModW32.aOpModMem = [
     function opMod32MemWord23(fn) {
         var w = fn.call(this, this.modEAWordData(this.regEBX), this.getSP() & this.maskData);
         if (BACKTRACK) {
-            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BTINFO.SP_LO; this.backTrack.btiEAHi = X86.BTINFO.SP_HI;
         }
         this.setEAWord(w);
     },
@@ -3730,7 +3730,7 @@ X86ModW32.aOpModMem = [
     function opMod32MemWord24(fn) {
         var w = fn.call(this, this.modEAWordData(this.getSIBAddr(0)), this.getSP() & this.maskData);
         if (BACKTRACK) {
-            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BTINFO.SP_LO; this.backTrack.btiEAHi = X86.BTINFO.SP_HI;
         }
         this.setEAWord(w);
     },
@@ -3743,7 +3743,7 @@ X86ModW32.aOpModMem = [
     function opMod32MemWord25(fn) {
         var w = fn.call(this, this.modEAWordData(this.getIPAddr()), this.getSP() & this.maskData);
         if (BACKTRACK) {
-            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BTINFO.SP_LO; this.backTrack.btiEAHi = X86.BTINFO.SP_HI;
         }
         this.setEAWord(w);
     },
@@ -3756,7 +3756,7 @@ X86ModW32.aOpModMem = [
     function opMod32MemWord26(fn) {
         var w = fn.call(this, this.modEAWordData(this.regESI), this.getSP() & this.maskData);
         if (BACKTRACK) {
-            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BTINFO.SP_LO; this.backTrack.btiEAHi = X86.BTINFO.SP_HI;
         }
         this.setEAWord(w);
     },
@@ -3769,7 +3769,7 @@ X86ModW32.aOpModMem = [
     function opMod32MemWord27(fn) {
         var w = fn.call(this, this.modEAWordData(this.regEDI), this.getSP() & this.maskData);
         if (BACKTRACK) {
-            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BTINFO.SP_LO; this.backTrack.btiEAHi = X86.BTINFO.SP_HI;
         }
         this.setEAWord(w);
     },
@@ -4510,7 +4510,7 @@ X86ModW32.aOpModMem = [
     function opMod32MemWord60(fn) {
         var w = fn.call(this, this.modEAWordData(this.regEAX + this.getIPDisp()), this.getSP() & this.maskData);
         if (BACKTRACK) {
-            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BTINFO.SP_LO; this.backTrack.btiEAHi = X86.BTINFO.SP_HI;
         }
         this.setEAWord(w);
     },
@@ -4523,7 +4523,7 @@ X86ModW32.aOpModMem = [
     function opMod32MemWord61(fn) {
         var w = fn.call(this, this.modEAWordData(this.regECX + this.getIPDisp()), this.getSP() & this.maskData);
         if (BACKTRACK) {
-            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BTINFO.SP_LO; this.backTrack.btiEAHi = X86.BTINFO.SP_HI;
         }
         this.setEAWord(w);
     },
@@ -4536,7 +4536,7 @@ X86ModW32.aOpModMem = [
     function opMod32MemWord62(fn) {
         var w = fn.call(this, this.modEAWordData(this.regEDX + this.getIPDisp()), this.getSP() & this.maskData);
         if (BACKTRACK) {
-            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BTINFO.SP_LO; this.backTrack.btiEAHi = X86.BTINFO.SP_HI;
         }
         this.setEAWord(w);
     },
@@ -4549,7 +4549,7 @@ X86ModW32.aOpModMem = [
     function opMod32MemWord63(fn) {
         var w = fn.call(this, this.modEAWordData(this.regEBX + this.getIPDisp()), this.getSP() & this.maskData);
         if (BACKTRACK) {
-            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BTINFO.SP_LO; this.backTrack.btiEAHi = X86.BTINFO.SP_HI;
         }
         this.setEAWord(w);
     },
@@ -4562,7 +4562,7 @@ X86ModW32.aOpModMem = [
     function opMod32MemWord64(fn) {
         var w = fn.call(this, this.modEAWordData(this.getSIBAddr(1) + this.getIPDisp()), this.getSP() & this.maskData);
         if (BACKTRACK) {
-            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BTINFO.SP_LO; this.backTrack.btiEAHi = X86.BTINFO.SP_HI;
         }
         this.setEAWord(w);
     },
@@ -4575,7 +4575,7 @@ X86ModW32.aOpModMem = [
     function opMod32MemWord65(fn) {
         var w = fn.call(this, this.modEAWordStack(this.regEBP + this.getIPDisp()), this.getSP() & this.maskData);
         if (BACKTRACK) {
-            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BTINFO.SP_LO; this.backTrack.btiEAHi = X86.BTINFO.SP_HI;
         }
         this.setEAWord(w);
     },
@@ -4588,7 +4588,7 @@ X86ModW32.aOpModMem = [
     function opMod32MemWord66(fn) {
         var w = fn.call(this, this.modEAWordData(this.regESI + this.getIPDisp()), this.getSP() & this.maskData);
         if (BACKTRACK) {
-            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BTINFO.SP_LO; this.backTrack.btiEAHi = X86.BTINFO.SP_HI;
         }
         this.setEAWord(w);
     },
@@ -4601,7 +4601,7 @@ X86ModW32.aOpModMem = [
     function opMod32MemWord67(fn) {
         var w = fn.call(this, this.modEAWordData(this.regEDI + this.getIPDisp()), this.getSP() & this.maskData);
         if (BACKTRACK) {
-            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BTINFO.SP_LO; this.backTrack.btiEAHi = X86.BTINFO.SP_HI;
         }
         this.setEAWord(w);
     },
@@ -5342,7 +5342,7 @@ X86ModW32.aOpModMem = [
     function opMod32MemWordA0(fn) {
         var w = fn.call(this, this.modEAWordData(this.regEAX + this.getIPAddr()), this.getSP() & this.maskData);
         if (BACKTRACK) {
-            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BTINFO.SP_LO; this.backTrack.btiEAHi = X86.BTINFO.SP_HI;
         }
         this.setEAWord(w);
     },
@@ -5355,7 +5355,7 @@ X86ModW32.aOpModMem = [
     function opMod32MemWordA1(fn) {
         var w = fn.call(this, this.modEAWordData(this.regECX + this.getIPAddr()), this.getSP() & this.maskData);
         if (BACKTRACK) {
-            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BTINFO.SP_LO; this.backTrack.btiEAHi = X86.BTINFO.SP_HI;
         }
         this.setEAWord(w);
     },
@@ -5368,7 +5368,7 @@ X86ModW32.aOpModMem = [
     function opMod32MemWordA2(fn) {
         var w = fn.call(this, this.modEAWordData(this.regEDX + this.getIPAddr()), this.getSP() & this.maskData);
         if (BACKTRACK) {
-            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BTINFO.SP_LO; this.backTrack.btiEAHi = X86.BTINFO.SP_HI;
         }
         this.setEAWord(w);
     },
@@ -5381,7 +5381,7 @@ X86ModW32.aOpModMem = [
     function opMod32MemWordA3(fn) {
         var w = fn.call(this, this.modEAWordData(this.regEBX + this.getIPAddr()), this.getSP() & this.maskData);
         if (BACKTRACK) {
-            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BTINFO.SP_LO; this.backTrack.btiEAHi = X86.BTINFO.SP_HI;
         }
         this.setEAWord(w);
     },
@@ -5394,7 +5394,7 @@ X86ModW32.aOpModMem = [
     function opMod32MemWordA4(fn) {
         var w = fn.call(this, this.modEAWordData(this.getSIBAddr(2) + this.getIPAddr()), this.getSP() & this.maskData);
         if (BACKTRACK) {
-            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BTINFO.SP_LO; this.backTrack.btiEAHi = X86.BTINFO.SP_HI;
         }
         this.setEAWord(w);
     },
@@ -5407,7 +5407,7 @@ X86ModW32.aOpModMem = [
     function opMod32MemWordA5(fn) {
         var w = fn.call(this, this.modEAWordStack(this.regEBP + this.getIPAddr()), this.getSP() & this.maskData);
         if (BACKTRACK) {
-            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BTINFO.SP_LO; this.backTrack.btiEAHi = X86.BTINFO.SP_HI;
         }
         this.setEAWord(w);
     },
@@ -5420,7 +5420,7 @@ X86ModW32.aOpModMem = [
     function opMod32MemWordA6(fn) {
         var w = fn.call(this, this.modEAWordData(this.regESI + this.getIPAddr()), this.getSP() & this.maskData);
         if (BACKTRACK) {
-            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BTINFO.SP_LO; this.backTrack.btiEAHi = X86.BTINFO.SP_HI;
         }
         this.setEAWord(w);
     },
@@ -5433,7 +5433,7 @@ X86ModW32.aOpModMem = [
     function opMod32MemWordA7(fn) {
         var w = fn.call(this, this.modEAWordData(this.regEDI + this.getIPAddr()), this.getSP() & this.maskData);
         if (BACKTRACK) {
-            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BTINFO.SP_LO; this.backTrack.btiEAHi = X86.BTINFO.SP_HI;
         }
         this.setEAWord(w);
     },

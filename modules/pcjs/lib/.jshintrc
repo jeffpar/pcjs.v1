@@ -47,6 +47,8 @@
     "X86Op0F": true,
     "X86ModB": true,
     "X86ModW": true,
+    "X86ModB16": true,
+    "X86ModW16": true,
     "X86ModB32": true,
     "X86ModW32": true,
     "X86ModSIB": true,

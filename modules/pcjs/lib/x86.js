@@ -758,7 +758,7 @@ var X86 = {
 /*
  * BACKTRACK-related definitions (used only if BACKTRACK is defined)
  */
-X86.BACKTRACK = {
+X86.BTINFO = {
     SP_LO:  0,
     SP_HI:  0
 };

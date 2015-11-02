@@ -2517,7 +2517,7 @@ X86ModW.aOpModReg = [
     function opModRegWordC4(fn) {
         this.regEAX = fn.call(this, this.regEAX, this.getSP());
         if (BACKTRACK) {
-            this.backTrack.btiAL = X86.BACKTRACK.SP_LO; this.backTrack.btiAH = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiAL = X86.BTINFO.SP_LO; this.backTrack.btiAH = X86.BTINFO.SP_HI;
         }
     },
     /**
@@ -2610,7 +2610,7 @@ X86ModW.aOpModReg = [
     function opModRegWordCC(fn) {
         this.regECX = fn.call(this, this.regECX, this.getSP());
         if (BACKTRACK) {
-            this.backTrack.btiCL = X86.BACKTRACK.SP_LO; this.backTrack.btiCH = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiCL = X86.BTINFO.SP_LO; this.backTrack.btiCH = X86.BTINFO.SP_HI;
         }
     },
     /**
@@ -2703,7 +2703,7 @@ X86ModW.aOpModReg = [
     function opModRegWordD4(fn) {
         this.regEDX = fn.call(this, this.regEDX, this.getSP());
         if (BACKTRACK) {
-            this.backTrack.btiDL = X86.BACKTRACK.SP_LO; this.backTrack.btiDH = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiDL = X86.BTINFO.SP_LO; this.backTrack.btiDH = X86.BTINFO.SP_HI;
         }
     },
     /**
@@ -2796,7 +2796,7 @@ X86ModW.aOpModReg = [
     function opModRegWordDC(fn) {
         this.regEBX = fn.call(this, this.regEBX, this.getSP());
         if (BACKTRACK) {
-            this.backTrack.btiBL = X86.BACKTRACK.SP_LO; this.backTrack.btiBH = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiBL = X86.BTINFO.SP_LO; this.backTrack.btiBH = X86.BTINFO.SP_HI;
         }
     },
     /**
@@ -2964,7 +2964,7 @@ X86ModW.aOpModReg = [
     function opModRegWordEC(fn) {
         this.regEBP = fn.call(this, this.regEBP, this.getSP());
         if (BACKTRACK) {
-            this.backTrack.btiBPLo = X86.BACKTRACK.SP_LO; this.backTrack.btiBPHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiBPLo = X86.BTINFO.SP_LO; this.backTrack.btiBPHi = X86.BTINFO.SP_HI;
         }
     },
     /**
@@ -3057,7 +3057,7 @@ X86ModW.aOpModReg = [
     function opModRegWordF4(fn) {
         this.regESI = fn.call(this, this.regESI, this.getSP());
         if (BACKTRACK) {
-            this.backTrack.btiSILo = X86.BACKTRACK.SP_LO; this.backTrack.btiSIHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiSILo = X86.BTINFO.SP_LO; this.backTrack.btiSIHi = X86.BTINFO.SP_HI;
         }
     },
     /**
@@ -3150,7 +3150,7 @@ X86ModW.aOpModReg = [
     function opModRegWordFC(fn) {
         this.regEDI = fn.call(this, this.regEDI, this.getSP());
         if (BACKTRACK) {
-            this.backTrack.btiDILo = X86.BACKTRACK.SP_LO; this.backTrack.btiDIHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiDILo = X86.BTINFO.SP_LO; this.backTrack.btiDIHi = X86.BTINFO.SP_HI;
         }
     },
     /**
@@ -3646,7 +3646,7 @@ X86ModW.aOpModMem = [
     function opModMemWord20(fn) {
         var w = fn.call(this, this.modEAWordData(this.regEBX + this.regESI), this.getSP());
         if (BACKTRACK) {
-            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BTINFO.SP_LO; this.backTrack.btiEAHi = X86.BTINFO.SP_HI;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
@@ -3660,7 +3660,7 @@ X86ModW.aOpModMem = [
     function opModMemWord21(fn) {
         var w = fn.call(this, this.modEAWordData(this.regEBX + this.regEDI), this.getSP());
         if (BACKTRACK) {
-            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BTINFO.SP_LO; this.backTrack.btiEAHi = X86.BTINFO.SP_HI;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
@@ -3674,7 +3674,7 @@ X86ModW.aOpModMem = [
     function opModMemWord22(fn) {
         var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regESI), this.getSP());
         if (BACKTRACK) {
-            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BTINFO.SP_LO; this.backTrack.btiEAHi = X86.BTINFO.SP_HI;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
@@ -3688,7 +3688,7 @@ X86ModW.aOpModMem = [
     function opModMemWord23(fn) {
         var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regEDI), this.getSP());
         if (BACKTRACK) {
-            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BTINFO.SP_LO; this.backTrack.btiEAHi = X86.BTINFO.SP_HI;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
@@ -3702,7 +3702,7 @@ X86ModW.aOpModMem = [
     function opModMemWord24(fn) {
         var w = fn.call(this, this.modEAWordData(this.regESI), this.getSP());
         if (BACKTRACK) {
-            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BTINFO.SP_LO; this.backTrack.btiEAHi = X86.BTINFO.SP_HI;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.cycleCounts.nEACyclesBase;
@@ -3716,7 +3716,7 @@ X86ModW.aOpModMem = [
     function opModMemWord25(fn) {
         var w = fn.call(this, this.modEAWordData(this.regEDI), this.getSP());
         if (BACKTRACK) {
-            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BTINFO.SP_LO; this.backTrack.btiEAHi = X86.BTINFO.SP_HI;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.cycleCounts.nEACyclesBase;
@@ -3730,7 +3730,7 @@ X86ModW.aOpModMem = [
     function opModMemWord26(fn) {
         var w = fn.call(this, this.modEAWordData(this.getIPAddr()), this.getSP());
         if (BACKTRACK) {
-            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BTINFO.SP_LO; this.backTrack.btiEAHi = X86.BTINFO.SP_HI;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.cycleCounts.nEACyclesDisp;
@@ -3744,7 +3744,7 @@ X86ModW.aOpModMem = [
     function opModMemWord27(fn) {
         var w = fn.call(this, this.modEAWordData(this.regEBX), this.getSP());
         if (BACKTRACK) {
-            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BTINFO.SP_LO; this.backTrack.btiEAHi = X86.BTINFO.SP_HI;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.cycleCounts.nEACyclesBase;
@@ -4542,7 +4542,7 @@ X86ModW.aOpModMem = [
     function opModMemWord60(fn) {
         var w = fn.call(this, this.modEAWordData(this.regEBX + this.regESI + this.getIPDisp()), this.getSP());
         if (BACKTRACK) {
-            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BTINFO.SP_LO; this.backTrack.btiEAHi = X86.BTINFO.SP_HI;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
@@ -4556,7 +4556,7 @@ X86ModW.aOpModMem = [
     function opModMemWord61(fn) {
         var w = fn.call(this, this.modEAWordData(this.regEBX + this.regEDI + this.getIPDisp()), this.getSP());
         if (BACKTRACK) {
-            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BTINFO.SP_LO; this.backTrack.btiEAHi = X86.BTINFO.SP_HI;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
@@ -4570,7 +4570,7 @@ X86ModW.aOpModMem = [
     function opModMemWord62(fn) {
         var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regESI + this.getIPDisp()), this.getSP());
         if (BACKTRACK) {
-            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BTINFO.SP_LO; this.backTrack.btiEAHi = X86.BTINFO.SP_HI;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
@@ -4584,7 +4584,7 @@ X86ModW.aOpModMem = [
     function opModMemWord63(fn) {
         var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regEDI + this.getIPDisp()), this.getSP());
         if (BACKTRACK) {
-            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BTINFO.SP_LO; this.backTrack.btiEAHi = X86.BTINFO.SP_HI;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
@@ -4598,7 +4598,7 @@ X86ModW.aOpModMem = [
     function opModMemWord64(fn) {
         var w = fn.call(this, this.modEAWordData(this.regESI + this.getIPDisp()), this.getSP());
         if (BACKTRACK) {
-            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BTINFO.SP_LO; this.backTrack.btiEAHi = X86.BTINFO.SP_HI;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -4612,7 +4612,7 @@ X86ModW.aOpModMem = [
     function opModMemWord65(fn) {
         var w = fn.call(this, this.modEAWordData(this.regEDI + this.getIPDisp()), this.getSP());
         if (BACKTRACK) {
-            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BTINFO.SP_LO; this.backTrack.btiEAHi = X86.BTINFO.SP_HI;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -4626,7 +4626,7 @@ X86ModW.aOpModMem = [
     function opModMemWord66(fn) {
         var w = fn.call(this, this.modEAWordStack(this.regEBP + this.getIPDisp()), this.getSP());
         if (BACKTRACK) {
-            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BTINFO.SP_LO; this.backTrack.btiEAHi = X86.BTINFO.SP_HI;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -4640,7 +4640,7 @@ X86ModW.aOpModMem = [
     function opModMemWord67(fn) {
         var w = fn.call(this, this.modEAWordData(this.regEBX + this.getIPDisp()), this.getSP());
         if (BACKTRACK) {
-            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BTINFO.SP_LO; this.backTrack.btiEAHi = X86.BTINFO.SP_HI;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -5438,7 +5438,7 @@ X86ModW.aOpModMem = [
     function opModMemWordA0(fn) {
         var w = fn.call(this, this.modEAWordData(this.regEBX + this.regESI + this.getIPAddr()), this.getSP());
         if (BACKTRACK) {
-            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BTINFO.SP_LO; this.backTrack.btiEAHi = X86.BTINFO.SP_HI;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
@@ -5452,7 +5452,7 @@ X86ModW.aOpModMem = [
     function opModMemWordA1(fn) {
         var w = fn.call(this, this.modEAWordData(this.regEBX + this.regEDI + this.getIPAddr()), this.getSP());
         if (BACKTRACK) {
-            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BTINFO.SP_LO; this.backTrack.btiEAHi = X86.BTINFO.SP_HI;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
@@ -5466,7 +5466,7 @@ X86ModW.aOpModMem = [
     function opModMemWordA2(fn) {
         var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regESI + this.getIPAddr()), this.getSP());
         if (BACKTRACK) {
-            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BTINFO.SP_LO; this.backTrack.btiEAHi = X86.BTINFO.SP_HI;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
@@ -5480,7 +5480,7 @@ X86ModW.aOpModMem = [
     function opModMemWordA3(fn) {
         var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regEDI + this.getIPAddr()), this.getSP());
         if (BACKTRACK) {
-            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BTINFO.SP_LO; this.backTrack.btiEAHi = X86.BTINFO.SP_HI;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
@@ -5494,7 +5494,7 @@ X86ModW.aOpModMem = [
     function opModMemWordA4(fn) {
         var w = fn.call(this, this.modEAWordData(this.regESI + this.getIPAddr()), this.getSP());
         if (BACKTRACK) {
-            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BTINFO.SP_LO; this.backTrack.btiEAHi = X86.BTINFO.SP_HI;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -5508,7 +5508,7 @@ X86ModW.aOpModMem = [
     function opModMemWordA5(fn) {
         var w = fn.call(this, this.modEAWordData(this.regEDI + this.getIPAddr()), this.getSP());
         if (BACKTRACK) {
-            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BTINFO.SP_LO; this.backTrack.btiEAHi = X86.BTINFO.SP_HI;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -5522,7 +5522,7 @@ X86ModW.aOpModMem = [
     function opModMemWordA6(fn) {
         var w = fn.call(this, this.modEAWordStack(this.regEBP + this.getIPAddr()), this.getSP());
         if (BACKTRACK) {
-            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BTINFO.SP_LO; this.backTrack.btiEAHi = X86.BTINFO.SP_HI;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -5536,7 +5536,7 @@ X86ModW.aOpModMem = [
     function opModMemWordA7(fn) {
         var w = fn.call(this, this.modEAWordData(this.regEBX + this.getIPAddr()), this.getSP());
         if (BACKTRACK) {
-            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BTINFO.SP_LO; this.backTrack.btiEAHi = X86.BTINFO.SP_HI;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;

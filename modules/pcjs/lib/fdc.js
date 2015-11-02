@@ -1960,7 +1960,9 @@ FDC.prototype.doCmd = function()
         break;
     }
 
-    if (this.regDataTotal > 0) this.regStatus |= (FDC.REG_STATUS.READ_DATA | FDC.REG_STATUS.BUSY);
+    if (this.regDataTotal > 0) {
+        this.regStatus |= (FDC.REG_STATUS.READ_DATA | FDC.REG_STATUS.BUSY);
+    }
 
     /*
      * After the Execution Phase (eg, DMA Terminal Count has occurred, or the EOT sector has been read/written),
@@ -2035,7 +2037,7 @@ FDC.prototype.popCmd = function(name)
     if (DEBUG && this.messageEnabled(Messages.PORT | Messages.FDC)) {
         var bCmdMasked = bCmd & FDC.REG_DATA.CMD.MASK;
         if (!name && !this.regDataIndex && FDC.aCmdInfo[bCmdMasked]) name = FDC.aCmdInfo[bCmdMasked].name;
-        this.printMessage("FDC.CMD[" + (name || this.regDataIndex) + "]: " + str.toHexByte(bCmd), true);
+        this.printMessage(this.id + ".popCmd(" + (name || this.regDataIndex) + "): " + str.toHexByte(bCmd), true);
     }
     this.regDataIndex++;
     return bCmd;
@@ -2087,7 +2089,7 @@ FDC.prototype.beginResult = function()
 FDC.prototype.pushResult = function(bResult, name)
 {
     if (DEBUG && this.messageEnabled(Messages.PORT | Messages.FDC)) {
-        this.printMessage("FDC.RES[" + (name || this.regDataTotal) + "]: " + str.toHexByte(bResult), true);
+        this.printMessage(this.id + ".pushResult(" + (name || this.regDataTotal) + "): " + str.toHexByte(bResult), true);
     }
     this.assert(!(bResult & ~0xff));
     this.regDataArray[this.regDataTotal++] = bResult;
@@ -2154,7 +2156,7 @@ FDC.prototype.dmaRead = function(drive, b, done)
     /*
      * The DMA controller should be ASKING for data, not GIVING us data; this suggests an internal DMA miscommunication
      */
-    if (DEBUG) this.printMessage("dmaRead(): invalid DMA acknowledgement");
+    if (DEBUG) this.printMessage(this.id + ".dmaRead(): invalid DMA acknowledgement");
     done(-1, false);
 };
 
@@ -2173,7 +2175,7 @@ FDC.prototype.dmaWrite = function(drive, b)
     /*
      * The DMA controller should be GIVING us data, not ASKING for data; this suggests an internal DMA miscommunication
      */
-    if (DEBUG) this.printMessage("dmaWrite(): invalid DMA acknowledgement");
+    if (DEBUG) this.printMessage(this.id + ".dmaWrite(): invalid DMA acknowledgement");
     return -1;
 };
 
@@ -2192,7 +2194,7 @@ FDC.prototype.dmaFormat = function(drive, b)
     /*
      * The DMA controller should be GIVING us data, not ASKING for data; this suggests an internal DMA miscommunication
      */
-    if (DEBUG) this.printMessage("dmaFormat(): invalid DMA acknowledgement");
+    if (DEBUG) this.printMessage(this.id + ".dmaFormat(): invalid DMA acknowledgement");
     return -1;
 };
 
@@ -2213,7 +2215,7 @@ FDC.prototype.doRead = function(drive)
 
     if (drive.disk) {
         if (DEBUG && this.messageEnabled()) {
-            this.printMessage("FDC.doRead(CHS=" + drive.bCylinder + ':' + drive.bHead + ':' + drive.bSector + ",PBA=" + (drive.bCylinder * (drive.disk.nHeads * drive.disk.nSectors) + drive.bHead * drive.disk.nSectors + drive.bSector-1) + ')');
+            this.printMessage(this.id + ".doRead(CHS=" + drive.bCylinder + ':' + drive.bHead + ':' + drive.bSector + ",PBA=" + (drive.bCylinder * (drive.disk.nHeads * drive.disk.nSectors) + drive.bHead * drive.disk.nSectors + drive.bSector-1) + ')');
         }
         drive.sector = null;
         drive.resCode = FDC.REG_DATA.RES.NONE;
@@ -2236,7 +2238,7 @@ FDC.prototype.doWrite = function(drive)
 
     if (drive.disk) {
         if (DEBUG && this.messageEnabled()) {
-            this.printMessage("FDC.doWrite(CHS=" + drive.bCylinder + ':' + drive.bHead + ':' + drive.bSector + ",PBA=" + (drive.bCylinder * (drive.disk.nHeads * drive.disk.nSectors) + drive.bHead * drive.disk.nSectors + drive.bSector-1) + ')');
+            this.printMessage(this.id + ".doWrite(CHS=" + drive.bCylinder + ':' + drive.bHead + ':' + drive.bSector + ",PBA=" + (drive.bCylinder * (drive.disk.nHeads * drive.disk.nSectors) + drive.bHead * drive.disk.nSectors + drive.bSector-1) + ')');
         }
         if (drive.disk.fWriteProtected) {
             drive.resCode = FDC.REG_DATA.RES.NOT_WRITABLE | FDC.REG_DATA.RES.INCOMPLETE;
@@ -2439,7 +2441,7 @@ FDC.prototype.writeFormat = function(drive, b)
         drive.nBytes = 128 << drive.abFormat[3];// N (0 => 128, 1 => 256, 2 => 512, 3 => 1024)
         drive.cbFormat = 0;
         if (DEBUG && this.messageEnabled()) {
-            this.printMessage("writeFormat(head=" + str.toHexByte(drive.bHead) + ",cyl=" + str.toHexByte(drive.bCylinder) + ",sec=" + str.toHexByte(drive.bSector) + ",len=" + str.toHexWord(drive.nBytes) + ")");
+            this.printMessage(this.id + ".writeFormat(head=" + str.toHexByte(drive.bHead) + ",cyl=" + str.toHexByte(drive.bCylinder) + ",sec=" + str.toHexByte(drive.bSector) + ",len=" + str.toHexWord(drive.nBytes) + ")");
         }
         for (var i = 0; i < drive.nBytes; i++) {
             if (this.writeData(drive, drive.bFiller) < 0) {

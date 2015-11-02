@@ -234,7 +234,7 @@ if (BACKTRACK) {
      *
      * Bit 9 is reserved for now.
      */
-    Bus.BACKTRACK = {
+    Bus.BTINFO = {
         SLOT_MAX:       32768,
         SLOT_SHIFT:     16,
         TYPE_DATA:      0x8000,
@@ -962,7 +962,7 @@ Bus.prototype.addBackTrackObject = function(obj, bto, off)
              */
             if (this.ibtLastAlloc >= 0) bto = this.abtObjects[this.ibtLastAlloc];
         }
-        if (!bto || bto.obj != obj || off < bto.off || off >= bto.off + Bus.BACKTRACK.OFF_MAX) {
+        if (!bto || bto.obj != obj || off < bto.off || off >= bto.off + Bus.BTINFO.OFF_MAX) {
 
             bto = {obj: obj, off: off, slot: 0, refs: 0};
 
@@ -972,7 +972,7 @@ Bus.prototype.addBackTrackObject = function(obj, bto, off)
             } else {
                 for (slot = this.ibtLastDelete; slot < cbtObjects; slot++) {
                     var btoTest = this.abtObjects[slot];
-                    if (!btoTest || !btoTest.refs && !this.isBackTrackWeak(slot << Bus.BACKTRACK.SLOT_SHIFT)) {
+                    if (!btoTest || !btoTest.refs && !this.isBackTrackWeak(slot << Bus.BTINFO.SLOT_SHIFT)) {
                         this.ibtLastDelete = slot + 1;
                         this.cbtDeletions--;
                         break;
@@ -1004,7 +1004,7 @@ Bus.prototype.addBackTrackObject = function(obj, bto, off)
              * TODO: Investigate.  For now, BACKTRACK is completely disabled (in part because it also needs
              * to be revamped for machines with paging enabled).
              */
-            this.assert(slot < Bus.BACKTRACK.SLOT_MAX);
+            this.assert(slot < Bus.BTINFO.SLOT_MAX);
             this.ibtLastAlloc = slot;
             bto.slot = slot + 1;
             if (slot == cbtObjects) {
@@ -1030,7 +1030,7 @@ Bus.prototype.getBackTrackIndex = function(bto, off)
 {
     var bti = 0;
     if (BACKTRACK && bto) {
-        bti = (bto.slot << Bus.BACKTRACK.SLOT_SHIFT) | Bus.BACKTRACK.TYPE_DATA | (off - bto.off);
+        bti = (bto.slot << Bus.BTINFO.SLOT_SHIFT) | Bus.BTINFO.TYPE_DATA | (off - bto.off);
     }
     return bti;
 };
@@ -1046,8 +1046,8 @@ Bus.prototype.getBackTrackIndex = function(bto, off)
 Bus.prototype.writeBackTrackObject = function(addr, bto, off)
 {
     if (BACKTRACK && bto) {
-        this.assert(off - bto.off >= 0 && off - bto.off < Bus.BACKTRACK.OFF_MAX);
-        var bti = (bto.slot << Bus.BACKTRACK.SLOT_SHIFT) | Bus.BACKTRACK.TYPE_DATA | (off - bto.off);
+        this.assert(off - bto.off >= 0 && off - bto.off < Bus.BTINFO.OFF_MAX);
+        var bti = (bto.slot << Bus.BTINFO.SLOT_SHIFT) | Bus.BTINFO.TYPE_DATA | (off - bto.off);
         this.writeBackTrack(addr, bti);
     }
 };
@@ -1077,10 +1077,10 @@ Bus.prototype.readBackTrack = function(addr)
 Bus.prototype.writeBackTrack = function(addr, bti)
 {
     if (BACKTRACK) {
-        var slot = bti >>> Bus.BACKTRACK.SLOT_SHIFT;
+        var slot = bti >>> Bus.BTINFO.SLOT_SHIFT;
         var iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
         var btiPrev = this.aMemBlocks[iBlock].writeBackTrack(addr & this.nBlockLimit, bti);
-        var slotPrev = btiPrev >>> Bus.BACKTRACK.SLOT_SHIFT;
+        var slotPrev = btiPrev >>> Bus.BTINFO.SLOT_SHIFT;
         if (slot != slotPrev) {
             this.aMemBlocks[iBlock].modBackTrack(true);
             if (btiPrev && slotPrev) {
@@ -1145,21 +1145,21 @@ Bus.prototype.writeBackTrack = function(addr, bti)
 Bus.prototype.isBackTrackWeak = function(bti)
 {
     var bt = this.cpu.backTrack;
-    var slot = bti >> Bus.BACKTRACK.SLOT_SHIFT;
-    return (bt.btiAL   >> Bus.BACKTRACK.SLOT_SHIFT == slot ||
-            bt.btiAH   >> Bus.BACKTRACK.SLOT_SHIFT == slot ||
-            bt.btiBL   >> Bus.BACKTRACK.SLOT_SHIFT == slot ||
-            bt.btiBH   >> Bus.BACKTRACK.SLOT_SHIFT == slot ||
-            bt.btiCL   >> Bus.BACKTRACK.SLOT_SHIFT == slot ||
-            bt.btiCH   >> Bus.BACKTRACK.SLOT_SHIFT == slot ||
-            bt.btiDL   >> Bus.BACKTRACK.SLOT_SHIFT == slot ||
-            bt.btiDH   >> Bus.BACKTRACK.SLOT_SHIFT == slot ||
-            bt.btiBPLo >> Bus.BACKTRACK.SLOT_SHIFT == slot ||
-            bt.btiBPHi >> Bus.BACKTRACK.SLOT_SHIFT == slot ||
-            bt.btiSILo >> Bus.BACKTRACK.SLOT_SHIFT == slot ||
-            bt.btiSIHi >> Bus.BACKTRACK.SLOT_SHIFT == slot ||
-            bt.btiDILo >> Bus.BACKTRACK.SLOT_SHIFT == slot ||
-            bt.btiDIHi >> Bus.BACKTRACK.SLOT_SHIFT == slot
+    var slot = bti >> Bus.BTINFO.SLOT_SHIFT;
+    return (bt.btiAL   >> Bus.BTINFO.SLOT_SHIFT == slot ||
+            bt.btiAH   >> Bus.BTINFO.SLOT_SHIFT == slot ||
+            bt.btiBL   >> Bus.BTINFO.SLOT_SHIFT == slot ||
+            bt.btiBH   >> Bus.BTINFO.SLOT_SHIFT == slot ||
+            bt.btiCL   >> Bus.BTINFO.SLOT_SHIFT == slot ||
+            bt.btiCH   >> Bus.BTINFO.SLOT_SHIFT == slot ||
+            bt.btiDL   >> Bus.BTINFO.SLOT_SHIFT == slot ||
+            bt.btiDH   >> Bus.BTINFO.SLOT_SHIFT == slot ||
+            bt.btiBPLo >> Bus.BTINFO.SLOT_SHIFT == slot ||
+            bt.btiBPHi >> Bus.BTINFO.SLOT_SHIFT == slot ||
+            bt.btiSILo >> Bus.BTINFO.SLOT_SHIFT == slot ||
+            bt.btiSIHi >> Bus.BTINFO.SLOT_SHIFT == slot ||
+            bt.btiDILo >> Bus.BTINFO.SLOT_SHIFT == slot ||
+            bt.btiDIHi >> Bus.BTINFO.SLOT_SHIFT == slot
     );
 };
 
@@ -1173,10 +1173,10 @@ Bus.prototype.isBackTrackWeak = function(bti)
 Bus.prototype.updateBackTrackCode = function(addr, bti)
 {
     if (BACKTRACK) {
-        if (bti & Bus.BACKTRACK.TYPE_DATA) {
-            bti = (bti & ~Bus.BACKTRACK.TYPE_MASK) | Bus.BACKTRACK.TYPE_COUNT_INC;
-        } else if ((bti & Bus.BACKTRACK.TYPE_MASK) < Bus.BACKTRACK.TYPE_COUNT_MAX) {
-            bti += Bus.BACKTRACK.TYPE_COUNT_INC;
+        if (bti & Bus.BTINFO.TYPE_DATA) {
+            bti = (bti & ~Bus.BTINFO.TYPE_MASK) | Bus.BTINFO.TYPE_COUNT_INC;
+        } else if ((bti & Bus.BTINFO.TYPE_MASK) < Bus.BTINFO.TYPE_COUNT_MAX) {
+            bti += Bus.BTINFO.TYPE_COUNT_INC;
         } else {
             return;
         }
@@ -1194,7 +1194,7 @@ Bus.prototype.updateBackTrackCode = function(addr, bti)
 Bus.prototype.getBackTrackObject = function(bti)
 {
     if (BACKTRACK) {
-        var slot = bti >>> Bus.BACKTRACK.SLOT_SHIFT;
+        var slot = bti >>> Bus.BTINFO.SLOT_SHIFT;
         if (slot) return this.abtObjects[slot-1];
     }
     return null;
@@ -1226,7 +1226,7 @@ Bus.prototype.getBackTrackInfo = function(bti, fSymbol, fNearest)
     if (BACKTRACK) {
         var bto = this.getBackTrackObject(bti);
         if (bto) {
-            var off = bti & Bus.BACKTRACK.OFF_MASK;
+            var off = bti & Bus.BTINFO.OFF_MASK;
             var file = bto.obj.file;
             if (file) {
                 this.assert(!bto.off);

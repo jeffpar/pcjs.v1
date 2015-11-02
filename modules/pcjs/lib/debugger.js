@@ -59,6 +59,8 @@ if (DEBUGGER) {
  *      type            one of the Debugger.ADDRTYPE values
  *      fData32         true if 32-bit operand size in effect
  *      fAddr32         true if 32-bit address size in effect
+ *      fData32Orig     original fData32 value, if any
+ *      fAddr32Orig     original fAddr32 value, if any
  *      cOverrides      non-zero if any overrides were processed with this address
  *      fComplete       true if a complete instruction was processed with this address
  *      fTempBreak      true if this is a temporary breakpoint address
@@ -72,6 +74,8 @@ if (DEBUGGER) {
  *      type:(number|undefined),
  *      fData32:(boolean|undefined),
  *      fAddr32:(boolean|undefined),
+ *      fData32Orig:(boolean|undefined),
+ *      fAddr32Orig:(boolean|undefined),
  *      cOverrides:(number|undefined),
  *      fComplete:(boolean|undefined),
  *      fTempBreak:(boolean|undefined),
@@ -1416,7 +1420,7 @@ if (DEBUGGER) {
                      *      0x1     data selector
                      *  DX:EBX -> D386_Device_Params structure (see addSectionInfo() for details)
                      */
-                    this.addSectionInfo(this.newAddr(cpu.regEBX, DX), !SI, this.fWinDbg);
+                    this.addSectionInfo(this.newAddr(cpu.regEBX, DX), !SI, !!this.fWinDbg);
                     break;
                 }
             }
@@ -1491,7 +1495,7 @@ if (DEBUGGER) {
                 break;
 
             case Interrupts.WINDBG.LOADSEG:             // 0x0050
-                this.addSegmentInfo(this.newAddr(DI, ES), BX+1, CX, !(SI & 0x1), this.fWinDbg);
+                this.addSegmentInfo(this.newAddr(DI, ES), BX+1, CX, !(SI & 0x1), !!this.fWinDbg);
                 break;
 
             case Interrupts.WINDBG.FREESEG:             // 0x0052
@@ -1580,7 +1584,7 @@ if (DEBUGGER) {
                  *      0x1     data selector
                  *  DX:EBX -> D386_Device_Params structure (see addSectionInfo() for details)
                  */
-                this.addSectionInfo(this.newAddr(cpu.regEBX, DX), !SI, this.fWinDbg);
+                this.addSectionInfo(this.newAddr(cpu.regEBX, DX), !SI, !!this.fWinDbg);
                 break;
 
             case Interrupts.WINDBG.FREESEG32:           // 0x0152
@@ -1715,7 +1719,7 @@ if (DEBUGGER) {
                      *  CX == paragraph
                      *  ES:DI -> module name
                      */
-                    this.addSegmentInfo(this.newAddr(DI, ES), 0, CX, true, this.fWinDbgRM);
+                    this.addSegmentInfo(this.newAddr(DI, ES), 0, CX, true, !!this.fWinDbgRM);
                 }
                 else if (AL < 0x80) {
                     /*
@@ -1731,7 +1735,7 @@ if (DEBUGGER) {
                      *  DX == actual selector (if 0x40 or 0x41)
                      *  ES:DI -> module name
                      */
-                    this.addSegmentInfo(this.newAddr(DI, ES), BX+1, (AL & 0x40)? DX : CX, !(AL & 0x1), this.fWinDbgRM);
+                    this.addSegmentInfo(this.newAddr(DI, ES), BX+1, (AL & 0x40)? DX : CX, !(AL & 0x1), !!this.fWinDbgRM);
                 }
                 else {
                     /*
@@ -1740,7 +1744,7 @@ if (DEBUGGER) {
 				     *      0x81    device driver data seg
                      *  ES:DI -> D386_Device_Params structure (see addSectionInfo() for details)
                      */
-                    this.addSectionInfo(this.newAddr(DI, ES), !(AL & 0x1), this.fWinDbgRM);
+                    this.addSectionInfo(this.newAddr(DI, ES), !(AL & 0x1), !!this.fWinDbgRM);
                 }
                 if (this.fWinDbgRM) {
                     cpu.regEAX = (cpu.regEAX & ~0xff) | 0x01;
@@ -5281,12 +5285,12 @@ if (DEBUGGER) {
     Debugger.prototype.parseReference = function(sValue)
     {
         var a;
-        while (a = sValue.match(/\{(.*?)\}/)) {
+        while (a = sValue.match(/\{(.*?)}/)) {
             if (a[1].indexOf('{') >= 0) break;          // unsupported nested brace(s)
             var value = this.parseExpression(a[1]);
             sValue = sValue.replace('{' + a[1] + '}', value != null? str.toHex(value) : "undefined");
         }
-        while (a = sValue.match(/\[(.*?)\]/)) {
+        while (a = sValue.match(/\[(.*?)]/)) {
             if (a[1].indexOf('[') >= 0) break;          // unsupported nested bracket(s)
             var dbgAddr = this.parseAddr(a[1]);
             sValue = sValue.replace('[' + a[1] + ']', dbgAddr? str.toHex(this.getWord(dbgAddr), dbgAddr.fData32? 8 : 4) : "undefined");
