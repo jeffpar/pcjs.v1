@@ -206,16 +206,16 @@ Component.subclass(X86CPU, CPU);
 
 if (PREFETCH) {
     /*
-     * NOTE: X86CPU.PREFETCH.LENGTH must be set to a power of two, so that LENGTH - 1 will form a mask
+     * NOTE: X86CPU.PFINFO.LENGTH must be set to a power of two, so that LENGTH - 1 will form a mask
      * (IP_MASK) we can use to create a sliding prefetch window of LENGTH bytes.  We also zero the low
      * 2 bits of IP_MASK so that the sliding window always starts on a 32-bit (long) boundary.  Finally,
      * instead breaking breaking all the longs we prefetch into bytes, we simply store the longs as-is
      * into every 4th element of the queue (the queue is sparse array).
      */
-    X86CPU.PREFETCH = {
+    X86CPU.PFINFO = {
         LENGTH:     16              // 16 generates a 16-byte prefetch queue consisting of 4 32-bit entries
     };
-    X86CPU.PREFETCH.IP_MASK = ((X86CPU.PREFETCH.LENGTH - 1) & ~0x3);
+    X86CPU.PFINFO.IP_MASK = ((X86CPU.PFINFO.LENGTH - 1) & ~0x3);
 }
 
 /**
@@ -235,7 +235,7 @@ if (PREFETCH) {
  *      8:  [dword]
  *     12:  [dword]
  *
- * The actual regLIP mask is X86CPU.PREFETCH.IP_MASK; ie, (X86CPU.PREFETCH.LENGTH - 1) & ~0x3.
+ * The actual regLIP mask is X86CPU.PFINFO.IP_MASK; ie, (X86CPU.PFINFO.LENGTH - 1) & ~0x3.
  *
  * On refilling, the queue is always filled to capacity, and cbPrefetch is set to its maximum
  * value (eg, a value from 16 to 13, depending on whether "regLIP & 0x3" is 0, 1, 2 or 3).
@@ -266,7 +266,7 @@ X86CPU.prototype.initMemory = function(aMemBlocks, nBlockShift)
     this.nBlockMask = this.nBlockTotal - 1;
     if (PREFETCH) {
      // this.nBusCycles = 0;
-        this.adwPrefetch = new Array(X86CPU.PREFETCH.LENGTH);
+        this.adwPrefetch = new Array(X86CPU.PFINFO.LENGTH);
     }
 };
 
@@ -2179,7 +2179,7 @@ X86CPU.prototype.resetIP = function(dec)
              * That's the bad news; the good news is that this extra refill should only hurt performance of the
              * first repetition.
              */
-            if (this.cbPrefetch > X86CPU.PREFETCH.LENGTH) this.refillPrefetch();
+            if (this.cbPrefetch > X86CPU.PFINFO.LENGTH) this.refillPrefetch();
         } else {
             this.regLIP = this.opLIP;
         }
@@ -3419,7 +3419,7 @@ X86CPU.prototype.getBytePrefetch = function()
         this.refillPrefetch();
         if (!this.cbPrefetch) return this.getByte(this.regLIP);
     }
-    var b = (this.adwPrefetch[this.regLIP & X86CPU.PREFETCH.IP_MASK] >> ((this.regLIP & 0x3) << 3)) & 0xff;
+    var b = (this.adwPrefetch[this.regLIP & X86CPU.PFINFO.IP_MASK] >> ((this.regLIP & 0x3) << 3)) & 0xff;
     this.assert(b === this.getByte(this.regLIP));
     this.cbPrefetch--;
     return b;
@@ -3441,8 +3441,8 @@ X86CPU.prototype.getShortPrefetch = function()
         }
     }
     var shift = (this.regLIP & 0x3) << 3;
-    var w = (this.adwPrefetch[this.regLIP & X86CPU.PREFETCH.IP_MASK] >>> shift) & 0xffff;
-    if (shift > 16) w |= (this.adwPrefetch[(this.regLIP + 4) & X86CPU.PREFETCH.IP_MASK] & 0xff) << 8;
+    var w = (this.adwPrefetch[this.regLIP & X86CPU.PFINFO.IP_MASK] >>> shift) & 0xffff;
+    if (shift > 16) w |= (this.adwPrefetch[(this.regLIP + 4) & X86CPU.PFINFO.IP_MASK] & 0xff) << 8;
     this.assert(w === this.getShort(this.regLIP));
     this.cbPrefetch -= 2;
     return w;
@@ -3464,8 +3464,8 @@ X86CPU.prototype.getLongPrefetch = function()
         }
     }
     var shift = (this.regLIP & 0x3) << 3;
-    var l = (this.adwPrefetch[this.regLIP & X86CPU.PREFETCH.IP_MASK] >>> shift)|0;
-    if (shift) l |= this.adwPrefetch[(this.regLIP + 4) & X86CPU.PREFETCH.IP_MASK] << (32 - shift);
+    var l = (this.adwPrefetch[this.regLIP & X86CPU.PFINFO.IP_MASK] >>> shift)|0;
+    if (shift) l |= this.adwPrefetch[(this.regLIP + 4) & X86CPU.PFINFO.IP_MASK] << (32 - shift);
     this.assert(l === this.getLong(this.regLIP));
     this.cbPrefetch -= 4;
     return l;
@@ -3509,9 +3509,9 @@ X86CPU.prototype.refillPrefetch = function()
     if (block) {
         var off = regLIP & this.nBlockLimit;
         var cbMax = this.nBlockSize - off;
-        if (cbMax > X86CPU.PREFETCH.LENGTH) cbMax = X86CPU.PREFETCH.LENGTH;
+        if (cbMax > X86CPU.PFINFO.LENGTH) cbMax = X86CPU.PFINFO.LENGTH;
         for (var i = 0; i < cbMax; i += 4) {
-            this.adwPrefetch[regLIP & X86CPU.PREFETCH.IP_MASK] = block.readLongDirect(off, regLIP);
+            this.adwPrefetch[regLIP & X86CPU.PFINFO.IP_MASK] = block.readLongDirect(off, regLIP);
             off += 4; regLIP += 4;
         }
         this.cbPrefetch = i - (this.regLIP & 0x3);
