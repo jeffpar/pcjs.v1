@@ -123,8 +123,7 @@ app.use(function(req, res, next) {
 });
 
 app.use(express.static(sServerRoot));
-/* Serve favicon at site root */
-app.use('/favicon.ico', express.static(path.join(sServerRoot, "versions/images/current/favicon.ico")));
+app.use('/favicon.ico', express.static(path.join(sServerRoot, "versions/icons/current/favicon.ico")));
 app.use(slash());
 
 var server = http.createServer(app).listen(app.get('port'), function() {

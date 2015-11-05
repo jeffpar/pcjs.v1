@@ -116,8 +116,8 @@ function Debugger(parmsDbg)
          * stepCPU() and checkInstruction() calls.  nCycles is updated by every stepCPU() or stop()
          * call and simply represents the number of cycles performed by the last run of instructions.
          */
-        this.nCycles = -1;
-        this.cOpcodes = -1;
+        this.nCycles = 0;
+        this.cOpcodes = this.cOpcodesStart = 0;
 
         /*
          * Default number of hex chars in a register and a linear address (ie, for real-mode);
@@ -3358,7 +3358,9 @@ if (DEBUGGER) {
                 sReplace = sAddr + ' "' + this.getSZ(dbgAddr) + '"';
                 s = s.replace('$' + sAddr, sReplace);
                 i += sReplace.length;
+                continue;
             }
+            $i++;
         }
         /*
          * Replace every ^XXXX:XXXX, where XXXX:XXXX is a segmented address, with the FCB filename stored at that address.
@@ -3372,7 +3374,9 @@ if (DEBUGGER) {
                 sReplace = sAddr + ' "' + this.getSZ(dbgAddr, 11) + '"';
                 s = s.replace('^' + sAddr, sReplace);
                 i += sReplace.length;
+                continue;
             }
+            i++;
         }
         return s;
     };
@@ -3757,7 +3761,7 @@ if (DEBUGGER) {
     Debugger.prototype.reset = function(fQuiet)
     {
         this.historyInit();
-        this.cOpcodes = 0;
+        this.cOpcodes = this.cOpcodesStart = 0;
         this.sMessagePrev = null;
         this.nCycles = 0;
         this.dbgAddrNextCode = this.newAddr(this.cpu.getIP(), this.cpu.getCS());
@@ -3852,7 +3856,7 @@ if (DEBUGGER) {
                     sStopped += " (";
                     if (this.checksEnabled()) {
                         sStopped += this.cOpcodes + " opcodes, ";
-                        this.cOpcodes = 0;      // remove this line if you want to maintain a longer total
+                        this.cOpcodes = this.cOpcodesStart = 0;
                     }
                     sStopped += this.nCycles + " cycles, " + msTotal + " ms, " + nCyclesPerSecond + " hz)";
                     if (MAXDEBUG && this.chipset) {
@@ -5271,7 +5275,7 @@ if (DEBUGGER) {
     };
 
     /**
-     * parseReference(sValue)
+     * parseReference(s)
      *
      * Returns the given string with any "{expression}" sequences replaced with the value of the expression,
      * and any "[address]" references replaced with the contents of the address.  Expressions are parsed BEFORE
@@ -5279,23 +5283,50 @@ if (DEBUGGER) {
      * (define intermediate variables if needed).
      *
      * @this {Debugger}
-     * @param {string} sValue
+     * @param {string} s
      * @return {string}
      */
-    Debugger.prototype.parseReference = function(sValue)
+    Debugger.prototype.parseReference = function(s)
     {
         var a;
-        while (a = sValue.match(/\{(.*?)}/)) {
+        while (a = s.match(/\{(.*?)}/)) {
             if (a[1].indexOf('{') >= 0) break;          // unsupported nested brace(s)
             var value = this.parseExpression(a[1]);
-            sValue = sValue.replace('{' + a[1] + '}', value != null? str.toHex(value) : "undefined");
+            s = s.replace('{' + a[1] + '}', value != null? str.toHex(value) : "undefined");
         }
-        while (a = sValue.match(/\[(.*?)]/)) {
+        while (a = s.match(/\[(.*?)]/)) {
             if (a[1].indexOf('[') >= 0) break;          // unsupported nested bracket(s)
             var dbgAddr = this.parseAddr(a[1]);
-            sValue = sValue.replace('[' + a[1] + ']', dbgAddr? str.toHex(this.getWord(dbgAddr), dbgAddr.fData32? 8 : 4) : "undefined");
+            s = s.replace('[' + a[1] + ']', dbgAddr? str.toHex(this.getWord(dbgAddr), dbgAddr.fData32? 8 : 4) : "undefined");
         }
-        return sValue;
+        return this.parseSysVars(s);
+    };
+
+    /**
+     * parseSysVars(s)
+     *
+     * Returns the given string with any recognized "$var" replaced with its value; eg:
+     *
+     *      $ops: the number of opcodes executed since the last time it was displayed (or reset)
+     *
+     * @this {Debugger}
+     * @param {string} s
+     * @return {string}
+     */
+    Debugger.prototype.parseSysVars = function(s)
+    {
+        var a;
+        while (a = s.match(/\$([a-z]+)/i)) {
+            var v = null;
+            switch(a[1].toLowerCase()) {
+            case "ops":
+                v = this.cOpcodes - this.cOpcodesStart;
+                break;
+            }
+            if (v == null) break;
+            s = s.replace(a[0], v.toString());
+        }
+        return s;
     };
 
     /**
@@ -5339,7 +5370,7 @@ if (DEBUGGER) {
         var fDefined = false;
         if (value !== undefined) {
             fDefined = true;
-            sValue = str.toHexLong(value) + " (" + value + '=' + str.toBinBytes(value) + ')';
+            sValue = str.toHexLong(value) + " " + value + ". (" + str.toBinBytes(value) + ")";
         }
         sVar = (sVar != null? (sVar + ": ") : "");
         this.println(sVar + sValue);
@@ -5975,31 +6006,6 @@ if (DEBUGGER) {
             return;
         }
 
-        if (sCmd == "disk") {
-            /*
-             * The "disk" command is an undocumented command that's useful any time we're inside an internal
-             * DOS dispatch function where the registers are substantially the same as the corresponding INT 0x13;
-             * "m int on; m disk on" produces the same output, but only when an actual INT 0x13 instruction is used.
-             * Issuing this command at any other time should also be OK, but the results will be meaningless.
-             */
-            this.messageInt(Interrupts.DISK, this.cpu.regLIP, true);
-            return;
-        }
-
-        if (sCmd == "dos") {
-            /*
-             * The "dos" command is an undocumented command that's useful any time we're inside an internal
-             * DOS dispatch function where the registers are substantially the same as the corresponding INT 0x21;
-             * "m int on; m dos on" produces the same output, but only when an actual INT 0x21 instruction is used.
-             * Issuing this command at any other time should also be OK, but the results will be meaningless.
-             *
-             * NOTE: This is different from the "d dos" command, which invokes dumpDos() to dump DOS memory blocks,
-             * and is handled by one of the registered dumper functions below.
-             */
-            this.messageInt(Interrupts.DOS, this.cpu.regLIP, true);
-            return;
-        }
-
         /*
          * Transform a "ds" command into a "d desc" command (simply as shorthand); ditto for "dg" and "dl",
          * only because that's the syntax that WDEB386 used.  I'm uncertain what WDEB386 would do with an LDT
@@ -6285,6 +6291,34 @@ if (DEBUGGER) {
         if (port !== undefined) {
             var bIn = this.bus.checkPortInputNotify(port, 1);
             this.println(str.toHexWord(port) + ": " + str.toHexByte(bIn));
+        }
+    };
+
+    /**
+     * doInt(sInt)
+     *
+     * Displays information about the given software interrupt (assuming that said interrupt is in progress).
+     *
+     * These messages also reset the system variable $ops (by updating cOpcodesStart), to make it easier to see
+     * how many opcodes were executed since the interrupt "started".
+     *
+     * @this {Debugger}
+     * @param {string|undefined} sInt
+     * @return {boolean} true if successful, false if not
+     */
+    Debugger.prototype.doInt = function(sInt)
+    {
+        switch(this.parseValue(sInt)) {
+        case 0x13:
+            this.messageInt(Interrupts.DISK, this.cpu.regLIP, true);
+            this.cOpcodesStart = this.cOpcodes;
+            return true;
+        case 0x21:
+            this.messageInt(Interrupts.DOS, this.cpu.regLIP, true);
+            this.cOpcodesStart = this.cOpcodes;
+            return true;
+        default:
+            return false;
         }
     };
 
@@ -7536,6 +7570,12 @@ if (DEBUGGER) {
                 case 'i':
                     if (asArgs[0] == "if") {
                         if (!this.doIf(sCmd.substr(2), fQuiet)) {
+                            result = false;
+                        }
+                        break;
+                    }
+                    if (asArgs[0] == "int") {
+                        if (!this.doInt(asArgs[1])) {
                             result = false;
                         }
                         break;
