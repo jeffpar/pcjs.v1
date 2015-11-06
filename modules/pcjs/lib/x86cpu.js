@@ -2901,44 +2901,51 @@ X86CPU.prototype.setBinding = function(sHTMLType, sBinding, control)
  * functions, like fnFaultMessage(), that must also avoid triggering faults, since they're not part of
  * standard CPU operation.
  *
- * NOTE: If the size parameter is used, then the caller is required to provide a valid size (1, 2 or 4)
- * and ensure that the data is contained entirely with the requested block (which we assert below).
+ * Since originally written, I've also relaxed the requirement that the request be contained entirely
+ * within a single block; this was never a problem for any size-aligned request, but unfortunately, it
+ * was difficult for the Debugger to guarantee that every 2 or 4-byte request would be always be word or
+ * dword-aligned.  So now requests that straddle blocks will be broken into smaller probeAddr() requests.
  *
  * @this {X86CPU}
  * @param {number} addr is a linear address
- * @param {number} [size] is a length (default is 1)
+ * @param {number} [size] is a length (default is 1; if specified, must be 1, 2 or 4)
  * @param {boolean} [fLinear] (true for linear probe, false for physical; linear is the default)
- * @return {number|null} byte (8-bit) value at that address, or null if invalid
+ * @return {number|null} value at the specified address, or null if invalid
  */
 X86CPU.prototype.probeAddr = function(addr, size, fLinear)
 {
-    var aBlocks = fLinear === false? this.aBusBlocks : this.aMemBlocks;
+    var aBlocks = (fLinear === false? this.aBusBlocks : this.aMemBlocks);
     var block = aBlocks[(addr & this.nMemMask) >>> this.nBlockShift];
-    if (block && block.type == Memory.TYPE.UNPAGED) {
-        block = this.mapPageBlock(addr, false, true);
-    }
+    if (block && block.type == Memory.TYPE.UNPAGED) block = this.mapPageBlock(addr, false, true);
+
     if (block) {
         var off = addr & this.nBlockLimit;
-        /*
-         * TODO: We actually hit this assert in rare cases where the Debugger is disassembling
-         * an instruction straddling a page boundary that also references a short or long operand.
-         * The best solution is to change the Debugger's getShort(), getLong(), etc, functions to
-         * use getByte() internally, which in turn will never call probeAddr() with a size > 1.
-         */
-        this.assert(off + (size || 1) <= this.nBlockSize);
-        switch(size) {
-        default:
+        if (!size || size == 1) {
             return block.readByteDirect(off, addr);
-        case 2:
-            return block.readShortDirect(off, addr);
-        case 4:
-            return block.readLongDirect(off, addr);
+        }
+        if (size == 2) {
+            if (off < this.nBlockLimit) {
+                return block.readShortDirect(off, addr);
+            }
+            return block.readByteDirect(off, addr) | (this.probeAddr(addr + 1, 1, fLinear) << 8);
+        }
+        if (size == 4) {
+            if (off < this.nBlockLimit - 2) {
+                return block.readLongDirect(off, addr);
+            }
+            if (off == this.nBlockLimit - 1) {
+                return block.readShortDirect(off, addr) | (this.probeAddr(addr + 2, 2, fLinear) << 16);
+            }
+            return block.readByteDirect(off, addr) | (this.probeAddr(addr + 1, 1, fLinear) << 8) | (this.probeAddr(addr + 2, 1, fLinear) << 16) | (this.probeAddr(addr + 3, 1, fLinear) << 24);
         }
     }
+
     /*
      * Since the Bus component initializes all unused portions of physical address space with an empty
      * block, we have also written mapPageBlock() to return an empty block (memEmpty) whenever there is
      * no valid mapping.  So if we ever end up here, this may represent a hole that needs plugging.
+     *
+     * It's also possible the caller passed a bogus parameter, such as an invalid size (must be 1, 2 or 4).
      */
     this.assert(false);
     return null;

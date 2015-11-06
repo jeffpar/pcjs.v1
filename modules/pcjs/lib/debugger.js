@@ -2060,10 +2060,7 @@ if (DEBUGGER) {
      */
     Debugger.prototype.getWord = function(dbgAddr, fAdvance)
     {
-        if (!dbgAddr.fData32) {
-            return this.getShort(dbgAddr, fAdvance? 2 : 0);
-        }
-        return this.getLong(dbgAddr, fAdvance? 4 : 0);
+        return dbgAddr.fData32? this.getLong(dbgAddr, fAdvance? 4 : 0) : this.getShort(dbgAddr, fAdvance? 2 : 0);
     };
 
     /**
@@ -2107,6 +2104,9 @@ if (DEBUGGER) {
     /**
      * setByte(dbgAddr, b, inc)
      *
+     * WARNING: Be careful with the editing commands that use function, because we don't have a safe
+     * counterpart to cpu.probeAddr().
+     *
      * @this {Debugger}
      * @param {DbgAddr} dbgAddr
      * @param {number} b
@@ -2124,6 +2124,9 @@ if (DEBUGGER) {
 
     /**
      * setShort(dbgAddr, w, inc)
+     *
+     * WARNING: Be careful with the editing commands that use function, because we don't have a safe
+     * counterpart to cpu.probeAddr().
      *
      * @this {Debugger}
      * @param {DbgAddr} dbgAddr
@@ -3360,7 +3363,7 @@ if (DEBUGGER) {
                 i += sReplace.length;
                 continue;
             }
-            $i++;
+            i++;
         }
         /*
          * Replace every ^XXXX:XXXX, where XXXX:XXXX is a segmented address, with the FCB filename stored at that address.
@@ -3856,7 +3859,13 @@ if (DEBUGGER) {
                     sStopped += " (";
                     if (this.checksEnabled()) {
                         sStopped += this.cOpcodes + " opcodes, ";
-                        this.cOpcodes = this.cOpcodesStart = 0;
+                        /*
+                         * $ops displays progress by calculating cOpcodes - cOpcodesStart, so before
+                         * zeroing cOpcodes, we should subtract cOpcodes from cOpcodesStart (since we're
+                         * effectively subtracting cOpcodes from cOpcodes as well).
+                         */
+                        this.cOpcodesStart -= this.cOpcodes;
+                        this.cOpcodes = 0;
                     }
                     sStopped += this.nCycles + " cycles, " + msTotal + " ms, " + nCyclesPerSecond + " hz)";
                     if (MAXDEBUG && this.chipset) {
@@ -6300,7 +6309,7 @@ if (DEBUGGER) {
      * Displays information about the given software interrupt (assuming that said interrupt is in progress).
      *
      * These messages also reset the system variable $ops (by updating cOpcodesStart), to make it easier to see
-     * how many opcodes were executed since the interrupt "started".
+     * how many opcodes were executed since these interrupts "started".
      *
      * @this {Debugger}
      * @param {string|undefined} sInt
@@ -7151,6 +7160,9 @@ if (DEBUGGER) {
     /**
      * getCall(dbgAddr, fFar)
      *
+     * Given a possible return address (typically from the stack), look for a matching CALL (or INT) that
+     * immediately precedes that address.
+     *
      * @this {Debugger}
      * @param {DbgAddr} dbgAddr
      * @param {boolean} [fFar]
@@ -7167,8 +7179,18 @@ if (DEBUGGER) {
                 dbgAddr.addr = null;
                 var s = this.getInstruction(dbgAddr);
                 if (s.indexOf("CALL") > 0 || fFar && s.indexOf("INT") > 0) {
-                    sCall = s;
-                    break;
+                    /*
+                     * Verify that the length of this CALL (or INT), when added to the address of the CALL (or INT),
+                     * matches the original return address.  We do this by getting the string index of the opcode bytes,
+                     * subtracting that from the string index of the next space, and dividing that difference by two,
+                     * to yield the length of the CALL (or INT) instruction, in bytes.
+                     */
+                    var i = s.indexOf(' ');
+                    var j = s.indexOf(' ', i+1);
+                    if (off + (j - i - 1)/2 == offOrig) {
+                        sCall = s;
+                        break;
+                    }
                 }
             }
             off--;
@@ -7202,7 +7224,7 @@ if (DEBUGGER) {
         this.println("stack trace for " + this.toHexAddr(dbgAddrStack));
 
         while (cFrames < nFrames) {
-            var sCall = null, cTests = 256;
+            var sCall = null, sCallPrev = null, cTests = 256;
             while ((dbgAddrStack.off >>> 0) < (this.cpu.regLSPLimit >>> 0)) {
                 dbgAddrCall.off = this.getWord(dbgAddrStack, true);
                 /*
@@ -7225,14 +7247,21 @@ if (DEBUGGER) {
                     break;
                 }
             }
-            if (!sCall) break;
+            /*
+             * The sCallPrev check eliminates duplicate sequential calls, which are usually (but not always)
+             * indicative of a false positive, in which case the previous call is probably bogus as well, but
+             * at least we won't duplicate that mistake.  Of course, there are always exceptions, recursion
+             * being one of them, but it's rare that we're debugging recursive code.
+             */
+            if (!sCall || sCall == sCallPrev) break;
             var sSymbol = null;
             if (sCmd == "ks") {
                 var a = sCall.match(/[0-9A-F]+$/);
                 if (a) sSymbol = this.doList(a[0]);
             }
-            sCall = str.pad(sCall, 50) + "  ;" + (sSymbol || "stack=" + this.toHexAddr(dbgAddrStack) + " return=" + this.toHexAddr(dbgAddrCall));
+            sCall = str.pad(sCall, 50) + "  ;" + (sSymbol || "stack=" + this.toHexAddr(dbgAddrStack)); // + " return=" + this.toHexAddr(dbgAddrCall));
             this.println(sCall);
+            sCallPrev = sCall;
             cFrames++;
         }
         if (!cFrames) this.println("no return addresses found");
