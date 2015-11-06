@@ -21,8 +21,6 @@
 ;   You should have received a copy of the GNU General Public License along with PCjs.  If not,
 ;   see <http://www.gnu.org/licenses/gpl.html>.
 ;
-
-;
 ;   Overview
 ;   --------
 ;   This 32Kb ROM image is ORG'ed at 0x8000, because most of its code is designed to run
@@ -85,6 +83,12 @@
 	org	0x8000
 
 CMD8042_WRITE_OUTPORT	equ	0xD1
+
+;
+;   BIOS DATA OFFSETS (RELATIVE TO SEGMENT 0x40)
+;
+MOTOR_STATUS	equ	0x3F
+MOTOR_COUNT	equ	0x40
 
 	xchg	bh,bl			; 00008000  86FB  '..'
 	xor	bh,bh			; 00008002  32FF  '2.'
@@ -500,7 +504,7 @@ x82f5:	lodsb				; 000082F5  AC  '.'
 	mov	bx,err101		; 000082FF  BB5AB7  '.Z.'
 	mov	cx,err101_len		; 00008302  B90F00  '...'
 	call	xc745			; 00008305  E83D44  '.=D'
-x8308:	jmp	short x8308		; 00008308  Hang the machine
+x8308:	jmp	short x8308		; 00008308  EBFE	; Hang the machine
 
 x830a:	pop	ds			; 0000830A  1F  '.'
 	ret				; 0000830B  C3  '.'
@@ -1055,21 +1059,21 @@ romgdt:					; 00008730
 	db	0xFF,0xFF,0x00,0x00,0xFF,0x92,0x00,0x00, 0xFF,0xFF,0x00,0x00,0x0E,0x92,0x00,0x00
 	db	0xFF,0xFF,0x00,0x00,0xFD,0x92,0x00,0x00
 
-gdtr_lo:				; accessed via offset 0x0778 (and also 0x8778)
-	dw	0x0047,0x0730,0x000F	; 00008778  GDTR referencing the above GDT in the 0th Mb
-gdtr_hi:				; accessed via offset 0x077E
-	dw	0x0047,0x0730,0x00FF	; 0000877E  GDTR referencing the above GDT in the 15th Mb
-idtr_lo:				; accessed via offset 0x0784
-	dw	0xFFFF,0x0000,0x0000	; 00008784  IDTR
+gdtr_lo:							; accessed via offset 0x0778 (and also 0x8778)
+	dw	0x0047,0x0730,0x000F	; 00008778  		; GDTR referencing the above GDT in the 0th Mb
+gdtr_hi:							; accessed via offset 0x077E
+	dw	0x0047,0x0730,0x00FF	; 0000877E  		; GDTR referencing the above GDT in the 15th Mb
+idtr_lo:							; accessed via offset 0x0784
+	dw	0xFFFF,0x0000,0x0000	; 00008784  		; IDTR
 
 	db	0xAA,0x87,0x18,0x00,0xF8,0x87
 	db	0x18,0x00,0x28,0x88,0x18,0x00
 
-x8796:	lgdt	[cs:0x0778]		; 00008796  load [gdtr_lo] into GDTR
+x8796:	lgdt	[cs:0x0778]		; 00008796  2E0F01167807; load [gdtr_lo] into GDTR
 	mov	eax,cr0			; 0000879C  0F2000
-	or	ax,0x1			; 0000879F  0D0100  0x0D,'..'
+	or	ax,0x1			; 0000879F  0D0100
 	mov	cr0,eax			; 000087A2  0F2200
-	jmp	far [cs:0x878a]		; 000087A5  2EFF2E8A87  '.....'
+	jmp	far [cs:0x878a]		; 000087A5  2EFF2E8A87
 
 	mov	ax,0x8			; 000087AA  B80800  '...'
 	mov	es,ax			; 000087AD  8EC0  '..'
@@ -1092,21 +1096,21 @@ x8796:	lgdt	[cs:0x0778]		; 00008796  load [gdtr_lo] into GDTR
 	cld				; 000087C3  FC  '.'
 	cld				; 000087C4  FC  '.'
 	cld				; 000087C5  FC  '.'
-x87c6:	mov	ax,0x10			; 000087C6  B81000  '...'
-	mov	es,ax			; 000087C9  8EC0  '..'
+x87c6:	mov	ax,0x10			; 000087C6  B81000
+	mov	es,ax			; 000087C9  8EC0
 	mov	eax,cr0			; 000087CB  0F2000
-	and	eax,0x7ffffffe		; 000087CE  6625FEFFFF7F  'f%....'
+	and	eax,0x7ffffffe		; 000087CE  6625FEFFFF7F
 	mov	cr0,eax			; 000087D4  0F2200
-	jmp	0xf000:x87dc		; 000087D7  EADC8700F0  '.....'
+	jmp	0xf000:x87dc		; 000087D7  EADC8700F0
 
-x87dc:	lidt	[cs:0x0784]		; 000087DC  load [idtr_lo] into IDTR
-	jmp	bp			; 000087E2  FFE5  '..'
+x87dc:	lidt	[cs:0x0784]		; 000087DC  2E0F011E8407; load [idtr_lo] into IDTR
+	jmp	bp			; 000087E2  FFE5
 
-x87e4:	lgdt	[cs:0x0778]		; 000087E4  load [gdtr_lo] into GDTR
+x87e4:	lgdt	[cs:0x0778]		; 000087E4  2E0F01167807; load [gdtr_lo] into GDTR
 	mov	eax,cr0			; 000087EA  0F2000
-	or	ax,0x1			; 000087ED  0D0100  0x0D,'..'
+	or	ax,0x1			; 000087ED  0D0100
 	mov	cr0,eax			; 000087F0  0F2200
-	jmp	far [cs:0x878e]		; 000087F3  2EFF2E8E87  '.....'
+	jmp	far [cs:0x878e]		; 000087F3  2EFF2E8E87
 
 	mov	ax,0x8			; 000087F8  B80800  '...'
 	mov	es,ax			; 000087FB  8EC0  '..'
@@ -1120,11 +1124,11 @@ x87e4:	lgdt	[cs:0x0778]		; 000087E4  load [gdtr_lo] into GDTR
 	out	0x61,al			; 00008810  E661  '.a'
 	jmp	short x87c6		; 00008812  EBB2  '..'
 
-x8814:	lgdt	[cs:0x8778]		; 00008814  load [gdtr_lo] into GDTR
+x8814:	lgdt	[cs:0x8778]		; 00008814  2E0F01167887; load [gdtr_lo] into GDTR
 	mov	eax,cr0			; 0000881A  0F2000
-	or	ax,0x1			; 0000881D  0D0100  0x0D,'..'
+	or	ax,0x1			; 0000881D  0D0100
 	mov	cr0,eax			; 00008820  0F2200
-	jmp	far [cs:0x8792]		; 00008823  2EFF2E9287  '.....'
+	jmp	far [cs:0x8792]		; 00008823  2EFF2E9287
 
 	mov	ax,0x20			; 00008828  B82000  '. .'
 	mov	ds,ax			; 0000882B  8ED8  '..'
@@ -2300,52 +2304,52 @@ x91a1:	in	al,0x40			; 000091A1  E440  '.@'
 ;
 ;   Here's where the first HDC (Hard Disk Controller) activity occurs during power-up.
 ;
-x91b0:	mov	dx,0x1f6		; 000091B0  select the DRVHD (Drive/Head) register
-	mov	al,0xa0			; 000091B3  select Head 0 (bits 0-3) and Drive 0 (bit 4)
-	out	dx,al			; 000091B5  write register
-	call	xc5af			; 000091B6  perform some I/O to the FDR (Fixed Disk Register), port 0x3F6
-	call	x83f9			; 000091B9  TBD (writes 0xA0, 0xA1, 0xA2, 0xA3, 0xA6 to port 0x84)
-	mov	al,0xa8			; 000091BC
-	out	0x84,al			; 000091BE
-	sti				; 000091C0
-	mov	dx,0x3f4		; 000091C1  select the REG_STATUS (Main Status Register) of the FDC
-	in	al,dx			; 000091C4  read register
-	std				; 000091C5
-	std				; 000091C6
-	std				; 000091C7
-	std				; 000091C8
-	std				; 000091C9
-	std				; 000091CA
-	cld				; 000091CB
-	and	al,0xf			; 000091CC  keep only the BUSY bits for drives A,B,C,D
-	or	al,al			; 000091CE  are any of those set?
-	jz	x91d5			; 000091D0  no
-	jmp	short x922a		; 000091D2  yes
-	nop				; 000091D4
+x91b0:	mov	dx,0x1f6		; 000091B0  BAF601	; select the DRVHD (Drive/Head) register
+	mov	al,0xa0			; 000091B3  B0A0	; select Head 0 (bits 0-3) and Drive 0 (bit 4)
+	out	dx,al			; 000091B5  EE		; write register
+	call	xc5af			; 000091B6  E8F633	; perform some I/O to the FDR (Fixed Disk Register), port 0x3F6
+	call	x83f9			; 000091B9  E83DF2	; TBD (writes 0xA0, 0xA1, 0xA2, 0xA3, 0xA6 to port 0x84)
+	mov	al,0xa8			; 000091BC  B0A8
+	out	0x84,al			; 000091BE  E684
+	sti				; 000091C0  FB
+	mov	dx,0x3f4		; 000091C1  BAF403	; select the REG_STATUS (Main Status Register) of the FDC
+	in	al,dx			; 000091C4  EC		; read register
+	std				; 000091C5  FD
+	std				; 000091C6  FD
+	std				; 000091C7  FD
+	std				; 000091C8  FD
+	std				; 000091C9  FD
+	std				; 000091CA  FD
+	cld				; 000091CB  FC
+	and	al,0xf			; 000091CC  240F	; keep only the BUSY bits for drives A,B,C,D
+	or	al,al			; 000091CE  0AC0	; are any of those set?
+	jz	x91d5			; 000091D0  7403	; no
+	jmp	short x922a		; 000091D2  EB56	; yes
+	nop				; 000091D4  90
 
-x91d5:	sub	sp,byte +0xd		; 000091D5
-	mov	bp,sp			; 000091D8
-	xor	ax,ax			; 000091DA
-	mov	ds,ax			; 000091DC
-	les	si,[0x78]		; 000091DE
-	mov	ax,0x40			; 000091E2
-	mov	ds,ax			; 000091E5
-	mov	byte [0x40],0xff	; 000091E7
-	call	xca03			; 000091EC
-	mov	byte [bp+0x6],0x0	; 000091EF
-	mov	byte [bp+0x7],0x0	; 000091F3
-	call	x9293			; 000091F7  this executes a lot of instructions, but no HDC ports are accessed
-	mov	byte [bp+0x6],0x1	; 000091FA
-	call	x9293			; 000091FE  again, this executes a lot of instructions, but no HDC ports are accessed
-	mov	byte [bp+0x5],0x0	; 00009201
-	call	xee9c			; 00009205
-	mov	al,0xaf			; 00009208
-	out	0x84,al			; 0000920A
-	mov	dx,0x3f2		; 0000920C  select the REG_OUTPUT (Digital Output Register) of the FDC
-	mov	al,0xc			; 0000920F  select the ENABLE and INT_ENABLE bits of REG_OUTPUT
-	out	dx,al			; 00009211  update register
-	and	byte [0x3f],0xf0	; 00009212
-	add	sp,byte +0xd		; 00009217
+x91d5:	sub	sp,byte +0xd		; 000091D5  83EC0D
+	mov	bp,sp			; 000091D8  8BEC
+	xor	ax,ax			; 000091DA  33C0
+	mov	ds,ax			; 000091DC  8ED8
+	les	si,[0x78]		; 000091DE  C4367800
+	mov	ax,0x40			; 000091E2  B84000
+	mov	ds,ax			; 000091E5  8ED8
+	mov	byte [MOTOR_COUNT],0xff	; 000091E7  C6064000FF
+	call	xca03			; 000091EC  E81438
+	mov	byte [bp+0x6],0x0	; 000091EF  C6460600
+	mov	byte [bp+0x7],0x0	; 000091F3  C6460700
+	call	x9293			; 000091F7  E89900	; this executes a lot of instructions, but no HDC ports are accessed
+	mov	byte [bp+0x6],0x1	; 000091FA  C6460601
+	call	x9293			; 000091FE  E89200	; again, this executes a lot of instructions, but no HDC ports are accessed
+	mov	byte [bp+0x5],0x0	; 00009201  C6460500
+	call	xee9c			; 00009205  E8945C
+	mov	al,0xaf			; 00009208  B0AF
+	out	0x84,al			; 0000920A  E684
+	mov	dx,0x3f2		; 0000920C  BAF203	; select the REG_OUTPUT (Digital Output Register) of the FDC
+	mov	al,0xc			; 0000920F  B00C	; select the ENABLE and INT_ENABLE bits of REG_OUTPUT
+	out	dx,al			; 00009211  EE		; update register
+	and	byte [MOTOR_STATUS],0xf0; 00009212  80263F00F0
+	add	sp,byte +0xd		; 00009217  83C40D
 	mov	al,0xb3			; 0000921A  B0B3  '..'
 	mov	ah,al			; 0000921C  8AE0  '..'
 	call	xb544			; 0000921E  E82323  '.##'
@@ -5094,7 +5098,7 @@ xac4d:	mov	bx,0xb810		; 0000AC4D  BB10B8  '...'
 	mov	cx,0x1d			; 0000AC50  B91D00  '...'
 	mov	bp,0xac59		; 0000AC53  BD59AC  '.Y.'
 	jmp	xc7f7			; 0000AC56  E99E1B  '...'
-xac59:	jmp	short xac59		; 0000AC59  Hang the machine
+xac59:	jmp	short xac59		; 0000AC59  EBFE	; Hang the machine
 
 xac5b:	in	al,0x60			; 0000AC5B  E460  '.`'
 	jmp	bp			; 0000AC5D  FFE5  '..'
@@ -6273,7 +6277,7 @@ xb665:	mov	bx,err201		; 0000B665  BBA6B6  '...'
 	mov	cx,err201_len		; 0000B668  B91100  '...'
 	mov	bp,0xb671		; 0000B66B  BD71B6  '.q.'
 	jmp	xc7f9			; 0000B66E  E98811  '...'
-xb671:	jmp	short xb671		; 0000B671  Hang the machine
+xb671:	jmp	short xb671		; 0000B671  EBFE	; Hang the machine
 
 xb673:	mov	al,[di+0x32]		; 0000B673  8A4532  '.E2'
 	and	al,0xfe			; 0000B676  24FE  '$.'
@@ -6490,7 +6494,7 @@ xbb95:	xor	ax,ax			; 0000BB95  33C0  '3.'
 	mov	cx,err102_len-2		; 0000BBAB  B91800  '...'
 	mov	bp,0xbbb4		; 0000BBAE  BDB4BB  '...'
 	jmp	xc7f7			; 0000BBB1  E9430C  '.C.'
-xbbb4:	jmp	short xbbb4		; 0000BBB4  Hang the machine
+xbbb4:	jmp	short xbbb4		; 0000BBB4  EBFE	; Hang the machine
 
 xbbb6:	mov	al,0x14			; 0000BBB6  B014  '..'
 	out	0x84,al			; 0000BBB8  E684  '..'
@@ -6572,7 +6576,7 @@ xbc38:	in	al,0x64			; 0000BC38  E464  '.d'
 	mov	bp,0xbc4c		; 0000BC46  BD4CBC  '.L.'
 	jmp	xc7f7			; 0000BC49  E9AB0B  '...'
 
-xbc4c:	jmp	short xbc4c		; 0000BC4C  Hang the machine
+xbc4c:	jmp	short xbc4c		; 0000BC4C  EBFE	; Hang the machine
 
 xbc4e:	mov	cx,0x2			; 0000BC4E  B90200  '...'
 xbc51:	in	al,0x60			; 0000BC51  E460  '.`'
@@ -6588,7 +6592,7 @@ xbc51:	in	al,0x60			; 0000BC51  E460  '.`'
 	mov	cx,0x1d			; 0000BC66  B91D00  '...'
 	mov	bp,0xbc6f		; 0000BC69  BD6FBC  '.o.'
 	jmp	xc7f7			; 0000BC6C  E9880B  '...'
-xbc6f:	jmp	short xbc6f		; 0000BC6F  Hang the machine
+xbc6f:	jmp	short xbc6f		; 0000BC6F  EBFE	; Hang the machine
 
 xbc71:	call	xa3e0			; 0000BC71  E86CE7  '.l.'
 	call	xaa5a			; 0000BC74  E8E3ED  '...'
@@ -8220,49 +8224,49 @@ xc944:	ret				; 0000C944  C3  '.'
 xc955:	ret				; 0000C955  C3  '.'
 
 xc956:	cli				; 0000C956  FA  '.'
-	mov	byte [0x40],0xff	; 0000C957  C6064000FF  '..@..'
-	mov	al,0x10			; 0000C95C  B010  '..'
-	mov	cl,[bp+0x6]		; 0000C95E  8A4E06  '.N.'
-	shl	al,cl			; 0000C961  D2E0  '..'
-	or	al,0xc			; 0000C963  0C0C  '..'
-	or	al,[bp+0x6]		; 0000C965  0A4606  0x0A,'F.'
-	mov	ah,[0x3f]		; 0000C968  8A263F00  '.&?.'
-	shl	ah,0x4			; 0000C96C  C0E404  '...'
-	or	al,ah			; 0000C96F  0AC4  0x0A,'.'
-	mov	dx,0x3f2		; 0000C971  BAF203  '...'
-	out	dx,al			; 0000C974  EE  '.'
-	mov	ah,al			; 0000C975  8AE0  '..'
-	mov	al,[0x8b]		; 0000C977  A08B00  '...'
-	shr	al,0x6			; 0000C97A  C0E806  '...'
-	mov	dx,0x3f7		; 0000C97D  BAF703  '...'
-	out	dx,al			; 0000C980  EE  '.'
-	shr	ah,0x4			; 0000C981  C0EC04  '...'
-	mov	al,[0x3f]		; 0000C984  A03F00  '.?.'
-	and	al,0xf			; 0000C987  240F  '$.'
-	cmp	al,ah			; 0000C989  3AC4  ':.'
-	jz	xc9bd			; 0000C98B  7430  't0'
-	or	[0x3f],ah		; 0000C98D  08263F00  '.&?.'
-	sti				; 0000C991  FB  '.'
-	clc				; 0000C992  F8  '.'
-	mov	ax,0x90fd		; 0000C993  B8FD90  '...'
-	int	0x15			; 0000C996  CD15  '..'
-	jc	xc9bd			; 0000C998  7223  'r#'
-	mov	al,0x7d			; 0000C99A  B07D  '.}'
-	mov	cl,0x8			; 0000C99C  B108  '..'
-	mov	bl,[es:si+0xa]		; 0000C99E  268A5C0A  '&.\',0x0A
-	cmp	byte [bp+0x1],0x3	; 0000C9A2  807E0103  '.~..'
-	jz	xc9b0			; 0000C9A6  7408  't.'
-	cmp	byte [bp+0x1],0x5	; 0000C9A8  807E0105  '.~..'
-	jnz	xc9b0			; 0000C9AC  7502  'u.'
-	mov	cl,0x5			; 0000C9AE  B105  '..'
-xc9b0:	cmp	bl,cl			; 0000C9B0  3AD9  ':.'
-	jnc	xc9b6			; 0000C9B2  7302  's.'
-	xchg	bl,cl			; 0000C9B4  86D9  '..'
-xc9b6:	mul	bl			; 0000C9B6  F6E3  '..'
-	mov	bx,ax			; 0000C9B8  8BD8  '..'
-	call	xc638			; 0000C9BA  E87BFC  '.{.'
-xc9bd:	sti				; 0000C9BD  FB  '.'
-	ret				; 0000C9BE  C3  '.'
+	mov	byte [MOTOR_COUNT],0xff	; 0000C957  C6064000FF	; RESET TIME-OUT COUNTER FOR MOTOR(S)
+	mov	al,0x10			; 0000C95C  B010
+	mov	cl,[bp+CALLER_DL]	; 0000C95E  8A4E06	; CL = DRIVE NUMBER
+	shl	al,cl			; 0000C961  D2E0
+	or	al,0xc			; 0000C963  0C0C
+	or	al,[bp+CALLER_DL]	; 0000C965  0A4606
+	mov	ah,[MOTOR_STATUS]	; 0000C968  8A263F00	; AH = MOTOR STATUS
+	shl	ah,0x4			; 0000C96C  C0E404
+	or	al,ah			; 0000C96F  0AC4
+	mov	dx,0x3f2		; 0000C971  BAF203
+	out	dx,al			; 0000C974  EE
+	mov	ah,al			; 0000C975  8AE0
+	mov	al,[0x8b]		; 0000C977  A08B00	; AL = LASTRATE (LAST DISKETTE DATA RATE SELECTED)
+	shr	al,0x6			; 0000C97A  C0E806
+	mov	dx,0x3f7		; 0000C97D  BAF703	; DX = FDC DIGITAL INPUT REGISTER (READ-ONLY)
+	out	dx,al			; 0000C980  EE
+	shr	ah,0x4			; 0000C981  C0EC04
+	mov	al,[MOTOR_STATUS]	; 0000C984  A03F00	; AL = MOTOR STATUS (BIT 3-0 = DRIVE 3-0 CURRENTLY RUNNING, BIT 7 = CURRENT OPERATION IS A WRITE)
+	and	al,0xf			; 0000C987  240F
+	cmp	al,ah			; 0000C989  3AC4
+	jz	xc9bd			; 0000C98B  7430	; NO DELAY
+	or	[MOTOR_STATUS],ah	; 0000C98D  08263F00
+	sti				; 0000C991  FB
+	clc				; 0000C992  F8
+	mov	ax,0x90fd		; 0000C993  B8FD90
+	int	0x15			; 0000C996  CD15
+	jc	xc9bd			; 0000C998  7223
+	mov	al,0x7d			; 0000C99A  B07D
+	mov	cl,0x8			; 0000C99C  B108	; DEFAULT DELAY
+	mov	bl,[es:si+0xa]		; 0000C99E  268A5C0A
+	cmp	byte [bp+CALLER_AH],0x3	; 0000C9A2  807E0103	; WRITE REQUEST?
+	jz	xc9b0			; 0000C9A6  7408	; YES
+	cmp	byte [bp+CALLER_AH],0x5	; 0000C9A8  807E0105	; FORMAT REQUEST?
+	jnz	xc9b0			; 0000C9AC  7502	; NO
+	mov	cl,0x5			; 0000C9AE  B105	; YES (SELECT SHORTER DELAY)
+xc9b0:	cmp	bl,cl			; 0000C9B0  3AD9
+	jnc	xc9b6			; 0000C9B2  7302
+	xchg	bl,cl			; 0000C9B4  86D9
+xc9b6:	mul	bl			; 0000C9B6  F6E3
+	mov	bx,ax			; 0000C9B8  8BD8
+	call	xc638			; 0000C9BA  E87BFC
+xc9bd:	sti				; 0000C9BD  FB
+	ret				; 0000C9BE  C3
 
 xc9bf:	push	cx			; 0000C9BF  51  'Q'
 	mov	dx,0x3f4		; 0000C9C0  BAF403  '...'
@@ -8627,7 +8631,7 @@ xcc5f:	cs	lodsb			; 0000CC5F  2EAC  '..'
 	mov	bx,err102		; 0000CC78  BB8CB6  '...'
 	mov	cx,err102_len		; 0000CC7B  B91A00  '...'
 	call	xc745			; 0000CC7E  E8C4FA  '...'
-xcc81:	jmp	short xcc81		; 0000CC81  Hang the machine
+xcc81:	jmp	short xcc81		; 0000CC81  EBFE	; Hang the machine
 
 xcc83:	mov	al,0x91			; 0000CC83  B091  '..'
 	out	0x84,al			; 0000CC85  E684  '..'
@@ -8729,7 +8733,7 @@ xcd2c:	mov	dx,0x0			; 0000CD2C  BA0000  '...'
 	mov	bx,err102		; 0000CD2F  BB8CB6  '...'
 	mov	cx,err102_len		; 0000CD32  B91A00  '...'
 	call	xc745			; 0000CD35  E80DFA  '.',0x0D,'.'
-xcd38:	jmp	short xcd38		; 0000CD38  Hang the machine
+xcd38:	jmp	short xcd38		; 0000CD38  EBFE	; Hang the machine
 
 xcd3a:	mov	al,0x95			; 0000CD3A  B095  '..'
 	out	0x84,al			; 0000CD3C  E684  '..'
@@ -8857,7 +8861,7 @@ xce0c:	push	es			; 0000CE0C  06  '.'
 	mov	bx,err102		; 0000CE3D  BB8CB6  '...'
 	mov	cx,err102_len		; 0000CE40  B91A00  '...'
 	call	xc745			; 0000CE43  E8FFF8  '...'
-xce46:	jmp	short xce46		; 0000CE46  Hang the machine
+xce46:	jmp	short xce46		; 0000CE46  EBFE	; Hang the machine
 
 xce48:	mov	[es:0x20],bp		; 0000CE48  26892E2000  '&.. .'
 	and	byte [0x6b],0xfe	; 0000CE4D  80266B00FE  '.&k..'
@@ -9060,7 +9064,7 @@ xcfc6:	in	al,0x64			; 0000CFC6  E464  '.d'
 	mov	bx,0xb810		; 0000CFD1  BB10B8  '...'
 	mov	cx,0x1f			; 0000CFD4  B91F00  '...'
 	call	xc745			; 0000CFD7  E86BF7  '.k.'
-xcfda:	jmp	short xcfda		; 0000CFDA  Hang the machine
+xcfda:	jmp	short xcfda		; 0000CFDA  EBFE	; Hang the machine
 
 xcfdc:	ret				; 0000CFDC  C3  '.'
 
@@ -9102,7 +9106,7 @@ xd019:	mov	al,0x83			; 0000D019  B083  '..'
 	mov	bx,0xb810		; 0000D020  BB10B8  '...'
 	mov	cx,0x1f			; 0000D023  B91F00  '...'
 	call	xc745			; 0000D026  E81CF7  '...'
-xd029:	jmp	short xd029		; 0000D029  EBFE  Hang the machine
+xd029:	jmp	short xd029		; 0000D029  EBFE	; Hang the machine
 
 xd02b:	mov	al,0x84			; 0000D02B  B084  '..'
 	out	0x84,al			; 0000D02D  E684  '..'
@@ -9717,7 +9721,7 @@ xd509:	mov	[0x41],ah		; 0000D509  88264100  '.&A.'
 ;
 xd50f:	mov	al,[0x42]		; 0000D50F  A04200  '.B.'
 	test	al,0xc0			; 0000D512  A8C0  '..'
-	jz	xd53d			; 0000D514  No problems
+	jz	xd53d			; 0000D514  7427	; No problems
 
 	test	al,0x8			; 0000D516  A808  '..'
 	jz	xd51e			; 0000D518  7404  't.'
@@ -10479,10 +10483,10 @@ xdb33:	push	bx			; 0000DB33  53  'S'
 ;
 ;   Display the Kb value in (BP)
 ;
-	mov	ax,0x40			; segment 0x40 mapped to %B0000
-	mov	es,ax			; (ES) -> video buffers
-	mov	ax,bp			; (AX) == value to display (in Kb)
-	call	x80a5			; display it
+	mov	ax,0x40			; 0000DB4E  B84000	; segment 0x40 mapped to %B0000
+	mov	es,ax			; 0000DB51  8EC0	; (ES) -> video buffers
+	mov	ax,bp			; 0000DB53  8BC5	; (AX) == value to display (in Kb)
+	call	x80a5			; 0000DB55  E84DA5	; display it
 
 xdb58:	cmp	word [0x82],byte +0x0	; 0000DB58  833E820000  '.>...'
 	jnz	xdb6b			; 0000DB5D  750C  'u.'
@@ -11108,7 +11112,7 @@ xe137:	mov	al,bl			; 0000E137  8AC3  '..'
 	mov	cx,err102_len-2		; 0000E151  B91800  '...'
 	mov	bp,0xe15a		; 0000E154  BD5AE1  '.Z.'
 	jmp	xc7f7			; 0000E157  E99DE6  '...'
-xe15a:	jmp	short xe15a		; 0000E15A  Hang the machine
+xe15a:	jmp	short xe15a		; 0000E15A  EBFE	; Hang the machine
 
 xe15c:	ret				; 0000E15C  C3  '.'
 
@@ -11574,7 +11578,7 @@ xe770:	test	dl,0x80			; 0000E770  F6C280  '...'
 
 	mov	si,boot_error		; 0000E78B  BE5D93  '.].'
 	call	print_str$		; 0000E78E  E83F00  '.?.'
-xe791:	jmp	short xe791		; 0000E791  Hang the machine
+xe791:	jmp	short xe791		; 0000E791  EBFE	; Hang the machine
 
 ;
 ;   Hard disk sector validation (as opposed to the preceding floppy disk sector validation)
@@ -12150,6 +12154,9 @@ xec32:	in	al,0x64			; 0000EC32  E464  '.d'
 ;
 ;   This address (F000:EC59) is stored in the IDT vector for INT 0x40 when a hard disk controls INT 0x13
 ;
+;   NOTE: EC59 is not a coincidental address; every IBM ROM BIOS (from the first 5150 through the 5170)
+;   has placed its INT 0x13 handler here (probably only because that's where it happened to land on the 5150).
+;
 int13_diskette:
 	sti				; 0000EC59  FB  '.'
 	push	bp			; 0000EC5A  55  'U'
@@ -12162,15 +12169,35 @@ int13_diskette:
 	push	bx			; 0000EC61  53  'S'
 	push	ax			; 0000EC62  50  'P'
 	mov	bp,sp			; 0000EC63  8BEC  '..'
+;
+;   At this point, the caller's registers can be accessed using the following offsets
+;
+CALLER_AL	equ	0x00		; [BP+0x00] = AL
+CALLER_AH	equ	0x01		; [BP+0x01] = AH
+CALLER_BL	equ	0x02		; [BP+0x02] = BL
+CALLER_BH	equ	0x03		; [BP+0x03] = BH
+CALLER_CL	equ	0x04		; [BP+0x04] = CL
+CALLER_CH	equ	0x05		; [BP+0x05] = CH
+CALLER_DL	equ	0x06		; [BP+0x06] = DL
+CALLER_DH	equ	0x07		; [BP+0x07] = DH
+CALLER_SI	equ	0x08		; [BP+0x08] = SI
+CALLER_DI	equ	0x0A		; [BP+0x0A] = DI
+CALLER_ES	equ	0x0C		; [BP+0x0C] = ES
+CALLER_DS	equ	0x0E		; [BP+0x0E] = DS
+CALLER_BP	equ	0x10		; [BP+0x10] = BP
+CALLER_IP	equ	0x12		; [BP+0x12] = IP
+CALLER_CS	equ	0x14		; [BP+0x14] = CS
+CALLER_FLAGS	equ	0x16		; [BP+0x16] = FLAGS
+
 	xor	ax,ax			; 0000EC65  33C0  '3.'
 	mov	ds,ax			; 0000EC67  8ED8  '..'
 	les	si,[0x78]		; 0000EC69  C4367800  '.6x.'
 	mov	ax,0x40			; 0000EC6D  B84000  '.@.'
 	mov	ds,ax			; 0000EC70  8ED8  '..'
-	mov	byte [0x40],0xff	; 0000EC72  C6064000FF  '..@..'
-	and	word [bp+0x16],0xfe	; 0000EC77  816616FE00  '.f...'
-	mov	al,[bp+0x1]		; 0000EC7C  8A4601  '.F.'
-	mov	ah,[bp+0x6]		; 0000EC7F  8A6606  '.f.'
+	mov	byte [MOTOR_COUNT],0xff	; 0000EC72  C6064000FF
+	and	word [bp+CALLER_FLAGS],0xfe	; 0000EC77  816616FE00  '.f...'
+	mov	al,[bp+CALLER_AH]; 0000EC7C  8A4601  '.F.'
+	mov	ah,[bp+CALLER_DL]; 0000EC7F  8A6606  '.f.'
 	cmp	ah,0x2			; 0000EC82  80FC02  '...'
 	jnc	xeca2			; 0000EC85  731B  's.'
 	cmp	al,0x18			; 0000EC87  3C18  '<.'
@@ -12190,19 +12217,22 @@ xeca2:	cmp	al,0x1			; 0000ECA2  3C01  '<.'
 	jna	xec95			; 0000ECA4  76EF  'v.'
 xeca6:	call	xd3e8			; 0000ECA6  E83FE7  '.?.'
 
-xeca9:	mov	bl,[es:si+0x2]		; 0000ECA9  268A5C02  '&.\.'
-	mov	[0x40],bl		; 0000ECAD  881E4000  '..@.'
-	or	word [bp+0x16],0x200	; 0000ECB1  814E160002  '.N...'
-	pop	bx			; 0000ECB6  5B  '['
-	pop	bx			; 0000ECB7  5B  '['
-	pop	cx			; 0000ECB8  59  'Y'
-	pop	dx			; 0000ECB9  5A  'Z'
-	pop	si			; 0000ECBA  5E  '^'
-	pop	di			; 0000ECBB  5F  '_'
-	pop	es			; 0000ECBC  07  '.'
-	pop	ds			; 0000ECBD  1F  '.'
-	pop	bp			; 0000ECBE  5D  ']'
-	iret				; 0000ECBF  CF  '.'
+;
+;   ES:SI (typically 0:522) points to Diskette Drive Parameters
+;
+xeca9:	mov	bl,[es:si+0x2]		; 0000ECA9  268A5C02	; BL == 0x25 (typically)
+	mov	[MOTOR_COUNT],bl	; 0000ECAD  881E4000
+	or word [bp+CALLER_FLAGS],0x200	; 0000ECB1  814E160002	; ENSURE THAT INTERRUPTS ARE ENABLED BY THE IRET
+	pop	bx			; 0000ECB6  5B
+	pop	bx			; 0000ECB7  5B
+	pop	cx			; 0000ECB8  59
+	pop	dx			; 0000ECB9  5A
+	pop	si			; 0000ECBA  5E
+	pop	di			; 0000ECBB  5F
+	pop	es			; 0000ECBC  07
+	pop	ds			; 0000ECBD  1F
+	pop	bp			; 0000ECBE  5D
+	iret				; 0000ECBF  CF
 
 	call	x8fa4			; 0000ECC0  E8E1A2  '...'
 	jnz	xecd4			; 0000ECC3  750F  'u.'
@@ -12315,6 +12345,9 @@ xedaf:	call	xd4c4			; 0000EDAF  E812E7  '...'
 	call	xd4c4			; 0000EDB5  E80CE7  '...'
 xedb8:	sub	si,byte +0x5		; 0000EDB8  83EE05  '...'
 
+;
+;   Wait for a bit...
+;
 xedbb:	call	xef85			; 0000EDBB  E8C701  '...'
 	jnz	xedd7			; 0000EDBE  7517  'u.'
 ;
@@ -12538,6 +12571,7 @@ xefa0:	test	byte [0x3e],0x80	; 0000EFA0  F6063E0080  '..>..'
 	jnz	xefb4			; 0000EFA5  750D  'u',0x0D
 	call	x919a			; 0000EFA7  E8F0A1  '...'
 	loop	xefa0			; 0000EFAA  E2F4  '..'
+
 	dec	bx			; 0000EFAC  4B  'K'
 	jnz	xef9b			; 0000EFAD  75EC  'u.'
 xefaf:	call	xca03			; 0000EFAF  E851DA  '.Q.'
@@ -12952,7 +12986,7 @@ xf494:	mov	al,0x0			; 0000F494  B000
 ;   register are set to anything other than 0x40 (ie, it returns to real-mode almost
 ;   immediately after entering protected-mode).
 ;
-	lgdt	[cs:0x077e]		; 0000F498  load [gdtr_hi] into GDTR
+	lgdt	[cs:0x077e]		; 0000F498  2E0F01167E07; load [gdtr_hi] into GDTR
 	mov	eax,cr0			; 0000F49E  0F2000
 	or	ax,0x1			; 0000F4A1  0D0100
 	mov	cr0,eax			; 0000F4A4  0F2200
@@ -13144,7 +13178,7 @@ xf655:	mov	ax,0x10			; 0000F655  B81000  '...'
 	mov	cr0,eax			; 0000F665  0F2200
 	jmp	0xf000:0xf66d		; 0000F668  EA6DF600F0  '.m...'
 
-	lidt	[cs:0x0784]		; 0000F66D  load [idtr_lo] into IDTR
+	lidt	[cs:0x0784]		; 0000F66D  2E0F011E8407; load [idtr_lo] into IDTR
 	in	al,0x80			; 0000F673  E480  '..'
 	cmp	al,0x0			; 0000F675  3C00  '<.'
 	jz	xf684			; 0000F677  740B  't.'
@@ -13750,7 +13784,7 @@ xfe81:	xor	ah,ah			; 0000FE81  32E4
 
 	db	0xBD,0x9C,0xD9,0x9C,0xF4,0x9C,0x1D,0x9D,0x50,0x9D,0x72,0x9D,0xAA,0x9D,0xF1,0x9D,0xFF ; 0000FE85-0000FE95
 
-xfe96:	and	byte [0x003f],0xf0	; 0000FE96  80263F00F0
+xfe96:	and	byte [MOTOR_STATUS],0xf0; 0000FE96  80263F00F0
 
 xfe9b:	int	0x1c			; 0000FE9B  CD1C  '..'
 	mov	al,0x20			; 0000FE9D  B020  '. '
@@ -13777,10 +13811,10 @@ xfeb7:	cmp	word [0x6e],byte +0x18	; 0000FEB7  833E6E0018  '.>n..'
 	mov	[0x6e],ax		; 0000FECA  A36E00  '.n.'
 	inc	ax			; 0000FECD  40  '@'
 	mov	[0x70],al		; 0000FECE  A27000  '.p.'
-xfed1:	mov	al,[0x40]		; 0000FED1  A04000  '.@.'
+xfed1:	mov	al,[MOTOR_COUNT]	; 0000FED1  A04000  '.@.'
 	cmp	al,0xff			; 0000FED4  3CFF  '<.'
 	jnz	xfef7			; 0000FED6  751F  'u.'
-	test	byte [0x3f],0x7		; 0000FED8  F6063F0007  '..?..'
+	test	byte [MOTOR_STATUS],0x7	; 0000FED8  F6063F0007  '..?..'
 	jz	xfef7			; 0000FEDD  7418  't.'
 	in	al,0x86			; 0000FEDF  E486  '..'
 	test	al,0x80			; 0000FEE1  A880  '..'
@@ -13793,22 +13827,22 @@ xfed1:	mov	al,[0x40]		; 0000FED1  A04000  '.@.'
 	out	0x4b,al			; 0000FEEF  E64B  '.K'
 	mov	al,[cs:0x67dd]		; 0000FEF1  2EA0DD67  '...g'
 	out	0x4a,al			; 0000FEF5  E64A  '.J'
-xfef7:	dec	byte [0x40]		; 0000FEF7  FE0E4000  '..@.'
-	jnz	xfe9b			; 0000FEFB  759E  'u.'
-	mov	al,0xc			; 0000FEFD  B00C  '..'
-	mov	dx,0x3f2		; 0000FEFF  BAF203  '...'
-	out	dx,al			; 0000FF02  EE  '.'
-	test	byte [0x3f],0x7		; 0000FF03  F6063F0007  '..?..'
+xfef7:	dec	byte [MOTOR_COUNT]	; 0000FEF7  FE0E4000
+	jnz	xfe9b			; 0000FEFB  759E
+	mov	al,0xc			; 0000FEFD  B00C	; CLEAR ALL DRIVE SELECT AND MOTOR BITS (0x0C IS JUST THE ENABLE AND INT_ENABLE BITS)
+	mov	dx,0x3f2		; 0000FEFF  BAF203
+	out	dx,al			; 0000FF02  EE
+	test	byte [MOTOR_STATUS],0x7	; 0000FF03  F6063F0007
 	jz	xfe96			; 0000FF08  748C
-	in	al,0x86			; 0000FF0A  E486  '..'
-	test	al,0x80			; 0000FF0C  A880  '..'
+	in	al,0x86			; 0000FF0A  E486	; (COMPAQ DESKPRO TECHREF REFERS TO PORT 0x86 AS "DMA Page Register Reserved")
+	test	al,0x80			; 0000FF0C  A880	; (TYPICALLY CLEAR)
 	jnz	xfe96			; 0000FF0E  7586
-	test	al,0x40			; 0000FF10  A840  '.@'
-	jnz	xfe96			; 0000FF12  7582
-	or	al,0xc0			; 0000FF14  0CC0  '..'
-	out	0x86,al			; 0000FF16  E686  '..'
-	mov	al,0x92			; 0000FF18  B092  '..'
-	out	0x4b,al			; 0000FF1A  E64B  '.K'
+	test	al,0x40			; 0000FF10  A840	; (TYPICALLY SET)
+	jnz	xfe96			; 0000FF12  7582	; GO CLEAR ALL MOTOR STATUS BITS
+	or	al,0xc0			; 0000FF14  0CC0
+	out	0x86,al			; 0000FF16  E686
+	mov	al,0x92			; 0000FF18  B092
+	out	0x4b,al			; 0000FF1A  E64B
 	jmp	xfe96			; 0000FF1C  E977FF
 
 	times	4 db 0xFF		; 0000FF1F - 0000FF22
@@ -13892,15 +13926,15 @@ bim_table_offset:
 cpu_idrev_offset:
 	dw	0x7FBE			; 0000FFE2  BE7F
 
-	db	'G'			; 0000FFE4  Product Family Code
-	db	'4'			; 0000FFE5  Point-Release Code
-	db	'J '			; 0000FFE6  Revision Code
-	db	'03'			; 0000FFE8  BIOS Type Code
-	db	'COMPAQ'		; 0000FFEA  Machine ID
+	db	'G'			; 0000FFE4  47		; Product Family Code
+	db	'4'			; 0000FFE5  34		; Point-Release Code
+	db	'J '			; 0000FFE6  4A20	; Revision Code
+	db	'03'			; 0000FFE8  3033	; BIOS Type Code
+	db	'COMPAQ'		; 0000FFEA  434F4D504151; Machine ID
 
 	jmp	0xf000:reset		; 0000FFF0  EA05F900F0
 
-	db	0x20			; 0000FFF5
-	db	'01/28/88'		; 0000FFF6  BIOS Revision Date
-	db	0xFC			; 0000FFFE  Machine Type Code
-	db	0x98			; 0000FFFF  Checksum
+	db	0x20			; 0000FFF5  20
+	db	'01/28/88'		; 0000FFF6  30312F32382F3838	; BIOS Revision Date
+	db	0xFC			; 0000FFFE  FC		; Machine Type Code
+	db	0x98			; 0000FFFF  98		; Checksum
