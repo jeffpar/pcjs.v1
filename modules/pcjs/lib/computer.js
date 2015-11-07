@@ -131,6 +131,7 @@ function Computer(parmsComputer, parmsMachine, fSuspended) {
     this.nBusWidth = parmsComputer['busWidth'] || parmsComputer['buswidth'];
     this.resume = Computer.RESUME_NONE;
     this.sStateData = null;
+    this.fStateData = false;            // remembers if sStateData was loaded
     this.fServerState = false;
     this.url = parmsMachine? parmsMachine['url'] : null;
 
@@ -331,6 +332,7 @@ Computer.prototype.onLoadSetReady = function(sStateFile, sStateData, nErrorCode)
 {
     if (!nErrorCode) {
         this.sStateData = sStateData;
+        this.fStateData = true;
         if (DEBUG && this.messageEnabled()) {
             this.printMessage("loaded state file " + sStateFile.replace(this.sUserID || "xxx", "xxx"));
         }
@@ -609,7 +611,7 @@ Computer.prototype.powerRestore = function(component, stateComputer, fRepower, f
                  * TODO: Considering doing this in ALL cases, not just in situations where a
                  * 'state' exists but we're not actually resuming from it.
                  */
-                if (this.sStatePath && !this.sStateData) {
+                if (this.sStatePath && !this.fStateData) {
                     stateComputer.clear();
                     this.resume = Computer.RESUME_NONE;
                     web.reloadPage();

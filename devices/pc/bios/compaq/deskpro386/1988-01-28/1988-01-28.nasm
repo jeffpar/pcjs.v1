@@ -13906,7 +13906,7 @@ xffb3:	pop	ds			; 0000FFB3  1F  '.'
 	db	0x0000			; 0000FFB8  0000
 	dw	0x0000			; 0000FFBA  0000
 	dw	0x0000			; 0000FFBC  0000
-	dw	0x0003			; 0000FFBE  0300 (replaced during ROM relocation with 0x03nn where nn is the CPU revision identifier)
+	dw	0x0003			; 0000FFBE  0300 (replaced during ROM relocation with 0x03nn, where nn is the CPU revision identifier)
 
 	times	29 db 0xFF		; 0000FFC0 - 0000FFDC
 

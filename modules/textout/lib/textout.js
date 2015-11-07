@@ -35,6 +35,7 @@
 var fs      = require("fs");
 var path    = require("path");
 var mkdirp  = require("mkdirp");
+var defines = require("../../shared/lib/defines");
 var net     = require("../../shared/lib/netlib");
 var proc    = require("../../shared/lib/proclib");
 var str     = require("../../shared/lib/strlib");

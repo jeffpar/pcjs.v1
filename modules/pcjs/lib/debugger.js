@@ -2104,6 +2104,8 @@ if (DEBUGGER) {
     /**
      * setByte(dbgAddr, b, inc)
      *
+     * NOTE: If you need to patch a ROM, you MUST use the ROM location's physical address.
+     *
      * WARNING: Be careful with the editing commands that use function, because we don't have a safe
      * counterpart to cpu.probeAddr().
      *
@@ -2116,7 +2118,11 @@ if (DEBUGGER) {
     {
         var addr = this.getAddr(dbgAddr, true, 1);
         if (addr !== X86.ADDR_INVALID) {
-            this.cpu.setByte(addr, b);
+            if (dbgAddr.type != Debugger.ADDRTYPE.PHYSICAL) {
+                this.cpu.setByte(addr, b);
+            } else {
+                this.bus.setByteDirect(addr, b);
+            }
             if (inc) this.incAddr(dbgAddr, inc);
             this.cpu.updateCPU(true);           // we set fForce to true in case video memory was the target
         }
@@ -2124,6 +2130,8 @@ if (DEBUGGER) {
 
     /**
      * setShort(dbgAddr, w, inc)
+     *
+     * NOTE: If you need to patch a ROM, you MUST use the ROM location's physical address.
      *
      * WARNING: Be careful with the editing commands that use function, because we don't have a safe
      * counterpart to cpu.probeAddr().
@@ -2137,7 +2145,11 @@ if (DEBUGGER) {
     {
         var addr = this.getAddr(dbgAddr, true, 2);
         if (addr !== X86.ADDR_INVALID) {
-            this.cpu.setShort(addr, w);
+            if (dbgAddr.type != Debugger.ADDRTYPE.PHYSICAL) {
+                this.cpu.setShort(addr, w);
+            } else {
+                this.bus.setShortDirect(addr, w);
+            }
             if (inc) this.incAddr(dbgAddr, inc);
             this.cpu.updateCPU(true);           // we set fForce to true in case video memory was the target
         }
