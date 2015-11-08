@@ -75,7 +75,7 @@ var littleEndian = (TYPEDARRAYS? (function() {
  * (LONGARRAYS) and shifting/masking bytes/words to/from dwords; in theory, byte accesses would
  * be faster and word accesses somewhat less faster.
  *
- * However, preliminary testing of that feature (FATARRAYS) did not yield significantly faster
+ * However, preliminary testing of that feature (BYTEARRAYS) did not yield significantly faster
  * performance, so it is OFF by default to minimize our memory consumption.  Using TYPEDARRAYS
  * would seem best, but as discussed in defines.js, it's off by default, because it doesn't perform
  * as well as LONGARRAYS; the other advantage of TYPEDARRAYS is that it should theoretically use
@@ -110,7 +110,6 @@ function Memory(addr, used, size, type, controller, cpu)
     this.controller = null;
     this.cpu = cpu;             // if a CPU reference is provided, then this must be an UNPAGED Memory block allocation
     this.fDirty = this.fDirtyEver = false;
-    this.setPhysBlock();
     this.copyBreakpoints();     // initialize the block's Debugger info (eg, breakpoint totals); the caller will reinitialize
 
     if (BACKTRACK) {
@@ -170,13 +169,13 @@ function Memory(addr, used, size, type, controller, cpu)
         this.ab = new Uint8Array(this.buffer, 0, size);
         this.aw = new Uint16Array(this.buffer, 0, size >> 1);
         this.adw = new Int32Array(this.buffer, 0, size >> 2);
-        this.setAccess(littleEndian? Memory.afnLittleEndian : Memory.afnBigEndian);
+        this.setAccess(littleEndian? Memory.afnArrayLE : Memory.afnArrayBE);
     } else {
-        if (FATARRAYS) {
+        if (BYTEARRAYS) {
             this.ab = new Array(size);
         } else {
             /*
-             * NOTE: This is the default mode of operation (!TYPEDARRAYS && !FATARRAYS), because it
+             * NOTE: This is the default mode of operation (!TYPEDARRAYS && !BYTEARRAYS), because it
              * seems to provide the best performance; and although in theory, that performance might
              * come at twice the overhead of TYPEDARRAYS, it's increasingly likely that the JavaScript
              * runtime will notice that all we ever store are 32-bit values, and optimize accordingly.
@@ -287,9 +286,9 @@ Memory.prototype = {
             this.ab = mem.ab;
             this.aw = mem.aw;
             this.adw = mem.adw;
-            this.setAccess(littleEndian? Memory.afnLittleEndian : Memory.afnBigEndian);
+            this.setAccess(littleEndian? Memory.afnArrayLE : Memory.afnArrayBE);
         } else {
-            if (FATARRAYS) {
+            if (BYTEARRAYS) {
                 this.ab = mem.ab;
             } else {
                 this.adw = mem.adw;
@@ -315,7 +314,7 @@ Memory.prototype = {
         if (this.controller) {
             adw = null;
         }
-        else if (FATARRAYS) {
+        else if (BYTEARRAYS) {
             adw = new Array(this.size >> 2);
             var off = 0;
             for (i = 0; i < adw.length; i++) {
@@ -367,11 +366,11 @@ Memory.prototype = {
          * memory blocks installed at the programmed address, and so we arrived here at a block with
          * no controller AND no data.
          */
-        // DEBUG: Component.assert(adw != null);
+        Component.assert(adw != null);
 
         if (adw && this.size == adw.length << 2) {
             var i;
-            if (FATARRAYS) {
+            if (BYTEARRAYS) {
                 var off = 0;
                 for (i = 0; i < adw.length; i++) {
                     this.ab[off] = adw[i] & 0xff;
@@ -399,7 +398,7 @@ Memory.prototype = {
      *
      * @this {Memory}
      * @param {Array.<function()>} [afn] function table
-     * @param {boolean} [fDirect]
+     * @param {boolean} [fDirect] (true to update direct access functions as well; default is true)
      */
     setAccess: function(afn, fDirect) {
         if (!afn) {
@@ -495,20 +494,32 @@ Memory.prototype = {
      * setPhysBlock(blockPhys, blockPDE, offPDE, blockPTE, offPTE)
      *
      * @this {Memory}
-     * @param {Memory|null} [blockPhys]
-     * @param {Memory|null} [blockPDE]
-     * @param {number} [offPDE]
-     * @param {Memory|null} [blockPTE]
-     * @param {number} [offPTE]
+     * @param {Memory} blockPhys
+     * @param {Memory} blockPDE
+     * @param {number} offPDE
+     * @param {Memory} blockPTE
+     * @param {number} offPTE
      */
     setPhysBlock: function(blockPhys, blockPDE, offPDE, blockPTE, offPTE) {
-        this.blockPhys = blockPhys;
         this.blockPDE = blockPDE;
         this.iPDE = offPDE >> 2;    // convert offPDE into iPDE (an adw index)
         this.blockPTE = blockPTE;
         this.iPTE = offPTE >> 2;    // convert offPTE into iPTE (an adw index)
-        this.bitPTEDirty = blockPhys? Memory.adjustEndian(X86.PTE.ACCESSED | X86.PTE.DIRTY) : 0;
-        this.bitPTEAccessed = blockPhys? Memory.adjustEndian(X86.PTE.ACCESSED) : 0;
+        /*
+         * This is an optimization for "normal" pages, installing paged memory handlers that mimic
+         * normal memory but also know how to update page tables.  If any of the criteria are not met
+         * for these special handlers, we fall back to the slower default "paged" memory handlers.
+         */
+        if (TYPEDARRAYS && littleEndian && blockPhys.adw && !blockPhys.controller) {
+            this.ab = blockPhys.ab;
+            this.aw = blockPhys.aw;
+            this.adw = blockPhys.adw;
+            this.setAccess(Memory.afnPagedLE);
+        } else {
+            this.blockPhys = blockPhys;
+            this.bitPTEAccessed = blockPhys? Memory.adjustEndian(X86.PTE.ACCESSED) : 0;
+            this.bitPTEDirty = blockPhys? Memory.adjustEndian(X86.PTE.ACCESSED | X86.PTE.DIRTY) : 0;
+        }
     },
     /**
      * printAddr(sMessage)
@@ -671,7 +682,6 @@ Memory.prototype = {
      * @param {number} addr
      */
     writeShortDefault: function writeShortDefault(off, w, addr) {
-        // DEBUG: Component.assert(!(w & ~0xffff));
         this.writeByte(off++, w & 0xff, addr++);
         this.writeByte(off, w >> 8, addr);
     },
@@ -698,8 +708,7 @@ Memory.prototype = {
      * @return {number}
      */
     readByteMemory: function readByteMemory(off, addr) {
-        // DEBUG: Component.assert(off >= 0 && off < this.size);
-        if (FATARRAYS) {
+        if (BYTEARRAYS) {
             return this.ab[off];
         }
         return ((this.adw[off >> 2] >>> ((off & 0x3) << 3)) & 0xff);
@@ -713,8 +722,7 @@ Memory.prototype = {
      * @return {number}
      */
     readShortMemory: function readShortMemory(off, addr) {
-        // DEBUG: Component.assert(off >= 0 && off < this.size - 1);
-        if (FATARRAYS) {
+        if (BYTEARRAYS) {
             return this.ab[off] | (this.ab[off + 1] << 8);
         }
         var w;
@@ -737,8 +745,7 @@ Memory.prototype = {
      * @return {number}
      */
     readLongMemory: function readLongMemory(off, addr) {
-        // DEBUG: Component.assert(off >= 0 && off < this.size - 3);
-        if (FATARRAYS) {
+        if (BYTEARRAYS) {
             return this.ab[off] | (this.ab[off + 1] << 8) | (this.ab[off + 2] << 16) | (this.ab[off + 3] << 24);
         }
         var idw = off >> 2;
@@ -759,8 +766,7 @@ Memory.prototype = {
      * @param {number} addr
      */
     writeByteMemory: function writeByteMemory(off, b, addr) {
-        // DEBUG: Component.assert(off >= 0 && off < this.size && (b & 0xff) == b);
-        if (FATARRAYS) {
+        if (BYTEARRAYS) {
             this.ab[off] = b;
         } else {
             var idw = off >> 2;
@@ -778,8 +784,7 @@ Memory.prototype = {
      * @param {number} addr
      */
     writeShortMemory: function writeShortMemory(off, w, addr) {
-        // DEBUG: Component.assert(off >= 0 && off < this.size - 1 && (w & 0xffff) == w);
-        if (FATARRAYS) {
+        if (BYTEARRAYS) {
             this.ab[off] = (w & 0xff);
             this.ab[off + 1] = (w >> 8);
         } else {
@@ -804,8 +809,7 @@ Memory.prototype = {
      * @param {number} addr
      */
     writeLongMemory: function writeLongMemory(off, l, addr) {
-        // DEBUG: Component.assert(off >= 0 && off < this.size - 3);
-        if (FATARRAYS) {
+        if (BYTEARRAYS) {
             this.ab[off] = (l & 0xff);
             this.ab[off + 1] = (l >> 8) & 0xff;
             this.ab[off + 2] = (l >> 16) & 0xff;
@@ -1071,51 +1075,60 @@ Memory.prototype = {
         this.getPageBlock(addr, true).writeLong(off, l, addr);
     },
     /**
-     * readByteBigEndian(off, addr)
+     * readByteBE(off, addr)
      *
      * @this {Memory}
      * @param {number} off
      * @param {number} addr
      * @return {number}
      */
-    readByteBigEndian: function readByteBigEndian(off, addr) {
-        // DEBUG: Component.assert(off >= 0 && off < this.size);
+    readByteBE: function readByteBE(off, addr) {
         return this.ab[off];
     },
     /**
-     * readByteLittleEndian(off, addr)
+     * readByteLE(off, addr)
      *
      * @this {Memory}
      * @param {number} off
      * @param {number} addr
      * @return {number}
      */
-    readByteLittleEndian: function readByteLittleEndian(off, addr) {
-        // DEBUG: Component.assert(off >= 0 && off < this.size);
+    readByteLE: function readByteLE(off, addr) {
         return this.ab[off];
     },
     /**
-     * readShortBigEndian(off, addr)
+     * readBytePLE(off, addr)
      *
      * @this {Memory}
      * @param {number} off
      * @param {number} addr
      * @return {number}
      */
-    readShortBigEndian: function readShortBigEndian(off, addr) {
-        // DEBUG: Component.assert(off >= 0 && off < this.size - 1);
+    readBytePLE: function readBytePLE(off, addr) {
+        this.blockPDE.adw[this.iPDE] |= X86.PTE.ACCESSED;
+        this.blockPTE.adw[this.iPTE] |= X86.PTE.ACCESSED;
+        return this.ab[off];
+    },
+    /**
+     * readShortBE(off, addr)
+     *
+     * @this {Memory}
+     * @param {number} off
+     * @param {number} addr
+     * @return {number}
+     */
+    readShortBE: function readShortBE(off, addr) {
         return this.dv.getUint16(off, true);
     },
     /**
-     * readShortLittleEndian(off, addr)
+     * readShortLE(off, addr)
      *
      * @this {Memory}
      * @param {number} off
      * @param {number} addr
      * @return {number}
      */
-    readShortLittleEndian: function readShortLittleEndian(off, addr) {
-        // DEBUG: Component.assert(off >= 0 && off < this.size - 1);
+    readShortLE: function readShortLE(off, addr) {
         /*
          * TODO: It remains to be seen if there's any advantage to checking the offset for an aligned read
          * vs. always reading the bytes separately; it seems a safe bet for longs, but it's less clear for shorts.
@@ -1123,27 +1136,42 @@ Memory.prototype = {
         return (off & 0x1)? (this.ab[off] | (this.ab[off+1] << 8)) : this.aw[off >> 1];
     },
     /**
-     * readLongBigEndian(off, addr)
+     * readShortPLE(off, addr)
      *
      * @this {Memory}
      * @param {number} off
      * @param {number} addr
      * @return {number}
      */
-    readLongBigEndian: function readLongBigEndian(off, addr) {
-        // DEBUG: Component.assert(off >= 0 && off < this.size - 3);
+    readShortPLE: function readShortPLE(off, addr) {
+        /*
+         * TODO: It remains to be seen if there's any advantage to checking the offset for an aligned read
+         * vs. always reading the bytes separately; it seems a safe bet for longs, but it's less clear for shorts.
+         */
+        this.blockPDE.adw[this.iPDE] |= X86.PTE.ACCESSED;
+        this.blockPTE.adw[this.iPTE] |= X86.PTE.ACCESSED;
+        return (off & 0x1)? (this.ab[off] | (this.ab[off+1] << 8)) : this.aw[off >> 1];
+    },
+    /**
+     * readLongBE(off, addr)
+     *
+     * @this {Memory}
+     * @param {number} off
+     * @param {number} addr
+     * @return {number}
+     */
+    readLongBE: function readLongBE(off, addr) {
         return this.dv.getInt32(off, true);
     },
     /**
-     * readLongLittleEndian(off, addr)
+     * readLongLE(off, addr)
      *
      * @this {Memory}
      * @param {number} off
      * @param {number} addr
      * @return {number}
      */
-    readLongLittleEndian: function readLongLittleEndian(off, addr) {
-        // DEBUG: Component.assert(off >= 0 && off < this.size - 3);
+    readLongLE: function readLongLE(off, addr) {
         /*
          * TODO: It remains to be seen if there's any advantage to checking the offset for an aligned read
          * vs. always reading the bytes separately; it seems a safe bet for longs, but it's less clear for shorts.
@@ -1151,54 +1179,81 @@ Memory.prototype = {
         return (off & 0x3)? (this.ab[off] | (this.ab[off+1] << 8) | (this.ab[off+2] << 16) | (this.ab[off+3] << 24)) : this.adw[off >> 2];
     },
     /**
-     * writeByteBigEndian(off, b, addr)
+     * readLongPLE(off, addr)
+     *
+     * @this {Memory}
+     * @param {number} off
+     * @param {number} addr
+     * @return {number}
+     */
+    readLongPLE: function readLongPLE(off, addr) {
+        /*
+         * TODO: It remains to be seen if there's any advantage to checking the offset for an aligned read
+         * vs. always reading the bytes separately; it seems a safe bet for longs, but it's less clear for shorts.
+         */
+        this.blockPDE.adw[this.iPDE] |= X86.PTE.ACCESSED;
+        this.blockPTE.adw[this.iPTE] |= X86.PTE.ACCESSED;
+        return (off & 0x3)? (this.ab[off] | (this.ab[off+1] << 8) | (this.ab[off+2] << 16) | (this.ab[off+3] << 24)) : this.adw[off >> 2];
+    },
+    /**
+     * writeByteBE(off, b, addr)
      *
      * @this {Memory}
      * @param {number} off
      * @param {number} b
      * @param {number} addr
      */
-    writeByteBigEndian: function writeByteBigEndian(off, b, addr) {
-        // DEBUG: Component.assert(off >= 0 && off < this.size);
+    writeByteBE: function writeByteBE(off, b, addr) {
         this.ab[off] = b;
         this.fDirty = true;
     },
     /**
-     * writeByteLittleEndian(off, b, addr)
+     * writeByteLE(off, b, addr)
      *
      * @this {Memory}
      * @param {number} off
      * @param {number} addr
      * @param {number} b
      */
-    writeByteLittleEndian: function writeByteLittleEndian(off, b, addr) {
-        // DEBUG: Component.assert(off >= 0 && off < this.size);
+    writeByteLE: function writeByteLE(off, b, addr) {
         this.ab[off] = b;
         this.fDirty = true;
     },
     /**
-     * writeShortBigEndian(off, w, addr)
+     * writeBytePLE(off, b, addr)
+     *
+     * @this {Memory}
+     * @param {number} off
+     * @param {number} addr
+     * @param {number} b
+     */
+    writeBytePLE: function writeBytePLE(off, b, addr) {
+        this.ab[off] = b;
+        this.blockPDE.adw[this.iPDE] |= X86.PTE.ACCESSED;
+        this.blockPTE.adw[this.iPTE] |= X86.PTE.ACCESSED | X86.PTE.DIRTY;
+        this.fDirty = true;
+    },
+    /**
+     * writeShortBE(off, w, addr)
      *
      * @this {Memory}
      * @param {number} off
      * @param {number} addr
      * @param {number} w
      */
-    writeShortBigEndian: function writeShortBigEndian(off, w, addr) {
-        // DEBUG: Component.assert(off >= 0 && off < this.size - 1);
+    writeShortBE: function writeShortBE(off, w, addr) {
         this.dv.setUint16(off, w, true);
         this.fDirty = true;
     },
     /**
-     * writeShortLittleEndian(off, w, addr)
+     * writeShortLE(off, w, addr)
      *
      * @this {Memory}
      * @param {number} off
      * @param {number} addr
      * @param {number} w
      */
-    writeShortLittleEndian: function writeShortLittleEndian(off, w, addr) {
-        // DEBUG: Component.assert(off >= 0 && off < this.size - 1);
+    writeShortLE: function writeShortLE(off, w, addr) {
         /*
          * TODO: It remains to be seen if there's any advantage to checking the offset for an aligned write
          * vs. always writing the bytes separately; it seems a safe bet for longs, but it's less clear for shorts.
@@ -1212,28 +1267,49 @@ Memory.prototype = {
         this.fDirty = true;
     },
     /**
-     * writeLongBigEndian(off, l, addr)
+     * writeShortPLE(off, w, addr)
+     *
+     * @this {Memory}
+     * @param {number} off
+     * @param {number} addr
+     * @param {number} w
+     */
+    writeShortPLE: function writeShortPLE(off, w, addr) {
+        /*
+         * TODO: It remains to be seen if there's any advantage to checking the offset for an aligned write
+         * vs. always writing the bytes separately; it seems a safe bet for longs, but it's less clear for shorts.
+         */
+        if (off & 0x1) {
+            this.ab[off] = w;
+            this.ab[off+1] = w >> 8;
+        } else {
+            this.aw[off >> 1] = w;
+        }
+        this.blockPDE.adw[this.iPDE] |= X86.PTE.ACCESSED;
+        this.blockPTE.adw[this.iPTE] |= X86.PTE.ACCESSED | X86.PTE.DIRTY;
+        this.fDirty = true;
+    },
+    /**
+     * writeLongBE(off, l, addr)
      *
      * @this {Memory}
      * @param {number} off
      * @param {number} l
      * @param {number} addr
      */
-    writeLongBigEndian: function writeLongBigEndian(off, l, addr) {
-        // DEBUG: Component.assert(off >= 0 && off < this.size - 3);
+    writeLongBE: function writeLongBE(off, l, addr) {
         this.dv.setInt32(off, l, true);
         this.fDirty = true;
     },
     /**
-     * writeLongLittleEndian(off, l, addr)
+     * writeLongLE(off, l, addr)
      *
      * @this {Memory}
      * @param {number} off
      * @param {number} l
      * @param {number} addr
      */
-    writeLongLittleEndian: function writeLongLittleEndian(off, l, addr) {
-        // DEBUG: Component.assert(off >= 0 && off < this.size - 3);
+    writeLongLE: function writeLongLE(off, l, addr) {
         /*
          * TODO: It remains to be seen if there's any advantage to checking the offset for an aligned write
          * vs. always writing the bytes separately; it seems a safe bet for longs, but it's less clear for shorts.
@@ -1246,6 +1322,31 @@ Memory.prototype = {
         } else {
             this.adw[off >> 2] = l;
         }
+        this.fDirty = true;
+    },
+    /**
+     * writeLongPLE(off, l, addr)
+     *
+     * @this {Memory}
+     * @param {number} off
+     * @param {number} l
+     * @param {number} addr
+     */
+    writeLongPLE: function writeLongPLE(off, l, addr) {
+        /*
+         * TODO: It remains to be seen if there's any advantage to checking the offset for an aligned write
+         * vs. always writing the bytes separately; it seems a safe bet for longs, but it's less clear for shorts.
+         */
+        if (off & 0x3) {
+            this.ab[off] = l;
+            this.ab[off+1] = (l >> 8);
+            this.ab[off+2] = (l >> 16);
+            this.ab[off+3] = (l >> 24);
+        } else {
+            this.adw[off >> 2] = l;
+        }
+        this.blockPDE.adw[this.iPDE] |= X86.PTE.ACCESSED;
+        this.blockPTE.adw[this.iPTE] |= X86.PTE.ACCESSED | X86.PTE.DIRTY;
         this.fDirty = true;
     },
     /**
@@ -1284,7 +1385,6 @@ Memory.prototype = {
      * @return {number}
      */
     readBackTrackIndex: function readBackTrackIndex(off) {
-        // DEBUG: Component.assert(off >= 0 && off < this.size);
         return this.abtIndexes[off];
     },
     /**
@@ -1297,7 +1397,6 @@ Memory.prototype = {
      */
     writeBackTrackIndex: function writeBackTrackIndex(off, bti) {
         var btiPrev;
-        // DEBUG: Component.assert(off >= 0 && off < this.size);
         btiPrev = this.abtIndexes[off];
         this.abtIndexes[off] = bti;
         return btiPrev;
@@ -1320,21 +1419,22 @@ Memory.prototype = {
  * This is the effective definition of afnNone, but we need not fully define it, because setAccess()
  * uses these defaults when any of the 6 handlers (ie, 3 read handlers and 3 write handlers) are undefined.
  *
-Memory.afnNone              = [Memory.prototype.readNone,        Memory.prototype.readShortDefault, Memory.prototype.readLongDefault, Memory.prototype.writeNone,        Memory.prototype.writeShortDefault, Memory.prototype.writeLongDefault];
+Memory.afnNone          = [Memory.prototype.readNone,        Memory.prototype.readShortDefault, Memory.prototype.readLongDefault, Memory.prototype.writeNone,        Memory.prototype.writeShortDefault, Memory.prototype.writeLongDefault];
  */
 
-Memory.afnNone              = [];
-Memory.afnMemory            = [Memory.prototype.readByteMemory,  Memory.prototype.readShortMemory,  Memory.prototype.readLongMemory,  Memory.prototype.writeByteMemory,  Memory.prototype.writeShortMemory,  Memory.prototype.writeLongMemory];
-Memory.afnChecked           = [Memory.prototype.readByteChecked, Memory.prototype.readShortChecked, Memory.prototype.readLongChecked, Memory.prototype.writeByteChecked, Memory.prototype.writeShortChecked, Memory.prototype.writeLongChecked];
+Memory.afnNone          = [];
+Memory.afnMemory        = [Memory.prototype.readByteMemory,  Memory.prototype.readShortMemory,  Memory.prototype.readLongMemory,  Memory.prototype.writeByteMemory,  Memory.prototype.writeShortMemory,  Memory.prototype.writeLongMemory];
+Memory.afnChecked       = [Memory.prototype.readByteChecked, Memory.prototype.readShortChecked, Memory.prototype.readLongChecked, Memory.prototype.writeByteChecked, Memory.prototype.writeShortChecked, Memory.prototype.writeLongChecked];
 
 if (PAGEBLOCKS) {
-    Memory.afnPaged         = [Memory.prototype.readBytePaged,   Memory.prototype.readShortPaged,   Memory.prototype.readLongPaged,   Memory.prototype.writeBytePaged,   Memory.prototype.writeShortPaged,   Memory.prototype.writeLongPaged];
-    Memory.afnUnpaged       = [Memory.prototype.readByteUnpaged, Memory.prototype.readShortUnpaged, Memory.prototype.readLongUnpaged, Memory.prototype.writeByteUnpaged, Memory.prototype.writeShortUnpaged, Memory.prototype.writeLongUnpaged];
+    Memory.afnPaged     = [Memory.prototype.readBytePaged,   Memory.prototype.readShortPaged,   Memory.prototype.readLongPaged,   Memory.prototype.writeBytePaged,   Memory.prototype.writeShortPaged,   Memory.prototype.writeLongPaged];
+    Memory.afnUnpaged   = [Memory.prototype.readByteUnpaged, Memory.prototype.readShortUnpaged, Memory.prototype.readLongUnpaged, Memory.prototype.writeByteUnpaged, Memory.prototype.writeShortUnpaged, Memory.prototype.writeLongUnpaged];
 }
 
 if (TYPEDARRAYS) {
-    Memory.afnBigEndian     = [Memory.prototype.readByteBigEndian,    Memory.prototype.readShortBigEndian,    Memory.prototype.readLongBigEndian,    Memory.prototype.writeByteBigEndian,    Memory.prototype.writeShortBigEndian,    Memory.prototype.writeLongBigEndian];
-    Memory.afnLittleEndian  = [Memory.prototype.readByteLittleEndian, Memory.prototype.readShortLittleEndian, Memory.prototype.readLongLittleEndian, Memory.prototype.writeByteLittleEndian, Memory.prototype.writeShortLittleEndian, Memory.prototype.writeLongLittleEndian];
+    Memory.afnArrayBE   = [Memory.prototype.readByteBE,  Memory.prototype.readShortBE,   Memory.prototype.readLongBE,    Memory.prototype.writeByteBE,   Memory.prototype.writeShortBE,  Memory.prototype.writeLongBE];
+    Memory.afnArrayLE   = [Memory.prototype.readByteLE,  Memory.prototype.readShortLE,   Memory.prototype.readLongLE,    Memory.prototype.writeByteLE,   Memory.prototype.writeShortLE,  Memory.prototype.writeLongLE];
+    Memory.afnPagedLE   = [Memory.prototype.readBytePLE, Memory.prototype.readShortPLE,  Memory.prototype.readLongPLE,   Memory.prototype.writeBytePLE,  Memory.prototype.writeShortPLE, Memory.prototype.writeLongPLE];
 }
 
 if (NODE) module.exports = Memory;

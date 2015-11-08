@@ -64,12 +64,12 @@ var PREFETCH = false;
 /**
  * @define {boolean}
  *
- * FATARRAYS is a Closure Compiler compile-time option that allocates an Array of numbers for every Memory block,
+ * BYTEARRAYS is a Closure Compiler compile-time option that allocates an Array of numbers for every Memory block,
  * where each a number represents ONE byte; very wasteful, but potentially slightly faster.
  *
  * See the Memory component for details.
  */
-var FATARRAYS = false;
+var BYTEARRAYS = false;
 
 /**
  * TYPEDARRAYS enables use of typed arrays for Memory blocks.  This used to be a compile-time-only option, but I've
@@ -147,7 +147,7 @@ if (NODE) {
     global.PCJSCLASS = PCJSCLASS;
     global.DEBUGGER = DEBUGGER;
     global.PREFETCH = PREFETCH;
-    global.FATARRAYS = FATARRAYS;
+    global.BYTEARRAYS = BYTEARRAYS;
     global.TYPEDARRAYS = TYPEDARRAYS;
     global.BACKTRACK = BACKTRACK;
     global.SYMBOLS = SYMBOLS;
