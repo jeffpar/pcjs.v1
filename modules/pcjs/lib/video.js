@@ -288,7 +288,7 @@ function Video(parmsVideo, canvas, context, textarea, container)
         if (sFileExt != "json") {
             sFileURL = web.getHost() + DumpAPI.ENDPOINT + '?' + DumpAPI.QUERY.FILE + '=' + sFileURL + '&' + DumpAPI.QUERY.FORMAT + '=' + DumpAPI.FORMAT.BYTES;
         }
-        web.loadResource(sFileURL, true, null, this, this.onLoadSetFonts);
+        web.loadResource(sFileURL, true, null, this, this.doneLoad);
     }
 }
 
@@ -3710,17 +3710,17 @@ Video.prototype.restore = function(data)
 };
 
 /**
- * onLoadSetFonts(sFontFile, sFontData, nErrorCode)
+ * doneLoad(sURL, sFontData, nErrorCode)
  *
  * @this {Video}
- * @param {string} sFontFile
+ * @param {string} sURL
  * @param {string} sFontData
  * @param {number} nErrorCode (response from server if anything other than 200)
  */
-Video.prototype.onLoadSetFonts = function(sFontFile, sFontData, nErrorCode)
+Video.prototype.doneLoad = function(sURL, sFontData, nErrorCode)
 {
     if (nErrorCode) {
-        this.notice("Unable to load font ROM image (error " + nErrorCode + ")");
+        this.notice("Unable to load font ROM (error " + nErrorCode + ": " + sURL + ")");
         return;
     }
     try {
@@ -3730,7 +3730,7 @@ Video.prototype.onLoadSetFonts = function(sFontFile, sFontData, nErrorCode)
         var abFontData = eval("(" + sFontData + ")");
 
         if (!abFontData.length) {
-            Component.error("Empty font ROM image: " + sFontFile);
+            Component.error("Empty font ROM: " + sURL);
             return;
         }
         else if (abFontData.length == 1) {

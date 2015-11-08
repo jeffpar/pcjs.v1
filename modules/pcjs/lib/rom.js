@@ -52,7 +52,7 @@ if (NODE) {
  *      notify: ID of a component to notify once the ROM is in place (optional)
  *
  * NOTE: The ROM data will not be copied into place until the Bus is ready (see initBus()) AND the
- * ROM data file has finished loading (see onLoadROM()).
+ * ROM data file has finished loading (see doneLoad()).
  *
  * Also, while the size parameter may seem redundant, I consider it useful to confirm that the ROM you received
  * is the ROM you expected.
@@ -117,7 +117,7 @@ function ROM(parmsROM)
         if (sFileExt != DumpAPI.FORMAT.JSON && sFileExt != DumpAPI.FORMAT.HEX) {
             sFileURL = web.getHost() + DumpAPI.ENDPOINT + '?' + DumpAPI.QUERY.FILE + '=' + this.sFilePath + '&' + DumpAPI.QUERY.FORMAT + '=' + DumpAPI.FORMAT.BYTES + '&' + DumpAPI.QUERY.DECIMAL + '=true';
         }
-        web.loadResource(sFileURL, true, null, this, ROM.prototype.onLoadROM);
+        web.loadResource(sFileURL, true, null, this, this.doneLoad);
     }
 }
 
@@ -212,17 +212,17 @@ ROM.prototype.powerDown = function(fSave, fShutdown)
 };
 
 /**
- * onLoadROM(sROMFile, sROMData, nErrorCode)
+ * doneLoad(sURL, sROMData, nErrorCode)
  *
  * @this {ROM}
- * @param {string} sROMFile
+ * @param {string} sURL
  * @param {string} sROMData
  * @param {number} nErrorCode (response from server if anything other than 200)
  */
-ROM.prototype.onLoadROM = function(sROMFile, sROMData, nErrorCode)
+ROM.prototype.doneLoad = function(sURL, sROMData, nErrorCode)
 {
     if (nErrorCode) {
-        this.notice("Unable to load system ROM (error " + nErrorCode + ")");
+        this.notice("Unable to load system ROM (error " + nErrorCode + ": " + sURL + ")");
         return;
     }
     if (sROMData.charAt(0) == "[" || sROMData.charAt(0) == "{") {
@@ -256,7 +256,7 @@ ROM.prototype.onLoadROM = function(sROMFile, sROMData, nErrorCode)
             this.aSymbols = rom['symbols'];
 
             if (!this.abROM.length) {
-                Component.error("Empty ROM: " + sROMFile);
+                Component.error("Empty ROM: " + sURL);
                 return;
             }
             else if (this.abROM.length == 1) {
@@ -286,8 +286,8 @@ ROM.prototype.onLoadROM = function(sROMFile, sROMData, nErrorCode)
 /**
  * copyROM()
  *
- * This function is called by both initBus() and onLoadROM(), but it cannot copy the the ROM data into place
- * until after initBus() has received the Bus component AND onloadROM() has received the abROM data.  When both
+ * This function is called by both initBus() and doneLoad(), but it cannot copy the the ROM data into place
+ * until after initBus() has received the Bus component AND doneLoad() has received the abROM data.  When both
  * those criteria are satisfied, the component becomes "ready".
  *
  * @this {ROM}

@@ -252,7 +252,7 @@ function Computer(parmsComputer, parmsMachine, fSuspended) {
     if (!sStatePath) {
         this.setReady();
     } else {
-        web.loadResource(sStatePath, true, null, this, this.onLoadSetReady);
+        web.loadResource(sStatePath, true, null, this, this.doneLoad);
     }
 
     if (!fSuspended) {
@@ -321,20 +321,20 @@ Computer.prototype.getUserID = function()
 };
 
 /**
- * onLoadSetReady(sStateFile, sStateData, nErrorCode)
+ * doneLoad(sURL, sStateData, nErrorCode)
  *
  * @this {Computer}
- * @param {string} sStateFile
+ * @param {string} sURL
  * @param {string} sStateData
  * @param {number} nErrorCode
  */
-Computer.prototype.onLoadSetReady = function(sStateFile, sStateData, nErrorCode)
+Computer.prototype.doneLoad = function(sURL, sStateData, nErrorCode)
 {
     if (!nErrorCode) {
         this.sStateData = sStateData;
         this.fStateData = true;
         if (DEBUG && this.messageEnabled()) {
-            this.printMessage("loaded state file " + sStateFile.replace(this.sUserID || "xxx", "xxx"));
+            this.printMessage("loaded state file " + sURL.replace(this.sUserID || "xxx", "xxx"));
         }
     } else {
         this.sResumePath = null;

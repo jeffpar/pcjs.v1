@@ -1012,6 +1012,8 @@ Disk.prototype.load = function(sDiskName, sDiskPath, file, fnNotify, controller)
 
     this.sDiskName = sDiskName;
     this.sDiskPath = sDiskPath;
+    this.sDiskFile = str.getBaseName(sDiskPath);
+
     this.fnNotify = fnNotify;
     this.controllerNotify = controller || this.controller;
 
@@ -1036,7 +1038,7 @@ Disk.prototype.load = function(sDiskName, sDiskPath, file, fnNotify, controller)
          * converter to return the corresponding JSON-encoded data.
          */
         var sDiskExt = str.getExtension(sDiskPath);
-        if (sDiskExt == DumpAPI.FORMAT.JSON) {
+        if (sDiskExt == DumpAPI.FORMAT.JSON || sDiskExt == DumpAPI.FORMAT.JSON_GZ) {
             sDiskURL = encodeURI(sDiskPath);
         } else {
             if (this.mode == DiskAPI.MODE.DEMANDRW || this.mode == DiskAPI.MODE.DEMANDRO) {
@@ -1076,7 +1078,7 @@ Disk.prototype.load = function(sDiskName, sDiskPath, file, fnNotify, controller)
             }
         }
     }
-    web.loadResource(sDiskURL, true, null, this, this.doneLoad, sDiskPath);
+    web.loadResource(sDiskURL, true, null, this, this.doneLoad);
 };
 
 /**
@@ -1135,35 +1137,32 @@ Disk.prototype.build = function(buffer, fModified)
 };
 
 /**
- * doneLoad(sDiskFile, sDiskData, nErrorCode, sDiskPath)
+ * doneLoad(sURL, sDiskData, nErrorCode)
  *
  * This function was originally called mount().  If the mount is successful, we pass the Disk object to the
  * caller's fnNotify handler; otherwise, we pass null.
  *
  * @this {Disk}
- * @param {string} sDiskFile
+ * @param {string} sURL
  * @param {string} sDiskData
  * @param {number} nErrorCode (response from server if anything other than 200)
- * @param {string} sDiskPath (passed through from load() to loadResource())
  */
-Disk.prototype.doneLoad = function(sDiskFile, sDiskData, nErrorCode, sDiskPath)
+Disk.prototype.doneLoad = function(sURL, sDiskData, nErrorCode)
 {
     var disk = null;
     this.fWriteProtected = false;
     var fPrintOnly = (nErrorCode < 0 && this.cmp && !this.cmp.aFlags.fPowered);
 
-    this.sDiskFile = sDiskFile;
-
     if (this.fOnDemand) {
         if (!nErrorCode) {
             if (DEBUG && this.messageEnabled()) {
-                this.printMessage('doneLoad("' + sDiskFile + '","' + sDiskPath + '")');
+                this.printMessage('doneLoad("' + this.sDiskPath + '")');
             }
             this.fRemote = true;
             if (BACKTRACK || SYMBOLS) this.buildFileTable();
             disk = this;
         } else {
-            this.controller.notice('Unable to connect to disk "' + sDiskPath + '" (error ' + nErrorCode + ': ' + sDiskData + ')', fPrintOnly);
+            this.controller.notice('Unable to connect to disk "' + this.sDiskPath + '" (error ' + nErrorCode + ': ' + sDiskData + ')', fPrintOnly);
         }
     }
     else if (nErrorCode) {
@@ -1174,10 +1173,10 @@ Disk.prototype.doneLoad = function(sDiskFile, sDiskData, nErrorCode, sDiskPath)
          * that yet.  For now, we rely on the lack of a specific error (nErrorCode < 0), and suppress the
          * notify() alert if there's no specific error AND the computer is not powered up yet.
          */
-        this.controller.notice("Unable to load disk \"" + this.sDiskName + "\" (error " + nErrorCode + ")", fPrintOnly);
+        this.controller.notice("Unable to load disk \"" + this.sDiskName + "\" (error " + nErrorCode + ": " + sURL + ")", fPrintOnly);
     } else {
         if (DEBUG && this.messageEnabled()) {
-            this.printMessage('doneLoad("' + sDiskFile + '","' + sDiskPath + '")');
+            this.printMessage('doneLoad("' + this.sDiskPath + '")');
         }
         try {
             /*
@@ -1189,7 +1188,7 @@ Disk.prototype.doneLoad = function(sDiskFile, sDiskData, nErrorCode, sDiskPath)
              * TODO: Provide some UI for turning write-protection on/off for disks at will, and provide
              * an XML-based solution (ie, a per-disk XML configuration option) for controlling it as well.
              */
-            var sBaseName = str.getBaseName(sDiskFile, true).toLowerCase();
+            var sBaseName = str.getBaseName(this.sDiskFile, true).toLowerCase();
             if (sBaseName.indexOf("-readonly") > 0) {
                 this.fWriteProtected = true;
             } else {
@@ -1354,7 +1353,7 @@ Disk.prototype.doneLoad = function(sDiskFile, sDiskData, nErrorCode, sDiskPath)
                 disk = this;
             }
         } catch (e) {
-            Component.error("Disk image error: " + e.message);
+            Component.error("Disk image error (" + sURL + "): " + e.message);
         }
     }
 

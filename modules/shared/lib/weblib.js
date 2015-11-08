@@ -203,7 +203,6 @@ web.loadResource = function(sURL, fAsync, data, componentNotify, fnNotify, pNoti
     }
     var nErrorCode = 0;
     var sURLData = null;
-    var sURLName = str.getBaseName(sURL);
     var xmlHTTP = (window.XMLHttpRequest? new window.XMLHttpRequest() : new window.ActiveXObject("Microsoft.XMLHTTP"));
     if (fAsync) {
         xmlHTTP.onreadystatechange = function() {
@@ -231,9 +230,9 @@ web.loadResource = function(sURL, fAsync, data, componentNotify, fnNotify, pNoti
                 }
                 if (fnNotify) {
                     if (!componentNotify) {
-                        fnNotify(sURLName, sURLData, nErrorCode, pNotify);
+                        fnNotify(sURL, sURLData, nErrorCode, pNotify);
                     } else {
-                        fnNotify.call(componentNotify, sURLName, sURLData, nErrorCode, pNotify);
+                        fnNotify.call(componentNotify, sURL, sURLData, nErrorCode, pNotify);
                     }
                 }
             }
@@ -267,9 +266,9 @@ web.loadResource = function(sURL, fAsync, data, componentNotify, fnNotify, pNoti
         }
         if (fnNotify) {
             if (!componentNotify) {
-                fnNotify(sURLName, sURLData, nErrorCode, pNotify);
+                fnNotify(sURL, sURLData, nErrorCode, pNotify);
             } else {
-                fnNotify.call(componentNotify, sURLName, sURLData, nErrorCode, pNotify);
+                fnNotify.call(componentNotify, sURL, sURLData, nErrorCode, pNotify);
             }
         }
         response = [nErrorCode, sURLData];

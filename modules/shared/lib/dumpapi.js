@@ -67,6 +67,7 @@ var DumpAPI = {
     },
     FORMAT: {
         JSON:       "json",     // default
+        JSON_GZ:    "gz",       // gzip is currently used ONLY for compressed JSON
         DATA:       "data",     // same as "json", but built without JSON.stringify() (DiskDump only)
         HEX:        "hex",      // deprecated
         BYTES:      "bytes",    // displays data as hex bytes; normally used only when comments are enabled
@@ -77,7 +78,7 @@ var DumpAPI = {
 
 /*
  * Because we use an overloaded API endpoint (ie, one that's shared with the FileDump module), we must
- * also provide a list of commands which, when combined with the endpoint, define a unique request. 
+ * also provide a list of commands which, when combined with the endpoint, define a unique request.
  */
 DumpAPI.asDiskCommands = [DumpAPI.QUERY.DIR, DumpAPI.QUERY.DISK, DumpAPI.QUERY.PATH];
 DumpAPI.asFileCommands = [DumpAPI.QUERY.FILE];
