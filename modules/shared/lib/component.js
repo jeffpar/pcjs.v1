@@ -960,16 +960,13 @@ Component.prototype = {
      * @param {string} sMessage is any caller-defined message string
      * @param {number|boolean} [bitsMessage] is zero or more MESSAGE_* category flag(s)
      * @param {boolean} [fAddress] is true to display the current address
-     * @return {boolean} true if Debugger available, false if not
      */
     printMessage: function(sMessage, bitsMessage, fAddress) {
         if (DEBUGGER && this.dbg) {
             if (bitsMessage === true || this.messageEnabled(bitsMessage | 0)) {
                 this.dbg.message(sMessage, fAddress);
             }
-            return true;
         }
-        return false;
     },
     /**
      * printMessageIO(port, bOut, addrFrom, name, bIn, bitsMessage)

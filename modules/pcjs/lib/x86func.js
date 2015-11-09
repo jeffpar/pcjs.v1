@@ -4116,7 +4116,8 @@ X86.fnFaultMessage = function(nFault, nError, fHalt)
         var sMessage = "Fault " + str.toHexByte(nFault) + (nError != null? " (" + str.toHexWord(nError) + ")" : "") + " on opcode " + str.toHexByte(bOpcode);
         if (fHalt && fRunning) sMessage += " (blocked by PCjs Debugger)";
 
-        if (this.printMessage(sMessage, fHalt || bitsMessage, true)) {
+        if (DEBUGGER && this.dbg) {
+            this.printMessage(sMessage, fHalt || bitsMessage, true);
             if (fHalt) {
                 /*
                  * By setting fHalt to fRunning (which is true while running but false while single-stepping),
@@ -4131,8 +4132,8 @@ X86.fnFaultMessage = function(nFault, nError, fHalt)
             }
         } else {
             /*
-             * If printMessage() returned false, then there's no Debugger, which means that messageEnabled() must have
-             * returned false as well, which means that fHalt must be true.  Which means we should shut the machine down.
+             * If there's no Debugger, then messageEnabled() must have returned false, which means that fHalt must
+             * be true.  Which means we should shut the machine down.
              */
             this.assert(fHalt);
             this.notice(sMessage);

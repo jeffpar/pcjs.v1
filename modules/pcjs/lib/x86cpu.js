@@ -218,6 +218,8 @@ if (PREFETCH) {
     X86CPU.PFINFO.IP_MASK = ((X86CPU.PFINFO.LENGTH - 1) & ~0x3);
 }
 
+X86CPU.PAGEBLOCKS_CACHE = 512;      // TODO: This seems adequate for 4Mb of RAM, but it should be dynamically reconfigured
+
 /**
  * initMemory(aMemBlocks, nBlockShift)
  *
@@ -432,6 +434,12 @@ X86CPU.prototype.enablePageBlocks = function()
          * if the Debugger is suppressing faults or calling probeAddr(), returning memEmpty is helpful.
          */
         this.memEmpty = new Memory();
+
+        /*
+         * Initialize our PAGEBLOCKS cache (see acquirePageBlock() and releasePageBlock()).
+         */
+        this.aCacheBlocks = new Array(X86CPU.PAGEBLOCKS_CACHE);
+        this.iCacheBlocks = 0;
     } else {
         /*
          * Our equivalent of a TLB flush.  NOTE: We do not attempt to simulate an actual TLB; our
@@ -440,10 +448,60 @@ X86CPU.prototype.enablePageBlocks = function()
          * a constrained TLB -- at least not from the 80386 era, which is all we're emulating.
          */
         for (var i = 0; i < this.aBlocksPaged.length; i++) {
-            this.aMemBlocks[this.aBlocksPaged[i]] = this.blockUnpaged;
+            var iBlock = this.aBlocksPaged[i];
+            this.releasePageBlock(this.aMemBlocks[iBlock]);
+            this.aMemBlocks[iBlock] = this.blockUnpaged;
         }
     }
     this.aBlocksPaged = [];
+};
+
+/**
+ * acquirePageBlock(addr)
+ *
+ * This implements a simple paged memory block cache.  Candidates for caching must be released via
+ * releasePageBlock().
+ *
+ * After acquiring a block from this cache, the caller MUST use setPhysBlock() to properly reinitialize
+ * it for the new given linear address.
+ *
+ * @this {X86CPU}
+ * @param {number} addr
+ * @return {Memory}
+ */
+X86CPU.prototype.acquirePageBlock = function(addr)
+{
+    var block;
+    if (this.iCacheBlocks > 0) {
+        block = this.aCacheBlocks[--this.iCacheBlocks];
+        /*
+         * Paged memory blocks are all very generic and contain no memory of their own, so the fact
+         * that we're not calling the Memory constructor to reinitialize it is OK.  setPhysBlock() is
+         * what's critical, and the caller will take care of that.  However, to avoid any confusion,
+         * especially when debugging, there are a few properties we should reinitialize, hence init().
+         */
+        block.init(addr);
+    } else {
+        block = new Memory(addr, 0, 0, Memory.TYPE.PAGED);
+    }
+    return block;
+};
+
+/**
+ * releasePageBlock(block)
+ *
+ * Instead of simply tossing Memory blocks onto the garbage collector's heap, we'll retain a maximum
+ * number (X86CPU.PAGEBLOCKS_CACHE) in aCacheBlocks, with iCacheBlocks pointing to the next free element.
+ *
+ * @this {X86CPU}
+ * @param {Memory} block
+ */
+X86CPU.prototype.releasePageBlock = function(block)
+{
+    this.assert(block && block.type === Memory.TYPE.PAGED);
+    if (this.iCacheBlocks < X86CPU.PAGEBLOCKS_CACHE) {
+        this.aCacheBlocks[this.iCacheBlocks++] = block;
+    }
 };
 
 /**
@@ -535,14 +593,13 @@ X86CPU.prototype.mapPageBlock = function(addr, fWrite, fSuppress)
      *
      * Now we can create a new PAGED Memory block and record the physical block info using setPhysBlock().
      */
-    var addrPage = addr & ~X86.LADDR.OFFSET;
-    var blockPage = new Memory(addrPage, 0, 0, Memory.TYPE.PAGED);
+    var blockPage = this.acquirePageBlock(addr & ~X86.LADDR.OFFSET);
     blockPage.setPhysBlock(blockPhys, blockPDE, offPDE, blockPTE, offPTE);
     blockPage.copyBreakpoints(this.dbg, block);
 
     this.aMemBlocks[iBlock] = blockPage;
-
     this.aBlocksPaged.push(iBlock);
+
     return blockPage;
 };
 
@@ -561,6 +618,19 @@ X86CPU.prototype.disablePageBlocks = function()
         this.aBlocksPaged = null;
         this.memEmpty = null;
     }
+};
+
+/**
+ * isPagingEnabled()
+ *
+ * @this {X86CPU}
+ * @return {boolean}
+ */
+X86CPU.prototype.isPagingEnabled = function()
+{
+    var fPaging = !!(this.regCR0 & X86.CR0.PG);
+    this.assert((this.aMemBlocks !== this.aBusBlocks) === fPaging);
+    return fPaging;
 };
 
 /**
@@ -1717,7 +1787,7 @@ X86CPU.prototype.save = function()
     state.set(1, a);
     state.set(2, [this.segData.sName, this.segStack.sName, this.opFlags, this.opPrefixes, this.intFlags, this.regEA, this.regEAWrite]);
     state.set(3, [0, this.nTotalCycles, this.getSpeed()]);
-    state.set(4, this.bus.saveMemory());
+    state.set(4, this.bus.saveMemory(this.isPagingEnabled()));
     return state.data();
 };
 

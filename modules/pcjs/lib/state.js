@@ -278,9 +278,7 @@ State.prototype = {
             if (s) {
                 this[this.id] = s;
                 this.fLoaded = true;
-                if (DEBUG && this.messageEnabled()) {
-                    this.printMessage("localStorage(" + this.key + "): " + s.length + " bytes loaded");
-                }
+                if (DEBUG) this.printString("localStorage(" + this.key + "): " + s.length + " bytes loaded");
                 return true;
             }
         }
@@ -317,9 +315,7 @@ State.prototype = {
         if (web.hasLocalStorage()) {
             var s = JSON.stringify(this[this.id]);
             if (web.setLocalStorageItem(this.key, s)) {
-                if (DEBUG && this.messageEnabled()) {
-                    this.printMessage("localStorage(" + this.key + "): " + s.length + " bytes stored");
-                }
+                if (DEBUG) this.printString("localStorage(" + this.key + "): " + s.length + " bytes stored");
             } else {
                 /*
                  * WARNING: Because browsers tend to disable all alerts() during an "unload" operation,
@@ -377,40 +373,24 @@ State.prototype = {
             var sKey = aKeys[i];
             if (sKey && (fAll || sKey.substr(0, this.key.length) == this.key)) {
                 web.removeLocalStorageItem(sKey);
-                if (DEBUG && this.messageEnabled()) {
-                    this.printMessage("localStorage(" + sKey + ") removed");
-                }
+                if (DEBUG) this.printString("localStorage(" + sKey + ") removed");
                 aKeys.splice(i, 1);
                 i = 0;
             }
         }
     },
     /**
-     * messageEnabled(bitsMessage)
+     * printString(s)
      *
      * @this {State}
-     * @param {number} [bitsMessage] is one or more Messages category flag(s)
-     * @return {boolean}
+     * @param {string} s is any caller-defined string
      */
-    messageEnabled: function(bitsMessage) {
-        if (DEBUGGER && this.dbg) {
-            if (bitsMessage == null) {
-                bitsMessage = Messages.STATE;
-            } else {
-                bitsMessage |= Messages.STATE;
+    printString: function(s) {
+        if (DEBUG && DEBUGGER && this.dbg) {
+            if (this.dbg.messageEnabled(Messages.STATE)) {
+                this.dbg.message(s);
             }
-            return this.dbg.messageEnabled(bitsMessage);
         }
-        return false;
-    },
-    /**
-     * printMessage(sMessage)
-     *
-     * @this {State}
-     * @param {string} sMessage is any caller-defined message string
-     */
-    printMessage: function(sMessage) {
-        if (DEBUGGER && this.dbg) this.dbg.message(sMessage);
     }
 };
 

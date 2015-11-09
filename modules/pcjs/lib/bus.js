@@ -61,9 +61,10 @@ if (NODE) {
  * addMemory().  If the component needs something more than simple read/write storage,
  * it must provide a controller with getMemoryBuffer() and getMemoryAccess() methods.
  *
- * By contrast, all port (I/O) operations are defined by external handlers; they register
- * with us, and we manage those registrations, as well as support for I/O breakpoints,
- * but unlike memory accesses, we're not involved with port data accesses.
+ * All port (I/O) operations are defined by external handlers; they register with us,
+ * and we manage those registrations and provide support for I/O breakpoints, but the
+ * only default I/O behavior we provide is ignoring writes to any unregistered output
+ * ports and returning 0xff from any unregistered input ports.
  *
  * @constructor
  * @extends Component
@@ -1266,7 +1267,7 @@ Bus.prototype.getSymbol = function(addr, fNearest)
 };
 
 /**
- * saveMemory()
+ * saveMemory(fAll)
  *
  * The only memory blocks we save are those marked as dirty, but most likely all of RAM will have been marked dirty,
  * and even if our dirty-memory flags were as smart as our dirty-sector flags (ie, were set only when a write changed
@@ -1291,17 +1292,17 @@ Bus.prototype.getSymbol = function(addr, fNearest)
  * helper methods compress() and decompress() to create and expand the compressed data arrays.
  *
  * @this {Bus}
+ * @param {boolean} [fAll] (true to save all non-ROM memory blocks, regardless of their dirty flags)
  * @return {Array} a
  */
-Bus.prototype.saveMemory = function()
+Bus.prototype.saveMemory = function(fAll)
 {
     var i = 0;
     var a = [];
 
     /*
      * A quick-and-dirty work-around for 32-bit bus machines, to ensure that all blocks in the 2nd Mb are
-     * mapped in before we save.  We do this by forcing A20 on, and then turning it back off again before we
-     * leave.
+     * mapped in before we save.  We do this by forcing A20 on, and then turning it off again before we leave.
      */
     var fA20 = this.getA20();
     if (!fA20) this.setA20(true);
@@ -1313,7 +1314,7 @@ Bus.prototype.saveMemory = function()
          * the memory blocks (eg, video memory), and while cleanMemory() will clear a dirty block's fDirty flag,
          * it also sets the dirty block's fDirtyEver flag, which is left set for the lifetime of the machine.
          */
-        if (block.fDirty || block.fDirtyEver) {
+        if (fAll && block.type != Memory.TYPE.ROM || block.fDirty || block.fDirtyEver) {
             a[i++] = iBlock;
             a[i++] = State.compress(block.save());
         }
@@ -1336,7 +1337,7 @@ Bus.prototype.saveMemory = function()
  * it was using when it's restored.  And since the CPU is guaranteed to be the last
  * component to be restored, all those blocks (and their attributes) should be in place now.
  *
- * See saveMemory() for a description of how the memory block contents are saved.
+ * See saveMemory() for more information on how the memory block contents are saved.
  *
  * @this {Bus}
  * @param {Array} a
@@ -1466,12 +1467,11 @@ Bus.prototype.checkPortInputNotify = function(port, size, addrLIP)
         var dataPort = maskPort;
 
         /*
-         * TODO: We need to decide what to do about 8-bit I/O to a 16-bit port
-         * (ditto for 16-bit I/O to a 32-bit port).  We probably should pass the
-         * size through to the aNotify[0] handler, and let it decide what to do,
-         * but I don't feel like changing all the I/O handlers right now.  The
-         * good news, at least, is that the 8-bit handlers would not have to do
-         * anything special.  This assert will warn us if this is a pressing need.
+         * TODO: We need to decide what to do about 8-bit I/O to a 16-bit port (ditto for 16-bit I/O
+         * to a 32-bit port).  We probably should pass the size through to the aNotify[0] handler,
+         * and let it decide what to do, but I don't feel like changing all the I/O handlers right now.
+         * The good news, at least, is that the 8-bit handlers would not have to do anything special.
+         * This assert will warn us if this is a pressing need.
          */
         this.assert(size >= sizePort);
 
@@ -1625,12 +1625,11 @@ Bus.prototype.checkPortOutputNotify = function(port, size, data, addrLIP)
         var dataPort = (data >>>= shift) & maskPort;
 
         /*
-         * TODO: We need to decide what to do about 8-bit I/O to a 16-bit port
-         * (ditto for 16-bit I/O to a 32-bit port).  We probably should pass the
-         * size through to the aNotify[0] handler, and let it decide what to do,
-         * but I don't feel like changing all the I/O handlers right now.  The
-         * good news, at least, is that the 8-bit handlers would not have to do
-         * anything special.  This assert will warn us if this is a pressing need.
+         * TODO: We need to decide what to do about 8-bit I/O to a 16-bit port (ditto for 16-bit I/O
+         * to a 32-bit port).  We probably should pass the size through to the aNotify[0] handler,
+         * and let it decide what to do, but I don't feel like changing all the I/O handlers right now.
+         * The good news, at least, is that the 8-bit handlers would not have to do anything special.
+         * This assert will warn us if this is a pressing need.
          */
         this.assert(size >= sizePort);
 

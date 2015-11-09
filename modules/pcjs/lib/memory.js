@@ -257,6 +257,17 @@ Memory.prototype = {
     constructor: Memory,
     parent: null,
     /**
+     * init(addr)
+     *
+     * Quick reinitializer when reusing a Memory block.
+     *
+     * @this {Memory}
+     * @param {number} addr
+     */
+    init: function(addr) {
+        this.addr = addr;
+    },
+    /**
      * clone(mem, type)
      *
      * Converts the current Memory block (this) into a clone of the given Memory block (mem),
@@ -501,6 +512,7 @@ Memory.prototype = {
      * @param {number} offPTE
      */
     setPhysBlock: function(blockPhys, blockPDE, offPDE, blockPTE, offPTE) {
+        this.blockPhys = blockPhys;
         this.blockPDE = blockPDE;
         this.iPDE = offPDE >> 2;    // convert offPDE into iPDE (an adw index)
         this.blockPTE = blockPTE;
@@ -516,9 +528,9 @@ Memory.prototype = {
             this.adw = blockPhys.adw;
             this.setAccess(Memory.afnPagedLE);
         } else {
-            this.blockPhys = blockPhys;
             this.bitPTEAccessed = blockPhys? Memory.adjustEndian(X86.PTE.ACCESSED) : 0;
             this.bitPTEDirty = blockPhys? Memory.adjustEndian(X86.PTE.ACCESSED | X86.PTE.DIRTY) : 0;
+            this.setAccess(Memory.afnPaged);
         }
     },
     /**
@@ -1231,7 +1243,14 @@ Memory.prototype = {
         this.ab[off] = b;
         this.blockPDE.adw[this.iPDE] |= X86.PTE.ACCESSED;
         this.blockPTE.adw[this.iPTE] |= X86.PTE.ACCESSED | X86.PTE.DIRTY;
-        this.fDirty = true;
+        /*
+         * NOTE: Technically, we should be setting the fDirty flag on blockPDE and blockPTE as well, but let's
+         * consider the two sole uses of fDirty.  First, we have cleanMemory(), which is currently used only by
+         * the Video component, and video memory should never contain page directories or page tables, so no
+         * worries there.  Second, we have saveMemory(), but the CPU now asks that function to save all physical
+         * memory blocks whenever paging is enabled, so no worries there either.
+         */
+        this.blockPhys.fDirty = true;
     },
     /**
      * writeShortBE(off, w, addr)
@@ -1287,7 +1306,14 @@ Memory.prototype = {
         }
         this.blockPDE.adw[this.iPDE] |= X86.PTE.ACCESSED;
         this.blockPTE.adw[this.iPTE] |= X86.PTE.ACCESSED | X86.PTE.DIRTY;
-        this.fDirty = true;
+        /*
+         * NOTE: Technically, we should be setting the fDirty flag on blockPDE and blockPTE as well, but let's
+         * consider the two sole uses of fDirty.  First, we have cleanMemory(), which is currently used only by
+         * the Video component, and video memory should never contain page directories or page tables, so no
+         * worries there.  Second, we have saveMemory(), but the CPU now asks that function to save all physical
+         * memory blocks whenever paging is enabled, so no worries there either.
+         */
+        this.blockPhys.fDirty = true;
     },
     /**
      * writeLongBE(off, l, addr)
@@ -1347,7 +1373,14 @@ Memory.prototype = {
         }
         this.blockPDE.adw[this.iPDE] |= X86.PTE.ACCESSED;
         this.blockPTE.adw[this.iPTE] |= X86.PTE.ACCESSED | X86.PTE.DIRTY;
-        this.fDirty = true;
+        /*
+         * NOTE: Technically, we should be setting the fDirty flag on blockPDE and blockPTE as well, but let's
+         * consider the two sole uses of fDirty.  First, we have cleanMemory(), which is currently used only by
+         * the Video component, and video memory should never contain page directories or page tables, so no
+         * worries there.  Second, we have saveMemory(), but the CPU now asks that function to save all physical
+         * memory blocks whenever paging is enabled, so no worries there either.
+         */
+        this.blockPhys.fDirty = true;
     },
     /**
      * readBackTrackNone(off)
