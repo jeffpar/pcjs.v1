@@ -109,8 +109,20 @@ function Memory(addr, used, size, type, controller, cpu)
     this.fReadOnly = (type == Memory.TYPE.ROM);
     this.controller = null;
     this.cpu = cpu;             // if a CPU reference is provided, then this must be an UNPAGED Memory block allocation
-    this.fDirty = this.fDirtyEver = false;
     this.copyBreakpoints();     // initialize the block's Debugger info (eg, breakpoint totals); the caller will reinitialize
+    /*
+     * TODO: Study the impact of dirty block tracking.  As noted in the paged block handlers (eg, writeBytePLE),
+     * the original purposes were to allow saveMemory() to save only dirty blocks, and to enable the Video component
+     * to quickly detect changes to the video buffer.  But the benefit to saveMemory() is minimal, and the Video
+     * component has other options; for example, it now uses a custom memory controller for all EGA/VGA video modes,
+     * which performs its own dirty block tracking, and that could easily be extended to the older MDA/CGA video modes,
+     * which still use conventional memory blocks.  Alternatively, we could restrict the use of dirty block tracking
+     * to certain memory types (eg, VIDEO memory).
+     *
+     * However, a quick test with with dirty block tracking disabled didn't yield a noticeable improvement in performance,
+     * so I think the overhead of our block-based architecture is swamping the impact of these micro-updates.
+     */
+    this.fDirty = this.fDirtyEver = false;
 
     if (BACKTRACK) {
         if (!size || controller) {
@@ -311,11 +323,11 @@ Memory.prototype = {
     /**
      * save()
      *
-     * This gets the contents of a Memory block as an array of 32-bit values;
-     * used by Bus.saveMemory(), which in turn is called by X86CPU.save().
+     * This gets the contents of a Memory block as an array of 32-bit values; used by Bus.saveMemory(),
+     * which in turn is called by X86CPU.save().
      *
-     * Memory blocks with custom memory controllers do NOT save their contents;
-     * that's the responsibility of the controller component.
+     * Memory blocks with custom memory controllers do NOT save their contents; that's the responsibility
+     * of the controller component.
      *
      * @this {Memory}
      * @return {Array|Int32Array|null}
