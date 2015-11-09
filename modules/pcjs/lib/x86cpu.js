@@ -400,6 +400,7 @@ X86CPU.prototype.enablePageBlocks = function()
         this.setError("PAGEBLOCKS support required");
         return;
     }
+    var iBlock;
     if (this.aMemBlocks === this.aBusBlocks) {
         this.aMemBlocks = new Array(this.nBlockTotal);
         /*
@@ -424,7 +425,7 @@ X86CPU.prototype.enablePageBlocks = function()
          */
         this.blockUnpaged = new Memory(null, 0, 0, Memory.TYPE.UNPAGED, null, this);
         this.blockUnpaged.copyBreakpoints(this.dbg);
-        for (var iBlock = 0; iBlock < this.nBlockTotal; iBlock++) {
+        for (iBlock = 0; iBlock < this.nBlockTotal; iBlock++) {
             this.aMemBlocks[iBlock] = this.blockUnpaged;
         }
         /*
@@ -448,7 +449,7 @@ X86CPU.prototype.enablePageBlocks = function()
          * a constrained TLB -- at least not from the 80386 era, which is all we're emulating.
          */
         for (var i = 0; i < this.aBlocksPaged.length; i++) {
-            var iBlock = this.aBlocksPaged[i];
+            iBlock = this.aBlocksPaged[i];
             this.releasePageBlock(this.aMemBlocks[iBlock]);
             this.aMemBlocks[iBlock] = this.blockUnpaged;
         }

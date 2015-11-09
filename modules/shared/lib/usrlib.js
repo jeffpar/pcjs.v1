@@ -234,7 +234,7 @@ var BitFields;
  * The above set bit field "bfs.num" in numeric variable "n" to the value 1.
  *
  * @param {Object} bfs
- * @return {*} (technically, we transform the bfs object into a BitFields object, but the Closure Compiler won't let us specify that)
+ * @return {BitFields}
  */
 usr.defineBitFields = function(bfs)
 {

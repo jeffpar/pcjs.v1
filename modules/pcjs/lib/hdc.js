@@ -508,7 +508,7 @@ HDC.prototype.initBus = function(cmp, bus, cpu, dbg)
      * We need access to the ChipSet component, because we need to communicate with
      * the PIC and DMA controller.
      */
-    this.chipset = cmp.getComponentByType("ChipSet");
+    this.chipset = cmp.getMachineComponent("ChipSet");
 
     bus.addPortInputTable(this, this.fATC? HDC.aATCPortInput : HDC.aXTCPortInput);
     bus.addPortOutputTable(this, this.fATC? HDC.aATCPortOutput : HDC.aXTCPortOutput);

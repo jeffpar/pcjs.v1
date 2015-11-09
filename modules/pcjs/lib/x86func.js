@@ -1694,7 +1694,7 @@ X86.fnLGDT = function(dst, src)
     } else {
         /*
          * Hopefully it won't hurt to always fetch a 32-bit base address (even on an 80286), which we then
-         * mask apppropriately.
+         * mask appropriately.
          */
         this.addrGDT = this.getLong(this.regEA + 2) & (this.maskData | (this.maskData << 8));
         /*
@@ -1756,7 +1756,7 @@ X86.fnLIDT = function(dst, src)
     } else {
         /*
          * Hopefully it won't hurt to always fetch a 32-bit base address (even on an 80286), which we then
-         * mask apppropriately.
+         * mask appropriately.
          */
         this.addrIDT = this.getLong(this.regEA + 2) & (this.maskData | (this.maskData << 8));
         /*

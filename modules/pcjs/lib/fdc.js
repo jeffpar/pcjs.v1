@@ -505,7 +505,7 @@ FDC.prototype.setBinding = function(sHTMLType, sBinding, control)
         }
         else {
             if (DEBUG) this.log("Local file support not available");
-            control.parentNode.removeChild(control);
+            control.parentNode.removeChild(/** @type {Node} */ (control));
         }
         return true;
 
@@ -531,7 +531,7 @@ FDC.prototype.initBus = function(cmp, bus, cpu, dbg)
     this.dbg = dbg;
     this.cmp = cmp;
 
-    this.chipset = cmp.getComponentByType("ChipSet");
+    this.chipset = cmp.getMachineComponent("ChipSet");
 
     /*
      * If we didn't need auto-mount support, we could defer controller initialization until we received a powerUp() notification,

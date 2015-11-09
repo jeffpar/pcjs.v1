@@ -193,7 +193,7 @@ Mouse.prototype.initBus = function(cmp, bus, cpu, dbg)
      * Attach the Video component to the CPU, so that the CPU can periodically update
      * the video display via updateVideo(), as cycles permit.
      */
-    for (var video = null; (video = cmp.getComponentByType("Video", video));) {
+    for (var video = null; (video = cmp.getMachineComponent("Video", video));) {
         this.aVideo.push(video);
     }
 };
@@ -246,7 +246,7 @@ Mouse.prototype.powerUp = function(data, fRepower)
         }
         if (this.sAdapterType && !this.componentAdapter) {
             var componentAdapter = null;
-            while ((componentAdapter = this.cmp.getComponentByType(this.sAdapterType, componentAdapter))) {
+            while ((componentAdapter = this.cmp.getMachineComponent(this.sAdapterType, componentAdapter))) {
                 if (componentAdapter.attachMouse) {
                     this.componentAdapter = componentAdapter.attachMouse(this.idAdapter, this);
                     if (this.componentAdapter) {

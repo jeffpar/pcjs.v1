@@ -348,7 +348,7 @@ Panel.prototype.initBus = function(cmp, bus, cpu, dbg)
     this.bus = bus;
     this.cpu = cpu;
     this.dbg = dbg;
-    this.kbd = cmp.getComponentByType("Keyboard");
+    this.kbd = cmp.getMachineComponent("Keyboard");
 };
 
 /**
@@ -486,7 +486,7 @@ Panel.prototype.findAddress = function(x, y)
                 x -= rect.x;
                 y -= rect.y;
                 var region = this.busInfo.aRegions[i];
-                var iBlock = usr.getBitField(Bus.BlockInfo.num, this.busInfo.aBlocks[region.iBlock]);
+                var iBlock = usr.getBitField(/** @type {BitField} */ (Bus.BlockInfo.num), this.busInfo.aBlocks[region.iBlock]);
                 var addr = iBlock * this.bus.nBlockSize;
                 var addrLimit = (iBlock + region.cBlocks) * this.bus.nBlockSize - 1;
 
@@ -619,8 +619,8 @@ Panel.prototype.findRegions = function()
 
     for (var iBlock = 0; iBlock < this.busInfo.cBlocks; iBlock++) {
         var blockInfo = this.busInfo.aBlocks[iBlock];
-        var typeBlock = usr.getBitField(Bus.BlockInfo.type, blockInfo);
-        var nBlockCurr = usr.getBitField(Bus.BlockInfo.num, blockInfo);
+        var typeBlock = usr.getBitField(/** @type {BitField} */ (Bus.BlockInfo.type), blockInfo);
+        var nBlockCurr = usr.getBitField(/** @type {BitField} */ (Bus.BlockInfo.num), blockInfo);
         if (typeBlock != typeRegion || nBlockCurr != nBlockPrev + 1) {
             var cBlocks = iBlock - iBlockRegion;
             if (cBlocks) {

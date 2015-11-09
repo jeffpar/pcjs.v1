@@ -1036,7 +1036,7 @@ ChipSet.prototype.initBus = function(cmp, bus, cpu, dbg)
     this.cpu = cpu;
     this.dbg = dbg;
     this.cmp = cmp;
-    this.kbd = cmp.getComponentByType("Keyboard");
+    this.kbd = cmp.getMachineComponent("Keyboard");
     /*
      * This divisor is invariant, so we calculate it as soon as we're able to query the CPU's base speed.
      */

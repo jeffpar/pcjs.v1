@@ -1151,7 +1151,7 @@ if (DEBUGGER) {
  *         01 Commit all local files (*) (3.0+)
  *            Entry: None
  *            Exit:  None
- *         02 Close all occurences of file (*) (3.0+)
+ *         02 Close all occurrences of file (*) (3.0+)
  *            Entry: DS:DX-&gt;parameter block (DS:DX-&gt;qualified filespec)
  *            Exit:  CF=0 None
  *                   CF=1 AX=error code

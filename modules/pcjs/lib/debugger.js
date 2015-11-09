@@ -1202,10 +1202,10 @@ if (DEBUGGER) {
         this.bus = bus;
         this.cpu = cpu;
         this.cmp = cmp;
-        this.fdc = cmp.getComponentByType("FDC");
-        this.hdc = cmp.getComponentByType("HDC");
-        this.mouse = cmp.getComponentByType("Mouse");
-        if (MAXDEBUG) this.chipset = cmp.getComponentByType("ChipSet");
+        this.fdc = cmp.getMachineComponent("FDC");
+        this.hdc = cmp.getMachineComponent("HDC");
+        this.mouse = cmp.getMachineComponent("Mouse");
+        if (MAXDEBUG) this.chipset = cmp.getMachineComponent("ChipSet");
 
         this.cchAddr = bus.getWidth() >> 2;
         this.maskAddr = bus.nBusLimit;
@@ -2630,7 +2630,7 @@ if (DEBUGGER) {
                 sInfo = '%' + str.toHex(addr) + ": " + (this.bus.getSymbol(addr, true) || sInfo);
             } else {
                 var component, componentPrev = null;
-                while (component = this.cmp.getComponentByType("Disk", componentPrev)) {
+                while (component = this.cmp.getMachineComponent("Disk", componentPrev)) {
                     var aInfo = component.getSymbolInfo(sAddr);
                     if (aInfo.length) {
                         sInfo = "";
@@ -3040,7 +3040,7 @@ if (DEBUGGER) {
         var aSymbols = [];
         if (SYMBOLS) {
             var component, componentPrev = null;
-            while (component = this.cmp.getComponentByType("Disk", componentPrev)) {
+            while (component = this.cmp.getMachineComponent("Disk", componentPrev)) {
                 aSymbols = component.getModuleInfo(sModule, nSegment);
                 if (aSymbols.length) break;
                 componentPrev = component;

@@ -1235,14 +1235,14 @@ Computer.prototype.onReset = function()
 };
 
 /**
- * getComponentByType(sType, componentPrev)
+ * getMachineComponent(sType, componentPrev)
  *
  * @this {Computer}
  * @param {string} sType
  * @param {Component|null} [componentPrev] of previously returned component, if any
  * @return {Component|null}
  */
-Computer.prototype.getComponentByType = function(sType, componentPrev)
+Computer.prototype.getMachineComponent = function(sType, componentPrev)
 {
     var aComponents = Component.getComponents(this.id);
     for (var iComponent = 0; iComponent < aComponents.length; iComponent++) {

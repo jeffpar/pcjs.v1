@@ -949,7 +949,7 @@ Bus.prototype.setLongDirect = function(addr, l)
  *
  * @this {Bus}
  * @param {Object} obj
- * @param {BackTrack} bto
+ * @param {BackTrack|null} bto
  * @param {number} off (the offset within obj that this wrapper object is relative to)
  * @return {BackTrack|null}
  */

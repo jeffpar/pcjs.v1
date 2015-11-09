@@ -186,7 +186,7 @@ CPU.prototype.initBus = function(cmp, bus, cpu, dbg)
      * Attach the Video component to the CPU, so that the CPU can periodically update
      * the video display via updateVideo(), as cycles permit.
      */
-    for (var video = null; (video = cmp.getComponentByType("Video", video));) {
+    for (var video = null; (video = cmp.getMachineComponent("Video", video));) {
         this.aVideo.push(video);
     }
     /*
@@ -195,7 +195,7 @@ CPU.prototype.initBus = function(cmp, bus, cpu, dbg)
      *
      * We must also call chipset.updateAllTimers() periodically; stepCPU() takes care of that.
      */
-    this.chipset = cmp.getComponentByType("ChipSet");
+    this.chipset = cmp.getMachineComponent("ChipSet");
     this.setReady();
 };
 

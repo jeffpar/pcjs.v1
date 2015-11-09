@@ -1465,9 +1465,9 @@ if (PAGEBLOCKS) {
 }
 
 if (TYPEDARRAYS) {
-    Memory.afnArrayBE   = [Memory.prototype.readByteBE,  Memory.prototype.readShortBE,   Memory.prototype.readLongBE,    Memory.prototype.writeByteBE,   Memory.prototype.writeShortBE,  Memory.prototype.writeLongBE];
-    Memory.afnArrayLE   = [Memory.prototype.readByteLE,  Memory.prototype.readShortLE,   Memory.prototype.readLongLE,    Memory.prototype.writeByteLE,   Memory.prototype.writeShortLE,  Memory.prototype.writeLongLE];
-    Memory.afnPagedLE   = [Memory.prototype.readBytePLE, Memory.prototype.readShortPLE,  Memory.prototype.readLongPLE,   Memory.prototype.writeBytePLE,  Memory.prototype.writeShortPLE, Memory.prototype.writeLongPLE];
+    Memory.afnArrayBE   = [Memory.prototype.readByteBE,      Memory.prototype.readShortBE,      Memory.prototype.readLongBE,      Memory.prototype.writeByteBE,      Memory.prototype.writeShortBE,      Memory.prototype.writeLongBE];
+    Memory.afnArrayLE   = [Memory.prototype.readByteLE,      Memory.prototype.readShortLE,      Memory.prototype.readLongLE,      Memory.prototype.writeByteLE,      Memory.prototype.writeShortLE,      Memory.prototype.writeLongLE];
+    Memory.afnPagedLE   = [Memory.prototype.readBytePLE,     Memory.prototype.readShortPLE,     Memory.prototype.readLongPLE,     Memory.prototype.writeBytePLE,     Memory.prototype.writeShortPLE,     Memory.prototype.writeLongPLE];
 }
 
 if (NODE) module.exports = Memory;

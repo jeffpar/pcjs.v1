@@ -2880,7 +2880,7 @@ Video.prototype.initBus = function(cmp, bus, cpu, dbg)
      * If we have an associated keyboard, then ensure that the keyboard will be notified whenever the canvas
      * gets focus and receives input.
      */
-    this.kbd = cmp.getComponentByType("Keyboard");
+    this.kbd = cmp.getMachineComponent("Keyboard");
     if (this.kbd && this.canvasScreen) {
         for (var s in this.bindings) {
             if (s.indexOf("lock") > 0) this.kbd.setBinding("led", s, this.bindings[s]);
@@ -2889,7 +2889,7 @@ Video.prototype.initBus = function(cmp, bus, cpu, dbg)
     }
 
     this.bEGASwitches = 0x09;   // our default "switches" setting (see aEGAMonitorSwitches)
-    this.chipset = cmp.getComponentByType("ChipSet");
+    this.chipset = cmp.getMachineComponent("ChipSet");
     if (this.chipset && this.sSwitches) {
         if (this.nCard == Video.CARD.EGA) this.bEGASwitches = this.chipset.parseSwitches(this.sSwitches, this.bEGASwitches);
     }
@@ -2900,7 +2900,7 @@ Video.prototype.initBus = function(cmp, bus, cpu, dbg)
      * touch-screen support.
      */
     if (this.sTouchScreen == "mouse") {
-        this.mouse = cmp.getComponentByType("Mouse");
+        this.mouse = cmp.getMachineComponent("Mouse");
         if (this.mouse) this.captureTouch(Video.TOUCH.MOUSE);
     }
     else if (this.sTouchScreen == "keygrid") {
@@ -2939,7 +2939,7 @@ Video.prototype.setBinding = function(sHTMLType, sBinding, control)
                 };
             } else {
                 if (DEBUG) this.log("FullScreen API not available");
-                control.parentNode.removeChild(control);
+                control.parentNode.removeChild(/** @type {Node} */ (control));
             }
             return true;
 
@@ -2952,7 +2952,7 @@ Video.prototype.setBinding = function(sHTMLType, sBinding, control)
                 };
             } else {
                 if (DEBUG) this.log("Pointer Lock API not available");
-                control.parentNode.removeChild(control);
+                control.parentNode.removeChild(/** @type {Node} */ (control));
             }
             return true;
 
@@ -4326,7 +4326,7 @@ Video.prototype.checkBlink = function()
             this.cBlinks = 0;
             /*
              * At this point, we can either fire up our own timer (doBlink), or rely on updateScreen()
-             * being called by the CPU at a regular rate (eg, CPU.VIDEO_UPDATES_PER_SECOND = 60) and advance
+             * being called by the CPU at regular bursts (eg, CPU.VIDEO_UPDATES_PER_SECOND = 60) and advance
              * cBlinks at the start of updateScreen() accordingly.
              *
              * doBlink() wants to increment cBlinks every 266ms.  On the other hand, if updateScreen() is being
@@ -5142,8 +5142,8 @@ Video.prototype.invalidateScreen = function(fModified)
  * doBlink()
  *
  * This function is obsolete, now that the checkBlink() function is called on every updateScreen()
- * and checkCursor() call.  updateScreen() is driven by the CPU timer, so piggy-backing on that to
- * drive blink updates seems preferable to having another active timer in the system.
+ * and checkCursor() call.  updateScreen() is driven by CPU bursts, so piggy-backing on that to drive
+ * blink updates seems preferable to having another active timer in the system.
  *
  * @this {Video}
  * @param {boolean} [fStart]
@@ -7151,8 +7151,9 @@ Video.init = function()
         var eTextArea = window.document.createElement("textarea");
 
         /*
-         * As noted in keyboard.js, the keyboard on an iOS device pops up with the SHIFT key depressed,
-         * which is not the initial keyboard state that the Keyboard component expects.
+         * As noted in keyboard.js, the keyboard on an iOS device tends to pop up with the SHIFT key depressed,
+         * which is not the initial keyboard state that the Keyboard component expects, so hopefully turning off
+         * these "auto" attributes will help.
          */
         if (web.isUserAgent("iOS")) {
             eTextArea.setAttribute("autocapitalize", "off");
