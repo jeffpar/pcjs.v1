@@ -526,6 +526,12 @@
 				<xsl:otherwise></xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
+		<xsl:variable name="fpu">
+			<xsl:choose>
+				<xsl:when test="@fpu"><xsl:value-of select="@fpu"/></xsl:when>
+				<xsl:otherwise>0</xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
 		<xsl:variable name="cycles">
 			<xsl:choose>
 				<xsl:when test="@cycles"><xsl:value-of select="@cycles"/></xsl:when>
@@ -565,7 +571,34 @@
 		<xsl:call-template name="component">
 			<xsl:with-param name="machine" select="$machine"/>
 			<xsl:with-param name="class" select="'cpu'"/>
-			<xsl:with-param name="parms">,model:<xsl:value-of select="$model"/>,stepping:'<xsl:value-of select="$stepping"/>',cycles:<xsl:value-of select="$cycles"/>,multiplier:<xsl:value-of select="$multiplier"/>,autoStart:<xsl:value-of select="$autoStart"/>,csStart:<xsl:value-of select="$csStart"/>,csInterval:<xsl:value-of select="$csInterval"/>,csStop:<xsl:value-of select="$csStop"/></xsl:with-param>
+			<xsl:with-param name="parms">,model:<xsl:value-of select="$model"/>,stepping:'<xsl:value-of select="$stepping"/>',fpu:<xsl:value-of select="$fpu"/>,cycles:<xsl:value-of select="$cycles"/>,multiplier:<xsl:value-of select="$multiplier"/>,autoStart:<xsl:value-of select="$autoStart"/>,csStart:<xsl:value-of select="$csStart"/>,csInterval:<xsl:value-of select="$csInterval"/>,csStop:<xsl:value-of select="$csStop"/></xsl:with-param>
+		</xsl:call-template>
+	</xsl:template>
+
+	<xsl:template match="fpu[@ref]">
+		<xsl:param name="machine" select="''"/>
+		<xsl:variable name="componentFile"><xsl:value-of select="$rootDir"/><xsl:value-of select="@ref"/></xsl:variable>
+		<xsl:apply-templates select="document($componentFile)/fpu"><xsl:with-param name="machine" select="$machine"/></xsl:apply-templates>
+	</xsl:template>
+
+	<xsl:template match="fpu[not(@ref)]">
+		<xsl:param name="machine" select="''"/>
+		<xsl:variable name="model">
+			<xsl:choose>
+				<xsl:when test="@model"><xsl:value-of select="@model"/></xsl:when>
+				<xsl:otherwise>8087</xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
+		<xsl:variable name="stepping">
+			<xsl:choose>
+				<xsl:when test="@stepping"><xsl:value-of select="@stepping"/></xsl:when>
+				<xsl:otherwise></xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
+		<xsl:call-template name="component">
+			<xsl:with-param name="machine" select="$machine"/>
+			<xsl:with-param name="class" select="'fpu'"/>
+			<xsl:with-param name="parms">,model:<xsl:value-of select="$model"/>,stepping:'<xsl:value-of select="$stepping"/>'</xsl:with-param>
 		</xsl:call-template>
 	</xsl:template>
 
