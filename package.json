@@ -107,6 +107,7 @@
     "./modules/pcjs/lib/cpu.js",
     "./modules/pcjs/lib/x86seg.js",
     "./modules/pcjs/lib/x86cpu.js",
+    "./modules/pcjs/lib/x86fpu.js",
     "./modules/pcjs/lib/x86func.js",
     "./modules/pcjs/lib/x86ops.js",
     "./modules/pcjs/lib/x86op0f.js",

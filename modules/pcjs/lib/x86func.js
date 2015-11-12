@@ -945,6 +945,11 @@ X86.fnDIVw = function(dst, src)
  */
 X86.fnESC = function(dst, src)
 {
+    if (this.fpu) {
+        this.fpu.fnFPU(this.bOpcode, this.bModRM, dst, src);
+        this.stopCPU();
+    }
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? 2 : 8);
     return dst;
 };
 

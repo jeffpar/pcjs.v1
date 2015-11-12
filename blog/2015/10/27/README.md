@@ -190,7 +190,7 @@ B2 was not an actual 80386 stepping; it is a *pseudo-stepping* that provides a s
 passes all 32-bit multiplication tests.
 
 As previously discussed, Windows 95 SETUP will refuse to install on any "A" or "B" stepping, but if it's already been
-installed, it *will* start up.
+installed, it *will* start up on a B1 stepping.
 
 PCjs stepping support is extremely limited at this point.  Here's a summary:
 

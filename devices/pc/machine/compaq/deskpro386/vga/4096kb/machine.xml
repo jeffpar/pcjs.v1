@@ -13,7 +13,7 @@
 	<fdc ref="/disks/pc/library.xml" automount=''/>
 	<debugger id="debugger" messages="" commands=''/>
 	<panel ref="/devices/pc/panel/wide386.xml"/>
-	<hdc id="hdcAT" type="at" drives='[{name:"68Mb Hard Disk",type:4,path:"http://static.pcjs.org/devices/pc/machine/compaq/deskpro386/vga/4096kb/WIN95-68Mb.json.gz"}]'/>
+	<hdc id="hdcAT" type="at" drives='[{name:"68Mb Hard Disk",type:4,path:"http://static.pcjs.org/devices/pc/machine/compaq/deskpro386/vga/4096kb/WIN95-68Mb.json"}]'/>
 	<chipset id="chipset" model="deskpro386" floppies="[1200,1200]" monitor="vga"/>
 	<serial id="com1" adapter="1"/>
 	<serial id="com2" adapter="2" binding="print"/>

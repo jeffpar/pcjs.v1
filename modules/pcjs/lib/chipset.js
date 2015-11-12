@@ -168,7 +168,7 @@ function ChipSet(parmsChipSet)
      * a separate question.  FYI, with only 16Kb, the ROM BIOS will still try to boot, and fail miserably.
      */
     this.sw1Init = 0;
-    var sw1 = parmsChipSet['sw1'];
+    var sw1 = parmsChipSet[ChipSet.CONTROLS.SW1];
     if (sw1) {
         this.sw1Init = this.parseSwitches(sw1, ChipSet.PPI_SW.MEMORY.X4 | ChipSet.PPI_SW.MONITOR.MONO);
     } else {
@@ -201,7 +201,9 @@ function ChipSet(parmsChipSet)
      * NOTE: If you use the "size" parameter, you will not be able to dynamically alter the memory configuration;
      * the RAM component will ignore any changes to SW1.
      */
-    this.sw2Init = this.parseSwitches(parmsChipSet['sw2'] || "11110000", 0);
+    this.sw2Init = this.parseSwitches(parmsChipSet[ChipSet.CONTROLS.SW2] || "11110000", 0);
+
+    this.sCellClass = PCJSCLASS + "-bitCell";
 
     /*
      * The SW1 memory setting is actually just a multiplier: it's multiplied by 16Kb on a MODEL_5150, 64Kb otherwise.
@@ -286,6 +288,12 @@ ChipSet.MODELS = {
     "5160":         ChipSet.MODEL_5160,
     "5170":         ChipSet.MODEL_5170,
     "deskpro386":   ChipSet.MODEL_DESKPRO386
+};
+
+ChipSet.CONTROLS = {
+    SW1:    "sw1",
+    SW2:    "sw2",
+    SWDESC: "swdesc"
 };
 
 /*
@@ -983,6 +991,8 @@ ChipSet.COPROC = {              // TODO: Define a variable for this
 };
 
 /**
+ * setBinding(sHTMLType, sBinding, control)
+ *
  * @this {ChipSet}
  * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
  * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "sw1")
@@ -992,31 +1002,43 @@ ChipSet.COPROC = {              // TODO: Define a variable for this
 ChipSet.prototype.setBinding = function(sHTMLType, sBinding, control)
 {
     switch (sBinding) {
-        case "sw1":
+    case ChipSet.CONTROLS.SW1:
+        this.bindings[sBinding] = control;
+        this.addSwitches(sBinding, 8, this.sw1Init, {
+            0: (this.model == ChipSet.MODEL_5150? "Bootable Floppy Drive" : "Loop on POST"),
+            /*
+             * NOTE: Both the Aug 1981 and the Apr 1984 IBM 5150 Technical Reference Manuals list SW1-2 as "RESERVED", but
+             * contemporary articles discussing 8087 support in early PCs all indicate that switch SW1-2 must be set to the
+             * OFF position if a coprocessor is installed.
+             *
+             * The 1981 5150 TechRef doesn't mention 8087 support at all, whereas the 1984 5150 TechRef discusses it in
+             * a fair bit of detail, including the fact that 8087 exceptions generate an NMI (despite Intel's warning in their
+             * "iAPX 86,88 User's Manual", on page S-27, that "[t]he 8087 should not be tied to the CPU's NMI (non-maskable
+             * interrupt) line.")
+             *
+             * In light of this, we have effectively disabled the "Reserved" option below, since model will never be < 5150.
+             */
+            1: (this.model < ChipSet.MODEL_5150? "Reserved" : "Coprocessor"),
+            2: "Base Memory Size",          // up to 64Kb on a MODEL_5150, 256Kb on a MODEL_5160
+            4: "Monitor Type",
+            6: "Number of Floppy Drives"
+        });
+        return true;
+    case ChipSet.CONTROLS.SW2:
+        if (this.model == ChipSet.MODEL_5150) {
             this.bindings[sBinding] = control;
-            this.addSwitches(sBinding, control, 8, this.sw1Init, {
-                0: (this.model == ChipSet.MODEL_5150? "Bootable Floppy Drive" : "Loop on POST"),
-                1: (this.model == ChipSet.MODEL_5150? "Reserved" : "Coprocessor"),
-                2: "Base Memory Size",          // up to 64Kb on a MODEL_5150, 256Kb on a MODEL_5160
-                4: "Monitor Type",
-                6: "Number of Floppy Drives"
+            this.addSwitches(sBinding, 8, this.sw2Init, {
+                0: "Expansion Memory Size", // up to 480Kb, which, when combined with 64Kb of MODEL_5150 base memory, gives a maximum of 544Kb
+                4: "Reserved"
             });
             return true;
-        case "sw2":
-            if (this.model == ChipSet.MODEL_5150) {
-                this.bindings[sBinding] = control;
-                this.addSwitches(sBinding, control, 8, this.sw2Init, {
-                    0: "Expansion Memory Size", // up to 480Kb, which, when combined with 64Kb of MODEL_5150 base memory, gives a maximum of 544Kb
-                    4: "Reserved"
-                });
-                return true;
-            }
-            break;
-        case "swdesc":
-            this.bindings[sBinding] = control;
-            return true;
-        default:
-            break;
+        }
+        break;
+    case ChipSet.CONTROLS.SWDESC:
+        this.bindings[sBinding] = control;
+        return true;
+    default:
+        break;
     }
     return false;
 };
@@ -1069,6 +1091,9 @@ ChipSet.prototype.initBus = function(cmp, bus, cpu, dbg)
         }
         cpu.addIntNotify(Interrupts.RTC, this.intBIOSRTC.bind(this));
     }
+    if (cpu.fpu) {
+        this.sw1Init |= ChipSet.PPI_SW.COPROC;
+    }
 };
 
 /**
@@ -1119,7 +1144,9 @@ ChipSet.prototype.reset = function(fHard)
     var i;
     this.sw1 = this.sw1Init;
     this.sw2 = this.sw2Init;
-    this.updateSwitchDesc();
+    this.updateSwitches(ChipSet.CONTROLS.SW1, this.sw1);
+    this.updateSwitches(ChipSet.CONTROLS.SW2, this.sw2);
+    this.updateSwitchDescriptions();
 
     /*
      * DMA (Direct Memory Access) Controller initialization
@@ -2196,45 +2223,91 @@ ChipSet.prototype.getSWVideoMonitor = function(fInit)
 };
 
 /**
- * addSwitches(s, control, n, v, oTips)
+ * addSwitches(sBinding, n, v, oTips)
  *
  * @this {ChipSet}
- * @param {string} s is the name of the control
- * @param {Object} control is the HTML control DOM object
+ * @param {string} sBinding is the name of the control
  * @param {number} n is the number of switches to add
  * @param {number} v contains the current value(s) of the switches
  * @param {Object} oTips contains tooltips for the various cells
  */
-ChipSet.prototype.addSwitches = function(s, control, n, v, oTips)
+ChipSet.prototype.addSwitches = function(sBinding, n, v, oTips)
 {
     var sHTML = "";
-    var sCellClass = PCJSCLASS + "-bitCell";
+    var control = this.bindings[sBinding];
     for (var i = 1; i <= n; i++) {
-        var sCellClasses = sCellClass;
-        if (!i) sCellClasses += " " + PCJSCLASS + "-bitCellLeft";
-        var sCellID = s + "-" + i;
+        var sCellClasses = this.sCellClass;
+        if (!i) sCellClasses += " " + this.sCellClass + "Left";
+        var sCellID = sBinding + "-" + i;
         sHTML += "<div id=\"" + sCellID + "\" class=\"" + sCellClasses + "\" data-value=\"0\">" + i + "</div>\n";
     }
     control.innerHTML = sHTML;
-    var aeCells = Component.getElementsByClass(control, sCellClass);
-    var sTip = null;
-    for (i = 0; i < aeCells.length; i++) {
-        if (oTips != null && oTips[i] != null) {
-            sTip = oTips[i];
+    this.updateSwitches(sBinding, v, oTips);
+};
+
+/**
+ * updateSwitches(sBinding, v, oTips)
+ *
+ * @this {ChipSet}
+ * @param {string} sBinding is the name of the control
+ * @param {number} v contains the current value(s) of the switches
+ * @param {Object} [oTips] contains tooltips for the various cells
+ */
+ChipSet.prototype.updateSwitches = function(sBinding, v, oTips)
+{
+    var control = this.bindings[sBinding];
+    if (control) {
+        var aeCells = Component.getElementsByClass(control, this.sCellClass);
+        for (var i = 0; i < aeCells.length; i++) {
+            var sTip = null;
+            if (oTips != null && oTips[i] != null) {
+                sTip = oTips[i];
+            }
+            if (sTip) aeCells[i].setAttribute("title", sTip);
+            this.setSwitch(aeCells[i], (v & (0x1 << i))? false : true);
+            aeCells[i].onclick = function(chipset, eSwitch) {
+                /*
+                 *  If we defined the onclick handler below as "function(e)" instead of simply "function()", then we could
+                 *  also receive an event object (e); however, IE reportedly requires that we examine a global (window.event)
+                 *  instead.  If that's true, and if we ever care to get more details about the click event, then we might
+                 *  have to worry about that (eg, define a local var: "var event = window.event || e").
+                 */
+                return function onClickSwitch() {
+                    chipset.toggleSwitch(eSwitch);
+                };
+            }(this, aeCells[i]);
         }
-        if (sTip) aeCells[i].setAttribute("title", sTip);
-        this.setSwitch(aeCells[i], (v & (0x1 << i))? false : true);
-        aeCells[i].onclick = function(chipset, eSwitch) {
-            /*
-             *  If we defined the onclick handler below as "function(e)" instead of simply "function()", then we could
-             *  also receive an event object (e); however, IE reportedly requires that we examine a global (window.event)
-             *  instead.  If that's true, and if we ever care to get more details about the click event, then we might
-             *  have to worry about that (eg, define a local var: "var event = window.event || e").
-             */
-            return function onClickSwitch() {
-                chipset.toggleSwitch(eSwitch);
-            };
-        }(this, aeCells[i]);
+    }
+};
+
+/**
+ * updateSwitchDescriptions()
+ *
+ * @this {ChipSet}
+ */
+ChipSet.prototype.updateSwitchDescriptions = function()
+{
+    var controlDesc = this.bindings[ChipSet.CONTROLS.SWDESC];
+    if (controlDesc != null) {
+        var sText = "";
+        /*
+         * TODO: Monitor type 0 used to be "None" (ie, "No Monitor"), which was correct in a pre-EGA world,
+         * but in the post-EGA world, it depends.  We should ask the Video component for a definitive answer.
+         */
+        var asMonitorTypes = {
+            0: "Enhanced Color",
+            1: "TV",
+            2: "Color",
+            3: "Monochrome"
+        };
+        sText += this.getSWMemorySize(true) + "Kb";
+        sText += ", " + ((this.sw1 & ChipSet.PPI_SW.COPROC)? "" : "No ") + "Coprocessor";
+        sText += ", " + asMonitorTypes[this.getSWVideoMonitor(true)] + " Monitor";
+        sText += ", " + this.getSWFloppyDrives(true) + " Floppy Drives";
+        if (this.sw1 != null && this.sw1 != this.sw1Init || this.sw2 != null && this.sw2 != this.sw2Init) {
+            sText += " (Reset required)";
+        }
+        controlDesc.textContent = sText;
     }
 };
 
@@ -2278,48 +2351,16 @@ ChipSet.prototype.toggleSwitch = function(control)
     var asParts = sID.split("-");
     var b = (0x1 << (+asParts[1] - 1));
     switch (asParts[0]) {
-    case "sw1":
+    case ChipSet.CONTROLS.SW1:
         this.sw1Init = (this.sw1Init & ~b) | (f? 0 : b);
         break;
-    case "sw2":
+    case ChipSet.CONTROLS.SW2:
         this.sw2Init = (this.sw2Init & ~b) | (f? 0 : b);
         break;
     default:
         break;
     }
-    this.updateSwitchDesc();
-};
-
-/**
- * updateSwitchDesc()
- *
- * @this {ChipSet}
- */
-ChipSet.prototype.updateSwitchDesc = function()
-{
-    var controlDesc = this.bindings["swdesc"];
-    /*
-     * TODO: Monitor type 0 used to be "No" (as in "No Monitor"), which was correct in the pre-EGA world,
-     * but in the post-EGA world, it depends.  We could ask the Video component for a definitive answer, but
-     * but what we print here isn't that critical, because most people won't bother with a Control Panel,
-     * which is really the only beneficiary of this code.
-     */
-    var asMonitorTypes = {
-        0: "Enhanced Color",
-        1: "TV",
-        2: "Color",
-        3: "Monochrome"
-    };
-    if (controlDesc != null) {
-        var sText = "";
-        sText += this.getSWMemorySize(true) + "Kb";
-        sText += ", " + asMonitorTypes[this.getSWVideoMonitor(true)] + " Monitor";
-        sText += ", " + this.getSWFloppyDrives(true) + " Floppy Drives";
-        if (this.sw1 != null && this.sw1 != this.sw1Init || this.sw2 != null && this.sw2 != this.sw2Init) {
-            sText += " (Reset required)";
-        }
-        controlDesc.textContent = sText;
-    }
+    this.updateSwitchDescriptions();
 };
 
 /**
@@ -5284,7 +5325,7 @@ ChipSet.init = function()
         var parmsChipSet = Component.getComponentParms(eChipSet);
         var chipset = new ChipSet(parmsChipSet);
         Component.bindComponentControls(chipset, eChipSet, PCJSCLASS);
-        chipset.updateSwitchDesc();
+        chipset.updateSwitchDescriptions();
     }
 };
 

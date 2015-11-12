@@ -138,8 +138,7 @@ function CPU(parmsCPU, nCyclesDefault)
      */
     this.aVideo = [];
 
-    var cpu = this;
-    this.onRunTimeout = function onRunTimeout() { cpu.runCPU(); };
+    this.onRunTimeout = this.runCPU.bind(this); // function onRunTimeout() { cpu.runCPU(); };
 
     this.setReady();
 }
@@ -179,9 +178,10 @@ CPU.STATUS_UPDATES_PER_SECOND = 2;
  */
 CPU.prototype.initBus = function(cmp, bus, cpu, dbg)
 {
+    this.cmp = cmp;
     this.bus = bus;
     this.dbg = dbg;
-    this.cmp = cmp;
+
     /*
      * Attach the Video component to the CPU, so that the CPU can periodically update
      * the video display via updateVideo(), as cycles permit.
@@ -189,13 +189,17 @@ CPU.prototype.initBus = function(cmp, bus, cpu, dbg)
     for (var video = null; (video = cmp.getMachineComponent("Video", video));) {
         this.aVideo.push(video);
     }
+
     /*
-     * Attach the ChipSet component to the CPU, so that it can obtain the IDT vector number of
-     * pending hardware interrupts, in response to ChipSet's updateINTR() notifications.
+     * Attach the ChipSet component to the CPU so that it can obtain the IDT vector number
+     * of pending hardware interrupts in response to the ChipSet's updateINTR() notifications.
      *
      * We must also call chipset.updateAllTimers() periodically; stepCPU() takes care of that.
      */
     this.chipset = cmp.getMachineComponent("ChipSet");
+
+    this.fpu = cmp.getMachineComponent("FPU");
+
     this.setReady();
 };
 

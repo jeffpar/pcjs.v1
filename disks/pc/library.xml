@@ -3,6 +3,7 @@
 	<control type="list" binding="listDrives"/>
 	<control type="list" binding="listDisks">
 		<disk path="">None</disk>
+		<manifest ref="/disks/pc/diags/ibm/2.20/manifest.xml" disk="*"/>
 		<manifest ref="/disks/pc/dos/ibm/1.00/manifest.xml" disk="*"/>
 		<manifest ref="/disks/pc/dos/ibm/1.10/manifest.xml" disk="*"/>
 		<manifest ref="/disks/pc/dos/ibm/2.00/manifest.xml" disk="*"/>
@@ -47,8 +48,8 @@
 		<manifest ref="/disks/pc/apps/microsoft/word/3.1/manifest.xml" disk="*"/>
 		<manifest ref="/disks/pc/apps/microsoft/word/5.0/manifest.xml" disk="*"/>
 		<manifest ref="/disks/pc/apps/microsoft/winword/2.0c/manifest.xml" disk="*"/>
-		<disk path="/disks/pc/games/id/wolf3d/1WOLF14.json">Wolfenstein 3D (v1.4)</disk>
-		<manifest ref="/disks/pc/games/microsoft/flightsim/manifest.xml" disk="*"/>
+		<manifest ref="/disks/pc/tools/borland/pascal/3.00b/manifest.xml" disk="*"/>
+		<manifest ref="/disks/pc/tools/borland/pascal/3.01a/manifest.xml" disk="*"/>
 		<manifest ref="/disks/pc/tools/microsoft/basic/manifest.xml" disk="*"/>
 		<manifest ref="/disks/pc/tools/microsoft/c/4.00/manifest.xml" disk="*"/>
 		<manifest ref="/disks/pc/tools/microsoft/masm/4.00/manifest.xml" disk="*"/>
@@ -58,6 +59,8 @@
 		<manifest ref="/disks/pc/tools/microsoft/windows/sdk/1.04/manifest.xml" disk="*"/>
 		<manifest ref="/disks/pc/tools/microsoft/windows/sdk/2.03/manifest.xml" disk="*"/>
 		<manifest ref="/disks/pc/tools/microsoft/windows/sdk/3.00/manifest.xml" disk="*"/>
+		<manifest ref="/disks/pc/games/microsoft/flightsim/manifest.xml" disk="*"/>
+		<disk path="/disks/pc/games/id/wolf3d/1WOLF14.json">Wolfenstein 3D (v1.4)</disk>
 		<manifest ref="/apps/pc/1981/visicalc/manifest.xml" disk="disk01"/>
 		<manifest ref="/apps/pc/1982/esuite/manifest.xml" disk="disk01"/>
 		<manifest ref="/apps/pc/1985/rogue/manifest.xml" disk="disk01"/>

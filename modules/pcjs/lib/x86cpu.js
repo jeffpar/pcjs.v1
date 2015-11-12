@@ -75,8 +75,8 @@ if (!I386) {
  *
  * The X86CPU class uses the following (parmsCPU) properties:
  *
- *      model: a number (eg, 8088) that should match one of the X86.MODEL values
- *      stepping: a string (eg, "B1") that should match one of the X86.STEPPING values
+ *      model: a number (eg, 8088) that should match one of the X86.MODEL values (default is 8088)
+ *      stepping: a string (eg, "B1") that should match one of the X86.STEPPING values (default is "")
  *
  * This extends the CPU class and passes any remaining parmsCPU properties to the CPU class
  * constructor, along with a default speed (cycles per second) based on the specified (or default)
@@ -1069,6 +1069,12 @@ X86CPU.prototype.resetRegs = function()
     this.fMDSet = false;        // regMDHi and/or regMDLo are invalid unless fMDSet is true
     this.regMDLo = this.regMDHi = 0;
     this.regXX = 0;             // internal register for segment register and control register moves
+
+    /*
+     * This internal "register" is set in selected opcode handlers to record the original opcode; ordinarily,
+     * we dispatch on the opcode but never save it, because it's rarely needed.
+     */
+    this.bOpcode = 0;
 
     /*
      * Another internal "register" we occasionally need is an interim copy of bModRM, set inside selected opcode

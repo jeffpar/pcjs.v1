@@ -494,6 +494,14 @@ var X86 = {
         INTN:       0xCD,       // opINTn()
         INTO:       0xCE,       // opINTO()
         IRET:       0xCF,       // opIRET()
+        ESC0:       0xD8,       // opESC0()
+        ESC1:       0xD9,       // opESC1()
+        ESC2:       0xDA,       // opESC2()
+        ESC3:       0xDB,       // opESC3()
+        ESC4:       0xDC,       // opESC4()
+        ESC5:       0xDD,       // opESC5()
+        ESC6:       0xDE,       // opESC6()
+        ESC7:       0xDF,       // opESC7()
         LOOPNZ:     0xE0,       // opLOOPNZ()
         LOOPZ:      0xE1,       // opLOOPZ()
         LOOP:       0xE2,       // opLOOP()
@@ -509,6 +517,80 @@ var X86 = {
         CALLFDW:    0x18FF,     // GRP4W: fnCALLFdw()
         CALLMASK:   0x38FF,     // mask 2-byte GRP4W opcodes with this before comparing to CALLW or CALLFDW
         UD2:        0x0B0F      // UD2 (invalid opcode "guaranteed" to generate UD_FAULT on all post-8086 processors)
+    },
+    /*
+     * Floating Point Unit (FPU), aka Numeric Data Processor (NDP), aka Numeric Processor Extension (NPX) definitions
+     */
+    FPU: {
+        MODEL_8087:     8087,
+        MODEL_80287:    80287,
+        MODEL_80387:    80387,
+        CONTROL: {              // FPU Control Word
+            IM:     0x0001,     // bit 0: Invalid Operation Mask
+            DM:     0x0002,     // bit 1: Denormalized Operand Mask
+            ZM:     0x0004,     // bit 2: Zero Divide Mask
+            OM:     0x0008,     // bit 3: Overflow Mask
+            UM:     0x0010,     // bit 4: Underflow Mask
+            PM:     0x0020,     // bit 5: Precision Mask
+            IEM:    0x0080,     // bit 7: Interrupt Enable Mask (0 enables interrupts, 1 masks them; 8087 only)
+            PC:     0x0300,     // bits 8-9: Precision Control
+            RC:     0x0C00,     // bits 10-11: Rounding Control
+            IC:     0x1000      // bit 12: Infinity Control (0 for Projective, 1 for Affine)
+        },
+        STATUS: {               // FPU Status Word
+            IE:     0x0001,     // bit 0: Invalid Operation
+            DE:     0x0002,     // bit 1: Denormalized Operand
+            ZE:     0x0004,     // bit 2: Zero Divide
+            OE:     0x0008,     // bit 3: Overflow
+            UE:     0x0010,     // bit 4: Underflow
+            PE:     0x0020,     // bit 5: Precision
+            SF:     0x0040,     // bit 6: Stack Fault (80387 and later)
+            ES:     0x0080,     // bit 7: Exception Summary (Interrupt Request on 8087)
+            C0:     0x0100,     // bit 8: Condition Code 0
+            C1:     0x0200,     // bit 9: Condition Code 1
+            C2:     0x0400,     // bit 10: Condition Code 2
+            ST:     0x3800,     // bits 11-13: Stack Top
+            C3:     0x4000,     // bit 14: Condition Code 3
+            BUSY:   0x8000      // bit 15: Busy
+        },
+        TAG: {
+            VALID:     0x0,
+            ZERO:      0x1,
+            SPECIAL:   0x2,
+            EMPTY:     0x3
+        }
+        /*
+            C3 C2 C1 C0     Condition Code (CC) values following an Examine
+
+            0  0  0  0      Valid, positive unnormalized (+Unnormal)
+            0  0  0  1      Invalid, positive, exponent=0 (+NaN)
+            0  0  1  0      Valid, negative, unnormalized (-Unnormal)
+            0  0  1  1      Invalid, negative, exponent=0 (-NaN)
+            0  1  0  0      Valid, positive, normalized (+Normal)
+            0  1  0  1      Infinity, positive (+Infinity)
+            0  1  1  0      Valid, negative, normalized (-Normal)
+            0  1  1  1      Infinity, negative (-Infinity)
+            1  0  0  0      Zero, positive (+0)
+            1  0  0  1      Empty
+            1  0  1  0      Zero, negative (-0)
+            1  0  1  1      Empty
+            1  1  0  0      Invalid, positive, exponent=0 (+Denormal)
+            1  1  0  1      Empty
+            1  1  1  0      Invalid, negative, exponent=0 (-Denormal)
+            1  1  1  1      Empty
+
+                            Condition Code (CC) values following an FCOM or FTST
+
+            0  0  ?  0      ST > source operand (FCOM); ST > 0 (FTST)
+            0  0  ?  1      ST < source operand (FCOM); ST < 0 (FTST)
+            1  0  ?  0      ST = source operand (FCOM); ST = 0 (FTST)
+            1  1  ?  1      ST is not comparable
+
+                            Condition Code (CC) values following a Remainder
+
+            Q1 0  Q0 Q2     Complete reduction (he three low bits of the quotient stored in C0, C3, and C1)
+            ?  1  ?  ?      Incomplete reduction
+         */
     },
     CYCLES_8088: {
         nWordCyclePenalty:          4,      // NOTE: accurate for the 8088/80188 only (on the 8086/80186, it applies to odd addresses only)

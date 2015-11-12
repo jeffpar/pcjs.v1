@@ -3771,14 +3771,95 @@ X86.opXLAT = function()
 };
 
 /**
- * op=0xD8-0xDF (ESC)
+ * opESC()
+ *
+ * @this {X86CPU}
+ * @param {number} bOpcode
+ */
+X86.opESC = function(bOpcode)
+{
+    this.bOpcode = bOpcode;
+    this.aOpModRegWord[this.bModRM = this.getIPByte()].call(this, X86.fnESC);
+};
+
+/**
+ * op=0xD8 (ESC0)
  *
  * @this {X86CPU}
  */
-X86.opESC = function()
+X86.opESC0 = function()
 {
-    this.aOpModRegWord[this.getIPByte()].call(this, X86.fnESC);
-    this.nStepCycles -= 8;      // TODO: Fix
+    X86.opESC.call(this, X86.OPCODE.ESC0);
+};
+
+/**
+ * op=0xD9 (ESC1)
+ *
+ * @this {X86CPU}
+ */
+X86.opESC1 = function()
+{
+    X86.opESC.call(this, X86.OPCODE.ESC1);
+};
+
+/**
+ * op=0xDA (ESC2)
+ *
+ * @this {X86CPU}
+ */
+X86.opESC2 = function()
+{
+    X86.opESC.call(this, X86.OPCODE.ESC2);
+};
+
+/**
+ * op=0xDB (ESC3)
+ *
+ * @this {X86CPU}
+ */
+X86.opESC3 = function()
+{
+    X86.opESC.call(this, X86.OPCODE.ESC3);
+};
+
+/**
+ * op=0xDC (ESC4)
+ *
+ * @this {X86CPU}
+ */
+X86.opESC4 = function()
+{
+    X86.opESC.call(this, X86.OPCODE.ESC4);
+};
+
+/**
+ * op=0xDD (ESC5)
+ *
+ * @this {X86CPU}
+ */
+X86.opESC5 = function()
+{
+    X86.opESC.call(this, X86.OPCODE.ESC5);
+};
+
+/**
+ * op=0xDE (ESC6)
+ *
+ * @this {X86CPU}
+ */
+X86.opESC6 = function()
+{
+    X86.opESC.call(this, X86.OPCODE.ESC6);
+};
+
+/**
+ * op=0xDF (ESC7)
+ *
+ * @this {X86CPU}
+ */
+X86.opESC7 = function()
+{
+    X86.opESC.call(this, X86.OPCODE.ESC7);
 };
 
 /**
@@ -4421,8 +4502,8 @@ X86.aOps = [
      * Even as of the Pentium, opcode 0xD6 is still marked as "reserved", but it's always been SALC (aka SETALC).
      */
     X86.opAAM,              X86.opAAD,              X86.opSALC,             X86.opXLAT,         // 0xD4-0xD7
-    X86.opESC,              X86.opESC,              X86.opESC,              X86.opESC,          // 0xD8-0xDB
-    X86.opESC,              X86.opESC,              X86.opESC,              X86.opESC,          // 0xDC-0xDF
+    X86.opESC0,             X86.opESC1,             X86.opESC2,             X86.opESC3,         // 0xD8-0xDB
+    X86.opESC4,             X86.opESC5,             X86.opESC6,             X86.opESC7,         // 0xDC-0xDF
     X86.opLOOPNZ,           X86.opLOOPZ,            X86.opLOOP,             X86.opJCXZ,         // 0xE0-0xE3
     X86.opINb,              X86.opINw,              X86.opOUTb,             X86.opOUTw,         // 0xE4-0xE7
     X86.opCALL,             X86.opJMP,              X86.opJMPF,             X86.opJMPs,         // 0xE8-0xEB

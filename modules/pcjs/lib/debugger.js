@@ -275,7 +275,7 @@ if (DEBUGGER) {
 
     Debugger.COMMANDS = {
         '?':     "help/print",
-        'a [#]': "assemble",
+        'a [#]': "assemble",            // TODO: Implement this command someday
         'b [#]': "breakpoint",          // multiple variations (use b? to list them)
         'c':     "clear output",
         'd [#]': "dump memory",         // additional syntax: d [#] [l#], where l# is a number of bytes to dump
@@ -320,67 +320,113 @@ if (DEBUGGER) {
     };
 
     /*
-     * Instruction ordinals
+     * CPU instruction ordinals
+     *
+     * Note that individual instructions end with ordinal 162 and instruction groups begin with ordinal 163;
+     * the disassembler knows it's dealing with a group whenever the ordinal is not a valid index into INS_NAMES.
      */
     Debugger.INS = {
         NONE:   0,   AAA:    1,   AAD:    2,   AAM:    3,   AAS:    4,   ADC:    5,   ADD:    6,   AND:    7,
         ARPL:   8,   AS:     9,   BOUND:  10,  BSF:    11,  BSR:    12,  BT:     13,  BTC:    14,  BTR:    15,
         BTS:    16,  CALL:   17,  CBW:    18,  CLC:    19,  CLD:    20,  CLI:    21,  CLTS:   22,  CMC:    23,
         CMP:    24,  CMPSB:  25,  CMPSW:  26,  CS:     27,  CWD:    28,  DAA:    29,  DAS:    30,  DEC:    31,
-        DIV:    32,  DS:     33,  ENTER:  34,  ES:     35,  ESC:    36,  FADD:   37,  FBLD:   38,  FBSTP:  39,
-        FCOM:   40,  FCOMP:  41,  FDIV:   42,  FDIVR:  43,  FIADD:  44,  FICOM:  45,  FICOMP: 46,  FIDIV:  47,
-        FIDIVR: 48,  FILD:   49,  FIMUL:  50,  FIST:   51,  FISTP:  52,  FISUB:  53,  FISUBR: 54,  FLD:    55,
-        FLDCW:  56,  FLDENV: 57,  FMUL:   58,  FNSAVE: 59,  FNSTCW: 60,  FNSTENV:61,  FNSTSW: 62,  FRSTOR: 63,
-        FS:     64,  FST:    65,  FSTP:   66,  FSUB:   67,  FSUBR:  68,  GS:     69,  HLT:    70,  IBTS:   71,
-        IDIV:   72,  IMUL:   73,  IN:     74,  INC:    75,  INS:    76,  INT:    77,  INT3:   78,  INTO:   79,
-        IRET:   80,  JBE:    81,  JC:     82,  JCXZ:   83,  JG:     84,  JGE:    85,  JL:     86,  JLE:    87,
-        JMP:    88,  JA:     89,  JNC:    90,  JNO:    91,  JNP:    92,  JNS:    93,  JNZ:    94,  JO:     95,
-        JP:     96,  JS:     97,  JZ:     98,  LAHF:   99,  LAR:    100, LDS:    101, LEA:    102, LEAVE:  103,
-        LES:    104, LFS:    105, LGDT:   106, LGS:    107, LIDT:   108, LLDT:   109, LMSW:   110, LOADALL:111,
-        LOCK:   112, LODSB:  113, LODSW:  114, LOOP:   115, LOOPNZ: 116, LOOPZ:  117, LSL:    118, LSS:    119,
-        LTR:    120, MOV:    121, MOVSB:  122, MOVSW:  123, MOVSX:  124, MOVZX:  125, MUL:    126, NEG:    127,
-        NOP:    128, NOT:    129, OR:     130, OS:     131, OUT:    132, OUTS:   133, POP:    134, POPA:   135,
-        POPF:   136, PUSHF:  137, PUSHA:  138, PUSH:   139, RCL:    140, RCR:    141, REPNZ:  142, REPZ:   143,
-        RET:    144, RETF:   145, ROL:    146, ROR:    147, SAHF:   148, SALC:   149, SAR:    150, SBB:    151,
-        SCASB:  152, SCASW:  153, SETBE:  154, SETC:   155, SETG:   156, SETGE:  157, SETL:   158, SETLE:  159,
-        SETNBE: 160, SETNC:  161, SETNO:  162, SETNP:  163, SETNS:  164, SETNZ:  165, SETO:   166, SETP:   167,
-        SETS:   168, SETZ:   169, SGDT:   170, SHL:    171, SHLD:   172, SHR:    173, SHRD:   174, SIDT:   175,
-        SLDT:   176, SMSW:   177, SS:     178, STC:    179, STD:    180, STI:    181, STOSB:  182, STOSW:  183,
-        STR:    184, SUB:    185, TEST:   186, VERR:   187, VERW:   188, WAIT:   189, XBTS:   190, XCHG:   191,
-        XLAT:   192, XOR:    193, GRP1B:  194, GRP1W:  195, GRP1SW: 196, GRP2B:  197, GRP2W:  198, GRP2B1: 199,
-        GRP2W1: 200, GRP2BC: 201, GRP2WC: 202, GRP3B:  203, GRP3W:  204, GRP4B:  205, GRP4W:  206, OP0F:   207,
-        GRP6:   208, GRP7:   209, GRP8:   210
+        DIV:    32,  DS:     33,  ENTER:  34,  ES:     35,  ESC:    36,  FS:     37,  GS:     38,  HLT:    39,
+        IBTS:   40,  IDIV:   41,  IMUL:   42,  IN:     43,  INC:    44,  INS:    45,  INT:    46,  INT3:   47,
+        INTO:   48,  IRET:   49,  JBE:    50,  JC:     51,  JCXZ:   52,  JG:     53,  JGE:    54,  JL:     55,
+        JLE:    56,  JMP:    57,  JA:     58,  JNC:    59,  JNO:    60,  JNP:    61,  JNS:    62,  JNZ:    63,
+        JO:     64,  JP:     65,  JS:     66,  JZ:     67,  LAHF:   68,  LAR:    69,  LDS:    70,  LEA:    71,
+        LEAVE:  72,  LES:    73,  LFS:    74,  LGDT:   75,  LGS:    76,  LIDT:   77,  LLDT:   78,  LMSW:   79,
+        LOADALL:80,  LOCK:   81,  LODSB:  82,  LODSW:  83,  LOOP:   84,  LOOPNZ: 85,  LOOPZ:  86,  LSL:    87,
+        LSS:    88,  LTR:    89,  MOV:    90,  MOVSB:  91,  MOVSW:  92,  MOVSX:  93,  MOVZX:  94,  MUL:    95,
+        NEG:    96,  NOP:    97,  NOT:    98,  OR:     99,  OS:     100, OUT:    101, OUTS:   102, POP:    103,
+        POPA:   104, POPF:   105, PUSHF:  106, PUSHA:  107, PUSH:   108, RCL:    109, RCR:    110, REPNZ:  111,
+        REPZ:   112, RET:    113, RETF:   114, ROL:    115, ROR:    116, SAHF:   117, SALC:   118, SAR:    119,
+        SBB:    120, SCASB:  121, SCASW:  122, SETBE:  123, SETC:   124, SETG:   125, SETGE:  126, SETL:   127,
+        SETLE:  128, SETNBE: 129, SETNC:  130, SETNO:  131, SETNP:  132, SETNS:  133, SETNZ:  134, SETO:   135,
+        SETP:   136, SETS:   137, SETZ:   138, SGDT:   139, SHL:    140, SHLD:   141, SHR:    142, SHRD:   143,
+        SIDT:   144, SLDT:   145, SMSW:   146, SS:     147, STC:    148, STD:    149, STI:    150, STOSB:  151,
+        STOSW:  152, STR:    153, SUB:    154, TEST:   155, VERR:   156, VERW:   157, WAIT:   158, XBTS:   159,
+        XCHG:   160, XLAT:   161, XOR:    162, GRP1B:  163, GRP1W:  164, GRP1SW: 165, GRP2B:  166, GRP2W:  167,
+        GRP2B1: 168, GRP2W1: 169, GRP2BC: 170, GRP2WC: 171, GRP3B:  172, GRP3W:  173, GRP4B:  174, GRP4W:  175,
+        OP0F:   176, GRP6:   177, GRP7:   178, GRP8:   179
     };
 
     /*
-     * Instruction names (mnemonics), indexed by instruction ordinal (above)
+     * CPU instruction names (mnemonics), indexed by CPU instruction ordinal (above)
      */
     Debugger.INS_NAMES = [
         "INVALID","AAA",    "AAD",    "AAM",    "AAS",    "ADC",    "ADD",    "AND",
         "ARPL",   "AS:",    "BOUND",  "BSF",    "BSR",    "BT",     "BTC",    "BTR",
         "BTS",    "CALL",   "CBW",    "CLC",    "CLD",    "CLI",    "CLTS",   "CMC",
         "CMP",    "CMPSB",  "CMPSW",  "CS:",    "CWD",    "DAA",    "DAS",    "DEC",
-        "DIV",    "DS:",    "ENTER",  "ES:",    "ESC",    "FADD",   "FBLD",   "FBSTP",
-        "FCOM",   "FCOMP",  "FDIV",   "FDIVR",  "FIADD",  "FICOM",  "FICOMP", "FIDIV",
-        "FIDIVR", "FILD",   "FIMUL",  "FIST",   "FISTP",  "FISUB",  "FISUBR", "FLD",
-        "FLDCW",  "FLDENV", "FMUL",   "FNSAVE", "FNSTCW", "FNSTENV","FNSTSW", "FRSTOR",
-        "FS:",    "FST",    "FSTP",   "FSUB",   "FSUBR",  "GS:",    "HLT",    "IBTS",
-        "IDIV",   "IMUL",   "IN",     "INC",    "INS",    "INT",    "INT3",   "INTO",
-        "IRET",   "JBE",    "JC",     "JCXZ",   "JG",     "JGE",    "JL",     "JLE",
-        "JMP",    "JA",     "JNC",    "JNO",    "JNP",    "JNS",    "JNZ",    "JO",
-        "JP",     "JS",     "JZ",     "LAHF",   "LAR",    "LDS",    "LEA",    "LEAVE",
-        "LES",    "LFS",    "LGDT",   "LGS",    "LIDT",   "LLDT",   "LMSW",   "LOADALL",
-        "LOCK",   "LODSB",  "LODSW",  "LOOP",   "LOOPNZ", "LOOPZ",  "LSL",    "LSS",
-        "LTR",    "MOV",    "MOVSB",  "MOVSW",  "MOVSX",  "MOVZX",  "MUL",    "NEG",
-        "NOP",    "NOT",    "OR",     "OS:",    "OUT",    "OUTS",   "POP",    "POPA",
-        "POPF",   "PUSHF",  "PUSHA",  "PUSH",   "RCL",    "RCR",    "REPNZ",  "REPZ",
-        "RET",    "RETF",   "ROL",    "ROR",    "SAHF",   "SALC",   "SAR",    "SBB",
-        "SCASB",  "SCASW",  "SETBE",  "SETC",   "SETG",   "SETGE",  "SETL",   "SETLE",
-        "SETNBE", "SETNC",  "SETNO",  "SETNP",  "SETNS",  "SETNZ",  "SETO",   "SETP",
-        "SETS",   "SETZ",   "SGDT",   "SHL",    "SHLD",   "SHR",    "SHRD",   "SIDT",
-        "SLDT",   "SMSW",   "SS:",    "STC",    "STD",    "STI",    "STOSB",  "STOSW",
-        "STR",    "SUB",    "TEST",   "VERR",   "VERW",   "WAIT",   "XBTS",   "XCHG",
-        "XLAT",   "XOR"
+        "DIV",    "DS:",    "ENTER",  "ES:",    "ESC",    "FS:",    "GS:",    "HLT",
+        "IBTS",   "IDIV",   "IMUL",   "IN",     "INC",    "INS",    "INT",    "INT3",
+        "INTO",   "IRET",   "JBE",    "JC",     "JCXZ",   "JG",     "JGE",    "JL",
+        "JLE",    "JMP",    "JA",     "JNC",    "JNO",    "JNP",    "JNS",    "JNZ",
+        "JO",     "JP",     "JS",     "JZ",     "LAHF",   "LAR",    "LDS",    "LEA",
+        "LEAVE",  "LES",    "LFS",    "LGDT",   "LGS",    "LIDT",   "LLDT",   "LMSW",
+        "LOADALL","LOCK",   "LODSB",  "LODSW",  "LOOP",   "LOOPNZ", "LOOPZ",  "LSL",
+        "LSS",    "LTR",    "MOV",    "MOVSB",  "MOVSW",  "MOVSX",  "MOVZX",  "MUL",
+        "NEG",    "NOP",    "NOT",    "OR",     "OS:",    "OUT",    "OUTS",   "POP",
+        "POPA",   "POPF",   "PUSHF",  "PUSHA",  "PUSH",   "RCL",    "RCR",    "REPNZ",
+        "REPZ",   "RET",    "RETF",   "ROL",    "ROR",    "SAHF",   "SALC",   "SAR",
+        "SBB",    "SCASB",  "SCASW",  "SETBE",  "SETC",   "SETG",   "SETGE",  "SETL",
+        "SETLE",  "SETNBE", "SETNC",  "SETNO",  "SETNP",  "SETNS",  "SETNZ",  "SETO",
+        "SETP",   "SETS",   "SETZ",   "SGDT",   "SHL",    "SHLD",   "SHR",    "SHRD",
+        "SIDT",   "SLDT",   "SMSW",   "SS:",    "STC",    "STD",    "STI",    "STOSB",
+        "STOSW",  "STR",    "SUB",    "TEST",   "VERR",   "VERW",   "WAIT",   "XBTS",
+        "XCHG",   "XLAT",   "XOR"
+    ];
+
+    /*
+     * FPU instruction ordinals
+     *
+     * Unlike CPU instruction ordinals, these are not organized alphabetically (which I did only for the
+     * sake of tidiness), but rather by functionality; ie:
+     *
+     *      0-3:    real transfers
+     *      4-6:    integer transfers
+     *      7-8:    packed decimal transfers
+     *      9-11:   addition
+     *      12-17:  subtraction
+     *      18-20:  multiplication
+     *      21-26:  division
+     *      27-33:  other
+     *      34-40:  comparisons
+     *      41-45:  transcendental
+     *      46-52:  constants
+     *      53-76:  coprocessor control
+     *
+     * Also, unlike the CPU instructions, there is no NONE ("INVALID") instruction; if an ESC instruction
+     * can't be decoded as a valid FPU instruction, then it should remain an ESC instruction.
+     */
+    Debugger.FINS = {
+        FLD:    0,   FST:    1,   FSTP:   2,   FXCH:   3,   FILD:   4,   FIST:   5,   FISTP:  6,   FBLD:   7,
+        FBSTP:  8,   FADD:   9,   FADDP:  10,  FIADD:  11,  FSUB:   12,  FSUBP:  13,  FISUB:  14,  FSUBR:  15,
+        FSUBRP: 16,  FISUBR: 17,  FMUL:   18,  FMULP:  19,  FIMUL:  20,  FDIV:   21,  FDIVP:  22,  FIDIV:  23,
+        FDIVR:  24,  FDIVRP: 25,  FIDIVR: 26,  FSQRT:  27,  FSCALE: 28,  FPREM:  29,  FRNDINT:30,  FXTRACT:31,
+        FABS:   32,  FCHS:   33,  FCOM:   34,  FCOMP:  35,  FCOMPP: 36,  FICOM:  37,  FICOMP: 38,  FTST:   39,
+        FXAM:   40,  FPTAN:  41,  FPATAN: 42,  F2XM1:  43,  FYL2X:  44,  FYL2XP1:45,  FLDZ:   46,  FLD1:   47,
+        FLDPI:  48,  FLDL2T: 49,  FLDL2E: 50,  FLDLG2: 51,  FLDLN2: 52,  FINIT:  53,  FNINIT: 54,  FDISI:  55,
+        FNDISI: 56,  FENI:   57,  FNENI:  58,  FLDCW:  59,  FSTCW:  60,  FNSTCW: 61,  FSTSW:  62,  FNSTSW: 63,
+        FCLEX:  64,  FNCLEX: 65,  FSTENV: 66,  FNSTENV:67,  FLDENV: 68,  FSAVE:  69,  FNSAVE: 70,  FRSTOR: 71,
+        FINCSTP:72,  FDECSTP:73,  FFREE:  74,  FNOP:   75,  FWAIT:  76
+    };
+
+    /*
+     * FPU instruction names (mnemonics), indexed by FPU instruction ordinal (above)
+     */
+    Debugger.FINS_NAMES = [
+        "FLD",    "FST",    "FSTP",   "FXCH",   "FILD",   "FIST",   "FISTP",  "FBLD",
+        "FBSTP",  "FADD",   "FADDP",  "FIADD",  "FSUB",   "FSUBP",  "FISUB",  "FSUBR",
+        "FSUBRP", "FISUBR", "FMUL",   "FMULP",  "FIMUL",  "FDIV",   "FDIVP",  "FIDIV",
+        "FDIVR",  "FDIVRP", "FIDIVR", "FSQRT",  "FSCALE", "FPREM",  "FRNDINT","FXTRACT",
+        "FABS",   "FCHS",   "FCOM",   "FCOMP",  "FCOMPP", "FICOM",  "FICOMP", "FTST",
+        "FXAM",   "FPTAN",  "FPATAN", "F2XM1",  "FYL2X",  "FYL2XP1","FLDZ",   "FLD1",
+        "FLDPI",  "FLDL2T", "FLDL2E", "FLDLG2", "FLDLN2", "FINIT",  "FNINIT", "FDISI",
+        "FNDISI", "FENI",   "FNENI",  "FLDCW",  "FSTCW",  "FNSTCW", "FSTSW",  "FNSTSW",
+        "FCLEX",  "FNCLEX", "FSTENV", "FNSTENV","FLDENV", "FSAVE",  "FNSAVE", "FRSTOR",
+        "FINCSTP","FDECSTP","FFREE",  "FNOP",   "FWAIT"
     ];
 
     Debugger.CPU_8086  = 0;
