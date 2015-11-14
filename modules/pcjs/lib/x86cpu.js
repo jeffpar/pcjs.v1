@@ -3937,7 +3937,7 @@ X86CPU.prototype.checkINTR = function()
                         this.intFlags &= ~X86.INTFLAG.INTR;
                         if (nIDT >= 0) {
                             this.intFlags &= ~X86.INTFLAG.HALT;
-                            X86.fnINT.call(this, this.nFault = nIDT, null, 11);
+                            X86.fnInterrupt.call(this, nIDT);
                             return true;
                         }
                     }
@@ -3947,7 +3947,7 @@ X86CPU.prototype.checkINTR = function()
                 if ((this.intFlags & X86.INTFLAG.TRAP)) {
                     this.intFlags &= ~X86.INTFLAG.TRAP;
                     if (I386 && this.model >= X86.MODEL_80386) this.regDR[6] |= X86.DR6.BS;
-                    X86.fnINT.call(this, this.nFault = X86.EXCEPTION.DB_EXC, null, 11);
+                    X86.fnInterrupt.call(this, X86.EXCEPTION.DB_EXC);
                     return true;
                 }
                 break;

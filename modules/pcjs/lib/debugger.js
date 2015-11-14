@@ -534,7 +534,8 @@ if (DEBUGGER) {
     Debugger.TYPE_OTHER     = 0xF000;   // "other" field
 
     /*
-     * TYPE_SIZE values.
+     * TYPE_SIZE values.  Some definitions use duplicate values when the operands are the
+     * same size and the Debugger doesn't need to make a distinction.
      */
     Debugger.TYPE_NONE      = 0x0000;   //     (all other TYPE fields ignored)
     Debugger.TYPE_BYTE      = 0x0001;   // (b) byte, regardless of operand size
@@ -544,18 +545,16 @@ if (DEBUGGER) {
     Debugger.TYPE_LONG      = 0x0005;   // (d) 32-bit value
     Debugger.TYPE_SEGP      = 0x0006;   // (p) 32-bit or 48-bit pointer
     Debugger.TYPE_FARP      = 0x0007;   // (p) 32-bit or 48-bit pointer for JMP/CALL
-    Debugger.TYPE_2WORD     = 0x0008;   // (a) two memory operands (BOUND only)
-    Debugger.TYPE_DESC      = 0x0009;   // (s) 6 byte pseudo-descriptor
-    Debugger.TYPE_PREFIX    = 0x000A;   //     (treat similarly to TYPE_NONE)
-    Debugger.TYPE_ST        = 0x000B;   //     FPU ST
-    Debugger.TYPE_STREG     = 0x000C;   //     FPU ST register
-    Debugger.TYPE_SI        = 0x000D;   //     FPU SI (short-integer; 32-bit)
-    Debugger.TYPE_SR        = 0x000D;   //     FPU SR (short-real; 32-bit)
-    Debugger.TYPE_LI        = 0x000E;   //     FPU LI (long-integer; 64-bit)
-    Debugger.TYPE_LR        = 0x000E;   //     FPU LR (long-real; 64-bit)
-    Debugger.TYPE_TR        = 0x000F;   //     FPU TR (temp-real; 80-bit)
-    Debugger.TYPE_PD        = 0x000F;   //     FPU PD (packed-decimal, 18 digits; 80-bit)
-    Debugger.TYPE_ENV       = 0x000F;   //     FPU ENV (environment; 14 bytes)
+    Debugger.TYPE_PREFIX    = 0x0008;   //     (treat similarly to TYPE_NONE)
+    Debugger.TYPE_ST        = 0x0009;   //     FPU ST (implicit top)
+    Debugger.TYPE_STREG     = 0x000A;   //     FPU ST (explicit register)
+    Debugger.TYPE_SI        = 0x000B;   //     FPU SI (short-integer; 32-bit)
+    Debugger.TYPE_SR        = 0x000B;   //     FPU SR (short-real; 32-bit)
+    Debugger.TYPE_LI        = 0x000C;   //     FPU LI (long-integer; 64-bit)
+    Debugger.TYPE_LR        = 0x000C;   //     FPU LR (long-real; 64-bit)
+    Debugger.TYPE_TR        = 0x000D;   //     FPU TR (temp-real; 80-zbit)
+    Debugger.TYPE_PD        = 0x000D;   //     FPU PD (packed-decimal, 18 digits; 80-bit)
+    Debugger.TYPE_ENV       = 0x000E;   //     FPU ENV (environment; 14 bytes)
     Debugger.TYPE_FPU       = 0x000F;   //     FPU SAVE (save/restore; 94 bytes)
 
     /*
@@ -816,7 +815,7 @@ if (DEBUGGER) {
 
     /* 0x60 */ [Debugger.INS.PUSHA, Debugger.TYPE_NONE   | Debugger.TYPE_80286],
     /* 0x61 */ [Debugger.INS.POPA,  Debugger.TYPE_NONE   | Debugger.TYPE_80286],
-    /* 0x62 */ [Debugger.INS.BOUND, Debugger.TYPE_REG    | Debugger.TYPE_WORD  | Debugger.TYPE_IN   | Debugger.TYPE_80286, Debugger.TYPE_MODRM | Debugger.TYPE_2WORD | Debugger.TYPE_IN],
+    /* 0x62 */ [Debugger.INS.BOUND, Debugger.TYPE_REG    | Debugger.TYPE_WORD  | Debugger.TYPE_IN   | Debugger.TYPE_80286, Debugger.TYPE_MODRM | Debugger.TYPE_WORD  | Debugger.TYPE_IN],
     /* 0x63 */ [Debugger.INS.ARPL,  Debugger.TYPE_MODRM  | Debugger.TYPE_SHORT | Debugger.TYPE_OUT,                        Debugger.TYPE_REG   | Debugger.TYPE_SHORT | Debugger.TYPE_IN],
     /* 0x64 */ [Debugger.INS.FS,    Debugger.TYPE_PREFIX | Debugger.TYPE_80386],
     /* 0x65 */ [Debugger.INS.GS,    Debugger.TYPE_PREFIX | Debugger.TYPE_80386],
@@ -1067,6 +1066,9 @@ if (DEBUGGER) {
         0xBF: [Debugger.INS.MOVSX,  Debugger.TYPE_REG    | Debugger.TYPE_LONG  | Debugger.TYPE_OUT  | Debugger.TYPE_80386, Debugger.TYPE_MODRM  | Debugger.TYPE_SHORT | Debugger.TYPE_IN]
     };
 
+    /*
+     * Be sure to keep the following table in sync with X86FPU.aaOps
+     */
     Debugger.aaaOpFPUDescs = {
         0xD8: {
             0x00: [Debugger.FINS.FADD,   Debugger.TYPE_MODRM  | Debugger.TYPE_SR | Debugger.TYPE_IN],
@@ -1097,7 +1099,7 @@ if (DEBUGGER) {
             0x30: [Debugger.FINS.FLD,    Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_OUT],
             0x31: [Debugger.FINS.FXCH,   Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_OUT],
             0x32: [Debugger.FINS.FNOP],
-            0x33: [Debugger.FINS.FSTP,   Debugger.TYPE_IMPREG | Debugger.TYPE_STREG    | Debugger.TYPE_OUT],
+            0x33: [Debugger.FINS.FSTP,   Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_OUT],
             0x40: [Debugger.FINS.FCHS],
             0x41: [Debugger.FINS.FABS],
             0x44: [Debugger.FINS.FTST],
@@ -1144,14 +1146,14 @@ if (DEBUGGER) {
             0x43: [Debugger.FINS.FINIT]
         },
         0xDC: {
-            0x00: [Debugger.FINS.FADD,   Debugger.TYPE_MODRM  | Debugger.TYPE_LR | Debugger.TYPE_IN],
-            0x01: [Debugger.FINS.FMUL,   Debugger.TYPE_MODRM  | Debugger.TYPE_LR | Debugger.TYPE_IN],
-            0x02: [Debugger.FINS.FCOM,   Debugger.TYPE_MODRM  | Debugger.TYPE_LR | Debugger.TYPE_IN],
-            0x03: [Debugger.FINS.FCOMP,  Debugger.TYPE_MODRM  | Debugger.TYPE_LR | Debugger.TYPE_IN],
-            0x04: [Debugger.FINS.FSUB,   Debugger.TYPE_MODRM  | Debugger.TYPE_LR | Debugger.TYPE_IN],
-            0x05: [Debugger.FINS.FSUBR,  Debugger.TYPE_MODRM  | Debugger.TYPE_LR | Debugger.TYPE_IN],
-            0x06: [Debugger.FINS.FDIV,   Debugger.TYPE_MODRM  | Debugger.TYPE_LR | Debugger.TYPE_IN],
-            0x07: [Debugger.FINS.FDIVR,  Debugger.TYPE_MODRM  | Debugger.TYPE_LR | Debugger.TYPE_IN],
+            0x00: [Debugger.FINS.FADD,   Debugger.TYPE_MODRM  | Debugger.TYPE_LR    | Debugger.TYPE_IN],
+            0x01: [Debugger.FINS.FMUL,   Debugger.TYPE_MODRM  | Debugger.TYPE_LR    | Debugger.TYPE_IN],
+            0x02: [Debugger.FINS.FCOM,   Debugger.TYPE_MODRM  | Debugger.TYPE_LR    | Debugger.TYPE_IN],
+            0x03: [Debugger.FINS.FCOMP,  Debugger.TYPE_MODRM  | Debugger.TYPE_LR    | Debugger.TYPE_IN],
+            0x04: [Debugger.FINS.FSUB,   Debugger.TYPE_MODRM  | Debugger.TYPE_LR    | Debugger.TYPE_IN],
+            0x05: [Debugger.FINS.FSUBR,  Debugger.TYPE_MODRM  | Debugger.TYPE_LR    | Debugger.TYPE_IN],
+            0x06: [Debugger.FINS.FDIV,   Debugger.TYPE_MODRM  | Debugger.TYPE_LR    | Debugger.TYPE_IN],
+            0x07: [Debugger.FINS.FDIVR,  Debugger.TYPE_MODRM  | Debugger.TYPE_LR    | Debugger.TYPE_IN],
             0x30: [Debugger.FINS.FADD,   Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_OUT, Debugger.TYPE_IMPREG | Debugger.TYPE_ST | Debugger.TYPE_IN],
             0x31: [Debugger.FINS.FMUL,   Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_OUT, Debugger.TYPE_IMPREG | Debugger.TYPE_ST | Debugger.TYPE_IN],
             0x32: [Debugger.FINS.FCOM,   Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_IN],
@@ -4902,14 +4904,14 @@ if (DEBUGGER) {
         var r_m = (bModRM & 0x7);
 
         /*
-         * Similar to how fnFPU() decodes FPU instructions, we now combine mod and reg into
-         * one decodable value: put mod in the high nibble and reg in the low nibble, after first
+         * Similar to how fnFPU() decodes FPU instructions, we combine mod and reg into one
+         * decodable value: put mod in the high nibble and reg in the low nibble, after first
          * collapsing all mod values < 3 to zero.
          */
         var modReg = (mod < 3? 0 : 0x30) + reg;
 
         /*
-         * Use values >= 0x40 to indicate mod == 0x3, with reg in the high nibble, and r_m in the low.
+         * Use values >= 0x40 to indicate mod == 0x3, with reg in the high nibble and r_m in the low.
          */
         if ((bOpcode == X86.OPCODE.ESC1 || bOpcode == X86.OPCODE.ESC3) && modReg >= 0x34) {
             modReg = (reg << 4) | r_m;
@@ -4949,7 +4951,6 @@ if (DEBUGGER) {
             sOperand = str.toHex((this.getByte(dbgAddr, 1) << 24) >> 24, dbgAddr.fData32? 8: 4);
             break;
         case Debugger.TYPE_WORD:
-        case Debugger.TYPE_2WORD:
             if (dbgAddr.fData32) {
                 sOperand = str.toHex(this.getLong(dbgAddr, 4));
                 break;

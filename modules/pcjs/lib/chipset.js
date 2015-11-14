@@ -40,6 +40,7 @@ if (NODE) {
     var Interrupts  = require("./interrupts");
     var Messages    = require("./messages");
     var State       = require("./state");
+    var X86         = require("./x86");
 }
 
 /**
@@ -985,7 +986,7 @@ ChipSet.NMI = {                 // this.bNMI
 /*
  * Coprocessor Control Registers (MODEL_5170)
  */
-ChipSet.COPROC = {              // TODO: Define a variable for this
+ChipSet.COPROC = {              // TODO: Define a variable for this?
     PORT_CLEAR:         0xF0,   // clear the coprocessor's "busy" state
     PORT_RESET:         0xF1    // reset the coprocessor
 };
@@ -1058,7 +1059,12 @@ ChipSet.prototype.initBus = function(cmp, bus, cpu, dbg)
     this.cpu = cpu;
     this.dbg = dbg;
     this.cmp = cmp;
+
+    this.fpu = cmp.getMachineComponent("FPU");
+    if (this.fpu) this.sw1Init |= ChipSet.PPI_SW.COPROC;
+
     this.kbd = cmp.getMachineComponent("Keyboard");
+
     /*
      * This divisor is invariant, so we calculate it as soon as we're able to query the CPU's base speed.
      */
@@ -1090,9 +1096,6 @@ ChipSet.prototype.initBus = function(cmp, bus, cpu, dbg)
             });
         }
         cpu.addIntNotify(Interrupts.RTC, this.intBIOSRTC.bind(this));
-    }
-    if (cpu.fpu) {
-        this.sw1Init |= ChipSet.PPI_SW.COPROC;
     }
 };
 
@@ -3514,6 +3517,43 @@ ChipSet.prototype.getIRRVector = function(iPIC)
 };
 
 /**
+ * setFPUInterrupt()
+ *
+ * @this {ChipSet}
+ */
+ChipSet.prototype.setFPUInterrupt = function()
+{
+    if (this.model >= ChipSet.MODEL_5170) {
+        this.setIRR(ChipSet.IRQ.COPROC);
+    } else {
+        /*
+         * TODO: Determine whether we need to maintain an "Active NMI" state; ie, if NMI.DISABLE is cleared
+         * later, and the coprocessor is still indicating an error condition, should we then generate an NMI?
+         */
+        if (!(this.bNMI & ChipSet.NMI.DISABLE)) {
+            X86.fnInterrupt.call(this.cpu, X86.EXCEPTION.NMI);
+        }
+    }
+};
+
+/**
+ * clearFPUInterrupt(fSet)
+ *
+ * @this {ChipSet}
+ */
+ChipSet.prototype.clearFPUInterrupt = function()
+{
+    if (this.model >= ChipSet.MODEL_5170) {
+        this.clearIRR(ChipSet.IRQ.COPROC);
+    } else {
+        /*
+         * TODO: If we maintain an "Active NMI" state, then we will need code here to clear that state, as well
+         * as code in outNMI() to clear that state and generate an NMI as needed.
+         */
+    }
+};
+
+/**
  * inTimer(iTimer, addrFrom)
  *
  * @this {ChipSet}
@@ -4959,11 +4999,9 @@ ChipSet.prototype.outNMI = function(port, bOut, addrFrom)
  */
 ChipSet.prototype.outCoprocClear = function(port, bOut, addrFrom)
 {
-    /*
-     * TODO: Implement
-     */
     this.printMessageIO(port, bOut, addrFrom, "COPROC.CLEAR");
     this.assert(!bOut);
+    if (this.fpu) this.fpu.clearBusy();
 };
 
 /**
@@ -4978,11 +5016,9 @@ ChipSet.prototype.outCoprocClear = function(port, bOut, addrFrom)
  */
 ChipSet.prototype.outCoprocReset = function(port, bOut, addrFrom)
 {
-    /*
-     * TODO: Implement
-     */
     this.printMessageIO(port, bOut, addrFrom, "COPROC.RESET");
     this.assert(!bOut);
+    if (this.fpu) this.fpu.resetFPU();
 };
 
 /**

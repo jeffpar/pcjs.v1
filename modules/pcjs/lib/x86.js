@@ -532,10 +532,13 @@ var X86 = {
             OM:     0x0008,     // bit 3: Overflow Mask
             UM:     0x0010,     // bit 4: Underflow Mask
             PM:     0x0020,     // bit 5: Precision Mask
+                                // bit 6: unused
             IEM:    0x0080,     // bit 7: Interrupt Enable Mask (0 enables interrupts, 1 masks them; 8087 only)
             PC:     0x0300,     // bits 8-9: Precision Control
             RC:     0x0C00,     // bits 10-11: Rounding Control
-            IC:     0x1000      // bit 12: Infinity Control (0 for Projective, 1 for Affine)
+            IC:     0x1000,     // bit 12: Infinity Control (0 for Projective, 1 for Affine)
+                                // bits 13-15: unused
+            INIT:   0x03BF      // X86.FPU.CONTROL.IM | X86.FPU.CONTROL.DM | X86.FPU.CONTROL.ZM | X86.FPU.CONTROL.OM | X86.FPU.CONTROL.UM | X86.FPU.CONTROL.PM | X86.FPU.CONTROL.IEM | X86.FPU.CONTROL.PC
         },
         STATUS: {               // FPU Status Word
             IE:     0x0001,     // bit 0: Invalid Operation
@@ -545,6 +548,7 @@ var X86 = {
             UE:     0x0010,     // bit 4: Underflow
             PE:     0x0020,     // bit 5: Precision
             SF:     0x0040,     // bit 6: Stack Fault (80387 and later)
+            EXC:    0x007F,     // all of the above exceptions
             ES:     0x0080,     // bit 7: Exception Summary (Interrupt Request on 8087)
             C0:     0x0100,     // bit 8: Condition Code 0
             C1:     0x0200,     // bit 9: Condition Code 1
@@ -553,11 +557,12 @@ var X86 = {
             C3:     0x4000,     // bit 14: Condition Code 3
             BUSY:   0x8000      // bit 15: Busy
         },
-        TAG: {
-            VALID:     0x0,
-            ZERO:      0x1,
-            SPECIAL:   0x2,
-            EMPTY:     0x3
+        TAGS: {
+            VALID:  0x0,
+            ZERO:   0x1,
+            SPECIAL:0x2,
+            EMPTY:  0x3,
+            MASK:   0x3
         }
         /*
             C3 C2 C1 C0     Condition Code (CC) values following an Examine

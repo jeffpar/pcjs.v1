@@ -946,8 +946,7 @@ X86.fnDIVw = function(dst, src)
 X86.fnESC = function(dst, src)
 {
     if (this.fpu) {
-        this.fpu.fnFPU(this.bOpcode, this.bModRM, dst, src);
-        this.stopCPU();
+        this.fpu.opFPU(this.bOpcode, this.bModRM, dst, src);
     }
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? 2 : 8);
     return dst;
@@ -3877,6 +3876,23 @@ X86.fnSRCNone = function()
 X86.fnSRCxx = function()
 {
     return this.regXX;
+};
+
+/**
+ * fnInterrupt(nIDT, nCycles)
+ *
+ * Helper to dispatch external interrupts.  nCycles defaults to 11 for the 8086/8088
+ * if no alternate value is specified.
+ *
+ * @this {X86CPU}
+ * @param {number} nIDT
+ * @param {number} [nCycles] (number of cycles in addition to the default of nOpCyclesInt)
+ */
+X86.fnInterrupt = function(nIDT, nCycles)
+{
+    this.nFault = nIDT;
+    if (nCycles === undefined) nCycles = 11;
+    X86.fnINT.call(this, nIDT, null, nCycles);
 };
 
 /**

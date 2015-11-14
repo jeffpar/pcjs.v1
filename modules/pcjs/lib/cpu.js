@@ -181,6 +181,7 @@ CPU.prototype.initBus = function(cmp, bus, cpu, dbg)
     this.cmp = cmp;
     this.bus = bus;
     this.dbg = dbg;
+    this.fpu = cmp.getMachineComponent("FPU");
 
     /*
      * Attach the Video component to the CPU, so that the CPU can periodically update
@@ -197,9 +198,6 @@ CPU.prototype.initBus = function(cmp, bus, cpu, dbg)
      * We must also call chipset.updateAllTimers() periodically; stepCPU() takes care of that.
      */
     this.chipset = cmp.getMachineComponent("ChipSet");
-
-    this.fpu = cmp.getMachineComponent("FPU");
-
     this.setReady();
 };
 
