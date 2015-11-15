@@ -124,7 +124,7 @@ if (NODE) {
  *      3F8-3FF         Asynchronous Communications (Primary)           [see the SerialPort component]
  *
  * [1] At power-on time, NMI is masked off, perhaps because models 5150 and 5160 also tie coprocessor
- * interrupts to NMI.  Suppressing NMI by default seems odd, because that would also suppress memory
+ * (FPU) interrupts to NMI.  Suppressing NMI by default seems odd, because that would also suppress memory
  * parity errors.  TODO: Determine whether "power-on time" refers to the initial power-on state of the
  * NMI Mask Register or the state that the BIOS "POST" (Power-On Self-Test) sets.
  *
@@ -134,14 +134,14 @@ if (NODE) {
  *      ----------      -----------
  *          070 [3]     CMOS Address                                    ChipSet.CMOS.ADDR.PORT
  *          071         CMOS Data                                       ChipSet.CMOS.DATA.PORT
- *          0F0         Coprocessor Clear Busy (output 0x00)
- *          0F1         Coprocessor Reset (output 0x00)
+ *          0F0         FPU Coprocessor Clear Busy (output 0x00)
+ *          0F1         FPU Coprocessor Reset (output 0x00)
  *      1F0-1F7         Hard Drive Controller (ATC)                     [see the HDC component]
  *
  * [3] Port 0x70 doubles as the NMI Mask Register: output a CMOS address with bit 7 clear to enable NMI
  * or with bit 7 set to disable NMI (apparently the inverse of the older NMI Mask Register at port 0xA0).
  * Also, apparently unlike previous models, the MODEL_5170 POST leaves NMI enabled.  And fortunately, the
- * coprocessor interrupt line is no longer tied to NMI (it uses IRQ 13).
+ * FPU coprocessor interrupt line is no longer tied to NMI (it uses IRQ 13).
  *
  * @constructor
  * @extends Component
@@ -526,7 +526,7 @@ ChipSet.PIC_HI = {              // ChipSet.PIC1.PORT_HI or ChipSet.PIC2.PORT_HI
  *      highest priority (IRQ9 is the highest) and IRQ3 through IRQ7 having the lowest priority (IRQ7 is
  *      the lowest).
  *
- *      Interrupt 13 (IRQ.COPROC) is used on the system board and is not available on the I/O channel.
+ *      Interrupt 13 (IRQ.FPU) is used on the system board and is not available on the I/O channel.
  *      Interrupt 8 (IRQ.RTC) is used for the real-time clock."
  *
  * This priority scheme is a byproduct of IRQ8 through IRQ15 (slave PIC interrupts) being tied to IRQ2 of
@@ -545,7 +545,7 @@ ChipSet.IRQ = {
     LPT1:               0x07,
     RTC:                0x08,   // MODEL_5170
     IRQ2:               0x09,   // MODEL_5170
-    COPROC:             0x0D,   // MODEL_5170
+    FPU:                0x0D,   // MODEL_5170
     ATC:                0x0E    // MODEL_5170 uses IRQ 14 for HDC (ATC version)
 };
 
@@ -673,7 +673,7 @@ ChipSet.PPI_SW = {
         MASK:           0xC0,
         SHIFT:          6
     },
-    COPROC:             0x02,   // MODEL_5150: reserved; MODEL_5160: coprocessor installed
+    FPU:                0x02,   // MODEL_5150: reserved; MODEL_5160: FPU coprocessor installed
     MEMORY: {                   // MODEL_5150: "X" is 16Kb; MODEL_5160: "X" is 64Kb
         X1:             0x00,   // 16Kb or 64Kb
         X2:             0x04,   // 32Kb or 128Kb
@@ -919,7 +919,7 @@ ChipSet.CMOS = {
      */
     EQUIP: {                    // abCMOSData[ChipSet.CMOS.ADDR.EQUIP]
         MONITOR:        ChipSet.PPI_SW.MONITOR,         // PPI_SW.MONITOR.MASK == 0x30
-        COPROC:         ChipSet.PPI_SW.COPROC,          // PPI_SW.COPROC == 0x02
+        FPU:            ChipSet.PPI_SW.FPU,             // PPI_SW.FPU == 0x02
         FDRIVE:         ChipSet.PPI_SW.FDRIVE           // PPI_SW.FDRIVE.IPL == 0x01 and PPI_SW.FDRIVE.MASK = 0xC0
     }
 };
@@ -984,11 +984,11 @@ ChipSet.NMI = {                 // this.bNMI
 };
 
 /*
- * Coprocessor Control Registers (MODEL_5170)
+ * FPU Coprocessor Control Registers (MODEL_5170)
  */
-ChipSet.COPROC = {              // TODO: Define a variable for this?
-    PORT_CLEAR:         0xF0,   // clear the coprocessor's "busy" state
-    PORT_RESET:         0xF1    // reset the coprocessor
+ChipSet.FPU = {                 // TODO: Define a variable for this?
+    PORT_CLEAR:         0xF0,   // clear the FPU's "busy" state
+    PORT_RESET:         0xF1    // reset the FPU
 };
 
 /**
@@ -1010,7 +1010,7 @@ ChipSet.prototype.setBinding = function(sHTMLType, sBinding, control)
             /*
              * NOTE: Both the Aug 1981 and the Apr 1984 IBM 5150 Technical Reference Manuals list SW1-2 as "RESERVED", but
              * contemporary articles discussing 8087 support in early PCs all indicate that switch SW1-2 must be set to the
-             * OFF position if a coprocessor is installed.
+             * OFF position if an FPU coprocessor is installed.
              *
              * The 1981 5150 TechRef doesn't mention 8087 support at all, whereas the 1984 5150 TechRef discusses it in
              * a fair bit of detail, including the fact that 8087 exceptions generate an NMI (despite Intel's warning in their
@@ -1061,7 +1061,7 @@ ChipSet.prototype.initBus = function(cmp, bus, cpu, dbg)
     this.cmp = cmp;
 
     this.fpu = cmp.getMachineComponent("FPU");
-    if (this.fpu) this.sw1Init |= ChipSet.PPI_SW.COPROC;
+    if (this.fpu) this.sw1Init |= ChipSet.PPI_SW.FPU;
 
     this.kbd = cmp.getMachineComponent("Keyboard");
 
@@ -1653,9 +1653,9 @@ ChipSet.prototype.initCMOSData = function()
 
     /*
      * We propagate all compatible "legacy" SW1 bits to the CMOS.EQUIP byte using the old SW masks, but any further
-     * access to CMOS.ADDR.EQUIP should use the new CMOS_EQUIP flags (eg, CMOS.EQUIP.COPROC, CMOS.EQUIP.MONITOR.CGA80, etc).
+     * access to CMOS.ADDR.EQUIP should use the new CMOS_EQUIP flags (eg, CMOS.EQUIP.FPU, CMOS.EQUIP.MONITOR.CGA80, etc).
      */
-    this.abCMOSData[ChipSet.CMOS.ADDR.EQUIP] = this.sw1 & (ChipSet.PPI_SW.MONITOR.MASK | ChipSet.PPI_SW.COPROC | ChipSet.PPI_SW.FDRIVE.IPL | ChipSet.PPI_SW.FDRIVE.MASK);
+    this.abCMOSData[ChipSet.CMOS.ADDR.EQUIP] = this.sw1 & (ChipSet.PPI_SW.MONITOR.MASK | ChipSet.PPI_SW.FPU | ChipSet.PPI_SW.FDRIVE.IPL | ChipSet.PPI_SW.FDRIVE.MASK);
     this.abCMOSData[ChipSet.CMOS.ADDR.FDRIVE] = (this.getSWFloppyDriveType(0) << 4) | this.getSWFloppyDriveType(1);
 
     /*
@@ -2304,7 +2304,7 @@ ChipSet.prototype.updateSwitchDescriptions = function()
             3: "Monochrome"
         };
         sText += this.getSWMemorySize(true) + "Kb";
-        sText += ", " + ((this.sw1 & ChipSet.PPI_SW.COPROC)? "" : "No ") + "Coprocessor";
+        sText += ", " + ((this.sw1 & ChipSet.PPI_SW.FPU)? "" : "No ") + "Coprocessor";
         sText += ", " + asMonitorTypes[this.getSWVideoMonitor(true)] + " Monitor";
         sText += ", " + this.getSWFloppyDrives(true) + " Floppy Drives";
         if (this.sw1 != null && this.sw1 != this.sw1Init || this.sw2 != null && this.sw2 != this.sw2Init) {
@@ -3524,11 +3524,11 @@ ChipSet.prototype.getIRRVector = function(iPIC)
 ChipSet.prototype.setFPUInterrupt = function()
 {
     if (this.model >= ChipSet.MODEL_5170) {
-        this.setIRR(ChipSet.IRQ.COPROC);
+        this.setIRR(ChipSet.IRQ.FPU);
     } else {
         /*
          * TODO: Determine whether we need to maintain an "Active NMI" state; ie, if NMI.DISABLE is cleared
-         * later, and the coprocessor is still indicating an error condition, should we then generate an NMI?
+         * later, and the FPU coprocessor is still indicating an error condition, should we then generate an NMI?
          */
         if (!(this.bNMI & ChipSet.NMI.DISABLE)) {
             X86.fnInterrupt.call(this.cpu, X86.EXCEPTION.NMI);
@@ -3544,7 +3544,7 @@ ChipSet.prototype.setFPUInterrupt = function()
 ChipSet.prototype.clearFPUInterrupt = function()
 {
     if (this.model >= ChipSet.MODEL_5170) {
-        this.clearIRR(ChipSet.IRQ.COPROC);
+        this.clearIRR(ChipSet.IRQ.FPU);
     } else {
         /*
          * TODO: If we maintain an "Active NMI" state, then we will need code here to clear that state, as well
@@ -4988,7 +4988,7 @@ ChipSet.prototype.outNMI = function(port, bOut, addrFrom)
 };
 
 /**
- * outCoprocClear(port, bOut, addrFrom)
+ * outFPUClear(port, bOut, addrFrom)
  *
  * This handler is installed only for MODEL_5170.
  *
@@ -4997,15 +4997,15 @@ ChipSet.prototype.outNMI = function(port, bOut, addrFrom)
  * @param {number} bOut (0x00 is the only expected output)
  * @param {number} [addrFrom] (not defined if the Debugger is trying to write the specified port)
  */
-ChipSet.prototype.outCoprocClear = function(port, bOut, addrFrom)
+ChipSet.prototype.outFPUClear = function(port, bOut, addrFrom)
 {
-    this.printMessageIO(port, bOut, addrFrom, "COPROC.CLEAR");
+    this.printMessageIO(port, bOut, addrFrom, "FPU.CLEAR");
     this.assert(!bOut);
     if (this.fpu) this.fpu.clearBusy();
 };
 
 /**
- * outCoprocReset(port, bOut, addrFrom)
+ * outFPUReset(port, bOut, addrFrom)
  *
  * This handler is installed only for MODEL_5170.
  *
@@ -5014,9 +5014,9 @@ ChipSet.prototype.outCoprocClear = function(port, bOut, addrFrom)
  * @param {number} bOut (0x00 is the only expected output)
  * @param {number} [addrFrom] (not defined if the Debugger is trying to write the specified port)
  */
-ChipSet.prototype.outCoprocReset = function(port, bOut, addrFrom)
+ChipSet.prototype.outFPUReset = function(port, bOut, addrFrom)
 {
-    this.printMessageIO(port, bOut, addrFrom, "COPROC.RESET");
+    this.printMessageIO(port, bOut, addrFrom, "FPU.RESET");
     this.assert(!bOut);
     if (this.fpu) this.fpu.resetFPU();
 };
@@ -5341,8 +5341,8 @@ ChipSet.aPortOutput5170 = {
     0xD6: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAMode(ChipSet.DMA1.INDEX, port, bOut, addrFrom); },
     0xD8: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAResetFF(ChipSet.DMA1.INDEX, port, bOut, addrFrom); },
     0xDA: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAMasterClear(ChipSet.DMA1.INDEX, port, bOut, addrFrom); },
-    0xF0: ChipSet.prototype.outCoprocClear,
-    0xF1: ChipSet.prototype.outCoprocReset
+    0xF0: ChipSet.prototype.outFPUClear,
+    0xF1: ChipSet.prototype.outFPUReset
 };
 
 /**
