@@ -4915,7 +4915,7 @@ if (DEBUGGER) {
 
         /*
          * All values >= 0x34 imply mod == 3 and reg >= 4, so now we shift reg into the high
-         * nibble and r_m into the low.
+         * nibble and r_m into the low, yielding values >= 0x40.
          */
         if ((bOpcode == X86.OPCODE.ESC1 || bOpcode == X86.OPCODE.ESC3) && modReg >= 0x34) {
             modReg = (reg << 4) | r_m;

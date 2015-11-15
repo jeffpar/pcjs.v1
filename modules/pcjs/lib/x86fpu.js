@@ -84,19 +84,19 @@ function X86FPU(parmsFPU)
 
     /*
      * Perform a one-time allocation of all floating-point registers.
-     * NOTE: Technically, the FPU's internal registers are 80-bit, but JavaScript gives us only 64-bit floats.
+     * NOTE: The FPU's internal registers are supposed to be 80-bit, but JavaScript gives us only 64-bit floats.
      */
     this.regStack = new Float64Array(8);
     this.intStack = new Int32Array(this.regStack.buffer);
 
     /*
-     * Used for "short-real" (SR) 32-bit floating-point operations
+     * Used for "short-real" (SR) 32-bit floating-point operations.
      */
     this.regTmpSR = new Float32Array(1);
     this.intTmpSR = new Int32Array(this.regTmpSR.buffer);
 
     /*
-     * Used for "long-real" (LR) 64-bit floating-point operations
+     * Used for "long-real" (LR) 64-bit floating-point operations.
      */
     this.regTmpLR = new Float64Array(1);
     this.intTmpLR = new Int32Array(this.regTmpLR.buffer);
@@ -104,7 +104,7 @@ function X86FPU(parmsFPU)
     /*
      * Used for conversion to/from the 80-bit "temp-real" (TR) format; used as three 32-bit integers,
      * where [0] contains TR bits 0-31, [1] contains TR bits 32-63, and [2] contains TR bits 64-79; the
-     * upper 16 bits of [2] are not used and should probably remain zero.
+     * upper 16 bits of [2] are not used and should remain zero.
      */
     this.regTmpTR = new Array(3);
 
@@ -112,7 +112,7 @@ function X86FPU(parmsFPU)
      * Initialize other (non-floating-point) coprocessor registers that resetFPU() doesn't touch,
      * such as the "exception" registers: regCodeSel, regCodeOff, regDataSel, regDataOff, and regOpcode.
      *
-     * Note that regCodeSel and regDataSel are never set in real-mode and are always set in protected-mode,
+     * Note that regCodeSel and regDataSel are NEVER set in real-mode and are ALWAYS set in protected-mode,
      * so we set them to -1 in their "unset" state; if those values ever show up in an exception block,
      * something may have gone amiss (it's not impossible though, because if an exception occurs before any
      * memory operands have been used, regDataSel may still be "unset").
@@ -127,7 +127,7 @@ function X86FPU(parmsFPU)
      */
     this.regIndefinite = new Float64Array(1);
     this.intIndefinite = new Int32Array(this.regIndefinite.buffer);
-    this.intIndefinite[0] = 0xFFF8000; this.intIndefinite[1] = 0x00000000;
+    this.intIndefinite[0] = 0x00000000; this.intIndefinite[1] = 0xFFF8000;
 
     this.regL2T = Math.log(10) / Math.LN2;      // log2(10) (use Math.log2() if we ever switch to ES6)
     this.regL2E = Math.LOG2E;                   // log2(e)
@@ -136,7 +136,7 @@ function X86FPU(parmsFPU)
     this.regLN2 = Math.LN2;                     // log(2)
 
     /*
-     * Reset all other coprocessor registers (control word, tag word, status word, etc).
+     * Initialize all other coprocessor registers (control word, tag word, status word, etc) by resetting them.
      */
     this.resetFPU();
 }
@@ -790,7 +790,7 @@ X86FPU.FLDtr = function()
  */
 X86FPU.FLDCW = function()
 {
-    this.opUnimplemented();
+    this.setControl(this.cpu.getShort(this.cpu.regEA));
 };
 
 /**
@@ -800,7 +800,7 @@ X86FPU.FLDCW = function()
  */
 X86FPU.FLDENV = function()
 {
-    this.opUnimplemented();
+    this.loadEnv(this.cpu.regEA);
 };
 
 /**
@@ -970,8 +970,8 @@ X86FPU.FPREM = function()
 X86FPU.FRSTOR = function()
 {
     var cpu = this.cpu;
+    var addr = this.loadEnv(cpu.regEA);
     var a = this.regTmpTR;
-    var addr = this.loadEnv(this.cpu.regEA);
     for (var i = 0; i < this.regStack.length; i++) {
         a[0] = cpu.getLong(addr);
         a[1] = cpu.getLong(addr += 4);
@@ -999,7 +999,7 @@ X86FPU.FRNDINT = function()
 X86FPU.FSAVE = function()
 {
     var cpu = this.cpu;
-    var addr = this.saveEnv(this.cpu.regEA);
+    var addr = this.saveEnv(cpu.regEA);
     for (var i = 0; i < this.regStack.length; i++) {
         var a = this.getTR(i);
         cpu.setLong(addr, a[0]);
@@ -1621,10 +1621,6 @@ X86FPU.prototype.fault = function(n)
     this.regStatus |= n;
 
     if (!(this.regControl & X86.FPU.CONTROL.IEM)) {
-        /*
-         * TODO: Make sure that "unused" bit 6 of regControl can never be set, otherwise it could inadvertently
-         * mask the SF error condition on 80387 and newer coprocessors.
-         */
         if ((this.regStatus & X86.FPU.STATUS.EXC) & ~this.regControl) {
             this.chipset.setFPUInterrupt();
         }
@@ -1647,6 +1643,10 @@ X86FPU.prototype.getSRFromEA = function()
 
 /**
  * setControl(n)
+ *
+ * NOTE: Be sure to use this function for all "wholesale" regControl updates, because it ensures that
+ * unused bits cannot be set -- including bit 6, which could otherwise inadvertently mask the SF error
+ * condition on 80387 and newer coprocessors.
  *
  * @this {X86FPU}
  * @param {number} n
@@ -2016,7 +2016,7 @@ X86FPU.prototype.opFPU = function(bOpcode, bModRM, dst, src)
 
     /*
      * All values >= 0x34 imply mod == 3 and reg >= 4, so now we shift reg into the high
-     * nibble and iOperand into the low.
+     * nibble and iOperand into the low, yielding values >= 0x40.
      */
     if ((bOpcode == X86.OPCODE.ESC1 || bOpcode == X86.OPCODE.ESC3) && modReg >= 0x34) {
         modReg = (reg << 4) | this.iOperand;
@@ -2032,8 +2032,8 @@ X86FPU.prototype.opFPU = function(bOpcode, bModRM, dst, src)
             var cpu = this.cpu;
             var off = cpu.opLIP;
             /*
-             * WARNING: opLIP includes any prefixes preceding the ESC instruction, but the 8087 always
-             * points at the ESC instruction.  Technically, that's a bug, but it's also a reality, so we
+             * WARNING: opLIP points to any prefixes preceding the ESC instruction, but the 8087 always
+             * points to the ESC instruction.  Technically, that's a bug, but it's also a reality, so we
              * have to check for preceding prefixes and bump the instruction pointer accordingly.  This
              * isn't a perfect solution, because it doesn't account for multiple (redundant) prefixes,
              * but it's the best we can do for now.
@@ -2071,13 +2071,15 @@ if (DEBUGGER) {
      * Returns the following information for the requested FPU stack element, relative to ST:
      *
      *      a[0]: physical stack position (0-7)
-     *      a[1]: tag value
-     *      a[2]: 64-bit floating-point value
-     *      a[3]: bits 0-31 of 64-bit floating-point value
-     *      a[4]: bits 32-63 bits of 64-bit floating-point value
-     *      a[5]: bits 0-31 of 80-bit "temp-real" value (32 total)
-     *      a[6]: bits 32-63 of 80-bit "temp-real" value (32 total)
-     *      a[7]: bits 64-79 of 80-bit "temp-real" value (16 total)
+     *      a[1]: corresponding tag value
+     *      a[2]: 64-bit "long-real" (LR) value
+     *      a[3]: bits 0-31 of 64-bit "long-real" (LR)
+     *      a[4]: bits 32-63 of 64-bit "long-real" (LR)
+     *      a[5]: bits 0-31 of 80-bit "temp-real" (TR)
+     *      a[6]: bits 32-63 of 80-bit "temp-real" (TR)
+     *      a[7]: bits 64-79 of 80-bit "temp-real" (TR) (in bits 0-15)
+     *
+     * Used by the Debugger for its floating-point register ("rfp") command.
      *
      * @this {X86FPU}
      * @param {number} i (stack index, relative to ST)
