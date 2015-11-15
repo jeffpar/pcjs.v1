@@ -375,17 +375,19 @@ str.replaceArray = function(a, s)
 };
 
 /**
- * pad(s, cch)
+ * pad(s, cch, fPadLeft)
  *
  * NOTE: the maximum amount of padding currently supported is 40 spaces.
  *
  * @param {string} s is a string
  * @param {number} cch is desired length
+ * @param {boolean} [fPadLeft] (default is padding on the right)
  * @returns {string} the original string (s) with spaces padding it to the specified length
  */
-str.pad = function(s, cch)
+str.pad = function(s, cch, fPadLeft)
 {
-    return s + "                                        ".substr(0, cch - s.length);
+    var sPadding = "                                        ";
+    return fPadLeft? (sPadding + s).slice(-cch) : (s + sPadding).slice(0, cch);
 };
 
 /**

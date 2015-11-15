@@ -301,7 +301,7 @@ CPU.prototype.powerDown = function(fSave, fShutdown)
      *
      *      this.aFlags.fPowered = false;
      */
-    return fSave && this.save ? this.save() : true;
+    return fSave? this.save() : true;
 };
 
 /**

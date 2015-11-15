@@ -142,7 +142,8 @@ X86Seg.ID = {
     TSS:    4,          // "TSS"
     LDT:    5,          // "LDT"
     VER:    6,          // "VER"
-    DBG:    7           // "DBG"
+    FPU:    7,          // "FPU"
+    DBG:    8           // "DBG"
 };
 
 X86Seg.CALLBREAK_SEL = 0x0001;

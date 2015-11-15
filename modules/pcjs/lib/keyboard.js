@@ -1373,7 +1373,7 @@ Keyboard.prototype.powerUp = function(data, fRepower)
  */
 Keyboard.prototype.powerDown = function(fSave, fShutdown)
 {
-    return fSave && this.save? this.save() : true;
+    return fSave? this.save() : true;
 };
 
 /**

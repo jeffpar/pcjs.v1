@@ -572,7 +572,7 @@ HDC.prototype.powerUp = function(data, fRepower)
  */
 HDC.prototype.powerDown = function(fSave, fShutdown)
 {
-    return fSave && this.save? this.save() : true;
+    return fSave? this.save() : true;
 };
 
 /**

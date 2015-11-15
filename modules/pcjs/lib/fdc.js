@@ -614,7 +614,7 @@ FDC.prototype.powerUp = function(data, fRepower)
  */
 FDC.prototype.powerDown = function(fSave, fShutdown)
 {
-    return fSave && this.save? this.save() : true;
+    return fSave? this.save() : true;
 };
 
 /**

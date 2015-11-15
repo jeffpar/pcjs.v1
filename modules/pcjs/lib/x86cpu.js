@@ -1186,6 +1186,8 @@ X86CPU.prototype.resetRegs = function()
     this.opFlags = this.opPrefixes = 0;
     this.regEA = this.regEAWrite = X86.ADDR_INVALID;
 
+    this.segEA = this.segNULL;
+
     /*
      * intFlags contains some internal states we use to indicate whether a hardware interrupt (INTFLAG.INTR) or
      * Trap software interrupt (INTR.TRAP) has been requested, as well as when we're in a "HLT" state (INTFLAG.HALT)

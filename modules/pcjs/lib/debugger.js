@@ -432,6 +432,8 @@ if (DEBUGGER) {
         "FINCSTP","FDECSTP","FFREE",  "FNOP",   "FWAIT"
     ];
 
+    Debugger.FPU_TAGS = ["VALID", "ZERO", "SPECIAL", "EMPTY"];
+
     Debugger.CPU_8086  = 0;
     Debugger.CPU_80186 = 1;
     Debugger.CPU_80286 = 2;
@@ -1404,6 +1406,7 @@ if (DEBUGGER) {
         this.cmp = cmp;
         this.fdc = cmp.getMachineComponent("FDC");
         this.hdc = cmp.getMachineComponent("HDC");
+        this.fpu = cmp.getMachineComponent("FPU");
         this.mouse = cmp.getMachineComponent("Mouse");
         if (MAXDEBUG) this.chipset = cmp.getMachineComponent("ChipSet");
 
@@ -3962,7 +3965,7 @@ if (DEBUGGER) {
     Debugger.prototype.powerDown = function(fSave, fShutdown)
     {
         if (fShutdown) this.println(fSave? "suspending" : "shutting down");
-        return fSave && this.save? this.save() : true;
+        return fSave? this.save() : true;
     };
 
     /**
@@ -4904,14 +4907,15 @@ if (DEBUGGER) {
         var r_m = (bModRM & 0x7);
 
         /*
-         * Similar to how fnFPU() decodes FPU instructions, we combine mod and reg into one
+         * Similar to how opFPU() decodes FPU instructions, we combine mod and reg into one
          * decodable value: put mod in the high nibble and reg in the low nibble, after first
          * collapsing all mod values < 3 to zero.
          */
         var modReg = (mod < 3? 0 : 0x30) + reg;
 
         /*
-         * Use values >= 0x40 to indicate mod == 0x3, with reg in the high nibble and r_m in the low.
+         * All values >= 0x34 imply mod == 3 and reg >= 4, so now we shift reg into the high
+         * nibble and r_m into the low.
          */
         if ((bOpcode == X86.OPCODE.ESC1 || bOpcode == X86.OPCODE.ESC3) && modReg >= 0x34) {
             modReg = (reg << 4) | r_m;
@@ -7021,6 +7025,7 @@ if (DEBUGGER) {
         if (asArgs && asArgs[1] == '?') {
             this.println("register commands:");
             this.println("\tr\tdump registers");
+            if (this.fpu) this.println("\trfp\tdump floating-point registers");
             this.println("\trp\tdump all registers");
             this.println("\trx [#]\tset flag or register x to [#]");
             return;
@@ -7031,9 +7036,14 @@ if (DEBUGGER) {
 
         if (asArgs != null && asArgs.length > 1) {
             var sReg = asArgs[1];
+            if (this.fpu && sReg == "fp") {
+                this.doFPURegisters(asArgs);
+                return;
+            }
             if (sReg == 'p') {
                 fProt = (this.cpu.model >= X86.MODEL_80286);
-            } else {
+            }
+            else {
              // fInstruction = false;
                 var sValue = null;
                 var i = sReg.indexOf('=');
@@ -7266,6 +7276,26 @@ if (DEBUGGER) {
         if (fInstruction) {
             this.dbgAddrNextCode = this.newAddr(this.cpu.getIP(), this.cpu.getCS());
             this.doUnassemble(this.toHexAddr(this.dbgAddrNextCode));
+        }
+    };
+
+    /**
+     * doFPURegisters(asArgs)
+     *
+     * NOTE: If we're called, the existence of an FPU has already been verified.
+     *
+     * @this {Debugger}
+     * @param {Array.<string>} [asArgs]
+     */
+    Debugger.prototype.doFPURegisters = function(asArgs)
+    {
+        this.assert(this.fpu);
+        for (var i = 0; i < 8; i++) {
+            var a = this.fpu.readFPUStack(i);
+            if (!a) break;
+            var sValue = str.pad(a[2].toFixed(15), 24, true);
+            this.println("ST" + i + ": " + sValue + "  " + str.toHex(a[4]) + "," + str.toHex(a[3]) + "  [" + Debugger.FPU_TAGS[a[1]] + "]");
+            // this.println("  REG" + a[0] + " " + str.toBin(a[7], 16) + str.toBin(a[6]) + str.toBin(a[5]));
         }
     };
 

@@ -524,6 +524,7 @@ var X86 = {
     FPU: {
         MODEL_8087:     8087,
         MODEL_80287:    80287,
+        MODEL_80287XL:  80387,  // internally, the 80287XL was an 80387SX, so I'm not sure we really want/need a unique identifier
         MODEL_80387:    80387,
         CONTROL: {              // FPU Control Word
             IM:     0x0001,     // bit 0: Invalid Operation Mask
@@ -532,13 +533,15 @@ var X86 = {
             OM:     0x0008,     // bit 3: Overflow Mask
             UM:     0x0010,     // bit 4: Underflow Mask
             PM:     0x0020,     // bit 5: Precision Mask
+            EXC:    0x003F,     // all of the above exceptions
                                 // bit 6: unused
             IEM:    0x0080,     // bit 7: Interrupt Enable Mask (0 enables interrupts, 1 masks them; 8087 only)
             PC:     0x0300,     // bits 8-9: Precision Control
             RC:     0x0C00,     // bits 10-11: Rounding Control
             IC:     0x1000,     // bit 12: Infinity Control (0 for Projective, 1 for Affine)
                                 // bits 13-15: unused
-            INIT:   0x03BF      // X86.FPU.CONTROL.IM | X86.FPU.CONTROL.DM | X86.FPU.CONTROL.ZM | X86.FPU.CONTROL.OM | X86.FPU.CONTROL.UM | X86.FPU.CONTROL.PM | X86.FPU.CONTROL.IEM | X86.FPU.CONTROL.PC
+            INIT:   0x03BF,     // X86.FPU.CONTROL.IM | X86.FPU.CONTROL.DM | X86.FPU.CONTROL.ZM | X86.FPU.CONTROL.OM | X86.FPU.CONTROL.UM | X86.FPU.CONTROL.PM | X86.FPU.CONTROL.IEM | X86.FPU.CONTROL.PC
+            UNUSED: 0xE040
         },
         STATUS: {               // FPU Status Word
             IE:     0x0001,     // bit 0: Invalid Operation
@@ -555,7 +558,8 @@ var X86 = {
             C2:     0x0400,     // bit 10: Condition Code 2
             ST:     0x3800,     // bits 11-13: Stack Top
             C3:     0x4000,     // bit 14: Condition Code 3
-            BUSY:   0x8000      // bit 15: Busy
+            BUSY:   0x8000,     // bit 15: Busy
+            ST_SHIFT: 11
         },
         TAGS: {
             VALID:  0x0,
