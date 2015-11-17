@@ -552,12 +552,13 @@ var X86 = {
             PE:     0x0020,     // bit 5: Precision
             SF:     0x0040,     // bit 6: Stack Fault (80387 and later)
             EXC:    0x007F,     // all of the above exceptions
-            ES:     0x0080,     // bit 7: Exception Summary (Interrupt Request on 8087)
+            ES:     0x0080,     // bit 7: Error/Exception Status/Summary (Interrupt Request on 8087)
             C0:     0x0100,     // bit 8: Condition Code 0
             C1:     0x0200,     // bit 9: Condition Code 1
             C2:     0x0400,     // bit 10: Condition Code 2
             ST:     0x3800,     // bits 11-13: Stack Top
             C3:     0x4000,     // bit 14: Condition Code 3
+            CC:     0x4700,     // all condition code bits
             BUSY:   0x8000,     // bit 15: Busy
             ST_SHIFT: 11
         },

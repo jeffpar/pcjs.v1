@@ -432,7 +432,7 @@ if (DEBUGGER) {
         "FINCSTP","FDECSTP","FFREE",  "FNOP",   "FWAIT"
     ];
 
-    Debugger.FPU_TAGS = ["VALID", "ZERO", "SPECIAL", "EMPTY"];
+    Debugger.FPU_TAGS = ["VALID", "ZERO ", "SPEC ", "EMPTY"];
 
     Debugger.CPU_8086  = 0;
     Debugger.CPU_80186 = 1;
@@ -554,10 +554,10 @@ if (DEBUGGER) {
     Debugger.TYPE_SR        = 0x000B;   //     FPU SR (short-real; 32-bit)
     Debugger.TYPE_LI        = 0x000C;   //     FPU LI (long-integer; 64-bit)
     Debugger.TYPE_LR        = 0x000C;   //     FPU LR (long-real; 64-bit)
-    Debugger.TYPE_TR        = 0x000D;   //     FPU TR (temp-real; 80-zbit)
-    Debugger.TYPE_PD        = 0x000D;   //     FPU PD (packed-decimal, 18 digits; 80-bit)
-    Debugger.TYPE_ENV       = 0x000E;   //     FPU ENV (environment; 14 bytes)
-    Debugger.TYPE_FPU       = 0x000F;   //     FPU SAVE (save/restore; 94 bytes)
+    Debugger.TYPE_TR        = 0x000D;   //     FPU TR (temp-real; 80-bit)
+    Debugger.TYPE_PD        = 0x000E;   //     FPU PD (packed-decimal, 18 digits; 80-bit)
+    Debugger.TYPE_ENV       = 0x000F;   //     FPU ENV (environment; 14 bytes in real-mode, 28 bytes in protected-mode)
+    Debugger.TYPE_FPU       = 0x000F;   //     FPU SAVE (save/restore; 94 bytes in real-mode, 108 bytes in protected-mode)
 
     /*
      * TYPE_MODE values.  Order is somewhat important, as all values implying
@@ -5121,6 +5121,20 @@ if (DEBUGGER) {
                 case Debugger.TYPE_LONG:
                     sPrefix = "DWORD";
                     break;
+                case Debugger.TYPE_SI:
+                case Debugger.TYPE_SR:
+                    sPrefix = "SREAL";
+                    break;
+                case Debugger.TYPE_LI:
+                case Debugger.TYPE_LR:
+                    sPrefix = "LREAL";
+                    break;
+                case Debugger.TYPE_TR:
+                    sPrefix = "TREAL";
+                    break;
+                case Debugger.TYPE_PD:
+                    sPrefix = "DEC18";
+                    break;
                 }
                 if (sPrefix) sOperand = sPrefix + ' ' + sOperand;
             }
@@ -7289,14 +7303,18 @@ if (DEBUGGER) {
      */
     Debugger.prototype.doFPURegisters = function(asArgs)
     {
-        this.assert(this.fpu);
+        var fpu = this.fpu;
+        this.assert(fpu);
+        var wStatus = fpu.getStatus(), wControl = fpu.getControl();
         for (var i = 0; i < 8; i++) {
-            var a = this.fpu.readFPUStack(i);
+            var a = fpu.readFPUStack(i);
             if (!a) break;
             var sValue = str.pad(a[2].toFixed(15), 24, true);
-            this.println("ST" + i + ": " + sValue + "  " + str.toHex(a[4]) + "," + str.toHex(a[3]) + "  [" + Debugger.FPU_TAGS[a[1]] + "]");
+            this.println("ST" + i + ": " + sValue + "  " + str.toHex(a[4]) + "," + str.toHex(a[3]) + "  [" + a[0] + ":" + Debugger.FPU_TAGS[a[1]] + "]");
             // this.println("  REG" + a[0] + " " + str.toBin(a[7], 16) + str.toBin(a[6]) + str.toBin(a[5]));
         }
+        this.println("    B3SSS210ESPUOZDI               xxxIRRPPIxPUOZDI");
+        this.println("SW: " + str.toBin(wStatus, 16) + " (" + str.toHexWord(wStatus) + ")  CW: " + str.toBin(wControl, 16) + " (" + str.toHexWord(wControl) + ")");
     };
 
     /**

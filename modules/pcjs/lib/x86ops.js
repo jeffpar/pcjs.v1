@@ -1097,6 +1097,52 @@ X86.opPUSHBX = function()
 /**
  * op=0x54 (PUSH SP)
  *
+ * NOTE: Having an accurate implementation of "PUSH SP" for the 8086/8088 isn't just a nice idea, it affects real
+ * code.  Case in point: early Microsoft C floating-point libraries relied on "PUSH SP" behavior to quickly determine
+ * whether an 8088 (and therefore presumably an 8087) or an 80286 (and presumably an 80287) was being used; eg:
+ *
+ *      &0910:1E82 D93E1709        FSTCW    WORD [0917]
+ *      &0910:1E86 CD3D            INT      3D
+ *      &0E4E:06D3 50              PUSH     AX
+ *      &0E4E:06D4 B83DA2          MOV      AX,A23D
+ *      &0E4E:06D7 EB04            JMP      06DD
+ *      &0E4E:06DD 55              PUSH     BP
+ *      &0E4E:06DE 1E              PUSH     DS
+ *      &0E4E:06DF 56              PUSH     SI
+ *      &0E4E:06E0 8BEC            MOV      BP,SP
+ *      &0E4E:06E2 C57608          LDS      SI,[BP+08]
+ *      &0E4E:06E5 4E              DEC      SI
+ *      &0E4E:06E6 4E              DEC      SI
+ *      &0E4E:06E7 897608          MOV      [BP+08],SI
+ *      &0E4E:06EA 2904            SUB      [SI],AX
+ *      &0E4E:06EC 53              PUSH     BX
+ *      &0E4E:06ED 33DB            XOR      BX,BX
+ *      &0E4E:06EF 54              PUSH     SP          ; beginning of processor check
+ *      &0E4E:06F0 58              POP      AX
+ *      &0E4E:06F1 3BC4            CMP      AX,SP
+ *      &0E4E:06F3 7528            JNZ      071D        ; jump if 8086/8088/80186/80188, no jump if 80286 or later
+ *      &0E4E:06F5 8B4001          MOV      AX,[BX+SI+01]
+ *      &0E4E:06F8 25FB30          AND      AX,30FB
+ *      &0E4E:06FB 3DD930          CMP      AX,30D9
+ *      &0E4E:06FE 7507            JNZ      0707
+ *      &0E4E:0700 8A4002          MOV      AL,[BX+SI+02]
+ *      &0E4E:0703 3CF0            CMP      AL,F0
+ *      &0E4E:0705 7216            JC       071D
+ *      &0E4E:0707 8B4001          MOV      AX,[BX+SI+01]
+ *      &0E4E:070A 25FFFE          AND      AX,FEFF
+ *      &0E4E:070D 3DDBE2          CMP      AX,E2DB
+ *      &0E4E:0710 740B            JZ       071D
+ *      &0E4E:0712 8B4001          MOV      AX,[BX+SI+01]
+ *      &0E4E:0715 3DDFE0          CMP      AX,E0DF
+ *      &0E4E:0718 7403            JZ       071D
+ *      &0E4E:071A C60490          MOV      [SI],90
+ *      &0E4E:071D 5B              POP      BX
+ *      &0E4E:071E 5E              POP      SI
+ *      &0E4E:071F 1F              POP      DS
+ *      &0E4E:0720 5D              POP      BP
+ *      &0E4E:0721 58              POP      AX
+ *      &0E4E:0722 CF              IRET
+ *
  * @this {X86CPU}
  */
 X86.opPUSHSP_8086 = function()

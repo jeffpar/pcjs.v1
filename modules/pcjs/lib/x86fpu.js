@@ -54,6 +54,19 @@ if (NODE) {
  *      SI (short-integer)  short binary integer (32 bits) in memory
  *      LI (long-integer)   long binary integer (64 bits) in memory
  *      NN (nn-bytes)       memory area nn bytes long
+ *
+ * FPU Coprocessor Trivia
+ *
+ *      Microsoft C libraries executed software interrupts in the range 0x34-0x3B immediately after
+ *      FPU operations, to assist with floating-point emulation when no coprocessor was present, since
+ *      processors prior to the 80286 had no mechanism for generating a fault when an unsupported FPU
+ *      instruction was executed.
+ *
+ *      In short, INT 0x34 through INT 0x3B was used for ESC opcodes 0xD8 through 0xDF, INT 0x3C was
+ *      used for FPU instructions containing a segment override, and INT 0x3D was used for FWAIT.
+ *
+ *      A sample piece of code is available in x86ops.js, because it also highlights the Microsoft C
+ *      library's dependency on the 8086/8088 behavior of "PUSH SP" (see the opPUSHSP_8086() function).
  */
 
 /**
@@ -117,10 +130,10 @@ function X86FPU(parmsFPU)
      * something may have gone amiss (it's not impossible though, because if an exception occurs before any
      * memory operands have been used, regDataSel may still be "unset").
      *
-     * NOTE: iOperand is the low 3 bits of the bModRM byte, for instructions that have an explicit operand.
+     * NOTE: iStack is the low 3 bits of the bModRM byte, for instructions that have an explicit stack operand.
      */
     this.regCodeSel = this.regDataSel = -1;
-    this.regCodeOff = this.regDataOff = this.regOpcode = this.iOperand = 0;
+    this.regCodeOff = this.regDataOff = this.regOpcode = this.iStack = 0;
 
     /*
      * Initialize floating-point constants, as if they were internal read-only registers.
@@ -180,7 +193,8 @@ X86FPU.FADDlr = function()
  */
 X86FPU.FADDsr = function()
 {
-    this.check(this.regStack[this.iST] += this.getSRFromEA());
+    var result = this.addition(this.regStack[this.iST], this.getSRFromEA());
+    if (result != null) this.regStack[this.iST] = result;
 };
 
 /**
@@ -190,7 +204,8 @@ X86FPU.FADDsr = function()
  */
 X86FPU.FADDst = function()
 {
-    this.check(this.regStack[this.iST] += this.regStack[this.iOperand]);
+    var result = this.addition(this.regStack[this.iST], this.regStack[this.iStack]);
+    if (result != null) this.regStack[this.iST] = result;
 };
 
 /**
@@ -200,7 +215,8 @@ X86FPU.FADDst = function()
  */
 X86FPU.FADDsti = function()
 {
-    this.check(this.regStack[this.iOperand] += this.regStack[this.iST]);
+    var result = this.addition(this.regStack[this.iStack], this.regStack[this.iST]);
+    if (result != null) this.regStack[this.iStack] = result;
 };
 
 /**
@@ -246,11 +262,16 @@ X86FPU.FCHS = function()
 /**
  * FCLEX()
  *
+ * NOTE: Although we explicitly clear the BUSY bit, there shouldn't be any code setting it, because
+ * we're never "busy" (all floating-point operations are performed synchronously).  Conversely, there's
+ * no need to explicitly clear the ES bit, because clearStatus() will call checkException(), which
+ * updates ES and clears/sets FPU interrupt status as appropriate.
+ *
  * @this {X86FPU}
  */
 X86FPU.FCLEX = function()
 {
-    this.opUnimplemented();
+    this.clearStatus(X86.FPU.STATUS.EXC | X86.FPU.STATUS.BUSY);
 };
 
 /**
@@ -320,7 +341,9 @@ X86FPU.FCOMPsr = function()
  */
 X86FPU.FCOMPst = function()
 {
-    this.opUnimplemented();
+    // if (this.opStop()) return;       // for untested instructions: stops the CPU if it's running, but not if single-stepping
+    this.comparison(this.getST(0), this.getST(this.iStack));
+    this.popValue();
 };
 
 /**
@@ -370,7 +393,8 @@ X86FPU.FDISI = function()
  */
 X86FPU.FDIVlr = function()
 {
-    this.opUnimplemented();
+    var quotient = this.division(this.regStack[this.iST], this.getLRFromEA());
+    if (quotient != null) this.regStack[this.iST] = quotient;
 };
 
 /**
@@ -746,11 +770,34 @@ X86FPU.FISUBR32 = function()
 /**
  * FLDlr()
  *
+ *  From PC Magazine's "Programmer's Technical Reference: The Processor and Coprocessor", p.647:
+ *
+ *      The FLD instruction loads the source operand, converts it to temporary real format (if required),
+ *      and pushes the resulting value onto the floating-point stack.
+ *
+ *      The load operation is accomplished by decrementing the top-of-stack pointer (TOP) and copying the
+ *      source operand to the new stack top. If the source operand is a float ing-point register, the index of
+ *      the register is taken before TOP is changed. The source operand may also be a short real, long real,
+ *      or temporary real memory operand. Short real and long real operands are converted automatically.
+ *
+ *      Note that coding the instruction FLD ST duplicates the value at the stack top.
+ *
+ *      On the 8087 and 80287, the FLD real80 instruction will raise the denormal exception if the memory
+ *      operand is a denormal. The 80287XL and later coprocessors will not, since the operation is not arithmetic.
+ *
+ *      On the 8087 and 80287, a denormal will be converted to an unnormal by FLD; on the 80287XL and later
+ *      coprocessors, the number will be converted to temporary real. If the next instruction is an FXTRACT or FXAM,
+ *      the 8087/80827 and 80287XL/80387/ 80486 results will be different.
+ *
+ *      On the 8087 and 80287, the FLD real32 and FLD real64 instructions will not raise an exception when loading
+ *      a signaling NaN; on the 80287XL and later coprocessors, loading a signaling NaN raises the invalid operation
+ *      exception.
+ *
  * @this {X86FPU}
  */
 X86FPU.FLDlr = function()
 {
-    this.opUnimplemented();
+    this.pushValue(this.getLRFromEA());
 };
 
 /**
@@ -760,7 +807,7 @@ X86FPU.FLDlr = function()
  */
 X86FPU.FLDsr = function()
 {
-    this.opUnimplemented();
+    this.pushValue(this.getSRFromEA());
 };
 
 /**
@@ -770,7 +817,8 @@ X86FPU.FLDsr = function()
  */
 X86FPU.FLDsti = function()
 {
-    this.opUnimplemented();
+    var v = this.getST(this.iStack);
+    if (v != null) this.pushValue(v);
 };
 
 /**
@@ -780,7 +828,7 @@ X86FPU.FLDsti = function()
  */
 X86FPU.FLDtr = function()
 {
-    this.opUnimplemented();
+    this.pushValue(this.getLRFromTR(this.getTRFromEA()));
 };
 
 /**
@@ -810,7 +858,7 @@ X86FPU.FLDENV = function()
  */
 X86FPU.FLD1 = function()
 {
-    this.push(1.0);
+    this.pushValue(1.0);
 };
 
 /**
@@ -820,7 +868,7 @@ X86FPU.FLD1 = function()
  */
 X86FPU.FLDL2T = function()
 {
-    this.push(this.regL2T);
+    this.pushValue(this.regL2T);
 };
 
 /**
@@ -830,7 +878,7 @@ X86FPU.FLDL2T = function()
  */
 X86FPU.FLDL2E = function()
 {
-    this.push(this.regL2E);
+    this.pushValue(this.regL2E);
 };
 
 /**
@@ -840,7 +888,7 @@ X86FPU.FLDL2E = function()
  */
 X86FPU.FLDPI = function()
 {
-    this.push(Math.PI);
+    this.pushValue(Math.PI);
 };
 
 /**
@@ -850,7 +898,7 @@ X86FPU.FLDPI = function()
  */
 X86FPU.FLDLG2 = function()
 {
-    this.push(this.regLG2);
+    this.pushValue(this.regLG2);
 };
 
 /**
@@ -860,7 +908,7 @@ X86FPU.FLDLG2 = function()
  */
 X86FPU.FLDLN2 = function()
 {
-    this.push(this.regLN2);
+    this.pushValue(this.regLN2);
 };
 
 /**
@@ -870,7 +918,7 @@ X86FPU.FLDLN2 = function()
  */
 X86FPU.FLDZ = function()
 {
-    this.push(0.0);
+    this.pushValue(0.0);
 };
 
 /**
@@ -890,7 +938,8 @@ X86FPU.FMULlr = function()
  */
 X86FPU.FMULsr = function()
 {
-    this.check(this.regStack[this.iST] *= this.getSRFromEA());
+    var result = this.multiplication(this.regStack[this.iST], this.getSRFromEA());
+    if (result != null) this.regStack[this.iST] = result;
 };
 
 /**
@@ -900,7 +949,8 @@ X86FPU.FMULsr = function()
  */
 X86FPU.FMULst = function()
 {
-    this.check(this.regStack[this.iST] *= this.regStack[this.iOperand]);
+    var result = this.multiplication(this.regStack[this.iST], this.regStack[this.iStack]);
+    if (result != null) this.regStack[this.iST] = result;
 };
 
 /**
@@ -910,7 +960,8 @@ X86FPU.FMULst = function()
  */
 X86FPU.FMULsti = function()
 {
-    this.check(this.regStack[this.iOperand] *= this.regStack[this.iST]);
+    var result = this.multiplication(this.regStack[this.iStack], this.regStack[this.iST]);
+    if (result != null) this.regStack[this.iStack] = result;
 };
 
 /**
@@ -1001,7 +1052,7 @@ X86FPU.FSAVE = function()
     var cpu = this.cpu;
     var addr = this.saveEnv(cpu.regEA);
     for (var i = 0; i < this.regStack.length; i++) {
-        var a = this.getTR(i);
+        var a = this.getTR(i, true);
         cpu.setLong(addr, a[0]);
         cpu.setLong(addr += 4, a[1]);
         cpu.setShort(addr += 4, a[2]);
@@ -1039,7 +1090,7 @@ X86FPU.FSETPM = function()
  */
 X86FPU.FSINCOS = function()
 {
-    if (this.leastModel(X86.FPU.MODEL_80287XL)) {
+    if (this.isAtLeastModel(X86.FPU.MODEL_80287XL)) {
         this.opUnimplemented();
     }
 };
@@ -1061,7 +1112,9 @@ X86FPU.FSQRT = function()
  */
 X86FPU.FSTlr = function()
 {
-    this.opUnimplemented();
+    if (this.getLR(0)) {
+        this.setEAFromSR();
+    }
 };
 
 /**
@@ -1071,7 +1124,9 @@ X86FPU.FSTlr = function()
  */
 X86FPU.FSTsr = function()
 {
-    this.opUnimplemented();
+    if (this.getSR(0)) {
+        this.setEAFromSR();
+    }
 };
 
 /**
@@ -1081,7 +1136,10 @@ X86FPU.FSTsr = function()
  */
 X86FPU.FSTsti = function()
 {
-    this.opUnimplemented();
+    var v = this.getST(0);
+    if (v != null) {
+        this.setST(this.iStack, v);
+    }
 };
 
 /**
@@ -1102,7 +1160,10 @@ X86FPU.FSTENV = function()
  */
 X86FPU.FSTPlr = function()
 {
-    this.opUnimplemented();
+    if (this.getLR(0)) {
+        this.setEAFromLR();
+        this.popValue();
+    }
 };
 
 /**
@@ -1112,7 +1173,10 @@ X86FPU.FSTPlr = function()
  */
 X86FPU.FSTPsr = function()
 {
-    this.opUnimplemented();
+    if (this.getSR(0)) {
+        this.setEAFromSR();
+        this.popValue();
+    }
 };
 
 /**
@@ -1122,7 +1186,11 @@ X86FPU.FSTPsr = function()
  */
 X86FPU.FSTPsti = function()
 {
-    this.opUnimplemented();
+    var v = this.getST(0);
+    if (v != null) {
+        this.setST(this.iStack, v);
+        this.popValue();
+    }
 };
 
 /**
@@ -1132,7 +1200,10 @@ X86FPU.FSTPsti = function()
  */
 X86FPU.FSTPtr = function()
 {
-    this.opUnimplemented();
+    if (this.getTR(0)) {
+        this.setEAFromTR();
+        this.popValue();
+    }
 };
 
 /**
@@ -1142,6 +1213,7 @@ X86FPU.FSTPtr = function()
  */
 X86FPU.FSTCW = function()
 {
+    this.assert(this.cpu.regEA !== X86.ADDR_INVALID);
     this.cpu.setShort(this.cpu.regEA, this.regControl);
 };
 
@@ -1152,6 +1224,7 @@ X86FPU.FSTCW = function()
  */
 X86FPU.FSTSW = function()
 {
+    this.assert(this.cpu.regEA !== X86.ADDR_INVALID);
     this.cpu.setShort(this.cpu.regEA, this.getStatus());
 };
 
@@ -1162,7 +1235,7 @@ X86FPU.FSTSW = function()
  */
 X86FPU.FSTSWAX = function()
 {
-    if (this.leastModel(X86.FPU.MODEL_80287)) {
+    if (this.isAtLeastModel(X86.FPU.MODEL_80287)) {
         this.cpu.regEAX = (this.cpu.regEAX & ~0xffff) | this.getStatus();
     }
 };
@@ -1375,7 +1448,7 @@ X86FPU.prototype.powerUp = function(data, fRepower)
             if (!this.restore(data)) return false;
         }
     }
-    if (DEBUG) {
+    if (MAXDEBUG) {
         /*
          * Test loading all 7 constants.
          */
@@ -1387,7 +1460,7 @@ X86FPU.prototype.powerUp = function(data, fRepower)
         X86FPU.FLDLG2.call(this);
         X86FPU.FLDLN2.call(this);
         /*
-         * Test the ability of getTR() to convert any LR to a TR, and then verify that getLR() can always obtain
+         * Test the ability of getTR() to convert any LR to a TR, and then verify that getST() can always obtain
          * the original LR from that TR.  TR->LR can be a lossy operation, but LR->TR->LR should never be.
          *
          * We'll start by taking the value PI, which should located at ST(2) after the above pushes, converting it
@@ -1395,7 +1468,7 @@ X86FPU.prototype.powerUp = function(data, fRepower)
          *
          * If that simple test passes, then we'll proceed to more aggressive testing, using randomly-generated floats.
          */
-        var a = this.getTR(2);
+        var a = this.getTR(2, true);
         this.setTR(7, a);
         this.assert(this.getST(2) === this.getST(7));
 
@@ -1404,7 +1477,7 @@ X86FPU.prototype.powerUp = function(data, fRepower)
             var lo = this.getRandomInt(0, 0xffffffff);
             var hi = this.getRandomInt(0, 0xffffffff);
             this.setST64(6, lo, hi);
-            a = this.getTR(6);
+            a = this.getTR(6, true);
             this.setTR(7, a);
             if (this.getST(6) !== this.getST(7)) {
                 /*
@@ -1497,6 +1570,15 @@ X86FPU.prototype.resetFPU = function()
     this.regControl = X86.FPU.CONTROL.INIT;
     this.regStatus = 0;         // contains all status register bits EXCEPT for ST
     this.iST = 0;               // the ST bits for regStatus are actually stored here
+    if (DEBUG) {
+        /*
+         * All the registers were tagged "unused" above, which is all that would normally happen, but debugging is
+         * a little easier if we also zero everything, too.
+         */
+        for (var iReg = 0; iReg < this.regStack.length; iReg++) {
+            this.regStack[iReg] = 0.0;
+        }
+    }
     if (this.chipset) this.chipset.clearFPUInterrupt();
 };
 
@@ -1512,15 +1594,11 @@ X86FPU.prototype.resetFPU = function()
  */
 X86FPU.prototype.isModel = function(model)
 {
-    if (this.model != model) {
-        this.opNone();
-        return false;
-    }
-    return true;
+    return this.model == model;
 };
 
 /**
- * leastModel(model)
+ * isAtLeastModel(model)
  *
  * If the current model is greater than or equal to the specified model, then it's assumed the
  * current operation is supported, and we return true.
@@ -1529,20 +1607,17 @@ X86FPU.prototype.isModel = function(model)
  * @param {number} model
  * @return {boolean}
  */
-X86FPU.prototype.leastModel = function(model)
+X86FPU.prototype.isAtLeastModel = function(model)
 {
-    if (this.model < model) {
-        this.opNone();
-        return false;
-    }
-    return true;
+    return this.model >= model;
 };
 
 /**
  * getRandomInt(min, max)
  *
- * NOTE: If either min or max is a 32-bit value with bit 31 set, and it has passed through some bit-wise operations,
- * then that value may end up being negative, and you may end up with an inverted (or empty) range.
+ * NOTE: If either min or max is a value containing 32 or more bits AND bit 31 is set AND it has passed
+ * through some bit-wise operation(s), then that value may end up being negative, so you may end up with an
+ * inverted (or empty) range or other unexpected results.
  *
  * @this {X86FPU}
  * @param {number} min (inclusive)
@@ -1560,16 +1635,36 @@ X86FPU.prototype.getRandomInt = function(min, max)
 };
 
 /**
+ * opStop(fError)
+ *
+ * @this {X86FPU}
+ * @param {boolean} [fError]
+ * @return {boolean} (true if there was an error or the CPU was running, false if not)
+ */
+X86FPU.prototype.opStop = function(fError)
+{
+    if (DEBUG) {
+        var cpu = this.cpu;
+        if (fError || cpu.isRunning()) {
+            cpu.setIP(cpu.opLIP - cpu.segCS.base);
+            cpu.stopCPU();
+            return true;
+        }
+    }
+    return false;
+};
+
+/**
  * opNone()
  *
- * Used for any coprocessor opcode that has no known operation, either for the current model or any model.
+ * Used for any coprocessor opcode that has no known operation for the given model.
  *
  * @this {X86FPU}
  */
 X86FPU.prototype.opNone = function()
 {
-    this.println(this.idComponent + ".opNone(" + str.toHexByte(this.cpu.bOpcode) + "," + str.toHexByte(this.cpu.bModRM) + ")");
-    this.cpu.stopCPU();
+    if (DEBUG) this.println(this.idComponent + ".opNone(" + str.toHexByte(this.cpu.bOpcode) + "," + str.toHexByte(this.cpu.bModRM) + ")");
+    this.opStop(true);
 };
 
 /**
@@ -1581,64 +1676,68 @@ X86FPU.prototype.opNone = function()
  */
 X86FPU.prototype.opUnimplemented = function()
 {
-    this.println(this.idComponent + ".opUnimplemented(" + str.toHexByte(this.cpu.bOpcode) + "," + str.toHexByte(this.cpu.bModRM) + ")");
-    this.cpu.stopCPU();
+    if (DEBUG) this.println(this.idComponent + ".opUnimplemented(" + str.toHexByte(this.cpu.bOpcode) + "," + str.toHexByte(this.cpu.bModRM) + ")");
+    this.opStop(true);
 };
 
 /**
- * check(f)
+ * checkException()
  *
  * @this {X86FPU}
- * @param {number} f
+ * @return {boolean} (true if unmasked exception exists, false if not)
  */
-X86FPU.prototype.check = function(f)
+X86FPU.prototype.checkException = function()
 {
-    if (!isFinite(f)) {
-        this.fault(f === Infinity? X86.FPU.STATUS.OE : X86.FPU.STATUS.UE);
+    this.regStatus &= ~X86.FPU.STATUS.ES;
+    if (this.regStatus & (~this.regControl & X86.FPU.STATUS.EXC)) {
+        this.regStatus |= X86.FPU.STATUS.ES;    // set ES whenever one or more unmasked EXC bits are set
     }
+    if ((this.regStatus & X86.FPU.STATUS.ES) && !(this.regControl & X86.FPU.CONTROL.IEM)) {
+        this.chipset.setFPUInterrupt();
+        return true;
+    }
+    this.chipset.clearFPUInterrupt();
+    return false;
 };
 
 /**
- * fault(n)
+ * setException(n)
  *
- *      IE: 0x0001  bit 0: Invalid Operation
- *      DE: 0x0002  bit 1: Denormalized Operand
- *      ZE: 0x0004  bit 2: Zero Divide
- *      OE: 0x0008  bit 3: Overflow
- *      UE: 0x0010  bit 4: Underflow
- *      PE: 0x0020  bit 5: Precision
- *      SF: 0x0040  bit 6: Stack Fault (80387 and later)
+ * Sets one or more of the FPU.STATUS.ECX bits; ie:
+ *
+ *      IE (0x0001 bit 0: Invalid Operation)
+ *      DE (0x0002 bit 1: Denormalized Operand)
+ *      ZE (0x0004 bit 2: Zero Divide)
+ *      OE (0x0008 bit 3: Overflow)
+ *      UE (0x0010 bit 4: Underflow)
+ *      PE (0x0020 bit 5: Precision)
+ *      SF (0x0040 bit 6: Stack Fault; 80387 and later)
  *
  * @this {X86FPU}
- * @param {number} n (one or more of the above error indicators)
+ * @param {number} n (one or more of the above error status bits)
+ * @return {boolean} (true if unmasked exception exists, false if not)
  */
-X86FPU.prototype.fault = function(n)
+X86FPU.prototype.setException = function(n)
 {
-    if (this.model < X86.FPU.MODEL_80387) {
-        n &= ~X86.FPU.STATUS.SF;        // this status bit didn't exist on pre-80387 coprocessors
-    }
+    if (DEBUG) this.println(this.idComponent + ".setException(" + str.toHexWord(n) + ")");
 
+    if (!this.isAtLeastModel(X86.FPU.MODEL_80387)) {
+        n &= ~X86.FPU.STATUS.SF;                // the SF bit didn't exist on pre-80387 coprocessors
+    }
+    this.assert(!(n & ~X86.FPU.STATUS.EXC));    // make sure the caller isn't setting any non-EXC bits
     this.regStatus |= n;
-
-    if (!(this.regControl & X86.FPU.CONTROL.IEM)) {
-        if ((this.regStatus & X86.FPU.STATUS.EXC) & ~this.regControl) {
-            this.chipset.setFPUInterrupt();
-        }
-    }
+    return this.checkException();
 };
 
 /**
- * getSRFromEA()
- *
- * Sets the internal regTmpSR register to the (32-bit) short-real value located at regEA.
+ * getControl()
  *
  * @this {X86FPU}
  * @return {number}
  */
-X86FPU.prototype.getSRFromEA = function()
+X86FPU.prototype.getControl = function()
 {
-    this.intTmpSR[0] = this.cpu.getLong(this.cpu.regEA);
-    return this.regTmpSR[0];
+    return this.regControl;
 };
 
 /**
@@ -1657,6 +1756,18 @@ X86FPU.prototype.setControl = function(n)
 };
 
 /**
+ * clearStatus(n)
+ *
+ * @this {X86FPU}
+ * @param {number} n
+ */
+X86FPU.prototype.clearStatus = function(n)
+{
+    this.regStatus &= ~n;
+    this.checkException();
+};
+
+/**
  * getStatus()
  *
  * @this {X86FPU}
@@ -1665,14 +1776,19 @@ X86FPU.prototype.setControl = function(n)
 X86FPU.prototype.getStatus = function()
 {
     /*
-     * As long as we never actually store any ST bit in regStatus, they should always be zero, so
-     * in order to return the complete regStatus, all we need to do is shift and "or" the bits from iST.
+     * As long as we never store any ST bits in regStatus, they should always be zero, so in
+     * order to return the complete regStatus, all we need to do is shift and "or" the bits from iST.
      */
     return this.regStatus | (this.iST << X86.FPU.STATUS.ST_SHIFT);
 };
 
 /**
  * setStatus(n)
+ *
+ * NOTE: Be sure to use this function for all "wholesale" regStatus updates, because it ensures that
+ * the ST bits get propagated to the internal iST register.  Setting individual EXC bits should be done
+ * through the fault() interface, and clearing individual EXC or BUSY bits should be done through
+ * clearStatus().  Both functions, including this function, call checkException() after updating regStatus.
  *
  * @this {X86FPU}
  * @param {number} n
@@ -1681,6 +1797,104 @@ X86FPU.prototype.setStatus = function(n)
 {
     this.regStatus = n & ~X86.FPU.STATUS.ST;
     this.iST = (n & X86.FPU.STATUS.ST) >> X86.FPU.STATUS.ST_SHIFT;
+    this.checkException();
+};
+
+/**
+ * checkOperand(v)
+ *
+ * @this {X86FPU}
+ * @param {number|null} v
+ * @return {boolean} (true if no exception, false otherwise)
+ */
+X86FPU.prototype.checkOperand = function(v)
+{
+    return isNaN(v)? !this.setException(X86.FPU.STATUS.IE) : true;
+};
+
+/**
+ * checkResult(v)
+ *
+ * @this {X86FPU}
+ * @param {number} v
+ * @return {boolean} (true if no exception, false otherwise)
+ */
+X86FPU.prototype.checkResult = function(v)
+{
+    return !isFinite(v)? !this.setException(v === Infinity? X86.FPU.STATUS.OE : X86.FPU.STATUS.UE) : true;
+};
+
+/**
+ * addition(operand1, operand2)
+ *
+ * @this {X86FPU}
+ * @param {number} operand1
+ * @param {number} operand2
+ * @return {number|null}
+ */
+X86FPU.prototype.addition = function(operand1, operand2)
+{
+    var result = operand1 + operand2;
+    if (!this.checkResult(result)) result = null;
+    return result;
+};
+
+/**
+ * multiplication(operand1, operand2)
+ *
+ * @this {X86FPU}
+ * @param {number} operand1
+ * @param {number} operand2
+ * @return {number|null}
+ */
+X86FPU.prototype.multiplication = function(operand1, operand2)
+{
+    var result = operand1 * operand2;
+    if (!this.checkResult(result)) result = null;
+    return result;
+};
+
+/**
+ * division(dividend, divisor)
+ *
+ * TODO: IE exceptions: infinity / infinity, 0 / 0, 0 / pseudo-zero, or divisor is denormal or unnormal.
+ *
+ * @this {X86FPU}
+ * @param {number} dividend
+ * @param {number} divisor
+ * @return {number|null}
+ */
+X86FPU.prototype.division = function(dividend, divisor)
+{
+    var quotient = null;
+    if (divisor || !this.setException(X86.FPU.STATUS.DE)) {
+        quotient = dividend / divisor;
+        if (!this.checkResult(quotient)) quotient = null;
+    }
+    return quotient;
+};
+
+/**
+ * comparison(operand1, operand2)
+ *
+ * @this {X86FPU}
+ * @param {number|null} operand1
+ * @param {number|null} operand2
+ */
+X86FPU.prototype.comparison = function(operand1, operand2)
+{
+    var cc = X86.FPU.STATUS.C0 | X86.FPU.STATUS.C2 | X86.FPU.STATUS.C3;
+    if (!isNaN(operand1) && !isNaN(operand2)) {
+        var result = operand1 - operand2;
+        if (result > 0) {
+            cc = 0;
+        } else if (result < 0) {
+            cc = X86.FPU.STATUS.C0;
+        } else {
+            cc = X86.FPU.STATUS.C3;
+        }
+    }
+    this.regStatus = (this.regStatus & ~X86.FPU.STATUS.CC) | cc;
 };
 
 /**
@@ -1745,37 +1959,81 @@ X86FPU.prototype.setTags = function(n)
 };
 
 /**
- * getST(i)
- *
- * This is equivalent to getLR(i), since we return the top-relative stack register in its native format,
- * which is currently the 64-bit "long-real" (LR) format.
+ * getSR(i)
  *
  * @this {X86FPU}
- * @param {number} i
- * @return {number}
+ * @param {number} i (eg, 0 for top-of-stack)
+ * @return {boolean} true if regTmpSR was loaded, false if not
+ */
+X86FPU.prototype.getSR = function(i)
+{
+    var iReg = (this.iST + i) & 7;
+    if (this.regUsed & (1 << iReg)) {
+        this.regTmpSR[0] = this.regStack[iReg];
+        return true;
+    } else if (!this.setException(X86.FPU.STATUS.IE)) {
+        this.regTmpSR[0] = this.regIndefinite[0];
+        return true;
+    }
+    return false;
+};
+
+/**
+ * getLR(i)
+ *
+ * @this {X86FPU}
+ * @param {number} i (eg, 0 for top-of-stack)
+ * @return {boolean} true if regTmpLR was loaded, false if not
+ */
+X86FPU.prototype.getLR = function(i)
+{
+    var iReg = (this.iST + i) & 7;
+    if (this.regUsed & (1 << iReg)) {
+        this.regTmpLR[0] = this.regStack[iReg];
+        return true;
+    } else if (!this.setException(X86.FPU.STATUS.IE)) {
+        this.regTmpLR[0] = this.regIndefinite[0];
+        return true;
+    }
+    return false;
+};
+
+/**
+ * getST(i)
+ *
+ * @this {X86FPU}
+ * @param {number} i (eg, 0 for top-of-stack)
+ * @return {number|null} v
  */
 X86FPU.prototype.getST = function(i)
 {
+    var v = null;
     var iReg = (this.iST + i) & 7;
-    this.assert(!!(this.regUsed & (1 << iReg)));
-    return this.regStack[iReg];
+    if (this.regUsed & (1 << iReg)) {
+        v = this.regStack[iReg];
+    } else if (!this.setException(X86.FPU.STATUS.IE)) {
+        v = this.regIndefinite[0];
+    }
+    return v;
 };
 
 /**
  * setST(i, v)
  *
- * This is equivalent to setLR(i, v), since we set the top-relative stack register using its native format,
- * which is currently the 64-bit "long-real" (LR) format.
- *
  * @this {X86FPU}
- * @param {number} i
+ * @param {number} i (eg, 0 for top-of-stack)
  * @param {number} v
+ * @return {boolean}
  */
 X86FPU.prototype.setST = function(i, v)
 {
     var iReg = (this.iST + i) & 7;
-    this.regStack[iReg] = v;
-    this.regUsed |= (1 << iReg);
+    if (this.checkOperand(v)) {
+        this.regStack[iReg] = v;
+        this.regUsed |= (1 << iReg);
+        return true;
+    }
+    return false;
 };
 
 /**
@@ -1794,13 +2052,135 @@ X86FPU.prototype.setST64 = function(i, lo, hi)
     var iInt = iReg << 1;
     this.intStack[iInt] = lo;
     this.intStack[iInt + 1] = hi;
+    this.checkOperand(this.regStack[iReg]);
     this.regUsed |= (1 << iReg);
 };
 
 /**
- * getTR(i)
+ * getTR(i, fNoException)
  *
- * Returns ST(i) as a TR ("long-real") in a[].
+ * @this {X86FPU}
+ * @param {number} i (stack index, 0-7)
+ * @param {boolean} [fNoException] (true to ignore all exception criteria)
+ * @return {Array.<number>|null} ("temp-real" aka TR, as an array of three 32-bit integers)
+ */
+X86FPU.prototype.getTR = function(i, fNoException)
+{
+    var a = null;
+    var iReg = (this.iST + i) & 7;
+    if (fNoException || this.regUsed & (1 << iReg) || !this.setException(X86.FPU.STATUS.IE)) {
+        var iInt = iReg << 1;
+        a = this.getTRFromLR(this.intStack[iInt], this.intStack[iInt + 1]);
+    }
+    return a;
+};
+
+/**
+ * setTR(i, a)
+ *
+ * Sets ST(i) to the TR ("long-real") in a[].
+ *
+ * @this {X86FPU}
+ * @param {number} i (stack index, 0-7)
+ * @param {Array.<number>|null} a
+ */
+X86FPU.prototype.setTR = function(i, a)
+{
+    if (a) this.setST(i, this.getLRFromTR(a));
+};
+
+/**
+ * getSRFromEA()
+ *
+ * Sets the internal regTmpSR register to the (32-bit) "short-real" value located at regEA.
+ *
+ * @this {X86FPU}
+ * @return {number} v
+ */
+X86FPU.prototype.getSRFromEA = function()
+{
+    this.assert(this.cpu.regEA !== X86.ADDR_INVALID);
+    this.intTmpSR[0] = this.cpu.getLong(this.cpu.regEA);
+    return this.regTmpSR[0];
+};
+
+/**
+ * getLRFromEA()
+ *
+ * Sets the internal regTmpLR register to the (64-bit) "long-real" value located at regEA.
+ *
+ * @this {X86FPU}
+ * @return {number} v
+ */
+X86FPU.prototype.getLRFromEA = function()
+{
+    this.assert(this.cpu.regEA !== X86.ADDR_INVALID);
+    this.intTmpLR[0] = this.cpu.getLong(this.cpu.regEA);
+    this.intTmpLR[1] = this.cpu.getLong(this.cpu.regEA + 4);
+    return this.regTmpLR[0];
+};
+
+/**
+ * getTRFromEA()
+ *
+ * Sets the internal regTmpTR register to the (80-bit) "temp-real" value located at regEA.
+ *
+ * @this {X86FPU}
+ * @return {Array.<number>} regTmpTR
+ */
+X86FPU.prototype.getTRFromEA = function()
+{
+    this.assert(this.cpu.regEA !== X86.ADDR_INVALID);
+    this.regTmpTR[0] = this.cpu.getLong(this.cpu.regEA);
+    this.regTmpTR[1] = this.cpu.getLong(this.cpu.regEA + 4);
+    this.regTmpTR[2] = this.cpu.getShort(this.cpu.regEA + 8);
+    return this.regTmpTR;
+};
+
+/**
+ * setEAFromSR()
+ *
+ * Stores the (32-bit) "short-real" value in the internal regTmpSR register to the address in regEA.
+ *
+ * @this {X86FPU}
+ */
+X86FPU.prototype.setEAFromSR = function()
+{
+    this.assert(this.cpu.regEA !== X86.ADDR_INVALID);
+    this.cpu.setLong(this.cpu.regEA, this.regTmpSR[0]);
+};
+
+/**
+ * setEAFromLR()
+ *
+ * Stores the (64-bit) "long-real" value in the internal regTmpLR register to the address in regEA.
+ *
+ * @this {X86FPU}
+ */
+X86FPU.prototype.setEAFromLR = function()
+{
+    this.assert(this.cpu.regEA !== X86.ADDR_INVALID);
+    this.cpu.setLong(this.cpu.regEA, this.regTmpLR[0]);
+    this.cpu.setLong(this.cpu.regEA + 4, this.regTmpLR[1]);
+};
+
+/**
+ * setEAFromTR()
+ *
+ * Stores the (80-bit) "temp-real" value in the internal regTmpTR register to the address in regEA.
+ *
+ * @this {X86FPU}
+ */
+X86FPU.prototype.setEAFromTR = function()
+{
+    this.assert(this.cpu.regEA !== X86.ADDR_INVALID);
+    this.cpu.setLong(this.cpu.regEA, this.regTmpTR[0]);
+    this.cpu.setLong(this.cpu.regEA + 4, this.regTmpTR[1]);
+    this.cpu.setShort(this.cpu.regEA + 8, this.regTmpTR[2]);
+};
+
+/**
+ * getLRFromTR(a)
  *
  * Since we must use the "long-real" (64-bit) format internally, rather than the "temp-real" (80-bit) format,
  * this function converts a 64-bit value to an 80-bit value.  The major differences: 1) the former uses a 52-bit
@@ -1808,15 +2188,58 @@ X86FPU.prototype.setST64 = function(i, lo, hi)
  * does NOT store a leading 1 with the fraction, whereas the latter does.
  *
  * @this {X86FPU}
- * @param {number} i (stack index, 0-7)
- * @return {Array.<number>} ("temp-real" aka TR, as an array of three 32-bit integers)
+ * @param {Array.<number>} a (eg, regTmpTR)
+ * @return {number} v
  */
-X86FPU.prototype.getTR = function(i)
+X86FPU.prototype.getLRFromTR = function(a)
 {
-    var iInt = ((this.iST + i) & 7) << 1;
-    var loLR = this.intStack[iInt];
-    var hiLR = this.intStack[iInt + 1];
+    var loTR = a[0], hiTR = a[1];
+    var signLR = (a[2] & 0x8000) >> 4, expLR = a[2] & 0x7fff;
+    /*
+     * We have no choice but to chop off the bottom 11 TR bits in order to fit in an LR....
+     */
+    var loLR = (loTR >>> 11) | (hiTR << 21), hiLR = (hiTR >> 11) & 0xfffff;
 
+    if (expLR == 0x7fff) {
+        /*
+         * Convert an TR NaN to a LR Nan.
+         */
+        expLR = 0x7ff;
+    }
+    else if (expLR) {
+        /*
+         * We have a normal (biased) TR exponent which we must now convert to a (biased) LR exponent;
+         * subtract the TR bias (0x3fff) and add the LR bias (0x3ff); additionally, we have a problem
+         * that getTRFromLR() did not: if the TR exponent is too large to fit in an LR exponent, then we
+         * have convert the result to +/- infinity.
+         */
+        expLR += 0x3ff - 0x3fff;
+        if (expLR <= 0) {
+            expLR = 0x7ff;
+            loLR = hiLR = 0;
+        }
+    }
+
+    this.intTmpLR[0] = loLR;
+    this.intTmpLR[1] = hiLR | ((signLR | expLR) << 20);
+    return this.regTmpLR[0];
+};
+
+/**
+ * getTRFromLR(loLR, hiLR)
+ *
+ * Since we must use the "long-real" (64-bit) format internally, rather than the "temp-real" (80-bit) format,
+ * this function converts a 64-bit value to an 80-bit value.  The major differences: 1) the former uses a 52-bit
+ * fraction and 11-bit exponent, while the latter uses a 64-bit fraction and 15-bit exponent, 2) the former
+ * does NOT store a leading 1 with the fraction, whereas the latter does.
+ *
+ * @this {X86FPU}
+ * @param {number} loLR
+ * @param {number} hiLR
+ * @return {Array.<number>} (regTmpTR)
+ */
+X86FPU.prototype.getTRFromLR = function(loLR, hiLR)
+{
     var expTR = (hiLR >> 20) & 0x07ff;
     var signTR = (hiLR >> 16) & 0x8000;
     var loTR = loLR << 11, hiTR = 0x80000000 | ((hiLR & 0x000fffff) << 11) | (loLR >>> 21);
@@ -1850,78 +2273,49 @@ X86FPU.prototype.getTR = function(i)
     this.regTmpTR[0] = loTR;
     this.regTmpTR[1] = hiTR;
     this.regTmpTR[2] = signTR | expTR;
-
     return this.regTmpTR;
 };
 
 /**
- * setTR(i, a)
- *
- * Sets ST(i) to the TR ("long-real") in a[].
- *
- * Since we must use the "long-real" (64-bit) format internally, rather than the "temp-real" (80-bit) format,
- * this function converts a 64-bit value to an 80-bit value.  The major differences: 1) the former uses a 52-bit
- * fraction and 11-bit exponent, while the latter uses a 64-bit fraction and 15-bit exponent, 2) the former
- * does NOT store a leading 1 with the fraction, whereas the latter does.
+ * popValue()
  *
  * @this {X86FPU}
- * @param {number} i (stack index, 0-7)
- * @param {Array.<number>} a
+ * @return {number|null} v
  */
-X86FPU.prototype.setTR = function(i, a)
+X86FPU.prototype.popValue = function()
 {
-    var loTR = a[0], hiTR = a[1];
-    var signLR = (a[2] & 0x8000) >> 4, expLR = a[2] & 0x7fff;
-    /*
-     * We have no choice but to chop off the bottom 11 TR bits in order to fit in an LR....
-     */
-    var loLR = (loTR >>> 11) | (hiTR << 21), hiLR = (hiTR >> 11) & 0xfffff;
-
-    if (expLR == 0x7fff) {
-        /*
-         * Convert an TR NaN to a LR Nan.
-         */
-        expLR = 0x7ff;
+    var v = null;
+    var bitUsed = (1 << this.iST);
+    if (!(this.regUsed & bitUsed)) {
+        this.regStatus &= ~X86.FPU.STATUS.C1;       // clear C1 to indicate stack underflow (80287XL and up)
+        if (this.setException(X86.FPU.STATUS.SF | X86.FPU.STATUS.IE)) return v;
     }
-    else if (expLR) {
-        /*
-         * We have a normal (biased) TR exponent which we must now convert to a (biased) LR exponent;
-         * subtract the TR bias (0x3fff) and add the LR bias (0x3ff); additionally, we have a problem
-         * that getTR() did not: if the TR exponent is too large to fit in an LR exponent, then we
-         * have convert the result to +/- infinity.
-         */
-        expLR += 0x3ff - 0x3fff;
-        if (expLR <= 0) {
-            expLR = 0x7ff;
-            loLR = hiLR = 0;
-        }
-    }
-
-    var iReg = (this.iST + i) & 7;
-    var iInt = iReg << 1;
-    this.intStack[iInt] = loLR;
-    this.intStack[iInt + 1] = hiLR | ((signLR | expLR) << 20);
-    this.regUsed |= (1 << iReg);
+    this.regUsed &= ~bitUsed;
+    v = this.regStack[this.iST];
+    this.iST = (this.iST + 1) & 7;
+    return v;
 };
 
 /**
- * push(f)
+ * pushValue(v)
  *
  * @this {X86FPU}
- * @param {number} f
+ * @param {number} v
  */
-X86FPU.prototype.push = function(f)
+X86FPU.prototype.pushValue = function(v)
 {
-    var iReg = this.iST = (this.iST-1) & 7;
+    var iReg = (this.iST - 1) & 7;
     var bitUsed = (1 << iReg);
     if (this.regUsed & bitUsed) {
-        this.regStatus |= X86.FPU.STATUS.C1;        // C1 set indicates stack overflow
-        this.regStack[iReg] = this.regIndefinite[0];
-        this.fault(X86.FPU.STATUS.SF | X86.FPU.STATUS.IE);
-    } else {
-        this.regStack[iReg] = f;
-        this.regUsed |= bitUsed;
+        this.regStatus |= X86.FPU.STATUS.C1;        // set C1 to indicate stack overflow (80287XL and up)
+        if (this.setException(X86.FPU.STATUS.SF | X86.FPU.STATUS.IE)) return;
     }
+    if (!this.checkOperand(v)) {
+        if (this.setException(X86.FPU.STATUS.IE)) return;
+        v = NaN;
+    }
+    this.regStack[this.iST = iReg] = v;
+    this.regUsed |= bitUsed;
 };
 
 /**
@@ -2002,11 +2396,9 @@ X86FPU.prototype.saveEnv = function(addr)
  */
 X86FPU.prototype.opFPU = function(bOpcode, bModRM, dst, src)
 {
-    this.println(this.idComponent + ".opFPU(" + str.toHexByte(bOpcode) + "," + str.toHexByte(bModRM) + ")");
-
     var mod = (bModRM >> 6) & 3;
     var reg = (bModRM >> 3) & 7;
-    this.iOperand = (bModRM & 7);
+    this.iStack = (bModRM & 7);
 
     /*
      * Combine mod and reg into one decodable value: put mod in the high nibble
@@ -2016,10 +2408,10 @@ X86FPU.prototype.opFPU = function(bOpcode, bModRM, dst, src)
 
     /*
      * All values >= 0x34 imply mod == 3 and reg >= 4, so now we shift reg into the high
-     * nibble and iOperand into the low, yielding values >= 0x40.
+     * nibble and iStack into the low, yielding values >= 0x40.
      */
     if ((bOpcode == X86.OPCODE.ESC1 || bOpcode == X86.OPCODE.ESC3) && modReg >= 0x34) {
-        modReg = (reg << 4) | this.iOperand;
+        modReg = (reg << 4) | this.iStack;
     }
 
     var fnOp = X86FPU.aaOps[bOpcode][modReg];
@@ -2028,7 +2420,7 @@ X86FPU.prototype.opFPU = function(bOpcode, bModRM, dst, src)
          * A handful of FPU instructions must preserve (at least some of) the "exception" registers,
          * so if the current function is NOT one of those, then update all the "exception" registers.
          */
-        if (X86FPU.afnPreserveExceptionRegs.indexOf(fnOp) < 0) {
+        if (X86FPU.afnPreserveExceptions.indexOf(fnOp) < 0) {
             var cpu = this.cpu;
             var off = cpu.opLIP;
             /*
@@ -2038,7 +2430,7 @@ X86FPU.prototype.opFPU = function(bOpcode, bModRM, dst, src)
              * isn't a perfect solution, because it doesn't account for multiple (redundant) prefixes,
              * but it's the best we can do for now.
              */
-            if (this.model == X86.FPU.MODEL_8087) {
+            if (this.isModel(X86.FPU.MODEL_8087)) {
                 if (cpu.opPrefixes & X86.OPFLAG.SEG) off++;
                 if (cpu.opPrefixes & X86.OPFLAG.LOCK) off++;
             }
@@ -2079,7 +2471,8 @@ if (DEBUGGER) {
      *      a[6]: bits 32-63 of 80-bit "temp-real" (TR)
      *      a[7]: bits 64-79 of 80-bit "temp-real" (TR) (in bits 0-15)
      *
-     * Used by the Debugger for its floating-point register ("rfp") command.
+     * Used by the Debugger for its floating-point register ("rfp") command.  For other FPU registers,
+     * the Debugger calls getStatus() and getControl() directly.
      *
      * @this {X86FPU}
      * @param {number} i (stack index, relative to ST)
@@ -2096,7 +2489,7 @@ if (DEBUGGER) {
             var iInt = iReg << 1;
             a[3] = this.intStack[iInt];
             a[4] = this.intStack[iInt + 1];
-            var aTR = this.getTR(i);
+            var aTR = this.getTRFromLR(a[3], a[4]);
             a[5] = aTR[0]; a[6] = aTR[1]; a[7] = aTR[2];
         }
         return a;
@@ -2164,7 +2557,7 @@ X86FPU.aaOps = {
 /*
  * An array of X86FPU functions documented as preserving the "exception" registers.
  */
-X86FPU.afnPreserveExceptionRegs = [
+X86FPU.afnPreserveExceptions = [
     X86FPU.FCLEX,   X86FPU.FINIT,   X86FPU.FLDCW,   X86FPU.FLDENV,  X86FPU.FRSTOR,
     X86FPU.FSAVE,   X86FPU.FSTCW,   X86FPU.FSTENV,  X86FPU.FSTSW,   X86FPU.FSTSWAX
 ];
