@@ -253,6 +253,20 @@ if (DEBUGGER) {
     Component.subclass(Debugger);
 
     /*
+     * NOTE: Every Debugger property from here to the first prototype function definition (initBus()) is a
+     * considered a "class constant"; most of them use our "all-caps" convention (and all of them SHOULD, but
+     * that wouldn't help us catch any bugs).
+     *
+     * Technically, all of them should ALSO be preceded by a "@const" annotation, but that's a lot of work and it
+     * really clutters the code.  I wish the Closure Compiler had a way to annotate every definition with a given
+     * section with a single annotation....
+     *
+     * Bugs can slip through the cracks without those annotations; for example, I unthinkingly redefined TYPE_SI
+     * at one point, and if all the definitions had been preceded by an "@const", that mistake would have been
+     * caught at compile-time.
+     */
+
+    /*
      * Information regarding interrupts of interest (used by messageInt() and others)
      */
     Debugger.INT_MESSAGES = {
@@ -398,7 +412,8 @@ if (DEBUGGER) {
      *      34-40:  comparisons
      *      41-45:  transcendental
      *      46-52:  constants
-     *      53-76:  coprocessor control
+     *      53-77:  coprocessor control
+     *      78---:  new for 80287 or higher
      *
      * Also, unlike the CPU instructions, there is no NONE ("INVALID") instruction; if an ESC instruction
      * can't be decoded as a valid FPU instruction, then it should remain an ESC instruction.
@@ -413,7 +428,8 @@ if (DEBUGGER) {
         FLDPI:  48,  FLDL2T: 49,  FLDL2E: 50,  FLDLG2: 51,  FLDLN2: 52,  FINIT:  53,  FNINIT: 54,  FDISI:  55,
         FNDISI: 56,  FENI:   57,  FNENI:  58,  FLDCW:  59,  FSTCW:  60,  FNSTCW: 61,  FSTSW:  62,  FNSTSW: 63,
         FCLEX:  64,  FNCLEX: 65,  FSTENV: 66,  FNSTENV:67,  FLDENV: 68,  FSAVE:  69,  FNSAVE: 70,  FRSTOR: 71,
-        FINCSTP:72,  FDECSTP:73,  FFREE:  74,  FNOP:   75,  FWAIT:  76
+        FINCSTP:72,  FDECSTP:73,  FFREE:  74,  FFREEP: 75,  FNOP:   76,  FWAIT:  77,  FSETPM: 78,  FSINCOS:79,
+        FSTSWAX:80
     };
 
     /*
@@ -429,7 +445,8 @@ if (DEBUGGER) {
         "FLDPI",  "FLDL2T", "FLDL2E", "FLDLG2", "FLDLN2", "FINIT",  "FNINIT", "FDISI",
         "FNDISI", "FENI",   "FNENI",  "FLDCW",  "FSTCW",  "FNSTCW", "FSTSW",  "FNSTSW",
         "FCLEX",  "FNCLEX", "FSTENV", "FNSTENV","FLDENV", "FSAVE",  "FNSAVE", "FRSTOR",
-        "FINCSTP","FDECSTP","FFREE",  "FNOP",   "FWAIT"
+        "FINCSTP","FDECSTP","FFREE",  "FFREEP", "FNOP",   "FWAIT",  "FSETPM", "FSINCOS",
+        "FSTSWAX"
     ];
 
     Debugger.FPU_TAGS = ["VALID", "ZERO ", "SPEC ", "EMPTY"];
@@ -548,14 +565,22 @@ if (DEBUGGER) {
     Debugger.TYPE_SEGP      = 0x0006;   // (p) 32-bit or 48-bit pointer
     Debugger.TYPE_FARP      = 0x0007;   // (p) 32-bit or 48-bit pointer for JMP/CALL
     Debugger.TYPE_PREFIX    = 0x0008;   //     (treat similarly to TYPE_NONE)
-    Debugger.TYPE_ST        = 0x0009;   //     FPU ST (implicit top)
-    Debugger.TYPE_STREG     = 0x000A;   //     FPU ST (explicit register)
-    Debugger.TYPE_SI        = 0x000B;   //     FPU SI (short-integer; 32-bit)
-    Debugger.TYPE_SR        = 0x000B;   //     FPU SR (short-real; 32-bit)
-    Debugger.TYPE_LI        = 0x000C;   //     FPU LI (long-integer; 64-bit)
-    Debugger.TYPE_LR        = 0x000C;   //     FPU LR (long-real; 64-bit)
-    Debugger.TYPE_TR        = 0x000D;   //     FPU TR (temp-real; 80-bit)
-    Debugger.TYPE_PD        = 0x000E;   //     FPU PD (packed-decimal, 18 digits; 80-bit)
+    /*
+     * The remaining TYPE_SIZE values are for the FPU.  Note that there are not enough values
+     * within this nibble for every type to have a unique value, so to differentiate between two
+     * types of the same size (eg, SINT and SREAL), we can inspect the opcode string, because only
+     * FI* instructions use INT operands.  Also, some FPU sizes are not in this list (eg, the
+     * so-called "word-integer"); since a word-integer is always 16 bits, we specify TYPE_SHORT,
+     * which the Debugger should display as "INT16" for FI* instructions.
+     */
+    Debugger.TYPE_ST        = 0x0009;   //     FPU ST (implicit stack top)
+    Debugger.TYPE_STREG     = 0x000A;   //     FPU ST (explicit stack register, relative to top)
+    Debugger.TYPE_SINT      = 0x000B;   //     FPU SI (short-integer; 32-bit); displayed as "INT32"
+    Debugger.TYPE_SREAL     = 0x000B;   //     FPU SR (short-real; 32-bit)
+    Debugger.TYPE_LINT      = 0x000C;   //     FPU LI (long-integer; 64-bit); displayed as "INT64"
+    Debugger.TYPE_LREAL     = 0x000C;   //     FPU LR (long-real; 64-bit)
+    Debugger.TYPE_TREAL     = 0x000D;   //     FPU TR (temp-real; 80-bit)
+    Debugger.TYPE_DEC18     = 0x000E;   //     FPU PD (packed-decimal, 18 digits; 80-bit)
     Debugger.TYPE_ENV       = 0x000F;   //     FPU ENV (environment; 14 bytes in real-mode, 28 bytes in protected-mode)
     Debugger.TYPE_FPU       = 0x000F;   //     FPU SAVE (save/restore; 94 bytes in real-mode, 108 bytes in protected-mode)
 
@@ -614,9 +639,12 @@ if (DEBUGGER) {
     Debugger.TYPE_OUT   = 0x2000;        // operand is output
     Debugger.TYPE_BOTH  = (Debugger.TYPE_IN | Debugger.TYPE_OUT);
     Debugger.TYPE_8086  = (Debugger.CPU_8086 << 14);
+    Debugger.TYPE_8087  = Debugger.TYPE_8086;
     Debugger.TYPE_80186 = (Debugger.CPU_80186 << 14);
     Debugger.TYPE_80286 = (Debugger.CPU_80286 << 14);
+    Debugger.TYPE_80287 = Debugger.TYPE_80286;
     Debugger.TYPE_80386 = (Debugger.CPU_80386 << 14);
+    Debugger.TYPE_80387 = Debugger.TYPE_80386;
     Debugger.TYPE_CPU_SHIFT = 14;
 
     /*
@@ -1073,27 +1101,27 @@ if (DEBUGGER) {
      */
     Debugger.aaaOpFPUDescs = {
         0xD8: {
-            0x00: [Debugger.FINS.FADD,   Debugger.TYPE_MODRM  | Debugger.TYPE_SR | Debugger.TYPE_IN],
-            0x01: [Debugger.FINS.FMUL,   Debugger.TYPE_MODRM  | Debugger.TYPE_SR | Debugger.TYPE_IN],
-            0x02: [Debugger.FINS.FCOM,   Debugger.TYPE_MODRM  | Debugger.TYPE_SR | Debugger.TYPE_IN],
-            0x03: [Debugger.FINS.FCOMP,  Debugger.TYPE_MODRM  | Debugger.TYPE_SR | Debugger.TYPE_IN],
-            0x04: [Debugger.FINS.FSUB,   Debugger.TYPE_MODRM  | Debugger.TYPE_SR | Debugger.TYPE_IN],
-            0x05: [Debugger.FINS.FSUBR,  Debugger.TYPE_MODRM  | Debugger.TYPE_SR | Debugger.TYPE_IN],
-            0x06: [Debugger.FINS.FDIV,   Debugger.TYPE_MODRM  | Debugger.TYPE_SR | Debugger.TYPE_IN],
-            0x07: [Debugger.FINS.FDIVR,  Debugger.TYPE_MODRM  | Debugger.TYPE_SR | Debugger.TYPE_IN],
-            0x30: [Debugger.FINS.FADD,   Debugger.TYPE_IMPREG | Debugger.TYPE_ST | Debugger.TYPE_OUT, Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_IN],
-            0x31: [Debugger.FINS.FMUL,   Debugger.TYPE_IMPREG | Debugger.TYPE_ST | Debugger.TYPE_OUT, Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_IN],
-            0x32: [Debugger.FINS.FCOM,   Debugger.TYPE_IMPREG | Debugger.TYPE_ST | Debugger.TYPE_OUT, Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_IN],
-            0x33: [Debugger.FINS.FCOMP,  Debugger.TYPE_IMPREG | Debugger.TYPE_ST | Debugger.TYPE_OUT, Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_IN],
-            0x34: [Debugger.FINS.FSUB,   Debugger.TYPE_IMPREG | Debugger.TYPE_ST | Debugger.TYPE_OUT, Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_IN],
-            0x35: [Debugger.FINS.FSUBR,  Debugger.TYPE_IMPREG | Debugger.TYPE_ST | Debugger.TYPE_OUT, Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_IN],
-            0x36: [Debugger.FINS.FDIV,   Debugger.TYPE_IMPREG | Debugger.TYPE_ST | Debugger.TYPE_OUT, Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_IN],
-            0x37: [Debugger.FINS.FDIVR,  Debugger.TYPE_IMPREG | Debugger.TYPE_ST | Debugger.TYPE_OUT, Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_IN]
+            0x00: [Debugger.FINS.FADD,   Debugger.TYPE_MODRM  | Debugger.TYPE_SREAL | Debugger.TYPE_IN],
+            0x01: [Debugger.FINS.FMUL,   Debugger.TYPE_MODRM  | Debugger.TYPE_SREAL | Debugger.TYPE_IN],
+            0x02: [Debugger.FINS.FCOM,   Debugger.TYPE_MODRM  | Debugger.TYPE_SREAL | Debugger.TYPE_IN],
+            0x03: [Debugger.FINS.FCOMP,  Debugger.TYPE_MODRM  | Debugger.TYPE_SREAL | Debugger.TYPE_IN],
+            0x04: [Debugger.FINS.FSUB,   Debugger.TYPE_MODRM  | Debugger.TYPE_SREAL | Debugger.TYPE_IN],
+            0x05: [Debugger.FINS.FSUBR,  Debugger.TYPE_MODRM  | Debugger.TYPE_SREAL | Debugger.TYPE_IN],
+            0x06: [Debugger.FINS.FDIV,   Debugger.TYPE_MODRM  | Debugger.TYPE_SREAL | Debugger.TYPE_IN],
+            0x07: [Debugger.FINS.FDIVR,  Debugger.TYPE_MODRM  | Debugger.TYPE_SREAL | Debugger.TYPE_IN],
+            0x30: [Debugger.FINS.FADD,   Debugger.TYPE_IMPREG | Debugger.TYPE_ST    | Debugger.TYPE_OUT, Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_IN],
+            0x31: [Debugger.FINS.FMUL,   Debugger.TYPE_IMPREG | Debugger.TYPE_ST    | Debugger.TYPE_OUT, Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_IN],
+            0x32: [Debugger.FINS.FCOM,   Debugger.TYPE_IMPREG | Debugger.TYPE_ST    | Debugger.TYPE_OUT, Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_IN],
+            0x33: [Debugger.FINS.FCOMP,  Debugger.TYPE_IMPREG | Debugger.TYPE_ST    | Debugger.TYPE_OUT, Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_IN],
+            0x34: [Debugger.FINS.FSUB,   Debugger.TYPE_IMPREG | Debugger.TYPE_ST    | Debugger.TYPE_OUT, Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_IN],
+            0x35: [Debugger.FINS.FSUBR,  Debugger.TYPE_IMPREG | Debugger.TYPE_ST    | Debugger.TYPE_OUT, Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_IN],
+            0x36: [Debugger.FINS.FDIV,   Debugger.TYPE_IMPREG | Debugger.TYPE_ST    | Debugger.TYPE_OUT, Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_IN],
+            0x37: [Debugger.FINS.FDIVR,  Debugger.TYPE_IMPREG | Debugger.TYPE_ST    | Debugger.TYPE_OUT, Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_IN]
         },
         0xD9: {
-            0x00: [Debugger.FINS.FLD,    Debugger.TYPE_MODRM  | Debugger.TYPE_SR    | Debugger.TYPE_IN],
-            0x02: [Debugger.FINS.FST,    Debugger.TYPE_MODRM  | Debugger.TYPE_SR    | Debugger.TYPE_OUT],
-            0x03: [Debugger.FINS.FSTP,   Debugger.TYPE_MODRM  | Debugger.TYPE_SR    | Debugger.TYPE_OUT],
+            0x00: [Debugger.FINS.FLD,    Debugger.TYPE_MODRM  | Debugger.TYPE_SREAL | Debugger.TYPE_IN],
+            0x02: [Debugger.FINS.FST,    Debugger.TYPE_MODRM  | Debugger.TYPE_SREAL | Debugger.TYPE_OUT],
+            0x03: [Debugger.FINS.FSTP,   Debugger.TYPE_MODRM  | Debugger.TYPE_SREAL | Debugger.TYPE_OUT],
             0x04: [Debugger.FINS.FLDENV, Debugger.TYPE_MODRM  | Debugger.TYPE_ENV   | Debugger.TYPE_IN],
             0x05: [Debugger.FINS.FLDCW,  Debugger.TYPE_MODRM  | Debugger.TYPE_SHORT | Debugger.TYPE_IN],
             0x06: [Debugger.FINS.FSTENV, Debugger.TYPE_MODRM  | Debugger.TYPE_ENV   | Debugger.TYPE_OUT],
@@ -1101,7 +1129,7 @@ if (DEBUGGER) {
             0x30: [Debugger.FINS.FLD,    Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_OUT],
             0x31: [Debugger.FINS.FXCH,   Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_OUT],
             0x32: [Debugger.FINS.FNOP],
-            0x33: [Debugger.FINS.FSTP,   Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_OUT],
+            0x33: [Debugger.FINS.FSTP,   Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_OUT],   // Obsolete decoding
             0x40: [Debugger.FINS.FCHS],
             0x41: [Debugger.FINS.FABS],
             0x44: [Debugger.FINS.FTST],
@@ -1127,53 +1155,55 @@ if (DEBUGGER) {
             0x75: [Debugger.FINS.FSCALE]
         },
         0xDA: {
-            0x00: [Debugger.FINS.FIADD,  Debugger.TYPE_MODRM  | Debugger.TYPE_SI | Debugger.TYPE_IN],
-            0x01: [Debugger.FINS.FIMUL,  Debugger.TYPE_MODRM  | Debugger.TYPE_SI | Debugger.TYPE_IN],
-            0x02: [Debugger.FINS.FICOM,  Debugger.TYPE_MODRM  | Debugger.TYPE_SI | Debugger.TYPE_IN],
-            0x03: [Debugger.FINS.FICOMP, Debugger.TYPE_MODRM  | Debugger.TYPE_SI | Debugger.TYPE_IN],
-            0x04: [Debugger.FINS.FISUB,  Debugger.TYPE_MODRM  | Debugger.TYPE_SI | Debugger.TYPE_IN],
-            0x05: [Debugger.FINS.FISUBR, Debugger.TYPE_MODRM  | Debugger.TYPE_SI | Debugger.TYPE_IN],
-            0x06: [Debugger.FINS.FIDIV,  Debugger.TYPE_MODRM  | Debugger.TYPE_SI | Debugger.TYPE_IN],
-            0x07: [Debugger.FINS.FIDIVR, Debugger.TYPE_MODRM  | Debugger.TYPE_SI | Debugger.TYPE_IN]
+            0x00: [Debugger.FINS.FIADD,  Debugger.TYPE_MODRM  | Debugger.TYPE_SINT | Debugger.TYPE_IN],
+            0x01: [Debugger.FINS.FIMUL,  Debugger.TYPE_MODRM  | Debugger.TYPE_SINT | Debugger.TYPE_IN],
+            0x02: [Debugger.FINS.FICOM,  Debugger.TYPE_MODRM  | Debugger.TYPE_SINT | Debugger.TYPE_IN],
+            0x03: [Debugger.FINS.FICOMP, Debugger.TYPE_MODRM  | Debugger.TYPE_SINT | Debugger.TYPE_IN],
+            0x04: [Debugger.FINS.FISUB,  Debugger.TYPE_MODRM  | Debugger.TYPE_SINT | Debugger.TYPE_IN],
+            0x05: [Debugger.FINS.FISUBR, Debugger.TYPE_MODRM  | Debugger.TYPE_SINT | Debugger.TYPE_IN],
+            0x06: [Debugger.FINS.FIDIV,  Debugger.TYPE_MODRM  | Debugger.TYPE_SINT | Debugger.TYPE_IN],
+            0x07: [Debugger.FINS.FIDIVR, Debugger.TYPE_MODRM  | Debugger.TYPE_SINT | Debugger.TYPE_IN]
         },
         0xDB: {
-            0x00: [Debugger.FINS.FILD,   Debugger.TYPE_MODRM  | Debugger.TYPE_SI | Debugger.TYPE_IN],
-            0x02: [Debugger.FINS.FIST,   Debugger.TYPE_MODRM  | Debugger.TYPE_SI | Debugger.TYPE_OUT],
-            0x03: [Debugger.FINS.FISTP,  Debugger.TYPE_MODRM  | Debugger.TYPE_SI | Debugger.TYPE_OUT],
-            0x05: [Debugger.FINS.FLD,    Debugger.TYPE_MODRM  | Debugger.TYPE_TR | Debugger.TYPE_IN],
-            0x07: [Debugger.FINS.FSTP,   Debugger.TYPE_MODRM  | Debugger.TYPE_TR | Debugger.TYPE_OUT],
+            0x00: [Debugger.FINS.FILD,   Debugger.TYPE_MODRM  | Debugger.TYPE_SINT  | Debugger.TYPE_IN],
+            0x02: [Debugger.FINS.FIST,   Debugger.TYPE_MODRM  | Debugger.TYPE_SINT  | Debugger.TYPE_OUT],
+            0x03: [Debugger.FINS.FISTP,  Debugger.TYPE_MODRM  | Debugger.TYPE_SINT  | Debugger.TYPE_OUT],
+            0x05: [Debugger.FINS.FLD,    Debugger.TYPE_MODRM  | Debugger.TYPE_TREAL | Debugger.TYPE_IN],
+            0x07: [Debugger.FINS.FSTP,   Debugger.TYPE_MODRM  | Debugger.TYPE_TREAL | Debugger.TYPE_OUT],
             0x40: [Debugger.FINS.FENI],
             0x41: [Debugger.FINS.FDISI],
             0x42: [Debugger.FINS.FCLEX],
-            0x43: [Debugger.FINS.FINIT]
+            0x43: [Debugger.FINS.FINIT],
+            0x44: [Debugger.FINS.FSETPM,  Debugger.TYPE_80287],
+            0x73: [Debugger.FINS.FSINCOS, Debugger.TYPE_80387]
         },
         0xDC: {
-            0x00: [Debugger.FINS.FADD,   Debugger.TYPE_MODRM  | Debugger.TYPE_LR    | Debugger.TYPE_IN],
-            0x01: [Debugger.FINS.FMUL,   Debugger.TYPE_MODRM  | Debugger.TYPE_LR    | Debugger.TYPE_IN],
-            0x02: [Debugger.FINS.FCOM,   Debugger.TYPE_MODRM  | Debugger.TYPE_LR    | Debugger.TYPE_IN],
-            0x03: [Debugger.FINS.FCOMP,  Debugger.TYPE_MODRM  | Debugger.TYPE_LR    | Debugger.TYPE_IN],
-            0x04: [Debugger.FINS.FSUB,   Debugger.TYPE_MODRM  | Debugger.TYPE_LR    | Debugger.TYPE_IN],
-            0x05: [Debugger.FINS.FSUBR,  Debugger.TYPE_MODRM  | Debugger.TYPE_LR    | Debugger.TYPE_IN],
-            0x06: [Debugger.FINS.FDIV,   Debugger.TYPE_MODRM  | Debugger.TYPE_LR    | Debugger.TYPE_IN],
-            0x07: [Debugger.FINS.FDIVR,  Debugger.TYPE_MODRM  | Debugger.TYPE_LR    | Debugger.TYPE_IN],
+            0x00: [Debugger.FINS.FADD,   Debugger.TYPE_MODRM  | Debugger.TYPE_LREAL | Debugger.TYPE_IN],
+            0x01: [Debugger.FINS.FMUL,   Debugger.TYPE_MODRM  | Debugger.TYPE_LREAL | Debugger.TYPE_IN],
+            0x02: [Debugger.FINS.FCOM,   Debugger.TYPE_MODRM  | Debugger.TYPE_LREAL | Debugger.TYPE_IN],
+            0x03: [Debugger.FINS.FCOMP,  Debugger.TYPE_MODRM  | Debugger.TYPE_LREAL | Debugger.TYPE_IN],
+            0x04: [Debugger.FINS.FSUB,   Debugger.TYPE_MODRM  | Debugger.TYPE_LREAL | Debugger.TYPE_IN],
+            0x05: [Debugger.FINS.FSUBR,  Debugger.TYPE_MODRM  | Debugger.TYPE_LREAL | Debugger.TYPE_IN],
+            0x06: [Debugger.FINS.FDIV,   Debugger.TYPE_MODRM  | Debugger.TYPE_LREAL | Debugger.TYPE_IN],
+            0x07: [Debugger.FINS.FDIVR,  Debugger.TYPE_MODRM  | Debugger.TYPE_LREAL | Debugger.TYPE_IN],
             0x30: [Debugger.FINS.FADD,   Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_OUT, Debugger.TYPE_IMPREG | Debugger.TYPE_ST | Debugger.TYPE_IN],
             0x31: [Debugger.FINS.FMUL,   Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_OUT, Debugger.TYPE_IMPREG | Debugger.TYPE_ST | Debugger.TYPE_IN],
-            0x32: [Debugger.FINS.FCOM,   Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_IN],
-            0x33: [Debugger.FINS.FCOMP,  Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_IN],
+            0x32: [Debugger.FINS.FCOM,   Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_IN],    // Obsolete decoding
+            0x33: [Debugger.FINS.FCOMP,  Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_IN],    // Obsolete decoding
             0x34: [Debugger.FINS.FSUB,   Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_OUT, Debugger.TYPE_IMPREG | Debugger.TYPE_ST | Debugger.TYPE_IN],
             0x35: [Debugger.FINS.FSUBR,  Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_OUT, Debugger.TYPE_IMPREG | Debugger.TYPE_ST | Debugger.TYPE_IN],
             0x36: [Debugger.FINS.FDIV,   Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_OUT, Debugger.TYPE_IMPREG | Debugger.TYPE_ST | Debugger.TYPE_IN],
             0x37: [Debugger.FINS.FDIVR,  Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_OUT, Debugger.TYPE_IMPREG | Debugger.TYPE_ST | Debugger.TYPE_IN]
         },
         0xDD: {
-            0x00: [Debugger.FINS.FLD,    Debugger.TYPE_MODRM  | Debugger.TYPE_LR    | Debugger.TYPE_IN],
-            0x02: [Debugger.FINS.FST,    Debugger.TYPE_MODRM  | Debugger.TYPE_LR    | Debugger.TYPE_OUT],
-            0x03: [Debugger.FINS.FSTP,   Debugger.TYPE_MODRM  | Debugger.TYPE_LR    | Debugger.TYPE_OUT],
+            0x00: [Debugger.FINS.FLD,    Debugger.TYPE_MODRM  | Debugger.TYPE_LREAL | Debugger.TYPE_IN],
+            0x02: [Debugger.FINS.FST,    Debugger.TYPE_MODRM  | Debugger.TYPE_LREAL | Debugger.TYPE_OUT],
+            0x03: [Debugger.FINS.FSTP,   Debugger.TYPE_MODRM  | Debugger.TYPE_LREAL | Debugger.TYPE_OUT],
             0x04: [Debugger.FINS.FRSTOR, Debugger.TYPE_MODRM  | Debugger.TYPE_FPU   | Debugger.TYPE_IN],
             0x06: [Debugger.FINS.FSAVE,  Debugger.TYPE_MODRM  | Debugger.TYPE_FPU   | Debugger.TYPE_OUT],
             0x07: [Debugger.FINS.FSTSW,  Debugger.TYPE_MODRM  | Debugger.TYPE_SHORT | Debugger.TYPE_OUT],
             0x30: [Debugger.FINS.FFREE,  Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_IN],
-            0x31: [Debugger.FINS.FXCH,   Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_OUT],
+            0x31: [Debugger.FINS.FXCH,   Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_OUT],   // Obsolete decoding
             0x32: [Debugger.FINS.FST,    Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_IN],
             0x33: [Debugger.FINS.FSTP,   Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_IN]
         },
@@ -1188,7 +1218,7 @@ if (DEBUGGER) {
             0x07: [Debugger.FINS.FIDIVR, Debugger.TYPE_MODRM  | Debugger.TYPE_SHORT | Debugger.TYPE_IN],
             0x30: [Debugger.FINS.FADDP,  Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_OUT, Debugger.TYPE_IMPREG | Debugger.TYPE_ST | Debugger.TYPE_IN],
             0x31: [Debugger.FINS.FMULP,  Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_OUT, Debugger.TYPE_IMPREG | Debugger.TYPE_ST | Debugger.TYPE_IN],
-            0x32: [Debugger.FINS.FCOMP,  Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_IN],
+            0x32: [Debugger.FINS.FCOMP,  Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_IN],    // Obsolete decoding
             0x33: [Debugger.FINS.FCOMPP, Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_IN],
             0x34: [Debugger.FINS.FSUBP,  Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_OUT, Debugger.TYPE_IMPREG | Debugger.TYPE_ST | Debugger.TYPE_IN],
             0x35: [Debugger.FINS.FSUBRP, Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_OUT, Debugger.TYPE_IMPREG | Debugger.TYPE_ST | Debugger.TYPE_IN],
@@ -1199,14 +1229,15 @@ if (DEBUGGER) {
             0x00: [Debugger.FINS.FILD,   Debugger.TYPE_MODRM  | Debugger.TYPE_SHORT | Debugger.TYPE_IN],
             0x02: [Debugger.FINS.FIST,   Debugger.TYPE_MODRM  | Debugger.TYPE_SHORT | Debugger.TYPE_OUT],
             0x03: [Debugger.FINS.FISTP,  Debugger.TYPE_MODRM  | Debugger.TYPE_SHORT | Debugger.TYPE_OUT],
-            0x04: [Debugger.FINS.FBLD,   Debugger.TYPE_MODRM  | Debugger.TYPE_PD    | Debugger.TYPE_IN],
-            0x05: [Debugger.FINS.FILD,   Debugger.TYPE_MODRM  | Debugger.TYPE_LI    | Debugger.TYPE_IN],
-            0x06: [Debugger.FINS.FBSTP,  Debugger.TYPE_MODRM  | Debugger.TYPE_PD    | Debugger.TYPE_OUT],
-            0x07: [Debugger.FINS.FISTP,  Debugger.TYPE_MODRM  | Debugger.TYPE_LI    | Debugger.TYPE_OUT],
-            0x30: [Debugger.FINS.FFREE,  Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_IN],
-            0x31: [Debugger.FINS.FXCH,   Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_OUT],
-            0x32: [Debugger.FINS.FSTP,   Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_IN],
-            0x33: [Debugger.FINS.FSTP,   Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_IN]
+            0x04: [Debugger.FINS.FBLD,   Debugger.TYPE_MODRM  | Debugger.TYPE_DEC18 | Debugger.TYPE_IN],
+            0x05: [Debugger.FINS.FILD,   Debugger.TYPE_MODRM  | Debugger.TYPE_LINT  | Debugger.TYPE_IN],
+            0x06: [Debugger.FINS.FBSTP,  Debugger.TYPE_MODRM  | Debugger.TYPE_DEC18 | Debugger.TYPE_OUT],
+            0x07: [Debugger.FINS.FISTP,  Debugger.TYPE_MODRM  | Debugger.TYPE_LINT  | Debugger.TYPE_OUT],
+            0x30: [Debugger.FINS.FFREEP, Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_IN],    // Obsolete decoding
+            0x31: [Debugger.FINS.FXCH,   Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_OUT],   // Obsolete decoding
+            0x32: [Debugger.FINS.FSTP,   Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_IN],    // Obsolete decoding
+            0x33: [Debugger.FINS.FSTP,   Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_IN],    // Obsolete decoding
+            0x34: [Debugger.FINS.FSTSWAX, Debugger.TYPE_80287]
         }
     };
 
@@ -4788,7 +4819,7 @@ if (DEBUGGER) {
                      * like "LEA AX,BX", it will actually do something (on some if not all processors), so
                      * there's probably some diagnostic value in allowing those cases to be disassembled.
                      */
-                    sOperand = this.getModRMOperand(bModRM, type, cOperands, dbgAddr);
+                    sOperand = this.getModRMOperand(sOpcode, bModRM, type, cOperands, dbgAddr);
                 }
                 else if (typeMode == Debugger.TYPE_MODREG) {
                     /*
@@ -5053,22 +5084,24 @@ if (DEBUGGER) {
     };
 
     /**
-     * getModRMOperand(bModRM, type, cOperands, dbgAddr)
+     * getModRMOperand(sOpcode, bModRM, type, cOperands, dbgAddr)
      *
      * @this {Debugger}
+     * @param {string} sOpcode
      * @param {number} bModRM
      * @param {number} type
      * @param {number} cOperands (if 1, memory operands are prefixed with the size; otherwise, size can be inferred)
      * @param {DbgAddr} dbgAddr
      * @return {string} operand
      */
-    Debugger.prototype.getModRMOperand = function(bModRM, type, cOperands, dbgAddr)
+    Debugger.prototype.getModRMOperand = function(sOpcode, bModRM, type, cOperands, dbgAddr)
     {
         var sOperand = "";
         var bMod = bModRM >> 6;
         var bRM = bModRM & 0x7;
         if (bMod < 3) {
             var disp;
+            var fInteger = (sOpcode.indexOf("FI") == 0);
             if (!bMod && (!dbgAddr.fAddr32 && bRM == 6 || dbgAddr.fAddr32 && bRM == 5)) {
                 bMod = 2;
             } else {
@@ -5116,23 +5149,38 @@ if (DEBUGGER) {
                     sPrefix = "BYTE";
                     break;
                 case Debugger.TYPE_SHORT:
+                    if (fInteger) {
+                        sPrefix = "INT16";
+                        break;
+                    }
+                    /* falls through */
                     sPrefix = "WORD";
                     break;
                 case Debugger.TYPE_LONG:
                     sPrefix = "DWORD";
                     break;
-                case Debugger.TYPE_SI:
-                case Debugger.TYPE_SR:
-                    sPrefix = "SREAL";
+                case Debugger.TYPE_SINT:
+                    if (fInteger) {
+                        sPrefix = "INT32";
+                        break;
+                    }
+                    /* falls through */
+                case Debugger.TYPE_SREAL:
+                    sPrefix = "REAL32";
                     break;
-                case Debugger.TYPE_LI:
-                case Debugger.TYPE_LR:
-                    sPrefix = "LREAL";
+                case Debugger.TYPE_LINT:
+                    if (fInteger) {
+                        sPrefix = "INT64";
+                        break;
+                    }
+                    /* falls through */
+                case Debugger.TYPE_LREAL:
+                    sPrefix = "REAL64";
                     break;
-                case Debugger.TYPE_TR:
-                    sPrefix = "TREAL";
+                case Debugger.TYPE_TREAL:
+                    sPrefix = "REAL80";
                     break;
-                case Debugger.TYPE_PD:
+                case Debugger.TYPE_DEC18:
                     sPrefix = "DEC18";
                     break;
                 }
@@ -7778,7 +7826,7 @@ if (DEBUGGER) {
              * Also, to allow quoted strings *inside* breakpoint commands, we first replace all
              * DOUBLE double-quotes with single quotes.
              */
-            sCmd = sCmd.replace(/""/g, "'");
+            sCmd = sCmd.toLowerCase().replace(/""/g, "'");
 
             var iPrev = 0;
             var chQuote = null;

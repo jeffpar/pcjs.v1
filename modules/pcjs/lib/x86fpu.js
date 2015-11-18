@@ -109,7 +109,9 @@ function X86FPU(parmsFPU)
     this.intTmpSR = new Int32Array(this.regTmpSR.buffer);
 
     /*
-     * Used for "long-real" (LR) 64-bit floating-point operations.
+     * Used for "long-real" (LR) 64-bit floating-point operations.  We also use intTmpLR as temporary storage
+     * for all "word-integer" (WI or INT16), "short-integer" (SI or INT32) and "long-integer" (LI or INT64) values,
+     * since it's just large enough to accommodate all three sizes of integers.
      */
     this.regTmpLR = new Float64Array(1);
     this.intTmpLR = new Int32Array(this.regTmpLR.buffer);
@@ -119,7 +121,7 @@ function X86FPU(parmsFPU)
      * where [0] contains TR bits 0-31, [1] contains TR bits 32-63, and [2] contains TR bits 64-79; the
      * upper 16 bits of [2] are not used and should remain zero.
      */
-    this.regTmpTR = new Array(3);
+    this.intTmpTR = new Array(3);
 
     /*
      * Initialize other (non-floating-point) coprocessor registers that resetFPU() doesn't touch,
@@ -142,12 +144,6 @@ function X86FPU(parmsFPU)
     this.intIndefinite = new Int32Array(this.regIndefinite.buffer);
     this.intIndefinite[0] = 0x00000000; this.intIndefinite[1] = 0xFFF8000;
 
-    this.regL2T = Math.log(10) / Math.LN2;      // log2(10) (use Math.log2() if we ever switch to ES6)
-    this.regL2E = Math.LOG2E;                   // log2(e)
-    this.regPI  = Math.PI;                      // pi
-    this.regLG2 = Math.log(2) / Math.LN10;      // log10(2) (use Math.log10() if we ever switch to ES6)
-    this.regLN2 = Math.LN2;                     // log(2)
-
     /*
      * Initialize all other coprocessor registers (control word, tag word, status word, etc) by resetting them.
      */
@@ -155,6 +151,32 @@ function X86FPU(parmsFPU)
 }
 
 Component.subclass(X86FPU);
+
+
+/** @const */
+X86FPU.regL2T = Math.log(10) / Math.LN2;        // log2(10) (use Math.log2() if we ever switch to ES6)
+
+/** @const */
+X86FPU.regL2E = Math.LOG2E;                     // log2(e)
+
+/** @const */
+X86FPU.regPI  = Math.PI;                        // pi
+
+/** @const */
+X86FPU.regLG2 = Math.log(2) / Math.LN10;        // log10(2) (use Math.log10() if we ever switch to ES6)
+
+/** @const */
+X86FPU.regLN2 = Math.LN2;                       // log(2)
+
+/** @const */
+X86FPU.MAX_INT16 = 0x8000;
+
+/** @const */
+X86FPU.MAX_INT32 = 0x80000000;
+
+/** @const */
+X86FPU.MAX_INT64 = Math.pow(2, 63);
+
 
 /**
  * F2XM1()
@@ -183,7 +205,7 @@ X86FPU.FABS = function()
  */
 X86FPU.FADDlr = function()
 {
-    this.opUnimplemented();
+    this.setST(0, this.doAdd(this.getST(0), this.getLRFromEA()));
 };
 
 /**
@@ -193,8 +215,7 @@ X86FPU.FADDlr = function()
  */
 X86FPU.FADDsr = function()
 {
-    var result = this.addition(this.regStack[this.iST], this.getSRFromEA());
-    if (result != null) this.regStack[this.iST] = result;
+    this.setST(0, this.doAdd(this.getST(0), this.getSRFromEA()));
 };
 
 /**
@@ -204,8 +225,7 @@ X86FPU.FADDsr = function()
  */
 X86FPU.FADDst = function()
 {
-    var result = this.addition(this.regStack[this.iST], this.regStack[this.iStack]);
-    if (result != null) this.regStack[this.iST] = result;
+    this.setST(0, this.doAdd(this.getST(0), this.getST(this.iStack)));
 };
 
 /**
@@ -215,8 +235,7 @@ X86FPU.FADDst = function()
  */
 X86FPU.FADDsti = function()
 {
-    var result = this.addition(this.regStack[this.iStack], this.regStack[this.iST]);
-    if (result != null) this.regStack[this.iStack] = result;
+    this.setST(this.iStack, this.doAdd(this.getST(this.iStack), this.getST(0)));
 };
 
 /**
@@ -315,6 +334,20 @@ X86FPU.FCOMsti = function()
 };
 
 /**
+ * FCOM8087()
+ *
+ * NOTE: This is used with decoding(s) (0xDC,0xD0-0xD7) that were valid for the 8087 and 80287
+ * but may no longer be valid as of the 80387.
+ *
+ * @this {X86FPU}
+ */
+X86FPU.FCOM8087 = function()
+{
+    this.opObsolete();
+    X86FPU.FCOMsti.call(this);
+};
+
+/**
  * FCOMPlr()
  *
  * @this {X86FPU}
@@ -342,7 +375,7 @@ X86FPU.FCOMPsr = function()
 X86FPU.FCOMPst = function()
 {
     // if (this.opStop()) return;       // for untested instructions: stops the CPU if it's running, but not if single-stepping
-    this.comparison(this.getST(0), this.getST(this.iStack));
+    this.doCompare(this.getST(0), this.getST(this.iStack));
     this.popValue();
 };
 
@@ -354,6 +387,20 @@ X86FPU.FCOMPst = function()
 X86FPU.FCOMPsti = function()
 {
     this.opUnimplemented();
+};
+
+/**
+ * FCOMP8087()
+ *
+ * NOTE: This is used with decodings (0xDC,0xD8-0xDF and 0xDE,0xD0-0xD7) that were valid for the 8087 and 80287
+ * but may no longer be valid as of the 80387.
+ *
+ * @this {X86FPU}
+ */
+X86FPU.FCOMP8087 = function()
+{
+    this.opObsolete();
+    X86FPU.FCOMPsti.call(this);
 };
 
 /**
@@ -393,8 +440,7 @@ X86FPU.FDISI = function()
  */
 X86FPU.FDIVlr = function()
 {
-    var quotient = this.division(this.regStack[this.iST], this.getLRFromEA());
-    if (quotient != null) this.regStack[this.iST] = quotient;
+    this.setST(0, this.doDivide(this.getST(0), this.getLRFromEA()));
 };
 
 /**
@@ -504,7 +550,23 @@ X86FPU.FENI = function()
  */
 X86FPU.FFREEsti = function()
 {
-    this.opUnimplemented();
+    this.setTag(this.iST, X86.FPU.TAGS.EMPTY);
+};
+
+/**
+ * FFREEP8087()
+ *
+ * NOTE: This is used with a decoding (0xDF,0xC0-0xC7) that was valid for the 8087 and 80287
+ * but may no longer be valid as of the 80387.  Also, if the older documentation is to be believed,
+ * this instruction has no modern counterpart, as FFREE doesn't pop the stack.
+ *
+ * @this {X86FPU}
+ */
+X86FPU.FFREEP8087 = function()
+{
+    this.opObsolete();
+    X86FPU.FFREEsti.call(this);
+    this.popValue();
 };
 
 /**
@@ -584,7 +646,7 @@ X86FPU.FIDIV16 = function()
  */
 X86FPU.FIDIV32 = function()
 {
-    this.opUnimplemented();
+    this.setST(0, this.doDivide(this.getST(0), this.getSIFromEA()));
 };
 
 /**
@@ -624,7 +686,8 @@ X86FPU.FILD16 = function()
  */
 X86FPU.FILD32 = function()
 {
-    this.opUnimplemented();
+    this.assert(this.cpu.regEA !== X86.ADDR_INVALID);
+    this.pushValue(this.cpu.getLong(this.cpu.regEA));
 };
 
 /**
@@ -714,7 +777,10 @@ X86FPU.FISTP16 = function()
  */
 X86FPU.FISTP32 = function()
 {
-    this.opUnimplemented();
+    if (this.getSI(0)) {
+        this.setEAFromSI();
+        this.popValue();
+    }
 };
 
 /**
@@ -838,6 +904,7 @@ X86FPU.FLDtr = function()
  */
 X86FPU.FLDCW = function()
 {
+    this.assert(this.cpu.regEA !== X86.ADDR_INVALID);
     this.setControl(this.cpu.getShort(this.cpu.regEA));
 };
 
@@ -848,6 +915,7 @@ X86FPU.FLDCW = function()
  */
 X86FPU.FLDENV = function()
 {
+    this.assert(this.cpu.regEA !== X86.ADDR_INVALID);
     this.loadEnv(this.cpu.regEA);
 };
 
@@ -868,7 +936,7 @@ X86FPU.FLD1 = function()
  */
 X86FPU.FLDL2T = function()
 {
-    this.pushValue(this.regL2T);
+    this.pushValue(X86FPU.regL2T);
 };
 
 /**
@@ -878,7 +946,7 @@ X86FPU.FLDL2T = function()
  */
 X86FPU.FLDL2E = function()
 {
-    this.pushValue(this.regL2E);
+    this.pushValue(X86FPU.regL2E);
 };
 
 /**
@@ -898,7 +966,7 @@ X86FPU.FLDPI = function()
  */
 X86FPU.FLDLG2 = function()
 {
-    this.pushValue(this.regLG2);
+    this.pushValue(X86FPU.regLG2);
 };
 
 /**
@@ -908,7 +976,7 @@ X86FPU.FLDLG2 = function()
  */
 X86FPU.FLDLN2 = function()
 {
-    this.pushValue(this.regLN2);
+    this.pushValue(X86FPU.regLN2);
 };
 
 /**
@@ -928,7 +996,7 @@ X86FPU.FLDZ = function()
  */
 X86FPU.FMULlr = function()
 {
-    this.opUnimplemented();
+    this.setST(0, this.doMultiply(this.getST(0), this.getLRFromEA()));
 };
 
 /**
@@ -938,8 +1006,7 @@ X86FPU.FMULlr = function()
  */
 X86FPU.FMULsr = function()
 {
-    var result = this.multiplication(this.regStack[this.iST], this.getSRFromEA());
-    if (result != null) this.regStack[this.iST] = result;
+    this.setST(0, this.doMultiply(this.getST(0), this.getSRFromEA()));
 };
 
 /**
@@ -949,8 +1016,7 @@ X86FPU.FMULsr = function()
  */
 X86FPU.FMULst = function()
 {
-    var result = this.multiplication(this.regStack[this.iST], this.regStack[this.iStack]);
-    if (result != null) this.regStack[this.iST] = result;
+    this.setST(0, this.doMultiply(this.getST(0), this.getST(this.iStack)));
 };
 
 /**
@@ -960,8 +1026,7 @@ X86FPU.FMULst = function()
  */
 X86FPU.FMULsti = function()
 {
-    var result = this.multiplication(this.regStack[this.iStack], this.regStack[this.iST]);
-    if (result != null) this.regStack[this.iStack] = result;
+    this.setST(this.iStack, this.doMultiply(this.getST(this.iStack), this.getST(0)));
 };
 
 /**
@@ -1022,7 +1087,7 @@ X86FPU.FRSTOR = function()
 {
     var cpu = this.cpu;
     var addr = this.loadEnv(cpu.regEA);
-    var a = this.regTmpTR;
+    var a = this.intTmpTR;
     for (var i = 0; i < this.regStack.length; i++) {
         a[0] = cpu.getLong(addr);
         a[1] = cpu.getLong(addr += 4);
@@ -1072,11 +1137,11 @@ X86FPU.FSCALE = function()
 };
 
 /**
- * FSETPM()
+ * FSETPM287()
  *
  * @this {X86FPU}
  */
-X86FPU.FSETPM = function()
+X86FPU.FSETPM287 = function()
 {
     if (this.isModel(X86.FPU.MODEL_80287)) {
         this.opUnimplemented();
@@ -1084,11 +1149,11 @@ X86FPU.FSETPM = function()
 };
 
 /**
- * FSINCOS()
+ * FSINCOS387()
  *
  * @this {X86FPU}
  */
-X86FPU.FSINCOS = function()
+X86FPU.FSINCOS387 = function()
 {
     if (this.isAtLeastModel(X86.FPU.MODEL_80287XL)) {
         this.opUnimplemented();
@@ -1102,7 +1167,7 @@ X86FPU.FSINCOS = function()
  */
 X86FPU.FSQRT = function()
 {
-    this.opUnimplemented();
+    this.setST(0, this.doSquareRoot(this.getST(0)));
 };
 
 /**
@@ -1113,7 +1178,7 @@ X86FPU.FSQRT = function()
 X86FPU.FSTlr = function()
 {
     if (this.getLR(0)) {
-        this.setEAFromSR();
+        this.setEAFromLR();
     }
 };
 
@@ -1136,10 +1201,7 @@ X86FPU.FSTsr = function()
  */
 X86FPU.FSTsti = function()
 {
-    var v = this.getST(0);
-    if (v != null) {
-        this.setST(this.iStack, v);
-    }
+    this.setST(this.iStack, this.getST(0));
 };
 
 /**
@@ -1149,6 +1211,7 @@ X86FPU.FSTsti = function()
  */
 X86FPU.FSTENV = function()
 {
+    this.assert(this.cpu.regEA !== X86.ADDR_INVALID);
     this.saveEnv(this.cpu.regEA);
     this.regControl |= X86.FPU.CONTROL.EXC;     // mask all exceptions (but do not set IEM)
 };
@@ -1186,11 +1249,23 @@ X86FPU.FSTPsr = function()
  */
 X86FPU.FSTPsti = function()
 {
-    var v = this.getST(0);
-    if (v != null) {
-        this.setST(this.iStack, v);
+    if (this.setST(this.iStack, this.getST(0))) {
         this.popValue();
     }
+};
+
+/**
+ * FSTP8087()
+ *
+ * NOTE: This is used with decodings (0xD9,0xD8-0xDF and 0xDF,0xD0-0xDF) that were valid for the 8087 and 80287
+ * but may no longer be valid as of the 80387.
+ *
+ * @this {X86FPU}
+ */
+X86FPU.FSTP8087 = function()
+{
+    this.opObsolete();
+    X86FPU.FSTPsti.call(this);
 };
 
 /**
@@ -1229,11 +1304,11 @@ X86FPU.FSTSW = function()
 };
 
 /**
- * FSTSWAX()
+ * FSTSWAX287()
  *
  * @this {X86FPU}
  */
-X86FPU.FSTSWAX = function()
+X86FPU.FSTSWAX287 = function()
 {
     if (this.isAtLeastModel(X86.FPU.MODEL_80287)) {
         this.cpu.regEAX = (this.cpu.regEAX & ~0xffff) | this.getStatus();
@@ -1327,7 +1402,7 @@ X86FPU.FSUBRst = function()
  */
 X86FPU.FSUBRsti = function()
 {
-    this.opUnimplemented();
+    this.setST(this.iStack, this.doSubtract(this.getST(this.iStack), this.getST(0)));
 };
 
 /**
@@ -1337,7 +1412,9 @@ X86FPU.FSUBRsti = function()
  */
 X86FPU.FSUBRPsti = function()
 {
-    this.opUnimplemented();
+    if (this.setST(this.iStack, this.doSubtract(this.getST(this.iStack), this.getST(0)))) {
+        this.popValue();
+    }
 };
 
 /**
@@ -1357,7 +1434,29 @@ X86FPU.FTST = function()
  */
 X86FPU.FXAM = function()
 {
-    this.opUnimplemented();
+    this.regStatus &= ~X86.FPU.STATUS.CC;
+
+    if (this.getSTSign(0)) {
+        this.regStatus |= X86.FPU.STATUS.C1;
+    }
+    if (this.getTag(this.iST) == X86.FPU.TAGS.EMPTY) {
+        this.regStatus |= X86.FPU.STATUS.C0 | X86.FPU.STATUS.C3;
+    }
+    else {
+        var v = this.getST(0);
+        if (isNaN(v)) {
+            this.regStatus |= X86.FPU.STATUS.C0;
+        }
+        else if (v === 0) {                                 // this equals -0, too (WTF, strict equality?)
+            this.regStatus |= X86.FPU.STATUS.C3;
+        }
+        else if (v === Infinity || v === -Infinity) {       // these are so divergent that even non-strict equality doesn't consider them equal
+            this.regStatus |= X86.FPU.STATUS.C0 | X86.FPU.STATUS.C2;
+        }
+        else {
+            this.regStatus |= X86.FPU.STATUS.C2;
+        }
+    }
 };
 
 /**
@@ -1368,6 +1467,20 @@ X86FPU.FXAM = function()
 X86FPU.FXCHsti = function()
 {
     this.opUnimplemented();
+};
+
+/**
+ * FXCH8087()
+ *
+ * NOTE: This is used with decodings (0xDD,0xC8-0xCF and 0xDF,0xC8-0xCF) that were valid for the 8087 and 80287
+ * but may no longer be valid as of the 80387.
+ *
+ * @this {X86FPU}
+ */
+X86FPU.FXCH8087 = function()
+{
+    this.opObsolete();
+    X86FPU.FXCHsti.call(this);
 };
 
 /**
@@ -1446,48 +1559,6 @@ X86FPU.prototype.powerUp = function(data, fRepower)
             this.resetFPU();
         } else {
             if (!this.restore(data)) return false;
-        }
-    }
-    if (MAXDEBUG) {
-        /*
-         * Test loading all 7 constants.
-         */
-        X86FPU.FLD1.call(this);
-        X86FPU.FLDZ.call(this);
-        X86FPU.FLDL2T.call(this);
-        X86FPU.FLDL2E.call(this);
-        X86FPU.FLDPI.call(this);
-        X86FPU.FLDLG2.call(this);
-        X86FPU.FLDLN2.call(this);
-        /*
-         * Test the ability of getTR() to convert any LR to a TR, and then verify that getST() can always obtain
-         * the original LR from that TR.  TR->LR can be a lossy operation, but LR->TR->LR should never be.
-         *
-         * We'll start by taking the value PI, which should located at ST(2) after the above pushes, converting it
-         * to a TR, and then setting ST(7), which should still be empty after the above pushes, with the same TR value.
-         *
-         * If that simple test passes, then we'll proceed to more aggressive testing, using randomly-generated floats.
-         */
-        var a = this.getTR(2, true);
-        this.setTR(7, a);
-        this.assert(this.getST(2) === this.getST(7));
-
-        var nTests = 10000;
-        while (nTests--) {
-            var lo = this.getRandomInt(0, 0xffffffff);
-            var hi = this.getRandomInt(0, 0xffffffff);
-            this.setST64(6, lo, hi);
-            a = this.getTR(6, true);
-            this.setTR(7, a);
-            if (this.getST(6) !== this.getST(7)) {
-                /*
-                 * In JavaScript, NaN values are never equal to any other value, even another identical NaN (sigh)
-                 */
-                if (!isNaN(this.getST(6)) || !isNaN(this.getST(7))) {
-                    this.println("test failure");
-                    break;
-                }
-            }
         }
     }
     return true;
@@ -1572,8 +1643,8 @@ X86FPU.prototype.resetFPU = function()
     this.iST = 0;               // the ST bits for regStatus are actually stored here
     if (DEBUG) {
         /*
-         * All the registers were tagged "unused" above, which is all that would normally happen, but debugging is
-         * a little easier if we also zero everything, too.
+         * All the registers were tagged "unused" above, which is all that would normally happen,
+         * but debugging is a little easier if we also zero everything, too.
          */
         for (var iReg = 0; iReg < this.regStack.length; iReg++) {
             this.regStack[iReg] = 0.0;
@@ -1664,6 +1735,19 @@ X86FPU.prototype.opStop = function(fError)
 X86FPU.prototype.opNone = function()
 {
     if (DEBUG) this.println(this.idComponent + ".opNone(" + str.toHexByte(this.cpu.bOpcode) + "," + str.toHexByte(this.cpu.bModRM) + ")");
+    this.opStop(true);
+};
+
+/**
+ * opObsolete()
+ *
+ * Used for any coprocessor opcodes that are redundant and potentially obsolete.
+ *
+ * @this {X86FPU}
+ */
+X86FPU.prototype.opObsolete = function()
+{
+    if (DEBUG) this.println(this.idComponent + ".opObsolete(" + str.toHexByte(this.cpu.bOpcode) + "," + str.toHexByte(this.cpu.bModRM) + ")");
     this.opStop(true);
 };
 
@@ -1825,76 +1909,166 @@ X86FPU.prototype.checkResult = function(v)
 };
 
 /**
- * addition(operand1, operand2)
+ * doAdd(operand1, operand2)
  *
  * @this {X86FPU}
- * @param {number} operand1
- * @param {number} operand2
+ * @param {number|null} operand1
+ * @param {number|null} operand2
  * @return {number|null}
  */
-X86FPU.prototype.addition = function(operand1, operand2)
+X86FPU.prototype.doAdd = function(operand1, operand2)
 {
-    var result = operand1 + operand2;
-    if (!this.checkResult(result)) result = null;
+    var result = null;
+    if (operand1 != null && operand2 != null) {
+        result = operand1 + operand2;
+        if (!this.checkResult(result)) result = null;
+    }
     return result;
 };
 
 /**
- * multiplication(operand1, operand2)
+ * doSubtract(operand1, operand2)
  *
  * @this {X86FPU}
- * @param {number} operand1
- * @param {number} operand2
+ * @param {number|null} operand1
+ * @param {number|null} operand2
  * @return {number|null}
  */
-X86FPU.prototype.multiplication = function(operand1, operand2)
+X86FPU.prototype.doSubtract = function(operand1, operand2)
 {
-    var result = operand1 * operand2;
-    if (!this.checkResult(result)) result = null;
+    var result = null;
+    if (operand1 != null && operand2 != null) {
+        result = operand1 - operand2;
+        if (!this.checkResult(result)) result = null;
+    }
     return result;
 };
 
 /**
- * division(dividend, divisor)
+ * doMultiply(operand1, operand2)
+ *
+ * @this {X86FPU}
+ * @param {number|null} operand1
+ * @param {number|null} operand2
+ * @return {number|null}
+ */
+X86FPU.prototype.doMultiply = function(operand1, operand2)
+{
+    var result = null;
+    if (operand1 != null && operand2 != null) {
+        result = operand1 * operand2;
+        if (!this.checkResult(result)) result = null;
+    }
+    return result;
+};
+
+/**
+ * doDivide(dividend, divisor)
  *
  * TODO: IE exceptions: infinity / infinity, 0 / 0, 0 / pseudo-zero, or divisor is denormal or unnormal.
  *
  * @this {X86FPU}
- * @param {number} dividend
- * @param {number} divisor
+ * @param {number|null} dividend
+ * @param {number|null} divisor
  * @return {number|null}
  */
-X86FPU.prototype.division = function(dividend, divisor)
+X86FPU.prototype.doDivide = function(dividend, divisor)
 {
     var quotient = null;
-    if (divisor || !this.setException(X86.FPU.STATUS.DE)) {
-        quotient = dividend / divisor;
-        if (!this.checkResult(quotient)) quotient = null;
+    if (dividend != null && divisor != null) {
+        if (divisor || !this.setException(X86.FPU.STATUS.DE)) {
+            quotient = dividend / divisor;
+            if (!this.checkResult(quotient)) quotient = null;
+        }
     }
     return quotient;
 };
 
 /**
- * comparison(operand1, operand2)
+ * doCompare(operand1, operand2)
  *
  * @this {X86FPU}
  * @param {number|null} operand1
  * @param {number|null} operand2
  */
-X86FPU.prototype.comparison = function(operand1, operand2)
+X86FPU.prototype.doCompare = function(operand1, operand2)
 {
-    var cc = X86.FPU.STATUS.C0 | X86.FPU.STATUS.C2 | X86.FPU.STATUS.C3;
-    if (!isNaN(operand1) && !isNaN(operand2)) {
-        var result = operand1 - operand2;
-        if (result > 0) {
-            cc = 0;
-        } else if (result < 0) {
-            cc = X86.FPU.STATUS.C0;
-        } else {
-            cc = X86.FPU.STATUS.C3;
+    if (operand1 != null && operand2 != null) {
+        var cc = X86.FPU.STATUS.C0 | X86.FPU.STATUS.C2 | X86.FPU.STATUS.C3;
+        if (!isNaN(operand1) && !isNaN(operand2)) {
+            var result = operand1 - operand2;
+            if (result > 0) {
+                cc = 0;
+            } else if (result < 0) {
+                cc = X86.FPU.STATUS.C0;
+            } else {
+                cc = X86.FPU.STATUS.C3;
+            }
         }
+        this.regStatus = (this.regStatus & ~X86.FPU.STATUS.CC) | cc;
     }
-    this.regStatus = (this.regStatus & ~X86.FPU.STATUS.CC) | cc;
+};
+
+/**
+ * doSquareRoot(operand)
+ *
+ * @this {X86FPU}
+ * @param {number|null} operand
+ * @return {number|null}
+ */
+X86FPU.prototype.doSquareRoot = function(operand)
+{
+    var result = null;
+    /*
+     * Happily, -0 is ALSO >= 0.  Also happily, Math.sqrt(-0) returns -0.
+     */
+    if (operand >= 0 || !this.setException(X86.FPU.STATUS.IE)) {
+        result = Math.sqrt(operand);
+        if (!this.checkResult(result)) result = null;
+    }
+    return result;
+};
+
+/**
+ * roundInteger(operand, limit)
+ *
+ * @this {X86FPU}
+ * @param {number|null} operand
+ * @param {number} limit (ie, 0x8000, 0x80000000, or 0x8000000000000000)
+ * @return {boolean} true if intTmpLR was loaded, false if not
+ */
+X86FPU.prototype.roundInteger = function(operand, limit)
+{
+    var result;
+    var rc = (this.regControl & X86.FPU.CONTROL.RC);
+
+    if (rc == X86.FPU.CONTROL.RC_NEAR) {
+        result = Math.round(operand);
+        if (result - operand === 0.5 && (result % 2)) result--;
+    }
+    else if (rc == X86.FPU.CONTROL.RC_DOWN || rc == X86.FPU.CONTROL.RC_CHOP && operand > 0) {
+        result = Math.floor(operand);
+    }
+    else {  // X86.FPU.CONTROL.RC_UP or X86.FPU.CONTROL.RC_CHOP && operand <= 0
+        result = Math.ceil(operand);
+    }
+
+    if (result >= limit) {
+        if (this.setException(X86.FPU.STATUS.OE)) return false;
+        result = limit - 1;
+    }
+    else if (result < -limit) {
+        if (this.setException(X86.FPU.STATUS.UE)) return false;
+        result = -limit;
+    }
+
+    this.intTmpLR[0] = result|0;
+
+    if (limit > X86FPU.MAX_INT32) {
+        this.intTmpLR[1] = (result / 0x100000000)|0;
+        if (!this.intTmpLR[1] && result < 0) this.intTmpLR[1] = -1;
+    }
+    return true;
 };
 
 /**
@@ -1938,6 +2112,19 @@ X86FPU.prototype.getTags = function()
 };
 
 /**
+ * setTag(iReg, tag)
+ *
+ * @this {X86FPU}
+ * @param {number} iReg (register index)
+ * @param {number} tag value for register (EMPTY is the only supported value)
+ */
+X86FPU.prototype.setTag = function(iReg, tag)
+{
+    this.assert(!(iReg & ~0x7) && tag == X86.FPU.TAGS.EMPTY);
+    this.regUsed &= ~(1 << iReg);
+};
+
+/**
  * setTags(n)
  *
  * All we need to update here are which physical registers are marked "empty"; the rest of the tags
@@ -1956,6 +2143,21 @@ X86FPU.prototype.setTags = function(n)
         }
         n >>= 2;
     }
+};
+
+/**
+ * getSI(i)
+ *
+ * Gets a "short-integer" (SI aka INT32)
+ *
+ * @this {X86FPU}
+ * @param {number} i (eg, 0 for top-of-stack)
+ * @return {boolean} true if intTmpLR was loaded, false if not
+ */
+X86FPU.prototype.getSI = function(i)
+{
+    var v = this.getST(i);
+    return v != null && this.roundInteger(v, X86FPU.MAX_INT32);
 };
 
 /**
@@ -2018,42 +2220,40 @@ X86FPU.prototype.getST = function(i)
 };
 
 /**
+ * getSTSign(i)
+ *
+ * Returns zero if sign bit clear, and non-zero (negative) if sign bit set.  This is safer
+ * than comparing getST() to zero, because JavaScript comparisons involving NaNs are meaningless.
+ *
+ * For internal use only; ignores whether the register is empty, and performs no exception checks.
+ *
+ * @this {X86FPU}
+ * @param {number} i (eg, 0 for top-of-stack)
+ * @return {number}
+ */
+X86FPU.prototype.getSTSign = function(i)
+{
+    var iInt = ((this.iST + i) & 7) << 1;
+    return this.intStack[iInt + 1] & (0x80000000|0);
+};
+
+/**
  * setST(i, v)
  *
  * @this {X86FPU}
  * @param {number} i (eg, 0 for top-of-stack)
- * @param {number} v
+ * @param {number|null} v
  * @return {boolean}
  */
 X86FPU.prototype.setST = function(i, v)
 {
-    var iReg = (this.iST + i) & 7;
-    if (this.checkOperand(v)) {
+    if (v != null && this.checkOperand(v)) {
+        var iReg = (this.iST + i) & 7;
         this.regStack[iReg] = v;
         this.regUsed |= (1 << iReg);
         return true;
     }
     return false;
-};
-
-/**
- * setST64(i, lo, hi)
- *
- * Use this instead of setST() if you want to set the two 32-bit portions of ST(i) directly.
- *
- * @this {X86FPU}
- * @param {number} i
- * @param {number} lo
- * @param {number} hi
- */
-X86FPU.prototype.setST64 = function(i, lo, hi)
-{
-    var iReg = (this.iST + i) & 7;
-    var iInt = iReg << 1;
-    this.intStack[iInt] = lo;
-    this.intStack[iInt + 1] = hi;
-    this.checkOperand(this.regStack[iReg]);
-    this.regUsed |= (1 << iReg);
 };
 
 /**
@@ -2086,7 +2286,24 @@ X86FPU.prototype.getTR = function(i, fNoException)
  */
 X86FPU.prototype.setTR = function(i, a)
 {
-    if (a) this.setST(i, this.getLRFromTR(a));
+    if (a) {
+        this.setST(i, this.getLRFromTR(a));
+    }
+};
+
+/**
+ * getSIFromEA()
+ *
+ * Sets the internal intTmpLR register to the (32-bit) "short-integer" value located at regEA.
+ *
+ * @this {X86FPU}
+ * @return {number} v
+ */
+X86FPU.prototype.getSIFromEA = function()
+{
+    this.assert(this.cpu.regEA !== X86.ADDR_INVALID);
+    this.intTmpLR[0] = this.cpu.getLong(this.cpu.regEA);
+    return this.intTmpLR[0];
 };
 
 /**
@@ -2123,18 +2340,58 @@ X86FPU.prototype.getLRFromEA = function()
 /**
  * getTRFromEA()
  *
- * Sets the internal regTmpTR register to the (80-bit) "temp-real" value located at regEA.
+ * Sets the internal intTmpTR register to the (80-bit) "temp-real" value located at regEA.
  *
  * @this {X86FPU}
- * @return {Array.<number>} regTmpTR
+ * @return {Array.<number>} intTmpTR
  */
 X86FPU.prototype.getTRFromEA = function()
 {
     this.assert(this.cpu.regEA !== X86.ADDR_INVALID);
-    this.regTmpTR[0] = this.cpu.getLong(this.cpu.regEA);
-    this.regTmpTR[1] = this.cpu.getLong(this.cpu.regEA + 4);
-    this.regTmpTR[2] = this.cpu.getShort(this.cpu.regEA + 8);
-    return this.regTmpTR;
+    this.intTmpTR[0] = this.cpu.getLong(this.cpu.regEA);
+    this.intTmpTR[1] = this.cpu.getLong(this.cpu.regEA + 4);
+    this.intTmpTR[2] = this.cpu.getShort(this.cpu.regEA + 8);
+    return this.intTmpTR;
+};
+
+/**
+ * setEAFromWI()
+ *
+ * Stores the (16-bit) "word-integer" value in the internal intTmpLR register to the address in regEA.
+ *
+ * @this {X86FPU}
+ */
+X86FPU.prototype.setEAFromWI = function()
+{
+    this.assert(this.cpu.regEA !== X86.ADDR_INVALID);
+    this.cpu.setShort(this.cpu.regEA, this.intTmpLR[0]);
+};
+
+/**
+ * setEAFromSI()
+ *
+ * Stores the (32-bit) "short-integer" value in the internal intTmpLR register to the address in regEA.
+ *
+ * @this {X86FPU}
+ */
+X86FPU.prototype.setEAFromSI = function()
+{
+    this.assert(this.cpu.regEA !== X86.ADDR_INVALID);
+    this.cpu.setLong(this.cpu.regEA, this.intTmpLR[0]);
+};
+
+/**
+ * setEAFromLI()
+ *
+ * Stores the (64-bit) "long-integer" value in the internal intTmpLR register to the address in regEA.
+ *
+ * @this {X86FPU}
+ */
+X86FPU.prototype.setEAFromLI = function()
+{
+    this.assert(this.cpu.regEA !== X86.ADDR_INVALID);
+    this.cpu.setLong(this.cpu.regEA, this.intTmpLR[0]);
+    this.cpu.setLong(this.cpu.regEA + 4, this.intTmpLR[1]);
 };
 
 /**
@@ -2147,7 +2404,7 @@ X86FPU.prototype.getTRFromEA = function()
 X86FPU.prototype.setEAFromSR = function()
 {
     this.assert(this.cpu.regEA !== X86.ADDR_INVALID);
-    this.cpu.setLong(this.cpu.regEA, this.regTmpSR[0]);
+    this.cpu.setLong(this.cpu.regEA, this.intTmpSR[0]);
 };
 
 /**
@@ -2160,23 +2417,23 @@ X86FPU.prototype.setEAFromSR = function()
 X86FPU.prototype.setEAFromLR = function()
 {
     this.assert(this.cpu.regEA !== X86.ADDR_INVALID);
-    this.cpu.setLong(this.cpu.regEA, this.regTmpLR[0]);
-    this.cpu.setLong(this.cpu.regEA + 4, this.regTmpLR[1]);
+    this.cpu.setLong(this.cpu.regEA, this.intTmpLR[0]);
+    this.cpu.setLong(this.cpu.regEA + 4, this.intTmpLR[1]);
 };
 
 /**
  * setEAFromTR()
  *
- * Stores the (80-bit) "temp-real" value in the internal regTmpTR register to the address in regEA.
+ * Stores the (80-bit) "temp-real" value in the internal intTmpTR register to the address in regEA.
  *
  * @this {X86FPU}
  */
 X86FPU.prototype.setEAFromTR = function()
 {
     this.assert(this.cpu.regEA !== X86.ADDR_INVALID);
-    this.cpu.setLong(this.cpu.regEA, this.regTmpTR[0]);
-    this.cpu.setLong(this.cpu.regEA + 4, this.regTmpTR[1]);
-    this.cpu.setShort(this.cpu.regEA + 8, this.regTmpTR[2]);
+    this.cpu.setLong(this.cpu.regEA, this.intTmpTR[0]);
+    this.cpu.setLong(this.cpu.regEA + 4, this.intTmpTR[1]);
+    this.cpu.setShort(this.cpu.regEA + 8, this.intTmpTR[2]);
 };
 
 /**
@@ -2188,7 +2445,7 @@ X86FPU.prototype.setEAFromTR = function()
  * does NOT store a leading 1 with the fraction, whereas the latter does.
  *
  * @this {X86FPU}
- * @param {Array.<number>} a (eg, regTmpTR)
+ * @param {Array.<number>} a (eg, intTmpTR)
  * @return {number} v
  */
 X86FPU.prototype.getLRFromTR = function(a)
@@ -2236,7 +2493,7 @@ X86FPU.prototype.getLRFromTR = function(a)
  * @this {X86FPU}
  * @param {number} loLR
  * @param {number} hiLR
- * @return {Array.<number>} (regTmpTR)
+ * @return {Array.<number>} (intTmpTR)
  */
 X86FPU.prototype.getTRFromLR = function(loLR, hiLR)
 {
@@ -2270,10 +2527,10 @@ X86FPU.prototype.getTRFromLR = function(loLR, hiLR)
         expTR += 0x3fff - 0x3ff;
     }
 
-    this.regTmpTR[0] = loTR;
-    this.regTmpTR[1] = hiTR;
-    this.regTmpTR[2] = signTR | expTR;
-    return this.regTmpTR;
+    this.intTmpTR[0] = loTR;
+    this.intTmpTR[1] = hiTR;
+    this.intTmpTR[2] = signTR | expTR;
+    return this.intTmpTR;
 };
 
 /**
@@ -2509,7 +2766,7 @@ X86FPU.aaOps = {
     0xD9: {
         0x00: X86FPU.FLDsr,                             0x02: X86FPU.FSTsr,     0x03: X86FPU.FSTPsr,
         0x04: X86FPU.FLDENV,    0x05: X86FPU.FLDCW,     0x06: X86FPU.FSTENV,    0x07: X86FPU.FSTCW,
-        0x30: X86FPU.FLDsti,    0x31: X86FPU.FXCHsti,   0x32: X86FPU.FNOP,      0x33: X86FPU.FSTPsti,
+        0x30: X86FPU.FLDsti,    0x31: X86FPU.FXCHsti,   0x32: X86FPU.FNOP,      0x33: X86FPU.FSTP8087,
         0x40: X86FPU.FCHS,      0x41: X86FPU.FABS,
         0x44: X86FPU.FTST,      0x45: X86FPU.FXAM,
         0x50: X86FPU.FLD1,      0x51: X86FPU.FLDL2T,    0x52: X86FPU.FLDL2E,    0x53: X86FPU.FLDPI,
@@ -2527,30 +2784,31 @@ X86FPU.aaOps = {
         0x00: X86FPU.FILD32,    0x02: X86FPU.FIST32,    0x03: X86FPU.FISTP32,
                                 0x05: X86FPU.FLDtr,                             0x07: X86FPU.FSTPtr,
         0x40: X86FPU.FENI,      0x41: X86FPU.FDISI,     0x42: X86FPU.FCLEX,     0x43: X86FPU.FINIT,
-        0x44: X86FPU.FSETPM,
-        0X73: X86FPU.FSINCOS
+        0x44: X86FPU.FSETPM287,
+        0x73: X86FPU.FSINCOS387
     },
     0xDC: {
         0x00: X86FPU.FADDlr,    0x01: X86FPU.FMULlr,    0x02: X86FPU.FCOMlr,    0x03: X86FPU.FCOMPlr,
         0x04: X86FPU.FSUBlr,    0x05: X86FPU.FSUBRlr,   0x06: X86FPU.FDIVlr,    0x07: X86FPU.FDIVRlr,
-        0x30: X86FPU.FADDsti,   0x31: X86FPU.FMULsti,   0x32: X86FPU.FCOMsti,   0x33: X86FPU.FCOMPsti,
+        0x30: X86FPU.FADDsti,   0x31: X86FPU.FMULsti,   0x32: X86FPU.FCOM8087,  0x33: X86FPU.FCOMP8087,
         0x34: X86FPU.FSUBsti,   0x35: X86FPU.FSUBRsti,  0x36: X86FPU.FDIVsti,   0x37: X86FPU.FDIVRsti
     },
     0xDD: {
         0x00: X86FPU.FLDlr,                             0x02: X86FPU.FSTlr,     0x03: X86FPU.FSTPlr,
         0x04: X86FPU.FRSTOR,                            0x06: X86FPU.FSAVE,     0x07: X86FPU.FSTSW,
-        0x30: X86FPU.FFREEsti,  0x31: X86FPU.FXCHsti,   0x32: X86FPU.FSTsti,    0x33: X86FPU.FSTPsti
+        0x30: X86FPU.FFREEsti,  0x31: X86FPU.FXCH8087,  0x32: X86FPU.FSTsti,    0x33: X86FPU.FSTPsti
     },
     0xDE: {
         0x00: X86FPU.FIADD16,   0x01: X86FPU.FIMUL16,   0x02: X86FPU.FICOM16,   0x03: X86FPU.FICOMP16,
         0x04: X86FPU.FISUB16,   0x05: X86FPU.FISUBR16,  0x06: X86FPU.FIDIV16,   0x07: X86FPU.FIDIVR16,
-        0x30: X86FPU.FADDPsti,  0x31: X86FPU.FMULPsti,  0x32: X86FPU.FCOMPsti,  0x33: X86FPU.FCOMPPsti,
+        0x30: X86FPU.FADDPsti,  0x31: X86FPU.FMULPsti,  0x32: X86FPU.FCOMP8087, 0x33: X86FPU.FCOMPPsti,
         0x34: X86FPU.FSUBPsti,  0x35: X86FPU.FSUBRPsti, 0x36: X86FPU.FDIVPsti,  0x37: X86FPU.FDIVRPsti
     },
     0xDF: {
-        0x00: X86FPU.FILD16,    0x02: X86FPU.FIST16,    0x03: X86FPU.FISTP16,   0x04: X86FPU.FBLDpd,
-        0x05: X86FPU.FILD64,    0x06: X86FPU.FBSTPpd,   0x07: X86FPU.FISTP64,   0x30: X86FPU.FFREEsti,
-        0x31: X86FPU.FXCHsti,   0x32: X86FPU.FSTPsti,   0x33: X86FPU.FSTPsti,   0x34: X86FPU.FSTSWAX
+        0x00: X86FPU.FILD16,                            0x02: X86FPU.FIST16,    0x03: X86FPU.FISTP16,
+        0x04: X86FPU.FBLDpd,    0x05: X86FPU.FILD64,    0x06: X86FPU.FBSTPpd,   0x07: X86FPU.FISTP64,
+        0x30: X86FPU.FFREEP8087,0x31: X86FPU.FXCH8087,  0x32: X86FPU.FSTP8087,  0x33: X86FPU.FSTP8087,
+        0x34: X86FPU.FSTSWAX287
     }
 };
 
@@ -2559,7 +2817,7 @@ X86FPU.aaOps = {
  */
 X86FPU.afnPreserveExceptions = [
     X86FPU.FCLEX,   X86FPU.FINIT,   X86FPU.FLDCW,   X86FPU.FLDENV,  X86FPU.FRSTOR,
-    X86FPU.FSAVE,   X86FPU.FSTCW,   X86FPU.FSTENV,  X86FPU.FSTSW,   X86FPU.FSTSWAX
+    X86FPU.FSAVE,   X86FPU.FSTCW,   X86FPU.FSTENV,  X86FPU.FSTSW,   X86FPU.FSTSWAX287
 ];
 
 /**
