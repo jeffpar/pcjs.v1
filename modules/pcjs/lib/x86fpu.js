@@ -245,7 +245,7 @@ X86FPU.FADDsti = function()
  */
 X86FPU.FADDPsti = function()
 {
-    this.opUnimplemented();
+    if (this.setST(this.iStack, this.doAdd(this.getST(this.iStack), this.getST(0)))) this.popValue();
 };
 
 /**
@@ -374,9 +374,7 @@ X86FPU.FCOMPsr = function()
  */
 X86FPU.FCOMPst = function()
 {
-    // if (this.opStop()) return;       // for untested instructions: stops the CPU if it's running, but not if single-stepping
-    this.doCompare(this.getST(0), this.getST(this.iStack));
-    this.popValue();
+    if (this.doCompare(this.getST(0), this.getST(this.iStack))) this.popValue();
 };
 
 /**
@@ -404,13 +402,13 @@ X86FPU.FCOMP8087 = function()
 };
 
 /**
- * FCOMPPsti()
+ * FCOMPP()
  *
  * @this {X86FPU}
  */
-X86FPU.FCOMPPsti = function()
+X86FPU.FCOMPP = function()
 {
-    this.opUnimplemented();
+    if (this.doCompare(this.getST(0), this.getST(1)) && this.popValue() != null) this.popValue();
 };
 
 /**
@@ -1249,9 +1247,7 @@ X86FPU.FSTPsr = function()
  */
 X86FPU.FSTPsti = function()
 {
-    if (this.setST(this.iStack, this.getST(0))) {
-        this.popValue();
-    }
+    if (this.setST(this.iStack, this.getST(0))) this.popValue();
 };
 
 /**
@@ -1322,7 +1318,7 @@ X86FPU.FSTSWAX287 = function()
  */
 X86FPU.FSUBlr = function()
 {
-    this.opUnimplemented();
+    this.setST(0, this.doSubtract(this.getST(0), this.getLRFromEA()));
 };
 
 /**
@@ -1332,37 +1328,43 @@ X86FPU.FSUBlr = function()
  */
 X86FPU.FSUBsr = function()
 {
-    this.opUnimplemented();
+    this.setST(0, this.doSubtract(this.getST(0), this.getSRFromEA()));
 };
 
 /**
  * FSUBst()
  *
+ * This is for encoding 0xD8,0xE0-0xE7 ("FSUB ST,ST(i)"): ST(0) <- ST(0) - ST(i)
+ *
  * @this {X86FPU}
  */
 X86FPU.FSUBst = function()
 {
-    this.opUnimplemented();
+    this.setST(0, this.doSubtract(this.getST(0), this.getST(this.iStack)));
 };
 
 /**
  * FSUBsti()
  *
+ * This is for encoding 0xDC,0xE8-0xEF ("FSUB ST(i),ST"): ST(i) <- ST(0) - ST(i)
+ *
  * @this {X86FPU}
  */
 X86FPU.FSUBsti = function()
 {
-    this.opUnimplemented();
+    this.setST(this.iStack, this.doSubtract(this.getST(0), this.getST(this.iStack)));
 };
 
 /**
  * FSUBPsti()
  *
+ * This is for encoding 0xDE,0xE8-0xEF ("FSUBP ST(i),ST"): ST(i) <- ST(0) - ST(i), POP
+ *
  * @this {X86FPU}
  */
 X86FPU.FSUBPsti = function()
 {
-    this.opUnimplemented();
+    if (this.setST(this.iStack, this.doSubtract(this.getST(0), this.getST(this.iStack)))) this.popValue();
 };
 
 /**
@@ -1372,7 +1374,7 @@ X86FPU.FSUBPsti = function()
  */
 X86FPU.FSUBRlr = function()
 {
-    this.opUnimplemented();
+    this.setST(0, this.doSubtract(this.getLRFromEA(), this.getST(0)));
 };
 
 /**
@@ -1382,21 +1384,25 @@ X86FPU.FSUBRlr = function()
  */
 X86FPU.FSUBRsr = function()
 {
-    this.opUnimplemented();
+    this.setST(0, this.doSubtract(this.getSRFromEA(), this.getST(0)));
 };
 
 /**
  * FSUBRst()
  *
+ * This is for encoding 0xD8,0xE8-0xEF ("FSUBR ST,ST(i)"): ST(0) <- ST(i) - ST(0)
+ *
  * @this {X86FPU}
  */
 X86FPU.FSUBRst = function()
 {
-    this.opUnimplemented();
+    this.setST(0, this.doSubtract(this.getST(this.iStack), this.getST(0)));
 };
 
 /**
  * FSUBRsti()
+ *
+ * This is for encoding 0xDC,0xE0-0xE7 ("FSUBR ST(i),ST"): ST(i) <- ST(i) - ST(0)
  *
  * @this {X86FPU}
  */
@@ -1408,13 +1414,13 @@ X86FPU.FSUBRsti = function()
 /**
  * FSUBRPsti()
  *
+ * This is for encoding 0xDE,0xE0-0xE7 ("FSUBRP ST(i),ST"): ST(i) <- ST(i) - ST(0), POP
+ *
  * @this {X86FPU}
  */
 X86FPU.FSUBRPsti = function()
 {
-    if (this.setST(this.iStack, this.doSubtract(this.getST(this.iStack), this.getST(0)))) {
-        this.popValue();
-    }
+    if (this.setST(this.iStack, this.doSubtract(this.getST(this.iStack), this.getST(0)))) this.popValue();
 };
 
 /**
@@ -1466,7 +1472,9 @@ X86FPU.FXAM = function()
  */
 X86FPU.FXCHsti = function()
 {
-    this.opUnimplemented();
+    var tmp = this.getST(0);
+    this.setST(0, this.getST(this.iStack));
+    this.setST(this.iStack, tmp);
 };
 
 /**
@@ -1707,6 +1715,12 @@ X86FPU.prototype.getRandomInt = function(min, max)
 
 /**
  * opStop(fError)
+ *
+ * Place this inside any opcode handler to stop the CPU from running the current instruction; eg:
+ *
+ *      if (this.opStop()) return;
+ *
+ * You can still use the Debugger to single-step over the instruction; opStop() will return false in that case.
  *
  * @this {X86FPU}
  * @param {boolean} [fError]
@@ -1990,6 +2004,7 @@ X86FPU.prototype.doDivide = function(dividend, divisor)
  * @this {X86FPU}
  * @param {number|null} operand1
  * @param {number|null} operand2
+ * @return {boolean}
  */
 X86FPU.prototype.doCompare = function(operand1, operand2)
 {
@@ -2006,7 +2021,9 @@ X86FPU.prototype.doCompare = function(operand1, operand2)
             }
         }
         this.regStatus = (this.regStatus & ~X86.FPU.STATUS.CC) | cc;
+        return true;
     }
+    return false;
 };
 
 /**
@@ -2030,14 +2047,16 @@ X86FPU.prototype.doSquareRoot = function(operand)
 };
 
 /**
- * roundInteger(operand, limit)
+ * roundInteger(operand, max)
+ *
+ * NOTE: The max parameter is EXCLUSIVE, not inclusive (ie, the maximum positive integer is < max).
  *
  * @this {X86FPU}
  * @param {number|null} operand
- * @param {number} limit (ie, 0x8000, 0x80000000, or 0x8000000000000000)
+ * @param {number} max (ie, 0x8000, 0x80000000, or 0x8000000000000000)
  * @return {boolean} true if intTmpLR was loaded, false if not
  */
-X86FPU.prototype.roundInteger = function(operand, limit)
+X86FPU.prototype.roundInteger = function(operand, max)
 {
     var result;
     var rc = (this.regControl & X86.FPU.CONTROL.RC);
@@ -2053,18 +2072,18 @@ X86FPU.prototype.roundInteger = function(operand, limit)
         result = Math.ceil(operand);
     }
 
-    if (result >= limit) {
+    if (result >= max) {
         if (this.setException(X86.FPU.STATUS.OE)) return false;
-        result = limit - 1;
+        result = max - 1;
     }
-    else if (result < -limit) {
+    else if (result < -max) {
         if (this.setException(X86.FPU.STATUS.UE)) return false;
-        result = -limit;
+        result = -max;
     }
 
     this.intTmpLR[0] = result|0;
 
-    if (limit > X86FPU.MAX_INT32) {
+    if (max > X86FPU.MAX_INT32) {
         this.intTmpLR[1] = (result / 0x100000000)|0;
         if (!this.intTmpLR[1] && result < 0) this.intTmpLR[1] = -1;
     }
@@ -2791,7 +2810,10 @@ X86FPU.aaOps = {
         0x00: X86FPU.FADDlr,    0x01: X86FPU.FMULlr,    0x02: X86FPU.FCOMlr,    0x03: X86FPU.FCOMPlr,
         0x04: X86FPU.FSUBlr,    0x05: X86FPU.FSUBRlr,   0x06: X86FPU.FDIVlr,    0x07: X86FPU.FDIVRlr,
         0x30: X86FPU.FADDsti,   0x31: X86FPU.FMULsti,   0x32: X86FPU.FCOM8087,  0x33: X86FPU.FCOMP8087,
-        0x34: X86FPU.FSUBsti,   0x35: X86FPU.FSUBRsti,  0x36: X86FPU.FDIVsti,   0x37: X86FPU.FDIVRsti
+        /*
+         * Intel's original 8087 datasheet had these forms of SUB and SUBR (and DIV and DIVR) swapped.
+         */
+        0x34: X86FPU.FSUBRsti,  0x35: X86FPU.FSUBsti,   0x36: X86FPU.FDIVRsti,  0x37: X86FPU.FDIVsti
     },
     0xDD: {
         0x00: X86FPU.FLDlr,                             0x02: X86FPU.FSTlr,     0x03: X86FPU.FSTPlr,
@@ -2801,8 +2823,11 @@ X86FPU.aaOps = {
     0xDE: {
         0x00: X86FPU.FIADD16,   0x01: X86FPU.FIMUL16,   0x02: X86FPU.FICOM16,   0x03: X86FPU.FICOMP16,
         0x04: X86FPU.FISUB16,   0x05: X86FPU.FISUBR16,  0x06: X86FPU.FIDIV16,   0x07: X86FPU.FIDIVR16,
-        0x30: X86FPU.FADDPsti,  0x31: X86FPU.FMULPsti,  0x32: X86FPU.FCOMP8087, 0x33: X86FPU.FCOMPPsti,
-        0x34: X86FPU.FSUBPsti,  0x35: X86FPU.FSUBRPsti, 0x36: X86FPU.FDIVPsti,  0x37: X86FPU.FDIVRPsti
+        0x30: X86FPU.FADDPsti,  0x31: X86FPU.FMULPsti,  0x32: X86FPU.FCOMP8087, 0x33: X86FPU.FCOMPP,
+        /*
+         * Intel's original 8087 datasheet had these forms of SUBP and SUBRP (and DIVP and DIVRP) swapped.
+         */
+        0x34: X86FPU.FSUBRPsti, 0x35: X86FPU.FSUBPsti,  0x36: X86FPU.FDIVRPsti, 0x37: X86FPU.FDIVPsti
     },
     0xDF: {
         0x00: X86FPU.FILD16,                            0x02: X86FPU.FIST16,    0x03: X86FPU.FISTP16,

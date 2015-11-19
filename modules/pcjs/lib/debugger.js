@@ -1129,7 +1129,7 @@ if (DEBUGGER) {
             0x30: [Debugger.FINS.FLD,    Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_OUT],
             0x31: [Debugger.FINS.FXCH,   Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_OUT],
             0x32: [Debugger.FINS.FNOP],
-            0x33: [Debugger.FINS.FSTP,   Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_OUT],   // Obsolete decoding
+            0x33: [Debugger.FINS.FSTP,   Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_OUT],   // Obsolete encoding
             0x40: [Debugger.FINS.FCHS],
             0x41: [Debugger.FINS.FABS],
             0x44: [Debugger.FINS.FTST],
@@ -1188,12 +1188,12 @@ if (DEBUGGER) {
             0x07: [Debugger.FINS.FDIVR,  Debugger.TYPE_MODRM  | Debugger.TYPE_LREAL | Debugger.TYPE_IN],
             0x30: [Debugger.FINS.FADD,   Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_OUT, Debugger.TYPE_IMPREG | Debugger.TYPE_ST | Debugger.TYPE_IN],
             0x31: [Debugger.FINS.FMUL,   Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_OUT, Debugger.TYPE_IMPREG | Debugger.TYPE_ST | Debugger.TYPE_IN],
-            0x32: [Debugger.FINS.FCOM,   Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_IN],    // Obsolete decoding
-            0x33: [Debugger.FINS.FCOMP,  Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_IN],    // Obsolete decoding
-            0x34: [Debugger.FINS.FSUB,   Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_OUT, Debugger.TYPE_IMPREG | Debugger.TYPE_ST | Debugger.TYPE_IN],
-            0x35: [Debugger.FINS.FSUBR,  Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_OUT, Debugger.TYPE_IMPREG | Debugger.TYPE_ST | Debugger.TYPE_IN],
-            0x36: [Debugger.FINS.FDIV,   Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_OUT, Debugger.TYPE_IMPREG | Debugger.TYPE_ST | Debugger.TYPE_IN],
-            0x37: [Debugger.FINS.FDIVR,  Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_OUT, Debugger.TYPE_IMPREG | Debugger.TYPE_ST | Debugger.TYPE_IN]
+            0x32: [Debugger.FINS.FCOM,   Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_IN],    // Obsolete encoding
+            0x33: [Debugger.FINS.FCOMP,  Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_IN],    // Obsolete encoding
+            0x34: [Debugger.FINS.FSUBR,  Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_OUT, Debugger.TYPE_IMPREG | Debugger.TYPE_ST | Debugger.TYPE_IN],
+            0x35: [Debugger.FINS.FSUB,   Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_OUT, Debugger.TYPE_IMPREG | Debugger.TYPE_ST | Debugger.TYPE_IN],
+            0x36: [Debugger.FINS.FDIVR,  Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_OUT, Debugger.TYPE_IMPREG | Debugger.TYPE_ST | Debugger.TYPE_IN],
+            0x37: [Debugger.FINS.FDIV,   Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_OUT, Debugger.TYPE_IMPREG | Debugger.TYPE_ST | Debugger.TYPE_IN]
         },
         0xDD: {
             0x00: [Debugger.FINS.FLD,    Debugger.TYPE_MODRM  | Debugger.TYPE_LREAL | Debugger.TYPE_IN],
@@ -1203,7 +1203,7 @@ if (DEBUGGER) {
             0x06: [Debugger.FINS.FSAVE,  Debugger.TYPE_MODRM  | Debugger.TYPE_FPU   | Debugger.TYPE_OUT],
             0x07: [Debugger.FINS.FSTSW,  Debugger.TYPE_MODRM  | Debugger.TYPE_SHORT | Debugger.TYPE_OUT],
             0x30: [Debugger.FINS.FFREE,  Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_IN],
-            0x31: [Debugger.FINS.FXCH,   Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_OUT],   // Obsolete decoding
+            0x31: [Debugger.FINS.FXCH,   Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_OUT],   // Obsolete encoding
             0x32: [Debugger.FINS.FST,    Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_IN],
             0x33: [Debugger.FINS.FSTP,   Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_IN]
         },
@@ -1218,12 +1218,12 @@ if (DEBUGGER) {
             0x07: [Debugger.FINS.FIDIVR, Debugger.TYPE_MODRM  | Debugger.TYPE_SHORT | Debugger.TYPE_IN],
             0x30: [Debugger.FINS.FADDP,  Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_OUT, Debugger.TYPE_IMPREG | Debugger.TYPE_ST | Debugger.TYPE_IN],
             0x31: [Debugger.FINS.FMULP,  Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_OUT, Debugger.TYPE_IMPREG | Debugger.TYPE_ST | Debugger.TYPE_IN],
-            0x32: [Debugger.FINS.FCOMP,  Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_IN],    // Obsolete decoding
+            0x32: [Debugger.FINS.FCOMP,  Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_IN],    // Obsolete encoding
             0x33: [Debugger.FINS.FCOMPP, Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_IN],
-            0x34: [Debugger.FINS.FSUBP,  Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_OUT, Debugger.TYPE_IMPREG | Debugger.TYPE_ST | Debugger.TYPE_IN],
-            0x35: [Debugger.FINS.FSUBRP, Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_OUT, Debugger.TYPE_IMPREG | Debugger.TYPE_ST | Debugger.TYPE_IN],
-            0x36: [Debugger.FINS.FDIVP,  Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_OUT, Debugger.TYPE_IMPREG | Debugger.TYPE_ST | Debugger.TYPE_IN],
-            0x37: [Debugger.FINS.FDIVRP, Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_OUT, Debugger.TYPE_IMPREG | Debugger.TYPE_ST | Debugger.TYPE_IN]
+            0x34: [Debugger.FINS.FSUBRP, Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_OUT, Debugger.TYPE_IMPREG | Debugger.TYPE_ST | Debugger.TYPE_IN],
+            0x35: [Debugger.FINS.FSUBP,  Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_OUT, Debugger.TYPE_IMPREG | Debugger.TYPE_ST | Debugger.TYPE_IN],
+            0x36: [Debugger.FINS.FDIVRP, Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_OUT, Debugger.TYPE_IMPREG | Debugger.TYPE_ST | Debugger.TYPE_IN],
+            0x37: [Debugger.FINS.FDIVP,  Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_OUT, Debugger.TYPE_IMPREG | Debugger.TYPE_ST | Debugger.TYPE_IN]
         },
         0xDF: {
             0x00: [Debugger.FINS.FILD,   Debugger.TYPE_MODRM  | Debugger.TYPE_SHORT | Debugger.TYPE_IN],
@@ -1233,10 +1233,10 @@ if (DEBUGGER) {
             0x05: [Debugger.FINS.FILD,   Debugger.TYPE_MODRM  | Debugger.TYPE_LINT  | Debugger.TYPE_IN],
             0x06: [Debugger.FINS.FBSTP,  Debugger.TYPE_MODRM  | Debugger.TYPE_DEC18 | Debugger.TYPE_OUT],
             0x07: [Debugger.FINS.FISTP,  Debugger.TYPE_MODRM  | Debugger.TYPE_LINT  | Debugger.TYPE_OUT],
-            0x30: [Debugger.FINS.FFREEP, Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_IN],    // Obsolete decoding
-            0x31: [Debugger.FINS.FXCH,   Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_OUT],   // Obsolete decoding
-            0x32: [Debugger.FINS.FSTP,   Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_IN],    // Obsolete decoding
-            0x33: [Debugger.FINS.FSTP,   Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_IN],    // Obsolete decoding
+            0x30: [Debugger.FINS.FFREEP, Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_IN],    // Obsolete encoding
+            0x31: [Debugger.FINS.FXCH,   Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_OUT],   // Obsolete encoding
+            0x32: [Debugger.FINS.FSTP,   Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_IN],    // Obsolete encoding
+            0x33: [Debugger.FINS.FSTP,   Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_IN],    // Obsolete encoding
             0x34: [Debugger.FINS.FSTSWAX, Debugger.TYPE_80287]
         }
     };
