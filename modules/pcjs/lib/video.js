@@ -5406,10 +5406,14 @@ Video.prototype.updateScreen = function(fForce)
          * cbScreen was computed (but without any CGA-related padding considerations).
          *
          * TODO: I'm taking a lot of shortcuts in this calculation (eg, relying on nFont to detect text modes,
-         * ignoring MODE_CTRL.BYTE_MODE, etc); generalize this someday.
+         * ignoring MODE_CTRL.BYTE_MODE, etc); generalize this someday.  In addition, dividing the total number of
+         * cells by nCellsPerWord yields total WORDS, not BYTES, so we need to double cbScreen -- EXCEPT that the
+         * notion of cell has a slightly different meaning for EGA and VGA-specific modes.  nCellsPerWord should
+         * not be overloaded like that.
          */
         this.nColsLogical = card.regCRTData[Card.CRTC.EGA.OFFSET] << (this.nFont? 1 : (card.regCRTData[Card.CRTC.EGA.UNDERLINE.INDX] & Card.CRTC.EGA.UNDERLINE.DWORD)? 3 : 4);
         cbScreen = ((this.nColsLogical * (this.nRows-1) + this.nCols) / this.nCellsPerWord)|0;
+        if (this.nMode <= Video.MODE.MDA_80X25) cbScreen <<= 1;
     }
 
     if (addrScreen + cbScreen > addrScreenLimit) {
