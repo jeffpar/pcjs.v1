@@ -62,7 +62,7 @@ if (NODE) {
  *      processors prior to the 80286 had no mechanism for generating a fault when an unsupported FPU
  *      instruction was executed.
  *
- *      In short, INT 0x34 through INT 0x3B was used for ESC opcodes 0xD8 through 0xDF, INT 0x3C was
+ *      In short, INT 0x34 through INT 0x3B was used after ESC opcodes 0xD8 through 0xDF, INT 0x3C was
  *      used for FPU instructions containing a segment override, and INT 0x3D was used for FWAIT.
  *
  *      A sample piece of code is available in x86ops.js, because it also highlights the Microsoft C
