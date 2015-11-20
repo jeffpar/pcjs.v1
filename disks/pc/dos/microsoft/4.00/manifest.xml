@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.20.1/manifest.xsl"?>
+<manifest type="software">
+	<title>MS-DOS</title>
+	<version>4.00</version>
+	<type>DOS</type>
+	<category>Operating System</category>
+	<author>Microsoft</author>
+	<releaseDate>October 1988</releaseDate>
+	<disk id="disk01" size="368640" chs="40:2:9" img="static/MSDOS400-DISK1.img" href="/disks/pc/dos/microsoft/4.00/MSDOS400-DISK1.json" md5="df21fae3375ec155a6ccffb25e0a8633" md5json="9364eb72b88a464ba288afd1b6163274">
+		<name>MS-DOS 4.00 (Disk 1)</name>
+	</disk>
+	<disk id="disk02" size="368640" chs="40:2:9" img="static/MSDOS400-DISK2.img" href="/disks/pc/dos/microsoft/4.00/MSDOS400-DISK2.json" md5="88bfc0863f0e65da54fd98320d7d97ab" md5json="37d8620c2a2a529ce1246b0b8cc2aab3">
+		<name>MS-DOS 4.00 (Disk 2)</name>
+	</disk>
+	<disk id="disk03" size="368640" chs="40:2:9" img="static/MSDOS400-DISK3.img" href="/disks/pc/dos/microsoft/4.00/MSDOS400-DISK3.json" md5="d3cec5205295e28190d64250f2fff670" md5json="cd7f1340a8c45f71794e8812a2a8e287">
+		<name>MS-DOS 4.00 (Disk 3)</name>
+	</disk>
+	<disk id="disk04" size="368640" chs="40:2:9" img="static/MSDOS400-DISK4.img" href="/disks/pc/dos/microsoft/4.00/MSDOS400-DISK4.json" md5="09e68c48357543b79bd21c856e3d72c0" md5json="9e50dca3ad47a0155b4d4565948c906c">
+		<name>MS-DOS 4.00 (Disk 4)</name>
+	</disk>
+	<disk id="disk05" size="368640" chs="40:2:9" img="static/MSDOS400-DISK5.img" href="/disks/pc/dos/microsoft/4.00/MSDOS400-DISK5.json" md5="1f88a4f7de2e9f2cb9b88c03dbc2e848" md5json="3ca4ae554d5a73f79c64c6e8c51f3c1d">
+		<name>MS-DOS 4.00 (Disk 5)</name>
+	</disk>
+	<disk id="disk06" size="368640" chs="40:2:9" img="static/MSDOS400-DISK6.img" href="/disks/pc/dos/microsoft/4.00/MSDOS400-DISK6.json" md5="739de673db09d5c2f2da2c2d0f2ba306" md5json="76a7e3a18a71d25ebc16176cca691bac">
+		<name>MS-DOS 4.00 (Disk 6)</name>
+	</disk>
+</manifest>
