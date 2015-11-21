@@ -3,11 +3,11 @@
 	<control type="list" binding="listDrives"/>
 	<control type="list" binding="listDisks">
 		<disk path="">None</disk>
-		<manifest ref="/disks/pc/dos/ibm/1.00/manifest.xml" disk="*"/>
-		<manifest ref="/disks/pc/dos/ibm/1.10/manifest.xml" disk="*"/>
-		<manifest ref="/disks/pc/dos/ibm/2.00/manifest.xml" disk="*"/>
-		<manifest ref="/disks/pc/games/microsoft/adventure/manifest.xml" disk="*"/>
-		<manifest ref="/apps/pc/1981/visicalc/manifest.xml" disk="*"/>
+		<manifest ref="/disks/pc/dos/ibm/1.00/manifest.xml"/>
+		<manifest ref="/disks/pc/dos/ibm/1.10/manifest.xml"/>
+		<manifest ref="/disks/pc/dos/ibm/2.00/manifest.xml"/>
+		<manifest ref="/disks/pc/games/microsoft/adventure/manifest.xml"/>
+		<manifest ref="/apps/pc/1981/visicalc/manifest.xml"/>
 	</control>
 	<control type="button" binding="loadDrive" padright="8px">Load</control>
 	<control type="description" binding="descDisk" padright="8px"/>
