@@ -448,37 +448,43 @@ X86FPU.FDIVlr = function()
  */
 X86FPU.FDIVsr = function()
 {
-    this.opUnimplemented();
+    this.setST(0, this.doDivide(this.getST(0), this.getSRFromEA()));
 };
 
 /**
  * FDIVst()
  *
+ * This is for encoding 0xD8,0xF0-0xF7 ("FDIV ST,ST(i)"): ST(0) <- ST(0) / ST(i)
+ *
  * @this {X86FPU}
  */
 X86FPU.FDIVst = function()
 {
-    this.opUnimplemented();
+    this.setST(0, this.doDivide(this.getST(0), this.getST(this.iStack)));
 };
 
 /**
  * FDIVsti()
  *
+ * This is for encoding 0xDC,0xF8-0xFF ("FDIV ST(i),ST"): ST(i) <- ST(i) / ST(0)
+ *
  * @this {X86FPU}
  */
 X86FPU.FDIVsti = function()
 {
-    this.opUnimplemented();
+    this.setST(this.iStack, this.doDivide(this.getST(this.iStack), this.getST(0)));
 };
 
 /**
  * FDIVPsti()
  *
+ * This is for encoding 0xDE,0xF8-0xFF ("FDIVP ST(i),ST"): ST(i) <- ST(i) / ST(0), POP
+ *
  * @this {X86FPU}
  */
 X86FPU.FDIVPsti = function()
 {
-    this.opUnimplemented();
+    if (this.setST(this.iStack, this.doDivide(this.getST(this.iStack), this.getST(0)))) this.popValue();
 };
 
 /**
@@ -488,7 +494,7 @@ X86FPU.FDIVPsti = function()
  */
 X86FPU.FDIVRlr = function()
 {
-    this.opUnimplemented();
+    this.setST(0, this.doDivide(this.getLRFromEA(), this.getST(0)));
 };
 
 /**
@@ -498,37 +504,43 @@ X86FPU.FDIVRlr = function()
  */
 X86FPU.FDIVRsr = function()
 {
-    this.opUnimplemented();
+    this.setST(0, this.doDivide(this.getSRFromEA(), this.getST(0)));
 };
 
 /**
  * FDIVRst()
  *
+ * This is for encoding 0xD8,0xF8-0xFF ("FDIVR ST,ST(i)"): ST(0) <- ST(i) / ST(0)
+ *
  * @this {X86FPU}
  */
 X86FPU.FDIVRst = function()
 {
-    this.opUnimplemented();
+    this.setST(0, this.doDivide(this.getST(this.iStack), this.getST(0)));
 };
 
 /**
  * FDIVRsti()
  *
+ * This is for encoding 0xDC,0xF0-0xF7 ("FDIVR ST(i),ST"): ST(i) <- ST(0) / ST(i)
+ *
  * @this {X86FPU}
  */
 X86FPU.FDIVRsti = function()
 {
-    this.opUnimplemented();
+    this.setST(this.iStack, this.doDivide(this.getST(0), this.getST(this.iStack)));
 };
 
 /**
  * FDIVRPsti()
  *
+ * This is for encoding 0xDE,0xF0-0xE7 ("FDIVRP ST(i),ST"): ST(i) <- ST(0) / ST(i), POP
+ *
  * @this {X86FPU}
  */
 X86FPU.FDIVRPsti = function()
 {
-    this.opUnimplemented();
+    if (this.setST(this.iStack, this.doDivide(this.getST(0), this.getST(this.iStack)))) this.popValue();
 };
 
 /**
