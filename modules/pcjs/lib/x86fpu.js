@@ -1034,7 +1034,7 @@ X86FPU.FMULsti = function()
  */
 X86FPU.FMULPsti = function()
 {
-    this.opUnimplemented();
+    if (this.setST(this.iStack, this.doMultiply(this.getST(this.iStack), this.getST(0)))) this.popValue();
 };
 
 /**
@@ -1346,25 +1346,25 @@ X86FPU.FSUBst = function()
 /**
  * FSUBsti()
  *
- * This is for encoding 0xDC,0xE8-0xEF ("FSUB ST(i),ST"): ST(i) <- ST(0) - ST(i)
+ * This is for encoding 0xDC,0xE8-0xEF ("FSUB ST(i),ST"): ST(i) <- ST(i) - ST(0)
  *
  * @this {X86FPU}
  */
 X86FPU.FSUBsti = function()
 {
-    this.setST(this.iStack, this.doSubtract(this.getST(0), this.getST(this.iStack)));
+    this.setST(this.iStack, this.doSubtract(this.getST(this.iStack), this.getST(0)));
 };
 
 /**
  * FSUBPsti()
  *
- * This is for encoding 0xDE,0xE8-0xEF ("FSUBP ST(i),ST"): ST(i) <- ST(0) - ST(i), POP
+ * This is for encoding 0xDE,0xE8-0xEF ("FSUBP ST(i),ST"): ST(i) <- ST(i) - ST(0), POP
  *
  * @this {X86FPU}
  */
 X86FPU.FSUBPsti = function()
 {
-    if (this.setST(this.iStack, this.doSubtract(this.getST(0), this.getST(this.iStack)))) this.popValue();
+    if (this.setST(this.iStack, this.doSubtract(this.getST(this.iStack), this.getST(0)))) this.popValue();
 };
 
 /**
@@ -1402,25 +1402,25 @@ X86FPU.FSUBRst = function()
 /**
  * FSUBRsti()
  *
- * This is for encoding 0xDC,0xE0-0xE7 ("FSUBR ST(i),ST"): ST(i) <- ST(i) - ST(0)
+ * This is for encoding 0xDC,0xE0-0xE7 ("FSUBR ST(i),ST"): ST(i) <- ST(0) - ST(i)
  *
  * @this {X86FPU}
  */
 X86FPU.FSUBRsti = function()
 {
-    this.setST(this.iStack, this.doSubtract(this.getST(this.iStack), this.getST(0)));
+    this.setST(this.iStack, this.doSubtract(this.getST(0), this.getST(this.iStack)));
 };
 
 /**
  * FSUBRPsti()
  *
- * This is for encoding 0xDE,0xE0-0xE7 ("FSUBRP ST(i),ST"): ST(i) <- ST(i) - ST(0), POP
+ * This is for encoding 0xDE,0xE0-0xE7 ("FSUBRP ST(i),ST"): ST(i) <- ST(0) - ST(i), POP
  *
  * @this {X86FPU}
  */
 X86FPU.FSUBRPsti = function()
 {
-    if (this.setST(this.iStack, this.doSubtract(this.getST(this.iStack), this.getST(0)))) this.popValue();
+    if (this.setST(this.iStack, this.doSubtract(this.getST(0), this.getST(this.iStack)))) this.popValue();
 };
 
 /**

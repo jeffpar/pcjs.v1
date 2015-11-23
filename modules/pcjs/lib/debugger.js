@@ -7748,6 +7748,7 @@ if (DEBUGGER) {
         }
 
         var cLines = 0;
+        var sInstruction;
         this.initAddrSize(dbgAddr, true);
 
         while (cb > 0 && n--) {
@@ -7771,7 +7772,7 @@ if (DEBUGGER) {
                 nSequence = null;
             }
 
-            var sInstruction = this.getInstruction(dbgAddr, sComment, nSequence);
+            sInstruction = this.getInstruction(dbgAddr, sComment, nSequence);
 
             /*
              * If getInstruction() reported that it did not process a complete instruction (via dbgAddr.fComplete),
