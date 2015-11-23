@@ -138,7 +138,8 @@ function X86FPU(parmsFPU)
     this.regCodeOff = this.regDataOff = this.regOpcode = this.iStack = 0;
 
     /*
-     * Initialize floating-point constants, as if they were internal read-only registers.
+     * Initialize special floating-point constants, as if they were internal read-only registers;
+     * all other simple (non-special) constants are "statically" initialized below, as class constants.
      */
     this.regIndefinite = new Float64Array(1);
     this.intIndefinite = new Int32Array(this.regIndefinite.buffer);
@@ -152,6 +153,10 @@ function X86FPU(parmsFPU)
 
 Component.subclass(X86FPU);
 
+
+/*
+ * Class constants
+ */
 
 /** @const */
 X86FPU.regL2T = Math.log(10) / Math.LN2;        // log2(10) (use Math.log2() if we ever switch to ES6)
@@ -210,6 +215,8 @@ X86FPU.FADDlr = function()
 
 /**
  * FADDsr()
+ *
+ * Encoding 0xD8,reg=0x00 ("FADD short-real"): ST(0) <- ST(0) + REAL32
  *
  * @this {X86FPU}
  */
@@ -296,79 +303,84 @@ X86FPU.FCLEX = function()
 /**
  * FCOMlr()
  *
+ * Encoding 0xDC,mod<3,reg=2 ("FCOM long-real"): Evaluate ST(0) - REAL64
+ *
  * @this {X86FPU}
  */
 X86FPU.FCOMlr = function()
 {
-    this.opUnimplemented();
+    this.doCompare(this.getST(0), this.getLRFromEA());
 };
 
 /**
  * FCOMsr()
  *
+ * Encoding 0xD8,mod<3,reg=2 ("FCOM short-real"): Evaluate ST(0) - REAL32
+ *
  * @this {X86FPU}
  */
 X86FPU.FCOMsr = function()
 {
-    this.opUnimplemented();
+    this.doCompare(this.getST(0), this.getSRFromEA());
 };
 
 /**
  * FCOMst()
  *
+ * Encoding 0xD8,mod=3,reg=2 ("FCOM ST(i)"): Evaluate ST(0) - ST(i)
+ *
  * @this {X86FPU}
  */
 X86FPU.FCOMst = function()
 {
-    this.opUnimplemented();
-};
-
-/**
- * FCOMsti()
- *
- * @this {X86FPU}
- */
-X86FPU.FCOMsti = function()
-{
-    this.opUnimplemented();
+    this.doCompare(this.getST(0), this.getST(this.iStack));
 };
 
 /**
  * FCOM8087()
  *
- * NOTE: This is used with decoding(s) (0xDC,0xD0-0xD7) that were valid for the 8087 and 80287
+ * NOTE: This is used with encoding(s) (0xDC,0xD0-0xD7) that were valid for the 8087 and 80287
  * but may no longer be valid as of the 80387.
+ *
+ * TODO: Determine if this form subtracted the operands in the same order, or if it requires an FCOMsti(),
+ * which, like the other *sti() functions, uses ST(0) as the second operand rather than the first.
  *
  * @this {X86FPU}
  */
 X86FPU.FCOM8087 = function()
 {
     this.opObsolete();
-    X86FPU.FCOMsti.call(this);
+    X86FPU.FCOMst.call(this);
 };
 
 /**
  * FCOMPlr()
  *
+ * Encoding 0xDC,mod<3,reg=3 ("FCOM long-real"): Evaluate ST(0) - REAL64, POP
+ *
  * @this {X86FPU}
  */
 X86FPU.FCOMPlr = function()
 {
-    this.opUnimplemented();
+    if (this.doCompare(this.getST(0), this.getLRFromEA())) this.popValue();
 };
 
 /**
  * FCOMPsr()
  *
+ * Encoding 0xD8,mod<3,reg=3 ("FCOM short-real"): Evaluate ST(0) - REAL32, POP
+ *
  * @this {X86FPU}
  */
 X86FPU.FCOMPsr = function()
 {
-    this.opUnimplemented();
+    if (this.doCompare(this.getST(0), this.getSRFromEA())) this.popValue();
 };
 
 /**
  * FCOMPst()
+ *
+ * Encoding 0xD8,mod=3,reg=3 ("FCOMP ST(i)"): Evaluate ST(0) - ST(i), POP
  *
  * @this {X86FPU}
  */
@@ -378,27 +390,20 @@ X86FPU.FCOMPst = function()
 };
 
 /**
- * FCOMPsti()
- *
- * @this {X86FPU}
- */
-X86FPU.FCOMPsti = function()
-{
-    this.opUnimplemented();
-};
-
-/**
  * FCOMP8087()
  *
- * NOTE: This is used with decodings (0xDC,0xD8-0xDF and 0xDE,0xD0-0xD7) that were valid for the 8087 and 80287
+ * NOTE: This is used with encodings (0xDC,0xD8-0xDF and 0xDE,0xD0-0xD7) that were valid for the 8087 and 80287
  * but may no longer be valid as of the 80387.
+ *
+ * TODO: Determine if this form subtracted the operands in the same order, or if it requires an FCOMPsti(),
+ * which, like the other *sti() functions, uses ST(0) as the second operand rather than the first.
  *
  * @this {X86FPU}
  */
 X86FPU.FCOMP8087 = function()
 {
     this.opObsolete();
-    X86FPU.FCOMPsti.call(this);
+    X86FPU.FCOMPst.call(this);
 };
 
 /**
@@ -422,13 +427,15 @@ X86FPU.FDECSTP = function()
 };
 
 /**
- * FDISI()
+ * FDISI8087()
  *
  * @this {X86FPU}
  */
-X86FPU.FDISI = function()
+X86FPU.FDISI8087 = function()
 {
-    this.opUnimplemented();
+    if (this.isModel(X86.FPU.MODEL_8087)) {
+        this.regControl |= X86.FPU.CONTROL.IEM;
+    }
 };
 
 /**
@@ -454,7 +461,7 @@ X86FPU.FDIVsr = function()
 /**
  * FDIVst()
  *
- * This is for encoding 0xD8,0xF0-0xF7 ("FDIV ST,ST(i)"): ST(0) <- ST(0) / ST(i)
+ * Encoding 0xD8,0xF0-0xF7 ("FDIV ST,ST(i)"): ST(0) <- ST(0) / ST(i)
  *
  * @this {X86FPU}
  */
@@ -466,7 +473,7 @@ X86FPU.FDIVst = function()
 /**
  * FDIVsti()
  *
- * This is for encoding 0xDC,0xF8-0xFF ("FDIV ST(i),ST"): ST(i) <- ST(i) / ST(0)
+ * Encoding 0xDC,0xF8-0xFF ("FDIV ST(i),ST"): ST(i) <- ST(i) / ST(0)
  *
  * @this {X86FPU}
  */
@@ -478,7 +485,7 @@ X86FPU.FDIVsti = function()
 /**
  * FDIVPsti()
  *
- * This is for encoding 0xDE,0xF8-0xFF ("FDIVP ST(i),ST"): ST(i) <- ST(i) / ST(0), POP
+ * Encoding 0xDE,0xF8-0xFF ("FDIVP ST(i),ST"): ST(i) <- ST(i) / ST(0), POP
  *
  * @this {X86FPU}
  */
@@ -510,7 +517,7 @@ X86FPU.FDIVRsr = function()
 /**
  * FDIVRst()
  *
- * This is for encoding 0xD8,0xF8-0xFF ("FDIVR ST,ST(i)"): ST(0) <- ST(i) / ST(0)
+ * Encoding 0xD8,0xF8-0xFF ("FDIVR ST,ST(i)"): ST(0) <- ST(i) / ST(0)
  *
  * @this {X86FPU}
  */
@@ -522,7 +529,7 @@ X86FPU.FDIVRst = function()
 /**
  * FDIVRsti()
  *
- * This is for encoding 0xDC,0xF0-0xF7 ("FDIVR ST(i),ST"): ST(i) <- ST(0) / ST(i)
+ * Encoding 0xDC,0xF0-0xF7 ("FDIVR ST(i),ST"): ST(i) <- ST(0) / ST(i)
  *
  * @this {X86FPU}
  */
@@ -534,7 +541,7 @@ X86FPU.FDIVRsti = function()
 /**
  * FDIVRPsti()
  *
- * This is for encoding 0xDE,0xF0-0xE7 ("FDIVRP ST(i),ST"): ST(i) <- ST(0) / ST(i), POP
+ * Encoding 0xDE,0xF0-0xE7 ("FDIVRP ST(i),ST"): ST(i) <- ST(0) / ST(i), POP
  *
  * @this {X86FPU}
  */
@@ -544,13 +551,15 @@ X86FPU.FDIVRPsti = function()
 };
 
 /**
- * FENI()
+ * FENI8087()
  *
  * @this {X86FPU}
  */
-X86FPU.FENI = function()
+X86FPU.FENI8087 = function()
 {
-    this.opUnimplemented();
+    if (this.isModel(X86.FPU.MODEL_8087)) {
+        this.regControl &= ~X86.FPU.CONTROL.IEM;
+    }
 };
 
 /**
@@ -566,7 +575,7 @@ X86FPU.FFREEsti = function()
 /**
  * FFREEP8087()
  *
- * NOTE: This is used with a decoding (0xDF,0xC0-0xC7) that was valid for the 8087 and 80287
+ * NOTE: This is used with an encoding (0xDF,0xC0-0xC7) that was valid for the 8087 and 80287
  * but may no longer be valid as of the 80387.  Also, if the older documentation is to be believed,
  * this instruction has no modern counterpart, as FFREE doesn't pop the stack.
  *
@@ -966,7 +975,7 @@ X86FPU.FLDL2E = function()
  */
 X86FPU.FLDPI = function()
 {
-    this.pushValue(Math.PI);
+    this.pushValue(X86FPU.regPI);
 };
 
 /**
@@ -1011,6 +1020,8 @@ X86FPU.FMULlr = function()
 
 /**
  * FMULsr()
+ *
+ * Encoding 0xD8,reg=0x01 ("FMUL short-real"): ST(0) <- ST(0) * REAL32
  *
  * @this {X86FPU}
  */
@@ -1265,7 +1276,7 @@ X86FPU.FSTPsti = function()
 /**
  * FSTP8087()
  *
- * NOTE: This is used with decodings (0xD9,0xD8-0xDF and 0xDF,0xD0-0xDF) that were valid for the 8087 and 80287
+ * NOTE: This is used with encodings (0xD9,0xD8-0xDF and 0xDF,0xD0-0xDF) that were valid for the 8087 and 80287
  * but may no longer be valid as of the 80387.
  *
  * @this {X86FPU}
@@ -1346,7 +1357,7 @@ X86FPU.FSUBsr = function()
 /**
  * FSUBst()
  *
- * This is for encoding 0xD8,0xE0-0xE7 ("FSUB ST,ST(i)"): ST(0) <- ST(0) - ST(i)
+ * Encoding 0xD8,0xE0-0xE7 ("FSUB ST,ST(i)"): ST(0) <- ST(0) - ST(i)
  *
  * @this {X86FPU}
  */
@@ -1358,7 +1369,7 @@ X86FPU.FSUBst = function()
 /**
  * FSUBsti()
  *
- * This is for encoding 0xDC,0xE8-0xEF ("FSUB ST(i),ST"): ST(i) <- ST(i) - ST(0)
+ * Encoding 0xDC,0xE8-0xEF ("FSUB ST(i),ST"): ST(i) <- ST(i) - ST(0)
  *
  * @this {X86FPU}
  */
@@ -1370,7 +1381,7 @@ X86FPU.FSUBsti = function()
 /**
  * FSUBPsti()
  *
- * This is for encoding 0xDE,0xE8-0xEF ("FSUBP ST(i),ST"): ST(i) <- ST(i) - ST(0), POP
+ * Encoding 0xDE,0xE8-0xEF ("FSUBP ST(i),ST"): ST(i) <- ST(i) - ST(0), POP
  *
  * @this {X86FPU}
  */
@@ -1402,7 +1413,7 @@ X86FPU.FSUBRsr = function()
 /**
  * FSUBRst()
  *
- * This is for encoding 0xD8,0xE8-0xEF ("FSUBR ST,ST(i)"): ST(0) <- ST(i) - ST(0)
+ * Encoding 0xD8,0xE8-0xEF ("FSUBR ST,ST(i)"): ST(0) <- ST(i) - ST(0)
  *
  * @this {X86FPU}
  */
@@ -1414,7 +1425,7 @@ X86FPU.FSUBRst = function()
 /**
  * FSUBRsti()
  *
- * This is for encoding 0xDC,0xE0-0xE7 ("FSUBR ST(i),ST"): ST(i) <- ST(0) - ST(i)
+ * Encoding 0xDC,0xE0-0xE7 ("FSUBR ST(i),ST"): ST(i) <- ST(0) - ST(i)
  *
  * @this {X86FPU}
  */
@@ -1426,7 +1437,7 @@ X86FPU.FSUBRsti = function()
 /**
  * FSUBRPsti()
  *
- * This is for encoding 0xDE,0xE0-0xE7 ("FSUBRP ST(i),ST"): ST(i) <- ST(0) - ST(i), POP
+ * Encoding 0xDE,0xE0-0xE7 ("FSUBRP ST(i),ST"): ST(i) <- ST(0) - ST(i), POP
  *
  * @this {X86FPU}
  */
@@ -1492,7 +1503,7 @@ X86FPU.FXCHsti = function()
 /**
  * FXCH8087()
  *
- * NOTE: This is used with decodings (0xDD,0xC8-0xCF and 0xDF,0xC8-0xCF) that were valid for the 8087 and 80287
+ * NOTE: This is used with encodings (0xDD,0xC8-0xCF and 0xDF,0xC8-0xCF) that were valid for the 8087 and 80287
  * but may no longer be valid as of the 80387.
  *
  * @this {X86FPU}
@@ -1650,7 +1661,7 @@ X86FPU.prototype.restore = function(data)
  *
  * Aside from calling this internally (eg, during initialization and FINIT operations), the ChipSet may also call
  * us whenever an I/O operation that resets the coprocessor is performed.  Only 80487 coprocessors and higher will
- * also clear the "exception" registers, but the 80487 is currently beyond our planned level of support.
+ * also clear the "exception" registers, but the 80487 is currently beyond my planned level of support.
  *
  * @this {X86FPU}
  */
@@ -1705,6 +1716,10 @@ X86FPU.prototype.isAtLeastModel = function(model)
 
 /**
  * getRandomInt(min, max)
+ *
+ * Used with old test code to verify that any randomly-constructed "long-real" (REAL64) could be converted
+ * to a "temp-real" (REAL80) and back again losslessly, otherwise a bug in either getTRFromLR() or getLRFromTR()
+ * might exist.  That test code can be resurrected from the repo; this code is being retained for future tests.
  *
  * NOTE: If either min or max is a value containing 32 or more bits AND bit 31 is set AND it has passed
  * through some bit-wise operation(s), then that value may end up being negative, so you may end up with an
@@ -2288,18 +2303,18 @@ X86FPU.prototype.setST = function(i, v)
 };
 
 /**
- * getTR(i, fNoException)
+ * getTR(i, fSafe)
  *
  * @this {X86FPU}
  * @param {number} i (stack index, 0-7)
- * @param {boolean} [fNoException] (true to ignore all exception criteria)
+ * @param {boolean} [fSafe] (true to ignore all exception criteria; used by FSAVE)
  * @return {Array.<number>|null} ("temp-real" aka TR, as an array of three 32-bit integers)
  */
-X86FPU.prototype.getTR = function(i, fNoException)
+X86FPU.prototype.getTR = function(i, fSafe)
 {
     var a = null;
     var iReg = (this.iST + i) & 7;
-    if (fNoException || this.regUsed & (1 << iReg) || !this.setException(X86.FPU.STATUS.IE)) {
+    if (fSafe || this.regUsed & (1 << iReg) || !this.setException(X86.FPU.STATUS.IE)) {
         var iInt = iReg << 1;
         a = this.getTRFromLR(this.intStack[iInt], this.intStack[iInt + 1]);
     }
@@ -2762,6 +2777,9 @@ if (DEBUGGER) {
      * Used by the Debugger for its floating-point register ("rfp") command.  For other FPU registers,
      * the Debugger calls getStatus() and getControl() directly.
      *
+     * NOTE: The "temp-real" values are fake; we manufacture them on demand from 64-bit "long-real" values
+     * actually stored in the stack; see getTRFromLR().
+     *
      * @this {X86FPU}
      * @param {number} i (stack index, relative to ST)
      * @return {Array.<number>|null} (an array of information as described above, or null if invalid element)
@@ -2785,7 +2803,55 @@ if (DEBUGGER) {
 }
 
 /*
- * Be sure to keep the following table in sync with Debugger.aaaOpFPUDescs
+ * FPU operation lookup table (be sure to keep the following table in sync with Debugger.aaaOpFPUDescs).
+ *
+ * The second lookup value corresponds to bits in the ModRegRM byte that follows the ESC byte (0xD8-0xDF).
+ *
+ * Here's a little cheat-sheet for how the lookup values relate to ModRegRM values; see opFPU() for details.
+ *
+ *      Lookup  ModRegRM value(s)
+ *      ------  -------------------------------
+ *      0x00:   0x00-0x07, 0x40-0x47, 0x80-0x87
+ *      0x01:   0x08-0x0F, 0x48-0x4F, 0x88-0x8F
+ *      0x02:   0x10-0x17, 0x50-0x57, 0x90-0x97
+ *      0x03:   0x18-0x1F, 0x58-0x5F, 0x98-0x9F
+ *      0x04:   0x20-0x27, 0x60-0x67, 0xA0-0xA7
+ *      0x05:   0x28-0x2F, 0x68-0x6F, 0xA8-0xAF
+ *      0x06:   0x30-0x37, 0x70-0x77, 0xB0-0xB7
+ *      0x07:   0x38-0x3F, 0x78-0x7F, 0xB8-0xBF
+ *      0x30:   0xC0-0xC7
+ *      0x31:   0xC8-0xCF
+ *      0x32:   0xD0-0xD7
+ *      0x33:   0xD8-0xDF
+ *      0x34:   0xE0-0xE7
+ *      0x35:   0xE8-0xEF
+ *      0x36:   0xF0-0xF7
+ *      0x37:   0xF8-0xFF
+ *
+ * ESC bytes 0xD9 and 0xDB use the RM field to further describe the operation when the ModRegRM value >= 0xE0.
+ * In those cases, we shift the Reg value into the high nibble and the RM value into the low nibble; you can think
+ * of those lookup values as hex-encoded octal.
+ *
+ *      0x40:   0xE0
+ *      0x41:   0xE1
+ *      ...
+ *      0x46:   0xE6
+ *      0x47:   0xE7
+ *      0x50:   0xE8
+ *      0x51:   0xE9
+ *      ...
+ *      0x56:   0xEE
+ *      0x57:   0xEF
+ *      0x60:   0xF0
+ *      0x61:   0xF1
+ *      ...
+ *      0x66:   0xF6
+ *      0x67:   0xF7
+ *      0x70:   0xF8
+ *      0x71:   0xF9
+ *      ...
+ *      0x76:   0xFE
+ *      0x77:   0xFF
  */
 X86FPU.aaOps = {
     0xD8: {
@@ -2814,7 +2880,7 @@ X86FPU.aaOps = {
     0xDB: {
         0x00: X86FPU.FILD32,    0x02: X86FPU.FIST32,    0x03: X86FPU.FISTP32,
                                 0x05: X86FPU.FLDtr,                             0x07: X86FPU.FSTPtr,
-        0x40: X86FPU.FENI,      0x41: X86FPU.FDISI,     0x42: X86FPU.FCLEX,     0x43: X86FPU.FINIT,
+        0x40: X86FPU.FENI8087,  0x41: X86FPU.FDISI8087, 0x42: X86FPU.FCLEX,     0x43: X86FPU.FINIT,
         0x44: X86FPU.FSETPM287,
         0x73: X86FPU.FSINCOS387
     },
