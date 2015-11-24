@@ -2883,57 +2883,77 @@ X86.fnSGDT = function(dst, src)
         X86.opInvalid.call(this);
     } else {
         /*
-         * We don't need to setShort() the first word of the operand, because the ModRM group decoder that
-         * calls us does that automatically with the value we return (dst).
+         * We don't need to set the first word of the operand, because the ModRM group decoder that calls us
+         * does that automatically with the value we return (dst).
          */
         dst = this.addrGDTLimit - this.addrGDT;
         this.assert(!(dst & ~0xffff));
-        /*
-         * We previously left the 6th byte of the target operand "undefined".  But it turns out we have to set
-         * it to *something*, because there's processor detection in PC-DOS 7.0 (at least in the SETUP portion)
-         * that looks like this:
-         *
-         *      145E:4B84 9C            PUSHF
-         *      145E:4B85 55            PUSH     BP
-         *      145E:4B86 8BEC          MOV      BP,SP
-         *      145E:4B88 B80000        MOV      AX,0000
-         *      145E:4B8B 50            PUSH     AX
-         *      145E:4B8C 9D            POPF
-         *      145E:4B8D 9C            PUSHF
-         *      145E:4B8E 58            POP      AX
-         *      145E:4B8F 2500F0        AND      AX,F000
-         *      145E:4B92 3D00F0        CMP      AX,F000
-         *      145E:4B95 7511          JNZ      4BA8
-         *      145E:4BA8 C8060000      ENTER    0006,00
-         *      145E:4BAC 0F0146FA      SGDT     [BP-06]
-         *      145E:4BB0 807EFFFF      CMP      [BP-01],FF
-         *      145E:4BB4 C9            LEAVE
-         *      145E:4BB5 BA8603        MOV      DX,0386
-         *      145E:4BB8 7503          JNZ      4BBD
-         *      145E:4BBA BA8602        MOV      DX,0286
-         *      145E:4BBD 89163004      MOV      [0430],DX
-         *      145E:4BC1 5D            POP      BP
-         *      145E:4BC2 9D            POPF
-         *      145E:4BC3 CB            RETF
-         *
-         * This code is expecting SGDT on an 80286 to set the 6th "undefined" byte to 0xFF.
-         *
-         * The 80386 adds an additional wrinkle: the 6th byte must be 0x00 if the OPERAND size is 2, whereas
-         * it must passed through if the OPERAND size is 4.
-         *
-         * In addition, when the OPERAND size is 4, the ModRM group decoder will call setLong(dst) rather than
-         * setShort(dst); we could fix that by forcing the dataSize to 2, but it seems simpler to set the high
-         * bits (16-31) of dst to match the low bits (0-15) of addr, so that the caller will harmlessly rewrite
-         * what we already wrote with the setLong() below.
-         */
+
         var addr = this.addrGDT;
         if (this.model == X86.MODEL_80286) {
+            /*
+             * We previously left the 6th byte of the target operand "undefined".  But it turns out we have to set
+             * it to *something*, because there's processor detection in PC-DOS 7.0 (at least in the SETUP portion)
+             * that looks like this:
+             *
+             *      145E:4B84 9C            PUSHF
+             *      145E:4B85 55            PUSH     BP
+             *      145E:4B86 8BEC          MOV      BP,SP
+             *      145E:4B88 B80000        MOV      AX,0000
+             *      145E:4B8B 50            PUSH     AX
+             *      145E:4B8C 9D            POPF
+             *      145E:4B8D 9C            PUSHF
+             *      145E:4B8E 58            POP      AX
+             *      145E:4B8F 2500F0        AND      AX,F000
+             *      145E:4B92 3D00F0        CMP      AX,F000
+             *      145E:4B95 7511          JNZ      4BA8
+             *      145E:4BA8 C8060000      ENTER    0006,00
+             *      145E:4BAC 0F0146FA      SGDT     [BP-06]
+             *      145E:4BB0 807EFFFF      CMP      [BP-01],FF
+             *      145E:4BB4 C9            LEAVE
+             *      145E:4BB5 BA8603        MOV      DX,0386
+             *      145E:4BB8 7503          JNZ      4BBD
+             *      145E:4BBA BA8602        MOV      DX,0286
+             *      145E:4BBD 89163004      MOV      [0430],DX
+             *      145E:4BC1 5D            POP      BP
+             *      145E:4BC2 9D            POPF
+             *      145E:4BC3 CB            RETF
+             *
+             * This code is expecting SGDT on an 80286 to set the 6th "undefined" byte to 0xFF, so that's what we do.
+             */
             addr |= (0xff000000|0);
         }
         else if (this.model >= X86.MODEL_80386) {
+            /*
+             * The 80386 added another wrinkle: Intel's documentation claimed that the 6th byte is either set to zero
+             * or the high byte of the BASE field, depending on the OPERAND size; from the "INTEL 80386 PROGRAMMER'S
+             * REFERENCE MANUAL 1986":
+             *
+             *      The LIMIT field of the [GDTR or IDTR] register is assigned to the first word at the effective address.
+             *      If the operand-size attribute is 32 bits, the next three bytes are assigned the BASE field of the
+             *      register, and the fourth byte is written with zero. The last byte is undefined. Otherwise, if the
+             *      operand-size attribute is 16 bits, the next 4 bytes are assigned the 32-bit BASE field of the register.
+             *
+             * However, Intel obviously meant the reverse (ie, that the BASE field is truncated when using a 16-bit
+             * OPERAND size, not when using a 32-bit OPERAND size).
+             *
+             * UPDATE: Thanks to Michal Necasek, we now know that the: "386 in reality does not pay attention to the
+             * operand size (despite Intel's claims to the contrary). In fact Windows 3.11/Win32s relies on it -- at least
+             * in some configurations, it will execute SGDT in 16-bit code and will crash if all 6 bytes aren't stored."
+             */
             if (this.sizeData == 2) {
-                addr &= 0x00ffffff;
+                /*
+                 * Based on the above information, we no longer mask the 6th byte on the 80386 when the OPERAND size is 2.
+                 *
+                 *      addr &= 0x00ffffff;
+                 */
             } else {
+                /*
+                 * When the OPERAND size is 4, our ModRM group decoder will call setLong(dst) rather than setShort(dst);
+                 * we could fix that by calling setDataSize(2), but it seems safer/simpler to set the high bits (16-31)
+                 * of dst to match the low bits (0-15) of addr, so that the caller will harmlessly rewrite what we are
+                 * already writing with the setLong() below.
+                 */
                 dst |= (addr << 16);
             }
         }
@@ -3277,8 +3297,8 @@ X86.fnSIDT = function(dst, src)
         X86.opInvalid.call(this);
     } else {
         /*
-         * We don't need to setShort() the first word of the operand, because the ModRM group decoder that calls
-         * us does that automatically with the value we return (dst).
+         * We don't need to set the first word of the operand, because the ModRM group decoder that calls us
+         * does that automatically with the value we return (dst).
          */
         dst = this.addrIDTLimit - this.addrIDT;
         this.assert(!(dst & ~0xffff));
@@ -3292,7 +3312,11 @@ X86.fnSIDT = function(dst, src)
         }
         else if (this.model >= X86.MODEL_80386) {
             if (this.sizeData == 2) {
-                addr &= 0x00ffffff;
+                /*
+                 * Based on the SGDT information above, we no longer mask the 6th byte when the OPERAND size is 2.
+                 *
+                 *      addr &= 0x00ffffff;
+                 */
             } else {
                 dst |= (addr << 16);
             }

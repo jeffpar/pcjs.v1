@@ -454,47 +454,45 @@
 	</xsl:template>
 
 	<xsl:template match="manifest[not(@ref)]" mode="component">
-		<xsl:param name="disk"><xsl:value-of select="@disk"/></xsl:param>
-		<xsl:if test="$disk != ''">
-			<xsl:variable name="prefix">
-				<xsl:if test="title/@prefix"><xsl:value-of select="title/@prefix"/><xsl:text>: </xsl:text></xsl:if>
-			</xsl:variable>
-			<xsl:for-each select="disk">
-				<xsl:if test="$disk = @id or $disk = '*'">
-					<xsl:variable name="name">
-						<xsl:choose>
-							<xsl:when test="name"><xsl:value-of select="$prefix"/><xsl:value-of select="name"/></xsl:when>
-							<xsl:when test="normalize-space(./text()) != ''">
-								<xsl:value-of select="$prefix"/><xsl:value-of select="normalize-space(./text())"/>
-							</xsl:when>
-							<xsl:otherwise>
-								<xsl:value-of select="../title"/><xsl:if test="../version != ''"><xsl:text> </xsl:text><xsl:value-of select="../version"/></xsl:if>
-							</xsl:otherwise>
-						</xsl:choose>
-					</xsl:variable>
-					<xsl:variable name="link">
-						<xsl:if test="link">
-							<xsl:text>desc:'</xsl:text><xsl:value-of select="link"/><xsl:text>'</xsl:text>
-							<xsl:if test="link/@href">
-								<xsl:text>,href:'</xsl:text><xsl:value-of select="link/@href"/><xsl:text>'</xsl:text>
-							</xsl:if>
+		<xsl:param name="disk"><xsl:if test="@disk"><xsl:value-of select="@disk"/></xsl:if><xsl:if test="not(@disk)">*</xsl:if></xsl:param>
+		<xsl:variable name="prefix">
+			<xsl:if test="title/@prefix"><xsl:value-of select="title/@prefix"/><xsl:text>: </xsl:text></xsl:if>
+		</xsl:variable>
+		<xsl:for-each select="disk">
+			<xsl:if test="$disk = @id or $disk = '*'">
+				<xsl:variable name="name">
+					<xsl:choose>
+						<xsl:when test="name"><xsl:value-of select="$prefix"/><xsl:value-of select="name"/></xsl:when>
+						<xsl:when test="normalize-space(./text()) != ''">
+							<xsl:value-of select="$prefix"/><xsl:value-of select="normalize-space(./text())"/>
+						</xsl:when>
+						<xsl:otherwise>
+							<xsl:value-of select="../title"/><xsl:if test="../version != ''"><xsl:text> </xsl:text><xsl:value-of select="../version"/></xsl:if>
+						</xsl:otherwise>
+					</xsl:choose>
+				</xsl:variable>
+				<xsl:variable name="link">
+					<xsl:if test="link">
+						<xsl:text>desc:'</xsl:text><xsl:value-of select="link"/><xsl:text>'</xsl:text>
+						<xsl:if test="link/@href">
+							<xsl:text>,href:'</xsl:text><xsl:value-of select="link/@href"/><xsl:text>'</xsl:text>
 						</xsl:if>
-					</xsl:variable>
-					<xsl:if test="@href">
-						<option value="{@href}" data-value="{$link}"><xsl:value-of select="$name"/></option>
 					</xsl:if>
-					<xsl:if test="not(@href)">
-						<xsl:variable name="dir">
-							<xsl:if test="@dir"><xsl:value-of select="@dir"/></xsl:if>
-						</xsl:variable>
-						<xsl:variable name="files">
-							<xsl:for-each select="file"><xsl:if test="position() = 1"><xsl:value-of select="$dir"/></xsl:if><xsl:value-of select="@dir"/><xsl:value-of select="."/><xsl:if test="position() != last()">;</xsl:if></xsl:for-each>
-						</xsl:variable>
-						<option value="{$files}" data-value="{$link}"><xsl:value-of select="$name"/></option>
-					</xsl:if>
+				</xsl:variable>
+				<xsl:if test="@href">
+					<option value="{@href}" data-value="{$link}"><xsl:value-of select="$name"/></option>
 				</xsl:if>
-			</xsl:for-each>
-		</xsl:if>
+				<xsl:if test="not(@href)">
+					<xsl:variable name="dir">
+						<xsl:if test="@dir"><xsl:value-of select="@dir"/></xsl:if>
+					</xsl:variable>
+					<xsl:variable name="files">
+						<xsl:for-each select="file"><xsl:if test="position() = 1"><xsl:value-of select="$dir"/></xsl:if><xsl:value-of select="@dir"/><xsl:value-of select="."/><xsl:if test="position() != last()">;</xsl:if></xsl:for-each>
+					</xsl:variable>
+					<option value="{$files}" data-value="{$link}"><xsl:value-of select="$name"/></option>
+				</xsl:if>
+			</xsl:if>
+		</xsl:for-each>
 	</xsl:template>
 
 	<xsl:template match="name">
