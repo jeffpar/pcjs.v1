@@ -2,40 +2,19 @@
 <?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.20.1/manifest.xsl"?>
 <manifest type="software">
 	<title>Microsoft Windows 3.00</title>
-	<disk id="disk01" size="737280" chs="80:2:9" img="static/720K/WIN300-DISK1.img" href="/disks/pc/windows/3.00/720K/WIN300-DISK1.json" md5="e885338cbefa095c6b2c403d03085cba" md5json="f6efc1eb0d6abd697fe09d2de7efc0c2">
-		<name>Windows 3.00 (720K Disk 1)</name>
+	<disk id="disk08" size="1228800" chs="80:2:15" img="static/1200K/WIN300-DISK1.img" href="/disks/pc/windows/3.00/WIN300-DISK1.json" md5="1deff1f338043f245788de88c4a57570" md5json="ff8e9c821c66eb6d799f62f38a042b63">
+		<name>Windows 3.00 (Disk 1)</name>
 	</disk>
-	<disk id="disk02" size="737280" chs="80:2:9" img="static/720K/WIN300-DISK2.img" href="/disks/pc/windows/3.00/720K/WIN300-DISK2.json" md5="1c6c289cc6d5ba5ccf0dd935e87f2cd8" md5json="9b7700a3cebb2437f603e46a17bb2428">
-		<name>Windows 3.00 (720K Disk 2)</name>
+	<disk id="disk09" size="1228800" chs="80:2:15" img="static/1200K/WIN300-DISK2.img" href="/disks/pc/windows/3.00/WIN300-DISK2.json" md5="b8edd0072aebf390e9da32b4c27c77ba" md5json="7aee2e323e16879f86d7157fa8cd9640">
+		<name>Windows 3.00 (Disk 2)</name>
 	</disk>
-	<disk id="disk03" size="737280" chs="80:2:9" img="static/720K/WIN300-DISK3.img" href="/disks/pc/windows/3.00/720K/WIN300-DISK3.json" md5="706bf6ae705644ffb72bf1b6ce50356e" md5json="0f770d50d4c515c9f2774acf9097f13b">
-		<name>Windows 3.00 (720K Disk 3)</name>
+	<disk id="disk10" size="1228800" chs="80:2:15" img="static/1200K/WIN300-DISK3.img" href="/disks/pc/windows/3.00/WIN300-DISK3.json" md5="e40bba28ef8fab25db114b84155ae976" md5json="f4f492dd1730cf2521bbd9e29bae282f">
+		<name>Windows 3.00 (Disk 3)</name>
 	</disk>
-	<disk id="disk04" size="737280" chs="80:2:9" img="static/720K/WIN300-DISK4.img" href="/disks/pc/windows/3.00/720K/WIN300-DISK4.json" md5="be69aa0330b7d052a0201fcb3f11a8bd" md5json="176ce2ad5a7c607ecc7a1b21be6582de">
-		<name>Windows 3.00 (720K Disk 4)</name>
+	<disk id="disk11" size="1228800" chs="80:2:15" img="static/1200K/WIN300-DISK4.img" href="/disks/pc/windows/3.00/WIN300-DISK4.json" md5="37e539fea32536dad2adfedd13127378" md5json="0e3febe3070de8171985bd6c2566f54b">
+		<name>Windows 3.00 (Disk 4)</name>
 	</disk>
-	<disk id="disk05" size="737280" chs="80:2:9" img="static/720K/WIN300-DISK5.img" href="/disks/pc/windows/3.00/720K/WIN300-DISK5.json" md5="a8192459926dc6fdcc7b6ca74388a99f" md5json="6aa9301b0188cb74d10384f6c953a350">
-		<name>Windows 3.00 (720K Disk 5)</name>
-	</disk>
-	<disk id="disk06" size="737280" chs="80:2:9" img="static/720K/WIN300-DISK6.img" href="/disks/pc/windows/3.00/720K/WIN300-DISK6.json" md5="974875d1b298c631961f47267fc8e725" md5json="2a388c20cb2fe950f8a5e8b4d2c86132">
-		<name>Windows 3.00 (720K Disk 6)</name>
-	</disk>
-	<disk id="disk07" size="737280" chs="80:2:9" img="static/720K/WIN300-DISK7.img" href="/disks/pc/windows/3.00/720K/WIN300-DISK7.json" md5="321daf0fe6b4dc80371c7f34a995e861" md5json="668909b9c813f567e921c57eb0c71b8f">
-		<name>Windows 3.00 (720K Disk 7)</name>
-	</disk>
-	<disk id="disk08" size="1228800" chs="80:2:15" img="static/1200K/WIN300-DISK1.img" href="/disks/pc/windows/3.00/1200K/WIN300-DISK1.json" md5="1deff1f338043f245788de88c4a57570" md5json="ff8e9c821c66eb6d799f62f38a042b63">
-		<name>Windows 3.00 (1200K Disk 1)</name>
-	</disk>
-	<disk id="disk09" size="1228800" chs="80:2:15" img="static/1200K/WIN300-DISK2.img" href="/disks/pc/windows/3.00/1200K/WIN300-DISK2.json" md5="b8edd0072aebf390e9da32b4c27c77ba" md5json="7aee2e323e16879f86d7157fa8cd9640">
-		<name>Windows 3.00 (1200K Disk 2)</name>
-	</disk>
-	<disk id="disk10" size="1228800" chs="80:2:15" img="static/1200K/WIN300-DISK3.img" href="/disks/pc/windows/3.00/1200K/WIN300-DISK3.json" md5="e40bba28ef8fab25db114b84155ae976" md5json="f4f492dd1730cf2521bbd9e29bae282f">
-		<name>Windows 3.00 (1200K Disk 3)</name>
-	</disk>
-	<disk id="disk11" size="1228800" chs="80:2:15" img="static/1200K/WIN300-DISK4.img" href="/disks/pc/windows/3.00/1200K/WIN300-DISK4.json" md5="37e539fea32536dad2adfedd13127378" md5json="0e3febe3070de8171985bd6c2566f54b">
-		<name>Windows 3.00 (1200K Disk 4)</name>
-	</disk>
-	<disk id="disk12" size="1228800" chs="80:2:15" img="static/1200K/WIN300-DISK5.img" href="/disks/pc/windows/3.00/1200K/WIN300-DISK5.json" md5="49cb80aa1d3a8106be527957aae27b44" md5json="d72b4d610b44174f7bf422d2b8fdd63e">
-		<name>Windows 3.00 (1200K Disk 5)</name>
+	<disk id="disk12" size="1228800" chs="80:2:15" img="static/1200K/WIN300-DISK5.img" href="/disks/pc/windows/3.00/WIN300-DISK5.json" md5="49cb80aa1d3a8106be527957aae27b44" md5json="d72b4d610b44174f7bf422d2b8fdd63e">
+		<name>Windows 3.00 (Disk 5)</name>
 	</disk>
 </manifest>

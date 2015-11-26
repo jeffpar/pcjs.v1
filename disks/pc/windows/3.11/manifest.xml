@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.20.1/manifest.xsl"?>
+<manifest type="software">
+	<title>Windows for Workgroups</title>
+	<version>3.11</version>
+	<type>Windows</type>
+	<category>Operating System</category>
+	<author>Microsoft</author>
+	<releaseDate/>
+	<disk id="disk01" size="1474560" chs="80:2:18" img="static/1440K/WFW311_DISK1.img" href="/disks/pc/windows/3.11/WFW311_DISK1.json" md5="441c21aa8998d750615117bef7ad44d3" md5json="9a129babdd1bbb643f2ea50a056a0569">
+		<name>Windows 3.11 (Disk 1)</name>
+	</disk>
+	<disk id="disk02" size="1474560" chs="80:2:18" img="static/1440K/WFW311_DISK2.img" href="/disks/pc/windows/3.11/WFW311_DISK2.json" md5="5c14bb07e019f9891374249eb24f41c9" md5json="df114d8eb4b3ac2e937f825857776dbe">
+		<name>Windows 3.11 (Disk 2)</name>
+	</disk>
+	<disk id="disk03" size="1474560" chs="80:2:18" img="static/1440K/WFW311_DISK3.img" href="/disks/pc/windows/3.11/WFW311_DISK3.json" md5="9280fcc45d1364d850dacd1526e77785" md5json="04645b096ecfcdb7f5f8b358325b5a1b">
+		<name>Windows 3.11 (Disk 3)</name>
+	</disk>
+	<disk id="disk04" size="1474560" chs="80:2:18" img="static/1440K/WFW311_DISK4.img" href="/disks/pc/windows/3.11/WFW311_DISK4.json" md5="f5b2ca1a054126b1c44322c39868de29" md5json="357957674006b85bdf3935c4c6b7ccc1">
+		<name>Windows 3.11 (Disk 4)</name>
+	</disk>
+	<disk id="disk05" size="1474560" chs="80:2:18" img="static/1440K/WFW311_DISK5.img" href="/disks/pc/windows/3.11/WFW311_DISK5.json" md5="37b17f61a9ba35755952fd29ed38e703" md5json="2dc6e8ea8e501d48da5aef34f0d993e4">
+		<name>Windows 3.11 (Disk 5)</name>
+	</disk>
+	<disk id="disk06" size="1474560" chs="80:2:18" img="static/1440K/WFW311_DISK6.img" href="/disks/pc/windows/3.11/WFW311_DISK6.json" md5="70eaf143f4b4336cf80d8955ba4cefa1" md5json="47d81ef90a8ac84bdaacf3b514089355">
+		<name>Windows 3.11 (Disk 6)</name>
+	</disk>
+	<disk id="disk07" size="1474560" chs="80:2:18" img="static/1440K/WFW311_DISK7.img" href="/disks/pc/windows/3.11/WFW311_DISK7.json" md5="0b67627a88f8bd03f26a9ea616aed392" md5json="1588d272e31b350a8853313d37c969ed">
+		<name>Windows 3.11 (Disk 7)</name>
+	</disk>
+	<disk id="disk08" size="1474560" chs="80:2:18" img="static/1440K/WFW311_DISK8.img" href="/disks/pc/windows/3.11/WFW311_DISK8.json" md5="b4f7f76754c7382fe3147e0f0ef089a7" md5json="53abadb291d784c505955f2cc3829ff3">
+		<name>Windows 3.11 (Disk 8)</name>
+	</disk>
+</manifest>

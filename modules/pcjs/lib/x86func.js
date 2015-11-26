@@ -2936,13 +2936,13 @@ X86.fnSGDT = function(dst, src)
              *
              * However, Intel obviously meant the reverse (ie, that the BASE field is truncated when using a 16-bit
              * OPERAND size, not when using a 32-bit OPERAND size).
-             *
-             * UPDATE: Thanks to Michal Necasek, we now know that the: "386 in reality does not pay attention to the
-             * operand size (despite Intel's claims to the contrary). In fact Windows 3.11/Win32s relies on it -- at least
-             * in some configurations, it will execute SGDT in 16-bit code and will crash if all 6 bytes aren't stored."
              */
             if (this.sizeData == 2) {
                 /*
+                 * Thanks to Michal Necasek, we now know that the: "386 in reality does not pay attention to the operand
+                 * size (despite Intel's claims to the contrary). In fact Windows 3.11/Win32s relies on it -- at least in
+                 * some configurations, it will execute SGDT in 16-bit code and will crash if all 6 bytes aren't stored."
+                 *
                  * Based on the above information, we no longer mask the 6th byte on the 80386 when the OPERAND size is 2.
                  *
                  *      addr &= 0x00ffffff;
