@@ -186,11 +186,15 @@ X86FPU.MAX_INT64 = Math.pow(2, 63);
 /**
  * F2XM1()
  *
+ * NOTE: On the 8087 and 80287, the value in ST(0) must satisfy the inequality 0 <= ST(0) <= 0.5.  On the 80287XL and
+ * later coprocessors, the permissible range is greater, and ST(0) must satisfy the inequality -1 < ST(0) < 1.  If ST(0)
+ * is out of range, the result is undefined, even though no exception is raised.
+ *
  * @this {X86FPU}
  */
 X86FPU.F2XM1 = function()
 {
-    this.opUnimplemented();
+    this.setST(0, Math.pow(2, this.getST(0)) - 1);
 };
 
 /**
@@ -200,7 +204,10 @@ X86FPU.F2XM1 = function()
  */
 X86FPU.FABS = function()
 {
-    this.opUnimplemented();
+    /*
+     * NOTE: This could be implemented more efficiently by simply clearing the sign bit of ST(0).
+     */
+    this.setST(0, Math.abs(this.getST(0)));
 };
 
 /**
@@ -282,7 +289,10 @@ X86FPU.FBSTPpd = function()
  */
 X86FPU.FCHS = function()
 {
-    this.opUnimplemented();
+    /*
+     * NOTE: This could be implemented more efficiently by simply inverting the sign bit of ST(0).
+     */
+    this.setST(0, -this.getST(0));
 };
 
 /**
@@ -423,7 +433,8 @@ X86FPU.FCOMPP = function()
  */
 X86FPU.FDECSTP = function()
 {
-    this.opUnimplemented();
+    this.iST = (this.iST - 1) & 0x7;
+    this.regStatus &= ~X86.FPU.STATUS.C1;
 };
 
 /**
@@ -595,7 +606,7 @@ X86FPU.FFREEP8087 = function()
  */
 X86FPU.FIADD16 = function()
 {
-    this.opUnimplemented();
+    this.setST(0, this.getST(0) + this.getWIFromEA());
 };
 
 /**
@@ -605,7 +616,7 @@ X86FPU.FIADD16 = function()
  */
 X86FPU.FIADD32 = function()
 {
-    this.opUnimplemented();
+    this.setST(0, this.getST(0) + this.getSIFromEA());
 };
 
 /**
@@ -615,7 +626,7 @@ X86FPU.FIADD32 = function()
  */
 X86FPU.FICOM16 = function()
 {
-    this.opUnimplemented();
+    this.doCompare(this.getST(0), this.getWIFromEA());
 };
 
 /**
@@ -625,7 +636,7 @@ X86FPU.FICOM16 = function()
  */
 X86FPU.FICOM32 = function()
 {
-    this.opUnimplemented();
+    this.doCompare(this.getST(0), this.getSIFromEA());
 };
 
 /**
@@ -635,7 +646,7 @@ X86FPU.FICOM32 = function()
  */
 X86FPU.FICOMP16 = function()
 {
-    this.opUnimplemented();
+    if (this.doCompare(this.getST(0), this.getWIFromEA())) this.popValue();
 };
 
 /**
@@ -645,7 +656,7 @@ X86FPU.FICOMP16 = function()
  */
 X86FPU.FICOMP32 = function()
 {
-    this.opUnimplemented();
+    if (this.doCompare(this.getST(0), this.getSIFromEA())) this.popValue();
 };
 
 /**
@@ -655,7 +666,7 @@ X86FPU.FICOMP32 = function()
  */
 X86FPU.FIDIV16 = function()
 {
-    this.opUnimplemented();
+    this.setST(0, this.doDivide(this.getST(0), this.getWIFromEA()));
 };
 
 /**
@@ -675,7 +686,7 @@ X86FPU.FIDIV32 = function()
  */
 X86FPU.FIDIVR16 = function()
 {
-    this.opUnimplemented();
+    this.setST(0, this.doDivide(this.getWIFromEA(), this.getST(0)));
 };
 
 /**
@@ -685,7 +696,7 @@ X86FPU.FIDIVR16 = function()
  */
 X86FPU.FIDIVR32 = function()
 {
-    this.opUnimplemented();
+    this.setST(0, this.doDivide(this.getSIFromEA(), this.getST(0)));
 };
 
 /**
@@ -695,7 +706,7 @@ X86FPU.FIDIVR32 = function()
  */
 X86FPU.FILD16 = function()
 {
-    this.opUnimplemented();
+    this.pushValue(this.getWIFromEA());
 };
 
 /**
@@ -705,8 +716,7 @@ X86FPU.FILD16 = function()
  */
 X86FPU.FILD32 = function()
 {
-    this.assert(this.cpu.regEA !== X86.ADDR_INVALID);
-    this.pushValue(this.cpu.getLong(this.cpu.regEA));
+    this.pushValue(this.getSIFromEA());
 };
 
 /**
@@ -716,7 +726,7 @@ X86FPU.FILD32 = function()
  */
 X86FPU.FILD64 = function()
 {
-    this.opUnimplemented();
+    this.pushValue(this.getLIFromEA());
 };
 
 /**
@@ -746,7 +756,8 @@ X86FPU.FIMUL32 = function()
  */
 X86FPU.FINCSTP = function()
 {
-    this.opUnimplemented();
+    this.iST = (this.iST + 1) & 0x7;
+    this.regStatus &= ~X86.FPU.STATUS.C1;
 };
 
 /**
@@ -2338,9 +2349,23 @@ X86FPU.prototype.setTR = function(i, a)
 };
 
 /**
+ * getWIFromEA()
+ *
+ * Returns the (16-bit) "word-integer" value located at regEA.
+ *
+ * @this {X86FPU}
+ * @return {number} v
+ */
+X86FPU.prototype.getWIFromEA = function()
+{
+    this.assert(this.cpu.regEA !== X86.ADDR_INVALID);
+    return (this.cpu.getShort(this.cpu.regEA) << 16) >> 16;
+};
+
+/**
  * getSIFromEA()
  *
- * Sets the internal intTmpLR register to the (32-bit) "short-integer" value located at regEA.
+ * Returns the (32-bit) "short-integer" value located at regEA.
  *
  * @this {X86FPU}
  * @return {number} v
@@ -2348,8 +2373,23 @@ X86FPU.prototype.setTR = function(i, a)
 X86FPU.prototype.getSIFromEA = function()
 {
     this.assert(this.cpu.regEA !== X86.ADDR_INVALID);
-    this.intTmpLR[0] = this.cpu.getLong(this.cpu.regEA);
-    return this.intTmpLR[0];
+    return this.cpu.getLong(this.cpu.regEA);
+};
+
+/**
+ * getLIFromEA()
+ *
+ * Returns the (64-bit) "long-integer" value located at regEA.
+ *
+ * @this {X86FPU}
+ * @return {number} v
+ */
+X86FPU.prototype.getLIFromEA = function()
+{
+    this.assert(this.cpu.regEA !== X86.ADDR_INVALID);
+    var lo = this.cpu.getLong(this.cpu.regEA);
+    var hi = this.cpu.getLong(this.cpu.regEA + 4);
+    return (hi * 0x100000000) + (lo >>> 0);
 };
 
 /**
