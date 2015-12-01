@@ -554,7 +554,7 @@ var X86 = {
             OE:     0x0008,     // bit 3: Overflow
             UE:     0x0010,     // bit 4: Underflow
             PE:     0x0020,     // bit 5: Precision
-            SF:     0x0040,     // bit 6: Stack Fault (80387 and later)
+            SF:     0x0040,     // bit 6: Stack Fault (80387 and later; triggers an Invalid Operation exception)
             EXC:    0x007F,     // all of the above exceptions
             ES:     0x0080,     // bit 7: Error/Exception Status/Summary (Interrupt Request on 8087)
             C0:     0x0100,     // bit 8: Condition Code 0

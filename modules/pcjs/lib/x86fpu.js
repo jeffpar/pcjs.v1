@@ -427,7 +427,16 @@ X86FPU.prototype.opUnimplemented = function()
 X86FPU.prototype.checkException = function()
 {
     this.regStatus &= ~X86.FPU.STATUS.ES;
-    if (this.regStatus & (~this.regControl & X86.FPU.STATUS.EXC)) {
+    /*
+     * NOTE: The "Stack Fault" (SF) status bit wasn't introduced until the 80387, so it triggers the pre-existing
+     * "Invalid Operation" (IE) exception; there is no corresponding "Stack Fault" (SE) exception, and the matching
+     * control bit is still reserved.  Consequently, X86.FPU.CONTROL.EXC is a *subset* of X86.FPU.STATUS.EXC (0x3F
+     * instead of 0x7F).
+     *
+     * However, we shouldn't have to do anything special when SF is set, because any setException() call that sets
+     * SF should ALSO set IE.
+     */
+    if (this.regStatus & (~this.regControl & X86.FPU.CONTROL.EXC)) {
         this.regStatus |= X86.FPU.STATUS.ES;    // set ES whenever one or more unmasked EXC bits are set
     }
     if ((this.regStatus & X86.FPU.STATUS.ES) && !(this.regControl & X86.FPU.CONTROL.IEM)) {
@@ -450,6 +459,9 @@ X86FPU.prototype.checkException = function()
  *      UE (0x0010 bit 4: Underflow)
  *      PE (0x0020 bit 5: Precision)
  *      SF (0x0040 bit 6: Stack Fault; 80387 and later)
+ *
+ * Also, as noted in checkException(), any time you set the SF bit, you should also set the IE bit, because
+ * Stack Fault is a subset of Invalid Operation.  TODO: We should include a test for that in the assertion below.
  *
  * @this {X86FPU}
  * @param {number} n (one or more of the above error status bits)
