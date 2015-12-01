@@ -111,7 +111,7 @@ function X86FPU(parmsFPU)
     /*
      * Used for "long-real" (LR) 64-bit floating-point operations.  We also use intTmpLR as temporary storage
      * for all "word-integer" (WI or INT16), "short-integer" (SI or INT32) and "long-integer" (LI or INT64) values,
-     * since it's just large enough to accommodate all three sizes of integers.
+     * since it's just large enough to accommodate all three integer sizes.
      */
     this.regTmpLR = new Float64Array(1);
     this.intTmpLR = new Int32Array(this.regTmpLR.buffer);
@@ -205,7 +205,7 @@ X86FPU.F2XM1 = function()
 X86FPU.FABS = function()
 {
     /*
-     * NOTE: This could be implemented more efficiently by simply clearing the sign bit of ST(0).
+     * TODO: This could be implemented more efficiently by simply clearing the sign bit of ST(0).
      */
     this.setST(0, Math.abs(this.getST(0)));
 };
@@ -269,7 +269,14 @@ X86FPU.FADDPsti = function()
  */
 X86FPU.FBLDpd = function()
 {
-    this.opUnimplemented();
+    var a = this.getTRFromEA();
+    /*
+     * a[0] contains the 8 least-significant BCD digits, a[1] contains the next 8, and a[2] contains
+     * the next 2 (bit 15 of a[2] is the sign bit, and bits 8-14 of a[2] are unused).
+     */
+    var v = this.decodeBCD(a[0], 8) + this.decodeBCD(a[1], 8) * 100000000 + this.decodeBCD(a[2], 2) * 10000000000000000;
+    if (a[2] & 0x8000) v = -v;
+    this.pushValue(v);
 };
 
 /**
@@ -279,7 +286,19 @@ X86FPU.FBLDpd = function()
  */
 X86FPU.FBSTPpd = function()
 {
-    this.opUnimplemented();
+    var v = this.roundInteger(this.popValue());
+    if (v != null) {
+        /*
+         * intTmpTR[0] will contain the 8 least-significant BCD digits, intTmpTR[1] will contain the next 8,
+         * and intTmpTR[2] will contain the next 2 (bit 15 of intTmpTR[2] will be the sign bit, and bits 8-14 of
+         * intTmpTR[2] will be unused).
+         */
+        this.intTmpTR[0] = this.encodeBCD(v, 8);
+        this.intTmpTR[1] = this.encodeBCD(v / 100000000, 8);
+        this.intTmpTR[2] = this.encodeBCD(v / 10000000000000000, 2);
+        if (v < 0) this.intTmpTR[2] |= 0x8000;
+        this.setEAFromTR();
+    }
 };
 
 /**
@@ -290,7 +309,7 @@ X86FPU.FBSTPpd = function()
 X86FPU.FCHS = function()
 {
     /*
-     * NOTE: This could be implemented more efficiently by simply inverting the sign bit of ST(0).
+     * TODO: This could be implemented more efficiently by simply inverting the sign bit of ST(0).
      */
     this.setST(0, -this.getST(0));
 };
@@ -402,8 +421,8 @@ X86FPU.FCOMPst = function()
 /**
  * FCOMP8087()
  *
- * NOTE: This is used with encodings (0xDC,0xD8-0xDF and 0xDE,0xD0-0xD7) that were valid for the 8087 and 80287
- * but may no longer be valid as of the 80387.
+ * NOTE: This is used with encodings (0xDC,0xD8-0xDF and 0xDE,0xD0-0xD7) that were valid for the 8087
+ * and 80287 but may no longer be valid as of the 80387.
  *
  * TODO: Determine if this form subtracted the operands in the same order, or if it requires an FCOMPsti(),
  * which, like the other *sti() functions, uses ST(0) as the second operand rather than the first.
@@ -606,7 +625,7 @@ X86FPU.FFREEP8087 = function()
  */
 X86FPU.FIADD16 = function()
 {
-    this.setST(0, this.getST(0) + this.getWIFromEA());
+    this.setST(0, this.doAdd(this.getST(0), this.getWIFromEA()));
 };
 
 /**
@@ -616,7 +635,7 @@ X86FPU.FIADD16 = function()
  */
 X86FPU.FIADD32 = function()
 {
-    this.setST(0, this.getST(0) + this.getSIFromEA());
+    this.setST(0, this.doAdd(this.getST(0), this.getSIFromEA()));
 };
 
 /**
@@ -736,7 +755,7 @@ X86FPU.FILD64 = function()
  */
 X86FPU.FIMUL16 = function()
 {
-    this.opUnimplemented();
+    this.setST(0, this.doMultiply(this.getST(0), this.getWIFromEA()));
 };
 
 /**
@@ -746,7 +765,7 @@ X86FPU.FIMUL16 = function()
  */
 X86FPU.FIMUL32 = function()
 {
-    this.opUnimplemented();
+    this.setST(0, this.doMultiply(this.getST(0), this.getSIFromEA()));
 };
 
 /**
@@ -777,7 +796,7 @@ X86FPU.FINIT = function()
  */
 X86FPU.FIST16 = function()
 {
-    this.opUnimplemented();
+    if (this.getWI(0)) this.setEAFromWI();
 };
 
 /**
@@ -787,7 +806,7 @@ X86FPU.FIST16 = function()
  */
 X86FPU.FIST32 = function()
 {
-    this.opUnimplemented();
+    if (this.getSI(0)) this.setEAFromSI();
 };
 
 /**
@@ -797,7 +816,10 @@ X86FPU.FIST32 = function()
  */
 X86FPU.FISTP16 = function()
 {
-    this.opUnimplemented();
+    if (this.getWI(0)) {
+        this.setEAFromWI();
+        this.popValue();
+    }
 };
 
 /**
@@ -820,7 +842,10 @@ X86FPU.FISTP32 = function()
  */
 X86FPU.FISTP64 = function()
 {
-    this.opUnimplemented();
+    if (this.getLI(0)) {
+        this.setEAFromLI();
+        this.popValue();
+    }
 };
 
 /**
@@ -830,7 +855,7 @@ X86FPU.FISTP64 = function()
  */
 X86FPU.FISUB16 = function()
 {
-    this.opUnimplemented();
+    this.setST(0, this.doSubtract(this.getST(0), this.getWIFromEA()));
 };
 
 /**
@@ -840,7 +865,7 @@ X86FPU.FISUB16 = function()
  */
 X86FPU.FISUB32 = function()
 {
-    this.opUnimplemented();
+    this.setST(0, this.doSubtract(this.getST(0), this.getSIFromEA()));
 };
 
 /**
@@ -850,7 +875,7 @@ X86FPU.FISUB32 = function()
  */
 X86FPU.FISUBR16 = function()
 {
-    this.opUnimplemented();
+    this.setST(0, this.doSubtract(this.getWIFromEA(), this.getST(0)));
 };
 
 /**
@@ -860,7 +885,7 @@ X86FPU.FISUBR16 = function()
  */
 X86FPU.FISUBR32 = function()
 {
-    this.opUnimplemented();
+    this.setST(0, this.doSubtract(this.getSIFromEA(), this.getST(0)));
 };
 
 /**
@@ -876,7 +901,7 @@ X86FPU.FISUBR32 = function()
  *      the register is taken before TOP is changed. The source operand may also be a short real, long real,
  *      or temporary real memory operand. Short real and long real operands are converted automatically.
  *
- *      Note that coding the instruction FLD ST duplicates the value at the stack top.
+ *      Note that coding the instruction FLD ST(0) duplicates the value at the stack top.
  *
  *      On the 8087 and 80287, the FLD real80 instruction will raise the denormal exception if the memory
  *      operand is a denormal. The 80287XL and later coprocessors will not, since the operation is not arithmetic.
@@ -913,8 +938,7 @@ X86FPU.FLDsr = function()
  */
 X86FPU.FLDsti = function()
 {
-    var v = this.getST(this.iStack);
-    if (v != null) this.pushValue(v);
+    this.pushValue(this.getST(this.iStack));
 };
 
 /**
@@ -1083,31 +1107,120 @@ X86FPU.FNOP = function()
 /**
  * FPATAN()
  *
+ * FPATAN calculates the partial arctangent of ST(0) divided by ST(1):
+ *
+ *      ST(1) = tan^-1( ST(1) / ST(0) )
+ *
+ * On the 8087 and 80287, the arguments must satisfy the inequality 0 < ST(1) < ST(0) < +infinity.
+ * On the 80287XL and later coprocessors, the range of the operands is unrestricted.  The result is
+ * returned to ST(1), and the stack is popped, destroying both operands and leaving the result in ST(0).
+ *
  * @this {X86FPU}
  */
 X86FPU.FPATAN = function()
 {
-    this.opUnimplemented();
+    if (this.setST(1, Math.atan2(this.getST(1), this.getST(0)))) this.popValue();
 };
 
 /**
  * FPTAN()
  *
+ * FPTAN calculates the partial tangent of ST(0):
+ *
+ *      y / x = tan( ST(0) )
+ *
+ * The result of the operation is a ratio.  y replaces the argument on the stack, and x is pushed onto the stack,
+ * where it becomes the new ST(0).
+ *
+ * On the 8087 and 80287, the FPTAN function assumes that its argument is valid and in-range.  No argument checking
+ * is performed.  The value of ST(0) must satisfy the inequality -pi/4 <= ST(0) <= pi/4.  In the case of an invalid
+ * argument, the result is undefined and no error is signaled.
+ *
+ * On the 80287XL and later coprocessors, if value of ST(0) satisfies the condition -2^63 < ST(0) < 2^63, it will
+ * automatically be reduced to within range.  If the operand is outside this range, however, C2 is set to 1 to indicate
+ * that the function is incomplete, and ST(0) is left unchanged.
+ *
+ * The 80287XL, 80387, and 80486 always push a value of +1.0 for x. The value of x pushed by the 8087 and 80287 may be
+ * any real number.  In either case, the ratio is the same. The cotangent can be calculated by executing FDIVR immediately
+ * after FPTAN.  The following code will leave the 8087 and 80287 in the same state as the later coprocessors:
+ *
+ *      FDIV
+ *      FLD1
+ *
+ * ST(7) must be empty before this instruction is executed to avoid an invalid operation exception.  If the invalid
+ * operation exception is masked, the 8087 and 80287 leave the original operand unchanged, but push it to ST(1).  On the
+ * 80287XL and later coprocessors, both ST(0) and ST(1) will contain quiet NaNs.  On the 80287XL and later coprocessors,
+ * if condition code bit C2 is 0 and the precision exception is raised, then C1=1 if the last bit was rounded up. C1 is
+ * undefined for the 8087 and 80287.
+ *
  * @this {X86FPU}
  */
 X86FPU.FPTAN = function()
 {
-    this.opUnimplemented();
+    if (this.setST(0, Math.tan(this.getST(0)))) this.pushValue(1.0);
 };
 
 /**
  * FPREM()
  *
+ * FPREM performs modulo division of ST(0) by ST(1) and returns the result to ST(0).
+ *
+ * The FPREM instruction is used to reduce the real operand in ST(0) to a value whose magnitude is less than the
+ * magnitude of ST(1).  FPREM produces an exact result, so the precision exception is never raised and the rounding
+ * control has no effect.  The sign of the remainder is the same as the sign of the original operand.
+ *
+ * The remaindering operation is performed by iterative scaled subtractions and can reduce the exponent of ST(0) by
+ * no more than 63 in one execution.  If the remainder is less than ST(1) (the modulus), the function is complete and
+ * C2 in the status word is cleared.
+ *
+ * If the modulo function is incomplete, C2 is set to 1, and the result in ST(0) is termed the partial remainder.
+ * C2 can be inspected by storing the status word and re-executing the instruction until C2 is clear. Alternately,
+ * ST(0) can be compared to ST(1).  If ST(0) > ST(1), then FPREM must be executed again.  If ST(0) = ST(1), then the
+ * remainder is 0.
+ *
+ * FPREM is important for reducing arguments to the periodic transcendental functions such as FPTAN.  Because FPREM
+ * produces an exact result, no round-off error is introduced into the calculation.
+ *
+ * When reduction is complete, the three least-significant bits of the quotient are stored in the condition code bits
+ * C3, C1, and C0, respectively.  When arguments to the tangent function are reduced by pi/4, this result can be used
+ * to identify the octant that contained the original angle.
+ *
+ * The FPREM function operates differently than specified by the IEEE 754 standard when rounding the quotient to form
+ * a partial remainder (see the algorithm).  The FPREM1 function (80287XL and up) is provided for compatibility with
+ * that standard.
+ *
+ * The FPREM instruction can also be used to normalize ST(0).  If ST(0) is unnormal and ST(1) is greater than ST(0),
+ * FPREM will normalize ST(0).  On the 8087 and 80287, operation on a denormal operand raises the invalid operation
+ * exception.  Underflow is not possible.  On the 80287XL and later coprocessors, operation on a denormal is supported
+ * and an underflow exception can occur.
+ *
+ * ALGORITHM:
+ *
+ *      t = EXPONENT(ST) - EXPONENT(ST(1))
+ *      IF (t < 64) THEN
+ *          q = R0UND(ST(0) / ST(1), CHOP)
+ *          ST(0) = ST(0) - (ST(1) * q)
+ *          C2 = 0
+ *          C0 = BIT 2 of q
+ *          C1 = BIT 1 of q
+ *          C3 = BIT 0 of q
+ *      ELSE
+ *          n = a number between 32 and 63
+ *          q = ROUND((ST(0) / ST(1)) / 2^(t-n), CHOP)
+ *          ST(0) = ST(0) - (ST(1) * q * 2^(t-n))
+ *          C2 = 1
+ *      ENDIF
+ *
+ * TODO: Determine the extent to which the JavaScript MOD operator differs from the above algorithm.
+ *
+ * ERRATA: On the 8087 and 80287, the condition code bits C3, C1, and C0 are incorrect when performing a reduction of
+ * 64^n + m, where n >= 1, and m=1 or m=2.  A bug fix should be implemented in software.
+ *
  * @this {X86FPU}
  */
 X86FPU.FPREM = function()
 {
-    this.opUnimplemented();
+    this.setST(0, this.getST(0) % this.getST(1));
 };
 
 /**
@@ -1136,7 +1249,7 @@ X86FPU.FRSTOR = function()
  */
 X86FPU.FRNDINT = function()
 {
-    this.opUnimplemented();
+    this.setST(0, this.roundInteger(this.getST(0), X86FPU.MAX_INT64));
 };
 
 /**
@@ -1161,11 +1274,26 @@ X86FPU.FSAVE = function()
 /**
  * FSCALE()
  *
+ * FSCALE interprets the value in ST(1) as an integer and adds this number to the exponent of the number in ST(0).
+ *
+ * The FSCALE instruction provides a means of quickly performing multiplication or division by powers of two.
+ * This operation is often required when scaling array indexes.
+ *
+ * On the 8087 and 80287, FSCALE assumes that the scale factor in ST(1) is an integer that satisfies the inequality
+ * -2^15 <= ST(1) < +2^15.  If ST(1) is not an integer value, the value is chopped to the next smallest integer in
+ * magnitude (chopped toward zero).  If the value is out of range or 0 < ST(1) < 1, FSCALE produces an undefined
+ * result and doesn't signal an exception.  Typically, the value in ST(0) is unchanged but should not be depended on.
+ *
+ * On the 80287XL and later coprocessors, there is no limit on the range of the scale factor in ST(1). The value in
+ * ST(1) is still chopped toward zero.  If ST(1) is 0, ST(0) is unchanged.
+ *
  * @this {X86FPU}
  */
 X86FPU.FSCALE = function()
 {
-    this.opUnimplemented();
+    var x = this.getST(0);
+    var y = this.getST(1);
+    if (x != null && y != null) this.setST(0, x * Math.pow(2, this.truncateValue(y)));
 };
 
 /**
@@ -1209,9 +1337,7 @@ X86FPU.FSQRT = function()
  */
 X86FPU.FSTlr = function()
 {
-    if (this.getLR(0)) {
-        this.setEAFromLR();
-    }
+    if (this.getLR(0)) this.setEAFromLR();
 };
 
 /**
@@ -1221,9 +1347,7 @@ X86FPU.FSTlr = function()
  */
 X86FPU.FSTsr = function()
 {
-    if (this.getSR(0)) {
-        this.setEAFromSR();
-    }
+    if (this.getSR(0)) this.setEAFromSR();
 };
 
 /**
@@ -1464,7 +1588,7 @@ X86FPU.FSUBRPsti = function()
  */
 X86FPU.FTST = function()
 {
-    this.opUnimplemented();
+    this.doCompare(this.getST(0), 0);
 };
 
 /**
@@ -1528,31 +1652,91 @@ X86FPU.FXCH8087 = function()
 /**
  * FXTRACT()
  *
+ * FXTRACT splits the value encoded in ST(0) into two separate numbers representing the actual value of the
+ * fraction (mantissa) and exponent fields.
+ *
+ * The FXTRACT instruction is used to decompose the two fields of the temporary real number in ST(0).  The exponent
+ * replaces the value in ST(0), then the fraction is pushed onto the stack.  When execution is complete, ST(0)
+ * contains the original fraction, expressed as a real number with a true exponent of 0 (0x3FFF in biased form),
+ * and ST(1) contains the value of the original operand's true (unbiased) exponent expressed as a real number.
+ *
+ * If ST(0) is 0, the 8087 and 80287 will leave zeros in both ST(0) and ST(1); both zeros will have the same sign as
+ * the original operand.  If ST(0) is +infinity, the invalid operation exception is raised.
+ *
+ * On the 80287XL and later coprocessors, if ST(0) is 0, the zero-divide exception is reported and ST(1) is set to
+ * -infinity.  If ST(0) is +infinity, no exception is reported.
+ *
+ * The FXTRACT instruction may be thought of as the complement to the FSCALE instruction, which combines a separate
+ * fraction and exponent into a single value.
+ *
+ * ALGORITHM:
+ *
+ *      IF (ST(0) = 0) THEN
+ *          DEC TOP
+ *          ST(0) = ST(1)
+ *      ELSE
+ *          temp = ST(0)
+ *          ST(0) = EXPONENT(ST(0))     ; stored as true exponent
+ *          DEC TOP
+ *          ST(0) = FRACTION(ST(0))
+ *      ENDIF
+ *
  * @this {X86FPU}
  */
 X86FPU.FXTRACT = function()
 {
-    this.opUnimplemented();
+    var v = this.getST(0);
+    if (v != null) {
+        this.regTmpLR[0] = v;
+        this.setST(0, ((this.intTmpLR[1] >> 20) & 0x7ff) - 0x3ff);
+        this.intTmpLR[1] = (this.intTmpLR[1] | 0x3ff00000) & ~0x40000000;
+        this.pushValue(this.regTmpLR[0]);
+    }
 };
 
 /**
  * FYL2X()
  *
+ * FYL2X (y log base 2 of x) calculates:
+ *
+ *      ST(1) = ST(1) * log2(ST(0))
+ *
+ * The operands must satisfy the inequalities 0 < ST(0) < +infinity and -infinity < ST(1) < +infinity.  FYL2X pops
+ * the stack and returns the result to the new ST(0).  Both original operands are destroyed.
+ *
+ * The FYL2X function is designed to optimize the calculation of a log to a base, n, other than two.  In such a case,
+ * the following multiplication is required; ie:
+ *
+ *      logn(x) = logn(2) * log2(x)
+ *
  * @this {X86FPU}
  */
 X86FPU.FYL2X = function()
 {
-    this.opUnimplemented();
+    if (this.setST(1, this.getST(1) * Math.log(this.getST(0)) / Math.LN2)) this.popValue();
 };
 
 /**
  * FYL2XP1()
  *
+ * FYL2XP1 (y log base 2 of x plus 1) calculates:
+ *
+ *      ST(1) = ST(1) * log2(ST(0) + 1)
+ *
+ * The operands must satisfy the inequalities -(1-sqrt(2)/2) < ST(0) < (1-sqrt(2)/2) and -infinity < ST(1) < +infinity.
+ * FYL2XP1 pops the stack and returns the result to the new ST(0).  Both original operands are destroyed.
+ *
+ * The FYL2XP1 function provides greater accuracy than FYL2X in computing the log of a number that is very close to 1.
+ *
+ * FYL2XP1 is typically used when computing compound interest, for example, which requires the calculation of a logarithm
+ * of 1.0 + n where 0 < n < 0.29.  If 1.0 was added to n, significant digits might be lost.  By using FYL2XP1, the result
+ * will be as accurate as n to within three units of temporary real precision.
+ *
  * @this {X86FPU}
  */
 X86FPU.FYL2XP1 = function()
 {
-    this.opUnimplemented();
+    if (this.setST(1, this.getST(1) * Math.log(this.getST(0) + 1.0) / Math.LN2)) this.popValue();
 };
 
 /**
@@ -2047,16 +2231,16 @@ X86FPU.prototype.doDivide = function(dividend, divisor)
 X86FPU.prototype.doCompare = function(operand1, operand2)
 {
     if (operand1 != null && operand2 != null) {
-        var cc = X86.FPU.STATUS.C0 | X86.FPU.STATUS.C2 | X86.FPU.STATUS.C3;
+        var cc = 0;             // default value used when result > 0
         if (!isNaN(operand1) && !isNaN(operand2)) {
             var result = operand1 - operand2;
-            if (result > 0) {
-                cc = 0;
-            } else if (result < 0) {
+            if (result < 0) {
                 cc = X86.FPU.STATUS.C0;
-            } else {
+            } else if (result === 0) {
                 cc = X86.FPU.STATUS.C3;
             }
+        } else {
+            cc = X86.FPU.STATUS.C0 | X86.FPU.STATUS.C2 | X86.FPU.STATUS.C3;
         }
         this.regStatus = (this.regStatus & ~X86.FPU.STATUS.CC) | cc;
         return true;
@@ -2091,13 +2275,14 @@ X86FPU.prototype.doSquareRoot = function(operand)
  *
  * @this {X86FPU}
  * @param {number|null} operand
- * @param {number} max (ie, 0x8000, 0x80000000, or 0x8000000000000000)
- * @return {boolean} true if intTmpLR was loaded, false if not
+ * @param {number} [max] (ie, 0x8000, 0x80000000, or 0x8000000000000000)
+ * @return {number|null} (rounded result if intTmpLR was loaded, null if not)
  */
 X86FPU.prototype.roundInteger = function(operand, max)
 {
-    var result;
-    var rc = (this.regControl & X86.FPU.CONTROL.RC);
+    if (operand == null) return null;
+
+    var rc = (this.regControl & X86.FPU.CONTROL.RC), result;
 
     if (rc == X86.FPU.CONTROL.RC_NEAR) {
         result = Math.round(operand);
@@ -2110,22 +2295,34 @@ X86FPU.prototype.roundInteger = function(operand, max)
         result = Math.ceil(operand);
     }
 
-    if (result >= max) {
-        if (this.setException(X86.FPU.STATUS.OE)) return false;
-        result = max - 1;
+    if (max) {
+        if (result >= max) {
+            if (this.setException(X86.FPU.STATUS.IE)) return null;
+            result = -max;      // apparently, the masked response is to return the most negative integer (not max - 1)
+        }
+        else if (result < -max) {
+            if (this.setException(X86.FPU.STATUS.IE)) return null;
+            result = -max;
+        }
+        this.intTmpLR[0] = result|0;
+        if (max > X86FPU.MAX_INT32) {
+            this.intTmpLR[1] = (result / 0x100000000)|0;
+            if (!this.intTmpLR[1] && result < 0) this.intTmpLR[1] = -1;
+        }
     }
-    else if (result < -max) {
-        if (this.setException(X86.FPU.STATUS.UE)) return false;
-        result = -max;
-    }
+    return result;
+};
 
-    this.intTmpLR[0] = result|0;
-
-    if (max > X86FPU.MAX_INT32) {
-        this.intTmpLR[1] = (result / 0x100000000)|0;
-        if (!this.intTmpLR[1] && result < 0) this.intTmpLR[1] = -1;
-    }
-    return true;
+/**
+ * truncateValue(v)
+ *
+ * @this {X86FPU}
+ * @param {number} v
+ * @return {number}
+ */
+X86FPU.prototype.truncateValue = function(v)
+{
+    return v > 0? Math.floor(v) : Math.ceil(v);
 };
 
 /**
@@ -2203,9 +2400,23 @@ X86FPU.prototype.setTags = function(n)
 };
 
 /**
+ * getWI(i)
+ *
+ * Gets a "word-integer" (WI aka INT16) from ST(i)
+ *
+ * @this {X86FPU}
+ * @param {number} i (eg, 0 for top-of-stack)
+ * @return {boolean} true if intTmpLR was loaded, false if not
+ */
+X86FPU.prototype.getWI = function(i)
+{
+    return this.roundInteger(this.getST(i), X86FPU.MAX_INT16) != null;
+};
+
+/**
  * getSI(i)
  *
- * Gets a "short-integer" (SI aka INT32)
+ * Gets a "short-integer" (SI aka INT32) from ST(i)
  *
  * @this {X86FPU}
  * @param {number} i (eg, 0 for top-of-stack)
@@ -2213,8 +2424,21 @@ X86FPU.prototype.setTags = function(n)
  */
 X86FPU.prototype.getSI = function(i)
 {
-    var v = this.getST(i);
-    return v != null && this.roundInteger(v, X86FPU.MAX_INT32);
+    return this.roundInteger(this.getST(i), X86FPU.MAX_INT32) != null;
+};
+
+/**
+ * getLI(i)
+ *
+ * Gets a "long-integer" (LI aka INT64) from ST(i)
+ *
+ * @this {X86FPU}
+ * @param {number} i (eg, 0 for top-of-stack)
+ * @return {boolean} true if intTmpLR was loaded, false if not
+ */
+X86FPU.prototype.getLI = function(i)
+{
+    return this.roundInteger(this.getST(i), X86FPU.MAX_INT64) != null;
 };
 
 /**
@@ -2343,9 +2567,7 @@ X86FPU.prototype.getTR = function(i, fSafe)
  */
 X86FPU.prototype.setTR = function(i, a)
 {
-    if (a) {
-        this.setST(i, this.getLRFromTR(a));
-    }
+    if (a) this.setST(i, this.getLRFromTR(a));
 };
 
 /**
@@ -2487,11 +2709,7 @@ X86FPU.prototype.setEAFromLI = function()
  *
  * @this {X86FPU}
  */
-X86FPU.prototype.setEAFromSR = function()
-{
-    this.assert(this.cpu.regEA !== X86.ADDR_INVALID);
-    this.cpu.setLong(this.cpu.regEA, this.intTmpSR[0]);
-};
+X86FPU.prototype.setEAFromSR = X86FPU.prototype.setEAFromSI;
 
 /**
  * setEAFromLR()
@@ -2500,12 +2718,7 @@ X86FPU.prototype.setEAFromSR = function()
  *
  * @this {X86FPU}
  */
-X86FPU.prototype.setEAFromLR = function()
-{
-    this.assert(this.cpu.regEA !== X86.ADDR_INVALID);
-    this.cpu.setLong(this.cpu.regEA, this.intTmpLR[0]);
-    this.cpu.setLong(this.cpu.regEA + 4, this.intTmpLR[1]);
-};
+X86FPU.prototype.setEAFromLR = X86FPU.prototype.setEAFromLI;
 
 /**
  * setEAFromTR()
@@ -2527,7 +2740,7 @@ X86FPU.prototype.setEAFromTR = function()
  *
  * Since we must use the "long-real" (64-bit) format internally, rather than the "temp-real" (80-bit) format,
  * this function converts a 64-bit value to an 80-bit value.  The major differences: 1) the former uses a 52-bit
- * fraction and 11-bit exponent, while the latter uses a 64-bit fraction and 15-bit exponent, 2) the former
+ * fraction and 11-bit exponent, while the latter uses a 64-bit fraction and 15-bit exponent; 2) the former
  * does NOT store a leading 1 with the fraction, whereas the latter does.
  *
  * @this {X86FPU}
@@ -2573,7 +2786,7 @@ X86FPU.prototype.getLRFromTR = function(a)
  *
  * Since we must use the "long-real" (64-bit) format internally, rather than the "temp-real" (80-bit) format,
  * this function converts a 64-bit value to an 80-bit value.  The major differences: 1) the former uses a 52-bit
- * fraction and 11-bit exponent, while the latter uses a 64-bit fraction and 15-bit exponent, 2) the former
+ * fraction and 11-bit exponent, while the latter uses a 64-bit fraction and 15-bit exponent; 2) the former
  * does NOT store a leading 1 with the fraction, whereas the latter does.
  *
  * @this {X86FPU}
@@ -2620,6 +2833,48 @@ X86FPU.prototype.getTRFromLR = function(loLR, hiLR)
 };
 
 /**
+ * decodeBCD()
+ *
+ * @this {X86FPU}
+ * @param {number} i (32-bit integer containing n BCD digits)
+ * @param {number} n (number of BCD digits to decode)
+ * @return {number} (binary value representing the specified number of BCD digits)
+ */
+X86FPU.prototype.decodeBCD = function(i, n)
+{
+    var v = 0, m = 1;
+    this.assert(n > 0 && n <= 8);
+    while (n--) {
+        var d = i & 0xf;
+        this.assert(d <= 9);
+        v += d * m;
+        m *= 10;
+        i >>= 4;
+    }
+    return v;
+};
+
+/**
+ * encodeBCD()
+ *
+ * @this {X86FPU}
+ * @param {number} v (binary value from which to extract n BCD digits)
+ * @param {number} n (number of BCD digits to extract)
+ * @return {number} (integer containing the requested number of BCD digits)
+ */
+X86FPU.prototype.encodeBCD = function(v, n)
+{
+    var i = 0, s = 0;
+    this.assert(n > 0 && n <= 8);
+    while (n--) {
+        i |= (v % 10) << s;
+        v /= 10;
+        s += 4;
+    }
+    return i;
+};
+
+/**
  * popValue()
  *
  * @this {X86FPU}
@@ -2643,10 +2898,11 @@ X86FPU.prototype.popValue = function()
  * pushValue(v)
  *
  * @this {X86FPU}
- * @param {number} v
+ * @param {number|null} v
  */
 X86FPU.prototype.pushValue = function(v)
 {
+    if (v == null) return;
     var iReg = (this.iST - 1) & 7;
     var bitUsed = (1 << iReg);
     if (this.regUsed & bitUsed) {
@@ -2847,7 +3103,7 @@ if (DEBUGGER) {
  *
  * The second lookup value corresponds to bits in the ModRegRM byte that follows the ESC byte (0xD8-0xDF).
  *
- * Here's a little cheat-sheet for how the lookup values relate to ModRegRM values; see opFPU() for details.
+ * Here's a little cheat-sheet for how the 2nd lookup values relate to ModRegRM values; see opFPU() for details.
  *
  *      Lookup  ModRegRM value(s)
  *      ------  -------------------------------
@@ -2869,8 +3125,8 @@ if (DEBUGGER) {
  *      0x37:   0xF8-0xFF
  *
  * ESC bytes 0xD9 and 0xDB use the RM field to further describe the operation when the ModRegRM value >= 0xE0.
- * In those cases, we shift the Reg value into the high nibble and the RM value into the low nibble; you can think
- * of those lookup values as hex-encoded octal.
+ * In those cases, we shift the Reg value into the high nibble and the RM value into the low nibble, resulting in
+ * the following lookup values (which look a lot like hex-encoded octal):
  *
  *      0x40:   0xE0
  *      0x41:   0xE1
