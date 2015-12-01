@@ -576,11 +576,11 @@ if (DEBUGGER) {
     Debugger.TYPE_ST        = 0x0009;   //     FPU ST (implicit stack top)
     Debugger.TYPE_STREG     = 0x000A;   //     FPU ST (explicit stack register, relative to top)
     Debugger.TYPE_SINT      = 0x000B;   //     FPU SI (short-integer; 32-bit); displayed as "INT32"
-    Debugger.TYPE_SREAL     = 0x000B;   //     FPU SR (short-real; 32-bit)
+    Debugger.TYPE_SREAL     = 0x000B;   //     FPU SR (short-real; 32-bit); displayed as "REAL32"
     Debugger.TYPE_LINT      = 0x000C;   //     FPU LI (long-integer; 64-bit); displayed as "INT64"
-    Debugger.TYPE_LREAL     = 0x000C;   //     FPU LR (long-real; 64-bit)
-    Debugger.TYPE_TREAL     = 0x000D;   //     FPU TR (temp-real; 80-bit)
-    Debugger.TYPE_DEC18     = 0x000E;   //     FPU PD (packed-decimal, 18 digits; 80-bit)
+    Debugger.TYPE_LREAL     = 0x000C;   //     FPU LR (long-real; 64-bit); displayed as "REAL64"
+    Debugger.TYPE_TREAL     = 0x000D;   //     FPU TR (temp-real; 80-bit); displayed as "REAL80"
+    Debugger.TYPE_BCD80     = 0x000E;   //     FPU PD (packed-decimal; 18 BCD digits in 80 bits, bits 72-78 unused, sign in bit 79); displayed as "BCD80"
     Debugger.TYPE_ENV       = 0x000F;   //     FPU ENV (environment; 14 bytes in real-mode, 28 bytes in protected-mode)
     Debugger.TYPE_FPU       = 0x000F;   //     FPU SAVE (save/restore; 94 bytes in real-mode, 108 bytes in protected-mode)
 
@@ -1229,9 +1229,9 @@ if (DEBUGGER) {
             0x00: [Debugger.FINS.FILD,   Debugger.TYPE_MODRM  | Debugger.TYPE_SHORT | Debugger.TYPE_IN],
             0x02: [Debugger.FINS.FIST,   Debugger.TYPE_MODRM  | Debugger.TYPE_SHORT | Debugger.TYPE_OUT],
             0x03: [Debugger.FINS.FISTP,  Debugger.TYPE_MODRM  | Debugger.TYPE_SHORT | Debugger.TYPE_OUT],
-            0x04: [Debugger.FINS.FBLD,   Debugger.TYPE_MODRM  | Debugger.TYPE_DEC18 | Debugger.TYPE_IN],
+            0x04: [Debugger.FINS.FBLD,   Debugger.TYPE_MODRM  | Debugger.TYPE_BCD80 | Debugger.TYPE_IN],
             0x05: [Debugger.FINS.FILD,   Debugger.TYPE_MODRM  | Debugger.TYPE_LINT  | Debugger.TYPE_IN],
-            0x06: [Debugger.FINS.FBSTP,  Debugger.TYPE_MODRM  | Debugger.TYPE_DEC18 | Debugger.TYPE_OUT],
+            0x06: [Debugger.FINS.FBSTP,  Debugger.TYPE_MODRM  | Debugger.TYPE_BCD80 | Debugger.TYPE_OUT],
             0x07: [Debugger.FINS.FISTP,  Debugger.TYPE_MODRM  | Debugger.TYPE_LINT  | Debugger.TYPE_OUT],
             0x30: [Debugger.FINS.FFREEP, Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_IN],    // Obsolete encoding
             0x31: [Debugger.FINS.FXCH,   Debugger.TYPE_IMPREG | Debugger.TYPE_STREG | Debugger.TYPE_OUT],   // Obsolete encoding
@@ -5180,8 +5180,8 @@ if (DEBUGGER) {
                 case Debugger.TYPE_TREAL:
                     sPrefix = "REAL80";
                     break;
-                case Debugger.TYPE_DEC18:
-                    sPrefix = "DEC18";
+                case Debugger.TYPE_BCD80:
+                    sPrefix = "BCD80";
                     break;
                 }
                 if (sPrefix) sOperand = sPrefix + ' ' + sOperand;
