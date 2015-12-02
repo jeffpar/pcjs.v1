@@ -2210,7 +2210,7 @@ Keyboard.prototype.keySimulate = function(simCode, fDown)
         var bCode = wCode & 0xff;
 
         /*
-         * TODO: Update the following restrictions to address 84-key and 101-key keyboards limitations.
+         * TODO: Update the following restrictions to address 84-key and 101-key keyboard limitations.
          */
         if (bCode > 83 && this.modelKeys == 83) {
             return false;
