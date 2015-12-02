@@ -47,11 +47,11 @@ if (NODE) {
  *
  * The Keyboard component can be configured with the following (parmsKbd) properties:
  *
- *      model: model string; should be one of:
+ *      model: keyboard model string, which must match one of the values listed in Keyboard.MODELS:
  *
- *          us83 (default)
- *          us84 (TODO: awaiting implementation)
- *          us101 (TODO: awaiting implementation)
+ *          "US83" (default)
+ *          "US84"
+ *          "US101"
  *
  * Its main purpose is to receive binding requests for various keyboard events, and to use those events
  * to simulate the PC's keyboard hardware.
@@ -64,7 +64,7 @@ function Keyboard(parmsKbd)
 {
     Component.call(this, "Keyboard", parmsKbd, Keyboard, Messages.KEYBOARD);
 
-    this.nDefaultModel = parmsKbd['model'];
+    this.setModel(parmsKbd['model']);
 
     this.fMobile = web.isMobile();
     this.fMSIE = web.isUserAgent("MSIE");
@@ -148,6 +148,11 @@ function Keyboard(parmsKbd)
 
 Component.subclass(Keyboard);
 
+/*
+ * Supported keyboard models (the first entry is the default if the specified model isn't recognized)
+ */
+Keyboard.MODELS = ["US83", "US84", "US101"];
+
 /**
  * Alphanumeric and other common (printable) ASCII codes.
  *
@@ -197,6 +202,7 @@ Keyboard.KEYCODE = {
     /* 0x13 */ PAUSE:       19,         // PAUSE/BREAK
     /* 0x14 */ CAPS_LOCK:   20,
     /* 0x1B */ ESC:         27,
+    /* 0x20 */ SPACE:       32,
     /* 0x21 */ PGUP:        33,
     /* 0x22 */ PGDN:        34,
     /* 0x23 */ END:         35,
@@ -339,6 +345,7 @@ Keyboard.SIMCODE = {
     ALT:          Keyboard.KEYCODE.ALT         + Keyboard.KEYCODE.ONDOWN,
     CAPS_LOCK:    Keyboard.KEYCODE.CAPS_LOCK   + Keyboard.KEYCODE.ONDOWN,
     ESC:          Keyboard.KEYCODE.ESC         + Keyboard.KEYCODE.ONDOWN,
+    SPACE:        Keyboard.KEYCODE.SPACE       + Keyboard.KEYCODE.ONDOWN,
     F1:           Keyboard.KEYCODE.F1          + Keyboard.KEYCODE.ONDOWN,
     F2:           Keyboard.KEYCODE.F2          + Keyboard.KEYCODE.ONDOWN,
     F3:           Keyboard.KEYCODE.F3          + Keyboard.KEYCODE.ONDOWN,
@@ -673,7 +680,7 @@ Keyboard.SOFTCODES = {
     /* 54 */    'right-shift':  Keyboard.SIMCODE.RSHIFT,        // formerly "rshift"
     /* 55 */    'prtsc':        Keyboard.SIMCODE.PRTSC,         // unshifted '*'; becomes dedicated 'Print Screen' key on 101-key keyboards
     /* 56 */    'alt':          Keyboard.SIMCODE.ALT,
-    /* 57 */    'space':        Keyboard.ASCII[' '],
+    /* 57 */    'space':        Keyboard.SIMCODE.SPACE,
     /* 58 */    'caps-lock':    Keyboard.SIMCODE.CAPS_LOCK,
     /* 59 */    'f1':           Keyboard.SIMCODE.F1,
     /* 60 */    'f2':           Keyboard.SIMCODE.F2,
@@ -858,7 +865,7 @@ Keyboard.SIMCODES[Keyboard.ASCII['?']]           = Keyboard.SCANCODE.SLASH  | (K
 Keyboard.SIMCODES[Keyboard.SIMCODE.RSHIFT]       = Keyboard.SCANCODE.RSHIFT;
 Keyboard.SIMCODES[Keyboard.SIMCODE.PRTSC]        = Keyboard.SCANCODE.PRTSC;
 Keyboard.SIMCODES[Keyboard.SIMCODE.ALT]          = Keyboard.SCANCODE.ALT;
-Keyboard.SIMCODES[Keyboard.ASCII[' ']]           = Keyboard.SCANCODE.SPACE;
+Keyboard.SIMCODES[Keyboard.SIMCODE.SPACE]        = Keyboard.SCANCODE.SPACE;
 Keyboard.SIMCODES[Keyboard.SIMCODE.CAPS_LOCK]    = Keyboard.SCANCODE.CAPS_LOCK;
 Keyboard.SIMCODES[Keyboard.SIMCODE.F1]           = Keyboard.SCANCODE.F1;
 Keyboard.SIMCODES[Keyboard.SIMCODE.F2]           = Keyboard.SCANCODE.F2;
@@ -1150,13 +1157,26 @@ Keyboard.prototype.notifyEscape = function(fDisabled, fAllDown)
 };
 
 /**
- * setModel(nModel)
+ * setModel(sModel)
+ *
+ * This breaks a model string (eg, "US83") into two parts: modelCountry (eg, "US") and modelKeys (eg, 83).
+ * If the model string isn't recognized, we use Keyboard.MODELS[0] (ie, the first entry in the model array).
  *
  * @this {Keyboard}
- * @param {number} nModel
+ * @param {string|undefined} sModel
  */
-Keyboard.prototype.setModel = function(nModel)
+Keyboard.prototype.setModel = function(sModel)
 {
+    var iModel = 0;
+    this.model = null;
+    if (sModel) {
+        this.model = sModel.toUpperCase();
+        iModel = Keyboard.MODELS.indexOf(this.model);
+        if (iModel < 0) iModel = 0;
+    }
+    sModel = Keyboard.MODELS[iModel];
+    this.modelCountry = sModel.substr(0, 2);
+    this.modelKeys = parseInt(sModel.substr(2), 10);
 };
 
 /**
@@ -1383,7 +1403,22 @@ Keyboard.prototype.powerDown = function(fSave, fShutdown)
  */
 Keyboard.prototype.reset = function()
 {
-    this.setModel(this.nDefaultModel);
+    /*
+     * If no keyboard model was specified, our initial setModel() call will select the "US83" keyboard as the
+     * default, but now that the ChipSet is initialized, we can pick a better default, based on the ChipSet model.
+     */
+    if (!this.model && this.chipset) {
+        switch(this.chipset.model) {
+        case ChipSet.MODEL_5150:
+        case ChipSet.MODEL_5160:
+            this.setModel(Keyboard.MODELS[0]);
+            break;
+        case ChipSet.MODEL_5170:
+        default:
+            this.setModel(Keyboard.MODELS[1]);
+            break;
+        }
+    }
 
     this.initState();
 
@@ -1881,7 +1916,7 @@ Keyboard.prototype.updateActiveKey = function(key, msTimer)
         this.printMessage((msTimer? '\n' : "") + "updateActiveKey(" + key.simCode + (msTimer? "," + msTimer + "ms" : "") + "): " + (key.fDown? "down" : "up"), true);
     }
 
-    this.keySimulate(key.simCode, key.fDown);
+    if (!this.keySimulate(key.simCode, key.fDown)) return;
 
     if (!key.nRepeat) return;
 
@@ -2173,6 +2208,14 @@ Keyboard.prototype.keySimulate = function(simCode, fDown)
 
         var abScanCodes = [];
         var bCode = wCode & 0xff;
+
+        /*
+         * TODO: Update the following restrictions to address 84-key and 101-key keyboards limitations.
+         */
+        if (bCode > 83 && this.modelKeys == 83) {
+            return false;
+        }
+
         abScanCodes.push(bCode | (fDown? 0 : Keyboard.SCANCODE.BREAK));
 
         var fAlpha = (simCode >= Keyboard.ASCII.A && simCode <= Keyboard.ASCII.Z || simCode >= Keyboard.ASCII.a && simCode <= Keyboard.ASCII.z);

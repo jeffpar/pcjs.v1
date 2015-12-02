@@ -89,7 +89,7 @@ var X86 = {
      * Priority: Instruction exception, TRAP, NMI, Processor Extension Segment Overrun, and finally INTR.
      *
      * All exceptions can also occur in real-mode, except where noted.  A GP_FAULT in real-mode can be triggered
-     * by "any memory reference instruction that attempts to reference [a] 16-bit word at offset 0FFFFH".
+     * by "any memory reference instruction that attempts to reference [a] 16-bit word at offset 0xFFFF".
      *
      * Interrupts beyond 0x10 (up through 0x1F) are reserved for future exceptions.
      *
@@ -137,11 +137,11 @@ var X86 = {
         DF:     0x0400,     // bit 10: Direction flag
         OF:     0x0800,     // bit 11: Overflow flag
         IOPL: {
-         MASK:  0x3000,     // bits 12-13: I/O Privilege Level (always set on 8086/80186, clear on 80286 reset)
+         MASK:  0x3000,     // bits 12-13: I/O Privilege Level (always set on 8086/80186; clear on 80286 reset)
          SHIFT: 12
         },
-        NT:     0x4000,     // bit 14: Nested Task flag (always set on 8086/80186, clear on 80286 reset)
-        BIT15:  0x8000,     // bit 15: reserved (always set on 8086/80186, clear otherwise)
+        NT:     0x4000,     // bit 14: Nested Task flag (always set on 8086/80186; clear on 80286 reset)
+        BIT15:  0x8000,     // bit 15: reserved (always set on 8086/80186; clear otherwise)
         RF:    0x10000,     // bit 16: Resume Flag (temporarily disables debug exceptions; 80386 only)
         VM:    0x20000      // bit 17: Virtual 8086 Mode (80386 only)
     },
@@ -461,7 +461,7 @@ var X86 = {
         SS:         0x36,       // opSS()
         DS:         0x3E,       // opDS()
         PUSHSP:     0x54,       // opPUSHSP()
-        PUSHA:      0x60,       // opPUHSA()    (80186 and up)
+        PUSHA:      0x60,       // opPUSHA()    (80186 and up)
         POPA:       0x61,       // opPOPA()     (80186 and up)
         BOUND:      0x62,       // opBOUND()    (80186 and up)
         ARPL:       0x63,       // opARPL()     (80286 and up)
@@ -519,12 +519,12 @@ var X86 = {
         UD2:        0x0B0F      // UD2 (invalid opcode "guaranteed" to generate UD_FAULT on all post-8086 processors)
     },
     /*
-     * Floating Point Unit (FPU), aka Numeric Data Processor (NDP), aka Numeric Processor Extension (NPX) definitions
+     * Floating Point Unit (FPU), aka Numeric Data Processor (NDP), aka Numeric Processor Extension (NPX), aka Coprocessor definitions
      */
     FPU: {
         MODEL_8087:     8087,
         MODEL_80287:    80287,
-        MODEL_80287XL:  80387,  // internally, the 80287XL was an 80387SX, so in general, we treat this as MODEL_80387
+        MODEL_80287XL:  80387,  // internally, the 80287XL was an 80387SX, so generally, we treat this as MODEL_80387
         MODEL_80387:    80387,
         CONTROL: {              // FPU Control Word
             IM:     0x0001,     // bit 0: Invalid Operation Mask
@@ -534,18 +534,18 @@ var X86 = {
             UM:     0x0010,     // bit 4: Underflow Mask
             PM:     0x0020,     // bit 5: Precision Mask
             EXC:    0x003F,     // all of the above exceptions
-                                // bit 6: unused
             IEM:    0x0080,     // bit 7: Interrupt Enable Mask (0 enables interrupts, 1 masks them; 8087 only)
             PC:     0x0300,     // bits 8-9: Precision Control
-            RC:     0x0C00,     // bits 10-11: Rounding Control
-            RC_NEAR:    0x0000,
-            RC_DOWN:    0x0400,
-            RC_UP:      0x0800,
-            RC_CHOP:    0x0C00,
+            RC: {               // bits 10-11: Rounding Control
+              NEAR: 0x0000,
+              DOWN: 0x0400,
+              UP:   0x0800,
+              CHOP: 0x0C00,
+              MASK: 0x0C00
+            },
             IC:     0x1000,     // bit 12: Infinity Control (0 for Projective, 1 for Affine)
-                                // bits 13-15: unused
-            INIT:   0x03BF,     // X86.FPU.CONTROL.IM | X86.FPU.CONTROL.DM | X86.FPU.CONTROL.ZM | X86.FPU.CONTROL.OM | X86.FPU.CONTROL.UM | X86.FPU.CONTROL.PM | X86.FPU.CONTROL.IEM | X86.FPU.CONTROL.PC
-            UNUSED: 0xE040
+            UNUSED: 0xE040,     // bits 6,13-15: unused
+            INIT:   0x03BF      // X86.FPU.CONTROL.IM | X86.FPU.CONTROL.DM | X86.FPU.CONTROL.ZM | X86.FPU.CONTROL.OM | X86.FPU.CONTROL.UM | X86.FPU.CONTROL.PM | X86.FPU.CONTROL.IEM | X86.FPU.CONTROL.PC
         },
         STATUS: {               // FPU Status Word
             IE:     0x0001,     // bit 0: Invalid Operation

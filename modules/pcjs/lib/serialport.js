@@ -343,12 +343,23 @@ SerialPort.prototype.setBinding = function(sHTMLType, sBinding, control)
 
     switch (sBinding) {
     case SerialPort.sIOBuffer:
+        /*
+         * TODO: Figure out how to make this control activate the soft keyboard on iOS; since
+         * this control has the "readonly" attribute by default, iOS refuses to activate the
+         * keyboard, and adding the "contenteditable" attribute doesn't override that behavior.
+         *
+         * Removing the "readonly" attribute works, but then every key press results in double
+         * characters; presumably that could be overcome by processing all keys in the onKeyDown()
+         * handler instead, but that would require keyCode mapping tables, because down events
+         * are not the same as press events.
+         */
         this.bindings[sBinding] = this.controlIOBuffer = control;
+
         /*
          * By establishing an onkeypress handler here, we make it possible for DOS commands like
          * "CTTY COM1" to more or less work (use "CTTY CON" to restore control to the DOS console).
          */
-        control.onkeydown = function onKeyDownSerial(event) {
+        control.onkeydown = function onKeyDown(event) {
             /*
              * This is required in addition to onkeypress, because it's the only way to prevent
              * BACKSPACE (keyCode 8) from being interpreted by the browser as a "Back" operation;
@@ -369,18 +380,28 @@ SerialPort.prototype.setBinding = function(sHTMLType, sBinding, control)
             }
             return true;
         };
-        control.onkeypress = function onKeyPressSerial(event) {
+        control.onkeypress = function onKeyPress(event) {
             /*
-             * Browser-independent keyCode extraction (refer to keyPress() and the other key
-             * event handlers in keyboard.js).
-             *
-             * The additional check for SPACE (keyCode 0x20) and subsequent preventDefault() call
-             * prevents SPACE from bubbling up to the document event handlers, where its default
-             * behavior is typically to scroll the entire page -- a real nuisance.
+             * Browser-independent keyCode extraction; refer to keyPress() and the other key event
+             * handlers in keyboard.js.
              */
             event = event || window.event;
             var keyCode = event.which || event.keyCode;
             serial.sendRBR([keyCode]);
+            /*
+             * This additional check for SPACE (keyCode 0x20) and subsequent preventDefault()
+             * prevents SPACE from bubbling up to the document event handlers, where the default
+             * behavior is typically to scroll the entire page -- a real nuisance.
+             *
+             * Keyboard.onKeyPress() has a similar issue, but it seems to be limited to Safari on iOS,
+             * first noticed on iOS 9.1.  The problem there is that Safari's default SPACE behavior
+             * occurs BEFORE the onkeypress handler is called, so we would have to call preventDefault()
+             * in the onkeydown handler, but then the onkeypress handler would no longer be called.
+             *
+             * So, to resolve the Keyboard.onKeyPress() issue, we now define SPACE as an ONDOWN key,
+             * so that onKeyDown() will process the SPACE key immediately and automatically invoke
+             * preventDefault().
+             */
             if (keyCode == 0x20) {
                 if (event.preventDefault) event.preventDefault();
             }

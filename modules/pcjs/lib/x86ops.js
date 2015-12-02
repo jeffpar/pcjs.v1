@@ -2600,8 +2600,9 @@ X86.opCALLF = function()
  */
 X86.opWAIT = function()
 {
-    this.printMessage("WAIT not implemented");
-    this.nStepCycles--;
+    if (!this.fpu || !this.fpu.opWAIT()) {
+        this.nStepCycles -= 3;     // X86FPU.opWAIT() is required to charge some number of cycles if it returns true
+    }
 };
 
 /**

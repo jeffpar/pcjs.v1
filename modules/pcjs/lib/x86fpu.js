@@ -60,7 +60,7 @@ if (NODE) {
  *
  * FPU Coprocessor Trivia
  *
- *      Microsoft C libraries executed software interrupts in the range 0x34-0x3B immediately after
+ *      Microsoft C 4.00 libraries executed software interrupts in the range 0x34-0x3B immediately after
  *      FPU operations, to assist with floating-point emulation when no coprocessor was present, since
  *      processors prior to the 80286 had no mechanism for generating a fault when an unsupported FPU
  *      instruction was executed.
@@ -68,7 +68,7 @@ if (NODE) {
  *      In short, INT 0x34 through INT 0x3B was used after ESC opcodes 0xD8 through 0xDF, INT 0x3C was
  *      used for FPU instructions containing a segment override, and INT 0x3D was used for FWAIT.
  *
- *      A sample piece of code is available in x86ops.js, because it also highlights the Microsoft C
+ *      A sample piece of code is available in x86ops.js, because it also highlights the Microsoft C 4.00
  *      library's dependency on the 8086/8088 behavior of "PUSH SP" (see the opPUSHSP_8086() function).
  */
 
@@ -276,6 +276,8 @@ X86FPU.prototype.restore = function(data)
  * us whenever an I/O operation that resets the coprocessor is performed.  Only 80487 coprocessors and higher will
  * also clear the "exception" registers, but the 80487 is currently beyond my planned level of support.
  *
+ * TODO: Add support for X86.FPU.CONTROL.PC (Precision Control) and X86.FPU.CONTROL.IC (Infinity Control)
+ *
  * @this {X86FPU}
  */
 X86FPU.prototype.resetFPU = function()
@@ -287,8 +289,8 @@ X86FPU.prototype.resetFPU = function()
     this.iST = 0;               // the ST bits for regStatus are actually stored here
     if (DEBUG) {
         /*
-         * All the registers were tagged "unused" above, which is all that would normally happen,
-         * but debugging is a little easier if we also zero everything, too.
+         * All the registers were tagged "unused" above, which is all that would normally happen, but debugging is
+         * a little easier if we zero all the registers as well.
          */
         for (var iReg = 0; iReg < this.regStack.length; iReg++) {
             this.regStack[iReg] = 0.0;
@@ -315,7 +317,7 @@ X86FPU.prototype.isModel = function(model)
 /**
  * isAtLeastModel(model)
  *
- * If the current model is greater than or equal to the specified model, then it's assumed the
+ * If the current model is greater than or equal to the specified model, then it's assumed that the
  * current operation is supported, and we return true.
  *
  * @this {X86FPU}
@@ -334,9 +336,9 @@ X86FPU.prototype.isAtLeastModel = function(model)
  * to a "temp-real" (REAL80) and back again losslessly, otherwise a bug in either getTRFromLR() or getLRFromTR()
  * might exist.  That test code can be resurrected from the repo; this code is being retained for future tests.
  *
- * NOTE: If either min or max is a value containing 32 or more bits AND bit 31 is set AND it has passed
- * through some bit-wise operation(s), then that value may end up being negative, so you may end up with an
- * inverted (or empty) range or other unexpected results.
+ * NOTE: If either min or max is a value containing 32 or more significant bits AND bit 31 is set AND it has passed
+ * through some bit-wise operation(s), then that value may end up being negative, so you may end up with an inverted
+ * range, or a range that's smaller or larger than intended.
  *
  * @this {X86FPU}
  * @param {number} min (inclusive)
@@ -712,16 +714,16 @@ X86FPU.prototype.roundInteger = function(operand, max)
 {
     if (operand == null) return null;
 
-    var rc = (this.regControl & X86.FPU.CONTROL.RC), result;
+    var rc = (this.regControl & X86.FPU.CONTROL.RC.MASK), result;
 
-    if (rc == X86.FPU.CONTROL.RC_NEAR) {
+    if (rc == X86.FPU.CONTROL.RC.NEAR) {
         result = Math.round(operand);
         if (result - operand === 0.5 && (result % 2)) result--;
     }
-    else if (rc == X86.FPU.CONTROL.RC_DOWN || rc == X86.FPU.CONTROL.RC_CHOP && operand > 0) {
+    else if (rc == X86.FPU.CONTROL.RC.DOWN || rc == X86.FPU.CONTROL.RC.CHOP && operand > 0) {
         result = Math.floor(operand);
     }
-    else {  // X86.FPU.CONTROL.RC_UP or X86.FPU.CONTROL.RC_CHOP && operand <= 0
+    else {  // X86.FPU.CONTROL.RC.UP or X86.FPU.CONTROL.RC.CHOP && operand <= 0
         result = Math.ceil(operand);
     }
 
@@ -1417,6 +1419,8 @@ X86FPU.prototype.saveEnv = function(addr)
 /**
  * opFPU(bOpcode, bModRM, dst, src)
  *
+ * This is called by the CPU's ESC opcode handlers, after each instruction has been fully decoded.
+ *
  * @this {X86FPU}
  * @param {number} bOpcode (0xD8-0xDF)
  * @param {number} bModRM
@@ -1483,6 +1487,23 @@ X86FPU.prototype.opFPU = function(bOpcode, bModRM, dst, src)
          */
         this.opNone();
     }
+};
+
+/**
+ * opWAIT()
+ *
+ * This is called by the CPU's WAIT opcode handler, giving us the opportunity to synchronize the FPU with the CPU,
+ * charge an appropriate number of cycles, and return true.  In this context, it's considered an FWAIT instruction,
+ * but technically, it's the same opcode.
+ *
+ * If we choose to do nothing, then we must return false, so that the CPU can charge a default number of cycles.
+ *
+ * @this {X86FPU}
+ * @return {boolean} true if implemented, false if not
+ */
+X86FPU.prototype.opWAIT = function()
+{
+    return false;
 };
 
 if (DEBUGGER) {
