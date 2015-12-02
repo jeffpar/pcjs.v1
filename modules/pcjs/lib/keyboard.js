@@ -179,15 +179,15 @@ Keyboard.ASCII = {
 };
 
 /**
- * Browser keyCodes we must pay particular attention to.  For the most part, these are
- * non-alphanumeric or function keys, some which may require special treatment (eg,
- * preventDefault() if returning false on the initial keyDown event is insufficient).
+ * Browser keyCodes we must pay particular attention to.  For the most part, these are non-alphanumeric
+ * or function keys, some which may require special treatment (eg, preventDefault() if returning false on
+ * the initial keyDown event is insufficient).
  *
  * keyCodes for most common ASCII keys can simply use the appropriate ASCII code above.
  *
- * Most of these represent non-ASCII keys (eg, the LEFT arrow key), yet for some reason,
- * browsers defined them using ASCII codes (eg, the LEFT arrow key uses the ASCII code
- * for '%' or 37).  This conflict is discussed further in the definition of CLICKCODE below.
+ * Most of these represent non-ASCII keys (eg, the LEFT arrow key), yet for some reason, browsers defined
+ * them using ASCII codes (eg, the LEFT arrow key uses the ASCII code for '%' or 37).  This conflict is
+ * discussed further in the definition of CLICKCODE below.
  *
  * @enum {number}
  */

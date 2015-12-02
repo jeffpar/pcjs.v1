@@ -6856,11 +6856,13 @@ Video.prototype.outCRTCData = function(card, port, bOut, addrFrom)
          *
          * The second part of the check is required to promptly detect a switch to "Mode X"; if we assume
          * that anyone switching to "Mode X" will first switch to mode 0x13, then it's a given that they
-         * must reprogram the VDISP_END register, and that they will change it from 0x8F to 0xDF.  However,
-         * I'm not going to make the test that restrictive, to help catch other mode variations (but at the
-         * expense of triggering potentially unnecessary calls to checkMode()).
+         * must reprogram the VDISP_END register, and that they will probably change it from 0x8F to 0xDF.
+         *
+         * Originally, I wasn't going to check specifically for 0xDF, to help catch other "Mode X" variations,
+         * but if I don't, then some spurious mode changes are triggered (eg, when Windows 1.0 switches from
+         * CGA graphics mode 0x06 to an EGA graphics mode).
          */
-        if (card.regCRTIndx == Card.CRTC.MAX_SCAN.INDX && card.regCRTPrev != Card.CRTC.MAX_SCAN.INDX-1 || card.regCRTIndx == Card.CRTC.EGA.VDISP_END) {
+        if (card.regCRTIndx == Card.CRTC.MAX_SCAN.INDX && card.regCRTPrev != Card.CRTC.MAX_SCAN.INDX-1 || card.regCRTIndx == Card.CRTC.EGA.VDISP_END && bOut == 0xDF) {
             this.checkMode(true);
         }
         this.checkCursor();
