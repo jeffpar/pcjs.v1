@@ -345,6 +345,16 @@ Keyboard.SIMCODE = {
     ALT:          Keyboard.KEYCODE.ALT         + Keyboard.KEYCODE.ONDOWN,
     CAPS_LOCK:    Keyboard.KEYCODE.CAPS_LOCK   + Keyboard.KEYCODE.ONDOWN,
     ESC:          Keyboard.KEYCODE.ESC         + Keyboard.KEYCODE.ONDOWN,
+    /*
+     * It seems that a recent change to Safari on iOS (first noticed in iOS 9.1) treats SPACE
+     * differently now, at least with regard to <textarea> controls, and possibly only readonly
+     * or hidden controls, like the hidden <textarea> we overlay on the Video <canvas> element.
+     *
+     * Whatever the exact criteria are, Safari on iOS now performs SPACE's default behavior
+     * after the onkeydown event but before the onkeypress event.  So we must now process SPACE
+     * as an ONDOWN key, so that we can call preventDefault() and properly simulate the key at
+     * the time the key goes down.
+     */
     SPACE:        Keyboard.KEYCODE.SPACE       + Keyboard.KEYCODE.ONDOWN,
     F1:           Keyboard.KEYCODE.F1          + Keyboard.KEYCODE.ONDOWN,
     F2:           Keyboard.KEYCODE.F2          + Keyboard.KEYCODE.ONDOWN,
