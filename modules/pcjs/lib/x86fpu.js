@@ -701,16 +701,19 @@ X86FPU.prototype.doSquareRoot = function(operand)
 };
 
 /**
- * roundInteger(operand, max)
+ * roundValue(operand, max)
  *
- * NOTE: The max parameter is EXCLUSIVE, not inclusive (ie, the maximum positive integer is < max).
+ * NOTE: The max parameter is EXCLUSIVE, not inclusive (ie, the maximum positive value is < max).
+ *
+ * Also, callers that expect intTmpLR[] to be loaded with the result *must* also specify a max parameter;
+ * callers performing internal rounding and using just the return value may omit max to skip loading intTmpLR[].
  *
  * @this {X86FPU}
  * @param {number|null} operand
  * @param {number} [max] (ie, 0x8000, 0x80000000, or 0x8000000000000000)
- * @return {number|null} (rounded result if intTmpLR was loaded, null if not)
+ * @return {number|null} (rounded result, or null if there was an unmasked exception)
  */
-X86FPU.prototype.roundInteger = function(operand, max)
+X86FPU.prototype.roundValue = function(operand, max)
 {
     if (operand == null) return null;
 
@@ -842,7 +845,7 @@ X86FPU.prototype.setTags = function(n)
  */
 X86FPU.prototype.getWI = function(i)
 {
-    return this.roundInteger(this.getST(i), X86FPU.MAX_INT16) != null;
+    return this.roundValue(this.getST(i), X86FPU.MAX_INT16) != null;
 };
 
 /**
@@ -856,7 +859,7 @@ X86FPU.prototype.getWI = function(i)
  */
 X86FPU.prototype.getSI = function(i)
 {
-    return this.roundInteger(this.getST(i), X86FPU.MAX_INT32) != null;
+    return this.roundValue(this.getST(i), X86FPU.MAX_INT32) != null;
 };
 
 /**
@@ -870,7 +873,7 @@ X86FPU.prototype.getSI = function(i)
  */
 X86FPU.prototype.getLI = function(i)
 {
-    return this.roundInteger(this.getST(i), X86FPU.MAX_INT64) != null;
+    return this.roundValue(this.getST(i), X86FPU.MAX_INT64) != null;
 };
 
 /**
@@ -1699,7 +1702,10 @@ X86FPU.FBLDpd = function()
  */
 X86FPU.FBSTPpd = function()
 {
-    var v = this.roundInteger(this.popValue());
+    /*
+     * TODO: Verify the operation of FBSTP (eg, does it signal an exception if abs(value) >= 1000000000000000000?)
+     */
+    var v = this.roundValue(this.popValue());
     if (v != null) {
         /*
          * intTmpTR[0] will contain the 8 least-significant BCD digits, intTmpTR[1] will contain the next 8,
@@ -2734,7 +2740,7 @@ X86FPU.FRSTOR = function()
  */
 X86FPU.FRNDINT = function()
 {
-    this.setST(0, this.roundInteger(this.getST(0), X86FPU.MAX_INT64));
+    this.setST(0, this.roundValue(this.getST(0), X86FPU.MAX_INT64));
 };
 
 /**
