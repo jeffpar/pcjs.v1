@@ -148,11 +148,16 @@ HDC.DEFAULT_DRIVE_NAME = "Hard Drive";
  * Also, I capitalize only the first letter of units like Kb and Mb, because kilobyte and megabyte are
  * single words; if they were two words, or even a pair of hyphenated words, then I might -- but they're not.
  */
+
+/*
+ * Drive type tables differed across IBM controller models (XTC drive types don't match ATC drive types)
+ * and across OEMs (eg, Compaq drive types only match a few IBM drive types), so you must use iDriveTable to
+ * index the correct table type inside both aDriveTables and aDriveTypes.
+ */
+HDC.aDriveTables = ["XTC", "ATC", "COMPAQ"];
+
 HDC.aDriveTypes = [
     /*
-     * Sadly, drive types differ across controller models (XTC drive types don't match ATC drive types),
-     * so aDriveTypes must first be indexed by a controller index (this.iDriveTable).
-     *
      * aDriveTypes[0] is for the IBM PC XT (XTC) controller.
      */
     {
@@ -1261,6 +1266,16 @@ HDC.prototype.doneLoadDisk = function(drive, disk, sDiskName, sDiskPath)
          * and is not guaranteed to match the drive mapping that DOS ultimately uses.
          */
         this.notice("Mounted disk \"" + sDiskName + "\" in drive " + String.fromCharCode(0x43 + drive.iDrive), drive.fAutoMount);
+
+        var aDiskInfo = disk.info();
+        if (aDiskInfo[0] != drive.nCylinders || aDiskInfo[1] != drive.nHeads || aDiskInfo[2] != drive.nSectors || aDiskInfo[3] != drive.cbSector) {
+            /*
+             * TODO: Decide how to deal with this problem; ie, either disallow disk access altogether, or automatically
+             * map the controller's I/O requests to the disk's geometry.  Also, we should provide a way to reformat such a
+             * disk so that its geometry matches the controller requirements.
+             */
+            this.notice("Warning: disk geometry (" + aDiskInfo[0] + ':' + aDiskInfo[1] + ':' + aDiskInfo[2] + ") does not match " + HDC.aDriveTables[this.iDriveTable] + " drive type " + drive.type + " (" + drive.nCylinders + ':' + drive.nHeads + ':' + drive.nSectors + ")");
+        }
     }
     if (drive.fAutoMount) {
         drive.fAutoMount = false;
