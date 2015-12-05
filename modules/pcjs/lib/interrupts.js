@@ -60,6 +60,17 @@ var Interrupts = {
     DOS_NETBIOS:0x2A,
     MOUSE:      0x33,
     ALT_DISK:   0x40,               // HDC BIOS saves original FDC BIOS vector here
+    HD0_PARMS:  0x41,               // parameter table for hard drive 0
+    HD1_PARMS:  0x46,               // parameter table for hard drive 1
+    HD_PARMS: {
+        MAX_CYL:    0x00,           // maximum cylinders (2 bytes)
+        MAX_HEADS:  0x02,           // maximum heads (1 byte)
+        WP_CYL:     0x05,           // write precompensation cylinder (2 bytes)
+        MAX_ECC:    0x07,           // max ECC burst (1 byte)
+        DRIVE_CTRL: 0x08,           // drive control (1 byte)
+        PARK_CYL:   0x0C,           // landing zone cylinder (2 bytes)
+        SEC_TRACK:  0x0E            // sectors per track (1 byte)
+    },
     ALT_VIDEO:  0x6D,               // IBM VGA BIOS saves original video BIOS vector here
     WINCB: {
         VECTOR:     0x30            // Windows PM call-back interface (aka Transfer Space Fault)

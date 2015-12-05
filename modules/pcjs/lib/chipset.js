@@ -838,12 +838,14 @@ ChipSet.CMOS = {
         DIAG:           0x0E,
         SHUTDOWN:       0x0F,
         FDRIVE:         0x10,
-        HDRIVE:         0x12,
+        HDRIVE:         0x12,   // bits 4-7 contain type of drive 0, bits 0-3 contain type of drive 1 (type 0 means none)
         EQUIP:          0x14,
         BASEMEM_LO:     0x15,
         BASEMEM_HI:     0x16,   // the BASEMEM values indicate the total Kb of base memory, up to 0x280 (640Kb)
         EXTMEM_LO:      0x17,
         EXTMEM_HI:      0x18,   // the EXTMEM values indicate the total Kb of extended memory, up to 0x3C00 (15Mb)
+        EXTHDRIVE0:     0x19,   // if bits 4-7 of HDRIVE contains 15, then the type of drive 0 is stored here (16-255)
+        EXTHDRIVE1:     0x1A,   // if bits 0-3 of HDRIVE contains 15, then the type of drive 1 is stored here (16-255)
         CHKSUM_HI:      0x2E,
         CHKSUM_LO:      0x2F,   // CMOS bytes included in the checksum calculation: 0x10-0x2D
         EXTMEM2_LO:     0x30,
@@ -1722,21 +1724,27 @@ ChipSet.prototype.addCMOSMemory = function(addr, size)
  * capacity of drives to be specified with a simple array (eg, [360, 360] for two 360Kb drives).
  *
  * @this {ChipSet}
- * @param {number} iDrive
- * @param {number} bType
+ * @param {number} iDrive (0 or 1)
+ * @param {number} bType (0 for none, 1-14 for original drive type, 16-255 for extended drive type; 15 reserved)
  * @return {boolean} true if successful, false if not (eg, CMOS not initialized yet, or no CMOS on this machine)
  */
 ChipSet.prototype.setCMOSDriveType = function(iDrive, bType)
 {
     if (this.abCMOSData) {
-        var b = this.abCMOSData[ChipSet.CMOS.ADDR.HDRIVE];
-        this.assert(bType > 0 && bType < 0xf);
-        if (iDrive) {
-            b = (b & ChipSet.CMOS.HDRIVE.D0_MASK) | bType;
-        } else {
-            b = (b & ChipSet.CMOS.HDRIVE.D1_MASK) | (bType << 4);
+        var bExt = null, iExt;
+        var bOrig = this.abCMOSData[ChipSet.CMOS.ADDR.HDRIVE];
+        if (bType > 15) {
+            bExt = bType;  bType = 15;
         }
-        this.setCMOSByte(ChipSet.CMOS.ADDR.HDRIVE, b);
+        if (iDrive) {
+            bOrig = (bOrig & ChipSet.CMOS.HDRIVE.D0_MASK) | bType;
+            iExt = ChipSet.CMOS.ADDR.EXTHDRIVE1;
+        } else {
+            bOrig = (bOrig & ChipSet.CMOS.HDRIVE.D1_MASK) | (bType << 4);
+            iExt = ChipSet.CMOS.ADDR.EXTHDRIVE0;
+        }
+        this.setCMOSByte(ChipSet.CMOS.ADDR.HDRIVE, bOrig);
+        if (bExt != null) this.setCMOSByte(iExt, bExt);
         return true;
     }
     return false;

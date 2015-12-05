@@ -110,8 +110,6 @@ function HDC(parmsHDC) {
      * AT drive type is 2 (for a 20Mb disk drive).
      */
     this.fATC = (parmsHDC['type'] == "at");
-    this.iHDC = this.fATC? 1 : 0;
-    this.iDriveTypeDefault = this.fATC? 2 : 3;
 
     /*
      * The remainder of HDC initialization now takes place in our initBus() handler
@@ -151,15 +149,20 @@ HDC.DEFAULT_DRIVE_NAME = "Hard Drive";
  * single words; if they were two words, or even a pair of hyphenated words, then I might -- but they're not.
  */
 HDC.aDriveTypes = [
-    {
-        0x00: [306, 2],
-        0x01: [375, 8],
-        0x02: [306, 6],
-        0x03: [306, 4]          // 10Mb (10.16Mb: 306*4*17*512 or 10,653,696 bytes) (default XTC drive type)
-    },
     /*
      * Sadly, drive types differ across controller models (XTC drive types don't match ATC drive types),
-     * so aDriveTypes must first be indexed by a controller index (this.iHDC).
+     * so aDriveTypes must first be indexed by a controller index (this.iDriveTable).
+     *
+     * aDriveTypes[0] is for the IBM PC XT (XTC) controller.
+     */
+    {
+         0: [306, 2],
+         1: [375, 8],
+         2: [306, 6],
+         3: [306, 4]            // 10Mb (10.16Mb: 306*4*17*512 or 10,653,696 bytes) (default XTC drive type: 3)
+    },
+    /*
+     * aDriveTypes[1] is for the IBM PC AT (ATC) controller.
      *
      * The following is a more complete description of the drive types supported by the MODEL_5170, where C is
      * Cylinders, H is Heads, WP is Write Pre-Comp, and LZ is Landing Zone (in practice, we don't need WP or LZ).
@@ -174,30 +177,103 @@ HDC.aDriveTypes = [
      *   6   615    4   no  615
      *   7   462    8  256  511
      *   8   733    5   no  733
-     *   9   900   15  no8  901
+     *   9   900   15   no  901
      *  10   820    3   no  820
      *  11   855    5   no  855
      *  12   855    7   no  855
      *  13   306    8  128  319
      *  14   733    7   no  733
      *  15  (reserved--all zeros)
+     *  16   612    4  all  663
+     *  17   977    5  300  977
+     *  18   977    7   no  977
+     *  19  1024    7  512 1023
+     *  20   733    5  300  732
+     *  21   733    7  300  732
+     *  22   733    5  300  733
+     *  23   306    4   no  336
      */
     {
-        0x01: [306, 4],         // 10Mb (10.16Mb:  306*4*17*512 or 10,653,696 bytes)
-        0x02: [615, 4],         // 20Mb (20.42Mb:  615*4*17*512 or 21,411,840 bytes) (default ATC drive type)
-        0x03: [615, 6],         // 31Mb (30.63Mb:  615*6*17*512 or 32,117,760 bytes)
-     // 0x04: [940, 8],         // 62Mb (62.42Mb:  940*8*17*512 or 65,454,080 bytes)
-        0x04: [1023,8],         // 68Mb (67.93Mb: 1023*8*17*512 or 71,233,536 bytes) (this is what a type 4 drive yields on a Compaq DeskPro 386)
-        0x05: [940, 6],         // 47Mb (46.82Mb:  940*6*17*512 or 49,090,560 bytes)
-        0x06: [615, 4],
-        0x07: [462, 8],
-        0x08: [733, 5],
-        0x09: [900,15],
-        0x0A: [820, 3],
-        0x0B: [855, 5],
-        0x0C: [855, 7],
-        0x0D: [306, 8],
-        0x0E: [733, 7]
+         1: [306,  4],          // 10Mb (10.16Mb:  306*4*17*512 or 10,653,696 bytes)
+         2: [615,  4],          // 20Mb (20.42Mb:  615*4*17*512 or 21,411,840 bytes) (default ATC drive type: 2)
+         3: [615,  6],          // 31Mb (30.63Mb:  615*6*17*512 or 32,117,760 bytes)
+         4: [940,  8],          // 62Mb (62.42Mb:  940*8*17*512 or 65,454,080 bytes)
+         5: [940,  6],          // 47Mb (46.82Mb:  940*6*17*512 or 49,090,560 bytes)
+         6: [615,  4],
+         7: [462,  8],
+         8: [733,  5],
+         9: [900, 15],
+        10: [820,  3],
+        11: [855,  5],
+        12: [855,  7],
+        13: [306,  8],
+        14: [733,  7],
+        16: [612,  4],
+        17: [977,  5],
+        18: [977,  7],
+        19: [1024, 7],
+        20: [733,  5],
+        21: [733,  7],
+        22: [733,  5],
+        23: [306,  4]
+    },
+    /*
+     * aDriveTypes[2] is for the Compaq DeskPro (ATC) controller.
+     *
+     * NOTE: According to Compaq, drive type 25 (0x19) must be used with their 130Mb drive when using MS-DOS 3.1
+     * or earlier, or when using any [unspecified] application software that supports only 17 sectors per track;
+     * otherwise, use drive type 35 (0x23), which uses the drive's full capacity of 34 sectors per track.
+     */
+    {
+         1: [306,  4],          // same as IBM
+         2: [615,  4],          // same as IBM
+         3: [615,  6],          // same as IBM
+         4: [1023, 8],          // 68Mb (67.93Mb: 1023*8*17*512 or 71,233,536 bytes) (TODO: Cylinders is listed as 1024 in the Compaq TechRef; confirm)
+         5: [940,  6],          // same as IBM
+         6: [697,  5],
+         7: [462,  8],          // same as IBM
+         8: [925,  5],
+         9: [900, 15],          // same as IBM
+        10: [980,  5],
+        11: [925,  7],
+        12: [925,  9],          // 70Mb (69.10Mb: 925*9*17*512 or 72,460,800 bytes)
+        13: [612,  8],
+        14: [980,  4],
+        /*
+         * Since the remaining drive types are > 14, they must be stored in either EXTHDRIVE0 or EXTHDRIVE1 CMOS bytes (0x19 or 0x1A)
+         */
+        16: [612,  4],          // same as IBM
+        17: [980,  5],          // 40Mb (40.67Mb: 980*5*17*512 or 42,649,600 bytes)
+        18: [966,  6],
+        19: [1023, 8],
+        20: [733,  5],          // same as IBM
+        21: [733,  7],          // same as IBM
+        22: [524,  4, 40],
+        23: [924,  8],
+        24: [966, 14],
+        25: [966, 16],          // 130Mb (128.30Mb: 966*16*17*512 or 134,529,024 bytes)
+        26: [1023,14],
+        27: [832,  6, 33],
+        28: [1222,15, 34],
+        29: [1240, 7, 34],
+        30: [615,  4, 25],
+        31: [615,  8, 25],
+        32: [905,  9, 25],
+        33: [832,  8, 33],      // 110Mb (107.25Mb: 832*8*33*512 or 112,459,776 bytes)
+        34: [966,  7, 34],
+        35: [966,  8, 34],      // 130Mb (128.30Mb: 966*8*34*512 or 134,529,024 bytes)
+        36: [966,  9, 34],
+        37: [966,  5, 34],
+        38: [612, 16, 63],      // 300Mb (301.22Mb: 612*16*63*512 or 315,850,752 bytes) (TODO: Cylinders is listed as 611 in the Compaq TechRef; confirm)
+        39: [1023,11, 33],
+        40: [1023,15, 34],
+        41: [1630,15, 52],
+        42: [1023,16, 63],
+        43: [805,  4, 26],
+        44: [805,  2, 26],
+        45: [748,  8, 33],
+        46: [748,  6, 33],
+        47: [966,  5, 25]
     }
 ];
 
@@ -226,10 +302,10 @@ HDC.aDriveTypes = [
  * wants to use high-capacity (80-track) diskettes with "Diskette Drive" portion of the controller.  This may not be
  * immediately obvious to anyone creating a 5170 machine configuration with the FDC component but no HDC component.
  *
- * TODO: Investigate what a MODEL_5170 can do, if anything, with diskettes if an "HFCOMBO card" was NOT installed
- * (eg, was there Diskette-only Controller that could be installed, and if so, did it support high-capacity diskettes?)
- * Also, consider making the FDC component able to detect when the HDC is missing and provide the same minimal HFCOMBO
- * port intercepts that ChipSet once provided (this is not a compatibility requirement, just a usability improvement).
+ * TODO: Investigate what a MODEL_5170 can do, if anything, with diskettes if an "HFCOMBO card" was NOT installed;
+ * eg, was there Diskette-only Controller that could be installed, and if so, did it support high-capacity diskette
+ * drives?  Also, consider making the FDC component able to detect when the HDC is missing and provide the same minimal
+ * HFCOMBO port intercepts that ChipSet once provided (this is not a requirement, just a usability improvement).
  */
 HDC.ATC = {
     DATA:   { PORT: 0x1F0},     // no register (read-write)
@@ -510,10 +586,16 @@ HDC.prototype.initBus = function(cmp, bus, cpu, dbg)
      */
     this.chipset = cmp.getMachineComponent("ChipSet");
 
+    this.iDriveTable = 0;
+    this.iDriveTypeDefault = 3;
+
     bus.addPortInputTable(this, this.fATC? HDC.aATCPortInput : HDC.aXTCPortInput);
     bus.addPortOutputTable(this, this.fATC? HDC.aATCPortOutput : HDC.aXTCPortOutput);
 
     if (this.fATC) {
+        this.iDriveTable++;
+        if (this.chipset && this.chipset.model == ChipSet.MODEL_DESKPRO386) this.iDriveTable++;
+        this.iDriveTypeDefault = 2;
         bus.addPortInputWidth(HDC.ATC.DATA.PORT, 2);
         bus.addPortOutputWidth(HDC.ATC.DATA.PORT, 2);
     }
@@ -859,9 +941,9 @@ HDC.prototype.initDrive = function(iDrive, drive, driveConfig, data, fHard)
     }
 
     drive.type = driveConfig['type'];
-    if (drive.type === undefined || HDC.aDriveTypes[this.iHDC][drive.type] === undefined) drive.type = this.iDriveTypeDefault;
+    if (drive.type === undefined || HDC.aDriveTypes[this.iDriveTable][drive.type] === undefined) drive.type = this.iDriveTypeDefault;
 
-    var driveType = HDC.aDriveTypes[this.iHDC][drive.type];
+    var driveType = HDC.aDriveTypes[this.iDriveTable][drive.type];
     drive.nSectors = driveType[2] || 17;    // sectors/track
     drive.cbSector = driveType[3] || 512;   // bytes/sector (default is 512 if unspecified in the table)
 
@@ -1004,8 +1086,8 @@ HDC.prototype.verifyDrive = function(drive, type)
             }
         }
         if (type != null && !nHeads) {
-            nHeads = HDC.aDriveTypes[this.iHDC][type][1];
-            nCylinders = HDC.aDriveTypes[this.iHDC][type][0];
+            nHeads = HDC.aDriveTypes[this.iDriveTable][type][1];
+            nCylinders = HDC.aDriveTypes[this.iDriveTable][type][0];
         }
         if (nHeads) {
             /*
@@ -1015,7 +1097,7 @@ HDC.prototype.verifyDrive = function(drive, type)
              *
              * Do these values agree with those for the given drive type?  Even if they don't, all we do is warn.
              */
-            var driveType = HDC.aDriveTypes[this.iHDC][drive.type];
+            var driveType = HDC.aDriveTypes[this.iDriveTable][drive.type];
             if (driveType) {
                 if (nCylinders != driveType[0] && nHeads != driveType[1]) {
                     this.notice("Warning: drive parameters (" + nCylinders + "," + nHeads + ") do not match drive type " + drive.type + " (" + driveType[0] + "," + driveType[1] + ")");
