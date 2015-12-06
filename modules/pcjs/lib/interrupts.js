@@ -203,7 +203,7 @@ if (DEBUGGER) {
         0x03: "write drive @DL (@CH:@DH:@CL,@AL) from @ES:@BX",
         0x04: "verify drive @DL (@CH:@DH:@CL,@AL)",
         0x05: "format drive @DL using @ES:@BX",
-        0x08: "read drive @DL parameters into @ES:@DI",
+        0x08: "read drive @DL parameters",
         0x15: "get drive @DL DASD type",
         0x16: "get drive @DL change line status",
         0x17: "set drive @DL DASD type",

@@ -1543,12 +1543,24 @@ HDC.prototype.inATCByte = function(port, addrFrom)
                         if (b >= 0) {
                             hdc.setATCIRR();
                             /*
-                             * FYI, I'm taking a shotgun approach to these status bits: I need to clear STATUS.BUSY and
-                             * set STATUS.DATA_REQ, because otherwise CompaqDeskPro386 reads will fail, and I need to set
-                             * the STATUS.READY and STATUS.SEEK_OK bits, because otherwise MODEL_5170_REV3 reads will fail.
+                             * Due to the way I'm immediately triggering an interrupt whenever more data is available,
+                             * I must take a "shotgun approach' to regStatus bits in order to make the MODEL_5170_REV1,
+                             * MODEL_5170_REV3, and MODEL_DESKPRO386 all happy.
+                             *
+                             * In general, it's fine for all of STATUS.READY, STATUS.SEEK_OK and STATUS.DATA_REQ to be
+                             * set now; the MODEL_5170_REV3 requires at least the first two, and the MODEL_DESKPRO386
+                             * requires the third.  Unfortunately, the outlier is the MODEL_5170_REV1, which also needs
+                             * the STATUS.BUSY to be set on the first regStatus read after it finishes reading a sector;
+                             * otherwise, the MODEL_5170_REV1 BIOS will never read any remaining sectors.
+                             *
+                             * Technically, it doesn't make sense for both BUSY and READY to be set at the same time,
+                             * so we fix that in inATCStatus() by clearing BUSY whenever READY is detected *after* that
+                             * first read.  In addition, since this hack is really only needed for the MODEL_5170_REV1,
+                             * we clear BUSY immediately on the MODEL_DESKPRO386 (which makes the Windows 95 protected-mode
+                             * disk driver much happier).
                              */
-                            hdc.regStatus = HDC.ATC.STATUS.READY | HDC.ATC.STATUS.SEEK_OK | HDC.ATC.STATUS.DATA_REQ;
-
+                            if (hdc.chipset && hdc.chipset.model == ChipSet.MODEL_DESKPRO386) hdc.regStatus = 0;
+                            hdc.regStatus |= HDC.ATC.STATUS.READY | HDC.ATC.STATUS.SEEK_OK | HDC.ATC.STATUS.DATA_REQ;
                         } else {
                             /*
                              * TODO: It would be nice to be a bit more specific about the error (if any) that just occurred.
@@ -1894,6 +1906,7 @@ HDC.prototype.inATCStatus = function(port, addrFrom)
      *
      *      if (this.chipset) this.chipset.clearIRR(ChipSet.IRQ.ATC);
      */
+    if (this.regStatus & HDC.ATC.STATUS.READY) this.regStatus &= ~HDC.ATC.STATUS.BUSY;
     return bIn;
 };
 
