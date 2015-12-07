@@ -341,10 +341,17 @@ MarkOut.prototype.convertMD = function(sIndent)
      *
      *      $sMD = preg_replace("%<!--.*?-->%s", "", $sMD);
      *
-     * NOTE: I found the following trick online: use "[\s\S]" to match any character, to work around JavaScript's
-     * lack of support for the "s" (aka "dotall" or "multiline") option that changes "." to match newlines.
+     * NOTE: I found the following trick online: use "[\s\S]" to match any character and work around
+     * the lack of JavaScript support for the "s" (aka "dotall" or "multiline") option that enables
+     * "." to match newlines.
      */
     sMD = sMD.replace(/<!--[\s\S]*?-->/g, "");
+
+    /*
+     * If the Markdown begins with a triple-dash, we assume there's a "Front Matter" header at the
+     * top of the file that we don't want to output, either.
+     */
+    sMD = sMD.replace(/^---[\s\S]*?---[ \t]*\n*/, "");
 
     /*
      * Convert all lone series of three or more hyphens/underscores/asterisks into horizontal rules.
