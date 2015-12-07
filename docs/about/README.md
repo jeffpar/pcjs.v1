@@ -1,3 +1,9 @@
+---
+layout: page
+title: About JavaScript Machines
+permalink: /docs/about/
+---
+
 About JavaScript Machines
 ---
 
