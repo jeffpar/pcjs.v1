@@ -308,6 +308,7 @@ MarkOut.aHTMLEntities = {
  */
 MarkOut.prototype.convertMD = function(sIndent)
 {
+    var aMatch;
     var sMD = this.sMD;
 
     /*
@@ -349,9 +350,20 @@ MarkOut.prototype.convertMD = function(sIndent)
 
     /*
      * If the Markdown begins with a triple-dash, we assume there's a "Front Matter" header at the
-     * top of the file that we don't want to output, either.
+     * top of the file that we don't want to output, either.  One wrinkle: we assume that if a
+     * "title" element exists in the Front Matter, then we should auto-generate a top-level heading
+     * with the same value.
      */
-    sMD = sMD.replace(/^---[\s\S]*?---[ \t]*\n*/, "");
+    if (sMD.substr(0, 3) == "---") {
+        aMatch = sMD.match(/^---([\s\S]*?)---[ \t]*\n*/);
+        if (aMatch) {
+            sMD = sMD.replace(aMatch[0], "");
+            aMatch = aMatch[1].match(/title:\s*(.*?)\s*?\n/);
+            if (aMatch) {
+                sMD = aMatch[1] + "\n---\n\n" + sMD;
+            }
+        }
+    }
 
     /*
      * Convert all lone series of three or more hyphens/underscores/asterisks into horizontal rules.
@@ -394,7 +406,6 @@ MarkOut.prototype.convertMD = function(sIndent)
      * you want the second paragraph to appear as a code block, it must be indented TWICE (by 8 spaces
      * or 2 tabs).  That behavior should fall out of this hack as well.
      */
-    var aMatch;
     var re = /(^|\n)(  ? ?)([\*+-]|[0-9]+\.)([^\n]*\n)([ \t]+[^\n]*\n|\n)+([ \t]+[^\n]+)/g;
     //noinspection UnnecessaryLocalVariableJS
     var sMDOrig = sMD;
