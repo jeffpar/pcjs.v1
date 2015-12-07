@@ -7,7 +7,6 @@
 .idea
 .project
 .settings
-index.html
 node_modules
 npm-debug.log
 /books

@@ -1,4 +1,7 @@
-PCjs: The Original IBM PC in Your Browser
+---
+layout: page
+title: "PCjs: The Original IBM PC in Your Browser"
+permalink: /
 ---
 
 Welcome to [PCjs](/docs/about/pcjs/), the first IBM PC simulation to run in your web browser without any plugins.
