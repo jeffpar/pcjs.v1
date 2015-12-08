@@ -1,8 +1,11 @@
 ---
 layout: page
-title: About JavaScript Machines
+title: About
+menu_order: 10
 permalink: /docs/about/
 ---
+
+## About JavaScript Machines
 
 The JavaScript Machines Project (originally at [jsmachines.net](http://jsmachines.net/)) is a collection of computer
 simulations written in JavaScript.  It has now been released on [GitHub](https://github.com/) as the

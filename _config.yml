@@ -1,5 +1,5 @@
 # Site settings
-title: PCjs
+title: "PCjs: The Original IBM PC in a Browser"
 email: Jeff@pcjs.org
 description: > # this means to ignore newlines until "baseurl:"
   Write an awesome description for your new site here. You can edit this
@@ -12,3 +12,9 @@ github_username:  jeffpar
 
 # Build settings
 markdown: kramdown
+
+kramdown:
+  input: GFM
+  hard_wrap: false
+
+pcjs_version: 1.20.1

@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "PCjs: The Original IBM PC in Your Browser"
+title: PCjs
 permalink: /
 ---
 

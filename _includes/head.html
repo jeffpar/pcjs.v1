@@ -2,10 +2,23 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width initial-scale=1" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-
     <title>{% if page.title %}{{ page.title }}{% else %}{{ site.title }}{% endif %}</title>
     <meta name="description" content="{{ site.description }}">
-
     <link rel="stylesheet" href="{{ "/css/main.css" | prepend: site.baseurl }}">
     <link rel="canonical" href="{{ page.url | replace:'index.html','' | prepend: site.baseurl | prepend: site.url }}">
+    <link rel="apple-touch-icon" sizes="57x57" href="{{ site.baseurl }}/versions/icons/current/pc-icon-57.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="{{ site.baseurl }}/versions/icons/current/pc-icon-72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="{{ site.baseurl }}/versions/icons/current/pc-icon-76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="{{ site.baseurl }}/versions/icons/current/pc-icon-114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="{{ site.baseurl }}/versions/icons/current/pc-icon-120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="{{ site.baseurl }}/versions/icons/current/pc-icon-144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="{{ site.baseurl }}/versions/icons/current/pc-icon-152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ site.baseurl }}/versions/icons/current/pc-icon-180.png">
+    <link rel="apple-touch-icon" sizes="192x192" href="{{ site.baseurl }}/versions/icons/current/pc-icon-192.png">
+    <link rel="apple-touch-icon" href="{{ site.baseurl }}/versions/icons/current/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="{{ site.baseurl }}/versions/icons/current/pc-icon-192.png">
+    <link rel="shortcut icon" type="image/x-icon" href="{{ site.baseurl }}/versions/icons/current/favicon.ico">
+    {% if page.machines %}
+	<link rel="stylesheet" type="text/css" href="{{ site.baseurl }}/versions/pcjs/{{ site.pcjs_version }}/components.css">
+    {% endif %}
 </head>

@@ -1,0 +1,4 @@
+{% for machine in page.machines %}
+  <script type="text/javascript" src="/versions/{{ machine.type }}js/{{ site.pcjs_version }}/{{ machine.type }}.js"></script>
+  <script type="text/javascript">window.embed{{ machine.type | upcase }}("{{ machine.id }}","machine.xml","/versions/{{ machine.type }}js/{{ site.pcjs_version }}/components.xsl");</script>
+{% endfor %}
