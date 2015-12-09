@@ -1,3 +1,13 @@
+---
+layout: page
+title: C1Pjs Documentation
+permalink: /docs/c1pjs/
+machines:
+  - type: c1p-dbg
+    id: c1p8kb
+    config: /devices/c1p/machine/8kb/large/debugger/machine.xml
+---
+
 C1Pjs Documentation
 ---
 
@@ -5,7 +15,7 @@ C1Pjs is a JavaScript simulation of the Challenger 1P, an 8-bit 6502-based micro
 manufactured by Ohio Scientific in 1978.  The base configuration included 4Kb of RAM and an
 8Kb BASIC-in-ROM from Microsoft.  Below is a simulation of the 8Kb model.
 
-[OSI Challenger C1P](/devices/c1p/machine/8kb/large/debugger/ "C1Pjs:c1p8kb:::debugger")
+{% include machine.html id="c1p8kb" %}
 
 More sample [C1P machine configurations](/devices/c1p/machine/) are available, as well as
 information on [customizing and embedding](embed/) your own configurations.
@@ -143,6 +153,6 @@ the &lt;canvas&gt; tag until IE9.
 
 ### Challenger 1P Reference Manuals
 
-![OSI BASIC-IN-ROM Manual](http://static.pcjs.org/pubs/c1p/techref/thumbs/OSI_BASIC-IN-ROM_Reference_Manual-thumb.jpg "link:http://static.pcjs.org/pubs/c1p/techref/pdfs/OSI_BASIC-IN-ROM_Reference_Manual.pdf:200:260")
-![OSI C1P Graphics Manual](http://static.pcjs.org/pubs/c1p/techref/thumbs/OSI_C1P_Character_Graphics_Reference_Manual-thumb.jpg "link:http://static.pcjs.org/pubs/c1p/techref/pdfs/OSI_C1P_Character_Graphics_Reference_Manual.pdf:200:260")
-![OSI C1P Users Manual](http://static.pcjs.org/pubs/c1p/techref/thumbs/OSI_C1P_Users_Manual-thumb.jpg "link:http://static.pcjs.org/pubs/c1p/techref/pdfs/OSI_C1P_Users_Manual.pdf:200:260")
+[<img src="http://static.pcjs.org/pubs/c1p/techref/thumbs/OSI_BASIC-IN-ROM_Reference_Manual-thumb.jpg" width="200" height="260" alt="OSI BASIC-IN-ROM Manual"/>](http://static.pcjs.org/pubs/c1p/techref/pdfs/OSI_BASIC-IN-ROM_Reference_Manual.pdf)
+[<img src="http://static.pcjs.org/pubs/c1p/techref/thumbs/OSI_C1P_Character_Graphics_Reference_Manual-thumb.jpg" width="200" height="260" alt="OSI C1P Graphics Manual"/>](http://static.pcjs.org/pubs/c1p/techref/pdfs/OSI_C1P_Character_Graphics_Reference_Manual.pdf)
+[<img src="http://static.pcjs.org/pubs/c1p/techref/thumbs/OSI_C1P_Users_Manual-thumb.jpg" width="200" height="260" alt="OSI C1P Users Manual"/>](http://static.pcjs.org/pubs/c1p/techref/pdfs/OSI_C1P_Users_Manual.pdf)

@@ -134,11 +134,11 @@ To convert PCjs' special links, such as:
 
 to normal Markdown links, search using this regex:
 
-	\!\[(.*?)\]\(([^ )]*) \"link:([^:]*):([0-9]*):([0-9]*)\"\)
+	\!\[(.*?)\]\(([^ )]*) \"link:(.*?):([0-9]*):([0-9]*)\"\)
 	
 and replace using this regex:
 
-	[<img src="$2" width="$4" height="$5"/>]($3 "$1")
+	[<img src="$2" width="$4" height="$5" alt="$1"/>]($3)
 
 
 Jekyll "Cheat Sheet"

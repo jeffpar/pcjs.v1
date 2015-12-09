@@ -1,7 +1,10 @@
-&lt;chipset&gt;
-===
+---
+layout: page
+title: PCjs &lt;chipset&gt; Element
+permalink: /docs/pcjs/chipset/
+---
 
-PCjs *ChipSet* XML Specification
+PCjs ChipSet Component
 ---
 
 Format

@@ -1,7 +1,10 @@
-&lt;serial&gt;
-===
+---
+layout: page
+title: PCjs &lt;serial&gt; Element
+permalink: /docs/pcjs/serial/
+---
 
-PCjs *SerialPort* XML Specification
+PCjs SerialPort Component
 ---
 
 Format

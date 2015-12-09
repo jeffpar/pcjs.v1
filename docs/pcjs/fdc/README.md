@@ -1,7 +1,10 @@
-&lt;FDC&gt;
-===
+---
+layout: page
+title: PCjs &lt;fdc&gt; Element
+permalink: /docs/pcjs/fdc/
+---
 
-PCjs *FDC* (Floppy Disk Controller) XML Specification
+PCjs Floppy Disk Controller (FDC) Component
 ---
 
 Format

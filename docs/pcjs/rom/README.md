@@ -1,7 +1,10 @@
-&lt;rom&gt;
-===
+---
+layout: page
+title: PCjs &lt;rom&gt; Element
+permalink: /docs/pcjs/rom/
+---
 
-PCjs *ROM* XML Specification
+PCjs Read-Only Memory (ROM) Component
 ---
 
 Format

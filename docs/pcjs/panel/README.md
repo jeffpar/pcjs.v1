@@ -1,7 +1,10 @@
-&lt;panel&gt;
-===
+---
+layout: page
+title: PCjs &lt;panel&gt; Element
+permalink: /docs/pcjs/panel/
+---
 
-PCjs *Panel* XML Specification
+PCjs Control Panel Component
 ---
 
 Format

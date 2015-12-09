@@ -1,7 +1,10 @@
-&lt;cpu&gt;
-===
+---
+layout: page
+title: PCjs &lt;cpu&gt; Element
+permalink: /docs/pcjs/cpu/
+---
 
-PCjs *CPU* XML Specification
+PCjs CPU Component
 ---
 
 Format

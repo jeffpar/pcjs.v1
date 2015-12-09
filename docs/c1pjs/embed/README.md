@@ -1,6 +1,17 @@
+---
+layout: page
+title: Embedding The C1Pjs Simulator
+permalink: /docs/c1pjs/embed/
+machines:
+  - type: c1p
+    id: c1p8kb
+    config: /devices/c1p/machine/8kb/embed/machine.xml
+---
+
 Embedding The C1Pjs Simulator
-===
-[Challenger 1P](/devices/c1p/machine/8kb/embed/ "C1Pjs:c1pDemo")
+---
+
+{% include machine.html id="c1p8kb" %}
 
 If you want to read as little as possible, then just paste the following code onto a web page:
 

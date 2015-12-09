@@ -1,3 +1,13 @@
+---
+layout: page
+title: PCjs Documentation Demos
+permalink: /docs/pcjs/demos/
+machines:
+  - type: pc
+    id: sample3
+    config: /docs/pcjs/demos/sample3b.xml
+---
+
 PCjs Documentation Demos
 ---
 
@@ -19,6 +29,6 @@ the "file:" or "http:" protocol.
 
 Have fun!
 
-[IBM PC using sample3b.xml](sample3b.xml "PCjs:sample3")
+{% include machine.html id="sample3" %}
 
 [Return to [PCjs Documentation](..)]

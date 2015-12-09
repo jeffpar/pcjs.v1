@@ -41,7 +41,7 @@ Some pre-configured machines are shown below, ready to run BASIC, DOS, Windows 1
 
 [<img src="/devices/pc/machine/5150/cga/64kb/donkey/thumbnail.jpg" width="200" height="100" alt="IBM PC running DONKEY.BAS"/>](/devices/pc/machine/5150/cga/64kb/donkey/)
 [<img src="/devices/pc/machine/5160/cga/256kb/demo/thumbnail.jpg" width="200" height="100" alt="IBM PC XT w/CGA, 10Mb Hard Drive"/>](/devices/pc/machine/5160/cga/256kb/demo/)
-[<img src="/devices/pc/machine/5160/cga/256kb/win101/thumbnail.jpg" width="200" height="100" alt="IBM PC XT w/CGA, Windows 1.01"/>](/devices/pc/machine/5160/cga/256kb/win101/")
+[<img src="/devices/pc/machine/5160/cga/256kb/win101/thumbnail.jpg" width="200" height="100" alt="IBM PC XT w/CGA, Windows 1.01"/>](/devices/pc/machine/5160/cga/256kb/win101/)
 [<img src="/devices/pc/machine/5160/ega/640kb/win101/thumbnail.jpg" width="200" height="100" alt="IBM PC XT w/EGA, Windows 1.01"/>](/devices/pc/machine/5160/ega/640kb/win101/)
 [<img src="/disks/pc/os2/ibm/1.0/thumbnail.jpg" width="200" height="100" alt="IBM PC AT w/EGA, OS/2 1.0"/>](/disks/pc/os2/ibm/1.0/)
 [<img src="/disks/pc/cpm/thumbnail.jpg" width="200" height="100" alt="IBM PC w/MDA, CP/M-86"/>](/disks/pc/cpm/)

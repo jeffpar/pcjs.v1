@@ -1,7 +1,10 @@
-&lt;mouse&gt;
-===
+---
+layout: page
+title: PCjs &lt;mouse&gt; Element
+permalink: /docs/pcjs/mouse/
+---
 
-PCjs *Mouse* XML Specification
+PCjs Mouse Component
 ---
 
 Format

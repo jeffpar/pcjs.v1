@@ -1,7 +1,10 @@
-&lt;computer&gt;
-===
+---
+layout: page
+title: PCjs &lt;computer&gt; Element
+permalink: /docs/pcjs/computer/
+---
 
-PCjs *Computer* XML Specification
+PCjs Computer Component
 ---
 
 Format

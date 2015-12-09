@@ -1,7 +1,10 @@
-&lt;video&gt;
-===
+---
+layout: page
+title: PCjs &lt;video&gt; Element
+permalink: /docs/pcjs/video/
+---
 
-PCjs *Video* XML Specification
+PCjs Video Component
 ---
 
 Format

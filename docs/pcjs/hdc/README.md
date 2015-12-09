@@ -1,7 +1,10 @@
-&lt;HDC&gt;
-===
+---
+layout: page
+title: PCjs &lt;hdc&gt; Element
+permalink: /docs/pcjs/hdc/
+---
 
-PCjs *HDC* (Hard Disk Controller) XML Specification
+PCjs Hard Disk Controller (HDC) Component
 ---
 
 Format

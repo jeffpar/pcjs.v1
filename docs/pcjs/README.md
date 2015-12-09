@@ -1,10 +1,20 @@
+---
+layout: page
+title: PCjs Documentation
+permalink: /docs/pcjs/
+machines:
+  - type: pc
+    id: ibm5150
+    config: /devices/pc/machine/5150/mda/64kb/machine.xml
+---
+
 PCjs Documentation
 ---
 
 [PCjs](/docs/about/pcjs/) is a full-featured IBM PC, PC XT and PC AT emulator written entirely in JavaScript.
 After you've read the Documentation, play with the [Demos](demos/).
 
-[IBM PC Model 5150](/devices/pc/machine/5150/mda/64kb/ "PCjs:ibm5150")
+{% include machine.html id="ibm5150" %}
 
 The [simulation](/devices/pc/machine/5150/mda/64kb/) above features an Intel 8088
 running at 4.77Mhz, with 64Kb of RAM and an IBM Monochrome Display Adapter.  To create your

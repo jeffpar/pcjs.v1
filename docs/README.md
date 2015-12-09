@@ -1,3 +1,10 @@
+---
+layout: page
+title: Docs
+menu_order: 6
+permalink: /docs/
+---
+
 Documentation
 ---
 

@@ -1,7 +1,10 @@
-&lt;component&gt;
-===
+---
+layout: page
+title: PCjs &lt;component&gt; Element
+permalink: /docs/pcjs/component/
+---
 
-*Component* XML Specification
+PCjs Component
 ---
 
 Format

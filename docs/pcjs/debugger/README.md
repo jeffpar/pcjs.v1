@@ -1,7 +1,10 @@
-&lt;debugger&gt;
-===
+---
+layout: page
+title: PCjs &lt;debugger&gt; Element
+permalink: /docs/pcjs/debugger/
+---
 
-PCjs *Debugger* XML Specification
+PCjs Debugger Component
 ---
 
 Format

@@ -1,7 +1,10 @@
-&lt;keyboard&gt;
-===
+---
+layout: page
+title: PCjs &lt;keyboard&gt; Element
+permalink: /docs/pcjs/keyboard/
+---
 
-PCjs *Keyboard* XML Specification
+PCjs Keyboard Component
 ---
 
 Format

@@ -1,7 +1,10 @@
-&lt;ram&gt;
-===
+---
+layout: page
+title: PCjs &lt;ram&gt; Element
+permalink: /docs/pcjs/ram/
+---
 
-PCjs *RAM* XML Specification
+PCjs Random-Access Memory (RAM) Component
 ---
 
 Format

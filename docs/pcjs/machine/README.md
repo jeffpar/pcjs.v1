@@ -1,7 +1,10 @@
-&lt;machine&gt;
-===
+---
+layout: page
+title: PCjs &lt;machine&gt; Element
+permalink: /docs/pcjs/machine/
+---
 
-PCjs *Machine* XML Specification
+PCjs Machine Component
 ---
 
 Format

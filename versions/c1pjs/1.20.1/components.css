@@ -9,6 +9,9 @@
 .c1pjs-embed:after {
     clear:both;
 }
+.c1pjs-machine {
+    padding-bottom: 1em;
+}
 .c1pjs-name {
     clear: both;
     font-weight: bold;
