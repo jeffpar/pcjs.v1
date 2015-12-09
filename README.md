@@ -2,6 +2,7 @@
 layout: page
 title: PCjs
 permalink: /
+developer: false
 ---
 
 Welcome to [PCjs](/docs/about/pcjs/), the first IBM PC simulation to run in your web browser without any plugins.
@@ -53,7 +54,7 @@ and the original machine are available in the [C1Pjs Documentation](/docs/c1pjs/
 
 [Embedded OSI Challenger C1P](/devices/c1p/machine/8kb/large/ "C1Pjs:demoC1P")
 
-<!--BEGIN:EXCLUDE-->
+{% if page.developer %}
 
 ---
 
@@ -338,7 +339,7 @@ manually or with the Grunt "clean" task:
 
 	grunt clean
 	
-<!--END:EXCLUDE-->
+{% endif %}
 
 License
 ---
