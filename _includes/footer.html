@@ -10,6 +10,8 @@
         </ul>
       </div>
 
+      {% comment %}
+      
       <div class="footer-col  footer-col-2">
         <ul class="social-media-list">
           {% if site.github_username %}
@@ -43,9 +45,11 @@
         </ul>
       </div>
 
+      {% endcomment %}
+      
       <div class="footer-col  footer-col-3">
         <p class="text">
-          <span style="float:right"><a href="http://pcjs.net">pcjs.net</a> website © 2012-2015 by <a href="http://twitter.com/jeffpar">@jeffpar</a></span><br/>
+          <span style="float:right"><a href="{{ site.url }}">{{ site.pcjs_domain }}</a> website © 2012-2015 by <a href="https://twitter.com/{{ site.twitter_username }}">@{{ site.twitter_username }}</a></span><br/>
           <span style="float:right">PCjs and C1Pjs released under <a href="http://gnu.org/licenses/gpl.html">GPL version 3 or later</a></span>
         </p>
       </div>

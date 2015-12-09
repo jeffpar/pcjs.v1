@@ -1,6 +1,5 @@
 @CHARSET "UTF-8";
 
-
 *:not(input,textarea) {
     -webkit-user-select: none;
 }
@@ -8,6 +7,9 @@
 }
 .pcjs-embed:after {
     clear:both;
+}
+.pcjs-machine {
+    padding-bottom: 1em;
 }
 .pcjs-name, .pcjs-menu {
     clear: both;

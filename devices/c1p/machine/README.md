@@ -1,3 +1,9 @@
+---
+layout: page
+title: Machines
+permalink: /devices/c1p/machine/
+---
+
 Challenger 1P Machine Configurations
 ---
 

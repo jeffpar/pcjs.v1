@@ -1,3 +1,10 @@
+---
+layout: page
+title: Machines
+menu_order: 5
+permalink: /devices/pc/machine/
+---
+
 IBM PC Machine Configurations
 ---
 

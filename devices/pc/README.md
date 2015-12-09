@@ -1,4 +1,10 @@
-IBM PC Configurations
+---
+layout: page
+title: PC Machine Configurations
+permalink: /devices/pc/
+---
+
+PC Machine Configurations
 ---
 
 This folder contains IBM PC [Machine Configurations](machine/), along with [Control Panels](/devices/pc/panel/),

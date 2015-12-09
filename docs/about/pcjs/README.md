@@ -1,3 +1,9 @@
+---
+layout: page
+title: About PCjs
+permalink: /docs/about/pcjs/
+---
+
 About PCjs
 ---
 

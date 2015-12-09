@@ -1,3 +1,9 @@
+---
+layout: page
+title: Machine Configurations
+permalink: /devices/
+---
+
 Machine Configurations
 ---
 

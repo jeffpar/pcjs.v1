@@ -355,9 +355,9 @@ All published portions are free for redistribution and/or modification under the
 [GNU General Public License](/LICENSE) as published by the Free Software Foundation, either version 3 of the License,
 or (at your option) any later version.
 
-You are required to include the following copyright notice, with a link to [http://pcjs.org]():
+You are required to include the following copyright notice, with a link to [{{ site.pcjs_domain }}]({{ site.url }}):
 
-> [PCjs](http://pcjs.org) © 2012-2015 by [Jeff Parsons](mailto:Jeff@pcjs.org) ([@jeffpar](http://twitter.com/jeffpar))
+> [PCjs]({{ site.url }}) © 2012-2015 by [Jeff Parsons](mailto:Jeff@pcjs.org) ([@jeffpar](http://twitter.com/jeffpar))
 
 in every source code file of every copy or modified version of this work, and to display that notice on every web page
 or computer that runs any version of this software.

@@ -1,10 +1,10 @@
 {% for machine in page.machines %}
-  {% capture machine_embed %}window.embed{{ machine.type | upcase }}{% endcapture %}
+  {% capture machine_embed %}window.embed{{ machine.type | remove:'-dbg' | upcase }}{% endcapture %}
   {% if machine.config %}{% capture machine_config %}{{ machine.config }}{% endcapture %}{% else %}{% assign machine_config = "machine.xml" %}{% endif %}
-  {% capture machine_template %}{{ site.baseurl }}/versions/{{ machine.type }}js/{{ site.pcjs_version }}/components.xsl{% endcapture %}
+  {% capture machine_template %}{{ site.baseurl }}/versions/{{ machine.type | remove:'-dbg' }}js/{{ site.pcjs_version }}/components.xsl{% endcapture %}
   {% capture machine_script %}/{{ machine.type }}.js{% endcapture %}
   {% unless machine_scripts contains machine_script %}
-    <script type="text/javascript" src="{{ site.baseurl }}/versions/{{ machine.type }}js/{{ site.pcjs_version }}{{ machine_script }}"></script>
+    <script type="text/javascript" src="{{ site.baseurl }}/versions/{{ machine.type | remove:'-dbg' }}js/{{ site.pcjs_version }}{{ machine_script }}"></script>
   {% endunless %}
   {% capture machine_scripts %}{{ machine_scripts }}{{ machine_script }}{% endcapture %}
     <script type="text/javascript">{{ machine_embed }}("{{ machine.id }}","{{ machine_config }}","{{ machine_template }}");</script>

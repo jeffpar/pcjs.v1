@@ -18,5 +18,5 @@ kramdown:
   hard_wrap: false
 
 # Custom site settings
-pcjs_sitename: pcjs.net
+pcjs_domain: pcjs.net
 pcjs_version: 1.20.1
