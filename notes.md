@@ -65,6 +65,7 @@ But in this case, there's nothing to pull, so force the push (this example assum
 
 	git push -f origin master
 
+
 Node "Cheat Sheet"
 ===
 
@@ -122,3 +123,33 @@ indicating the name of serial device to connect to:
 The advantage of using *nc* is that no "middle man" is required: your terminal window will be connected directly
 to the virtual serial port.  And *nc* is included with OS X, whereas *socat* must installed separately (see
 [http://www.dest-unreach.org/socat/](http://www.dest-unreach.org/socat/)).
+
+
+Markdown "Cheat Sheet"
+===
+
+To convert PCjs' special links, such as:
+
+	![IBM PC XT w/CGA, 10Mb Hard Drive](/devices/pc/machine/5160/cga/256kb/demo/thumbnail.jpg "link:/devices/pc/machine/5160/cga/256kb/demo/:200:100")
+
+to normal Markdown links, search using this regex:
+
+	\!\[(.*?)\]\(([^ )]*) \"link:([^:]*):([0-9]*):([0-9]*)\"\)
+	
+and replace using this regex:
+
+	[<img src="$2" width="$4" height="$5"/>]($3 "$1")
+
+
+Jekyll "Cheat Sheet"
+===
+
+Although I created image.html in the **_includes** folder, so that I could do this:
+
+	{% include image.html src="/devices/pc/machine/5150/cga/64kb/donkey/thumbnail.jpg" width="200" height="100" link="/devices/pc/machine/5150/cga/64kb/donkey/" alt="IBM PC running DONKEY.BAS" %}
+
+instead of this:
+
+	[<img src="{{ site.baseurl }}/devices/pc/machine/5150/cga/64kb/donkey/thumbnail.jpg" width="200" height="100"/>](/devices/pc/machine/5150/cga/64kb/donkey/ "IBM PC running DONKEY.BAS")
+
+I decided to stick with the latter, since it has a better chance of rendering as normal Markdown.

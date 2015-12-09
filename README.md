@@ -31,14 +31,14 @@ Demos
 ---
 Some pre-configured machines are shown below, ready to run BASIC, DOS, Windows 1.01, and assorted non-DOS software.
 
-![IBM PC running DONKEY.BAS](/devices/pc/machine/5150/cga/64kb/donkey/thumbnail.jpg "link:/devices/pc/machine/5150/cga/64kb/donkey/:200:100")
-![IBM PC XT w/CGA, 10Mb Hard Drive](/devices/pc/machine/5160/cga/256kb/demo/thumbnail.jpg "link:/devices/pc/machine/5160/cga/256kb/demo/:200:100")
-![IBM PC XT w/CGA, Windows 1.01](/devices/pc/machine/5160/cga/256kb/win101/thumbnail.jpg "link:/devices/pc/machine/5160/cga/256kb/win101/:200:100")
-![IBM PC XT w/EGA, Windows 1.01](/devices/pc/machine/5160/ega/640kb/win101/thumbnail.jpg "link:/devices/pc/machine/5160/ega/640kb/win101/:200:100")
-![IBM PC AT w/EGA, OS/2 1.0](/disks/pc/os2/ibm/1.0/thumbnail.jpg "link:/disks/pc/os2/ibm/1.0/:200:100")
-![IBM PC w/MDA, CP/M-86](/disks/pc/cpm/thumbnail.jpg "link:/disks/pc/cpm/:200:100")
-![IBM PC w/MDA, Microsoft Adventure](/disks/pc/games/microsoft/adventure/thumbnail.jpg "link:/disks/pc/games/microsoft/adventure/:200:100")
-![IBM PC w/CGA, Zork I](/disks/pc/games/infocom/zork1/thumbnail.jpg "link:/disks/pc/games/infocom/zork1/:200:100")
+[<img src="/devices/pc/machine/5150/cga/64kb/donkey/thumbnail.jpg" width="200" height="100"/>](/devices/pc/machine/5150/cga/64kb/donkey/ "IBM PC running DONKEY.BAS")
+[<img src="{{ site.baseurl }}/devices/pc/machine/5160/cga/256kb/demo/thumbnail.jpg" width="200" height="100"/>]({{ site.baseurl }}/devices/pc/machine/5160/cga/256kb/demo/ "IBM PC XT w/CGA, 10Mb Hard Drive")
+[<img src="{{ site.baseurl }}/devices/pc/machine/5160/cga/256kb/win101/thumbnail.jpg" width="200" height="100"/>]({{ site.baseurl }}/devices/pc/machine/5160/cga/256kb/win101/ "IBM PC XT w/CGA, Windows 1.01")
+[<img src="{{ site.baseurl }}/devices/pc/machine/5160/ega/640kb/win101/thumbnail.jpg" width="200" height="100"/>]({{ site.baseurl }}/devices/pc/machine/5160/ega/640kb/win101/ "IBM PC XT w/EGA, Windows 1.01")
+[<img src="{{ site.baseurl }}/disks/pc/os2/ibm/1.0/thumbnail.jpg" width="200" height="100"/>]({{ site.baseurl }}/disks/pc/os2/ibm/1.0/ "IBM PC AT w/EGA, OS/2 1.0")
+[<img src="{{ site.baseurl }}/disks/pc/cpm/thumbnail.jpg" width="200" height="100"/>]({{ site.baseurl }}/disks/pc/cpm/ "IBM PC w/MDA, CP/M-86")
+[<img src="{{ site.baseurl }}/disks/pc/games/microsoft/adventure/thumbnail.jpg" width="200" height="100"/>]({{ site.baseurl }}/disks/pc/games/microsoft/adventure/ "IBM PC w/MDA, Microsoft Adventure")
+[<img src="{{ site.baseurl }}/disks/pc/games/infocom/zork1/thumbnail.jpg" width="200" height="100"/>]({{ site.baseurl }}/disks/pc/games/infocom/zork1/ "IBM PC w/CGA, Zork I")
 
 Check out the rest of the PCjs [Application](/apps/pc/), [Boot Disk](/disks/pc/) and [Machine](/devices/pc/machine/)
 demos, including an [IBM PC Dual Display System](/devices/pc/machine/5150/dual/64kb/) demo of multiple monitor support,
