@@ -3,15 +3,22 @@
   {% unless machine.config %}
     {% assign machine_config = "machine.xml" %}
   {% else %}
-    {% capture machine_config %}{{ machine.config }}{% endcapture %}
+    {% assign machine_config = machine.config %}
   {% endunless %}
-  {% capture machine_template %}{{ site.baseurl }}/versions/{{ machine.type | remove:'-dbg' }}js/{{ site.pcjs_version }}/components.xsl{% endcapture %}
+  {% unless machine.template %}
+    {% assign machine_template = '' %}
+  {% else %}
+    {% assign machine_template = machine.template %}
+  {% endunless %}
   {% if site.pcjs_compiled %}
-    {% capture machine_script %}<script type="text/javascript" src="{{ site.baseurl }}/versions/{{ machine.type | remove:'-dbg' }}js/{{ site.pcjs_version }}{{ machine_script }}"></script>{% endcapture %}
+    {% capture machine_script %}<script type="text/javascript" src="{{ site.baseurl }}/versions/{{ machine.type | remove:'-dbg' }}js/{{ site.pcjs_version }}/{{ machine.type }}.js"></script>{% endcapture %}
     {% unless machine_scripts contains machine_script %}
       {{ machine_script }}
     {% endunless %}
     {% capture machine_scripts %}{{ machine_scripts }}{{ machine_script }}{% endcapture %}
+    {% if machine_template == '' %}
+      {% capture machine_template %}{{ site.baseurl }}/versions/{{ machine.type | remove:'-dbg' }}js/{{ site.pcjs_version }}/components.xsl{% endcapture %}
+    {% endif %}
   {% else %}
     {% if machine.type == "pc" or machine.type == "pc-dbg" %}{% assign array_scripts = site.pcjs_scripts %}{% endif %}
     {% if machine.type == "c1p" or machine.type == "c1p-dbg" %}{% assign array_scripts = site.c1pjs_scripts %}{% endif %}
@@ -22,6 +29,9 @@
       {% endunless %}
       {% capture machine_scripts %}{{ machine_scripts }}{{ machine_script }}{% endcapture %}
     {% endfor %}
+    {% if machine_template == '' %}    
+      {% capture machine_template %}{{ site.baseurl }}/modules/{{ machine.type | remove:'-dbg' }}js/templates/components.xsl{% endcapture %}
+    {% endif %}
   {% endif %}
   <script type="text/javascript">{{ machine_embed }}("{{ machine.id }}","{{ machine_config }}","{{ machine_template }}");</script>
 {% endfor %}

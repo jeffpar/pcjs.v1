@@ -403,11 +403,15 @@ function embedMachine(sName, sVersion, idElement, sXMLFile, sXSLFile, sStateFile
                             xsltProcessor['importStylesheet'](xsl);
                             var eFragment = xsltProcessor['transformToFragment'](xml, window.document);
                             if (eFragment) {
-                                if (eMachine.parentNode) {
+                                var machine = eFragment.getElementById(idElement);
+                                if (!machine) {
+                                    displayError("machine generation failed: " + idElement);
+                                }
+                                else if (!eMachine.parentNode) {
+                                    displayError("invalid machine element: " + idElement);
+                                } else {
                                     eMachine.parentNode.replaceChild(eFragment, eMachine);
                                     doneMachine();
-                                } else {
-                                    displayError("invalid machine element: " + idElement);
                                 }
                             } else {
                                 displayError("transformToFragment failed");

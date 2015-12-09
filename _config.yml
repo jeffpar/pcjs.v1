@@ -20,7 +20,7 @@ kramdown:
 # Custom site settings
 pcjs_domain: pcjs.net
 pcjs_version: 1.20.1
-pcjs_compiled: false
+pcjs_compiled: true
 
 c1pjs_scripts:
   - /modules/shared/lib/defines.js
