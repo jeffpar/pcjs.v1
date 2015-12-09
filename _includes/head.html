@@ -18,7 +18,5 @@
     <link rel="apple-touch-icon" href="{{ site.baseurl }}/versions/icons/current/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="192x192" href="{{ site.baseurl }}/versions/icons/current/pc-icon-192.png">
     <link rel="shortcut icon" type="image/x-icon" href="{{ site.baseurl }}/versions/icons/current/favicon.ico">
-    {% if page.machines %}
-	<link rel="stylesheet" type="text/css" href="{{ site.baseurl }}/versions/pcjs/{{ site.pcjs_version }}/components.css">
-    {% endif %}
+    {% include machine-styles.html %}
 </head>

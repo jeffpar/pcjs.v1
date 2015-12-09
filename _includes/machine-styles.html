@@ -1,0 +1,7 @@
+{% for machine in page.machines %}
+  {% capture machine_style %}{{ site.baseurl }}/versions/{{ machine.type }}js/{{ site.pcjs_version }}/components.css{% endcapture %}
+  {% unless machine_styles contains machine_style %}
+	<link rel="stylesheet" type="text/css" href="{{ machine_style }}">
+  {% endunless %}
+  {% capture machine_styles %}{{ machine_styles }}{{ machine_style }}{% endcapture %}
+{% endfor %}

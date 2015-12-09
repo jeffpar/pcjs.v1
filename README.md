@@ -3,6 +3,13 @@ layout: page
 title: PCjs
 permalink: /
 developer: false
+machines:
+  - type: pc
+    id: ibm5150
+    config: /devices/pc/machine/5150/mda/64kb/machine.xml
+  - type: c1p
+    id: demoC1P
+    config: /devices/c1p/machine/8kb/large/machine.xml
 ---
 
 Welcome to [PCjs](/docs/about/pcjs/), the first IBM PC simulation to run in your web browser without any plugins.
@@ -16,7 +23,7 @@ All the simulations are written entirely in JavaScript.  No Flash, Java or other
 Supported browsers include modern versions of Chrome, Safari, Firefox, Internet Explorer (v9.0 and up), Edge,
 and assorted mobile browsers.
 
-[Embedded IBM PC](/devices/pc/machine/5150/mda/64kb/ "PCjs:ibm5150")
+{% include machine.html id="ibm5150" %}
 
 The [simulation](/devices/pc/machine/5150/mda/64kb/) above features an Intel 8088 running at 4.77Mhz,
 with 64Kb of RAM and an IBM Monochrome Display Adapter.  For more control, there are also
@@ -52,7 +59,7 @@ Below is the [OSI Challenger C1P](/docs/c1pjs/), another simulation in the JavaS
 It simulates Ohio Scientific's 6502-based microcomputer, released in 1978.  More details about this simulation
 and the original machine are available in the [C1Pjs Documentation](/docs/c1pjs/).
 
-[Embedded OSI Challenger C1P](/devices/c1p/machine/8kb/large/ "C1Pjs:demoC1P")
+{% include machine.html id="demoC1P" %}
 
 {% if page.developer %}
 
