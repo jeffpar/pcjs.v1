@@ -1,5 +1,9 @@
 {% for machine in page.machines %}
-  {% capture machine_style %}{{ site.baseurl }}/versions/{{ machine.type | remove:'-dbg' }}js/{{ site.pcjs_version }}/components.css{% endcapture %}
+  {% unless site.pcjs_compiled %}
+    {% capture machine_style %}{{ site.baseurl }}/modules/{{ machine.type | remove:'-dbg' }}js/templates/components.css{% endcapture %}
+  {% else %}
+    {% capture machine_style %}{{ site.baseurl }}/versions/{{ machine.type | remove:'-dbg' }}js/{{ site.pcjs_version }}/components.css{% endcapture %}
+  {% endunless %}
   {% unless machine_styles contains machine_style %}
 	<link rel="stylesheet" type="text/css" href="{{ machine_style }}">
   {% endunless %}

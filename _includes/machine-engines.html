@@ -1,11 +1,27 @@
 {% for machine in page.machines %}
   {% capture machine_embed %}window.embed{{ machine.type | remove:'-dbg' | upcase }}{% endcapture %}
-  {% if machine.config %}{% capture machine_config %}{{ machine.config }}{% endcapture %}{% else %}{% assign machine_config = "machine.xml" %}{% endif %}
-  {% capture machine_template %}{{ site.baseurl }}/versions/{{ machine.type | remove:'-dbg' }}js/{{ site.pcjs_version }}/components.xsl{% endcapture %}
-  {% capture machine_script %}/{{ machine.type }}.js{% endcapture %}
-  {% unless machine_scripts contains machine_script %}
-    <script type="text/javascript" src="{{ site.baseurl }}/versions/{{ machine.type | remove:'-dbg' }}js/{{ site.pcjs_version }}{{ machine_script }}"></script>
+  {% unless machine.config %}
+    {% assign machine_config = "machine.xml" %}
+  {% else %}
+    {% capture machine_config %}{{ machine.config }}{% endcapture %}
   {% endunless %}
-  {% capture machine_scripts %}{{ machine_scripts }}{{ machine_script }}{% endcapture %}
-    <script type="text/javascript">{{ machine_embed }}("{{ machine.id }}","{{ machine_config }}","{{ machine_template }}");</script>
+  {% capture machine_template %}{{ site.baseurl }}/versions/{{ machine.type | remove:'-dbg' }}js/{{ site.pcjs_version }}/components.xsl{% endcapture %}
+  {% if site.pcjs_compiled %}
+    {% capture machine_script %}<script type="text/javascript" src="{{ site.baseurl }}/versions/{{ machine.type | remove:'-dbg' }}js/{{ site.pcjs_version }}{{ machine_script }}"></script>{% endcapture %}
+    {% unless machine_scripts contains machine_script %}
+      {{ machine_script }}
+    {% endunless %}
+    {% capture machine_scripts %}{{ machine_scripts }}{{ machine_script }}{% endcapture %}
+  {% else %}
+    {% if machine.type == "pc" or machine.type == "pc-dbg" %}{% assign array_scripts = site.pcjs_scripts %}{% endif %}
+    {% if machine.type == "c1p" or machine.type == "c1p-dbg" %}{% assign array_scripts = site.c1pjs_scripts %}{% endif %}
+    {% for script in array_scripts %}
+      {% capture machine_script %}<script type="text/javascript" src="{{ site.baseurl }}{{ script }}"></script>{% endcapture %}
+      {% unless machine_scripts contains machine_script %}
+        {{ machine_script }}
+      {% endunless %}
+      {% capture machine_scripts %}{{ machine_scripts }}{{ machine_script }}{% endcapture %}
+    {% endfor %}
+  {% endif %}
+  <script type="text/javascript">{{ machine_embed }}("{{ machine.id }}","{{ machine_config }}","{{ machine_template }}");</script>
 {% endfor %}

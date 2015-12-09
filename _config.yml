@@ -20,3 +20,71 @@ kramdown:
 # Custom site settings
 pcjs_domain: pcjs.net
 pcjs_version: 1.20.1
+pcjs_compiled: false
+
+c1pjs_scripts:
+  - /modules/shared/lib/defines.js
+  - /modules/shared/lib/dumpapi.js
+  - /modules/shared/lib/reportapi.js
+  - /modules/shared/lib/strlib.js
+  - /modules/shared/lib/usrlib.js
+  - /modules/shared/lib/weblib.js
+  - /modules/shared/lib/component.js
+  - /modules/c1pjs/lib/defines.js
+  - /modules/c1pjs/lib/panel.js
+  - /modules/c1pjs/lib/cpu.js
+  - /modules/c1pjs/lib/rom.js
+  - /modules/c1pjs/lib/ram.js
+  - /modules/c1pjs/lib/keyboard.js
+  - /modules/c1pjs/lib/video.js
+  - /modules/c1pjs/lib/serial.js
+  - /modules/c1pjs/lib/disk.js
+  - /modules/c1pjs/lib/debugger.js
+  - /modules/c1pjs/lib/computer.js
+  - /modules/shared/lib/embed.js
+
+pcjs_scripts:
+  - /modules/shared/lib/defines.js
+  - /modules/shared/lib/diskapi.js
+  - /modules/shared/lib/dumpapi.js
+  - /modules/shared/lib/reportapi.js
+  - /modules/shared/lib/userapi.js
+  - /modules/shared/lib/strlib.js
+  - /modules/shared/lib/usrlib.js
+  - /modules/shared/lib/weblib.js
+  - /modules/shared/lib/component.js
+  - /modules/pcjs/lib/defines.js
+  - /modules/pcjs/lib/x86.js
+  - /modules/pcjs/lib/interrupts.js
+  - /modules/pcjs/lib/messages.js
+  - /modules/pcjs/lib/panel.js
+  - /modules/pcjs/lib/bus.js
+  - /modules/pcjs/lib/memory.js
+  - /modules/pcjs/lib/cpu.js
+  - /modules/pcjs/lib/x86seg.js
+  - /modules/pcjs/lib/x86cpu.js
+  - /modules/pcjs/lib/x86fpu.js
+  - /modules/pcjs/lib/x86func.js
+  - /modules/pcjs/lib/x86ops.js
+  - /modules/pcjs/lib/x86op0f.js
+  - /modules/pcjs/lib/x86modb.js
+  - /modules/pcjs/lib/x86modw.js
+  - /modules/pcjs/lib/x86modb16.js
+  - /modules/pcjs/lib/x86modw16.js
+  - /modules/pcjs/lib/x86modb32.js
+  - /modules/pcjs/lib/x86modw32.js
+  - /modules/pcjs/lib/x86modsib.js
+  - /modules/pcjs/lib/chipset.js
+  - /modules/pcjs/lib/rom.js
+  - /modules/pcjs/lib/ram.js
+  - /modules/pcjs/lib/keyboard.js
+  - /modules/pcjs/lib/video.js
+  - /modules/pcjs/lib/serialport.js
+  - /modules/pcjs/lib/mouse.js
+  - /modules/pcjs/lib/disk.js
+  - /modules/pcjs/lib/fdc.js
+  - /modules/pcjs/lib/hdc.js
+  - /modules/pcjs/lib/debugger.js
+  - /modules/pcjs/lib/state.js
+  - /modules/pcjs/lib/computer.js
+  - /modules/shared/lib/embed.js
