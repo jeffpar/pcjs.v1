@@ -1,4 +1,13 @@
-Windows 95 In Your Web Browser
+---
+layout: post
+title:  Windows 95 In Your Web Browser
+date:   2015-09-21 11:00:00
+categories: windows-95 80386
+permalink: /blog/2015/09/21/
+machines:
+  - type: pc-dbg
+    id: deskpro386
+    config: /devices/pc/machine/compaq/deskpro386/vga/4096kb/machine.xml
 ---
 
 Today, the last serious bug preventing a successful boot of Windows 95 was fixed.  I won't bore you with
@@ -21,7 +30,7 @@ to be resolved, but booting has been achieved.
 
 The adventure continues.
 
-[Embedded DeskPro 386](/devices/pc/machine/compaq/deskpro386/vga/4096kb/machine.xml "PCjs:deskpro386")
+{% include machine.html id="deskpro386" %}
 
 *[@jeffpar](http://twitter.com/jeffpar)*  
 *September 21, 2015*

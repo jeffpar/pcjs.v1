@@ -1,0 +1,76 @@
+---
+layout: post
+title:  Rebuilding the PCjs Website
+date:   2015-12-10 11:03:00
+categories: blog
+---
+
+It's been nice using Node.js to power the PCjs website, using Amazon's Elastic Beanstalk service, but that combination
+has also been a source of some frustrations:
+
+* When someone posts an article or a tweet linking to a PCjs page, the website bogs down, and while Amazon's Elastic
+Beanstalk service makes it easy to automatically scale up, each new instance automatically multiplies my expenses as well,
+which hover around $34/month for a single instance.  With assorted S3 and transfer charges, my average monthly bill is
+over $55/month.  That's a bit much for a site that generates zero revenue.
+
+* Once or twice a year, when I'm attempting to either update the server or upgrade my Node configuration, the update
+or upgrade will fail, and Amazon's web console provides virtually no details about why it failed.  Iget an error message
+like "**ERROR: Failed to deploy application**" and that is it.  Literally.
+
+Granted, there are some "simple" things I could do to improve performance, like adding an **nginx** proxy server to
+the configuration, but that feels like a band-aid solution, and as a software developer, the time spent fiddling with
+web server issues is time I'd much rather spend writing code.
+
+Since PCjs is designed to do all its work in the user's web browser, and since the website can be completely built out
+as a set of static web pages, I've decided to stop using Node to power www.pcjs.org.  I'm in the process of migrating
+the website to [GitHub Pages](https://pages.github.com/), and using [Jekyll](https://help.github.com/articles/using-jekyll-with-pages/)
+to convert all my existing Markdown files to static HTML pages.
+
+This new approach is *very* similar to what the PCjs custom Node modules did: every time time someone visited a folder
+on the website that did not yet contain an "index.html", the PCjs Node server would create one, either by converting the
+README.md file in that folder to HTML or generating a default HTML document.  The PCjs Markdown-to-HTML converter also
+contained some special logic that made it easy to embed PCjs machines on a page.
+
+Thanks to GitHub Pages, all of that now happens ahead of time: whenever I update the PCjs "gh-pages" branch on GitHub,
+Jekyll automatically runs through the entire site and rebuilds a complete set of web pages.
+
+The Node web server would automatically embed PCjs machines on web pages by looking for special Markdown links, such as;
+
+	[Embedded IBM PC](machine.xml "PCjs:ibm5150")
+
+After migrating to GitHub Pages and Jekyll, that markup must now be written as:
+
+{% raw %}
+	{% include machine.html id="ibm5150" %}
+{% endraw %}
+
+and the following "Front Matter" (YAML) must appear at the top of the Markdown file:
+
+	---
+	...
+	machines:
+	  - type: pc
+	    id: ibm5150
+	---
+
+Basically, the YAML at the top of the file lists all the machines that the page intends to use, and then
+{% raw %}`{% include ... %}`{% endraw %} is inserted in the text at the point where a machine should be embedded.
+
+The `machine.html` include accepts only one parameter: the `id` of a machine listed at the top of the file.
+
+The `machines` element at the top of the file must specify a `type` and `id` at a minimum.  `type` must be one of
+the following values, depending on whether you want an IBM PC or Challenger 1P, with or without a debugger:
+
+- pc
+- pc-dbg
+- c1p
+- c1p-dbg
+
+and `id` can be any identifier you want to use to embed the machine.  You may also use `config` to specify a machine XML
+configuration file if not using the default `machine.xml`, `template` to specify an alternate XSL template file if not
+using the default `components.xsl` file, and `state` to specify a JSON-encoded machine state file if the machine
+requires a predefined state.
+
+I will continue to include a Node web server with the PCjs project, but it remains to be seen whether I'll update the
+Node components to parse the new Jekyll "Front Matter" that's been added to all the Markdown files, or whether I'll leave
+leave the Node support as-is on the old "master" branch, and make the "gh-pages" the new default branch.

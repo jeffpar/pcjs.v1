@@ -1,4 +1,9 @@
-The Strange Case of the EGA Graphics Scroll Bug 
+---
+layout: post
+title:  The Strange Case of the EGA Graphics Scroll Bug
+date:   2015-06-05 11:00:00
+categories: video
+permalink: /blog/2015/06/05/
 ---
 
 I was playing with different video modes using this [IBM PC AT w/EGA](/devices/pc/machine/5170/ega/640kb/rev1/),

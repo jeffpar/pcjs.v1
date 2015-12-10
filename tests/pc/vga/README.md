@@ -1,3 +1,9 @@
+---
+layout: page
+title: VGA Tests
+permalink: /tests/pc/vga/
+---
+
 VGA Tests
 ---
 
