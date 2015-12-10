@@ -140,6 +140,14 @@ and replace using this regex:
 
 	[<img src="$2" width="$4" height="$5" alt="$1"/>]($3)
 
+For magazines (eg, BYTE), change:
+
+	\!\[(.*?)\]\(../static/([^)]*) \"link:../static/(.*?):([0-9]*):([0-9]*)\"\)
+
+to:
+
+	[<img src="http://static.pcjs.org/pubs/pc/magazines/BYTE/$2" width="$4" height="$5" alt= "$1"/>](http://static.pcjs.org/pubs/pc/magazines/BYTE/$3)
+
 
 Jekyll "Cheat Sheet"
 ===

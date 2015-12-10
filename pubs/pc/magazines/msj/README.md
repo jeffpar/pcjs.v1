@@ -1,5 +1,17 @@
+---
+layout: page
+title: Microsoft Systems Journal
+permalink: /pubs/pc/magazines/msj/
+---
+
 Microsoft Systems Journal
 ---
 
-![Microsoft Systems Journal, Oct 1986](static/MSJ-1986-10/thumbs/MSJ-1986-10 1.jpeg "link:MSJ-1986-10/:200:260")
-![Microsoft Systems Journal, May 1987](static/MSJ-1987-05/thumbs/MSJ-1987-05 1.jpeg "link:MSJ-1987-05/:200:260")
+Microsoft provides a [1986-1994 Index](https://www.microsoft.com/msj/backissues86.aspx) of Microsoft Systems Journal issues.
+Unfortunately, the only online issues they currently provide are from January 1993 (Vol. 8, No. 1) through December 1994 (Vol. 9, No. 12).
+
+PCjs has two early Microsoft Systems Journal issues for your out-dated programming enjoyment: October 1986 (Vol. 1, No. 1)
+and the OS/2 Issue from May 1987 (Vol. 2, No. 2). 
+
+[<img src="http://static.pcjs.org/pubs/pc/magazines/msj/MSJ-1986-10/thumbs/MSJ-1986-10 1.jpeg" width="200" height="260" alt="Microsoft Systems Journal, Oct 1986"/>](MSJ-1986-10/)
+[<img src="http://static.pcjs.org/pubs/pc/magazines/msj/MSJ-1987-05/thumbs/MSJ-1987-05 1.jpeg" width="200" height="260" alt="Microsoft Systems Journal, May 1987"/>](MSJ-1987-05/)

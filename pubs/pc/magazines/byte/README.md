@@ -1,4 +1,10 @@
+---
+layout: page
+title: Byte Magazine
+permalink: /pubs/pc/magazines/byte/
+---
+
 Byte Magazine
 ---
 
-![Byte, Nov 1975](static/BYTE-1975-11/thumbs/BYTE-1975-11 1.jpeg "link:BYTE-1975-11/:200:260")
+[<img src="http://static.pcjs.org/pubs/pc/magazines/byte/BYTE-1975-11/thumbs/BYTE-1975-11 1.jpeg" width="200" height="260" alt= "Byte Magazine"/>](BYTE-1975-11/)
