@@ -5,6 +5,10 @@ permalink: /pubs/pc/programming/Graphics_for_the_IBM_PC/demos/
 machines:
   - type: pc
     id: xt-cga-256k-1
+    state: 02-03.json
+  - type: pc
+    id: xt-cga-256k-2
+    state: 04-01.json
 ---
 
 Selected Live Demos from [Graphics for the IBM PC](../)
@@ -66,3 +70,5 @@ From [Page 58](/modules/shared/templates/pdf.html?url=/pubs/pc/programming/Graph
 > white appears much sharper on a television than any
 > other color, this palette is the palette of choice for television
 > work. (The same is true of any composite monitor.)
+
+{% include machine.html id="xt-cga-256k-2" %}
