@@ -6,7 +6,7 @@ categories: windows-95 80386
 permalink: /blog/2015/10/27/
 ---
 
-Every time Windows 95 starts up, its real-mode loader performs the following CPU identification test:
+Every time Windows 95 starts up, its real-mode loader performs the following CPU identification test.
 
 	&0654:121E 9C              PUSHF   
 	&0654:121F 33C0            XOR      AX,AX           ; try to clear bit 15 of flags

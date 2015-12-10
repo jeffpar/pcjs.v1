@@ -8,10 +8,11 @@ permalink: /blog/2015/06/01/
 
 The IBM VGA ("Video Graphics Array") standard was introduced as part of the IBM PS/2 line of computers;
 it was not a feature you could purchase or install in older PC, XT or AT-compatible machines.  In fact, full VGA
-support was not even available in all PS/2 models.  Of the first four PS/2 models -- the 8086-based Model 30, the
-80286-based Model 50 and Model 60, and the 80386-based Model 80 -- VGA support was available only in the three
-higher-end models.  The Model 30 came with MCGA ("Multicolor Graphics Array") video hardware that supported a subset
-of VGA modes (eg, 640x480 2-color and 320x200 256-color graphics).
+support was not even available in all PS/2 models.
+
+Of the first four PS/2 models -- the 8086-based Model 30, the 80286-based Model 50 and Model 60, and the 80386-based
+Model 80 -- VGA support was available only in the three higher-end models.  The Model 30 came with MCGA ("Multicolor
+Graphics Array") video hardware that supported a subset of VGA modes (eg, 640x480 2-color and 320x200 256-color graphics).
 
 It wasn't until October 1987 that IBM finally introduced an 8-bit ISA card that brought VGA capability to older PCs.
 The card was called the **IBM PS/2 Display Adapter**.  However, I think the name is a bit confusing, since the card

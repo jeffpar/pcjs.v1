@@ -6,7 +6,7 @@ categories: blog
 ---
 
 It's been nice using Node.js to power the PCjs website, using Amazon's Elastic Beanstalk service, but that combination
-has also been a source of some frustrations:
+has also been a source of some frustrations.
 
 * When someone posts an article or a tweet linking to a PCjs page, the website bogs down, and while Amazon's Elastic
 Beanstalk service makes it easy to automatically scale up, each new instance automatically multiplies my expenses as well,
@@ -70,6 +70,16 @@ and `id` can be any identifier you want to use to embed the machine.  You may al
 configuration file if not using the default `machine.xml`, `template` to specify an alternate XSL template file if not
 using the default `components.xsl` file, and `state` to specify a JSON-encoded machine state file if the machine
 requires a predefined state.
+
+For example, the PCjs home page contains two machines, and so this appears at the top of the root [README.md](https://raw.githubusercontent.com/jeffpar/pcjs/gh-pages/README.md):
+
+	machines:
+	  - type: pc
+	    id: ibm5150
+	    config: /devices/pc/machine/5150/mda/64kb/machine.xml
+	  - type: c1p
+	    id: demoC1P
+	    config: /devices/c1p/machine/8kb/large/machine.xml
 
 I will continue to include a Node web server with the PCjs project, but it remains to be seen whether I'll update the
 Node components to parse the new Jekyll "Front Matter" that's been added to all the Markdown files, or whether I'll leave
