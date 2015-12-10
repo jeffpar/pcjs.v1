@@ -1,4 +1,13 @@
-[IBM PC](machine.xml "PCjs:ibm5160")
+---
+layout: page
+title: "IBM PC XT (Model 5160) with Color Display, 256Kb"
+permalink: /devices/pc/machine/5160/cga/256kb/demo/
+machines:
+  - type: pc
+    id: ibm5160
+---
+
+{% include machine.html id="ibm5160" %}
 
 The above simulation is configured for a clock speed of 4.77Mhz, with 256Kb of RAM and a CGA display,
 using the original IBM PC Model 5160 ROM BIOS and CGA font ROM.

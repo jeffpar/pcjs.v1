@@ -1,3 +1,9 @@
+---
+layout: page
+title: IBM PC XT (Model 5160)
+permalink: /devices/pc/machine/5160/
+---
+
 IBM PC XT (Model 5160)
 ---
 

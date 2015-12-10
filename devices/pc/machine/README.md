@@ -43,6 +43,7 @@ Configurations for the [Challenger 1P](/devices/c1p/machine/) and other non-IBM 
 * [IBM PC XT, CGA, 640K, Multitasking MS-DOS 4.00](/devices/pc/machine/5160/cga/640kb/dos400m/)
 * [IBM PC XT, CGA "Server Array" Demo](/devices/pc/machine/5160/cga/256kb/array/)
 * [IBM PC XT, EGA, 256K, 10Mb Drive, Debugger](/devices/pc/machine/5160/ega/256kb/debugger/)
+* [IBM PC XT, EGA, 640K, 10Mb Drive](/devices/pc/machine/5160/ega/640kb/)
 * [IBM PC XT, EGA, 640K, 10Mb Drive, Debugger](/devices/pc/machine/5160/ega/640kb/debugger/)
 * [IBM PC XT, EGA, 640K, Windows 1.01](/devices/pc/machine/5160/ega/640kb/win101/)
 * [IBM PC XT, EGA, 640K, Windows 1.01, Debugger](/devices/pc/machine/5160/ega/640kb/win101/debugger/)
