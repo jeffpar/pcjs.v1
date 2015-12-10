@@ -1,5 +1,13 @@
-Instructions Longer than 10 Bytes
 ---
+layout: page
+title: "Intel 80286 CPU Documentation: Extra Prefixes"
+permalink: /pubs/pc/reference/intel/80286/extra_prefixes/
+---
+
+Intel 80286 CPU Documentation
+---
+
+### Instructions Longer than 10 Bytes
 
 When the CPU detects an instruction that is illegal due to being greater than 10 bytes in length, it generates an
 exception #13 (General Protection Violation) instead of exception #6 (Invalid Opcode). The only way an instruction

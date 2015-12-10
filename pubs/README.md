@@ -7,9 +7,13 @@ permalink: /pubs/
 
 Publications
 ---
-An assortment of PC-related publications, including [Datasheets](pc/datasheets/), [Magazines](pc/magazines/),
-[Programming Guides](pc/programming/), [IBM PC Reference Manuals](pc/reference/ibm/), [Intel CPU Documentation](pc/reference/intel/),
-[Software Manuals](pc/software/), and more.
+An assortment of PC-related publications, including:
+
+* [Datasheets](pc/datasheets/)
+* [Magazines](pc/magazines/)
+* [Programming Guides](pc/programming/)
+* [Reference Manuals](pc/reference/)
+* [Software Manuals](pc/software/)
 
 [<img src="http://static.pcjs.org/pubs/pc/datasheets/thumbs/8088-CPU.jpg" width="200" height="260" alt= "8088 CPU"/>](pc/datasheets/)
 [<img src="http://static.pcjs.org/pubs/pc/magazines/byte/BYTE-1975-11/thumbs/BYTE-1975-11 1.jpeg" width="200" height="260" alt= "Byte Magazine"/>](pc/magazines/byte/)

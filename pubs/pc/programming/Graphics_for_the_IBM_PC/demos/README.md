@@ -1,3 +1,12 @@
+---
+layout: page
+title: 'Selected Live Demos from "Graphics for the IBM PC"'
+permalink: /pubs/pc/programming/Graphics_for_the_IBM_PC/demos/
+machines:
+  - type: pc
+    id: xt-cga-256k-1
+---
+
 Selected Live Demos from [Graphics for the IBM PC](../)
 ---
 
@@ -21,7 +30,7 @@ From [Page 46](/modules/shared/templates/pdf.html?url=/pubs/pc/programming/Graph
 > can be produced with only a few program
 > lines thanks to the power of Advanced BASIC.
     
-[Embedded IBM PC](machine.xml "PCjs:xt-cga-256k-1::::02-03.json")
+{% include machine.html id="xt-cga-256k-1" %}
 
 From [Page 58](/modules/shared/templates/pdf.html?url=/pubs/pc/programming/Graphics_for_the_IBM_PC/pages/Graphics_for_the_IBM_PC 60.pdf&page=60&total=320):
 
@@ -57,6 +66,3 @@ From [Page 58](/modules/shared/templates/pdf.html?url=/pubs/pc/programming/Graph
 > white appears much sharper on a television than any
 > other color, this palette is the palette of choice for television
 > work. (The same is true of any composite monitor.)
-
-[Embedded IBM PC](machine.xml "PCjs:xt-cga-256k-2::::04-01.json")
-

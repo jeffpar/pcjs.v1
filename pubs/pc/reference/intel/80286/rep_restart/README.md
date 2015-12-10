@@ -1,5 +1,13 @@
-80286 REP MOVS and REP INS Restartability
 ---
+layout: page
+title: "Intel 80286 CPU Documentation: REP Restart"
+permalink: /pubs/pc/reference/intel/80286/rep_restart/
+---
+
+Intel 80286 CPU Documentation
+---
+
+### 80286 REP MOVS and REP INS Restartability
 
 The repeated string instructions on 80286 were made restartable after protection violations on the (B-2/B-3) and
 later 80286 steppings. Should a protection violation occur when using these instructions in protected mode, it is

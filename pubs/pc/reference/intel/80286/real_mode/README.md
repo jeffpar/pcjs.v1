@@ -1,5 +1,13 @@
-Executing Real Mode Programs in Protected Mode
 ---
+layout: page
+title: "Intel 80286 CPU Documentation: Real Mode"
+permalink: /pubs/pc/reference/intel/80286/real_mode/
+---
+
+Intel 80286 CPU Documentation
+---
+
+### Executing Real Mode Programs in Protected Mode
 
 An iAPX 86/88 program using real mode addressing can be executed in protected mode with full protection between
 it and other programs. All segment register semantics of iAPX 86 real mode can be emulated. The address space

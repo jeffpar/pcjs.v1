@@ -1,5 +1,13 @@
-Exceptions from Undefined Opcodes and String Instructions
 ---
+layout: page
+title: "Intel 80286 CPU Documentation: Early Errata"
+permalink: /pubs/pc/reference/intel/80286/early_errata/
+---
+
+Intel 80286 CPU Documentation
+---
+
+### Exceptions from Undefined Opcodes and String Instructions
 
 The exception 13 handler will probably use a lookup table for the opcode byte of the instruction causing exception
 13 to determine the correct action for this instruction. In general, any undefined opcode causes exception 6 and

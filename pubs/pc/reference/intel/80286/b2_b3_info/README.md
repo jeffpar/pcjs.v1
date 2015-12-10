@@ -1,5 +1,13 @@
-80286 (B-2/B-3) Information
 ---
+layout: page
+title: "Intel 80286 CPU Documentation: B-2/B-3 Steppings"
+permalink: /pubs/pc/reference/intel/80286/b2_b3_info/
+---
+
+Intel 80286 CPU Documentation
+---
+
+### 80286 B-2/B-3 Steppings
 
 This applies to S-spec #40093 and to S-spec #54012 of the 80286, since they contain a (B-2/B-3) stepping of the 80286.
 Their complete parametric specifications are given by the datasheet in the 1984 Intel Microsystem Components Handbook,

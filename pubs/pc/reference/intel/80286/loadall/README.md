@@ -1,5 +1,13 @@
-LOADALL (0F05H)
 ---
+layout: page
+title: "Intel 80286 CPU Documentation: LOADALL"
+permalink: /pubs/pc/reference/intel/80286/loadall/
+---
+
+Intel 80286 CPU Documentation
+---
+
+### LOADALL (0F05H)
 
 The iAPX 286 microprocessor (part number 80286) has an undocumented instruction used by Intel test programs to
 allow direct access to internal registers for fast initialization. The instruction is called LOADALL. Each 80286
