@@ -13,7 +13,7 @@ An assortment of PC-related publications, including:
 * [Magazines](pc/magazines/)
 * [Programming Guides](pc/programming/)
 * [Reference Manuals](pc/reference/)
-* [Software Manuals](pc/software/)
+* [Software User Guides](pc/software/)
 
 [<img src="http://static.pcjs.org/pubs/pc/datasheets/thumbs/8088-CPU.jpg" width="200" height="260" alt= "8088 CPU"/>](pc/datasheets/)
 [<img src="http://static.pcjs.org/pubs/pc/magazines/byte/BYTE-1975-11/thumbs/BYTE-1975-11 1.jpeg" width="200" height="260" alt= "Byte Magazine"/>](pc/magazines/byte/)
