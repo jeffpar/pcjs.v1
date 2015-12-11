@@ -1,8 +1,8 @@
 ---
 layout: post
-title:  Windows 95 In Your Web Browser
-date:   2015-09-21 11:00:00
-categories: windows-95 80386
+title: Windows 95 In Your Web Browser
+date: 2015-09-21 11:00:00
+category: Windows 95
 permalink: /blog/2015/09/21/
 machines:
   - type: pc-dbg

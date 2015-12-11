@@ -134,7 +134,7 @@ To convert PCjs' special links, such as:
 
 to normal Markdown links, search using this regex:
 
-	\!\[(.*?)\]\(([^ )]*) \"link:(.*?):([0-9]*):([0-9]*)\"\)
+	\!\[(.*?)\]\((.*?) \"link:(.*?):([0-9]*):([0-9]*)\"\)
 	
 and replace using this regex:
 

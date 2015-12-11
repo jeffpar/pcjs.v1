@@ -1,5 +1,5 @@
 {% for machine in page.machines %}
-  {% unless site.pcjs_compiled %}
+  {% unless site.pcjs_compiled == true and machine.uncompiled != true %}
     {% capture machine_style %}{{ site.baseurl }}/modules/{{ machine.type | remove:'-dbg' }}js/templates/components.css{% endcapture %}
   {% else %}
     {% capture machine_style %}{{ site.baseurl }}/versions/{{ machine.type | remove:'-dbg' }}js/{{ site.pcjs_version }}/components.css{% endcapture %}

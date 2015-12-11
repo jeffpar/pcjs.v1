@@ -1,8 +1,8 @@
 ---
 layout: post
-title:  Windows 95 and Early 80386 CPUs
-date:   2015-10-27 11:00:00
-categories: windows-95 80386
+title: Windows 95 and Early 80386 CPUs
+date: 2015-10-27 11:00:00
+categories: ['Windows 95', '80386']
 permalink: /blog/2015/10/27/
 ---
 

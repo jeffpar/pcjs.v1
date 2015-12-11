@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Compaq DeskPro 386 with VGA Display, 4Mb"
+title: "Compaq DeskPro 386 with VGA, 4Mb RAM"
 permalink: /devices/pc/machine/compaq/deskpro386/vga/4096kb/
 machines:
   - type: pc-dbg

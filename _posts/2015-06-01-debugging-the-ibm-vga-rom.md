@@ -1,8 +1,8 @@
 ---
 layout: post
-title:  Debugging the IBM VGA ROM
-date:   2015-06-01 11:00:00
-categories: video
+title: Debugging the IBM VGA ROM
+date: 2015-06-01 11:00:00
+category: Video
 permalink: /blog/2015/06/01/
 ---
 

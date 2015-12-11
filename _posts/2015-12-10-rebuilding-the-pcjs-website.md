@@ -1,8 +1,9 @@
 ---
 layout: post
-title:  Rebuilding the PCjs Website
-date:   2015-12-10 11:03:00
-categories: blog
+title: Rebuilding the PCjs Website
+date: 2015-12-10 11:03:00
+category: Website
+permalink: /blog/2015/12/10/
 ---
 
 It's been nice using Node.js to power the PCjs website, using Amazon's Elastic Beanstalk service, but that combination
@@ -67,9 +68,10 @@ the following values, depending on whether you want an IBM PC or Challenger 1P, 
 - c1p-dbg
 
 and `id` can be any identifier you want to use to embed the machine.  You may also use `config` to specify a machine XML
-configuration file if not using the default `machine.xml`, `template` to specify an alternate XSL template file if not
-using the default `components.xsl` file, and `state` to specify a JSON-encoded machine state file if the machine
-requires a predefined state.
+configuration file if not using the default `machine.xml`; `template` to specify an alternate XSL template file if not
+using the default `components.xsl` file; `state` to specify a JSON-encoded machine state file if the machine requires a
+predefined state; and `uncompiled` may be set to *true* to force a machine to use uncompiled sources, overriding the
+value of `site.pcjs_compiled` in **_config.yml**.
 
 For example, the PCjs home page contains two machines, and so this appears at the top of the root [README.md](https://raw.githubusercontent.com/jeffpar/pcjs/gh-pages/README.md):
 
@@ -84,3 +86,6 @@ For example, the PCjs home page contains two machines, and so this appears at th
 I will continue to include a Node web server with the PCjs project, but it remains to be seen whether I'll update the
 Node components to parse the new Jekyll "Front Matter" that's been added to all the Markdown files, or whether I'll leave
 leave the Node support as-is on the old "master" branch, and make the "gh-pages" the new default branch.
+
+*[@jeffpar](http://twitter.com/jeffpar)*  
+*December 10, 2015*

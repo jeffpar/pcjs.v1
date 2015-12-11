@@ -15,7 +15,7 @@
   {% else %}
     {% assign machine_state = machine.state %}
   {% endunless %}
-  {% if site.pcjs_compiled %}
+  {% if site.pcjs_compiled == true and machine.uncompiled != true %}
     {% capture machine_script %}<script type="text/javascript" src="{{ site.baseurl }}/versions/{{ machine.type | remove:'-dbg' }}js/{{ site.pcjs_version }}/{{ machine.type }}.js"></script>{% endcapture %}
     {% unless machine_scripts contains machine_script %}
       {{ machine_script }}

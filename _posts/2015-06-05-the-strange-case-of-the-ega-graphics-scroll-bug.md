@@ -1,8 +1,8 @@
 ---
 layout: post
-title:  The Strange Case of the EGA Graphics Scroll Bug
-date:   2015-06-05 11:00:00
-categories: video
+title: The Strange Case of the EGA Graphics Scroll Bug
+date: 2015-06-05 11:00:00
+category: Video
 permalink: /blog/2015/06/05/
 ---
 
