@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "BM PC AT (8Mhz), 128Kb EGA, 1152Kb RAM, 20Mb Hard Disk"
+title: "IBM PC AT (8Mhz), 128Kb EGA, 1152Kb RAM, 20Mb Hard Disk"
 permalink: /disks/pc/os2/misc/
 machines:
   - type: pc-dbg
