@@ -15,6 +15,12 @@ An assortment of PC-related publications, including:
 * [Reference Manuals](pc/reference/)
 * [Software User Guides](pc/software/)
 
+Publications related to the Challenger 1P are also available:
+
+* [Datasheets](c1p/datasheets/)
+* [Programming Guides/Samples](c1p/programming/)
+* [Reference Manuals](c1p/techref/)
+
 [<img src="http://static.pcjs.org/pubs/pc/datasheets/thumbs/8088-CPU.jpg" width="200" height="260" alt= "8088 CPU"/>](pc/datasheets/)
 [<img src="http://static.pcjs.org/pubs/pc/magazines/byte/BYTE-1975-11/thumbs/BYTE-1975-11 1.jpeg" width="200" height="260" alt= "Byte Magazine"/>](pc/magazines/byte/)
 [<img src="http://static.pcjs.org/pubs/pc/magazines/msj/MSJ-1986-10/thumbs/MSJ-1986-10 1.jpeg" width="200" height="260" alt= "Microsoft Systems Journal"/>](pc/magazines/msj/)

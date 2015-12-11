@@ -2,7 +2,7 @@ Paradise VGA Board: WDVGA PLUS 16
 ---
 This Paradise VGA board was manufactured in 1988 and sold by Western Digital Corporation as a **WDVGA PLUS 16**, Model No. 61-603023-02.
  
-![Paradise VGA Board](/devices/pc/video/paradise/vga/static/Paradise_VGA_1988-640.jpg "link:/devices/pc/video/paradise/vga/static/Paradise_VGA_1988.jpg")
+[<img src="http://static.pcjs.org/devices/pc/video/paradise/vga/Paradise_VGA_1988-640.jpg" alt="Paradise VGA Board"/>](http://static.pcjs.org/devices/pc/video/paradise/vga/Paradise_VGA_1988.jpg)
 
 A copy of the board's [ROM BIOS](1988-05-23.json) was created by [dumping](/devices/pc/bios/compaq/deskpro386/#dumping-the-roms)
 the contents of each of the board's two M27128AZB PROMs to a *.hex* file, and then merging the *.hex* files with the following

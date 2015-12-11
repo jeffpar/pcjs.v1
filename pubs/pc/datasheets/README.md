@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Datasheets
+title: PC Component Datasheets
 permalink: /pubs/pc/datasheets/
 ---
 

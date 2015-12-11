@@ -1,6 +1,12 @@
+---
+layout: page
+title: Challenger 1P Technical Reference Manuals
+permalink: /pubs/c1p/techref/
+---
+
 Challenger 1P Technical Reference Manuals
 ---
 
-![OSI BASIC-IN-ROM Manual](static/thumbs/OSI_BASIC-IN-ROM_Reference_Manual-thumb.jpg "link:static/pdfs/OSI_BASIC-IN-ROM_Reference_Manual.pdf:200:260")
-![OSI C1P Graphics Manual](static/thumbs/OSI_C1P_Character_Graphics_Reference_Manual-thumb.jpg "link:static/pdfs/OSI_C1P_Character_Graphics_Reference_Manual.pdf:200:260")
-![OSI C1P Users Manual](static/thumbs/OSI_C1P_Users_Manual-thumb.jpg "link:static/pdfs/OSI_C1P_Users_Manual.pdf:200:260")
+[<img src="http://static.pcjs.org/pubs/c1p/techref/thumbs/OSI_BASIC-IN-ROM_Reference_Manual-thumb.jpg" width="200" height="260" alt="OSI BASIC-IN-ROM Manual"/>](http://static.pcjs.org/pubs/c1p/techref/pdfs/OSI_BASIC-IN-ROM_Reference_Manual.pdf)
+[<img src="http://static.pcjs.org/pubs/c1p/techref/thumbs/OSI_C1P_Character_Graphics_Reference_Manual-thumb.jpg" width="200" height="260" alt="OSI C1P Graphics Manual"/>](http://static.pcjs.org/pubs/c1p/techref/pdfs/OSI_C1P_Character_Graphics_Reference_Manual.pdf)
+[<img src="http://static.pcjs.org/pubs/c1p/techref/thumbs/OSI_C1P_Users_Manual-thumb.jpg" width="200" height="260" alt="OSI C1P Users Manual"/>](http://static.pcjs.org/pubs/c1p/techref/pdfs/OSI_C1P_Users_Manual.pdf)

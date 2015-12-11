@@ -1,3 +1,9 @@
+---
+layout: page
+title: "Compaq Enhanced Color Graphics Board (EGA)"
+permalink: /devices/pc/video/compaq/ega/
+---
+
 Compaq Enhanced Color Graphics Board (EGA)
 ---
 
