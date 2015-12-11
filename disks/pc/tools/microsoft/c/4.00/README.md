@@ -213,6 +213,6 @@ Microsoft C Compiler v4.00
 
 [Manifest](manifest.xml) was updated using:
 
-	find -L static -name "*" -type f -exec node ../../../../../../modules/diskdump/bin/diskdump --format=json --output=. --manifest --disk={} \;
+	find -L static -name "*" -type f -exec node http://static.pcjs.org/../../modules/diskdump/bin/diskdump --format=json --output=. --manifest --disk={} \;
 
 The original diskettes are not part of the repository/website.

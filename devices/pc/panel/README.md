@@ -1,3 +1,9 @@
+---
+layout: page
+title: IBM PC Control Panels
+permalink: /devices/pc/panel/
+---
+
 IBM PC Control Panels
 ---
 

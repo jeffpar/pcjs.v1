@@ -1,3 +1,9 @@
+---
+layout: page
+title: Application Archives
+permalink: /apps/
+---
+
 Application Archives
 ---
 Browse classic [IBM PC](pc/) and [Challenger 1P](c1p/) software that you can run with [PCjs](/docs/about/pcjs/)

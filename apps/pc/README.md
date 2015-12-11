@@ -1,3 +1,9 @@
+---
+layout: page
+title: IBM PC Application Demos
+permalink: /apps/pc/
+---
+
 IBM PC Application Demos
 ---
 
@@ -15,7 +21,7 @@ Learn more about
 [Application Demos](https://github.com/jeffpar/pcjs/tree/master/apps/pc) in the
 [PCjs Project](https://github.com/jeffpar/pcjs) on [GitHub](https://github.com/).
 
-<!--BEGIN:EXCLUDE-->
+{% if page.developer %}
 
 ### Developer Notes: How To Produce A Demo
 
@@ -61,4 +67,5 @@ the &lt;machine&gt; entry in the [Manifest](1981/visicalc/manifest.xml):
 It's important to use a state file *only* with the machine configuration it was created with; in this case, we're OK,
 because the only difference between the two chosen Model 5150 machines is the addition of the Debugger.
 
-<!--END:EXCLUDE-->
+{% endif %}
+

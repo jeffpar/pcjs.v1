@@ -1,19 +1,25 @@
+---
+layout: page
+title: IBM PC Disk Archive
+permalink: /disks/pc/
+---
+
 IBM PC Disk Archive
 ---
 
 Below are selected Disk Sets featuring "Ready-to-Boot" machine configurations:
 
-* [IBM PC (Model 5150), MDA, 64K, CP/M-86</a>](/disks/pc/cpm/)
-* [IBM PC (Model 5150), MDA, 64K, IBM Diagnostics v2.20</a>](/disks/pc/diags/ibm/2.20/)
-* [IBM PC (Model 5150), CGA, 64K, Zork I</a>](/disks/pc/games/infocom/zork1/)
+* [IBM PC (Model 5150), MDA, 64K, CP/M-86](/disks/pc/cpm/)
+* [IBM PC (Model 5150), MDA, 64K, IBM Diagnostics v2.20](/disks/pc/diags/ibm/2.20/)
+* [IBM PC (Model 5150), CGA, 64K, Zork I](/disks/pc/games/infocom/zork1/)
 
 You can browse the rest of the disk archive by type.  There is no search capability at this time.
 
 Learn more about
-[Disk Sets](https://github.com/jeffpar/pcjs/tree/master/disks/pc) in the
+[Disk Sets](https://github.com/jeffpar/pcjs/tree/gh-pages/disks/pc) in the
 [PCjs Project](https://github.com/jeffpar/pcjs) on [GitHub](https://github.com/).
 
-<!--BEGIN:EXCLUDE-->
+{% if page.developer %}
 
 ### Developer Notes: Disk Sets and Manifests
 
@@ -84,4 +90,4 @@ or via the PCjs server's DiskDump API:
 
 Learn more about PCjs disk image formats [here](/disks/).
 
-<!--END:EXCLUDE-->
+{% endif %}
