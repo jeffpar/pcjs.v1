@@ -15,7 +15,7 @@ which hover around $34/month for a single instance.  With assorted S3 and transf
 over $55/month.  That's a bit much for a site that generates zero revenue.
 
 * Once or twice a year, when I'm attempting to either update the server or upgrade my Node configuration, the update
-or upgrade will fail, and Amazon's web console provides virtually no details about why it failed.  Iget an error message
+or upgrade will fail, and Amazon's web console provides virtually no details about why it failed.  I get an error message
 like "**ERROR: Failed to deploy application**" and that is it.  Literally.
 
 Granted, there are some "simple" things I could do to improve performance, like adding an **nginx** proxy server to
@@ -25,7 +25,7 @@ web server issues is time I'd much rather spend writing code.
 Since PCjs is designed to do all its work in the user's web browser, and since the website can be completely built out
 as a set of static web pages, I've decided to stop using Node to power www.pcjs.org.  I'm in the process of migrating
 the website to [GitHub Pages](https://pages.github.com/), and using [Jekyll](https://help.github.com/articles/using-jekyll-with-pages/)
-to convert all my existing Markdown files to static HTML pages.
+to convert all my existing Markdown files to HTML.
 
 This new approach is *very* similar to what the PCjs custom Node modules did: every time time someone visited a folder
 on the website that did not yet contain an "index.html", the PCjs Node server would create one, either by converting the
