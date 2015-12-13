@@ -8,6 +8,8 @@
 ]>
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
+	<xsl:output method="html"/>
+
 	<xsl:template name="commonStyles">
 		<meta charset="utf-8"/>
 		<link rel="shortcut icon" href="/versions/images/current/favicon.ico" type="image/x-icon"/>

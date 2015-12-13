@@ -403,6 +403,14 @@ function embedMachine(sName, sVersion, idElement, sXMLFile, sXSLFile, sStateFile
                             xsltProcessor['importStylesheet'](xsl);
                             var eFragment = xsltProcessor['transformToFragment'](xml, window.document);
                             if (eFragment) {
+                                /*
+                                 * This fails in Microsoft Edge...
+                                 *
+                                var machine = eFragment.getElementById(idElement);
+                                if (!machine) {
+                                    displayError("machine generation failed: " + idElement);
+                                } else
+                                */
                                 if (eMachine.parentNode) {
                                     eMachine.parentNode.replaceChild(eFragment, eMachine);
                                     doneMachine();

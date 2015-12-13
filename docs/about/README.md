@@ -1,7 +1,4 @@
----
-layout: page
-title: About JavaScript Machines
-permalink: /docs/about/
+About JavaScript Machines
 ---
 
 The JavaScript Machines Project (originally at [jsmachines.net](http://jsmachines.net/)) is a collection of computer
