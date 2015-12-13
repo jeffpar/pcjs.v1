@@ -1,3 +1,9 @@
+---
+layout: page
+title: Challenger 1P Disks
+permalink: /disks/c1p/
+---
+
 Challenger 1P Disks
 ---
 

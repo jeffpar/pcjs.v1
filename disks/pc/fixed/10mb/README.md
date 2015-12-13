@@ -1,5 +1,12 @@
+---
+layout: page
+title: 10Mb Disk Image with Windows 1.01
+permalink: /disks/pc/fixed/10mb/
+---
+
 10Mb Disk Image with Windows 1.01
 ---
+
 This folder contains a 10Mb hard disk image ([pcdos200-win101.json](pcdos200-win101.json)) with a Windows 1.01 installation.
 
 This disk image is used by various [Model 5160 CGA](/devices/pc/machine/5160/cga/) machine configurations.

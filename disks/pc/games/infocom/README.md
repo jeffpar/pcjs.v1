@@ -1,4 +1,13 @@
+---
+layout: page
+title: Infocom Games
+permalink: /disks/pc/games/infocom/
+machines:
+  - type: pc
+    id: ibm5150
+---
+
 Infocom Games
 ---
 
-[Infocom Games](machine.xml "PCjs:ibm5150")
+{% include machine.html id="ibm5150" %}

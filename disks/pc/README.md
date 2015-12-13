@@ -13,7 +13,7 @@ Below are selected Disk Sets featuring "Ready-to-Boot" machine configurations:
 * [IBM PC (Model 5150), MDA, 64K, IBM Diagnostics v2.20](/disks/pc/diags/ibm/2.20/)
 * [IBM PC (Model 5150), CGA, 64K, Zork I](/disks/pc/games/infocom/zork1/)
 
-The rest of our disk disk archive is listed below, organized by category.  There is no search capability at this time.
+The rest of our disk archive is available directly from the various [Machines](/devices/pc/machine/).
 
 ### PC-DOS (IBM)
 

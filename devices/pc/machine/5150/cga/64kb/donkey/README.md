@@ -1,4 +1,16 @@
-[IBM PC](machine.xml "PCjs:ibm5150")
+---
+layout: page
+title: IBM PC (Model 5150) running DONKEY.BAS
+permalink: /devices/pc/machine/5150/cga/64kb/donkey/
+machines:
+  - type: pc
+    id: ibm5150
+---
+
+IBM PC (Model 5150) running DONKEY.BAS
+---
+
+{% include machine.html id="ibm5150" %}
 
 The above simulation is configured for a clock speed of 4.77Mhz, with 64Kb of RAM and a CGA display,
 using the original IBM PC Model 5150 ROM BIOS and CGA font ROM.  This configuration also includes a

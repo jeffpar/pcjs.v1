@@ -1,5 +1,12 @@
+---
+layout: page
+title: "Paradise VGA Board: WDVGA PLUS 16"
+permalink: /devices/pc/video/paradise/vga/
+---
+
 Paradise VGA Board: WDVGA PLUS 16
 ---
+
 This Paradise VGA board was manufactured in 1988 and sold by Western Digital Corporation as a **WDVGA PLUS 16**, Model No. 61-603023-02.
  
 [<img src="http://static.pcjs.org/devices/pc/video/paradise/vga/Paradise_VGA_1988-640.jpg" alt="Paradise VGA Board"/>](http://static.pcjs.org/devices/pc/video/paradise/vga/Paradise_VGA_1988.jpg)

@@ -1,6 +1,7 @@
 ---
 layout: page
-title: IBM PC Application Demos
+title: Apps
+menu_order: 4
 permalink: /apps/pc/
 ---
 

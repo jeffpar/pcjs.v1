@@ -1,3 +1,9 @@
+---
+layout: page
+title: Compaq Portable III Information
+permalink: /devices/pc/bios/compaq/portable3/
+---
+
 Compaq Portable III Information
 ---
 
