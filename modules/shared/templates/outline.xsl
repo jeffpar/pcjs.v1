@@ -7,7 +7,7 @@
 ]>
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
-	<xsl:output doctype-system="about:legacy-compat"/>
+	<xsl:output doctype-system="about:legacy-compat" method="html"/>
 
 	<xsl:include href="common.xsl"/>
 	<xsl:include href="document.xsl"/>

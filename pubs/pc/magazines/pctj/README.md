@@ -9,6 +9,9 @@ PC Tech Journal
 
 (The nearly-complete collection!)
 
+We also have links to all the [Microsoft Languages NewsLetters](/disks/pc/tools/microsoft/) that were published
+in PC Tech Journal.
+
 [<img src="http://static.pcjs.org/pubs/pc/magazines/pctj/PCTJ-1983-07/thumbs/PCTJ-1983-07 1.jpeg" width="200" height="260" alt="PC Tech Journal, Jul 1983"/>](PCTJ-1983-07/)
 [<img src="http://static.pcjs.org/pubs/pc/magazines/pctj/PCTJ-1983-09/thumbs/PCTJ-1983-09 1.jpeg" width="200" height="260" alt="PC Tech Journal, Sep 1983"/>](PCTJ-1983-09/)
 [<img src="http://static.pcjs.org/pubs/pc/magazines/pctj/PCTJ-1983-11/thumbs/PCTJ-1983-11 1.jpeg" width="200" height="260" alt="PC Tech Journal, Nov 1983"/>](PCTJ-1983-11/)

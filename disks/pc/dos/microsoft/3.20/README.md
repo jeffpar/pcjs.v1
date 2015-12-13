@@ -1,3 +1,9 @@
+---
+layout: page
+title: MS-DOS 3.20
+permalink: /disks/pc/dos/microsoft/3.20/
+---
+
 MS-DOS 3.20
 ---
 

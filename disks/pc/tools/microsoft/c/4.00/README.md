@@ -1,3 +1,9 @@
+---
+layout: page
+title: Microsoft C Compiler v4.00
+permalink: /disks/pc/tools/microsoft/c/4.00/
+---
+
 Microsoft C Compiler v4.00
 ---
 
@@ -210,9 +216,3 @@ Microsoft C Compiler v4.00
 	CHELLO   DEF      311   7-18-86   4:00a
 	LHELLO   DEF      262   7-18-86   4:00a
 		   19 File(s)     11264 bytes free
-
-[Manifest](manifest.xml) was updated using:
-
-	find -L static -name "*" -type f -exec node http://static.pcjs.org/../../modules/diskdump/bin/diskdump --format=json --output=. --manifest --disk={} \;
-
-The original diskettes are not part of the repository/website.

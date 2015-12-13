@@ -4,6 +4,9 @@
 	<!-- XSLT understands these entities only: lt, gt, apos, quot, and amp.  Other required entities may be defined below (see http://www.pcjs.org/modules/shared/templates/entities.dtd). -->
 ]>
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+
+	<xsl:output method="html"/>
+
 	<xsl:param name="rootDir" select="''"/>
 	<xsl:param name="generator" select="'client'"/>
 
@@ -236,7 +239,7 @@
 				<xsl:otherwise/>
 			</xsl:choose>
 		</xsl:variable>
-		<h3 style="{$pos}"><xsl:apply-templates/></h3>
+		<h2 style="{$pos}"><xsl:apply-templates/></h2>
 	</xsl:template>
 
 	<xsl:template match="name" mode="component">

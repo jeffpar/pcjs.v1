@@ -9,11 +9,105 @@ IBM PC Disk Archive
 
 Below are selected Disk Sets featuring "Ready-to-Boot" machine configurations:
 
-* [IBM PC (Model 5150), MDA, 64K, CP/M-86](/disks/pc/cpm/)
+* [IBM PC (Model 5150), MDA, 64K, CP/M-86](/disks/pc/cpm/1.1b/)
 * [IBM PC (Model 5150), MDA, 64K, IBM Diagnostics v2.20](/disks/pc/diags/ibm/2.20/)
 * [IBM PC (Model 5150), CGA, 64K, Zork I](/disks/pc/games/infocom/zork1/)
 
-You can browse the rest of the disk archive by type.  There is no search capability at this time.
+The rest of our disk disk archive is listed below, organized by category.  There is no search capability at this time.
+
+### PC-DOS (IBM)
+
+* [PC-DOS 1.00](/disks/pc/dos/ibm/1.00/)
+* [PC-DOS 1.10](/disks/pc/dos/ibm/1.10/)
+* PC-DOS 2.00
+* PC-DOS 2.10
+* PC-DOS 3.00
+* PC-DOS 3.10
+* PC-DOS 3.20
+* PC-DOS 3.30
+* PC-DOS 4.00
+* PC-DOS 5.00
+* PC-DOS 6.10
+* PC-DOS 7.00
+
+### MS-DOS (Microsoft)
+
+* MS-DOS 1.25
+* MS-DOS 2.00
+* [MS-DOS 3.20](/disks/pc/dos/microsoft/3.20/)
+* MS-DOS 3.21
+* MS-DOS 3.30
+* MS-DOS 3.31
+* [MS-DOS 4.00](/disks/pc/dos/microsoft/4.00/)
+* [MS-DOS 4.01](/disks/pc/dos/microsoft/4.01/)
+* [MS-DOS 4.0M](/disks/pc/dos/microsoft/4.0M/)
+* MS-DOS 5.00
+* MS-DOS 6.00
+* MS-DOS 6.20
+* MS-DOS 6.22
+
+### Compaq DOS
+
+* Compaq DOS 3.10
+* Compaq DOS 3.31
+
+### OS/2
+
+* [IBM OS/2 1.0](/disks/pc/os2/ibm/1.0/)
+* IBM OS/2 1.1
+* IBM OS/2 1.3
+* Misc. OS/2 Files
+
+### Microsoft Windows
+
+* Microsoft Windows 1.01
+* Microsoft Windows 1.03
+* Microsoft Windows 1.03A
+* Microsoft Windows 1.04
+* Microsoft Windows 2.01
+* Microsoft Windows 2.03
+* Microsoft Windows 3.00
+* Microsoft Windows 3.11
+* Microsoft Windows 95
+
+### Non-DOS Operating Systems
+
+* Minix 1.1
+* PC/IX 1.0
+* [Microport's AT&T UNIX System V-AT 2.3](/disks/pc/unix/microport/system-v/2.3/)
+* [SCO Xenix 8086 Operating System v2.1.3](/disks/pc/xenix/sco/8086/2.1.3/)
+
+### Applications
+
+* Lotus 1-2-3 1.0A
+* Microsoft Chart 2.02
+* Microsoft Word 3.0
+* Microsoft Word 3.1
+* Microsoft Word 5.0
+* Microsoft Word for Windows 2.0C
+
+### Borland Tools
+* Borland Pascal 3.00B
+* Borland Pascal 3.01A
+
+### Microsoft Tools
+
+* Microsoft BASIC
+* [Microsoft C 4.00](/disks/pc/tools/microsoft/c/4.00/)
+* Microsoft MASM 4.00
+* Microsoft Mouse 5.00
+* Microsoft Windows SDK 1.01
+* Microsoft Windows SDK 1.03
+* Microsoft Windows SDK 1.04
+* Microsoft Windows SDK 2.03
+* Microsoft Windows SDK 3.00
+
+We also have links to all the [Microsoft Languages NewsLetters](/disks/pc/tools/microsoft/) that were published
+in [PC Tech Journal](/pubs/pc/magazines/pctj/).
+
+### Microsoft Games
+
+* Microsoft Flight Simulator
 
 Learn more about
 [Disk Sets](https://github.com/jeffpar/pcjs/tree/gh-pages/disks/pc) in the

@@ -1,9 +1,18 @@
+---
+layout: page
+title: PC-DOS 1.10
+permalink: /disks/pc/dos/ibm/1.10/
+machines:
+  - type: pc
+    id: ibm5150-pcdos110
+---
+
 PC-DOS 1.10
 ---
 
 The PCjs machine below is running PC-DOS 1.10.
 
-[IBM Model 5150](machine.xml "PCjs:ibm5150-pcdos110")
+{% include machine.html id="ibm5150-pcdos110" %}
 
 Vital Statistics
 ---

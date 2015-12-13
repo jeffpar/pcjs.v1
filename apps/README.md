@@ -93,8 +93,8 @@ be re-generated.
 
 ### Example: CP/M-86
 
-CPM-86 is stored as two disk images in a [/disks folder](/disks/pc/cpm/). The disk images are described in that
-folder's [manifest](/disks/pc/cpm/manifest.xml):
+CPM-86 is stored as two disk images in a [/disks folder](/disks/pc/cpm/1.1b/). The disk images are described in that
+folder's [manifest](/disks/pc/cpm/1.1b/manifest.xml):
 
 	<manifest>
 		<title>CP/M-86</title>
@@ -104,11 +104,11 @@ folder's [manifest](/disks/pc/cpm/manifest.xml):
 		<company href="http://en.wikipedia.org/wiki/Digital_Research">Digital Research</company>
 		<publisher href="http://en.wikipedia.org/wiki/Eagle_Computer">Eagle Computer</publisher>
 		<releaseDate>May 20, 1983</releaseDate>
-		<machine href="/disks/pc/cpm/machine.xml"/>
-		<disk id="disk01" href="/disks/pc/cpm/cpm86-disk1.json">
+		<machine href="/disks/pc/cpm/1.1b/machine.xml"/>
+		<disk id="disk01" href="/disks/pc/cpm/1.1b/cpm86-disk1.json">
 			<name>CP/M-86 (Disk 1)</name>
 		</disk>
-		<disk id="disk02" href="/disks/pc/cpm/cpm86-disk2.json">
+		<disk id="disk02" href="/disks/pc/cpm/1.1b/cpm86-disk2.json">
 			<name>CP/M-86 (Disk 2)</name>
 		</disk>
 	</manifest>
@@ -121,10 +121,10 @@ the disk images.
 
 If a machine file wanted to use only the first disk, then it would specify:
 
-	<manifest ref="/disks/pc/cpm/manifest.xml" disk="disk01"/>
+	<manifest ref="/disks/pc/cpm/1.1b/manifest.xml" disk="disk01"/>
 	
 and if it wanted to use all the disks listed in the manifest, it would specify:
 
-	<manifest ref="/disks/pc/cpm/manifest.xml" disk="*"/>
+	<manifest ref="/disks/pc/cpm/1.1b/manifest.xml" disk="*"/>
 
-which is what our [CP/M Machine Configuration](/disks/pc/cpm/machine.xml) does.
+which is what our [CP/M Machine Configuration](/disks/pc/cpm/1.1b/machine.xml) does.

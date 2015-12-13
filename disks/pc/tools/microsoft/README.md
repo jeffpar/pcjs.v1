@@ -1,7 +1,11 @@
-Microsoft Languages and Tools
+---
+layout: page
+title: Microsoft Languages and Tools
+permalink: /disks/pc/tools/microsoft/
 ---
 
-Browse an assortment of old Microsoft software development tools on the left.
+Microsoft Languages and Tools
+---
 
 Below are all the "Microsoft Languages NewsLetters" that Microsoft published in
 [PC Tech Journal](/pubs/pc/magazines/pctj/), before they decided to focus exclusively

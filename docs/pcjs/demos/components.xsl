@@ -3,12 +3,15 @@
 <!DOCTYPE xsl:stylesheet [
 ]>
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+
+	<xsl:output method="html"/>
+
 	<xsl:param name="rootDir" select="''"/>
 	<xsl:param name="generator" select="'client'"/>
 
 	<xsl:variable name="MACHINECLASS">pc</xsl:variable>
 	<xsl:variable name="APPCLASS">pcjs</xsl:variable>
-	<xsl:variable name="APPVERSION">1.20.1</xsl:variable>
+	<xsl:variable name="APPVERSION">1.20.2</xsl:variable>
 	<xsl:variable name="SITEHOST">www.pcjs.org</xsl:variable>
 
 	<xsl:template name="componentStyles">

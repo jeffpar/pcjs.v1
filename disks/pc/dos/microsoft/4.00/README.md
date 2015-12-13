@@ -1,9 +1,18 @@
+---
+layout: page
+title: MS-DOS 4.00
+permalink: /disks/pc/dos/microsoft/4.00/
+machines:
+  - type: pc
+    id: ibm5170-msdos400
+---
+
 MS-DOS 4.00
 ---
 
 The PCjs machine below is running PC-DOS 4.00.
 
-[IBM Model 5170](machine.xml "PCjs:ibm5170-msdos400")
+{% include machine.html id="ibm5170-msdos400" %}
 
 Vital Statistics
 ---

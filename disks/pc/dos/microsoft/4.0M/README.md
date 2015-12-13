@@ -1,3 +1,13 @@
+---
+layout: page
+title: Multitasking MS-DOS 4.00
+permalink: /disks/pc/dos/microsoft/4.0M/
+machines:
+  - type: pc-dbg
+    id: ibm5160
+    config: /devices/pc/machine/5160/cga/640kb/dos400m/machine.xml
+---
+
 Multitasking MS-DOS 4.00
 ---
 
@@ -14,7 +24,7 @@ differentiate these disk images from those of the official MS-DOS 4.00 release i
 The [IBM Model 5160](/devices/pc/machine/) machine configuration below boots MS-DOS 4.0M.  To access the MS-DOS
 "Session Manager" after it's booted, tap the **Alt** key.
 
-[IBM Model 5160](/devices/pc/machine/5160/cga/640kb/dos400m/ "PCjs:ibm5160:::debugger")
+{% include machine.html id="ibm5160" %}
 
 Additional Information From [PC DOS Retro](https://sites.google.com/site/pcdosretro/multitaskingdos4) by Vernon Brooks
 ---
