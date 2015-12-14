@@ -11,7 +11,7 @@ machines:
     uncompiled: true
 ---
 
-Most machines on [{{ site.pcjs_domain }}](/) run with a compiled version of PCjs, which is produced
+Most machines on [{{ site.pcjs.domain }}](/) run with a compiled version of PCjs, which is produced
 by running PCjs JavaScript source code through Google's Closure Compiler, yielding a smaller (minified)
 version that loads and runs much faster than the original source code.
 
@@ -21,7 +21,7 @@ or file location).  Once the BACKTRACK feature is finished, it will be folded in
 then, the only way to experiment with it is by running the uncompiled code.
 
 To make it easier to launch machines with uncompiled code, a PCjs machine definition can now set `uncompiled`
-to *true*, overriding the value of `site.pcjs_compiled` in **_config.yml**.
+to *true*, overriding the value of `site.pcjs.compiled` in **_config.yml**.
 
 Here's what a typical Markdown file would look like:
 

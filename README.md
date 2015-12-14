@@ -224,7 +224,7 @@ like a good little REPL.
 
 Use the "load" command to load a JSON machine configuration file.  A sample [ibm5150.json](modules/pcjs/bin/ibm5150.json)
 is provided in the *bin* directory, which is a "JSON-ified" version of the [machine.xml](devices/pc/machine/5150/mda/64kb/machine.xml)
-displayed on the [{{ site.pcjs_domain }}]({{ site.url }}/) home page.
+displayed on the [{{ site.pcjs.domain }}]({{ site.url }}/) home page.
 
 The command-line loader creates all the JSON-defined machine components in the same order that the browser creates
 XML-defined components.  You can also issue the "load" command directly from the command-line:
@@ -355,7 +355,7 @@ All published portions are free for redistribution and/or modification under the
 [GNU General Public License](/LICENSE) as published by the Free Software Foundation, either version 3 of the License,
 or (at your option) any later version.
 
-You are required to include the following copyright notice, with a link to [{{ site.pcjs_domain }}]({{ site.url }}/):
+You are required to include the following copyright notice, with a link to [{{ site.pcjs.domain }}]({{ site.url }}/):
 
 > [PCjs]({{ site.url }}/) © 2012-2015 by [Jeff Parsons](mailto:Jeff@pcjs.org) ([@jeffpar](http://twitter.com/jeffpar))
 

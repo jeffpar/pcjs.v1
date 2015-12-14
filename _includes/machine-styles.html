@@ -1,8 +1,8 @@
 {% for machine in page.machines %}
-  {% unless site.pcjs_compiled == true and machine.uncompiled != true %}
+  {% unless site.pcjs.compiled == true and machine.uncompiled != true %}
     {% capture machine_style %}{{ site.baseurl }}/modules/{{ machine.type | remove:'-dbg' }}js/templates/components.css{% endcapture %}
   {% else %}
-    {% capture machine_style %}{{ site.baseurl }}/versions/{{ machine.type | remove:'-dbg' }}js/{{ site.pcjs_version }}/components.css{% endcapture %}
+    {% capture machine_style %}{{ site.baseurl }}/versions/{{ machine.type | remove:'-dbg' }}js/{{ site.pcjs.version }}/components.css{% endcapture %}
   {% endunless %}
   {% unless machine_styles contains machine_style %}
 	<link rel="stylesheet" type="text/css" href="{{ machine_style }}">

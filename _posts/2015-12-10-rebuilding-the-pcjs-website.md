@@ -71,7 +71,7 @@ and `id` can be any identifier you want to use to embed the machine.  You may al
 configuration file if not using the default `machine.xml`; `template` to specify an alternate XSL template file if not
 using the default `components.xsl` file; `state` to specify a JSON-encoded machine state file if the machine requires a
 predefined state; and `uncompiled` may be set to *true* to force a machine to use uncompiled sources, overriding the
-value of `site.pcjs_compiled` in **_config.yml**.
+value of `site.pcjs.compiled` in **_config.yml**.
 
 For example, the PCjs home page contains two machines, and so this appears at the top of the root [README.md](https://raw.githubusercontent.com/jeffpar/pcjs/gh-pages/README.md):
 

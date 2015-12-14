@@ -15,18 +15,18 @@
   {% else %}
     {% assign machine_state = machine.state %}
   {% endunless %}
-  {% if site.pcjs_compiled == true and machine.uncompiled != true %}
-    {% capture machine_script %}<script type="text/javascript" src="{{ site.baseurl }}/versions/{{ machine.type | remove:'-dbg' }}js/{{ site.pcjs_version }}/{{ machine.type }}.js"></script>{% endcapture %}
+  {% if site.pcjs.compiled == true and machine.uncompiled != true %}
+    {% capture machine_script %}<script type="text/javascript" src="{{ site.baseurl }}/versions/{{ machine.type | remove:'-dbg' }}js/{{ site.pcjs.version }}/{{ machine.type }}.js"></script>{% endcapture %}
     {% unless machine_scripts contains machine_script %}
       {{ machine_script }}
     {% endunless %}
     {% capture machine_scripts %}{{ machine_scripts }}{{ machine_script }}{% endcapture %}
     {% if machine_template == '' %}
-      {% capture machine_template %}{{ site.baseurl }}/versions/{{ machine.type | remove:'-dbg' }}js/{{ site.pcjs_version }}/components.xsl{% endcapture %}
+      {% capture machine_template %}{{ site.baseurl }}/versions/{{ machine.type | remove:'-dbg' }}js/{{ site.pcjs.version }}/components.xsl{% endcapture %}
     {% endif %}
   {% else %}
-    {% if machine.type == "pc" or machine.type == "pc-dbg" %}{% assign array_scripts = site.pcjs_scripts %}{% endif %}
-    {% if machine.type == "c1p" or machine.type == "c1p-dbg" %}{% assign array_scripts = site.c1pjs_scripts %}{% endif %}
+    {% if machine.type == "pc" or machine.type == "pc-dbg" %}{% assign array_scripts = site.pcjs.pc_scripts %}{% endif %}
+    {% if machine.type == "c1p" or machine.type == "c1p-dbg" %}{% assign array_scripts = site.pcjs.c1p_scripts %}{% endif %}
     {% for script in array_scripts %}
       {% capture machine_script %}<script type="text/javascript" src="{{ site.baseurl }}{{ script }}"></script>{% endcapture %}
       {% unless machine_scripts contains machine_script %}
