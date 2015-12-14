@@ -1,6 +1,5 @@
 ---
 layout: page
-title: PCjs
 permalink: /
 developer: false
 machines:

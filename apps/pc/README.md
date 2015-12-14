@@ -1,11 +1,12 @@
 ---
 layout: page
-title: Apps
+title: Application Archive
+menu_title: Apps
 menu_order: 4
 permalink: /apps/pc/
 ---
 
-IBM PC Application Demos
+IBM PC Application Archive
 ---
 
 Below are selected demos of classic IBM PC applications running on [PCjs](/docs/about/pcjs/).

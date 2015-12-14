@@ -1,11 +1,12 @@
 ---
 layout: page
-title: Pubs
+title: Publication Archive
+menu_title: Pubs
 menu_order: 7
 permalink: /pubs/
 ---
 
-Publications
+Publication Archive
 ---
 An assortment of PC-related publications, including:
 

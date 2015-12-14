@@ -1,6 +1,7 @@
 ---
 layout: page
-title: Docs
+title: Documentation
+menu_title: Docs
 menu_order: 6
 permalink: /docs/
 ---

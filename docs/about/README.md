@@ -1,6 +1,7 @@
 ---
 layout: page
-title: About
+title: JavaScript Machines
+menu_title: About
 menu_order: 10
 permalink: /docs/about/
 ---

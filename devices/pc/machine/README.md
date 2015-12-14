@@ -1,6 +1,7 @@
 ---
 layout: page
-title: Machines
+title: Machine Configurations
+menu_title: Machines
 menu_order: 5
 permalink: /devices/pc/machine/
 ---
