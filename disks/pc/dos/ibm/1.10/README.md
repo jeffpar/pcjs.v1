@@ -65,7 +65,8 @@ CHKDSK reports:
 	      144384 bytes in 26 user files 
 	        7168 bytes available on disk
 
-Additional details from [PC DOS Retro](https://sites.google.com/site/pcdosretro/doshist):
+Additional Information From [PC DOS Retro](https://sites.google.com/site/pcdosretro/doshist)
+---
 
 - distributed on 1 160KB floppy disk
 - double-sided 320KB floppy disk support added
@@ -75,4 +76,4 @@ Additional details from [PC DOS Retro](https://sites.google.com/site/pcdosretro/
 - new external command: EXE2BIN
 - INT 21h functions 1Ch, 1Fh, 2Eh added
 
-See [PC-DOS 1.10 Documentation](../../../../../pubs/pc/software/dos/PCDOS110/) for more information.
+See [PC-DOS 1.10 Documentation](/pubs/pc/software/dos/PCDOS110/) for more information.

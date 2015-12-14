@@ -71,7 +71,8 @@ CHKDSK reports:
 	      160256 bytes total disk space
 	        6144 bytes remain available
 
-Additional details from [PC DOS Retro](https://sites.google.com/site/pcdosretro/doshist):
+Additional Information From [PC DOS Retro](https://sites.google.com/site/pcdosretro/doshist)
+---
 
 - distributed on 1 160KB floppy disk
 - initial release (equivalent to 86-DOS 1.14)
@@ -101,4 +102,4 @@ Additional details from [PC DOS Retro](https://sites.google.com/site/pcdosretro/
 - CP/M CALL 0 interface (executes INT 20h)
 - CP/M CALL 5 interface supporting INT 21h functions 00h-24h
 
-See [PC-DOS 1.00 Documentation](../../../../../pubs/pc/software/dos/PCDOS100/) for more information.
+See [PC-DOS 1.00 Documentation](/pubs/pc/software/dos/PCDOS100/) for more information.

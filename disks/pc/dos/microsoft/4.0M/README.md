@@ -19,14 +19,14 @@ More information is available at
 [MSDN Blogs](http://blogs.msdn.com/b/larryosterman/archive/2004/03/22/94209.aspx).
 
 Note: The designation "4.0M" is not an official version number; it's an internal version number used only to
-differentiate these disk images from those of the official MS-DOS 4.00 release in July 1988. 
+differentiate these disk images from those of the official MS-DOS 4.00 release in October 1988.
 
 The [IBM Model 5160](/devices/pc/machine/) machine configuration below boots MS-DOS 4.0M.  To access the MS-DOS
 "Session Manager" after it's booted, tap the **Alt** key.
 
 {% include machine.html id="ibm5160" %}
 
-Additional Information From [PC DOS Retro](https://sites.google.com/site/pcdosretro/multitaskingdos4) by Vernon Brooks
+Additional Information From [PC DOS Retro](https://sites.google.com/site/pcdosretro/multitaskingdos4)
 ---
 
 Multitasking MS-DOS 4.0 was a little known and separate development of DOS done in parallel with the development
