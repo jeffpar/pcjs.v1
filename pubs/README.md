@@ -29,4 +29,3 @@ Publications related to the Challenger 1P are also available:
 [<img src="http://archive.pcjs.org/pubs/pc/reference/ibm/5150/techref/1981-08/thumbs/IBM-5150-TECHREF 1.jpeg" width="200" height="260" alt= "IBM 5150 Technical Reference (August 1981)"/>](pc/reference/ibm/)
 [<img src="http://archive.pcjs.org/pubs/pc/reference/intel/80286/progref/thumbs/80286_and_80287_Programmers_Reference_Manual_1987 1.jpeg" width="200" height="260" alt= "80286 and 80287 Programmer's Reference"/>](pc/reference/intel/)
 [<img src="http://archive.pcjs.org/pubs/pc/software/dos/PCDOS100/thumbs/PCDOS100.jpg" width="200" height="260" alt= "IBM PC Disk Operating System v1.00"/>](pc/software/)
-[<img src="http://archive.pcjs.org/pubs/pc/software/dos/PCDOS110/thumbs/PCDOS110.jpg" width="200" height="260" alt= "IBM PC Disk Operating System v1.10"/>](pc/software/)
