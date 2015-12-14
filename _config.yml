@@ -7,8 +7,8 @@ description: >
   Classic computer simulations in JavaScript.
   Includes an archive of historical PC software and publications.
   Additional computer simulations in JavaScript include the 6502-based Ohio Scientifc Challenger 1P.
-baseurl: ""             # "/pcjs" when using http://jeffpar.github.io or "" when using http://pcjs.net 
-url: "http://pcjs.net"  # "http://jeffpar.github.io" or "http://pcjs.net"
+baseurl: ""             # "/pcjs" when using http://jeffpar.github.io or "" when using http://pcjs.org 
+url: "http://www.pcjs.org"  # "http://jeffpar.github.io" or "http://pcjs.org"
 twitter_username: jeffpar
 github_username:  jeffpar
 
@@ -23,7 +23,7 @@ kramdown:
 # Custom site settings
 
 pcjs:
-  domain: pcjs.net    # whereas site.url is used for linking purposes, site.pcjs.domain is used for display purposes
+  domain: pcjs.org    # whereas site.url is used for linking purposes, site.pcjs.domain is used for display purposes
   version: 1.20.2     # IMPORTANT: Keep pcjs.version in sync with package.json:version
   compiled: true      # By default, the compiled pcjs.version scripts will be used (eg, pc.js or pc-dbg.js)
   pc_scripts:         # If pcjs.compiled is false, the following scripts will be included instead, in the order listed
