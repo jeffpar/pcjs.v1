@@ -158,6 +158,12 @@ Although I created image.html in the **_includes** folder, so that I could do th
 
 instead of this:
 
-	[<img src="{{ site.baseurl }}/devices/pc/machine/5150/cga/64kb/donkey/thumbnail.jpg" width="200" height="100"/>](/devices/pc/machine/5150/cga/64kb/donkey/ "IBM PC running DONKEY.BAS")
+	[<img src="/devices/pc/machine/5150/cga/64kb/donkey/thumbnail.jpg" width="200" height="100"/>](/devices/pc/machine/5150/cga/64kb/donkey/ "IBM PC running DONKEY.BAS")
 
 I decided to stick with the latter, since it has a better chance of rendering as normal Markdown.
+
+Technically, the URLs in the latter should include:
+
+	{{ site.baseurl }}
+
+but since I'm using a custom domain name (http://pcjs.net instead of http://jeffpar.github.io/pcjs), it's not necessary.
