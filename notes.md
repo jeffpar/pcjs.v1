@@ -152,18 +152,12 @@ to:
 Jekyll "Cheat Sheet"
 ===
 
-Although I created image.html in the **_includes** folder, so that I could do this:
+I created screenshot.html in the **_includes** folder, so that I could do this:
 
-	{% include image.html src="/devices/pc/machine/5150/cga/64kb/donkey/thumbnail.jpg" width="200" height="100" link="/devices/pc/machine/5150/cga/64kb/donkey/" alt="IBM PC running DONKEY.BAS" %}
+	{% include screenshot.html src="/devices/pc/machine/5150/cga/64kb/donkey/thumbnail.jpg" width="200" height="100" link="/devices/pc/machine/5150/cga/64kb/donkey/" title="IBM PC running DONKEY.BAS" %}
 
 instead of this:
 
 	[<img src="/devices/pc/machine/5150/cga/64kb/donkey/thumbnail.jpg" width="200" height="100"/>](/devices/pc/machine/5150/cga/64kb/donkey/ "IBM PC running DONKEY.BAS")
 
-I decided to stick with the latter, since it has a better chance of rendering as normal Markdown.
-
-Technically, the URLs in the latter should include:
-
-	{{ site.baseurl }}
-
-but since I'm using a custom domain name (http://pcjs.net instead of http://jeffpar.github.io/pcjs), it's not necessary.
+The latter is better for pure Markdown environments, but the former enables Jekyll to properly style screenshots.
