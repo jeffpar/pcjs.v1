@@ -160,9 +160,8 @@ If necessary, you can also reverse the process, converting a JSON disk image bac
 
 	http://localhost:8088/api/v1/dump?disk=http://www.pcjs.org/disks/pc/dos/ibm/1.00/PCDOS100.json&format=img
 
-Although PCjs will accept IMG disk image files, it must call the [DiskDump API](/api/v1/dump)
-to convert the image every time it's loaded, so it's *much* faster and more efficient to use pre-converted
-JSON-encoded disk images.
+Although PCjs will accept IMG disk image files, it must call the **DiskDump API** to convert the image
+every time it's loaded, so it's *much* faster and more efficient to use pre-converted JSON-encoded disk images.
 
 Remember that PC and PC XT machines supported only 160Kb diskettes (on any version of PC-DOS),
 320Kb diskettes (on PC-DOS 1.1 and higher), and 180Kb and 360Kb diskettes (on PC-DOS 2.0 and higher).
