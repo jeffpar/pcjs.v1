@@ -1403,7 +1403,7 @@ FDC.prototype.doneLoadDiskette = function onFDCLoadNotify(drive, disk, sDiskette
 FDC.prototype.addDiskette = function(sName, sPath)
 {
     var controlDisks = this.bindings["listDisks"];
-    if (controlDisks) {
+    if (controlDisks && controlDisks.options) {
         for (var i = 0; i < controlDisks.options.length; i++) {
             if (controlDisks.options[i].value == sPath) return;
         }
@@ -1433,7 +1433,7 @@ FDC.prototype.displayDiskette = function(iDrive, fUpdateDrive)
         /*
          * Next, make sure controls for both drives and disks exist.
          */
-        if (controlDisks && controlDrives) {
+        if (controlDisks && controlDrives && controlDisks.options && controlDrives.options) {
             /*
              * Next, make sure the drive whose disk we're updating is the currently selected drive.
              */

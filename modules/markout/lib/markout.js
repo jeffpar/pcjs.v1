@@ -349,19 +349,20 @@ MarkOut.prototype.convertMD = function(sIndent)
     sMD = sMD.replace(/<!--[\s\S]*?-->/g, "");
 
     /*
-     * If the Markdown begins with a triple-dash, we assume there's a "Front Matter" header at the
-     * top of the file that we don't want to output, either.  One wrinkle: we assume that if a
-     * "title" element exists in the Front Matter, then we should auto-generate a top-level heading
-     * with the same value.
+     * If the Markdown begins with a triple-dash, see if there's a "Front Matter" header at the
+     * top of the file that we should suppress.
      */
     if (sMD.substr(0, 3) == "---") {
         aMatch = sMD.match(/^---([\s\S]*?)---[ \t]*\n*/);
         if (aMatch) {
             sMD = sMD.replace(aMatch[0], "");
-            aMatch = aMatch[1].match(/title:\s*(.*?)\s*?\n/);
-            if (aMatch) {
-                sMD = aMatch[1] + "\n---\n\n" + sMD;
-            }
+            /*
+             * If a "title" element existed in the Front Matter, then you can enable this code to
+             * auto-generate a top-level heading with the same value.
+             *
+             *      aMatch = aMatch[1].match(/title:\s*(.*?)\s*?\n/);
+             *      if (aMatch) sMD = aMatch[1] + "\n---\n\n" + sMD;
+            */
         }
     }
 
