@@ -1,3 +1,9 @@
+---
+layout: page
+title: DiskDump
+permalink: /modules/diskdump/
+---
+
 DiskDump
 ===
 

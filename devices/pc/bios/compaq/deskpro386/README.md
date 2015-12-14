@@ -88,7 +88,7 @@ The `-o0x8000` argument is required to "org" the file at the proper starting add
 are optional; they simply establish a few sync points within the ROM image that save a little cleanup effort, by
 preventing disassembly in the middle of instructions.
 
-Next, the PCjs [TextOut](/modules/textout/lib/) command, with the *--nasm* option, prepares the code for reassembly:
+Next, the PCjs [TextOut](/modules/textout/) command, with the *--nasm* option, prepares the code for reassembly:
 
 	node ../../../../../../modules/textout/bin/textout --file=1988-01-28.nasm --nasm > temp.nasm
 	mv temp.nasm 1988-01-28.nasm

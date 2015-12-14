@@ -31,9 +31,9 @@ should contain the following information about the software:
 - Machine (reference to PCjs machine.xml file capable of loading/running the software)
 - Disk(s) (one or more entries describing sets of files and/or disk images)
 
-The distinctions made by Type and Category are a bit aribitrary and likely to change.  For now,
-Type is merely a reflection of how we initially filed the software (eg, under [/diags](/disks/pc/diags/),
-[/games](/disks/pc/games/), [/tools](/disks/pc/tools/), etc), while Category provides more detail.
+The distinctions made by Type and Category are a bit arbitrary and likely to change.  For now,
+Type is merely a reflection of how we initially filed the original [disks](/disks/pc/), while Category
+provides more detail.
 
 ### Example: VisiCalc
 
@@ -72,7 +72,7 @@ which refers to the &lt;disk&gt; entry in the VisiCalc manifest -- which brings 
 Since that &lt;disk&gt; entry is just a reference to a folder, PCjs must first convert it to a disk image,
 using the following API request:
 
-	http://www.pcjs.org/api/v1/dump?path=/apps/pc/1981/visicalc/bin/VC.COM;../README.md&format=json
+	http://localhost:8088/api/v1/dump?path=/apps/pc/1981/visicalc/bin/VC.COM;../README.md&format=json
 
 The PCjs DiskDump module processes the dump request and generates a JSON-encoded DOS 2.x-compatible disk image
 containing all the specified files.
