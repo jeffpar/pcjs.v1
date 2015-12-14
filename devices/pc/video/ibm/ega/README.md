@@ -15,4 +15,4 @@ The symbol information in the MAP file will be automatically converted and appen
 
 The PCjs server's Dump API can be used as well:
 
-	http://www.pcjs.org/api/v1/dump?file=http://static.pcjs.org/devices/pc/video/ibm/ega/ibm-ega.rom&format=bytes&decimal=true
+	http://www.pcjs.org/api/v1/dump?file=http://archive.pcjs.org/devices/pc/video/ibm/ega/ibm-ega.rom&format=bytes&decimal=true

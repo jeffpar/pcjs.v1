@@ -25,8 +25,8 @@ Aside from the additional DMA Controller, other major new motherboard components
 The Keyboard Controller and Real-Time Clock/CMOS components required the most tinkering to pass through the ROM BIOS
 gauntlet.
 
-For example, at one point, the BIOS ("[TEST.21](http://static.pcjs.org/pubs/pc/reference/ibm/5170/techref/1984-03/pages/IBM-5170-TECHREF 202.pdf)")
-reset the keyboard ("[KBD_RESET](http://static.pcjs.org/pubs/pc/reference/ibm/5170/techref/1984-03/pages/IBM-5170-TECHREF 212.pdf)"),
+For example, at one point, the BIOS ("[TEST.21](http://archive.pcjs.org/pubs/pc/reference/ibm/5170/techref/1984-03/pages/IBM-5170-TECHREF 202.pdf)")
+reset the keyboard ("[KBD_RESET](http://archive.pcjs.org/pubs/pc/reference/ibm/5170/techref/1984-03/pages/IBM-5170-TECHREF 212.pdf)"),
 which unmasked the keyboard IRQ and waited for an interrupt, using a loop where CX was initialized to zero and then
 decremented until either CX wrapped around to zero again *or* an interrupt occurred.  The "TEST.21" code then assumed
 that if "KBD_RESET" returned zero in CX, no interrupt had occurred.

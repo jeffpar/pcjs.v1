@@ -9,7 +9,7 @@ Compaq DeskPro 386 ROMs
 The oldest Compaq DeskPro 386 ROM I have is a Rev J.4 ROM from a "Version 2" motherboard designed
 in 1987 and released in 1988.
 
-[<img src="http://static.pcjs.org/pubs/pc/reference/compaq/images/Compaq_DeskPro_386-16_System_Board_V2-640.jpg" alt="Compaq DeskPro 386 System Board Version 2"/>](http://static.pcjs.org/pubs/pc/reference/compaq/images/Compaq_DeskPro_386-16_System_Board_V2.jpg)
+[<img src="http://archive.pcjs.org/pubs/pc/reference/compaq/images/Compaq_DeskPro_386-16_System_Board_V2-640.jpg" alt="Compaq DeskPro 386 System Board Version 2"/>](http://archive.pcjs.org/pubs/pc/reference/compaq/images/Compaq_DeskPro_386-16_System_Board_V2.jpg)
 
 Thanks to folks on the [Vintage Computer](http://www.vintage-computer.com/) forums, I also have a Rev N.1 ROM from 1989.
 
@@ -62,10 +62,10 @@ prototyping board, and capturing the serial port output on my MacBook Pro -- as 
 "[Stick a Straw in Its Brain and Suck: How to Read a ROM](http://www.nycresistor.com/2012/07/07/stick-a-straw-in-its-brain-and-suck-how-to-read-a-rom/)"
 by [NYC Resistor](http://www.nycresistor.com/) contributor [phooky](http://www.nycresistor.com/author/phooky/).
 
-The DeskPro 386 ROMs were P27128A-2 chips, so I wired my Uno32 based on this [27128A](http://static.pcjs.org/pubs/pc/datasheets/27128A.pdf)
+The DeskPro 386 ROMs were P27128A-2 chips, so I wired my Uno32 based on this [27128A](http://archive.pcjs.org/pubs/pc/datasheets/27128A.pdf)
 datasheet -- the closest match I could find online.
 
-![<img src="http://static.pcjs.org/pubs/pc/reference/compaq/images/Compaq_DeskPro_386-16_System_ROM_V2_Breadboard-640.jpg" alt="Compaq DeskPro 386 System ROM Version 2"/>](http://static.pcjs.org/pubs/pc/reference/compaq/images/Compaq_DeskPro_386-16_System_ROM_V2_Breadboard.jpg)
+![<img src="http://archive.pcjs.org/pubs/pc/reference/compaq/images/Compaq_DeskPro_386-16_System_ROM_V2_Breadboard-640.jpg" alt="Compaq DeskPro 386 System ROM Version 2"/>](http://archive.pcjs.org/pubs/pc/reference/compaq/images/Compaq_DeskPro_386-16_System_ROM_V2_Breadboard.jpg)
 
 On my first dump attempt, every ROM address returned 0xFF.  After looking at the 27128A datasheet more closely, I noticed
 the DEVICE OPERATION table indicated that, for a READ operation, /CE and /OE pins should be connected to INPUT LOW VOLTAGE,
