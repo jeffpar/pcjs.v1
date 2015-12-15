@@ -12,8 +12,8 @@ machines:
 ---
 
 Welcome to [PCjs](/docs/about/pcjs/), the first IBM PC simulation to run in your web browser without any plugins.
-It was added to the [JavaScript Machines](/docs/about/) project in Fall 2012, and is now part of the
-[PCjs GitHub](https://github.com/jeffpar/pcjs) project.  The project includes:
+It was added to the [JavaScript Machines](/docs/about/) project in Fall 2012, and it is now part of the
+[PCjs Project](https://github.com/jeffpar/pcjs/tree/gh-pages) on GitHub.  The project includes:
 
 * [PCjs](/docs/about/pcjs/), a simulation of the original IBM PC (circa 1981)
 * [C1Pjs](/docs/c1pjs/), a simulation of the OSI Challenger 1P (circa 1978)

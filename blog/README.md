@@ -6,7 +6,7 @@ menu_order: 2
 permalink: /blog/
 ---
 
-Keep tabs on the [PCjs GitHub](https://github.com/jeffpar/pcjs/tree/gh-pages) project's [Releases](https://github.com/jeffpar/pcjs/releases), [Issues](https://github.com/jeffpar/pcjs/issues),
+Keep tabs on the [PCjs Project](https://github.com/jeffpar/pcjs/tree/gh-pages) on GitHub: [Releases](https://github.com/jeffpar/pcjs/releases), [Issues](https://github.com/jeffpar/pcjs/issues),
 and [Commits](https://github.com/jeffpar/pcjs/commits/gh-pages).
 
 For random musings about PCjs, web technologies, old hardware and software, and more, read on.

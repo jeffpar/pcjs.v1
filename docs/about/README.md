@@ -10,7 +10,7 @@ permalink: /docs/about/
 
 The JavaScript Machines Project (originally at [jsmachines.net](http://jsmachines.net/)) is a collection of computer
 simulations written in JavaScript.  It has now been released on [GitHub](https://github.com/) as the
-[PCjs Project](https://github.com/jeffpar/pcjs), a copy of which is hosted here at [{{ site.pcjs.domain }}]({{ site.url }}/).
+[PCjs Project](https://github.com/jeffpar/pcjs/tree/gh-pages), a copy of which is hosted here at [{{ site.pcjs.domain }}]({{ site.url }}/).
 
 The goals of the project are to create fast, full-featured simulations of classic computer
 hardware, help people understand how these early machines worked, make it easy to experiment with different machine
