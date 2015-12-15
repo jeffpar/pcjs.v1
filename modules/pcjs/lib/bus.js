@@ -39,7 +39,6 @@ if (NODE) {
     var Memory      = require("./memory");
     var Messages    = require("./messages");
     var State       = require("./state");
-    var X86         = require("./x86");
 }
 
 /**
@@ -768,7 +767,7 @@ Bus.prototype.getLong = function(addr)
  * @this {Bus}
  * @param {number} addr is a physical address
  * @return {number} long (32-bit) value at that address
- */
+ *
 Bus.prototype.getLongDirect = function(addr)
 {
     var off = addr & this.nBlockLimit;
@@ -776,12 +775,12 @@ Bus.prototype.getLongDirect = function(addr)
     if (off < this.nBlockLimit - 2) {
         return this.aMemBlocks[iBlock].readLongDirect(off, addr);
     }
-    /*
-     * I think the previous version of this function tried to be too clever (ie, reading the last
-     * long in the current block and the first long in the next block and masking/combining the results),
-     * which may have also created some undesirable side-effects for custom memory controllers.
-     * This simpler (and probably more reliable) approach is to simply read the long as individual bytes.
-     */
+    //
+    // I think the previous version of this function tried to be too clever (ie, reading the last
+    // long in the current block and the first long in the next block and masking/combining the results),
+    // which may have also created some undesirable side-effects for custom memory controllers.
+    // This simpler (and probably more reliable) approach is to simply read the long as individual bytes.
+    //
     var l = 0;
     var cb = 4, nShift = 0;
     var cbBlock = 4 - (off & 0x3);    // (off & 0x3) will be 1, 2 or 3, so cbBlock will be 3, 2, or 1
@@ -795,6 +794,7 @@ Bus.prototype.getLongDirect = function(addr)
     }
     return l;
 };
+ */
 
 /**
  * setByte(addr, b)
@@ -912,7 +912,7 @@ Bus.prototype.setLong = function(addr, l)
  * @this {Bus}
  * @param {number} addr is a physical address
  * @param {number} l is the long (32-bit) value to write
- */
+ *
 Bus.prototype.setLongDirect = function(addr, l)
 {
     var off = addr & this.nBlockLimit;
@@ -921,12 +921,12 @@ Bus.prototype.setLongDirect = function(addr, l)
         this.aMemBlocks[iBlock].writeLongDirect(off, l, addr);
         return;
     }
-    /*
-     * I think the previous version of this function tried to be too clever (ie, reading and rewriting
-     * the last long in the current block, and then reading and rewriting the first long in the next
-     * block), which may have also created some undesirable side-effects for custom memory controllers.
-     * This simpler (and probably more reliable) approach is to simply write the long as individual bytes.
-     */
+    //
+    // I think the previous version of this function tried to be too clever (ie, reading and rewriting
+    // the last long in the current block, and then reading and rewriting the first long in the next
+    // block), which may have also created some undesirable side-effects for custom memory controllers.
+    // This simpler (and probably more reliable) approach is to simply write the long as individual bytes.
+    //
     var cb = 4;
     var cbBlock = 4 - (off & 0x3);    // (off & 0x3) will be 1, 2 or 3, so cbBlock will be 3, 2, or 1
     while (cb--) {
@@ -938,6 +938,7 @@ Bus.prototype.setLongDirect = function(addr, l)
         l >>>= 8;
     }
 };
+ */
 
 /**
  * addBackTrackObject(obj, bto, off)
@@ -1207,11 +1208,12 @@ Bus.prototype.getBackTrackObject = function(bti)
  * @this {Bus}
  * @param {number} addr
  * @return {Object|null}
- */
+ *
 Bus.prototype.getBackTrackObjectFromAddr = function(addr)
 {
     return BACKTRACK? this.getBackTrackObject(this.readBackTrack(addr)) : null;
 };
+ */
 
 /**
  * getBackTrackInfo(bti, fSymbol, fNearest)
@@ -1247,11 +1249,12 @@ Bus.prototype.getBackTrackInfo = function(bti, fSymbol, fNearest)
  * @this {Bus}
  * @param {number} addr
  * @return {string|null}
- */
+ *
 Bus.prototype.getBackTrackInfoFromAddr = function(addr)
 {
     return BACKTRACK? this.getBackTrackInfo(this.readBackTrack(addr)) : null;
 };
+ */
 
 /**
  * getSymbol(addr, fNearest)

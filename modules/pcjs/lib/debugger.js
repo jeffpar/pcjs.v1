@@ -40,7 +40,6 @@ if (DEBUGGER) {
         var Component   = require("../../shared/lib/component");
         var Interrupts  = require("./interrupts");
         var Messages    = require("./messages");
-        var Bus         = require("./bus");
         var Memory      = require("./memory");
         var Keyboard    = require("./keyboard");
         var State       = require("./state");
@@ -124,7 +123,6 @@ function Debugger(parmsDbg)
          * updated by initBus().
          */
         this.cchReg = 4;
-        this.maskReg = 0xffff;
         this.cchAddr = 5;
         this.maskAddr = 0xfffff;
 
@@ -1464,10 +1462,7 @@ if (DEBUGGER) {
                  * pre-80286 CPUs.  But at least I'm being up front about it.
                  */
                 this.aaOpDescs[0x0F] = Debugger.aOpDesc0F;
-                if (I386 && this.cpu.model >= X86.MODEL_80386) {
-                    this.cchReg = 8;
-                    this.maskReg = 0xffffffff|0;
-                }
+                if (I386 && this.cpu.model >= X86.MODEL_80386) this.cchReg = 8;
             }
         }
 
@@ -1857,7 +1852,6 @@ if (DEBUGGER) {
          */
         Debugger.prototype.intWindowsDebuggerRM = function(addr)
         {
-            var dbgAddr;
             var cpu = this.cpu;
             var AL = cpu.regEAX & 0xff;
             var AH = (cpu.regEAX >> 8) & 0xff;
@@ -2936,7 +2930,7 @@ if (DEBUGGER) {
         var blockPTE = bus.aMemBlocks[(addrPTE & bus.nBusMask) >>> bus.nBlockShift];
         var lPTE = blockPTE.readLong(offPTE);
         var addrPhys = (lPTE & X86.PTE.FRAME) + (addr & X86.LADDR.OFFSET);
-        var blockPhys = bus.aMemBlocks[(addrPhys & bus.nBusMask) >>> bus.nBlockShift];
+        //var blockPhys = bus.aMemBlocks[(addrPhys & bus.nBusMask) >>> bus.nBlockShift];
         /*
          * And here ends the code that is remarkably similar to mapPageBlock(), with fSuppress set.
          */
@@ -6960,7 +6954,6 @@ if (DEBUGGER) {
     Debugger.prototype.doMouse = function(sAction, sDelta)
     {
         if (this.mouse) {
-            var xDelta = 0, yDelta = 0;
             var sign = 1;
             if (sDelta.charAt(0) == '-') {
                 sign = -1;
@@ -7753,7 +7746,6 @@ if (DEBUGGER) {
 
         while (cb > 0 && n--) {
 
-            var bOpcode = this.getByte(dbgAddr);
             var addr = dbgAddr.addr;
             var nSequence = (this.isBusy(false) || this.nStep)? this.nCycles : null;
             var sComment = (nSequence != null? "cycles" : null);

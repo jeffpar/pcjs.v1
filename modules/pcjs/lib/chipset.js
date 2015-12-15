@@ -2830,7 +2830,7 @@ ChipSet.prototype.outDMAPageSpare = function(iSpare, port, bOut, addrFrom)
  * Called by the CPU whenever INTR.DMA is set.
  *
  * @return {boolean} true if one or more async DMA channels are still active (unmasked), false to reset INTR.DMA
- */
+ *
 ChipSet.prototype.checkDMA = function()
 {
     var fActive = false;
@@ -2846,6 +2846,7 @@ ChipSet.prototype.checkDMA = function()
     }
     return fActive;
 };
+ */
 
 /**
  * connectDMA(iDMAChannel, component, sFunction, obj)

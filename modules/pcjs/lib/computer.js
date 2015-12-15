@@ -33,8 +33,8 @@
 /*
  * BUILD INSTRUCTIONS
  *
- * To build PCjs (pc.js), run Google's Closure Compiler, replacing "*.js" with
- * the input file sequence defined by the "pcJSFiles" property in package.json:
+ * To build PCjs (pc.js), run Google's Closure Compiler, replacing "*.js" with the input file sequence defined
+ * by the "pcJSFiles" property in package.json:
  *
  *      java -jar compiler.jar
  *          --compilation_level ADVANCED_OPTIMIZATIONS
@@ -43,23 +43,19 @@
  *          --js *.js
  *          --js_output_file pc.js
  *
- * Google's Closure Compiler (compiler.jar) is documented at
- * https://developers.google.com/closure/compiler/ and is available
- * for download here:
+ * Google's Closure Compiler (compiler.jar) is documented at https://developers.google.com/closure/compiler/
+ * and is available for download here:
  *
  *      http://closure-compiler.googlecode.com/files/compiler-latest.zip
  *
- * The PCjs JavaScript files do have some initialization-order dependencies.
- * If you load the files individually, it's recommended that you load them in
- * the same order that they're compiled.
+ * The PCjs JavaScript files do have some initialization-order dependencies.  If you load the files individually,
+ * it's recommended that you load them in the same order that they're compiled.
  *
- * Generally speaking, component.js should be first, computer.js should be
- * last (of the files based on component.js), and panel.js should be listed
- * early so that the Control Panel is ready as soon as possible.
+ * Generally speaking, component.js should be first, computer.js should be last (of the files based on component.js),
+ * and panel.js should be listed early so that the Control Panel is ready as soon as possible.
  *
- * Another recent ordering requirement is that rom.js must be loaded before
- * ram.js; this was true before, but now it's required, because I'm starting
- * to add ROM BIOS Data Area definitions to rom.js, and since the data area
+ * Another recent ordering requirement is that rom.js must be loaded before ram.js; this was true before, but now
+ * it's required, because I'm starting to add ROM BIOS Data Area definitions to rom.js, and since the data area
  * is in RAM, ram.js may want access to some of those definitions.
  */
 

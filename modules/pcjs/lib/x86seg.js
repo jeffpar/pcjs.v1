@@ -35,7 +35,6 @@
 if (NODE) {
     var str         = require("../../shared/lib/strlib");
     var Messages    = require("./messages");
-    var Memory      = require("./memory");
     var X86         = require("./x86");
 }
 
@@ -528,7 +527,7 @@ X86Seg.prototype.checkWriteDebugger = function checkWriteDebugger(off, cb)
  * @param {number} sel (protected-mode only)
  * @param {boolean} [fGDT] is true if sel must be in the GDT
  * @return {number} ACC field from descriptor, or X86.DESC.ACC.INVALID if error
- */
+ *
 X86Seg.prototype.loadAcc = function(sel, fGDT)
 {
     var addrDT;
@@ -551,6 +550,7 @@ X86Seg.prototype.loadAcc = function(sel, fGDT)
     X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel & X86.ERRCODE.SELMASK);
     return X86.DESC.ACC.INVALID;
 };
+ */
 
 /**
  * loadDesc6(addrDesc, sel)
