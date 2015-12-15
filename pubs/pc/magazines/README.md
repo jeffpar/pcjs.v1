@@ -6,7 +6,7 @@ permalink: /pubs/pc/magazines/
 
 Magazines
 ---
-Browser our collection of PC-related magazines.
+Browse our collection of PC-related magazines.
 
 [<img src="http://archive.pcjs.org/pubs/pc/magazines/byte/BYTE-1975-11/thumbs/BYTE-1975-11 1.jpeg" width="200" height="260" alt= "Byte Magazine"/>](byte/)
 [<img src="http://archive.pcjs.org/pubs/pc/magazines/msj/MSJ-1986-10/thumbs/MSJ-1986-10 1.jpeg" width="200" height="260" alt= "Microsoft Systems Journal"/>](msj/)
