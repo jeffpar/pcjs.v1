@@ -41,7 +41,6 @@ if (NODE) {
     var Component   = require("../../shared/lib/component");
     var State       = require("./state");
     var X86         = require("./x86");
-    var X86Seg      = require("./x86seg");
 }
 
 /*
@@ -283,7 +282,6 @@ X86FPU.prototype.restore = function(data)
 X86FPU.prototype.resetFPU = function()
 {
     this.regUsed = 0;           // bits 0-7 are set as regs 0-7 are used
-    this.regTags = 0xffff;      // this is updated only as needed by getTags()
     this.regControl = X86.FPU.CONTROL.INIT;
     this.regStatus = 0;         // contains all status register bits EXCEPT for ST
     this.iST = 0;               // the ST bits for regStatus are actually stored here
@@ -344,7 +342,7 @@ X86FPU.prototype.isAtLeastModel = function(model)
  * @param {number} min (inclusive)
  * @param {number} max (inclusive)
  * @return {number}
- */
+ *
 X86FPU.prototype.getRandomInt = function(min, max)
 {
     max -= min;
@@ -354,6 +352,7 @@ X86FPU.prototype.getRandomInt = function(min, max)
     }
     return Math.floor(Math.random() * (max + 1)) + min;
 };
+ */
 
 /**
  * opStop(fError)

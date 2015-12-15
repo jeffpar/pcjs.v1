@@ -37,7 +37,6 @@ if (NODE) {
     var web         = require("../../shared/lib/weblib");
     var Component   = require("../../shared/lib/component");
     var Messages    = require("./messages");
-    var Bus         = require("./bus");
     var Memory      = require("./memory");
     var State       = require("./state");
     var CPU         = require("./cpu");
@@ -1301,7 +1300,7 @@ X86CPU.prototype.zeroSeg = function(seg)
  *
  * @this {X86CPU}
  * @param {number} size (2 for 2-byte/16-bit operands, or 4 for 4-byte/32-bit operands)
- */
+ *
 X86CPU.prototype.setAddrSize = function(size)
 {
     if (this.sizeAddr != size) {
@@ -1311,6 +1310,7 @@ X86CPU.prototype.setAddrSize = function(size)
         this.updateAddrSize();
     }
 };
+ */
 
 /**
  * updateAddrSize()
@@ -3643,7 +3643,7 @@ X86CPU.prototype.getIPShort = function()
  *
  * @this {X86CPU}
  * @return {number} long at the current IP; IP advanced by 4
- */
+ *
 X86CPU.prototype.getIPLong = function()
 {
     var l = (PREFETCH? this.getLongPrefetch() : this.getLong(this.regLIP));
@@ -3656,6 +3656,7 @@ X86CPU.prototype.getIPLong = function()
     this.advanceIP(4);
     return l;
 };
+ */
 
 /**
  * getIPAddr()

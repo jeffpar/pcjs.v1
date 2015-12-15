@@ -2200,7 +2200,6 @@ X86.fnPUSHw = function(dst, src)
 X86.fnRCLb = function(dst, src)
 {
     var result = dst;
-    var flagsIn = (DEBUG? this.getPS() : 0);
     var count = src & this.nShiftCountMask;
     if (count) {
         var carry = this.getCarry();
@@ -2227,7 +2226,6 @@ X86.fnRCLb = function(dst, src)
 X86.fnRCLw = function(dst, src)
 {
     var result = dst;
-    var flagsIn = (DEBUG? this.getPS() : 0);
     var count = src & this.nShiftCountMask;
     if (count) {
         var carry = this.getCarry();
@@ -2254,7 +2252,6 @@ X86.fnRCLw = function(dst, src)
 X86.fnRCLd = function(dst, src)
 {
     var result = dst;
-    var flagsIn = (DEBUG? this.getPS() : 0);
     var count = src & this.nShiftCountMask;     // this 32-bit-only function could mask with 0x1f directly
     if (count) {
         var carry = this.getCarry();
@@ -2281,7 +2278,6 @@ X86.fnRCLd = function(dst, src)
 X86.fnRCRb = function(dst, src)
 {
     var result = dst;
-    var flagsIn = (DEBUG? this.getPS() : 0);
     var count = src & this.nShiftCountMask;
     if (count) {
         var carry = this.getCarry();
@@ -2308,7 +2304,6 @@ X86.fnRCRb = function(dst, src)
 X86.fnRCRw = function(dst, src)
 {
     var result = dst;
-    var flagsIn = (DEBUG? this.getPS() : 0);
     var count = src & this.nShiftCountMask;
     if (count) {
         var carry = this.getCarry();
@@ -2335,7 +2330,6 @@ X86.fnRCRw = function(dst, src)
 X86.fnRCRd = function(dst, src)
 {
     var result = dst;
-    var flagsIn = (DEBUG? this.getPS() : 0);
     var count = src & this.nShiftCountMask;     // this 32-bit-only function could mask with 0x1f directly
     if (count) {
         var carry = this.getCarry();
@@ -2416,7 +2410,6 @@ X86.fnRETF = function(n)
 X86.fnROLb = function(dst, src)
 {
     var result = dst;
-    var flagsIn = (DEBUG? this.getPS() : 0);
     var count = src & this.nShiftCountMask;
     if (count) {
         var carry;
@@ -2443,7 +2436,6 @@ X86.fnROLb = function(dst, src)
 X86.fnROLw = function(dst, src)
 {
     var result = dst;
-    var flagsIn = (DEBUG? this.getPS() : 0);
     var count = src & this.nShiftCountMask;
     if (count) {
         var carry;
@@ -2470,7 +2462,6 @@ X86.fnROLw = function(dst, src)
 X86.fnROLd = function(dst, src)
 {
     var result = dst;
-    var flagsIn = (DEBUG? this.getPS() : 0);
     var count = src & this.nShiftCountMask;
     if (count) {
         var carry = dst << (count - 1);
@@ -2491,7 +2482,6 @@ X86.fnROLd = function(dst, src)
 X86.fnRORb = function(dst, src)
 {
     var result = dst;
-    var flagsIn = (DEBUG? this.getPS() : 0);
     var count = src & this.nShiftCountMask;
     if (count) {
         var carry;
@@ -2518,7 +2508,6 @@ X86.fnRORb = function(dst, src)
 X86.fnRORw = function(dst, src)
 {
     var result = dst;
-    var flagsIn = (DEBUG? this.getPS() : 0);
     var count = src & this.nShiftCountMask;
     if (count) {
         var carry;
@@ -2545,7 +2534,6 @@ X86.fnRORw = function(dst, src)
 X86.fnRORd = function(dst, src)
 {
     var result = dst;
-    var flagsIn = (DEBUG? this.getPS() : 0);
     var count = src & this.nShiftCountMask;
     if (count) {
         var carry = dst << (32 - count);
@@ -2974,7 +2962,6 @@ X86.fnSGDT = function(dst, src)
 X86.fnSHLb = function(dst, src)
 {
     var result = dst;
-    var flagsIn = (DEBUG? this.getPS() : 0);
     var count = src & this.nShiftCountMask;
     if (count) {
         var carry = 0;
@@ -3000,7 +2987,6 @@ X86.fnSHLb = function(dst, src)
 X86.fnSHLw = function(dst, src)
 {
     var result = dst;
-    var flagsIn = (DEBUG? this.getPS() : 0);
     var count = src & this.nShiftCountMask;
     if (count) {
         var carry = 0;
@@ -3026,7 +3012,6 @@ X86.fnSHLw = function(dst, src)
 X86.fnSHLd = function(dst, src)
 {
     var result = dst;
-    var flagsIn = (DEBUG? this.getPS() : 0);
     var count = src & this.nShiftCountMask;     // this 32-bit-only function could mask with 0x1f directly
     if (count) {
         var carry = dst << (count - 1);

@@ -779,6 +779,15 @@ MarkOut.prototype.convertMDLines = function(s)
  */
 MarkOut.prototype.convertMDLinks = function(sBlock)
 {
+    /*
+     * Before we start replacing Markdown links, see if there are any Liquid-style replacements
+     * (in case this Markdown file is part of a Jekyll installation) and remove them.
+     *
+     * TODO: These replacements should use appropriate values from _config.yml; however, unless/until
+     * we start using Node again to host the public site, that's low priority.
+     */
+    sBlock = sBlock.replace(/\{([\{%]).*?\1}/, "");
+
     var aMatch;
     var re = /\[([^\[\]]*)]\((.*?)(?:\s*"(.*?)"\)|\))/g;
     while ((aMatch = re.exec(sBlock))) {
