@@ -14,7 +14,7 @@ github_username:  jeffpar
 
 # Build settings
 
-exclude: ["logs", "node_modules", "static", "tmp", "web"]
+exclude: ["logs", "node_modules", "**/static", "src", "tmp", "videos", "web"]
 markdown: kramdown
 
 kramdown:
