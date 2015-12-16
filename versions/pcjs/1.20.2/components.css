@@ -9,10 +9,6 @@
 .pcjs-embed:after {
     clear:both;
 }
-.pcjs-machine {
-    padding-right: 16px;
-    padding-bottom: 16px;
-}
 .pcjs-name, .pcjs-menu {
     clear: both;
     font-weight: bold;

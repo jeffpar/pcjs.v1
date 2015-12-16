@@ -1,16 +1,9 @@
+About JavaScript Machines
 ---
-layout: page
-title: JavaScript Machines
-menu_title: About
-menu_order: 10
-permalink: /docs/about/
----
-
-## About JavaScript Machines
 
 The JavaScript Machines Project (originally at [jsmachines.net](http://jsmachines.net/)) is a collection of computer
 simulations written in JavaScript.  It has now been released on [GitHub](https://github.com/) as the
-[PCjs Project](https://github.com/jeffpar/pcjs/tree/gh-pages), a copy of which is hosted here at [{{ site.pcjs.domain }}]({{ site.url }}/).
+[PCjs Project](https://github.com/jeffpar/pcjs), a copy of which is hosted here at [pcjs.org](http://www.pcjs.org/).
 
 The goals of the project are to create fast, full-featured simulations of classic computer
 hardware, help people understand how these early machines worked, make it easy to experiment with different machine
@@ -29,7 +22,7 @@ The first JavaScript Machines simulation was [C1Pjs](/docs/c1pjs/), a simulation
 Challenger 1P, which was a 6502-based microcomputer introduced by Ohio Scientific in 1978.
 
 C1Pjs v1.0 was released in July 2012, first on ecpsim.org and cpusim.org, then on [jsmachines.net](http://jsmachines.net/c1pjs),
-and finally [{{ site.pcjs.domain }}]({{ site.url }}/). More information about the first release of C1Pjs was also 
+and finally [pcjs.org](http://www.pcjs.org/). More information about the first release of C1Pjs was also 
 [posted](http://osiweb.org/osiforum/viewtopic.php?f=3&t=103) on the [OSI Discussion Forum](http://osiweb.org/osiforum/index.php)
 at [osiweb.org](http://osiweb.org/).
 
@@ -53,8 +46,8 @@ Read [About PCjs](/docs/about/pcjs/) to learn more about its history, features, 
 
 ### Migrating to Node: The PCjs Project
 
-The JavaScript Machines Project was migrated to a [Node.js](http://nodejs.org) web server in 2014, and became the
-PCjs Project.
+The JavaScript Machines Project was migrated to a [Node.js](http://nodejs.org) web server ([pcjs.org](http://www.pcjs.org/))
+in 2014, and became the PCjs Project.
 
 The goals included:
 
@@ -76,9 +69,9 @@ All published portions are free for redistribution and/or modification under the
 [GNU General Public License](/LICENSE) as published by the Free Software Foundation, either version 3 of the License,
 or (at your option) any later version.
 
-You are required to include the following copyright notice, with a link to [{{ site.pcjs.domain }}]({{ site.url }}/):
+You are required to include the following copyright notice, with a link to [http://pcjs.org]():
 
-> [PCjs]({{ site.url }}/) © 2012-2015 by [Jeff Parsons](mailto:Jeff@pcjs.org) ([@jeffpar](http://twitter.com/jeffpar))
+> [PCjs](http://pcjs.org) © 2012-2015 by [Jeff Parsons](mailto:Jeff@pcjs.org) ([@jeffpar](http://twitter.com/jeffpar))
 
 in every source code file of every copy or modified version of this work, and to display that notice on every web page
 or computer that runs any version of this software.

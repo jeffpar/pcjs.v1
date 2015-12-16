@@ -110,9 +110,8 @@ function MarkOut(sMD, sIndent, req, aParms, fDebug)
     }
     this.fDebug = fDebug;
     this.sHTML = null;
-    this.aIDs = [];         // this keeps track of auto-generated ID attributes for page elements, to insure uniqueness
-    this.aMachines = [];    // this keeps track of embedded machines on the page
-    this.aMachineDefs = {}; // this keeps track of any machine definitions at the top of the file (as part of any Jekyll "Front Matter")
+    this.aIDs = [];         // this keeps tracks of auto-generated ID attributes for page elements, to insure uniqueness
+    this.aMachines = [];    // this keeps tracks of embedded machines on the page
 }
 
 /*
@@ -356,40 +355,14 @@ MarkOut.prototype.convertMD = function(sIndent)
     if (sMD.substr(0, 3) == "---") {
         aMatch = sMD.match(/^---([\s\S]*?)---[ \t]*\n*/);
         if (aMatch) {
-            /*
-             * Remove the Front Matter.
-             */
             sMD = sMD.replace(aMatch[0], "");
-            /*
-             * Extract machine definitions, if any, from the Front Matter.
-             */
-            var aMachineDefs = aMatch[1].match(/\nmachines:([\s\S]*?)\n([^\s]|$)/);
-            if (aMachineDefs) {
-                var asMachines = aMachineDefs[1].split(/\n[ \t]+-\s*/);
-                for (var iMachine = 0; iMachine < asMachines.length; iMachine++) {
-                    if (!asMachines[iMachine]) continue;
-                    var id = null;
-                    var aOptions, machine = {};
-                    var reOption = /([^\s]+):\s*([^\n]*)/g;
-                    while (aOptions = reOption.exec(asMachines[iMachine])) {
-                        if (!id && aOptions[1] == "id") {
-                            id = aOptions[2];
-                        }
-                        else {
-                            machine[aOptions[1]] = aOptions[2];
-                        }
-                    }
-                    if (id) this.aMachineDefs[id] = machine;
-                }
-            }
             /*
              * If a "title" element existed in the Front Matter, then you can enable this code to
              * auto-generate a top-level heading with the same value.
              *
              *      aMatch = aMatch[1].match(/title:\s*(.*?)\s*?\n/);
              *      if (aMatch) sMD = aMatch[1] + "\n---\n\n" + sMD;
-             */
-
+            */
         }
     }
 
@@ -779,15 +752,6 @@ MarkOut.prototype.convertMDLines = function(s)
  */
 MarkOut.prototype.convertMDLinks = function(sBlock)
 {
-    /*
-     * Before we start replacing Markdown links, see if there are any Liquid-style replacements
-     * (in case this Markdown file is part of a Jekyll installation) and remove them.
-     *
-     * TODO: These replacements should use appropriate values from _config.yml; however, unless/until
-     * we start using Node again to host the public site, that's low priority.
-     */
-    sBlock = sBlock.replace(/\{([\{%]).*?\1}/, "");
-
     var aMatch;
     var re = /\[([^\[\]]*)]\((.*?)(?:\s*"(.*?)"\)|\))/g;
     while ((aMatch = re.exec(sBlock))) {
@@ -829,24 +793,6 @@ MarkOut.prototype.convertMDLinks = function(sBlock)
 MarkOut.prototype.convertMDImageLinks = function(sBlock, sIndent)
 {
     /*
-     * Before we start looking for Markdown-style image links, see if there are any Liquid-style images,
-     * (in case this Markdown file is part of a Jekyll installation) and convert them to Markdown-style links.
-     */
-    var aMatch;
-    var reIncludes = /\{%\s*include screenshot\.html\s+(.*?)\s*%}/g;
-
-    while ((aMatch = reIncludes.exec(sBlock))) {
-        var option, aOptions = {};
-        var reOptions = /([^\s]+)=(['"])(.*?)\2/g;
-        while ((option = reOptions.exec(aMatch[1]))) {
-            aOptions[option[1]] = option[3];
-        }
-        var sReplacement = "![" + aOptions['title'] + "](" + aOptions['src'] + ' "link:' + aOptions['link'] + ':' + aOptions['width'] + ':' + aOptions['height'] + '")';
-        sBlock = sBlock.replace(aMatch[0], sReplacement);
-        reIncludes.lastIndex = 0;       // reset lastIndex, since we just modified the string that reIncludes is iterating over
-    }
-
-    /*
      * Look for image links of the form ![...](...) and convert them.  We do this before processing non-image
      * ("normal") links, since the only difference in syntax is the presence of a preceding exclamation point (!).
      *
@@ -854,6 +800,7 @@ MarkOut.prototype.convertMDImageLinks = function(sBlock, sIndent)
      * a special "link:" prefix; if that prefix is present, we will wrap the image with the URL following that prefix,
      * and then wrap THAT with the special image classes, if any, that we were given at initialization.
      */
+    var aMatch;
     var cImageLinks = 0;
     var fNoGallery = false;
     var sBlockOrig = sBlock;
@@ -943,101 +890,76 @@ MarkOut.prototype.convertMDImageLinks = function(sBlock, sIndent)
 /**
  * convertMDMachineLinks(sBlock)
  *
- * Before we call convertMDLinks() to process any normal Markdown-style links, we first look for our own
- * special flavor of "machine" Markdown links; ie:
- *
- *      [IBM PC](/devices/pc/machine/5150/mda/64kb/ "PCjs:demoPC:stylesheet:version:options:state")
- *
- * where a special title attribute triggers generation of an embedded machine rather than a link.
- *
- * Use "PCjs" or "C1Pjs" to automatically include the latest version of either "pc.js" or "c1p.js", followed
- * by a colon and the ID you want to use for the embedded <div>.  If you need to use the script with the built-in
- * Debugger (ie, either "pc-dbg.js" or "c1p-dbg.js"), then include "debugger" in the list of comma-delimited
- * options, as in:
- *
- *      [IBM PC](/devices/pc/machine/5150/mda/64kb/ "PCjs:demoPC:::debugger")
- *
- * If the link ends with a slash, then it's an implied reference to a "machine.xml".
- *
- * Granted, there are a number of things we could be smarter about.  First, you probably don't care about the
- * ID for the <div>; it's purely a mechanism for telling the script where to embed the machine, so we could
- * auto-generate an ID for you, but on the other hand, there might actually be situations where you want to style
- * the machine a certain way, or interact with it from another script, so having a known ID can be a good thing.
- *
- * Second, if we know we're running on the same server as the machine XML file in the link, we could crack
- * that file open right now, see if it includes a <debugger>, and automatically include the appropriate script,
- * without requiring the user to specify that.  And in fact, that's exactly what the "machine.xsl" stylesheet
- * does: it calls componentScripts() with the appropriate script based on the presence of a <debugger> element
- * in the XML file.  That's similar to what getMachineXML() in htmlout.js does, when it's loading a "machine.xml".
- *
- * We don't have the XML file open here, and I don't think it's worth the hit to open it.  Besides, the XML
- * config file isn't necessarily on the same server (although whenever this script is being used, it very likely is).
- *
- * TODO: Consider cracking open the XML file anyway, even though the Markdown module is supposed to be non-blocking;
- * I'd like to be smarter about defaults (eg, specifying "debugger" when the XML file clearly needs it).
- *
  * @this {MarkOut}
  * @param {string} sBlock
  * @return {string}
  */
 MarkOut.prototype.convertMDMachineLinks = function(sBlock)
 {
-    var aMatch, sReplacement;
-    var sMachine, sMachineID, sMachineXMLFile, sMachineXSLFile, sMachineVersion, sMachineOptions, sMachineState;
-
     /*
-     * Before we start looking for Markdown-style machine links, see if there are any Liquid-style machines,
-     * (in case this Markdown file is part of a Jekyll installation) and convert them to Markdown-style links.
+     * Before we call convertMDLinks() to process any normal Markdown-style links, we first
+     * look for our own special flavor of "machine" Markdown links; ie:
+     *
+     *      [IBM PC](/devices/pc/machine/5150/mda/64kb/ "PCjs:demoPC:stylesheet:version:options:state")
+     *
+     * where a special title attribute triggers generation of an embedded machine rather than
+     * a link.  Use "PCjs" or "C1Pjs" to automatically include the latest version of either
+     * "pc.js" or "c1p.js", followed by a colon and the ID you want to use for the embedded <div>.
+     * If you need to use the script with the built-in Debugger (ie, either "pc-dbg.js" or
+     * "c1p-dbg.js"), then include "debugger" in the list of comma-delimited options, as in:
+     *
+     *      [IBM PC](/devices/pc/machine/5150/mda/64kb/ "PCjs:demoPC:::debugger")
+     *
+     * If the link ends with a slash, then it's an implied reference to a "machine.xml".
+     *
+     * Granted, there are a number of things we could be smarter about.  First, you probably
+     * don't care about the ID for the <div>; it's purely a mechanism for telling the script
+     * where to embed the machine, so we could auto-generate an ID for you, but on the other hand,
+     * there might actually be situations where you want to style the machine a certain way, or
+     * interact with it from another script, so having a known ID can be a good thing.
+     *
+     * Second, if we know we're running on the same server as the machine XML file in the link,
+     * we could crack that file open right now, see if it includes a <debugger>, and automatically
+     * include the appropriate script, without requiring the user to specify that.  And in fact,
+     * that's exactly what the "machine.xsl" stylesheet does: it calls componentScripts() with the
+     * appropriate script based on the presence of a <debugger> element in the XML file.  That's
+     * similar to what getMachineXML() in htmlout.js does, when it's loading a "machine.xml".
+     *
+     * We don't have the XML file open here, and I don't think it's worth the hit to open it.
+     * Besides, the XML config file isn't necessarily on the same server (although whenever this
+     * script is being used, it very likely is).
+     *
+     * TODO: Consider cracking open the XML file anyway, even though the Markdown module is supposed
+     * to be non-blocking; I'd like to be smarter about defaults (eg, specifying "debugger" when the
+     * XML file clearly needs it).
      */
-    var reIncludes = /\{%\s*include machine\.html\s+id="(.*?)"\s*%}/g;
-
-    while ((aMatch = reIncludes.exec(sBlock))) {
-        sMachineID = aMatch[1];
-        sReplacement = "[Embedded PC]";
-        if (this.aMachineDefs[sMachineID]) {
-            var machine = this.aMachineDefs[sMachineID];
-            sMachine = machine['type'] || "pc";
-            sMachineOptions = (sMachine.indexOf("-dbg") > 0? "debugger" : "");
-            sMachine = sMachine.replace("-dbg", "").toUpperCase();
-            sMachineXMLFile = machine['config'] || "machine.xml";
-            sMachineXSLFile = machine['template'] || "";
-            sMachineVersion = (machine['uncompiled'] && machine['uncompiled'] == "true"? "uncompiled" : "");
-            sMachineState = machine['state'] || "";
-            sReplacement += "(" + sMachineXMLFile + ' "' + sMachine + 'js:' + sMachineID + ':' + sMachineXSLFile + '::' + sMachineOptions + ':' + sMachineState + '")';
-        }
-        sBlock = sBlock.replace(aMatch[0], sReplacement);
-        reIncludes.lastIndex = 0;       // reset lastIndex, since we just modified the string that reIncludes is iterating over
-    }
-
-    /*
-     * Start looking for Markdown-style machine links now...
-     */
+    var aMatch;
     var cMatches = 0;
     var reMachines = /\[(.*?)]\((.*?)\s*"(PC|C1P)js:(.*?)"\)/gi;
 
     while ((aMatch = reMachines.exec(sBlock))) {
 
-        sMachineXMLFile = aMatch[2];
+        var sMachineXMLFile = aMatch[2];
         if (sMachineXMLFile.slice(-1) == "/") sMachineXMLFile += "machine.xml";
 
-        sMachine = aMatch[3].toUpperCase();
+        var sMachine = aMatch[3].toUpperCase();
         var sMachineFunc = "embed" + sMachine;
         var sMachineClass = sMachine.toLowerCase();
         var aMachineParms = aMatch[4].split(':');
         var sMachineMessage = "Waiting for " + sMachine + "js to load";
 
-        sMachineID = aMachineParms[0];
-        sMachineXSLFile = aMachineParms[1] || "";
-        sMachineVersion = aMachineParms[2] || this.sMachineVersion;
-        sMachineOptions = aMachineParms[3] || "";
-        sMachineState = aMachineParms[4] || "";
+        var sMachineID = aMachineParms[0];
+        var sMachineXSLFile = aMachineParms[1] || "";
+        var sMachineVersion = aMachineParms[2] || this.sMachineVersion;
+        var sMachineOptions = aMachineParms[3] || "";
+        var sMachineState = aMachineParms[4] || "";
         var aMachineOptions = sMachineOptions.split(',');
         var fDebugger = (aMachineOptions.indexOf("debugger") >= 0);
 
         /*
          * TODO: Consider validating the existence of this XML file and generating a more meaningful error if not found
          */
-        sReplacement = '<div id="' + sMachineID + '" class="machine-placeholder"><p>' + aMatch[1] + '</p><p class="machine-warning">' + sMachineMessage + '</p></div>\n';
+        var sReplacement = '<div id="' + sMachineID + '" class="machine-placeholder"><p>' + aMatch[1] + '</p><p class="machine-warning">' + sMachineMessage + '</p></div>\n';
 
         /*
          * The embedPC()/embedC1P functions take an XSL file as the 3rd parameter, which defaults to:
