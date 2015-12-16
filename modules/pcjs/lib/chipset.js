@@ -66,10 +66,10 @@ if (NODE) {
  * For reference, here's how the SW1 and SW2 switches correspond to the internal 8255A PPI bit values:
  *
  *      SW1[1]    (bit 0)     "0xxxxxxx" (1):  IPL,  "1xxxxxxx" (0):  No IPL
- *      SW1[2]    (bit 1)     reserved
- *      SW1[3,4]  (bits 3-2)  "xx11xxxx" (00): 16Kb, "xx01xxxx" (01): 32Kb,  "xx10xxxx" (10): 48Kb,  "xx00xxxx" (11): 64Kb
- *      SW1[5,6]  (bits 5-4)  "xxxx11xx" (00): none, "xxxx01xx" (01): tv,    "xxxx10xx" (10): color, "xxxx00xx" (11): mono
- *      SW1[7,8]  (bits 7-6)  "xxxxxx11" (00): 1 FD, "xxxxxx01" (01): 2 FD,  "xxxxxx10" (10): 3 FD,  "xxxxxx00" (11): 4 FD
+ *      SW1[2]    (bit 1)     reserved on the 5150; OFF (1) if FPU installed in a 5160
+ *      SW1[3,4]  (bits 3-2)  "xx11xxxx" (00): 16Kb, "xx01xxxx" (10): 32Kb,  "xx10xxxx" (01): 48Kb,  "xx00xxxx" (11): 64Kb
+ *      SW1[5,6]  (bits 5-4)  "xxxx11xx" (00): none, "xxxx01xx" (10): tv,    "xxxx10xx" (01): color, "xxxx00xx" (11): mono
+ *      SW1[7,8]  (bits 7-6)  "xxxxxx11" (00): 1 FD, "xxxxxx01" (10): 2 FD,  "xxxxxx10" (01): 3 FD,  "xxxxxx00" (11): 4 FD
  *
  * Note: FD refers to floppy drive, and IPL refers to an "Initial Program Load" floppy drive.
  *
@@ -2312,7 +2312,7 @@ ChipSet.prototype.updateSwitchDescriptions = function()
             3: "Monochrome"
         };
         sText += this.getSWMemorySize(true) + "Kb";
-        sText += ", " + ((this.sw1 & ChipSet.PPI_SW.FPU)? "" : "No ") + "Coprocessor";
+        sText += ", " + ((this.sw1Init & ChipSet.PPI_SW.FPU)? "" : "No ") + "Coprocessor";
         sText += ", " + asMonitorTypes[this.getSWVideoMonitor(true)] + " Monitor";
         sText += ", " + this.getSWFloppyDrives(true) + " Floppy Drives";
         if (this.sw1 != null && this.sw1 != this.sw1Init || this.sw2 != null && this.sw2 != this.sw2Init) {

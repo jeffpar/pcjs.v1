@@ -7746,10 +7746,11 @@ if (DEBUGGER) {
 
         while (cb > 0 && n--) {
 
-            var addr = dbgAddr.addr;
             var nSequence = (this.isBusy(false) || this.nStep)? this.nCycles : null;
             var sComment = (nSequence != null? "cycles" : null);
             var aSymbol = this.findSymbol(dbgAddr);
+
+            var addr = dbgAddr.addr;    // we snap dbgAddr.addr *after* calling findSymbol(), which re-evaluates it
 
             if (aSymbol[0] && n) {
                 if (!cLines && n || aSymbol[0].indexOf('+') < 0) {
