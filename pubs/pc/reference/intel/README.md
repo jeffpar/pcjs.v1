@@ -7,7 +7,10 @@ permalink: /pubs/pc/reference/intel/
 Intel CPU Documentation
 ---
 
-**NEW**: Historical information on the [Intel 80286 CPU](80286/).
+Processor-specific information:
+
+ * [80286 CPU](80286/)
+ * [80386 CPU](80386/)
 
 ### Assorted Publications
 

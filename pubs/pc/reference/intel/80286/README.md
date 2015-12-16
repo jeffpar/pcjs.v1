@@ -1,10 +1,10 @@
 ---
 layout: page
-title: Intel 80286 CPU Documentation
+title: Intel 80286 CPU Information
 permalink: /pubs/pc/reference/intel/80286/
 ---
 
-Intel 80286 CPU Documentation
+Intel 80286 CPU Information
 ---
 
 ### 80286 Errata
