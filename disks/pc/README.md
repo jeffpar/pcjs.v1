@@ -110,7 +110,7 @@ in [PC Tech Journal](/pubs/pc/magazines/pctj/).
 * Microsoft Flight Simulator
 
 Learn more about
-[Disk Sets](https://github.com/jeffpar/pcjs/tree/gh-pages/disks/pc) in the
+[Disk Sets](https://github.com/jeffpar/pcjs/tree/master/disks/pc) in the
 [PCjs Project](https://github.com/jeffpar/pcjs) on [GitHub](https://github.com/).
 
 {% if page.developer %}
