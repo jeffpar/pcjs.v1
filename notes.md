@@ -65,6 +65,54 @@ But in this case, there's nothing to pull, so force the push (this example assum
 
 	git push -f origin master
 
+Bringing the "gh-pages" branch up-to-date with the "master" branch
+---
+
+First, make sure all changes have been checked into the "master" branch (or stashed).
+
+Next, issue these commands:
+
+	git checkout gh-pages
+	git merge master
+	git push origin gh-pages
+	git checkout master
+
+Here's a sample run:
+
+	[~/Sites/pcjs] git checkout gh-pages
+	Branch gh-pages set up to track remote branch gh-pages from origin.
+	Switched to a new branch 'gh-pages'
+	
+	[~/Sites/pcjs] git merge master
+	Updating 33098e4..ab4f241
+	Fast-forward
+	 README.md                                           |   2 +-
+	 _config.yml                                         |   2 +-
+	 _posts/2015-12-10-rebuilding-the-pcjs-website.md    |  28 ++++---
+	 apps/c1p/README.md                                  |   2 +-
+	 blog/README.md                                      |   4 +-
+	 devices/pc/machine/5170/ega/1152kb/rev1/machine.xml |   2 +-
+	 disks/pc/README.md                                  |   2 +-
+	 docs/about/README.md                                |  21 ++---
+	 docs/about/pcjs/README.md                           |   2 +-
+	 docs/pcjs/demos/pc-dbg.js                           |  86 ++++++++++----------
+	 modules/markout/lib/markout.js                      | 174 +++++++++++-----------------------------
+	 pubs/pc/reference/intel/8087/README.md              | 347 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	 versions/c1pjs/1.20.2/components.css                |   4 -
+	 versions/pcjs/1.20.2/components.css                 |   4 -
+	 versions/pcjs/1.20.2/pc-dbg.js                      | 104 ++++++++++++++++++++++++
+	 15 files changed, 572 insertions(+), 212 deletions(-)
+	 create mode 100644 pubs/pc/reference/intel/8087/README.md
+	 
+	[~/Sites/pcjs] git push origin gh-pages
+	Total 0 (delta 0), reused 0 (delta 0)
+	To git@github.com:jeffpar/pcjs.git
+	   33098e4..ab4f241  gh-pages -> gh-pages
+	   
+	[~/Sites/pcjs] git checkout master
+	Switched to branch 'master'
+	Your branch is up-to-date with 'origin/master'.
+
 
 Node "Cheat Sheet"
 ===
