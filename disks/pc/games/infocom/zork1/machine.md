@@ -8,4 +8,7 @@ machines:
     config: /disks/pc/games/infocom/machine.xml
 ---
 
+Zork
+---
+
 {% include machine.html id="ibm5150" %}
