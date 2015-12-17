@@ -4,7 +4,7 @@ title: PC Tech Journal, 1987 Guide
 permalink: /pubs/pc/magazines/pctj/PCTJ-1987-00/
 ---
 
-[PC Tech Journal, 1987 Guide](http://archive.pcjs.org/pubs/pc/magazines/pcjs/PCTJ-1987-00/PCTJ-1987-00.pdf)
+[PC Tech Journal, 1987 Guide](http://archive.pcjs.org/pubs/pc/magazines/pctj/PCTJ-1987-00/PCTJ-1987-00.pdf)
 ---
 
 [<img src="http://archive.pcjs.org/pubs/pc/magazines/pctj/PCTJ-1987-00/thumbs/PCTJ-1987-00 1.jpeg" width="200" height="260" alt="Page 1"/>](/modules/shared/templates/pdf.html?url=/pubs/pc/magazines/pctj/PCTJ-1987-00/pages/PCTJ-1987-00 1.pdf&page=1&total=658)
