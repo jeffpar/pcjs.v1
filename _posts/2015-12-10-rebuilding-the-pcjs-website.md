@@ -92,9 +92,9 @@ as before.  But there are no guarantees.
 
 WARNING: If you decide to run/alternate between Jekyll's web server (WEBrick) and the built-in Node web
 server (server.js), you should run "grunt clean" before starting either one, to remove any old **index.html**
-files; otherwise, Jekyll may inadvertently propagate those files to its "_site" folder.  It's easy to tell
-when this happens, because you'll see the wrong color scheme: Node web server pages were designed to use *dark*
-colors, whereas Jekyll web server pages currently use *light* colors.
+files.  Node may inadvertently reuse old "index.html" files, and Jekyll may inadvertently propagate them
+to its "_site" folder.  It's easy to tell when this happens, because you'll see the wrong color scheme: Node
+web server pages were designed to use *dark* colors, whereas Jekyll web server pages currently use *light* colors.
 
 *[@jeffpar](http://twitter.com/jeffpar)*  
 *December 10, 2015*

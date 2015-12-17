@@ -332,6 +332,7 @@ MarkOut.prototype.convertMD = function(sIndent)
      * triple-dash-style comments.
      */
     if (!this.fDebug) {
+        sMD = sMD.replace(/\{%\s*if\s+page\.developer\s*%}[\s\S]*?{%\s*endif\s*%}\s*/, "");
         sMD = sMD.replace(/[ \t]*<!--+\s*begin:exclude\s*-+->[\s\S]*?<!--+\s*end:exclude\s*-+->[\r\n]*/i, "");
     }
 
