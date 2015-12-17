@@ -4,7 +4,7 @@ title: PC Tech Journal, July 1987
 permalink: /pubs/pc/magazines/pctj/PCTJ-1987-07/
 ---
 
-[PC Tech Journal, July 1987](http://archive.pcjs.org/pubs/pc/magazines/pcjs/PCTJ-1987-07/PCTJ-1987-07.pdf)
+[PC Tech Journal, July 1987](http://archive.pcjs.org/pubs/pc/magazines/pctj/PCTJ-1987-07/PCTJ-1987-07.pdf)
 ---
 
 [<img src="http://archive.pcjs.org/pubs/pc/magazines/pctj/PCTJ-1987-07/thumbs/PCTJ-1987-07 1.jpeg" width="200" height="260" alt="Page 1"/>](/modules/shared/templates/pdf.html?url=/pubs/pc/magazines/pctj/PCTJ-1987-07/pages/PCTJ-1987-07%201.pdf&page=1&total=230)

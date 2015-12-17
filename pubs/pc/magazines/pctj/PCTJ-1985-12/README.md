@@ -4,7 +4,7 @@ title: PC Tech Journal, December 1985
 permalink: /pubs/pc/magazines/pctj/PCTJ-1985-12/
 ---
 
-[PC Tech Journal, December 1985](http://archive.pcjs.org/pubs/pc/magazines/pcjs/PCTJ-1985-12/PCTJ-1985-12.pdf)
+[PC Tech Journal, December 1985](http://archive.pcjs.org/pubs/pc/magazines/pctj/PCTJ-1985-12/PCTJ-1985-12.pdf)
 ---
 
 [<img src="http://archive.pcjs.org/pubs/pc/magazines/pctj/PCTJ-1985-12/thumbs/PCTJ-1985-12 1.jpeg" width="200" height="260" alt="Page 1"/>](/modules/shared/templates/pdf.html?url=/pubs/pc/magazines/pctj/PCTJ-1985-12/pages/PCTJ-1985-12 1.pdf&page=1&total=218)

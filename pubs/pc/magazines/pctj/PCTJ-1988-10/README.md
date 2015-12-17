@@ -4,7 +4,7 @@ title: PC Tech Journal, October 1988
 permalink: /pubs/pc/magazines/pctj/PCTJ-1988-10/
 ---
 
-[PC Tech Journal, October 1988](http://archive.pcjs.org/pubs/pc/magazines/pcjs/PCTJ-1988-10/PCTJ-1988-10.pdf)
+[PC Tech Journal, October 1988](http://archive.pcjs.org/pubs/pc/magazines/pctj/PCTJ-1988-10/PCTJ-1988-10.pdf)
 ---
 
 [<img src="http://archive.pcjs.org/pubs/pc/magazines/pctj/PCTJ-1988-10/thumbs/PCTJ-1988-10 1.jpeg" width="200" height="260" alt="Page 1"/>](/modules/shared/templates/pdf.html?url=/pubs/pc/magazines/pctj/PCTJ-1988-10/pages/PCTJ-1988-10 1.pdf&page=1&total=170)

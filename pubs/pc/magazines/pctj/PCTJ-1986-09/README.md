@@ -4,7 +4,7 @@ title: PC Tech Journal, September 1986
 permalink: /pubs/pc/magazines/pctj/PCTJ-1986-09/
 ---
 
-[PC Tech Journal, September 1986](http://archive.pcjs.org/pubs/pc/magazines/pcjs/PCTJ-1986-09/PCTJ-1986-09.pdf)
+[PC Tech Journal, September 1986](http://archive.pcjs.org/pubs/pc/magazines/pctj/PCTJ-1986-09/PCTJ-1986-09.pdf)
 ---
 
 [<img src="http://archive.pcjs.org/pubs/pc/magazines/pctj/PCTJ-1986-09/thumbs/PCTJ-1986-09 1.jpeg" width="200" height="260" alt="Page 1"/>](/modules/shared/templates/pdf.html?url=/pubs/pc/magazines/pctj/PCTJ-1986-09/pages/PCTJ-1986-09 1.pdf&page=1&total=230)

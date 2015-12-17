@@ -4,7 +4,7 @@ title: PC Tech Journal, June 1986
 permalink: /pubs/pc/magazines/pctj/PCTJ-1986-06/
 ---
 
-[PC Tech Journal, June 1986](http://archive.pcjs.org/pubs/pc/magazines/pcjs/PCTJ-1986-06/PCTJ-1986-06.pdf)
+[PC Tech Journal, June 1986](http://archive.pcjs.org/pubs/pc/magazines/pctj/PCTJ-1986-06/PCTJ-1986-06.pdf)
 ---
 
 [<img src="http://archive.pcjs.org/pubs/pc/magazines/pctj/PCTJ-1986-06/thumbs/PCTJ-1986-06 1.jpeg" width="200" height="260" alt="Page 1"/>](/modules/shared/templates/pdf.html?url=/pubs/pc/magazines/pctj/PCTJ-1986-06/pages/PCTJ-1986-06 1.pdf&page=1&total=222)

@@ -4,7 +4,7 @@ title: PC Tech Journal, April 1984
 permalink: /pubs/pc/magazines/pctj/PCTJ-1984-04/
 ---
 
-[PC Tech Journal, April 1984](http://archive.pcjs.org/pubs/pc/magazines/pcjs/PCTJ-1984-04/PCTJ-1984-04.pdf)
+[PC Tech Journal, April 1984](http://archive.pcjs.org/pubs/pc/magazines/pctj/PCTJ-1984-04/PCTJ-1984-04.pdf)
 ---
 
 [<img src="http://archive.pcjs.org/pubs/pc/magazines/pctj/PCTJ-1984-04/thumbs/PCTJ-1984-04 1.jpeg" width="200" height="260" alt="Page 1"/>](/modules/shared/templates/pdf.html?url=/pubs/pc/magazines/pctj/PCTJ-1984-04/pages/PCTJ-1984-04 1.pdf&page=1&total=232)
