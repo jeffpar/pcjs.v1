@@ -95,8 +95,9 @@ var sDefaultFile = "./README.md";
  * @param {Object} [req] is the web server's (ie, Express) request object, if any
  * @param {Array.<string>|null} [aParms] is an array of overrides to use (see below)
  * @param {boolean} [fDebug] turns on debugging features (eg, debug comments, special URL encodings, etc)
+ * @param {boolean} [fMachineXML] true if a machine.xml file has already been processed by the caller
  */
-function MarkOut(sMD, sIndent, req, aParms, fDebug)
+function MarkOut(sMD, sIndent, req, aParms, fDebug, fMachineXML)
 {
     this.sMD = sMD;
     this.sIndent = (sIndent || "");
@@ -109,6 +110,7 @@ function MarkOut(sMD, sIndent, req, aParms, fDebug)
         this.sClassImageLabel = this.sClassImage + "-label";
     }
     this.fDebug = fDebug;
+    this.fMachineXML = fMachineXML;
     this.sHTML = null;
     this.aIDs = [];         // this keeps track of auto-generated ID attributes for page elements, to insure uniqueness
     this.aMachines = [];    // this keeps track of embedded machines on the page
@@ -993,9 +995,9 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
     var reIncludes = /\{%\s*include machine\.html\s+id="(.*?)"\s*%}/g;
 
     while ((aMatch = reIncludes.exec(sBlock))) {
+        sReplacement = "";
         sMachineID = aMatch[1];
-        sReplacement = "[Embedded PC]";
-        if (this.aMachineDefs[sMachineID]) {
+        if (!this.fMachineXML && this.aMachineDefs[sMachineID]) {
             var machine = this.aMachineDefs[sMachineID];
             sMachine = machine['type'] || "pc";
             sMachineOptions = (sMachine.indexOf("-dbg") > 0? "debugger" : "");
@@ -1004,7 +1006,7 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
             sMachineXSLFile = machine['template'] || "";
             sMachineVersion = (machine['uncompiled'] && machine['uncompiled'] == "true"? "uncompiled" : "");
             sMachineState = machine['state'] || "";
-            sReplacement += "(" + sMachineXMLFile + ' "' + sMachine + 'js:' + sMachineID + ':' + sMachineXSLFile + '::' + sMachineOptions + ':' + sMachineState + '")';
+            sReplacement = "[Embedded PC](" + sMachineXMLFile + ' "' + sMachine + 'js:' + sMachineID + ':' + sMachineXSLFile + '::' + sMachineOptions + ':' + sMachineState + '")';
         }
         sBlock = sBlock.replace(aMatch[0], sReplacement);
         reIncludes.lastIndex = 0;       // reset lastIndex, since we just modified the string that reIncludes is iterating over

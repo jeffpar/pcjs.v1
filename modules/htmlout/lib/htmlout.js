@@ -1400,7 +1400,7 @@ HTMLOut.prototype.getMachineXML = function(sToken, sIndent, aParms, sXMLFile, sS
                     s = m.convertMD("    ").trim();
 
                     obj.processMachines(m.getMachines(), function doneProcessXMLMachines() {
-                        obj.getReadMe(sToken, sIndent, aParms, s);
+                        obj.getReadMe(sToken, sIndent, aParms, s, true);
                     });
                     return;
                 }
@@ -1626,7 +1626,7 @@ HTMLOut.prototype.getManifestXML = function(sToken, sIndent, aParms)
 };
 
 /**
- * getReadMe(sToken, sIndent, aParms, sPrevious)
+ * getReadMe(sToken, sIndent, aParms, sPrevious, fMachineXML)
  *
  * If a "README.md" exists in the current directory, open it, convert it, and prepare for replacement.
  *
@@ -1635,8 +1635,9 @@ HTMLOut.prototype.getManifestXML = function(sToken, sIndent, aParms)
  * @param {string} [sIndent]
  * @param {Array.<string>} [aParms]
  * @param {string|null} [sPrevious] is text, if any, that should precede the README.md
+ * @param {boolean} [fMachineXML] true if a machine.xml file has already been processed by the caller
  */
-HTMLOut.prototype.getReadMe = function(sToken, sIndent, aParms, sPrevious)
+HTMLOut.prototype.getReadMe = function(sToken, sIndent, aParms, sPrevious, fMachineXML)
 {
     var obj = this;
     var sFile = path.join(this.sDir, sReadMeFile);
@@ -1663,7 +1664,7 @@ HTMLOut.prototype.getReadMe = function(sToken, sIndent, aParms, sPrevious)
                 obj.getMachineXML(sToken, sIndent);     // we don't pass along aParms, because those are for Markdown files only
             }
         } else {
-            var m = new MarkOut(s, sIndent, obj.req, aParms, obj.fDebug);
+            var m = new MarkOut(s, sIndent, obj.req, aParms, obj.fDebug, fMachineXML);
             s = m.convertMD("    ").trim();
             /*
              * If the Markdown document begins with a heading, stuff that into the <title> tag;
