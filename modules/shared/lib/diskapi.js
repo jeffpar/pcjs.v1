@@ -83,7 +83,11 @@ DiskAPI.DISKETTE_FORMATS = {
     737280:  [80,2,9],          // media type 0xF9: 80 cylinders, 2 heads (double-sided),  9 sectors/track, (1440 total sectors x 512 bytes/sector ==  737280)
     1228800: [80,2,15],         // media type 0xF9: 80 cylinders, 2 heads (double-sided), 15 sectors/track, (2400 total sectors x 512 bytes/sector == 1228800)
     1474560: [80,2,18],         // media type 0xF0: 80 cylinders, 2 heads (double-sided), 18 sectors/track, (2880 total sectors x 512 bytes/sector == 1474560)
-    2949120: [80,2,36]          // media type 0xF0: 80 cylinders, 2 heads (double-sided), 36 sectors/track, (5760 total sectors x 512 bytes/sector == 2949120)
+    2949120: [80,2,36],         // media type 0xF0: 80 cylinders, 2 heads (double-sided), 36 sectors/track, (5760 total sectors x 512 bytes/sector == 2949120)
+    /*
+     * The following are common early hard disk sizes, which we explicitly map to CHS values, since the BPB can mislead us when attempting to calculate total cylinders
+     */
+    21368320:[615,4,17]         // PC AT 20Mb hard disk (type 2)
 };
 
 DiskAPI.MBR = {

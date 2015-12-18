@@ -2142,14 +2142,18 @@ DiskDump.prototype.convertToJSON = function()
         var cbDiskData = this.bufDisk.length;
 
         if (cbDiskData >= 3000000) {        // arbitrary threshold between diskette image sizes and hard disk image sizes
-            /*
-             * In this case, the first sector should be an MBR; find the active partition entry,
-             * then read the LBA of the first partition sector to calculate the boot sector offset.
-             */
-            for (var offEntry = 0x1BE; offEntry <= 0x1EE; offEntry += 0x10) {
-                if (this.bufDisk.readUInt8(offEntry) >= 0x80) {
-                    offBootSector = this.bufDisk.readUInt16LE(offEntry + 0x08) * cbSector;
-                    break;
+            var wSig = this.bufDisk.readUInt16LE(0x1FE);
+            if (wSig == 0xAA55) {
+                /*
+                 * In this case, the first sector should be an MBR; find the active partition entry,
+                 * then read the LBA of the first partition sector to calculate the boot sector offset.
+                 */
+                for (var offEntry = 0x1BE; offEntry <= 0x1EE; offEntry += 0x10) {
+                    if (this.bufDisk.readUInt8(offEntry) >= 0x80) {
+                        offBootSector = this.bufDisk.readUInt32LE(offEntry + 0x08) * cbSector;
+                        cbDiskData = this.bufDisk.readUInt32LE(offEntry + 0x0C) * cbSector;
+                        break;
+                    }
                 }
             }
             /*
