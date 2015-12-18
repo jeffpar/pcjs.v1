@@ -88,6 +88,7 @@ and no matter how many times I press Reload, the response is the same (except fo
 
 So, here's the kludge I've added to my Express server code, to prevent Safari from displaying blank pages for those XML files:
  
+{% highlight javascript linenos %}
     /*
      * The Safari "blank page" problem continues to plague us.  Our first work-around was for directory
      * "index.html" documents, which we resolved by always sending the document ourselves, along with an
@@ -128,6 +129,7 @@ So, here's the kludge I've added to my Express server code, to prevent Safari fr
             }
         }
     }
+{% endhighlight %}
     
 I should add that this problem wasn't limited to XML files.  It's a problem for the first resource requested by
 Safari for any URL on the site (eg, URLs that default to "index.html" files).
