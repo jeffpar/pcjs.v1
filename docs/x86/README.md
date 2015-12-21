@@ -4,12 +4,86 @@ title: x86 Documentation
 permalink: /docs/x86/
 ---
 
-x86 Documentation
+Placeholder for future x86 documentation.
+
+x86 Instructions
 ---
 
-First Header  | Second Header
-------------- | -------------
-Content Cell  | Content Cell
-Content Cell  | Content Cell
-
-More to come...
+[AAA](/docs/x86/ops/aaa/)
+AAD
+AAM
+AAS
+ADC
+ADD
+AND
+CALL
+CBW
+CLC
+CLD
+CLI
+CMC
+CMP
+CMPS
+CWD
+DAA
+DAS
+DEC
+DIV
+ESC
+HLT
+IDIV
+IMUL
+IN
+INC
+INT 3
+INT
+INTO
+IRET
+Jcc
+JMP
+LAHF
+LDS
+LEA
+LES
+LOCK
+LODS
+LOOP
+LOOPZ
+LOOPNZ
+MOV
+MOVS
+MUL
+NEG
+NOP
+NOT
+OR
+OUT
+POP
+POPF
+PUSH
+PUSHF
+RCL
+RCR
+REP
+REPZ
+REPNZ
+RET
+ROL
+ROR
+SAHF
+SAL
+SAR
+SBB
+SCAS
+SHL
+SHR
+STC
+STD
+STI
+STOS
+SUB
+TEST
+WAIT
+XCHG
+XLAT
+XOR

@@ -764,13 +764,17 @@ X86.opAAA = function()
     var AL = this.regEAX & 0xff;
     var AH = (this.regEAX >> 8) & 0xff;
     if ((AL & 0xf) > 9 || this.getAF()) {
-        AL = (AL + 0x6) & 0xf;
-        AH = (AH + 1) & 0xff;
+        AL += 6;
+        /*
+         * Simulate the fact that the 80286 and higher actually add 6 to AX rather than AL.
+         */
+        if (this.model >= X86.MODEL_80286 && AL > 0xff) AH++;
+        AH++;
         CF = AF = 1;
     } else {
         CF = AF = 0;
     }
-    this.regEAX = (this.regEAX & ~0xffff) | ((AH << 8) | AL);
+    this.regEAX = (this.regEAX & ~0xffff) | (((AH << 8) | AL) & 0xff0f);
     if (CF) this.setCF(); else this.clearCF();
     if (AF) this.setAF(); else this.clearAF();
     this.nStepCycles -= this.cycleCounts.nOpCyclesAAA;

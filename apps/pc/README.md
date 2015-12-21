@@ -15,7 +15,7 @@ Below are selected demos of classic IBM PC applications running on [PCjs](/docs/
 * [Executive Suite (1982)](1982/esuite/)
 * [Rogue (1985)](1985/rogue/)
 * [ThinkTank (1987)](1987/thinktank/)
-* The Dungeons of Moria (1988, [1992](1992/moria/))
+* [The Dungeons of Moria (1992)](1992/moria/)
 
 Additional software is available in the [IBM PC Disk Archive](/disks/pc/).
 
