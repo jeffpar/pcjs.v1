@@ -61,6 +61,7 @@
 		<manifest ref="/disks/pc/tools/microsoft/c/4.00/manifest.xml"/>
 		<manifest ref="/disks/pc/tools/microsoft/masm/4.00/manifest.xml"/>
 		<manifest ref="/disks/pc/tools/microsoft/mouse/5.00/manifest.xml"/>
+		<manifest ref="/disks/pc/tools/microsoft/os2/sdk/1.02/manifest.xml"/>
 		<manifest ref="/disks/pc/tools/microsoft/windows/sdk/1.01/manifest.xml"/>
 		<manifest ref="/disks/pc/tools/microsoft/windows/sdk/1.03/manifest.xml"/>
 		<manifest ref="/disks/pc/tools/microsoft/windows/sdk/1.04/manifest.xml"/>
