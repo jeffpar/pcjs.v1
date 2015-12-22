@@ -19,9 +19,8 @@ Below are selected demos of classic IBM PC applications running on [PCjs](/docs/
 
 Additional software is available in the [IBM PC Disk Archive](/disks/pc/).
 
-Learn more about
-[Application Demos](https://github.com/jeffpar/pcjs/tree/master/apps/pc) in the
-[PCjs Project](https://github.com/jeffpar/pcjs) on [GitHub](https://github.com/).
+More information about creating [Application Demos](https://github.com/jeffpar/pcjs/tree/master/apps/pc)
+is available in the [PCjs Project](https://github.com/jeffpar/pcjs) on [GitHub](https://github.com/).
 
 {% if page.developer %}
 

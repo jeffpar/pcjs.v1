@@ -19,7 +19,7 @@ along with these IBM PC-compatibles:
 
 * [Compaq DeskPro 386](compaq/deskpro386/)
 
-Configurations for the [Challenger 1P](/devices/c1p/machine/) and other non-IBM machines are also [available](/devices/).
+Browse the [Devices](/devices/) used by all PCjs machines, including the 6502-based [Challenger 1P](/devices/c1p/machine/).
 
 ---
 

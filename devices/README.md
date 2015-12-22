@@ -1,10 +1,15 @@
 ---
 layout: page
-title: Machine Configurations
+title: Device Configurations
 permalink: /devices/
 ---
 
-Machine Configurations
+Device Configurations
 ---
 
-Browse [IBM PC](/devices/pc/machine/) and [Challenger 1P](/devices/c1p/machine/) machine configurations.
+All PCjs machines, including the:
+ 
+* [IBM PC](pc/machine/)
+* [Challenger 1P](c1p/machine/)
+
+are built from collections of [PC Devices](pc/) and [C1P Devices](c1p/).

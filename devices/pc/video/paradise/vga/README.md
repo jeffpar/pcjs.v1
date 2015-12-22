@@ -23,7 +23,7 @@ For a more human-readable dump, use the `--comments` option:
 
 And for those who want a binary file, the FileDump API can be used to recreate binary data from JSON data:
 
-> [http://www.pcjs.org/api/v1/dump?file=http://www.pcjs.org/devices/pc/video/paradise/vga/1988-05-23.json&format=rom](http://www.pcjs.org/api/v1/dump?file=http://www.pcjs.org/devices/pc/video/paradise/vga/1988-05-23.json&format=rom)
+> [http://localhost:8088/api/v1/dump?file=/devices/pc/video/paradise/vga/1988-05-23.json&format=rom](http://localhost:8088/api/v1/dump?file=/devices/pc/video/paradise/vga/1988-05-23.json&format=rom)
 
 The first 128 bytes of the ROM BIOS contain:
 

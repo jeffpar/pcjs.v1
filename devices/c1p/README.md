@@ -1,13 +1,12 @@
 ---
 layout: page
-title: Challenger 1P Machine Configurations
+title: Challenger 1P Device Configurations
 permalink: /devices/c1p/
 ---
 
-Challenger 1P Configurations
+Challenger 1P Device Configurations
 ---
 
-This folder contains Challenger 1P [Machine Configurations](machine/), along with [Control Panels](panel/) and
-other components.
+This folder contains [Control Panels](panel/) and other components for all [Challenger 1P Machine Configurations](machine/).
 
 [Applications](/apps/c1p/) and [Disk Images](/disks/c1p/) are also available.

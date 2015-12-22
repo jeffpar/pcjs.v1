@@ -60,7 +60,7 @@ For a more human-readable dump, use the `--comments` option:
 
 And for those who want a binary file, the FileDump API can be used to recreate binary data from JSON data:
 
-> [http://www.pcjs.org/api/v1/dump?file=http://www.pcjs.org/devices/pc/video/compaq/vga/109360-001/1988-05-18.json&format=rom](http://www.pcjs.org/api/v1/dump?file=http://www.pcjs.org/devices/pc/video/compaq/vga/109360-001/1988-05-18.json&format=rom)
+> [http://localhost:8088/api/v1/dump?file=/devices/pc/video/compaq/vga/109360-001/1988-05-18.json&format=rom](http://localhost:8088/api/v1/dump?file=/devices/pc/video/compaq/vga/109360-001/1988-05-18.json&format=rom)
 
 The Compaq VGA ROM BIOS concludes with the usual copyright string and author initials:
 
