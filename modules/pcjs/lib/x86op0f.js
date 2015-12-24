@@ -138,9 +138,6 @@ X86.opLSL = function()
  *          85A-85F                        IDTR
  *          860-865                        TSS descriptor cache
  *
- * Oddly, the above document gives two contradictory cycle counts for LOADALL: 190 and 195.  I'll go with 195, since
- * the PCMag_Prog_TechRef mentions that time as well.
- *
  * @this {X86CPU}
  */
 X86.opLOADALL286 = function()
@@ -185,7 +182,14 @@ X86.opLOADALL286 = function()
     this.addrIDT = this.getShort(0x85A) | (this.getByte(0x85C) << 16);
     this.addrIDTLimit = this.addrIDT + this.getShort(0x85E);
     this.segTSS.loadDesc6(0x860, this.getShort(0x816));
+
+    /*
+     * Oddly, the above Intel document gives two contradictory cycle counts for LOADALL: 190 and 195.  I go with 195,
+     * since both the PC Magazine Programmer's Technical Reference and Robert Collins (http://www.rcollins.org/articles/loadall/tspec_a3_doc.html)
+     * agree.
+     */
     this.nStepCycles -= 195;
+
     /*
      * TODO: LOADALL operation still needs to be verified in protected mode....
      */
@@ -309,7 +313,11 @@ X86.opLOADALL386 = function()
      */
     X86.opUndefined.call(this);
 
-    this.nStepCycles -= 100;            // TODO: I've not seen a documented time for the 80386 LOADALL; update this random guess
+    /*
+     * According to Robert Collins (http://www.rcollins.org/articles/loadall/tspec_a3_doc.html), the 80386 LOADALL
+     * takes 122 cycles.
+     */
+    this.nStepCycles -= 122;
 };
 
 /**

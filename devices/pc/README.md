@@ -18,7 +18,7 @@ IBM PC [Machine Configurations](machine/) are built from a collection of devices
 * Hard Disk (Fixed Disk) Controllers
 * [Control Panels](panel/)
 
-Each of those devices can be configured in multiple ways, and also some support external UI controls.
+Each of those devices can be configured in multiple ways, and some support external UI controls.
 
 For example, the IBM PC Keyboard component supports different keyboard models (eg, 83-key, 84-key, 101-key),
 and each of those models can also be configured to have dedicated buttons for selected key combinations,

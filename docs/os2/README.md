@@ -9,6 +9,6 @@ OS/2 Programming Guides
 
 For OS/2 1.0:
 
-* [Microsoft® Operating System/2 Programmer’s Toolkit](/docs/os2/microsoft/1.0/)
+* [Microsoft® Operating System/2 Programmer’s Toolkit](/docs/os2/microsoft/ptk/1.0/), March 1988
 
 Note that the above guide is a work-in-progress (converting the PDF text to Markdown).
