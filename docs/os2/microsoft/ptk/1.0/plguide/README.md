@@ -91,13 +91,10 @@ Version 1.0
 
 This is a Markdown conversion of the document entitled:
 
->Microsoft® Operating System/2
-
->Programmer's Toolkit
-
->Programmer's Learning Guide
-
->Version 1.0
+>Microsoft® Operating System/2  
+Programmer's Toolkit  
+Programmer's Learning Guide  
+Version 1.0
 
 That document includes the following copyright and trademark information:
 
@@ -109,12 +106,8 @@ manual and/or database may be reproduced or transmitted in any form or by any me
 including photocopying, recording, or information storage and retrieval systems, for any purpose other than the
 purchaser's personal use, without the written permission of Microsoft Corporation.
 	
->© Copyright Microsoft Corporation, 1988. All rights reserved. Simultaneously published in the U.S. and Canada.
-	
->Microsoft®, MS®, and the Microsoft logo are registered trademarks of Microsoft Corporation.
-	
->Intel® is a registered trademark of Intel Corporation.
-	
->Hayes® is a registered trademark of Hayes Microcomputer Products, Inc.
-	
->Document No. 060060004-100-R00-0388
+>© Copyright Microsoft Corporation, 1988. All rights reserved. Simultaneously published in the U.S. and Canada.  
+Microsoft®, MS®, and the Microsoft logo are registered trademarks of Microsoft Corporation.  
+Intel® is a registered trademark of Intel Corporation.  
+Hayes® is a registered trademark of Hayes Microcomputer Products, Inc.  
+Document No. 060060004-100-R00-0388
