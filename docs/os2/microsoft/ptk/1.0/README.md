@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Microsoft OS/2: Welcome"
+title: "Microsoft OS/2 Programmer's Toolkit: Welcome"
 permalink: /docs/os2/microsoft/ptk/1.0/
 ---
 
@@ -36,3 +36,7 @@ the A: prompt:
 
 After running **setup**, make sure that you modify your PATH, INCLUDE, and LIB environment variables as directed by
 the program.
+
+---
+
+Note: the above guides are a work-in-progress (we're converting the PDFs to Markdown).

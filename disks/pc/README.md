@@ -96,6 +96,7 @@ The rest of our disk archive is available directly from the various [Machines](/
 * [Microsoft C 4.00](/disks/pc/tools/microsoft/c/4.00/)
 * Microsoft MASM 4.00
 * Microsoft Mouse 5.00
+* [Microsoft OS/2 SDK 1.02](/disks/pc/tools/microsoft/os2/sdk/1.02/)
 * Microsoft Windows SDK 1.01
 * Microsoft Windows SDK 1.03
 * Microsoft Windows SDK 1.04
