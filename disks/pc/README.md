@@ -76,7 +76,7 @@ that automatically run the software.
 
 ### Other Operating Systems
 
-* [CP/M-86 v1.1B](/disks/pc/cpm/1.1b/)
+* [CP/M-86 1.1B](/disks/pc/cpm/1.1b/)
 * Minix 1.1
 * PC/IX 1.0
 * [Microport's AT&T UNIX System V-AT 2.3](/disks/pc/unix/microport/system-v/2.3/)
@@ -120,13 +120,13 @@ in [PC Tech Journal](/pubs/pc/magazines/pctj/).
 
 * Microsoft Flight Simulator
 
-Learn more about
-[Disk Sets](https://github.com/jeffpar/pcjs/tree/master/disks/pc) in the
-[PCjs Project](https://github.com/jeffpar/pcjs) on [GitHub](https://github.com/).
-
 ### Other Games
 
 * [Infocom Zork I](/disks/pc/games/infocom/zork1/)
+
+Learn more about
+[Disk Sets](https://github.com/jeffpar/pcjs/tree/master/disks/pc) in the
+[PCjs Project](https://github.com/jeffpar/pcjs) on [GitHub](https://github.com/).
 
 {% if page.developer %}
 
