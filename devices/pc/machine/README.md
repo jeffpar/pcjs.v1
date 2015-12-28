@@ -19,8 +19,31 @@ along with these IBM PC-compatibles:
 
 * [Compaq DeskPro 386](compaq/deskpro386/)
 
-Browse the [Devices](/devices/) used by all PCjs machines, including the 6502-based [Challenger 1P](/devices/c1p/machine/).
+We also support a variety of other [Devices](/devices/):
 
+* 6502-based [Challenger 1P](/devices/c1p/machine/)
+
+### Ready-To-Run App Demos
+
+Check out these machines from our [IBM PC Application Archive](/apps/pc/):
+
+* [VisiCalc (1981)](1981/visicalc/)
+* [Executive Suite (1982)](1982/esuite/)
+* [Rogue (1985)](1985/rogue/)
+* [ThinkTank (1987)](1987/thinktank/)
+* [The Dungeons of Moria (1992)](1992/moria/)
+
+### Ready-To-Boot Disk Demos
+
+And here are some machines from our [IBM PC Disk Archive](/disks/pc/):
+
+* [CP/M-86 v1.1B](/disks/pc/cpm/1.1b/)
+* [IBM Diagnostics v2.20](/disks/pc/diags/ibm/2.20/)
+* [Infocom Zork I](/disks/pc/games/infocom/zork1/)
+
+---
+
+List of Preconfigured IBM PC Machines
 ---
 
 ### Model 5150 Machine Configurations
@@ -56,7 +79,7 @@ Browse the [Devices](/devices/) used by all PCjs machines, including the 6502-ba
 * [IBM PC AT (6Mhz), EGA, 1152Kb, 20Mb Drive, Debugger](/devices/pc/machine/5170/ega/1152kb/rev1/)
 * [IBM PC AT (8Mhz), EGA, 1152Kb, 20Mb Drive, Debugger](/devices/pc/machine/5170/ega/1152kb/rev3/)
 
-### Machine Configurations with "Soft Keyboard"
+### Machine Configurations with "Soft Keyboards"
 
 * [IBM PC, MDA, 64K](/devices/pc/machine/5150/mda/64kb/softkbd/)
 * [IBM PC, CGA, 64K](/devices/pc/machine/5150/cga/64kb/softkbd/)
@@ -65,5 +88,3 @@ Browse the [Devices](/devices/) used by all PCjs machines, including the 6502-ba
 * [IBM PC XT, CGA, 256K, 10Mb Drive](/devices/pc/machine/5160/cga/256kb/softkbd/)
 * [IBM PC XT, CGA, 256K, Windows 1.01](/devices/pc/machine/5160/cga/256kb/win101/softkbd/)
 * [IBM PC XT, CGA, 512K, Windows 1.01](/devices/pc/machine/5160/cga/512kb/win101/softkbd/)
-
-There are also some pre-built Machine Configurations for selected [IBM PC Disk Sets](/disks/pc/).

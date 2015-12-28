@@ -7,13 +7,11 @@ permalink: /disks/pc/
 IBM PC Disk Archive
 ---
 
-Below are selected Disk Sets featuring "Ready-to-Boot" machine configurations:
+This is a list of disks available to any of the [IBM PC Machines](/devices/pc/machine/) that use the
+[library.xml](/disks/pc/library.xml) disk configuration file.
 
-* [IBM PC (Model 5150), MDA, 64K, CP/M-86](/disks/pc/cpm/1.1b/)
-* [IBM PC (Model 5150), MDA, 64K, IBM Diagnostics v2.20](/disks/pc/diags/ibm/2.20/)
-* [IBM PC (Model 5150), CGA, 64K, Zork I](/disks/pc/games/infocom/zork1/)
-
-The rest of our disk archive is available directly from the various [Machines](/devices/pc/machine/).
+For some of the disks below, we have provided more information about the software, and in some cases, machines
+that automatically run the software.
 
 ### PC-DOS (IBM)
 
@@ -51,12 +49,18 @@ The rest of our disk archive is available directly from the various [Machines](/
 * Compaq DOS 3.10
 * Compaq DOS 3.31
 
-### OS/2
+### IBM OS/2
 
 * [IBM OS/2 1.0](/disks/pc/os2/ibm/1.0/)
 * IBM OS/2 1.1
 * IBM OS/2 1.3
-* Misc. OS/2 Files
+
+### Microsoft OS/2
+
+* [MS OS/2 Pre-Release Files](/disks/pc/os2/misc/)
+* MS OS/2 1.0
+* MS OS/2 1.1
+* MS OS/2 1.2
 
 ### Microsoft Windows
 
@@ -70,8 +74,9 @@ The rest of our disk archive is available directly from the various [Machines](/
 * Microsoft Windows 3.11
 * Microsoft Windows 95
 
-### Non-DOS Operating Systems
+### Other Operating Systems
 
+* [CP/M-86 v1.1B](/disks/pc/cpm/1.1b/)
 * Minix 1.1
 * PC/IX 1.0
 * [Microport's AT&T UNIX System V-AT 2.3](/disks/pc/unix/microport/system-v/2.3/)
@@ -87,8 +92,13 @@ The rest of our disk archive is available directly from the various [Machines](/
 * Microsoft Word for Windows 2.0C
 
 ### Borland Tools
+
 * Borland Pascal 3.00B
 * Borland Pascal 3.01A
+
+### IBM Tools
+
+* [IBM Diagnostics v2.20](/disks/pc/diags/ibm/2.20/)
 
 ### Microsoft Tools
 
@@ -113,6 +123,10 @@ in [PC Tech Journal](/pubs/pc/magazines/pctj/).
 Learn more about
 [Disk Sets](https://github.com/jeffpar/pcjs/tree/master/disks/pc) in the
 [PCjs Project](https://github.com/jeffpar/pcjs) on [GitHub](https://github.com/).
+
+### Other Games
+
+* [Infocom Zork I](/disks/pc/games/infocom/zork1/)
 
 {% if page.developer %}
 

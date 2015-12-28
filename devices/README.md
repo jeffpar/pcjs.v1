@@ -7,9 +7,10 @@ permalink: /devices/
 Device Configurations
 ---
 
-All PCjs machines, including the:
+All PCjs machines are built from the following collections of devices:
  
-* [IBM PC](pc/machine/)
-* [Challenger 1P](c1p/machine/)
+* [IBM PC Devices](pc/)
+* [Challenger 1P Devices](c1p/)
 
-are built from collections of [PC Devices](pc/) and [C1P Devices](c1p/).
+These devices are user-installable components that you would typically find in a real personal computer,
+such as keyboards, disk controllers with one or more disk drives, video cards, etc.

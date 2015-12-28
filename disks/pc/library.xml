@@ -35,6 +35,7 @@
 		<manifest ref="/disks/pc/os2/ibm/1.0/manifest.xml"/>
 		<manifest ref="/disks/pc/os2/ibm/1.1/manifest.xml"/>
 		<manifest ref="/disks/pc/os2/ibm/1.3/manifest.xml"/>
+		<manifest ref="/disks/pc/os2/microsoft/1.0/manifest.xml"/>
 		<manifest ref="/disks/pc/os2/misc/manifest.xml"/>
 		<manifest ref="/disks/pc/windows/1.01/manifest.xml"/>
 		<manifest ref="/disks/pc/windows/1.03/manifest.xml"/>

@@ -7,7 +7,7 @@ permalink: /devices/pc/
 IBM PC Device Configurations
 ---
 
-IBM PC [Machine Configurations](machine/) are built from a collection of devices, including:
+[IBM PC Machine Configurations](machine/) are built from a collection of devices, including:
 
 * CPU
 * RAM
@@ -46,3 +46,6 @@ looks like:
 		<fdc ref="/disks/pc/samples.xml" pos="right"/>
 		<chipset id="chipset" model="5150" sw1="01000001" sw2="11110000"/>
 	</machine>
+
+All the devices are fully configured within the XML file, except for the Keyboard and Floppy Disk Controller (FDC)
+devices, which are defined in separate XML files.

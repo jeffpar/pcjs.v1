@@ -1,8 +1,6 @@
 ---
 layout: page
-title: Application Archive
-menu_title: Apps
-menu_order: 4
+title: IBM PC Application Archive
 permalink: /apps/pc/
 ---
 
