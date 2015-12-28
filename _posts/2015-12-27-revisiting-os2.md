@@ -11,7 +11,7 @@ machines:
 ---
 
 Just for fun (because I have a warped sense of fun), I decided to revisit some of the old OS/2 software I wrote
-almost 30 years ago.  But first, I need an OS/2 development environment.
+almost 30 years ago.  But first, I needed an OS/2 development environment.
 
 So I started with a clean install of IBM's OS/2 1.0 in the [8Mhz IBM PC AT](/disks/pc/os2/ibm/1.0/) machine
 below, by booting from the "IBM OS/2 1.0 (1.44M Install)" diskette in drive A and reformatting the machine's 20Mb
