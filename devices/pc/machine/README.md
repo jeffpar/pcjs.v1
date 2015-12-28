@@ -19,7 +19,7 @@ along with these IBM PC-compatibles:
 
 * [Compaq DeskPro 386](compaq/deskpro386/)
 
-We also support a variety of other [Devices](/devices/):
+We also support a few non-IBM [Devices](/devices/):
 
 * 6502-based [Challenger 1P](/devices/c1p/machine/)
 
