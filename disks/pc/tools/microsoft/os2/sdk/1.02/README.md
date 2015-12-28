@@ -79,7 +79,7 @@ include it in the SDK at a later date.
 ### Using SDKED
 
 As previously noted, we don't have a copy of this SDK's documentation.  But we *have* unearthed a copy of the
-"[User's Guide to the Z Editor](/disks/pc/tools/microsoft/misc/root/Z.TXT)", by Mark Zbikowski, August 4, 1986,
+"[User's Guide to the Z Editor](/disks/pc/tools/microsoft/misc/root/Z.TXT)" by Mark Zbikowski, August 4, 1986,
 included below.  **SDKED** was an OS/2 port of the Z Editor.
 
 

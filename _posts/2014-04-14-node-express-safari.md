@@ -74,7 +74,7 @@ with a response of 304 ("Not Modified") and the following response headers:
 	X-Powered-By:   Express
 	
 And here's where the "blank page" problem occurs: pressing Safari's Reload button.  Again, the request looks the same as before,
-and the response is still be 304 ("Not Modified"), but the page is blank, and the response now looks like:
+and the response is still 304 ("Not Modified"), but the page is blank, and the response now looks like:
 
 	Date:           Mon, 14 Apr 2014 22:21:15 GMT
 	Cache-Control:  public, max-age=0
