@@ -18,7 +18,7 @@ printed documentation that came with the SDK, such as the *Installation Guide*, 
 
 ### Installation
 
-If you look at the **TOOLKIT1** disk, in the **OS2DOC** folder, you'll find **READ.ME!**, which includes some very
+If you mount the **TOOLKIT1** disk and look in the **OS2DOC** folder, you'll find **READ.ME!**, which includes some very
 useful information about the SDK installation process:
 
 	The installation guide is confusing, can you give me three easy steps to
@@ -73,13 +73,14 @@ the missing **NETWORK** disk; specifically:
 	NMPIPE.H
 	README.DOC
 
-but you aren't likely to need those.
+but you aren't likely to need those.  We will rebuild a copy of this missing disk from other sources and
+include it in the SDK at a later date.
 
 ### Using SDKED
 
-As previously noted, we don't have a copy of this SDK's documentation.  But we do have a copy of the "[User's Guide
-to the Z Editor](/disks/pc/tools/microsoft/misc/root/Z.TXT)", by Mark Zbikowski, August 4, 1986, included
-below.  **SDKED** was an OS/2 port of the Z Editor.
+As previously noted, we don't have a copy of this SDK's documentation.  But we *have* unearthed copy of the
+"[User's Guide to the Z Editor](/disks/pc/tools/microsoft/misc/root/Z.TXT)", by Mark Zbikowski, August 4, 1986,
+included below.  **SDKED** was an OS/2 port of the Z Editor.
 
 
 

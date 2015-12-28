@@ -25,7 +25,7 @@ We also support a variety of other [Devices](/devices/):
 
 ### Ready-To-Run App Demos
 
-Check out these machines from our [IBM PC Application Archive](/apps/pc/):
+Machines from our [IBM PC Application Archive](/apps/pc/):
 
 * [VisiCalc (1981)](1981/visicalc/)
 * [Executive Suite (1982)](1982/esuite/)
@@ -45,6 +45,13 @@ And here are some machines from our [IBM PC Disk Archive](/disks/pc/):
 
 List of Preconfigured IBM PC Machines
 ---
+
+This is a list of all the other preconfigured IBM PC machines in the project.  Some of them include
+a predefined state, which automatically restores the machine and the specified application to an initial
+state, while others include a hard disk with preinstalled software.
+
+However, most simply boot an early version of DOS, and the hard disk, if any, will generally be unformatted.
+From there, you can load another disk image  
 
 ### Model 5150 Machine Configurations
 
