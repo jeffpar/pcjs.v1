@@ -17,7 +17,7 @@ PCjs supports these IBM PC models:
 
 along with these IBM PC-compatibles:
 
-* [Compaq DeskPro 386](compaq/deskpro386/)
+* [Compaq DeskPro 386](/devices/pc/machine/compaq/deskpro386/)
 
 We also support a few non-IBM [Devices](/devices/):
 
@@ -27,11 +27,11 @@ We also support a few non-IBM [Devices](/devices/):
 
 Machines from our [IBM PC Application Archive](/apps/pc/):
 
-* [VisiCalc (1981)](1981/visicalc/)
-* [Executive Suite (1982)](1982/esuite/)
-* [Rogue (1985)](1985/rogue/)
-* [ThinkTank (1987)](1987/thinktank/)
-* [The Dungeons of Moria (1992)](1992/moria/)
+* [VisiCalc (1981)](/apps/pc/1981/visicalc/)
+* [Executive Suite (1982)](/apps/pc/1982/esuite/)
+* [Rogue (1985)](/apps/pc/1985/rogue/)
+* [ThinkTank (1987)](/apps/pc/1987/thinktank/)
+* [The Dungeons of Moria (1992)](/apps/pc/1992/moria/)
 
 ### Ready-To-Boot Disk Demos
 
