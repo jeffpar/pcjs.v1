@@ -734,67 +734,67 @@ a double sigma sign. All 80386s produced after the B1 stepping should be free of
 	K1      DD      41h                 ; memory-based constant 1
 	K2      DD      81h                 ; memory-based constant 2
 	
-			MOV     EAX,0042E8h         ; load EAX with operand
-			MUL     K1                  ; EAX = EAX * 41H
-			CMP     EAX,10FCE8h         ; check answer
-			JNE     fail                ; failure if not equal
-	
-			MOV     EAX,085D00h
-			MUL     K1
-			CMP     EAX,021F9D00h
-			JNE     fail
-	
-			MOV     EAX,042E80000h
-			MUL     K1
-			CMP     EAX,0FCE80000h
-			JNE     fail
-			CMP     EDX,010h
-			JNE     fail
-	
-			MOV     EAX,0417A000h
-			MUL     K2
-			CMP     EAX,0FE7A000h
-			JNE     fail
-			CMP     EDX,0002h
-			JNE     fail
-	
-			MOV     DX,0AB66h
-			MOV     AX,09AE8h
-			MUL     DX
-			CMP     AX,0B070h
-			JNE     fail
-	
-			MOV     DX,0FDF3h
-			MOV     AX,09AE8h
-			MUL     DX
-			CMP     AX,05238h
-			JNE     fail
-	
-			MOV     DX,0B554h
-			MOV     AX,0E8EAh
-			MUL     DX
-			CMP     DX,0A4F9h
-			JNE     fail
-	
-			MOV     DX,0B4C6h
-			MOV     AX,0E8EAh
-			MUL     DX
-			CMP     AX,0ACFCh
-			JNE     fail
-			CMP     DX,0A478h
-			JNE     fail
-	
-			MOV     DX,0B318h
-			MOV     AX,0E8EAh
-			MUL     DX
-			CMP     DX,0A2F1h
-			JNE     fail
-	
-			MOV     DX,0B43Bh
-			MOV     AX,0E8EAh
-			MUL     DX
-			CMP     DX,0A3FAh
-			JNE     fail
+	        MOV     EAX,0042E8h         ; load EAX with operand
+	        MUL     K1                  ; EAX = EAX * 41H
+	        CMP     EAX,10FCE8h         ; check answer
+	        JNE     fail                ; failure if not equal
+	        
+	        MOV     EAX,085D00h
+	        MUL     K1
+	        CMP     EAX,021F9D00h
+	        JNE     fail
+	        
+	        MOV     EAX,042E80000h
+	        MUL     K1
+	        CMP     EAX,0FCE80000h
+	        JNE     fail
+	        CMP     EDX,010h
+	        JNE     fail
+	        
+	        MOV     EAX,0417A000h
+	        MUL     K2
+	        CMP     EAX,0FE7A000h
+	        JNE     fail
+	        CMP     EDX,0002h
+	        JNE     fail
+	        
+	        MOV     DX,0AB66h
+	        MOV     AX,09AE8h
+	        MUL     DX
+	        CMP     AX,0B070h
+	        JNE     fail
+	        
+	        MOV     DX,0FDF3h
+	        MOV     AX,09AE8h
+	        MUL     DX
+	        CMP     AX,05238h
+	        JNE     fail
+	        
+	        MOV     DX,0B554h
+	        MOV     AX,0E8EAh
+	        MUL     DX
+	        CMP     DX,0A4F9h
+	        JNE     fail
+	        
+	        MOV     DX,0B4C6h
+	        MOV     AX,0E8EAh
+	        MUL     DX
+	        CMP     AX,0ACFCh
+	        JNE     fail
+	        CMP     DX,0A478h
+	        JNE     fail
+	        
+	        MOV     DX,0B318h
+	        MOV     AX,0E8EAh
+	        MUL     DX
+	        CMP     DX,0A2F1h
+	        JNE     fail
+	        
+	        MOV     DX,0B43Bh
+	        MOV     AX,0E8EAh
+	        MUL     DX
+	        CMP     DX,0A3FAh
+	        JNE     fail
 
 ### C0 Stepping
 
