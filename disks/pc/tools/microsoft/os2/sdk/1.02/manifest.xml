@@ -2,15 +2,6 @@
 <?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.20.2/manifest.xsl"?>
 <manifest type="software">
 	<title>MS OS/2 SDK 1.02</title>
-	<disk id="disk01" size="1474560" chs="80:2:18" img="static/MSOS2INS.img" href="/disks/pc/tools/microsoft/os2/sdk/1.02/MSOS2-SDK102-DISK01.json" md5="872d670ccc2dd4c771ba6343d17455ca" md5json="cd72e181905dfa6b742e9ada8b83e89a">
-		<name>MS OS/2 SDK 1.02: INSTALL</name>
-	</disk>
-	<disk id="disk02" size="1474560" chs="80:2:18" img="static/MSOS2PGM.img" href="/disks/pc/tools/microsoft/os2/sdk/1.02/MSOS2-SDK102-DISK02.json" md5="e2241300e687d3aa106ca181e4001865" md5json="0fa98adb6fdc48e615dab66c29e3aa22">
-		<name>MS OS/2 SDK 1.02: PROGRAM</name>
-	</disk>
-	<disk id="disk03" size="1474560" chs="80:2:18" img="static/MSOS2SUP.img" href="/disks/pc/tools/microsoft/os2/sdk/1.02/MSOS2-SDK102-DISK03.json" md5="78e9b7eb522c5fdaf5ecf1a5620f3af5" md5json="74223059707414811573734ecd1c347f">
-		<name>MS OS/2 SDK 1.02: SUPPLEMENTAL</name>
-	</disk>
 	<disk id="disk04" size="737280" chs="80:2:9" img="static/MSOS2TK1.img" href="/disks/pc/tools/microsoft/os2/sdk/1.02/MSOS2-SDK102-DISK04.json" md5="e6b2bf28e29654dbfbb32b0bf4377038" md5json="978662c324153dbacf0fc9ac3a9b0c61">
 		<name>MS OS/2 SDK 1.02: TOOLKIT1</name>
 	</disk>

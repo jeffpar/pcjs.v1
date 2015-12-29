@@ -11,10 +11,10 @@ This copy of the Microsoft OS/2 SDK (1.02) was obtained from the [WinWorld](http
 website.  Unfortunately, it's missing the **NETWORK** disk, so we've included an empty **NETWORK** disk
 that allows the SDK installation script to finish.
 
-This SDK was released around December 1987 and included a copy of Microsoft OS/2 1.0.  We do not have any of the
-printed documentation that came with the SDK, such as the *Installation Guide*, but we do have the
-[Microsoft® Operating System/2 Programmer’s Toolkit](/docs/os2/microsoft/ptk/1.0/) from March 1988, thanks to the
-[OS/2 Museum](http://www.os2museum.com/).
+This SDK was released in December 1987 along with [Microsoft OS/2 1.0](/disks/pc/os2/microsoft/1.0/).
+We do not have any of the printed documentation that came with the SDK, such as the *Installation Guide*, but we
+do have the [Microsoft® Operating System/2 Programmer’s Toolkit](/docs/os2/microsoft/ptk/1.0/) documentation from
+March 1988, thanks to the [OS/2 Museum](http://www.os2museum.com/wp/os2-history/os2-library/os2-1-x-programming/).
 
 ### Installation
 
@@ -43,8 +43,8 @@ PCjs currently only simulates PC, XT and AT-class machines, not PS/2 machines, s
 of machine you're using.  It's asking that question merely to determine whether you're using 3.5-inch or 5.25-inch SDK
 distribution diskettes.  These disks happen to be the 3.5-inch versions, so you must pretend you're using a PS/2.
 
-Also, this SDK may have only been tested with Microsoft's release of OS/2 1.0 (included with the SDK), because if you
-install it on [IBM OS/2 1.0](/disks/pc/os2/ibm/1.0/), the script will fail when it attempts to run LIBBUILD to build
+Also, this SDK may have only been tested with Microsoft's release of OS/2 1.0, because if you install it on
+[IBM OS/2 1.0](/disks/pc/os2/ibm/1.0/), the script will fail when it attempts to run LIBBUILD to build
 all the C runtime libraries.  Apparently, this is because IBM OS/2 1.0 creates an OS2INIT.CMD with PATH set to:
 
 	C:\;C:\OS2;C:\OS2\INSTALL;
@@ -73,8 +73,8 @@ the missing **NETWORK** disk; specifically:
 	NMPIPE.H
 	README.DOC
 
-but you aren't likely to need those.  We will rebuild a copy of this missing disk from other sources and
-include it in the SDK at a later date.
+but you aren't likely to need those.  We will rebuild a copy of that missing disk from other sources and
+include it with the SDK diskettes at a later date.
 
 ### Using SDKED
 
