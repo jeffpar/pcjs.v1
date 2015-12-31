@@ -13,9 +13,9 @@ machines:
 
 Welcome to [PCjs](/docs/about/pcjs/), the first IBM PC simulation to run in your web browser without any plugins.
 It was added to the [JavaScript Machines](/docs/about/) project in Fall 2012, and it is now part of the
-[PCjs Project](https://github.com/jeffpar/pcjs) on GitHub.  The project includes:
+[PCjs Project](https://github.com/jeffpar/pcjs) on [GitHub](http://github.com/).  The project includes:
 
-* [PCjs](/docs/about/pcjs/), a simulation of the original IBM PC (circa 1981)
+* [PCjs](/docs/pcjs/), a simulation of the original IBM PC (circa 1981)
 * [C1Pjs](/docs/c1pjs/), a simulation of the OSI Challenger 1P (circa 1978)
 
 All the simulations are written entirely in JavaScript.  No Flash, Java or other plugins are required.
@@ -38,6 +38,16 @@ Demos
 ---
 Some pre-configured machines are shown below, ready to run BASIC, DOS, Windows 1.01, and assorted non-DOS software.
 
+{% comment %}
+![IBM PC running DONKEY.BAS](/devices/pc/machine/5150/cga/64kb/donkey/thumbnail.jpg "link:/devices/pc/machine/5150/cga/64kb/donkey/:200:100")
+![IBM PC XT w/CGA, 10Mb Hard Drive](/devices/pc/machine/5160/cga/256kb/demo/thumbnail.jpg "link:/devices/pc/machine/5160/cga/256kb/demo/:200:100")
+![IBM PC XT w/CGA, Windows 1.01](/devices/pc/machine/5160/cga/256kb/win101/thumbnail.jpg "link:/devices/pc/machine/5160/cga/256kb/win101/:200:100")
+![IBM PC XT w/EGA, Windows 1.01](/devices/pc/machine/5160/ega/640kb/win101/thumbnail.jpg "link:/devices/pc/machine/5160/ega/640kb/win101/:200:100")
+![IBM PC AT w/EGA, OS/2 1.0](/disks/pc/os2/ibm/1.0/thumbnail.jpg "link:/disks/pc/os2/ibm/1.0/:200:100")
+![IBM PC w/MDA, CP/M-86](/disks/pc/cpm/1.1b/thumbnail.jpg "link:/disks/pc/cpm/1.1b/:200:100")
+![IBM PC w/MDA, Microsoft Adventure](/disks/pc/games/microsoft/adventure/thumbnail.jpg "link:/disks/pc/games/microsoft/adventure/:200:100")
+![IBM PC w/CGA, Zork I](/disks/pc/games/infocom/zork1/thumbnail.jpg "link:/disks/pc/games/infocom/zork1/:200:100")
+{% endcomment %}
 {% include screenshot.html src="/devices/pc/machine/5150/cga/64kb/donkey/thumbnail.jpg" width="200" height="120" title="IBM PC running DONKEY.BAS" link="/devices/pc/machine/5150/cga/64kb/donkey/" %}
 {% include screenshot.html src="/devices/pc/machine/5160/cga/256kb/demo/thumbnail.jpg" width="200" height="120" title="IBM PC XT w/CGA, 10Mb Hard Drive" link="/devices/pc/machine/5160/cga/256kb/demo/" %}
 {% include screenshot.html src="/devices/pc/machine/5160/cga/256kb/win101/thumbnail.jpg" width="200" height="120" title="IBM PC XT w/CGA, Windows 1.01" link="/devices/pc/machine/5160/cga/256kb/win101/" %}

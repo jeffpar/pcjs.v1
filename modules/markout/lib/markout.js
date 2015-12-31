@@ -128,7 +128,7 @@ function MarkOut(sMD, sIndent, req, aParms, fDebug, fMachineXML)
 /**
  * CLI()
  *
- * Provides a command-line interface for the markout module
+ * Provides a command-line interface for the MarkOut module
  *
  * Usage:
  *
@@ -323,7 +323,7 @@ MarkOut.prototype.convertMD = function(sIndent)
 
     /*
      * Before performing the original comment-elimination step, a new step has been added that
-     * allows blocks of Markdown to be excluded from the Markout process (eg, build instructions
+     * allows blocks of Markdown to be excluded from the MarkOut process (eg, build instructions
      * that you'd like to see on GitHub but that don't need to be displayed on the public website).
      *
      * Basically, you wrap those kinds of blocks with a pair of special comments, like so:
@@ -334,8 +334,8 @@ MarkOut.prototype.convertMD = function(sIndent)
      * triple-dash-style comments.
      */
     if (!this.fDebug) {
-        sMD = sMD.replace(/\{%\s*if\s+page\.developer\s*%}[\s\S]*?{%\s*endif\s*%}\s*/, "");
-        sMD = sMD.replace(/[ \t]*<!--+\s*begin:exclude\s*-+->[\s\S]*?<!--+\s*end:exclude\s*-+->[\r\n]*/i, "");
+        sMD = sMD.replace(/\{%\s*if\s+page\.developer\s*%}[\s\S]*?{%\s*endif\s*%}\s*/g, "");
+        sMD = sMD.replace(/[ \t]*<!--+\s*begin:exclude\s*-+->[\s\S]*?<!--+\s*end:exclude\s*-+->[\r\n]*/gi, "");
     }
 
     /*
@@ -350,6 +350,7 @@ MarkOut.prototype.convertMD = function(sIndent)
      * the lack of JavaScript support for the "s" (aka "dotall" or "multiline") option that enables
      * "." to match newlines.
      */
+    sMD = sMD.replace(/\{%\s*comment\s*%}[\s\S]*?{%\s*endcomment\s*%}\s*/g, "");
     sMD = sMD.replace(/<!--[\s\S]*?-->/g, "");
 
     /*
@@ -789,7 +790,7 @@ MarkOut.prototype.convertMDLinks = function(sBlock)
      * TODO: These replacements should use appropriate values from _config.yml; however, unless/until
      * we start using Node again to host the public site, that's low priority.
      */
-    sBlock = sBlock.replace(/\{([\{%]).*?\1}/, "");
+    sBlock = sBlock.replace(/\{([\{%]).*?\1}/g, "");
 
     var aMatch;
     var re = /\[([^\[\]]*)]\((.*?)(?:\s*"(.*?)"\)|\))/g;
