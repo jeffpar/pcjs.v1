@@ -4,7 +4,7 @@
  * @version 1.0
  * Created 2012-Jun-15
  *
- * Copyright © 2012-2015 Jeff Parsons <Jeff@pcjs.org>
+ * Copyright © 2012-2016 Jeff Parsons <Jeff@pcjs.org>
  *
  * This file is part of PCjs, which is part of the JavaScript Machines Project (aka JSMachines)
  * at <http://jsmachines.net/> and <http://pcjs.org/>.
@@ -269,7 +269,7 @@ Component.subclass(Computer);
  */
 Computer.sAppName = APPNAME || "PCjs";
 Computer.sAppVer = APPVERSION;
-Computer.sCopyright = "Copyright © 2012-2015 Jeff Parsons <Jeff@pcjs.org>";
+Computer.sCopyright = "Copyright © 2012-2016 Jeff Parsons <Jeff@pcjs.org>";
 
 /*
  * I think it's a good idea to also display a GPL notice, putting people on notice that even

@@ -20,7 +20,7 @@ The following output should appear:
 	ibm5150.pc-mda-64k object created
 	PCjs> ramLow: 64Kb allocated
 	PCjs v1.x.x
-	Copyright © 2012-2015 Jeff Parsons <Jeff@pcjs.org>
+	Copyright © 2012-2016 Jeff Parsons <Jeff@pcjs.org>
 	License: GPL version 3 or later <http://gnu.org/licenses/gpl.html>
 	Type ? for list of debugger commands
 	AX=0000 BX=0000 CX=0000 DX=0000 SP=0000 BP=0000 SI=0000 DI=0000 

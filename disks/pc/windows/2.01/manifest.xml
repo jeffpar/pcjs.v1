@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.20.2/manifest.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.20.3/manifest.xsl"?>
 <manifest type="software">
 	<title>Microsoft Windows 2.01</title>
 	<disk id="disk01" size="1228800" chs="80:2:15" img="static/1200K/WIN201-DISK1.img" href="/disks/pc/windows/2.01/WIN201_DISK1.json" md5="aaea821752eaacbe2a531f1759544b64" md5json="eff7921e9448285acfc82b8fcf472831">

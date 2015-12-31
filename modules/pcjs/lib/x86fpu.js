@@ -4,7 +4,7 @@
  * @version 1.0
  * Created 2015-Nov-09
  *
- * Copyright © 2012-2015 Jeff Parsons <Jeff@pcjs.org>
+ * Copyright © 2012-2016 Jeff Parsons <Jeff@pcjs.org>
  *
  * FPU instruction description excerpts from the PC Magazine "Programmer's Technical Reference:
  * The Processor and Coprocessor," Copyright 1992 by Ziff-Davis Press (ISBN 1-56276-016-5).

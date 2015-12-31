@@ -24,7 +24,7 @@ the "file:" or "http:" protocol.
 	- [sample3b.html](sample3b.html) and [sample3b.xml](sample3b.xml)
 + Feel free to copy/paste additional components from other machine XML files on [pcjs.org](http://www.pcjs.org/).
 + Remember to display the appropriate attribution on anything you share publicly; e.g.:
-		[PCjs](http://pcjs.org) © 2012-2015 by [Jeff Parsons](mailto:Jeff@pcjs.org) ([@jeffpar](http://twitter.com/jeffpar))
+		[PCjs](http://pcjs.org) © 2012-2016 by [Jeff Parsons](mailto:Jeff@pcjs.org) ([@jeffpar](http://twitter.com/jeffpar))
 + Stay in sync with the [PCjs repository](https://github.com/jeffpar/pcjs), to keep your copy of PCjs up-to-date.
 
 Have fun!
