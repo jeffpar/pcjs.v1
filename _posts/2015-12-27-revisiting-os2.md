@@ -23,12 +23,14 @@ printed documentation that came with the SDK, such as the *Installation Guide*, 
 [Microsoft® Operating System/2 Programmer’s Toolkit](/docs/os2/microsoft/ptk/1.0/) documentation from March 1988,
 thanks to the [OS/2 Museum](http://www.os2museum.com/wp/os2-history/os2-library/os2-1-x-programming/).
 
-Aside from Microsoft's assembler (MASM) and C compiler, the SDK included some other useful tools, such as **SDKED**
-(SDK Editor), which was essentially an OS/2 port of Mark Zbikowski's **Z** Editor that was used internally at
-Microsoft for many years.  The same editor was later renamed to **M** and ultimately **PWB** (Programmer's Workbench).
-With the introduction of various Integrated Development Environment (IDE) products, such as Visual BASIC in 1991,
-Visual C++ in 1993, and Visual Studio in 1995, this stand-alone editor became obsolete, but in the 1980s, it was a
-valuable tool.
+Aside from Microsoft's assembler (MASM) and C compiler (CL), the SDK included some other useful tools, such as the
+**SDK Editor** (SDKED), which was essentially an OS/2 port of Mark Zbikowski's **Z** Editor that was used internally
+at Microsoft for many years.  It was renamed to the **Microsoft Editor** (M or MEP) with the release of Microsoft C
+5.1, and it was later integrated into **Programmer's Workbench** (PWB), the text-mode Integrated Development
+Environment (IDE) that came with Microsoft C 6.0.
+
+With the introduction of graphical IDEs, such as Visual BASIC in 1991, Visual C++ in 1993, and Visual Studio in 1995,
+this stand-alone, text-mode editor became obsolete, but in the 1980s, it was an essential tool.
 
 You can learn more about [SDKED](/disks/pc/tools/microsoft/os2/sdk/1.02/#using-sdked) on the
 [MS OS/2 SDK 1.02](/disks/pc/tools/microsoft/os2/sdk/1.02/) page.  I'll be adding a complete list of all the files
