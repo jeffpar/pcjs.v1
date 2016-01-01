@@ -12,9 +12,6 @@ url: "http://www.pcjs.org"  # "http://jeffpar.github.io" or "http://www.pcjs.org
 twitter_username: jeffpar
 github_username:  jeffpar
 
-gems:
-  - jekyll-sitemap
-
 # Build settings
 
 exclude: ["index.html", "logs", "node_modules", "**/c64", "**/static", "src", "tmp", "videos", "web"]
