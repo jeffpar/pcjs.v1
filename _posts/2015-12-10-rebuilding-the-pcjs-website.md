@@ -9,12 +9,12 @@ permalink: /blog/2015/12/10/
 It's been nice using Node.js to power the PCjs website, using Amazon's Elastic Beanstalk service, but that combination
 has also been a source of some frustrations.
 
-* When someone posts an article or a tweet linking to a PCjs page, the website bogs down, and while Amazon's Elastic
++ When someone posts an article or a tweet linking to a PCjs page, the website bogs down, and while Amazon's Elastic
 Beanstalk service makes it easy to automatically scale up, each new instance automatically multiplies my expenses as well,
 which hover around $34/month for a single instance.  With assorted S3 and transfer charges, my average monthly bill is
 over $55/month.  That's a bit much for a site that generates zero revenue.
 
-* Once or twice a year, when I'm attempting to either update the server or upgrade my Node configuration, the update
++ Once or twice a year, when I'm attempting to either update the server or upgrade my Node configuration, the update
 or upgrade will fail, and Amazon's web console provides virtually no details about why it failed.  I get an error message
 like "**ERROR: Failed to deploy application**" and that is it.  Literally.
 
