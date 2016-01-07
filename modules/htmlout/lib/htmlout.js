@@ -244,30 +244,41 @@ var asFilesNonServed = [
     "web.config"        // Azure/IISNode-specific
 ];
 
-var nBlogExcerpts = 20;
+/*
+ * Maximum blog entries increased from 20 to 100 for the new blog format.
+ */
+var nBlogExcerpts = 100;
 
 /**
  * HTMLOut()
  *
- * Load (building or rebuilding as needed) a default HTML document ("index.html")
- * for the specified directory (which corresponds to req.path).  sFile is the name
- * of a specific template file to start with, but in most cases, callers will pass
- * null, which means we'll fall back to sTemplateFile.
+ * Load (building or rebuilding as needed) a default HTML document (eg, "index.html")
+ * for the specified directory (which corresponds to req.path).  sTemplateFile is the name
+ * of a specific template file to start with, but in most cases, callers will pass null,
+ * which means we'll fall back to sTemplateFile.
  *
  * @constructor
- * @param {string} sDir is a fully-qualified web server directory
- * @param {string|null} sFile is an optional template path (relative to sDir)
+ * @param {string} sPath is a fully-qualified web server directory or file
+ * @param {string|null} sFile is an optional template path (relative to sPath)
  * @param {boolean} fRebuild (this overrides the module's normal fRebuild setting)
  * @param {Object} req
  * @param {function(Error,string)} done
  */
-function HTMLOut(sDir, sFile, fRebuild, req, done)
+function HTMLOut(sPath, sFile, fRebuild, req, done)
 {
-    this.sDir = sDir;
+    var i;
+    this.sPath = sPath;
+    this.sDir = sPath.replace("/blog", "/_posts");
+    this.sFile = sReadMeFile;
+    this.sExt = ((i = this.sPath.lastIndexOf('.')) > 0? this.sPath.substr(i+1) : "").toLowerCase();
+    if (this.sExt == "md") {
+        this.sFile = path.basename(this.sDir);
+        this.sDir = path.dirname(this.sDir);
+    }
 
-    this.sFile = (sFile? path.join(sDir, sFile) : path.join(sServerRoot, sTemplateFile));
+    this.sTemplateFile = (sFile? path.join(this.sDir, sFile) : path.join(sServerRoot, sTemplateFile));
 
-    HTMLOut.logDebug('HTMLOut("' + sDir + '", "' + this.sFile + '", ' + fRebuild + ')');
+    HTMLOut.logDebug('HTMLOut("' + this.sPath + '", "' + this.sTemplateFile + '", ' + fRebuild + ')');
 
     this.fDebug = (fServerDebug || net.hasParm(net.GORT_COMMAND, net.GORT_DEBUG, req)) && !net.hasParm(net.GORT_COMMAND, net.GORT_RELEASE, req);
     this.fRebuild = fRebuild;
@@ -299,7 +310,7 @@ function HTMLOut(sDir, sFile, fRebuild, req, done)
      * that we would never want to cache.
      */
     if (!fCache || fServerDebug || net.hasParm(net.GORT_COMMAND, null, req) || net.hasParm(net.REVEAL_COMMAND, null, req)) {
-        this.loadFile(this.sFile, true);
+        this.loadFile(this.sTemplateFile, true);
         return;
     }
 
@@ -307,11 +318,15 @@ function HTMLOut(sDir, sFile, fRebuild, req, done)
      * Set the name of the default file (eg, "index.html") we will use to cache the template
      * after all tokens have been replaced.
      */
-    this.sCacheFile = path.join(sDir, sDefaultFile);
+    if (this.sExt == "md") {
+        this.sCacheFile = this.sPath.replace(".md", ".html");
+    } else {
+        this.sCacheFile = path.join(this.sDir, sDefaultFile);
+    }
 
     if (this.fRebuild) {
         HTMLOut.logDebug("HTMLOut(): rebuilding " + this.sCacheFile);
-        this.loadFile(this.sFile, true);
+        this.loadFile(this.sTemplateFile, true);
         return;
     }
 
@@ -322,15 +337,15 @@ function HTMLOut(sDir, sFile, fRebuild, req, done)
     var obj = this;
     fs.stat(this.sCacheFile, function doneStatCacheFile(err, statsIndex) {
         if (err) {
-            obj.loadFile(obj.sFile, true);
+            obj.loadFile(obj.sTemplateFile, true);
         } else {
-            fs.stat(obj.sFile, function doneStatTemplateFile(err, statsTemplate) {
+            fs.stat(obj.sTemplateFile, function doneStatTemplateFile(err, statsTemplate) {
                 if (!err && statsIndex.mtime.getTime() < statsTemplate.mtime.getTime()) {
                     /*
                      * Since the template has a new timestamp, we're going to load and process it
                      * as a template (so set fTemplate = true);
                      */
-                    obj.loadFile(obj.sFile, true);
+                    obj.loadFile(obj.sTemplateFile, true);
                 } else {
                     /*
                      * If the specified template file can't be accessed, we can either report that as
@@ -548,7 +563,11 @@ HTMLOut.filter = function(req, res, next)
      * NOTE: To minimize unnecessary redirects, the getDirList() function should always (try to) generate URLs for
      * folders with trailing slashes.
      */
-    if (asNonDirectories.indexOf(sBaseName) < 0) {
+    var sDir = sPath;
+    if (sBaseExt == "md") {
+        sDir = sDir.replace("/blog", "/_posts");
+    }
+    else if (asNonDirectories.indexOf(sBaseName) < 0) {
         if (sTrailingChar != '/') {
             HTMLOut.logDebug('HTMLOut.filter("' + sBaseName + '"): passing static file request to next()');
             next();
@@ -556,16 +575,16 @@ HTMLOut.filter = function(req, res, next)
         }
     }
 
-    fs.stat(sPath, function doneStatDirFilter(err, stats) {
+    fs.stat(sDir, function doneStatDirFilter(err, stats) {
         if (err) {
             HTMLOut.logError(err);
             // res.status(404).send(err.message);
         } else {
             var fDir = stats.isDirectory();
 
-            HTMLOut.logDebug('HTMLOut.filter(): isDirectory("' + sPath + '"): ' + fDir);
+            HTMLOut.logDebug('HTMLOut.filter(): isDirectory("' + sDir + '"): ' + fDir);
 
-            if (fDir) {
+            if (fDir || sBaseExt == "md") {
                 new HTMLOut(sPath, null, fRebuild, req, function doneHTMLOutFilter(err, sData) {
                     if (err) {
                         HTMLOut.logError(err);
@@ -993,11 +1012,17 @@ HTMLOut.prototype.getPCPath = function(sToken, sIndent, aParms)
 HTMLOut.prototype.getDirList = function(sToken, sIndent, aParms)
 {
     var obj = this;
+
     fs.readdir(this.sDir, function doneReadDirList(err, asFiles) {
         if (err) {
             obj.aTokens[sToken] = HTMLOut.logError(err);
         } else {
             var sList = "";
+
+            /*
+             * We only want a parent directory entry if we're processing a file rather than a directory.
+             */
+            if (obj.sExt) asFiles = [];
 
             /*
              * We add an entry for the parent directory; when we call path.join() with obj.req.path,
@@ -1145,13 +1170,24 @@ HTMLOut.prototype.getYear = function(sToken, sIndent, aParms)
 HTMLOut.prototype.getBlog = function(sToken, sIndent, aParms)
 {
     var obj = this;
-    if (this.sDir.match(/[\/\\]blog/)) {
-        var sPath = path.join(this.sDir, "**/README.md");
+
+    if (this.sExt == "md") return false;
+
+    if (this.sPath.match(/[\/\\]blog/)) {
+        /*
+         * The original blog structure created for the Node web server organized posts within
+         * date-based subdirectories under "/blog", but the new blog structure for GitHub Pages is
+         * date-based filenames within a single "_posts" directory.
+         */
+
+        var sDir = path.join(this.sDir, "*.md");
+        // var sDir = path.join(this.sDir, "**/README.md");
+
         /*
          * WARNING: On Azure, this.sDir will contain backslashes instead of slashes, which means
          * you'd also expect the results from glob() to contain backslashes as well -- but they don't.
          *
-         * For example, sPath on Azure is typically:
+         * For example, sDir on Azure is typically:
          *
          *      D:\home\site\wwwroot\blog\**\README.md
          *
@@ -1163,20 +1199,20 @@ HTMLOut.prototype.getBlog = function(sToken, sIndent, aParms)
          * However, it would be VERY unwise to rely on that behavior.  Let's continue to operate in a
          * path-separator-agnostic mode, like passing any URL we form from these paths through encodeURL().
          */
-        glob(sPath, {nosort: true}, function doneGlobForBlog(err, asPaths) {
-            asPaths.sort(function(a, b) {return a < b? 1 : -1;});
+        glob(sDir, {nosort: true}, function doneGlobForBlog(err, asDirs) {
+            asDirs.sort(function(a, b) {return a < b? 1 : -1;});
             /*
              * Sorting the list of blog files now was all well and good, except that there's
              * no guarantee the readFile() callbacks will return in the same order we issue them.
              *
-             * To deal with that, we turn asPaths into aExcerpts: an array of objects (instead of
+             * To deal with that, we turn asDirs into aExcerpts: an array of objects (instead of
              * strings) that can hold the excerpts.  We'll plug the excerpts into aExcerpts as they
              * come in, and then we'll assemble them all at the end.
              *
              * We also take this opportunity to cap the number of (most recent) excerpts.
              */
             var i;
-            var cExcerpts = Math.min(asPaths.length, nBlogExcerpts);
+            var cExcerpts = Math.min(asDirs.length, nBlogExcerpts);
             var aExcerpts = new Array(cExcerpts);
             var cExcerptsRemaining = aExcerpts.length;
             for (i = 0; i < cExcerpts; i++) {
@@ -1186,31 +1222,44 @@ HTMLOut.prototype.getBlog = function(sToken, sIndent, aParms)
                  * then we can presume that there's a README.md in the requested directory, meaning
                  * this is probably a "leaf" folder of the blog "tree", and so it's that README.md we
                  * should display, not these excerpts -- so set the excerpt count to zero and bail.
-                 */
-                if (path.dirname(asPaths[i]).length - obj.sDir.length <= 0) {
+                 *
+                 * NOTE: This is no longer a valid assumption with the new blog structure for GitHub Pages.
+                 *
+                if (path.dirname(asDirs[i]).length - obj.sDir.length <= 0) {
                     cExcerptsRemaining = 0;
                     break;
                 }
-                aExcerpts[i] = {path: asPaths[i], excerpt: ""};
+                 */
+                aExcerpts[i] = {dir: asDirs[i], excerpt: ""};
             }
             if (cExcerptsRemaining) {
                 for (i = 0; i < aExcerpts.length; i++) {
                     (function(iPath) {
-                        var sFile = aExcerpts[iPath].path;
-                        fs.readFile(sFile, {encoding: "utf8"}, function doneReadFileForBlog(err, s) {
+                        var sFile = aExcerpts[iPath].dir;
+                        fs.readFile(sFile, {encoding: "utf8"}, function doneReadFileForBlog(err, sPost) {
                             if (err) {
                                 aExcerpts[iPath].excerpt = HTMLOut.logError(err);
                             } else {
-                                s = s.replace(/\r\n/g, "\n");
-                                var cch = s.indexOf("\n\n");
-                                cch = s.indexOf("\n\n", cch+2);
+                                sPost = sPost.replace(/\r\n/g, "\n");
+
+                                /*
+                                 * Remove any Front Matter from the top of the post, after extracting the title.
+                                 */
+                                var aFM = sPost.match(/^---[\s\S]*?\stitle:\s*['"]?(.*?)['"]?\s*\n[\s\S]*?---\s*/);
+                                if (aFM) sPost = aFM[1] + "\n---\n\n" + sPost.substr(aFM[0].length);
+
+                                var cch = sPost.indexOf("\n\n");
+                                cch = sPost.indexOf("\n\n", cch+2);
                                 if (cch >= 0) {
-                                    s = s.substr(0, cch+2);
+                                    sPost = sPost.substr(0, cch+2);
                                     /*
                                      * I believe path.dirname() always removes any trailing slash, and since
                                      * these are directories, we definitely want a trailing slash on the URL.
                                      */
-                                    var sURL = path.dirname(sFile.substr(obj.sDir.length)) + "/";
+                                    // var sURL = path.dirname(sFile.substr(obj.sDir.length)) + "/";
+
+                                    var sURL = "/blog/" + path.basename(sFile);
+
                                     /*
                                      * I would like to annotate the excerpt with date information, which we can
                                      * derive from sFile, which should be in one of two forms:
@@ -1222,14 +1271,17 @@ HTMLOut.prototype.getBlog = function(sToken, sIndent, aParms)
                                      * We adhere to those forms because, when sorted, they produce a chronological listing.
                                      */
                                     var asParts = sFile.match(/[\/\\](\d\d\d\d)[\/\\](\d\d)[\/\\]?(\d*)/);
+                                    if (!asParts) {
+                                        asParts = sFile.match(/[\/\\](\d\d\d\d)-(\d+)-(\d+)-/)
+                                    }
                                     if (asParts) {
                                         var iYear = parseInt(asParts[1], 10);
                                         var iMonth = parseInt(asParts[2], 10) - 1;
                                         var iDay = asParts[3]? parseInt(asParts[3], 10) : 1;
                                         var sDate = usr.formatDate(asParts[3]? "F j, Y" : "F Y", new Date(iYear, iMonth, iDay));
-                                        s = s.replace(/^([^\n]*\n[^\n]*\n)/, '$1<p style="font-size:x-small;margin-top:-12px">' + sDate + '</p>\n\n');
+                                        sPost = sPost.replace(/^([^\n]*\n[^\n]*\n)/, '$1<p style="font-size:x-small;margin-top:-12px">' + sDate + '</p>\n\n');
                                     }
-                                    aExcerpts[iPath].excerpt = s + "[Read more](" + sURL + ")...";
+                                    aExcerpts[iPath].excerpt = sPost + "[Read more](" + sURL + ")...";
                                 } else {
                                     aExcerpts[iPath].excerpt = "Can't parse " + sFile;
                                 }
@@ -1263,15 +1315,15 @@ HTMLOut.prototype.getBlog = function(sToken, sIndent, aParms)
  * getBlog() gets first crack; if we're in a blog folder, it will display the appropriate blog entries.
  * If getBlog() declines the request, we move on to getManifestXML(), because we have some folders where
  * there's BOTH a manifest and a README, such as /apps/pc/1981/visicalc, and we want the manifest to take
- * priority.  getManifestXML() will, in turn, pass the request on to getReadMe(), which will, in turn,
+ * priority.  getManifestXML() will, in turn, pass the request on to getMarkdownFile(), which will, in turn,
  * pass the request on to getMachineXML().
  *
  * If getMachineXML() declines as well, then getRandomString() is called, which is kinda useless, but better
  * than nothing (well, maybe).
  *
- * Some wrinkles have been added to the above: getManifestXML() can alternatively call getMachineXML()
- * with a specific machine XML file, which would have had the potential to bypass getReadMe() altogether, so
- * getMachineXML() may now call getReadMe() -- which must NOT call getMachineXML() back whenever that happens.
+ * Some wrinkles have been added to the above: getManifestXML() can alternatively call getMachineXML() with a
+ * specific machine XML file, which would have had the potential to bypass getMarkdownFile() altogether, so
+ * getMachineXML() may now call getMarkdownFile() -- which must NOT call getMachineXML() back whenever that happens.
  *
  * @this {HTMLOut}
  * @param {string} sToken
@@ -1400,7 +1452,7 @@ HTMLOut.prototype.getMachineXML = function(sToken, sIndent, aParms, sXMLFile, sS
                     s = m.convertMD("    ").trim();
 
                     obj.processMachines(m.getMachines(), function doneProcessXMLMachines() {
-                        obj.getReadMe(sToken, sIndent, aParms, s, true);
+                        obj.getMarkdownFile(obj.sFile, sToken, sIndent, aParms, s, true);
                     });
                     return;
                 }
@@ -1424,11 +1476,11 @@ HTMLOut.prototype.getMachineXML = function(sToken, sIndent, aParms, sXMLFile, sS
          */
 
         /*
-         * If we were called from getManifestXML(), then let's fallback to getReadMe() instead.
+         * If we were called from getManifestXML(), then let's fallback to getMarkdownFile() instead.
          */
         s = obj.getRandomString(sIndent);
         if (fFromManifest) {
-            obj.getReadMe(sToken, sIndent, aParms, s);
+            obj.getMarkdownFile(obj.sFile, sToken, sIndent, aParms, s);
             return;
         }
 
@@ -1610,41 +1662,43 @@ HTMLOut.prototype.getManifestXML = function(sToken, sIndent, aParms)
                     /*
                      * If we're still here, then there was either a problem reading the manifest XSL file,
                      * or the manifest XML file didn't contain a machine reference.  For now, we fall back to
-                     * getReadMe().
+                     * getMarkdownFile().
                      */
-                    obj.getReadMe(sToken, sIndent, aParms);
+                    obj.getMarkdownFile(obj.sFile, sToken, sIndent, aParms);
                 });
                 return;
             }
         }
         /*
          * If we're still here, then there was either a problem reading the manifest XML file, or it didn't
-         * contain a recognized stylesheet.  For now, we fall back to getReadMe().
+         * contain a recognized stylesheet.  For now, we fall back to getMarkdownFile().
          */
-        obj.getReadMe(sToken, sIndent, aParms);
+        obj.getMarkdownFile(obj.sFile, sToken, sIndent, aParms);
     });
 };
 
 /**
- * getReadMe(sToken, sIndent, aParms, sPrevious, fMachineXML)
+ * getMarkdownFile(sFile, sToken, sIndent, aParms, sPrevious, fMachineXML)
  *
- * If a "README.md" exists in the current directory, open it, convert it, and prepare for replacement.
+ * If sFile exists in the current directory, open it, convert it, and prepare for replacement.
  *
  * @this {HTMLOut}
- * @param {string} sToken
+ * @param {string} sFile
+ * @param {string} [sToken]
  * @param {string} [sIndent]
  * @param {Array.<string>} [aParms]
- * @param {string|null} [sPrevious] is text, if any, that should precede the README.md
+ * @param {string|null} [sPrevious] is text, if any, that should precede the file
  * @param {boolean} [fMachineXML] true if a machine.xml file has already been processed by the caller
  */
-HTMLOut.prototype.getReadMe = function(sToken, sIndent, aParms, sPrevious, fMachineXML)
+HTMLOut.prototype.getMarkdownFile = function(sFile, sToken, sIndent, aParms, sPrevious, fMachineXML)
 {
     var obj = this;
-    var sFile = path.join(this.sDir, sReadMeFile);
 
-    HTMLOut.logConsole('HTMLOut.getReadMe("' + sFile + '")');
+    sFile = path.join(this.sDir, sFile);
 
-    fs.readFile(sFile, {encoding: "utf8"}, function doneReadMeFile(err, s) {
+    HTMLOut.logConsole('HTMLOut.getMarkdownFile("' + sFile + '")');
+
+    fs.readFile(sFile, {encoding: "utf8"}, function doneMarkdownFile(err, s) {
         if (err) {
             /*
              * Instead of displaying a cryptic error message inside our beautiful HTML template, eg:
@@ -1657,19 +1711,21 @@ HTMLOut.prototype.getReadMe = function(sToken, sIndent, aParms, sPrevious, fMach
              *
              * we now try some fallbacks, like checking for a "machine.xml" -- but only if sPrevious is not defined.
              */
-            if (sPrevious !== undefined) {              // this means we were called from getMachineXML(), so it's the end of road
-                obj.aTokens[sToken] = sPrevious;
-                obj.replaceTokens();
-            } else {
-                obj.getMachineXML(sToken, sIndent);     // we don't pass along aParms, because those are for Markdown files only
+            if (sToken) {
+                if (sPrevious !== undefined) {          // this means getMachineXML() called us, so it's the end of road
+                    obj.aTokens[sToken] = sPrevious;
+                    obj.replaceTokens();
+                } else {
+                    obj.getMachineXML(sToken, sIndent); // we don't pass along aParms, because those are for Markdown files only
+                }
             }
         } else {
-            var m = new MarkOut(s, sIndent, obj.req, aParms, obj.fDebug, fMachineXML);
+            var m = new MarkOut(s, sIndent, obj.req, aParms, obj.fDebug, fMachineXML, obj.sExt == "md");
             s = m.convertMD("    ").trim();
             /*
              * If the Markdown document begins with a heading, stuff that into the <title> tag;
              * it would be cleaner if this replacement could be performed by getTitle(), but unfortunately,
-             * getTitle() is called long before any README.md is opened.
+             * getTitle() is called long before we're called.
              */
             var match = s.match(/^\s*<h([0-9])[^>]*>(.*?)<\/h\1>/);
             if (match) {
@@ -1679,13 +1735,13 @@ HTMLOut.prototype.getReadMe = function(sToken, sIndent, aParms, sPrevious, fMach
                 obj.sHTML = obj.sHTML.replace(/(<title[^>]*>)([^\|]*)\|[^<]*(<\/title>)/, "$1$2| " + sTitle + "$3");
             }
             /*
-             * We need to query the MarkOut object for any machine definitions that the current "readme"
+             * We need to query the MarkOut object for any machine definitions that the current Markdown
              * document contained and give them to processMachines(), so that any associated scripts can
              * be added to the current page.
              *
              * However, processMachines() may need to search the file system for the appropriate scripts,
-             * and since that may not finish immediately, we defer updating the "readme" token until the
-             * processMachines() callback has been called.  This insures that the HTML page will not be
+             * and since that may not finish immediately, we defer updating the Markdown token, if any, until
+             * the processMachines() callback has been called.  This insures that the HTML page will not be
              * delivered until all associated scripts for all machine definitions have been added.
              *
              * Note that if we ever decide to support more than one Markdown document (or "readme" token)
@@ -1693,9 +1749,11 @@ HTMLOut.prototype.getReadMe = function(sToken, sIndent, aParms, sPrevious, fMach
              * any duplicates from that array, and then call processMachines() at some later point, after
              * all tokens have been replaced.
              */
-            obj.processMachines(m.getMachines(), function doneProcessReadMeMachines() {
-                obj.aTokens[sToken] = sPrevious? (sPrevious + sIndent + s) : s;
-                obj.replaceTokens();
+            obj.processMachines(m.getMachines(), function doneProcessMachines() {
+                if (sToken) {
+                    obj.aTokens[sToken] = sPrevious? (sPrevious + sIndent + s) : s;
+                    obj.replaceTokens();
+                }
             });
         }
     });

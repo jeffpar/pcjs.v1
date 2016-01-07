@@ -96,8 +96,9 @@ var sDefaultFile = "./README.md";
  * @param {Array.<string>|null} [aParms] is an array of overrides to use (see below)
  * @param {boolean} [fDebug] turns on debugging features (eg, debug comments, special URL encodings, etc)
  * @param {boolean} [fMachineXML] true if a machine.xml file has already been processed by the caller
+ * @param {boolean} [fAutoHeading] true to automatically generate a page heading
  */
-function MarkOut(sMD, sIndent, req, aParms, fDebug, fMachineXML)
+function MarkOut(sMD, sIndent, req, aParms, fDebug, fMachineXML, fAutoHeading)
 {
     this.sMD = sMD;
     this.sIndent = (sIndent || "");
@@ -111,6 +112,7 @@ function MarkOut(sMD, sIndent, req, aParms, fDebug, fMachineXML)
     }
     this.fDebug = fDebug;
     this.fMachineXML = fMachineXML;
+    this.fAutoHeading = fAutoHeading;
     this.sHTML = null;
     this.aIDs = [];         // this keeps track of auto-generated ID attributes for page elements, to insure uniqueness
     this.aMachines = [];    // this keeps track of embedded machines on the page
@@ -387,13 +389,13 @@ MarkOut.prototype.convertMD = function(sIndent)
                 }
             }
             /*
-             * If a "title" element existed in the Front Matter, then you can enable this code to
-             * auto-generate a top-level heading with the same value.
-             *
-             *      aMatch = aMatch[1].match(/title:\s*(.*?)\s*?\n/);
-             *      if (aMatch) sMD = aMatch[1] + "\n---\n\n" + sMD;
+             * If a "title" element existed in the Front Matter, this code auto-generates a top-level
+             * heading with the same value.
              */
-
+            if (this.fAutoHeading) {
+                aMatch = aMatch[1].match(/title:\s*(.*?)\s*?\n/);
+                if (aMatch) sMD = aMatch[1] + "\n---\n\n" + sMD;
+            }
         }
     }
 

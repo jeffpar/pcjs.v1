@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "IBM PC XT (Model 5160) with Color Display, 256Kb, Windows 1.01"
+title: "IBM PC XT (Model 5160, 256Kb) Windows 1.01 with CGA Display"
 permalink: /devices/pc/machine/5160/cga/256kb/win101/
 machines:
   - type: pc
