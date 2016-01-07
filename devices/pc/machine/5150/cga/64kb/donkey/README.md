@@ -1,7 +1,9 @@
 ---
 layout: page
-title: IBM PC (Model 5150) running DONKEY.BAS
+title: IBM PC (Model 5150, 64Kb) running DONKEY.BAS
 permalink: /devices/pc/machine/5150/cga/64kb/donkey/
+redirect_from:
+  - /configs/pc/machines/5150/cga/64kb/donkey/
 machines:
   - type: pc
     id: ibm5150

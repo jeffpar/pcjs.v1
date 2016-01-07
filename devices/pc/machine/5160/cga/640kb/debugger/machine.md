@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "IBM PC XT (Model 5160) with Color Display, 640Kb"
+title: "IBM PC XT (Model 5160, 640Kb) with Color Display and Debugger"
 permalink: /devices/pc/machine/5160/cga/640kb/debugger/
 machines:
   - type: pc-dbg

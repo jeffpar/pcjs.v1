@@ -64,7 +64,8 @@ that automatically run the software.
 
 ### Microsoft Windows
 
-* Microsoft Windows 1.01
+* Microsoft Windows 1.00
+* [Microsoft Windows 1.01](/disks/pc/windows/1.01/)
 * Microsoft Windows 1.03
 * Microsoft Windows 1.03A
 * Microsoft Windows 1.04

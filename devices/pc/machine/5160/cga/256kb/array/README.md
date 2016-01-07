@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "IBM PC XT (Model 5160) with Color Display, 256Kb"
+title: "IBM PC XT (Model 5160, 256Kb) Server Array"
 permalink: /devices/pc/machine/5160/cga/256kb/array/
 machines:
   - type: pc
@@ -10,7 +10,7 @@ machines:
 ---
 
 IBM PC XT "Server Array"
-===
+---
 
 ### Demonstration of Multiple IBM PCs on a Single Web Page
 

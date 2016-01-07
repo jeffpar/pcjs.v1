@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "IBM PC (Model 5150) with Color Display"
+title: "IBM PC (Model 5150, 384Kb) with Color Display"
 permalink: /devices/pc/machine/5150/cga/384kb/softkbd/
 machines:
   - type: pc-dbg

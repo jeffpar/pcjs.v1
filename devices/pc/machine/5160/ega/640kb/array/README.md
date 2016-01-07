@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Windows 1.01 "Server Array"
+title: "Windows 1.01 Server Array"
 permalink: /devices/pc/machine/5160/ega/640kb/array/
 machines:
   - type: pc
@@ -14,7 +14,7 @@ machines:
 ---
 
 Windows 1.01 "Server Array"
-===
+---
 
 ### Demonstration of Multiple IBM PCs on a Single Web Page
 

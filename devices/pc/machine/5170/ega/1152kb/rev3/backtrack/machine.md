@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "IBM PC AT (Model 5170) with EGA Display, 1152Kb, 20Mb Hard Disk"
+title: "IBM PC AT (Model 5170, 1152Kb) with EGA Display and 20Mb Hard Disk"
 permalink: /devices/pc/machine/5170/ega/1152kb/rev3/backtrack/
 machines:
   - type: pc

@@ -20,6 +20,10 @@ kramdown:
   input: GFM
   hard_wrap: false
 
+gems:
+  - jekyll-sitemap
+  - jekyll-redirect-from
+
 # Custom site settings
 
 pcjs:
