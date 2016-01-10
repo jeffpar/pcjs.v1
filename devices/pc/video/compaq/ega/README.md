@@ -7,7 +7,7 @@ permalink: /devices/pc/video/compaq/ega/
 Compaq Enhanced Color Graphics Board (EGA)
 ---
 
-The Compaq [EGA ROM BIOS](000412-001B/compaq-ega.json) in [000412-001B](000412-001B/) comes from
+Our Compaq [EGA ROM BIOS](000412-001B/compaq-ega.json) comes from
 [bitsavers](http://bitsavers.trailing-edge.com/pdf/compaq/firmware/000412-001B_EGA/).
 
 	cd 000412-001B
