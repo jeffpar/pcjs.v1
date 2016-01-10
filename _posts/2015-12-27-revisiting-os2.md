@@ -24,7 +24,7 @@ printed documentation that came with the SDK, such as the *Installation Guide*, 
 thanks to the [OS/2 Museum](http://www.os2museum.com/wp/os2-history/os2-library/os2-1-x-programming/).
 
 Aside from Microsoft's assembler (MASM) and C compiler (CL), the SDK included some other useful tools, such as the
-**SDK Editor** (SDKED), which was essentially an OS/2 port of Mark Zbikowski's **Z** Editor that was used internally
+**SDK Editor** (SDKED), which was essentially an OS/2 port of Mark Zbikowski's Editor (Z) that was used internally
 at Microsoft for many years.  It was renamed to the **Microsoft Editor** (M or MEP) with the release of Microsoft C
 5.1, and it was later integrated into **Programmer's Workbench** (PWB), the text-mode Integrated Development
 Environment (IDE) that came with Microsoft C 6.0.
