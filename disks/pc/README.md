@@ -73,7 +73,7 @@ that automatically run the software.
 * Microsoft Windows 2.03
 * Microsoft Windows 3.00
 * Microsoft Windows 3.11
-* Microsoft Windows 95
+* [Microsoft Windows 95](/disks/pc/windows/win95/4.00.950/)
 
 ### Other Operating Systems
 
