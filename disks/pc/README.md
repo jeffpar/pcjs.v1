@@ -73,11 +73,11 @@ that automatically run the software.
 * Microsoft Windows 2.03
 * Microsoft Windows 3.00
 * Microsoft Windows 3.11
-* Microsoft Windows 95
+* [Microsoft Windows 95](/disks/pc/windows/win95/4.00.950/)
 
 ### Other Operating Systems
 
-* [CP/M-86 1.1B](/disks/pc/cpm/1.1b/)
+* [CP/M-86](/disks/pc/cpm/)
 * Minix 1.1
 * PC/IX 1.0
 * [Microport's AT&T UNIX System V-AT 2.3](/disks/pc/unix/microport/system-v/2.3/)
