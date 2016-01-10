@@ -77,7 +77,7 @@ that automatically run the software.
 
 ### Other Operating Systems
 
-* [CP/M-86 1.1B](/disks/pc/cpm/1.1b/)
+* [CP/M-86](/disks/pc/cpm/)
 * Minix 1.1
 * PC/IX 1.0
 * [Microport's AT&T UNIX System V-AT 2.3](/disks/pc/unix/microport/system-v/2.3/)
