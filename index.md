@@ -1,7 +1,6 @@
 ---
 layout: page
 permalink: /
-developer: false
 machines:
   - type: pc
     id: ibm5150
