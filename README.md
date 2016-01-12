@@ -1,15 +1,5 @@
----
-layout: page
-permalink: /
-developer: false
-machines:
-  - type: pc
-    id: ibm5150
-    config: /devices/pc/machine/5150/mda/64kb/machine.xml
-  - type: c1p
-    id: demoC1P
-    config: /devices/c1p/machine/8kb/large/machine.xml
----
+PCjs: The Virtual IBM PC
+===
 
 Welcome to [PCjs](/docs/about/pcjs/), the first IBM PC simulation to run in your web browser without any plugins.
 It was added to the [JavaScript Machines](/docs/about/) project in Fall 2012, and it is now part of the
@@ -22,7 +12,7 @@ All the simulations are written entirely in JavaScript.  No Flash, Java or other
 Supported browsers include modern versions of Chrome, Safari, Firefox, Internet Explorer (v9.0 and up), Edge,
 and assorted mobile browsers.
 
-{% include machine.html id="ibm5150" %}
+[Embedded IBM PC](/devices/pc/machine/5150/mda/64kb/ "PCjs:ibm5150")
 
 The [simulation](/devices/pc/machine/5150/mda/64kb/) above features an Intel 8088 running at 4.77Mhz,
 with 64Kb of RAM and an IBM Monochrome Display Adapter.  For more control, there are also
@@ -38,27 +28,14 @@ Demos
 ---
 Some pre-configured machines are shown below, ready to run BASIC, DOS, Windows 1.01, and assorted non-DOS software.
 
-{% comment %}
-
-![IBM PC running DONKEY.BAS](/devices/pc/machine/5150/cga/64kb/donkey/thumbnail.jpg "link:/devices/pc/machine/5150/cga/64kb/donkey/:200:100")
-![IBM PC XT w/CGA, 10Mb Hard Drive](/devices/pc/machine/5160/cga/256kb/demo/thumbnail.jpg "link:/devices/pc/machine/5160/cga/256kb/demo/:200:100")
-![IBM PC XT w/CGA, Windows 1.01](/devices/pc/machine/5160/cga/256kb/win101/thumbnail.jpg "link:/devices/pc/machine/5160/cga/256kb/win101/:200:100")
-![IBM PC XT w/EGA, Windows 1.01](/devices/pc/machine/5160/ega/640kb/win101/thumbnail.jpg "link:/devices/pc/machine/5160/ega/640kb/win101/:200:100")
-![IBM PC AT w/EGA, OS/2 1.0](/disks/pc/os2/ibm/1.0/thumbnail.jpg "link:/disks/pc/os2/ibm/1.0/:200:100")
-![IBM PC w/MDA, CP/M-86](/disks/pc/cpm/1.1b/thumbnail.jpg "link:/disks/pc/cpm/1.1b/:200:100")
-![IBM PC w/MDA, Microsoft Adventure](/disks/pc/games/microsoft/adventure/thumbnail.jpg "link:/disks/pc/games/microsoft/adventure/:200:100")
-![IBM PC w/CGA, Zork I](/disks/pc/games/infocom/zork1/thumbnail.jpg "link:/disks/pc/games/infocom/zork1/:200:100")
-
-{% endcomment %}
-
-{% include screenshot.html src="/devices/pc/machine/5150/cga/64kb/donkey/thumbnail.jpg" width="200" height="120" title="IBM PC running DONKEY.BAS" link="/devices/pc/machine/5150/cga/64kb/donkey/" %}
-{% include screenshot.html src="/devices/pc/machine/5160/cga/256kb/demo/thumbnail.jpg" width="200" height="120" title="IBM PC XT w/CGA, 10Mb Hard Drive" link="/devices/pc/machine/5160/cga/256kb/demo/" %}
-{% include screenshot.html src="/devices/pc/machine/5160/cga/256kb/win101/thumbnail.jpg" width="200" height="120" title="IBM PC XT w/CGA, Windows 1.01" link="/devices/pc/machine/5160/cga/256kb/win101/" %}
-{% include screenshot.html src="/devices/pc/machine/5160/ega/640kb/win101/thumbnail.jpg" width="200" height="120" title="IBM PC XT w/EGA, Windows 1.01" link="/devices/pc/machine/5160/ega/640kb/win101/" %}
-{% include screenshot.html src="/disks/pc/os2/ibm/1.0/thumbnail.jpg" width="200" height="120" title="IBM PC AT w/EGA, OS/2 1.0" link="/disks/pc/os2/ibm/1.0/" %}
-{% include screenshot.html src="/disks/pc/cpm/1.1b/thumbnail.jpg" width="200" height="120" title="IBM PC w/MDA, CP/M-86" link="/disks/pc/cpm/1.1b/" %}
-{% include screenshot.html src="/disks/pc/games/microsoft/adventure/thumbnail.jpg" width="200" height="120" title="IBM PC w/MDA, Microsoft Adventure" link="/disks/pc/games/microsoft/adventure/" %}
-{% include screenshot.html src="/disks/pc/games/infocom/zork1/thumbnail.jpg" width="200" height="120" title="IBM PC w/CGA, Zork I" link="/disks/pc/games/infocom/zork1/" %}
+![IBM PC running DONKEY.BAS](/devices/pc/machine/5150/cga/64kb/donkey/thumbnail.jpg "link:/devices/pc/machine/5150/cga/64kb/donkey/:200:120")
+![IBM PC XT w/CGA, 10Mb Hard Drive](/devices/pc/machine/5160/cga/256kb/demo/thumbnail.jpg "link:/devices/pc/machine/5160/cga/256kb/demo/:200:120")
+![IBM PC XT w/CGA, Windows 1.01](/devices/pc/machine/5160/cga/256kb/win101/thumbnail.jpg "link:/devices/pc/machine/5160/cga/256kb/win101/:200:120")
+![IBM PC XT w/EGA, Windows 1.01](/devices/pc/machine/5160/ega/640kb/win101/thumbnail.jpg "link:/devices/pc/machine/5160/ega/640kb/win101/:200:120")
+![IBM PC AT w/EGA, OS/2 1.0](/disks/pc/os2/ibm/1.0/thumbnail.jpg "link:/disks/pc/os2/ibm/1.0/:200:120")
+![IBM PC w/MDA, CP/M-86](/disks/pc/cpm/1.1b/thumbnail.jpg "link:/disks/pc/cpm/1.1b/:200:120")
+![IBM PC w/MDA, Microsoft Adventure](/disks/pc/games/microsoft/adventure/thumbnail.jpg "link:/disks/pc/games/microsoft/adventure/:200:120")
+![IBM PC w/CGA, Zork I](/disks/pc/games/infocom/zork1/thumbnail.jpg "link:/disks/pc/games/infocom/zork1/:200:120")
 
 Check out the rest of the PCjs [Application](/apps/pc/), [Boot Disk](/disks/pc/) and [Machine](/devices/pc/machine/)
 demos, including an [IBM PC Dual Display System](/devices/pc/machine/5150/dual/64kb/) demo of multiple monitor support,
@@ -71,9 +48,9 @@ Below is the [OSI Challenger C1P](/docs/c1pjs/), another simulation in the JavaS
 It simulates Ohio Scientific's 6502-based microcomputer, released in 1978.  More details about this simulation
 and the original machine are available in the [C1Pjs Documentation](/docs/c1pjs/).
 
-{% include machine.html id="demoC1P" %}
+[Embedded OSI Challenger C1P](/devices/c1p/machine/8kb/large/ "C1Pjs:demoC1P")
 
-{% if page.developer %}
+<!--BEGIN:EXCLUDE-->
 
 ---
 
@@ -82,7 +59,7 @@ Developer Notes
 
 The [PCjs repository](https://github.com/jeffpar/pcjs) on GitHub contains everything needed to run PCjs
 computer simulations.  The [PCjs](/docs/pcjs/) and [C1Pjs](/docs/c1pjs/) emulators run in any modern web browser,
-with or without a web server, and examples are provided for both [local](/docs/pcjs/demos/) and [remote]({{ site.url }}/)
+with or without a web server, and examples are provided for both [local](/docs/pcjs/demos/) and [remote](http://www.pcjs.org/)
 operation.
 
 The project includes:
@@ -236,7 +213,7 @@ like a good little REPL.
 
 Use the "load" command to load a JSON machine configuration file.  A sample [ibm5150.json](modules/pcjs/bin/ibm5150.json)
 is provided in the *bin* directory, which is a "JSON-ified" version of the [machine.xml](devices/pc/machine/5150/mda/64kb/machine.xml)
-displayed on the [{{ site.pcjs.domain }}]({{ site.url }}/) home page.
+displayed on the [pcjs.org](http://www.pcjs.org/) home page.
 
 The command-line loader creates all the JSON-defined machine components in the same order that the browser creates
 XML-defined components.  You can also issue the "load" command directly from the command-line:
@@ -358,7 +335,7 @@ manually or with the Grunt "clean" task:
 
 	grunt clean
 	
-{% endif %}
+<!--END:EXCLUDE-->
 
 License
 ---
@@ -367,9 +344,9 @@ All published portions are free for redistribution and/or modification under the
 [GNU General Public License](/LICENSE) as published by the Free Software Foundation, either version 3 of the License,
 or (at your option) any later version.
 
-You are required to include the following copyright notice, with a link to [{{ site.pcjs.domain }}]({{ site.url }}/):
+You are required to include the following copyright notice, with a link to [pcjs.org](http://www.pcjs.org/):
 
-> [PCjs]({{ site.url }}/) © 2012-2016 by [Jeff Parsons](mailto:Jeff@pcjs.org) ([@jeffpar](http://twitter.com/jeffpar))
+> [PCjs](http://www.pcjs.org/) © 2012-2016 by [Jeff Parsons](mailto:Jeff@pcjs.org) ([@jeffpar](http://twitter.com/jeffpar))
 
 in every source code file of every copy or modified version of this work, and to display that notice on every web page
 or computer that runs any version of this software.
