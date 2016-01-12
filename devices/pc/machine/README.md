@@ -21,7 +21,7 @@ along with these IBM PC-compatibles:
 
 We also support a few non-IBM [Devices](/devices/):
 
-* 6502-based [Challenger 1P](/devices/c1p/machine/)
+* [6502 Challenger 1P](/devices/c1p/machine/)
 
 ### Ready-To-Run App Demos
 
