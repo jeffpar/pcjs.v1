@@ -65,10 +65,22 @@ documentation for the 80386 and 80486.
 
 ### Timing
 
-Operands   | **x** | **88** | **86** | **286** | **386** | **486**
----------- | :---: | :----: | :----: | :-----: | :-----: | :-----:
-none       |   0   |    8   |    8   |    3    |    4    |    3
+Operands   | **x** | **8088** | **8086** | **80286** | **80386** | **80486**
+---------- | :---: | :------: | :------: | :-------: | :-------: | :-------:
+none       |   0   |     8    |     8    |     3     |     4     |     3
+
+(x is the number of memory transfers)
 
 ---
 
 Source: PC Magazine "Programmer's Technical Reference: The Processor and Coprocessor," by Robert L. Hummel.
+
+---
+
+### PCjs Code
+
+{% highlight javascript linenos %}
+
+{% include_relative pcjs/opAAA.js %}
+
+{% endhighlight %}

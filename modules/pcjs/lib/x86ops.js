@@ -22,7 +22,7 @@
  *
  * You are required to include the above copyright notice in every source code file of every
  * copy or modified version of this work, and to display that copyright notice on every screen
- * that loads or runs any version of this software (see Computer.sCopyright).
+ * that loads or runs any version of this software (see Computer.COPYRIGHT).
  *
  * Some PCjs files also attempt to load external resource files, such as character-image files,
  * ROM files, and disk image files. Those external resource files are not considered part of the
@@ -766,7 +766,7 @@ X86.opAAA = function()
     if ((AL & 0xf) > 9 || this.getAF()) {
         AL += 6;
         /*
-         * Simulate the fact that the 80286 and higher actually add 6 to AX rather than AL.
+         * Simulate the fact that the 80286 and higher add 6 to AX rather than AL.
          */
         if (this.model >= X86.MODEL_80286 && AL > 0xff) AH++;
         AH++;

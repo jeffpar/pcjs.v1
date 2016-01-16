@@ -22,7 +22,7 @@
  *
  * You are required to include the above copyright notice in every source code file of every
  * copy or modified version of this work, and to display that copyright notice on every screen
- * that loads or runs any version of this software (see Computer.sCopyright).
+ * that loads or runs any version of this software (see C1PComputer.COPYRIGHT).
  *
  * Some C1Pjs files also attempt to load external resource files, such as character-image files,
  * ROM files, and disk image files. Those external resource files are not considered part of the
@@ -94,9 +94,9 @@ function C1PComputer(parmsComputer, modules)
     this.modules = modules;
 }
 
-C1PComputer.sAppName = APPNAME || "C1Pjs";
-C1PComputer.sAppVer = APPVERSION;
-C1PComputer.sCopyright = "Copyright © 2012-2016 Jeff Parsons <Jeff@pcjs.org>";
+C1PComputer.APPNAME = APPNAME || "C1Pjs";
+C1PComputer.APPVERSION = APPVERSION;
+C1PComputer.COPYRIGHT = "Copyright © 2012-2016 Jeff Parsons <Jeff@pcjs.org>";
 
 Component.subclass(C1PComputer);
 
@@ -237,7 +237,7 @@ C1PComputer.power = function(computer)
      */
     computer.setReady();
 
-    computer.println(C1PComputer.sAppName + " v" + C1PComputer.sAppVer + "\n" + C1PComputer.sCopyright);
+    computer.println(C1PComputer.APPNAME + " v" + C1PComputer.APPVERSION + "\n" + C1PComputer.COPYRIGHT);
 
     /*
      * Once we get to this point, we're guaranteed that all components are ready, so it's safe to "power" the CPU;

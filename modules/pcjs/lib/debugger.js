@@ -22,7 +22,7 @@
  *
  * You are required to include the above copyright notice in every source code file of every
  * copy or modified version of this work, and to display that copyright notice on every screen
- * that loads or runs any version of this software (see Computer.sCopyright).
+ * that loads or runs any version of this software (see Computer.COPYRIGHT).
  *
  * Some PCjs files also attempt to load external resource files, such as character-image files,
  * ROM files, and disk image files. Those external resource files are not considered part of the
@@ -1029,6 +1029,7 @@ if (DEBUGGER) {
         0x03: [Debugger.INS.LSL,    Debugger.TYPE_REG    | Debugger.TYPE_SHORT | Debugger.TYPE_OUT  | Debugger.TYPE_80286, Debugger.TYPE_MODMEM | Debugger.TYPE_SHORT| Debugger.TYPE_IN],
         0x05: [Debugger.INS.LOADALL,Debugger.TYPE_80286],
         0x06: [Debugger.INS.CLTS,   Debugger.TYPE_80286],
+        0x07: [Debugger.INS.LOADALL,Debugger.TYPE_80386],   // TODO: implied operand is ES:[(E)DI]
         0x20: [Debugger.INS.MOV,    Debugger.TYPE_MODREG | Debugger.TYPE_LONG  | Debugger.TYPE_OUT  | Debugger.TYPE_80386, Debugger.TYPE_CTLREG | Debugger.TYPE_LONG  | Debugger.TYPE_IN],
         0x21: [Debugger.INS.MOV,    Debugger.TYPE_MODREG | Debugger.TYPE_LONG  | Debugger.TYPE_OUT  | Debugger.TYPE_80386, Debugger.TYPE_DBGREG | Debugger.TYPE_LONG  | Debugger.TYPE_IN],
         0x22: [Debugger.INS.MOV,    Debugger.TYPE_CTLREG | Debugger.TYPE_LONG  | Debugger.TYPE_OUT  | Debugger.TYPE_80386, Debugger.TYPE_MODREG | Debugger.TYPE_LONG  | Debugger.TYPE_IN],
