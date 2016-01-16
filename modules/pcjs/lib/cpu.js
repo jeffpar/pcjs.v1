@@ -22,7 +22,7 @@
  *
  * You are required to include the above copyright notice in every source code file of every
  * copy or modified version of this work, and to display that copyright notice on every screen
- * that loads or runs any version of this software (see Computer.sCopyright).
+ * that loads or runs any version of this software (see Computer.COPYRIGHT).
  *
  * Some PCjs files also attempt to load external resource files, such as character-image files,
  * ROM files, and disk image files. Those external resource files are not considered part of the
@@ -167,6 +167,8 @@ CPU.YIELDS_PER_SECOND         = 30;
 CPU.VIDEO_UPDATES_PER_SECOND  = 60;     // WARNING: if you change this, beware of side-effects in the Video component
 CPU.STATUS_UPDATES_PER_SECOND = 2;
 
+CPU.BUTTONS = ["power", "reset"];
+
 /**
  * initBus(cmp, bus, cpu, dbg)
  *
@@ -181,6 +183,12 @@ CPU.prototype.initBus = function(cmp, bus, cpu, dbg)
     this.cmp = cmp;
     this.bus = bus;
     this.dbg = dbg;
+
+    for (var i = 0; i < CPU.BUTTONS.length; i++) {
+        var control = this.bindings[CPU.BUTTONS[i]];
+        if (control) this.cmp.setBinding(null, CPU.BUTTONS[i], control);
+    }
+
     this.fpu = cmp.getMachineComponent("FPU");
 
     /*
@@ -522,6 +530,17 @@ CPU.prototype.setBinding = function(sHTMLType, sBinding, control)
     var cpu = this;
     var fBound = false;
     switch (sBinding) {
+    case "power":
+    case "reset":
+        /*
+         * The "power" and "reset" buttons are functions of the entire computer, not just the CPU,
+         * but it's not always convenient to stick a power button in the Computer component definition,
+         * so we record those bindings here and pass them on to the Computer component in initBus().
+         */
+        this.bindings[sBinding] = control;
+        fBound = true;
+        break;
+
     case "run":
         this.bindings[sBinding] = control;
         control.onclick = function onClickRun() {
@@ -530,19 +549,6 @@ CPU.prototype.setBinding = function(sHTMLType, sBinding, control)
                 cpu.runCPU(true);
             else
                 cpu.stopCPU(true);
-        };
-        fBound = true;
-        break;
-
-    case "reset":
-        /*
-         * A "reset" button is really a function of the entire computer, not just the CPU, but
-         * it's not always convenient to stick a reset button in the computer component definition,
-         * so we support a "reset" binding both here AND in the Computer component.
-         */
-        this.bindings[sBinding] = control;
-        control.onclick = function onClickReset() {
-            if (cpu.cmp) cpu.cmp.onReset();
         };
         fBound = true;
         break;
