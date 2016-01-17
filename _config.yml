@@ -14,7 +14,7 @@ github_username:  jeffpar
 
 # Build settings
 
-exclude: ["index.html", "logs", "node_modules", "**/c64", "src", "**/src", "**/static", "tmp", "videos", "web"]
+exclude: ["index.html", "**/index.html", "logs", "node_modules", "**/c64", "src", "**/src", "**/static", "tmp", "videos", "web"]
 markdown: kramdown
 kramdown:
   input: GFM
