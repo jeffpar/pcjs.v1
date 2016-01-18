@@ -66,5 +66,5 @@ to build these binaries.
 	VDISK    SYS      4662 10-12-88  12:12p
 	HARDERR  EXE     16288 10-12-88  11:14a
 	CONFIG   SYS       101 12-04-14   7:45p
-		   34 file(s)     765785 bytes
-						  437760 bytes free
+	       34 file(s)     765785 bytes
+	                      437760 bytes free
