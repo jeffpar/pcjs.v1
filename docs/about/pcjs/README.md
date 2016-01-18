@@ -11,7 +11,7 @@ PCjs is a IBM PC/XT/AT simulator written entirely in JavaScript.  It's designed 
 fast, it works well in all modern web browsers (both desktop and mobile), and it's easy to customize.  It is part of
 the [PCjs Project](https://github.com/jeffpar/pcjs), an open source project on [GitHub](http://github.com/).
 
-Check out the [Demos](/#demos) on the home page, and all the other PCjs [Application](/apps/pc/), [Boot Disk](/disks/pc/)
+Check out the [Demos](/#demos) on the home page, and all the other PCjs [Application](/apps/pc/), [Disk](/disks/pc/)
 and [Machine](/devices/pc/machine/) demos, including an IBM PC XT "[Server Array](/devices/pc/machine/5160/cga/256kb/array/)"
 featuring multiple PCs running side-by-side.
 
