@@ -12,7 +12,18 @@ IBM OS/2 1.0
 
 IBM OS/2 1.0 was announced on April 2, 1987, finalized in October 1987, and released in December 1987.
 
-Directory listings of all four 1.44Mb distributions diskettes are provided below.
+When the installation disk boots, it displays:
+
+	IBM Operating System/2 Version 1.00
+	(C) Copyright IBM Corp. 1981, 1987. All rights reserved.
+	(C) Copyright Microsoft Corp. 1981, 1987.
+	
+	87294
+
+The 5-digit number indicates the day the files were built.  The first 2 digits are the year (87) and the 3 remaining
+digits are the day of the year (294 or October 21).
+
+Directory listings of the four 1.44Mb distribution diskettes are provided below.
 
 {% include machine.html id="ibm5170" %}
 
@@ -76,8 +87,7 @@ Directory listings of all four 1.44Mb distributions diskettes are provided below
 	SYSINST  PIP     21964 10-21-87  12:00p
 	SYSLABL  EXE      6896 10-21-87  12:00p
 	VIOCALLS DLL     13981 10-21-87  12:00p
-	VENDOR-# DO1         0 07-04-83  12:00a
-	       56 file(s)    1115375 bytes
+	       55 file(s)    1115375 bytes
 	                      328192 bytes free
 
 ### Directory of IBM OS/2 1.0 (Disk 1)
@@ -139,8 +149,7 @@ Directory listings of all four 1.44Mb distributions diskettes are provided below
 	VIOTBL   DCP     52150 10-21-87  12:00p
 	4201     DCP     17069 10-21-87  12:00p
 	5202     DCP       404 10-21-87  12:00p
-	VENDOR-# DO1         0 07-04-83  12:00a
-	       55 file(s)    1076370 bytes
+	       54 file(s)    1076370 bytes
 	                      367104 bytes free
 
 ### Directory of IBM OS/2 1.0 (Disk 2)
@@ -186,8 +195,7 @@ Directory listings of all four 1.44Mb distributions diskettes are provided below
 	TREE     COM     28928 10-21-87  12:00p
 	VDISK    SYS      4662 10-21-87  12:00p
 	XCOPY    EXE     40656 10-21-87  12:00p
-	VENDOR-# DO1         0 07-04-83  12:00a
-	       39 file(s)    1061894 bytes
+	       38 file(s)    1061894 bytes
 	                      386048 bytes free
 
 ### Directory of IBM OS/2 1.0 (Disk 3)
@@ -218,8 +226,7 @@ Directory listings of all four 1.44Mb distributions diskettes are provided below
 	RESTORE  COM     54896 10-21-87  12:00p
 	SETCOM40 EXE      8654 10-21-87  12:00p
 	INTRO        <DIR>     10-21-87   2:10p
-	VENDOR-# DO1         0 07-04-83  12:00a
-	       23 file(s)     505672 bytes
+	       22 file(s)     505672 bytes
 	
 	Directory of A:\INTRO
 	

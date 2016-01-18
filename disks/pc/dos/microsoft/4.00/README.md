@@ -17,9 +17,9 @@ The PCjs machine below is running PC-DOS 4.00.
 Vital Statistics
 ---
 
-MS-DOS 4.00 was released in October, 1988.  The contents of the six 360Kb distribution diskettes are shown below.
+MS-DOS 4.00 was released in October 1988.  The contents of the six 360Kb distribution diskettes are shown below.
 
-***DISK 1***
+### Directory of MS-DOS 4.00 (Disk 1)
 
 	 Volume in drive A has no label
 	 Volume Serial Number is 1456-15F4
@@ -42,9 +42,9 @@ MS-DOS 4.00 was released in October, 1988.  The contents of the six 360Kb distri
 	SELECT   HLP     28695 10-06-88  12:00a
 	SELECT   PRT      1329 10-06-88  12:00a
 	SYS      COM     11456 10-06-88  12:00a
-		   15 File(s)      18432 bytes free
+	       17 File(s)      18432 bytes free
 
-***DISK 2***
+### Directory of MS-DOS 4.00 (Disk 2)
 
 	 Volume in drive A has no label
 	 Volume Serial Number is 2B61-1BE2
@@ -71,9 +71,9 @@ MS-DOS 4.00 was released in October, 1988.  The contents of the six 360Kb distri
 	SUBST    EXE     18467 10-06-88  12:00a
 	TREE     COM      6302 10-06-88  12:00a
 	XCOPY    EXE     17055 10-06-88  12:00a
-		   21 File(s)      56320 bytes free
+	       21 File(s)      56320 bytes free
 
-***DISK 3***
+### Directory of MS-DOS 4.00 (Disk 3)
 
 	 Volume in drive A has no label
 	 Volume Serial Number is 2047-15E0
@@ -88,9 +88,9 @@ MS-DOS 4.00 was released in October, 1988.  The contents of the six 360Kb distri
 	RAMDRIVE SYS      8235 10-06-88  12:00a
 	SMARTDRV SYS     10224 10-06-88  12:00a
 	XMA2EMS  SYS     29211 10-06-88  12:00a
-			9 File(s)      39936 bytes free
+	        9 File(s)      39936 bytes free
 
-***DISK 4***
+### Directory of MS-DOS 4.00 (Disk 4)
 
 	 Volume in drive A has no label
 	 Volume Serial Number is 0569-15F3
@@ -118,9 +118,9 @@ MS-DOS 4.00 was released in October, 1988.  The contents of the six 360Kb distri
 	4208     CPI       720 10-06-88  12:00a
 	5202     CPI       370 10-06-88  12:00a
 	README   TXT     14148 10-12-88   9:13p
-		   22 File(s)       1024 bytes free
+	       22 File(s)       1024 bytes free
 
-***DISK 5***
+### Directory of MS-DOS 4.00 (Disk 5)
 
 	 Volume in drive A has no label
 	 Volume Serial Number is 1F41-15E1
@@ -135,9 +135,9 @@ MS-DOS 4.00 was released in October, 1988.  The contents of the six 360Kb distri
 	SELECT   DAT     22999 10-06-88  12:00a
 	SELECT   EXE     95107 10-06-88  12:00a
 	XMA2EMS  SYS     29211 10-06-88  12:00a
-			9 File(s)      30720 bytes free
+	        9 File(s)      30720 bytes free
 
-***DISK 6***
+### Directory of MS-DOS 4.00 (Disk 6)
 
 	 Volume in drive A has no label
 	 Volume Serial Number is 1101-1B52
@@ -154,7 +154,9 @@ MS-DOS 4.00 was released in October, 1988.  The contents of the six 360Kb distri
 	SHELLC   EXE    153855 10-06-88  12:00a
 	DOSUTIL  MEU      6660 10-06-88  12:00a
 	COMMAND  COM     37556 10-06-88  12:00a
-		   11 File(s)      36864 bytes free
+	       11 File(s)      36864 bytes free
+
+---
 
 One important new feature of MS-DOS 4.00 was the ability to update the system files (IO.SYS and MSDOS.SYS)
 of any boot disk, by moving the first two directory entries (and the contents of the first three data sectors)
@@ -168,7 +170,7 @@ Learn more about the history of the SYS command from [Microsoft Support](https:/
 
 Additional details about MS-DOS 4.00 from [PC DOS Retro](https://sites.google.com/site/pcdosretro/doshist):
 
-- distributed on 2 720KB floppy disks [or 6 360KB diskettes]
+- distributed on 2 720KB floppy disks [also released on 6 360KB diskettes; the number of 720KB diskettes needs to be verified]
 - SHARE loaded for FCB operations on hard disks greater than 32MB
 - IFS driver support added
 - MEM command added to report memory usage

@@ -14,10 +14,7 @@ The PCjs machine below is running PC-DOS 1.10.
 
 {% include machine.html id="ibm5150-pcdos110" %}
 
-Vital Statistics
----
-
-PC-DOS 1.10 was released in May, 1982 on one single-sided (160Kb) diskette.  A complete listing of all the files
+PC-DOS 1.10 was released in May 1982 on one single-sided (160Kb) diskette.  A complete listing of all the files
 is shown below.  Note that IBMBIO.COM and IBMDOS.COM were marked as *hidden* and *system*, so they are not displayed
 by DIR; their sizes and dates have been determined by inspecting the root directory.
 
@@ -27,6 +24,8 @@ bytes.
 
 CHKDSK considers the size of IBMBIO.COM to be 2048 bytes (1920 rounded up to the nearest 512 multiple), and the
 size of IBMDOS.COM is 6656, so the total number of bytes consumed by those two files is 8704.
+
+### Directory of PC-DOS 1.10 Diskette
 
 	IBMBIO    COM        1920  05-07-82
 	IBMDOS    COM        6400  05-07-82
@@ -56,7 +55,7 @@ size of IBMDOS.COM is 6656, so the total number of bytes consumed by those two f
 	SPACE     BAS        1920  05-07-82
 	BALL      BAS        2048  05-07-82
 	COMM      BAS        4352  05-07-82
-	        26 File(s)
+	        28 File(s)
 
 CHKDSK reports:
 

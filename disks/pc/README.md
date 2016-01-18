@@ -17,12 +17,12 @@ that automatically run the software.
 
 * [PC-DOS 1.00](/disks/pc/dos/ibm/1.00/)
 * [PC-DOS 1.10](/disks/pc/dos/ibm/1.10/)
-* PC-DOS 2.00
-* PC-DOS 2.10
-* PC-DOS 3.00
-* PC-DOS 3.10
-* PC-DOS 3.20
-* PC-DOS 3.30
+* [PC-DOS 2.00](/disks/pc/dos/ibm/2.00/)
+* [PC-DOS 2.10](/disks/pc/dos/ibm/2.10/)
+* [PC-DOS 3.00](/disks/pc/dos/ibm/3.00/)
+* [PC-DOS 3.10](/disks/pc/dos/ibm/3.10/)
+* [PC-DOS 3.20](/disks/pc/dos/ibm/3.20/)
+* [PC-DOS 3.30](/disks/pc/dos/ibm/3.30/)
 * PC-DOS 4.00
 * PC-DOS 5.00
 * PC-DOS 6.10
@@ -57,10 +57,13 @@ that automatically run the software.
 
 ### Microsoft OS/2
 
-* [MS OS/2 Pre-Release Files](/disks/pc/os2/misc/)
-* MS OS/2 1.0
+* [MS OS/2 1.0](/disks/pc/os2/microsoft/1.0/)
 * MS OS/2 1.1
 * MS OS/2 1.2
+
+### Other OS/2 Disks
+
+* [OS/2 1.0 Debugger Boot Disk](/disks/pc/os2/misc/)
 
 ### Microsoft Windows
 
@@ -73,7 +76,8 @@ that automatically run the software.
 * Microsoft Windows 2.03
 * Microsoft Windows 3.00
 * Microsoft Windows 3.11
-* [Microsoft Windows 95](/disks/pc/windows/win95/4.00.950/)
+* [Microsoft Windows 95 (Build 499)](/disks/pc/windows/win95/4.00.499/)
+* [Microsoft Windows 95 (Build 950)](/disks/pc/windows/win95/4.00.950/)
 
 ### Other Operating Systems
 

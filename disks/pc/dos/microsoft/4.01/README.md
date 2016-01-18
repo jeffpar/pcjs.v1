@@ -17,9 +17,9 @@ The PCjs machine below is running PC-DOS 4.01.
 Vital Statistics
 ---
 
-MS-DOS 4.01 was released in April, 1989.  The contents of the six 360Kb distribution diskettes are shown below.
+MS-DOS 4.01 was released in April 1989.  The contents of the six 360Kb distribution diskettes are shown below.
 
-***DISK 1***
+### Directory of MS-DOS 4.01 (Disk 1)
 
 	 Volume in drive A is INST V401  
 	 Volume Serial Number is 2A33-13E4
@@ -42,9 +42,9 @@ MS-DOS 4.01 was released in April, 1989.  The contents of the six 360Kb distribu
 	SELECT   HLP     28695 04-07-89  12:00a
 	SELECT   PRT      1329 04-07-89  12:00a
 	SYS      COM     11456 04-07-89  12:00a
-		   15 File(s)      18432 bytes free
+	       17 File(s)      18432 bytes free
 
-***DISK 2***
+### Directory of MS-DOS 4.01 (Disk 2)
 
 	 Volume in drive A is OP#1 V401  
 	 Directory of  A:\
@@ -70,9 +70,9 @@ MS-DOS 4.01 was released in April, 1989.  The contents of the six 360Kb distribu
 	SUBST    EXE     18467 04-07-89  12:00a
 	TREE     COM      6302 04-07-89  12:00a
 	XCOPY    EXE     17055 04-07-89  12:00a
-		   21 File(s)      56320 bytes free
+	       21 File(s)      56320 bytes free
 
-***DISK 3***
+### Directory of MS-DOS 4.01 (Disk 3)
 
 	 Volume in drive A is OP#2 V401  
 	 Directory of  A:\
@@ -87,9 +87,9 @@ MS-DOS 4.01 was released in April, 1989.  The contents of the six 360Kb distribu
 	README   TXT     17825 04-07-89  12:00a
 	SMARTDRV SYS     10224 04-07-89  12:00a
 	XMA2EMS  SYS     29211 04-07-89  12:00a
-		   10 File(s)      21504 bytes free
+	       10 File(s)      21504 bytes free
 
-***DISK 4***
+### Directory of MS-DOS 4.01 (Disk 4)
 
 	 Volume in drive A is OP#3 V401  
 	 Volume Serial Number is 2A33-13E4
@@ -116,9 +116,9 @@ MS-DOS 4.01 was released in April, 1989.  The contents of the six 360Kb distribu
 	PRINTER  SYS     18914 04-07-89  12:00a
 	RAMDRIVE SYS      8235 04-07-89  12:00a
 	RECOVER  COM     10588 04-07-89  12:00a
-		   21 File(s)      15360 bytes free
+	       21 File(s)      15360 bytes free
 
-***DISK 5***
+### Directory of MS-DOS 4.01 (Disk 5)
 
 	 Volume in drive A is SELECT V401
 	 Directory of  A:\
@@ -132,9 +132,9 @@ MS-DOS 4.01 was released in April, 1989.  The contents of the six 360Kb distribu
 	SELECT   DAT     22999 04-07-89  12:00a
 	SELECT   EXE     95107 04-07-89  12:00a
 	XMA2EMS  SYS     29211 04-07-89  12:00a
-			9 File(s)      30720 bytes free
+	        9 File(s)      30720 bytes free
 
-***DISK 6***
+### Directory of MS-DOS 4.01 (Disk 6)
 
 	 Volume in drive A is SHELL V401 
 	 Directory of  A:\
@@ -150,21 +150,13 @@ MS-DOS 4.01 was released in April, 1989.  The contents of the six 360Kb distribu
 	SHELL    CLR      4406 04-07-89  12:00a
 	SHELLB   COM      3894 04-07-89  12:00a
 	SHELLC   EXE    153855 04-07-89  12:00a
-		   11 File(s)      36864 bytes free
+	       11 File(s)      36864 bytes free
 
-One important new feature of MS-DOS 4.01 was the ability to update the system files (IO.SYS and MSDOS.SYS)
-of any boot disk, by moving the first two directory entries (and the contents of the first three data sectors)
-as needed to make room for the new IO.SYS and MSDOS.SYS files.
-
-The SYS command in older versions of MS-DOS would report "No room for system on destination disk" if the first
-two directory entries (or the first three data sectors) were unavailable.  However, after using the MS-DOS 4.01
-SYS command, it usually becomes possible to install older MS-DOS versions as well.
-
-Learn more about the history of the SYS command from [Microsoft Support](https://support.microsoft.com/en-us/kb/66530).
+---
 
 Additional details about MS-DOS 4.01 from [PC DOS Retro](https://sites.google.com/site/pcdosretro/doshist):
 
-- distributed on 2 720KB floppy disks [or 6 360KB diskettes]
+- distributed on 2 720KB floppy disks [also released on 6 360KB diskettes; the number of 720KB diskettes needs to be verified]
 - maintenance release
 - DOS version is reported as 4.00 [although the VER command reports "4.01"]
 - SHARE loaded for FCB operations on hard disks greater than 32MB
