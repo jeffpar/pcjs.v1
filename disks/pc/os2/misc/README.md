@@ -13,8 +13,8 @@ The  [OS/2 1.0 Debugger Boot Disk](/disks/pc/os2/misc/1.0/debugger/) contains a 
 October 12, 1988, which includes the built-in kernel debugger used by Microsoft and IBM for internal development.
 For more details, see the "OS/2 1.0" [blog post](/blog/2014/12/04/).
 
-Note that IBM OS/2 1.0 was released in December 1987, nearly a year before the timestamps of these files, suggesting
-that this was a private build of IBM OS/2 1.0.  When this disk boots, it displays:
+Note that [IBM OS/2 1.0](/disks/pc/os2/ibm/1.0/) was finalized in October 1987, nearly a year before the timestamps
+of these files, suggesting that this was a private build of IBM OS/2 1.0.  When this disk boots, it displays:
 
 	IBM Operating System/2 Version 1.00
 	(C) Copyright IBM Corp. 1981, 1987. All rights reserved.
