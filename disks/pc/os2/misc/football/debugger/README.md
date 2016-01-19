@@ -15,9 +15,20 @@ machines:
 OS/2 FOOTBALL Boot Disk (v7.68.17)
 ---
 
-This disk contains a prototype version of OS/2 from early 1987 that added preliminary support for the Intel 80386
-processor, including limited support for 32-bit code and the ability to run multiple DOS applications in V86-mode.
-It was forked from pre-OS/2 1.0 sources, and the only machine it supported was the Compaq DeskPro 386-16.
+This disk contains a prototype version of OS/2 from early 1987 (code-named FOOTBALL) that was designed to test new
+features of the Intel 80386 processor (eg, paging and V86-mode).  Most of the work on this prototype occurred between
+December 1, 1986 and February 28, 1987, with the principal goal of demonstrating multiple DOS applications running
+in V86-mode to BillG (the demo probably occurred in March 1987), but also with the underlying goal of demonstrating
+to IBM that Microsoft was ahead of the curve on 32-bit design considerations for OS/2.
+
+The FOOTBALL prototype was forked from pre-1.0 OS/2 sources, and the only hardware it supported was the Compaq DeskPro
+386-16.  The source code was later sent to IBM, and as of April 1987, they were adapting it to run on the Model 80 PS/2.
+No versions of FOOTBALL were ever released outside of Microsoft and IBM.
+ 
+Although FOOTBALL contained features not found in OS/2 until version 2.0, there is no direct connection between this
+internal Microsoft effort and OS/2 2.0.  Some of the 32-bit support and paging work undoubtedly migrated to version 2.0
+eventually, but that would have happened much later, since work on OS/2 2.0 did not begin in earnest until October 1987,
+after 1.0 was finished.
 
 A directory listing of this disk is provided [below](#directory-of-os2-football-boot-disk-v76817).
 
