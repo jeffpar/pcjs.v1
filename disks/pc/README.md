@@ -61,7 +61,7 @@ that automatically run the software.
 * MS OS/2 1.1
 * MS OS/2 1.2
 
-### [Other OS/2 Disks](/disks/pc/os2/misc/)
+### Other OS/2 Disks
 
 * [OS/2 1.0 Debugger Boot Disk](/disks/pc/os2/misc/1.0/debugger/)
 * [OS/2 FOOTBALL Boot Disk (v7.68.17)](/disks/pc/os2/misc/football/debugger/)

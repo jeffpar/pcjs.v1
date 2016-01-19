@@ -20,4 +20,4 @@ from early 1987 that added preliminary support for the Intel 80386 processor, in
 and the ability to run multiple DOS applications in V86-mode.  It was forked from pre-OS/2 1.0 sources, and the only
 machine it supported was the Compaq DeskPro 386-16.
 
-Return to [IBM PC Disk Archive](/disks/pc/).
+Return to [IBM PC Disk Archive](/disks/pc/#other-os2-disks).
