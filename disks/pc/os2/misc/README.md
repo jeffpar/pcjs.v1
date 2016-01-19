@@ -19,3 +19,5 @@ The [OS/2 FOOTBALL Boot Disk (v7.68.17)](/disks/pc/os2/misc/football/debugger/) 
 from early 1987 that added preliminary support for the Intel 80386 processor, including limited support for 32-bit code
 and the ability to run multiple DOS applications in V86-mode.  It was forked from pre-OS/2 1.0 sources, and the only
 machine it supported was the Compaq DeskPro 386-16.
+
+Return to [IBM PC Disk Archive](/disks/pc/).
