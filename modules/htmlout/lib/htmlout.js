@@ -1850,7 +1850,10 @@ HTMLOut.prototype.processMachines = function(aMachines, done)
 
         var sScriptEmbed = "";
         if (infoMachine['func']) {
-            sScriptEmbed = '<script type="text/javascript">' + 'window.' + infoMachine['func'] + '("' + infoMachine['id'] + '","' + infoMachine['xml'] + '"' + (infoMachine['xsl']? (',"' + infoMachine['xsl'] + '"') : ',""') + (infoMachine['state']? (',"' + infoMachine['state'] + '"') : '') + ');</script>';
+            sScriptEmbed = '<script type="text/javascript">' + 'window.' + infoMachine['func'];
+            sScriptEmbed += "('" + infoMachine['id'] + "','" + infoMachine['xml'] + "'";
+            sScriptEmbed += (infoMachine['xsl']? (",'" + infoMachine['xsl'] + "'") : ",''");
+            sScriptEmbed += (infoMachine['parms']? (",'" + infoMachine['parms'] + "'") : '') + ');</script>';
         }
 
         var asFiles = [];

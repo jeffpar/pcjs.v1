@@ -131,13 +131,22 @@ function parseXML(sXML, sXMLFile, idMachine, sParms, fResolve, display, done)
              */
             if (!sParms) {
                 sParms = '{';
-            } else if (sParms.substr(0, 1) == '{') {
+            } else if (sParms.slice(-1) == '}') {
                 sParms = sParms.slice(0, -1);
                 if (sParms.length > 1) sParms += ',';
-            } else {            // backward compatibility: sParms is actually sStateFile
+            } else {            // sParms must just be a "state" file, so encode it as a "state" property
                 sParms = '{state:"' + sParms + '",';
             }
             sParms += 'url:"' + sURL + '"}';
+            /*
+             * Note that while we no longer generate a machine XML file with a "state" attribute (because it's
+             * encoded inside the "parms" attribute), the XSL file must still cope with "state" attributes inside
+             * other XML files; for example, manifest XML files like /apps/pc/1981/visicalc/manifest.xml contain
+             * machine elements with "state" attributes that must still be passed down to the computer element
+             * "the old fashioned way".
+             *
+             * Until/unless that changes, components.xsl cannot be simplified as much as I might have hoped.
+             */
             sXML = sXML.replace(/(<machine[^>]*\sid=)(['"]).*?\2/, "$1$2" + idMachine + "$2" + (sParms? " parms='" + sParms + "'" : "") + (sURL? ' url="' + sURL + '"' : ''));
         }
         /*

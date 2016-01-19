@@ -34,5 +34,5 @@
       {% capture machine_template %}{{ site.baseurl }}/modules/{{ machine.type | remove:'-dbg' }}js/templates/components.xsl{% endcapture %}
     {% endif %}
   {% endif %}
-  <script type="text/javascript">{{ machine_embed }}("{{ machine.id }}","{{ machine_config }}","{{ machine_template }}",'{{ machine_parms }}');</script>
+  <script type="text/javascript">{{ machine_embed }}('{{ machine.id }}','{{ machine_config }}','{{ machine_template }}','{{ machine_parms }}');</script>
 {% endfor %}

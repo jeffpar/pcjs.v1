@@ -7,9 +7,9 @@ machines:
     type: pc-dbg
     config: /devices/pc/machine/compaq/deskpro386/ega/2048kb/machine.xml
     automount:
-        A:
-          name: OS/2 FOOTBALL Boot Disk (v7.68.17)
-          path: /disks/pc/os2/misc/football/debugger/FOOTBALL-7.68.17.json
+      A:
+        name: OS/2 FOOTBALL Boot Disk (v7.68.17)
+        path: /disks/pc/os2/misc/football/debugger/FOOTBALL-7.68.17.json
 ---
 
 OS/2 FOOTBALL Boot Disk (v7.68.17)
