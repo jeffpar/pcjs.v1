@@ -59,6 +59,6 @@ A directory listing of this disk is provided [below](#directory-of-os2-football-
 	LIN      EXE     8084   2-12-87   3:00p
 	MAIN     EXE    32482  11-14-86  12:44p
 	CPGREP   EXE    25286  10-21-86   9:08p
-		   31 File(s)    549888 bytes free
+	       31 File(s)    549888 bytes free
 
 Return to [Other OS/2 Disks](/disks/pc/os2/misc/).
