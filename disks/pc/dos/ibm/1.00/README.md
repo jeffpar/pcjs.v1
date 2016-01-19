@@ -5,6 +5,11 @@ permalink: /disks/pc/dos/ibm/1.00/
 machines:
   - type: pc
     id: ibm5150-pcdos100
+    config: /devices/pc/machine/5150/mda/64kb/machine.xml
+    automount:
+      A:
+        name: PC-DOS 1.00
+        path: /disks/pc/dos/ibm/1.00/PCDOS100.json
 ---
 
 PC-DOS 1.00
