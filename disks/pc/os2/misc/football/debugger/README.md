@@ -6,7 +6,6 @@ machines:
   - type: pc-dbg
     id: deskpro386
     config: /devices/pc/machine/compaq/deskpro386/ega/2048kb/machine.xml
-    uncompiled: true
     automount:
         A:
           name: OS/2 FOOTBALL Boot Disk (v7.68.17)

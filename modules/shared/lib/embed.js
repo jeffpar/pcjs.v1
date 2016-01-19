@@ -126,8 +126,8 @@ function parseXML(sXML, sXMLFile, idMachine, sParms, fResolve, display, done)
             var sURL = sXMLFile;
             if (sURL && sURL.indexOf('/') < 0) sURL = window.location.pathname + sURL;
             /*
-             * We embed the URL to the XML file both as a separate "xml" attribute for easy access from the
-             * XSL file and as part of the "parms" attribute for easy access from JavaScript.
+             * We embed the URL of the XML file both as a separate "xml" attribute for easy access from the
+             * XSL file, and as part of the "parms" attribute for easy access from machines (see getMachineParm()).
              */
             if (!sParms) {
                 sParms = '{';

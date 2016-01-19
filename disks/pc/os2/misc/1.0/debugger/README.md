@@ -5,6 +5,11 @@ permalink: /disks/pc/os2/misc/1.0/debugger/
 machines:
   - type: pc-dbg
     id: ibm5170
+    config: /devices/pc/machine/5170/ega/1152kb/rev3/machine.xml
+    automount:
+        A:
+          name: OS/2 1.0 Debugger Boot Disk
+          path: /disks/pc/os2/misc/1.0/debugger/OS210-BOOT.json
 ---
 
 OS/2 1.0 Debugger Boot Disk
