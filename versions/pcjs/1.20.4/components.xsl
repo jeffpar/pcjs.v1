@@ -462,12 +462,12 @@
 	</xsl:template>
 
 	<xsl:template match="manifest[not(@ref)]" mode="component">
-		<xsl:param name="disk"><xsl:if test="@disk"><xsl:value-of select="@disk"/></xsl:if><xsl:if test="not(@disk)">*</xsl:if></xsl:param>
+		<xsl:param name="disk" select="''"/>
 		<xsl:variable name="prefix">
 			<xsl:if test="title/@prefix"><xsl:value-of select="title/@prefix"/><xsl:text>: </xsl:text></xsl:if>
 		</xsl:variable>
 		<xsl:for-each select="disk">
-			<xsl:if test="$disk = @id or $disk = '*'">
+			<xsl:if test="$disk = @id or $disk = '*' or $disk = ''">
 				<xsl:variable name="name">
 					<xsl:choose>
 						<xsl:when test="name"><xsl:value-of select="$prefix"/><xsl:value-of select="name"/></xsl:when>
