@@ -157,7 +157,7 @@
 			</xsl:if>
 			<div class="{$APPCLASS}-container" style="{$border}{$style}">
 				<xsl:if test="$class != '' and $component != 'machine'">
-					<div class="{$APPCLASS}-{$class}-object" data-value="id:'{$id}',name:'{$name}'{$parms}"></div>
+					<div class="{$APPCLASS}-{$class}-object" data-value="{{id:'{$id}',name:'{$name}'{$parms}}}"></div>
 				</xsl:if>
 				<xsl:if test="control">
 					<div class="{$APPCLASS}-controls">
@@ -270,27 +270,27 @@
 			</xsl:if>
 			<xsl:choose>
 				<xsl:when test="@type = 'button'">
-					<button class="{$APPCLASS}-binding" style="{$border}{$width}{$height}{$fontsize}{$style}" data-value="{$type},{$binding}"><xsl:apply-templates/></button>
+					<button class="{$APPCLASS}-binding" style="{$border}{$width}{$height}{$fontsize}{$style}" data-value="{{{$type},{$binding}}}"><xsl:apply-templates/></button>
 				</xsl:when>
 				<xsl:when test="@type = 'list'">
-					<select class="{$APPCLASS}-binding" style="{$border}{$width}{$height}{$fontsize}{$style}" data-value="{$type},{$binding}">
+					<select class="{$APPCLASS}-binding" style="{$border}{$width}{$height}{$fontsize}{$style}" data-value="{{{$type},{$binding}}}">
 						<xsl:apply-templates select="item" mode="component"/>
 					</select>
 				</xsl:when>
 				<xsl:when test="@type = 'text'">
-					<input class="{$APPCLASS}-binding" type="text" style="{$border}{$width}{$height}{$style}" data-value="{$type},{$binding}" value="" autocapitalize="off" autocorrect="off"/>
+					<input class="{$APPCLASS}-binding" type="text" style="{$border}{$width}{$height}{$style}" data-value="{{{$type},{$binding}}}" value="" autocapitalize="off" autocorrect="off"/>
 				</xsl:when>
 				<xsl:when test="@type = 'submit'">
-					<input class="{$APPCLASS}-binding" type="submit" style="{$border}{$fontsize}{$style}" data-value="{$type},{$binding}" value="{.}"/>
+					<input class="{$APPCLASS}-binding" type="submit" style="{$border}{$fontsize}{$style}" data-value="{{{$type},{$binding}}}" value="{.}"/>
 				</xsl:when>
 				<xsl:when test="@type = 'textarea'">
-					<textarea class="{$APPCLASS}-binding" style="{$border}{$width}{$height}{$style}" data-value="{$type},{$binding}" readonly="readonly"></textarea>
+					<textarea class="{$APPCLASS}-binding" style="{$border}{$width}{$height}{$style}" data-value="{{{$type},{$binding}}}" readonly="readonly"></textarea>
 				</xsl:when>
 				<xsl:when test="@type = 'heading'">
 					<div><xsl:value-of select="."/></div>
 				</xsl:when>
 				<xsl:when test="@type = 'file'">
-					<form class="{$APPCLASS}-binding" style="{$border}{$width}{$height}{$style}" data-value="{$type},{$binding}">
+					<form class="{$APPCLASS}-binding" style="{$border}{$width}{$height}{$style}" data-value="{{{$type},{$binding}}}">
 						<fieldset class="{$APPCLASS}-fieldset">
 							<input type="file"/>
 							<input type="submit" value="Mount" disabled="true"/>
@@ -304,7 +304,7 @@
 					<div style="clear:both"></div><br/>
 				</xsl:when>
 				<xsl:otherwise>
-					<div class="{$APPCLASS}-binding{$subclass}" style="{$border}{$width}{$height}{$style}" data-value="{$type},{$binding}"><xsl:apply-templates/></div>
+					<div class="{$APPCLASS}-binding{$subclass}" style="{$border}{$width}{$height}{$style}" data-value="{{{$type},{$binding}}}"><xsl:apply-templates/></div>
 				</xsl:otherwise>
 			</xsl:choose>
 			<xsl:if test="@label">

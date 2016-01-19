@@ -68,7 +68,12 @@
 				</xsl:with-param>
 				<xsl:with-param name="component" select="'machine'"/>
 				<xsl:with-param name="class"><xsl:value-of select="@class"/>js</xsl:with-param>
-				<xsl:with-param name="parms"><xsl:if test="@parms">,<xsl:value-of select="@parms"/></xsl:if></xsl:with-param>
+				<xsl:with-param name="parms">
+					<xsl:choose>
+						<xsl:when test="$machineState != ''">state:"<xsl:value-of select="$machineState"/>"</xsl:when>
+						<xsl:otherwise><xsl:value-of select="@parms"/></xsl:otherwise>
+					</xsl:choose>
+				</xsl:with-param>
 				<xsl:with-param name="url"><xsl:value-of select="@url"/></xsl:with-param>
 			</xsl:call-template>
 		</div>
@@ -107,9 +112,9 @@
 				<xsl:otherwise><xsl:value-of select="$component"/></xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
-		<xsl:variable name="componentURL">
+		<xsl:variable name="machineParms">
 			<xsl:choose>
-				<xsl:when test="$component = 'machine'">url:'<xsl:value-of select="$url"/>'</xsl:when>
+				<xsl:when test="$component = 'machine'"><xsl:value-of select="$parms"/></xsl:when>
 				<xsl:otherwise/>
 			</xsl:choose>
 		</xsl:variable>
@@ -191,7 +196,7 @@
 		<xsl:variable name="componentClass">
 			<xsl:value-of select="$APPCLASS"/><xsl:text>-</xsl:text><xsl:value-of select="$component"/><xsl:text> </xsl:text><xsl:value-of select="$APPCLASS"/><xsl:text>-component</xsl:text>
 		</xsl:variable>
-		<div id="{$id}" class="{$componentClass}" style="{$width}{$height}{$pos}{$left}{$top}{$padding}" data-value="{$componentURL}">
+		<div id="{$id}" class="{$componentClass}" style="{$width}{$height}{$pos}{$left}{$top}{$padding}" data-value="{$machineParms}">
 			<xsl:if test="$component = 'machine'">
 				<xsl:apply-templates select="name" mode="machine"/>
 			</xsl:if>
@@ -206,7 +211,7 @@
 					<xsl:apply-templates select="menu" mode="component"/>
 				</xsl:if>
 				<xsl:if test="$class != '' and $component != 'machine'">
-					<div class="{$APPCLASS}-{$class}-object" data-value="id:'{$id}',name:'{$name}'{$comment}{$parms}"> </div>
+					<div class="{$APPCLASS}-{$class}-object" data-value="{{id:'{$id}',name:'{$name}'{$comment}{$parms}}}"> </div>
 				</xsl:if>
 				<xsl:if test="control">
 					<div class="{$APPCLASS}-controls">
@@ -354,30 +359,30 @@
 			</xsl:if>
 			<xsl:choose>
 				<xsl:when test="@type = 'canvas'">
-					<canvas class="{$APPCLASS}-binding {$APPCLASS}-canvas" width="{@width}" height="{@height}" style="-webkit-user-select:none;{$border}{$fontsize}{$style}" data-value="{$type},{$binding}"><xsl:apply-templates/></canvas>
+					<canvas class="{$APPCLASS}-binding {$APPCLASS}-canvas" width="{@width}" height="{@height}" style="-webkit-user-select:none;{$border}{$fontsize}{$style}" data-value="{{{$type},{$binding}}}"><xsl:apply-templates/></canvas>
 				</xsl:when>
 				<xsl:when test="@type = 'button'">
-					<button class="{$APPCLASS}-binding" style="-webkit-user-select:none;{$border}{$width}{$height}{$fontsize}{$style}" data-value="{$type},{$binding}"><xsl:apply-templates/></button>
+					<button class="{$APPCLASS}-binding" style="-webkit-user-select:none;{$border}{$width}{$height}{$fontsize}{$style}" data-value="{{{$type},{$binding}}}"><xsl:apply-templates/></button>
 				</xsl:when>
 				<xsl:when test="@type = 'list'">
-					<select class="{$APPCLASS}-binding" style="{$border}{$width}{$height}{$fontsize}{$style}" data-value="{$type},{$binding}">
+					<select class="{$APPCLASS}-binding" style="{$border}{$width}{$height}{$fontsize}{$style}" data-value="{{{$type},{$binding}}}">
 						<xsl:apply-templates select="disk|app|manifest" mode="component"/>
 					</select>
 				</xsl:when>
 				<xsl:when test="@type = 'text'">
-					<input class="{$APPCLASS}-binding" type="text" style="{$border}{$width}{$height}{$style}" data-value="{$type},{$binding}" value="{.}" autocapitalize="off" autocorrect="off"/>
+					<input class="{$APPCLASS}-binding" type="text" style="{$border}{$width}{$height}{$style}" data-value="{{{$type},{$binding}}}" value="{.}" autocapitalize="off" autocorrect="off"/>
 				</xsl:when>
 				<xsl:when test="@type = 'submit'">
-					<input class="{$APPCLASS}-binding" type="submit" style="{$border}{$fontsize}{$style}" data-value="{$type},{$binding}" value="{.}"/>
+					<input class="{$APPCLASS}-binding" type="submit" style="{$border}{$fontsize}{$style}" data-value="{{{$type},{$binding}}}" value="{.}"/>
 				</xsl:when>
 				<xsl:when test="@type = 'textarea'">
-					<textarea class="{$APPCLASS}-binding" style="{$border}{$width}{$height}{$style}" data-value="{$type},{$binding}" readonly="readonly"> </textarea>
+					<textarea class="{$APPCLASS}-binding" style="{$border}{$width}{$height}{$style}" data-value="{{{$type},{$binding}}}" readonly="readonly"> </textarea>
 				</xsl:when>
 				<xsl:when test="@type = 'heading'">
 					<div><xsl:value-of select="."/></div>
 				</xsl:when>
 				<xsl:when test="@type = 'file'">
-					<form class="{$APPCLASS}-binding" data-value="{$type},{$binding}">
+					<form class="{$APPCLASS}-binding" data-value="{{{$type},{$binding}}}">
 						<fieldset class="{$APPCLASS}-fieldset">
 							<input type="file"/>
 							<input type="submit" value="Mount" disabled="true"/>
@@ -385,7 +390,7 @@
 					</form>
 				</xsl:when>
 				<xsl:when test="@type = 'led'">
-					<div class="{$APPCLASS}-binding {$APPCLASS}-{@type}" data-value="{$type},{$binding}"><xsl:value-of select="."/></div>
+					<div class="{$APPCLASS}-binding {$APPCLASS}-{@type}" data-value="{{{$type},{$binding}}}"><xsl:value-of select="."/></div>
 				</xsl:when>
 				<xsl:when test="@type = 'separator'">
 					<hr/>
@@ -397,7 +402,7 @@
 					<div style="clear:both"> </div>
 				</xsl:when>
 				<xsl:otherwise>
-					<div class="{$APPCLASS}-binding{$subClass} {$APPCLASS}-{@type}" style="-webkit-user-select:none;{$border}{$width}{$height}{$fontsize}{$style}" data-value="{$type},{$binding}"><xsl:apply-templates/></div>
+					<div class="{$APPCLASS}-binding{$subClass} {$APPCLASS}-{@type}" style="-webkit-user-select:none;{$border}{$width}{$height}{$fontsize}{$style}" data-value="{{{$type},{$binding}}}"><xsl:apply-templates/></div>
 				</xsl:otherwise>
 			</xsl:choose>
 			<xsl:if test="@label">
@@ -423,7 +428,7 @@
 				</xsl:if>
 			</xsl:if>
 		</xsl:variable>
-		<option value="{@path}" data-value="{$desc}"><xsl:if test="name"><xsl:value-of select="name"/></xsl:if><xsl:if test="not(name)"><xsl:value-of select="."/></xsl:if></option>
+		<option value="{@path}" data-value="{{{$desc}}}"><xsl:if test="name"><xsl:value-of select="name"/></xsl:if><xsl:if test="not(name)"><xsl:value-of select="."/></xsl:if></option>
 	</xsl:template>
 
 	<xsl:template match="app[@ref]" mode="component">
@@ -446,7 +451,7 @@
 		<xsl:variable name="files">
 			<xsl:for-each select="file"><xsl:if test="position() = 1"><xsl:value-of select="$path"/></xsl:if><xsl:value-of select="@name"/><xsl:if test="position() != last()">;</xsl:if></xsl:for-each>
 		</xsl:variable>
-		<option value="{$files}" data-value="{$desc}"><xsl:value-of select="@name"/></option>
+		<option value="{$files}" data-value="{{{$desc}}}"><xsl:value-of select="@name"/></option>
 	</xsl:template>
 
 	<xsl:template match="manifest[@ref]" mode="component">
@@ -483,7 +488,7 @@
 					</xsl:if>
 				</xsl:variable>
 				<xsl:if test="@href">
-					<option value="{@href}" data-value="{$link}"><xsl:value-of select="$name"/></option>
+					<option value="{@href}" data-value="{{{$link}}}"><xsl:value-of select="$name"/></option>
 				</xsl:if>
 				<xsl:if test="not(@href)">
 					<xsl:variable name="dir">
@@ -492,7 +497,7 @@
 					<xsl:variable name="files">
 						<xsl:for-each select="file"><xsl:if test="position() = 1"><xsl:value-of select="$dir"/></xsl:if><xsl:value-of select="@dir"/><xsl:value-of select="."/><xsl:if test="position() != last()">;</xsl:if></xsl:for-each>
 					</xsl:variable>
-					<option value="{$files}" data-value="{$link}"><xsl:value-of select="$name"/></option>
+					<option value="{$files}" data-value="{{{$link}}}"><xsl:value-of select="$name"/></option>
 				</xsl:if>
 			</xsl:if>
 		</xsl:for-each>

@@ -37,8 +37,13 @@ Machines from our [IBM PC Application Archive](/apps/pc/):
 
 And here are some machines from our [IBM PC Disk Archive](/disks/pc/):
 
-* [CP/M-86 v1.1B](/disks/pc/cpm/1.1b/)
+* [PC-DOS 1.00](/disks/pc/dos/ibm/1.00/)
+* [PC-DOS 1.10](/disks/pc/dos/ibm/1.10/)
+* [Multitasking MS-DOS 4.00](/disks/pc/dos/microsoft/4.0M/)
 * [IBM Diagnostics v2.20](/disks/pc/diags/ibm/2.20/)
+* [IBM OS/2 1.0](/disks/pc/os2/ibm/1.0/)
+* [OS/2 1.0 Debugger Boot Disk](/disks/pc/os2/misc/1.0/debugger/)
+* [CP/M-86 v1.1B](/disks/pc/cpm/1.1b/)
 * [Infocom Zork I](/disks/pc/games/infocom/zork1/)
 
 ---

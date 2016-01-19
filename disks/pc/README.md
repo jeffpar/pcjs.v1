@@ -61,9 +61,10 @@ that automatically run the software.
 * MS OS/2 1.1
 * MS OS/2 1.2
 
-### Other OS/2 Disks
+### [Other OS/2 Disks](/disks/pc/os2/misc/)
 
-* [OS/2 1.0 Debugger Boot Disk](/disks/pc/os2/misc/)
+* [OS/2 1.0 Debugger Boot Disk](/disks/pc/os2/misc/1.0/debugger/)
+* [OS/2 FOOTBALL Boot Disk (v7.68.17)](/disks/pc/os2/misc/football/debugger/)
 
 ### Microsoft Windows
 
@@ -118,7 +119,7 @@ that automatically run the software.
 * Microsoft Windows SDK 2.03
 * Microsoft Windows SDK 3.00
 
-We also have links to all the [Microsoft Languages NewsLetters](/disks/pc/tools/microsoft/) that were published
+NOTE: We also have links to all the [Microsoft Languages NewsLetters](/disks/pc/tools/microsoft/) that were published
 in [PC Tech Journal](/pubs/pc/magazines/pctj/).
 
 ### Microsoft Games

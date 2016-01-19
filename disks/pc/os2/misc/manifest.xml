@@ -6,4 +6,7 @@
 	<disk id="disk01" size="1228800" chs="80:2:15" href="/disks/pc/os2/misc/1.0/debugger/OS210-BOOT.json">
 		<name>OS/2 1.0 Debugger Boot Disk</name>
 	</disk>
+	<disk id="disk02" size="1228800" chs="80:2:15" img="football/debugger/static/FOOTBALL-7.68.17.img" href="/disks/pc/os2/misc/football/debugger/FOOTBALL-7.68.17.json" md5="3825dc8053f904c266b1ce98dbf1e981" md5json="7ea3f05e71ae4f3ccc7432f025426140">
+		<name>OS/2 FOOTBALL Boot Disk (v7.68.17)</name>
+	</disk>
 </manifest>

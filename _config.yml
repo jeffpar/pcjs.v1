@@ -12,6 +12,9 @@ url: "http://www.pcjs.org"  # "http://jeffpar.github.io" or "http://www.pcjs.org
 twitter_username: jeffpar
 github_username:  jeffpar
 
+left_brace: "{"
+right_brace: "}"
+
 # Build settings
 
 exclude: ["index.html", "**/index.html", "logs", "node_modules", "**/c64", "src", "**/src", "**/static", "tmp", "videos", "web"]

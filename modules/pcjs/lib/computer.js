@@ -82,7 +82,7 @@ if (NODE) {
  * @param {Object} [parmsMachine]
  * @param {boolean} [fSuspended]
  *
- * The Computer component has no required (parmsComputer) properties, but does
+ * The Computer component has no required (parmsComputer) properties, but it does
  * support the following:
  *
  *      autoPower: true to automatically power the computer (default), false to wait;
@@ -101,6 +101,16 @@ if (NODE) {
  *          or a string containing the path of a predefined JSON-encoded state
  *
  *      state: the path to JSON-encoded state file (see details regarding 'state' below)
+ *
+ * The parmsMachine object, if provided, may contain any of:
+ *
+ *      url: the location of the machine XML file
+ *
+ *      autoMount: if set, this should override any 'autoMount' property in the FDC's
+ *      parmsFDC object.
+ *
+ *      state: if set, this should override any 'state' property in the Computer's
+ *      parmsComputer object.
  *
  * If a predefined state is supplied AND it's successfully loaded, then resume behavior
  * defaults to '1' (ie, resume enabled without prompting).
@@ -141,7 +151,9 @@ function Computer(parmsComputer, parmsMachine, fSuspended) {
     this.sStateData = null;
     this.fStateData = false;            // remembers if sStateData was loaded
     this.fServerState = false;
-    this.url = parmsMachine? parmsMachine['url'] : null;
+
+    this.parmsMachine = parmsMachine;
+    this.url = this.getMachineParm('url') || "";
 
     /*
      * Generate a random number x (where 0 <= x < 1), add 0.1 so that it's guaranteed to be
@@ -230,7 +242,7 @@ function Computer(parmsComputer, parmsMachine, fSuspended) {
      * localStorage (in other words, it prevents fAllowResume from being true, and forcing resume off).
      */
     var fAllowResume;
-    var sState = Component.parmsURL && Component.parmsURL['state'] || (fAllowResume = true) && parmsComputer['state'];
+    var sState = Component.parmsURL && Component.parmsURL['state'] || this.getMachineParm('state') || (fAllowResume = true) && parmsComputer['state'];
 
     if (sState) {
         sStatePath = this.sStatePath = sState;
@@ -316,6 +328,17 @@ Computer.RESUME_DELETE   =  3;  // same as RESUME_PROMPT but discards ALL machin
 Computer.prototype.getMachineID = function()
 {
     return this.sMachineID;
+};
+
+/**
+ * getMachineParm(sParm)
+ *
+ * @param {string} sParm
+ * @return {string|undefined}
+ */
+Computer.prototype.getMachineParm = function(sParm)
+{
+    return this.parmsMachine && this.parmsMachine[sParm];
 };
 
 /**

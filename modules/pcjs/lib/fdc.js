@@ -142,22 +142,11 @@ function FDC(parmsFDC) {
     this['dmaWrite'] = this.dmaWrite;
     this['dmaFormat'] = this.dmaFormat;
 
-    this.configMount = null;
-    if (parmsFDC['autoMount']) {
-        this.configMount = parmsFDC['autoMount'];
-        if (typeof this.configMount == "string") {
-            try {
-                /*
-                 * The most likely source of any exception will be right here, where we're parsing
-                 * the JSON-encoded diskette data.
-                 */
-                this.configMount = eval("(" + parmsFDC['autoMount'] + ")");
-            } catch (e) {
-                Component.error("FDC auto-mount error: " + e.message + " (" + parmsFDC['autoMount'] + ")");
-                this.configMount = null;
-            }
-        }
-    }
+    /*
+     * We record any 'autoMount' object now, but we no longer parse it until initBus(), because the Computer's
+     * getMachineParm() service may have an override for us.
+     */
+    this.configMount = parmsFDC['autoMount'] || null;
 
     /*
      * The following array keeps track of every disk image we've ever mounted.  Each entry in the
@@ -532,6 +521,23 @@ FDC.prototype.initBus = function(cmp, bus, cpu, dbg)
     this.cmp = cmp;
 
     this.chipset = cmp.getMachineComponent("ChipSet");
+
+    this.configMount = this.cmp.getMachineParm('autoMount') || this.configMount;
+
+    if (this.configMount) {
+        if (typeof this.configMount == "string") {
+            try {
+                /*
+                 * The most likely source of any exception will be right here, where we're parsing
+                 * the JSON-encoded diskette data.
+                 */
+                this.configMount = eval("(" + this.configMount + ")");
+            } catch (e) {
+                Component.error("FDC auto-mount error: " + e.message + " (" + this.configMount + ")");
+                this.configMount = null;
+            }
+        }
+    }
 
     /*
      * If we didn't need auto-mount support, we could defer controller initialization until we received a powerUp() notification,
