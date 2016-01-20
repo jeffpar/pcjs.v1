@@ -800,10 +800,9 @@ MarkOut.prototype.convertMDLines = function(s)
 /**
  * convertMDLinks(sBlock)
  *
- * Aside from basic "inline" Markdown links, we also support named anchors; if the link begins with '#',
- * we strip the '#' and use the remainder of the link as the name of the anchor.  To reference a named
- * anchor from another link, you have to specify a path with '#' and the anchor name appended, in order
- * to distinguish an anchor name from an anchor reference.
+ * Aside from basic "inline" Markdown links, we also support named anchors; if the link begins with '!',
+ * we strip the '!' and use the remainder of the link as the name of the anchor.  To reference a named
+ * anchor from another link, specify a path with '#' and the anchor name appended.
  *
  * Note that the need for named anchors is somewhat diminished now that I automatically generate IDs for
  * all heading tags (eg, <h1>); refer to the generateID() function that's used in convertMDBlocks().
