@@ -17,7 +17,7 @@ right_brace: "}"
 
 # Build settings
 
-exclude: ["index.html", "**/index.html", "logs", "node_modules", "**/c64", "src", "**/src", "**/static", "tmp", "videos", "web"]
+exclude: ["index.html", "**/index.html", "logs", "node_modules", "**/c64", "src", "**/src", "**/static", "tmp", "videos", "web", ".git", ".idea"]
 markdown: kramdown
 kramdown:
   input: GFM
