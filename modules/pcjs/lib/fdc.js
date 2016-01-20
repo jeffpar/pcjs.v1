@@ -426,7 +426,7 @@ FDC.prototype.setBinding = function(sHTMLType, sBinding, control)
                 var sValue = controlOption.getAttribute("data-value");
                 if (sValue) {
                     try {
-                        dataValue = eval("({" + sValue + "})");
+                        dataValue = eval("(" + sValue + ")");
                     } catch (e) {
                         Component.error("FDC option error: " + e.message);
                     }

@@ -3,10 +3,13 @@
 <manifest type="software">
 	<title>Other OS/2 Disks</title>
 	<machine href="/disks/pc/os2/misc/1.0/debugger/machine.xml"/>
-	<disk id="disk01" size="1228800" chs="80:2:15" href="/disks/pc/os2/misc/1.0/debugger/OS210-BOOT.json">
+	<disk id="disk01" size="1228800" chs="80:2:15" img="1.0/static/OS210-88286.img" href="/disks/pc/os2/misc/1.0/OS210-88286.json">
 		<name>OS/2 1.0 Debugger Boot Disk</name>
 	</disk>
-	<disk id="disk02" size="1228800" chs="80:2:15" img="football/debugger/static/FOOTBALL-7.68.17.img" href="/disks/pc/os2/misc/football/debugger/FOOTBALL-7.68.17.json" md5="3825dc8053f904c266b1ce98dbf1e981" md5json="7ea3f05e71ae4f3ccc7432f025426140">
+	<disk id="disk02" size="1228800" chs="80:2:15" img="football/static/FOOTBALL-76817.img" href="/disks/pc/os2/misc/football/FOOTBALL-76817.json" md5="3825dc8053f904c266b1ce98dbf1e981" md5json="7ea3f05e71ae4f3ccc7432f025426140">
 		<name>OS/2 FOOTBALL Boot Disk (v7.68.17)</name>
+	</disk>
+	<disk id="disk03" size="1228800" chs="80:2:15" img="football/static/FOOTBALL-44100.img" href="/disks/pc/os2/misc/football/FOOTBALL-44100.json" md5="d4dd7e3afc4ea60fc302b93d5b2c4c4b" md5json="6a85048a4c2eccfc911aeda13db5e6f7">
+		<name>OS/2 FOOTBALL Boot Disk (v4.41.00)</name>
 	</disk>
 </manifest>

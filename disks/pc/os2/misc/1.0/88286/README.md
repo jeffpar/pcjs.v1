@@ -1,7 +1,7 @@
 ---
 layout: page
 title: OS/2 1.0 Debugger Boot Disk
-permalink: /disks/pc/os2/misc/1.0/debugger/
+permalink: /disks/pc/os2/misc/1.0/88286/
 machines:
   - id: ibm5170
     type: pc-dbg
@@ -9,14 +9,16 @@ machines:
     automount:
       A:
         name: OS/2 1.0 Debugger Boot Disk
-        path: /disks/pc/os2/misc/1.0/debugger/OS210-BOOT.json
+        path: /disks/pc/os2/misc/1.0/OS210-88286.json
+redirect_from:
+  - /disks/pc/os2/misc/1.0/debugger/
 ---
 
 OS/2 1.0 Debugger Boot Disk
 ---
 
-This disk contains a version of OS/2 1.0 built on October 12, 1988, which includes the built-in kernel debugger used by
-Microsoft and IBM for internal development.
+This disk contains a version of OS/2 1.0 built on October 12, 1988, which includes the built-in kernel debugger
+used by Microsoft and IBM for internal development.
 
 Note that [IBM OS/2 1.0](/disks/pc/os2/ibm/1.0/) was finalized in October 1987, nearly a year before the timestamps
 of these files, indicating that this was a private build of IBM OS/2 1.0.  When this disk boots, it displays:
@@ -34,12 +36,12 @@ A directory listing of this disk is provided [below](#directory-of-os2-10-debugg
 
 {% include machine.html id="ibm5170" %}
 
+### Directory of OS/2 1.0 Debugger Boot Disk
+
 Aside from the fact that the IBMDOS.COM on this disk is much larger than the 1987 version (thanks to the inclusion of
 the kernel debugger), most of the other file sizes are identical.  But not all.  For example, the 1987 version of
 CLOCK01.SYS is 2762 bytes, whereas this version is 2812 bytes.  So apparently a few changes were slipped into the 1.0
 sources used to build these binaries.
-
-### Directory of OS/2 1.0 Debugger Boot Disk
 
 	IBMBIO   COM      4096 10-12-88  12:32p
 	IBMDOS   COM    299143 10-12-88  10:53a
