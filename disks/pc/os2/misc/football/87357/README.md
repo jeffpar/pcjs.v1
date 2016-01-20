@@ -31,6 +31,10 @@ it *is* newer than the 7.68.17 prototype.  This is confirmed by the build date (
 and the higher version number.  Version 1.30 was probably anticipated to be the first 80386 release, an honor
 that ultimately went to version 2.00.
 
+A directory listing of this disk is provided [below](#directory-of-os2-football-boot-disk-v44100).
+
+{% include machine.html id="deskpro386" %}
+
 ### Directory of OS/2 FOOTBALL Boot Disk (v4.41.00)
 
 	 Volume in drive A has no label

@@ -70,7 +70,7 @@
 				<xsl:with-param name="class"><xsl:value-of select="@class"/>js</xsl:with-param>
 				<xsl:with-param name="parms">
 					<xsl:choose>
-						<xsl:when test="$machineState != ''">state:"<xsl:value-of select="$machineState"/>"</xsl:when>
+						<xsl:when test="$machineState != ''">"<xsl:value-of select="$machineState"/>"</xsl:when>
 						<xsl:otherwise><xsl:value-of select="@parms"/></xsl:otherwise>
 					</xsl:choose>
 				</xsl:with-param>
