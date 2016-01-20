@@ -25,7 +25,7 @@
  * You are required to include the above copyright notice in every source
  * code file of every copy or modified version of this work, and to display
  * that copyright notice on every screen that loads or runs any version
- * of this software (see Computer.sCopyright).
+ * of this software (see Computer.COPYRIGHT).
  *
  * Some C1Pjs and PCjs files also attempt to load external resource files, such
  * as character-image files and ROM files. Those external resource files are

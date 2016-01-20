@@ -11,10 +11,10 @@ and [C1Pjs](/docs/c1pjs/).
 
 ### Software Application Manifests
 
-Every complete software package is stored in its own folder, either as a set of individual files
-(under [/apps](/apps/)) or as a set of disk images (under [/disks](/disks/)), along with a **manifest.xml**
-file that describes the software.  The manifest format is still being developed, but at a minimum, it
-should contain the following information about the software:
+In the PCjs Project, every complete software package is stored in its own folder, either as a set of individual
+files (under [/apps](/apps/)) or as a set of disk images (under [/disks](/disks/)), along with a **manifest.xml**
+file that describes the software.  The manifest format is still being developed, but at a minimum, it should contain
+the following information about the software:
 
 - Title
 - Version

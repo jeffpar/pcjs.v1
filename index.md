@@ -46,7 +46,7 @@ Some pre-configured machines are shown below, ready to run BASIC, DOS, Windows 1
 {% include screenshot.html src="/disks/pc/games/microsoft/adventure/thumbnail.jpg" width="200" height="120" title="IBM PC w/MDA, Microsoft Adventure" link="/disks/pc/games/microsoft/adventure/" %}
 {% include screenshot.html src="/disks/pc/games/infocom/zork1/thumbnail.jpg" width="200" height="120" title="IBM PC w/CGA, Zork I" link="/disks/pc/games/infocom/zork1/" %}
 
-Check out the rest of the PCjs [Application](/apps/pc/), [Boot Disk](/disks/pc/) and [Machine](/devices/pc/machine/)
+Check out the rest of the PCjs [Application](/apps/pc/), [Disk](/disks/pc/), and [Machine](/devices/pc/machine/)
 demos, including an [IBM PC Dual Display System](/devices/pc/machine/5150/dual/64kb/) demo of multiple monitor support,
 and [IBM PC XT "Server Array"](/devices/pc/machine/5160/cga/256kb/array/) and [Windows 1.01 "Server Array"](/devices/pc/machine/5160/ega/640kb/array/)
 demos of multiple machines running side-by-side.

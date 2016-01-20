@@ -22,7 +22,7 @@
  *
  * You are required to include the above copyright notice in every source code file of every
  * copy or modified version of this work, and to display that copyright notice on every screen
- * that loads or runs any version of this software (see Computer.sCopyright).
+ * that loads or runs any version of this software (see Computer.COPYRIGHT).
  *
  * Some JSMachines files also attempt to load external resource files, such as character-image files,
  * ROM files, and disk image files. Those external resource files are not considered part of the
@@ -231,14 +231,14 @@ MarkOut.setOptions = function(options)
  * The infoMachine object should contain, at a minimum:
  *
  *      {
- *          'class': sMachineClass,     // eg, "pc"
- *          'func': sMachineFunc,
- *          'id': sMachineID,
- *          'xml': sMachineXMLFile,
- *          'xsl': sMachineXSLFile,
- *          'version': sMachineVersion, // eg, "1.13.0"
+ *          'class':    sMachineClass,  // eg, "pc"
+ *          'func':     sMachineFunc,
+ *          'id':       sMachineID,
+ *          'xml':      sMachineXMLFile,
+ *          'xsl':      sMachineXSLFile,
+ *          'version':  sMachineVersion,// eg, "1.13.0"
  *          'debugger': fDebugger,      // eg, false
- *          'state': sMachineState
+ *          'parms':    sMachineParms
  *      }
  *
  * This is an internal function, used by convertMDMachineLinks() to record all the machines defined
@@ -273,13 +273,16 @@ MarkOut.prototype.getMachines = function()
  * the result.  Furthermore, if the generated ID is not unique (among the set of ALL generated IDs),
  * then no ID is produced.
  *
+ * UPDATE: Revised the algorithm to be more Jekyll-like (ie, REMOVING anything not a letter or digit or
+ * space, then removing any leading or trailing spaces, and then replacing any remaining spaces with a hyphen).
+ *
  * @this {MarkOut}
  * @param {string} sText
  * @returns {string|null} converts the given text to a unique ID (or null if resulting ID was not unique)
  */
 MarkOut.prototype.generateID = function(sText)
 {
-    var sID = sText.replace(/[^A-Z0-9]+/gi, '-').replace(/^-+|-+$/g, "").toLowerCase();
+    var sID = sText.replace(/[^A-Z0-9 ]+/gi, '').replace(/^ +| +$/g, '').replace(/ +/g, '-').toLowerCase();
     if (this.aIDs.indexOf(sID) < 0) {
         this.aIDs.push(sID);
         return sID;
@@ -375,16 +378,54 @@ MarkOut.prototype.convertMD = function(sIndent)
                 for (var iMachine = 0; iMachine < asMachines.length; iMachine++) {
                     if (!asMachines[iMachine]) continue;
                     var id = null;
-                    var aOptions, machine = {};
-                    var reOption = /([^\s]+):\s*([^\n]*)/g;
+                    var aOptions, aaOptions = [], machine = {};
+                    var reOption = /([ \t]*)([^\s]+):[ \t]*([^\n]*)/g;
                     while (aOptions = reOption.exec(asMachines[iMachine])) {
-                        if (!id && aOptions[1] == "id") {
-                            id = aOptions[2];
-                        }
-                        else {
-                            machine[aOptions[1]] = aOptions[2];
-                        }
+                        aaOptions.push(aOptions);
                     }
+                    for (var iOption = 0; iOption < aaOptions.length; iOption++) {
+                        var aOptions = aaOptions[iOption];
+                        var sSpace = aOptions[1], sName = aOptions[2], sValue = aOptions[3];
+                        if (!id && sName == 'id') {
+                            id = sValue;
+                        } else if (sName == 'automount') {
+                            /*
+                             * I take a simplistic approach to parsing the object definition associated with "automount",
+                             * because I know it only consist of 1 or more drive letters, each of which may be followed by
+                             * 1 or 2 additional properties (eg, "name" and "path").  If we need to support other JSON
+                             * object definitions in the future, this will have to be generalized.
+                             *
+                             * Here's an example of "automount" output:
+                             *
+                             *      {"A":{"name":"OS/2 FOOTBALL Boot Disk (v7.68.17)","path":"/disks/pc/os2/misc/football/debugger/FOOTBALL-7.68.17.json"}}
+                             */
+                            sValue = '{';
+                            var cDrives = 0, cProps = 0, iProp;
+                            for (iProp = iOption + 1; iProp < aaOptions.length; iProp++) {
+                                var sPropSpace = aaOptions[iProp][1];
+                                if (sPropSpace.length <= sSpace.length) break;
+                                var sPropName = aaOptions[iProp][2];
+                                var sPropValue = aaOptions[iProp][3];
+                                if (!sPropValue) {
+                                    if (cProps) sValue += '}';
+                                    if (cDrives++) sValue += ',';
+                                    sValue += '"' + sPropName + '":{';
+                                    cProps = 0;
+                                } else {
+                                    if (cProps++) sValue += ',';
+                                    sValue += '"' + sPropName + '":"' + sPropValue + '"';
+                                }
+                            }
+                            if (cProps++) sValue += '}';
+                            sValue += '}';
+                            iOption = iProp - 1;
+                        }
+                        machine[sName] = sValue;
+                    }
+                    /*
+                     * Any 'state' and 'automount' properties must now be merged into a 'parms' property.
+                     */
+                    machine['parms'] = '{state:"' + (machine['state'] || "") + '",autoMount:' + machine['automount'] + '}';
                     if (id) this.aMachineDefs[id] = machine;
                 }
             }
@@ -812,7 +853,10 @@ MarkOut.prototype.convertMDLinks = function(sBlock)
             }
         }
         sURL = sURL.replace(/\*/g, pkg.version);
-        if (sURL.charAt(0) == '#') {
+        /*
+         * My own goofy way of defining a named anchor (by using an exclamation point) in Markdown....
+         */
+        if (sURL.charAt(0) == '!') {
             sTag = "span";      // using <a> to name an anchor is deprecated
             sType = "id";       // using the "name" attribute is deprecated as well
             sURL = sURL.substr(1);
@@ -952,7 +996,7 @@ MarkOut.prototype.convertMDImageLinks = function(sBlock, sIndent)
  * Before we call convertMDLinks() to process any normal Markdown-style links, we first look for our own
  * special flavor of "machine" Markdown links; ie:
  *
- *      [IBM PC](/devices/pc/machine/5150/mda/64kb/ "PCjs:demoPC:stylesheet:version:options:state")
+ *      [IBM PC](/devices/pc/machine/5150/mda/64kb/ "PCjs:demoPC:stylesheet:version:options:parms")
  *
  * where a special title attribute triggers generation of an embedded machine rather than a link.
  *
@@ -964,6 +1008,11 @@ MarkOut.prototype.convertMDImageLinks = function(sBlock, sIndent)
  *      [IBM PC](/devices/pc/machine/5150/mda/64kb/ "PCjs:demoPC:::debugger")
  *
  * If the link ends with a slash, then it's an implied reference to a "machine.xml".
+ *
+ * UPDATE: Since parms containing JSON may also contain colons, machine Markdown links may now use '|'
+ * instead of ':' as separators; eg:
+ *
+ *      [IBM PC](/devices/pc/machine/5150/mda/64kb/ "PCjs|demoPC|stylesheet|version|options|parms")
  *
  * Granted, there are a number of things we could be smarter about.  First, you probably don't care about the
  * ID for the <div>; it's purely a mechanism for telling the script where to embed the machine, so we could
@@ -989,7 +1038,7 @@ MarkOut.prototype.convertMDImageLinks = function(sBlock, sIndent)
 MarkOut.prototype.convertMDMachineLinks = function(sBlock)
 {
     var aMatch, sReplacement;
-    var sMachine, sMachineID, sMachineXMLFile, sMachineXSLFile, sMachineVersion, sMachineOptions, sMachineState;
+    var sMachine, sMachineID, sMachineXMLFile, sMachineXSLFile, sMachineVersion, sMachineOptions, sMachineParms;
 
     /*
      * Before we start looking for Markdown-style machine links, see if there are any Liquid-style machines,
@@ -1008,8 +1057,8 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
             sMachineXMLFile = machine['config'] || "machine.xml";
             sMachineXSLFile = machine['template'] || "";
             sMachineVersion = (machine['uncompiled'] && machine['uncompiled'] == "true"? "uncompiled" : "");
-            sMachineState = machine['state'] || "";
-            sReplacement = "[Embedded PC](" + sMachineXMLFile + ' "' + sMachine + 'js:' + sMachineID + ':' + sMachineXSLFile + '::' + sMachineOptions + ':' + sMachineState + '")';
+            sMachineParms = machine['parms'] || "";
+            sReplacement = "[Embedded PC](" + sMachineXMLFile + ' "' + sMachine + 'js|' + sMachineID + '|' + sMachineXSLFile + '||' + sMachineOptions + '|' + sMachineParms + '")';
         }
         sBlock = sBlock.replace(aMatch[0], sReplacement);
         reIncludes.lastIndex = 0;       // reset lastIndex, since we just modified the string that reIncludes is iterating over
@@ -1019,7 +1068,7 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
      * Start looking for Markdown-style machine links now...
      */
     var cMatches = 0;
-    var reMachines = /\[(.*?)]\((.*?)\s*"(PC|C1P)js:(.*?)"\)/gi;
+    var reMachines = /\[(.*?)]\((.*?)\s*"(PC|C1P)js[:|](.*?)"\)/gi;
 
     while ((aMatch = reMachines.exec(sBlock))) {
 
@@ -1029,14 +1078,14 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
         sMachine = aMatch[3].toUpperCase();
         var sMachineFunc = "embed" + sMachine;
         var sMachineClass = sMachine.toLowerCase();
-        var aMachineParms = aMatch[4].split(':');
+        var aMachineParms = aMatch[4].split(aMatch[4].indexOf('|') > 0? '|' : ':');
         var sMachineMessage = "Waiting for " + sMachine + "js to load";
 
         sMachineID = aMachineParms[0];
         sMachineXSLFile = aMachineParms[1] || "";
         sMachineVersion = aMachineParms[2] || this.sMachineVersion;
         sMachineOptions = aMachineParms[3] || "";
-        sMachineState = aMachineParms[4] || "";
+        sMachineParms = aMachineParms[4] || "";
         var aMachineOptions = sMachineOptions.split(',');
         var fDebugger = (aMachineOptions.indexOf("debugger") >= 0);
 
@@ -1071,14 +1120,14 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
         cMatches++;
 
         this.addMachine({
-            'class': sMachineClass,     // eg, a machine class, such as "pc" or "c1p"
-            'func': sMachineFunc,
-            'id': sMachineID,
-            'xml': sMachineXMLFile,
-            'xsl': sMachineXSLFile,
-            'version': sMachineVersion, // eg, "1.10", "*" to select the current version, or "uncompiled"; "*" is the default
+            'class':    sMachineClass,  // eg, a machine class, such as "pc" or "c1p"
+            'func':     sMachineFunc,
+            'id':       sMachineID,
+            'xml':      sMachineXMLFile,
+            'xsl':      sMachineXSLFile,
+            'version':  sMachineVersion,// eg, "1.10", "*" to select the current version, or "uncompiled"; "*" is the default
             'debugger': fDebugger,      // eg, true or false; false is the default
-            'state': sMachineState}
+            'parms':    sMachineParms}
         );
     }
 

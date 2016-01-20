@@ -22,7 +22,7 @@
  *
  * You are required to include the above copyright notice in every source code file of every
  * copy or modified version of this work, and to display that copyright notice on every screen
- * that loads or runs any version of this software (see Computer.sCopyright).
+ * that loads or runs any version of this software (see Computer.COPYRIGHT).
  *
  * Some JSMachines files also attempt to load external resource files, such as character-image files,
  * ROM files, and disk image files. Those external resource files are not considered part of the
@@ -56,7 +56,7 @@ var cMachines = 0;
 var fAsync = true;
 
 /**
- * loadXML(sFile, idMachine, sStateFile, fResolve, display, done)
+ * loadXML(sFile, idMachine, sParms, fResolve, display, done)
  *
  * This is the preferred way to load all XML and XSL files. It uses loadResource()
  * to load them as strings, which parseXML() can massage before parsing/transforming them.
@@ -81,12 +81,12 @@ var fAsync = true;
  *
  * @param {string} sXMLFile
  * @param {string|null|undefined} idMachine
- * @param {string|null|undefined} sStateFile
+ * @param {string|null|undefined} sParms
  * @param {boolean} fResolve is true to resolve any "ref" attributes
  * @param {function(string)} display
  * @param {function(string,Object)} done (string contains the unparsed XML string data, and Object contains a parsed XML object)
  */
-function loadXML(sXMLFile, idMachine, sStateFile, fResolve, display, done)
+function loadXML(sXMLFile, idMachine, sParms, fResolve, display, done)
 {
     var doneLoadXML = function(sURLName, sXML, nErrorCode) {
         if (nErrorCode) {
@@ -94,14 +94,14 @@ function loadXML(sXMLFile, idMachine, sStateFile, fResolve, display, done)
             done(sXML, null);
             return;
         }
-        parseXML(sXML, sXMLFile, idMachine, sStateFile, fResolve, display, done);
+        parseXML(sXML, sXMLFile, idMachine, sParms, fResolve, display, done);
     };
     display("Loading " + sXMLFile + "...");
     web.loadResource(sXMLFile, fAsync, null, null, doneLoadXML);
 }
 
 /**
- * parseXML(sXML, sXMLFile, idMachine, sStateFile, fResolve, display, done)
+ * parseXML(sXML, sXMLFile, idMachine, sParms, fResolve, display, done)
  *
  * Generates an XML document from an XML string. This function also provides a work-around for XSLT's
  * lack of support for the document() function (at least on some browsers), by replacing every reference
@@ -110,12 +110,12 @@ function loadXML(sXMLFile, idMachine, sStateFile, fResolve, display, done)
  * @param {string} sXML
  * @param {string|null} sXMLFile
  * @param {string|null|undefined} idMachine
- * @param {string|null|undefined} sStateFile
+ * @param {string|null|undefined} sParms
  * @param {boolean} fResolve is true to resolve any "ref" attributes; default is false
  * @param {function(string)} display
  * @param {function(string,Object)} done (string contains the unparsed XML string data, and Object contains a parsed XML object)
  */
-function parseXML(sXML, sXMLFile, idMachine, sStateFile, fResolve, display, done)
+function parseXML(sXML, sXMLFile, idMachine, sParms, fResolve, display, done)
 {
     var buildXML = function(sXML, sError) {
         if (sError) {
@@ -125,7 +125,29 @@ function parseXML(sXML, sXMLFile, idMachine, sStateFile, fResolve, display, done
         if (idMachine) {
             var sURL = sXMLFile;
             if (sURL && sURL.indexOf('/') < 0) sURL = window.location.pathname + sURL;
-            sXML = sXML.replace(/(<machine[^>]*\sid=)(['"]).*?\2/, "$1$2" + idMachine + "$2" + (sStateFile? " state=$2" + sStateFile + "$2" : "") + (sURL? " url=$2" + sURL + "$2" : ""));
+            /*
+             * We embed the URL of the XML file both as a separate "xml" attribute for easy access from the
+             * XSL file, and as part of the "parms" attribute for easy access from machines (see getMachineParm()).
+             */
+            if (!sParms) {
+                sParms = '{';
+            } else if (sParms.slice(-1) == '}') {
+                sParms = sParms.slice(0, -1);
+                if (sParms.length > 1) sParms += ',';
+            } else {            // sParms must just be a "state" file, so encode it as a "state" property
+                sParms = '{state:"' + sParms + '",';
+            }
+            sParms += 'url:"' + sURL + '"}';
+            /*
+             * Note that while we no longer generate a machine XML file with a "state" attribute (because it's
+             * encoded inside the "parms" attribute), the XSL file must still cope with "state" attributes inside
+             * other XML files; for example, manifest XML files like /apps/pc/1981/visicalc/manifest.xml contain
+             * machine elements with "state" attributes that must still be passed down to the computer element
+             * "the old fashioned way".
+             *
+             * Until/unless that changes, components.xsl cannot be simplified as much as I might have hoped.
+             */
+            sXML = sXML.replace(/(<machine[^>]*\sid=)(['"]).*?\2/, "$1$2" + idMachine + "$2" + (sParms? " parms='" + sParms + "'" : "") + (sURL? ' url="' + sURL + '"' : ''));
         }
         /*
          * Non-COMPILED kludge to replace the version number template in the XSL file (which we assume we're reading,
@@ -281,7 +303,7 @@ function resolveXML(sXML, display, done)
 }
 
 /**
- * embedMachine(sName, sVersion, idElement, sXMLFile, sXSLFile, sStateFile)
+ * embedMachine(sName, sVersion, idElement, sXMLFile, sXSLFile, sParms)
  *
  * This allows to you embed a machine on a web page, by transforming the machine XML into HTML.
  *
@@ -290,10 +312,10 @@ function resolveXML(sXML, display, done)
  * @param {string} idElement
  * @param {string} sXMLFile
  * @param {string} sXSLFile
- * @param {string} [sStateFile]
+ * @param {string} [sParms]
  * @return {boolean} true if successful, false if error
  */
-function embedMachine(sName, sVersion, idElement, sXMLFile, sXSLFile, sStateFile)
+function embedMachine(sName, sVersion, idElement, sXMLFile, sXSLFile, sParms)
 {
     var eMachine, eWarning, fSuccess = true;
 
@@ -439,9 +461,9 @@ function embedMachine(sName, sVersion, idElement, sXMLFile, sXSLFile, sStateFile
                 }
             };
             if (sXMLFile.charAt(0) != '<') {
-                loadXML(sXMLFile, idElement, sStateFile, true, displayMessage, loadXSL);
+                loadXML(sXMLFile, idElement, sParms, true, displayMessage, loadXSL);
             } else {
-                parseXML(sXMLFile, null, idElement, sStateFile, false, displayMessage, loadXSL);
+                parseXML(sXMLFile, null, idElement, sParms, false, displayMessage, loadXSL);
             }
         } else {
             displayError("missing machine element: " + idElement);
@@ -467,18 +489,18 @@ function embedC1P(idElement, sXMLFile, sXSLFile)
 }
 
 /**
- * embedPC(idElement, sXMLFile, sXSLFile, sStateFile)
+ * embedPC(idElement, sXMLFile, sXSLFile, sParms)
  *
  * @param {string} idElement
  * @param {string} sXMLFile
  * @param {string} sXSLFile
- * @param {string} [sStateFile]
+ * @param {string} [sParms]
  * @return {boolean} true if successful, false if error
  */
-function embedPC(idElement, sXMLFile, sXSLFile, sStateFile)
+function embedPC(idElement, sXMLFile, sXSLFile, sParms)
 {
     if (fAsync) web.enablePageEvents(false);
-    return embedMachine("PCjs", APPVERSION, idElement, sXMLFile, sXSLFile, sStateFile);
+    return embedMachine("PCjs", APPVERSION, idElement, sXMLFile, sXSLFile, sParms);
 }
 
 /**

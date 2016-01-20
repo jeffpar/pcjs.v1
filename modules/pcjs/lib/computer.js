@@ -22,7 +22,7 @@
  *
  * You are required to include the above copyright notice in every source code file of every
  * copy or modified version of this work, and to display that copyright notice on every screen
- * that loads or runs any version of this software (see Computer.sCopyright).
+ * that loads or runs any version of this software (see Computer.COPYRIGHT).
  *
  * Some PCjs files also attempt to load external resource files, such as character-image files,
  * ROM files, and disk image files. Those external resource files are not considered part of the
@@ -82,8 +82,11 @@ if (NODE) {
  * @param {Object} [parmsMachine]
  * @param {boolean} [fSuspended]
  *
- * The Computer component has no required (parmsComputer) properties, but does
+ * The Computer component has no required (parmsComputer) properties, but it does
  * support the following:
+ *
+ *      autoPower: true to automatically power the computer (default), false to wait;
+ *      false is honored only if a "power" button binding exists.
  *
  *      busWidth: number of memory address lines (address bits) on the computer's "bus";
  *      20 is the minimum (and the default), which implies 8086/8088 real-mode addressing,
@@ -98,6 +101,16 @@ if (NODE) {
  *          or a string containing the path of a predefined JSON-encoded state
  *
  *      state: the path to JSON-encoded state file (see details regarding 'state' below)
+ *
+ * The parmsMachine object, if provided, may contain any of:
+ *
+ *      url: the location of the machine XML file
+ *
+ *      autoMount: if set, this should override any 'autoMount' property in the FDC's
+ *      parmsFDC object.
+ *
+ *      state: if set, this should override any 'state' property in the Computer's
+ *      parmsComputer object.
  *
  * If a predefined state is supplied AND it's successfully loaded, then resume behavior
  * defaults to '1' (ie, resume enabled without prompting).
@@ -121,15 +134,26 @@ function Computer(parmsComputer, parmsMachine, fSuspended) {
     Component.call(this, "Computer", parmsComputer, Computer, Messages.COMPUTER);
 
     this.aFlags.fPowered = false;
+    this.fAutoPower = parmsComputer['autoPower'];
+
+    /*
+     * nPowerChange is 0 while the power state is stable, 1 while power is transitioning
+     * to "on", and -1 while power is transitioning to "off".
+     */
+    this.nPowerChange = 0;
+
     /*
      * TODO: Deprecate 'buswidth' (it should have always used camelCase)
      */
     this.nBusWidth = parmsComputer['busWidth'] || parmsComputer['buswidth'];
+
     this.resume = Computer.RESUME_NONE;
     this.sStateData = null;
     this.fStateData = false;            // remembers if sStateData was loaded
     this.fServerState = false;
-    this.url = parmsMachine? parmsMachine['url'] : null;
+
+    this.parmsMachine = parmsMachine;
+    this.url = this.getMachineParm('url') || "";
 
     /*
      * Generate a random number x (where 0 <= x < 1), add 0.1 so that it's guaranteed to be
@@ -218,7 +242,7 @@ function Computer(parmsComputer, parmsMachine, fSuspended) {
      * localStorage (in other words, it prevents fAllowResume from being true, and forcing resume off).
      */
     var fAllowResume;
-    var sState = Component.parmsURL && Component.parmsURL['state'] || (fAllowResume = true) && parmsComputer['state'];
+    var sState = Component.parmsURL && Component.parmsURL['state'] || this.getMachineParm('state') || (fAllowResume = true) && parmsComputer['state'];
 
     if (sState) {
         sStatePath = this.sStatePath = sState;
@@ -227,7 +251,7 @@ function Computer(parmsComputer, parmsMachine, fSuspended) {
             this.resume = Computer.RESUME_NONE;
         }
         if (this.resume) {
-            this.stateComputer = new State(this, Computer.sAppVer);
+            this.stateComputer = new State(this, Computer.APPVERSION);
             if (this.stateComputer.load()) {
                 sStatePath = null;
             } else {
@@ -251,12 +275,12 @@ function Computer(parmsComputer, parmsMachine, fSuspended) {
         web.loadResource(sStatePath, true, null, this, this.doneLoad);
     }
 
-    if (!fSuspended) {
-        /*
-         * Power "up" the computer, giving every component the opportunity to reset or restore itself.
-         */
-        this.wait(this.powerOn);
-    }
+    if (!this.bindings["power"]) this.fAutoPower = true;
+
+    /*
+     * Power on the computer, giving every component the opportunity to reset or restore itself.
+     */
+    if (!fSuspended && this.fAutoPower) this.wait(this.powerOn);
 }
 
 Component.subclass(Computer);
@@ -267,9 +291,9 @@ Component.subclass(Computer);
  * previous localStorage data be released with a version number that is at least 1 greater,
  * since we're tagging the localStorage data with the integer portion of the version string.
  */
-Computer.sAppName = APPNAME || "PCjs";
-Computer.sAppVer = APPVERSION;
-Computer.sCopyright = "Copyright © 2012-2016 Jeff Parsons <Jeff@pcjs.org>";
+Computer.APPNAME = APPNAME || "PCjs";
+Computer.APPVERSION = APPVERSION;
+Computer.COPYRIGHT = "Copyright © 2012-2016 Jeff Parsons <Jeff@pcjs.org>";
 
 /*
  * I think it's a good idea to also display a GPL notice, putting people on notice that even
@@ -290,11 +314,11 @@ Computer.STATE_USERID    = "user";
  * internal use only, and RESUME_DELETE is not documented (it provides a way of deleting ALL saved states
  * whenever a resume is declined).  As a result, the only "end-user" values are 0, 1 and 2.
  */
-Computer.RESUME_REPOWER = -1;   // resume without changing any state (for internal use only)
-Computer.RESUME_NONE    = 0;    // default (no resume)
-Computer.RESUME_AUTO    = 1;    // automatically save/restore state
-Computer.RESUME_PROMPT  = 2;    // automatically save but conditionally restore (WARNING: if restore is declined, any state is discarded)
-Computer.RESUME_DELETE  = 3;    // same as RESUME_PROMPT but discards ALL machines states whenever ANY machine restore is declined (undocumented)
+Computer.RESUME_REPOWER  = -1;  // resume without changing any state (for internal use only)
+Computer.RESUME_NONE     =  0;  // default (no resume)
+Computer.RESUME_AUTO     =  1;  // automatically save/restore state
+Computer.RESUME_PROMPT   =  2;  // automatically save but conditionally restore (WARNING: if restore is declined, any state is discarded)
+Computer.RESUME_DELETE   =  3;  // same as RESUME_PROMPT but discards ALL machines states whenever ANY machine restore is declined (undocumented)
 
 /**
  * getMachineID()
@@ -304,6 +328,17 @@ Computer.RESUME_DELETE  = 3;    // same as RESUME_PROMPT but discards ALL machin
 Computer.prototype.getMachineID = function()
 {
     return this.sMachineID;
+};
+
+/**
+ * getMachineParm(sParm)
+ *
+ * @param {string} sParm
+ * @return {string|undefined}
+ */
+Computer.prototype.getMachineParm = function(sParm)
+{
+    return this.parmsMachine && this.parmsMachine[sParm];
 };
 
 /**
@@ -388,7 +423,7 @@ Computer.prototype.wait = function(fn, parms)
 Computer.prototype.validateState = function(stateComputer)
 {
     var fValid = true;
-    var stateValidate = new State(this, Computer.sAppVer, Computer.STATE_VALIDATE);
+    var stateValidate = new State(this, Computer.APPVERSION, Computer.STATE_VALIDATE);
     if (stateValidate.load() && stateValidate.parse()) {
         var sTimestampValidate = stateValidate.get(Computer.STATE_TIMESTAMP);
         var sTimestampComputer = stateComputer ? stateComputer.get(Computer.STATE_TIMESTAMP) : "unknown";
@@ -423,10 +458,15 @@ Computer.prototype.powerOn = function(resume)
         this.printMessage("Computer.powerOn(" + (resume == Computer.RESUME_REPOWER ? "repower" : (resume ? "resume" : "")) + ")");
     }
 
+    if (this.nPowerChange) {
+        return;
+    }
+    this.nPowerChange++;
+
     var fRepower = false;
     var fRestore = false;
     this.fRestoreError = false;
-    var stateComputer = this.stateComputer || new State(this, Computer.sAppVer);
+    var stateComputer = this.stateComputer || new State(this, Computer.APPVERSION);
 
     if (resume == Computer.RESUME_REPOWER) {
         fRepower = true;
@@ -439,7 +479,7 @@ Computer.prototype.powerOn = function(resume)
              * Which means, of course, that if a previous "failsafe" checkpoint already exists, something bad
              * may have happened the last time around.
              */
-            this.stateFailSafe = new State(this, Computer.sAppVer, Computer.STATE_FAILSAFE);
+            this.stateFailSafe = new State(this, Computer.APPVERSION, Computer.STATE_FAILSAFE);
             if (this.stateFailSafe.load()) {
                 this.powerReport(stateComputer);
                 /*
@@ -459,7 +499,7 @@ Computer.prototype.powerOn = function(resume)
             this.stateFailSafe.store();
 
             var fValidate = this.resume && !this.fServerState;
-            if (resume == Computer.RESUME_AUTO || web.confirmUser("Click OK to restore the previous " + Computer.sAppName + " machine state, or CANCEL to reset the machine.")) {
+            if (resume == Computer.RESUME_AUTO || web.confirmUser("Click OK to restore the previous " + Computer.APPNAME + " machine state, or CANCEL to reset the machine.")) {
                 fRestore = stateComputer.parse();
                 if (fRestore) {
                     var sCode = stateComputer.get(UserAPI.RES.CODE);
@@ -663,9 +703,11 @@ Computer.prototype.donePowerOn = function(aParms)
     }
 
     this.aFlags.fPowered = true;
+    var controlPower = this.bindings["power"];
+    if (controlPower) controlPower.textContent = "On";
 
     if (!this.fInitialized) {
-        this.println(Computer.sAppName + " v" + Computer.sAppVer + "\n" + Computer.sCopyright + "\n" + Computer.LICENSE);
+        this.println(Computer.APPNAME + " v" + Computer.APPVERSION + "\n" + Computer.COPYRIGHT + "\n" + Computer.LICENSE);
         this.fInitialized = true;
     }
 
@@ -694,6 +736,8 @@ Computer.prototype.donePowerOn = function(aParms)
         this.stateFailSafe.clear();
         delete this.stateFailSafe;
     }
+
+    this.nPowerChange = 0;
 };
 
 /**
@@ -732,8 +776,8 @@ Computer.prototype.checkPower = function()
  */
 Computer.prototype.powerReport = function(stateComputer)
 {
-    if (web.confirmUser("There may be a problem with your " + Computer.sAppName + " machine.\n\nTo help us diagnose it, click OK to send this " + Computer.sAppName + " machine state to http://" + SITEHOST + ".")) {
-        web.sendReport(Computer.sAppName, Computer.sAppVer, this.url, this.getUserID(), ReportAPI.TYPE.BUG, stateComputer.toString());
+    if (web.confirmUser("There may be a problem with your " + Computer.APPNAME + " machine.\n\nTo help us diagnose it, click OK to send this " + Computer.APPNAME + " machine state to http://" + SITEHOST + ".")) {
+        web.sendReport(Computer.APPNAME, Computer.APPVERSION, this.url, this.getUserID(), ReportAPI.TYPE.BUG, stateComputer.toString());
     }
 };
 
@@ -777,8 +821,13 @@ Computer.prototype.powerOff = function(fSave, fShutdown)
         this.printMessage("Computer.powerOff(" + (fSave ? "save" : "nosave") + (fShutdown ? ",shutdown" : "") + ")");
     }
 
-    var stateComputer = new State(this, Computer.sAppVer);
-    var stateValidate = new State(this, Computer.sAppVer, Computer.STATE_VALIDATE);
+    if (this.nPowerChange) {
+        return null;
+    }
+    this.nPowerChange--;
+
+    var stateComputer = new State(this, Computer.APPVERSION);
+    var stateValidate = new State(this, Computer.APPVERSION, Computer.STATE_VALIDATE);
 
     var sTimestamp = usr.getTimestamp();
     stateValidate.set(Computer.STATE_TIMESTAMP, sTimestamp);
@@ -862,7 +911,13 @@ Computer.prototype.powerOff = function(fSave, fShutdown)
         }
     }
 
-    if (fShutdown) this.aFlags.fPowered = false;
+    if (fShutdown) {
+        this.aFlags.fPowered = false;
+        var controlPower = this.bindings["power"];
+        if (controlPower) controlPower.textContent = "Off";
+    }
+
+    this.nPowerChange = 0;
 
     return sState;
 };
@@ -960,6 +1015,20 @@ Computer.prototype.setBinding = function(sHTMLType, sBinding, control)
     var computer = this;
 
     switch (sBinding) {
+    case "power":
+        this.bindings[sBinding] = control;
+        control.onclick = function onClickPower() {
+            computer.onPower();
+        };
+        return true;
+
+    case "reset":
+        this.bindings[sBinding] = control;
+        control.onclick = function onClickReset() {
+            computer.onReset();
+        };
+        return true;
+
     case "save":
         this.bindings[sBinding] = control;
         control.onclick = function onClickSave() {
@@ -993,13 +1062,6 @@ Computer.prototype.setBinding = function(sHTMLType, sBinding, control)
              *
              *      $('<a href="' + sState + '" download="state.json">Download</a>').appendTo('#container');
              */
-        };
-        return true;
-
-    case "reset":
-        this.bindings[sBinding] = control;
-        control.onclick = function onClickReset() {
-            computer.onReset();
         };
         return true;
 
@@ -1092,7 +1154,7 @@ Computer.prototype.getServerStatePath = function()
         if (DEBUG && this.messageEnabled()) {
             this.printMessage(Computer.STATE_USERID + " for load: " + this.sUserID);
         }
-        sStatePath = web.getHost() + UserAPI.ENDPOINT + '?' + UserAPI.QUERY.REQ + '=' + UserAPI.REQ.LOAD + '&' + UserAPI.QUERY.USER + '=' + this.sUserID + '&' + UserAPI.QUERY.STATE + '=' + State.key(this, Computer.sAppVer);
+        sStatePath = web.getHost() + UserAPI.ENDPOINT + '?' + UserAPI.QUERY.REQ + '=' + UserAPI.REQ.LOAD + '&' + UserAPI.QUERY.USER + '=' + this.sUserID + '&' + UserAPI.QUERY.STATE + '=' + State.key(this, Computer.APPVERSION);
     } else {
         if (DEBUG && this.messageEnabled()) {
             this.printMessage(Computer.STATE_USERID + " unavailable");
@@ -1160,7 +1222,7 @@ Computer.prototype.storeServerState = function(sUserID, sState, fSync)
     var data = {};
     data[UserAPI.QUERY.REQ] = UserAPI.REQ.STORE;
     data[UserAPI.QUERY.USER] = sUserID;
-    data[UserAPI.QUERY.STATE] = State.key(this, Computer.sAppVer);
+    data[UserAPI.QUERY.STATE] = State.key(this, Computer.APPVERSION);
     data[UserAPI.QUERY.DATA] = sState;
     var sRequest = web.getHost() + UserAPI.ENDPOINT;
     if (!fSync) {
@@ -1183,12 +1245,38 @@ Computer.prototype.storeServerState = function(sUserID, sState, fSync)
 };
 
 /**
+ * onPower()
+ *
+ * This handles UI requests to toggle the computer's power (eg, see the "power" button binding).
+ *
+ * @this {Computer}
+ */
+Computer.prototype.onPower = function()
+{
+    if (!this.nPowerChange) {
+        if (!this.aFlags.fPowered) {
+            this.wait(this.powerOn);
+        } else {
+            this.powerOff(false, true);
+        }
+    }
+};
+
+/**
  * onReset()
+ *
+ * This handles UI requests to reset the computer's state (eg, see the "reset" button binding).
  *
  * @this {Computer}
  */
 Computer.prototype.onReset = function()
 {
+    /*
+     * I'm going to start with the presumption that it makes little sense for an "unpowered" computer to be "reset";
+     * ditto if the power state is currently being changed.
+     */
+    if (!this.aFlags.fPowered || this.nPowerChange) return;
+
     /*
      * If this is a "resumable" machine (and it's not using a predefined state), then we overload the reset
      * operation to offer an explicit "save or discard" option first.  This is currently the only UI we offer to
@@ -1203,7 +1291,7 @@ Computer.prototype.onReset = function()
          * I used to bypass the prompt if this.resume == Computer.RESUME_AUTO, setting fSave to true automatically,
          * but that gives the user no means of resetting a resumable machine that contains errors in its resume state.
          */
-        var fSave = (/* this.resume == Computer.RESUME_AUTO || */ web.confirmUser("Click OK to save changes to this " + Computer.sAppName + " machine.\n\nWARNING: If you CANCEL, all disk changes will be discarded."));
+        var fSave = (/* this.resume == Computer.RESUME_AUTO || */ web.confirmUser("Click OK to save changes to this " + Computer.APPNAME + " machine.\n\nWARNING: If you CANCEL, all disk changes will be discarded."));
         this.powerOff(fSave, true);
         /*
          * Forcing the page to reload is an expedient option, but ugly. It's preferable to call powerOn()
@@ -1265,7 +1353,7 @@ Computer.init = function()
     /*
      * In non-COMPILED builds, embedMachine() may have set XMLVERSION.
      */
-    if (!COMPILED && XMLVERSION) Computer.sAppVer = XMLVERSION;
+    if (!COMPILED && XMLVERSION) Computer.APPVERSION = XMLVERSION;
 
     var aeMachines = Component.getElementsByClass(window.document, PCJSCLASS + "-machine");
 
@@ -1292,17 +1380,16 @@ Computer.init = function()
             }
 
             /*
-             * For now, all we support are "reset" and "save" buttons. We may eventually add a "power"
-             * button to manually suspend/resume the machine.  An "erase" button was also considered, but
-             * "reset" now provides a way to force the machine to start from scratch again, so "erase"
-             * might be redundant now.
+             * Bind any "power", "reset" and "save" buttons.  An "erase" button was also considered,
+             * but "reset" now provides a way to force the machine to start from scratch again, so "erase"
+             * may be redundant now.
              */
             Component.bindComponentControls(computer, eComputer, PCJSCLASS);
 
             /*
-             * Power "up" the computer, giving every component the opportunity to reset or restore itself.
+             * Power on the computer, giving every component the opportunity to reset or restore itself.
              */
-            computer.wait(computer.powerOn);
+            if (computer.fAutoPower) computer.wait(computer.powerOn);
         }
     }
 };
@@ -1380,7 +1467,7 @@ Computer.exit = function()
 
             if (computer.aFlags.fPowered) {
                 /**
-                 * Power "down" the computer, giving every component an opportunity to save its state,
+                 * Power off the computer, giving every component an opportunity to save its state,
                  * but only if 'resume' has been set AND there is no valid resume path (because if a valid resume
                  * path exists, we'll always load our state from there, and not from whatever we save here).
                  */

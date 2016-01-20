@@ -10,11 +10,7 @@
   {% else %}
     {% assign machine_template = machine.template %}
   {% endunless %}
-  {% unless machine.state %}
-    {% assign machine_state = '' %}
-  {% else %}
-    {% assign machine_state = machine.state %}
-  {% endunless %}
+  {% capture machine_parms %}{{ site.left_brace }}state:"{{ machine.state }}",autoMount:{{ machine.automount|jsonify }}{{ site.right_brace }}{% endcapture %}
   {% if site.pcjs.compiled == true and machine.uncompiled != true %}
     {% capture machine_script %}<script type="text/javascript" src="{{ site.baseurl }}/versions/{{ machine.type | remove:'-dbg' }}js/{{ site.pcjs.version }}/{{ machine.type }}.js"></script>{% endcapture %}
     {% unless machine_scripts contains machine_script %}
@@ -38,5 +34,5 @@
       {% capture machine_template %}{{ site.baseurl }}/modules/{{ machine.type | remove:'-dbg' }}js/templates/components.xsl{% endcapture %}
     {% endif %}
   {% endif %}
-  <script type="text/javascript">{{ machine_embed }}("{{ machine.id }}","{{ machine_config }}","{{ machine_template }}","{{ machine_state }}");</script>
+  <script type="text/javascript">{{ machine_embed }}('{{ machine.id }}','{{ machine_config }}','{{ machine_template }}','{{ machine_parms }}');</script>
 {% endfor %}

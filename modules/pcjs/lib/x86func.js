@@ -22,7 +22,7 @@
  *
  * You are required to include the above copyright notice in every source code file of every
  * copy or modified version of this work, and to display that copyright notice on every screen
- * that loads or runs any version of this software (see Computer.sCopyright).
+ * that loads or runs any version of this software (see Computer.COPYRIGHT).
  *
  * Some PCjs files also attempt to load external resource files, such as character-image files,
  * ROM files, and disk image files. Those external resource files are not considered part of the
@@ -4107,9 +4107,11 @@ X86.fnFaultMessage = function(nFault, nError, fHalt)
             fHalt = false;
         }
     }
-    if (nFault == X86.EXCEPTION.PF_FAULT && bOpcode == X86.OPCODE.IRET) {
+    /*
+    if (nFault == X86.EXCEPTION.GP_FAULT) {
         fHalt = true;
     }
+    */
 
     /*
      * If fHalt has been explicitly set to false, we also take that as a cue to disable fault messages

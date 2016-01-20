@@ -7,10 +7,11 @@ permalink: /disks/pc/os2/microsoft/1.0/
 Microsoft OS/2 1.0
 ---
 
-Microsoft OS/2 1.0 was released in December 1987.  Directory listings of all three 1.2Mb distributions diskettes
-are provided below.
+Microsoft OS/2 1.0 was released in December 1987.
 
-### Disk 1: MS OS/2 1.0 (1.2M Install)
+Directory listings of the three 1.2Mb distribution diskettes are provided below.
+
+### Directory of MS OS/2 1.0 (1.2M Install)
 
 	 Volume in drive A is OS2INSTALL 
 	 Directory of  A:\
@@ -55,9 +56,9 @@ are provided below.
 	SWAPPER  EXE     4150  12-15-87  12:00a
 	VIOCALLS DLL    13981  12-15-87  12:00a
 	REFORMAT DTA       12  12-28-15  10:34p
-		   40 File(s)    253440 bytes free
+	       40 File(s)    253440 bytes free
 
-### Disk 2: MS OS/2 1.0 (1.2M Program)
+### Directory of MS OS/2 1.0 (1.2M Program)
 
 	 Volume in drive A is OS2PROGRAM 
 	 Directory of  A:\
@@ -112,9 +113,9 @@ are provided below.
 	VDISK    SYS     4662  12-15-87  12:00a
 	VIOCALLS DLL    13981  12-15-87  12:00a
 	VIOTBL   DCP    52162  12-15-87  12:00a
-		   50 File(s)     48128 bytes free
+	       50 File(s)     48128 bytes free
 
-### Disk 3: MS OS/2 1.0 (1.2M Supplemental)
+### Directory of MS OS/2 1.0 (1.2M Supplemental)
 
 	 Volume in drive A is OS2SUPP    
 	 Directory of  A:\
@@ -156,4 +157,4 @@ are provided below.
 	TRACEFMT EXE    64432  12-15-87  12:00a
 	TREE     COM    28928  12-15-87  12:00a
 	XCOPY    EXE    41168  12-15-87  12:00a
-		   37 File(s)     40960 bytes free
+	       37 File(s)     40960 bytes free
