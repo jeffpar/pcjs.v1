@@ -63,9 +63,7 @@ that automatically run the software.
 
 ### Other OS/2 Disks
 
-* [OS/2 1.0 Debugger Boot Disk](/disks/pc/os2/misc/1.0/88286/)
-* [OS/2 FOOTBALL Boot Disk (v7.68.17)](/disks/pc/os2/misc/football/87058/)
-* [OS/2 FOOTBALL Boot Disk (v4.41.00)](/disks/pc/os2/misc/football/87357/)
+* [OS/2 Boot Disks](/disks/pc/os2/misc/)
 
 ### Microsoft Windows
 

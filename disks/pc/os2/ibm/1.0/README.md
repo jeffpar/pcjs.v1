@@ -12,7 +12,7 @@ IBM OS/2 1.0
 
 IBM OS/2 1.0 was announced on April 2, 1987, finalized in October 1987, and released in December 1987.
 
-When the installation disk boots, it displays:
+When the installation disk boots, the following message is displayed on-screen:
 
 	IBM Operating System/2 Version 1.00
 	(C) Copyright IBM Corp. 1981, 1987. All rights reserved.
