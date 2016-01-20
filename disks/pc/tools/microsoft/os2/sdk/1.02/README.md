@@ -76,6 +76,1185 @@ the missing **NETWORK** disk; specifically:
 but you aren't likely to need those.  We will rebuild a copy of that missing disk from other sources and
 include it with the SDK diskettes at a later date.
 
+### Directory of MS OS/2 SDK 1.02: TOOLKIT1
+
+	 Volume in drive A is OS2TOOLKIT1
+	
+	Directory of A:\
+	
+	DEMOS        <DIR>     12-15-87  12:00a
+	OS2DOC       <DIR>     12-15-87  12:00a
+	PROFILER     <DIR>     12-15-87  12:00a
+	TOOLKIT1 CTL         7 12-16-87  11:10a
+			4 file(s)          7 bytes
+	
+	Directory of A:\DEMOS
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	EXAMPLES     <DIR>     12-15-87  12:00a
+			3 file(s)          0 bytes
+	
+	Directory of A:\DEMOS\EXAMPLES
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	ALLOC        <DIR>     12-15-87  12:00a
+	ARGUMENT     <DIR>     12-15-87  12:00a
+	ASMEXMPL     <DIR>     12-15-87  12:00a
+	ASYNCIO      <DIR>     12-15-87  12:00a
+	BEEPC        <DIR>     12-15-87  12:00a
+	CONFIG       <DIR>     12-15-87  12:00a
+	COUNTRY      <DIR>     12-15-87  12:00a
+	CRITSEC      <DIR>     12-15-87  12:00a
+	CSALIAS      <DIR>     12-15-87  12:00a
+	CWAIT        <DIR>     12-15-87  12:00a
+	DATETIME     <DIR>     12-15-87  12:00a
+	DOSEXIT      <DIR>     12-15-87  12:00a
+	DYNLINK      <DIR>     12-15-87  12:00a
+	EXITLIST     <DIR>     12-15-87  12:00a
+	FSINFO       <DIR>     12-15-87  12:00a
+	GETENV       <DIR>     12-15-87  12:00a
+	DO       BAT        36 12-15-87  12:00a
+	DO       CMD        19 12-15-87  12:00a
+	MAKEALL  BAT      1666 12-15-87  12:00a
+	MAKEALL  CMD      1666 12-15-87  12:00a
+	README            2484 12-15-87  12:00a
+		   23 file(s)       5871 bytes
+	
+	Directory of A:\DEMOS\EXAMPLES\ALLOC
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	ALLOC              199 12-15-87  12:00a
+	ALLOC    C        1826 12-15-87  12:00a
+	ALLOC    EXE     19100 12-15-87  12:00a
+			5 file(s)      21125 bytes
+	
+	Directory of A:\DEMOS\EXAMPLES\ARGUMENT
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	ARGUMENT           164 12-15-87  12:00a
+	ARGUMENT C        2826 12-15-87  12:00a
+	ARGUMENT EXE      8182 12-15-87  12:00a
+			5 file(s)      11172 bytes
+	
+	Directory of A:\DEMOS\EXAMPLES\ASMEXMPL
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	ASMEXMPL           211 12-15-87  12:00a
+	ASMEXMPL ASM      3626 12-15-87  12:00a
+	ASMEXMPL EXE      1273 12-15-87  12:00a
+			5 file(s)       5110 bytes
+	
+	Directory of A:\DEMOS\EXAMPLES\ASYNCIO
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	ASYNCIO            149 12-15-87  12:00a
+	ASYNCIO  C        1011 12-15-87  12:00a
+	ASYNCIO  EXE      9396 12-15-87  12:00a
+			5 file(s)      10556 bytes
+	
+	Directory of A:\DEMOS\EXAMPLES\BEEPC
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	BEEPC              192 12-15-87  12:00a
+	BEEPC    C         548 12-15-87  12:00a
+	BEEPC    EXE      9454 12-15-87  12:00a
+			5 file(s)      10194 bytes
+	
+	Directory of A:\DEMOS\EXAMPLES\CONFIG
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	CONFIG             198 12-15-87  12:00a
+	CONFIG   C         812 12-15-87  12:00a
+	CONFIG   EXE     19068 12-15-87  12:00a
+			5 file(s)      20078 bytes
+	
+	Directory of A:\DEMOS\EXAMPLES\COUNTRY
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	COUNTRY            201 12-15-87  12:00a
+	COUNTRY  C        1331 12-15-87  12:00a
+	COUNTRY  EXE     19564 12-15-87  12:00a
+			5 file(s)      21096 bytes
+	
+	Directory of A:\DEMOS\EXAMPLES\CRITSEC
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	CRITSEC            110 12-15-87  12:00a
+	CRITSEC  C        2593 12-15-87  12:00a
+	CRITSEC  EXE      8158 12-15-87  12:00a
+			5 file(s)      10861 bytes
+	
+	Directory of A:\DEMOS\EXAMPLES\CSALIAS
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	CSALIAS            204 12-15-87  12:00a
+	CSALIAS  C        2646 12-15-87  12:00a
+	CSALIAS  EXE     19072 12-15-87  12:00a
+			5 file(s)      21922 bytes
+	
+	Directory of A:\DEMOS\EXAMPLES\CWAIT
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	CHILD    C         360 12-15-87  12:00a
+	CHILD    EXE      9388 12-15-87  12:00a
+	CWAIT              240 12-15-87  12:00a
+	CWAIT    C        2494 12-15-87  12:00a
+	CWAIT    EXE      9574 12-15-87  12:00a
+			7 file(s)      22056 bytes
+	
+	Directory of A:\DEMOS\EXAMPLES\DATETIME
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	DATETIME           206 12-15-87  12:00a
+	DATETIME C        1934 12-15-87  12:00a
+	DATETIME EXE     19690 12-15-87  12:00a
+			5 file(s)      21830 bytes
+	
+	Directory of A:\DEMOS\EXAMPLES\DOSEXIT
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	DOSEXIT            153 12-15-87  12:00a
+	DOSEXIT  C        2141 12-15-87  12:00a
+	DOSEXIT  EXE      9996 12-15-87  12:00a
+			5 file(s)      12290 bytes
+	
+	Directory of A:\DEMOS\EXAMPLES\DYNLINK
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	FAR          <DIR>     12-15-87  12:00a
+	NEAR         <DIR>     12-15-87  12:00a
+	DYNCVP   CMD        35 12-15-87  12:00a
+	DYNDEMO2 EXE      5098 12-15-87  12:00a
+	DYNGO    CMD       151 12-15-87  12:00a
+	DYNINIT  ASM       424 12-15-87  12:00a
+	DYNLIB   C        1986 12-15-87  12:00a
+	DYNLIB   DEF      2204 12-15-87  12:00a
+	DYNLIB   H         144 12-15-87  12:00a
+	DYNLIB2  C        1242 12-15-87  12:00a
+	DYNLIB3  ASM      6648 12-15-87  12:00a
+	DYNLINK           2400 12-15-87  12:00a
+	DYNLINK  CMD       660 12-15-87  12:00a
+	DYNLINK  DEF       181 12-15-87  12:00a
+	DYNLINK1 C         520 12-15-87  12:00a
+	DYNLINK2 C        1541 12-15-87  12:00a
+	README            3956 12-15-87  12:00a
+		   19 file(s)      27190 bytes
+	
+	Directory of A:\DEMOS\EXAMPLES\DYNLINK\FAR
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	DYNLIB   C        1412 12-15-87  12:00a
+	DYNLIB2  C        1253 12-15-87  12:00a
+			4 file(s)       2665 bytes
+	
+	Directory of A:\DEMOS\EXAMPLES\DYNLINK\NEAR
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	DYNLIB   C        1699 12-15-87  12:00a
+	DYNLIB2  C        1242 12-15-87  12:00a
+			4 file(s)       2941 bytes
+	
+	Directory of A:\DEMOS\EXAMPLES\EXITLIST
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	EXITLIST           154 12-15-87  12:00a
+	EXITLIST C        2095 12-15-87  12:00a
+	EXITLIST EXE      9402 12-15-87  12:00a
+			5 file(s)      11651 bytes
+	
+	Directory of A:\DEMOS\EXAMPLES\FSINFO
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	FSINFO             198 12-15-87  12:00a
+	FSINFO   C        3632 12-15-87  12:00a
+	FSINFO   EXE     17624 12-15-87  12:00a
+			5 file(s)      21454 bytes
+	
+	Directory of A:\DEMOS\EXAMPLES\GETENV
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	GETENV             194 12-15-87  12:00a
+	GETENV   C        1037 12-15-87  12:00a
+	GETENV   EXE     19062 12-15-87  12:00a
+			5 file(s)      20293 bytes
+	
+	Directory of A:\OS2DOC
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	INPUT    EXE     13062 12-15-87  12:00a
+	INSTSDK  BAT      4729 12-15-87  12:00a
+	INSTSDK  CMD      3824 12-15-87  12:00a
+	READ     ME!      7527 12-15-87  12:00a
+			6 file(s)      29142 bytes
+	
+	Directory of A:\PROFILER
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	EXAMPLE      <DIR>     12-15-87  12:00a
+	OS2DOSP  COM    265006 12-15-87  12:00a
+	PROFILE  DLL      1050 12-15-87  12:00a
+	PROFILE  DOC      5750 12-15-87  12:00a
+	PROFILE  H         540 12-15-87  12:00a
+	PROFILE  LIB      1024 12-15-87  12:00a
+			8 file(s)     273370 bytes
+	
+	Directory of A:\PROFILER\EXAMPLE
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	TESTPROF C        1051 12-15-87  12:00a
+	TESTPROF DEF        59 12-15-87  12:00a
+	TESTPROF LRF       120 12-15-87  12:00a
+	TESTPROF MAK       518 12-15-87  12:00a
+			6 file(s)       1748 bytes
+	
+	Total files listed:
+		  154 file(s)     584622 bytes
+						   69632 bytes free
+
+### Directory of MS OS/2 SDK 1.02: TOOLKIT2
+
+	 Volume in drive A is OS2TOOLKIT2
+	
+	Directory of A:\
+	
+	DEMOS        <DIR>     12-15-87  12:00a
+	LIB          <DIR>     12-15-87  12:00a
+	TOOLKIT2 CTL         7 12-11-87   3:30p
+			3 file(s)          7 bytes
+	
+	Directory of A:\DEMOS
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	EXAMPLES     <DIR>     12-15-87  12:00a
+			3 file(s)          0 bytes
+	
+	Directory of A:\DEMOS\EXAMPLES
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	HELLO        <DIR>     12-15-87  12:00a
+	HUGE         <DIR>     12-15-87  12:00a
+	INFOSEG      <DIR>     12-15-87  12:00a
+	IOPL         <DIR>     12-15-87  12:00a
+	KEYS         <DIR>     12-15-87  12:00a
+	KILL         <DIR>     12-15-87  12:00a
+	MACHMODE     <DIR>     12-15-87  12:00a
+	MONITORS     <DIR>     12-15-87  12:00a
+	MOVE         <DIR>     12-15-87  12:00a
+	PIPES        <DIR>     12-15-87  12:00a
+	QHTYPE       <DIR>     12-15-87  12:00a
+	QUEUES       <DIR>     12-15-87  12:00a
+	REALLOC      <DIR>     12-15-87  12:00a
+	SESSION      <DIR>     12-15-87  12:00a
+	SETMAXFH     <DIR>     12-15-87  12:00a
+	SETVEC       <DIR>     12-15-87  12:00a
+	SHARE        <DIR>     12-15-87  12:00a
+	SIGNAL       <DIR>     12-15-87  12:00a
+	SLEEP        <DIR>     12-15-87  12:00a
+	SUBALLOC     <DIR>     12-15-87  12:00a
+	SUSPEND      <DIR>     12-15-87  12:00a
+	THREADS      <DIR>     12-15-87  12:00a
+	TIMER        <DIR>     12-15-87  12:00a
+	VERSION      <DIR>     12-15-87  12:00a
+		   26 file(s)          0 bytes
+	
+	Directory of A:\DEMOS\EXAMPLES\HELLO
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	HELLO              173 12-15-87  12:00a
+	HELLO    C          66 12-15-87  12:00a
+	HELLO    EXE     14174 12-15-87  12:00a
+			5 file(s)      14413 bytes
+	
+	Directory of A:\DEMOS\EXAMPLES\HUGE
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	HUGE               186 12-15-87  12:00a
+	HUGE     C        2348 12-15-87  12:00a
+	HUGE     EXE     16044 12-15-87  12:00a
+			5 file(s)      18578 bytes
+	
+	Directory of A:\DEMOS\EXAMPLES\INFOSEG
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	INFOSEG            149 12-15-87  12:00a
+	INFOSEG  C        2182 12-15-87  12:00a
+	INFOSEG  EXE      9408 12-15-87  12:00a
+			5 file(s)      11739 bytes
+	
+	Directory of A:\DEMOS\EXAMPLES\IOPL
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	IOPL               354 12-15-87  12:00a
+	IOPL     DEF        60 12-15-87  12:00a
+	IOPL     EXE      8584 12-15-87  12:00a
+	IOPLMAIN C         633 12-15-87  12:00a
+	IOPLSUB  ASM      3087 12-15-87  12:00a
+			7 file(s)      12718 bytes
+	
+	Directory of A:\DEMOS\EXAMPLES\KEYS
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	KEYS               194 12-15-87  12:00a
+	KEYS     C         923 12-15-87  12:00a
+	KEYS     EXE     14724 12-15-87  12:00a
+			5 file(s)      15841 bytes
+	
+	Directory of A:\DEMOS\EXAMPLES\KILL
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	KILL               134 12-15-87  12:00a
+	KILL     C        1815 12-15-87  12:00a
+	KILL     EXE      9878 12-15-87  12:00a
+			5 file(s)      11827 bytes
+	
+	Directory of A:\DEMOS\EXAMPLES\MACHMODE
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	MACHMODE           210 12-15-87  12:00a
+	MACHMODE C         373 12-15-87  12:00a
+	MACHMODE EXE     19038 12-15-87  12:00a
+			5 file(s)      19621 bytes
+	
+	Directory of A:\DEMOS\EXAMPLES\MONITORS
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	MONITORS           166 12-15-87  12:00a
+	MONITORS C        8845 12-15-87  12:00a
+	MONITORS EXE     14059 12-15-87  12:00a
+			5 file(s)      23070 bytes
+	
+	Directory of A:\DEMOS\EXAMPLES\MOVE
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	MOVE               182 12-15-87  12:00a
+	MOVE     C        1345 12-15-87  12:00a
+	MOVE     EXE     20596 12-15-87  12:00a
+			5 file(s)      22123 bytes
+	
+	Directory of A:\DEMOS\EXAMPLES\PIPES
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	PC       C         371 12-15-87  12:00a
+	PC       EXE      8292 12-15-87  12:00a
+	PCHILD   C        2004 12-15-87  12:00a
+	PCHILD   EXE      8320 12-15-87  12:00a
+	PIPES              359 12-15-87  12:00a
+	PIPES    C        3210 12-15-87  12:00a
+	PIPES    EXE      8354 12-15-87  12:00a
+	PP       C        3812 12-15-87  12:00a
+	PP       EXE      8140 12-15-87  12:00a
+		   11 file(s)      42862 bytes
+	
+	Directory of A:\DEMOS\EXAMPLES\QHTYPE
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	QHTYPE             198 12-15-87  12:00a
+	QHTYPE   C        2230 12-15-87  12:00a
+	QHTYPE   EXE     19418 12-15-87  12:00a
+			5 file(s)      21846 bytes
+	
+	Directory of A:\DEMOS\EXAMPLES\QUEUES
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	CUST     C        4358 12-15-87  12:00a
+	CUST     EXE      3360 12-15-87  12:00a
+	DEFINES  H        1238 12-15-87  12:00a
+	FIFOQUE  CMD        94 12-15-87  12:00a
+	LIFOQUE  CMD        94 12-15-87  12:00a
+	PRIOQUE  CMD        98 12-15-87  12:00a
+	QUEUES             260 12-15-87  12:00a
+	README            1553 12-15-87  12:00a
+	SERV     C        4897 12-15-87  12:00a
+	SERV     EXE     10232 12-15-87  12:00a
+		   12 file(s)      26184 bytes
+	
+	Directory of A:\DEMOS\EXAMPLES\REALLOC
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	REALLOC            210 12-15-87  12:00a
+	REALLOC  C         574 12-15-87  12:00a
+	REALLOC  EXE      8942 12-15-87  12:00a
+			5 file(s)       9726 bytes
+	
+	Directory of A:\DEMOS\EXAMPLES\SESSION
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	SESSION            167 12-15-87  12:00a
+	SESSION  C        3634 12-15-87  12:00a
+	SESSION  EXE      9268 12-15-87  12:00a
+			5 file(s)      13069 bytes
+	
+	Directory of A:\DEMOS\EXAMPLES\SETMAXFH
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	SETMAXFH           154 12-15-87  12:00a
+	SETMAXFH C        1314 12-15-87  12:00a
+	SETMAXFH EXE      9914 12-15-87  12:00a
+			5 file(s)      11382 bytes
+	
+	Directory of A:\DEMOS\EXAMPLES\SETVEC
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	SETVEC             202 12-15-87  12:00a
+	SETVEC   C        2764 12-15-87  12:00a
+	SETVEC   EXE     19016 12-15-87  12:00a
+			5 file(s)      21982 bytes
+	
+	Directory of A:\DEMOS\EXAMPLES\SHARE
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	SHARE              211 12-15-87  12:00a
+	SHARE    C        3461 12-15-87  12:00a
+	SHARE    EXE      9980 12-15-87  12:00a
+	SHARE    H        1069 12-15-87  12:00a
+	SHRCHILD C        1376 12-15-87  12:00a
+	SHRCHILD EXE      3334 12-15-87  12:00a
+			8 file(s)      19431 bytes
+	
+	Directory of A:\DEMOS\EXAMPLES\SIGNAL
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	SIGNAL             232 12-15-87  12:00a
+	SIGNAL   C        2645 12-15-87  12:00a
+	SIGNAL   EXE     19998 12-15-87  12:00a
+			5 file(s)      22875 bytes
+	
+	Directory of A:\DEMOS\EXAMPLES\SLEEP
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	SLEEP              192 12-15-87  12:00a
+	SLEEP    C         901 12-15-87  12:00a
+	SLEEP    EXE     19052 12-15-87  12:00a
+			5 file(s)      20145 bytes
+	
+	Directory of A:\DEMOS\EXAMPLES\SUBALLOC
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	SUBALLOC           210 12-15-87  12:00a
+	SUBALLOC C        2572 12-15-87  12:00a
+	SUBALLOC EXE     19570 12-15-87  12:00a
+			5 file(s)      22352 bytes
+	
+	Directory of A:\DEMOS\EXAMPLES\SUSPEND
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	SUSPEND            153 12-15-87  12:00a
+	SUSPEND  C        2084 12-15-87  12:00a
+	SUSPEND  EXE      9946 12-15-87  12:00a
+			5 file(s)      12183 bytes
+	
+	Directory of A:\DEMOS\EXAMPLES\THREADS
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	THREADS            151 12-15-87  12:00a
+	THREADS  C        5269 12-15-87  12:00a
+	THREADS  EXE      9900 12-15-87  12:00a
+			5 file(s)      15320 bytes
+	
+	Directory of A:\DEMOS\EXAMPLES\TIMER
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	TIMER              139 12-15-87  12:00a
+	TIMER    C        2742 12-15-87  12:00a
+	TIMER    EXE      3324 12-15-87  12:00a
+			5 file(s)       6205 bytes
+	
+	Directory of A:\DEMOS\EXAMPLES\VERSION
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	VERSION            204 12-15-87  12:00a
+	VERSION  C         589 12-15-87  12:00a
+	VERSION  EXE     19018 12-15-87  12:00a
+			5 file(s)      19811 bytes
+	
+	Directory of A:\LIB
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	API      LIB     81408 12-15-87  12:00a
+	DOSCALLS LIB     29184 12-15-87  12:00a
+			4 file(s)     110592 bytes
+	
+	Total files listed:
+		  174 file(s)     545902 bytes
+						   97280 bytes free
+
+### Directory of MS OS/2 SDK 1.02: UTILITY1
+
+	 Volume in drive A is OS2UTILITY1
+	
+	Directory of A:\
+	
+	INIT         <DIR>     12-15-87  12:00a
+	TOOLS        <DIR>     12-15-87  12:00a
+	UTILITY1 CTL         7 12-11-87   3:30p
+			3 file(s)          7 bytes
+	
+	Directory of A:\INIT
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	AUTOEXEC BAT       561 12-15-87  12:00a
+	TOOLS    INI      1711 12-15-87  12:00a
+			4 file(s)       2272 bytes
+	
+	Directory of A:\TOOLS
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	BIN          <DIR>     12-15-87  12:00a
+			3 file(s)          0 bytes
+	
+	Directory of A:\TOOLS\BIN
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	CHKCACHE EXE     25165 12-15-87  12:00a
+	ECH      EXE     18342 12-15-87  12:00a
+	EXEHDR   EXE     29504 12-15-87  12:00a
+	EXP      EXE     31186 12-15-87  12:00a
+	LIB      EXE     49034 12-15-87  12:00a
+	LIBWHERE EXE     21962 12-15-87  12:00a
+	LINK     EXE    109046 12-15-87  12:00a
+	MAKE     EXE     38942 12-15-87  12:00a
+	RM       EXE     24334 12-15-87  12:00a
+	SDKED    EXE    177270 12-15-87  12:00a
+	SDKGREP  EXE     30410 12-15-87  12:00a
+	SHD      EXE     26710 12-15-87  12:00a
+	UNDEL    EXE     29012 12-15-87  12:00a
+	WHERE    EXE     33056 12-15-87  12:00a
+		   16 file(s)     643973 bytes
+	
+	Total files listed:
+		   26 file(s)     646252 bytes
+						   71680 bytes free
+
+### Directory of MS OS/2 SDK 1.02: UTILITY2
+
+	 Volume in drive A is OS2UTILITY2
+	
+	Directory of A:\
+	
+	TOOLS        <DIR>     12-15-87  12:00a
+	UTILITY2 CTL         7 12-11-87   3:30p
+			2 file(s)          7 bytes
+	
+	Directory of A:\TOOLS
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	BIN          <DIR>     12-15-87  12:00a
+	PBIN         <DIR>     12-15-87  12:00a
+			4 file(s)          0 bytes
+	
+	Directory of A:\TOOLS\BIN
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	BIND     EXE     36946 12-15-87  12:00a
+	IMPLIB   EXE     28362 12-15-87  12:00a
+	MKMSGF   EXE     27628 12-15-87  12:00a
+	MSGBIND  EXE     28216 12-15-87  12:00a
+			6 file(s)     121152 bytes
+	
+	Directory of A:\TOOLS\PBIN
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	CVP      EXE    225661 12-15-87  12:00a
+	CVP      HLP     18348 12-15-87  12:00a
+	KBDP     EXE      6688 12-15-87  12:00a
+	PINFO    EXE     33097 12-15-87  12:00a
+	PS       EXE     40481 12-15-87  12:00a
+	PSET     EXE      9100 12-15-87  12:00a
+			8 file(s)     333375 bytes
+	
+	Total files listed:
+		   20 file(s)     454534 bytes
+						  267264 bytes free
+
+### Directory of MS OS/2 SDK 1.02: CBIN1
+
+	 Volume in drive A is OS2CBIN1   
+	
+	Directory of A:\
+	
+	TOOLS        <DIR>     12-15-87  12:00a
+	CBIN1    CTL         7 12-11-87   3:29p
+			2 file(s)          7 bytes
+	
+	Directory of A:\TOOLS
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	BIN          <DIR>     12-15-87  12:00a
+			3 file(s)          0 bytes
+	
+	Directory of A:\TOOLS\BIN
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	C1       EXE    124613 12-15-87  12:00a
+	C1L      EXE    166009 12-15-87  12:00a
+	C2       EXE    241466 12-15-87  12:00a
+	CL       EXE     50039 12-15-87  12:00a
+			6 file(s)     582127 bytes
+	
+	Total files listed:
+		   11 file(s)     582134 bytes
+						  143360 bytes free
+
+### Directory of MS OS/2 SDK 1.02: CBIN2
+
+	 Volume in drive A is OS2CBIN2   
+	
+	Directory of A:\
+	
+	OS2DOC       <DIR>     12-15-87  12:00a
+	STARTUP      <DIR>     12-15-87  12:00a
+	TOOLS        <DIR>     12-15-87  12:00a
+	CBIN2    CTL         7 12-16-87  11:10a
+			4 file(s)          7 bytes
+	
+	Directory of A:\OS2DOC
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	C500     TXT     47528 12-15-87  12:00a
+	DEVHLP   TXT      4926 12-15-87  12:00a
+	ERRMSG   TXT     23627 12-15-87  12:00a
+	FILELIST         16718 12-15-87  12:00a
+	INPUT    EXE     13062 12-15-87  12:00a
+	LIBWHERE TXT      1503 12-15-87  12:00a
+	PROGSEL  TXT     12333 12-15-87  12:00a
+	SHD      HLP      5748 12-15-87  12:00a
+	UTILS    TXT      5503 12-15-87  12:00a
+	WHERE    HLP      1378 12-15-87  12:00a
+		   12 file(s)     132326 bytes
+	
+	Directory of A:\STARTUP
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	DOS          <DIR>     12-15-87  12:00a
+	OS2          <DIR>     12-15-87  12:00a
+	BRKCTL   INC       779 12-15-87  12:00a
+	CHKSTK   ASM      2036 12-15-87  12:00a
+	CHKSUM   ASM      3506 12-15-87  12:00a
+	CMACROS  INC     12061 12-15-87  12:00a
+	CRT0FP   ASM      2207 12-15-87  12:00a
+	DOSSEG   EXE     19929 12-15-87  12:00a
+	FMSGHDR  ASM      2417 12-15-87  12:00a
+	MAKEFILE          3893 12-15-87  12:00a
+	MSDOS    H        6845 12-15-87  12:00a
+	MSDOS    INC      6087 12-15-87  12:00a
+	NULBODY  C          13 12-15-87  12:00a
+	README   DOC      3188 12-15-87  12:00a
+	REGISTER H         922 12-15-87  12:00a
+	SETARGV  ASM       959 12-15-87  12:00a
+	STARTUP  BAT      1663 12-15-87  12:00a
+	VERSION  INC       498 12-15-87  12:00a
+	WILD     C        7182 12-15-87  12:00a
+		   21 file(s)      74185 bytes
+	
+	Directory of A:\STARTUP\DOS
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	CRT0     ASM     14465 12-15-87  12:00a
+	CRT0DAT  ASM     21555 12-15-87  12:00a
+	CRT0MSG  ASM      3131 12-15-87  12:00a
+	EXECMSG  ASM      1332 12-15-87  12:00a
+	NMSGHDR  ASM      5132 12-15-87  12:00a
+	NULBODY  LNK       145 12-15-87  12:00a
+	STDALLOC ASM      3336 12-15-87  12:00a
+	STDARGV  ASM     14604 12-15-87  12:00a
+	STDENVP  ASM      3692 12-15-87  12:00a
+		   11 file(s)      67392 bytes
+	
+	Directory of A:\STARTUP\OS2
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	CRT0     ASM     10317 12-15-87  12:00a
+	CRT0DAT  ASM      9910 12-15-87  12:00a
+	CRT0MSG  ASM      2061 12-15-87  12:00a
+	EXECMSG  ASM      2203 12-15-87  12:00a
+	NMSGHDR  ASM      3475 12-15-87  12:00a
+	NULBODY  LNK       164 12-15-87  12:00a
+	STDALLOC ASM      3234 12-15-87  12:00a
+	STDARGV  ASM     13612 12-15-87  12:00a
+	STDENVP  ASM      5316 12-15-87  12:00a
+		   11 file(s)      50292 bytes
+	
+	Directory of A:\TOOLS
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	BIN          <DIR>     12-15-87  12:00a
+			3 file(s)          0 bytes
+	
+	Directory of A:\TOOLS\BIN
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	C1       ERR     14756 12-15-87  12:00a
+	C23      ERR      3093 12-15-87  12:00a
+	C3       EXE    144764 12-15-87  12:00a
+	CL       ERR      2159 12-15-87  12:00a
+	CL       HLP      1990 12-15-87  12:00a
+	LIBBUILD EXE     33152 12-15-87  12:00a
+			8 file(s)     199914 bytes
+	
+	Total files listed:
+		   70 file(s)     524116 bytes
+						  166912 bytes free
+
+### Directory of MS OS/2 SDK 1.02: CLIB1
+
+	 Volume in drive A is OS2CLIB1   
+	
+	Directory of A:\
+	
+	INCLUDE      <DIR>     12-15-87  12:00a
+	LIB          <DIR>     12-15-87  12:00a
+	CLIB1    CTL         7 12-11-87   3:30p
+			3 file(s)          7 bytes
+	
+	Directory of A:\INCLUDE
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	SYS          <DIR>     12-15-87  12:00a
+	ASSERT   H         670 12-15-87  12:00a
+	BIOS     H        4857 12-15-87  12:00a
+	CONIO    H         950 12-15-87  12:00a
+	CTYPE    H        2469 12-15-87  12:00a
+	DIRECT   H         690 12-15-87  12:00a
+	DOS      H        5917 12-15-87  12:00a
+	ERRNO    H        1283 12-15-87  12:00a
+	FCNTL    H        1255 12-15-87  12:00a
+	FLOAT    H        6011 12-15-87  12:00a
+	GRAPH    H        7294 12-15-87  12:00a
+	IO       H        1296 12-15-87  12:00a
+	LIMITS   H        1553 12-15-87  12:00a
+	MALLOC   H        3099 12-15-87  12:00a
+	MATH     H        3308 12-15-87  12:00a
+	MEMORY   H        1065 12-15-87  12:00a
+	PROCESS  H        1976 12-15-87  12:00a
+	SEARCH   H        1024 12-15-87  12:00a
+	SETJMP   H         905 12-15-87  12:00a
+	SHARE    H         554 12-15-87  12:00a
+	SIGNAL   H        1913 12-15-87  12:00a
+	STDARG   H         613 12-15-87  12:00a
+	STDDEF   H        1098 12-15-87  12:00a
+	STDIO    H        4470 12-15-87  12:00a
+	STDLIB   H        4837 12-15-87  12:00a
+	STRING   H        2209 12-15-87  12:00a
+	TIME     H        2342 12-15-87  12:00a
+	VARARGS  H         641 12-15-87  12:00a
+		   30 file(s)      64299 bytes
+	
+	Directory of A:\INCLUDE\SYS
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	LOCKING  H         573 12-15-87  12:00a
+	STAT     H        1497 12-15-87  12:00a
+	TIMEB    H         846 12-15-87  12:00a
+	TYPES    H         849 12-15-87  12:00a
+	UTIME    H        1061 12-15-87  12:00a
+			7 file(s)       4826 bytes
+	
+	Directory of A:\LIB
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	87       LIB      4121 12-15-87  12:00a
+	BINMODE  OBJ       122 12-15-87  12:00a
+	CLIBCP   LIB     34397 12-15-87  12:00a
+	CLIBFA   LIB     47625 12-15-87  12:00a
+	CLIBFP   LIB     38309 12-15-87  12:00a
+	CVARSTCK OBJ       476 12-15-87  12:00a
+	EM       LIB     16921 12-15-87  12:00a
+	EM       MAP       429 12-15-87  12:00a
+	EMOEM    ASM     12125 12-15-87  12:00a
+	LIBH     LIB     13673 12-15-87  12:00a
+	LLIBCP   LIB     34909 12-15-87  12:00a
+	LLIBFA   LIB     48649 12-15-87  12:00a
+	LLIBFP   LIB     39845 12-15-87  12:00a
+	LVARSTCK OBJ       476 12-15-87  12:00a
+	MLIBCP   LIB     33373 12-15-87  12:00a
+	MLIBFA   LIB     47625 12-15-87  12:00a
+	MLIBFP   LIB     38307 12-15-87  12:00a
+	MVARSTCK OBJ       508 12-15-87  12:00a
+	SETARGV  OBJ       132 12-15-87  12:00a
+	SLIBCP   LIB     33373 12-15-87  12:00a
+	SLIBFA   LIB     46601 12-15-87  12:00a
+	SLIBFP   LIB     37795 12-15-87  12:00a
+	SVARSTCK OBJ       508 12-15-87  12:00a
+		   25 file(s)     530299 bytes
+	
+	Total files listed:
+		   65 file(s)     599431 bytes
+						   98304 bytes free
+
+### Directory of MS OS/2 SDK 1.02: CLIB2
+
+	 Volume in drive A is OS2CLIB2   
+	
+	Directory of A:\
+	
+	LIB          <DIR>     12-15-87  12:00a
+	CLIB2    CTL         7 12-11-87   3:30p
+			2 file(s)          7 bytes
+	
+	Directory of A:\LIB
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	CLIBC    LIB     94271 12-15-87  12:00a
+	CLIBC3   LIB     46957 12-15-87  12:00a
+	LLIBC    LIB     95295 12-15-87  12:00a
+	LLIBC3   LIB     47469 12-15-87  12:00a
+	MLIBC    LIB     87099 12-15-87  12:00a
+	MLIBC3   LIB     45933 12-15-87  12:00a
+	SLIBC    LIB     86075 12-15-87  12:00a
+	SLIBC3   LIB     45421 12-15-87  12:00a
+		   10 file(s)     548520 bytes
+	
+	Total files listed:
+		   12 file(s)     548527 bytes
+						  174080 bytes free
+
+### Directory of MS OS/2 SDK 1.02: MASM
+
+	 Volume in drive A is OS2MASM    
+	
+	Directory of A:\
+	
+	OS2DOC       <DIR>     12-15-87  12:00a
+	TOOLS        <DIR>     12-15-87  12:00a
+	MASM     CTL         7 12-11-87   3:30p
+			3 file(s)          7 bytes
+	
+	Directory of A:\OS2DOC
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	MASM     TXT     11977 12-15-87  12:00a
+	MASM500  TXT     16004 12-15-87  12:00a
+			4 file(s)      27981 bytes
+	
+	Directory of A:\TOOLS
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	BIN          <DIR>     12-15-87  12:00a
+	RBIN         <DIR>     12-15-87  12:00a
+			4 file(s)          0 bytes
+	
+	Directory of A:\TOOLS\BIN
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	CREF     EXE     28434 12-15-87  12:00a
+	MASM     EXE    118777 12-15-87  12:00a
+			4 file(s)     147211 bytes
+	
+	Directory of A:\TOOLS\RBIN
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	CV       EXE    220066 12-15-87  12:00a
+	CV       HLP     18348 12-15-87  12:00a
+			4 file(s)     238414 bytes
+	
+	Total files listed:
+		   19 file(s)     413613 bytes
+						  310272 bytes free
+
+### Directory of MS OS/2 SDK 1.02: EXAMPLE1
+
+	 Volume in drive A is OS2EXAMPLE1
+	
+	Directory of A:\
+	
+	DEMOS        <DIR>     12-15-87  12:00a
+	EXAMPLE1 CTL         7 12-11-87   3:30p
+			2 file(s)          7 bytes
+	
+	Directory of A:\DEMOS
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	APPS         <DIR>     12-15-87  12:00a
+			3 file(s)          0 bytes
+	
+	Directory of A:\DEMOS\APPS
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	BIGBEN       <DIR>     12-15-87  12:00a
+	CHASER       <DIR>     12-15-87  12:00a
+	CPGREP       <DIR>     12-15-87  12:00a
+	DS           <DIR>     12-15-87  12:00a
+	FILELIST     <DIR>     12-15-87  12:00a
+	LIFE         <DIR>     12-15-87  12:00a
+	SETEGA       <DIR>     12-15-87  12:00a
+	TERMINAL     <DIR>     12-15-87  12:00a
+	WAKEUP       <DIR>     12-15-87  12:00a
+	MAKEALL  BAT       495 12-15-87  12:00a
+	MAKEALL  CMD       495 12-15-87  12:00a
+		   13 file(s)        990 bytes
+	
+	Directory of A:\DEMOS\APPS\BIGBEN
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	BIGBEN             239 12-15-87  12:00a
+	BIGBEN   C        2983 12-15-87  12:00a
+	BIGBEN   DEF        81 12-15-87  12:00a
+	BIGBEN   EXE     45598 12-15-87  12:00a
+			6 file(s)      48901 bytes
+	
+	Directory of A:\DEMOS\APPS\CHASER
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	CHASER             188 12-15-87  12:00a
+	CHASER   C       14285 12-15-87  12:00a
+	CHASER   EXE      9676 12-15-87  12:00a
+			5 file(s)      24149 bytes
+	
+	Directory of A:\DEMOS\APPS\CPGREP
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	CPGREP             542 12-15-87  12:00a
+	CPGREP   C       30035 12-15-87  12:00a
+	CPGREP   DEF        29 12-15-87  12:00a
+	CPGREP   EXE     27330 12-15-87  12:00a
+	CPGREP   HLP      1633 12-15-87  12:00a
+	CPGREPSB ASM     15249 12-15-87  12:00a
+	STUBS    ASM       386 12-15-87  12:00a
+			9 file(s)      75204 bytes
+	
+	Directory of A:\DEMOS\APPS\DS
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	DISPLAY  C        7510 12-15-87  12:00a
+	DS                 497 12-15-87  12:00a
+	DS       C        2371 12-15-87  12:00a
+	DS       EXE     22892 12-15-87  12:00a
+	DS       H        3373 12-15-87  12:00a
+	FILE     C        5847 12-15-87  12:00a
+	HELP     C        1856 12-15-87  12:00a
+	OPTION   C        8060 12-15-87  12:00a
+	TREE     C        9384 12-15-87  12:00a
+	VARS     C         767 12-15-87  12:00a
+	VARS     H         868 12-15-87  12:00a
+		   13 file(s)      63425 bytes
+	
+	Directory of A:\DEMOS\APPS\FILELIST
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	FILELIST           401 12-15-87  12:00a
+	FILELIST C        5031 12-15-87  12:00a
+	FILELIST EXE     15884 12-15-87  12:00a
+			5 file(s)      21316 bytes
+	
+	Directory of A:\DEMOS\APPS\LIFE
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	ACORN    LIF       458 12-15-87  12:00a
+	GUN      LIF       458 12-15-87  12:00a
+	INT33H   ASM      1132 12-15-87  12:00a
+	LIFE               525 12-15-87  12:00a
+	LIFE     C       38321 12-15-87  12:00a
+	LIFE     EXE     48964 12-15-87  12:00a
+	LIFE2    ASM     10745 12-15-87  12:00a
+	MOUAPI   C        4020 12-15-87  12:00a
+	R        LIF       458 12-15-87  12:00a
+	READ     ME       3181 12-15-87  12:00a
+	SPIRAL   LIF       458 12-15-87  12:00a
+		   13 file(s)     108720 bytes
+	
+	Directory of A:\DEMOS\APPS\SETEGA
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	SETEGA             211 12-15-87  12:00a
+	SETEGA   C        3764 12-15-87  12:00a
+	SETEGA   EXE     36708 12-15-87  12:00a
+			5 file(s)      40683 bytes
+	
+	Directory of A:\DEMOS\APPS\TERMINAL
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	MODEM    C       11841 12-15-87  12:00a
+	OPTIONS  C       26724 12-15-87  12:00a
+	README             299 12-15-87  12:00a
+	TERM     H        6725 12-15-87  12:00a
+	TERMINAL           460 12-15-87  12:00a
+	TERMINAL C       15901 12-15-87  12:00a
+	TERMINAL DEF        22 12-15-87  12:00a
+	TERMINAL EXE     19896 12-15-87  12:00a
+	TERMINAL INI        88 12-15-87  12:00a
+		   11 file(s)      81956 bytes
+	
+	Directory of A:\DEMOS\APPS\WAKEUP
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	WAKEUP             126 12-15-87  12:00a
+	WAKEUP   C        2460 12-15-87  12:00a
+	WAKEUP   DEF       256 12-15-87  12:00a
+	WAKEUP   EXE      7108 12-15-87  12:00a
+			6 file(s)       9950 bytes
+	
+	Total files listed:
+		   91 file(s)     475301 bytes
+						  211968 bytes free
+
+### Directory of MS OS/2 SDK 1.02: EXAMPLE2
+
+	 Volume in drive A is OS2EXAMPLE2
+	
+	Directory of A:\
+	
+	DEMOS        <DIR>     12-15-87  12:00a
+	INCLUDE      <DIR>     12-15-87  12:00a
+	EXAMPLE2 CTL         7 12-11-87   3:30p
+			3 file(s)          7 bytes
+	
+	Directory of A:\DEMOS
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	APPS         <DIR>     12-15-87  12:00a
+			3 file(s)          0 bytes
+	
+	Directory of A:\DEMOS\APPS
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	MANDEL       <DIR>     12-15-87  12:00a
+	SSE          <DIR>     12-15-87  12:00a
+			4 file(s)          0 bytes
+	
+	Directory of A:\DEMOS\APPS\MANDEL
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	CD14     CNT    188860 12-15-87  12:00a
+	CMACROS  INC     12120 12-15-87  12:00a
+	EGA      INC      4554 12-15-87  12:00a
+	M        CMD       160 12-15-87  12:00a
+	MANDEL             923 12-15-87  12:00a
+	MANDEL   C       10254 12-15-87  12:00a
+	MANDEL   EXE     34517 12-15-87  12:00a
+	MANDITER ASM     15024 12-15-87  12:00a
+	MDRAW    C       24749 12-15-87  12:00a
+	MDRAW    DEF       302 12-15-87  12:00a
+	MDRAW    EXE     26570 12-15-87  12:00a
+	MDRAW    H        3251 12-15-87  12:00a
+	MSTAT    C        4751 12-15-87  12:00a
+	MSTAT    EXE     29717 12-15-87  12:00a
+	README            4027 12-15-87  12:00a
+	SETSCAN  ASM     15438 12-15-87  12:00a
+		   18 file(s)     375217 bytes
+	
+	Directory of A:\DEMOS\APPS\SSE
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	DISPATCH C       24057 12-15-87  12:00a
+	KEYDEFS  H        1011 12-15-87  12:00a
+	KEYFUNC1 C       12960 12-15-87  12:00a
+	KEYFUNCS C       45651 12-15-87  12:00a
+	README             390 12-15-87  12:00a
+	SSE                734 12-15-87  12:00a
+	SSE      C        4584 12-15-87  12:00a
+	SSE      EXE     45340 12-15-87  12:00a
+	SSEDEFS  H        2541 12-15-87  12:00a
+	SSEFILE  C       11121 12-15-87  12:00a
+	SSELINE  C        5981 12-15-87  12:00a
+	SSEMEM   C        1227 12-15-87  12:00a
+		   14 file(s)     155597 bytes
+	
+	Directory of A:\INCLUDE
+	
+	.            <DIR>     12-15-87  12:00a
+	..           <DIR>     12-15-87  12:00a
+	DOSCALLS H       16455 12-15-87  12:00a
+	ERROR    H       16329 12-15-87  12:00a
+	ERROR    INC     16942 12-15-87  12:00a
+	ERROR2   H       20338 12-15-87  12:00a
+	ERROR2   INC     18933 12-15-87  12:00a
+	INFOSEG  H        2965 12-15-87  12:00a
+	NEWEXE   H       16878 12-15-87  12:00a
+	PTRACE   H        1098 12-15-87  12:00a
+	SUBCALLS H       11896 12-15-87  12:00a
+		   11 file(s)     121834 bytes
+	
+	Total files listed:
+		   53 file(s)     652655 bytes
+						   53248 bytes free
+
 ### Using SDKED
 
 As previously noted, we don't have a copy of this SDK's documentation.  But we *have* unearthed a copy of the
