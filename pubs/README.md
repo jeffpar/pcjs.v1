@@ -1,26 +1,25 @@
 ---
 layout: page
 title: Publication Archive
-menu_title: Pubs
-menu_order: 7
 permalink: /pubs/
 ---
 
 Publication Archive
 ---
-An assortment of PC-related publications, including:
 
-* [Datasheets](pc/datasheets/)
-* [Magazines](pc/magazines/)
-* [Programming Guides](pc/programming/)
-* [Reference Manuals](pc/reference/)
-* [Software User Guides](pc/software/)
+We have an assortment of PC-related resources:
+
+* [Datasheets](/pubs/pc/datasheets/)
+* [Magazines](/pubs/pc/magazines/)
+* [Programming Guides](/pubs/pc/programming/) (eg, [OS/2](/pubs/pc/programming/os2/))
+* [Reference Manuals](/pubs/pc/reference/)
+* [Software User Guides](/pubs/pc/software/)
 
 Publications related to the Challenger 1P are also available:
 
-* [Datasheets](c1p/datasheets/)
-* [Programming Guides/Samples](c1p/programming/)
-* [Reference Manuals](c1p/techref/)
+* [Datasheets](/pubs/c1p/datasheets/)
+* [Programming Guides/Samples](/pubs/c1p/programming/)
+* [Reference Manuals](/pubs/c1p/techref/)
 
 [<img src="http://archive.pcjs.org/pubs/pc/datasheets/thumbs/8088-CPU.jpg" width="200" height="260" alt= "8088 CPU"/>](pc/datasheets/)
 [<img src="http://archive.pcjs.org/pubs/pc/magazines/byte/BYTE-1975-11/thumbs/BYTE-1975-11 1.jpeg" width="200" height="260" alt= "Byte Magazine"/>](pc/magazines/byte/)

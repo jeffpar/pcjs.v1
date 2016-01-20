@@ -20,8 +20,8 @@ drive C.
 Next, I installed the [MS OS/2 SDK 1.02](/disks/pc/tools/microsoft/os2/sdk/1.02/).  This SDK was released
 in December 1987 along with [Microsoft OS/2 1.0](/disks/pc/os2/microsoft/1.0/).  I don't have any of the
 printed documentation that came with the SDK, such as the *Installation Guide*, but I do have the
-[Microsoft® Operating System/2 Programmer’s Toolkit](/docs/os2/microsoft/ptk/1.0/) documentation from March 1988,
-thanks to the [OS/2 Museum](http://www.os2museum.com/wp/os2-history/os2-library/os2-1-x-programming/).
+[Microsoft® Operating System/2 Programmer’s Toolkit](/pubs/pc/programming/os2/microsoft/ptk/1.0/) documentation
+from March 1988, thanks to the [OS/2 Museum](http://www.os2museum.com/wp/os2-history/os2-library/os2-1-x-programming/).
 
 Aside from Microsoft's assembler (MASM) and C compiler (CL), the SDK included some other useful tools, such as the
 **SDK Editor** (SDKED), which was essentially an OS/2 port of Mark Zbikowski's Editor (Z) that was used internally

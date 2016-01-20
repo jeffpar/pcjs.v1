@@ -1,7 +1,7 @@
 ---
 layout: page
 title: "Microsoft OS/2 Programmer's Toolkit: Welcome"
-permalink: /docs/os2/microsoft/ptk/1.0/
+permalink: /pubs/pc/programming/os2/microsoft/ptk/1.0/
 ---
 
 Welcome
@@ -19,7 +19,7 @@ MS OS/2 Programmer's Toolkit:
 + *Microsoft Operating System/2 Programming Tools* describes the programming tools found in the MS OS/2 Programmer's
 Toolkit.  You can use these tools to develop OS/2 programs.
 
-+ *[Microsoft Operating System/2 Programmer's Learning Guide](/docs/os2/microsoft/ptk/1.0/plguide/)* teaches you the
++ *[Microsoft Operating System/2 Programmer's Learning Guide](/pubs/pc/programming/os2/microsoft/ptk/1.0/plguide/)* teaches you the
 fundamentals of programming for MS OS/2.  You will be led through the steps necessary to create your first MS OS/2
 program and dynamic-link library.
 

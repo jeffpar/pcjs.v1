@@ -31,7 +31,7 @@ Most of the work on this prototype occurred between December 1, 1986 and Februar
 of demonstrating multiple DOS applications running in V86-mode to BillG; that demo probably occurred in March 1987.
 However, another underlying goal was to demonstrate to IBM that Microsoft was ahead of the curve on 32-bit design
 considerations for OS/2.  Up to this point, all OS/2 design and development work had been 16-bit, since the
-state-of-the-art Intel CPU at the time was the 80286.
+dominant state-of-the-art Intel CPU at the time was the 80286.
 
 The FOOTBALL prototype was based on pre-1.0 OS/2 sources, and the only hardware it supported was the Compaq DeskPro
 386-16.  The source code was later sent to IBM, who in early April 1987 was adapting it to run on the Model 80 PS/2.

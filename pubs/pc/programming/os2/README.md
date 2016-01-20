@@ -1,7 +1,7 @@
 ---
 layout: page
 title: "OS/2 Programming Guides"
-permalink: /docs/os2/
+permalink: /pubs/pc/programming/os2/
 ---
 
 OS/2 Programming Guides
@@ -9,7 +9,7 @@ OS/2 Programming Guides
 
 For OS/2 1.0:
 
-* [Microsoft® Operating System/2 Programmer’s Toolkit](/docs/os2/microsoft/ptk/1.0/), March 1988
+* [Microsoft® Operating System/2 Programmer’s Toolkit](/pubs/pc/programming/os2/microsoft/ptk/1.0/), March 1988
 
 Note: the above guides are a work-in-progress (we're converting the PDFs to Markdown).
 
