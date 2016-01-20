@@ -15,7 +15,8 @@ machines:
 OS/2 FOOTBALL Boot Disk (v4.41.00)
 ---
 
-This disk contains an updated version of the [OS/2 FOOTBALL Boot Disk (v7.68.17)](/disks/pc/os2/misc/football/87058/).  
+This disk contains an updated version of [OS/2 FOOTBALL Boot Disk (v7.68.17)](/disks/pc/os2/misc/football/87058/).
+The binaries were built in December 1987, using the final OS/2 1.0 sources merged with assorted FOOTBALL changes.
 
 It crashes on an 80286, jumping to invalid code immediately after performing a processor check.  On an 80386,
 the following boot message is displayed on-screen:
@@ -27,9 +28,9 @@ the following boot message is displayed on-screen:
 	Internal revision 4.41.00, 12/02/87
 
 The numbering of revisions must have been, um, revised, because despite the lower revision (4.41.00 vs. 7.68.17),
-it *is* newer than the 7.68.17 prototype.  This is confirmed by the build date (12/02/87), the file dates (12-23-87)
-and the higher version number.  Version 1.30 was probably anticipated to be the first 80386 release, an honor
-that ultimately went to version 2.00.
+it *is* newer than the 7.68.17 prototype.  This is confirmed by the boot message (12/02/87), the file dates (12-23-87)
+and the higher version number (1.3).  Version 1.3 was expected to be the first 80386 release, but that honor ultimately
+went to version 2.0.
 
 A directory listing of this disk is provided [below](#directory-of-os2-football-boot-disk-v44100).
 

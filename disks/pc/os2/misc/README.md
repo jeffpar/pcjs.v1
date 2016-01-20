@@ -10,8 +10,8 @@ Other OS/2 Disks
 ### OS/2 1.0 Debugger Boot Disk
 
 The [OS/2 1.0 Debugger Boot Disk](/disks/pc/os2/misc/1.0/88286/) contains a version of OS/2 1.0 built on
-October 12, 1988, which includes the built-in kernel debugger used by Microsoft and IBM for internal development.
-For more details, see the [OS/2 1.0](/blog/2014/12/04/) blog post.
+October 12, 1988, which included the built-in kernel debugger used by Microsoft and IBM for internal development,
+along with a rudimentary program selector.  For more details, see the [OS/2 1.0](/blog/2014/12/04/) blog post.
 
 ### OS/2 FOOTBALL Boot Disk (v7.68.17)
 

@@ -200,6 +200,20 @@ to:
 Jekyll "Cheat Sheet"
 ===
 
+Installing Jekyll
+---
+
+	sudo gem install bundler
+	(create Gemfile:
+		source 'https://rubygems.org'
+		gem 'github-pages'
+	)
+	bundle install
+	jekyll serve (or: bundle exec jekyll serve)
+
+Embedding Screenshots
+---
+
 I created screenshot.html in the **_includes** folder, so that I could do this:
 
 	{% include screenshot.html src="/devices/pc/machine/5150/cga/64kb/donkey/thumbnail.jpg" width="200" height="100" link="/devices/pc/machine/5150/cga/64kb/donkey/" title="IBM PC running DONKEY.BAS" %}

@@ -63,7 +63,7 @@ that automatically run the software.
 
 ### Other OS/2 Disks
 
-* [OS/2 Boot Disks](/disks/pc/os2/misc/)
+* [OS/2 Prototype Disks](/disks/pc/os2/misc/)
 
 ### Microsoft Windows
 

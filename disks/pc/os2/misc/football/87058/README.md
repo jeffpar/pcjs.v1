@@ -16,7 +16,7 @@ OS/2 FOOTBALL Boot Disk (v7.68.17)
 ---
 
 This disk contains a prototype version of OS/2 from early 1987, code-named **FOOTBALL** (aka **PIGSKIN**).
-It predates the release of OS/2 1.0 by some 8 months.
+It predates the completion of OS/2 1.0 by some eight months.
 
 On boot, the following message is displayed on-screen:
 
@@ -33,17 +33,18 @@ However, another underlying goal was to demonstrate to IBM that Microsoft was ah
 considerations for OS/2.  Up to this point, all OS/2 design and development work had been 16-bit, since the
 state-of-the-art Intel CPU at the time was the 80286.
 
-The FOOTBALL prototype was forked from pre-1.0 OS/2 sources, and the only hardware it supported was the Compaq DeskPro
-386-16.  The source code was later sent to IBM, and as of April 1987, they were adapting it to run on the Model 80 PS/2.
-It is unlikely that any FOOTBALL prototype was ever released outside of Microsoft and IBM.
+The FOOTBALL prototype was based on pre-1.0 OS/2 sources, and the only hardware it supported was the Compaq DeskPro
+386-16.  The source code was later sent to IBM, who in early April 1987 was adapting it to run on the Model 80 PS/2.
  
-Although FOOTBALL contained features not found in OS/2 until version 2.0, there is no direct connection between this
-internal Microsoft effort and OS/2 2.0.  Some of the 32-bit support and paging work undoubtedly migrated to version 2.0
-eventually, but that would have happened much later, since work on OS/2 2.0 did not begin in earnest until October 1987,
-after 1.0 was finished.
+After OS/2 1.0 was finished in October 1987, FOOTBALL changes were merged into a fresh set of 1.0 sources, which
+initially was version 1.3 (also known as **PIGSKIN** and later **CRUISER**) but ultimately became version 2.0.
+
+A directory listing of this disk is provided [below](#directory-of-os2-football-boot-disk-v76817).
 
 Booting FOOTBALL
 ---
+
+{% include machine.html id="deskpro386" %}
 
 When booting on a [Compaq DeskPro 386-16 with 2Mb of RAM](/devices/pc/machine/compaq/deskpro386/ega/2048kb/),
 the following information is output to COM2 by the kernel's built-in debugger:
@@ -93,10 +94,6 @@ the following information is output to COM2 by the kernel's built-in debugger:
 After typing "g" into the kernel debugger, the on-screen boot message is displayed.
 
 Under PCjs, the kernel crashes shortly thereafter.  This issue is still under investigation.
-
-A directory listing of this disk is provided [below](#directory-of-os2-football-boot-disk-v76817).
-
-{% include machine.html id="deskpro386" %}
 
 ### Directory of OS/2 FOOTBALL Boot Disk (v7.68.17)
 

@@ -273,13 +273,16 @@ MarkOut.prototype.getMachines = function()
  * the result.  Furthermore, if the generated ID is not unique (among the set of ALL generated IDs),
  * then no ID is produced.
  *
+ * UPDATE: Revised the algorithm to be more Jekyll-like (ie, REMOVING anything not a letter or digit or
+ * space, then removing any leading or trailing spaces, and then replacing any remaining spaces with a hyphen).
+ *
  * @this {MarkOut}
  * @param {string} sText
  * @returns {string|null} converts the given text to a unique ID (or null if resulting ID was not unique)
  */
 MarkOut.prototype.generateID = function(sText)
 {
-    var sID = sText.replace(/[^A-Z0-9]+/gi, '-').replace(/^-+|-+$/g, "").toLowerCase();
+    var sID = sText.replace(/[^A-Z0-9 ]+/gi, '').replace(/^ +| +$/g, '').replace(/ +/g, '-').toLowerCase();
     if (this.aIDs.indexOf(sID) < 0) {
         this.aIDs.push(sID);
         return sID;
@@ -850,7 +853,10 @@ MarkOut.prototype.convertMDLinks = function(sBlock)
             }
         }
         sURL = sURL.replace(/\*/g, pkg.version);
-        if (sURL.charAt(0) == '#') {
+        /*
+         * My own goofy way of defining a named anchor (by using an exclamation point) in Markdown....
+         */
+        if (sURL.charAt(0) == '!') {
             sTag = "span";      // using <a> to name an anchor is deprecated
             sType = "id";       // using the "name" attribute is deprecated as well
             sURL = sURL.substr(1);
