@@ -1034,10 +1034,10 @@ DiskDump.prototype.dumpSectorOSI = function(nSectorSig, nSectorNum, nSectorPages
  * fills out the rest of the sector.
  *
  * There are many compression schemes I could have adopted to reduce the size of
- * JSON-encoded disk images, but for now, I keep it simple: trim all bytes from
- * the end of each sector that match.  This is easy for the simulator to deal with,
- * since all it has to do is append zeros (or the specified pattern byte) to every
- * under-sized sector.
+ * JSON-encoded disk images, but for now, I keep it simple: trim all matching bytes
+ * (DWORDs actually) from the end of each sector.  This is easy for the simulator
+ * to deal with, since all it has to do is append zeros (or the specified pattern)
+ * to every under-sized sector.
  *
  * NOTE: The C1Pjs Simulator doesn't support this feature (yet), which is why
  * trimSector() isn't used when dumping OSI disk images.
