@@ -39,8 +39,8 @@ And here are some machines from our [IBM PC Disk Archive](/disks/pc/):
 
 * [PC-DOS 1.00](/disks/pc/dos/ibm/1.00/)
 * [PC-DOS 1.10](/disks/pc/dos/ibm/1.10/)
+* [IBM Diagnostics](/disks/pc/diags/ibm/2.20/)
 * [Multitasking MS-DOS](/disks/pc/dos/microsoft/4.0M/)
-* [IBM Diagnostics v2.20](/disks/pc/diags/ibm/2.20/)
 * [OS/2 Prototype Disks](/disks/pc/os2/misc/)
 * [CP/M-86 v1.1B](/disks/pc/cpm/1.1b/)
 * [Infocom Zork I](/disks/pc/games/infocom/zork1/)
@@ -86,9 +86,9 @@ From there, you can load another disk image
 
 ### Model 5170 Machine Configurations
 
-* [IBM PC AT (6Mhz), EGA, 640K, Debugger](/devices/pc/machine/5170/ega/640kb/rev1/)
-* [IBM PC AT (6Mhz), EGA, 1152Kb, 20Mb Drive, Debugger](/devices/pc/machine/5170/ega/1152kb/rev1/)
-* [IBM PC AT (8Mhz), EGA, 1152Kb, 20Mb Drive, Debugger](/devices/pc/machine/5170/ega/1152kb/rev3/)
+* [IBM PC AT (6Mhz), EGA, 640K, Debugger](/devices/pc/machine/5170/ega/640kb/rev1/debugger/)
+* [IBM PC AT (6Mhz), EGA, 1152Kb, 20Mb Drive, Debugger](/devices/pc/machine/5170/ega/1152kb/rev1/debugger/)
+* [IBM PC AT (8Mhz), EGA, 1152Kb, 20Mb Drive, Debugger](/devices/pc/machine/5170/ega/1152kb/rev3/debugger/)
 
 ### Machine Configurations with "Soft Keyboards"
 

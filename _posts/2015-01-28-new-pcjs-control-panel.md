@@ -7,7 +7,7 @@ permalink: /blog/2015/01/28/
 machines:
   - type: pc-dbg
     id: at-ega-1152k-rev3
-    config: /devices/pc/machine/5170/ega/1152kb/rev3/backtrack/machine.xml
+    config: /devices/pc/machine/5170/ega/1152kb/rev3/debugger/backtrack/machine.xml
     uncompiled: true
 ---
 

@@ -7,7 +7,7 @@ permalink: /blog/2015/01/17/
 machines:
   - type: pc-dbg
     id: at-ega-1152k-rev3
-    config: /devices/pc/machine/5170/ega/1152kb/rev3/machine.xml
+    config: /devices/pc/machine/5170/ega/1152kb/rev3/debugger/machine.xml
     uncompiled: true
 ---
 
@@ -31,7 +31,7 @@ Here's what a typical Markdown file would look like:
 	machines:
 	  - type: pc-dbg
 	    id: at-ega-1152k-rev3
-	    config: /devices/pc/machine/5170/ega/1152kb/rev3/machine.xml
+	    config: /devices/pc/machine/5170/ega/1152kb/rev3/debugger/machine.xml
 	    uncompiled: true
 	---
 	...
