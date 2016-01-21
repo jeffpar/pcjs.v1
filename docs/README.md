@@ -9,7 +9,7 @@ permalink: /docs/
 Documentation
 ---
 
-Documentation is available for the following JavaScript Machines:
+Help is available for the following JavaScript Machines:
 
 * [PCjs](/docs/pcjs/)
 * [C1Pjs](/docs/c1pjs/)
@@ -23,7 +23,7 @@ Assorted documentation is also available for programming the machines:
 
 {% endif %}
 
-Our [Publication Archive](/pubs/) contains an assortment of PC-related resources:
+Our [Publication Archive](/pubs/) includes these PC-related resources:
 
 * [Datasheets](/pubs/pc/datasheets/)
 * [Magazines](/pubs/pc/magazines/)
@@ -31,7 +31,7 @@ Our [Publication Archive](/pubs/) contains an assortment of PC-related resources
 * [Reference Manuals](/pubs/pc/reference/)
 * [Software User Guides](/pubs/pc/software/)
 
-Publications related to the Challenger 1P are also available:
+Publications related to Ohio Scientific's 6502-based Challenger 1P:
 
 * [Datasheets](/pubs/c1p/datasheets/)
 * [Programming Guides/Samples](/pubs/c1p/programming/)

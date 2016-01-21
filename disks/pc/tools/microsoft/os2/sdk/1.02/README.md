@@ -16,6 +16,10 @@ We do not have any of the printed documentation that came with the SDK, such as 
 have the [Microsoft® Operating System/2 Programmer’s Toolkit](/pubs/pc/programming/os2/microsoft/ptk/1.0/) documentation
 from March 1988, thanks to the [OS/2 Museum](http://www.os2museum.com/wp/os2-history/os2-library/os2-1-x-programming/).
 
+Other documentation is available for selected OS/2 SDK tools:
+
+* [SDKED (SDK Editor)](#using-sdked)
+
 ### Installation
 
 If you mount the **TOOLKIT1** disk and look in the **OS2DOC** folder, you'll find **READ.ME!**, which includes some very
@@ -24,15 +28,15 @@ useful information about the SDK installation process:
 	The installation guide is confusing, can you give me three easy steps to
 	installing the SDK?
 	
-		Sure.  First, put the program diskette into your machine and reboot it.
-		Follow the instructions.  If you have a new machine, first format the
-		hard drive, then reboot with the program diskette.
+	    Sure.  First, put the program diskette into your machine and reboot it.
+	    Follow the instructions.  If you have a new machine, first format the
+	    hard drive, then reboot with the program diskette.
 	
-		Second: copy the files \OS2DOC\INPUT.EXE and \OS2DOC\INSTSDK.CMD from the
-		TOOLKIT diskette to the root of your hard drive.  Run the program INSTSDK
-		and answer its questions.
+	    Second: copy the files \OS2DOC\INPUT.EXE and \OS2DOC\INSTSDK.CMD from the
+	    TOOLKIT diskette to the root of your hard drive.  Run the program INSTSDK
+	    and answer its questions.
 	
-		Thats, all. [sic]
+	    Thats, all. [sic]
 
 One of the first questions that the INSTSDK.CMD script asks is:
 
@@ -86,14 +90,14 @@ include it with the SDK diskettes at a later date.
 	OS2DOC       <DIR>     12-15-87  12:00a
 	PROFILER     <DIR>     12-15-87  12:00a
 	TOOLKIT1 CTL         7 12-16-87  11:10a
-			4 file(s)          7 bytes
+	        4 file(s)          7 bytes
 	
 	Directory of A:\DEMOS
 	
 	.            <DIR>     12-15-87  12:00a
 	..           <DIR>     12-15-87  12:00a
 	EXAMPLES     <DIR>     12-15-87  12:00a
-			3 file(s)          0 bytes
+	        3 file(s)          0 bytes
 	
 	Directory of A:\DEMOS\EXAMPLES
 	
@@ -129,7 +133,7 @@ include it with the SDK diskettes at a later date.
 	ALLOC              199 12-15-87  12:00a
 	ALLOC    C        1826 12-15-87  12:00a
 	ALLOC    EXE     19100 12-15-87  12:00a
-			5 file(s)      21125 bytes
+	        5 file(s)      21125 bytes
 	
 	Directory of A:\DEMOS\EXAMPLES\ARGUMENT
 	
@@ -138,7 +142,7 @@ include it with the SDK diskettes at a later date.
 	ARGUMENT           164 12-15-87  12:00a
 	ARGUMENT C        2826 12-15-87  12:00a
 	ARGUMENT EXE      8182 12-15-87  12:00a
-			5 file(s)      11172 bytes
+	        5 file(s)      11172 bytes
 	
 	Directory of A:\DEMOS\EXAMPLES\ASMEXMPL
 	
@@ -147,7 +151,7 @@ include it with the SDK diskettes at a later date.
 	ASMEXMPL           211 12-15-87  12:00a
 	ASMEXMPL ASM      3626 12-15-87  12:00a
 	ASMEXMPL EXE      1273 12-15-87  12:00a
-			5 file(s)       5110 bytes
+	        5 file(s)       5110 bytes
 	
 	Directory of A:\DEMOS\EXAMPLES\ASYNCIO
 	
@@ -156,7 +160,7 @@ include it with the SDK diskettes at a later date.
 	ASYNCIO            149 12-15-87  12:00a
 	ASYNCIO  C        1011 12-15-87  12:00a
 	ASYNCIO  EXE      9396 12-15-87  12:00a
-			5 file(s)      10556 bytes
+	        5 file(s)      10556 bytes
 	
 	Directory of A:\DEMOS\EXAMPLES\BEEPC
 	
@@ -165,7 +169,7 @@ include it with the SDK diskettes at a later date.
 	BEEPC              192 12-15-87  12:00a
 	BEEPC    C         548 12-15-87  12:00a
 	BEEPC    EXE      9454 12-15-87  12:00a
-			5 file(s)      10194 bytes
+	        5 file(s)      10194 bytes
 	
 	Directory of A:\DEMOS\EXAMPLES\CONFIG
 	
@@ -174,7 +178,7 @@ include it with the SDK diskettes at a later date.
 	CONFIG             198 12-15-87  12:00a
 	CONFIG   C         812 12-15-87  12:00a
 	CONFIG   EXE     19068 12-15-87  12:00a
-			5 file(s)      20078 bytes
+	        5 file(s)      20078 bytes
 	
 	Directory of A:\DEMOS\EXAMPLES\COUNTRY
 	
@@ -183,7 +187,7 @@ include it with the SDK diskettes at a later date.
 	COUNTRY            201 12-15-87  12:00a
 	COUNTRY  C        1331 12-15-87  12:00a
 	COUNTRY  EXE     19564 12-15-87  12:00a
-			5 file(s)      21096 bytes
+	        5 file(s)      21096 bytes
 	
 	Directory of A:\DEMOS\EXAMPLES\CRITSEC
 	
@@ -192,7 +196,7 @@ include it with the SDK diskettes at a later date.
 	CRITSEC            110 12-15-87  12:00a
 	CRITSEC  C        2593 12-15-87  12:00a
 	CRITSEC  EXE      8158 12-15-87  12:00a
-			5 file(s)      10861 bytes
+	        5 file(s)      10861 bytes
 	
 	Directory of A:\DEMOS\EXAMPLES\CSALIAS
 	
@@ -201,7 +205,7 @@ include it with the SDK diskettes at a later date.
 	CSALIAS            204 12-15-87  12:00a
 	CSALIAS  C        2646 12-15-87  12:00a
 	CSALIAS  EXE     19072 12-15-87  12:00a
-			5 file(s)      21922 bytes
+	        5 file(s)      21922 bytes
 	
 	Directory of A:\DEMOS\EXAMPLES\CWAIT
 	
@@ -212,7 +216,7 @@ include it with the SDK diskettes at a later date.
 	CWAIT              240 12-15-87  12:00a
 	CWAIT    C        2494 12-15-87  12:00a
 	CWAIT    EXE      9574 12-15-87  12:00a
-			7 file(s)      22056 bytes
+	        7 file(s)      22056 bytes
 	
 	Directory of A:\DEMOS\EXAMPLES\DATETIME
 	
@@ -221,7 +225,7 @@ include it with the SDK diskettes at a later date.
 	DATETIME           206 12-15-87  12:00a
 	DATETIME C        1934 12-15-87  12:00a
 	DATETIME EXE     19690 12-15-87  12:00a
-			5 file(s)      21830 bytes
+	        5 file(s)      21830 bytes
 	
 	Directory of A:\DEMOS\EXAMPLES\DOSEXIT
 	
@@ -230,7 +234,7 @@ include it with the SDK diskettes at a later date.
 	DOSEXIT            153 12-15-87  12:00a
 	DOSEXIT  C        2141 12-15-87  12:00a
 	DOSEXIT  EXE      9996 12-15-87  12:00a
-			5 file(s)      12290 bytes
+	        5 file(s)      12290 bytes
 	
 	Directory of A:\DEMOS\EXAMPLES\DYNLINK
 	
@@ -261,7 +265,7 @@ include it with the SDK diskettes at a later date.
 	..           <DIR>     12-15-87  12:00a
 	DYNLIB   C        1412 12-15-87  12:00a
 	DYNLIB2  C        1253 12-15-87  12:00a
-			4 file(s)       2665 bytes
+	        4 file(s)       2665 bytes
 	
 	Directory of A:\DEMOS\EXAMPLES\DYNLINK\NEAR
 	
@@ -269,7 +273,7 @@ include it with the SDK diskettes at a later date.
 	..           <DIR>     12-15-87  12:00a
 	DYNLIB   C        1699 12-15-87  12:00a
 	DYNLIB2  C        1242 12-15-87  12:00a
-			4 file(s)       2941 bytes
+	        4 file(s)       2941 bytes
 	
 	Directory of A:\DEMOS\EXAMPLES\EXITLIST
 	
@@ -278,7 +282,7 @@ include it with the SDK diskettes at a later date.
 	EXITLIST           154 12-15-87  12:00a
 	EXITLIST C        2095 12-15-87  12:00a
 	EXITLIST EXE      9402 12-15-87  12:00a
-			5 file(s)      11651 bytes
+	        5 file(s)      11651 bytes
 	
 	Directory of A:\DEMOS\EXAMPLES\FSINFO
 	
@@ -287,7 +291,7 @@ include it with the SDK diskettes at a later date.
 	FSINFO             198 12-15-87  12:00a
 	FSINFO   C        3632 12-15-87  12:00a
 	FSINFO   EXE     17624 12-15-87  12:00a
-			5 file(s)      21454 bytes
+	        5 file(s)      21454 bytes
 	
 	Directory of A:\DEMOS\EXAMPLES\GETENV
 	
@@ -296,7 +300,7 @@ include it with the SDK diskettes at a later date.
 	GETENV             194 12-15-87  12:00a
 	GETENV   C        1037 12-15-87  12:00a
 	GETENV   EXE     19062 12-15-87  12:00a
-			5 file(s)      20293 bytes
+	        5 file(s)      20293 bytes
 	
 	Directory of A:\OS2DOC
 	
@@ -306,7 +310,7 @@ include it with the SDK diskettes at a later date.
 	INSTSDK  BAT      4729 12-15-87  12:00a
 	INSTSDK  CMD      3824 12-15-87  12:00a
 	READ     ME!      7527 12-15-87  12:00a
-			6 file(s)      29142 bytes
+	        6 file(s)      29142 bytes
 	
 	Directory of A:\PROFILER
 	
@@ -318,7 +322,7 @@ include it with the SDK diskettes at a later date.
 	PROFILE  DOC      5750 12-15-87  12:00a
 	PROFILE  H         540 12-15-87  12:00a
 	PROFILE  LIB      1024 12-15-87  12:00a
-			8 file(s)     273370 bytes
+	        8 file(s)     273370 bytes
 	
 	Directory of A:\PROFILER\EXAMPLE
 	
@@ -328,11 +332,11 @@ include it with the SDK diskettes at a later date.
 	TESTPROF DEF        59 12-15-87  12:00a
 	TESTPROF LRF       120 12-15-87  12:00a
 	TESTPROF MAK       518 12-15-87  12:00a
-			6 file(s)       1748 bytes
+	        6 file(s)       1748 bytes
 	
 	Total files listed:
 		  154 file(s)     584622 bytes
-						   69632 bytes free
+	            		   69632 bytes free
 
 ### Directory of MS OS/2 SDK 1.02: TOOLKIT2
 
@@ -343,14 +347,14 @@ include it with the SDK diskettes at a later date.
 	DEMOS        <DIR>     12-15-87  12:00a
 	LIB          <DIR>     12-15-87  12:00a
 	TOOLKIT2 CTL         7 12-11-87   3:30p
-			3 file(s)          7 bytes
+	        3 file(s)          7 bytes
 	
 	Directory of A:\DEMOS
 	
 	.            <DIR>     12-15-87  12:00a
 	..           <DIR>     12-15-87  12:00a
 	EXAMPLES     <DIR>     12-15-87  12:00a
-			3 file(s)          0 bytes
+	        3 file(s)          0 bytes
 	
 	Directory of A:\DEMOS\EXAMPLES
 	
@@ -389,7 +393,7 @@ include it with the SDK diskettes at a later date.
 	HELLO              173 12-15-87  12:00a
 	HELLO    C          66 12-15-87  12:00a
 	HELLO    EXE     14174 12-15-87  12:00a
-			5 file(s)      14413 bytes
+	        5 file(s)      14413 bytes
 	
 	Directory of A:\DEMOS\EXAMPLES\HUGE
 	
@@ -398,7 +402,7 @@ include it with the SDK diskettes at a later date.
 	HUGE               186 12-15-87  12:00a
 	HUGE     C        2348 12-15-87  12:00a
 	HUGE     EXE     16044 12-15-87  12:00a
-			5 file(s)      18578 bytes
+	        5 file(s)      18578 bytes
 	
 	Directory of A:\DEMOS\EXAMPLES\INFOSEG
 	
@@ -407,7 +411,7 @@ include it with the SDK diskettes at a later date.
 	INFOSEG            149 12-15-87  12:00a
 	INFOSEG  C        2182 12-15-87  12:00a
 	INFOSEG  EXE      9408 12-15-87  12:00a
-			5 file(s)      11739 bytes
+	        5 file(s)      11739 bytes
 	
 	Directory of A:\DEMOS\EXAMPLES\IOPL
 	
@@ -418,7 +422,7 @@ include it with the SDK diskettes at a later date.
 	IOPL     EXE      8584 12-15-87  12:00a
 	IOPLMAIN C         633 12-15-87  12:00a
 	IOPLSUB  ASM      3087 12-15-87  12:00a
-			7 file(s)      12718 bytes
+	        7 file(s)      12718 bytes
 	
 	Directory of A:\DEMOS\EXAMPLES\KEYS
 	
@@ -427,7 +431,7 @@ include it with the SDK diskettes at a later date.
 	KEYS               194 12-15-87  12:00a
 	KEYS     C         923 12-15-87  12:00a
 	KEYS     EXE     14724 12-15-87  12:00a
-			5 file(s)      15841 bytes
+	        5 file(s)      15841 bytes
 	
 	Directory of A:\DEMOS\EXAMPLES\KILL
 	
@@ -436,7 +440,7 @@ include it with the SDK diskettes at a later date.
 	KILL               134 12-15-87  12:00a
 	KILL     C        1815 12-15-87  12:00a
 	KILL     EXE      9878 12-15-87  12:00a
-			5 file(s)      11827 bytes
+	        5 file(s)      11827 bytes
 	
 	Directory of A:\DEMOS\EXAMPLES\MACHMODE
 	
@@ -445,7 +449,7 @@ include it with the SDK diskettes at a later date.
 	MACHMODE           210 12-15-87  12:00a
 	MACHMODE C         373 12-15-87  12:00a
 	MACHMODE EXE     19038 12-15-87  12:00a
-			5 file(s)      19621 bytes
+	        5 file(s)      19621 bytes
 	
 	Directory of A:\DEMOS\EXAMPLES\MONITORS
 	
@@ -454,7 +458,7 @@ include it with the SDK diskettes at a later date.
 	MONITORS           166 12-15-87  12:00a
 	MONITORS C        8845 12-15-87  12:00a
 	MONITORS EXE     14059 12-15-87  12:00a
-			5 file(s)      23070 bytes
+	        5 file(s)      23070 bytes
 	
 	Directory of A:\DEMOS\EXAMPLES\MOVE
 	
@@ -463,7 +467,7 @@ include it with the SDK diskettes at a later date.
 	MOVE               182 12-15-87  12:00a
 	MOVE     C        1345 12-15-87  12:00a
 	MOVE     EXE     20596 12-15-87  12:00a
-			5 file(s)      22123 bytes
+	        5 file(s)      22123 bytes
 	
 	Directory of A:\DEMOS\EXAMPLES\PIPES
 	
@@ -487,7 +491,7 @@ include it with the SDK diskettes at a later date.
 	QHTYPE             198 12-15-87  12:00a
 	QHTYPE   C        2230 12-15-87  12:00a
 	QHTYPE   EXE     19418 12-15-87  12:00a
-			5 file(s)      21846 bytes
+	        5 file(s)      21846 bytes
 	
 	Directory of A:\DEMOS\EXAMPLES\QUEUES
 	
@@ -512,7 +516,7 @@ include it with the SDK diskettes at a later date.
 	REALLOC            210 12-15-87  12:00a
 	REALLOC  C         574 12-15-87  12:00a
 	REALLOC  EXE      8942 12-15-87  12:00a
-			5 file(s)       9726 bytes
+	        5 file(s)       9726 bytes
 	
 	Directory of A:\DEMOS\EXAMPLES\SESSION
 	
@@ -521,7 +525,7 @@ include it with the SDK diskettes at a later date.
 	SESSION            167 12-15-87  12:00a
 	SESSION  C        3634 12-15-87  12:00a
 	SESSION  EXE      9268 12-15-87  12:00a
-			5 file(s)      13069 bytes
+	        5 file(s)      13069 bytes
 	
 	Directory of A:\DEMOS\EXAMPLES\SETMAXFH
 	
@@ -530,7 +534,7 @@ include it with the SDK diskettes at a later date.
 	SETMAXFH           154 12-15-87  12:00a
 	SETMAXFH C        1314 12-15-87  12:00a
 	SETMAXFH EXE      9914 12-15-87  12:00a
-			5 file(s)      11382 bytes
+	        5 file(s)      11382 bytes
 	
 	Directory of A:\DEMOS\EXAMPLES\SETVEC
 	
@@ -539,7 +543,7 @@ include it with the SDK diskettes at a later date.
 	SETVEC             202 12-15-87  12:00a
 	SETVEC   C        2764 12-15-87  12:00a
 	SETVEC   EXE     19016 12-15-87  12:00a
-			5 file(s)      21982 bytes
+	        5 file(s)      21982 bytes
 	
 	Directory of A:\DEMOS\EXAMPLES\SHARE
 	
@@ -551,7 +555,7 @@ include it with the SDK diskettes at a later date.
 	SHARE    H        1069 12-15-87  12:00a
 	SHRCHILD C        1376 12-15-87  12:00a
 	SHRCHILD EXE      3334 12-15-87  12:00a
-			8 file(s)      19431 bytes
+	        8 file(s)      19431 bytes
 	
 	Directory of A:\DEMOS\EXAMPLES\SIGNAL
 	
@@ -560,7 +564,7 @@ include it with the SDK diskettes at a later date.
 	SIGNAL             232 12-15-87  12:00a
 	SIGNAL   C        2645 12-15-87  12:00a
 	SIGNAL   EXE     19998 12-15-87  12:00a
-			5 file(s)      22875 bytes
+	        5 file(s)      22875 bytes
 	
 	Directory of A:\DEMOS\EXAMPLES\SLEEP
 	
@@ -569,7 +573,7 @@ include it with the SDK diskettes at a later date.
 	SLEEP              192 12-15-87  12:00a
 	SLEEP    C         901 12-15-87  12:00a
 	SLEEP    EXE     19052 12-15-87  12:00a
-			5 file(s)      20145 bytes
+	        5 file(s)      20145 bytes
 	
 	Directory of A:\DEMOS\EXAMPLES\SUBALLOC
 	
@@ -578,7 +582,7 @@ include it with the SDK diskettes at a later date.
 	SUBALLOC           210 12-15-87  12:00a
 	SUBALLOC C        2572 12-15-87  12:00a
 	SUBALLOC EXE     19570 12-15-87  12:00a
-			5 file(s)      22352 bytes
+	        5 file(s)      22352 bytes
 	
 	Directory of A:\DEMOS\EXAMPLES\SUSPEND
 	
@@ -587,7 +591,7 @@ include it with the SDK diskettes at a later date.
 	SUSPEND            153 12-15-87  12:00a
 	SUSPEND  C        2084 12-15-87  12:00a
 	SUSPEND  EXE      9946 12-15-87  12:00a
-			5 file(s)      12183 bytes
+	        5 file(s)      12183 bytes
 	
 	Directory of A:\DEMOS\EXAMPLES\THREADS
 	
@@ -596,7 +600,7 @@ include it with the SDK diskettes at a later date.
 	THREADS            151 12-15-87  12:00a
 	THREADS  C        5269 12-15-87  12:00a
 	THREADS  EXE      9900 12-15-87  12:00a
-			5 file(s)      15320 bytes
+	        5 file(s)      15320 bytes
 	
 	Directory of A:\DEMOS\EXAMPLES\TIMER
 	
@@ -605,7 +609,7 @@ include it with the SDK diskettes at a later date.
 	TIMER              139 12-15-87  12:00a
 	TIMER    C        2742 12-15-87  12:00a
 	TIMER    EXE      3324 12-15-87  12:00a
-			5 file(s)       6205 bytes
+	        5 file(s)       6205 bytes
 	
 	Directory of A:\DEMOS\EXAMPLES\VERSION
 	
@@ -614,7 +618,7 @@ include it with the SDK diskettes at a later date.
 	VERSION            204 12-15-87  12:00a
 	VERSION  C         589 12-15-87  12:00a
 	VERSION  EXE     19018 12-15-87  12:00a
-			5 file(s)      19811 bytes
+	        5 file(s)      19811 bytes
 	
 	Directory of A:\LIB
 	
@@ -622,11 +626,11 @@ include it with the SDK diskettes at a later date.
 	..           <DIR>     12-15-87  12:00a
 	API      LIB     81408 12-15-87  12:00a
 	DOSCALLS LIB     29184 12-15-87  12:00a
-			4 file(s)     110592 bytes
+	        4 file(s)     110592 bytes
 	
 	Total files listed:
 		  174 file(s)     545902 bytes
-						   97280 bytes free
+	            		   97280 bytes free
 
 ### Directory of MS OS/2 SDK 1.02: UTILITY1
 
@@ -637,7 +641,7 @@ include it with the SDK diskettes at a later date.
 	INIT         <DIR>     12-15-87  12:00a
 	TOOLS        <DIR>     12-15-87  12:00a
 	UTILITY1 CTL         7 12-11-87   3:30p
-			3 file(s)          7 bytes
+	        3 file(s)          7 bytes
 	
 	Directory of A:\INIT
 	
@@ -645,14 +649,14 @@ include it with the SDK diskettes at a later date.
 	..           <DIR>     12-15-87  12:00a
 	AUTOEXEC BAT       561 12-15-87  12:00a
 	TOOLS    INI      1711 12-15-87  12:00a
-			4 file(s)       2272 bytes
+	        4 file(s)       2272 bytes
 	
 	Directory of A:\TOOLS
 	
 	.            <DIR>     12-15-87  12:00a
 	..           <DIR>     12-15-87  12:00a
 	BIN          <DIR>     12-15-87  12:00a
-			3 file(s)          0 bytes
+	        3 file(s)          0 bytes
 	
 	Directory of A:\TOOLS\BIN
 	
@@ -676,7 +680,7 @@ include it with the SDK diskettes at a later date.
 	
 	Total files listed:
 		   26 file(s)     646252 bytes
-						   71680 bytes free
+	            		   71680 bytes free
 
 ### Directory of MS OS/2 SDK 1.02: UTILITY2
 
@@ -686,7 +690,7 @@ include it with the SDK diskettes at a later date.
 	
 	TOOLS        <DIR>     12-15-87  12:00a
 	UTILITY2 CTL         7 12-11-87   3:30p
-			2 file(s)          7 bytes
+	        2 file(s)          7 bytes
 	
 	Directory of A:\TOOLS
 	
@@ -694,7 +698,7 @@ include it with the SDK diskettes at a later date.
 	..           <DIR>     12-15-87  12:00a
 	BIN          <DIR>     12-15-87  12:00a
 	PBIN         <DIR>     12-15-87  12:00a
-			4 file(s)          0 bytes
+	        4 file(s)          0 bytes
 	
 	Directory of A:\TOOLS\BIN
 	
@@ -704,7 +708,7 @@ include it with the SDK diskettes at a later date.
 	IMPLIB   EXE     28362 12-15-87  12:00a
 	MKMSGF   EXE     27628 12-15-87  12:00a
 	MSGBIND  EXE     28216 12-15-87  12:00a
-			6 file(s)     121152 bytes
+	        6 file(s)     121152 bytes
 	
 	Directory of A:\TOOLS\PBIN
 	
@@ -716,11 +720,11 @@ include it with the SDK diskettes at a later date.
 	PINFO    EXE     33097 12-15-87  12:00a
 	PS       EXE     40481 12-15-87  12:00a
 	PSET     EXE      9100 12-15-87  12:00a
-			8 file(s)     333375 bytes
+	        8 file(s)     333375 bytes
 	
 	Total files listed:
 		   20 file(s)     454534 bytes
-						  267264 bytes free
+	            		  267264 bytes free
 
 ### Directory of MS OS/2 SDK 1.02: CBIN1
 
@@ -730,14 +734,14 @@ include it with the SDK diskettes at a later date.
 	
 	TOOLS        <DIR>     12-15-87  12:00a
 	CBIN1    CTL         7 12-11-87   3:29p
-			2 file(s)          7 bytes
+	        2 file(s)          7 bytes
 	
 	Directory of A:\TOOLS
 	
 	.            <DIR>     12-15-87  12:00a
 	..           <DIR>     12-15-87  12:00a
 	BIN          <DIR>     12-15-87  12:00a
-			3 file(s)          0 bytes
+	        3 file(s)          0 bytes
 	
 	Directory of A:\TOOLS\BIN
 	
@@ -747,11 +751,11 @@ include it with the SDK diskettes at a later date.
 	C1L      EXE    166009 12-15-87  12:00a
 	C2       EXE    241466 12-15-87  12:00a
 	CL       EXE     50039 12-15-87  12:00a
-			6 file(s)     582127 bytes
+	        6 file(s)     582127 bytes
 	
 	Total files listed:
 		   11 file(s)     582134 bytes
-						  143360 bytes free
+	            		  143360 bytes free
 
 ### Directory of MS OS/2 SDK 1.02: CBIN2
 
@@ -763,7 +767,7 @@ include it with the SDK diskettes at a later date.
 	STARTUP      <DIR>     12-15-87  12:00a
 	TOOLS        <DIR>     12-15-87  12:00a
 	CBIN2    CTL         7 12-16-87  11:10a
-			4 file(s)          7 bytes
+	        4 file(s)          7 bytes
 	
 	Directory of A:\OS2DOC
 	
@@ -841,7 +845,7 @@ include it with the SDK diskettes at a later date.
 	.            <DIR>     12-15-87  12:00a
 	..           <DIR>     12-15-87  12:00a
 	BIN          <DIR>     12-15-87  12:00a
-			3 file(s)          0 bytes
+	        3 file(s)          0 bytes
 	
 	Directory of A:\TOOLS\BIN
 	
@@ -853,11 +857,11 @@ include it with the SDK diskettes at a later date.
 	CL       ERR      2159 12-15-87  12:00a
 	CL       HLP      1990 12-15-87  12:00a
 	LIBBUILD EXE     33152 12-15-87  12:00a
-			8 file(s)     199914 bytes
+	        8 file(s)     199914 bytes
 	
 	Total files listed:
 		   70 file(s)     524116 bytes
-						  166912 bytes free
+	            		  166912 bytes free
 
 ### Directory of MS OS/2 SDK 1.02: CLIB1
 
@@ -868,7 +872,7 @@ include it with the SDK diskettes at a later date.
 	INCLUDE      <DIR>     12-15-87  12:00a
 	LIB          <DIR>     12-15-87  12:00a
 	CLIB1    CTL         7 12-11-87   3:30p
-			3 file(s)          7 bytes
+	        3 file(s)          7 bytes
 	
 	Directory of A:\INCLUDE
 	
@@ -913,7 +917,7 @@ include it with the SDK diskettes at a later date.
 	TIMEB    H         846 12-15-87  12:00a
 	TYPES    H         849 12-15-87  12:00a
 	UTIME    H        1061 12-15-87  12:00a
-			7 file(s)       4826 bytes
+	        7 file(s)       4826 bytes
 	
 	Directory of A:\LIB
 	
@@ -946,7 +950,7 @@ include it with the SDK diskettes at a later date.
 	
 	Total files listed:
 		   65 file(s)     599431 bytes
-						   98304 bytes free
+	            		   98304 bytes free
 
 ### Directory of MS OS/2 SDK 1.02: CLIB2
 
@@ -956,7 +960,7 @@ include it with the SDK diskettes at a later date.
 	
 	LIB          <DIR>     12-15-87  12:00a
 	CLIB2    CTL         7 12-11-87   3:30p
-			2 file(s)          7 bytes
+	        2 file(s)          7 bytes
 	
 	Directory of A:\LIB
 	
@@ -974,7 +978,7 @@ include it with the SDK diskettes at a later date.
 	
 	Total files listed:
 		   12 file(s)     548527 bytes
-						  174080 bytes free
+	            		  174080 bytes free
 
 ### Directory of MS OS/2 SDK 1.02: MASM
 
@@ -985,7 +989,7 @@ include it with the SDK diskettes at a later date.
 	OS2DOC       <DIR>     12-15-87  12:00a
 	TOOLS        <DIR>     12-15-87  12:00a
 	MASM     CTL         7 12-11-87   3:30p
-			3 file(s)          7 bytes
+	        3 file(s)          7 bytes
 	
 	Directory of A:\OS2DOC
 	
@@ -993,7 +997,7 @@ include it with the SDK diskettes at a later date.
 	..           <DIR>     12-15-87  12:00a
 	MASM     TXT     11977 12-15-87  12:00a
 	MASM500  TXT     16004 12-15-87  12:00a
-			4 file(s)      27981 bytes
+	        4 file(s)      27981 bytes
 	
 	Directory of A:\TOOLS
 	
@@ -1001,7 +1005,7 @@ include it with the SDK diskettes at a later date.
 	..           <DIR>     12-15-87  12:00a
 	BIN          <DIR>     12-15-87  12:00a
 	RBIN         <DIR>     12-15-87  12:00a
-			4 file(s)          0 bytes
+	        4 file(s)          0 bytes
 	
 	Directory of A:\TOOLS\BIN
 	
@@ -1009,7 +1013,7 @@ include it with the SDK diskettes at a later date.
 	..           <DIR>     12-15-87  12:00a
 	CREF     EXE     28434 12-15-87  12:00a
 	MASM     EXE    118777 12-15-87  12:00a
-			4 file(s)     147211 bytes
+	        4 file(s)     147211 bytes
 	
 	Directory of A:\TOOLS\RBIN
 	
@@ -1017,11 +1021,11 @@ include it with the SDK diskettes at a later date.
 	..           <DIR>     12-15-87  12:00a
 	CV       EXE    220066 12-15-87  12:00a
 	CV       HLP     18348 12-15-87  12:00a
-			4 file(s)     238414 bytes
+	        4 file(s)     238414 bytes
 	
 	Total files listed:
 		   19 file(s)     413613 bytes
-						  310272 bytes free
+	            		  310272 bytes free
 
 ### Directory of MS OS/2 SDK 1.02: EXAMPLE1
 
@@ -1031,14 +1035,14 @@ include it with the SDK diskettes at a later date.
 	
 	DEMOS        <DIR>     12-15-87  12:00a
 	EXAMPLE1 CTL         7 12-11-87   3:30p
-			2 file(s)          7 bytes
+	        2 file(s)          7 bytes
 	
 	Directory of A:\DEMOS
 	
 	.            <DIR>     12-15-87  12:00a
 	..           <DIR>     12-15-87  12:00a
 	APPS         <DIR>     12-15-87  12:00a
-			3 file(s)          0 bytes
+	        3 file(s)          0 bytes
 	
 	Directory of A:\DEMOS\APPS
 	
@@ -1065,7 +1069,7 @@ include it with the SDK diskettes at a later date.
 	BIGBEN   C        2983 12-15-87  12:00a
 	BIGBEN   DEF        81 12-15-87  12:00a
 	BIGBEN   EXE     45598 12-15-87  12:00a
-			6 file(s)      48901 bytes
+	        6 file(s)      48901 bytes
 	
 	Directory of A:\DEMOS\APPS\CHASER
 	
@@ -1074,7 +1078,7 @@ include it with the SDK diskettes at a later date.
 	CHASER             188 12-15-87  12:00a
 	CHASER   C       14285 12-15-87  12:00a
 	CHASER   EXE      9676 12-15-87  12:00a
-			5 file(s)      24149 bytes
+	        5 file(s)      24149 bytes
 	
 	Directory of A:\DEMOS\APPS\CPGREP
 	
@@ -1087,7 +1091,7 @@ include it with the SDK diskettes at a later date.
 	CPGREP   HLP      1633 12-15-87  12:00a
 	CPGREPSB ASM     15249 12-15-87  12:00a
 	STUBS    ASM       386 12-15-87  12:00a
-			9 file(s)      75204 bytes
+	        9 file(s)      75204 bytes
 	
 	Directory of A:\DEMOS\APPS\DS
 	
@@ -1113,7 +1117,7 @@ include it with the SDK diskettes at a later date.
 	FILELIST           401 12-15-87  12:00a
 	FILELIST C        5031 12-15-87  12:00a
 	FILELIST EXE     15884 12-15-87  12:00a
-			5 file(s)      21316 bytes
+	        5 file(s)      21316 bytes
 	
 	Directory of A:\DEMOS\APPS\LIFE
 	
@@ -1139,7 +1143,7 @@ include it with the SDK diskettes at a later date.
 	SETEGA             211 12-15-87  12:00a
 	SETEGA   C        3764 12-15-87  12:00a
 	SETEGA   EXE     36708 12-15-87  12:00a
-			5 file(s)      40683 bytes
+	        5 file(s)      40683 bytes
 	
 	Directory of A:\DEMOS\APPS\TERMINAL
 	
@@ -1164,11 +1168,11 @@ include it with the SDK diskettes at a later date.
 	WAKEUP   C        2460 12-15-87  12:00a
 	WAKEUP   DEF       256 12-15-87  12:00a
 	WAKEUP   EXE      7108 12-15-87  12:00a
-			6 file(s)       9950 bytes
+	        6 file(s)       9950 bytes
 	
 	Total files listed:
 		   91 file(s)     475301 bytes
-						  211968 bytes free
+	            		  211968 bytes free
 
 ### Directory of MS OS/2 SDK 1.02: EXAMPLE2
 
@@ -1179,14 +1183,14 @@ include it with the SDK diskettes at a later date.
 	DEMOS        <DIR>     12-15-87  12:00a
 	INCLUDE      <DIR>     12-15-87  12:00a
 	EXAMPLE2 CTL         7 12-11-87   3:30p
-			3 file(s)          7 bytes
+	        3 file(s)          7 bytes
 	
 	Directory of A:\DEMOS
 	
 	.            <DIR>     12-15-87  12:00a
 	..           <DIR>     12-15-87  12:00a
 	APPS         <DIR>     12-15-87  12:00a
-			3 file(s)          0 bytes
+	        3 file(s)          0 bytes
 	
 	Directory of A:\DEMOS\APPS
 	
@@ -1194,7 +1198,7 @@ include it with the SDK diskettes at a later date.
 	..           <DIR>     12-15-87  12:00a
 	MANDEL       <DIR>     12-15-87  12:00a
 	SSE          <DIR>     12-15-87  12:00a
-			4 file(s)          0 bytes
+	        4 file(s)          0 bytes
 	
 	Directory of A:\DEMOS\APPS\MANDEL
 	
@@ -1216,7 +1220,7 @@ include it with the SDK diskettes at a later date.
 	MSTAT    EXE     29717 12-15-87  12:00a
 	README            4027 12-15-87  12:00a
 	SETSCAN  ASM     15438 12-15-87  12:00a
-		   18 file(s)     375217 bytes
+	       18 file(s)     375217 bytes
 	
 	Directory of A:\DEMOS\APPS\SSE
 	
@@ -1234,7 +1238,7 @@ include it with the SDK diskettes at a later date.
 	SSEFILE  C       11121 12-15-87  12:00a
 	SSELINE  C        5981 12-15-87  12:00a
 	SSEMEM   C        1227 12-15-87  12:00a
-		   14 file(s)     155597 bytes
+	       14 file(s)     155597 bytes
 	
 	Directory of A:\INCLUDE
 	
@@ -1249,17 +1253,22 @@ include it with the SDK diskettes at a later date.
 	NEWEXE   H       16878 12-15-87  12:00a
 	PTRACE   H        1098 12-15-87  12:00a
 	SUBCALLS H       11896 12-15-87  12:00a
-		   11 file(s)     121834 bytes
+	       11 file(s)     121834 bytes
 	
 	Total files listed:
-		   53 file(s)     652655 bytes
-						   53248 bytes free
+	       53 file(s)     652655 bytes
+	            		   53248 bytes free
 
 ### Using SDKED
 
-As previously noted, we don't have a copy of this SDK's documentation.  But we *have* unearthed a copy of the
+**SDK Editor** (SDKED) was essentially an OS/2 port of Mark Zbikowski's Editor (Z) that was used internally
+at Microsoft for many years.  It was renamed to the **Microsoft Editor** (M or MEP) with the release of Microsoft C
+5.1, and it was later integrated into **Programmer's Workbench** (PWB), the text-mode Integrated Development
+Environment (IDE) that came with Microsoft C 6.0.
+
+While we don't have the SDK documentation, we *have* unearthed a copy of the
 "[User's Guide to the Z Editor](/disks/pc/tools/microsoft/misc/root/Z.TXT)" by Mark Zbikowski, August 4, 1986,
-included below.  **SDKED** was an OS/2 port of the Z Editor.
+included below.
 
 
 

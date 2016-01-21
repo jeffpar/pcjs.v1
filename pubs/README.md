@@ -15,7 +15,7 @@ We have an assortment of PC-related resources:
 * [Reference Manuals](/pubs/pc/reference/)
 * [Software User Guides](/pubs/pc/software/)
 
-Publications related to the Challenger 1P are also available:
+Publications related to Ohio Scientific's 6502-based Challenger 1P:
 
 * [Datasheets](/pubs/c1p/datasheets/)
 * [Programming Guides/Samples](/pubs/c1p/programming/)
