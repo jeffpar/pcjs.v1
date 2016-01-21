@@ -1,14 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.20.4/manifest.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.20.5/manifest.xsl"?>
 <manifest type="software">
 	<title>Other OS/2 Disks</title>
-	<disk id="disk01" size="1228800" chs="80:2:15" img="1.0/static/OS210-88286.img" href="/disks/pc/os2/misc/1.0/OS210-88286.json">
-		<name>OS/2 1.0 Debugger Boot Disk</name>
+	<disk id="disk01" size="1228800" chs="80:2:15" img="cpdos/static/286DOS-76800.img" href="/disks/pc/os2/misc/cpdos/286DOS-76800.json" md5="d206be5501ae2e5cfead6a93d4b7b953" md5json="040f2bd5e1d9176b0ac7b5fc24ec8b2c">
+		<name>OS/2 CP-DOS Boot Disk (v7.68)</name>
 	</disk>
-	<disk id="disk02" size="1228800" chs="80:2:15" img="football/static/FOOTBALL-76817.img" href="/disks/pc/os2/misc/football/FOOTBALL-76817.json" md5="83a3f16ff871f3a1a8a6960c9553a2c7" md5json="a1a0cfa6fb1033f9eb0a9ec70a5545d4">
+	<disk id="disk02" size="1228800" chs="80:2:15" img="football/static/FOOTBALL-76817.img" href="/disks/pc/os2/misc/football/FOOTBALL-76817.json" md5="fe76a77d6931490d1936945fb60bada8" md5json="9477050abad7153895f6f4023227b4f7">
 		<name>OS/2 FOOTBALL Boot Disk (v7.68.17)</name>
 	</disk>
 	<disk id="disk03" size="1228800" chs="80:2:15" img="football/static/FOOTBALL-44100.img" href="/disks/pc/os2/misc/football/FOOTBALL-44100.json" md5="adf9c504f249c281afa88697cc5bfae1" md5json="1ee20675444641e0398434ffa6eabe19">
 		<name>OS/2 FOOTBALL Boot Disk (v4.41.00)</name>
+	</disk>
+	<disk id="disk04" size="1228800" chs="80:2:15" img="1.0/static/OS210-88286.img" href="/disks/pc/os2/misc/1.0/OS210-88286.json">
+		<name>OS/2 1.0 Debugger Boot Disk</name>
 	</disk>
 </manifest>
