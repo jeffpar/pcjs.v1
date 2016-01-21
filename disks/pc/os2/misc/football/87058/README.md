@@ -15,7 +15,7 @@ machines:
 OS/2 FOOTBALL Boot Disk (v7.68.17)
 ---
 
-This disk contains a prototype version of OS/2 from early 1987, code-named **FOOTBALL** (aka **PIGSKIN**).
+This disk contains a prototype version of OS/2 from February 1987, code-named **FOOTBALL** (aka **PIGSKIN**).
 It predates the completion of OS/2 1.0 by some eight months.
 
 On boot, the following message is displayed on-screen:
