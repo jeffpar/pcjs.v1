@@ -1,7 +1,7 @@
 ---
 layout: page
 title: OS/2 CP-DOS Boot Disk (v7.68)
-permalink: /disks/pc/os2/cpdos/86295/
+permalink: /disks/pc/os2/misc/cpdos/86295/
 machines:
   - id: ibm5170
     type: pc-dbg

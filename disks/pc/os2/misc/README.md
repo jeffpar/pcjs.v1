@@ -10,12 +10,12 @@ Other OS/2 Disks
 ### OS/2 CP-DOS Boot Disk (v7.68)
 
 The [OS/2 CP-DOS Boot Disk (v7.68)](/disks/pc/os2/misc/cpdos/86295/) contains a pre-1.0 version of OS/2
-(aka **CP-DOS** or **286DOS**) built on October 22, 1986.
+(aka **CP-DOS** or **286DOS** or **DOS5**) built on October 22, 1986.
 
 ### OS/2 FOOTBALL Boot Disk (v7.68.17)
 
 The [OS/2 FOOTBALL Boot Disk (v7.68.17)](/disks/pc/os2/misc/football/87058/) contains a prototype version of OS/2
-from early 1987 that was designed to test two important new features of the Intel 80386 processor: paging and V86-mode.
+from February 1987 that was designed to test two important new features of the Intel 80386 processor: paging and V86-mode.
 This prototype was forked from pre-1.0 OS/2 sources, and the only hardware it supported was the Compaq DeskPro 386-16.
 
 ### OS/2 FOOTBALL Boot Disk (v4.41.00)
