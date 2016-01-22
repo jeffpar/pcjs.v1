@@ -20,15 +20,6 @@ It predated the completion of OS/2 1.0 by some eight months.
 
 See the original [Design Document](#design-document) describing the **FOOTBALL** prototype.
 
-On boot, the following message is displayed on-screen:
-
-	CP-DOS version 1.0
-	Copyright 1986,1987  Microsoft Corp.
-	
-	PIGSKIN Internal revision 7.68.17, 87/02/26
-
-This prototype was designed to test two important new features of the Intel 80386 processor: paging and V86-mode.
-
 Most of the work on this prototype occurred between December 1, 1986 and February 28, 1987, with the principal goal
 of demonstrating multiple DOS applications running in V86-mode to BillG; that demo probably occurred in March 1987.
 However, another underlying goal was to demonstrate to IBM that Microsoft was ahead of the curve on 32-bit design
@@ -45,6 +36,13 @@ A directory listing of this disk is provided [below](#directory-of-os2-football-
 
 Booting FOOTBALL
 ---
+
+On boot, the following message is displayed on-screen:
+
+	CP-DOS version 1.0
+	Copyright 1986,1987  Microsoft Corp.
+	
+	PIGSKIN Internal revision 7.68.17, 87/02/26
 
 {% include machine.html id="deskpro386" %}
 

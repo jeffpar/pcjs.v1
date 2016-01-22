@@ -17,7 +17,7 @@ OS/2 SIZZLE Boot Disk (v7.68.18 DEBUG)
 
 This disk contained a *DEBUG* pre-1.0 version of OS/2 (aka **CP-DOS** or **286DOS**) built on January 7, 1987, and
 it is largely identical to the [OS/2 SIZZLE Boot Disk (v7.68.18)](/disks/pc/os2/misc/cpdos/87007/), with
-the exception of a *DEBUG* kernel (with built-in debugger) and a different assortment of tools. 
+the exception of a debug kernel (with built-in debugger) and a different assortment of tools. 
 
 When this disk boots, the following message is displayed on-screen:
 
