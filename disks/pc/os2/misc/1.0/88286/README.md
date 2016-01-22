@@ -17,7 +17,7 @@ redirect_from:
 OS/2 1.0 Debugger Boot Disk
 ---
 
-This disk contains a version of OS/2 1.0 built on October 12, 1988, which included the built-in kernel debugger
+This disk contained a version of OS/2 1.0 built on October 12, 1988, which included the built-in kernel debugger
 used by Microsoft and IBM for internal development, along with a rudimentary program selector.
 
 Note that [IBM OS/2 1.0](/disks/pc/os2/ibm/1.0/) was finalized in October 1987, nearly a year before the timestamps

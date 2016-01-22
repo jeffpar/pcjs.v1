@@ -15,7 +15,7 @@ machines:
 OS/2 CP-DOS Boot Disk (v7.68)
 ---
 
-This disk contains a pre-1.0 version of OS/2 (aka **CP-DOS** or **286DOS**) built on October 22, 1986.
+This disk contained a pre-1.0 version of OS/2 (aka **CP-DOS** or **286DOS**) built on October 22, 1986.
 
 When this disk boots, the following message is displayed on-screen:
 
