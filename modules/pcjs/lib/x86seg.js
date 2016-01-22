@@ -859,6 +859,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fProbe)
                 cpu.assert(this.cpl == cplNew);
 
                 if (this.cpl < cplOld) {
+
                     if (fCall !== true) {
                         cpu.assert(false);
                         return X86.ADDR_INVALID;
@@ -955,7 +956,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fProbe)
              * In both cases, the segment type is not valid for the target segment register *and* the PRESENT bit
              * is clear.  OS/2 doesn't seem to care whether I report an NP_FAULT or GP_FAULT, but Windows 95 definitely
              * cares: it will resolve the fault only if a GP_FAULT is reported.  And Intel's 80386 Programmers Reference
-             * implies that, yes, NP_FAULT checks are supposed to be performed *after* GP_FAULT checks.
+             * implies that, yes, GP_FAULT checks are supposed to be performed *before* NP_FAULT checks.
              */
             if (type < X86.DESC.ACC.TYPE.SEG || (type & (X86.DESC.ACC.TYPE.CODE | X86.DESC.ACC.TYPE.READABLE)) == X86.DESC.ACC.TYPE.CODE) {
                 if (this.id < X86Seg.ID.VER) X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel & X86.ERRCODE.SELMASK);
@@ -1484,12 +1485,12 @@ X86Seg.prototype.updateMode = function(fLoad, fProt, fV86)
                  * loaded); unlike the ACCESSED and DIRTY bits in PTEs, a descriptor ACCESSED bit is only
                  * updated on loads, not on every memory access.
                  *
-                 * We compute address of the descriptor byte containing the ACCESSED bit (offset 0x5);
+                 * We compute the address of the descriptor byte containing the ACCESSED bit (offset 0x5);
                  * note that it's perfectly normal for addrDesc to occasionally be invalid (eg, when the CPU
                  * is creating protected-mode-only segment registers like LDT and TSS, or when the CPU has
                  * transitioned from real-mode to protected-mode and new selector(s) have not been loaded yet).
                  *
-                 * TODO: Note I do NOT update the ACCESSED bit for null GDT selectors, because I assume the
+                 * NOTE: I do NOT update the ACCESSED bit for null GDT selectors, because I'm assuming the
                  * hardware does not update it either.  In fact, I've seen code that uses the null GDT descriptor
                  * for other purposes, on the assumption that that descriptor is completely unused.
                  */
