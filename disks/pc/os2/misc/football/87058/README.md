@@ -15,10 +15,11 @@ machines:
 OS/2 FOOTBALL Boot Disk (v7.68.17)
 ---
 
-This disk contained a prototype version of OS/2 from February 1987, code-named **FOOTBALL** (aka **PIGSKIN**).
-It predated the completion of OS/2 1.0 by some eight months.
+This disk contained a prototype version of OS/2 from February 1987, code-named **FOOTBALL**
+(aka **PIGSKIN**).  It predated the completion of OS/2 1.0 by some eight months and was based on the
+[SIZZLE](/disks/pc/os2/misc/cpdos/87007/) fork, which started around November 1987.
 
-See the original [Design Document](#design-document) describing the **FOOTBALL** prototype.
+Below is an original [FOOTBALL Design Document](#football-design-document) describing the **FOOTBALL** prototype.
 
 Most of the work on this prototype occurred between December 1, 1986 and February 28, 1987, with the principal goal
 of demonstrating multiple DOS applications running in V86-mode to BillG; that demo probably occurred in March 1987.
@@ -133,7 +134,7 @@ Under PCjs, the kernel crashes shortly thereafter.  This issue is still under in
 	CPGREP   EXE    25286  10-21-86   9:08p
 	       31 File(s)    549888 bytes free
 
-Design Document
+FOOTBALL Design Document
 ---
 
 The following text is from an email titled "3xBox Design Document" sent to the
