@@ -111,22 +111,22 @@ three physical address ranges at any time, regardless whether A20 is disabled or
 Which is a good thing, because I came across at least one code sequence in the ROM BIOS that enters
 protected-mode with A20 disabled -- an unwise thing to do on most machines: 
 
-	;;
-	;; When we arrive here, the A20 line has been disabled; on most systems, that would
-	;; mean that the ROM's GDT would only be accessible at the "low" ROM address (%0F0730),
-	;; not the "high" address (%FF0730).  But fortunately, A20 management on Compaq
-	;; DeskPros affects wrap-around only from the 1st to the 2nd megabyte; no other address
-	;; range is affected.
-	;;
-	;; FYI, it seems this code doesn't do anything if bits 6 and 7 of the RAM Settings
-	;; register are set to anything other than 0x40 (ie, it returns to real-mode almost
-	;; immediately after entering protected-mode).
-	;;
-	lgdt    [cs:0x077e]     ; 0000F498  load [gdtr_hi] into GDTR
-	mov     eax,cr0         ; 0000F49E  0F2000
-	or      ax,0x1          ; 0000F4A1  0D0100
-	mov     cr0,eax         ; 0000F4A4  0F2200
-	jmp     0x28:xf4ac      ; 0000F4A7  EAACF42800
+	;
+	;   When we arrive here, the A20 line has been disabled; on most systems, that would
+	;   mean that the ROM's GDT would only be accessible at the "low" ROM address (%0F0730),
+	;   not the "high" address (%FF0730).  But fortunately, A20 management on Compaq
+	;   DeskPros affects wrap-around only from the 1st to the 2nd megabyte; no other address
+	;   range is affected.
+	;
+	;   FYI, it seems this code doesn't do anything if bits 6 and 7 of the RAM Settings
+	;   register are set to anything other than 0x40 (ie, it returns to real-mode almost
+	;   immediately after entering protected-mode).
+	;
+	        lgdt    [cs:0x077e]     ; 0000F498  2E0F01167E07; load [gdtr_hi] into GDTR
+	        mov     eax,cr0         ; 0000F49E  0F2000
+	        or      ax,0x1          ; 0000F4A1  0D0100
+	        mov     cr0,eax         ; 0000F4A4  0F2200
+	        jmp     0x28:xf4ac      ; 0000F4A7  EAACF42800
 
 Before fully understanding the DeskPro's unusual A20 management, PCjs worked around it by
 redirecting all A20 changes from the Bus component to the CPU component, giving the CPU first

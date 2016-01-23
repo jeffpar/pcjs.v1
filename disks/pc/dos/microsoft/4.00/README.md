@@ -5,6 +5,11 @@ permalink: /disks/pc/dos/microsoft/4.00/
 machines:
   - type: pc
     id: ibm5170-msdos400
+    config: /devices/pc/machine/5170/ega/640kb/rev1/machine.xml
+    automount:
+      A:
+        name: MS-DOS 4.00 (Disk 1)
+        path: /disks/pc/dos/microsoft/4.00/MSDOS400-DISK1.json
 ---
 
 MS-DOS 4.00

@@ -2,6 +2,14 @@
 layout: page
 title: MS-DOS 3.20
 permalink: /disks/pc/dos/microsoft/3.20/
+machines:
+  - type: pc
+    id: ibm5170-msdos320
+    config: /devices/pc/machine/5170/ega/640kb/rev1/machine.xml
+    automount:
+      A:
+        name: MS-DOS 3.20 (Disk 1)
+        path: /disks/pc/dos/microsoft/3.20/MSDOS320-DISK1.json
 ---
 
 MS-DOS 3.20
@@ -10,6 +18,13 @@ MS-DOS 3.20
 The MS-DOS 3.20 disks in the PCjs collection are the only known non-OEM copies of that release
 available online.  All other known MS-DOS 3.20 disk images are OEM releases (eg, HP, Zenith, Data General,
 Seiko Epson, etc.) and can be found on sites like [WinWorld](https://winworldpc.com/product/ms-dos/320).
+
+Directory listings of the four 360Kb distribution diskettes are provided [below](#directory-listings).
+
+{% include machine.html id="ibm5170-msdos320" %}
+
+Directory Listings
+---
 
 Disks 3 and 4 contained a printed date of `March 21, 1986` (see the photo below), which is consistent with
 the file timestamps (`2-14-86` and `3-14-86`) on those disks.  However, all the files on Disks 1 and 2 are
@@ -31,8 +46,6 @@ order.  As proof, the following data from Disk 1:
 
 matches the data listed at [16bitos.com](http://16bitos.com/320ms.htm), as do the MD5 checksums of IO.SYS,
 MSDODS.SYS and COMMAND.COM.
-
-Directory listings of the four 360Kb distribution diskettes are provided below.
 
 ### Directory of MS-DOS 3.20 (Disk 1)
 

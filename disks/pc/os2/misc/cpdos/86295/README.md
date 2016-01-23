@@ -5,7 +5,7 @@ permalink: /disks/pc/os2/misc/cpdos/86295/
 machines:
   - id: ibm5170
     type: pc-dbg
-    config: /devices/pc/machine/5170/ega/1152kb/rev3/machine.xml
+    config: /devices/pc/machine/5170/ega/1152kb/rev3/debugger/machine.xml
     automount:
       A:
         name: OS/2 CP-DOS Boot Disk (v7.68)
@@ -15,7 +15,8 @@ machines:
 OS/2 CP-DOS Boot Disk (v7.68)
 ---
 
-This disk contains a pre-1.0 version of OS/2 (aka **CP-DOS** or **286DOS**) built on October 22, 1986.
+This disk contained a pre-1.0 version of OS/2 (aka **CP-DOS** or **MT-DOS** or **ADOS** or **286DOS** or **DOS5**)
+built on October 22, 1986, with a few files (IBMDOS.COM and NLS.EXE) apparently rebuilt on October 23, 1986.
 
 When this disk boots, the following message is displayed on-screen:
 
@@ -23,6 +24,13 @@ When this disk boots, the following message is displayed on-screen:
 	Copyright 1986 IBM Corp.
 	
 	Internal revision 7.68, 86/10/22
+
+and after it finishes processing CONFIG.SYS, displays "Start A Program", and you press Enter, it displays:
+
+	ADOS Command Interpreter Version 5.00
+	(*** Development Rev 5.37 10/17/86 ***)
+	
+	A]
 
 A directory listing of this disk is provided [below](#directory-of-os2-cpdos-boot-disk-v768).
 
@@ -255,4 +263,4 @@ A directory listing of this disk is provided [below](#directory-of-os2-cpdos-boo
 	      175 file(s)    1143816 bytes
 	                       17920 bytes free
 
-Return to [Other OS/2 Disks](/disks/pc/os2/misc/).
+Return to [OS/2 Prototype Disks](/disks/pc/os2/misc/).

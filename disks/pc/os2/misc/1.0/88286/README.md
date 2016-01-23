@@ -5,7 +5,7 @@ permalink: /disks/pc/os2/misc/1.0/88286/
 machines:
   - id: ibm5170
     type: pc-dbg
-    config: /devices/pc/machine/5170/ega/1152kb/rev3/machine.xml
+    config: /devices/pc/machine/5170/ega/1152kb/rev3/debugger/machine.xml
     automount:
       A:
         name: OS/2 1.0 Debugger Boot Disk
@@ -17,7 +17,7 @@ redirect_from:
 OS/2 1.0 Debugger Boot Disk
 ---
 
-This disk contains a version of OS/2 1.0 built on October 12, 1988, which included the built-in kernel debugger
+This disk contained a version of OS/2 1.0 built on October 12, 1988, which included the built-in kernel debugger
 used by Microsoft and IBM for internal development, along with a rudimentary program selector.
 
 Note that [IBM OS/2 1.0](/disks/pc/os2/ibm/1.0/) was finalized in October 1987, nearly a year before the timestamps
@@ -81,4 +81,4 @@ sources used to build these binaries.
 	       34 file(s)     765785 bytes
 	                      437760 bytes free
 
-Return to [Other OS/2 Disks](/disks/pc/os2/misc/).
+Return to [OS/2 Prototype Disks](/disks/pc/os2/misc/).

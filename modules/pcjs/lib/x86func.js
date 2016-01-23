@@ -4107,11 +4107,6 @@ X86.fnFaultMessage = function(nFault, nError, fHalt)
             fHalt = false;
         }
     }
-    /*
-    if (nFault == X86.EXCEPTION.GP_FAULT) {
-        fHalt = true;
-    }
-    */
 
     /*
      * If fHalt has been explicitly set to false, we also take that as a cue to disable fault messages

@@ -15,17 +15,11 @@ machines:
 OS/2 FOOTBALL Boot Disk (v7.68.17)
 ---
 
-This disk contains a prototype version of OS/2 from February 1987, code-named **FOOTBALL** (aka **PIGSKIN**).
-It predates the completion of OS/2 1.0 by some eight months.
+This disk contained a prototype version of OS/2 from February 1987, code-named **FOOTBALL**
+(aka **PIGSKIN**).  It predated the completion of OS/2 1.0 by some eight months and was based on the
+[SIZZLE](/disks/pc/os2/misc/cpdos/87007/) fork, which started around November 1987.
 
-On boot, the following message is displayed on-screen:
-
-	CP-DOS version 1.0
-	Copyright 1986,1987  Microsoft Corp.
-	
-	PIGSKIN Internal revision 7.68.17, 87/02/26
-
-This prototype was designed to test two important new features of the Intel 80386 processor: paging and V86-mode.
+Below is an original [FOOTBALL Design Document](#football-design-document) describing the **FOOTBALL** prototype.
 
 Most of the work on this prototype occurred between December 1, 1986 and February 28, 1987, with the principal goal
 of demonstrating multiple DOS applications running in V86-mode to BillG; that demo probably occurred in March 1987.
@@ -43,6 +37,13 @@ A directory listing of this disk is provided [below](#directory-of-os2-football-
 
 Booting FOOTBALL
 ---
+
+On boot, the following message is displayed on-screen:
+
+	CP-DOS version 1.0
+	Copyright 1986,1987  Microsoft Corp.
+	
+	PIGSKIN Internal revision 7.68.17, 87/02/26
 
 {% include machine.html id="deskpro386" %}
 
@@ -133,4 +134,228 @@ Under PCjs, the kernel crashes shortly thereafter.  This issue is still under in
 	CPGREP   EXE    25286  10-21-86   9:08p
 	       31 File(s)    549888 bytes free
 
-Return to [Other OS/2 Disks](/disks/pc/os2/misc/).
+FOOTBALL Design Document
+---
+
+The following text is from an email titled "3xBox Design Document" sent to the
+*football* alias on Saturday, February 28, 1987, at 5:02pm.
+
+### Overview
+
+	The goal for this research project was to demonstrate the feasability of
+	supporting multiple virtual DOS 3.x machines on a 286DOS-based kernel running
+	on an 386 personal computer.  Each "3xBox" would have its own virtual screen,
+	keyboard, interrupt vectors, and address space.  Furthermore, well- behaved
+	DOS 3.x applications that do text (as opposed to graphic) screen output would
+	run in the background.
+	
+	In order to acheive this goal in a reasonable amount of time, we started from
+	the 286DOS "sizzle" kernel and made the minimum amount of changes necessary,
+	both in code and fundamental design.  The resulting DOS will be referred to
+	as "386DOS" in this paper.
+	
+	386DOS provides up to four 3xBoxes, depending upon the available RAM.  More
+	3xBoxes could be supported if a slight change is made to the method of
+	allocating page tables.
+	
+	Well-behaved DOS 3.x applications (i.e., MS-Multiplan, MS-Word, Lotus 1-2-3)
+	can run in the background, multi-tasking against one another and against the
+	foreground screen group.  Lotus 1-2-3 (version 2.01) passes its floppy-based
+	copy protection when in the foreground.
+	
+	It should be noted that 386DOS, while functional, is not an optimal design/
+	implementation of multiple 3xBoxes.  In particular, interrupt management, the
+	device driver model, and the existence of V86-mode kernel code should be
+	modified before 386DOS is made a commercial product.
+	
+	Unless stated otherwise, most of the concepts extant in 286DOS apply to 386DOS.
+
+### V86 Mode and the 386
+
+	The 386 CPU has three distinct execution modes: REAL, PROT, and V86.  REAL
+	and PROT modes are largely compatible with the corresponding modes of an 286.
+	V86 modes is exactly the same as RING 3 PROT mode, with the following
+	differences:
+	
+		o Memory Address Hierarchy
+			A 386 has three levels of memory addresses:
+			- Virtual (Intel refers to this as Logical)
+				This is either the selector:offset or segment:offset address used
+				by unprivledged machine language code.
+			- Linear
+				This is the 32-bit address arrived at either via a GDT/LDT
+				selector lookup, or via the 8086-compatible (seg << 4 + offset).
+			- Physical
+				This is the 32-bit address arrived at by pushing a linear address
+				through the paging mechanism.  This is the address that the CPU
+				sends out on the bus to select physical memory.
+	
+			When in V86 mode, the CPU performs the 8086-compatible computation.
+	
+		o I/O instructions are NOT IOPL-sensitive
+			Trapping of I/O is done using the IO Permission Map.
+	
+		o All instructions which modify or expose the Interrupt Flag ARE IOPL-
+		  sensitive.
+			This allows the OS to simulate the Interrupt Flag, if desired.
+
+### V86 IRETD Frame
+
+	When any interrupt, trap, exception, or fault occurs in V86 mode, the CPU
+	switches to PROT mode and switches to the TSS Ring 0 Stack and builds the
+	following stack frame:
+	
+				(0) (old GS)
+				(0) (old FS)
+				(0) (old DS)
+				(0) (old ES)
+				(0) (old SS)
+				   (old ESP)
+				(old EFLAGS)
+				(0) (old CS)
+				   (old EIP) <- (SS:SP)
+
+### CPU Mode Determination
+
+	A new implementation of the WHATMODE macro was written in order to distinguish
+	between the three CPU modes: REAL, PROT, and V86.  REAL mode is indicated by
+	a 0 PE bit in CR0 (a.k.a. MSW on a 286).  If the PE bit is 1, then the mode
+	may be either PROT or V86.  These two modes may be distinguished by attempting
+	to change the IOPL bits in the FLAGS word.  At Ring 0 in PROT mode (the only
+	place WHATMODE is used), the IOPL may be changed.  In V86 mode, IOPL cannot
+	be changed.  So, we change IOPL and then check to see if it changed.  If so,
+	PROT mode, else V86 mode.
+
+### CPU Mode Switching
+
+	The 286DOS kernel relies extensively on switching inbetween REAL and PROT.
+	This functionality is provided by the RealMode and ProtMode routines.
+	In 386DOS, RealMode is no longer needed.  As soon as we switch to PROT mode
+	during SysInit, the CPU only uses PROT and V86 modes.
+	
+	Two new routines, ProtToV86 and V86ToProt, that are analogous to RealMode and
+	ProtMode.  ProtToV86 is quite straightforward.  We build a V86 IRETD frame
+	on the stack with the VM bit set in the EFLAGS image.  We set the SS:SP
+	image to be equivalent to the stack just above the V86 IRETD frame, and
+	set the CS:IP image to instruction following an IRETD.  Then, we issue the
+	IRETD and the CPU continues processing following the IRETD and in V86 mode.
+	
+	V86ToProt is a bit trickier.  The only way to get out of V86 mode is to
+	trap or fault or issue a software interrupt.  We chose to use a software
+	interrupt, 30h, which we call the V86 Services interrupt.  The INT 30h entry
+	in the IDT is a ring 3 interrupt gate, so issuing an INT 30 from V86 mode
+	causes a V86 IRETD frame to be built on the TSS Ring 0 stack and control
+	transfers to the INT 30h vector.  The handler verifies that the INT 30h
+	was issued by the V86ToProt routine (checks CS:IP on the stack).  If not,
+	the interrupt is reflected back to the requesting 3xBox (See Interrupt
+	Reflection).  If it was V86ToProt, we clean off the stack frame and return to
+	the caller.  NOTE: V86 Services is also used for completing the 386 LOADALL
+	used by PhysToVirt to map "high" memory in "REAL" mode.
+
+### Stack Switching
+
+	In order to maintain the 286DOS mode switch and stack switch semantics
+	when V86 mode is used, we have a new stack (the V86 Stack) in the 3xBox PTDA.
+
+### 286DOS Modes and Stacks
+
+	The RealMode and ProtMode procedures in 286DOS are the only ways to switch
+	the CPU execution mode.  These routines both maintain SS:SP, allowing
+	RealMode and ProtMode to be reentrant.  The TSS Ring 0 stack is always the
+	current TCB stack in the current PTDA.  The only other stacks in the system
+	are the Interrupt Stack and user stack(s).
+
+### 386DOS Modes and Stacks
+
+	In 386DOS, any interrupt or exception while in V86 mode causes a switch to
+	PROT mode and the TSS Ring 0 Stack.  So we have a new way to mode switch with
+	an incompatible stack semantic.  We had to fix this mode switch to make it
+	compatible with 286DOS.
+
+### Observation
+
+	In V86 mode, the current stack must not be the TSS Ring 0 Stack.  The CPU
+	only leaves V86 mode via an interrupt/exception, which causes a stack switch
+	to the TSS Ring 0 Stack.  If the current stack was the same as the TSS Ring 0
+	Stack, then the stack might get corrupted.  In 286DOS, the Ring 0 Stack is
+	the PTDA.  Since we run on this stack in V86 mode, we need a new Ring 0 stack
+	when a 3xBox is running.
+
+### Approach
+
+	1)  When a PMBox is running, the TSS Ring 0 Stack is a PTDA TCB stack.
+			+   This is consistent with the 286DOS model.
+	
+	2)  When a 3xBox is running, the TSS Ring 0 Stack is the "V86 Stack".
+			+   The V86 Stack is allocated in the 3xBox PTDA.
+			+   If the cause of the mode switch can be handled without enabling
+				interrupts (e.g., interrupt reflection, IN/OUT trapping), we stay
+				on the V86 stack.
+			+   Otherwise, copy the V86 IRETD frame to the previous stack and
+				switch back to the previous stack.
+
+### Details
+
+	1)  Leaving V86 mode
+		a.  V86ToProt (analog of ProtMode)
+			+   Issue special V86ToProt software interrupt.  If the interrupt
+				gate is DPL=3 (and it must be a 386 Interrupt Gate), then the 386
+				switches to Ring 0 (and the TSS Ring 0 stack) and transfers
+				control to the handler.
+			+   To ensure that 3xBox apps don't use this feature, the interrupt
+				handler checks that CS=DosGroup and IP is in the correct range.
+				If not, then the interrupt is reflected (see below).
+			+   To make V86ToProt compatible with ProtMode, the interrupt handler
+				switches to the old stack (we get SS:ESP from TSS Ring 0 stack,
+				which is where we are running).
+			+   Finally, V86ToProt restores saved registers and flags from the
+				stack and returns to caller.
+	
+		b.  Software interrupt
+			+   GP-Fault handler reflects to 3xBox IVT handler in V86 mode.
+				o   Add IRET frame on old stack, taking IP, CS, FLAGS from
+					TSS Ring 0 Stack.
+				o   Look up handler in 3xBox IVT.
+				o   Edit TSS Ring 0 Stack EIP and CS to point to IVT handler.
+				o   IRETD
+			+   IVT interrupt handler IRET uses IRET frame we built on old stack.
+	
+		c.  Hardware interrupt
+			+   To make this operation compatible with 286Dos, the interrupt
+				handler copies the V86 stack from the TSS Ring 0 stack to
+				the old stack, then switches stacks to the newly modified old
+				stack.  This allows the Interupt Manager to do an IRETD to
+				get back to the correct mode.
+	
+		d.  Exception
+			+   Remain on V86 stack, process exception, and IRETD.
+	
+	2)  Entering V86 mode
+		a.  ProtToV86
+			+   Build V86 IRETD frame on current stack and IRETD.
+		b.  LinToVirtDM_HANDLE
+			+   Execute 386 LOADALL with VM bit set in EFLAGS image in loadall
+				buffer.
+
+### Interrupt Management
+
+	All software interrupts, hardware interrupts, and CPU traps and exceptions
+	are vectored through a common IDT, regardless of whether the CPU is in PROT
+	or V86 mode.
+	
+	NOTE: Background 3xBoxes get no hardware interrupts.  In the commercial 386DOS,
+		  this restriction can be relaxed so that interrupts, other than for the
+		  keyboard and mouse (since those are implicitly for the foreground box),
+		  can be given to background 3xBoxes.
+
+### Passing Hardware Interrupts to the Foreground 3xBox
+
+	In the interrupt manager:
+	
+	IF  a 3xBox is foreground       -AND-
+	    the current mapped 3xBox is background
+	THEN
+	    MapIn foreground 3xBox;
+	    Dispatch interrupt;
+
+Return to [OS/2 Prototype Disks](/disks/pc/os2/misc/).

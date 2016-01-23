@@ -14,4 +14,10 @@
 	<disk id="disk04" size="1228800" chs="80:2:15" img="1.0/static/OS210-88286.img" href="/disks/pc/os2/misc/1.0/OS210-88286.json">
 		<name>OS/2 1.0 Debugger Boot Disk</name>
 	</disk>
+	<disk id="disk05" size="1228800" chs="80:2:15" img="cpdos/static/SIZZLE-76818-19870107.img" href="/disks/pc/os2/misc/cpdos/SIZZLE-76818-19870107.json" md5="ced5ecb7f44b52a2f276c050efa94160" md5json="79840e6f2a2236a7bb228751d7c22d00">
+		<name>OS/2 SIZZLE Boot Disk (v7.68.18)</name>
+	</disk>
+	<disk id="disk06" size="1228800" chs="80:2:15" img="cpdos/static/SIZZLE-76818-19870107-DEBUG.img" href="/disks/pc/os2/misc/cpdos/SIZZLE-76818-19870107-DEBUG.json" md5="9c9270b83aea4798f2618d38465f56b8" md5json="bd6baaa820d6ff254f81ec7d7ff07e67">
+		<name>OS/2 SIZZLE Boot Disk (v7.68.18 DEBUG)</name>
+	</disk>
 </manifest>

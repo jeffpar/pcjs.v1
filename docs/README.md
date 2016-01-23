@@ -16,14 +16,14 @@ Help is available for the following JavaScript Machines:
 
 {% if page.developer %}
 
-Assorted documentation is also available for programming the machines:
+Instruction documentation is also available:
 
-* [6502 Instructions](/docs/6502/)
 * [x86 Instructions](/docs/x86/)
+* [6502 Instructions](/docs/6502/)
 
 {% endif %}
 
-Our [Publication Archive](/pubs/) also includes these PC-related resources:
+Our [Publication Archive](/pubs/) includes these PC-related resources:
 
 * [Datasheets](/pubs/pc/datasheets/)
 * [Magazines](/pubs/pc/magazines/)
