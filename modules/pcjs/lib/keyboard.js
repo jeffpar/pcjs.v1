@@ -389,7 +389,8 @@ Keyboard.SIMCODE = {
     FF_CMD:       Keyboard.KEYCODE.FF_CMD      + Keyboard.KEYCODE.ONDOWN,
     CTRL_C:       Keyboard.ASCII.CTRL_C        + Keyboard.KEYCODE.FAKE,
     CTRL_BREAK:   Keyboard.KEYCODE.BS          + Keyboard.KEYCODE.FAKE,
-    CTRL_ALT_DEL: Keyboard.KEYCODE.DEL         + Keyboard.KEYCODE.FAKE
+    CTRL_ALT_DEL: Keyboard.KEYCODE.DEL         + Keyboard.KEYCODE.FAKE,
+    SYSREQ:       Keyboard.KEYCODE.ESC         + Keyboard.KEYCODE.FAKE
 };
 
 /*
@@ -582,6 +583,7 @@ Keyboard.CLICKCODES = {
     'UP':           Keyboard.SIMCODE.UP,        // formerly "up-arrow"
     'RIGHT':        Keyboard.SIMCODE.RIGHT,     // formerly "right-arrow"
     'DOWN':         Keyboard.SIMCODE.DOWN,      // formerly "down-arrow"
+    'SYSREQ':       Keyboard.SIMCODE.SYSREQ,
     /*
      * These bindings are for convenience (common key combinations that can be bound to a single control)
      */
@@ -716,8 +718,8 @@ Keyboard.SOFTCODES = {
     /* 80 */    'num-down':     Keyboard.SIMCODE.DOWN,          // formerly "down-arrow"
     /* 81 */    'num-pgdn':     Keyboard.SIMCODE.PGDN,          // formerly "page-down"
     /* 82 */    'num-ins':      Keyboard.SIMCODE.INS,           // formerly "ins"
-    /* 83 */    'num-del':      Keyboard.SIMCODE.DEL            // formerly "del"
-//  /* 84 */    'sysreq':       Keyboard.SCANCODE.SYSREQ,       // 84-key keyboard only (simulated with 'alt'+'prtsc' on 101-key keyboards)
+    /* 83 */    'num-del':      Keyboard.SIMCODE.DEL,           // formerly "del"
+    /* 84 */    'sysreq':       Keyboard.SCANCODE.SYSREQ        // 84-key keyboard only (simulated with 'alt'+'prtsc' on 101-key keyboards)
 //  /* 84 */    'pause':        Keyboard.SCANCODE.PAUSE,        // 101-key keyboard only
 //  /* 85 */    'f11':          Keyboard.SCANCODE.F11,
 //  /* 86 */    'f12':          Keyboard.SCANCODE.F12,
@@ -902,6 +904,7 @@ Keyboard.SIMCODES[Keyboard.SIMCODE.DOWN]         = Keyboard.SCANCODE.NUM_DOWN;
 Keyboard.SIMCODES[Keyboard.SIMCODE.PGDN]         = Keyboard.SCANCODE.NUM_PGDN;
 Keyboard.SIMCODES[Keyboard.SIMCODE.INS]          = Keyboard.SCANCODE.NUM_INS;
 Keyboard.SIMCODES[Keyboard.SIMCODE.DEL]          = Keyboard.SCANCODE.NUM_DEL;
+Keyboard.SIMCODES[Keyboard.SIMCODE.SYSREQ]       = Keyboard.SCANCODE.SYSREQ;
 /*
  * Entries beyond this point are for keys that existed only on 101-key keyboards (well, except for 'sysreq',
  * which also existed on the 84-key keyboard), which ALSO means that these keys essentially did not exist

@@ -10,7 +10,7 @@ Other OS/2 Disks
 ### OS/2 CP-DOS Boot Disk (v7.68)
 
 The [OS/2 CP-DOS Boot Disk (v7.68)](/disks/pc/os2/misc/cpdos/86295/) contained a pre-1.0 version of OS/2
-(aka **CP-DOS** or **286DOS** or **DOS5**) built on October 22, 1986.
+(aka **CP-DOS** or **MT-DOS** or **ADOS** or **286DOS**) built on October 22, 1986.
 
 ### OS/2 FOOTBALL Boot Disk (v7.68.17)
 

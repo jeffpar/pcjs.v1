@@ -1519,9 +1519,9 @@ X86Seg.prototype.updateMode = function(fLoad, fProt, fV86)
  * @param {number} type
  * @param {number} [ext]
  */
-if (DEBUG) {
-    X86Seg.prototype.messageSeg = function(sel, base, limit, type, ext)
-    {
+X86Seg.prototype.messageSeg = function(sel, base, limit, type, ext)
+{
+    if (DEBUG) {
         if (DEBUGGER && this.dbg && this.dbg.messageEnabled(Messages.SEG)) {
             var ch = (this.sName.length < 3? " " : "");
             var sDPL = " dpl=" + this.dpl;
@@ -1529,8 +1529,8 @@ if (DEBUG) {
             this.dbg.message("loadSeg(" + this.sName + "):" + ch + "sel=" + str.toHexWord(sel) + " base=" + str.toHex(base) + " limit=" + str.toHexWord(limit) + " type=" + str.toHexWord(type) + sDPL, true);
         }
         this.cpu.assert(/* base !== X86.ADDR_INVALID && */ (this.cpu.model >= X86.MODEL_80386 || !ext || ext == X86.DESC.EXT.AVAIL));
-    };
-}
+    }
+};
 
 /**
  * probeDesc(sel)
@@ -1541,9 +1541,9 @@ if (DEBUG) {
  * @param {number} sel
  * @return {number} base address of selected segment, or X86.ADDR_INVALID if error
  */
-if (DEBUGGER) {
-    X86Seg.prototype.probeDesc = function(sel)
-    {
+X86Seg.prototype.probeDesc = function(sel)
+{
+    if (DEBUGGER) {
         var addrDT;
         var addrDTLimit;
         var cpu = this.cpu;
@@ -1588,8 +1588,8 @@ if (DEBUGGER) {
             this.updateMode(true, true, false);
             return base;
         }
-        return X86.ADDR_INVALID;
-    };
-}
+    }
+    return X86.ADDR_INVALID;
+};
 
 if (NODE) module.exports = X86Seg;
