@@ -27,7 +27,8 @@ it was originally assigned version number 1.3, this version of OS/2 would ultima
 ### OS/2 SIZZLE Boot Disk (v7.68.18)
 
 The [OS/2 SIZZLE Boot Disk (v7.68.18)](/disks/pc/os2/misc/cpdos/87007/) contained a pre-1.0 version of OS/2
-(aka **CP-DOS** or **286DOS** or **DOS5**) built on January 7, 1987.
+(aka **CP-DOS** or **286DOS** or **DOS5**) built on January 7, 1987, which was based on an interim source code fork
+known as "SIZZLE", the code-name for a collection of changes intended to improve overall OS/2 performance.
 
 ### OS/2 SIZZLE Boot Disk (v7.68.18 DEBUG)
 
