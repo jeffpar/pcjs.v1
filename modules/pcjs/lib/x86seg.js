@@ -269,7 +269,7 @@ X86Seg.prototype.loadProt = function loadProt(sel, fProbe)
             return this.loadDesc8(addrDesc, sel, fProbe);
         }
         if (this.id < X86Seg.ID.VER) {
-            X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel & X86.ERRCODE.SELMASK);
+            X86.fnFault.call(cpu, fProbe && this.id == X86Seg.ID.STACK? X86.EXCEPTION.TS_FAULT : X86.EXCEPTION.GP_FAULT, sel & X86.ERRCODE.SELMASK);
         }
     }
     return X86.ADDR_INVALID;
@@ -700,7 +700,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fProbe)
         var rpl = sel & X86.SEL.RPL;
         var dpl = (acc & X86.DESC.ACC.DPL.MASK) >> X86.DESC.ACC.DPL.SHIFT;
 
-        var sizeGate, selCode, cplOld, fIDT;
+        var sizeGate, selCode, cplOld, cplNew, fIDT;
         var addrTSS, offSP, lenSP, regSPPrev, regSSPrev, regPSClear, regSP;
 
         /*
@@ -716,7 +716,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fProbe)
          * Since we are X86Seg.ID.CODE, we can use this.cpl instead of the more generic cpu.segCS.cpl
          */
         if (type >= X86.DESC.ACC.TYPE.CODE_EXECONLY) {
-            rpl = sel & X86.SEL.RPL;
+
             if (rpl > this.cpl) {
                 /*
                  * If fCall is false, then we must have a RETF to a less privileged segment, which is OK.
@@ -793,8 +793,8 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fProbe)
             fIDT = (addrDesc == cpu.addrIDT + sel);
 
             /*
-             * Software interrupts (where fIDT is true and cpu.nFault < 0) require an additional test: if DPL < CPL,
-             * then we must fall into the GP_FAULT code at the end of this case.
+             * Software interrupts (where fIDT is true and cpu.nFault < 0) require an additional test:
+             * if DPL < CPL, then we must fall into the GP_FAULT code at the end of this case.
              */
             if (rpl <= dpl && (!fIDT || cpu.nFault >= 0 || cplOld <= dpl))  {
 
@@ -810,7 +810,8 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fProbe)
                     limit = limitOrig | (ext << 16);
                 }
 
-                var cplNew = (selCode & X86.SEL.RPL), selStack = 0, offStack = 0;
+                var selStack = 0, offStack = 0;
+                cplNew = (selCode & X86.SEL.RPL);
 
                 /*
                  * If a stack switch is required, we must perform "probed" loads of both the new selCode
@@ -818,9 +819,19 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fProbe)
                  * old code segment is still loaded.
                  */
                 if (cplNew < cplOld) {
+                    /*
+                     * Intel pseudo-code suggests that selStack should be "probed" before selCode, but it also
+                     * implies that we need to have the DPL of selCode in order to select the correct selStack,
+                     * so who knows...?
+                     */
                     if (this.loadProt(selCode, true) === X86.ADDR_INVALID) {
                         return X86.ADDR_INVALID;
                     }
+                    /*
+                     * Intel pseudo-code suggests that the TSS stack pointer offset is based on the DPL of selCode
+                     * rather than the RPL of selCode.  TODO: Check for instances where DPL and RPL of selCode differ,
+                     * and then figure out which should really be used.
+                     */
                     addrTSS = cpu.segTSS.base;
                     if (!I386 || !(cpu.segTSS.type & X86.DESC.ACC.NONSEG_386)) {
                         offSP = (cplNew << 2) + X86.TSS286.CPL0_SP;
@@ -830,6 +841,22 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fProbe)
                         lenSP = 4;
                     }
                     selStack = cpu.getShort(addrTSS + offSP + lenSP);
+
+                    /*
+                     * Intel pseudo-code indicates at least FIVE discrete selStack tests that could trigger
+                     * a TS_FAULT at this point:
+                     *
+                     *      1) Selector must not be null else #TS(O)
+                     *      2) Selector index must be within its descriptor table limits else #TS (SS selector)
+                     *      3) Selector's RPL must equal DPL of code segment else #TS (SS selector)
+                     *      4) Stack segment DPL must equal DPL of code segment else #TS (SS selector)
+                     *      5) Descriptor must indicate writable data segment else #TS (SS selector)
+                     */
+                    if (!selStack) {
+                        X86.fnFault.call(cpu, X86.EXCEPTION.TS_FAULT, selStack);
+                        return X86.ADDR_INVALID;
+                    }
+
                     if (cpu.segSS.loadProt(selStack, true) === X86.ADDR_INVALID) {
                         return X86.ADDR_INVALID;
                     }
@@ -856,6 +883,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fProbe)
                 cpu.setDataSize(sizeGate);
 
                 this.offIP = limit;
+
                 cpu.assert(this.cpl == cplNew);
 
                 if (this.cpl < cplOld) {
@@ -916,7 +944,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fProbe)
 
         if (sizeGate !== 0) {
             var nError = (sel & X86.ERRCODE.SELMASK) | (fIDT? X86.ERRCODE.IDT : 0);
-            if (this.id < X86Seg.ID.VER) X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, nError);
+            X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, nError);
             return X86.ADDR_INVALID;
         }
         break;
@@ -959,14 +987,14 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fProbe)
              * implies that, yes, GP_FAULT checks are supposed to be performed *before* NP_FAULT checks.
              */
             if (type < X86.DESC.ACC.TYPE.SEG || (type & (X86.DESC.ACC.TYPE.CODE | X86.DESC.ACC.TYPE.READABLE)) == X86.DESC.ACC.TYPE.CODE) {
-                if (this.id < X86Seg.ID.VER) X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel & X86.ERRCODE.SELMASK);
+                X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel & X86.ERRCODE.SELMASK);
                 return X86.ADDR_INVALID;
             }
             /*
              * TODO: This would be a good place to perform some additional access rights checks, too.
              */
             if (!(acc & X86.DESC.ACC.PRESENT)) {
-                if (this.id < X86Seg.ID.VER) X86.fnFault.call(cpu, X86.EXCEPTION.NP_FAULT, sel & X86.ERRCODE.SELMASK);
+                X86.fnFault.call(cpu, X86.EXCEPTION.NP_FAULT, sel & X86.ERRCODE.SELMASK);
                 return X86.ADDR_INVALID;
             }
         }
@@ -974,11 +1002,11 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fProbe)
 
     case X86Seg.ID.STACK:
         if (!(acc & X86.DESC.ACC.PRESENT)) {
-            if (this.id < X86Seg.ID.VER) X86.fnFault.call(cpu, X86.EXCEPTION.SS_FAULT, sel & X86.ERRCODE.SELMASK);
+            X86.fnFault.call(cpu, X86.EXCEPTION.SS_FAULT, sel & X86.ERRCODE.SELMASK);
             return X86.ADDR_INVALID;
         }
         if (!selMasked || type < X86.DESC.ACC.TYPE.SEG || (type & (X86.DESC.ACC.TYPE.CODE | X86.DESC.ACC.TYPE.WRITABLE)) != X86.DESC.ACC.TYPE.WRITABLE) {
-            if (this.id < X86Seg.ID.VER) X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel & X86.ERRCODE.SELMASK);
+            X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel & X86.ERRCODE.SELMASK);
             return X86.ADDR_INVALID;
         }
         break;
@@ -986,7 +1014,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fProbe)
     case X86Seg.ID.TSS:
         var typeTSS = type & ~X86.DESC.ACC.TSS_BUSY;
         if (!selMasked || typeTSS != X86.DESC.ACC.TYPE.TSS286 && typeTSS != X86.DESC.ACC.TYPE.TSS386) {
-            if (this.id < X86Seg.ID.VER) X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel & X86.ERRCODE.SELMASK);
+            X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel & X86.ERRCODE.SELMASK);
             return X86.ADDR_INVALID;
         }
         /*
@@ -1057,64 +1085,6 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fProbe)
     if (DEBUG) this.messageSeg(sel, base, limit, type, ext);
 
     return base;
-};
-
-/**
- * probeDesc(sel)
- *
- * This is a neutered version of loadProt() designed for the Debugger.
- *
- * @this {X86Seg}
- * @param {number} sel
- * @return {number} base address of selected segment, or X86.ADDR_INVALID if error
- */
-X86Seg.prototype.probeDesc = function(sel)
-{
-    var addrDT;
-    var addrDTLimit;
-    var cpu = this.cpu;
-
-    sel &= 0xffff;
-
-    if (!(sel & X86.SEL.LDT)) {
-        addrDT = cpu.addrGDT;
-        addrDTLimit = cpu.addrGDTLimit;
-    } else {
-        addrDT = cpu.segLDT.base;
-        addrDTLimit = (addrDT + cpu.segLDT.limit)|0;
-    }
-
-    var addrDesc = (addrDT + (sel & X86.SEL.MASK))|0;
-
-    if ((addrDTLimit - addrDesc)|0 >= 7) {
-
-        /*
-         * Load the descriptor from memory using probeAddr().
-         */
-        var limit = cpu.probeAddr(addrDesc + X86.DESC.LIMIT.OFFSET, 2);
-        var acc = cpu.probeAddr(addrDesc + X86.DESC.ACC.OFFSET, 2);
-        var type = (acc & X86.DESC.ACC.TYPE.MASK);
-        var base = cpu.probeAddr(addrDesc + X86.DESC.BASE.OFFSET, 2) | ((acc & X86.DESC.ACC.BASE1623) << 16);
-        var ext = cpu.probeAddr(addrDesc + X86.DESC.EXT.OFFSET, 2);
-
-        if (I386 && cpu.model >= X86.MODEL_80386) {
-            base |= (ext & X86.DESC.EXT.BASE2431) << 16;
-            limit |= (ext & X86.DESC.EXT.LIMIT1619) << 16;
-            if (ext & X86.DESC.EXT.LIMITPAGES) limit = (limit << 12) | 0xfff;
-        }
-
-        this.sel = sel;
-        this.base = base;
-        this.limit = limit;
-        this.offMax = (limit >>> 0) + 1;
-        this.acc = acc;
-        this.type = type;
-        this.ext = ext;
-        this.addrDesc = addrDesc;
-        this.updateMode(true, true, false);
-        return base;
-    }
-    return X86.ADDR_INVALID;
 };
 
 /**
@@ -1500,6 +1470,7 @@ X86Seg.prototype.updateMode = function(fLoad, fProt, fV86)
                 }
             }
         }
+
         /*
          * TODO: For non-SEG descriptors, are there other checks or functions we should establish?
          */
@@ -1548,9 +1519,9 @@ X86Seg.prototype.updateMode = function(fLoad, fProt, fV86)
  * @param {number} type
  * @param {number} [ext]
  */
-X86Seg.prototype.messageSeg = function(sel, base, limit, type, ext)
-{
-    if (DEBUG) {
+if (DEBUG) {
+    X86Seg.prototype.messageSeg = function(sel, base, limit, type, ext)
+    {
         if (DEBUGGER && this.dbg && this.dbg.messageEnabled(Messages.SEG)) {
             var ch = (this.sName.length < 3? " " : "");
             var sDPL = " dpl=" + this.dpl;
@@ -1558,7 +1529,67 @@ X86Seg.prototype.messageSeg = function(sel, base, limit, type, ext)
             this.dbg.message("loadSeg(" + this.sName + "):" + ch + "sel=" + str.toHexWord(sel) + " base=" + str.toHex(base) + " limit=" + str.toHexWord(limit) + " type=" + str.toHexWord(type) + sDPL, true);
         }
         this.cpu.assert(/* base !== X86.ADDR_INVALID && */ (this.cpu.model >= X86.MODEL_80386 || !ext || ext == X86.DESC.EXT.AVAIL));
-    }
-};
+    };
+}
+
+/**
+ * probeDesc(sel)
+ *
+ * This is a neutered version of loadProt() designed for the Debugger.
+ *
+ * @this {X86Seg}
+ * @param {number} sel
+ * @return {number} base address of selected segment, or X86.ADDR_INVALID if error
+ */
+if (DEBUGGER) {
+    X86Seg.prototype.probeDesc = function(sel)
+    {
+        var addrDT;
+        var addrDTLimit;
+        var cpu = this.cpu;
+
+        sel &= 0xffff;
+
+        if (!(sel & X86.SEL.LDT)) {
+            addrDT = cpu.addrGDT;
+            addrDTLimit = cpu.addrGDTLimit;
+        } else {
+            addrDT = cpu.segLDT.base;
+            addrDTLimit = (addrDT + cpu.segLDT.limit)|0;
+        }
+
+        var addrDesc = (addrDT + (sel & X86.SEL.MASK))|0;
+
+        if ((addrDTLimit - addrDesc)|0 >= 7) {
+
+            /*
+             * Load the descriptor from memory using probeAddr().
+             */
+            var limit = cpu.probeAddr(addrDesc + X86.DESC.LIMIT.OFFSET, 2);
+            var acc = cpu.probeAddr(addrDesc + X86.DESC.ACC.OFFSET, 2);
+            var type = (acc & X86.DESC.ACC.TYPE.MASK);
+            var base = cpu.probeAddr(addrDesc + X86.DESC.BASE.OFFSET, 2) | ((acc & X86.DESC.ACC.BASE1623) << 16);
+            var ext = cpu.probeAddr(addrDesc + X86.DESC.EXT.OFFSET, 2);
+
+            if (I386 && cpu.model >= X86.MODEL_80386) {
+                base |= (ext & X86.DESC.EXT.BASE2431) << 16;
+                limit |= (ext & X86.DESC.EXT.LIMIT1619) << 16;
+                if (ext & X86.DESC.EXT.LIMITPAGES) limit = (limit << 12) | 0xfff;
+            }
+
+            this.sel = sel;
+            this.base = base;
+            this.limit = limit;
+            this.offMax = (limit >>> 0) + 1;
+            this.acc = acc;
+            this.type = type;
+            this.ext = ext;
+            this.addrDesc = addrDesc;
+            this.updateMode(true, true, false);
+            return base;
+        }
+        return X86.ADDR_INVALID;
+    };
+}
 
 if (NODE) module.exports = X86Seg;
