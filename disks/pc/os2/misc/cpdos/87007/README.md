@@ -15,7 +15,10 @@ machines:
 OS/2 SIZZLE Boot Disk (v7.68.18)
 ---
 
-This disk contained a pre-1.0 version of OS/2 (aka **CP-DOS** or **286DOS**) built on January 7, 1987.
+This disk contained a pre-1.0 version of OS/2 (aka **CP-DOS** or **286DOS**) built on January 7, 1987, which was
+based on an interim source code fork known as "SIZZLE", the code-name for a collection of changes intended to improve
+overall OS/2 performance.  An internal specification known as "The London Performance Spec" drove some of this work,
+but neither the contents of that specification nor the details of any SIZZLE changes are known at this point.
 
 When this disk boots, the following message is displayed on-screen:
 
