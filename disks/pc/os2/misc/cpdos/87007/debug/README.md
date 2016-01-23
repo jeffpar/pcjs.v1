@@ -15,7 +15,7 @@ machines:
 OS/2 SIZZLE Boot Disk (v7.68.18 DEBUG)
 ---
 
-This disk contained a *DEBUG* pre-1.0 version of OS/2 (aka **CP-DOS** or **286DOS**) built on January 7, 1987, and
+This disk contained a *DEBUG* pre-1.0 version of OS/2 built on January 7, 1987, and
 it is largely identical to the [OS/2 SIZZLE Boot Disk (v7.68.18)](/disks/pc/os2/misc/cpdos/87007/), with
 the exception of a debug kernel (with built-in debugger) and a different assortment of tools. 
 
@@ -97,4 +97,4 @@ A directory listing of this disk is provided [below](#directory-of-os2-sizzle-bo
 	       51 file(s)    1179667 bytes
 	                       19456 bytes free
 
-Return to [Other OS/2 Disks](/disks/pc/os2/misc/).
+Return to [OS/2 Prototype Disks](/disks/pc/os2/misc/).

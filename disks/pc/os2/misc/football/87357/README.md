@@ -77,4 +77,4 @@ A directory listing of this disk is provided [below](#directory-of-os2-football-
 	       33 file(s)     776910 bytes
 	                      427008 bytes free
 
-Return to [Other OS/2 Disks](/disks/pc/os2/misc/).
+Return to [OS/2 Prototype Disks](/disks/pc/os2/misc/).

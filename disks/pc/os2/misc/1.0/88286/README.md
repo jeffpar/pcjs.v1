@@ -81,4 +81,4 @@ sources used to build these binaries.
 	       34 file(s)     765785 bytes
 	                      437760 bytes free
 
-Return to [Other OS/2 Disks](/disks/pc/os2/misc/).
+Return to [OS/2 Prototype Disks](/disks/pc/os2/misc/).

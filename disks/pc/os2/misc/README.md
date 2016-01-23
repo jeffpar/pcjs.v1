@@ -1,16 +1,19 @@
 ---
 layout: page
-title: Other OS/2 Disks
+title: OS/2 Prototype Disks
 permalink: /disks/pc/os2/misc/
 ---
 
-Other OS/2 Disks
+OS/2 Prototype Disks
 ---
+
+Below are some interesting pre-1.0 (or 1.0-based) OS/2 revisions we have unearthed.  They provide an early glimpse
+of OS/2 when it was still a work-in-progress.  Not all of the disks run properly in PCjs yet, but we're working on it.
 
 ### OS/2 CP-DOS Boot Disk (v7.68)
 
-The [OS/2 CP-DOS Boot Disk (v7.68)](/disks/pc/os2/misc/cpdos/86295/) contained a pre-1.0 version of OS/2
-(aka **CP-DOS** or **MT-DOS** or **ADOS** or **286DOS**) built on October 22, 1986.
+The [OS/2 CP-DOS Boot Disk (v7.68)](/disks/pc/os2/misc/cpdos/86295/) contained a pre-1.0 version of OS/2 built on
+October 22, 1986.
 
 ### OS/2 FOOTBALL Boot Disk (v7.68.17)
 
@@ -27,8 +30,8 @@ it was originally assigned version number 1.3, this version of OS/2 would ultima
 ### OS/2 SIZZLE Boot Disk (v7.68.18)
 
 The [OS/2 SIZZLE Boot Disk (v7.68.18)](/disks/pc/os2/misc/cpdos/87007/) contained a pre-1.0 version of OS/2
-(aka **CP-DOS** or **286DOS** or **DOS5**) built on January 7, 1987, which was based on an interim source code fork
-known as "SIZZLE", the code-name for a collection of changes intended to improve overall OS/2 performance.
+built on January 7, 1987, which was based on an interim source code fork known as "SIZZLE", the code-name for a
+collection of changes intended to improve overall OS/2 performance.
 
 ### OS/2 SIZZLE Boot Disk (v7.68.18 DEBUG)
 

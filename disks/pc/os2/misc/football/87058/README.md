@@ -357,4 +357,4 @@ The following text is from an email titled "3xBox Design Document" sent to the
 	    MapIn foreground 3xBox;
 	    Dispatch interrupt;
 
-Return to [Other OS/2 Disks](/disks/pc/os2/misc/).
+Return to [OS/2 Prototype Disks](/disks/pc/os2/misc/).
