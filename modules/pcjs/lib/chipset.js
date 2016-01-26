@@ -3479,9 +3479,17 @@ ChipSet.prototype.getIRRVector = function(iPIC)
          */
         var nIRL = pic.bIRLow + 1;
         while (true) {
-            nIRL &= 0x7;
 
+            nIRL &= 0x7;
             var bIRNext = 1 << nIRL;
+
+            /*
+             * If we encounter an interrupt that's still in-service BEFORE we encounter a requested interrupt,
+             * then we're done; we must allow a higher priority in-service interrupt to finish before acknowledging
+             * any lower priority interrupts.
+             */
+            if (pic.bISR & bIRNext) break;
+
             if (bIR & bIRNext) {
 
                 if (!iPIC && nIRL == ChipSet.IRQ.SLAVE) {
@@ -5176,11 +5184,14 @@ ChipSet.prototype.setSpeaker = function(fOn)
  */
 ChipSet.prototype.messageBitsDMA = function(iChannel)
 {
-    var bitsMessage = Messages.DATA;
-    if (iChannel == ChipSet.DMA_FDC) {
-        bitsMessage |= Messages.FDC;
-    } else if (iChannel == ChipSet.DMA_HDC) {
-        bitsMessage |= Messages.HDC;
+    var bitsMessage = 0;
+    if (DEBUG) {
+        bitsMessage = Messages.DATA;
+        if (iChannel == ChipSet.DMA_FDC) {
+            bitsMessage |= Messages.FDC;
+        } else if (iChannel == ChipSet.DMA_HDC) {
+            bitsMessage |= Messages.HDC;
+        }
     }
     return bitsMessage;
 };
@@ -5194,23 +5205,26 @@ ChipSet.prototype.messageBitsDMA = function(iChannel)
  */
 ChipSet.prototype.messageBitsIRQ = function(nIRQ)
 {
-    var bitsMessage = Messages.PIC;
-    if (nIRQ == ChipSet.IRQ.TIMER0) {           // IRQ 0
-        bitsMessage |= Messages.TIMER;
-    } else if (nIRQ == ChipSet.IRQ.KBD) {       // IRQ 1
-        bitsMessage |= Messages.KEYBOARD;
-    } else if (nIRQ == ChipSet.IRQ.SLAVE) {     // IRQ 2 (MODEL_5170 and up)
-        bitsMessage |= Messages.CHIPSET;
-    } else if (nIRQ == ChipSet.IRQ.COM1 || nIRQ == ChipSet.IRQ.COM2) {
-        bitsMessage |= Messages.SERIAL;
-    } else if (nIRQ == ChipSet.IRQ.XTC) {       // IRQ 5 (MODEL_5160)
-        bitsMessage |= Messages.HDC;
-    } else if (nIRQ == ChipSet.IRQ.FDC) {       // IRQ 6
-        bitsMessage |= Messages.FDC;
-    } else if (nIRQ == ChipSet.IRQ.RTC) {       // IRQ 8 (MODEL_5170 and up)
-        bitsMessage |= Messages.RTC;
-    } else if (nIRQ == ChipSet.IRQ.ATC) {       // IRQ 14 (MODEL_5170 and up)
-        bitsMessage |= Messages.HDC;
+    var bitsMessage = 0;
+    if (DEBUG) {
+        bitsMessage = Messages.PIC;
+        if (nIRQ == ChipSet.IRQ.TIMER0) {           // IRQ 0
+            bitsMessage |= Messages.TIMER;
+        } else if (nIRQ == ChipSet.IRQ.KBD) {       // IRQ 1
+            bitsMessage |= Messages.KEYBOARD;
+        } else if (nIRQ == ChipSet.IRQ.SLAVE) {     // IRQ 2 (MODEL_5170 and up)
+            bitsMessage |= Messages.CHIPSET;
+        } else if (nIRQ == ChipSet.IRQ.COM1 || nIRQ == ChipSet.IRQ.COM2) {
+            bitsMessage |= Messages.SERIAL;
+        } else if (nIRQ == ChipSet.IRQ.XTC) {       // IRQ 5 (MODEL_5160)
+            bitsMessage |= Messages.HDC;
+        } else if (nIRQ == ChipSet.IRQ.FDC) {       // IRQ 6
+            bitsMessage |= Messages.FDC;
+        } else if (nIRQ == ChipSet.IRQ.RTC) {       // IRQ 8 (MODEL_5170 and up)
+            bitsMessage |= Messages.RTC;
+        } else if (nIRQ == ChipSet.IRQ.ATC) {       // IRQ 14 (MODEL_5170 and up)
+            bitsMessage |= Messages.HDC;
+        }
     }
     return bitsMessage;
 };

@@ -141,8 +141,7 @@ X86Seg.ID = {
     TSS:    4,          // "TSS"
     LDT:    5,          // "LDT"
     VER:    6,          // "VER"
-    FPU:    7,          // "FPU"
-    DBG:    8           // "DBG"
+    DBG:    7           // "DBG"
 };
 
 X86Seg.CALLBREAK_SEL = 0x0001;
@@ -581,7 +580,14 @@ X86Seg.prototype.loadDesc6 = function(addrDesc, sel)
     this.type = (acc & X86.DESC.ACC.TYPE.MASK);
     this.ext = 0;
     this.addrDesc = addrDesc;
-    this.updateMode(true);
+
+    /*
+     * NOTE: This code must take care to leave the mode of the TSS, LDT, and VER segment registers alone;
+     * in particular, we must not allow a real-mode LOADALL to modify their mode, because the rest of PCjs
+     * assumes that their mode will never change (they were allocated with fProt set to true), so there's
+     * no code to force them back into protected-mode.
+     */
+    if (this.id < X86Seg.ID.TSS) this.updateMode(true);
 
     if (DEBUG) this.messageSeg(sel, base, limit, this.type);
 
@@ -876,6 +882,10 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fProbe)
                     cpu.setProtMode(true, false);
                 }
 
+                /*
+                 * TODO: Consider whether we can skip this loadProt() call if this.sel already contains selCode
+                 * (and the previous mode matches, which might require we cache the mode in the X86Seg object, too).
+                 */
                 if (this.loadProt(selCode) === X86.ADDR_INVALID) {
                     return X86.ADDR_INVALID;
                 }
@@ -1466,7 +1476,15 @@ X86Seg.prototype.updateMode = function(fLoad, fProt, fV86)
                  */
                 if ((this.sel & ~X86.SEL.RPL) && this.addrDesc !== X86.ADDR_INVALID) {
                     var addrType = this.addrDesc + X86.DESC.ACC.TYPE.OFFSET;
-                    this.cpu.setByte(addrType, this.cpu.getByte(addrType) | (X86.DESC.ACC.TYPE.ACCESSED >> 8));
+                    var bType = this.cpu.getByte(addrType);
+                    /*
+                     * This code used to ALWAYS call setByte(), but that's a waste of time if ACCESSED is already
+                     * set.  TODO: It would also be nice if we could simply use the cached type value, and eliminate
+                     * the getByte() call; that seems a bit risky, but I think we should still try it someday.
+                     */
+                    if (!(bType & (X86.DESC.ACC.TYPE.ACCESSED >> 8))) {
+                        this.cpu.setByte(addrType, bType | (X86.DESC.ACC.TYPE.ACCESSED >> 8));
+                    }
                 }
             }
         }
