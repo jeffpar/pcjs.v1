@@ -360,7 +360,6 @@ X86.fnBTMem = function(dst, src)
     if (this.regEA === X86.ADDR_INVALID) {
         return X86.fnBT.call(this, dst, src);
     }
-
     /*
      * TODO: Consider a worker function that performs the following block of code for: BT, BTC, BTR, and BTS.
      * It's somewhat inconvenient, because it needs to provide two results: an updated src AND an updated dst.
@@ -409,7 +408,6 @@ X86.fnBTCMem = function(dst, src)
     if (this.regEA === X86.ADDR_INVALID) {
         return X86.fnBTC.call(this, dst, src);
     }
-
     /*
      * src is usually positive BUT can also be negative (as the IA32 spec says: "The offset operand then selects
      * a bit position within the range −231 to 231 − 1 for a register offset and 0 to 31 for an immediate offset.")
@@ -451,7 +449,6 @@ X86.fnBTRMem = function(dst, src)
     if (this.regEA === X86.ADDR_INVALID) {
         return X86.fnBTR.call(this, dst, src);
     }
-
     /*
      * src is usually positive BUT can also be negative (as the IA32 spec says: "The offset operand then selects
      * a bit position within the range −231 to 231 − 1 for a register offset and 0 to 31 for an immediate offset.")
@@ -493,7 +490,6 @@ X86.fnBTSMem = function(dst, src)
     if (this.regEA === X86.ADDR_INVALID) {
         return X86.fnBTS.call(this, dst, src);
     }
-
     /*
      * src is usually positive BUT can also be negative (as the IA32 spec says: "The offset operand then selects
      * a bit position within the range −231 to 231 − 1 for a register offset and 0 to 31 for an immediate offset.")
@@ -3939,7 +3935,7 @@ X86.fnTrap = function(nIDT, nCycles)
  */
 X86.fnFault = function(nFault, nError, nCycles, fHalt)
 {
-    var fDispatch = null;
+    var fDispatch = false;
 
     if (!this.aFlags.fComplete) {
         /*
@@ -3950,6 +3946,9 @@ X86.fnFault = function(nFault, nError, nCycles, fHalt)
         this.setIP(this.opLIP - this.segCS.base);
     }
     else if (this.model >= X86.MODEL_80186) {
+
+        fDispatch = true;
+
         if (this.nFault < 0) {
             /*
              * Single-fault (error code is passed through, and the responsible instruction is restartable;
@@ -3966,14 +3965,12 @@ X86.fnFault = function(nFault, nError, nCycles, fHalt)
                 this.setSP((this.regESP & ~this.segSS.maskAddr) | (this.opLSP - this.segSS.base));
                 this.opLSP = X86.ADDR_INVALID;
             }
-            fDispatch = true;
         }
         else if (this.nFault != X86.EXCEPTION.DF_FAULT) {
             /*
              * Double-fault (error code is always zero, and the responsible instruction is not restartable)
              */
             nError = 0; nFault = X86.EXCEPTION.DF_FAULT;
-            fDispatch = true;
         }
         else {
             /*
@@ -3982,12 +3979,17 @@ X86.fnFault = function(nFault, nError, nCycles, fHalt)
              */
             nFault = -1; nError = 0;
             this.resetRegs();
-            fHalt = false;
+            fDispatch = fHalt = false;
         }
     }
 
     if (X86.fnFaultMessage.call(this, nFault, nError, fHalt)) {
-        fDispatch = false;
+        /*
+         * If this is a fault that would normally be dispatched BUT fnFaultMessage() wants us to halt,
+         * then we throw a bogus fault number (-1), simply to interrupt the current instruction in exactly
+         * the same way that a dispatched fault would interrupt it.
+         */
+        if (fDispatch) throw -1;
     }
 
     if (fDispatch) {
