@@ -921,29 +921,29 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fProbe)
                          * Frames coming from V86-mode ALWAYS contain 32-bit values, and look like this:
                          *
                          *      low:    EIP
-                         *              CS (padded to 32 bits)
+                         *              CS (upper 16 bits undefined)
                          *              EFLAGS
                          *              ESP
-                         *              SS (padded to 32 bits)
-                         *              ES (padded to 32 bits)
-                         *              DS (padded to 32 bits)
-                         *              FS (padded to 32 bits)
-                         *      high:   GS (padded to 32 bits)
+                         *              SS (upper 16 bits undefined)
+                         *              ES (upper 16 bits undefined)
+                         *              DS (upper 16 bits undefined)
+                         *              FS (upper 16 bits undefined)
+                         *      high:   GS (upper 16 bits undefined)
                          *
                          * Our caller (eg, fnINT()) will take care of pushing the final bits (EFLAGS, CS, and EIP).
                          */
                         cpu.setDataSize(4);
                         cpu.assert(I386 && cpu.model >= X86.MODEL_80386);
-                        cpu.pushWord(cpu.segGS.sel);
+                        cpu.pushData(cpu.segGS.sel, 4, 2);
                         cpu.setGS(0);
-                        cpu.pushWord(cpu.segFS.sel);
+                        cpu.pushData(cpu.segFS.sel, 4, 2);
                         cpu.setFS(0);
-                        cpu.pushWord(cpu.segDS.sel);
+                        cpu.pushData(cpu.segDS.sel, 4, 2);
                         cpu.setDS(0);
-                        cpu.pushWord(cpu.segES.sel);
+                        cpu.pushData(cpu.segES.sel, 4, 2);
                         cpu.setES(0);
                     }
-                    cpu.pushWord(regSSPrev);
+                    cpu.pushData(regSSPrev, cpu.sizeData, 2);
                     cpu.pushWord(regSPPrev);
                     while (i) cpu.pushWord(this.awParms[--i]);
                     this.fStackSwitch = true;

@@ -567,8 +567,13 @@ X86.fnCALLF = function(off, sel)
     var oldIP = this.getIP();
     var oldSize = (I386? this.sizeData : 2);
     if (this.setCSIP(off, sel, true) != null) {
-        this.pushData(this.opCS, oldSize);
-        this.pushData(oldIP, oldSize);
+        /*
+         * When the OPERAND size is 32 bits, the 80386 will decrement the stack pointer by 4, write the selector
+         * into the 2 lower bytes, and leave the 2 upper bytes untouched; at least, that's the case for all other
+         * segment register writes, so we assume this case is no different.  Hence, the hard-coded size of 2.
+         */
+        this.pushData(this.opCS, oldSize, 2);
+        this.pushData(oldIP, oldSize, oldSize);
     }
     this.opLSP = X86.ADDR_INVALID;
     this.opCS = -1;
@@ -1941,12 +1946,14 @@ X86.fnMOVn = function(dst, src)
  */
 X86.fnMOVxx = function(dst, src)
 {
+    /*
+     * When a 32-bit OPERAND size is in effect, segment register writes via opMOVwsr() must write 32 bits
+     * (zero-extended) if the destination is a register, but only 16 bits if the destination is memory,
+     * hence the setDataSize(2) below.
+     *
+     * The only other caller, opMOVrc(), is not affected, because it writes only to register destinations.
+     */
     if (this.regEAWrite !== X86.ADDR_INVALID) {
-        /*
-         * When a 32-bit OPERAND size is in effect, opMOVwsr() will write 32 bits (zero-extended) if the destination
-         * is a register, but only 16 bits if the destination is memory.  The only other caller, opMOVrc(), is not
-         * affected, because it writes only to register destinations.
-         */
         this.setDataSize(2);
     }
     return X86.fnMOV.call(this, dst, this.regXX);

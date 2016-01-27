@@ -1707,8 +1707,14 @@ X86CPU.prototype.setProtMode = function(fProt, fV86)
     if (I386 && this.model >= X86.MODEL_80386) {
         this.segFS.updateMode(false, fProt, fV86);
         this.segGS.updateMode(false, fProt, fV86);
-        this.resetSizes();
     }
+    /*
+     * This function used to be called only when I386 is true, but it's probably best if we ALWAYS call it, even
+     * for 16-bit-only CPUs like the 8086 and 80286; this allows us to write opcode logic by either checking I386
+     * and using appropriate hard-coded sizes, or NOT checking I386 and simply using the "soft-coded" sizes in
+     * sizeData and sizeAddr.
+     */
+    this.resetSizes();
 };
 
 /**
@@ -3759,17 +3765,18 @@ X86CPU.prototype.popWord = function()
 };
 
 /**
- * pushData(d, size)
+ * pushData(d, width, size)
  *
  * @this {X86CPU}
  * @param {number} d is the data to push at current SP; SP decreased by size
- * @param {number} size is the size of the data to push (must be either 2 or 4)
+ * @param {number} width is the width of the data to push, in bytes (must be either 2 or 4)
+ * @param {number} size is the size of the data to push, in bytes (must be > 0 and <= width)
  */
-X86CPU.prototype.pushData = function(d, size)
+X86CPU.prototype.pushData = function(d, width, size)
 {
-    this.assert(size == 2 || size == 4);
+    this.assert((width == 2 || width == 4) && (size > 0 && size <= width));
 
-    var regLSP = (this.regLSP - size)|0;
+    var regLSP = (this.regLSP - width)|0;
 
     /*
      * Properly comparing regLSP to regLSPLimitLow would normally require coercing both to unsigned
@@ -3790,10 +3797,19 @@ X86CPU.prototype.pushData = function(d, size)
         }
     }
 
-    if (size == 2) {
+    switch(size) {
+    case 1:
+        this.setByte(regLSP, d);
+        break
+    case 2:
         this.setShort(regLSP, d);
-    } else {
+        break
+    case 4:
         this.setLong(regLSP, d);
+        break
+    default:
+        this.assert(false);
+        break;
     }
 
     /*

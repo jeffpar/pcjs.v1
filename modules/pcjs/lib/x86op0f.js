@@ -1109,11 +1109,15 @@ X86.opSETNLE = function()
 X86.opPUSHFS = function()
 {
     /*
-     * TODO: Reportedly, when the OPERAND size is 32 bits, the 80386 will decrement the stack pointer by 4,
-     * write the selector into the 2 lower bytes, and leave the 2 upper bytes untouched, whereas we will write
-     * a 32-bit value, effectively zeroing the 2 upper bytes.  Need to confirm this.
+     * When the OPERAND size is 32 bits, the 80386 will decrement the stack pointer by 4, write the selector
+     * into the 2 lower bytes, and leave the 2 upper bytes untouched; to properly emulate that, we must use the
+     * more generic pushData() instead of pushWord().
      */
-    this.pushWord(this.segFS.sel);
+    if (!I386) {
+        this.pushWord(this.segFS.sel);
+    } else {
+        this.pushData(this.segFS.sel, this.sizeData, 2);
+    }
     this.nStepCycles -= this.cycleCounts.nOpCyclesPushSeg;
 };
 
@@ -1210,11 +1214,15 @@ X86.opIBTS = function()
 X86.opPUSHGS = function()
 {
     /*
-     * TODO: Reportedly, when the OPERAND size is 32 bits, the 80386 will decrement the stack pointer by 4,
-     * write the selector into the 2 lower bytes, and leave the 2 upper bytes untouched, whereas we will write
-     * a 32-bit value, effectively zeroing the 2 upper bytes.  Need to confirm this.
+     * When the OPERAND size is 32 bits, the 80386 will decrement the stack pointer by 4, write the selector
+     * into the 2 lower bytes, and leave the 2 upper bytes untouched; to properly emulate that, we must use the
+     * more generic pushData() instead of pushWord().
      */
-    this.pushWord(this.segGS.sel);
+    if (!I386) {
+        this.pushWord(this.segGS.sel);
+    } else {
+        this.pushData(this.segGS.sel, this.sizeData, 2);
+    }
     this.nStepCycles -= this.cycleCounts.nOpCyclesPushSeg;
 };
 
