@@ -9,6 +9,7 @@ Intel 80286 CPU Information
 
 ### 80286 Errata
 
+* [Early 80286 Errata of Interest](early_errata/#early-80286-errata-of-interest)
 * [ARPL Behavior](arpl/)
 * [Coprocessor Operand Beyond Segment Limit](b2_b3_info/#coprocessor-operand-partially-beyond-limit-of-erc-segment)
 * [Instructions Longer than 10 Bytes](extra_prefixes/)
@@ -16,9 +17,8 @@ Intel 80286 CPU Information
 * [Non-Restartable Protection Violations](b2_b3_info/#non-restartable-protection-violations)
 * [POPF Behavior](b2_b3_info/#popf-behavior)
 * [REP MOVS and REP INS Restartability](rep_restart/)
-* [Early 80286 Errata of Interest](early_errata/#early-80286-errata-of-interest)
 
-### 80286 Undocumented Opcodes
+### 80286 Undocumented Instructions
 
 * [LOADALL](loadall/)
 

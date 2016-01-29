@@ -25,10 +25,10 @@ it is a BCD digit.
 
 The following example shows how to add BCD numbers then adjust the result:
 
-	MOV AH,0    ;Clear AH for most significant digit
-	MOV AL,6    ;BCD 6 in AL
-	ADD AL,5    ;Add BCD 5 to digit in AL
-	AAA         ;AH=1, AL=1 representing BCD 11.
+	MOV     AH,0        ; Clear AH for most significant digit
+	MOV     AL,6        ; BCD 6 in AL
+	ADD     AL,5        ; Add BCD 5 to digit in AL
+	AAA                 ; AH=1, AL=1 representing BCD 11.
 
 ### Algorithm
 

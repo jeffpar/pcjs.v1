@@ -1,11 +1,13 @@
 ---
 layout: page
-title: "Intel 80286 CPU Documentation: B-2/B-3 Steppings"
+title: "Intel 80286 CPU Errata: B-2/B-3 Steppings"
 permalink: /pubs/pc/reference/intel/80286/b2_b3_info/
 ---
 
-Intel 80286 CPU Documentation
+Intel 80286 CPU Errata: B-2/B-3 Steppings
 ---
+
+[The following information is from a 7-page Intel document titled "80286(B-2/B-3) Information Sheet, 21 November 1984"]
 
 ### 80286 B-2/B-3 Steppings
 
@@ -197,5 +199,3 @@ handled if the 80286 interrupts are always disabled before programming the inter
 is performed no unmasked interrupt is active. The interrupt handler for IR7 can read ISR7 of the 8259A to tell if this was a real
 interrupt on IR7. The ISR7 bit will be 0 if at the time the interrupt was acknowledged, no unmasked IR inputs of the 8259A were
 active ("phantom" interrupt).
-
-[This information is from a 7-page Intel document titled "80286(B-2/B-3) Information Sheet, 21 November 1984"]

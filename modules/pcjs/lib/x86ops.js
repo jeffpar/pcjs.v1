@@ -129,11 +129,15 @@ X86.opADDAX = function()
 X86.opPUSHES = function()
 {
     /*
-     * TODO: Reportedly, when the OPERAND size is 32 bits, the 80386 will decrement the stack pointer by 4,
-     * write the selector into the 2 lower bytes, and leave the 2 upper bytes untouched, whereas we will write
-     * a 32-bit value, effectively zeroing the 2 upper bytes.  Need to confirm this.
+     * When the OPERAND size is 32 bits, the 80386 will decrement the stack pointer by 4, write the selector
+     * into the 2 lower bytes, and leave the 2 upper bytes untouched; to properly emulate that, we must use the
+     * more generic pushData() instead of pushWord().
      */
-    this.pushWord(this.segES.sel);
+    if (!I386) {
+        this.pushWord(this.segES.sel);
+    } else {
+        this.pushData(this.segES.sel, this.sizeData, 2);
+    }
     this.nStepCycles -= this.cycleCounts.nOpCyclesPushSeg;
 };
 
@@ -227,11 +231,15 @@ X86.opORAX = function()
 X86.opPUSHCS = function()
 {
     /*
-     * TODO: Reportedly, when the OPERAND size is 32 bits, the 80386 will decrement the stack pointer by 4,
-     * write the selector into the 2 lower bytes, and leave the 2 upper bytes untouched, whereas we will write
-     * a 32-bit value, effectively zeroing the 2 upper bytes.  Need to confirm this.
+     * When the OPERAND size is 32 bits, the 80386 will decrement the stack pointer by 4, write the selector
+     * into the 2 lower bytes, and leave the 2 upper bytes untouched; to properly emulate that, we must use the
+     * more generic pushData() instead of pushWord().
      */
-    this.pushWord(this.segCS.sel);
+    if (!I386) {
+        this.pushWord(this.segCS.sel);
+    } else {
+        this.pushData(this.segCS.sel, this.sizeData, 2);
+    }
     this.nStepCycles -= this.cycleCounts.nOpCyclesPushSeg;
 };
 
@@ -333,11 +341,15 @@ X86.opADCAX = function()
 X86.opPUSHSS = function()
 {
     /*
-     * TODO: Reportedly, when the OPERAND size is 32 bits, the 80386 will decrement the stack pointer by 4,
-     * write the selector into the 2 lower bytes, and leave the 2 upper bytes untouched, whereas we will write
-     * a 32-bit value, effectively zeroing the 2 upper bytes.  Need to confirm this.
+     * When the OPERAND size is 32 bits, the 80386 will decrement the stack pointer by 4, write the selector
+     * into the 2 lower bytes, and leave the 2 upper bytes untouched; to properly emulate that, we must use the
+     * more generic pushData() instead of pushWord().
      */
-    this.pushWord(this.segSS.sel);
+    if (!I386) {
+        this.pushWord(this.segSS.sel);
+    } else {
+        this.pushData(this.segSS.sel, this.sizeData, 2);
+    }
     this.nStepCycles -= this.cycleCounts.nOpCyclesPushSeg;
 };
 
@@ -431,11 +443,15 @@ X86.opSBBAX = function()
 X86.opPUSHDS = function()
 {
     /*
-     * TODO: Reportedly, when the OPERAND size is 32 bits, the 80386 will decrement the stack pointer by 4,
-     * write the selector into the 2 lower bytes, and leave the 2 upper bytes untouched, whereas we will write
-     * a 32-bit value, effectively zeroing the 2 upper bytes.  Need to confirm this.
+     * When the OPERAND size is 32 bits, the 80386 will decrement the stack pointer by 4, write the selector
+     * into the 2 lower bytes, and leave the 2 upper bytes untouched; to properly emulate that, we must use the
+     * more generic pushData() instead of pushWord().
      */
-    this.pushWord(this.segDS.sel);
+    if (!I386) {
+        this.pushWord(this.segDS.sel);
+    } else {
+        this.pushData(this.segDS.sel, this.sizeData, 2);
+    }
     this.nStepCycles -= this.cycleCounts.nOpCyclesPushSeg;
 };
 
@@ -1636,12 +1652,11 @@ X86.opINSb = function()
         if (!this.checkIOPM(port, 1, true)) return;
         var b = this.bus.checkPortInputNotify(port, 1, this.regLIP - nDelta - 1);
         this.setSOByte(this.segES, this.regEDI & maskAddr, b);
-
         /*
-         * TODO: Remove this once we've done enough testing of fnFault() throwing exceptions
+         * fnFault() throws exceptions now, so inline checks of X86.OPFLAG.FAULT should no longer be necessary.
+         *
+         *      if (this.opFlags & X86.OPFLAG.FAULT) return;
          */
-        if (this.opFlags & X86.OPFLAG.FAULT) return;
-
         if (BACKTRACK) this.backTrack.btiMem0 = this.backTrack.btiIO;
         this.regEDI = (this.regEDI & ~maskAddr) | ((this.regEDI + ((this.regPS & X86.PS.DF)? -1 : 1)) & maskAddr);
         this.regECX = (this.regECX & ~maskAddr) | ((this.regECX - nDelta) & maskAddr);
@@ -1690,12 +1705,11 @@ X86.opINSw = function()
             this.backTrack.btiMem1 = this.backTrack.btiIO;
         }
         this.setSOWord(this.segES, this.regEDI & maskAddr, w);
-
         /*
-         * TODO: Remove this once we've done enough testing of fnFault() throwing exceptions
+         * fnFault() throws exceptions now, so inline checks of X86.OPFLAG.FAULT should no longer be necessary.
+         *
+         *      if (this.opFlags & X86.OPFLAG.FAULT) return;
          */
-        if (this.opFlags & X86.OPFLAG.FAULT) return;
-
         this.regEDI = (this.regEDI & ~maskAddr) | ((this.regEDI + ((this.regPS & X86.PS.DF)? -this.sizeData : this.sizeData)) & maskAddr);
         this.regECX = (this.regECX & ~maskAddr) | ((this.regECX - nDelta) & maskAddr);
         this.nStepCycles -= nCycles;
@@ -1737,12 +1751,11 @@ X86.opOUTSb = function()
         var port = this.regEDX & 0xffff;
         if (!this.checkIOPM(port, 1, false)) return;
         var b = this.getSOByte(this.segDS, this.regESI & maskAddr);
-
         /*
-         * TODO: Remove this once we've done enough testing of fnFault() throwing exceptions
+         * fnFault() throws exceptions now, so inline checks of X86.OPFLAG.FAULT should no longer be necessary.
+         *
+         *      if (this.opFlags & X86.OPFLAG.FAULT) return;
          */
-        if (this.opFlags & X86.OPFLAG.FAULT) return;
-
         if (BACKTRACK) this.backTrack.btiIO = this.backTrack.btiMem0;
         this.bus.checkPortOutputNotify(port, 1, b, this.regLIP - nDelta - 1);
         this.regESI = (this.regESI & ~maskAddr) | ((this.regESI + ((this.regPS & X86.PS.DF)? -1 : 1)) & maskAddr);
@@ -1784,12 +1797,11 @@ X86.opOUTSw = function()
     }
     if (nReps--) {
         var w = this.getSOWord(this.segDS, this.regESI & maskAddr);
-
         /*
-         * TODO: Remove this once we've done enough testing of fnFault() throwing exceptions
+         * fnFault() throws exceptions now, so inline checks of X86.OPFLAG.FAULT should no longer be necessary.
+         *
+         *      if (this.opFlags & X86.OPFLAG.FAULT) return;
          */
-        if (this.opFlags & X86.OPFLAG.FAULT) return;
-
         var port = this.regEDX & 0xffff;
         if (!this.checkIOPM(port, this.sizeData, false)) return;
         if (BACKTRACK) {
@@ -2787,12 +2799,11 @@ X86.opMOVSb = function()
     }
     if (nReps--) {
         this.setSOByte(this.segES, this.regEDI & maskAddr, this.getSOByte(this.segData, this.regESI & maskAddr));
-
         /*
-         * TODO: Remove this once we've done enough testing of fnFault() throwing exceptions
+         * fnFault() throws exceptions now, so inline checks of X86.OPFLAG.FAULT should no longer be necessary.
+         *
+         *      if (this.opFlags & X86.OPFLAG.FAULT) return;
          */
-        if (this.opFlags & X86.OPFLAG.FAULT) return;
-
         var nInc = ((this.regPS & X86.PS.DF)? -1 : 1);
         this.regESI = (this.regESI & ~maskAddr) | ((this.regESI + nInc) & maskAddr);
         this.regEDI = (this.regEDI & ~maskAddr) | ((this.regEDI + nInc) & maskAddr);
@@ -2825,12 +2836,11 @@ X86.opMOVSw = function()
     }
     if (nReps--) {
         this.setSOWord(this.segES, this.regEDI & maskAddr, this.getSOWord(this.segData, this.regESI & maskAddr));
-
         /*
-         * TODO: Remove this once we've done enough testing of fnFault() throwing exceptions
+         * fnFault() throws exceptions now, so inline checks of X86.OPFLAG.FAULT should no longer be necessary.
+         *
+         *      if (this.opFlags & X86.OPFLAG.FAULT) return;
          */
-        if (this.opFlags & X86.OPFLAG.FAULT) return;
-
         var nInc = ((this.regPS & X86.PS.DF)? -this.sizeData : this.sizeData);
         this.regESI = (this.regESI & ~maskAddr) | ((this.regESI + nInc) & maskAddr);
         this.regEDI = (this.regEDI & ~maskAddr) | ((this.regEDI + nInc) & maskAddr);
@@ -2864,12 +2874,11 @@ X86.opCMPSb = function()
     if (nReps--) {
         var bDst = this.getEAByte(this.segData, this.regESI & maskAddr);
         var bSrc = this.modEAByte(this.segES, this.regEDI & maskAddr);
-
         /*
-         * TODO: Remove this once we've done enough testing of fnFault() throwing exceptions
+         * fnFault() throws exceptions now, so inline checks of X86.OPFLAG.FAULT should no longer be necessary.
+         *
+         *      if (this.opFlags & X86.OPFLAG.FAULT) return;
          */
-        if (this.opFlags & X86.OPFLAG.FAULT) return;
-
         X86.fnCMPb.call(this, bDst, bSrc);
         var nInc = ((this.regPS & X86.PS.DF)? -1 : 1);
         this.regESI = (this.regESI & ~maskAddr) | ((this.regESI + nInc) & maskAddr);
@@ -2912,12 +2921,11 @@ X86.opCMPSw = function()
     if (nReps--) {
         var wDst = this.getEAWord(this.segData, this.regESI & maskAddr);
         var wSrc = this.modEAWord(this.segES, this.regEDI & maskAddr);
-
         /*
-         * TODO: Remove this once we've done enough testing of fnFault() throwing exceptions
+         * fnFault() throws exceptions now, so inline checks of X86.OPFLAG.FAULT should no longer be necessary.
+         *
+         *      if (this.opFlags & X86.OPFLAG.FAULT) return;
          */
-        if (this.opFlags & X86.OPFLAG.FAULT) return;
-
         X86.fnCMPw.call(this, wDst, wSrc);
         var nInc = ((this.regPS & X86.PS.DF)? -this.sizeData : this.sizeData);
         this.regESI = (this.regESI & ~maskAddr) | ((this.regESI + nInc) & maskAddr);
@@ -2983,12 +2991,11 @@ X86.opSTOSb = function()
     }
     if (nReps--) {
         this.setSOByte(this.segES, this.regEDI & maskAddr, this.regEAX);
-
         /*
-         * TODO: Remove this once we've done enough testing of fnFault() throwing exceptions
+         * fnFault() throws exceptions now, so inline checks of X86.OPFLAG.FAULT should no longer be necessary.
+         *
+         *      if (this.opFlags & X86.OPFLAG.FAULT) return;
          */
-        if (this.opFlags & X86.OPFLAG.FAULT) return;
-
         if (BACKTRACK) this.backTrack.btiMem0 = this.backTrack.btiAL;
 
         this.regECX = (this.regECX & ~maskAddr) | ((this.regECX - nDelta) & maskAddr);
@@ -3042,12 +3049,11 @@ X86.opSTOSw = function()
     }
     if (nReps--) {
         this.setSOWord(this.segES, this.regEDI & maskAddr, this.regEAX);
-
         /*
-         * TODO: Remove this once we've done enough testing of fnFault() throwing exceptions
+         * fnFault() throws exceptions now, so inline checks of X86.OPFLAG.FAULT should no longer be necessary.
+         *
+         *      if (this.opFlags & X86.OPFLAG.FAULT) return;
          */
-        if (this.opFlags & X86.OPFLAG.FAULT) return;
-
         if (BACKTRACK) {
             this.backTrack.btiMem0 = this.backTrack.btiAL; this.backTrack.btiMem1 = this.backTrack.btiAH;
         }
@@ -3081,12 +3087,11 @@ X86.opLODSb = function()
     }
     if (nReps--) {
         var b = this.getSOByte(this.segData, this.regESI & maskAddr);
-
         /*
-         * TODO: Remove this once we've done enough testing of fnFault() throwing exceptions
+         * fnFault() throws exceptions now, so inline checks of X86.OPFLAG.FAULT should no longer be necessary.
+         *
+         *      if (this.opFlags & X86.OPFLAG.FAULT) return;
          */
-        if (this.opFlags & X86.OPFLAG.FAULT) return;
-
         this.regEAX = (this.regEAX & ~0xff) | b;
         if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMem0;
         this.regESI = (this.regESI & ~maskAddr) | ((this.regESI + ((this.regPS & X86.PS.DF)? -1 : 1)) & maskAddr);
@@ -3119,12 +3124,11 @@ X86.opLODSw = function()
     }
     if (nReps--) {
         var w = this.getSOWord(this.segData, this.regESI & maskAddr);
-
         /*
-         * TODO: Remove this once we've done enough testing of fnFault() throwing exceptions
+         * fnFault() throws exceptions now, so inline checks of X86.OPFLAG.FAULT should no longer be necessary.
+         *
+         *      if (this.opFlags & X86.OPFLAG.FAULT) return;
          */
-        if (this.opFlags & X86.OPFLAG.FAULT) return;
-
         this.regEAX = (this.regEAX & ~this.maskData) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiMem0; this.backTrack.btiAH = this.backTrack.btiMem1;
@@ -3159,12 +3163,11 @@ X86.opSCASb = function()
     }
     if (nReps--) {
         X86.fnCMPb.call(this, this.regEAX & 0xff, this.modEAByte(this.segES, this.regEDI & maskAddr));
-
         /*
-         * TODO: Remove this once we've done enough testing of fnFault() throwing exceptions
+         * fnFault() throws exceptions now, so inline checks of X86.OPFLAG.FAULT should no longer be necessary.
+         *
+         *      if (this.opFlags & X86.OPFLAG.FAULT) return;
          */
-        if (this.opFlags & X86.OPFLAG.FAULT) return;
-
         this.regEDI = (this.regEDI & ~maskAddr) | ((this.regEDI + ((this.regPS & X86.PS.DF)? -1 : 1)) & maskAddr);
         this.regECX = (this.regECX & ~maskAddr) | ((this.regECX - nDelta) & maskAddr);
         /*
@@ -3203,12 +3206,11 @@ X86.opSCASw = function()
     }
     if (nReps--) {
         X86.fnCMPw.call(this, this.regEAX & this.maskData, this.modEAWord(this.segES, this.regEDI & maskAddr));
-
         /*
-         * TODO: Remove this once we've done enough testing of fnFault() throwing exceptions
+         * fnFault() throws exceptions now, so inline checks of X86.OPFLAG.FAULT should no longer be necessary.
+         *
+         *      if (this.opFlags & X86.OPFLAG.FAULT) return;
          */
-        if (this.opFlags & X86.OPFLAG.FAULT) return;
-
         this.regEDI = (this.regEDI & ~maskAddr) | ((this.regEDI + ((this.regPS & X86.PS.DF)? -this.sizeData : this.sizeData)) & maskAddr);
         this.regECX = (this.regECX & ~maskAddr) | ((this.regECX - nDelta) & maskAddr);
         /*
@@ -4455,7 +4457,7 @@ X86.opInvalid = function()
 X86.opUndefined = function()
 {
     this.setIP(this.opLIP - this.segCS.base);
-    this.setError("Undefined opcode " + str.toHexByte(this.bus.getByteDirect(this.regLIP)) + " at " + str.toHexLong(this.regLIP));
+    this.setError("Undefined opcode " + str.toHexByte(this.getByte(this.regLIP)) + " at " + str.toHexLong(this.regLIP));
     this.stopCPU();
 };
 

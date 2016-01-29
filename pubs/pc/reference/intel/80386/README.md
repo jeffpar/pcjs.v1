@@ -4,26 +4,27 @@ title: Intel 80386 CPU Information
 permalink: /pubs/pc/reference/intel/80386/
 ---
 
-
 Intel 80386 CPU Information
 ---
 
- * [A0 Stepping](#a0-stepping)
- * [A1 Stepping](#a1-stepping)
- * [A2 Stepping](#a2-stepping)
- * [B0 Stepping](#b0-stepping)
- * [B1 Stepping](#b1-stepping)
- * [C0 Stepping](#c0-stepping)
- * [D0 Stepping](#d0-stepping)
- * [D1 Stepping](#d1-stepping)
- * [D2 Stepping](#d2-stepping)
-
-
-80386 Instructions
+80386 Errata
 ---
 
- * [IBTS and XBTS](ibts_xbts/)
+* [A0 Stepping](#a0-stepping)
+* [A1 Stepping](#a1-stepping)
+* [A2 Stepping](#a2-stepping)
+* [B0 Stepping](#b0-stepping)
+* [B1 Stepping](#b1-stepping)
+* [C0 Stepping](#c0-stepping)
+* [D0 Stepping](#d0-stepping)
+* [D1 Stepping](#d1-stepping)
+* [D2 Stepping](#d2-stepping)
 
+80386 Undocumented Instructions
+---
+
+* [LOADALL](loadall/)
+* [IBTS and XBTS](ibts_xbts/)
 
 80386 Steppings
 ---

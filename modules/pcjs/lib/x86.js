@@ -193,7 +193,7 @@ var X86 = {
     SEL: {
         RPL:    0x0003,     // requested privilege level (0-3)
         LDT:    0x0004,     // table indicator (0: GDT, 1: LDT)
-        MASK:   0xFFF8      // table index
+        MASK:   0xFFF8      // table offset
     },
     DESC: {                 // Descriptor Table Entry
         LIMIT: {            // LIMIT bits 0-15 (or OFFSET if this is an INTERRUPT or TRAP gate)

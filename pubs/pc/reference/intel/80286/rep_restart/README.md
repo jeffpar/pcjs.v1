@@ -1,11 +1,13 @@
 ---
 layout: page
-title: "Intel 80286 CPU Documentation: REP Restart"
+title: "Intel 80286 CPU Errata: REP Restart"
 permalink: /pubs/pc/reference/intel/80286/rep_restart/
 ---
 
-Intel 80286 CPU Documentation
+Intel 80286 CPU Errata: REP Restart
 ---
+
+[The following information is from an Intel document titled "80286 REP MOVS and REP INS Restartability, 15 October 1984"]
 
 ### 80286 REP MOVS and REP INS Restartability
 
@@ -46,5 +48,3 @@ The above three problems are being corrected in all future steppings of the 8028
 register will hold 0ffffH when the CPU detects a violation due to the conditions above. Note that even when REP MOVS and
 REP INS restartability is corrected, CX will correctly continue to be 0000H when these instructions complete without generating
 a protection violation.
-
-[This information is from an Intel document titled "80286 REP MOVS and REP INS Restartability, 15 October 1984"]

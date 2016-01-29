@@ -1,11 +1,13 @@
 ---
 layout: page
-title: "Intel 80286 CPU Documentation: Extra Prefixes"
+title: "Intel 80286 CPU Errata: Extra Prefixes"
 permalink: /pubs/pc/reference/intel/80286/extra_prefixes/
 ---
 
-Intel 80286 CPU Documentation
+Intel 80286 CPU Errata: Extra Prefixes
 ---
+
+[The following information is from an Intel document titled "80286 ARPL and Overlength Instructions, 15 October 1984"]
 
 ### Instructions Longer than 10 Bytes
 
@@ -16,5 +18,3 @@ greater than ten bytes can occur is by using the assembler to intentionally plac
 
 There are no plans to change this functionality of the 80286 and future editions of the "iAPX286 Programmer's Reference
 Manual" and 80286 datasheet will accurately describe how 80286 reacts to instructions greater than 10 bytes in length.
-
-[This information is from an Intel document titled "80286 ARPL and Overlength Instructions, 15 October 1984"]

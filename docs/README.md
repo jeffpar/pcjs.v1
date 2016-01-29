@@ -26,6 +26,7 @@ Instruction documentation is also available:
 Our [Publication Archive](/pubs/) includes these PC-related resources:
 
 * [Datasheets](/pubs/pc/datasheets/)
+* [Intel CPU Documents](/pubs/pc/reference/intel/)
 * [Magazines](/pubs/pc/magazines/)
 * [Programming Guides](/pubs/pc/programming/) (eg, [OS/2](/pubs/pc/programming/os2/))
 * [Reference Manuals](/pubs/pc/reference/)

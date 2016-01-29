@@ -1,11 +1,13 @@
 ---
 layout: page
-title: "Intel 80286 CPU Documentation: LOADALL"
+title: "Intel 80286 LOADALL Instruction"
 permalink: /pubs/pc/reference/intel/80286/loadall/
 ---
 
-Intel 80286 CPU Documentation
+Intel 80286 LOADALL Instruction
 ---
+
+[The following information is from an undated 15-page Intel document titled "Undocumented iAPX 286 Test Instruction"]
 
 ### LOADALL (0F05H)
 
@@ -154,5 +156,3 @@ For proper protected mode operation, the following is required:
 
  4. The DPL fields of the ES and DS descriptors should be 3 to prevent their being zeroed by RET or IRET
  instructions.
-
-[This information is from an undated 15-page Intel document titled "Undocumented iAPX 286 Test Instruction"]

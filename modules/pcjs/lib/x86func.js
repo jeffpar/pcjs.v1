@@ -360,7 +360,6 @@ X86.fnBTMem = function(dst, src)
     if (this.regEA === X86.ADDR_INVALID) {
         return X86.fnBT.call(this, dst, src);
     }
-
     /*
      * TODO: Consider a worker function that performs the following block of code for: BT, BTC, BTR, and BTS.
      * It's somewhat inconvenient, because it needs to provide two results: an updated src AND an updated dst.
@@ -409,7 +408,6 @@ X86.fnBTCMem = function(dst, src)
     if (this.regEA === X86.ADDR_INVALID) {
         return X86.fnBTC.call(this, dst, src);
     }
-
     /*
      * src is usually positive BUT can also be negative (as the IA32 spec says: "The offset operand then selects
      * a bit position within the range −231 to 231 − 1 for a register offset and 0 to 31 for an immediate offset.")
@@ -451,7 +449,6 @@ X86.fnBTRMem = function(dst, src)
     if (this.regEA === X86.ADDR_INVALID) {
         return X86.fnBTR.call(this, dst, src);
     }
-
     /*
      * src is usually positive BUT can also be negative (as the IA32 spec says: "The offset operand then selects
      * a bit position within the range −231 to 231 − 1 for a register offset and 0 to 31 for an immediate offset.")
@@ -493,7 +490,6 @@ X86.fnBTSMem = function(dst, src)
     if (this.regEA === X86.ADDR_INVALID) {
         return X86.fnBTS.call(this, dst, src);
     }
-
     /*
      * src is usually positive BUT can also be negative (as the IA32 spec says: "The offset operand then selects
      * a bit position within the range −231 to 231 − 1 for a register offset and 0 to 31 for an immediate offset.")
@@ -558,20 +554,26 @@ X86.fnCALLw = function(dst, src)
 X86.fnCALLF = function(off, sel)
 {
     /*
-     * Since we always push the return address AFTER calling setCSIP(), and since either push could trigger
+     * Since we always push the return address AFTER calling setCSIP(), and since either push could trigger a
      * fault (eg, segment fault, page fault, etc), we must not only snapshot regLSP into opLSP, but also the
-     * current CS into opCS, so that fnFault() can always make CALLF restartable.
+     * current CS into opCS, so that fnFault() can always make CALLF restartable.  Ditto for opSS and the SS register.
      */
     this.opCS = this.getCS();
+    this.opSS = this.getSS();
     this.opLSP = this.regLSP;
     var oldIP = this.getIP();
     var oldSize = (I386? this.sizeData : 2);
     if (this.setCSIP(off, sel, true) != null) {
-        this.pushData(this.opCS, oldSize);
-        this.pushData(oldIP, oldSize);
+        /*
+         * When the OPERAND size is 32 bits, the 80386 will decrement the stack pointer by 4, write the selector
+         * into the 2 lower bytes, and leave the 2 upper bytes untouched; at least, that's the case for all other
+         * segment register writes, so we assume this case is no different.  Hence, the hard-coded size of 2.
+         */
+        this.pushData(this.opCS, oldSize, 2);
+        this.pushData(oldIP, oldSize, oldSize);
     }
     this.opLSP = X86.ADDR_INVALID;
-    this.opCS = -1;
+    this.opCS = this.opSS = -1;
 };
 
 /**
@@ -1941,12 +1943,14 @@ X86.fnMOVn = function(dst, src)
  */
 X86.fnMOVxx = function(dst, src)
 {
+    /*
+     * When a 32-bit OPERAND size is in effect, segment register writes via opMOVwsr() must write 32 bits
+     * (zero-extended) if the destination is a register, but only 16 bits if the destination is memory,
+     * hence the setDataSize(2) below.
+     *
+     * The only other caller, opMOVrc(), is not affected, because it writes only to register destinations.
+     */
     if (this.regEAWrite !== X86.ADDR_INVALID) {
-        /*
-         * When a 32-bit OPERAND size is in effect, opMOVwsr() will write 32 bits (zero-extended) if the destination
-         * is a register, but only 16 bits if the destination is memory.  The only other caller, opMOVrc(), is not
-         * affected, because it writes only to register destinations.
-         */
         this.setDataSize(2);
     }
     return X86.fnMOV.call(this, dst, this.regXX);
@@ -3932,55 +3936,70 @@ X86.fnTrap = function(nIDT, nCycles)
  */
 X86.fnFault = function(nFault, nError, nCycles, fHalt)
 {
-    var fDispatch = null;
+    var fDispatch = false;
 
     if (!this.aFlags.fComplete) {
         /*
          * Prior to each new burst of instructions, stepCPU() sets fComplete to true, and the only (normal) way
          * for fComplete to become false is through stopCPU(), which isn't ordinarily called, except by the Debugger.
          */
-        this.resetSizes();
-        this.setIP(this.opLIP - this.segCS.base);
+        this.setLIP(this.opLIP);
     }
     else if (this.model >= X86.MODEL_80186) {
+
+        fDispatch = true;
+
         if (this.nFault < 0) {
             /*
-             * Single-fault (error code is passed through, and the responsible instruction is restartable;
-             * the call to resetSizes() is critical, otherwise setIP() may update IP with the wrong size if
-             * the current instruction contains an OPERAND size override).
+             * Single-fault (error code is passed through, and the responsible instruction is restartable.
              */
-            this.resetSizes();
             if (this.opCS != -1) {
+                /*
+                 * HACK: We must slam 3 into this.segCS.cpl to ensure that loading the original CS segment doesn't
+                 * fail.  For example, if we faulted in the middle of a ring transition that loaded CS with a higher
+                 * privilege (lower CPL) code segment, then our attempt here to reload the lower privilege (higher CPL)
+                 * code segment could be viewed as a privilege violation (which it would be outside this context).
+                 */
+                this.segCS.cpl = 3;
                 this.setCS(this.opCS);
                 this.opCS = -1;
             }
-            this.setIP(this.opLIP - this.segCS.base);
+            this.setLIP(this.opLIP);
+            if (this.opSS != -1) {
+                this.setSS(this.opSS);
+                this.opSS = -1;
+            }
             if (this.opLSP !== X86.ADDR_INVALID) {
                 this.setSP((this.regESP & ~this.segSS.maskAddr) | (this.opLSP - this.segSS.base));
                 this.opLSP = X86.ADDR_INVALID;
             }
-            fDispatch = true;
         }
         else if (this.nFault != X86.EXCEPTION.DF_FAULT) {
             /*
              * Double-fault (error code is always zero, and the responsible instruction is not restartable)
              */
-            nError = 0; nFault = X86.EXCEPTION.DF_FAULT;
-            fDispatch = true;
+            nError = 0;
+            nFault = X86.EXCEPTION.DF_FAULT;
         }
         else {
             /*
              * Triple-fault (usually referred to in Intel literature as a "shutdown", but at least on the 80286,
              * it's actually a "reset")
              */
-            nFault = -1; nError = 0;
+            nError = 0;
+            nFault = -1;
             this.resetRegs();
-            fHalt = false;
+            fDispatch = fHalt = false;
         }
     }
 
-    if (X86.fnFaultMessage.call(this, nFault, nError, fHalt)) {
-        fDispatch = false;
+    if (X86.fnCheckFault.call(this, nFault, nError, fHalt)) {
+        /*
+         * If this is a fault that would normally be dispatched BUT fnCheckFault() wants us to halt,
+         * then we throw a bogus fault number (-1), simply to interrupt the current instruction in exactly
+         * the same way that a dispatched fault would interrupt it.
+         */
+        if (fDispatch) throw -1;
     }
 
     if (fDispatch) {
@@ -4051,7 +4070,7 @@ X86.fnPageFault = function(addr, fPresent, fWrite)
 };
 
 /**
- * fnFaultMessage(nFault, nError, fHalt)
+ * fnCheckFault(nFault, nError, fHalt)
  *
  * Aside from giving the Debugger an opportunity to report every fault, this also gives us the ability to
  * halt exception processing in tracks: return true to prevent the fault handler from being dispatched.
@@ -4067,7 +4086,7 @@ X86.fnPageFault = function(addr, fPresent, fWrite)
  * @param {boolean} [fHalt] (true to halt the CPU, false to not, undefined if "it depends")
  * @return {boolean|undefined} true to block the fault (often desirable when fHalt is true), otherwise dispatch it
  */
-X86.fnFaultMessage = function(nFault, nError, fHalt)
+X86.fnCheckFault = function(nFault, nError, fHalt)
 {
     var bitsMessage = Messages.FAULT;
 
