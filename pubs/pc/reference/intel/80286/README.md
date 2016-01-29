@@ -9,7 +9,7 @@ Intel 80286 CPU Information
 
 ### 80286 Errata
 
-* [Early 80286 Errata of Interest](early_errata/#early-80286-errata-of-interest)
+* [Early Errata: A1 and B1 Steppings](early_errata/)
 * [ARPL Behavior](arpl/)
 * [Coprocessor Operand Beyond Segment Limit](b2_b3_info/#coprocessor-operand-partially-beyond-limit-of-erc-segment)
 * [Instructions Longer than 10 Bytes](extra_prefixes/)
@@ -28,7 +28,7 @@ Intel 80286 CPU Information
 * [Discrepancies from an iAPX 86/88 Using Emulation](real_mode/#discrepancies-from-an-iapx-86-88-using-emulation)
 * [Extending the Address Space of Current iAPX 86 Software](real_mode/#extending-the-address-space-of-current-iapx-86-software)
 * [Mixing Real Mode and Protected Mode](real_mode/#mixing-real-mode-and-protected-mode)
-* [Exceptions from Undefined Opcodes and String Instructions](early_errata/)
+* [Exceptions from Undefined Opcodes and String Instructions](exceptions/)
 
 ### Assorted Publications
 

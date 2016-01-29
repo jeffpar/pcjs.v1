@@ -1,13 +1,14 @@
 ---
 layout: page
-title: "Intel 80286 LOADALL Instruction"
+title: "Intel 80286 CPU: LOADALL"
 permalink: /pubs/pc/reference/intel/80286/loadall/
 ---
 
-Intel 80286 LOADALL Instruction
+Intel 80286 CPU: LOADALL
 ---
 
-[The following information is from an undated 15-page Intel document titled "Undocumented iAPX 286 Test Instruction"]
+[The following information is from an undated 15-page Intel document titled "Undocumented iAPX 286 Test Instruction",
+pp. 1-4]
 
 ### LOADALL (0F05H)
 
@@ -61,34 +62,34 @@ requires 190 clocks with no wait states.
 
 ### LOADALL Memory Area Format ###
 
-	Physical Address (Hex)		Associated CPU Register
-		800-805						None
-		806-807						MSW
-		808-815						None
-		816-817						TR
-		818-819						Flag word
-		81A-81B						IP
-		81C-81D						LDT
-        81E-81F						DS
-        820-821						SS
-        822-823						CS
-        824-825						ES
-        826-827						DI
-        828-829						SI
-        82A-82B						BP
-        82C-82D						SP
-        82E-82F						BX
-        830-831						DX
-        832-833						CX
-        834-835						AX
-        836-83B						ES descriptor cache
-        83C-841						CS descriptor cache
-        842-847						SS descriptor cache
-        848-84D						DS descriptor cache
-        84E-853						GDTR
-        854-859						LDT descriptor cache
-        85A-85F						IDTR
-        860-865						TSS descriptor cache
+	Physical Address (Hex)    Associated CPU Register
+	    800-805                     None
+	    806-807                     MSW
+	    808-815                     None
+	    816-817                     TR
+	    818-819                     Flag word
+	    81A-81B                     IP
+	    81C-81D                     LDT
+	    81E-81F                     DS
+	    820-821                     SS
+	    822-823                     CS
+	    824-825                     ES
+	    826-827                     DI
+	    828-829                     SI
+	    82A-82B                     BP
+	    82C-82D                     SP
+	    82E-82F                     BX
+	    830-831                     DX
+	    832-833                     CX
+	    834-835                     AX
+	    836-83B                     ES descriptor cache
+	    83C-841                     CS descriptor cache
+	    842-847                     SS descriptor cache
+	    848-84D                     DS descriptor cache
+	    84E-853                     GDTR
+	    854-859                     LDT descriptor cache
+	    85A-85F                     IDTR
+	    860-865                     TSS descriptor cache
         
 No checks are made between the program visible selector values and the associated descriptor table entry.
 LOADALL does not perform any descriptor table accesses. No checks are made regarding the type or access rights
@@ -156,3 +157,5 @@ For proper protected mode operation, the following is required:
 
  4. The DPL fields of the ES and DS descriptors should be 3 to prevent their being zeroed by RET or IRET
  instructions.
+
+[Return to [Intel 80286 CPU Information](/pubs/pc/reference/intel/80286/)]

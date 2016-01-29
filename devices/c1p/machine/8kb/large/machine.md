@@ -5,6 +5,8 @@ permalink: /devices/c1p/machine/8kb/large/
 machines:
   - type: c1p
     id: c1p8kb
+redirect_from:
+  - /configs/c1p/machines/8kb/large/
 ---
 
 {% include machine.html id="c1p8kb" %}

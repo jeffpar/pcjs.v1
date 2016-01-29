@@ -18,3 +18,5 @@ greater than ten bytes can occur is by using the assembler to intentionally plac
 
 There are no plans to change this functionality of the 80286 and future editions of the "iAPX286 Programmer's Reference
 Manual" and 80286 datasheet will accurately describe how 80286 reacts to instructions greater than 10 bytes in length.
+
+[Return to [Intel 80286 CPU Information](/pubs/pc/reference/intel/80286/)]

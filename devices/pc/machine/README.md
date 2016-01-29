@@ -4,6 +4,8 @@ title: Machine Configurations
 menu_title: Machines
 menu_order: 5
 permalink: /devices/pc/machine/
+redirect_from:
+  - /configs/pc/machines/
 ---
 
 IBM PC Machine Configurations
@@ -58,6 +60,8 @@ However, most simply boot an early version of DOS, and the hard disk, if any, wi
 From there, you can load another disk image  
 
 ### Model 5150 Machine Configurations
+
+Our pre-built [Model 5150](/devices/pc/machine/5150/) machines include:
 
 * [IBM PC, MDA, 64K](/devices/pc/machine/5150/mda/64kb/)
 * [IBM PC, MDA, 64K, Debugger](/devices/pc/machine/5150/mda/64kb/debugger/)

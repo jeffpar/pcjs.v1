@@ -6,6 +6,9 @@ machines:
   - type: c1p-dbg
     id: c1p8kb
     config: /devices/c1p/machine/8kb/large/debugger/machine.xml
+redirect_from:
+  - /c1p/
+  - /c1pjs/
 ---
 
 C1Pjs Documentation

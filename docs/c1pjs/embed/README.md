@@ -6,6 +6,8 @@ machines:
   - type: c1p
     id: c1p8kb
     config: /devices/c1p/machine/8kb/embed/machine.xml
+redirect_from:
+  - /configs/c1p/embed/
 ---
 
 Embedding The C1Pjs Simulator
