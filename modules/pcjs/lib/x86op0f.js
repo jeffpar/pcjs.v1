@@ -161,6 +161,11 @@ X86.opLOADALL286 = function()
     this.segCS.loadDesc6(0x83C, this.getShort(0x822));
     this.segSS.loadDesc6(0x842, this.getShort(0x820));
     this.segDS.loadDesc6(0x848, this.getShort(0x81E));
+    /*
+     * Unlike LOADALL386, there's no requirement for calling setPS() before loading segment registers;
+     * in fact, since we're not passing a CPL to setPS(), it may be preferable to have CS (and perhaps SS)
+     * already loaded, so that setPS() can query the CPL.  TODO: Verify that CPL is set correctly.
+     */
     this.setPS(this.getShort(0x818));
     /*
      * It's important to call setIP() and setSP() *after* the segCS and segSS loads, so that the CPU's
@@ -178,15 +183,15 @@ X86.opLOADALL286 = function()
      */
     this.addrGDT = this.getShort(0x84E) | (this.getByte(0x850) << 16);
     this.addrGDTLimit = this.addrGDT + this.getShort(0x852);
-    this.segLDT.loadDesc6(0x854, this.getShort(0x81C));
     this.addrIDT = this.getShort(0x85A) | (this.getByte(0x85C) << 16);
     this.addrIDTLimit = this.addrIDT + this.getShort(0x85E);
+    this.segLDT.loadDesc6(0x854, this.getShort(0x81C));
     this.segTSS.loadDesc6(0x860, this.getShort(0x816));
 
     /*
-     * Oddly, the above Intel document gives two contradictory cycle counts for LOADALL: 190 and 195.  I go with 195,
-     * since both the PC Magazine Programmer's Technical Reference and Robert Collins (http://www.rcollins.org/articles/loadall/tspec_a3_doc.html)
-     * agree.
+     * Oddly, the above Intel document gives two contradictory cycle counts for LOADALL: 190 and 195.
+     * I'm going with 195, since both the PC Magazine Programmer's Technical Reference and Robert Collins
+     * (http://www.rcollins.org/articles/loadall/tspec_a3_doc.html) agree.
      */
     this.nStepCycles -= 195;
 
@@ -221,7 +226,8 @@ X86.opCLTS = function()
  *
  * op=0x0F,0x07 (LOADALL ES:[EDI])
  *
- * Excerpt from Intel Internal Correspondence on "386 LOADALL Instruction" (undated):
+ * Excerpt from Intel Internal Correspondence on "386 LOADALL Instruction" (undated), available as part of the
+ * PCjs Project at http://www.pcjs.org/pubs/pc/reference/intel/80386/loadall/
  *
  *      1.5. 386 LOADALL Memory Format
  *
@@ -234,6 +240,7 @@ X86.opCLTS = function()
  *      be DWORD aligned.
  *
  *         Offset         Register
+ *         ------         --------
  *          0x00            CR0
  *          0x04            EFLAGS
  *          0x08            EIP
@@ -247,44 +254,44 @@ X86.opCLTS = function()
  *          0x28            EAX
  *          0x2C            DR6
  *          0x30            DR7
- *          0x34            TR (TSS Selector--Word)
- *          0x38            LDTR (LDT Selector--Word)
+ *          0x34            TSSR(TSSSelector-Word)
+ *          0x38            LDTR(LDTSelector-Word)
  *          0x3C            GS
  *          0x40            FS
  *          0x44            DS
  *          0x48            SS
  *          0x4C            CS
  *          0x50            ES
- *          0x54            TSS (AR)
- *          0x58            TSS (BASE)
- *          0x5C            TSS (LIMIT)
- *          0x60            IDT (AR)
- *          0x64            IDT (BASE)
- *          0x68            IDT (LIMIT)
- *          0x6C            GDT (AR)
- *          0x70            GDT (BASE)
- *          0x74            GDT (LIMIT)
- *          0x78            LDT (AR)
- *          0x7C            LDT (BASE)
- *          0x80            LDT (LIMIT)
- *          0x84            GS (AR)
- *          0x88            GS (BASE)
- *          0x8C            GS (LIMIT)
- *          0x90            FS (AR)
- *          0x94            FS (BASE)
- *          0x98            FS (LIMIT)
- *          0x9C            DS (AR)
- *          0xA0            DS (BASE)
- *          0xA4            DS (LIMIT)
- *          0xA8            SS (AR)
- *          0xAC            SS (BASE)
- *          0xB0            SS (LIMIT)
- *          0xB4            CS (AR)
- *          0xB8            CS (BASE)
- *          0xBC            CS (LIMIT)
- *          0xC0            ES (AR)
- *          0xC4            ES (BASE)
- *          0xC8            ES (LIMIT)
+ *          0x54            TSS(AR)
+ *          0x58            TSS(BASE)
+ *          0x5C            TSS(LIMIT)
+ *          0x60            IDT(AR)
+ *          0x64            IDT(BASE)
+ *          0x68            IDT(LIMIT)
+ *          0x6C            GDT(AR)
+ *          0x70            GDT(BASE)
+ *          0x74            GDT(LIMIT)
+ *          0x78            LDT(AR)
+ *          0x7C            LDT(BASE)
+ *          0x80            LDT(LIMIT)
+ *          0x84            GS(AR)
+ *          0x88            GS(BASE)
+ *          0x8C            GS(LIMIT)
+ *          0x90            FS(AR)
+ *          0x94            FS(BASE)
+ *          0x98            FS(LIMIT)
+ *          0x9C            DS(AR)
+ *          0xA0            DS(BASE)
+ *          0xA4            DS(LIMIT)
+ *          0xA8            SS(AR)
+ *          0xAC            SS(BASE)
+ *          0xB0            SS(LIMIT)
+ *          0xB4            CS(AR)
+ *          0xB8            CS(BASE)
+ *          0xBC            CS(LIMIT)
+ *          0xC0            ES(AR)
+ *          0xC4            ES(BASE)
+ *          0xC8            ES(LIMIT)
  *
  *      Each descriptor entry consists of 3 pieces:
  *
@@ -292,10 +299,11 @@ X86.opCLTS = function()
  *          BASE
  *          LIMIT
  *
- *      The AR part has the same format as the second dword of a segment descriptor except that only the AR byte (bits 8-15)
- *      and the G and B/D bits (bits 23 and 22) are used. All other bits in the AR field are ignored. The BASE and LIMIT parts
- *      contain full 32-bit values, fully expanded and unscrambled from the 386 descriptor. In particular, the LIMIT field
- *      loaded for a page granular segment gives a byte granular limit, so should contain the page limit*4096 plus 4095.
+ *      The AR part has the same format as the second dword of a segment descriptor except that only the AR byte
+ *      (bits 8-15) and the G and B/D bits (bits 23 and 22) are used. All other bits in the AR field are ignored.
+ *      The BASE and LIMIT parts contain full 32-bit values, fully expanded and unscrambled from the 386 descriptor.
+ *      In particular, the LIMIT field loaded for a page granular segment gives a byte granular limit, so should
+ *      contain the page limit*4096 plus 4095.
  *
  * @this {X86CPU}
  */
@@ -308,16 +316,59 @@ X86.opLOADALL386 = function()
         X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0, 0, true);
         return;
     }
-    /*
-     * TODO: Implement
-     */
-    X86.opUndefined.call(this);
+    var addr = this.segES.checkRead(this.regEDI & this.maskAddr, 0xCC);
+    if (addr !== X86.ADDR_INVALID) {
+        X86.fnLCR0.call(this, this.getLong(addr));
+        /*
+         * We need to call setPS() before loading any segment registers, because if the Virtual 8086 Mode (VM)
+         * bit is set in EFLAGS, the segment registers need to know that.
+         */
+        var accSS = this.getLong(addr + 0xA8);
+        var cpl = (accSS & X86.DESC.ACC.DPL.MASK) >> X86.DESC.ACC.DPL.SHIFT;
+        this.setPS(this.getLong(addr + 0x04), cpl);
+        /*
+         * TODO: We have no use for the GDT(AR) at offset 0x6C or the IDT(AR) at offset 0x60, because
+         * we don't manage them as segment registers.  Should we?
+         */
+        this.addrGDT = this.getLong(addr + 0x70);
+        this.addrGDTLimit = this.addrGDT + this.getLong(addr + 0x74);
+        this.addrIDT = this.getLong(addr + 0x64);
+        this.addrIDTLimit = this.addrIDT + this.getLong(addr + 0x68);
+        this.segLDT.loadDesc(this.getLong(addr + 0x38), this.getLong(addr + 0x78), this.getLong(addr + 0x7C), this.getLong(addr + 0x80));
+        this.segTSS.loadDesc(this.getLong(addr + 0x34), this.getLong(addr + 0x54), this.getLong(addr + 0x58), this.getLong(addr + 0x5C));
+        this.regEDI = this.getLong(addr + 0x0C);
+        this.regESI = this.getLong(addr + 0x10);
+        this.regEBP = this.getLong(addr + 0x14);
+        this.regEBX = this.getLong(addr + 0x1C);
+        this.regEDX = this.getLong(addr + 0x20);
+        this.regECX = this.getLong(addr + 0x24);
+        this.regEAX = this.getLong(addr + 0x28);
+        this.segGS.loadDesc(this.getLong(addr + 0x3C), this.getLong(addr + 0x84), this.getLong(addr + 0x88), this.getLong(addr + 0x8C));
+        this.segFS.loadDesc(this.getLong(addr + 0x40), this.getLong(addr + 0x90), this.getLong(addr + 0x94), this.getLong(addr + 0x98));
+        this.segDS.loadDesc(this.getLong(addr + 0x44), this.getLong(addr + 0x9C), this.getLong(addr + 0xA0), this.getLong(addr + 0xA4));
+        this.segSS.loadDesc(this.getLong(addr + 0x48), accSS,                     this.getLong(addr + 0xAC), this.getLong(addr + 0xB0));
+        this.segCS.loadDesc(this.getLong(addr + 0x4C), this.getLong(addr + 0xB4), this.getLong(addr + 0xB8), this.getLong(addr + 0xBC));
+        this.segES.loadDesc(this.getLong(addr + 0x50), this.getLong(addr + 0xC0), this.getLong(addr + 0xC4), this.getLong(addr + 0xC8));
+        /*
+         * It's important to call setIP() and setSP() *after* the segCS and segSS loads, so that the CPU's
+         * linear IP and SP registers (regLIP and regLSP) will be updated properly.  Ordinarily that would be
+         * taken care of by simply using the CPU's setCS() and setSS() functions, but those functions call the
+         * default descriptor load() functions, and obviously here we must use loadDesc() instead.
+         */
+        this.setIP(this.getLong(addr + 0x08));
+        this.setSP(this.getLong(addr + 0x18));
+        /*
+         * TODO: We need to factor out the code that updates DR6 and DR7 from X86.opMOVdr(), so that we can
+         * more easily update DR6 and DR7 (which we're simply ignoring for now).
+         */
+    }
 
     /*
      * According to Robert Collins (http://www.rcollins.org/articles/loadall/tspec_a3_doc.html), the 80386 LOADALL
-     * takes 122 cycles.
+     * takes 122 cycles.  Also, according the above-mentioned Intel document, if the memory buffer is not DWORD aligned,
+     * execution time will DOUBLE.
      */
-    this.nStepCycles -= 122;
+    this.nStepCycles -= (122 << ((addr & 0x3)? 1 : 0));
 };
 
 /**
@@ -547,10 +598,18 @@ X86.opMOVrt = function()
     var bModRM = this.getIPByte();
     var iSrc = (bModRM & 0x38) >> 3;
 
+    /*
+     * Only TR6 and TR7 are defined, and only for the 80386 and 80486.  From the PC Magazine Prog. TechRef, p.64:
+     *
+     *  "The 80386 provides two 32-bit test registers, TR6 and TR7, as a mechanism for programmers to verify proper
+     *   operation of the Translation Lookaside Buffer (TLB) when power is applied to the chip. The TLB is a cache used
+     *   internally by the 80386 to translate linear addresses to physical addresses."
+     */
     if (iSrc < 6) {
         X86.opUndefined.call(this);
         return;
     }
+
     this.setReg(bModRM & 0x7, this.regTR[iSrc]);
     this.nStepCycles -= 12;
 
@@ -585,6 +644,13 @@ X86.opMOVtr = function()
     var bModRM = this.getIPByte();
     var iDst = (bModRM & 0x38) >> 3;
 
+    /*
+     * Only TR6 and TR7 are defined, and only for the 80386 and 80486.  From the PC Magazine Prog. TechRef, p.64:
+     *
+     *  "The 80386 provides two 32-bit test registers, TR6 and TR7, as a mechanism for programmers to verify proper
+     *   operation of the Translation Lookaside Buffer (TLB) when power is applied to the chip. The TLB is a cache used
+     *   internally by the 80386 to translate linear addresses to physical addresses."
+     */
     if (iDst < 6) {
         X86.opUndefined.call(this);
         return;
@@ -1679,7 +1745,7 @@ X86.aOps0F[0xFF] = X86.opInvalid;
 
 if (I386) {
     X86.aOps0F386 = [];
-    X86.aOps0F386[0x05] = X86.opInvalid;        // the 80286 LOADALL opcode is invalid on the 80386
+    X86.aOps0F386[0x05] = X86.opInvalid;        // the 80286 LOADALL opcode (LOADALL286) is invalid on the 80386
     X86.aOps0F386[0x07] = X86.opLOADALL386;
     X86.aOps0F386[0x20] = X86.opMOVrc;
     X86.aOps0F386[0x21] = X86.opMOVrd;

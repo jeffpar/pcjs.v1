@@ -4793,6 +4793,14 @@ if (DEBUGGER) {
 
             if (typeCPU == null) typeCPU = type >> Debugger.TYPE_CPU_SHIFT;
 
+            if (iIns == Debugger.INS.LOADALL) {
+                if (typeCPU == Debugger.CPU_80286) {
+                    sOperands = "[%800]";
+                } else if (typeCPU == Debugger.CPU_80386) {
+                    sOperands = "ES:[" + (dbgAddr.fAddr32? 'E':'') + "DI]";
+                }
+            }
+
             var typeSize = type & Debugger.TYPE_SIZE;
             if (typeSize == Debugger.TYPE_NONE) {
                 continue;

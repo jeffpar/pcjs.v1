@@ -1,11 +1,15 @@
 ---
 layout: page
-title: "Intel 80286 CPU Documentation: Early Errata"
+title: "Intel 80286 CPU Errata: Early Problems"
 permalink: /pubs/pc/reference/intel/80286/early_errata/
 ---
 
-Intel 80286 CPU Documentation
+Intel 80286 CPU Errata: Early Problems
 ---
+
+[The following information is from an undated 15-page Intel document titled "Undocumented iAPX 286 Test Instruction".
+NOTE: The initial reference to LOADALL as "opcode 0F04H" and the subsequent references to the "0F05H opcode" are exactly
+as they appear in the original document. Whether or not they were mistakes is unknown.]
 
 ### Exceptions from Undefined Opcodes and String Instructions
 
@@ -101,5 +105,3 @@ steppings of the 80286 and are fixed in later steppings of the 80286.
  0-wait memory for the data values or be sure bit 0 of memory location 804H is zero. HOLD requests and processor
  extension data transfers should be inhibited while [LOADALL](../loadall/) is running. Later steppings of the 80286 will correctly
  load the MSW during [LOADALL](../loadall/) with HOLD and processor extension transfers.
-
-[This information is from an undated 15-page Intel document titled "Undocumented iAPX 286 Test Instruction"]

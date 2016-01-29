@@ -4,8 +4,10 @@ title: "Intel 80286 CPU Documentation: Real Mode"
 permalink: /pubs/pc/reference/intel/80286/real_mode/
 ---
 
-Intel 80286 CPU Documentation
+Intel 80286 CPU Documentation: Real Mode
 ---
+
+[The following information is from an undated 15-page Intel document titled "Undocumented iAPX 286 Test Instruction"]
 
 ### Executing Real Mode Programs in Protected Mode
 
@@ -300,5 +302,3 @@ Interrupts must be handled specially. Interrupt handlers for both real mode and 
 times.  If an interrupt handler needs to access a data area, that data area must be addressable from both real and
 protected mode. The real mode interrupt table would be would be kept at location 000000H. The protected mode IDT could
 be anywhere. [LOADALL](../loadall/) will switch to the protected interrupt table.
-
-[This information is from an undated 15-page Intel document titled "Undocumented iAPX 286 Test Instruction"]

@@ -1123,8 +1123,10 @@ X86CPU.prototype.resetRegs = function()
      * More recently, opCS was added to selectively snapshot an instruction's original CS in case an
      * exception occurs accessing the stack after a new CS has been loaded, allowing the exception handler
      * to recover the old CS and make instructions like CALLF restartable; otherwise, opCS should remain -1.
+     *
+     * Ditto for opSS and the SS register.
      */
-    this.opCS = -1;
+    this.opCS = this.opSS = -1;
     this.opLIP = this.opLSP = X86.ADDR_INVALID;
 
     /*
@@ -2131,7 +2133,13 @@ X86CPU.prototype.setLIP = function(addr)
 {
     this.regLIP = addr|0;
     this.regLIPLimit = (this.segCS.base + this.segCS.limit)|0;
+
+    /*
+     * TODO: Verify the proper source for CPL.  Should it come from segCS.cpl or segCS.dpl?
+     * Also, note that LOADALL386 wants it to come from segSS.dpl.
+     */
     this.nCPL = this.segCS.cpl;             // cache the current CPL where it's more convenient
+
     if (I386) this.resetSizes();
     /*
      * Here, we need to additionally test whether the prefetch buffer (adwPrefetch) has been allocated yet,
@@ -2983,7 +2991,7 @@ X86CPU.prototype.setBinding = function(sHTMLType, sBinding, control)
  * probeAddr(addr, size, fLinear)
  *
  * Used by the Debugger to probe addresses without risk of triggering a page fault, and by internal
- * functions, like fnFaultMessage(), that must also avoid triggering faults, since they're not part of
+ * functions, like fnCheckFault(), that must also avoid triggering faults, since they're not part of
  * standard CPU operation.
  *
  * Since originally written, I've also relaxed the requirement that the request be contained entirely
@@ -3767,10 +3775,21 @@ X86CPU.prototype.popWord = function()
 /**
  * pushData(d, width, size)
  *
+ * This function serves two very limited purposes: 1) the ability to push data according to a previous
+ * operand size (width), and 2) the ability to write fewer bytes than the width if necessary (size).
+ *
+ * The former occurs when a 32-bit code segment performs a 16:32 call to a 16-bit code segment; after the
+ * new 16-bit code segment is loaded (and possible stack switch occurs), the return address (both segment
+ * and offset) must still be pushed as 32-bit values.
+ *
+ * The latter occurs with segment register pushes.  When a 32-bit operand size is in effect (ie, width is 4),
+ * only the low 16 bits should be written (size must be 2).  For all other kinds of pushes, width and size are
+ * impliedly the same.
+ *
  * @this {X86CPU}
  * @param {number} d is the data to push at current SP; SP decreased by size
  * @param {number} width is the width of the data to push, in bytes (must be either 2 or 4)
- * @param {number} size is the size of the data to push, in bytes (must be > 0 and <= width)
+ * @param {number} size is the size of the data to push, in bytes (must be 1, 2, or 4, and <= width)
  */
 X86CPU.prototype.pushData = function(d, width, size)
 {
@@ -3800,13 +3819,13 @@ X86CPU.prototype.pushData = function(d, width, size)
     switch(size) {
     case 1:
         this.setByte(regLSP, d);
-        break
+        break;
     case 2:
         this.setShort(regLSP, d);
-        break
+        break;
     case 4:
         this.setLong(regLSP, d);
-        break
+        break;
     default:
         this.assert(false);
         break;

@@ -4457,7 +4457,7 @@ X86.opInvalid = function()
 X86.opUndefined = function()
 {
     this.setIP(this.opLIP - this.segCS.base);
-    this.setError("Undefined opcode " + str.toHexByte(this.bus.getByteDirect(this.regLIP)) + " at " + str.toHexLong(this.regLIP));
+    this.setError("Undefined opcode " + str.toHexByte(this.getByte(this.regLIP)) + " at " + str.toHexLong(this.regLIP));
     this.stopCPU();
 };
 
