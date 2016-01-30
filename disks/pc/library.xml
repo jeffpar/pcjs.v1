@@ -37,9 +37,12 @@
 		<manifest ref="/disks/pc/os2/ibm/1.3/manifest.xml"/>
 		<manifest ref="/disks/pc/os2/microsoft/1.0/manifest.xml"/>
 		<manifest ref="/disks/pc/os2/misc/manifest.xml"/>
+		<manifest ref="/disks/pc/windows/1.00/manifest.xml"/>
 		<manifest ref="/disks/pc/windows/1.01/manifest.xml"/>
+		<manifest ref="/disks/pc/windows/1.02/manifest.xml"/>
 		<manifest ref="/disks/pc/windows/1.03/manifest.xml"/>
 		<manifest ref="/disks/pc/windows/1.03a/manifest.xml"/>
+		<manifest ref="/disks/pc/windows/1.03b/manifest.xml"/>
 		<manifest ref="/disks/pc/windows/1.04/manifest.xml"/>
 		<manifest ref="/disks/pc/windows/2.01/manifest.xml"/>
 		<manifest ref="/disks/pc/windows/2.03/manifest.xml"/>

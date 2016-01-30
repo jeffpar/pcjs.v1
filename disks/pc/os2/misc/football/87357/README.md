@@ -8,7 +8,6 @@ machines:
     config: /devices/pc/machine/compaq/deskpro386/ega/2048kb/machine.xml
     automount:
       A:
-        name: OS/2 FOOTBALL Boot Disk (v4.41.00)
         path: /disks/pc/os2/misc/football/FOOTBALL-44100.json
 ---
 
@@ -77,4 +76,4 @@ A directory listing of this disk is provided [below](#directory-of-os2-football-
 	       33 file(s)     776910 bytes
 	                      427008 bytes free
 
-Return to [OS/2 Prototype Disks](/disks/pc/os2/misc/).
+[Return to [OS/2 Prototype Disks](/disks/pc/os2/misc/)]

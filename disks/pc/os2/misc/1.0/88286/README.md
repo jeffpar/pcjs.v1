@@ -8,7 +8,6 @@ machines:
     config: /devices/pc/machine/5170/ega/1152kb/rev3/debugger/machine.xml
     automount:
       A:
-        name: OS/2 1.0 Debugger Boot Disk
         path: /disks/pc/os2/misc/1.0/OS210-88286.json
 redirect_from:
   - /disks/pc/os2/misc/1.0/debugger/
@@ -81,4 +80,4 @@ sources used to build these binaries.
 	       34 file(s)     765785 bytes
 	                      437760 bytes free
 
-Return to [OS/2 Prototype Disks](/disks/pc/os2/misc/).
+[Return to [OS/2 Prototype Disks](/disks/pc/os2/misc/)]

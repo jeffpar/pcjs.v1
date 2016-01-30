@@ -175,7 +175,7 @@ image as follows:
 
 * All registers=0
 * GS,FS,DS,ES,SS=0
-* CS=F000, EIP=FFF0, CS-Base-FFFF0000
+* CS=F000,EIP=FFF0,CS-Base=FFFF0000
 * GS,FS,DS,ES,SS-Base=0
 * GS,FS,DS,ES,SS-AR=Present
 * GS,FS,DS,ES,SS-Limit=FFFF

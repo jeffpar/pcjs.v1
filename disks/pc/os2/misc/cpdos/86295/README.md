@@ -8,7 +8,6 @@ machines:
     config: /devices/pc/machine/5170/ega/1152kb/rev3/debugger/machine.xml
     automount:
       A:
-        name: OS/2 CP-DOS Boot Disk (v7.68)
         path: /disks/pc/os2/misc/cpdos/286DOS-76800.json
 ---
 
@@ -263,4 +262,4 @@ A directory listing of this disk is provided [below](#directory-of-os2-cpdos-boo
 	      175 file(s)    1143816 bytes
 	                       17920 bytes free
 
-Return to [OS/2 Prototype Disks](/disks/pc/os2/misc/).
+[Return to [OS/2 Prototype Disks](/disks/pc/os2/misc/)]

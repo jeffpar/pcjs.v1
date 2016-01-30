@@ -8,7 +8,6 @@ machines:
     config: /devices/pc/machine/5170/ega/1152kb/rev3/debugger/machine.xml
     automount:
       A:
-        name: OS/2 SIZZLE Boot Disk (v7.68.18)
         path: /disks/pc/os2/misc/cpdos/SIZZLE-76818-19870107.json
 ---
 
@@ -93,4 +92,4 @@ A directory listing of this disk is provided [below](#directory-of-os2-sizzle-bo
 	       43 file(s)    1111545 bytes
 	                       88576 bytes free
 
-Return to [OS/2 Prototype Disks](/disks/pc/os2/misc/).
+[Return to [OS/2 Prototype Disks](/disks/pc/os2/misc/)]

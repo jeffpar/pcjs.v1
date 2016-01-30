@@ -4,7 +4,7 @@ title: "Intel 80286 CPU Errata: A1 and B1 Steppings"
 permalink: /pubs/pc/reference/intel/80286/early_errata/
 ---
 
-Intel 80286 CPU Errata: A1 and B1 Steppings
+Early 80286 Errata of Interest
 ---
 
 [The following information is from an undated 15-page Intel document titled "Undocumented iAPX 286 Test Instruction",

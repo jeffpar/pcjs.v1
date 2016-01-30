@@ -2,146 +2,22 @@
 <?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.20.8/manifest.xsl"?>
 <manifest type="software">
 	<title>Microsoft Windows 1.03</title>
-	<disk id="disk01" size="368640" chs="40:2:9" dir="static/01-SETUP/" href="/disks/pc/windows/1.03/WIN103-DISK1-SETUP.json" md5="6cdc68e0fc237c858fc5099957e5fb3d" md5json="09605e98952fbec2e0bf39524c1106f3">
+	<disk id="disk01" size="368640" chs="40:2:9" img="static/WIN103-DISK1-SETUP.img" href="/disks/pc/windows/1.03/WIN103-DISK1-SETUP.json" md5="99939d58ff8cadd532b3c819596a0c73" md5json="8ebcbb9c5a8f322f5246c6661a0a6a9f">
 		<name>Windows 1.03 (SETUP)</name>
-		<file size="15776" time="1986-05-23 18:22:58" attr="0x20" md5="bcbfab1443115fe31409b02575897acd">ATTDC.DRV</file>
-		<file size="17824" time="1986-05-23 15:23:10" attr="0x20" md5="17799cc158ecfeed3cc8dec0d60e3a45">ATTDEB.DRV</file>
-		<file size="3903" time="1986-05-22 17:21:26" attr="0x20" md5="b947940ecbe40272efe099a11cf323b5">ATTKBD.DRV</file>
-		<file size="2305" time="1986-05-22 15:30:10" attr="0x20" md5="13b9c37f723c06bf938778d670a3a14d">ATTMOUSE.DRV</file>
-		<file size="13008" time="1986-06-24 21:39:30" attr="0x20" md5="f57a0c692dd03a766c058daae0dd93bb">CGA.DRV</file>
-		<file size="4860" time="1986-05-22 10:01:04" attr="0x20" md5="6388cafb4341db2c3afd082e479ceb3e">COMM.DRV</file>
-		<file size="4649" time="1986-07-20 18:28:26" attr="0x20" md5="e000441804f95eecb05898afd37f0a5a">DENMARK.DRV</file>
-		<file size="13952" time="1986-06-24 21:35:48" attr="0x20" md5="1d347bc3434f45a4ae2cd7089b87e4c1">EGAHIBW.DRV</file>
-		<file size="17536" time="1986-06-24 21:47:16" attr="0x20" md5="ec28b68963e462ef692a39ff88c1bc9e">EGAHIRES.DRV</file>
-		<file size="15648" time="1986-06-24 21:46:20" attr="0x20" md5="c5964dc4c9632b829ba4e4db4b23e550">EGALORES.DRV</file>
-		<file size="13952" time="1986-06-24 21:36:38" attr="0x20" md5="48ffae769b328405bc786679b87471f3">EGAMONO.DRV</file>
-		<file size="12874" time="1985-07-30 18:33:12" attr="0x20" md5="bb94da89048e5e95cc4916146df1720f">EMM.AT</file>
-		<file size="12898" time="1985-07-30 18:15:28" attr="0x20" md5="e0ed6334da69572e86f536828a82c6fe">EMM.PC</file>
-		<file size="7952" time="1986-07-29 17:42:46" attr="0x20" md5="508602db30823140d0ac7b5db7096b97">FONTS400.FON</file>
-		<file size="4773" time="1986-07-20 18:27:22" attr="0x20" md5="73488604daf511e423a3d68d93b8e022">FRANCE.DRV</file>
-		<file size="1961" time="1986-05-22 11:48:34" attr="0x20" md5="a6f4c85179cc6cdd9308d87f7487b6fd">FTG.DRV</file>
-		<file size="15216" time="1985-12-19 22:25:50" attr="0x20" md5="640780b190f8b36f89073e66d8dbc365">GENIUS.DRV</file>
-		<file size="4758" time="1986-07-20 18:27:50" attr="0x20" md5="8389779c0c5436c3a12e3bd9cdd1c803">GERMANY.DRV</file>
-		<file size="15776" time="1986-06-24 21:41:24" attr="0x20" md5="257237ea623dc7f2834076a5c773111e">HERCULES.DRV</file>
-		<file size="7472" time="1986-07-29 17:42:34" attr="0x20" md5="635a8356e156acfee2f2b4e4405af95f">HIFONTS.FON</file>
-		<file size="4027" time="1986-07-20 18:27:40" attr="0x20" md5="e2f4f1360e7485eb984f414741cd2163">ITALY.DRV</file>
-		<file size="2114" time="1986-05-22 11:35:24" attr="0x20" md5="60b33efa7f7d41e4b94c8fa73b2386a9">JOYMOUSE.DRV</file>
-		<file size="34063" time="1986-08-06 15:59:44" attr="0x20" md5="828df56a7d553cee921a7e4fb4ad275e">KERNEL.EXE</file>
-		<file size="372" time="1986-06-11 12:23:36" attr="0x20" md5="bd5127984d7ed6342eb56352ba359a41">LASRHARD.TXT</file>
-		<file size="372" time="1986-06-11 12:22:36" attr="0x20" md5="52081530bb4462055266a903063b72b2">LASRSOFT.TXT</file>
-		<file size="2661" time="1986-05-02 18:47:00" attr="0x20" md5="266696a8e572bf0de600e12001677cef">LMOUSE.DRV</file>
-		<file size="5552" time="1986-07-29 17:42:24" attr="0x20" md5="3f48e7ee3e9e326589817fd8067a70d4">LOFONTS.FON</file>
-		<file size="2438" time="1986-05-22 11:41:00" attr="0x20" md5="d4444d317abfb0097039c53944733efb">LPC.DRV</file>
-		<file size="3358" time="1986-08-21 18:15:48" attr="0x20" md5="ee92ae5f238906c47f151c99d08b0d51">MOUSE.DRV</file>
-		<file size="1966" time="1986-05-22 11:45:16" attr="0x20" md5="df170782e967384fb4a9aa67318dd517">MSMOUSE1.DRV</file>
-		<file size="1966" time="1986-05-22 11:45:36" attr="0x20" md5="dc8c73e8bd5144338745950b30bda08c">MSMOUSE2.DRV</file>
-		<file size="1592" time="1986-05-22 11:42:06" attr="0x20" md5="243f60b8ed01af9380f6b3a06a2dfb55">NOMOUSE.DRV</file>
-		<file size="4649" time="1986-07-20 18:28:16" attr="0x20" md5="4b34333ebd9fd4354f69ec51ba7e1f65">NORWAY.DRV</file>
-		<file size="6680" time="1986-08-01 06:59:02" attr="0x20" md5="bd4ea98a82db2c07cb0c7d70fc873809">RAMDRIVE.SYS</file>
-		<file size="0" time="1986-08-11 12:59:50" attr="0x20">SETUP</file>
-		<file size="36676" time="1986-06-30 18:57:30" attr="0x20" md5="3033e5bb087fc4417f1d005f30f2dd4f">SETUP.EXE</file>
-		<file size="8" time="1986-08-11 12:59:50" attr="0x20" md5="f08d9ce3074b6f11621bf2938125ac86">SETUP.LBL</file>
-		<file size="5853" time="1986-05-22 12:49:16" attr="0x20" md5="e61a3322677507cbde6880f569076ba6">SOUND.DRV</file>
-		<file size="4630" time="1986-07-20 18:27:58" attr="0x20" md5="ee0220a1de142716f279c16c9152ba16">SPAIN.DRV</file>
-		<file size="4649" time="1986-07-20 18:28:08" attr="0x20" md5="472089ad83120138c3f450d58bcaf73e">SWEDEN.DRV</file>
-		<file size="2663" time="1986-07-09 16:15:06" attr="0x20" md5="3d09830bd24398b0103ca2fa17067ef6">SYSTEM.DRV</file>
-		<file size="4009" time="1986-07-20 18:27:32" attr="0x20" md5="ce6c7e943a258c023e5de618befb50d9">UK.DRV</file>
-		<file size="4005" time="1986-07-20 18:27:14" attr="0x20" md5="7fe39cc5606a53c988a9e98df504cf81">USA.DRV</file>
-		<file size="47" time="1986-08-11 13:02:32" attr="0x20" md5="e9721f6396ab02d63a64cc19fc0a699f">WRITE.DAT</file>
 	</disk>
-	<disk id="disk02" size="368640" chs="40:2:9" dir="static/02-BUILD/" href="/disks/pc/windows/1.03/WIN103-DISK2-BUILD.json" md5="48f381b45d820c8602d9b53f4caaf655" md5json="f402e9c07203eb248f8e9d731b24a138">
+	<disk id="disk02" size="368640" chs="40:2:9" img="static/WIN103-DISK2-BUILD.img" href="/disks/pc/windows/1.03/WIN103-DISK2-BUILD.json" md5="e81e8e1cff25c4625a5651920b2197b2" md5json="15d053ce1341e007e5ffd0beabfb1353">
 		<name>Windows 1.03 (BUILD)</name>
-		<file size="1307" time="1986-02-22 10:34:02" attr="0x20" md5="e664fdc7580527b66f13b185f2760ce2">ATTDC.GRB</file>
-		<file size="2916" time="1986-05-28 12:30:52" attr="0x20" md5="bb12b0b1796809f7dc7d031e5dcc6ad1">ATTDC.LGO</file>
-		<file size="12" time="1986-05-23 14:11:54" attr="0x20" md5="08b81ad9e5cb0a13d1778ab9e13af3f7">ATTDEB.GRB</file>
-		<file size="3095" time="1986-05-28 12:31:24" attr="0x20" md5="6d213595de033463bb2a52d72aa6b42c">ATTDEB.LGO</file>
-		<file size="8" time="1986-08-11 13:02:54" attr="0x20" md5="dcf3c58f26cfbad3c2903a83d5538abc">BUILD.LBL</file>
-		<file size="1403" time="1986-07-17 00:07:08" attr="0x20" md5="76591fd636ee7cbd1d3f9e6a7a922d9c">CGA.GRB</file>
-		<file size="2937" time="1986-08-11 12:41:00" attr="0x20" md5="a04fb3c1a6aac3c669e0b989852183c7">CGA.LGO</file>
-		<file size="15" time="1985-07-24 14:55:06" attr="0x20" md5="21d765a5b8815ed5ab6f0090319baa9e">EGAHIBW.GRB</file>
-		<file size="9" time="1985-06-27 13:29:22" attr="0x20" md5="89d9650a98a9fdeb8b01761e2699b7ab">EGAHIBW.LGO</file>
-		<file size="15" time="1985-07-24 14:55:06" attr="0x20" md5="21d765a5b8815ed5ab6f0090319baa9e">EGAHIRES.GRB</file>
-		<file size="9" time="1985-06-27 13:29:22" attr="0x20" md5="89d9650a98a9fdeb8b01761e2699b7ab">EGAHIRES.LGO</file>
-		<file size="1266" time="1986-07-17 00:07:30" attr="0x20" md5="6ffe75049f2a9dd89ac2cdadc53fbb25">EGALORES.GRB</file>
-		<file size="9" time="1985-06-27 13:29:22" attr="0x20" md5="89d9650a98a9fdeb8b01761e2699b7ab">EGALORES.LGO</file>
-		<file size="1114" time="1986-07-17 00:07:44" attr="0x20" md5="e3df5706b12556ef65a365da349dd5b4">EGAMONO.GRB</file>
-		<file size="2936" time="1986-08-11 12:41:48" attr="0x20" md5="a85a6972efc82bacfad3bf6c2bd8a080">EGAMONO.LGO</file>
-		<file size="92638" time="1986-07-11 16:23:38" attr="0x20" md5="ce076ddd58034687f9c6630b00e91934">GDI.EXE</file>
-		<file size="9" time="1986-07-29 16:55:28" attr="0x20" md5="e1817f7d4a8e8e00ff5e640e4c66645f">GENIUS.GRB</file>
-		<file size="9" time="1985-06-27 13:29:22" attr="0x20" md5="89d9650a98a9fdeb8b01761e2699b7ab">GENIUS.LGO</file>
-		<file size="1303" time="1986-07-17 00:07:20" attr="0x20" md5="97e6db45b35640c70e4f5cb0d290d2f9">HERCULES.GRB</file>
-		<file size="3060" time="1986-08-11 12:41:28" attr="0x20" md5="64415db9aced2007a97ab04702928d7a">HERCULES.LGO</file>
-		<file size="43104" time="1986-06-09 17:57:32" attr="0x20" md5="350b92b64748288f4c0e14023bb48722">MSDOS.EXE</file>
-		<file size="6242" time="1986-06-23 15:32:56" attr="0x20" md5="bd8ac5cec8a8a9b54ba0d42a94ee2d30">MSDOSD.EXE</file>
-		<file size="13264" time="1986-06-30 19:09:14" attr="0x20" md5="6b41c6250aa55a607f9e3b3080d7dabd">SPOOLER.EXE</file>
-		<file size="122432" time="1986-08-24 16:57:02" attr="0x20" md5="f3401da698acb2cdd261cd3e62282d06">USER.EXE</file>
-		<file size="1936" time="1985-11-12 16:13:46" attr="0x20" md5="fc497abb6ae59f9c5516a6fd3d5f9740">WIN.CNF</file>
-		<file size="2093" time="1986-05-22 14:50:36" attr="0x20" md5="4ee2801e187df84ebdb15248f26b13c5">WIN.INI</file>
-		<file size="19824" time="1986-08-01 04:16:58" attr="0x20" md5="c528b57046cdbeefd5a4a7ae2b04d97e">WINOLDAP.MOD</file>
 	</disk>
-	<disk id="disk03" size="368640" chs="40:2:9" dir="static/03-UTILITY/" href="/disks/pc/windows/1.03/WIN103-DISK3-UTILITY.json" md5="dc5f79ccb7b75ec3b2b9a91713ea8484" md5json="a7ea164d131c9ab98c023ed20dc3b2a2">
+	<disk id="disk03" size="368640" chs="40:2:9" img="static/WIN103-DISK3-UTILITY.img" href="/disks/pc/windows/1.03/WIN103-DISK3-UTILITY.json" md5="44e1e5cc1ff3a43f7f3590e7b5c634a8" md5json="babc785e32b088f474740f804b74e6f4">
 		<name>Windows 1.03 (UTILITY)</name>
-		<file size="12016" time="1986-05-22 11:58:02" attr="0x20" md5="3409c27aa4b804de3eacedcf68eb079d">CITOH.DRV</file>
-		<file size="14352" time="1986-05-22 12:07:52" attr="0x20" md5="87ac6cf916a5b9f66e5f83548b49e03a">EPSON.DRV</file>
-		<file size="12176" time="1986-05-22 13:18:46" attr="0x20" md5="3f87833c66c5c81ad688ee8a11e1bf3a">EPSONMX.DRV</file>
-		<file size="16336" time="1986-07-29 15:20:16" attr="0x20" md5="9f83e4f29fde2f032f16818408aa4520">HP7470A.DRV</file>
-		<file size="18960" time="1986-07-29 15:14:04" attr="0x20" md5="8522527326893e21d2925aa15630f10a">HP7475A.DRV</file>
-		<file size="20384" time="1986-07-29 14:50:46" attr="0x20" md5="9ce8c5fe762864dd852b6c626362e6d8">HP7550A.DRV</file>
-		<file size="21504" time="1986-08-06 13:52:30" attr="0x20" md5="9533d128da18ac0775571c00fdcc25b8">HPLASER.DRV</file>
-		<file size="22864" time="1986-08-06 14:06:20" attr="0x20" md5="bc285cd087e61fef75127cff832c2680">HPLASERP.DRV</file>
-		<file size="12288" time="1986-05-22 13:28:42" attr="0x20" md5="0a8dd5514f28753c5801e140d4cfacc8">IBMGRX.DRV</file>
-		<file size="14544" time="1986-05-22 13:39:26" attr="0x20" md5="71670472636f417bcbd3ea9e5b99651d">LQ1500.DRV</file>
-		<file size="22512" time="1986-05-22 11:23:24" attr="0x20" md5="2ec4bb693e5e01a83070d1ee1030cfaf">NEC3550.DRV</file>
-		<file size="12304" time="1986-05-22 13:49:58" attr="0x20" md5="1417ad318edc08006d90485e997e648f">NECP2.DRV</file>
-		<file size="12416" time="1986-05-22 13:59:40" attr="0x20" md5="1094ed1c3d68cdcbfb79a10daa17b539">OKI92.DRV</file>
-		<file size="56224" time="1986-08-13 11:26:48" attr="0x20" md5="341df1e25f7b583beabc56ca7ef9b7b5">PSCRIPT.DRV</file>
-		<file size="148" time="1986-07-21 15:22:50" attr="0x20" md5="a0f9bb00d1ff5ea90d9ff16d4a0097bf">README.DOC</file>
-		<file size="14848" time="1986-05-22 12:17:26" attr="0x20" md5="f770b9ef5b3cb6bcb42dfaf1226b8338">SG10.DRV</file>
-		<file size="12128" time="1986-07-10 13:00:06" attr="0x20" md5="6ff68b25697b62bb77da83e8fa644bb0">THINKJET.DRV</file>
-		<file size="11584" time="1986-05-22 14:09:20" attr="0x20" md5="9cfa1226652d8cea3636a147fa2dc49f">TI850.DRV</file>
-		<file size="12432" time="1986-05-22 12:27:22" attr="0x20" md5="43635acdfc553b259b491040aa4cb134">TOSH.DRV</file>
-		<file size="4800" time="1986-07-10 14:52:20" attr="0x20" md5="0bec0b771222f75cb29692e8d7fdb6b9">TTY.DRV</file>
-		<file size="11" time="1986-08-14 21:41:06" attr="0x20" md5="759b6a2860ff7ac70b0d51d20833d00b">UTILITY.LBL</file>
-		<file size="21024" time="1986-08-14 21:05:26" attr="0x20" md5="a289857e4cdccaeac2132a1054af7f2f">XER4020.DRV</file>
 	</disk>
-	<disk id="disk04" size="368640" chs="40:2:9" dir="static/04-FONT/" href="/disks/pc/windows/1.03/WIN103-DISK4-FONT.json" md5="11d85178e6768deea17663608c3d1d98" md5json="3e283e034baa118b392224a49d23ec93">
+	<disk id="disk04" size="368640" chs="40:2:9" img="static/WIN103-DISK4-FONT.img" href="/disks/pc/windows/1.03/WIN103-DISK4-FONT.json" md5="9054b8c1da0034f2c87d989b2f87c5b3" md5json="1388bc02c9251f53dfa9ef7878d3a817">
 		<name>Windows 1.03 (FONT)</name>
-		<file size="8720" time="1986-07-29 17:43:18" attr="0x20" md5="361fced75dec2fefc482baa78f1f6c6a">COURA.FON</file>
-		<file size="12304" time="1986-07-29 17:43:30" attr="0x20" md5="c8158ce9e796699ad4ec47aade5e2f09">COURB.FON</file>
-		<file size="8784" time="1986-07-29 17:43:40" attr="0x20" md5="0b0079fa633ab512b41c93012b0c1755">COURC.FON</file>
-		<file size="15136" time="1986-07-29 17:43:54" attr="0x20" md5="ac1e7588333eff02b08bcdb632c14a5b">COURD.FON</file>
-		<file size="7" time="1986-08-11 13:08:40" attr="0x20" md5="9f6cbe9b1c8600b5fd658524a699c4ce">FONT.LBL</file>
-		<file size="27056" time="1986-07-29 17:44:48" attr="0x20" md5="46a3f92ba493e9bf4d37d5704e108d37">HELVA.FON</file>
-		<file size="37680" time="1986-07-29 17:45:04" attr="0x20" md5="13b6900ea62257f731941976d92fe3e4">HELVB.FON</file>
-		<file size="26624" time="1986-07-29 17:45:20" attr="0x20" md5="08de0a3eab8bdcb9466f0ba9c052fd8f">HELVC.FON</file>
-		<file size="45600" time="1986-07-29 17:45:38" attr="0x20" md5="453d5e73a9b08b2b596aab5466e83b10">HELVD.FON</file>
-		<file size="7584" time="1986-07-09 18:18:12" attr="0x20" md5="27cae3a7c5a5d51b14f8e293ef4a6da4">MODERN.FON</file>
-		<file size="11120" time="1986-07-09 18:19:14" attr="0x20" md5="9e11d18c16b0768e047ce37bc7dd0ae9">ROMAN.FON</file>
-		<file size="10304" time="1986-07-09 18:18:44" attr="0x20" md5="cf19bad631a9bea84612e1c2d0e6304c">SCRIPT.FON</file>
-		<file size="26256" time="1986-07-29 17:46:32" attr="0x20" md5="f4e448d4fc6d4b2a7dc1dc1b76f9ac3f">TMSRA.FON</file>
-		<file size="36240" time="1986-07-29 17:46:50" attr="0x20" md5="5d1674edb79d9385b116179d64fa5718">TMSRB.FON</file>
-		<file size="25824" time="1986-07-29 17:47:06" attr="0x20" md5="51187b4c191241d9b1c12207c1cc84bc">TMSRC.FON</file>
-		<file size="45200" time="1986-07-29 17:47:24" attr="0x20" md5="b36d7e946e62cb713196cd2e14a9b0fe">TMSRD.FON</file>
 	</disk>
-	<disk id="disk05" size="368640" chs="40:2:9" dir="static/05-APPS/" href="/disks/pc/windows/1.03/WIN103-DISK5-APPS.json" md5="cecfaaa0274665979bf09a769e419013" md5json="eea7495765434569711d07ba0d50f286">
+	<disk id="disk05" size="368640" chs="40:2:9" img="static/WIN103-DISK5-APPS.img" href="/disks/pc/windows/1.03/WIN103-DISK5-APPS.json" md5="cccf53de1ffd4ff3346a7f13abf740b0" md5json="7485d50f897205c68efef8c1835a9fd9">
 		<name>Windows 1.03 (APPS)</name>
-		<file size="42" time="1985-06-04 10:07:36" attr="0x20" md5="353472a7d9a5ca979ec01c65729a3314">ABC.TXT</file>
-		<file size="25008" time="1986-05-22 05:33:36" attr="0x20" md5="a87888b37c03400a03d96cb69105661d">CALC.EXE</file>
-		<file size="37552" time="1986-05-22 08:55:48" attr="0x20" md5="0f1d3434ec4d3adf974264417c26f301">CALENDAR.EXE</file>
-		<file size="36992" time="1986-05-22 05:23:40" attr="0x20" md5="ff7f9d7c3d24b3998cfc4726a0f85e09">CARDFILE.EXE</file>
-		<file size="9712" time="1986-05-22 07:17:52" attr="0x20" md5="a94d3e533dfcb1f0ae0d7282ab132f1f">CLIPBRD.EXE</file>
-		<file size="7984" time="1986-05-22 07:08:08" attr="0x20" md5="316fbd2d1c4f7ee3d1b4145d709d822e">CLOCK.EXE</file>
-		<file size="52704" time="1986-08-14 17:13:12" attr="0x20" md5="2055c936325457edbaf3caa9c619e52d">CONTROL.EXE</file>
-		<file size="493" time="1985-10-25 14:02:04" attr="0x20" md5="6b417ad6594473612825b70631f63fab">DOTHIS.TXT</file>
-		<file size="18736" time="1986-05-22 07:28:22" attr="0x20" md5="4e957bd6167e6cbbf5e7c6a099514c26">NOTEPAD.EXE</file>
-		<file size="90176" time="1986-07-10 19:28:20" attr="0x20" md5="ff8b41b114f1b4afe32dd26dba479fae">PAINT.EXE</file>
-		<file size="14864" time="1986-05-22 05:28:28" attr="0x20" md5="b1a7fdc1f11215267ff6fdf2eb227df9">REVERSI.EXE</file>
-		<file size="47344" time="1986-06-12 12:22:48" attr="0x20" md5="5202a5979b2245e79d659bfdae560a2a">TERMINAL.EXE</file>
 	</disk>
-	<disk id="disk06" size="368640" chs="40:2:9" dir="static/06-WRITE/" href="/disks/pc/windows/1.03/WIN103-DISK6-WRITE.json" md5="44d14cbdf45c59cbb701ed4da82f4726" md5json="733c6bcccf79296a18de7e2f2045de98">
-		<name>Windows 1.03 (WRITE)</name>
-		<file size="2944" time="1985-09-09 16:04:14" attr="0x20" md5="b7ce592cd474ff286bed94b9c6492f39">PRACTICE.WRI</file>
-		<file size="11196" time="1986-08-01 15:21:04" attr="0x20" md5="369f20a68320d77be073431fc953baaa">README.TXT</file>
-		<file size="192176" time="1986-07-22 12:36:42" attr="0x20" md5="e076bb0313ccb5973eb20e5c9ce9e5e1">WRITE.EXE</file>
+	<disk id="disk06" size="368640" chs="40:2:9" img="static/WIN103-DISK6-PROGRAM.img" href="/disks/pc/windows/1.03/WIN103-DISK6-PROGRAM.json" md5="04421789cb2feac58c3dad541164017d" md5json="b3d0cadf46e5115c4a5ed48e6095aa9e">
+		<name>Windows 1.03 (PROGRAM)</name>
 	</disk>
 </manifest>

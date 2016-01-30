@@ -8,7 +8,6 @@ machines:
     config: /devices/pc/machine/compaq/deskpro386/ega/2048kb/machine.xml
     automount:
       A:
-        name: OS/2 FOOTBALL Boot Disk (v7.68.17)
         path: /disks/pc/os2/misc/football/FOOTBALL-76817.json
 ---
 
@@ -358,4 +357,4 @@ The following text is from an email titled "3xBox Design Document" sent to the
 	    MapIn foreground 3xBox;
 	    Dispatch interrupt;
 
-Return to [OS/2 Prototype Disks](/disks/pc/os2/misc/).
+[Return to [OS/2 Prototype Disks](/disks/pc/os2/misc/)]

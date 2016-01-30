@@ -8,6 +8,7 @@ machines:
     config: /devices/c1p/machine/8kb/embed/machine.xml
 redirect_from:
   - /configs/c1p/embed/
+  - /demos/c1p/embed.html
 ---
 
 Embedding The C1Pjs Simulator
