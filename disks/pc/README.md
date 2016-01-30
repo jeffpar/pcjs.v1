@@ -68,8 +68,8 @@ that automatically run the software.
 ### Microsoft Windows
 
 * [Microsoft Windows 1.00](/disks/pc/windows/1.00/)
-* [Microsoft Windows 1.01](/disks/pc/windows/1.02/)
 * [Microsoft Windows 1.01](/disks/pc/windows/1.01/)
+* [Microsoft Windows 1.02](/disks/pc/windows/1.02/)
 * [Microsoft Windows 1.03](/disks/pc/windows/1.03/)
 * [Microsoft Windows 1.03a](/disks/pc/windows/1.03a/)
 * [Microsoft Windows 1.03b](/disks/pc/windows/1.03b/)

@@ -9,9 +9,9 @@ Microsoft Windows 1.03b
 
 [Windows 1.03](../1.03/) was released in August 1986.
 
-It's been noted on the [WinWorld](https://winworldpc.com/product/windows-10/103) that 1.03 disks have
+It's been noted on [WinWorld](https://winworldpc.com/product/windows-10/103) that version 1.03 disks have
 been found with `USER.EXE` dated either `08-21-86` *or* `08-24-86`.  However, we are not convinced, so we have
-designated these disks **Windows 1.03b**.
+designated such disks **Windows 1.03b**.
 
 Directory listings of the six 360Kb distribution diskettes are provided below.
 

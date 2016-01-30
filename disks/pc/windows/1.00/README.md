@@ -8,8 +8,9 @@ Microsoft Windows 1.00 ("Premiere Edition")
 ---
 
 Windows 1.00 was not a public release.  Microsoft released these disks (dubbed the "Premiere Edition") to selected
-vendors, analysts, and members of the press in Summer 1985 to obtain feedback on the product.  [Windows 1.01](../1.01/)
-was the first public release.
+vendors, analysts, and members of the press in Summer 1985 to obtain feedback on the product.
+
+[Windows 1.01](../1.01/) was the first public release.
 
 Directory listings of the four 360Kb distribution diskettes are provided below.
 
