@@ -7,11 +7,11 @@ permalink: /disks/pc/windows/1.03b/
 Microsoft Windows 1.03b
 ---
 
-[Windows 1.03](../1.03/) was released in August 1986.
+These disks are from [WinWorld](https://winworldpc.com/product/windows-10/103), where it was noted that version 1.03
+disks have `USER.EXE` dated either `08-21-86` *or* `08-24-86`.  However, we are not convinced, so we have designated
+such disks **Windows 1.03b**.
 
-It's been noted on [WinWorld](https://winworldpc.com/product/windows-10/103) that version 1.03 disks have
-been found with `USER.EXE` dated either `08-21-86` *or* `08-24-86`.  However, we are not convinced, so we have
-designated such disks **Windows 1.03b**.
+See our [Windows 1.03](../1.03/) disks.
 
 Directory listings of the six 360Kb distribution diskettes are provided below.
 
