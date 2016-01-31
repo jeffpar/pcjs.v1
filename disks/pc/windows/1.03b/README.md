@@ -7,9 +7,8 @@ permalink: /disks/pc/windows/1.03b/
 Microsoft Windows 1.03b
 ---
 
-These disks are from [WinWorld](https://winworldpc.com/product/windows-10/103), where it was noted that version 1.03
-disks have been found with `USER.EXE` dated either `08-21-86` *or* `08-24-86`.  We have designated these disks
-**Windows 1.03b**.
+These disks are from [WinWorld](https://winworldpc.com/product/windows-10/103). They contain newer `USER.EXE` and
+`MOUSE.DRV`, and *no* `DEMO` files on the PROGRAM disk. 
 
 For the original version, see [Windows 1.03](../1.03/).
 

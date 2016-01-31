@@ -12,16 +12,14 @@ Windows 1.03 was released in August 1986.
 Directory listings of the six 360Kb distribution diskettes are provided below.
 
 It's been noted on [WinWorld](https://winworldpc.com/product/windows-10/103) that version 1.03 disks have
-been found with `USER.EXE` dated either `08-21-86` *or* `08-24-86`.  Copies of disks with the latter are in
+been found with `USER.EXE` dated either `05-22-86` *or* `08-24-86`.  The latter is available as
 [Windows 1.03b](../1.03b/).
 
-These disks were dumped from the PCjs private collection.  They contain `USER.EXE` dated `05-22-86`, which is
-likely the *original* version 1.03 file.
+These disks were dumped from the PCjs private collection.  Differences include: 
 
-Other differences:
-
-* Our `MOUSE.DRV` below is dated `07-02-86` (in [Windows 1.03b](../1.03b/), it is dated `08-24-86`)
-* Our PROGRAM disk below contains an assortment of DEMO applications (the [Windows 1.03b](../1.03b/) PROGRAM disk does not) 
+* `USER.EXE` below is dated `05-22-86` (in [Windows 1.03b](../1.03b/), it is dated `08-24-86`)
+* `MOUSE.DRV` below is dated `07-02-86` (in [Windows 1.03b](../1.03b/), it is dated `08-21-86`)
+* The PROGRAM disk below contains an assortment of DEMO applications ([Windows 1.03b](../1.03b/) does not) 
 
 ### Directory of Windows 1.03 (SETUP)
 
