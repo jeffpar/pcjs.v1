@@ -1557,6 +1557,10 @@ X86.fnLCR0 = function(l)
     this.regCR0 = l;
     this.setProtMode();
     if (this.regCR0 & X86.CR0.PG) {
+        /*
+         * TODO: Determine if setting X86.CR0.PG when already set should really act as a flush;
+         * I'm not currently worried about it, because I'm assuming CR0 is not rewritten that often.
+         */
         this.enablePageBlocks();
     } else {
         this.disablePageBlocks();
@@ -1579,7 +1583,7 @@ X86.fnLCR3 = function(l)
      * so let's ensure that the low 12 bits of regCR3 are always zero.
      */
     this.assert(!(this.regCR3 & X86.LADDR.OFFSET));
-    if (this.regCR0 & X86.CR0.PG) this.enablePageBlocks();
+    this.flushPageBlocks();
 };
 
 /**

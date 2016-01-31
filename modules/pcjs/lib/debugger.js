@@ -84,6 +84,37 @@ if (DEBUGGER) {
  */
 var DbgAddr;
 
+/*
+ * Debugger Breakpoint Tips
+ *
+ * Here's an example of our powerful new breakpoint command capabilities:
+ *
+ *      bp 0397:022B "?'GlobalAlloc(wFlags:[ss:sp+8],dwBytes:[ss:sp+6][ss:sp+4])';g [ss:sp+2]:[ss:sp] '?ax;if ax'"
+ *
+ * The above breakpoint will display a pleasing "GlobalAlloc()" string containing the current
+ * stack parameters, and will briefly stop execution on the return to print the result in AX,
+ * halting the CPU whenever AX is zero (the default behavior of "if" whenever the expression is
+ * false is to look for an "else" and automatically halt when there is no "else").
+ *
+ * How do you figure out where the code for GlobalAlloc is in the first place?  You need to have
+ * BACKTRACK support enabled (which currently means running the non-COMPILED version), so that as
+ * the Disk component loads disk images, it will automatically extract symbolic information from all
+ * "NE" (New Executable) binaries on those disks, which the Debugger's "di" command can then search
+ * for you; eg:
+ *
+ *      ## di globalalloc
+ *      GLOBALALLOC: KRNL386.EXE 0001:022B len 0xC570
+ *
+ * And then you just need to do a bit more sleuthing to find the right CODE segment.  And that just
+ * got easier, now that the PCjs Debugger mimics portions of the Windows Debugger INT 0x41 interface;
+ * see intWindowsDebugger() for details.  So even if you neglect to run WDEB386.EXE /E inside the
+ * machine before running Windows, you should still see notifications like:
+ *
+ *      KERNEL!undefined code(0001)=#0397 len 0000C580
+ *
+ * in the PCjs Debugger output window, as segments are being loaded by the Windows kernel.
+ */
+
 /**
  * Debugger(parmsDbg)
  *
@@ -2273,7 +2304,7 @@ if (DEBUGGER) {
         var b = 0xff;
         var addr = this.getAddr(dbgAddr, false, 1);
         if (addr !== X86.ADDR_INVALID) {
-            b = this.cpu.probeAddr(addr, 1, dbgAddr.type != Debugger.ADDRTYPE.PHYSICAL) | 0;
+            b = this.cpu.probeAddr(addr, 1, dbgAddr.type == Debugger.ADDRTYPE.PHYSICAL) | 0;
             if (inc) this.incAddr(dbgAddr, inc);
         }
         return b;
@@ -2305,7 +2336,7 @@ if (DEBUGGER) {
         var w = 0xffff;
         var addr = this.getAddr(dbgAddr, false, 2);
         if (addr !== X86.ADDR_INVALID) {
-            w = this.cpu.probeAddr(addr, 2, dbgAddr.type != Debugger.ADDRTYPE.PHYSICAL);
+            w = this.cpu.probeAddr(addr, 2, dbgAddr.type == Debugger.ADDRTYPE.PHYSICAL);
             if (inc) this.incAddr(dbgAddr, inc);
         }
         return w;
@@ -2324,7 +2355,7 @@ if (DEBUGGER) {
         var l = -1;
         var addr = this.getAddr(dbgAddr, false, 4);
         if (addr !== X86.ADDR_INVALID) {
-            l = this.cpu.probeAddr(addr, 4, dbgAddr.type != Debugger.ADDRTYPE.PHYSICAL);
+            l = this.cpu.probeAddr(addr, 4, dbgAddr.type == Debugger.ADDRTYPE.PHYSICAL);
             if (inc) this.incAddr(dbgAddr, inc);
         }
         return l;
@@ -4313,14 +4344,14 @@ if (DEBUGGER) {
         if (this.aBreakRead !== undefined) {
             for (i = 1; i < this.aBreakRead.length; i++) {
                 dbgAddr = this.aBreakRead[i];
-                this.cpu.removeMemBreak(this.getAddr(dbgAddr), false, dbgAddr.type != Debugger.ADDRTYPE.PHYSICAL);
+                this.cpu.removeMemBreak(this.getAddr(dbgAddr), false, dbgAddr.type == Debugger.ADDRTYPE.PHYSICAL);
             }
         }
         this.aBreakRead = ["br"];
         if (this.aBreakWrite !== undefined) {
             for (i = 1; i < this.aBreakWrite.length; i++) {
                 dbgAddr = this.aBreakWrite[i];
-                this.cpu.removeMemBreak(this.getAddr(dbgAddr), true, dbgAddr.type != Debugger.ADDRTYPE.PHYSICAL);
+                this.cpu.removeMemBreak(this.getAddr(dbgAddr), true, dbgAddr.type == Debugger.ADDRTYPE.PHYSICAL);
             }
         }
         this.aBreakWrite = ["bw"];
@@ -4353,33 +4384,6 @@ if (DEBUGGER) {
      * also consider a more WDEB386-like syntax, where "br" is used to set a variety of access-specific
      * breakpoints, using modifiers like "r1", "r2", "w1", "w2, etc.
      *
-     * Here's an example of our powerful new breakpoint command capabilities:
-     *
-     *      bp 0397:022B "?'GlobalAlloc(wFlags:[ss:sp+8],dwBytes:[ss:sp+6][ss:sp+4])';g [ss:sp+2]:[ss:sp] '?ax;if ax'"
-     *
-     * The above breakpoint will display a pleasing "GlobalAlloc()" string containing the current
-     * stack parameters, and will briefly stop execution on the return to print the result in AX,
-     * halting the CPU whenever AX is zero (the default behavior of "if" whenever the expression is
-     * false is to look for an "else" and automatically halt when there is no "else").
-     *
-     * How do you figure out where the code for GlobalAlloc is in the first place?  You need to have
-     * BACKTRACK support enabled (which currently means running the non-COMPILED version), so that as
-     * the Disk component loads disk images, it will automatically extract symbolic information from all
-     * "NE" (New Executable) binaries on those disks, which the Debugger's "di" command can then search
-     * for you; eg:
-     *
-     *      ## di globalalloc
-     *      GLOBALALLOC: KRNL386.EXE 0001:022B len 0xC570
-     *
-     * And then you just need to do a bit more sleuthing to find the right CODE segment.  And that just
-     * got easier, now that the PCjs Debugger mimics portions of the Windows Debugger INT 0x41 interface;
-     * see intWindowsDebugger() for details.  So even if you neglect to run WDEB386.EXE /E inside the
-     * machine before running Windows, you should still see notifications like:
-     *
-     *      KERNEL!undefined code(0001)=#0397 len 0000C580
-     *
-     * in the PCjs Debugger output window, as segments are being loaded by the Windows kernel.
-     *
      * @this {Debugger}
      * @param {Array} aBreak
      * @param {DbgAddr} dbgAddr
@@ -4410,11 +4414,7 @@ if (DEBUGGER) {
                 this.println("invalid address: " + this.toHexAddr(dbgAddr));
                 fSuccess = false;
             } else {
-                this.cpu.addMemBreak(addr, aBreak == this.aBreakWrite, dbgAddr.type != Debugger.ADDRTYPE.PHYSICAL);
-                /*
-                 * Force memory breakpoints to use their linear address, by zapping the selector.
-                 */
-                dbgAddr.sel = null;
+                this.cpu.addMemBreak(addr, aBreak == this.aBreakWrite, dbgAddr.type == Debugger.ADDRTYPE.PHYSICAL);
             }
         }
 
@@ -4469,7 +4469,7 @@ if (DEBUGGER) {
                         }
                         aBreak.splice(i, 1);
                         if (aBreak != this.aBreakExec) {
-                            this.cpu.removeMemBreak(addr, aBreak == this.aBreakWrite, dbgAddrBreak.type != Debugger.ADDRTYPE.PHYSICAL);
+                            this.cpu.removeMemBreak(addr, aBreak == this.aBreakWrite, dbgAddrBreak.type == Debugger.ADDRTYPE.PHYSICAL);
                         }
                         /*
                          * We'll mirror the logic in addBreakpoint() and leave the history buffer alone if this
