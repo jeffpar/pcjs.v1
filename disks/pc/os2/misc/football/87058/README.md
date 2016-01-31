@@ -5,7 +5,7 @@ permalink: /disks/pc/os2/misc/football/87058/
 machines:
   - id: deskpro386
     type: pc-dbg
-    config: /devices/pc/machine/compaq/deskpro386/ega/2048kb/machine.xml
+    config: /devices/pc/machine/compaq/deskpro386/ega/4096kb/machine.xml
     automount:
       A:
         path: /disks/pc/os2/misc/football/FOOTBALL-76817.json
@@ -18,7 +18,12 @@ This disk contained a prototype version of OS/2 from February 1987, code-named *
 (aka **PIGSKIN**).  It predated the completion of OS/2 1.0 by some eight months and was based on the
 [SIZZLE](/disks/pc/os2/misc/cpdos/87007/) fork, which started around November 1987.
 
-Below is an original [FOOTBALL Design Document](#football-design-document) describing the **FOOTBALL** prototype.
+On boot, it displays the following version banner:
+
+	CP-DOS version 1.0
+	Copyright 1986,1987  Microsoft Corp.
+	
+	PIGSKIN Internal revision 7.68.17, 87/02/26
 
 Most of the work on this prototype occurred between December 1, 1986 and February 28, 1987, with the principal goal
 of demonstrating multiple DOS applications running in V86-mode to BillG; that demo probably occurred in March 1987.
@@ -34,19 +39,14 @@ initially was version 1.3 (also known as **PIGSKIN** and later **CRUISER**) but 
 
 A directory listing of this disk is provided [below](#directory-of-os2-football-boot-disk-v76817).
 
-Booting FOOTBALL
----
-
-On boot, the following message is displayed on-screen:
-
-	CP-DOS version 1.0
-	Copyright 1986,1987  Microsoft Corp.
-	
-	PIGSKIN Internal revision 7.68.17, 87/02/26
+We also have an original [FOOTBALL Design Document](#football-design-document) describing this prototype.
 
 {% include machine.html id="deskpro386" %}
 
-When booting on a [Compaq DeskPro 386-16 with 2Mb of RAM](/devices/pc/machine/compaq/deskpro386/ega/2048kb/),
+Booting FOOTBALL
+---
+
+When booting on a [Compaq DeskPro 386-16 with 4Mb of RAM](/devices/pc/machine/compaq/deskpro386/ega/4096kb/),
 the following information is output to COM2 by the kernel's built-in debugger:
 
 	bx=001d, cx=f905, dx=0700, cs=1770, ds=1b10
@@ -58,7 +58,7 @@ the following information is output to COM2 by the kernel's built-in debugger:
 	 3:   1770   1770  0900/0900  0000c922  00003922/00003922  00000000
 	 4:   1b10   1b10  0d00/0d00  0000ec01  00001c01/000025e0  00000000
 	devlist=0100:1327, 3xdevlist=0300:0504, buffers=0003, orgfinalseg=083c
-	dosloadseg=1800, finalseg=0900, mem=640k/1024k, defdrive=0001
+	dosloadseg=1800, finalseg=0900, mem=640k/3072k, defdrive=0001
 	Driver='SCREEN$ ' link=0100:0e26,attr=8082,strat=4be6,intr=004e,ds/cs=0100/0300
 	Driver='KBD$    ' link=0100:0e86,attr=c881,strat=3108,intr=28aa,ds/cs=0100/0300
 	Driver='PRN     ' link=0100:0000,attr=8880,strat=4542,intr=0000,ds/cs=0100/0300
@@ -91,9 +91,34 @@ the following information is output to COM2 by the kernel's built-in debugger:
 	0128:0483 C3             RET
 	#
 
-After typing "g" into the kernel debugger, the on-screen boot message is displayed.
+After typing "g" into the kernel debugger, the version banner is displayed.  After any CONFIG.SYS messages,
+SHELL.EXE should display:
 
-Under PCjs, the kernel crashes shortly thereafter.  This issue is still under investigation.
+* Start A Protect Mode Program
+* Start A Real Mode Program
+
+The first option will start CMD.EXE, which appears to work fine.  The second option will start COMMAND.COM,
+which will generally crash if CMD.EXE was started previously:
+
+	*# Internal Error 0158:1397  *
+	_panic: PageLock: unlocked page not in list
+
+If "Start A Real Mode Program" is chosen first, a hard error popup is displayed:
+
+	DOS0022: The system cannot accept the command.
+	
+	Return the error to the program
+	End the program or operation
+	Retry the operation
+
+Any response is likely to trigger the following error:
+
+	Trap 0 - Divide Error
+	AX=80EA0000  BX=00000000  CX=00000000  DX=00000000  SI=E1C0001E  DI=00EB0022
+	IP=00000402  SP=00000758  BP=0000075A  CR0=8000FFFD  ErrC=0000
+	CS=0127  SS=00FF  DS=0347  ES=0347  FS=0058  GS=0000  Flags=00003246
+
+This error is currently under investigation.
 
 ### Directory of OS/2 FOOTBALL Boot Disk (v7.68.17)
 

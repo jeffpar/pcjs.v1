@@ -17,7 +17,7 @@ OS/2 CP-DOS Boot Disk (v7.68)
 This disk contained a pre-1.0 version of OS/2 (aka **CP-DOS** or **MT-DOS** or **ADOS** or **286DOS** or **DOS5**)
 built on October 22, 1986, with a few files (IBMDOS.COM and NLS.EXE) apparently rebuilt on October 23, 1986.
 
-When this disk boots, the following message is displayed on-screen:
+When this disk boots, the following version banner is displayed:
 
 	CP-DOS version 1.0
 	Copyright 1986 IBM Corp.

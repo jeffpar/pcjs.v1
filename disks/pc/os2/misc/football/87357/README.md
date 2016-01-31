@@ -19,7 +19,7 @@ It was built in December 1987, using final OS/2 1.0 sources merged with assorted
 it was originally assigned version number 1.3, this version of OS/2 would ultimately become 2.0.
 
 It crashes on an 80286, jumping to invalid code immediately after performing a processor check.  On an 80386,
-the following boot message is displayed on-screen:
+the following version banner is displayed:
 
 	Operating System/2  Version 1.30
 	(C) Copyright Microsoft Corp. 1981, 1987, 1988.

@@ -22,7 +22,7 @@ Work on **SIZZLE** started around November 1987, and an internal specification k
 "The London Performance Spec" drove some of that work, but at this point, not much is known about either the
 contents of that specification or any of the **SIZZLE** changes.
 
-When this disk boots, the following message is displayed on-screen:
+When this disk boots, the following version banner is displayed:
 
 	CP-DOS version 1.0
 	Copyright 1986 IBM Corp.

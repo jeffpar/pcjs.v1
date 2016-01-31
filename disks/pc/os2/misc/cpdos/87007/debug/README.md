@@ -18,7 +18,7 @@ This disk contained a *DEBUG* pre-1.0 version of OS/2 built on January 7, 1987, 
 it is largely identical to the [OS/2 SIZZLE Boot Disk (v7.68.18)](/disks/pc/os2/misc/cpdos/87007/), with
 the exception of a debug kernel (with built-in debugger) and a different assortment of tools. 
 
-When this disk boots, the following message is displayed on-screen:
+When this disk boots, the following version banner is displayed:
 
 	CP-DOS version 1.0
 	Copyright 1986 IBM Corp.

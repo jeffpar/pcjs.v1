@@ -20,8 +20,8 @@ This disk contained a version of OS/2 1.0 built on October 12, 1988, which inclu
 used by Microsoft and IBM for internal development, along with a rudimentary program selector.
 
 Note that [IBM OS/2 1.0](/disks/pc/os2/ibm/1.0/) was finalized in October 1987, nearly a year before the timestamps
-of these files, indicating that this was a private build of IBM OS/2 1.0.  When this disk boots, the following message
-is displayed on-screen:
+of these files, indicating that this was a private build of IBM OS/2 1.0.  When this disk boots, the following version
+banner is displayed:
 
 	IBM Operating System/2 Version 1.00
 	(C) Copyright IBM Corp. 1981, 1987. All rights reserved.
