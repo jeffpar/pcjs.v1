@@ -712,10 +712,16 @@
 				<xsl:otherwise/>
 			</xsl:choose>
 		</xsl:variable>
+		<xsl:variable name="tabSize">
+			<xsl:choose>
+				<xsl:when test="@tabsize"><xsl:value-of select="@tabsize"/></xsl:when>
+				<xsl:otherwise>0</xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
 		<xsl:call-template name="component">
 			<xsl:with-param name="machine" select="$machine"/>
 			<xsl:with-param name="class">serial</xsl:with-param>
-			<xsl:with-param name="parms">,adapter:<xsl:value-of select="$adapter"/>,binding:'<xsl:value-of select="$binding"/>'</xsl:with-param>
+			<xsl:with-param name="parms">,adapter:<xsl:value-of select="$adapter"/>,binding:'<xsl:value-of select="$binding"/>',tabSize:<xsl:value-of select="$tabSize"/></xsl:with-param>
 		</xsl:call-template>
 	</xsl:template>
 

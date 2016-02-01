@@ -48,6 +48,11 @@ if (NODE) {
  *
  *      adapter: 1 (for port 0x3F8) or 2 (for port 0x2F8); 0 if not defined
  *
+ *      binding: name of a control (based on its "binding" attribute) to bind to this port's I/O
+ *
+ *      tabSize: set to a non-zero number to convert tabs to spaces (applies only to output to
+ *      the above binding); default is 0 (no conversion)
+ *
  * WARNING: Since the XSL file defines 'adapter' as a number, not a string, there's no need to
  * use parseInt(), and as an added benefit, we don't need to worry about whether a hex or decimal
  * format was used.
@@ -95,6 +100,14 @@ function SerialPort(parmsSerial) {
      * @type {Object}
      */
     this.controlIOBuffer = null;
+
+    /*
+     * If controlIOBuffer is being used AND 'tabSize' is set, then we make an attempt to monitor the characters
+     * being echoed via echoByte(), maintain a logical column position, and convert any tabs into the appropriate
+     * number of spaces.
+     */
+    this.tabSize = parmsSerial['tabSize'];
+    this.iLogicalCol = 0;
 
     Component.call(this, "SerialPort", parmsSerial, SerialPort, Messages.SERIAL);
 
@@ -805,13 +818,27 @@ SerialPort.prototype.updateIRR = function()
 SerialPort.prototype.echoByte = function(b)
 {
     if (this.controlIOBuffer) {
-        if (b != 0x0D) {
-            if (b == 0x08) {
-                this.controlIOBuffer.value = this.controlIOBuffer.value.slice(0, -1);
-            } else {
-                this.controlIOBuffer.value += String.fromCharCode(b);
-                this.controlIOBuffer.scrollTop = this.controlIOBuffer.scrollHeight;
+        if (b == 0x0D) {
+            this.iLogicalCol = 0;
+        }
+        else if (b == 0x08) {
+            this.controlIOBuffer.value = this.controlIOBuffer.value.slice(0, -1);
+            /*
+             * TODO: Back up the correct number of columns if the character erased was a tab.
+             */
+            if (this.iLogicalCol > 0) this.iLogicalCol--;
+        }
+        else {
+            var s = String.fromCharCode(b);
+            var nChars = (b >= 0x20? 1 : 0);
+            if (b == 0x09) {
+                var tabSize = this.tabSize || 8;
+                nChars = tabSize - (this.iLogicalCol % tabSize);
+                if (this.tabSize) s = str.pad("", nChars);
             }
+            this.controlIOBuffer.value += s;
+            this.controlIOBuffer.scrollTop = this.controlIOBuffer.scrollHeight;
+            this.iLogicalCol += nChars;
         }
         return true;
     }
