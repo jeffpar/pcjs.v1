@@ -2,7 +2,7 @@
 layout: page
 title: Machine Configurations
 menu_title: Machines
-menu_order: 5
+menu_order: 6
 permalink: /devices/pc/machine/
 redirect_from:
   - /configs/pc/machines/

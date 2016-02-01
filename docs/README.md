@@ -2,7 +2,7 @@
 layout: page
 title: Documentation
 menu_title: Docs
-menu_order: 6
+menu_order: 8
 permalink: /docs/
 ---
 

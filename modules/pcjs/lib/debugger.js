@@ -2731,7 +2731,10 @@ if (DEBUGGER) {
     Debugger.prototype.toHexAddr = function(dbgAddr)
     {
         var ch = this.getAddrPrefix(dbgAddr);
-        return dbgAddr.sel == null? (ch + str.toHex(dbgAddr.addr)) : (ch + this.toHexOffset(dbgAddr.off, dbgAddr.sel, dbgAddr.fAddr32));
+        /*
+         * TODO: Revisit the decision to check sel == null; I would rather see these decisions based on type.
+         */
+        return (dbgAddr.type >= Debugger.ADDRTYPE.LINEAR || dbgAddr.sel == null)? (ch + str.toHex(dbgAddr.addr)) : (ch + this.toHexOffset(dbgAddr.off, dbgAddr.sel, dbgAddr.fAddr32));
     };
 
     /**
@@ -2881,40 +2884,6 @@ if (DEBUGGER) {
     };
 
     /**
-     * dumpInfo(asArgs)
-     *
-     * @this {Debugger}
-     * @param {Array.<string>} asArgs
-     */
-    Debugger.prototype.dumpInfo = function(asArgs)
-    {
-        var sInfo = "no information";
-        if (BACKTRACK) {
-            var sAddr = asArgs[0];
-            var dbgAddr = this.parseAddr(sAddr, true, true, false);
-            if (dbgAddr) {
-                var addr = this.getAddr(dbgAddr);
-                sInfo = '%' + str.toHex(addr) + ": " + (this.bus.getSymbol(addr, true) || sInfo);
-            } else {
-                var component, componentPrev = null;
-                while (component = this.cmp.getMachineComponent("Disk", componentPrev)) {
-                    var aInfo = component.getSymbolInfo(sAddr);
-                    if (aInfo.length) {
-                        sInfo = "";
-                        for (var i in aInfo) {
-                            var a = aInfo[i];
-                            if (sInfo) sInfo += '\n';
-                            sInfo += a[0] + ": " + a[1] + ' ' + str.toHex(a[2], 4) + ':' + str.toHex(a[3], 4) + " len " + str.toHexWord(a[4]);
-                        }
-                    }
-                    componentPrev = component;
-                }
-            }
-        }
-        return sInfo;
-    };
-
-    /**
      * getPageEntry(addrPE, lPE, fPTE)
      *
      * @this {Debugger}
@@ -2932,6 +2901,77 @@ if (DEBUGGER) {
         s += (lPE & X86.PTE.READWRITE)? 'W' : 'R';
         s += (lPE & X86.PTE.PRESENT)? 'P' : 'N';
         return s;
+    };
+
+    /**
+     * getPageInfo(addr)
+     *
+     * @this {Debugger}
+     * @param {number} addr
+     * @return {Object|null}
+     */
+    Debugger.prototype.getPageInfo = function(addr)
+    {
+        var pageInfo = null;
+        if (I386 && this.cpu.model >= X86.MODEL_80386) {
+            var bus = this.bus;
+            /*
+             * Here begins code remarkably similar to mapPageBlock() (with fSuppress set).
+             */
+            pageInfo = {};
+            pageInfo.offPDE = (addr & X86.LADDR.PDE.MASK) >>> X86.LADDR.PDE.SHIFT;
+            pageInfo.addrPDE = this.cpu.regCR3 + pageInfo.offPDE;
+            pageInfo.blockPDE = bus.aMemBlocks[(pageInfo.addrPDE & bus.nBusMask) >>> bus.nBlockShift];
+            pageInfo.lPDE = pageInfo.blockPDE.readLong(pageInfo.offPDE);
+            pageInfo.offPTE = (addr & X86.LADDR.PTE.MASK) >>> X86.LADDR.PTE.SHIFT;
+            pageInfo.addrPTE = (pageInfo.lPDE & X86.PTE.FRAME) + pageInfo.offPTE;
+            pageInfo.blockPTE = bus.aMemBlocks[(pageInfo.addrPTE & bus.nBusMask) >>> bus.nBlockShift];
+            pageInfo.lPTE = pageInfo.blockPTE.readLong(pageInfo.offPTE);
+            pageInfo.addrPhys = (pageInfo.lPTE & X86.PTE.FRAME) + (addr & X86.LADDR.OFFSET);
+            //var blockPhys = bus.aMemBlocks[(addrPhys & bus.nBusMask) >>> bus.nBlockShift];
+        }
+        return pageInfo;
+    };
+
+    /**
+     * dumpInfo(asArgs)
+     *
+     * @this {Debugger}
+     * @param {Array.<string>} asArgs
+     */
+    Debugger.prototype.dumpInfo = function(asArgs)
+    {
+        var sInfo = "no information";
+        if (BACKTRACK) {
+            var sAddr = asArgs[0];
+            var dbgAddr = this.parseAddr(sAddr, true, true, false);
+            if (dbgAddr) {
+                var addr = this.getAddr(dbgAddr);
+                if (dbgAddr.type != Debugger.ADDRTYPE.PHYSICAL) {
+                    var pageInfo = this.getPageInfo(addr);
+                    if (pageInfo) {
+                        dbgAddr.addr = pageInfo.addrPhys;
+                        dbgAddr.type = Debugger.ADDRTYPE.PHYSICAL;
+                    }
+                }
+                sInfo = this.toHexAddr(dbgAddr) + ": " + (this.bus.getSymbol(addr, true) || sInfo);
+            } else {
+                var component, componentPrev = null;
+                while (component = this.cmp.getMachineComponent("Disk", componentPrev)) {
+                    var aInfo = component.getSymbolInfo(sAddr);
+                    if (aInfo.length) {
+                        sInfo = "";
+                        for (var i in aInfo) {
+                            var a = aInfo[i];
+                            if (sInfo) sInfo += '\n';
+                            sInfo += a[0] + ": " + a[1] + ' ' + str.toHex(a[2], 4) + ':' + str.toHex(a[3], 4) + " len " + str.toHexWord(a[4]);
+                        }
+                    }
+                    componentPrev = component;
+                }
+            }
+        }
+        return sInfo;
     };
 
     /**
@@ -2956,30 +2996,18 @@ if (DEBUGGER) {
             return;
         }
 
-        /*
-         * Here begins the code that is remarkably similar to mapPageBlock(), with fSuppress set.
-         */
-        var bus = this.bus;
-        var offPDE = (addr & X86.LADDR.PDE.MASK) >>> X86.LADDR.PDE.SHIFT;
-        var addrPDE = this.cpu.regCR3 + offPDE;
-        var blockPDE = bus.aMemBlocks[(addrPDE & bus.nBusMask) >>> bus.nBlockShift];
-        var lPDE = blockPDE.readLong(offPDE);
-        var offPTE = (addr & X86.LADDR.PTE.MASK) >>> X86.LADDR.PTE.SHIFT;
-        var addrPTE = (lPDE & X86.PTE.FRAME) + offPTE;
-        var blockPTE = bus.aMemBlocks[(addrPTE & bus.nBusMask) >>> bus.nBlockShift];
-        var lPTE = blockPTE.readLong(offPTE);
-        var addrPhys = (lPTE & X86.PTE.FRAME) + (addr & X86.LADDR.OFFSET);
-        //var blockPhys = bus.aMemBlocks[(addrPhys & bus.nBusMask) >>> bus.nBlockShift];
-        /*
-         * And here ends the code that is remarkably similar to mapPageBlock(), with fSuppress set.
-         */
+        var pageInfo = this.getPageInfo(addr);
+        if (!pageInfo) {
+            this.println("unsupported operation");
+            return;
+        }
 
         this.println("linear     PDE addr   PDE             PTE addr   PTE             physical" );
         this.println("---------  ---------- --------        ---------- --------        ----------");
         var s = '%' + str.toHex(addr);
-        s += "  %%" + this.getPageEntry(addrPDE, lPDE);
-        s += "  %%" + this.getPageEntry(addrPTE, lPTE, true);
-        s += "  %%" + str.toHex(addrPhys);
+        s += "  %%" + this.getPageEntry(pageInfo.addrPDE, pageInfo.lPDE);
+        s += "  %%" + this.getPageEntry(pageInfo.addrPTE, pageInfo.lPTE, true);
+        s += "  %%" + str.toHex(pageInfo.addrPhys);
         this.println(s);
     };
 

@@ -1,14 +1,16 @@
 ---
 layout: page
 title: IBM PC Disk Archive
+menu_title: Disks
+menu_order: 4
 permalink: /disks/pc/
 ---
 
 IBM PC Disk Archive
 ---
 
-This is a list of disks available to any of the [IBM PC Machines](/devices/pc/machine/) that use the
-[library.xml](/disks/pc/library.xml) disk configuration file.
+This is a list of disks available to any of the [IBM PC Machines](/devices/pc/machine/) that use our
+[Library](/disks/pc/library.xml) XML disk configuration file.
 
 For some of the disks below, we have provided more information about the software, and in some cases, machines
 that automatically run the software.

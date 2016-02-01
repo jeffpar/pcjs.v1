@@ -471,14 +471,18 @@ FileInfo.prototype.loadSegmentTable = function(offEntries, nEntries, nSegOffShif
     this.aSegments = [];
     this.aOrdinals = [];                // this is an optional array for quick ordinal-to-segment lookup
 
-    if (MAXDEBUG) this.disk.println("loadSegmentTable(" + this.sPath + "," + str.toHexLong(offEntries) + "," + str.toHexWord(nEntries) + ")");
+    if (DEBUG && this.disk.messageEnabled(Messages.DISK | Messages.DATA)) {
+        this.disk.printMessage("loadSegmentTable(" + this.sPath + "," + str.toHexLong(offEntries) + "," + str.toHexWord(nEntries) + ")");
+    }
 
     while (nEntries--) {
         var offSegment = this.loadValue(offEntries) << nSegOffShift;
         if (offSegment) {
             var lenSegment = this.loadValue(offEntries + 2) || 0x10000;       // 0 means 64K
 
-            if (MAXDEBUG) this.disk.println("segment " + iSegment + ": offStart=" + str.toHexLong(offSegment) + " offEnd=" + str.toHexLong(offSegment + lenSegment));
+                if (DEBUG && this.disk.messageEnabled(Messages.DISK | Messages.DATA)) {
+                    this.disk.printMessage("segment " + iSegment + ": offStart=" + str.toHexLong(offSegment) + " offEnd=" + str.toHexLong(offSegment + lenSegment));
+                }
 
             this.aSegments[iSegment++] = {offStart: offSegment, offEnd: offSegment + lenSegment - 1, aEntries: []};
         }
@@ -520,7 +524,9 @@ FileInfo.prototype.loadEntryTable = function(offEntries, offEntriesEnd)
 {
     var iOrdinal = 1;
 
-    if (MAXDEBUG) this.disk.println("loadEntryTable(" + str.toHexLong(offEntries) + "," + str.toHexLong(offEntriesEnd) + ")");
+    if (DEBUG && this.disk.messageEnabled(Messages.DISK | Messages.DATA)) {
+        this.disk.printMessage("loadEntryTable(" + str.toHexLong(offEntries) + "," + str.toHexLong(offEntriesEnd) + ")");
+    }
 
     while (offEntries < offEntriesEnd) {
 
@@ -529,7 +535,9 @@ FileInfo.prototype.loadEntryTable = function(offEntries, offEntriesEnd)
         if (!bEntries) break;
         var bSegment = w >> 8, iSegment;
 
-        if (MAXDEBUG) this.disk.println("bundle for segment " + bSegment + ": " + bEntries + " entries @" + str.toHex(offEntries));
+        if (DEBUG && this.disk.messageEnabled(Messages.DISK | Messages.DATA)) {
+            this.disk.printMessage("bundle for segment " + bSegment + ": " + bEntries + " entries @" + str.toHex(offEntries));
+        }
 
         offEntries += 2;
 
@@ -564,10 +572,14 @@ FileInfo.prototype.loadEntryTable = function(offEntries, offEntriesEnd)
                 offEntries += 6;
             }
             if (!this.aSegments[iSegment]) {
-                if (MAXDEBUG) this.disk.println("invalid segment: " + iSegment);
+                if (DEBUG && this.disk.messageEnabled(Messages.DISK | Messages.DATA)) {
+                    this.disk.printMessage("invalid segment: " + iSegment);
+                }
             } else {
                 this.aSegments[iSegment].aEntries[iOrdinal] = [offEntry];
-                if (MAXDEBUG) this.disk.println("ordinal " + iOrdinal + ": segment=" + iSegment + " offset=" + str.toHexLong(offEntry) + " @" + str.toHex(offDebug));
+                if (DEBUG && this.disk.messageEnabled(Messages.DISK | Messages.DATA)) {
+                    this.disk.printMessage("ordinal " + iOrdinal + ": segment=" + iSegment + " offset=" + str.toHexLong(offEntry) + " @" + str.toHex(offDebug));
+                }
             }
             this.aOrdinals[iOrdinal] = [iSegment, offEntry];
             iOrdinal++;
@@ -590,7 +602,9 @@ FileInfo.prototype.loadNameTable = function(offEntries, offEntriesEnd)
 {
     var cNames = 0;
 
-    if (MAXDEBUG) this.disk.println("loadNameTable(" + str.toHexLong(offEntries) + (offEntriesEnd? ("," + str.toHexLong(offEntriesEnd)) : "") + ")");
+    if (DEBUG && this.disk.messageEnabled(Messages.DISK | Messages.DATA)) {
+        this.disk.printMessage("loadNameTable(" + str.toHexLong(offEntries) + (offEntriesEnd? ("," + str.toHexLong(offEntriesEnd)) : "") + ")");
+    }
 
     while (!offEntriesEnd || offEntries < offEntriesEnd) {
 
@@ -618,12 +632,18 @@ FileInfo.prototype.loadNameTable = function(offEntries, offEntriesEnd)
                     var aEntries = this.aSegments[iSegment].aEntries[iOrdinal];
                     this.disk.assert(aEntries && aEntries.length == 1);
                     aEntries.push(sSymbol);
-                    if (MAXDEBUG) this.disk.println("segment " + iSegment + " offset " + str.toHexWord(aEntries[0]) + " ordinal " + iOrdinal + ": " + sSymbol + " @" + str.toHex(offDebug));
+                    if (DEBUG && this.disk.messageEnabled(Messages.DISK | Messages.DATA)) {
+                        this.disk.printMessage("segment " + iSegment + " offset " + str.toHexWord(aEntries[0]) + " ordinal " + iOrdinal + ": " + sSymbol + " @" + str.toHex(offDebug));
+                    }
                 } else {
-                    if (MAXDEBUG) this.disk.println(this.sPath + ": cannot find segment " + iSegment + " (offset " + str.toHexWord(tuple[1]) + ") for symbol " + sSymbol + " with ordinal " + iOrdinal + " @" + str.toHex(offDebug));
+                    if (DEBUG && this.disk.messageEnabled(Messages.DISK | Messages.DATA)) {
+                        this.disk.printMessage(this.sPath + ": cannot find segment " + iSegment + " (offset " + str.toHexWord(tuple[1]) + ") for symbol " + sSymbol + " with ordinal " + iOrdinal + " @" + str.toHex(offDebug));
+                    }
                 }
             } else {
-                if (MAXDEBUG) this.disk.println(this.sPath + ": cannot find ordinal " + iOrdinal + " for symbol " + sSymbol + " @" + str.toHex(offDebug));
+                if (DEBUG && this.disk.messageEnabled(Messages.DISK | Messages.DATA)) {
+                    this.disk.printMessage(this.sPath + ": cannot find ordinal " + iOrdinal + " for symbol " + sSymbol + " @" + str.toHex(offDebug));
+                }
             }
         }
         offEntries += 2;
@@ -1268,7 +1288,7 @@ Disk.prototype.doneLoad = function(sURL, sDiskData, nErrorCode)
              * conversion to a forward-compatible 'data' array.
              */
             else {
-                if (MAXDEBUG && this.messageEnabled()) {
+                if (DEBUG && this.messageEnabled(Messages.DISK | Messages.DATA)) {
                     var sCylinders = aDiskData.length + " track" + (aDiskData.length > 1 ? "s" : "");
                     var nHeads = aDiskData[0].length;
                     var sHeads = nHeads + " head" + (nHeads > 1 ? "s" : "");

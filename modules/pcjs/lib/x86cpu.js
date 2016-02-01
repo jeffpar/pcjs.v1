@@ -475,7 +475,7 @@ X86CPU.prototype.enablePageBlocks = function()
 X86CPU.prototype.flushPageBlocks = function()
 {
     if (this.regCR0 & X86.CR0.PG) this.enablePageBlocks();
-}
+};
 
 /**
  * acquirePageBlock(addr)
