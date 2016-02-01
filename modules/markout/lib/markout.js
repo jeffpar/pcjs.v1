@@ -1040,10 +1040,10 @@ MarkOut.prototype.convertMDImageLinks = function(sBlock, sIndent)
  *
  * If the link ends with a slash, then it's an implied reference to a "machine.xml".
  *
- * UPDATE: Since parms containing JSON may also contain colons, machine Markdown links may now use '|'
- * instead of ':' as separators; eg:
+ * UPDATE: Since parms containing JSON may also contain colons, machine Markdown links may now use '!' instead
+ * of ':' as separators; eg:
  *
- *      [IBM PC](/devices/pc/machine/5150/mda/64kb/ "PCjs|demoPC|stylesheet|version|options|parms")
+ *      [IBM PC](/devices/pc/machine/5150/mda/64kb/ "PCjs!demoPC!stylesheet!version!options!parms")
  *
  * Granted, there are a number of things we could be smarter about.  First, you probably don't care about the
  * ID for the <div>; it's purely a mechanism for telling the script where to embed the machine, so we could
@@ -1089,7 +1089,7 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
             sMachineXSLFile = machine['template'] || "";
             sMachineVersion = (machine['uncompiled'] && machine['uncompiled'] == "true"? "uncompiled" : "");
             sMachineParms = machine['parms'] || "";
-            sReplacement = "[Embedded PC](" + sMachineXMLFile + ' "' + sMachine + 'js|' + sMachineID + '|' + sMachineXSLFile + '||' + sMachineOptions + '|' + sMachineParms + '")';
+            sReplacement = "[Embedded PC](" + sMachineXMLFile + ' "' + sMachine + 'js!' + sMachineID + '!' + sMachineXSLFile + '!!' + sMachineOptions + '!' + sMachineParms + '")';
         }
         sBlock = sBlock.replace(aMatch[0], sReplacement);
         reIncludes.lastIndex = 0;       // reset lastIndex, since we just modified the string that reIncludes is iterating over
@@ -1099,7 +1099,7 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
      * Start looking for Markdown-style machine links now...
      */
     var cMatches = 0;
-    var reMachines = /\[(.*?)]\((.*?)\s*"(PC|C1P)js[:|](.*?)"\)/gi;
+    var reMachines = /\[(.*?)]\((.*?)\s*"(PC|C1P)js[:!](.*?)"\)/gi;
 
     while ((aMatch = reMachines.exec(sBlock))) {
 
@@ -1109,7 +1109,7 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
         sMachine = aMatch[3].toUpperCase();
         var sMachineFunc = "embed" + sMachine;
         var sMachineClass = sMachine.toLowerCase();
-        var aMachineParms = aMatch[4].split(aMatch[4].indexOf('|') > 0? '|' : ':');
+        var aMachineParms = aMatch[4].split(aMatch[4].indexOf('|') > 0? '!' : ':');
         var sMachineMessage = "Waiting for " + sMachine + "js to load";
 
         sMachineID = aMachineParms[0];
