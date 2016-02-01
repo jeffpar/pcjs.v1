@@ -1040,8 +1040,8 @@ MarkOut.prototype.convertMDImageLinks = function(sBlock, sIndent)
  *
  * If the link ends with a slash, then it's an implied reference to a "machine.xml".
  *
- * UPDATE: Since parms containing JSON may also contain colons, machine Markdown links may now use '!' instead
- * of ':' as separators; eg:
+ * UPDATE: Since parms containing JSON may also contain colons, machine Markdown links may now use '!' or '|'
+ * instead of ':' as separators.  In fact, whichever separator is used first will be used throughout; eg:
  *
  *      [IBM PC](/devices/pc/machine/5150/mda/64kb/ "PCjs!demoPC!stylesheet!version!options!parms")
  *
@@ -1099,7 +1099,7 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
      * Start looking for Markdown-style machine links now...
      */
     var cMatches = 0;
-    var reMachines = /\[(.*?)]\((.*?)\s*"(PC|C1P)js[:!](.*?)"\)/gi;
+    var reMachines = /\[(.*?)]\((.*?)\s*"(PC|C1P)js([:!|])(.*?)"\)/gi;
 
     while ((aMatch = reMachines.exec(sBlock))) {
 
@@ -1109,7 +1109,7 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
         sMachine = aMatch[3].toUpperCase();
         var sMachineFunc = "embed" + sMachine;
         var sMachineClass = sMachine.toLowerCase();
-        var aMachineParms = aMatch[4].split(aMatch[4].indexOf('|') > 0? '!' : ':');
+        var aMachineParms = aMatch[5].split(aMatch[4]);
         var sMachineMessage = "Waiting for " + sMachine + "js to load";
 
         sMachineID = aMachineParms[0];
