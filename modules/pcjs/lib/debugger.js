@@ -250,6 +250,7 @@ function Debugger(parmsDbg)
         /*
          * Initialize Debugger message support
          */
+        this.afnDumpers = [];
         this.messageInit(parmsDbg['messages']);
 
         this.sInitCommands = parmsDbg['commands'];
@@ -1470,6 +1471,12 @@ if (DEBUGGER) {
         this.fpu = cmp.getMachineComponent("FPU");
         this.mouse = cmp.getMachineComponent("Mouse");
         if (MAXDEBUG) this.chipset = cmp.getMachineComponent("ChipSet");
+
+        /*
+         * Re-initialize Debugger message support if necessary
+         */
+        var sMessages = cmp.getMachineParm('messages');
+        if (sMessages) this.messageInit(sMessages);
 
         this.cchAddr = bus.getWidth() >> 2;
         this.maskAddr = bus.nBusLimit;
@@ -3320,7 +3327,6 @@ if (DEBUGGER) {
         this.dbg = this;
         this.bitsMessage = this.bitsWarning = Messages.WARN;
         this.sMessagePrev = null;
-        this.afnDumpers = [];
         /*
          * Internally, we use "key" instead of "keys", since the latter is a method on JavasScript objects,
          * but externally, we allow the user to specify "keys"; "kbd" is also allowed as shorthand for "keyboard".

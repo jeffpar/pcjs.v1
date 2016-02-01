@@ -1441,7 +1441,7 @@ FDC.prototype.findDiskette = function(sPath)
             }
         }
     }
-    return null;
+    return str.getBaseName(sPath, true);
 };
 
 /**
