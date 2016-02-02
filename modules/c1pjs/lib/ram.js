@@ -32,6 +32,11 @@
 
 "use strict";
 
+if (NODE) {
+    var web         = require("../../shared/lib/weblib");
+    var Component   = require("../../shared/lib/component");
+}
+
 /**
  * C1PRAM(parmsRAM)
  *

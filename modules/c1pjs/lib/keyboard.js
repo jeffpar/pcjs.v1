@@ -32,6 +32,12 @@
 
 "use strict";
 
+if (NODE) {
+    var str         = require("../../shared/lib/strlib");
+    var web         = require("../../shared/lib/weblib");
+    var Component   = require("../../shared/lib/component");
+}
+
 /**
  * C1PKeyboard(parmsKbd)
  *
@@ -352,7 +358,7 @@ C1PKeyboard.prototype.reset = function()
      */
     if (this.aKeyTimers) {
         for (var i in this.aKeyTimers) {
-            if (isNaN(i)) continue; // ignore any non-numeric properties, if any
+            if (isNaN(+i)) continue; // ignore any non-numeric properties, if any
             if (this.aKeyTimers[i]) clearTimeout(this.aKeyTimers[i]);
         }
     }
@@ -391,9 +397,10 @@ C1PKeyboard.prototype.reset = function()
  * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea")
  * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "esc", "ctrl-c")
  * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+ * @param {string} [sValue] optional data value
  * @return {boolean} true if binding was successful, false if unrecognized binding request
  */
-C1PKeyboard.prototype.setBinding = function(sHTMLType, sBinding, control)
+C1PKeyboard.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
 {
     /*
      * I want to bind to the first caller (ie, the Screen), not subsequent ones (eg, the Panel)
@@ -524,8 +531,9 @@ C1PKeyboard.prototype.setPower = function(fOn, cmp)
 
 /**
  * @this {C1PKeyboard}
+ * @param {boolean} [fReady] is assumed to indicate "ready" unless EXPLICITLY set to false
  */
-C1PKeyboard.prototype.setReady = function()
+C1PKeyboard.prototype.setReady = function(fReady)
 {
     this.iOS = web.isUserAgent("iOS");
     this.fMobile = (this.iOS || web.isUserAgent("Android"));
@@ -536,7 +544,7 @@ C1PKeyboard.prototype.setReady = function()
 };
 
 /**
- * calcReleaseDelay(fRepeat
+ * calcReleaseDelay(fRepeat)
  *
  * This attempts to scale our default "release" delay appropriately for the current CPU speed.
  *

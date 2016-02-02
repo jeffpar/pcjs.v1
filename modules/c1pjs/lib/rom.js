@@ -32,6 +32,13 @@
 
 "use strict";
 
+if (NODE) {
+    var str         = require("../../shared/lib/strlib");
+    var web         = require("../../shared/lib/weblib");
+    var DumpAPI     = require("../../shared/lib/dumpapi");
+    var Component   = require("../../shared/lib/component");
+}
+
 /**
  * C1PROM(parmsROM)
  *

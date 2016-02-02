@@ -21,7 +21,7 @@
 
 	<xsl:template name="componentScripts">
 		<xsl:param name="component"/>
-		<script type="text/javascript" src="/versions/{$APPCLASS}/{$APPVERSION}/{$component}.js"></script>
+		<script type="text/javascript" src="/versions/{$APPCLASS}/{$APPVERSION}/{$component}.js"> </script>
 	</xsl:template>
 
 	<xsl:template name="componentIncludes">
@@ -157,7 +157,7 @@
 			</xsl:if>
 			<div class="{$APPCLASS}-container" style="{$border}{$style}">
 				<xsl:if test="$class != '' and $component != 'machine'">
-					<div class="{$APPCLASS}-{$class}-object" data-value="{{id:'{$id}',name:'{$name}'{$parms}}}"></div>
+					<div class="{$APPCLASS}-{$class}-object" data-value="{{id:'{$id}',name:'{$name}'{$parms}}}"> </div>
 				</xsl:if>
 				<xsl:if test="control">
 					<div class="{$APPCLASS}-controls">
@@ -174,7 +174,7 @@
 				<div class="{$APPCLASS}-copyright">
 					<a href="http://{$SITEHOST}/{$APPCLASS}" target="_blank">C1Pjs</a> v<xsl:value-of select="$APPVERSION"/> © 2012-2016 by <a href="http://twitter.com/jeffpar" target="_blank">@jeffpar</a>
 				</div>
-				<div style="clear:both"></div>
+				<div style="clear:both"> </div>
 			</xsl:if>
 		</div>
 	</xsl:template>
@@ -284,7 +284,7 @@
 					<input class="{$APPCLASS}-binding" type="submit" style="{$border}{$fontsize}{$style}" data-value="{{{$type},{$binding}}}" value="{.}"/>
 				</xsl:when>
 				<xsl:when test="@type = 'textarea'">
-					<textarea class="{$APPCLASS}-binding" style="{$border}{$width}{$height}{$style}" data-value="{{{$type},{$binding}}}" readonly="readonly"></textarea>
+					<textarea class="{$APPCLASS}-binding" style="{$border}{$width}{$height}{$style}" data-value="{{{$type},{$binding}}}" readonly="readonly"> </textarea>
 				</xsl:when>
 				<xsl:when test="@type = 'heading'">
 					<div><xsl:value-of select="."/></div>
@@ -301,7 +301,7 @@
 					<hr/>
 				</xsl:when>
 				<xsl:when test="not(@type)">
-					<div style="clear:both"></div><br/>
+					<div style="clear:both"> </div><br/>
 				</xsl:when>
 				<xsl:otherwise>
 					<div class="{$APPCLASS}-binding{$subclass}" style="{$border}{$width}{$height}{$style}" data-value="{{{$type},{$binding}}}"><xsl:apply-templates/></div>
@@ -311,7 +311,7 @@
 				<xsl:if test="@labelpos = 'right'">
 					<div class="{$APPCLASS}-label" style="{$labelwidth}{$labelstyle}"><xsl:value-of select="@label"/></div>
 				</xsl:if>
-				<div style="clear:both"></div>
+				<div style="clear:both"> </div>
 			</xsl:if>
 		</div>
 	</xsl:template>

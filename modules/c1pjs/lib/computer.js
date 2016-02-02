@@ -60,6 +60,11 @@
 
 "use strict";
 
+if (NODE) {
+    var web         = require("../../shared/lib/weblib");
+    var Component   = require("../../shared/lib/component");
+}
+
 /**
  * C1PComputer(parmsComputer, modules)
  *
@@ -166,9 +171,10 @@ C1PComputer.prototype.stop = function(msStart, nCycles)
  * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea")
  * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "reset")
  * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+ * @param {string} [sValue] optional data value
  * @return {boolean} true if binding was successful, false if unrecognized binding request
  */
-C1PComputer.prototype.setBinding = function(sHTMLType, sBinding, control)
+C1PComputer.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
 {
     switch(sBinding) {
     case "reset":
@@ -186,13 +192,15 @@ C1PComputer.prototype.setBinding = function(sHTMLType, sBinding, control)
 };
 
 /**
+ * NOTE: If there are multiple components for a given type, we may need to provide a means of discriminating.
+ *
  * @this {C1PComputer}
  * @param {string} sType
- * @return {Component}
- *
- * NOTE: If there are multiple components for a given type, we may need to provide a means of discriminating.
+ * @param {string} [idRelated] of related component
+ * @param {Component|null} [componentPrev] of previously returned component, if any
+ * @return {Component|null}
  */
-C1PComputer.prototype.getComponentByType = function(sType)
+C1PComputer.prototype.getComponentByType = function(sType, idRelated, componentPrev)
 {
     if (this.modules[sType]) {
         return this.modules[sType][0];

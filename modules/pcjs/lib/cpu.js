@@ -517,15 +517,16 @@ CPU.prototype.setFocus = function()
 };
 
 /**
- * setBinding(sHTMLType, sBinding, control)
+ * setBinding(sHTMLType, sBinding, control, sValue)
  *
  * @this {CPU}
  * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
  * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "run")
  * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+ * @param {string} [sValue] optional data value
  * @return {boolean} true if binding was successful, false if unrecognized binding request
  */
-CPU.prototype.setBinding = function(sHTMLType, sBinding, control)
+CPU.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
 {
     var cpu = this;
     var fBound = false;

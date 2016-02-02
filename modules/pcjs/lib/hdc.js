@@ -553,15 +553,16 @@ if (DEBUG) {
 }
 
 /**
- * setBinding(sHTMLType, sBinding, control)
+ * setBinding(sHTMLType, sBinding, control, sValue)
  *
  * @this {HDC}
  * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
  * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "listDisks")
  * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+ * @param {string} [sValue] optional data value
  * @return {boolean} true if binding was successful, false if unrecognized binding request
  */
-HDC.prototype.setBinding = function(sHTMLType, sBinding, control)
+HDC.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
 {
     /*
      * This is reserved for future use; for now, hard disk images can be specified during initialization only (no "hot-swapping")
