@@ -1048,14 +1048,6 @@ Keyboard.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
             };
             return true;
 
-        case "test":
-            this.bindings[id] = control;
-            control.onclick = function onClickTest(event) {
-                if (kbd.cpu) kbd.cpu.setFocus();
-                return kbd.injectKeys(sValue);
-            };
-            return true;
-
         default:
             /*
              * Maintain support for older button codes; eg, map button code "ctrl-c" to CLICKCODE "CTRL_C"
@@ -1072,7 +1064,8 @@ Keyboard.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
                     };
                 }(this, sCode, Keyboard.CLICKCODES[sCode]);
                 return true;
-            } else if (Keyboard.SOFTCODES[sBinding] !== undefined) {
+            }
+            else if (Keyboard.SOFTCODES[sBinding] !== undefined) {
                 this.cSoftCodes++;
                 this.bindings[id] = control;
                 var fnDown = function(kbd, sKey, simCode) {
@@ -1092,6 +1085,19 @@ Keyboard.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
                     control.onmousedown = fnDown;
                     control.onmouseup = control.onmouseout = fnUp;
                 }
+                return true;
+            }
+            else if (sValue) {
+                /*
+                 * Instead of just having a dedicated "test" control, we now treat any unrecognized control with
+                 * a data value as a test control.  The only caveat is that such controls must have binding IDs that
+                 * do not conflict with predefined controls (which, of course, is the only way you can get here).
+                 */
+                this.bindings[id] = control;
+                control.onclick = function onClickTest(event) {
+                    if (kbd.cpu) kbd.cpu.setFocus();
+                    return kbd.injectKeys(sValue);
+                };
                 return true;
             }
             break;

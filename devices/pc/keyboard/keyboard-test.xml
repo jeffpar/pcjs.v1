@@ -7,5 +7,6 @@
 	<control type="button" binding="up">&#x2191;</control>
 	<control type="button" binding="down">&#x2193;</control>
 	<control type="button" binding="right">&#x2192;</control>
-	<control type="button" binding="test" value="Hello World!">TEST</control>
+	<control type="button" binding="test1" value="Hello World!">HELLO</control>
+	<control type="button" binding="test2" value="GoodBye!">GOODBYE</control>
 </keyboard>
