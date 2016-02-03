@@ -35,36 +35,50 @@ Another exception is optional parameters.  When I write a method with optional p
 parameters to either be omitted (ie, *undefined*) or set to *null*.  Using "==", you can check for either value with
 a single comparison:
 
-	if (parameter == null) { ... }
-	
+``` javascript
+if (parameter == null) { ... }
+```
+
 whereas strict equality requires more work:
  
-	if (parameter === undefined || parameter === null) { ... }
+``` javascript
+if (parameter === undefined || parameter === null) { ... }
+```
 
 This is one of those times when coercion (of *undefined* to *null*), and the use of "non-strict" operators, is beneficial.
 Here's another:
 
-	if (!b) { ... }
+``` javascript
+if (!b) { ... }
+```
 
 Coercing a value to *boolean* is a popular way of checking for all "falsy" values (ie, *undefined*, *null*,
 0, false, "", NaN, etc).  It is shorthand for:
 
-	if (b == false) { ... }
+``` javascript
+if (b == false) { ... }
+```
 
 yet I suspect the proponents of strict equality would embrace the former while rejecting the latter.
 
 However, I don't recommend "falsy" checks for optional parameters:
 
-	if (!parameter) { ... }
+``` javascript
+if (!parameter) { ... }
+```
 
 because often a valid numeric parameter might include 0, or a valid string parameter might include "", so it's better
 to do this:
 
-	if (parameter == null) { ... }
+``` javascript
+if (parameter == null) { ... }
+```
 
 and obviously if *null* is also a acceptable value, then you should definitely use strict equality:
 	
-	if (parameter === undefined) { ... }
+``` javascript
+if (parameter === undefined) { ... }
+```
 
 Problems with type coercion are **NOT** problems caused by a poor choice of operators, so trying to make
 those problems go away by artificially limiting your choice of operators seems like the wrong solution.
@@ -78,18 +92,20 @@ Explicitly convert variables to a single type whenever possible.  For example, I
 that accepts an optional numeric parameter, with a documented default value when it's omitted.  I think it's
 important make that parameter unambiguously numeric as soon as possible; eg:
 
-	/**
-	 * foo(n)
-	 *
-	 * Performs a mathematical operation on n and returns a result.
-	 *
-	 * @param {number} [n] is an optional parameter (defaults to zero if omitted)
-	 * @return {number}
-	 */
-	function foo(n) {
-		n = n || 0;
-		...
-	}
+``` javascript
+/**
+ * foo(n)
+ *
+ * Performs a mathematical operation on n and returns a result.
+ *
+ * @param {number} [n] is an optional parameter (defaults to zero if omitted)
+ * @return {number}
+ */
+function foo(n) {
+	n = n || 0;
+	...
+}
+```
 
 The expression `n || 0` might seem pointless, because *undefined* and *zero* are equivalent in a "falsy" sense, but
 *undefined* is not a number, and there will be fewer problems downstream if you ensure that n is *always* a number.
@@ -98,8 +114,10 @@ The expression `n || 0` might seem pointless, because *undefined* and *zero* are
 
 When using *for*...*in* loops like this:
 
-	var a = [100, 200, 300];
-	for (var i in a) { ... }
+``` javascript
+var a = [100, 200, 300];
+for (var i in a) { ... }
+```
 	
 the type of variable *i* will be **string** rather than **number**; that is, it will contain "0", "1", and "2" rather
 than 0, 1, and 2.  If you then use *i* to set a matching element in another array, that element will not be stored in
@@ -107,27 +125,35 @@ the same (numeric) position as the original array.
 
 One solution is to convert *i* to a **number**:
 
-	parseInt(i, 10);
+``` javascript
+parseInt(i, 10);
+```
 
 However, a more elegant solution is to use the unary "+" operator to coerce the **string** to a **number**:
 
-	+i;
+``` javascript
++i;
+```
 
 The same problem arises with objects using numeric properties.  And watch out for JavaScript's automatic base
 conversion of numeric properties.  For example, when you enumerate the properties of object "o":
 
-	var o = {
-		0x20: ' ',
-		0x41: 'A'
-	};
+``` javascript
+var o = {
+	0x20: ' ',
+	0x41: 'A'
+};
+```
 
 you will get the strings "32" and "65", not "0x20" and "0x41".  You must quote your property names to prevent
 any conversion; eg:
 
-	var o = {
-		"0x20": ' ',
-		"0x41": 'A'
-	};
+``` javascript
+var o = {
+	"0x20": ' ',
+	"0x41": 'A'
+};
+```
 
 Numeric properties can always be safely converted using the unary "+" operator, regardless whether they were quoted
 or not.
@@ -141,8 +167,10 @@ whereas unary "+" conversion will return *NaN* if there are any invalid digits i
 It turns out that shifting an integer value by more than 31 bits in either direction may not shift as many bits as
 you'd expect.  For example:
 
-	n = 0x10000000;
-	n >>>= 33;
+``` javascript
+n = 0x10000000;
+n >>>= 33;
+```
 
 will shift n by only *one* bit, not 33 bits, and the result will be 0x08000000, not zero.  This is because,
 just like the shift instructions on 32-bit Intel processors, JavaScript converts the shift count to a *mod 32* value
@@ -150,17 +178,23 @@ just like the shift instructions on 32-bit Intel processors, JavaScript converts
 
 So the above example is equivalent to:
 
-	n >>>= 1;
+``` javascript
+n >>>= 1;
+```
 
 If you really need larger shift counts to work in a consistent manner, you can perform multiple shifts, where each
 shift count is in the range 0-31.  Here's one way to shift a number 33 bits:
 
-	n = (n >>> 31) >>> 2;
+``` javascript
+n = (n >>> 31) >>> 2;
+```
 
 Also, it's not quite correct to say that a shift count of zero has *no* effect on a number:
 
-	n = 0x88888888|0;       // n is displayed as -2004318072
-	n >>>= 0;               // n is displayed as 2290649224
+``` javascript
+n = 0x88888888|0;       // n is displayed as -2004318072
+n >>>= 0;               // n is displayed as 2290649224
+```
 
 It's true that the bottom 32 bits of the number were not changed, but a side-effect of the unsigned shift operator
 is that all the upper sign bits are stripped from the (64-bit) result.
@@ -168,7 +202,9 @@ is that all the upper sign bits are stripped from the (64-bit) result.
 Similarly, as soon as you perform any other bitwise operation on the number, even one that does not modify the low
 32 bits, the upper bits will revert to the sign of the lower 32-bit value:
 
-	n |= 0;                 // n is displayed as -2004318072 again
+``` javascript
+n |= 0;                 // n is displayed as -2004318072 again
+```
 
 *[@jeffpar](http://twitter.com/jeffpar)*  
 *March 26, 2015*
