@@ -9,7 +9,7 @@ permalink: /disks/pc/
 IBM PC Disk Archive
 ---
 
-This is a list of disks available to any of the [IBM PC Machines](/devices/pc/machine/) that use our
+This is a list of disks available to any [IBM PC Machine](/devices/pc/machine/) that uses our
 [Library](/disks/pc/library.xml) XML disk configuration file.
 
 For some of the disks below, we have provided more information about the software, and in some cases, machines
@@ -46,10 +46,11 @@ that automatically run the software.
 * MS-DOS 6.20
 * MS-DOS 6.22
 
-### Compaq DOS
+### MS-DOS (COMPAQ)
 
-* Compaq DOS 3.10
-* Compaq DOS 3.31
+* [COMPAQ MS-DOS 1.12](/disks/pc/dos/compaq/1.12/)
+* [COMPAQ MS-DOS 3.10](/disks/pc/dos/compaq/3.10/)
+* [COMPAQ MS-DOS 3.31](/disks/pc/dos/compaq/3.31/)
 
 ### IBM OS/2
 
