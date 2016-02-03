@@ -1,15 +1,15 @@
 ---
 layout: page
-title: Microsoft Windows/386 2.03
+title: Microsoft Windows 2.03
 permalink: /disks/pc/windows/2.03/
 ---
 
-Microsoft Windows/386 2.03
+Microsoft Windows 2.03
 ---
 
 Directory listings of the nine 360Kb distribution diskettes are provided below.
 
-### Directory of Windows/386 2.03 (SETUP)
+### Directory of Windows 2.03 (SETUP)
 
 	 Volume in drive A has no label
 
@@ -31,7 +31,7 @@ Directory listings of the nine 360Kb distribution diskettes are provided below.
 	       10 file(s)     352322 bytes
 	                        4096 bytes free
 
-### Directory of Windows/386 2.03 (BUILD)
+### Directory of Windows 2.03 (BUILD)
 
 	 Volume in drive A has no label
 
@@ -76,7 +76,7 @@ Directory listings of the nine 360Kb distribution diskettes are provided below.
 	       33 file(s)     326486 bytes
 	                       18432 bytes free
 
-### Directory of Windows/386 2.03 (DISPLAYS)
+### Directory of Windows 2.03 (DISPLAYS)
 
 	 Volume in drive A is DISPLAYS   
 
@@ -107,7 +107,7 @@ Directory listings of the nine 360Kb distribution diskettes are provided below.
 	       19 file(s)     330292 bytes
 	                       21504 bytes free
 
-### Directory of Windows/386 2.03 (UTILS 1)
+### Directory of Windows 2.03 (UTILS 1)
 
 	 Volume in drive A has no label
 
@@ -134,7 +134,7 @@ Directory listings of the nine 360Kb distribution diskettes are provided below.
 	       15 file(s)     351232 bytes
 	                        2048 bytes free
 
-### Directory of Windows/386 2.03 (UTILS 2)
+### Directory of Windows 2.03 (UTILS 2)
 
 	 Volume in drive A has no label
 
@@ -165,7 +165,7 @@ Directory listings of the nine 360Kb distribution diskettes are provided below.
 	       19 file(s)     349083 bytes
 	                        4096 bytes free
 
-### Directory of Windows/386 2.03 (FONTS 1)
+### Directory of Windows 2.03 (FONTS 1)
 
 	 Volume in drive A is FONTS_1    
 
@@ -188,7 +188,7 @@ Directory listings of the nine 360Kb distribution diskettes are provided below.
 	       11 file(s)     350005 bytes
 	                        7168 bytes free
 
-### Directory of Windows/386 2.03 (FONTS 2)
+### Directory of Windows 2.03 (FONTS 2)
 
 	 Volume in drive A is FONTS_2    
 
@@ -209,7 +209,7 @@ Directory listings of the nine 360Kb distribution diskettes are provided below.
 	        9 file(s)     312784 bytes
 	                       47104 bytes free
 
-### Directory of Windows/386 2.03 (APPS)
+### Directory of Windows 2.03 (APPS)
 
 	 Volume in drive A is DESK_APPS  
 
@@ -233,7 +233,7 @@ Directory listings of the nine 360Kb distribution diskettes are provided below.
 	       12 file(s)     355127 bytes
 	                        1024 bytes free
 
-### Directory of Windows/386 2.03 (PROGRAM)
+### Directory of Windows 2.03 (PROGRAM)
 
 	 Volume in drive A has no label
 
@@ -295,3 +295,13 @@ Directory listings of the nine 360Kb distribution diskettes are provided below.
 	Total files listed:
 	       47 file(s)     271555 bytes
 	                       62464 bytes free
+
+### Directory of Windows/386 2.03 (SETUP)
+
+### Directory of Windows/386 2.03 (UTILITY)
+
+### Directory of Windows/386 2.03 (FONTS)
+
+### Directory of Windows/386 2.03 (PROGRAM)
+
+### Directory of Windows/386 2.03 (UTILITY 2)
