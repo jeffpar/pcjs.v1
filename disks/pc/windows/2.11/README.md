@@ -4,8 +4,15 @@ title: Microsoft Windows 2.11
 permalink: /disks/pc/windows/2.11/
 ---
 
+Microsoft Windows 2.11, like [Windows 2.10](/disks/pc/windows/2.10/), was again released as two separate products:
+
+* [Windows/286 2.11](#microsoft-windows286-211)
+* [Windows/386 2.11](#microsoft-windows386-211)
+
 Microsoft Windows/286 2.11
 ---
+
+Windows/286 2.11 was finalized on March 13, 1989.
 
 Directory listings of the four 1.2Mb distribution diskettes are provided below.
 
@@ -300,6 +307,8 @@ Directory listings of the four 1.2Mb distribution diskettes are provided below.
 
 Microsoft Windows/386 2.11
 ---
+
+Windows/386 2.11 was also finalized on March 13, 1989.
 
 Directory listings of the four 1.2Mb distribution diskettes are provided below.
 

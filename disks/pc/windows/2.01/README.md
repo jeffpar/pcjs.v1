@@ -4,8 +4,17 @@ title: Microsoft Windows/386 2.01
 permalink: /disks/pc/windows/2.01/
 ---
 
+Microsoft Windows 2.0 existed only as "point releases":
+
+* [Windows 2.03](/disks/pc/windows/2.03/microsoft-windows-203)
+* [Windows/386 2.01](#microsoft-windows386-201)
+* [Windows/386 2.03](/disks/pc/windows/2.03/#microsoft-windows386-203)
+
 Microsoft Windows/386 2.01
 ---
+
+This Windows/386 release was finalized in September 1987, predating [Windows 2.03](/disks/pc/windows/2.03/)
+by several months.
 
 Directory listings of the three 1.2Mb distribution diskettes are provided below.
 

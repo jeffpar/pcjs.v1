@@ -4,8 +4,16 @@ title: Microsoft Windows 2.03
 permalink: /disks/pc/windows/2.03/
 ---
 
+Microsoft Windows 2.0 existed only as "point releases":
+
+* [Windows 2.03](#microsoft-windows-203)
+* [Windows/386 2.01](/disks/pc/windows/2.01/#microsoft-windows386-201)
+* [Windows/386 2.03](#microsoft-windows386-203)
+
 Microsoft Windows 2.03
 ---
+
+Windows 2.03 was finalized in November 1987 and released on December 9, 1987.
 
 Directory listings of the nine 360Kb distribution diskettes are provided below.
 
@@ -298,6 +306,12 @@ Directory listings of the nine 360Kb distribution diskettes are provided below.
 
 Microsoft Windows/386 2.03
 ---
+
+Windows/386 2.03 appears to have been finalized in December 1987.
+
+Note that only about two months separated this release from [Windows/386 2.01](/disks/pc/windows/2.01/#microsoft-windows386-201).
+
+Directory listings of the five 720Kb distribution diskettes are provided below.
 
 ### Directory of Windows/386 2.03 (SETUP)
 
