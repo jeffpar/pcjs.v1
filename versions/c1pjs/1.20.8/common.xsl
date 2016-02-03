@@ -41,7 +41,7 @@
 				</ul>
 			</div>
 			<div class="common-top-right">
-				<p>Powered by <a href="http://nodejs.org" target="_blank">Node.js</a> and <a href="http://github.com/jeffpar/pcjs" target="_blank">GitHub</a></p>
+				<p>Powered by JavaScript and <a href="http://github.com/jeffpar/pcjs" target="_blank">GitHub</a></p>
 			</div>
 		</div>
 	</xsl:template>

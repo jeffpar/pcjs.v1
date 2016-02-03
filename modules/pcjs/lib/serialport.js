@@ -105,8 +105,12 @@ function SerialPort(parmsSerial) {
      * If controlIOBuffer is being used AND 'tabSize' is set, then we make an attempt to monitor the characters
      * being echoed via echoByte(), maintain a logical column position, and convert any tabs into the appropriate
      * number of spaces.
+     *
+     * charBOL, if nonzero, is a character to automatically output at the beginning of every line.  This probably
+     * isn't generally useful; I use it internally to preformat serial output.
      */
     this.tabSize = parmsSerial['tabSize'];
+    this.charBOL = parmsSerial['charBOL'];
     this.iLogicalCol = 0;
 
     Component.call(this, "SerialPort", parmsSerial, SerialPort, Messages.SERIAL);
@@ -837,6 +841,7 @@ SerialPort.prototype.echoByte = function(b)
                 nChars = tabSize - (this.iLogicalCol % tabSize);
                 if (this.tabSize) s = str.pad("", nChars);
             }
+            if (this.charBOL && !this.iLogicalCol && nChars) s = String.fromCharCode(this.charBOL) + s;
             this.controlIOBuffer.value += s;
             this.controlIOBuffer.scrollTop = this.controlIOBuffer.scrollHeight;
             this.iLogicalCol += nChars;
