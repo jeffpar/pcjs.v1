@@ -125,6 +125,69 @@ on OS X.  In newer versions of Node, the REPL blocks execution of the applicatio
 
 That Node package came bundled with its own version of NPM as well: v1.3.25.
 
+
+Markdown "Cheat Sheet"
+===
+
+To convert PCjs' special links, such as:
+
+	![IBM PC XT w/CGA, 10Mb Hard Drive](/devices/pc/machine/5160/cga/256kb/demo/thumbnail.jpg "link:/devices/pc/machine/5160/cga/256kb/demo/:200:100")
+
+to normal Markdown links, search using this regex:
+
+	\!\[(.*?)\]\((.*?) \"link:(.*?):([0-9]*):([0-9]*)\"\)
+	
+and replace using this regex:
+
+	[<img src="$2" width="$4" height="$5" alt="$1"/>]($3)
+
+For magazines (eg, BYTE), change:
+
+	\!\[(.*?)\]\(../static/([^)]*) \"link:../static/(.*?):([0-9]*):([0-9]*)\"\)
+
+to:
+
+	[<img src="http://archive.pcjs.org/pubs/pc/magazines/BYTE/$2" width="$4" height="$5" alt= "$1"/>](http://archive.pcjs.org/pubs/pc/magazines/BYTE/$3)
+
+
+Jekyll "Cheat Sheet"
+===
+
+Installing Jekyll
+---
+
+	sudo gem install bundler
+	(create Gemfile:
+		source 'https://rubygems.org'
+		gem 'github-pages'
+	)
+	bundle install
+	jekyll serve (or: bundle exec jekyll serve)
+
+Updating Jekyll
+---
+
+	bundle update
+
+Running Jekyll
+---
+
+	jekyll serve --incremental --config _config.yml,_developer.yml
+
+Embedding Screenshots with Jekyll
+---
+
+I created screenshot.html in the **_includes** folder, so that I could do this:
+
+	{% include screenshot.html src="/devices/pc/machine/5150/cga/64kb/donkey/thumbnail.jpg" width="200" height="100" link="/devices/pc/machine/5150/cga/64kb/donkey/" title="IBM PC running DONKEY.BAS" %}
+
+instead of this:
+
+	[<img src="/devices/pc/machine/5150/cga/64kb/donkey/thumbnail.jpg" width="200" height="100"/>](/devices/pc/machine/5150/cga/64kb/donkey/ "IBM PC running DONKEY.BAS")
+
+The latter is better for pure Markdown environments, but the former enables Jekyll to properly style screenshots.
+
+
 Miscellaneous Tips
 ===
 
@@ -171,55 +234,3 @@ indicating the name of serial device to connect to:
 The advantage of using *nc* is that no "middle man" is required: your terminal window will be connected directly
 to the virtual serial port.  And *nc* is included with OS X, whereas *socat* must installed separately (see
 [http://www.dest-unreach.org/socat/](http://www.dest-unreach.org/socat/)).
-
-
-Markdown "Cheat Sheet"
-===
-
-To convert PCjs' special links, such as:
-
-	![IBM PC XT w/CGA, 10Mb Hard Drive](/devices/pc/machine/5160/cga/256kb/demo/thumbnail.jpg "link:/devices/pc/machine/5160/cga/256kb/demo/:200:100")
-
-to normal Markdown links, search using this regex:
-
-	\!\[(.*?)\]\((.*?) \"link:(.*?):([0-9]*):([0-9]*)\"\)
-	
-and replace using this regex:
-
-	[<img src="$2" width="$4" height="$5" alt="$1"/>]($3)
-
-For magazines (eg, BYTE), change:
-
-	\!\[(.*?)\]\(../static/([^)]*) \"link:../static/(.*?):([0-9]*):([0-9]*)\"\)
-
-to:
-
-	[<img src="http://archive.pcjs.org/pubs/pc/magazines/BYTE/$2" width="$4" height="$5" alt= "$1"/>](http://archive.pcjs.org/pubs/pc/magazines/BYTE/$3)
-
-
-Jekyll "Cheat Sheet"
-===
-
-Installing Jekyll
----
-
-	sudo gem install bundler
-	(create Gemfile:
-		source 'https://rubygems.org'
-		gem 'github-pages'
-	)
-	bundle install
-	jekyll serve (or: bundle exec jekyll serve)
-
-Embedding Screenshots
----
-
-I created screenshot.html in the **_includes** folder, so that I could do this:
-
-	{% include screenshot.html src="/devices/pc/machine/5150/cga/64kb/donkey/thumbnail.jpg" width="200" height="100" link="/devices/pc/machine/5150/cga/64kb/donkey/" title="IBM PC running DONKEY.BAS" %}
-
-instead of this:
-
-	[<img src="/devices/pc/machine/5150/cga/64kb/donkey/thumbnail.jpg" width="200" height="100"/>](/devices/pc/machine/5150/cga/64kb/donkey/ "IBM PC running DONKEY.BAS")
-
-The latter is better for pure Markdown environments, but the former enables Jekyll to properly style screenshots.
