@@ -7,7 +7,4 @@ machines:
     id: ibm5150
 ---
 
-IBM PC (Model 5150, 64Kb) with Color Display and Debugger
----
-
 {% include machine.html id="ibm5150" %}

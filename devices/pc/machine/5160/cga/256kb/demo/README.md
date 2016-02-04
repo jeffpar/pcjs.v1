@@ -7,7 +7,7 @@ machines:
     id: ibm5160
 ---
 
-IBM PC XT (Model 5160, 256Kb, 10Mb Drive) with Color Display
+IBM PC XT with Color Display
 ---
 
 {% include machine.html id="ibm5160" %}

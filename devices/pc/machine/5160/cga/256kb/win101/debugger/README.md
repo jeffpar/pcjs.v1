@@ -9,7 +9,7 @@ machines:
     id: ibm5160
 ---
 
-IBM PC XT running Windows 1.01
+IBM PC XT with Debugger running Windows 1.01
 ---
 
 {% include machine.html id="ibm5160" %}
