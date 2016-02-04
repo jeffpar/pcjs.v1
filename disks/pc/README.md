@@ -32,8 +32,8 @@ that automatically run the software.
 
 ### MS-DOS (Microsoft)
 
-* MS-DOS 1.25
-* MS-DOS 2.00
+* [MS-DOS 1.25](/disks/pc/dos/microsoft/1.25/)
+* [MS-DOS 2.00](/disks/pc/dos/microsoft/2.00/)
 * [MS-DOS 3.20](/disks/pc/dos/microsoft/3.20/)
 * MS-DOS 3.21
 * MS-DOS 3.30

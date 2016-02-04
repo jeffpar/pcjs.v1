@@ -4342,7 +4342,7 @@ X86.opGRP3w = function()
 X86.opCLC = function()
 {
     this.clearCF();
-    this.nStepCycles -= 2;                          // CLC takes 2 cycles on all CPUs
+    this.nStepCycles -= 2;                              // CLC takes 2 cycles on all CPUs
 };
 
 /**
@@ -4353,7 +4353,7 @@ X86.opCLC = function()
 X86.opSTC = function()
 {
     this.setCF();
-    this.nStepCycles -= 2;                          // STC takes 2 cycles on all CPUs
+    this.nStepCycles -= 2;                              // STC takes 2 cycles on all CPUs
 };
 
 /**
@@ -4373,7 +4373,7 @@ X86.opCLI = function()
         return;
     }
     this.clearIF();
-    this.nStepCycles -= this.cycleCounts.nOpCyclesCLI;   // CLI takes LONGER on an 80286
+    this.nStepCycles -= this.cycleCounts.nOpCyclesCLI;  // CLI takes LONGER on an 80286
 };
 
 /**
@@ -4394,7 +4394,7 @@ X86.opSTI = function()
     }
     this.setIF();
     this.opFlags |= X86.OPFLAG.NOINTR;
-    this.nStepCycles -= 2;                          // STI takes 2 cycles on all CPUs
+    this.nStepCycles -= 2;                              // STI takes 2 cycles on all CPUs
 };
 
 /**
@@ -4405,7 +4405,7 @@ X86.opSTI = function()
 X86.opCLD = function()
 {
     this.clearDF();
-    this.nStepCycles -= 2;                          // CLD takes 2 cycles on all CPUs
+    this.nStepCycles -= 2;                              // CLD takes 2 cycles on all CPUs
 };
 
 /**
@@ -4416,7 +4416,7 @@ X86.opCLD = function()
 X86.opSTD = function()
 {
     this.setDF();
-    this.nStepCycles -= 2;                          // STD takes 2 cycles on all CPUs
+    this.nStepCycles -= 2;                              // STD takes 2 cycles on all CPUs
 };
 
 /**
@@ -4655,5 +4655,5 @@ X86.aOpGrp4b = [
 
 X86.aOpGrp4w = [
     X86.fnINCw,             X86.fnDECw,             X86.fnCALLw,            X86.fnCALLFdw,          // 0xFF(reg=0x0-0x3)
-    X86.fnJMPw,             X86.fnJMPFdw,           X86.fnPUSHw,            X86.fnGRPFault          // 0xFF(reg=0x4-0x7)
+    X86.fnJMPw,             X86.fnJMPFdw,           X86.fnPUSHw,            X86.fnGRPUndefined      // 0xFF(reg=0x4-0x7)
 ];
