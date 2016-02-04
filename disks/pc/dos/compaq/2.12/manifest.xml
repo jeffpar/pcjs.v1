@@ -2,12 +2,12 @@
 <?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.20.8/manifest.xsl"?>
 <manifest type="software">
 	<title>MS-DOS</title>
-	<version>1.12</version>
+	<version>2.12</version>
 	<type>DOS</type>
 	<category>Operating System</category>
 	<author>Microsoft/COMPAQ</author>
 	<releaseDate/>
-	<disk id="disk01" size="327680" chs="40:2:8" img="static/COMPAQ-DOS112.img" href="/disks/pc/dos/compaq/1.12/COMPAQ-DOS112.json" md5="78669dbfd2c3a23e30353788fcbabdef" md5json="5aaf3703a5c1374f464d9e7f90175ddf">
-		<name>COMPAQ MS-DOS 1.12</name>
+	<disk id="disk01" size="368640" chs="40:2:9" img="static/COMPAQ-DOS212.img" href="/disks/pc/dos/microsoft/2.00/COMPAQ-DOS212.json" md5="90489565ef2f3dd7e378d1477eb6623e" md5json="c76b7c3b1d9578da79680a1385f73285">
+		<name>COMPAQ MS-DOS 2.12</name>
 	</disk>
 </manifest>

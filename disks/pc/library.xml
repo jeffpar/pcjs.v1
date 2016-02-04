@@ -17,8 +17,6 @@
 		<manifest ref="/disks/pc/dos/ibm/5.00/manifest.xml"/>
 		<manifest ref="/disks/pc/dos/ibm/6.10/manifest.xml"/>
 		<manifest ref="/disks/pc/dos/ibm/7.00/manifest.xml"/>
-		<manifest ref="/disks/pc/dos/microsoft/1.25/manifest.xml"/>
-		<manifest ref="/disks/pc/dos/microsoft/2.00/manifest.xml"/>
 		<manifest ref="/disks/pc/dos/microsoft/3.20/manifest.xml"/>
 		<manifest ref="/disks/pc/dos/microsoft/3.21/manifest.xml"/>
 		<manifest ref="/disks/pc/dos/microsoft/3.30/manifest.xml"/>
@@ -30,7 +28,9 @@
 		<manifest ref="/disks/pc/dos/microsoft/6.00/manifest.xml"/>
 		<manifest ref="/disks/pc/dos/microsoft/6.20/manifest.xml"/>
 		<manifest ref="/disks/pc/dos/microsoft/6.22/manifest.xml"/>
+		<manifest ref="/disks/pc/dos/compaq/1.11/manifest.xml"/>
 		<manifest ref="/disks/pc/dos/compaq/1.12/manifest.xml"/>
+		<manifest ref="/disks/pc/dos/compaq/2.12/manifest.xml"/>
 		<manifest ref="/disks/pc/dos/compaq/3.10/manifest.xml"/>
 		<manifest ref="/disks/pc/dos/compaq/3.31/manifest.xml"/>
 		<manifest ref="/disks/pc/os2/ibm/1.0/manifest.xml"/>

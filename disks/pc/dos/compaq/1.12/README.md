@@ -4,7 +4,7 @@ title: COMPAQ MS-DOS 1.12
 permalink: /disks/pc/dos/compaq/1.12/
 machines:
   - type: pc
-    id: ibm5150-compaqdos112
+    id: ibm5150-compaq112
     config: /devices/pc/machine/5150/mda/64kb/machine.xml
     automount:
       A:
@@ -20,11 +20,11 @@ Released in 1983 by COMPAQ Computer Corp, this early version of MS-DOS displays 
 	Version 1.12
 	
 	(C) Copyright COMPAQ Computer Corp. 1982, 83
-	(C) Copyright Microsoft 1982, 82
+	(C) Copyright Microsoft 1981, 82
 
-A directory listing of the diskette is provided [below](#directory-of-compaq-dos-112-diskette).
+A directory listing of the diskette is provided [below](#directory-of-compaq-msdos-112-diskette).
 
-{% include machine.html id="ibm5150-compaqdos112" %}
+{% include machine.html id="ibm5150-compaq112" %}
 
 ### Directory of COMPAQ MS-DOS 1.12 Diskette
 
