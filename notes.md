@@ -117,6 +117,21 @@ to:
 Jekyll "Cheat Sheet"
 ===
 
+The [README](README.md) still assumes that you'll use the Node web server with the PCjs project, and it explains how
+to do that.
+
+However, if you'd rather use Jekyll to locally serve PCjs web pages (since that www.pcjs.org does now, thanks to
+to GitHub Pages), the basic steps are below.
+
+NOTE: The Node web server *is* still supported.  In fact, I've put significant effort into updating the Node components
+so that they recognize the Jekyll "Front Matter" that all pages now use to describe and load PCjs machines, allowing
+me to continue debugging PCjs with WebStorm's built-in Node support.  But since I now run Jekyll's web server by
+default (both locally and externally at www.pcjs.org), there will inevitably be some features that are "degraded" under
+Node.  I don't have the time or bandwidth to keep every aspect of Node's server operation in perfect sync with Jekyll's.
+The most obvious example of that are all the CSS style differences (colors, fonts, etc) between what Node and Jekyll
+render; Node pages continue to display an older, darker color scheme, because the servers take completely different
+approaches to templating.
+
 Installing Jekyll
 ---
 
@@ -136,6 +151,19 @@ Running Jekyll
 ---
 
 	bundle exec jekyll serve --incremental --config _config.yml,_developer.yml
+
+Once you see the following messages:
+
+	...
+	Server address: http://127.0.0.1:4000/
+	Server running... press ctrl-c to stop.
+	...
+
+You should now be able to use [http://localhost:4000](http://localhost:4000/) to load PCjs web pages.
+
+Note that **_developer.yml** is intended only for development purposes (it forces the use of uncompiled PCjs source
+code, to make debugging easier, and enables certain developer-only portions of assorted pages); a production server
+should not use that file.
 
 Embedding Screenshots with Jekyll
 ---
