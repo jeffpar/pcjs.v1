@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Windows 1.01 Server Array"
+title: "IBM PC XT (Model 5160, 256Kb, 10Mb Drive) Machine Array with EGA Displays"
 permalink: /devices/pc/machine/5160/ega/640kb/array/
 machines:
   - type: pc
@@ -13,7 +13,7 @@ machines:
     id: ibm5160d
 ---
 
-Windows 1.01 "Server Array"
+IBM PC XT EGA Machine Array
 ---
 
 ### Demonstration of Multiple IBM PCs on a Single Web Page

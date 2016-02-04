@@ -14,7 +14,7 @@ Help is available for the following JavaScript Machines:
 * [PCjs](/docs/pcjs/)
 * [C1Pjs](/docs/c1pjs/)
 
-{% if page.developer %}
+{% if site.developer %}
 
 Instruction documentation is also available:
 

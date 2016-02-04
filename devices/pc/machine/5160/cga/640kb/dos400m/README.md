@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "IBM PC XT (Model 5160, 640Kb) with Multitasking MS-DOS 4.00"
+title: "IBM PC XT (Model 5160, 640Kb, 10Mb Drive) with Color Display running Multitasking MS-DOS 4.00"
 permalink: /devices/pc/machine/5160/cga/640kb/dos400m/
 redirect_from:
   - /configs/pc/machines/5160/cga/640kb/dos400m/

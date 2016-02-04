@@ -1,9 +1,9 @@
 ---
 layout: post
 title: JavaScript Idiosyncrasies
-date: 2015-03-16 11:00:00
+date: 2015-03-26 11:00:00
 category: JavaScript
-permalink: /blog/2015/03/16/
+permalink: /blog/2015/03/26/
 ---
 
 Time to mention a few JavaScript idiosyncrasies, and how I deal with them.
@@ -102,8 +102,8 @@ important make that parameter unambiguously numeric as soon as possible; eg:
  * @return {number}
  */
 function foo(n) {
-	n = n || 0;
-	...
+    n = n || 0;
+    ...
 }
 ```
 
@@ -140,8 +140,8 @@ conversion of numeric properties.  For example, when you enumerate the propertie
 
 ``` javascript
 var o = {
-	0x20: ' ',
-	0x41: 'A'
+    0x20: ' ',
+    0x41: 'A'
 };
 ```
 
@@ -150,8 +150,8 @@ any conversion; eg:
 
 ``` javascript
 var o = {
-	"0x20": ' ',
-	"0x41": 'A'
+    "0x20": ' ',
+    "0x41": 'A'
 };
 ```
 

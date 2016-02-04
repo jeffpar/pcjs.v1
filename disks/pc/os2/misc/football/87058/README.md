@@ -9,7 +9,7 @@ machines:
     automount:
       A:
         path: /disks/pc/os2/misc/football/FOOTBALL-76817.json
-    messages: disk|data
+    messages: disk
 ---
 
 OS/2 FOOTBALL Boot Disk (v7.68.17)

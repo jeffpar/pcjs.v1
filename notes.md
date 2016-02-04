@@ -162,7 +162,6 @@ Installing Jekyll
 		gem 'github-pages'
 	)
 	bundle install
-	jekyll serve (or: bundle exec jekyll serve)
 
 Updating Jekyll
 ---
@@ -172,7 +171,7 @@ Updating Jekyll
 Running Jekyll
 ---
 
-	jekyll serve --incremental --config _config.yml,_developer.yml
+	bundle exec jekyll serve --incremental --config _config.yml,_developer.yml
 
 Embedding Screenshots with Jekyll
 ---
