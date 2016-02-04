@@ -8,27 +8,27 @@ To automatically stage files that have been modified and deleted, include -a; eg
 
 	git commit -a
 
-Creating a new branch ("386dev")
+Creating a new branch ("next-release")
 ---
 
 You could use `git branch`, but if you've already modified some files that you now want to 
 move to a new branch:
 
-	git checkout -b 386dev
+	git checkout -b next-release
 	
-Pushing a new branch ("386dev")
+Pushing a new branch ("next-release")
 ---
 
-Since a simple `git push` will report:
+If `git push` reports:
 
-	fatal: The current branch 386dev has no upstream branch.
+	fatal: The current branch next-release has no upstream branch.
     To push the current branch and set the remote as upstream, use
     
-        git push --set-upstream origin 386dev
+        git push --set-upstream origin next-release
 
 do what it recommends (*-u* is shorthand for *--set-upstream*):
 
-	git push -u origin 386dev
+	git push -u origin next-release
 
 Reverting (resetting) a single file [[link](http://www.norbauer.com/rails-consulting/notes/git-revert-reset-a-single-file.html)]
 ---
@@ -76,42 +76,6 @@ Next, issue these commands:
 	git merge master
 	git push origin gh-pages
 	git checkout master
-
-Here's a sample run:
-
-	[~/Sites/pcjs] git checkout gh-pages
-	Branch gh-pages set up to track remote branch gh-pages from origin.
-	Switched to a new branch 'gh-pages'
-	
-	[~/Sites/pcjs] git merge master
-	Updating 33098e4..ab4f241
-	Fast-forward
-	 README.md                                           |   2 +-
-	 _config.yml                                         |   2 +-
-	 _posts/2015-12-10-rebuilding-the-pcjs-website.md    |  28 ++++---
-	 apps/c1p/README.md                                  |   2 +-
-	 blog/README.md                                      |   4 +-
-	 devices/pc/machine/5170/ega/1152kb/rev1/machine.xml |   2 +-
-	 disks/pc/README.md                                  |   2 +-
-	 docs/about/README.md                                |  21 ++---
-	 docs/about/pcjs/README.md                           |   2 +-
-	 docs/pcjs/demos/pc-dbg.js                           |  86 ++++++++++----------
-	 modules/markout/lib/markout.js                      | 174 +++++++++++-----------------------------
-	 pubs/pc/reference/intel/8087/README.md              | 347 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-	 versions/c1pjs/1.20.2/components.css                |   4 -
-	 versions/pcjs/1.20.2/components.css                 |   4 -
-	 versions/pcjs/1.20.2/pc-dbg.js                      | 104 ++++++++++++++++++++++++
-	 15 files changed, 572 insertions(+), 212 deletions(-)
-	 create mode 100644 pubs/pc/reference/intel/8087/README.md
-	 
-	[~/Sites/pcjs] git push origin gh-pages
-	Total 0 (delta 0), reused 0 (delta 0)
-	To git@github.com:jeffpar/pcjs.git
-	   33098e4..ab4f241  gh-pages -> gh-pages
-	   
-	[~/Sites/pcjs] git checkout master
-	Switched to branch 'master'
-	Your branch is up-to-date with 'origin/master'.
 
 
 Node "Cheat Sheet"
