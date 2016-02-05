@@ -5,7 +5,7 @@
 	<version>3.10</version>
 	<type>DOS</type>
 	<category>Operating System</category>
-	<author>Compaq/Microsoft</author>
+	<author>Microsoft/COMPAQ</author>
 	<releaseDate/>
 	<machine href="/devices/pc/machine/5170/ega/1152kb/rev3/debugger/machine.xml"/>
 	<disk id="disk01" size="368640" chs="40:2:9" img="static/COMPAQ-DOS310-DISK1.img" href="/disks/pc/dos/compaq/3.10/COMPAQ-DOS310-DISK1.json" md5="a2a329b9d06e5bd425050a10e14e2f92" md5json="c212bb6bcd6a4c5853be2c390df66536">
