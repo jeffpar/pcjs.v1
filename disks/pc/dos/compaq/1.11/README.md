@@ -22,7 +22,7 @@ Released in 1983 by COMPAQ Computer Corp, this early version of MS-DOS displays 
 	(C) Copyright COMPAQ Computer Corp. 1982
 	(C) Copyright Microsoft 1981, 82
 
-A directory listing of the diskette is provided [below](#directory-of-compaq-msdos-111-diskette).
+A directory listing of the diskette is provided [below](#directory-of-compaq-ms-dos-111-diskette).
 
 {% include machine.html id="ibm5150-compaq111" %}
 
