@@ -12,7 +12,7 @@
 	<keyboard ref="/devices/pc/keyboard/keyboard-minimal-functions.xml"/>
 	<debugger id="debugger" messages="fault" commands=""/>
 	<panel ref="/devices/pc/panel/wide.xml"/>
-	<fdc ref="/disks/pc/library.xml" automount=''/>
+	<fdc ref="/disks/pc/compiled/library.xml" automount=''/>
 	<hdc id="hdcAT" type="at" drives='[{name:"20Mb Hard Disk",type:2,path:"/disks/pc/os2/ibm/1.0/OS210-HDISK.json"}]'/>
 	<chipset id="chipset" model="5170" floppies="[1440,1200]"/>
 	<serial id="com1" adapter="1"/>

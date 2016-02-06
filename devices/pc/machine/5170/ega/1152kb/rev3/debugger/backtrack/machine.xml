@@ -11,7 +11,7 @@
 	<video ref="/devices/pc/video/ibm/ega/ibm-ega-128kb-autolockfs.xml"/>
 	<keyboard ref="/devices/pc/keyboard/keyboard-minimal-functions.xml"/>
 	<debugger id="debugger" messages="fault" commands=""/>
-	<fdc ref="/disks/pc/library.xml" automount='{A: {name: "PC-DOS 3.20 (Disk 1)", path: "/disks/pc/dos/ibm/3.20/PCDOS320-DISK1.json"}, B: {name: "PC-DOS 3.20 (Disk 2)", path: "/disks/pc/dos/ibm/3.20/PCDOS320-DISK2.json"}}'/>
+	<fdc ref="/disks/pc/compiled/library.xml" automount='{A: {name: "PC-DOS 3.20 (Disk 1)", path: "/disks/pc/dos/ibm/3.20/PCDOS320-DISK1.json"}, B: {name: "PC-DOS 3.20 (Disk 2)", path: "/disks/pc/dos/ibm/3.20/PCDOS320-DISK2.json"}}'/>
 	<panel ref="/devices/pc/panel/btpanel.xml"/>
 	<hdc id="hdcAT" type="at" drives='[{name:"20Mb Hard Disk",type:2}]'/>
 	<chipset id="chipset" model="5170" floppies="[1440,1200]" monitor="ega"/>

@@ -11,7 +11,7 @@
 	<rom id="romBIOS" addr="0xf8000" size="0x8000" alias="[0xf0000,0xffff0000,0xffff8000]" file="/devices/pc/bios/compaq/deskpro386/1988-01-28/1988-01-28.json"/>
 	<video ref="/devices/pc/video/ibm/vga/ibm-vga-autolockfs.xml"/>
 	<keyboard ref="/devices/pc/keyboard/keyboard-minimal-functions.xml"/>
-	<fdc ref="/disks/pc/library.xml" automount='{A: {name: "PC-DOS 3.30 (Disk 1)", path: "/disks/pc/dos/ibm/3.30/PCDOS330-DISK1.json"}, B: {name: "VGA Tests (Black Book)", path: "/tests/pc/vga/VGABIN.json"}}'/>
+	<fdc ref="/disks/pc/compiled/library.xml" automount='{A: {name: "PC-DOS 3.30 (Disk 1)", path: "/disks/pc/dos/ibm/3.30/PCDOS330-DISK1.json"}, B: {name: "VGA Tests (Black Book)", path: "/tests/pc/vga/VGABIN.json"}}'/>
 	<debugger id="debugger" messages="fault|int" commands=""/>
 	<panel ref="/devices/pc/panel/btpanel.xml"/>
 	<hdc id="hdcAT" type="at" drives='[{name:"20Mb Hard Disk",type:2}]'/>

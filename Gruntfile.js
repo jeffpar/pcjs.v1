@@ -312,7 +312,7 @@ module.exports = function(grunt) {
             "c1pxsl": {
                 files: [
                     {
-                        cwd: "./modules/shared/templates/",
+                        cwd: "modules/shared/templates/",
                         src: ["common.css", "common.xsl", "document.css", "document.xsl", "machine.xsl", "manifest.xsl", "outline.xsl"],
                         dest: "versions/c1pjs/<%= pkg.version %>/",
                         expand: true
@@ -330,7 +330,7 @@ module.exports = function(grunt) {
             "pcxsl": {
                 files: [
                     {
-                        cwd: "./modules/shared/templates/",
+                        cwd: "modules/shared/templates/",
                         src: ["common.css", "common.xsl", "document.css", "document.xsl", "machine.xsl", "manifest.xsl", "outline.xsl"],
                         dest: "versions/pcjs/<%= pkg.version %>/",
                         expand: true
@@ -348,7 +348,7 @@ module.exports = function(grunt) {
             "c1pjs": {
                 files: [
                     {
-                        cwd: "./modules/c1pjs/templates/",
+                        cwd: "modules/c1pjs/templates/",
                         src: ["components.*"],
                         dest: "versions/c1pjs/<%= pkg.version %>/",
                         expand: true
@@ -365,7 +365,7 @@ module.exports = function(grunt) {
             "pcjs": {
                 files: [
                     {
-                        cwd: "./modules/pcjs/templates/",
+                        cwd: "modules/pcjs/templates/",
                         src: ["components.*"],
                         dest: "versions/pcjs/<%= pkg.version %>/",
                         expand: true
@@ -391,6 +391,48 @@ module.exports = function(grunt) {
                 options: {
                     process: function(content, srcPath) {
                         return content.replace(/\/versions\/\{\$APPCLASS}\/\{\$APPVERSION}\//g, "");
+                    }
+                }
+            },
+            "manifests": {
+                files: [
+                    {
+                        cwd: "disks/pc/",
+                        src: ["library.xml", "samples.xml"],
+                        dest: "disks/pc/compiled/",
+                        expand: true
+                    }
+                ],
+                options: {
+                    process: function(content, srcPath) {
+                        var contentOrig = content;
+                        var reManifest = /([ \t]*)<manifest.*? ref="(.*?)".*?\/>/g, matchManifest;
+                        while ((matchManifest = reManifest.exec(contentOrig))) {
+                            var sManifest = grunt.file.read(path.join('.', matchManifest[2]));
+                            if (!sManifest) continue;
+                            var sDefaultName = "", match;
+                            match = sManifest.match(/<title.*?>(.*?)<\/title>/);
+                            if (match) {
+                                sDefaultName = match[1];
+                                match = sManifest.match(/<version.*?>(.*?)<\/version>/);
+                                if (match) sDefaultName += ' ' + match[1];
+                            }
+                            var reDisk, matchDisk, sDisks = "";
+                            reDisk = /<disk.*? href="([^"]*)".*?\/>/g;
+                            while ((matchDisk = reDisk.exec(sManifest))) {
+                                if (sDisks) sDisks += "\n";
+                                sDisks += matchManifest[1] + "<disk path=\"" + matchDisk[1] + "\">" + sDefaultName + "</disk>";
+                            }
+                            reDisk = /<disk.*? href="([^"]*)".*?>([\S\s]*?)<\/disk>/g;
+                            while ((matchDisk = reDisk.exec(sManifest))) {
+                                if (sDisks) sDisks += "\n";
+                                var matchName = matchDisk[2].match(/<name.*?>(.*?)<\/name>/);
+                                var sName = matchName && matchName[1] || sDefaultName;
+                                sDisks += matchManifest[1] + "<disk path=\"" + matchDisk[1] + "\">" + sName + "</disk>";
+                            }
+                            content = content.replace(matchManifest[0], sDisks);
+                        }
+                        return content;
                     }
                 }
             }

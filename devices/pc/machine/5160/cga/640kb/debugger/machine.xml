@@ -12,7 +12,7 @@
 	<keyboard ref="/devices/pc/keyboard/keyboard-minimal.xml"/>
 	<debugger id="debugger"/>
 	<panel ref="/devices/pc/panel/wide.xml"/>
-	<fdc ref="/disks/pc/library.xml" width="320px"/>
+	<fdc ref="/disks/pc/compiled/library.xml" width="320px"/>
 	<chipset id="chipset" model="5160" sw1="01001001" pos="left" padleft="8px" padbottom="8px">
 		<control type="switches" label="SW1" binding="sw1" left="0px"/>
 		<control type="description" binding="swdesc" left="0px"/>

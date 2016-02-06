@@ -7240,8 +7240,14 @@ if (DEBUGGER) {
                         this.dbgAddrNextCode = this.newAddr(this.cpu.getIP(), this.cpu.getCS());
                         break;
                     /*
-                     * I used to alias "PC" to "IP", until I discovered that early (perhaps ALL) versions of
-                     * DEBUG.COM treat "PC" as an alias for the 16-bit flags register.  I, of course, prefer "PS".
+                     * I used to alias "PC" (Program Counter) to "IP" (Instruction Pointer), because in PC-DOS 1.00
+                     * through 2.10, DEBUG.COM did the same thing.  Then I discovered that, starting with PC-DOS 3.00,
+                     * DEBUG.COM changed "PC" to refer to the 16-bit flags register (Program or Processor Control?)
+                     * I've elected to go for PC-DOS 3.00+ compatibility, since that will be more widely known.
+                     *
+                     * PCjs prefers "PS" (Processor Status) for accessing the FLAGS register in its 16-bit (or 32-bit)
+                     * entirety.  Individual flag bits can also be accessed as 1-bit registers, using the names shown
+                     * below ("C", "P", "A", "Z", etc.)
                      */
                     case "PC":
                     case "PS":
