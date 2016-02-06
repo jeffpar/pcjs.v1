@@ -43,7 +43,7 @@ None.
 
 Example
 ---
-	<rom id="romBIOS" addr="0xfe000" size="0x02000" file="/devices/pc/bios/5150/1981-04-24.json"/>
+	<rom id="romBIOS" addr="0xfe000" size="0x02000" file="/devices/pc/rom/5150/bios/1981-04-24.json"/>
 
 Output
 ---

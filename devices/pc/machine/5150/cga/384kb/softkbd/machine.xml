@@ -6,8 +6,8 @@
 	<cpu id="cpu8088" model="8088"/>
 	<debugger id="debugger"/>
 	<ram id="ramLow" addr="0x00000" test="false" comment="no memory test"/>
-	<rom id="romBASIC" addr="0xf6000" size="0x8000" file="/devices/pc/basic/ibm-basic-1.00.json"/>
-	<rom id="romBIOS" addr="0xfe000" size="0x2000" file="/devices/pc/bios/5150/1981-04-24.json"/>
+	<rom id="romBASIC" addr="0xf6000" size="0x8000" file="/devices/pc/rom/5150/basic/BASIC100.json"/>
+	<rom id="romBIOS" addr="0xfe000" size="0x2000" file="/devices/pc/rom/5150/bios/1981-04-24.json"/>
 	<video ref="/devices/pc/video/ibm/cga/ibm-cga-960.xml"/>
 	<keyboard ref="/devices/pc/keyboard/keyboard-us83.xml"/>
 	<panel ref="/devices/pc/panel/wide.xml"/>

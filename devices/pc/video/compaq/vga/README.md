@@ -47,7 +47,7 @@ a way of getting the sharpest and fastest graphics without abandoning your commi
 As such, this board is in perfect accord with the Compaq philosophy, and it may be the best way available
 for mating a VGA-style monitor and VGA graphics to your AT.
 
-A copy of the board's [VGA ROM BIOS](109360-001/1988-05-18.json) was created by [dumping](/devices/pc/bios/compaq/deskpro386/#dumping-the-roms)
+A copy of the board's [VGA ROM BIOS](109360-001/1988-05-18.json) was created by [dumping](/devices/pc/rom/compaq/bios/deskpro386/#dumping-the-roms)
 the contents of each EPROM chip to a *.hex* file, and then merging the *.hex* files with the following
 [FileDump](/modules/filedump/) command:
 
@@ -70,7 +70,7 @@ The Compaq VGA ROM BIOS concludes with the usual copyright string and author ini
 	05/18/88
 
 Four of the authors -- **RWS**, **NPB**, **DJC**, and **CAB** -- are also listed as authors of the
-[DeskPro 386 ROM BIOS](/devices/pc/bios/compaq/deskpro386/).
+[DeskPro 386 ROM BIOS](/devices/pc/rom/compaq/bios/deskpro386/).
 
 An older version of the VGA ROM BIOS, [1987-10-27.json](109360-001/1987-10-27.json), is also available online.  It comes
 from an [earlier revision](http://bitsavers.trailing-edge.com/pdf/compaq/firmware/109360-001_VGA/) of the same board, with
