@@ -405,6 +405,20 @@ module.exports = function(grunt) {
                 ],
                 options: {
                     process: function(content, srcPath) {
+                        /*
+                         * This function mimics what components.xsl normally does for disk manifests referenced
+                         * by the FDC machine component.  Compare it to the following template in components.xsl:
+                         * 
+                         *      <xsl:template match="manifest[not(@ref)]" mode="component">
+                         * 
+                         * This code is not perfect (it doesn't process "link" attributes, for example, which is why
+                         * we've left machines that use the samples.xml disk library alone), but for machines that use
+                         * library.xml, having them use compiled/library.xml instead speeds up loading significantly.
+                         * 
+                         * Granted, after the first machine has fetched all the individual manifest files, your
+                         * browser should do a reasonably good job using cached copies for all subsequent machines,
+                         * but even then, there's still a noticeable delay.
+                         */
                         var contentOrig = content;
                         var reManifest = /([ \t]*)<manifest.*? ref="(.*?)".*?\/>/g, matchManifest;
                         while ((matchManifest = reManifest.exec(contentOrig))) {
