@@ -28,4 +28,5 @@ The project contains the following IBM PC BIOS ROMs:
 As well as BIOS ROMs, with more detailed information, for the following machines:
 
 * [Model 5170](5170/bios/)
-* [Compaq DeskPro 386](compaq/deskpro386/)
+* [Compaq DeskPro 386](compaq/bios/deskpro386/)
+* [Compaq Portable III](compaq/bios/portable3/)

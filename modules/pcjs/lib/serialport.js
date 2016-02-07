@@ -46,16 +46,19 @@ if (NODE) {
  *
  * The SerialPort component has the following component-specific (parmsSerial) properties:
  *
- *      adapter: 1 (for port 0x3F8) or 2 (for port 0x2F8); 0 if not defined
+ *      adapter: 1 (port 0x3F8) or 2 (port 0x2F8); 0 if not defined
  *
  *      binding: name of a control (based on its "binding" attribute) to bind to this port's I/O
  *
  *      tabSize: set to a non-zero number to convert tabs to spaces (applies only to output to
  *      the above binding); default is 0 (no conversion)
  *
- * WARNING: Since the XSL file defines 'adapter' as a number, not a string, there's no need to
- * use parseInt(), and as an added benefit, we don't need to worry about whether a hex or decimal
- * format was used.
+ * In the future, we may support 'port' and 'irq' properties that allow the machine to define a
+ * non-standard serial port configuration, instead of only our pre-defined 'adapter' configurations.
+ *
+ * NOTE: Since the XSL file defines 'adapter' as a number, not a string, there's no need to use
+ * parseInt(), and as an added benefit, we don't need to worry about whether a hex or decimal format
+ * was used.
  *
  * This hard-coded approach mimics the original IBM PC Asynchronous Adapter configuration, which
  * contained a pair of "shunt modules" that allowed the user to select a port address of either

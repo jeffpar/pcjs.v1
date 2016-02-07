@@ -164,24 +164,24 @@ usually of no concern to the programmer. All 8086/8088 addressing modes may be u
 operands, enabling convenient processing of numeric arrays, structures, based variables, etc.
 
 	                       Table S-3. Principal Instructions
-				
-		Class                   Instructions
-		
-		Data Transfer           Load (all data types), Store (all data types), Exchange
-		
-		Arithmetic              Add, Subtract, Multiply, Divide, Subtract Reversed, Divide Reversed,
-								Square Root, Scale, Remainder, Integer Part, Change Sign,
-								Absolute Value, Extract
-								
-		Comparison              Compare, Examine, Test
-		
-		Transcendental          Tangent, Arctangent, 2^x-1, Y*Log2(X + 1), Y*Log2(X)
-		
-		Constants               0, 1, π, Log10(2), Loge(2), Log2(10), Log2(e)
-		
-		Processor Control       Load Control Word, Store Control Word, Store Status Word,
-								Load Environment, Store Environment, Save, Restore, Enable Interrupts,
-								Disable Interrupts, Clear Exceptions, Initialize
+	
+	    Class                   Instructions
+	
+	    Data Transfer           Load (all data types), Store (all data types), Exchange
+	
+	    Arithmetic              Add, Subtract, Multiply, Divide, Subtract Reversed, Divide Reversed,
+	                            Square Root, Scale, Remainder, Integer Part, Change Sign,
+	                            Absolute Value, Extract
+	
+	    Comparison              Compare, Examine, Test
+	
+	    Transcendental          Tangent, Arctangent, 2^x-1, Y*Log2(X + 1), Y*Log2(X)
+	
+	    Constants               0, 1, π, Log10(2), Loge(2), Log2(10), Log2(e)
+	
+	    Processor Control       Load Control Word, Store Control Word, Store Status Word,
+	                            Load Environment, Store Environment, Save, Restore, Enable Interrupts,
+	                            Disable Interrupts, Clear Exceptions, Initialize
 
 > NDP routines may also be written in PL/M-86, Intel's high-level language for the 8086 and 8088 CPUs. PL/M-86
 provides the programmer with access to many 8087 facilities while reducing the programmer's need to understand the
