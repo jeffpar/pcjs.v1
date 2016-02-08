@@ -8,7 +8,7 @@ redirect_from:
 
 IBM PC AT (Model 5170) BIOS
 ---
-[1984-01-10.json](1984-01-10.json) contains the original IBM PC AT BIOS.
+[ATBIOS-REV1.json](1984-01-10/ATBIOS-REV1.json) contains the original IBM PC AT BIOS.
 
 From [http://minuszerodegrees.net/bios/BIOS_5170_10JAN84_6MHZ.zip](http://minuszerodegrees.net/bios/):
 
@@ -31,24 +31,24 @@ From [http://minuszerodegrees.net/bios/BIOS_5170_10JAN84_6MHZ.zip](http://minusz
 
 The JSON-encoded ROM image that PCjs uses was created using the *FileDump* command-line *merge* option:
 
-	filedump --file=http://archive.pcjs.org/devices/pc/rom/5170/bios/BIOS_5170_10JAN84_U27_6181028_27256_6MHZ.BIN --merge=http://archive.pcjs.org/devices/pc/rom/5170/bios/BIOS_5170_10JAN84_U47_6181029_27256_6MHZ.BIN --output=1984-01-10.json --overwrite
+	filedump --file=http://archive.pcjs.org/devices/pc/rom/5170/bios/BIOS_5170_10JAN84_U27_6181028_27256_6MHZ.BIN --merge=http://archive.pcjs.org/devices/pc/rom/5170/bios/BIOS_5170_10JAN84_U47_6181029_27256_6MHZ.BIN --output=ATBIOS-REV1.json --overwrite
 	
-Since a MAP file ([1984-01-10.map](1984-01-10.map)) exists as well, it is automatically appended to the JSON file
-([1984-01-10.json](1984-01-10.json)) when using a ROM input file (or JSON output file) with a matching filename.
+Since a MAP file ([ATBIOS-REV1.map](1984-01-10/ATBIOS-REV1.map)) exists as well, it is automatically appended to the JSON file
+([ATBIOS-REV1.json](1984-01-10/ATBIOS-REV1.json)) when using a ROM input file (or JSON output file) with a matching filename.
 
-It is also possible to create a merged binary ROM image ([1984-01-10.rom](http://archive.pcjs.org/devices/pc/rom/5170/bios/1984-01-10.rom))
+It is also possible to create a merged binary ROM image ([ATBIOS-REV1.rom](http://archive.pcjs.org/devices/pc/rom/5170/bios/ATBIOS-REV1.rom))
 by adding *--format=rom* to the command-line (the default is *--format=json*).
 
 These operations can only be performed using the *FileDump* command-line interface; the *FileDump* API does not support
 either the *merge* option or the appending of MAP data.  For the moment, the API can only dump unadorned ROM images; eg:
 
-	http://localhost:8088/api/v1/dump/?file=http://archive.pcjs.org/devices/pc/rom/5170/bios/1984-01-10.rom
+	http://localhost:8088/api/v1/dump/?file=http://archive.pcjs.org/devices/pc/rom/5170/bios/ATBIOS-REV1.rom
 
 ---
 
 IBM PC AT (Model 5170) BIOS ("Rev 2")
 ---
-[1985-06-10.json](1985-06-10.json) contains the second IBM PC AT BIOS, dated June 10, 1985, which expanded hard disk
+[ATBIOS-REV2.json](1985-06-10/ATBIOS-REV2.json) contains the second IBM PC AT BIOS, dated June 10, 1985, which expanded hard disk
 support from 15 to 23 drive types, fixed some bugs, and added support for 720Kb 3.5-inch floppy diskette drives.
 
 From [http://minuszerodegrees.net/bios/BIOS_5170_10JUN85_6MHZ.zip](http://minuszerodegrees.net/bios/):
@@ -72,13 +72,13 @@ From [http://minuszerodegrees.net/bios/BIOS_5170_10JUN85_6MHZ.zip](http://minusz
 
 The JSON-encoded ROM image that PCjs uses was created using the *FileDump* command-line *merge* option:
 
-	filedump --file=http://archive.pcjs.org/devices/pc/rom/5170/bios/BIOS_5170_10JUN85_U27_6480090_27256.BIN --merge=http://archive.pcjs.org/devices/pc/rom/5170/bios/BIOS_5170_10JUN85_U47_6480091_27256.BIN --output=1985-06-10.json --overwrite
+	filedump --file=http://archive.pcjs.org/devices/pc/rom/5170/bios/BIOS_5170_10JUN85_U27_6480090_27256.BIN --merge=http://archive.pcjs.org/devices/pc/rom/5170/bios/BIOS_5170_10JUN85_U47_6480091_27256.BIN --output=ATBIOS-REV2.json --overwrite
 
 ---
 
 IBM PC AT (Model 5170) BIOS ("Rev 3")
 ---
-[1985-11-15.json](1985-11-15.json) contains the third (and last) IBM PC AT BIOS, dated November 15, 1985,
+[ATBIOS-REV3.json](1985-11-15/ATBIOS-REV3.json) contains the third (and last) IBM PC AT BIOS, dated November 15, 1985,
 which added support for 101-key keyboards and 1.44Mb floppy diskette drives.
 
 From [http://minuszerodegrees.net/bios/BIOS_5170_15NOV85_8MHZ_VARIATION_2.zip](http://minuszerodegrees.net/bios/):
@@ -102,4 +102,4 @@ From [http://minuszerodegrees.net/bios/BIOS_5170_15NOV85_8MHZ_VARIATION_2.zip](h
 
 The JSON-encoded ROM image that PCjs uses was created using the *FileDump* command-line *merge* option:
 
-	filedump --file=http://archive.pcjs.org/devices/pc/rom/5170/bios/BIOS_5170_15NOV85_U27_61X9266_27256.BIN --merge=http://archive.pcjs.org/devices/pc/rom/5170/bios/BIOS_5170_15NOV85_U47_61X9265_27256.BIN --output=1985-11-15.json --overwrite
+	filedump --file=http://archive.pcjs.org/devices/pc/rom/5170/bios/BIOS_5170_15NOV85_U27_61X9266_27256.BIN --merge=http://archive.pcjs.org/devices/pc/rom/5170/bios/BIOS_5170_15NOV85_U47_61X9265_27256.BIN --output=ATBIOS-REV3.json --overwrite
