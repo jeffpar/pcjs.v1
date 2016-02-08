@@ -416,10 +416,20 @@ Bus.prototype.addMemory = function(addr, size, type, controller)
         addr = addrBlock + this.nBlockSize;
         size -= sizeBlock;
     }
-    if (size > 0) {
-        return this.reportError(Bus.ERROR.ADD_MEM_BADRANGE, addr, size);
+    if (size <= 0) {
+        /*
+         * If all addMemory() calls happened ONLY during device initialization, the following code would not
+         * be necessary; unfortunately, the Video component can add and remove physical memory blocks during video
+         * mode changes, so we have to kick out any PAGED blocks that could have references to those physical memory
+         * blocks.  If paging isn't enabled (or supported by the current the CPU), this call has no effect.
+         *
+         * We could handle this case with a little more, um, precision, but Video mode changes aren't frequent enough
+         * to warrant it.
+         */
+        this.cpu.flushPageBlocks();
+        return true;
     }
-    return true;
+    return this.reportError(Bus.ERROR.ADD_MEM_BADRANGE, addr, size);
 };
 
 /**
@@ -600,6 +610,16 @@ Bus.prototype.removeMemory = function(addr, size)
             addr = iBlock * this.nBlockSize;
             size -= this.nBlockSize;
         }
+        /*
+         * If all removeMemory() calls happened ONLY during device initialization, the following code would not
+         * be necessary; unfortunately, the Video component can add and remove physical memory blocks during video
+         * mode changes, so we have to kick out any PAGED blocks that could have references to those physical memory
+         * blocks.  If paging isn't enabled (or supported by the current the CPU), this call has no effect.
+         *
+         * We could handle this case with a little more, um, precision, but Video mode changes aren't frequent enough
+         * to warrant it.
+         */
+        this.cpu.flushPageBlocks();
         return true;
     }
     return this.reportError(Bus.ERROR.REM_MEM_BADRANGE, addr, size);

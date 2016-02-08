@@ -36,6 +36,7 @@ A PCjs machine XML file defines all a machine's components. Components include:
 * [Mouse](/docs/pcjs/mouse/)
 * [RAM](/docs/pcjs/ram/)
 * [ROM](/docs/pcjs/rom/)
+* [Parallel Port](/docs/pcjs/parallel/)
 * [Serial Port](/docs/pcjs/serial/)
 * [Video Adapter](/docs/pcjs/video/)
 
