@@ -695,6 +695,33 @@
 		</xsl:call-template>
 	</xsl:template>
 
+	<xsl:template match="parallel[@ref]">
+		<xsl:param name="machine" select="''"/>
+		<xsl:variable name="componentFile"><xsl:value-of select="$rootDir"/><xsl:value-of select="@ref"/></xsl:variable>
+		<xsl:apply-templates select="document($componentFile)/parallel"><xsl:with-param name="machine" select="$machine"/></xsl:apply-templates>
+	</xsl:template>
+
+	<xsl:template match="parallel[not(@ref)]">
+		<xsl:param name="machine" select="''"/>
+		<xsl:variable name="adapter">
+			<xsl:choose>
+				<xsl:when test="@adapter"><xsl:value-of select="@adapter"/></xsl:when>
+				<xsl:otherwise>0</xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
+		<xsl:variable name="binding">
+			<xsl:choose>
+				<xsl:when test="@binding"><xsl:value-of select="@binding"/></xsl:when>
+				<xsl:otherwise/>
+			</xsl:choose>
+		</xsl:variable>
+		<xsl:call-template name="component">
+			<xsl:with-param name="machine" select="$machine"/>
+			<xsl:with-param name="class">parallel</xsl:with-param>
+			<xsl:with-param name="parms">,adapter:<xsl:value-of select="$adapter"/>,binding:'<xsl:value-of select="$binding"/>'</xsl:with-param>
+		</xsl:call-template>
+	</xsl:template>
+
 	<xsl:template match="serial[@ref]">
 		<xsl:param name="machine" select="''"/>
 		<xsl:variable name="componentFile"><xsl:value-of select="$rootDir"/><xsl:value-of select="@ref"/></xsl:variable>

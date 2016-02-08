@@ -98,28 +98,7 @@ SHELL.EXE should display:
 * Start A Protect Mode Program
 * Start A Real Mode Program
 
-The first option will start CMD.EXE, which appears to work fine.  The second option will start COMMAND.COM,
-which will generally crash if CMD.EXE was started previously:
-
-	*# Internal Error 0158:1397  *
-	_panic: PageLock: unlocked page not in list
-
-If "Start A Real Mode Program" is chosen first, a hard error popup is displayed:
-
-	DOS0022: The system cannot accept the command.
-	
-	Return the error to the program
-	End the program or operation
-	Retry the operation
-
-Any response is likely to trigger the following error:
-
-	Trap 0 - Divide Error
-	AX=80EA0000  BX=00000000  CX=00000000  DX=00000000  SI=E1C0001E  DI=00EB0022
-	IP=00000402  SP=00000758  BP=0000075A  CR0=8000FFFD  ErrC=0000
-	CS=0127  SS=00FF  DS=0347  ES=0347  FS=0058  GS=0000  Flags=00003246
-
-This error is currently under investigation.
+The first option will start CMD.EXE, and the second option will start COMMAND.COM.
 
 ### Directory of OS/2 FOOTBALL Boot Disk (v7.68.17)
 

@@ -39,7 +39,7 @@ Bindings
 
 Example
 ---
-	<parallel id="lpt1" adapter="1" binding="print"/>
+	<parallel id="lpt1" adapter="2" binding="print"/>
 
 Output
 ---

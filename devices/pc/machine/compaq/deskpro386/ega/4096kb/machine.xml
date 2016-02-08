@@ -16,6 +16,7 @@
 	<fdc ref="/disks/pc/compiled/library.xml" automount='{A: {name: "PC-DOS 3.30 (Disk 1)", path: "/disks/pc/dos/ibm/3.30/PCDOS330-DISK1.json"}, B: {name: "PC-DOS 3.30 (Disk 2)", path: "/disks/pc/dos/ibm/3.30/PCDOS330-DISK2.json"}}'/>
 	<hdc id="hdcAT" type="at" drives='[{name: "20Mb Hard Disk", type: 2, path: "/disks/pc/fixed/20mb/pcdos330-empty.json"}]'/>
 	<chipset id="chipset" model="deskpro386" floppies="[1200,1200]"/>
+	<parallel id="lpt1" adapter="2"/>
 	<serial id="com1" adapter="1"/>
 	<serial id="com2" adapter="2" binding="print" tabsize="8" charbol="9"/>
 	<mouse serial="com1"/>

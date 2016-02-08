@@ -387,7 +387,7 @@ State.prototype = {
      */
     printString: function(s) {
         if (DEBUG && DEBUGGER && this.dbg) {
-            if (this.dbg.messageEnabled(Messages.STATE)) {
+            if (this.dbg.messageEnabled(Messages.LOG)) {
                 this.dbg.message(s);
             }
         }
