@@ -526,7 +526,7 @@ Component.bindComponentControls = function(component, element, sAppClass)
                     case sAppClass + "-binding":
                         parms = Component.getComponentParms(control);
                         if (parms && parms['binding']) {
-                            component.setBinding(parms['type'], parms['binding'], control);
+                            component.setBinding(parms['type'], parms['binding'], control, parms['value']);
                         } else {
                             Component.log("Component '" + component.toString() + "' missing binding" + (parms? " for " + parms['type'] : ""), "warning");
                         }
@@ -606,7 +606,7 @@ Component.prototype = {
         return nMachine;
     },
     /**
-     * setBinding(sHTMLType, sBinding, control)
+     * setBinding(sHTMLType, sBinding, control, sValue)
      *
      * Component's setBinding() method is intended to be overridden by subclasses.
      *
@@ -614,9 +614,10 @@ Component.prototype = {
      * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "reset")
      * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
-    setBinding: function(sHTMLType, sBinding, control) {
+    setBinding: function(sHTMLType, sBinding, control, sValue) {
         switch (sBinding) {
         case "clear":
             if (!this.bindings[sBinding]) {

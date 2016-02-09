@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "IBM PC XT (Model 5160, 256Kb) with Monochrome Display"
+title: "IBM PC XT (Model 5160, 256Kb, 10Mb Drive) with Monochrome Display"
 permalink: /devices/pc/machine/5160/mda/256kb/
 machines:
   - type: pc

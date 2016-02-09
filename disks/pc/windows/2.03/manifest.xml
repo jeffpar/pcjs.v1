@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.20.7/manifest.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.20.8/manifest.xsl"?>
 <manifest type="software">
 	<title>Microsoft Windows 2.03</title>
 	<source href="http://os2museum.com">os2museum.com</source>
@@ -27,7 +27,22 @@
 	<disk id="disk08" size="368640" chs="40:2:9" img="static/360K/WIN203-DISK8-APPS.img" href="/disks/pc/windows/2.03/WIN203-DISK8-APPS.json" md5="272a839b7d625d74b9b43fa35f28d8b2" md5json="6f125d2e93110ad9f158bb352dead477">
 		<name>Windows 2.03 (APPS)</name>
 	</disk>
-	<disk id="disk09" size="368640" chs="40:2:9" img="static/360K/WIN203-DISK9-WRITE.img" href="/disks/pc/windows/2.03/WIN203-DISK9-WRITE.json" md5="1a46590d19f8027655287b1c885a7bb8" md5json="31436d67a05e4963153f431ea3563609">
-		<name>Windows 2.03 (WRITE)</name>
+	<disk id="disk09" size="368640" chs="40:2:9" img="static/360K/WIN203-DISK9-PROGRAM.img" href="/disks/pc/windows/2.03/WIN203-DISK9-PROGRAM.json" md5="1a46590d19f8027655287b1c885a7bb8" md5json="31436d67a05e4963153f431ea3563609">
+		<name>Windows 2.03 (PROGRAM)</name>
+	</disk>
+	<disk id="disk10" size="737280" chs="80:2:9" img="static/720K/WIN203-386-DISK1.img" href="/disks/pc/windows/2.03/WIN203-386-DISK1.json" md5="d484cde3645932cf14bf01905286b2ed" md5json="c179cef758b566779118703ef5ed2c38">
+		<name>Windows/386 2.03 (SETUP)</name>
+	</disk>
+	<disk id="disk11" size="737280" chs="80:2:9" img="static/720K/WIN203-386-DISK2.img" href="/disks/pc/windows/2.03/WIN203-386-DISK2.json" md5="dae1a30defe29636bc7a58460012e9e7" md5json="dcc99c8ee1a895af0b7236a92378e96f">
+		<name>Windows/386 2.03 (UTILITY)</name>
+	</disk>
+	<disk id="disk12" size="737280" chs="80:2:9" img="static/720K/WIN203-386-DISK3.img" href="/disks/pc/windows/2.03/WIN203-386-DISK3.json" md5="6343a6aa3779be3abbfe23d72e3fa529" md5json="de20b76902d42143098b15221363ad67">
+		<name>Windows/386 2.03 (FONTS)</name>
+	</disk>
+	<disk id="disk13" size="737280" chs="80:2:9" img="static/720K/WIN203-386-DISK4.img" href="/disks/pc/windows/2.03/WIN203-386-DISK4.json" md5="2c3c30e304b0975b7afec51bfbaa216a" md5json="5f6a7441d7d575386e2d4f621deccd38">
+		<name>Windows/386 2.03 (PROGRAM)</name>
+	</disk>
+	<disk id="disk14" size="737280" chs="80:2:9" img="static/720K/WIN203-386-DISK5.img" href="/disks/pc/windows/2.03/WIN203-386-DISK5.json" md5="fb6306edc770b6e31e1e19acd83e2f5c" md5json="4d76254a33d283d355e1698864218793">
+		<name>Windows/386 2.03 (UTILITY 2)</name>
 	</disk>
 </manifest>

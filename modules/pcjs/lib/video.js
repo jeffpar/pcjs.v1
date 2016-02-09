@@ -2909,15 +2909,16 @@ Video.prototype.initBus = function(cmp, bus, cpu, dbg)
 };
 
 /**
- * setBinding(sHTMLType, sBinding, control)
+ * setBinding(sHTMLType, sBinding, control, sValue)
  *
  * @this {Video}
  * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
  * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "refresh")
  * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+ * @param {string} [sValue] optional data value
  * @return {boolean} true if binding was successful, false if unrecognized binding request
  */
-Video.prototype.setBinding = function(sHTMLType, sBinding, control)
+Video.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
 {
     var video = this;
 
@@ -4597,6 +4598,7 @@ Video.prototype.getCardAccess = function()
  *
  * @this {Video}
  * @param {number|undefined} nAccess (one of the Card.ACCESS.* constants)
+ * @return {boolean} true if access may have changed, false if not
  */
 Video.prototype.setCardAccess = function(nAccess)
 {
@@ -4617,7 +4619,9 @@ Video.prototype.setCardAccess = function(nAccess)
          * before choking.
          */
         this.bus.setMemoryAccess(card.addrBuffer, card.sizeBuffer, card.getMemoryAccess(), true);
+        return true;
     }
+    return false;
 };
 
 /**
@@ -6307,7 +6311,32 @@ Video.prototype.outSEQData = function(port, bOut, addrFrom)
         this.cardEGA.nSeqMapMask = Video.aEGAByteToDW[bOut & Card.SEQ.MAPMASK.MAPS];
         break;
     case Card.SEQ.MEMMODE.INDX:
-        this.setCardAccess(this.getCardAccess());
+        if (this.setCardAccess(this.getCardAccess())) {
+            /*
+             * When switching screens (via SysReq) on early revisions of OS/2 (eg, FOOTBALL), the screen would go
+             * blank; this appeared to be because when the card is reprogrammed, we first think the card is going into
+             * graphics mode, then we reverse course when it becomes clear that the card is going back into text mode,
+             * but unfortunately, at that precise moment, the Sequencer hasn't been fully reprogrammed, so when we're
+             * reading screen memory, we're getting back ZEROS for every odd byte (which are the text attribute bytes),
+             * so the screen is redrawn as black-on-black.
+             *
+             * My solution was to change setCardAccess() to indicate whether it actually altered the video buffer
+             * address and/or format, and if so, then force another screen update.
+             *
+             * TODO: This scenario does not seem unique; it suggests that we should generally force a screen update
+             * whenever the video buffer has undergone a significant change.
+             *
+             * UPDATE: This change was NOT sufficient to resolve the OS/2 screen-switching bug described above; in fact,
+             * it's apparently not even necessary, because the REAL problem was caused by PAGED blocks with stale
+             * physical video memory blocks; the solution was for the Bus addMemory() and removeMemory() functions to
+             * call the the CPU flushPageBlocks() function.  With that change in place, the window now stays in sync
+             * with the buffer.
+             *
+             * However, calling updateScreen() here still seems like a good idea, and it shouldn't hurt performance,
+             * since we're doing it only when setCardAccess() indicates a change, so I'm leaving this addition in place.
+             */
+            this.updateScreen(true);
+        }
         break;
     default:
         break;

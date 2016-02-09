@@ -8,7 +8,6 @@ machines:
     config: /devices/pc/machine/5170/ega/1152kb/rev3/debugger/machine.xml
     automount:
       A:
-        name: OS/2 CP-DOS Boot Disk (v7.68)
         path: /disks/pc/os2/misc/cpdos/286DOS-76800.json
 ---
 
@@ -18,7 +17,7 @@ OS/2 CP-DOS Boot Disk (v7.68)
 This disk contained a pre-1.0 version of OS/2 (aka **CP-DOS** or **MT-DOS** or **ADOS** or **286DOS** or **DOS5**)
 built on October 22, 1986, with a few files (IBMDOS.COM and NLS.EXE) apparently rebuilt on October 23, 1986.
 
-When this disk boots, the following message is displayed on-screen:
+When this disk boots, the following version banner is displayed:
 
 	CP-DOS version 1.0
 	Copyright 1986 IBM Corp.
@@ -263,4 +262,4 @@ A directory listing of this disk is provided [below](#directory-of-os2-cpdos-boo
 	      175 file(s)    1143816 bytes
 	                       17920 bytes free
 
-Return to [OS/2 Prototype Disks](/disks/pc/os2/misc/).
+[Return to [OS/2 Prototype Disks](/disks/pc/os2/misc/)]

@@ -2,6 +2,9 @@
 layout: page
 title: About PCjs
 permalink: /docs/about/pcjs/
+redirect_from:
+  - /pc/
+  - /pcjs/
 ---
 
 About PCjs

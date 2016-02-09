@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.20.7/manifest.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.20.8/manifest.xsl"?>
 <manifest type="software">
 	<title>Microsoft Windows 1.03a</title>
 	<disk id="disk01" size="368640" chs="40:2:9" img="static/WIN103A-DISK1-SETUP.img" href="/disks/pc/windows/1.03a/WIN103A-DISK1-SETUP.json" md5="90e3c32f675bf573bba222681143e9a4" md5json="a480122e92b286eab69388f167827253">
@@ -11,8 +11,8 @@
 	<disk id="disk03" size="368640" chs="40:2:9" img="static/WIN103A-DISK3-UTILITY.img" href="/disks/pc/windows/1.03a/WIN103A-DISK3-UTILITY.json" md5="62e516111993d8c755b2a1911d520b88" md5json="3efeeebdface0d55c1a3edc34a19df0a">
 		<name>Windows 1.03a (UTILITY)</name>
 	</disk>
-	<disk id="disk04" size="368640" chs="40:2:9" img="static/WIN103A-DISK4-FONTS.img" href="/disks/pc/windows/1.03a/WIN103A-DISK4-FONTS.json" md5="7c723da1eaf2e4de8ea3c57ea3f73410" md5json="89dfc8c3e60e01348e407d00d70be2ee">
-		<name>Windows 1.03a (FONTS)</name>
+	<disk id="disk04" size="368640" chs="40:2:9" img="static/WIN103A-DISK4-FONT.img" href="/disks/pc/windows/1.03a/WIN103A-DISK4-FONT.json" md5="7c723da1eaf2e4de8ea3c57ea3f73410" md5json="89dfc8c3e60e01348e407d00d70be2ee">
+		<name>Windows 1.03a (FONT)</name>
 	</disk>
 	<disk id="disk05" size="368640" chs="40:2:9" img="static/WIN103A-DISK5-APPS.img" href="/disks/pc/windows/1.03a/WIN103A-DISK5-APPS.json" md5="df38981a6ca87a95746af6219caf0898" md5json="0e881f9bc161abf4e7ebb785bd24a1c0">
 		<name>Windows 1.03a (APPS)</name>

@@ -1557,6 +1557,10 @@ X86.fnLCR0 = function(l)
     this.regCR0 = l;
     this.setProtMode();
     if (this.regCR0 & X86.CR0.PG) {
+        /*
+         * TODO: Determine if setting X86.CR0.PG when already set should really act as a flush;
+         * I'm not currently worried about it, because I'm assuming CR0 is not rewritten that often.
+         */
         this.enablePageBlocks();
     } else {
         this.disablePageBlocks();
@@ -1579,7 +1583,7 @@ X86.fnLCR3 = function(l)
      * so let's ensure that the low 12 bits of regCR3 are always zero.
      */
     this.assert(!(this.regCR3 & X86.LADDR.OFFSET));
-    if (this.regCR0 & X86.CR0.PG) this.enablePageBlocks();
+    this.flushPageBlocks();
 };
 
 /**
@@ -3772,6 +3776,18 @@ X86.fnXORw = function(dst, src)
  */
 X86.fnGRPFault = function(dst, src)
 {
+    /*
+     * This should NEVER be called on 8086/8088 CPUs, and yet we preset some of the handlers in aOpGrpPOPw,
+     * aOpGrp4b, and aOpGrp4w to call it.  initProcessor() DOES patch aOpGrp4b[0x07] and aOpGrp4w[0x07] to
+     * fnGRPInvalid, but that's it.
+     *
+     * However, given the infrequency of this call, it's simpler to continue presetting all the handlers in
+     * aOpGrpPOPw to their post-8086 default, and deal with the appropriate 8086 behavior here (which for now,
+     * is to call fnGRPUndefined instead).
+     */
+    if (this.model < X86.MODEL_80186) {
+        return X86.fnGRPUndefined.call(this, dst, src);
+    }
     X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
     return dst;
 };

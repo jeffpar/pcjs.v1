@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.20.7/machine.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.20.8/machine.xsl"?>
 <machine id="ibm5150" class="pc" border="1" width="980px" pos="center" background="#FAEBD7">
 	<name pos="center">IBM PC Model 5150 (CGA, 64K)</name>
 	<computer id="infocom-cga-64k" name="IBM PC" resume="1"/>
 	<cpu id="cpu8088" model="8088"/>
 	<ram id="ramLow" addr="0x00000" test="false"/>
-	<rom id="romBASIC" addr="0xf6000" size="0x8000" file="/devices/pc/basic/static/ibm-basic-1.00.rom"/>
-	<rom id="romBIOS"  addr="0xfe000" size="0x2000" file="/devices/pc/bios/5150/static/1981-04-24.rom"/>
+	<rom id="romBASIC" addr="0xf6000" size="0x8000" file="/devices/pc/rom/5150/basic/static/BASIC100.rom"/>
+	<rom id="romBIOS"  addr="0xfe000" size="0x2000" file="/devices/pc/rom/5150/bios/static/1981-04-24.rom"/>
 	<video ref="/devices/pc/video/ibm/cga/ibm-cga.xml"/>
 	<keyboard id="keyboard" pos="left" padleft="8px">
 		<control type="button" binding="esc">ESC</control>

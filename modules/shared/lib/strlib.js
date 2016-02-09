@@ -249,7 +249,7 @@ str.toHexLong = function(l)
  *
  * This is a poor-man's version of Node's path.basename(), which Node-only components should use instead.
  *
- * Note that fStripExt can be used to strip ANY extension, whereas path.basename() will strip the extension only
+ * Note that if fStripExt is true, this strips ANY extension, whereas path.basename() strips the extension only
  * if it matches the second parameter (eg, path.basename("/foo/bar/baz/asdf/quux.html", ".html") returns "quux").
  *
  * @param {string} sFileName

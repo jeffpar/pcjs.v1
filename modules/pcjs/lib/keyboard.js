@@ -970,15 +970,16 @@ Keyboard.LIMIT = {
 };
 
 /**
- * setBinding(sHTMLType, sBinding, control)
+ * setBinding(sHTMLType, sBinding, control, sValue)
  *
  * @this {Keyboard}
  * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
  * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "esc")
  * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+ * @param {string} [sValue] optional data value
  * @return {boolean} true if binding was successful, false if unrecognized binding request
  */
-Keyboard.prototype.setBinding = function(sHTMLType, sBinding, control)
+Keyboard.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
 {
     /*
      * There's a special binding that the Video component uses ("kbd") to effectively bind its
@@ -1063,7 +1064,8 @@ Keyboard.prototype.setBinding = function(sHTMLType, sBinding, control)
                     };
                 }(this, sCode, Keyboard.CLICKCODES[sCode]);
                 return true;
-            } else if (Keyboard.SOFTCODES[sBinding] !== undefined) {
+            }
+            else if (Keyboard.SOFTCODES[sBinding] !== undefined) {
                 this.cSoftCodes++;
                 this.bindings[id] = control;
                 var fnDown = function(kbd, sKey, simCode) {
@@ -1083,6 +1085,19 @@ Keyboard.prototype.setBinding = function(sHTMLType, sBinding, control)
                     control.onmousedown = fnDown;
                     control.onmouseup = control.onmouseout = fnUp;
                 }
+                return true;
+            }
+            else if (sValue) {
+                /*
+                 * Instead of just having a dedicated "test" control, we now treat any unrecognized control with
+                 * a data value as a test control.  The only caveat is that such controls must have binding IDs that
+                 * do not conflict with predefined controls (which, of course, is the only way you can get here).
+                 */
+                this.bindings[id] = control;
+                control.onclick = function onClickTest(event) {
+                    if (kbd.cpu) kbd.cpu.setFocus();
+                    return kbd.injectKeys(sValue);
+                };
                 return true;
             }
             break;
@@ -1562,17 +1577,19 @@ Keyboard.prototype.addScanCode = function(bScan)
 };
 
 /**
- * injectKeys(sKeyCodes, msDelay)
+ * injectKeys(sKeys, msDelay)
  *
  * @this {Keyboard}
- * @param {string} sKeyCodes
- * @param {number|undefined} [msDelay] is an optional injection delay (default is msInjectDelay)
+ * @param {string|undefined} sKeys
+ * @param {number} [msDelay] is an optional injection delay (default is msInjectDelay)
  */
-Keyboard.prototype.injectKeys = function(sKeyCodes, msDelay)
+Keyboard.prototype.injectKeys = function(sKeys, msDelay)
 {
-    this.sInjectBuffer = sKeyCodes;
-    if (!COMPILED) this.log("injectKeys(" + this.sInjectBuffer.split("\n").join("\\n") + ")");
-    this.injectKeysFromBuffer(msDelay || this.msInjectDelay);
+    if (sKeys && !this.sInjectBuffer) {
+        this.sInjectBuffer = sKeys;
+        if (!COMPILED) this.log("injectKeys(" + this.sInjectBuffer.split("\n").join("\\n") + ")");
+        this.injectKeysFromBuffer(msDelay || this.msInjectDelay);
+    }
 };
 
 /**

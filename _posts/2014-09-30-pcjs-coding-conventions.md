@@ -51,34 +51,42 @@ can be thought of as "class constants".
 For example, the ChipSet component, which manages (among other things) Programmable Interrupt Controllers or PICs,
 *could* define the constant for an EOI command like this:
 
-	ChipSet.EOI = 0x20;                     // non-specific EOI (end-of-interrupt)
-	
+``` javascript
+ChipSet.EOI = 0x20;                     // non-specific EOI (end-of-interrupt)
+```
+
 but since the EOI command is actually one of a number Operation Command Words (specifically, OCW2), I include an
 "OCW2_" prefix in the constant name:
 
-	ChipSet.OCW2_EOI = 0x20;                // non-specific EOI (end-of-interrupt)
-	
+``` javascript
+ChipSet.OCW2_EOI = 0x20;                // non-specific EOI (end-of-interrupt)
+```
+
 and since I also like to group constants that are associated with a particular register or port, and since I don't
 want the ChipSet constructor becoming littered with property constants, I first define a constant object; in this
 case, **PIC_LO**:
 
-	ChipSet.PIC_LO = {};
-	ChipSet.PIC_LO.OCW2_EOI = 0x20;         // non-specific EOI (end-of-interrupt)
-	ChipSet.PIC_LO.OCW2_EOI_SPEC = 0x60;    // specific EOI
-	ChipSet.PIC_LO.OCW2_EOI_ROT = 0xA0;     // rotate on non-specific EOI
-	ChipSet.PIC_LO.OCW2_EOI_ROTSPEC = 0xE0; // rotate on specific EOI
+``` javascript
+ChipSet.PIC_LO = {};
+ChipSet.PIC_LO.OCW2_EOI = 0x20;         // non-specific EOI (end-of-interrupt)
+ChipSet.PIC_LO.OCW2_EOI_SPEC = 0x60;    // specific EOI
+ChipSet.PIC_LO.OCW2_EOI_ROT = 0xA0;     // rotate on non-specific EOI
+ChipSet.PIC_LO.OCW2_EOI_ROTSPEC = 0xE0; // rotate on specific EOI
+```
 
 By using fully-qualified property names for each constant, the code has a more C-like appearance (think *#define*)
 that's also easier to preprocess.
 
 However, I've gradually switched to the more conventional JavaScript object notation for class constants:
  
-	ChipSet.PIC_LO = {
-		OCW2_EOI:           0x20,           // non-specific EOI (end-of-interrupt)
-		OCW2_EOI_SPEC:      0x60,           // specific EOI
-		OCW2_EOI_ROT:       0xA0,           // rotate on non-specific EOI
-		OCW2_EOI_ROTSPEC:   0xE0            // rotate on specific EOI
-	};
+``` javascript
+ChipSet.PIC_LO = {
+	OCW2_EOI:           0x20,           // non-specific EOI (end-of-interrupt)
+	OCW2_EOI_SPEC:      0x60,           // specific EOI
+	OCW2_EOI_ROT:       0xA0,           // rotate on non-specific EOI
+	OCW2_EOI_ROTSPEC:   0xE0            // rotate on specific EOI
+};
+```
 
 because, again, the Closure Compiler does an excellent job inlining such constants (or indeed any property that is
 never modified *or* enumerated).
@@ -94,17 +102,23 @@ override it, setting it to **FALSE** and disabling debug-only code.
 
 To ensure that debug-only code is not simply *disabled* but also *removed*, the code should be wrapped with:
 
-	if (DEBUG) {
-		[code to be removed by the Closure Compiler]
-	}
+``` javascript
+if (DEBUG) {
+	[code to be removed by the Closure Compiler]
+}
+```
 
 In many cases, the compiler is able to completely remove calls to debug-only class methods; eg:
 
-	Component.assert(off >= 0 && off < this.cb);
+``` javascript
+Component.assert(off >= 0 && off < this.cb);
+```
 
 However, calls to debug-only instance methods seem to be more problematic, so all such calls are wrapped; eg:
 
-	if (DEBUG) this.log('load("' + sFileURL + '")');
+``` javascript
+if (DEBUG) this.log('load("' + sFileURL + '")');
+```
 
 There are a number of other important shared constants in [/modules/shared/lib/defines.js](/modules/shared/lib/defines.js)
 and PCjs-specific constants in [/modules/pcjs/lib/defines.js](/modules/pcjs/lib/defines.js); refer
@@ -163,12 +177,16 @@ objects, but I'll leave my gripes about JSON for another post.
 
 Generally speaking, the only time I quote property names is when I have to.  I'll use the "dot" syntax; eg:
 
-	obj.prop = true;
-	
+``` javascript
+obj.prop = true;
+```
+
 instead of:
 
-	obj['prop'] = true;
-	
+``` javascript
+obj['prop'] = true;
+```
+
 unless the property name doesn't conform to variable name syntax (eg, if it starts with a digit) or if it's a
 "public" property and therefore I can't risk Google's Closure Compiler "minifying" the property name to something
 else.

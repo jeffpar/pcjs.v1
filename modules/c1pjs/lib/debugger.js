@@ -32,6 +32,13 @@
 
 "use strict";
 
+if (NODE) {
+    var str         = require("../../shared/lib/strlib");
+    var usr         = require("../../shared/lib/usrlib");
+    var web         = require("../../shared/lib/weblib");
+    var Component   = require("../../shared/lib/component");
+}
+
 /**
  * C1PDebugger(parmsDbg)
  *
@@ -491,9 +498,10 @@ if (DEBUGGER) {
      * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "reset")
      * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
-    C1PDebugger.prototype.setBinding = function(sHTMLType, sBinding, control)
+    C1PDebugger.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
     {
         var dbg = this;
         switch(sBinding) {

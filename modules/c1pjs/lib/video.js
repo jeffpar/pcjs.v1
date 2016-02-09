@@ -32,6 +32,11 @@
 
 "use strict";
 
+if (NODE) {
+    var web         = require("../../shared/lib/weblib");
+    var Component   = require("../../shared/lib/component");
+}
+
 /**
  * C1PVideo(parmsVideo, eCanvas, context, imgChars)
  *
@@ -183,9 +188,10 @@ C1PVideo.prototype.reset = function(fPowerOn)
  * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea")
  * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "refresh")
  * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+ * @param {string} [sValue] optional data value
  * @return {boolean} true if binding was successful, false if unrecognized binding request
  */
-C1PVideo.prototype.setBinding = function(sHTMLType, sBinding, control)
+C1PVideo.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
 {
     switch(sBinding) {
     case "refresh":
@@ -345,15 +351,16 @@ C1PVideo.prototype.setPower = function(fOn, cmp)
 };
 
 /**
- * @this {C1PVideo}
- *
  * cxChar and cyChar are the source cell size. Originally, those values came strictly from the parmsVideo
  * 'charWidth' and 'charHeight' properties. Now, if those aren't defined (which is normally the case now),
  * then we infer the source cell size from the dimensions of imgChars, which is expected to be a 16x16 array of
  * character bitmaps.  We could be even more flexible, by allowing imgChars to be any rectangular dimension
  * (eg, 1x256) as long as we can assume it contains exactly 256 characters, but there's no need to get carried away....
+ *
+ * @this {C1PVideo}
+ * @param {boolean} [fReady] is assumed to indicate "ready" unless EXPLICITLY set to false
  */
-C1PVideo.prototype.setReady = function()
+C1PVideo.prototype.setReady = function(fReady)
 {
     if (!this.cxChar) this.cxChar = Math.floor(this.imgChars.width / 16);
     if (!this.cyChar) this.cyChar = Math.floor(this.imgChars.height / 16);

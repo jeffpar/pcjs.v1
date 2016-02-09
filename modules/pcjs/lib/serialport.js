@@ -46,11 +46,19 @@ if (NODE) {
  *
  * The SerialPort component has the following component-specific (parmsSerial) properties:
  *
- *      adapter: 1 (for port 0x3F8) or 2 (for port 0x2F8); 0 if not defined
+ *      adapter: 1 (port 0x3F8) or 2 (port 0x2F8); 0 if not defined
  *
- * WARNING: Since the XSL file defines 'adapter' as a number, not a string, there's no need to
- * use parseInt(), and as an added benefit, we don't need to worry about whether a hex or decimal
- * format was used.
+ *      binding: name of a control (based on its "binding" attribute) to bind to this port's I/O
+ *
+ *      tabSize: set to a non-zero number to convert tabs to spaces (applies only to output to
+ *      the above binding); default is 0 (no conversion)
+ *
+ * In the future, we may support 'port' and 'irq' properties that allow the machine to define a
+ * non-standard serial port configuration, instead of only our pre-defined 'adapter' configurations.
+ *
+ * NOTE: Since the XSL file defines 'adapter' as a number, not a string, there's no need to use
+ * parseInt(), and as an added benefit, we don't need to worry about whether a hex or decimal format
+ * was used.
  *
  * This hard-coded approach mimics the original IBM PC Asynchronous Adapter configuration, which
  * contained a pair of "shunt modules" that allowed the user to select a port address of either
@@ -95,6 +103,18 @@ function SerialPort(parmsSerial) {
      * @type {Object}
      */
     this.controlIOBuffer = null;
+
+    /*
+     * If controlIOBuffer is being used AND 'tabSize' is set, then we make an attempt to monitor the characters
+     * being echoed via echoByte(), maintain a logical column position, and convert any tabs into the appropriate
+     * number of spaces.
+     *
+     * charBOL, if nonzero, is a character to automatically output at the beginning of every line.  This probably
+     * isn't generally useful; I use it internally to preformat serial output.
+     */
+    this.tabSize = parmsSerial['tabSize'];
+    this.charBOL = parmsSerial['charBOL'];
+    this.iLogicalCol = 0;
 
     Component.call(this, "SerialPort", parmsSerial, SerialPort, Messages.SERIAL);
 
@@ -329,15 +349,16 @@ SerialPort.prototype.syncMouse = function()
  */
 
 /**
- * setBinding(sHTMLType, sBinding, control)
+ * setBinding(sHTMLType, sBinding, control, sValue)
  *
  * @this {SerialPort}
  * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
  * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "buffer")
  * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+ * @param {string} [sValue] optional data value
  * @return {boolean} true if binding was successful, false if unrecognized binding request
  */
-SerialPort.prototype.setBinding = function(sHTMLType, sBinding, control)
+SerialPort.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
 {
     var serial = this;
 
@@ -805,13 +826,28 @@ SerialPort.prototype.updateIRR = function()
 SerialPort.prototype.echoByte = function(b)
 {
     if (this.controlIOBuffer) {
-        if (b != 0x0D) {
-            if (b == 0x08) {
-                this.controlIOBuffer.value = this.controlIOBuffer.value.slice(0, -1);
-            } else {
-                this.controlIOBuffer.value += String.fromCharCode(b);
-                this.controlIOBuffer.scrollTop = this.controlIOBuffer.scrollHeight;
+        if (b == 0x0D) {
+            this.iLogicalCol = 0;
+        }
+        else if (b == 0x08) {
+            this.controlIOBuffer.value = this.controlIOBuffer.value.slice(0, -1);
+            /*
+             * TODO: Back up the correct number of columns if the character erased was a tab.
+             */
+            if (this.iLogicalCol > 0) this.iLogicalCol--;
+        }
+        else {
+            var s = String.fromCharCode(b);
+            var nChars = (b >= 0x20? 1 : 0);
+            if (b == 0x09) {
+                var tabSize = this.tabSize || 8;
+                nChars = tabSize - (this.iLogicalCol % tabSize);
+                if (this.tabSize) s = str.pad("", nChars);
             }
+            if (this.charBOL && !this.iLogicalCol && nChars) s = String.fromCharCode(this.charBOL) + s;
+            this.controlIOBuffer.value += s;
+            this.controlIOBuffer.scrollTop = this.controlIOBuffer.scrollHeight;
+            this.iLogicalCol += nChars;
         }
         return true;
     }

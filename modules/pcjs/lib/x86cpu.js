@@ -298,7 +298,7 @@ X86CPU.prototype.setAddressMask = function(nBusMask)
 };
 
 /**
- * addMemBreak(addr, fWrite, fLinear)
+ * addMemBreak(addr, fWrite, fPhysical)
  *
  * NOTE: addMemBreak() could be merged with addMemCheck(), but the new merged interface would
  * have to provide one additional parameter indicating whether the Debugger or the CPU is the client.
@@ -308,19 +308,24 @@ X86CPU.prototype.setAddressMask = function(nBusMask)
  * @this {X86CPU}
  * @param {number} addr
  * @param {boolean} fWrite is true for a memory write breakpoint, false for a memory read breakpoint
- * @param {boolean} [fLinear] (true for linear breakpoint, false for physical)
+ * @param {boolean} [fPhysical] (true for physical breakpoint, false for linear)
  */
-X86CPU.prototype.addMemBreak = function(addr, fWrite, fLinear)
+X86CPU.prototype.addMemBreak = function(addr, fWrite, fPhysical)
 {
     if (DEBUGGER) {
         var iBlock = addr >>> this.nBlockShift;
-        var aBlocks = (fLinear? this.aMemBlocks : this.aBusBlocks);
+        var aBlocks = (fPhysical? this.aBusBlocks : this.aMemBlocks);
         aBlocks[iBlock].addBreakpoint(addr & this.nBlockLimit, fWrite);
+        /*
+         * When a physical memory breakpoint is added, a fresh setPhysBlock() call is REQUIRED for any
+         * linear mappings to that address.  This is a bit of a sledgehammer solution, but at least it's a solution.
+         */
+        if (fPhysical) this.flushPageBlocks();
     }
 };
 
 /**
- * removeMemBreak(addr, fWrite, fLinear)
+ * removeMemBreak(addr, fWrite, fPhysical)
  *
  * NOTE: removeMemBreak() could be merged with removeMemCheck(), but the new merged interface would
  * have to provide one additional parameter indicating whether the Debugger or the CPU is the client.
@@ -330,14 +335,19 @@ X86CPU.prototype.addMemBreak = function(addr, fWrite, fLinear)
  * @this {X86CPU}
  * @param {number} addr
  * @param {boolean} fWrite is true for a memory write breakpoint, false for a memory read breakpoint
- * @param {boolean} [fLinear] (true for linear breakpoint, false for physical)
+ * @param {boolean} [fPhysical] (true for physical breakpoint, false for linear)
  */
-X86CPU.prototype.removeMemBreak = function(addr, fWrite, fLinear)
+X86CPU.prototype.removeMemBreak = function(addr, fWrite, fPhysical)
 {
     if (DEBUGGER) {
         var iBlock = addr >>> this.nBlockShift;
-        var aBlocks = (fLinear? this.aMemBlocks : this.aBusBlocks);
+        var aBlocks = (fPhysical? this.aBusBlocks : this.aMemBlocks);
         aBlocks[iBlock].removeBreakpoint(addr & this.nBlockLimit, fWrite);
+        /*
+         * When a physical memory breakpoint is removed, a fresh setPhysBlock() call is RECOMMENDED for any
+         * linear mappings to that address.  This is a bit of a sledgehammer solution, but at least it's a solution.
+         */
+        if (fPhysical) this.flushPageBlocks();
     }
 };
 
@@ -454,6 +464,17 @@ X86CPU.prototype.enablePageBlocks = function()
         }
     }
     this.aBlocksPaged = [];
+};
+
+
+/**
+ * flushPageBlocks()
+ *
+ * @this {X86CPU}
+ */
+X86CPU.prototype.flushPageBlocks = function()
+{
+    if (this.regCR0 & X86.CR0.PG) this.enablePageBlocks();
 };
 
 /**
@@ -2926,15 +2947,16 @@ X86CPU.prototype.checkIOPM = function(port, nPorts, fInput)
 };
 
 /**
- * setBinding(sHTMLType, sBinding, control)
+ * setBinding(sHTMLType, sBinding, control, sValue)
  *
  * @this {X86CPU}
  * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
  * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "AX")
  * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+ * @param {string} [sValue] optional data value
  * @return {boolean} true if binding was successful, false if unrecognized binding request
  */
-X86CPU.prototype.setBinding = function(sHTMLType, sBinding, control)
+X86CPU.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
 {
     var fBound = false;
     switch (sBinding) {
@@ -2988,7 +3010,7 @@ X86CPU.prototype.setBinding = function(sHTMLType, sBinding, control)
 };
 
 /**
- * probeAddr(addr, size, fLinear)
+ * probeAddr(addr, size, fPhysical)
  *
  * Used by the Debugger to probe addresses without risk of triggering a page fault, and by internal
  * functions, like fnCheckFault(), that must also avoid triggering faults, since they're not part of
@@ -3002,12 +3024,12 @@ X86CPU.prototype.setBinding = function(sHTMLType, sBinding, control)
  * @this {X86CPU}
  * @param {number} addr is a linear address
  * @param {number} [size] is a length (default is 1; if specified, must be 1, 2 or 4)
- * @param {boolean} [fLinear] (true for linear probe, false for physical; linear is the default)
+ * @param {boolean} [fPhysical] (true for physical probe, false for linear; linear is the default)
  * @return {number|null} value at the specified address, or null if invalid
  */
-X86CPU.prototype.probeAddr = function(addr, size, fLinear)
+X86CPU.prototype.probeAddr = function(addr, size, fPhysical)
 {
-    var aBlocks = (fLinear === false? this.aBusBlocks : this.aMemBlocks);
+    var aBlocks = (fPhysical? this.aBusBlocks : this.aMemBlocks);
     var block = aBlocks[(addr & this.nMemMask) >>> this.nBlockShift];
     if (block && block.type == Memory.TYPE.UNPAGED) block = this.mapPageBlock(addr, false, true);
 
@@ -3020,16 +3042,16 @@ X86CPU.prototype.probeAddr = function(addr, size, fLinear)
             if (off < this.nBlockLimit) {
                 return block.readShortDirect(off, addr);
             }
-            return block.readByteDirect(off, addr) | (this.probeAddr(addr + 1, 1, fLinear) << 8);
+            return block.readByteDirect(off, addr) | (this.probeAddr(addr + 1, 1, fPhysical) << 8);
         }
         if (size == 4) {
             if (off < this.nBlockLimit - 2) {
                 return block.readLongDirect(off, addr);
             }
             if (off == this.nBlockLimit - 1) {
-                return block.readShortDirect(off, addr) | (this.probeAddr(addr + 2, 2, fLinear) << 16);
+                return block.readShortDirect(off, addr) | (this.probeAddr(addr + 2, 2, fPhysical) << 16);
             }
-            return block.readByteDirect(off, addr) | (this.probeAddr(addr + 1, 1, fLinear) << 8) | (this.probeAddr(addr + 2, 1, fLinear) << 16) | (this.probeAddr(addr + 3, 1, fLinear) << 24);
+            return block.readByteDirect(off, addr) | (this.probeAddr(addr + 1, 1, fPhysical) << 8) | (this.probeAddr(addr + 2, 1, fPhysical) << 16) | (this.probeAddr(addr + 3, 1, fPhysical) << 24);
         }
     }
 

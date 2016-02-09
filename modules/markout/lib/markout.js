@@ -308,6 +308,28 @@ MarkOut.aHTMLEntities = {
     "\\!":  "&#33;"
 };
 
+/*
+ * This is a list of "reserved" Front Matter machine properties (ie, properties that will NOT be
+ * bundled as strings in the 'parms' property).  Any machine property not in this list will be added
+ * to the 'parms' object as a string property.
+ *
+ *      'id' (eg, "ibm5150")
+ *      'type' (eg, "pc")
+ *      'config' (eg, "machine.xml")
+ *      'template' (eg, "machine.xsl")
+ *      'uncompiled' (eg, true)
+ *      'automount' (eg, {"A":{"name":"OS/2 FOOTBALL Boot Disk (v7.68.17)","path":"/disks/pc/os2/misc/football/debugger/FOOTBALL-7.68.17.json"}})
+ *      'parms'
+ *
+ * Non-reserved properties include:
+ *
+ *      'state' (eg, "state.json")
+ *      'messages' (eg, "disk")
+ *
+ * and any other string-based property you wish to pass through to PCjs (via the embedPC() sParms parameter).
+ */
+MarkOut.aFMReservedMachineProps = ['id', 'type', 'config', 'template', 'uncompiled', 'automount', 'parms'];
+
 /**
  * convertMD()
  *
@@ -377,30 +399,33 @@ MarkOut.prototype.convertMD = function(sIndent)
                 var asMachines = aMachineDefs[1].split(/\n[ \t]+-\s*/);
                 for (var iMachine = 0; iMachine < asMachines.length; iMachine++) {
                     if (!asMachines[iMachine]) continue;
-                    var id = null;
+                    var id = null, iProp, sProp;
                     var aOptions, aaOptions = [], machine = {};
                     var reOption = /([ \t]*)([^\s]+):[ \t]*([^\n]*)/g;
                     while (aOptions = reOption.exec(asMachines[iMachine])) {
                         aaOptions.push(aOptions);
                     }
                     for (var iOption = 0; iOption < aaOptions.length; iOption++) {
-                        var aOptions = aaOptions[iOption];
+                        aOptions = aaOptions[iOption];
                         var sSpace = aOptions[1], sName = aOptions[2], sValue = aOptions[3];
                         if (!id && sName == 'id') {
                             id = sValue;
                         } else if (sName == 'automount') {
                             /*
                              * I take a simplistic approach to parsing the object definition associated with "automount",
-                             * because I know it only consist of 1 or more drive letters, each of which may be followed by
-                             * 1 or 2 additional properties (eg, "name" and "path").  If we need to support other JSON
+                             * because I know it only consists of 1 or more drive letters, each of which may be followed
+                             * by 1 or 2 additional properties (eg, "name" and "path").  If we need to support other JSON
                              * object definitions in the future, this will have to be generalized.
                              *
                              * Here's an example of "automount" output:
                              *
                              *      {"A":{"name":"OS/2 FOOTBALL Boot Disk (v7.68.17)","path":"/disks/pc/os2/misc/football/debugger/FOOTBALL-7.68.17.json"}}
+                             *
+                             * Note that the the only required property for a drive object is 'path'; if 'name' is omitted,
+                             * the FDC component will search for the given 'path' and use whatever name it can find.
                              */
                             sValue = '{';
-                            var cDrives = 0, cProps = 0, iProp;
+                            var cDrives = 0, cProps = 0;
                             for (iProp = iOption + 1; iProp < aaOptions.length; iProp++) {
                                 var sPropSpace = aaOptions[iProp][1];
                                 if (sPropSpace.length <= sSpace.length) break;
@@ -423,9 +448,16 @@ MarkOut.prototype.convertMD = function(sIndent)
                         machine[sName] = sValue;
                     }
                     /*
-                     * Any 'state' and 'automount' properties must now be merged into a 'parms' property.
+                     * Any "non-reserved" properties are now merged into the 'parms' property; 'automount'
+                     * is treated as reserved only because it must be encoded as an object rather than a string.
                      */
-                    machine['parms'] = '{state:"' + (machine['state'] || "") + '",autoMount:' + machine['automount'] + '}';
+                    machine['parms'] = '{';
+                    for (sProp in machine) {
+                        if (MarkOut.aFMReservedMachineProps.indexOf(sProp) < 0) {
+                            machine['parms'] += sProp + ':"' + machine[sProp] + '",';
+                        }
+                    }
+                    machine['parms'] += 'autoMount:' + machine['automount'] + '}';
                     if (id) this.aMachineDefs[id] = machine;
                 }
             }
@@ -1008,10 +1040,10 @@ MarkOut.prototype.convertMDImageLinks = function(sBlock, sIndent)
  *
  * If the link ends with a slash, then it's an implied reference to a "machine.xml".
  *
- * UPDATE: Since parms containing JSON may also contain colons, machine Markdown links may now use '|'
- * instead of ':' as separators; eg:
+ * UPDATE: Since parms containing JSON may also contain colons, machine Markdown links may now use '!' or '|'
+ * instead of ':' as separators.  In fact, whichever separator is used first will be used throughout; eg:
  *
- *      [IBM PC](/devices/pc/machine/5150/mda/64kb/ "PCjs|demoPC|stylesheet|version|options|parms")
+ *      [IBM PC](/devices/pc/machine/5150/mda/64kb/ "PCjs!demoPC!stylesheet!version!options!parms")
  *
  * Granted, there are a number of things we could be smarter about.  First, you probably don't care about the
  * ID for the <div>; it's purely a mechanism for telling the script where to embed the machine, so we could
@@ -1057,7 +1089,7 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
             sMachineXSLFile = machine['template'] || "";
             sMachineVersion = (machine['uncompiled'] && machine['uncompiled'] == "true"? "uncompiled" : "");
             sMachineParms = machine['parms'] || "";
-            sReplacement = "[Embedded PC](" + sMachineXMLFile + ' "' + sMachine + 'js|' + sMachineID + '|' + sMachineXSLFile + '||' + sMachineOptions + '|' + sMachineParms + '")';
+            sReplacement = "[Embedded PC](" + sMachineXMLFile + ' "' + sMachine + 'js!' + sMachineID + '!' + sMachineXSLFile + '!!' + sMachineOptions + '!' + sMachineParms + '")';
         }
         sBlock = sBlock.replace(aMatch[0], sReplacement);
         reIncludes.lastIndex = 0;       // reset lastIndex, since we just modified the string that reIncludes is iterating over
@@ -1067,7 +1099,7 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
      * Start looking for Markdown-style machine links now...
      */
     var cMatches = 0;
-    var reMachines = /\[(.*?)]\((.*?)\s*"(PC|C1P)js[:|](.*?)"\)/gi;
+    var reMachines = /\[(.*?)]\((.*?)\s*"(PC|C1P)js([:!|])(.*?)"\)/gi;
 
     while ((aMatch = reMachines.exec(sBlock))) {
 
@@ -1077,7 +1109,7 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
         sMachine = aMatch[3].toUpperCase();
         var sMachineFunc = "embed" + sMachine;
         var sMachineClass = sMachine.toLowerCase();
-        var aMachineParms = aMatch[4].split(aMatch[4].indexOf('|') > 0? '|' : ':');
+        var aMachineParms = aMatch[5].split(aMatch[4]);
         var sMachineMessage = "Waiting for " + sMachine + "js to load";
 
         sMachineID = aMachineParms[0];

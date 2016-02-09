@@ -84,6 +84,37 @@ if (DEBUGGER) {
  */
 var DbgAddr;
 
+/*
+ * Debugger Breakpoint Tips
+ *
+ * Here's an example of our powerful new breakpoint command capabilities:
+ *
+ *      bp 0397:022B "?'GlobalAlloc(wFlags:[ss:sp+8],dwBytes:[ss:sp+6][ss:sp+4])';g [ss:sp+2]:[ss:sp] '?ax;if ax'"
+ *
+ * The above breakpoint will display a pleasing "GlobalAlloc()" string containing the current
+ * stack parameters, and will briefly stop execution on the return to print the result in AX,
+ * halting the CPU whenever AX is zero (the default behavior of "if" whenever the expression is
+ * false is to look for an "else" and automatically halt when there is no "else").
+ *
+ * How do you figure out where the code for GlobalAlloc is in the first place?  You need to have
+ * BACKTRACK support enabled (which currently means running the non-COMPILED version), so that as
+ * the Disk component loads disk images, it will automatically extract symbolic information from all
+ * "NE" (New Executable) binaries on those disks, which the Debugger's "di" command can then search
+ * for you; eg:
+ *
+ *      ## di globalalloc
+ *      GLOBALALLOC: KRNL386.EXE 0001:022B len 0xC570
+ *
+ * And then you just need to do a bit more sleuthing to find the right CODE segment.  And that just
+ * got easier, now that the PCjs Debugger mimics portions of the Windows Debugger INT 0x41 interface;
+ * see intWindowsDebugger() for details.  So even if you neglect to run WDEB386.EXE /E inside the
+ * machine before running Windows, you should still see notifications like:
+ *
+ *      KERNEL!undefined code(0001)=#0397 len 0000C580
+ *
+ * in the PCjs Debugger output window, as segments are being loaded by the Windows kernel.
+ */
+
 /**
  * Debugger(parmsDbg)
  *
@@ -219,6 +250,7 @@ function Debugger(parmsDbg)
         /*
          * Initialize Debugger message support
          */
+        this.afnDumpers = [];
         this.messageInit(parmsDbg['messages']);
 
         this.sInitCommands = parmsDbg['commands'];
@@ -682,10 +714,10 @@ if (DEBUGGER) {
         "fdc":      Messages.FDC,
         "hdc":      Messages.HDC,
         "disk":     Messages.DISK,
+        "parallel": Messages.PARALLEL,
         "serial":   Messages.SERIAL,
-        "speaker":  Messages.SPEAKER,
-        "state":    Messages.STATE,
         "mouse":    Messages.MOUSE,
+        "speaker":  Messages.SPEAKER,
         "computer": Messages.COMPUTER,
         "dos":      Messages.DOS,
         "data":     Messages.DATA,
@@ -1440,6 +1472,12 @@ if (DEBUGGER) {
         this.mouse = cmp.getMachineComponent("Mouse");
         if (MAXDEBUG) this.chipset = cmp.getMachineComponent("ChipSet");
 
+        /*
+         * Re-initialize Debugger message support if necessary
+         */
+        var sMessages = cmp.getMachineParm('messages');
+        if (sMessages) this.messageInit(sMessages);
+
         this.cchAddr = bus.getWidth() >> 2;
         this.maskAddr = bus.nBusLimit;
 
@@ -2046,15 +2084,16 @@ if (DEBUGGER) {
     }
 
     /**
-     * setBinding(sHTMLType, sBinding, control)
+     * setBinding(sHTMLType, sBinding, control, sValue)
      *
      * @this {Debugger}
      * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "debugInput")
      * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
-    Debugger.prototype.setBinding = function(sHTMLType, sBinding, control)
+    Debugger.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
     {
         var dbg = this;
         switch (sBinding) {
@@ -2273,7 +2312,7 @@ if (DEBUGGER) {
         var b = 0xff;
         var addr = this.getAddr(dbgAddr, false, 1);
         if (addr !== X86.ADDR_INVALID) {
-            b = this.cpu.probeAddr(addr, 1, dbgAddr.type != Debugger.ADDRTYPE.PHYSICAL) | 0;
+            b = this.cpu.probeAddr(addr, 1, dbgAddr.type == Debugger.ADDRTYPE.PHYSICAL) | 0;
             if (inc) this.incAddr(dbgAddr, inc);
         }
         return b;
@@ -2305,7 +2344,7 @@ if (DEBUGGER) {
         var w = 0xffff;
         var addr = this.getAddr(dbgAddr, false, 2);
         if (addr !== X86.ADDR_INVALID) {
-            w = this.cpu.probeAddr(addr, 2, dbgAddr.type != Debugger.ADDRTYPE.PHYSICAL);
+            w = this.cpu.probeAddr(addr, 2, dbgAddr.type == Debugger.ADDRTYPE.PHYSICAL);
             if (inc) this.incAddr(dbgAddr, inc);
         }
         return w;
@@ -2324,7 +2363,7 @@ if (DEBUGGER) {
         var l = -1;
         var addr = this.getAddr(dbgAddr, false, 4);
         if (addr !== X86.ADDR_INVALID) {
-            l = this.cpu.probeAddr(addr, 4, dbgAddr.type != Debugger.ADDRTYPE.PHYSICAL);
+            l = this.cpu.probeAddr(addr, 4, dbgAddr.type == Debugger.ADDRTYPE.PHYSICAL);
             if (inc) this.incAddr(dbgAddr, inc);
         }
         return l;
@@ -2693,7 +2732,10 @@ if (DEBUGGER) {
     Debugger.prototype.toHexAddr = function(dbgAddr)
     {
         var ch = this.getAddrPrefix(dbgAddr);
-        return dbgAddr.sel == null? (ch + str.toHex(dbgAddr.addr)) : (ch + this.toHexOffset(dbgAddr.off, dbgAddr.sel, dbgAddr.fAddr32));
+        /*
+         * TODO: Revisit the decision to check sel == null; I would rather see these decisions based on type.
+         */
+        return (dbgAddr.type >= Debugger.ADDRTYPE.LINEAR || dbgAddr.sel == null)? (ch + str.toHex(dbgAddr.addr)) : (ch + this.toHexOffset(dbgAddr.off, dbgAddr.sel, dbgAddr.fAddr32));
     };
 
     /**
@@ -2843,40 +2885,6 @@ if (DEBUGGER) {
     };
 
     /**
-     * dumpInfo(asArgs)
-     *
-     * @this {Debugger}
-     * @param {Array.<string>} asArgs
-     */
-    Debugger.prototype.dumpInfo = function(asArgs)
-    {
-        var sInfo = "no information";
-        if (BACKTRACK) {
-            var sAddr = asArgs[0];
-            var dbgAddr = this.parseAddr(sAddr, true, true, false);
-            if (dbgAddr) {
-                var addr = this.getAddr(dbgAddr);
-                sInfo = '%' + str.toHex(addr) + ": " + (this.bus.getSymbol(addr, true) || sInfo);
-            } else {
-                var component, componentPrev = null;
-                while (component = this.cmp.getMachineComponent("Disk", componentPrev)) {
-                    var aInfo = component.getSymbolInfo(sAddr);
-                    if (aInfo.length) {
-                        sInfo = "";
-                        for (var i in aInfo) {
-                            var a = aInfo[i];
-                            if (sInfo) sInfo += '\n';
-                            sInfo += a[0] + ": " + a[1] + ' ' + str.toHex(a[2], 4) + ':' + str.toHex(a[3], 4) + " len " + str.toHexWord(a[4]);
-                        }
-                    }
-                    componentPrev = component;
-                }
-            }
-        }
-        return sInfo;
-    };
-
-    /**
      * getPageEntry(addrPE, lPE, fPTE)
      *
      * @this {Debugger}
@@ -2894,6 +2902,77 @@ if (DEBUGGER) {
         s += (lPE & X86.PTE.READWRITE)? 'W' : 'R';
         s += (lPE & X86.PTE.PRESENT)? 'P' : 'N';
         return s;
+    };
+
+    /**
+     * getPageInfo(addr)
+     *
+     * @this {Debugger}
+     * @param {number} addr
+     * @return {Object|null}
+     */
+    Debugger.prototype.getPageInfo = function(addr)
+    {
+        var pageInfo = null;
+        if (I386 && this.cpu.model >= X86.MODEL_80386) {
+            var bus = this.bus;
+            /*
+             * Here begins code remarkably similar to mapPageBlock() (with fSuppress set).
+             */
+            pageInfo = {};
+            pageInfo.offPDE = (addr & X86.LADDR.PDE.MASK) >>> X86.LADDR.PDE.SHIFT;
+            pageInfo.addrPDE = this.cpu.regCR3 + pageInfo.offPDE;
+            pageInfo.blockPDE = bus.aMemBlocks[(pageInfo.addrPDE & bus.nBusMask) >>> bus.nBlockShift];
+            pageInfo.lPDE = pageInfo.blockPDE.readLong(pageInfo.offPDE);
+            pageInfo.offPTE = (addr & X86.LADDR.PTE.MASK) >>> X86.LADDR.PTE.SHIFT;
+            pageInfo.addrPTE = (pageInfo.lPDE & X86.PTE.FRAME) + pageInfo.offPTE;
+            pageInfo.blockPTE = bus.aMemBlocks[(pageInfo.addrPTE & bus.nBusMask) >>> bus.nBlockShift];
+            pageInfo.lPTE = pageInfo.blockPTE.readLong(pageInfo.offPTE);
+            pageInfo.addrPhys = (pageInfo.lPTE & X86.PTE.FRAME) + (addr & X86.LADDR.OFFSET);
+            //var blockPhys = bus.aMemBlocks[(addrPhys & bus.nBusMask) >>> bus.nBlockShift];
+        }
+        return pageInfo;
+    };
+
+    /**
+     * dumpInfo(asArgs)
+     *
+     * @this {Debugger}
+     * @param {Array.<string>} asArgs
+     */
+    Debugger.prototype.dumpInfo = function(asArgs)
+    {
+        var sInfo = "no information";
+        if (BACKTRACK) {
+            var sAddr = asArgs[0];
+            var dbgAddr = this.parseAddr(sAddr, true, true, false);
+            if (dbgAddr) {
+                var addr = this.getAddr(dbgAddr);
+                if (dbgAddr.type != Debugger.ADDRTYPE.PHYSICAL) {
+                    var pageInfo = this.getPageInfo(addr);
+                    if (pageInfo) {
+                        dbgAddr.addr = pageInfo.addrPhys;
+                        dbgAddr.type = Debugger.ADDRTYPE.PHYSICAL;
+                    }
+                }
+                sInfo = this.toHexAddr(dbgAddr) + ": " + (this.bus.getSymbol(addr, true) || sInfo);
+            } else {
+                var component, componentPrev = null;
+                while (component = this.cmp.getMachineComponent("Disk", componentPrev)) {
+                    var aInfo = component.getSymbolInfo(sAddr);
+                    if (aInfo.length) {
+                        sInfo = "";
+                        for (var i in aInfo) {
+                            var a = aInfo[i];
+                            if (sInfo) sInfo += '\n';
+                            sInfo += a[0] + ": " + a[1] + ' ' + str.toHex(a[2], 4) + ':' + str.toHex(a[3], 4) + " len " + str.toHexWord(a[4]);
+                        }
+                    }
+                    componentPrev = component;
+                }
+            }
+        }
+        return sInfo;
     };
 
     /**
@@ -2918,30 +2997,18 @@ if (DEBUGGER) {
             return;
         }
 
-        /*
-         * Here begins the code that is remarkably similar to mapPageBlock(), with fSuppress set.
-         */
-        var bus = this.bus;
-        var offPDE = (addr & X86.LADDR.PDE.MASK) >>> X86.LADDR.PDE.SHIFT;
-        var addrPDE = this.cpu.regCR3 + offPDE;
-        var blockPDE = bus.aMemBlocks[(addrPDE & bus.nBusMask) >>> bus.nBlockShift];
-        var lPDE = blockPDE.readLong(offPDE);
-        var offPTE = (addr & X86.LADDR.PTE.MASK) >>> X86.LADDR.PTE.SHIFT;
-        var addrPTE = (lPDE & X86.PTE.FRAME) + offPTE;
-        var blockPTE = bus.aMemBlocks[(addrPTE & bus.nBusMask) >>> bus.nBlockShift];
-        var lPTE = blockPTE.readLong(offPTE);
-        var addrPhys = (lPTE & X86.PTE.FRAME) + (addr & X86.LADDR.OFFSET);
-        //var blockPhys = bus.aMemBlocks[(addrPhys & bus.nBusMask) >>> bus.nBlockShift];
-        /*
-         * And here ends the code that is remarkably similar to mapPageBlock(), with fSuppress set.
-         */
+        var pageInfo = this.getPageInfo(addr);
+        if (!pageInfo) {
+            this.println("unsupported operation");
+            return;
+        }
 
         this.println("linear     PDE addr   PDE             PTE addr   PTE             physical" );
         this.println("---------  ---------- --------        ---------- --------        ----------");
         var s = '%' + str.toHex(addr);
-        s += "  %%" + this.getPageEntry(addrPDE, lPDE);
-        s += "  %%" + this.getPageEntry(addrPTE, lPTE, true);
-        s += "  %%" + str.toHex(addrPhys);
+        s += "  %%" + this.getPageEntry(pageInfo.addrPDE, pageInfo.lPDE);
+        s += "  %%" + this.getPageEntry(pageInfo.addrPTE, pageInfo.lPTE, true);
+        s += "  %%" + str.toHex(pageInfo.addrPhys);
         this.println(s);
     };
 
@@ -3289,7 +3356,6 @@ if (DEBUGGER) {
         this.dbg = this;
         this.bitsMessage = this.bitsWarning = Messages.WARN;
         this.sMessagePrev = null;
-        this.afnDumpers = [];
         /*
          * Internally, we use "key" instead of "keys", since the latter is a method on JavasScript objects,
          * but externally, we allow the user to specify "keys"; "kbd" is also allowed as shorthand for "keyboard".
@@ -4313,14 +4379,14 @@ if (DEBUGGER) {
         if (this.aBreakRead !== undefined) {
             for (i = 1; i < this.aBreakRead.length; i++) {
                 dbgAddr = this.aBreakRead[i];
-                this.cpu.removeMemBreak(this.getAddr(dbgAddr), false, dbgAddr.type != Debugger.ADDRTYPE.PHYSICAL);
+                this.cpu.removeMemBreak(this.getAddr(dbgAddr), false, dbgAddr.type == Debugger.ADDRTYPE.PHYSICAL);
             }
         }
         this.aBreakRead = ["br"];
         if (this.aBreakWrite !== undefined) {
             for (i = 1; i < this.aBreakWrite.length; i++) {
                 dbgAddr = this.aBreakWrite[i];
-                this.cpu.removeMemBreak(this.getAddr(dbgAddr), true, dbgAddr.type != Debugger.ADDRTYPE.PHYSICAL);
+                this.cpu.removeMemBreak(this.getAddr(dbgAddr), true, dbgAddr.type == Debugger.ADDRTYPE.PHYSICAL);
             }
         }
         this.aBreakWrite = ["bw"];
@@ -4353,33 +4419,6 @@ if (DEBUGGER) {
      * also consider a more WDEB386-like syntax, where "br" is used to set a variety of access-specific
      * breakpoints, using modifiers like "r1", "r2", "w1", "w2, etc.
      *
-     * Here's an example of our powerful new breakpoint command capabilities:
-     *
-     *      bp 0397:022B "?'GlobalAlloc(wFlags:[ss:sp+8],dwBytes:[ss:sp+6][ss:sp+4])';g [ss:sp+2]:[ss:sp] '?ax;if ax'"
-     *
-     * The above breakpoint will display a pleasing "GlobalAlloc()" string containing the current
-     * stack parameters, and will briefly stop execution on the return to print the result in AX,
-     * halting the CPU whenever AX is zero (the default behavior of "if" whenever the expression is
-     * false is to look for an "else" and automatically halt when there is no "else").
-     *
-     * How do you figure out where the code for GlobalAlloc is in the first place?  You need to have
-     * BACKTRACK support enabled (which currently means running the non-COMPILED version), so that as
-     * the Disk component loads disk images, it will automatically extract symbolic information from all
-     * "NE" (New Executable) binaries on those disks, which the Debugger's "di" command can then search
-     * for you; eg:
-     *
-     *      ## di globalalloc
-     *      GLOBALALLOC: KRNL386.EXE 0001:022B len 0xC570
-     *
-     * And then you just need to do a bit more sleuthing to find the right CODE segment.  And that just
-     * got easier, now that the PCjs Debugger mimics portions of the Windows Debugger INT 0x41 interface;
-     * see intWindowsDebugger() for details.  So even if you neglect to run WDEB386.EXE /E inside the
-     * machine before running Windows, you should still see notifications like:
-     *
-     *      KERNEL!undefined code(0001)=#0397 len 0000C580
-     *
-     * in the PCjs Debugger output window, as segments are being loaded by the Windows kernel.
-     *
      * @this {Debugger}
      * @param {Array} aBreak
      * @param {DbgAddr} dbgAddr
@@ -4410,11 +4449,7 @@ if (DEBUGGER) {
                 this.println("invalid address: " + this.toHexAddr(dbgAddr));
                 fSuccess = false;
             } else {
-                this.cpu.addMemBreak(addr, aBreak == this.aBreakWrite, dbgAddr.type != Debugger.ADDRTYPE.PHYSICAL);
-                /*
-                 * Force memory breakpoints to use their linear address, by zapping the selector.
-                 */
-                dbgAddr.sel = null;
+                this.cpu.addMemBreak(addr, aBreak == this.aBreakWrite, dbgAddr.type == Debugger.ADDRTYPE.PHYSICAL);
             }
         }
 
@@ -4469,7 +4504,7 @@ if (DEBUGGER) {
                         }
                         aBreak.splice(i, 1);
                         if (aBreak != this.aBreakExec) {
-                            this.cpu.removeMemBreak(addr, aBreak == this.aBreakWrite, dbgAddrBreak.type != Debugger.ADDRTYPE.PHYSICAL);
+                            this.cpu.removeMemBreak(addr, aBreak == this.aBreakWrite, dbgAddrBreak.type == Debugger.ADDRTYPE.PHYSICAL);
                         }
                         /*
                          * We'll mirror the logic in addBreakpoint() and leave the history buffer alone if this
@@ -7205,8 +7240,14 @@ if (DEBUGGER) {
                         this.dbgAddrNextCode = this.newAddr(this.cpu.getIP(), this.cpu.getCS());
                         break;
                     /*
-                     * I used to alias "PC" to "IP", until I discovered that early (perhaps ALL) versions of
-                     * DEBUG.COM treat "PC" as an alias for the 16-bit flags register.  I, of course, prefer "PS".
+                     * I used to alias "PC" (Program Counter) to "IP" (Instruction Pointer), because in PC-DOS 1.00
+                     * through 2.10, DEBUG.COM did the same thing.  Then I discovered that, starting with PC-DOS 3.00,
+                     * DEBUG.COM changed "PC" to refer to the 16-bit flags register (Program or Processor Control?)
+                     * I've elected to go for PC-DOS 3.00+ compatibility, since that will be more widely known.
+                     *
+                     * PCjs prefers "PS" (Processor Status) for accessing the FLAGS register in its 16-bit (or 32-bit)
+                     * entirety.  Individual flag bits can also be accessed as 1-bit registers, using the names shown
+                     * below ("C", "P", "A", "Z", etc.)
                      */
                     case "PC":
                     case "PS":

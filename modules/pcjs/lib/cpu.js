@@ -517,15 +517,16 @@ CPU.prototype.setFocus = function()
 };
 
 /**
- * setBinding(sHTMLType, sBinding, control)
+ * setBinding(sHTMLType, sBinding, control, sValue)
  *
  * @this {CPU}
  * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
  * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "run")
  * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+ * @param {string} [sValue] optional data value
  * @return {boolean} true if binding was successful, false if unrecognized binding request
  */
-CPU.prototype.setBinding = function(sHTMLType, sBinding, control)
+CPU.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
 {
     var cpu = this;
     var fBound = false;
@@ -1024,6 +1025,14 @@ CPU.prototype.runCPU = function(fOnClick)
             catch(exception) {
                 if (typeof exception != "number") throw exception;
                 if (MAXDEBUG) this.println("CPU exception " + str.toHexByte(exception));
+                /*
+                 * TODO: If we ever get into a situation where every single instruction is generating a fault
+                 * (eg, if an 8088 executes opcode 0xFF 0xFF, which is incorrectly routed to fnFault() instead
+                 * of fnGRPUndefined()), the browser may hang because we're failing to yield often enough.
+                 * This is likely because the thrown exceptions are taking MUCH longer than normal instructions,
+                 * throwing off our burst calculations.  We need to either adjust the burst or break out of the
+                 * DO-WHILE loop on every exception.
+                 */
             }
 
             /*

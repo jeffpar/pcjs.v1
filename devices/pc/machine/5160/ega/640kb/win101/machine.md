@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "IBM PC XT (Model 5160, 640Kb) with EGA Display running Windows 1.01"
+title: "IBM PC XT (Model 5160, 640Kb, 10Mb Drive) with EGA Display running Windows 1.01"
 permalink: /devices/pc/machine/5160/ega/640kb/win101/
 redirect_from:
   - /configs/pc/machines/5160/ega/640kb/win101/

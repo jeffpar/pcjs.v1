@@ -20,12 +20,6 @@ Intel 80386 CPU Information
 * [D1 Stepping](#d1-stepping)
 * [D2 Stepping](#d2-stepping)
 
-80386 Undocumented Instructions
----
-
-* [LOADALL](loadall/)
-* [IBTS and XBTS](ibts_xbts/)
-
 80386 Steppings
 ---
 
@@ -818,3 +812,9 @@ Revision identifier: 0x08.
 ### D2 Stepping
 
 Revision identifier: 0x08 (same as the D1 stepping).
+
+80386 Undocumented Instructions
+---
+
+* [LOADALL](loadall/)
+* [IBTS and XBTS](ibts_xbts/)

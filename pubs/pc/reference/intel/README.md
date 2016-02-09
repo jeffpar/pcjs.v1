@@ -7,10 +7,26 @@ permalink: /pubs/pc/reference/intel/
 Intel CPU Documentation
 ---
 
-Processor-specific information:
+### [8086 CPU](8086/)
+ 
+### [8087 FPU](8087/)
+ 
+### [80186 CPU](80186/)
+ 
+### [80286 CPU](80286/)
+ 
+ * [80286 Errata](80286/#errata)
+ * [80286 Undocumented Instructions](80286/#undocumented-instructions)
+	 * [LOADALL](80286/loadall/)
+ * [80286 Real-Mode Emulation Notes](80286/#real-mode-emulation-notes)
 
- * [80286 CPU](80286/)
- * [80386 CPU](80386/)
+### [80386 CPU](80386/)
+ 
+ * [80386 Errata](80386/#errata)
+ * [80386 Steppings](80386/#steppings)
+ * [80386 Undocumented Instructions](80386/#undocumented-instructions)
+	 * [LOADALL](80386/loadall/)
+	 * [IBTS](80386/ibts_xbts/), [XBTS](80386/ibts_xbts/)
 
 ### Assorted Publications
 

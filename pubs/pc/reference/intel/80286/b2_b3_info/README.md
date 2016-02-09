@@ -199,3 +199,5 @@ handled if the 80286 interrupts are always disabled before programming the inter
 is performed no unmasked interrupt is active. The interrupt handler for IR7 can read ISR7 of the 8259A to tell if this was a real
 interrupt on IR7. The ISR7 bit will be 0 if at the time the interrupt was acknowledged, no unmasked IR inputs of the 8259A were
 active ("phantom" interrupt).
+
+[Return to [Intel 80286 CPU Information](/pubs/pc/reference/intel/80286/)]

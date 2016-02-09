@@ -401,15 +401,16 @@ FDC.aCmdInfo = {
 };
 
 /**
- * setBinding(sHTMLType, sBinding, control)
+ * setBinding(sHTMLType, sBinding, control, sValue)
  *
  * @this {FDC}
  * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
  * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "listDisks")
  * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+ * @param {string} [sValue] optional data value
  * @return {boolean} true if binding was successful, false if unrecognized binding request
  */
-FDC.prototype.setBinding = function(sHTMLType, sBinding, control)
+FDC.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
 {
     var fdc = this;
 
@@ -1170,20 +1171,22 @@ FDC.prototype.autoMount = function(fRemount)
     if (this.configMount) {
         for (var sDrive in this.configMount) {
             var configDrive = this.configMount[sDrive];
-            if (configDrive['name'] && configDrive['path']) {
+            var sDiskettePath = configDrive['path'];
+            var sDisketteName = configDrive['name'] || this.findDiskette(sDiskettePath);
+            if (sDiskettePath && sDisketteName) {
                 /*
                  * WARNING: This conversion of drive letter to drive number, starting with A:, is very simplistic
                  * and is not guaranteed to match the drive mapping that DOS ultimately uses.
                  */
                 var iDrive = sDrive.charCodeAt(0) - 0x41;
                 if (iDrive >= 0 && iDrive < this.aDrives.length) {
-                    if (!this.loadDiskette(iDrive, configDrive['name'], configDrive['path'], true) && fRemount) {
+                    if (!this.loadDiskette(iDrive, sDisketteName, sDiskettePath, true) && fRemount) {
                         this.setReady(false);
                     }
                     continue;
                 }
             }
-            this.notice("Unrecognized auto-mount specification for drive " + sDrive);
+            this.notice("Incorrect auto-mount settings for drive " + sDrive + " (" + JSON.stringify(configDrive) + ")");
         }
     }
     return !!this.cAutoMount;
@@ -1418,6 +1421,28 @@ FDC.prototype.addDiskette = function(sName, sPath)
         controlOption.textContent = sName;
         controlDisks.appendChild(controlOption);
     }
+};
+
+/**
+ * findDiskette(sPath)
+ *
+ * This is used to deal with mount requests (eg, autoMount) that supply a path without a name;
+ * if we can find the path in the "listDisks" control, then we return the associated disk name.
+ *
+ * @param {string} sPath
+ * @return {string|null}
+ */
+FDC.prototype.findDiskette = function(sPath)
+{
+    var controlDisks = this.bindings["listDisks"];
+    if (controlDisks && controlDisks.options) {
+        for (var i = 0; i < controlDisks.options.length; i++) {
+            if (controlDisks.options[i].value == sPath) {
+                return controlDisks.options[i].innerText;
+            }
+        }
+    }
+    return str.getBaseName(sPath, true);
 };
 
 /**

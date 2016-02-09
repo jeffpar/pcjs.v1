@@ -534,7 +534,7 @@ Memory.prototype = {
          * normal memory but also know how to update page tables.  If any of the criteria are not met
          * for these special handlers, we fall back to the slower default "paged" memory handlers.
          */
-        if (TYPEDARRAYS && littleEndian && blockPhys.adw && !blockPhys.controller) {
+        if (TYPEDARRAYS && littleEndian && blockPhys.adw && !blockPhys.controller && !blockPhys.cReadBreakpoints && !blockPhys.cWriteBreakpoints) {
             this.ab = blockPhys.ab;
             this.aw = blockPhys.aw;
             this.adw = blockPhys.adw;
@@ -855,8 +855,9 @@ Memory.prototype = {
     /**
      * readByteChecked(off, addr)
      *
-     * TODO: Considering adding an assert that "this.addr + off === addr", and consider using that fact to eliminate
-     * the extra 'addr' parameter.
+     * NOTE: When we're called in the context of a PAGED block (eg, with one or more DEBUGGER breakpoints set),
+     * the checkMemory functions need "this.addr + off" rather than "addr", because the former will be the physical
+     * address rather than the linear address.
      *
      * @this {Memory}
      * @param {number} off
@@ -864,7 +865,7 @@ Memory.prototype = {
      * @return {number}
      */
     readByteChecked: function readByteChecked(off, addr) {
-        if (!DEBUGGER || !this.dbg || !this.dbg.checkMemoryRead(addr)) {
+        if (!DEBUGGER || !this.dbg || this.addr == null || !this.dbg.checkMemoryRead(this.addr + off)) {
             if (I386 && this.cpu) this.cpu.checkMemoryException(addr, 1, false);
         }
         return this.readByteDirect(off, addr);
@@ -872,16 +873,13 @@ Memory.prototype = {
     /**
      * readShortChecked(off, addr)
      *
-     * TODO: Considering adding an assert that "this.addr + off === addr", and consider using that fact to eliminate
-     * the extra 'addr' parameter.
-     *
      * @this {Memory}
      * @param {number} off
      * @param {number} addr
      * @return {number}
      */
     readShortChecked: function readShortChecked(off, addr) {
-        if (!DEBUGGER || !this.dbg || !this.dbg.checkMemoryRead(addr, 2)) {
+        if (!DEBUGGER || !this.dbg || this.addr == null || !this.dbg.checkMemoryRead(this.addr + off, 2)) {
             if (I386 && this.cpu) this.cpu.checkMemoryException(addr, 2, false);
         }
         return this.readShortDirect(off, addr);
@@ -889,16 +887,13 @@ Memory.prototype = {
     /**
      * readLongChecked(off, addr)
      *
-     * TODO: Considering adding an assert that "this.addr + off === addr", and consider using that fact to eliminate
-     * the extra 'addr' parameter.
-     *
      * @this {Memory}
      * @param {number} off
      * @param {number} addr
      * @return {number}
      */
     readLongChecked: function readLongChecked(off, addr) {
-        if (!DEBUGGER || !this.dbg || !this.dbg.checkMemoryRead(addr, 4)) {
+        if (!DEBUGGER || !this.dbg || this.addr == null || !this.dbg.checkMemoryRead(this.addr + off, 4)) {
             if (I386 && this.cpu) this.cpu.checkMemoryException(addr, 4, false);
         }
         return this.readLongDirect(off, addr);
@@ -906,16 +901,13 @@ Memory.prototype = {
     /**
      * writeByteChecked(off, b, addr)
      *
-     * TODO: Considering adding an assert that "this.addr + off === addr", and consider using that fact to eliminate
-     * the extra 'addr' parameter.
-     *
      * @this {Memory}
      * @param {number} off
      * @param {number} addr
      * @param {number} b
      */
     writeByteChecked: function writeByteChecked(off, b, addr) {
-        if (!DEBUGGER || !this.dbg || !this.dbg.checkMemoryWrite(addr)) {
+        if (!DEBUGGER || !this.dbg || this.addr == null || !this.dbg.checkMemoryWrite(this.addr + off)) {
             if (I386 && this.cpu) this.cpu.checkMemoryException(addr, 1, true);
         }
         if (this.fReadOnly) this.writeNone(off, b, addr); else this.writeByteDirect(off, b, addr);
@@ -923,16 +915,13 @@ Memory.prototype = {
     /**
      * writeShortChecked(off, w, addr)
      *
-     * TODO: Considering adding an assert that "this.addr + off === addr", and consider using that fact to eliminate
-     * the extra 'addr' parameter.
-     *
      * @this {Memory}
      * @param {number} off
      * @param {number} addr
      * @param {number} w
      */
     writeShortChecked: function writeShortChecked(off, w, addr) {
-        if (!DEBUGGER || !this.dbg || !this.dbg.checkMemoryWrite(addr, 2)) {
+        if (!DEBUGGER || !this.dbg || this.addr == null || !this.dbg.checkMemoryWrite(this.addr + off, 2)) {
             if (I386 && this.cpu) this.cpu.checkMemoryException(addr, 2, true);
         }
         if (this.fReadOnly) this.writeNone(off, w, addr); else this.writeShortDirect(off, w, addr);
@@ -940,16 +929,13 @@ Memory.prototype = {
     /**
      * writeLongChecked(off, l, addr)
      *
-     * TODO: Considering adding an assert that "this.addr + off === addr", and consider using that fact to eliminate
-     * the extra 'addr' parameter.
-     *
      * @this {Memory}
      * @param {number} off
      * @param {number} l
      * @param {number} addr
      */
     writeLongChecked: function writeLongChecked(off, l, addr) {
-        if (!DEBUGGER || !this.dbg || !this.dbg.checkMemoryWrite(addr, 4)) {
+        if (!DEBUGGER || !this.dbg || this.addr == null || !this.dbg.checkMemoryWrite(this.addr + off, 4)) {
             if (I386 && this.cpu) this.cpu.checkMemoryException(addr, 4, true);
         }
         if (this.fReadOnly) this.writeNone(off, l, addr); else this.writeLongDirect(off, l, addr);

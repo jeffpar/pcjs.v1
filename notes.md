@@ -8,27 +8,27 @@ To automatically stage files that have been modified and deleted, include -a; eg
 
 	git commit -a
 
-Creating a new branch ("386dev")
+Creating a new branch ("next-release")
 ---
 
 You could use `git branch`, but if you've already modified some files that you now want to 
 move to a new branch:
 
-	git checkout -b 386dev
+	git checkout -b next-release
 	
-Pushing a new branch ("386dev")
+Pushing a new branch ("next-release")
 ---
 
-Since a simple `git push` will report:
+If `git push` reports:
 
-	fatal: The current branch 386dev has no upstream branch.
+	fatal: The current branch next-release has no upstream branch.
     To push the current branch and set the remote as upstream, use
     
-        git push --set-upstream origin 386dev
+        git push --set-upstream origin next-release
 
 do what it recommends (*-u* is shorthand for *--set-upstream*):
 
-	git push -u origin 386dev
+	git push -u origin next-release
 
 Reverting (resetting) a single file [[link](http://www.norbauer.com/rails-consulting/notes/git-revert-reset-a-single-file.html)]
 ---
@@ -77,42 +77,6 @@ Next, issue these commands:
 	git push origin gh-pages
 	git checkout master
 
-Here's a sample run:
-
-	[~/Sites/pcjs] git checkout gh-pages
-	Branch gh-pages set up to track remote branch gh-pages from origin.
-	Switched to a new branch 'gh-pages'
-	
-	[~/Sites/pcjs] git merge master
-	Updating 33098e4..ab4f241
-	Fast-forward
-	 README.md                                           |   2 +-
-	 _config.yml                                         |   2 +-
-	 _posts/2015-12-10-rebuilding-the-pcjs-website.md    |  28 ++++---
-	 apps/c1p/README.md                                  |   2 +-
-	 blog/README.md                                      |   4 +-
-	 devices/pc/machine/5170/ega/1152kb/rev1/machine.xml |   2 +-
-	 disks/pc/README.md                                  |   2 +-
-	 docs/about/README.md                                |  21 ++---
-	 docs/about/pcjs/README.md                           |   2 +-
-	 docs/pcjs/demos/pc-dbg.js                           |  86 ++++++++++----------
-	 modules/markout/lib/markout.js                      | 174 +++++++++++-----------------------------
-	 pubs/pc/reference/intel/8087/README.md              | 347 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-	 versions/c1pjs/1.20.2/components.css                |   4 -
-	 versions/pcjs/1.20.2/components.css                 |   4 -
-	 versions/pcjs/1.20.2/pc-dbg.js                      | 104 ++++++++++++++++++++++++
-	 15 files changed, 572 insertions(+), 212 deletions(-)
-	 create mode 100644 pubs/pc/reference/intel/8087/README.md
-	 
-	[~/Sites/pcjs] git push origin gh-pages
-	Total 0 (delta 0), reused 0 (delta 0)
-	To git@github.com:jeffpar/pcjs.git
-	   33098e4..ab4f241  gh-pages -> gh-pages
-	   
-	[~/Sites/pcjs] git checkout master
-	Switched to branch 'master'
-	Your branch is up-to-date with 'origin/master'.
-
 
 Node "Cheat Sheet"
 ===
@@ -124,6 +88,96 @@ which appears to be the newest version of Node that does *not* suffer from a [se
 on OS X.  In newer versions of Node, the REPL blocks execution of the application until keys are typed.
 
 That Node package came bundled with its own version of NPM as well: v1.3.25.
+
+
+Markdown "Cheat Sheet"
+===
+
+To convert PCjs' special links, such as:
+
+	![IBM PC XT w/CGA, 10Mb Hard Drive](/devices/pc/machine/5160/cga/256kb/demo/thumbnail.jpg "link:/devices/pc/machine/5160/cga/256kb/demo/:200:100")
+
+to normal Markdown links, search using this regex:
+
+	\!\[(.*?)\]\((.*?) \"link:(.*?):([0-9]*):([0-9]*)\"\)
+	
+and replace using this regex:
+
+	[<img src="$2" width="$4" height="$5" alt="$1"/>]($3)
+
+For magazines (eg, BYTE), change:
+
+	\!\[(.*?)\]\(../static/([^)]*) \"link:../static/(.*?):([0-9]*):([0-9]*)\"\)
+
+to:
+
+	[<img src="http://archive.pcjs.org/pubs/pc/magazines/BYTE/$2" width="$4" height="$5" alt= "$1"/>](http://archive.pcjs.org/pubs/pc/magazines/BYTE/$3)
+
+
+Jekyll "Cheat Sheet"
+===
+
+The [README](README.md) still assumes that you'll use the Node web server with the PCjs project, and it explains how
+to do that.
+
+However, if you'd rather use Jekyll to locally serve PCjs web pages (since that www.pcjs.org does now, thanks to
+to GitHub Pages), the basic steps are below.
+
+NOTE: The Node web server *is* still supported.  In fact, I've put significant effort into updating the Node components
+so that they recognize the Jekyll "Front Matter" that all pages now use to describe and load PCjs machines, allowing
+me to continue debugging PCjs with WebStorm's built-in Node support.  But since I now run Jekyll's web server by
+default (both locally and externally at www.pcjs.org), there will inevitably be some features that are "degraded" under
+Node.  I don't have the time or bandwidth to keep every aspect of Node's server operation in perfect sync with Jekyll's.
+The most obvious example of that are all the CSS style differences (colors, fonts, etc) between what Node and Jekyll
+render; Node pages continue to display an older, darker color scheme, because the servers take completely different
+approaches to templating.
+
+Installing Jekyll
+---
+
+	sudo gem install bundler
+	(create Gemfile:
+		source 'https://rubygems.org'
+		gem 'github-pages'
+	)
+	bundle install
+
+Updating Jekyll
+---
+
+	bundle update
+
+Running Jekyll
+---
+
+	bundle exec jekyll serve --incremental --config _config.yml,_developer.yml
+
+Once you see the following messages:
+
+	...
+	Server address: http://127.0.0.1:4000/
+	Server running... press ctrl-c to stop.
+	...
+
+You should now be able to use [http://localhost:4000](http://localhost:4000/) to load PCjs web pages.
+
+Note that **_developer.yml** is intended only for development purposes (it forces the use of uncompiled PCjs source
+code, to make debugging easier, and enables certain developer-only portions of assorted pages); a production server
+should not use that file.
+
+Embedding Screenshots with Jekyll
+---
+
+I created screenshot.html in the **_includes** folder, so that I could do this:
+
+	{% include screenshot.html src="/devices/pc/machine/5150/cga/64kb/donkey/thumbnail.jpg" width="200" height="100" link="/devices/pc/machine/5150/cga/64kb/donkey/" title="IBM PC running DONKEY.BAS" %}
+
+instead of this:
+
+	[<img src="/devices/pc/machine/5150/cga/64kb/donkey/thumbnail.jpg" width="200" height="100"/>](/devices/pc/machine/5150/cga/64kb/donkey/ "IBM PC running DONKEY.BAS")
+
+The latter is better for pure Markdown environments, but the former enables Jekyll to properly style screenshots.
+
 
 Miscellaneous Tips
 ===
@@ -171,55 +225,3 @@ indicating the name of serial device to connect to:
 The advantage of using *nc* is that no "middle man" is required: your terminal window will be connected directly
 to the virtual serial port.  And *nc* is included with OS X, whereas *socat* must installed separately (see
 [http://www.dest-unreach.org/socat/](http://www.dest-unreach.org/socat/)).
-
-
-Markdown "Cheat Sheet"
-===
-
-To convert PCjs' special links, such as:
-
-	![IBM PC XT w/CGA, 10Mb Hard Drive](/devices/pc/machine/5160/cga/256kb/demo/thumbnail.jpg "link:/devices/pc/machine/5160/cga/256kb/demo/:200:100")
-
-to normal Markdown links, search using this regex:
-
-	\!\[(.*?)\]\((.*?) \"link:(.*?):([0-9]*):([0-9]*)\"\)
-	
-and replace using this regex:
-
-	[<img src="$2" width="$4" height="$5" alt="$1"/>]($3)
-
-For magazines (eg, BYTE), change:
-
-	\!\[(.*?)\]\(../static/([^)]*) \"link:../static/(.*?):([0-9]*):([0-9]*)\"\)
-
-to:
-
-	[<img src="http://archive.pcjs.org/pubs/pc/magazines/BYTE/$2" width="$4" height="$5" alt= "$1"/>](http://archive.pcjs.org/pubs/pc/magazines/BYTE/$3)
-
-
-Jekyll "Cheat Sheet"
-===
-
-Installing Jekyll
----
-
-	sudo gem install bundler
-	(create Gemfile:
-		source 'https://rubygems.org'
-		gem 'github-pages'
-	)
-	bundle install
-	jekyll serve (or: bundle exec jekyll serve)
-
-Embedding Screenshots
----
-
-I created screenshot.html in the **_includes** folder, so that I could do this:
-
-	{% include screenshot.html src="/devices/pc/machine/5150/cga/64kb/donkey/thumbnail.jpg" width="200" height="100" link="/devices/pc/machine/5150/cga/64kb/donkey/" title="IBM PC running DONKEY.BAS" %}
-
-instead of this:
-
-	[<img src="/devices/pc/machine/5150/cga/64kb/donkey/thumbnail.jpg" width="200" height="100"/>](/devices/pc/machine/5150/cga/64kb/donkey/ "IBM PC running DONKEY.BAS")
-
-The latter is better for pure Markdown environments, but the former enables Jekyll to properly style screenshots.

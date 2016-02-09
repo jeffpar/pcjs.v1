@@ -32,6 +32,11 @@
 
 "use strict";
 
+if (NODE) {
+    var web         = require("../../shared/lib/weblib");
+    var Component   = require("../../shared/lib/component");
+}
+
 /**
  * C1PPanel(parmsPanel)
  *
@@ -58,15 +63,16 @@ Component.subclass(C1PPanel);
  * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
  * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "reset")
  * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+ * @param {string} [sValue] optional data value
  * @return {boolean} true if binding was successful, false if unrecognized binding request
  */
-C1PPanel.prototype.setBinding = function(sHTMLType, sBinding, control)
+C1PPanel.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
 {
-    if (this.cmp && this.cmp.setBinding(sHTMLType, sBinding, control)) return true;
-    if (this.cpu && this.cpu.setBinding(sHTMLType, sBinding, control)) return true;
-    if (this.kbd && this.kbd.setBinding(sHTMLType, sBinding, control)) return true;
-    if (DEBUGGER && this.dbg && this.dbg.setBinding(sHTMLType, sBinding, control)) return true;
-    return Component.prototype.setBinding.call(this, sHTMLType, sBinding, control);
+    if (this.cmp && this.cmp.setBinding(sHTMLType, sBinding, control, sValue)) return true;
+    if (this.cpu && this.cpu.setBinding(sHTMLType, sBinding, control, sValue)) return true;
+    if (this.kbd && this.kbd.setBinding(sHTMLType, sBinding, control, sValue)) return true;
+    if (DEBUGGER && this.dbg && this.dbg.setBinding(sHTMLType, sBinding, control, sValue)) return true;
+    return Component.prototype.setBinding.call(this, sHTMLType, sBinding, control, sValue);
 };
 
 /**

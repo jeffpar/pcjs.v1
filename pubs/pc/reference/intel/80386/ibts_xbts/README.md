@@ -4,11 +4,12 @@ title: "Obsolete 80386 Instructions: IBTS and XBTS"
 permalink: /pubs/pc/reference/intel/80386/ibts_xbts/
 ---
 
-### Obsolete 80386 Instructions
+Obsolete 80386 Instructions
+---
 
 Here's more information on the 80386 opcodes (IBTS and XBTS) that were removed from the 80386 as of the B1 stepping.
 
-[IBTS (0x0F 0xA7)](http://asm.inightmare.org/opcodelst/index.php?op=IBTS)
+### [IBTS (0x0F 0xA7)](http://asm.inightmare.org/opcodelst/index.php?op=IBTS)
 
 	Opcode IBTS
 	
@@ -28,7 +29,7 @@ Here's more information on the 80386 opcodes (IBTS and XBTS) that were removed f
 	Clocks:	IBTS 
 	80386:	12/19
 
-[XBTS (0x0F 0xA6)](http://asm.inightmare.org/opcodelst/index.php?op=XBTS):
+### [XBTS (0x0F 0xA6)](http://asm.inightmare.org/opcodelst/index.php?op=XBTS)
 
     Opcode XBTS
 

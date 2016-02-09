@@ -1,14 +1,16 @@
 ---
 layout: page
 title: IBM PC Disk Archive
+menu_title: Disks
+menu_order: 4
 permalink: /disks/pc/
 ---
 
 IBM PC Disk Archive
 ---
 
-This is a list of disks available to any of the [IBM PC Machines](/devices/pc/machine/) that use the
-[library.xml](/disks/pc/library.xml) disk configuration file.
+This is a list of disks available to any [IBM PC Machine](/devices/pc/machine/) that uses our
+[Library](/disks/pc/library.xml) XML disk configuration file.
 
 For some of the disks below, we have provided more information about the software, and in some cases, machines
 that automatically run the software.
@@ -30,8 +32,8 @@ that automatically run the software.
 
 ### MS-DOS (Microsoft)
 
-* MS-DOS 1.25
-* MS-DOS 2.00
+* [MS-DOS 1.25](/disks/pc/dos/microsoft/1.25/)
+* [MS-DOS 2.00](/disks/pc/dos/microsoft/2.00/)
 * [MS-DOS 3.20](/disks/pc/dos/microsoft/3.20/)
 * MS-DOS 3.21
 * MS-DOS 3.30
@@ -44,10 +46,13 @@ that automatically run the software.
 * MS-DOS 6.20
 * MS-DOS 6.22
 
-### Compaq DOS
+### MS-DOS (COMPAQ)
 
-* Compaq DOS 3.10
-* Compaq DOS 3.31
+* [COMPAQ MS-DOS 1.11](/disks/pc/dos/compaq/1.11/)
+* [COMPAQ MS-DOS 1.12](/disks/pc/dos/compaq/1.12/)
+* [COMPAQ MS-DOS 2.12](/disks/pc/dos/compaq/2.12/)
+* [COMPAQ MS-DOS 3.10](/disks/pc/dos/compaq/3.10/)
+* [COMPAQ MS-DOS 3.31](/disks/pc/dos/compaq/3.31/)
 
 ### IBM OS/2
 
@@ -67,15 +72,23 @@ that automatically run the software.
 
 ### Microsoft Windows
 
-* Microsoft Windows 1.00
+* [Microsoft Windows 1.00](/disks/pc/windows/1.00/)
 * [Microsoft Windows 1.01](/disks/pc/windows/1.01/)
-* Microsoft Windows 1.03
-* Microsoft Windows 1.03A
-* Microsoft Windows 1.04
-* Microsoft Windows 2.01
-* Microsoft Windows 2.03
-* Microsoft Windows 3.00
-* Microsoft Windows 3.11
+* [Microsoft Windows 1.02](/disks/pc/windows/1.02/)
+* [Microsoft Windows 1.03](/disks/pc/windows/1.03/)
+* [Microsoft Windows 1.03a](/disks/pc/windows/1.03a/)
+* [Microsoft Windows 1.03b](/disks/pc/windows/1.03b/)
+* [Microsoft Windows 1.04](/disks/pc/windows/1.04/)
+* [Microsoft Windows 2.03](/disks/pc/windows/2.03/)
+* [Microsoft Windows/386 2.01](/disks/pc/windows/2.01/)
+* [Microsoft Windows/386 2.03](/disks/pc/windows/2.03/#microsoft-windows386-203)
+* [Microsoft Windows/286 2.10](/disks/pc/windows/2.10/#microsoft-windows286-210)
+* [Microsoft Windows/386 2.10](/disks/pc/windows/2.10/#microsoft-windows386-210)
+* [Microsoft Windows/286 2.11](/disks/pc/windows/2.11/#microsoft-windows286-211)
+* [Microsoft Windows/386 2.11](/disks/pc/windows/2.11/#microsoft-windows386-211)
+* [Microsoft Windows 3.00](/disks/pc/windows/3.00/)
+* [Microsoft Windows 3.10](/disks/pc/windows/3.10/)
+* [Microsoft Windows 3.11](/disks/pc/windows/3.11/)
 * [Microsoft Windows 95 (Build 499)](/disks/pc/windows/win95/4.00.499/)
 * [Microsoft Windows 95 (Build 950)](/disks/pc/windows/win95/4.00.950/)
 
@@ -133,7 +146,7 @@ Learn more about
 [Disk Sets](https://github.com/jeffpar/pcjs/tree/master/disks/pc) in the
 [PCjs Project](https://github.com/jeffpar/pcjs) on [GitHub](https://github.com/).
 
-{% if page.developer %}
+{% if site.developer %}
 
 ### Developer Notes: Disk Sets and Manifests
 

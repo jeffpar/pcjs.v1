@@ -2,7 +2,7 @@
 layout: page
 title: Documentation
 menu_title: Docs
-menu_order: 6
+menu_order: 8
 permalink: /docs/
 ---
 
@@ -14,7 +14,7 @@ Help is available for the following JavaScript Machines:
 * [PCjs](/docs/pcjs/)
 * [C1Pjs](/docs/c1pjs/)
 
-{% if page.developer %}
+{% if site.developer %}
 
 Instruction documentation is also available:
 
@@ -25,8 +25,8 @@ Instruction documentation is also available:
 
 Our [Publication Archive](/pubs/) includes these PC-related resources:
 
+* [CPU Documents](/pubs/pc/reference/intel/)
 * [Datasheets](/pubs/pc/datasheets/)
-* [Intel CPU Documents](/pubs/pc/reference/intel/)
 * [Magazines](/pubs/pc/magazines/)
 * [Programming Guides](/pubs/pc/programming/) (eg, [OS/2](/pubs/pc/programming/os2/))
 * [Reference Manuals](/pubs/pc/reference/)

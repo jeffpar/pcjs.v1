@@ -48,3 +48,5 @@ The above three problems are being corrected in all future steppings of the 8028
 register will hold 0ffffH when the CPU detects a violation due to the conditions above. Note that even when REP MOVS and
 REP INS restartability is corrected, CX will correctly continue to be 0000H when these instructions complete without generating
 a protection violation.
+
+[Return to [Intel 80286 CPU Information](/pubs/pc/reference/intel/80286/)]

@@ -30,6 +30,10 @@ machines:
   - type: c1p
     id: osi9
     config: /devices/c1p/machine/8kb/small/machine.xml
+redirect_from:
+  - /configs/c1p/machines/array/
+  - /configs/c1p/machines/8kb/array/
+  - /devices/other/c1p/array.xml
 ---
 
 Challenger 1P (8Kb) "Server Array"

@@ -266,6 +266,9 @@
 		<xsl:variable name="binding">
 			<xsl:text>binding:'</xsl:text><xsl:value-of select="@binding"/><xsl:text>'</xsl:text>
 		</xsl:variable>
+		<xsl:variable name="value">
+			<xsl:text>value:'</xsl:text><xsl:value-of select="@value"/><xsl:text>'</xsl:text>
+		</xsl:variable>
 		<xsl:variable name="border">
 			<xsl:choose>
 				<xsl:when test="@border = '1'">border:1px solid black;</xsl:when>
@@ -363,7 +366,7 @@
 					<canvas class="{$APPCLASS}-binding {$APPCLASS}-canvas" width="{@width}" height="{@height}" style="-webkit-user-select:none;{$border}{$fontsize}{$style}" data-value="{{{$type},{$binding}}}"><xsl:apply-templates/></canvas>
 				</xsl:when>
 				<xsl:when test="@type = 'button'">
-					<button class="{$APPCLASS}-binding" style="-webkit-user-select:none;{$border}{$width}{$height}{$fontsize}{$style}" data-value="{{{$type},{$binding}}}"><xsl:apply-templates/></button>
+					<button class="{$APPCLASS}-binding" style="-webkit-user-select:none;{$border}{$width}{$height}{$fontsize}{$style}" data-value="{{{$type},{$binding},{$value}}}"><xsl:apply-templates/></button>
 				</xsl:when>
 				<xsl:when test="@type = 'list'">
 					<select class="{$APPCLASS}-binding" style="{$border}{$width}{$height}{$fontsize}{$style}" data-value="{{{$type},{$binding}}}">
@@ -531,7 +534,7 @@
 		<xsl:variable name="stepping">
 			<xsl:choose>
 				<xsl:when test="@stepping"><xsl:value-of select="@stepping"/></xsl:when>
-				<xsl:otherwise></xsl:otherwise>
+				<xsl:otherwise/>
 			</xsl:choose>
 		</xsl:variable>
 		<xsl:variable name="fpu">
@@ -600,7 +603,7 @@
 		<xsl:variable name="stepping">
 			<xsl:choose>
 				<xsl:when test="@stepping"><xsl:value-of select="@stepping"/></xsl:when>
-				<xsl:otherwise></xsl:otherwise>
+				<xsl:otherwise/>
 			</xsl:choose>
 		</xsl:variable>
 		<xsl:call-template name="component">
@@ -694,6 +697,33 @@
 		</xsl:call-template>
 	</xsl:template>
 
+	<xsl:template match="parallel[@ref]">
+		<xsl:param name="machine" select="''"/>
+		<xsl:variable name="componentFile"><xsl:value-of select="$rootDir"/><xsl:value-of select="@ref"/></xsl:variable>
+		<xsl:apply-templates select="document($componentFile)/parallel"><xsl:with-param name="machine" select="$machine"/></xsl:apply-templates>
+	</xsl:template>
+
+	<xsl:template match="parallel[not(@ref)]">
+		<xsl:param name="machine" select="''"/>
+		<xsl:variable name="adapter">
+			<xsl:choose>
+				<xsl:when test="@adapter"><xsl:value-of select="@adapter"/></xsl:when>
+				<xsl:otherwise>0</xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
+		<xsl:variable name="binding">
+			<xsl:choose>
+				<xsl:when test="@binding"><xsl:value-of select="@binding"/></xsl:when>
+				<xsl:otherwise/>
+			</xsl:choose>
+		</xsl:variable>
+		<xsl:call-template name="component">
+			<xsl:with-param name="machine" select="$machine"/>
+			<xsl:with-param name="class">parallel</xsl:with-param>
+			<xsl:with-param name="parms">,adapter:<xsl:value-of select="$adapter"/>,binding:'<xsl:value-of select="$binding"/>'</xsl:with-param>
+		</xsl:call-template>
+	</xsl:template>
+
 	<xsl:template match="serial[@ref]">
 		<xsl:param name="machine" select="''"/>
 		<xsl:variable name="componentFile"><xsl:value-of select="$rootDir"/><xsl:value-of select="@ref"/></xsl:variable>
@@ -714,10 +744,22 @@
 				<xsl:otherwise/>
 			</xsl:choose>
 		</xsl:variable>
+		<xsl:variable name="charBOL">
+			<xsl:choose>
+				<xsl:when test="@charbol"><xsl:value-of select="@charbol"/></xsl:when>
+				<xsl:otherwise>0</xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
+		<xsl:variable name="tabSize">
+			<xsl:choose>
+				<xsl:when test="@tabsize"><xsl:value-of select="@tabsize"/></xsl:when>
+				<xsl:otherwise>0</xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
 		<xsl:call-template name="component">
 			<xsl:with-param name="machine" select="$machine"/>
 			<xsl:with-param name="class">serial</xsl:with-param>
-			<xsl:with-param name="parms">,adapter:<xsl:value-of select="$adapter"/>,binding:'<xsl:value-of select="$binding"/>'</xsl:with-param>
+			<xsl:with-param name="parms">,adapter:<xsl:value-of select="$adapter"/>,binding:'<xsl:value-of select="$binding"/>',tabSize:<xsl:value-of select="$tabSize"/>,charBOL:<xsl:value-of select="$charBOL"/></xsl:with-param>
 		</xsl:call-template>
 	</xsl:template>
 
@@ -950,7 +992,7 @@
 		<xsl:variable name="touchScreen">
 			<xsl:choose>
 				<xsl:when test="@touchscreen"><xsl:value-of select="@touchscreen"/></xsl:when>
-				<xsl:otherwise></xsl:otherwise>
+				<xsl:otherwise/>
 			</xsl:choose>
 		</xsl:variable>
 		<xsl:variable name="autoLock">

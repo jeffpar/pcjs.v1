@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "IBM PC XT (Model 5160, 256Kb) Server Array"
+title: "IBM PC XT (Model 5160, 256Kb, 10Mb Drive) Machine Array with CGA Displays"
 permalink: /devices/pc/machine/5160/cga/256kb/array/
 machines:
   - type: pc
@@ -9,7 +9,7 @@ machines:
     id: ibm5160b
 ---
 
-IBM PC XT "Server Array"
+IBM PC XT CGA Machine Array
 ---
 
 ### Demonstration of Multiple IBM PCs on a Single Web Page

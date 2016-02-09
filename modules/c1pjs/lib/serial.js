@@ -32,6 +32,12 @@
 
 "use strict";
 
+if (NODE) {
+    var str         = require("../../shared/lib/strlib");
+    var web         = require("../../shared/lib/weblib");
+    var Component   = require("../../shared/lib/component");
+}
+
 /**
  * C1PSerialPort(parmsSerial)
  *
@@ -103,9 +109,10 @@ C1PSerialPort.prototype.start = function()
  * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea")
  * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "listSerial")
  * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+ * @param {string} [sValue] optional data value
  * @return {boolean} true if binding was successful, false if unrecognized binding request
  */
-C1PSerialPort.prototype.setBinding = function(sHTMLType, sBinding, control)
+C1PSerialPort.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
 {
     var serial = this;
 
@@ -162,7 +169,7 @@ C1PSerialPort.prototype.setBinding = function(sHTMLType, sBinding, control)
         }
         else {
             if (DEBUG) this.log("Local file support not available");
-            control.parentNode.removeChild(control);
+            control.parentNode.removeChild(/** @type {Node} */ (control));
         }
         return true;
 

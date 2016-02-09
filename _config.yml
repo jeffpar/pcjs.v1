@@ -17,7 +17,7 @@ right_brace: "}"
 
 # Build settings
 
-exclude: ["index.html", "**/index.html", "logs", "node_modules", "**/c64", "src", "**/src", "**/static", "tmp", "videos", "web", ".git", ".idea"]
+exclude: ["index.html", "**/index.html", "logs", "node_modules", "**/c64", "**/private", "src", "**/src", "**/static", "tmp", "videos", "web", ".git", ".idea"]
 markdown: kramdown
 kramdown:
   input: GFM
@@ -31,7 +31,7 @@ gems:
 
 pcjs:
   domain: pcjs.org    # whereas site.url is used for linking purposes, site.pcjs.domain is used for display purposes
-  version: 1.20.7     # IMPORTANT: keep pcjs.version in sync with package.json:version
+  version: 1.20.8     # IMPORTANT: keep pcjs.version in sync with package.json:version
   compiled: true      # by default, the compiled pcjs.version scripts will be used (eg, pc.js or pc-dbg.js)
   pc_scripts:         # if pcjs.compiled is false, the following scripts will be included instead, in the order listed
     - /modules/shared/lib/defines.js
@@ -69,6 +69,7 @@ pcjs:
     - /modules/pcjs/lib/ram.js
     - /modules/pcjs/lib/keyboard.js
     - /modules/pcjs/lib/video.js
+    - /modules/pcjs/lib/parallelport.js
     - /modules/pcjs/lib/serialport.js
     - /modules/pcjs/lib/mouse.js
     - /modules/pcjs/lib/disk.js

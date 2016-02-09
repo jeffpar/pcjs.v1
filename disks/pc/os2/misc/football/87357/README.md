@@ -8,7 +8,6 @@ machines:
     config: /devices/pc/machine/compaq/deskpro386/ega/2048kb/machine.xml
     automount:
       A:
-        name: OS/2 FOOTBALL Boot Disk (v4.41.00)
         path: /disks/pc/os2/misc/football/FOOTBALL-44100.json
 ---
 
@@ -20,7 +19,7 @@ It was built in December 1987, using final OS/2 1.0 sources merged with assorted
 it was originally assigned version number 1.3, this version of OS/2 would ultimately become 2.0.
 
 It crashes on an 80286, jumping to invalid code immediately after performing a processor check.  On an 80386,
-the following boot message is displayed on-screen:
+the following version banner is displayed:
 
 	Operating System/2  Version 1.30
 	(C) Copyright Microsoft Corp. 1981, 1987, 1988.
@@ -77,4 +76,4 @@ A directory listing of this disk is provided [below](#directory-of-os2-football-
 	       33 file(s)     776910 bytes
 	                      427008 bytes free
 
-Return to [OS/2 Prototype Disks](/disks/pc/os2/misc/).
+[Return to [OS/2 Prototype Disks](/disks/pc/os2/misc/)]
