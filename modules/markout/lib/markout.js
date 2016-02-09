@@ -314,7 +314,8 @@ MarkOut.aHTMLEntities = {
  * to the 'parms' object as a string property.
  *
  *      'id' (eg, "ibm5150")
- *      'type' (eg, "pc")
+ *      'name' (eg, "IBM PC (Model 5150) with Monochrome Display")
+ *      'type' (eg, "pc" or "pc-dbg")
  *      'config' (eg, "machine.xml")
  *      'template' (eg, "machine.xsl")
  *      'uncompiled' (eg, true)
@@ -328,7 +329,7 @@ MarkOut.aHTMLEntities = {
  *
  * and any other string-based property you wish to pass through to PCjs (via the embedPC() sParms parameter).
  */
-MarkOut.aFMReservedMachineProps = ['id', 'type', 'config', 'template', 'uncompiled', 'automount', 'parms'];
+MarkOut.aFMReservedMachineProps = ['id', 'name', 'type', 'config', 'template', 'uncompiled', 'automount', 'parms'];
 
 /**
  * convertMD()

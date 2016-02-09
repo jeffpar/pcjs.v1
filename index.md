@@ -4,6 +4,7 @@ permalink: /
 machines:
   - type: pc
     id: ibm5150
+    name: "IBM PC (Model 5150) with Monochrome Display"
     config: /devices/pc/machine/5150/mda/64kb/machine.xml
   - type: c1p
     id: demoC1P

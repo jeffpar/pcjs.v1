@@ -1,3 +1,25 @@
+{% comment %}
+As documented in /modules/markout/lib/markout.js, the following machine properties are recognized in Front Matter:
+
+    'id' (eg, "ibm5150")
+    'name' (eg, "IBM PC (Model 5150) with Monochrome Display")
+    'type' (eg, "pc" or "pc-dbg")
+    'config' (eg, "machine.xml")
+    'template' (eg, "machine.xsl")
+    'uncompiled' (eg, true)
+    'parms'
+
+and the following properties (along with any property not listed above) will be added to the 'parms' property:
+
+    'automount' (eg, {"A":{"name":"OS/2 FOOTBALL Boot Disk (v7.68.17)","path":"/disks/pc/os2/misc/football/debugger/FOOTBALL-7.68.17.json"}})
+    'state' (eg, "state.json")
+    'messages' (eg, "disk")
+
+Of all the above properties, the following are purely cosmetic:
+
+    'name' (used by machine.html, not machine-engines.html)
+
+{% endcomment %}
 {% for machine in page.machines %}
   {% capture machine_embed %}window.embed{{ machine.type | remove:'-dbg' | upcase }}{% endcapture %}
   {% unless machine.config %}
