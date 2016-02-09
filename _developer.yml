@@ -2,3 +2,90 @@ developer: true
 
 pcjs:
   compiled: false
+  #
+  # Since pcjs.compiled is false, the following scripts will be included instead, in the order listed;
+  # and since nodebug.js is included immediately after defines.js, DEBUG code is disabled by default.
+  #
+  # Note that the Node web server is considerably smarter than the Jekyll templates we're using; Node
+  # will automatically skip (or include) nodebug.js depending on whether the server is in DEBUG mode,
+  # and will include nodebugger.js (and skip debugger.js) if DEBUGGER is disabled.  The Node server
+  # also ensures that only one uncompiled copy of each of JavaScript file is included on a given page,
+  # regardless how many different machines are loaded on the page.
+  #
+  # But, you're a developer, otherwise you wouldn't be starting Jekyll like this:
+  #
+  #     bundle exec jekyll serve --config _config.yml,_developer.yml
+  #
+  # so deal with it! ;-)
+  #
+  # NOTE: If you're debugging PCjs source code, you'll probably be happier using a JetBrains IDE like WebStorm,
+  # launching PCjs pages via Node rather than Jekyll, and using the JetBrains Chrome debugger plug-in.
+  # 
+  pc_scripts:
+    - /modules/shared/lib/defines.js
+    - /modules/shared/lib/nodebug.js
+    - /modules/shared/lib/diskapi.js
+    - /modules/shared/lib/dumpapi.js
+    - /modules/shared/lib/reportapi.js
+    - /modules/shared/lib/userapi.js
+    - /modules/shared/lib/strlib.js
+    - /modules/shared/lib/usrlib.js
+    - /modules/shared/lib/weblib.js
+    - /modules/shared/lib/component.js
+    - /modules/pcjs/lib/defines.js
+    - /modules/pcjs/lib/x86.js
+    - /modules/pcjs/lib/interrupts.js
+    - /modules/pcjs/lib/messages.js
+    - /modules/pcjs/lib/panel.js
+    - /modules/pcjs/lib/bus.js
+    - /modules/pcjs/lib/memory.js
+    - /modules/pcjs/lib/cpu.js
+    - /modules/pcjs/lib/x86seg.js
+    - /modules/pcjs/lib/x86cpu.js
+    - /modules/pcjs/lib/x86fpu.js
+    - /modules/pcjs/lib/x86func.js
+    - /modules/pcjs/lib/x86ops.js
+    - /modules/pcjs/lib/x86op0f.js
+    - /modules/pcjs/lib/x86modb.js
+    - /modules/pcjs/lib/x86modw.js
+    - /modules/pcjs/lib/x86modb16.js
+    - /modules/pcjs/lib/x86modw16.js
+    - /modules/pcjs/lib/x86modb32.js
+    - /modules/pcjs/lib/x86modw32.js
+    - /modules/pcjs/lib/x86modsib.js
+    - /modules/pcjs/lib/chipset.js
+    - /modules/pcjs/lib/rom.js
+    - /modules/pcjs/lib/ram.js
+    - /modules/pcjs/lib/keyboard.js
+    - /modules/pcjs/lib/video.js
+    - /modules/pcjs/lib/parallelport.js
+    - /modules/pcjs/lib/serialport.js
+    - /modules/pcjs/lib/mouse.js
+    - /modules/pcjs/lib/disk.js
+    - /modules/pcjs/lib/fdc.js
+    - /modules/pcjs/lib/hdc.js
+    - /modules/pcjs/lib/debugger.js
+    - /modules/pcjs/lib/state.js
+    - /modules/pcjs/lib/computer.js
+    - /modules/shared/lib/embed.js
+  c1p_scripts:
+    - /modules/shared/lib/defines.js
+    - /modules/shared/lib/nodebug.js
+    - /modules/shared/lib/dumpapi.js
+    - /modules/shared/lib/reportapi.js
+    - /modules/shared/lib/strlib.js
+    - /modules/shared/lib/usrlib.js
+    - /modules/shared/lib/weblib.js
+    - /modules/shared/lib/component.js
+    - /modules/c1pjs/lib/defines.js
+    - /modules/c1pjs/lib/panel.js
+    - /modules/c1pjs/lib/cpu.js
+    - /modules/c1pjs/lib/rom.js
+    - /modules/c1pjs/lib/ram.js
+    - /modules/c1pjs/lib/keyboard.js
+    - /modules/c1pjs/lib/video.js
+    - /modules/c1pjs/lib/serial.js
+    - /modules/c1pjs/lib/disk.js
+    - /modules/c1pjs/lib/debugger.js
+    - /modules/c1pjs/lib/computer.js
+    - /modules/shared/lib/embed.js
