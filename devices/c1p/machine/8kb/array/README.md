@@ -33,7 +33,6 @@ machines:
 redirect_from:
   - /configs/c1p/machines/array/
   - /configs/c1p/machines/8kb/array/
-  - /devices/other/c1p/array.xml
 ---
 
 Challenger 1P (8Kb) "Server Array"
