@@ -7,10 +7,10 @@
 	<category>Operating System</category>
 	<author>IBM/Microsoft</author>
 	<releaseDate/>
-	<disk id="disk01" size="368640" chs="40:2:9" img="static/PCDOS310-DISK1.img" href="/disks/pc/dos/ibm/3.10/PCDOS310-DISK1.json" md5="26961da6e8f8a3465387180a15fef158" md5json="188cb5dce015e8656b3092699cd01277">
+	<disk id="disk01" size="368640" chs="40:2:9" img="archive/PCDOS310-DISK1.img" href="/disks/pc/dos/ibm/3.10/PCDOS310-DISK1.json" md5="26961da6e8f8a3465387180a15fef158" md5json="188cb5dce015e8656b3092699cd01277">
 		<name>PC-DOS 3.10 (Disk 1)</name>
 	</disk>
-	<disk id="disk02" size="368640" chs="40:2:9" img="static/PCDOS310-DISK2.img" href="/disks/pc/dos/ibm/3.10/PCDOS310-DISK2.json" md5="2ff086072ee0e8000984f4a99680c568" md5json="8efbbb438447bf1fbe33066b723b126a">
+	<disk id="disk02" size="368640" chs="40:2:9" img="archive/PCDOS310-DISK2.img" href="/disks/pc/dos/ibm/3.10/PCDOS310-DISK2.json" md5="2ff086072ee0e8000984f4a99680c568" md5json="8efbbb438447bf1fbe33066b723b126a">
 		<name>PC-DOS 3.10 (Disk 2)</name>
 	</disk>
 </manifest>

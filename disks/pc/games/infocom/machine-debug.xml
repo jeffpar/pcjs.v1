@@ -5,8 +5,8 @@
 	<computer id="infocom-cga-64k" name="IBM PC" resume="1"/>
 	<cpu id="cpu8088" model="8088"/>
 	<ram id="ramLow" addr="0x00000" test="false"/>
-	<rom id="romBASIC" addr="0xf6000" size="0x8000" file="/devices/pc/rom/5150/basic/static/BASIC100.rom"/>
-	<rom id="romBIOS"  addr="0xfe000" size="0x2000" file="/devices/pc/rom/5150/bios/static/1981-04-24.rom"/>
+	<rom id="romBASIC" addr="0xf6000" size="0x8000" file="/devices/pc/rom/5150/basic/archive/BASIC100.rom"/>
+	<rom id="romBIOS"  addr="0xfe000" size="0x2000" file="/devices/pc/rom/5150/bios/archive/1981-04-24.rom"/>
 	<video ref="/devices/pc/video/ibm/cga/ibm-cga.xml"/>
 	<keyboard id="keyboard" pos="left" padleft="8px">
 		<control type="button" binding="esc">ESC</control>

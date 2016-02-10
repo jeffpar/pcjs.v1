@@ -2,16 +2,16 @@
 <?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.20.8/manifest.xsl"?>
 <manifest type="software">
 	<title>Microsoft Windows 1.00</title>
-	<disk id="disk01" size="368640" chs="40:2:9" img="static/WIN100-DISK1.img" href="/disks/pc/windows/1.00/WIN100-DISK1.json" md5="99d1a20c7748b336d5cd532be05f7abd" md5json="853e3ce165ebd97a0cad4310aadfcf22">
+	<disk id="disk01" size="368640" chs="40:2:9" img="archive/WIN100-DISK1.img" href="/disks/pc/windows/1.00/WIN100-DISK1.json" md5="99d1a20c7748b336d5cd532be05f7abd" md5json="853e3ce165ebd97a0cad4310aadfcf22">
 		<name>Windows 1.00 (SETUP)</name>
 	</disk>
-	<disk id="disk02" size="368640" chs="40:2:9" img="static/WIN100-DISK2.img" href="/disks/pc/windows/1.00/WIN100-DISK2.json" md5="99c6060fcbcff2ae155665c25af25ea5" md5json="67d56cdf535ee52b9bb03775179acc5a">
+	<disk id="disk02" size="368640" chs="40:2:9" img="archive/WIN100-DISK2.img" href="/disks/pc/windows/1.00/WIN100-DISK2.json" md5="99c6060fcbcff2ae155665c25af25ea5" md5json="67d56cdf535ee52b9bb03775179acc5a">
 		<name>Windows 1.00 (BUILD)</name>
 	</disk>
-	<disk id="disk03" size="368640" chs="40:2:9" img="static/WIN100-DISK3.img" href="/disks/pc/windows/1.00/WIN100-DISK3.json" md5="f83948c8e84f41219ed84f8f4b11e35b" md5json="547c944c77db92dbb679d045e329ea9b">
+	<disk id="disk03" size="368640" chs="40:2:9" img="archive/WIN100-DISK3.img" href="/disks/pc/windows/1.00/WIN100-DISK3.json" md5="f83948c8e84f41219ed84f8f4b11e35b" md5json="547c944c77db92dbb679d045e329ea9b">
 		<name>Windows 1.00 (UTILITY)</name>
 	</disk>
-	<disk id="disk04" size="368640" chs="40:2:9" img="static/WIN100-DISK4.img" href="/disks/pc/windows/1.00/WIN100-DISK4.json" md5="ad9b053fae3447d92ef9798a5a7d2dad" md5json="3638b7cfaf44f732d75a2b5c84965d9f">
+	<disk id="disk04" size="368640" chs="40:2:9" img="archive/WIN100-DISK4.img" href="/disks/pc/windows/1.00/WIN100-DISK4.json" md5="ad9b053fae3447d92ef9798a5a7d2dad" md5json="3638b7cfaf44f732d75a2b5c84965d9f">
 		<name>Windows 1.00 (APPS)</name>
 	</disk>
 </manifest>

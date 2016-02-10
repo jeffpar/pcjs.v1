@@ -7,7 +7,7 @@
 	<category>Operating System</category>
 	<author>Microsoft/COMPAQ</author>
 	<releaseDate/>
-	<disk id="disk01" size="368640" chs="40:2:9" img="static/COMPAQ-DOS212.img" href="/disks/pc/dos/microsoft/2.00/COMPAQ-DOS212.json" md5="90489565ef2f3dd7e378d1477eb6623e" md5json="c76b7c3b1d9578da79680a1385f73285">
+	<disk id="disk01" size="368640" chs="40:2:9" img="archive/COMPAQ-DOS212.img" href="/disks/pc/dos/microsoft/2.00/COMPAQ-DOS212.json" md5="90489565ef2f3dd7e378d1477eb6623e" md5json="c76b7c3b1d9578da79680a1385f73285">
 		<name>COMPAQ MS-DOS 2.12</name>
 	</disk>
 </manifest>

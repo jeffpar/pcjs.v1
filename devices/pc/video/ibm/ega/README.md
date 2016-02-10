@@ -9,7 +9,7 @@ IBM EGA ROM
 
 To (re)build the JSON-encoded IBM EGA ROM with symbols, run the following command:
 
-	filedump --file=static/ibm-ega.rom --format=bytes --decimal
+	filedump --file=archive/ibm-ega.rom --format=bytes --decimal
 	
 The symbol information in the MAP file will be automatically converted and appended to the dump of the ROM file. 
 

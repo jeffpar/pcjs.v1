@@ -12,7 +12,7 @@
 	<author>Ken Arnold</author>
 	<author>Jon Lane</author>
 	<author>Michael Toy</author>
-	<disk id="disk01" size="163840" chs="40:1:8" dir="static/" href="/apps/pc/1985/rogue/disk.json" md5="91fab29636a7517e17eaa38b30ff156a" md5json="c531e9f249b20adad667a3c376e427c8">
+	<disk id="disk01" size="163840" chs="40:1:8" dir="archive/" href="/apps/pc/1985/rogue/disk.json" md5="91fab29636a7517e17eaa38b30ff156a" md5json="c531e9f249b20adad667a3c376e427c8">
 		<name>Rogue (1985)</name>
 		<file size="14016" time="1985-03-25 14:33:18" attr="0x20" md5="e8f7c7b97210f480c7b741a0d58951bd">MKOPT.EXE</file>
 		<file size="2616" time="1995-09-01 18:46:18" attr="0x20" md5="275fd64a3502af22b56e23934c79e9ef">ROGUE.COM</file>

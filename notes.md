@@ -107,7 +107,7 @@ and replace using this regex:
 
 For magazines (eg, BYTE), change:
 
-	\!\[(.*?)\]\(../static/([^)]*) \"link:../static/(.*?):([0-9]*):([0-9]*)\"\)
+	\!\[(.*?)\]\(../archive/([^)]*) \"link:../archive/(.*?):([0-9]*):([0-9]*)\"\)
 
 to:
 

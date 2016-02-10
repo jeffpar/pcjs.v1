@@ -7,10 +7,10 @@
 	<category>BASIC Compiler</category>
 	<author>Microsoft</author>
 	<releaseDate/>
-	<disk id="disk01" size="368640" chs="40:2:9" img="static/BASCOM536.img" href="/disks/pc/tools/microsoft/basic/BASCOM536.json" md5="9f60598a1c85ffac3639611a3e94e83d" md5json="b60517d447af09c48928621b65e7fff2">
+	<disk id="disk01" size="368640" chs="40:2:9" img="archive/BASCOM536.img" href="/disks/pc/tools/microsoft/basic/BASCOM536.json" md5="9f60598a1c85ffac3639611a3e94e83d" md5json="b60517d447af09c48928621b65e7fff2">
 		<name>MS BASIC (Compiler v5.36)</name>
 	</disk>
-	<disk id="disk02" size="368640" chs="40:2:9" img="static/QUICKBASIC-DISK1.img" href="/disks/pc/tools/microsoft/basic/QUICKBASIC-DISK1.json" md5="08e6fbd8be024cd965a4be8554f18d77" md5json="72f2bcbe228131b766c18f881e7ac67e">
+	<disk id="disk02" size="368640" chs="40:2:9" img="archive/QUICKBASIC-DISK1.img" href="/disks/pc/tools/microsoft/basic/QUICKBASIC-DISK1.json" md5="08e6fbd8be024cd965a4be8554f18d77" md5json="72f2bcbe228131b766c18f881e7ac67e">
 		<name>MS BASIC (QuickBASIC v2.0)</name>
 	</disk>
 </manifest>

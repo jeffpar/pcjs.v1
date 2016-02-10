@@ -2,13 +2,13 @@
 <?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.20.8/manifest.xsl"?>
 <manifest type="software">
 	<title>MS OS/2 1.0</title>
-	<disk id="disk01" size="1228800" chs="80:2:15" img="static/MSOS210-INSTALL.img" href="/disks/pc/os2/microsoft/1.0/MSOS210-INSTALL.json" md5="3a11b6f40af5872e3be4293773eb0169" md5json="dbd169c61900c937be8b0dc557e1c14f">
+	<disk id="disk01" size="1228800" chs="80:2:15" img="archive/MSOS210-INSTALL.img" href="/disks/pc/os2/microsoft/1.0/MSOS210-INSTALL.json" md5="3a11b6f40af5872e3be4293773eb0169" md5json="dbd169c61900c937be8b0dc557e1c14f">
 		<name>MS OS/2 1.0 (1.2M Install)</name>
 	</disk>
-	<disk id="disk02" size="1228800" chs="80:2:15" img="static/MSOS210-PROGRAM.img" href="/disks/pc/os2/microsoft/1.0/MSOS210-PROGRAM.json" md5="e513da95619ff79b7888da08e26c2f29" md5json="35d685d351af5d5b842d6515ddddcfa1">
+	<disk id="disk02" size="1228800" chs="80:2:15" img="archive/MSOS210-PROGRAM.img" href="/disks/pc/os2/microsoft/1.0/MSOS210-PROGRAM.json" md5="e513da95619ff79b7888da08e26c2f29" md5json="35d685d351af5d5b842d6515ddddcfa1">
 		<name>MS OS/2 1.0 (1.2M Program)</name>
 	</disk>
-	<disk id="disk03" size="1228800" chs="80:2:15" img="static/MSOS210-SUPP.img" href="/disks/pc/os2/microsoft/1.0/MSOS210-SUPP.json" md5="317da1f82fa43b1b7677afc71996fac0" md5json="b74f49b57e45c7cb9d56b1b6a57281f6">
+	<disk id="disk03" size="1228800" chs="80:2:15" img="archive/MSOS210-SUPP.img" href="/disks/pc/os2/microsoft/1.0/MSOS210-SUPP.json" md5="317da1f82fa43b1b7677afc71996fac0" md5json="b74f49b57e45c7cb9d56b1b6a57281f6">
 		<name>MS OS/2 1.0 (1.2M Supplemental)</name>
 	</disk>
 </manifest>

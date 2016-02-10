@@ -7,28 +7,28 @@
 	<category>C Compiler</category>
 	<author>Microsoft</author>
 	<releaseDate/>
-	<disk id="disk01" size="368640" chs="40:2:9" img="static/MSC-048014-400-DISK1-COMPILER.img" href="/disks/pc/tools/microsoft/c/4.00/MSC-048014-400-DISK1-COMPILER.json" md5="a8fdf772092a56892889637977480e53" md5json="f8e9c3d2bb3d20c20441a80a36ad2d3f">
+	<disk id="disk01" size="368640" chs="40:2:9" img="archive/MSC-048014-400-DISK1-COMPILER.img" href="/disks/pc/tools/microsoft/c/4.00/MSC-048014-400-DISK1-COMPILER.json" md5="a8fdf772092a56892889637977480e53" md5json="f8e9c3d2bb3d20c20441a80a36ad2d3f">
 		<name>MS C 4.00 (Disk 1)</name><desc>Compiler</desc>
 	</disk>
-	<disk id="disk02" size="368640" chs="40:2:9" img="static/MSC-048014-400-DISK2-UTILITIES.img" href="/disks/pc/tools/microsoft/c/4.00/MSC-048014-400-DISK2-UTILITIES.json" md5="5f2c0cb30decf7ebb7f57f1038ed2a8c" md5json="cf4ab6023b747c63f50af4592ea6a143">
+	<disk id="disk02" size="368640" chs="40:2:9" img="archive/MSC-048014-400-DISK2-UTILITIES.img" href="/disks/pc/tools/microsoft/c/4.00/MSC-048014-400-DISK2-UTILITIES.json" md5="5f2c0cb30decf7ebb7f57f1038ed2a8c" md5json="cf4ab6023b747c63f50af4592ea6a143">
 		<name>MS C 4.00 (Disk 2)</name><desc>Utilities</desc>
 	</disk>
-	<disk id="disk03" size="368640" chs="40:2:9" img="static/MSC-048014-400-DISK3-LIBSMALL.img" href="/disks/pc/tools/microsoft/c/4.00/MSC-048014-400-DISK3-LIBSMALL.json" md5="7416914979451d11823245402f7cae9a" md5json="1da587cf5a341354901b25bacbbeada1">
+	<disk id="disk03" size="368640" chs="40:2:9" img="archive/MSC-048014-400-DISK3-LIBSMALL.img" href="/disks/pc/tools/microsoft/c/4.00/MSC-048014-400-DISK3-LIBSMALL.json" md5="7416914979451d11823245402f7cae9a" md5json="1da587cf5a341354901b25bacbbeada1">
 		<name>MS C 4.00 (Disk 3)</name><desc>Small-Model Libs</desc>
 	</disk>
-	<disk id="disk04" size="368640" chs="40:2:9" img="static/MSC-048014-400-DISK4-LIBMEDIUM.img" href="/disks/pc/tools/microsoft/c/4.00/MSC-048014-400-DISK4-LIBMEDIUM.json" md5="48ceb5e1dd734c92d74a9ec67fb7439f" md5json="99128e98efc05dd83b18f8a06a7e0b33">
+	<disk id="disk04" size="368640" chs="40:2:9" img="archive/MSC-048014-400-DISK4-LIBMEDIUM.img" href="/disks/pc/tools/microsoft/c/4.00/MSC-048014-400-DISK4-LIBMEDIUM.json" md5="48ceb5e1dd734c92d74a9ec67fb7439f" md5json="99128e98efc05dd83b18f8a06a7e0b33">
 		<name>MS C 4.00 (Disk 4)</name><desc>Medium-Model Libs</desc>
 	</disk>
-	<disk id="disk05" size="368640" chs="40:2:9" img="static/MSC-048014-400-DISK5-LIBLARGE.img" href="/disks/pc/tools/microsoft/c/4.00/MSC-048014-400-DISK5-LIBLARGE.json" md5="339fbaf4e164d302fa830c1cb1d4ac01" md5json="d0f6adc5e147d9a3f1c6195a103abc38">
+	<disk id="disk05" size="368640" chs="40:2:9" img="archive/MSC-048014-400-DISK5-LIBLARGE.img" href="/disks/pc/tools/microsoft/c/4.00/MSC-048014-400-DISK5-LIBLARGE.json" md5="339fbaf4e164d302fa830c1cb1d4ac01" md5json="d0f6adc5e147d9a3f1c6195a103abc38">
 		<name>MS C 4.00 (Disk 5)</name><desc>Large-Model Libs</desc>
 	</disk>
-	<disk id="disk06" size="368640" chs="40:2:9" img="static/MSC-048014-400-DISK6-STARTUP.img" href="/disks/pc/tools/microsoft/c/4.00/MSC-048014-400-DISK6-STARTUP.json" md5="1d7d7261537aba69fd37cf3df3162b2d" md5json="17bf43ce866069126f25fb70d72821a2">
+	<disk id="disk06" size="368640" chs="40:2:9" img="archive/MSC-048014-400-DISK6-STARTUP.img" href="/disks/pc/tools/microsoft/c/4.00/MSC-048014-400-DISK6-STARTUP.json" md5="1d7d7261537aba69fd37cf3df3162b2d" md5json="17bf43ce866069126f25fb70d72821a2">
 		<name>MS C 4.00 (Disk 6)</name><desc>Startup Source Code</desc>
 	</disk>
-	<disk id="disk07" size="368640" chs="40:2:9" img="static/MSC-048014-400-DISK7-CODEVIEW.img" href="/disks/pc/tools/microsoft/c/4.00/MSC-048014-400-DISK7-CODEVIEW.json" md5="011a9ac9c24492487e338ace11837ce9" md5json="772f51b2b7683bf568237962f3ef6955">
+	<disk id="disk07" size="368640" chs="40:2:9" img="archive/MSC-048014-400-DISK7-CODEVIEW.img" href="/disks/pc/tools/microsoft/c/4.00/MSC-048014-400-DISK7-CODEVIEW.json" md5="011a9ac9c24492487e338ace11837ce9" md5json="772f51b2b7683bf568237962f3ef6955">
 		<name>MS C 4.00 (Disk 7)</name><desc>Learning CodeView</desc>
 	</disk>
-	<disk id="disk08" size="368640" chs="40:2:9" img="static/MSC-048014-400-DISK8-DEVKIT.img" href="/disks/pc/tools/microsoft/c/4.00/MSC-048014-400-DISK8-DEVKIT.json" md5="12563467b59e3a5e5d760ed3c1e61f70" md5json="5dd1e8c7060098bea1770bbecc54deea">
+	<disk id="disk08" size="368640" chs="40:2:9" img="archive/MSC-048014-400-DISK8-DEVKIT.img" href="/disks/pc/tools/microsoft/c/4.00/MSC-048014-400-DISK8-DEVKIT.json" md5="12563467b59e3a5e5d760ed3c1e61f70" md5json="5dd1e8c7060098bea1770bbecc54deea">
 		<name>MS C 4.00 (Disk 8)</name><desc>Windows DevKit Update</desc>
 	</disk>
 </manifest>

@@ -5,7 +5,7 @@
 	<source href="http://minuszerodegrees.net">minuszerodegrees.net</source>
 	<document href="http://minuszerodegrees.net/oa/OA - IBM Enhanced Graphics Adapter.pdf">
 		<name>IBM EGA Technical Reference</name>
-		<cover href="../static/ega/thumbs/IBM-EGA 1.jpeg"/>
+		<cover href="../archive/ega/thumbs/IBM-EGA 1.jpeg"/>
 		<page>Misc (3C2/3DA)</page>
 		<page href="#page=16">3C2: Misc Output</page>
 		<page href="#page=19">3C2: Input Status 0</page>

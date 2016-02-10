@@ -966,18 +966,18 @@ MarkOut.prototype.convertMDImageLinks = function(sBlock, sIndent)
                     asParts.splice(2, 1);
                 }
                 /*
-                 * If the image link (aMatch[2]) contains "static/" but the sURL is external, AND we're in
-                 * "reveal mode", then transform sURL into a "static/" URL as well; encodeURL() will take care
+                 * If the image link (aMatch[2]) contains "archive/" but the sURL is external, AND we're in
+                 * "reveal mode", then transform sURL into a "archive/" URL as well; encodeURL() will take care
                  * of the rest of the transformation.
                  *
                  * This feature is used with READMEs like /pubs/pc/programming/README.md, where normally we
                  * want to link to documents stored on sites like archive.org, minuszerodegrees.net or bitsavers,
                  * unless you're in "reveal mode", in which case we'll serve up our own "backup copies".
                  *
-                 * The assumption here is that if we have "static" thumbs, then we should also have full "static"
+                 * The assumption here is that if we have "archive" thumbs, then we should also have full "archive"
                  * copies as well.
                  */
-                if (aMatch[2].indexOf("static/") >= 0 && sURL.indexOf("://") > 0 && (this.fDebug || net.hasParm(net.REVEAL_COMMAND, net.REVEAL_PDFS, this.req))) {
+                if (aMatch[2].indexOf("archive/") >= 0 && sURL.indexOf("://") > 0 && (this.fDebug || net.hasParm(net.REVEAL_COMMAND, net.REVEAL_PDFS, this.req))) {
                     sURL = aMatch[2].replace("/thumbs/", "/").replace(" 1.jpeg", ".pdf").replace(".jpg", ".pdf");
                 }
                 sURL = net.encodeURL(sURL, this.req, this.fDebug);

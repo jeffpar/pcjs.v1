@@ -2,22 +2,22 @@
 <?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.20.8/manifest.xsl"?>
 <manifest type="software">
 	<title>OS/2 Prototype Disks</title>
-	<disk id="disk01" size="1228800" chs="80:2:15" img="cpdos/static/286DOS-76800.img" href="/disks/pc/os2/misc/cpdos/286DOS-76800.json" md5="d206be5501ae2e5cfead6a93d4b7b953" md5json="040f2bd5e1d9176b0ac7b5fc24ec8b2c">
+	<disk id="disk01" size="1228800" chs="80:2:15" img="cpdos/archive/286DOS-76800.img" href="/disks/pc/os2/misc/cpdos/286DOS-76800.json" md5="d206be5501ae2e5cfead6a93d4b7b953" md5json="040f2bd5e1d9176b0ac7b5fc24ec8b2c">
 		<name>OS/2 CP-DOS (v7.68)</name>
 	</disk>
-	<disk id="disk02" size="1228800" chs="80:2:15" img="football/static/FOOTBALL-76817.img" href="/disks/pc/os2/misc/football/FOOTBALL-76817.json" md5="fe76a77d6931490d1936945fb60bada8" md5json="9477050abad7153895f6f4023227b4f7">
+	<disk id="disk02" size="1228800" chs="80:2:15" img="football/archive/FOOTBALL-76817.img" href="/disks/pc/os2/misc/football/FOOTBALL-76817.json" md5="fe76a77d6931490d1936945fb60bada8" md5json="9477050abad7153895f6f4023227b4f7">
 		<name>OS/2 FOOTBALL (v7.68.17)</name>
 	</disk>
-	<disk id="disk03" size="1228800" chs="80:2:15" img="football/static/FOOTBALL-44100.img" href="/disks/pc/os2/misc/football/FOOTBALL-44100.json" md5="adf9c504f249c281afa88697cc5bfae1" md5json="1ee20675444641e0398434ffa6eabe19">
+	<disk id="disk03" size="1228800" chs="80:2:15" img="football/archive/FOOTBALL-44100.img" href="/disks/pc/os2/misc/football/FOOTBALL-44100.json" md5="adf9c504f249c281afa88697cc5bfae1" md5json="1ee20675444641e0398434ffa6eabe19">
 		<name>OS/2 FOOTBALL (v4.41.00)</name>
 	</disk>
-	<disk id="disk04" size="1228800" chs="80:2:15" img="1.0/static/OS210-88286.img" href="/disks/pc/os2/misc/1.0/OS210-88286.json">
+	<disk id="disk04" size="1228800" chs="80:2:15" img="1.0/archive/OS210-88286.img" href="/disks/pc/os2/misc/1.0/OS210-88286.json">
 		<name>OS/2 1.0 Debugger</name>
 	</disk>
-	<disk id="disk05" size="1228800" chs="80:2:15" img="cpdos/static/SIZZLE-76818-19870107.img" href="/disks/pc/os2/misc/cpdos/SIZZLE-76818-19870107.json" md5="ced5ecb7f44b52a2f276c050efa94160" md5json="79840e6f2a2236a7bb228751d7c22d00">
+	<disk id="disk05" size="1228800" chs="80:2:15" img="cpdos/archive/SIZZLE-76818-19870107.img" href="/disks/pc/os2/misc/cpdos/SIZZLE-76818-19870107.json" md5="ced5ecb7f44b52a2f276c050efa94160" md5json="79840e6f2a2236a7bb228751d7c22d00">
 		<name>OS/2 SIZZLE (v7.68.18)</name>
 	</disk>
-	<disk id="disk06" size="1228800" chs="80:2:15" img="cpdos/static/SIZZLE-76818-19870107-DEBUG.img" href="/disks/pc/os2/misc/cpdos/SIZZLE-76818-19870107-DEBUG.json" md5="9c9270b83aea4798f2618d38465f56b8" md5json="bd6baaa820d6ff254f81ec7d7ff07e67">
+	<disk id="disk06" size="1228800" chs="80:2:15" img="cpdos/archive/SIZZLE-76818-19870107-DEBUG.img" href="/disks/pc/os2/misc/cpdos/SIZZLE-76818-19870107-DEBUG.json" md5="9c9270b83aea4798f2618d38465f56b8" md5json="bd6baaa820d6ff254f81ec7d7ff07e67">
 		<name>OS/2 SIZZLE (v7.68.18 DEBUG)</name>
 	</disk>
 </manifest>

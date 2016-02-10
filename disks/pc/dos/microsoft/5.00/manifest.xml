@@ -7,28 +7,28 @@
 	<category>Operating System</category>
 	<author>Microsoft</author>
 	<releaseDate/>
-	<disk id="disk01" size="368640" chs="40:2:9" img="static/360K/MSDOS500-DISK1.img" href="/disks/pc/dos/microsoft/5.00/360K/MSDOS500-DISK1.json" md5="7e9745c5f029d3b6d212ea807af63fef" md5json="0cec25b697c02062df948eb2a54c7cd0">
+	<disk id="disk01" size="368640" chs="40:2:9" img="archive/360K/MSDOS500-DISK1.img" href="/disks/pc/dos/microsoft/5.00/360K/MSDOS500-DISK1.json" md5="7e9745c5f029d3b6d212ea807af63fef" md5json="0cec25b697c02062df948eb2a54c7cd0">
 		<name>MS-DOS 5.00 (360K Disk 1)</name>
 	</disk>
-	<disk id="disk02" size="368640" chs="40:2:9" img="static/360K/MSDOS500-DISK2.img" href="/disks/pc/dos/microsoft/5.00/360K/MSDOS500-DISK2.json" md5="3dc6fa07e08b09b1559955cb7c91cbde" md5json="477635397d1ce6de3dcf2b6f58f032cf">
+	<disk id="disk02" size="368640" chs="40:2:9" img="archive/360K/MSDOS500-DISK2.img" href="/disks/pc/dos/microsoft/5.00/360K/MSDOS500-DISK2.json" md5="3dc6fa07e08b09b1559955cb7c91cbde" md5json="477635397d1ce6de3dcf2b6f58f032cf">
 		<name>MS-DOS 5.00 (360K Disk 2)</name>
 	</disk>
-	<disk id="disk03" size="368640" chs="40:2:9" img="static/360K/MSDOS500-DISK3.img" href="/disks/pc/dos/microsoft/5.00/360K/MSDOS500-DISK3.json" md5="adcfcbcf89f3f11f3b98040f702ff42b" md5json="d6c6000cc3723045a314a35aa47ff17d">
+	<disk id="disk03" size="368640" chs="40:2:9" img="archive/360K/MSDOS500-DISK3.img" href="/disks/pc/dos/microsoft/5.00/360K/MSDOS500-DISK3.json" md5="adcfcbcf89f3f11f3b98040f702ff42b" md5json="d6c6000cc3723045a314a35aa47ff17d">
 		<name>MS-DOS 5.00 (360K Disk 3)</name>
 	</disk>
-	<disk id="disk04" size="368640" chs="40:2:9" img="static/360K/MSDOS500-DISK4.img" href="/disks/pc/dos/microsoft/5.00/360K/MSDOS500-DISK4.json" md5="424a3f240db1e6f5123702e2e418b4c3" md5json="2179d909243e8c102c0b6275b9d7c003">
+	<disk id="disk04" size="368640" chs="40:2:9" img="archive/360K/MSDOS500-DISK4.img" href="/disks/pc/dos/microsoft/5.00/360K/MSDOS500-DISK4.json" md5="424a3f240db1e6f5123702e2e418b4c3" md5json="2179d909243e8c102c0b6275b9d7c003">
 		<name>MS-DOS 5.00 (360K Disk 4)</name>
 	</disk>
-	<disk id="disk05" size="368640" chs="40:2:9" img="static/360K/MSDOS500-DISK5.img" href="/disks/pc/dos/microsoft/5.00/360K/MSDOS500-DISK5.json" md5="1cab22f71e27374c5d23cae01930a01e" md5json="9203b7234a7262fad8207e0dc4052a82">
+	<disk id="disk05" size="368640" chs="40:2:9" img="archive/360K/MSDOS500-DISK5.img" href="/disks/pc/dos/microsoft/5.00/360K/MSDOS500-DISK5.json" md5="1cab22f71e27374c5d23cae01930a01e" md5json="9203b7234a7262fad8207e0dc4052a82">
 		<name>MS-DOS 5.00 (360K Disk 5)</name>
 	</disk>
-	<disk id="disk06" size="737280" chs="80:2:9" img="static/720K/MSDOS500-DISK1.img" href="/disks/pc/dos/microsoft/5.00/720K/MSDOS500-DISK1.json" md5="637b4c237b2932eb2ba5661ef6758162" md5json="a2e79fb22adc034ed5fe638301120608">
+	<disk id="disk06" size="737280" chs="80:2:9" img="archive/720K/MSDOS500-DISK1.img" href="/disks/pc/dos/microsoft/5.00/720K/MSDOS500-DISK1.json" md5="637b4c237b2932eb2ba5661ef6758162" md5json="a2e79fb22adc034ed5fe638301120608">
 		<name>MS-DOS 5.00 (720K Disk 1)</name>
 	</disk>
-	<disk id="disk07" size="737280" chs="80:2:9" img="static/720K/MSDOS500-DISK2.img" href="/disks/pc/dos/microsoft/5.00/720K/MSDOS500-DISK2.json" md5="03ee29d66e84650165dfd97c304b9f3a" md5json="f0ac77b0fce97c1635f99c9f443a6b7b">
+	<disk id="disk07" size="737280" chs="80:2:9" img="archive/720K/MSDOS500-DISK2.img" href="/disks/pc/dos/microsoft/5.00/720K/MSDOS500-DISK2.json" md5="03ee29d66e84650165dfd97c304b9f3a" md5json="f0ac77b0fce97c1635f99c9f443a6b7b">
 		<name>MS-DOS 5.00 (720K Disk 2)</name>
 	</disk>
-	<disk id="disk08" size="737280" chs="80:2:9" img="static/720K/MSDOS500-DISK3.img" href="/disks/pc/dos/microsoft/5.00/720K/MSDOS500-DISK3.json" md5="6864241d46bbf1f92383f0840f432f62" md5json="b0f3292650a2e82066af42583d0bb297">
+	<disk id="disk08" size="737280" chs="80:2:9" img="archive/720K/MSDOS500-DISK3.img" href="/disks/pc/dos/microsoft/5.00/720K/MSDOS500-DISK3.json" md5="6864241d46bbf1f92383f0840f432f62" md5json="b0f3292650a2e82066af42583d0bb297">
 		<name>MS-DOS 5.00 (720K Disk 3)</name>
 	</disk>
 </manifest>

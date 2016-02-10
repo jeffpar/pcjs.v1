@@ -4,7 +4,7 @@
 	<title>IBM PC AT References</title>
 	<document href="http://minuszerodegrees.net/manuals/IBM_5170_Technical_Reference_1502243_MAR84.pdf">
 		<name>IBM 5170 Technical Reference (March 1984)</name>
-		<cover href="../../../../../../../../pubs/pc/reference/ibm/static/5170/techref/1984-03/thumbs/IBM-5170-TECHREF 1.jpeg"/>
+		<cover href="../../../../../../../../pubs/pc/reference/ibm/archive/5170/techref/1984-03/thumbs/IBM-5170-TECHREF 1.jpeg"/>
 		<page href="#page=48">I/O Address Map</page>
 		<page href="#page=67">CMOS Addresses</page>
 		<page href="#page=165">BIOS Map</page>
@@ -16,7 +16,7 @@
 	</document>
 	<document href="https://archive.org/download/bitsavers_intel80286287ProgrammersReferenceManual1987_27505703/210498-005_80286_and_80287_Programmers_Reference_Manual_1987.pdf">
 		<name>80286 and 80287 Programmers Reference Manual (1987)</name>
-		<cover href="../../../../../../../../pubs/pc/reference/intel/static/80286/progref/thumbs/80286_and_80287_Programmers_Reference_Manual_1987 1.jpeg"/>
+		<cover href="../../../../../../../../pubs/pc/reference/intel/archive/80286/progref/thumbs/80286_and_80287_Programmers_Reference_Manual_1987 1.jpeg"/>
 		<page href="#page=27">Memory Organization and Segmentation</page>
 		<page href="#page=321">VERR/VERW</page>
 	</document>

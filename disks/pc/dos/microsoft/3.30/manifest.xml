@@ -7,11 +7,11 @@
 	<category>Operating System</category>
 	<author>Microsoft</author>
 	<releaseDate/>
-	<disk id="disk01" size="368640" chs="40:2:9" img="static/MSDOS330-DISK1.img" href="/disks/pc/dos/microsoft/3.30/MSDOS330-DISK1.json" md5="06b083ce47c8b554b862fa2553cf3ef5" md5json="0fcd1998979e749a19cbb9fdf04942aa">
+	<disk id="disk01" size="368640" chs="40:2:9" img="archive/MSDOS330-DISK1.img" href="/disks/pc/dos/microsoft/3.30/MSDOS330-DISK1.json" md5="06b083ce47c8b554b862fa2553cf3ef5" md5json="0fcd1998979e749a19cbb9fdf04942aa">
 		<name>MS-DOS 3.30 (Disk 1)</name>
 		<from href="http://www.hampa.ch/pub/software/DOS/DOS/PC-DOS%203.30%20360K.7z"/>
 	</disk>
-	<disk id="disk02" size="368640" chs="40:2:9" img="static/MSDOS330-DISK2.img" href="/disks/pc/dos/microsoft/3.30/MSDOS330-DISK2.json" md5="e0868a5ba87a7c80a07c5c54f002ecb2" md5json="7c3f986cf8d9db68f49e167ed499cc83">
+	<disk id="disk02" size="368640" chs="40:2:9" img="archive/MSDOS330-DISK2.img" href="/disks/pc/dos/microsoft/3.30/MSDOS330-DISK2.json" md5="e0868a5ba87a7c80a07c5c54f002ecb2" md5json="7c3f986cf8d9db68f49e167ed499cc83">
 		<name>MS-DOS 3.30 (Disk 2)</name>
 		<from href="http://www.hampa.ch/pub/software/DOS/DOS/PC-DOS%203.30%20360K.7z"/>
 	</disk>

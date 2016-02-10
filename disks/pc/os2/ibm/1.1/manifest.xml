@@ -2,25 +2,25 @@
 <?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.20.8/manifest.xsl"?>
 <manifest type="software">
 	<title>IBM OS/2 1.1</title>
-	<disk id="disk00" size="1474560" chs="80:2:18" img="static/OS211-INSTALLATION.img" href="/disks/pc/os2/ibm/1.1/OS211-INSTALLATION.json" md5="64b1a50f35385f326e7b59b17b417769" md5json="6510aede5a434ae794a3ee9e8d09d6c9">
+	<disk id="disk00" size="1474560" chs="80:2:18" img="archive/OS211-INSTALLATION.img" href="/disks/pc/os2/ibm/1.1/OS211-INSTALLATION.json" md5="64b1a50f35385f326e7b59b17b417769" md5json="6510aede5a434ae794a3ee9e8d09d6c9">
 		<name>IBM OS/2 1.1 (1.44M Install Disk)</name>
 	</disk>
-	<disk id="disk01" size="1474560" chs="80:2:18" img="static/OS211-DISK01.img" href="/disks/pc/os2/ibm/1.1/OS211-DISK01.json" md5="5b0526049c097e7afa54073f13cf87d1" md5json="f74cb91702c9a502418139601269280d">
+	<disk id="disk01" size="1474560" chs="80:2:18" img="archive/OS211-DISK01.img" href="/disks/pc/os2/ibm/1.1/OS211-DISK01.json" md5="5b0526049c097e7afa54073f13cf87d1" md5json="f74cb91702c9a502418139601269280d">
 		<name>IBM OS/2 1.1 (1.44M Disk 1)</name>
 	</disk>
-	<disk id="disk02" size="1474560" chs="80:2:18" img="static/OS211-DISK02.img" href="/disks/pc/os2/ibm/1.1/OS211-DISK02.json" md5="ebd9cc64c9c24f79b63836fcce58b0f0" md5json="63f462d7abb7367145d35789a547f913">
+	<disk id="disk02" size="1474560" chs="80:2:18" img="archive/OS211-DISK02.img" href="/disks/pc/os2/ibm/1.1/OS211-DISK02.json" md5="ebd9cc64c9c24f79b63836fcce58b0f0" md5json="63f462d7abb7367145d35789a547f913">
 		<name>IBM OS/2 1.1 (1.44M Disk 2)</name>
 	</disk>
-	<disk id="disk03" size="1474560" chs="80:2:18" img="static/OS211-DISK03.img" href="/disks/pc/os2/ibm/1.1/OS211-DISK03.json" md5="f4b85ca988d76f876c2f0a00cf4b57e8" md5json="f07266e75f25f5f5a5ce4e299d9dcff6">
+	<disk id="disk03" size="1474560" chs="80:2:18" img="archive/OS211-DISK03.img" href="/disks/pc/os2/ibm/1.1/OS211-DISK03.json" md5="f4b85ca988d76f876c2f0a00cf4b57e8" md5json="f07266e75f25f5f5a5ce4e299d9dcff6">
 		<name>IBM OS/2 1.1 (1.44M Disk 3)</name>
 	</disk>
-	<disk id="disk04" size="1474560" chs="80:2:18" img="static/OS211-DISK04.img" href="/disks/pc/os2/ibm/1.1/OS211-DISK04.json" md5="67eb167bca6cf7b169011fdaedf4d358" md5json="e821febc52f1736ee2714bbe6aaf6c83">
+	<disk id="disk04" size="1474560" chs="80:2:18" img="archive/OS211-DISK04.img" href="/disks/pc/os2/ibm/1.1/OS211-DISK04.json" md5="67eb167bca6cf7b169011fdaedf4d358" md5json="e821febc52f1736ee2714bbe6aaf6c83">
 		<name>IBM OS/2 1.1 (1.44M Disk 4)</name>
 	</disk>
-	<disk id="disk05" size="1474560" chs="80:2:18" img="static/OS211-DEVICES.img" href="/disks/pc/os2/ibm/1.1/OS211-DEVICES.json" md5="9d3dfde0206b562beae90cab21f9eba5" md5json="2cb39da33b61e762b87259b59bf5ccf5">
+	<disk id="disk05" size="1474560" chs="80:2:18" img="archive/OS211-DEVICES.img" href="/disks/pc/os2/ibm/1.1/OS211-DEVICES.json" md5="9d3dfde0206b562beae90cab21f9eba5" md5json="2cb39da33b61e762b87259b59bf5ccf5">
 		<name>IBM OS/2 1.1 (1.44M Devices Disk)</name>
 	</disk>
-	<disk id="disk06" size="1474560" chs="80:2:18" img="static/OS211-PRINTERS.img" href="/disks/pc/os2/ibm/1.1/OS211-PRINTERS.json" md5="36cd9ea1e7184872548598dae4b60cb8" md5json="3ddd4aa8468a17a42aa247cf7b447a65">
+	<disk id="disk06" size="1474560" chs="80:2:18" img="archive/OS211-PRINTERS.img" href="/disks/pc/os2/ibm/1.1/OS211-PRINTERS.json" md5="36cd9ea1e7184872548598dae4b60cb8" md5json="3ddd4aa8468a17a42aa247cf7b447a65">
 		<name>IBM OS/2 1.1 (1.44M Printers Disk)</name>
 	</disk>
 </manifest>

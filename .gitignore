@@ -11,6 +11,7 @@
 .settings
 node_modules
 npm-debug.log
+archive/
 /books
 /notes
 /states
@@ -18,7 +19,6 @@ npm-debug.log
 /web
 private/
 src/
-static/
 tmp/
 _site
 .sass-cache

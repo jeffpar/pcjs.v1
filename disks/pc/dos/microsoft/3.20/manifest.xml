@@ -7,16 +7,16 @@
 	<category>Operating System</category>
 	<author>Microsoft</author>
 	<releaseDate>July 7, 1986</releaseDate>
-	<disk id="disk01" size="368640" chs="40:2:9" img="static/MSDOS320-DISK1.img" href="/disks/pc/dos/microsoft/3.20/MSDOS320-DISK1.json" md5="5d5d9c79890228fce53ab9d191e94e77" md5json="3d9263e37cba3ca91b917ae4af5c8056">
+	<disk id="disk01" size="368640" chs="40:2:9" img="archive/MSDOS320-DISK1.img" href="/disks/pc/dos/microsoft/3.20/MSDOS320-DISK1.json" md5="5d5d9c79890228fce53ab9d191e94e77" md5json="3d9263e37cba3ca91b917ae4af5c8056">
 		<name>MS-DOS 3.20 (Disk 1)</name>
 	</disk>
-	<disk id="disk02" size="368640" chs="40:2:9" img="static/MSDOS320-DISK2.img" href="/disks/pc/dos/microsoft/3.20/MSDOS320-DISK2.json" md5="06a2613a1630f27c67955d47880dfaeb" md5json="60e59a2fd61c16a16c57ad8a7a696fcd">
+	<disk id="disk02" size="368640" chs="40:2:9" img="archive/MSDOS320-DISK2.img" href="/disks/pc/dos/microsoft/3.20/MSDOS320-DISK2.json" md5="06a2613a1630f27c67955d47880dfaeb" md5json="60e59a2fd61c16a16c57ad8a7a696fcd">
 		<name>MS-DOS 3.20 (Disk 2)</name>
 	</disk>
-	<disk id="disk03" size="368640" chs="40:2:9" img="static/MSDOS320-DISK3-PROGREF1.img" href="/disks/pc/dos/microsoft/3.20/MSDOS320-DISK3-PROGREF1.json" md5="40031b4ebd53f2c84d58aea4a37e84c1" md5json="f39a377cb8938660aab2ee46c27f331b">
+	<disk id="disk03" size="368640" chs="40:2:9" img="archive/MSDOS320-DISK3-PROGREF1.img" href="/disks/pc/dos/microsoft/3.20/MSDOS320-DISK3-PROGREF1.json" md5="40031b4ebd53f2c84d58aea4a37e84c1" md5json="f39a377cb8938660aab2ee46c27f331b">
 		<name>MS-DOS 3.20 (ProgRef 1)</name>
 	</disk>
-	<disk id="disk04" size="368640" chs="40:2:9" img="static/MSDOS320-DISK4-PROGREF2.img" href="/disks/pc/dos/microsoft/3.20/MSDOS320-DISK4-PROGREF2.json" md5="0818c0e1aa3bc50d3dbbfa075f0f9863" md5json="3e05a10152efe4ff2a8ee9206132fe52">
+	<disk id="disk04" size="368640" chs="40:2:9" img="archive/MSDOS320-DISK4-PROGREF2.img" href="/disks/pc/dos/microsoft/3.20/MSDOS320-DISK4-PROGREF2.json" md5="0818c0e1aa3bc50d3dbbfa075f0f9863" md5json="3e05a10152efe4ff2a8ee9206132fe52">
 		<name>MS-DOS 3.20 (ProgRef 2)</name>
 	</disk>
 </manifest>

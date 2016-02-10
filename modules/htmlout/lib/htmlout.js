@@ -1587,7 +1587,7 @@ HTMLOut.prototype.getManifestXML = function(sToken, sIndent, aParms)
 
                                     var matchCover = null;
                                     match = matchNode[2].match('<cover[^>]*href="([^"]*)"');
-                                    if (match && match[1].indexOf("static/") >= 0) {
+                                    if (match && match[1].indexOf("archive/") >= 0) {
                                         matchCover = match[1];
                                         if (obj.fDebug) {
                                             sNodeLink = matchCover.replace("/thumbs/", '/').replace(/ ?[0-9]*\.(jpeg|jpg)/, ".pdf");
