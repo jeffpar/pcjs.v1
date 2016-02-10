@@ -4,11 +4,16 @@ title: Build Your Own PC
 permalink: /devices/pc/machine/custom/
 machines:
   - type: pc
-    id: custom
+    name: Custom PC
+    id: custom-pc
+    uncompiled: true
     autopower: false
+build: build-pc
 ---
 
 Build Your Own PC
 ---
 
-{% include machine.html id="custom" %}
+{% include build.html id="build-pc" %}
+
+{% include machine.html id="custom-pc" %}

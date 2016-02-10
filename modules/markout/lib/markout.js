@@ -116,6 +116,7 @@ function MarkOut(sMD, sIndent, req, aParms, fDebug, fMachineXML, fAutoHeading)
     this.sHTML = null;
     this.aIDs = [];         // this keeps track of auto-generated ID attributes for page elements, to insure uniqueness
     this.aMachines = [];    // this keeps track of embedded machines on the page
+    this.buildOptions = {}; // this keeps track of any build options specified on the page
     this.aMachineDefs = {}; // this keeps track of any machine definitions at the top of the file (as part of any Jekyll "Front Matter")
 }
 
@@ -266,6 +267,17 @@ MarkOut.prototype.getMachines = function()
 };
 
 /**
+ * getBuildOptions()
+ *
+ * @this {MarkOut}
+ * @return {Object} containing build options, if any
+ */
+MarkOut.prototype.getBuildOptions = function()
+{
+    return this.buildOptions;
+};
+
+/**
  * generateID(sText)
  *
  * Generate an ID from the given text, by basically converting it to lower case, converting anything
@@ -409,6 +421,7 @@ MarkOut.prototype.convertMD = function(sIndent)
             /*
              * Extract machine definitions, if any, from the Front Matter.
              */
+            var aSubMatch;
             var aMachineDefs = aMatch[1].match(/\nmachines:([\s\S]*?)\n([^\s]|$)/);
             if (aMachineDefs) {
                 var asMachines = aMachineDefs[1].split(/\n[ \t]+-\s*/);
@@ -485,9 +498,14 @@ MarkOut.prototype.convertMD = function(sIndent)
              * heading with the same value.
              */
             if (this.fAutoHeading) {
-                aMatch = aMatch[1].match(/title:\s*(.*?)\s*?\n/);
-                if (aMatch) sMD = aMatch[1] + "\n---\n\n" + sMD;
+                aSubMatch = aMatch[1].match(/title:\s*(.*?)\s*?\n/);
+                if (aSubMatch) sMD = aSubMatch[1] + "\n---\n\n" + sMD;
             }
+            /*
+             * If a "build" ID element existed in the Front Matter, capture it.
+             */
+            aSubMatch = aMatch[1].match(/build:\s*(\S*)/);
+            if (aSubMatch) this.buildOptions.id = aSubMatch[1];
         }
     }
 
@@ -1094,11 +1112,12 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
      * Before we start looking for Markdown-style machine links, see if there are any Liquid-style machines,
      * (in case this Markdown file is part of a Jekyll installation) and convert them to Markdown-style links.
      */
-    var reIncludes = /\{%\s*include machine\.html\s+id="(.*?)"\s*%}/g;
+
+    var reIncludes = /\{%\s*include\s+machine\.html\s+id=(["'])(.*?)\1\s*%}/g;
 
     while ((aMatch = reIncludes.exec(sBlock))) {
         sReplacement = "";
-        sMachineID = aMatch[1];
+        sMachineID = aMatch[2];
         if (!this.fMachineXML && this.aMachineDefs[sMachineID]) {
             var machine = this.aMachineDefs[sMachineID];
             sMachine = machine['type'] || "pc";
@@ -1108,11 +1127,14 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
             sMachineXSLFile = machine['template'] || "";
             sMachineVersion = (machine['uncompiled'] && machine['uncompiled'] == "true"? "uncompiled" : "");
             sMachineParms = machine['parms'] || "";
-            sReplacement = "[Embedded PC](" + sMachineXMLFile + ' "' + sMachine + 'js!' + sMachineID + '!' + sMachineXSLFile + '!!' + sMachineOptions + '!' + sMachineParms + '")';
+            sReplacement = machine['name'] || "Embedded PC";
+            sReplacement = "[" + sReplacement + "](" + sMachineXMLFile + ' "' + sMachine + 'js!' + sMachineID + '!' + sMachineXSLFile + '!!' + sMachineOptions + '!' + sMachineParms + '")';
         }
         sBlock = sBlock.replace(aMatch[0], sReplacement);
         reIncludes.lastIndex = 0;       // reset lastIndex, since we just modified the string that reIncludes is iterating over
     }
+
+    sBlock = sBlock.replace(/\{%\s*include\s+build\.html\s+id=(["'])(.*?)\1\s*%}/g, '<div id=$1$2$1></div>');
 
     /*
      * Start looking for Markdown-style machine links now...

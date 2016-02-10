@@ -1251,7 +1251,7 @@ FDC.prototype.loadSelectedDrive = function(sDisketteName, sDiskettePath, file)
         }
         return;
     }
-    this.notice("Nothing to load");
+    this.notice("Unable to load the selected drive");
 };
 
 /**
