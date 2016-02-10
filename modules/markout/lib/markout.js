@@ -309,9 +309,9 @@ MarkOut.aHTMLEntities = {
 };
 
 /*
- * This is a list of "reserved" Front Matter machine properties (ie, properties that will NOT be
- * bundled as strings in the 'parms' property).  Any machine property not in this list will be added
- * to the 'parms' object as a string property.
+ * This is a list of "reserved" Front Matter machine properties (ie, properties that will NOT be bundled as
+ * strings in the 'parms' property).  Any machine property not in this list will be added to the 'parms' object
+ * as a string property.
  *
  *      'id' (eg, "ibm5150")
  *      'name' (eg, "IBM PC (Model 5150) with Monochrome Display")
@@ -329,6 +329,16 @@ MarkOut.aHTMLEntities = {
  *      'autopower' (eg, true)
  *
  * and any other string-based property you wish to pass through to PCjs (via the embedPC() sParms parameter).
+ *
+ * As for any other NON-string-based property you might want to pass through sParms, like 'autopower', add it to the
+ * aFMBooleanMachineProps table, and it will be unquoted (ie, true or false rather than "true" or "false"); also note
+ * that even though the only non-reserved, non-string properties we currently use are booleans, that table is not
+ * really limited to booleans (eg, they could just as well be numeric properties).
+ *
+ * The other purpose that aFMBooleanMachineProps serves is to remap any lower-case Front Matter keywords to their
+ * camelCase equivalents; although in hindsight it was probably a stupid decision, all our machine definition properties
+ * (whether as attributes in a XML file or as Front Matter keywords at the top of a Markdown file) are purely lower-case,
+ * which are then converted to camelCase prior to calling the JavaScript components.
  */
 MarkOut.aFMBooleanMachineProps = {
     'autopower': "autoPower"

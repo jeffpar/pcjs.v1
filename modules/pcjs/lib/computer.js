@@ -713,7 +713,7 @@ Computer.prototype.donePowerOn = function(aParms)
 
     this.aFlags.fPowered = true;
     var controlPower = this.bindings["power"];
-    if (controlPower) controlPower.textContent = "On";
+    if (controlPower) controlPower.textContent = "Shutdown";
 
     if (!this.fInitialized) {
         this.println(Computer.APPNAME + " v" + Computer.APPVERSION + "\n" + Computer.COPYRIGHT + "\n" + Computer.LICENSE);
@@ -923,7 +923,7 @@ Computer.prototype.powerOff = function(fSave, fShutdown)
     if (fShutdown) {
         this.aFlags.fPowered = false;
         var controlPower = this.bindings["power"];
-        if (controlPower) controlPower.textContent = "Off";
+        if (controlPower) controlPower.textContent = "Power";
     }
 
     this.nPowerChange = 0;
