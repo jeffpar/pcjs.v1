@@ -11,7 +11,7 @@
 
 	<xsl:variable name="MACHINECLASS">pc</xsl:variable>
 	<xsl:variable name="APPCLASS">pcjs</xsl:variable>
-	<xsl:variable name="APPVERSION">1.20.8</xsl:variable>
+	<xsl:variable name="APPVERSION">1.20.9</xsl:variable>
 	<xsl:variable name="SITEHOST">www.pcjs.org</xsl:variable>
 
 	<xsl:template name="componentStyles">

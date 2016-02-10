@@ -11,6 +11,7 @@ As documented in /modules/markout/lib/markout.js, the following machine properti
 
 and the following properties (along with any property not listed above) will be added to the 'parms' property:
 
+    'autopower' (eg, "true")
     'automount' (eg, {"A":{"name":"OS/2 FOOTBALL Boot Disk (v7.68.17)","path":"/disks/pc/os2/misc/football/debugger/FOOTBALL-7.68.17.json"}})
     'state' (eg, "state.json")
     'messages' (eg, "disk")
@@ -22,6 +23,11 @@ Of all the above properties, the following are purely cosmetic:
 {% endcomment %}
 {% for machine in page.machines %}
   {% capture machine_embed %}window.embed{{ machine.type | remove:'-dbg' | upcase }}{% endcapture %}
+  {% unless machine.autopower %}
+    {% assign machine_autopower = "true" %}
+  {% else %}
+    {% capture machine_autopower %}{{ machine.autopower }}{% endcapture %}
+  {% endunless %}
   {% unless machine.config %}
     {% assign machine_config = "machine.xml" %}
   {% else %}
@@ -32,7 +38,7 @@ Of all the above properties, the following are purely cosmetic:
   {% else %}
     {% assign machine_template = machine.template %}
   {% endunless %}
-  {% capture machine_parms %}{{ site.left_brace }}state:"{{ machine.state }}",autoMount:{{ machine.automount|jsonify }},messages:"{{ machine.messages }}"{{ site.right_brace }}{% endcapture %}
+  {% capture machine_parms %}{{ site.left_brace }}autoPower:{{ machine_autopower }},state:"{{ machine.state }}",autoMount:{{ machine.automount|jsonify }},messages:"{{ machine.messages }}"{{ site.right_brace }}{% endcapture %}
   {% if site.pcjs.compiled == true and machine.uncompiled != true %}
     {% capture machine_script %}<script type="text/javascript" src="{{ site.baseurl }}/versions/{{ machine.type | remove:'-dbg' }}js/{{ site.pcjs.version }}/{{ machine.type }}.js"></script>{% endcapture %}
     {% unless machine_scripts contains machine_script %}

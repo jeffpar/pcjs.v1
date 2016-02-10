@@ -134,7 +134,9 @@ function Computer(parmsComputer, parmsMachine, fSuspended) {
     Component.call(this, "Computer", parmsComputer, Computer, Messages.COMPUTER);
 
     this.aFlags.fPowered = false;
-    this.fAutoPower = parmsComputer['autoPower'];
+    this.parmsMachine = parmsMachine;
+
+    this.fAutoPower = this.getMachineParm('autoPower', parmsComputer);
 
     /*
      * nPowerChange is 0 while the power state is stable, 1 while power is transitioning
@@ -152,7 +154,6 @@ function Computer(parmsComputer, parmsMachine, fSuspended) {
     this.fStateData = false;            // remembers if sStateData was loaded
     this.fServerState = false;
 
-    this.parmsMachine = parmsMachine;
     this.url = this.getMachineParm('url') || "";
 
     /*
@@ -331,14 +332,22 @@ Computer.prototype.getMachineID = function()
 };
 
 /**
- * getMachineParm(sParm)
+ * getMachineParm(sParm, parmsComponent)
+ *
+ * If the machine parameter doesn't exist, and component parameters have been provided, we'll automatically look up the latter.
  *
  * @param {string} sParm
- * @return {string|undefined}
+ * @param {Object} [parmsComponent]
+ * @return {Object|number|string|boolean|null|undefined}
  */
-Computer.prototype.getMachineParm = function(sParm)
+Computer.prototype.getMachineParm = function(sParm, parmsComponent)
 {
-    return this.parmsMachine && this.parmsMachine[sParm];
+    if (this.parmsMachine) {
+        if (this.parmsMachine[sParm] != null) {
+            return this.parmsMachine[sParm];
+        }
+    }
+    return parmsComponent? parmsComponent[sParm] : null;
 };
 
 /**
@@ -348,7 +357,7 @@ Computer.prototype.getMachineParm = function(sParm)
  */
 Computer.prototype.getUserID = function()
 {
-    return this.sUserID? this.sUserID : "";
+    return this.sUserID || "";
 };
 
 /**

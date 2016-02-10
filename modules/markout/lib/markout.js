@@ -326,9 +326,13 @@ MarkOut.aHTMLEntities = {
  *
  *      'state' (eg, "state.json")
  *      'messages' (eg, "disk")
+ *      'autopower' (eg, true)
  *
  * and any other string-based property you wish to pass through to PCjs (via the embedPC() sParms parameter).
  */
+MarkOut.aFMBooleanMachineProps = {
+    'autopower': "autoPower"
+};
 MarkOut.aFMReservedMachineProps = ['id', 'name', 'type', 'config', 'template', 'uncompiled', 'automount', 'parms'];
 
 /**
@@ -455,6 +459,10 @@ MarkOut.prototype.convertMD = function(sIndent)
                     machine['parms'] = '{';
                     for (sProp in machine) {
                         if (MarkOut.aFMReservedMachineProps.indexOf(sProp) < 0) {
+                            if (MarkOut.aFMBooleanMachineProps[sProp]) {
+                                machine['parms'] += MarkOut.aFMBooleanMachineProps[sProp] + ':' + machine[sProp] + ',';
+                                continue;
+                            }
                             machine['parms'] += sProp + ':"' + machine[sProp] + '",';
                         }
                     }
