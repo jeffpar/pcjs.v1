@@ -36,6 +36,76 @@
  * This file provides all the UI options for building a functional PCjs PC.
  */
 
+var typeAddress = {
+    type: "address"
+};
+
+var typeBoolean = {
+    type: "boolean"
+};
+
+var typeNumber = {
+    type: "number"
+};
+
+var typePath = {
+    type: "string"
+};
+
+var typeString = {
+    type: "string"
+};
+
+var machineTypes = {
+    '5150': "IBM PC (Model 5150)",
+    '5160': "IBM PC XT (Model 5160)",
+    '5170': "IBM PC AT (Model 5170)",
+    'deskpro386': "COMPAQ DeskPro 386"
+};
+
+var aMachineElements = {
+    'machine': {
+        choices: machineTypes
+    },
+    'name': {
+        desc: "Machine Description"
+    },
+    'computer': {
+        desc: "General Computer Features",
+        'buswidth': {
+            type: typeNumber,
+            values: [20, 24, 32]
+        },
+        'resume': {
+            type: typeNumber,
+            value: [0, 1, 2],
+            descs: ["Resume Disabled", "Resume Enabled", "Resume with Prompt"]
+        }
+    },
+    'ram': {
+        desc: "Read-Write Memory (Conventional or Extended)",
+        'addr': {
+            type: typeAddress
+        },
+        'size': {
+            type: typeNumber
+        }
+    },
+    'rom': {
+        desc: "Read-Only Memory",
+        'addr': {
+            type: typeAddress
+        },
+        'size': {
+            type: typeNumber
+        },
+        'file': {
+            type: typePath
+        }
+    }
+};
+
+
 /**
  * buildPC(idElement)
  *

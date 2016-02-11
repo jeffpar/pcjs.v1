@@ -104,13 +104,19 @@ if (NODE) {
  *
  * The parmsMachine object, if provided, may contain any of:
  *
- *      url: the location of the machine XML file
- *
  *      autoMount: if set, this should override any 'autoMount' property in the FDC's
  *      parmsFDC object.
  *
+ *      autoPower: if set, this should override any 'autoPower' property in the Computer's
+ *      parmsComputer object.
+ *
+ *      messages: if set, this should override any 'messages' property in the Debugger's
+ *      parmsDbg object.
+ *
  *      state: if set, this should override any 'state' property in the Computer's
  *      parmsComputer object.
+ *
+ *      url: the location of the machine XML file
  *
  * If a predefined state is supplied AND it's successfully loaded, then resume behavior
  * defaults to '1' (ie, resume enabled without prompting).
