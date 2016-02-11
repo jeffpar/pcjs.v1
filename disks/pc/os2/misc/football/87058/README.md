@@ -142,10 +142,10 @@ FOOTBALL Design Document
 ---
 
 The following text is from an email titled "3xBox Design Document" sent to the
-*football* alias on Saturday, February 28, 1987, at 5:02pm.
+Microsoft *football* alias on Saturday, February 28, 1987, at 5:02pm.
 
-### Overview
-
+	Overview
+	--------
 	The goal for this research project was to demonstrate the feasability of
 	supporting multiple virtual DOS 3.x machines on a 286DOS-based kernel running
 	on an 386 personal computer.  Each "3xBox" would have its own virtual screen,
@@ -174,8 +174,8 @@ The following text is from an email titled "3xBox Design Document" sent to the
 	
 	Unless stated otherwise, most of the concepts extant in 286DOS apply to 386DOS.
 
-### V86 Mode and the 386
-
+	V86 Mode and the 386
+	----------------------
 	The 386 CPU has three distinct execution modes: REAL, PROT, and V86.  REAL
 	and PROT modes are largely compatible with the corresponding modes of an 286.
 	V86 modes is exactly the same as RING 3 PROT mode, with the following
@@ -203,8 +203,8 @@ The following text is from an email titled "3xBox Design Document" sent to the
 		  sensitive.
 			This allows the OS to simulate the Interrupt Flag, if desired.
 
-### V86 IRETD Frame
-
+	V86 IRETD Frame
+	---------------
 	When any interrupt, trap, exception, or fault occurs in V86 mode, the CPU
 	switches to PROT mode and switches to the TSS Ring 0 Stack and builds the
 	following stack frame:
@@ -219,8 +219,8 @@ The following text is from an email titled "3xBox Design Document" sent to the
 				(0) (old CS)
 				   (old EIP) <- (SS:SP)
 
-### CPU Mode Determination
-
+	CPU Mode Determination
+	----------------------
 	A new implementation of the WHATMODE macro was written in order to distinguish
 	between the three CPU modes: REAL, PROT, and V86.  REAL mode is indicated by
 	a 0 PE bit in CR0 (a.k.a. MSW on a 286).  If the PE bit is 1, then the mode
@@ -230,8 +230,8 @@ The following text is from an email titled "3xBox Design Document" sent to the
 	be changed.  So, we change IOPL and then check to see if it changed.  If so,
 	PROT mode, else V86 mode.
 
-### CPU Mode Switching
-
+	CPU Mode Switching
+	------------------
 	The 286DOS kernel relies extensively on switching inbetween REAL and PROT.
 	This functionality is provided by the RealMode and ProtMode routines.
 	In 386DOS, RealMode is no longer needed.  As soon as we switch to PROT mode
@@ -256,28 +256,28 @@ The following text is from an email titled "3xBox Design Document" sent to the
 	the caller.  NOTE: V86 Services is also used for completing the 386 LOADALL
 	used by PhysToVirt to map "high" memory in "REAL" mode.
 
-### Stack Switching
-
+	Stack Switching
+	---------------
 	In order to maintain the 286DOS mode switch and stack switch semantics
 	when V86 mode is used, we have a new stack (the V86 Stack) in the 3xBox PTDA.
 
-### 286DOS Modes and Stacks
-
+	286DOS Modes and Stacks
+	-----------------------
 	The RealMode and ProtMode procedures in 286DOS are the only ways to switch
 	the CPU execution mode.  These routines both maintain SS:SP, allowing
 	RealMode and ProtMode to be reentrant.  The TSS Ring 0 stack is always the
 	current TCB stack in the current PTDA.  The only other stacks in the system
 	are the Interrupt Stack and user stack(s).
 
-### 386DOS Modes and Stacks
-
+	386DOS Modes and Stacks
+	-----------------------
 	In 386DOS, any interrupt or exception while in V86 mode causes a switch to
 	PROT mode and the TSS Ring 0 Stack.  So we have a new way to mode switch with
 	an incompatible stack semantic.  We had to fix this mode switch to make it
 	compatible with 286DOS.
 
-### Observation
-
+	Observation
+	-----------
 	In V86 mode, the current stack must not be the TSS Ring 0 Stack.  The CPU
 	only leaves V86 mode via an interrupt/exception, which causes a stack switch
 	to the TSS Ring 0 Stack.  If the current stack was the same as the TSS Ring 0
@@ -285,8 +285,8 @@ The following text is from an email titled "3xBox Design Document" sent to the
 	the PTDA.  Since we run on this stack in V86 mode, we need a new Ring 0 stack
 	when a 3xBox is running.
 
-### Approach
-
+	Approach
+	--------
 	1)  When a PMBox is running, the TSS Ring 0 Stack is a PTDA TCB stack.
 			+   This is consistent with the 286DOS model.
 	
@@ -298,8 +298,8 @@ The following text is from an email titled "3xBox Design Document" sent to the
 			+   Otherwise, copy the V86 IRETD frame to the previous stack and
 				switch back to the previous stack.
 
-### Details
-
+	Details
+	-------
 	1)  Leaving V86 mode
 		a.  V86ToProt (analog of ProtMode)
 			+   Issue special V86ToProt software interrupt.  If the interrupt
@@ -341,8 +341,8 @@ The following text is from an email titled "3xBox Design Document" sent to the
 			+   Execute 386 LOADALL with VM bit set in EFLAGS image in loadall
 				buffer.
 
-### Interrupt Management
-
+	Interrupt Management
+	--------------------
 	All software interrupts, hardware interrupts, and CPU traps and exceptions
 	are vectored through a common IDT, regardless of whether the CPU is in PROT
 	or V86 mode.
@@ -352,8 +352,8 @@ The following text is from an email titled "3xBox Design Document" sent to the
 		  keyboard and mouse (since those are implicitly for the foreground box),
 		  can be given to background 3xBoxes.
 
-### Passing Hardware Interrupts to the Foreground 3xBox
-
+	Passing Hardware Interrupts to the Foreground 3xBox
+	---------------------------------------------------
 	In the interrupt manager:
 	
 	IF  a 3xBox is foreground       -AND-
