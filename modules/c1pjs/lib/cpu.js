@@ -3879,7 +3879,7 @@ C1PCPU.prototype.opUndefined = function()
  */
 C1PCPU.init = function()
 {
-    var aeCPUs = Component.getElementsByClass(window.document, C1PJSCLASS, "cpu");
+    var aeCPUs = Component.getElementsByClass(document, C1PJSCLASS, "cpu");
     for (var iCPU=0; iCPU < aeCPUs.length; iCPU++) {
         var eCPU = aeCPUs[iCPU];
         var parmsCPU = Component.getComponentParms(eCPU);

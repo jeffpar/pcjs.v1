@@ -32,7 +32,7 @@
 
 "use strict";
 
-/* global window: true, XSLTProcessor: false, APPNAME: false, APPVERSION: false, DEBUG: true */
+/* global document: true, window: true, XSLTProcessor: false, APPNAME: false, APPVERSION: false, DEBUG: true */
 
 if (NODE) {
     var Component;
@@ -189,11 +189,13 @@ function parseXML(sXML, sXMLFile, idMachine, sParms, fResolve, display, done)
                  * 'ActiveXObject' crud has gone away; but of course, this code must remain in place if
                  * we want to continue supporting older Internet Explorer browsers (ie, back to IE9).
                  */
+                /** @namespace window.ActiveXObject */
                 if (window.ActiveXObject || 'ActiveXObject' in window) {                // second test is required for IE11 on Windows 8.1
                     xmlDoc = new window.ActiveXObject("Microsoft.XMLDOM");
                     xmlDoc.async = false;
                     xmlDoc['loadXML'](sXML);
                 } else {
+                    /** @namespace window.DOMParser */
                     xmlDoc = (new window.DOMParser()).parseFromString(sXML, "text/xml");
                 }
             } catch(e) {
@@ -356,7 +358,7 @@ function embedMachine(sName, sVersion, idElement, sXMLFile, sXSLFile, sParms)
     };
 
     try {
-        eMachine = window.document.getElementById(idElement);
+        eMachine = document.getElementById(idElement);
         if (eMachine) {
             var sAppClass = sName.toLowerCase();        // eg, "pcjs" or "c1pjs"
             if (!sXSLFile) {
@@ -420,10 +422,10 @@ function embedMachine(sName, sVersion, idElement, sXMLFile, sXSLFile, sParms)
                                 displayError("transformNodeToObject failed");
                             }
                         }
-                        else if (window.document.implementation && window.document.implementation.createDocument) {
+                        else if (document.implementation && document.implementation.createDocument) {
                             var xsltProcessor = new XSLTProcessor();
                             xsltProcessor['importStylesheet'](xsl);
-                            var eFragment = xsltProcessor['transformToFragment'](xml, window.document);
+                            var eFragment = xsltProcessor['transformToFragment'](xml, document);
                             if (eFragment) {
                                 /*
                                  * This fails in Microsoft Edge...

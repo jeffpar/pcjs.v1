@@ -592,7 +592,7 @@ FDC.prototype.powerUp = function(data, fRepower)
             }
             controlDrives.textContent = "";
             for (var iDrive = 0; iDrive < this.nDrives; iDrive++) {
-                var controlOption = window.document.createElement("option");
+                var controlOption = document.createElement("option");
                 controlOption['value'] = iDrive;
                 /*
                  * TODO: This conversion of drive number to drive letter, starting with A:, is very simplistic
@@ -1416,7 +1416,7 @@ FDC.prototype.addDiskette = function(sName, sPath)
         for (var i = 0; i < controlDisks.options.length; i++) {
             if (controlDisks.options[i].value == sPath) return;
         }
-        var controlOption = window.document.createElement("option");
+        var controlOption = document.createElement("option");
         controlOption['value'] = sPath;
         controlOption.textContent = sName;
         controlDisks.appendChild(controlOption);
@@ -2518,7 +2518,7 @@ FDC.aPortOutput = {
  * any associated HTML controls to the new component.
  */
 FDC.init = function() {
-    var aeFDC = Component.getElementsByClass(window.document, PCJSCLASS, "fdc");
+    var aeFDC = Component.getElementsByClass(document, PCJSCLASS, "fdc");
     for (var iFDC = 0; iFDC < aeFDC.length; iFDC++) {
         var eFDC = aeFDC[iFDC];
         var parmsFDC = Component.getComponentParms(eFDC);

@@ -8131,7 +8131,7 @@ if (DEBUGGER) {
      */
     Debugger.init = function()
     {
-        var aeDbg = Component.getElementsByClass(window.document, PCJSCLASS, "debugger");
+        var aeDbg = Component.getElementsByClass(document, PCJSCLASS, "debugger");
         for (var iDbg = 0; iDbg < aeDbg.length; iDbg++) {
             var eDbg = aeDbg[iDbg];
             var parmsDbg = Component.getComponentParms(eDbg);

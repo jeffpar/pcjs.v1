@@ -1134,7 +1134,7 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
         reIncludes.lastIndex = 0;       // reset lastIndex, since we just modified the string that reIncludes is iterating over
     }
 
-    sBlock = sBlock.replace(/\{%\s*include\s+build\.html\s+id=(["'])(.*?)\1\s*%}/g, '<div class="pcbuild" id=$1$2$1></div>');
+    sBlock = sBlock.replace(/\{%\s*include\s+build\.html\s+id=(["'])(.*?)\1\s*%}/g, '<div class="buildpc" id=$1$2$1></div>');
 
     /*
      * Start looking for Markdown-style machine links now...

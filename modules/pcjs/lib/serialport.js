@@ -897,7 +897,7 @@ SerialPort.aPortOutput = {
  */
 SerialPort.init = function()
 {
-    var aeSerial = Component.getElementsByClass(window.document, PCJSCLASS, "serial");
+    var aeSerial = Component.getElementsByClass(document, PCJSCLASS, "serial");
     for (var iSerial = 0; iSerial < aeSerial.length; iSerial++) {
         var eSerial = aeSerial[iSerial];
         var parmsSerial = Component.getComponentParms(eSerial);

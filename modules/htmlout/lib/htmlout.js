@@ -1908,7 +1908,7 @@ HTMLOut.prototype.processMachines = function(aMachines, buildOptions, done)
                 this.addFilesToHTML(asFiles, sScriptEmbed);
                 if (buildOptions.id) {
                     asFiles = [];
-                    asFiles.push("/modules/pcbuild/lib/build.js");
+                    asFiles.push("/modules/build/lib/build.js");
                     sScriptEmbed = '<script type="text/javascript">buildPC("' + buildOptions.id + '")</script>';
                     this.addFilesToHTML(asFiles, sScriptEmbed);
                 }

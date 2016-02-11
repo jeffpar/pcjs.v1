@@ -51,7 +51,7 @@
 
 "use strict";
 
-/* global window: true, DEBUG: true */
+/* global document: true, window: true, DEBUG: true */
 
 if (NODE) {
     require("./defines");
@@ -494,7 +494,7 @@ Component.bindExternalControl = function(component, sControl, sBinding, sType)
     }
 };
 
-if (window && !window.document.ELEMENT_NODE) window.document.ELEMENT_NODE = 1;
+if (document && !document.ELEMENT_NODE) document.ELEMENT_NODE = 1;
 
 /**
  * Component.bindComponentControls(component, element, sAppClass)
@@ -513,7 +513,7 @@ Component.bindComponentControls = function(component, element, sAppClass)
 
         for (var iNode = 0; iNode < aeChildNodes.length; iNode++) {
             var control = aeChildNodes[iNode];
-            if (control.nodeType !== window.document.ELEMENT_NODE) {
+            if (control.nodeType !== document.ELEMENT_NODE) {
                 continue;
             }
             var sClass = control.getAttribute("class");

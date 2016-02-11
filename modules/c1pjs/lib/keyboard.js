@@ -1094,7 +1094,7 @@ C1PKeyboard.prototype.updateMemory = function(fPropagate, addr, bWrite)
  */
 C1PKeyboard.init = function()
 {
-    var aeKbd = Component.getElementsByClass(window.document, C1PJSCLASS, "keyboard");
+    var aeKbd = Component.getElementsByClass(document, C1PJSCLASS, "keyboard");
     for (var iKbd=0; iKbd < aeKbd.length; iKbd++) {
         var eKbd = aeKbd[iKbd];
         var parmsKbd = Component.getComponentParms(eKbd);

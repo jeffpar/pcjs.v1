@@ -3363,7 +3363,7 @@ X86FPU.afnPreserveExceptions = [
  */
 X86FPU.init = function()
 {
-    var aeFPUs = Component.getElementsByClass(window.document, PCJSCLASS, "fpu");
+    var aeFPUs = Component.getElementsByClass(document, PCJSCLASS, "fpu");
     for (var iFPU = 0; iFPU < aeFPUs.length; iFPU++) {
         var eFPU = aeFPUs[iFPU];
         var parmsFPU = Component.getComponentParms(eFPU);

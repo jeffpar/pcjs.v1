@@ -64,7 +64,7 @@ here and in markout.js.  Examples include 'autopower' ('autoPower') and 'automou
   {% endif %}
   <script type="text/javascript">{{ machine_embed }}('{{ machine.id }}','{{ machine_config }}','{{ machine_template }}','{{ machine_parms }}');</script>
   {% if page.build %}
-    <script type="text/javascript" src="{{ site.baseurl }}/modules/pcbuild/lib/build.js"></script>
+    <script type="text/javascript" src="{{ site.baseurl }}/modules/build/lib/build.js"></script>
     <script type="text/javascript">buildPC("{{ page.build }}");</script>
   {% endif %}
 {% endfor %}

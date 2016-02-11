@@ -266,7 +266,7 @@ RAM.prototype.restore = function(data)
  */
 RAM.init = function()
 {
-    var aeRAM = Component.getElementsByClass(window.document, PCJSCLASS, "ram");
+    var aeRAM = Component.getElementsByClass(document, PCJSCLASS, "ram");
     for (var iRAM = 0; iRAM < aeRAM.length; iRAM++) {
         var eRAM = aeRAM[iRAM];
         var parmsRAM = Component.getComponentParms(eRAM);

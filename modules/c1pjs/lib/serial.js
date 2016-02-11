@@ -391,7 +391,7 @@ C1PSerialPort.prototype.updateMemory = function()
  */
 C1PSerialPort.init = function()
 {
-    var aeSerial = Component.getElementsByClass(window.document, C1PJSCLASS, "serial");
+    var aeSerial = Component.getElementsByClass(document, C1PJSCLASS, "serial");
     for (var iSerial=0; iSerial < aeSerial.length; iSerial++) {
         var eSerial = aeSerial[iSerial];
         var parmsSerial = Component.getComponentParms(eSerial);

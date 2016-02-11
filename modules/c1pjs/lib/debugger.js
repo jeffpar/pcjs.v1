@@ -2202,7 +2202,7 @@ if (DEBUGGER) {
      */
     C1PDebugger.init = function()
     {
-        var aeDbg = Component.getElementsByClass(window.document, C1PJSCLASS, "debugger");
+        var aeDbg = Component.getElementsByClass(document, C1PJSCLASS, "debugger");
         for (var iDbg=0; iDbg < aeDbg.length; iDbg++) {
             var eDbg = aeDbg[iDbg];
             var parmsDbg = Component.getComponentParms(eDbg);

@@ -229,7 +229,7 @@ C1PROM.prototype.copyImage = function()
  */
 C1PROM.init = function()
 {
-    var aeROM = Component.getElementsByClass(window.document, C1PJSCLASS, "rom");
+    var aeROM = Component.getElementsByClass(document, C1PJSCLASS, "rom");
     for (var iROM=0; iROM < aeROM.length; iROM++) {
         var eROM = aeROM[iROM];
         var parmsROM = Component.getComponentParms(eROM);

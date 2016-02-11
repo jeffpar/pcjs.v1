@@ -4358,7 +4358,7 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
  */
 X86CPU.init = function()
 {
-    var aeCPUs = Component.getElementsByClass(window.document, PCJSCLASS, "cpu");
+    var aeCPUs = Component.getElementsByClass(document, PCJSCLASS, "cpu");
     for (var iCPU = 0; iCPU < aeCPUs.length; iCPU++) {
         var eCPU = aeCPUs[iCPU];
         var parmsCPU = Component.getComponentParms(eCPU);

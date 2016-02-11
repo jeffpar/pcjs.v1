@@ -503,7 +503,7 @@ ParallelPort.aPortOutput = {
  */
 ParallelPort.init = function()
 {
-    var aeParallel = Component.getElementsByClass(window.document, PCJSCLASS, "parallel");
+    var aeParallel = Component.getElementsByClass(document, PCJSCLASS, "parallel");
     for (var iParallel = 0; iParallel < aeParallel.length; iParallel++) {
         var eParallel = aeParallel[iParallel];
         var parmsParallel = Component.getComponentParms(eParallel);

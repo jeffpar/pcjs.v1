@@ -344,7 +344,7 @@ Computer.prototype.getMachineID = function()
  *
  * @param {string} sParm
  * @param {Object} [parmsComponent]
- * @return {Object|number|string|boolean|null|undefined}
+ * @return {string|null}
  */
 Computer.prototype.getMachineParm = function(sParm, parmsComponent)
 {
@@ -1371,7 +1371,7 @@ Computer.init = function()
      */
     if (!COMPILED && XMLVERSION) Computer.APPVERSION = XMLVERSION;
 
-    var aeMachines = Component.getElementsByClass(window.document, PCJSCLASS + "-machine");
+    var aeMachines = Component.getElementsByClass(document, PCJSCLASS + "-machine");
 
     for (var iMachine = 0; iMachine < aeMachines.length; iMachine++) {
 
@@ -1421,7 +1421,7 @@ Computer.init = function()
  */
 Computer.show = function()
 {
-    var aeComputers = Component.getElementsByClass(window.document, PCJSCLASS, "computer");
+    var aeComputers = Component.getElementsByClass(document, PCJSCLASS, "computer");
     for (var iComputer = 0; iComputer < aeComputers.length; iComputer++) {
         var eComputer = aeComputers[iComputer];
         var parmsComputer = Component.getComponentParms(eComputer);
@@ -1470,7 +1470,7 @@ Computer.show = function()
  */
 Computer.exit = function()
 {
-    var aeComputers = Component.getElementsByClass(window.document, PCJSCLASS, "computer");
+    var aeComputers = Component.getElementsByClass(document, PCJSCLASS, "computer");
     for (var iComputer = 0; iComputer < aeComputers.length; iComputer++) {
         var eComputer = aeComputers[iComputer];
         var parmsComputer = Component.getComponentParms(eComputer);
