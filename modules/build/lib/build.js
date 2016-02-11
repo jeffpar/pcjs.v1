@@ -33,7 +33,9 @@
 "use strict";
 
 /*
- * This file provides all the UI options for building a functional PCjs PC.
+ * This file provides UI options for building a functional PCjs PC.
+ *
+ * WARNING: This code is experimental and FAR from functional.  It is a work-in-progress.
  */
 
 var typeAddress = {
