@@ -215,7 +215,7 @@ Component.subclass = function(subclass, superclass, methods, statics)
  * This enables any component to locate another component by ID (see Component.getComponentByID())
  * or by type (see Component.getComponentByType()).
  */
-Component.all = [];
+Component.components = [];
 
 /**
  * Component.add(component)
@@ -225,11 +225,57 @@ Component.all = [];
 Component.add = function(component)
 {
     /*
-     * This just generates a lot of useless noise, handy in the early days, not so much these days...
+     * This just generates a lot of useless noise, handy in the early days, not so much these days....
      *
      *      if (DEBUG) Component.log("Component.add(" + component.type + "," + component.id + ")");
      */
-    Component.all[Component.all.length] = component;
+    Component.components.push(component);
+};
+
+/*
+ * Every machine on the page are now recorded as well, by their machine ID.  We then record the various resources
+ * used by that machine.
+ */
+Component.machines = {};
+
+/**
+ * Component.addMachine(idMachine)
+ *
+ * @param {string} idMachine
+ */
+Component.addMachine = function(idMachine)
+{
+    Component.machines[idMachine] = {};
+};
+
+/**
+ * Component.addMachineResource(idMachine, sName, data)
+ *
+ * @param {string} idMachine
+ * @param {string} sName (name of the resource)
+ * @param {*} data
+ */
+Component.addMachineResource = function(idMachine, sName, data)
+{
+    Component.assert(Component.machines[idMachine]);
+    if (Component.machines[idMachine]) {
+        if (!Component.machines[idMachine][sName]) {
+            Component.machines[idMachine][sName] = [];
+        }
+        Component.machines[idMachine][sName].push(data);
+    }
+};
+
+/**
+ * Component.getMachineResources(idMachine, sName)
+ *
+ * @param {string} idMachine
+ * @param {string} sName (name of the resource)
+ * @return {Array|undefined}
+ */
+Component.getMachineResources = function(idMachine, sName)
+{
+    return Component.machines[idMachine] && Component.machines[idMachine][sName];
 };
 
 /**
@@ -343,8 +389,8 @@ Component.error = function(s)
 /**
  * Component.getComponents(idRelated)
  *
- * We could store components as properties of an 'all' object, using the component's ID,
- * and change this linear lookup into a property lookup, but some components may have no ID.
+ * We could store components as properties, using the component's ID, and change
+ * this linear lookup into a property lookup, but some components may have no ID.
  *
  * @param {string} [idRelated] of related component
  * @return {Array} of components
@@ -366,8 +412,8 @@ Component.getComponents = function(idRelated)
         else
             idRelated = "";
     }
-    for (i = 0; i < Component.all.length; i++) {
-        var component = Component.all[i];
+    for (i = 0; i < Component.components.length; i++) {
+        var component = Component.components[i];
         if (!idRelated || !component.id.indexOf(idRelated)) {
             aComponents.push(component);
         }
@@ -378,8 +424,8 @@ Component.getComponents = function(idRelated)
 /**
  * Component.getComponentByID(id, idRelated)
  *
- * We could store components as properties of an 'all' object, using the component's ID,
- * and change this linear lookup into a property lookup, but some components may have no ID.
+ * We could store components as properties, using the component's ID, and change
+ * this linear lookup into a property lookup, but some components may have no ID.
  *
  * @param {string} id of the desired component
  * @param {string} [idRelated] of related component
@@ -397,9 +443,9 @@ Component.getComponentByID = function(id, idRelated)
         if (idRelated && (i = idRelated.indexOf('.')) > 0) {
             id = idRelated.substr(0, i + 1) + id;
         }
-        for (i = 0; i < Component.all.length; i++) {
-            if (Component.all[i].id === id) {
-                return Component.all[i];
+        for (i = 0; i < Component.components.length; i++) {
+            if (Component.components[i].id === id) {
+                return Component.components[i];
             }
         }
         Component.log("Component ID '" + id + "' not found", "warning");
@@ -431,13 +477,13 @@ Component.getComponentByType = function(sType, idRelated, componentPrev)
                 idRelated = "";
             }
         }
-        for (i = 0; i < Component.all.length; i++) {
+        for (i = 0; i < Component.components.length; i++) {
             if (componentPrev) {
-                if (componentPrev == Component.all[i]) componentPrev = null;
+                if (componentPrev == Component.components[i]) componentPrev = null;
                 continue;
             }
-            if (sType == Component.all[i].type && (!idRelated || !Component.all[i].id.indexOf(idRelated))) {
-                return Component.all[i];
+            if (sType == Component.components[i].type && (!idRelated || !Component.components[i].id.indexOf(idRelated))) {
+                return Component.components[i];
             }
         }
         Component.log("Component type '" + sType + "' not found", "warning");

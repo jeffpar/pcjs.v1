@@ -225,6 +225,9 @@ ROM.prototype.doneLoad = function(sURL, sROMData, nErrorCode)
         this.notice("Unable to load system ROM (error " + nErrorCode + ": " + sURL + ")");
         return;
     }
+
+    Component.addMachineResource(this.idMachine, sURL, sROMData);
+
     if (sROMData.charAt(0) == "[" || sROMData.charAt(0) == "{") {
         try {
             /*

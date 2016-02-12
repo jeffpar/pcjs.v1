@@ -24,6 +24,6 @@
 		<name>COMPAQ MS-DOS 3.31 (Disk 5)</name>
 	</disk>
 	<disk id="disk06" size="368640" chs="40:2:9" img="archive/COMPAQ-DOS331-DIAG.img" href="/disks/pc/dos/compaq/3.31/COMPAQ-DOS331-DIAG.json" md5="6fc3678180e8d8c2ff5e1c3d99f14d08" md5json="a5e0a418db4fe09c13cfd86635753a05">
-		<name>COMPAQ MS-DOS 3.31 (Diagnostics)</name>
+		<name>COMPAQ MS-DOS 3.31 (Diags)</name>
 	</disk>
 </manifest>

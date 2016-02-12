@@ -35,7 +35,7 @@
 /* global document: true, window: true, XSLTProcessor: false, APPNAME: false, APPVERSION: false, DEBUG: true */
 
 if (NODE) {
-    var Component;
+    var Component = require("./component");
     var str = require("./strlib");
     var web = require("./weblib");
 }
@@ -52,8 +52,8 @@ if (NODE) {
  * notification events at the start of the embedding process (web.enablePageEvents(false)) and
  * re-enable them at the end (web.enablePageEvents(true)).
  */
-var cMachines = 0;
 var fAsync = true;
+var cAsyncMachines = 0;
 
 /**
  * loadXML(sFile, idMachine, sParms, fResolve, display, done)
@@ -305,27 +305,28 @@ function resolveXML(sXML, display, done)
 }
 
 /**
- * embedMachine(sName, sVersion, idElement, sXMLFile, sXSLFile, sParms)
+ * embedMachine(sName, sVersion, idMachine, sXMLFile, sXSLFile, sParms)
  *
  * This allows to you embed a machine on a web page, by transforming the machine XML into HTML.
  *
  * @param {string} sName is the app name (eg, "PCjs")
  * @param {string} sVersion is the app version (eg, "1.15.7")
- * @param {string} idElement
+ * @param {string} idMachine
  * @param {string} sXMLFile
  * @param {string} sXSLFile
  * @param {string} [sParms]
  * @return {boolean} true if successful, false if error
  */
-function embedMachine(sName, sVersion, idElement, sXMLFile, sXSLFile, sParms)
+function embedMachine(sName, sVersion, idMachine, sXMLFile, sXSLFile, sParms)
 {
     var eMachine, eWarning, fSuccess = true;
 
-    cMachines++;
+    cAsyncMachines++;
+    Component.addMachine(idMachine);
 
     var doneMachine = function() {
-        Component.assert(cMachines > 0);
-        if (!--cMachines) {
+        Component.assert(cAsyncMachines > 0);
+        if (!--cAsyncMachines) {
             if (fAsync) web.enablePageEvents(true);
         }
     };
@@ -358,7 +359,7 @@ function embedMachine(sName, sVersion, idElement, sXMLFile, sXSLFile, sParms)
     };
 
     try {
-        eMachine = document.getElementById(idElement);
+        eMachine = document.getElementById(idMachine);
         if (eMachine) {
             var sAppClass = sName.toLowerCase();        // eg, "pcjs" or "c1pjs"
             if (!sXSLFile) {
@@ -380,6 +381,7 @@ function embedMachine(sName, sVersion, idElement, sXMLFile, sXSLFile, sParms)
                     displayError(sXML);
                     return;
                 }
+                Component.addMachineResource(idMachine, 'xml', sXML);
                 /*
                  * Non-COMPILED kludge to extract the version number from the stylesheet path in the machine XML file;
                  * we don't need this code in COMPILED (non-DEBUG) releases, because APPVERSION is hard-coded into them.
@@ -393,82 +395,75 @@ function embedMachine(sName, sVersion, idElement, sXMLFile, sXSLFile, sParms)
                         displayError(sXSL);
                         return;
                     }
-                    if (xsl) {
-                        /*
-                         * The <machine> template in components.xsl now generates a "machine div" that makes
-                         * the div we required the caller of embedMachine() to provide redundant, so instead
-                         * of appending this fragment to the caller's node, we REPLACE the caller's node.
-                         * This works only because because we ALSO inject the caller's "machine div" ID into
-                         * the fragment's ID during parseXML().
-                         *
-                         *      eMachine.innerHTML = sFragment;
-                         *
-                         * Also, if the transform function fails, make sure you're using the appropriate
-                         * "components.xsl" and not a "machine.xsl", because the latter will not produce valid
-                         * embeddable HTML (and is the most common cause of failure at this final stage).
-                         */
-                        displayMessage("Processing " + sXMLFile + "...");
-                        /*
-                         * Beginning with Microsoft Edge and the corresponding release of Windows 10, all the
-                         * 'ActiveXObject' crud has gone away; but of course, this code must remain in place if
-                         * we want to continue supporting older Internet Explorer browsers (ie, back to IE9).
-                         */
-                        if (window.ActiveXObject || 'ActiveXObject' in window) {        // second test is required for IE11 on Windows 8.1
-                            var sFragment = xml['transformNode'](xsl);
-                            if (sFragment) {
-                                eMachine.outerHTML = sFragment;
+                    Component.addMachineResource(idMachine, 'xsl', sXSL);
+                    /*
+                     * The <machine> template in components.xsl now generates a "machine div" that makes
+                     * the div we required the caller of embedMachine() to provide redundant, so instead
+                     * of appending this fragment to the caller's node, we REPLACE the caller's node.
+                     * This works only because because we ALSO inject the caller's "machine div" ID into
+                     * the fragment's ID during parseXML().
+                     *
+                     *      eMachine.innerHTML = sFragment;
+                     *
+                     * Also, if the transform function fails, make sure you're using the appropriate
+                     * "components.xsl" and not a "machine.xsl", because the latter will not produce valid
+                     * embeddable HTML (and is the most common cause of failure at this final stage).
+                     */
+                    displayMessage("Processing " + sXMLFile + "...");
+                    /*
+                     * Beginning with Microsoft Edge and the corresponding release of Windows 10, all the
+                     * 'ActiveXObject' crud has gone away; but of course, this code must remain in place if
+                     * we want to continue supporting older Internet Explorer browsers (ie, back to IE9).
+                     */
+                    if (window.ActiveXObject || 'ActiveXObject' in window) {        // second test is required for IE11 on Windows 8.1
+                        var sFragment = xml['transformNode'](xsl);
+                        if (sFragment) {
+                            eMachine.outerHTML = sFragment;
+                            doneMachine();
+                        } else {
+                            displayError("transformNodeToObject failed");
+                        }
+                    }
+                    else if (document.implementation && document.implementation.createDocument) {
+                        var xsltProcessor = new XSLTProcessor();
+                        xsltProcessor['importStylesheet'](xsl);
+                        var eFragment = xsltProcessor['transformToFragment'](xml, document);
+                        if (eFragment) {
+                            /*
+                             * This fails in Microsoft Edge...
+                             *
+                            var machine = eFragment.getElementById(idMachine);
+                            if (!machine) {
+                                displayError("machine generation failed: " + idMachine);
+                            } else
+                            */
+                            if (eMachine.parentNode) {
+                                eMachine.parentNode.replaceChild(eFragment, eMachine);
                                 doneMachine();
                             } else {
-                                displayError("transformNodeToObject failed");
-                            }
-                        }
-                        else if (document.implementation && document.implementation.createDocument) {
-                            var xsltProcessor = new XSLTProcessor();
-                            xsltProcessor['importStylesheet'](xsl);
-                            var eFragment = xsltProcessor['transformToFragment'](xml, document);
-                            if (eFragment) {
-                                /*
-                                 * This fails in Microsoft Edge...
-                                 *
-                                var machine = eFragment.getElementById(idElement);
-                                if (!machine) {
-                                    displayError("machine generation failed: " + idElement);
-                                } else
-                                */
-                                if (eMachine.parentNode) {
-                                    eMachine.parentNode.replaceChild(eFragment, eMachine);
-                                    doneMachine();
-                                } else {
-                                    displayError("invalid machine element: " + idElement);
-                                }
-                            } else {
-                                displayError("transformToFragment failed");
+                                displayError("invalid machine element: " + idMachine);
                             }
                         } else {
-                            /*
-                             * Perhaps I should have performed this test at the outset; on the other hand, I'm
-                             * not aware of any browsers don't support one or both of the above XSLT transformation
-                             * methods, so treat this as a bug.
-                             */
-                            displayError("unable to transform XML: unsupported browser");
+                            displayError("transformToFragment failed");
                         }
                     } else {
-                        displayError("failed to load XSL file: " + sXSLFile);
+                        /*
+                         * Perhaps I should have performed this test at the outset; on the other hand, I'm
+                         * not aware of any browsers don't support one or both of the above XSLT transformation
+                         * methods, so treat this as a bug.
+                         */
+                        displayError("unable to transform XML: unsupported browser");
                     }
                 };
-                if (xml) {
-                    loadXML(sXSLFile, null, null, false, displayMessage, transformXML);
-                } else {
-                    displayError("failed to load XML file: " + sXMLFile);
-                }
+                loadXML(sXSLFile, null, null, false, displayMessage, transformXML);
             };
             if (sXMLFile.charAt(0) != '<') {
-                loadXML(sXMLFile, idElement, sParms, true, displayMessage, loadXSL);
+                loadXML(sXMLFile, idMachine, sParms, true, displayMessage, loadXSL);
             } else {
-                parseXML(sXMLFile, null, idElement, sParms, false, displayMessage, loadXSL);
+                parseXML(sXMLFile, null, idMachine, sParms, false, displayMessage, loadXSL);
             }
         } else {
-            displayError("missing machine element: " + idElement);
+            displayError("missing machine element: " + idMachine);
         }
     } catch(e) {
         displayError(e.message);
@@ -477,32 +472,54 @@ function embedMachine(sName, sVersion, idElement, sXMLFile, sXSLFile, sParms)
 }
 
 /**
- * embedC1P(idElement, sXMLFile, sXSLFile)
+ * embedC1P(idMachine, sXMLFile, sXSLFile)
  *
- * @param {string} idElement
+ * @param {string} idMachine
  * @param {string} sXMLFile
  * @param {string} sXSLFile
  * @return {boolean} true if successful, false if error
  */
-function embedC1P(idElement, sXMLFile, sXSLFile)
+function embedC1P(idMachine, sXMLFile, sXSLFile)
 {
     if (fAsync) web.enablePageEvents(false);
-    return embedMachine("C1Pjs", APPVERSION, idElement, sXMLFile, sXSLFile);
+    return embedMachine("C1Pjs", APPVERSION, idMachine, sXMLFile, sXSLFile);
 }
 
 /**
- * embedPC(idElement, sXMLFile, sXSLFile, sParms)
+ * embedPC(idMachine, sXMLFile, sXSLFile, sParms)
  *
- * @param {string} idElement
+ * @param {string} idMachine
  * @param {string} sXMLFile
  * @param {string} sXSLFile
  * @param {string} [sParms]
  * @return {boolean} true if successful, false if error
  */
-function embedPC(idElement, sXMLFile, sXSLFile, sParms)
+function embedPC(idMachine, sXMLFile, sXSLFile, sParms)
 {
     if (fAsync) web.enablePageEvents(false);
-    return embedMachine("PCjs", APPVERSION, idElement, sXMLFile, sXSLFile, sParms);
+    return embedMachine("PCjs", APPVERSION, idMachine, sXMLFile, sXSLFile, sParms);
+}
+
+/**
+ * savePC(idMachine)
+ *
+ * @param {string} idMachine
+ * @return {boolean} true if successful, false if error
+ */
+function savePC(idMachine)
+{
+    var cmp = Component.getComponentByType("Computer", idMachine);
+    var dbg = Component.getComponentByType("Debugger", idMachine);
+    if (cmp) {
+        var sPCJSFile = "/versions/pcjs/" + XMLVERSION + "/pc" + (dbg? "-dbg" : "") + ".js";
+        var sPCJSCode = web.loadResource(sPCJSFile);
+        /*
+         * Next, we need to enumerate the FDC drives and "dump" the disks in them....
+         */
+        return true;
+    }
+    web.alertUser("Unable to identify machine '" + idMachine + "'");
+    return false;
 }
 
 /**
@@ -511,6 +528,7 @@ function embedPC(idElement, sXMLFile, sXSLFile, sParms)
  */
 if (APPNAME == "PCjs") {
     window['embedPC'] = embedPC;
+    window['savePC'] = savePC;
 }
 
 if (APPNAME == "C1Pjs") {

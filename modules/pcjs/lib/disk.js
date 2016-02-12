@@ -1198,6 +1198,9 @@ Disk.prototype.doneLoad = function(sURL, sDiskData, nErrorCode)
         if (DEBUG && this.messageEnabled()) {
             this.printMessage('doneLoad("' + this.sDiskPath + '")');
         }
+
+        Component.addMachineResource(this.controller.idMachine, sURL, sDiskData);
+
         try {
             /*
              * The following code was a hack to turn on write-protection for a disk image if there was
@@ -1839,55 +1842,22 @@ Disk.prototype.getClusterEntry = function(dir, iCluster, iByte)
  *
  * @this {Disk}
  * @param {number} pba (physical block address)
- * @return {Object} sector
+ * @return {Object|null} sector
  */
 Disk.prototype.getSector = function(pba)
 {
     var nSectorsPerCylinder = this.nHeads * this.nSectors;
     var iCylinder = (pba / nSectorsPerCylinder) | 0;
-    this.assert(iCylinder < this.nCylinders);
-    var nSectorsRemaining = (pba % nSectorsPerCylinder);
-    var iHead = (nSectorsRemaining / this.nSectors) | 0;
-    /*
-     * PBA numbers are 0-based, but the sector numbers in CHS addressing are 1-based, so add one to iSector
-     */
-    var iSector = (nSectorsRemaining % this.nSectors) + 1;
-    return this.seek(iCylinder, iHead, iSector);
-};
-
-/**
- * updateSector(file, pba, off)
- *
- * Like getSector(), this must convert a PBA into CHS values; consider factoring that conversion code out.
- *
- * @this {Disk}
- * @param {Object} file
- * @param {number} pba (physical block address from the file's apba)
- * @param {number} off (file offset corresponding to the given pba of the given file)
- * @return {boolean} true if successfully updated, false if not
- */
-Disk.prototype.updateSector = function(file, pba, off)
-{
-    var nSectorsPerCylinder = this.nHeads * this.nSectors;
-    var iCylinder = (pba / nSectorsPerCylinder) | 0;
-    var nSectorsRemaining = (pba % nSectorsPerCylinder);
-    var iHead = (nSectorsRemaining / this.nSectors) | 0;
-    var iSector = (nSectorsRemaining % this.nSectors);
-    var cylinder, head, sector;
-    if ((cylinder = this.aDiskData[iCylinder]) && (head = cylinder[iHead]) && (sector = head[iSector])) {
-        this.assert(sector['sector'] == iSector +1);
-        if (sector['file']) {
-            if (DEBUG && this.messageEnabled()) {
-                this.printMessage('"' + sector['file'].sPath + '" cross-linked at offset ' + sector['file'].offFile + ' with "' + file.sPath + '" at offset ' + off);
-            }
-            return false;
-        }
-        sector['file'] = file;
-        sector.offFile = off;
-        return true;
+    if (iCylinder < this.nCylinders) {
+        var nSectorsRemaining = (pba % nSectorsPerCylinder);
+        var iHead = (nSectorsRemaining / this.nSectors) | 0;
+        /*
+         * PBA numbers are 0-based, but the sector numbers in CHS addressing are 1-based, so add one to iSector
+         */
+        var iSector = (nSectorsRemaining % this.nSectors) + 1;
+        return this.seek(iCylinder, iHead, iSector);
     }
-    if (DEBUG && this.messageEnabled()) this.printMessage("unable to map PBA " + pba + " to CHS");
-    return false;
+    return null;
 };
 
 /**
@@ -1941,6 +1911,41 @@ Disk.prototype.getSectorString = function(sector, off, len)
         s += String.fromCharCode(b);
     }
     return s;
+};
+
+/**
+ * updateSector(file, pba, off)
+ *
+ * Like getSector(), this must convert a PBA into CHS values; consider factoring that conversion code out.
+ *
+ * @this {Disk}
+ * @param {Object} file
+ * @param {number} pba (physical block address from the file's apba)
+ * @param {number} off (file offset corresponding to the given pba of the given file)
+ * @return {boolean} true if successfully updated, false if not
+ */
+Disk.prototype.updateSector = function(file, pba, off)
+{
+    var nSectorsPerCylinder = this.nHeads * this.nSectors;
+    var iCylinder = (pba / nSectorsPerCylinder) | 0;
+    var nSectorsRemaining = (pba % nSectorsPerCylinder);
+    var iHead = (nSectorsRemaining / this.nSectors) | 0;
+    var iSector = (nSectorsRemaining % this.nSectors);
+    var cylinder, head, sector;
+    if ((cylinder = this.aDiskData[iCylinder]) && (head = cylinder[iHead]) && (sector = head[iSector])) {
+        this.assert(sector['sector'] == iSector +1);
+        if (sector['file']) {
+            if (DEBUG && this.messageEnabled()) {
+                this.printMessage('"' + sector['file'].sPath + '" cross-linked at offset ' + sector['file'].offFile + ' with "' + file.sPath + '" at offset ' + off);
+            }
+            return false;
+        }
+        sector['file'] = file;
+        sector.offFile = off;
+        return true;
+    }
+    if (DEBUG && this.messageEnabled()) this.printMessage("unable to map PBA " + pba + " to CHS");
+    return false;
 };
 
 /**
@@ -2497,6 +2502,7 @@ Disk.prototype.write = function(sector, ibSector, b)
             var dwPattern = sector['pattern'];
             var idw = ibSector >> 2;
             var nShift = (ibSector & 0x3) << 3;
+
             /*
              * Ensure every byte up to the specified byte is properly initialized.
              */
@@ -2518,6 +2524,26 @@ Disk.prototype.write = function(sector, ibSector, b)
         return true;
     }
     return null;
+};
+
+/**
+ * encodeAsBase64()
+ *
+ * @this {Disk}
+ * @return {string}
+ */
+Disk.prototype.encodeAsBase64 = function()
+{
+    /*
+     * Gross, but simple; more importantly, it works -- at least for disks of typical floppy magnitude.
+     */
+    var s = "", pba = 0, sector;
+    while ((sector = this.getSector(pba++))) {
+        for (var off = 0, len = sector['length']; off < len; off++) {
+            s += String.fromCharCode(this.getSectorData(sector, off, 1));
+        }
+    }
+    return btoa(s);
 };
 
 /**

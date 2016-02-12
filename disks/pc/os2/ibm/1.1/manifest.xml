@@ -18,9 +18,9 @@
 		<name>IBM OS/2 1.1 (1.44M Disk 4)</name>
 	</disk>
 	<disk id="disk05" size="1474560" chs="80:2:18" img="archive/OS211-DEVICES.img" href="/disks/pc/os2/ibm/1.1/OS211-DEVICES.json" md5="9d3dfde0206b562beae90cab21f9eba5" md5json="2cb39da33b61e762b87259b59bf5ccf5">
-		<name>IBM OS/2 1.1 (1.44M Devices Disk)</name>
+		<name>IBM OS/2 1.1 (1.44M Devices)</name>
 	</disk>
 	<disk id="disk06" size="1474560" chs="80:2:18" img="archive/OS211-PRINTERS.img" href="/disks/pc/os2/ibm/1.1/OS211-PRINTERS.json" md5="36cd9ea1e7184872548598dae4b60cb8" md5json="3ddd4aa8468a17a42aa247cf7b447a65">
-		<name>IBM OS/2 1.1 (1.44M Printers Disk)</name>
+		<name>IBM OS/2 1.1 (1.44M Printers)</name>
 	</disk>
 </manifest>

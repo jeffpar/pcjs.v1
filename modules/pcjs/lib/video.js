@@ -3724,6 +3724,9 @@ Video.prototype.doneLoad = function(sURL, sFontData, nErrorCode)
         this.notice("Unable to load font ROM (error " + nErrorCode + ": " + sURL + ")");
         return;
     }
+
+    Component.addMachineResource(this.idMachine, sURL, sFontData);
+
     try {
         /*
          * The most likely source of any exception will be right here, where we're parsing the JSON-encoded data.

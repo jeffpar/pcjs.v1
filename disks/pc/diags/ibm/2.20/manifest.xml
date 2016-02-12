@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.20.9/manifest.xsl"?>
 <manifest type="software">
-	<title>IBM Advanced Diagnostics</title>
+	<title>IBM Diagnostics</title>
 	<version>2.20</version>
 	<type>Diagnostics</type>
 	<category>Hardware Tests</category>

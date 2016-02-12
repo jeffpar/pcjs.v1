@@ -467,6 +467,37 @@ FDC.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
         };
         return true;
 
+    case "saveDrive":
+        this.bindings[sBinding] = control;
+        control.onclick = function onClickLoadDrive(event) {
+            var controlDrives = fdc.bindings["listDrives"];
+            if (controlDrives && controlDrives.options && fdc.aDrives) {
+                var iDriveSelected = str.parseInt(controlDrives.value, 10);
+                var drive = fdc.aDrives[iDriveSelected];
+                if (drive) {
+                    if (drive.disk) {
+                        if (DEBUG) fdc.println("saving disk " + drive.disk.sDiskPath + "...");
+                        var uri = "data:application/octet-stream;base64," + drive.disk.encodeAsBase64();
+                        var link = document.createElement('a');
+                        if (typeof link.download == 'string') {
+                            link.href = uri;
+                            link.download = drive.disk.sDiskFile.replace(".json", ".img");
+                            document.body.appendChild(link);    // Firefox requires the link to be in the body (?)
+                            link.click();
+                            document.body.removeChild(link);
+                        } else {
+                            window.open(uri);
+                        }
+                    } else {
+                        fdc.notice("No disk loaded in drive");
+                    }
+                } else {
+                    fdc.notice("No drive selected");
+                }
+            }
+        };
+        return true;
+
     case "mountDrive":
         if (this.fLocalDisks) {
             this.bindings[sBinding] = control;
@@ -1229,10 +1260,10 @@ FDC.prototype.loadSelectedDrive = function(sDisketteName, sDiskettePath, file)
             sDiskettePath = window.prompt("Enter the URL of a remote disk image.", "") || "";
             if (!sDiskettePath) return;
             sDisketteName = str.getBaseName(sDiskettePath);
-            this.println("Attempting to load " + sDiskettePath + " as \"" + sDisketteName + "\"");
+            if (DEBUG) this.println("Attempting to load " + sDiskettePath + " as \"" + sDisketteName + "\"");
         }
 
-        this.println("loading disk " + sDiskettePath + "...");
+        if (DEBUG) this.println("loading disk " + sDiskettePath + "...");
 
         while (this.loadDiskette(iDrive, sDisketteName, sDiskettePath, false, file)) {
             if (!window.confirm("Click OK to reload the original disk.\n(WARNING: All disk changes will be discarded)")) {

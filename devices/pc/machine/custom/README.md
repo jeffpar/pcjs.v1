@@ -9,6 +9,7 @@ machines:
     uncompiled: true
     autopower: false
 build: build-pc
+sitemap: false
 ---
 
 Build Your Own PC
