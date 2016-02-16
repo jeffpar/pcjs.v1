@@ -33,6 +33,7 @@ From [http://www.rcollins.org/secrets/opcodes/LOADALL.html](http://www.rcollins.
 	                                          +----------+----------+
 	Input:  ES:EDI points to the                         Clocks:  122
 	        LOADALL register image.                   Bus Cycles:  51
+	
 	LOADALL loads the entire CPU state from a table pointed to by
 	ES:EDI.  At the completion of LOADALL, the CPU state is defined
 	according to this table.  No protection checks are performed
@@ -40,15 +41,18 @@ From [http://www.rcollins.org/secrets/opcodes/LOADALL.html](http://www.rcollins.
 	exceptions in real mode, or in protected mode at IOPL 0.
 	Attempting to execute LOADALL at any other privilege level will
 	generate an exception 13.
+	
 	There are three types of structures in the LOADALL image:
 	1) 32-bit CPU registers entries;
 	2) 16-bit segment registers (zero-extended to 32-bits);
 	3) 96-bit segment descriptor cache entries.
+	
 	The segment register entries have the following format:
 	SREG      STRUC
 	          REG_VAL   DW   ?    ; low 16-bits defined
 	                    DW   0    ; high 16-bits=0
 	          ENDS
+	          
 	The segment descriptor cache entires have the following format:
 	DESC_CACHE     STRUC
 	                         DB   0    ; b[00-07] not used
@@ -58,6 +62,7 @@ From [http://www.rcollins.org/secrets/opcodes/LOADALL.html](http://www.rcollins.
 	               S_Addr    DD   ?    ; Segment Address in memory
 	               S_Limit   DD   ?    ; Segment size limit
 	               ENDS
+	
 	The LOADALL tables is organized as follows:
 	;----------------------------------------------------------------
 	; LOADALL table pointed to by ES:EDI
