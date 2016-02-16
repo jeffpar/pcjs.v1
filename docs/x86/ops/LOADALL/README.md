@@ -18,19 +18,19 @@ From [http://www.rcollins.org/secrets/opcodes/LOADALL.html](http://www.rcollins.
 	Read LOADALL magazine article and download LOADALL demo source code.
 	
 	Undocumented:  Available on all 80386 processors.
-				   Useful for diagnostics purposes on production
-					CPU's.
-				   Useful for ICE BONDOUT CPU's to return the
-					processor to EMUlation state.
-															  LOADALL
+	               Useful for diagnostics purposes on production
+	                CPU's.
+	               Useful for ICE BONDOUT CPU's to return the
+	                processor to EMUlation state.
+	                                                          LOADALL
 	Flags:                                 Loads the entire CPU state
 	All flags set according to                +----------+----------+
 	the LOADALL flags image.                  | 00001111 | 00000111 |
-											  +----------+----------+
-											  |    0F    |    07    |
-											  +----------+----------+
+	                                          +----------+----------+
+	                                          |    0F    |    07    |
+	                                          +----------+----------+
 	Input:  ES:EDI points to the                         Clocks:  122
-			LOADALL register image.                   Bus Cycles:  51
+	        LOADALL register image.                   Bus Cycles:  51
 	LOADALL loads the entire CPU state from a table pointed to by
 	ES:EDI.  At the completion of LOADALL, the CPU state is defined
 	according to this table.  No protection checks are performed
@@ -44,18 +44,18 @@ From [http://www.rcollins.org/secrets/opcodes/LOADALL.html](http://www.rcollins.
 	3) 96-bit segment descriptor cache entries.
 	The segment register entries have the following format:
 	SREG      STRUC
-			  REG_VAL   DW   ?    ; low 16-bits defined
-						DW   0    ; high 16-bits=0
-			  ENDS
+	          REG_VAL   DW   ?    ; low 16-bits defined
+	                    DW   0    ; high 16-bits=0
+	          ENDS
 	The segment descriptor cache entires have the following format:
 	DESC_CACHE     STRUC
-							 DB   0    ; b[00-07] not used
-				   S_USE     DB   ?    ; b[14]    operand size
-				   S_Access  DB   ?    ; b[16-23] Access Rights
-							 DB   0    ; b[24-31] not used
-				   S_Addr    DD   ?    ; Segment Address in memory
-				   S_Limit   DD   ?    ; Segment size limit
-				   ENDS
+	                         DB   0    ; b[00-07] not used
+	               S_USE     DB   ?    ; b[14]    operand size
+	               S_Access  DB   ?    ; b[16-23] Access Rights
+	                         DB   0    ; b[24-31] not used
+	               S_Addr    DD   ?    ; Segment Address in memory
+	               S_Limit   DD   ?    ; Segment size limit
+	               ENDS
 	The LOADALL tables is organized as follows:
 	;----------------------------------------------------------------
 	; LOADALL table pointed to by ES:EDI

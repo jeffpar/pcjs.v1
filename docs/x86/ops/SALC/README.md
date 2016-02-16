@@ -16,8 +16,8 @@ From [http://www.rcollins.org/secrets/opcodes/SALC.html](http://www.rcollins.org
 	language.
 	
 	Undocumented:  Available to all Intel x86 processors
-				   Useful in production source code.
-																 SALC
+	               Useful in production source code.
+	                                                             SALC
 	Flags:                                       SET Carry flag to AL
 	+-+-+-+-+-+-+-+-+-+                                  +----------+
 	|O|D|I|T|S|Z|A|P|C|                                  | 11010110 |

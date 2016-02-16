@@ -22,13 +22,13 @@ From [http://www.rcollins.org/secrets/opcodes/UMOV.html](http://www.rcollins.org
 	All of these problems are eliminated, simply by using this instruction -- provided you know its caveats.
 	
 	Undocumented:  Available to all 80386-class (and above)
-				   processors as described herein.
-				   May be available to 80286 processors, but
-					 implemented in a different manner.
-				   Useful to BONDOUT (ICE) processors.
-				   Especially useful during ICE debugging.
-				   Useful in production source code.
-																ICEBP
+	               processors as described herein.
+	               May be available to 80286 processors, but
+	                 implemented in a different manner.
+	               Useful to BONDOUT (ICE) processors.
+	               Especially useful during ICE debugging.
+	               Useful in production source code.
+	                                                            ICEBP
 	Flags:                                            ICE Break Point
 	+-+-+-+-+-+-+-+-+-+                                  +----------+
 	|O|D|I|T|S|Z|A|P|C|                                  | 11110001 |

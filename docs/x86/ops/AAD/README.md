@@ -12,8 +12,8 @@ AAD (0xD5)
 From [http://www.rcollins.org/secrets/opcodes/AAD.html](http://www.rcollins.org/secrets/opcodes/AAD.html):
 
 	Undocumented:  Available to all Intel x86 processors
-				   Useful in production source code.
-																  AAD
+	               Useful in production source code.
+	                                                              AAD
 	Flags:                               ASCII Adjust before Division
 	+-+-+-+-+-+-+-+-+-+                       +----------+----------+
 	|O|D|I|T|S|Z|A|P|C|                       | 11010101 |   DATA   |

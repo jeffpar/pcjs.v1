@@ -14,8 +14,8 @@ From [http://www.rcollins.org/secrets/opcodes/UMOV.html](http://www.rcollins.org
 	An undocumented op code used by ICE host software to perform memory cycles to the target system during HALT mode.
 	
 	Undocumented:  Available on all 80386/80486 processors.
-				   Useful only to BONDOUT (ICE) processors.
-																 UMOV
+	               Useful only to BONDOUT (ICE) processors.
+	                                                             UMOV
 	Flags:                                             User MOVE data
 	+-+-+-+-+-+-+-+-+-+         +----------+----------+-------------+
 	|O|D|I|T|S|Z|A|P|C|         | 00001111 | 000100dw | mod,reg,r/m |
@@ -40,8 +40,8 @@ From [http://www.rcollins.org/secrets/opcodes/UMOV.html](http://www.rcollins.org
 	The field operands to UMOV are exactly the same as the MOV
 	instruction.  For example:
 	d    Direction.  If set (d=1), do memory to register, or register
-		 to register; the reg field is the destination.  If cleared
-		 (d=0), do register to memory; the reg field is the source.
+	     to register; the reg field is the destination.  If cleared
+	     (d=0), do register to memory; the reg field is the source.
 	w    Width.  Selects the default data width.  W=1 selects
-		 word width, according to the appropriate CPU operating mode,
-		 and/or size prefix override.  W=0 selects 8-bit operands.
+	     word width, according to the appropriate CPU operating mode,
+	     and/or size prefix override.  W=0 selects 8-bit operands.

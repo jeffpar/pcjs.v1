@@ -12,8 +12,8 @@ AAD (0xD4)
 From [http://www.rcollins.org/secrets/opcodes/AAM.html](http://www.rcollins.org/secrets/opcodes/AAM.html):
 
 	Undocumented:  Available to all Intel x86 processors.
-				   Useful in production source code.
-																  AAM
+	               Useful in production source code.
+	                                                              AAM
 	Flags:                                ASCII Adjust after Multiply
 	+-+-+-+-+-+-+-+-+-+                       +----------+----------+
 	|O|D|I|T|S|Z|A|P|C|                       | 11010100 |   DATA   |
