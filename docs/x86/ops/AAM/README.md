@@ -59,4 +59,6 @@ From [http://www.rcollins.org/secrets/opcodes/AAM.html](http://www.rcollins.org/
 	
 	This instruction exists in this form on all Intel x86 processors.
 
-See the file [AAM.ASM](AAM.ASM) for diagnostic source code for this instruction.
+The following related files were saved on February 16, 2015 from [http://www.rcollins.org](http://www.rcollins.org/):
+
+* [AAM.ASM](AAM.ASM)

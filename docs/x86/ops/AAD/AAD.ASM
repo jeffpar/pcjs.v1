@@ -1,6 +1,3 @@
-;
-;       Saved on February 16, 2015 from http://www.rcollins.org/ftp/source/aad/aad.asm
-;
 .386p
 ;-----------------------------------------------------------------------------
 ;
@@ -201,4 +198,4 @@ Test_AAD        endp
 
 end
 
- 
+
