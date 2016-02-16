@@ -29,6 +29,7 @@ From [http://www.rcollins.org/secrets/opcodes/UMOV.html](http://www.rcollins.org
 	cycles.  Since the '386 is a dynamic device, it must be executing
 	some instructions during HALT, but it is not doing it in a way
 	recognizable to a logic analyzer with a '386 probe attached.
+	
 	During HALT mode, the ICE differentiates between USER space and
 	HOST space.  The ICE is fetching, and performing all bus cycles
 	to HOST memory space during HALT, and not USER space.  Since the
@@ -36,8 +37,10 @@ From [http://www.rcollins.org/secrets/opcodes/UMOV.html](http://www.rcollins.org
 	mechanism to access user memory space.  That mechanism is UMOV.
 	When a user request to view memory, or disassemble memory, the
 	ICE executes UMOV instructions to get data from User space.
+	
 	If UMOV is executed by a user program, it will appear it is a
 	alias for MOV.
+	
 	The field operands to UMOV are exactly the same as the MOV
 	instruction.  For example:
 	d    Direction.  If set (d=1), do memory to register, or register
