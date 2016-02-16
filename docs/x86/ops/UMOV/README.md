@@ -11,7 +11,8 @@ UMOV (0x100F,0x110F,0x120F,0x130F)
 
 From [http://www.rcollins.org/secrets/opcodes/UMOV.html](http://www.rcollins.org/secrets/opcodes/UMOV.html):
 
-	An undocumented op code used by ICE host software to perform memory cycles to the target system during HALT mode.
+	An undocumented op code used by ICE host software to perform
+	memory cycles to the target system during HALT mode.
 	
 	Undocumented:  Available on all 80386/80486 processors.
 	               Useful only to BONDOUT (ICE) processors.

@@ -11,9 +11,11 @@ LOADALL386 (0x070F)
 
 From [http://www.rcollins.org/secrets/opcodes/LOADALL.html](http://www.rcollins.org/secrets/opcodes/LOADALL.html):
 
-	(LOADALL) An undocumented op code used by ICE host software and diagnostics software to test CPU functionality.
-	This instruction has the ability to bypass the entire protection checking mechanism in the CPU, and therefore can
-	be used to test many aspects of CPU behavior that can't be duplicated by any other software means.
+	(LOADALL) An undocumented op code used by ICE host software and
+	diagnostics software to test CPU functionality. This instruction
+	has the ability to bypass the entire protection checking mechanism
+	in the CPU, and therefore can be used to test many aspects of CPU
+	behavior that can't be duplicated by any other software means.
 	
 	Read LOADALL magazine article and download LOADALL demo source code.
 	
