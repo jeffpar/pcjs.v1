@@ -157,20 +157,20 @@ function downloadPC(sURL, sPCJS, nErrorCode, aMachineInfo)
         }
 
         if (sXMLFile && sXSLFile) {
-            var uri;
             var sResources = JSON.stringify(resNew);
             var sScriptFile = str.getBaseName(sURL, true);
 
             sPCJS = matchScript[1] + "var resources=" + sResources + ";" + matchScript[2] + matchScript[3];
             Component.log("saving machine: '" + idMachine + "' (" + sPCJS.length + " bytes)");
 
+            var uri;
             if (MAXDEBUG) {
                 sPCJS = sPCJS.replace(/[\u00A0-\u2666]/g, function(c) {
                     return '&#' + c.charCodeAt(0) + ';';
                 });
                 uri = "data:application/javascript;base64," + btoa(sPCJS);
             } else {
-                uri = "data:application/javascript," + encodeURI(sPCJS);
+                uri = "data:application/javascript," + (web.isUserAgent("Firefox")? encodeURIComponent(sPCJS) : encodeURI(sPCJS));
             }
 
             var link = document.createElement('a');
@@ -180,17 +180,18 @@ function downloadPC(sURL, sPCJS, nErrorCode, aMachineInfo)
                 document.body.appendChild(link);    // Firefox requires the link to be in the body (?)
                 link.click();
                 document.body.removeChild(link);
-                var sAlert = 'Check your Downloads folder for "' + sScriptFile + '.json", ';
-                sAlert += 'copy it to your web server as "' + sScriptFile + '.js", and then add the following to your web page:\n\n';
-                sAlert += '<div id="' + idMachine + '"></div>\n';
-                sAlert += '...\n';
-                sAlert += '<script type="text/javascript" src="' + sScriptFile + '.js"></script>\n';
-                sAlert += '<script type="text/javascript">embedPC("' + idMachine + '","' + sXMLFile + '","' + sXSLFile + '");</script>\n\n';
-                sAlert += 'The machine should appear where the <div> is located.';
-                web.alertUser(sAlert);
             } else {
                 window.open(uri);
             }
+
+            var sAlert = 'Check your Downloads folder for "' + sScriptFile + '.json", ';
+            sAlert += 'copy it to your web server as "' + sScriptFile + '.js", and then add the following to your web page:\n\n';
+            sAlert += '<div id="' + idMachine + '"></div>\n';
+            sAlert += '...\n';
+            sAlert += '<script type="text/javascript" src="' + sScriptFile + '.js"></script>\n';
+            sAlert += '<script type="text/javascript">embedPC("' + idMachine + '","' + sXMLFile + '","' + sXSLFile + '");</script>\n\n';
+            sAlert += 'The machine should appear where the <div> is located.';
+            web.alertUser(sAlert);
         } else {
             web.alertUser("Missing XML/XSL resources");
         }

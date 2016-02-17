@@ -8072,6 +8072,7 @@ if (DEBUGGER) {
                         break;
                     }
                     this.println((APPNAME || "PCjs") + " version " + (XMLVERSION || APPVERSION) + " (" + this.cpu.model + (COMPILED? ",RELEASE" : (DEBUG? ",DEBUG" : ",NODEBUG")) + (PREFETCH? ",PREFETCH" : ",NOPREFETCH") + (TYPEDARRAYS? ",TYPEDARRAYS" : (BYTEARRAYS? ",BYTEARRAYS" : ",LONGARRAYS")) + (BACKTRACK? ",BACKTRACK" : ",NOBACKTRACK") + ')');
+                    this.println(web.getUserAgent());
                     break;
                 case 'x':
                     this.doExecOptions(asArgs);
