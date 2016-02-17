@@ -252,13 +252,13 @@ Component.addMachine = function(idMachine)
  * Component.addMachineResource(idMachine, sName, data)
  *
  * @param {string} idMachine
- * @param {string} sName (name of the resource)
+ * @param {string|null} sName (name of the resource)
  * @param {*} data
  */
 Component.addMachineResource = function(idMachine, sName, data)
 {
     Component.assert(Component.machines[idMachine]);
-    if (Component.machines[idMachine]) {
+    if (Component.machines[idMachine] && sName) {
         Component.assert(Component.machines[idMachine][sName] === undefined);
         Component.machines[idMachine][sName] = data;
     }

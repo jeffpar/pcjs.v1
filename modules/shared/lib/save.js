@@ -55,13 +55,13 @@ function savePC(idMachine, sPCJSFile)
         var sState = cmp.powerOff(true);
         var sParms = cmp.saveMachineParms();
         if (!sPCJSFile) {
-            if (MAXDEBUG) {
+            if (DEBUG) {
                 sPCJSFile = "/tmp/pcjs/" + (XMLVERSION || APPVERSION) + "/pc.js"
             } else {
                 sPCJSFile = "/versions/pcjs/" + (XMLVERSION || APPVERSION) + "/pc" + (dbg? "-dbg" : "") + ".js";
             }
         }
-        web.loadResource(sPCJSFile, true, null, null, downloadPC, [idMachine, sParms, sState, cmp, dbg]);
+        web.loadResource(sPCJSFile, true, null, null, downloadCSS, [idMachine, str.getBaseName(sPCJSFile, true), sParms, sState]);
         return true;
     }
     web.alertUser("Unable to identify machine '" + idMachine + "'");
@@ -69,17 +69,50 @@ function savePC(idMachine, sPCJSFile)
 }
 
 /**
- * downloadPC(sURL, sPCJS, nErrorCode, aMachineInfo)
+ * downloadCSS(sURL, sPCJS, nErrorCode, aMachineInfo)
  *
  * @param {string} sURL
  * @param {string} sPCJS
  * @param {number} nErrorCode
- * @param {string} aMachineInfo ([0] = idMachine, [1] = sParms, [2] = sState, [3] = Computer component, [4] = Debugger component, if any)
+ * @param {Array} aMachineInfo ([0] = idMachine, [1] = sScript, [2] = sParms, [3] = sState)
  */
-function downloadPC(sURL, sPCJS, nErrorCode, aMachineInfo)
+function downloadCSS(sURL, sPCJS, nErrorCode, aMachineInfo)
 {
-    var matchScript;
-    var idMachine = aMachineInfo[0], sXMLFile, sXSLFile;
+    if (!nErrorCode && sPCJS) {
+        aMachineInfo.push(sPCJS);
+        var res = Component.getMachineResources(aMachineInfo[0]);
+        var sCSSFile = null;
+        for (var sName in res) {
+            if (str.endsWith(sName, "components.xsl")) {
+                sCSSFile = sName.replace(".xsl", ".css");
+                break;
+            }
+        }
+        if (!sCSSFile) {
+            /*
+             * This is probably a bad idea (ie, allowing downloadPC() to proceed with our stylesheet)...
+             */
+            downloadPC(sURL, null, 0, aMachineInfo);
+        } else {
+            web.loadResource(sCSSFile, true, null, null, downloadPC, aMachineInfo);
+        }
+        return;
+    }
+    web.alertUser("Error (" + nErrorCode + ") requesting " + sURL);
+}
+
+/**
+ * downloadPC(sURL, sCSS, nErrorCode, aMachineInfo)
+ *
+ * @param {string} sURL
+ * @param {string|null} sCSS
+ * @param {number} nErrorCode
+ * @param {Array} aMachineInfo ([0] = idMachine, [1] = sScript, [2] = sParms, [3] = sState, [4] = sPCJS)
+ */
+function downloadPC(sURL, sCSS, nErrorCode, aMachineInfo)
+{
+    var matchScript, sXMLFile, sXSLFile;
+    var idMachine = aMachineInfo[0], sScript = aMachineInfo[1], sPCJS = aMachineInfo[4];
 
     /*
      * sPCJS is supposed to contain the entire PCjs script, which has been wrapped with:
@@ -101,103 +134,101 @@ function downloadPC(sURL, sPCJS, nErrorCode, aMachineInfo)
      * Note that the "resources" variable has been added to our externs.js, to prevent it from being renamed
      * by the Closure Compiler.
      */
-    if (sPCJS) {
-        matchScript = sPCJS.match(/^(\s*\(function\(\)\{)([\s\S]*)(}\)\(\);\s*)$/);
-        if (!matchScript) {
-            /*
-             * If the match failed, we assume that a DEBUG (uncompiled) script is being used,
-             * so we'll provide a fake match that should work with whatever script was provided.
-             */
-            if (DEBUG) {
-                matchScript = [sPCJS, "", sPCJS, ""];
-            } else {
-                sPCJS = "";
-            }
+    matchScript = sPCJS.match(/^(\s*\(function\(\)\{)([\s\S]*)(}\)\(\);\s*)$/);
+    if (!matchScript) {
+        /*
+         * If the match failed, we assume that a DEBUG (uncompiled) script is being used,
+         * so we'll provide a fake match that should work with whatever script was provided.
+         */
+        if (DEBUG) {
+            matchScript = [sPCJS, "", sPCJS, ""];
+        } else {
+            sPCJS = "";
         }
     }
 
-    if (sPCJS) {
-        var resOld = Component.getMachineResources(idMachine), resNew = {};
-        for (var sName in resOld) {
-            var data = resOld[sName];
-            var sExt = str.getExtension(sName);
-            if (sExt == "xml") {
-                /*
-                 * Look through this resource for <disk> entries whose paths do not appear as one of the
-                 * other machine resources, and remove those entries.
-                 */
-                var matchDisk, reDisk = /[ \t]*<disk [^>]*path=(['"])(.*?)\1.*?<\/disk>\n?/g;
-                while (matchDisk = reDisk.exec(resOld[sName])) {
-                    var path = matchDisk[2];
-                    if (path) {
-                        if (resOld[path]) {
-                            Component.log("recording disk: '" + path + "'");
-                        } else {
-                            data = data.replace(matchDisk[0], "");
-                        }
+    var resOld = Component.getMachineResources(idMachine), resNew = {};
+    for (var sName in resOld) {
+        var data = resOld[sName];
+        var sExt = str.getExtension(sName);
+        if (sExt == "xml") {
+            /*
+             * Look through this resource for <disk> entries whose paths do not appear as one of the
+             * other machine resources, and remove those entries.
+             */
+            var matchDisk, reDisk = /[ \t]*<disk [^>]*path=(['"])(.*?)\1.*?<\/disk>\n?/g;
+            while (matchDisk = reDisk.exec(resOld[sName])) {
+                var path = matchDisk[2];
+                if (path) {
+                    if (resOld[path]) {
+                        Component.log("recording disk: '" + path + "'");
+                    } else {
+                        data = data.replace(matchDisk[0], "");
                     }
                 }
-                sXMLFile = sName = str.getBaseName(sName);
             }
-            else if (sExt == "xsl") {
-                sXSLFile = sName = str.getBaseName(sName);
-            }
-            Component.log("saving resource: '" + sName + "' (" + data.length + " bytes)");
-            resNew[sName] = data;
+            sXMLFile = sName = str.getBaseName(sName);
         }
-
-        if (aMachineInfo[1]) {
-            var sParms = resNew[sName = 'parms'] = aMachineInfo[1];
-            Component.log("saving resource: '" + sName + "' (" + sParms.length + " bytes)");
+        else if (sExt == "xsl") {
+            sXSLFile = sName = str.getBaseName(sName);
         }
-
-        if (aMachineInfo[2]) {
-            var sState = resNew[sName = 'state'] = aMachineInfo[2];
-            Component.log("saving resource: '" + sName + "' (" + sState.length + " bytes)");
-        }
-
-        if (sXMLFile && sXSLFile) {
-            var sResources = JSON.stringify(resNew);
-            var sScriptFile = str.getBaseName(sURL, true);
-
-            sPCJS = matchScript[1] + "var resources=" + sResources + ";" + matchScript[2] + matchScript[3];
-            Component.log("saving machine: '" + idMachine + "' (" + sPCJS.length + " bytes)");
-
-            var uri;
-            if (MAXDEBUG) {
-                sPCJS = sPCJS.replace(/[\u00A0-\u2666]/g, function(c) {
-                    return '&#' + c.charCodeAt(0) + ';';
-                });
-                uri = "data:application/javascript;base64," + btoa(sPCJS);
-            } else {
-                uri = "data:application/javascript," + (web.isUserAgent("Firefox")? encodeURIComponent(sPCJS) : encodeURI(sPCJS));
-            }
-
-            var link = document.createElement('a');
-            if (typeof link.download == 'string') {
-                link.href = uri;
-                link.download = sScriptFile + ".json";
-                document.body.appendChild(link);    // Firefox requires the link to be in the body (?)
-                link.click();
-                document.body.removeChild(link);
-            } else {
-                window.open(uri);
-            }
-
-            var sAlert = 'Check your Downloads folder for "' + sScriptFile + '.json", ';
-            sAlert += 'copy it to your web server as "' + sScriptFile + '.js", and then add the following to your web page:\n\n';
-            sAlert += '<div id="' + idMachine + '"></div>\n';
-            sAlert += '...\n';
-            sAlert += '<script type="text/javascript" src="' + sScriptFile + '.js"></script>\n';
-            sAlert += '<script type="text/javascript">embedPC("' + idMachine + '","' + sXMLFile + '","' + sXSLFile + '");</script>\n\n';
-            sAlert += 'The machine should appear where the <div> is located.';
-            web.alertUser(sAlert);
-        } else {
-            web.alertUser("Missing XML/XSL resources");
-        }
-    } else {
-        web.alertUser("Unabled to download script");
+        Component.log("saving resource: '" + sName + "' (" + data.length + " bytes)");
+        resNew[sName] = data;
     }
+
+    if (sCSS) {
+        resNew[sName = 'css'] = sCSS;
+        Component.log("saving resource: '" + sName + "' (" + sCSS.length + " bytes)");
+    }
+
+    if (aMachineInfo[2]) {
+        var sParms = resNew[sName = 'parms'] = aMachineInfo[2];
+        Component.log("saving resource: '" + sName + "' (" + sParms.length + " bytes)");
+    }
+
+    if (aMachineInfo[3]) {
+        var sState = resNew[sName = 'state'] = aMachineInfo[3];
+        Component.log("saving resource: '" + sName + "' (" + sState.length + " bytes)");
+    }
+
+    if (sXMLFile && sXSLFile) {
+        var sResources = JSON.stringify(resNew);
+
+        sPCJS = matchScript[1] + "var resources=" + sResources + ";" + matchScript[2] + matchScript[3];
+        Component.log("saving machine: '" + idMachine + "' (" + sPCJS.length + " bytes)");
+
+        var uri;
+        if (MAXDEBUG) {
+            sPCJS = sPCJS.replace(/[\u00A0-\u2666]/g, function(c) {
+                return '&#' + c.charCodeAt(0) + ';';
+            });
+            uri = "data:application/javascript;base64," + btoa(sPCJS);
+        } else {
+            uri = "data:application/javascript," + (web.isUserAgent("Firefox")? encodeURIComponent(sPCJS) : encodeURI(sPCJS));
+        }
+
+        var link = document.createElement('a');
+        if (typeof link.download == 'string' && sPCJS.length < 2000000) {
+            link.href = uri;
+            link.download = sScript + ".json";
+            document.body.appendChild(link);    // Firefox requires the link to be in the body (?)
+            link.click();
+            document.body.removeChild(link);
+        } else {
+            window.open(uri);
+        }
+
+        var sAlert = 'Check your Downloads folder for "' + sScript + '.json", ';
+        sAlert += 'copy it to your web server as "' + sScript + '.js", and then add the following to your web page:\n\n';
+        sAlert += '<div id="' + idMachine + '"></div>\n';
+        sAlert += '...\n';
+        sAlert += '<script type="text/javascript" src="' + sScript + '.js"></script>\n';
+        sAlert += '<script type="text/javascript">embedPC("' + idMachine + '","' + sXMLFile + '","' + sXSLFile + '");</script>\n\n';
+        sAlert += 'The machine should appear where the <div> is located.';
+        web.alertUser(sAlert);
+        return;
+    }
+    web.alertUser("Missing XML/XSL resources");
 }
 
 /**

@@ -1011,6 +1011,7 @@ Disk.prototype.create = function(mode, nCylinders, nHeads, nSectors, cbSector)
  * @param {File} [file] is set if there's an associated File object
  * @param {function(...)} [fnNotify]
  * @param {Component} [controller]
+ * @return {boolean} true if load completed (successfully or not), false if queued
  */
 Disk.prototype.load = function(sDiskName, sDiskPath, file, fnNotify, controller)
 {
@@ -1027,7 +1028,7 @@ Disk.prototype.load = function(sDiskName, sDiskPath, file, fnNotify, controller)
 
     if (this.fnNotify) {
         if (DEBUG) this.controller.log('too many load requests for "' + sDiskName + '" (' + sDiskPath + ')');
-        return;
+        return true;
     }
 
     this.sDiskName = sDiskName;
@@ -1044,7 +1045,7 @@ Disk.prototype.load = function(sDiskName, sDiskPath, file, fnNotify, controller)
             disk.build(reader.result, true);
         };
         reader.readAsArrayBuffer(file);
-        return;
+        return true;
     }
 
     /*
@@ -1098,7 +1099,8 @@ Disk.prototype.load = function(sDiskName, sDiskPath, file, fnNotify, controller)
             }
         }
     }
-    web.loadResource(sDiskURL, true, null, this, this.doneLoad);
+    var result = web.loadResource(sDiskURL, true, null, this, this.doneLoad);
+    return result.length > 0;
 };
 
 /**

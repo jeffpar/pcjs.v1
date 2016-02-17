@@ -1332,8 +1332,9 @@ FDC.prototype.loadDiskette = function(iDrive, sDisketteName, sDiskettePath, fAut
         }
         drive.fLocal = !!file;
         var disk = new Disk(this, drive, DiskAPI.MODE.PRELOAD);
-        disk.load(sDisketteName, sDiskettePath, file, this.doneLoadDiskette);
-        return false;
+        if (!disk.load(sDisketteName, sDiskettePath, file, this.doneLoadDiskette)) {
+            return false;
+        }
     }
     return true;
 };

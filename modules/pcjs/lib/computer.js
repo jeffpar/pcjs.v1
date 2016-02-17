@@ -366,7 +366,9 @@ Computer.prototype.setMachineParms = function(parmsMachine)
  * If the machine parameter doesn't exist, we check for a matching component parameter (if parmsComponent is provided),
  * and failing that, we check the bundled resources (if any).
  *
- * At the moment, the only bundled resource match we expect to encounter is 'state'.
+ * At the moment, the only bundled resource request we expect to encounter is 'state'; if it exists, then we return
+ * 'state' back to the caller (ie, the name of the resource), so that the caller will then attempt to load the 'state'
+ * resource to obtain the actual state.
  *
  * @param {string} sParm
  * @param {Object} [parmsComponent]
@@ -381,8 +383,8 @@ Computer.prototype.getMachineParm = function(sParm, parmsComponent)
     if (value == null && parmsComponent) {
         value = parmsComponent[sParm];
     }
-    if (value == null && typeof resources == 'object') {
-        value = resources[sParm];
+    if (value == null && typeof resources == 'object' && resources[sParm]) {
+        value = sParm;
     }
     return value;
 };

@@ -123,8 +123,17 @@ function parseXML(sXML, sXMLFile, idMachine, sParms, fResolve, display, done)
             return;
         }
         if (idMachine) {
+
+            /*
+             * A more sensible place to record the machine XML would be embedMachine(), like we do for the
+             * XSL file, but since we're about to modify the original machine XML, it's best to record it now.
+             */
+            Component.addMachineResource(idMachine, sXMLFile, sXML);
+
             var sURL = sXMLFile;
-            if (sURL && sURL.indexOf('/') < 0) sURL = window.location.pathname + sURL;
+            if (sURL && sURL.indexOf('/') < 0 && window.location.pathname.slice(-1) == '/') {
+                sURL = window.location.pathname + sURL;
+            }
             /*
              * We embed the URL of the XML file both as a separate "xml" attribute for easy access from the
              * XSL file, and as part of the "parms" attribute for easy access from machines (see getMachineParm()).
@@ -361,6 +370,23 @@ function embedMachine(sName, sVersion, idMachine, sXMLFile, sXSLFile, sParms)
     try {
         eMachine = document.getElementById(idMachine);
         if (eMachine) {
+
+            /*
+             * If we have a 'css' resource, add it to the page first.
+             */
+            var css;
+            if (typeof resources == "object" && (css = resources['css'])) {
+                var head = document.head || document.getElementsByTagName('head')[0];
+                var style = document.createElement('style');
+                style.type = 'text/css';
+                if (style.styleSheet) {
+                    style.styleSheet.cssText = css;
+                } else {
+                    style.appendChild(document.createTextNode(css));
+                }
+                head.appendChild(style);
+            }
+
             var sAppClass = sName.toLowerCase();        // eg, "pcjs" or "c1pjs"
             if (!sXSLFile) {
                 /*
@@ -381,7 +407,6 @@ function embedMachine(sName, sVersion, idMachine, sXMLFile, sXSLFile, sParms)
                     displayError(sXML);
                     return;
                 }
-                Component.addMachineResource(idMachine, sXMLFile, sXML);
                 /*
                  * Non-COMPILED kludge to extract the version number from the stylesheet path in the machine XML file;
                  * we don't need this code in COMPILED (non-DEBUG) releases, because APPVERSION is hard-coded into them.
@@ -395,6 +420,9 @@ function embedMachine(sName, sVersion, idMachine, sXMLFile, sXSLFile, sParms)
                         displayError(sXSL);
                         return;
                     }
+                    /*
+                     * Record the XSL file, in case someone wants to save the entire machine later.
+                     */
                     Component.addMachineResource(idMachine, sXSLFile, sXSL);
                     /*
                      * The <machine> template in components.xsl now generates a "machine div" that makes
