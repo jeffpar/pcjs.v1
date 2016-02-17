@@ -33,5 +33,6 @@
 "use strict";
 
 var global;
+var resources;
 
 // var webkitAudioContext;

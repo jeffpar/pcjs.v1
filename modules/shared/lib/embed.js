@@ -381,7 +381,7 @@ function embedMachine(sName, sVersion, idMachine, sXMLFile, sXSLFile, sParms)
                     displayError(sXML);
                     return;
                 }
-                Component.addMachineResource(idMachine, 'xml', sXML);
+                Component.addMachineResource(idMachine, sXMLFile, sXML);
                 /*
                  * Non-COMPILED kludge to extract the version number from the stylesheet path in the machine XML file;
                  * we don't need this code in COMPILED (non-DEBUG) releases, because APPVERSION is hard-coded into them.
@@ -395,7 +395,7 @@ function embedMachine(sName, sVersion, idMachine, sXMLFile, sXSLFile, sParms)
                         displayError(sXSL);
                         return;
                     }
-                    Component.addMachineResource(idMachine, 'xsl', sXSL);
+                    Component.addMachineResource(idMachine, sXSLFile, sXSL);
                     /*
                      * The <machine> template in components.xsl now generates a "machine div" that makes
                      * the div we required the caller of embedMachine() to provide redundant, so instead
@@ -501,25 +501,100 @@ function embedPC(idMachine, sXMLFile, sXSLFile, sParms)
 }
 
 /**
- * savePC(idMachine)
+ * savePC(idMachine, sPCJSFile)
  *
  * @param {string} idMachine
+ * @param {string} [sPCJSFile]
  * @return {boolean} true if successful, false if error
  */
-function savePC(idMachine)
+function savePC(idMachine, sPCJSFile)
 {
     var cmp = Component.getComponentByType("Computer", idMachine);
     var dbg = Component.getComponentByType("Debugger", idMachine);
     if (cmp) {
-        var sPCJSFile = "/versions/pcjs/" + XMLVERSION + "/pc" + (dbg? "-dbg" : "") + ".js";
-        var sPCJSCode = web.loadResource(sPCJSFile);
-        /*
-         * Next, we need to enumerate the FDC drives and "dump" the disks in them....
-         */
+        if (!sPCJSFile) sPCJSFile = "/versions/pcjs/" + (XMLVERSION || APPVERSION) + "/pc" + (dbg? "-dbg" : "") + ".js";
+        web.loadResource(sPCJSFile, true, null, null, downloadPC, [idMachine, cmp, dbg]);
         return true;
     }
     web.alertUser("Unable to identify machine '" + idMachine + "'");
     return false;
+}
+
+/**
+ * downloadPC(sURL, sPCJS, nErrorCode, aMachineInfo)
+ *
+ * @param {string} sURL
+ * @param {string} sPCJS
+ * @param {number} nErrorCode
+ * @param {string} aMachineInfo ([0] = idMachine, [1] = Computer component, [2] = Debugger component, if any)
+ */
+function downloadPC(sURL, sPCJS, nErrorCode, aMachineInfo)
+{
+    /*
+     * sPCJS is supposed to contain the entire PCjs script, which has been wrapped with:
+     *
+     *      (function(){...
+     *
+     * at the top and:
+     *
+     *      ...})();
+     *
+     * at the bottom, thanks to the following Closure Compiler option:
+     *
+     *      --output_wrapper "(function(){%output%})();"
+     *
+     * Immediately inside that wrapping, we want to embed all the specified machine's resources, using:
+     *
+     *      var resources = {"xml": "...", "xsl": "...", ...};
+     *
+     * Note that the "resources" variable has been added to our externs.js, to prevent it from being renamed
+     * by the Closure Compiler.
+     */
+    if (sPCJS) {
+        var idMachine = aMachineInfo[0];
+        var matchScript = sPCJS.match(/^(\s*\(function\(\)\{)([\s\S]*)(}\)\(\);\s*)$/);
+        if (matchScript) {
+            var resources = Component.getMachineResources(idMachine), resourcesNew = {};
+            for (var name in resources) {
+                var data = resources[name];
+                if (name == "xml") {
+                    /*
+                     * Look through this resource for <disk> entries whose paths do not appear as one of the other
+                     * machine resources, and remove those entries.
+                     */
+                    var matchDisk, reDisk = /[ \t]*<disk [^>]*path=(['"])(.*?)\1.*?<\/disk>\n?/g;
+                    while (matchDisk = reDisk.exec(resources[name])) {
+                        var path = matchDisk[2];
+                        if (path) {
+                            if (resources[path]) {
+                                console.log("saving disk: '" + path);
+                            } else {
+                                data = data.replace(matchDisk[0], "");
+                            }
+                        }
+                    }
+                }
+                console.log("saving resource: '" + name + "' (" + data.length + " bytes)");
+                resourcesNew[name] = data;
+            }
+
+            var sResources = JSON.stringify(resourcesNew);
+            sPCJS = matchScript[1] + "var resources=" + sResources + ";" + matchScript[2] + matchScript[3];
+            console.log("saving machine: '" + idMachine + "' (" + sPCJS.length + " bytes)");
+
+            var uri = "data:application/octet-stream;base64," + btoa(sPCJS);
+            var link = document.createElement('a');
+            if (typeof link.download == 'string') {
+                link.href = uri;
+                link.download = str.getBaseName(sURL, true) + ".json";
+                document.body.appendChild(link);    // Firefox requires the link to be in the body (?)
+                link.click();
+                document.body.removeChild(link);
+            } else {
+                window.open(uri);
+            }
+        }
+    }
 }
 
 /**

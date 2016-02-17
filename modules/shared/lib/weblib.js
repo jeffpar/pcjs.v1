@@ -190,7 +190,20 @@ web.notice = function(s, fPrintOnly, id)
  */
 web.loadResource = function(sURL, fAsync, data, componentNotify, fnNotify, pNotify)
 {
-    fAsync = !!fAsync;          // ensure that fAsync is a valid boolean (Internet Explorer xmlHTTP functions insist on it)
+    var nErrorCode = 0;
+    var sURLData = null;
+
+    if (resources && (sURLData = resources[sURL])) {
+        if (fnNotify) {
+            if (!componentNotify) {
+                fnNotify(sURL, sURLData, nErrorCode, pNotify);
+            } else {
+                fnNotify.call(componentNotify, sURL, sURLData, nErrorCode, pNotify);
+            }
+        }
+        return [nErrorCode, sURLData];
+    }
+
     if (NODE) {
         /*
          * We don't even need to load Component, because we can't use any of the code below
@@ -201,8 +214,7 @@ web.loadResource = function(sURL, fAsync, data, componentNotify, fnNotify, pNoti
         var net = require("./netlib");
         return net.loadResource(sURL, fAsync, data, componentNotify, fnNotify, pNotify);
     }
-    var nErrorCode = 0;
-    var sURLData = null;
+
     var xmlHTTP = (window.XMLHttpRequest? new window.XMLHttpRequest() : new window.ActiveXObject("Microsoft.XMLHTTP"));
     if (fAsync) {
         xmlHTTP.onreadystatechange = function() {
@@ -238,6 +250,7 @@ web.loadResource = function(sURL, fAsync, data, componentNotify, fnNotify, pNoti
             }
         };
     }
+
     if (data) {
         var sData = "";
         for (var p in data) {
@@ -247,14 +260,15 @@ web.loadResource = function(sURL, fAsync, data, componentNotify, fnNotify, pNoti
         }
         sData = sData.replace(/%20/g, '+');
         if (MAXDEBUG) web.log("web.loadResource(POST " + sURL + "): " + sData.length + " bytes");
-        xmlHTTP.open("POST", sURL, fAsync);
+        xmlHTTP.open("POST", sURL, !!fAsync);   // ensure that fAsync is a valid boolean (Internet Explorer xmlHTTP functions insist on it)
         xmlHTTP.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
         xmlHTTP.send(sData);
     } else {
         if (MAXDEBUG) web.log("web.loadResource(GET " + sURL + ")");
-        xmlHTTP.open("GET", sURL, fAsync);
+        xmlHTTP.open("GET", sURL, !!fAsync);    // ensure that fAsync is a valid boolean (Internet Explorer xmlHTTP functions insist on it)
         xmlHTTP.send();
     }
+
     var response = [];
     if (!fAsync) {
         sURLData = xmlHTTP.responseText;

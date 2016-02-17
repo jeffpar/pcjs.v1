@@ -259,23 +259,20 @@ Component.addMachineResource = function(idMachine, sName, data)
 {
     Component.assert(Component.machines[idMachine]);
     if (Component.machines[idMachine]) {
-        if (!Component.machines[idMachine][sName]) {
-            Component.machines[idMachine][sName] = [];
-        }
-        Component.machines[idMachine][sName].push(data);
+        Component.assert(Component.machines[idMachine][sName] === undefined);
+        Component.machines[idMachine][sName] = data;
     }
 };
 
 /**
- * Component.getMachineResources(idMachine, sName)
+ * Component.getMachineResources(idMachine)
  *
  * @param {string} idMachine
- * @param {string} sName (name of the resource)
- * @return {Array|undefined}
+ * @return {Object|undefined}
  */
-Component.getMachineResources = function(idMachine, sName)
+Component.getMachineResources = function(idMachine)
 {
-    return Component.machines[idMachine] && Component.machines[idMachine][sName];
+    return Component.machines[idMachine];
 };
 
 /**
