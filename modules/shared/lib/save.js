@@ -55,7 +55,7 @@ function savePC(idMachine, sPCJSFile)
         var sState = cmp.powerOff(true);
         var sParms = cmp.saveMachineParms();
         if (!sPCJSFile) {
-            if (DEBUG) {
+            if (MAXDEBUG) {
                 sPCJSFile = "/tmp/pcjs/" + (XMLVERSION || APPVERSION) + "/pc.js"
             } else {
                 sPCJSFile = "/versions/pcjs/" + (XMLVERSION || APPVERSION) + "/pc" + (dbg? "-dbg" : "") + ".js";
@@ -204,11 +204,12 @@ function downloadPC(sURL, sCSS, nErrorCode, aMachineInfo)
             });
             uri = "data:application/javascript;base64," + btoa(sPCJS);
         } else {
+            sPCJS = sPCJS.replace(/\u00A9/g, "&#xA9;");
             uri = "data:application/javascript," + (web.isUserAgent("Firefox")? encodeURIComponent(sPCJS) : encodeURI(sPCJS));
         }
 
         var link = document.createElement('a');
-        if (typeof link.download == 'string' && sPCJS.length < 2000000) {
+        if (typeof link.download == 'string') {
             link.href = uri;
             link.download = sScript + ".json";
             document.body.appendChild(link);    // Firefox requires the link to be in the body (?)
