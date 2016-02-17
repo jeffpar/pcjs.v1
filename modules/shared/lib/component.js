@@ -495,8 +495,8 @@ Component.getComponentByType = function(sType, idRelated, componentPrev)
  */
 Component.getComponentParms = function(element)
 {
-    var parms = null,
-        sParms = element.getAttribute("data-value");
+    var parms = null;
+    var sParms = element.getAttribute("data-value");
     if (sParms) {
         try {
             parms = eval("(" + sParms + ")");   // jshint ignore:line

@@ -6366,23 +6366,23 @@ if (DEBUGGER) {
         }
 
         if (sAddr == "state") {
-            var s = this.cmp.powerOff(true);
+            var sState = this.cmp.powerOff(true);
             if (sLen == "console") {
                 /*
                  * Console buffers are notoriously small, and even the following code, which breaks the
                  * data into parts (eg, "d state console 1", "d state console 2", etc) just isn't that helpful.
                  *
                  *      var nPart = +sBytes;
-                 *      if (nPart) s = s.substr(1000000 * (nPart-1), 1000000);
+                 *      if (nPart) sState = sState.substr(1000000 * (nPart-1), 1000000);
                  *
                  * So, the best way to capture a large machine state is to run your own local server and use
                  * server-side storage.  Take a look at the "Save" binding in computer.js, which binds an HTML
                  * control to the computer.powerOff() and computer.saveServerState() functions.
                  */
-                console.log(s);
+                console.log(sState);
             } else {
                 this.doClear();
-                this.println(s);
+                this.println(sState);
             }
             return;
         }

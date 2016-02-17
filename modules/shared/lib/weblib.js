@@ -193,7 +193,7 @@ web.loadResource = function(sURL, fAsync, data, componentNotify, fnNotify, pNoti
     var nErrorCode = 0;
     var sURLData = null;
 
-    if (resources && (sURLData = resources[sURL])) {
+    if (typeof resources == 'object' && (sURLData = resources[sURL])) {
         if (fnNotify) {
             if (!componentNotify) {
                 fnNotify(sURL, sURLData, nErrorCode, pNotify);

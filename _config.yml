@@ -79,6 +79,7 @@ pcjs:
     - /modules/pcjs/lib/state.js
     - /modules/pcjs/lib/computer.js
     - /modules/shared/lib/embed.js
+    - /modules/shared/lib/save.js
   c1p_scripts:
     - /modules/shared/lib/defines.js
     - /modules/shared/lib/dumpapi.js
