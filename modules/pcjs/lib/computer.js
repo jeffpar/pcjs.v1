@@ -372,18 +372,18 @@ Computer.prototype.setMachineParms = function(parmsMachine)
  *
  * @param {string} sParm
  * @param {Object} [parmsComponent]
- * @return {string|null}
+ * @return {string|undefined}
  */
 Computer.prototype.getMachineParm = function(sParm, parmsComponent)
 {
-    var value = null;
+    var value;
     if (this.parmsMachine) {
         value = this.parmsMachine[sParm];
     }
-    if (value == null && parmsComponent) {
+    if (value === undefined && parmsComponent) {
         value = parmsComponent[sParm];
     }
-    if (value == null && typeof resources == 'object' && resources[sParm]) {
+    if (value === undefined && typeof resources == 'object' && resources[sParm]) {
         value = sParm;
     }
     return value;

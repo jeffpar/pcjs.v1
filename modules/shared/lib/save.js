@@ -55,7 +55,7 @@ function savePC(idMachine, sPCJSFile)
         var sState = cmp.powerOff(true);
         var sParms = cmp.saveMachineParms();
         if (!sPCJSFile) {
-            if (MAXDEBUG) {
+            if (DEBUG) {
                 sPCJSFile = "/tmp/pcjs/" + (XMLVERSION || APPVERSION) + "/pc.js"
             } else {
                 sPCJSFile = "/versions/pcjs/" + (XMLVERSION || APPVERSION) + "/pc" + (dbg? "-dbg" : "") + ".js";
@@ -209,7 +209,7 @@ function downloadPC(sURL, sCSS, nErrorCode, aMachineInfo)
         }
 
         var link = document.createElement('a');
-        if (typeof link.download == 'string') {
+        if (!DEBUG && typeof link.download == 'string') {
             link.href = uri;
             link.download = sScript + ".json";
             document.body.appendChild(link);    // Firefox requires the link to be in the body (?)
