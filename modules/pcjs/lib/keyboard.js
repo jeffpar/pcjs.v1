@@ -2312,7 +2312,7 @@ Keyboard.prototype.keySimulate = function(simCode, fDown)
  */
 Keyboard.init = function()
 {
-    var aeKbd = Component.getElementsByClass(window.document, PCJSCLASS, "keyboard");
+    var aeKbd = Component.getElementsByClass(document, PCJSCLASS, "keyboard");
     for (var iKbd = 0; iKbd < aeKbd.length; iKbd++) {
         var eKbd = aeKbd[iKbd];
         var parmsKbd = Component.getComponentParms(eKbd);

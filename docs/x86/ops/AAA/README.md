@@ -1,7 +1,7 @@
 ---
 layout: page
 title: "x86 Instructions: AAA"
-permalink: /docs/x86/ops/aaa/
+permalink: /docs/x86/ops/AAA/
 ---
 
 AAA (0x37)

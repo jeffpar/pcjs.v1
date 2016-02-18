@@ -11,7 +11,7 @@
 
 	<xsl:variable name="MACHINECLASS">pc</xsl:variable>
 	<xsl:variable name="APPCLASS">pcjs</xsl:variable>
-	<xsl:variable name="APPVERSION">1.20.8</xsl:variable>
+	<xsl:variable name="APPVERSION">1.20.9</xsl:variable>
 	<xsl:variable name="SITEHOST">www.pcjs.org</xsl:variable>
 
 	<xsl:template name="componentStyles">
@@ -228,6 +228,7 @@
 					<xsl:when test="$url != ''"><div class="{$APPCLASS}-reference">[<a href="{$url}">XML</a>]</div></xsl:when>
 					<xsl:otherwise/>
 				</xsl:choose>
+				<xsl:if test="$MACHINECLASS = 'pc'"><div class="{$APPCLASS}-reference" style="padding-left:8px">[<a href="#" onclick="savePC('{$machine}'); return false;">Save Machine</a>]</div></xsl:if>
 				<div class="{$APPCLASS}-copyright">
 					<a href="http://{$SITEHOST}" target="_blank">PCjs</a> v<xsl:value-of select="$APPVERSION"/> © 2012-2016 by <a href="http://twitter.com/jeffpar" target="_blank">@jeffpar</a>
 				</div>

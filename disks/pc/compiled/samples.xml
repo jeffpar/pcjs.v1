@@ -10,7 +10,8 @@
 		<disk path="/disks/pc/games/microsoft/adventure/adventure-1981.json">Microsoft Adventure</disk>
 		<disk path="/apps/pc/1981/visicalc/disk.json">VisiCalc</disk>
 	</control>
-	<control type="button" binding="loadDrive" padright="8px">Load</control>
+	<control type="button" binding="loadDrive">Load</control>
+	<control type="button" binding="saveDrive" padright="8px">Save</control>
 	<control type="description" binding="descDisk" padright="8px"/>
 	<control type="file" binding="mountDrive"/>
 </fdc>

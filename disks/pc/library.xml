@@ -85,7 +85,8 @@
 		<manifest ref="/apps/pc/1992/moria/manifest.xml" disk="disk01"/>
 		<disk path="/tests/pc/vga/VGABIN.json">VGA Tests (Black Book)</disk>
 	</control>
-	<control type="button" binding="loadDrive" padright="8px">Load</control>
+	<control type="button" binding="loadDrive">Load</control>
+	<control type="button" binding="saveDrive" padright="8px">Save</control>
 	<control type="description" binding="descDisk" padright="8px"/>
 	<control type="file" binding="mountDrive"/>
 </fdc>

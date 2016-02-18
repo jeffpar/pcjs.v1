@@ -1,6 +1,5 @@
 {
   "name": "filedump",
-  "version": "0.2.0",
   "description": "Converts file contents to JSON",
   "main": "./lib/filedump",
   "scripts": {

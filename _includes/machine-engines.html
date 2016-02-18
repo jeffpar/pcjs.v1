@@ -1,5 +1,33 @@
+{% comment %}
+As documented in /modules/markout/lib/markout.js, our Node web server recognizes the following machine properties
+in the Front Matter of Markdown files, for compatibility with the Jekyll web server:
+
+    'id' (eg, "ibm5150")
+    'name' (eg, "IBM PC (Model 5150) with Monochrome Display")
+    'type' (eg, "pc" or "pc-dbg")
+    'config' (eg, "machine.xml")
+    'template' (eg, "machine.xsl")
+    'uncompiled' (eg, true)
+    'parms'
+
+And the following properties (along with any property not listed above) will be added to the 'parms' property:
+
+    'autopower' (eg, "true")
+    'automount' (eg, {"A":{"name":"OS/2 FOOTBALL Boot Disk (v7.68.17)","path":"/disks/pc/os2/misc/football/debugger/FOOTBALL-7.68.17.json"}})
+    'state' (eg, "state.json")
+    'messages' (eg, "disk")
+
+And all our JavaScript components expect multi-word property names to use camelCase, so that conversion happens both
+here and in markout.js.  Examples include 'autopower' ('autoPower') and 'automount' ('autoMount').
+
+{% endcomment %}
 {% for machine in page.machines %}
   {% capture machine_embed %}window.embed{{ machine.type | remove:'-dbg' | upcase }}{% endcapture %}
+  {% if machine.autopower == nil %}
+    {% assign machine_autopower = "true" %}
+  {% else %}
+    {% capture machine_autopower %}{{ machine.autopower }}{% endcapture %}
+  {% endif %}
   {% unless machine.config %}
     {% assign machine_config = "machine.xml" %}
   {% else %}
@@ -10,7 +38,7 @@
   {% else %}
     {% assign machine_template = machine.template %}
   {% endunless %}
-  {% capture machine_parms %}{{ site.left_brace }}state:"{{ machine.state }}",autoMount:{{ machine.automount|jsonify }},messages:"{{ machine.messages }}"{{ site.right_brace }}{% endcapture %}
+  {% capture machine_parms %}{{ site.left_brace }}autoPower:{{ machine_autopower }},state:"{{ machine.state }}",autoMount:{{ machine.automount|jsonify }},messages:"{{ machine.messages }}"{{ site.right_brace }}{% endcapture %}
   {% if site.pcjs.compiled == true and machine.uncompiled != true %}
     {% capture machine_script %}<script type="text/javascript" src="{{ site.baseurl }}/versions/{{ machine.type | remove:'-dbg' }}js/{{ site.pcjs.version }}/{{ machine.type }}.js"></script>{% endcapture %}
     {% unless machine_scripts contains machine_script %}
@@ -35,4 +63,8 @@
     {% endif %}
   {% endif %}
   <script type="text/javascript">{{ machine_embed }}('{{ machine.id }}','{{ machine_config }}','{{ machine_template }}','{{ machine_parms }}');</script>
+  {% if page.build %}
+    <script type="text/javascript" src="{{ site.baseurl }}/modules/build/lib/build.js"></script>
+    <script type="text/javascript">buildPC("{{ page.build }}");</script>
+  {% endif %}
 {% endfor %}

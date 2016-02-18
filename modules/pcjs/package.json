@@ -1,6 +1,5 @@
 {
   "name": "PCjs",
-  "version": "1.17.5",
   "description": "IBM PC Emulator",
   "author": "Jeff Parsons <Jeff@pcjs.org>",
   "licenses": [

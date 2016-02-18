@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.20.8/manifest.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.20.9/manifest.xsl"?>
 <manifest type="document">
 	<title>PC Programming Guides</title>
 	<document href="http://bitsavers.trailing-edge.com/pdf/ibm/pc/dos/6172220_DOS_1.0_Jan82.pdf">
 		<name>PC-DOS 1.00 Disk Operating System</name>
-		<cover href="static/PCDOS110.jpg"/>
+		<cover href="archive/PCDOS110.jpg"/>
 	</document>
 	<document href="http://bitsavers.trailing-edge.com/pdf/ibm/pc/dos/IBM_DOS_1.1_May82.pdf">
 		<name>PC-DOS 1.10 Disk Operating System</name>
-		<cover href="static/PCDOS110.jpg"/>
+		<cover href="archive/PCDOS110.jpg"/>
 	</document>
 	<document>
 		<name>The 8086 Book</name>
-		<cover href="static/The_8086_Book.jpg"/>
+		<cover href="archive/The_8086_Book.jpg"/>
 	</document>
 </manifest>

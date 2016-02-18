@@ -294,13 +294,13 @@ Panel.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
             this.cxDump = this.cxReg;
             this.cyDump = ((this.canvas.height * Panel.LIVEDUMP.CY) / Panel.LIVECANVAS.CY) | 0;
 
-            this.canvasLiveMem = window.document.createElement("canvas");
+            this.canvasLiveMem = document.createElement("canvas");
             this.canvasLiveMem.width = Panel.LIVEMEM.CX;
             this.canvasLiveMem.height = Panel.LIVEMEM.CY;
             this.contextLiveMem = this.canvasLiveMem.getContext("2d");
             this.imageLiveMem = this.contextLiveMem.createImageData(this.canvasLiveMem.width, this.canvasLiveMem.height);
 
-            this.canvasLiveRegs = window.document.createElement("canvas");
+            this.canvasLiveRegs = document.createElement("canvas");
             this.canvasLiveRegs.width = Panel.LIVEREGS.CX;
             this.canvasLiveRegs.height = Panel.LIVEREGS.CY;
             this.contextLiveRegs = this.canvasLiveRegs.getContext("2d");
@@ -969,7 +969,7 @@ Panel.prototype.centerText = function(sText)
 Panel.init = function()
 {
     var fReady = false;
-    var aePanels = Component.getElementsByClass(window.document, PCJSCLASS, "panel");
+    var aePanels = Component.getElementsByClass(document, PCJSCLASS, "panel");
     for (var iPanel=0; iPanel < aePanels.length; iPanel++) {
         var ePanel = aePanels[iPanel];
         var parmsPanel = Component.getComponentParms(ePanel);

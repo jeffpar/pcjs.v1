@@ -265,7 +265,7 @@ C1PComputer.power = function(computer)
  */
 C1PComputer.init = function()
 {
-    var aeComputers = Component.getElementsByClass(window.document, C1PJSCLASS, "computer");
+    var aeComputers = Component.getElementsByClass(document, C1PJSCLASS, "computer");
 
     for (var iComputer=0; iComputer < aeComputers.length; iComputer++) {
 

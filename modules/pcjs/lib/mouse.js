@@ -717,7 +717,7 @@ Mouse.prototype.notifyMCR = function(bMCR)
  */
 Mouse.init = function()
 {
-    var aeMouse = Component.getElementsByClass(window.document, PCJSCLASS, "mouse");
+    var aeMouse = Component.getElementsByClass(document, PCJSCLASS, "mouse");
     for (var iMouse = 0; iMouse < aeMouse.length; iMouse++) {
         var eMouse = aeMouse[iMouse];
         var parmsMouse = Component.getComponentParms(eMouse);

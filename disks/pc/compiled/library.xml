@@ -5,7 +5,7 @@
 		<disk path="">None</disk>
 		<disk path="/disks/pc/cpm/1.1b/cpm86-disk1.json">CP/M-86 (Disk 1)</disk>
 		<disk path="/disks/pc/cpm/1.1b/cpm86-disk2.json">CP/M-86 (Disk 2)</disk>
-		<disk path="/disks/pc/diags/ibm/2.20/5150_5155_5160_ADVDIAG_220.json">IBM Advanced Diagnostics 2.20</disk>
+		<disk path="/disks/pc/diags/ibm/2.20/5150_5155_5160_ADVDIAG_220.json">IBM Diagnostics 2.20</disk>
 		<disk path="/disks/pc/dos/ibm/1.00/PCDOS100.json">PC-DOS 1.00</disk>
 		<disk path="/disks/pc/dos/ibm/1.10/PCDOS110.json">PC-DOS 1.10</disk>
 		<disk path="/disks/pc/dos/ibm/2.00/PCDOS200-DISK1.json">PC-DOS 2.00 (Disk 1)</disk>
@@ -109,7 +109,7 @@
 		<disk path="/disks/pc/dos/compaq/3.31/COMPAQ-DOS331-DISK3.json">COMPAQ MS-DOS 3.31 (Disk 3)</disk>
 		<disk path="/disks/pc/dos/compaq/3.31/COMPAQ-DOS331-DISK4.json">COMPAQ MS-DOS 3.31 (Disk 4)</disk>
 		<disk path="/disks/pc/dos/compaq/3.31/COMPAQ-DOS331-DISK5.json">COMPAQ MS-DOS 3.31 (Disk 5)</disk>
-		<disk path="/disks/pc/dos/compaq/3.31/COMPAQ-DOS331-DIAG.json">COMPAQ MS-DOS 3.31 (Diagnostics)</disk>
+		<disk path="/disks/pc/dos/compaq/3.31/COMPAQ-DOS331-DIAG.json">COMPAQ MS-DOS 3.31 (Diags)</disk>
 		<disk path="/disks/pc/os2/ibm/1.0/OS210-INSTALL.json">IBM OS/2 1.0 (1.44M Install)</disk>
 		<disk path="/disks/pc/os2/ibm/1.0/OS210-DISK1.json">IBM OS/2 1.0 (1.44M Disk 1)</disk>
 		<disk path="/disks/pc/os2/ibm/1.0/OS210-DISK2.json">IBM OS/2 1.0 (1.44M Disk 2)</disk>
@@ -119,8 +119,8 @@
 		<disk path="/disks/pc/os2/ibm/1.1/OS211-DISK02.json">IBM OS/2 1.1 (1.44M Disk 2)</disk>
 		<disk path="/disks/pc/os2/ibm/1.1/OS211-DISK03.json">IBM OS/2 1.1 (1.44M Disk 3)</disk>
 		<disk path="/disks/pc/os2/ibm/1.1/OS211-DISK04.json">IBM OS/2 1.1 (1.44M Disk 4)</disk>
-		<disk path="/disks/pc/os2/ibm/1.1/OS211-DEVICES.json">IBM OS/2 1.1 (1.44M Devices Disk)</disk>
-		<disk path="/disks/pc/os2/ibm/1.1/OS211-PRINTERS.json">IBM OS/2 1.1 (1.44M Printers Disk)</disk>
+		<disk path="/disks/pc/os2/ibm/1.1/OS211-DEVICES.json">IBM OS/2 1.1 (1.44M Devices)</disk>
+		<disk path="/disks/pc/os2/ibm/1.1/OS211-PRINTERS.json">IBM OS/2 1.1 (1.44M Printers)</disk>
 		<disk path="/disks/pc/os2/ibm/1.3/OS213-DISK01.json">IBM OS/2 1.3 (1.44M Disk 1)</disk>
 		<disk path="/disks/pc/os2/ibm/1.3/OS213-DISK02.json">IBM OS/2 1.3 (1.44M Disk 2)</disk>
 		<disk path="/disks/pc/os2/ibm/1.3/OS213-DISK03.json">IBM OS/2 1.3 (1.44M Disk 3)</disk>
@@ -428,7 +428,8 @@
 		<disk path="/apps/pc/1992/moria/disk.json">Moria 5.5</disk>
 		<disk path="/tests/pc/vga/VGABIN.json">VGA Tests (Black Book)</disk>
 	</control>
-	<control type="button" binding="loadDrive" padright="8px">Load</control>
+	<control type="button" binding="loadDrive">Load</control>
+	<control type="button" binding="saveDrive" padright="8px">Save</control>
 	<control type="description" binding="descDisk" padright="8px"/>
 	<control type="file" binding="mountDrive"/>
 </fdc>

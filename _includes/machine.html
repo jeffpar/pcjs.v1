@@ -1,1 +1,10 @@
-<div class="machine" id="{{ include.id }}"></div>
+<div class="machine" id="{{ include.id }}">
+	{% assign machine_name = "PCjs: The Virtual IBM PC" %}
+	{% for machine in page.machines %}
+	  {% if include.id == machine.id and machine.name%}
+		{% assign machine_name = machine.name %}
+	    {% break %}
+	  {% endif %}
+	{% endfor %}
+	[{{ machine_name }}]
+</div>

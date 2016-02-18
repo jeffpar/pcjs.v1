@@ -93,7 +93,7 @@ var TYPEDARRAYS = (typeof ArrayBuffer !== 'undefined');
  * TODO: BACKTRACK support is currently completely disabled until we have a chance to investigate the problem
  * discussed in Bus.addBackTrackObject().
  */
-var BACKTRACK = !COMPILED;
+var BACKTRACK = !COMPILED && DEBUG;
 
 /**
  * @define {boolean}
@@ -127,7 +127,7 @@ var I386 = true;
  *
  * COMPAQ386 enables Compaq DeskPro 386 support.  Requires I386 support as well (duh).
  */
-var COMPAQ386 = true;
+var COMPAQ386 = I386;
 
 /**
  * @define {boolean}

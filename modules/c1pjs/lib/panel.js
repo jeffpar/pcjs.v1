@@ -112,7 +112,7 @@ C1PPanel.prototype.setPower = function(fOn, cmp)
 C1PPanel.init = function()
 {
     var fReady = false;
-    var aePanels = Component.getElementsByClass(window.document, C1PJSCLASS, "panel");
+    var aePanels = Component.getElementsByClass(document, C1PJSCLASS, "panel");
     for (var iPanel=0; iPanel < aePanels.length; iPanel++) {
         var ePanel = aePanels[iPanel];
         var parmsPanel = Component.getComponentParms(ePanel);

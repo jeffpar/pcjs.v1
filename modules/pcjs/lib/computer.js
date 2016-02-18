@@ -104,13 +104,19 @@ if (NODE) {
  *
  * The parmsMachine object, if provided, may contain any of:
  *
- *      url: the location of the machine XML file
- *
  *      autoMount: if set, this should override any 'autoMount' property in the FDC's
  *      parmsFDC object.
  *
+ *      autoPower: if set, this should override any 'autoPower' property in the Computer's
+ *      parmsComputer object.
+ *
+ *      messages: if set, this should override any 'messages' property in the Debugger's
+ *      parmsDbg object.
+ *
  *      state: if set, this should override any 'state' property in the Computer's
  *      parmsComputer object.
+ *
+ *      url: the location of the machine XML file
  *
  * If a predefined state is supplied AND it's successfully loaded, then resume behavior
  * defaults to '1' (ie, resume enabled without prompting).
@@ -134,7 +140,10 @@ function Computer(parmsComputer, parmsMachine, fSuspended) {
     Component.call(this, "Computer", parmsComputer, Computer, Messages.COMPUTER);
 
     this.aFlags.fPowered = false;
-    this.fAutoPower = parmsComputer['autoPower'];
+
+    this.setMachineParms(parmsMachine);
+
+    this.fAutoPower = this.getMachineParm('autoPower', parmsComputer);
 
     /*
      * nPowerChange is 0 while the power state is stable, 1 while power is transitioning
@@ -152,7 +161,6 @@ function Computer(parmsComputer, parmsMachine, fSuspended) {
     this.fStateData = false;            // remembers if sStateData was loaded
     this.fServerState = false;
 
-    this.parmsMachine = parmsMachine;
     this.url = this.getMachineParm('url') || "";
 
     /*
@@ -186,7 +194,7 @@ function Computer(parmsComputer, parmsMachine, fSuspended) {
      */
     var iComponent, component;
     var aComponents = Component.getComponents(this.id);
-    this.panel = Component.getComponentByType("Panel", this.id);
+    this.panel = /** @type {Panel} */ (Component.getComponentByType("Panel", this.id));
 
     if (this.panel && this.panel.controlPrint) {
         for (iComponent = 0; iComponent < aComponents.length; iComponent++) {
@@ -331,14 +339,64 @@ Computer.prototype.getMachineID = function()
 };
 
 /**
- * getMachineParm(sParm)
+ * setMachineParms(parmsMachine)
+ *
+ * If no explicit machine parms were provided, then we check for 'parms' in the bundled resources (if any).
+ *
+ * @param {Object} [parmsMachine]
+ */
+Computer.prototype.setMachineParms = function(parmsMachine)
+{
+    if (!parmsMachine) {
+        var sParms;
+        if (typeof resources == 'object' && (sParms = resources['parms'])) {
+            try {
+                parmsMachine = /** @type {Object} */ (eval("(" + sParms + ")"));
+            } catch(e) {
+                Component.error(e.message + " (" + sParms + ")");
+            }
+        }
+    }
+    this.parmsMachine = parmsMachine;
+};
+
+/**
+ * getMachineParm(sParm, parmsComponent)
+ *
+ * If the machine parameter doesn't exist, we check for a matching component parameter (if parmsComponent is provided),
+ * and failing that, we check the bundled resources (if any).
+ *
+ * At the moment, the only bundled resource request we expect to encounter is 'state'; if it exists, then we return
+ * 'state' back to the caller (ie, the name of the resource), so that the caller will then attempt to load the 'state'
+ * resource to obtain the actual state.
  *
  * @param {string} sParm
+ * @param {Object} [parmsComponent]
  * @return {string|undefined}
  */
-Computer.prototype.getMachineParm = function(sParm)
+Computer.prototype.getMachineParm = function(sParm, parmsComponent)
 {
-    return this.parmsMachine && this.parmsMachine[sParm];
+    var value;
+    if (this.parmsMachine) {
+        value = this.parmsMachine[sParm];
+    }
+    if (value === undefined && parmsComponent) {
+        value = parmsComponent[sParm];
+    }
+    if (value === undefined && typeof resources == 'object' && resources[sParm]) {
+        value = sParm;
+    }
+    return value;
+};
+
+/**
+ * saveMachineParms()
+ *
+ * @return {string|null}
+ */
+Computer.prototype.saveMachineParms = function()
+{
+    return this.parmsMachine? JSON.stringify(this.parmsMachine) : null;
 };
 
 /**
@@ -348,7 +406,7 @@ Computer.prototype.getMachineParm = function(sParm)
  */
 Computer.prototype.getUserID = function()
 {
-    return this.sUserID? this.sUserID : "";
+    return this.sUserID || "";
 };
 
 /**
@@ -704,7 +762,7 @@ Computer.prototype.donePowerOn = function(aParms)
 
     this.aFlags.fPowered = true;
     var controlPower = this.bindings["power"];
-    if (controlPower) controlPower.textContent = "On";
+    if (controlPower) controlPower.textContent = "Shutdown";
 
     if (!this.fInitialized) {
         this.println(Computer.APPNAME + " v" + Computer.APPVERSION + "\n" + Computer.COPYRIGHT + "\n" + Computer.LICENSE);
@@ -914,7 +972,7 @@ Computer.prototype.powerOff = function(fSave, fShutdown)
     if (fShutdown) {
         this.aFlags.fPowered = false;
         var controlPower = this.bindings["power"];
-        if (controlPower) controlPower.textContent = "Off";
+        if (controlPower) controlPower.textContent = "Power";
     }
 
     this.nPowerChange = 0;
@@ -1356,7 +1414,7 @@ Computer.init = function()
      */
     if (!COMPILED && XMLVERSION) Computer.APPVERSION = XMLVERSION;
 
-    var aeMachines = Component.getElementsByClass(window.document, PCJSCLASS + "-machine");
+    var aeMachines = Component.getElementsByClass(document, PCJSCLASS + "-machine");
 
     for (var iMachine = 0; iMachine < aeMachines.length; iMachine++) {
 
@@ -1406,11 +1464,11 @@ Computer.init = function()
  */
 Computer.show = function()
 {
-    var aeComputers = Component.getElementsByClass(window.document, PCJSCLASS, "computer");
+    var aeComputers = Component.getElementsByClass(document, PCJSCLASS, "computer");
     for (var iComputer = 0; iComputer < aeComputers.length; iComputer++) {
         var eComputer = aeComputers[iComputer];
         var parmsComputer = Component.getComponentParms(eComputer);
-        var computer = Component.getComponentByType("Computer", parmsComputer['id']);
+        var computer = /** @type {Computer} */ (Component.getComponentByType("Computer", parmsComputer['id']));
         if (computer) {
 
             if (DEBUG && computer.messageEnabled()) {
@@ -1455,11 +1513,11 @@ Computer.show = function()
  */
 Computer.exit = function()
 {
-    var aeComputers = Component.getElementsByClass(window.document, PCJSCLASS, "computer");
+    var aeComputers = Component.getElementsByClass(document, PCJSCLASS, "computer");
     for (var iComputer = 0; iComputer < aeComputers.length; iComputer++) {
         var eComputer = aeComputers[iComputer];
         var parmsComputer = Component.getComponentParms(eComputer);
-        var computer = Component.getComponentByType("Computer", parmsComputer['id']);
+        var computer = /** @type {Computer} */ (Component.getComponentByType("Computer", parmsComputer['id']));
         if (computer) {
 
             if (DEBUG && computer.messageEnabled()) {

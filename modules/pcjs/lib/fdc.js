@@ -467,6 +467,37 @@ FDC.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
         };
         return true;
 
+    case "saveDrive":
+        this.bindings[sBinding] = control;
+        control.onclick = function onClickLoadDrive(event) {
+            var controlDrives = fdc.bindings["listDrives"];
+            if (controlDrives && controlDrives.options && fdc.aDrives) {
+                var iDriveSelected = str.parseInt(controlDrives.value, 10);
+                var drive = fdc.aDrives[iDriveSelected];
+                if (drive) {
+                    if (drive.disk) {
+                        if (DEBUG) fdc.println("saving disk " + drive.disk.sDiskPath + "...");
+                        var uri = "data:application/octet-stream;base64," + drive.disk.encodeAsBase64();
+                        var link = document.createElement('a');
+                        if (typeof link.download == 'string') {
+                            link.href = uri;
+                            link.download = drive.disk.sDiskFile.replace(".json", ".img");
+                            document.body.appendChild(link);    // Firefox requires the link to be in the body (?)
+                            link.click();
+                            document.body.removeChild(link);
+                        } else {
+                            window.open(uri);
+                        }
+                    } else {
+                        fdc.notice("No disk loaded in drive");
+                    }
+                } else {
+                    fdc.notice("No drive selected");
+                }
+            }
+        };
+        return true;
+
     case "mountDrive":
         if (this.fLocalDisks) {
             this.bindings[sBinding] = control;
@@ -592,7 +623,7 @@ FDC.prototype.powerUp = function(data, fRepower)
             }
             controlDrives.textContent = "";
             for (var iDrive = 0; iDrive < this.nDrives; iDrive++) {
-                var controlOption = window.document.createElement("option");
+                var controlOption = document.createElement("option");
                 controlOption['value'] = iDrive;
                 /*
                  * TODO: This conversion of drive number to drive letter, starting with A:, is very simplistic
@@ -1229,10 +1260,10 @@ FDC.prototype.loadSelectedDrive = function(sDisketteName, sDiskettePath, file)
             sDiskettePath = window.prompt("Enter the URL of a remote disk image.", "") || "";
             if (!sDiskettePath) return;
             sDisketteName = str.getBaseName(sDiskettePath);
-            this.println("Attempting to load " + sDiskettePath + " as \"" + sDisketteName + "\"");
+            if (DEBUG) this.println("Attempting to load " + sDiskettePath + " as \"" + sDisketteName + "\"");
         }
 
-        this.println("loading disk " + sDiskettePath + "...");
+        if (DEBUG) this.println("loading disk " + sDiskettePath + "...");
 
         while (this.loadDiskette(iDrive, sDisketteName, sDiskettePath, false, file)) {
             if (!window.confirm("Click OK to reload the original disk.\n(WARNING: All disk changes will be discarded)")) {
@@ -1251,7 +1282,7 @@ FDC.prototype.loadSelectedDrive = function(sDisketteName, sDiskettePath, file)
         }
         return;
     }
-    this.notice("Nothing to load");
+    this.notice("Unable to load the selected drive");
 };
 
 /**
@@ -1301,8 +1332,9 @@ FDC.prototype.loadDiskette = function(iDrive, sDisketteName, sDiskettePath, fAut
         }
         drive.fLocal = !!file;
         var disk = new Disk(this, drive, DiskAPI.MODE.PRELOAD);
-        disk.load(sDisketteName, sDiskettePath, file, this.doneLoadDiskette);
-        return false;
+        if (!disk.load(sDisketteName, sDiskettePath, file, this.doneLoadDiskette)) {
+            return false;
+        }
     }
     return true;
 };
@@ -1416,7 +1448,7 @@ FDC.prototype.addDiskette = function(sName, sPath)
         for (var i = 0; i < controlDisks.options.length; i++) {
             if (controlDisks.options[i].value == sPath) return;
         }
-        var controlOption = window.document.createElement("option");
+        var controlOption = document.createElement("option");
         controlOption['value'] = sPath;
         controlOption.textContent = sName;
         controlDisks.appendChild(controlOption);
@@ -2518,7 +2550,7 @@ FDC.aPortOutput = {
  * any associated HTML controls to the new component.
  */
 FDC.init = function() {
-    var aeFDC = Component.getElementsByClass(window.document, PCJSCLASS, "fdc");
+    var aeFDC = Component.getElementsByClass(document, PCJSCLASS, "fdc");
     for (var iFDC = 0; iFDC < aeFDC.length; iFDC++) {
         var eFDC = aeFDC[iFDC];
         var parmsFDC = Component.getComponentParms(eFDC);

@@ -21,5 +21,5 @@ with the *format* parameter set to `img` instead of `json`.  For example:
 In fact, when browsing the disk archives, the PCjs web server automatically provides "onclick" handlers
 for links to JSON-encoded disk images, which will invoke the API for you.
 
-See **Creating PCjs-Compatible Disk Images** in the [PCjs Documentation](/docs/pcjs/) for more information
-about supported disks and formats.
+See **Creating PCjs-Compatible Disk Images** in the [PCjs Documentation](/docs/pcjs/#creating-pcjs-compatible-disk-images)
+for more information about supported disks and formats.

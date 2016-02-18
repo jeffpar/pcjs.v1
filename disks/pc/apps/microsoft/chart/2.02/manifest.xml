@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.20.8/manifest.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.20.9/manifest.xsl"?>
 <manifest type="software">
 	<title>Microsoft Chart</title>
 	<version>2.02</version>
@@ -25,7 +25,7 @@
 
 		I would much rather post copies of original distribution disks here, but this is all we've currently got.
 	</notes>
-	<disk id="disk01" size="368640" chs="40:2:9" img="static/CHART202.img" href="/disks/pc/apps/microsoft/chart/2.02/CHART202.json" md5="cc155799da50666f6233a21d1d81fe6e" md5json="bd8a3be09c88ee917b3d7f02f0add7a9">
+	<disk id="disk01" size="368640" chs="40:2:9" img="archive/CHART202.img" href="/disks/pc/apps/microsoft/chart/2.02/CHART202.json" md5="cc155799da50666f6233a21d1d81fe6e" md5json="bd8a3be09c88ee917b3d7f02f0add7a9">
 		<name>MS Chart 2.02 (Unofficial)</name>
 	</disk>
 </manifest>

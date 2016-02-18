@@ -83,7 +83,7 @@ C1PRAM.prototype.setBuffer = function(abMemory, start, end, cpu)
  */
 C1PRAM.init = function()
 {
-    var aeRAM = Component.getElementsByClass(window.document, C1PJSCLASS, "ram");
+    var aeRAM = Component.getElementsByClass(document, C1PJSCLASS, "ram");
     for (var iRAM=0; iRAM < aeRAM.length; iRAM++) {
         var eRAM = aeRAM[iRAM];
         var parmsRAM = Component.getComponentParms(eRAM);

@@ -3748,24 +3748,53 @@ X86.opGRP2wCL = function()
  *
  * From "The 8086 Book":
  *
- *  1. Divide AL by 0x0A; store the quotient in AH and the remainder in AL
- *  2. Set PF, SF, and ZF based on the AL register (CF, OF, and AF are undefined)
+ *      1. Divide AL by 0x0A; store the quotient in AH and the remainder in AL
+ *      2. Set PF, SF, and ZF based on the AL register (CF, OF, and AF are undefined)
+ *
+ * From "Undocumented Opcodes" (http://www.rcollins.org/secrets/opcodes/AAM.html):
+ *
+ *      AAM is shown as a two byte encoding used to divide AL by 10, putting the quotient in AH, and the remainder in AL.
+ *      However, AAM is listed in the op code map as a single byte instruction. This leads one to wonder why a two-byte
+ *      opcode is listed in the single-byte opcode map. In reality, the second byte is an undocumented operand to AAM.
+ *      The operand is the divisor. In its documented incarnation, AAM is encoded as D4 0A. The operand 0A is the divisor.
+ *      This divisor can be changed to any value between 0 and FF.
+ *
+ *      Using AAM in this manner is useful -- as it extends the CPU instruction set to include a DIV IMM8 instruction
+ *      that is not available from any other form of the DIV instruction. The extended form of the AAM instruction is also
+ *      useful because it sets the flags register according to the results, unlike the DIV or IDIV instruction.
+ *
+ *      According to Intel documentation, SF, ZF, and PF flags are set according to the result, while OF, AF, and CF
+ *      are undefined. However, if AAM were used strictly as documented, then the Sign Flag (SF) could not be set under
+ *      any circumstances, since anything divided by 10 will leave a remainder between 0 and 9. Obviously the remainder
+ *      could never be between 128 and 255 (or -1 and -128 if you prefer) if used only as documented. Since AAM divides
+ *      an 8 bit number by another 8-bit number, a carry or overflow could never occur. Therefore CF and OF always=0.
+ *      Intel claims they are undefined, but my observations are consistent with my theory.
+ *
+ *      Contrary to documentation, AAM will generate exceptions in real mode, protected mode, and V86 mode. AAM can only
+ *      generate Exception 0 -- divide by 0.
+ *
+ *      Finally, in the Pentium User's Manual, this heretofore undocumented form of AMM is described. Intel says:
+ *
+ *          Note: imm8 has the value of the instruction's second byte. The second byte under normally assembly [sic] of
+ *          this instruction will be 0A, however, explicit modification of this byte will result in the operation described
+ *          above and may alter results.
+ *
+ *      This instruction exists in this form on all Intel x86 processors. See the file [AAM.ASM](/docs/x86/ops/AAM/AAM.ASM)
+ *      for diagnostics source code for this instruction.
  *
  * @this {X86CPU}
  */
 X86.opAAM = function()
 {
-    var bDivisor = this.getIPByte();
-    if (!bDivisor) {
-        /*
-         * TODO: Generate a divide-by-zero exception, if appropriate for the current CPU
-         */
+    var b = this.getIPByte();
+    if (!b) {
+        X86.fnDIVOverflow.call(this);
         return;
     }
     var AL = this.regEAX & 0xff;
-    this.regEAX = (this.regEAX & ~0xffff) | ((AL / bDivisor) << 8) | (AL % bDivisor);
+    this.regEAX = (this.regEAX & ~0xffff) | ((AL / b) << 8) | (AL % b);
     /*
-     * setLogicResult() is slightly overkill, because technically, we don't need to clear CF and OF....
+     * setLogicResult() is perfect, because it ensures that CF and OF are cleared as well (see above for why).
      */
     this.setLogicResult(this.regEAX, X86.RESULT.BYTE);
     this.nStepCycles -= this.cycleCounts.nOpCyclesAAM;
@@ -3776,19 +3805,41 @@ X86.opAAM = function()
  *
  * From "The 8086 Book":
  *
- *  1. Multiply AH by 0x0A, add AH to AL, and store 0x00 in AH
- *  2. Set PF, SF, and ZF based on the AL register (CF, OF, and AF are undefined)
+ *      1. Multiply AH by 0x0A, add AH to AL, and store 0x00 in AH
+ *      2. Set PF, SF, and ZF based on the AL register (CF, OF, and AF are undefined)
+ *
+ * From "Undocumented Opcodes" (http://www.rcollins.org/secrets/opcodes/AAD.html):
+ *
+ *      This instruction is the multiplication counterpart to AAM. As is the case with AAM, AAD uses the second
+ *      byte as an operand. This operand is the multiplicand for AAD. Like AAM, AAD provides a way to execute a MUL
+ *      IMM8 that is unavailable through any other means in the CPU.
+ *
+ *      Unlike MUL, or IMUL, AAD sets all of the CPU status flags according to the result. Intel states that the
+ *      Overflow Flag (OF), Auxiliary carry Flag (AF), and Carry Flag (CF) are undefined. This assertion is incorrect.
+ *      These flags are fully defined, and are set consistently with respect to any other integer operations.
+ *
+ *      And again, like AMM, beginning with the Pentium, Intel has finally acknowledged the existence of the second
+ *      byte of this instruction as its operand. Intel says:
+ *
+ *          Note: imm8 has the value of the instruction's second byte. The second byte under normally assembly [sic]
+ *          of this instruction will be 0A, however, explicit modification of this byte will result in the operation
+ *          described above and may alter results.
+ *
+ *      This instruction exists in this form on all Intel x86 processors. See the file [AAD.ASM](/docs/x86/ops/AAD/AAD.ASM)
+ *      for diagnostics source code for this instruction.
+ *
+ * TODO: Confirm on real hardware that flags reflect the result of the final addition (ie, that the result of the
+ * intermediate multiplication is irrelevant); it also might be nice to confirm that an operand override has no effect.
  *
  * @this {X86CPU}
  */
 X86.opAAD = function()
 {
-    var bMultiplier = this.getIPByte();
-    this.regEAX = (this.regEAX & ~0xffff) | (((((this.regEAX >> 8) & 0xff) * bMultiplier) + this.regEAX) & 0xff);
-    /*
-     * setLogicResult() is slightly overkill, because technically, we don't need to clear CF and OF....
-     */
-    this.setLogicResult(this.regEAX, X86.RESULT.BYTE);
+    var dst = (this.regEAX & 0xff);
+    var src = (((this.regEAX >> 8) & 0xff) * this.getIPByte())|0;
+    var result = (dst + src)|0;
+    this.regEAX = (this.regEAX & ~0xffff) | (result & 0xff);
+    this.setArithResult(dst, src, result, X86.RESULT.BYTE | X86.RESULT.ALL);
     this.nStepCycles -= this.cycleCounts.nOpCyclesAAD;
 };
 
@@ -4187,7 +4238,11 @@ X86.opLOCK = function()
 /**
  * op=0xF1 (INT1; undocumented; 80186/80188 and up; TODO: Verify)
  *
- * I still treat this as undefined, until I can verify the behavior on real hardware.
+ * Note that this handler is assigned to opcode 0xF1 only on 80186 processors and up, because on 8086/8086
+ * processors, we treat that opcode as an alias for LOCK (0xF0).
+ *
+ * For the 80186 and up, and we treat it as undefined.  Starting with the 80386, this opcode is known as INT1
+ * or ICEBP, since it effectively performs an INT 0x01 but is normally only performed with an ICE.
  *
  * @this {X86CPU}
  */

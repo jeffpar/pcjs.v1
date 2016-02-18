@@ -6366,23 +6366,23 @@ if (DEBUGGER) {
         }
 
         if (sAddr == "state") {
-            var s = this.cmp.powerOff(true);
+            var sState = this.cmp.powerOff(true);
             if (sLen == "console") {
                 /*
                  * Console buffers are notoriously small, and even the following code, which breaks the
                  * data into parts (eg, "d state console 1", "d state console 2", etc) just isn't that helpful.
                  *
                  *      var nPart = +sBytes;
-                 *      if (nPart) s = s.substr(1000000 * (nPart-1), 1000000);
+                 *      if (nPart) sState = sState.substr(1000000 * (nPart-1), 1000000);
                  *
                  * So, the best way to capture a large machine state is to run your own local server and use
                  * server-side storage.  Take a look at the "Save" binding in computer.js, which binds an HTML
                  * control to the computer.powerOff() and computer.saveServerState() functions.
                  */
-                console.log(s);
+                console.log(sState);
             } else {
                 this.doClear();
-                this.println(s);
+                this.println(sState);
             }
             return;
         }
@@ -8072,6 +8072,7 @@ if (DEBUGGER) {
                         break;
                     }
                     this.println((APPNAME || "PCjs") + " version " + (XMLVERSION || APPVERSION) + " (" + this.cpu.model + (COMPILED? ",RELEASE" : (DEBUG? ",DEBUG" : ",NODEBUG")) + (PREFETCH? ",PREFETCH" : ",NOPREFETCH") + (TYPEDARRAYS? ",TYPEDARRAYS" : (BYTEARRAYS? ",BYTEARRAYS" : ",LONGARRAYS")) + (BACKTRACK? ",BACKTRACK" : ",NOBACKTRACK") + ')');
+                    this.println(web.getUserAgent());
                     break;
                 case 'x':
                     this.doExecOptions(asArgs);
@@ -8131,7 +8132,7 @@ if (DEBUGGER) {
      */
     Debugger.init = function()
     {
-        var aeDbg = Component.getElementsByClass(window.document, PCJSCLASS, "debugger");
+        var aeDbg = Component.getElementsByClass(document, PCJSCLASS, "debugger");
         for (var iDbg = 0; iDbg < aeDbg.length; iDbg++) {
             var eDbg = aeDbg[iDbg];
             var parmsDbg = Component.getComponentParms(eDbg);

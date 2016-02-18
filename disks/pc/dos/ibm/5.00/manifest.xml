@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.20.8/manifest.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.20.9/manifest.xsl"?>
 <manifest type="software">
 	<title>PC-DOS</title>
 	<version>5.00</version>
@@ -7,13 +7,13 @@
 	<category>Operating System</category>
 	<author>IBM/Microsoft</author>
 	<releaseDate/>
-	<disk id="disk01" size="737280" chs="80:2:9" img="static/PCDOS500-DISK1-720K.img" href="/disks/pc/dos/ibm/5.00/PCDOS500-DISK1-720K.json" md5="14fd673f05b595a84b9f581ccd166d62" md5json="7ae70067f70e6c5fa64d6b0e64d9178b">
+	<disk id="disk01" size="737280" chs="80:2:9" img="archive/PCDOS500-DISK1-720K.img" href="/disks/pc/dos/ibm/5.00/PCDOS500-DISK1-720K.json" md5="14fd673f05b595a84b9f581ccd166d62" md5json="7ae70067f70e6c5fa64d6b0e64d9178b">
 		<name>PC-DOS 5.00 (Disk 1)</name>
 	</disk>
-	<disk id="disk02" size="737280" chs="80:2:9" img="static/PCDOS500-DISK2-720K.img" href="/disks/pc/dos/ibm/5.00/PCDOS500-DISK2-720K.json" md5="38d4d77fdd68b1a53a2c72d0ddc9f737" md5json="d033bf53fbbddc8f3326804c6bc333cd">
+	<disk id="disk02" size="737280" chs="80:2:9" img="archive/PCDOS500-DISK2-720K.img" href="/disks/pc/dos/ibm/5.00/PCDOS500-DISK2-720K.json" md5="38d4d77fdd68b1a53a2c72d0ddc9f737" md5json="d033bf53fbbddc8f3326804c6bc333cd">
 		<name>PC-DOS 5.00 (Disk 2)</name>
 	</disk>
-	<disk id="disk03" size="737280" chs="80:2:9" img="static/PCDOS500-DISK3-720K.img" href="/disks/pc/dos/ibm/5.00/PCDOS500-DISK3-720K.json" md5="7f364385cad9e3257bdedafeea25bb24" md5json="73c233f18dfa662a9ed917a1af1b0fad">
+	<disk id="disk03" size="737280" chs="80:2:9" img="archive/PCDOS500-DISK3-720K.img" href="/disks/pc/dos/ibm/5.00/PCDOS500-DISK3-720K.json" md5="7f364385cad9e3257bdedafeea25bb24" md5json="73c233f18dfa662a9ed917a1af1b0fad">
 		<name>PC-DOS 5.00 (Disk 3)</name>
 	</disk>
 </manifest>

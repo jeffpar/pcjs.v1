@@ -3001,7 +3001,7 @@ HDC.aATCPortOutput = {
  */
 HDC.init = function()
 {
-    var aeHDC = Component.getElementsByClass(window.document, PCJSCLASS, "hdc");
+    var aeHDC = Component.getElementsByClass(document, PCJSCLASS, "hdc");
     for (var iHDC = 0; iHDC < aeHDC.length; iHDC++) {
         var eHDC = aeHDC[iHDC];
         var parmsHDC = Component.getComponentParms(eHDC);

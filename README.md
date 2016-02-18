@@ -306,7 +306,7 @@ Updating PCjs
 
 To start developing features for a new version of PCjs, here are the recommended steps:
  
-1. Change the version number in the root [package.json](/package.json)
+1. Change the version number in the root [package.json](package.json) and [_config.yml](_config.yml)
 2. Run the "grunt promote" task to bump the version in all the machine XML files
 3. Make changes
 4. Run "grunt" to build new versions of the apps (eg, "/versions/pcjs/1.x.x/pc.js")

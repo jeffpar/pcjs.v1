@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.20.8/manifest.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.20.9/manifest.xsl"?>
 <manifest type="software">
 	<title>Microsoft Windows 1.02</title>
-	<disk id="disk01" size="368640" chs="40:2:9" img="static/WIN102-DISK1-SETUP.img" href="/disks/pc/windows/1.02/WIN102-DISK1-SETUP.json" md5="be2f9d03a2c47027197665c67cef819e" md5json="a03edae429e0cbb5a01b9dcd6edf8c03">
+	<disk id="disk01" size="368640" chs="40:2:9" img="archive/WIN102-DISK1-SETUP.img" href="/disks/pc/windows/1.02/WIN102-DISK1-SETUP.json" md5="be2f9d03a2c47027197665c67cef819e" md5json="a03edae429e0cbb5a01b9dcd6edf8c03">
 		<name>Windows 1.02 (SETUP)</name>
 	</disk>
-	<disk id="disk02" size="368640" chs="40:2:9" img="static/WIN102-DISK2-BUILD.img" href="/disks/pc/windows/1.02/WIN102-DISK2-BUILD.json" md5="575040e24f0b5d8cab403c84b323fa12" md5json="70594619ba4c29a866c243c14fc4d71f">
+	<disk id="disk02" size="368640" chs="40:2:9" img="archive/WIN102-DISK2-BUILD.img" href="/disks/pc/windows/1.02/WIN102-DISK2-BUILD.json" md5="575040e24f0b5d8cab403c84b323fa12" md5json="70594619ba4c29a866c243c14fc4d71f">
 		<name>Windows 1.02 (BUILD)</name>
 	</disk>
-	<disk id="disk03" size="368640" chs="40:2:9" img="static/WIN102-DISK3-UTILITY.img" href="/disks/pc/windows/1.02/WIN102-DISK3-UTILITY.json" md5="2e56430424e6152f402729484a7028f9" md5json="5bac592b0f7864b19e000f466fb87876">
+	<disk id="disk03" size="368640" chs="40:2:9" img="archive/WIN102-DISK3-UTILITY.img" href="/disks/pc/windows/1.02/WIN102-DISK3-UTILITY.json" md5="2e56430424e6152f402729484a7028f9" md5json="5bac592b0f7864b19e000f466fb87876">
 		<name>Windows 1.02 (UTILITY)</name>
 	</disk>
-	<disk id="disk04" size="368640" chs="40:2:9" img="static/WIN102-DISK4-FONT.img" href="/disks/pc/windows/1.02/WIN102-DISK4-FONT.json" md5="1e3dae7eec3af331b641e0ec9b41e404" md5json="8ed1624b6804731693b8c1a632ba6096">
+	<disk id="disk04" size="368640" chs="40:2:9" img="archive/WIN102-DISK4-FONT.img" href="/disks/pc/windows/1.02/WIN102-DISK4-FONT.json" md5="1e3dae7eec3af331b641e0ec9b41e404" md5json="8ed1624b6804731693b8c1a632ba6096">
 		<name>Windows 1.02 (FONT)</name>
 	</disk>
-	<disk id="disk05" size="368640" chs="40:2:9" img="static/WIN102-DISK5-APPS.img" href="/disks/pc/windows/1.02/WIN102-DISK5-APPS.json" md5="a51bf8ffe94cb50f13b08aded3c19e2a" md5json="7058fba999b79081e97b23bdcdedb966">
+	<disk id="disk05" size="368640" chs="40:2:9" img="archive/WIN102-DISK5-APPS.img" href="/disks/pc/windows/1.02/WIN102-DISK5-APPS.json" md5="a51bf8ffe94cb50f13b08aded3c19e2a" md5json="7058fba999b79081e97b23bdcdedb966">
 		<name>Windows 1.02 (APPS)</name>
 	</disk>
-	<disk id="disk06" size="368640" chs="40:2:9" img="static/WIN102-DISK6-WRITE.img" href="/disks/pc/windows/1.02/WIN102-DISK6-WRITE.json" md5="316bab57c7c4de6c6fd5fce44cab4386" md5json="e81365c733c4bd3964a79fe6641bbce4">
+	<disk id="disk06" size="368640" chs="40:2:9" img="archive/WIN102-DISK6-WRITE.img" href="/disks/pc/windows/1.02/WIN102-DISK6-WRITE.json" md5="316bab57c7c4de6c6fd5fce44cab4386" md5json="e81365c733c4bd3964a79fe6641bbce4">
 		<name>Windows 1.02 (WRITE)</name>
 	</disk>
 </manifest>

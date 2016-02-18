@@ -1747,6 +1747,10 @@ if (I386) {
     X86.aOps0F386 = [];
     X86.aOps0F386[0x05] = X86.opInvalid;        // the 80286 LOADALL opcode (LOADALL286) is invalid on the 80386
     X86.aOps0F386[0x07] = X86.opLOADALL386;
+    X86.aOps0F386[0x10] = X86.opMOVmb;          // see the undocumented [UMOV](/docs/x86/ops/UMOV/) instruction
+    X86.aOps0F386[0x11] = X86.opMOVmw;          // see the undocumented [UMOV](/docs/x86/ops/UMOV/) instruction
+    X86.aOps0F386[0x12] = X86.opMOVrb;          // see the undocumented [UMOV](/docs/x86/ops/UMOV/) instruction
+    X86.aOps0F386[0x13] = X86.opMOVrw;          // see the undocumented [UMOV](/docs/x86/ops/UMOV/) instruction
     X86.aOps0F386[0x20] = X86.opMOVrc;
     X86.aOps0F386[0x21] = X86.opMOVrd;
     X86.aOps0F386[0x22] = X86.opMOVcr;

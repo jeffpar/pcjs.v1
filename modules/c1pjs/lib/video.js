@@ -533,7 +533,7 @@ C1PVideo.prototype.updateWindow = function(col, row, b)
  */
 C1PVideo.init = function()
 {
-    var aeVideo = Component.getElementsByClass(window.document, C1PJSCLASS, "video");
+    var aeVideo = Component.getElementsByClass(document, C1PJSCLASS, "video");
     for (var iVideo=0; iVideo < aeVideo.length; iVideo++) {
         var eVideo = aeVideo[iVideo];
         var parmsVideo = Component.getComponentParms(eVideo);
@@ -547,7 +547,7 @@ C1PVideo.init = function()
          * I've since settled on a better work-around in keyboard.js, so I've stopped worrying about how to make
          * "autocapitalize" work here.
          */
-        var eCanvas = window.document.createElement("canvas");
+        var eCanvas = document.createElement("canvas");
         if (eCanvas === undefined || !eCanvas.getContext) {
             eVideo.innerHTML = "<br/>Missing &lt;canvas&gt; support. Please try a newer web browser.";
             return;

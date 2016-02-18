@@ -5379,7 +5379,7 @@ ChipSet.aPortOutput5170 = {
  */
 ChipSet.init = function()
 {
-    var aeChipSet = Component.getElementsByClass(window.document, PCJSCLASS, "chipset");
+    var aeChipSet = Component.getElementsByClass(document, PCJSCLASS, "chipset");
     for (var iChip = 0; iChip < aeChipSet.length; iChip++) {
         var eChipSet = aeChipSet[iChip];
         var parmsChipSet = Component.getComponentParms(eChipSet);

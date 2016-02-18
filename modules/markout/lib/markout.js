@@ -116,6 +116,7 @@ function MarkOut(sMD, sIndent, req, aParms, fDebug, fMachineXML, fAutoHeading)
     this.sHTML = null;
     this.aIDs = [];         // this keeps track of auto-generated ID attributes for page elements, to insure uniqueness
     this.aMachines = [];    // this keeps track of embedded machines on the page
+    this.buildOptions = {}; // this keeps track of any build options specified on the page
     this.aMachineDefs = {}; // this keeps track of any machine definitions at the top of the file (as part of any Jekyll "Front Matter")
 }
 
@@ -266,6 +267,17 @@ MarkOut.prototype.getMachines = function()
 };
 
 /**
+ * getBuildOptions()
+ *
+ * @this {MarkOut}
+ * @return {Object} containing build options, if any
+ */
+MarkOut.prototype.getBuildOptions = function()
+{
+    return this.buildOptions;
+};
+
+/**
  * generateID(sText)
  *
  * Generate an ID from the given text, by basically converting it to lower case, converting anything
@@ -309,12 +321,13 @@ MarkOut.aHTMLEntities = {
 };
 
 /*
- * This is a list of "reserved" Front Matter machine properties (ie, properties that will NOT be
- * bundled as strings in the 'parms' property).  Any machine property not in this list will be added
- * to the 'parms' object as a string property.
+ * This is a list of "reserved" Front Matter machine properties (ie, properties that will NOT be bundled as
+ * strings in the 'parms' property).  Any machine property not in this list will be added to the 'parms' object
+ * as a string property.
  *
  *      'id' (eg, "ibm5150")
- *      'type' (eg, "pc")
+ *      'name' (eg, "IBM PC (Model 5150) with Monochrome Display")
+ *      'type' (eg, "pc" or "pc-dbg")
  *      'config' (eg, "machine.xml")
  *      'template' (eg, "machine.xsl")
  *      'uncompiled' (eg, true)
@@ -325,10 +338,24 @@ MarkOut.aHTMLEntities = {
  *
  *      'state' (eg, "state.json")
  *      'messages' (eg, "disk")
+ *      'autopower' (eg, true)
  *
  * and any other string-based property you wish to pass through to PCjs (via the embedPC() sParms parameter).
+ *
+ * As for any other NON-string-based property you might want to pass through sParms, like 'autopower', add it to the
+ * aFMBooleanMachineProps table, and it will be unquoted (ie, true or false rather than "true" or "false"); also note
+ * that even though the only non-reserved, non-string properties we currently use are booleans, that table is not
+ * really limited to booleans (eg, they could just as well be numeric properties).
+ *
+ * The other purpose that aFMBooleanMachineProps serves is to remap any lower-case Front Matter keywords to their
+ * camelCase equivalents; although in hindsight it was probably a stupid decision, all our machine definition properties
+ * (whether as attributes in a XML file or as Front Matter keywords at the top of a Markdown file) are purely lower-case,
+ * which are then converted to camelCase prior to calling the JavaScript components.
  */
-MarkOut.aFMReservedMachineProps = ['id', 'type', 'config', 'template', 'uncompiled', 'automount', 'parms'];
+MarkOut.aFMBooleanMachineProps = {
+    'autopower': "autoPower"
+};
+MarkOut.aFMReservedMachineProps = ['id', 'name', 'type', 'config', 'template', 'uncompiled', 'automount', 'parms'];
 
 /**
  * convertMD()
@@ -394,6 +421,7 @@ MarkOut.prototype.convertMD = function(sIndent)
             /*
              * Extract machine definitions, if any, from the Front Matter.
              */
+            var aSubMatch;
             var aMachineDefs = aMatch[1].match(/\nmachines:([\s\S]*?)\n([^\s]|$)/);
             if (aMachineDefs) {
                 var asMachines = aMachineDefs[1].split(/\n[ \t]+-\s*/);
@@ -454,6 +482,10 @@ MarkOut.prototype.convertMD = function(sIndent)
                     machine['parms'] = '{';
                     for (sProp in machine) {
                         if (MarkOut.aFMReservedMachineProps.indexOf(sProp) < 0) {
+                            if (MarkOut.aFMBooleanMachineProps[sProp]) {
+                                machine['parms'] += MarkOut.aFMBooleanMachineProps[sProp] + ':' + machine[sProp] + ',';
+                                continue;
+                            }
                             machine['parms'] += sProp + ':"' + machine[sProp] + '",';
                         }
                     }
@@ -466,9 +498,14 @@ MarkOut.prototype.convertMD = function(sIndent)
              * heading with the same value.
              */
             if (this.fAutoHeading) {
-                aMatch = aMatch[1].match(/title:\s*(.*?)\s*?\n/);
-                if (aMatch) sMD = aMatch[1] + "\n---\n\n" + sMD;
+                aSubMatch = aMatch[1].match(/title:\s*(.*?)\s*?\n/);
+                if (aSubMatch) sMD = aSubMatch[1] + "\n---\n\n" + sMD;
             }
+            /*
+             * If a "build" ID element existed in the Front Matter, capture it.
+             */
+            aSubMatch = aMatch[1].match(/build:\s*(\S*)/);
+            if (aSubMatch) this.buildOptions.id = aSubMatch[1];
         }
     }
 
@@ -965,18 +1002,18 @@ MarkOut.prototype.convertMDImageLinks = function(sBlock, sIndent)
                     asParts.splice(2, 1);
                 }
                 /*
-                 * If the image link (aMatch[2]) contains "static/" but the sURL is external, AND we're in
-                 * "reveal mode", then transform sURL into a "static/" URL as well; encodeURL() will take care
+                 * If the image link (aMatch[2]) contains "archive/" but the sURL is external, AND we're in
+                 * "reveal mode", then transform sURL into a "archive/" URL as well; encodeURL() will take care
                  * of the rest of the transformation.
                  *
                  * This feature is used with READMEs like /pubs/pc/programming/README.md, where normally we
                  * want to link to documents stored on sites like archive.org, minuszerodegrees.net or bitsavers,
                  * unless you're in "reveal mode", in which case we'll serve up our own "backup copies".
                  *
-                 * The assumption here is that if we have "static" thumbs, then we should also have full "static"
+                 * The assumption here is that if we have "archive" thumbs, then we should also have full "archive"
                  * copies as well.
                  */
-                if (aMatch[2].indexOf("static/") >= 0 && sURL.indexOf("://") > 0 && (this.fDebug || net.hasParm(net.REVEAL_COMMAND, net.REVEAL_PDFS, this.req))) {
+                if (aMatch[2].indexOf("archive/") >= 0 && sURL.indexOf("://") > 0 && (this.fDebug || net.hasParm(net.REVEAL_COMMAND, net.REVEAL_PDFS, this.req))) {
                     sURL = aMatch[2].replace("/thumbs/", "/").replace(" 1.jpeg", ".pdf").replace(".jpg", ".pdf");
                 }
                 sURL = net.encodeURL(sURL, this.req, this.fDebug);
@@ -1075,11 +1112,12 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
      * Before we start looking for Markdown-style machine links, see if there are any Liquid-style machines,
      * (in case this Markdown file is part of a Jekyll installation) and convert them to Markdown-style links.
      */
-    var reIncludes = /\{%\s*include machine\.html\s+id="(.*?)"\s*%}/g;
+
+    var reIncludes = /\{%\s*include\s+machine\.html\s+id=(["'])(.*?)\1\s*%}/g;
 
     while ((aMatch = reIncludes.exec(sBlock))) {
         sReplacement = "";
-        sMachineID = aMatch[1];
+        sMachineID = aMatch[2];
         if (!this.fMachineXML && this.aMachineDefs[sMachineID]) {
             var machine = this.aMachineDefs[sMachineID];
             sMachine = machine['type'] || "pc";
@@ -1089,11 +1127,14 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
             sMachineXSLFile = machine['template'] || "";
             sMachineVersion = (machine['uncompiled'] && machine['uncompiled'] == "true"? "uncompiled" : "");
             sMachineParms = machine['parms'] || "";
-            sReplacement = "[Embedded PC](" + sMachineXMLFile + ' "' + sMachine + 'js!' + sMachineID + '!' + sMachineXSLFile + '!!' + sMachineOptions + '!' + sMachineParms + '")';
+            sReplacement = machine['name'] || "Embedded PC";
+            sReplacement = "[" + sReplacement + "](" + sMachineXMLFile + ' "' + sMachine + 'js!' + sMachineID + '!' + sMachineXSLFile + '!!' + sMachineOptions + '!' + sMachineParms + '")';
         }
         sBlock = sBlock.replace(aMatch[0], sReplacement);
         reIncludes.lastIndex = 0;       // reset lastIndex, since we just modified the string that reIncludes is iterating over
     }
+
+    sBlock = sBlock.replace(/\{%\s*include\s+build\.html\s+id=(["'])(.*?)\1\s*%}/g, '<div class="buildpc" id=$1$2$1></div>');
 
     /*
      * Start looking for Markdown-style machine links now...

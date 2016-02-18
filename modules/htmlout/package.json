@@ -1,6 +1,5 @@
 {
   "name": "htmlout",
-  "version": "0.1.0",
   "description": "Filters HTTP requests and creates default documents from HTML templates",
   "main": "./lib/htmlout",
   "scripts": {

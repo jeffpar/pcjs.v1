@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.20.8/manifest.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.20.9/manifest.xsl"?>
 <manifest type="software">
 	<title>PC-DOS</title>
 	<version>4.00</version>
@@ -7,19 +7,19 @@
 	<category>Operating System</category>
 	<author>IBM/Microsoft</author>
 	<releaseDate/>
-	<disk id="disk01" size="368640" chs="40:2:9" img="static/PCDOS400-DISK1.img" href="/disks/pc/dos/ibm/4.00/PCDOS400-DISK1.json" md5="5b57cb48f46e3d0aa76b286ec40cf2ad" md5json="ae84a789ffd778467103b823c3af7193">
+	<disk id="disk01" size="368640" chs="40:2:9" img="archive/PCDOS400-DISK1.img" href="/disks/pc/dos/ibm/4.00/PCDOS400-DISK1.json" md5="5b57cb48f46e3d0aa76b286ec40cf2ad" md5json="ae84a789ffd778467103b823c3af7193">
 		<name>PC-DOS 4.00 (Disk 1)</name>
 	</disk>
-	<disk id="disk02" size="368640" chs="40:2:9" img="static/PCDOS400-DISK2.img" href="/disks/pc/dos/ibm/4.00/PCDOS400-DISK2.json" md5="91403cee04802a0b28ccfd3e22511c72" md5json="9fced9cf325351f433ea40f4c6dab45e">
+	<disk id="disk02" size="368640" chs="40:2:9" img="archive/PCDOS400-DISK2.img" href="/disks/pc/dos/ibm/4.00/PCDOS400-DISK2.json" md5="91403cee04802a0b28ccfd3e22511c72" md5json="9fced9cf325351f433ea40f4c6dab45e">
 		<name>PC-DOS 4.00 (Disk 2)</name>
 	</disk>
-	<disk id="disk03" size="368640" chs="40:2:9" img="static/PCDOS400-DISK3.img" href="/disks/pc/dos/ibm/4.00/PCDOS400-DISK3.json" md5="ce397160ca9338aee2468ca19dbf0cec" md5json="b250a88cfe7b70cb6c3fd2756cafc55e">
+	<disk id="disk03" size="368640" chs="40:2:9" img="archive/PCDOS400-DISK3.img" href="/disks/pc/dos/ibm/4.00/PCDOS400-DISK3.json" md5="ce397160ca9338aee2468ca19dbf0cec" md5json="b250a88cfe7b70cb6c3fd2756cafc55e">
 		<name>PC-DOS 4.00 (Disk 3)</name>
 	</disk>
-	<disk id="disk04" size="368640" chs="40:2:9" img="static/PCDOS400-DISK4.img" href="/disks/pc/dos/ibm/4.00/PCDOS400-DISK4.json" md5="3e4a24bc28238076a3463e1565a20fb5" md5json="5cf23afdb6e1320333195abdbddea80f">
+	<disk id="disk04" size="368640" chs="40:2:9" img="archive/PCDOS400-DISK4.img" href="/disks/pc/dos/ibm/4.00/PCDOS400-DISK4.json" md5="3e4a24bc28238076a3463e1565a20fb5" md5json="5cf23afdb6e1320333195abdbddea80f">
 		<name>PC-DOS 4.00 (Disk 4)</name>
 	</disk>
-	<disk id="disk05" size="368640" chs="40:2:9" img="static/PCDOS400-DISK5.img" href="/disks/pc/dos/ibm/4.00/PCDOS400-DISK5.json" md5="950630f35cfc9296d859209290e30a9d" md5json="f689321e2efd53aa0349b5770eee1d9e">
+	<disk id="disk05" size="368640" chs="40:2:9" img="archive/PCDOS400-DISK5.img" href="/disks/pc/dos/ibm/4.00/PCDOS400-DISK5.json" md5="950630f35cfc9296d859209290e30a9d" md5json="f689321e2efd53aa0349b5770eee1d9e">
 		<name>PC-DOS 4.00 (Disk 5)</name>
 	</disk>
 </manifest>

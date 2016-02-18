@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.20.8/manifest.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.20.9/manifest.xsl"?>
 <manifest type="software">
 	<title>MINIX</title>
 	<version>1.1</version>
-	<disk id="disk01" size="1228800" chs="80:2:15" img="static/MINIX11-DISK1-BOOT.img" href="/disks/pc/minix/1.1/MINIX11-DISK1-BOOT.json" md5="9b291bfcaa4e5827498a695f367a1ba3" md5json="af44589551017d9e89a7612cb12841bd">
+	<disk id="disk01" size="1228800" chs="80:2:15" img="archive/MINIX11-DISK1-BOOT.img" href="/disks/pc/minix/1.1/MINIX11-DISK1-BOOT.json" md5="9b291bfcaa4e5827498a695f367a1ba3" md5json="af44589551017d9e89a7612cb12841bd">
 		<name>Minix Boot (Disk 1)</name>
 	</disk>
-	<disk id="disk02" size="1228800" chs="80:2:15" img="static/MINIX11-DISK2-ROOT.img" href="/disks/pc/minix/1.1/MINIX11-DISK2-ROOT.json" md5="76da894a087ebde24c3824b9ca5db986" md5json="eb9bfcef965ae843375f8dcd70c139be">
+	<disk id="disk02" size="1228800" chs="80:2:15" img="archive/MINIX11-DISK2-ROOT.img" href="/disks/pc/minix/1.1/MINIX11-DISK2-ROOT.json" md5="76da894a087ebde24c3824b9ca5db986" md5json="eb9bfcef965ae843375f8dcd70c139be">
 		<name>Minix Root Filesystem (Disk 2)</name>
 	</disk>
-	<disk id="disk03" size="1228800" chs="80:2:15" img="static/MINIX11-DISK3-USR.img" href="/disks/pc/minix/1.1/MINIX11-DISK3-USR.json" md5="3da7a86d60b21354fab6cf6740101fa6" md5json="acb7015697562bb5c3d126e19482a7ef">
+	<disk id="disk03" size="1228800" chs="80:2:15" img="archive/MINIX11-DISK3-USR.img" href="/disks/pc/minix/1.1/MINIX11-DISK3-USR.json" md5="3da7a86d60b21354fab6cf6740101fa6" md5json="acb7015697562bb5c3d126e19482a7ef">
 		<name>Minix User Files (Disk 3)</name>
 	</disk>
-	<disk id="disk04" size="1228800" chs="80:2:15" img="static/MINIX11-DISK4-KERNEL.img" href="/disks/pc/minix/1.1/MINIX11-DISK4-KERNEL.json" md5="552a6429014163771bf6a3d5e70df212" md5json="b0410747e618817524bdad186b367a95">
+	<disk id="disk04" size="1228800" chs="80:2:15" img="archive/MINIX11-DISK4-KERNEL.img" href="/disks/pc/minix/1.1/MINIX11-DISK4-KERNEL.json" md5="552a6429014163771bf6a3d5e70df212" md5json="b0410747e618817524bdad186b367a95">
 		<name>Minix Kernel (Disk 4)</name>
 	</disk>
-	<disk id="disk05" size="1228800" chs="80:2:15" img="static/MINIX11-DISK5-TOOLS.img" href="/disks/pc/minix/1.1/MINIX11-DISK5-TOOLS.json" md5="7f7b045290374b198623ad25d125251f" md5json="81c1d9b807db35607c29e4b0b836672e">
+	<disk id="disk05" size="1228800" chs="80:2:15" img="archive/MINIX11-DISK5-TOOLS.img" href="/disks/pc/minix/1.1/MINIX11-DISK5-TOOLS.json" md5="7f7b045290374b198623ad25d125251f" md5json="81c1d9b807db35607c29e4b0b836672e">
 		<name>Minix Tools (Disk 5)</name>
 	</disk>
 </manifest>

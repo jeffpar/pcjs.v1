@@ -1,41 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.20.8/manifest.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.20.9/manifest.xsl"?>
 <manifest type="software">
 	<title>MS OS/2 SDK 1.02</title>
-	<disk id="disk04" size="737280" chs="80:2:9" img="static/MSOS2TK1.img" href="/disks/pc/tools/microsoft/os2/sdk/1.02/MSOS2-SDK102-DISK04.json" md5="e6b2bf28e29654dbfbb32b0bf4377038" md5json="978662c324153dbacf0fc9ac3a9b0c61">
+	<disk id="disk04" size="737280" chs="80:2:9" img="archive/MSOS2TK1.img" href="/disks/pc/tools/microsoft/os2/sdk/1.02/MSOS2-SDK102-DISK04.json" md5="e6b2bf28e29654dbfbb32b0bf4377038" md5json="978662c324153dbacf0fc9ac3a9b0c61">
 		<name>MS OS/2 SDK 1.02: TOOLKIT1</name>
 	</disk>
-	<disk id="disk05" size="737280" chs="80:2:9" img="static/MSOS2TK2.img" href="/disks/pc/tools/microsoft/os2/sdk/1.02/MSOS2-SDK102-DISK05.json" md5="f44940ccf9c063d3aaf381dce16f6caa" md5json="951fc0498bfacdc2a1ae3b77e4ea1bcb">
+	<disk id="disk05" size="737280" chs="80:2:9" img="archive/MSOS2TK2.img" href="/disks/pc/tools/microsoft/os2/sdk/1.02/MSOS2-SDK102-DISK05.json" md5="f44940ccf9c063d3aaf381dce16f6caa" md5json="951fc0498bfacdc2a1ae3b77e4ea1bcb">
 		<name>MS OS/2 SDK 1.02: TOOLKIT2</name>
 	</disk>
-	<disk id="disk06" size="737280" chs="80:2:9" img="static/MSOS2UT1.img" href="/disks/pc/tools/microsoft/os2/sdk/1.02/MSOS2-SDK102-DISK06.json" md5="3fa28e90175ff371492ffde81dd2c17f" md5json="78ccbfa853a0657a19f18af7b1e51e4e">
+	<disk id="disk06" size="737280" chs="80:2:9" img="archive/MSOS2UT1.img" href="/disks/pc/tools/microsoft/os2/sdk/1.02/MSOS2-SDK102-DISK06.json" md5="3fa28e90175ff371492ffde81dd2c17f" md5json="78ccbfa853a0657a19f18af7b1e51e4e">
 		<name>MS OS/2 SDK 1.02: UTILITY1</name>
 	</disk>
-	<disk id="disk07" size="737280" chs="80:2:9" img="static/MSOS2UT2.img" href="/disks/pc/tools/microsoft/os2/sdk/1.02/MSOS2-SDK102-DISK07.json" md5="c154e9ba6e6c4634e131f117e44055f4" md5json="b3e73ce8085a5ac66c28667ff2023f9e">
+	<disk id="disk07" size="737280" chs="80:2:9" img="archive/MSOS2UT2.img" href="/disks/pc/tools/microsoft/os2/sdk/1.02/MSOS2-SDK102-DISK07.json" md5="c154e9ba6e6c4634e131f117e44055f4" md5json="b3e73ce8085a5ac66c28667ff2023f9e">
 		<name>MS OS/2 SDK 1.02: UTILITY2</name>
 	</disk>
-	<disk id="disk08" size="737280" chs="80:2:9" img="static/MSOS2C1.img" href="/disks/pc/tools/microsoft/os2/sdk/1.02/MSOS2-SDK102-DISK08.json" md5="aa67eac9c8680b50147801dc01a1f53a" md5json="581fac50c41fa668a2e94b554f8ddb12">
+	<disk id="disk08" size="737280" chs="80:2:9" img="archive/MSOS2C1.img" href="/disks/pc/tools/microsoft/os2/sdk/1.02/MSOS2-SDK102-DISK08.json" md5="aa67eac9c8680b50147801dc01a1f53a" md5json="581fac50c41fa668a2e94b554f8ddb12">
 		<name>MS OS/2 SDK 1.02: CBIN1</name>
 	</disk>
-	<disk id="disk09" size="737280" chs="80:2:9" img="static/MSOS2C2.img" href="/disks/pc/tools/microsoft/os2/sdk/1.02/MSOS2-SDK102-DISK09.json" md5="9299b25bc5aa1c08e5137d1a8a191f83" md5json="b21bd1d2b228f453385e1f027233f6e1">
+	<disk id="disk09" size="737280" chs="80:2:9" img="archive/MSOS2C2.img" href="/disks/pc/tools/microsoft/os2/sdk/1.02/MSOS2-SDK102-DISK09.json" md5="9299b25bc5aa1c08e5137d1a8a191f83" md5json="b21bd1d2b228f453385e1f027233f6e1">
 		<name>MS OS/2 SDK 1.02: CBIN2</name>
 	</disk>
-	<disk id="disk10" size="737280" chs="80:2:9" img="static/MSOS2C3.img" href="/disks/pc/tools/microsoft/os2/sdk/1.02/MSOS2-SDK102-DISK10.json" md5="b8760d4e5b3eb371b28d54b46f587183" md5json="abe81a240c41cabbba32db8548e27547">
+	<disk id="disk10" size="737280" chs="80:2:9" img="archive/MSOS2C3.img" href="/disks/pc/tools/microsoft/os2/sdk/1.02/MSOS2-SDK102-DISK10.json" md5="b8760d4e5b3eb371b28d54b46f587183" md5json="abe81a240c41cabbba32db8548e27547">
 		<name>MS OS/2 SDK 1.02: CLIB1</name>
 	</disk>
-	<disk id="disk11" size="737280" chs="80:2:9" img="static/MSOS2C4.img" href="/disks/pc/tools/microsoft/os2/sdk/1.02/MSOS2-SDK102-DISK11.json" md5="71d9f449e330d4618214406c4a0ad435" md5json="d6f96112df8b66cbfbf4b55d6e9ad0fe">
+	<disk id="disk11" size="737280" chs="80:2:9" img="archive/MSOS2C4.img" href="/disks/pc/tools/microsoft/os2/sdk/1.02/MSOS2-SDK102-DISK11.json" md5="71d9f449e330d4618214406c4a0ad435" md5json="d6f96112df8b66cbfbf4b55d6e9ad0fe">
 		<name>MS OS/2 SDK 1.02: CLIB2</name>
 	</disk>
-	<disk id="disk12" size="737280" chs="80:2:9" img="static/MSOS2ASM.img" href="/disks/pc/tools/microsoft/os2/sdk/1.02/MSOS2-SDK102-DISK12.json" md5="fa70ed5d9be6e8baaa53132342340bd0" md5json="dc077844b3e205fd241a4ff4b35f626e">
+	<disk id="disk12" size="737280" chs="80:2:9" img="archive/MSOS2ASM.img" href="/disks/pc/tools/microsoft/os2/sdk/1.02/MSOS2-SDK102-DISK12.json" md5="fa70ed5d9be6e8baaa53132342340bd0" md5json="dc077844b3e205fd241a4ff4b35f626e">
 		<name>MS OS/2 SDK 1.02: MASM</name>
 	</disk>
-	<disk id="disk13" size="737280" chs="80:2:9" img="static/MSOS2EX1.img" href="/disks/pc/tools/microsoft/os2/sdk/1.02/MSOS2-SDK102-DISK13.json" md5="80c633ea40c8b02b6a0a34fa4aed5b02" md5json="5c4792eb92e22db9ab27b746798c7551">
+	<disk id="disk13" size="737280" chs="80:2:9" img="archive/MSOS2EX1.img" href="/disks/pc/tools/microsoft/os2/sdk/1.02/MSOS2-SDK102-DISK13.json" md5="80c633ea40c8b02b6a0a34fa4aed5b02" md5json="5c4792eb92e22db9ab27b746798c7551">
 		<name>MS OS/2 SDK 1.02: EXAMPLE1</name>
 	</disk>
-	<disk id="disk14" size="737280" chs="80:2:9" img="static/MSOS2EX2.img" href="/disks/pc/tools/microsoft/os2/sdk/1.02/MSOS2-SDK102-DISK14.json" md5="dff3350293309128f6631a6617e6d4f8" md5json="d76ce34886016e84d689291c51ebc42f">
+	<disk id="disk14" size="737280" chs="80:2:9" img="archive/MSOS2EX2.img" href="/disks/pc/tools/microsoft/os2/sdk/1.02/MSOS2-SDK102-DISK14.json" md5="dff3350293309128f6631a6617e6d4f8" md5json="d76ce34886016e84d689291c51ebc42f">
 		<name>MS OS/2 SDK 1.02: EXAMPLE2</name>
 	</disk>
-	<disk id="disk15" size="368640" chs="40:2:9" img="static/MSOS2NET.img" href="/disks/pc/tools/microsoft/os2/sdk/1.02/MSOS2-SDK102-DISK15.json" md5="51b40d098260cdc4ed787c0eeef11497" md5json="8da00c0ab0960195367f0f058171e579">
+	<disk id="disk15" size="368640" chs="40:2:9" img="archive/MSOS2NET.img" href="/disks/pc/tools/microsoft/os2/sdk/1.02/MSOS2-SDK102-DISK15.json" md5="51b40d098260cdc4ed787c0eeef11497" md5json="8da00c0ab0960195367f0f058171e579">
 		<name>MS OS/2 SDK 1.02: NETWORK</name>
 	</disk>
 </manifest>

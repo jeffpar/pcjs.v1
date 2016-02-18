@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.20.8/manifest.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.20.9/manifest.xsl"?>
 <manifest type="software">
 	<title>MS Word</title>
 	<version>3.1</version>
@@ -7,28 +7,28 @@
 	<category>Word Processor</category>
 	<author>Microsoft</author>
 	<releaseDate/>
-	<disk id="disk01" size="368640" chs="40:2:9" img="static/WORD31-DISK1-PROGRAM.img" href="/disks/pc/apps/microsoft/word/3.1/WORD31-DISK1-PROGRAM.json" md5="1c370c3abc240dbd20d87af6cd0902e2" md5json="f5db259c42fcb1e8236c23a4cc9f263e">
+	<disk id="disk01" size="368640" chs="40:2:9" img="archive/WORD31-DISK1-PROGRAM.img" href="/disks/pc/apps/microsoft/word/3.1/WORD31-DISK1-PROGRAM.json" md5="1c370c3abc240dbd20d87af6cd0902e2" md5json="f5db259c42fcb1e8236c23a4cc9f263e">
 		<name>MS Word 3.1 (Disk 1)</name>
 	</disk>
-	<disk id="disk02" size="368640" chs="40:2:9" img="static/WORD31-DISK2-SPELL.img" href="/disks/pc/apps/microsoft/word/3.1/WORD31-DISK2-SPELL.json" md5="9353352b7cffb1a7cf7aa39c5a68a827" md5json="135ce767ba56423ce09f59f1b20944d0">
+	<disk id="disk02" size="368640" chs="40:2:9" img="archive/WORD31-DISK2-SPELL.img" href="/disks/pc/apps/microsoft/word/3.1/WORD31-DISK2-SPELL.json" md5="9353352b7cffb1a7cf7aa39c5a68a827" md5json="135ce767ba56423ce09f59f1b20944d0">
 		<name>MS Word 3.1 (Disk 2)</name>
 	</disk>
-	<disk id="disk03" size="368640" chs="40:2:9" img="static/WORD31-DISK3-THESAURUS.img" href="/disks/pc/apps/microsoft/word/3.1/WORD31-DISK3-THESAURUS.json" md5="a27129a4549ac43e15dcffb39deb1e12" md5json="bb110081bc34da49b408c5593c561595">
+	<disk id="disk03" size="368640" chs="40:2:9" img="archive/WORD31-DISK3-THESAURUS.img" href="/disks/pc/apps/microsoft/word/3.1/WORD31-DISK3-THESAURUS.json" md5="a27129a4549ac43e15dcffb39deb1e12" md5json="bb110081bc34da49b408c5593c561595">
 		<name>MS Word 3.1 (Disk 3)</name>
 	</disk>
-	<disk id="disk04" size="368640" chs="40:2:9" img="static/WORD31-DISK4-UTILITIES.img" href="/disks/pc/apps/microsoft/word/3.1/WORD31-DISK4-UTILITIES.json" md5="3b11d6096006d3a5020183b95414c2b9" md5json="33273f2eb4c4e5e47984f9f57361df28">
+	<disk id="disk04" size="368640" chs="40:2:9" img="archive/WORD31-DISK4-UTILITIES.img" href="/disks/pc/apps/microsoft/word/3.1/WORD31-DISK4-UTILITIES.json" md5="3b11d6096006d3a5020183b95414c2b9" md5json="33273f2eb4c4e5e47984f9f57361df28">
 		<name>MS Word 3.1 (Disk 4)</name>
 	</disk>
-	<disk id="disk05" size="368640" chs="40:2:9" img="static/WORD31-DISK5-PRINTER.img" href="/disks/pc/apps/microsoft/word/3.1/WORD31-DISK5-PRINTER.json" md5="52b513f65a38135d12b4a88c4442898b" md5json="689fcd827cda42d97bca383b40af912c">
+	<disk id="disk05" size="368640" chs="40:2:9" img="archive/WORD31-DISK5-PRINTER.img" href="/disks/pc/apps/microsoft/word/3.1/WORD31-DISK5-PRINTER.json" md5="52b513f65a38135d12b4a88c4442898b" md5json="689fcd827cda42d97bca383b40af912c">
 		<name>MS Word 3.1 (Disk 5)</name>
 	</disk>
-	<disk id="disk06" size="368640" chs="40:2:9" img="static/WORD31-DISK6-PRINTER.img" href="/disks/pc/apps/microsoft/word/3.1/WORD31-DISK6-PRINTER.json" md5="48724973d58cf7202912ddaf5dde8a9a" md5json="b32dad034f454f8d16a5e0ded6c80e56">
+	<disk id="disk06" size="368640" chs="40:2:9" img="archive/WORD31-DISK6-PRINTER.img" href="/disks/pc/apps/microsoft/word/3.1/WORD31-DISK6-PRINTER.json" md5="48724973d58cf7202912ddaf5dde8a9a" md5json="b32dad034f454f8d16a5e0ded6c80e56">
 		<name>MS Word 3.1 (Disk 6)</name>
 	</disk>
-	<disk id="disk07" size="368640" chs="40:2:9" img="static/WORD31-DISK7-LEARNMOU.img" href="/disks/pc/apps/microsoft/word/3.1/WORD31-DISK7-LEARNMOU.json" md5="cc25608720e3e64573007612e9c39b1f" md5json="25c30ded5aa26f7c75c527baa95c8f2c">
+	<disk id="disk07" size="368640" chs="40:2:9" img="archive/WORD31-DISK7-LEARNMOU.img" href="/disks/pc/apps/microsoft/word/3.1/WORD31-DISK7-LEARNMOU.json" md5="cc25608720e3e64573007612e9c39b1f" md5json="25c30ded5aa26f7c75c527baa95c8f2c">
 		<name>MS Word 3.1 (Disk 7)</name>
 	</disk>
-	<disk id="disk08" size="368640" chs="40:2:9" img="static/WORD31-DISK8-LEARNKBD.img" href="/disks/pc/apps/microsoft/word/3.1/WORD31-DISK8-LEARNKBD.json" md5="6627c0b21995fe62f169f402f251a2d2" md5json="be5c00c96fed397648b76a19f0dbced6">
+	<disk id="disk08" size="368640" chs="40:2:9" img="archive/WORD31-DISK8-LEARNKBD.img" href="/disks/pc/apps/microsoft/word/3.1/WORD31-DISK8-LEARNKBD.json" md5="6627c0b21995fe62f169f402f251a2d2" md5json="be5c00c96fed397648b76a19f0dbced6">
 		<name>MS Word 3.1 (Disk 8)</name>
 	</disk>
 </manifest>

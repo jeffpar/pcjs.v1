@@ -1,35 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.20.8/manifest.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.20.9/manifest.xsl"?>
 <manifest type="software">
 	<title>IBM OS/2 1.3</title>
-	<disk id="disk01" size="1474560" chs="80:2:18" img="static/OS213-DISK01.img" href="/disks/pc/os2/ibm/1.3/OS213-DISK01.json" md5="b393291dc9d96255b7ea9d9d614ecf23" md5json="a3af9c440d774c4084862a4caa5e17e2">
+	<disk id="disk01" size="1474560" chs="80:2:18" img="archive/OS213-DISK01.img" href="/disks/pc/os2/ibm/1.3/OS213-DISK01.json" md5="b393291dc9d96255b7ea9d9d614ecf23" md5json="a3af9c440d774c4084862a4caa5e17e2">
 		<name>IBM OS/2 1.3 (1.44M Disk 1)</name>
 	</disk>
-	<disk id="disk02" size="1474560" chs="80:2:18" img="static/OS213-DISK02.img" href="/disks/pc/os2/ibm/1.3/OS213-DISK02.json" md5="6b3bf3f03c914c9718a9fe603a4a62b2" md5json="65322381b4ffbd62266c28c2ec0c027f">
+	<disk id="disk02" size="1474560" chs="80:2:18" img="archive/OS213-DISK02.img" href="/disks/pc/os2/ibm/1.3/OS213-DISK02.json" md5="6b3bf3f03c914c9718a9fe603a4a62b2" md5json="65322381b4ffbd62266c28c2ec0c027f">
 		<name>IBM OS/2 1.3 (1.44M Disk 2)</name>
 	</disk>
-	<disk id="disk03" size="1474560" chs="80:2:18" img="static/OS213-DISK03.img" href="/disks/pc/os2/ibm/1.3/OS213-DISK03.json" md5="207c6196d09dc1ef11a16e34e731c7d9" md5json="dea620df5b4f6a41deec101bd6dc3ef8">
+	<disk id="disk03" size="1474560" chs="80:2:18" img="archive/OS213-DISK03.img" href="/disks/pc/os2/ibm/1.3/OS213-DISK03.json" md5="207c6196d09dc1ef11a16e34e731c7d9" md5json="dea620df5b4f6a41deec101bd6dc3ef8">
 		<name>IBM OS/2 1.3 (1.44M Disk 3)</name>
 	</disk>
-	<disk id="disk04" size="1474560" chs="80:2:18" img="static/OS213-DISK04.img" href="/disks/pc/os2/ibm/1.3/OS213-DISK04.json" md5="8175fa3257fc60b3b281fbf25b50adcc" md5json="5d7aaf6609dd58b614554b5f26600a2b">
+	<disk id="disk04" size="1474560" chs="80:2:18" img="archive/OS213-DISK04.img" href="/disks/pc/os2/ibm/1.3/OS213-DISK04.json" md5="8175fa3257fc60b3b281fbf25b50adcc" md5json="5d7aaf6609dd58b614554b5f26600a2b">
 		<name>IBM OS/2 1.3 (1.44M Disk 4)</name>
 	</disk>
-	<disk id="disk05" size="1474560" chs="80:2:18" img="static/OS213-DISK05.img" href="/disks/pc/os2/ibm/1.3/OS213-DISK05.json" md5="8175fa3257fc60b3b281fbf25b50adcc" md5json="5d7aaf6609dd58b614554b5f26600a2b">
+	<disk id="disk05" size="1474560" chs="80:2:18" img="archive/OS213-DISK05.img" href="/disks/pc/os2/ibm/1.3/OS213-DISK05.json" md5="8175fa3257fc60b3b281fbf25b50adcc" md5json="5d7aaf6609dd58b614554b5f26600a2b">
 		<name>IBM OS/2 1.3 (1.44M Disk 5)</name>
 	</disk>
-	<disk id="disk06" size="1474560" chs="80:2:18" img="static/OS213-DISK06.img" href="/disks/pc/os2/ibm/1.3/OS213-DISK06.json" md5="3f61008d56453a40c4444a397260b39c" md5json="a25d13bd6beacb002acfd4b6cacdbea3">
+	<disk id="disk06" size="1474560" chs="80:2:18" img="archive/OS213-DISK06.img" href="/disks/pc/os2/ibm/1.3/OS213-DISK06.json" md5="3f61008d56453a40c4444a397260b39c" md5json="a25d13bd6beacb002acfd4b6cacdbea3">
 		<name>IBM OS/2 1.3 (1.44M Disk 6)</name>
 	</disk>
-	<disk id="disk07" size="1474560" chs="80:2:18" img="static/OS213-DISK07.img" href="/disks/pc/os2/ibm/1.3/OS213-DISK07.json" md5="0de3327c227f1fe00e211b558ea2e23a" md5json="d33aaa2d626b5f3c42b354a21d4bfe67">
+	<disk id="disk07" size="1474560" chs="80:2:18" img="archive/OS213-DISK07.img" href="/disks/pc/os2/ibm/1.3/OS213-DISK07.json" md5="0de3327c227f1fe00e211b558ea2e23a" md5json="d33aaa2d626b5f3c42b354a21d4bfe67">
 		<name>IBM OS/2 1.3 (1.44M Disk 7)</name>
 	</disk>
-	<disk id="disk08" size="1474560" chs="80:2:18" img="static/OS213-DISK08.img" href="/disks/pc/os2/ibm/1.3/OS213-DISK08.json" md5="821a6873437610f77167e8884c4bd977" md5json="93bb507a019409004716c48f5c002a5d">
+	<disk id="disk08" size="1474560" chs="80:2:18" img="archive/OS213-DISK08.img" href="/disks/pc/os2/ibm/1.3/OS213-DISK08.json" md5="821a6873437610f77167e8884c4bd977" md5json="93bb507a019409004716c48f5c002a5d">
 		<name>IBM OS/2 1.3 (1.44M Disk 8)</name>
 	</disk>
-	<disk id="disk09" size="1474560" chs="80:2:18" img="static/OS213-DISK09.img" href="/disks/pc/os2/ibm/1.3/OS213-DISK09.json" md5="fce2113a6d1a286afa1653bdc77214e0" md5json="3282cd0642a19f97a1c8758f3a4debdc">
+	<disk id="disk09" size="1474560" chs="80:2:18" img="archive/OS213-DISK09.img" href="/disks/pc/os2/ibm/1.3/OS213-DISK09.json" md5="fce2113a6d1a286afa1653bdc77214e0" md5json="3282cd0642a19f97a1c8758f3a4debdc">
 		<name>IBM OS/2 1.3 (1.44M Disk 9)</name>
 	</disk>
-	<disk id="disk10" size="1474560" chs="80:2:18" img="static/OS213-DISK10.img" href="/disks/pc/os2/ibm/1.3/OS213-DISK10.json" md5="58e1156eba5600bc600d17be93f5e8e0" md5json="e8567c55839410508911dc96b260ee57">
+	<disk id="disk10" size="1474560" chs="80:2:18" img="archive/OS213-DISK10.img" href="/disks/pc/os2/ibm/1.3/OS213-DISK10.json" md5="58e1156eba5600bc600d17be93f5e8e0" md5json="e8567c55839410508911dc96b260ee57">
 		<name>IBM OS/2 1.3 (1.44M Disk 10)</name>
 	</disk>
 </manifest>

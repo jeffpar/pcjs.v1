@@ -1451,7 +1451,7 @@ HTMLOut.prototype.getMachineXML = function(sToken, sIndent, aParms, sXMLFile, sS
                     var m = new MarkOut(s, sIndent, obj.req, null, obj.fDebug);
                     s = m.convertMD("    ").trim();
 
-                    obj.processMachines(m.getMachines(), function doneProcessXMLMachines() {
+                    obj.processMachines(m.getMachines(), m.getBuildOptions(), function doneProcessXMLMachines() {
                         obj.getMarkdownFile(obj.sFile, sToken, sIndent, aParms, s, true);
                     });
                     return;
@@ -1587,7 +1587,7 @@ HTMLOut.prototype.getManifestXML = function(sToken, sIndent, aParms)
 
                                     var matchCover = null;
                                     match = matchNode[2].match('<cover[^>]*href="([^"]*)"');
-                                    if (match && match[1].indexOf("static/") >= 0) {
+                                    if (match && match[1].indexOf("archive/") >= 0) {
                                         matchCover = match[1];
                                         if (obj.fDebug) {
                                             sNodeLink = matchCover.replace("/thumbs/", '/').replace(/ ?[0-9]*\.(jpeg|jpg)/, ".pdf");
@@ -1749,7 +1749,7 @@ HTMLOut.prototype.getMarkdownFile = function(sFile, sToken, sIndent, aParms, sPr
              * any duplicates from that array, and then call processMachines() at some later point, after
              * all tokens have been replaced.
              */
-            obj.processMachines(m.getMachines(), function doneProcessMachines() {
+            obj.processMachines(m.getMachines(), m.getBuildOptions(), function doneProcessMachines() {
                 if (sToken) {
                     obj.aTokens[sToken] = sPrevious? (sPrevious + sIndent + s) : s;
                     obj.replaceTokens();
@@ -1809,7 +1809,7 @@ HTMLOut.prototype.getRandomString = function(sIndent)
 };
 
 /**
- * processMachines(aMachines, done)
+ * processMachines(aMachines, buildOptions, done)
  *
  * At a minimum, each machine object should contain the following properties:
  *
@@ -1819,9 +1819,10 @@ HTMLOut.prototype.getRandomString = function(sIndent)
  *
  * @this {HTMLOut}
  * @param {Array} aMachines is an array of objects containing information about each machine on the current page
+ * @param {Object} buildOptions
  * @param {function()} done
  */
-HTMLOut.prototype.processMachines = function(aMachines, done)
+HTMLOut.prototype.processMachines = function(aMachines, buildOptions, done)
 {
     for (var iMachine = 0; iMachine < aMachines.length; iMachine++) {
 
@@ -1894,8 +1895,8 @@ HTMLOut.prototype.processMachines = function(aMachines, done)
                         }
                     }
                     /*
-                     * Step 2: If there's a "debugger.js" source file in the list of uncompiled files, we need to remove it,
-                     * which we do by using the Array splice() method, removing the 1 matching element from the array.
+                     * Step 2: If there's a "debugger.js" source file in the list of uncompiled files, we need to remove
+                     * it, which we do by using the Array splice() method, removing the 1 matching element from the array.
                      */
                     for (i = 0; i < asFiles.length; i++) {
                         if (asFiles[i].indexOf("/debugger.js") >= 0) {
@@ -1905,6 +1906,12 @@ HTMLOut.prototype.processMachines = function(aMachines, done)
                     }
                 }
                 this.addFilesToHTML(asFiles, sScriptEmbed);
+                if (buildOptions.id) {
+                    asFiles = [];
+                    asFiles.push("/modules/build/lib/build.js");
+                    sScriptEmbed = '<script type="text/javascript">buildPC("' + buildOptions.id + '")</script>';
+                    this.addFilesToHTML(asFiles, sScriptEmbed);
+                }
             }
         }
     }
@@ -1912,7 +1919,7 @@ HTMLOut.prototype.processMachines = function(aMachines, done)
 };
 
 /**
- * addFilesToHTML(asFiles)
+ * addFilesToHTML(asFiles, sScriptEmbed)
  *
  * @this {HTMLOut}
  * @param {Array.<string>} asFiles is a list of CSS and/or JS files to include in the HTML

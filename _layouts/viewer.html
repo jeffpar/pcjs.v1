@@ -38,7 +38,7 @@
             var totalPages = parseInt(aParms['total'], 10) || 999;
             var frame = document.getElementById('framePDF');
             if (pdf && frame) {
-                pdf = pdf.replace('/static/', '/');
+                pdf = pdf.replace('/archive/', '/');
                 var i = pdf.indexOf("/pages/");
                 if (i > 0) {
                     var sReturnLink = pdf.substr(0, i+1);

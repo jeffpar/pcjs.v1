@@ -1,6 +1,6 @@
 {
   "name": "pcjs",
-  "version": "1.20.8",
+  "version": "1.20.9",
   "description": "Node-enabled version of PCjs",
   "engine": "node ^0.12.7",
   "main": "server.js",
@@ -132,6 +132,7 @@
     "./modules/pcjs/lib/debugger.js",
     "./modules/pcjs/lib/state.js",
     "./modules/pcjs/lib/computer.js",
-    "./modules/shared/lib/embed.js"
+    "./modules/shared/lib/embed.js",
+    "./modules/shared/lib/save.js"
   ]
 }

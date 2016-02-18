@@ -1,6 +1,5 @@
 {
   "name": "diskdump",
-  "version": "0.2.0",
   "description": "Converts disk images to/from JSON",
   "main": "./lib/diskdump",
   "scripts": {

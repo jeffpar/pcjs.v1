@@ -1,6 +1,5 @@
 {
   "name": "markout",
-  "version": "0.1.0",
   "description": "Transforms simplified Markdown to HTML",
   "main": "./lib/markout",
   "scripts": {

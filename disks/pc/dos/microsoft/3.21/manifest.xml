@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.20.8/manifest.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.20.9/manifest.xsl"?>
 <manifest type="software">
 	<title>MS-DOS</title>
 	<version>3.21</version>
@@ -7,10 +7,10 @@
 	<category>Operating System</category>
 	<author>Microsoft</author>
 	<releaseDate>May 1, 1987</releaseDate>
-	<disk id="disk01" size="368640" chs="40:2:9" img="static/MSDOS321-DISK1.img" href="/disks/pc/dos/microsoft/3.21/MSDOS321-DISK1.json" md5="251b00fc091a252d655a3bc447eb330b" md5json="92c4a838698bef22ab51528d69636bbd">
+	<disk id="disk01" size="368640" chs="40:2:9" img="archive/MSDOS321-DISK1.img" href="/disks/pc/dos/microsoft/3.21/MSDOS321-DISK1.json" md5="251b00fc091a252d655a3bc447eb330b" md5json="92c4a838698bef22ab51528d69636bbd">
 		<name>MS-DOS 3.21 (Disk 1)</name>
 	</disk>
-	<disk id="disk02" size="368640" chs="40:2:9" img="static/MSDOS321-DISK2.img" href="/disks/pc/dos/microsoft/3.21/MSDOS321-DISK2.json" md5="c55adcc046038c7909e3f27965ff9b8f" md5json="b891c15e24538935a9aeca47f69659ca">
+	<disk id="disk02" size="368640" chs="40:2:9" img="archive/MSDOS321-DISK2.img" href="/disks/pc/dos/microsoft/3.21/MSDOS321-DISK2.json" md5="c55adcc046038c7909e3f27965ff9b8f" md5json="b891c15e24538935a9aeca47f69659ca">
 		<name>MS-DOS 3.21 (Disk 2)</name>
 	</disk>
 </manifest>

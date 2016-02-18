@@ -3232,7 +3232,7 @@ Video.prototype.onFocusChange = function(fFocus)
      *
      *  if (fFocus) {
      *      window.scrollTo(0, 0);
-     *      window.document.body.scrollTop = 0;
+     *      document.body.scrollTop = 0;
      *  }
      */
     this.fHasFocus = fFocus;
@@ -3724,6 +3724,9 @@ Video.prototype.doneLoad = function(sURL, sFontData, nErrorCode)
         this.notice("Unable to load font ROM (error " + nErrorCode + ": " + sURL + ")");
         return;
     }
+
+    Component.addMachineResource(this.idMachine, sURL, sFontData);
+
     try {
         /*
          * The most likely source of any exception will be right here, where we're parsing the JSON-encoded data.
@@ -4221,7 +4224,7 @@ Video.prototype.createFontColor = function(font, iColor, rgbColor, nDouble, offD
      * We still have to use putImageData() to build the font canvas, but that's a one-time operation.
      */
     var rgbOff = [0x00, 0x00, 0x00, 0x00];
-    var canvasFont = window.document.createElement("canvas");
+    var canvasFont = document.createElement("canvas");
     canvasFont.width = font.cxCell << 4;
     canvasFont.height = (font.cyCell << 4);
     var contextFont = canvasFont.getContext("2d");
@@ -4780,7 +4783,7 @@ Video.prototype.setDimensions = function()
      * Allocate the off-screen buffers
      */
     this.imageScreenBuffer = this.contextScreen.createImageData(this.cxBuffer, this.cyBuffer);
-    this.canvasScreenBuffer = window.document.createElement("canvas");
+    this.canvasScreenBuffer = document.createElement("canvas");
     this.canvasScreenBuffer.width = this.cxBuffer;
     this.canvasScreenBuffer.height = this.cyBuffer;
     this.contextScreenBuffer = this.canvasScreenBuffer.getContext("2d");
@@ -7116,12 +7119,12 @@ Video.aVGAPortOutput = {
  */
 Video.init = function()
 {
-    var aeVideo = Component.getElementsByClass(window.document, PCJSCLASS, "video");
+    var aeVideo = Component.getElementsByClass(document, PCJSCLASS, "video");
     for (var iVideo = 0; iVideo < aeVideo.length; iVideo++) {
         var eVideo = aeVideo[iVideo];
         var parmsVideo = Component.getComponentParms(eVideo);
 
-        var eCanvas = window.document.createElement("canvas");
+        var eCanvas = document.createElement("canvas");
         if (eCanvas === undefined || !eCanvas.getContext) {
             eVideo.innerHTML = "<br/>Missing &lt;canvas&gt; support. Please try a newer web browser.";
             return;
@@ -7176,14 +7179,14 @@ Video.init = function()
          * clearly see the overlaid semi-transparent input field, but none of the input characters were passed along,
          * with the exception of the "Go" (Enter) key.
          *
-         *      var eInput = window.document.createElement("input");
+         *      var eInput = document.createElement("input");
          *      eInput.setAttribute("type", "password");
          *      eInput.setAttribute("style", "position:absolute; left:0; top:0; width:100%; height:100%; opacity:0.5");
          *      eVideo.appendChild(eInput);
          *
          * See this Chromium issue for more information: https://code.google.com/p/chromium/issues/detail?id=118639
          */
-        var eTextArea = window.document.createElement("textarea");
+        var eTextArea = document.createElement("textarea");
 
         /*
          * As noted in keyboard.js, the keyboard on an iOS device tends to pop up with the SHIFT key depressed,

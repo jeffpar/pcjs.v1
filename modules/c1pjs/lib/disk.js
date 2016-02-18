@@ -1254,7 +1254,7 @@ C1PDiskController.prototype.writePort = function(port, reg)
  */
 C1PDiskController.init = function()
 {
-    var aeDC = Component.getElementsByClass(window.document, C1PJSCLASS, "disk");
+    var aeDC = Component.getElementsByClass(document, C1PJSCLASS, "disk");
     for (var iDC=0; iDC < aeDC.length; iDC++) {
         var eDC = aeDC[iDC];
         var parmsDC = Component.getComponentParms(eDC);
