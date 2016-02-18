@@ -36,9 +36,9 @@ It's also recommended that make your **.img** files *read-only*, so that if you 
 computer, neither you nor the operating system will inadvertently modify the contents of the disk.  On OS X, this is
 easily done with the **chmod** utility.
 
-For example, if you saved the disk named "PC-DOS 2.00 (Disk 1)", it should have been downloaded as "PCDOS200-DISK2.img"
-in your Downloads folder, so the OS X Terminal command `chmod -w PCDOS200-DISK2.img` will make it read-only, and
-`chmod +w PCDOS200-DISK2.img` will make it writable again.
+For example, if you saved the disk named "PC-DOS 2.00 (Disk 1)", it should have been downloaded as "PCDOS200-DISK1.img"
+in your Downloads folder, so the OS X Terminal command `chmod -w PCDOS200-DISK1.img` will make it read-only, and
+`chmod +w PCDOS200-DISK1.img` will make it writable again.
 
 Saving Machines
 ---
@@ -48,7 +48,7 @@ You can choose to save a machine in its initial state, or make changes to any of
 All your changes should be preserved.
 
 Under the bottom-left corner of any IBM PC on the PCjs [website](/), you should now see a
-[**Save Machine**] link.  When you click that link, PCjs will generate a large "blob" of JavaScript containing
+[**Save Machine**] link.  When you click that link, PCjs will generate a large chunk of JavaScript containing
 everything that machine needs to run, including:
 
  * The machine XML configuration file (eg, "machine.xml")
@@ -61,12 +61,12 @@ everything that machine needs to run, including:
 Let's say you want to save the IBM PC on the PCjs [home page](/).  When you click **Save Machine**, two things should
 happen:
 
- * A file will be downloaded ("pc.json")
- * A popup will appear with some markup to copy-and-paste
+ * A file will be downloaded (eg, "pc.js")
+ * A dialog box will appear with some markup to copy-and-paste
 
-The popup should provide the following information:
+The dialog box should provide the following information:
 
-	Check your Downloads folder for "pc.json", copy it to your web server as "pc.js",
+	Check your Downloads folder for "pc.js", copy it to your web server as "pc.js",
 	and then add the following to your web page:
 
 		<div id="ibm5150"></div>
@@ -76,18 +76,21 @@ The popup should provide the following information:
 	
 	The machine should appear where the <div> is located.
 
-Rename the downloaded file from **pc.json** to **pc.js**, copy it to your own web server, then create or edit
-a web page and insert the above text.  If **pc.js** and your web page are in different folders, then you'll also
-need to change *src* to indicate the location of **pc.js**.
+Copy the downloaded file to your own web server as **pc.js**, then create or edit a web page and insert the above text.
+If **pc.js** and your web page are in different folders, then you'll also need to update *src* to include the exact
+location of the script.
 
 Some notes:
 
- * PCjs asks the browser to name the downloaded file **pc.json** instead of **pc.js** because a file with a ".js"
- extension may cause the Chrome web browser to block the download.  And not all browsers support named downloads;
- PCjs will attempt to open a new window/tab if that seems to be the case.
+ * PCjs may attempt to name the downloaded file **pc.json** instead of **pc.js**, because a file with a ".js"
+ extension could cause your web browser to block the download.
  
- * Your version of Chrome may also impose size limitations on the download.  If nothing downloads, the machine may
- be too large for your browser, so try a different browser (eg, Firefox or Safari).
+ * For browsers that don't support dynamic downloads, PCjs will attempt to open a new window/tab instead.  Make sure
+ you copy the *entire* contents of that window into a file named to **pc.js** (or **pc-dbg.js** if the machine is using
+ the built-in PCjs debugger).
+ 
+ * Your browser may also impose size limitations on the download.  If nothing happens, the machine data may be too
+ large for your browser; try a different browser (eg, Firefox or Safari) or a different machine.
 
  * If you have modified any floppy disks mounted by the machine *or* any of the machine's hard disks, those
  modifications should be saved along with the machine.
@@ -99,10 +102,10 @@ Some notes:
  * Any floppy disks *not* mounted during the lifetime of the machine will be *removed* from the machine's list of
  available disks; we don't want machines running on other websites to be consuming our bandwidth.
 
- * The machine's current state, including memory and screen contents, are included as part of the saved
- machine state.  So, even if the original machine always powers on from scratch, the *copied* machine will always
- resume at the point it was saved.  This behavior, however, can be disabled by passing a *parms* object as the
- 4th parameter to the *embedPC()* call, overriding the 'state' property:
+ * The machine's current state, including memory and screen contents, are saved as part of the machine state.
+ So, even if the original machine always powers on from scratch, the *copied* machine will always resume at the point
+ it was saved.  This behavior, however, can be disabled by passing a *parms* object as the 4th parameter to the
+ *embedPC()* call, overriding the 'state' property:
  
 		<script type="text/javascript">embedPC("ibm5150","machine.xml","components.xsl","{state:null}");</script>
 
