@@ -197,29 +197,38 @@ function downloadPC(sURL, sCSS, nErrorCode, aMachineInfo)
         sPCJS = matchScript[1] + "var resources=" + sResources + ";" + matchScript[2] + matchScript[3];
         Component.log("saving machine: '" + idMachine + "' (" + sPCJS.length + " bytes)");
 
-        var uri;
+        var sURI, sAlert;
+        var link = document.createElement('a');
+        var fDownload = (!DEBUG && typeof link.download == 'string');
+
         if (MAXDEBUG) {
             sPCJS = sPCJS.replace(/[\u00A0-\u2666]/g, function(c) {
                 return '&#' + c.charCodeAt(0) + ';';
             });
-            uri = "data:application/javascript;base64," + btoa(sPCJS);
+            sURI = "data:application/javascript;base64," + btoa(encodeURI(sPCJS));
         } else {
             sPCJS = sPCJS.replace(/\u00A9/g, "&#xA9;");
-            uri = "data:application/javascript," + (web.isUserAgent("Firefox")? encodeURIComponent(sPCJS) : encodeURI(sPCJS));
+            sURI = "data:application/javascript,";
+            if (!web.isUserAgent("Firefox")) {
+                fDownload = false;
+                sURI += encodeURI(sPCJS);
+            } else {
+                sURI += encodeURIComponent(sPCJS);
+            }
         }
 
-        var link = document.createElement('a');
-        if (!DEBUG && typeof link.download == 'string') {
-            link.href = uri;
-            link.download = sScript + ".json";
-            document.body.appendChild(link);    // Firefox requires the link to be in the body (?)
+        if (fDownload) {
+            link.href = sURI;
+            link.download = sScript + ".js";
+            document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+            sAlert = 'Check your Downloads folder for "' + link.download + '", ';
         } else {
-            window.open(uri);
+            window.open(sURI);
+            sAlert = 'Check your browser for a new window/tab containing the PCjs script, ';
         }
 
-        var sAlert = 'Check your Downloads folder for "' + sScript + '.json", ';
         sAlert += 'copy it to your web server as "' + sScript + '.js", and then add the following to your web page:\n\n';
         sAlert += '<div id="' + idMachine + '"></div>\n';
         sAlert += '...\n';

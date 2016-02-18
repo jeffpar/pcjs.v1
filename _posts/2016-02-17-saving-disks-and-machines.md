@@ -43,9 +43,9 @@ in your Downloads folder, so the OS X Terminal command `chmod -w PCDOS200-DISK2.
 Saving Machines
 ---
 
-Saving the entire state of any existing IBM PC machine is also possible with a single click.  You can choose to save
-a machine in its initial state, or make changes to any of the machine's disks and then save it.  All your changes should
-be preserved.
+Saving the entire state of any existing IBM PC machine is also easy now, thanks to the new **Save Machine** link.
+You can choose to save a machine in its initial state, or make changes to any of the machine's disks and then save it.
+All your changes should be preserved.
 
 Under the bottom-left corner of any IBM PC on the PCjs [website](/), you should now see a
 [**Save Machine**] link.  When you click that link, PCjs will generate a large "blob" of JavaScript containing
