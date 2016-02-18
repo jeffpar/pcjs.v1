@@ -6,9 +6,9 @@ permalink: /blog/2016/02/17/
 ---
 
 PCjs (v1.20.9) now offers some new, *much* easier ways to save disks and machines, thanks to the new
-[Save Disk](#saving-disks) and [Save Machine](#saving-machines) features.  With one click, PCjs can now 
-generate a single download containing everything you need to embed any of our IBM PC demos on your own
-web page.
+[Save Disk](/blog/2016/02/17/#saving-disks) and [Save Machine](/blog/2016/02/17/#saving-machines) features.
+With one click, PCjs can now generate a single download containing everything you need to embed any of our
+IBM PC demos on your own web page.
 
 Saving Disks
 ---
