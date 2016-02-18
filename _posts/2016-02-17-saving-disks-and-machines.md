@@ -47,7 +47,7 @@ Saving the entire state of any existing IBM PC machine is also possible with a s
 a machine in its initial state, or make changes to any of the machine's disks and then save it.  All your changes should
 be preserved.
 
-Under the bottom-left corner of any IBM PC on the PCjs [website](http://www.pcjs.org/), you should now see a
+Under the bottom-left corner of any IBM PC on the PCjs [website](/), you should now see a
 [**Save Machine**] link.  When you click that link, PCjs will generate a large "blob" of JavaScript containing
 everything that machine needs to run, including:
 
@@ -58,8 +58,8 @@ everything that machine needs to run, including:
  * The PCjs machine emulation script (eg, "pc.js")
  * Copies of all the disk images mounted by the machine
 
-Let's say you want to save the IBM PC on the PCjs [home page](http://www.pcjs.org/).  When you click
-**Save Machine**, two things should happen:
+Let's say you want to save the IBM PC on the PCjs [home page](/).  When you click **Save Machine**, two things should
+happen:
 
  * A file will be downloaded ("pc.json")
  * A popup will appear with some markup to copy-and-paste
