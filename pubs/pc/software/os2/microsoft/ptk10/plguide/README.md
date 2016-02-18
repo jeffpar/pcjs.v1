@@ -1,7 +1,9 @@
 ---
 layout: page
 title: "Microsoft OS/2 Programmer's Learning Guide"
-permalink: /pubs/pc/programming/os2/microsoft/ptk/1.0/plguide/
+permalink: /pubs/pc/software/os2/microsoft/ptk10/plguide/
+redirect_from:
+  - /pubs/pc/programming/os2/microsoft/ptk/1.0/plguide/
 ---
 
 Programmer's Toolkit
@@ -15,13 +17,13 @@ Version 1.0
 
 ### Contents
 
-* 1.0 [Introduction](/pubs/pc/programming/os2/microsoft/ptk/1.0/plguide/chapter1/)
-	* 1.1 [Overview](/pubs/pc/programming/os2/microsoft/ptk/1.0/plguide/chapter1/#overview)
-	* 1.2 [What You Need to Start](/pubs/pc/programming/os2/microsoft/ptk/1.0/plguide/chapter1/#what-you-need-to-start)
-	* 1.3 [What This Guide Covers](/pubs/pc/programming/os2/microsoft/ptk/1.0/plguide/chapter1/#what-this-guide-covers)
-	* 1.4 [The Lqh Sample Program](/pubs/pc/programming/os2/microsoft/ptk/1.0/plguide/chapter1/#the-lqh-sample-program)
-	* 1.5 [MS OS/2 Sample Programs](/pubs/pc/programming/os2/microsoft/ptk/1.0/plguide/chapter1/#ms-os2-sample-programs)
-	* 1.6 [MS OS/2 and the C Run-time Library](/pubs/pc/programming/os2/microsoft/ptk/1.0/plguide/chapter1/#ms-os2-and-the-c-run-time-library)
+* 1.0 [Introduction](/pubs/pc/software/os2/microsoft/ptk10/plguide/chapter1/)
+	* 1.1 [Overview](/pubs/pc/software/os2/microsoft/ptk10/plguide/chapter1/#overview)
+	* 1.2 [What You Need to Start](/pubs/pc/software/os2/microsoft/ptk10/plguide/chapter1/#what-you-need-to-start)
+	* 1.3 [What This Guide Covers](/pubs/pc/software/os2/microsoft/ptk10/plguide/chapter1/#what-this-guide-covers)
+	* 1.4 [The Lqh Sample Program](/pubs/pc/software/os2/microsoft/ptk10/plguide/chapter1/#the-lqh-sample-program)
+	* 1.5 [MS OS/2 Sample Programs](/pubs/pc/software/os2/microsoft/ptk10/plguide/chapter1/#ms-os2-sample-programs)
+	* 1.6 [MS OS/2 and the C Run-time Library](/pubs/pc/software/os2/microsoft/ptk10/plguide/chapter1/#ms-os2-and-the-c-run-time-library)
 * 2.0 Overview
 	* 2.1 Introduction
 	* 2.2 Creating an MS OS/2 Program
