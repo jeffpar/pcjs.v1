@@ -5,7 +5,7 @@ date: 2016-02-17 14:00:00
 permalink: /blog/2016/02/17/
 ---
 
-PCjs (v1.20.9) now offers some new, *much* easier ways to save disks and machines, thanks to the new
+PCjs (v1.20.9) now offers new, *much* easier ways to save disks and machines, thanks to the new
 [Save Disk](/blog/2016/02/17/#saving-disks) and [Save Machine](/blog/2016/02/17/#saving-machines) features.
 With one click, PCjs can now generate a single download containing everything you need to embed any of our
 IBM PC demos on your own web page.
@@ -22,17 +22,17 @@ copy of the disk, click the **Load** button first.  PCjs will ask you to confirm
 disk and discard any changes.
 
 Note that the disk *should* be downloaded as an **.img** file, which is nothing more than a sector-by-sector binary
-dump of the disk.  For example, a 360Kb double-sided double-density (DSDD) disk contains 9 512-byte sectors on each
+dump of the disk.  For example, a 360Kb double-sided double-density (DSDD) disk contains 9 512-byte sectors in each
 of the 40 tracks on each of its 2 sides, so when you **Save** a 360Kb disk, the downloaded file should be exactly
 368,640 bytes large.
 
 The Mac OS X operating system can automatically mount most **.img** files (from disks created by DOS 2.0 or later).
-Older 1.x DOS disks, along with most non-DOS disks, do not have a BIOS Parameter Block (BPB) in the boot sector, so
+Older DOS 1.x disks, along with most non-DOS disks, do not have a BIOS Parameter Block (BPB) in the boot sector, so
 most modern operating systems won't recognize the disk format.  Other operating systems, like Windows, may require
 third-party software in order to mount an **.img** file, and some third-party software may prefer a different extension,
 such as **.ima** or **.bin**.
 
-It's also recommended that make your **.img** files *read-only*, so that if you do mount them on your desktop
+It's also recommended that you make your **.img** files *read-only*, so that if you do mount them on your desktop
 computer, neither you nor the operating system will inadvertently modify the contents of the disk.  On OS X, this is
 easily done with the **chmod** utility.
 
@@ -40,10 +40,14 @@ For example, if you saved the disk named "PC-DOS 2.00 (Disk 1)", it should have 
 in your Downloads folder, so the OS X Terminal command `chmod -w PCDOS200-DISK1.img` will make it read-only, and
 `chmod +w PCDOS200-DISK1.img` will make it writable again.
 
+**NOTE**: Some browsers, notably Safari, do not support named downloads, so any disks you download will end up
+with default names like "Unknown" or "download".  PCjs will still try to let you know what the original filename was,
+so that you can rename it appropriately.
+
 Saving Machines
 ---
 
-Saving the entire state of any existing IBM PC machine is also easy now, thanks to the new **Save Machine** link.
+Saving the entire state of any existing IBM PC machine is also much simpler now, using the new **Save Machine** link.
 You can choose to save a machine in its initial state, or make changes to any of the machine's disks and then save it.
 All your changes should be preserved.
 
@@ -85,9 +89,9 @@ Some notes:
  * PCjs may attempt to name the downloaded file **pc.json** instead of **pc.js**, because a file with a ".js"
  extension could cause your web browser to block the download.
  
- * For browsers that don't support dynamic downloads, PCjs will attempt to open a new window/tab instead.  Make sure
- you copy the *entire* contents of that window into a file named to **pc.js** (or **pc-dbg.js** if the machine is using
- the built-in PCjs debugger).
+ * For browsers that don't support named downloads, PCjs will attempt to open a new window/tab instead.  Make sure
+ you copy the *entire* contents of that window into a file named to **pc.js** (or **pc-dbg.js** if the machine is
+ using the built-in PCjs debugger).
  
  * Your browser may also impose size limitations on the download.  If nothing happens, the machine data may be too
  large for your browser; try a different browser (eg, Firefox or Safari) or a different machine.
