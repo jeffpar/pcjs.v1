@@ -6,6 +6,9 @@ redirect_from:
   - /pubs/pc/programming/os2/microsoft/ptk/1.0/
 ---
 
+[Microsoft OS/2 Programmer's Toolkit](../../)
+---
+
 Welcome
 ---
 

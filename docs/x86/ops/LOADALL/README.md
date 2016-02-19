@@ -9,7 +9,7 @@ LOADALL386 (0x070F)
 
 ### Description
 
-From [http://www.rcollins.org/secrets/opcodes/LOADALL.html](http://www.rcollins.org/secrets/opcodes/LOADALL.html):
+Excerpt from [http://www.rcollins.org/secrets/opcodes/LOADALL.html](http://www.rcollins.org/secrets/opcodes/LOADALL.html):
 
 	(LOADALL) An undocumented op code used by ICE host software and
 	diagnostics software to test CPU functionality. This instruction

@@ -6,10 +6,7 @@ redirect_from:
   - /pubs/pc/programming/os2/microsoft/ptk/1.0/plguide/
 ---
 
-Programmer's Toolkit
----
-
-Programmer's Learning Guide
+[Microsoft OS/2 Programmer's Learning Guide](../)
 ---
 
 Version 1.0
@@ -17,27 +14,27 @@ Version 1.0
 
 ### Contents
 
-* 1.0 [Introduction](/pubs/pc/software/os2/microsoft/ptk10/plguide/chapter1/)
-	* 1.1 [Overview](/pubs/pc/software/os2/microsoft/ptk10/plguide/chapter1/#overview)
-	* 1.2 [What You Need to Start](/pubs/pc/software/os2/microsoft/ptk10/plguide/chapter1/#what-you-need-to-start)
-	* 1.3 [What This Guide Covers](/pubs/pc/software/os2/microsoft/ptk10/plguide/chapter1/#what-this-guide-covers)
-	* 1.4 [The Lqh Sample Program](/pubs/pc/software/os2/microsoft/ptk10/plguide/chapter1/#the-lqh-sample-program)
-	* 1.5 [MS OS/2 Sample Programs](/pubs/pc/software/os2/microsoft/ptk10/plguide/chapter1/#ms-os2-sample-programs)
-	* 1.6 [MS OS/2 and the C Run-time Library](/pubs/pc/software/os2/microsoft/ptk10/plguide/chapter1/#ms-os2-and-the-c-run-time-library)
-* 2.0 Overview
-	* 2.1 Introduction
-	* 2.2 Creating an MS OS/2 Program
-	* 2.3 C-Language Header Files
-	* 2.4 A Simple Program: Echoing the Command Line
-	* 2.5 Using the MS OS/2 Naming Conventions
-	* 2.6 Using Structures: Getting the Time of Day
-	* 2.7 Using Bit Masks
-	* 2.8 Sharing Resources: Playing a Tune
-* 3.0 Input and Output
-	* 3.1 Introduction
-	* 3.2 Opening Files
-	* 3.3 Reading and Writing to Files
-	* 3.4 Creating a File
+* 1.0 [Introduction](chapter1/)
+	* 1.1 [Overview](chapter1/#overview)
+	* 1.2 [What You Need to Start](chapter1/#what-you-need-to-start)
+	* 1.3 [What This Guide Covers](chapter1/#what-this-guide-covers)
+	* 1.4 [The Lqh Sample Program](chapter1/#the-lqh-sample-program)
+	* 1.5 [MS OS/2 Sample Programs](chapter1/#ms-os2-sample-programs)
+	* 1.6 [MS OS/2 and the C Run-time Library](chapter1/#ms-os2-and-the-c-run-time-library)
+* 2.0 [Overview](chapter2/)
+	* 2.1 [Introduction](chapter2/#introduction)
+	* 2.2 [Creating an MS OS/2 Program](chapter2/#creating-an-ms-os2-program)
+	* 2.3 [C-Language Header Files](chapter2/#c-language-header-files)
+	* 2.4 [A Simple Program: Echoing the Command Line](chapter2/#a-simple-program-echoing-the-command-line)
+	* 2.5 [Using the MS OS/2 Naming Conventions](chapter2/#using-the-ms-os2-naming-conventions)
+	* 2.6 [Using Structures: Getting the Time of Day](chapter2/#using-structures-getting-the-time-of-day)
+	* 2.7 [Using Bit Masks](chapter2/#using-bit-masks)
+	* 2.8 [Sharing Resources: Playing a Tune](chapter2/#sharing-resources-playing-a-tune)
+* 3.0 [Input and Output](chapter3/)
+	* 3.1 [Introduction](chapter3/#introduction)
+	* 3.2 [Opening Files](chapter3/#opening-files)
+	* 3.3 [Reading and Writing to Files](chapter3/#reading-and-writing-to-files)
+	* 3.4 [Creating a File](chapter3/#creating-a-file)
 	* 3.5 Closing a File
 	* 3.6 Standard Input and Output Files
 	* 3.7 Redirecting Standard Files

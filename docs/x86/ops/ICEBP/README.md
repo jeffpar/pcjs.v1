@@ -9,7 +9,7 @@ ICEBP (0xF1)
 
 ### Description
 
-From [http://www.rcollins.org/secrets/opcodes/UMOV.html](http://www.rcollins.org/secrets/opcodes/UMOV.html):
+Excerpt from [http://www.rcollins.org/secrets/opcodes/ICEBP.html](http://www.rcollins.org/secrets/opcodes/ICEBP.html):
 
 	An undocumented op code that will make debugging run-time code
 	on an ICE easier. Normally, to set an arbitrary breakpoint in a

@@ -6,7 +6,7 @@ redirect_from:
   - /pubs/pc/programming/os2/microsoft/ptk/1.0/plguide/chapter1/
 ---
 
-Microsoft OS/2 Programmer's Learning Guide
+[Microsoft OS/2 Programmer's Learning Guide](../)
 ---
 
 Introduction
@@ -111,6 +111,7 @@ threads       | Creates and manages threads.
 timer         | Sleeps and then beeps three times.
 version       | Prints the DOS version (bound).
 vioreg        | Registers a Vio subsystem.
+              |
 
 The following sample programs are extended examples that combine many of the features illustrated in the previous
 samples:
@@ -127,6 +128,7 @@ mandel        | Displays the Mandelbrot set, using EGA high-resolution graphics.
 bigben        | Displays a digital clock, demonstrating the Vio functions (bound).
 setega        | Sets 25/43-line mode (bound).
 chaser        | Demonstrates the use of threads (requires a mouse).
+              |
 
 ### 1.6 MS OS/2 and the C Run-time Library
 

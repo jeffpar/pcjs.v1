@@ -4,12 +4,12 @@ title: "x86 Instructions: AAM"
 permalink: /docs/x86/ops/AAM/
 ---
 
-AAD (0xD4)
+AAM (0xD4)
 ---
 
 ### Description
 
-From [http://www.rcollins.org/secrets/opcodes/AAM.html](http://www.rcollins.org/secrets/opcodes/AAM.html):
+Excerpt from [http://www.rcollins.org/secrets/opcodes/AAM.html](http://www.rcollins.org/secrets/opcodes/AAM.html):
 
 	Undocumented:  Available to all Intel x86 processors.
 	               Useful in production source code.
