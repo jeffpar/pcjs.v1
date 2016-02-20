@@ -17,7 +17,7 @@ OS/2 FOOTBALL Boot Disk (v7.68.17)
 
 This disk contained a prototype version of OS/2 from February 1987, code-named **FOOTBALL**
 (aka **PIGSKIN**).  It predated the completion of OS/2 1.0 by some eight months and was based on the
-[SIZZLE](/disks/pc/os2/misc/cpdos/87007/) fork, which started around November 1987.
+[SIZZLE](/disks/pc/os2/misc/cpdos/87007/) fork, which started around November 1986.
 
 On boot, it displays the following version banner:
 

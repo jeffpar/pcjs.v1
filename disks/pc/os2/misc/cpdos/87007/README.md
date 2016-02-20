@@ -18,7 +18,7 @@ This disk contained a pre-1.0 version of OS/2 built on January 7, 1987, which wa
 source code fork known as **SIZZLE**, the code-name for a collection of changes intended to improve overall
 OS/2 performance.
 
-Work on **SIZZLE** started around November 1987, and an internal specification known as
+Work on **SIZZLE** started around November 1986, and an internal specification known as
 "The London Performance Spec" drove some of that work, but at this point, not much is known about either the
 contents of that specification or any of the **SIZZLE** changes.
 
