@@ -22,7 +22,7 @@ here and in markout.js.  Examples include 'autopower' ('autoPower') and 'automou
 
 {% endcomment %}
 {% for machine in page.machines %}
-  {% capture machine_embed %}window.embed{{ machine.type | remove:'-dbg' | upcase }}{% endcapture %}
+  {% capture machine_embed %}embed{{ machine.type | remove:'-dbg' | upcase }}{% endcapture %}
   {% if machine.autopower == nil %}
     {% assign machine_autopower = "true" %}
   {% else %}

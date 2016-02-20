@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<machine id="sample3" class="pc" border="0" width="900px">
+<machine id="example3" class="pc" border="0" width="900px">
 	<computer id="pc" name="IBM PC"/>
 	<cpu id="cpu8088" model="8088" autostart="true"/>
 	<debugger id="debugger"/>

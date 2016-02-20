@@ -379,12 +379,12 @@ module.exports = function(grunt) {
                     }
                 }
             },
-            "demos": {
+            "examples": {
                 files: [
                     {
                         cwd: "versions/pcjs/<%= pkg.version %>/",
                         src: ["pc.js", "pc-dbg.js", "components.css", "components.xsl"],
-                        dest: "docs/pcjs/demos/",
+                        dest: "docs/pcjs/examples/",
                         expand: true
                     }
                 ],
@@ -457,8 +457,8 @@ module.exports = function(grunt) {
                 cmd: "./modules/htmlout/bin/delete_indexes.sh",
                 args: []
             },
-            "zipify-demos": {
-                options: {cwd: "docs/pcjs/demos"},
+            "zipify-examples": {
+                options: {cwd: "docs/pcjs/examples"},
                 cmd: "./zip.sh",
                 args: ["v" + pkg.version + ".zip"]
             }
@@ -512,6 +512,6 @@ module.exports = function(grunt) {
     grunt.registerTask("promote", ["replace:promote-to-version"]);
     grunt.registerTask("clean", ["run:delete-indexes"]);
     grunt.registerTask("copyfiles", grunt.option("rebuild")? ["copy"] : ["newer:copy"]);
-    grunt.registerTask("default-osx", ["compile", "copyfiles", "run:zipify-demos"]);
+    grunt.registerTask("default-osx", ["compile", "copyfiles", "run:zipify-examples"]);
     grunt.registerTask("default", ["compile", "copyfiles"]);
 };
