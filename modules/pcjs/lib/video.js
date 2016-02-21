@@ -200,13 +200,12 @@ function Video(parmsVideo, canvas, context, textarea, container)
      */
     this.fHasFocus = false;
 
-    var video = this;
-
     /*
      * Here's the gross code to handle full-screen support across all supported browsers.  The lack of standards
      * is exasperating; browsers can't agree on 'full' or 'Full, 'request' or 'Request', 'screen' or 'Screen', and
      * while some browsers honor other browser prefixes, most browsers don't.
      */
+    var video = this;
     this.fGecko = web.isUserAgent("Gecko/");
     var i, sEvent, asPrefixes = ['', 'moz', 'webkit', 'ms'];
 
@@ -288,7 +287,9 @@ function Video(parmsVideo, canvas, context, textarea, container)
         if (sFileExt != "json") {
             sFileURL = web.getHost() + DumpAPI.ENDPOINT + '?' + DumpAPI.QUERY.FILE + '=' + sFileURL + '&' + DumpAPI.QUERY.FORMAT + '=' + DumpAPI.FORMAT.BYTES;
         }
-        web.loadResource(sFileURL, true, null, this, this.doneLoad);
+        web.getResource(sFileURL, null, true, function(sURL, sResponse, nErrorCode) {
+            video.doneLoad(sURL, sResponse, nErrorCode);
+        });
     }
 }
 

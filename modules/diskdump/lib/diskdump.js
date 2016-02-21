@@ -36,26 +36,28 @@
 
 "use strict";
 
-var fs      = require("fs");
-var path    = require("path");
-var http    = require("http");
-var mkdirp  = require("mkdirp");
-var crypto  = require("crypto");
-var defines = require("../../shared/lib/defines");
-var net     = require("../../shared/lib/netlib");
-var proc    = require("../../shared/lib/proclib");
-var str     = require("../../shared/lib/strlib");
-var usr     = require("../../shared/lib/usrlib");
-var DiskAPI = require("../../shared/lib/diskapi");
-var DumpAPI = require("../../shared/lib/dumpapi");
-var X86     = require("../../pcjs/lib/x86");
-
-/**
- * @class exports
- * @property {string} name
- * @property {string} version
- */
-var pkg = require("../../../package.json");
+if (NODE) {
+    var fs      = require("fs");
+    var path    = require("path");
+    var http    = require("http");
+    var mkdirp  = require("mkdirp");
+    var crypto  = require("crypto");
+    var defines = require("../../shared/lib/defines");
+    var net     = require("../../shared/lib/netlib");
+    var proc    = require("../../shared/lib/proclib");
+    var str     = require("../../shared/lib/strlib");
+    var usr     = require("../../shared/lib/usrlib");
+    var web     = require("../../shared/lib/weblib");
+    var DiskAPI = require("../../shared/lib/diskapi");
+    var DumpAPI = require("../../shared/lib/dumpapi");
+    var X86     = require("../../pcjs/lib/x86");
+    /**
+     * @class exports
+     * @property {string} name
+     * @property {string} version
+     */
+    var pkg = require("../../../package.json");
+}
 
 /*
  * fConsole controls console messages; it is false by default but is enable by the CLI interface.
@@ -423,6 +425,29 @@ DiskDump.CLI = function()
         DiskDump.logError(err);
         process.exit(1);
     }
+};
+
+/**
+ * API
+ *
+ * Client-side version of the server-side function HTTPAPI.processDumpAPI(req, res).
+ *
+ * @param {Object} aParms (analogous to req.query on the server)
+ */
+DiskDump.API = function(aParms)
+{
+    var sDisk = aParms[DumpAPI.QUERY.DISK];
+    var sFormat = aParms[DumpAPI.QUERY.FORMAT] || DumpAPI.FORMAT.JSON;
+    var fComments = (aParms[DumpAPI.QUERY.COMMENTS]? true : false);
+
+    var disk = new DiskDump(sDisk, null, sFormat, fComments);
+
+    disk.loadFile(function(err) {
+        if (!err) {
+            var sResponse = disk.convertToJSON();
+            if (sResponse) web.downloadJSON(sResponse);
+        }
+    });
 };
 
 /**
@@ -983,7 +1008,7 @@ DiskDump.prototype.dumpBuffer = function(sKey, buf, len, cbItem, offData)
  * @this {DiskDump}
  * @param {string} sTrackSig
  * @param {number} nTrackNum
- * @param {number} nTrackType
+ * @param {number|null} nTrackType
  * @param {number} [nTrackLoad]
  * @return {string}
  */
@@ -2784,4 +2809,9 @@ DiskDump.prototype.convertToIMG = function()
     return this.bufDisk;
 };
 
-module.exports = DiskDump;
+if (NODE) {
+    module.exports = DiskDump;
+} else {
+    var aParms = web.getURLParameters();
+    DiskDump.API(aParms);
+}

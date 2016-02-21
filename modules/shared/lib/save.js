@@ -44,7 +44,7 @@ if (NODE) {
  * savePC(idMachine, sPCJSFile)
  *
  * @param {string} idMachine
- * @param {string} [sPCJSFile]
+ * @param {string} sPCJSFile
  * @return {boolean} true if successful, false if error
  */
 function savePC(idMachine, sPCJSFile)
@@ -61,7 +61,9 @@ function savePC(idMachine, sPCJSFile)
                 sPCJSFile = "/versions/pcjs/" + (XMLVERSION || APPVERSION) + "/pc" + (dbg? "-dbg" : "") + ".js";
             }
         }
-        web.loadResource(sPCJSFile, true, null, null, downloadCSS, [idMachine, str.getBaseName(sPCJSFile, true), sParms, sState]);
+        web.getResource(sPCJSFile, null, true, function(sURL, sResponse, nErrorCode) {
+            downloadCSS(sURL, sResponse, nErrorCode, [idMachine, str.getBaseName(sPCJSFile, true), sParms, sState]);
+        });
         return true;
     }
     web.alertUser("Unable to identify machine '" + idMachine + "'");
@@ -94,7 +96,9 @@ function downloadCSS(sURL, sPCJS, nErrorCode, aMachineInfo)
              */
             downloadPC(sURL, null, 0, aMachineInfo);
         } else {
-            web.loadResource(sCSSFile, true, null, null, downloadPC, aMachineInfo);
+            web.getResource(sCSSFile, null, true, function(sURL, sResponse, nErrorCode) {
+                downloadPC(sURL, sResponse, nErrorCode, aMachineInfo);
+            });
         }
         return;
     }

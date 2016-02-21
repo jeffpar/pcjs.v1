@@ -15,6 +15,6 @@ sitemap: false
 Build Your Own PC
 ---
 
-{% include build.html id="build-pc" %}
+{% include machine-build.html id="build-pc" %}
 
 {% include machine.html id="custom-pc" %}

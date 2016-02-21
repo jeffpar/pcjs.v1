@@ -74,7 +74,10 @@ function C1PROM(parmsROM)
         if (sFileExt != DumpAPI.FORMAT.JSON && sFileExt != DumpAPI.FORMAT.HEX) {
             sFileURL = web.getHost() + DumpAPI.ENDPOINT + '?' + DumpAPI.QUERY.FILE + '=' + this.sImage + '&' + DumpAPI.QUERY.FORMAT + '=' + DumpAPI.FORMAT.BYTES;
         }
-        web.loadResource(sFileURL, true, null, this, this.convertImage);
+        var rom = this;
+        web.getResource(sFileURL, null, true, function(sURL, sResponse, nErrorCode) {
+            rom.convertImage(sURL, sResponse, nErrorCode);
+        });
     }
 }
 

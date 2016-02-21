@@ -1099,8 +1099,10 @@ Disk.prototype.load = function(sDiskName, sDiskPath, file, fnNotify, controller)
             }
         }
     }
-    var result = web.loadResource(sDiskURL, true, null, this, this.doneLoad);
-    return result.length > 0;
+    var disk = this;
+    return !!web.getResource(sDiskURL, null, true, function(sURL, sResponse, nErrorCode) {
+        disk.doneLoad(sURL, sResponse, nErrorCode);
+    });
 };
 
 /**
@@ -2032,8 +2034,11 @@ Disk.prototype.readRemoteSectors = function(iCylinder, iHead, iSector, nSectors,
         sParms += '&' + DiskAPI.QUERY.ADDR + '=' + iCylinder + ':' + iHead + ':' + iSector + ':' + nSectors;
         sParms += '&' + DiskAPI.QUERY.MACHINE + '=' + this.controller.getMachineID();
         sParms += '&' + DiskAPI.QUERY.USER + '=' + this.controller.getUserID();
+        var disk = this;
         var sDiskURL = web.getHost() + DiskAPI.ENDPOINT + '?' + sParms;
-        web.loadResource(sDiskURL, fAsync, null, this, this.doneReadRemoteSectors, [iCylinder, iHead, iSector, nSectors, fAsync, done]);
+        web.getResource(sDiskURL, null, fAsync, function(sURL, sResponse, nErrorCode) {
+            disk.doneReadRemoteSectors(sURL, sResponse, nErrorCode, [iCylinder, iHead, iSector, nSectors, fAsync, done]);
+        });
         return;
     }
     if (done) done(-1, false);
@@ -2121,17 +2126,20 @@ Disk.prototype.writeRemoteSectors = function(iCylinder, iHead, iSector, nSectors
     }
 
     if (this.fRemote) {
-        var data = {};
+        var dataPost = {};
         this.fWriteInProgress = true;
-        data[DiskAPI.QUERY.ACTION] = DiskAPI.ACTION.WRITE;
-        data[DiskAPI.QUERY.VOLUME] = this.sDiskPath;
-        data[DiskAPI.QUERY.CHS] = this.nCylinders + ':' + this.nHeads + ':' + this.nSectors + ':' + this.cbSector;
-        data[DiskAPI.QUERY.ADDR] = iCylinder + ':' + iHead + ':' + iSector + ':' + nSectors;
-        data[DiskAPI.QUERY.MACHINE] = this.controller.getMachineID();
-        data[DiskAPI.QUERY.USER] = this.controller.getUserID();
-        data[DiskAPI.QUERY.DATA] = JSON.stringify(abSectors);
+        dataPost[DiskAPI.QUERY.ACTION] = DiskAPI.ACTION.WRITE;
+        dataPost[DiskAPI.QUERY.VOLUME] = this.sDiskPath;
+        dataPost[DiskAPI.QUERY.CHS] = this.nCylinders + ':' + this.nHeads + ':' + this.nSectors + ':' + this.cbSector;
+        dataPost[DiskAPI.QUERY.ADDR] = iCylinder + ':' + iHead + ':' + iSector + ':' + nSectors;
+        dataPost[DiskAPI.QUERY.MACHINE] = this.controller.getMachineID();
+        dataPost[DiskAPI.QUERY.USER] = this.controller.getUserID();
+        dataPost[DiskAPI.QUERY.DATA] = JSON.stringify(abSectors);
+        var disk = this;
         var sDiskURL = web.getHost() + DiskAPI.ENDPOINT;
-        return web.loadResource(sDiskURL, fAsync, data, this, this.doneWriteRemoteSectors, [iCylinder, iHead, iSector, nSectors, fAsync]);
+        web.getResource(sDiskURL, dataPost, fAsync, function(sURL, sResponse, nErrorCode) {
+            disk.doneWriteRemoteSectors(sURL, sResponse, nErrorCode, [iCylinder, iHead, iSector, nSectors, fAsync]);
+        });
     }
     return false;
 };
@@ -2188,7 +2196,7 @@ Disk.prototype.disconnectRemoteDisk = function()
         sParms += '&' + DiskAPI.QUERY.MACHINE + '=' + this.controller.getMachineID();
         sParms += '&' + DiskAPI.QUERY.USER + '=' + this.controller.getUserID();
         var sDiskURL = web.getHost() + DiskAPI.ENDPOINT + '?' + sParms;
-        web.loadResource(sDiskURL, true);
+        web.getResource(sDiskURL, null, true);
         this.fRemote = false;
     }
 };

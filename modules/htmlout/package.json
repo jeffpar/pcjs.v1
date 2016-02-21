@@ -13,6 +13,9 @@
     }
   ],
   "bin": {
-    "example": "./bin/htmlout"
+    "htmlout": "./bin/htmlout"
+  },
+  "dependencies": {
+    "mkdirp": "^0.3.5"
   }
 }

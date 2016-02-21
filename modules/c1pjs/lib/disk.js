@@ -701,7 +701,9 @@ C1PDiskController.prototype.setBinding = function(sHTMLType, sBinding, control, 
                         sFileURL = "http://" + window.location.host + "/api/v1/dump?disk=" + sFilePath;
                     }
                     controller.println("loading  " + str.getBaseName(sFilePath) + "...");
-                    web.loadResource(sFileURL, true, null, controller, controller.loadDisk);
+                    web.getResource(sFileURL, null, true, function(sURL, sResponse, nErrorCode) {
+                        controller.loadDisk(sURL, sResponse, nErrorCode);
+                    });
                 }
             };
         }(this);

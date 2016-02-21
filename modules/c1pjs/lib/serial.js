@@ -129,7 +129,9 @@ C1PSerialPort.prototype.setBinding = function(sHTMLType, sBinding, control, sVal
             if (serial.bindings["listSerial"]) {
                 var sFile = serial.bindings["listSerial"].value;
                 // serial.println("loading " + sFile + "...");
-                web.loadResource(sFile, true, null, serial, serial.loadFile);
+                web.getResource(sFile, null, true, function(sURL, sResponse, nErrorCode) {
+                    serial.loadFile(sURL, sResponse, nErrorCode);
+                });
             }
         };
         return true;
@@ -228,8 +230,8 @@ C1PSerialPort.prototype.startLoad = function()
 
 /**
  * @this {C1PSerialPort}
- * @param {String} sFileName
- * @param {string} sFileData (null if loadResource() encountered an error)
+ * @param {string} sFileName
+ * @param {string} sFileData (null if getResource() encountered an error)
  * @param {number} nResponse from server
  */
 C1PSerialPort.prototype.loadFile = function(sFileName, sFileData, nResponse)
@@ -245,7 +247,7 @@ C1PSerialPort.prototype.loadFile = function(sFileName, sFileData, nResponse)
         this.println("auto-loading " + sFileName);
         /*
          * QUESTION: Is this setFocus() call strictly necessary?  We're being called in the
-         * context of loadResource(), not some user action.  If there was an original user action,
+         * context of getResource(), not some user action.  If there was an original user action,
          * then the handler for THAT action should take care to switch focus back, not us.
          */
         this.cpu.setFocus();
