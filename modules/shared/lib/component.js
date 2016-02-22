@@ -51,7 +51,7 @@
 
 "use strict";
 
-/* global document: true, window: true, DEBUG: true */
+/* global window: true, DEBUG: true */
 
 if (NODE) {
     require("./defines");
@@ -257,7 +257,10 @@ Component.addMachine = function(idMachine)
  */
 Component.addMachineResource = function(idMachine, sName, data)
 {
-    Component.assert(Component.machines[idMachine]);
+    /*
+     * I used to assert(Component.machines[idMachine]), but when we're running as a Node app, embed.js is not used,
+     * so addMachine() is never called, so resources do not need to be recorded.
+     */
     if (Component.machines[idMachine] && sName) {
         Component.assert(Component.machines[idMachine][sName] === undefined);
         Component.machines[idMachine][sName] = data;
@@ -537,8 +540,6 @@ Component.bindExternalControl = function(component, sControl, sBinding, sType)
     }
 };
 
-if (document && !document.ELEMENT_NODE) document.ELEMENT_NODE = 1;
-
 /**
  * Component.bindComponentControls(component, element, sAppClass)
  *
@@ -556,7 +557,7 @@ Component.bindComponentControls = function(component, element, sAppClass)
 
         for (var iNode = 0; iNode < aeChildNodes.length; iNode++) {
             var control = aeChildNodes[iNode];
-            if (control.nodeType !== document.ELEMENT_NODE) {
+            if (control.nodeType !== 1 /* document.ELEMENT_NODE */) {
                 continue;
             }
             var sClass = control.getAttribute("class");

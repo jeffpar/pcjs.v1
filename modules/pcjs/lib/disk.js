@@ -1035,11 +1035,11 @@ Disk.prototype.load = function(sDiskName, sDiskPath, file, fnNotify, controller)
     this.sDiskPath = sDiskPath;
     this.sDiskFile = str.getBaseName(sDiskPath);
 
+    var disk = this;
     this.fnNotify = fnNotify;
     this.controllerNotify = controller || this.controller;
 
     if (file) {
-        var disk = this;
         var reader = new FileReader();
         reader.onload = function() {
             disk.build(reader.result, true);
@@ -1099,7 +1099,6 @@ Disk.prototype.load = function(sDiskName, sDiskPath, file, fnNotify, controller)
             }
         }
     }
-    var disk = this;
     return !!web.getResource(sDiskURL, null, true, function(sURL, sResponse, nErrorCode) {
         disk.doneLoad(sURL, sResponse, nErrorCode);
     });

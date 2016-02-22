@@ -252,10 +252,9 @@ web.getResource = function(sURL, dataPost, fAsync, done)
     if (!fAsync) {
         sResource = xmlHTTP.responseText;
         if (xmlHTTP.status == 200) {
-            response = sResource;
             if (MAXDEBUG) web.log("web.getResource(" + sURL + "): returned " + sResource.length + " bytes");
         } else {
-            response = nErrorCode = xmlHTTP.status || -1;
+            nErrorCode = xmlHTTP.status || -1;
             web.log("web.getResource(" + sURL + "): error code " + nErrorCode);
         }
         if (done) done(sURL, sResource, nErrorCode);
@@ -630,30 +629,30 @@ web.downloadJSON = function(sJSON, sFileName)
 
 
 /**
- * onCountRepeat(n, fn, fnComplete, msDelay)
+ * onCountRepeat(n, fnRepeat, fnComplete, msDelay)
  *
- * Call fn() n times with an msDelay millisecond delay between calls, then
- * call fnComplete() when the count has been exhausted OR fn() returns false.
+ * Call fnRepeat() n times with an msDelay millisecond delay between calls,
+ * then call fnComplete() when n has been exhausted OR fnRepeat() returns false.
  *
  * @param {number} n
- * @param {function()} fn
+ * @param {function()} fnRepeat
  * @param {function()} fnComplete
  * @param {number} [msDelay]
  */
-web.onCountRepeat = function(n, fn, fnComplete, msDelay)
+web.onCountRepeat = function(n, fnRepeat, fnComplete, msDelay)
 {
-    var fnRepeat = function doCountRepeat() {
+    var fnTimeout = function doCountRepeat() {
         n -= 1;
         if (n >= 0) {
-            if (!fn()) n = 0;
+            if (!fnRepeat()) n = 0;
         }
         if (n > 0) {
-            setTimeout(fnRepeat, msDelay || 0);
+            setTimeout(fnTimeout, msDelay || 0);
             return;
         }
         fnComplete();
     };
-    fnRepeat();
+    fnTimeout();
 };
 
 /**
