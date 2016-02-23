@@ -28,10 +28,10 @@ capabilities can be found in the [Documentation](/docs/).
 The first JavaScript Machines simulation was [C1Pjs](/docs/c1pjs/), a simulation of the
 Challenger 1P, which was a 6502-based microcomputer introduced by Ohio Scientific in 1978.
 
-C1Pjs v1.0 was released in July 2012, first on ecpsim.org and cpusim.org, then on [jsmachines.net](http://jsmachines.net/),
-and finally [{{ site.pcjs.domain }}]({{ site.url }}/). More information about the first release of C1Pjs was also 
-[posted](http://osiweb.org/osiforum/viewtopic.php?f=3&t=103) on the [OSI Discussion Forum](http://osiweb.org/osiforum/index.php)
-at [osiweb.org](http://osiweb.org/).
+C1Pjs v1.0 was released in July 2012, originally on ecpsim.org and cpusim.org, and then
+[jsmachines.net](http://jsmachines.net/), which has since become [{{ site.pcjs.domain }}]({{ site.url }}/).
+More information about the first release of C1Pjs was also [posted](http://osiweb.org/osiforum/viewtopic.php?f=3&t=103)
+on the [OSI Discussion Forum](http://osiweb.org/osiforum/index.php) at [osiweb.org](http://osiweb.org/).
 
 ---
 
@@ -40,9 +40,10 @@ at [osiweb.org](http://osiweb.org/).
 The next JavaScript Machines simulation was [PCjs](/docs/about/pcjs/), which simulates the original IBM PC, IBM PC XT,
 and IBM PC AT.
 
-[PCjs](/docs/about/pcjs/) emulates the Intel 8088 and 80286 CPUs, as well as IBM Monochrome Display Adapter (MDA),
-Color Graphics Adapter (CGA), and Enhanced Graphics Adapter (EGA) video cards, along with assorted motherboard and
-expansion bus components.  It also includes an optional Debugger and a user-configurable Control Panel.
+[PCjs](/docs/about/pcjs/) emulates the Intel 8088, 80186, 80286 and 80386 CPUs, as well as IBM Monochrome Display
+Adapter (MDA), Color Graphics Adapter (CGA), Enhanced Graphics Adapter (EGA), and Video Graphics Array (VGA) video
+cards, along with assorted motherboard and expansion bus components.  It also includes an optional
+[Debugger](/docs/pcjs/debugger/) and a user-configurable [Control Panel](/docs/pcjs/panel/).
 
 PCjs v1.0 was released on [jsmachines.net](http://jsmachines.net/) in late 2012, and the JavaScript Machines Project,
 with its second full-featured machine emulation, was launched.
