@@ -175,8 +175,16 @@ web.notice = function(s, fPrintOnly, id)
  *
  * Request the specified resource (sURL), and once the request is complete, notify done().
  *
+ * Also, if dataPost is set to a string, that string can be used to control the response format;
+ * by default, the response format is plain text, but you can specify "bytes" to request arbitrary
+ * binary data, which should come back as a string of bytes.
+ *
+ * TODO: The "bytes" option works by calling overrideMimeType(), which was never a best practice.
+ * Instead, we should implement supported response types ("text" and "arraybuffer", at a minimum)
+ * by setting xmlHTTP.responseType to one of those values before calling xmlHTTP.send().
+ *
  * @param {string} sURL
- * @param {Object|null} [dataPost] for a POST request (default is a GET request)
+ * @param {string|Object|null} [dataPost] for a POST request (default is a GET request)
  * @param {boolean} [fAsync] is true for an asynchronous request
  * @param {function(string,string,number)} [done]
  * @return {Array|null} Array containing [sResource, nErrorCode], or null if no response yet
@@ -231,7 +239,7 @@ web.getResource = function(sURL, dataPost, fAsync, done)
         };
     }
 
-    if (dataPost) {
+    if (typeof dataPost == "object") {
         var sDataPost = "";
         for (var p in dataPost) {
             if (!dataPost.hasOwnProperty(p)) continue;
@@ -246,6 +254,9 @@ web.getResource = function(sURL, dataPost, fAsync, done)
     } else {
         if (MAXDEBUG) web.log("web.getResource(GET " + sURL + ")");
         xmlHTTP.open("GET", sURL, !!fAsync);    // ensure that fAsync is a valid boolean (Internet Explorer xmlHTTP functions insist on it)
+        if (dataPost == "bytes") {
+            xmlHTTP.overrideMimeType("text/plain; charset=x-user-defined");
+        }
         xmlHTTP.send();
     }
 

@@ -199,7 +199,7 @@ FileDump.logError = function(err)
 {
     var sError = "";
     if (err) {
-        sError = "filedump error: " + err.message;
+        sError = "FileDump error: " + err.message;
         console.log(sError);
     }
     return sError;

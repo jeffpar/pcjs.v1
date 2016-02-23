@@ -36,7 +36,7 @@
 
 "use strict";
 
-if (NODE) {
+if (typeof module != "undefined") {     // we can't simply test for NODE, since defines.js hasn't been loaded yet
     var fs      = require("fs");
     var path    = require("path");
     var http    = require("http");
@@ -82,6 +82,231 @@ var logFile = null;
  * thing, I don't provide any UI for turning it off.
  */
 var fNormalize = true;
+
+/**
+ * BufferPF(init, start, end)
+ *
+ * BufferPF is our browser polyfill (hence the PF) for Node's Buffer class.  It's basically a wrapper object
+ * containing a real Buffer in Node and a simulated buffer in a browser.
+ *
+ * This is NOT a general-purpose polyfill.  It supports only those Buffer constructor calls and methods that the
+ * DiskDump module actually requires.
+ *
+ * The constructor supports initialization with: 1) a number specifying the buffer length in bytes, 2) a string,
+ * 3) an array of byte-sized numbers (aka octets), or 4) another BufferPF, but only when ALSO specifying start and end
+ * parameters; this final variation is used to support the slice() method.
+ *
+ * Finally, under Node, if an API gives us a real Buffer, we need a way to create a BufferPF from it, so that's handled
+ * as a special NODE case.
+ *
+ * @constructor
+ * @param {number|string|Array|BufferPF|Buffer} [init]
+ * @param {number} [start]
+ * @param {number} [end]
+ */
+function BufferPF(init, start, end)
+{
+    if (NODE) {
+        if (start === undefined) {
+            if (typeof init == "object" && init instanceof Buffer) {
+                this.buf = init;
+            } else {
+                this.buf = new Buffer(init);
+            }
+        } else {
+            this.buf = init.buf.slice(start, end);
+        }
+        this.length = this.buf.length;
+    }
+    else if (typeof init == "number") {
+        this.ab = new ArrayBuffer(init);
+        this.dv = new DataView(this.ab, 0, init);
+        this.length = init;
+    }
+    else if (start === undefined) {
+        var off;
+        this.ab = new ArrayBuffer(init.length);
+        this.dv = new DataView(this.ab, 0, init.length);
+        if (typeof init != "string") {
+            for (off = 0; off < init.length; off++) {
+                this.dv.setUint8(off, init[off]);
+            }
+        } else {
+            for (off = 0; off < init.length; off++) {
+                this.dv.setUint8(off, init.charCodeAt(off));
+            }
+        }
+        this.length = init.length;
+    } else {
+        this.ab = init.ab;
+        if (end === undefined) end = this.ab.length;
+        this.dv = new DataView(this.ab, start, this.length = end - start);
+    }
+}
+
+/**
+ * fill(b)
+ *
+ * @this {BufferPF}
+ * @param {number} b
+ */
+BufferPF.prototype.fill = function(b)
+{
+    if (NODE) {
+        this.buf.fill(b);
+    } else {
+        for (var off = 0; off < this.ab.length; off++) {
+            this.dv.setUint8(off, b);
+        }
+    }
+};
+
+/**
+ * write(s, off, len)
+ *
+ * @this {BufferPF}
+ * @param {string} s
+ * @param {number} off
+ * @param {number} len
+ */
+BufferPF.prototype.write = function(s, off, len)
+{
+    if (NODE) {
+        this.buf.write(s, off, len);
+    } else {
+        var i = 0;
+        while (off < init.length) {
+            this.dv.setUint8(off, s.charCodeAt(i++));
+            off++;
+        }
+    }
+};
+
+/**
+ * readUInt8(b)
+ *
+ * @this {BufferPF}
+ * @param {number} off
+ * @return {number}
+ */
+BufferPF.prototype.readUInt8 = function(off)
+{
+    return (NODE? this.buf.readUInt8(off) : this.dv.getUint8(off));
+};
+
+/**
+ * writeUInt8(b, off)
+ *
+ * @this {BufferPF}
+ * @param {number} b
+ * @param {number} off
+ */
+BufferPF.prototype.writeUInt8 = function(b, off)
+{
+    if (NODE) {
+        this.buf.writeUInt8(b, off);
+    } else {
+        this.dv.setUint8(off, b);
+    }
+};
+
+/**
+ * readUInt16BE(off)
+ *
+ * @this {BufferPF}
+ * @param {number} off
+ * @return {number}
+ */
+BufferPF.prototype.readUInt16BE = function(off)
+{
+    return (NODE? this.buf.readUInt16BE(off) : this.dv.getUint16(off));
+};
+
+/**
+ * readUInt16LE(off)
+ *
+ * @this {BufferPF}
+ * @param {number} off
+ * @return {number}
+ */
+BufferPF.prototype.readUInt16LE = function(off)
+{
+    return (NODE? this.buf.readUInt16LE(off) : this.dv.getUint16(off, true));
+};
+
+/**
+ * readUInt32LE(off)
+ *
+ * @this {BufferPF}
+ * @param {number} off
+ * @return {number}
+ */
+BufferPF.prototype.readUInt32LE = function(off)
+{
+    return (NODE? this.buf.readUInt32LE(off) : this.dv.getUint32(off, true));
+};
+
+/**
+ * readInt32LE(off)
+ *
+ * @this {BufferPF}
+ * @param {number} off
+ * @return {number}
+ */
+BufferPF.prototype.readInt32LE = function(off)
+{
+    return (NODE? this.buf.readInt32LE(off) : this.dv.getInt32(off, true));
+};
+
+/**
+ * writeInt32LE(dw, off)
+ *
+ * @this {BufferPF}
+ * @param {number} dw
+ * @param {number} off
+ */
+BufferPF.prototype.writeInt32LE = function(dw, off)
+{
+    if (NODE) {
+        this.buf.writeInt32LE(dw, off);
+    } else {
+        this.dv.setInt32(off, dw, true);
+    }
+};
+
+/**
+ * copy(bufTarget, offTarget)
+ *
+ * @this {BufferPF}
+ * @param {BufferPF} bufTarget
+ * @param {number} offTarget
+ */
+BufferPF.prototype.copy = function(bufTarget, offTarget)
+{
+    if (NODE) {
+        this.buf.copy(bufTarget.buf, offTarget);
+    } else {
+        var offMax = this.length;
+        var cbMax = bufTarget.length - offTarget;
+        if (offMax > cbMax) offMax = cbMax;
+        for (var off = 0; off < offMax; off++) {
+            bufTarget.writeUInt8(this.readUInt8(off), offTarget + off);
+        }
+    }
+};
+
+/**
+ * slice(start, end)
+ *
+ * @this {BufferPF}
+ * @param {number} [start]
+ * @param {number} [end]
+ * @return {BufferPF}
+ */
+BufferPF.prototype.slice = function(start, end)
+{
+    return new BufferPF(this, start || 0, end);
+};
 
 /**
  * DiskDump()
@@ -738,7 +963,8 @@ DiskDump.logError = function(err)
 {
     var sError = "";
     if (err) {
-        sError = "diskdump error: " + err.message;
+        sError = "DiskDump error: " + err.message;
+        if (!NODE) web.alertUser(sError);
         DiskDump.logConsole(sError);
     }
     return sError;
@@ -787,24 +1013,39 @@ DiskDump.getStat = function(sPath, done)
  */
 DiskDump.readFile = function(sPath, sEncoding, done)
 {
-    if (net.isRemote(sPath)) {
-        /*
-         * Just a quick verification that the getStat() function works...
-         *
-         net.getStat(sPath, function(err, stats) {
-            if (!err) {
-                DiskDump.logConsole(stats);
-            } else {
-                DiskDump.logError(err);
-            }
-        });
-         */
-        net.getFile(sPath, sEncoding, function doneReadFileRemote(err, status, buf) {
-            done(err, buf);
-        });
+    if (NODE) {
+        if (net.isRemote(sPath)) {
+            /*
+             * Just a quick verification that the getStat() function works...
+             *
+             net.getStat(sPath, function(err, stats) {
+                if (!err) {
+                    DiskDump.logConsole(stats);
+                } else {
+                    DiskDump.logError(err);
+                }
+            });
+             */
+            net.getFile(sPath, sEncoding, function doneReadFileRemote(err, status, buf) {
+                done(err, buf);
+            });
+        } else {
+            fs.readFile(sPath, {encoding: sEncoding}, function doneReadFileLocal(err, buf) {
+                done(err, buf);
+            });
+        }
     } else {
-        fs.readFile(sPath, {encoding: sEncoding}, function doneReadFileLocal(err, buf) {
-            done(err, buf);
+        /*
+         * This is the browser code path (ie, you've loaded diskdump.js in your browser rather than in Node)
+         */
+        web.getResource(sPath, "bytes", true, function doneReadFileBrowser(sURL, sResource, nErrorCode) {
+            var buf = sResource;
+            if (!nErrorCode) {
+                if (str.endsWith(sURL, ".img")) {
+                    buf = new BufferPF(sResource);
+                }
+            }
+            done(nErrorCode? new Error(sURL + " (" + nErrorCode + ")") : null, buf);
         });
     }
 };
@@ -1166,7 +1407,7 @@ DiskDump.prototype.validateTime = function(dateTime)
  * @this {DiskDump}
  * @param {number} cb
  * @param {Array.<number>} [abInit]
- * @return {Array.<number>} of bytes zero-initialized
+ * @return {Array.<number>} of bytes, initialized with abInit (or with zero when abInit is empty or exhausted)
  */
 DiskDump.prototype.buildData = function(cb, abInit)
 {
@@ -1187,7 +1428,7 @@ DiskDump.prototype.buildData = function(cb, abInit)
  */
 DiskDump.prototype.copyData = function(offDisk, ab)
 {
-    var buf = new Buffer(ab);
+    var buf = new BufferPF(ab);
     buf.copy(this.bufDisk, offDisk);
     return ab.length;
 };
@@ -1793,14 +2034,14 @@ DiskDump.prototype.buildClusters = function(aFiles, offDisk, cbCluster, iParentC
                 }(aFiles[iFile], cbData, offDisk));     // jshint ignore:line
             } else {
                 cbData = sData.length;
-                bufData = new Buffer(sData);
+                bufData = new BufferPF(sData);
                 if (this.sManifestFile) aFiles[iFile].FILE_MD5 = crypto.createHash('md5').update(bufData).digest('hex');
             }
         }
         else if (cbData < 0) {
             var abData = [];
             cbData = this.buildDir(abData, aFiles[iFile].FILE_DATA, aFiles[iFile].FILE_TIME, aFiles[iFile].FILE_CLUS, iParentCluster) * 32;
-            bufData = new Buffer(this.buildData(cbData, abData));
+            bufData = new BufferPF(this.buildData(cbData, abData));
             cSubDirs++;
         }
         if (bufData) {
@@ -2049,7 +2290,7 @@ DiskDump.prototype.buildImageFromFiles = function(aFiles, done)
      * functions that prefer not passing around temporary buffers.  In the meantime, perhaps any catastrophic
      * failures should set bufDisk back to null?
      */
-    this.bufDisk = new Buffer(cbDisk);
+    this.bufDisk = new BufferPF(cbDisk);
 
     /*
      * WARNING: Buffers are NOT zero-initialized, so we need explicitly fill bufDisk with zeros (this seems
@@ -2707,7 +2948,7 @@ DiskDump.prototype.convertToIMG = function()
             var cbDisk = nCylinders * nHeads * nSectorsPerTrack * 512;
 
             var off = 0;
-            buf = new Buffer(cbDisk);
+            buf = new BufferPF(cbDisk);
 
             /*
              * WARNING: Buffers are NOT zero-initialized, so we need explicitly fill it with zeros (this seems to

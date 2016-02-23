@@ -290,12 +290,14 @@ Component.log = function(s, type)
 {
     if (DEBUG) {
         if (s) {
-            var msElapsed, sMsg = (type? (type + ": ") : "") + s;
-            if (Component.msStart === undefined) {
-                Component.msStart = usr.getTime();
+            var sElapsed = "", sMsg = (type? (type + ": ") : "") + s;
+            if (typeof usr != "undefined") {
+                if (Component.msStart === undefined) {
+                    Component.msStart = usr.getTime();
+                }
+                sElapsed = (usr.getTime() - Component.msStart) + "ms: ";
             }
-            msElapsed = usr.getTime() - Component.msStart;
-            if (window && window.console) console.log(msElapsed + "ms: " + sMsg.replace(/\n/g, " "));
+            if (window && window.console) console.log(sElapsed + sMsg.replace(/\n/g, " "));
         }
     }
 };
@@ -749,6 +751,7 @@ Component.prototype = {
      *
      * TODO: Add a task to the build process that "asserts" there are no instances of "assertion failure" in RELEASE builds.
      *
+     * @this {Component}
      * @param {boolean} f is the expression we are asserting to be true
      * @param {string} [s] is description of the assertion on failure
      */
