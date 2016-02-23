@@ -41,6 +41,12 @@ to display for each component. You can choose the size of the display window cre
 component, add **Halt** or **Speed** buttons to the [CPU](/docs/pcjs/cpu/) component, display clickable "DIP Switches"
 for the [Chipset](/docs/pcjs/chipset/) component, or even design your own [Control Panel](/docs/pcjs/panel/).
 
++ The UI includes a responsive design that tailors itself to your browser and device, and support for touch events
+and soft keyboards means you get the best possible emulation experience -- better than any other browser-based
+emulator currently available.  It almost feels like your DOS and Windows mouse-based applications have been rewritten
+to work with your iPad or iPhone -- almost.  Please note, however, that some mobile devices provide better support than
+others.
+
 + A fully-integrated [Debugger](/docs/pcjs/debugger/) is available.  Disassemble code, set breakpoints on
 memory write/read/execution addresses, dump and edit memory, dump disk sectors, enable/disable categories of diagnostic
 messages, and view instruction history, cycle counts and more.  The Debugger does not rely on CPU breakpoint
