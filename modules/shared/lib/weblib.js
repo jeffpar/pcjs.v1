@@ -239,7 +239,7 @@ web.getResource = function(sURL, dataPost, fAsync, done)
         };
     }
 
-    if (typeof dataPost == "object") {
+    if (dataPost && typeof dataPost == "object") {
         var sDataPost = "";
         for (var p in dataPost) {
             if (!dataPost.hasOwnProperty(p)) continue;
@@ -601,43 +601,40 @@ web.getURLParameters = function(sParms)
 };
 
 /**
- * downloadJSON()
+ * downloadFile(sData, sType, fBase64, sFileName)
  *
- * @param {string} sJSON
+ * @param {string} sData
+ * @param {string} sType
+ * @param {boolean} [fBase64]
  * @param {string} [sFileName]
  */
-web.downloadJSON = function(sJSON, sFileName)
+web.downloadFile = function(sData, sType, fBase64, sFileName)
 {
-    var link, sAlert;
-    var fDownload = !!sFileName;
-    var sURI = "data:application/json,";
+    var link = null, sAlert;
+    var sURI = "data:application/" + sType + (fBase64? ";base64" : "") + ",";
 
     if (!web.isUserAgent("Firefox")) {
-        fDownload = false;
-        sURI += encodeURI(sJSON);
+        sURI += (fBase64? sData : encodeURI(sData));
     } else {
-        sURI += encodeURIComponent(sJSON);
-        if (fDownload) {
+        sURI += (fBase64? sData : encodeURIComponent(sData));
+        if (sFileName) {
             link = document.createElement('a');
-            if (typeof link.download != 'string') fDownload = false;
+            if (typeof link.download != 'string') link = null;
         }
     }
-
-    if (fDownload) {
+    if (link) {
         link.href = sURI;
         link.download = sFileName;
-        document.body.appendChild(link);
+        document.body.appendChild(link);    // Firefox requires the link to be in the body
         link.click();
         document.body.removeChild(link);
-        sAlert = 'Check your Downloads folder for "' + sFileName + '".';
+        sAlert = 'Check your Downloads folder for "' + sFileName + '"';
     } else {
         window.open(sURI);
-        sAlert = 'Check your browser for a new window/tab containing the requested data.';
+        sAlert = 'Check your browser for a new window/tab containing the requested data';
     }
-
-    web.alertUser(sAlert);
+    return sAlert;
 };
-
 
 /**
  * onCountRepeat(n, fnRepeat, fnComplete, msDelay)

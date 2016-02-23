@@ -87,7 +87,7 @@ var fNormalize = true;
  * BufferPF(init, start, end)
  *
  * BufferPF is our browser polyfill (hence the PF) for Node's Buffer class.  It's basically a wrapper object
- * containing a real Buffer in Node and a simulated buffer in a browser.
+ * containing a real Buffer in Node and a simulated buffer in the browser.
  *
  * This is NOT a general-purpose polyfill.  It supports only those Buffer constructor calls and methods that the
  * DiskDump module actually requires.
@@ -311,10 +311,10 @@ BufferPF.prototype.slice = function(start, end)
 /**
  * DiskDump()
  *
- * TODO: Honor the caller's mbHD size. At the moment, any hard disk build request translates to 10Mb,
+ * TODO: Honor the caller's mbHD size.  At the moment, any hard disk request translates to 10Mb,
  * since we rely on a "canned" BPB in aDefaultBPBs.
  *
- * TODO: If sServerRoot is set, make sure the final sDiskPath refers to something in either /apps/ or /disks/,
+ * TODO: If sServerRoot is set, make sure sDiskPath refers to something in either /apps/ or /disks/,
  * to prevent random enumeration of other server resources.
  *
  * @constructor
@@ -336,7 +336,10 @@ function DiskDump(sDiskPath, asExclude, sFormat, fComments, mbHD, sServerRoot, s
      * with a slash, and process.cwd() otherwise.
      */
     this.sServerRoot = sServerRoot;
-    this.sDiskPath = (net.isRemote(sDiskPath)? sDiskPath : path.join(this.sServerRoot, sDiskPath));
+    this.sDiskPath = sDiskPath;
+    if (this.sServerRoot && !net.isRemote(sDiskPath)) {
+        this.sDiskPath = path.join(this.sServerRoot, sDiskPath);
+    }
     this.asExclude = asExclude || DiskDump.asExclusions;
     this.mbHD = mbHD? parseInt(mbHD, 10) : 0;
     this.sFormat = (sFormat || DumpAPI.FORMAT.JSON);
@@ -402,7 +405,7 @@ DiskDump.setLogFile = function(file) {
  * Class constants
  */
 DiskDump.sAPIURL = "http://www.pcjs.org" + DumpAPI.ENDPOINT;
-DiskDump.sCopyright = "© 2012-2015 by Jeff Parsons (@jeffpar)";
+DiskDump.sCopyright = "© 2012-2016 by Jeff Parsons (@jeffpar)";
 DiskDump.sNotice = DiskDump.sAPIURL + " " + DiskDump.sCopyright;
 DiskDump.sUsage = "Usage: " + DiskDump.sAPIURL + "?" + DumpAPI.QUERY.PATH + "={url}&amp;" + DumpAPI.QUERY.FORMAT + "=json|data|hex|bytes|img";
 
@@ -669,8 +672,22 @@ DiskDump.API = function(aParms)
 
     disk.loadFile(function(err) {
         if (!err) {
-            var sResponse = disk.convertToJSON();
-            if (sResponse) web.downloadJSON(sResponse);
+            var sData, sType, fBase64;
+            if (sFormat == DumpAPI.FORMAT.IMG) {
+                sType = "octet-stream";
+                var buf = disk.convertToIMG();
+                if (buf) {
+                    sData = disk.encodeAsBase64(buf);
+                    fBase64 = true;
+                }
+            } else {
+                sType = "json";
+                sData = disk.convertToJSON();
+            }
+            if (sData) {
+                var sAlert = web.downloadFile(sData, sType, fBase64);
+                web.alertUser(sAlert);
+            }
         }
     });
 };
@@ -1041,7 +1058,7 @@ DiskDump.readFile = function(sPath, sEncoding, done)
         web.getResource(sPath, "bytes", true, function doneReadFileBrowser(sURL, sResource, nErrorCode) {
             var buf = sResource;
             if (!nErrorCode) {
-                if (str.endsWith(sURL, ".img")) {
+                if (!str.endsWith(sURL, ".json")) {
                     buf = new BufferPF(sResource);
                 }
             }
@@ -3048,6 +3065,25 @@ DiskDump.prototype.convertToIMG = function()
         this.bufDisk = buf;
     }
     return this.bufDisk;
+};
+
+/**
+ * encodeAsBase64(buf)
+ *
+ * Converts the buffer contents to base64.  TODO: Consider implementing BufferPF.toString('ascii').
+ *
+ * @this {DiskDump}
+ * @param {Buffer} buf
+ * @return {string}
+ */
+DiskDump.prototype.encodeAsBase64 = function(buf)
+{
+    var s = "";
+    for (var off = 0; off < buf.length; off++) {
+        s += String.fromCharCode(buf.readUInt8(off));
+    }
+    return btoa(s);
+
 };
 
 if (NODE) {

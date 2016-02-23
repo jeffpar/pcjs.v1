@@ -198,45 +198,18 @@ function downloadPC(sURL, sCSS, nErrorCode, aMachineInfo)
     if (sXMLFile && sXSLFile) {
         var sResources = JSON.stringify(resNew);
 
+        sScript += ".js";
         sPCJS = matchScript[1] + "var resources=" + sResources + ";" + matchScript[2] + matchScript[3];
         Component.log("saving machine: '" + idMachine + "' (" + sPCJS.length + " bytes)");
 
-        var sURI, sAlert;
-        var link = document.createElement('a');
-        var fDownload = (!DEBUG && typeof link.download == 'string');
+        sPCJS = sPCJS.replace(/\u00A9/g, "&#xA9;");
 
-        if (MAXDEBUG) {
-            sPCJS = sPCJS.replace(/[\u00A0-\u2666]/g, function(c) {
-                return '&#' + c.charCodeAt(0) + ';';
-            });
-            sURI = "data:application/javascript;base64," + btoa(encodeURI(sPCJS));
-        } else {
-            sPCJS = sPCJS.replace(/\u00A9/g, "&#xA9;");
-            sURI = "data:application/javascript,";
-            if (!web.isUserAgent("Firefox")) {
-                fDownload = false;
-                sURI += encodeURI(sPCJS);
-            } else {
-                sURI += encodeURIComponent(sPCJS);
-            }
-        }
+        var sAlert = web.downloadFile(sPCJS, "javascript", false, sScript);
 
-        if (fDownload) {
-            link.href = sURI;
-            link.download = sScript + ".js";
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            sAlert = 'Check your Downloads folder for "' + link.download + '", ';
-        } else {
-            window.open(sURI);
-            sAlert = 'Check your browser for a new window/tab containing the PCjs script, ';
-        }
-
-        sAlert += 'copy it to your web server as "' + sScript + '.js", and then add the following to your web page:\n\n';
+        sAlert += ', copy it to your web server as "' + sScript + '", and then add the following to your web page:\n\n';
         sAlert += '<div id="' + idMachine + '"></div>\n';
         sAlert += '...\n';
-        sAlert += '<script type="text/javascript" src="' + sScript + '.js"></script>\n';
+        sAlert += '<script type="text/javascript" src="' + sScript + '"></script>\n';
         sAlert += '<script type="text/javascript">embedPC("' + idMachine + '","' + sXMLFile + '","' + sXSLFile + '");</script>\n\n';
         sAlert += 'The machine should appear where the <div> is located.';
         web.alertUser(sAlert);
