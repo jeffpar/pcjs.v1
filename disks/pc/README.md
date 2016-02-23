@@ -211,9 +211,9 @@ or with the "--path" option, which specifies either a single file or a set files
 
 	node diskdump --path="./apps/pc/1981/visicalc/bin/vc.com;../readme.md" --format=json --output=./apps/pc/1981/visicalc/disk.json
 	
-or via the PCjs server's DiskDump API:
+or via the PCjs server's [DiskDump API](/api/v1/dump):
 
-	http://www.pcjs.org/api/v1/dump?path=/apps/pc/1981/visicalc/bin/vc.com&format=json
+	{{ site.url }}/api/v1/dump?path=/apps/pc/1981/visicalc/bin/vc.com&format=json
 
 Learn more about PCjs disk image formats [here](/disks/).
 

@@ -155,7 +155,7 @@ BufferPF.prototype.fill = function(b)
     if (NODE) {
         this.buf.fill(b);
     } else {
-        for (var off = 0; off < this.ab.length; off++) {
+        for (var off = 0; off < this.length; off++) {
             this.dv.setUint8(off, b);
         }
     }
@@ -175,7 +175,7 @@ BufferPF.prototype.write = function(s, off, len)
         this.buf.write(s, off, len);
     } else {
         var i = 0;
-        while (off < init.length) {
+        while (off < this.length) {
             this.dv.setUint8(off, s.charCodeAt(i++));
             off++;
         }

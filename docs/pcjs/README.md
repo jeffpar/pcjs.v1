@@ -158,25 +158,27 @@ All of the examples described above are available for [download](examples/).
 
 ### Creating PCjs-Compatible Disk Images
 
-If you have (or find) an IMG disk image file on a server, the PCjs web server provides a **DiskDump API** via endpoint
-"/api/v1/dump" that creates PCjs-compatible disks in JSON:
+If you have (or find) an IMG disk image file on a server, the PCjs web server provides a
+[DiskDump API](/api/v1/dump) via endpoint "/api/v1/dump" that creates PCjs-compatible disks in JSON:
 
-	http://localhost:8088/api/v1/dump?disk=(file|url)&format=json
+	{{ site.url }}/api/v1/dump?disk=(file|url)&format=json
 
-For example, let's say you found a disk image online:
+For example, let's say you found a disk image online, such as:
 
 	http://archive.pcjs.org/disks/pc/dos/ibm/1.00/PCDOS100.img
 
-To convert it to a PCjs-compatible JSON format, use the following command:
+To convert it to a PCjs-compatible JSON format, issue the following
+[request](/api/v1/dump?disk=http://archive.pcjs.org/disks/pc/dos/ibm/1.00/PCDOS100.img&format=json),
+save the resulting JSON file to a folder on your server, and then update your machine XML file(s) to use that file.
 
-	http://localhost:8088/api/v1/dump?disk=http://archive.pcjs.org/disks/pc/dos/ibm/1.00/PCDOS100.img&format=json
+	{{ site.url }}/api/v1/dump?disk=http://archive.pcjs.org/disks/pc/dos/ibm/1.00/PCDOS100.img&format=json
 
-Save the resulting JSON file to a folder on your server, and then update your machine XML file(s) to use that file.
-If necessary, you can also reverse the process, converting a JSON disk image back into an IMG file:
+If necessary, you can also reverse the process and convert a JSON disk image back into an IMG file, with the
+this [request](/api/v1/dump?disk=http://www.pcjs.org/disks/pc/dos/ibm/1.00/PCDOS100.json&format=img):
 
-	http://localhost:8088/api/v1/dump?disk=http://www.pcjs.org/disks/pc/dos/ibm/1.00/PCDOS100.json&format=img
+	{{ site.url }}/api/v1/dump?disk={{ site.url }}/disks/pc/dos/ibm/1.00/PCDOS100.json&format=img
 
-Although PCjs will accept IMG disk image files, it must call the **DiskDump API** to convert the image
+Although PCjs will accept IMG disk image files, it must call the [DiskDump API](/api/v1/dump) to convert the image
 every time it's loaded, so it's *much* faster and more efficient to use pre-converted JSON-encoded disk images.
 
 Remember that PC and PC XT machines supported only 160Kb diskettes (on any version of PC-DOS),
