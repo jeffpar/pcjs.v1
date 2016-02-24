@@ -1,12 +1,12 @@
 ---
 layout: page
-title: Compaq Portable III Information
+title: Compaq Portable III ROMs
 permalink: /devices/pc/rom/compaq/bios/portable3/
 redirect_from:
   - /devices/pc/bios/compaq/portable3/
 ---
 
-Compaq Portable III Information
+Compaq Portable III ROMs
 ---
 
 ### System ROM Locations

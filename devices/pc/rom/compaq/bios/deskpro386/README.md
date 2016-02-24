@@ -1,21 +1,22 @@
 ---
 layout: page
-title: Compaq DeskPro 386 ROMs
+title: COMPAQ DeskPro 386 ROMs
 permalink: /devices/pc/rom/compaq/bios/deskpro386/
 redirect_from:
   - /devices/pc/bios/compaq/deskpro386/
 ---
 
-Compaq DeskPro 386 ROMs
+COMPAQ DeskPro 386 ROMs
 ---
-The oldest Compaq DeskPro 386 ROM I have is a Rev J.4 ROM from a "Version 2" motherboard designed
+
+The oldest COMPAQ DeskPro 386 ROM I have is a Rev J.4 ROM from a "Version 2" motherboard designed
 in 1987 and released in 1988.
 
 [<img src="http://archive.pcjs.org/pubs/pc/reference/compaq/images/Compaq_DeskPro_386-16_System_Board_V2-640.jpg" alt="Compaq DeskPro 386 System Board Version 2"/>](http://archive.pcjs.org/pubs/pc/reference/compaq/images/Compaq_DeskPro_386-16_System_Board_V2.jpg)
 
 Thanks to folks on the [Vintage Computer](http://www.vintage-computer.com/) forums, I also have a Rev N.1 ROM from 1989.
 
-However, I'm still on the lookout for any "Version 1" motherboards from 1986, so that I can obtain dumps of Compaq's
+However, I'm still on the lookout for any "Version 1" motherboards from 1986, so that I can obtain dumps of COMPAQ's
 ROMs for their earliest 80386-based systems.
 
 ### System ROM Locations on COMPAQ DESKPRO 386 System Board Version 2 (Assembly No. 000558-001)
@@ -58,22 +59,23 @@ from the two 16Kb BIN files provided by [Al Kossow](http://www.vintage-computer.
 
 Dumping the ROMs
 ---
-The *.hex* files for the 1988-01-28 DeskPro ROM were produced by running [eeprom_read](http://github.com/phooky/PROM/blob/master/tools/eeprom_read/eeprom_read.pde)
-on a [chipKIT Uno32](http://www.digilentinc.com/Products/Detail.cfm?NavPath=2,892,893&Prod=CHIPKIT-UNO32) Arduino-compatible
-prototyping board, and capturing the serial port output on my MacBook Pro -- as outlined in
+The *.hex* files for the 1988-01-28 DeskPro ROM were produced by running
+[eeprom_read](http://github.com/phooky/PROM/blob/master/tools/eeprom_read/eeprom_read.pde)
+on a [chipKIT Uno32](http://www.digilentinc.com/Products/Detail.cfm?NavPath=2,892,893&Prod=CHIPKIT-UNO32)
+Arduino-compatible prototyping board, and capturing the serial port output on my MacBook Pro -- as outlined in
 "[Stick a Straw in Its Brain and Suck: How to Read a ROM](http://www.nycresistor.com/2012/07/07/stick-a-straw-in-its-brain-and-suck-how-to-read-a-rom/)"
 by [NYC Resistor](http://www.nycresistor.com/) contributor [phooky](http://www.nycresistor.com/author/phooky/).
 
-The DeskPro 386 ROMs were P27128A-2 chips, so I wired my Uno32 based on this [27128A](http://archive.pcjs.org/pubs/pc/datasheets/27128A.pdf)
-datasheet -- the closest match I could find online.
+The DeskPro 386 ROMs were P27128A-2 chips, so I wired my Uno32 based on this
+[27128A](http://archive.pcjs.org/pubs/pc/datasheets/27128A.pdf) datasheet -- the closest match I could find online.
 
 ![<img src="http://archive.pcjs.org/pubs/pc/reference/compaq/images/Compaq_DeskPro_386-16_System_ROM_V2_Breadboard-640.jpg" alt="Compaq DeskPro 386 System ROM Version 2"/>](http://archive.pcjs.org/pubs/pc/reference/compaq/images/Compaq_DeskPro_386-16_System_ROM_V2_Breadboard.jpg)
 
-On my first dump attempt, every ROM address returned 0xFF.  After looking at the 27128A datasheet more closely, I noticed
-the DEVICE OPERATION table indicated that, for a READ operation, /CE and /OE pins should be connected to INPUT LOW VOLTAGE,
-while the /PGM should be connected to INPUT HIGH VOLTAGE.  So I wired pin 27 (/PGM) to +5V instead of GND, and the dump
-worked perfectly.  The NYC Resistor article implied that every *active low* pin should be connected to GND, but apparently
-there are exceptions to that general rule.
+On my first dump attempt, every ROM address returned 0xFF.  After looking at the 27128A datasheet more closely,
+I noticed the DEVICE OPERATION table indicated that, for a READ operation, /CE and /OE pins should be connected to
+INPUT LOW VOLTAGE, while the /PGM should be connected to INPUT HIGH VOLTAGE.  So I wired pin 27 (/PGM) to +5V instead
+of GND, and the dump worked perfectly.  The NYC Resistor article implied that every *active low* pin should be
+connected to GND, but apparently there are exceptions to that general rule.
 
 Recreating ROM Source Code
 ---
@@ -104,7 +106,7 @@ However, it does NOT produce a binary identical to the original ROM, in part bec
 instructions that can be assembled multiple ways). It's possible the reassembled ROM may still work, but more research
 is required.
 
-One interesting section of the Compaq DeskPro ROM is this string at offset 0xE002:
+One interesting section of the COMPAQ DeskPro ROM is this string at offset 0xE002:
  
 	db	'AUTHORS CAB93GLB93RWS93DJC93NPB(C)Copyright COMPAQ Computer Corporation 1982,83,84,85,86'
 

@@ -1,0 +1,67 @@
+CPQPATCH v1.0                                    12 August 2008, John Elliott
+=============================================================================
+
+  CPQPATCH patches the BIOS ROM of a Compaq Portable so that it can boot from 
+a hard drive whose own ROM doesn't support booting an XT.
+
+  To explain a little:
+
+- On the original PC and XT, the BIOS ROM doesn't know anything about hard 
+drives. The hard drive controller comes with its own ROM, and this handles all 
+aspects of the drives, including booting from them.
+
+- On AT-class machines, the BIOS ROM does know about hard drives, and supports 
+ATA drives itself. Additional hard drive controllers (eg: SCSI) can get away 
+with just adding the drives to the system; the BIOS handles booting.
+
+  So, I had a Compaq portable, and an add-on drive for it (2Mb of flash on an 
+ISA card) which left booting up to the BIOS. The attached program will patch 
+the revision C ROM so that it will boot from my add-on drive. It should also 
+work with the Future Domain TMC-850 (firmware 8.4 or 8.5).
+
+  The C source (cpqpatch.c) includes the assembly language source code for
+the changes made.
+
+To use CPQPATCH:
+~~~~~~~~~~~~~~~~
+
+You will need:
+* A Compaq Portable
+* An EPROM burner
+* A 2764 EPROM, 28c64 EEPROM, or compatible chip.
+
+1. Get hold of a Compaq Portable BIOS image (revision C). This should be an 8k 
+file. If you have a Portable, you can check the BIOS revision with DEBUG:
+
+A>DEBUG
+
+-DFFFE:6,f
+FFFE:0006  43 20 20 20 43 4F 4D 50 51 51                       C   COMPAQ
+-
+
+  The 'C' by itself is the revision number.
+
+  Either save the ROM with DEBUG, or image it once you've dismantled the PC.
+
+2. Take the motherboard out of the Portable.
+
+3. Remove the BIOS ROM. This should be marked 100666-1 (or 1006661) and be 
+  plugged into a socket near the DIP switches. If you haven't imaged it, do so 
+  now.
+
+4. Run CPQPATCH:
+
+     CPQPATCH bios.bin new.bin
+
+  where "bios.bin" is the original BIOS, and "new.bin" is the name you want to
+  give to the patched version.
+
+5. Burn "new.bin" to an EPROM or EEPROM.
+
+6. Put that EPROM/EEPROM in the socket where the BIOS ROM came from. The 
+  silkscreening on the board should show you which way round it goes, but in 
+  case it doesn't, the end with the notch should point in the direction of the 
+  ISA slots.
+
+7. Put the whole thing back together, power it up, and hope it works.
+
