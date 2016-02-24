@@ -12,18 +12,18 @@ At the same time, I thought it would be a good idea to create my own roughly chr
 the 1980s, since they are all machines I would like to see PCjs eventually support:
 
  + [COMPAQ Portable](#compaq-portable)
- + COMPAQ [Portable] Plus
- + COMPAQ DeskPro
- + COMPAQ DeskPro 286
- + COMPAQ Portable 286
- + COMPAQ Portable II
+ + [COMPAQ [Portable] Plus](#compaq-portable-plus-aka-compaq-plus)
+ + [COMPAQ DeskPro](#compaq-deskpro)
+ + [COMPAQ DeskPro 286](#compaq-deskpro-286)
+ + [COMPAQ Portable 286](#compaq-portable-286)
+ + [COMPAQ Portable II](#compaq-portable-ii)
  + [COMPAQ DeskPro 386](#compaq-deskpro-386)
  + [COMPAQ Portable III](#compaq-portable-iii)
- + COMPAQ Portable 386
- + COMPAQ 386/20e
- + COMPAQ SLT Series
+ + [COMPAQ Portable 386](#compaq-portable-386)
+ + [COMPAQ 386/20e](#compaq-38620e)
+ + [COMPAQ SLT Series](#compaq-slt-series)
 	 + COMPAQ SLT/286
- + COMPAQ LTE Series
+ + [COMPAQ LTE Series](#compaq-lte-series)
 	 + COMPAQ LTE 286
 	 + COMPAQ LTE 386
 
