@@ -477,19 +477,8 @@ FDC.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
                 if (drive) {
                     if (drive.disk) {
                         if (DEBUG) fdc.println("saving disk " + drive.disk.sDiskPath + "...");
-                        var sURI = "data:application/octet-stream;base64," + drive.disk.encodeAsBase64();
-                        var link = document.createElement('a');
-                        var sFileName = drive.disk.sDiskFile.replace(".json", ".img");
-                        if (typeof link.download == 'string') {
-                            link.href = sURI;
-                            link.download = sFileName;
-                            document.body.appendChild(link);    // Firefox requires the link to be in the body
-                            link.click();
-                            document.body.removeChild(link);
-                        } else {
-                            window.open(sURI);
-                            web.alertUser('The disk is being downloaded, but you will need to manually rename it to "' + sFileName + '".');
-                        }
+                        var sAlert = web.downloadFile(drive.disk.encodeAsBase64(), "octet-stream", true, drive.disk.sDiskFile.replace(".json", ".img"));
+                        web.alertUser(sAlert);
                     } else {
                         fdc.notice("No disk loaded in drive");
                     }

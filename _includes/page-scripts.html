@@ -1,0 +1,8 @@
+{% comment %}
+
+Used by pages like the one in /api/v1/dump/ to implement a client-side API.
+
+{% endcomment %}
+{% for script in page.scripts %}
+  <script type="text/javascript" src="{{ site.baseurl }}{{ script }}"></script>
+{% endfor %}

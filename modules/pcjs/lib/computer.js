@@ -280,7 +280,10 @@ function Computer(parmsComputer, parmsMachine, fSuspended) {
     if (!sStatePath) {
         this.setReady();
     } else {
-        web.loadResource(sStatePath, true, null, this, this.doneLoad);
+        var cmp = this;
+        web.getResource(sStatePath, null, true, function(sURL, sResource, nErrorCode) {
+            cmp.doneLoad(sURL, sResource, nErrorCode);
+        });
     }
 
     if (!this.bindings["power"]) this.fAutoPower = true;
@@ -436,15 +439,14 @@ Computer.prototype.doneLoad = function(sURL, sStateData, nErrorCode)
 /**
  * wait(fn, parms)
  *
- * wait() waits until every component is ready (including ourselves, the last component we check),
- * then calls the specified Computer method.
+ * wait() waits until every component is ready (including ourselves, the last component we check), then calls the
+ * specified Computer method.
  *
- * TODO: As with web.loadResource(), the Closure Compiler makes it difficult for us to define
- * a function type for "fn" that works in all cases; sometimes we want to pass a function that takes
- * only a "number", and other times we want to pass a function that takes only an "Array" (the type
- * will mirror that of the "parms" parameter). However, the Closure Compiler insists that both functions
- * must be declared as accepting both types of parameters. So once again, we must use an untyped function
- * declaration, instead of something stricter like:
+ * TODO: The Closure Compiler makes it difficult for us to define a function type for "fn" that works in all cases;
+ * sometimes we want to pass a function that takes only a "number", and other times we want to pass a function that
+ * takes only an "Array" (the type will mirror that of the "parms" parameter).  However, the Closure Compiler insists
+ * that both functions must be declared as accepting both types of parameters.  So once again, we must use an untyped
+ * function declaration, instead of something stricter like:
  *
  *      param {function(this:Computer, (number|Array|undefined)): undefined} fn
  *
@@ -845,7 +847,7 @@ Computer.prototype.powerReport = function(stateComputer)
  * Power every component "down" and optionally save the machine state.
  *
  * There's one scenario that powerOff() isn't currently able to deal with very effectively: what to do when
- * the user switches away while it's still being restored, causing Disk loadResource() calls to fail.  The
+ * the user switches away while it's still being restored, causing Disk getResource() calls to fail.  The
  * Disk component calls notify() when that happens -- see Disk.mount() -- but the FDC and HDC controllers don't
  * notify *us* of those problems, so Computer assumes that the restore was completely successful, when in fact
  * it was only partially successful.
@@ -1178,7 +1180,7 @@ Computer.prototype.verifyUserID = function(sUserID)
     var fMessages = DEBUG && this.messageEnabled();
     if (fMessages) this.printMessage("verifyUserID(" + sUserID + ")");
     var sRequest = web.getHost() + UserAPI.ENDPOINT + '?' + UserAPI.QUERY.REQ + '=' + UserAPI.REQ.VERIFY + '&' + UserAPI.QUERY.USER + '=' + sUserID;
-    var response = web.loadResource(sRequest);
+    var response = web.getResource(sRequest);
     var nErrorCode = response[0];
     var sResponse = response[1];
     if (!nErrorCode && sResponse) {
@@ -1278,24 +1280,24 @@ Computer.prototype.storeServerState = function(sUserID, sState, fSync)
      * TODO: Determine whether or not any browsers cancel our request if we're called during a browser "shutdown" event,
      * and whether or not it matters if we do an async request (currently, we're not, to try to ensure the request goes through).
      */
-    var data = {};
-    data[UserAPI.QUERY.REQ] = UserAPI.REQ.STORE;
-    data[UserAPI.QUERY.USER] = sUserID;
-    data[UserAPI.QUERY.STATE] = State.key(this, Computer.APPVERSION);
-    data[UserAPI.QUERY.DATA] = sState;
+    var dataPost = {};
+    dataPost[UserAPI.QUERY.REQ] = UserAPI.REQ.STORE;
+    dataPost[UserAPI.QUERY.USER] = sUserID;
+    dataPost[UserAPI.QUERY.STATE] = State.key(this, Computer.APPVERSION);
+    dataPost[UserAPI.QUERY.DATA] = sState;
     var sRequest = web.getHost() + UserAPI.ENDPOINT;
     if (!fSync) {
-        web.loadResource(sRequest, true, data);
+        web.getResource(sRequest, dataPost, true);
     } else {
-        var response = web.loadResource(sRequest, false, data);
-        var sResponse = response[1];
-        if (response[0]) {
+        var response = web.getResource(sRequest, dataPost);
+        var sResponse = response[0];
+        if (response[1]) {
             if (sResponse) {
                 var i = sResponse.indexOf('\n');
                 if (i > 0) sResponse = sResponse.substr(0, i);
                 if (!sResponse.indexOf("Error: ")) sResponse = sResponse.substr(7);
             }
-            sResponse = '{"' + UserAPI.RES.CODE + '":' + response[0] + ',"' + UserAPI.RES.DATA + '":"' + sResponse + '"}';
+            sResponse = '{"' + UserAPI.RES.CODE + '":' + response[1] + ',"' + UserAPI.RES.DATA + '":"' + sResponse + '"}';
         }
         if (DEBUG && this.messageEnabled()) this.printMessage(sResponse);
         return JSON.parse(sResponse);
@@ -1359,7 +1361,7 @@ Computer.prototype.onReset = function()
          * or not to unload/reload all their original auto-mounted disk images.
          *
          * However, if we started with a predefined state (ie, sStatePath is set), we take this shortcut, because
-         * we don't (yet) have code in place to gracefully reload the initial state (requires calling loadResource()
+         * we don't (yet) have code in place to gracefully reload the initial state (requires calling getResource()
          * again); alternatively, we could avoid throwing that state away, but it seems better to save the memory.
          *
          * TODO: Make this more graceful, so that we can stop using the reloadPage() sledgehammer.

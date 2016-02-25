@@ -1377,6 +1377,15 @@ X86.fnINT = function(nIDT, nError, nCycles)
     var oldIP = this.getIP();
     var addr = this.segCS.loadIDT(nIDT);
     if (addr !== X86.ADDR_INVALID) {
+        /*
+         * TODO: Determine if we should use pushData() instead of pushWord() for oldCS and nError, to deal with
+         * the same 32-bit 80386 compatibility issue that fnCALLF(), opPUSHCS(), et al must deal with; namely, that
+         * 32-bit segment register writes (and, reportedly, 32-bit error codes) don't modify the upper 16 bits.
+         *
+         * Also, note that fnCALLF() is using the OPERAND size in effect *before* CS is loaded, whereas here we're
+         * using the OPERAND size in effect *after* CS is loaded.  Is that correct?  And does an explicit OPERAND
+         * size override on an "INT" instruction have any effect on that behavior?  Is that even allowed?
+         */
         this.pushWord(oldPS);
         this.pushWord(oldCS);
         this.pushWord(oldIP);

@@ -82,7 +82,7 @@ function FileDump(sFormat, fComments, fDecimal, offDump, nWidthDump, sServerRoot
  * Class constants
  */
 FileDump.sAPIURL = "http://www.pcjs.org" + DumpAPI.ENDPOINT;
-FileDump.sCopyright = "© 2012-2015 by Jeff Parsons (@jeffpar)";
+FileDump.sCopyright = "© 2012-2016 by Jeff Parsons (@jeffpar)";
 FileDump.sNotice = FileDump.sAPIURL + " " + FileDump.sCopyright;
 FileDump.sUsage = "Usage: " + FileDump.sAPIURL + "?" + DumpAPI.QUERY.FILE + "=({path}|{URL})&" + DumpAPI.QUERY.FORMAT + "=(json|data|hex|bytes|rom)";
 
@@ -199,7 +199,7 @@ FileDump.logError = function(err)
 {
     var sError = "";
     if (err) {
-        sError = "filedump error: " + err.message;
+        sError = "FileDump error: " + err.message;
         console.log(sError);
     }
     return sError;

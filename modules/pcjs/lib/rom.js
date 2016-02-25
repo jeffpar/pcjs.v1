@@ -117,7 +117,10 @@ function ROM(parmsROM)
         if (sFileExt != DumpAPI.FORMAT.JSON && sFileExt != DumpAPI.FORMAT.HEX) {
             sFileURL = web.getHost() + DumpAPI.ENDPOINT + '?' + DumpAPI.QUERY.FILE + '=' + this.sFilePath + '&' + DumpAPI.QUERY.FORMAT + '=' + DumpAPI.FORMAT.BYTES + '&' + DumpAPI.QUERY.DECIMAL + '=true';
         }
-        web.loadResource(sFileURL, true, null, this, this.doneLoad);
+        var rom = this;
+        web.getResource(sFileURL, null, true, function(sURL, sResponse, nErrorCode) {
+            rom.doneLoad(sURL, sResponse, nErrorCode);
+        });
     }
 }
 

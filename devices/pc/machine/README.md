@@ -19,7 +19,7 @@ PCjs supports these IBM PC models:
 
 along with these IBM PC-compatibles:
 
-* [Compaq DeskPro 386](/devices/pc/machine/compaq/deskpro386/)
+* [COMPAQ](/devices/pc/machine/compaq/) (eg, [DeskPro 386](/devices/pc/machine/compaq/deskpro386/))
 
 We also support a few non-IBM [Devices](/devices/):
 

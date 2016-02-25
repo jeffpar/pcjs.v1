@@ -5,8 +5,12 @@ Welcome to [PCjs](/docs/about/pcjs/), the first IBM PC simulation to run in your
 It was added to the [JavaScript Machines](/docs/about/) project in Fall 2012, and it is now part of the
 [PCjs Project](https://github.com/jeffpar/pcjs) on [GitHub](http://github.com/).  The project includes:
 
-* [PCjs](/docs/pcjs/), a simulation of the original IBM PC (circa 1981)
-* [C1Pjs](/docs/c1pjs/), a simulation of the OSI Challenger 1P (circa 1978)
+* [PCjs](/docs/pcjs/), a simulation of the IBM PC and PC compatibles 
+* [C1Pjs](/docs/c1pjs/), a simulation of the 6502-based OSI Challenger 1P
+
+PCjs first simulated the 4.77Mhz 8088-based IBM PC, and has steadily evolved to support more classic machines,
+including the IBM PC XT, the 80286-based IBM PC AT, and the 80386-based COMPAQ DeskPro 386.  PCjs fully supports
+the machines' original ROMs, video cards, etc, and all machines run at their original speeds.
 
 All the simulations are written entirely in JavaScript.  No Flash, Java or other plugins are required.
 Supported browsers include modern versions of Chrome, Safari, Firefox, Internet Explorer (v9.0 and up), Edge,
@@ -59,8 +63,8 @@ Developer Notes
 
 The [PCjs repository](https://github.com/jeffpar/pcjs) on GitHub contains everything needed to run PCjs
 computer simulations.  The [PCjs](/docs/pcjs/) and [C1Pjs](/docs/c1pjs/) emulators run in any modern web browser,
-with or without a web server, and examples are provided for both [local](/docs/pcjs/demos/) and [remote](http://www.pcjs.org/)
-operation.
+with or without a web server, and examples are provided for both [local](/docs/pcjs/examples/) and
+[remote](http://www.pcjs.org/) operation.
 
 The project includes:
 
@@ -76,7 +80,7 @@ JavaScript files to your browser will work.  However, instructions for doing tha
 In fact, you can run PCjs simulations without a web server at all, using the "file:" protocol instead of "http:".
 However, most of the machine configurations require additional resource files (ROMs, disk images, etc), which are
 included in the project, but unless all the resource files are moved into a single directory (as they are in these
-[Demos](/docs/pcjs/demos/)), your browser will probably be unable to load all of them, due to security restrictions.
+[Demos](/docs/pcjs/examples/)), your browser will probably be unable to load all of them, due to security restrictions.
 Using the bundled web server is the preferred solution.
 
 The project includes a large selection of disk images, and a powerful [DiskDump](modules/diskdump/) utility that

@@ -226,7 +226,7 @@ Since the B1 stepping set DL to 0x03 on reset, this would lead one to believe th
 for a B0 stepping was 0x02, but according to Turley (see above), the B0 and B1 steppings report the *same*
 revision; as noted above, it would be nice to see some independent confirmation.
 
-The 80386 CPU on my Compaq DeskPro 386 "Version 2" System Board is labeled as:
+The 80386 CPU on my COMPAQ DeskPro 386 "Version 2" System Board is labeled as:
 
                 A80386-16
                 S40344

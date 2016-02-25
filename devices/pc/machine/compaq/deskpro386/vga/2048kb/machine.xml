@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.20.9/machine.xsl"?>
 <machine id="deskpro386" class="pc" border="1" pos="center" background="#FAEBD7">
-	<name pos="center">Compaq DeskPro 386 (16Mhz), IBM VGA, 2048Kb RAM, 20Mb Hard Disk</name>
-	<computer id="deskpro386-vga-2048k" name="Compaq DeskPro 386" buswidth="32"/>
+	<name pos="center">COMPAQ DeskPro 386 (16Mhz), IBM VGA, 2048Kb RAM, 20Mb Hard Disk</name>
+	<computer id="deskpro386-vga-2048k" name="COMPAQ DeskPro 386" buswidth="32"/>
 	<cpu id="cpu386" model="80386" autostart="false"/>
 	<ram id="ramLow" addr="0x00000" test="true" size="0xa0000" comment="ROM BIOS memory test has NOT been disabled"/>
-	<ram id="ramCPQ" addr="0xfa0000" size="0x60000" comment="Compaq memory at 0xFA0000"/>
+	<ram id="ramCPQ" addr="0xfa0000" size="0x60000" comment="COMPAQ memory at 0xFA0000"/>
 	<ram id="ramExt" addr="0x100000" size="0x100000" comment="Extended memory at 0x100000"/>
-	<rom id="romVGA" addr="0xc0000" size="0x6000" file="/devices/pc/video/ibm/vga/ibm-vga.json" notify="videoVGA[0x378d,0x3f8d]"/>
+	<rom id="romVGA" addr="0xc0000" size="0x6000" file="/devices/pc/video/ibm/vga/1986-10-27/ibm-vga.json" notify="videoVGA[0x378d,0x3f8d]"/>
 	<rom id="romBIOS" addr="0xf8000" size="0x8000" alias="[0xf0000,0xffff0000,0xffff8000]" file="/devices/pc/rom/compaq/bios/deskpro386/1988-01-28/1988-01-28.json"/>
 	<video ref="/devices/pc/video/ibm/vga/ibm-vga-autolockfs.xml"/>
 	<keyboard ref="/devices/pc/keyboard/keyboard-minimal-functions.xml"/>

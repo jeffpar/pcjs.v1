@@ -58,7 +58,7 @@ var cAsyncMachines = 0;
 /**
  * loadXML(sFile, idMachine, sParms, fResolve, display, done)
  *
- * This is the preferred way to load all XML and XSL files. It uses loadResource()
+ * This is the preferred way to load all XML and XSL files. It uses getResource()
  * to load them as strings, which parseXML() can massage before parsing/transforming them.
  *
  * For example, since I've been unable to get the XSLT document() function to work inside any
@@ -97,7 +97,7 @@ function loadXML(sXMLFile, idMachine, sParms, fResolve, display, done)
         parseXML(sXML, sXMLFile, idMachine, sParms, fResolve, display, done);
     };
     display("Loading " + sXMLFile + "...");
-    web.loadResource(sXMLFile, fAsync, null, null, doneLoadXML);
+    web.getResource(sXMLFile, null, fAsync, doneLoadXML);
 }
 
 /**
@@ -177,7 +177,7 @@ function parseXML(sXML, sXMLFile, idMachine, sParms, fResolve, display, done)
          * Supposedly, the IE XML DOM parser will throw an exception, but I haven't tested that, and unless all other
          * browsers do that, that's not helpful.
          *
-         * The best I can do at this stage (assuming web.loadResource() didn't drop any error information on the floor)
+         * The best I can do at this stage (assuming web.getResource() didn't drop any error information on the floor)
          * is verify that the requested resource "looks like" valid XML (in other words, it begins with a '<').
          */
         var xmlDoc = null;
@@ -308,7 +308,7 @@ function resolveXML(sXML, display, done)
         };
 
         display("Loading " + sRefFile + "...");
-        web.loadResource(sRefFile, fAsync, null, null, doneReadXML);
+        web.getResource(sRefFile, null, fAsync, doneReadXML);
         return;
     }
     done(sXML, null);

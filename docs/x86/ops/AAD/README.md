@@ -9,7 +9,7 @@ AAD (0xD5)
 
 ### Description
 
-From [http://www.rcollins.org/secrets/opcodes/AAD.html](http://www.rcollins.org/secrets/opcodes/AAD.html):
+Excerpt from [http://www.rcollins.org/secrets/opcodes/AAD.html](http://www.rcollins.org/secrets/opcodes/AAD.html):
 
 	Undocumented:  Available to all Intel x86 processors
 	               Useful in production source code.

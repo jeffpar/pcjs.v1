@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Compaq DeskPro 386 (4Mb) with EGA Display"
+title: "COMPAQ DeskPro 386 (4Mb) with EGA Display"
 permalink: /devices/pc/machine/compaq/deskpro386/ega/4096kb/
 machines:
   - type: pc-dbg

@@ -51,7 +51,7 @@
 
 "use strict";
 
-/* global document: true, window: true, DEBUG: true */
+/* global window: true, DEBUG: true */
 
 if (NODE) {
     require("./defines");
@@ -257,7 +257,10 @@ Component.addMachine = function(idMachine)
  */
 Component.addMachineResource = function(idMachine, sName, data)
 {
-    Component.assert(Component.machines[idMachine]);
+    /*
+     * I used to assert(Component.machines[idMachine]), but when we're running as a Node app, embed.js is not used,
+     * so addMachine() is never called, so resources do not need to be recorded.
+     */
     if (Component.machines[idMachine] && sName) {
         Component.assert(Component.machines[idMachine][sName] === undefined);
         Component.machines[idMachine][sName] = data;
@@ -287,12 +290,14 @@ Component.log = function(s, type)
 {
     if (DEBUG) {
         if (s) {
-            var msElapsed, sMsg = (type? (type + ": ") : "") + s;
-            if (Component.msStart === undefined) {
-                Component.msStart = usr.getTime();
+            var sElapsed = "", sMsg = (type? (type + ": ") : "") + s;
+            if (typeof usr != "undefined") {
+                if (Component.msStart === undefined) {
+                    Component.msStart = usr.getTime();
+                }
+                sElapsed = (usr.getTime() - Component.msStart) + "ms: ";
             }
-            msElapsed = usr.getTime() - Component.msStart;
-            if (window && window.console) console.log(msElapsed + "ms: " + sMsg.replace(/\n/g, " "));
+            if (window && window.console) console.log(sElapsed + sMsg.replace(/\n/g, " "));
         }
     }
 };
@@ -537,8 +542,6 @@ Component.bindExternalControl = function(component, sControl, sBinding, sType)
     }
 };
 
-if (document && !document.ELEMENT_NODE) document.ELEMENT_NODE = 1;
-
 /**
  * Component.bindComponentControls(component, element, sAppClass)
  *
@@ -556,7 +559,7 @@ Component.bindComponentControls = function(component, element, sAppClass)
 
         for (var iNode = 0; iNode < aeChildNodes.length; iNode++) {
             var control = aeChildNodes[iNode];
-            if (control.nodeType !== document.ELEMENT_NODE) {
+            if (control.nodeType !== 1 /* document.ELEMENT_NODE */) {
                 continue;
             }
             var sClass = control.getAttribute("class");
@@ -748,6 +751,7 @@ Component.prototype = {
      *
      * TODO: Add a task to the build process that "asserts" there are no instances of "assertion failure" in RELEASE builds.
      *
+     * @this {Component}
      * @param {boolean} f is the expression we are asserting to be true
      * @param {string} [s] is description of the assertion on failure
      */

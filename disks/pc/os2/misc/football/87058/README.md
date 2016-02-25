@@ -32,7 +32,7 @@ However, another underlying goal was to demonstrate to IBM that Microsoft was ah
 considerations for OS/2.  Up to this point, all OS/2 design and development work had been 16-bit, since the
 dominant state-of-the-art Intel CPU at the time was the 80286.
 
-The FOOTBALL prototype was based on pre-1.0 OS/2 sources, and the only hardware it supported was the Compaq DeskPro
+The FOOTBALL prototype was based on pre-1.0 OS/2 sources, and the only hardware it supported was the COMPAQ DeskPro
 386-16.  The source code was later sent to IBM, who in early April 1987 was adapting it to run on the Model 80 PS/2.
  
 After OS/2 1.0 was finished in October 1987, FOOTBALL changes were merged into a fresh set of 1.0 sources, which
@@ -47,7 +47,7 @@ We also have an original [FOOTBALL Design Document](#football-design-document) d
 Booting FOOTBALL
 ---
 
-When booting on a [Compaq DeskPro 386-16 with 4Mb of RAM](/devices/pc/machine/compaq/deskpro386/ega/4096kb/),
+When booting on a [COMPAQ DeskPro 386-16 with 4Mb of RAM](/devices/pc/machine/compaq/deskpro386/ega/4096kb/),
 the following information is output to COM2 by the kernel's built-in debugger:
 
 	bx=001d, cx=f905, dx=0700, cs=1770, ds=1b10

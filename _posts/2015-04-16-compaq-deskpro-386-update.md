@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Compaq DeskPro 386 Update
+title: COMPAQ DeskPro 386 Update
 date: 2015-04-16 11:00:00
 category: 80386
 permalink: /blog/2015/04/16/
@@ -11,7 +11,7 @@ machines:
     uncompiled: true
 ---
 
-PCjs can now boot the [Compaq DeskPro 386/16 ROM BIOS](/devices/pc/bios/compaq/deskpro386/).
+PCjs can now boot the [COMPAQ DeskPro 386/16 ROM BIOS](/devices/pc/bios/compaq/deskpro386/).
 
 There's still a problem with the hard disk controller, which I haven't looked into yet,
 but booting from a floppy works.
@@ -43,7 +43,7 @@ of the 80386's 4Gb address space are physically mapped to this ROM image.
 replacing the ROM in the first megabyte with write-protected RAM; the top 64Kb of that
 RAM must first be initialized with the 64Kb at %000F0000 prior to remapping.  It's also
 possible to copy external ROMs from %000C0000 through %000EFFFF into the bottom 64Kb of
-that RAM, but this is only done for ROMs known to contain relocatable code; eg, a Compaq
+that RAM, but this is only done for ROMs known to contain relocatable code; eg, a COMPAQ
 Video Graphics Controller (VGC) Board.
 
 > Every DeskPro 386 system must have a MINIMUM of 1Mb of RAM, of which either 256Kb,
@@ -53,7 +53,7 @@ to the top of the 16th megabyte (ending at address %00FFFFFF), the last 128Kb of
 is used by the "RAM Relocation" feature.  The remaining memory immediately below that
 128Kb (ie, below %00FE0000) can only be accessed by special system software, such as CEMM.
 
-> Compaq refers to that remaining memory as "Compaq Built-in Memory".
+> COMPAQ refers to that remaining memory as "Compaq Built-in Memory".
 
 So there you have it.  Once the ROM has relocated itself to RAM at the top of the 16th
 megabyte, there are no less than THREE physical address ranges where ROM code and data
@@ -75,7 +75,7 @@ accessible; the other two are not.
 April 19, 2015 Update
 ---
 Thanks to some sleuthing by [Michal Necasek](http://os2museum.com/), it turns out that my
-assumptions about A20 management on the Compaq DeskPro 386 were incorrect.
+assumptions about A20 management on the COMPAQ DeskPro 386 were incorrect.
 
 He noted that, on page 398 of "DOS Internals" by Geoff Chappell, (c) 1994, the author says:
 
@@ -114,7 +114,7 @@ protected-mode with A20 disabled -- an unwise thing to do on most machines:
 	;
 	;   When we arrive here, the A20 line has been disabled; on most systems, that would
 	;   mean that the ROM's GDT would only be accessible at the "low" ROM address (%0F0730),
-	;   not the "high" address (%FF0730).  But fortunately, A20 management on Compaq
+	;   not the "high" address (%FF0730).  But fortunately, A20 management on COMPAQ
 	;   DeskPros affects wrap-around only from the 1st to the 2nd megabyte; no other address
 	;   range is affected.
 	;
@@ -140,12 +140,12 @@ I'm in the process of replacing that work-around with a much more compatible cha
 on 32-bit bus configurations, which involves changing the physical address map for the 2nd megabyte
 to match that of the 1st megabyte whenever A20 is disabled.  I could probably get away with remapping
 only the first 64Kb of the 2nd megabyte, but until I'm actually able to run some tests on a real
-DeskPro 386, I'm going to assume Compaq's A20 implementation affected the entire 2nd megabyte.
+DeskPro 386, I'm going to assume COMPAQ's A20 implementation affected the entire 2nd megabyte.
 
-Here's my Compaq DeskPro 386/16 PCjs test configuration.  Set a breakpoint at F000:F498 ("bp f000:f498")
-in the Debugger panel to see the above code in action.  When the machine is operating in real-mode, you
-can use the "rp" command to dump all the registers, including the current base and limit values loaded into
-the segment registers.
+Here's my [COMPAQ DeskPro 386/16](/devices/pc/machine/compaq/deskpro386/ega/2048kb/) test configuration.
+Set a breakpoint at F000:F498 ("bp f000:f498") in the Debugger panel to see the above code in action.
+When the machine is operating in real-mode, you can use the "rp" command to dump all the registers,
+including the current base and limit values loaded into the segment registers.
 
 {% include machine.html id="deskpro386" %}
 

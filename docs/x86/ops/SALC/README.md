@@ -9,7 +9,7 @@ SALC (0xD6)
 
 ### Description
 
-From [http://www.rcollins.org/secrets/opcodes/SALC.html](http://www.rcollins.org/secrets/opcodes/SALC.html):
+Excerpt from [http://www.rcollins.org/secrets/opcodes/SALC.html](http://www.rcollins.org/secrets/opcodes/SALC.html):
 
 	An undocumented op code that performs an operation common to
 	every Assembly language subroutine to C and many other higher

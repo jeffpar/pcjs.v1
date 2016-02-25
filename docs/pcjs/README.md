@@ -12,7 +12,7 @@ PCjs Documentation
 ---
 
 [PCjs](/docs/about/pcjs/) is a full-featured IBM PC, PC XT and PC AT emulator written entirely in JavaScript.
-After you've read the Documentation, play with the [Demos](demos/).
+After you've read the Documentation, play with the [Examples](examples/).
 
 {% include machine.html id="ibm5150" %}
 
@@ -23,29 +23,29 @@ of XSL and CSS support files (included in the ZIP file below).
 
 ### Creating Machine XML Files
 
-A PCjs machine XML file defines all a machine's components. Components include:
+A PCjs machine XML file defines all a machine's components, including:
 
-* [Chipset](/docs/pcjs/chipset/)
-* [Computer](/docs/pcjs/computer/)
-* [Control Panel](/docs/pcjs/panel/)
-* [CPU](/docs/pcjs/cpu/)
-* [Debugger](/docs/pcjs/debugger/)
-* [Floppy Disk Controller](/docs/pcjs/fdc/)
-* [Hard Disk Controller](/docs/pcjs/hdc/)
-* [Keyboard](/docs/pcjs/keyboard/)
-* [Mouse](/docs/pcjs/mouse/)
-* [RAM](/docs/pcjs/ram/)
-* [ROM](/docs/pcjs/rom/)
-* [Parallel Port](/docs/pcjs/parallel/)
-* [Serial Port](/docs/pcjs/serial/)
-* [Video Adapter](/docs/pcjs/video/)
+* [Chipset](chipset/)
+* [Computer](computer/)
+* [Control Panel](panel/)
+* [CPU](cpu/)
+* [Debugger](debugger/)
+* [Floppy Disk Controller](fdc/)
+* [Hard Disk Controller](hdc/)
+* [Keyboard](keyboard/)
+* [Mouse](mouse/)
+* [RAM](ram/)
+* [ROM](rom/)
+* [Parallel Port](parallel/)
+* [Serial Port](serial/)
+* [Video Adapter](video/)
 
 Here's a simple machine XML file that includes an 8088 CPU and 16Kb of RAM:
 
 	<machine id="ibm">
-		<computer id="pc" name="IBM PC"/>
-		<cpu id="cpu8088" model="8088"/>
-		<ram id="ramLow" addr="0x00000" size="0x04000"/>
+	    <computer id="pc" name="IBM PC"/>
+	    <cpu id="cpu8088" model="8088"/>
+	    <ram id="ramLow" addr="0x00000" size="0x04000"/>
 	</machine>
 
 However, that machine isn't usable, since it lacks a keyboard, screen, or any code (ROMs) to execute.
@@ -53,115 +53,132 @@ However, that machine isn't usable, since it lacks a keyboard, screen, or any co
 A simple machine definition that actually works might look like:
 
 	<machine id="ibm" class="pc" width="720px">
-		<computer id="pc" name="IBM PC"/>
-		<cpu id="cpu8088" model="8088"/>
-		<ram id="ramLow" addr="0x00000" size="0x04000"/>
-		<rom id="romBASIC" addr="0xf6000" size="0x8000" file="ibm-basic-1.00.json"/>
-		<rom id="romBIOS" addr="0xfe000" size="0x2000" file="1981-04-24.json"/>
-		<keyboard id="keyboard"/>
-		<video id="videoMDA" model="mda" screenwidth="720" screenheight="350" charset="ibm-mda-cga.json">
-			<name>Monochrome Display</name>
-		</video>
-		<chipset id="chipset" model="5150" sw1="01000001" sw2="11110000"/>
+	    <computer id="pc" name="IBM PC"/>
+	    <cpu id="cpu8088" model="8088"/>
+	    <ram id="ramLow" addr="0x00000" size="0x04000"/>
+	    <rom id="romBASIC" addr="0xf6000" size="0x8000" file="ibm-basic-1.00.json"/>
+	    <rom id="romBIOS" addr="0xfe000" size="0x2000" file="1981-04-24.json"/>
+	    <keyboard id="keyboard"/>
+	    <video id="videoMDA" model="mda" screenwidth="720" screenheight="350" charset="ibm-mda-cga.json">
+	        <name>Monochrome Display</name>
+	    </video>
+	    <chipset id="chipset" model="5150" sw1="01000001" sw2="11110000"/>
 	</machine>
 
-Here is a [demo](/docs/pcjs/demos/sample1.html) of this machine's [XML](/docs/pcjs/demos/sample1.xml) file.
+Here is an [example](examples/example1.html) of this machine's [XML](examples/example1.xml) file.
 
 Machine definitions can also include visual elements.  For example, we can include a "Run" button with the CPU component.
 Note that as soon as the machine is ready and the CPU starts running, the "Run" button will change to "Halt".
 
 	<machine id="ibm" class="pc" width="720px">
-		<computer id="pc" name="IBM PC"/>
-		<cpu id="cpu8088" model="8088">
-			<control type="button" class="input" binding="run">Run</control>
-		</cpu>
-		...
+	    <computer id="pc" name="IBM PC"/>
+	    <cpu id="cpu8088" model="8088">
+	        <control type="button" class="input" binding="run">Run</control>
+	    </cpu>
+	    ...
 	</machine>
 
 Next, we can add a Floppy Disk Controller (FDC) component.  And since we want to be able to "load" and "unload" floppy
 disks at will, we'll include some UI controls.
 
 	<machine id="ibm" class="pc" width="720px">
-		<fdc id="fdcNEC" automount="{A: {name: 'PC-DOS 1.0', path: 'pcdos-1.00.json'}}">
-			<control type="container">
-			<control type="list" class="input" binding="listDrives"/>
-				<control type="list" class="input" binding="listDisks">
-					<disk path="">None</disk>
-					<disk path="pcdos-1.00.json">PC-DOS 1.0</disk>
-				</control>
-				<control type="button" class="input" binding="loadDrive">Load</control>
-			</control>
-		</fdc>
-		...
+	    <fdc id="fdcNEC" automount="{A: {name: 'PC-DOS 1.0', path: 'pcdos-1.00.json'}}">
+	        <control type="container">
+	            <control type="list" class="input" binding="listDrives"/>
+	            <control type="list" class="input" binding="listDisks">
+	                <disk path="">None</disk>
+	                <disk path="pcdos-1.00.json">PC-DOS 1.0</disk>
+	            </control>
+	            <control type="button" class="input" binding="loadDrive">Load</control>
+	        </control>
+	    </fdc>
+	    ...
 	</machine>
 
-Here is a [demo](/docs/pcjs/demos/sample2.html) of the updated machine's [XML](/docs/pcjs/demos/sample2.xml) file.
+Here is an [example](examples/example2.html) of the updated machine's [XML](examples/example2.xml)
+file.
 
 ### Loading Machine XML Files
 
-Inside a web page, add a &lt;div&gt; to contain the machine, load the **pc.js** script
-(**pc-dbg.js** if you need the PCjs [Debugger](/docs/pcjs/debugger/)), and then call *window.embedPC()*:
+Inside a web page, add a &lt;div&gt; to contain the machine, load the *pc.js* script
+(*pc-dbg.js* if you need the PCjs [Debugger](debugger/)), and then call *embedPC()*:
 
-	<div id="sample2"/>
+	<div id="example2"/>
 	<script type="text/javascript" src="pc.js"/>
 	<script type="text/javascript">
-		window.embedPC("sample2", "sample2.xml", "components.xsl");
+	    embedPC("example2", "example2.xml", "components.xsl");
 	</script>
 
-In fact, this is exactly what we did in the previous [demo](/docs/pcjs/demos/sample2.html).
+In fact, this is exactly what we did in the previous [example](examples/example2.html).
 
-*window.embedPC()* requires 3 parameters:
+*embedPC()* accepts 4 parameters:
 
-- The *id* of the machine &lt;div&gt; (e.g., "sample2");
-- The *url* of the machine XML file (e.g., "sample2.xml");
+- The *id* of the machine &lt;div&gt; (e.g., "example2");
+- The *url* of the machine XML file (e.g., "example2.xml");
 - The *url* of the components XSL file (e.g., "components.xsl")
+- Any *parms* that should be passed to the machine components during initialization
 
-**components.xsl** (and the corresponding **components.css**) are included with the PCjs scripts in the samples download below.
+The first 3 parameters are required; the *parms* parameter is optional.  If *parms* is specified, it should
+contain a single-quoted JSON object definition, with properties intended to override those specified in the
+machine XML file; eg:
+
+	'{messages:"warn",autoMount:{"A":{"path":"/disks/pc/dos/ibm/1.00/PCDOS100.json"}}}'
+
+*components.xsl* (and the corresponding *components.css*) are included with the PCjs scripts in the
+[Examples](#running-pcjs-on-your-own-server) download.  Every version of *components.xsl* has a corresponding
+*components.css*, which your web page should also load, usually with a &lt;link&gt; tag inside the &lt;head&gt;
+element; eg:
+
+	<link rel="stylesheet" type="text/css" href="components.css">
 
 ### Using the PCjs Debugger
 
 To create a configuration that includes the PCjs Debugger, you need to:
 
-- Add [Debugger](/docs/pcjs/debugger/) and [Control Panel](/docs/pcjs/panel/) components to the machine XML file;
+- Add [Debugger](debugger/) and [Control Panel](panel/) components to the machine XML file;
 - Add debugger controls to the Control Panel, such as Run, Step, Reset, etc;
-- Change your web page to load **pc-dbg.js** instead of **pc.js**.
+- Change your web page to load *pc-dbg.js* instead of *pc.js*.
 
-Take a look at the [sample3a](/docs/pcjs/demos/sample3a.html) demo (with [XML file](/docs/pcjs/demos/sample3a.xml)) for an example.
+Take a look at the [example3a](examples/example3a.html) example
+(with [XML file](examples/example3a.xml)).
 
-The debugger gives you access to more capabilities than mere debugging. For example, you can use the **load** command
-to load diskette sectors into memory ("l &lt;addr&gt; &lt;drive&gt; ...") or dump an entire diskette as JSON ("l json &lt;drive&gt;").
-You can also **halt** a machine ("h") and **dump** its entire state as JSON ("d state"). You can save that state in a .json file,
-and then use that state to initialize a new machine (as long as it uses the same machine *id*).
+The debugger gives you access to more capabilities than mere debugging. For example, you can use the **load**
+command to load diskette sectors into memory ("l [addr] [drive #] ...") or the **dump** command to dump an entire
+diskette as JSON ("d disk [drive #]").  You can also **halt** a machine ("h") and **dump** its entire state as JSON
+("d state"). You can save that state in a .json file, and then use that state to initialize a new machine (as long as
+it uses the same machine *id*).
 
-In fact, the [sample3b](/docs/pcjs/demos/sample3b.html) demo (with [XML file](/docs/pcjs/demos/sample3b.xml))
-does just that, using JSON dumps created from [sample3a](/docs/pcjs/demos/sample3a.html) after starting VisiCalc.
-See the *state* attribute on the [Computer](/docs/pcjs/computer/) component for more information on state files.
+In fact, the [example3b](examples/example3b.html) example (with [XML file](examples/example3b.xml))
+does just that, using JSON dumps created from [example3a](examples/example3a.html) after starting VisiCalc.
+See the *state* attribute on the [Computer](computer/) component for more information on state files.
 
 ### Running PCjs On Your Own Server
 			
-All of the demos described above are available for [download](/docs/pcjs/demos/).
+All of the examples described above are available for [download](examples/).
 
 ### Creating PCjs-Compatible Disk Images
 
-If you have (or find) an IMG disk image file on a server, the PCjs web server provides a **DiskDump API** via endpoint
-"/api/v1/dump" that creates PCjs-compatible disks in JSON:
+If you have (or find) an IMG disk image file on a server, the PCjs web server provides a
+[DiskDump API](/api/v1/dump) via endpoint "/api/v1/dump" that creates PCjs-compatible disks in JSON:
 
-	http://localhost:8088/api/v1/dump?disk=(file|url)&format=json
+	{{ site.url }}/api/v1/dump?disk=(file|url)&format=json
 
-For example, let's say you found a disk image online:
+For example, let's say you found a disk image online, such as:
 
 	http://archive.pcjs.org/disks/pc/dos/ibm/1.00/PCDOS100.img
 
-To convert it to a PCjs-compatible JSON format, use the following command:
+To convert it to a PCjs-compatible JSON format, issue the following
+[request](/api/v1/dump?disk=http://archive.pcjs.org/disks/pc/dos/ibm/1.00/PCDOS100.img&format=json),
+save the resulting JSON file to a folder on your server, and then update your machine XML file(s) to use that file.
 
-	http://localhost:8088/api/v1/dump?disk=http://archive.pcjs.org/disks/pc/dos/ibm/1.00/PCDOS100.img&format=json
+	{{ site.url }}/api/v1/dump?disk=http://archive.pcjs.org/disks/pc/dos/ibm/1.00/PCDOS100.img&format=json
 
-Save the resulting JSON file to a folder on your server, and then update your machine XML file(s) to use that file.
-If necessary, you can also reverse the process, converting a JSON disk image back into an IMG file:
+If necessary, you can also reverse the process and convert a JSON disk image back into an IMG file, with the
+this [request](/api/v1/dump?disk=http://www.pcjs.org/disks/pc/dos/ibm/1.00/PCDOS100.json&format=img):
 
-	http://localhost:8088/api/v1/dump?disk=http://www.pcjs.org/disks/pc/dos/ibm/1.00/PCDOS100.json&format=img
+	{{ site.url }}/api/v1/dump?disk={{ site.url }}/disks/pc/dos/ibm/1.00/PCDOS100.json&format=img
 
-Although PCjs will accept IMG disk image files, it must call the **DiskDump API** to convert the image
+Although PCjs will accept IMG disk image files, it must call the [DiskDump API](/api/v1/dump) to convert the image
 every time it's loaded, so it's *much* faster and more efficient to use pre-converted JSON-encoded disk images.
 
 Remember that PC and PC XT machines supported only 160Kb diskettes (on any version of PC-DOS),

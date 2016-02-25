@@ -1,10 +1,10 @@
 ---
 layout: page
-title: "Intel 80286 CPU: LOADALL"
+title: "Intel 80286 LOADALL Instruction"
 permalink: /pubs/pc/reference/intel/80286/loadall/
 ---
 
-Intel 80286 CPU: LOADALL
+Intel 80286 LOADALL Instruction
 ---
 
 [The following information is from an undated 15-page Intel document titled "Undocumented iAPX 286 Test Instruction",

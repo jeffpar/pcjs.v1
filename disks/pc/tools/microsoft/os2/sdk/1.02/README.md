@@ -13,7 +13,7 @@ that allows the SDK installation script to finish.
 
 This SDK was released in December 1987 along with [Microsoft OS/2 1.0](/disks/pc/os2/microsoft/1.0/).
 We do not have any of the printed documentation that came with the SDK, such as the *Installation Guide*, but we do
-have the [Microsoft® Operating System/2 Programmer’s Toolkit](/pubs/pc/programming/os2/microsoft/ptk/1.0/) documentation
+have the [Microsoft® Operating System/2 Programmer’s Toolkit](/pubs/pc/software/os2/microsoft/ptk10/) documentation
 from March 1988, thanks to the [OS/2 Museum](http://www.os2museum.com/wp/os2-history/os2-library/os2-1-x-programming/).
 
 Other documentation is available for selected OS/2 SDK tools:

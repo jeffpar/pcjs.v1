@@ -84,7 +84,7 @@ try {
 var Component;
 var dbg;
 var aComponents = [];
-var asComponentsIgnore = ["embed"];
+var asComponentsIgnore = ["embed","save"];
 
 /**
  * loadComponents(asFiles)

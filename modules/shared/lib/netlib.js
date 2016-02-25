@@ -325,35 +325,29 @@ net.downloadFile = function(sURL, sFile, done)
 };
 
 /**
- * loadResource(sURL, fAsync, data, componentNotify, fnNotify, pNotify)
+ * getResource(sURL, dataPost, fAsync, done)
  *
- * Request the specified resource (sURL), and once the request is complete,
- * optionally call the specified method (fnNotify) of the specified component (componentNotify).
- *
- * TODO: Figure out how we can strongly type the fnNotify parameter, because the Closure Compiler has issues with:
- *
- *      {function(this:Component, string, (string|null), number, (number|string|null|Object|Array|undefined))} [fnNotify]
- *
- * NOTE: This function is a mirror image of the weblib version, for server-side component testing within Node;
- * since it is NOT intended for production use, it may make liberal use of synchronous functions, warning messages, etc.
+ * Request the specified resource (sURL), and once the request is complete, notify done().
  *
  * @param {string} sURL
+ * @param {Object|null} [dataPost] for a POST request (default is a GET request)
  * @param {boolean} [fAsync] is true for an asynchronous request
- * @param {Object|null} [data] for a POST request (default is a GET request)
- * @param {Component} [componentNotify]
- * @param {function(...)} [fnNotify]
- * @param {number|string|null|Object|Array} [pNotify] optional fnNotify parameter
- * @return {Array} containing errorCode and responseText (empty array if async request)
+ * @param {function(string,string,number)} [done]
+ * @return {Array|null} Array containing [sResource, nErrorCode], or null if no response yet
  */
-net.loadResource = function(sURL, fAsync, data, componentNotify, fnNotify, pNotify) {
-    var nErrorCode = -1;
-    var sResponse = null;
+net.getResource = function(sURL, dataPost, fAsync, done)
+{
+    var nErrorCode = -1, sResource = null, response = null;
+
     if (net.isRemote(sURL)) {
-        console.log('net.loadResource("' + sURL + '"): unimplemented');
+        console.log('net.getResource("' + sURL + '"): unimplemented');
     } else {
         if (!sServerRoot) {
             sServerRoot = path.join(path.dirname(fs.realpathSync(__filename)), "../../../");
         }
+        /*
+         * TODO: Revisit why we pass back sBaseName instead of the original sURL....
+         */
         var sBaseName = str.getBaseName(sURL);
         var sFile = path.join(sServerRoot, sURL);
         if (fAsync) {
@@ -362,21 +356,14 @@ net.loadResource = function(sURL, fAsync, data, componentNotify, fnNotify, pNoti
                  * TODO: If err is set, is there an error code we should return (instead of -1)?
                  */
                 if (!err) {
-                    sResponse = s;
+                    sResource = s;
                     nErrorCode = 0;
                 }
-                if (fnNotify) {
-                    if (!componentNotify) {
-                        fnNotify(sBaseName, sResponse, nErrorCode, pNotify);
-                    } else {
-                        fnNotify.call(componentNotify, sBaseName, sResponse, nErrorCode, pNotify);
-                    }
-                }
+                if (done) done(sBaseName, sResource, nErrorCode);
             });
-            return [];
         } else {
             try {
-                sResponse = fs.readFileSync(sFile, {encoding: "utf8"});
+                sResource = fs.readFileSync(sFile, {encoding: "utf8"});
                 nErrorCode = 0;
             } catch(err) {
                 /*
@@ -384,16 +371,11 @@ net.loadResource = function(sURL, fAsync, data, componentNotify, fnNotify, pNoti
                  */
                 console.log(err.message);
             }
-            if (fnNotify) {
-                if (!componentNotify) {
-                    fnNotify(sBaseName, sResponse, nErrorCode, pNotify);
-                } else {
-                    fnNotify.call(componentNotify, sBaseName, sResponse, nErrorCode, pNotify);
-                }
-            }
+            if (done) done(sBaseName, sResource, nErrorCode);
+            response = [sResource, nErrorCode];
         }
     }
-    return [nErrorCode, sResponse];
+    return response;
 };
 
 if (NODE) module.exports = net;

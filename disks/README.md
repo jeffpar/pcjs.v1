@@ -13,10 +13,10 @@ Browse [IBM PC](pc/) and [Challenger 1P](c1p/) disk archives.
 PCjs works best with disk images in a **JSON** format, to save conversion time, so that's the only
 disk image format you'll find on the PCjs website.
 
-To convert any of our **JSON** disk images back into an **IMG** file, you can use the DiskDump API
+To convert any of our **JSON** disk images back into an **IMG** file, you can use the [DiskDump API](/api/v1/dump)
 with the *format* parameter set to `img` instead of `json`.  For example:
 
-	http://localhost:8088/api/v1/dump?disk=/disks/pc/dos/ibm/2.00/PCDOS200-DISK1.json&format=img
+	{{ site.url }}/api/v1/dump?disk=/disks/pc/dos/ibm/2.00/PCDOS200-DISK1.json&format=img
 
 In fact, when browsing the disk archives, the PCjs web server automatically provides "onclick" handlers
 for links to JSON-encoded disk images, which will invoke the API for you.

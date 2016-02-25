@@ -1,5 +1,5 @@
 ;
-;   ROM BIOS for Compaq DeskPro 386-16
+;   ROM BIOS for COMPAQ DeskPro 386-16
 ;   Rev J.4, from parts 109592-001 and 109591-001, dated '01/28/88'
 ;   (C)Copyright COMPAQ Computer Corporation 1982,83,84,85,86,87-All rights reserved.
 ;
@@ -42,7 +42,7 @@
 ;   replacing the ROM in the first megabyte with write-protected RAM; the top 64Kb of that
 ;   RAM must first be initialized with the 64Kb at %000F0000 prior to remapping.  It's also
 ;   possible to copy external ROMs from %000C0000 through %000EFFFF into the bottom 64Kb of
-;   that RAM, but this is only done for ROMs known to contain relocatable code; eg, a Compaq
+;   that RAM, but this is only done for ROMs known to contain relocatable code; eg, a COMPAQ
 ;   Video Graphics Controller (VGC) Board.
 ;
 ;   Every DeskPro 386 system must have a MINIMUM of 1Mb of RAM, of which either 256Kb,
@@ -52,9 +52,9 @@
 ;   is used by the "RAM Relocation" feature.  The remaining memory immediately below that
 ;   128Kb (ie, below %00FE0000) can only be accessed by special system software, such as CEMM.
 ;
-;   Compaq refers to that remaining memory as "Compaq Built-in Memory".
+;   COMPAQ refers to that remaining memory as "Compaq Built-in Memory".
 ;
-;   As the Compaq 386/25 TechRef explains:
+;   As the COMPAQ 386/25 TechRef explains:
 ;
 ;	A data structure in memory indicates how much of the COMPAQ Built-in Memory (F40000h
 ;	to FE0000h) is [available and] in use. This memory is allocated downward (decreasing
@@ -244,7 +244,7 @@ x80b3:	xor	dx,dx			; 000080B3  33D2  '3.'
 ;
 ;   Returns ZF set if successful
 ;
-;   See Compaq 386/25 TechRef, p.4-98 for details
+;   See COMPAQ 386/25 TechRef, p.4-98 for details
 ;
 x80e2:	push	bx			; 000080E2  53  'S'
 	push	cx			; 000080E3  51  'Q'
@@ -4803,7 +4803,7 @@ xa9e9:	cs	rep movsw		; 0000A9E9  F32EA5  '...'
 	call	xc259			; 0000A9FD  E85918  '.Y.'
 	;
 	;   Set bit 2 (reserved?) and bit 4 (memory size?) of ROM BIOS Video Mode Options byte @40:0087.
-	;   It would appear that Compaq had a different conception of this byte; however, in the case of an
+	;   It would appear that COMPAQ had a different conception of this byte; however, in the case of an
 	;   adapter like the IBM VGA, it doesn't matter, since the IBM VGA ROM will rewrite this byte anyway.
 	;
 	or	byte [0x87],0x14	; 0000AA00  800E870014  '.....'
@@ -10383,7 +10383,7 @@ xdabb:	push	bx			; 0000DABB  53  'S'
 	out	0x84,al			; 0000DAC0  E684  '..'
 ;
 ;   This is special: move BL into AL, and then move AL back into BL.
-;   We'll give Compaq the benefit of the doubt and assume this is macro nonsense.
+;   We'll give COMPAQ the benefit of the doubt and assume this is macro nonsense.
 ;
 	mov	al,bl			; 0000DAC2  8AC3  '..'
 	mov	bl,al			; 0000DAC4  8AD8  '..'
@@ -10454,7 +10454,7 @@ xdb31:	pop	bx			; 0000DB31  5B  '['
 ;
 ;   We then proceed to test the 128Kb starting at %FE0000 through %FFFFFF (the top of the 16Mb range),
 ;   which is where this ROM (and potentially other ROMs) will be copied and then mapped to %0E0000
-;   through %0FFFFF.  Compaq refers to this as "relocatable RAM".
+;   through %0FFFFF.  COMPAQ refers to this as "relocatable RAM".
 ;
 ;   On the second call (from xdb16), AH is 0x02 (the first 64Kb block after the first 128Kb), and on
 ;   successful completion of that call, "00768 KB OK" will be displayed, referring to the first 640Kb
@@ -10464,7 +10464,7 @@ xdb31:	pop	bx			; 0000DB31  5B  '['
 ;   successfully tests another 1024Kb, a total of "01792 KB OK" will be displayed.
 ;
 ;   There appears to be a fourth call (from xd82e), where AH is 0xF0 (the first 64Kb of the last 1Mb
-;   of the first 16Mb); we place no memory there, and Compaq memory maps typically show no memory there,
+;   of the first 16Mb); we place no memory there, and COMPAQ memory maps typically show no memory there,
 ;   so I'm not sure what that's all about. -JP
 ;
 xdb33:	push	bx			; 0000DB33  53  'S'
@@ -12978,7 +12978,7 @@ xf494:	mov	al,0x0			; 0000F494  B000
 ;
 ;   When we arrive here, the A20 line has been disabled; on most systems, that would
 ;   mean that the ROM's GDT would only be accessible at the "low" ROM address (%0F0730),
-;   not the "high" address (%FF0730).  But fortunately, A20 management on Compaq
+;   not the "high" address (%FF0730).  But fortunately, A20 management on COMPAQ
 ;   DeskPros affects wrap-around only from the 1st to the 2nd megabyte; no other address
 ;   range is affected.
 ;

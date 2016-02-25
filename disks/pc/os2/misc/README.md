@@ -30,7 +30,7 @@ of OS/2 when it was still a work-in-progress.  Not all of the disks run properly
 
 	The [OS/2 FOOTBALL Boot Disk (v7.68.17)](/disks/pc/os2/misc/football/87058/) contained a prototype version of OS/2
 	from February 1987 that was designed to test two important new features of the Intel 80386 processor: paging and V86-mode.
-	This prototype was forked from pre-1.0 OS/2 sources, and the only hardware it supported was the Compaq DeskPro 386-16.
+	This prototype was forked from pre-1.0 OS/2 sources, and the only hardware it supported was the COMPAQ DeskPro 386-16.
 
  * **OS/2 FOOTBALL Boot Disk (v4.41.00)**
 

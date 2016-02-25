@@ -171,37 +171,31 @@ web.notice = function(s, fPrintOnly, id)
 };
 
 /**
- * loadResource(sURL, fAsync, data, componentNotify, fnNotify, pNotify)
+ * getResource(sURL, dataPost, fAsync, done)
  *
- * Request the specified resource (sURL), and once the request is complete,
- * optionally call the specified method (fnNotify) of the specified component (componentNotify).
+ * Request the specified resource (sURL), and once the request is complete, notify done().
  *
- * TODO: Figure out how we can strongly type the fnNotify parameter, because the Closure Compiler has issues with:
+ * Also, if dataPost is set to a string, that string can be used to control the response format;
+ * by default, the response format is plain text, but you can specify "bytes" to request arbitrary
+ * binary data, which should come back as a string of bytes.
  *
- *      {function(this:Component, string, (string|null), number, (number|string|null|Object|Array|undefined))} [fnNotify]
+ * TODO: The "bytes" option works by calling overrideMimeType(), which was never a best practice.
+ * Instead, we should implement supported response types ("text" and "arraybuffer", at a minimum)
+ * by setting xmlHTTP.responseType to one of those values before calling xmlHTTP.send().
  *
  * @param {string} sURL
+ * @param {string|Object|null} [dataPost] for a POST request (default is a GET request)
  * @param {boolean} [fAsync] is true for an asynchronous request
- * @param {Object} [data] for a POST request (default is a GET request)
- * @param {Component} [componentNotify]
- * @param {function(...)} [fnNotify]
- * @param {number|string|null|Object|Array} [pNotify] optional fnNotify info parameter
- * @return {Array} containing errorCode and responseText (empty array if fAsync is true)
+ * @param {function(string,string,number)} [done]
+ * @return {Array|null} Array containing [sResource, nErrorCode], or null if no response yet
  */
-web.loadResource = function(sURL, fAsync, data, componentNotify, fnNotify, pNotify)
+web.getResource = function(sURL, dataPost, fAsync, done)
 {
-    var nErrorCode = 0;
-    var sURLData = null;
+    var nErrorCode = 0, sResource = null, response = null;
 
-    if (typeof resources == 'object' && (sURLData = resources[sURL])) {
-        if (fnNotify) {
-            if (!componentNotify) {
-                fnNotify(sURL, sURLData, nErrorCode, pNotify);
-            } else {
-                fnNotify.call(componentNotify, sURL, sURLData, nErrorCode, pNotify);
-            }
-        }
-        return [nErrorCode, sURLData];
+    if (typeof resources == 'object' && (sResource = resources[sURL])) {
+        if (done) done(sURL, sResource, nErrorCode);
+        return [sResource, nErrorCode];
     }
 
     if (NODE) {
@@ -212,7 +206,7 @@ web.loadResource = function(sURL, fAsync, data, componentNotify, fnNotify, pNoti
          *      if (!Component) Component = require("./component");
          */
         var net = require("./netlib");
-        return net.loadResource(sURL, fAsync, data, componentNotify, fnNotify, pNotify);
+        return net.getResource(sURL, dataPost, fAsync, done);
     }
 
     var xmlHTTP = (window.XMLHttpRequest? new window.XMLHttpRequest() : new window.ActiveXObject("Microsoft.XMLHTTP"));
@@ -228,64 +222,54 @@ web.loadResource = function(sURL, fAsync, data, componentNotify, fnNotify, pNoti
                  *
                  *      xmlHTTP.onreadystatechange = undefined;
                  */
-                sURLData = xmlHTTP.responseText;
+                sResource = xmlHTTP.responseText;
                 /*
                  * The normal "success" case is an HTTP status code of 200, but when testing with files loaded
                  * from the local file system (ie, when using the "file:" protocol), we have to be a bit more "flexible".
                  */
-                if (xmlHTTP.status == 200 || !xmlHTTP.status && sURLData.length && web.getHostProtocol() == "file:") {
-                    if (MAXDEBUG) web.log("xmlHTTP.onreadystatechange(" + sURL + "): returned " + sURLData.length + " bytes");
+                if (xmlHTTP.status == 200 || !xmlHTTP.status && sResource.length && web.getHostProtocol() == "file:") {
+                    if (MAXDEBUG) web.log("xmlHTTP.onreadystatechange(" + sURL + "): returned " + sResource.length + " bytes");
                 }
                 else {
                     nErrorCode = xmlHTTP.status || -1;
                     web.log("xmlHTTP.onreadystatechange(" + sURL + "): error code " + nErrorCode);
                 }
-                if (fnNotify) {
-                    if (!componentNotify) {
-                        fnNotify(sURL, sURLData, nErrorCode, pNotify);
-                    } else {
-                        fnNotify.call(componentNotify, sURL, sURLData, nErrorCode, pNotify);
-                    }
-                }
+                if (done) done(sURL, sResource, nErrorCode);
             }
         };
     }
 
-    if (data) {
-        var sData = "";
-        for (var p in data) {
-            if (!data.hasOwnProperty(p)) continue;
-            if (sData) sData += "&";
-            sData += p + '=' + encodeURIComponent(data[p]);
+    if (dataPost && typeof dataPost == "object") {
+        var sDataPost = "";
+        for (var p in dataPost) {
+            if (!dataPost.hasOwnProperty(p)) continue;
+            if (sDataPost) sDataPost += "&";
+            sDataPost += p + '=' + encodeURIComponent(dataPost[p]);
         }
-        sData = sData.replace(/%20/g, '+');
-        if (MAXDEBUG) web.log("web.loadResource(POST " + sURL + "): " + sData.length + " bytes");
+        sDataPost = sDataPost.replace(/%20/g, '+');
+        if (MAXDEBUG) web.log("web.getResource(POST " + sURL + "): " + sDataPost.length + " bytes");
         xmlHTTP.open("POST", sURL, !!fAsync);   // ensure that fAsync is a valid boolean (Internet Explorer xmlHTTP functions insist on it)
         xmlHTTP.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-        xmlHTTP.send(sData);
+        xmlHTTP.send(sDataPost);
     } else {
-        if (MAXDEBUG) web.log("web.loadResource(GET " + sURL + ")");
+        if (MAXDEBUG) web.log("web.getResource(GET " + sURL + ")");
         xmlHTTP.open("GET", sURL, !!fAsync);    // ensure that fAsync is a valid boolean (Internet Explorer xmlHTTP functions insist on it)
+        if (dataPost == "bytes") {
+            xmlHTTP.overrideMimeType("text/plain; charset=x-user-defined");
+        }
         xmlHTTP.send();
     }
 
-    var response = [];
     if (!fAsync) {
-        sURLData = xmlHTTP.responseText;
+        sResource = xmlHTTP.responseText;
         if (xmlHTTP.status == 200) {
-            if (MAXDEBUG) web.log("web.loadResource(" + sURL + "): returned " + sURLData.length + " bytes");
+            if (MAXDEBUG) web.log("web.getResource(" + sURL + "): returned " + sResource.length + " bytes");
         } else {
             nErrorCode = xmlHTTP.status || -1;
-            web.log("web.loadResource(" + sURL + "): error code " + nErrorCode);
+            web.log("web.getResource(" + sURL + "): error code " + nErrorCode);
         }
-        if (fnNotify) {
-            if (!componentNotify) {
-                fnNotify(sURL, sURLData, nErrorCode, pNotify);
-            } else {
-                fnNotify.call(componentNotify, sURL, sURLData, nErrorCode, pNotify);
-            }
-        }
-        response = [nErrorCode, sURLData];
+        if (done) done(sURL, sResource, nErrorCode);
+        response = [sResource, nErrorCode];
     }
     return response;
 };
@@ -305,15 +289,15 @@ web.loadResource = function(sURL, fAsync, data, componentNotify, fnNotify, pNoti
  */
 web.sendReport = function(sApp, sVer, sURL, sUser, sType, sReport, sHostName)
 {
-    var data = {};
-    data[ReportAPI.QUERY.APP] = sApp;
-    data[ReportAPI.QUERY.VER] = sVer;
-    data[ReportAPI.QUERY.URL] = sURL;
-    data[ReportAPI.QUERY.USER] = sUser;
-    data[ReportAPI.QUERY.TYPE] = sType;
-    data[ReportAPI.QUERY.DATA] = sReport;
+    var dataPost = {};
+    dataPost[ReportAPI.QUERY.APP] = sApp;
+    dataPost[ReportAPI.QUERY.VER] = sVer;
+    dataPost[ReportAPI.QUERY.URL] = sURL;
+    dataPost[ReportAPI.QUERY.USER] = sUser;
+    dataPost[ReportAPI.QUERY.TYPE] = sType;
+    dataPost[ReportAPI.QUERY.DATA] = sReport;
     var sReportURL = (sHostName? sHostName : "http://" + SITEHOST) + ReportAPI.ENDPOINT;
-    web.loadResource(sReportURL, true, data);
+    web.getResource(sReportURL, dataPost, true);
 };
 
 /**
@@ -596,7 +580,7 @@ web.isMobile = function()
 web.getURLParameters = function(sParms)
 {
     var aParms = {};
-    if (window) {       // an alternative to "if (typeof module === 'undefined')" if require("defines") has been invoked
+    if (window) {       // an alternative to "if (typeof module === 'undefined')" if require("defines") was used
         if (!sParms) {
             /*
              * Note that window.location.href returns the entire URL, whereas window.location.search
@@ -605,7 +589,7 @@ web.getURLParameters = function(sParms)
             sParms = window.location.search.substr(1);
         }
         var match;
-        var pl = /\+/g;     // RegExp for replacing addition symbol with a space
+        var pl = /\+/g; // RegExp for replacing addition symbol with a space
         var search = /([^&=]+)=?([^&]*)/g;
         var decode = function(s) { return decodeURIComponent(s.replace(pl, " ")); };
 
@@ -617,30 +601,66 @@ web.getURLParameters = function(sParms)
 };
 
 /**
- * onCountRepeat(n, fn, fnComplete, msDelay)
+ * downloadFile(sData, sType, fBase64, sFileName)
  *
- * Call fn() n times with an msDelay millisecond delay between calls, then
- * call fnComplete() when the count has been exhausted OR fn() returns false.
+ * @param {string} sData
+ * @param {string} sType
+ * @param {boolean} [fBase64]
+ * @param {string} [sFileName]
+ */
+web.downloadFile = function(sData, sType, fBase64, sFileName)
+{
+    var link = null, sAlert;
+    var sURI = "data:application/" + sType + (fBase64? ";base64" : "") + ",";
+
+    if (!web.isUserAgent("Firefox")) {
+        sURI += (fBase64? sData : encodeURI(sData));
+    } else {
+        sURI += (fBase64? sData : encodeURIComponent(sData));
+        if (sFileName) {
+            link = document.createElement('a');
+            if (typeof link.download != 'string') link = null;
+        }
+    }
+    if (link) {
+        link.href = sURI;
+        link.download = sFileName;
+        document.body.appendChild(link);    // Firefox requires the link to be in the body
+        link.click();
+        document.body.removeChild(link);
+        sAlert = 'Check your Downloads folder for "' + sFileName + '"';
+    } else {
+        window.open(sURI);
+        sAlert = 'Check your browser for a new window/tab containing the requested data';
+    }
+    return sAlert;
+};
+
+/**
+ * onCountRepeat(n, fnRepeat, fnComplete, msDelay)
+ *
+ * Call fnRepeat() n times with an msDelay millisecond delay between calls,
+ * then call fnComplete() when n has been exhausted OR fnRepeat() returns false.
  *
  * @param {number} n
- * @param {function()} fn
+ * @param {function()} fnRepeat
  * @param {function()} fnComplete
  * @param {number} [msDelay]
  */
-web.onCountRepeat = function(n, fn, fnComplete, msDelay)
+web.onCountRepeat = function(n, fnRepeat, fnComplete, msDelay)
 {
-    var fnRepeat = function doCountRepeat() {
+    var fnTimeout = function doCountRepeat() {
         n -= 1;
         if (n >= 0) {
-            if (!fn()) n = 0;
+            if (!fnRepeat()) n = 0;
         }
         if (n > 0) {
-            setTimeout(fnRepeat, msDelay || 0);
+            setTimeout(fnTimeout, msDelay || 0);
             return;
         }
         fnComplete();
     };
-    fnRepeat();
+    fnTimeout();
 };
 
 /**

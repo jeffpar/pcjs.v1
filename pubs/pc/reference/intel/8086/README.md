@@ -27,28 +27,31 @@ Intel provided a fix for this on later processors, by delaying the acknowledgeme
 after a `MOV SS,xxx` or `POP SS` instruction; the delay lasts only one instruction, so you're obliged to change SP on
 the very next instruction.
 
-Note that Intel's fix appears to have been over-broad: *all* `MOV segreg,xxx` and `POP segreg`
+Intel's fix also appears to have been overbroad: *all* `MOV segreg,xxx` and `POP segreg`
 instructions delay interrupts, not just `MOV SS,xxx` and `POP SS`.  In fact, it's been
-[reported](http://www.malinov.com/Home/sergeys-projects/sergey-s-xt/historical-notes)
-that all PUSH *segreg* instructions also have the same delaying effect, at least on selected 80C88 processors.
+[reported](http://www.malinov.com/Home/sergeys-projects/sergey-s-xt/historical-notes) that all
+`PUSH segreg` instructions may also have the same delaying effect, at least on some 80C88 processors.
 
 ### Interrupted String Instructions With Multiple Prefixes Do Not Resume Correctly
 
-If a repeated string instruction includes more than one override; eg:
+If a repeated string instruction includes more than one override prefix; eg:
 
 		REP ES: MOVSB
 
-and an interrupt occurs, the instruction will restart with only the last override.  This was never fixed in any
-8086/8088.
+and an interrupt occurs, the instruction will restart with the last override prefix byte, ignoring any
+preceding prefix bytes.  This was never fixed in any 8086/8088.
 
-The recommended work-around is to ensure that the segment override immediately precedes the instruction, and to rewrite
-the sequence:
+The recommended work-around is to ensure that the *segment override* is the last prefix byte, and then rewrite
+the operation like this:
 
 	top:
 		REP ES: MOVSB
 		JCXZ    done
 		JMP     top
 	done:
+
+If you're not sure your assembler will output the `REP` and `ES:` overrides in the order shown, then you should
+generate the override bytes manually, using **DB** or a similar assembler directive.
 
 8086 Undocumented Instructions
 ---
@@ -63,11 +66,16 @@ corresponding IP.
 There is no `POP CS` instruction on later x86 CPUs.  The opcode was explicitly made invalid on the 80186/80188,
 but was reused on later CPUs (starting with the 80286) as the first byte in a series of two-byte opcodes.
 
+### Duplicate Conditional Jumps (0x60-0x6F)
+
+Opcodes 0x60 through 0x6F decode identically to the conditional jump opcodes at 0x70 through 0x7F, respectively.
+This is not true for any other x86 CPU.
+
 ### MOV segreg,xxx (0x8E)
 
 Similar to `POP CS`, this instruction was of limited value when the selected *segreg* was CS.
 
-Note that *segreg* was encoded as a 3-bit value in the second byte of the instruction, where:
+Note that *segreg* is encoded as a 3-bit value in the second byte of the instruction, where:
 
  * 0 = ES
  * 1 = CS (invalid on 80286 and later)
@@ -80,17 +88,6 @@ Note that *segreg* was encoded as a 3-bit value in the second byte of the instru
  
 On the 8086/8088/80186/80188, values 0-3 were treated the same as values 4-7, and all values were allowed.
 
-### SETALC aka SALC (0xD6)
-
-Performs an operation equivalent to `SBB AL,AL`, but without modifying any flags.  In other words, AL will be set to
-0xFF or 0x00, depending on whether CF is set or clear.  This instruction exists on all later x86 CPUs, but for some
-reason, it has never been documented.
-
-### Duplicate Conditional Jumps (0x60-0x6F)
-
-Opcodes 0x60 through 0x6F decode identically to the conditional jump opcodes at 0x70 through 0x7F, respectively.
-This is not true for any other x86 CPU.
-
 ### Duplicate RET and RETF Instructions (0xC0, 0xC1, 0xC8, 0xC9)
 
 * Opcode 0xC0 decodes identically to RET n (0xC2) 
@@ -98,14 +95,31 @@ This is not true for any other x86 CPU.
 * Opcode 0xC8 decodes identically to RETF n (0xCA) 
 * Opcode 0xC9 decodes identically to RET n (0xCB)
 
-Starting with the 80186, opcodes 0xC0 and 0xC1 were reused for new shift and rotate instruction groups, and opcodes
-0xC8 and 0xC9 became the `ENTER` and `LEAVE` instructions.
+Starting with the 80186, opcodes 0xC0 and 0xC1 were reused for new shift and rotate instruction groups,
+and opcodes 0xC8 and 0xC9 became the `ENTER` and `LEAVE` instructions.
+
+### [AAM](/docs/x86/ops/AAM/) (0xD4)
+
+While AAM is documented, it has undocumented features (eg, its ability to divide by values other than 10,
+and its effect on the flags).  See the [AAM](/docs/x86/ops/AAM/) instruction for details.
+
+### [AAD](/docs/x86/ops/AAD/) (0xD5)
+
+While AAD is documented, it has undocumented features (eg, its ability to multiply by values other than 10,
+and its effect on the flags).  See the [AAD](/docs/x86/ops/AAD/) instruction for details.
+
+### [SALC](/docs/x86/ops/SALC/) (0xD6)
+
+Performs an operation equivalent to `SBB AL,AL`, but without modifying any flags.  In other words, AL will be set to
+0xFF or 0x00, depending on whether CF is set or clear.  This instruction exists on all later x86 CPUs, but for some
+reason, it has never been documented.  Also known as **SETALC**.
 
 ### Duplicate LOCK Prefix (0xF1)
 
 It is believed that 0xF1 decodes identically to 0xF0 (the `LOCK` prefix).
 
-On newer processors, 0xF1 is an undocumented instruction usually called `ICEBP` or `INT1`.
+On newer processors, 0xF1 is an undocumented instruction usually called `ICEBP` or `INT1`.  See the
+[ICEBP](/docs/x86/ops/ICEBP/) instruction for details.
 
 Assorted Publications
 ---
