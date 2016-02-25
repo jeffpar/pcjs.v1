@@ -1,15 +1,14 @@
 ---
-layout: post
-title: "COMPAQ Revisited"
-date: 2016-02-24 14:00:00
-permalink: /blog/2016/02/24/
+layout: page
+title: COMPAQ Machines
+permalink: /devices/pc/machine/compaq/
 ---
 
-I finally obtained a [ROM Dump](/devices/pc/rom/compaq/bios/portable/) from COMPAQ's first machine,
-the [COMPAQ Portable](#compaq-portable).
+COMPAQ Machines
+---
 
-At the same time, I thought it would be a good idea to create my own roughly chronological list of COMPAQ machines from
-the 1980s, since they are all machines I would like to see PCjs eventually support:
+This is an evolving (and roughly chronological) list of COMPAQ machines from the 1980s, which PCjs may eventually
+support:
 
  + [COMPAQ Portable](#compaq-portable)
  + [COMPAQ [Portable] Plus](#compaq-portable-plus-aka-compaq-plus)
@@ -21,25 +20,33 @@ the 1980s, since they are all machines I would like to see PCjs eventually suppo
  + [COMPAQ Portable III](#compaq-portable-iii)
  + [COMPAQ Portable 386](#compaq-portable-386)
  + [COMPAQ 386/20e](#compaq-38620e)
- + [COMPAQ SLT Series](#compaq-slt-series)
-	 + COMPAQ SLT/286
- + [COMPAQ LTE Series](#compaq-lte-series)
-	 + COMPAQ LTE 286
-	 + COMPAQ LTE 386
+ + [COMPAQ SLT Series](#compaq-slt-series) (SLT/286)
+ + [COMPAQ LTE Series](#compaq-lte-series) (LTE 286, LTE 386)
 
-It's hard to stop at this point, because COMPAQ did produce other 80386-based systems, like those in the "LTE Lite"
-series.  But I think I need to stick my original plan and draw a line at the end of the 1980s.
+At the moment, only the [COMPAQ DeskPro 386](deskpro386/) is supported, but now that we have ROMs for a few other
+COMPAQ machines -- most importantly, their **first** machine, the [COMPAQ Portable](/devices/pc/rom/compaq/bios/portable/) --
+more should follow.
 
-Below is a random assortment of information I've gathered about some of the above models, with gaping holes for others.
-Currently, the *most* gaping is the [COMPAQ DeskPro 386](#compaq-deskpro-386), because that's the one COMPAQ machine
-that PCjs *already* supports.  I just need more time to organize and fill in the details.
+### Regarding The COMPAQ Name
+
+As best I can tell, COMPAQ preferred to print its company name in all-caps, so that's my practice as well.
+
+However, it seems that sometime between the release of [COMPAQ MS-DOS 3.10](/disks/pc/dos/compaq/3.10/) and
+[COMPAQ MS-DOS 3.31](/disks/pc/dos/compaq/3.31/), there may have been a shift in policy.  Both products still
+called themselves `The COMPAQ Personal Computer MS-DOS`, but in 3.31, the copyright string changed to
+`Compaq Computer Corp.`
+
+Their all-caps practice also extended to at least *some* product names (eg, the `COMPAQ DESKPRO`), but I'm not sure
+how strict they were, and I'm decidedly less so, which is why I use the name `COMPAQ DeskPro`.
+
+The rest of this page will be used to collect information about the machines listed above.
 
 ---
 
 COMPAQ Portable
 ---
 
-PCjs now has a [ROM Dump](/devices/pc/rom/compaq/bios/portable/).
+The PCjs Project now has a [ROM Dump](/devices/pc/rom/compaq/bios/portable/) (REV C).
 
 Reviewed in Byte Magazine, Jan 1983.  Reprinted [here](http://blog.modernmechanix.com/byte-reviews-the-compaq-first-pc-clone/).
 
@@ -133,10 +140,10 @@ at a later date.
 COMPAQ Portable III
 ---
 
+The PCjs Project now has a [ROM Dump](/devices/pc/rom/compaq/bios/portable3/) (REV K, 1987-01-29).
+
 Reportedly intended to be an 80386-based machine, the Portable III was first released in 1987 as a 12Mhz
 80286-based system.
-
-PCjs also has information about [COMPAQ Portable III ROMs](/devices/pc/rom/compaq/bios/portable3/).
 
 **Model** | **Price** | **CPU**           | **Options**
 :-------- | :-------- | :---------------- | :----------------------------
@@ -177,6 +184,4 @@ Various models, such as the [Model 40](http://www.overclockers.com/compaq-lte-28
 
 ### COMPAQ LTE 386
 
-
-*[@jeffpar](http://twitter.com/jeffpar)*  
-*February 24, 2016*
+[TBD]

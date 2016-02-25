@@ -1,15 +1,15 @@
 ---
 layout: page
-title: "Compaq Video Graphics Controller (VGA)"
+title: "COMPAQ Video Graphics Controller (VGA)"
 permalink: /devices/pc/video/compaq/vga/
 ---
 
-Compaq Video Graphics Controller (VGA)
+COMPAQ Video Graphics Controller (VGA)
 ---
-This is the Compaq Video Graphics Controller Board, one of the earliest VGA boards Compaq released
+This is the COMPAQ Video Graphics Controller Board, one of the earliest VGA boards COMPAQ released
 for its DeskPro 386 line.
 
-[<img src="http://archive.pcjs.org/devices/pc/video/compaq/vga/109360-001/Compaq_VGA_109360-001-640.jpg" alt="Compaq VGA Board"/>](http://archive.pcjs.org/devices/pc/video/compaq/vga/109360-001/Compaq_VGA_109360-001.jpg)
+[<img src="http://archive.pcjs.org/devices/pc/video/compaq/vga/109360-001/Compaq_VGA_109360-001-640.jpg" alt="COMPAQ VGA Board"/>](http://archive.pcjs.org/devices/pc/video/compaq/vga/109360-001/Compaq_VGA_109360-001.jpg)
 
 It was featured in the February 16, 1988 of PC Magazine (p.188).  At that time, it retailed for $599, and it was described
 as "the sharpest, fastest IBM-standard video board you can slide into your PC."  The article goes on to say:
@@ -62,7 +62,7 @@ And for those who want a binary file, the FileDump API can be used to recreate b
 
 > [http://localhost:8088/api/v1/dump?file=/devices/pc/video/compaq/vga/109360-001/1988-05-18.json&format=rom](http://localhost:8088/api/v1/dump?file=/devices/pc/video/compaq/vga/109360-001/1988-05-18.json&format=rom)
 
-The Compaq VGA ROM BIOS concludes with the usual copyright string and author initials:
+The COMPAQ VGA ROM BIOS concludes with the usual copyright string and author initials:
 
 	Copyright COMPAQ Computer Corporation, 1982, 1983, 1984, 1985, 1986, 1987, 1988
 	RWS*PNA*NPB*DJC*CAB*ALL*

@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.20.9/machine.xsl"?>
 <machine id="deskpro386" class="pc" border="1" pos="center" background="#FAEBD7">
-	<name pos="center">Compaq DeskPro 386 (16Mhz), 256Kb EGA, 4096Kb RAM</name>
-	<computer id="deskpro386-ega-2048k" name="Compaq DeskPro 386" buswidth="32"/>
+	<name pos="center">COMPAQ DeskPro 386 (16Mhz), 256Kb EGA, 4096Kb RAM</name>
+	<computer id="deskpro386-ega-2048k" name="COMPAQ DeskPro 386" buswidth="32"/>
 	<cpu id="cpu386" model="80386" autostart="false"/>
 	<ram id="ramLow" addr="0x00000" test="false" size="0xa0000" comment="ROM BIOS memory test has been disabled"/>
-	<ram id="ramCPQ" addr="0xfa0000" size="0x60000" comment="Compaq memory at 0xFA0000"/>
+	<ram id="ramCPQ" addr="0xfa0000" size="0x60000" comment="COMPAQ memory at 0xFA0000"/>
 	<ram id="ramExt" addr="0x100000" size="0x300000" comment="Extended memory at 0x100000"/>
 	<rom id="romEGA" addr="0xc0000" size="0x4000" file="/devices/pc/video/ibm/ega/1984-09-13/ibm-ega.json" notify="videoEGA"/>
 	<rom id="romBIOS" addr="0xf8000" size="0x8000" alias="[0xf0000,0xffff0000,0xffff8000]" file="/devices/pc/rom/compaq/bios/deskpro386/1988-01-28/1988-01-28.json"/>
