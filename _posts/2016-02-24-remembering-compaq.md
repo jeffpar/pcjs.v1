@@ -36,7 +36,7 @@ IBM machines, it didn't force you to choose between a higher-quality text-only (
 graphics-capable (CGA) display.  COMPAQ improved on IBM's mutually-exclusive display choices by creating a monochrome
 display that could display both high-quality text *and* graphics.
 
-IBM released their own portable unit a year later, but it looked suspciously COMPAQ-like, and it lacked COMPAQ's
+IBM released their own portable unit a year later, but it looked suspiciously COMPAQ-like, and it lacked COMPAQ's
 innovative display.
 
 That tradition of innovation at COMPAQ continued for many years.  Sometimes they even seemed *more* concerned about
@@ -75,7 +75,7 @@ since they are all machines I would like to see PCjs eventually support:
  + COMPAQ LTE Series (LTE 286, LTE 386)
 
 It's hard to stop at this point, because PCjs supports the 80386, and COMPAQ produced other 80386-based systems,
-like those in the "LTE Lite" series.  But I think I need to stick my original plan and draw a line at the end of the
+like those in the "LTE Lite" series.  But I think I need to stick to my original plan and draw a line at the end of the
 1980s.
 
 ### Regarding The COMPAQ Name
