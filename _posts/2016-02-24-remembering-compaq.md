@@ -6,17 +6,17 @@ permalink: /blog/2016/02/24/
 ---
 
 IBM is obviously the company everyone thinks of first when we talk about the IBM PC -- after all, IBM is right
-there in the name.  And they designed the thing.  So IBM deserves lots of credit, especially the folks who worked
-in Boca Raton at IBM's Entry Systems Division in the early 1980's.
+there in the name.  And they designed the thing.  So IBM deserves lots of credit for where we are today, especially
+the folks who worked in Boca Raton at IBM's Entry Systems Division in the early 1980's.
 
 However, IBM was a huge company that existed *before* the IBM PC and which still exists today; they had some built-in
-advantages.  The PC era also saw a lot of companies spring up from nowhere and then disappear just as quickly.
-Some of them didn't do anything particularly innovative or noteworthy -- they probably just wanted to ride the PC wave
-and make some easy money in the process.
+advantages.  The PC era also saw the rise and fall of many other personal computer companies.  Some of them didn't
+do anything particularly innovative or noteworthy -- perhaps they simply wanted to ride the PC wave and make some easy
+money in the process.
 
-I think one of the more exceptional companies from that era is COMPAQ.  It's easy to dismiss COMPAQ as just another
-"copy-cat" operation, but I think it's a mistake to dismiss any company in the PC business as simply "copying" or
-"cloning" the IBM design.  Companies like COMPAQ were really in the *compatibility* business.
+One of the more exceptional companies from that era is COMPAQ.  It's easy to dismiss COMPAQ as just another
+company that merely "copied" or "cloned" the IBM design, but COMPAQ's ambitions went beyond imitation: they were
+really in the *compatibility* business.
 
 Innovation in the PC industry would not have been as rapid and diverse if IBM had been the only supplier of
 compatible machines and accessories.  And IBM probably would have continued some of the monopolistic practices it had
@@ -69,14 +69,17 @@ since they are all machines I would like to see PCjs eventually support:
  + COMPAQ Portable II
  + [COMPAQ DeskPro 386](/devices/pc/machine/compaq/deskpro386/)
  + COMPAQ Portable III
+ + COMPAQ DeskPro 386/20
  + COMPAQ Portable 386
- + COMPAQ 386/20e
+ + COMPAQ DeskPro 386/25
+ + COMPAQ DeskPro 386s
+ + COMPAQ DeskPro 386/20e
  + COMPAQ SLT Series (SLT/286)
- + COMPAQ LTE Series (LTE 286, LTE 386)
+ + COMPAQ DeskPro 386/33
+ + COMPAQ LTE Series (LTE and LTE/286)
 
-It's hard to stop at this point, because PCjs supports the 80386, and COMPAQ produced other 80386-based systems,
-like those in the "LTE Lite" series.  But I think I need to stick to my original plan and draw a line at the end of the
-1980s.
+It's hard to stop at this point, because COMPAQ produced other innovative 80386-based systems, like those in the LTE
+and LTE Lite series.  But I think I need to stick to my original plan and draw a line at the end of the 1980s.
 
 ### Regarding The COMPAQ Name
 
@@ -87,8 +90,9 @@ However, it seems that sometime between the release of [COMPAQ MS-DOS 3.10](/dis
 called themselves `The COMPAQ Personal Computer MS-DOS`, but in 3.31, the copyright string changed to
 `Compaq Computer Corp.`
 
-Their all-caps practice also extended to at least *some* product names (eg, the `COMPAQ DESKPRO`), but I'm not sure
-how strict they were, and I'm decidedly less so, which is why I use the name `COMPAQ DeskPro`.
+Their all-caps practice also extended to product names (eg, `COMPAQ DESKPRO`), at least in their marketing literature.
+Contemporary news stories, however, tended to lower-case the product name (eg, `COMPAQ Deskpro`).  I've decided to
+split the difference and use mixed-case where it seems appropriate (eg, `COMPAQ DeskPro`).
 
 *[@jeffpar](http://twitter.com/jeffpar)*  
 *February 24, 2016*

@@ -18,10 +18,14 @@ support:
  + [COMPAQ Portable II](#compaq-portable-ii)
  + [COMPAQ DeskPro 386](#compaq-deskpro-386)
  + [COMPAQ Portable III](#compaq-portable-iii)
+ + COMPAQ DeskPro 386/20
  + [COMPAQ Portable 386](#compaq-portable-386)
- + [COMPAQ 386/20e](#compaq-38620e)
+ + COMPAQ DeskPro 386/25
+ + COMPAQ DeskPro 386s
+ + [COMPAQ DeskPro 386/20e](#compaq-38620e)
  + [COMPAQ SLT Series](#compaq-slt-series) (SLT/286)
- + [COMPAQ LTE Series](#compaq-lte-series) (LTE 286, LTE 386)
+ + COMPAQ DeskPro 386/33
+ + [COMPAQ LTE Series](#compaq-lte-series) (LTE and LTE/286)
 
 At the moment, only the [COMPAQ DeskPro 386](deskpro386/) is supported, but now that we have ROMs for a few other
 COMPAQ machines -- most importantly, their **first** machine, the [COMPAQ Portable](/devices/pc/rom/compaq/bios/portable/) --
@@ -36,8 +40,9 @@ However, it seems that sometime between the release of [COMPAQ MS-DOS 3.10](/dis
 called themselves `The COMPAQ Personal Computer MS-DOS`, but in 3.31, the copyright string changed to
 `Compaq Computer Corp.`
 
-Their all-caps practice also extended to at least *some* product names (eg, the `COMPAQ DESKPRO`), but I'm not sure
-how strict they were, and I'm decidedly less so, which is why I use the name `COMPAQ DeskPro`.
+Their all-caps practice also extended to product names (eg, `COMPAQ DESKPRO`), at least in their marketing literature.
+Contemporary news stories, however, tended to lower-case the product name (eg, `COMPAQ Deskpro`).  I've decided to
+split the difference and use mixed-case where it seems appropriate (eg, `COMPAQ DeskPro`).
 
 The rest of this page will be used to collect information about the machines listed above.
 
