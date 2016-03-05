@@ -3441,7 +3441,7 @@ X86.opMOVDI = function()
  */
 X86.opGRP2bn = function()
 {
-    this.aOpModGrpByte[this.getIPByte()].call(this, X86.aOpGrp2b, X86.fnSRCCountN);
+    this.aOpModGrpByte[this.getIPByte()].call(this, X86.aOpGrp2b, X86.fnSRCByte);
 };
 
 /**
@@ -3451,7 +3451,7 @@ X86.opGRP2bn = function()
  */
 X86.opGRP2wn = function()
 {
-    this.aOpModGrpWord[this.getIPByte()].call(this, this.sizeData == 2? X86.aOpGrp2w : X86.aOpGrp2d, X86.fnSRCCountN);
+    this.aOpModGrpWord[this.getIPByte()].call(this, this.sizeData == 2? X86.aOpGrp2w : X86.aOpGrp2d, X86.fnSRCByte);
 };
 
 /**
@@ -3710,7 +3710,7 @@ X86.opIRET = function()
  */
 X86.opGRP2b1 = function()
 {
-    this.aOpModGrpByte[this.getIPByte()].call(this, X86.aOpGrp2b, X86.fnSRCCount1);
+    this.aOpModGrpByte[this.getIPByte()].call(this, X86.aOpGrp2b, X86.fnSRC1);
 };
 
 /**
@@ -3720,7 +3720,7 @@ X86.opGRP2b1 = function()
  */
 X86.opGRP2w1 = function()
 {
-    this.aOpModGrpWord[this.getIPByte()].call(this, this.sizeData == 2? X86.aOpGrp2w : X86.aOpGrp2d, X86.fnSRCCount1);
+    this.aOpModGrpWord[this.getIPByte()].call(this, this.sizeData == 2? X86.aOpGrp2w : X86.aOpGrp2d, X86.fnSRC1);
 };
 
 /**
@@ -3730,7 +3730,7 @@ X86.opGRP2w1 = function()
  */
 X86.opGRP2bCL = function()
 {
-    this.aOpModGrpByte[this.getIPByte()].call(this, X86.aOpGrp2b, X86.fnSRCCountCL);
+    this.aOpModGrpByte[this.getIPByte()].call(this, X86.aOpGrp2b, X86.fnSRCCL);
 };
 
 /**
@@ -3740,7 +3740,7 @@ X86.opGRP2bCL = function()
  */
 X86.opGRP2wCL = function()
 {
-    this.aOpModGrpWord[this.getIPByte()].call(this, this.sizeData == 2? X86.aOpGrp2w : X86.aOpGrp2d, X86.fnSRCCountCL);
+    this.aOpModGrpWord[this.getIPByte()].call(this, this.sizeData == 2? X86.aOpGrp2w : X86.aOpGrp2d, X86.fnSRCCL);
 };
 
 /**
@@ -3788,7 +3788,7 @@ X86.opAAM = function()
 {
     var b = this.getIPByte();
     if (!b) {
-        X86.fnDIVOverflow.call(this);
+        X86.fnDivOverflow.call(this);
         return;
     }
     var AL = this.regEAX & 0xff;

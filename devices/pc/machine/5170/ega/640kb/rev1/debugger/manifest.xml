@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.20.9/manifest.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.30.0/manifest.xsl"?>
 <manifest type="document">
 	<title>IBM PC AT References</title>
 	<document href="http://minuszerodegrees.net/manuals/IBM_5170_Technical_Reference_1502243_MAR84.pdf">
