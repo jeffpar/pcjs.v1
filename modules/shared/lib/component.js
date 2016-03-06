@@ -125,6 +125,16 @@ function Component(type, parms, constructor, bitsMessage)
     this.dbg = null;                    // by default, no connection to a Debugger
     this.bitsMessage = bitsMessage || 0;
 
+    /*
+     * TODO: Consider adding another parameter to the Component() constructor that allows components to tell
+     * us if they support single or multiple instances per machine.  For example, there can be multiple SerialPort
+     * components per machine, but only one CPU component (well, OK, an FPU is also supported, but that's considered
+     * a different component).
+     *
+     * It's not critical, but it would help catch machine configuration errors; for example, a machine that mistakenly
+     * includes two CPU components may, aside from wasting memory, end up with odd side-effects, like unresponsive
+     * CPU controls.
+     */
     Component.add(this);
 }
 
@@ -262,7 +272,6 @@ Component.addMachineResource = function(idMachine, sName, data)
      * so addMachine() is never called, so resources do not need to be recorded.
      */
     if (Component.machines[idMachine] && sName) {
-        Component.assert(Component.machines[idMachine][sName] === undefined);
         Component.machines[idMachine][sName] = data;
     }
 };

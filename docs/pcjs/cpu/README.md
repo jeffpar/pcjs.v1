@@ -24,7 +24,7 @@ Attributes
 	to the whims of JavaScript, your web browser, and your machine's overall workload.
 * *multiplier* (optional; default is 1)
 	* Provides an easy way to multiply the default CPU speed.
-* *autostart* (optional)
+* *autoStart* (optional)
 	* This can be set to "true" or "false" to explicitly control whether or not the machine starts running automatically.
 	If this parameter is omitted, the machine will autostart only if no Debugger component is included and no "Run" button is defined.
 
@@ -49,7 +49,7 @@ Bindings
 
 Example
 ---
-	<cpu id="cpu8088" model="8088" autostart="true">
+	<cpu id="cpu8088" model="8088" autoStart="true">
 		<control type="button" class="input" binding="run">Run</control>
 	</cpu>
 
@@ -57,7 +57,7 @@ Output
 ---
 	<div id="..." class="pc-cpu pc-component" style="">
 		<div class="pc-container" style="">
-			<div class="pcjs-cpu" data-value="id:'...',name:'...',model:'...',cycles:'...',multiplier:'...',autostart:'...'">
+			<div class="pcjs-cpu" data-value="id:'...',name:'...',model:'...',cycles:'...',multiplier:'...',autoStart:'...'">
 			</div>
 		</div>
 	</div>

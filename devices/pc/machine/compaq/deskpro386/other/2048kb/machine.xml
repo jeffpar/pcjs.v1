@@ -10,10 +10,10 @@
 	<rom id="romVGA" addr="0xc0000" size="0x8000" file="/devices/pc/video/compaq/vga/109360-001/1987-10-27.json" notify="videoVGA"/>
 	<rom id="romBIOS" addr="0xf8000" size="0x8000" alias="[0xf0000,0xffff0000,0xffff8000]" file="/devices/pc/rom/compaq/bios/deskpro386/1988-01-28/1988-01-28.json"/>
 	<video ref="/devices/pc/video/compaq/vga/compaq-vga-lock.xml"/>
+	<fdc ref="/disks/pc/compiled/library.xml" automount='{A: {name: "PC-DOS 3.00 (Disk 1)", path: "/disks/pc/dos/ibm/3.00/PCDOS300-DISK1.json"}, B: {name: "PC-DOS 3.00 (Disk 2)", path: "/disks/pc/dos/ibm/3.00/PCDOS300-DISK2.json"}}'/>
 	<keyboard ref="/devices/pc/keyboard/keyboard-minimal-functions.xml"/>
 	<debugger id="debugger" messages="fault|port" commands=""/>
 	<panel ref="/devices/pc/panel/btpanel.xml"/>
-	<fdc ref="/disks/pc/compiled/library.xml" automount='{A: {name: "PC-DOS 3.00 (Disk 1)", path: "/disks/pc/dos/ibm/3.00/PCDOS300-DISK1.json"}, B: {name: "PC-DOS 3.00 (Disk 2)", path: "/disks/pc/dos/ibm/3.00/PCDOS300-DISK2.json"}}'/>
 	<hdcNone id="hdcAT" type="at" drives='[{name:"20Mb Hard Disk",type:2}]'/>
 	<chipset id="chipset" model="deskpro386" floppies="[1200,1200]"/>
 	<serial id="com1" adapter="1"/>

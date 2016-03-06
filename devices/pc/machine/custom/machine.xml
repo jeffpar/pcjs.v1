@@ -7,12 +7,12 @@
 	<rom id="romBASIC" addr="0xf6000" size="0x8000" file="/devices/pc/rom/5150/basic/BASIC100.json"/>
 	<rom id="romBIOS" addr="0xfe000" size="0x2000" file="/devices/pc/rom/5150/bios/1981-04-24/PCBIOS-REV1.json"/>
 	<video ref="/devices/pc/video/ibm/mda/ibm-mda.xml"/>
-	<cpu id="cpu8088" model="8088" autostart="true" padleft="8px">
+	<fdc ref="/disks/pc/samples.xml"/>
+	<cpu id="cpu8088" model="8088" autostart="true" pos="left" padleft="8px" padbottom="8px">
 		<control type="button" binding="power">Power</control>
 		<control type="button" binding="run">Run</control>
 		<control type="button" binding="reset">Reset</control>
 	</cpu>
 	<keyboard ref="/devices/pc/keyboard/keyboard-minimal.xml"/>
-	<fdc ref="/disks/pc/samples.xml" pos="right"/>
 	<chipset id="chipset" model="5150" sw1="01000001" sw2="11110000"/>
 </machine>

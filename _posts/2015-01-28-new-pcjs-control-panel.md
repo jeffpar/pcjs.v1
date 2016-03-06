@@ -5,8 +5,9 @@ date: 2015-01-28 11:00:00
 category: Control Panel
 permalink: /blog/2015/01/28/
 machines:
-  - type: pc-dbg
+  - type: pc
     id: at-ega-1152k-rev3
+    debugger: true
     config: /devices/pc/machine/5170/ega/1152kb/rev3/debugger/backtrack/machine.xml
     uncompiled: true
 ---

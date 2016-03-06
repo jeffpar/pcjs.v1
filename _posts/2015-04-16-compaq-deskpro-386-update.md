@@ -5,8 +5,9 @@ date: 2015-04-16 11:00:00
 category: 80386
 permalink: /blog/2015/04/16/
 machines:
-  - type: pc-dbg
+  - type: pc
     id: deskpro386
+    debugger: true
     config: /devices/pc/machine/compaq/deskpro386/ega/2048kb/machine.xml
     uncompiled: true
 ---

@@ -3899,16 +3899,16 @@ if (DEBUGGER) {
     };
 
     /**
-     * runCPU(fOnClick)
+     * runCPU(fSetFocus)
      *
      * @this {Debugger}
-     * @param {boolean} [fOnClick] is true if called from a click handler that might have stolen focus
+     * @param {boolean} [fSetFocus] is true to give the CPU focus
      * @return {boolean} true if run request successful, false if not
      */
-    Debugger.prototype.runCPU = function(fOnClick)
+    Debugger.prototype.runCPU = function(fSetFocus)
     {
         if (!this.isCPUAvail()) return false;
-        this.cpu.runCPU(fOnClick);
+        this.cpu.runCPU(fSetFocus);
         return true;
     };
 

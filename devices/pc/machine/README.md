@@ -85,7 +85,7 @@ Our pre-built [Model 5160](/devices/pc/machine/5160/) machines include:
 * [IBM PC XT (256Kb, 10Mb Drive) with Color Display running Windows 1.01](/devices/pc/machine/5160/cga/256kb/win101/)
 * [IBM PC XT (256Kb, 10Mb Drive) with Color Display and Debugger running Windows 1.01](/devices/pc/machine/5160/cga/256kb/win101/debugger/)
 * [IBM PC XT (256Kb, 10Mb Drive) with Color Display and Soft Keyboard running Windows 1.01](/devices/pc/machine/5160/cga/256kb/win101/softkbd/)
-* [IBM PC XT (256Kb, 10Mb Drive) Machine Array with CGA Displays](/devices/pc/machine/5160/cga/256kb/array/)
+* [IBM PC XT (256Kb, 10Mb Drive) Machine Array with Color Displays](/devices/pc/machine/5160/cga/256kb/array/)
 * [IBM PC XT (256Kb, 10Mb Drive) with EGA Display and Debugger](/devices/pc/machine/5160/ega/256kb/debugger/)
 * [IBM PC XT (256Kb, 10Mb Drive) with Monochrome Display and Debugger](/devices/pc/machine/5160/mda/256kb/debugger/)
 * [IBM PC XT (512Kb, 10Mb Drive) with Color Display and Soft Keyboard running Windows 1.01](/devices/pc/machine/5160/cga/512kb/win101/softkbd/)
@@ -100,6 +100,10 @@ Our pre-built [Model 5160](/devices/pc/machine/5160/) machines include:
 
 ### Model 5170 Machine Configurations
 
-* [IBM PC AT (6Mhz), EGA, 640K, Debugger](/devices/pc/machine/5170/ega/640kb/rev1/debugger/)
-* [IBM PC AT (6Mhz), EGA, 1152Kb, 20Mb Drive, Debugger](/devices/pc/machine/5170/ega/1152kb/rev1/debugger/)
-* [IBM PC AT (8Mhz), EGA, 1152Kb, 20Mb Drive, Debugger](/devices/pc/machine/5170/ega/1152kb/rev3/debugger/)
+* [IBM PC AT (6Mhz, 640Kb) with EGA Display and Debugger](/devices/pc/machine/5170/ega/640kb/rev1/debugger/)
+* [IBM PC AT (6Mhz, 1152Kb, 20Mb Drive) with EGA Display and Debugger](/devices/pc/machine/5170/ega/1152kb/rev1/debugger/)
+* [IBM PC AT (8Mhz, 1152Kb, 20Mb Drive) with EGA Display and Debugger](/devices/pc/machine/5170/ega/1152kb/rev3/debugger/)
+* [IBM PC AT (8Mhz, 1152Kb, 20Mb Drive) with EGA Display running Windows 3.00](/devices/pc/machine/5170/ega/1152kb/win300/)
+* [IBM PC AT (8Mhz, 1152Kb, 20Mb Drive) with EGA Display and Debugger running Windows 3.00](/devices/pc/machine/5170/ega/1152kb/win300/)
+* [IBM PC AT (8Mhz, 2Mb, 20Mb Drive) with VGA Display running Windows 3.10](/devices/pc/machine/5170/vga/2048kb/win310/)
+* [IBM PC AT (8Mhz, 2Mb, 20Mb Drive) with VGA Display and Debugger running Windows 3.10](/devices/pc/machine/5170/vga/2048kb/win310/debugger/)

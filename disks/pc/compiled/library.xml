@@ -140,7 +140,6 @@
 		<disk path="/disks/pc/os2/misc/1.0/OS210-88286.json">OS/2 1.0 Debugger</disk>
 		<disk path="/disks/pc/os2/misc/cpdos/SIZZLE-76818-19870107.json">OS/2 SIZZLE (v7.68.18)</disk>
 		<disk path="/disks/pc/os2/misc/cpdos/SIZZLE-76818-19870107-DEBUG.json">OS/2 SIZZLE (v7.68.18 DEBUG)</disk>
-		<disk path="/disks/pc/os2/misc/cruiser/OS2SDK-048014.100.json">OS/2 CRUISER (048014.100)</disk>
 		<disk path="/disks/pc/windows/1.00/WIN100-DISK1.json">Windows 1.00 (SETUP)</disk>
 		<disk path="/disks/pc/windows/1.00/WIN100-DISK2.json">Windows 1.00 (BUILD)</disk>
 		<disk path="/disks/pc/windows/1.00/WIN100-DISK3.json">Windows 1.00 (UTILITY)</disk>

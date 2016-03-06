@@ -1589,7 +1589,18 @@ X86Seg.prototype.messageSeg = function(sel, base, limit, type, ext)
             if (this.id == X86Seg.ID.CODE) sDPL += " cpl=" + this.cpl;
             this.dbg.message("loadSeg(" + this.sName + "):" + ch + "sel=" + str.toHexWord(sel) + " base=" + str.toHex(base) + " limit=" + str.toHexWord(limit) + " type=" + str.toHexWord(type) + sDPL, true);
         }
-        this.cpu.assert(/* base !== X86.ADDR_INVALID && */ (this.cpu.model >= X86.MODEL_80386 || !ext || ext == X86.DESC.EXT.AVAIL));
+        /*
+         * Unless I've got a bug that's causing descriptor corruption, it appears that Windows 3.0 may be setting the
+         * EXT field of descriptors, even when the processor is an 80286; eg, the EXT field below has been set to 0x000F:
+         *
+         *      ## ds 1bd
+         *      dumpSel(0x01BD): %1101B8
+         *      %001101B8  FFFF  C090  B317  000F
+         *
+         * So I've disabled this assert (I had already disabled the "base !== X86.ADDR_INVALID" check).
+         *
+         *      this.cpu.assert(base !== X86.ADDR_INVALID && (this.cpu.model >= X86.MODEL_80386 || !ext || ext == X86.DESC.EXT.AVAIL));
+         */
     }
 };
 

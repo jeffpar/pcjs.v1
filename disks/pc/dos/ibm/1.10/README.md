@@ -6,7 +6,7 @@ machines:
   - type: pc
     id: ibm5150-pcdos110
     config: /devices/pc/machine/5150/mda/64kb/machine.xml
-    automount:
+    autoMount:
       A:
         path: /disks/pc/dos/ibm/1.10/PCDOS110.json
 ---

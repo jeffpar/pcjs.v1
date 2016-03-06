@@ -183,7 +183,7 @@
 			<xsl:choose>
 				<xsl:when test="@pos = 'left'">float:left;</xsl:when>
 				<xsl:when test="@pos = 'right'">float:right;</xsl:when>
-				<xsl:when test="@pos = 'center'">margin:0 auto;</xsl:when>
+				<xsl:when test="@pos = 'center'">margin:0 auto;clear:both;</xsl:when>
 				<xsl:when test="@pos">position:<xsl:value-of select="@pos"/>;</xsl:when>
 				<xsl:when test="$left != '' or $top != ''">position:relative;</xsl:when>
 				<xsl:otherwise/>
@@ -349,11 +349,16 @@
 				<xsl:if test="@label"><xsl:text> </xsl:text><xsl:value-of select="$APPCLASS"/><xsl:text>-label</xsl:text></xsl:if>
 			</xsl:variable>
 			<xsl:variable name="labelWidth">
-				<xsl:if test="@labelwidth">width:<xsl:value-of select="@labelwidth"/>;</xsl:if>
+				<xsl:choose>
+					<xsl:when test="@labelwidth">width:<xsl:value-of select="@labelwidth"/>;</xsl:when>
+					<xsl:when test="@labelWidth">width:<xsl:value-of select="@labelWidth"/>;</xsl:when>
+					<xsl:otherwise/>
+				</xsl:choose>
 			</xsl:variable>
 			<xsl:variable name="labelStyle">
 				<xsl:choose>
 					<xsl:when test="@labelstyle"><xsl:value-of select="@labelstyle"/></xsl:when>
+					<xsl:when test="@labelStyle"><xsl:value-of select="@labelStyle"/></xsl:when>
 					<xsl:otherwise>text-align:right;</xsl:otherwise>
 				</xsl:choose>
 			</xsl:variable>
@@ -559,24 +564,28 @@
 		<xsl:variable name="autoStart">
 			<xsl:choose>
 				<xsl:when test="@autostart"><xsl:value-of select="@autostart"/></xsl:when>
+				<xsl:when test="@autoStart"><xsl:value-of select="@autoStart"/></xsl:when>
 				<xsl:otherwise>null</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
 		<xsl:variable name="csStart">
 			<xsl:choose>
 				<xsl:when test="@csstart"><xsl:value-of select="@csstart"/></xsl:when>
+				<xsl:when test="@csStart"><xsl:value-of select="@csStart"/></xsl:when>
 				<xsl:otherwise>-1</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
 		<xsl:variable name="csInterval">
 			<xsl:choose>
 				<xsl:when test="@csinterval"><xsl:value-of select="@csinterval"/></xsl:when>
+				<xsl:when test="@csInterval"><xsl:value-of select="@csInterval"/></xsl:when>
 				<xsl:otherwise>-1</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
 		<xsl:variable name="csStop">
 			<xsl:choose>
 				<xsl:when test="@csstop"><xsl:value-of select="@csstop"/></xsl:when>
+				<xsl:when test="@csStop"><xsl:value-of select="@csStop"/></xsl:when>
 				<xsl:otherwise>-1</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
@@ -748,12 +757,14 @@
 		<xsl:variable name="charBOL">
 			<xsl:choose>
 				<xsl:when test="@charbol"><xsl:value-of select="@charbol"/></xsl:when>
+				<xsl:when test="@charBOL"><xsl:value-of select="@charBOL"/></xsl:when>
 				<xsl:otherwise>0</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
 		<xsl:variable name="tabSize">
 			<xsl:choose>
 				<xsl:when test="@tabsize"><xsl:value-of select="@tabsize"/></xsl:when>
+				<xsl:when test="@tabSize"><xsl:value-of select="@tabSize"/></xsl:when>
 				<xsl:otherwise>0</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
@@ -938,12 +949,14 @@
 		<xsl:variable name="screenWidth">
 			<xsl:choose>
 				<xsl:when test="@screenwidth"><xsl:value-of select="@screenwidth"/></xsl:when>
+				<xsl:when test="@screenWidth"><xsl:value-of select="@screenWidth"/></xsl:when>
 				<xsl:otherwise>256</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
 		<xsl:variable name="screenHeight">
 			<xsl:choose>
 				<xsl:when test="@screenheight"><xsl:value-of select="@screenheight"/></xsl:when>
+				<xsl:when test="@screenHeight"><xsl:value-of select="@screenHeight"/></xsl:when>
 				<xsl:otherwise>224</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
@@ -968,12 +981,14 @@
 		<xsl:variable name="charCols">
 			<xsl:choose>
 				<xsl:when test="@cols"><xsl:value-of select="@cols"/></xsl:when>
+				<xsl:when test="@charCols"><xsl:value-of select="@charCols"/></xsl:when>
 				<xsl:otherwise>80</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
 		<xsl:variable name="charRows">
 			<xsl:choose>
 				<xsl:when test="@rows"><xsl:value-of select="@rows"/></xsl:when>
+				<xsl:when test="@charRows"><xsl:value-of select="@charRows"/></xsl:when>
 				<xsl:otherwise>25</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
@@ -981,24 +996,28 @@
 			<xsl:choose>
 				<xsl:when test="@charset"><xsl:value-of select="@charset"/></xsl:when>
 				<xsl:when test="@fontrom"><xsl:value-of select="@fontrom"/></xsl:when>
+				<xsl:when test="@fontROM"><xsl:value-of select="@fontROM"/></xsl:when>
 				<xsl:otherwise/>
 			</xsl:choose>
 		</xsl:variable>
 		<xsl:variable name="screenColor">
 			<xsl:choose>
 				<xsl:when test="@screencolor"><xsl:value-of select="@screencolor"/></xsl:when>
+				<xsl:when test="@screenColor"><xsl:value-of select="@screenColor"/></xsl:when>
 				<xsl:otherwise>black</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
 		<xsl:variable name="touchScreen">
 			<xsl:choose>
 				<xsl:when test="@touchscreen"><xsl:value-of select="@touchscreen"/></xsl:when>
+				<xsl:when test="@touchScreen"><xsl:value-of select="@touchScreen"/></xsl:when>
 				<xsl:otherwise/>
 			</xsl:choose>
 		</xsl:variable>
 		<xsl:variable name="autoLock">
 			<xsl:choose>
 				<xsl:when test="@autolock"><xsl:value-of select="@autolock"/></xsl:when>
+				<xsl:when test="@autoLock"><xsl:value-of select="@autoLock"/></xsl:when>
 				<xsl:otherwise>false</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
@@ -1066,12 +1085,14 @@
 		<xsl:variable name="autoPower">
 			<xsl:choose>
 				<xsl:when test="@autopower"><xsl:value-of select="@autopower"/></xsl:when>
+				<xsl:when test="@autoPower"><xsl:value-of select="@autoPower"/></xsl:when>
 				<xsl:otherwise>true</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
 		<xsl:variable name="busWidth">
 			<xsl:choose>
 				<xsl:when test="@buswidth"><xsl:value-of select="@buswidth"/></xsl:when>
+				<xsl:when test="@busWidth"><xsl:value-of select="@busWidth"/></xsl:when>
 				<xsl:otherwise>20</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>

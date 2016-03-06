@@ -42,19 +42,23 @@ Demos
 ---
 Some pre-configured machines are shown below, ready to run BASIC, DOS, Windows 1.01, and assorted non-DOS software.
 
+{% include screenshot.html src="/apps/pc/1981/visicalc/thumbnail.jpg" width="200" height="120" title="IBM PC running VisiCalc" link="/apps/pc/1981/visicalc/" %}
 {% include screenshot.html src="/devices/pc/machine/5150/cga/64kb/donkey/thumbnail.jpg" width="200" height="120" title="IBM PC running DONKEY.BAS" link="/devices/pc/machine/5150/cga/64kb/donkey/" %}
 {% include screenshot.html src="/devices/pc/machine/5160/cga/256kb/demo/thumbnail.jpg" width="200" height="120" title="IBM PC XT w/CGA, 10Mb Hard Drive" link="/devices/pc/machine/5160/cga/256kb/demo/" %}
-{% include screenshot.html src="/devices/pc/machine/5160/cga/256kb/win101/thumbnail.jpg" width="200" height="120" title="IBM PC XT w/CGA, Windows 1.01" link="/devices/pc/machine/5160/cga/256kb/win101/" %}
-{% include screenshot.html src="/devices/pc/machine/5160/ega/640kb/win101/thumbnail.jpg" width="200" height="120" title="IBM PC XT w/EGA, Windows 1.01" link="/devices/pc/machine/5160/ega/640kb/win101/" %}
 {% include screenshot.html src="/disks/pc/os2/ibm/1.0/thumbnail.jpg" width="200" height="120" title="IBM PC AT w/EGA, OS/2 1.0" link="/disks/pc/os2/ibm/1.0/" %}
+{% include screenshot.html src="/devices/pc/machine/5160/cga/256kb/win101/thumbnail.jpg" width="200" height="120" title="IBM PC XT w/CGA, Windows 1.01" link="/devices/pc/machine/5160/cga/256kb/win101/" %}
+{% include screenshot.html src="/disks/pc/windows/1.01/thumbnail.jpg" width="200" height="120" title="IBM PC XT w/EGA, Windows 1.01" link="/disks/pc/windows/1.01/" %}
+{% include screenshot.html src="/disks/pc/windows/3.00/thumbnail.jpg" width="200" height="120" title="IBM PC AT w/EGA, Windows 3.00" link="/disks/pc/windows/3.00/" %}
+{% include screenshot.html src="/disks/pc/windows/3.10/thumbnail.jpg" width="200" height="120" title="IBM PC AT w/VGA, Windows 3.10" link="/disks/pc/windows/3.10/" %}
+{% include screenshot.html src="/disks/pc/windows/win95/4.00.950/thumbnail.jpg" width="200" height="120" title="COMPAQ DeskPro 386, Windows 95" link="/disks/pc/windows/win95/4.00.950/" %}
 {% include screenshot.html src="/disks/pc/cpm/1.1b/thumbnail.jpg" width="200" height="120" title="IBM PC w/MDA, CP/M-86" link="/disks/pc/cpm/1.1b/" %}
 {% include screenshot.html src="/disks/pc/games/microsoft/adventure/thumbnail.jpg" width="200" height="120" title="IBM PC w/MDA, Microsoft Adventure" link="/disks/pc/games/microsoft/adventure/" %}
 {% include screenshot.html src="/disks/pc/games/infocom/zork1/thumbnail.jpg" width="200" height="120" title="IBM PC w/CGA, Zork I" link="/disks/pc/games/infocom/zork1/" %}
 
 Check out the rest of the PCjs [Application](/apps/pc/), [Disk](/disks/pc/), and [Machine](/devices/pc/machine/)
 demos, including an [IBM PC Dual Display System](/devices/pc/machine/5150/dual/64kb/) demo of multiple monitor support,
-and [IBM PC XT "Server Array"](/devices/pc/machine/5160/cga/256kb/array/) and [Windows 1.01 "Server Array"](/devices/pc/machine/5160/ega/640kb/array/)
-demos of multiple machines running side-by-side.
+and "Server Array" demos of multiple [IBM PC XT](/devices/pc/machine/5160/cga/256kb/array/) and
+[Windows 1.01](/devices/pc/machine/5160/ega/640kb/array/) machines running side-by-side.
 
 C1Pjs
 ---

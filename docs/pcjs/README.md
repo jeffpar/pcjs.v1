@@ -82,7 +82,7 @@ Next, we can add a Floppy Disk Controller (FDC) component.  And since we want to
 disks at will, we'll include some UI controls.
 
 	<machine id="ibm" class="pc" width="720px">
-	    <fdc id="fdcNEC" automount="{A: {name: 'PC-DOS 1.0', path: 'pcdos-1.00.json'}}">
+	    <fdc id="fdcNEC" autoMount="{A: {name: 'PC-DOS 1.0', path: 'pcdos-1.00.json'}}">
 	        <control type="container">
 	            <control type="list" class="input" binding="listDrives"/>
 	            <control type="list" class="input" binding="listDisks">

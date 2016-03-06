@@ -3,8 +3,9 @@ layout: page
 title: Multitasking MS-DOS 4.00
 permalink: /disks/pc/dos/microsoft/4.0M/
 machines:
-  - type: pc-dbg
+  - type: pc
     id: ibm5160
+    debugger: true
     config: /devices/pc/machine/5160/cga/640kb/dos400m/machine.xml
 ---
 

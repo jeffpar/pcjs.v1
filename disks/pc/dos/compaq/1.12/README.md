@@ -6,7 +6,7 @@ machines:
   - type: pc
     id: ibm5150-compaq112
     config: /devices/pc/machine/5150/mda/64kb/machine.xml
-    automount:
+    autoMount:
       A:
         path: /disks/pc/dos/compaq/1.12/COMPAQ-DOS112.json
 ---

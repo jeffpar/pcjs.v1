@@ -1091,6 +1091,10 @@ Computer.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
         return true;
 
     case "save":
+        if (str.endsWith(web.getHost(), "pcjs.org")) {
+            control.style.display = "none";
+            return false;
+        }
         this.bindings[sBinding] = control;
         control.onclick = function onClickSave() {
             var sUserID = computer.queryUserID(true);
@@ -1154,6 +1158,11 @@ Computer.prototype.queryUserID = function(fPrompt)
         sUserID = web.getLocalStorageItem(Computer.STATE_USERID);
         if (sUserID !== undefined) {
             if (!sUserID && fPrompt) {
+                /*
+                 * NOTE: Warning the user here that "Save" operations are not currently supported by pcjs.org is
+                 * merely a precaution, because ordinarily, setBinding() should have already determined if we are
+                 * running from pcjs.org and disabled any "Save" button.
+                 */
                 sUserID = web.promptUser("Saving machine states on the pcjs.org server is currently unsupported.\n\nIf you're running your own server, enter your user ID below.");
                 if (sUserID) {
                     sUserID = this.verifyUserID(sUserID);

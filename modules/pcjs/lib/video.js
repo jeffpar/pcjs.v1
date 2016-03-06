@@ -3172,15 +3172,16 @@ Video.prototype.captureTouch = function(nTouchConfig)
                 function onTouchEnd(event) { video.onTouchEnd(event); },
                 false                   // we'll specify false for the 'useCapture' parameter for now...
             );
+
+            /*
+             * Using desktop mouse events to simulate touch events should only be enabled as needed.
+             *
             if (DEBUG) {
-                /*
-                 */
                 control.addEventListener(
                     'mousedown',
                     function onMouseDown(event) { video.onTouchStart(event); },
                     false               // we'll specify false for the 'useCapture' parameter for now...
                 );
-                /*
                 control.addEventListener(
                     'mousemove',
                     function onMouseMove(event) { video.onTouchMove(event); },
@@ -3191,17 +3192,21 @@ Video.prototype.captureTouch = function(nTouchConfig)
                     function onMouseUp(event) { video.onTouchEnd(event); },
                     false               // we'll specify false for the 'useCapture' parameter for now...
                 );
-                 */
             }
+            */
+
             // this.log("touch events captured");
+
             this.nTouchConfig = nTouchConfig;
             this.xTouch = this.yTouch = this.timeTouch = -1;
+
             /*
              * As long as fTouchDefault is false, we call preventDefault() on every touch event, to prevent
              * the page from moving/scrolling while the canvas is processing touch events.  However, there must
              * also be exceptions to permit the soft keyboard to activate; see processTouchEvent() for details.
              */
             this.fTouchDefault = false;
+
             /*
              * I also need to come up with some rules for when the simulated mouse's primary button stays down.
              * Let's try setting a timeout handler whenever a touchstart is received, which we'll immediately cancel

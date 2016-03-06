@@ -109,11 +109,11 @@ function CPU(parmsCPU, nCyclesDefault)
     this.aFlags.fDisplayLiveRegs = false;
 
     /*
-     * Provide a power-saving URL-based way of overriding the 'autostart' setting;
-     * if an "autostart" parameter is specified on the URL, anything other than "true"
+     * Provide a power-saving URL-based way of overriding the 'autoStart' setting;
+     * if an "autoStart" parameter is specified on the URL, anything other than "true"
      * or "false" is treated as the null setting (see above for details).
      */
-    var sAutoStart = Component.parmsURL['autostart'];
+    var sAutoStart = Component.parmsURL['autostart'] || Component.parmsURL['autoStart'];
     if (sAutoStart !== undefined) {
         this.aFlags.fAutoStart = (sAutoStart == "true"? true : (sAutoStart  == "false"? false : null));
     }
@@ -320,8 +320,15 @@ CPU.prototype.powerDown = function(fSave, fShutdown)
  */
 CPU.prototype.autoStart = function()
 {
+    /*
+     * Start running automatically on power-up, assuming there's no Debugger and no "Run" button
+     */
     if (this.aFlags.fAutoStart === true || this.aFlags.fAutoStart === null && (!DEBUGGER || !this.dbg) && this.bindings["run"] === undefined) {
-        this.runCPU();      // start running automatically on power-up, assuming there's no Debugger and no "Run" button
+        /*
+         * Now we ALSO set fSetFocus when calling runCPU(), on the assumption that in the "auto-starting" context,
+         * a machine without focus is like a day without sunshine.
+         */
+        this.runCPU(true);
         return true;
     }
     return false;
@@ -385,7 +392,10 @@ CPU.prototype.resetChecksum = function()
     if (this.aFlags.fChecksum) {
         this.aCounts.nChecksum = 0;
         this.aCounts.nCyclesChecksumNext = this.aCounts.nCyclesChecksumStart - this.nTotalCycles;
-        // this.aCounts.nCyclesChecksumNext = this.aCounts.nCyclesChecksumStart + this.aCounts.nCyclesChecksumInterval - (this.nTotalCycles % this.aCounts.nCyclesChecksumInterval);
+        /*
+         *  this.aCounts.nCyclesChecksumNext = this.aCounts.nCyclesChecksumStart + this.aCounts.nCyclesChecksumInterval -
+         *      (this.nTotalCycles % this.aCounts.nCyclesChecksumInterval);
+         */
         return true;
     }
     return false;
@@ -513,7 +523,16 @@ CPU.prototype.updateVideo = function(fForce)
  */
 CPU.prototype.setFocus = function()
 {
-    if (this.aVideo.length) this.aVideo[0].setFocus();
+    if (this.aVideo.length) {
+        /*
+         * This seems to be recommended work-around to prevent the browser from scrolling the focused element
+         * into view.  The CPU is not a visual component, so when the CPU wants to set focus, the primary intent
+         * is to ensure that keyboard input is fielded properly.
+         */
+        var x = window.scrollX, y = window.scrollY;
+        this.aVideo[0].setFocus();
+        window.scrollTo(x, y);
+    }
 };
 
 /**
@@ -530,6 +549,7 @@ CPU.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
 {
     var cpu = this;
     var fBound = false;
+
     switch (sBinding) {
     case "power":
     case "reset":
@@ -795,19 +815,20 @@ CPU.prototype.getSpeedTarget = function()
 };
 
 /**
- * setSpeed(nMultiplier, fOnClick)
+ * setSpeed(nMultiplier, fSetFocus)
  *
  * NOTE: This used to return the target speed, in mhz, but no callers appear to care at this point.
  *
  * @this {CPU}
  * @param {number} [nMultiplier] is the new proposed multiplier (reverts to 1 if the target was too high)
- * @param {boolean} [fOnClick] is true if called from a click handler that might have stolen focus
+ * @param {boolean} [fSetFocus] is true to give the CPU focus
  * @return {boolean} true if successful, false if not
+ *
  * @desc Whenever the speed is changed, the running cycle count and corresponding start time must be reset,
  * so that the next effective speed calculation obtains sensible results.  In fact, when runCPU() initially calls
  * setSpeed() with no parameters, that's all this function does (it doesn't change the current speed setting).
  */
-CPU.prototype.setSpeed = function(nMultiplier, fOnClick)
+CPU.prototype.setSpeed = function(nMultiplier, fSetFocus)
 {
     var fSuccess = false;
     if (nMultiplier !== undefined) {
@@ -828,7 +849,7 @@ CPU.prototype.setSpeed = function(nMultiplier, fOnClick)
             if (controlSpeed) controlSpeed.textContent = sSpeed;
             this.println("target speed: " + sSpeed);
         }
-        if (fOnClick) this.setFocus();
+        if (fSetFocus) this.setFocus();
     }
     this.addCycles(this.nRunCycles);
     this.nRunCycles = 0;
@@ -985,12 +1006,12 @@ CPU.prototype.calcRemainingTime = function()
 };
 
 /**
- * runCPU(fOnClick)
+ * runCPU(fSetFocus)
  *
  * @this {CPU}
- * @param {boolean} [fOnClick] is true if called from a click handler that might have stolen focus
+ * @param {boolean} [fSetFocus] is true to give the CPU focus
  */
-CPU.prototype.runCPU = function(fOnClick)
+CPU.prototype.runCPU = function(fSetFocus)
 {
     if (!this.setBusy(true)) {
         this.updateCPU();
@@ -998,7 +1019,7 @@ CPU.prototype.runCPU = function(fOnClick)
         return;
     }
 
-    this.startCPU(fOnClick);
+    this.startCPU(fSetFocus);
 
     /*
      *  calcStartTime() initializes the cycle counter and timestamp for this runCPU() invocation, and optionally

@@ -2,10 +2,18 @@
 layout: page
 title: Microsoft Windows 3.00
 permalink: /disks/pc/windows/3.00/
+machines:
+  - type: pc
+    id: ibm5170-pcdos320
+    config: /devices/pc/machine/5170/ega/1152kb/win300/machine.xml
 ---
 
 Microsoft Windows 3.00
 ---
+
+The PCjs machine below is running Microsoft Windows 3.00 on an IBM PC AT with PC-DOS 3.20.
+
+{% include machine.html id="ibm5170-pcdos320" %}
 
 Directory listings of the five 1.2Mb distribution diskettes are provided below.
 

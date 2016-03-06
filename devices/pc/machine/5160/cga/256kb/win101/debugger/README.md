@@ -5,8 +5,9 @@ permalink: /devices/pc/machine/5160/cga/256kb/win101/debugger/
 redirect_from:
   - /configs/pc/machines/5160/cga/256kb/win101/debugger/
 machines:
-  - type: pc-dbg
+  - type: pc
     id: ibm5160
+    debugger: true
 ---
 
 IBM PC XT with Debugger running Windows 1.01

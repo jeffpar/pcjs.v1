@@ -48,7 +48,7 @@ would happily report:
 but it would NEVER display anything but deployment information.  Instead, I had to browse the log files using Azure's
 "FTP DIAGNOSTIC LOGS" link on the web portal -- which presents the logs as one big, ugly, fragmented mess:
  
-![Azure Logs](/blog/images/iisnode_logs.png)
+![Azure Logs](/blog/images/iisnode-logs.jpg)
 
 Sigh. But at least the site is up and fully operational now.
 

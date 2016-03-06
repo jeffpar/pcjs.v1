@@ -2,10 +2,18 @@
 layout: page
 title: Microsoft Windows 3.10
 permalink: /disks/pc/windows/3.10/
+machines:
+  - type: pc
+    id: ibm5170-pcdos330
+    config: /devices/pc/machine/5170/vga/2048kb/win310/machine.xml
 ---
 
 Microsoft Windows 3.10
 ---
+
+The PCjs machine below is running Microsoft Windows 3.10 on an IBM PC AT with PC-DOS 3.30.
+
+{% include machine.html id="ibm5170-pcdos330" %}
 
 Directory listings of the seven 1.2Mb distribution diskettes are provided below.
 

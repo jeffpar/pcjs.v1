@@ -5,8 +5,9 @@ date: 2015-12-27 11:00:00
 category: OS/2
 permalink: /blog/2015/12/27/
 machines:
-  - type: pc-dbg
+  - type: pc
     id: ibm5170
+    debugger: true
     config: /disks/pc/os2/ibm/1.0/machine.xml
 ---
 

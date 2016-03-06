@@ -32,19 +32,23 @@ Demos
 ---
 Some pre-configured machines are shown below, ready to run BASIC, DOS, Windows 1.01, and assorted non-DOS software.
 
+![IBM PC running VisiCalc](/apps/pc/1981/visicalc/thumbnail.jpg "link:/apps/pc/1981/visicalc/:200:120")
 ![IBM PC running DONKEY.BAS](/devices/pc/machine/5150/cga/64kb/donkey/thumbnail.jpg "link:/devices/pc/machine/5150/cga/64kb/donkey/:200:120")
 ![IBM PC XT w/CGA, 10Mb Hard Drive](/devices/pc/machine/5160/cga/256kb/demo/thumbnail.jpg "link:/devices/pc/machine/5160/cga/256kb/demo/:200:120")
-![IBM PC XT w/CGA, Windows 1.01](/devices/pc/machine/5160/cga/256kb/win101/thumbnail.jpg "link:/devices/pc/machine/5160/cga/256kb/win101/:200:120")
-![IBM PC XT w/EGA, Windows 1.01](/devices/pc/machine/5160/ega/640kb/win101/thumbnail.jpg "link:/devices/pc/machine/5160/ega/640kb/win101/:200:120")
 ![IBM PC AT w/EGA, OS/2 1.0](/disks/pc/os2/ibm/1.0/thumbnail.jpg "link:/disks/pc/os2/ibm/1.0/:200:120")
+![IBM PC XT w/CGA, Windows 1.01](/devices/pc/machine/5160/cga/256kb/win101/thumbnail.jpg "link:/devices/pc/machine/5160/cga/256kb/win101/:200:120")
+![IBM PC XT w/EGA, Windows 1.01](/disks/pc/windows/1.01/thumbnail.jpg "link:/disks/pc/windows/1.01/:200:120")
+![IBM PC AT w/EGA, Windows 3.00](/disks/pc/windows/3.00/thumbnail.jpg "link:/disks/pc/windows/3.00/:200:120")
+![IBM PC AT w/VGA, Windows 3.10](/disks/pc/windows/3.10/thumbnail.jpg "link:/disks/pc/windows/3.10/:200:120")
+![COMPAQ DeskPro 386, Windows 95](/disks/pc/windows/win95/4.00.950/thumbnail.jpg "link:/disks/pc/windows/win95/4.00.950/:200:120")
 ![IBM PC w/MDA, CP/M-86](/disks/pc/cpm/1.1b/thumbnail.jpg "link:/disks/pc/cpm/1.1b/:200:120")
 ![IBM PC w/MDA, Microsoft Adventure](/disks/pc/games/microsoft/adventure/thumbnail.jpg "link:/disks/pc/games/microsoft/adventure/:200:120")
 ![IBM PC w/CGA, Zork I](/disks/pc/games/infocom/zork1/thumbnail.jpg "link:/disks/pc/games/infocom/zork1/:200:120")
 
 Check out the rest of the PCjs [Application](/apps/pc/), [Disk](/disks/pc/), and [Machine](/devices/pc/machine/)
 demos, including an [IBM PC Dual Display System](/devices/pc/machine/5150/dual/64kb/) demo of multiple monitor support,
-and [IBM PC XT "Server Array"](/devices/pc/machine/5160/cga/256kb/array/) and [Windows 1.01 "Server Array"](/devices/pc/machine/5160/ega/640kb/array/)
-demos of multiple machines running side-by-side.
+and "Server Array" demos of multiple [IBM PC XT](/devices/pc/machine/5160/cga/256kb/array/) and
+[Windows 1.01](/devices/pc/machine/5160/ega/640kb/array/) machines running side-by-side.
 
 C1Pjs
 ---

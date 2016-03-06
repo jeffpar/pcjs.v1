@@ -22,7 +22,7 @@ Creates an instance of the Floppy Disk Controller (FDC) component. The FDC is re
 
 Attributes
 ---
- * *automount* (optional)
+ * *autoMount* (optional)
  
 	This is an object definition containing one or more drive-letter properties.
 	Each drive-letter property should contain, in turn, another object definition with 'name' and 'path' properties.
@@ -53,7 +53,7 @@ Bindings
 
 Example
 ---
-	<fdc id="fdcNEC" automount="'{A: {name: "PC-DOS 1.0", path: "pcdos-1.00.json"}}'">
+	<fdc id="fdcNEC" autoMount="'{A: {name: "PC-DOS 1.0", path: "pcdos-1.00.json"}}'">
     	<control type="container">
     		<control type="list" class="input" binding="listDrives"/>
     		<control type="list" class="input" binding="listDisks">

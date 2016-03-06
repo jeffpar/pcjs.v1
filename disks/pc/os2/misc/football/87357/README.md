@@ -4,9 +4,10 @@ title: "OS/2 FOOTBALL Boot Disk (v4.41.00)"
 permalink: /disks/pc/os2/misc/football/87357/
 machines:
   - id: deskpro386
-    type: pc-dbg
+    type: pc
+    debugger: true
     config: /devices/pc/machine/compaq/deskpro386/ega/2048kb/machine.xml
-    automount:
+    autoMount:
       A:
         path: /disks/pc/os2/misc/football/FOOTBALL-44100.json
 ---
