@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<panel id="panel" pos="center" width="720px" padding="8px">
+<panel id="panel" width="100%" padding="8px">
 	<name>Control Panel</name>
 	<control type="container" class="pcjs-textarea" width="58%" padbottom="8px" padright="8px">
 		<control type="textarea" binding="print" width="100%" height="260px" pos="relative" padbottom="4px" style="resize:vertical;"/>

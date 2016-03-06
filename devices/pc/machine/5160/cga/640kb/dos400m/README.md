@@ -6,8 +6,9 @@ redirect_from:
   - /configs/pc/machines/5160/cga/640kb/dos400m/
   - /videos/pcjs/
 machines:
-  - type: pc-dbg
+  - type: pc
     id: ibm5160
+    debugger: true
 ---
 
 Multitasking MS-DOS 4.00

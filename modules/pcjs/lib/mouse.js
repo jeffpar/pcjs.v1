@@ -557,17 +557,20 @@ Mouse.prototype.clickMouse = function(iButton, fDown)
             if (this.fButton1 != fDown) {
                 this.fButton1 = fDown;
                 this.sendPacket(sDiag);
+                return;
             }
             break;
         case Mouse.BUTTON.RIGHT:
             if (this.fButton2 != fDown) {
                 this.fButton2 = fDown;
                 this.sendPacket(sDiag);
+                return;
             }
             break;
         default:
             break;
         }
+        this.printMessage(sDiag + ": ignored");
     }
 };
 

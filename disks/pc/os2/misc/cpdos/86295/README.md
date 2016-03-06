@@ -4,9 +4,10 @@ title: OS/2 CP-DOS Boot Disk (v7.68)
 permalink: /disks/pc/os2/misc/cpdos/86295/
 machines:
   - id: ibm5170
-    type: pc-dbg
+    type: pc
+    debugger: true
     config: /devices/pc/machine/5170/ega/1152kb/rev3/debugger/machine.xml
-    automount:
+    autoMount:
       A:
         path: /disks/pc/os2/misc/cpdos/286DOS-76800.json
 ---

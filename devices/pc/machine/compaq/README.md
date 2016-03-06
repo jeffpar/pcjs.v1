@@ -10,22 +10,22 @@ COMPAQ Machines
 This is an evolving (and roughly chronological) list of COMPAQ machines from the 1980s, which PCjs may eventually
 support:
 
- + [COMPAQ Portable](#compaq-portable)
- + [COMPAQ [Portable] Plus](#compaq-portable-plus-aka-compaq-plus)
- + [COMPAQ DeskPro](#compaq-deskpro)
- + [COMPAQ DeskPro 286](#compaq-deskpro-286)
- + [COMPAQ Portable 286](#compaq-portable-286)
- + [COMPAQ Portable II](#compaq-portable-ii)
- + [COMPAQ DeskPro 386](#compaq-deskpro-386)
- + [COMPAQ Portable III](#compaq-portable-iii)
- + COMPAQ DeskPro 386/20
- + [COMPAQ Portable 386](#compaq-portable-386)
- + COMPAQ DeskPro 386/25
- + COMPAQ DeskPro 386s
- + [COMPAQ DeskPro 386/20e](#compaq-38620e)
- + [COMPAQ SLT Series](#compaq-slt-series) (SLT/286)
- + COMPAQ DeskPro 386/33
- + [COMPAQ LTE Series](#compaq-lte-series) (LTE and LTE/286)
+ - [COMPAQ Portable](#compaq-portable)
+ - [COMPAQ [Portable] Plus](#compaq-portable-plus-aka-compaq-plus)
+ - [COMPAQ DeskPro](#compaq-deskpro)
+ - [COMPAQ DeskPro 286](#compaq-deskpro-286)
+ - [COMPAQ Portable 286](#compaq-portable-286)
+ - [COMPAQ Portable II](#compaq-portable-ii)
+ - [COMPAQ DeskPro 386](#compaq-deskpro-386)
+ - [COMPAQ Portable III](#compaq-portable-iii)
+ - COMPAQ DeskPro 386/20
+ - [COMPAQ Portable 386](#compaq-portable-386)
+ - COMPAQ DeskPro 386/25
+ - COMPAQ DeskPro 386s
+ - [COMPAQ DeskPro 386/20e](#compaq-38620e)
+ - [COMPAQ SLT Series](#compaq-slt-series) (SLT/286)
+ - COMPAQ DeskPro 386/33
+ - [COMPAQ LTE Series](#compaq-lte-series) (LTE and LTE/286)
 
 At the moment, only the [COMPAQ DeskPro 386](deskpro386/) is supported, but now that we have ROMs for a few other
 COMPAQ machines -- most importantly, their **first** machine, the [COMPAQ Portable](/devices/pc/rom/compaq/bios/portable/) --
@@ -136,7 +136,8 @@ COMPAQ DeskPro 386
 
 Released in late 1986.
 
-PCjs has detailed information about the [DeskPro 386 ROMs](/devices/pc/rom/compaq/bios/deskpro386/) and system boards.
+PCjs has detailed information about the [DeskPro 386 ROMs](/devices/pc/rom/compaq/bios/deskpro386/) and system boards,
+along with a number of [DeskPro 386 Machines](/devices/pc/machine/compaq/deskpro386/).
 
 I also have the hard-to-find **COMPAQ Technical Reference Guide** for the DeskPro 386/25 (Vol. 1), which I'll post
 at a later date.

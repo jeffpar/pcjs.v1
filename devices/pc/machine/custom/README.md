@@ -7,7 +7,7 @@ machines:
     name: Custom PC
     id: custom-pc
     uncompiled: true
-    autopower: false
+    autoPower: false
 build: build-pc
 sitemap: false
 ---

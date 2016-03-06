@@ -5,10 +5,11 @@ date: 2015-01-17 11:00:00
 category: Features
 permalink: /blog/2015/01/17/
 machines:
-  - type: pc-dbg
+  - type: pc
     id: at-ega-1152k-rev3
-    config: /devices/pc/machine/5170/ega/1152kb/rev3/debugger/machine.xml
+    debugger: true
     uncompiled: true
+    config: /devices/pc/machine/5170/ega/1152kb/rev3/debugger/machine.xml
 ---
 
 Most machines on [{{ site.pcjs.domain }}](/) run with a compiled version of PCjs, which is produced
@@ -29,10 +30,11 @@ Here's what a typical Markdown file would look like:
 	---
 	...
 	machines:
-	  - type: pc-dbg
+	  - type: pc
 	    id: at-ega-1152k-rev3
-	    config: /devices/pc/machine/5170/ega/1152kb/rev3/debugger/machine.xml
+	    debugger: true
 	    uncompiled: true
+	    config: /devices/pc/machine/5170/ega/1152kb/rev3/debugger/machine.xml
 	---
 	...
 	{% include machine.html id="at-ega-1152k-rev3" %}

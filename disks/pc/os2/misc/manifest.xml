@@ -20,7 +20,4 @@
 	<disk id="disk06" size="1228800" chs="80:2:15" img="cpdos/archive/SIZZLE-76818-19870107-DEBUG.img" href="/disks/pc/os2/misc/cpdos/SIZZLE-76818-19870107-DEBUG.json" md5="9c9270b83aea4798f2618d38465f56b8" md5json="bd6baaa820d6ff254f81ec7d7ff07e67">
 		<name>OS/2 SIZZLE (v7.68.18 DEBUG)</name>
 	</disk>
-	<disk id="disk07" size="1228800" chs="80:2:15" img="cruiser/archive/OS2SDK-048014.100.img" href="/disks/pc/os2/misc/cruiser/OS2SDK-048014.100.json" md5="348ee09ced86af5e3211fccff87113c5" md5json="41a64f6ee27fd064c9ae7c04d9eecb88">
-		<name>OS/2 CRUISER (048014.100)</name>
-	</disk>
 </manifest>

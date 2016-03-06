@@ -3,8 +3,9 @@ layout: page
 title: IBM OS/2 1.0
 permalink: /disks/pc/os2/ibm/1.0/
 machines:
-  - type: pc-dbg
+  - type: pc
     id: ibm5170
+    debugger: true
 ---
 
 IBM OS/2 1.0

@@ -6,7 +6,7 @@ machines:
   - type: pc
     id: ibm5170-msdos320
     config: /devices/pc/machine/5170/ega/640kb/rev1/machine.xml
-    automount:
+    autoMount:
       A:
         name: MS-DOS 3.20 (Disk 1)
         path: /disks/pc/dos/microsoft/3.20/MSDOS320-DISK1.json

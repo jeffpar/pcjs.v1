@@ -9,11 +9,11 @@
 	<rom id="romBASIC" addr="0xf6000" size="0x8000" file="/devices/pc/rom/5160/basic/BASIC110.json"/>
 	<rom id="romBIOS" addr="0xfe000" size="0x2000" file="/devices/pc/rom/5160/bios/1982-11-08/XTBIOS-REV1.json"/>
 	<video ref="/devices/pc/video/ibm/ega/ibm-ega-128kb-autolockfs.xml"/>
+	<fdc ref="/disks/pc/compiled/library.xml"/>
 	<keyboard ref="/devices/pc/keyboard/keyboard-minimal.xml"/>
 	<cpu id="cpu8088" model="8088">
 		<control type="button" binding="setSpeed">Fast</control>
 	</cpu>
-	<fdc ref="/disks/pc/compiled/library.xml" pos="right"/>
 	<chipset id="chipset" model="5160" sw1="01001101"/>
 	<hdc ref="/disks/pc/fixed/win101-ega.xml"/>
 	<serial id="com2" adapter="2"/>

@@ -61,22 +61,22 @@ Looking ahead to the day when PCjs will be able to simulate the original COMPAQ 
 idea to create my own roughly chronological list of [COMPAQ Machines](/devices/pc/machine/compaq/) from the 1980s,
 since they are all machines I would like to see PCjs eventually support:
 
- + COMPAQ Portable
- + COMPAQ [Portable] Plus
- + COMPAQ DeskPro
- + COMPAQ DeskPro 286
- + COMPAQ Portable 286
- + COMPAQ Portable II
- + [COMPAQ DeskPro 386](/devices/pc/machine/compaq/deskpro386/)
- + COMPAQ Portable III
- + COMPAQ DeskPro 386/20
- + COMPAQ Portable 386
- + COMPAQ DeskPro 386/25
- + COMPAQ DeskPro 386s
- + COMPAQ DeskPro 386/20e
- + COMPAQ SLT Series (SLT/286)
- + COMPAQ DeskPro 386/33
- + COMPAQ LTE Series (LTE and LTE/286)
+ - COMPAQ Portable
+ - COMPAQ [Portable] Plus
+ - COMPAQ DeskPro
+ - COMPAQ DeskPro 286
+ - COMPAQ Portable 286
+ - COMPAQ Portable II
+ - [COMPAQ DeskPro 386](/devices/pc/machine/compaq/deskpro386/)
+ - COMPAQ Portable III
+ - COMPAQ DeskPro 386/20
+ - COMPAQ Portable 386
+ - COMPAQ DeskPro 386/25
+ - COMPAQ DeskPro 386s
+ - COMPAQ DeskPro 386/20e
+ - COMPAQ SLT Series (SLT/286)
+ - COMPAQ DeskPro 386/33
+ - COMPAQ LTE Series (LTE and LTE/286)
 
 It's hard to stop at this point, because COMPAQ produced other innovative 80386-based systems, like those in the LTE
 and LTE Lite series.  But I think I need to stick to my original plan and draw a line at the end of the 1980s.

@@ -5,8 +5,9 @@ date: 2015-09-21 11:00:00
 category: Windows 95
 permalink: /blog/2015/09/21/
 machines:
-  - type: pc-dbg
+  - type: pc
     id: deskpro386
+    debugger: true
     config: /devices/pc/machine/compaq/deskpro386/vga/4096kb/machine.xml
 ---
 

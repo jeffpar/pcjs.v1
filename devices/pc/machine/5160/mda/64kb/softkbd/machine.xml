@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.20.9/machine.xsl"?>
-<machine id="ibm5160" class="pc" border="1" width="1000px" pos="center" background="white">
-	<name>IBM PC XT (Model 5160), MDA, 64K, 10Mb Drive</name>
+<machine id="ibm5160" class="pc" border="1" pos="center" background="white">
+	<name pos="center">IBM PC XT (Model 5160), MDA, 64K, 10Mb Drive</name>
 	<computer id="xt-mda-64k" name="IBM PC XT"/>
 	<cpu id="cpu8088" model="8088"/>
 	<ram id="ramLow" addr="0x00000"/>
@@ -9,10 +9,10 @@
 	<rom id="romBASIC" addr="0xf6000" size="0x8000" file="/devices/pc/rom/5160/basic/BASIC110.json"/>
 	<rom id="romBIOS" addr="0xfe000" size="0x2000" file="/devices/pc/rom/5160/bios/1982-11-08/XTBIOS-REV1.json"/>
 	<video ref="/devices/pc/video/ibm/mda/ibm-mda.xml"/>
+	<fdc ref="/disks/pc/samples.xml"/>
 	<keyboard ref="/devices/pc/keyboard/keyboard-us83.xml"/>
 	<debugger id="debugger"/>
 	<panel ref="/devices/pc/panel/default.xml"/>
-	<fdc ref="/disks/pc/samples.xml" width="280px"/>
 	<chipset id="chipset" model="5160" sw1="01110001" pos="left" padleft="8px" padbottom="8px">
 		<control type="switches" label="SW1" binding="sw1" left="0px"/>
 		<control type="description" binding="swdesc" left="0px"/>

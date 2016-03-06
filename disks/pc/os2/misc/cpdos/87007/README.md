@@ -4,9 +4,10 @@ title: OS/2 SIZZLE Boot Disk (v7.68.18)
 permalink: /disks/pc/os2/misc/cpdos/87007/
 machines:
   - id: ibm5170
-    type: pc-dbg
+    type: pc
+    debugger: true
     config: /devices/pc/machine/5170/ega/1152kb/rev3/debugger/machine.xml
-    automount:
+    autoMount:
       A:
         path: /disks/pc/os2/misc/cpdos/SIZZLE-76818-19870107.json
 ---

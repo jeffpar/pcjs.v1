@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<video id="videoVGA" model="vga" screenwidth="640" screenheight="480" scale="true" touchscreen="mouse" autolock="true" pos="center" padding="8px">
+<video id="videoVGA" model="vga" screenwidth="1280" screenheight="960" scale="true" touchscreen="mouse" autolock="true" pos="center" padding="8px">
 	<menu>
 		<title>VGA Color Display</title>
 		<control type="container" pos="right">

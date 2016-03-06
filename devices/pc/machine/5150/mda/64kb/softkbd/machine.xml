@@ -8,10 +8,10 @@
 	<rom id="romBASIC" addr="0xf6000" size="0x8000" file="/devices/pc/rom/5150/basic/BASIC100.json"/>
 	<rom id="romBIOS" addr="0xfe000" size="0x2000" file="/devices/pc/rom/5150/bios/1981-04-24/PCBIOS-REV1.json"/>
 	<video ref="/devices/pc/video/ibm/mda/ibm-mda.xml"/>
+	<fdc ref="/disks/pc/samples.xml"/>
 	<keyboard ref="/devices/pc/keyboard/keyboard-us83.xml"/>
 	<debugger id="debugger"/>
 	<panel ref="/devices/pc/panel/wide.xml"/>
-	<fdc ref="/disks/pc/samples.xml" width="280px"/>
 	<chipset id="chipset" model="5150" sw1="01000001" sw2="11110000" pos="left" padleft="8px" padbottom="8px">
 		<control type="switches" label="SW1" binding="sw1" left="0px"/>
 		<control type="switches" label="SW2" binding="sw2" left="0px"/>

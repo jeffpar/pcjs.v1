@@ -328,6 +328,7 @@ MarkOut.aHTMLEntities = {
  *      'id' (eg, "ibm5150")
  *      'name' (eg, "IBM PC (Model 5150) with Monochrome Display")
  *      'type' (eg, "pc" or "pc-dbg")
+ *      'debugger' (eg, true)
  *      'config' (eg, "machine.xml")
  *      'template' (eg, "machine.xsl")
  *      'uncompiled' (eg, true)
@@ -355,7 +356,7 @@ MarkOut.aHTMLEntities = {
 MarkOut.aFMBooleanMachineProps = {
     'autopower': "autoPower"
 };
-MarkOut.aFMReservedMachineProps = ['id', 'name', 'type', 'config', 'template', 'uncompiled', 'automount', 'parms'];
+MarkOut.aFMReservedMachineProps = ['id', 'name', 'type', 'debugger', 'config', 'template', 'uncompiled', 'automount', 'parms'];
 
 /**
  * convertMD()
@@ -1121,11 +1122,11 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
         if (!this.fMachineXML && this.aMachineDefs[sMachineID]) {
             var machine = this.aMachineDefs[sMachineID];
             sMachine = machine['type'] || "pc";
-            sMachineOptions = (sMachine.indexOf("-dbg") > 0? "debugger" : "");
+            sMachineOptions = ((sMachine.indexOf("-dbg") > 0 || machine['debugger'] == "true")? "debugger" : "");
             sMachine = sMachine.replace("-dbg", "").toUpperCase();
             sMachineXMLFile = machine['config'] || "machine.xml";
             sMachineXSLFile = machine['template'] || "";
-            sMachineVersion = (machine['uncompiled'] && machine['uncompiled'] == "true"? "uncompiled" : "");
+            sMachineVersion = ((machine['uncompiled'] == "true")? "uncompiled" : "");
             sMachineParms = machine['parms'] || "";
             sReplacement = machine['name'] || "Embedded PC";
             sReplacement = "[" + sReplacement + "](" + sMachineXMLFile + ' "' + sMachine + 'js!' + sMachineID + '!' + sMachineXSLFile + '!!' + sMachineOptions + '!' + sMachineParms + '")';

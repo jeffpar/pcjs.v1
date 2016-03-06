@@ -3,8 +3,9 @@ layout: page
 title: "Microsoft Windows 95 (First Retail Release)"
 permalink: /disks/pc/windows/win95/4.00.950/
 machines:
-  - type: pc-dbg
+  - type: pc
     id: deskpro386
+    debugger: true
     config: /devices/pc/machine/compaq/deskpro386/vga/4096kb/machine.xml
 ---
 
