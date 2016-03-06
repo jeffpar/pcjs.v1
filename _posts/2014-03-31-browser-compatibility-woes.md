@@ -24,7 +24,7 @@ I've done what testing I can with the Android SDK and the "Android Virtual Devic
 looks fine -- you click/tap on the PC's screen, the soft keyboard pops up, and typing works.  So I guess Silk is just
 an outlier.  I'm not sure what I'll do about it yet (or even what I can do).
 
-![PCjs in AVD](/blog/images/avd_tablet.png)
+![PCjs in AVD](/blog/images/avd-tablet.jpg)
 
 ---
 
