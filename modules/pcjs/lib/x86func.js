@@ -572,6 +572,9 @@ X86.fnCMPb = function(dst, src)
 {
     var b = (dst - src)|0;
     this.setArithResult(dst, src, b, X86.RESULT.BYTE | X86.RESULT.ALL, true);
+    /*
+     * TODO: Verify that it makes sense for any fnCMPb() callers to be setting regEAWrite...
+     */
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesArithRR : this.cycleCounts.nOpCyclesCompareRM) : this.cycleCounts.nOpCyclesArithRM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;
@@ -589,6 +592,9 @@ X86.fnCMPw = function(dst, src)
 {
     var w = (dst - src)|0;
     this.setArithResult(dst, src, w, this.typeData | X86.RESULT.ALL, true);
+    /*
+     * TODO: Verify that it makes sense for any fnCMPw() callers to be setting regEAWrite...
+     */
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesArithRR : this.cycleCounts.nOpCyclesCompareRM) : this.cycleCounts.nOpCyclesArithRM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;
@@ -1518,6 +1524,48 @@ X86.fnMOVX = function(dst, src)
 };
 
 /**
+ * fnMOVXb(dst, src)
+ *
+ * Helper for opMOVSXb() and opMOVZXb()
+ *
+ * @this {X86CPU}
+ * @param {number} dst (current value, ignored)
+ * @param {number} src (new value)
+ * @return {number} dst (updated value, from src)
+ */
+X86.fnMOVXb = function(dst, src)
+{
+    /*
+     * The ModRegByte handlers update the registers in the 1st column, but we need to update those in the 2nd column.
+     *
+     *      000:    AL      ->      000:    AX
+     *      001:    CL      ->      001:    CX
+     *      010:    DL      ->      010:    DX
+     *      011:    BL      ->      011:    BX
+     *      100:    AH      ->      100:    SP
+     *      101:    CH      ->      101:    BP
+     *      110:    DH      ->      110:    SI
+     *      111:    BH      ->      111:    DI
+     */
+    var reg = (this.bModRM & 0x38) >> 3;
+    switch(reg) {
+    case 0x4:
+        this.regXX = this.regEAX;
+        break;
+    case 0x5:
+        this.regXX = this.regECX;
+        break;
+    case 0x6:
+        this.regXX = this.regEDX;
+        break;
+    case 0x7:
+        this.regXX = this.regEBX;
+        break;
+    }
+    return src;
+};
+
+/**
  * fnMOVn(dst, src)
  *
  * @this {X86CPU}
@@ -1532,15 +1580,50 @@ X86.fnMOVn = function(dst, src)
 };
 
 /**
- * fnMOVxx(dst, src)
+ * fnMOVwsr(dst, src)
  *
  * @this {X86CPU}
  * @param {number} dst (current value, ignored)
  * @param {number} src (new value)
- * @return {number} dst (src is overridden, replaced with regXX, as specified by opMOVwsr() or opMOVrc())
+ * @return {number} dst
  */
-X86.fnMOVxx = function(dst, src)
+X86.fnMOVwsr = function(dst, src)
 {
+    var reg = (this.bModRM & 0x38) >> 3;
+
+    switch (reg) {
+    case 0x0:
+        src = this.segES.sel;
+        break;
+    case 0x1:
+        src = this.segCS.sel;
+        break;
+    case 0x2:
+        src = this.segSS.sel;
+        break;
+    case 0x3:
+        src = this.segDS.sel;
+        break;
+    case 0x4:
+        if (I386 && this.model >= X86.MODEL_80386) {
+            src = this.segFS.sel;
+            break;
+        }
+        X86.opInvalid.call(this);
+        src = dst;
+        break;
+    case 0x5:
+        if (I386 && this.model >= X86.MODEL_80386) {
+            src = this.segGS.sel;
+            break;
+        }
+        /* falls through */
+    default:
+        X86.opInvalid.call(this);
+        src = dst;
+        break;
+    }
+
     /*
      * When a 32-bit OPERAND size is in effect, segment register writes via opMOVwsr() must write 32 bits
      * (zero-extended) if the destination is a register, but only 16 bits if the destination is memory,
@@ -1551,7 +1634,61 @@ X86.fnMOVxx = function(dst, src)
     if (this.regEAWrite !== X86.ADDR_INVALID) {
         this.setDataSize(2);
     }
-    return X86.fnMOV.call(this, dst, this.regXX);
+    return X86.fnMOV.call(this, dst, src);
+};
+
+/**
+ * fnMOVsrw(dst, src)
+ *
+ * This helper saves the contents of the general-purpose register that will be overwritten, so that the caller
+ * can restore it after moving the updated value to the correct segment register.
+ *
+ * @this {X86CPU}
+ * @param {number} dst (current value, ignored)
+ * @param {number} src (new value)
+ * @return {number} dst (updated value, from src)
+ */
+X86.fnMOVsrw = function(dst, src)
+{
+    var reg = (this.bModRM >> 3) & 0x7;
+
+    switch(reg) {
+    case 0x0:
+        this.regXX = this.regEAX;
+        break;
+    case 0x2:
+        this.regXX = this.regEDX;
+        break;
+    case 0x3:
+        this.regXX = this.regEBX;
+        break;
+    default:
+        if (this.model == X86.MODEL_80286 || this.model == X86.MODEL_80386 && reg != 0x4 && reg != 0x5) {
+            X86.opInvalid.call(this);
+            break;
+        }
+        switch(reg) {
+        case 0x1:           // MOV to CS is undocumented on 8086/8088/80186/80188, and invalid on 80286 and up
+            this.regXX = this.regECX;
+            break;
+        case 0x4:           // this form of MOV to ES is undocumented on 8086/8088/80186/80188, invalid on 80286, and uses FS starting with 80386
+            this.regXX = this.getSP();
+            break;
+        case 0x5:           // this form of MOV to CS is undocumented on 8086/8088/80186/80188, invalid on 80286, and uses GS starting with 80386
+            this.regXX = this.regEBP;
+            break;
+        case 0x6:           // this form of MOV to SS is undocumented on 8086/8088/80186/80188, invalid on 80286 and up
+            this.regXX = this.regESI;
+            break;
+        case 0x7:           // this form of MOV to DS is undocumented on 8086/8088/80186/80188, invalid on 80286 and up
+            this.regXX = this.regEDI;
+            break;
+        default:
+            break;
+        }
+        break;
+    }
+    return src;
 };
 
 /**
@@ -3103,9 +3240,9 @@ X86.fnXCHGrb = function(dst, src)
         this.nStepCycles -= this.cycleCounts.nOpCyclesXchgRR;
     } else {
         /*
-         * This is a case where the ModRM decoder that's calling us didn't know it should have called modEAByte()
-         * instead of getEAByte(), so we compensate by updating regEAWrite.  However, setEAByte() has since been
-         * changed to revalidate the write using segEA:offEA, so updating regEAWrite here isn't strictly necessary.
+         * This is a case where the ModRM decoder that's calling us didn't know it should have set regEAWrite,
+         * so we compensate by updating regEAWrite.  However, setEAWord() has since been changed to revalidate
+         * the write using segEA:offEA, so updating regEAWrite here isn't strictly necessary.
          */
         this.regEAWrite = this.regEA;
         this.setEAByte(dst);
@@ -3168,9 +3305,9 @@ X86.fnXCHGrw = function(dst, src)
         this.nStepCycles -= this.cycleCounts.nOpCyclesXchgRR;
     } else {
         /*
-         * This is a case where the ModRM decoder that's calling us didn't know it should have called modEAWord()
-         * instead of getEAWord(), so we compensate by updating regEAWrite.  However, setEAWord() has since been
-         * changed to revalidate the write using segEA:offEA, so updating regEAWrite here isn't strictly necessary.
+         * This is a case where the ModRM decoder that's calling us didn't know it should have set regEAWrite,
+         * so we compensate by updating regEAWrite.  However, setEAWord() has since been changed to revalidate
+         * the write using segEA:offEA, so updating regEAWrite here isn't strictly necessary.
          */
         this.regEAWrite = this.regEA;
         this.setEAWord(dst);

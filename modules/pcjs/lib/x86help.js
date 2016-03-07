@@ -288,7 +288,7 @@ X86.fnLCR3 = function(l)
 X86.fnSETcc = function(fnSet)
 {
     this.opFlags |= X86.OPFLAG.NOREAD;
-    this.aOpModMemByte[this.getIPByte()].call(this, fnSet);
+    this.decodeModMemByte.call(this, fnSet);
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? 4 : 5);
 };
 

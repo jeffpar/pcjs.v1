@@ -44,31 +44,6 @@ if (NODE) {
     var X86Seg      = require("./x86seg");
 }
 
-if (!I386) {
-    /*
-     * These are the original ModRM decoders, which were simpler and faster because they could treat all
-     * word instructions as 16-bit, assume bits 16-31 of all registers were always zero, and use masking
-     * constants instead of variables.  If I386 is enabled, these decoders are not used, and the Closure
-     * Compiler will eliminate them from the compiled JavaScript code.
-     */
-    if (NODE) {
-        var X86ModB     = require("./x86modb");
-        var X86ModW     = require("./x86modw");
-    }
-} else {
-    /*
-     * These are the more general-purpose ModRM decoders, required for I386 support.  The current addressing
-     * mode (16-bit or 32-bit) dynamically selects the appropriate set of decoders.
-     */
-    if (NODE) {
-        var X86ModB16   = require("./x86modb16");
-        var X86ModW16   = require("./x86modw16");
-        var X86ModB32   = require("./x86modb32");
-        var X86ModW32   = require("./x86modw32");
-        var X86ModSIB   = require("./x86modsib");
-    }
-}
-
 /**
  * X86CPU(parmsCPU)
  *
@@ -1088,7 +1063,7 @@ X86CPU.prototype.resetRegs = function()
      */
     this.fMDSet = false;        // regMDHi and/or regMDLo are invalid unless fMDSet is true
     this.regMDLo = this.regMDHi = 0;
-    this.regXX = 0;             // internal register for segment register and control register moves
+    this.regXX = 0;             // for internal use only (eg, assists with ModRM decoder helper functions)
 
     /*
      * This internal "register" is set in selected opcode handlers to record the original opcode; ordinarily,
@@ -1341,35 +1316,76 @@ X86CPU.prototype.setAddrSize = function(size)
  * Select the appropriate ModRM dispatch tables, based on the current ADDRESS size (addrSize), which
  * is based foremost on segCS.sizeAddr, but can also be overridden by an ADDRESS size instruction prefix.
  *
+ * There used to be six primary ModRM dispatch table pointers:
+ *
+ *      aOpModRegByte
+ *      aOpModMemByte
+ *      aOpModGrpByte
+ *      aOpModRegWord
+ *      aOpModMemWord
+ *      aOpModGrpWord
+ *
+ * However, when support for the 80386 was added, the number of dispatch tables doubled, and since each entry
+ * in the table was a discrete function, decoding was fast, but it also produced a lot of code.
+ *
+ * So we have now replaced the above table pointers with function pointers:
+ *
+ *      decodeModRegByte (set to one of: decodeModRegByte16, decodeModRegByte32)
+ *      decodeModMemByte (set to one of: decodeModMemByte16, decodeModMemByte32)
+ *      decodeModGrpByte (set to one of: decodeModGrpByte16, decodeModGrpByte32)
+ *      decodeModRegWord (set to one of: decodeModRegShort16, decodeModRegLong16, decodeModRegShort32, decodeModRegLong32)
+ *      decodeModMemWord (set to one of: decodeModMemShort16, decodeModMemLong16, decodeModMemShort32, decodeModMemLong32)
+ *      decodeModGrpWord (set to one of: decodeModGrpShort16, decodeModGrpLong16, decodeModGrpShort32, decodeModGrpLong32)
+ *
+ * So opcode handlers that used to do this:
+ *
+ *      this.aOpModMemByte[b].call(this, X86.fnADDb);
+ *
+ * now do this:
+ *
+ *      this.decodeModMemByte.call(this, X86.fnADDb);
+ *
  * @this {X86CPU}
  */
 X86CPU.prototype.updateAddrSize = function()
 {
     if (!I386) {
         this.getAddr = (PREFETCH? this.getShortPrefetch : this.getShort);
-        this.aOpModRegByte = X86ModB.aOpModReg;
-        this.aOpModMemByte = X86ModB.aOpModMem;
-        this.aOpModGrpByte = X86ModB.aOpModGrp;
-        this.aOpModRegWord = X86ModW.aOpModReg;
-        this.aOpModMemWord = X86ModW.aOpModMem;
-        this.aOpModGrpWord = X86ModW.aOpModGrp;
+        this.decodeModRegByte = X86.decodeModRegByte16;
+        this.decodeModMemByte = X86.decodeModMemByte16;
+        this.decodeModGrpByte = X86.decodeModGrpByte16;
+        this.decodeModRegWord = X86.decodeModRegShort16;
+        this.decodeModMemWord = X86.decodeModMemShort16;
+        this.decodeModGrpWord = X86.decodeModGrpShort16;
     } else {
         if (this.sizeAddr == 2) {
             this.getAddr = (PREFETCH? this.getShortPrefetch : this.getShort);
-            this.aOpModRegByte = X86ModB16.aOpModReg;
-            this.aOpModMemByte = X86ModB16.aOpModMem;
-            this.aOpModGrpByte = X86ModB16.aOpModGrp;
-            this.aOpModRegWord = X86ModW16.aOpModReg;
-            this.aOpModMemWord = X86ModW16.aOpModMem;
-            this.aOpModGrpWord = X86ModW16.aOpModGrp;
+            this.decodeModRegByte = X86.decodeModRegByte16;
+            this.decodeModMemByte = X86.decodeModMemByte16;
+            this.decodeModGrpByte = X86.decodeModGrpByte16;
+            if (this.sizeData == 2) {
+                this.decodeModRegWord = X86.decodeModRegShort16;
+                this.decodeModMemWord = X86.decodeModMemShort16;
+                this.decodeModGrpWord = X86.decodeModGrpShort16;
+            } else {
+                this.decodeModRegWord = X86.decodeModRegLong16;
+                this.decodeModMemWord = X86.decodeModMemLong16;
+                this.decodeModGrpWord = X86.decodeModGrpLong16;
+            }
         } else {
             this.getAddr = (PREFETCH? this.getLongPrefetch : this.getLong);
-            this.aOpModRegByte = X86ModB32.aOpModReg;
-            this.aOpModMemByte = X86ModB32.aOpModMem;
-            this.aOpModGrpByte = X86ModB32.aOpModGrp;
-            this.aOpModRegWord = X86ModW32.aOpModReg;
-            this.aOpModMemWord = X86ModW32.aOpModMem;
-            this.aOpModGrpWord = X86ModW32.aOpModGrp;
+            this.decodeModRegByte = X86.decodeModRegByte32;
+            this.decodeModMemByte = X86.decodeModMemByte32;
+            this.decodeModGrpByte = X86.decodeModGrpByte32;
+            if (this.sizeData == 2) {
+                this.decodeModRegWord = X86.decodeModRegShort32;
+                this.decodeModMemWord = X86.decodeModMemShort32;
+                this.decodeModGrpWord = X86.decodeModGrpShort32;
+            } else {
+                this.decodeModRegWord = X86.decodeModRegLong32;
+                this.decodeModMemWord = X86.decodeModMemLong32;
+                this.decodeModGrpWord = X86.decodeModGrpLong32;
+            }
         }
     }
 };
@@ -1404,10 +1420,28 @@ X86CPU.prototype.updateDataSize = function()
         this.typeData = X86.RESULT.WORD;
         this.getWord = this.getShort;
         this.setWord = this.setShort;
+        if (this.sizeAddr == 2) {
+            this.decodeModRegWord = X86.decodeModRegShort16;
+            this.decodeModMemWord = X86.decodeModMemShort16;
+            this.decodeModGrpWord = X86.decodeModGrpShort16;
+        } else {
+            this.decodeModRegWord = X86.decodeModRegShort32;
+            this.decodeModMemWord = X86.decodeModMemShort32;
+            this.decodeModGrpWord = X86.decodeModGrpShort32;
+        }
     } else {
         this.typeData = X86.RESULT.DWORD;
         this.getWord = this.getLong;
         this.setWord = this.setLong;
+        if (this.sizeAddr == 2) {
+            this.decodeModRegWord = X86.decodeModRegLong16;
+            this.decodeModMemWord = X86.decodeModMemLong16;
+            this.decodeModGrpWord = X86.decodeModGrpLong16;
+        } else {
+            this.decodeModRegWord = X86.decodeModRegLong32;
+            this.decodeModMemWord = X86.decodeModMemLong32;
+            this.decodeModGrpWord = X86.decodeModGrpLong32;
+        }
     }
 };
 
@@ -3297,6 +3331,88 @@ X86CPU.prototype.getEAByteStack = function(off)
 };
 
 /**
+ * getEAShortData(off)
+ *
+ * @this {X86CPU}
+ * @param {number} off is a segment-relative offset
+ * @return {number} word (16-bit) value at that address
+ */
+X86CPU.prototype.getEAShortData = function(off)
+{
+    this.segEA = this.segData;
+    this.offEA = off & (I386? this.maskAddr : 0xffff);
+    this.regEA = this.segEA.checkRead(this.offEA, 2);
+    if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
+    var w = this.getShort(this.regEA);
+    if (BACKTRACK) {
+        this.backTrack.btiEALo = this.backTrack.btiMem0;
+        this.backTrack.btiEAHi = this.backTrack.btiMem1;
+    }
+    return w;
+};
+
+/**
+ * getEAShortStack(off)
+ *
+ * @this {X86CPU}
+ * @param {number} off is a segment-relative offset
+ * @return {number} word (16-bit) value at that address
+ */
+X86CPU.prototype.getEAShortStack = function(off)
+{
+    this.segEA = this.segStack;
+    this.offEA = off & (I386? this.maskAddr : 0xffff);
+    this.regEA = this.segEA.checkRead(this.offEA, 2);
+    if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
+    var w = this.getShort(this.regEA);
+    if (BACKTRACK) {
+        this.backTrack.btiEALo = this.backTrack.btiMem0;
+        this.backTrack.btiEAHi = this.backTrack.btiMem1;
+    }
+    return w;
+};
+
+/**
+ * getEALongData(off)
+ *
+ * @this {X86CPU}
+ * @param {number} off is a segment-relative offset
+ * @return {number} word (16-bit) value at that address
+ */
+X86CPU.prototype.getEALongData = function(off)
+{
+    this.segEA = this.segData;
+    this.regEA = this.segEA.checkRead(this.offEA = off, 4);
+    if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
+    var w = this.getLong(this.regEA);
+    if (BACKTRACK) {
+        this.backTrack.btiEALo = this.backTrack.btiMem0;
+        this.backTrack.btiEAHi = this.backTrack.btiMem1;
+    }
+    return w;
+};
+
+/**
+ * getEALongStack(off)
+ *
+ * @this {X86CPU}
+ * @param {number} off is a segment-relative offset
+ * @return {number} word (16-bit) value at that address
+ */
+X86CPU.prototype.getEALongStack = function(off)
+{
+    this.segEA = this.segStack;
+    this.regEA = this.segEA.checkRead(this.offEA = off, 4);
+    if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
+    var w = this.getLong(this.regEA);
+    if (BACKTRACK) {
+        this.backTrack.btiEALo = this.backTrack.btiMem0;
+        this.backTrack.btiEAHi = this.backTrack.btiMem1;
+    }
+    return w;
+};
+
+/**
  * getEAWord(seg, off)
  *
  * @this {X86CPU}
@@ -3342,93 +3458,6 @@ X86CPU.prototype.getEAWordStack = function(off)
 };
 
 /**
- * modEAByte(seg, off)
- *
- * @this {X86CPU}
- * @param {X86Seg} seg register (eg, segDS)
- * @param {number} off is a segment-relative offset
- * @return {number} byte (8-bit) value at that address
- */
-X86CPU.prototype.modEAByte = function(seg, off)
-{
-    this.segEA = seg;
-    this.regEAWrite = this.regEA = seg.checkRead(this.offEA = off, 1);
-    if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
-    var b = this.getByte(this.regEA);
-    if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiMem0;
-    return b;
-};
-
-/**
- * modEAByteData(off)
- *
- * @this {X86CPU}
- * @param {number} off is a segment-relative offset
- * @return {number} byte (8-bit) value at that address
- */
-X86CPU.prototype.modEAByteData = function(off)
-{
-    return this.modEAByte(this.segData, off & (I386? this.maskAddr : 0xffff));
-};
-
-/**
- * modEAByteStack(off)
- *
- * @this {X86CPU}
- * @param {number} off is a segment-relative offset
- * @return {number} byte (8-bit) value at that address
- */
-X86CPU.prototype.modEAByteStack = function(off)
-{
-    return this.modEAByte(this.segStack, off & (I386? this.maskAddr : 0xffff));
-};
-
-/**
- * modEAWord(seg, off)
- *
- * @this {X86CPU}
- * @param {X86Seg} seg register (eg, segDS)
- * @param {number} off is a segment-relative offset
- * @return {number} word (16-bit) value at that address
- */
-X86CPU.prototype.modEAWord = function(seg, off)
-{
-    this.segEA = seg;
-    this.regEAWrite = this.regEA = seg.checkRead(this.offEA = off, (I386? this.sizeData : 2));
-    if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
-    var w = this.getWord(this.regEA);
-    if (BACKTRACK) {
-        this.backTrack.btiEALo = this.backTrack.btiMem0;
-        this.backTrack.btiEAHi = this.backTrack.btiMem1;
-    }
-    return w;
-};
-
-/**
- * modEAWordData(off)
- *
- * @this {X86CPU}
- * @param {number} off is a segment-relative offset
- * @return {number} word (16-bit) value at that address
- */
-X86CPU.prototype.modEAWordData = function(off)
-{
-    return this.modEAWord(this.segData, off & (I386? this.maskAddr : 0xffff));
-};
-
-/**
- * modEAWordStack(off)
- *
- * @this {X86CPU}
- * @param {number} off is a segment-relative offset
- * @return {number} word (16-bit) value at that address
- */
-X86CPU.prototype.modEAWordStack = function(off)
-{
-    return this.modEAWord(this.segStack, off & (I386? this.maskAddr : 0xffff));
-};
-
-/**
  * setEAByte(b)
  *
  * @this {X86CPU}
@@ -3442,10 +3471,42 @@ X86CPU.prototype.setEAByte = function(b)
 };
 
 /**
+ * setEAShort(w)
+ *
+ * @this {X86CPU}
+ * @param {number} w is the short (16-bit) value to write
+ */
+X86CPU.prototype.setEAShort = function(w)
+{
+    if (this.opFlags & X86.OPFLAG.NOWRITE) return;
+    if (BACKTRACK) {
+        this.backTrack.btiMem0 = this.backTrack.btiEALo;
+        this.backTrack.btiMem1 = this.backTrack.btiEAHi;
+    }
+    this.setShort(this.segEA.checkWrite(this.offEA, 2), w);
+};
+
+/**
+ * setEALong(l)
+ *
+ * @this {X86CPU}
+ * @param {number} l is the long (32-bit) value to write
+ */
+X86CPU.prototype.setEALong = function(l)
+{
+    if (this.opFlags & X86.OPFLAG.NOWRITE) return;
+    if (BACKTRACK) {
+        this.backTrack.btiMem0 = this.backTrack.btiEALo;
+        this.backTrack.btiMem1 = this.backTrack.btiEAHi;
+    }
+    this.setLong(this.segEA.checkWrite(this.offEA, 4), l);
+};
+
+/**
  * setEAWord(w)
  *
  * @this {X86CPU}
- * @param {number} w is the word (16-bit) value to write
+ * @param {number} w is the word (16-bit or 32-bit) value to write
  */
 X86CPU.prototype.setEAWord = function(w)
 {
@@ -3743,18 +3804,14 @@ X86CPU.prototype.getIPDisp = function()
 };
 
 /**
- * getSIBAddr(mod)
+ * peekIPByte()
  *
  * @this {X86CPU}
- * @param {number} mod
- * @return {number}
+ * @return {number} byte at the current IP
  */
-X86CPU.prototype.getSIBAddr = function(mod)
+X86CPU.prototype.peekIPByte = function()
 {
-    var b = PREFETCH? this.getBytePrefetch() : this.getByte(this.regLIP);
-    if (BACKTRACK) this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMem0);
-    this.advanceIP(1);
-    return X86ModSIB.aOpModSIB[b].call(this, mod);
+    return (PREFETCH? this.getBytePrefetch() : this.getByte(this.regLIP));
 };
 
 /**

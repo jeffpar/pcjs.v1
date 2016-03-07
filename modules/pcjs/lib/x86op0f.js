@@ -43,11 +43,11 @@ if (NODE) {
  */
 X86.opGRP6 = function()
 {
-    var bModRM = this.getIPByte();
+    var bModRM = this.peekIPByte();
     if ((bModRM & 0x38) < 0x10) {   // possible reg values: 0x00, 0x08, 0x10, 0x18, 0x20, 0x28, 0x30, 0x38
         this.opFlags |= X86.OPFLAG.NOREAD;
     }
-    this.aOpModGrpWord[bModRM].call(this, this.aOpGrp6, X86.fnSRCNone);
+    this.decodeModGrpWord.call(this, this.aOpGrp6, X86.fnSRCNone);
 };
 
 /**
@@ -57,11 +57,11 @@ X86.opGRP6 = function()
  */
 X86.opGRP7 = function()
 {
-    var bModRM = this.getIPByte();
+    var bModRM = this.peekIPByte();
     if (!(bModRM & 0x10)) {
         this.opFlags |= X86.OPFLAG.NOREAD;
     }
-    this.aOpModGrpWord[bModRM].call(this, X86.aOpGrp7, X86.fnSRCNone);
+    this.decodeModGrpWord.call(this, X86.aOpGrp7, X86.fnSRCNone);
 };
 
 /**
@@ -80,7 +80,7 @@ X86.opLAR = function()
         X86.opInvalid.call(this);
         return;
     }
-    this.aOpModRegWord[this.getIPByte()].call(this, X86.fnLAR);
+    this.decodeModRegWord.call(this, X86.fnLAR);
 };
 
 /**
@@ -99,7 +99,7 @@ X86.opLSL = function()
         X86.opInvalid.call(this);
         return;
     }
-    this.aOpModRegWord[this.getIPByte()].call(this, X86.fnLSL);
+    this.decodeModRegWord.call(this, X86.fnLSL);
 };
 
 /**
@@ -567,6 +567,7 @@ X86.opMOVdr = function()
     }
 
     this.nStepCycles -= (iDst < 4? 22 : 14);
+
     /*
      * TODO: Implement BACKTRACK for this instruction (although Debug registers are not likely to be a conduit for interesting data).
      */
@@ -1214,7 +1215,7 @@ X86.opPOPFS = function()
  */
 X86.opBT = function()
 {
-    this.aOpModMemWord[this.getIPByte()].call(this, X86.fnBTMem);
+    this.decodeModMemWord.call(this, X86.fnBTMem);
     if (this.regEA !== X86.ADDR_INVALID) this.nStepCycles -= 6;
 };
 
@@ -1227,7 +1228,7 @@ X86.opBT = function()
  */
 X86.opSHLDn = function()
 {
-    this.aOpModMemWord[this.getIPByte()].call(this, this.sizeData == 2? X86.fnSHLDwi : X86.fnSHLDdi);
+    this.decodeModMemWord.call(this, this.sizeData == 2? X86.fnSHLDwi : X86.fnSHLDdi);
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? 3 : 7);
 };
 
@@ -1240,7 +1241,7 @@ X86.opSHLDn = function()
  */
 X86.opSHLDcl = function()
 {
-    this.aOpModMemWord[this.getIPByte()].call(this, this.sizeData == 2? X86.fnSHLDwCL : X86.fnSHLDdCL);
+    this.decodeModMemWord.call(this, this.sizeData == 2? X86.fnSHLDwCL : X86.fnSHLDdCL);
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? 3 : 7);
 };
 
@@ -1253,7 +1254,7 @@ X86.opSHLDcl = function()
  */
 X86.opXBTS = function()
 {
-    this.aOpModRegWord[this.getIPByte()].call(this, X86.fnXBTS);
+    this.decodeModRegWord.call(this, X86.fnXBTS);
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? 6 : 13);
 };
 
@@ -1266,7 +1267,7 @@ X86.opXBTS = function()
  */
 X86.opIBTS = function()
 {
-    this.aOpModMemWord[this.getIPByte()].call(this, X86.fnIBTS);
+    this.decodeModMemWord.call(this, X86.fnIBTS);
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? 12 : 19);
 };
 
@@ -1319,7 +1320,7 @@ X86.opPOPGS = function()
  */
 X86.opBTS = function()
 {
-    this.aOpModMemWord[this.getIPByte()].call(this, X86.fnBTSMem);
+    this.decodeModMemWord.call(this, X86.fnBTSMem);
     if (this.regEA !== X86.ADDR_INVALID) this.nStepCycles -= 5;
 };
 
@@ -1332,7 +1333,7 @@ X86.opBTS = function()
  */
 X86.opSHRDn = function()
 {
-    this.aOpModMemWord[this.getIPByte()].call(this, this.sizeData == 2? X86.fnSHRDwi : X86.fnSHRDdi);
+    this.decodeModMemWord.call(this, this.sizeData == 2? X86.fnSHRDwi : X86.fnSHRDdi);
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? 3 : 7);
 };
 
@@ -1345,7 +1346,7 @@ X86.opSHRDn = function()
  */
 X86.opSHRDcl = function()
 {
-    this.aOpModMemWord[this.getIPByte()].call(this, this.sizeData == 2? X86.fnSHRDwCL : X86.fnSHRDdCL);
+    this.decodeModMemWord.call(this, this.sizeData == 2? X86.fnSHRDwCL : X86.fnSHRDdCL);
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? 3 : 7);
 };
 
@@ -1358,7 +1359,7 @@ X86.opSHRDcl = function()
  */
 X86.opIMUL = function()
 {
-    this.aOpModRegWord[this.getIPByte()].call(this, this.sizeData == 2? X86.fnIMULrw : X86.fnIMULrd);
+    this.decodeModRegWord.call(this, this.sizeData == 2? X86.fnIMULrw : X86.fnIMULrd);
 };
 
 /**
@@ -1372,7 +1373,7 @@ X86.opIMUL = function()
  */
 X86.opLSS = function()
 {
-    this.aOpModRegWord[this.getIPByte()].call(this, X86.fnLSS);
+    this.decodeModRegWord.call(this, X86.fnLSS);
 };
 
 /**
@@ -1384,7 +1385,7 @@ X86.opLSS = function()
  */
 X86.opBTR = function()
 {
-    this.aOpModMemWord[this.getIPByte()].call(this, X86.fnBTRMem);
+    this.decodeModMemWord.call(this, X86.fnBTRMem);
     if (this.regEA !== X86.ADDR_INVALID) this.nStepCycles -= 5;
 };
 
@@ -1399,7 +1400,7 @@ X86.opBTR = function()
  */
 X86.opLFS = function()
 {
-    this.aOpModRegWord[this.getIPByte()].call(this, X86.fnLFS);
+    this.decodeModRegWord.call(this, X86.fnLFS);
 };
 
 /**
@@ -1413,7 +1414,7 @@ X86.opLFS = function()
  */
 X86.opLGS = function()
 {
-    this.aOpModRegWord[this.getIPByte()].call(this, X86.fnLGS);
+    this.decodeModRegWord.call(this, X86.fnLGS);
 };
 
 /**
@@ -1425,36 +1426,8 @@ X86.opLGS = function()
  */
 X86.opMOVZXb = function()
 {
-    /*
-     * The ModRegByte handlers update the registers in the 1st column, but we need to update those in the 2nd column.
-     *
-     *      000:    AL      ->      000:    AX
-     *      001:    CL      ->      001:    CX
-     *      010:    DL      ->      010:    DX
-     *      011:    BL      ->      011:    BX
-     *      100:    AH      ->      100:    SP
-     *      101:    CH      ->      101:    BP
-     *      110:    DH      ->      110:    SI
-     *      111:    BH      ->      111:    DI
-     */
-    var temp;
-    var bModRM = this.getIPByte();
-    var reg = (bModRM & 0x38) >> 3;
-    switch(reg) {
-    case 0x4:
-        temp = this.regEAX;
-        break;
-    case 0x5:
-        temp = this.regECX;
-        break;
-    case 0x6:
-        temp = this.regEDX;
-        break;
-    case 0x7:
-        temp = this.regEBX;
-        break;
-    }
-    this.aOpModRegByte[bModRM].call(this, X86.fnMOVX);
+    this.decodeModRegByte.call(this, X86.fnMOVXb);
+    var reg = (this.bModRM & 0x38) >> 3;
     switch(reg) {
     case 0x0:
         this.regEAX = (this.regEAX & ~this.maskData) | (this.regEAX & 0xff);
@@ -1470,19 +1443,19 @@ X86.opMOVZXb = function()
         break;
     case 0x4:
         this.regESP = (this.regESP & ~this.maskData) | ((this.regEAX >> 8) & 0xff);
-        this.regEAX = temp;
+        this.regEAX = this.regXX;
         break;
     case 0x5:
         this.regEBP = (this.regEBP & ~this.maskData) | ((this.regECX >> 8) & 0xff);
-        this.regECX = temp;
+        this.regECX = this.regXX;
         break;
     case 0x6:
         this.regESI = (this.regESI & ~this.maskData) | ((this.regEDX >> 8) & 0xff);
-        this.regEDX = temp;
+        this.regEDX = this.regXX;
         break;
     case 0x7:
         this.regEDI = (this.regEDI & ~this.maskData) | ((this.regEBX >> 8) & 0xff);
-        this.regEBX = temp;
+        this.regEBX = this.regXX;
         break;
     }
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? 3 : 6);
@@ -1497,10 +1470,9 @@ X86.opMOVZXb = function()
  */
 X86.opMOVZXw = function()
 {
-    var bModRM = this.getIPByte();
     this.setDataSize(2);
-    this.aOpModRegWord[bModRM].call(this, X86.fnMOVX);
-    switch((bModRM & 0x38) >> 3) {
+    this.decodeModRegWord.call(this, X86.fnMOVX);
+    switch((this.bModRM & 0x38) >> 3) {
     case 0x0:
         this.regEAX = (this.regEAX & 0xffff);
         break;
@@ -1536,7 +1508,7 @@ X86.opMOVZXw = function()
  */
 X86.opGRP8 = function()
 {
-    this.aOpModGrpWord[this.getIPByte()].call(this, X86.aOpGrp8, this.getIPByte);
+    this.decodeModGrpWord.call(this, X86.aOpGrp8, this.getIPByte);
 };
 
 /**
@@ -1548,7 +1520,7 @@ X86.opGRP8 = function()
  */
 X86.opBTC = function()
 {
-    this.aOpModMemWord[this.getIPByte()].call(this, X86.fnBTCMem);
+    this.decodeModMemWord.call(this, X86.fnBTCMem);
     if (this.regEA !== X86.ADDR_INVALID) this.nStepCycles -= 5;
 };
 
@@ -1561,7 +1533,7 @@ X86.opBTC = function()
  */
 X86.opBSF = function()
 {
-    this.aOpModRegWord[this.getIPByte()].call(this, X86.fnBSF);
+    this.decodeModRegWord.call(this, X86.fnBSF);
 };
 
 /**
@@ -1573,7 +1545,7 @@ X86.opBSF = function()
  */
 X86.opBSR = function()
 {
-    this.aOpModRegWord[this.getIPByte()].call(this, X86.fnBSR);
+    this.decodeModRegWord.call(this, X86.fnBSR);
 };
 
 /**
@@ -1585,36 +1557,8 @@ X86.opBSR = function()
  */
 X86.opMOVSXb = function()
 {
-    /*
-     * The ModRegByte handlers update the registers in the 1st column, but we need to update those in the 2nd column.
-     *
-     *      000:    AL      ->      000:    AX
-     *      001:    CL      ->      001:    CX
-     *      010:    DL      ->      010:    DX
-     *      011:    BL      ->      011:    BX
-     *      100:    AH      ->      100:    SP
-     *      101:    CH      ->      101:    BP
-     *      110:    DH      ->      110:    SI
-     *      111:    BH      ->      111:    DI
-     */
-    var temp;
-    var bModRM = this.getIPByte();
-    var reg = (bModRM & 0x38) >> 3;
-    switch(reg) {
-    case 0x4:
-        temp = this.regEAX;
-        break;
-    case 0x5:
-        temp = this.regECX;
-        break;
-    case 0x6:
-        temp = this.regEDX;
-        break;
-    case 0x7:
-        temp = this.regEBX;
-        break;
-    }
-    this.aOpModRegByte[bModRM].call(this, X86.fnMOVX);
+    this.decodeModRegByte.call(this, X86.fnMOVXb);
+    var reg = (this.bModRM & 0x38) >> 3;
     switch(reg) {
     case 0x0:
         this.regEAX = (this.regEAX & ~this.maskData) | ((((this.regEAX & 0xff) << 24) >> 24) & this.maskData);
@@ -1630,19 +1574,19 @@ X86.opMOVSXb = function()
         break;
     case 0x4:
         this.regESP = (this.regESP & ~this.maskData) | (((this.regEAX << 16) >> 24) & this.maskData);
-        this.regEAX = temp;
+        this.regEAX = this.regXX;
         break;
     case 0x5:
         this.regEBP = (this.regEBP & ~this.maskData) | (((this.regECX << 16) >> 24) & this.maskData);
-        this.regECX = temp;
+        this.regECX = this.regXX;
         break;
     case 0x6:
         this.regESI = (this.regESI & ~this.maskData) | (((this.regEDX << 16) >> 24) & this.maskData);
-        this.regEDX = temp;
+        this.regEDX = this.regXX;
         break;
     case 0x7:
         this.regEDI = (this.regEDI & ~this.maskData) | (((this.regEBX << 16) >> 24) & this.maskData);
-        this.regEBX = temp;
+        this.regEBX = this.regXX;
         break;
     }
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? 3 : 6);
@@ -1657,10 +1601,9 @@ X86.opMOVSXb = function()
  */
 X86.opMOVSXw = function()
 {
-    var bModRM = this.getIPByte();
     this.setDataSize(2);
-    this.aOpModRegWord[bModRM].call(this, X86.fnMOVX);
-    switch((bModRM & 0x38) >> 3) {
+    this.decodeModRegWord.call(this, X86.fnMOVX);
+    switch((this.bModRM & 0x38) >> 3) {
     case 0x0:
         this.regEAX = ((this.regEAX << 16) >> 16);
         break;

@@ -31,7 +31,7 @@ gems:
 
 pcjs:
   domain: pcjs.org    # whereas site.url is used for linking purposes, site.pcjs.domain is used for display purposes
-  version: 1.30.0     # IMPORTANT: keep pcjs.version in sync with package.json:version
+  version: 1.21.0     # IMPORTANT: keep pcjs.version in sync with package.json:version
   compiled: true      # by default, the compiled pcjs.version scripts will be used (eg, pc.js or pc-dbg.js)
   pc_scripts:         # if pcjs.compiled is false, the following scripts will be included instead, in the order listed
     - /modules/shared/lib/defines.js
@@ -55,17 +55,11 @@ pcjs:
     - /modules/pcjs/lib/x86cpu.js
     - /modules/pcjs/lib/x86fpu.js
     - /modules/pcjs/lib/x86func.js
-    - /modules/pcjs/lib/x86flow.js
     - /modules/pcjs/lib/x86help.js
+    - /modules/pcjs/lib/x86ints.js
+    - /modules/pcjs/lib/x86mods.js
     - /modules/pcjs/lib/x86ops.js
     - /modules/pcjs/lib/x86op0f.js
-    - /modules/pcjs/lib/x86modb.js
-    - /modules/pcjs/lib/x86modw.js
-    - /modules/pcjs/lib/x86modb16.js
-    - /modules/pcjs/lib/x86modw16.js
-    - /modules/pcjs/lib/x86modb32.js
-    - /modules/pcjs/lib/x86modw32.js
-    - /modules/pcjs/lib/x86modsib.js
     - /modules/pcjs/lib/chipset.js
     - /modules/pcjs/lib/rom.js
     - /modules/pcjs/lib/ram.js

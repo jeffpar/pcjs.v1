@@ -45,7 +45,7 @@ if (NODE) {
  */
 X86.opADDmb = function()
 {
-    var b = this.getIPByte();
+    this.decodeModMemByte.call(this, X86.fnADDb);
     /*
      * Opcode bytes 0x00 0x00 are sufficiently uncommon that it's more likely we've started
      * executing in the weeds, so if you're in DEBUG mode, we'll print a warning and stop the
@@ -54,11 +54,10 @@ X86.opADDmb = function()
      * Notice that we also test fRunning: this allows the Debugger to step over the instruction,
      * because its trace ("t") command doesn't "run" the CPU; it merely "steps" the CPU.
      */
-    if (DEBUG && !b && this.aFlags.fRunning) {
+    if (DEBUG && !this.bModRM && this.aFlags.fRunning) {
         this.printMessage("suspicious opcode: 0x00 0x00", DEBUGGER || this.bitsMessage);
         if (DEBUGGER && this.dbg) this.dbg.stopCPU();
     }
-    this.aOpModMemByte[b].call(this, X86.fnADDb);
 };
 
 /**
@@ -68,7 +67,7 @@ X86.opADDmb = function()
  */
 X86.opADDmw = function()
 {
-    this.aOpModMemWord[this.getIPByte()].call(this, X86.fnADDw);
+    this.decodeModMemWord.call(this, X86.fnADDw);
 };
 
 /**
@@ -78,7 +77,7 @@ X86.opADDmw = function()
  */
 X86.opADDrb = function()
 {
-    this.aOpModRegByte[this.getIPByte()].call(this, X86.fnADDb);
+    this.decodeModRegByte.call(this, X86.fnADDb);
 };
 
 /**
@@ -88,7 +87,7 @@ X86.opADDrb = function()
  */
 X86.opADDrw = function()
 {
-    this.aOpModRegWord[this.getIPByte()].call(this, X86.fnADDw);
+    this.decodeModRegWord.call(this, X86.fnADDw);
 };
 
 /**
@@ -164,7 +163,7 @@ X86.opPOPES = function()
  */
 X86.opORmb = function()
 {
-    this.aOpModMemByte[this.getIPByte()].call(this, X86.fnORb);
+    this.decodeModMemByte.call(this, X86.fnORb);
 };
 
 /**
@@ -174,7 +173,7 @@ X86.opORmb = function()
  */
 X86.opORmw = function()
 {
-    this.aOpModMemWord[this.getIPByte()].call(this, X86.fnORw);
+    this.decodeModMemWord.call(this, X86.fnORw);
 };
 
 /**
@@ -184,7 +183,7 @@ X86.opORmw = function()
  */
 X86.opORrb = function()
 {
-    this.aOpModRegByte[this.getIPByte()].call(this, X86.fnORb);
+    this.decodeModRegByte.call(this, X86.fnORb);
 };
 
 /**
@@ -194,7 +193,7 @@ X86.opORrb = function()
  */
 X86.opORrw = function()
 {
-    this.aOpModRegWord[this.getIPByte()].call(this, X86.fnORw);
+    this.decodeModRegWord.call(this, X86.fnORw);
 };
 
 /**
@@ -274,7 +273,7 @@ X86.op0F = function()
  */
 X86.opADCmb = function()
 {
-    this.aOpModMemByte[this.getIPByte()].call(this, X86.fnADCb);
+    this.decodeModMemByte.call(this, X86.fnADCb);
 };
 
 /**
@@ -284,7 +283,7 @@ X86.opADCmb = function()
  */
 X86.opADCmw = function()
 {
-    this.aOpModMemWord[this.getIPByte()].call(this, X86.fnADCw);
+    this.decodeModMemWord.call(this, X86.fnADCw);
 };
 
 /**
@@ -294,7 +293,7 @@ X86.opADCmw = function()
  */
 X86.opADCrb = function()
 {
-    this.aOpModRegByte[this.getIPByte()].call(this, X86.fnADCb);
+    this.decodeModRegByte.call(this, X86.fnADCb);
 };
 
 /**
@@ -304,7 +303,7 @@ X86.opADCrb = function()
  */
 X86.opADCrw = function()
 {
-    this.aOpModRegWord[this.getIPByte()].call(this, X86.fnADCw);
+    this.decodeModRegWord.call(this, X86.fnADCw);
 };
 
 /**
@@ -376,7 +375,7 @@ X86.opPOPSS = function()
  */
 X86.opSBBmb = function()
 {
-    this.aOpModMemByte[this.getIPByte()].call(this, X86.fnSBBb);
+    this.decodeModMemByte.call(this, X86.fnSBBb);
 };
 
 /**
@@ -386,7 +385,7 @@ X86.opSBBmb = function()
  */
 X86.opSBBmw = function()
 {
-    this.aOpModMemWord[this.getIPByte()].call(this, X86.fnSBBw);
+    this.decodeModMemWord.call(this, X86.fnSBBw);
 };
 
 /**
@@ -396,7 +395,7 @@ X86.opSBBmw = function()
  */
 X86.opSBBrb = function()
 {
-    this.aOpModRegByte[this.getIPByte()].call(this, X86.fnSBBb);
+    this.decodeModRegByte.call(this, X86.fnSBBb);
 };
 
 /**
@@ -406,7 +405,7 @@ X86.opSBBrb = function()
  */
 X86.opSBBrw = function()
 {
-    this.aOpModRegWord[this.getIPByte()].call(this, X86.fnSBBw);
+    this.decodeModRegWord.call(this, X86.fnSBBw);
 };
 
 /**
@@ -478,7 +477,7 @@ X86.opPOPDS = function()
  */
 X86.opANDmb = function()
 {
-    this.aOpModMemByte[this.getIPByte()].call(this, X86.fnANDb);
+    this.decodeModMemByte.call(this, X86.fnANDb);
 };
 
 /**
@@ -488,7 +487,7 @@ X86.opANDmb = function()
  */
 X86.opANDmw = function()
 {
-    this.aOpModMemWord[this.getIPByte()].call(this, X86.fnANDw);
+    this.decodeModMemWord.call(this, X86.fnANDw);
 };
 
 /**
@@ -498,7 +497,7 @@ X86.opANDmw = function()
  */
 X86.opANDrb = function()
 {
-    this.aOpModRegByte[this.getIPByte()].call(this, X86.fnANDb);
+    this.decodeModRegByte.call(this, X86.fnANDb);
 };
 
 /**
@@ -508,7 +507,7 @@ X86.opANDrb = function()
  */
 X86.opANDrw = function()
 {
-    this.aOpModRegWord[this.getIPByte()].call(this, X86.fnANDw);
+    this.decodeModRegWord.call(this, X86.fnANDw);
 };
 
 /**
@@ -586,7 +585,7 @@ X86.opDAA = function()
  */
 X86.opSUBmb = function()
 {
-    this.aOpModMemByte[this.getIPByte()].call(this, X86.fnSUBb);
+    this.decodeModMemByte.call(this, X86.fnSUBb);
 };
 
 /**
@@ -596,7 +595,7 @@ X86.opSUBmb = function()
  */
 X86.opSUBmw = function()
 {
-    this.aOpModMemWord[this.getIPByte()].call(this, X86.fnSUBw);
+    this.decodeModMemWord.call(this, X86.fnSUBw);
 };
 
 /**
@@ -606,7 +605,7 @@ X86.opSUBmw = function()
  */
 X86.opSUBrb = function()
 {
-    this.aOpModRegByte[this.getIPByte()].call(this, X86.fnSUBb);
+    this.decodeModRegByte.call(this, X86.fnSUBb);
 };
 
 /**
@@ -616,7 +615,7 @@ X86.opSUBrb = function()
  */
 X86.opSUBrw = function()
 {
-    this.aOpModRegWord[this.getIPByte()].call(this, X86.fnSUBw);
+    this.decodeModRegWord.call(this, X86.fnSUBw);
 };
 
 /**
@@ -694,7 +693,7 @@ X86.opDAS = function()
  */
 X86.opXORmb = function()
 {
-    this.aOpModMemByte[this.getIPByte()].call(this, X86.fnXORb);
+    this.decodeModMemByte.call(this, X86.fnXORb);
 };
 
 /**
@@ -704,7 +703,7 @@ X86.opXORmb = function()
  */
 X86.opXORmw = function()
 {
-    this.aOpModMemWord[this.getIPByte()].call(this, X86.fnXORw);
+    this.decodeModMemWord.call(this, X86.fnXORw);
 };
 
 /**
@@ -714,7 +713,7 @@ X86.opXORmw = function()
  */
 X86.opXORrb = function()
 {
-    this.aOpModRegByte[this.getIPByte()].call(this, X86.fnXORb);
+    this.decodeModRegByte.call(this, X86.fnXORb);
 };
 
 /**
@@ -724,7 +723,7 @@ X86.opXORrb = function()
  */
 X86.opXORrw = function()
 {
-    this.aOpModRegWord[this.getIPByte()].call(this, X86.fnXORw);
+    this.decodeModRegWord.call(this, X86.fnXORw);
 };
 
 /**
@@ -803,7 +802,7 @@ X86.opAAA = function()
  */
 X86.opCMPmb = function()
 {
-    this.aOpModMemByte[this.getIPByte()].call(this, X86.fnCMPb);
+    this.decodeModMemByte.call(this, X86.fnCMPb);
 };
 
 /**
@@ -813,7 +812,7 @@ X86.opCMPmb = function()
  */
 X86.opCMPmw = function()
 {
-    this.aOpModMemWord[this.getIPByte()].call(this, X86.fnCMPw);
+    this.decodeModMemWord.call(this, X86.fnCMPw);
 };
 
 /**
@@ -823,7 +822,7 @@ X86.opCMPmw = function()
  */
 X86.opCMPrb = function()
 {
-    this.aOpModRegByte[this.getIPByte()].call(this, X86.fnCMPb);
+    this.decodeModRegByte.call(this, X86.fnCMPb);
 };
 
 /**
@@ -833,7 +832,7 @@ X86.opCMPrb = function()
  */
 X86.opCMPrw = function()
 {
-    this.aOpModRegWord[this.getIPByte()].call(this, X86.fnCMPw);
+    this.decodeModRegWord.call(this, X86.fnCMPw);
 };
 
 /**
@@ -1440,7 +1439,7 @@ X86.opPOPA = function()
  */
 X86.opBOUND = function()
 {
-    this.aOpModRegWord[this.getIPByte()].call(this, X86.fnBOUND);
+    this.decodeModRegWord.call(this, X86.fnBOUND);
 };
 
 /**
@@ -1475,7 +1474,7 @@ X86.opARPL = function()
         X86.opInvalid.call(this);
         return;
     }
-    this.aOpModMemWord[this.getIPByte()].call(this, X86.fnARPL);
+    this.decodeModMemWord.call(this, X86.fnARPL);
 };
 
 /**
@@ -1593,7 +1592,7 @@ X86.opPUSHn = function()
  */
 X86.opIMULn = function()
 {
-    this.aOpModRegWord[this.getIPByte()].call(this, X86.fnIMULn);
+    this.decodeModRegWord.call(this, X86.fnIMULn);
 };
 
 /**
@@ -1615,7 +1614,7 @@ X86.opPUSH8 = function()
  */
 X86.opIMUL8 = function()
 {
-    this.aOpModRegWord[this.getIPByte()].call(this, X86.fnIMUL8);
+    this.decodeModRegWord.call(this, X86.fnIMUL8);
 };
 
 /**
@@ -2082,7 +2081,7 @@ X86.opJNLE = function()
  */
 X86.opGRP1b = function()
 {
-    this.aOpModGrpByte[this.getIPByte()].call(this, X86.aOpGrp1b, this.getIPByte);
+    this.decodeModGrpByte.call(this, X86.aOpGrp1b, this.getIPByte);
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? 1 : this.cycleCounts.nOpCyclesArithMID);
 };
 
@@ -2093,7 +2092,7 @@ X86.opGRP1b = function()
  */
 X86.opGRP1w = function()
 {
-    this.aOpModGrpWord[this.getIPByte()].call(this, X86.aOpGrp1w, this.getIPWord);
+    this.decodeModGrpWord.call(this, X86.aOpGrp1w, this.getIPWord);
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? 1 : this.cycleCounts.nOpCyclesArithMID);
 };
 
@@ -2108,7 +2107,7 @@ X86.opGRP1w = function()
  */
 X86.opGRP1sw = function()
 {
-    this.aOpModGrpWord[this.getIPByte()].call(this, X86.aOpGrp1w, this.getIPDisp);
+    this.decodeModGrpWord.call(this, X86.aOpGrp1w, this.getIPDisp);
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? 1 : this.cycleCounts.nOpCyclesArithMID);
 };
 
@@ -2119,7 +2118,7 @@ X86.opGRP1sw = function()
  */
 X86.opTESTrb = function()
 {
-    this.aOpModMemByte[this.getIPByte()].call(this, X86.fnTESTb);
+    this.decodeModMemByte.call(this, X86.fnTESTb);
 };
 
 /**
@@ -2129,7 +2128,7 @@ X86.opTESTrb = function()
  */
 X86.opTESTrw = function()
 {
-    this.aOpModMemWord[this.getIPByte()].call(this, X86.fnTESTw);
+    this.decodeModMemWord.call(this, X86.fnTESTw);
 };
 
 /**
@@ -2162,7 +2161,7 @@ X86.opXCHGrb = function()
      *          this.regEDX = (this.regEDX & 0xff) | (b << 8);
      *      }
      */
-    this.aOpModRegByte[this.bModRM = this.getIPByte()].call(this, X86.fnXCHGrb);
+    this.decodeModRegByte.call(this, X86.fnXCHGrb);
 };
 
 /**
@@ -2175,7 +2174,7 @@ X86.opXCHGrb = function()
  */
 X86.opXCHGrw = function()
 {
-    this.aOpModRegWord[this.bModRM = this.getIPByte()].call(this, X86.fnXCHGrw);
+    this.decodeModRegWord.call(this, X86.fnXCHGrw);
 };
 
 /**
@@ -2189,7 +2188,7 @@ X86.opMOVmb = function()
      * Like other MOV operations, the destination does not need to be read, just written.
      */
     this.opFlags |= X86.OPFLAG.NOREAD;
-    this.aOpModMemByte[this.getIPByte()].call(this, X86.fnMOV);
+    this.decodeModMemByte.call(this, X86.fnMOV);
 };
 
 /**
@@ -2203,7 +2202,7 @@ X86.opMOVmw = function()
      * Like other MOV operations, the destination does not need to be read, just written.
      */
     this.opFlags |= X86.OPFLAG.NOREAD;
-    this.aOpModMemWord[this.getIPByte()].call(this, X86.fnMOV);
+    this.decodeModMemWord.call(this, X86.fnMOV);
 };
 
 /**
@@ -2213,7 +2212,7 @@ X86.opMOVmw = function()
  */
 X86.opMOVrb = function()
 {
-    this.aOpModRegByte[this.getIPByte()].call(this, X86.fnMOV);
+    this.decodeModRegByte.call(this, X86.fnMOV);
 };
 
 /**
@@ -2223,57 +2222,24 @@ X86.opMOVrb = function()
  */
 X86.opMOVrw = function()
 {
-    this.aOpModRegWord[this.getIPByte()].call(this, X86.fnMOV);
+    this.decodeModRegWord.call(this, X86.fnMOV);
 };
 
 /**
  * op=0x8C (MOV word,sreg)
  *
- * NOTE: Since the ModRM decoders deal only with general-purpose registers, we must move
- * the appropriate segment register into a special variable (regXX), which our helper function
- * (fnMOVxx) will use to replace the decoder's src operand.
+ * NOTE: Since the ModRM decoders deal only with general-purpose registers, we rely on our helper
+ * function (fnMOVwsr) to select the appropriate segment register and replace the decoder's src operand.
  *
  * @this {X86CPU}
  */
 X86.opMOVwsr = function()
 {
-    var bModRM = this.getIPByte();
-    var reg = (bModRM & 0x38) >> 3;
-    switch (reg) {
-    case 0x0:
-        this.regXX = this.segES.sel;
-        break;
-    case 0x1:
-        this.regXX = this.segCS.sel;
-        break;
-    case 0x2:
-        this.regXX = this.segSS.sel;
-        break;
-    case 0x3:
-        this.regXX = this.segDS.sel;
-        break;
-    case 0x4:
-        if (I386 && this.model >= X86.MODEL_80386) {
-            this.regXX = this.segFS.sel;
-            break;
-        }
-        X86.opInvalid.call(this);
-        return;
-    case 0x5:
-        if (I386 && this.model >= X86.MODEL_80386) {
-            this.regXX = this.segGS.sel;
-            break;
-        }
-        /* falls through */
-    default:
-        X86.opInvalid.call(this);
-        return;
-    }
     /*
      * Like other MOV operations, the destination does not need to be read, just written.
      */
     this.opFlags |= X86.OPFLAG.NOREAD;
-    this.aOpModMemWord[bModRM].call(this, X86.fnMOVxx);
+    this.decodeModMemWord.call(this, X86.fnMOVwsr);
 };
 
 /**
@@ -2285,84 +2251,46 @@ X86.opLEA = function()
 {
     this.opFlags |= X86.OPFLAG.NOREAD;
     this.segData = this.segStack = this.segNULL;    // we can't have the EA calculation, if any, "polluted" by segment arithmetic
-    this.aOpModRegWord[this.getIPByte()].call(this, X86.fnLEA);
+    this.decodeModRegWord.call(this, X86.fnLEA);
 };
 
 /**
  * op=0x8E (MOV sreg,word)
  *
- * NOTE: Since the ModRM decoders deal only with general-purpose registers, we have to
- * make a note of which general-purpose register will be overwritten, so that we can restore it
- * after moving the modified value to the correct segment register.
+ * NOTE: Since the ModRM decoders deal only with general-purpose registers, we rely on our
+ * helper function (fnMOVsrw) to make a note of which general-purpose register will be overwritten,
+ * so that we can restore it after moving the updated value to the correct segment register.
  *
  * @this {X86CPU}
  */
 X86.opMOVsrw = function()
 {
-    var temp, sel;
-    var bModRM = this.getIPByte();
-    var reg = (bModRM & 0x38) >> 3;
-    switch(reg) {
-    case 0x0:
-        temp = this.regEAX;
-        break;
-    case 0x2:
-        temp = this.regEDX;
-        break;
-    case 0x3:
-        temp = this.regEBX;
-        break;
-    default:
-        if (this.model == X86.MODEL_80286 || this.model == X86.MODEL_80386 && reg != 0x4 && reg != 0x5) {
-            X86.opInvalid.call(this);
-            return;
-        }
-        switch(reg) {
-        case 0x1:           // MOV to CS is undocumented on 8086/8088/80186/80188, and invalid on 80286 and up
-            temp = this.regECX;
-            break;
-        case 0x4:           // this form of MOV to ES is undocumented on 8086/8088/80186/80188, invalid on 80286, and uses FS starting with 80386
-            temp = this.getSP();
-            break;
-        case 0x5:           // this form of MOV to CS is undocumented on 8086/8088/80186/80188, invalid on 80286, and uses GS starting with 80386
-            temp = this.regEBP;
-            break;
-        case 0x6:           // this form of MOV to SS is undocumented on 8086/8088/80186/80188, invalid on 80286 and up
-            temp = this.regESI;
-            break;
-        case 0x7:           // this form of MOV to DS is undocumented on 8086/8088/80186/80188, invalid on 80286 and up
-            temp = this.regEDI;
-            break;
-        default:
-            break;
-        }
-        break;
-    }
-    this.aOpModRegWord[bModRM].call(this, X86.fnMOV);
-    switch (reg) {
+    var sel;
+    this.decodeModRegWord.call(this, X86.fnMOVsrw);
+    switch ((this.bModRM >> 3) & 0x7) {
     case 0x0:
         sel = this.regEAX;
-        this.regEAX = temp;
+        this.regEAX = this.regXX;
         this.setES(sel);
         break;
     case 0x1:
         sel = this.regECX;
-        this.regECX = temp;
+        this.regECX = this.regXX;
         this.setCS(sel);
         break;
     case 0x2:
         sel = this.regEDX;
-        this.regEDX = temp;
+        this.regEDX = this.regXX;
         this.setSS(sel);
         break;
     case 0x3:
         sel = this.regEBX;
-        this.regEBX = temp;
+        this.regEBX = this.regXX;
         this.setDS(sel);
         break;
     case 0x4:
         sel = this.getSP();
-        this.setSP(temp);
+        this.setSP(this.regXX);
         if (I386 && this.model >= X86.MODEL_80386) {
             this.setFS(sel);
         } else {
@@ -2371,7 +2299,7 @@ X86.opMOVsrw = function()
         break;
     case 0x5:
         sel = this.regEBP;
-        this.regEBP = temp;
+        this.regEBP = this.regXX;
         if (I386 && this.model >= X86.MODEL_80386) {
             this.setGS(sel);
         } else {
@@ -2380,12 +2308,12 @@ X86.opMOVsrw = function()
         break;
     case 0x6:
         sel = this.regESI;
-        this.regESI = temp;
+        this.regESI = this.regXX;
         this.setSS(sel);
         break;
     case 0x7:
         sel = this.regEDI;
-        this.regEDI = temp;
+        this.regEDI = this.regXX;
         this.setDS(sel);
         break;
     }
@@ -2425,7 +2353,7 @@ X86.opPOPmw = function()
      */
     this.regXX = this.popWord();
 
-    this.aOpModGrpWord[this.getIPByte()].call(this, X86.aOpGrpPOPw, X86.fnSRCxx);
+    this.decodeModGrpWord.call(this, X86.aOpGrpPOPw, X86.fnSRCxx);
 
     this.opLSP = X86.ADDR_INVALID;
 };
@@ -2873,7 +2801,8 @@ X86.opCMPSb = function()
     }
     if (nReps--) {
         var bDst = this.getEAByte(this.segData, this.regESI & maskAddr);
-        var bSrc = this.modEAByte(this.segES, this.regEDI & maskAddr);
+        var bSrc = this.getEAByte(this.segES, this.regEDI & maskAddr);
+        this.regEAWrite = this.regEA;           // TODO: Is this necessary?
         /*
          * fnFault() throws exceptions now, so inline checks of X86.OPFLAG.FAULT should no longer be necessary.
          *
@@ -2920,7 +2849,8 @@ X86.opCMPSw = function()
     }
     if (nReps--) {
         var wDst = this.getEAWord(this.segData, this.regESI & maskAddr);
-        var wSrc = this.modEAWord(this.segES, this.regEDI & maskAddr);
+        var wSrc = this.getEAWord(this.segES, this.regEDI & maskAddr);
+        this.regEAWrite = this.regEA;           // TODO: Is this necessary?
         /*
          * fnFault() throws exceptions now, so inline checks of X86.OPFLAG.FAULT should no longer be necessary.
          *
@@ -3162,7 +3092,10 @@ X86.opSCASb = function()
         if (!(this.opPrefixes & X86.OPFLAG.REPEAT)) this.nStepCycles -= this.cycleCounts.nOpCyclesScaSr0;
     }
     if (nReps--) {
-        X86.fnCMPb.call(this, this.regEAX & 0xff, this.modEAByte(this.segES, this.regEDI & maskAddr));
+        var bDst = this.regEAX & 0xff;
+        var bSrc = this.getEAByte(this.segES, this.regEDI & maskAddr);
+        this.regEAWrite = this.regEA;           // TODO: Is this necessary?
+        X86.fnCMPb.call(this, bDst, bSrc);
         /*
          * fnFault() throws exceptions now, so inline checks of X86.OPFLAG.FAULT should no longer be necessary.
          *
@@ -3205,7 +3138,10 @@ X86.opSCASw = function()
         if (!(this.opPrefixes & X86.OPFLAG.REPEAT)) this.nStepCycles -= this.cycleCounts.nOpCyclesScaSr0;
     }
     if (nReps--) {
-        X86.fnCMPw.call(this, this.regEAX & this.maskData, this.modEAWord(this.segES, this.regEDI & maskAddr));
+        var wDst = this.regEAX & this.maskData;
+        var wSrc = this.getEAWord(this.segES, this.regEDI & maskAddr);
+        this.regEAWrite = this.regEA;           // TODO: Is this necessary?
+        X86.fnCMPw.call(this, wDst, wSrc);
         /*
          * fnFault() throws exceptions now, so inline checks of X86.OPFLAG.FAULT should no longer be necessary.
          *
@@ -3441,7 +3377,7 @@ X86.opMOVDI = function()
  */
 X86.opGRP2bn = function()
 {
-    this.aOpModGrpByte[this.getIPByte()].call(this, X86.aOpGrp2b, X86.fnSRCByte);
+    this.decodeModGrpByte.call(this, X86.aOpGrp2b, X86.fnSRCByte);
 };
 
 /**
@@ -3451,7 +3387,7 @@ X86.opGRP2bn = function()
  */
 X86.opGRP2wn = function()
 {
-    this.aOpModGrpWord[this.getIPByte()].call(this, this.sizeData == 2? X86.aOpGrp2w : X86.aOpGrp2d, X86.fnSRCByte);
+    this.decodeModGrpWord.call(this, this.sizeData == 2? X86.aOpGrp2w : X86.aOpGrp2d, X86.fnSRCByte);
 };
 
 /**
@@ -3489,7 +3425,7 @@ X86.opRET = function()
  */
 X86.opLES = function()
 {
-    this.aOpModRegWord[this.getIPByte()].call(this, X86.fnLES);
+    this.decodeModRegWord.call(this, X86.fnLES);
 };
 
 /**
@@ -3501,7 +3437,7 @@ X86.opLES = function()
  */
 X86.opLDS = function()
 {
-    this.aOpModRegWord[this.getIPByte()].call(this, X86.fnLDS);
+    this.decodeModRegWord.call(this, X86.fnLDS);
 };
 
 /**
@@ -3515,7 +3451,7 @@ X86.opMOVb = function()
      * Like other MOV operations, the destination does not need to be read, just written.
      */
     this.opFlags |= X86.OPFLAG.NOREAD;
-    this.aOpModGrpByte[this.getIPByte()].call(this, X86.aOpGrpMOVn, this.getIPByte);
+    this.decodeModGrpByte.call(this, X86.aOpGrpMOVn, this.getIPByte);
 };
 
 /**
@@ -3529,7 +3465,7 @@ X86.opMOVw = function()
      * Like other MOV operations, the destination does not need to be read, just written.
      */
     this.opFlags |= X86.OPFLAG.NOREAD;
-    this.aOpModGrpWord[this.getIPByte()].call(this, X86.aOpGrpMOVn, this.getIPWord);
+    this.decodeModGrpWord.call(this, X86.aOpGrpMOVn, this.getIPWord);
 };
 
 /**
@@ -3710,7 +3646,7 @@ X86.opIRET = function()
  */
 X86.opGRP2b1 = function()
 {
-    this.aOpModGrpByte[this.getIPByte()].call(this, X86.aOpGrp2b, X86.fnSRC1);
+    this.decodeModGrpByte.call(this, X86.aOpGrp2b, X86.fnSRC1);
 };
 
 /**
@@ -3720,7 +3656,7 @@ X86.opGRP2b1 = function()
  */
 X86.opGRP2w1 = function()
 {
-    this.aOpModGrpWord[this.getIPByte()].call(this, this.sizeData == 2? X86.aOpGrp2w : X86.aOpGrp2d, X86.fnSRC1);
+    this.decodeModGrpWord.call(this, this.sizeData == 2? X86.aOpGrp2w : X86.aOpGrp2d, X86.fnSRC1);
 };
 
 /**
@@ -3730,7 +3666,7 @@ X86.opGRP2w1 = function()
  */
 X86.opGRP2bCL = function()
 {
-    this.aOpModGrpByte[this.getIPByte()].call(this, X86.aOpGrp2b, X86.fnSRCCL);
+    this.decodeModGrpByte.call(this, X86.aOpGrp2b, X86.fnSRCCL);
 };
 
 /**
@@ -3740,7 +3676,7 @@ X86.opGRP2bCL = function()
  */
 X86.opGRP2wCL = function()
 {
-    this.aOpModGrpWord[this.getIPByte()].call(this, this.sizeData == 2? X86.aOpGrp2w : X86.aOpGrp2d, X86.fnSRCCL);
+    this.decodeModGrpWord.call(this, this.sizeData == 2? X86.aOpGrp2w : X86.aOpGrp2d, X86.fnSRCCL);
 };
 
 /**
@@ -3882,7 +3818,7 @@ X86.opXLAT = function()
 X86.opESC = function(bOpcode)
 {
     this.bOpcode = bOpcode;
-    this.aOpModRegWord[this.bModRM = this.getIPByte()].call(this, X86.fnESC);
+    this.decodeModRegWord.call(this, X86.fnESC);
 };
 
 /**
@@ -4356,7 +4292,7 @@ X86.opCMC = function()
 X86.opGRP3b = function()
 {
     this.fMDSet = false;
-    this.aOpModGrpByte[this.getIPByte()].call(this, X86.aOpGrp3b, X86.fnSRCNone);
+    this.decodeModGrpByte.call(this, X86.aOpGrp3b, X86.fnSRCNone);
     if (this.fMDSet) this.regEAX = (this.regEAX & ~this.maskData) | (this.regMDLo & this.maskData);
 };
 
@@ -4382,7 +4318,7 @@ X86.opGRP3b = function()
 X86.opGRP3w = function()
 {
     this.fMDSet = false;
-    this.aOpModGrpWord[this.getIPByte()].call(this, X86.aOpGrp3w, X86.fnSRCNone);
+    this.decodeModGrpWord.call(this, X86.aOpGrp3w, X86.fnSRCNone);
     if (this.fMDSet) {
         this.regEAX = (this.regEAX & ~this.maskData) | (this.regMDLo & this.maskData);
         this.regEDX = (this.regEDX & ~this.maskData) | (this.regMDHi & this.maskData);
@@ -4481,7 +4417,7 @@ X86.opSTD = function()
  */
 X86.opGRP4b = function()
 {
-    this.aOpModGrpByte[this.getIPByte()].call(this, X86.aOpGrp4b, X86.fnSRCNone);
+    this.decodeModGrpByte.call(this, X86.aOpGrp4b, X86.fnSRCNone);
 };
 
 /**
@@ -4491,7 +4427,7 @@ X86.opGRP4b = function()
  */
 X86.opGRP4w = function()
 {
-    this.aOpModGrpWord[this.getIPByte()].call(this, X86.aOpGrp4w, X86.fnSRCNone);
+    this.decodeModGrpWord.call(this, X86.aOpGrp4w, X86.fnSRCNone);
 };
 
 /**

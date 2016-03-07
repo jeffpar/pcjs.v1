@@ -1,5 +1,5 @@
 /**
- * @fileoverview Implements PCjs control flow helpers.
+ * @fileoverview Implements PCjs control flow functions.
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @version 1.0
  * Created 2016-Mar-04
