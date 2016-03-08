@@ -37,17 +37,15 @@ if (NODE) {
 }
 
 /**
- * decodeModRegByte16(bModRM, fn)
+ * decodeModRegByte16(fn)
  *
  * @this {X86CPU}
- * @param {number} bModRM
  * @param {function(number,number)} fn (dst,src)
  */
-X86.decodeModRegByte16 = function(bModRM, fn)
+X86.decodeModRegByte16 = function(fn)
 {
     var dst, src;
-    this.bModRM = bModRM;
-    bModRM &= 0xC7;
+    var bModRM = (this.bModRM = this.getIPByte()) & 0xC7;
 
     switch(bModRM) {
     case 0x00:
@@ -184,7 +182,7 @@ X86.decodeModRegByte16 = function(bModRM, fn)
         break;
     }
 
-    var reg = (bModRM >> 3) & 0x7;
+    var reg = (this.bModRM >> 3) & 0x7;
 
     switch(reg) {
     case 0x0:
@@ -255,17 +253,15 @@ X86.decodeModRegByte16 = function(bModRM, fn)
 };
 
 /**
- * decodeModMemByte16(bModRM, fn)
+ * decodeModMemByte16(fn)
  *
  * @this {X86CPU}
- * @param {number} bModRM
  * @param {function(number,number)} fn (dst,src)
  */
-X86.decodeModMemByte16 = function(bModRM, fn)
+X86.decodeModMemByte16 = function(fn)
 {
     var dst, src;
-    this.bModRM = bModRM;
-    bModRM &= 0xC7;
+    var bModRM = (this.bModRM = this.getIPByte()) & 0xC7;
 
     switch(bModRM) {
     case 0x00:
@@ -394,7 +390,7 @@ X86.decodeModMemByte16 = function(bModRM, fn)
         break;
     }
 
-    var reg = (bModRM >> 3) & 0x7;
+    var reg = (this.bModRM >> 3) & 0x7;
 
     switch(reg) {
     case 0x0:
@@ -521,7 +517,7 @@ X86.decodeModMemByte16 = function(bModRM, fn)
 };
 
 /**
- * decodeModGrpByte16(bModRM, afnGrp, fnSrc)
+ * decodeModGrpByte16(afnGrp, fnSrc)
  *
  * @this {X86CPU}
  * @param {Array.<function(number,number)>} afnGrp
@@ -658,7 +654,7 @@ X86.decodeModGrpByte16 = function(afnGrp, fnSrc) {
         break;
     }
 
-    var reg = (bModRM >> 3) & 0x7;
+    var reg = (this.bModRM >> 3) & 0x7;
 
     var b = afnGrp[reg].call(this, dst, fnSrc.call(this));
 
@@ -897,7 +893,7 @@ X86.decodeModRegShort16 = function(fn)
         break;
     }
 
-    var reg = (bModRM >> 3) & 0x7;
+    var reg = (this.bModRM >> 3) & 0x7;
 
     switch(reg) {
     case 0x0:
@@ -1118,7 +1114,7 @@ X86.decodeModMemShort16 = function(fn)
         break;
     }
 
-    var reg = (bModRM >> 3) & 0x7;
+    var reg = (this.bModRM >> 3) & 0x7;
 
     switch(reg) {
     case 0x0:
@@ -1411,7 +1407,7 @@ X86.decodeModGrpShort16 = function(afnGrp, fnSrc) {
         break;
     }
 
-    var reg = (bModRM >> 3) & 0x7;
+    var reg = (this.bModRM >> 3) & 0x7;
 
     var w = afnGrp[reg].call(this, dst, fnSrc.call(this));
 
@@ -1650,7 +1646,7 @@ X86.decodeModRegLong16 = function(fn)
         break;
     }
 
-    var reg = (bModRM >> 3) & 0x7;
+    var reg = (this.bModRM >> 3) & 0x7;
 
     switch(reg) {
     case 0x0:
@@ -1871,7 +1867,7 @@ X86.decodeModMemLong16 = function(fn)
         break;
     }
 
-    var reg = (bModRM >> 3) & 0x7;
+    var reg = (this.bModRM >> 3) & 0x7;
 
     switch(reg) {
     case 0x0:
@@ -2163,7 +2159,7 @@ X86.decodeModGrpLong16 = function(afnGrp, fnSrc) {
         break;
     }
 
-    var reg = (bModRM >> 3) & 0x7;
+    var reg = (this.bModRM >> 3) & 0x7;
 
     var l = afnGrp[reg].call(this, dst, fnSrc.call(this));
 
@@ -2362,7 +2358,7 @@ X86.decodeModRegByte32 = function(fn)
         break;
     }
 
-    var reg = (bModRM >> 3) & 0x7;
+    var reg = (this.bModRM >> 3) & 0x7;
 
     switch(reg) {
     case 0x0:
@@ -2570,7 +2566,7 @@ X86.decodeModMemByte32 = function(fn)
         break;
     }
 
-    var reg = (bModRM >> 3) & 0x7;
+    var reg = (this.bModRM >> 3) & 0x7;
 
     switch(reg) {
     case 0x0:
@@ -2789,7 +2785,7 @@ X86.decodeModGrpByte32 = function(afnGrp, fnSrc) {
         break;
     }
 
-    var reg = (bModRM >> 3) & 0x7;
+    var reg = (this.bModRM >> 3) & 0x7;
 
     var b = afnGrp[reg].call(this, dst, fnSrc.call(this));
 
@@ -2962,7 +2958,7 @@ X86.decodeModRegShort32 = function(fn)
         break;
     }
 
-    var reg = (bModRM >> 3) & 0x7;
+    var reg = (this.bModRM >> 3) & 0x7;
 
     switch(reg) {
     case 0x0:
@@ -3183,7 +3179,7 @@ X86.decodeModMemShort32 = function(fn)
         break;
     }
 
-    var reg = (bModRM >> 3) & 0x7;
+    var reg = (this.bModRM >> 3) & 0x7;
 
     switch(reg) {
     case 0x0:
@@ -3431,7 +3427,7 @@ X86.decodeModGrpShort32 = function(afnGrp, fnSrc) {
         break;
     }
 
-    var reg = (bModRM >> 3) & 0x7;
+    var reg = (this.bModRM >> 3) & 0x7;
 
     var w = afnGrp[reg].call(this, dst, fnSrc.call(this));
 
@@ -3604,7 +3600,7 @@ X86.decodeModRegLong32 = function(fn)
         break;
     }
 
-    var reg = (bModRM >> 3) & 0x7;
+    var reg = (this.bModRM >> 3) & 0x7;
 
     switch(reg) {
     case 0x0:
@@ -3825,7 +3821,7 @@ X86.decodeModMemLong32 = function(fn)
         break;
     }
 
-    var reg = (bModRM >> 3) & 0x7;
+    var reg = (this.bModRM >> 3) & 0x7;
 
     switch(reg) {
     case 0x0:
@@ -4073,7 +4069,7 @@ X86.decodeModGrpLong32 = function(afnGrp, fnSrc) {
         break;
     }
 
-    var reg = (bModRM >> 3) & 0x7;
+    var reg = (this.bModRM >> 3) & 0x7;
 
     var l = afnGrp[reg].call(this, dst, fnSrc.call(this));
 

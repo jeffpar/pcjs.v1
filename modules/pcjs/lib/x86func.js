@@ -735,6 +735,60 @@ X86.fnESC = function(dst, src)
 };
 
 /**
+ * fnGRPFault(dst, src)
+ *
+ * @this {X86CPU}
+ * @param {number} dst
+ * @param {number} src
+ * @return {number}
+ */
+X86.fnGRPFault = function(dst, src)
+{
+    /*
+     * This should NEVER be called on 8086/8088 CPUs, and yet we preset some of the handlers in aOpGrpPOPw,
+     * aOpGrp4b, and aOpGrp4w to call it.  initProcessor() DOES patch aOpGrp4b[0x07] and aOpGrp4w[0x07] to
+     * fnGRPInvalid, but that's it.
+     *
+     * However, given the infrequency of this call, it's simpler to continue presetting all the handlers in
+     * aOpGrpPOPw to their post-8086 default, and deal with the appropriate 8086 behavior here (which for now,
+     * is to call fnGRPUndefined instead).
+     */
+    if (this.model < X86.MODEL_80186) {
+        return X86.fnGRPUndefined.call(this, dst, src);
+    }
+    X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
+    return dst;
+};
+
+/**
+ * fnGRPInvalid(dst, src)
+ *
+ * @this {X86CPU}
+ * @param {number} dst
+ * @param {number} src
+ * @return {number}
+ */
+X86.fnGRPInvalid = function(dst, src)
+{
+    X86.opInvalid.call(this);
+    return dst;
+};
+
+/**
+ * fnGRPUndefined(dst, src)
+ *
+ * @this {X86CPU}
+ * @param {number} dst
+ * @param {number} src
+ * @return {number}
+ */
+X86.fnGRPUndefined = function(dst, src)
+{
+    X86.opUndefined.call(this);
+    return dst;
+};
+
+/**
  * fnIDIVb(dst, src)
  *
  * @this {X86CPU}
