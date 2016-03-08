@@ -2800,8 +2800,8 @@ X86.opCMPSb = function()
         if (!(this.opPrefixes & X86.OPFLAG.REPEAT)) this.nStepCycles -= this.cycleCounts.nOpCyclesCmpSr0;
     }
     if (nReps--) {
-        var bDst = this.getEAByte(this.segData, this.regESI & maskAddr);
-        var bSrc = this.getEAByte(this.segES, this.regEDI & maskAddr);
+        var bDst = this.getEAByte(this.segData, this.regESI);
+        var bSrc = this.getEAByte(this.segES, this.regEDI);
         this.regEAWrite = this.regEA;           // TODO: Is this necessary?
         /*
          * fnFault() throws exceptions now, so inline checks of X86.OPFLAG.FAULT should no longer be necessary.
@@ -3093,7 +3093,7 @@ X86.opSCASb = function()
     }
     if (nReps--) {
         var bDst = this.regEAX & 0xff;
-        var bSrc = this.getEAByte(this.segES, this.regEDI & maskAddr);
+        var bSrc = this.getEAByte(this.segES, this.regEDI);
         this.regEAWrite = this.regEA;           // TODO: Is this necessary?
         X86.fnCMPb.call(this, bDst, bSrc);
         /*
@@ -3802,10 +3802,9 @@ X86.opSALC = function()
 X86.opXLAT = function()
 {
     /*
-     * NOTE: I have no idea whether XLAT actually wraps the 16-bit address calculation;
-     * I'm masking it as if it does, but I need to run a test on real hardware to be sure.
+     * TODO: Verify whether XLAT wraps its address calculation....
      */
-    this.regEAX = (this.regEAX & ~0xff) | this.getEAByte(this.segData, ((this.regEBX + (this.regEAX & 0xff)) & 0xffff));
+    this.regEAX = (this.regEAX & ~0xff) | this.getEAByte(this.segData, (this.regEBX + (this.regEAX & 0xff)));
     this.nStepCycles -= this.cycleCounts.nOpCyclesXLAT;
 };
 

@@ -3299,7 +3299,8 @@ X86CPU.prototype.setLong = function setLong(addr, l)
 X86CPU.prototype.getEAByte = function(seg, off)
 {
     this.segEA = seg;
-    this.regEA = seg.checkRead(this.offEA = off, 1);
+    this.offEA = off & (I386? this.maskAddr : 0xffff);
+    this.regEA = seg.checkRead(this.offEA, 1);
     if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
     var b = this.getByte(this.regEA);
     if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiMem0;
@@ -3315,7 +3316,7 @@ X86CPU.prototype.getEAByte = function(seg, off)
  */
 X86CPU.prototype.getEAByteData = function(off)
 {
-    return this.getEAByte(this.segData, off & (I386? this.maskAddr : 0xffff));
+    return this.getEAByte(this.segData, off);
 };
 
 /**
@@ -3327,7 +3328,29 @@ X86CPU.prototype.getEAByteData = function(off)
  */
 X86CPU.prototype.getEAByteStack = function(off)
 {
-    return this.getEAByte(this.segStack, off & (I386? this.maskAddr : 0xffff));
+    return this.getEAByte(this.segStack, off);
+};
+
+/**
+ * getEAWord(seg, off)
+ *
+ * @this {X86CPU}
+ * @param {X86Seg} seg register (eg, segDS)
+ * @param {number} off is a segment-relative offset
+ * @return {number} word (16-bit) value at that address
+ */
+X86CPU.prototype.getEAWord = function(seg, off)
+{
+    this.segEA = seg;
+    this.offEA = off & (I386? this.maskAddr : 0xffff);
+    this.regEA = seg.checkRead(this.offEA, (I386? this.sizeData : 2));
+    if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
+    var w = this.getWord(this.regEA);
+    if (BACKTRACK) {
+        this.backTrack.btiEALo = this.backTrack.btiMem0;
+        this.backTrack.btiEAHi = this.backTrack.btiMem1;
+    }
+    return w;
 };
 
 /**
@@ -3335,7 +3358,7 @@ X86CPU.prototype.getEAByteStack = function(off)
  *
  * @this {X86CPU}
  * @param {number} off is a segment-relative offset
- * @return {number} word (16-bit) value at that address
+ * @return {number} short (16-bit) value at that address
  */
 X86CPU.prototype.getEAShortData = function(off)
 {
@@ -3356,7 +3379,7 @@ X86CPU.prototype.getEAShortData = function(off)
  *
  * @this {X86CPU}
  * @param {number} off is a segment-relative offset
- * @return {number} word (16-bit) value at that address
+ * @return {number} short (16-bit) value at that address
  */
 X86CPU.prototype.getEAShortStack = function(off)
 {
@@ -3377,12 +3400,13 @@ X86CPU.prototype.getEAShortStack = function(off)
  *
  * @this {X86CPU}
  * @param {number} off is a segment-relative offset
- * @return {number} word (16-bit) value at that address
+ * @return {number} long (32-bit) value at that address
  */
 X86CPU.prototype.getEALongData = function(off)
 {
     this.segEA = this.segData;
-    this.regEA = this.segEA.checkRead(this.offEA = off, 4);
+    this.offEA = off & (I386? this.maskAddr : 0xffff);
+    this.regEA = this.segEA.checkRead(this.offEA, 4);
     if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
     var w = this.getLong(this.regEA);
     if (BACKTRACK) {
@@ -3397,12 +3421,13 @@ X86CPU.prototype.getEALongData = function(off)
  *
  * @this {X86CPU}
  * @param {number} off is a segment-relative offset
- * @return {number} word (16-bit) value at that address
+ * @return {number} long (32-bit) value at that address
  */
 X86CPU.prototype.getEALongStack = function(off)
 {
     this.segEA = this.segStack;
-    this.regEA = this.segEA.checkRead(this.offEA = off, 4);
+    this.offEA = off & (I386? this.maskAddr : 0xffff);
+    this.regEA = this.segEA.checkRead(this.offEA, 4);
     if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
     var w = this.getLong(this.regEA);
     if (BACKTRACK) {
@@ -3410,51 +3435,6 @@ X86CPU.prototype.getEALongStack = function(off)
         this.backTrack.btiEAHi = this.backTrack.btiMem1;
     }
     return w;
-};
-
-/**
- * getEAWord(seg, off)
- *
- * @this {X86CPU}
- * @param {X86Seg} seg register (eg, segDS)
- * @param {number} off is a segment-relative offset
- * @return {number} word (16-bit) value at that address
- */
-X86CPU.prototype.getEAWord = function(seg, off)
-{
-    this.segEA = seg;
-    this.regEA = seg.checkRead(this.offEA = off, (I386? this.sizeData : 2));
-    if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
-    var w = this.getWord(this.regEA);
-    if (BACKTRACK) {
-        this.backTrack.btiEALo = this.backTrack.btiMem0;
-        this.backTrack.btiEAHi = this.backTrack.btiMem1;
-    }
-    return w;
-};
-
-/**
- * getEAWordData(off)
- *
- * @this {X86CPU}
- * @param {number} off is a segment-relative offset
- * @return {number} word (16-bit) value at that address
- */
-X86CPU.prototype.getEAWordData = function(off)
-{
-    return this.getEAWord(this.segData, off & (I386? this.maskAddr : 0xffff));
-};
-
-/**
- * getEAWordStack(off)
- *
- * @this {X86CPU}
- * @param {number} off is a segment-relative offset
- * @return {number} word (16-bit) value at that address
- */
-X86CPU.prototype.getEAWordStack = function(off)
-{
-    return this.getEAWord(this.segStack, off & (I386? this.maskAddr : 0xffff));
 };
 
 /**

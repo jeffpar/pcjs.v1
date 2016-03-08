@@ -572,9 +572,6 @@ X86.fnCMPb = function(dst, src)
 {
     var b = (dst - src)|0;
     this.setArithResult(dst, src, b, X86.RESULT.BYTE | X86.RESULT.ALL, true);
-    /*
-     * TODO: Verify that it makes sense for any fnCMPb() callers to be setting regEAWrite...
-     */
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesArithRR : this.cycleCounts.nOpCyclesCompareRM) : this.cycleCounts.nOpCyclesArithRM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;
@@ -592,9 +589,6 @@ X86.fnCMPw = function(dst, src)
 {
     var w = (dst - src)|0;
     this.setArithResult(dst, src, w, this.typeData | X86.RESULT.ALL, true);
-    /*
-     * TODO: Verify that it makes sense for any fnCMPw() callers to be setting regEAWrite...
-     */
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesArithRR : this.cycleCounts.nOpCyclesCompareRM) : this.cycleCounts.nOpCyclesArithRM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;

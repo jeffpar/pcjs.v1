@@ -3696,99 +3696,99 @@ X86.decodeModMemLong32 = function(fn)
 
     switch(bModRM) {
     case 0x00:
-        dst = this.getEAByteData(this.regEAX);
+        dst = this.getEALongData(this.regEAX);
         this.regEAWrite = this.regEA;
         break;
     case 0x01:
-        dst = this.getEAByteData(this.regECX);
+        dst = this.getEALongData(this.regECX);
         this.regEAWrite = this.regEA;
         break;
     case 0x02:
-        dst = this.getEAByteData(this.regEDX);
+        dst = this.getEALongData(this.regEDX);
         this.regEAWrite = this.regEA;
         break;
     case 0x03:
-        dst = this.getEAByteData(this.regEBX);
+        dst = this.getEALongData(this.regEBX);
         this.regEAWrite = this.regEA;
         break;
     case 0x04:
-        dst = this.getEAByteData(X86.decodeSIB.call(this, 0));
+        dst = this.getEALongData(X86.decodeSIB.call(this, 0));
         this.regEAWrite = this.regEA;
         break;
     case 0x05:
-        dst = this.getEAByteData(this.getIPAddr());
+        dst = this.getEALongData(this.getIPAddr());
         this.regEAWrite = this.regEA;
         break;
     case 0x06:
-        dst = this.getEAByteData(this.regESI);
+        dst = this.getEALongData(this.regESI);
         this.regEAWrite = this.regEA;
         break;
     case 0x07:
-        dst = this.getEAByteData(this.regEDI);
+        dst = this.getEALongData(this.regEDI);
         this.regEAWrite = this.regEA;
         break;
     case 0x40:
-        dst = this.getEAByteData(this.regEAX + this.getIPDisp());
+        dst = this.getEALongData(this.regEAX + this.getIPDisp());
         this.regEAWrite = this.regEA;
         break;
     case 0x41:
-        dst = this.getEAByteData(this.regECX + this.getIPDisp());
+        dst = this.getEALongData(this.regECX + this.getIPDisp());
         this.regEAWrite = this.regEA;
         break;
     case 0x42:
-        dst = this.getEAByteData(this.regEDX + this.getIPDisp());
+        dst = this.getEALongData(this.regEDX + this.getIPDisp());
         this.regEAWrite = this.regEA;
         break;
     case 0x43:
-        dst = this.getEAByteData(this.regEBX + this.getIPDisp());
+        dst = this.getEALongData(this.regEBX + this.getIPDisp());
         this.regEAWrite = this.regEA;
         break;
     case 0x44:
-        dst = this.getEAByteData(X86.decodeSIB.call(this, 1) + this.getIPDisp());
+        dst = this.getEALongData(X86.decodeSIB.call(this, 1) + this.getIPDisp());
         this.regEAWrite = this.regEA;
         break;
     case 0x45:
-        dst = this.getEAByteStack(this.regEBP + this.getIPDisp());
+        dst = this.getEALongStack(this.regEBP + this.getIPDisp());
         this.regEAWrite = this.regEA;
         break;
     case 0x46:
-        dst = this.getEAByteData(this.regESI + this.getIPDisp());
+        dst = this.getEALongData(this.regESI + this.getIPDisp());
         this.regEAWrite = this.regEA;
         break;
     case 0x47:
-        dst = this.getEAByteData(this.regEDI + this.getIPDisp());
+        dst = this.getEALongData(this.regEDI + this.getIPDisp());
         this.regEAWrite = this.regEA;
         break;
     case 0x80:
-        dst = this.getEAByteData(this.regEAX + this.getIPAddr());
+        dst = this.getEALongData(this.regEAX + this.getIPAddr());
         this.regEAWrite = this.regEA;
         break;
     case 0x81:
-        dst = this.getEAByteData(this.regECX + this.getIPAddr());
+        dst = this.getEALongData(this.regECX + this.getIPAddr());
         this.regEAWrite = this.regEA;
         break;
     case 0x82:
-        dst = this.getEAByteData(this.regEDX + this.getIPAddr());
+        dst = this.getEALongData(this.regEDX + this.getIPAddr());
         this.regEAWrite = this.regEA;
         break;
     case 0x83:
-        dst = this.getEAByteData(this.regEBX + this.getIPAddr());
+        dst = this.getEALongData(this.regEBX + this.getIPAddr());
         this.regEAWrite = this.regEA;
         break;
     case 0x84:
-        dst = this.getEAByteData(X86.decodeSIB.call(this, 2) + this.getIPAddr());
+        dst = this.getEALongData(X86.decodeSIB.call(this, 2) + this.getIPAddr());
         this.regEAWrite = this.regEA;
         break;
     case 0x85:
-        dst = this.getEAByteStack(this.regEBP + this.getIPAddr());
+        dst = this.getEALongStack(this.regEBP + this.getIPAddr());
         this.regEAWrite = this.regEA;
         break;
     case 0x86:
-        dst = this.getEAByteData(this.regESI + this.getIPAddr());
+        dst = this.getEALongData(this.regESI + this.getIPAddr());
         this.regEAWrite = this.regEA;
         break;
     case 0x87:
-        dst = this.getEAByteData(this.regEDI + this.getIPAddr());
+        dst = this.getEALongData(this.regEDI + this.getIPAddr());
         this.regEAWrite = this.regEA;
         break;
     case 0xC0:
@@ -3944,99 +3944,99 @@ X86.decodeModGrpLong32 = function(afnGrp, fnSrc) {
 
     switch(bModRM) {
     case 0x00:
-        dst = this.getEAByteData(this.regEAX);
+        dst = this.getEALongData(this.regEAX);
         this.regEAWrite = this.regEA;
         break;
     case 0x01:
-        dst = this.getEAByteData(this.regECX);
+        dst = this.getEALongData(this.regECX);
         this.regEAWrite = this.regEA;
         break;
     case 0x02:
-        dst = this.getEAByteData(this.regEDX);
+        dst = this.getEALongData(this.regEDX);
         this.regEAWrite = this.regEA;
         break;
     case 0x03:
-        dst = this.getEAByteData(this.regEBX);
+        dst = this.getEALongData(this.regEBX);
         this.regEAWrite = this.regEA;
         break;
     case 0x04:
-        dst = this.getEAByteData(X86.decodeSIB.call(this, 0));
+        dst = this.getEALongData(X86.decodeSIB.call(this, 0));
         this.regEAWrite = this.regEA;
         break;
     case 0x05:
-        dst = this.getEAByteData(this.getIPAddr());
+        dst = this.getEALongData(this.getIPAddr());
         this.regEAWrite = this.regEA;
         break;
     case 0x06:
-        dst = this.getEAByteData(this.regESI);
+        dst = this.getEALongData(this.regESI);
         this.regEAWrite = this.regEA;
         break;
     case 0x07:
-        dst = this.getEAByteData(this.regEDI);
+        dst = this.getEALongData(this.regEDI);
         this.regEAWrite = this.regEA;
         break;
     case 0x40:
-        dst = this.getEAByteData(this.regEAX + this.getIPDisp());
+        dst = this.getEALongData(this.regEAX + this.getIPDisp());
         this.regEAWrite = this.regEA;
         break;
     case 0x41:
-        dst = this.getEAByteData(this.regECX + this.getIPDisp());
+        dst = this.getEALongData(this.regECX + this.getIPDisp());
         this.regEAWrite = this.regEA;
         break;
     case 0x42:
-        dst = this.getEAByteData(this.regEDX + this.getIPDisp());
+        dst = this.getEALongData(this.regEDX + this.getIPDisp());
         this.regEAWrite = this.regEA;
         break;
     case 0x43:
-        dst = this.getEAByteData(this.regEBX + this.getIPDisp());
+        dst = this.getEALongData(this.regEBX + this.getIPDisp());
         this.regEAWrite = this.regEA;
         break;
     case 0x44:
-        dst = this.getEAByteData(X86.decodeSIB.call(this, 1) + this.getIPDisp());
+        dst = this.getEALongData(X86.decodeSIB.call(this, 1) + this.getIPDisp());
         this.regEAWrite = this.regEA;
         break;
     case 0x45:
-        dst = this.getEAByteStack(this.regEBP + this.getIPDisp());
+        dst = this.getEALongStack(this.regEBP + this.getIPDisp());
         this.regEAWrite = this.regEA;
         break;
     case 0x46:
-        dst = this.getEAByteData(this.regESI + this.getIPDisp());
+        dst = this.getEALongData(this.regESI + this.getIPDisp());
         this.regEAWrite = this.regEA;
         break;
     case 0x47:
-        dst = this.getEAByteData(this.regEDI + this.getIPDisp());
+        dst = this.getEALongData(this.regEDI + this.getIPDisp());
         this.regEAWrite = this.regEA;
         break;
     case 0x80:
-        dst = this.getEAByteData(this.regEAX + this.getIPAddr());
+        dst = this.getEALongData(this.regEAX + this.getIPAddr());
         this.regEAWrite = this.regEA;
         break;
     case 0x81:
-        dst = this.getEAByteData(this.regECX + this.getIPAddr());
+        dst = this.getEALongData(this.regECX + this.getIPAddr());
         this.regEAWrite = this.regEA;
         break;
     case 0x82:
-        dst = this.getEAByteData(this.regEDX + this.getIPAddr());
+        dst = this.getEALongData(this.regEDX + this.getIPAddr());
         this.regEAWrite = this.regEA;
         break;
     case 0x83:
-        dst = this.getEAByteData(this.regEBX + this.getIPAddr());
+        dst = this.getEALongData(this.regEBX + this.getIPAddr());
         this.regEAWrite = this.regEA;
         break;
     case 0x84:
-        dst = this.getEAByteData(X86.decodeSIB.call(this, 2) + this.getIPAddr());
+        dst = this.getEALongData(X86.decodeSIB.call(this, 2) + this.getIPAddr());
         this.regEAWrite = this.regEA;
         break;
     case 0x85:
-        dst = this.getEAByteStack(this.regEBP + this.getIPAddr());
+        dst = this.getEALongStack(this.regEBP + this.getIPAddr());
         this.regEAWrite = this.regEA;
         break;
     case 0x86:
-        dst = this.getEAByteData(this.regESI + this.getIPAddr());
+        dst = this.getEALongData(this.regESI + this.getIPAddr());
         this.regEAWrite = this.regEA;
         break;
     case 0x87:
-        dst = this.getEAByteData(this.regEDI + this.getIPAddr());
+        dst = this.getEALongData(this.regEDI + this.getIPAddr());
         this.regEAWrite = this.regEA;
         break;
     case 0xC0:
