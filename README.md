@@ -110,27 +110,11 @@ and type the following commands:
 
 	git clone git@github.com:jeffpar/pcjs.git pcjs
 	cd pcjs
-	npm install
+	npm install --production
 	node server.js
 
 Now open a web browser and go to `http://localhost:8088/`.  You're done!
  
-If you just want to launch the web server or don't plan to do any development, you can reduce the
-footprint slightly by asking NPM to install only "production" modules (which can also eliminate some
-errors if, for example, you neglected to install Python):
- 
-	npm install --production
-	
-If you ever inadvertently run `npm install` without `--production`, you can easily uninstall all the
-"devDependencies" listed in [package.json](package.json) with this command:
-
-	npm prune --production
-	
-Finally, when installing on an AWS server, although you have complete control over how Node is launched, you
-don't have direct control over NPM; I think the best you can do is set the following AWS "Environment Property":
-
-	NPM_CONFIG_PRODUCTION=true
-	
 The current version of Node ([0.10.32](http://nodejs.org/dist/v0.10.32/node-v0.10.32.pkg) at the time of this
 writing) should work fine, but version [0.10.26](http://nodejs.org/dist/v0.10.26/node-v0.10.26.pkg)
 is what's been used to develop and test PCjs so far.
