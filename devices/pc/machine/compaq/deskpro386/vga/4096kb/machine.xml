@@ -13,7 +13,7 @@
 	<keyboard id="keyboard"/>
 	<debugger id="debugger" messages="" commands=''/>
 	<panel ref="/devices/pc/panel/wide386.xml"/>
-	<hdc id="hdcAT" type="at" drives='[{name:"68Mb Hard Disk",type:4,path:"http://archive.pcjs.org/devices/pc/machine/compaq/deskpro386/vga/4096kb/WIN95-68Mb.json"}]'/>
+	<hdc id="hdcAT" type="at" drives='[{name:"68Mb Hard Disk",type:4,path:"http://archive.pcjs.org/disks/pc/fixed/68mb/win95.json"}]'/>
 	<chipset id="chipset" model="deskpro386" floppies="[1200,1200]" monitor="vga"/>
 	<serial id="com1" adapter="1"/>
 	<serial id="com2" adapter="2" binding="print"/>

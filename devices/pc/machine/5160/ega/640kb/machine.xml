@@ -12,7 +12,7 @@
 	<fdc ref="/disks/pc/compiled/library.xml"/>
 	<keyboard ref="/devices/pc/keyboard/keyboard-minimal-functions.xml"/>
 	<chipset id="chipset" model="5160" sw1="01001101"/>
-	<hdc ref="/disks/pc/fixed/win101-ega.xml"/>
+	<hdc ref="/disks/pc/fixed/10mb/pcdos200-win101-ega.xml"/>
 	<serial id="com2" adapter="2"/>
 	<mouse serial="com2"/>
 </machine>
