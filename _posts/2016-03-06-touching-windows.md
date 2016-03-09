@@ -35,7 +35,7 @@ Another problem is how to differentiate between *moving the mouse* (ie, without 
 (aka Force Touch), and using pressure to determine the user's intent, but most devices don't have that feature,
 and I'm not sure I'd want to rely on that anyway.
 
-The PCjs soution: if you *tap and hold* for more than 200ms, and then start moving, your movements become the
+The PCjs solution: if you *tap and hold* for more than 200ms, and then start moving, your movements become the
 equivalent of a *mouse drag* operation.
 
 This is my first stab at touch-to-mouse conversion, and it's not perfect, but it's already fairly usable,
