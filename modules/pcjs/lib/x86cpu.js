@@ -2190,8 +2190,8 @@ X86CPU.prototype.setIP = function(off)
  */
 X86CPU.prototype.setLIP = function(addr)
 {
-    this.regLIP = addr|0;
-    this.regLIPLimit = (this.segCS.base + this.segCS.limit)|0;
+    this.regLIP = addr;
+    this.regLIPMax = (this.segCS.base >>> 0) + (this.segCS.limit >>> 0) + 1;
 
     /*
      * TODO: Verify the proper source for CPL.  Should it come from segCS.cpl or segCS.dpl?
@@ -2230,8 +2230,7 @@ X86CPU.prototype.setLIP = function(addr)
 X86CPU.prototype.setCSIP = function(off, sel, fCall)
 {
     /*
-     * We break this operation into the following discrete steps (eg, set IP, load CS, and then update IP) so
-     * that segCS.load(sel) has the ability to modify IP when sel refers to a gate (call, interrupt, trap, etc).
+     * Setting IP needs to occur AFTER loadCode(), because it may differ from the given IP if sel refers to a gate.
      */
     var base = this.segCS.loadCode(off, sel, fCall);
     if (base !== X86.ADDR_INVALID) {
@@ -2254,61 +2253,41 @@ X86CPU.prototype.setCSBase = function(addr)
     var regIP = this.getIP();
     addr = this.segCS.setBase(addr);
     this.regLIP = (addr + regIP)|0;
-    this.regLIPLimit = (addr + this.segCS.limit)|0;
+    this.regLIPMax = (addr >>> 0) + (this.segCS.limit >>> 0) + 1;
 };
 
 /**
- * advanceIP(inc)
+ * checkIP(inc)
+ *
+ * TODO: If we didn't care about compatibility, we could just return:
+ *
+ *      (this.regLIP + inc)|0
+ *
+ * and be done with it, because there probably isn't any "good" code that triggers the
+ * "newLIP > this.regLIPMax" condition.  This check costs us about 2Mhz performance on an 80386.
+ *
+ * Turning PREFETCH on tends to offset this performance hit, but PREFETCH *without* this hit would
+ * probably perform even better.
  *
  * @this {X86CPU}
  * @param {number} inc (positive)
+ * @return {number} new LIP
  */
-X86CPU.prototype.advanceIP = function(inc)
+X86CPU.prototype.checkIP = function(inc)
 {
-    // DEBUG: this.assert(inc > 0);
-
-    this.regLIP = (this.regLIP + inc)|0;
-    /*
-     * Properly comparing regLIP to regLIPLimit would normally require coercing both to unsigned
-     * (ie, floating-point) values.  But instead, we do a subtraction, (regLIPLimit - regLIP), and
-     * if the result is negative, we need only be concerned if the signs of both numbers are the same
-     * (ie, the sign of their XOR'ed union is positive).
-     *
-     * TODO: I'm combining the old 8088 address-wrap check with the new segment-limit check,
-     * even though the correct time to do the latter is immediately BEFORE a fetch, not AFTER; eg,
-     * consider the following code:
-     *
-     *      AX=0100 BX=0015 CX=0080 DX=F859 SP=0A62 BP=0A98 SI=0000 DI=0000
-     *      SS=0038[1759E0,0B5F] DS=02E8[0107A0,017F] ES=0970[009700,6949] A20=ON
-     *      CS=02E0[010080,06FB] LD=0028[000000,0000] GD=[11AEE0,4977] ID=[120082,03FF]
-     *      TR=0010 MS=FFF3 PS=3202 V0 D0 I1 T0 S0 Z0 A0 P0 C0
-     *      02E0:06F9 C20400          RET      0004
-     *
-     * After fetching the 3rd byte of the "RET 0004" instruction at CS:06FB, the CPU wants to automatically
-     * advance IP to 06FC, which of course, exceeds the limit, but that doesn't matter unless we actually
-     * fetch a byte from 06FC, which won't happen.  I'm working around this for now by applying a -1
-     * fudge factor to the fault check below.
-     */
-    if (DEBUG) {
+    var newLIP = (this.regLIP >>> 0) + inc;
+    if (newLIP > this.regLIPMax) {
         /*
-         * TODO: This isn't DEBUG code, but it also isn't strictly necessary for properly written code,
-         * and it hurts performance.  Since this effectively turns advanceIP() into a one-line function for
-         * non-DEBUG builds, it should automatically get inlined (either at compile-time by the Closure Compiler
-         * or at run-time by whatever JavaScript engine you're using).
+         * There's no such thing as a GP fault on the 8086/8088, and I'm assuming that,
+         * on newer processors, when the segment limit is the maximum, it's OK for IP to wrap.
          */
-        var off = (this.regLIPLimit - this.regLIP)|0;
-        if (off < 0 && (this.regLIPLimit ^ this.regLIP) >= 0) {
-            /*
-             * There's no such thing as a GP fault on the 8086/8088, and I'm assuming that, on newer
-             * processors, when the segment limit is set to the maximum, it's OK for IP to wrap.
-             */
-            if (this.model <= X86.MODEL_8088 || this.segCS.limit == this.segCS.maskAddr) {
-                this.setIP(this.regLIP - this.segCS.base);
-            } else if (off < -1) {          // fudge factor
-                X86.helpFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
-            }
+        if (this.model <= X86.MODEL_8088 || this.segCS.limit == this.segCS.maskAddr) {
+            newLIP = this.segCS.base + ((newLIP - this.regLIPMax) & (I386? this.maskData : 0xffff));
+        } else {
+            X86.helpFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
         }
     }
+    return newLIP|0;
 };
 
 /**
@@ -3704,9 +3683,10 @@ X86CPU.prototype.refillPrefetch = function()
  */
 X86CPU.prototype.getIPByte = function()
 {
+    var newLIP = this.checkIP(1);
     var b = (PREFETCH? this.getBytePrefetch() : this.getByte(this.regLIP));
     if (BACKTRACK) this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMem0);
-    this.advanceIP(1);
+    this.regLIP = newLIP;
     return b;
 };
 
@@ -3718,12 +3698,13 @@ X86CPU.prototype.getIPByte = function()
  */
 X86CPU.prototype.getIPShort = function()
 {
+    var newLIP = this.checkIP(2);
     var w = (PREFETCH? this.getShortPrefetch() : this.getShort(this.regLIP));
     if (BACKTRACK) {
         this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMem0);
         this.bus.updateBackTrackCode(this.regLIP + 1, this.backTrack.btiMem1);
     }
-    this.advanceIP(2);
+    this.regLIP = newLIP;
     return w;
 };
 
@@ -3735,6 +3716,7 @@ X86CPU.prototype.getIPShort = function()
  *
 X86CPU.prototype.getIPLong = function()
 {
+    var newLIP = this.checkIP(4);
     var l = (PREFETCH? this.getLongPrefetch() : this.getLong(this.regLIP));
     if (BACKTRACK) {
         this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMem0);
@@ -3742,7 +3724,7 @@ X86CPU.prototype.getIPLong = function()
         this.bus.updateBackTrackCode(this.regLIP + 2, this.backTrack.btiMem2);
         this.bus.updateBackTrackCode(this.regLIP + 3, this.backTrack.btiMem3);
     }
-    this.advanceIP(4);
+    this.regLIP = newLIP;
     return l;
 };
  */
@@ -3755,12 +3737,13 @@ X86CPU.prototype.getIPLong = function()
  */
 X86CPU.prototype.getIPAddr = function()
 {
+    var newLIP = this.checkIP(this.sizeAddr);
     var w = (PREFETCH? this.getAddr() : this.getAddr(this.regLIP));
     if (BACKTRACK) {
         this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMem0);
         this.bus.updateBackTrackCode(this.regLIP + 1, this.backTrack.btiMem1);
     }
-    this.advanceIP(this.sizeAddr);
+    this.regLIP = newLIP;
     return w;
 };
 
@@ -3772,12 +3755,13 @@ X86CPU.prototype.getIPAddr = function()
  */
 X86CPU.prototype.getIPWord = function()
 {
+    var newLIP = this.checkIP(this.sizeData);
     var w = (PREFETCH? this.getWordPrefetch() : this.getWord(this.regLIP));
     if (BACKTRACK) {
         this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMem0);
         this.bus.updateBackTrackCode(this.regLIP + 1, this.backTrack.btiMem1);
     }
-    this.advanceIP(this.sizeData);
+    this.regLIP = newLIP;
     return w;
 };
 
@@ -3789,9 +3773,10 @@ X86CPU.prototype.getIPWord = function()
  */
 X86CPU.prototype.getIPDisp = function()
 {
+    var newLIP = this.checkIP(1);
     var w = ((PREFETCH? this.getBytePrefetch() : this.getByte(this.regLIP)) << 24) >> 24;
     if (BACKTRACK) this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMem0);
-    this.advanceIP(1);
+    this.regLIP = newLIP;
     return w;
 };
 

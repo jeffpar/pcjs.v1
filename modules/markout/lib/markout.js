@@ -332,7 +332,7 @@ MarkOut.aHTMLEntities = {
  *      'config' (eg, "machine.xml")
  *      'template' (eg, "machine.xsl")
  *      'uncompiled' (eg, true)
- *      'automount' (eg, {"A":{"name":"OS/2 FOOTBALL Boot Disk (v7.68.17)","path":"/disks/pc/os2/misc/football/debugger/FOOTBALL-7.68.17.json"}})
+ *      'autoMount' (eg, {"A":{"name":"OS/2 FOOTBALL Boot Disk (v7.68.17)","path":"/disks/pc/os2/misc/football/debugger/FOOTBALL-7.68.17.json"}})
  *      'parms'
  *
  * Non-reserved properties include:
@@ -356,7 +356,7 @@ MarkOut.aHTMLEntities = {
 MarkOut.aFMBooleanMachineProps = {
     'autopower': "autoPower"
 };
-MarkOut.aFMReservedMachineProps = ['id', 'name', 'type', 'debugger', 'config', 'template', 'uncompiled', 'automount', 'parms'];
+MarkOut.aFMReservedMachineProps = ['id', 'name', 'type', 'debugger', 'config', 'template', 'uncompiled', 'autoMount', 'parms'];
 
 /**
  * convertMD()
@@ -436,17 +436,18 @@ MarkOut.prototype.convertMD = function(sIndent)
                     }
                     for (var iOption = 0; iOption < aaOptions.length; iOption++) {
                         aOptions = aaOptions[iOption];
-                        var sSpace = aOptions[1], sName = aOptions[2], sValue = aOptions[3];
+                        var sSpace = aOptions[1], sName = aOptions[2].toLowerCase(), sValue = aOptions[3];
+                        if (sName == 'automount') sName = 'autoMount';  // for backward compatibility
                         if (!id && sName == 'id') {
                             id = sValue;
-                        } else if (sName == 'automount') {
+                        } else if (sName == 'autoMount') {
                             /*
-                             * I take a simplistic approach to parsing the object definition associated with "automount",
+                             * I take a simplistic approach to parsing the object definition associated with "autoMount",
                              * because I know it only consists of 1 or more drive letters, each of which may be followed
                              * by 1 or 2 additional properties (eg, "name" and "path").  If we need to support other JSON
                              * object definitions in the future, this will have to be generalized.
                              *
-                             * Here's an example of "automount" output:
+                             * Here's an example of "autoMount" output:
                              *
                              *      {"A":{"name":"OS/2 FOOTBALL Boot Disk (v7.68.17)","path":"/disks/pc/os2/misc/football/debugger/FOOTBALL-7.68.17.json"}}
                              *
@@ -477,7 +478,7 @@ MarkOut.prototype.convertMD = function(sIndent)
                         machine[sName] = sValue;
                     }
                     /*
-                     * Any "non-reserved" properties are now merged into the 'parms' property; 'automount'
+                     * Any "non-reserved" properties are now merged into the 'parms' property; 'autoMount'
                      * is treated as reserved only because it must be encoded as an object rather than a string.
                      */
                     machine['parms'] = '{';
@@ -490,7 +491,7 @@ MarkOut.prototype.convertMD = function(sIndent)
                             machine['parms'] += sProp + ':"' + machine[sProp] + '",';
                         }
                     }
-                    machine['parms'] += 'autoMount:' + machine['automount'] + '}';
+                    machine['parms'] += 'autoMount:' + machine['autoMount'] + '}';
                     if (id) this.aMachineDefs[id] = machine;
                 }
             }

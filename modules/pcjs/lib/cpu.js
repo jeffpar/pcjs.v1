@@ -529,9 +529,15 @@ CPU.prototype.setFocus = function()
          * into view.  The CPU is not a visual component, so when the CPU wants to set focus, the primary intent
          * is to ensure that keyboard input is fielded properly.
          */
-        var x = window.scrollX, y = window.scrollY;
+        var x = 0, y = 0;
+        if (window) {
+            x = window.scrollX;
+            y = window.scrollY;
+        }
         this.aVideo[0].setFocus();
-        window.scrollTo(x, y);
+        if (window) {
+            window.scrollTo(x, y);
+        }
     }
 };
 

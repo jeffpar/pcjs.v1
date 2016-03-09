@@ -59,7 +59,7 @@ var DEBUGGER = true;            // this @define is overridden by the Closure Com
  * but as currently implemented, it does not yield as much improvement as I'd hoped when paging is enabled, so PREFETCH
  * is still off by default.
  */
-var PREFETCH = false;
+var PREFETCH = true;
 
 /**
  * @define {boolean}
