@@ -47,7 +47,7 @@ X86.opGRP6 = function()
     if ((bModRM & 0x38) < 0x10) {   // possible reg values: 0x00, 0x08, 0x10, 0x18, 0x20, 0x28, 0x30, 0x38
         this.opFlags |= X86.OPFLAG.NOREAD;
     }
-    this.decodeModGrpWord.call(this, this.aOpGrp6, X86.fnSRCNone);
+    this.decodeModGrpWord.call(this, this.aOpGrp6, X86.helpSRCNone);
 };
 
 /**
@@ -61,7 +61,7 @@ X86.opGRP7 = function()
     if (!(bModRM & 0x10)) {
         this.opFlags |= X86.OPFLAG.NOREAD;
     }
-    this.decodeModGrpWord.call(this, X86.aOpGrp7, X86.fnSRCNone);
+    this.decodeModGrpWord.call(this, X86.aOpGrp7, X86.helpSRCNone);
 };
 
 /**
@@ -146,7 +146,7 @@ X86.opLOADALL286 = function()
         /*
          * To use LOADALL, CPL must be zero.
          */
-        X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0, 0, true);
+        X86.helpFault.call(this, X86.EXCEPTION.GP_FAULT, 0, 0, true);
         return;
     }
     this.setMSW(this.getShort(0x806));
@@ -214,7 +214,7 @@ X86.opCLTS = function()
      * NOTE: The following code shouldn't need to also test X86.PS.VM, because V86-mode is CPL 3.
      */
     if (this.nCPL) {
-        X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
+        X86.helpFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
         return;
     }
     this.regCR0 &= ~X86.CR0.MSW.TS;
@@ -313,12 +313,12 @@ X86.opLOADALL386 = function()
         /*
          * To use LOADALL, CPL must be zero.
          */
-        X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0, 0, true);
+        X86.helpFault.call(this, X86.EXCEPTION.GP_FAULT, 0, 0, true);
         return;
     }
     var addr = this.segES.checkRead(this.regEDI & this.maskAddr, 0xCC);
     if (addr !== X86.ADDR_INVALID) {
-        X86.fnLCR0.call(this, this.getLong(addr));
+        X86.helpLoadCR0.call(this, this.getLong(addr));
         /*
          * We need to call setPS() before loading any segment registers, because if the Virtual 8086 Mode (VM)
          * bit is set in EFLAGS, the segment registers need to know that.
@@ -399,7 +399,7 @@ X86.opMOVrc = function()
         /*
          * You're not allowed to read control registers if the current privilege level is not zero.
          */
-        X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
+        X86.helpFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
         return;
     }
 
@@ -448,7 +448,7 @@ X86.opMOVrd = function()
         /*
          * You're not allowed to read control registers if the current privilege level is not zero.
          */
-        X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
+        X86.helpFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
         return;
     }
 
@@ -497,7 +497,7 @@ X86.opMOVcr = function()
         /*
          * You're not allowed to write control registers if the current privilege level is not zero.
          */
-        X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
+        X86.helpFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
         return;
     }
 
@@ -506,7 +506,7 @@ X86.opMOVcr = function()
 
     switch((bModRM & 0x38) >> 3) {
     case 0x0:
-        X86.fnLCR0.call(this, reg);
+        X86.helpLoadCR0.call(this, reg);
         this.nStepCycles -= 10;
         break;
     case 0x2:
@@ -514,7 +514,7 @@ X86.opMOVcr = function()
         this.nStepCycles -= 4;
         break;
     case 0x3:
-        X86.fnLCR3.call(this, reg);
+        X86.helpLoadCR3.call(this, reg);
         this.nStepCycles -= 5;
         break;
     default:
@@ -546,7 +546,7 @@ X86.opMOVdr = function()
         /*
          * You're not allowed to write control registers if the current privilege level is not zero.
          */
-        X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
+        X86.helpFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
         return;
     }
 
@@ -592,7 +592,7 @@ X86.opMOVrt = function()
         /*
          * You're not allowed to read control registers if the current privilege level is not zero.
          */
-        X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
+        X86.helpFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
         return;
     }
 
@@ -638,7 +638,7 @@ X86.opMOVtr = function()
         /*
          * You're not allowed to write control registers if the current privilege level is not zero.
          */
-        X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
+        X86.helpFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
         return;
     }
 
@@ -983,7 +983,7 @@ X86.opJNLEw = function()
  */
 X86.opSETO = function()
 {
-    X86.fnSETcc.call(this, X86.fnSETO);
+    X86.helpSETcc.call(this, X86.fnSETO);
 };
 
 /**
@@ -995,7 +995,7 @@ X86.opSETO = function()
  */
 X86.opSETNO = function()
 {
-    X86.fnSETcc.call(this, X86.fnSETO);
+    X86.helpSETcc.call(this, X86.fnSETO);
 };
 
 /**
@@ -1007,7 +1007,7 @@ X86.opSETNO = function()
  */
 X86.opSETC = function()
 {
-    X86.fnSETcc.call(this, X86.fnSETC);
+    X86.helpSETcc.call(this, X86.fnSETC);
 };
 
 /**
@@ -1019,7 +1019,7 @@ X86.opSETC = function()
  */
 X86.opSETNC = function()
 {
-    X86.fnSETcc.call(this, X86.fnSETNC);
+    X86.helpSETcc.call(this, X86.fnSETNC);
 };
 
 /**
@@ -1031,7 +1031,7 @@ X86.opSETNC = function()
  */
 X86.opSETZ = function()
 {
-    X86.fnSETcc.call(this, X86.fnSETZ);
+    X86.helpSETcc.call(this, X86.fnSETZ);
 };
 
 /**
@@ -1043,7 +1043,7 @@ X86.opSETZ = function()
  */
 X86.opSETNZ = function()
 {
-    X86.fnSETcc.call(this, X86.fnSETNZ);
+    X86.helpSETcc.call(this, X86.fnSETNZ);
 };
 
 /**
@@ -1055,7 +1055,7 @@ X86.opSETNZ = function()
  */
 X86.opSETBE = function()
 {
-    X86.fnSETcc.call(this, X86.fnSETBE);
+    X86.helpSETcc.call(this, X86.fnSETBE);
 };
 
 /**
@@ -1067,7 +1067,7 @@ X86.opSETBE = function()
  */
 X86.opSETNBE = function()
 {
-    X86.fnSETcc.call(this, X86.fnSETNBE);
+    X86.helpSETcc.call(this, X86.fnSETNBE);
 };
 
 /**
@@ -1079,7 +1079,7 @@ X86.opSETNBE = function()
  */
 X86.opSETS = function()
 {
-    X86.fnSETcc.call(this, X86.fnSETS);
+    X86.helpSETcc.call(this, X86.fnSETS);
 };
 
 /**
@@ -1091,7 +1091,7 @@ X86.opSETS = function()
  */
 X86.opSETNS = function()
 {
-    X86.fnSETcc.call(this, X86.fnSETNS);
+    X86.helpSETcc.call(this, X86.fnSETNS);
 };
 
 /**
@@ -1103,7 +1103,7 @@ X86.opSETNS = function()
  */
 X86.opSETP = function()
 {
-    X86.fnSETcc.call(this, X86.fnSETP);
+    X86.helpSETcc.call(this, X86.fnSETP);
 };
 
 /**
@@ -1115,7 +1115,7 @@ X86.opSETP = function()
  */
 X86.opSETNP = function()
 {
-    X86.fnSETcc.call(this, X86.fnSETNP);
+    X86.helpSETcc.call(this, X86.fnSETNP);
 };
 
 /**
@@ -1127,7 +1127,7 @@ X86.opSETNP = function()
  */
 X86.opSETL = function()
 {
-    X86.fnSETcc.call(this, X86.fnSETL);
+    X86.helpSETcc.call(this, X86.fnSETL);
 };
 
 /**
@@ -1139,7 +1139,7 @@ X86.opSETL = function()
  */
 X86.opSETNL = function()
 {
-    X86.fnSETcc.call(this, X86.fnSETNL);
+    X86.helpSETcc.call(this, X86.fnSETNL);
 };
 
 /**
@@ -1151,7 +1151,7 @@ X86.opSETNL = function()
  */
 X86.opSETLE = function()
 {
-    X86.fnSETcc.call(this, X86.fnSETLE);
+    X86.helpSETcc.call(this, X86.fnSETLE);
 };
 
 /**
@@ -1163,7 +1163,7 @@ X86.opSETLE = function()
  */
 X86.opSETNLE = function()
 {
-    X86.fnSETcc.call(this, X86.fnSETNLE);
+    X86.helpSETcc.call(this, X86.fnSETNLE);
 };
 
 /**
@@ -1427,7 +1427,7 @@ X86.opLGS = function()
 X86.opMOVZXb = function()
 {
     this.decodeModRegByte.call(this, X86.fnMOVXb);
-    var reg = (this.bModRM & 0x38) >> 3;
+    var reg = (this.bModRM >> 3) & 0x7;
     switch(reg) {
     case 0x0:
         this.regEAX = (this.regEAX & ~this.maskData) | (this.regEAX & 0xff);
@@ -1471,8 +1471,8 @@ X86.opMOVZXb = function()
 X86.opMOVZXw = function()
 {
     this.setDataSize(2);
-    this.decodeModRegWord.call(this, X86.fnMOVX);
-    switch((this.bModRM & 0x38) >> 3) {
+    this.decodeModRegWord.call(this, X86.fnMOVXw);
+    switch((this.bModRM >> 3) & 0x7) {
     case 0x0:
         this.regEAX = (this.regEAX & 0xffff);
         break;
@@ -1558,7 +1558,7 @@ X86.opBSR = function()
 X86.opMOVSXb = function()
 {
     this.decodeModRegByte.call(this, X86.fnMOVXb);
-    var reg = (this.bModRM & 0x38) >> 3;
+    var reg = (this.bModRM >> 3) & 0x7;
     switch(reg) {
     case 0x0:
         this.regEAX = (this.regEAX & ~this.maskData) | ((((this.regEAX & 0xff) << 24) >> 24) & this.maskData);
@@ -1602,8 +1602,8 @@ X86.opMOVSXb = function()
 X86.opMOVSXw = function()
 {
     this.setDataSize(2);
-    this.decodeModRegWord.call(this, X86.fnMOVX);
-    switch((this.bModRM & 0x38) >> 3) {
+    this.decodeModRegWord.call(this, X86.fnMOVXw);
+    switch((this.bModRM >> 3) & 0x7) {
     case 0x0:
         this.regEAX = ((this.regEAX << 16) >> 16);
         break;

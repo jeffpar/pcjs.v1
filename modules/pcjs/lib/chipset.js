@@ -3549,7 +3549,7 @@ ChipSet.prototype.setFPUInterrupt = function()
          * later, and the FPU coprocessor is still indicating an error condition, should we then generate an NMI?
          */
         if (!(this.bNMI & ChipSet.NMI.DISABLE)) {
-            X86.fnInterrupt.call(this.cpu, X86.EXCEPTION.NMI);
+            X86.helpInterrupt.call(this.cpu, X86.EXCEPTION.NMI);
         }
     }
 };

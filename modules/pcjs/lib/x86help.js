@@ -39,14 +39,14 @@ if (NODE) {
 }
 
 /**
- * fnAdd64(dst, src)
+ * helpAdd64(dst, src)
  *
  * Adds src to dst.
  *
  * @param {Array} dst is a 64-bit value
  * @param {Array} src is a 64-bit value
  */
-X86.fnAdd64 = function(dst, src)
+X86.helpAdd64 = function(dst, src)
 {
     dst[0] += src[0];
     dst[1] += src[1];
@@ -57,7 +57,7 @@ X86.fnAdd64 = function(dst, src)
 };
 
 /**
- * fnCmp64(dst, src)
+ * helpCmp64(dst, src)
  *
  * Compares dst to src, by computing dst - src.
  *
@@ -65,7 +65,7 @@ X86.fnAdd64 = function(dst, src)
  * @param {Array} src is a 64-bit value
  * @return {number} > 0 if dst > src, == 0 if dst == src, < 0 if dst < src
  */
-X86.fnCmp64 = function(dst, src)
+X86.helpCmp64 = function(dst, src)
 {
     var result = dst[1] - src[1];
     if (!result) result = dst[0] - src[0];
@@ -73,24 +73,24 @@ X86.fnCmp64 = function(dst, src)
 };
 
 /**
- * fnSet64(lo, hi)
+ * helpSet64(lo, hi)
  *
  * @param {number} lo
  * @param {number} hi
  */
-X86.fnSet64 = function(lo, hi)
+X86.helpSet64 = function(lo, hi)
 {
     return [lo >>> 0, hi >>> 0];
 };
 
 /**
- * fnShr64(dst)
+ * helpShr64(dst)
  *
  * Shifts dst right one bit.
  *
  * @param {Array} dst is a 64-bit value
  */
-X86.fnShr64 = function(dst)
+X86.helpShr64 = function(dst)
 {
     dst[0] >>>= 1;
     if (dst[1] & 0x1) {
@@ -100,14 +100,14 @@ X86.fnShr64 = function(dst)
 };
 
 /**
- * fnSub64(dst, src)
+ * helpSub64(dst, src)
  *
  * Subtracts src from dst.
  *
  * @param {Array} dst is a 64-bit value
  * @param {Array} src is a 64-bit value
  */
-X86.fnSub64 = function(dst, src)
+X86.helpSub64 = function(dst, src)
 {
     dst[0] -= src[0];
     dst[1] -= src[1];
@@ -118,13 +118,13 @@ X86.fnSub64 = function(dst, src)
 };
 
 /**
- * fnDECr(w)
+ * helpDECreg(w)
  *
  * @this {X86CPU}
  * @param {number} w
  * @return {number}
  */
-X86.fnDECr = function(w)
+X86.helpDECreg = function(w)
 {
     var result = (w - 1)|0;
     this.setArithResult(w, 1, result, this.typeData | X86.RESULT.NOTCF, true);
@@ -133,7 +133,7 @@ X86.fnDECr = function(w)
 };
 
 /**
- * fnDIV32(dstLo, dstHi, src)
+ * helpDIV32(dstLo, dstHi, src)
  *
  * This sets regMDLo to dstHi:dstLo / src, and regMDHi to dstHi:dstLo % src; all inputs are treated as unsigned.
  *
@@ -145,7 +145,7 @@ X86.fnDECr = function(w)
  * @param {number} src (32-bit divisor)
  * @return {boolean} true if successful, false if overflow (ie, the divisor was either zero or too small)
  */
-X86.fnDIV32 = function(dstLo, dstHi, src)
+X86.helpDIV32 = function(dstLo, dstHi, src)
 {
     src >>>= 0;
     if (!src || src <= (dstHi >>> 0)) {
@@ -154,19 +154,19 @@ X86.fnDIV32 = function(dstLo, dstHi, src)
 
     var result = 0, bit = 1;
 
-    var div = X86.fnSet64(src, 0);
-    var rem = X86.fnSet64(dstLo, dstHi);
+    var div = X86.helpSet64(src, 0);
+    var rem = X86.helpSet64(dstLo, dstHi);
 
-    while (X86.fnCmp64(rem, div) > 0) {
-        X86.fnAdd64(div, div);
+    while (X86.helpCmp64(rem, div) > 0) {
+        X86.helpAdd64(div, div);
         bit += bit;
     }
     do {
-        if (X86.fnCmp64(rem, div) >= 0) {
-            X86.fnSub64(rem, div);
+        if (X86.helpCmp64(rem, div) >= 0) {
+            X86.helpSub64(rem, div);
             result += bit;
         }
-        X86.fnShr64(div);
+        X86.helpShr64(div);
         bit /= 2;
     } while (bit >= 1);
 
@@ -178,7 +178,7 @@ X86.fnDIV32 = function(dstLo, dstHi, src)
 };
 
 /**
- * fnIDIV32(dstLo, dstHi, src)
+ * helpIDIV32(dstLo, dstHi, src)
  *
  * This sets regMDLo to dstHi:dstLo / src, and regMDHi to dstHi:dstLo % src; all inputs are treated as signed.
  *
@@ -190,7 +190,7 @@ X86.fnDIV32 = function(dstLo, dstHi, src)
  * @param {number} src (32-bit divisor)
  * @return {boolean} true if successful, false if overflow (ie, the divisor was either zero or too small)
  */
-X86.fnIDIV32 = function(dstLo, dstHi, src)
+X86.helpIDIV32 = function(dstLo, dstHi, src)
 {
     var bNegLo = 0, bNegHi = 0;
     /*
@@ -212,7 +212,7 @@ X86.fnIDIV32 = function(dstLo, dstHi, src)
         bNegHi = 1;
         bNegLo = 1 - bNegLo;
     }
-    if (!X86.fnDIV32.call(this, dstLo, dstHi, src) || this.regMDLo > 0x7fffffff+bNegLo || this.regMDHi > 0x7fffffff+bNegHi) {
+    if (!X86.helpDIV32.call(this, dstLo, dstHi, src) || this.regMDLo > 0x7fffffff+bNegLo || this.regMDHi > 0x7fffffff+bNegHi) {
         return false;
     }
     if (bNegLo) this.regMDLo = -this.regMDLo;
@@ -221,13 +221,13 @@ X86.fnIDIV32 = function(dstLo, dstHi, src)
 };
 
 /**
- * fnINCr(w)
+ * helpINCreg(w)
  *
  * @this {X86CPU}
  * @param {number} w
  * @return {number}
  */
-X86.fnINCr = function(w)
+X86.helpINCreg = function(w)
 {
     var result = (w + 1)|0;
     this.setArithResult(w, 1, result, this.typeData | X86.RESULT.NOTCF);
@@ -236,7 +236,7 @@ X86.fnINCr = function(w)
 };
 
 /**
- * fnLCR0(l)
+ * helpLoadCR0(l)
  *
  * This is called by an 80386 control instruction (ie, MOV CR0,reg).
  *
@@ -245,7 +245,7 @@ X86.fnINCr = function(w)
  * @this {X86CPU}
  * @param {number} l
  */
-X86.fnLCR0 = function(l)
+X86.helpLoadCR0 = function(l)
 {
     this.regCR0 = l;
     this.setProtMode();
@@ -261,14 +261,14 @@ X86.fnLCR0 = function(l)
 };
 
 /**
- * fnLCR3(l)
+ * helpLoadCR3(l)
  *
  * This is called by an 80386 control instruction (ie, MOV CR3,reg) or an 80386 task switch.
  *
  * @this {X86CPU}
  * @param {number} l
  */
-X86.fnLCR3 = function(l)
+X86.helpLoadCR3 = function(l)
 {
     this.regCR3 = l;
     /*
@@ -280,12 +280,12 @@ X86.fnLCR3 = function(l)
 };
 
 /**
- * fnSETcc()
+ * helpSETcc()
  *
  * @this {X86CPU}
  * @param {function(number,number)} fnSet
  */
-X86.fnSETcc = function(fnSet)
+X86.helpSETcc = function(fnSet)
 {
     this.opFlags |= X86.OPFLAG.NOREAD;
     this.decodeModMemByte.call(this, fnSet);
@@ -293,7 +293,7 @@ X86.fnSETcc = function(fnSet)
 };
 
 /**
- * fnSHLDw(dst, src, count)
+ * helpSHLDw(dst, src, count)
  *
  * @this {X86CPU}
  * @param {number} dst
@@ -301,7 +301,7 @@ X86.fnSETcc = function(fnSet)
  * @param {number} count (0-31)
  * @return {number}
  */
-X86.fnSHLDw = function(dst, src, count)
+X86.helpSHLDw = function(dst, src, count)
 {
     if (count) {
         if (count > 16) {
@@ -316,7 +316,7 @@ X86.fnSHLDw = function(dst, src, count)
 };
 
 /**
- * fnSHLDd(dst, src, count)
+ * helpSHLDd(dst, src, count)
  *
  * @this {X86CPU}
  * @param {number} dst
@@ -324,7 +324,7 @@ X86.fnSHLDw = function(dst, src, count)
  * @param {number} count
  * @return {number}
  */
-X86.fnSHLDd = function(dst, src, count)
+X86.helpSHLDd = function(dst, src, count)
 {
     if (count) {
         var carry = dst << (count - 1);
@@ -335,7 +335,7 @@ X86.fnSHLDd = function(dst, src, count)
 };
 
 /**
- * fnSHRDw(dst, src, count)
+ * helpSHRDw(dst, src, count)
  *
  * @this {X86CPU}
  * @param {number} dst
@@ -343,7 +343,7 @@ X86.fnSHLDd = function(dst, src, count)
  * @param {number} count (0-31)
  * @return {number}
  */
-X86.fnSHRDw = function(dst, src, count)
+X86.helpSHRDw = function(dst, src, count)
 {
     if (count) {
         if (count > 16) {
@@ -358,7 +358,7 @@ X86.fnSHRDw = function(dst, src, count)
 };
 
 /**
- * fnSHRDd(dst, src, count)
+ * helpSHRDd(dst, src, count)
  *
  * @this {X86CPU}
  * @param {number} dst
@@ -366,7 +366,7 @@ X86.fnSHRDw = function(dst, src, count)
  * @param {number} count
  * @return {number}
  */
-X86.fnSHRDd = function(dst, src, count)
+X86.helpSHRDd = function(dst, src, count)
 {
     if (count) {
         var carry = dst >>> (count - 1);
@@ -377,24 +377,24 @@ X86.fnSHRDd = function(dst, src, count)
 };
 
 /**
- * fnSRC1()
+ * helpSRC1()
  *
  * @this {X86CPU}
  * @return {number}
  */
-X86.fnSRC1 = function()
+X86.helpSRC1 = function()
 {
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? 2 : this.cycleCounts.nOpCyclesShift1M);
     return 1;
 };
 
 /**
- * fnSRCCL()
+ * helpSRCCL()
  *
  * @this {X86CPU}
  * @return {number}
  */
-X86.fnSRCCL = function()
+X86.helpSRCCL = function()
 {
     var count = this.regECX & 0xff;
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesShiftCR : this.cycleCounts.nOpCyclesShiftCM) + (count << this.cycleCounts.nOpCyclesShiftCS);
@@ -402,12 +402,12 @@ X86.fnSRCCL = function()
 };
 
 /**
- * fnSRCByte()
+ * helpSRCByte()
  *
  * @this {X86CPU}
  * @return {number}
  */
-X86.fnSRCByte = function()
+X86.helpSRCByte = function()
 {
     var count = this.getIPByte();
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesShiftCR : this.cycleCounts.nOpCyclesShiftCM) + (count << this.cycleCounts.nOpCyclesShiftCS);
@@ -415,18 +415,18 @@ X86.fnSRCByte = function()
 };
 
 /**
- * fnSRCNone()
+ * helpSRCNone()
  *
  * @this {X86CPU}
  * @return {number|null}
  */
-X86.fnSRCNone = function()
+X86.helpSRCNone = function()
 {
     return null;
 };
 
 /**
- * fnSRCxx()
+ * helpSRCxx()
  *
  * This is used by opPOPmw(), because the actual pop must occur BEFORE the effective address (EA)
  * calculation.  So opPOPmw() does the pop, saves the popped value in regXX, and this passes src function
@@ -435,13 +435,13 @@ X86.fnSRCNone = function()
  * @this {X86CPU}
  * @return {number} regXX
  */
-X86.fnSRCxx = function()
+X86.helpSRCxx = function()
 {
     return this.regXX;
 };
 
 /**
- * fnCALLF(off, sel)
+ * helpCALLF(off, sel)
  *
  * For protected-mode, this function must attempt to load the new code segment first, because if the new segment
  * requires a change in privilege level, the return address must be pushed on the NEW stack, not the current stack.
@@ -459,12 +459,12 @@ X86.fnSRCxx = function()
  * @param {number} off
  * @param {number} sel
  */
-X86.fnCALLF = function(off, sel)
+X86.helpCALLF = function(off, sel)
 {
     /*
      * Since we always push the return address AFTER calling setCSIP(), and since either push could trigger a
      * fault (eg, segment fault, page fault, etc), we must not only snapshot regLSP into opLSP, but also the
-     * current CS into opCS, so that fnFault() can always make CALLF restartable.  Ditto for opSS and the SS register.
+     * current CS into opCS, so that helpFault() can always make CALLF restartable.  Ditto for opSS and the SS register.
      */
     this.opCS = this.getCS();
     this.opSS = this.getSS();
@@ -485,7 +485,7 @@ X86.fnCALLF = function(off, sel)
 };
 
 /**
- * fnINT(nIDT, nError, nCycles)
+ * helpINT(nIDT, nError, nCycles)
  *
  * NOTE: We no longer use setCSIP(), because it always loads the new CS using segCS.load(), which only knows
  * how to load GDT and LDT descriptors, whereas interrupts must use setCS.loadIDT(), which deals exclusively
@@ -496,7 +496,7 @@ X86.fnCALLF = function(off, sel)
  * @param {number|null} [nError]
  * @param {number} [nCycles] (in addition to the default of nOpCyclesInt)
  */
-X86.fnINT = function(nIDT, nError, nCycles)
+X86.helpINT = function(nIDT, nError, nCycles)
 {
     /*
      * TODO: We assess the cycle cost up front, because otherwise, if loadIDT() fails, no cost may be assessed.
@@ -509,10 +509,10 @@ X86.fnINT = function(nIDT, nError, nCycles)
     if (addr !== X86.ADDR_INVALID) {
         /*
          * TODO: Determine if we should use pushData() instead of pushWord() for oldCS and nError, to deal with
-         * the same 32-bit 80386 compatibility issue that fnCALLF(), opPUSHCS(), et al must deal with; namely, that
+         * the same 32-bit 80386 compatibility issue that helpCALLF(), opPUSHCS(), et al must deal with; namely, that
          * 32-bit segment register writes (and, reportedly, 32-bit error codes) don't modify the upper 16 bits.
          *
-         * Also, note that fnCALLF() is using the OPERAND size in effect *before* CS is loaded, whereas here we're
+         * Also, note that helpCALLF() is using the OPERAND size in effect *before* CS is loaded, whereas here we're
          * using the OPERAND size in effect *after* CS is loaded.  Is that correct?  And does an explicit OPERAND
          * size override on an "INT" instruction have any effect on that behavior?  Is that even allowed?
          */
@@ -526,11 +526,11 @@ X86.fnINT = function(nIDT, nError, nCycles)
 };
 
 /**
- * fnIRET()
+ * helpIRET()
  *
  * @this {X86CPU}
  */
-X86.fnIRET = function()
+X86.helpIRET = function()
 {
     /*
      * Originally, we would snapshot regLSP into opLSP because newCS could trigger a segment fault,
@@ -615,7 +615,7 @@ X86.fnIRET = function()
 };
 
 /**
- * fnRETF(n)
+ * helpRETF(n)
  *
  * For protected-mode, this function must pop any arguments off the current stack AND whatever stack
  * we may have switched to; setCSIP() returns true if a stack switch occurred, false if not, and null
@@ -624,7 +624,7 @@ X86.fnIRET = function()
  * @this {X86CPU}
  * @param {number} n
  */
-X86.fnRETF = function(n)
+X86.helpRETF = function(n)
 {
     /*
      * Originally, we would snapshot regLSP into opLSP because newCS could trigger a segment fault,
@@ -669,11 +669,11 @@ X86.fnRETF = function(n)
 };
 
 /**
- * fnDivOverflow()
+ * helpDIVOverflow()
  *
  * @this {X86CPU}
  */
-X86.fnDivOverflow = function()
+X86.helpDIVOverflow = function()
 {
     /*
      * Divide error exceptions are traps on the 8086 and faults on later processors.  I question the value of that
@@ -685,14 +685,14 @@ X86.fnDivOverflow = function()
      * TODO: Determine the proper cycle cost.
      */
     if (this.model == X86.MODEL_8086) {
-        X86.fnTrap.call(this, X86.EXCEPTION.DE_EXC, 2);
+        X86.helpTrap.call(this, X86.EXCEPTION.DE_EXC, 2);
     } else {
-        X86.fnFault.call(this, X86.EXCEPTION.DE_EXC, null, 2);
+        X86.helpFault.call(this, X86.EXCEPTION.DE_EXC, null, 2);
     }
 };
 
 /**
- * fnInterrupt(nIDT, nCycles)
+ * helpInterrupt(nIDT, nCycles)
  *
  * Helper to dispatch external interrupts.  nCycles defaults to 11 for the 8086/8088
  * if no alternate value is specified.
@@ -701,15 +701,15 @@ X86.fnDivOverflow = function()
  * @param {number} nIDT
  * @param {number} [nCycles] (number of cycles in addition to the default of nOpCyclesInt)
  */
-X86.fnInterrupt = function(nIDT, nCycles)
+X86.helpInterrupt = function(nIDT, nCycles)
 {
     this.nFault = nIDT;
     if (nCycles === undefined) nCycles = 11;
-    X86.fnINT.call(this, nIDT, null, nCycles);
+    X86.helpINT.call(this, nIDT, null, nCycles);
 };
 
 /**
- * fnTrap(nIDT, nCycles)
+ * helpTrap(nIDT, nCycles)
  *
  * Helper to dispatch traps (ie, exceptions that occur AFTER the instruction, with NO error code)
  *
@@ -717,24 +717,24 @@ X86.fnInterrupt = function(nIDT, nCycles)
  * @param {number} nIDT
  * @param {number} [nCycles] (number of cycles in addition to the default of nOpCyclesInt)
  */
-X86.fnTrap = function(nIDT, nCycles)
+X86.helpTrap = function(nIDT, nCycles)
 {
     this.nFault = -1;
-    X86.fnINT.call(this, nIDT, null, nCycles);
+    X86.helpINT.call(this, nIDT, null, nCycles);
 };
 
 /**
- * fnFault(nFault, nError, nCycles, fHalt)
+ * helpFault(nFault, nError, nCycles, fHalt)
  *
  * Helper to dispatch faults (ie, exceptions that occur DURING an instruction and MAY generate an error code)
  *
  * @this {X86CPU}
  * @param {number} nFault
  * @param {number|null} [nError] (if omitted, no error code will be pushed)
- * @param {number} [nCycles] cycle count to pass through to fnINT(), if any
+ * @param {number} [nCycles] cycle count to pass through to helpINT(), if any
  * @param {boolean} [fHalt] (true to halt the CPU, false to not, undefined if "it depends")
  */
-X86.fnFault = function(nFault, nError, nCycles, fHalt)
+X86.helpFault = function(nFault, nError, nCycles, fHalt)
 {
     var fDispatch = false;
 
@@ -793,9 +793,9 @@ X86.fnFault = function(nFault, nError, nCycles, fHalt)
         }
     }
 
-    if (X86.fnCheckFault.call(this, nFault, nError, fHalt)) {
+    if (X86.helpCheckFault.call(this, nFault, nError, fHalt)) {
         /*
-         * If this is a fault that would normally be dispatched BUT fnCheckFault() wants us to halt,
+         * If this is a fault that would normally be dispatched BUT helpCheckFault() wants us to halt,
          * then we throw a bogus fault number (-1), simply to interrupt the current instruction in exactly
          * the same way that a dispatched fault would interrupt it.
          */
@@ -805,7 +805,7 @@ X86.fnFault = function(nFault, nError, nCycles, fHalt)
     if (fDispatch) {
 
         this.nFault = nFault;
-        X86.fnINT.call(this, nFault, nError, nCycles);
+        X86.helpINT.call(this, nFault, nError, nCycles);
 
         /*
          * REP'eated instructions that rewind regLIP to opLIP used to screw up this dispatch,
@@ -850,7 +850,7 @@ X86.fnFault = function(nFault, nError, nCycles, fHalt)
 };
 
 /**
- * fnPageFault(addr, fPresent, fWrite)
+ * helpPageFault(addr, fPresent, fWrite)
  *
  * Helper to dispatch page faults.
  *
@@ -859,18 +859,18 @@ X86.fnFault = function(nFault, nError, nCycles, fHalt)
  * @param {boolean} fPresent
  * @param {boolean} fWrite
  */
-X86.fnPageFault = function(addr, fPresent, fWrite)
+X86.helpPageFault = function(addr, fPresent, fWrite)
 {
     this.regCR2 = addr;
     var nError = 0;
     if (fPresent) nError |= X86.PTE.PRESENT;
     if (fWrite) nError |= X86.PTE.READWRITE;
     if (this.nCPL == 3) nError |= X86.PTE.USER;
-    X86.fnFault.call(this, X86.EXCEPTION.PF_FAULT, nError);
+    X86.helpFault.call(this, X86.EXCEPTION.PF_FAULT, nError);
 };
 
 /**
- * fnCheckFault(nFault, nError, fHalt)
+ * helpCheckFault(nFault, nError, fHalt)
  *
  * Aside from giving the Debugger an opportunity to report every fault, this also gives us the ability to
  * halt exception processing in tracks: return true to prevent the fault handler from being dispatched.
@@ -886,7 +886,7 @@ X86.fnPageFault = function(addr, fPresent, fWrite)
  * @param {boolean} [fHalt] (true to halt the CPU, false to not, undefined if "it depends")
  * @return {boolean|undefined} true to block the fault (often desirable when fHalt is true), otherwise dispatch it
  */
-X86.fnCheckFault = function(nFault, nError, fHalt)
+X86.helpCheckFault = function(nFault, nError, fHalt)
 {
     var bitsMessage = Messages.FAULT;
 

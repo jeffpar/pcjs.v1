@@ -903,7 +903,7 @@ X86.opAAS = function()
  */
 X86.opINCAX = function()
 {
-    this.regEAX = X86.fnINCr.call(this, this.regEAX);
+    this.regEAX = X86.helpINCreg.call(this, this.regEAX);
 };
 
 /**
@@ -913,7 +913,7 @@ X86.opINCAX = function()
  */
 X86.opINCCX = function()
 {
-    this.regECX = X86.fnINCr.call(this, this.regECX);
+    this.regECX = X86.helpINCreg.call(this, this.regECX);
 };
 
 /**
@@ -923,7 +923,7 @@ X86.opINCCX = function()
  */
 X86.opINCDX = function()
 {
-    this.regEDX = X86.fnINCr.call(this, this.regEDX);
+    this.regEDX = X86.helpINCreg.call(this, this.regEDX);
 };
 
 /**
@@ -933,7 +933,7 @@ X86.opINCDX = function()
  */
 X86.opINCBX = function()
 {
-    this.regEBX = X86.fnINCr.call(this, this.regEBX);
+    this.regEBX = X86.helpINCreg.call(this, this.regEBX);
 };
 
 /**
@@ -943,7 +943,7 @@ X86.opINCBX = function()
  */
 X86.opINCSP = function()
 {
-    this.setSP(X86.fnINCr.call(this, this.getSP()));
+    this.setSP(X86.helpINCreg.call(this, this.getSP()));
 };
 
 /**
@@ -953,7 +953,7 @@ X86.opINCSP = function()
  */
 X86.opINCBP = function()
 {
-    this.regEBP = X86.fnINCr.call(this, this.regEBP);
+    this.regEBP = X86.helpINCreg.call(this, this.regEBP);
 };
 
 /**
@@ -963,7 +963,7 @@ X86.opINCBP = function()
  */
 X86.opINCSI = function()
 {
-    this.regESI = X86.fnINCr.call(this, this.regESI);
+    this.regESI = X86.helpINCreg.call(this, this.regESI);
 };
 
 /**
@@ -973,7 +973,7 @@ X86.opINCSI = function()
  */
 X86.opINCDI = function()
 {
-    this.regEDI = X86.fnINCr.call(this, this.regEDI);
+    this.regEDI = X86.helpINCreg.call(this, this.regEDI);
 };
 
 /**
@@ -983,7 +983,7 @@ X86.opINCDI = function()
  */
 X86.opDECAX = function()
 {
-    this.regEAX = X86.fnDECr.call(this, this.regEAX);
+    this.regEAX = X86.helpDECreg.call(this, this.regEAX);
 };
 
 /**
@@ -993,7 +993,7 @@ X86.opDECAX = function()
  */
 X86.opDECCX = function()
 {
-    this.regECX = X86.fnDECr.call(this, this.regECX);
+    this.regECX = X86.helpDECreg.call(this, this.regECX);
 };
 
 /**
@@ -1003,7 +1003,7 @@ X86.opDECCX = function()
  */
 X86.opDECDX = function()
 {
-    this.regEDX = X86.fnDECr.call(this, this.regEDX);
+    this.regEDX = X86.helpDECreg.call(this, this.regEDX);
 };
 
 /**
@@ -1013,7 +1013,7 @@ X86.opDECDX = function()
  */
 X86.opDECBX = function()
 {
-    this.regEBX = X86.fnDECr.call(this, this.regEBX);
+    this.regEBX = X86.helpDECreg.call(this, this.regEBX);
 };
 
 /**
@@ -1023,7 +1023,7 @@ X86.opDECBX = function()
  */
 X86.opDECSP = function()
 {
-    this.setSP(X86.fnDECr.call(this, this.getSP()));
+    this.setSP(X86.helpDECreg.call(this, this.getSP()));
 };
 
 /**
@@ -1033,7 +1033,7 @@ X86.opDECSP = function()
  */
 X86.opDECBP = function()
 {
-    this.regEBP = X86.fnDECr.call(this, this.regEBP);
+    this.regEBP = X86.helpDECreg.call(this, this.regEBP);
 };
 
 /**
@@ -1043,7 +1043,7 @@ X86.opDECBP = function()
  */
 X86.opDECSI = function()
 {
-    this.regESI = X86.fnDECr.call(this, this.regESI);
+    this.regESI = X86.helpDECreg.call(this, this.regESI);
 };
 
 /**`
@@ -1053,7 +1053,7 @@ X86.opDECSI = function()
  */
 X86.opDECDI = function()
 {
-    this.regEDI = X86.fnDECr.call(this, this.regEDI);
+    this.regEDI = X86.helpDECreg.call(this, this.regEDI);
 };
 
 /**
@@ -1652,7 +1652,7 @@ X86.opINSb = function()
         var b = this.bus.checkPortInputNotify(port, 1, this.regLIP - nDelta - 1);
         this.setSOByte(this.segES, this.regEDI & maskAddr, b);
         /*
-         * fnFault() throws exceptions now, so inline checks of X86.OPFLAG.FAULT should no longer be necessary.
+         * helpFault() throws exceptions now, so inline checks of X86.OPFLAG.FAULT should no longer be necessary.
          *
          *      if (this.opFlags & X86.OPFLAG.FAULT) return;
          */
@@ -1705,7 +1705,7 @@ X86.opINSw = function()
         }
         this.setSOWord(this.segES, this.regEDI & maskAddr, w);
         /*
-         * fnFault() throws exceptions now, so inline checks of X86.OPFLAG.FAULT should no longer be necessary.
+         * helpFault() throws exceptions now, so inline checks of X86.OPFLAG.FAULT should no longer be necessary.
          *
          *      if (this.opFlags & X86.OPFLAG.FAULT) return;
          */
@@ -1751,7 +1751,7 @@ X86.opOUTSb = function()
         if (!this.checkIOPM(port, 1, false)) return;
         var b = this.getSOByte(this.segDS, this.regESI & maskAddr);
         /*
-         * fnFault() throws exceptions now, so inline checks of X86.OPFLAG.FAULT should no longer be necessary.
+         * helpFault() throws exceptions now, so inline checks of X86.OPFLAG.FAULT should no longer be necessary.
          *
          *      if (this.opFlags & X86.OPFLAG.FAULT) return;
          */
@@ -1797,7 +1797,7 @@ X86.opOUTSw = function()
     if (nReps--) {
         var w = this.getSOWord(this.segDS, this.regESI & maskAddr);
         /*
-         * fnFault() throws exceptions now, so inline checks of X86.OPFLAG.FAULT should no longer be necessary.
+         * helpFault() throws exceptions now, so inline checks of X86.OPFLAG.FAULT should no longer be necessary.
          *
          *      if (this.opFlags & X86.OPFLAG.FAULT) return;
          */
@@ -2344,7 +2344,7 @@ X86.opPOPmw = function()
      *
      * pops the DWORD from the top of the stack and places it at ESP+08, where ESP is the value
      * AFTER the pop, not before.  We used to (incorrectly) pass "popWord" as the fnSrc parameter
-     * below; we now pop the word first, saving it in regXX, and then pass "fnSRCxx" as fnSrc,
+     * below; we now pop the word first, saving it in regXX, and then pass "helpSRCxx" as fnSrc,
      * which simply returns the contents of regXX.
      *
      * Also, in case you're wondering, fnPUSHw() (in aOpGrp4w) is the complement to this instruction,
@@ -2353,7 +2353,7 @@ X86.opPOPmw = function()
      */
     this.regXX = this.popWord();
 
-    this.decodeModGrpWord.call(this, X86.aOpGrpPOPw, X86.fnSRCxx);
+    this.decodeModGrpWord.call(this, X86.aOpGrpPOPw, X86.helpSRCxx);
 
     this.opLSP = X86.ADDR_INVALID;
 };
@@ -2532,7 +2532,7 @@ X86.opCWD = function()
  */
 X86.opCALLF = function()
 {
-    X86.fnCALLF.call(this, this.getIPWord(), this.getIPShort());
+    X86.helpCALLF.call(this, this.getIPWord(), this.getIPShort());
     this.nStepCycles -= this.cycleCounts.nOpCyclesCallF;
 };
 
@@ -2562,7 +2562,7 @@ X86.opPUSHF = function()
     if (I386) {
         if ((regPS & X86.PS.VM) && this.nIOPL < 3) {
             if (DEBUG) this.printMessage("PUSHF in v86-mode (IOPL < 3)", this.bitsMessage, true);
-            X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
+            X86.helpFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
             return;
         }
         /*
@@ -2597,7 +2597,7 @@ X86.opPOPF = function()
      */
     if (I386 && (this.regPS & X86.PS.VM) && this.nIOPL < 3) {
         if (DEBUG) this.printMessage("POPF in v86-mode (IOPL < 3)", this.bitsMessage, true);
-        X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
+        X86.helpFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
         return;
     }
     /*
@@ -2728,7 +2728,7 @@ X86.opMOVSb = function()
     if (nReps--) {
         this.setSOByte(this.segES, this.regEDI & maskAddr, this.getSOByte(this.segData, this.regESI & maskAddr));
         /*
-         * fnFault() throws exceptions now, so inline checks of X86.OPFLAG.FAULT should no longer be necessary.
+         * helpFault() throws exceptions now, so inline checks of X86.OPFLAG.FAULT should no longer be necessary.
          *
          *      if (this.opFlags & X86.OPFLAG.FAULT) return;
          */
@@ -2765,7 +2765,7 @@ X86.opMOVSw = function()
     if (nReps--) {
         this.setSOWord(this.segES, this.regEDI & maskAddr, this.getSOWord(this.segData, this.regESI & maskAddr));
         /*
-         * fnFault() throws exceptions now, so inline checks of X86.OPFLAG.FAULT should no longer be necessary.
+         * helpFault() throws exceptions now, so inline checks of X86.OPFLAG.FAULT should no longer be necessary.
          *
          *      if (this.opFlags & X86.OPFLAG.FAULT) return;
          */
@@ -2804,7 +2804,7 @@ X86.opCMPSb = function()
         var bSrc = this.getEAByte(this.segES, this.regEDI);
         this.regEAWrite = this.regEA;           // TODO: Is this necessary?
         /*
-         * fnFault() throws exceptions now, so inline checks of X86.OPFLAG.FAULT should no longer be necessary.
+         * helpFault() throws exceptions now, so inline checks of X86.OPFLAG.FAULT should no longer be necessary.
          *
          *      if (this.opFlags & X86.OPFLAG.FAULT) return;
          */
@@ -2852,7 +2852,7 @@ X86.opCMPSw = function()
         var wSrc = this.getEAWord(this.segES, this.regEDI & maskAddr);
         this.regEAWrite = this.regEA;           // TODO: Is this necessary?
         /*
-         * fnFault() throws exceptions now, so inline checks of X86.OPFLAG.FAULT should no longer be necessary.
+         * helpFault() throws exceptions now, so inline checks of X86.OPFLAG.FAULT should no longer be necessary.
          *
          *      if (this.opFlags & X86.OPFLAG.FAULT) return;
          */
@@ -2922,7 +2922,7 @@ X86.opSTOSb = function()
     if (nReps--) {
         this.setSOByte(this.segES, this.regEDI & maskAddr, this.regEAX);
         /*
-         * fnFault() throws exceptions now, so inline checks of X86.OPFLAG.FAULT should no longer be necessary.
+         * helpFault() throws exceptions now, so inline checks of X86.OPFLAG.FAULT should no longer be necessary.
          *
          *      if (this.opFlags & X86.OPFLAG.FAULT) return;
          */
@@ -2980,7 +2980,7 @@ X86.opSTOSw = function()
     if (nReps--) {
         this.setSOWord(this.segES, this.regEDI & maskAddr, this.regEAX);
         /*
-         * fnFault() throws exceptions now, so inline checks of X86.OPFLAG.FAULT should no longer be necessary.
+         * helpFault() throws exceptions now, so inline checks of X86.OPFLAG.FAULT should no longer be necessary.
          *
          *      if (this.opFlags & X86.OPFLAG.FAULT) return;
          */
@@ -3018,7 +3018,7 @@ X86.opLODSb = function()
     if (nReps--) {
         var b = this.getSOByte(this.segData, this.regESI & maskAddr);
         /*
-         * fnFault() throws exceptions now, so inline checks of X86.OPFLAG.FAULT should no longer be necessary.
+         * helpFault() throws exceptions now, so inline checks of X86.OPFLAG.FAULT should no longer be necessary.
          *
          *      if (this.opFlags & X86.OPFLAG.FAULT) return;
          */
@@ -3055,7 +3055,7 @@ X86.opLODSw = function()
     if (nReps--) {
         var w = this.getSOWord(this.segData, this.regESI & maskAddr);
         /*
-         * fnFault() throws exceptions now, so inline checks of X86.OPFLAG.FAULT should no longer be necessary.
+         * helpFault() throws exceptions now, so inline checks of X86.OPFLAG.FAULT should no longer be necessary.
          *
          *      if (this.opFlags & X86.OPFLAG.FAULT) return;
          */
@@ -3097,7 +3097,7 @@ X86.opSCASb = function()
         this.regEAWrite = this.regEA;           // TODO: Is this necessary?
         X86.fnCMPb.call(this, bDst, bSrc);
         /*
-         * fnFault() throws exceptions now, so inline checks of X86.OPFLAG.FAULT should no longer be necessary.
+         * helpFault() throws exceptions now, so inline checks of X86.OPFLAG.FAULT should no longer be necessary.
          *
          *      if (this.opFlags & X86.OPFLAG.FAULT) return;
          */
@@ -3143,7 +3143,7 @@ X86.opSCASw = function()
         this.regEAWrite = this.regEA;           // TODO: Is this necessary?
         X86.fnCMPw.call(this, wDst, wSrc);
         /*
-         * fnFault() throws exceptions now, so inline checks of X86.OPFLAG.FAULT should no longer be necessary.
+         * helpFault() throws exceptions now, so inline checks of X86.OPFLAG.FAULT should no longer be necessary.
          *
          *      if (this.opFlags & X86.OPFLAG.FAULT) return;
          */
@@ -3377,7 +3377,7 @@ X86.opMOVDI = function()
  */
 X86.opGRP2bn = function()
 {
-    this.decodeModGrpByte.call(this, X86.aOpGrp2b, X86.fnSRCByte);
+    this.decodeModGrpByte.call(this, X86.aOpGrp2b, X86.helpSRCByte);
 };
 
 /**
@@ -3387,7 +3387,7 @@ X86.opGRP2bn = function()
  */
 X86.opGRP2wn = function()
 {
-    this.decodeModGrpWord.call(this, this.sizeData == 2? X86.aOpGrp2w : X86.aOpGrp2d, X86.fnSRCByte);
+    this.decodeModGrpWord.call(this, this.sizeData == 2? X86.aOpGrp2w : X86.aOpGrp2d, X86.helpSRCByte);
 };
 
 /**
@@ -3533,7 +3533,7 @@ X86.opLEAVE = function()
  */
 X86.opRETFn = function()
 {
-    X86.fnRETF.call(this, this.getIPShort());
+    X86.helpRETF.call(this, this.getIPShort());
     this.nStepCycles -= this.cycleCounts.nOpCyclesRetFn;
 };
 
@@ -3544,7 +3544,7 @@ X86.opRETFn = function()
  */
 X86.opRETF = function()
 {
-    X86.fnRETF.call(this, 0);
+    X86.helpRETF.call(this, 0);
     this.nStepCycles -= this.cycleCounts.nOpCyclesRetF;
 };
 
@@ -3560,16 +3560,16 @@ X86.opINT3 = function()
      */
     if (I386 && (this.regPS & X86.PS.VM) && this.nIOPL < 3) {
         if (DEBUG) this.printMessage("INT 0x03 in v86-mode (IOPL < 3)", this.bitsMessage, true);
-        X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
+        X86.helpFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
         return;
     }
     /*
-     * Because INT3 is a trap, not a fault, we must use fnTrap() rather than fnFault().  Unfortunately, that
-     * means you can't rely on the Debugger logic instead fnFault() to conditionally stop execution on an INT3,
+     * Because INT3 is a trap, not a fault, we must use helpTrap() rather than helpFault().  Unfortunately, that
+     * means you can't rely on the Debugger logic instead helpFault() to conditionally stop execution on an INT3,
      * so I've changed the Debugger's checkBreakpoint() function to stop execution on INT3 whenever both the
      * INT and HALT message bits are set; a simple "g" command allows you to continue.
      */
-    X86.fnTrap.call(this, X86.EXCEPTION.BP_TRAP, this.cycleCounts.nOpCyclesInt3D);
+    X86.helpTrap.call(this, X86.EXCEPTION.BP_TRAP, this.cycleCounts.nOpCyclesInt3D);
 };
 
 /**
@@ -3585,7 +3585,7 @@ X86.opINTn = function()
      */
     if (I386 && (this.regPS & X86.PS.VM) && this.nIOPL < 3) {
         if (DEBUG && this.messageEnabled()) this.printMessage("INT " + str.toHexByte(nInt) + " in v86-mode (IOPL < 3)", true, true);
-        X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
+        X86.helpFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
         return;
     }
     /*
@@ -3593,7 +3593,7 @@ X86.opINTn = function()
      * and returns false ONLY if a notification handler returned false (ie, requesting the interrupt be skipped).
      */
     if (this.checkIntNotify(nInt)) {
-        X86.fnTrap.call(this, nInt, 0);
+        X86.helpTrap.call(this, nInt, 0);
         return;
     }
     this.nStepCycles--;     // we don't need to assess the full cost of nOpCyclesInt, but we need to assess something...
@@ -3612,10 +3612,10 @@ X86.opINTO = function()
          */
         if (I386 && (this.regPS & X86.PS.VM) && this.nIOPL < 3) {
             if (DEBUG) this.printMessage("INTO in v86-mode (IOPL < 3)", this.bitsMessage, true);
-            X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
+            X86.helpFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
             return;
         }
-        X86.fnTrap.call(this, X86.EXCEPTION.OF_TRAP, this.cycleCounts.nOpCyclesIntOD);
+        X86.helpTrap.call(this, X86.EXCEPTION.OF_TRAP, this.cycleCounts.nOpCyclesIntOD);
         return;
     }
     this.nStepCycles -= this.cycleCounts.nOpCyclesIntOFall;
@@ -3633,10 +3633,10 @@ X86.opIRET = function()
      */
     if (I386 && (this.regPS & X86.PS.VM) && this.nIOPL < 3) {
         if (DEBUG) this.printMessage("IRET in v86-mode (IOPL < 3)", this.bitsMessage, true);
-        X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
+        X86.helpFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
         return;
     }
-    X86.fnIRET.call(this);
+    X86.helpIRET.call(this);
 };
 
 /**
@@ -3646,7 +3646,7 @@ X86.opIRET = function()
  */
 X86.opGRP2b1 = function()
 {
-    this.decodeModGrpByte.call(this, X86.aOpGrp2b, X86.fnSRC1);
+    this.decodeModGrpByte.call(this, X86.aOpGrp2b, X86.helpSRC1);
 };
 
 /**
@@ -3656,7 +3656,7 @@ X86.opGRP2b1 = function()
  */
 X86.opGRP2w1 = function()
 {
-    this.decodeModGrpWord.call(this, this.sizeData == 2? X86.aOpGrp2w : X86.aOpGrp2d, X86.fnSRC1);
+    this.decodeModGrpWord.call(this, this.sizeData == 2? X86.aOpGrp2w : X86.aOpGrp2d, X86.helpSRC1);
 };
 
 /**
@@ -3666,7 +3666,7 @@ X86.opGRP2w1 = function()
  */
 X86.opGRP2bCL = function()
 {
-    this.decodeModGrpByte.call(this, X86.aOpGrp2b, X86.fnSRCCL);
+    this.decodeModGrpByte.call(this, X86.aOpGrp2b, X86.helpSRCCL);
 };
 
 /**
@@ -3676,7 +3676,7 @@ X86.opGRP2bCL = function()
  */
 X86.opGRP2wCL = function()
 {
-    this.decodeModGrpWord.call(this, this.sizeData == 2? X86.aOpGrp2w : X86.aOpGrp2d, X86.fnSRCCL);
+    this.decodeModGrpWord.call(this, this.sizeData == 2? X86.aOpGrp2w : X86.aOpGrp2d, X86.helpSRCCL);
 };
 
 /**
@@ -3724,7 +3724,7 @@ X86.opAAM = function()
 {
     var b = this.getIPByte();
     if (!b) {
-        X86.fnDivOverflow.call(this);
+        X86.helpDIVOverflow.call(this);
         return;
     }
     var AL = this.regEAX & 0xff;
@@ -4227,7 +4227,7 @@ X86.opHLT = function()
      * TODO: Consider swapping out this function whenever setProtMode() changes the mode to V86-mode.
      */
     if (I386 && (this.regPS & X86.PS.VM)) {
-        X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
+        X86.helpFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
         return;
     }
     /*
@@ -4291,7 +4291,7 @@ X86.opCMC = function()
 X86.opGRP3b = function()
 {
     this.fMDSet = false;
-    this.decodeModGrpByte.call(this, X86.aOpGrp3b, X86.fnSRCNone);
+    this.decodeModGrpByte.call(this, X86.aOpGrp3b, X86.helpSRCNone);
     if (this.fMDSet) this.regEAX = (this.regEAX & ~this.maskData) | (this.regMDLo & this.maskData);
 };
 
@@ -4317,7 +4317,7 @@ X86.opGRP3b = function()
 X86.opGRP3w = function()
 {
     this.fMDSet = false;
-    this.decodeModGrpWord.call(this, X86.aOpGrp3w, X86.fnSRCNone);
+    this.decodeModGrpWord.call(this, X86.aOpGrp3w, X86.helpSRCNone);
     if (this.fMDSet) {
         this.regEAX = (this.regEAX & ~this.maskData) | (this.regMDLo & this.maskData);
         this.regEDX = (this.regEDX & ~this.maskData) | (this.regMDHi & this.maskData);
@@ -4359,7 +4359,7 @@ X86.opCLI = function()
      */
     if (this.nCPL > this.nIOPL) {
         if (DEBUG && (this.regPS & X86.PS.VM)) this.printMessage("CLI in v86-mode (IOPL < 3)", this.bitsMessage, true);
-        X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
+        X86.helpFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
         return;
     }
     this.clearIF();
@@ -4379,7 +4379,7 @@ X86.opSTI = function()
      */
     if (this.nCPL > this.nIOPL) {
         if (DEBUG && (this.regPS & X86.PS.VM)) this.printMessage("STI in v86-mode (IOPL < 3)", this.bitsMessage, true);
-        X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
+        X86.helpFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
         return;
     }
     this.setIF();
@@ -4416,7 +4416,7 @@ X86.opSTD = function()
  */
 X86.opGRP4b = function()
 {
-    this.decodeModGrpByte.call(this, X86.aOpGrp4b, X86.fnSRCNone);
+    this.decodeModGrpByte.call(this, X86.aOpGrp4b, X86.helpSRCNone);
 };
 
 /**
@@ -4426,7 +4426,7 @@ X86.opGRP4b = function()
  */
 X86.opGRP4w = function()
 {
-    this.decodeModGrpWord.call(this, X86.aOpGrp4w, X86.fnSRCNone);
+    this.decodeModGrpWord.call(this, X86.aOpGrp4w, X86.helpSRCNone);
 };
 
 /**
@@ -4436,7 +4436,7 @@ X86.opGRP4w = function()
  */
 X86.opInvalid = function()
 {
-    X86.fnFault.call(this, X86.EXCEPTION.UD_FAULT);
+    X86.helpFault.call(this, X86.EXCEPTION.UD_FAULT);
 };
 
 /**

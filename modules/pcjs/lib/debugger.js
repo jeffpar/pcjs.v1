@@ -3173,9 +3173,17 @@ if (DEBUGGER) {
                  * We must create a new dbgAddr from the address in aHistory, because dbgAddr was
                  * a reference, not a copy, and we don't want getInstruction() modifying the original.
                  */
-                dbgAddr = this.newAddr(dbgAddr.off, dbgAddr.sel, dbgAddr.addr, dbgAddr.type, dbgAddr.fData32, dbgAddr.fAddr32);
+                var dbgAddrNew = this.newAddr(dbgAddr.off, dbgAddr.sel, dbgAddr.addr, dbgAddr.type, dbgAddr.fData32, dbgAddr.fAddr32);
 
-                var sInstruction = this.getInstruction(dbgAddr, "history", nPrev--);
+                var sComment = "history";
+                var nSequence = nPrev--;
+                if (DEBUG && dbgAddr.cycleCount != null) {
+                    sComment = "cycles";
+                    nSequence = dbgAddr.cycleCount;
+                }
+
+                var sInstruction = this.getInstruction(dbgAddrNew, sComment, nSequence);
+
                 if (!aFilters.length || sInstruction.indexOf(aFilters[0]) >= 0) {
                     this.println(sInstruction);
                 }
@@ -3184,8 +3192,8 @@ if (DEBUGGER) {
                  * If there were OPERAND or ADDRESS overrides on the previous instruction, getInstruction()
                  * will have automatically disassembled additional bytes, so skip additional history entries.
                  */
-                if (dbgAddr.cOverrides) {
-                    iHistory += dbgAddr.cOverrides; nLines -= dbgAddr.cOverrides; nPrev -= dbgAddr.cOverrides;
+                if (dbgAddrNew.cOverrides) {
+                    iHistory += dbgAddrNew.cOverrides; nLines -= dbgAddrNew.cOverrides; nPrev -= dbgAddrNew.cOverrides;
                 }
 
                 if (iHistory >= aHistory.length) iHistory = 0;
@@ -4240,6 +4248,8 @@ if (DEBUGGER) {
      */
     Debugger.prototype.checkInstruction = function(addr, nState)
     {
+        var cpu = this.cpu;
+
         if (nState > 0) {
             if (this.nBreakIns && !--this.nBreakIns) {
                 return true;
@@ -4250,8 +4260,8 @@ if (DEBUGGER) {
             /*
              * Halt if running with interrupts disabled and IOPL < CPL, because that's likely an error
              */
-            if (MAXDEBUG && !(this.cpu.regPS & X86.PS.IF) && this.cpu.nIOPL < this.cpu.nCPL) {
-                this.printMessage("interrupts disabled at IOPL " + this.cpu.nIOPL + " and CPL " + this.cpu.nCPL, true);
+            if (MAXDEBUG && !(cpu.regPS & X86.PS.IF) && cpu.nIOPL < cpu.nCPL) {
+                this.printMessage("interrupts disabled at IOPL " + cpu.nIOPL + " and CPL " + cpu.nCPL, true);
                 return true;
             }
         }
@@ -4264,11 +4274,12 @@ if (DEBUGGER) {
          */
         if (nState >= 0 && this.aaOpcodeCounts.length) {
             this.cOpcodes++;
-            var bOpcode = this.cpu.probeAddr(addr);
+            var bOpcode = cpu.probeAddr(addr);
             if (bOpcode != null) {
                 this.aaOpcodeCounts[bOpcode][1]++;
                 var dbgAddr = this.aOpcodeHistory[this.iOpcodeHistory];
-                this.setAddr(dbgAddr, this.cpu.getIP(), this.cpu.getCS());
+                this.setAddr(dbgAddr, cpu.getIP(), cpu.getCS());
+                if (DEBUG) dbgAddr.cycleCount = cpu.getCycles();
                 if (++this.iOpcodeHistory == this.aOpcodeHistory.length) this.iOpcodeHistory = 0;
             }
         }
@@ -7341,14 +7352,14 @@ if (DEBUGGER) {
                                         break;
                                     case "CR0":
                                         this.cpu.regCR0 = w;
-                                        X86.fnLCR0.call(this.cpu, w);
+                                        X86.helpLoadCR0.call(this.cpu, w);
                                         break;
                                     case "CR2":
                                         this.cpu.regCR2 = w;
                                         break;
                                     case "CR3":
                                         this.cpu.regCR3 = w;
-                                        X86.fnLCR3.call(this.cpu, w);
+                                        X86.helpLoadCR3.call(this.cpu, w);
                                         break;
                                     /*
                                      * TODO: Add support for DR0-DR7 and TR6-TR7.
@@ -7682,18 +7693,35 @@ if (DEBUGGER) {
     /**
      * doTrace(sCmd, sCount)
      *
+     * The "t" and "tr" commands interpret the count as a number of instructions, and since
+     * we call the Debugger's stepCPU() for each iteration, a single instruction includes
+     * any/all prefixes; the CPU's stepCPU() treats prefixes as discrete operations.  The only
+     * difference between "t" and "tr": the former displays only the next instruction, while
+     * the latter also displays the (updated) registers.
+     *
+     * The "tc" command interprets the count as a number of cycles rather than instructions,
+     * allowing you to quickly execute large chunks of instructions with a single command; it
+     * doesn't display anything until the the chunk has finished.
+     *
+     * However, generally a more useful command is "bn", which allows you to break after some
+     * number of instructions have been executed (as opposed to some number of cycles).
+     *
      * @this {Debugger}
-     * @param {string} [sCmd] "t" or "tr"
+     * @param {string} [sCmd] ("t", "tc", or "tr")
      * @param {string} [sCount] # of instructions to step
      */
     Debugger.prototype.doTrace = function(sCmd, sCount)
     {
         var dbg = this;
-        var fRegs = (sCmd == "tr");
-        var count = this.parseValue(sCount, null, true) || 1;
-        var nCycles = (count == 1? 0 : 1);
+        var fRegs = (sCmd != "t");
+        var nCount = this.parseValue(sCount, null, true) || 1;
+        var nCycles = (nCount == 1? 0 : 1);
+        if (sCmd == "tc") {
+            nCycles = nCount;
+            nCount = 1;
+        }
         web.onCountRepeat(
-            count,
+            nCount,
             function onCountStep() {
                 return dbg.setBusy(true) && dbg.stepCPU(nCycles, fRegs, false);
             },

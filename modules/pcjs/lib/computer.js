@@ -1090,9 +1090,28 @@ Computer.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
         };
         return true;
 
+    /*
+     * Technically, this binding should now be called "saveState", to clearly distinguish it from
+     * the "Save Machine" control that's normally bound to the savePC() function in save.js.  Saving
+     * an entire machine includes everything needed to start/restore the machine; eg, the machine
+     * XML configuration file(s) *and* the JSON-encoded machine state.
+     */
     case "save":
+        /*
+         * Since this feature depends on the server supporting the PCjs User API (see userapi.js),
+         * and since pcjs.org is no longer running a Node web server, we disable the feature for that
+         * particular host.
+         */
         if (str.endsWith(web.getHost(), "pcjs.org")) {
-            control.style.display = "none";
+            if (DEBUG) this.log("Remote user API not available");
+            /*
+             * We could also simply hide the control; eg:
+             *
+             *      control.style.display = "none";
+             *
+             * but removing the control altogether seems better.
+             */
+            control.parentNode.removeChild(/** @type {Node} */ (control));
             return false;
         }
         this.bindings[sBinding] = control;

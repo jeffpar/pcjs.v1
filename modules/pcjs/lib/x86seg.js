@@ -115,7 +115,7 @@ function X86Seg(cpu, id, sName, fProt)
      * will be pushed from awParms onto the new stack.
      *
      * The typical ways of loading a new segment into CS are JMPF, CALLF (or INT), and RETF (or IRET),
-     * via CPU functions setCSIP() and fnINT(), which use segCS.loadCode() and segCS.loadIDT(), respectively.
+     * via CPU functions setCSIP() and helpINT(), which use segCS.loadCode() and segCS.loadIDT(), respectively.
      *
      * loadCode() requires an fCall value: null means NO privilege level transition may occur, true
      * allows a stack switch and a privilege transition to a numerically lower privilege, and false allows
@@ -268,7 +268,7 @@ X86Seg.prototype.loadProt = function loadProt(sel, fProbe)
             return this.loadDesc8(addrDesc, sel, fProbe);
         }
         if (this.id < X86Seg.ID.VER) {
-            X86.fnFault.call(cpu, fProbe && this.id == X86Seg.ID.STACK? X86.EXCEPTION.TS_FAULT : X86.EXCEPTION.GP_FAULT, sel & X86.ERRCODE.SELMASK);
+            X86.helpFault.call(cpu, fProbe && this.id == X86Seg.ID.STACK? X86.EXCEPTION.TS_FAULT : X86.EXCEPTION.GP_FAULT, sel & X86.ERRCODE.SELMASK);
         }
     }
     return X86.ADDR_INVALID;
@@ -323,15 +323,15 @@ X86Seg.prototype.loadIDTProt = function loadIDTProt(nIDT)
         if (addr !== X86.ADDR_INVALID) addr += this.offIP;
         return addr;
     }
-    X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, nIDT | X86.ERRCODE.IDT);
+    X86.helpFault.call(cpu, X86.EXCEPTION.GP_FAULT, nIDT | X86.ERRCODE.IDT);
     return X86.ADDR_INVALID;
 };
 
 /**
  * checkReadReal(off, cb)
  *
- * TODO: Invoke X86.fnFault.call(this.cpu, X86.EXCEPTION.GP_FAULT) if off+cb is beyond offMax on 80186 and up;
- * also, determine whether fnFault() call should include an error code, since this is happening in real-mode.
+ * TODO: Invoke X86.helpFault.call(this.cpu, X86.EXCEPTION.GP_FAULT) if off+cb is beyond offMax on 80186 and up;
+ * also, determine whether helpFault() call should include an error code, since this is happening in real-mode.
  *
  * @this {X86Seg}
  * @param {number} off is a segment-relative offset
@@ -346,8 +346,8 @@ X86Seg.prototype.checkReadReal = function checkReadReal(off, cb)
 /**
  * checkWriteReal(off, cb)
  *
- * TODO: Invoke X86.fnFault.call(this.cpu, X86.EXCEPTION.GP_FAULT) if off+cb is beyond offMax on 80186 and up;
- * also, determine whether fnFault() call should include an error code, since this is happening in real-mode.
+ * TODO: Invoke X86.helpFault.call(this.cpu, X86.EXCEPTION.GP_FAULT) if off+cb is beyond offMax on 80186 and up;
+ * also, determine whether helpFault() call should include an error code, since this is happening in real-mode.
  *
  * @this {X86Seg}
  * @param {number} off is a segment-relative offset
@@ -409,7 +409,7 @@ X86Seg.prototype.checkReadProtDown = function checkReadProtDown(off, cb)
  */
 X86Seg.prototype.checkReadProtDisallowed = function checkReadProtDisallowed(off, cb)
 {
-    X86.fnFault.call(this.cpu, X86.EXCEPTION.GP_FAULT, 0);
+    X86.helpFault.call(this.cpu, X86.EXCEPTION.GP_FAULT, 0);
     return X86.ADDR_INVALID;
 };
 
@@ -463,7 +463,7 @@ X86Seg.prototype.checkWriteProtDown = function checkWriteProtDown(off, cb)
  */
 X86Seg.prototype.checkWriteProtDisallowed = function checkWriteProtDisallowed(off, cb)
 {
-    X86.fnFault.call(this.cpu, X86.EXCEPTION.GP_FAULT, 0);
+    X86.helpFault.call(this.cpu, X86.EXCEPTION.GP_FAULT, 0);
     return X86.ADDR_INVALID;
 };
 
@@ -546,7 +546,7 @@ X86Seg.prototype.loadAcc = function(sel, fGDT)
             return cpu.getShort(addrDesc + X86.DESC.ACC.OFFSET);
         }
     }
-    X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel & X86.ERRCODE.SELMASK);
+    X86.helpFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel & X86.ERRCODE.SELMASK);
     return X86.DESC.ACC.INVALID;
 };
  */
@@ -898,7 +898,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fProbe)
                      *      5) Descriptor must indicate writable data segment else #TS (SS selector)
                      */
                     if (!selStack) {
-                        X86.fnFault.call(cpu, X86.EXCEPTION.TS_FAULT, selStack);
+                        X86.helpFault.call(cpu, X86.EXCEPTION.TS_FAULT, selStack);
                         return X86.ADDR_INVALID;
                     }
 
@@ -969,7 +969,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fProbe)
                          *              FS (upper 16 bits undefined)
                          *      high:   GS (upper 16 bits undefined)
                          *
-                         * Our caller (eg, fnINT()) will take care of pushing the final bits (EFLAGS, CS, and EIP).
+                         * Our caller (eg, helpINT()) will take care of pushing the final bits (EFLAGS, CS, and EIP).
                          */
                         cpu.setDataSize(4);
                         cpu.assert(I386 && cpu.model >= X86.MODEL_80386);
@@ -992,12 +992,12 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fProbe)
         }
 
         if (sizeGate != 0) {
-            X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, (sel & X86.ERRCODE.SELMASK) | (fIDT? X86.ERRCODE.IDT : 0));
+            X86.helpFault.call(cpu, X86.EXCEPTION.GP_FAULT, (sel & X86.ERRCODE.SELMASK) | (fIDT? X86.ERRCODE.IDT : 0));
             return X86.ADDR_INVALID;
         }
 
         if (!(acc & X86.DESC.ACC.PRESENT)) {
-            X86.fnFault.call(cpu, X86.EXCEPTION.NP_FAULT, (sel & X86.ERRCODE.SELMASK) | (fIDT? X86.ERRCODE.IDT : 0));
+            X86.helpFault.call(cpu, X86.EXCEPTION.NP_FAULT, (sel & X86.ERRCODE.SELMASK) | (fIDT? X86.ERRCODE.IDT : 0));
             return X86.ADDR_INVALID;
         }
         break;
@@ -1040,14 +1040,14 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fProbe)
              * implies that, yes, GP_FAULT checks are supposed to be performed *before* NP_FAULT checks.
              */
             if (type < X86.DESC.ACC.TYPE.SEG || (type & (X86.DESC.ACC.TYPE.CODE | X86.DESC.ACC.TYPE.READABLE)) == X86.DESC.ACC.TYPE.CODE) {
-                X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel & X86.ERRCODE.SELMASK);
+                X86.helpFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel & X86.ERRCODE.SELMASK);
                 return X86.ADDR_INVALID;
             }
             /*
              * TODO: This would be a good place to perform some additional access rights checks, too.
              */
             if (!(acc & X86.DESC.ACC.PRESENT)) {
-                X86.fnFault.call(cpu, X86.EXCEPTION.NP_FAULT, sel & X86.ERRCODE.SELMASK);
+                X86.helpFault.call(cpu, X86.EXCEPTION.NP_FAULT, sel & X86.ERRCODE.SELMASK);
                 return X86.ADDR_INVALID;
             }
         }
@@ -1055,11 +1055,11 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fProbe)
 
     case X86Seg.ID.STACK:
         if (!selMasked || type < X86.DESC.ACC.TYPE.SEG || (type & (X86.DESC.ACC.TYPE.CODE | X86.DESC.ACC.TYPE.WRITABLE)) != X86.DESC.ACC.TYPE.WRITABLE) {
-            X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel & X86.ERRCODE.SELMASK);
+            X86.helpFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel & X86.ERRCODE.SELMASK);
             return X86.ADDR_INVALID;
         }
         if (!(acc & X86.DESC.ACC.PRESENT)) {
-            X86.fnFault.call(cpu, X86.EXCEPTION.SS_FAULT, sel & X86.ERRCODE.SELMASK);
+            X86.helpFault.call(cpu, X86.EXCEPTION.SS_FAULT, sel & X86.ERRCODE.SELMASK);
             return X86.ADDR_INVALID;
         }
         break;
@@ -1067,7 +1067,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fProbe)
     case X86Seg.ID.TSS:
         var typeTSS = type & ~X86.DESC.ACC.TSS_BUSY;
         if (!selMasked || typeTSS != X86.DESC.ACC.TYPE.TSS286 && typeTSS != X86.DESC.ACC.TYPE.TSS386) {
-            X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel & X86.ERRCODE.SELMASK);
+            X86.helpFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel & X86.ERRCODE.SELMASK);
             return X86.ADDR_INVALID;
         }
         /*
@@ -1181,7 +1181,7 @@ X86Seg.prototype.switchTSS = function switchTSS(selNew, fNest)
          * TODO: Verify that it is (always) correct to require that the BUSY bit be currently set.
          */
         if (!(cpu.segTSS.type & X86.DESC.ACC.TSS_BUSY)) {
-            X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, selNew & X86.ERRCODE.SELMASK);
+            X86.helpFault.call(cpu, X86.EXCEPTION.GP_FAULT, selNew & X86.ERRCODE.SELMASK);
             return false;
         }
         /*
@@ -1201,7 +1201,7 @@ X86Seg.prototype.switchTSS = function switchTSS(selNew, fNest)
 
     if (fNest !== false) {
         if (cpu.segTSS.type & X86.DESC.ACC.TSS_BUSY) {
-            X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, selNew & X86.ERRCODE.SELMASK);
+            X86.helpFault.call(cpu, X86.EXCEPTION.GP_FAULT, selNew & X86.ERRCODE.SELMASK);
             return false;
         }
         cpu.setShort(cpu.segTSS.addrDesc + X86.DESC.ACC.OFFSET, cpu.segTSS.acc |= X86.DESC.ACC.TSS_BUSY);
@@ -1288,7 +1288,7 @@ X86Seg.prototype.switchTSS = function switchTSS(selNew, fNest)
          * rather than later, so that as segment registers are reloaded, any LDT selectors will
          * will be located in the correct table.
          */
-        X86.fnLCR3.call(cpu, cpu.getLong(addrNew + X86.TSS386.TASK_CR3));
+        X86.helpLoadCR3.call(cpu, cpu.getLong(addrNew + X86.TSS386.TASK_CR3));
         cpu.segLDT.load(cpu.getShort(addrNew + X86.TSS386.TASK_LDT));
         cpu.setPS(cpu.getLong(addrNew + X86.TSS386.TASK_PS) | (fNest? X86.PS.NT : 0));
         cpu.assert(!fNest || !!(cpu.regPS & X86.PS.NT));

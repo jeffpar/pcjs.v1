@@ -545,12 +545,12 @@ X86CPU.prototype.mapPageBlock = function(addr, fWrite, fSuppress)
     var pde = blockPDE.readLong(offPDE);
 
     if (!(pde & X86.PTE.PRESENT)) {
-        if (!fSuppress) X86.fnPageFault.call(this, addr, false, fWrite);
+        if (!fSuppress) X86.helpPageFault.call(this, addr, false, fWrite);
         return this.memEmpty;
     }
 
     if (!(pde & X86.PTE.USER) && this.nCPL == 3) {
-        if (!fSuppress) X86.fnPageFault.call(this, addr, true, fWrite);
+        if (!fSuppress) X86.helpPageFault.call(this, addr, true, fWrite);
         return this.memEmpty;
     }
 
@@ -565,12 +565,12 @@ X86CPU.prototype.mapPageBlock = function(addr, fWrite, fSuppress)
     var pte = blockPTE.readLong(offPTE);
 
     if (!(pte & X86.PTE.PRESENT)) {
-        if (!fSuppress) X86.fnPageFault.call(this, addr, false, fWrite);
+        if (!fSuppress) X86.helpPageFault.call(this, addr, false, fWrite);
         return this.memEmpty;
     }
 
     if (!(pte & X86.PTE.USER) && this.nCPL == 3) {
-        if (!fSuppress) X86.fnPageFault.call(this, addr, true, fWrite);
+        if (!fSuppress) X86.helpPageFault.call(this, addr, true, fWrite);
         return this.memEmpty;
     }
 
@@ -1080,7 +1080,7 @@ X86CPU.prototype.resetRegs = function()
 
     /*
      * NOTE: Even though the 8086 doesn't have CR0 (aka MSW) and IDTR, we initialize them for ALL CPUs, so
-     * that functions like X86.fnINT() can use the same code for both.  The 8086/8088 have no direct way
+     * that functions like X86.helpINT() can use the same code for both.  The 8086/8088 have no direct way
      * of accessing or changing them, so this is an implementation detail those processors are unaware of.
      */
     this.regCR0 = X86.CR0.MSW.ON;
@@ -1096,8 +1096,8 @@ X86CPU.prototype.resetRegs = function()
     this.resultDst = this.resultSrc = this.resultArith = this.resultLogic = 0;
 
     /*
-     * nFault is set by fnFault() and reset (to -1) by resetRegs() and opIRET().  Its initial purpose was to
-     * help fnFault() determine when a nested fault should be converted into either a double-fault (DF_FAULT)
+     * nFault is set by helpFault() and reset (to -1) by resetRegs() and opIRET().  Its initial purpose was to
+     * help helpFault() determine when a nested fault should be converted into either a double-fault (DF_FAULT)
      * or a triple-fault (ie, a processor reset).
      *
      * It has since evolved into another important role: helping segCS.loadIDT() know when an exception
@@ -1105,8 +1105,8 @@ X86CPU.prototype.resetRegs = function()
      * to the corresponding fault #, whereas the latter must set it to -1, so that if the IDT contains a gate
      * whose DPL < CPL, a GP fault will be generated instead.
      *
-     * The former always call fnFault(), and the latter call fnTrap(), so nFault is updated automatically.
-     * However, there are also intermediate cases, like hardware interrupts, which call fnINT() after manually
+     * The former always call helpFault(), and the latter call helpTrap(), so nFault is updated automatically.
+     * However, there are also intermediate cases, like hardware interrupts, which call helpINT() after manually
      * setting nFault to the IDT #.  TODO: Review all those "intermediate" cases.
      */
     this.nFault = -1;
@@ -1326,16 +1326,16 @@ X86CPU.prototype.setAddrSize = function(size)
  *      aOpModGrpWord
  *
  * However, when support for the 80386 was added, the number of dispatch tables doubled, and since each entry
- * in the table was a discrete function, decoding was fast, but it also produced a lot of code.
+ * in the table was a discrete function, decoding was fast, but it also required a LOT of code.
  *
  * So we have now replaced the above table pointers with function pointers:
  *
- *      decodeModRegByte (set to one of: decodeModRegByte16, decodeModRegByte32)
- *      decodeModMemByte (set to one of: decodeModMemByte16, decodeModMemByte32)
- *      decodeModGrpByte (set to one of: decodeModGrpByte16, decodeModGrpByte32)
- *      decodeModRegWord (set to one of: decodeModRegShort16, decodeModRegLong16, decodeModRegShort32, decodeModRegLong32)
- *      decodeModMemWord (set to one of: decodeModMemShort16, decodeModMemLong16, decodeModMemShort32, decodeModMemLong32)
- *      decodeModGrpWord (set to one of: decodeModGrpShort16, decodeModGrpLong16, decodeModGrpShort32, decodeModGrpLong32)
+ *      decodeModRegByte (set to one of: modRegByte16, modRegByte32)
+ *      decodeModMemByte (set to one of: modMemByte16, modMemByte32)
+ *      decodeModGrpByte (set to one of: modGrpByte16, modGrpByte32)
+ *      decodeModRegWord (set to one of: modRegShort16, modRegLong16, modRegShort32, modRegLong32)
+ *      decodeModMemWord (set to one of: modMemShort16, modMemLong16, modMemShort32, modMemLong32)
+ *      decodeModGrpWord (set to one of: modGrpShort16, modGrpLong16, modGrpShort32, modGrpLong32)
  *
  * So opcode handlers that used to do this:
  *
@@ -1345,46 +1345,50 @@ X86CPU.prototype.setAddrSize = function(size)
  *
  *      this.decodeModMemByte.call(this, X86.fnADDb);
  *
+ * Decoding of ModRM bytes is now slightly slower, but the previous code is still in the repository
+ * (look for x86modb.js and x86modw.js for the pre-80386 dispatch tables, and x86modb16.js, x86modb32.js,
+ * x86modw16.js, x86modw32.js, and x86modsib.js for the post-80386 dispatch tables).
+ *
  * @this {X86CPU}
  */
 X86CPU.prototype.updateAddrSize = function()
 {
     if (!I386) {
         this.getAddr = (PREFETCH? this.getShortPrefetch : this.getShort);
-        this.decodeModRegByte = X86.decodeModRegByte16;
-        this.decodeModMemByte = X86.decodeModMemByte16;
-        this.decodeModGrpByte = X86.decodeModGrpByte16;
-        this.decodeModRegWord = X86.decodeModRegShort16;
-        this.decodeModMemWord = X86.decodeModMemShort16;
-        this.decodeModGrpWord = X86.decodeModGrpShort16;
+        this.decodeModRegByte = X86.modRegByte16;
+        this.decodeModMemByte = X86.modMemByte16;
+        this.decodeModGrpByte = X86.modGrpByte16;
+        this.decodeModRegWord = X86.modRegShort16;
+        this.decodeModMemWord = X86.modMemShort16;
+        this.decodeModGrpWord = X86.modGrpShort16;
     } else {
         if (this.sizeAddr == 2) {
             this.getAddr = (PREFETCH? this.getShortPrefetch : this.getShort);
-            this.decodeModRegByte = X86.decodeModRegByte16;
-            this.decodeModMemByte = X86.decodeModMemByte16;
-            this.decodeModGrpByte = X86.decodeModGrpByte16;
+            this.decodeModRegByte = X86.modRegByte16;
+            this.decodeModMemByte = X86.modMemByte16;
+            this.decodeModGrpByte = X86.modGrpByte16;
             if (this.sizeData == 2) {
-                this.decodeModRegWord = X86.decodeModRegShort16;
-                this.decodeModMemWord = X86.decodeModMemShort16;
-                this.decodeModGrpWord = X86.decodeModGrpShort16;
+                this.decodeModRegWord = X86.modRegShort16;
+                this.decodeModMemWord = X86.modMemShort16;
+                this.decodeModGrpWord = X86.modGrpShort16;
             } else {
-                this.decodeModRegWord = X86.decodeModRegLong16;
-                this.decodeModMemWord = X86.decodeModMemLong16;
-                this.decodeModGrpWord = X86.decodeModGrpLong16;
+                this.decodeModRegWord = X86.modRegLong16;
+                this.decodeModMemWord = X86.modMemLong16;
+                this.decodeModGrpWord = X86.modGrpLong16;
             }
         } else {
             this.getAddr = (PREFETCH? this.getLongPrefetch : this.getLong);
-            this.decodeModRegByte = X86.decodeModRegByte32;
-            this.decodeModMemByte = X86.decodeModMemByte32;
-            this.decodeModGrpByte = X86.decodeModGrpByte32;
+            this.decodeModRegByte = X86.modRegByte32;
+            this.decodeModMemByte = X86.modMemByte32;
+            this.decodeModGrpByte = X86.modGrpByte32;
             if (this.sizeData == 2) {
-                this.decodeModRegWord = X86.decodeModRegShort32;
-                this.decodeModMemWord = X86.decodeModMemShort32;
-                this.decodeModGrpWord = X86.decodeModGrpShort32;
+                this.decodeModRegWord = X86.modRegShort32;
+                this.decodeModMemWord = X86.modMemShort32;
+                this.decodeModGrpWord = X86.modGrpShort32;
             } else {
-                this.decodeModRegWord = X86.decodeModRegLong32;
-                this.decodeModMemWord = X86.decodeModMemLong32;
-                this.decodeModGrpWord = X86.decodeModGrpLong32;
+                this.decodeModRegWord = X86.modRegLong32;
+                this.decodeModMemWord = X86.modMemLong32;
+                this.decodeModGrpWord = X86.modGrpLong32;
             }
         }
     }
@@ -1421,26 +1425,26 @@ X86CPU.prototype.updateDataSize = function()
         this.getWord = this.getShort;
         this.setWord = this.setShort;
         if (this.sizeAddr == 2) {
-            this.decodeModRegWord = X86.decodeModRegShort16;
-            this.decodeModMemWord = X86.decodeModMemShort16;
-            this.decodeModGrpWord = X86.decodeModGrpShort16;
+            this.decodeModRegWord = X86.modRegShort16;
+            this.decodeModMemWord = X86.modMemShort16;
+            this.decodeModGrpWord = X86.modGrpShort16;
         } else {
-            this.decodeModRegWord = X86.decodeModRegShort32;
-            this.decodeModMemWord = X86.decodeModMemShort32;
-            this.decodeModGrpWord = X86.decodeModGrpShort32;
+            this.decodeModRegWord = X86.modRegShort32;
+            this.decodeModMemWord = X86.modMemShort32;
+            this.decodeModGrpWord = X86.modGrpShort32;
         }
     } else {
         this.typeData = X86.RESULT.DWORD;
         this.getWord = this.getLong;
         this.setWord = this.setLong;
         if (this.sizeAddr == 2) {
-            this.decodeModRegWord = X86.decodeModRegLong16;
-            this.decodeModMemWord = X86.decodeModMemLong16;
-            this.decodeModGrpWord = X86.decodeModGrpLong16;
+            this.decodeModRegWord = X86.modRegLong16;
+            this.decodeModMemWord = X86.modMemLong16;
+            this.decodeModGrpWord = X86.modGrpLong16;
         } else {
-            this.decodeModRegWord = X86.decodeModRegLong32;
-            this.decodeModMemWord = X86.decodeModMemLong32;
-            this.decodeModGrpWord = X86.decodeModGrpLong32;
+            this.decodeModRegWord = X86.modRegLong32;
+            this.decodeModMemWord = X86.modMemLong32;
+            this.decodeModGrpWord = X86.modGrpLong32;
         }
     }
 };
@@ -1591,8 +1595,8 @@ X86CPU.prototype.addIntReturn = function(addr, fn)
 /**
  * checkIntReturn(addr)
  *
- * We check for possible "INT n" software interrupt returns in the cases of "IRET" (fnIRET), "RETF 2"
- * (fnRETF) and "JMPF [DWORD]" (fnJMPFdw).
+ * We check for possible "INT n" software interrupt returns in the cases of "IRET" (helpIRET), "RETF 2"
+ * (helpRETF) and "JMPF [DWORD]" (fnJMPFdw).
  *
  * "JMPF [DWORD]" is an unfortunate choice that newer versions of DOS (as of at least 3.20, and probably
  * earlier) employed in their INT 0x13 hooks; I would have preferred not making this call for that opcode.
@@ -1718,7 +1722,7 @@ X86CPU.prototype.checkMemoryException = function(addr, nb, fWrite)
                      * Data access breakpoints are not faults; they must generate a trap at the end of the
                      * instruction, so we use the X86.INTFLAG.TRAP flag to generate the X86.EXCEPTION.DB_EXC trap.
                      *
-                     *      X86.fnFault.call(this, X86.EXCEPTION.DB_EXC);
+                     *      X86.helpFault.call(this, X86.EXCEPTION.DB_EXC);
                      */
                     this.intFlags |= X86.INTFLAG.TRAP;
                     return;
@@ -2285,16 +2289,24 @@ X86CPU.prototype.advanceIP = function(inc)
      * fetch a byte from 06FC, which won't happen.  I'm working around this for now by applying a -1
      * fudge factor to the fault check below.
      */
-    var off = (this.regLIPLimit - this.regLIP)|0;
-    if (off < 0 && (this.regLIPLimit ^ this.regLIP) >= 0) {
+    if (DEBUG) {
         /*
-         * There's no such thing as a GP fault on the 8086/8088, and I'm assuming that, on newer
-         * processors, when the segment limit is set to the maximum, it's OK for IP to wrap.
+         * TODO: This isn't DEBUG code, but it also isn't strictly necessary for properly written code,
+         * and it hurts performance.  Since this effectively turns advanceIP() into a one-line function for
+         * non-DEBUG builds, it should automatically get inlined (either at compile-time by the Closure Compiler
+         * or at run-time by whatever JavaScript engine you're using).
          */
-        if (this.model <= X86.MODEL_8088 || this.segCS.limit == this.segCS.maskAddr) {
-            this.setIP(this.regLIP - this.segCS.base);
-        } else if (off < -1) {          // fudge factor
-            X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
+        var off = (this.regLIPLimit - this.regLIP)|0;
+        if (off < 0 && (this.regLIPLimit ^ this.regLIP) >= 0) {
+            /*
+             * There's no such thing as a GP fault on the 8086/8088, and I'm assuming that, on newer
+             * processors, when the segment limit is set to the maximum, it's OK for IP to wrap.
+             */
+            if (this.model <= X86.MODEL_8088 || this.segCS.limit == this.segCS.maskAddr) {
+                this.setIP(this.regLIP - this.segCS.base);
+            } else if (off < -1) {          // fudge factor
+                X86.helpFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
+            }
         }
     }
 };
@@ -2974,7 +2986,7 @@ X86CPU.prototype.checkIOPM = function(port, nPorts, fInput)
     }
     if (bitsPorts) {
         if (this.messageEnabled(Messages.PORT)) this.printMessage("checkIOPM(" + str.toHexWord(port) + "," + nPorts + "," + (fInput? "input" : "output") + "): trapped", true, true);
-        X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
+        X86.helpFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
         return false;
     }
     return true;
@@ -3047,7 +3059,7 @@ X86CPU.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
  * probeAddr(addr, size, fPhysical)
  *
  * Used by the Debugger to probe addresses without risk of triggering a page fault, and by internal
- * functions, like fnCheckFault(), that must also avoid triggering faults, since they're not part of
+ * functions, like helpCheckFault(), that must also avoid triggering faults, since they're not part of
  * standard CPU operation.
  *
  * Since originally written, I've also relaxed the requirement that the request be contained entirely
@@ -3110,7 +3122,7 @@ X86CPU.prototype.probeAddr = function(addr, size, fPhysical)
  * @param {number} addr is a linear address
  * @return {number} byte (8-bit) value at that address
  */
-X86CPU.prototype.getByte = function getByte(addr)
+X86CPU.prototype.getByte = function(addr)
 {
     if (BACKTRACK) this.backTrack.btiMem0 = this.bus.readBackTrack(addr);
     return this.aMemBlocks[(addr & this.nMemMask) >>> this.nBlockShift].readByte(addr & this.nBlockLimit, addr);
@@ -3126,7 +3138,7 @@ X86CPU.prototype.getByte = function getByte(addr)
  * @param {number} addr is a linear address
  * @return {number} word (16-bit) value at that address
  */
-X86CPU.prototype.getShort = function getShort(addr)
+X86CPU.prototype.getShort = function(addr)
 {
     var off = addr & this.nBlockLimit;
     var iBlock = (addr & this.nMemMask) >>> this.nBlockShift;
@@ -3160,7 +3172,7 @@ X86CPU.prototype.getShort = function getShort(addr)
  * @param {number} addr is a linear address
  * @return {number} long (32-bit) value at that address
  */
-X86CPU.prototype.getLong = function getLong(addr)
+X86CPU.prototype.getLong = function(addr)
 {
     var off = addr & this.nBlockLimit;
     var iBlock = (addr & this.nMemMask) >>> this.nBlockShift;
@@ -3204,7 +3216,7 @@ X86CPU.prototype.getLong = function getLong(addr)
  * @param {number} addr is a linear address
  * @param {number} b is the byte (8-bit) value to write (which we truncate to 8 bits; required by opSTOSb)
  */
-X86CPU.prototype.setByte = function setByte(addr, b)
+X86CPU.prototype.setByte = function(addr, b)
 {
     if (BACKTRACK) this.bus.writeBackTrack(addr, this.backTrack.btiMem0);
     this.aMemBlocks[(addr & this.nMemMask) >>> this.nBlockShift].writeByte(addr & this.nBlockLimit, b & 0xff, addr);
@@ -3220,7 +3232,7 @@ X86CPU.prototype.setByte = function setByte(addr, b)
  * @param {number} addr is a linear address
  * @param {number} w is the word (16-bit) value to write (which we truncate to 16 bits to be safe)
  */
-X86CPU.prototype.setShort = function setShort(addr, w)
+X86CPU.prototype.setShort = function(addr, w)
 {
     var off = addr & this.nBlockLimit;
     var iBlock = (addr & this.nMemMask) >>> this.nBlockShift;
@@ -3253,7 +3265,7 @@ X86CPU.prototype.setShort = function setShort(addr, w)
  * @param {number} addr is a linear address
  * @param {number} l is the long (32-bit) value to write
  */
-X86CPU.prototype.setLong = function setLong(addr, l)
+X86CPU.prototype.setLong = function(addr, l)
 {
     var off = addr & this.nBlockLimit;
     var iBlock = (addr & this.nMemMask) >>> this.nBlockShift;
@@ -3825,7 +3837,7 @@ X86CPU.prototype.popWord = function()
         if (this.model <= X86.MODEL_8088 || !this.segSS.fExpDown && this.segSS.limit == this.segSS.maskAddr || this.segSS.fExpDown && !this.segSS.limit) {
             this.setSP((this.regLSP - this.segSS.base) & this.segSS.maskAddr);
         } else if (off < -1) {          // fudge factor
-            X86.fnFault.call(this, X86.EXCEPTION.SS_FAULT, 0);
+            X86.helpFault.call(this, X86.EXCEPTION.SS_FAULT, 0);
         }
     }
     return w;
@@ -3871,7 +3883,7 @@ X86CPU.prototype.pushData = function(d, width, size)
             this.setSP((regLSP - this.segSS.base) & this.segSS.maskAddr);
             regLSP = this.regLSP;
         } else {
-            X86.fnFault.call(this, X86.EXCEPTION.SS_FAULT, 0);
+            X86.helpFault.call(this, X86.EXCEPTION.SS_FAULT, 0);
         }
     }
 
@@ -3932,7 +3944,7 @@ X86CPU.prototype.pushWord = function(w)
             this.setSP((regLSP - this.segSS.base) & this.segSS.maskAddr);
             regLSP = this.regLSP;
         } else {
-            X86.fnFault.call(this, X86.EXCEPTION.SS_FAULT, 0);
+            X86.helpFault.call(this, X86.EXCEPTION.SS_FAULT, 0);
         }
     }
 
@@ -4034,7 +4046,7 @@ X86CPU.prototype.checkINTR = function()
                         this.intFlags &= ~X86.INTFLAG.INTR;
                         if (nIDT >= 0) {
                             this.intFlags &= ~X86.INTFLAG.HALT;
-                            X86.fnInterrupt.call(this, nIDT);
+                            X86.helpInterrupt.call(this, nIDT);
                             return true;
                         }
                     }
@@ -4044,7 +4056,7 @@ X86CPU.prototype.checkINTR = function()
                 if ((this.intFlags & X86.INTFLAG.TRAP)) {
                     this.intFlags &= ~X86.INTFLAG.TRAP;
                     if (I386 && this.model >= X86.MODEL_80386) this.regDR[6] |= X86.DR6.BS;
-                    X86.fnInterrupt.call(this, X86.EXCEPTION.DB_EXC);
+                    X86.helpInterrupt.call(this, X86.EXCEPTION.DB_EXC);
                     return true;
                 }
                 break;

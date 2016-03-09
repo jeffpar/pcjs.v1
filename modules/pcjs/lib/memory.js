@@ -1117,6 +1117,16 @@ Memory.prototype = {
     readBytePLE: function readBytePLE(off, addr) {
         this.blockPDE.adw[this.iPDE] |= X86.PTE.ACCESSED;
         this.blockPTE.adw[this.iPTE] |= X86.PTE.ACCESSED;
+        /*
+         * TODO: Review this performance hack.  Basically, after the first read of a page,
+         * we redirect the default read handler to a faster handler.  However, if operating
+         * systems clear the PDE/PTE bits without reloading CR3, they won't get set again.
+         *
+         * We should look into creating special write handlers for pages containing PDE/PTE
+         * entries, and whenever those entries are written, reset the read/write handlers
+         * for the corresponding pages.
+         */
+        this.readByte = this.readByteLE;
         return this.ab[off];
     },
     /**
@@ -1160,6 +1170,16 @@ Memory.prototype = {
          */
         this.blockPDE.adw[this.iPDE] |= X86.PTE.ACCESSED;
         this.blockPTE.adw[this.iPTE] |= X86.PTE.ACCESSED;
+        /*
+         * TODO: Review this performance hack.  Basically, after the first read of a page,
+         * we redirect the default read handler to a faster handler.  However, if operating
+         * systems clear the PDE/PTE bits without reloading CR3, they won't get set again.
+         *
+         * We should look into creating special write handlers for pages containing PDE/PTE
+         * entries, and whenever those entries are written, reset the read/write handlers
+         * for the corresponding pages.
+         */
+        this.readShort = this.readShortLE;
         return (off & 0x1)? (this.ab[off] | (this.ab[off+1] << 8)) : this.aw[off >> 1];
     },
     /**
@@ -1203,6 +1223,16 @@ Memory.prototype = {
          */
         this.blockPDE.adw[this.iPDE] |= X86.PTE.ACCESSED;
         this.blockPTE.adw[this.iPTE] |= X86.PTE.ACCESSED;
+        /*
+         * TODO: Review this performance hack.  Basically, after the first read of a page,
+         * we redirect the default read handler to a faster handler.  However, if operating
+         * systems clear the PDE/PTE bits without reloading CR3, they won't get set again.
+         *
+         * We should look into creating special write handlers for pages containing PDE/PTE
+         * entries, and whenever those entries are written, reset the read/write handlers
+         * for the corresponding pages.
+         */
+        this.readLong = this.readLongLE;
         return (off & 0x3)? (this.ab[off] | (this.ab[off+1] << 8) | (this.ab[off+2] << 16) | (this.ab[off+3] << 24)) : this.adw[off >> 2];
     },
     /**
@@ -1241,6 +1271,16 @@ Memory.prototype = {
         this.ab[off] = b;
         this.blockPDE.adw[this.iPDE] |= X86.PTE.ACCESSED;
         this.blockPTE.adw[this.iPTE] |= X86.PTE.ACCESSED | X86.PTE.DIRTY;
+        /*
+         * TODO: Review this performance hack.  Basically, after the first write of a page,
+         * we redirect the default write handler to a faster handler.  However, if operating
+         * systems clear the PDE/PTE bits without reloading CR3, they won't get set again.
+         *
+         * We should look into creating special write handlers for pages containing PDE/PTE
+         * entries, and whenever those entries are written, reset the read/write handlers
+         * for the corresponding pages.
+         */
+        this.writeByte = this.writeByteLE;
         /*
          * NOTE: Technically, we should be setting the fDirty flag on blockPDE and blockPTE as well, but let's
          * consider the two sole uses of fDirty.  First, we have cleanMemory(), which is currently used only by
@@ -1304,6 +1344,16 @@ Memory.prototype = {
         }
         this.blockPDE.adw[this.iPDE] |= X86.PTE.ACCESSED;
         this.blockPTE.adw[this.iPTE] |= X86.PTE.ACCESSED | X86.PTE.DIRTY;
+        /*
+         * TODO: Review this performance hack.  Basically, after the first write of a page,
+         * we redirect the default write handler to a faster handler.  However, if operating
+         * systems clear the PDE/PTE bits without reloading CR3, they won't get set again.
+         *
+         * We should look into creating special write handlers for pages containing PDE/PTE
+         * entries, and whenever those entries are written, reset the read/write handlers
+         * for the corresponding pages.
+         */
+        this.writeShort = this.writeShortLE;
         /*
          * NOTE: Technically, we should be setting the fDirty flag on blockPDE and blockPTE as well, but let's
          * consider the two sole uses of fDirty.  First, we have cleanMemory(), which is currently used only by
@@ -1371,6 +1421,16 @@ Memory.prototype = {
         }
         this.blockPDE.adw[this.iPDE] |= X86.PTE.ACCESSED;
         this.blockPTE.adw[this.iPTE] |= X86.PTE.ACCESSED | X86.PTE.DIRTY;
+        /*
+         * TODO: Review this performance hack.  Basically, after the first write of a page,
+         * we redirect the default write handler to a faster handler.  However, if operating
+         * systems clear the PDE/PTE bits without reloading CR3, they won't get set again.
+         *
+         * We should look into creating special write handlers for pages containing PDE/PTE
+         * entries, and whenever those entries are written, reset the read/write handlers
+         * for the corresponding pages.
+         */
+        this.writeLong = this.writeLongLE;
         /*
          * NOTE: Technically, we should be setting the fDirty flag on blockPDE and blockPTE as well, but let's
          * consider the two sole uses of fDirty.  First, we have cleanMemory(), which is currently used only by

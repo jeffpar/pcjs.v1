@@ -37,12 +37,12 @@ if (NODE) {
 }
 
 /**
- * decodeModRegByte16(fn)
+ * modRegByte16(fn)
  *
  * @this {X86CPU}
  * @param {function(number,number)} fn (dst,src)
  */
-X86.decodeModRegByte16 = function(fn)
+X86.modRegByte16 = function(fn)
 {
     var dst, src;
     var bModRM = (this.bModRM = this.getIPByte()) & 0xC7;
@@ -178,7 +178,7 @@ X86.decodeModRegByte16 = function(fn)
         break;
     default:
         src = 0;
-        this.assert(false, "decodeModRegByte16(): unrecognized modrm byte " + str.toHexByte(bModRM));
+        this.assert(false, "modRegByte16(): unrecognized modrm byte " + str.toHexByte(bModRM));
         break;
     }
 
@@ -253,12 +253,12 @@ X86.decodeModRegByte16 = function(fn)
 };
 
 /**
- * decodeModMemByte16(fn)
+ * modMemByte16(fn)
  *
  * @this {X86CPU}
  * @param {function(number,number)} fn (dst,src)
  */
-X86.decodeModMemByte16 = function(fn)
+X86.modMemByte16 = function(fn)
 {
     var dst, src;
     var bModRM = (this.bModRM = this.getIPByte()) & 0xC7;
@@ -386,7 +386,7 @@ X86.decodeModMemByte16 = function(fn)
         break;
     default:
         dst = 0;
-        this.assert(false, "decodeModMemByte16(): unrecognized modrm byte " + str.toHexByte(bModRM));
+        this.assert(false, "modMemByte16(): unrecognized modrm byte " + str.toHexByte(bModRM));
         break;
     }
 
@@ -511,19 +511,19 @@ X86.decodeModMemByte16 = function(fn)
         if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiEALo;
         break;
     default:
-        this.assert(false, "decodeModMemByte16(): unrecognized modrm byte " + str.toHexByte(bModRM));
+        this.assert(false, "modMemByte16(): unrecognized modrm byte " + str.toHexByte(bModRM));
         break;
     }
 };
 
 /**
- * decodeModGrpByte16(afnGrp, fnSrc)
+ * modGrpByte16(afnGrp, fnSrc)
  *
  * @this {X86CPU}
  * @param {Array.<function(number,number)>} afnGrp
  * @param {function()} fnSrc
  */
-X86.decodeModGrpByte16 = function(afnGrp, fnSrc) {
+X86.modGrpByte16 = function(afnGrp, fnSrc) {
     var dst;
     var bModRM = (this.bModRM = this.getIPByte()) & 0xC7;
 
@@ -650,7 +650,7 @@ X86.decodeModGrpByte16 = function(afnGrp, fnSrc) {
         break;
     default:
         dst = 0;
-        this.assert(false, "decodeModGrpByte16(): unrecognized modrm byte " + str.toHexByte(bModRM));
+        this.assert(false, "modGrpByte16(): unrecognized modrm byte " + str.toHexByte(bModRM));
         break;
     }
 
@@ -732,12 +732,12 @@ X86.decodeModGrpByte16 = function(afnGrp, fnSrc) {
 };
 
 /**
- * decodeModRegShort16(fn)
+ * modRegShort16(fn)
  *
  * @this {X86CPU}
  * @param {function(number,number)} fn (dst,src)
  */
-X86.decodeModRegShort16 = function(fn)
+X86.modRegShort16 = function(fn)
 {
     var dst, src;
     var bModRM = (this.bModRM = this.getIPByte()) & 0xC7;
@@ -889,7 +889,7 @@ X86.decodeModRegShort16 = function(fn)
         break;
     default:
         src = 0;
-        this.assert(false, "decodeModRegShort16(): unrecognized modrm byte " + str.toHexByte(bModRM));
+        this.assert(false, "modRegShort16(): unrecognized modrm byte " + str.toHexByte(bModRM));
         break;
     }
 
@@ -977,12 +977,12 @@ X86.decodeModRegShort16 = function(fn)
 };
 
 /**
- * decodeModMemShort16(fn)
+ * modMemShort16(fn)
  *
  * @this {X86CPU}
  * @param {function(number,number)} fn (dst,src)
  */
-X86.decodeModMemShort16 = function(fn)
+X86.modMemShort16 = function(fn)
 {
     var dst, src;
     var bModRM = (this.bModRM = this.getIPByte()) & 0xC7;
@@ -1110,7 +1110,7 @@ X86.decodeModMemShort16 = function(fn)
         break;
     default:
         dst = 0;
-        this.assert(false, "decodeModMemShort16(): unrecognized modrm byte " + str.toHexByte(bModRM));
+        this.assert(false, "modMemShort16(): unrecognized modrm byte " + str.toHexByte(bModRM));
         break;
     }
 
@@ -1219,64 +1219,64 @@ X86.decodeModMemShort16 = function(fn)
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
         break;
     case 0xC0:
-        this.regEAX = w;
+        this.regEAX = (this.regEAX & ~0xffff) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
         break;
     case 0xC1:
-        this.regECX = w;
+        this.regECX = (this.regECX & ~0xffff) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
         break;
     case 0xC2:
-        this.regEDX = w;
+        this.regEDX = (this.regEDX & ~0xffff) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
         break;
     case 0xC3:
-        this.regEBX = w;
+        this.regEBX = (this.regEBX & ~0xffff) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
         break;
     case 0xC4:
-        this.setSP(w);
+        this.setSP((this.getSP() & ~0xffff) | w);
         break;
     case 0xC5:
-        this.regEBP = w;
+        this.regEBP = (this.regEBP & ~0xffff) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
         break;
     case 0xC6:
-        this.regESI = w;
+        this.regESI = (this.regESI & ~0xffff) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
         break;
     case 0xC7:
-        this.regEDI = w;
+        this.regEDI = (this.regEDI & ~0xffff) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
         break;
     default:
-        this.assert(false, "decodeModMemShort16(): unrecognized modrm byte " + str.toHexByte(bModRM));
+        this.assert(false, "modMemShort16(): unrecognized modrm byte " + str.toHexByte(bModRM));
         break;
     }
 };
 
 /**
- * decodeModGrpShort16(afnGrp, fnSrc)
+ * modGrpShort16(afnGrp, fnSrc)
  *
  * @this {X86CPU}
  * @param {Array.<function(number,number)>} afnGrp
  * @param {function()} fnSrc
  */
-X86.decodeModGrpShort16 = function(afnGrp, fnSrc) {
+X86.modGrpShort16 = function(afnGrp, fnSrc) {
     var dst;
     var bModRM = (this.bModRM = this.getIPByte()) & 0xC7;
 
@@ -1403,7 +1403,7 @@ X86.decodeModGrpShort16 = function(afnGrp, fnSrc) {
         break;
     default:
         dst = 0;
-        this.assert(false, "decodeModGrpShort16(): unrecognized modrm byte " + str.toHexByte(bModRM));
+        this.assert(false, "modGrpShort16(): unrecognized modrm byte " + str.toHexByte(bModRM));
         break;
     }
 
@@ -1485,12 +1485,12 @@ X86.decodeModGrpShort16 = function(afnGrp, fnSrc) {
 };
 
 /**
- * decodeModRegLong16(fn)
+ * modRegLong16(fn)
  *
  * @this {X86CPU}
  * @param {function(number,number)} fn (dst,src)
  */
-X86.decodeModRegLong16 = function(fn)
+X86.modRegLong16 = function(fn)
 {
     var dst, src;
     var bModRM = (this.bModRM = this.getIPByte()) & 0xC7;
@@ -1642,7 +1642,7 @@ X86.decodeModRegLong16 = function(fn)
         break;
     default:
         src = 0;
-        this.assert(false, "decodeModRegLong16(): unrecognized modrm byte " + str.toHexByte(bModRM));
+        this.assert(false, "modRegLong16(): unrecognized modrm byte " + str.toHexByte(bModRM));
         break;
     }
 
@@ -1730,12 +1730,12 @@ X86.decodeModRegLong16 = function(fn)
 };
 
 /**
- * decodeModMemLong16(fn)
+ * modMemLong16(fn)
  *
  * @this {X86CPU}
  * @param {function(number,number)} fn (dst,src)
  */
-X86.decodeModMemLong16 = function(fn)
+X86.modMemLong16 = function(fn)
 {
     var dst, src;
     var bModRM = (this.bModRM = this.getIPByte()) & 0xC7;
@@ -1863,7 +1863,7 @@ X86.decodeModMemLong16 = function(fn)
         break;
     default:
         dst = 0;
-        this.assert(false, "decodeModMemLong16(): unrecognized modrm byte " + str.toHexByte(bModRM));
+        this.assert(false, "modMemLong16(): unrecognized modrm byte " + str.toHexByte(bModRM));
         break;
     }
 
@@ -2017,19 +2017,19 @@ X86.decodeModMemLong16 = function(fn)
         }
         break;
     default:
-        this.assert(false, "decodeModMemLong16(): unrecognized modrm byte " + str.toHexByte(bModRM));
+        this.assert(false, "modMemLong16(): unrecognized modrm byte " + str.toHexByte(bModRM));
         break;
     }
 };
 
 /**
- * decodeModGrpLong16(afnGrp, fnSrc)
+ * modGrpLong16(afnGrp, fnSrc)
  *
  * @this {X86CPU}
  * @param {Array.<function(number,number)>} afnGrp
  * @param {function()} fnSrc
  */
-X86.decodeModGrpLong16 = function(afnGrp, fnSrc) {
+X86.modGrpLong16 = function(afnGrp, fnSrc) {
     var dst;
     var bModRM = (this.bModRM = this.getIPByte()) & 0xC7;
 
@@ -2155,7 +2155,7 @@ X86.decodeModGrpLong16 = function(afnGrp, fnSrc) {
         dst = this.regEDI;
         break;
     default:
-        this.assert(false, "decodeModGrpLong16(): unrecognized modrm byte " + str.toHexByte(bModRM));
+        this.assert(false, "modGrpLong16(): unrecognized modrm byte " + str.toHexByte(bModRM));
         break;
     }
 
@@ -2237,12 +2237,12 @@ X86.decodeModGrpLong16 = function(afnGrp, fnSrc) {
 };
 
 /**
- * decodeModRegByte32(fn)
+ * modRegByte32(fn)
  *
  * @this {X86CPU}
  * @param {function(number,number)} fn (dst,src)
  */
-X86.decodeModRegByte32 = function(fn)
+X86.modRegByte32 = function(fn)
 {
     var dst, src;
     var bModRM = (this.bModRM = this.getIPByte()) & 0xC7;
@@ -2261,7 +2261,7 @@ X86.decodeModRegByte32 = function(fn)
         src = this.getEAByteData(this.regEBX);
         break;
     case 0x04:
-        src = this.getEAByteData(X86.decodeSIB.call(this, 0));
+        src = this.getEAByteData(X86.modSIB.call(this, 0));
         break;
     case 0x05:
         src = this.getEAByteData(this.getIPAddr());
@@ -2285,7 +2285,7 @@ X86.decodeModRegByte32 = function(fn)
         src = this.getEAByteData(this.regEBX + this.getIPDisp());
         break;
     case 0x44:
-        src = this.getEAByteData(X86.decodeSIB.call(this, 1) + this.getIPDisp());
+        src = this.getEAByteData(X86.modSIB.call(this, 1) + this.getIPDisp());
         break;
     case 0x45:
         src = this.getEAByteStack(this.regEBP + this.getIPDisp());
@@ -2309,7 +2309,7 @@ X86.decodeModRegByte32 = function(fn)
         src = this.getEAByteData(this.regEBX + this.getIPAddr());
         break;
     case 0x84:
-        src = this.getEAByteData(X86.decodeSIB.call(this, 2) + this.getIPAddr());
+        src = this.getEAByteData(X86.modSIB.call(this, 2) + this.getIPAddr());
         break;
     case 0x85:
         src = this.getEAByteStack(this.regEBP + this.getIPAddr());
@@ -2354,7 +2354,7 @@ X86.decodeModRegByte32 = function(fn)
         break;
     default:
         src = 0;
-        this.assert(false, "decodeModRegByte32(): unrecognized modrm byte " + str.toHexByte(bModRM));
+        this.assert(false, "modRegByte32(): unrecognized modrm byte " + str.toHexByte(bModRM));
         break;
     }
 
@@ -2429,12 +2429,12 @@ X86.decodeModRegByte32 = function(fn)
 };
 
 /**
- * decodeModMemByte32(fn)
+ * modMemByte32(fn)
  *
  * @this {X86CPU}
  * @param {function(number,number)} fn (dst,src)
  */
-X86.decodeModMemByte32 = function(fn)
+X86.modMemByte32 = function(fn)
 {
     var dst, src;
     var bModRM = (this.bModRM = this.getIPByte()) & 0xC7;
@@ -2457,7 +2457,7 @@ X86.decodeModMemByte32 = function(fn)
         this.regEAWrite = this.regEA;
         break;
     case 0x04:
-        dst = this.getEAByteData(X86.decodeSIB.call(this, 0));
+        dst = this.getEAByteData(X86.modSIB.call(this, 0));
         this.regEAWrite = this.regEA;
         break;
     case 0x05:
@@ -2489,7 +2489,7 @@ X86.decodeModMemByte32 = function(fn)
         this.regEAWrite = this.regEA;
         break;
     case 0x44:
-        dst = this.getEAByteData(X86.decodeSIB.call(this, 1) + this.getIPDisp());
+        dst = this.getEAByteData(X86.modSIB.call(this, 1) + this.getIPDisp());
         this.regEAWrite = this.regEA;
         break;
     case 0x45:
@@ -2521,7 +2521,7 @@ X86.decodeModMemByte32 = function(fn)
         this.regEAWrite = this.regEA;
         break;
     case 0x84:
-        dst = this.getEAByteData(X86.decodeSIB.call(this, 2) + this.getIPAddr());
+        dst = this.getEAByteData(X86.modSIB.call(this, 2) + this.getIPAddr());
         this.regEAWrite = this.regEA;
         break;
     case 0x85:
@@ -2562,7 +2562,7 @@ X86.decodeModMemByte32 = function(fn)
         break;
     default:
         dst = 0;
-        this.assert(false, "decodeModMemByte32(): unrecognized modrm byte " + str.toHexByte(bModRM));
+        this.assert(false, "modMemByte32(): unrecognized modrm byte " + str.toHexByte(bModRM));
         break;
     }
 
@@ -2648,13 +2648,13 @@ X86.decodeModMemByte32 = function(fn)
 };
 
 /**
- * decodeModGrpByte32(afnGrp, fnSrc)
+ * modGrpByte32(afnGrp, fnSrc)
  *
  * @this {X86CPU}
  * @param {Array.<function(number,number)>} afnGrp
  * @param {function()} fnSrc
  */
-X86.decodeModGrpByte32 = function(afnGrp, fnSrc) {
+X86.modGrpByte32 = function(afnGrp, fnSrc) {
     var dst;
     var bModRM = (this.bModRM = this.getIPByte()) & 0xC7;
 
@@ -2676,7 +2676,7 @@ X86.decodeModGrpByte32 = function(afnGrp, fnSrc) {
         this.regEAWrite = this.regEA;
         break;
     case 0x04:
-        dst = this.getEAByteData(X86.decodeSIB.call(this, 0));
+        dst = this.getEAByteData(X86.modSIB.call(this, 0));
         this.regEAWrite = this.regEA;
         break;
     case 0x05:
@@ -2708,7 +2708,7 @@ X86.decodeModGrpByte32 = function(afnGrp, fnSrc) {
         this.regEAWrite = this.regEA;
         break;
     case 0x44:
-        dst = this.getEAByteData(X86.decodeSIB.call(this, 1) + this.getIPDisp());
+        dst = this.getEAByteData(X86.modSIB.call(this, 1) + this.getIPDisp());
         this.regEAWrite = this.regEA;
         break;
     case 0x45:
@@ -2740,7 +2740,7 @@ X86.decodeModGrpByte32 = function(afnGrp, fnSrc) {
         this.regEAWrite = this.regEA;
         break;
     case 0x84:
-        dst = this.getEAByteData(X86.decodeSIB.call(this, 2) + this.getIPAddr());
+        dst = this.getEAByteData(X86.modSIB.call(this, 2) + this.getIPAddr());
         this.regEAWrite = this.regEA;
         break;
     case 0x85:
@@ -2781,7 +2781,7 @@ X86.decodeModGrpByte32 = function(afnGrp, fnSrc) {
         break;
     default:
         dst = 0;
-        this.assert(false, "decodeModGrpByte32(): unrecognized modrm byte " + str.toHexByte(bModRM));
+        this.assert(false, "modGrpByte32(): unrecognized modrm byte " + str.toHexByte(bModRM));
         break;
     }
 
@@ -2821,12 +2821,12 @@ X86.decodeModGrpByte32 = function(afnGrp, fnSrc) {
 };
 
 /**
- * decodeModRegShort32(fn)
+ * modRegShort32(fn)
  *
  * @this {X86CPU}
  * @param {function(number,number)} fn (dst,src)
  */
-X86.decodeModRegShort32 = function(fn)
+X86.modRegShort32 = function(fn)
 {
     var dst, src;
     var bModRM = (this.bModRM = this.getIPByte()) & 0xC7;
@@ -2845,7 +2845,7 @@ X86.decodeModRegShort32 = function(fn)
         src = this.getEAShortData(this.regEBX);
         break;
     case 0x04:
-        src = this.getEAShortData(X86.decodeSIB.call(this, 0));
+        src = this.getEAShortData(X86.modSIB.call(this, 0));
         break;
     case 0x05:
         src = this.getEAShortData(this.getIPAddr());
@@ -2869,7 +2869,7 @@ X86.decodeModRegShort32 = function(fn)
         src = this.getEAShortData(this.regEBX + this.getIPDisp());
         break;
     case 0x44:
-        src = this.getEAShortData(X86.decodeSIB.call(this, 1) + this.getIPDisp());
+        src = this.getEAShortData(X86.modSIB.call(this, 1) + this.getIPDisp());
         break;
     case 0x45:
         src = this.getEAShortStack(this.regEBP + this.getIPDisp());
@@ -2893,7 +2893,7 @@ X86.decodeModRegShort32 = function(fn)
         src = this.getEAShortData(this.regEBX + this.getIPAddr());
         break;
     case 0x84:
-        src = this.getEAShortData(X86.decodeSIB.call(this, 2) + this.getIPAddr());
+        src = this.getEAShortData(X86.modSIB.call(this, 2) + this.getIPAddr());
         break;
     case 0x85:
         src = this.getEAShortStack(this.regEBP + this.getIPAddr());
@@ -2954,7 +2954,7 @@ X86.decodeModRegShort32 = function(fn)
         break;
     default:
         src = 0;
-        this.assert(false, "decodeModRegShort32(): unrecognized modrm byte " + str.toHexByte(bModRM));
+        this.assert(false, "modRegShort32(): unrecognized modrm byte " + str.toHexByte(bModRM));
         break;
     }
 
@@ -3042,12 +3042,12 @@ X86.decodeModRegShort32 = function(fn)
 };
 
 /**
- * decodeModMemShort32(fn)
+ * modMemShort32(fn)
  *
  * @this {X86CPU}
  * @param {function(number,number)} fn (dst,src)
  */
-X86.decodeModMemShort32 = function(fn)
+X86.modMemShort32 = function(fn)
 {
     var dst, src;
     var bModRM = (this.bModRM = this.getIPByte()) & 0xC7;
@@ -3070,7 +3070,7 @@ X86.decodeModMemShort32 = function(fn)
         this.regEAWrite = this.regEA;
         break;
     case 0x04:
-        dst = this.getEAShortData(X86.decodeSIB.call(this, 0));
+        dst = this.getEAShortData(X86.modSIB.call(this, 0));
         this.regEAWrite = this.regEA;
         break;
     case 0x05:
@@ -3102,7 +3102,7 @@ X86.decodeModMemShort32 = function(fn)
         this.regEAWrite = this.regEA;
         break;
     case 0x44:
-        dst = this.getEAShortData(X86.decodeSIB.call(this, 1) + this.getIPDisp());
+        dst = this.getEAShortData(X86.modSIB.call(this, 1) + this.getIPDisp());
         this.regEAWrite = this.regEA;
         break;
     case 0x45:
@@ -3134,7 +3134,7 @@ X86.decodeModMemShort32 = function(fn)
         this.regEAWrite = this.regEA;
         break;
     case 0x84:
-        dst = this.getEAShortData(X86.decodeSIB.call(this, 2) + this.getIPAddr());
+        dst = this.getEAShortData(X86.modSIB.call(this, 2) + this.getIPAddr());
         this.regEAWrite = this.regEA;
         break;
     case 0x85:
@@ -3175,7 +3175,7 @@ X86.decodeModMemShort32 = function(fn)
         break;
     default:
         dst = 0;
-        this.assert(false, "decodeModMemShort32(): unrecognized modrm byte " + str.toHexByte(bModRM));
+        this.assert(false, "modMemShort32(): unrecognized modrm byte " + str.toHexByte(bModRM));
         break;
     }
 
@@ -3290,13 +3290,13 @@ X86.decodeModMemShort32 = function(fn)
 };
 
 /**
- * decodeModGrpShort32(afnGrp, fnSrc)
+ * modGrpShort32(afnGrp, fnSrc)
  *
  * @this {X86CPU}
  * @param {Array.<function(number,number)>} afnGrp
  * @param {function()} fnSrc
  */
-X86.decodeModGrpShort32 = function(afnGrp, fnSrc) {
+X86.modGrpShort32 = function(afnGrp, fnSrc) {
     var dst;
     var bModRM = (this.bModRM = this.getIPByte()) & 0xC7;
 
@@ -3318,7 +3318,7 @@ X86.decodeModGrpShort32 = function(afnGrp, fnSrc) {
         this.regEAWrite = this.regEA;
         break;
     case 0x04:
-        dst = this.getEAShortData(X86.decodeSIB.call(this, 0));
+        dst = this.getEAShortData(X86.modSIB.call(this, 0));
         this.regEAWrite = this.regEA;
         break;
     case 0x05:
@@ -3350,7 +3350,7 @@ X86.decodeModGrpShort32 = function(afnGrp, fnSrc) {
         this.regEAWrite = this.regEA;
         break;
     case 0x44:
-        dst = this.getEAShortData(X86.decodeSIB.call(this, 1) + this.getIPDisp());
+        dst = this.getEAShortData(X86.modSIB.call(this, 1) + this.getIPDisp());
         this.regEAWrite = this.regEA;
         break;
     case 0x45:
@@ -3382,7 +3382,7 @@ X86.decodeModGrpShort32 = function(afnGrp, fnSrc) {
         this.regEAWrite = this.regEA;
         break;
     case 0x84:
-        dst = this.getEAShortData(X86.decodeSIB.call(this, 2) + this.getIPAddr());
+        dst = this.getEAShortData(X86.modSIB.call(this, 2) + this.getIPAddr());
         this.regEAWrite = this.regEA;
         break;
     case 0x85:
@@ -3423,7 +3423,7 @@ X86.decodeModGrpShort32 = function(afnGrp, fnSrc) {
         break;
     default:
         dst = 0;
-        this.assert(false, "decodeModGrpShort32(): unrecognized modrm byte " + str.toHexByte(bModRM));
+        this.assert(false, "modGrpShort32(): unrecognized modrm byte " + str.toHexByte(bModRM));
         break;
     }
 
@@ -3463,12 +3463,12 @@ X86.decodeModGrpShort32 = function(afnGrp, fnSrc) {
 };
 
 /**
- * decodeModRegLong32(fn)
+ * modRegLong32(fn)
  *
  * @this {X86CPU}
  * @param {function(number,number)} fn (dst,src)
  */
-X86.decodeModRegLong32 = function(fn)
+X86.modRegLong32 = function(fn)
 {
     var dst, src;
     var bModRM = (this.bModRM = this.getIPByte()) & 0xC7;
@@ -3487,7 +3487,7 @@ X86.decodeModRegLong32 = function(fn)
         src = this.getEALongData(this.regEBX);
         break;
     case 0x04:
-        src = this.getEALongData(X86.decodeSIB.call(this, 0));
+        src = this.getEALongData(X86.modSIB.call(this, 0));
         break;
     case 0x05:
         src = this.getEALongData(this.getIPAddr());
@@ -3511,7 +3511,7 @@ X86.decodeModRegLong32 = function(fn)
         src = this.getEALongData(this.regEBX + this.getIPDisp());
         break;
     case 0x44:
-        src = this.getEALongData(X86.decodeSIB.call(this, 1) + this.getIPDisp());
+        src = this.getEALongData(X86.modSIB.call(this, 1) + this.getIPDisp());
         break;
     case 0x45:
         src = this.getEALongStack(this.regEBP + this.getIPDisp());
@@ -3535,7 +3535,7 @@ X86.decodeModRegLong32 = function(fn)
         src = this.getEALongData(this.regEBX + this.getIPAddr());
         break;
     case 0x84:
-        src = this.getEALongData(X86.decodeSIB.call(this, 2) + this.getIPAddr());
+        src = this.getEALongData(X86.modSIB.call(this, 2) + this.getIPAddr());
         break;
     case 0x85:
         src = this.getEALongStack(this.regEBP + this.getIPAddr());
@@ -3596,7 +3596,7 @@ X86.decodeModRegLong32 = function(fn)
         break;
     default:
         src = 0;
-        this.assert(false, "decodeModRegLong32(): unrecognized modrm byte " + str.toHexByte(bModRM));
+        this.assert(false, "modRegLong32(): unrecognized modrm byte " + str.toHexByte(bModRM));
         break;
     }
 
@@ -3684,12 +3684,12 @@ X86.decodeModRegLong32 = function(fn)
 };
 
 /**
- * decodeModMemLong32(fn)
+ * modMemLong32(fn)
  *
  * @this {X86CPU}
  * @param {function(number,number)} fn (dst,src)
  */
-X86.decodeModMemLong32 = function(fn)
+X86.modMemLong32 = function(fn)
 {
     var dst, src;
     var bModRM = (this.bModRM = this.getIPByte()) & 0xC7;
@@ -3712,7 +3712,7 @@ X86.decodeModMemLong32 = function(fn)
         this.regEAWrite = this.regEA;
         break;
     case 0x04:
-        dst = this.getEALongData(X86.decodeSIB.call(this, 0));
+        dst = this.getEALongData(X86.modSIB.call(this, 0));
         this.regEAWrite = this.regEA;
         break;
     case 0x05:
@@ -3744,7 +3744,7 @@ X86.decodeModMemLong32 = function(fn)
         this.regEAWrite = this.regEA;
         break;
     case 0x44:
-        dst = this.getEALongData(X86.decodeSIB.call(this, 1) + this.getIPDisp());
+        dst = this.getEALongData(X86.modSIB.call(this, 1) + this.getIPDisp());
         this.regEAWrite = this.regEA;
         break;
     case 0x45:
@@ -3776,7 +3776,7 @@ X86.decodeModMemLong32 = function(fn)
         this.regEAWrite = this.regEA;
         break;
     case 0x84:
-        dst = this.getEALongData(X86.decodeSIB.call(this, 2) + this.getIPAddr());
+        dst = this.getEALongData(X86.modSIB.call(this, 2) + this.getIPAddr());
         this.regEAWrite = this.regEA;
         break;
     case 0x85:
@@ -3817,7 +3817,7 @@ X86.decodeModMemLong32 = function(fn)
         break;
     default:
         dst = 0;
-        this.assert(false, "decodeModMemLong32(): unrecognized modrm byte " + str.toHexByte(bModRM));
+        this.assert(false, "modMemLong32(): unrecognized modrm byte " + str.toHexByte(bModRM));
         break;
     }
 
@@ -3932,13 +3932,13 @@ X86.decodeModMemLong32 = function(fn)
 };
 
 /**
- * decodeModGrpLong32(afnGrp, fnSrc)
+ * modGrpLong32(afnGrp, fnSrc)
  *
  * @this {X86CPU}
  * @param {Array.<function(number,number)>} afnGrp
  * @param {function()} fnSrc
  */
-X86.decodeModGrpLong32 = function(afnGrp, fnSrc) {
+X86.modGrpLong32 = function(afnGrp, fnSrc) {
     var dst;
     var bModRM = (this.bModRM = this.getIPByte()) & 0xC7;
 
@@ -3960,7 +3960,7 @@ X86.decodeModGrpLong32 = function(afnGrp, fnSrc) {
         this.regEAWrite = this.regEA;
         break;
     case 0x04:
-        dst = this.getEALongData(X86.decodeSIB.call(this, 0));
+        dst = this.getEALongData(X86.modSIB.call(this, 0));
         this.regEAWrite = this.regEA;
         break;
     case 0x05:
@@ -3992,7 +3992,7 @@ X86.decodeModGrpLong32 = function(afnGrp, fnSrc) {
         this.regEAWrite = this.regEA;
         break;
     case 0x44:
-        dst = this.getEALongData(X86.decodeSIB.call(this, 1) + this.getIPDisp());
+        dst = this.getEALongData(X86.modSIB.call(this, 1) + this.getIPDisp());
         this.regEAWrite = this.regEA;
         break;
     case 0x45:
@@ -4024,7 +4024,7 @@ X86.decodeModGrpLong32 = function(afnGrp, fnSrc) {
         this.regEAWrite = this.regEA;
         break;
     case 0x84:
-        dst = this.getEALongData(X86.decodeSIB.call(this, 2) + this.getIPAddr());
+        dst = this.getEALongData(X86.modSIB.call(this, 2) + this.getIPAddr());
         this.regEAWrite = this.regEA;
         break;
     case 0x85:
@@ -4065,7 +4065,7 @@ X86.decodeModGrpLong32 = function(afnGrp, fnSrc) {
         break;
     default:
         dst = 0;
-        this.assert(false, "decodeModGrpLong32(): unrecognized modrm byte " + str.toHexByte(bModRM));
+        this.assert(false, "modGrpLong32(): unrecognized modrm byte " + str.toHexByte(bModRM));
         break;
     }
 
@@ -4105,13 +4105,13 @@ X86.decodeModGrpLong32 = function(afnGrp, fnSrc) {
 };
 
 /**
- * decodeSIB(mod)
+ * modSIB(mod)
  *
  * @this {X86CPU}
  * @param {number} mod
  * @return {number}
  */
-X86.decodeSIB = function(mod)
+X86.modSIB = function(mod)
 {
     var bSIB = this.getIPByte();
     var scale = bSIB >> 6, index, base;

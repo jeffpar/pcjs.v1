@@ -457,6 +457,7 @@ FDC.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
 
     case "loadDrive":
         this.bindings[sBinding] = control;
+
         control.onclick = function onClickLoadDrive(event) {
             var controlDisks = fdc.bindings["listDisks"];
             if (controlDisks) {
@@ -468,7 +469,21 @@ FDC.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
         return true;
 
     case "saveDrive":
+        if (!this.fLocalDisks) {
+            if (DEBUG) this.log("Local disk support not available");
+            /*
+             * We could also simply hide the control; eg:
+             *
+             *      control.style.display = "none";
+             *
+             * but removing the control altogether seems better.
+             */
+            control.parentNode.removeChild(/** @type {Node} */ (control));
+            return false;
+        }
+
         this.bindings[sBinding] = control;
+
         control.onclick = function onClickLoadDrive(event) {
             var controlDrives = fdc.bindings["listDrives"];
             if (controlDrives && controlDrives.options && fdc.aDrives) {
@@ -490,35 +505,43 @@ FDC.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
         return true;
 
     case "mountDrive":
-        if (this.fLocalDisks) {
-            this.bindings[sBinding] = control;
+        if (!this.fLocalDisks) {
+            if (DEBUG) this.log("Local disk support not available");
             /*
-             * Enable "Mount" button only if a file is actually selected
+             * We could also simply hide the control; eg:
+             *
+             *      control.style.display = "none";
+             *
+             * but removing the control altogether seems better.
              */
-            control.addEventListener('change', function() {
-                var fieldset = control.children[0];
-                var files = fieldset.children[0].files;
-                var submit = fieldset.children[1];
-                submit.disabled = !files.length;
-            });
-
-            control.onsubmit = function(event) {
-                var file = event.currentTarget[1].files[0];
-                if (file) {
-                    var sDiskettePath = file.name;
-                    var sDisketteName = str.getBaseName(sDiskettePath, true);
-                    fdc.loadSelectedDrive(sDisketteName, sDiskettePath, file);
-                }
-                /*
-                 * Prevent reloading of web page after form submission
-                 */
-                return false;
-            };
-        }
-        else {
-            if (DEBUG) this.log("Local file support not available");
             control.parentNode.removeChild(/** @type {Node} */ (control));
+            return false;
         }
+
+        this.bindings[sBinding] = control;
+
+        /*
+         * Enable "Mount" button only if a file is actually selected
+         */
+        control.addEventListener('change', function() {
+            var fieldset = control.children[0];
+            var files = fieldset.children[0].files;
+            var submit = fieldset.children[1];
+            submit.disabled = !files.length;
+        });
+
+        control.onsubmit = function(event) {
+            var file = event.currentTarget[1].files[0];
+            if (file) {
+                var sDiskettePath = file.name;
+                var sDisketteName = str.getBaseName(sDiskettePath, true);
+                fdc.loadSelectedDrive(sDisketteName, sDiskettePath, file);
+            }
+            /*
+             * Prevent reloading of web page after form submission
+             */
+            return false;
+        };
         return true;
 
     default:

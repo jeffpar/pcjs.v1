@@ -186,9 +186,9 @@ X86.fnBOUND = function(dst, src)
          * The INT 0x05 handler must be called with CS:IP pointing to the BOUND instruction.
          *
          * TODO: Determine the cycle cost when a BOUND exception is triggered, over and above nCyclesBound,
-         * and then call X86.fnFault(X86.EXCEPTION.BR_FAULT, null, nCycles).
+         * and then call X86.helpFault(X86.EXCEPTION.BR_FAULT, null, nCycles).
          */
-        X86.fnFault.call(this, X86.EXCEPTION.BR_FAULT);
+        X86.helpFault.call(this, X86.EXCEPTION.BR_FAULT);
     }
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;
@@ -546,13 +546,13 @@ X86.fnCALLFdw = function(dst, src)
         return X86.fnGRPUndefined.call(this, dst, src);
     }
     /*
-     * Originally, we would snapshot regLSP into opLSP because fnCALLF() could trigger a segment fault,
+     * Originally, we would snapshot regLSP into opLSP because helpCALLF() could trigger a segment fault,
      * but additionally, the stack segment could trigger either a segment fault or a page fault; indeed,
      * any operation that performs multiple stack modifications must take this precaution and snapshot regLSP.
      */
     this.opLSP = this.regLSP;
 
-    X86.fnCALLF.call(this, dst, this.getShort(this.regEA + this.sizeData));
+    X86.helpCALLF.call(this, dst, this.getShort(this.regEA + this.sizeData));
     this.nStepCycles -= this.cycleCounts.nOpCyclesCallDM;
     this.opFlags |= X86.OPFLAG.NOWRITE;
 
@@ -640,7 +640,7 @@ X86.fnDIVb = function(dst, src)
      * Detect zero divisor
      */
     if (!dst) {
-        X86.fnDivOverflow.call(this);
+        X86.helpDIVOverflow.call(this);
         return dst;
     }
 
@@ -649,7 +649,7 @@ X86.fnDIVb = function(dst, src)
      */
     var result = ((src = this.regEAX & 0xffff) / dst);
     if (result > 0xff) {
-        X86.fnDivOverflow.call(this);
+        X86.helpDIVOverflow.call(this);
         return dst;
     }
 
@@ -676,7 +676,7 @@ X86.fnDIVw = function(dst, src)
          * Detect zero divisor
          */
         if (!dst) {
-            X86.fnDivOverflow.call(this);
+            X86.helpDIVOverflow.call(this);
             return dst;
         }
         /*
@@ -689,15 +689,15 @@ X86.fnDIVw = function(dst, src)
         src = (this.regEDX & 0xffff) * 0x10000 + (this.regEAX & 0xffff);
         var result = (src / dst);
         if (result >= 0x10000) {
-            X86.fnDivOverflow.call(this);
+            X86.helpDIVOverflow.call(this);
             return dst;
         }
         this.regMDLo = (result & 0xffff);
         this.regMDHi = (src % dst) & 0xffff;
     }
     else {
-        if (!X86.fnDIV32.call(this, this.regEAX, this.regEDX, dst)) {
-            X86.fnDivOverflow.call(this);
+        if (!X86.helpDIV32.call(this, this.regEAX, this.regEDX, dst)) {
+            X86.helpDIVOverflow.call(this);
             return dst;
         }
         this.regMDLo |= 0;
@@ -750,7 +750,7 @@ X86.fnGRPFault = function(dst, src)
     if (this.model < X86.MODEL_80186) {
         return X86.fnGRPUndefined.call(this, dst, src);
     }
-    X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
+    X86.helpFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
     return dst;
 };
 
@@ -796,7 +796,7 @@ X86.fnIDIVb = function(dst, src)
      * Detect zero divisor
      */
     if (!dst) {
-        X86.fnDivOverflow.call(this);
+        X86.helpDIVOverflow.call(this);
         return dst;
     }
 
@@ -816,7 +816,7 @@ X86.fnIDIVb = function(dst, src)
      *      -32768 and -128 in decimal, respectively)."
      */
     if (result != ((result << 24) >> 24) || this.model == X86.MODEL_8086 && result == -128) {
-        X86.fnDivOverflow.call(this);
+        X86.helpDIVOverflow.call(this);
         return dst;
     }
 
@@ -843,7 +843,7 @@ X86.fnIDIVw = function(dst, src)
          * Detect zero divisor
          */
         if (!dst) {
-            X86.fnDivOverflow.call(this);
+            X86.helpDIVOverflow.call(this);
             return dst;
         }
 
@@ -863,7 +863,7 @@ X86.fnIDIVw = function(dst, src)
          *      -32768 and -128 in decimal, respectively)."
          */
         if (result != ((result << 16) >> 16) || this.model == X86.MODEL_8086 && result == -32768) {
-            X86.fnDivOverflow.call(this);
+            X86.helpDIVOverflow.call(this);
             return dst;
         }
 
@@ -871,8 +871,8 @@ X86.fnIDIVw = function(dst, src)
         this.regMDHi = (src % div) & 0xffff;
     }
     else {
-        if (!X86.fnIDIV32.call(this, this.regEAX, this.regEDX, dst)) {
-            X86.fnDivOverflow.call(this);
+        if (!X86.helpIDIV32.call(this, this.regEAX, this.regEDX, dst)) {
+            X86.helpDIVOverflow.call(this);
             return dst;
         }
         this.regMDLo |= 0;
@@ -1559,22 +1559,9 @@ X86.fnMOV = function(dst, src)
 };
 
 /**
- * fnMOVX(dst, src)
- *
- * @this {X86CPU}
- * @param {number} dst (current value, ignored)
- * @param {number} src (new value)
- * @return {number} dst (updated value, from src)
- */
-X86.fnMOVX = function(dst, src)
-{
-    return src;
-};
-
-/**
  * fnMOVXb(dst, src)
  *
- * Helper for opMOVSXb() and opMOVZXb()
+ * Helper for opMOVSXb() and opMOVZXb() (which also take care of updating nStepCycles, so we don't have to)
  *
  * @this {X86CPU}
  * @param {number} dst (current value, ignored)
@@ -1595,7 +1582,8 @@ X86.fnMOVXb = function(dst, src)
      *      110:    DH      ->      110:    SI
      *      111:    BH      ->      111:    DI
      */
-    var reg = (this.bModRM & 0x38) >> 3;
+    var reg = (this.bModRM >> 3) & 0x7;
+
     switch(reg) {
     case 0x4:
         this.regXX = this.regEAX;
@@ -1614,6 +1602,21 @@ X86.fnMOVXb = function(dst, src)
 };
 
 /**
+ * fnMOVXw(dst, src)
+ *
+ * Helper for opMOVSXw() and opMOVZXw() (which also take care of updating nStepCycles, so we don't have to)
+ *
+ * @this {X86CPU}
+ * @param {number} dst (current value, ignored)
+ * @param {number} src (new value)
+ * @return {number} dst (updated value, from src)
+ */
+X86.fnMOVXw = function(dst, src)
+{
+    return src;
+};
+
+/**
  * fnMOVn(dst, src)
  *
  * @this {X86CPU}
@@ -1625,64 +1628,6 @@ X86.fnMOVn = function(dst, src)
 {
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesMovRI : this.cycleCounts.nOpCyclesMovMI);
     return src;
-};
-
-/**
- * fnMOVwsr(dst, src)
- *
- * @this {X86CPU}
- * @param {number} dst (current value, ignored)
- * @param {number} src (new value)
- * @return {number} dst
- */
-X86.fnMOVwsr = function(dst, src)
-{
-    var reg = (this.bModRM & 0x38) >> 3;
-
-    switch (reg) {
-    case 0x0:
-        src = this.segES.sel;
-        break;
-    case 0x1:
-        src = this.segCS.sel;
-        break;
-    case 0x2:
-        src = this.segSS.sel;
-        break;
-    case 0x3:
-        src = this.segDS.sel;
-        break;
-    case 0x4:
-        if (I386 && this.model >= X86.MODEL_80386) {
-            src = this.segFS.sel;
-            break;
-        }
-        X86.opInvalid.call(this);
-        src = dst;
-        break;
-    case 0x5:
-        if (I386 && this.model >= X86.MODEL_80386) {
-            src = this.segGS.sel;
-            break;
-        }
-        /* falls through */
-    default:
-        X86.opInvalid.call(this);
-        src = dst;
-        break;
-    }
-
-    /*
-     * When a 32-bit OPERAND size is in effect, segment register writes via opMOVwsr() must write 32 bits
-     * (zero-extended) if the destination is a register, but only 16 bits if the destination is memory,
-     * hence the setDataSize(2) below.
-     *
-     * The only other caller, opMOVrc(), is not affected, because it writes only to register destinations.
-     */
-    if (this.regEAWrite !== X86.ADDR_INVALID) {
-        this.setDataSize(2);
-    }
-    return X86.fnMOV.call(this, dst, src);
 };
 
 /**
@@ -1736,7 +1681,71 @@ X86.fnMOVsrw = function(dst, src)
         }
         break;
     }
-    return src;
+    /*
+     * We could just return src, but nStepCycles needs to be updated, too.
+     */
+    return X86.fnMOV.call(this, dst, src);
+};
+
+/**
+ * fnMOVwsr(dst, src)
+ *
+ * @this {X86CPU}
+ * @param {number} dst (current value, ignored)
+ * @param {number} src (new value)
+ * @return {number} dst
+ */
+X86.fnMOVwsr = function(dst, src)
+{
+    var reg = (this.bModRM >> 3) & 0x7;
+
+    switch (reg) {
+    case 0x0:
+        src = this.segES.sel;
+        break;
+    case 0x1:
+        src = this.segCS.sel;
+        break;
+    case 0x2:
+        src = this.segSS.sel;
+        break;
+    case 0x3:
+        src = this.segDS.sel;
+        break;
+    case 0x4:
+        if (I386 && this.model >= X86.MODEL_80386) {
+            src = this.segFS.sel;
+            break;
+        }
+        X86.opInvalid.call(this);
+        src = dst;
+        break;
+    case 0x5:
+        if (I386 && this.model >= X86.MODEL_80386) {
+            src = this.segGS.sel;
+            break;
+        }
+        /* falls through */
+    default:
+        X86.opInvalid.call(this);
+        src = dst;
+        break;
+    }
+
+    /*
+     * When a 32-bit OPERAND size is in effect, segment register writes via opMOVwsr() must write 32 bits
+     * (zero-extended) if the destination is a register, but only 16 bits if the destination is memory,
+     * hence the setDataSize(2) below.
+     *
+     * The only other caller, opMOVrc(), is not affected, because it writes only to register destinations.
+     */
+    if (this.regEAWrite !== X86.ADDR_INVALID) {
+        this.setDataSize(2);
+    }
+    /*
+     * We could just return src, but nStepCycles needs to be updated, too.
+     */
+    return X86.fnMOV.call(this, dst, src);
 };
 
 /**
@@ -2751,7 +2760,7 @@ X86.fnSHLd = function(dst, src)
  */
 X86.fnSHLDwi = function(dst, src)
 {
-    return X86.fnSHLDw.call(this, dst, src, this.getIPByte());
+    return X86.helpSHLDw.call(this, dst, src, this.getIPByte());
 };
 
 /**
@@ -2764,7 +2773,7 @@ X86.fnSHLDwi = function(dst, src)
  */
 X86.fnSHLDdi = function(dst, src)
 {
-    return X86.fnSHLDd.call(this, dst, src, this.getIPByte());
+    return X86.helpSHLDd.call(this, dst, src, this.getIPByte());
 };
 
 /**
@@ -2777,7 +2786,7 @@ X86.fnSHLDdi = function(dst, src)
  */
 X86.fnSHLDwCL = function(dst, src)
 {
-    return X86.fnSHLDw.call(this, dst, src, this.regECX & 0x1f);
+    return X86.helpSHLDw.call(this, dst, src, this.regECX & 0x1f);
 };
 
 /**
@@ -2790,7 +2799,7 @@ X86.fnSHLDwCL = function(dst, src)
  */
 X86.fnSHLDdCL = function(dst, src)
 {
-    return X86.fnSHLDd.call(this, dst, src, this.regECX & 0x1f);
+    return X86.helpSHLDd.call(this, dst, src, this.regECX & 0x1f);
 };
 
 /**
@@ -2860,7 +2869,7 @@ X86.fnSHRd = function(dst, src)
  */
 X86.fnSHRDwi = function(dst, src)
 {
-    return X86.fnSHRDw.call(this, dst, src, this.getIPByte());
+    return X86.helpSHRDw.call(this, dst, src, this.getIPByte());
 };
 
 /**
@@ -2873,7 +2882,7 @@ X86.fnSHRDwi = function(dst, src)
  */
 X86.fnSHRDdi = function(dst, src)
 {
-    return X86.fnSHRDd.call(this, dst, src, this.getIPByte());
+    return X86.helpSHRDd.call(this, dst, src, this.getIPByte());
 };
 
 /**
@@ -2886,7 +2895,7 @@ X86.fnSHRDdi = function(dst, src)
  */
 X86.fnSHRDwCL = function(dst, src)
 {
-    return X86.fnSHRDw.call(this, dst, src, this.regECX & 0x1f);
+    return X86.helpSHRDw.call(this, dst, src, this.regECX & 0x1f);
 };
 
 /**
@@ -2899,7 +2908,7 @@ X86.fnSHRDwCL = function(dst, src)
  */
 X86.fnSHRDdCL = function(dst, src)
 {
-    return X86.fnSHRDd.call(this, dst, src, this.regECX & 0x1f);
+    return X86.helpSHRDd.call(this, dst, src, this.regECX & 0x1f);
 };
 
 /**
