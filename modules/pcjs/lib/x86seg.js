@@ -285,7 +285,7 @@ X86Seg.prototype.loadIDTReal = function loadIDTReal(nIDT)
 {
     var cpu = this.cpu;
     /*
-     * NOTE: The Compaq DeskPro 386 ROM loads the IDTR for the real-mode IDT with a limit of 0xffff instead
+     * NOTE: The COMPAQ DeskPro 386 ROM loads the IDTR for the real-mode IDT with a limit of 0xffff instead
      * of the normal 0x3ff.  A limit higher than 0x3ff is OK, since all real-mode IDT entries are 4 bytes, and
      * there's no way to issue an interrupt with a vector > 0xff.  Just something to be aware of.
      */

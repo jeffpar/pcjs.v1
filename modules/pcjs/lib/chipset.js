@@ -561,7 +561,7 @@ ChipSet.IRQ = {
  * and PIT1 for the second.  This mirrors how we refer to multiple DMA controllers
  * (eg, DMA0 and DMA1) and multiple PICs (eg, PIC0 and PIC1).
  *
- * This differs from Compaq's nomenclature, which used "Timer 1" to refer to the first
+ * This differs from COMPAQ's nomenclature, which used "Timer 1" to refer to the first
  * PIT, and "Timer 2" for the second PIT, and then referred to "Counter 0", "Counter 1",
  * and "Counter 2" within each PIT.
  */
@@ -741,22 +741,22 @@ ChipSet.KBC = {
         }
     },
     INPORT: {                   // this.b8042InPort
-        COMPAQ_50MHZ:   0x01,   // 50Mhz system clock enabled (0=48Mhz); see Compaq 386/25 TechRef p2-106
+        COMPAQ_50MHZ:   0x01,   // 50Mhz system clock enabled (0=48Mhz); see COMPAQ 386/25 TechRef p2-106
         UNDEFINED:      0x02,   // undefined
-        COMPAQ_NO80387: 0x04,   // 80387 coprocessor NOT installed; see Compaq 386/25 TechRef p2-106
-        COMPAQ_NOWEITEK:0x08,   // Weitek coprocessor NOT installed; see Compaq 386/25 TechRef p2-106
+        COMPAQ_NO80387: 0x04,   // 80387 coprocessor NOT installed; see COMPAQ 386/25 TechRef p2-106
+        COMPAQ_NOWEITEK:0x08,   // Weitek coprocessor NOT installed; see COMPAQ 386/25 TechRef p2-106
         ENABLE_256KB:   0x10,   // enable 2nd 256Kb of system board RAM
-        COMPAQ_HISPEED: 0x10,   // high-speed enabled (0=auto); see Compaq 386/25 TechRef p2-106
+        COMPAQ_HISPEED: 0x10,   // high-speed enabled (0=auto); see COMPAQ 386/25 TechRef p2-106
         MFG_OFF:        0x20,   // manufacturing jumper not installed
-        COMPAQ_DIP5OFF: 0x20,   // system board DIP switch #5 OFF (0=ON); see Compaq 386/25 TechRef p2-106
+        COMPAQ_DIP5OFF: 0x20,   // system board DIP switch #5 OFF (0=ON); see COMPAQ 386/25 TechRef p2-106
         MONO:           0x40,   // monochrome monitor is primary display
-        COMPAQ_NONDUAL: 0x40,   // Compaq Dual-Mode monitor NOT installed; see Compaq 386/25 TechRef p2-106
-        KBD_UNLOCKED:   0x80    // keyboard not inhibited (in Compaq parlance: security lock is unlocked)
+        COMPAQ_NONDUAL: 0x40,   // COMPAQ Dual-Mode monitor NOT installed; see COMPAQ 386/25 TechRef p2-106
+        KBD_UNLOCKED:   0x80    // keyboard not inhibited (in COMPAQ parlance: security lock is unlocked)
     },
     OUTPORT: {                  // this.b8042OutPort
         NO_RESET:       0x01,   // set by default
         A20_ON:         0x02,   // set by default
-        COMPAQ_SLOWD:   0x08,   // SL0WD* NOT asserted (refer to timer 2, counter 2); see Compaq 386/25 TechRef p2-105
+        COMPAQ_SLOWD:   0x08,   // SL0WD* NOT asserted (refer to timer 2, counter 2); see COMPAQ 386/25 TechRef p2-105
         OUTBUFF_FULL:   0x10,   // output buffer full
         INBUFF_EMPTY:   0x20,   // input buffer empty
         KBD_CLOCK:      0x40,   // keyboard clock (output)
@@ -783,9 +783,9 @@ ChipSet.KBC = {
         PORT:           0x64,
         READ_CMD:       0x20,   // sends the current CMD byte (this.b8042CmdData) to KBC.DATA.PORT
         WRITE_CMD:      0x60,   // followed by a command byte written to KBC.DATA.PORT (see KBC.DATA.CMD)
-        COMPAQ_SLOWD:   0xA3,   // enable system slow down; see Compaq 386/25 TechRef p2-111
-        COMPAQ_TOGGLE:  0xA4,   // toggle speed-control bit; see Compaq 386/25 TechRef p2-111
-        COMPAQ_SPCREAD: 0xA5,   // special read of "port 2"; see Compaq 386/25 TechRef p2-111
+        COMPAQ_SLOWD:   0xA3,   // enable system slow down; see COMPAQ 386/25 TechRef p2-111
+        COMPAQ_TOGGLE:  0xA4,   // toggle speed-control bit; see COMPAQ 386/25 TechRef p2-111
+        COMPAQ_SPCREAD: 0xA5,   // special read of "port 2"; see COMPAQ 386/25 TechRef p2-111
         SELF_TEST:      0xAA,   // self-test (KBC.DATA.SELF_TEST.OK is placed in the output buffer if no errors)
         INTF_TEST:      0xAB,   // interface test
         DIAG_DUMP:      0xAC,   // diagnostic dump
@@ -803,7 +803,7 @@ ChipSet.KBC = {
         INBUFF_FULL:    0x02,   // set if the controller has received but not yet read data from the input buffer (not normally set)
         SYS_FLAG:       0x04,
         CMD_FLAG:       0x08,   // set on write to KBC.CMD (port 0x64), clear on write to KBC.DATA (port 0x60)
-        NO_INHIBIT:     0x10,   // (in Compaq parlance: security lock not engaged)
+        NO_INHIBIT:     0x10,   // (in COMPAQ parlance: security lock not engaged)
         XMT_TIMEOUT:    0x20,
         RCV_TIMEOUT:    0x40,
         PARITY_ERR:     0x80,   // last byte of data received had EVEN parity (ODD parity is normally expected)

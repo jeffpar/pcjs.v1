@@ -385,7 +385,7 @@ X86.opLOADALL386 = function()
  * a MOD != 11 as an illegal opcode.  This was changed in later versions to ignore the value of MOD.
  * Assemblers that generate MOD != 11 for these instructions will fail on some 80486s."
  *
- * And in fact, the Compaq DeskPro 386 ROM BIOS executes this instruction with MOD set to 00, so we have
+ * And in fact, the COMPAQ DeskPro 386 ROM BIOS executes this instruction with MOD set to 00, so we have
  * to ignore it.
  *
  * @this {X86CPU}
@@ -483,7 +483,7 @@ X86.opMOVrd = function()
  * a MOD != 11 as an illegal opcode.  This was changed in later versions to ignore the value of MOD.
  * Assemblers that generate MOD != 11 for these instructions will fail on some 80486s."
  *
- * And in fact, the Compaq DeskPro 386 ROM BIOS executes this instruction with MOD set to 00, so we have
+ * And in fact, the COMPAQ DeskPro 386 ROM BIOS executes this instruction with MOD set to 00, so we have
  * to ignore it.
  *
  * @this {X86CPU}

@@ -504,7 +504,7 @@ Bus.prototype.getA20 = function()
 /**
  * setA20(fEnable)
  *
- * On 32-bit bus machines, I've adopted the approach that Compaq took with DeskPro 386 machines,
+ * On 32-bit bus machines, I've adopted the approach that COMPAQ took with DeskPro 386 machines,
  * which is to map the 1st Mb to the 2nd Mb whenever A20 is disabled, rather than blindly masking
  * the A20 address bit from all addresses; in fact, this is what the DeskPro 386 ROM BIOS requires.
  *

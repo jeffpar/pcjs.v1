@@ -125,7 +125,7 @@ var I386 = true;
 /**
  * @define {boolean}
  *
- * COMPAQ386 enables Compaq DeskPro 386 support.  Requires I386 support as well (duh).
+ * COMPAQ386 enables COMPAQ DeskPro 386 support.  Requires I386 support as well (duh).
  */
 var COMPAQ386 = I386;
 

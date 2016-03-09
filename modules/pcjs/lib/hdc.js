@@ -151,7 +151,7 @@ HDC.DEFAULT_DRIVE_NAME = "Hard Drive";
 
 /*
  * Drive type tables differed across IBM controller models (XTC drive types don't match ATC drive types)
- * and across OEMs (eg, Compaq drive types only match a few IBM drive types), so you must use iDriveTable to
+ * and across OEMs (eg, COMPAQ drive types only match a few IBM drive types), so you must use iDriveTable to
  * index the correct table type inside both aDriveTables and aDriveTypes.
  */
 HDC.aDriveTables = ["XTC", "ATC", "COMPAQ"];
@@ -223,9 +223,9 @@ HDC.aDriveTypes = [
         23: [306,  4]
     },
     /*
-     * aDriveTypes[2] is for the Compaq DeskPro (ATC) controller.
+     * aDriveTypes[2] is for the COMPAQ DeskPro (ATC) controller.
      *
-     * NOTE: According to Compaq, drive type 25 (0x19) must be used with their 130Mb drive when using MS-DOS 3.1
+     * NOTE: According to COMPAQ, drive type 25 (0x19) must be used with their 130Mb drive when using MS-DOS 3.1
      * or earlier, or when using any [unspecified] application software that supports only 17 sectors per track;
      * otherwise, use drive type 35 (0x23), which uses the drive's full capacity of 34 sectors per track.
      */
@@ -233,7 +233,7 @@ HDC.aDriveTypes = [
          1: [306,  4],          // same as IBM
          2: [615,  4],          // same as IBM
          3: [615,  6],          // same as IBM
-         4: [1023, 8],          // 68Mb (67.93Mb: 1023*8*17*512 or 71,233,536 bytes) (TODO: Cylinders is listed as 1024 in the Compaq TechRef; confirm)
+         4: [1023, 8],          // 68Mb (67.93Mb: 1023*8*17*512 or 71,233,536 bytes) (TODO: Cylinders is listed as 1024 in the COMPAQ TechRef; confirm)
          5: [940,  6],          // same as IBM
          6: [697,  5],
          7: [462,  8],          // same as IBM
@@ -269,7 +269,7 @@ HDC.aDriveTypes = [
         35: [966,  8, 34],      // 130Mb (128.30Mb: 966*8*34*512 or 134,529,024 bytes)
         36: [966,  9, 34],
         37: [966,  5, 34],
-        38: [612, 16, 63],      // 300Mb (301.22Mb: 612*16*63*512 or 315,850,752 bytes) (TODO: Cylinders is listed as 611 in the Compaq TechRef; confirm)
+        38: [612, 16, 63],      // 300Mb (301.22Mb: 612*16*63*512 or 315,850,752 bytes) (TODO: Cylinders is listed as 611 in the COMPAQ TechRef; confirm)
         39: [1023,11, 33],
         40: [1023,15, 34],
         41: [1630,15, 52],
@@ -1865,7 +1865,7 @@ HDC.prototype.outATCDrvHd = function(port, bOut, addrFrom)
      * TODO: Dig into the ATC documentation some more, and determine what other situations, if any, regStatus
      * needs to be updated.
      *
-     * UPDATE: The Compaq DeskPro 386 ROM BIOS requires setting STATUS.SEEK_OK in addition to STATUS.READY;
+     * UPDATE: The COMPAQ DeskPro 386 ROM BIOS requires setting STATUS.SEEK_OK in addition to STATUS.READY;
      * a quick retest of the MODEL_5170_REV3 BIOS suggests that it's happy with that change, so it's quite likely
      * that was the appropriate change all along.
      */
@@ -2030,7 +2030,7 @@ HDC.prototype.doATC = function()
                  * Bytes from the requested sector(s) will now be delivered via inATCByte().
                  *
                  * FYI, I'm taking a shotgun approach to these status bits: I need to clear STATUS.BUSY and
-                 * set STATUS.DATA_REQ, because otherwise CompaqDeskPro386 reads will fail, and I need to set
+                 * set STATUS.DATA_REQ, because otherwise COMPAQ DeskPro 386 reads will fail, and I need to set
                  * the STATUS.READY and STATUS.SEEK_OK bits, because otherwise MODEL_5170_REV3 reads will fail.
                  */
                 hdc.regStatus = HDC.ATC.STATUS.READY | HDC.ATC.STATUS.SEEK_OK | HDC.ATC.STATUS.DATA_REQ;
@@ -2063,7 +2063,7 @@ HDC.prototype.doATC = function()
     case HDC.ATC.COMMAND.SEEK:                  // 0x70
         /*
          * Physically, this moves the head(s) to the requested cylinder, but logically, there isn't anything to do;
-         * in fact, we didn't even need this command for the MODEL_5170 ROM BIOS (the Compaq DeskPro 386 ROM BIOS was
+         * in fact, we didn't even need this command for the MODEL_5170 ROM BIOS (the COMPAQ DeskPro 386 ROM BIOS was
          * another story).
          */
         fInterrupt = true;

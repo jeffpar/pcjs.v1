@@ -27,7 +27,7 @@ as a set of static web pages, I've decided to stop using Node to power www.pcjs.
 the website to [GitHub Pages](https://pages.github.com/), and using [Jekyll](https://help.github.com/articles/using-jekyll-with-pages/)
 to convert all my existing Markdown files to HTML.
 
-This new approach is *very* similar to what the PCjs custom Node modules did: every time time someone visited a folder
+This new approach is *very* similar to what the PCjs custom Node modules did: every time someone visited a folder
 on the website that did not yet contain an "index.html", the PCjs Node server would create one, either by converting the
 README.md file in that folder to HTML or generating a default HTML document.  The PCjs Markdown-to-HTML converter also
 contained some special logic that made it easy to embed PCjs machines on a page.
@@ -59,19 +59,20 @@ Basically, the YAML at the top of the file lists all the machines that the page 
 
 The `machine.html` include accepts only one parameter: the `id` of a machine listed at the top of the file.
 
-The `machines` element at the top of the file must specify a `type` and `id` at a minimum.  `type` must be one of
-the following values, depending on whether you want an IBM PC or Challenger 1P, with or without a debugger:
+The `machines` element at the top of the file must specify a `type` and `id` at a minimum.  `type` should be one of
+the following values, depending on whether you want an IBM PC or Challenger 1P:
 
 - pc
-- pc-dbg
 - c1p
-- c1p-dbg
 
-and `id` can be any identifier you want to use to embed the machine.  You may also use `config` to specify a machine
-XML configuration file if not using the default `machine.xml`; `template` to specify an alternate XSL template file
-if not using the default `components.xsl`; `state` to specify a JSON-encoded machine state file if the machine requires
-a predefined state; and `uncompiled` may be set to *true* to force a machine to use uncompiled sources, overriding the
-value of `site.pcjs.compiled` in **_config.yml**.
+and `id` can be any identifier you want to use to embed the machine.  If you want to include the machine's built-in
+debugger, set `debugger` to *true*; the older method of specifying *pc-dbg* or *c1p-dbg* instead of *pc* or *c1p* as the
+`type` still works, too.
+
+You may also use `config` to specify a machine XML configuration file if not using the default *machine.xml*;
+`template` to specify an alternate XSL template file if not using the default *components.xsl*; `state` to specify
+a JSON-encoded machine state file if the machine requires a predefined state; and `uncompiled` may be set to *true*
+to force a machine to use uncompiled sources, overriding the value of `site.pcjs.compiled` in **_config.yml**.
 
 For example, the PCjs home page contains two machines, so this appears at the top of the root
 [README.md](https://raw.githubusercontent.com/jeffpar/pcjs/master/README.md):
@@ -83,6 +84,21 @@ For example, the PCjs home page contains two machines, so this appears at the to
 	  - type: c1p
 	    id: demoC1P
 	    config: /devices/c1p/machine/8kb/large/machine.xml
+
+If necessary, you can also override some of the settings in a machine XML file.  Here's an example of overriding the
+FDC `autoMount` setting, making it easy to reuse the same machine XML file with different boot disks:
+
+	machines:
+	  - type: pc
+	    id: deskpro386
+	    debugger: true
+	    config: /devices/pc/machine/compaq/deskpro386/ega/4096kb/machine.xml
+	    autoMount:
+	      A:
+	        path: /disks/pc/os2/misc/football/FOOTBALL-76817.json
+
+`messages`, `state`, and `autoPower` are some other settings that can be overridden, and support for more can
+easily be added.
 
 I will continue to include a Node web server with the PCjs project, but it's now intended for development
 purposes only (not production servers).  I've updated the PCjs MarkOut component to parse any "Front Matter"

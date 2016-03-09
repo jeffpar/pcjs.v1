@@ -181,7 +181,7 @@ RAM.prototype.reset = function()
 
             /*
              * Memory with an ID of "ramCPQ" is reserved for built-in memory located just below the 16Mb
-             * boundary on Compaq DeskPro 386 machines.
+             * boundary on COMPAQ DeskPro 386 machines.
              *
              * Technically, that memory is part of the first 1Mb of memory that also provides up to 640Kb
              * of conventional memory (ie, memory below 1Mb).
@@ -193,7 +193,7 @@ RAM.prototype.reset = function()
              *
              * Therefore, a DeskPro 386's first 1Mb of physical memory is allocated by PCjs in two pieces,
              * and the second piece must have an ID of "ramCPQ", triggering the additional allocation of
-             * Compaq-specific memory-mapped registers.
+             * COMPAQ-specific memory-mapped registers.
              *
              * See CompaqController for more details.
              */
@@ -216,7 +216,7 @@ RAM.prototype.reset = function()
         }
         /*
          * Don't add the "ramCPQ" memory to the CMOS total, because addCMOSMemory() will add it to the extended
-         * memory total, which will just confuse the Compaq BIOS.
+         * memory total, which will just confuse the COMPAQ BIOS.
          */
         if (!COMPAQ386 || this.idComponent != "ramCPQ") {
             if (this.chipset) this.chipset.addCMOSMemory(this.addrRAM, this.sizeRAM);
@@ -302,8 +302,8 @@ RAM.init = function()
  * memory slots spanning 0x000E0000-0x000FFFFF, and then update those slots with the blocks from
  * 0x00FE0000-0x00FFFFFF.  Note that only the top 128Kb of "ramCPQ" addressability is affected; the
  * rest of that memory, ranging anywhere from 256Kb to 640Kb, remains addressable at its original
- * location.  Compaq's CEMM and VDISK utilities were generally the only software able to access that
- * remaining memory (what Compaq refers to as "Compaq Built-in Memory").
+ * location.  COMPAQ's CEMM and VDISK utilities were generally the only software able to access that
+ * remaining memory (what COMPAQ refers to as "Compaq Built-in Memory").
  *
  * @constructor
  * @param {RAM} ram
@@ -328,7 +328,7 @@ CompaqController.MAP_SIZE   = 0x00020000;
 /*
  * Bit definitions for the 16-bit write-only memory-mapping register (wMappings)
  *
- * NOTE: Although Compaq says the memory at %FE0000 is "relocated", it actually remains addressable
+ * NOTE: Although COMPAQ says the memory at %FE0000 is "relocated", it actually remains addressable
  * at %FE0000; it simply becomes addressable at %0E0000 as well, displacing any ROMs that used to be
  * addressable at %0E0000 through %0FFFFF.
  */
@@ -344,7 +344,7 @@ CompaqController.MAPPINGS = {
  *
  * SW1-7 and SW1-8 are mapped to bits 5 and 4 of wSettings, respectively, as follows:
  *
- *      SW1-7   SW1-8   Bit5    Bit4    Amount (of base memory provided by the Compaq 32-bit memory board)
+ *      SW1-7   SW1-8   Bit5    Bit4    Amount (of base memory provided by the COMPAQ 32-bit memory board)
  *      -----   -----   ----    ----    ------
  *        ON      ON      0       0     640Kb
  *        ON      OFF     0       1     Invalid
@@ -358,7 +358,7 @@ CompaqController.MAPPINGS = {
  *      SW1-3:  ON sets memory from 0xC00000 to 0xFFFFFF (between 12 and 16 megabytes) non-cacheable
  *      SW1-4:  ON selects AUTO system speed (OFF selects HIGH system speed)
  *      SW1-5:  RESERVED (however, the system can read its state; see below)
- *      SW1-6:  Compaq Dual-Mode Monitor or Color Monitor (OFF selects Monochrome monitor other than Compaq)
+ *      SW1-6:  COMPAQ Dual-Mode Monitor or Color Monitor (OFF selects Monochrome monitor other than COMPAQ)
  *
  * While SW1-7 and SW1-8 are connected to this memory-mapped register, other SW1 DIP switches are accessible
  * through the 8042 Keyboard Controller's KBC.INPORT register, as follows:
