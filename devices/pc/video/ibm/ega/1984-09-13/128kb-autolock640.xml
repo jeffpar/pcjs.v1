@@ -8,4 +8,5 @@
 			<control type="led" label="Scroll" binding="scroll-lock" padleft="8px"/>
 		</control>
 	</menu>
+	<rom id="romEGA" addr="0xc0000" size="0x4000" file="/devices/pc/video/ibm/ega/1984-09-13/ibm-ega.json" notify="videoEGA"/>
 </video>

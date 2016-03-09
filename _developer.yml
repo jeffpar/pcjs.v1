@@ -45,15 +45,10 @@ pcjs:
     - /modules/pcjs/lib/x86cpu.js
     - /modules/pcjs/lib/x86fpu.js
     - /modules/pcjs/lib/x86func.js
+    - /modules/pcjs/lib/x86help.js
+    - /modules/pcjs/lib/x86mods.js
     - /modules/pcjs/lib/x86ops.js
     - /modules/pcjs/lib/x86op0f.js
-    - /modules/pcjs/lib/x86modb.js
-    - /modules/pcjs/lib/x86modw.js
-    - /modules/pcjs/lib/x86modb16.js
-    - /modules/pcjs/lib/x86modw16.js
-    - /modules/pcjs/lib/x86modb32.js
-    - /modules/pcjs/lib/x86modw32.js
-    - /modules/pcjs/lib/x86modsib.js
     - /modules/pcjs/lib/chipset.js
     - /modules/pcjs/lib/rom.js
     - /modules/pcjs/lib/ram.js

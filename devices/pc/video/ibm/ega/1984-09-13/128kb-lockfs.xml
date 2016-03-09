@@ -10,4 +10,5 @@
 			<control type="button" binding="fullScreen" padleft="8px">Full Screen</control>
 		</control>
 	</menu>
+	<rom id="romEGA" addr="0xc0000" size="0x4000" file="/devices/pc/video/ibm/ega/1984-09-13/ibm-ega.json" notify="videoEGA"/>
 </video>
