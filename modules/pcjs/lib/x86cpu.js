@@ -1063,7 +1063,7 @@ X86CPU.prototype.resetRegs = function()
      */
     this.fMDSet = false;        // regMDHi and/or regMDLo are invalid unless fMDSet is true
     this.regMDLo = this.regMDHi = 0;
-    this.regXX = 0;             // for internal use only (eg, assists with ModRM decoder helper functions)
+    this.regXX = 0;             // for internal use only (eg, assists with ModRM helper functions)
 
     /*
      * This internal "register" is set in selected opcode handlers to record the original opcode; ordinarily,

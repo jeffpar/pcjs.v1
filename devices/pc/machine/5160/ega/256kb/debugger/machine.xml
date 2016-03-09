@@ -5,11 +5,10 @@
 	<computer id="xt-ega-256k" name="IBM PC XT"/>
 	<cpu id="cpu8088" model="8088"/>
 	<ram id="ramLow" addr="0x00000" test="false"/>
-	<rom id="romEGA" addr="0xc0000" size="0x4000" file="/devices/pc/video/ibm/ega/1984-09-13/ibm-ega.json" notify="videoEGA"/>
 	<rom id="romHDC" addr="0xc8000" size="0x2000" file="/devices/pc/hdc/ibm-xebec-1982.json"/>
 	<rom id="romBASIC" addr="0xf6000" size="0x8000" file="/devices/pc/rom/5160/basic/BASIC110.json"/>
 	<rom id="romBIOS" addr="0xfe000" size="0x2000" file="/devices/pc/rom/5160/bios/1982-11-08/XTBIOS-REV1.json"/>
-	<video ref="/devices/pc/video/ibm/ega/ibm-ega-64kb.xml"/>
+	<video ref="/devices/pc/video/ibm/ega/1984-09-13/64kb.xml"/>
 	<fdc ref="/disks/pc/compiled/library.xml"/>
 	<keyboard ref="/devices/pc/keyboard/keyboard-minimal-functions.xml"/>
 	<debugger id="debugger"/>
