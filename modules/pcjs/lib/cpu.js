@@ -517,11 +517,15 @@ CPU.prototype.updateVideo = function(fForce)
 };
 
 /**
- * setFocus()
+ * setFocus(fScroll)
+ *
+ * NOTE: When soft keyboard buttons call us to return focus to the machine (and away from the button),
+ * the scroll feature has annoying effect on iOS, so we no longer do it by default (fScroll must be true).
  *
  * @this {CPU}
+ * @param {boolean} [fScroll]
  */
-CPU.prototype.setFocus = function()
+CPU.prototype.setFocus = function(fScroll)
 {
     if (this.aVideo.length) {
         /*
@@ -530,12 +534,12 @@ CPU.prototype.setFocus = function()
          * is to ensure that keyboard input is fielded properly.
          */
         var x = 0, y = 0;
-        if (window) {
+        if (fScroll && window) {
             x = window.scrollX;
             y = window.scrollY;
         }
         this.aVideo[0].setFocus();
-        if (window) {
+        if (fScroll && window) {
             window.scrollTo(x, y);
         }
     }
@@ -1127,7 +1131,7 @@ CPU.prototype.startCPU = function(fSetFocus)
         var controlRun = this.bindings["run"];
         if (controlRun) controlRun.textContent = "Halt";
         this.updateStatus(true);
-        if (fSetFocus) this.setFocus();
+        if (fSetFocus) this.setFocus(true);
     }
 };
 
