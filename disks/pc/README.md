@@ -25,9 +25,11 @@ that automatically run the software.
 * [PC-DOS 3.10](/disks/pc/dos/ibm/3.10/)
 * [PC-DOS 3.20](/disks/pc/dos/ibm/3.20/)
 * [PC-DOS 3.30](/disks/pc/dos/ibm/3.30/)
-* PC-DOS 4.00
+* [PC-DOS 4.00](/disks/pc/dos/ibm/4.00/)
 * [PC-DOS 5.00](/disks/pc/dos/ibm/5.00/)
-* PC-DOS 6.10
+* PC-DOS 6.00
+* [PC-DOS 6.10](/disks/pc/dos/ibm/6.10/)
+* PC-DOS 6.30
 * PC-DOS 7.00
 
 ### MS-DOS (Microsoft)

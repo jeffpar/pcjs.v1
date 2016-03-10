@@ -1,0 +1,410 @@
+---
+layout: page
+title: PC-DOS 6.10
+permalink: /disks/pc/dos/ibm/6.10/
+machines:
+  - type: pc
+    id: ibm5170-pcdos610
+    debugger: true
+    autoMount:
+      A:
+        path: /disks/pc/dos/ibm/6.10/PCDOS610-DISK1-1440K.json
+    config: /devices/pc/machine/5170/ega/2048kb/rev3/debugger/machine.xml
+---
+
+PC-DOS 6.10
+---
+
+PC-DOS 6.10 was released in June 1993.
+
+Directory listings of the five 1.44Mb distribution diskettes are provided below.
+
+{% include machine.html id="ibm5170-pcdos610" %}
+
+### Directory of PC-DOS 6.10 (Disk 1)
+
+	 Volume in drive A is DISK      1
+	 Volume Serial Number is 2C34-1CFA
+	 Directory of A:\
+
+	IBMBIO   COM     40646 11-19-93  12:00p
+	IBMDOS   COM     37174 11-19-93  12:00p
+	COMMAND  COM     52797 11-19-93  12:00p
+	4201     CP_      9522 11-19-93  12:00p
+	4208     CPI       115 11-19-93  12:00p
+	ANSI     SY_      6276 11-19-93  12:00p
+	APPEND   EXE      7730 11-19-93  12:00p
+	ASSIGN   COM      5110 11-19-93  12:00p
+	ATTRIB   EXE     10109 11-19-93  12:00p
+	AUTOEXEC BAT       129 11-19-93  12:00p
+	CHKDSK   COM     12969 11-19-93  12:00p
+	CHOICE   COM      1586 11-19-93  12:00p
+	CMOSCLK  SYS       855 11-19-93  12:00p
+	COMP     COM      8561 11-19-93  12:00p
+	CONFIG   SYS        75 11-19-93  12:00p
+	COUNTRY  SYS     18142 11-19-93  12:00p
+	DEBUG    COM     15267 11-19-93  12:00p
+	DEFRAG   EXE     74841 11-19-93  12:00p
+	DEFRAG   HL_      4168 11-19-93  12:00p
+	DELTREE  EXE      5353 11-19-93  12:00p
+	DISKCOMP COM      7367 11-19-93  12:00p
+	DISKCOPY COM      7964 11-19-93  12:00p
+	DISPLAY  SYS     15279 11-19-93  12:00p
+	DOSHELP  HL_      3253 11-19-93  12:00p
+	DOSKEY   CO_      4258 11-19-93  12:00p
+	DRVLOCK  EXE      6854 11-19-93  12:00p
+	E        EXE     58321 11-19-93  12:00p
+	E        E_      27084 11-19-93  12:00p
+	EDLIN    COM      9568 11-19-93  12:00p
+	EGA      CPI     58820 11-19-93  12:00p
+	EGA      SY_      3684 11-19-93  12:00p
+	EGAX     CP_     13048 11-19-93  12:00p
+	EHELP    HL_      4891 11-19-93  12:00p
+	EJECT    EXE      5443 11-19-93  12:00p
+	EMM386   EX_     48903 11-19-93  12:00p
+	EPS      CP_      4967 11-19-93  12:00p
+	EXE2BIN  EXE      6625 11-19-93  12:00p
+	EXPAND   EXE     15729 11-19-93  12:00p
+	FASTOPEN EXE      8015 11-19-93  12:00p
+	FC       EXE     11238 11-19-93  12:00p
+	FDISK    COM     28381 11-19-93  12:00p
+	FIND     EXE      5489 11-19-93  12:00p
+	FORMAT   COM     23811 11-19-93  12:00p
+	GRAPHICS CO_     11224 11-19-93  12:00p
+	GRAPHICS PR_      4102 11-19-93  12:00p
+	HELP     EXE      8539 11-19-93  12:00p
+	HIMEM    SY_      8631 11-19-93  12:00p
+	INTERLNK EX_     10777 11-19-93  12:00p
+	INTERSVR EXE     26787 11-19-93  12:00p
+	ISO      CP_     13280 11-19-93  12:00p
+	JOIN     EXE      9611 11-19-93  12:00p
+	KEYB     COM     10854 11-19-93  12:00p
+	KEYBOARD SYS     45860 11-19-93  12:00p
+	LABEL    COM      4554 11-19-93  12:00p
+	LOADFIX  COM      1038 11-19-93  12:00p
+	MEM      EXE     20537 11-19-93  12:00p
+	MEUTOINI EXE     13195 11-19-93  12:00p
+	MODE     COM     15567 11-19-93  12:00p
+	MORE     COM      2449 11-19-93  12:00p
+	MOUSE    CO_     22345 11-19-93  12:00p
+	MOVE     EXE     11927 11-19-93  12:00p
+	NLSFUNC  EXE      5600 11-19-93  12:00p
+	POWER    EX_      5548 11-19-93  12:00p
+	PPDS     CP_       217 11-19-93  12:00p
+	PRINT    COM     10081 11-19-93  12:00p
+	QCONFIG  EXE     43752 11-19-93  12:00p
+	RAMBOOST EX_     77611 11-19-93  12:00p
+	RAMBOOST IN_       606 11-19-93  12:00p
+	RAMDRIVE SY_      3389 11-19-93  12:00p
+	RAMSETUP EXE     81052 11-19-93  12:00p
+	RAMSETUP HL_      5129 11-19-93  12:00p
+	RAMSETUP IN_       589 11-19-93  12:00p
+	XCOPY    EXE     10979 04-14-07   8:26p
+	RECOVER  CO_      6506 11-19-93  12:00p
+	REPLACE  EXE     12641 11-19-93  12:00p
+	RESTORE  CO_     22617 11-19-93  12:00p
+	SETUP    COM      4509 11-19-93  12:00p
+	SETUP    INI      7668 11-19-93  12:00p
+	SETUP    MSG      3841 01-06-03  10:45a
+	SETUP1   OVL     86371 11-19-93  12:00p
+	SETVER   EX_      6201 11-19-93  12:00p
+	SHARE    EX_      8022 11-19-93  12:00p
+	SMARTDRV EX_     13848 11-19-93  12:00p
+	SORT     EXE      4884 11-19-93  12:00p
+	SUBST    EXE     10385 11-19-93  12:00p
+	SYS      COM      9784 11-19-93  12:00p
+	TREE     COM      5210 11-19-93  12:00p
+	UNFORMAT COM     12638 11-19-93  12:00p
+	WINA20   38_      2662 04-14-07   5:48p
+	       89 file(s)    1394034 bytes
+	                       40960 bytes free
+
+### Directory of PC-DOS 6.10 (Disk 2)
+
+	 Volume in drive A is DISK      2
+	 Volume Serial Number is 3B1A-FF1F
+	 Directory of A:\
+
+	FILES    TX_      5454 04-14-07   5:33p
+	DOSSHELL COM      2261 04-14-07   5:33p
+	DOSSHELL EXE    140308 04-14-07   5:33p
+	DOSSHELL HL_     49524 04-14-07   5:33p
+	DOSSWAP  EXE     14484 04-14-07   5:33p
+	CGA      VI_      6131 04-14-07   5:33p
+	CGA      IN_      3073 04-14-07   5:33p
+	CGA      GR_      1617 04-14-07   5:33p
+	EGA      VI_      6160 04-14-07   5:33p
+	EGA      IN_      3073 04-14-07   5:33p
+	EGA      GR_      2466 04-14-07   5:33p
+	EGAMONO  GR_      2318 04-14-07   5:33p
+	GROUP    IN_       888 04-14-07   5:33p
+	HERC     VI_      6271 04-14-07   5:33p
+	HERC     GR_      1636 04-14-07   5:33p
+	MONO     IN_      2377 04-14-07   5:33p
+	MONO     GR_       296 04-14-07   5:33p
+	VGA      VI_      6357 04-14-07   5:33p
+	VGA      IN_      3081 04-14-07   5:33p
+	VGA      GR_      3198 04-14-07   5:33p
+	VGAMONO  GR_      3214 04-14-07   5:33p
+	DRIVER   SY_      3910 04-14-07   5:33p
+	PRINTER  SY_     10765 04-14-07   5:33p
+	PCFORMAT EX_     21797 04-14-07   5:33p
+	PCMATA   SY_      7377 04-14-07   5:33p
+	PCMCS    EX_     24396 04-14-07   5:33p
+	PCMFDD   EX_      2505 04-14-07   5:33p
+	PCMMTD   EX_      3353 04-14-07   5:33p
+	PCMINFO  EXE     11477 04-14-07   5:33p
+	PCMSCD   EX_     10234 04-14-07   5:33p
+	PCMVCD   38_      7249 04-14-07   5:33p
+	WPCMINFO CP_      9795 04-14-07   5:33p
+	WPCMINFO HL_      5540 04-14-07   5:33p
+	PCMSS    EX_      6775 04-14-07   5:33p
+	PEN      EX_     14139 04-14-07   5:33p
+	PENDEV   SY_       448 04-14-07   5:33p
+	PENDOS   CF_       970 04-14-07   5:33p
+	PINK     EX_      6421 04-14-07   5:33p
+	PKEYUS   EX_      4319 04-14-07   5:33p
+	PMOUSE   EX_      3488 04-14-07   5:33p
+	PSETUP   EX_      1685 04-14-07   5:33p
+	PSYS     EX_      2905 04-14-07   5:33p
+	PWW      EX_      2421 04-14-07   5:33p
+	TD3125   EX_      1483 04-14-07   5:33p
+	TDACE5X5 EX_      1614 04-14-07   5:33p
+	TDCALCMP EX_      1611 04-14-07   5:33p
+	TDEWAC   EX_      1527 04-14-07   5:33p
+	TDKURTA  EX_      1628 04-14-07   5:33p
+	TDMOUSE  EX_      1431 04-14-07   5:33p
+	TDPBTOP  EX_      1367 04-14-07   5:33p
+	TDPL100V EX_      1496 04-14-07   5:33p
+	TDSAMSNG EX_      1426 04-14-07   5:33p
+	TDSEIKO  EX_      1506 04-14-07   5:33p
+	TDTP2521 EX_      1463 04-14-07   5:33p
+	TDTP2523 EX_      1364 04-14-07   5:33p
+	TDW510C  EX_      1538 04-14-07   5:33p
+	LIMREC   EX_     51342 04-14-07   5:33p
+	VLOAD    EX_      5957 04-14-07   5:33p
+	AV       GR$       600 04-14-07   5:33p
+	BK       GR$       968 04-14-07   5:33p
+	UD       GR$       648 04-14-07   5:33p
+	AVBK     GR$      1240 04-14-07   5:33p
+	AVUD     GR$       907 04-14-07   5:33p
+	BKUD     GR$      1267 04-14-07   5:33p
+	AVBKUD   GR$      1519 04-14-07   5:33p
+	IBMDOS   IC_       235 04-14-07   5:33p
+	IBMDOS   PI_       200 04-14-07   5:33p
+	DATAMON  EXE     40655 04-14-07   5:33p
+	CPB      OV_      2037 04-14-07   5:33p
+	CPS      HL_      6930 04-14-07   5:33p
+	CPSHELP  OV_     17958 04-14-07   5:33p
+	LIBPCT01 DL_    103905 04-14-07   5:33p
+	VIEW     LI_     54751 04-14-07   5:33p
+	VIEW     OV_     74639 04-14-07   5:33p
+	VIEW     HL_      8164 04-14-07   5:33p
+	WNIBM1   DL_     70384 04-14-07   5:33p
+	WNGRAFIC DL_     18094 04-14-07   5:33p
+	WNUNDEL  EX_     66824 04-14-07   5:33p
+	WNUNDEL  HL_     22239 04-14-07   5:33p
+	UNDELETE EX_    118090 04-14-07   5:33p
+	UNDEL    HL_     24279 04-14-07   5:33p
+	PALETTE  AV_       162 04-14-07   5:33p
+	IBMAVD   EX_    175475 04-14-07   5:33p
+	IBMAVD01 HL_      2795 04-14-07   5:33p
+	IBMAVD02 HL_       426 04-14-07   5:33p
+	IBMAVD03 HL_       524 04-14-07   5:33p
+	IBMAVD04 HL_      1855 04-14-07   5:33p
+	IBMAVD05 HL_      1089 04-14-07   5:33p
+	IBMAVD06 HL_      2309 04-14-07   5:33p
+	IBMAVD07 HL_       966 04-14-07   5:33p
+	IBMAVD08 HL_      1363 04-14-07   5:33p
+	IBMAVD09 HL_      3282 04-14-07   5:33p
+	IBMAVD10 HL_       533 04-14-07   5:33p
+	IBMAVD11 HL_       280 04-14-07   5:33p
+	WNSCHEDL EX_     58298 04-14-07   5:33p
+	RSSTUB   CO_       621 04-14-07   5:33p
+	       96 file(s)    1389420 bytes
+	                       44544 bytes free
+
+### Directory of PC-DOS 6.10 (Disk 3)
+
+	 Volume in drive A is DISK      3
+	 Volume Serial Number is 3B1A-FF1F
+	 Directory of A:\
+
+	WNSCHEDL HL_      7936 04-14-07   5:33p
+	WNSCHEL  RS_      4684 04-14-07   5:33p
+	CPB1     OVL     10425 04-14-07   5:33p
+	CPB2     OVL      8495 04-14-07   5:33p
+	CPB3     OVL     28358 04-14-07   5:33p
+	CPB4     OVL     11879 04-14-07   5:33p
+	CPB5     OVL     27788 04-14-07   5:33p
+	CPB6     OV_      4804 04-14-07   5:33p
+	CPBA1540 OVL      6780 04-14-07   5:33p
+	CPBA1640 OVL      6795 04-14-07   5:33p
+	CPBACKUP EX_    219888 04-14-07   5:33p
+	CPBACKUP HL_     68089 04-14-07   5:33p
+	CPBACKUP MS_      7961 04-14-07   5:33p
+	CPBASPI  OVL      5311 04-14-07   5:33p
+	CPBCE    OVL      4546 04-14-07   5:33p
+	CPBCP    OV_      4732 04-14-07   5:33p
+	CPBDIR   EX_      7171 04-14-07   5:33p
+	CPBFMTB  OVL     24154 04-14-07   5:33p
+	CPBFMTR  OVL     22837 04-14-07   5:33p
+	CPBH     OVL     25928 04-14-07   5:33p
+	CPBNWLIB OVL     12182 04-14-07   5:33p
+	CPBQ3    OVL     33012 04-14-07   5:33p
+	CPBQ4    OVL     29971 04-14-07   5:33p
+	CPBQ5    OVL     37367 04-14-07   5:33p
+	CPBSCSI  OVL      5137 04-14-07   5:33p
+	CPBSDEV  OVL      8905 04-14-07   5:33p
+	CPBT3    OVL     34435 04-14-07   5:33p
+	CPBT4    OVL     30566 04-14-07   5:33p
+	CPBT5    OVL     38686 04-14-07   5:33p
+	CPBV     OVL     30078 04-14-07   5:33p
+	CPBX     OVL     76579 04-14-07   5:33p
+	CPSMAIN  FN_      4558 04-14-07   5:33p
+	DAILY    SE_       268 04-14-07   5:33p
+	DATABASE SE_       289 04-14-07   5:33p
+	FILECHK  OVL     10552 04-14-07   5:33p
+	SPREAD   SE_       290 04-14-07   5:33p
+	NWNETAPI DL_     52334 04-14-07   5:33p
+	WEEKLY   SE_       260 04-14-07   5:33p
+	WORDPROC SE_       301 04-14-07   5:33p
+	IBMAVW   EX_    148513 04-14-07   5:33p
+	IBMAVW   HL_     88985 04-14-07   5:33p
+	PRODUCT  MSG       267 04-14-07   5:33p
+	WNTB     DL_     40324 04-14-07   5:33p
+	WNTLDTH1 DL_     22523 04-14-07   5:33p
+	WNTR     DL_     43832 04-14-07   5:33p
+	WNUSER   IN_       623 04-14-07   5:33p
+	WNVADOS1 DL_      3551 04-14-07   5:33p
+	WNVC1    DL_     25521 04-14-07   5:33p
+	WNVCBIN1 DL_      9557 04-14-07   5:33p
+	WNVCRAS1 DL_      9549 04-14-07   5:33p
+	WNVCTBL1 DL_     15408 04-14-07   5:33p
+	WNVCTXT1 DL_     25615 04-14-07   5:33p
+	WNVCVEC1 DL_     41441 04-14-07   5:33p
+	WNVE1    DL_     18745 04-14-07   5:33p
+	WNVE1L   RS_      4048 04-14-07   5:33p
+	WNVF1    DL_      6021 04-14-07   5:33p
+	       56 file(s)    1418854 bytes
+	                       25088 bytes free
+
+### Directory of PC-DOS 6.10 (Disk 4)
+
+	 Volume in drive A is DISK      4
+	 Volume Serial Number is 3B1A-FF1F
+	 Directory of A:\
+
+	CPBNMI   38_       926 04-14-07   5:33p
+	CPBVXD   38_       933 04-14-07   5:33p
+	WNABSIO1 DL_     38665 04-14-07   5:33p
+	WNBA1540 DL_      5300 04-14-07   5:33p
+	WNBA1640 DL_      5033 04-14-07   5:33p
+	WNBACKUP EX_    274978 04-14-07   5:33p
+	WNBACKUP HL_     87990 04-14-07   5:33p
+	WNBACKL  RS_     36391 04-14-07   5:33p
+	WNBASPI  DL_      4247 04-14-07   5:33p
+	WNBSEL   RS_       688 04-14-07   5:33p
+	WNBCE    DL_      2901 04-14-07   5:33p
+	WNBCP    DL_      4166 04-14-07   5:33p
+	WNBFMTR  DL_     29835 04-14-07   5:33p
+	WNBSDEV  DL_      8533 04-14-07   5:33p
+	WNIBM1L  RS_      3384 04-14-07   5:33p
+	WNDOSLI1 DL_     19141 04-14-07   5:33p
+	WNDRTRE3 DL_     34200 04-14-07   5:33p
+	WNFB     DL_     31684 04-14-07   5:33p
+	WNFBL    RS_       825 04-14-07   5:33p
+	WNFLBMP1 DL_     18809 04-14-07   5:33p
+	WNFLCDR1 DL_      6771 04-14-07   5:33p
+	WNFLCGM1 DL_     20331 04-14-07   5:33p
+	WNFLEPS1 DL_     26718 04-14-07   5:33p
+	WNFLEXE1 DL_      7665 04-14-07   5:33p
+	WNFLGIF1 DL_     15042 04-14-07   5:33p
+	WNFLHEX1 DL_      2728 04-14-07   5:33p
+	WNFLICO1 DL_      4470 04-14-07   5:33p
+	WNFLMSP1 DL_      6724 04-14-07   5:33p
+	WNFLQP1  DL_     18140 04-14-07   5:33p
+	WNFLPCX1 DL_     12414 04-14-07   5:33p
+	WNFLPIC1 DL_      7353 04-14-07   5:33p
+	WNFLRTF1 DL_      8102 04-14-07   5:33p
+	WNFLTIF1 DL_     26046 04-14-07   5:33p
+	WNFLTXT1 DL_      3623 04-14-07   5:33p
+	WNFLWK31 DL_     18293 04-14-07   5:33p
+	WNFLWKS1 DL_     16413 04-14-07   5:33p
+	WNFLWPG1 DL_     20296 04-14-07   5:33p
+	WNFLXLS1 DL_     31799 04-14-07   5:33p
+	WNFLZIP1 DL_      8540 04-14-07   5:33p
+	WNFR     DL_     20769 04-14-07   5:33p
+	WNHB     DL_      8006 04-14-07   5:33p
+	WNHR     DL_      7214 04-14-07   5:33p
+	WNNC     DL_      4968 04-14-07   5:33p
+	WNQB     DL_     36734 04-14-07   5:33p
+	WNQR     DL_     35286 04-14-07   5:33p
+	WNFSV1   DL_     97483 04-14-07   5:33p
+	IBMAVDQ  EX_     25244 04-14-07   5:33p
+	IBMAVSH  CO_      9808 04-14-07   5:33p
+	IBMAVSP  EX_     78253 04-14-07   5:33p
+	IBMAVDR  BA_       582 04-14-07   5:33p
+	LOCAL    MS_       222 04-14-07   5:33p
+	TUTORIAL LS_      9920 04-14-07   5:33p
+	AUTORUN  PR_       160 04-14-07   5:33p
+	ADMIN    PRF       715 04-14-07   5:33p
+	DEFAULT  PR_       226 04-14-07   5:33p
+	VIRINFO  LS_     24653 04-14-07   5:33p
+	VIRUS    LS_     18385 04-14-07   5:33p
+	PRODINFO LS_       173 04-14-07   5:33p
+	VIRSIG   LS_     49936 04-14-07   5:33p
+	VERV     VD_      6922 04-14-07   5:33p
+	CONTACT  LS_       403 04-14-07   5:33p
+	F_LOG    EX_     50053 04-14-07   5:33p
+	CPSCHED  EXE      4946 04-14-07   5:33p
+	CPSCHED  OV_      2842 04-14-07   5:33p
+	SCHEDULE EXE      1408 04-14-07   5:33p
+	SCHEDULE HL_      2709 04-14-07   5:33p
+	SCHEDULE OV1     25799 04-14-07   5:33p
+	SETUP2   OVL     27721 04-14-07   5:33p
+	       68 file(s)    1421637 bytes
+	                       18432 bytes free
+
+### Directory of PC-DOS 6.10 (Disk 5)
+
+	 Volume in drive A is DISK      5
+	 Volume Serial Number is 3B1A-FF1F
+	 Directory of A:\
+
+	UMBCGA   SY_      1088 04-14-07   5:33p
+	UMBMONO  SY_      1114 04-14-07   5:33p
+	UMBHERC  SY_      1899 04-14-07   5:33p
+	UMBEMS   SY_      1055 04-14-07   5:33p
+	PCMSS    EX_      6775 04-14-07   5:33p
+	PCMCS    EX_     24396 04-14-07   5:33p
+	PCMSCD   EX_     10234 04-14-07   5:33p
+	PCFORMAT EX_     21797 04-14-07   5:33p
+	PCMATA   SY_      7377 04-14-07   5:33p
+	PCMFDD   EX_      2505 04-14-07   5:33p
+	PCMMTD   EX_      3353 04-14-07   5:33p
+	PCMINFO  EXE     11477 04-14-07   5:33p
+	PCMVCD   38_      7249 04-14-07   5:33p
+	WPCMINFO CP_      9795 04-14-07   5:33p
+	WPCMINFO HL_      5540 04-14-07   5:33p
+	IBMAVW   EX_    148513 04-14-07   5:33p
+	IBMAVD   EX_    175475 04-14-07   5:33p
+	IBMAVSP  EX_     78253 04-14-07   5:33p
+	VIRSIG   LS_     49936 04-14-07   5:33p
+	ADDHELP  OV_      6883 04-14-07   5:33p
+	DBLSPACE BI_     28986 04-14-07   5:33p
+	DBLSPACE SYS       292 04-14-07   5:33p
+	UDEON    COM     15700 04-14-07   5:33p
+	UDEOFF   COM       326 04-14-07   5:33p
+	SSTOR    EXE     96037 04-14-07   5:33p
+	SSUTIL   EX_     98686 04-14-07   5:33p
+	SSUNCOMP EXE     80309 04-14-07   5:33p
+	UNMOUNT  EXE     24807 04-14-07   5:33p
+	MOUNT    EXE     27749 04-14-07   5:33p
+	RTOOL    EX_     52411 04-14-07   5:33p
+	DOSUMB   CO_       744 04-14-07   5:33p
+	MONOUMB  38_       935 04-14-07   5:33p
+	SETUP2   OVL     27721 04-14-07   5:33p
+	README   TXT     50963 04-14-07   5:33p
+	       34 file(s)    1080380 bytes
+	                      368640 bytes free
