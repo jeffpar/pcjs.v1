@@ -1,2 +1,2 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<hdc id="hdcXT" drives='[{name:"10Mb Hard Disk",path:"/disks/pc/fixed/10mb/pcdos200-win101.json",type:3}]'/>
+<hdc id="hdcXT" drives='[{name:"10Mb Hard Disk",path:"/disks/pc/fixed/10mb/PCDOS200-WIN101.json",type:3}]'/>
