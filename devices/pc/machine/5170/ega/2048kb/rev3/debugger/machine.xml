@@ -15,6 +15,6 @@
 	<hdc id="hdcAT" type="at" drives='[{name:"20Mb Hard Disk",type:2,path:"/disks/pc/fixed/20mb/PCDOS330-EMPTY.json"}]'/>
 	<chipset id="chipset" model="5170" floppies="[1440,1200]"/>
 	<serial id="com1" adapter="1"/>
-	<serial id="com2" adapter="2" binding="print"/>
+	<serial id="com2" adapter="2" binding="print" tabsize="8" charbol="9"/>
 	<mouse serial="com1"/>
 </machine>
