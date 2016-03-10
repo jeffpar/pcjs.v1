@@ -8,5 +8,5 @@
 	<author>Infocom</author>
 	<releaseDate/>
 	<machine href="/disks/pc/games/infocom/machine.xml"/>
-	<disk id="disk01" href="/disks/pc/games/infocom/zork1/zork1-readonly.json" md5="e18d730285f6f8ae00d89e8e6ee8f3c7" md5json="d99fe5bf8d8ac1f177e360ca72fe3d7b"/>
+	<disk id="disk01" href="/disks/pc/games/infocom/zork1/ZORK1-READONLY.json" md5="e18d730285f6f8ae00d89e8e6ee8f3c7" md5json="d99fe5bf8d8ac1f177e360ca72fe3d7b"/>
 </manifest>

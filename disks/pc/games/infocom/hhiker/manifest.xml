@@ -8,7 +8,7 @@
 	<author>Infocom</author>
 	<releaseDate/>
 	<machine href="/disks/pc/games/infocom/machine.xml"/>
-	<disk id="disk01" href="/disks/pc/games/infocom/hhiker/hhiker-readonly.json" md5="99393c253f1b054cf7c017700a11adea" md5json="9eebc93891ecd41d786dfa1f525f8f05">
+	<disk id="disk01" href="/disks/pc/games/infocom/hhiker/HHIKER-READONLY.json" md5="99393c253f1b054cf7c017700a11adea" md5json="9eebc93891ecd41d786dfa1f525f8f05">
 		<name>Hitchhiker's Guide</name>
 	</disk>
 </manifest>
