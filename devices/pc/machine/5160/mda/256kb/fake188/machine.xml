@@ -27,7 +27,7 @@
 	<cpu id="cpu80188" model="80188" autostart="true" pos="left" padleft="8px" padbottom="8px">
 		<control type="button" binding="run">Run</control>
 	</cpu>
-	<keyboard ref="/devices/pc/keyboard/keyboard-minimal.xml"/>
+	<keyboard ref="/devices/pc/keyboard/us83-buttons-minimal.xml"/>
 	<chipset id="chipset" model="5160" sw1="01000001"/>
 	<hdc id="hdcXT" drives='[{name:"10Mb Hard Disk",type:3}]'/>
 </machine>

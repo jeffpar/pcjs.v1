@@ -10,7 +10,7 @@
 	<rom id="romBIOS" addr="0xfe000" size="0x2000" file="/devices/pc/rom/5160/bios/1982-11-08/XTBIOS-REV1.json"/>
 	<video ref="/devices/pc/video/ibm/cga/ibm-cga-960.xml"/>
 	<fdc ref="/disks/pc/compiled/library.xml"/>
-	<keyboard ref="/devices/pc/keyboard/keyboard-us83.xml"/>
+	<keyboard ref="/devices/pc/keyboard/us83-softkeys.xml"/>
 	<debugger id="debugger"/>
 	<panel ref="/devices/pc/panel/default.xml"/>
 	<chipset id="chipset" model="5160" sw1="01001001" pos="left" padleft="8px" padbottom="8px">

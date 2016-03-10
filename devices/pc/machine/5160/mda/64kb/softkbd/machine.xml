@@ -9,7 +9,7 @@
 	<rom id="romBASIC" addr="0xf6000" size="0x8000" file="/devices/pc/rom/5160/basic/BASIC110.json"/>
 	<rom id="romBIOS" addr="0xfe000" size="0x2000" file="/devices/pc/rom/5160/bios/1982-11-08/XTBIOS-REV1.json"/>
 	<video ref="/devices/pc/video/ibm/mda/ibm-mda.xml"/>
-	<keyboard ref="/devices/pc/keyboard/keyboard-us83.xml"/>
+	<keyboard ref="/devices/pc/keyboard/us83-softkeys.xml"/>
 	<debugger id="debugger"/>
 	<panel ref="/devices/pc/panel/default.xml"/>
 	<fdc ref="/disks/pc/samples.xml" width="280px"/>
