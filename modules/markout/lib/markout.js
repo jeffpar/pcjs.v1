@@ -333,6 +333,7 @@ MarkOut.aHTMLEntities = {
  *      'template' (eg, "machine.xsl")
  *      'uncompiled' (eg, true)
  *      'autoMount' (eg, {"A":{"name":"OS/2 FOOTBALL Boot Disk (v7.68.17)","path":"/disks/pc/os2/misc/football/debugger/FOOTBALL-7.68.17.json"}})
+ *      'drives' (eg, [{name:"68Mb Hard Disk",type:4,path:"http://archive.pcjs.org/disks/pc/fixed/68mb/win95.json"}])
  *      'parms'
  *
  * Non-reserved properties include:
@@ -356,7 +357,7 @@ MarkOut.aHTMLEntities = {
 MarkOut.aFMBooleanMachineProps = {
     'autopower': "autoPower"
 };
-MarkOut.aFMReservedMachineProps = ['id', 'name', 'type', 'debugger', 'config', 'template', 'uncompiled', 'autoMount', 'parms'];
+MarkOut.aFMReservedMachineProps = ['id', 'name', 'type', 'debugger', 'config', 'template', 'uncompiled', 'autoMount', 'drives', 'parms'];
 
 /**
  * convertMD()
@@ -480,6 +481,7 @@ MarkOut.prototype.convertMD = function(sIndent)
                     /*
                      * Any "non-reserved" properties are now merged into the 'parms' property; 'autoMount'
                      * is treated as reserved only because it must be encoded as an object rather than a string.
+                     * Ditto for 'drives'.
                      */
                     machine['parms'] = '{';
                     for (sProp in machine) {
@@ -491,7 +493,19 @@ MarkOut.prototype.convertMD = function(sIndent)
                             machine['parms'] += sProp + ':"' + machine[sProp] + '",';
                         }
                     }
-                    machine['parms'] += 'autoMount:' + machine['autoMount'] + '}';
+                    var sDrives = machine['drives'];
+                    if (sDrives) {
+                        var matchQuotes = sDrives.match(/(['"])(.*)\1/);
+                        if (matchQuotes) {
+                            sDrives = matchQuotes[2];
+                            if (!sDrives) {
+                                sDrives = '[]';
+                            } else {
+                                sDrives = sDrives.replace(/'/g, '"');
+                            }
+                        }
+                    }
+                    machine['parms'] += 'autoMount:' + (machine['autoMount'] || "null") + ',drives:' + (sDrives || "null") + '}';
                     if (id) this.aMachineDefs[id] = machine;
                 }
             }

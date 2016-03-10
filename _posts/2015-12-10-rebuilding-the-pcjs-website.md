@@ -74,8 +74,8 @@ You may also use `config` to specify a machine XML configuration file if not usi
 a JSON-encoded machine state file if the machine requires a predefined state; and `uncompiled` may be set to *true*
 to force a machine to use uncompiled sources, overriding the value of `site.pcjs.compiled` in **_config.yml**.
 
-For example, the PCjs home page contains two machines, so this appears at the top of the root
-[README.md](https://raw.githubusercontent.com/jeffpar/pcjs/master/README.md):
+For example, the PCjs Home page contains two machines, so this appears at the top of the
+[Markdown file](https://raw.githubusercontent.com/jeffpar/pcjs/master/index.md):
 
 	machines:
 	  - type: pc
@@ -92,14 +92,22 @@ FDC `autoMount` setting, making it easy to reuse the same machine XML file with 
 	  - type: pc
 	    id: deskpro386
 	    debugger: true
-	    config: /devices/pc/machine/compaq/deskpro386/ega/4096kb/machine.xml
 	    autoMount:
 	      A:
 	        path: /disks/pc/os2/misc/football/FOOTBALL-76817.json
+	    config: /devices/pc/machine/compaq/deskpro386/ega/4096kb/machine.xml
 
-`messages`, `state`, and `autoPower` are some other settings that can be overridden, and support for more can
-easily be added.
+Other settings that can currently be overridden include:
 
+ + `autoPower`
+ + `drives`
+ + `messages`
+ + `state`
+
+Additional overrides will be added as needed.  See the [Windows 95 Demo](/disks/pc/windows/win95/4.00.950/)
+machine and its associated [Markdown file](https://raw.githubusercontent.com/jeffpar/pcjs/master/disks/pc/windows/win95/4.00.950/README.md)
+for more override examples, including how to set `autoMount` to *not* mount any diskettes. 
+ 
 I will continue to include a Node web server with the PCjs project, but it's now intended for development
 purposes only (not production servers).  I've updated the PCjs MarkOut component to parse any "Front Matter"
 at the top of the PCjs Markdown files, and to convert all new Jekyll-style embedded machines and screenshots

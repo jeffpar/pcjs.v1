@@ -10,4 +10,5 @@ COMPAQ DeskPro 386 Machines
 * [COMPAQ DeskPro 386 with 2Mb RAM and COMPAQ EGA](ega/2048kb/)
 * [COMPAQ DeskPro 386 with 4Mb RAM and COMPAQ EGA](ega/4096kb/)
 * [COMPAQ DeskPro 386 with 2Mb RAM and IBM VGA](vga/2048kb/)
-* [COMPAQ DeskPro 386 with 4Mb RAM and IBM VGA, running Windows 95](vga/4096kb/)
+* [COMPAQ DeskPro 386 with 4Mb RAM and IBM VGA](vga/4096kb/)
+* [COMPAQ DeskPro 386 with 4Mb RAM and IBM VGA running Windows 95](/disks/pc/windows/win95/4.00.950/)

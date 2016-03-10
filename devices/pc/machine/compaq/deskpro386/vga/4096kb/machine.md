@@ -8,7 +8,4 @@ machines:
     debugger: true
 ---
 
-Windows 95 Test Machine
----
-
 {% include machine.html id="deskpro386" %}

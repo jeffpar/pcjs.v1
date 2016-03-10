@@ -6,11 +6,11 @@ machines:
   - id: deskpro386
     type: pc
     debugger: true
-    config: /devices/pc/machine/compaq/deskpro386/ega/4096kb/machine.xml
     autoMount:
       A:
         path: /disks/pc/os2/misc/football/FOOTBALL-76817.json
     messages: warn
+    config: /devices/pc/machine/compaq/deskpro386/ega/4096kb/machine.xml
 ---
 
 OS/2 FOOTBALL Boot Disk (v7.68.17)

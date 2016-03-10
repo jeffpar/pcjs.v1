@@ -6,7 +6,10 @@ machines:
   - type: pc
     id: deskpro386
     debugger: true
+    state: deskpro386.json
     config: /devices/pc/machine/compaq/deskpro386/vga/4096kb/machine.xml
+    drives: '[{name:"68Mb Hard Disk",type:4,path:"http://archive.pcjs.org/disks/pc/fixed/68mb/win95.json"}]'
+    autoMount: ''
 ---
 
 Microsoft Windows 95 (First Retail Release)

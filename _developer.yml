@@ -17,8 +17,6 @@ pcjs:
   #
   #     bundle exec jekyll serve --config _config.yml,_developer.yml
   #
-  # so deal with it! ;-)
-  #
   # NOTE: If you're debugging PCjs source code, you'll probably be happier using a JetBrains IDE like WebStorm,
   # launching PCjs pages via Node rather than Jekyll, and using the JetBrains Chrome debugger plug-in.
   # 

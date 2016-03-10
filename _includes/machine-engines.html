@@ -14,7 +14,8 @@ in the Front Matter of Markdown files, for compatibility with the Jekyll web ser
 And the following properties (along with any property not listed above) will be added to the 'parms' property:
 
     'autoPower' (eg, "true")
-    'autoMount' (eg, {"A":{"name":"OS/2 FOOTBALL Boot Disk (v7.68.17)","path":"/disks/pc/os2/misc/football/debugger/FOOTBALL-7.68.17.json"}})
+    'autoMount' (eg, {"A":{"name":"OS/2 FOOTBALL (v7.68.17)","path":"/disks/pc/os2/misc/football/FOOTBALL-76817.json"}})
+    'drives' (eg, '[{name:"68Mb Hard Disk",type:4,path:"http://archive.pcjs.org/disks/pc/fixed/68mb/win95.json"}]')
     'state' (eg, "state.json")
     'messages' (eg, "disk")
 
@@ -31,9 +32,17 @@ here and in markout.js.  Examples include 'autopower' ('autoPower') and 'automou
   {% endif %}
   {% capture machine_embed %}embed{{ machine_type | upcase }}{% endcapture %}
   {% if machine.automount != nil %}
-    {% capture machine_autoMount %}{{ machine.automount|jsonify }}{% endcapture %}
+    {% if machine.automount == '' %}
+      {% assign machine_autoMount = '{}' %}
+    {% else %}
+      {% capture machine_autoMount %}{{ machine.automount|jsonify }}{% endcapture %}
+    {% endif %}
   {% else %}
-    {% capture machine_autoMount %}{{ machine.autoMount|jsonify }}{% endcapture %}
+    {% if machine.autoMount == '' %}
+      {% assign machine_autoMount = '{}' %}
+    {% else %}
+      {% capture machine_autoMount %}{{ machine.autoMount|jsonify }}{% endcapture %}
+    {% endif %}
   {% endif %}
   {% if machine.autopower != nil %}
     {% capture machine_autoPower %}{{ machine.autopower }}{% endcapture %}
@@ -47,12 +56,21 @@ here and in markout.js.  Examples include 'autopower' ('autoPower') and 'automou
   {% else %}
     {% assign machine_config = machine.config %}
   {% endunless %}
+  {% if machine.drives != nil %}
+    {% if machine.drives == '' %}
+      {% assign machine_drives = '[]' %}
+    {% else %}
+      {% capture machine_drives %}{{ machine.drives }}{% endcapture %}
+    {% endif %}
+  {% else %}
+    {% capture machine_drives %}null{% endcapture %}
+  {% endif %}
   {% unless machine.template %}
     {% assign machine_template = '' %}
   {% else %}
     {% assign machine_template = machine.template %}
   {% endunless %}
-  {% capture machine_parms %}{{ site.left_brace }}autoPower:{{ machine_autoPower }},state:"{{ machine.state }}",autoMount:{{ machine_autoMount }},messages:"{{ machine.messages }}"{{ site.right_brace }}{% endcapture %}
+  {% capture machine_parms %}{{ site.left_brace }}autoMount:{{ machine_autoMount }},autoPower:{{ machine_autoPower }},drives:{{ machine_drives }},state:"{{ machine.state }}",messages:"{{ machine.messages }}"{{ site.right_brace }}{% endcapture %}
   {% if site.pcjs.compiled == true and machine.uncompiled != true %}
     {% capture machine_script %}<script type="text/javascript" src="{{ site.baseurl }}/versions/{{ machine_type }}js/{{ site.pcjs.version }}/{{ machine_file }}.js"></script>{% endcapture %}
     {% unless machine_scripts contains machine_script %}

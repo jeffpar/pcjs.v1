@@ -88,21 +88,11 @@ function HDC(parmsHDC) {
 
     this.aDriveConfigs = [];
 
-    if (parmsHDC['drives']) {
-        try {
-            /*
-             * The most likely source of any exception will be right here, where we're parsing
-             * the JSON-encoded drive data.
-             */
-            this.aDriveConfigs = eval("(" + parmsHDC['drives'] + ")");
-            /*
-             * Nothing more to do with aDriveConfigs now. initController() and autoMount() (if there are
-             * any disk image "path" properties to process) will take care of the rest.
-             */
-        } catch (e) {
-            Component.error("HDC drive configuration error: " + e.message + " (" + parmsHDC['drives'] + ")");
-        }
-    }
+    /*
+     * We used to eval() sDriveConfigs immediately, but now we wait until initBus()
+     * is called, so that we can check for any machine overrides.
+     */
+    this.sDriveConfigs = parmsHDC['drives'];
 
     /*
      * Set fATC (AT Controller flag) according to the 'type' parameter.  This in turn determines other
@@ -112,7 +102,7 @@ function HDC(parmsHDC) {
     this.fATC = (parmsHDC['type'] == "at");
 
     /*
-     * The remainder of HDC initialization now takes place in our initBus() handler
+     * The remainder of HDC initialization now takes place in our initBus() handler.
      */
 }
 
@@ -585,6 +575,26 @@ HDC.prototype.initBus = function(cmp, bus, cpu, dbg)
     this.cpu = cpu;
     this.dbg = dbg;
     this.cmp = cmp;
+
+    var aDriveConfigs = cmp.getMachineParm('drives');
+    if (aDriveConfigs) {
+        this.aDriveConfigs = aDriveConfigs;
+    }
+    else if (this.sDriveConfigs) {
+        try {
+            /*
+             * The most likely source of any exception will be right here, where we're parsing
+             * the JSON-encoded drive data.
+             */
+            this.aDriveConfigs = eval("(" + this.sDriveConfigs + ")");
+            /*
+             * Nothing more to do with aDriveConfigs now. initController() and autoMount() (if there are
+             * any disk image "path" properties to process) will take care of the rest.
+             */
+        } catch (e) {
+            Component.error("HDC drive configuration error: " + e.message + " (" + this.sDriveConfigs + ")");
+        }
+    }
 
     /*
      * We need access to the ChipSet component, because we need to communicate with
