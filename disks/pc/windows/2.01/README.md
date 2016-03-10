@@ -2,6 +2,13 @@
 layout: page
 title: Microsoft Windows/386 2.01
 permalink: /disks/pc/windows/2.01/
+machines:
+  - type: pc
+    id: deskpro386
+    debugger: true
+    config: /devices/pc/machine/compaq/deskpro386/vga/2048kb/machine.xml
+    drives: '[{name:"20Mb Hard Disk",type:2,path:"/disks/pc/fixed/20mb/COMPAQ310-WIN386201-VGA.json"}]'
+    autoMount: ''
 ---
 
 Microsoft Windows 2.0 existed only as "point releases":
@@ -17,6 +24,8 @@ This Windows/386 release was finalized in September 1987, predating [Windows 2.0
 by several months.
 
 Directory listings of the three 1.2Mb distribution diskettes are provided below.
+
+{% include machine.html id="deskpro386" %}
 
 ### Directory of Windows/386 2.01 (Disk 1)
 

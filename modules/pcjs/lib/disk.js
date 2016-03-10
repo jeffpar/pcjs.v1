@@ -757,7 +757,7 @@ FileInfo.prototype.getSymbol = function(off, fNearest)
 };
 
 /**
- * Every Sector object (once loaded and fully parsed) should have ALL of the following named properties:
+ * Every Sector object (once loaded, parsed, and "normalized") should have ALL of the following named properties:
  *
  *      'sector':   sector number
  *      'length':   size of the sector, in bytes
@@ -939,6 +939,7 @@ Disk.prototype.powerDown = function(fSave, fShutdown)
 /**
  * create()
  *
+ * @this {Disk}
  * @param {string} mode
  * @param {number} nCylinders
  * @param {number} nHeads
@@ -1968,6 +1969,7 @@ Disk.prototype.updateSector = function(file, pba, off)
  *      cModify:    number of modified dwords in sector
  *      fDirty:     true if sector is dirty, false if clean (or cleaning in progress)
  *
+ * @this {Disk}
  * @param {Object} sector
  * @param {number} iCylinder
  * @param {number} iHead
@@ -2013,6 +2015,7 @@ Disk.prototype.connectRemoteDisk = function(sDiskPath)
 /**
  * readRemoteSectors(iCylinder, iHead, iSector, nSectors, fAsync, done)
  *
+ * @this {Disk}
  * @param {number} iCylinder
  * @param {number} iHead
  * @param {number} iSector
@@ -2046,6 +2049,7 @@ Disk.prototype.readRemoteSectors = function(iCylinder, iHead, iSector, nSectors,
 /**
  * doneReadRemoteSectors(sURLName, sURLData, nErrorCode, sectorInfo)
  *
+ * @this {Disk}
  * @param {string} sURLName
  * @param {string} sURLData
  * @param {number} nErrorCode
@@ -2110,6 +2114,7 @@ Disk.prototype.doneReadRemoteSectors = function(sURLName, sURLData, nErrorCode, 
  * clean -- unless one or more writes to the sector occurred in the meantime, which we track through a per-sector
  * fDirty flag.
  *
+ * @this {Disk}
  * @param {number} iCylinder
  * @param {number} iHead
  * @param {number} iSector
@@ -2146,6 +2151,7 @@ Disk.prototype.writeRemoteSectors = function(iCylinder, iHead, iSector, nSectors
 /**
  * doneWriteRemoteSectors(sURLName, sURLData, nErrorCode, sectorInfo)
  *
+ * @this {Disk}
  * @param {string} sURLName
  * @param {string} sURLData
  * @param {number} nErrorCode
@@ -2212,6 +2218,7 @@ Disk.prototype.disconnectRemoteDisk = function()
  * is finally written, we want to take advantage of the write request to write any additional dirty
  * sectors that follow it, even if those additional sectors were written less than 2 seconds ago.
  *
+ * @this {Disk}
  * @param {Object} sector
  * @param {boolean} fAsync (true to update write timer, false to not)
  * @return {boolean} true if write timer set, false if not
@@ -2241,6 +2248,7 @@ Disk.prototype.queueDirtySector = function(sector, fAsync)
  * If a timer is already active, make sure it's still valid (ie, the time the timer is scheduled to fire is
  * >= the timestamp of the next dirty sector + REMOTE_WRITE_DELAY); if not, cancel the timer and start a new one.
  *
+ * @this {Disk}
  * @return {boolean} true if write timer set, false if not
  */
 Disk.prototype.updateWriteTimer = function()
@@ -2276,11 +2284,12 @@ Disk.prototype.updateWriteTimer = function()
 /**
  * findDirtySectors(fAsync)
  *
- * @param {boolean} fAsync is true if this function is being called asynchronously, false otherwise
- * @return {boolean|Array} false if no dirty sectors, otherwise true (or a response array if not fAsync)
- *
  * Starting with the oldest dirty sector in the queue (aDirtySectors), determine the longest contiguous stretch of
  * dirty sectors (currently limited to the same track), mark them all as not dirty, and then call writeRemoteSectors().
+ *
+ * @this {Disk}
+ * @param {boolean} fAsync is true if this function is being called asynchronously, false otherwise
+ * @return {boolean|Array} false if no dirty sectors, otherwise true (or a response array if not fAsync)
  */
 Disk.prototype.findDirtySectors = function(fAsync)
 {
@@ -2418,6 +2427,7 @@ Disk.prototype.seek = function(iCylinder, iHead, iSector, fWrite, done)
 /**
  * fill(sector, ab, off)
  *
+ * @this {Disk}
  * @param {Object} sector
  * @param {*} ab (technically, this should be typed as Array.<number> but I'm having trouble coercing JSON.parse() to that)
  * @param {number} off
@@ -2440,6 +2450,7 @@ Disk.prototype.fill = function(sector, ab, off)
 /**
  * toBytes(sector)
  *
+ * @this {Disk}
  * @param {Object} sector
  * @return {Array.<number>} is an array of bytes
  */
@@ -2704,8 +2715,9 @@ Disk.prototype.restore = function(deltas)
             var sector = this.aDiskData[iCylinder][iHead][iSector];
             if (!sector) continue;
             /*
-             * Since write() now deals with empty/partial sectors, we no longer need to completely "inflate" the sector prior
-             * to applying modifications.  So let's just make sure that the sector is "inflated" up to iModify.
+             * Since write() now deals with empty/partial sectors, we no longer need to completely "inflate"
+             * the sector prior to applying modifications.  So let's just make sure that the sector is "inflated"
+             * up to iModify.
              */
             var idw = sector['data'].length;
             while (idw < iModify) {
@@ -2744,17 +2756,25 @@ Disk.prototype.restore = function(deltas)
  * toJSON()
  *
  * We perform some RegExp massaging on the JSON data to eliminate unnecessary properties
- * (eg, 'length' values of 512, 'pattern' values of 0, quotes around the property names, etc).
- * Sectors that were initially compressed should remain compressed unless/until they were modified.
+ * (eg, 'length' values of 512, 'pattern' values of 0, since those are defaults).
  *
- * TODO: Check sectors (or at least modified sectors) to see if they can be recompressed.
+ * In addition, we first check every sector to see if it can be "deflated".  Sectors that were
+ * initially "deflated" should remain that way unless/until they were modified, so technically,
+ * we could call deflateSector() just for modified sectors, but this isn't a common operation,
+ * so it doesn't hurt to check every sector.
  *
  * @this {Disk}
  * @return {string} containing the entire disk image as JSON-encoded data
  */
 Disk.prototype.toJSON = function()
 {
-    var s = JSON.stringify(this.aDiskData, function(key, value) {
+    var s, pba = 0, sector, sectorLast;
+
+    while ((sector = this.getSector(pba++))) {
+        this.deflateSector(sector);
+    }
+
+    s = JSON.stringify(this.aDiskData, function(key, value) {
         /*
          * If BACKTRACK support is enabled, we have to filter out any 'file' properties that may
          * be attached to the sector objects, lest we risk blowing the stack due to circular references.
@@ -2764,7 +2784,12 @@ Disk.prototype.toJSON = function()
         }
         return value;
     });
+
+    /*
+     * Eliminate unnecessary default properties (eg, 'length' values of 512, 'pattern' values of 0).
+     */
     s = s.replace(/,"length":512/gm, "").replace(/,"pattern":0/gm, "");
+
     /*
      * I don't really want to strip quotes from disk image property names, since I would have to put them
      * back again during mount() -- or whenever JSON.parse() is used instead of eval().  But I still remove
@@ -2773,12 +2798,14 @@ Disk.prototype.toJSON = function()
      * all the property names that remain.
      */
     s = s.replace(/"(sector|length|data|pattern)":/gm, "$1:");
+
     /*
      * The next line will remove any other numeric or boolean properties that were added at runtime, although
      * they may have completely different ("minified") names if the code has been compiled.
      */
     s = s.replace(/,"[^"]*":([0-9]+|true|false)/gm, "");
     s = s.replace(/(sector|length|data|pattern):/gm, "\"$1\":");
+
     /*
      * Last but not least, insert line breaks after every object definition, to ease the pain on text editors.
      */
@@ -2787,8 +2814,35 @@ Disk.prototype.toJSON = function()
 };
 
 /**
+ * deflateSector(sector)
+ *
+ * This is just the first revision: it currently looks only at fully inflated sectors.
+ *
+ * @this {Disk}
+ * @param {Object} sector
+ */
+Disk.prototype.deflateSector = function(sector)
+{
+    var adw = sector['data'];
+    var cdw = adw.length;
+    if ((cdw << 2) == sector['length']) {
+        var idw = cdw - 1;
+        var dwPattern = adw[idw], cDupes = 0;
+        while (idw--) {
+            if (adw[idw] !== dwPattern) break;
+            cDupes++;
+        }
+        if (cDupes++) {
+            adw.length = cdw - cDupes;
+            sector['pattern'] = dwPattern;
+        }
+    }
+};
+
+/**
  * dumpSector(sector, pba, sDesc)
  *
+ * @this {Disk}
  * @param {Object} sector (returned from a previous seek)
  * @param {number} [pba]
  * @param {string} [sDesc]
