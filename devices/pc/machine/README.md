@@ -101,10 +101,9 @@ Our pre-built [Model 5160](/devices/pc/machine/5160/) machines include:
 ### Model 5170 Machine Configurations
 
 * [IBM PC AT (6Mhz, 640Kb) with EGA Display and Debugger](/devices/pc/machine/5170/ega/640kb/rev1/debugger/)
-* [IBM PC AT (6Mhz, 1152Kb, 20Mb Drive) with EGA Display and Debugger](/devices/pc/machine/5170/ega/1152kb/rev1/debugger/)
-* [IBM PC AT (8Mhz, 1152Kb, 20Mb Drive) with EGA Display and Debugger](/devices/pc/machine/5170/ega/1152kb/rev3/debugger/)
-* [IBM PC AT (8Mhz, 1152Kb, 20Mb Drive) with EGA Display running Windows 3.00](/devices/pc/machine/5170/ega/1152kb/win300/)
-* [IBM PC AT (8Mhz, 1152Kb, 20Mb Drive) with EGA Display and Debugger running Windows 3.00](/devices/pc/machine/5170/ega/1152kb/win300/)
+* [IBM PC AT (6Mhz, 1Mb, 20Mb Drive) with EGA Display and Debugger](/devices/pc/machine/5170/ega/1152kb/rev1/debugger/)
+* [IBM PC AT (8Mhz, 1Mb, 20Mb Drive) with EGA Display and Debugger](/devices/pc/machine/5170/ega/1152kb/rev3/debugger/)
+* [IBM PC AT (8Mhz, 2Mb, 20Mb Drive) with EGA Display](/devices/pc/machine/5170/ega/2048kb/rev3/)
 * [IBM PC AT (8Mhz, 2Mb, 20Mb Drive) with EGA Display and Debugger](/devices/pc/machine/5170/ega/2048kb/rev3/debugger/)
-* [IBM PC AT (8Mhz, 2Mb, 20Mb Drive) with VGA Display running Windows 3.10](/devices/pc/machine/5170/vga/2048kb/win310/)
-* [IBM PC AT (8Mhz, 2Mb, 20Mb Drive) with VGA Display and Debugger running Windows 3.10](/devices/pc/machine/5170/vga/2048kb/win310/debugger/)
+* [IBM PC AT (8Mhz, 2Mb, 20Mb Drive) with VGA Display](/devices/pc/machine/5170/vga/2048kb/)
+* [IBM PC AT (8Mhz, 2Mb, 20Mb Drive) with VGA Display and Debugger](/devices/pc/machine/5170/vga/2048kb/debugger/)

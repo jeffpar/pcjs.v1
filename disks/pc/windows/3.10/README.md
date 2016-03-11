@@ -5,7 +5,9 @@ permalink: /disks/pc/windows/3.10/
 machines:
   - type: pc
     id: ibm5170-pcdos330
-    config: /devices/pc/machine/5170/vga/2048kb/win310/machine.xml
+    config: /devices/pc/machine/5170/vga/2048kb/machine.xml
+    drives: '[{name:"20Mb Hard Disk",type:2,path:"/disks/pc/fixed/20mb/PCDOS330-WIN310.json"}]'
+    autoMount: ''
 ---
 
 Microsoft Windows 3.10

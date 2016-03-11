@@ -47,6 +47,7 @@
 		<manifest ref="/disks/pc/windows/1.03b/manifest.xml"/>
 		<manifest ref="/disks/pc/windows/1.04/manifest.xml"/>
 		<manifest ref="/disks/pc/windows/2.0x/manifest.xml"/>
+		<manifest ref="/disks/pc/windows/2.03/manifest.xml"/>
 		<manifest ref="/disks/pc/windows/2.10/manifest.xml"/>
 		<manifest ref="/disks/pc/windows/2.11/manifest.xml"/>
 		<manifest ref="/disks/pc/windows/3.00/manifest.xml"/>
