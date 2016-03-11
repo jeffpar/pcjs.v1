@@ -6,6 +6,7 @@ machines:
   - type: pc
     id: deskpro386
     debugger: true
+    state: deskpro386.json
     config: /devices/pc/machine/compaq/deskpro386/vga/2048kb/machine.xml
     drives: '[{name:"20Mb Hard Disk",type:2,path:"/disks/pc/fixed/20mb/COMPAQ310-WIN386201-VGA.json"}]'
     autoMount: ''
@@ -17,9 +18,6 @@ Microsoft Windows/386 2.0 existed as the following "point releases":
 
 * [Windows/386 2.01](#microsoft-windows386-201)
 * [Windows/386 2.03](#microsoft-windows386-203)
-
-[Microsoft Windows 2.03](/disks/pc/windows/2.03/) was released around the same time as
-[Windows/386 2.03](#microsoft-windows386-203), but it did not require an 80386-based machine.
 
 Microsoft Windows/386 2.01
 ---
@@ -243,7 +241,7 @@ Microsoft Windows/386 2.03
 
 Windows/386 2.03 appears to have been finalized in December 1987.
 
-Note that only about two months separated this release from [Windows/386 2.01](/disks/pc/windows/2.01/#microsoft-windows386-201).
+Note that only about two months separated this release from [Windows/386 2.01](/disks/pc/windows/2.0x/#microsoft-windows386-201).
 
 Directory listings of the five 720Kb distribution diskettes are provided below.
 
