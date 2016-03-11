@@ -17,10 +17,10 @@ redirect_from:
 Microsoft Windows 1.01
 ---
 
-Windows 1.01, the first public version of Windows, was released on November 20, 1985.  It is shown
-here running on an IBM PC XT (Model 5160) with an EGA.
+Microsoft Windows 1.01, the first public version of Windows, was released on November 20, 1985.  It is shown
+here running on an IBM PC XT (Model 5160) with an EGA Display.
 
-You can also run [Windows 1.01 on a CGA](/devices/pc/machine/5160/cga/256kb/win101/).
+You can also run [Windows 1.01 with a CGA Display](/devices/pc/machine/5160/cga/256kb/win101/).
 
 Directory listings of the five 360Kb distribution diskettes are provided [below](#directory-listings). 
 
