@@ -6,7 +6,16 @@ machines:
   - type: pc
     id: ibm5160
     debugger: true
-    config: /devices/pc/machine/5160/cga/640kb/dos400m/machine.xml
+    config: /devices/pc/machine/5160/cga/640kb/softkbd/machine.xml
+    autoMount:
+      A:
+        path: /disks/pc/dos/microsoft/4.0M/MSDOS400M-DISK1.json
+      B:
+        path: /disks/pc/dos/microsoft/4.0M/MSDOS400M-DISK2.json
+redirect_from:
+  - /devices/pc/machine/5160/cga/640kb/dos400m/
+  - /configs/pc/machines/5160/cga/640kb/dos400m/
+  - /videos/pcjs/
 ---
 
 Multitasking MS-DOS 4.00

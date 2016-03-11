@@ -5,16 +5,24 @@ permalink: /disks/pc/windows/1.01/
 machines:
   - type: pc
     id: ibm5160
-    config: /devices/pc/machine/5160/ega/640kb/win101/machine.xml
+    state: ibm5160-ega.json
+    config: /devices/pc/machine/5160/ega/640kb/machine.xml
+    drives: '[{name:"10Mb Hard Disk",type:3,path:"/disks/pc/fixed/10mb/PCDOS200-WIN101-EGA.json"}]'
+redirect_from:
+  - /configs/pc/machines/5160/ega/640kb/win101/
+  - /devices/pc/machine/5160/ega/640kb/win101/
+  - /devices/pc/machine/5160/ega/640kb/win101/debugger/
 ---
 
 Microsoft Windows 1.01
 ---
 
-Windows 1.01, the first public version of Windows, was released on November 20, 1985.
+Windows 1.01, the first public version of Windows, was released on November 20, 1985.  It is shown
+here running on an IBM PC XT (Model 5160) with an EGA.
 
-It is shown here running on an IBM PC XT (Model 5160) with an EGA.  Directory listings of the five 360Kb distribution
-diskettes are provided [below](#directory-listings). 
+You can also run [Windows 1.01 on a CGA](/devices/pc/machine/5160/cga/256kb/win101/).
+
+Directory listings of the five 360Kb distribution diskettes are provided [below](#directory-listings). 
 
 {% include machine.html id="ibm5160" %}
 
