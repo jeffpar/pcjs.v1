@@ -17,20 +17,20 @@ that automatically run the software.
 
 ### PC-DOS (IBM)
 
-* [PC-DOS 1.00](/disks/pc/dos/ibm/1.00/)
-* [PC-DOS 1.10](/disks/pc/dos/ibm/1.10/)
-* [PC-DOS 2.00](/disks/pc/dos/ibm/2.00/)
-* [PC-DOS 2.10](/disks/pc/dos/ibm/2.10/)
-* [PC-DOS 3.00](/disks/pc/dos/ibm/3.00/)
-* [PC-DOS 3.10](/disks/pc/dos/ibm/3.10/)
-* [PC-DOS 3.20](/disks/pc/dos/ibm/3.20/)
-* [PC-DOS 3.30](/disks/pc/dos/ibm/3.30/)
-* [PC-DOS 4.00](/disks/pc/dos/ibm/4.00/)
-* [PC-DOS 5.00](/disks/pc/dos/ibm/5.00/)
+* [PC-DOS 1.00](/disks/pc/dos/ibm/1.00/) (1981)
+* [PC-DOS 1.10](/disks/pc/dos/ibm/1.10/) (1982)
+* [PC-DOS 2.00](/disks/pc/dos/ibm/2.00/) (1983)
+* [PC-DOS 2.10](/disks/pc/dos/ibm/2.10/) (1983)
+* [PC-DOS 3.00](/disks/pc/dos/ibm/3.00/) (1984)
+* [PC-DOS 3.10](/disks/pc/dos/ibm/3.10/) (1985)
+* [PC-DOS 3.20](/disks/pc/dos/ibm/3.20/) (1986)
+* [PC-DOS 3.30](/disks/pc/dos/ibm/3.30/) (1987)
+* [PC-DOS 4.00](/disks/pc/dos/ibm/4.00/) (1988)
+* [PC-DOS 5.00](/disks/pc/dos/ibm/5.00/) (1991)
 * PC-DOS 6.00
-* [PC-DOS 6.10](/disks/pc/dos/ibm/6.10/)
-* PC-DOS 6.30
-* PC-DOS 7.00
+* [PC-DOS 6.10](/disks/pc/dos/ibm/6.10/) (1993)
+* [PC-DOS 6.30](/disks/pc/dos/ibm/6.30/) (1993)
+* [PC-DOS 7.00](/disks/pc/dos/ibm/7.00/) (1994)
 
 ### MS-DOS (Microsoft)
 

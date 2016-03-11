@@ -3,8 +3,8 @@
 	<control type="list" binding="listDrives"/>
 	<control type="list" binding="listDisks">
 		<disk path="">None</disk>
-		<disk path="/disks/pc/cpm/1.1b/cpm86-disk1.json">CP/M-86 (Disk 1)</disk>
-		<disk path="/disks/pc/cpm/1.1b/cpm86-disk2.json">CP/M-86 (Disk 2)</disk>
+		<disk path="/disks/pc/cpm/1.1b/CPM86-DISK1.json">CP/M-86 (Disk 1)</disk>
+		<disk path="/disks/pc/cpm/1.1b/CPM86-DISK2.json">CP/M-86 (Disk 2)</disk>
 		<disk path="/disks/pc/diags/ibm/2.20/5150_5155_5160_ADVDIAG_220.json">IBM Diagnostics 2.20</disk>
 		<disk path="/disks/pc/dos/ibm/1.00/PCDOS100.json">PC-DOS 1.00</disk>
 		<disk path="/disks/pc/dos/ibm/1.10/PCDOS110.json">PC-DOS 1.10</disk>
@@ -33,7 +33,11 @@
 		<disk path="/disks/pc/dos/ibm/6.10/PCDOS610-DISK2-1440K.json">PC-DOS 6.10 (Disk 2)</disk>
 		<disk path="/disks/pc/dos/ibm/6.10/PCDOS610-DISK3-1440K.json">PC-DOS 6.10 (Disk 3)</disk>
 		<disk path="/disks/pc/dos/ibm/6.10/PCDOS610-DISK4-1440K.json">PC-DOS 6.10 (Disk 4)</disk>
-		<disk path="/disks/pc/dos/ibm/6.10/PCDOS610-DISK5-1440K.json">PC-DOS 6.10 (Disk 5)</disk>
+		<disk path="/disks/pc/dos/ibm/6.30/PCDOS630-DISK1-1440K.json">PC-DOS 6.30 (Disk 1)</disk>
+		<disk path="/disks/pc/dos/ibm/6.30/PCDOS630-DISK2-1440K.json">PC-DOS 6.30 (Disk 2)</disk>
+		<disk path="/disks/pc/dos/ibm/6.30/PCDOS630-DISK3-1440K.json">PC-DOS 6.30 (Disk 3)</disk>
+		<disk path="/disks/pc/dos/ibm/6.30/PCDOS630-DISK4-1440K.json">PC-DOS 6.30 (Disk 4)</disk>
+		<disk path="/disks/pc/dos/ibm/6.30/PCDOS630-DISK5-1440K.json">PC-DOS 6.30 (Disk 5)</disk>
 		<disk path="/disks/pc/dos/ibm/7.00/PCDOS700-DISK1.json">PC-DOS 7.00 (SETUP Disk 1)</disk>
 		<disk path="/disks/pc/dos/ibm/7.00/PCDOS700-DISK2.json">PC-DOS 7.00 (SETUP Disk 2)</disk>
 		<disk path="/disks/pc/dos/ibm/7.00/PCDOS700-DISK3.json">PC-DOS 7.00 (SETUP Disk 3)</disk>
@@ -419,7 +423,7 @@
 		<disk path="/disks/pc/tools/microsoft/windows/sdk/3.00/WIN30SDK_DISK08.json">Win300 SDK (720K Disk 8)</disk>
 		<disk path="/disks/pc/tools/microsoft/windows/sdk/3.00/WIN30SDK_DISK09.json">Win300 SDK (720K Disk 9)</disk>
 		<disk path="/disks/pc/tools/microsoft/windows/sdk/3.00/WIN30SDK_DISK10.json">Win300 SDK (720K Disk 10)</disk>
-		<disk path="/disks/pc/games/microsoft/flightsim/1984/flightsim-1984.json">MS Flight Simulator (1984)</disk>
+		<disk path="/disks/pc/games/microsoft/flightsim/1984/FLIGHTSIM-1984.json">MS Flight Simulator (1984)</disk>
 		<disk path="/disks/pc/games/id/wolf3d/1WOLF14.json">Wolfenstein 3D (v1.4)</disk>
 		<disk path="/apps/pc/1981/visicalc/disk.json">VisiCalc</disk>
 		<disk path="/apps/pc/1982/esuite/disk.json">Executive Suite (1982)</disk>

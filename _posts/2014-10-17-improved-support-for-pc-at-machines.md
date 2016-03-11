@@ -1,13 +1,13 @@
 ---
 layout: post
-title: Release of PCjs v1.15.5
+title: Improved support for PC AT machines
 date: 2014-10-17 11:00:00
 category: Releases
 permalink: /blog/2014/10/17/
 ---
 
-The [8Mhz IBM PC AT](/devices/pc/machine/5170/ega/1152kb/rev3/debugger/) machine configuration boots in
-v1.15.5 of PCjs now, which includes the following fixes:
+The [8Mhz IBM PC AT](/devices/pc/machine/5170/ega/1152kb/rev3/debugger/) machine configuration now boots in
+[PCjs v1.15.5](https://github.com/jeffpar/pcjs/releases/tag/v1.15.5), which includes the following fixes:
 
 + The BIOS expects memory refresh to occur roughly every 16us, which I've resolved by tying the state
 of the refresh bit in port 0x61 to bit 6 of the CPU cycle count (see *in8042RWReg()* in [chipset.js](/modules/pcjs/lib/chipset.js));

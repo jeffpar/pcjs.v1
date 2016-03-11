@@ -7,19 +7,16 @@
 	<category>Operating System</category>
 	<author>IBM/Microsoft</author>
 	<releaseDate/>
-	<disk id="disk01" size="1474560" chs="80:2:18" img="archive/PCDOS610-DISK1-1440K.img" href="/disks/pc/dos/ibm/6.10/PCDOS610-DISK1-1440K.json" md5="65e3c8e35064cc83bb4f1178dd8469c2" md5json="424965514a6ba3cdf4aa7dda27b01dec">
+	<disk id="disk01" size="1474560" chs="80:2:18" img="archive/PCDOS610-DISK1-1440K.img" href="/disks/pc/dos/ibm/6.10/PCDOS610-DISK1-1440K.json" md5="1352a89386e537fdf17e45bc9e059e46" md5json="c1411e57a01e0b28acc4f05c70cb6e01">
 		<name>PC-DOS 6.10 (Disk 1)</name>
 	</disk>
-	<disk id="disk02" size="1474560" chs="80:2:18" img="archive/PCDOS610-DISK2-1440K.img" href="/disks/pc/dos/ibm/6.10/PCDOS610-DISK2-1440K.json" md5="773ee7f32254ae04c8e68e81c47b5f2d" md5json="f92840d10a2b6098b8eff7f65a9e982e">
+	<disk id="disk02" size="1474560" chs="80:2:18" img="archive/PCDOS610-DISK2-1440K.img" href="/disks/pc/dos/ibm/6.10/PCDOS610-DISK2-1440K.json" md5="55081c8a2af6fc80bdb68dab6abdcb73" md5json="f64d0d7536f87aecdce21b8b054b2780">
 		<name>PC-DOS 6.10 (Disk 2)</name>
 	</disk>
-	<disk id="disk03" size="1474560" chs="80:2:18" img="archive/PCDOS610-DISK3-1440K.img" href="/disks/pc/dos/ibm/6.10/PCDOS610-DISK3-1440K.json" md5="fddbc7eea89870a72215634ff5be55eb" md5json="b6467abf8ba9aaa88f07e4ef8aa14af8">
+	<disk id="disk03" size="1474560" chs="80:2:18" img="archive/PCDOS610-DISK3-1440K.img" href="/disks/pc/dos/ibm/6.10/PCDOS610-DISK3-1440K.json" md5="cdb0c178340005c05a554d3ec2d6787a" md5json="45ba66207149f3ea2148414f5d62916a">
 		<name>PC-DOS 6.10 (Disk 3)</name>
 	</disk>
-	<disk id="disk04" size="1474560" chs="80:2:18" img="archive/PCDOS610-DISK4-1440K.img" href="/disks/pc/dos/ibm/6.10/PCDOS610-DISK4-1440K.json" md5="021e22b748b8845fcf6220b31e92dde4" md5json="5bfa76149f69360dbbe2d28c02aa0b7c">
+	<disk id="disk04" size="1474560" chs="80:2:18" img="archive/PCDOS610-DISK4-1440K.img" href="/disks/pc/dos/ibm/6.10/PCDOS610-DISK4-1440K.json" md5="72d1faf196a0dfb6ca3e409727d79a38" md5json="bfbecaf8cd367a7610c96d96e5ca6b1f">
 		<name>PC-DOS 6.10 (Disk 4)</name>
-	</disk>
-	<disk id="disk05" size="1474560" chs="80:2:18" img="archive/PCDOS610-DISK5-1440K.img" href="/disks/pc/dos/ibm/6.10/PCDOS610-DISK5-1440K.json" md5="981d2c09b5462cda32c671330a43de71" md5json="63c97171942f0eb0c7d1a32eaf1ea8ad">
-		<name>PC-DOS 6.10 (Disk 5)</name>
 	</disk>
 </manifest>

@@ -5,11 +5,10 @@ permalink: /disks/pc/dos/ibm/4.00/
 machines:
   - type: pc
     id: ibm5170-pcdos400
-    debugger: true
     autoMount:
       A:
         path: /disks/pc/dos/ibm/4.00/PCDOS400-DISK1.json
-    config: /devices/pc/machine/5170/ega/2048kb/rev3/debugger/machine.xml
+    config: /devices/pc/machine/5170/ega/2048kb/rev3/machine.xml
 ---
 
 PC-DOS 4.00

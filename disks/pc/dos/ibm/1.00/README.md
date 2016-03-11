@@ -22,9 +22,6 @@ PC-DOS 1.00 was completed in August 1981 and announced at an IBM press conferenc
 introduced the original IBM PC (Model 5150).
 
 PC-DOS 1.00 was released on one single-sided (160Kb) diskette.  A complete listing of all the files is shown below. 
-Note that IBMBIO.COM and IBMDOS.COM were marked as *hidden* and *system*, so they are not displayed by the PC-DOS 1.0
-**DIR** command; their sizes and dates have been determined by inspecting the root directory entries with the **DEBUG**
-utility.
 
 ### Directory of PC-DOS 1.00 Diskette
 
