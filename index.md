@@ -44,10 +44,10 @@ Some pre-configured machines are shown below, ready to run BASIC, DOS, Windows, 
 
 {% include screenshot.html src="/apps/pc/1981/visicalc/thumbnail.jpg" width="200" height="120" title="IBM PC running VisiCalc" link="/apps/pc/1981/visicalc/" %}
 {% include screenshot.html src="/devices/pc/machine/5150/cga/64kb/donkey/thumbnail.jpg" width="200" height="120" title="IBM PC running DONKEY.BAS" link="/devices/pc/machine/5150/cga/64kb/donkey/" %}
-{% include screenshot.html src="/devices/pc/machine/5160/cga/256kb/demo/thumbnail.jpg" width="200" height="120" title="IBM PC XT w/CGA, 10Mb Hard Drive" link="/devices/pc/machine/5160/cga/256kb/demo/" %}
 {% include screenshot.html src="/disks/pc/os2/ibm/1.0/thumbnail.jpg" width="200" height="120" title="IBM PC AT w/EGA, OS/2 1.0" link="/disks/pc/os2/ibm/1.0/" %}
 {% include screenshot.html src="/devices/pc/machine/5160/cga/256kb/win101/thumbnail.jpg" width="200" height="120" title="IBM PC XT w/CGA, Windows 1.01" link="/devices/pc/machine/5160/cga/256kb/win101/" %}
 {% include screenshot.html src="/disks/pc/windows/1.01/thumbnail.jpg" width="200" height="120" title="IBM PC XT w/EGA, Windows 1.01" link="/disks/pc/windows/1.01/" %}
+{% include screenshot.html src="/disks/pc/windows/2.0x/thumbnail.jpg" width="200" height="120" title="COMPAQ DeskPro 386, Windows/386 2.01" link="/disks/pc/windows/2.0x/" %}
 {% include screenshot.html src="/disks/pc/windows/3.00/thumbnail.jpg" width="200" height="120" title="IBM PC AT w/EGA, Windows 3.00" link="/disks/pc/windows/3.00/" %}
 {% include screenshot.html src="/disks/pc/windows/3.10/thumbnail.jpg" width="200" height="120" title="IBM PC AT w/VGA, Windows 3.10" link="/disks/pc/windows/3.10/" %}
 {% include screenshot.html src="/disks/pc/windows/win95/4.00.950/thumbnail.jpg" width="200" height="120" title="COMPAQ DeskPro 386, Windows 95" link="/disks/pc/windows/win95/4.00.950/" %}

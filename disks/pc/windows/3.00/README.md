@@ -15,9 +15,9 @@ Microsoft Windows 3.00
 
 The PCjs machine below starts Microsoft Windows 3.00, using an IBM PC AT running PC-DOS 3.20.
 
-{% include machine.html id="ibm5170-win300" %}
-
 Directory listings of the five 1.2Mb distribution diskettes are provided below.
+
+{% include machine.html id="ibm5170-win300" %}
 
 ### Directory of Windows 3.00 (Disk 1)
 

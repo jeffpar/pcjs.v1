@@ -17,14 +17,16 @@ machines:
 VGA "Black Book" Tests
 ---
 
-To aid in the development of PCjs VGA support, I've started adding some VGA tests to the project.  For now, the
-only "tests" are samples taken directly from [Michael Abrash's Graphics Programming Black Book](https://github.com/jeffpar/abrash-black-book).
+To aid in the development of PCjs VGA support, I've added some VGA tests to the project.
+For now, the only "tests" are samples taken directly from
+[Michael Abrash's Graphics Programming Black Book](https://github.com/jeffpar/abrash-black-book), which you
+can run in the [VGA "Black Book" Test Machine](#vga-black-book-test-machine) below.
 
 Abrash's book is available on many sites, but I'm partial to the Markdown version that [James Gregory](https://github.com/jagregory)
 has made available on GitHub, because (a) it's a brilliant way to render and share the text, and (b) it apparently has
 Abrash's blessing, so I feel more comfortable forking it, using it, and resharing it.
 
-The main reasons for my [fork](https://github.com/jeffpar/abrash-black-book): to make the book's
+The main reasons for my [fork](https://github.com/jeffpar/abrash-black-book) are to make the book's
 images display properly on GitHub, and to extract and add assorted source code listings as I need them.  Since that
 project's [/src](https://github.com/jeffpar/abrash-black-book/tree/master/src) folder contains just the book's text,
 I've added a [/code](https://github.com/jeffpar/abrash-black-book/tree/master/code) folder for the source code listings.
@@ -113,9 +115,11 @@ burden on the server, it's best to do this only when running PCjs from a local P
 One advantage of using [DiskDump](/modules/diskdump/) is that it automatically converts linefeeds in known text files
 (including ASM files) into DOS-compatible CR/LF sequences.
 
+VGA "Black Book" Test Machine
 ---
 
-The [Compaq DeskPro 386](/devices/pc/machine/compaq/deskpro386/vga/2048kb/) machine below uses the
-[Library](/disks/pc/library.xml) disk collection and loads the "VGA Tests (Black Book)" disk in Drive B.
+The [Compaq DeskPro 386](/devices/pc/machine/compaq/deskpro386/vga/2048kb/) machine below loads the
+"VGA Tests (Black Book)" disk from the PCjs [Library](/disks/pc/library.xml) disk collection into Drive B.
+Click the "Run" button to start the machine.
 
 {% include machine.html id="deskpro386" %}

@@ -6,12 +6,13 @@ permalink: /blog/2016/03/06/
 ---
 
 Yesterday, I fired up [Windows 3.1](/disks/pc/windows/3.10/) and played a complete game of
-[Windows Solitaire](https://en.wikipedia.org/wiki/Microsoft_Solitaire) on my iPad.  And I won!
+[Windows Solitaire](https://en.wikipedia.org/wiki/Microsoft_Solitaire) on my iPad.  It was a bit, um, touchy,
+but it worked.
 
 {% comment %}[<img src="/blog/images/ipad-solitaire-small.jpg" alt="Windows Solitaire on iPad"/>](/blog/images/ipad-solitaire.jpg){% endcomment %}
 {% include screenshot.html src="/blog/images/ipad-solitaire-small.jpg" title="iPad running Solitaire on Windows 3.10" link="/blog/images/ipad-solitaire.jpg" %}
 
-Converting touch events to mouse events can be a bit, um, touchy.  The basic touch events are:
+The basic touch events are:
 
  - `touchstart`
  - `touchmove`
