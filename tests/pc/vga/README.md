@@ -1,6 +1,6 @@
 ---
 layout: page
-title: 'VGA "Black Book" Tests'
+title: VGA "Black Book" Tests
 permalink: /tests/pc/vga/
 machines:
   - type: pc
@@ -11,7 +11,7 @@ machines:
       A:
         path: /disks/pc/dos/compaq/3.31/COMPAQ-DOS331-DISK2.json
       B:
-	    path: /tests/pc/vga/VGABIN.json
+        path: /tests/pc/vga/VGABIN.json
 ---
 
 VGA "Black Book" Tests
@@ -99,7 +99,7 @@ built from the sources in this directory:
 
 	<disk path="/tests/pc/vga/VGABIN.json">VGA Tests (Black Book)</disk>
 
-The VGABIN disk image was built with this command:
+The "VGA Tests (Black Book)" disk image (VGABIN) was built with this command:
 
 	diskdump --dir=bin --format=json --output=VGABIN.json
 
