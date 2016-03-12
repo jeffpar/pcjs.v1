@@ -13,7 +13,7 @@ machines:
 Microsoft Windows 3.00
 ---
 
-The PCjs machine below is running Microsoft Windows 3.00 on an IBM PC AT with PC-DOS 3.20.
+The PCjs machine below starts Microsoft Windows 3.00, using an IBM PC AT running PC-DOS 3.20.
 
 {% include machine.html id="ibm5170-win300" %}
 

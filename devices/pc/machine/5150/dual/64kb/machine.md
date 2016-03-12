@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "IBM PC (Model 5150, 64Kb) with Dual Display"
+title: "IBM PC (Model 5150, 64Kb) with Dual Displays"
 permalink: /devices/pc/machine/5150/dual/64kb/
 machines:
   - type: pc

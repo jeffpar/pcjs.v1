@@ -40,7 +40,7 @@ machine configurations, and provide a platform for running and analyzing old com
 
 Demos
 ---
-Some pre-configured machines are shown below, ready to run BASIC, DOS, Windows 1.01, and assorted non-DOS software.
+Some pre-configured machines are shown below, ready to run BASIC, DOS, Windows, OS/2, and other assorted software.
 
 {% include screenshot.html src="/apps/pc/1981/visicalc/thumbnail.jpg" width="200" height="120" title="IBM PC running VisiCalc" link="/apps/pc/1981/visicalc/" %}
 {% include screenshot.html src="/devices/pc/machine/5150/cga/64kb/donkey/thumbnail.jpg" width="200" height="120" title="IBM PC running DONKEY.BAS" link="/devices/pc/machine/5150/cga/64kb/donkey/" %}
@@ -56,9 +56,9 @@ Some pre-configured machines are shown below, ready to run BASIC, DOS, Windows 1
 {% include screenshot.html src="/disks/pc/games/infocom/zork1/thumbnail.jpg" width="200" height="120" title="IBM PC w/CGA, Zork I" link="/disks/pc/games/infocom/zork1/" %}
 
 Check out the rest of the PCjs [Application](/apps/pc/), [Disk](/disks/pc/), and [Machine](/devices/pc/machine/)
-demos, including an [IBM PC Dual Display System](/devices/pc/machine/5150/dual/64kb/) demo of multiple monitor support,
-and "Server Array" demos of multiple [IBM PC XT](/devices/pc/machine/5160/cga/256kb/array/) and
-[Windows 1.01](/devices/pc/machine/5160/ega/640kb/array/) machines running side-by-side.
+demos, including an [IBM PC with Dual Displays](/devices/pc/machine/5150/dual/64kb/) demonstrating early multi-monitor
+support, and multiple IBM PC XT machines running side-by-side with [CGA Displays](/devices/pc/machine/5160/cga/256kb/array/)
+and [EGA Displays](/devices/pc/machine/5160/ega/640kb/array/).
 
 C1Pjs
 ---

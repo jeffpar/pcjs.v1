@@ -4,7 +4,7 @@ title: Microsoft Windows 3.10
 permalink: /disks/pc/windows/3.10/
 machines:
   - type: pc
-    id: ibm5170-pcdos330
+    id: ibm5170-win310
     config: /devices/pc/machine/5170/vga/2048kb/machine.xml
     drives: '[{name:"20Mb Hard Disk",type:2,path:"/disks/pc/fixed/20mb/PCDOS330-WIN310.json"}]'
     autoMount: ''
@@ -13,9 +13,9 @@ machines:
 Microsoft Windows 3.10
 ---
 
-The PCjs machine below is running Microsoft Windows 3.10 on an IBM PC AT with PC-DOS 3.30.
+The PCjs machine below starts Microsoft Windows 3.10, using an IBM PC AT running PC-DOS 3.30.
 
-{% include machine.html id="ibm5170-pcdos330" %}
+{% include machine.html id="ibm5170-win310" %}
 
 Directory listings of the seven 1.2Mb distribution diskettes are provided below.
 

@@ -11,6 +11,6 @@ IBM PC Machines (Model 5150)
 
 All our Model 5150 configurations of the IBM PC are located here, including:
 
-* [IBM PC with Color Display](/devices/pc/machine/5150/cga/)
-* [IBM PC with Dual Display](/devices/pc/machine/5150/dual/64kb/)
 * [IBM PC with Monochrome Display](/devices/pc/machine/5150/mda/)
+* [IBM PC with Color Display](/devices/pc/machine/5150/cga/)
+* [IBM PC with Dual Displays (Monochrome and Color)](/devices/pc/machine/5150/dual/64kb/)

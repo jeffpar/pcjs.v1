@@ -9,7 +9,7 @@ machines:
     id: ibm5160b
 ---
 
-IBM PC XT CGA Machine Array
+IBM PC XT Machine Array with CGA Displays
 ---
 
 ### Demonstration of Multiple IBM PCs on a Single Web Page

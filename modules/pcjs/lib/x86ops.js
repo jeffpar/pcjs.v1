@@ -543,10 +543,6 @@ X86.opANDAX = function()
  */
 X86.opES = function()
 {
-    /*
-     * NOTE: The fact that we're setting NOINTR along with SEG is really just for documentation purposes;
-     * the way stepCPU() is written, the presence of any prefix bypasses normal interrupt processing anyway.
-     */
     this.opFlags |= X86.OPFLAG.SEG | X86.OPFLAG.NOINTR;
     this.segData = this.segStack = this.segES;
     this.nStepCycles -= this.cycleCounts.nOpCyclesPrefix;
@@ -651,10 +647,6 @@ X86.opSUBAX = function()
  */
 X86.opCS = function()
 {
-    /*
-     * NOTE: The fact that we're setting NOINTR along with SEG is really just for documentation purposes;
-     * the way stepCPU() is written, the presence of any prefix bypasses normal interrupt processing anyway.
-     */
     this.opFlags |= X86.OPFLAG.SEG | X86.OPFLAG.NOINTR;
     this.segData = this.segStack = this.segCS;
     this.nStepCycles -= this.cycleCounts.nOpCyclesPrefix;
@@ -759,10 +751,6 @@ X86.opXORAX = function()
  */
 X86.opSS = function()
 {
-    /*
-     * NOTE: The fact that we're setting NOINTR along with SEG is really just for documentation purposes;
-     * the way stepCPU() is written, the presence of any prefix bypasses normal interrupt processing anyway.
-     */
     this.opFlags |= X86.OPFLAG.SEG | X86.OPFLAG.NOINTR;
     this.segData = this.segStack = this.segSS;      // QUESTION: Is there a case where segStack would not already be segSS? (eg, multiple segment overrides?)
     this.nStepCycles -= this.cycleCounts.nOpCyclesPrefix;
@@ -864,10 +852,6 @@ X86.opCMPAX = function()
  */
 X86.opDS = function()
 {
-    /*
-     * NOTE: The fact that we're setting NOINTR along with SEG is really just for documentation purposes;
-     * the way stepCPU() is written, the presence of any prefix bypasses normal interrupt processing anyway.
-     */
     this.opFlags |= X86.OPFLAG.SEG | X86.OPFLAG.NOINTR;
     this.segData = this.segStack = this.segDS;      // QUESTION: Is there a case where segData would not already be segDS? (eg, multiple segment overrides?)
     this.nStepCycles -= this.cycleCounts.nOpCyclesPrefix;
@@ -1484,10 +1468,6 @@ X86.opARPL = function()
  */
 X86.opFS = function()
 {
-    /*
-     * NOTE: The fact that we're setting NOINTR along with SEG is really just for documentation purposes;
-     * the way stepCPU() is written, the presence of any prefix bypasses normal interrupt processing anyway.
-     */
     this.opFlags |= X86.OPFLAG.SEG | X86.OPFLAG.NOINTR;
     this.segData = this.segStack = this.segFS;
     this.nStepCycles -= this.cycleCounts.nOpCyclesPrefix;
@@ -1500,10 +1480,6 @@ X86.opFS = function()
  */
 X86.opGS = function()
 {
-    /*
-     * NOTE: The fact that we're setting NOINTR along with SEG is really just for documentation purposes;
-     * the way stepCPU() is written, the presence of any prefix bypasses normal interrupt processing anyway.
-     */
     this.opFlags |= X86.OPFLAG.SEG | X86.OPFLAG.NOINTR;
     this.segData = this.segStack = this.segGS;
     this.nStepCycles -= this.cycleCounts.nOpCyclesPrefix;
@@ -2149,14 +2125,14 @@ X86.opXCHGrb = function()
      * To be clear, a single assignment like this will fail:
      *
      *      opModRegByteF2: function(fn)
-{
+     *      {
      *          this.regEDX = (this.regEDX & 0xff) | (fn.call(this, this.regEDX >> 8, this.regEDX & 0xff) << 8);
      *      }
      *
      * which is why all affected decoders now use separate assignments; eg:
      *
      *      opModRegByteF2: function(fn)
-{
+     *      {
      *          var b = fn.call(this, this.regEDX >> 8, this.regEDX & 0xff);
      *          this.regEDX = (this.regEDX & 0xff) | (b << 8);
      *      }
@@ -4162,10 +4138,6 @@ X86.opOUTDXw = function()
  */
 X86.opLOCK = function()
 {
-    /*
-     * NOTE: The fact that we're setting NOINTR along with LOCK is really just for documentation purposes;
-     * the way stepCPU() is written, the presence of any prefix bypasses normal interrupt processing anyway.
-     */
     this.opFlags |= X86.OPFLAG.LOCK | X86.OPFLAG.NOINTR;
     this.nStepCycles -= this.cycleCounts.nOpCyclesPrefix;
 };
@@ -4193,10 +4165,6 @@ X86.opINT1 = function()
  */
 X86.opREPNZ = function()
 {
-    /*
-     * NOTE: The fact that we're setting NOINTR along with REPNZ is really just for documentation purposes;
-     * the way stepCPU() is written, the presence of any prefix bypasses normal interrupt processing anyway.
-     */
     this.opFlags |= X86.OPFLAG.REPNZ | X86.OPFLAG.NOINTR;
     this.nStepCycles -= this.cycleCounts.nOpCyclesPrefix;
 };
@@ -4208,10 +4176,6 @@ X86.opREPNZ = function()
  */
 X86.opREPZ = function()
 {
-    /*
-     * NOTE: The fact that we're setting NOINTR along with REPZ is really just for documentation purposes;
-     * the way stepCPU() is written, the presence of any prefix bypasses normal interrupt processing anyway.
-     */
     this.opFlags |= X86.OPFLAG.REPZ | X86.OPFLAG.NOINTR;
     this.nStepCycles -= this.cycleCounts.nOpCyclesPrefix;
 };

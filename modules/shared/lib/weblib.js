@@ -198,6 +198,13 @@ web.getResource = function(sURL, dataPost, fAsync, done)
         return [sResource, nErrorCode];
     }
 
+    if (DEBUG) {
+        /*
+         * The larger resources that we put on archive.pcjs.org should also be available locally...
+         */
+        sURL = sURL.replace("http://archive.pcjs.org", "");
+    }
+
     if (NODE) {
         /*
          * We don't even need to load Component, because we can't use any of the code below

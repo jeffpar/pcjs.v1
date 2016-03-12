@@ -60,20 +60,16 @@ state, while others include a hard disk with preinstalled software.
 However, most simply boot an early version of DOS, and the hard disk, if any, will generally be unformatted.
 From there, you can load another disk image  
 
-### Model 5150 Machine Configurations
+### [Model 5150 Machine Configurations](/devices/pc/machine/5150/)
 
-Our pre-built [Model 5150](/devices/pc/machine/5150/) machines include:
-
-* [IBM PC (64Kb) with Color Display](/devices/pc/machine/5150/cga/64kb/donkey/) ([Debugger](/devices/pc/machine/5150/cga/64kb/donkey/debugger/))
-* [IBM PC (64Kb) with Color Display and Soft Keyboard](/devices/pc/machine/5150/cga/64kb/softkbd/)
-* [IBM PC (64Kb) with Dual Display](/devices/pc/machine/5150/dual/64kb/)
 * [IBM PC (64Kb) with Monochrome Display](/devices/pc/machine/5150/mda/64kb/) ([Debugger](/devices/pc/machine/5150/mda/64kb/debugger/))
 * [IBM PC (64Kb) with Monochrome Display and Soft Keyboard (Debugger)](/devices/pc/machine/5150/mda/64kb/softkbd/)
+* [IBM PC (64Kb) with Color Display](/devices/pc/machine/5150/cga/64kb/donkey/) ([Debugger](/devices/pc/machine/5150/cga/64kb/donkey/debugger/))
+* [IBM PC (64Kb) with Color Display and Soft Keyboard](/devices/pc/machine/5150/cga/64kb/softkbd/)
 * [IBM PC (384Kb) with Color Display and Soft Keyboard (Debugger)](/devices/pc/machine/5150/cga/384kb/softkbd/)
+* [IBM PC (64Kb) with Dual Displays (Monochrome and Color)](/devices/pc/machine/5150/dual/64kb/)
 
-### Model 5160 Machine Configurations
-
-Our pre-built [Model 5160](/devices/pc/machine/5160/) machines include:
+### [Model 5160 Machine Configurations](/devices/pc/machine/5160/)
 
 * [IBM PC XT (64Kb, 10Mb Drive) with Monochrome Display](/devices/pc/machine/5160/mda/64kb/softkbd/)
 * [IBM PC XT (256Kb, 10Mb Drive) with Monochrome Display](/devices/pc/machine/5160/mda/256kb/) ([Debugger](/devices/pc/machine/5160/mda/256kb/debugger/))

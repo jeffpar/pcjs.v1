@@ -33,8 +33,30 @@
 "use strict";
 
 if (NODE) {
+    var str         = require("../../shared/lib/strlib");
     var X86         = require("./x86");
 }
+
+/*
+ * Before 80386 support was added to PCjs, the approach to decoding ModRegRM bytes (which I usually
+ * just call ModRM bytes) used one generated function per ModRM value.  This was optimal for 16-bit processors,
+ * because the functions were small, and it was maximally efficient, turning the entire ModRM decoding operation
+ * into one table lookup and function call.
+ *
+ * However, that approach didn't scale well for 32-bit processors, which had extended ModRM capabilities in both
+ * the addressing mode dimension and the operand size dimension.  So I've rewritten ModRM decoding as 18 functions.
+ * The first 9 are for 16-bit addressing modes, and the second 9 are for 32-bit addressing modes.  Within each
+ * group of 9, there are 3 for 8-bit operands, 3 for 16-bit operands, and 3 for 32-bit operands.  And each group of 3
+ * contains functions for register-source, memory-source, and group-source.
+ *
+ * Each of the 18 functions must do additional work to examine the ModRM bits, which makes decoding slightly slower,
+ * but it's not really noticeable, and the speed difference didn't justify the additional generated code.  So one much
+ * smaller file (x86mods.js) replaces a host of older files (x86modb.js, x86modw.js, x86modb16.js, x86modw16.js,
+ * x86modb32.js, x86modw32.js, and x86modsib.js).
+ *
+ * You can dig up the older files from the repository if you're curious, or you can run /modules/pcjs/bin/x86gen.js to
+ * get a sense of what they contained (x86gen.js created most of the code, but it still had to be massaged afterward).
+ */
 
 /**
  * modRegByte16(fn)

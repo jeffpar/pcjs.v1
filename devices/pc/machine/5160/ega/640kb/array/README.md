@@ -13,7 +13,7 @@ machines:
     id: ibm5160d
 ---
 
-IBM PC XT EGA Machine Array
+IBM PC XT Machine Array with EGA Displays
 ---
 
 ### Demonstration of Multiple IBM PCs on a Single Web Page
