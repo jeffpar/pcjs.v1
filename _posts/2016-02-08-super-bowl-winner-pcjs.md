@@ -12,9 +12,9 @@ and blank screens.
 A hard-error popup would occur when FOOTBALL tried to initialize a non-existent PRN device.  To resolve that, PCjs
 now provides basic parallel port emulation, in the form of a [ParallelPort](/docs/pcjs/parallel/) component that you
 include in a machine XML file with the &lt;parallel&gt; element, in much the same way you include the
-[SerialPort](/docs/pcjs/serial/) component with the &lt;serial&gt; element.  The Compaq DeskPro 386
-[Test Machine](/devices/pc/machine/compaq/deskpro386/ega/4096kb/) used to run FOOTBALL has now been updated to include
-one parallel port.
+[SerialPort](/docs/pcjs/serial/) component with the &lt;serial&gt; element.  This [Compaq DeskPro 386]
+(/devices/pc/machine/compaq/deskpro386/ega/4096kb/debugger/) machine used to run FOOTBALL has now been updated to
+include one parallel port.
 
 The other problem was that switching between sessions with the **SysReq** key would often result in a blank screen;
 the new session was active, but you couldn't see it.  This was a side-effect of how FOOTBALL reprograms the video

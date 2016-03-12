@@ -1,10 +1,20 @@
 ---
 layout: page
-title: VGA Tests
+title: 'VGA "Black Book" Tests'
 permalink: /tests/pc/vga/
+machines:
+  - type: pc
+    id: deskpro386
+    debugger: true
+    config: /devices/pc/machine/compaq/deskpro386/vga/2048kb/debugger/machine.xml
+    autoMount:
+      A:
+        path: /disks/pc/dos/compaq/3.31/COMPAQ-DOS331-DISK2.json
+      B:
+	    path: /tests/pc/vga/VGABIN.json
 ---
 
-VGA Tests
+VGA "Black Book" Tests
 ---
 
 To aid in the development of PCjs VGA support, I've started adding some VGA tests to the project.  For now, the
@@ -103,13 +113,9 @@ burden on the server, it's best to do this only when running PCjs from a local P
 One advantage of using [DiskDump](/modules/diskdump/) is that it automatically converts linefeeds in known text files
 (including ASM files) into DOS-compatible CR/LF sequences.
 
-I've updated a [Compaq DeskPro 386 Machine](/devices/pc/machine/compaq/deskpro386/vga/2048kb/) to use the
-[Library](/disks/pc/library.xml) disk collection and automatically load the above disk:
+---
 
-	<fdc ref="/disks/pc/library.xml"
-	     width="340px"
-	     automount='{A: {name: "PC-DOS 3.00 (Disk 1)",
-	                     path: "/disks/pc/dos/ibm/3.00/PCDOS300-DISK1.json"},
-	                 B: {name: "VGA Tests (Black Book)",
-	                     path: "/tests/pc/vga/VGABIN.json"}
-	     }' />
+The [Compaq DeskPro 386](/devices/pc/machine/compaq/deskpro386/vga/2048kb/) machine below uses the
+[Library](/disks/pc/library.xml) disk collection and loads the "VGA Tests (Black Book)" disk in Drive B.
+
+{% include machine.html id="deskpro386" %}

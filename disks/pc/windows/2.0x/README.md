@@ -5,7 +5,6 @@ permalink: /disks/pc/windows/2.0x/
 machines:
   - type: pc
     id: deskpro386
-    debugger: true
     state: deskpro386.json
     config: /devices/pc/machine/compaq/deskpro386/vga/2048kb/machine.xml
     drives: '[{name:"20Mb Hard Disk",type:2,path:"/disks/pc/fixed/20mb/COMPAQ310-WIN386201-VGA.json"}]'

@@ -8,8 +8,8 @@ machines:
   - type: pc
     id: deskpro386
     debugger: true
-    config: /devices/pc/machine/compaq/deskpro386/ega/2048kb/machine.xml
     uncompiled: true
+    config: /devices/pc/machine/compaq/deskpro386/ega/2048kb/debugger/machine.xml
 ---
 
 I finally dumped the [COMPAQ DeskPro 386/16 ROMs](/devices/pc/bios/compaq/deskpro386/) from the motherboard I bought
@@ -20,7 +20,7 @@ to find COMPAQ Maintenance and Service guides online, but their Technical Refere
 they were expensive ($149) and not many were sold.  Anyway, I'm hoping to either borrow or buy a copy, and then scan and
 post it.
 
-A [COMPAQ DeskPro 386](/devices/pc/machine/compaq/deskpro386/ega/2048kb/) test configuration is displayed below.
+A [COMPAQ DeskPro 386](/devices/pc/machine/compaq/deskpro386/ega/2048kb/debugger/) test configuration is displayed below.
 The configuration doesn't run, and the debugger can't disassemble 80386-specific code yet, but this is what I will be
 using to test and debug my changes over the next few months.
 

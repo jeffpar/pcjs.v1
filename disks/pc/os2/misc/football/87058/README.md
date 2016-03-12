@@ -10,7 +10,7 @@ machines:
       A:
         path: /disks/pc/os2/misc/football/FOOTBALL-76817.json
     messages: warn
-    config: /devices/pc/machine/compaq/deskpro386/ega/4096kb/machine.xml
+    config: /devices/pc/machine/compaq/deskpro386/ega/4096kb/debugger/machine.xml
 ---
 
 OS/2 FOOTBALL Boot Disk (v7.68.17)
@@ -48,7 +48,7 @@ We also have an original [FOOTBALL Design Document](#football-design-document) d
 Booting FOOTBALL
 ---
 
-When booting on a [COMPAQ DeskPro 386-16 with 4Mb of RAM](/devices/pc/machine/compaq/deskpro386/ega/4096kb/),
+When booting on a [COMPAQ DeskPro 386 with 4Mb of RAM](/devices/pc/machine/compaq/deskpro386/ega/4096kb/debugger/),
 the following information is output to COM2 by the kernel's built-in debugger:
 
 	bx=001d, cx=f905, dx=0700, cs=1770, ds=1b10

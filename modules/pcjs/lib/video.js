@@ -4893,8 +4893,10 @@ Video.prototype.checkMode = function(fForce)
                  * from increasingly greater EGA support to increasingly greater VGA support.  Make it more rational someday,
                  * so that as support is added for even more modes (eg, "Mode X" variations, monochrome modes, etc), it
                  * doesn't get totally out of control.
+                 *
+                 * One of the problems with the current approach is that it depends on the card's registers being programmed
+                 * in at least roughly the same order that the IBM EGA and VGA ROMs program them.
                  */
-                var fSEQDotClock, nCRTCVertTotal, nCRTCMaxScan;
                 var regGRCMode = card.regGRCData[Card.GRC.MODE.INDX];
 
                 /*
@@ -4916,13 +4918,16 @@ Video.prototype.checkMode = function(fForce)
                     }
                 }
 
-                fSEQDotClock = (card.regSEQData[Card.SEQ.CLOCKING.INDX] & Card.SEQ.CLOCKING.DOTCLOCK);
-                nCRTCVertTotal = card.regCRTData[Card.CRTC.EGA.VTOTAL];
+                var fSEQDotClock = (card.regSEQData[Card.SEQ.CLOCKING.INDX] & Card.SEQ.CLOCKING.DOTCLOCK);
+
+                var nCRTCVertTotal = card.regCRTData[Card.CRTC.EGA.VTOTAL];
                 nCRTCVertTotal |= ((card.regCRTData[Card.CRTC.EGA.OVERFLOW.INDX] & Card.CRTC.EGA.OVERFLOW.VTOTAL_BIT8)? 0x100 : 0);
                 if (card.nCard == Video.CARD.VGA) {
                     nCRTCVertTotal |= ((card.regCRTData[Card.CRTC.EGA.OVERFLOW.INDX] & Card.CRTC.EGA.OVERFLOW.VTOTAL_BIT9)? 0x200 : 0);
                 }
-                nCRTCMaxScan = card.regCRTData[Card.CRTC.EGA.MAX_SCAN.INDX];
+
+                var nCRTCMaxScan = card.regCRTData[Card.CRTC.EGA.MAX_SCAN.INDX];
+                var nCRTCModeCtrl = card.regCRTData[Card.CRTC.EGA.MODE_CTRL.INDX];
 
                 if (nMode != Video.MODE.UNKNOWN) {
                     if (!(regGRCMisc & Card.GRC.MISC.GRAPHICS)) {
@@ -4933,16 +4938,16 @@ Video.prototype.checkMode = function(fForce)
                          */
                         nMode -= (fSEQDotClock? 2 : 0);
                     }
-                    else if (card.addrBuffer != 0xA0000 && !fTextGraphicsHybrid && nCRTCVertTotal < 350) {
+                    else if (card.addrBuffer != 0xA0000 && !fTextGraphicsHybrid && !(nCRTCModeCtrl & Card.CRTC.EGA.MODE_CTRL.COMPAT_MODE)) {
                         /*
                          * Here's where we handle CGA graphics modes; since nMode will have been assigned a
                          * default of either 0x02 or 0x03, convert that to either 0x05 or 0x04 if we're in a
                          * low-res graphics mode, 0x06 otherwise.
                          *
-                         * For Windows 95, I've had to add BOTH the "!fTextGraphicsHybrid" test (to avoid
-                         * misdetecting the logo display mode) AND the "nCRTCVertTotal < 350" test (to avoid
-                         * misinterpreting the VDD's video reprogramming during VM creation, the purpose of
-                         * which is still a mystery to me).
+                         * For Windows 95, I've had to add BOTH the fTextGraphicsHybrid test, to avoid misdetecting
+                         * the logo display mode, AND the COMPAT_MODE test, to avoid misinterpreting the VDD's physical
+                         * (NOT logical) card reprogramming during windowed VM creation; the latter seems like a VDD bug,
+                         * because only the Windows display driver should be *physically* reprogramming the card then.
                          */
                         nMode = fSEQDotClock? (7 - nMode) : Video.MODE.CGA_640X200;
                     } else {

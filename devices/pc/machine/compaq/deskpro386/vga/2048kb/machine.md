@@ -5,7 +5,6 @@ permalink: /devices/pc/machine/compaq/deskpro386/vga/2048kb/
 machines:
   - type: pc
     id: deskpro386
-    debugger: true
 ---
 
 {% include machine.html id="deskpro386" %}

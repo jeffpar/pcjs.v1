@@ -95,7 +95,7 @@ FDC `autoMount` setting, making it easy to reuse the same machine XML file with 
 	    autoMount:
 	      A:
 	        path: /disks/pc/os2/misc/football/FOOTBALL-76817.json
-	    config: /devices/pc/machine/compaq/deskpro386/ega/4096kb/machine.xml
+	    config: /devices/pc/machine/compaq/deskpro386/ega/4096kb/debugger/machine.xml
 
 Other settings that can currently be overridden include:
 

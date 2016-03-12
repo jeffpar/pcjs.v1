@@ -8,8 +8,8 @@ machines:
   - type: pc
     id: deskpro386
     debugger: true
-    config: /devices/pc/machine/compaq/deskpro386/ega/2048kb/machine.xml
     uncompiled: true
+    config: /devices/pc/machine/compaq/deskpro386/ega/2048kb/debugger/machine.xml
 ---
 
 PCjs can now boot the [COMPAQ DeskPro 386/16 ROM BIOS](/devices/pc/bios/compaq/deskpro386/).
@@ -143,10 +143,10 @@ to match that of the 1st megabyte whenever A20 is disabled.  I could probably ge
 only the first 64Kb of the 2nd megabyte, but until I'm actually able to run some tests on a real
 DeskPro 386, I'm going to assume COMPAQ's A20 implementation affected the entire 2nd megabyte.
 
-Here's my [COMPAQ DeskPro 386/16](/devices/pc/machine/compaq/deskpro386/ega/2048kb/) test configuration.
-Set a breakpoint at F000:F498 ("bp f000:f498") in the Debugger panel to see the above code in action.
-When the machine is operating in real-mode, you can use the "rp" command to dump all the registers,
-including the current base and limit values loaded into the segment registers.
+Here's my [COMPAQ DeskPro 386/16](/devices/pc/machine/compaq/deskpro386/ega/2048kb/debugger/) test
+configuration.  Set a breakpoint at F000:F498 ("bp f000:f498") in the Debugger panel to see the above
+code in action.  When the machine is operating in real-mode, you can use the "rp" command to dump all
+the registers, including the current base and limit values loaded into the segment registers.
 
 {% include machine.html id="deskpro386" %}
 

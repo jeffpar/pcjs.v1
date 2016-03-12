@@ -148,6 +148,10 @@ Learn more about
 [Disk Sets](https://github.com/jeffpar/pcjs/tree/master/disks/pc) in the
 [PCjs Project](https://github.com/jeffpar/pcjs) on [GitHub](https://github.com/).
 
+### PCjs Test Suites
+
+* [VGA "Black Book" Tests](/tests/pc/vga/)
+
 {% if site.developer %}
 
 ### Developer Notes: Disk Sets and Manifests

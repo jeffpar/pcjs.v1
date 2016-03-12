@@ -24,7 +24,7 @@ the source code for its ROMs, so I've created some assemblable source code from 
 [here](/devices/pc/video/ibm/vga/).
 
 I've finally started debugging a machine configuration that uses the IBM VGA ROM.  Since the VGA and the 80386 are
-contemporaries, I'm using an [80386 machine configuration](/devices/pc/machine/compaq/deskpro386/vga/2048kb/machine.xml).
+contemporaries, I'm using an [80386 machine configuration](/devices/pc/machine/compaq/deskpro386/vga/2048kb/debugger/).
 However, I don't expect the IBM VGA ROM to require any 80386 support or PS/2-specific features.  
 
 The first problem I ran into was here:

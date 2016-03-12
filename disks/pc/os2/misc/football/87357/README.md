@@ -6,7 +6,7 @@ machines:
   - id: deskpro386
     type: pc
     debugger: true
-    config: /devices/pc/machine/compaq/deskpro386/ega/2048kb/machine.xml
+    config: /devices/pc/machine/compaq/deskpro386/ega/2048kb/debugger/machine.xml
     autoMount:
       A:
         path: /disks/pc/os2/misc/football/FOOTBALL-44100.json
