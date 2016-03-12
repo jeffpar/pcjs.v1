@@ -6,12 +6,13 @@ permalink: /blog/2016/03/12/
 ---
 
 I recently added some more demos to the PCjs Project, to showcase its ability to run old 80286-based and
-80386-based software, such as [Windows/386](/disks/pc/windows/2.0x/), [Windows 3.0](/disks/pc/windows/3.00/), and
-[Windows 3.1](/disks/pc/windows/3.10/).
+80386-based software, such as [Windows/386](/disks/pc/windows/2.0x/), [Windows 3.0](/disks/pc/windows/3.00/),
+[Windows 3.1](/disks/pc/windows/3.10/), and [Windows 95](/disks/pc/windows/win95/4.00.950/).
 
 {% include screenshot.html src="/disks/pc/windows/2.0x/thumbnail.jpg" width="200" height="120" title="COMPAQ DeskPro 386, Windows/386 2.01" link="/disks/pc/windows/2.0x/" %}
 {% include screenshot.html src="/disks/pc/windows/3.00/thumbnail.jpg" width="200" height="120" title="IBM PC AT w/EGA, Windows 3.00" link="/disks/pc/windows/3.00/" %}
 {% include screenshot.html src="/disks/pc/windows/3.10/thumbnail.jpg" width="200" height="120" title="IBM PC AT w/VGA, Windows 3.10" link="/disks/pc/windows/3.10/" %}
+{% include screenshot.html src="/disks/pc/windows/win95/4.00.950/thumbnail.jpg" width="200" height="120" title="COMPAQ DeskPro 386, Windows 95" link="/disks/pc/windows/win95/4.00.950/" %}
 
 As the [OS/2 Museum](http://www.os2museum.com/wp/windows386-2-01/) points out, [Windows/386 2.01](/disks/pc/windows/2.0x/)
 was the first Microsoft product to specifically target the 80386.  However, not only was it *not* a 32-bit operating
