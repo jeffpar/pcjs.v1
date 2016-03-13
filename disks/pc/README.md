@@ -138,7 +138,8 @@ in [PC Tech Journal](/pubs/pc/magazines/pctj/).
 
 ### Microsoft Games
 
-* Microsoft Flight Simulator
+* [Microsoft Adventure](/disks/pc/games/microsoft/adventure/) (1981)
+* Microsoft Flight Simulator (1984)
 
 ### Other Games
 
