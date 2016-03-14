@@ -1,18 +1,21 @@
 ---
 layout: page
-title: IBM PC Video Support
+title: IBM PC Video Devices
 permalink: /devices/pc/video/
 ---
 
-IBM PC Video Support
+IBM PC Video Devices
 ---
+
+Video devices are added to machines by including a *[Video](/docs/pcjs/video/)* component in the machine XML
+configuration file.  See one of the following video adapters for  examples of how to do this.
 
 PCjs supports the following IBM PC video adapters:
 
-* MDA (Monochrome Display Adapter)
-* CGA (Color Graphics Adapter)
-* EGA (Enhanced Graphics Adapter)
-* [VGA](ibm/vga/) (Video Graphics Adapter)
+* Monochrome Display Adapter (MDA)
+* Color Graphics Adapter (CGA)
+* [Enhanced Graphics Adapter (EGA)](ibm/ega/)
+* [Video Graphics Array (VGA)](ibm/vga/)
 
 More detailed information is available for the following IBM-compatible video adapters:
 

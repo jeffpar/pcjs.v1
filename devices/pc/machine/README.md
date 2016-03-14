@@ -21,9 +21,8 @@ along with these IBM PC-compatibles:
 
 * [COMPAQ](/devices/pc/machine/compaq/) (eg, [DeskPro 386](/devices/pc/machine/compaq/deskpro386/))
 
-We also support a few non-IBM [Devices](/devices/):
-
-* [6502 Challenger 1P](/devices/c1p/machine/)
+Learn more about the [Devices](/devices/) used to build all our machines, such as the 6502-based
+[Ohio Scientific Challenger 1P](/devices/c1p/machine/).
 
 ### Ready-To-Run App Demos
 
@@ -37,7 +36,7 @@ Machines from our [IBM PC Application Archive](/apps/pc/):
 
 ### Ready-To-Boot Disk Demos
 
-And here are some machines from our [IBM PC Disk Archive](/disks/pc/):
+And here are some machines from our [IBM PC Disk Library](/disks/pc/):
 
 * [CP/M-86 v1.1B](/disks/pc/cpm/1.1b/)
 * [PC-DOS 1.00](/disks/pc/dos/ibm/1.00/)
@@ -58,9 +57,11 @@ a predefined state, which automatically restores the machine and the specified a
 state, while others include a hard disk with preinstalled software.
 
 However, most simply boot an early version of DOS, and the hard disk, if any, will generally be unformatted.
-From there, you can load another disk image  
+From there, you can other disks and install other software.  
 
-### [Model 5150 Machine Configurations](/devices/pc/machine/5150/)
+### Model 5150 Machine Configurations
+
+[Model 5150 Machines](/devices/pc/machine/5150/) include:
 
 * [IBM PC (64Kb) with Monochrome Display](/devices/pc/machine/5150/mda/64kb/) ([Debugger](/devices/pc/machine/5150/mda/64kb/debugger/))
 * [IBM PC (64Kb) with Monochrome Display and Soft Keyboard (Debugger)](/devices/pc/machine/5150/mda/64kb/softkbd/)
@@ -69,7 +70,9 @@ From there, you can load another disk image
 * [IBM PC (384Kb) with Color Display and Soft Keyboard (Debugger)](/devices/pc/machine/5150/cga/384kb/softkbd/)
 * [IBM PC (64Kb) with Dual Displays (Monochrome and Color)](/devices/pc/machine/5150/dual/64kb/)
 
-### [Model 5160 Machine Configurations](/devices/pc/machine/5160/)
+### Model 5160 Machine Configurations
+
+[Model 5160 Machines](/devices/pc/machine/5160/) include:
 
 * [IBM PC XT (64Kb, 10Mb Drive) with Monochrome Display](/devices/pc/machine/5160/mda/64kb/softkbd/)
 * [IBM PC XT (256Kb, 10Mb Drive) with Monochrome Display](/devices/pc/machine/5160/mda/256kb/) ([Debugger](/devices/pc/machine/5160/mda/256kb/debugger/))
@@ -86,6 +89,8 @@ From there, you can load another disk image
 * [IBM PC XT (640Kb, 10Mb Drive) Machine Array with EGA Displays](/devices/pc/machine/5160/ega/640kb/array/)
 
 ### Model 5170 Machine Configurations
+
+[Model 5170 Machines](/devices/pc/machine/5170/) include:
 
 * [IBM PC AT (6Mhz, 640Kb) with EGA Display (Debugger)](/devices/pc/machine/5170/ega/640kb/rev1/debugger/)
 * [IBM PC AT (6Mhz, 1Mb, 20Mb Drive) with EGA Display (Debugger)](/devices/pc/machine/5170/ega/1152kb/rev1/debugger/)

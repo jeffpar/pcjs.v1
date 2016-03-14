@@ -44,4 +44,4 @@ of OS/2 when it was still a work-in-progress.  Not all of the disks run properly
 	October 12, 1988, which included the built-in kernel debugger used by Microsoft and IBM for internal development,
 	along with a rudimentary program selector.  For more details, see the [OS/2 1.0](/blog/2014/12/04/) blog post.
 
-[Return to [IBM PC Disk Archive](/disks/pc/#other-os2-disks)]
+[Return to [IBM PC Disk Library](/disks/pc/#other-os2-disks)]

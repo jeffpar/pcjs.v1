@@ -31,7 +31,7 @@ Attributes
 	
  * *notify* (optional)
  
-	The *id* of a component to notify when *file* has been loaded. For example, the [Video](/docs/pcjs/video/)
+	The *id* of a component to notify when *file* has been loaded. For example, the *[Video](/docs/pcjs/video/)*
 	component may need to know when an external video ROM has been loaded. Any component can load its own files,
 	including ROM image files, but it's simpler to use the ROM component and request notification.
 	

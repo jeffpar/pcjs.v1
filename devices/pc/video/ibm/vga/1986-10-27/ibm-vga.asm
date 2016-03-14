@@ -1,4 +1,4 @@
-Aa;
+;
 ;   ROM BIOS for IBM VGA Adapter (aka IBM PS/2 Display Adapter)
 ;   (C)COPYRIGHT IBM Corp. 1984, 1986 10/27/86
 ;

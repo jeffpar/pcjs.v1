@@ -28,8 +28,8 @@ Complete machine configurations are constructed from those devices.  A machine c
 that lists all the device components to be used.  A machine XML file can choose to configure every device itself,
 or it can include pre-configured device XML files, such as those provided above or elsewhere.
 
-For example, here's what the machine located at [/devices/pc/machine/5150/mda/64kb/machine.xml](/devices/pc/machine/5150/mda/64kb/machine.xml)
-looks like:
+For example, here's what the machine located at
+[/devices/pc/machine/5150/mda/64kb/machine.xml](/devices/pc/machine/5150/mda/64kb/machine.xml) looks like:
 
 	<machine id="ibm5150" class="pc" border="1" pos="center" background="#FAEBD7">
 		<name pos="center">IBM PC (Model 5150) with Monochrome Display</name>
@@ -47,5 +47,6 @@ looks like:
 		<chipset id="chipset" model="5150" sw1="01000001" sw2="11110000"/>
 	</machine>
 
-All the devices are fully configured within the XML file, except for the Keyboard and Floppy Disk Controller (FDC)
-devices, which are defined in separate XML files.
+All the devices are fully configured within the XML file, except for the [Video](/docs/pcjs/video/),
+[Keyboard](/docs/pcjs/keyboard/), and [Floppy Disk Controller (FDC)](/docs/pcjs/fdc/) components, which are defined
+in separate XML files.

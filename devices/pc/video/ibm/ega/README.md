@@ -1,11 +1,50 @@
 ---
 layout: page
-title: IBM EGA ROM
+title: "IBM Enhanced Graphics Adapter (EGA)"
 permalink: /devices/pc/video/ibm/ega/
 ---
 
-IBM EGA ROM
+IBM Enhanced Graphics Adapter (EGA)
 ---
+
+### IBM EGA Configurations
+
+The easiest way for a machine to include an EGA *[Video](/docs/pcjs/video/)* component in its XML configuration file
+is to reference one of the project's predefined EGA configuration files, using the *ref* attribute; eg:
+
+	<video ref="/devices/pc/video/ibm/ega/1984-09-13/64kb.xml"/>
+
+The referenced XML file automatically defines visual elements (eg, dimensions of the display window and other
+visual indicators), display behaviors (eg, touchscreen support, mouse pointer locking), the ROM to load (and where
+to load it), and other video card hardware features (eg, *memory* and *switches*).
+
+Here's what *64kb.xml* currently looks like:
+
+	<video id="videoEGA" model="ega" memory="0x10000" screenwidth="640" screenheight="350" touchscreen="mouse" pos="center" padding="8px">
+	    <menu>
+	        <title>IBM Enhanced Color Display</title>
+	        <control type="container" pos="right">
+	            <control type="led" label="Caps" binding="caps-lock" padleft="8px"/>
+	            <control type="led" label="Num" binding="num-lock" padleft="8px"/>
+	            <control type="led" label="Scroll" binding="scroll-lock" padleft="8px"/>
+	        </control>
+	    </menu>
+	    <rom id="romEGA" addr="0xc0000" size="0x4000" file="/devices/pc/video/ibm/ega/1984-09-13/ibm-ega.json" notify="videoEGA"/>
+	</video>
+
+The following IBM EGA configuration files are currently available:
+
+ - [64kb.xml](1984-09-13/64kb.xml)
+ - [128kb-autolock640.xml](1984-09-13/128kb-autolock640.xml)
+ - [128kb-autolockfs.xml](1984-09-13/128kb-autolockfs.xml)
+ - [128kb-lockfs.xml](1984-09-13/128kb-lockfs.xml)
+ - [256kb-autolock640.xml](1984-09-13/256kb-autolock640.xml)
+ - [256kb-autolockfs.xml](1984-09-13/256kb-autolockfs.xml)
+ - [256kb-lockfs.xml](1984-09-13/256kb-lockfs.xml)
+
+### IBM EGA ROM
+
+We have only one IBM EGA ROM revision, dated September 13, 1984.
 
 To (re)build the JSON-encoded IBM EGA ROM with symbols, run the following command:
 
@@ -15,9 +54,9 @@ The symbol information in the MAP file will be automatically converted and appen
 
 The PCjs server's Dump API can be used as well:
 
-	http://www.pcjs.org/api/v1/dump?file=http://archive.pcjs.org/devices/pc/video/ibm/ega/ibm-ega.rom&format=bytes&decimal=true
+	http://www.pcjs.org/api/v1/dump?file=http://archive.pcjs.org/devices/pc/video/ibm/ega/1984-09-13/ibm-ega.rom&format=bytes&decimal=true
 
-### Font Information
+### IBM EGA Font Information
 
 As noted in [Video.onROMLoad()](/modules/pcjs/lib/video.js), the Video component needs to know where the card's
 font data is located:

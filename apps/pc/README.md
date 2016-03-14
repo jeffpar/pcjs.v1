@@ -15,7 +15,7 @@ Below are selected demos of classic IBM PC applications running on [PCjs](/docs/
 * [ThinkTank (1987)](1987/thinktank/)
 * [The Dungeons of Moria (1992)](1992/moria/)
 
-Additional software is available in the [IBM PC Disk Archive](/disks/pc/).
+A list of all the software available to PCjs machines can be found in the [IBM PC Disk Library](/disks/pc/).
 
 ### Creating IBM PC Application Demos
 
@@ -34,8 +34,8 @@ Next, the [manifest](1981/visicalc/manifest.xml) required a disk image containin
 	cd apps/pc/1981/visicalc
 	node ../../../../modules/diskdump/bin/diskdump --path="archive/VC.COM;../README.md" --format=json --output=disk.json --manifest
 	
-The DiskDump command created a disk image named "disk.json" containing two files ("VC.COM" from the "static" subdirectory,
-and "README.md" from the "static" parent directory) and automatically added that disk image to the demo's [manifest](1981/visicalc/manifest.xml):
+The DiskDump command created a disk image named "disk.json" containing two files ("VC.COM" from the "archive" subdirectory,
+and "README.md" from the "archive" parent directory) and automatically added that disk image to the demo's [manifest](1981/visicalc/manifest.xml):
 
 	<disk id="disk01" size="163840" chs="40:1:8" dir="archive/" href="/apps/pc/1981/visicalc/disk.json" md5="61494f998d5fb0e31e7b8bd99f1cc588" md5json="3ad82ed815725e6bd786f92a4714e84f">
 		<file size="27520" time="1981-12-16 23:00:00" attr="0x20" md5="28997dfedb2440c6054d8be835be8634">VC.COM</file>

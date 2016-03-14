@@ -1,19 +1,27 @@
 ---
 layout: page
-title: IBM PC Disk Archive
+title: IBM PC Disk Library
 menu_title: Disks
 menu_order: 4
 permalink: /disks/pc/
 ---
 
-IBM PC Disk Archive
+IBM PC Disk Library
 ---
 
-This is a list of disks available to any [IBM PC Machine](/devices/pc/machine/) that uses our
-[Library](/disks/pc/library.xml) XML disk configuration file.
+These disks are available to any [IBM PC Machine](/devices/pc/machine/) that uses the
+PCjs [Disk Library](/disks/pc/library.xml), which references all the [Disk Manifests](#disk-manifests)
+in the PCjs Project.
 
-For some of the disks below, we have provided more information about the software, and in some cases, machines
-that automatically run the software.
+The list below is *not* a complete list of everything in the [Disk Library](/disks/pc/library.xml),
+just highlights.  For some of the disks, we have provided more information about the software,
+and in some cases, machines that automatically run the software.  Ideally, everything in the
+[Disk Library](/disks/pc/library.xml) would also be listed below, and linked to a page that describes
+the software in more detail, along with a live demonstration of the software.  But there's just
+too much to do.
+
+For more demos, see the [IBM PC Application Archive](/apps/pc/).  There again, the Application Archive
+merely provides some highlights from the Disk Library.
 
 ### PC-DOS (IBM)
 
@@ -145,83 +153,57 @@ in [PC Tech Journal](/pubs/pc/magazines/pctj/).
 
 * [Infocom Zork I](/disks/pc/games/infocom/zork1/)
 
-Learn more about
-[Disk Sets](https://github.com/jeffpar/pcjs/tree/master/disks/pc) in the
-[PCjs Project](https://github.com/jeffpar/pcjs) on [GitHub](https://github.com/).
-
 ### PCjs Test Suites
 
 * [VGA "Black Book" Tests](/tests/pc/vga/)
 
-{% if site.developer %}
+---
 
-### Developer Notes: Disk Sets and Manifests
+Disk Manifests
+---
 
-Collections of related disks are organized into *Disk Sets* which can then be loaded from the
-[FDC (Floppy Disk Controller)](/docs/pcjs/fdc/) component of an [IBM PC Machine Configuration](/devices/pc/machine/).
+Typically, all the distribution disks for a single version of a piece of software are placed in a single
+folder, along with a **manifest.xml** file that contains *metadata* about the software, including a list of
+the individual disks.  This is generally referred to as a [Software Manifest](/apps/), but when we're only
+interested in the disks, we may also refer to it as a Disk Manifest.
 
-Disk Sets are stored in their own folders, along with a **manifest.xml** file listing the individual diskettes.
-Manifests also record a variety of metadata about the software; more information about the manifest format
-is available in [Application Archives](/apps/).
+A Disk Manifest can then be added to a *[Floppy Disk Controller (FDC)](/docs/pcjs/fdc/)* configuration file,
+making all its disks available to any machine loading that particular configuration file.
 
-A simple FDC XML file, such as [samples.xml](samples.xml), *could* contain &lt;disk&gt; entries like:
+A simple FDC configuration file, such as [samples.xml](samples.xml), *could* contain individual &lt;disk&gt;
+entries like:
 
-	<disk path="/disks/pc/dos/ibm/1.00/PCDOS100.json">PC-DOS 1.0</disk>
-	<disk path="/disks/pc/dos/ibm/1.10/PCDOS110.json">PC-DOS 1.1</disk>
-	<disk path="/disks/pc/dos/ibm/2.00/PCDOS200-DISK1.json">PC-DOS 2.0 (Disk 1)</disk>
-	<disk path="/disks/pc/dos/ibm/2.00/PCDOS200-DISK2.json">PC-DOS 2.0 (Disk 2)</disk>
+	<disk path="/disks/pc/dos/ibm/1.00/PCDOS100.json">PC-DOS 1.00</disk>
+	<disk path="/disks/pc/dos/ibm/1.10/PCDOS110.json">PC-DOS 1.10</disk>
+	<disk path="/disks/pc/dos/ibm/2.00/PCDOS200-DISK1.json">PC-DOS 2.00 (Disk 1)</disk>
+	<disk path="/disks/pc/dos/ibm/2.00/PCDOS200-DISK2.json">PC-DOS 2.00 (Disk 2)</disk>
 	...
 
-listing all the diskettes available for the machine to load.  However, listing individual diskettes is tedious,
-so the FDC also supports **manifest.xml** files.  Instead of listing the PC-DOS 2.0 diskettes individually,
-they can be added to [samples.xml](samples.xml) with a single line:
+However, listing individual diskettes like that is tedious, so support was added for Disk Manifests.
+
+So instead of listing the PC-DOS 2.00 diskettes individually, they can be added to [samples.xml](samples.xml)
+with a single line:
 
 	<manifest ref="/disks/pc/dos/ibm/2.00/manifest.xml" disk="*"/>
 
-The same feature works with [Application Manifests](/apps/#software-application-manifests).  Here's how you might
-add [VisiCalc](/apps/pc/1981/visicalc/) to [samples.xml](samples.xml):
+When you want to include only one particular disk from a manifest, set the *disk* value to the *id* of the disk.
+Here's how you would include only the *first* disk from PC-DOS 2.00:
 
-	<manifest ref="/apps/pc/1981/visicalc/manifest.xml" disk="disk"/>
+	<manifest ref="/disks/pc/dos/ibm/2.00/manifest.xml" disk="disk01"/>
 
-The application must have a **manifest.xml** with &lt;disk&gt; section containing an *id* value that matches the
-*disk* value specified above:
+For reference, here's what the entire Disk Manifest for PC-DOS 2.00 currently looks like:
 
-    <disk id="disk" dir="/apps/pc/1981/visicalc/bin/">
-        <file>VC.COM</file>
-        <file dir="../">README.md</file>
-        <link href="http://www.bricklin.com/history/vclicense.htm">VisiCalc License</link>
-    </disk>
-
-If multiple disks are defined in the manifest, and you want to include them all, you can set the *disk* value to '*', as in:
-
-	<manifest ref="/apps/pc/1981/visicalc/manifest.xml" disk="*"/>
-
-As an added bonus, PCjs will automatically display the descriptive &lt;link&gt; whenever this item is selected, and it will
-dynamically generate a disk image containing all the specified &lt;file&gt; entries when the selected item is loaded.
-
-Pre-generated disk images are preferred to dynamically-generated images, and you can now include those in the application
-**manifest.xml** as well, by adding an *href* value to the &lt;disk&gt; section that was used to create the image: 
-
-    <disk id="disk" dir="/apps/pc/1981/visicalc/bin/" href="/apps/pc/1981/visicalc/disk.json">
-        <file>VC.COM</file>
-        <file dir="../">README.md</file>
-        <link href="http://www.bricklin.com/history/vclicense.htm">VisiCalc License</link>
-    </disk>
-
-The PCjs [DiskDump](/modules/diskdump/) module is used to create all our pre-generated JSON-encoded disk images.
-In the above example, a pre-generated disk image could be created from the command-line with either the "--dir" option
-(which will traverse all subdirectories as well): 
-
-	node diskdump --dir=./apps/pc/1981/visicalc/bin/ --format=json --output=./apps/pc/1981/visicalc/disk.json
-	
-or with the "--path" option, which specifies either a single file or a set files separated by semi-colons:
-
-	node diskdump --path="./apps/pc/1981/visicalc/bin/vc.com;../readme.md" --format=json --output=./apps/pc/1981/visicalc/disk.json
-	
-or via the PCjs server's [DiskDump API](/api/v1/dump):
-
-	{{ site.url }}/api/v1/dump?path=/apps/pc/1981/visicalc/bin/vc.com&format=json
-
-Learn more about PCjs disk image formats [here](/disks/).
-
-{% endif %}
+	<manifest type="software">
+	    <title>PC-DOS</title>
+	    <version>2.00</version>
+	    <type>DOS</type>
+	    <category>Operating System</category>
+	    <author>IBM/Microsoft</author>
+	    <releaseDate/>
+	    <disk id="disk01" size="184320" chs="40:1:9" img="archive/PCDOS200-DISK1.img" href="/disks/pc/dos/ibm/2.00/PCDOS200-DISK1.json" md5="d57ceef82122790d1c0ff7bebc12f90a" md5json="2507c02da6cbafe9a94a35cbdd993be2">
+	        <name>PC-DOS 2.00 (Disk 1)</name>
+	    </disk>
+	    <disk id="disk02" size="184320" chs="40:1:9" img="archive/PCDOS200-DISK2.img" href="/disks/pc/dos/ibm/2.00/PCDOS200-DISK2.json" md5="1c7aac53c78446992f8821cf42d04c4a" md5json="b66e296319c1f97990b596b1aa376d39">
+	        <name>PC-DOS 2.00 (Disk 2)</name>
+	    </disk>
+	</manifest>
