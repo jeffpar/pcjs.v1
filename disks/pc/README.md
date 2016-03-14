@@ -9,19 +9,19 @@ permalink: /disks/pc/
 IBM PC Disk Library
 ---
 
-These disks are available to any [IBM PC Machine](/devices/pc/machine/) that uses the
-PCjs [Disk Library](/disks/pc/library.xml), which references all the [Disk Manifests](#disk-manifests)
-in the PCjs Project.
+This [Disk Library](/disks/pc/library.xml) collects all the [Disk Manifests](#disk-manifests) in the
+[PCjs Project](/docs/about/pcjs/).  These disks are available to any [IBM PC Machine](/devices/pc/machine/)
+in the project that uses the library.  However, most machines use the *[compiled](/disks/pc/compiled/library.xml)*
+form of the library in order to reduce machine load time.
 
-The list below is *not* a complete list of everything in the [Disk Library](/disks/pc/library.xml),
-just highlights.  For some of the disks, we have provided more information about the software,
-and in some cases, machines that automatically run the software.  Ideally, everything in the
-[Disk Library](/disks/pc/library.xml) would also be listed below, and linked to a page that describes
-the software in more detail, along with a live demonstration of the software.  But there's just
-too much to do.
+The list below is *not* a complete list of everything in the library, just highlights.  For some of the disks,
+we have provided more information about the software, and in some cases, machines that automatically run the software.
+Ideally, everything in the library would also be listed below, and linked to a page that describes the software in
+more detail, along with a live demonstration of the software, but that is not yet a reality.
 
-For more demos, see the [IBM PC Application Archive](/apps/pc/).  There again, the Application Archive
-merely provides some highlights from the Disk Library.
+For application demos, see the [IBM PC Application Archive](/apps/pc/), which focuses excusively on applications.
+The [Disk Library](/disks/pc/library.xml) is a superset, including operating systems, application software, diagnostics,
+and more.
 
 ### PC-DOS (IBM)
 
@@ -163,9 +163,9 @@ Disk Manifests
 ---
 
 Typically, all the distribution disks for a single version of a piece of software are placed in a single
-folder, along with a **manifest.xml** file that contains *metadata* about the software, including a list of
-the individual disks.  This is generally referred to as a [Software Manifest](/apps/), but when we're only
-interested in the disks, we may also refer to it as a Disk Manifest.
+folder, along with a **manifest.xml** file containing *metadata* about the software and a list of the individual
+disks.  This is generally referred to as a [Software Manifest](/apps/), but in the context of disk management,
+it is also known as a Disk Manifest.
 
 A Disk Manifest can then be added to a *[Floppy Disk Controller (FDC)](/docs/pcjs/fdc/)* configuration file,
 making all its disks available to any machine loading that particular configuration file.

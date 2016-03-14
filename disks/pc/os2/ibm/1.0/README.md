@@ -30,8 +30,8 @@ digits are the day of the year (294 or October 21).
 Directory listings of the four 1.44Mb distribution diskettes are provided below.
 
 IBM OS/2 1.0 has been pre-installed on this machine's 20Mb hard disk, along with a copy of the
-[Microsoft OS/2 SDK 1.02](/disks/pc/tools/microsoft/os2/sdk/1.02/), as discussed in this
-[blog post](/blog/2015/12/27/).
+[Microsoft OS/2 SDK 1.02](/disks/pc/tools/microsoft/os2/sdk/1.02/), as discussed in the
+[PCjs Blog](/blog/2015/12/27/).
 
 {% include machine.html id="ibm5170" %}
 
