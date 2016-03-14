@@ -1711,7 +1711,11 @@ Bus.prototype.reportError = function(op, addr, size, fQuiet)
 {
     var sError = "Memory block error (" + op + ": " + str.toHex(addr) + "," + str.toHex(size) + ")";
     if (fQuiet) {
-        this.log(sError);
+        if (this.dbg) {
+            this.dbg.message(sError);
+        } else {
+            this.log(sError);
+        }
     } else {
         Component.error(sError);
     }

@@ -3708,30 +3708,29 @@ if (DEBUGGER) {
      */
     Debugger.prototype.message = function(sMessage, fAddress)
     {
-        if (fAddress) { //foo
+        if (fAddress) {
             sMessage += " at " + this.toHexAddr(this.newAddr(this.cpu.getIP(), this.cpu.getCS())) + " (%" + str.toHex(this.cpu.regLIP) + ")";
         }
 
         if (this.sMessagePrev && sMessage == this.sMessagePrev) return;
+        this.sMessagePrev = sMessage;
+
+        if (this.bitsMessage & Messages.HALT) {
+            this.stopCPU();
+            sMessage += " (cpu halted)";
+        }
 
         this.println(sMessage); // + " (" + this.cpu.getCycles() + " cycles)"
 
-        this.sMessagePrev = sMessage;
-
-        if (this.cpu) {
-            if (this.bitsMessage & Messages.HALT) {
-                this.stopCPU();
-            }
-            /*
-             * We have no idea what the frequency of println() calls might be; all we know is that they easily
-             * screw up the CPU's careful assumptions about cycles per burst.  So we call yieldCPU() after every
-             * message, to effectively end the current burst and start fresh.
-             *
-             * TODO: See CPU.calcStartTime() for a discussion of why we might want to call yieldCPU() *before*
-             * we display the message.
-             */
-            this.cpu.yieldCPU();
-        }
+        /*
+         * We have no idea what the frequency of println() calls might be; all we know is that they easily
+         * screw up the CPU's careful assumptions about cycles per burst.  So we call yieldCPU() after every
+         * message, to effectively end the current burst and start fresh.
+         *
+         * TODO: See CPU.calcStartTime() for a discussion of why we might want to call yieldCPU() *before*
+         * we display the message.
+         */
+        if (this.cpu) this.cpu.yieldCPU();
     };
 
     /**
