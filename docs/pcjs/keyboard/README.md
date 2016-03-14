@@ -43,7 +43,8 @@ Example
 ---
 	<keyboard id="keyboard" model="us83"/>
 
-See [/devices/pc/keyboard/us83.xml](/devices/pc/keyboard/keyboard-us83.xml) for an example that provides a complete "soft keyboard".
+See [/devices/pc/keyboard/us83-softkeys.xml](/devices/pc/keyboard/us83-softkeys.xml) for an example that provides a
+complete "soft keyboard".
 
 Output
 ---

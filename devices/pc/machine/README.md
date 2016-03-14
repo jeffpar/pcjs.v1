@@ -57,7 +57,8 @@ a predefined state, which automatically restores the machine and the specified a
 state, while others include a hard disk with preinstalled software.
 
 However, most simply boot an early version of DOS, and the hard disk, if any, will generally be unformatted.
-From there, you can other disks and install other software.  
+From there, you can load other disks from the [Disk Library](/disks/pc/) (or mount your own disks) and install
+other software.
 
 ### Model 5150 Machine Configurations
 

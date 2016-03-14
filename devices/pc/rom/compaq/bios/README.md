@@ -2,7 +2,7 @@
 layout: post
 title: COMPAQ BIOS ROMs
 date: 2016-02-24 14:00:00
-permalink: /blog/2016/02/24/
+permalink: /devices/pc/rom/compaq/bios/
 ---
 
 COMPAQ BIOS ROMs
