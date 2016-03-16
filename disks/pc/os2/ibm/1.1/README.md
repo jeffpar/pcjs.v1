@@ -10,7 +10,7 @@ machines:
     automount:
       A:
         path: /disks/pc/os2/ibm/1.1/OS211-INSTALLATION.json
-    messages: fault|halt
+    messages: fault|disk|data
 ---
 
 IBM OS/2 1.1
@@ -20,14 +20,14 @@ IBM OS/2 1.1 was announced on April 2, 1987 (the same day as OS/2 1.0) and relea
 
 When the installation disk boots, the following message is displayed on-screen:
 
-	IBM Operating System/2 Version 1.00
-	(C) Copyright IBM Corp. 1981, 1987. All rights reserved.
-	(C) Copyright Microsoft Corp. 1981, 1987.
+	IBM Operating System/2 Version 1.10
+	(C) Copyright IBM Corp. 1981, 1988. All rights reserved.
+	(C) Copyright Microsoft Corp. 1981, 1988.
 	
-	87294
+	88300
 
-The 5-digit number indicates the day the files were built.  The first 2 digits are the year (87) and the 3 remaining
-digits are the day of the year (294 or October 21).
+The 5-digit number indicates the day the files were built.  The first 2 digits (88) are the year and the 3 remaining
+digits (300) are the day of the year (October 26, since 1988 was a leap year).
 
 Directory listings of the seven 1.44Mb distribution diskettes are provided below.
 

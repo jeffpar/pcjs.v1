@@ -24,8 +24,8 @@ When the installation disk boots, the following message is displayed on-screen:
 	
 	87294
 
-The 5-digit number indicates the day the files were built.  The first 2 digits are the year (87) and the 3 remaining
-digits are the day of the year (294 or October 21).
+The 5-digit number indicates the day the files were built.  The first 2 digits (87) are the year and the 3 remaining
+digits (294) are the day of the year (October 21).
 
 Directory listings of the four 1.44Mb distribution diskettes are provided below.
 

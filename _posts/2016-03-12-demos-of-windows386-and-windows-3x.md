@@ -1,6 +1,6 @@
 ---
 layout: post
-title: More Demos
+title: Demos of Windows/386 and Windows 3.x
 date: 2016-03-12 14:00:00
 permalink: /blog/2016/03/12/
 ---
