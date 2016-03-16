@@ -12,7 +12,7 @@
 	<fdc ref="/disks/pc/compiled/library.xml" automount='{A: {name: "COMPAQ MS-DOS 3.31 (Disk 2)", path: "/disks/pc/dos/compaq/3.31/COMPAQ-DOS331-DISK2.json"}, B: {name: "COMPAQ MS-DOS 3.31 (Disk 3)", path: "/disks/pc/dos/compaq/3.31/COMPAQ-DOS331-DISK3.json"}}'/>
 	<keyboard ref="/devices/pc/keyboard/us84-buttons-functions.xml"/>
 	<debugger id="debugger" messages="fault|port" commands=""/>
-	<panel ref="/devices/pc/panel/wide386.xml"/>
+	<panel ref="/devices/pc/panel/btpanel.xml"/>
 	<hdcNone id="hdcAT" type="at" drives='[{name:"20Mb Hard Disk",type:2}]'/>
 	<chipset id="chipset" model="deskpro386" floppies="[1200,1200]"/>
 	<serial id="com1" adapter="1"/>
