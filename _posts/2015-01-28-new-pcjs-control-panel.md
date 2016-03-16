@@ -8,8 +8,8 @@ machines:
   - type: pc
     id: at-ega-1152k-rev3
     debugger: true
-    config: /devices/pc/machine/5170/ega/1152kb/rev3/debugger/backtrack/machine.xml
     uncompiled: true
+    config: /devices/pc/machine/5170/ega/1152kb/rev3/debugger/backtrack/machine.xml
 ---
 
 A new PCjs Control Panel is under development, featuring a new "Display Panel" that will provide a variety of

@@ -49,9 +49,9 @@ if (NODE) {
  *
  *      multiplier: base cycle multiplier; default is 1.
  *
- *      autoStart: true to automatically start, false to not (default); however,
- *      in the latter case, we make the final autoStart decision based on whether
- *      or not a Debugger is installed and/or a "Run" button is present.
+ *      autoStart: true to automatically start, false to not, or null if "it depends";
+ *      null is the default, which means do not autostart UNLESS there is no Debugger
+ *      and no "Run" button (ie, no way to manually start the machine).
  *
  *      csStart: the number of cycles that runCPU() must wait before generating
  *      checksum records; -1 if disabled. checksum records are a diagnostic aid
@@ -200,7 +200,7 @@ CPU.prototype.initBus = function(cmp, bus, cpu, dbg)
      * We've already saved the parmsCPU 'autoStart' setting, but there may be a machine (or URL) override.
      */
     var sAutoStart = cmp.getMachineParm('autoStart');
-    if (sAutoStart !== undefined) {
+    if (sAutoStart != null) {
         this.flags.fAutoStart = (sAutoStart == "true"? true : (sAutoStart  == "false"? false : !!sAutoStart));
     }
 

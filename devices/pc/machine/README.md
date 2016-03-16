@@ -95,7 +95,7 @@ other software.
 
 * [IBM PC AT (6Mhz, 640Kb) with EGA Display (Debugger)](/devices/pc/machine/5170/ega/640kb/rev1/debugger/)
 * [IBM PC AT (6Mhz, 1Mb, 20Mb Drive) with EGA Display (Debugger)](/devices/pc/machine/5170/ega/1152kb/rev1/debugger/)
-* [IBM PC AT (8Mhz, 1Mb, 20Mb Drive) with EGA Display (Debugger)](/devices/pc/machine/5170/ega/1152kb/rev3/debugger/)
-* [IBM PC AT (8Mhz, 2Mb, 20Mb Drive) with EGA Display](/devices/pc/machine/5170/ega/2048kb/rev3/) ([Debugger](/devices/pc/machine/5170/ega/2048kb/rev3/debugger/))
+* [IBM PC AT (8Mhz, 1Mb, 20Mb Drive) with EGA Display](/devices/pc/machine/5170/ega/1152kb/rev3/) ([Debugger](/devices/pc/machine/5170/ega/1152kb/rev3/debugger/),[Backtrack](/devices/pc/machine/5170/ega/1152kb/rev3/debugger/backtrack/))
+* [IBM PC AT (8Mhz, 2Mb, 20Mb Drive) with EGA Display](/devices/pc/machine/5170/ega/2048kb/rev3/) ([Debugger](/devices/pc/machine/5170/ega/2048kb/rev3/debugger/),[Backtrack](/devices/pc/machine/5170/ega/2048kb/rev3/debugger/backtrack/))
 * [IBM PC AT (8Mhz, 2Mb, 20Mb Drive) with VGA Display](/devices/pc/machine/5170/vga/2048kb/) ([Debugger](/devices/pc/machine/5170/vga/2048kb/debugger/))
 * [IBM PC AT (8Mhz, 4Mb, 20Mb Drive) with VGA Display](/devices/pc/machine/5170/vga/4096kb/) ([Debugger](/devices/pc/machine/5170/vga/4096kb/debugger/))

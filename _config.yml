@@ -35,6 +35,7 @@ pcjs:
   compiled: true      # by default, the compiled pcjs.version scripts will be used (eg, pc.js or pc-dbg.js)
   pc_scripts:         # if pcjs.compiled is false, the following scripts will be included instead, in the order listed
     - /modules/shared/lib/defines.js
+    - /modules/shared/lib/nodebug.js
     - /modules/shared/lib/diskapi.js
     - /modules/shared/lib/dumpapi.js
     - /modules/shared/lib/reportapi.js
@@ -77,6 +78,7 @@ pcjs:
     - /modules/shared/lib/save.js
   c1p_scripts:
     - /modules/shared/lib/defines.js
+    - /modules/shared/lib/nodebug.js
     - /modules/shared/lib/dumpapi.js
     - /modules/shared/lib/reportapi.js
     - /modules/shared/lib/strlib.js

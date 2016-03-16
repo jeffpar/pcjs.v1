@@ -8,13 +8,15 @@ in the Front Matter of Markdown files, for compatibility with the Jekyll web ser
     'debugger' (eg, true)
     'config' (eg, "machine.xml")
     'template' (eg, "machine.xsl")
+    'debug' (eg, true)
     'uncompiled' (eg, true)
     'parms'
 
 And the following properties (along with any property not listed above) will be added to the 'parms' property:
 
-    'autoPower' (eg, "true")
     'autoMount' (eg, {"A":{"name":"OS/2 FOOTBALL (v7.68.17)","path":"/disks/pc/os2/misc/football/FOOTBALL-76817.json"}})
+    'autoPower' (eg, true)
+    'autoStart' (eg, true)
     'drives' (eg, '[{name:"68Mb Hard Disk",type:4,path:"http://archive.pcjs.org/disks/pc/fixed/68mb/win95.json"}]')
     'state' (eg, "state.json")
     'messages' (eg, "disk")
@@ -91,11 +93,16 @@ here and in markout.js.  Examples include 'autopower' ('autoPower') and 'automou
     {% if machine_type == "pc" %}{% assign array_scripts = site.pcjs.pc_scripts %}{% endif %}
     {% if machine_type == "c1p" %}{% assign array_scripts = site.pcjs.c1p_scripts %}{% endif %}
     {% for script in array_scripts %}
-      {% capture machine_script %}<script type="text/javascript" src="{{ site.baseurl }}{{ script }}"></script>{% endcapture %}
-      {% unless machine_scripts contains machine_script %}
-        {{ machine_script }}
-      {% endunless %}
-      {% capture machine_scripts %}{{ machine_scripts }}{{ machine_script }}{% endcapture %}
+      {% if script != "/modules/shared/lib/nodebug.js" or machine.debug != true %}
+        {% capture machine_script %}<script type="text/javascript" src="{{ site.baseurl }}{{ script }}"></script>{% endcapture %}
+        {% unless machine_scripts contains machine_script %}
+          {{ machine_script }}
+          {% if script contains "js/lib/defines.js" and machine.debugger != true %}
+            {{ machine_script | replace:"defines.js","nodebugger.js" }}
+          {% endif %}
+        {% endunless %}
+        {% capture machine_scripts %}{{ machine_scripts }}{{ machine_script }}{% endcapture %}
+      {% endif %}
     {% endfor %}
     {% if machine_template == "" %}    
       {% capture machine_template %}{{ site.baseurl }}/modules/{{ machine_type }}js/templates/components.xsl{% endcapture %}

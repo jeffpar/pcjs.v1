@@ -40,8 +40,8 @@
  * debugger.js from the compilation process altogether.
  *
  * However, when we're in "development mode" and running uncompiled code in debugger-less configurations,
- * I would like to skip loading debugger.js altogether.  To do that, we must arrange for this additional file
- * (nodebugger.js) to be loaded as early as possible, which *explicitly* overrides the previously defined value
+ * I would like to skip loading debugger.js altogether.  To do that, we must arrange for this additional file,
+ * nodebugger.js, to be loaded immediately after defines.js, *explicitly* overriding the previously defined value
  * of DEBUGGER with *false*.
  */
-var DEBUGGER = false;
+DEBUGGER = false;

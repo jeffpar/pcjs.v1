@@ -93,7 +93,7 @@ var TYPEDARRAYS = (typeof ArrayBuffer !== 'undefined');
  * TODO: BACKTRACK support is currently completely disabled until we have a chance to investigate the problem
  * discussed in Bus.addBackTrackObject().
  */
-var BACKTRACK = !COMPILED && DEBUG;
+var BACKTRACK = !COMPILED && DEBUGGER;
 
 /**
  * @define {boolean}

@@ -6,27 +6,24 @@ permalink: /blog/2016/02/24/
 ---
 
 IBM is obviously the company everyone thinks of first when we talk about the IBM PC -- after all, IBM is right
-there in the name.  And they designed the thing.  So IBM deserves lots of credit for where we are today, especially
-the folks who worked in Boca Raton at IBM's Entry Systems Division in the early 1980's.
+there in the name.  They designed the thing.  So IBM, and in particular the folks who worked in Boca Raton at IBM's
+Entry Systems Division in the early 1980's, deserve all the credit for defining what eventually became known as the
+Industry Standard Architecture (ISA) PC platform.
 
-However, IBM was a huge company that existed *before* the IBM PC and which still exists today; they had some built-in
-advantages.  The PC era also saw the rise and fall of many other personal computer companies.  Some of them didn't
-do anything particularly innovative or noteworthy -- perhaps they simply wanted to ride the PC wave and make some easy
-money in the process.
-
-One of the more exceptional companies from that era is COMPAQ.  It's easy to dismiss COMPAQ as just another
-company that merely "copied" or "cloned" the IBM design, but COMPAQ's ambitions went beyond imitation: they were
-really in the *compatibility* business.
+However, the dawn of the PC era also saw the rise and fall of many other personal computer companies.
+One of the more exceptional companies from that era was COMPAQ.  It would be a mistake to dismiss COMPAQ as just
+another company that set out to "copy" or "clone" IBM's design, because from the very beginning, COMPAQ's ambitions
+went beyond mere imitation.  They were really in the *compatibility* business.
 
 Innovation in the PC industry would not have been as rapid and diverse if IBM had been the only supplier of
-compatible machines and accessories.  And IBM probably would have continued some of the monopolistic practices it had
-perfected in the mainframe era, like exclusive service contracts.  That might have been a win for IBM, but it almost
-certainly would *not* have been a win for customers.
+compatible machines and accessories.  If IBM had been able to control the market, they probably would have continued
+some of the monopolistic practices they had perfected in the mainframe era.  Market control might have been a win for
+IBM, but it almost certainly would *not* have been a win for customers.
 
 In 1982, the founders of COMPAQ took a big gamble, by reportedly investing around a million dollars to create
-system software (ROM BIOS) that mimicked IBM's without infringing on it.  I don't know if COMPAQ pioneered the concept
-of "clean room" design, where the engineers designing and coding have no direct contact with the hardware and software
-they're cloning, but they were certainly successful.
+a system that mimicked IBM's without infringing on it.  I don't know if COMPAQ pioneered the concept of "clean room"
+design, where the engineers designing and coding have no direct contact with the hardware and software they're cloning,
+but they were certainly successful.
 
 But that wasn't COMPAQ's most important contribution.  That was just the price they had to "pay to play."  Armed with
 compatible hardware and software, COMPAQ proceeded to innovate in ways that IBM did not.
@@ -54,8 +51,8 @@ all we have are the memories.
 
 In particular, Read-Only Memories: we have precious few of those, too.  I finally obtained
 a [ROM Dump](/devices/pc/rom/compaq/bios/portable/) from COMPAQ's first machine, the COMPAQ Portable, but I had to buy
-a system board on eBay to get it.  Considering all the effort (and money) that COMPAQ invested in writing that code,
-you would think those things would be memorialized a bit better.
+a system board on ebay to get it.  Considering all the effort (and money) that COMPAQ invested in writing that code,
+it's a bit depressing that these things haven't been properly preserved and memorialized.
 
 Looking ahead to the day when PCjs will be able to simulate the original COMPAQ Portable, I thought it would be a good
 idea to create my own roughly chronological list of [COMPAQ Machines](/devices/pc/machine/compaq/) from the 1980s,
