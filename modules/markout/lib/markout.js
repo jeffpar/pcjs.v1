@@ -341,6 +341,7 @@ MarkOut.aHTMLEntities = {
  *      'state' (eg, "state.json")
  *      'messages' (eg, "disk")
  *      'autopower' (eg, true)
+ *      'autostart' (eg, true)
  *
  * and any other string-based property you wish to pass through to PCjs (via the embedPC() sParms parameter).
  *
@@ -355,7 +356,8 @@ MarkOut.aHTMLEntities = {
  * which are then converted to camelCase prior to calling the JavaScript components.
  */
 MarkOut.aFMBooleanMachineProps = {
-    'autopower': "autoPower"
+    'autopower': "autoPower",
+    'autostart': "autoStart"
 };
 MarkOut.aFMReservedMachineProps = ['id', 'name', 'type', 'debugger', 'config', 'template', 'uncompiled', 'autoMount', 'drives', 'parms'];
 

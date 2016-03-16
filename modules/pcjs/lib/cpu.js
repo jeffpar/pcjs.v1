@@ -45,14 +45,13 @@ if (NODE) {
  * The CPU class supports the following (parmsCPU) properties:
  *
  *      cycles: the machine's base cycles per second; the X86CPU constructor will
- *      provide us with a default (based on the CPU model) to use as a fallback
+ *      provide us with a default (based on the CPU model) to use as a fallback.
  *
- *      multiplier: base cycle multiplier; default is 1
+ *      multiplier: base cycle multiplier; default is 1.
  *
- *      autoStart: true to automatically start, false to not, or null (default)
- *      to make the autoStart decision based on whether or not a Debugger is
- *      installed (if there's no Debugger AND no "Run" button, then auto-start,
- *      otherwise don't)
+ *      autoStart: true to automatically start, false to not (default); however,
+ *      in the latter case, we make the final autoStart decision based on whether
+ *      or not a Debugger is installed and/or a "Run" button is present.
  *
  *      csStart: the number of cycles that runCPU() must wait before generating
  *      checksum records; -1 if disabled. checksum records are a diagnostic aid
@@ -99,24 +98,14 @@ function CPU(parmsCPU, nCyclesDefault)
     /*
      * We add a number of flags to the set initialized by Component
      */
-    this.aFlags.fRunning = false;
-    this.aFlags.fStarting = false;
-    this.aFlags.fAutoStart = parmsCPU['autoStart'];
+    this.flags.fRunning = false;
+    this.flags.fStarting = false;
+    this.flags.fAutoStart = parmsCPU['autoStart'];
 
     /*
      * TODO: Add some UI for fDisplayLiveRegs (either an XML property, or a UI checkbox, or both)
      */
-    this.aFlags.fDisplayLiveRegs = false;
-
-    /*
-     * Provide a power-saving URL-based way of overriding the 'autoStart' setting;
-     * if an "autoStart" parameter is specified on the URL, anything other than "true"
-     * or "false" is treated as the null setting (see above for details).
-     */
-    var sAutoStart = Component.parmsURL['autostart'] || Component.parmsURL['autoStart'];
-    if (sAutoStart !== undefined) {
-        this.aFlags.fAutoStart = (sAutoStart == "true"? true : (sAutoStart  == "false"? false : null));
-    }
+    this.flags.fDisplayLiveRegs = false;
 
     /*
      * Get checksum parameters, if any. runCPU() behavior is not affected until fChecksum
@@ -127,7 +116,7 @@ function CPU(parmsCPU, nCyclesDefault)
      * command ("x"); for example, "x cs int 5000" will set nCyclesChecksumInterval to 5000
      * and call resetChecksum().
      */
-    this.aFlags.fChecksum = false;
+    this.flags.fChecksum = false;
     this.aCounts.nChecksum = this.aCounts.nCyclesChecksumNext = 0;
     this.aCounts.nCyclesChecksumStart = parmsCPU["csStart"];
     this.aCounts.nCyclesChecksumInterval = parmsCPU["csInterval"];
@@ -206,6 +195,15 @@ CPU.prototype.initBus = function(cmp, bus, cpu, dbg)
      * We must also call chipset.updateAllTimers() periodically; stepCPU() takes care of that.
      */
     this.chipset = cmp.getMachineComponent("ChipSet");
+
+    /*
+     * We've already saved the parmsCPU 'autoStart' setting, but there may be a machine (or URL) override.
+     */
+    var sAutoStart = cmp.getMachineParm('autoStart');
+    if (sAutoStart !== undefined) {
+        this.flags.fAutoStart = (sAutoStart == "true"? true : (sAutoStart  == "false"? false : !!sAutoStart));
+    }
+
     this.setReady();
 };
 
@@ -287,7 +285,7 @@ CPU.prototype.powerUp = function(data, fRepower)
      * The Computer component (which is responsible for all powerDown and powerUp notifications)
      * is now responsible for managing a component's fPowered flag, not us.
      *
-     *      this.aFlags.fPowered = true;
+     *      this.flags.fPowered = true;
      */
     this.updateCPU();
     return true;
@@ -307,7 +305,7 @@ CPU.prototype.powerDown = function(fSave, fShutdown)
      * The Computer component (which is responsible for all powerDown and powerUp notifications)
      * is now responsible for managing a component's fPowered flag, not us.
      *
-     *      this.aFlags.fPowered = false;
+     *      this.flags.fPowered = false;
      */
     return fSave? this.save() : true;
 };
@@ -323,7 +321,7 @@ CPU.prototype.autoStart = function()
     /*
      * Start running automatically on power-up, assuming there's no Debugger and no "Run" button
      */
-    if (this.aFlags.fAutoStart === true || this.aFlags.fAutoStart === null && (!DEBUGGER || !this.dbg) && this.bindings["run"] === undefined) {
+    if (this.flags.fAutoStart || (!DEBUGGER || !this.dbg) && this.bindings["run"] === undefined) {
         /*
          * Now we ALSO set fSetFocus when calling runCPU(), on the assumption that in the "auto-starting" context,
          * a machine without focus is like a day without sunshine.
@@ -342,7 +340,7 @@ CPU.prototype.autoStart = function()
  */
 CPU.prototype.isPowered = function()
 {
-    if (!this.aFlags.fPowered) {
+    if (!this.flags.fPowered) {
         this.println(this.toString() + " not powered");
         return false;
     }
@@ -357,7 +355,7 @@ CPU.prototype.isPowered = function()
  */
 CPU.prototype.isRunning = function()
 {
-    return this.aFlags.fRunning;
+    return this.flags.fRunning;
 };
 
 /**
@@ -388,8 +386,8 @@ CPU.prototype.resetChecksum = function()
     if (this.aCounts.nCyclesChecksumStart === undefined) this.aCounts.nCyclesChecksumStart = 0;
     if (this.aCounts.nCyclesChecksumInterval === undefined) this.aCounts.nCyclesChecksumInterval = -1;
     if (this.aCounts.nCyclesChecksumStop === undefined) this.aCounts.nCyclesChecksumStop = -1;
-    this.aFlags.fChecksum = (this.aCounts.nCyclesChecksumStart >= 0 && this.aCounts.nCyclesChecksumInterval > 0);
-    if (this.aFlags.fChecksum) {
+    this.flags.fChecksum = (this.aCounts.nCyclesChecksumStart >= 0 && this.aCounts.nCyclesChecksumInterval > 0);
+    if (this.flags.fChecksum) {
         this.aCounts.nChecksum = 0;
         this.aCounts.nCyclesChecksumNext = this.aCounts.nCyclesChecksumStart - this.nTotalCycles;
         /*
@@ -414,7 +412,7 @@ CPU.prototype.resetChecksum = function()
  */
 CPU.prototype.updateChecksum = function(nCycles)
 {
-    if (this.aFlags.fChecksum) {
+    if (this.flags.fChecksum) {
         /*
          * Get a 32-bit summation of the current CPU state and add it to our running 32-bit checksum
          */
@@ -470,7 +468,7 @@ CPU.prototype.displayValue = function(sLabel, nValue, cch)
             this.stopCPU();
         }
         var sVal;
-        if (!this.aFlags.fRunning || this.aFlags.fDisplayLiveRegs) {
+        if (!this.flags.fRunning || this.flags.fDisplayLiveRegs) {
             sVal = str.toHex(nValue, cch);
         } else {
             sVal = "--------".substr(0, cch);
@@ -576,7 +574,7 @@ CPU.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
         this.bindings[sBinding] = control;
         control.onclick = function onClickRun() {
             if (!cpu.cmp || !cpu.cmp.checkPower()) return;
-            if (!cpu.aFlags.fRunning)
+            if (!cpu.flags.fRunning)
                 cpu.runCPU(true);
             else
                 cpu.stopCPU(true);
@@ -617,7 +615,7 @@ CPU.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
  */
 CPU.prototype.setBurstCycles = function(nCycles)
 {
-    if (this.aFlags.fRunning) {
+    if (this.flags.fRunning) {
         var nDelta = this.nStepCycles - nCycles;
         /*
          * NOTE: If nDelta is negative, we will actually be increasing nStepCycles and nBurstCycles.
@@ -807,7 +805,7 @@ CPU.prototype.getSpeedCurrent = function()
     /*
      * TODO: Has toFixed() been "fixed" in all browsers (eg, IE) to return a rounded value now?
      */
-    return ((this.aFlags.fRunning && this.aCounts.mhz)? (this.aCounts.mhz.toFixed(2) + "Mhz") : "Stopped");
+    return ((this.flags.fRunning && this.aCounts.mhz)? (this.aCounts.mhz.toFixed(2) + "Mhz") : "Stopped");
 };
 
 /**
@@ -1038,7 +1036,7 @@ CPU.prototype.runCPU = function(fSetFocus)
     this.calcStartTime();
     try {
         do {
-            var nCyclesPerBurst = (this.aFlags.fChecksum? 1 : this.aCounts.nCyclesPerBurst);
+            var nCyclesPerBurst = (this.flags.fChecksum? 1 : this.aCounts.nCyclesPerBurst);
 
             if (this.chipset) {
                 this.chipset.updateAllTimers();
@@ -1094,7 +1092,7 @@ CPU.prototype.runCPU = function(fSetFocus)
                 this.aCounts.nCyclesNextYield += this.aCounts.nCyclesPerYield;
                 break;
             }
-        } while (this.aFlags.fRunning);
+        } while (this.flags.fRunning);
     }
     catch (e) {
         this.stopCPU();
@@ -1116,7 +1114,7 @@ CPU.prototype.runCPU = function(fSetFocus)
  */
 CPU.prototype.startCPU = function(fSetFocus)
 {
-    if (!this.aFlags.fRunning) {
+    if (!this.flags.fRunning) {
         /*
          *  setSpeed() without a speed parameter leaves the selected speed in place, but also resets the
          *  cycle counter and timestamp for the current series of runCPU() calls, calculates the maximum number
@@ -1125,8 +1123,8 @@ CPU.prototype.startCPU = function(fSetFocus)
          */
         this.setSpeed();
         if (this.cmp) this.cmp.start(this.aCounts.msStartRun, this.getCycles());
-        this.aFlags.fRunning = true;
-        this.aFlags.fStarting = true;
+        this.flags.fRunning = true;
+        this.flags.fStarting = true;
         if (this.chipset) this.chipset.setSpeaker();
         var controlRun = this.bindings["run"];
         if (controlRun) controlRun.textContent = "Halt";
@@ -1167,13 +1165,13 @@ CPU.prototype.stopCPU = function(fComplete)
     this.nStepCycles = 0;
     this.addCycles(this.nRunCycles);
     this.nRunCycles = 0;
-    if (this.aFlags.fRunning) {
-        this.aFlags.fRunning = false;
+    if (this.flags.fRunning) {
+        this.flags.fRunning = false;
         if (this.chipset) this.chipset.setSpeaker();
         var controlRun = this.bindings["run"];
         if (controlRun) controlRun.textContent = "Run";
     }
-    this.aFlags.fComplete = fComplete;
+    this.flags.fComplete = fComplete;
 };
 
 /**

@@ -128,7 +128,7 @@ function C1PKeyboard(parmsKbd)
 {
     Component.call(this, "C1PKeyboard", parmsKbd);
 
-    this.aFlags.fPowered = false;
+    this.flags.fPowered = false;
     this.nDefaultModel = parmsKbd['model'];
 
     /*
@@ -522,8 +522,8 @@ C1PKeyboard.prototype.setModel = function(nModel)
  */
 C1PKeyboard.prototype.setPower = function(fOn, cmp)
 {
-    if (fOn && !this.aFlags.fPowered) {
-        this.aFlags.fPowered = true;
+    if (fOn && !this.flags.fPowered) {
+        this.flags.fPowered = true;
         this.cmp = cmp;
         if (DEBUGGER) this.dbg = cmp.getComponentByType("debugger");
     }

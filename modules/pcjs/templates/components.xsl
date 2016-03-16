@@ -565,7 +565,7 @@
 			<xsl:choose>
 				<xsl:when test="@autostart"><xsl:value-of select="@autostart"/></xsl:when>
 				<xsl:when test="@autoStart"><xsl:value-of select="@autoStart"/></xsl:when>
-				<xsl:otherwise>null</xsl:otherwise>
+				<xsl:otherwise>false</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
 		<xsl:variable name="csStart">

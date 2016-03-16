@@ -111,7 +111,7 @@ function Component(type, parms, constructor, bitsMessage)
      * Gather all the various component flags (booleans) into a single "flags" object, and encourage
      * subclasses to do the same, to reduce the property clutter we have to wade through while debugging.
      */
-    this.aFlags = {
+    this.flags = {
         fReady: false,
         fBusy: false,
         fBusyCancel: false,
@@ -848,7 +848,7 @@ Component.prototype = {
      * @param {string} s describes a fatal error condition
      */
     setError: function(s) {
-        this.aFlags.fError = true;
+        this.flags.fError = true;
         this.notice(s);         // TODO: Any cases where we should still prefix this string with "Fatal error: "?
     },
     /**
@@ -859,7 +859,7 @@ Component.prototype = {
      * @this {Component}
      */
     clearError: function() {
-        this.aFlags.fError = false;
+        this.flags.fError = false;
     },
     /**
      * isError()
@@ -870,7 +870,7 @@ Component.prototype = {
      * @return {boolean} true if a fatal error condition exists, false if not
      */
     isError: function() {
-        if (this.aFlags.fError) {
+        if (this.flags.fError) {
             this.println(this.toString() + " error");
             return true;
         }
@@ -891,14 +891,14 @@ Component.prototype = {
      */
     isReady: function(fnReady) {
         if (fnReady) {
-            if (this.aFlags.fReady) {
+            if (this.flags.fReady) {
                 fnReady();
             } else {
                 if (MAXDEBUG) this.log("NOT ready");
                 this.fnReady = fnReady;
             }
         }
-        return this.aFlags.fReady;
+        return this.flags.fReady;
     },
     /**
      * setReady(fReady)
@@ -909,9 +909,9 @@ Component.prototype = {
      * @param {boolean} [fReady] is assumed to indicate "ready" unless EXPLICITLY set to false
      */
     setReady: function(fReady) {
-        if (!this.aFlags.fError) {
-            this.aFlags.fReady = (fReady !== false);
-            if (this.aFlags.fReady) {
+        if (!this.flags.fError) {
+            this.flags.fReady = (fReady !== false);
+            if (this.flags.fReady) {
                 if (MAXDEBUG /* || this.name */) this.log("ready");
                 var fnReady = this.fnReady;
                 this.fnReady = null;
@@ -929,14 +929,14 @@ Component.prototype = {
      * @return {boolean} true if "busy", false if not
      */
     isBusy: function(fCancel) {
-        if (this.aFlags.fBusy) {
+        if (this.flags.fBusy) {
             if (fCancel) {
-                this.aFlags.fBusyCancel = true;
+                this.flags.fBusyCancel = true;
             } else if (fCancel === undefined) {
                 this.println(this.toString() + " busy");
             }
         }
-        return this.aFlags.fBusy;
+        return this.flags.fBusy;
     },
     /**
      * setBusy(fBusy)
@@ -948,19 +948,19 @@ Component.prototype = {
      * @return {boolean}
      */
     setBusy: function(fBusy) {
-        if (this.aFlags.fBusyCancel) {
-            if (this.aFlags.fBusy) {
-                this.aFlags.fBusy = false;
+        if (this.flags.fBusyCancel) {
+            if (this.flags.fBusy) {
+                this.flags.fBusy = false;
             }
-            this.aFlags.fBusyCancel = false;
+            this.flags.fBusyCancel = false;
             return false;
         }
-        if (this.aFlags.fError) {
+        if (this.flags.fError) {
             this.println(this.toString() + " error");
             return false;
         }
-        this.aFlags.fBusy = fBusy;
-        return this.aFlags.fBusy;
+        this.flags.fBusy = fBusy;
+        return this.flags.fBusy;
     },
     /**
      * powerUp(fSave)
@@ -971,7 +971,7 @@ Component.prototype = {
      * @return {boolean} true if successful, false if failure
      */
     powerUp: function(data, fRepower) {
-        this.aFlags.fPowered = true;
+        this.flags.fPowered = true;
         return true;
     },
     /**
@@ -983,7 +983,7 @@ Component.prototype = {
      * @return {Object|boolean} component state if fSave; otherwise, true if successful, false if failure
      */
     powerDown: function(fSave, fShutdown) {
-        if (fShutdown) this.aFlags.fPowered = false;
+        if (fShutdown) this.flags.fPowered = false;
         return true;
     },
     /**

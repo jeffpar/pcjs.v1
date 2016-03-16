@@ -762,19 +762,22 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fProbe)
 
         if (type >= X86.DESC.ACC.TYPE.CODE_EXECONLY) {
             /*
-             * There are three basic ways a new code segment can be loaded (ignoring special cases like LOADALL):
+             * There are three basic ways to load a new code segment (ignoring special cases like LOADALL):
              *
              *      1) CALLF (fCall is true)
              *      2) RETF (fCall is false)
              *      3) JMPF (fCall is undefined)
+             *
+             * Also, note that if fProbe is set, we're being called on behalf of a gate, in which case the
+             * gate logic will examine the relative privileges.
              */
             if (fProbe != null) {
                 sizeGate = 0;
             }
             else if (fCall !== false) {
                 /*
-                 * We deal with CALLF/JMPF first.  We've already ascertained that the selector type refers to
-                 * a segment, not a gate, so the next important distinction is CONFORMING vs. non-CONFORMING.
+                 * We deal with CALLF/JMPF first.  We've already ascertained that the selector type is a
+                 * segment, not a gate, so the next important distinction is CONFORMING vs. non-CONFORMING.
                  *
                  * For a CONFORMING target, we must verify that its DPL <= CPL.  For a non-CONFORMING target,
                  * we must verify that RPL <= CPL and DPL == CPL.  Assuming both those tests pass, we must also

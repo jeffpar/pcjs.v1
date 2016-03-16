@@ -4087,7 +4087,7 @@ if (DEBUGGER) {
          * it here, so that if the CPU is reset while running, we can prevent stop()
          * from unnecessarily dumping the CPU state.
          */
-        this.aFlags.fRunning = false;
+        this.flags.fRunning = false;
         this.clearTempBreakpoint();
         if (!fQuiet) this.updateStatus();
     };
@@ -4146,7 +4146,7 @@ if (DEBUGGER) {
     Debugger.prototype.start = function(ms, nCycles)
     {
         if (!this.nStep) this.println("running");
-        this.aFlags.fRunning = true;
+        this.flags.fRunning = true;
         this.msStart = ms;
         this.nCyclesStart = nCycles;
     };
@@ -4162,8 +4162,8 @@ if (DEBUGGER) {
      */
     Debugger.prototype.stop = function(ms, nCycles)
     {
-        if (this.aFlags.fRunning) {
-            this.aFlags.fRunning = false;
+        if (this.flags.fRunning) {
+            this.flags.fRunning = false;
             this.nCycles = nCycles - this.nCyclesStart;
             if (!this.nStep) {
                 var sStopped = "stopped";
@@ -4966,7 +4966,7 @@ if (DEBUGGER) {
 
         if (sComment && fComplete) {
             sLine = str.pad(sLine, dbgAddrIns.fAddr32? 74 : 56) + ';' + sComment;
-            if (!this.cpu.aFlags.fChecksum) {
+            if (!this.cpu.flags.fChecksum) {
                 sLine += (nSequence != null? '=' + nSequence.toString() : "");
             } else {
                 var nCycles = this.cpu.getCycles();
@@ -6613,7 +6613,7 @@ if (DEBUGGER) {
     Debugger.prototype.doHalt = function(fQuiet)
     {
         var sMsg;
-        if (this.aFlags.fRunning) {
+        if (this.flags.fRunning) {
             sMsg = "halting";
             this.stopCPU();
         } else {
@@ -7082,7 +7082,7 @@ if (DEBUGGER) {
             if (nCycles !== undefined) {
                 this.cpu.resetChecksum();
             }
-            this.println("checksums " + (this.cpu.aFlags.fChecksum? "enabled" : "disabled"));
+            this.println("checksums " + (this.cpu.flags.fChecksum? "enabled" : "disabled"));
             break;
         case "sp":
             if (asArgs[2] !== undefined) {

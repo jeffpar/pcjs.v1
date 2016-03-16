@@ -149,7 +149,7 @@ function X86CPU(parmsCPU)
      * stepCPU() call, but it's good form to do so.
      */
     this.resetCycles();
-    this.aFlags.fComplete = this.aFlags.fDebugCheck = false;
+    this.flags.fComplete = this.flags.fDebugCheck = false;
 
     /*
      * If there are no live registers to display, then updateStatus() can skip a bit....
@@ -898,7 +898,7 @@ X86CPU.prototype.initProcessor = function()
  */
 X86CPU.prototype.reset = function()
 {
-    if (this.aFlags.fRunning) this.stopCPU();
+    if (this.flags.fRunning) this.stopCPU();
     this.resetRegs();
     this.resetCycles();
     this.clearError();      // clear any fatal error/exception that setError() may have flagged
@@ -1554,7 +1554,7 @@ X86CPU.prototype.checkIntNotify = function(nInt)
      * For most purposes, just having dbg.messageInt(), and the Debugger's ability to selectively turn categories
      * of messages on and off, is good enough.
      */
-    if (DEBUGGER && this.aFlags.fDebugCheck) {
+    if (DEBUGGER && this.flags.fDebugCheck) {
         if (this.messageEnabled(Messages.INT) && this.dbg.messageInt(nInt, this.regLIP) && MAXDEBUG) {
             this.addIntReturn(this.regLIP, function(cpu, nCycles) {
                 return function onIntReturn(nLevel) {
@@ -4151,7 +4151,7 @@ X86CPU.prototype.updateReg = function(sReg, nValue)
 X86CPU.prototype.updateStatus = function(fForce)
 {
     if (this.cLiveRegs) {
-        if (fForce || !this.aFlags.fRunning || this.aFlags.fDisplayLiveRegs) {
+        if (fForce || !this.flags.fRunning || this.flags.fDisplayLiveRegs) {
             this.updateReg("EAX", this.regEAX);
             this.updateReg("EBX", this.regEBX);
             this.updateReg("ECX", this.regECX);
@@ -4225,12 +4225,12 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
      * Debugger is single-stepping (even when performing multiple single-steps), fRunning is never set,
      * so stopCPU() would have no effect as far as the Debugger is concerned.
      */
-    this.aFlags.fComplete = true;
+    this.flags.fComplete = true;
 
     /*
      * fDebugCheck is true if we need to "check" every instruction with the Debugger.
      */
-    var fDebugCheck = this.aFlags.fDebugCheck = (DEBUGGER && this.dbg && this.dbg.checksEnabled());
+    var fDebugCheck = this.flags.fDebugCheck = (DEBUGGER && this.dbg && this.dbg.checksEnabled());
 
     /*
      * nDebugState is checked only when fDebugCheck is true, and its sole purpose is to tell the first call
@@ -4240,8 +4240,8 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
      * Once we snap fStarting, we clear it, because technically, we've moved beyond "starting" and have
      * officially "started" now.
      */
-    var nDebugState = (!nMinCycles)? -1 : (this.aFlags.fStarting? 0 : 1);
-    this.aFlags.fStarting = false;
+    var nDebugState = (!nMinCycles)? -1 : (this.flags.fStarting? 0 : 1);
+    this.flags.fStarting = false;
 
     /*
      * We move the minimum cycle count to nStepCycles (the number of cycles left to step), so that other
@@ -4367,7 +4367,7 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
             //
             // Make sure that every instruction is assessing a cycle cost, and that the cost is a net positive.
             //
-            if (this.aFlags.fComplete && this.nStepCycles >= this.nSnapCycles && !(this.opFlags & X86.OPFLAG_PREFIXES)) {
+            if (this.flags.fComplete && this.nStepCycles >= this.nSnapCycles && !(this.opFlags & X86.OPFLAG_PREFIXES)) {
                 this.println("cycle miscount: " + (this.nSnapCycles - this.nStepCycles));
                 this.setIP(this.opLIP - this.segCS.base);
                 this.stopCPU();
@@ -4378,7 +4378,7 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
 
     } while (this.nStepCycles > 0);
 
-    return (this.aFlags.fComplete? this.nBurstCycles - this.nStepCycles : (this.aFlags.fComplete === undefined? 0 : -1));
+    return (this.flags.fComplete? this.nBurstCycles - this.nStepCycles : (this.flags.fComplete === undefined? 0 : -1));
 };
 
 /**

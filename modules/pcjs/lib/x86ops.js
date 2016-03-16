@@ -54,7 +54,7 @@ X86.opADDmb = function()
      * Notice that we also test fRunning: this allows the Debugger to step over the instruction,
      * because its trace ("t") command doesn't "run" the CPU; it merely "steps" the CPU.
      */
-    if (DEBUG && !this.bModRM && this.aFlags.fRunning) {
+    if (DEBUG && !this.bModRM && this.flags.fRunning) {
         this.printMessage("suspicious opcode: 0x00 0x00", DEBUGGER || this.bitsMessage);
         if (DEBUGGER && this.dbg) this.dbg.stopCPU();
     }

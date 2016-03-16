@@ -139,7 +139,7 @@ function Computer(parmsComputer, parmsMachine, fSuspended) {
 
     Component.call(this, "Computer", parmsComputer, Computer, Messages.COMPUTER);
 
-    this.aFlags.fPowered = false;
+    this.flags.fPowered = false;
 
     this.setMachineParms(parmsMachine);
 
@@ -250,7 +250,7 @@ function Computer(parmsComputer, parmsMachine, fSuspended) {
      * localStorage (in other words, it prevents fAllowResume from being true, and forcing resume off).
      */
     var fAllowResume;
-    var sState = Component.parmsURL && Component.parmsURL['state'] || this.getMachineParm('state') || (fAllowResume = true) && parmsComputer['state'];
+    var sState = this.getMachineParm('state') || (fAllowResume = true) && parmsComputer['state'];
 
     if (sState) {
         sStatePath = this.sStatePath = sState;
@@ -379,8 +379,16 @@ Computer.prototype.setMachineParms = function(parmsMachine)
  */
 Computer.prototype.getMachineParm = function(sParm, parmsComponent)
 {
-    var value;
-    if (this.parmsMachine) {
+    /*
+     * When checking parmsURL, the check is allowed be a bit looser, because URL parameters are
+     * user-supplied, whereas most other parameters are developer-supplied.  Granted, a developer
+     * may also be sloppy and neglect to use correct case (eg, 'automount' instead of 'autoMount'),
+     * but there are limits to my paranoia.
+     */
+    var sParmLC = sParm.toLowerCase();
+    var value = Component.parmsURL && (Component.parmsURL[sParm] || Component.parmsURL[sParmLC]);
+
+    if (value === undefined && this.parmsMachine) {
         value = this.parmsMachine[sParm];
     }
     if (value === undefined && parmsComponent) {
@@ -653,9 +661,9 @@ Computer.prototype.powerOn = function(resume)
  */
 Computer.prototype.powerRestore = function(component, stateComputer, fRepower, fRestore)
 {
-    if (!component.aFlags.fPowered) {
+    if (!component.flags.fPowered) {
 
-        component.aFlags.fPowered = true;
+        component.flags.fPowered = true;
 
         if (component.powerUp) {
 
@@ -758,11 +766,11 @@ Computer.prototype.donePowerOn = function(aParms)
     var fRepower = (aParms[1] < 0);
     var fRestore = aParms[2];
 
-    if (DEBUG && this.aFlags.fPowered && this.messageEnabled()) {
+    if (DEBUG && this.flags.fPowered && this.messageEnabled()) {
         this.printMessage("Computer.donePowerOn(): redundant");
     }
 
-    this.aFlags.fPowered = true;
+    this.flags.fPowered = true;
     var controlPower = this.bindings["power"];
     if (controlPower) controlPower.textContent = "Shutdown";
 
@@ -808,22 +816,22 @@ Computer.prototype.donePowerOn = function(aParms)
  */
 Computer.prototype.checkPower = function()
 {
-    if (this.aFlags.fPowered) return true;
+    if (this.flags.fPowered) return true;
 
     var component = null, iComponent;
     var aComponents = Component.getComponents(this.id);
     for (iComponent = 0; iComponent < aComponents.length; iComponent++) {
         component = aComponents[iComponent];
-        if (component !== this && !component.aFlags.fReady) break;
+        if (component !== this && !component.flags.fReady) break;
     }
     if (iComponent == aComponents.length) {
         for (iComponent = 0; iComponent < aComponents.length; iComponent++) {
             component = aComponents[iComponent];
-            if (component !== this && !component.aFlags.fPowered) break;
+            if (component !== this && !component.flags.fPowered) break;
         }
     }
     if (iComponent == aComponents.length) component = this;
-    var s = "The " + component.type + " component (" + component.id + ") is not " + (!component.aFlags.fReady? "ready yet" + (component.fnReady? " (waiting for notification)" : "") : "powered yet") + ".";
+    var s = "The " + component.type + " component (" + component.id + ") is not " + (!component.flags.fReady? "ready yet" + (component.fnReady? " (waiting for notification)" : "") : "powered yet") + ".";
     web.alertUser(s);
     return false;
 };
@@ -905,7 +913,7 @@ Computer.prototype.powerOff = function(fSave, fShutdown)
         data = this.cpu.powerDown(fSave, fShutdown);
         if (typeof data === "object") stateComputer.set(this.cpu.id, data);
         if (fShutdown) {
-            this.cpu.aFlags.fPowered = false;
+            this.cpu.flags.fPowered = false;
             if (data === false) sState = null;
         }
     }
@@ -913,13 +921,13 @@ Computer.prototype.powerOff = function(fSave, fShutdown)
     var aComponents = Component.getComponents(this.id);
     for (var iComponent = 0; iComponent < aComponents.length; iComponent++) {
         var component = aComponents[iComponent];
-        if (component.aFlags.fPowered) {
+        if (component.flags.fPowered) {
             if (component.powerDown) {
                 data = component.powerDown(fSave, fShutdown);
                 if (typeof data === "object") stateComputer.set(component.id, data);
             }
             if (fShutdown) {
-                component.aFlags.fPowered = false;
+                component.flags.fPowered = false;
                 if (data === false) sState = null;
             }
         }
@@ -972,7 +980,7 @@ Computer.prototype.powerOff = function(fSave, fShutdown)
     }
 
     if (fShutdown) {
-        this.aFlags.fPowered = false;
+        this.flags.fPowered = false;
         var controlPower = this.bindings["power"];
         if (controlPower) controlPower.textContent = "Power";
     }
@@ -1343,7 +1351,7 @@ Computer.prototype.storeServerState = function(sUserID, sState, fSync)
 Computer.prototype.onPower = function()
 {
     if (!this.nPowerChange) {
-        if (!this.aFlags.fPowered) {
+        if (!this.flags.fPowered) {
             this.wait(this.powerOn);
         } else {
             this.powerOff(false, true);
@@ -1364,7 +1372,7 @@ Computer.prototype.onReset = function()
      * I'm going to start with the presumption that it makes little sense for an "unpowered" computer to be "reset";
      * ditto if the power state is currently being changed.
      */
-    if (!this.aFlags.fPowered || this.nPowerChange) return;
+    if (!this.flags.fPowered || this.nPowerChange) return;
 
     /*
      * If this is a "resumable" machine (and it's not using a predefined state), then we overload the reset
@@ -1465,7 +1473,7 @@ Computer.init = function()
             var computer = new Computer(parmsComputer, parmsMachine, true);
 
             if (DEBUG && computer.messageEnabled()) {
-                computer.printMessage("onInit(" + computer.aFlags.fPowered + ")");
+                computer.printMessage("onInit(" + computer.flags.fPowered + ")");
             }
 
             /*
@@ -1502,10 +1510,10 @@ Computer.show = function()
         if (computer) {
 
             if (DEBUG && computer.messageEnabled()) {
-                computer.printMessage("onShow(" + computer.fInitialized + "," + computer.aFlags.fPowered + ")");
+                computer.printMessage("onShow(" + computer.fInitialized + "," + computer.flags.fPowered + ")");
             }
 
-            if (computer.fInitialized && !computer.aFlags.fPowered) {
+            if (computer.fInitialized && !computer.flags.fPowered) {
                 /**
                  * Repower the computer, notifying every component to continue running as-is.
                  */
@@ -1551,10 +1559,10 @@ Computer.exit = function()
         if (computer) {
 
             if (DEBUG && computer.messageEnabled()) {
-                computer.printMessage("onExit(" + computer.aFlags.fPowered + ")");
+                computer.printMessage("onExit(" + computer.flags.fPowered + ")");
             }
 
-            if (computer.aFlags.fPowered) {
+            if (computer.flags.fPowered) {
                 /**
                  * Power off the computer, giving every component an opportunity to save its state,
                  * but only if 'resume' has been set AND there is no valid resume path (because if a valid resume

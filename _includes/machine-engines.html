@@ -24,7 +24,7 @@ here and in markout.js.  Examples include 'autopower' ('autoPower') and 'automou
 
 {% endcomment %}
 {% for machine in page.machines %}
-  {% capture machine_type %}{{ machine.type | remove:'-dbg' }}{% endcapture %}
+  {% capture machine_type %}{{ machine.type | remove:"-dbg" }}{% endcapture %}
   {% if machine.debugger %}
     {% capture machine_file %}{{ machine_type }}-dbg{% endcapture %}
   {% else %}
@@ -32,24 +32,31 @@ here and in markout.js.  Examples include 'autopower' ('autoPower') and 'automou
   {% endif %}
   {% capture machine_embed %}embed{{ machine_type | upcase }}{% endcapture %}
   {% if machine.automount != nil %}
-    {% if machine.automount == '' %}
-      {% assign machine_autoMount = '{}' %}
+    {% if machine.automount == "" %}
+      {% assign machine_autoMount = "{}" %}
     {% else %}
       {% capture machine_autoMount %}{{ machine.automount|jsonify }}{% endcapture %}
     {% endif %}
   {% else %}
-    {% if machine.autoMount == '' %}
-      {% assign machine_autoMount = '{}' %}
+    {% if machine.autoMount == "" %}
+      {% assign machine_autoMount = "{}" %}
     {% else %}
       {% capture machine_autoMount %}{{ machine.autoMount|jsonify }}{% endcapture %}
     {% endif %}
   {% endif %}
   {% if machine.autopower != nil %}
-    {% capture machine_autoPower %}{{ machine.autopower }}{% endcapture %}
+    {% capture machine_autoPower %},autoPower:{{ machine.autopower }}{% endcapture %}
   {% elsif machine.autoPower != nil %}
-    {% capture machine_autoPower %}{{ machine.autoPower }}{% endcapture %}
+    {% capture machine_autoPower %},autoPower:{{ machine.autoPower }}{% endcapture %}
   {% else %}
-    {% assign machine_autoPower = "true" %}
+    {% assign machine_autoPower = "" %}
+  {% endif %}
+  {% if machine.autostart != nil %}
+    {% capture machine_autoStart %},autoStart:{{ machine.autostart }}{% endcapture %}
+  {% elsif machine.autoStart != nil %}
+    {% capture machine_autoStart %},autoStart:{{ machine.autoStart }}{% endcapture %}
+  {% else %}
+    {% assign machine_autoStart = "" %}
   {% endif %}
   {% unless machine.config %}
     {% assign machine_config = "machine.xml" %}
@@ -57,27 +64,27 @@ here and in markout.js.  Examples include 'autopower' ('autoPower') and 'automou
     {% assign machine_config = machine.config %}
   {% endunless %}
   {% if machine.drives != nil %}
-    {% if machine.drives == '' %}
-      {% assign machine_drives = '[]' %}
+    {% if machine.drives == "" %}
+      {% assign machine_drives = ",drives:[]" %}
     {% else %}
-      {% capture machine_drives %}{{ machine.drives }}{% endcapture %}
+      {% capture machine_drives %},drives:{{ machine.drives }}{% endcapture %}
     {% endif %}
   {% else %}
-    {% capture machine_drives %}null{% endcapture %}
+    {% assign machine_drives = "" %}
   {% endif %}
   {% unless machine.template %}
-    {% assign machine_template = '' %}
+    {% assign machine_template = "" %}
   {% else %}
     {% assign machine_template = machine.template %}
   {% endunless %}
-  {% capture machine_parms %}{{ site.left_brace }}autoMount:{{ machine_autoMount }},autoPower:{{ machine_autoPower }},drives:{{ machine_drives }},state:"{{ machine.state }}",messages:"{{ machine.messages }}"{{ site.right_brace }}{% endcapture %}
+  {% capture machine_parms %}{{ site.left_brace }}autoMount:{{ machine_autoMount }}{{ machine_autoPower }}{{ machine_autoStart }}{{ machine_drives }},state:"{{ machine.state }}",messages:"{{ machine.messages }}"{{ site.right_brace }}{% endcapture %}
   {% if site.pcjs.compiled == true and machine.uncompiled != true %}
     {% capture machine_script %}<script type="text/javascript" src="{{ site.baseurl }}/versions/{{ machine_type }}js/{{ site.pcjs.version }}/{{ machine_file }}.js"></script>{% endcapture %}
     {% unless machine_scripts contains machine_script %}
       {{ machine_script }}
     {% endunless %}
     {% capture machine_scripts %}{{ machine_scripts }}{{ machine_script }}{% endcapture %}
-    {% if machine_template == '' %}
+    {% if machine_template == "" %}
       {% capture machine_template %}{{ site.baseurl }}/versions/{{ machine_type }}js/{{ site.pcjs.version }}/components.xsl{% endcapture %}
     {% endif %}
   {% else %}
@@ -90,7 +97,7 @@ here and in markout.js.  Examples include 'autopower' ('autoPower') and 'automou
       {% endunless %}
       {% capture machine_scripts %}{{ machine_scripts }}{{ machine_script }}{% endcapture %}
     {% endfor %}
-    {% if machine_template == '' %}    
+    {% if machine_template == "" %}    
       {% capture machine_template %}{{ site.baseurl }}/modules/{{ machine_type }}js/templates/components.xsl{% endcapture %}
     {% endif %}
   {% endif %}
