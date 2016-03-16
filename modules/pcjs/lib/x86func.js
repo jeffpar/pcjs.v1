@@ -1537,8 +1537,8 @@ X86.fnLTR = function(dst, src)
 {
     this.opFlags |= X86.OPFLAG.NOWRITE;
     if (this.segTSS.load(dst) !== X86.ADDR_INVALID) {
-        this.setShort(this.segTSS.addrDesc + X86.DESC.ACC.OFFSET, this.segTSS.acc |= X86.DESC.ACC.TSS_BUSY);
-        this.segTSS.type |= X86.DESC.ACC.TSS_BUSY;
+        this.setShort(this.segTSS.addrDesc + X86.DESC.ACC.OFFSET, this.segTSS.acc |= X86.DESC.ACC.TYPE.TSS_BUSY);
+        this.segTSS.type |= X86.DESC.ACC.TYPE.TSS_BUSY;
     }
     this.nStepCycles -= (17 + (this.regEA === X86.ADDR_INVALID? 0 : 2));
     return dst;

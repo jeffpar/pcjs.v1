@@ -645,7 +645,7 @@ X86Seg.prototype.loadDesc6 = function(addrDesc, sel)
  *
  * Probed loads allow us to deal with complex segment load operations (ie, those involving an implied stack-switch
  * or task-switch), by allowing us to probe all the new selectors and generate the necessary faults before modifying
- * any segment registers; if all the probes succeed, then all the loads can proceed.
+ * any segment registers; if all the probes succeed, then the original load can proceed.
  *
  * The next non-probed load of a probed selector will move those probed descriptor values into the X86Seg object,
  * saving us from having to reload and reparse the descriptor.  However, if a different selector is loaded between
@@ -705,21 +705,25 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fProbe)
 
     case X86Seg.ID.CODE:
 
+        /*
+         * NOTE: Since we are X86Seg.ID.CODE, we can use this.cpl instead of the more convoluted
+         * this.cpu.segCS.cpl.
+         */
         var fCall = this.fCall;
         this.fStackSwitch = false;
 
         /*
          * This special bit of code is currently used only by the Debugger, when it needs to inject
          * a 16:32 callback address into the machine that it can intercept calls to.  We call these
-         * "call break" addresses, because they're like private breakpoints that only operate when
+         * "call break" addresses, because they're essentially breakpoints that only operate when
          * a particular address is called; specifically, an address with selector 0x0001 and an offset
-         * that forms an index (1-based) into the aCallBreaks function table.
+         * that forms a (1-based) index into the aCallBreaks function table.
          *
-         * In protected-mode, 0x0001 is an invalid code selector (a null selector with an RPL of 1),
-         * and while it's not inconceivable that an operating system might use such a selector for
-         * some strange purpose, I've not seen such an operating system.  And in any case, those
-         * operating systems are not likely to trigger the Debugger's call to addCallBreak(), so no
-         * call breaks will be generated, and this code will never execute.
+         * In protected-mode, any null selector, including 0x0001 (null with an RPL of 1), is
+         * an invalid CS selector, and while it's not inconceivable that an operating system might
+         * use such a selector for some strange purpose, I've not seen such an operating system.
+         * And in any case, those operating systems are not likely to trigger the Debugger's call to
+         * addCallBreak(), so no call breaks will be generated, and this code will never execute.
          *
          * TODO: If we ever need this to be mode-independent, it can be moved somewhere where it will
          * trigger for both real and protected-mode code segment loads, because CALLBREAK_SEL (0x0001)
@@ -744,41 +748,79 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fProbe)
 
         if (!selMasked) {
             /*
-             * selMasked is really the descriptor table offset, and a zero offset is fine for the IDT;
-             * it MAY even be OK for the LDT.  But it's definitely not OK for the GDT; a null selector
-             * is allowed in any of DS, ES, SS, FS, or GS, but never CS).  Since there's no parameter
-             * that tells us which table we're using, we have to check manually.
+             * selMasked is really the descriptor table offset, and a zero offset is fine for the IDT,
+             * and it's probably fine for the LDT, but it's definitely NOT fine for the GDT, because
+             * that's a reference to the null selector.  A null selector is allowed in DS, ES, FS, or GS,
+             * but never CS or SS.  Since there's no parameter that tells us which table we're using,
+             * we have to check manually.
              *
-             * If we ARE attempting to load a null selector from the GDT, then we zero type, which ensures
-             * that sizeGate will remain invalid, triggering a GP_FAULT below.
+             * If we ARE attempting to load a null selector from the GDT, then we zero type, ensuring that
+             * sizeGate will remain invalid (-1), triggering a GP_FAULT below.
              */
             if (addrDesc >= cpu.addrGDT && addrDesc < cpu.addrGDTLimit) type = 0;
         }
 
-        /*
-         * Since we are X86Seg.ID.CODE, we can use this.cpl instead of the more generic cpu.segCS.cpl
-         */
         if (type >= X86.DESC.ACC.TYPE.CODE_EXECONLY) {
-            sizeGate = 0;
-            if (rpl > this.cpl) {
-                /*.
-                 * If fCall is false, then we must have a RETF to a less privileged segment, which is OK.
+            /*
+             * There are three basic ways a new code segment can be loaded (ignoring special cases like LOADALL):
+             *
+             *      1) CALLF (fCall is true)
+             *      2) RETF (fCall is false)
+             *      3) JMPF (fCall is undefined)
+             */
+            if (fProbe != null) {
+                sizeGate = 0;
+            }
+            else if (fCall !== false) {
+                /*
+                 * We deal with CALLF/JMPF first.  We've already ascertained that the selector type refers to
+                 * a segment, not a gate, so the next important distinction is CONFORMING vs. non-CONFORMING.
                  *
-                 * Otherwise, we must be dealing with a CALLF or JMPF to a less privileged segment, in which
-                 * case either DPL == CPL *or* the new segment is conforming and DPL <= CPL.
+                 * For a CONFORMING target, we must verify that its DPL <= CPL.  For a non-CONFORMING target,
+                 * we must verify that RPL <= CPL and DPL == CPL.  Assuming both those tests pass, we must also
+                 * ensure that the current CPL is recorded as the new RPL (that is, the RPL bits of sel must be
+                 * updated).
                  */
-                sizeGate = -1;
-                if (fCall === false || dpl == this.cpl || (type & X86.DESC.ACC.TYPE.CONFORMING) && dpl <= this.cpl) {
-                    /*
-                     * It's critical that any stack switch occur with the operand size in effect at the time of
-                     * the current instruction, BEFORE any calls to updateMode() and resetSizes(), otherwise the
-                     * operand size (or operand override) in effect on an instruction like IRETD will be ignored.
-                     */
-                    regSP = cpu.popWord();
-                    cpu.setSS(cpu.popWord(), true);
-                    cpu.setSP(regSP);
-                    this.fStackSwitch = true;
+                if (type & X86.DESC.ACC.TYPE.CONFORMING) {
+                    if (dpl <= this.cpl) {
+                        sizeGate = 0;
+                    }
+                } else {
+                    if (rpl <= this.cpl && dpl == this.cpl) {
+                        sizeGate = 0;
+                    }
+                }
+                if (!sizeGate) {
+                    sel = (sel & ~X86.SEL.RPL) | (this.cpl & X86.SEL.RPL);
+                }
+            }
+            else {
+                /*
+                 * We deal with RETF next.  For starters, we must verify that RPL >= CPL.  Moreover, if
+                 * RPL > CPL, then we have a privilege level change that requires a stack switch, assuming
+                 * the stack selector is acceptable.
+                 */
+                if (rpl >= this.cpl) {
+                    if (rpl > this.cpl) {
+                        regSP = cpu.popWord();
+                        cpu.setSS(cpu.popWord(), true);
+                        cpu.setSP(regSP);
+                        this.fStackSwitch = true;
+                    }
                     sizeGate = 0;
+                }
+            }
+            if (DEBUG) {
+                var sizeGateCheck = 0, fStackSwitchCheck = false;
+                if (rpl > this.cpl) {
+                    sizeGateCheck = -1;
+                    if (fCall === false || dpl == this.cpl || (type & X86.DESC.ACC.TYPE.CONFORMING) && dpl <= this.cpl) {
+                        fStackSwitchCheck = true;
+                        sizeGateCheck = 0;
+                    }
+                }
+                if (sizeGate != sizeGateCheck || this.fStackSwitch != fStackSwitchCheck) {
+                    this.cpu.stopCPU();
                 }
             }
         }
@@ -851,7 +893,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fProbe)
                  * TODO: Verify the PRESENT bit of the gate descriptor, and issue NP_FAULT as appropriate.
                  */
                 selCode = base & 0xffff;
-                if (I386 && (type & X86.DESC.ACC.NONSEG_386)) {
+                if (I386 && (type & X86.DESC.ACC.TYPE.NONSEG_386)) {
                     limit = limitOrig | (ext << 16);
                 }
 
@@ -878,7 +920,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fProbe)
                      * and then figure out which should really be used.
                      */
                     addrTSS = cpu.segTSS.base;
-                    if (!I386 || !(cpu.segTSS.type & X86.DESC.ACC.NONSEG_386)) {
+                    if (!I386 || !(cpu.segTSS.type & X86.DESC.ACC.TYPE.NONSEG_386)) {
                         offSP = (cplNew << 2) + X86.TSS286.CPL0_SP;
                         lenSP = 2;
                     } else {
@@ -925,7 +967,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fProbe)
                  * TODO: Consider whether we can skip this loadProt() call if this.sel already contains selCode
                  * (and the previous mode matches, which might require we cache the mode in the X86Seg object, too).
                  */
-                if (this.loadProt(selCode) === X86.ADDR_INVALID) {
+                if (this.loadProt(selCode, false) === X86.ADDR_INVALID) {
                     return X86.ADDR_INVALID;
                 }
 
@@ -933,9 +975,9 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fProbe)
 
                 this.offIP = limit;
 
-                cpu.assert(this.cpl == cplNew);
+                // cpu.assert(this.cpl == cplNew);
 
-                if (this.cpl < cplOld) {
+                if (cplNew < cplOld) {
 
                     if (fCall !== true) {
                         cpu.assert(false);
@@ -1065,7 +1107,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fProbe)
         break;
 
     case X86Seg.ID.TSS:
-        var typeTSS = type & ~X86.DESC.ACC.TSS_BUSY;
+        var typeTSS = type & ~X86.DESC.ACC.TYPE.TSS_BUSY;
         if (!selMasked || typeTSS != X86.DESC.ACC.TYPE.TSS286 && typeTSS != X86.DESC.ACC.TYPE.TSS386) {
             X86.helpFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel & X86.ERRCODE.SELMASK);
             return X86.ADDR_INVALID;
@@ -1180,14 +1222,14 @@ X86Seg.prototype.switchTSS = function switchTSS(selNew, fNest)
         /*
          * TODO: Verify that it is (always) correct to require that the BUSY bit be currently set.
          */
-        if (!(cpu.segTSS.type & X86.DESC.ACC.TSS_BUSY)) {
+        if (!(cpu.segTSS.type & X86.DESC.ACC.TYPE.TSS_BUSY)) {
             X86.helpFault.call(cpu, X86.EXCEPTION.GP_FAULT, selNew & X86.ERRCODE.SELMASK);
             return false;
         }
         /*
          * TODO: Should I be more paranoid about writing our cached ACC value back into the descriptor?
          */
-        cpu.setShort(cpu.segTSS.addrDesc + X86.DESC.ACC.OFFSET, cpu.segTSS.acc &= ~X86.DESC.ACC.TSS_BUSY);
+        cpu.setShort(cpu.segTSS.addrDesc + X86.DESC.ACC.OFFSET, cpu.segTSS.acc &= ~X86.DESC.ACC.TYPE.TSS_BUSY);
     }
 
     if (cpu.segTSS.load(selNew) === X86.ADDR_INVALID) {
@@ -1200,18 +1242,18 @@ X86Seg.prototype.switchTSS = function switchTSS(selNew, fNest)
     }
 
     if (fNest !== false) {
-        if (cpu.segTSS.type & X86.DESC.ACC.TSS_BUSY) {
+        if (cpu.segTSS.type & X86.DESC.ACC.TYPE.TSS_BUSY) {
             X86.helpFault.call(cpu, X86.EXCEPTION.GP_FAULT, selNew & X86.ERRCODE.SELMASK);
             return false;
         }
-        cpu.setShort(cpu.segTSS.addrDesc + X86.DESC.ACC.OFFSET, cpu.segTSS.acc |= X86.DESC.ACC.TSS_BUSY);
+        cpu.setShort(cpu.segTSS.addrDesc + X86.DESC.ACC.OFFSET, cpu.segTSS.acc |= X86.DESC.ACC.TYPE.TSS_BUSY);
     }
 
     /*
      * Now that we're done checking the TSS_BUSY bit in the TYPE field (which is a subset of the ACC field),
      * sync any changes made above in the ACC field to the TYPE field.
      */
-    cpu.segTSS.type = (cpu.segTSS.type & ~X86.DESC.ACC.TSS_BUSY) | (cpu.segTSS.acc & X86.DESC.ACC.TSS_BUSY);
+    cpu.segTSS.type = (cpu.segTSS.type & ~X86.DESC.ACC.TYPE.TSS_BUSY) | (cpu.segTSS.acc & X86.DESC.ACC.TYPE.TSS_BUSY);
 
     /*
      * Update the old TSS

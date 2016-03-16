@@ -960,7 +960,7 @@ X86.helpCheckFault = function(nFault, nError, fHalt)
 
         var fRunning = this.aFlags.fRunning;
         var sMessage = "Fault " + str.toHexByte(nFault) + (nError != null? " (" + str.toHexWord(nError) + ")" : "") + " on opcode " + str.toHexByte(bOpcode);
-        if (fHalt && fRunning) sMessage += " (blocked by PCjs Debugger)";
+        if (fHalt && fRunning) sMessage += " (blocked)";
 
         if (DEBUGGER && this.dbg) {
             this.printMessage(sMessage, fHalt || bitsMessage, true);

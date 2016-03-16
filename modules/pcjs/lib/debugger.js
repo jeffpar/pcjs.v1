@@ -3298,7 +3298,7 @@ if (DEBUGGER) {
         if (!seg) return;
 
         var sDump = "";
-        var type = seg.type & ~X86.DESC.ACC.TSS_BUSY;
+        var type = seg.type & ~X86.DESC.ACC.TYPE.TSS_BUSY;
         var cch = (type == X86.DESC.ACC.TYPE.TSS286? 4 : 8);
         var aTSSFields = (type == X86.DESC.ACC.TYPE.TSS286? Debugger.TSS286 : Debugger.TSS386);
         var off, addr, v;
@@ -4205,6 +4205,15 @@ if (DEBUGGER) {
                             this.println("TIMER0 update #" + i + ": [" + a[0] + ',' + a[1] + ',' + a[2] + ']');
                         }
                         this.chipset.acTimer0Counts = [];
+                    }
+                } else {
+                    if (this.messageEnabled(Messages.HALT)) {
+                        /*
+                         * It's possible the user is trying to 'g' past a fault that was blocked by helpCheckFault()
+                         * for the Debugger's benefit; if so, it will continue to be blocked, so try displaying a helpful
+                         * message (another helpful tip would be to simply turn off the "halt" message category).
+                         */
+                        sStopped += " (use the 't' command to execute blocked faults)";
                     }
                 }
                 this.println(sStopped);

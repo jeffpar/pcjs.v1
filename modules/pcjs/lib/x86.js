@@ -220,6 +220,11 @@ var X86 = {
                 CONFORMING:                 0x0400,     // CODE: set if conforming, clear if not
                 EXPDOWN:                    0x0400,     // DATA: set if expand-down, clear if not
                 /*
+                 * Assorted bits that apply only within NONSEG values
+                 */
+                TSS_BUSY:                   0x0200,
+                NONSEG_386:                 0x0800,     // 80386 and up
+                /*
                  * The following are all the possible (valid) types (well, except for the variations
                  * of DATA and CODE where the ACCESSED bit (0x0100) may also be set)
                  */
@@ -244,11 +249,6 @@ var X86 = {
                 CODE_CONFORMING:            0x1C00,
                 CODE_CONFORMING_READABLE:   0x1E00
             },
-            /*
-             * Assorted ACC bits within NONSEG values
-             */
-            TSS_BUSY:                       0x0200,
-            NONSEG_386:                     0x0800,     // 80386 and up
             DPL: {
                 MASK:                       0x6000,
                 SHIFT:                      13

@@ -2216,7 +2216,7 @@ X86CPU.prototype.setLIP = function(addr)
  * never set without an accompanying IP (well, except for a few undocumented instructions, like POP CS, which
  * were available ONLY on the 8086/8088/80186/80188; see setCS() for details).
  *
- * And even though this function is called setCSIP(), please note the order of the parameters is IP,CS,
+ * And even though this function is called setCSIP(), please note the order of the parameters is [IP,CS],
  * which matches the order that CS:IP values are normally stored in memory, allowing us to make calls like this:
  *
  *      this.setCSIP(this.popWord(), this.popWord());
@@ -2225,7 +2225,7 @@ X86CPU.prototype.setLIP = function(addr)
  * @param {number} off
  * @param {number} sel
  * @param {boolean} [fCall] is true if CALLF in progress, false if RETF/IRET in progress, undefined otherwise
- * @return {boolean|null} true if a stack switch occurred; the only opcode that really needs to pay attention is opRETFn()
+ * @return {boolean|null} true if a stack switch occurred; the only operation that needs to pay attention is opRETFn()
  */
 X86CPU.prototype.setCSIP = function(off, sel, fCall)
 {
