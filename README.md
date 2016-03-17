@@ -213,17 +213,18 @@ Using PCjs
 
 ### From The Browser
 
-The PCjs web server is little more than a file/directory browser for the PCjs project, plus a collection of APIs.
+The PCjs Node web server is little more than a file/directory browser for the PCjs project, plus a collection of APIs.
 
-If a URL corresponds to a PCjs project folder and no "index.html" exists in that folder, the server loads an HTML
-template ([common.html](modules/shared/templates/common.html)) and generates an "index.html" for that folder.
+If a URL corresponds to a PCjs project folder and no "index.html" exists in that folder, the Node web server loads
+an HTML template ([common.html](modules/shared/templates/common.html)) and generates an "index.html" for that folder.
 
 The contents of the "index.html" will vary depending on the contents of the folder; for example, if the folder
 contains a README.md, then that Markdown file is converted to HTML and embedded in the "index.html".  Similarly,
 if the folder contains a machine XML file, that is embedded as well.
 
-Markdown files containing one or more embedded machines should contain a Jekyll "Front Matter" header that describes
-them.  For example, here's the header from the pcjs.org home page ([index.md](index.md)):
+To work well with both the Node and Jekyll web servers, all Markdown files containing one or more embedded machines
+should contain a Jekyll "Front Matter" header that describes the machines.  For example, here's the header from the
+pcjs.org home page ([index.md](index.md)):
 
 	---
 	layout: page
@@ -238,11 +239,13 @@ them.  For example, here's the header from the pcjs.org home page ([index.md](in
 	    config: /devices/c1p/machine/8kb/large/machine.xml
 	---
 
-Then the following line is inserted at the point where the machine should appear:
+Then the following lines are inserted at the points where the machines should appear:
 
 	{% include machine.html id="ibm5150" %}
+	...
+	{% include machine.html id="demoC1P" %}
 
-For more information on all the machine options you can specify in a Markdown file, see the Jekyll include file
+For more information on all the machine options supported in a Markdown file, see the project's Jekyll include file
 [machine-engines.html](/_includes/machine-engines.html).
 
 ### From The Command-Line
