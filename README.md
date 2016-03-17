@@ -341,7 +341,7 @@ To start developing features for a new version of PCjs, here are the recommended
 3. Make changes
 4. Run "grunt" to build new versions of the apps (eg, "/versions/pcjs/1.x.x/pc.js")
  
-You might also want to check out the blog post on [PCjs Coding Conventions](/blog/2014/09/30/).
+You might also want to check out the blog post on [PCjs Coding Conventions](http://www.pcjs.org/blog/2014/09/30/).
 
 You may also want to skip step #2 until you're ready to start testing the new version.  Depending on the nature
 of your changes, it may be better to manually edit the version number in only a few machine XML files for testing,
