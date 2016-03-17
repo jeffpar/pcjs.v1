@@ -219,8 +219,31 @@ If a URL corresponds to a PCjs project folder and no "index.html" exists in that
 template ([common.html](modules/shared/templates/common.html)) and generates an "index.html" for that folder.
 
 The contents of the "index.html" will vary depending on the contents of the folder; for example, if the folder
-contains a README.md, then that file is converted to HTML and embedded in the "index.html".  Similarly, if the folder
-contains a machine XML file, that is embedded as well.
+contains a README.md, then that Markdown file is converted to HTML and embedded in the "index.html".  Similarly,
+if the folder contains a machine XML file, that is embedded as well.
+
+Markdown files containing one or more embedded machines should contain a Jekyll "Front Matter" header that describes
+them.  For example, here's the header from the pcjs.org home page ([index.md](index.md)):
+
+	---
+	layout: page
+	permalink: /
+	machines:
+	  - type: pc
+	    id: ibm5150
+	    name: "IBM PC (Model 5150) with Monochrome Display"
+	    config: /devices/pc/machine/5150/mda/64kb/machine.xml
+	  - type: c1p
+	    id: demoC1P
+	    config: /devices/c1p/machine/8kb/large/machine.xml
+	---
+
+Then the following line is inserted at the point where the machine should appear:
+
+	{% include machine.html id="ibm5150" %}
+
+For more information on all the machine options you can specify in a Markdown file, see the Jekyll include file
+[machine-engines.html](/_includes/machine-engines.html).
 
 ### From The Command-Line
 
