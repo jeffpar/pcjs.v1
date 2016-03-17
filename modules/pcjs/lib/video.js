@@ -2721,7 +2721,7 @@ Card.prototype.setMemoryAccess = function(nAccess)
         var nReadAccess = nAccess & Card.ACCESS.READ.MASK;
         var fnReadByte = Card.ACCESS.afn[nReadAccess];
         if (!fnReadByte) {
-            if (DEBUG && this.dbg) {
+            if (DEBUG && this.dbg && this.dbg.messageEnabled(Messages.VIDEO)) {
                 this.dbg.message("Card.setMemoryAccess(" + str.toHexWord(nAccess) + "): missing readByte handler");
                 /*
                  * I've taken a look, and the cases I've seen so far stem from the order in which the IBM VGA BIOS
@@ -2746,7 +2746,7 @@ Card.prototype.setMemoryAccess = function(nAccess)
         var nWriteAccess = nAccess & Card.ACCESS.WRITE.MASK;
         var fnWriteByte = Card.ACCESS.afn[nWriteAccess];
         if (!fnWriteByte) {
-            if (DEBUG && this.dbg) {
+            if (DEBUG && this.dbg && this.dbg.messageEnabled(Messages.VIDEO)) {
                 this.dbg.message("Card.setMemoryAccess(" + str.toHexWord(nAccess) + "): missing writeByte handler");
                 /*
                  * I've taken a look, and the cases I've seen so far stem from the order in which the IBM VGA BIOS
