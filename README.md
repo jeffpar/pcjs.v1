@@ -92,7 +92,7 @@ runs on both the client and server, featuring a command-line interface (CLI) and
 existing disk images as JSON, **DiskDump** has evolved into a full-featured disk image generator, capable of creating PC-compatible
 diskette *and* hard disk images from either lists *or* directories of files (including all subdirectories).
 
-### Installing PCjs
+### Installing PCjs with Node
 
 The following instructions were originally written for OS X.  However, users of other operating systems should have
 no problem following along.  There are some prerequisites:
@@ -103,7 +103,8 @@ no problem following along.  There are some prerequisites:
 Some additional (optional) tools are also recommended:
 
 - Python (included with OS X; separate download required for [Windows](https://www.python.org/downloads/windows/))
-- GitHub (useful for getting Git set up on [Windows](https://windows.github.com/); also available for [OS X](https://mac.github.com/)) 
+- GitHub (useful for getting Git set up on [Windows](https://windows.github.com/); also available for
+[OS X](https://mac.github.com/)) 
 
 Once you have the prerequisites, open a command-line window, `cd` to the directory where you'd like to install PCjs,
 and type the following commands:
@@ -125,6 +126,38 @@ Express v4 has been released, but the `npm install` command above will make sure
 The plan is to eventually move development to a newer version of Node, and migrate the PCjs server to a newer
 version of Express; there's no desire to remain stuck in the past (well, ignoring the fact that PCjs is the
 quintessential "stuck in the past" project), but there's also no urgency to update.
+
+### Installing PCjs with Jekyll
+
+PCjs can also be used with [Jekyll](http://jekyllrb.com) and the WEBrick web server, now that the project
+has been converted to work with [GitHub Pages](https://pages.github.com).  This is how the project is currently
+set up at [pcjs.org](http://www.pcjs.org/).
+
+This isn't going to be a Jekyll "How To" guide, because that would unnecessarily repeat all the information available
+at [GitHub Pages](https://pages.github.com).  But we'll summarize the basic steps, which replace the `npm` and `node`
+steps above.
+
+To install Jekyll for use with PCjs:
+
+ 1. Install Ruby (on OS X, it should already be installed)
+ 2. Install Bundler (on OS X, run `sudo gem install bundler`)
+ 3. Create a `Gemfile` containing `gem 'github-pages'` (this is already checked in)
+ 4. Run `bundle install` (GitHub Pages alternatively suggests: `bundle exec jekyll build --safe`)
+ 5. Run `bundle exec jekyll serve --host=0.0.0.0 --config _config.yml` to start the web server
+
+Now open a web browser and go to `http://localhost:4000/`.  You're done!
+
+Using the `--host` option makes it possible to access the web server from other devices on your local network;
+for example, you may want to run PCjs on your iPhone, iPad, or other wireless device.
+
+Another useful variation is `--config _config.yml,_developer.yml` which uses the settings in `_developer.yml`
+to override the defaults in `_config.yml`.
+
+GitHub Pages says you can run `jekyll serve` instead of `bundle exec jekyll serve`, but with the addition of
+more gems to `Gemfile` (eg, `jekyll-sitemap`), running `jekyll serve` may trigger dependency errors on some systems.
+`bundle exec ...` should always work.
+
+Last but not least, run `bundle update` periodically to keep Jekyll up-to-date.
 
 ### Building PCjs
 
@@ -198,14 +231,15 @@ run a series of automated tests, etc:
     node pcjs
 
 The [pcjs](modules/pcjs/bin/pcjs) script in [modules/pcjs/bin](modules/pcjs/bin) loads
-all the PCjs browser scripts listed in the root [package.json](/package.json) and then starts a Node REPL ("read-eval-print loop").
-The REPL handles a few special commands (eg, "load", "quit") and passes anything else to the PCjs Debugger component.
-If no Debugger component has been created yet, or if the Debugger didn't recognize the command, then it's passed on to *eval()*,
-like a good little REPL.
+all the PCjs browser scripts listed in the root [package.json](/package.json) and then starts a Node REPL
+("read-eval-print loop").  The REPL handles a few special commands (eg, "load", "quit") and passes anything else
+to the PCjs Debugger component.  If no Debugger component has been created yet, or if the Debugger didn't recognize
+the command, then it's passed on to *eval()*, like a good little REPL.
 
-Use the "load" command to load a JSON machine configuration file.  A sample [ibm5150.json](modules/pcjs/bin/ibm5150.json)
-is provided in the *bin* directory, which is a "JSON-ified" version of the [machine.xml](devices/pc/machine/5150/mda/64kb/machine.xml)
-displayed on the [pcjs.org](http://www.pcjs.org/) home page.
+Use the "load" command to load a JSON machine configuration file.  A sample
+[ibm5150.json](modules/pcjs/bin/ibm5150.json) is provided in the *bin* directory, which is a "JSON-ified" version
+of the [machine.xml](devices/pc/machine/5150/mda/64kb/machine.xml) displayed on the [pcjs.org](http://www.pcjs.org/)
+home page.
 
 The command-line loader creates all the JSON-defined machine components in the same order that the browser creates
 XML-defined components.  You can also issue the "load" command directly from the command-line:
@@ -233,6 +267,10 @@ to the server, or both.
 
 Debugging PCjs
 ---
+
+NOTE: The following information assumes you're running Node as your local web server, not Jekyll.  You can still
+debug PCjs while running Jekyll, using `http://localhost:4000/` and your favorite web browser's Developer Tools,
+but none of the special server or client features discussed below will be available.
 
 ### Server Components
 
