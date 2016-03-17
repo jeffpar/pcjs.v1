@@ -30,8 +30,8 @@ banner is displayed:
 	
 	88286
 
-The 5-digit number indicates the day the files were built.  The first 2 digits are the year (88) and the 3 remaining
-digits are the day of the year (286 or October 12).
+The 5-digit number indicates the day the files were built.  The first 2 digits (88) are the year and the 3 remaining
+digits (286) are the day of the year (October 12).
 
 A directory listing of this disk is provided [below](#directory-of-os2-10-debugger-boot-disk).
 

@@ -794,20 +794,12 @@ FileInfo.prototype.getSymbol = function(off, fNearest)
  *  iCylinder:  number,
  *  iHead:      number,
  *  iModify:    number,
- *  cModify:    number
+ *  cModify:    number,
+ *  file:       FileInfo,
+ *  offFile:    number
  * }}
  */
-var SectorData;
-
-/**
- * @class SectorInfo
- * @property {number} 0 contains iCylinder
- * @property {number} 1 contains iHead
- * @property {number} 2 contains iSector
- * @property {number} 3 contains nSectors
- * @property {boolean} 4 contains fAsync
- * @property {function(nErrorCode:number,fAsync:boolean)} 5 contains done
- */
+var SectorInfo;
 
 /**
  * initBus(cmp, bus, cpu, dbg)
@@ -1923,7 +1915,7 @@ Disk.prototype.getSectorString = function(sector, off, len)
  * Like getSector(), this must convert a PBA into CHS values; consider factoring that conversion code out.
  *
  * @this {Disk}
- * @param {Object} file
+ * @param {FileInfo} file
  * @param {number} pba (physical block address from the file's apba)
  * @param {number} off (file offset corresponding to the given pba of the given file)
  * @return {boolean} true if successfully updated, false if not
@@ -2047,22 +2039,22 @@ Disk.prototype.readRemoteSectors = function(iCylinder, iHead, iSector, nSectors,
 };
 
 /**
- * doneReadRemoteSectors(sURLName, sURLData, nErrorCode, sectorInfo)
+ * doneReadRemoteSectors(sURLName, sURLData, nErrorCode, aRequest)
  *
  * @this {Disk}
  * @param {string} sURLName
  * @param {string} sURLData
  * @param {number} nErrorCode
- * @param {Array} sectorInfo
+ * @param {Array} aRequest ([iCylinder, iHead, iSector, nSectors, fAsync, done])
  */
-Disk.prototype.doneReadRemoteSectors = function(sURLName, sURLData, nErrorCode, sectorInfo)
+Disk.prototype.doneReadRemoteSectors = function(sURLName, sURLData, nErrorCode, aRequest)
 {
     var fAsync = false;
 
-    var iCylinder = sectorInfo[0];
-    var iHead = sectorInfo[1];
-    var iSector = sectorInfo[2];
-    var nSectors = sectorInfo[3];
+    var iCylinder = aRequest[0];
+    var iHead = aRequest[1];
+    var iSector = aRequest[2];
+    var nSectors = aRequest[3];
 
     if (!nErrorCode) {
         var abData = JSON.parse(sURLData);
@@ -2092,13 +2084,13 @@ Disk.prototype.doneReadRemoteSectors = function(sURLName, sURLData, nErrorCode, 
              */
             iSector++;
         }
-        fAsync = sectorInfo[4];
+        fAsync = aRequest[4];
     } else {
         if (DEBUG && this.messageEnabled()) {
             this.printMessage("doneReadRemoteSectors(CHS=" + iCylinder + ':' + iHead + ':' + iSector + ",N=" + nSectors + ") returned error " + nErrorCode);
         }
     }
-    var done = sectorInfo[5];
+    var done = aRequest[5];
     if (done) done(nErrorCode, fAsync);
 };
 
@@ -2149,21 +2141,21 @@ Disk.prototype.writeRemoteSectors = function(iCylinder, iHead, iSector, nSectors
 };
 
 /**
- * doneWriteRemoteSectors(sURLName, sURLData, nErrorCode, sectorInfo)
+ * doneWriteRemoteSectors(sURLName, sURLData, nErrorCode, aRequest)
  *
  * @this {Disk}
  * @param {string} sURLName
  * @param {string} sURLData
  * @param {number} nErrorCode
- * @param {Array} sectorInfo
+ * @param {Array} aRequest ([iCylinder, iHead, iSector, nSectors, fAsync])
  */
-Disk.prototype.doneWriteRemoteSectors = function(sURLName, sURLData, nErrorCode, sectorInfo)
+Disk.prototype.doneWriteRemoteSectors = function(sURLName, sURLData, nErrorCode, aRequest)
 {
-    var iCylinder = sectorInfo[0];
-    var iHead = sectorInfo[1];
-    var iSector = sectorInfo[2];
-    var nSectors = sectorInfo[3];
-    var fAsync = sectorInfo[4];
+    var iCylinder = aRequest[0];
+    var iHead = aRequest[1];
+    var iSector = aRequest[2];
+    var nSectors = aRequest[3];
+    var fAsync = aRequest[4];
     this.fWriteInProgress = false;
 
     if (iCylinder >= 0 && iCylinder < this.aDiskData.length && iHead >= 0 && iHead < this.aDiskData[iCylinder].length) {

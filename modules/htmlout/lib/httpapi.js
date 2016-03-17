@@ -407,7 +407,7 @@ HTTPAPI.openUserVolume = function(sPath, sMachine, sUser, sMode, cbInit, done)
 };
 
 /**
- * readUserVolume(sPath, fd, aCHS, aAddr, done)
+ * readUserVolume(sPath, fd, aCHS, aRequest, done)
  *
  * aCHS is filled in as follows:
  *
@@ -416,7 +416,7 @@ HTTPAPI.openUserVolume = function(sPath, sMachine, sUser, sMode, cbInit, done)
  *      [2]: total sectors per track
  *      [3]: total bytes per sector (generally 512)
  *
- * aAddr is filled in as follows:
+ * aRequest is filled in as follows:
  *
  *      [0]: 0-based cylinder number
  *      [1]: 0-based head number
@@ -426,13 +426,13 @@ HTTPAPI.openUserVolume = function(sPath, sMachine, sUser, sMode, cbInit, done)
  * @param {string} sPath
  * @param {number} fd
  * @param {Array.<number>} aCHS
- * @param {Array.<number>} aAddr
+ * @param {Array.<number>} aRequest
  * @param {function(nResponse:number,sResponse:string)} done
  */
-HTTPAPI.readUserVolume = function(sPath, fd, aCHS, aAddr, done)
+HTTPAPI.readUserVolume = function(sPath, fd, aCHS, aRequest, done)
 {
-    var pos = (aAddr[0] * (aCHS[1] * aCHS[2] * aCHS[3])) + (aAddr[1] * (aCHS[2] * aCHS[3])) + ((aAddr[2] - 1) * aCHS[3]);
-    var len = (aAddr[3] * aCHS[3]);
+    var pos = (aRequest[0] * (aCHS[1] * aCHS[2] * aCHS[3])) + (aRequest[1] * (aCHS[2] * aCHS[3])) + ((aRequest[2] - 1) * aCHS[3]);
+    var len = (aRequest[3] * aCHS[3]);
 
     HTMLOut.logDebug('HTMLOut.readUserVolume("' + sPath + '"): pos: ' + pos + ', len: ' + len);
 
@@ -462,7 +462,7 @@ HTTPAPI.readUserVolume = function(sPath, fd, aCHS, aAddr, done)
 };
 
 /**
- * writeUserVolume(sPath, fd, aCHS, aAddr, sData, done)
+ * writeUserVolume(sPath, fd, aCHS, aRequest, sData, done)
  *
  * aCHS is filled in as follows:
  *
@@ -471,7 +471,7 @@ HTTPAPI.readUserVolume = function(sPath, fd, aCHS, aAddr, done)
  *      [2]: total sectors per track
  *      [3]: total bytes per sector (generally 512)
  *
- * aAddr is filled in as follows:
+ * aRequest is filled in as follows:
  *
  *      [0]: 0-based cylinder number
  *      [1]: 0-based head number
@@ -481,14 +481,14 @@ HTTPAPI.readUserVolume = function(sPath, fd, aCHS, aAddr, done)
  * @param {string} sPath
  * @param {number} fd
  * @param {Array.<number>} aCHS
- * @param {Array.<number>} aAddr
+ * @param {Array.<number>} aRequest
  * @param {string} sData
  * @param {function(nResponse:number,sResponse:string)} done
  */
-HTTPAPI.writeUserVolume = function(sPath, fd, aCHS, aAddr, sData, done)
+HTTPAPI.writeUserVolume = function(sPath, fd, aCHS, aRequest, sData, done)
 {
-    var pos = (aAddr[0] * (aCHS[1] * aCHS[2] * aCHS[3])) + (aAddr[1] * (aCHS[2] * aCHS[3])) + ((aAddr[2] - 1) * aCHS[3]);
-    var len = (aAddr[3] * aCHS[3]);
+    var pos = (aRequest[0] * (aCHS[1] * aCHS[2] * aCHS[3])) + (aRequest[1] * (aCHS[2] * aCHS[3])) + ((aRequest[2] - 1) * aCHS[3]);
+    var len = (aRequest[3] * aCHS[3]);
 
     HTMLOut.logDebug('HTMLOut.writeUserVolume("' + sPath + '"): pos: ' + pos + ', len: ' + len);
 
@@ -615,7 +615,7 @@ HTTPAPI.processDiskAPI = function(req, res)
      *      [2]: total sectors per track
      *      [3]: total bytes per sector (generally 512)
      *
-     * aAddr is filled in as follows:
+     * aRequest is filled in as follows:
      *
      *      [0]: 0-based cylinder number
      *      [1]: 0-based head number
@@ -623,7 +623,7 @@ HTTPAPI.processDiskAPI = function(req, res)
      *      [3]: sector count
      */
     var aCHS = HTTPAPI.parseDiskValues(sCHS, [0, 0, 0, 512]);
-    var aAddr = HTTPAPI.parseDiskValues(sAddr, [0, 0, 0, 0]);
+    var aRequest = HTTPAPI.parseDiskValues(sAddr, [0, 0, 0, 0]);
 
     HTMLOut.logDebug('HTTPAPI.processDiskAPI("' + sPath + '"): action=' + sAction + ', chs=' + sCHS + ', addr=' + sAddr);
 
@@ -641,7 +641,7 @@ HTTPAPI.processDiskAPI = function(req, res)
                     case DiskAPI.ACTION.READ:
                         HTTPAPI.openUserVolume(sPath, sMachine, sUser, sMode, cbInit, function(nResponse, sResponse, fd) {
                             if (fd) {
-                                HTTPAPI.readUserVolume(sPath, fd, aCHS, aAddr, function(nResponse, sResponse) {
+                                HTTPAPI.readUserVolume(sPath, fd, aCHS, aRequest, function(nResponse, sResponse) {
                                     /*
                                      * Without the addition of "no-store", Chrome will assume that a previous response to
                                      * a previously seen URL can be re-used without hitting the server again, which would be
@@ -661,7 +661,7 @@ HTTPAPI.processDiskAPI = function(req, res)
                     case DiskAPI.ACTION.WRITE:
                         HTTPAPI.openUserVolume(sPath, sMachine, sUser, sMode, cbInit, function(nResponse, sResponse, fd) {
                             if (fd) {
-                                HTTPAPI.writeUserVolume(sPath, fd, aCHS, aAddr, sData, function(nResponse, sResponse) {
+                                HTTPAPI.writeUserVolume(sPath, fd, aCHS, aRequest, sData, function(nResponse, sResponse) {
                                     res.status(nResponse).send(sResponse);
                                 });
                             } else {

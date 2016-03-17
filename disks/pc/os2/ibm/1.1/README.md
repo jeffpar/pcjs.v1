@@ -10,7 +10,7 @@ machines:
     automount:
       A:
         path: /disks/pc/os2/ibm/1.1/OS211-INSTALLATION.json
-    messages: fault|disk|data
+    messages: fault
 ---
 
 IBM OS/2 1.1

@@ -2986,8 +2986,15 @@ ChipSet.prototype.advanceDMA = function(channel, fInit)
                         if (!channel.masked) {
                             chipset.bus.setByte(addrCur, b);
                             if (BACKTRACK) {
-                                if (!off && obj.file && chipset.messageEnabled(Messages.DISK)) {
-                                    chipset.printMessage("loading " + obj.file.sPath + '[' + obj.offFile + "] at %" + str.toHex(addrCur), true);
+                                if (!off && obj.file) {
+                                    if (chipset.messageEnabled(Messages.DISK)) {
+                                        chipset.printMessage("loading " + obj.file.sPath + '[' + obj.offFile + "] at %" + str.toHex(addrCur), true);
+                                    }
+                                    /*
+                                    if (obj.file.sPath == "\\SYSBAS.EXE" && obj.offFile == 512) {
+                                        chipset.cpu.stopCPU();
+                                    }
+                                    */
                                 }
                                 bto = chipset.bus.addBackTrackObject(obj, bto, off);
                                 chipset.bus.writeBackTrackObject(addrCur, bto, off);
@@ -4411,14 +4418,14 @@ ChipSet.prototype.out8042InBuffData = function(port, bOut, addrFrom)
             break;
 
         /*
-         * This case is reserved for command bytes that the 8042 is not expecting, which should therefore be passed on
-         * to the Keyboard itself.
+         * This case is reserved for command bytes that the 8042 is not expecting, which should therefore be passed
+         * on to the Keyboard itself.
          *
-         * Here's some relevant MODEL_5170 ROM BIOS code, "XMIT_8042" (missing from the original MODEL_5170 ROM BIOS listing),
-         * which sends a command code in AL to the Keyboard and waits for a response, returning it in AL.  Note that
-         * the only "success" exit path from this function involves LOOPing 64K times before finally reading the Keyboard's
-         * response; either the hardware and/or this code seems a bit brain-damaged if that's REALLY what you had to do to ensure
-         * a valid response....
+         * Here's some relevant MODEL_5170 ROM BIOS code, "XMIT_8042" (missing from the original MODEL_5170 ROM BIOS
+         * listing), which sends a command code in AL to the Keyboard and waits for a response, returning it in AL.
+         * Note that the only "success" exit path from this function involves LOOPing 64K times before finally reading
+         * the Keyboard's response; either the hardware and/or this code seems a bit brain-damaged if that's REALLY
+         * what you had to do to ensure a valid response....
          *
          *      F000:1B25 86E0          XCHG     AH,AL
          *      F000:1B27 2BC9          SUB      CX,CX
@@ -4453,9 +4460,9 @@ ChipSet.prototype.out8042InBuffData = function(port, bOut, addrFrom)
          *      F000:1B62 83E901        SUB      CX,0001    ; EXIT WITH SUCCESS (CX != 0)
          *      F000:1B65 C3            RET
          *
-         * But WAIT, the FUN doesn't end there.  After this function returns, "KBD_RESET" waits for a Keyboard interrupt
-         * to occur, hoping for scan code 0xAA as the Keyboard's final response.  "KBD_RESET" also returns CX to the caller,
-         * and the caller ("TEST.21") assumes there was no interrupt if CX is zero.
+         * But WAIT, the FUN doesn't end there.  After this function returns, "KBD_RESET" waits for a Keyboard
+         * interrupt to occur, hoping for scan code 0xAA as the Keyboard's final response.  "KBD_RESET" also returns
+         * CX to the caller, and the caller ("TEST.21") assumes there was no interrupt if CX is zero.
          *
          *              MOV     AL,0FDH
          *              OUT     INTA01,AL
@@ -4470,9 +4477,9 @@ ChipSet.prototype.out8042InBuffData = function(port, bOut, addrFrom)
          *              JNZ     G11
          *              ...
          *
-         * However, if [INTR_FLAG] is set immediately, the above code will exit immediately, without ever decrementing CX.
-         * CX can be zero not only if the loop exhausted it, but also if no looping was required; the latter is not an
-         * error, but "TEST.21" assumes that it is.
+         * However, if [INTR_FLAG] is set immediately, the above code will exit immediately, without ever decrementing
+         * CX.  CX can be zero not only if the loop exhausted it, but also if no looping was required; the latter is not
+         * an error, but "TEST.21" assumes that it is.
          */
         default:
             this.set8042CmdData(this.b8042CmdData & ~ChipSet.KBC.DATA.CMD.NO_CLOCK);
