@@ -1,28 +1,35 @@
 {% comment %}
-As documented in /modules/markout/lib/markout.js, our Node web server recognizes the following machine properties
-in the Front Matter of Markdown files, for compatibility with the Jekyll web server:
+
+As discussed in /modules/markout/lib/markout.js, our Node web server recognizes the following machine properties
+in the Front Matter of our Markdown documents, for compatibility with the Jekyll web server:
 
     'id' (eg, "ibm5150")
     'name' (eg, "IBM PC (Model 5150) with Monochrome Display")
-    'type' (eg, "pc" or "c1p")
-    'debugger' (eg, true)
-    'config' (eg, "machine.xml")
-    'template' (eg, "machine.xsl")
-    'debug' (eg, true)
-    'uncompiled' (eg, true)
-    'parms'
+    'type' ("pc" or "c1p")
+    'debugger' (default is false)
+    'config' (default is "machine.xml")
+    'template' (default is "machine.xsl")
+    'debug' (default is false; true enables asserts and is very slow)
+    'uncompiled' (default is false; true is useful for debugging but slow)
+    'parms' (stringified object that collects additional machine properties listed below)
 
-And the following properties (along with any property not listed above) will be added to the 'parms' property:
+Note that if you want BACKTRACK support enabled in a machine, both 'debugger' and 'uncompiled' must be true.
+Also note that while multiple machines ARE supported on a single page, there are some limitations; for example,
+loading two or more machines of the same 'type' but with different 'debug', 'uncompiled', or 'debugger' settings
+may not work as desired.
+
+The following optional machine properties will be added to the 'parms' property:
 
     'autoMount' (eg, {"A":{"name":"OS/2 FOOTBALL (v7.68.17)","path":"/disks/pc/os2/misc/football/FOOTBALL-76817.json"}})
     'autoPower' (eg, true)
     'autoStart' (eg, true)
     'drives' (eg, '[{name:"68Mb Hard Disk",type:4,path:"http://archive.pcjs.org/disks/pc/fixed/68mb/win95.json"}]')
     'state' (eg, "state.json")
-    'messages' (eg, "disk")
+    'messages' (eg, "fault")
 
-And all our JavaScript components expect multi-word property names to use camelCase, so that conversion happens both
-here and in markout.js.  Examples include 'autopower' ('autoPower') and 'automount' ('autoMount').
+Finally, all our JavaScript components expect multi-word property names to use camelCase, so we automatically convert
+any lower-case forms to camelCase, both here and in markout.js and components.xsl, in case we've gotten sloppy in any
+of our Markdown or XML documents.  Examples: 'automount' becomes 'autoMount', 'autopower' becomes 'autoPower', etc.
 
 {% endcomment %}
 {% for machine in page.machines %}
