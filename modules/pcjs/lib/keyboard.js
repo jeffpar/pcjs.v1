@@ -934,16 +934,116 @@ Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_ALT_DEL] = Keyboard.SCANCODE.NUM_DEL    
 /**
  * Commands that can be sent to the Keyboard via the 8042; see sendCmd()
  *
+ * Aside from the commands listed below, 0xEF-0xF2 and 0xF7-0xFD are expressly documented as NOPs; ie:
+ *
+ *      These commands are reserved and are effectively no-operation or NOP. The system does not use these codes.
+ *      If sent, the keyboard will acknowledge the command and continue in its prior scanning state. No other
+ *      operation will occur.
+ *
+ * However, IBM's documentation is silent with regard to 0x00-0xEC.  It's likely that most if not all of those
+ * commands are NOPs as well.
+ *
  * @enum {number}
  */
 Keyboard.CMD = {
+    /*
+     * RESET (0xFF)
+     *
+     * The system issues a RESET command to start a program reset and a keyboard internal self-test. The keyboard
+     * acknowledges the command with an 'acknowledge' signal (ACK) and ensures the system accepts the ACK before
+     * executing the command. The system signals acceptance of the ACK by raising the clock and data for a minimum
+     * of 500 microseconds. The keyboard is disabled from the time it receives the RESET command until the ACK is
+     * accepted or until another command overrides the previous one. Following acceptance of the ACK, the keyboard
+     * begins the reset operation, which is similar to a power-on reset. The keyboard clears the output buffer and
+     * sets up default values for typematic and delay rates.
+     */
     RESET:      0xFF,
+
+    /*
+     * RESEND (0xFE)
+     *
+     * The system can send this command when it detects an error in any transmission from the keyboard. It can be
+     * sent only after a keyboard transmission and before the system enables the interface to allow the next keyboard
+     * output. Upon receipt of RESEND, the keyboard sends the previous output again unless the previous output was
+     * RESEND. In this case, the keyboard will resend the last byte before the RESEND command.
+     */
     RESEND:     0xFE,
+
+    /*
+     * SET DEFAULT (0xF6)
+     *
+     * The SET DEFAULT command resets all conditions to the power-on default state. The keyboard responds with ACK,
+     * clears its output buffer, sets default conditions, and continues scanning (only if the keyboard was previously
+     * enabled).
+     */
     DEF_ON:     0xF6,
+
+    /*
+     * DEFAULT DISABLE (0xF5)
+     *
+     * This command is similar to SET DEFAULT, except the keyboard stops scanning and awaits further instructions.
+     */
     DEF_OFF:    0xF5,
+
+    /*
+     * ENABLE (0xF4)
+     *
+     * Upon receipt of this command, the keyboard responds with ACK, clears its output buffer, and starts scanning.
+     */
     ENABLE:     0xF4,
+
+    /*
+     * SET TYPEMATIC RATE/DELAY (0xF3)
+     *
+     * The system issues this command, followed by a parameter, to change the typematic rate and delay. The typematic
+     * rate and delay parameters are determined by the value of the byte following the command. Bits 6 and 5 serve as
+     * the delay parameter and bits 4,3,2, 1, and 0 (the least-significant bit) are the rate parameter. Bit 7, the
+     * most-significant bit, is always 0. The delay is equal to 1 plus the binary value of bits 6 and 5 multiplied by
+     * 250 milliseconds ±20%.
+     */
     SET_RATE:   0xF3,
+
+    /*
+     * ECHO (0xEE)
+     *
+     * ECHO is a diagnostic aid. When the keyboard receives this command, it issues a 0xEE response and continues
+     * scanning if the keyboard was previously enabled.
+     */
     ECHO:       0xEE,
+
+    /*
+     * SET/RESET MODE INDICATORS (0xED)
+     *
+     * Three mode indicators on the keyboard are accessible to the system. The keyboard activates or deactivates
+     * these indicators when it receives a valid command from the system. They can be activated or deactivated in
+     * any combination.
+     *
+     * The system remembers the previous state of an indicator so that its setting does not change when a command
+     * sequence is issued to change the state of another indicator.
+     *
+     * A SET/RESET MODE INDICATORS command consists of 2 bytes. The first is the command byte and has the following
+     * bit setup:
+     *
+     *      11101101 - 0xED
+     *
+     * The second byte is an option byte. It has a list of the indicators to be acted upon. The bit assignments for
+     * this option byte are as follows:
+     *
+     *      Bit         Indicator
+     *      ---         ---------
+     *       0          Scroll Lock Indicator
+     *       1          Num Lock Indicator
+     *       2          Caps Lock Indicator
+     *      3-7         Reserved (must be 0's)
+     *
+     * NOTE: Bit 7 is the most-significant bit; bit 0 is the least-significant.
+     *
+     * The keyboard will respond to the set/reset mode indicators command with an ACK, discontinue scanning, and wait
+     * for the option byte. The keyboard will respond to the option byte with an ACK, set the indicators, and continue
+     * scanning if the keyboard was previously enabled. If another command is received in place of the option byte,
+     * execution of the function of the SET/RESET MODE INDICATORS command is stopped with no change to the indicator
+     * states, and the new command is processed. Then scanning is resumed.
+     */
     SET_LEDS:   0xED
 };
 
@@ -953,16 +1053,70 @@ Keyboard.CMD = {
  * @enum {number}
  */
 Keyboard.CMDRES = {
+    /*
+     * OVERRUN (0x00)
+     *
+     * An overrun character is placed in position 17 of the keyboard buffer, overlaying the last code if the
+     * buffer becomes full. The code is sent to the system as an overrun when it reaches the top of the buffer.
+     */
     OVERRUN:    0x00,
+
     LOAD_TEST:  0x65,   // undocumented "LOAD MANUFACTURING TEST REQUEST" response code
-    BAT_OK:     0xAA,   // Basic Assurance Test (BAT) succeeded
+
+    /*
+     * BAT Completion Code (0xAA)
+     *
+     * Following satisfactory completion of the BAT, the keyboard sends 0xAA. 0xFC (or any other code)
+     * means the keyboard microprocessor check failed.
+     */
+    BAT_OK:     0xAA,
+
+    /*
+     * ECHO Response (0xEE)
+     *
+     * This is sent in response to an ECHO command (also 0xEE) from the system.
+     */
     ECHO:       0xEE,
-    BREAK_PREF: 0xF0,   // break prefix
+
+    /*
+     * BREAK CODE PREFIX (0xF0)
+     *
+     * This code is sent as the first byte of a 2-byte sequence to indicate the release of a key.
+     */
+    BREAK_PREF: 0xF0,
+
+    /*
+     * ACK (0xFA)
+     *
+     * The keyboard issues an ACK response to any valid input other than an ECHO or RESEND command.
+     * If the keyboard is interrupted while sending ACK, it will discard ACK and accept and respond
+     * to the new command.
+     */
     ACK:        0xFA,
-    BAT_FAIL:   0xFC,   // Basic Assurance Test (BAT) failed
+
+    /*
+     * BASIC ASSURANCE TEST FAILURE (0xFC)
+     */
+    BAT_FAIL:   0xFC,   // TODO: Verify this response code (is this just for older 83-key keyboards?)
+
+    /*
+     * DIAGNOSTIC FAILURE (0xFD)
+     *
+     * The keyboard periodically tests the sense amplifier and sends a diagnostic failure code if it detects
+     * any problems. If a failure occurs during BAT, the keyboard stops scanning and waits for a system command
+     * or power-down to restart. If a failure is reported after scanning is enabled, scanning continues.
+     */
     DIAG_FAIL:  0xFD,
+
+    /*
+     * RESEND (0xFE)
+     *
+     * The keyboard issues a RESEND command following receipt of an invalid input, or any input with incorrect parity.
+     * If the system sends nothing to the keyboard, no response is required.
+     */
     RESEND:     0xFE,
-    BUFF_FULL:  0xFF    // TODO: Verify this response code (is it just for older 83-key keyboards?)
+
+    BUFF_FULL:  0xFF    // TODO: Verify this response code (is this just for older 83-key keyboards?)
 };
 
 Keyboard.LIMIT = {
@@ -1219,9 +1373,8 @@ Keyboard.prototype.resetDevice = function(fNotify)
      * TODO: There's more to reset, like LED indicators, default type rate, and emptying the scan code buffer.
      */
     this.printMessage("keyboard reset", Messages.KEYBOARD | Messages.PORT);
-    this.abBuffer = [Keyboard.CMDRES.BAT_OK];
-    this.fAdvance = true;
-    if (fNotify && this.chipset) this.chipset.notifyKbdData(this.abBuffer[0]);
+    this.abBuffer = [];
+    this.setResponse(Keyboard.CMDRES.BAT_OK);
 };
 
 /**
@@ -1276,6 +1429,47 @@ Keyboard.prototype.setEnabled = function(fData, fClock)
 };
 
 /**
+ * setLEDs(b)
+ *
+ * This processes the option byte received after a SET_LEDS command byte.
+ *
+ * @this {Keyboard}
+ * @param {number} b
+ */
+Keyboard.prototype.setLEDs = function(b)
+{
+    this.bLEDs = b;             // TODO: Implement
+};
+
+/**
+ * setRate(b)
+ *
+ * This processes the rate parameter byte received after a SET_RATE command byte.
+ *
+ * @this {Keyboard}
+ * @param {number} b
+ */
+Keyboard.prototype.setRate = function(b)
+{
+    this.bRate = b;             // TODO: Implement
+};
+
+/**
+ * setResponse(b)
+ *
+ * @this {Keyboard}
+ * @param {number} b
+ */
+Keyboard.prototype.setResponse = function(b)
+{
+    if (this.chipset) {
+        this.abBuffer.unshift(b);
+        this.fAdvance = true;
+        this.chipset.notifyKbdData(b);
+    }
+};
+
+/**
  * sendCmd(bCmd)
  *
  * This is the ChipSet's primary interface for controlling "Model M" keyboards (ie, those used
@@ -1288,14 +1482,43 @@ Keyboard.prototype.setEnabled = function(fData, fClock)
 Keyboard.prototype.sendCmd = function(bCmd)
 {
     var b = -1;
-    switch(bCmd) {
-    case Keyboard.CMD.RESET:
+
+    if (this.messageEnabled()) this.printMessage("sendCmd(" + str.toHexByte(bCmd) + ")");
+
+    switch(this.bCmdPending || bCmd) {
+
+    case Keyboard.CMD.RESET:            // 0xFF
+        /*
+         * TODO: Determine whether we really need to also return CMDRES.ACK. resetDevice() operates
+         * like setResponse(CMDRES.BAT_OK).  Do we need both the ACK and the BAT_OK?
+         */
         b = Keyboard.CMDRES.ACK;
         this.resetDevice();
         break;
+
+    case Keyboard.CMD.SET_RATE:         // 0xF3
+        if (this.bCmdPending) {
+            this.setRate(bCmd);
+            bCmd = 0;
+        }
+        this.setResponse(Keyboard.CMDRES.ACK);
+        this.bCmdPending = bCmd;
+        break;
+
+    case Keyboard.CMD.SET_LEDS:         // 0xED
+        if (this.bCmdPending) {
+            this.setLEDs(bCmd);
+            bCmd = 0;
+        }
+        this.setResponse(Keyboard.CMDRES.ACK);
+        this.bCmdPending = bCmd;
+        break;
+
     default:
+        this.printMessage("sendCmd(): unrecognized command");
         break;
     }
+
     return b;
 };
 
@@ -1318,7 +1541,9 @@ Keyboard.prototype.checkScanCode = function()
         b = this.abBuffer[0];
         if (this.chipset) this.chipset.notifyKbdData(b);
     }
-    if (this.messageEnabled()) this.printMessage("scan code " + str.toHexByte(b) + " available");
+    if (this.messageEnabled()) {
+        this.printMessage(b? ("scan code " + str.toHexByte(b) + " available") : "no scan codes available");
+    }
     return b;
 };
 
@@ -1514,6 +1739,7 @@ Keyboard.prototype.initState = function(data)
     if (data === undefined) data = [];
     this.fClock = this.fAdvance = data[i++];
     this.fData = data[i];
+    this.bCmdPending = 0;       // when non-zero, a command is pending (eg, SET_LED or SET_RATE)
     return true;
 };
 

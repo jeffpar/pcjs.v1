@@ -194,7 +194,7 @@ function ChipSet(parmsChipSet)
      * was 15 * 32Kb, or 480Kb.  With a maximum of 64Kb on the motherboard, the MODEL_5150 ROM BIOS could support
      * a grand total of 544Kb.
      *
-     * For MODEL_5160 (PC XT) and up, memory expansion cards had their own configuration switches, and the motherboard
+     * For MODEL_5160 (PC XT) and up, memory expansion cards had their own switches, and the motherboard
      * SW2 switches for I/O expansion RAM were eliminated.  Instead, the ROM BIOS scans the entire address space
      * (up to 0xA0000) looking for additional memory.  As a result, the only mechanism we provide for adding RAM
      * (above the maximum of 256Kb supported on the motherboard) is the "size" parameter of the RAM component.
