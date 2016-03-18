@@ -51,7 +51,7 @@ if (NODE) {
  * The Video component can be configured with the following (parmsVideo) properties:
  *
  *      model: model (eg, "mda" for Monochrome Display Adapter)
- *      mode: mode number (hardware-specific, 7 is the default)
+ *      mode: initial video mode (default is null, which selects a mode based on model)
  *      memory: amount of installed memory (ignored for MDA/CGA)
  *      screenWidth: width of the screen canvas, in pixels
  *      screenHeight: height of the screen canvas, in pixels

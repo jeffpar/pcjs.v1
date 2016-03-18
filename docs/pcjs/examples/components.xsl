@@ -941,7 +941,7 @@
 		<xsl:variable name="mode">
 			<xsl:choose>
 				<xsl:when test="@mode"><xsl:value-of select="@mode"/></xsl:when>
-				<xsl:otherwise>7</xsl:otherwise>
+				<xsl:otherwise>null</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
 		<xsl:variable name="screenWidth">
