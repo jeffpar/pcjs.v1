@@ -813,19 +813,6 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fProbe)
                     sizeGate = 0;
                 }
             }
-            if (DEBUG) {
-                var sizeGateCheck = 0, fStackSwitchCheck = false;
-                if (rpl > this.cpl) {
-                    sizeGateCheck = -1;
-                    if (fCall === false || dpl == this.cpl || (type & X86.DESC.ACC.TYPE.CONFORMING) && dpl <= this.cpl) {
-                        fStackSwitchCheck = true;
-                        sizeGateCheck = 0;
-                    }
-                }
-                if (sizeGate != sizeGateCheck || this.fStackSwitch != fStackSwitchCheck) {
-                    this.cpu.stopCPU();
-                }
-            }
         }
         else if (type == X86.DESC.ACC.TYPE.TSS286 || type == X86.DESC.ACC.TYPE.TSS386) {
             if (!this.switchTSS(sel, fCall)) {

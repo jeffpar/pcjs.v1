@@ -7,9 +7,8 @@ machines:
     id: ibm5170
     debugger: true
     config: /devices/pc/machine/5170/vga/4096kb/debugger/machine.xml
-    automount:
-      A:
-        path: /disks/pc/os2/ibm/1.1/OS211-INSTALLATION.json
+    drives: '[{name:"20Mb Hard Disk",type:2,path:"/disks/pc/fixed/20mb/IBMOS211.json"}]'
+    automount: ''
     messages: fault
 ---
 

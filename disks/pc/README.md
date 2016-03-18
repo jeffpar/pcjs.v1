@@ -67,7 +67,7 @@ and more.
 ### IBM OS/2
 
 * [IBM OS/2 1.0](/disks/pc/os2/ibm/1.0/)
-* IBM OS/2 1.1
+* [IBM OS/2 1.1](/disks/pc/os2/ibm/1.1/)
 * IBM OS/2 1.3
 
 ### Microsoft OS/2
