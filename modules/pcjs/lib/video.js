@@ -108,8 +108,9 @@ function Video(parmsVideo, canvas, context, textarea, container)
      * (since those motherboard switches tell us only the type of monitor, not the type of card).
      */
     this.model = parmsVideo['model'];
-    this.nCard = Video.CARD.NAMES[this.model] || Video.CARD.MDA;
+    var aModelDefaults = Video.MODEL[this.model] || Video.MODEL['mda'];
 
+    this.nCard = aModelDefaults[0];
     this.cbMemory = parmsVideo['memory'] || 0;  // zero means fallback to the cardSpec's default size
     this.sSwitches = parmsVideo['switches'];
 
@@ -117,8 +118,8 @@ function Video(parmsVideo, canvas, context, textarea, container)
      * powerUp() uses the default mode ONLY if ChipSet doesn't give us a default.
      */
     this.nModeDefault = parmsVideo['mode'];
-    if (this.nModeDefault === undefined || Video.aModeParms[this.nModeDefault] === undefined) {
-        this.nModeDefault = Video.MODE.MDA_80X25;
+    if (this.nModeDefault == null || Video.aModeParms[this.nModeDefault] == null) {
+        this.nModeDefault = aModelDefaults[1];
     }
 
     /*
@@ -538,24 +539,6 @@ Video.TRAPALL = true;           // monitor all I/O by default (not just deltas)
  */
 
 /*
- * Supported Cards
- *
- * Note that we choose IDs that match the default font ID for each card as well, for convenience.
- */
-Video.CARD = {
-    MDA: 1,
-    CGA: 3,
-    EGA: 5,
-    VGA: 7,
-    NAMES: {
-        "mda": 1,
-        "cga": 3,
-        "ega": 5,
-        "vga": 7
-    }
-};
-
-/*
  * Supported Modes
  *
  * Although this component is designed to be a video hardware emulation, not a BIOS simulation, we DO
@@ -601,6 +584,61 @@ Video.MODE = {
      * from the second half of video memory).
      */
     UNKNOWN:            0xFF
+};
+
+/*
+ * Supported Fonts
+ *
+ * Once we've finished loading the standard 8K font file, aFonts[] should contain one or more of the
+ * entries listed below.  For the standard MDA/CGA font ROM, the first (MDA) font resides in the first 4Kb,
+ * and the second and third (CGA) fonts reside in the two 2K halves of the second 4Kb.
+ *
+ * It may seem odd that the cell size for FONT_CGAD is *larger* than the cell size for FONT_CGA,
+ * since 40-column mode is actually lower resolution, but since we don't shrink the screen canvas when we
+ * shrink the mode, the characters must be drawn larger, and they look better if we don't have to scale them.
+ *
+ * From the IBM EGA Manual (p.5):
+ *
+ *     "In alphanumeric modes, characters are formed from one of two ROM (Read Only Memory) character
+ *      generators on the adapter. One character generator defines 7x9 characters in a 9x14 character box.
+ *      For Enhanced Color Display support, the 9x14 character set is modified to provide an 8x14 character set.
+ *      The second character generator defines 7x7 characters in an 8x8 character box. These generators contain
+ *      dot patterns for 256 different characters. The character sets are identical to those provided by the
+ *      IBM Monochrome Display Adapter and the IBM Color/Graphics Monitor Adapter."
+ */
+Video.FONT = {
+    MDA:    1,          // 9x14 monochrome font
+    MDAD:   2,          // 18x28 monochrome font (this is the 9x14 font doubled)
+    CGA:    3,          // 8x8 color font
+    CGAD:   6,          // 16x16 color font (this is the 8x8 CGA font doubled)
+    EGA:    5,          // 8x14 color font
+    EGAD:   10,         // 16x28 color font (this is the 8x14 EGA font doubled)
+    VGA:    7,          // 8x16 color font
+    VGAD:   14          // 16x32 color font (this is the 8x16 VGA font doubled)
+};
+
+/*
+ * Supported Cards
+ *
+ * Note that we choose card IDs that match the default font ID for each card as well, for convenience.
+ */
+Video.CARD = {
+    MDA: Video.FONT.MDA,
+    CGA: Video.FONT.CGA,
+    EGA: Video.FONT.EGA,
+    VGA: Video.FONT.VGA
+};
+
+/*
+ * Supported Models
+ *
+ * Each model refers to an array where [0] is the card ID, and [1] is the default mode.
+ */
+Video.MODEL = {
+    "mda": [Video.CARD.MDA, Video.MODE.MDA_80X25],
+    "cga": [Video.CARD.CGA, Video.MODE.CGA_80X25],
+    "ega": [Video.CARD.EGA, Video.MODE.CGA_80X25],
+    "vga": [Video.CARD.VGA, Video.MODE.CGA_80X25]
 };
 
 /*
@@ -755,37 +793,6 @@ Video.aEGAMonitorSwitches = {
  * @property {Array} aColorMap
  * @property {Array} aCanvas
  */
-
-/*
- * Supported Fonts
- *
- * Once we've finished loading the standard 8K font file, aFonts[] should contain one or more of the
- * entries listed below.  For the standard MDA/CGA font ROM, the first (MDA) font resides in the first 4Kb,
- * and the second and third (CGA) fonts reside in the two 2K halves of the second 4Kb.
- *
- * It may seem odd that the cell size for FONT_CGAD is *larger* than the cell size for FONT_CGA,
- * since 40-column mode is actually lower resolution, but since we don't shrink the screen canvas when we
- * shrink the mode, the characters must be drawn larger, and they look better if we don't have to scale them.
- *
- * From the IBM EGA Manual (p.5):
- *
- *     "In alphanumeric modes, characters are formed from one of two ROM (Read Only Memory) character
- *      generators on the adapter. One character generator defines 7x9 characters in a 9x14 character box.
- *      For Enhanced Color Display support, the 9x14 character set is modified to provide an 8x14 character set.
- *      The second character generator defines 7x7 characters in an 8x8 character box. These generators contain
- *      dot patterns for 256 different characters. The character sets are identical to those provided by the
- *      IBM Monochrome Display Adapter and the IBM Color/Graphics Monitor Adapter."
- */
-Video.FONT = {
-    MDA:    1,          // 9x14 monochrome font
-    MDAD:   2,          // 18x28 monochrome font (this is the 9x14 font doubled)
-    CGA:    3,          // 8x8 color font
-    CGAD:   6,          // 16x16 color font (this is the 8x8 CGA font doubled)
-    EGA:    5,          // 8x14 color font
-    EGAD:   10,         // 16x28 color font (this is the 8x14 EGA font doubled)
-    VGA:    7,          // 8x16 color font
-    VGAD:   14          // 16x32 color font (this is the 8x16 VGA font doubled)
-};
 
 /*
  * For each video mode, we need to know the following pieces of information:
@@ -2835,9 +2842,14 @@ Video.prototype.initBus = function(cmp, bus, cpu, dbg)
     this.dbg = dbg;
 
     /*
+     * nCard will be undefined if no model was explicitly set (whereas this.nCard is ALWAYS defined).
+     */
+    var aModel = Video.MODEL[this.model], nCard = aModel && aModel[0];
+
+    /*
      * The only time we do NOT want to trap MDA ports is when the model has been explicitly set to CGA.
      */
-    if (Video.CARD.NAMES[this.model] != Video.CARD.CGA) {
+    if (nCard !== Video.CARD.CGA) {
         bus.addPortInputTable(this, Video.aMDAPortInput);
         bus.addPortOutputTable(this, Video.aMDAPortOutput);
     }
@@ -2845,7 +2857,7 @@ Video.prototype.initBus = function(cmp, bus, cpu, dbg)
     /*
      * Similarly, the only time we do NOT want to trap CGA ports is when the model is explicitly set to MDA.
      */
-    if (Video.CARD.NAMES[this.model] != Video.CARD.MDA) {
+    if (nCard !== Video.CARD.MDA) {
         bus.addPortInputTable(this, Video.aCGAPortInput);
         bus.addPortOutputTable(this, Video.aCGAPortOutput);
     }
@@ -3739,21 +3751,27 @@ Video.prototype.doneLoad = function(sURL, sFontData, nErrorCode)
          */
         var abFontData = eval("(" + sFontData + ")");
 
-        if (!abFontData.length) {
+        var ab = abFontData['bytes'] || abFontData;
+
+        if (!ab.length) {
             Component.error("Empty font ROM: " + sURL);
             return;
         }
-        else if (abFontData.length == 1) {
-            Component.error(abFontData[0]);
+        else if (ab.length == 1) {
+            Component.error(ab[0]);
             return;
         }
         /*
          * Translate the character data into separate "fonts", each of which will be a separate canvas object, with all
          * 256 characters arranged in a 16x16 grid.
          */
-        if (abFontData.length == 8192) {
+        if (ab.length == 8192) {
             /*
-             * Here are the first few rows of MDA font data, at the 0K and 2K boundaries:
+             * The assumption here is that we're dealing with the original (IBM) MDA/CGA font data, which apparently
+             * was identical on both MDA and CGA cards (even though the former had no use for the latter, and vice versa).
+             *
+             * First, let's take a look at the MDA portion of the data.  Here are the first few rows of MDA font data,
+             * at the 0K and 2K boundaries:
              *
              *      00000000  00 00 00 00 00 00 00 00  00 00 7e 81 a5 81 81 bd  |..........~.....|
              *      00000010  00 00 7e ff db ff ff c3  00 00 00 36 7f 7f 7f 7f  |..~........6....|
@@ -3811,10 +3829,17 @@ Video.prototype.doneLoad = function(sURL, sFontData, nErrorCode)
              * CGA font at 0x1800 (which was the PC's default font as well), instead of the thinner "single dot" font at 0x1000.
              * The second offset is for the MDA font.
              */
-            this.setFontData(abFontData, [0x1800, 0x0000]);
+            this.setFontData(ab, [0x1800, 0x0000]);
+        }
+        else if (ab.length == 2048) {
+            /*
+             * The assumption here is that we're dealing strictly with CGA (8x8) font data, like the font data found
+             * in the Columbia Data Products (CDP) Font ROM.
+             */
+            this.setFontData(ab, [0x0000]);
         }
         else {
-            this.notice("Unrecognized font data length (" + abFontData.length + ")");
+            this.notice("Unrecognized font data length (" + ab.length + ")");
             return;
         }
 
@@ -4082,20 +4107,23 @@ Video.prototype.buildFonts = function(fRebuild)
         var cxChar = this.cxFontChar? this.cxFontChar : 8;
         var aRGBColors = this.getCardColors();
 
-        if (this.buildFont(Video.FONT.CGA, this.aFontOffsets[0], offSplit, cxChar, 8, this.abFontData, aRGBColors)) {
-            fChanges = true;
+        if (this.aFontOffsets[0] != null) {
+            if (this.buildFont(Video.FONT.CGA, this.aFontOffsets[0], offSplit, cxChar, 8, this.abFontData, aRGBColors)) {
+                fChanges = true;
+            }
         }
 
         offSplit = this.cxFontChar? 0 : 0x0800;
         cxChar = this.cxFontChar? this.cxFontChar : 9;
 
-        if (this.buildFont(Video.FONT.MDA, this.aFontOffsets[1], offSplit, cxChar, 14, this.abFontData, Video.aMDAColors, Video.aMDAColorMap)) {
-            fChanges = true;
-        }
-
-        if (this.cxFontChar) {
-            if (this.buildFont(this.nCard, this.aFontOffsets[1], 0, this.cxFontChar, 14, this.abFontData, aRGBColors)) {
+        if (this.aFontOffsets[1] != null) {
+            if (this.buildFont(Video.FONT.MDA, this.aFontOffsets[1], offSplit, cxChar, 14, this.abFontData, Video.aMDAColors, Video.aMDAColorMap)) {
                 fChanges = true;
+            }
+            if (this.cxFontChar) {
+                if (this.buildFont(this.nCard, this.aFontOffsets[1], 0, this.cxFontChar, 14, this.abFontData, aRGBColors)) {
+                    fChanges = true;
+                }
             }
         }
     }
@@ -4731,6 +4759,10 @@ Video.prototype.setDimensions = function()
      */
     if (this.nFont) {
         var font = this.aFonts[this.nFont];
+        if (!font) {
+            this.assert(false);
+            return;
+        }
         var fontDoubled = this.aFonts[this.nFont << 1];
 
         if (this.fScaleFont && this.nCols == 80) {
