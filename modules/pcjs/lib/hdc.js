@@ -610,7 +610,7 @@ HDC.prototype.initBus = function(cmp, bus, cpu, dbg)
 
     if (this.fATC) {
         this.iDriveTable++;
-        if (this.chipset && this.chipset.model == ChipSet.MODEL_DESKPRO386) this.iDriveTable++;
+        if (this.chipset && this.chipset.model == ChipSet.MODEL_COMPAQ_DESKPRO386) this.iDriveTable++;
         this.iDriveTypeDefault = 2;
         bus.addPortInputWidth(HDC.ATC.DATA.PORT, 2);
         bus.addPortOutputWidth(HDC.ATC.DATA.PORT, 2);
@@ -1556,10 +1556,10 @@ HDC.prototype.inATCByte = function(port, addrFrom)
                             /*
                              * Due to the way I'm immediately triggering an interrupt whenever more data is available,
                              * I must take a "shotgun approach' to regStatus bits in order to make the MODEL_5170_REV1,
-                             * MODEL_5170_REV3, and MODEL_DESKPRO386 all happy.
+                             * MODEL_5170_REV3, and MODEL_COMPAQ_DESKPRO386 all happy.
                              *
                              * In general, it's fine for all of STATUS.READY, STATUS.SEEK_OK and STATUS.DATA_REQ to be
-                             * set now; the MODEL_5170_REV3 requires at least the first two, and the MODEL_DESKPRO386
+                             * set now; the MODEL_5170_REV3 requires at least the first two, and the MODEL_COMPAQ_DESKPRO386
                              * requires the third.  Unfortunately, the outlier is the MODEL_5170_REV1, which also needs
                              * the STATUS.BUSY to be set on the first regStatus read after it finishes reading a sector;
                              * otherwise, the MODEL_5170_REV1 BIOS will never read any remaining sectors.
@@ -1567,10 +1567,10 @@ HDC.prototype.inATCByte = function(port, addrFrom)
                              * Technically, it doesn't make sense for both BUSY and READY to be set at the same time,
                              * so we fix that in inATCStatus() by clearing BUSY whenever READY is detected *after* that
                              * first read.  In addition, since this hack is really only needed for the MODEL_5170_REV1,
-                             * we clear BUSY immediately on the MODEL_DESKPRO386 (which makes the Windows 95 protected-mode
-                             * disk driver much happier).
+                             * we clear BUSY immediately on the MODEL_COMPAQ_DESKPRO386 (which makes the Windows 95
+                             * protected-mode disk driver much happier).
                              */
-                            if (hdc.chipset && hdc.chipset.model == ChipSet.MODEL_DESKPRO386) hdc.regStatus = 0;
+                            if (hdc.chipset && hdc.chipset.model == ChipSet.MODEL_COMPAQ_DESKPRO386) hdc.regStatus = 0;
                             hdc.regStatus |= HDC.ATC.STATUS.READY | HDC.ATC.STATUS.SEEK_OK | HDC.ATC.STATUS.DATA_REQ;
                         } else {
                             /*

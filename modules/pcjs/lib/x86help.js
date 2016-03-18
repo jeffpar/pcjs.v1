@@ -752,25 +752,43 @@ X86.helpFault = function(nFault, nError, nCycles, fHalt)
         if (this.nFault < 0) {
             /*
              * Single-fault (error code is passed through, and the responsible instruction is restartable.
+             *
+             * TODO: The following opCS/opLIP/opSS/opLSP checks are primarily required for 80386-based machines
+             * with paging enabled, because page faults introduce a new set of complex faults that our current
+             * segment load "probes" are insufficient to catch.  So as a stop-gap measure, we rely on these FOUR
+             * "snapshot" registers to temporarily resolve the general instruction restartability problem.
+             *
+             * If you want to closely examine the underlying causes of these more complex faults, set breakpoints
+             * where indicated below, and examine the stack trace.
              */
             if (this.opCS != -1) {
-                /*
-                 * HACK: We must slam 3 into this.segCS.cpl to ensure that loading the original CS segment doesn't
-                 * fail.  For example, if we faulted in the middle of a ring transition that loaded CS with a higher
-                 * privilege (lower CPL) code segment, then our attempt here to reload the lower privilege (higher CPL)
-                 * code segment could be viewed as a privilege violation (which it would be outside this context).
-                 */
-                this.segCS.cpl = 3;
-                this.setCS(this.opCS);
+                if (this.opCS !== this.segCS.sel) {
+                    /*
+                     * HACK: We slam the RPL into this.segCS.cpl to ensure that loading the original CS segment doesn't
+                     * fail.  For example, if we faulted in the middle of a ring transition that loaded CS with a higher
+                     * privilege (lower CPL) code segment, then our attempt here to reload the lower privilege (higher CPL)
+                     * code segment could be viewed as a privilege violation (which it would be outside this context).
+                     */
+                    this.segCS.cpl = this.opCS & 0x3;           // set breakpoint here to inspect complex faults
+                    this.setCS(this.opCS);
+                }
                 this.opCS = -1;
             }
-            this.setLIP(this.opLIP);
+            if (this.opLIP !== this.regLIP) {
+                this.setLIP(this.opLIP);                        // set breakpoint here to inspect complex faults
+                this.assert(this.opLIP === this.regLIP);
+            }
             if (this.opSS != -1) {
-                this.setSS(this.opSS);
+                if (this.opSS !== this.segSS.sel) {
+                    this.setSS(this.opSS);                      // set breakpoint here to inspect complex faults
+                }
                 this.opSS = -1;
             }
             if (this.opLSP !== X86.ADDR_INVALID) {
-                this.setSP((this.regESP & ~this.segSS.maskAddr) | (this.opLSP - this.segSS.base));
+                if (this.opLSP !== this.regLSP) {               // set breakpoint below to inspect complex faults
+                    this.setSP((this.regESP & ~this.segSS.maskAddr) | (this.opLSP - this.segSS.base));
+                    this.assert(this.opLSP === this.regLSP);
+                }
                 this.opLSP = X86.ADDR_INVALID;
             }
         }

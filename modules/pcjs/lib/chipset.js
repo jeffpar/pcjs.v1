@@ -265,21 +265,28 @@ Component.subclass(ChipSet);
  *
  * Unless otherwise noted, all BIOS references refer to the *original* BIOS released with each model.
  */
-ChipSet.MODEL_5150      = 5150;         // used in reference to the 1st 5150 BIOS, dated Apr 24, 1981
-ChipSet.MODEL_5160      = 5160;         // used in reference to the 1st 5160 BIOS, dated Nov 8, 1982
-ChipSet.MODEL_5170      = 5170;         // used in reference to the 1st 5170 BIOS, dated Jan 10, 1984
+ChipSet.MODEL_5150              = 5150;     // used in reference to the 1st 5150 BIOS, dated Apr 24, 1981
+ChipSet.MODEL_5160              = 5160;     // used in reference to the 1st 5160 BIOS, dated Nov 8, 1982
+ChipSet.MODEL_5170              = 5170;     // used in reference to the 1st 5170 BIOS, dated Jan 10, 1984
 
 /*
  * The following are fake model numbers, used only to document issues/features in later IBM PC AT BIOS revisions.
  */
-ChipSet.MODEL_5170_REV2 = 5170.2;       // used in reference to the 2nd 5170 BIOS, dated Jun 10, 1985
-ChipSet.MODEL_5170_REV3 = 5170.3;       // used in reference to the 3rd 5170 BIOS, dated Nov 15, 1985
+ChipSet.MODEL_5170_REV2         = 5170.2;   // used in reference to the 2nd 5170 BIOS, dated Jun 10, 1985
+ChipSet.MODEL_5170_REV3         = 5170.3;   // used in reference to the 3rd 5170 BIOS, dated Nov 15, 1985
 
 /*
- * The following are even more fake model numbers, as we begin to depart from the IBM lineage.  All that
- * really matters at this point is that MODEL_DESKPRO386 > MODEL_5170.
+ * The following are even more fake model numbers, as we begin to depart more significantly from the IBM lineage.
+ * All that really matters at this point is that MODEL_COMPAQ_DESKPRO386 > MODEL_5170.
  */
-ChipSet.MODEL_DESKPRO386 = 5180;
+ChipSet.MODEL_COMPAQ_PORTABLE   = 5150.1;   // COMPAQ Portable (COMPAQ's first PC)
+ChipSet.MODEL_COMPAQ_DESKPRO386 = 5180.1;   // COMPAQ DeskPro 386 (COMPAQ's first 80386-based PC)
+
+/*
+ * More assorted non-IBM models
+ */
+ChipSet.MODEL_CDP_MPC1600       = 5150.2;   // Columbia Data Products MPC 1600
+ChipSet.MODEL_ZENITH_Z150       = 5150.3;   // Zenith Data Systems Z-150
 
 /*
  * Last but not least, a complete list of supported model strings, and corresponding internal model numbers.
@@ -288,7 +295,9 @@ ChipSet.MODELS = {
     "5150":         ChipSet.MODEL_5150,
     "5160":         ChipSet.MODEL_5160,
     "5170":         ChipSet.MODEL_5170,
-    "deskpro386":   ChipSet.MODEL_DESKPRO386
+    "deskpro386":   ChipSet.MODEL_COMPAQ_DESKPRO386,
+    "mpc1600":      ChipSet.MODEL_CDP_MPC1600,
+    "z150":         ChipSet.MODEL_ZENITH_Z150
 };
 
 ChipSet.CONTROLS = {
@@ -573,7 +582,7 @@ ChipSet.PIT0 = {
 };
 
 ChipSet.PIT1 = {
-    PORT:               0x48,   // MODEL_DESKPRO386 only
+    PORT:               0x48,   // MODEL_COMPAQ_DESKPRO386 only
     TIMER3:             0,      // used for fail-safe clock
     TIMER4:             1,      // N/A
     TIMER5:             2       // used for refresher request extend/speed control
@@ -1180,8 +1189,8 @@ ChipSet.prototype.reset = function(fHard)
      * as TIMER3, TIMER4 and TIMER5; that numbering also matches their indexes in the aTimers array.
      */
     this.bPIT1Ctrl = null;          // tracks writes to port 0x43
-    this.bPIT2Ctrl = null;          // tracks writes to port 0x4B (MODEL_DESKPRO386 only)
-    this.aTimers = new Array(this.model == ChipSet.MODEL_DESKPRO386? 6 : 3);
+    this.bPIT2Ctrl = null;          // tracks writes to port 0x4B (MODEL_COMPAQ_DESKPRO386 only)
+    this.aTimers = new Array(this.model == ChipSet.MODEL_COMPAQ_DESKPRO386? 6 : 3);
     for (i = 0; i < this.aTimers.length; i++) {
         this.initTimer(i);
     }
@@ -1226,7 +1235,7 @@ ChipSet.prototype.reset = function(fHard)
             this.b8042InPort |= ChipSet.KBC.INPORT.MONO;
         }
 
-        if (COMPAQ386 && this.model == ChipSet.MODEL_DESKPRO386) {
+        if (COMPAQ386 && this.model == ChipSet.MODEL_COMPAQ_DESKPRO386) {
             this.b8042InPort |= ChipSet.KBC.INPORT.COMPAQ_NO80387 | ChipSet.KBC.INPORT.COMPAQ_NOWEITEK;
         }
 
@@ -2819,7 +2828,7 @@ ChipSet.prototype.outDMAPageSpare = function(iSpare, port, bOut, addrFrom)
      * TODO: Remove this DEBUG-only DESKPRO386 code once we're done debugging DeskPro 386 ROMs;
      * it enables logging of all DeskPro ROM checkpoint I/O to port 0x84.
      */
-    if (this.messageEnabled(Messages.DMA | Messages.PORT) || DEBUG && this.model == ChipSet.MODEL_DESKPRO386 && port == 0x84) {
+    if (this.messageEnabled(Messages.DMA | Messages.PORT) || DEBUG && this.model == ChipSet.MODEL_COMPAQ_DESKPRO386 && port == 0x84) {
         this.printMessageIO(port, bOut, addrFrom, "DMA.SPARE" + iSpare + ".PAGE", null, true);
     }
     this.abDMAPageSpare[iSpare] = bOut;
