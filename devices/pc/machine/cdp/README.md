@@ -7,4 +7,4 @@ permalink: /devices/pc/machine/cdp/
 Columbia Data Products Machines
 ---
 
-* [Columbia Data Products MPC 1600](/devices/pc/machine/cdp/mpc1600/cga/640kb/) ([Debugger](/devices/pc/machine/cdp/mpc1600/cga/640kb/debugger/))
+* [MPC 1600](/devices/pc/machine/cdp/mpc1600/cga/640kb/) ([Debugger](/devices/pc/machine/cdp/mpc1600/cga/640kb/debugger/))

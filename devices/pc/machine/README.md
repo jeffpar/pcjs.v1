@@ -19,8 +19,10 @@ PCjs supports these IBM PC models:
 
 along with these IBM PC-compatibles:
 
-* [Columbia Data Products](/devices/pc/machine/cdp/) (eg, [MPC 1600](/devices/pc/machine/cdp/mpc1600/cga/640kb/))
-* [COMPAQ](/devices/pc/machine/compaq/) (eg, [DeskPro 386](/devices/pc/machine/compaq/deskpro386/))
+* [AT&amp;T](/devices/pc/machine/att/) ([AT&amp;T 6300](/devices/pc/machine/att/6300/cga/640kb/))
+* [Columbia Data Products](/devices/pc/machine/cdp/) ([MPC 1600](/devices/pc/machine/cdp/mpc1600/cga/640kb/))
+* [COMPAQ](/devices/pc/machine/compaq/) ([DeskPro 386](/devices/pc/machine/compaq/deskpro386/))
+* [Zenith Data Systems](/devices/pc/machine/zenith/) ([Z-150](/devices/pc/machine/zenith/z150/cga/640kb/))
 
 Learn more about the [Devices](/devices/) used to build all our machines, such as the 6502-based
 [Ohio Scientific Challenger 1P](/devices/c1p/machine/).

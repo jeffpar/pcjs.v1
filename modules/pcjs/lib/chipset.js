@@ -152,10 +152,16 @@ function ChipSet(parmsChipSet)
     Component.call(this, "ChipSet", parmsChipSet, ChipSet, Messages.CHIPSET);
 
     var model = parmsChipSet['model'];
+
     /*
      * this.model is a numeric version of the 'model' string; when comparing this.model to assorted
      * model values, you should generally compare (this.model|0) to the target value, which truncates it.
+     *
+    if (model && !ChipSet.MODELS[model]) {
+        Component.notice("Unrecognized ChipSet model: " + model);
+    }
      */
+
     this.model = model && ChipSet.MODELS[model] || ChipSet.MODEL_5150;
 
     /*
@@ -285,8 +291,9 @@ ChipSet.MODEL_5170_REV3         = 5170.3;   // used in reference to the 3rd 5170
 /*
  * Assorted non-IBM models (we don't put "IBM" in the IBM models, but non-IBM models should include the company name).
  */
-ChipSet.MODEL_CDP_MPC1600       = 5150.800; // Columbia Data Products MPC 1600 ("Copyright Columbia Data Products 1983, ROM/BIOS Ver 4.34")
-ChipSet.MODEL_ZENITH_Z150       = 5150.810; // Zenith Data Systems Z-150 ("08/11/88 (C)ZDS CORP")
+ChipSet.MODEL_ATT_6300          = 5150.800; // AT&T Personal Computer 6300/Olivetti M24 ("COPYRIGHT (C) OLIVETTI 1984","04/03/86",v1.43)
+ChipSet.MODEL_CDP_MPC1600       = 5150.810; // Columbia Data Products MPC 1600 ("Copyright Columbia Data Products 1983, ROM/BIOS Ver 4.34")
+ChipSet.MODEL_ZENITH_Z150       = 5150.820; // Zenith Data Systems Z-150 ("08/11/88 (C)ZDS CORP")
 ChipSet.MODEL_COMPAQ_PORTABLE   = 5150.900; // COMPAQ Portable (COMPAQ's first PC)
 ChipSet.MODEL_COMPAQ_DESKPRO386 = 5180;     // COMPAQ DeskPro 386 (COMPAQ's first 80386-based PC); should be > MODEL_5170
 
@@ -297,9 +304,10 @@ ChipSet.MODELS = {
     "5150":         ChipSet.MODEL_5150,
     "5160":         ChipSet.MODEL_5160,
     "5170":         ChipSet.MODEL_5170,
-    "deskpro386":   ChipSet.MODEL_COMPAQ_DESKPRO386,
+    "att6300":      ChipSet.MODEL_ATT_6300,
     "mpc1600":      ChipSet.MODEL_CDP_MPC1600,
-    "z150":         ChipSet.MODEL_ZENITH_Z150
+    "z150":         ChipSet.MODEL_ZENITH_Z150,
+    "deskpro386":   ChipSet.MODEL_COMPAQ_DESKPRO386
 };
 
 ChipSet.CONTROLS = {

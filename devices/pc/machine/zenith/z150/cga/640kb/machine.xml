@@ -4,7 +4,8 @@
 	<name pos="center">Zenith Z-150 with Color Display</name>
 	<computer id="z150-640k" name="Z-150"/>
 	<ram id="ramLow" addr="0x00000" size="0xa0000"/>
-	<rom ref="/devices/pc/rom/zenith/z150/z150-1988.xml"/>
+	<ram id="ramBIOS" addr="0xf0000" size="0x4000" comment="16Kb of scratchpad RAM"/>
+	<rom ref="/devices/pc/rom/zenith/z150/bios-z150-1988.xml"/>
 	<video ref="/devices/pc/video/ibm/cga/ibm-cga.xml"/>
 	<fdc ref="/disks/pc/compiled/library.xml"/>
 	<cpu id="cpu8088" model="8088" autostart="true" pos="left" padleft="8px" padbottom="8px">
