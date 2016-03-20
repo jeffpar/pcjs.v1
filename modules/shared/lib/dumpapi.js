@@ -43,11 +43,11 @@
  *
  * Similarly, our "FileDump API" used to look like:
  *
- *      http://jsmachines.net/bin/convrom.php?rom=/devices/pc/bios/5150/1981-04-24.rom&format=json
+ *      http://jsmachines.net/bin/convrom.php?rom=/devices/pc/rom/5150/1981-04-24/PCBIOS-REV1.rom&format=json
  *
  * and that request now looks like:
  *
- *      http://www.pcjs.org/api/v1/dump?file=/devices/pc/bios/5150/1981-04-24.rom&format=json
+ *      http://www.pcjs.org/api/v1/dump?file=/devices/pc/rom/5150/1981-04-24/PCBIOS-REV1.rom&format=json
  *
  * I don't think it makes sense to avoid "query" parameters, because blending the path of a disk image with the
  * the rest of the URL would be (a) confusing, and (b) more work to parse.

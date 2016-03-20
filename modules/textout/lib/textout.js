@@ -88,7 +88,7 @@ TextOut.asTargetRefs = ["call", "jmp", "jz", "jnz", "jc", "jnc", "ja", "jna", "j
  *
  * Examples
  * ---
- *      node modules/textout/bin/textout --file=devices/pc/bios/compaq/deskpro386/1988-01-28.nasm --nasm
+ *      node modules/textout/bin/textout --file=devices/pc/rom/compaq/deskpro386/1988-01-28/1988-01-28.asm --nasm
  */
 TextOut.CLI = function()
 {

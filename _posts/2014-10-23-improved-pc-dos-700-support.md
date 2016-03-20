@@ -21,7 +21,7 @@ through "PC-DOS 7.00 (Disk 5)", so your best bet is to boot from the 1.44Mb "PC-
 Note that you must also use a fairly new 80286 machine configuration, like this
 [8Mhz IBM PC AT](/devices/pc/machine/5170/ega/1152kb/rev3/debugger/),
 in order to use 1.44Mb diskette images; previous models did not support 3.5-inch diskette drives, unless they had been
-retrofitted with a newer [BIOS](/devices/pc/bios/5170/).
+retrofitted with a newer [BIOS](/devices/pc/rom/5170/).
 
 *[@jeffpar](http://twitter.com/jeffpar)*  
 *October 23, 2014*

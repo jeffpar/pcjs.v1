@@ -7,7 +7,7 @@
 	<debugger id="debugger"/>
 	<ram id="ramLow" addr="0x00000" test="false" comment="no memory test"/>
 	<rom id="romBASIC" addr="0xf6000" size="0x8000" file="/devices/pc/rom/5150/basic/BASIC100.json"/>
-	<rom id="romBIOS" addr="0xfe000" size="0x2000" file="/devices/pc/rom/5150/bios/1981-04-24/PCBIOS-REV1.json"/>
+	<rom id="romBIOS" addr="0xfe000" size="0x2000" file="/devices/pc/rom/5150/1981-04-24/PCBIOS-REV1.json"/>
 	<video ref="/devices/pc/video/ibm/cga/ibm-cga.xml"/>
 	<fdc ref="/disks/pc/compiled/library.xml"/>
 	<keyboard ref="/devices/pc/keyboard/us83-softkeys.xml"/>

@@ -1,7 +1,7 @@
 ---
 layout: page
 title: Compaq Portable Computer ROMs
-permalink: /devices/pc/rom/compaq/bios/portable/
+permalink: /devices/pc/rom/compaq/portable/
 ---
 
 Compaq Portable Computer ROMs

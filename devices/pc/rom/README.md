@@ -3,7 +3,7 @@ layout: page
 title: IBM PC ROMs
 permalink: /devices/pc/rom/
 redirect_from:
-  - /devices/pc/bios/
+  - /devices/pc/
 ---
 
 IBM PC ROMs
@@ -12,7 +12,7 @@ IBM PC ROMs
 ROMs are added to machines by including one *[ROM](/docs/pcjs/rom/)* component in the machine XML configuration file
 for each ROM in the machine; eg:
 
-	<rom id="romBIOS" addr="0xf0000" size="0x10000" alias="0xff0000" file="/devices/pc/rom/5170/bios/1984-01-10/ATBIOS-REV1.json"/>
+	<rom id="romBIOS" addr="0xf0000" size="0x10000" alias="0xff0000" file="/devices/pc/rom/5170/1984-01-10/ATBIOS-REV1.json"/>
 
 ### BASIC ROMs
 
@@ -25,16 +25,16 @@ The project contains the following IBM PC BASIC ROMs:
 
 The project contains the following IBM PC BIOS ROMs:
 
- * [Model 5150: Apr 24, 1981](5150/bios/1981-04-24/PCBIOS-REV1.json)
- * [Model 5150: Oct 19, 1981](5150/bios/1981-10-19/PCBIOS-REV2.json)
- * [Model 5150: Oct 27, 1982](5150/bios/1982-10-27/PCBIOS-REV3.json)
- * [Model 5160: Nov 08, 1982](5160/bios/1982-11-08/XTBIOS-REV1.json)
- * [Model 5160: May 09, 1986](5160/bios/1986-05-09/XTBIOS-REV3.json)
+ * [Model 5150: Apr 24, 1981](5150/1981-04-24/PCBIOS-REV1.json)
+ * [Model 5150: Oct 19, 1981](5150/1981-10-19/PCBIOS-REV2.json)
+ * [Model 5150: Oct 27, 1982](5150/1982-10-27/PCBIOS-REV3.json)
+ * [Model 5160: Nov 08, 1982](5160/1982-11-08/XTBIOS-REV1.json)
+ * [Model 5160: May 09, 1986](5160/1986-05-09/XTBIOS-REV3.json)
 
 The project also contains BIOS ROMs, along with more detailed information, for the following machines:
 
- * [IBM PC AT Model 5170](5170/bios/)
- * [COMPAQ Portable and DeskPro Machines](compaq/bios/)
+ * [IBM PC AT Model 5170](5170/)
+ * [COMPAQ Portable and DeskPro Machines](compaq/)
 
 ### Other ROMs
 

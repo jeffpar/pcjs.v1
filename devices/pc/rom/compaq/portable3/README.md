@@ -1,9 +1,9 @@
 ---
 layout: page
 title: COMPAQ Portable III ROMs
-permalink: /devices/pc/rom/compaq/bios/portable3/
+permalink: /devices/pc/rom/compaq/portable3/
 redirect_from:
-  - /devices/pc/bios/compaq/portable3/
+  - /devices/pc/compaq/portable3/
 ---
 
 COMPAQ Portable III ROMs

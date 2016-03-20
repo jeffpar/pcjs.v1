@@ -50,7 +50,7 @@ all we have are the memories.
 ### Speaking of Memories
 
 In particular, Read-Only Memories: we have precious few of those, too.  I finally obtained
-a [ROM Dump](/devices/pc/rom/compaq/bios/portable/) from COMPAQ's first machine, the COMPAQ Portable, but I had to buy
+a [ROM Dump](/devices/pc/rom/compaq/portable/) from COMPAQ's first machine, the COMPAQ Portable, but I had to buy
 a system board on ebay to get it.  Considering all the effort (and money) that COMPAQ invested in writing that code,
 it's a bit depressing that these things haven't been properly preserved and memorialized.
 

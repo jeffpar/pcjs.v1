@@ -12,15 +12,15 @@ machines:
     config: /devices/pc/machine/compaq/deskpro386/ega/2048kb/debugger/machine.xml
 ---
 
-PCjs can now boot the [COMPAQ DeskPro 386/16 ROM BIOS](/devices/pc/bios/compaq/deskpro386/).
+PCjs can now boot the [COMPAQ DeskPro 386/16 ROM BIOS](/devices/pc/rom/compaq/deskpro386/).
 
 There's still a problem with the hard disk controller, which I haven't looked into yet,
 but booting from a floppy works.
 
 While working through issues with this ROM BIOS, I created some lightly-annotated
-[source code](/devices/pc/bios/compaq/deskpro386/1988-01-28/1988-01-28.asm) that can be re-assembled
+[source code](/devices/pc/rom/compaq/deskpro386/1988-01-28/1988-01-28.asm) that can be re-assembled
 with [NASM](http://www.nasm.us/).  The initial process of creating the source code is
-explained [here](/devices/pc/bios/compaq/deskpro386/#recreating-rom-source-code).
+explained [here](/devices/pc/rom/compaq/deskpro386/#recreating-rom-source-code).
 
 At the top of the source code, I explain a few important details about ROM addresses that
 are worth recapping here:

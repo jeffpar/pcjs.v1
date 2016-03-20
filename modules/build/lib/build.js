@@ -227,7 +227,7 @@ var machineElements = {
                 'id': "romBIOS",
                 'addr': "0xfe000",
                 'size': "0x2000",
-                'file': "/devices/pc/rom/5150/bios/1981-04-24/PCBIOS-REV1.json"
+                'file': "/devices/pc/rom/5150/1981-04-24/PCBIOS-REV1.json"
             }
         ],
         'addr': {

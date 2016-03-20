@@ -32,10 +32,10 @@ I've also tidied up a few things in the [Devices](/devices/) folder.  ROM images
 `/devices/pc/basic/` and `/devices/pc/bios/`, but BASIC and BIOS ROM images aren't actually devices; they are the
 *contents* of ROM devices.  So, with that in mind, I've made the following rearrangements:
 
-* `/devices/pc/bios/5150/*` => `/devices/pc/rom/5150/bios/*`
-* `/devices/pc/bios/5160/*` => `/devices/pc/rom/5160/bios/*`
-* `/devices/pc/bios/5170/*` => `/devices/pc/rom/5170/bios/*`
-* `/devices/pc/bios/compaq/*` => `/devices/pc/rom/compaq/bios/*`
+* `/devices/pc/bios/5150/*` => `/devices/pc/rom/5150/*`
+* `/devices/pc/bios/5160/*` => `/devices/pc/rom/5160/*`
+* `/devices/pc/bios/5170/*` => `/devices/pc/rom/5170/*`
+* `/devices/pc/bios/compaq/*` => `/devices/pc/rom/compaq/*`
 * `/devices/pc/basic/ibm-basic-1.00.json` => `/devices/pc/rom/5150/basic/BASIC100.json`
 * `/devices/pc/basic/ibm-basic-1.10.json` => `/devices/pc/rom/5160/basic/BASIC110.json`
 
