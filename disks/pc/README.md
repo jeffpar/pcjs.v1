@@ -9,19 +9,20 @@ permalink: /disks/pc/
 IBM PC Disk Library
 ---
 
-This [Disk Library](/disks/pc/library.xml) collects all the [Disk Manifests](#disk-manifests) in the
-[PCjs Project](/docs/about/pcjs/).  These disks are available to any [IBM PC Machine](/devices/pc/machine/)
+This [Disk Library](/disks/pc/library.xml) lists all the [Disk Manifests](#disk-manifests) in the
+[PCjs Project](/docs/about/pcjs/), and makes those disks available to any [IBM PC Machine](/devices/pc/machine/)
 in the project that uses the library.  However, most machines use the *[compiled](/disks/pc/compiled/library.xml)*
 form of the library in order to reduce machine load time.
 
-The list below is *not* a complete list of everything in the library, just highlights.  For some of the disks,
-we have provided more information about the software, and in some cases, machines that automatically run the software.
-Ideally, everything in the library would also be listed below, and linked to a page that describes the software in
-more detail, along with a live demonstration of the software, but that is not yet a reality.
+The [Disk Library](/disks/pc/library.xml) summary below is not a complete list of everything in the library,
+just highlights.  For some of the disks, we have provided more information about the software, and in some cases,
+machines that automatically run the software.  Ideally, everything in the library would also be listed below,
+and linked to a page that describes the software in more detail, along with a live demonstration of the software,
+but that's not yet a reality.
 
 For application demos, see the [IBM PC Application Archive](/apps/pc/), which focuses excusively on applications.
-The [Disk Library](/disks/pc/library.xml) is a superset, including operating systems, application software, diagnostics,
-and more.
+The [Disk Library](/disks/pc/library.xml) is a superset, including operating systems, application software,
+diagnostics, and more.
 
 ### PC-DOS (IBM)
 
@@ -163,9 +164,9 @@ Disk Manifests
 ---
 
 Typically, all the distribution disks for a single version of a piece of software are placed in a single
-folder, along with a **manifest.xml** file containing *metadata* about the software and a list of the individual
-disks.  This is generally referred to as a [Software Manifest](/apps/), but in the context of disk management,
-it is also known as a Disk Manifest.
+folder, along with a **manifest.xml** file containing metadata about the software and a list of the individual
+disks.  This is generally referred to as a [Software Manifest](/apps/), but in the context of the Disk Library,
+it's simply known as a Disk Manifest.
 
 A Disk Manifest can then be added to a *[Floppy Disk Controller (FDC)](/docs/pcjs/fdc/)* configuration file,
 making all its disks available to any machine loading that particular configuration file.
@@ -179,10 +180,10 @@ entries like:
 	<disk path="/disks/pc/dos/ibm/2.00/PCDOS200-DISK2.json">PC-DOS 2.00 (Disk 2)</disk>
 	...
 
-However, listing individual diskettes like that is tedious, so support was added for Disk Manifests.
+However, listing individual diskettes like that is tedious, so support was added for Disk Manifest references:
 
-So instead of listing the PC-DOS 2.00 diskettes individually, they can be added to [samples.xml](samples.xml)
-with a single line:
+Instead of listing the PC-DOS 2.00 diskettes individually, they can now be added to an XML configuration file
+with a single Disk Manifest reference:
 
 	<manifest ref="/disks/pc/dos/ibm/2.00/manifest.xml" disk="*"/>
 
@@ -191,7 +192,7 @@ Here's how you would include only the *first* disk from PC-DOS 2.00:
 
 	<manifest ref="/disks/pc/dos/ibm/2.00/manifest.xml" disk="disk01"/>
 
-For reference, here's what the entire Disk Manifest for PC-DOS 2.00 currently looks like:
+Here's what the entire Disk Manifest for PC-DOS 2.00 currently looks like:
 
 	<manifest type="software">
 	    <title>PC-DOS</title>

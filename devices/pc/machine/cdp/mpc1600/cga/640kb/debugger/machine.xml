@@ -8,8 +8,8 @@
 	<rom ref="/devices/pc/rom/cdp/bios/mpc1600/mpc-443.xml"/>
 	<video ref="/devices/pc/video/cdp/cga/cdp-cga.xml"/>
 	<fdc ref="/disks/pc/compiled/library.xml"/>
-	<keyboard ref="/devices/pc/keyboard/us83-buttons-minimal.xml"/>
+	<keyboard ref="/devices/pc/keyboard/us83-buttons-debug.xml"/>
 	<debugger id="debugger"/>
 	<panel ref="/devices/pc/panel/wide.xml"/>
-	<chipset id="chipset" model="mpc1600"/>
+	<chipset ref="/devices/pc/chipset/mpc1600-cga-max.xml"/>
 </machine>

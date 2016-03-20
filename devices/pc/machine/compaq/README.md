@@ -7,8 +7,11 @@ permalink: /devices/pc/machine/compaq/
 COMPAQ Machines
 ---
 
-This is an evolving (and roughly chronological) list of COMPAQ machines from the 1980s, which PCjs may eventually
-support:
+PCjs currently supports the following COMPAQ machines:
+
+ - [COMPAQ DeskPro 386](deskpro386/)
+
+And here is a roughly chronological list of COMPAQ machines from the 1980's which PCjs may eventually support:
 
  - [COMPAQ Portable](#compaq-portable)
  - [COMPAQ [Portable] Plus](#compaq-portable-plus-aka-compaq-plus)
@@ -16,7 +19,7 @@ support:
  - [COMPAQ DeskPro 286](#compaq-deskpro-286)
  - [COMPAQ Portable 286](#compaq-portable-286)
  - [COMPAQ Portable II](#compaq-portable-ii)
- - [COMPAQ DeskPro 386](#compaq-deskpro-386)
+ - **[COMPAQ DeskPro 386](#compaq-deskpro-386)**
  - [COMPAQ Portable III](#compaq-portable-iii)
  - COMPAQ DeskPro 386/20
  - [COMPAQ Portable 386](#compaq-portable-386)
@@ -26,10 +29,6 @@ support:
  - [COMPAQ SLT Series](#compaq-slt-series) (SLT/286)
  - COMPAQ DeskPro 386/33
  - [COMPAQ LTE Series](#compaq-lte-series) (LTE and LTE/286)
-
-At the moment, only the [COMPAQ DeskPro 386](deskpro386/) is supported, but now that we have ROMs for a few other
-COMPAQ machines -- most importantly, their **first** machine, the [COMPAQ Portable](/devices/pc/rom/compaq/bios/portable/) --
-more should follow.
 
 ### Regarding The COMPAQ Name
 

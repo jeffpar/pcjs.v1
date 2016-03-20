@@ -19,6 +19,7 @@ PCjs supports these IBM PC models:
 
 along with these IBM PC-compatibles:
 
+* [Columbia Data Products](/devices/pc/machine/cdp/) (eg, [MPC 1600](/devices/pc/machine/cdp/mpc1600/cga/640kb/))
 * [COMPAQ](/devices/pc/machine/compaq/) (eg, [DeskPro 386](/devices/pc/machine/compaq/deskpro386/))
 
 Learn more about the [Devices](/devices/) used to build all our machines, such as the 6502-based

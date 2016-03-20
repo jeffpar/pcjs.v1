@@ -48,7 +48,7 @@ if (NODE) {
  *
  * The ChipSet component has the following component-specific (parmsChipSet) properties:
  *
- *      model:          "5150", "5160", "5170" or "deskpro386" (should be a member of ChipSet.MODELS)
+ *      model:          eg, "5150", "5160", "5170", "deskpro386", etc (should be a member of ChipSet.MODELS)
  *      sw1:            8-character binary string representing the SW1 DIP switches (SW1[1-8])
  *      sw2:            8-character binary string representing the SW2 DIP switches (SW2[1-8]) (MODEL_5150 only)
  *      sound:          true to enable (experimental) sound support (default); false to disable
@@ -151,8 +151,12 @@ function ChipSet(parmsChipSet)
 {
     Component.call(this, "ChipSet", parmsChipSet, ChipSet, Messages.CHIPSET);
 
-    this.model = parmsChipSet['model'];
-    this.model = this.model && ChipSet.MODELS[this.model] || ChipSet.MODEL_5150;
+    var model = parmsChipSet['model'];
+    /*
+     * this.model is a numeric version of the 'model' string; when comparing this.model to assorted
+     * model values, you should generally compare (this.model|0) to the target value, which truncates it.
+     */
+    this.model = model && ChipSet.MODELS[model] || ChipSet.MODEL_5150;
 
     /*
      * SW1 describes the number of floppy drives, the amount of base memory, the primary monitor type,
@@ -209,7 +213,7 @@ function ChipSet(parmsChipSet)
     /*
      * The SW1 memory setting is actually just a multiplier: it's multiplied by 16Kb on a MODEL_5150, 64Kb otherwise.
      */
-    this.kbSW = (this.model == ChipSet.MODEL_5150? 16 : 64);
+    this.kbSW = ((this.model|0) == ChipSet.MODEL_5150? 16 : 64);
 
     this.cDMACs = this.cPICs = 1;
     if (this.model >= ChipSet.MODEL_5170) {
@@ -263,30 +267,28 @@ Component.subclass(ChipSet);
 /*
  * Supported model numbers
  *
- * Unless otherwise noted, all BIOS references refer to the *original* BIOS released with each model.
+ * In general, when comparing this.model to "base" model numbers (ie, non-REV numbers), you should use
+ * (this.model|0), which truncates the current model number.
  */
 ChipSet.MODEL_5150              = 5150;     // used in reference to the 1st 5150 BIOS, dated Apr 24, 1981
-ChipSet.MODEL_5160              = 5160;     // used in reference to the 1st 5160 BIOS, dated Nov 8, 1982
-ChipSet.MODEL_5170              = 5170;     // used in reference to the 1st 5170 BIOS, dated Jan 10, 1984
+ChipSet.MODEL_5150_REV2         = 5150.2;   // used in reference to the 2nd 5150 BIOS, dated Oct 19, 1981
+ChipSet.MODEL_5150_REV3         = 5150.3;   // used in reference to the 3rd 5150 BIOS, dated Oct 27, 1982
 
-/*
- * The following are fake model numbers, used only to document issues/features in later IBM PC AT BIOS revisions.
- */
+ChipSet.MODEL_5160              = 5160;     // used in reference to the 1st 5160 BIOS, dated Nov 08, 1982
+ChipSet.MODEL_5160_REV2         = 5160.2;   // used in reference to the 1st 5160 BIOS, dated Jan 10, 1986
+ChipSet.MODEL_5160_REV3         = 5160.3;   // used in reference to the 1st 5160 BIOS, dated May 09, 1986
+
+ChipSet.MODEL_5170              = 5170;     // used in reference to the 1st 5170 BIOS, dated Jan 10, 1984
 ChipSet.MODEL_5170_REV2         = 5170.2;   // used in reference to the 2nd 5170 BIOS, dated Jun 10, 1985
 ChipSet.MODEL_5170_REV3         = 5170.3;   // used in reference to the 3rd 5170 BIOS, dated Nov 15, 1985
 
 /*
- * The following are even more fake model numbers, as we begin to depart more significantly from the IBM lineage.
- * All that really matters at this point is that MODEL_COMPAQ_DESKPRO386 > MODEL_5170.
+ * Assorted non-IBM models (we don't put "IBM" in the IBM models, but non-IBM models should include the company name).
  */
-ChipSet.MODEL_COMPAQ_PORTABLE   = 5150.1;   // COMPAQ Portable (COMPAQ's first PC)
-ChipSet.MODEL_COMPAQ_DESKPRO386 = 5180.1;   // COMPAQ DeskPro 386 (COMPAQ's first 80386-based PC)
-
-/*
- * More assorted non-IBM models
- */
-ChipSet.MODEL_CDP_MPC1600       = 5150.2;   // Columbia Data Products MPC 1600
-ChipSet.MODEL_ZENITH_Z150       = 5150.3;   // Zenith Data Systems Z-150
+ChipSet.MODEL_CDP_MPC1600       = 5150.800; // Columbia Data Products MPC 1600 ("Copyright Columbia Data Products 1983, ROM/BIOS Ver 4.34")
+ChipSet.MODEL_ZENITH_Z150       = 5150.810; // Zenith Data Systems Z-150 ("08/11/88 (C)ZDS CORP")
+ChipSet.MODEL_COMPAQ_PORTABLE   = 5150.900; // COMPAQ Portable (COMPAQ's first PC)
+ChipSet.MODEL_COMPAQ_DESKPRO386 = 5180;     // COMPAQ DeskPro 386 (COMPAQ's first 80386-based PC); should be > MODEL_5170
 
 /*
  * Last but not least, a complete list of supported model strings, and corresponding internal model numbers.
@@ -1018,7 +1020,7 @@ ChipSet.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
     case ChipSet.CONTROLS.SW1:
         this.bindings[sBinding] = control;
         this.addSwitches(sBinding, 8, this.sw1Init, {
-            0: (this.model == ChipSet.MODEL_5150? "Bootable Floppy Drive" : "Loop on POST"),
+            0: ((this.model|0) == ChipSet.MODEL_5150)? "Bootable Floppy Drive" : "Loop on POST",
             /*
              * NOTE: Both the Aug 1981 and the Apr 1984 IBM 5150 Technical Reference Manuals list SW1-2 as "RESERVED", but
              * contemporary articles discussing 8087 support in early PCs all indicate that switch SW1-2 must be set to the
@@ -1031,14 +1033,14 @@ ChipSet.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
              *
              * In light of this, we have effectively disabled the "Reserved" option below, since model will never be < 5150.
              */
-            1: (this.model < ChipSet.MODEL_5150? "Reserved" : "Coprocessor"),
+            1: (this.model < ChipSet.MODEL_5150)? "Reserved" : "Coprocessor",
             2: "Base Memory Size",          // up to 64Kb on a MODEL_5150, 256Kb on a MODEL_5160
             4: "Monitor Type",
             6: "Number of Floppy Drives"
         });
         return true;
     case ChipSet.CONTROLS.SW2:
-        if (this.model == ChipSet.MODEL_5150) {
+        if ((this.model|0) == ChipSet.MODEL_5150) {
             this.bindings[sBinding] = control;
             this.addSwitches(sBinding, 8, this.sw2Init, {
                 0: "Expansion Memory Size", // up to 480Kb, which, when combined with 64Kb of MODEL_5150 base memory, gives a maximum of 544Kb
@@ -1190,7 +1192,7 @@ ChipSet.prototype.reset = function(fHard)
      */
     this.bPIT1Ctrl = null;          // tracks writes to port 0x43
     this.bPIT2Ctrl = null;          // tracks writes to port 0x4B (MODEL_COMPAQ_DESKPRO386 only)
-    this.aTimers = new Array(this.model == ChipSet.MODEL_COMPAQ_DESKPRO386? 6 : 3);
+    this.aTimers = new Array((this.model|0) == ChipSet.MODEL_COMPAQ_DESKPRO386? 6 : 3);
     for (i = 0; i < this.aTimers.length; i++) {
         this.initTimer(i);
     }
@@ -1235,7 +1237,7 @@ ChipSet.prototype.reset = function(fHard)
             this.b8042InPort |= ChipSet.KBC.INPORT.MONO;
         }
 
-        if (COMPAQ386 && this.model == ChipSet.MODEL_COMPAQ_DESKPRO386) {
+        if (COMPAQ386 && (this.model|0) == ChipSet.MODEL_COMPAQ_DESKPRO386) {
             this.b8042InPort |= ChipSet.KBC.INPORT.COMPAQ_NO80387 | ChipSet.KBC.INPORT.COMPAQ_NOWEITEK;
         }
 
@@ -2173,7 +2175,7 @@ ChipSet.prototype.getSWMemorySize = function(fInit)
 ChipSet.prototype.getSWFloppyDrives = function(fInit)
 {
     var sw1 = (fInit? this.sw1Init : this.sw1);
-    return ((this.model != ChipSet.MODEL_5150) || (sw1 & ChipSet.PPI_SW.FDRIVE.IPL))? ((sw1 & ChipSet.PPI_SW.FDRIVE.MASK) >> ChipSet.PPI_SW.FDRIVE.SHIFT) + 1 : 0;
+    return (((this.model|0) != ChipSet.MODEL_5150) || (sw1 & ChipSet.PPI_SW.FDRIVE.IPL))? ((sw1 & ChipSet.PPI_SW.FDRIVE.MASK) >> ChipSet.PPI_SW.FDRIVE.SHIFT) + 1 : 0;
 };
 
 /**
@@ -2828,7 +2830,7 @@ ChipSet.prototype.outDMAPageSpare = function(iSpare, port, bOut, addrFrom)
      * TODO: Remove this DEBUG-only DESKPRO386 code once we're done debugging DeskPro 386 ROMs;
      * it enables logging of all DeskPro ROM checkpoint I/O to port 0x84.
      */
-    if (this.messageEnabled(Messages.DMA | Messages.PORT) || DEBUG && this.model == ChipSet.MODEL_COMPAQ_DESKPRO386 && port == 0x84) {
+    if (this.messageEnabled(Messages.DMA | Messages.PORT) || DEBUG && (this.model|0) == ChipSet.MODEL_COMPAQ_DESKPRO386 && port == 0x84) {
         this.printMessageIO(port, bOut, addrFrom, "DMA.SPARE" + iSpare + ".PAGE", null, true);
     }
     this.abDMAPageSpare[iSpare] = bOut;
@@ -4286,7 +4288,7 @@ ChipSet.prototype.inPPIC = function(port, addrFrom)
      * If you ever wanted to simulate I/O channel errors or R/W memory parity errors, you could
      * add either PPI_C.IO_CHANNEL_CHK (0x40) or PPI_C.RW_PARITY_CHK (0x80) to the return value (b).
      */
-    if (this.model == ChipSet.MODEL_5150) {
+    if ((this.model|0) == ChipSet.MODEL_5150) {
         if (this.bPPIB & ChipSet.PPI_B.ENABLE_SW2) {
             b |= this.sw2 & ChipSet.PPI_C.SW;
         } else {
