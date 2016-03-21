@@ -36,7 +36,6 @@ diagnostics, and more.
 * [PC-DOS 3.30](/disks/pc/dos/ibm/3.30/) (1987)
 * [PC-DOS 4.00](/disks/pc/dos/ibm/4.00/) (1988)
 * [PC-DOS 5.00](/disks/pc/dos/ibm/5.00/) (1991)
-* PC-DOS 6.00
 * [PC-DOS 6.10](/disks/pc/dos/ibm/6.10/) (1993)
 * [PC-DOS 6.30](/disks/pc/dos/ibm/6.30/) (1993)
 * [PC-DOS 7.00](/disks/pc/dos/ibm/7.00/) (1994)
