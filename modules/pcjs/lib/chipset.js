@@ -57,6 +57,11 @@ if (NODE) {
  *      monitor:        none|tv|color|mono|ega|vga (if no sw1 value provided, default is "ega" for 5170, "mono" otherwise)
  *      rtcDate:        optional RTC date/time (in GMT) to use on reset; use the ISO 8601 format; eg: "2014-10-01T08:00:00"
  *
+ * As support for IBM-compatible machines grows, we should refrain from adding new model strings (eg, "deskpro386")
+ * and make the individual ChipSet components more configurable; eg:
+ *
+ *      pit1:           set to 0x48 to enable PIT1 at base port 0x48 (as used by DESKPRO386); default is undefined
+ *
  * The conventions used for the sw1 and sw2 strings are that the left-most character represents DIP switch [1],
  * the right-most character represents DIP switch [8], and "1" means the DIP switch is ON and "0" means it is OFF.
  *
@@ -154,8 +159,8 @@ function ChipSet(parmsChipSet)
     var model = parmsChipSet['model'];
 
     /*
-     * this.model is a numeric version of the 'model' string; when comparing this.model to assorted
-     * model values, you should generally compare (this.model|0) to the target value, which truncates it.
+     * this.model is a numeric version of the 'model' string; when comparing this.model to standard IBM
+     * model numbers, you should generally compare (this.model|0) to the target value, which truncates it.
      *
     if (model && !ChipSet.MODELS[model]) {
         Component.notice("Unrecognized ChipSet model: " + model);
@@ -279,23 +284,26 @@ Component.subclass(ChipSet);
 ChipSet.MODEL_5150              = 5150;     // used in reference to the 1st 5150 BIOS, dated Apr 24, 1981
 ChipSet.MODEL_5150_REV2         = 5150.2;   // used in reference to the 2nd 5150 BIOS, dated Oct 19, 1981
 ChipSet.MODEL_5150_REV3         = 5150.3;   // used in reference to the 3rd 5150 BIOS, dated Oct 27, 1982
+ChipSet.MODEL_5150_OTHER        = 5150.9;
 
 ChipSet.MODEL_5160              = 5160;     // used in reference to the 1st 5160 BIOS, dated Nov 08, 1982
 ChipSet.MODEL_5160_REV2         = 5160.2;   // used in reference to the 1st 5160 BIOS, dated Jan 10, 1986
 ChipSet.MODEL_5160_REV3         = 5160.3;   // used in reference to the 1st 5160 BIOS, dated May 09, 1986
+ChipSet.MODEL_5160_OTHER        = 5160.9;
 
 ChipSet.MODEL_5170              = 5170;     // used in reference to the 1st 5170 BIOS, dated Jan 10, 1984
 ChipSet.MODEL_5170_REV2         = 5170.2;   // used in reference to the 2nd 5170 BIOS, dated Jun 10, 1985
 ChipSet.MODEL_5170_REV3         = 5170.3;   // used in reference to the 3rd 5170 BIOS, dated Nov 15, 1985
+ChipSet.MODEL_5170_OTHER        = 5170.9;
 
 /*
  * Assorted non-IBM models (we don't put "IBM" in the IBM models, but non-IBM models should include the company name).
  */
-ChipSet.MODEL_ATT_6300          = 5150.800; // AT&T Personal Computer 6300/Olivetti M24 ("COPYRIGHT (C) OLIVETTI 1984","04/03/86",v1.43)
-ChipSet.MODEL_CDP_MPC1600       = 5150.810; // Columbia Data Products MPC 1600 ("Copyright Columbia Data Products 1983, ROM/BIOS Ver 4.34")
-ChipSet.MODEL_ZENITH_Z150       = 5150.820; // Zenith Data Systems Z-150 ("08/11/88 (C)ZDS CORP")
-ChipSet.MODEL_COMPAQ_PORTABLE   = 5150.900; // COMPAQ Portable (COMPAQ's first PC)
-ChipSet.MODEL_COMPAQ_DESKPRO386 = 5180;     // COMPAQ DeskPro 386 (COMPAQ's first 80386-based PC); should be > MODEL_5170
+ChipSet.MODEL_ATT_6300          = ChipSet.MODEL_5150_OTHER; // AT&T Personal Computer 6300/Olivetti M24 ("COPYRIGHT (C) OLIVETTI 1984","04/03/86",v1.43)
+ChipSet.MODEL_CDP_MPC1600       = ChipSet.MODEL_5150_OTHER; // Columbia Data Products MPC 1600 ("Copyright Columbia Data Products 1983, ROM/BIOS Ver 4.34")
+ChipSet.MODEL_ZENITH_Z150       = ChipSet.MODEL_5150_OTHER; // Zenith Data Systems Z-150 ("08/11/88 (C)ZDS CORP")
+ChipSet.MODEL_COMPAQ_PORTABLE   = ChipSet.MODEL_5150_OTHER; // COMPAQ Portable (COMPAQ's first PC)
+ChipSet.MODEL_COMPAQ_DESKPRO386 = 5180;                     // COMPAQ DeskPro 386 (COMPAQ's first 80386-based PC); should be > MODEL_5170
 
 /*
  * Last but not least, a complete list of supported model strings, and corresponding internal model numbers.
@@ -304,9 +312,7 @@ ChipSet.MODELS = {
     "5150":         ChipSet.MODEL_5150,
     "5160":         ChipSet.MODEL_5160,
     "5170":         ChipSet.MODEL_5170,
-    "att6300":      ChipSet.MODEL_ATT_6300,
-    "mpc1600":      ChipSet.MODEL_CDP_MPC1600,
-    "z150":         ChipSet.MODEL_ZENITH_Z150,
+    "other":        ChipSet.MODEL_5150_OTHER,
     "deskpro386":   ChipSet.MODEL_COMPAQ_DESKPRO386
 };
 
