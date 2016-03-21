@@ -805,6 +805,12 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fProbe)
                  */
                 if (rpl >= this.cpl) {
                     if (rpl > this.cpl) {
+                        /*
+                         * TODO: See if we can defer calling setSS() and setSP() until AFTER the final checks
+                         * below, because if, for example, the new CS is not PRESENT, we must generate a fault,
+                         * which in turn must restore the original stack, which means helpRETF() must snapshot
+                         * the stack registers.
+                         */
                         regSP = cpu.popWord();
                         cpu.setSS(cpu.popWord(), true);
                         cpu.setSP(regSP);

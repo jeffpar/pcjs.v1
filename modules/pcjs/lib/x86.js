@@ -240,9 +240,10 @@ var X86 = {
                 GATE386_CALL:               0x0C00,     // 80386 and up
                 GATE386_INT:                0x0E00,     // 80386 and up
                 GATE386_TRAP:               0x0F00,     // 80386 and up
+                CODE_OR_DATA:               0x1E00,
                 DATA_READONLY:              0x1000,
                 DATA_WRITABLE:              0x1200,
-                DATA_EXPDOWN_READONLY:      0x1400,
+                DATA_EXPDOWN:               0x1400,
                 DATA_EXPDOWN_WRITABLE:      0x1600,
                 CODE_EXECONLY:              0x1800,
                 CODE_READABLE:              0x1A00,

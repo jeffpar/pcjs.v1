@@ -1084,7 +1084,8 @@ X86CPU.prototype.resetRegs = function()
      * of accessing or changing them, so this is an implementation detail those processors are unaware of.
      */
     this.regCR0 = X86.CR0.MSW.ON;
-    this.addrIDT = 0; this.addrIDTLimit = 0x03FF;
+    this.addrIDT = 0;
+    this.addrIDTLimit = 0x03FF;
     this.regPS = this.nIOPL = 0;// these should be set before the first setPS() call
 
     /*
@@ -1273,21 +1274,6 @@ X86CPU.prototype.resetRegs = function()
      * Now that all the segment registers have been created, it's safe to set the current addressing mode.
      */
     this.setProtMode();
-};
-
-/**
- * zeroSeg(seg)
- *
- * Helper to zero a segment register as privilege transitions require.
- *
- * @this {X86CPU}
- * @param {X86Seg} seg
- */
-X86CPU.prototype.zeroSeg = function(seg)
-{
-    if ((seg.sel & X86.SEL.MASK) && seg.dpl < this.nCPL && (seg.acc & X86.DESC.ACC.TYPE.CODE_CONFORMING) != X86.DESC.ACC.TYPE.CODE_CONFORMING) {
-        seg.load(0);
-    }
 };
 
 /**
@@ -1734,6 +1720,28 @@ X86CPU.prototype.checkMemoryException = function(addr, nb, fWrite)
 };
 
 /**
+ * getProtMode()
+ *
+ * @this {X86CPU}
+ * @return {boolean} true if protected-mode, false if not
+ */
+X86CPU.prototype.getProtMode = function()
+{
+    return !!(this.regCR0 & X86.CR0.MSW.PE);
+};
+
+/**
+ * getV68Mode()
+ *
+ * @this {X86CPU}
+ * @return {boolean} true if V86-mode, false if not
+ */
+X86CPU.prototype.getV86Mode = function()
+{
+    return !!(this.regPS & X86.PS.VM);
+};
+
+/**
  * setProtMode(fProt, fV86)
  *
  * Update any opcode handlers that operate significantly differently in real-mode vs. protected-mode, and
@@ -1752,12 +1760,12 @@ X86CPU.prototype.checkMemoryException = function(addr, nb, fWrite)
 X86CPU.prototype.setProtMode = function(fProt, fV86)
 {
     if (fProt === undefined) {
-        fProt = !!(this.regCR0 & X86.CR0.MSW.PE);
+        fProt = this.getProtMode();
     }
     if (fV86 === undefined) {
-        fV86 = !!(this.regPS & X86.PS.VM);
+        fV86 = this.getV86Mode();
     }
-    if (DEBUG && (!fProt != !(this.regCR0 & X86.CR0.MSW.PE) || fV86 != !!(this.regPS & X86.PS.VM)) && this.messageEnabled()) {
+    if (DEBUG && (fProt != this.getProtMode() || fV86 != this.getV86Mode()) && this.messageEnabled()) {
         this.printMessage("CPU switching to " + (fProt? (fV86? "v86" : "protected") : "real") + "-mode", this.bitsMessage, true);
     }
     this.aOpGrp6 = (fProt && !fV86? X86.aOpGrp6Prot : X86.aOpGrp6Real);

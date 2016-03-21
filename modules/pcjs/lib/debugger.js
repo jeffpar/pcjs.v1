@@ -99,10 +99,10 @@ var DbgAddr;
  * How do you figure out where the code for GlobalAlloc is in the first place?  You need to have
  * BACKTRACK support enabled (which currently means running the non-COMPILED version), so that as
  * the Disk component loads disk images, it will automatically extract symbolic information from all
- * "NE" (New Executable) binaries on those disks, which the Debugger's "di" command can then search
+ * "NE" (New Executable) binaries on those disks, which the Debugger's "dt" command can then search
  * for you; eg:
  *
- *      ## di globalalloc
+ *      ## dt globalalloc
  *      GLOBALALLOC: KRNL386.EXE 0001:022B len 0xC570
  *
  * And then you just need to do a bit more sleuthing to find the right CODE segment.  And that just
@@ -1506,10 +1506,10 @@ if (DEBUGGER) {
         }
 
         this.messageDump(Messages.BUS,  function onDumpBus(asArgs) { dbg.dumpBus(asArgs); });
-        this.messageDump(Messages.MEM,  function onDumpMem(asArgs) { dbg.dumpMem(asArgs); });
         this.messageDump(Messages.DESC, function onDumpSel(asArgs) { dbg.dumpSel(asArgs); });
-        this.messageDump(Messages.TSS,  function onDumpTSS(asArgs) { dbg.dumpTSS(asArgs); });
         this.messageDump(Messages.DOS,  function onDumpDOS(asArgs) { dbg.dumpDOS(asArgs); });
+        this.messageDump(Messages.MEM,  function onDumpMem(asArgs) { dbg.dumpMem(asArgs); });
+        this.messageDump(Messages.TSS,  function onDumpTSS(asArgs) { dbg.dumpTSS(asArgs); });
 
         if (Interrupts.WINDBG.ENABLED || Interrupts.WINDBGRM.ENABLED) {
             this.fWinDbg = null;
@@ -2763,36 +2763,44 @@ if (DEBUGGER) {
     };
 
     /**
-     * dumpDOS(asArgs)
-     *
-     * Dumps DOS MCBs (Memory Control Blocks).
-     *
-     * TODO: Add some code to detect the current version of DOS (if any) and locate the first MCB automatically.
+     * dumpBackTrack(asArgs)
      *
      * @this {Debugger}
      * @param {Array.<string>} asArgs
      */
-    Debugger.prototype.dumpDOS = function(asArgs)
+    Debugger.prototype.dumpBackTrack = function(asArgs)
     {
-        var mcb;
-        var sMCB = asArgs[0];
-        if (sMCB) {
-            mcb = this.parseValue(sMCB);
+        var sInfo = "no information";
+        if (BACKTRACK) {
+            var sAddr = asArgs[0];
+            var dbgAddr = this.parseAddr(sAddr, true, true, false);
+            if (dbgAddr) {
+                var addr = this.getAddr(dbgAddr);
+                if (dbgAddr.type != Debugger.ADDRTYPE.PHYSICAL) {
+                    var pageInfo = this.getPageInfo(addr);
+                    if (pageInfo) {
+                        dbgAddr.addr = pageInfo.addrPhys;
+                        dbgAddr.type = Debugger.ADDRTYPE.PHYSICAL;
+                    }
+                }
+                sInfo = this.toHexAddr(dbgAddr) + ": " + (this.bus.getSymbol(addr, true) || sInfo);
+            } else {
+                var component, componentPrev = null;
+                while (component = this.cmp.getMachineComponent("Disk", componentPrev)) {
+                    var aInfo = component.getSymbolInfo(sAddr);
+                    if (aInfo.length) {
+                        sInfo = "";
+                        for (var i in aInfo) {
+                            var a = aInfo[i];
+                            if (sInfo) sInfo += '\n';
+                            sInfo += a[0] + ": " + a[1] + ' ' + str.toHex(a[2], 4) + ':' + str.toHex(a[3], 4) + " len " + str.toHexWord(a[4]);
+                        }
+                    }
+                    componentPrev = component;
+                }
+            }
         }
-        if (mcb === undefined) {
-            this.println("invalid MCB");
-            return;
-        }
-        this.println("dumpMCB(" + str.toHexWord(mcb) + ')');
-        while (mcb) {
-            var dbgAddr = this.newAddr(0, mcb);
-            var bSig = this.getByte(dbgAddr, 1);
-            var wPID = this.getShort(dbgAddr, 2);
-            var wParas = this.getShort(dbgAddr, 5);
-            if (bSig != 0x4D && bSig != 0x5A) break;
-            this.println(this.toHexOffset(0, mcb) + ": '" + String.fromCharCode(bSig) + "' PID=" + str.toHexWord(wPID) + " LEN=" + str.toHexWord(wParas) + ' "' + this.getSZ(dbgAddr, 8) + '"');
-            mcb += 1 + wParas;
-        }
+        return sInfo;
     };
 
     /**
@@ -2872,6 +2880,78 @@ if (DEBUGGER) {
     };
 
     /**
+     * dumpDOS(asArgs)
+     *
+     * Dumps DOS MCBs (Memory Control Blocks).
+     *
+     * TODO: Add some code to detect the current version of DOS (if any) and locate the first MCB automatically.
+     *
+     * @this {Debugger}
+     * @param {Array.<string>} asArgs
+     */
+    Debugger.prototype.dumpDOS = function(asArgs)
+    {
+        var mcb;
+        var sMCB = asArgs[0];
+        if (sMCB) {
+            mcb = this.parseValue(sMCB);
+        }
+        if (mcb === undefined) {
+            this.println("invalid MCB");
+            return;
+        }
+        this.println("dumpMCB(" + str.toHexWord(mcb) + ')');
+        while (mcb) {
+            var dbgAddr = this.newAddr(0, mcb);
+            var bSig = this.getByte(dbgAddr, 1);
+            var wPID = this.getShort(dbgAddr, 2);
+            var wParas = this.getShort(dbgAddr, 5);
+            if (bSig != 0x4D && bSig != 0x5A) break;
+            this.println(this.toHexOffset(0, mcb) + ": '" + String.fromCharCode(bSig) + "' PID=" + str.toHexWord(wPID) + " LEN=" + str.toHexWord(wParas) + ' "' + this.getSZ(dbgAddr, 8) + '"');
+            mcb += 1 + wParas;
+        }
+    };
+
+    /**
+     * dumpIDT(asArgs)
+     *
+     * Dumps an IDT vector entry.
+     *
+     * @this {Debugger}
+     * @param {Array.<string>} asArgs
+     */
+    Debugger.prototype.dumpIDT = function(asArgs)
+    {
+        var sIDT = asArgs[0];
+
+        if (!sIDT) {
+            this.println("no IDT vector");
+            return;
+        }
+
+        var nIDT = this.parseValue(sIDT);
+        if (nIDT === undefined || nIDT < 0 || nIDT > 255) {
+            this.println("invalid vector: " + sIDT);
+            return;
+        }
+
+        var ch = '&', fProt = this.cpu.getProtMode(), fAddr32 = false;
+        var addrIDT = this.cpu.addrIDT + (nIDT << (fProt? 3 : 2));
+        var off = this.cpu.getShort(addrIDT + X86.DESC.LIMIT.OFFSET);
+        var sel = this.cpu.getShort(addrIDT + X86.DESC.BASE.OFFSET);
+        if (fProt) {
+            ch = '#';
+            var acc = this.cpu.getShort(addrIDT + X86.DESC.ACC.OFFSET);
+            if (acc & X86.DESC.ACC.TYPE.NONSEG_386) {
+                fAddr32 = true;
+                off |= this.cpu.getShort(addrIDT + X86.DESC.EXT.OFFSET) << 16;
+            }
+        }
+
+        this.println("dumpIDT(" + str.toHexWord(nIDT) + "): " + ch + str.toHex(sel, 4) + ':' + str.toHex(off, fAddr32? 8 : 4));
+    };
+
+    /**
      * dumpMem(asArgs)
      *
      * Dumps page allocations.
@@ -2932,47 +3012,6 @@ if (DEBUGGER) {
             //var blockPhys = bus.aMemBlocks[(addrPhys & bus.nBusMask) >>> bus.nBlockShift];
         }
         return pageInfo;
-    };
-
-    /**
-     * dumpInfo(asArgs)
-     *
-     * @this {Debugger}
-     * @param {Array.<string>} asArgs
-     */
-    Debugger.prototype.dumpInfo = function(asArgs)
-    {
-        var sInfo = "no information";
-        if (BACKTRACK) {
-            var sAddr = asArgs[0];
-            var dbgAddr = this.parseAddr(sAddr, true, true, false);
-            if (dbgAddr) {
-                var addr = this.getAddr(dbgAddr);
-                if (dbgAddr.type != Debugger.ADDRTYPE.PHYSICAL) {
-                    var pageInfo = this.getPageInfo(addr);
-                    if (pageInfo) {
-                        dbgAddr.addr = pageInfo.addrPhys;
-                        dbgAddr.type = Debugger.ADDRTYPE.PHYSICAL;
-                    }
-                }
-                sInfo = this.toHexAddr(dbgAddr) + ": " + (this.bus.getSymbol(addr, true) || sInfo);
-            } else {
-                var component, componentPrev = null;
-                while (component = this.cmp.getMachineComponent("Disk", componentPrev)) {
-                    var aInfo = component.getSymbolInfo(sAddr);
-                    if (aInfo.length) {
-                        sInfo = "";
-                        for (var i in aInfo) {
-                            var a = aInfo[i];
-                            if (sInfo) sInfo += '\n';
-                            sInfo += a[0] + ": " + a[1] + ' ' + str.toHex(a[2], 4) + ':' + str.toHex(a[3], 4) + " len " + str.toHexWord(a[4]);
-                        }
-                    }
-                    componentPrev = component;
-                }
-            }
-        }
-        return sInfo;
     };
 
     /**
@@ -6376,10 +6415,11 @@ if (DEBUGGER) {
             this.println("\tdw [a] [#]    dump # words at address a");
             this.println("\tdd [a] [#]    dump # dwords at address a");
             this.println("\tdh [#] [#]    dump # instructions from history");
-            if (BACKTRACK) {
-                this.println("\tdi [a]        dump backtrack info for address a");
-            }
+            this.println("\tdi [#]        dump descriptor info for IDT #");
             this.println("\tds [#]        dump descriptor info for selector #");
+            if (BACKTRACK) {
+                this.println("\tdt [a]        dump backtrack info for address a");
+            }
             if (sDumpers.length) this.println("dump extension commands:\n\t" + sDumpers);
             return;
         }
@@ -6470,7 +6510,13 @@ if (DEBUGGER) {
 
         if (sCmd == "di") {
             asArgs.shift();
-            var sInfo = this.dumpInfo(asArgs);
+            this.dumpIDT(asArgs);
+            return;
+        }
+
+        if (sCmd == "dt") {
+            asArgs.shift();
+            var sInfo = this.dumpBackTrack(asArgs);
             this.println(sInfo);
             return;
         }

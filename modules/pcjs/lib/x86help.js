@@ -462,9 +462,9 @@ X86.helpSRCxx = function()
 X86.helpCALLF = function(off, sel)
 {
     /*
-     * Since we always push the return address AFTER calling setCSIP(), and since either push could trigger a
-     * fault (eg, segment fault, page fault, etc), we must not only snapshot regLSP into opLSP, but also the
-     * current CS into opCS, so that helpFault() can always make CALLF restartable.  Ditto for opSS and the SS register.
+     * Since we always push the return address AFTER calling setCSIP(), and since either push could trigger
+     * a fault (eg, segment fault, page fault, etc), we must not only snapshot regSS and regLSP, but also regCS,
+     * so that helpFault() can always make CALLF restartable.
      */
     this.opCS = this.getCS();
     this.opSS = this.getSS();
@@ -532,11 +532,7 @@ X86.helpINT = function(nIDT, nError, nCycles)
  */
 X86.helpIRET = function()
 {
-    /*
-     * Originally, we would snapshot regLSP into opLSP because newCS could trigger a segment fault,
-     * but additionally, the stack segment could trigger either a segment fault or a page fault; indeed,
-     * any operation that performs multiple stack modifications must take this precaution and snapshot regLSP.
-     */
+    this.opSS = this.getSS();
     this.opLSP = this.regLSP;
 
     this.nStepCycles -= this.cycleCounts.nOpCyclesIRet;
@@ -612,6 +608,7 @@ X86.helpIRET = function()
     }
 
     this.opLSP = X86.ADDR_INVALID;
+    this.opSS = -1;
 };
 
 /**
@@ -626,11 +623,7 @@ X86.helpIRET = function()
  */
 X86.helpRETF = function(n)
 {
-    /*
-     * Originally, we would snapshot regLSP into opLSP because newCS could trigger a segment fault,
-     * but additionally, the stack segment could trigger either a segment fault or a page fault; indeed,
-     * any operation that performs multiple stack modifications must take this precaution and snapshot regLSP.
-     */
+    this.opSS = this.getSS();
     this.opLSP = this.regLSP;
 
     var newIP = this.popWord();
@@ -656,16 +649,17 @@ X86.helpRETF = function(n)
          * it safe and using CODE_CONFORMING instead of CODE_CONFORMING_READABLE.  Also, for the record, I've not
          * seen this situation occur yet (eg, in OS/2 1.0).
          */
-        this.zeroSeg(this.segDS);
-        this.zeroSeg(this.segES);
+        X86.zeroSeg.call(this, this.segDS);
+        X86.zeroSeg.call(this, this.segES);
         if (I386 && this.model >= X86.MODEL_80386) {
-            this.zeroSeg(this.segFS);
-            this.zeroSeg(this.segGS);
+            X86.zeroSeg.call(this, this.segFS);
+            X86.zeroSeg.call(this, this.segGS);
         }
     }
     if (n == 2 && this.cIntReturn) this.checkIntReturn(this.regLIP);
 
     this.opLSP = X86.ADDR_INVALID;
+    this.opSS = -1;
 };
 
 /**
@@ -755,8 +749,8 @@ X86.helpFault = function(nFault, nError, nCycles, fHalt)
              *
              * TODO: The following opCS/opLIP/opSS/opLSP checks are primarily required for 80386-based machines
              * with paging enabled, because page faults introduce a new set of complex faults that our current
-             * segment load "probes" are insufficient to catch.  So as a stop-gap measure, we rely on these FOUR
-             * "snapshot" registers to temporarily resolve the general instruction restartability problem.
+             * segment load "probes" are insufficient to catch.  So as a stop-gap measure, we rely on these four
+             * "snapshot" registers to resolve the general instruction restartability problem (for now).
              *
              * If you want to closely examine the underlying causes of these more complex faults, set breakpoints
              * where indicated below, and examine the stack trace.
@@ -938,12 +932,13 @@ X86.helpCheckFault = function(nFault, nError, fHalt)
      * interrupts in V86-mode regardless (they generate a GP_FAULT if IOPL < 3, and even when IOPL == 3, only
      * the protected-mode IDT handler gets to run).
      */
-    if ((this.regPS & X86.PS.VM)) {
+    if (this.regPS & X86.PS.VM) {
         if (nFault == X86.EXCEPTION.UD_FAULT && bOpcode == X86.OPCODE.ARPL ||
             nFault == X86.EXCEPTION.GP_FAULT && bOpcode == X86.OPCODE.INTN) {
             fHalt = false;
         }
     }
+    // else if (DEBUG && nFault == X86.EXCEPTION.GP_FAULT && fHalt === undefined) fHalt = true;
 
     /*
      * If fHalt has been explicitly set to false, we also take that as a cue to disable fault messages
@@ -1005,4 +1000,24 @@ X86.helpCheckFault = function(nFault, nError, fHalt)
         }
     }
     return fHalt;
+};
+
+/**
+ * zeroSeg(seg)
+ *
+ * Helper to zero a segment register whenever transitioning to a less privileged (numerically higher) level.
+ *
+ * @this {X86CPU}
+ * @param {X86Seg} seg
+ */
+X86.zeroSeg = function(seg)
+{
+    var acc = seg.acc & X86.DESC.ACC.TYPE.CODE_OR_DATA;
+    if (seg.sel & X86.SEL.MASK) {
+        if (acc == X86.DESC.ACC.TYPE.CODE_EXECONLY ||           // non-readable code segment (not allowed)
+            acc == X86.DESC.ACC.TYPE.CODE_CONFORMING ||         // non-readable code segment (not allowed)
+            acc < X86.DESC.ACC.TYPE.CODE_CONFORMING && seg.dpl < this.nCPL && seg.dpl < (seg.sel & X86.SEL.RPL)) {
+            seg.load(0);
+        }
+    }
 };

@@ -26,7 +26,7 @@ Windows 95 was released to manufacturing on July 14, 1995 and went on sale at mi
 
 It is shown running below, following a "Compact Installation" on a 68Mb hard disk.  Before the machine can
 start, it must download the disk image, which may take a minute or two, depending on the speed of your
-internet connection.
+internet connection.  You can also run Windows 95 with the [PCjs Debugger](debugger/).
 
 More information about this Windows 95 demo is available in the [PCjs Blog](/blog/2015/09/21/).
 
