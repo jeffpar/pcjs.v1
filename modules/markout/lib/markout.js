@@ -1275,8 +1275,8 @@ MarkOut.prototype.convertMDEmphasis = function(sBlock)
      *      *[modules](/modules/)*
      */
     if (sBlock.indexOf('*') >= 0 || sBlock.indexOf('_') >= 0) {
-        sBlock = sBlock.replace(/(^|[^a-z0-9])([\*_])\2([\s\S]*?)\2\2([^a-z0-9]|$)/gi, "$1<strong>$3</strong>$4");
-        sBlock = sBlock.replace(/(^|[^a-z0-9])([\*_])([\s\S]*?)\2([^a-z0-9]|$)/gi, "$1<em>$3</em>$4");
+        sBlock = sBlock.replace(/(^|[^a-z0-9-])([\*_])\2([\s\S]*?)\2\2([^a-z0-9-]|$)/gi, "$1<strong>$3</strong>$4");
+        sBlock = sBlock.replace(/(^|[^a-z0-9-])([\*_])([\s\S]*?)\2([^a-z0-9-]|$)/gi, "$1<em>$3</em>$4");
     }
     return sBlock;
 };
