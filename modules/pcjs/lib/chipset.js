@@ -48,8 +48,8 @@ if (NODE) {
  *
  * The ChipSet component has the following component-specific (parmsChipSet) properties:
  *
- *      model:          eg, "5150", "5160", "5170", "deskpro386", etc (should be a member of ChipSet.MODELS)
- *      sw1:            8-character binary string representing the SW1 DIP switches (SW1[1-8])
+ *      model:          eg, "5150", "5160", "5170", "deskpro386" (should be a member of ChipSet.MODELS)
+ *      sw1:            8-character binary string representing the SW1 DIP switches (SW1[1-8]); see Switches Overview
  *      sw2:            8-character binary string representing the SW2 DIP switches (SW2[1-8]) (MODEL_5150 only)
  *      sound:          true to enable (experimental) sound support (default); false to disable
  *      scaleTimers:    true to divide timer cycle counts by the CPU's cycle multiplier (default is false)
@@ -58,95 +58,10 @@ if (NODE) {
  *      rtcDate:        optional RTC date/time (in GMT) to use on reset; use the ISO 8601 format; eg: "2014-10-01T08:00:00"
  *
  * As support for IBM-compatible machines grows, we should refrain from adding new model strings (eg, "deskpro386")
- * and make the individual ChipSet components more configurable; eg:
+ * and instead add more ChipSet configuration properties, such as:
  *
- *      pit1:           set to 0x48 to enable PIT1 at base port 0x48 (as used by DESKPRO386); default is undefined
- *
- * The conventions used for the sw1 and sw2 strings are that the left-most character represents DIP switch [1],
- * the right-most character represents DIP switch [8], and "1" means the DIP switch is ON and "0" means it is OFF.
- *
- * Internally, we convert the above strings into binary values that the 8255A PPI returns, where DIP switch [1]
- * is bit 0 and DIP switch [8] is bit 7, and 0 indicates the switch is ON and 1 indicates it is OFF.
- *
- * For reference, here's how the SW1 and SW2 switches correspond to the internal 8255A PPI bit values:
- *
- *      SW1[1]    (bit 0)     "0xxxxxxx" (1):  IPL,  "1xxxxxxx" (0):  No IPL
- *      SW1[2]    (bit 1)     reserved on the 5150; OFF (1) if FPU installed in a 5160
- *      SW1[3,4]  (bits 3-2)  "xx11xxxx" (00): 16Kb, "xx01xxxx" (10): 32Kb,  "xx10xxxx" (01): 48Kb,  "xx00xxxx" (11): 64Kb
- *      SW1[5,6]  (bits 5-4)  "xxxx11xx" (00): none, "xxxx01xx" (10): tv,    "xxxx10xx" (01): color, "xxxx00xx" (11): mono
- *      SW1[7,8]  (bits 7-6)  "xxxxxx11" (00): 1 FD, "xxxxxx01" (10): 2 FD,  "xxxxxx10" (01): 3 FD,  "xxxxxx00" (11): 4 FD
- *
- * Note: FD refers to floppy drive, and IPL refers to an "Initial Program Load" floppy drive.
- *
- *      SW2[1-4]    (bits 3-0)  "NNNNxxxx": number of 32Kb blocks of I/O expansion RAM present
- *
- * TODO: There are cryptic references to SW2[5] in the original (5150) TechRef, and apparently the 8255A PPI can
- * be programmed to return it (which we support), but its purpose remains unclear to me (see PPI_B.ENABLE_SW2).
- *
- * For example, sw1="01110011" indicates that all SW1 DIP switches are ON, except for SW1[1], SW1[5] and SW1[6],
- * which are OFF.  Internally, the order of these bits must reversed (to 11001110) and then inverted (to 00110001)
- * to yield the value that the 8255A PPI returns.  Reading the final value right-to-left, 00110001 indicates an
- * IPL floppy drive, 1X of RAM (where X is 16Kb on a MODEL_5150 and 64Kb on a MODEL_5160), MDA, and 1 floppy drive.
- *
- * WARNING: It is possible to set SW1 to indicate more memory than the RAM component has been configured to provide.
- * This is a configuration error which will cause the machine to crash after reporting a "201" error code (memory
- * test failure), which is presumably what a real machine would do if it was similarly misconfigured.  Surprisingly,
- * the BIOS forges ahead, setting SP to the top of the memory range indicated by SW1 (via INT 0x12), but the lack of
- * a valid stack causes the system to crash after the next IRET.  The BIOS should have either halted or modified
- * the actual memory size to match the results of the memory test.
- *
- * This module provides support for many of the following components (except where a separate component is noted).
- * This list is taken from p.1-8 ("System Unit") of the IBM 5160 (PC XT) Technical Reference Manual (as revised
- * April 1983), only because I didn't see a similar listing in the original 5150 TechRef.
- *
- *      Port(s)         Description
- *      -------         -----------
- *      000-00F         DMA Chip 8237A-5                                [see below]
- *      020-021         Interrupt 8259A                                 [see below]
- *      040-043         Timer 8253-5                                    [see below]
- *      060-063         PPI 8255A-5                                     [see below]
- *      080-083         DMA Page Registers                              [see below]
- *          0Ax [1]     NMI Mask Register                               [see below]
- *          0Cx         Reserved
- *          0Ex         Reserved
- *      200-20F         Game Control
- *      210-217         Expansion Unit
- *      220-24F         Reserved
- *      278-27F         Reserved
- *      2F0-2F7         Reserved
- *      2F8-2FF         Asynchronous Communications (Secondary)         [see the SerialPort component]
- *      300-31F         Prototype Card
- *      320-32F         Hard Drive Controller (XTC)                     [see the HDC component]
- *      378-37F         Printer
- *      380-38C [2]     SDLC Communications
- *      380-389 [2]     Binary Synchronous Communications (Secondary)
- *      3A0-3A9         Binary Synchronous Communications (Primary)
- *      3B0-3BF         IBM Monochrome Display/Printer                  [see the Video component]
- *      3C0-3CF         Reserved
- *      3D0-3DF         Color/Graphics (Motorola 6845)                  [see the Video component]
- *      3EO-3E7         Reserved
- *      3FO-3F7         Floppy Drive Controller                         [see the FDC component]
- *      3F8-3FF         Asynchronous Communications (Primary)           [see the SerialPort component]
- *
- * [1] At power-on time, NMI is masked off, perhaps because models 5150 and 5160 also tie coprocessor
- * (FPU) interrupts to NMI.  Suppressing NMI by default seems odd, because that would also suppress memory
- * parity errors.  TODO: Determine whether "power-on time" refers to the initial power-on state of the
- * NMI Mask Register or the state that the BIOS "POST" (Power-On Self-Test) sets.
- *
- * [2] These devices cannot be used together since their port addresses overlap.
- *
- *      MODEL_5170      Description
- *      ----------      -----------
- *          070 [3]     CMOS Address                                    ChipSet.CMOS.ADDR.PORT
- *          071         CMOS Data                                       ChipSet.CMOS.DATA.PORT
- *          0F0         FPU Coprocessor Clear Busy (output 0x00)
- *          0F1         FPU Coprocessor Reset (output 0x00)
- *      1F0-1F7         Hard Drive Controller (ATC)                     [see the HDC component]
- *
- * [3] Port 0x70 doubles as the NMI Mask Register: output a CMOS address with bit 7 clear to enable NMI
- * or with bit 7 set to disable NMI (apparently the inverse of the older NMI Mask Register at port 0xA0).
- * Also, apparently unlike previous models, the MODEL_5170 POST leaves NMI enabled.  And fortunately, the
- * FPU coprocessor interrupt line is no longer tied to NMI (it uses IRQ 13).
+ *      pit1:           0x48 to enable PIT1 at base port 0x48 (as used by COMPAQ_DESKPRO386); default is undefined
+ *      kc:             8041 to enable 8041 emulation (eg, for ATT_6300); default is 8255 for MODEL_5150/MODEL_5160, 8042 for MODEL_5170
  *
  * @constructor
  * @extends Component
@@ -161,13 +76,12 @@ function ChipSet(parmsChipSet)
     /*
      * this.model is a numeric version of the 'model' string; when comparing this.model to standard IBM
      * model numbers, you should generally compare (this.model|0) to the target value, which truncates it.
-     *
+     */
     if (model && !ChipSet.MODELS[model]) {
         Component.notice("Unrecognized ChipSet model: " + model);
     }
-     */
 
-    this.model = model && ChipSet.MODELS[model] || ChipSet.MODEL_5150;
+    this.model = model && ChipSet.MODELS[model] || ChipSet.MODEL_5150_OTHER;
 
     /*
      * SW1 describes the number of floppy drives, the amount of base memory, the primary monitor type,
@@ -276,6 +190,64 @@ function ChipSet(parmsChipSet)
 Component.subclass(ChipSet);
 
 /*
+ * Ports Overview
+ * --------------
+ *
+ * This module provides support for many of the following components (except where a separate component is noted).
+ * This list is taken from p.1-8 ("System Unit") of the IBM 5160 (PC XT) Technical Reference Manual (as revised
+ * April 1983), only because I didn't see a similar listing in the original 5150 Technical Reference.
+ *
+ *      Port(s)         Description
+ *      -------         -----------
+ *      000-00F         DMA Chip 8237A-5                                [see below]
+ *      020-021         Interrupt 8259A                                 [see below]
+ *      040-043         Timer 8253-5                                    [see below]
+ *      060-063         PPI 8255A-5                                     [see below]
+ *      080-083         DMA Page Registers                              [see below]
+ *          0Ax [1]     NMI Mask Register                               [see below]
+ *          0Cx         Reserved
+ *          0Ex         Reserved
+ *      200-20F         Game Control
+ *      210-217         Expansion Unit
+ *      220-24F         Reserved
+ *      278-27F         Reserved
+ *      2F0-2F7         Reserved
+ *      2F8-2FF         Asynchronous Communications (Secondary)         [see the SerialPort component]
+ *      300-31F         Prototype Card
+ *      320-32F         Hard Drive Controller (XTC)                     [see the HDC component]
+ *      378-37F         Printer
+ *      380-38C [2]     SDLC Communications
+ *      380-389 [2]     Binary Synchronous Communications (Secondary)
+ *      3A0-3A9         Binary Synchronous Communications (Primary)
+ *      3B0-3BF         IBM Monochrome Display/Printer                  [see the Video component]
+ *      3C0-3CF         Reserved
+ *      3D0-3DF         Color/Graphics (Motorola 6845)                  [see the Video component]
+ *      3EO-3E7         Reserved
+ *      3FO-3F7         Floppy Drive Controller                         [see the FDC component]
+ *      3F8-3FF         Asynchronous Communications (Primary)           [see the SerialPort component]
+ *
+ * [1] At power-on time, NMI is masked off, perhaps because models 5150 and 5160 also tie coprocessor
+ * (FPU) interrupts to NMI.  Suppressing NMI by default seems odd, because that would also suppress memory
+ * parity errors.  TODO: Determine whether "power-on time" refers to the initial power-on state of the
+ * NMI Mask Register or the state that the BIOS "POST" (Power-On Self-Test) sets.
+ *
+ * [2] These devices cannot be used together since their port addresses overlap.
+ *
+ *      MODEL_5170      Description
+ *      ----------      -----------
+ *          070 [3]     CMOS Address                                    ChipSet.CMOS.ADDR.PORT
+ *          071         CMOS Data                                       ChipSet.CMOS.DATA.PORT
+ *          0F0         FPU Coprocessor Clear Busy (output 0x00)
+ *          0F1         FPU Coprocessor Reset (output 0x00)
+ *      1F0-1F7         Hard Drive Controller (ATC)                     [see the HDC component]
+ *
+ * [3] Port 0x70 doubles as the NMI Mask Register: output a CMOS address with bit 7 clear to enable NMI
+ * or with bit 7 set to disable NMI (apparently the inverse of the older NMI Mask Register at port 0xA0).
+ * Also, apparently unlike previous models, the MODEL_5170 POST leaves NMI enabled.  And fortunately, the
+ * FPU coprocessor interrupt line is no longer tied to NMI (it uses IRQ 13).
+ */
+
+/*
  * Supported model numbers
  *
  * In general, when comparing this.model to "base" model numbers (ie, non-REV numbers), you should use
@@ -299,11 +271,11 @@ ChipSet.MODEL_5170_OTHER        = 5170.9;
 /*
  * Assorted non-IBM models (we don't put "IBM" in the IBM models, but non-IBM models should include the company name).
  */
-ChipSet.MODEL_ATT_6300          = ChipSet.MODEL_5150_OTHER; // AT&T Personal Computer 6300/Olivetti M24 ("COPYRIGHT (C) OLIVETTI 1984","04/03/86",v1.43)
-ChipSet.MODEL_CDP_MPC1600       = ChipSet.MODEL_5150_OTHER; // Columbia Data Products MPC 1600 ("Copyright Columbia Data Products 1983, ROM/BIOS Ver 4.34")
-ChipSet.MODEL_ZENITH_Z150       = ChipSet.MODEL_5150_OTHER; // Zenith Data Systems Z-150 ("08/11/88 (C)ZDS CORP")
-ChipSet.MODEL_COMPAQ_PORTABLE   = ChipSet.MODEL_5150_OTHER; // COMPAQ Portable (COMPAQ's first PC)
-ChipSet.MODEL_COMPAQ_DESKPRO386 = 5180;                     // COMPAQ DeskPro 386 (COMPAQ's first 80386-based PC); should be > MODEL_5170
+ChipSet.MODEL_ATT_6300          = 5160.101; // AT&T Personal Computer 6300/Olivetti M24 ("COPYRIGHT (C) OLIVETTI 1984","04/03/86",v1.43)
+ChipSet.MODEL_CDP_MPC1600       = 5150.101; // Columbia Data Products MPC 1600 ("Copyright Columbia Data Products 1983, ROM/BIOS Ver 4.34")
+ChipSet.MODEL_ZENITH_Z150       = 5160.150; // Zenith Data Systems Z-150 ("08/11/88 (C)ZDS CORP")
+ChipSet.MODEL_COMPAQ_PORTABLE   = 5150.102; // COMPAQ Portable (COMPAQ's first PC)
+ChipSet.MODEL_COMPAQ_DESKPRO386 = 5180;     // COMPAQ DeskPro 386 (COMPAQ's first 80386-based PC); should be > MODEL_5170
 
 /*
  * Last but not least, a complete list of supported model strings, and corresponding internal model numbers.
@@ -312,14 +284,68 @@ ChipSet.MODELS = {
     "5150":         ChipSet.MODEL_5150,
     "5160":         ChipSet.MODEL_5160,
     "5170":         ChipSet.MODEL_5170,
-    "other":        ChipSet.MODEL_5150_OTHER,
-    "deskpro386":   ChipSet.MODEL_COMPAQ_DESKPRO386
+    "att6300":      ChipSet.MODEL_ATT_6300,
+    "mpc1600":      ChipSet.MODEL_CDP_MPC1600,
+    "z150":         ChipSet.MODEL_ZENITH_Z150,
+    "compaq":       ChipSet.MODEL_COMPAQ_PORTABLE,
+    "deskpro386":   ChipSet.MODEL_COMPAQ_DESKPRO386,
+    "other":        ChipSet.MODEL_5150_OTHER
 };
 
 ChipSet.CONTROLS = {
     SW1:    "sw1",
     SW2:    "sw2",
     SWDESC: "swdesc"
+};
+
+ChipSet.SW1_LABELS = {};
+
+ChipSet.SW1_LABELS[ChipSet.MODEL_5150] = {
+    0: "Bootable Floppy Drive",
+    /*
+     * NOTE: Both the Aug 1981 and the Apr 1984 IBM 5150 Technical Reference Manuals list SW1-2 as "RESERVED", but
+     * contemporary articles discussing 8087 support in early PCs all indicate that switch SW1-2 must be set to the
+     * OFF position if an FPU coprocessor is installed.
+     *
+     * The 1981 5150 TechRef doesn't mention 8087 support at all, whereas the 1984 5150 TechRef discusses it in
+     * a fair bit of detail, including the fact that 8087 exceptions generate an NMI (despite Intel's warning in their
+     * "iAPX 86,88 User's Manual", on page S-27, that "[t]he 8087 should not be tied to the CPU's NMI (non-maskable
+     * interrupt) line.")
+     *
+     * In light of this, we have replaced the "Reserved" option with "Coprocessor" instead.
+     */
+    1: "Coprocessor",
+    2: "Base Memory Size",          // up to 64Kb on a MODEL_5150, 256Kb on a MODEL_5160
+    4: "Monitor Type",
+    6: "Number of Floppy Drives"
+};
+
+ChipSet.SW1_LABELS[ChipSet.MODEL_5160] = {};
+ChipSet.SW1_LABELS[ChipSet.MODEL_5160][0] = "Loop on Post";
+ChipSet.SW1_LABELS[ChipSet.MODEL_5160][1] = ChipSet.SW1_LABELS[ChipSet.MODEL_5150][1];
+ChipSet.SW1_LABELS[ChipSet.MODEL_5160][2] = ChipSet.SW1_LABELS[ChipSet.MODEL_5150][2];
+ChipSet.SW1_LABELS[ChipSet.MODEL_5160][4] = ChipSet.SW1_LABELS[ChipSet.MODEL_5150][4];
+ChipSet.SW1_LABELS[ChipSet.MODEL_5160][6] = ChipSet.SW1_LABELS[ChipSet.MODEL_5150][6];
+
+ChipSet.SW1_LABELS[ChipSet.MODEL_ATT_6300] = {
+    0: "Total RAM",
+    4: "Coprocessor",
+    5: "Serial Interface"
+};
+
+ChipSet.SW2_LABELS = {};
+
+ChipSet.SW2_LABELS[ChipSet.MODEL_5150] = {
+    0: "Expansion Memory Size",     // up to 480Kb, which, when combined with 64Kb of MODEL_5150 base memory, gives a maximum of 544Kb
+    4: "Reserved"
+};
+
+ChipSet.SW2_LABELS[ChipSet.MODEL_ATT_6300] = {
+    0: "Floppy Type",
+    1: "Fast Startup",
+    2: "HDU",
+    4: "Monitor Type",
+    6: "Number of Floppy Drives"
 };
 
 /*
@@ -380,7 +406,7 @@ ChipSet.DMA0 = {
         MASK:           0x0A,
         MODE:           0x0B,
         RESET_FF:       0x0C,   // reset flip-flop
-        MASTER_CLEAR:   0x0D,   // master clear
+        MASTER_CLEAR:   0x0D,   // OUT: master clear            IN: temporary register
         MASK_CLEAR:     0x0E,   // TODO: Provide handlers
         MASK_ALL:       0x0F,   // TODO: Provide handlers
         CH2_PAGE:       0x81,   // OUT: DMA channel 2 page register
@@ -592,6 +618,7 @@ ChipSet.IRQ = {
  */
 ChipSet.PIT0 = {
     PORT:               0x40,
+    INDEX:              0,
     TIMER0:             0,      // used for time-of-day (prior to MODEL_5170)
     TIMER1:             1,      // used for memory refresh
     TIMER2:             2       // used for speaker tone generation
@@ -599,6 +626,7 @@ ChipSet.PIT0 = {
 
 ChipSet.PIT1 = {
     PORT:               0x48,   // MODEL_COMPAQ_DESKPRO386 only
+    INDEX:              1,
     TIMER3:             0,      // used for fail-safe clock
     TIMER4:             1,      // N/A
     TIMER5:             2       // used for refresher request extend/speed control
@@ -652,7 +680,7 @@ ChipSet.PPI_A = {               // this.bPPIA (port 0x60)
 };
 
 ChipSet.PPI_B = {               // this.bPPIB (port 0x61)
-    PORT:               0x61,   // OUTPUT (although it has to be treated as INPUT, too: the keyboard interrupt handler reads it, OR's PPI_B.CLEAR_KBD, writes it, and then rewrites the original read value)
+    PORT:               0x61,   // OUTPUT (although it has to be treated as INPUT, too; the keyboard interrupt handler reads it, OR's PPI_B.CLEAR_KBD, writes it, and then rewrites the original read value)
     CLK_TIMER2:         0x01,   // ALL: set to enable clock to TIMER2
     SPK_TIMER2:         0x02,   // ALL: set to connect output of TIMER2 to speaker (MODEL_5150: clear for cassette)
     ENABLE_SW2:         0x04,   // MODEL_5150: set to enable SW2[1-4] through PPI_C.PORT, clear to enable SW2[5]; MODEL_5160: unused (there is no SW2 switch block on the MODEL_5160 motherboard)
@@ -684,10 +712,86 @@ ChipSet.PPI_CTRL = {            // this.bPPICtrl (port 0x63)
 };
 
 /*
- * On the MODEL_5150, the following PPI_SW bits are exposed through PPI_A.
+ * Switches Overview
+ * -----------------
  *
- * On the MODEL_5160, either the low or high 4 bits are exposed through PPI_C.SW, if PPI_B.ENABLE_SW_HI is clear or set.
+ * The conventions used for the sw1 and sw2 strings are that the left-most character represents DIP switch [1],
+ * the right-most character represents DIP switch [8], and "1" means the DIP switch is ON and "0" means it is OFF.
+ *
+ * Internally, we convert the above strings into binary values that the 8255A PPI returns, where DIP switch [1]
+ * is bit 0 and DIP switch [8] is bit 7, and 0 indicates the switch is ON and 1 indicates it is OFF.
+ *
+ * For reference, here's how the SW1 and SW2 switches correspond to the internal 8255A PPI bit values:
+ *
+ *      SW1[1]    (bit 0)     "0xxxxxxx" (1):  IPL,  "1xxxxxxx" (0):  No IPL
+ *      SW1[2]    (bit 1)     reserved on the 5150; OFF (1) if FPU installed in a 5160
+ *      SW1[3,4]  (bits 3-2)  "xx11xxxx" (00): 16Kb, "xx01xxxx" (10): 32Kb,  "xx10xxxx" (01): 48Kb,  "xx00xxxx" (11): 64Kb
+ *      SW1[5,6]  (bits 5-4)  "xxxx11xx" (00): none, "xxxx01xx" (10): tv,    "xxxx10xx" (01): color, "xxxx00xx" (11): mono
+ *      SW1[7,8]  (bits 7-6)  "xxxxxx11" (00): 1 FD, "xxxxxx01" (10): 2 FD,  "xxxxxx10" (01): 3 FD,  "xxxxxx00" (11): 4 FD
+ *
+ * Note: FD refers to floppy drive, and IPL refers to an "Initial Program Load" floppy drive.
+ *
+ *      SW2[1-4]    (bits 3-0)  "NNNNxxxx": number of 32Kb blocks of I/O expansion RAM present
+ *
+ * TODO: There are cryptic references to SW2[5] in the original (5150) TechRef, and apparently the 8255A PPI can
+ * be programmed to return it (which we support), but its purpose remains unclear to me (see PPI_B.ENABLE_SW2).
+ *
+ * For example, sw1="01110011" indicates that all SW1 DIP switches are ON, except for SW1[1], SW1[5] and SW1[6],
+ * which are OFF.  Internally, the order of these bits must reversed (to 11001110) and then inverted (to 00110001)
+ * to yield the value that the 8255A PPI returns.  Reading the final value right-to-left, 00110001 indicates an
+ * IPL floppy drive, 1X of RAM (where X is 16Kb on a MODEL_5150 and 64Kb on a MODEL_5160), MDA, and 1 floppy drive.
+ *
+ * WARNING: It is possible to set SW1 to indicate more memory than the RAM component has been configured to provide.
+ * This is a configuration error which will cause the machine to crash after reporting a "201" error code (memory
+ * test failure), which is presumably what a real machine would do if it was similarly misconfigured.  Surprisingly,
+ * the BIOS forges ahead, setting SP to the top of the memory range indicated by SW1 (via INT 0x12), but the lack of
+ * a valid stack causes the system to crash after the next IRET.  The BIOS should have either halted or modified
+ * the actual memory size to match the results of the memory test.
+ *
+ * MODEL 5150 Switches
+ * -------------------
+ *
+ * PPI_SW bits are exposed via port PPI_A.
+ *
+ * MODEL 5160 Switches
+ * ------------------------
+ *
+ * PPI_SW bits 0-3 are exposed via PPI_C.SW if PPI_B.ENABLE_SW_HI is clear; bits 4-7 if PPI_B.ENABLE_SW_HI is set.
+ *
+ * AT&T 6300 Switches
+ * ------------------
+ *
+ * Based on ATT_PC_6300_Service_Manual.pdf, there are two 8-switch blocks, DIPSW-0 and DIPSW-1, where:
+ *
+ *      DIPSW-0[1-4] Total RAM
+ *      DIPSW-0[5] - ON if 8087 not installed, OFF if installed
+ *      DIPSW-0[6] - ON if 8250 ACE serial interface present, OFF if Z-8530 SCC interface present
+ *      DIPSW-0[7] - Not used
+ *      DIPSW-0[8] - Type of EPROM chip for ROM 1.21 or lower, or presence of RAM in bank 1 for ROM 1.43 or higher
+ *
+ * and:
+ *
+ *      DIPSW-1[1] - Floppy Type (ON for 48TPI, OFF for 96TPI)
+ *      DIPSW-1[2] - Floppy Speed (ON for slow startup, OFF for fast startup)
+ *      DIPSW-1[3] - HDU ROM (ON for indigenous, OFF for external)
+ *      DIPSW-1[4] - Not used (ROM 1.21 or lower) or Scroll Speed (ROM 1.43 or higher: ON for fast, OFF for slow)
+ *      DIPSW-1[5-6] - Display Type (11=EGA or none, 01=color 40x25, 10=color 80x25, 00=monochrome 80x25)
+ *      DIPSW-1[7-8] - Number of Floppy Drives (11=one, 01=two, 10=three, 00=four)
+ *
+ * For AT&T 6300 ROM 1.43 and up, DIPSW-0 supports the following RAM combinations:
+ *
+ *      0111xxx1: 128Kb on motherboard
+ *      1011xxx0: 256Kb on motherboard
+ *      1101xxx0: 256Kb on motherboard, 256Kb on expansion board (512Kb total)
+ *      1110xxx1: 512Kb on motherboard
+ *      0101xxx0: 256Kb on motherboard, 384Kb on expansion board (640Kb total)
+ *      0100xxx0: 640Kb on motherboard (128Kb bank 0, 512Kb bank 1)
+ *      0110xxx0: 640Kb on motherboard (512Kb bank 0, 128Kb bank 1)
+ *
+ * Inspection of the AT&T 6300 Plus ROM BIOS reveals that DIPSW-0[1-8] are obtained from bits 0-7
+ * of port 0x66 ("sys_conf_a") and DIPSW-1[1-8] are obtained from bits 0-7 of port 0x67 ("sys_conf_b").
  */
+
 ChipSet.PPI_SW = {
     FDRIVE: {
         IPL:            0x01,   // MODEL_5150: IPL ("Initial Program Load") floppy drive attached; MODEL_5160: "Loop on POST"
@@ -717,23 +821,45 @@ ChipSet.PPI_SW = {
 };
 
 /*
+ * 8041 Keyboard Controller I/O ports (MODEL_ATT_6300)
+ *
+ * The AT&T 6300 uses an 8041 for its Keyboard Controller, which has the following ports:
+ *
+ *      Port    Description
+ *      ----    -----------
+ *      0x60    Keyboard Scan Code (input)
+ *      0x61    Keyboard Control Port (output)
+ *      0x64    Keyboard Status Port (input)
+ *
+ * And the Keyboard Control Port (0x61) has the following bit definitions:
+ *
+ *      0x01    Speaker gate to 8253 (counter 2)
+ *      0x02    Speaker data
+ *      0x0C    Not used
+ *      0x10    RAM Parity (NMI) Enable
+ *      0x20    I/O Channel (NMI) Enable
+ *      0x40    Keyboard Clock Reset
+ *      0x80    Reset Interrupt Pending
+ */
+
+/*
  * 8042 Keyboard Controller I/O ports (MODEL_5170)
  *
- * On the MODEL_5170, port 0x60 is designated KBC.DATA rather than PPI_A, although the BIOS also refers to it
+ * On the MODEL_5170, port 0x60 is designated KC8042.DATA rather than PPI_A, although the BIOS also refers to it
  * as "PORT_A: 8042 KEYBOARD SCAN/DIAG OUTPUTS").  This is the 8042's output buffer and should be read only when
- * KBC.STATUS.OUTBUFF_FULL is set.
+ * KC8042.STATUS.OUTBUFF_FULL is set.
  *
- * Similarly, port 0x61 is designated KBC.RWREG rather than PPI_B; the BIOS also refers to it as "PORT_B: 8042
+ * Similarly, port 0x61 is designated KC8042.RWREG rather than PPI_B; the BIOS also refers to it as "PORT_B: 8042
  * READ WRITE REGISTER", but it is not otherwise discussed in the MODEL_5170 TechRef's 8042 documentation.
  *
- * There are brief references to bits 0 and 1 (KBC.RWREG.CLK_TIMER2 and KBC.RWREG.SPK_TIMER2), and the BIOS sets
- * bits 2-7 to "DISABLE PARITY CHECKERS" (principally KBC.RWREG.DISABLE_NMI, which are bits 2 and 3); why the BIOS
+ * There are brief references to bits 0 and 1 (KC8042.RWREG.CLK_TIMER2 and KC8042.RWREG.SPK_TIMER2), and the BIOS sets
+ * bits 2-7 to "DISABLE PARITY CHECKERS" (principally KC8042.RWREG.DISABLE_NMI, which are bits 2 and 3); why the BIOS
  * also sets bits 4-7 (or if those bits are even settable) is unclear, since it uses 11111100b rather than defined
  * constants.
  *
  * The bottom line: on a MODEL_5170, port 0x61 is still used for speaker control and parity checking, so we use
  * the same register (bPPIB) but install different I/O handlers.  It's also bi-directional: at one point, the BIOS
- * reads KBC.RWREG.REFRESH_BIT (bit 4) to verify that it's alternating.
+ * reads KC8042.RWREG.REFRESH_BIT (bit 4) to verify that it's alternating.
  *
  * PPI_C and PPI_CTRL don't seem to be documented or used by the MODEL_5170 BIOS, so I'm assuming they're obsolete.
  *
@@ -743,21 +869,21 @@ ChipSet.PPI_SW = {
  *      http://halicery.com/8042/8042_INTERN_TXT.htm
  *      http://www.os2museum.com/wp/ibm-pcat-8042-keyboard-controller-commands/
  */
-ChipSet.KBC = {
+ChipSet.KC8042 = {
     DATA: {                     // this.b8042OutBuff (PPI_A on previous models, still referred to as "PORT A" by the MODEL_5170 BIOS)
         PORT:           0x60,
-        CMD: {                  // this.b8042CmdData (KBC.DATA.CMD "data bytes" written to port 0x60, after writing a KBC.CMD byte to port 0x64)
+        CMD: {                  // this.b8042CmdData (KC8042.DATA.CMD "data bytes" written to port 0x60, after writing a KC8042.CMD byte to port 0x64)
             INT_ENABLE: 0x01,   // generate an interrupt when the controller places data in the output buffer
-            SYS_FLAG:   0x04,   // this value is propagated to ChipSet.KBC.STATUS.SYS_FLAG
+            SYS_FLAG:   0x04,   // this value is propagated to ChipSet.KC8042.STATUS.SYS_FLAG
             NO_INHIBIT: 0x08,   // disable inhibit function
             NO_CLOCK:   0x10,   // disable keyboard by driving "clock" line low
             PC_MODE:    0x20,
             PC_COMPAT:  0x40    // generate IBM PC-compatible scan codes
         },
-        SELF_TEST: {            // result of ChipSet.KBC.CMD.SELF_TEST command (0xAA)
+        SELF_TEST: {            // result of ChipSet.KC8042.CMD.SELF_TEST command (0xAA)
             OK:         0x55
         },
-        INTF_TEST: {            // result of ChipSet.KBC.CMD.INTF_TEST command (0xAB)
+        INTF_TEST: {            // result of ChipSet.KC8042.CMD.INTF_TEST command (0xAB)
             OK:         0x00,   // no error
             CLOCK_LO:   0x01,   // keyboard clock line stuck low
             CLOCK_HI:   0x02,   // keyboard clock line stuck high
@@ -806,19 +932,19 @@ ChipSet.KBC = {
     },
     CMD: {                      // this.b8042InBuff (on write to port 0x64, interpret this as a CMD)
         PORT:           0x64,
-        READ_CMD:       0x20,   // sends the current CMD byte (this.b8042CmdData) to KBC.DATA.PORT
-        WRITE_CMD:      0x60,   // followed by a command byte written to KBC.DATA.PORT (see KBC.DATA.CMD)
+        READ_CMD:       0x20,   // sends the current CMD byte (this.b8042CmdData) to KC8042.DATA.PORT
+        WRITE_CMD:      0x60,   // followed by a command byte written to KC8042.DATA.PORT (see KC8042.DATA.CMD)
         COMPAQ_SLOWD:   0xA3,   // enable system slow down; see COMPAQ 386/25 TechRef p2-111
         COMPAQ_TOGGLE:  0xA4,   // toggle speed-control bit; see COMPAQ 386/25 TechRef p2-111
         COMPAQ_SPCREAD: 0xA5,   // special read of "port 2"; see COMPAQ 386/25 TechRef p2-111
-        SELF_TEST:      0xAA,   // self-test (KBC.DATA.SELF_TEST.OK is placed in the output buffer if no errors)
+        SELF_TEST:      0xAA,   // self-test (KC8042.DATA.SELF_TEST.OK is placed in the output buffer if no errors)
         INTF_TEST:      0xAB,   // interface test
         DIAG_DUMP:      0xAC,   // diagnostic dump
         DISABLE_KBD:    0xAD,   // disable keyboard
         ENABLE_KBD:     0xAE,   // enable keyboard
         READ_INPORT:    0xC0,   // read input port and place data in output buffer (use only if output buffer empty)
         READ_OUTPORT:   0xD0,   // read output port and place data in output buffer (use only if output buffer empty)
-        WRITE_OUTPORT:  0xD1,   // next byte written to KBC.DATA.PORT (port 0x60) is placed in the output port (see KBC.OUTPORT)
+        WRITE_OUTPORT:  0xD1,   // next byte written to KC8042.DATA.PORT (port 0x60) is placed in the output port (see KC8042.OUTPORT)
         READ_TEST:      0xE0,
         PULSE_OUTPORT:  0xF0    // this is the 1st of 16 commands (0xF0-0xFF) that pulse bits 0-3 of the output port
     },
@@ -827,7 +953,7 @@ ChipSet.KBC = {
         OUTBUFF_FULL:   0x01,
         INBUFF_FULL:    0x02,   // set if the controller has received but not yet read data from the input buffer (not normally set)
         SYS_FLAG:       0x04,
-        CMD_FLAG:       0x08,   // set on write to KBC.CMD (port 0x64), clear on write to KBC.DATA (port 0x60)
+        CMD_FLAG:       0x08,   // set on write to KC8042.CMD (port 0x64), clear on write to KC8042.DATA (port 0x60)
         NO_INHIBIT:     0x10,   // (in COMPAQ parlance: security lock not engaged)
         XMT_TIMEOUT:    0x20,
         RCV_TIMEOUT:    0x40,
@@ -1031,41 +1157,24 @@ ChipSet.FPU = {                 // TODO: Define a variable for this?
 ChipSet.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
 {
     switch (sBinding) {
+
     case ChipSet.CONTROLS.SW1:
         this.bindings[sBinding] = control;
-        this.addSwitches(sBinding, 8, this.sw1Init, {
-            0: ((this.model|0) == ChipSet.MODEL_5150)? "Bootable Floppy Drive" : "Loop on POST",
-            /*
-             * NOTE: Both the Aug 1981 and the Apr 1984 IBM 5150 Technical Reference Manuals list SW1-2 as "RESERVED", but
-             * contemporary articles discussing 8087 support in early PCs all indicate that switch SW1-2 must be set to the
-             * OFF position if an FPU coprocessor is installed.
-             *
-             * The 1981 5150 TechRef doesn't mention 8087 support at all, whereas the 1984 5150 TechRef discusses it in
-             * a fair bit of detail, including the fact that 8087 exceptions generate an NMI (despite Intel's warning in their
-             * "iAPX 86,88 User's Manual", on page S-27, that "[t]he 8087 should not be tied to the CPU's NMI (non-maskable
-             * interrupt) line.")
-             *
-             * In light of this, we have effectively disabled the "Reserved" option below, since model will never be < 5150.
-             */
-            1: (this.model < ChipSet.MODEL_5150)? "Reserved" : "Coprocessor",
-            2: "Base Memory Size",          // up to 64Kb on a MODEL_5150, 256Kb on a MODEL_5160
-            4: "Monitor Type",
-            6: "Number of Floppy Drives"
-        });
+        this.addSwitches(sBinding, 8, this.sw1Init, ChipSet.SW1_LABELS[this.model]);
         return true;
+
     case ChipSet.CONTROLS.SW2:
-        if ((this.model|0) == ChipSet.MODEL_5150) {
+        if ((this.model|0) == ChipSet.MODEL_5150 || this.model == ChipSet.MODEL_ATT_6300) {
             this.bindings[sBinding] = control;
-            this.addSwitches(sBinding, 8, this.sw2Init, {
-                0: "Expansion Memory Size", // up to 480Kb, which, when combined with 64Kb of MODEL_5150 base memory, gives a maximum of 544Kb
-                4: "Reserved"
-            });
+            this.addSwitches(sBinding, 8, this.sw2Init, ChipSet.SW2_LABELS[this.model]);
             return true;
         }
         break;
+
     case ChipSet.CONTROLS.SWDESC:
         this.bindings[sBinding] = control;
         return true;
+
     default:
         break;
     }
@@ -1101,8 +1210,13 @@ ChipSet.prototype.initBus = function(cmp, bus, cpu, dbg)
     bus.addPortInputTable(this, ChipSet.aPortInput);
     bus.addPortOutputTable(this, ChipSet.aPortOutput);
     if (this.model < ChipSet.MODEL_5170) {
-        bus.addPortInputTable(this, ChipSet.aPortInput5150);
-        bus.addPortOutputTable(this, ChipSet.aPortOutput5150);
+        if (this.model != ChipSet.MODEL_ATT_6300) {
+            bus.addPortInputTable(this, ChipSet.aPortInput5150);
+            bus.addPortOutputTable(this, ChipSet.aPortOutput5150);
+        } else {
+            bus.addPortInputTable(this, ChipSet.aPortInput6300);
+            bus.addPortOutputTable(this, ChipSet.aPortOutput6300);
+        }
     } else {
         bus.addPortInputTable(this, ChipSet.aPortInput5170);
         bus.addPortOutputTable(this, ChipSet.aPortOutput5170);
@@ -1204,8 +1318,8 @@ ChipSet.prototype.reset = function(fHard)
      * TIMER0, TIMER1 and TIMER2.  Which means that we refer to the "counters" in the second PIT
      * as TIMER3, TIMER4 and TIMER5; that numbering also matches their indexes in the aTimers array.
      */
-    this.bPIT1Ctrl = null;          // tracks writes to port 0x43
-    this.bPIT2Ctrl = null;          // tracks writes to port 0x4B (MODEL_COMPAQ_DESKPRO386 only)
+    this.bPIT0Ctrl = null;          // tracks writes to port 0x43
+    this.bPIT1Ctrl = null;          // tracks writes to port 0x4B (MODEL_COMPAQ_DESKPRO386 only)
     this.aTimers = new Array((this.model|0) == ChipSet.MODEL_COMPAQ_DESKPRO386? 6 : 3);
     for (i = 0; i < this.aTimers.length; i++) {
         this.initTimer(i);
@@ -1220,42 +1334,47 @@ ChipSet.prototype.reset = function(fHard)
     this.bPPICtrl = null;           // tracks writes to port 0x63 (eg, 0x99); read-only
     this.bNMI = ChipSet.NMI.DISABLE;// tracks writes to the NMI Mask Register
 
+    if (this.model == ChipSet.MODEL_ATT_6300) {
+        this.b8041Ctrl = 0;
+        this.b8041Status = 0;
+    }
+
     /*
      * ChipSet state introduced by the MODEL_5170
      */
     if (this.model >= ChipSet.MODEL_5170) {
         /*
          * The 8042 input buffer is treated as a "command byte" when written via port 0x64 and as a "data byte"
-         * when written via port 0x60.  So, whenever the KBC.CMD.WRITE_CMD "command byte" is written to the input
-         * buffer, the subsequent command data byte is saved in b8042CmdData.  Similarly, for KBC.CMD.WRITE_OUTPORT,
+         * when written via port 0x60.  So, whenever the KC8042.CMD.WRITE_CMD "command byte" is written to the input
+         * buffer, the subsequent command data byte is saved in b8042CmdData.  Similarly, for KC8042.CMD.WRITE_OUTPORT,
          * the subsequent data byte is saved in b8042OutPort.
          *
          * TODO: Consider a UI for the Keyboard INHIBIT switch.  By default, our keyboard is never inhibited
          * (ie, locked).  Also, note that the hardware changes this bit only when new data is sent to b8042OutBuff.
          */
-        this.b8042Status = ChipSet.KBC.STATUS.NO_INHIBIT;
+        this.b8042Status = ChipSet.KC8042.STATUS.NO_INHIBIT;
         this.b8042InBuff = 0;
-        this.b8042CmdData = ChipSet.KBC.DATA.CMD.NO_CLOCK;
+        this.b8042CmdData = ChipSet.KC8042.DATA.CMD.NO_CLOCK;
         this.b8042OutBuff = 0;
 
         /*
          * TODO: Provide more control over these 8042 "Input Port" bits (eg, the keyboard lock)
          */
-        this.b8042InPort = ChipSet.KBC.INPORT.MFG_OFF | ChipSet.KBC.INPORT.KBD_UNLOCKED;
+        this.b8042InPort = ChipSet.KC8042.INPORT.MFG_OFF | ChipSet.KC8042.INPORT.KBD_UNLOCKED;
 
         if (this.getSWMemorySize() >= 512) {
-            this.b8042InPort |= ChipSet.KBC.INPORT.ENABLE_256KB;
+            this.b8042InPort |= ChipSet.KC8042.INPORT.ENABLE_256KB;
         }
 
         if (this.getSWVideoMonitor() == ChipSet.MONITOR.MONO) {
-            this.b8042InPort |= ChipSet.KBC.INPORT.MONO;
+            this.b8042InPort |= ChipSet.KC8042.INPORT.MONO;
         }
 
         if (COMPAQ386 && (this.model|0) == ChipSet.MODEL_COMPAQ_DESKPRO386) {
-            this.b8042InPort |= ChipSet.KBC.INPORT.COMPAQ_NO80387 | ChipSet.KBC.INPORT.COMPAQ_NOWEITEK;
+            this.b8042InPort |= ChipSet.KC8042.INPORT.COMPAQ_NO80387 | ChipSet.KC8042.INPORT.COMPAQ_NOWEITEK;
         }
 
-        this.b8042OutPort = ChipSet.KBC.OUTPORT.NO_RESET | ChipSet.KBC.OUTPORT.A20_ON;
+        this.b8042OutPort = ChipSet.KC8042.OUTPORT.NO_RESET | ChipSet.KC8042.OUTPORT.A20_ON;
 
         this.abDMAPageSpare = new Array(8);
 
@@ -1811,7 +1930,7 @@ ChipSet.prototype.save = function()
     state.set(0, [this.sw1Init, this.sw2Init, this.sw1, this.sw2]);
     state.set(1, [this.saveDMAControllers()]);
     state.set(2, [this.savePICs()]);
-    state.set(3, [this.bPIT1Ctrl, this.saveTimers(), this.bPIT2Ctrl]);
+    state.set(3, [this.bPIT0Ctrl, this.saveTimers(), this.bPIT1Ctrl]);
     state.set(4, [this.bPPIA, this.bPPIB, this.bPPIC, this.bPPICtrl, this.bNMI]);
     if (this.model >= ChipSet.MODEL_5170) {
         state.set(5, [this.b8042Status, this.b8042InBuff, this.b8042CmdData,
@@ -1850,8 +1969,8 @@ ChipSet.prototype.restore = function(data)
     }
 
     a = data[3];
-    this.bPIT1Ctrl = a[0];
-    this.bPIT2Ctrl = a[2];
+    this.bPIT0Ctrl = a[0];
+    this.bPIT1Ctrl = a[2];
     for (i = 0; i < this.aTimers.length; i++) {
         this.initTimer(i, a[1][i]);
     }
@@ -1896,7 +2015,7 @@ ChipSet.prototype.restore = function(data)
     return true;
 };
 
-ChipSet.aDMAControllerInit = [0, null, null, 0, new Array(4)];
+ChipSet.aDMAControllerInit = [0, null, null, 0, new Array(4), 0];
 
 /**
  * initDMAController(iDMAC, aState)
@@ -1914,7 +2033,7 @@ ChipSet.prototype.initDMAController = function(iDMAC, aState)
             aChannels: new Array(4)
         };
     }
-    var a = aState && aState.length == 5? aState : ChipSet.aDMAControllerInit;
+    var a = aState && aState.length >= 5? aState : ChipSet.aDMAControllerInit;
     controller.bStatus = a[0];
     controller.bCmd = a[1];
     controller.bReq = a[2];
@@ -1923,6 +2042,7 @@ ChipSet.prototype.initDMAController = function(iDMAC, aState)
     for (var iChannel = 0; iChannel < controller.aChannels.length; iChannel++) {
         this.initDMAChannel(controller, iChannel, a[4][iChannel]);
     }
+    controller.bTemp = a[5] || 0;       // not present in older states
     this.aDMACs[iDMAC] = controller;
 };
 
@@ -2004,7 +2124,8 @@ ChipSet.prototype.saveDMAControllers = function()
             controller.bCmd,
             controller.bReq,
             controller.bIndex,
-            this.saveDMAChannels(controller)
+            this.saveDMAChannels(controller),
+            controller.bTemp
         ];
     }
     return data;
@@ -2260,15 +2381,15 @@ ChipSet.prototype.getSWVideoMonitor = function(fInit)
 };
 
 /**
- * addSwitches(sBinding, n, v, oTips)
+ * addSwitches(sBinding, n, v, oLabels)
  *
  * @this {ChipSet}
  * @param {string} sBinding is the name of the control
  * @param {number} n is the number of switches to add
  * @param {number} v contains the current value(s) of the switches
- * @param {Object} oTips contains tooltips for the various cells
+ * @param {Object} [oLabels] contains labels for the various cells
  */
-ChipSet.prototype.addSwitches = function(sBinding, n, v, oTips)
+ChipSet.prototype.addSwitches = function(sBinding, n, v, oLabels)
 {
     var sHTML = "";
     var control = this.bindings[sBinding];
@@ -2279,28 +2400,28 @@ ChipSet.prototype.addSwitches = function(sBinding, n, v, oTips)
         sHTML += "<div id=\"" + sCellID + "\" class=\"" + sCellClasses + "\" data-value=\"0\">" + i + "</div>\n";
     }
     control.innerHTML = sHTML;
-    this.updateSwitches(sBinding, v, oTips);
+    this.updateSwitches(sBinding, v, oLabels);
 };
 
 /**
- * updateSwitches(sBinding, v, oTips)
+ * updateSwitches(sBinding, v, oLabels)
  *
  * @this {ChipSet}
  * @param {string} sBinding is the name of the control
  * @param {number} v contains the current value(s) of the switches
- * @param {Object} [oTips] contains tooltips for the various cells
+ * @param {Object} [oLabels] contains labels for the various cells
  */
-ChipSet.prototype.updateSwitches = function(sBinding, v, oTips)
+ChipSet.prototype.updateSwitches = function(sBinding, v, oLabels)
 {
     var control = this.bindings[sBinding];
     if (control) {
         var aeCells = Component.getElementsByClass(control, this.sCellClass);
         for (var i = 0; i < aeCells.length; i++) {
-            var sTip = null;
-            if (oTips != null && oTips[i] != null) {
-                sTip = oTips[i];
+            var sLabel = null;
+            if (oLabels != null && oLabels[i] != null) {
+                sLabel = oLabels[i];
             }
-            if (sTip) aeCells[i].setAttribute("title", sTip);
+            if (sLabel) aeCells[i].setAttribute("title", sLabel);
             this.setSwitch(aeCells[i], (v & (0x1 << i))? false : true);
             aeCells[i].onclick = function(chipset, eSwitch) {
                 /*
@@ -2747,6 +2868,37 @@ ChipSet.prototype.outDMAResetFF = function(iDMAC, port, bOut, addrFrom)
         this.printMessageIO(port, bOut, addrFrom, "DMA" + iDMAC + ".RESET_FF", null, true);
     }
     this.aDMACs[iDMAC].bIndex = 0;
+};
+
+/**
+ * inDMATemp(iDMAC, port, addrFrom)
+ *
+ * From the 8237A spec:
+ *
+ * "The Temporary register is used to hold data during memory-to-memory transfers  Following the
+ * completion of the transfers, the last word moved can be read by the microprocessor in the Program Condition.
+ * The Temporary register always contains the last byte transferred in the previous memory-to-memory operation,
+ * unless cleared by a Reset."
+ *
+ * TRIVIA: This hook wasn't installed when I was testing with ANY of the IBM ROMs, but it's required
+ * by the AT&T 6300 (aka Olivetti M24) ROM.
+ *
+ * TODO: When support is added for memory-to-memory transfers, bTemp needs to be updated according to spec.
+ *
+ * @this {ChipSet}
+ * @param {number} iDMAC
+ * @param {number} port (0x0D for DMAC 0, 0xDA for DMAC 1)
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
+ * @return {number} simulated port value
+ */
+ChipSet.prototype.inDMATemp = function(iDMAC, port, addrFrom)
+{
+    var controller = this.aDMACs[iDMAC];
+    var b = controller.bTemp;
+    if (this.messageEnabled(Messages.DMA | Messages.PORT)) {
+        this.printMessageIO(port, null, addrFrom, "DMA" + iDMAC + ".TEMP", b, true);
+    }
+    return b;
 };
 
 /**
@@ -3604,18 +3756,20 @@ ChipSet.prototype.clearFPUInterrupt = function()
 };
 
 /**
- * inTimer(iTimer, addrFrom)
+ * inTimer(iPIT, iPITTimer, addrFrom)
  *
  * @this {ChipSet}
- * @param {number} iTimer
+ * @param {number} iPIT (0 or 1)
+ * @param {number} iPITTimer (0, 1, or 2)
  * @param {number} port (0x40, 0x41, 0x42, etc)
  * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
  * @return {number} simulated port value
  */
-ChipSet.prototype.inTimer = function(iTimer, port, addrFrom)
+ChipSet.prototype.inTimer = function(iPIT, iPITTimer, port, addrFrom)
 {
     var b;
-    var timer = this.aTimers[iTimer];
+    var iBaseTimer = (iPIT? 3 : 0);
+    var timer = this.aTimers[iBaseTimer + iPITTimer];
 
     if (timer.fStatusLatched) {
         b = timer.bStatus;
@@ -3623,7 +3777,7 @@ ChipSet.prototype.inTimer = function(iTimer, port, addrFrom)
     }
     else {
         if (timer.countIndex == timer.countBytes) {
-            this.resetTimerIndex(iTimer);
+            this.resetTimerIndex(iBaseTimer + iPITTimer);
         }
         if (timer.fCountLatched) {
             b = timer.countLatched[timer.countIndex++];
@@ -3632,18 +3786,18 @@ ChipSet.prototype.inTimer = function(iTimer, port, addrFrom)
             }
         }
         else {
-            this.updateTimer(iTimer);
+            this.updateTimer(iBaseTimer + iPITTimer);
             b = timer.countCurrent[timer.countIndex++];
         }
     }
     if (this.messageEnabled(Messages.TIMER | Messages.PORT)) {
-        this.printMessageIO(port, null, addrFrom, "TIMER" + iTimer, b, true);
+        this.printMessageIO(port, null, addrFrom, "PIT" + iPIT + ".TIMER" + iPITTimer, b, true);
     }
     return b;
 };
 
 /**
- * outTimer(iTimer, port, bOut, addrFrom)
+ * outTimer(iPIT, iPITTimer, port, bOut, addrFrom)
  *
  * We now rely EXCLUSIVELY on setBurstCycles() to address situations where quick timer interrupt turn-around
  * is expected; eg, by the ROM BIOS POST when it sets TIMER0 to a low test count (0x16); since we typically
@@ -3655,21 +3809,23 @@ ChipSet.prototype.inTimer = function(iTimer, port, addrFrom)
  * OK with that.
  *
  * @this {ChipSet}
- * @param {number} iTimer
+ * @param {number} iPIT (0 or 1)
+ * @param {number} iPITTimer (0, 1, or 2)
  * @param {number} port (0x40, 0x41, 0x42, etc)
  * @param {number} bOut
  * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
  */
-ChipSet.prototype.outTimer = function(iTimer, port, bOut, addrFrom)
+ChipSet.prototype.outTimer = function(iPIT, iPITTimer, port, bOut, addrFrom)
 {
     if (this.messageEnabled(Messages.TIMER | Messages.PORT)) {
-        this.printMessageIO(port, bOut, addrFrom, "TIMER" + iTimer, null, true);
+        this.printMessageIO(port, bOut, addrFrom, "PIT" + iPIT + ".TIMER" + iPITTimer, null, true);
     }
 
-    var timer = this.aTimers[iTimer];
+    var iBaseTimer = (iPIT? 3 : 0);
+    var timer = this.aTimers[iBaseTimer + iPITTimer];
 
     if (timer.countIndex == timer.countBytes) {
-        this.resetTimerIndex(iTimer);
+        this.resetTimerIndex(iBaseTimer + iPITTimer);
     }
 
     timer.countInit[timer.countIndex++] = bOut;
@@ -3694,7 +3850,7 @@ ChipSet.prototype.outTimer = function(iTimer, port, bOut, addrFrom)
              */
             timer.fOUT = (timer.mode != ChipSet.PIT_CTRL.MODE0);
 
-            if (iTimer == ChipSet.PIT0.TIMER0) {
+            if (iPIT == ChipSet.PIT0.INDEX && iPITTimer == ChipSet.PIT0.TIMER0) {
                 /*
                  * TODO: Determine if there are situations/modes where I should NOT automatically clear IRQ0 on behalf of TIMER0.
                  */
@@ -3706,61 +3862,69 @@ ChipSet.prototype.outTimer = function(iTimer, port, bOut, addrFrom)
             }
         }
 
-        if (iTimer == ChipSet.PIT0.TIMER2) this.setSpeaker();
+        if (iPIT == ChipSet.PIT0.INDEX && iPITTimer == ChipSet.PIT0.TIMER2) this.setSpeaker();
     }
 };
 
 /**
- * inPIT1Ctrl(port, addrFrom)
+ * inTimerCtrl(iPIT, port, addrFrom)
  *
  * @this {ChipSet}
- * @param {number} port (0x43)
+ * @param {number} iPIT (0 or 1)
+ * @param {number} port (0x43 or 0x4B)
  * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
  * @return {number|null} simulated port value
  */
-ChipSet.prototype.inPIT1Ctrl = function(port, addrFrom)
+ChipSet.prototype.inTimerCtrl = function(iPIT, port, addrFrom)
 {
-    this.printMessageIO(port, null, addrFrom, "PIT1_CTRL", null, Messages.TIMER);
+    this.printMessageIO(port, null, addrFrom, "PIT" + iPIT + ".CTRL", null, Messages.TIMER);
     /*
      * NOTE: Even though reads to port 0x43 are undefined (I think), I'm going to "define" it
      * as returning the last value written, purely for the Debugger's benefit.
      */
-    return this.bPIT1Ctrl;
+    return iPIT? this.bPIT1Ctrl : this.bPIT0Ctrl;
 };
 
 /**
- * outPIT1Ctrl(port, bOut, addrFrom)
+ * outTimerCtrl(iPIT, port, bOut, addrFrom)
  *
  * @this {ChipSet}
+ * @param {number} iPIT (0 or 1)
  * @param {number} port (0x43)
  * @param {number} bOut
  * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
  */
-ChipSet.prototype.outPIT1Ctrl = function(port, bOut, addrFrom)
+ChipSet.prototype.outTimerCtrl = function(iPIT, port, bOut, addrFrom)
 {
-    this.bPIT1Ctrl = bOut;
-    this.printMessageIO(port, bOut, addrFrom, "PIT1_CTRL", null, Messages.TIMER);
+    this.printMessageIO(port, bOut, addrFrom, "PIT" + iPIT + ".CTRL", null, Messages.TIMER);
 
     /*
      * Extract the SC (Select Counter) bits.
      */
-    var iTimer = (bOut & ChipSet.PIT_CTRL.SC);
+    var iBaseTimer = 0;
+    var iPITTimer = (bOut & ChipSet.PIT_CTRL.SC);
+    if (!iPIT) {
+        this.bPIT0Ctrl = bOut;
+    } else {
+        iBaseTimer = 3;
+        this.bPIT1Ctrl = bOut;
+    }
 
     /*
      * Check for the Read-Back command and process as needed.
      */
-    if (iTimer == ChipSet.PIT_CTRL.SC_BACK) {
+    if (iPITTimer == ChipSet.PIT_CTRL.SC_BACK) {
         if (!(bOut & ChipSet.PIT_CTRL.RB_STATUS)) {
-            for (iTimer = 0; iTimer <= 2; iTimer++) {
-                if (bOut & (ChipSet.PIT_CTRL.RB_CTR0 << iTimer)) {
-                    this.latchTimerStatus(iTimer);
+            for (iPITTimer = 0; iPITTimer <= 2; iPITTimer++) {
+                if (bOut & (ChipSet.PIT_CTRL.RB_CTR0 << iPITTimer)) {
+                    this.latchTimerStatus(iBaseTimer + iPITTimer);
                 }
             }
         }
         if (!(bOut & ChipSet.PIT_CTRL.RB_COUNTS)) {
-            for (iTimer = 0; iTimer <= 2; iTimer++) {
-                if (bOut & (ChipSet.PIT_CTRL.RB_CTR0 << iTimer)) {
-                    this.latchTimerCount(iTimer);
+            for (iPITTimer = 0; iPITTimer <= 2; iPITTimer++) {
+                if (bOut & (ChipSet.PIT_CTRL.RB_CTR0 << iPITTimer)) {
+                    this.latchTimerCount(iBaseTimer + iPITTimer);
                 }
             }
         }
@@ -3768,9 +3932,9 @@ ChipSet.prototype.outPIT1Ctrl = function(port, bOut, addrFrom)
     }
 
     /*
-     * Convert the SC (Select Counter) bits into an iTimer index (0-2).
+     * Convert the SC (Select Counter) bits into an iPITTimer index (0-2).
      */
-    iTimer >>= ChipSet.PIT_CTRL.SC_SHIFT;
+    iPITTimer >>= ChipSet.PIT_CTRL.SC_SHIFT;
 
     /*
      * Extract BCD (bit 0), MODE (bits 1-3), and RW (bits 4-5), which we simply store as-is (see setTimerMode).
@@ -3784,10 +3948,10 @@ ChipSet.prototype.outPIT1Ctrl = function(port, bOut, addrFrom)
          * Of all the RW bit combinations, this is the only one that "countermands" normal control register
          * processing (the BCD and MODE bits are "don't care").
          */
-        this.latchTimerCount(iTimer);
+        this.latchTimerCount(iBaseTimer + iPITTimer);
     }
     else {
-        this.setTimerMode(iTimer, bcd, mode, rw);
+        this.setTimerMode(iBaseTimer + iPITTimer, bcd, mode, rw);
 
         /*
          * The 5150 ROM BIOS code @F000:E285 ("TEST.7") would fail after a warm boot (eg, after a CTRL-ALT-DEL) because
@@ -3806,7 +3970,7 @@ ChipSet.prototype.outPIT1Ctrl = function(port, bOut, addrFrom)
          *
          * TODO: Determine if there are situations/modes where I should NOT automatically clear IRQ0 on behalf of TIMER0.
          */
-        if (iTimer == ChipSet.PIT0.TIMER0) this.clearIRR(ChipSet.IRQ.TIMER0);
+        if (iPIT == ChipSet.PIT0.INDEX && iPITTimer == ChipSet.PIT0.TIMER0) this.clearIRR(ChipSet.IRQ.TIMER0);
 
         /*
          * Another TIMER0 HACK: The "CASSETTE DATA WRAP TEST" @F000:E51E occasionally reports an error when the second of
@@ -3819,7 +3983,7 @@ ChipSet.prototype.outPIT1Ctrl = function(port, bOut, addrFrom)
          * FWIW, I believe the cassette hardware was discontinued after MODEL_5150, and even if the test fails, it's non-fatal;
          * the ROM BIOS displays an error (131) and moves on.
          */
-        if (iTimer == ChipSet.PIT0.TIMER2) {
+        if (iPIT == ChipSet.PIT0.INDEX && iPITTimer == ChipSet.PIT0.TIMER2) {
             var pic = this.aPICs[0];
             if (pic.bIMR == 0xff && this.bPPIB == (ChipSet.PPI_B.CLK_TIMER2 | ChipSet.PPI_B.ENABLE_SW2 | ChipSet.PPI_B.CASS_MOTOR_OFF | ChipSet.PPI_B.CLK_KBD)) {
                 var timer = this.aTimers[0];
@@ -3827,7 +3991,7 @@ ChipSet.prototype.outPIT1Ctrl = function(port, bOut, addrFrom)
                 timer.countStart[1] = timer.countInit[1];
                 timer.nCyclesStart = this.cpu.getCycles(this.fScaleTimers);
                 if (DEBUG && this.messageEnabled(Messages.TIMER)) {
-                    this.printMessage("TIMER0 count reset @" + timer.nCyclesStart + " cycles", true);
+                    this.printMessage("PIT0.TIMER0 count reset @" + timer.nCyclesStart + " cycles", true);
                 }
             }
         }
@@ -4220,6 +4384,36 @@ ChipSet.prototype.outPPIA = function(port, bOut, addrFrom)
     this.bPPIA = bOut;
 };
 
+
+/**
+ * in8041Kbd(port, addrFrom)
+ *
+ * @this {ChipSet}
+ * @param {number} port (0x60)
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
+ * @return {number} simulated port value
+ */
+ChipSet.prototype.in8041Kbd = function(port, addrFrom)
+{
+    var b = this.kbd? this.kbd.readScanCode() : 0;
+    this.printMessageIO(port, null, addrFrom, "8041_KBD", b);
+    return b;
+};
+
+/**
+ * out8041Kbd(port, bOut, addrFrom)
+ *
+ * @this {ChipSet}
+ * @param {number} port (0x60)
+ * @param {number} bOut
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
+ */
+ChipSet.prototype.out8041Kbd = function(port, bOut, addrFrom)
+{
+    this.printMessageIO(port, bOut, addrFrom, "8041_KBD");
+    // if (this.kbd) this.kbd.sendCmd(bOut);
+};
+
 /**
  * inPPIB(port, addrFrom)
  *
@@ -4284,6 +4478,35 @@ ChipSet.prototype.updatePPIB = function(bOut)
          */
         this.setSpeaker(fNewSpeaker);
     }
+};
+
+/**
+ * in8041Ctrl(port, addrFrom)
+ *
+ * @this {ChipSet}
+ * @param {number} port (0x61)
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
+ * @return {number} simulated port value
+ */
+ChipSet.prototype.in8041Ctrl = function(port, addrFrom)
+{
+    var b = this.b8041Ctrl;
+    this.printMessageIO(port, null, addrFrom, "8041_CTRL", b);
+    return b;
+};
+
+/**
+ * out8041Ctrl(port, bOut, addrFrom)
+ *
+ * @this {ChipSet}
+ * @param {number} port (0x61)
+ * @param {number} bOut
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
+ */
+ChipSet.prototype.out8041Ctrl = function(port, bOut, addrFrom)
+{
+    this.printMessageIO(port, bOut, addrFrom, "8041_CTRL");
+    this.b8041Ctrl = bOut;
 };
 
 /**
@@ -4391,7 +4614,7 @@ ChipSet.prototype.outPPICtrl = function(port, bOut, addrFrom)
  *
  * To avoid that problem, kbd.checkScanCode() also requires that kbd.setEnabled() be called
  * before it supplies any more data via notifyKbdData().  That will happen as soon as the
- * ROM re-enables the controller, and is why KBC.CMD.ENABLE_KBD processing also ends with a
+ * ROM re-enables the controller, and is why KC8042.CMD.ENABLE_KBD processing also ends with a
  * call to kbd.checkScanCode().
  *
  * Note that, the foregoing notwithstanding, I still clear the OUTBUFF_FULL bit here (as I
@@ -4409,7 +4632,7 @@ ChipSet.prototype.in8042OutBuff = function(port, addrFrom)
 {
     var b = this.b8042OutBuff;
     this.printMessageIO(port, null, addrFrom, "8042_OUTBUFF", b, Messages.C8042);
-    this.b8042Status &= ~(ChipSet.KBC.STATUS.OUTBUFF_FULL | ChipSet.KBC.STATUS.OUTBUFF_DELAY);
+    this.b8042Status &= ~(ChipSet.KC8042.STATUS.OUTBUFF_FULL | ChipSet.KC8042.STATUS.OUTBUFF_DELAY);
     if (this.kbd) this.kbd.checkScanCode();
     return b;
 };
@@ -4418,8 +4641,8 @@ ChipSet.prototype.in8042OutBuff = function(port, addrFrom)
  * out8042InBuffData(port, bOut, addrFrom)
  *
  * This writes to the 8042's input buffer; using this port (ie, 0x60 instead of 0x64) designates the
- * the byte as a KBC.DATA.CMD "data byte".  Before clearing KBC.STATUS.CMD_FLAG, however, we see if it's set,
- * and then based on the previous KBC.CMD "command byte", we do whatever needs to be done with this "data byte".
+ * the byte as a KC8042.DATA.CMD "data byte".  Before clearing KC8042.STATUS.CMD_FLAG, however, we see if it's set,
+ * and then based on the previous KC8042.CMD "command byte", we do whatever needs to be done with this "data byte".
  *
  * @this {ChipSet}
  * @param {number} port (0x60)
@@ -4430,15 +4653,15 @@ ChipSet.prototype.out8042InBuffData = function(port, bOut, addrFrom)
 {
     this.printMessageIO(port, bOut, addrFrom, "8042_INBUF.DATA", null, Messages.C8042);
 
-    if (this.b8042Status & ChipSet.KBC.STATUS.CMD_FLAG) {
+    if (this.b8042Status & ChipSet.KC8042.STATUS.CMD_FLAG) {
 
         switch (this.b8042InBuff) {
 
-        case ChipSet.KBC.CMD.WRITE_CMD:
+        case ChipSet.KC8042.CMD.WRITE_CMD:
             this.set8042CmdData(bOut);
             break;
 
-        case ChipSet.KBC.CMD.WRITE_OUTPORT:
+        case ChipSet.KC8042.CMD.WRITE_OUTPORT:
             this.set8042OutPort(bOut);
             break;
 
@@ -4507,13 +4730,13 @@ ChipSet.prototype.out8042InBuffData = function(port, bOut, addrFrom)
          * an error, but "TEST.21" assumes that it is.
          */
         default:
-            this.set8042CmdData(this.b8042CmdData & ~ChipSet.KBC.DATA.CMD.NO_CLOCK);
+            this.set8042CmdData(this.b8042CmdData & ~ChipSet.KC8042.DATA.CMD.NO_CLOCK);
             if (this.kbd) this.set8042OutBuff(this.kbd.sendCmd(bOut));
             break;
         }
     }
     this.b8042InBuff = bOut;
-    this.b8042Status &= ~ChipSet.KBC.STATUS.CMD_FLAG;
+    this.b8042Status &= ~ChipSet.KC8042.STATUS.CMD_FLAG;
 };
 
 /**
@@ -4528,13 +4751,13 @@ ChipSet.prototype.in8042RWReg = function(port, addrFrom)
 {
     /*
      * Normally, we return whatever was last written to this port, but we do need to mask the
-     * two upper-most bits (KBC.RWREG.NMI_ERROR), as those are output-only bits used to signal
+     * two upper-most bits (KC8042.RWREG.NMI_ERROR), as those are output-only bits used to signal
      * parity errors.
      *
      * Also, "TEST.09" of the MODEL_5170 BIOS expects the REFRESH_BIT to alternate, so we used to
      * do this:
      *
-     *      this.bPPIB ^= ChipSet.KBC.RWREG.REFRESH_BIT;
+     *      this.bPPIB ^= ChipSet.KC8042.RWREG.REFRESH_BIT;
      *
      * However, the MODEL_5170_REV3 BIOS not only checks REFRESH_BIT in "TEST.09", but includes
      * an additional test right before "TEST.11A", which requires the bit change "a bit less"
@@ -4550,7 +4773,7 @@ ChipSet.prototype.in8042RWReg = function(port, addrFrom)
      * in 1us, 64 cycles represents 8us, so that might be a bit fast for "WAITF", but bit 6
      * is the only choice that also satisfies the pre-"TEST.11A" test as well.
      */
-    var b = this.bPPIB & ~(ChipSet.KBC.RWREG.NMI_ERROR | ChipSet.KBC.RWREG.REFRESH_BIT) | ((this.cpu.getCycles() & 0x40)? ChipSet.KBC.RWREG.REFRESH_BIT : 0);
+    var b = this.bPPIB & ~(ChipSet.KC8042.RWREG.NMI_ERROR | ChipSet.KC8042.RWREG.REFRESH_BIT) | ((this.cpu.getCycles() & 0x40)? ChipSet.KC8042.RWREG.REFRESH_BIT : 0);
     /*
      * Thanks to the WAITF function, this has become a very "busy" port, so if this generates too
      * many messages, try adding Messages.LOG to the criteria.
@@ -4587,22 +4810,22 @@ ChipSet.prototype.in8042Status = function(port, addrFrom)
     var b = this.b8042Status & 0xff;
     /*
      * There's code in the 5170 BIOS (F000:03BF) that writes an 8042 command (0xAA), waits for
-     * KBC.STATUS.INBUFF_FULL to go clear (which it always is, because we always accept commands
-     * immediately), then checks KBC.STATUS.OUTBUFF_FULL and performs a "flush" on port 0x60 if
-     * it's set, then waits for KBC.STATUS.OUTBUFF_FULL *again*.  Unfortunately, the "flush" throws
+     * KC8042.STATUS.INBUFF_FULL to go clear (which it always is, because we always accept commands
+     * immediately), then checks KC8042.STATUS.OUTBUFF_FULL and performs a "flush" on port 0x60 if
+     * it's set, then waits for KC8042.STATUS.OUTBUFF_FULL *again*.  Unfortunately, the "flush" throws
      * away our response if we respond immediately.
      *
-     * So now when out8042InBuffCmd() has a response, it sets KBC.STATUS.OUTBUFF_DELAY instead
-     * (which is outside the 0xff range of bits we return); when we see KBC.STATUS.OUTBUFF_DELAY,
-     * we clear it and set KBC.STATUS.OUTBUFF_FULL, which will be returned on the next read.
+     * So now when out8042InBuffCmd() has a response, it sets KC8042.STATUS.OUTBUFF_DELAY instead
+     * (which is outside the 0xff range of bits we return); when we see KC8042.STATUS.OUTBUFF_DELAY,
+     * we clear it and set KC8042.STATUS.OUTBUFF_FULL, which will be returned on the next read.
      *
      * This provides a single poll delay, so that the aforementioned "flush" won't toss our response.
      * If longer delays are needed down the road, we may need to set a delay count in the upper (hidden)
      * bits of b8042Status, instead of using a single delay bit.
      */
-    if (this.b8042Status & ChipSet.KBC.STATUS.OUTBUFF_DELAY) {
-        this.b8042Status |= ChipSet.KBC.STATUS.OUTBUFF_FULL;
-        this.b8042Status &= ~ChipSet.KBC.STATUS.OUTBUFF_DELAY;
+    if (this.b8042Status & ChipSet.KC8042.STATUS.OUTBUFF_DELAY) {
+        this.b8042Status |= ChipSet.KC8042.STATUS.OUTBUFF_FULL;
+        this.b8042Status &= ~ChipSet.KC8042.STATUS.OUTBUFF_DELAY;
     }
     return b;
 };
@@ -4611,7 +4834,7 @@ ChipSet.prototype.in8042Status = function(port, addrFrom)
  * out8042InBuffCmd(port, bOut, addrFrom)
  *
  * This writes to the 8042's input buffer; using this port (ie, 0x64 instead of 0x60) designates the
- * the byte as a "command byte".  We immediately set KBC.STATUS.CMD_FLAG, and then see if we can act upon
+ * the byte as a "command byte".  We immediately set KC8042.STATUS.CMD_FLAG, and then see if we can act upon
  * the command immediately (some commands requires us to wait for a "data byte").
  *
  * @this {ChipSet}
@@ -4622,33 +4845,33 @@ ChipSet.prototype.in8042Status = function(port, addrFrom)
 ChipSet.prototype.out8042InBuffCmd = function(port, bOut, addrFrom)
 {
     this.printMessageIO(port, bOut, addrFrom, "8042_INBUFF.CMD", null, Messages.C8042);
-    this.assert(!(this.b8042Status & ChipSet.KBC.STATUS.INBUFF_FULL));
+    this.assert(!(this.b8042Status & ChipSet.KC8042.STATUS.INBUFF_FULL));
     this.b8042InBuff = bOut;
 
-    this.b8042Status |= ChipSet.KBC.STATUS.CMD_FLAG;
+    this.b8042Status |= ChipSet.KC8042.STATUS.CMD_FLAG;
 
     var bPulseBits = 0;
-    if (this.b8042InBuff >= ChipSet.KBC.CMD.PULSE_OUTPORT) {
+    if (this.b8042InBuff >= ChipSet.KC8042.CMD.PULSE_OUTPORT) {
         bPulseBits = (this.b8042InBuff ^ 0xf);
         /*
-         * Now that we have isolated the bit(s) to pulse, map all pulse commands to KBC.CMD.PULSE_OUTPORT
+         * Now that we have isolated the bit(s) to pulse, map all pulse commands to KC8042.CMD.PULSE_OUTPORT
          */
-        this.b8042InBuff = ChipSet.KBC.CMD.PULSE_OUTPORT;
+        this.b8042InBuff = ChipSet.KC8042.CMD.PULSE_OUTPORT;
     }
 
     switch (this.b8042InBuff) {
-    case ChipSet.KBC.CMD.READ_CMD:          // 0x20
+    case ChipSet.KC8042.CMD.READ_CMD:           // 0x20
         this.set8042OutBuff(this.b8042CmdData);
         break;
 
-    case ChipSet.KBC.CMD.WRITE_CMD:         // 0x60
+    case ChipSet.KC8042.CMD.WRITE_CMD:          // 0x60
         /*
          * No further action required for this command; more data is expected via out8042InBuffData()
          */
         break;
 
-    case ChipSet.KBC.CMD.DISABLE_KBD:       // 0xAD
-        this.set8042CmdData(this.b8042CmdData | ChipSet.KBC.DATA.CMD.NO_CLOCK);
+    case ChipSet.KC8042.CMD.DISABLE_KBD:        // 0xAD
+        this.set8042CmdData(this.b8042CmdData | ChipSet.KC8042.DATA.CMD.NO_CLOCK);
         if (DEBUG) this.printMessage("keyboard disabled", Messages.KEYBOARD | Messages.PORT);
         /*
          * NOTE: The MODEL_5170 BIOS calls "KBD_RESET" (F000:17D2) while the keyboard interface is disabled,
@@ -4657,46 +4880,46 @@ ChipSet.prototype.out8042InBuffCmd = function(port, bOut, addrFrom)
          */
         break;
 
-    case ChipSet.KBC.CMD.ENABLE_KBD:        // 0xAE
-        this.set8042CmdData(this.b8042CmdData & ~ChipSet.KBC.DATA.CMD.NO_CLOCK);
+    case ChipSet.KC8042.CMD.ENABLE_KBD:         // 0xAE
+        this.set8042CmdData(this.b8042CmdData & ~ChipSet.KC8042.DATA.CMD.NO_CLOCK);
         if (DEBUG) this.printMessage("keyboard re-enabled", Messages.KEYBOARD | Messages.PORT);
         if (this.kbd) this.kbd.checkScanCode();
         break;
 
-    case ChipSet.KBC.CMD.SELF_TEST:         // 0xAA
+    case ChipSet.KC8042.CMD.SELF_TEST:          // 0xAA
         if (this.kbd) this.kbd.flushScanCode();
-        this.set8042CmdData(this.b8042CmdData | ChipSet.KBC.DATA.CMD.NO_CLOCK);
+        this.set8042CmdData(this.b8042CmdData | ChipSet.KC8042.DATA.CMD.NO_CLOCK);
         if (DEBUG) this.printMessage("keyboard disabled on reset", Messages.KEYBOARD | Messages.PORT);
-        this.set8042OutBuff(ChipSet.KBC.DATA.SELF_TEST.OK);
-        this.set8042OutPort(ChipSet.KBC.OUTPORT.NO_RESET | ChipSet.KBC.OUTPORT.A20_ON);
+        this.set8042OutBuff(ChipSet.KC8042.DATA.SELF_TEST.OK);
+        this.set8042OutPort(ChipSet.KC8042.OUTPORT.NO_RESET | ChipSet.KC8042.OUTPORT.A20_ON);
         break;
 
-    case ChipSet.KBC.CMD.INTF_TEST:         // 0xAB
+    case ChipSet.KC8042.CMD.INTF_TEST:          // 0xAB
         /*
          * TODO: Determine all the side-effects of the Interface Test, if any.
          */
-        this.set8042OutBuff(ChipSet.KBC.DATA.INTF_TEST.OK);
+        this.set8042OutBuff(ChipSet.KC8042.DATA.INTF_TEST.OK);
         break;
 
-    case ChipSet.KBC.CMD.READ_INPORT:       // 0xC0
+    case ChipSet.KC8042.CMD.READ_INPORT:        // 0xC0
         this.set8042OutBuff(this.b8042InPort);
         break;
 
-    case ChipSet.KBC.CMD.READ_OUTPORT:      // 0xD0
+    case ChipSet.KC8042.CMD.READ_OUTPORT:       // 0xD0
         this.set8042OutBuff(this.b8042OutPort);
         break;
 
-    case ChipSet.KBC.CMD.WRITE_OUTPORT:     // 0xD1
+    case ChipSet.KC8042.CMD.WRITE_OUTPORT:      // 0xD1
         /*
          * No further action required for this command; more data is expected via out8042InBuffData()
          */
         break;
 
-    case ChipSet.KBC.CMD.READ_TEST:         // 0xE0
-        this.set8042OutBuff((this.b8042CmdData & ChipSet.KBC.DATA.CMD.NO_CLOCK)? 0 : ChipSet.KBC.TESTPORT.KBD_CLOCK);
+    case ChipSet.KC8042.CMD.READ_TEST:          // 0xE0
+        this.set8042OutBuff((this.b8042CmdData & ChipSet.KC8042.DATA.CMD.NO_CLOCK)? 0 : ChipSet.KC8042.TESTPORT.KBD_CLOCK);
         break;
 
-    case ChipSet.KBC.CMD.PULSE_OUTPORT:     // 0xF0-0xFF
+    case ChipSet.KC8042.CMD.PULSE_OUTPORT:      // 0xF0-0xFF
         if (bPulseBits & 0x1) {
             /*
              * Bit 0 of the 8042's output port is connected to RESET.  If it's pulsed, the processor resets.
@@ -4725,12 +4948,12 @@ ChipSet.prototype.out8042InBuffCmd = function(port, bOut, addrFrom)
 ChipSet.prototype.set8042CmdData = function(b)
 {
     this.b8042CmdData = b;
-    this.assert(ChipSet.KBC.DATA.CMD.SYS_FLAG === ChipSet.KBC.STATUS.SYS_FLAG);
-    this.b8042Status = (this.b8042Status & ~ChipSet.KBC.STATUS.SYS_FLAG) | (b & ChipSet.KBC.DATA.CMD.SYS_FLAG);
+    this.assert(ChipSet.KC8042.DATA.CMD.SYS_FLAG === ChipSet.KC8042.STATUS.SYS_FLAG);
+    this.b8042Status = (this.b8042Status & ~ChipSet.KC8042.STATUS.SYS_FLAG) | (b & ChipSet.KC8042.DATA.CMD.SYS_FLAG);
     if (this.kbd) {
         /*
          * This seems to be what the doctor ordered for the MODEL_5170_REV3 BIOS @F000:0A6D, where it
-         * sends ChipSet.KBC.CMD.WRITE_CMD to port 0x64, followed by 0x4D to port 0x60, which clears NO_CLOCK
+         * sends ChipSet.KC8042.CMD.WRITE_CMD to port 0x64, followed by 0x4D to port 0x60, which clears NO_CLOCK
          * and enables the keyboard.  The BIOS then waits for OUTBUFF_FULL to be set, at which point it seems
          * to be anticipating an 0xAA response in the output buffer.
          *
@@ -4743,7 +4966,7 @@ ChipSet.prototype.set8042CmdData = function(b)
          * powered on, it performs the BAT, and then when the clock and data lines go high, the keyboard sends
          * a completion code (eg, 0xAA for success, or 0xFC or something else for failure).
          */
-        this.kbd.setEnabled(!!(b & ChipSet.KBC.DATA.CMD.NO_INHIBIT), !(b & ChipSet.KBC.DATA.CMD.NO_CLOCK));
+        this.kbd.setEnabled(!!(b & ChipSet.KC8042.DATA.CMD.NO_INHIBIT), !(b & ChipSet.KC8042.DATA.CMD.NO_CLOCK));
     }
 };
 
@@ -4772,10 +4995,10 @@ ChipSet.prototype.set8042OutBuff = function(b, fNoDelay)
     if (b >= 0) {
         this.b8042OutBuff = b;
         if (fNoDelay) {
-            this.b8042Status |= ChipSet.KBC.STATUS.OUTBUFF_FULL;
+            this.b8042Status |= ChipSet.KC8042.STATUS.OUTBUFF_FULL;
         } else {
-            this.b8042Status &= ~ChipSet.KBC.STATUS.OUTBUFF_FULL;
-            this.b8042Status |= ChipSet.KBC.STATUS.OUTBUFF_DELAY;
+            this.b8042Status &= ~ChipSet.KC8042.STATUS.OUTBUFF_FULL;
+            this.b8042Status |= ChipSet.KC8042.STATUS.OUTBUFF_DELAY;
         }
         if (DEBUG && this.messageEnabled(Messages.KEYBOARD | Messages.PORT)) {
             this.printMessage("set8042OutBuff(" + str.toHexByte(b) + ',' + (fNoDelay? "no" : "") + "delay)", true);
@@ -4786,7 +5009,7 @@ ChipSet.prototype.set8042OutBuff = function(b, fNoDelay)
 /**
  * set8042OutPort(b)
  *
- * When ChipSet.KBC.CMD.WRITE_OUTPORT (0xD1) is written to port 0x64, the next byte written to port 0x60 comes here,
+ * When ChipSet.KC8042.CMD.WRITE_OUTPORT (0xD1) is written to port 0x64, the next byte written to port 0x60 comes here,
  * to the KBC's OUTPORT.  One of the most important bits in the OUTPORT is the A20_ON bit (0x02): set it to turn A20 on,
  * clear it to turn A20 off.
  *
@@ -4797,12 +5020,12 @@ ChipSet.prototype.set8042OutPort = function(b)
 {
     this.b8042OutPort = b;
 
-    this.bus.setA20(!!(b & ChipSet.KBC.OUTPORT.A20_ON));
+    this.bus.setA20(!!(b & ChipSet.KC8042.OUTPORT.A20_ON));
 
-    if (!(b & ChipSet.KBC.OUTPORT.NO_RESET)) {
+    if (!(b & ChipSet.KC8042.OUTPORT.NO_RESET)) {
         /*
          * Bit 0 of the 8042's output port is connected to RESET.  Normally, it's "pulsed" with the
-         * KBC.CMD.PULSE_OUTPORT command, so if a RESET is detected via this command, we should try to
+         * KC8042.CMD.PULSE_OUTPORT command, so if a RESET is detected via this command, we should try to
          * determine if that's what the caller intended.
          */
         if (DEBUG && this.messageEnabled(Messages.C8042)) {
@@ -4820,7 +5043,7 @@ ChipSet.prototype.set8042OutPort = function(b)
  * keyboard controller.  However, the Keyboard's sole responsibility is to emulate an actual keyboard and call
  * notifyKbdData() whenever it has some data; it's not allowed to mess with IRQ lines.
  *
- * If there's an 8042, we check (this.b8042CmdData & ChipSet.KBC.DATA.CMD.NO_CLOCK); if NO_CLOCK is clear,
+ * If there's an 8042, we check (this.b8042CmdData & ChipSet.KC8042.DATA.CMD.NO_CLOCK); if NO_CLOCK is clear,
  * we can raise the IRQ immediately.  Well, not quite immediately....
  *
  * Notes regarding the MODEL_5170 (eg, /devices/pc/machine/5170/ega/1152kb/rev3/machine.xml):
@@ -4863,7 +5086,7 @@ ChipSet.prototype.set8042OutPort = function(b)
  * eliminating the need for the second CLI (@F000:370E).
  *
  * Of course, in "real life", this was probably never a problem, because the 8042 probably wasn't fast enough to
- * generate another interrupt so soon after receiving the ChipSet.KBC.CMD.ENABLE_KBD command.  In my case, I ran
+ * generate another interrupt so soon after receiving the ChipSet.KC8042.CMD.ENABLE_KBD command.  In my case, I ran
  * into this problem by 1) turning on "kbd" Debugger messages and 2) rapidly typing lots of keys.  The Debugger
  * messages bogged the machine down enough for me to hit the "window of opportunity", generating this message in
  * PC-DOS 3.20:
@@ -4903,12 +5126,12 @@ ChipSet.prototype.notifyKbdData = function(b)
         this.setIRR(ChipSet.IRQ.KBD, 4);
     }
     else {
-        if (!(this.b8042CmdData & ChipSet.KBC.DATA.CMD.NO_CLOCK)) {
+        if (!(this.b8042CmdData & ChipSet.KC8042.DATA.CMD.NO_CLOCK)) {
             /*
              * The next read of b8042OutBuff will clear both of these bits and call kbd.checkScanCode(),
              * which will call notifyKbdData() again if there's still keyboard data to process.
              */
-            if (!(this.b8042Status & (ChipSet.KBC.STATUS.OUTBUFF_FULL | ChipSet.KBC.STATUS.OUTBUFF_DELAY))) {
+            if (!(this.b8042Status & (ChipSet.KC8042.STATUS.OUTBUFF_FULL | ChipSet.KC8042.STATUS.OUTBUFF_DELAY))) {
                 this.set8042OutBuff(b, true);
                 this.kbd.shiftScanCode();
                 /*
@@ -4928,6 +5151,37 @@ ChipSet.prototype.notifyKbdData = function(b)
             }
         }
     }
+};
+
+/**
+ * in8041Status(port, addrFrom)
+ *
+ * @this {ChipSet}
+ * @param {number} port (0x64)
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
+ * @return {number} simulated port value
+ */
+ChipSet.prototype.in8041Status = function(port, addrFrom)
+{
+    var b = this.b8041Status;
+    this.printMessageIO(port, null, addrFrom, "8041_STATUS", b);
+    return b;
+};
+
+/**
+ * in6300SysConf(iConf, port, addrFrom)
+ *
+ * @this {ChipSet}
+ * @param {number} iConf (0 or 1)
+ * @param {number} port (0x66 or 0x67)
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
+ * @return {number} simulated port value
+ */
+ChipSet.prototype.in6300SysConf = function(iConf, port, addrFrom)
+{
+    var b = (iConf? this.sw2 : this.sw1);
+    this.printMessageIO(port, null, addrFrom, (iConf? "SYS_CONF_B" : "SYS_CONF_A"), b, Messages.CHIPSET);
+    return b;
 };
 
 /**
@@ -5275,12 +5529,13 @@ ChipSet.aPortInput = {
     0x06: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAChannelAddr(ChipSet.DMA0.INDEX, 3, port, addrFrom); },
     0x07: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAChannelCount(ChipSet.DMA0.INDEX, 3, port, addrFrom); },
     0x08: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAStatus(ChipSet.DMA0.INDEX, port, addrFrom); },
+    0x0D: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMATemp(ChipSet.DMA0.INDEX, port, addrFrom); },
     0x20: /** @this {ChipSet} */ function(port, addrFrom) { return this.inPICLo(ChipSet.PIC0.INDEX, addrFrom); },
     0x21: /** @this {ChipSet} */ function(port, addrFrom) { return this.inPICHi(ChipSet.PIC0.INDEX, addrFrom); },
-    0x40: /** @this {ChipSet} */ function(port, addrFrom) { return this.inTimer(ChipSet.PIT0.TIMER0, port, addrFrom); },
-    0x41: /** @this {ChipSet} */ function(port, addrFrom) { return this.inTimer(ChipSet.PIT0.TIMER1, port, addrFrom); },
-    0x42: /** @this {ChipSet} */ function(port, addrFrom) { return this.inTimer(ChipSet.PIT0.TIMER2, port, addrFrom); },
-    0x43: ChipSet.prototype.inPIT1Ctrl,
+    0x40: /** @this {ChipSet} */ function(port, addrFrom) { return this.inTimer(ChipSet.PIT0.INDEX, ChipSet.PIT0.TIMER0, port, addrFrom); },
+    0x41: /** @this {ChipSet} */ function(port, addrFrom) { return this.inTimer(ChipSet.PIT0.INDEX, ChipSet.PIT0.TIMER1, port, addrFrom); },
+    0x42: /** @this {ChipSet} */ function(port, addrFrom) { return this.inTimer(ChipSet.PIT0.INDEX, ChipSet.PIT0.TIMER2, port, addrFrom); },
+    0x43: /** @this {ChipSet} */ function(port, addrFrom) { return this.inTimerCtrl(ChipSet.PIT0.INDEX, port, addrFrom); },
     0x81: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAPageReg(ChipSet.DMA0.INDEX, 2, port, addrFrom); },
     0x82: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAPageReg(ChipSet.DMA0.INDEX, 3, port, addrFrom); },
     0x83: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAPageReg(ChipSet.DMA0.INDEX, 1, port, addrFrom); },
@@ -5291,7 +5546,7 @@ ChipSet.aPortInput5150 = {
     0x60: ChipSet.prototype.inPPIA,
     0x61: ChipSet.prototype.inPPIB,
     0x62: ChipSet.prototype.inPPIC,
-    0x63: ChipSet.prototype.inPPICtrl   // technically, not actually readable, but I want the Debugger to be able to read this
+    0x63: ChipSet.prototype.inPPICtrl   // technically, not actually readable, but I want the Debugger to be able to read it
 };
 
 ChipSet.aPortInput5170 = {
@@ -5322,7 +5577,16 @@ ChipSet.aPortInput5170 = {
     0xCA: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAChannelCount(ChipSet.DMA1.INDEX, 2, port, addrFrom); },
     0xCC: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAChannelAddr(ChipSet.DMA1.INDEX, 3, port, addrFrom); },
     0xCE: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAChannelCount(ChipSet.DMA1.INDEX, 3, port, addrFrom); },
-    0xD0: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAStatus(ChipSet.DMA1.INDEX, port, addrFrom); }
+    0xD0: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAStatus(ChipSet.DMA1.INDEX, port, addrFrom); },
+    0xDA: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMATemp(ChipSet.DMA1.INDEX, port, addrFrom); }
+};
+
+ChipSet.aPortInput6300 = {
+    0x60: ChipSet.prototype.in8041Kbd,
+    0x61: ChipSet.prototype.in8041Ctrl,
+    0x64: ChipSet.prototype.in8041Status,
+    0x66: /** @this {ChipSet} */ function(port, addrFrom) { return this.in6300SysConf(0, port, addrFrom); },
+    0x67: /** @this {ChipSet} */ function(port, addrFrom) { return this.in6300SysConf(1, port, addrFrom); }
 };
 
 /*
@@ -5345,10 +5609,10 @@ ChipSet.aPortOutput = {
     0x0D: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAMasterClear(ChipSet.DMA0.INDEX, port, bOut, addrFrom); },
     0x20: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outPICLo(ChipSet.PIC0.INDEX, bOut, addrFrom); },
     0x21: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outPICHi(ChipSet.PIC0.INDEX, bOut, addrFrom); },
-    0x40: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outTimer(ChipSet.PIT0.TIMER0, port, bOut, addrFrom); },
-    0x41: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outTimer(ChipSet.PIT0.TIMER1, port, bOut, addrFrom); },
-    0x42: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outTimer(ChipSet.PIT0.TIMER2, port, bOut, addrFrom); },
-    0x43: ChipSet.prototype.outPIT1Ctrl,
+    0x40: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outTimer(ChipSet.PIT0.INDEX, ChipSet.PIT0.TIMER0, port, bOut, addrFrom); },
+    0x41: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outTimer(ChipSet.PIT0.INDEX, ChipSet.PIT0.TIMER1, port, bOut, addrFrom); },
+    0x42: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outTimer(ChipSet.PIT0.INDEX, ChipSet.PIT0.TIMER2, port, bOut, addrFrom); },
+    0x43: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outTimerCtrl(ChipSet.PIT0.INDEX, port, bOut, addrFrom); },
     0x81: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAPageReg(ChipSet.DMA0.INDEX, 2, port, bOut, addrFrom); },
     0x82: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAPageReg(ChipSet.DMA0.INDEX, 3, port, bOut, addrFrom); },
     0x83: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAPageReg(ChipSet.DMA0.INDEX, 1, port, bOut, addrFrom); },
@@ -5399,6 +5663,12 @@ ChipSet.aPortOutput5170 = {
     0xDA: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAMasterClear(ChipSet.DMA1.INDEX, port, bOut, addrFrom); },
     0xF0: ChipSet.prototype.outFPUClear,
     0xF1: ChipSet.prototype.outFPUReset
+};
+
+ChipSet.aPortOutput6300 = {
+    0x60: ChipSet.prototype.out8041Kbd,
+    0x61: ChipSet.prototype.out8041Ctrl,
+    0xA0: ChipSet.prototype.outNMI
 };
 
 /**

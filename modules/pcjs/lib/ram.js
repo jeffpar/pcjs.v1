@@ -364,11 +364,11 @@ CompaqController.MAPPINGS = {
  * through the 8042 Keyboard Controller's KBC.INPORT register, as follows:
  *
  *      SW1-1:  TODO: Determine
- *      SW1-2:  ChipSet.KBC.INPORT.COMPAQ_NO80387 clear if ON, set (0x04) if OFF
+ *      SW1-2:  ChipSet.KC8042.INPORT.COMPAQ_NO80387 clear if ON, set (0x04) if OFF
  *      SW1-3:  TODO: Determine
- *      SW1-4:  ChipSet.KBC.INPORT.COMPAQ_HISPEED clear if ON, set (0x10) if OFF
- *      SW1-5:  ChipSet.KBC.INPORT.COMPAQ_DIP5OFF clear if ON, set (0x20) if OFF
- *      SW1-6:  ChipSet.KBC.INPORT.COMPAQ_NONDUAL clear if ON, set (0x40) if OFF
+ *      SW1-4:  ChipSet.KC8042.INPORT.COMPAQ_HISPEED clear if ON, set (0x10) if OFF
+ *      SW1-5:  ChipSet.KC8042.INPORT.COMPAQ_DIP5OFF clear if ON, set (0x20) if OFF
+ *      SW1-6:  ChipSet.KC8042.INPORT.COMPAQ_NONDUAL clear if ON, set (0x40) if OFF
  */
 CompaqController.SETTINGS = {
     B0_PARITY:  0x0001,         // parity OK in byte 0
