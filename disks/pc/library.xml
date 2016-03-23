@@ -84,6 +84,7 @@
 		<manifest ref="/apps/pc/1985/rogue/manifest.xml" disk="disk01"/>
 		<manifest ref="/apps/pc/1987/thinktank/manifest.xml" disk="disk01"/>
 		<manifest ref="/apps/pc/1992/moria/manifest.xml" disk="disk01"/>
+		<manifest ref="/pubs/pc/programming/manifest.xml"/>
 		<disk path="/tests/pc/vga/VGABIN.json">VGA Tests (Black Book)</disk>
 	</control>
 	<control type="button" binding="loadDrive">Load</control>
