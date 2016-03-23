@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.21.2/manifest.xsl"?>
+<manifest type="software">
+	<title>Microsoft Macro Assembler</title>
+	<version>5.10</version>
+	<type>Tool</type>
+	<category>Assembler</category>
+	<author>Microsoft</author>
+	<disk id="disk01" size="368640" chs="40:2:9" img="archive/disk1.img" href="/disks/pc/tools/microsoft/masm/5.10/MASM510-DISK1.json" md5="340fae77a5ea5a5dfd52534226941526" md5json="b2940662c1d2b9b5eaac73bfde1cba23">
+		<name>MS MASM 5.10 (Disk 1)</name>
+	</disk>
+	<disk id="disk02" size="368640" chs="40:2:9" img="archive/disk2.img" href="/disks/pc/tools/microsoft/masm/5.10/MASM510-DISK2.json" md5="1a41e7ecd941da02f8de7503cedab7a9" md5json="b40ee9490fcd6ebbfce412543b7d8450">
+		<name>MS MASM 5.10 (Disk 2)</name>
+	</disk>
+	<disk id="disk03" size="368640" chs="40:2:9" img="archive/disk3.img" href="/disks/pc/tools/microsoft/masm/5.10/MASM510-DISK3.json" md5="6ee407452e2138eb844d1a19a2431852" md5json="3e332447b4868de32b61636ffdf3f185">
+		<name>MS MASM 5.10 (Disk 3)</name>
+	</disk>
+	<disk id="disk04" size="368640" chs="40:2:9" img="archive/disk4.img" href="/disks/pc/tools/microsoft/masm/5.10/MASM510-DISK4.json" md5="15a5da4c89fa5af993112bb31cd4772b" md5json="755ab1a4d914a35d9ecf6f74533d3631">
+		<name>MS MASM 5.10 (Disk 4)</name>
+	</disk>
+	<disk id="disk05" size="1228800" chs="80:2:15" img="archive/disk5.img" href="/disks/pc/tools/microsoft/masm/5.10/MASM510-DISK5.json" md5="4c859bcc62806d3371f22b909803edfc" md5json="ea30fe942df231e348a93b7e0201f1ac">
+		<name>MS MASM 5.10 (Disk 5)</name>
+	</disk>
+	<disk id="disk06" size="368640" chs="40:2:9" img="archive/disk6.img" href="/disks/pc/tools/microsoft/masm/5.10/MASM510-DISK6.json" md5="3aafd51461e486722c8ead384ff56204" md5json="316e89e9157e26bcc3f94e5487aa3399">
+		<name>MS MASM 5.10 (Disk 6)</name>
+	</disk>
+</manifest>

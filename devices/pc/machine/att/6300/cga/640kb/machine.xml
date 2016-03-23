@@ -11,6 +11,6 @@
 		<control type="button" binding="run">Run</control>
 		<control type="button" binding="reset">Reset</control>
 	</cpu>
-	<keyboard ref="/devices/pc/keyboard/us83-buttons-debug.xml"/>
-	<chipset id="chipset" model="6300" sw1="01001001" sw2="11110000"/>
+	<keyboard ref="/devices/pc/keyboard/us83-buttons-minimal.xml"/>
+	<chipset id="chipset" model="att6300" sw1="01001000" sw2="11111001"/>
 </machine>

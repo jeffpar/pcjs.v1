@@ -7,7 +7,9 @@ permalink: /disks/pc/tools/microsoft/c/4.00/
 Microsoft C Compiler v4.00
 ---
 
-***DISK 1***
+Directory listings of the eight 360Kb distribution diskettes are provided below.
+
+### Directory of MS C 4.00 (Disk 1)
 
 	 Volume in drive A is C COMPILER 
 	 Directory of  A:\
@@ -18,7 +20,7 @@ Microsoft C Compiler v4.00
 	C3       EXE    83481   6-27-86   4:00a
 			4 File(s)      2048 bytes free
 
-***DISK 2***
+### Directory of MS C 4.00 (Disk 2)
 
 	 Volume in drive A is C UTILITIES
 	 Directory of  A:\
@@ -36,7 +38,7 @@ Microsoft C Compiler v4.00
 	README   DOC    41655   6-27-86   4:00a
 		   11 File(s)      2048 bytes free
 
-***DISK 3***
+### Directory of MS C 4.00 (Disk 3)
 
 	 Volume in drive A is C INC LIB S
 	 Directory of  A:\
@@ -83,7 +85,7 @@ Microsoft C Compiler v4.00
 	VARARGS  H        391   6-27-86   4:00a
 		   40 File(s)     11264 bytes free
 
-***DISK 4***
+### Directory of MS C 4.00 (Disk 4)
 
 	 Volume in drive A is C LIB M C  
 	 Directory of  A:\
@@ -99,7 +101,7 @@ Microsoft C Compiler v4.00
 	MVARSTCK OBJ      504   6-27-86   4:00a
 			9 File(s)     34816 bytes free
 
-***DISK 5***
+### Directory of MS C 4.00 (Disk 5)
 
 	 Volume in drive A is C LIB L    
 	 Directory of  A:\
@@ -114,7 +116,7 @@ Microsoft C Compiler v4.00
 	MOUSE    COM     8957   6-27-86   4:00a
 			8 File(s)         0 bytes free
 
-***DISK 6***
+### Directory of MS C 4.00 (Disk 6)
 
 	 Volume in drive A is C STARTUP  
 	 Directory of  A:\
@@ -149,7 +151,7 @@ Microsoft C Compiler v4.00
 	_WILD    ASM     1507   6-27-86   4:00a
 		   28 File(s)    260096 bytes free
 
-***DISK 7***
+### Directory of MS C 4.00 (Disk 7)
 
 	 Volume in drive A is CV LEARN   
 	 Directory of  A:\
@@ -191,7 +193,7 @@ Microsoft C Compiler v4.00
 	PIB      BAT      413   6-27-86   4:00a
 		   35 File(s)      8192 bytes free
 
-***DISK 8***
+### Directory of MS C 4.00 (Disk 8)
 
 	 Volume in drive A is C WINDOWS  
 	 Directory of  A:\

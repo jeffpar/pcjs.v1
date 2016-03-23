@@ -11,6 +11,6 @@
 		<control type="button" binding="run">Run</control>
 		<control type="button" binding="reset">Reset</control>
 	</cpu>
-	<keyboard ref="/devices/pc/keyboard/us83-buttons-debug.xml"/>
+	<keyboard ref="/devices/pc/keyboard/us83-buttons-mpc1600.xml"/>
 	<chipset id="chipset" model="mpc1600" sw1="01001001" sw2="11110000"/>
 </machine>
