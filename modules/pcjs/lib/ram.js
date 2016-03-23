@@ -197,7 +197,7 @@ RAM.prototype.reset = function()
              *
              * See CompaqController for more details.
              */
-            if (COMPAQ386) {
+            if (DESKPRO386) {
                 if (this.idComponent == "ramCPQ") {
                     this.controller = new CompaqController(this);
                     this.bus.addMemory(CompaqController.ADDR, 4, Memory.TYPE.CTRL, this.controller);
@@ -218,7 +218,7 @@ RAM.prototype.reset = function()
          * Don't add the "ramCPQ" memory to the CMOS total, because addCMOSMemory() will add it to the extended
          * memory total, which will just confuse the COMPAQ BIOS.
          */
-        if (!COMPAQ386 || this.idComponent != "ramCPQ") {
+        if (!DESKPRO386 || this.idComponent != "ramCPQ") {
             if (this.chipset) this.chipset.addCMOSMemory(this.addrRAM, this.sizeRAM);
         }
     } else {

@@ -57,11 +57,11 @@ if (NODE) {
  *      monitor:        none|tv|color|mono|ega|vga (if no sw1 value provided, default is "ega" for 5170, "mono" otherwise)
  *      rtcDate:        optional RTC date/time (in GMT) to use on reset; use the ISO 8601 format; eg: "2014-10-01T08:00:00"
  *
- * As support for IBM-compatible machines grows, we should refrain from adding new model strings (eg, "deskpro386")
- * and instead add more ChipSet configuration properties, such as:
+ * As support for IBM-compatible machines grows, we should refrain from adding new model strings (eg, "att6300")
+ * and corresponding model checks, and instead add more ChipSet configuration properties, such as:
  *
- *      pit1:           0x48 to enable PIT1 at base port 0x48 (as used by COMPAQ_DESKPRO386); default is undefined
- *      kc:             8041 to enable 8041 emulation (eg, for ATT_6300); default is 8255 for MODEL_5150/MODEL_5160, 8042 for MODEL_5170
+ *      pit1:           0x48 to enable PIT1 at base port 0x48 (as used by COMPAQ_DESKPRO386); default to undefined
+ *      kc:             8041 to select 8041 emulation (eg, for ATT_6300); default to 8255 for MODEL_5150/MODEL_5160, 8042 for MODEL_5170
  *
  * @constructor
  * @extends Component
@@ -271,10 +271,12 @@ ChipSet.MODEL_5170_OTHER        = 5170.9;
 /*
  * Assorted non-IBM models (we don't put "IBM" in the IBM models, but non-IBM models should include the company name).
  */
-ChipSet.MODEL_ATT_6300          = 5160.101; // AT&T Personal Computer 6300/Olivetti M24 ("COPYRIGHT (C) OLIVETTI 1984","04/03/86",v1.43)
 ChipSet.MODEL_CDP_MPC1600       = 5150.101; // Columbia Data Products MPC 1600 ("Copyright Columbia Data Products 1983, ROM/BIOS Ver 4.34")
-ChipSet.MODEL_ZENITH_Z150       = 5160.150; // Zenith Data Systems Z-150 ("08/11/88 (C)ZDS CORP")
 ChipSet.MODEL_COMPAQ_PORTABLE   = 5150.102; // COMPAQ Portable (COMPAQ's first PC)
+
+ChipSet.MODEL_ATT_6300          = 5160.101; // AT&T Personal Computer 6300/Olivetti M24 ("COPYRIGHT (C) OLIVETTI 1984","04/03/86",v1.43)
+ChipSet.MODEL_ZENITH_Z150       = 5160.150; // Zenith Data Systems Z-150 ("08/11/88 (C)ZDS CORP")
+
 ChipSet.MODEL_COMPAQ_DESKPRO386 = 5180;     // COMPAQ DeskPro 386 (COMPAQ's first 80386-based PC); should be > MODEL_5170
 
 /*
@@ -288,9 +290,12 @@ ChipSet.MODELS = {
     "mpc1600":      ChipSet.MODEL_CDP_MPC1600,
     "z150":         ChipSet.MODEL_ZENITH_Z150,
     "compaq":       ChipSet.MODEL_COMPAQ_PORTABLE,
-    "deskpro386":   ChipSet.MODEL_COMPAQ_DESKPRO386,
     "other":        ChipSet.MODEL_5150_OTHER
 };
+
+if (DESKPRO386) {
+    ChipSet.MODELS["deskpro386"] = ChipSet.MODEL_COMPAQ_DESKPRO386;
+}
 
 ChipSet.CONTROLS = {
     SW1:    "sw1",
@@ -1220,6 +1225,10 @@ ChipSet.prototype.initBus = function(cmp, bus, cpu, dbg)
     } else {
         bus.addPortInputTable(this, ChipSet.aPortInput5170);
         bus.addPortOutputTable(this, ChipSet.aPortOutput5170);
+        if (DESKPRO386 && (this.model|0) == ChipSet.MODEL_COMPAQ_DESKPRO386) {
+            bus.addPortInputTable(this, ChipSet.aPortInputDeskPro386);
+            bus.addPortOutputTable(this, ChipSet.aPortOutputDeskPro386);
+        }
     }
     if (DEBUGGER) {
         if (dbg) {
@@ -1335,8 +1344,7 @@ ChipSet.prototype.reset = function(fHard)
     this.bNMI = ChipSet.NMI.DISABLE;// tracks writes to the NMI Mask Register
 
     if (this.model == ChipSet.MODEL_ATT_6300) {
-        this.b8041Ctrl = 0;
-        this.b8041Status = 0;
+        this.b8041Status = 0;       // similar to b8042Status (but apparently only bits 0 and 1 are used)
     }
 
     /*
@@ -1370,7 +1378,7 @@ ChipSet.prototype.reset = function(fHard)
             this.b8042InPort |= ChipSet.KC8042.INPORT.MONO;
         }
 
-        if (COMPAQ386 && (this.model|0) == ChipSet.MODEL_COMPAQ_DESKPRO386) {
+        if (DESKPRO386 && (this.model|0) == ChipSet.MODEL_COMPAQ_DESKPRO386) {
             this.b8042InPort |= ChipSet.KC8042.INPORT.COMPAQ_NO80387 | ChipSet.KC8042.INPORT.COMPAQ_NOWEITEK;
         }
 
@@ -2994,7 +3002,7 @@ ChipSet.prototype.outDMAPageSpare = function(iSpare, port, bOut, addrFrom)
 {
     /*
      * TODO: Remove this DEBUG-only DESKPRO386 code once we're done debugging DeskPro 386 ROMs;
-     * it enables logging of all DeskPro ROM checkpoint I/O to port 0x84.
+     * it enables logging of all DeskPro 386 ROM checkpoint I/O to port 0x84.
      */
     if (this.messageEnabled(Messages.DMA | Messages.PORT) || DEBUG && (this.model|0) == ChipSet.MODEL_COMPAQ_DESKPRO386 && port == 0x84) {
         this.printMessageIO(port, bOut, addrFrom, "DMA.SPARE" + iSpare + ".PAGE", null, true);
@@ -3843,10 +3851,10 @@ ChipSet.prototype.outTimer = function(iPIT, iPITTimer, port, bOut, addrFrom)
             timer.fCounting = true;
 
             /*
-             * I believe MODE0 is the only mode where "OUT" (fOUT) starts out "low" (false); for the rest of the modes,
-             * "OUT" (fOUT) starts "high" (true).  It's also my understanding that the way edge-triggered interrupts work
-             * on the original PC is that an interrupt is requested only when the corresponding "OUT" transitions from
-             * "low" to "high".
+             * I believe MODE0 is the only mode where OUT (fOUT) starts out low (false); for the rest of the modes,
+             * OUT (fOUT) starts high (true).  It's also my understanding that the way edge-triggered interrupts work
+             * on the original PC is that an interrupt is requested only when the corresponding OUT transitions from
+             * low to high.
              */
             timer.fOUT = (timer.mode != ChipSet.PIT_CTRL.MODE0);
 
@@ -4249,11 +4257,11 @@ ChipSet.prototype.updateTimer = function(iTimer, fCycleReset)
          * where TIMER1 is programmed for MODE2, LSB (the same settings, incidentally, used immediately afterward
          * for TIMER1 in conjunction with DMA channel 0 memory refreshes).
          *
-         * Now this mode generates interrupts.  Note that "OUT" goes "low" when the count reaches 1, then "high"
+         * Now this mode generates interrupts.  Note that OUT goes low when the count reaches 1, then high
          * one tick later, at which point the count is reloaded and counting continues.
          *
-         * Chances are, we will often miss the exact point at which the count becomes 1 (or more importantly, one
-         * tick later, when the count *would* become 0, since that's when "OUT" transitions from "low" to "high"),
+         * Chances are, we will often miss the exact point at which the count becomes 1 (or more importantly,
+         * one tick later, when the count *would* become 0, since that's when OUT transitions from low to high),
          * but as with MODE3, hopefully no one will mind.
          *
          * FYI, technically, it appears that the count is never supposed to reach 0, and that an initial count of 1
@@ -4386,35 +4394,6 @@ ChipSet.prototype.outPPIA = function(port, bOut, addrFrom)
 
 
 /**
- * in8041Kbd(port, addrFrom)
- *
- * @this {ChipSet}
- * @param {number} port (0x60)
- * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
- * @return {number} simulated port value
- */
-ChipSet.prototype.in8041Kbd = function(port, addrFrom)
-{
-    var b = this.kbd? this.kbd.readScanCode() : 0;
-    this.printMessageIO(port, null, addrFrom, "8041_KBD", b);
-    return b;
-};
-
-/**
- * out8041Kbd(port, bOut, addrFrom)
- *
- * @this {ChipSet}
- * @param {number} port (0x60)
- * @param {number} bOut
- * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
- */
-ChipSet.prototype.out8041Kbd = function(port, bOut, addrFrom)
-{
-    this.printMessageIO(port, bOut, addrFrom, "8041_KBD");
-    // if (this.kbd) this.kbd.sendCmd(bOut);
-};
-
-/**
  * inPPIB(port, addrFrom)
  *
  * @this {ChipSet}
@@ -4478,35 +4457,6 @@ ChipSet.prototype.updatePPIB = function(bOut)
          */
         this.setSpeaker(fNewSpeaker);
     }
-};
-
-/**
- * in8041Ctrl(port, addrFrom)
- *
- * @this {ChipSet}
- * @param {number} port (0x61)
- * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
- * @return {number} simulated port value
- */
-ChipSet.prototype.in8041Ctrl = function(port, addrFrom)
-{
-    var b = this.b8041Ctrl;
-    this.printMessageIO(port, null, addrFrom, "8041_CTRL", b);
-    return b;
-};
-
-/**
- * out8041Ctrl(port, bOut, addrFrom)
- *
- * @this {ChipSet}
- * @param {number} port (0x61)
- * @param {number} bOut
- * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
- */
-ChipSet.prototype.out8041Ctrl = function(port, bOut, addrFrom)
-{
-    this.printMessageIO(port, bOut, addrFrom, "8041_CTRL");
-    this.b8041Ctrl = bOut;
 };
 
 /**
@@ -4598,6 +4548,80 @@ ChipSet.prototype.outPPICtrl = function(port, bOut, addrFrom)
 {
     this.printMessageIO(port, bOut, addrFrom, "PPI_CTRL");
     this.bPPICtrl = bOut;
+};
+
+/**
+ * in8041Kbd(port, addrFrom)
+ *
+ * @this {ChipSet}
+ * @param {number} port (0x60)
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
+ * @return {number} simulated port value
+ */
+ChipSet.prototype.in8041Kbd = function(port, addrFrom)
+{
+    var b = this.kbd? this.kbd.readScanCode() : 0;
+    this.printMessageIO(port, null, addrFrom, "8041_KBD", b);
+    this.b8041Status &= ~ChipSet.KC8042.STATUS.OUTBUFF_FULL;
+    return b;
+};
+
+/**
+ * out8041Kbd(port, bOut, addrFrom)
+ *
+ * @this {ChipSet}
+ * @param {number} port (0x60)
+ * @param {number} bOut
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
+ */
+ChipSet.prototype.out8041Kbd = function(port, bOut, addrFrom)
+{
+    this.printMessageIO(port, bOut, addrFrom, "8041_KBD");
+    // if (this.kbd) this.kbd.sendCmd(bOut);
+};
+
+/**
+ * in8041Ctrl(port, addrFrom)
+ *
+ * @this {ChipSet}
+ * @param {number} port (0x61)
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
+ * @return {number} simulated port value
+ */
+ChipSet.prototype.in8041Ctrl = function(port, addrFrom)
+{
+    var b = this.bPPIB;
+    this.printMessageIO(port, null, addrFrom, "8041_CTRL", b);
+    return b;
+};
+
+/**
+ * out8041Ctrl(port, bOut, addrFrom)
+ *
+ * @this {ChipSet}
+ * @param {number} port (0x61)
+ * @param {number} bOut
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
+ */
+ChipSet.prototype.out8041Ctrl = function(port, bOut, addrFrom)
+{
+    this.printMessageIO(port, bOut, addrFrom, "8041_CTRL");
+    this.updatePPIB(bOut);
+};
+
+/**
+ * in8041Status(port, addrFrom)
+ *
+ * @this {ChipSet}
+ * @param {number} port (0x64)
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
+ * @return {number} simulated port value
+ */
+ChipSet.prototype.in8041Status = function(port, addrFrom)
+{
+    var b = this.b8041Status;
+    this.printMessageIO(port, null, addrFrom, "8041_STATUS", b);
+    return b;
 };
 
 /**
@@ -5124,6 +5148,7 @@ ChipSet.prototype.notifyKbdData = function(b)
          * TODO: Should we be checking bPPI for PPI_B.CLK_KBD on these older machines, before calling setIRR()?
          */
         this.setIRR(ChipSet.IRQ.KBD, 4);
+        this.b8041Status |= ChipSet.KC8042.STATUS.OUTBUFF_FULL;
     }
     else {
         if (!(this.b8042CmdData & ChipSet.KC8042.DATA.CMD.NO_CLOCK)) {
@@ -5151,21 +5176,6 @@ ChipSet.prototype.notifyKbdData = function(b)
             }
         }
     }
-};
-
-/**
- * in8041Status(port, addrFrom)
- *
- * @this {ChipSet}
- * @param {number} port (0x64)
- * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
- * @return {number} simulated port value
- */
-ChipSet.prototype.in8041Status = function(port, addrFrom)
-{
-    var b = this.b8041Status;
-    this.printMessageIO(port, null, addrFrom, "8041_STATUS", b);
-    return b;
 };
 
 /**
@@ -5589,6 +5599,15 @@ ChipSet.aPortInput6300 = {
     0x67: /** @this {ChipSet} */ function(port, addrFrom) { return this.in6300SysConf(1, port, addrFrom); }
 };
 
+if (DESKPRO386) {
+    ChipSet.aPortInputDeskPro386 = {
+        0x48: /** @this {ChipSet} */ function(port, addrFrom) { return this.inTimer(ChipSet.PIT1.INDEX, ChipSet.PIT1.TIMER3, port, addrFrom); },
+        0x49: /** @this {ChipSet} */ function(port, addrFrom) { return this.inTimer(ChipSet.PIT1.INDEX, ChipSet.PIT1.TIMER4, port, addrFrom); },
+        0x4A: /** @this {ChipSet} */ function(port, addrFrom) { return this.inTimer(ChipSet.PIT1.INDEX, ChipSet.PIT1.TIMER5, port, addrFrom); },
+        0x4B: /** @this {ChipSet} */ function(port, addrFrom) { return this.inTimerCtrl(ChipSet.PIT1.INDEX, port, addrFrom); }
+    };
+}
+
 /*
  * Port output notification tables
  */
@@ -5670,6 +5689,15 @@ ChipSet.aPortOutput6300 = {
     0x61: ChipSet.prototype.out8041Ctrl,
     0xA0: ChipSet.prototype.outNMI
 };
+
+if (DESKPRO386) {
+    ChipSet.aPortOutputDeskPro386 = {
+        0x48: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outTimer(ChipSet.PIT1.INDEX, ChipSet.PIT1.TIMER3, port, bOut, addrFrom); },
+        0x49: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outTimer(ChipSet.PIT1.INDEX, ChipSet.PIT1.TIMER4, port, bOut, addrFrom); },
+        0x4A: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outTimer(ChipSet.PIT1.INDEX, ChipSet.PIT1.TIMER5, port, bOut, addrFrom); },
+        0x4B: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outTimerCtrl(ChipSet.PIT1.INDEX, port, bOut, addrFrom); }
+    };
+}
 
 /**
  * ChipSet.init()

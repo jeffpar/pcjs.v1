@@ -125,9 +125,9 @@ var I386 = true;
 /**
  * @define {boolean}
  *
- * COMPAQ386 enables COMPAQ DeskPro 386 support.  Requires I386 support as well (duh).
+ * DESKPRO386 enables COMPAQ DeskPro 386 support.  Requires I386 support as well (duh).
  */
-var COMPAQ386 = I386;
+var DESKPRO386 = I386;
 
 /**
  * @define {boolean}
@@ -153,7 +153,7 @@ if (NODE) {
     global.SYMBOLS = SYMBOLS;
     global.BUGS_8086 = BUGS_8086;
     global.I386 = I386;
-    global.COMPAQ386 = COMPAQ386;
+    global.DESKPRO386 = DESKPRO386;
     global.PAGEBLOCKS = PAGEBLOCKS;
     /*
      * TODO: When we're "required" by Node, should we return anything via module.exports?
