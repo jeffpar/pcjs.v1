@@ -197,6 +197,12 @@ web.getResource = function(sURL, dataPost, fAsync, done)
         if (done) done(sURL, sResource, nErrorCode);
         return [sResource, nErrorCode];
     }
+    else if (fAsync && typeof resources == 'function') {
+        resources(sURL, function(sResource, nErrorCode) {
+            if (done) done(sURL, sResource, nErrorCode);
+        });
+        return;
+    }
 
     if (DEBUG) {
         /*
