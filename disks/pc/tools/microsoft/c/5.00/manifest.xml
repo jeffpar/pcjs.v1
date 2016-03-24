@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.21.2/manifest.xsl"?>
+<manifest type="software">
+	<title>Microsoft C Compiler</title>
+	<version>5.00</version>
+	<type>Tool</type>
+	<category>C Compiler</category>
+	<author>Microsoft</author>
+	<releaseDate/>
+	<disk id="disk01" size="368640" chs="40:2:9" img="archive/Setup Disk (048-014-124).img" href="/disks/pc/tools/microsoft/c/5.00/MSC500-DISK1-SETUP.json" md5="3980d6c0d426531cf8e3d55b9bccb6f5" md5json="37be8dbc21875aca8b5a1cd31514e76d">
+		<name>MS C 5.00 (SETUP)</name>
+	</disk>
+	<disk id="disk02" size="368640" chs="40:2:9" img="archive/Compiler Disk (048-014-116).img" href="/disks/pc/tools/microsoft/c/5.00/MSC500-DISK2-COMPILER.json" md5="9d0b0525bc8e2fbfdc11c95af14378e9" md5json="f37e2c8bc56eed7909a0ace133ffeaf4">
+		<name>MS C 5.00 (COMPILER)</name>
+	</disk>
+	<disk id="disk03" size="368640" chs="40:2:9" img="archive/Utilities Disk (048-014-117).img" href="/disks/pc/tools/microsoft/c/5.00/MSC500-DISK3-UTILITY1.json" md5="0b3c260f5917629352a70b6bb9f0ae80" md5json="19d544f8d40307ce0001ffa6443b5327">
+		<name>MS C 5.00 (UTILITY1)</name>
+	</disk>
+	<disk id="disk04" size="368640" chs="40:2:9" img="archive/Additional Utilities Disk (01287).img" href="/disks/pc/tools/microsoft/c/5.00/MSC500-DISK4-UTILITY2.json" md5="aadee5801afc6058a76063870a3687a3" md5json="854e3fa687dcb6de1ff9df78fcd6e50e">
+		<name>MS C 5.00 (UTILITY2)</name>
+	</disk>
+</manifest>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.21.2/manifest.xsl"?>
+<manifest type="software">
+	<title>Microsoft Macro Assembler</title>
+	<version>1.00</version>
+	<type>Tool</type>
+	<category>Assembler</category>
+	<author>Microsoft</author>
+	<disk id="disk01" size="163840" chs="40:1:8" img="archive/MASM100.img" href="/disks/pc/tools/microsoft/masm/1.00/MASM100.json" md5="6fcbc81764c022aad13e85d8615e04a3" md5json="f079059f4f8b8b8e27a16811fc394d7f">
+		<name>MS MASM 1.00</name>
+	</disk>
+</manifest>

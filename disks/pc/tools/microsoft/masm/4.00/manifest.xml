@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.21.2/manifest.xsl"?>
 <manifest type="software">
-	<title>Microsoft Macro Assember</title>
+	<title>Microsoft Macro Assembler</title>
+	<version>4.00</version>
 	<type>Tool</type>
 	<category>Assembler</category>
 	<author>Microsoft</author>

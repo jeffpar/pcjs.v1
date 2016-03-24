@@ -7,6 +7,28 @@ permalink: /disks/pc/tools/microsoft/
 Microsoft Languages and Tools
 ---
 
+* Microsoft BASIC
+* [Microsoft C Compiler 2.03](/disks/pc/tools/microsoft/c/2.03/)
+* [Microsoft C Compiler 3.00](/disks/pc/tools/microsoft/c/3.00/)
+* [Microsoft C Compiler 4.00](/disks/pc/tools/microsoft/c/4.00/)
+* [Microsoft C Compiler 5.00](/disks/pc/tools/microsoft/c/5.00/)
+* [Microsoft C Compiler 5.10](/disks/pc/tools/microsoft/c/5.10/)
+* [Microsoft Macro Assembler 1.00](/disks/pc/tools/microsoft/masm/1.00/)
+* [Microsoft Macro Assembler 3.00](/disks/pc/tools/microsoft/masm/3.00/)
+* [Microsoft Macro Assembler 3.01](/disks/pc/tools/microsoft/masm/3.01/)
+* [Microsoft Macro Assembler 4.00](/disks/pc/tools/microsoft/masm/4.00/)
+* [Microsoft Macro Assembler 5.00](/disks/pc/tools/microsoft/masm/5.00/)
+* [Microsoft Macro Assembler 5.10](/disks/pc/tools/microsoft/masm/5.10/)
+* [Microsoft Macro Assembler 6.00](/disks/pc/tools/microsoft/masm/6.00/)
+* [Microsoft Macro Assembler 6.11](/disks/pc/tools/microsoft/masm/6.11/)
+* [Microsoft Mouse 5.00](/disks/pc/tools/microsoft/mouse/5.00/)
+* [Microsoft OS/2 SDK 1.02](/disks/pc/tools/microsoft/os2/sdk/1.02/)
+* [Microsoft Windows SDK 1.01](/disks/pc/tools/microsoft/windows/sdk/1.01/)
+* [Microsoft Windows SDK 1.03](/disks/pc/tools/microsoft/windows/sdk/1.03/)
+* [Microsoft Windows SDK 1.04](/disks/pc/tools/microsoft/windows/sdk/1.04/)
+* Microsoft Windows SDK 2.03
+* Microsoft Windows SDK 3.00
+
 Below are all the "Microsoft Languages NewsLetters" that Microsoft published in
 [PC Tech Journal](/pubs/pc/magazines/pctj/), before they decided to focus exclusively
 on their own publication, [Microsoft Systems Journal](/pubs/pc/magazines/msj/).

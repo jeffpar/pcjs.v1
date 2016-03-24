@@ -113,6 +113,8 @@ diagnostics, and more.
 ### Applications
 
 * Lotus 1-2-3 1.0A
+* [MicroPro WordStar 3.30](/disks/pc/apps/micropro/wordstar/3.30/)
+* [MicroPro WordStar 4.00](/disks/pc/apps/micropro/wordstar/4.00/)
 * Microsoft Chart 2.02
 * Microsoft Word 3.0
 * Microsoft Word 3.1
@@ -131,13 +133,24 @@ diagnostics, and more.
 ### Microsoft Tools
 
 * Microsoft BASIC
-* [Microsoft C 4.00](/disks/pc/tools/microsoft/c/4.00/)
-* Microsoft MASM 4.00
-* Microsoft Mouse 5.00
+* [Microsoft C Compiler 2.03](/disks/pc/tools/microsoft/c/2.03/)
+* [Microsoft C Compiler 3.00](/disks/pc/tools/microsoft/c/3.00/)
+* [Microsoft C Compiler 4.00](/disks/pc/tools/microsoft/c/4.00/)
+* [Microsoft C Compiler 5.00](/disks/pc/tools/microsoft/c/5.00/)
+* [Microsoft C Compiler 5.10](/disks/pc/tools/microsoft/c/5.10/)
+* [Microsoft Macro Assembler 1.00](/disks/pc/tools/microsoft/masm/1.00/)
+* [Microsoft Macro Assembler 3.00](/disks/pc/tools/microsoft/masm/3.00/)
+* [Microsoft Macro Assembler 3.01](/disks/pc/tools/microsoft/masm/3.01/)
+* [Microsoft Macro Assembler 4.00](/disks/pc/tools/microsoft/masm/4.00/)
+* [Microsoft Macro Assembler 5.00](/disks/pc/tools/microsoft/masm/5.00/)
+* [Microsoft Macro Assembler 5.10](/disks/pc/tools/microsoft/masm/5.10/)
+* [Microsoft Macro Assembler 6.00](/disks/pc/tools/microsoft/masm/6.00/)
+* [Microsoft Macro Assembler 6.11](/disks/pc/tools/microsoft/masm/6.11/)
+* [Microsoft Mouse 5.00](/disks/pc/tools/microsoft/mouse/5.00/)
 * [Microsoft OS/2 SDK 1.02](/disks/pc/tools/microsoft/os2/sdk/1.02/)
-* Microsoft Windows SDK 1.01
-* Microsoft Windows SDK 1.03
-* Microsoft Windows SDK 1.04
+* [Microsoft Windows SDK 1.01](/disks/pc/tools/microsoft/windows/sdk/1.01/)
+* [Microsoft Windows SDK 1.03](/disks/pc/tools/microsoft/windows/sdk/1.03/)
+* [Microsoft Windows SDK 1.04](/disks/pc/tools/microsoft/windows/sdk/1.04/)
 * Microsoft Windows SDK 2.03
 * Microsoft Windows SDK 3.00
 

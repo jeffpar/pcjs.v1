@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.21.2/manifest.xsl"?>
+<manifest type="software">
+	<title>Microsoft Macro Assembler</title>
+	<version>6.11</version>
+	<type>Tool</type>
+	<category>Assembler</category>
+	<author>Microsoft</author>
+	<disk id="disk01" size="1474560" chs="80:2:18" img="archive/Disk1.img" href="/disks/pc/tools/microsoft/masm/6.11/MASM610-DISK1.json" md5="02497c7dadcf4f98b0c487df8aaff995" md5json="bc50632cc41cf7e285f9cbd37c86cf57">
+		<name>MS MASM 6.11 (Disk 1)</name>
+	</disk>
+	<disk id="disk02" size="1474560" chs="80:2:18" img="archive/Disk2.img" href="/disks/pc/tools/microsoft/masm/6.11/MASM610-DISK2.json" md5="25e9019200cb582b4c58e1524e50f1e5" md5json="bae15f1ecd8808f3ef607df987b1ed95">
+		<name>MS MASM 6.11 (Disk 2)</name>
+	</disk>
+	<disk id="disk03" size="1474560" chs="80:2:18" img="archive/Disk3.img" href="/disks/pc/tools/microsoft/masm/6.11/MASM610-DISK3.json" md5="b858fa6984deadb1b2c2d563e71c8642" md5json="331d280dd67f671e2d1de2bba63207b8">
+		<name>MS MASM 6.11 (Disk 3)</name>
+	</disk>
+	<disk id="disk04" size="1474560" chs="80:2:18" img="archive/Disk4.img" href="/disks/pc/tools/microsoft/masm/6.11/MASM610-DISK4.json" md5="d51146901177fa36da05e932496ca019" md5json="b63963c9d2e34e286b78eddab7c5004b">
+		<name>MS MASM 6.11 (Disk 4)</name>
+	</disk>
+	<disk id="disk05" size="1474560" chs="80:2:18" img="archive/Disk5.img" href="/disks/pc/tools/microsoft/masm/6.11/MASM610-DISK5.json" md5="b299066883181a36ba0d918165b75bd9" md5json="f2a84af3f5568ed846874c048aa9acb7">
+		<name>MS MASM 6.11 (Disk 5)</name>
+	</disk>
+</manifest>

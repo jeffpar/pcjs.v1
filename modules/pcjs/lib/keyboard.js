@@ -387,11 +387,12 @@ Keyboard.SIMCODE = {
     CMD:          Keyboard.KEYCODE.CMD         + Keyboard.KEYCODE.ONDOWN,
     RCMD:         Keyboard.KEYCODE.RCMD        + Keyboard.KEYCODE.ONDOWN,
     FF_CMD:       Keyboard.KEYCODE.FF_CMD      + Keyboard.KEYCODE.ONDOWN,
+    SYSREQ:       Keyboard.KEYCODE.ESC         + Keyboard.KEYCODE.FAKE,
     CTRL_C:       Keyboard.ASCII.CTRL_C        + Keyboard.KEYCODE.FAKE,
     CTRL_BREAK:   Keyboard.KEYCODE.BS          + Keyboard.KEYCODE.FAKE,
     CTRL_ALT_DEL: Keyboard.KEYCODE.DEL         + Keyboard.KEYCODE.FAKE,
     CTRL_ALT_INS: Keyboard.KEYCODE.INS         + Keyboard.KEYCODE.FAKE,
-    SYSREQ:       Keyboard.KEYCODE.ESC         + Keyboard.KEYCODE.FAKE
+    CTRL_ALT_ENTER: Keyboard.KEYCODE.CR        + Keyboard.KEYCODE.FAKE
 };
 
 /*
@@ -591,7 +592,8 @@ Keyboard.CLICKCODES = {
     'CTRL_C':       Keyboard.SIMCODE.CTRL_C,
     'CTRL_BREAK':   Keyboard.SIMCODE.CTRL_BREAK,
     'CTRL_ALT_DEL': Keyboard.SIMCODE.CTRL_ALT_DEL,
-    'CTRL_ALT_INS': Keyboard.SIMCODE.CTRL_ALT_INS
+    'CTRL_ALT_INS': Keyboard.SIMCODE.CTRL_ALT_INS,
+    'CTRL_ALT_ENTER':   Keyboard.SIMCODE.CTRL_ALT_ENTER
 };
 
 /**
@@ -933,6 +935,7 @@ Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_C]       = Keyboard.SCANCODE.C          
 Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_BREAK]   = Keyboard.SCANCODE.SCROLL_LOCK | (Keyboard.SCANCODE.CTRL << 8);
 Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_ALT_DEL] = Keyboard.SCANCODE.NUM_DEL     | (Keyboard.SCANCODE.CTRL << 8) | (Keyboard.SCANCODE.ALT << 16);
 Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_ALT_INS] = Keyboard.SCANCODE.NUM_INS     | (Keyboard.SCANCODE.CTRL << 8) | (Keyboard.SCANCODE.ALT << 16);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_ALT_ENTER] = Keyboard.SCANCODE.ENTER     | (Keyboard.SCANCODE.CTRL << 8) | (Keyboard.SCANCODE.ALT << 16);
 
 /**
  * Commands that can be sent to the Keyboard via the 8042; see sendCmd()

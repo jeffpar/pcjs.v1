@@ -386,7 +386,7 @@
 					<input class="{$APPCLASS}-binding" type="submit" style="{$border}{$fontsize}{$style}" data-value="{{{$type},{$binding}}}" value="{.}"/>
 				</xsl:when>
 				<xsl:when test="@type = 'textarea'">
-					<textarea class="{$APPCLASS}-binding" style="{$border}{$width}{$height}{$style}" data-value="{{{$type},{$binding}}}" readonly="readonly"> </textarea>
+					<textarea class="{$APPCLASS}-binding" style="{$border}{$width}{$height}{$style}" data-value="{{{$type},{$binding}}}" readonly="readonly" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"> </textarea>
 				</xsl:when>
 				<xsl:when test="@type = 'heading'">
 					<div><xsl:value-of select="."/></div>

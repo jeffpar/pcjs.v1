@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.21.2/manifest.xsl"?>
+<manifest type="software">
+	<title>Microsoft Macro Assembler</title>
+	<version>5.00</version>
+	<type>Tool</type>
+	<category>Assembler</category>
+	<author>Microsoft</author>
+	<disk id="disk01" size="368640" chs="40:2:9" img="archive/disk01.img" href="/disks/pc/tools/microsoft/masm/5.00/MASM500-DISK1.json" md5="d7b9d6fec1ae8f2b75ae2a174dd5e9b4" md5json="7d1985d28e48a51b2f8cf34f9d4586f0">
+		<name>MS MASM 5.00 (Disk 1)</name>
+	</disk>
+	<disk id="disk02" size="368640" chs="40:2:9" img="archive/disk02.img" href="/disks/pc/tools/microsoft/masm/5.00/MASM500-DISK2.json" md5="a8e7f967353b27d732727ce3fde6cca2" md5json="045e55d45ee9d46940a6efc41371dcbc">
+		<name>MS MASM 5.00 (Disk 2)</name>
+	</disk>
+</manifest>

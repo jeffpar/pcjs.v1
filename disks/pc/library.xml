@@ -60,6 +60,8 @@
 		<manifest ref="/disks/pc/unix/microport/system-v/2.3/manifest.xml"/>
 		<manifest ref="/disks/pc/xenix/sco/8086/2.1.3/manifest.xml"/>
 		<manifest ref="/disks/pc/apps/lotus/123/1.0a/manifest.xml"/>
+		<manifest ref="/disks/pc/apps/micropro/wordstar/3.30/manifest.xml"/>
+		<manifest ref="/disks/pc/apps/micropro/wordstar/4.00/manifest.xml"/>
 		<manifest ref="/disks/pc/apps/microsoft/chart/2.02/manifest.xml"/>
 		<manifest ref="/disks/pc/apps/microsoft/word/3.0/manifest.xml"/>
 		<manifest ref="/disks/pc/apps/microsoft/word/3.1/manifest.xml"/>
@@ -68,8 +70,19 @@
 		<manifest ref="/disks/pc/tools/borland/pascal/3.00b/manifest.xml"/>
 		<manifest ref="/disks/pc/tools/borland/pascal/3.01a/manifest.xml"/>
 		<manifest ref="/disks/pc/tools/microsoft/basic/manifest.xml"/>
+		<manifest ref="/disks/pc/tools/microsoft/c/2.03/manifest.xml"/>
+		<manifest ref="/disks/pc/tools/microsoft/c/3.00/manifest.xml"/>
 		<manifest ref="/disks/pc/tools/microsoft/c/4.00/manifest.xml"/>
+		<manifest ref="/disks/pc/tools/microsoft/c/5.00/manifest.xml"/>
+		<manifest ref="/disks/pc/tools/microsoft/c/5.10/manifest.xml"/>
+		<manifest ref="/disks/pc/tools/microsoft/masm/1.00/manifest.xml"/>
+		<manifest ref="/disks/pc/tools/microsoft/masm/3.00/manifest.xml"/>
+		<manifest ref="/disks/pc/tools/microsoft/masm/3.01/manifest.xml"/>
 		<manifest ref="/disks/pc/tools/microsoft/masm/4.00/manifest.xml"/>
+		<manifest ref="/disks/pc/tools/microsoft/masm/5.00/manifest.xml"/>
+		<manifest ref="/disks/pc/tools/microsoft/masm/5.10/manifest.xml"/>
+		<manifest ref="/disks/pc/tools/microsoft/masm/6.00/manifest.xml"/>
+		<manifest ref="/disks/pc/tools/microsoft/masm/6.11/manifest.xml"/>
 		<manifest ref="/disks/pc/tools/microsoft/mouse/5.00/manifest.xml"/>
 		<manifest ref="/disks/pc/tools/microsoft/os2/sdk/1.02/manifest.xml"/>
 		<manifest ref="/disks/pc/tools/microsoft/windows/sdk/1.01/manifest.xml"/>
@@ -84,6 +97,7 @@
 		<manifest ref="/apps/pc/1985/rogue/manifest.xml" disk="disk01"/>
 		<manifest ref="/apps/pc/1987/thinktank/manifest.xml" disk="disk01"/>
 		<manifest ref="/apps/pc/1992/moria/manifest.xml" disk="disk01"/>
+		<manifest ref="/pubs/pc/programming/manifest.xml"/>
 		<disk path="/tests/pc/vga/VGABIN.json">VGA Tests (Black Book)</disk>
 	</control>
 	<control type="button" binding="loadDrive">Load</control>

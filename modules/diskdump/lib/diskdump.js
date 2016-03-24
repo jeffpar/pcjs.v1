@@ -749,7 +749,7 @@ DiskDump.outputDisk = function(err, disk, sDiskPath, sOutputFile, fOverwrite, sM
                         } else {
                             var sDirName = path.dirname(sOutputFile);
                             if (!fs.existsSync(sDirName)) mkdirp.sync(sDirName);
-                            fs.writeFileSync(sOutputFile, data);
+                            fs.writeFileSync(sOutputFile, data.buf || data);
                             DiskDump.logConsole(cbDisk + "-byte disk image saved to " + sOutputFile);
                         }
                     }
@@ -2042,7 +2042,7 @@ DiskDump.prototype.buildClusters = function(aFiles, offDisk, cbCluster, iParentC
                         if (!obj.cWritesPending) return;
                         if (!err) {
                             if (fDebug && cb != buf.length) DiskDump.logConsole(file.FILE_NAME + ": initial size (" + cb + ") does not match actual size (" + buf.length + ")");
-                            buf.copy(obj.bufDisk, off);
+                            buf.copy(obj.bufDisk.buf || obj.bufDisk, off);
                             if (fDebug) DiskDump.logConsole("0x" + str.toHex(off) + ": 0x" + str.toHex(buf.length) + " bytes written for " + file.FILE_PATH);
                             if (obj.sManifestFile) file.FILE_MD5 = crypto.createHash('md5').update(buf).digest('hex');
                         }
