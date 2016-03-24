@@ -41,10 +41,11 @@ if (NODE) {
 }
 
 /**
- * savePC(idMachine, sPCJSFile)
+ * savePC(idMachine, sPCJSFile, callback)
  *
  * @param {string} idMachine
  * @param {string} sPCJSFile
+ * @param {function(Object)} [callback]
  * @return {boolean} true if successful, false if error
  */
 function savePC(idMachine, sPCJSFile, callback)

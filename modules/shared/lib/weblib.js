@@ -201,7 +201,7 @@ web.getResource = function(sURL, dataPost, fAsync, done)
         resources(sURL, function(sResource, nErrorCode) {
             if (done) done(sURL, sResource, nErrorCode);
         });
-        return;
+        return response;
     }
 
     if (DEBUG) {
