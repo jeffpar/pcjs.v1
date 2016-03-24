@@ -1483,8 +1483,9 @@ FDC.prototype.findDiskette = function(sPath)
     var controlDisks = this.bindings["listDisks"];
     if (controlDisks && controlDisks.options) {
         for (var i = 0; i < controlDisks.options.length; i++) {
-            if (controlDisks.options[i].value == sPath) {
-                return controlDisks.options[i].innerText;
+            var control = controlDisks.options[i];
+            if (control.value == sPath) {
+                return control.textContent;
             }
         }
     }
