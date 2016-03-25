@@ -2904,7 +2904,9 @@ Video.prototype.initBus = function(cmp, bus, cpu, dbg)
     this.bEGASwitches = 0x09;   // our default "switches" setting (see aEGAMonitorSwitches)
     this.chipset = cmp.getMachineComponent("ChipSet");
     if (this.chipset && this.sSwitches) {
-        if (this.nCard == Video.CARD.EGA) this.bEGASwitches = this.chipset.parseSwitches(this.sSwitches, this.bEGASwitches);
+        if (this.nCard == Video.CARD.EGA) {
+            this.bEGASwitches = this.chipset.parseDIPSwitches(this.sSwitches, this.bEGASwitches);
+        }
     }
 
     /*
@@ -3535,7 +3537,7 @@ Video.prototype.reset = function()
      * on the EGA's own switch settings instead.
      */
     if (this.chipset) {
-        nMonitorType = this.chipset.getSWVideoMonitor();
+        nMonitorType = this.chipset.getDIPVideoMonitor();
     }
 
     /*

@@ -83,6 +83,9 @@ function ChipSet(parmsChipSet)
 
     this.model = model && ChipSet.MODELS[model] || ChipSet.MODEL_5150_OTHER;
 
+    var bSwitches;
+    this.aDIPSwitches = [];
+
     /*
      * SW1 describes the number of floppy drives, the amount of base memory, the primary monitor type,
      * and (on the MODEL_5160) whether or not a coprocessor is installed.  If no SW1 settings are provided,
@@ -97,31 +100,25 @@ function ChipSet(parmsChipSet)
      * required to boot is therefore 32Kb.  Whether that's actually enough to run any or all versions of PC-DOS is
      * a separate question.  FYI, with only 16Kb, the ROM BIOS will still try to boot, and fail miserably.
      */
-    this.sw1Init = 0;
-    var sw1 = parmsChipSet[ChipSet.CONTROLS.SW1];
-    if (sw1) {
-        this.sw1Init = this.parseSwitches(sw1, ChipSet.PPI_SW.MEMORY.X4 | ChipSet.PPI_SW.MONITOR.MONO);
-    } else {
+    bSwitches = this.parseDIPSwitches(parmsChipSet[ChipSet.CONTROLS.SW1]);
+    this.aDIPSwitches[0] = [bSwitches, bSwitches];
+
+    if (bSwitches == null) {
         this.aFloppyDrives = [360, 360];
         var aFloppyDrives = parmsChipSet['floppies'];
         if (aFloppyDrives && aFloppyDrives.length) this.aFloppyDrives = aFloppyDrives;
-        var nDrives = this.aFloppyDrives.length;
-        if (nDrives) {
-            this.sw1Init |= ChipSet.PPI_SW.FDRIVE.IPL;
-            nDrives--;
-            this.sw1Init |= ((nDrives & 0x3) << ChipSet.PPI_SW.FDRIVE.SHIFT);
-        }
+        this.setDIPSwitches(ChipSet.SWITCH_TYPE.FLOPNUM, this.aFloppyDrives.length);
+
         var sMonitor = parmsChipSet['monitor'] || (this.model < ChipSet.MODEL_5170? "mono" : "ega");
-        if (sMonitor && ChipSet.aMonitorSwitches[sMonitor] !== undefined) {
-            this.sw1Init |= (ChipSet.aMonitorSwitches[sMonitor] << ChipSet.PPI_SW.MONITOR.SHIFT);
-        }
+        this.setDIPSwitches(ChipSet.SWITCH_TYPE.MONITOR, sMonitor);
     }
 
     /*
      * SW2 describes the number of 32Kb blocks of I/O expansion RAM that's present in the system. The MODEL_5150
      * ROM BIOS only checked/supported the first four switches, so the maximum amount of additional RAM specifiable
-     * was 15 * 32Kb, or 480Kb.  With a maximum of 64Kb on the motherboard, the MODEL_5150 ROM BIOS could support
-     * a grand total of 544Kb.
+     * was 15 * 32Kb, or 480Kb.  So with a 16Kb-64Kb motherboard, the MODEL_5150 ROM BIOS could support a grand
+     * total of 544Kb.  With the 64Kb-256Kb motherboard revision, a 5150 could use the first FIVE SW2 switches,
+     * allowing for a grand total as high as 640Kb.
      *
      * For MODEL_5160 (PC XT) and up, memory expansion cards had their own switches, and the motherboard
      * SW2 switches for I/O expansion RAM were eliminated.  Instead, the ROM BIOS scans the entire address space
@@ -131,14 +128,10 @@ function ChipSet(parmsChipSet)
      * NOTE: If you use the "size" parameter, you will not be able to dynamically alter the memory configuration;
      * the RAM component will ignore any changes to SW1.
      */
-    this.sw2Init = this.parseSwitches(parmsChipSet[ChipSet.CONTROLS.SW2] || "11110000", 0);
+    bSwitches = this.parseDIPSwitches(parmsChipSet[ChipSet.CONTROLS.SW2]);
+    this.aDIPSwitches[1] = [bSwitches, bSwitches];
 
     this.sCellClass = PCJSCLASS + "-bitCell";
-
-    /*
-     * The SW1 memory setting is actually just a multiplier: it's multiplied by 16Kb on a MODEL_5150, 64Kb otherwise.
-     */
-    this.kbSW = ((this.model|0) == ChipSet.MODEL_5150? 16 : 64);
 
     this.cDMACs = this.cPICs = 1;
     if (this.model >= ChipSet.MODEL_5170) {
@@ -252,20 +245,33 @@ Component.subclass(ChipSet);
  *
  * In general, when comparing this.model to "base" model numbers (ie, non-REV numbers), you should use
  * (this.model|0), which truncates the current model number.
+ *
+ * Note that there were two 5150 motherboard revisions: the "REV A" 16Kb-64Kb motherboard and the
+ * "REV B" 64Kb-256Kb motherboard.  There may have been a manufacturing correlation between motherboard
+ * revisions ("REV A" and "REV B") and the ROM BIOS revisions shown below, but in general, we can't assume
+ * any correlation, because newer ROMs could be installed with either motherboard.
+ *
+ * I do know that, for "REV A" motherboards, the Apr 1984 5150 TechRef says that "To expand the memory
+ * of your system beyond 544K requires your IBM Personal Computer System Unit to have a BIOS ROM module
+ * dated 10/27/82 or later."  Which suggests that SW2[5] was not used until the REV3 5150 ROM BIOS.
+ *
+ * For now, we treat all our MODEL_5150 systems as 16Kb-64Kb motherboards; if you want a 64Kb-256Kb motherboard,
+ * then step up to a MODEL_5160 system.  We use a multiplier of 16 for 5150 LOWMEM values, and a multiplier
+ * of 64 for 5160 LOWMEM values.
  */
-ChipSet.MODEL_5150              = 5150;     // used in reference to the 1st 5150 BIOS, dated Apr 24, 1981
-ChipSet.MODEL_5150_REV2         = 5150.2;   // used in reference to the 2nd 5150 BIOS, dated Oct 19, 1981
-ChipSet.MODEL_5150_REV3         = 5150.3;   // used in reference to the 3rd 5150 BIOS, dated Oct 27, 1982
+ChipSet.MODEL_5150              = 5150;     // used in reference to the 1st 5150 ROM BIOS, dated Apr 24, 1981
+ChipSet.MODEL_5150_REV2         = 5150.2;   // used in reference to the 2nd 5150 ROM BIOS, dated Oct 19, 1981
+ChipSet.MODEL_5150_REV3         = 5150.3;   // used in reference to the 3rd 5150 ROM BIOS, dated Oct 27, 1982
 ChipSet.MODEL_5150_OTHER        = 5150.9;
 
-ChipSet.MODEL_5160              = 5160;     // used in reference to the 1st 5160 BIOS, dated Nov 08, 1982
-ChipSet.MODEL_5160_REV2         = 5160.2;   // used in reference to the 1st 5160 BIOS, dated Jan 10, 1986
-ChipSet.MODEL_5160_REV3         = 5160.3;   // used in reference to the 1st 5160 BIOS, dated May 09, 1986
+ChipSet.MODEL_5160              = 5160;     // used in reference to the 1st 5160 ROM BIOS, dated Nov 08, 1982
+ChipSet.MODEL_5160_REV2         = 5160.2;   // used in reference to the 1st 5160 ROM BIOS, dated Jan 10, 1986
+ChipSet.MODEL_5160_REV3         = 5160.3;   // used in reference to the 1st 5160 ROM BIOS, dated May 09, 1986
 ChipSet.MODEL_5160_OTHER        = 5160.9;
 
-ChipSet.MODEL_5170              = 5170;     // used in reference to the 1st 5170 BIOS, dated Jan 10, 1984
-ChipSet.MODEL_5170_REV2         = 5170.2;   // used in reference to the 2nd 5170 BIOS, dated Jun 10, 1985
-ChipSet.MODEL_5170_REV3         = 5170.3;   // used in reference to the 3rd 5170 BIOS, dated Nov 15, 1985
+ChipSet.MODEL_5170              = 5170;     // used in reference to the 1st 5170 ROM BIOS, dated Jan 10, 1984
+ChipSet.MODEL_5170_REV2         = 5170.2;   // used in reference to the 2nd 5170 ROM BIOS, dated Jun 10, 1985
+ChipSet.MODEL_5170_REV3         = 5170.3;   // used in reference to the 3rd 5170 ROM BIOS, dated Nov 15, 1985
 ChipSet.MODEL_5170_OTHER        = 5170.9;
 
 /*
@@ -303,58 +309,8 @@ ChipSet.CONTROLS = {
     SWDESC: "swdesc"
 };
 
-ChipSet.SW1_LABELS = {};
-
-ChipSet.SW1_LABELS[ChipSet.MODEL_5150] = {
-    0: "Bootable Floppy Drive",
-    /*
-     * NOTE: Both the Aug 1981 and the Apr 1984 IBM 5150 Technical Reference Manuals list SW1-2 as "RESERVED", but
-     * contemporary articles discussing 8087 support in early PCs all indicate that switch SW1-2 must be set to the
-     * OFF position if an FPU coprocessor is installed.
-     *
-     * The 1981 5150 TechRef doesn't mention 8087 support at all, whereas the 1984 5150 TechRef discusses it in
-     * a fair bit of detail, including the fact that 8087 exceptions generate an NMI (despite Intel's warning in their
-     * "iAPX 86,88 User's Manual", on page S-27, that "[t]he 8087 should not be tied to the CPU's NMI (non-maskable
-     * interrupt) line.")
-     *
-     * In light of this, we have replaced the "Reserved" option with "Coprocessor" instead.
-     */
-    1: "Coprocessor",
-    2: "Base Memory Size",          // up to 64Kb on a MODEL_5150, 256Kb on a MODEL_5160
-    4: "Monitor Type",
-    6: "Number of Floppy Drives"
-};
-
-ChipSet.SW1_LABELS[ChipSet.MODEL_5160] = {};
-ChipSet.SW1_LABELS[ChipSet.MODEL_5160][0] = "Loop on Post";
-ChipSet.SW1_LABELS[ChipSet.MODEL_5160][1] = ChipSet.SW1_LABELS[ChipSet.MODEL_5150][1];
-ChipSet.SW1_LABELS[ChipSet.MODEL_5160][2] = ChipSet.SW1_LABELS[ChipSet.MODEL_5150][2];
-ChipSet.SW1_LABELS[ChipSet.MODEL_5160][4] = ChipSet.SW1_LABELS[ChipSet.MODEL_5150][4];
-ChipSet.SW1_LABELS[ChipSet.MODEL_5160][6] = ChipSet.SW1_LABELS[ChipSet.MODEL_5150][6];
-
-ChipSet.SW1_LABELS[ChipSet.MODEL_ATT_6300] = {
-    0: "Total RAM",
-    4: "Coprocessor",
-    5: "Serial Interface"
-};
-
-ChipSet.SW2_LABELS = {};
-
-ChipSet.SW2_LABELS[ChipSet.MODEL_5150] = {
-    0: "Expansion Memory Size",     // up to 480Kb, which, when combined with 64Kb of MODEL_5150 base memory, gives a maximum of 544Kb
-    4: "Reserved"
-};
-
-ChipSet.SW2_LABELS[ChipSet.MODEL_ATT_6300] = {
-    0: "Floppy Type",
-    1: "Fast Startup",
-    2: "HDU",
-    4: "Monitor Type",
-    6: "Number of Floppy Drives"
-};
-
 /*
- * Values returned by ChipSet.getSWVideoMonitor()
+ * Values returned by ChipSet.getDIPVideoMonitor()
  */
 ChipSet.MONITOR = {
     NONE:               0,
@@ -364,19 +320,6 @@ ChipSet.MONITOR = {
     EGACOLOR:           4,  // Enhanced Color Display (5154) in High-Res Mode
     EGAEMULATION:       6,  // Enhanced Color Display (5154) in Emulation Mode
     VGACOLOR:           7   // VGA Color Display
-};
-
-/*
- * Lookup table for converting ChipSet "monitor" values into the corresponding SW1 switch bits
- * (they must be shifted left by ChipSet.PPI_SW.MONITOR.SHIFT before OR'ing them into sw1/sw1Init).
- */
-ChipSet.aMonitorSwitches = {
-    "none":             0x0,
-    "tv":               0x1,
-    "color":            0x2,
-    "mono":             0x3,
-    "ega":              0x0,
-    "vga":              0x0
 };
 
 /*
@@ -736,10 +679,7 @@ ChipSet.PPI_CTRL = {            // this.bPPICtrl (port 0x63)
  *
  * Note: FD refers to floppy drive, and IPL refers to an "Initial Program Load" floppy drive.
  *
- *      SW2[1-4]    (bits 3-0)  "NNNNxxxx": number of 32Kb blocks of I/O expansion RAM present
- *
- * TODO: There are cryptic references to SW2[5] in the original (5150) TechRef, and apparently the 8255A PPI can
- * be programmed to return it (which we support), but its purpose remains unclear to me (see PPI_B.ENABLE_SW2).
+ *      SW2[1-5]    (bits 4-0)  "NNNxxxxx": number of 32Kb blocks of I/O expansion RAM present
  *
  * For example, sw1="01110011" indicates that all SW1 DIP switches are ON, except for SW1[1], SW1[5] and SW1[6],
  * which are OFF.  Internally, the order of these bits must reversed (to 11001110) and then inverted (to 00110001)
@@ -824,6 +764,167 @@ ChipSet.PPI_SW = {
         SHIFT:          4
     }
 };
+
+/*
+ * Some models have completely different DIP switch implementations from the MODEL_5150, which, being
+ * the first IBM PC, was the model that we, um, modeled our DIP switch support on.  So, to support other
+ * implementations, we now get and set DIP switch values according to SWITCH_TYPE, and rely on the
+ * tables that follow to define which DIP switch(es) correspond to each SWITCH_TYPE.
+ *
+ * Not every model needs its own tables.  The getDIPSwitches() and setDIPSwitches() functions look first
+ * for an *exact* model match, then a "truncated" model match, and failing that, they fall back to the
+ * MODEL_5150 switch definitions.
+ */
+ChipSet.SWITCH_TYPE = {
+    FLOPNUM:    1,
+    FLOPTYPE:   2,
+    FPU:        3,
+    MONITOR:    4,
+    LOWMEM:     5,
+    EXPMEM:     6
+};
+
+ChipSet.DIPSW = [{},{}];
+ChipSet.DIPSW[0][ChipSet.MODEL_5150] = {};
+ChipSet.DIPSW[1][ChipSet.MODEL_5150] = {};
+ChipSet.DIPSW[0][ChipSet.MODEL_5150][ChipSet.SWITCH_TYPE.FLOPNUM] = {
+    MASK:       0xC0,
+    VALUES: {
+        1:      0x00,
+        2:      0x40,
+        3:      0x80,
+        4:      0xC0
+    },
+    LABEL: "Number of Floppy Drives"
+};
+/*
+ * NOTE: Both the Aug 1981 and the Apr 1984 IBM 5150 Technical Reference Manuals list SW1[2] as "RESERVED",
+ * but the Aug 1981 edition (p. 2-28) hints that SW1[2] "MUST BE ON (RESERVED FOR CO-PROCESSOR)".  Contemporary
+ * articles discussing 8087 support in early PCs all indicate that switch SW1[2] must OFF if a coprocessor
+ * is installed, and the 1984 5150 Guide to Operations (p. 5-34) confirms it.
+ *
+ * The Aug 1981 5150 TechRef makes no further mention of coprocessor support, whereas the Apr 1984 5150 TechRef
+ * discusses it in a fair bit of detail, including the fact that 8087 exceptions generate an NMI, despite Intel's
+ * warning in their iAPX 86,88 User's Manual, p. S-27, that "[t]he 8087 should not be tied to the CPU's NMI
+ * (non-maskable interrupt) line.")
+ */
+ChipSet.DIPSW[0][ChipSet.MODEL_5150][ChipSet.SWITCH_TYPE.FPU] = {
+    MASK:       0x02,
+    VALUES: {
+        0:      0x00,   // 0 means an FPU is NOT installed
+        1:      0x02    // 1 means an FPU is installed
+    },
+    LABEL: "Coprocessor"
+};
+ChipSet.DIPSW[0][ChipSet.MODEL_5150][ChipSet.SWITCH_TYPE.MONITOR] = {
+    MASK:       0x30,
+    VALUES: {
+        0:      0x00,
+        1:      0x10,
+        2:      0x20,
+        3:      0x30,
+        "none": 0x00,
+        "tv":   0x10,
+        "color":0x20,
+        "mono": 0x30,
+        "ega":  0x00,
+        "vga":  0x00
+    },
+    LABEL: "Monitor Type"
+};
+ChipSet.DIPSW[0][ChipSet.MODEL_5150][ChipSet.SWITCH_TYPE.LOWMEM] = {
+    MASK:       0x0C,
+    VALUES: {
+        16:     0x00,
+        32:     0x04,
+        48:     0x08,
+        64:     0x0C
+    },
+    LABEL: "Base Memory (16Kb Increments)"
+};
+ChipSet.DIPSW[1][ChipSet.MODEL_5150][ChipSet.SWITCH_TYPE.EXPMEM] = {
+    MASK:       0x1F,   // technically, this mask should be 0x0F for ROM revisions prior to 5150_REV3, and 0x1F on 5150_REV3
+    VALUES: {
+        0:      0x00,
+        32:     0x01,
+        64:     0x02,
+        96:     0x03,
+        128:    0x04,
+        160:    0x05,
+        192:    0x06,
+        224:    0x07,
+        256:    0x08,
+        288:    0x09,
+        320:    0x0A,
+        352:    0x0B,
+        384:    0x0C,
+        416:    0x0D,
+        448:    0x0E,
+        480:    0x0F,
+        512:    0x10,
+        544:    0x11,
+        576:    0x12
+        /*
+         * Obviously, more bit combinations are possible here (up to 0x1F), but assuming a minimum of 64Kb already on
+         * the motherboard, any amount of expansion memory about 576Kb would break the 640Kb barrier.  If you stuck with
+         * MDA or CGA video cards, perhaps you could go as high as 704Kb in a real system.  But in our happy little
+         * world, this is where we stop.
+         *
+         * TODO: A value larger than 0x12 usually comes from a misconfigured machine (ie, it forgot to leave SW2[5] ON).
+         * To compensate, when getDIPMemorySize() gets null back from its EXPMEM request, perhaps it should try truncating
+         * the DIP switch value.
+         */
+    },
+    LABEL: "Expansion Memory (32Kb Increments)"
+};
+
+ChipSet.DIPSW[0][ChipSet.MODEL_5160] = {};
+ChipSet.DIPSW[1][ChipSet.MODEL_5160] = {};
+ChipSet.DIPSW[0][ChipSet.MODEL_5160][ChipSet.SWITCH_TYPE.FLOPNUM] = ChipSet.DIPSW[0][ChipSet.MODEL_5150][ChipSet.SWITCH_TYPE.FLOPNUM];
+ChipSet.DIPSW[0][ChipSet.MODEL_5160][ChipSet.SWITCH_TYPE.FPU]     = ChipSet.DIPSW[0][ChipSet.MODEL_5150][ChipSet.SWITCH_TYPE.FPU];
+ChipSet.DIPSW[0][ChipSet.MODEL_5160][ChipSet.SWITCH_TYPE.MONITOR] = ChipSet.DIPSW[0][ChipSet.MODEL_5150][ChipSet.SWITCH_TYPE.MONITOR];
+ChipSet.DIPSW[0][ChipSet.MODEL_5160][ChipSet.SWITCH_TYPE.LOWMEM]  = {
+    MASK:       0x0C,
+    VALUES: {
+        64:     0x00,
+        128:    0x04,
+        192:    0x08,
+        256:    0x0C
+    },
+    LABEL: "Base Memory (64Kb Increments)"
+};
+ChipSet.DIPSW[1][ChipSet.MODEL_5160][ChipSet.SWITCH_TYPE.EXPMEM]  = ChipSet.DIPSW[1][ChipSet.MODEL_5150][ChipSet.SWITCH_TYPE.EXPMEM];
+
+ChipSet.DIPSW[0][ChipSet.MODEL_ATT_6300] = {};
+ChipSet.DIPSW[1][ChipSet.MODEL_ATT_6300] = {};
+ChipSet.DIPSW[0][ChipSet.MODEL_ATT_6300][ChipSet.SWITCH_TYPE.LOWMEM] = {
+    MASK:       0x8F,
+    VALUES: {
+        128:    0x01,   // "0111xxx1"
+        256:    0x82,   // "1011xxx0"
+        512:    0x08,   // "1110xxx1"
+        640:    0x8D    // "0100xxx0"
+    },
+    LABEL: "Base Memory (128Kb Increments)"
+};
+ChipSet.DIPSW[0][ChipSet.MODEL_ATT_6300][ChipSet.SWITCH_TYPE.FPU] = {
+    MASK:       0x10,
+    VALUES: {
+        0:      0x00,
+        1:      0x10
+    },
+    LABEL: "Coprocessor"
+};
+ChipSet.DIPSW[1][ChipSet.MODEL_ATT_6300][ChipSet.SWITCH_TYPE.FLOPTYPE] = {
+    MASK:       0x01,
+    VALUES: {
+        0:      0x00,
+        1:      0x01
+    },
+    LABEL: "Floppy Type"
+};
+ChipSet.DIPSW[1][ChipSet.MODEL_ATT_6300][ChipSet.SWITCH_TYPE.FLOPNUM] = ChipSet.DIPSW[0][ChipSet.MODEL_5150][ChipSet.SWITCH_TYPE.FLOPNUM];
+ChipSet.DIPSW[1][ChipSet.MODEL_ATT_6300][ChipSet.SWITCH_TYPE.MONITOR] = ChipSet.DIPSW[0][ChipSet.MODEL_5150][ChipSet.SWITCH_TYPE.MONITOR];
 
 /*
  * 8041 Keyboard Controller I/O ports (MODEL_ATT_6300)
@@ -1057,7 +1158,7 @@ ChipSet.CMOS = {
         /*
          * There's at least one floppy drive type that IBM didn't bother defining a CMOS drive type for:
          * single-sided drives that were only capable of storing 160Kb (or 180Kb when using 9 sectors/track).
-         * So, as you can see in getSWFloppyDriveType(), we lump all standard diskette capacities <= 360Kb
+         * So, as you can see in getDIPFloppyDriveType(), we lump all standard diskette capacities <= 360Kb
          * into the FD360 bucket.
          */
         FD360:          1,      // 5.25-inch double-sided double-density (DSDD 48TPI) drive: 40 tracks, 9 sectors/track, 360Kb max
@@ -1165,13 +1266,13 @@ ChipSet.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
 
     case ChipSet.CONTROLS.SW1:
         this.bindings[sBinding] = control;
-        this.addSwitches(sBinding, 8, this.sw1Init, ChipSet.SW1_LABELS[this.model]);
+        this.addDIPSwitches(0, sBinding);
         return true;
 
     case ChipSet.CONTROLS.SW2:
         if ((this.model|0) == ChipSet.MODEL_5150 || this.model == ChipSet.MODEL_ATT_6300) {
             this.bindings[sBinding] = control;
-            this.addSwitches(sBinding, 8, this.sw2Init, ChipSet.SW2_LABELS[this.model]);
+            this.addDIPSwitches(1, sBinding);
             return true;
         }
         break;
@@ -1203,7 +1304,7 @@ ChipSet.prototype.initBus = function(cmp, bus, cpu, dbg)
     this.cmp = cmp;
 
     this.fpu = cmp.getMachineComponent("FPU");
-    if (this.fpu) this.sw1Init |= ChipSet.PPI_SW.FPU;
+    this.setDIPSwitches(ChipSet.SWITCH_TYPE.FPU, this.fpu?1:0, true);
 
     this.kbd = cmp.getMachineComponent("Keyboard");
 
@@ -1292,15 +1393,13 @@ ChipSet.prototype.powerDown = function(fSave, fShutdown)
 ChipSet.prototype.reset = function(fHard)
 {
     /*
-     * We propagate the sw1Init/sw2Init values to sw1/sw2 at reset; the user is only
-     * allowed to tweak sw1Init/sw2Init, which doesn't take effect until the next reset.
+     * We propagate the initial DIP switch values to the current DIP switch values on reset;
+     * the user is only allowed to tweak the initial values, which require a reset to take effect.
      */
     var i;
-    this.sw1 = this.sw1Init;
-    this.sw2 = this.sw2Init;
-    this.updateSwitches(ChipSet.CONTROLS.SW1, this.sw1);
-    this.updateSwitches(ChipSet.CONTROLS.SW2, this.sw2);
-    this.updateSwitchDescriptions();
+    this.updateDIPSwitchControls(0, ChipSet.CONTROLS.SW1);
+    this.updateDIPSwitchControls(1, ChipSet.CONTROLS.SW2);
+    this.updateDIPSwitchDescriptions();
 
     /*
      * DMA (Direct Memory Access) Controller initialization
@@ -1370,11 +1469,11 @@ ChipSet.prototype.reset = function(fHard)
          */
         this.b8042InPort = ChipSet.KC8042.INPORT.MFG_OFF | ChipSet.KC8042.INPORT.KBD_UNLOCKED;
 
-        if (this.getSWMemorySize() >= 512) {
+        if (this.getDIPMemorySize() >= 512) {
             this.b8042InPort |= ChipSet.KC8042.INPORT.ENABLE_256KB;
         }
 
-        if (this.getSWVideoMonitor() == ChipSet.MONITOR.MONO) {
+        if (this.getDIPVideoMonitor() == ChipSet.MONITOR.MONO) {
             this.b8042InPort |= ChipSet.KC8042.INPORT.MONO;
         }
 
@@ -1810,8 +1909,8 @@ ChipSet.prototype.initCMOSData = function()
      * We propagate all compatible "legacy" SW1 bits to the CMOS.EQUIP byte using the old SW masks, but any further
      * access to CMOS.ADDR.EQUIP should use the new CMOS_EQUIP flags (eg, CMOS.EQUIP.FPU, CMOS.EQUIP.MONITOR.CGA80, etc).
      */
-    this.abCMOSData[ChipSet.CMOS.ADDR.EQUIP] = this.sw1 & (ChipSet.PPI_SW.MONITOR.MASK | ChipSet.PPI_SW.FPU | ChipSet.PPI_SW.FDRIVE.IPL | ChipSet.PPI_SW.FDRIVE.MASK);
-    this.abCMOSData[ChipSet.CMOS.ADDR.FDRIVE] = (this.getSWFloppyDriveType(0) << 4) | this.getSWFloppyDriveType(1);
+    this.abCMOSData[ChipSet.CMOS.ADDR.EQUIP] = this.getDIPLegacyBits(0);
+    this.abCMOSData[ChipSet.CMOS.ADDR.FDRIVE] = (this.getDIPFloppyDriveType(0) << 4) | this.getDIPFloppyDriveType(1);
 
     /*
      * The final step is calculating the CMOS checksum, which we then store into the CMOS as a courtesy, so that the
@@ -1935,7 +2034,7 @@ ChipSet.prototype.updateCMOSChecksum = function()
 ChipSet.prototype.save = function()
 {
     var state = new State(this);
-    state.set(0, [this.sw1Init, this.sw2Init, this.sw1, this.sw2]);
+    state.set(0, [this.aDIPSwitches]);
     state.set(1, [this.saveDMAControllers()]);
     state.set(2, [this.savePICs()]);
     state.set(3, [this.bPIT0Ctrl, this.saveTimers(), this.bPIT1Ctrl]);
@@ -1961,10 +2060,18 @@ ChipSet.prototype.restore = function(data)
 {
     var a, i;
     a = data[0];
-    this.sw1Init = a[0];
-    this.sw2Init = a[1];
-    this.sw1 = a[2];
-    this.sw2 = a[3];
+
+    if (Array.isArray(a[0])) {
+        this.aDIPSwitches = a[0];
+    } else {
+        this.aDIPSwitches[0][0] = a[0];
+        this.aDIPSwitches[1][0] = a[1] & 0x0F;  // we do honor SW2[5] now, but it was erroneously set on some machines
+        this.aDIPSwitches[0][1] = a[2];
+        this.aDIPSwitches[1][1] = a[3] & 0x0F;  // we do honor SW2[5] now, but it was erroneously set on some machines
+    }
+    this.updateDIPSwitchControls(0, ChipSet.CONTROLS.SW1);
+    this.updateDIPSwitchControls(1, ChipSet.CONTROLS.SW2);
+    this.updateDIPSwitchDescriptions();
 
     a = data[1];
     for (i = 0; i < this.cDMACs; i++) {
@@ -2295,42 +2402,138 @@ ChipSet.prototype.saveTimers = function()
 };
 
 /**
- * getSWMemorySize(fInit)
+ * addDIPSwitches(iDIP, sBinding)
  *
  * @this {ChipSet}
- * @param {boolean} [fInit] is true for init switch value(s) only, current value(s) otherwise
- * @return {number} number of Kb of specified memory (NOT necessarily the same as installed memory; see RAM component)
+ * @param {number} iDIP (0 or 1)
+ * @param {string} sBinding is the name of the control
  */
-ChipSet.prototype.getSWMemorySize = function(fInit)
+ChipSet.prototype.addDIPSwitches = function(iDIP, sBinding)
 {
-    var sw1 = (fInit? this.sw1Init : this.sw1);
-    var sw2 = (fInit? this.sw2Init : this.sw2);
-    return (((sw1 & ChipSet.PPI_SW.MEMORY.MASK) >> ChipSet.PPI_SW.MEMORY.SHIFT) + 1) * this.kbSW + (sw2 & ChipSet.PPI_C.SW) * 32;
+    var sHTML = "";
+    var control = this.bindings[sBinding];
+    for (var i = 1; i <= 8; i++) {
+        var sCellClasses = this.sCellClass;
+        if (!i) sCellClasses += " " + this.sCellClass + "Left";
+        var sCellID = sBinding + "-" + i;
+        sHTML += "<div id=\"" + sCellID + "\" class=\"" + sCellClasses + "\" data-value=\"0\">" + i + "</div>\n";
+    }
+    control.innerHTML = sHTML;
+    this.updateDIPSwitchControls(iDIP, sBinding, true);
 };
 
 /**
- * getSWFloppyDrives(fInit)
+ * findDIPSwitch(iDIP, iSwitch)
+ *
+ * @this {ChipSet}
+ * @param {number} iDIP
+ * @param {number} iSwitch
+ * @return {Object|null} DIPSW switchGroup containing the DIP switch's MASK, VALUES, and LABEL, or null if none
+ */
+ChipSet.prototype.findDIPSwitch = function(iDIP, iSwitch)
+{
+    var switchTypes = ChipSet.DIPSW[iDIP][this.model|0];
+    if (switchTypes) {
+        for (var iType in switchTypes) {
+            var switchGroup = switchTypes[iType];
+            if (switchGroup.MASK & (1 << iSwitch)) {
+                return switchGroup;
+            }
+        }
+    }
+    return null;
+};
+
+/**
+ * getDIPLegacyBits(iDIP)
+ *
+ * @this {ChipSet}
+ * @param {number} iDIP
+ * @return {number|undefined}
+ */
+ChipSet.prototype.getDIPLegacyBits = function(iDIP)
+{
+    var b;
+    if (!iDIP) {
+        b = 0;
+        b |= (this.getDIPVideoMonitor() << ChipSet.PPI_SW.MONITOR.SHIFT) & ChipSet.PPI_SW.MONITOR.MASK;
+        b |= (this.getDIPCoprocessor()? ChipSet.PPI_SW.FPU : 0);
+        var nDrives = this.getDIPFloppyDrives();
+        b |= (nDrives? ((((nDrives - 1) << ChipSet.PPI_SW.FDRIVE.SHIFT) & ChipSet.PPI_SW.FDRIVE.MASK) | ChipSet.PPI_SW.FDRIVE.IPL) : 0);
+    }
+    return b;
+};
+
+/**
+ * getDIPSwitches(iType, fInit)
+ *
+ * @this {ChipSet}
+ * @param {number} iType
+ * @param {boolean} [fInit] is true for initial switch value, current value otherwise
+ * @return {*|null}
+ */
+ChipSet.prototype.getDIPSwitches = function(iType, fInit)
+{
+    var value = null;
+    for (var iDIP = 0; iDIP < ChipSet.DIPSW.length; iDIP++) {
+        var switchTypes = ChipSet.DIPSW[iDIP][this.model] || ChipSet.DIPSW[iDIP][this.model|0] || ChipSet.DIPSW[iDIP][ChipSet.MODEL_5150];
+        if (switchTypes) {
+            var switchGroup = switchTypes[iType];
+            if (switchGroup) {
+                var bits = this.aDIPSwitches[iDIP][fInit?0:1] & switchGroup.MASK;
+                for (var v in switchGroup.VALUES) {
+                    if (switchGroup.VALUES[v] == bits) {
+                        value = v;
+                        /*
+                         * We prefer numeric properties, and all switch definitions must provide them
+                         * if their helper functions (eg, getDIPVideoMonitor()) expect numeric properties.
+                         */
+                        if (typeof +value == 'number') break;
+                    }
+                }
+                break;
+            }
+        }
+    }
+    return value;
+};
+
+/**
+ * getDIPCoprocessor(fInit)
+ *
+ * @this {ChipSet}
+ * @param {boolean} [fInit] is true for init switch value(s) only, current value(s) otherwise
+ * @return {number} 1 if installed, 0 if not
+ */
+ChipSet.prototype.getDIPCoprocessor = function(fInit)
+{
+    var n = /** @type {number} */ (this.getDIPSwitches(ChipSet.SWITCH_TYPE.FPU, fInit));
+    return +n;
+};
+
+/**
+ * getDIPFloppyDrives(fInit)
  *
  * @this {ChipSet}
  * @param {boolean} [fInit] is true for init switch value(s) only, current value(s) otherwise
  * @return {number} number of floppy drives specified by SW1 (range is 0 to 4)
  */
-ChipSet.prototype.getSWFloppyDrives = function(fInit)
+ChipSet.prototype.getDIPFloppyDrives = function(fInit)
 {
-    var sw1 = (fInit? this.sw1Init : this.sw1);
-    return (((this.model|0) != ChipSet.MODEL_5150) || (sw1 & ChipSet.PPI_SW.FDRIVE.IPL))? ((sw1 & ChipSet.PPI_SW.FDRIVE.MASK) >> ChipSet.PPI_SW.FDRIVE.SHIFT) + 1 : 0;
+    var n = /** @type {number} */ (this.getDIPSwitches(ChipSet.SWITCH_TYPE.FLOPNUM, fInit));
+    return +n;
 };
 
 /**
- * getSWFloppyDriveType(iDrive)
+ * getDIPFloppyDriveType(iDrive)
  *
  * @this {ChipSet}
  * @param {number} iDrive (0-based)
  * @return {number} one of the ChipSet.CMOS.FDRIVE.FD* values (FD360, FD1200, etc)
  */
-ChipSet.prototype.getSWFloppyDriveType = function(iDrive)
+ChipSet.prototype.getDIPFloppyDriveType = function(iDrive)
 {
-    if (iDrive < this.getSWFloppyDrives()) {
+    if (iDrive < this.getDIPFloppyDrives()) {
         if (!this.aFloppyDrives) {
             return ChipSet.CMOS.FDRIVE.FD360;
         }
@@ -2355,15 +2558,15 @@ ChipSet.prototype.getSWFloppyDriveType = function(iDrive)
 };
 
 /**
- * getSWFloppyDriveSize(iDrive)
+ * getDIPFloppyDriveSize(iDrive)
  *
  * @this {ChipSet}
  * @param {number} iDrive (0-based)
  * @return {number} capacity of drive in Kb (eg, 360, 1200, 1440, etc), or 0 if none
  */
-ChipSet.prototype.getSWFloppyDriveSize = function(iDrive)
+ChipSet.prototype.getDIPFloppyDriveSize = function(iDrive)
 {
-    if (iDrive < this.getSWFloppyDrives()) {
+    if (iDrive < this.getDIPFloppyDrives()) {
         if (!this.aFloppyDrives) {
             return 360;
         }
@@ -2376,61 +2579,162 @@ ChipSet.prototype.getSWFloppyDriveSize = function(iDrive)
 };
 
 /**
- * getSWVideoMonitor(fInit)
+ * getDIPMemorySize(fInit)
+ *
+ * @this {ChipSet}
+ * @param {boolean} [fInit] is true for init switch value(s) only, current value(s) otherwise
+ * @return {number} number of Kb of specified memory (NOT necessarily the same as installed memory; see RAM component)
+ */
+ChipSet.prototype.getDIPMemorySize = function(fInit)
+{
+    var nKBLowMem = /** @type {number} */ (this.getDIPSwitches(ChipSet.SWITCH_TYPE.LOWMEM, fInit));
+    var nKBExpMem = /** @type {number} */ (this.getDIPSwitches(ChipSet.SWITCH_TYPE.EXPMEM, fInit));
+    return +nKBLowMem + +nKBExpMem;
+};
+
+/**
+ * getDIPVideoMonitor(fInit)
  *
  * @this {ChipSet}
  * @param {boolean} [fInit] is true for init switch value(s) only, current value(s) otherwise
  * @return {number} one of ChipSet.MONITOR.*
  */
-ChipSet.prototype.getSWVideoMonitor = function(fInit)
+ChipSet.prototype.getDIPVideoMonitor = function(fInit)
 {
-    var sw1 = (fInit? this.sw1Init : this.sw1);
-    return (sw1 & ChipSet.PPI_SW.MONITOR.MASK) >> ChipSet.PPI_SW.MONITOR.SHIFT;
+    var n = /** @type {number} */ (this.getDIPSwitches(ChipSet.SWITCH_TYPE.MONITOR, fInit));
+    return +n;
 };
 
 /**
- * addSwitches(sBinding, n, v, oLabels)
+ * parseDIPSwitches(sBits, bDefault)
  *
  * @this {ChipSet}
- * @param {string} sBinding is the name of the control
- * @param {number} n is the number of switches to add
- * @param {number} v contains the current value(s) of the switches
- * @param {Object} [oLabels] contains labels for the various cells
+ * @param {string} sBits describing switch settings
+ * @param {number} [bDefault]
+ * @return {number|undefined}
  */
-ChipSet.prototype.addSwitches = function(sBinding, n, v, oLabels)
+ChipSet.prototype.parseDIPSwitches = function(sBits, bDefault)
 {
-    var sHTML = "";
-    var control = this.bindings[sBinding];
-    for (var i = 1; i <= n; i++) {
-        var sCellClasses = this.sCellClass;
-        if (!i) sCellClasses += " " + this.sCellClass + "Left";
-        var sCellID = sBinding + "-" + i;
-        sHTML += "<div id=\"" + sCellID + "\" class=\"" + sCellClasses + "\" data-value=\"0\">" + i + "</div>\n";
+    var b = bDefault;
+    if (sBits) {
+        /*
+         * NOTE: We can't use parseInt() with a base of 2, because both bit order and bit sense are reversed.
+         */
+        b = 0;
+        var bit = 0x1;
+        for (var i = 0; i < sBits.length; i++) {
+            if (sBits.charAt(i) == "0") b |= bit;
+            bit <<= 1;
+        }
     }
-    control.innerHTML = sHTML;
-    this.updateSwitches(sBinding, v, oLabels);
+    return b;
 };
 
 /**
- * updateSwitches(sBinding, v, oLabels)
+ * setDIPSwitches(iType, value, fInit)
  *
  * @this {ChipSet}
- * @param {string} sBinding is the name of the control
- * @param {number} v contains the current value(s) of the switches
- * @param {Object} [oLabels] contains labels for the various cells
+ * @param {number} iType
+ * @param {*} value
+ * @param {boolean} [fInit]
+ * @return {boolean} true if successful, false if unrecognized type and/or value
  */
-ChipSet.prototype.updateSwitches = function(sBinding, v, oLabels)
+ChipSet.prototype.setDIPSwitches = function(iType, value, fInit)
+{
+    for (var iDIP = 0; iDIP < ChipSet.DIPSW.length; iDIP++) {
+        var switchTypes = ChipSet.DIPSW[iDIP][this.model] || ChipSet.DIPSW[iDIP][this.model|0] || ChipSet.DIPSW[iDIP][ChipSet.MODEL_5150];
+        if (switchTypes) {
+            var switchGroup = switchTypes[iType];
+            if (switchGroup) {
+                for (var v in switchGroup.VALUES) {
+                    if (v == value) {
+                        this.aDIPSwitches[iDIP][fInit?0:1] &= ~switchGroup.MASK;
+                        this.aDIPSwitches[iDIP][fInit?0:1] |= switchGroup.VALUES[v];
+                        return true;
+                    }
+                }
+            }
+        }
+    }
+    return false;
+};
+
+/**
+ * getDIPSwitchControl(control)
+ *
+ * @this {ChipSet}
+ * @param {Object} control is an HTML control DOM object
+ * @return {boolean} true if the switch represented by e is "on", false if "off"
+ */
+ChipSet.prototype.getDIPSwitchControl = function(control)
+{
+    return control.getAttribute("data-value") == "1";
+};
+
+/**
+ * setDIPSwitchControl(control, f)
+ *
+ * @this {ChipSet}
+ * @param {Object} control is an HTML control DOM object
+ * @param {boolean} f is true if the switch represented by control should be "on", false if "off"
+ */
+ChipSet.prototype.setDIPSwitchControl = function(control, f)
+{
+    control.setAttribute("data-value", f? "1" : "0");
+    control.style.color = (f? "#ffffff" : "#000000");
+    control.style.backgroundColor = (f? "#000000" : "#ffffff");
+};
+
+/**
+ * toggleDIPSwitchControl(control)
+ *
+ * @this {ChipSet}
+ * @param {Object} control is an HTML control DOM object
+ */
+ChipSet.prototype.toggleDIPSwitchControl = function(control)
+{
+    var f = !this.getDIPSwitchControl(control);
+    this.setDIPSwitchControl(control, f);
+    var sID = control.getAttribute("id");
+    var asParts = sID.split("-");
+    var b = (0x1 << (+asParts[1] - 1));
+    switch (asParts[0]) {
+    case ChipSet.CONTROLS.SW1:
+        this.aDIPSwitches[0][0] = (this.aDIPSwitches[0][0] & ~b) | (f? 0 : b);
+        break;
+    case ChipSet.CONTROLS.SW2:
+        this.aDIPSwitches[1][0] = (this.aDIPSwitches[1][0] & ~b) | (f? 0 : b);
+        break;
+    default:
+        break;
+    }
+    this.updateDIPSwitchDescriptions();
+};
+
+/**
+ * updateDIPSwitchControls(iDIP, sBinding, fInit)
+ *
+ * @this {ChipSet}
+ * @param {number} iDIP (0 or 1)
+ * @param {string} sBinding is the name of the control
+ * @param {boolean} [fInit]
+ */
+ChipSet.prototype.updateDIPSwitchControls = function(iDIP, sBinding, fInit)
 {
     var control = this.bindings[sBinding];
     if (control) {
+        var v;
+        if (fInit) {
+            v = this.aDIPSwitches[iDIP][0];
+        } else {
+            v = this.aDIPSwitches[iDIP][1] = this.aDIPSwitches[iDIP][0];
+        }
         var aeCells = Component.getElementsByClass(control, this.sCellClass);
         for (var i = 0; i < aeCells.length; i++) {
-            var sLabel = null;
-            if (oLabels != null && oLabels[i] != null) {
-                sLabel = oLabels[i];
-            }
-            if (sLabel) aeCells[i].setAttribute("title", sLabel);
-            this.setSwitch(aeCells[i], (v & (0x1 << i))? false : true);
+            var switchGroup = this.findDIPSwitch(iDIP, i);
+            var sLabel = switchGroup && switchGroup.LABEL || "Reserved";
+            aeCells[i].setAttribute("title", sLabel);
+            this.setDIPSwitchControl(aeCells[i], (v & (0x1 << i))? false : true);
             aeCells[i].onclick = function(chipset, eSwitch) {
                 /*
                  *  If we defined the onclick handler below as "function(e)" instead of simply "function()", then we could
@@ -2439,7 +2743,7 @@ ChipSet.prototype.updateSwitches = function(sBinding, v, oLabels)
                  *  have to worry about that (eg, define a local var: "var event = window.event || e").
                  */
                 return function onClickSwitch() {
-                    chipset.toggleSwitch(eSwitch);
+                    chipset.toggleDIPSwitchControl(eSwitch);
                 };
             }(this, aeCells[i]);
         }
@@ -2447,11 +2751,11 @@ ChipSet.prototype.updateSwitches = function(sBinding, v, oLabels)
 };
 
 /**
- * updateSwitchDescriptions()
+ * updateDIPSwitchDescriptions()
  *
  * @this {ChipSet}
  */
-ChipSet.prototype.updateSwitchDescriptions = function()
+ChipSet.prototype.updateDIPSwitchDescriptions = function()
 {
     var controlDesc = this.bindings[ChipSet.CONTROLS.SWDESC];
     if (controlDesc != null) {
@@ -2466,67 +2770,16 @@ ChipSet.prototype.updateSwitchDescriptions = function()
             2: "Color",
             3: "Monochrome"
         };
-        sText += this.getSWMemorySize(true) + "Kb";
-        sText += ", " + ((this.sw1Init & ChipSet.PPI_SW.FPU)? "" : "No ") + "Coprocessor";
-        sText += ", " + asMonitorTypes[this.getSWVideoMonitor(true)] + " Monitor";
-        sText += ", " + this.getSWFloppyDrives(true) + " Floppy Drives";
-        if (this.sw1 != null && this.sw1 != this.sw1Init || this.sw2 != null && this.sw2 != this.sw2Init) {
+        sText += this.getDIPMemorySize(true) + "Kb";
+        sText += ", " + (+this.getDIPCoprocessor(true)? "" : "No ") + "Coprocessor";
+        sText += ", " + asMonitorTypes[this.getDIPVideoMonitor(true)] + " Monitor";
+        sText += ", " + this.getDIPFloppyDrives(true) + " Floppy Drives";
+        if (this.aDIPSwitches[0][1] != null && this.aDIPSwitches[0][1] != this.aDIPSwitches[0][0] ||
+            this.aDIPSwitches[1][1] != null && this.aDIPSwitches[1][1] != this.aDIPSwitches[1][0]) {
             sText += " (Reset required)";
         }
         controlDesc.textContent = sText;
     }
-};
-
-/**
- * getSwitch(control)
- *
- * @this {ChipSet}
- * @param {Object} control is an HTML control DOM object
- * @return {boolean} true if the switch represented by e is "on", false if "off"
- */
-ChipSet.prototype.getSwitch = function(control)
-{
-    return control.getAttribute("data-value") == "1";
-};
-
-/**
- * setSwitch(control, f)
- *
- * @this {ChipSet}
- * @param {Object} control is an HTML control DOM object
- * @param {boolean} f is true if the switch represented by control should be "on", false if "off"
- */
-ChipSet.prototype.setSwitch = function(control, f)
-{
-    control.setAttribute("data-value", f? "1" : "0");
-    control.style.color = (f? "#ffffff" : "#000000");
-    control.style.backgroundColor = (f? "#000000" : "#ffffff");
-};
-
-/**
- * toggleSwitch(control)
- *
- * @this {ChipSet}
- * @param {Object} control is an HTML control DOM object
- */
-ChipSet.prototype.toggleSwitch = function(control)
-{
-    var f = !this.getSwitch(control);
-    this.setSwitch(control, f);
-    var sID = control.getAttribute("id");
-    var asParts = sID.split("-");
-    var b = (0x1 << (+asParts[1] - 1));
-    switch (asParts[0]) {
-    case ChipSet.CONTROLS.SW1:
-        this.sw1Init = (this.sw1Init & ~b) | (f? 0 : b);
-        break;
-    case ChipSet.CONTROLS.SW2:
-        this.sw2Init = (this.sw2Init & ~b) | (f? 0 : b);
-        break;
-    default:
-        break;
-    }
-    this.updateSwitchDescriptions();
 };
 
 /**
@@ -4368,7 +4621,7 @@ ChipSet.prototype.inPPIA = function(port, addrFrom)
     var b = this.bPPIA;
     if (this.bPPICtrl & ChipSet.PPI_CTRL.A_IN) {
         if (this.bPPIB & ChipSet.PPI_B.CLEAR_KBD) {
-            b = this.sw1;
+            b = this.aDIPSwitches[0][1];
         }
         else if (this.kbd) {
             b = this.kbd.readScanCode();
@@ -4477,15 +4730,15 @@ ChipSet.prototype.inPPIC = function(port, addrFrom)
      */
     if ((this.model|0) == ChipSet.MODEL_5150) {
         if (this.bPPIB & ChipSet.PPI_B.ENABLE_SW2) {
-            b |= this.sw2 & ChipSet.PPI_C.SW;
+            b |= this.aDIPSwitches[1][1] & ChipSet.PPI_C.SW;
         } else {
-            b |= (this.sw2 >> 4) & 0x1;     // QUESTION: Does any component actually care about SW2[5] on a MODEL_5150?
+            b |= (this.aDIPSwitches[1][1] >> 4) & 0x1;
         }
     } else {
         if (this.bPPIB & ChipSet.PPI_B.ENABLE_SW_HI) {
-            b |= this.sw1 >> 4;
+            b |= this.aDIPSwitches[0][1] >> 4;
         } else {
-            b |= this.sw1 & 0xf;
+            b |= this.aDIPSwitches[0][1] & 0xf;
         }
     }
 
@@ -5179,18 +5432,18 @@ ChipSet.prototype.notifyKbdData = function(b)
 };
 
 /**
- * in6300SysConf(iConf, port, addrFrom)
+ * in6300DIPSwitches(iDIP, port, addrFrom)
  *
  * @this {ChipSet}
- * @param {number} iConf (0 or 1)
+ * @param {number} iDIP (0 or 1)
  * @param {number} port (0x66 or 0x67)
  * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
  * @return {number} simulated port value
  */
-ChipSet.prototype.in6300SysConf = function(iConf, port, addrFrom)
+ChipSet.prototype.in6300DIPSwitches = function(iDIP, port, addrFrom)
 {
-    var b = (iConf? this.sw2 : this.sw1);
-    this.printMessageIO(port, null, addrFrom, (iConf? "SYS_CONF_B" : "SYS_CONF_A"), b, Messages.CHIPSET);
+    var b = this.aDIPSwitches[iDIP][1];
+    this.printMessageIO(port, null, addrFrom, "DIPSW-" + iDIP, b, Messages.CHIPSET);
     return b;
 };
 
@@ -5386,28 +5639,6 @@ ChipSet.prototype.intBIOSRTC = function(addr)
 };
 
 /**
- * parseSwitches(s, def)
- *
- * @this {ChipSet}
- * @param {string|undefined} s describing switch settings
- * @param {number} def is a default value to use if s is undefined
- * @return {number} value representing the switch settings
- */
-ChipSet.prototype.parseSwitches = function(s, def)
-{
-    if (s === undefined) return def;
-    /*
-     * NOTE: We can't simply use parseInt() with a base of 2, because the bit order is reversed, as well as the bit sense.
-     */
-    var b = 0, bit = 0x1;
-    for (var i = 0; i < s.length; i++) {
-        if (s.charAt(i) == "0") b |= bit;
-        bit <<= 1;
-    }
-    return b;
-};
-
-/**
  * setSpeaker(fOn)
  *
  * @this {ChipSet}
@@ -5595,8 +5826,8 @@ ChipSet.aPortInput6300 = {
     0x60: ChipSet.prototype.in8041Kbd,
     0x61: ChipSet.prototype.in8041Ctrl,
     0x64: ChipSet.prototype.in8041Status,
-    0x66: /** @this {ChipSet} */ function(port, addrFrom) { return this.in6300SysConf(0, port, addrFrom); },
-    0x67: /** @this {ChipSet} */ function(port, addrFrom) { return this.in6300SysConf(1, port, addrFrom); }
+    0x66: /** @this {ChipSet} */ function(port, addrFrom) { return this.in6300DIPSwitches(0, port, addrFrom); },
+    0x67: /** @this {ChipSet} */ function(port, addrFrom) { return this.in6300DIPSwitches(1, port, addrFrom); }
 };
 
 if (DESKPRO386) {
@@ -5715,7 +5946,7 @@ ChipSet.init = function()
         var parmsChipSet = Component.getComponentParms(eChipSet);
         var chipset = new ChipSet(parmsChipSet);
         Component.bindComponentControls(chipset, eChipSet, PCJSCLASS);
-        chipset.updateSwitchDescriptions();
+        chipset.updateDIPSwitchDescriptions();
     }
 };
 

@@ -771,7 +771,7 @@ FDC.prototype.initController = function(data)
 
     if (this.aDrives === undefined) {
         this.nDrives = 4;                       // default to the maximum number of drives
-        if (this.chipset) this.nDrives = this.chipset.getSWFloppyDrives();
+        if (this.chipset) this.nDrives = this.chipset.getDIPFloppyDrives();
         /*
          * I would prefer to allocate only nDrives, but as discussed in the handling of the FDC.REG_DATA.CMD.SENSE_INT
          * command, we're faced with situations where the controller must respond to any drive in the range 0-3, regardless
@@ -789,7 +789,7 @@ FDC.prototype.initController = function(data)
              * the drive's physical limits accordingly (ie, max tracks, max heads, and max sectors/track).
              */
             drive = this.aDrives[iDrive] = {};
-            var nKb = (this.chipset? this.chipset.getSWFloppyDriveSize(iDrive) : 0);
+            var nKb = (this.chipset? this.chipset.getDIPFloppyDriveSize(iDrive) : 0);
             switch(nKb) {
             case 160:
             case 180:

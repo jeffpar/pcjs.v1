@@ -158,7 +158,7 @@ RAM.prototype.powerDown = function(fSave, fShutdown)
 RAM.prototype.reset = function()
 {
     if (!this.addrRAM && !this.fInstalled && this.chipset) {
-        var baseRAM = this.chipset.getSWMemorySize() * 1024;
+        var baseRAM = this.chipset.getDIPMemorySize() * 1024;
         if (this.sizeRAM && baseRAM != this.sizeRAM) {
             this.bus.removeMemory(this.addrRAM, this.sizeRAM);
             this.fAllocated = false;

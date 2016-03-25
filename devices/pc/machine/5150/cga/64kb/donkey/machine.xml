@@ -13,5 +13,5 @@
 		<control type="button" binding="reset">Reset</control>
 	</cpu>
 	<keyboard ref="/devices/pc/keyboard/us83-buttons-minimal.xml"/>
-	<chipset id="chipset" model="5150" sw1="01001001" sw2="11110000"/>
+	<chipset id="chipset" model="5150" sw1="01001001" sw2="11111000"/>
 </machine>

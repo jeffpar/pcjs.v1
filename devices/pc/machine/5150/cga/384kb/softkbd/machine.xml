@@ -12,7 +12,7 @@
 	<fdc ref="/disks/pc/compiled/library.xml"/>
 	<keyboard ref="/devices/pc/keyboard/us83-softkeys.xml"/>
 	<panel ref="/devices/pc/panel/wide.xml"/>
-	<chipset id="chipset" model="5150" sw1="01001001" sw2="10100000" pos="left" padleft="8px" padbottom="8px">
+	<chipset id="chipset" model="5150" sw1="01001001" sw2="10101000" pos="left" padleft="8px" padbottom="8px">
 		<control type="switches" label="SW1" binding="sw1" left="0px"/>
 		<control type="switches" label="SW2" binding="sw2" left="0px"/>
 		<control type="description" binding="swdesc" left="0px"/>
