@@ -1279,7 +1279,7 @@ FDC.prototype.loadSelectedDrive = function(sDisketteName, sDiskettePath, file)
 
         if (DEBUG) this.println("loading disk " + sDiskettePath + "...");
 
-        while (this.loadDiskette(iDrive, sDisketteName, sDiskettePath, false, file)) {
+        while (this.loadDiskette(iDrive, sDisketteName, sDiskettePath, false, file) < 0) {
             if (!window.confirm("Click OK to reload the original disk.\n(WARNING: All disk changes will be discarded)")) {
                 return;
             }
@@ -1327,7 +1327,7 @@ FDC.prototype.mountDiskette = function(iDrive, sDisketteName, sDiskettePath)
  * @param {string} sDiskettePath
  * @param {boolean} [fAutoMount]
  * @param {File} [file] is set if there's an associated File object
- * @return {boolean} true if diskette (already) loaded, false if queued up (or busy)
+ * @return {number} 1 if diskette loaded, 0 if queued up (or busy), -1 if already loaded
  */
 FDC.prototype.loadDiskette = function(iDrive, sDisketteName, sDiskettePath, fAutoMount, file)
 {
@@ -1336,7 +1336,7 @@ FDC.prototype.loadDiskette = function(iDrive, sDisketteName, sDiskettePath, fAut
         this.unloadDrive(iDrive, fAutoMount, true);
         if (drive.fBusy) {
             this.notice("Drive " + iDrive + " busy");
-            return true;
+            return 0;
         }
         drive.fBusy = true;
         if (fAutoMount) {
@@ -1347,10 +1347,11 @@ FDC.prototype.loadDiskette = function(iDrive, sDisketteName, sDiskettePath, fAut
         drive.fLocal = !!file;
         var disk = new Disk(this, drive, DiskAPI.MODE.PRELOAD);
         if (!disk.load(sDisketteName, sDiskettePath, file, this.doneLoadDiskette)) {
-            return false;
+            return 0;
         }
+        return 1;
     }
-    return true;
+    return -1;
 };
 
 /**

@@ -799,7 +799,7 @@ ChipSet.DIPSW[0][ChipSet.MODEL_5150][ChipSet.SWITCH_TYPE.FLOPNUM] = {
 };
 /*
  * NOTE: Both the Aug 1981 and the Apr 1984 IBM 5150 Technical Reference Manuals list SW1[2] as "RESERVED",
- * but the Aug 1981 edition (p. 2-28) hints that SW1[2] "MUST BE ON (RESERVED FOR CO-PROCESSOR)".  Contemporary
+ * but the Aug 1981 edition (p. 2-28) also says SW1[2] "MUST BE ON (RESERVED FOR CO-PROCESSOR)".  Contemporary
  * articles discussing 8087 support in early PCs all indicate that switch SW1[2] must OFF if a coprocessor
  * is installed, and the 1984 5150 Guide to Operations (p. 5-34) confirms it.
  *
