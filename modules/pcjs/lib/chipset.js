@@ -866,13 +866,14 @@ ChipSet.DIPSW[1][ChipSet.MODEL_5150][ChipSet.SWITCH_TYPE.EXPMEM] = {
         576:    0x12
         /*
          * Obviously, more bit combinations are possible here (up to 0x1F), but assuming a minimum of 64Kb already on
-         * the motherboard, any amount of expansion memory about 576Kb would break the 640Kb barrier.  If you stuck with
-         * MDA or CGA video cards, perhaps you could go as high as 704Kb in a real system.  But in our happy little
-         * world, this is where we stop.
+         * the motherboard, any amount of expansion memory above 576Kb would break the 640Kb barrier.  Yes, if you used
+         * only MDA or CGA video cards, you could go as high as 704Kb in a real system.  But in our happy little world,
+         * this is where we stop.
          *
          * TODO: A value larger than 0x12 usually comes from a misconfigured machine (ie, it forgot to leave SW2[5] ON).
          * To compensate, when getDIPMemorySize() gets null back from its EXPMEM request, perhaps it should try truncating
-         * the DIP switch value.
+         * the DIP switch value.  However, that would introduce a machine-specific hack into a function that's supposed
+         * be machine-independent now.
          */
     },
     LABEL: "Expansion Memory (32Kb Increments)"
