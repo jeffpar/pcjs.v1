@@ -787,6 +787,7 @@ ChipSet.SWITCH_TYPE = {
 ChipSet.DIPSW = [{},{}];
 ChipSet.DIPSW[0][ChipSet.MODEL_5150] = {};
 ChipSet.DIPSW[1][ChipSet.MODEL_5150] = {};
+
 ChipSet.DIPSW[0][ChipSet.MODEL_5150][ChipSet.SWITCH_TYPE.FLOPNUM] = {
     MASK:       0xC0,
     VALUES: {
@@ -1398,9 +1399,7 @@ ChipSet.prototype.reset = function(fHard)
      * the user is only allowed to tweak the initial values, which require a reset to take effect.
      */
     var i;
-    this.updateDIPSwitchControls(0, ChipSet.CONTROLS.SW1);
-    this.updateDIPSwitchControls(1, ChipSet.CONTROLS.SW2);
-    this.updateDIPSwitchDescriptions();
+    this.updateDIPSwitches();
 
     /*
      * DMA (Direct Memory Access) Controller initialization
@@ -2070,9 +2069,7 @@ ChipSet.prototype.restore = function(data)
         this.aDIPSwitches[0][1] = a[2];
         this.aDIPSwitches[1][1] = a[3] & 0x0F;  // we do honor SW2[5] now, but it was erroneously set on some machines
     }
-    this.updateDIPSwitchControls(0, ChipSet.CONTROLS.SW1);
-    this.updateDIPSwitchControls(1, ChipSet.CONTROLS.SW2);
-    this.updateDIPSwitchDescriptions();
+    this.updateDIPSwitches();
 
     a = data[1];
     for (i = 0; i < this.cDMACs; i++) {
@@ -2709,6 +2706,18 @@ ChipSet.prototype.toggleDIPSwitchControl = function(control)
     default:
         break;
     }
+    this.updateDIPSwitchDescriptions();
+};
+
+/**
+ * updateDIPSwitches()
+ *
+ * @this {ChipSet}
+ */
+ChipSet.prototype.updateDIPSwitches = function()
+{
+    this.updateDIPSwitchControls(0, ChipSet.CONTROLS.SW1);
+    this.updateDIPSwitchControls(1, ChipSet.CONTROLS.SW2);
     this.updateDIPSwitchDescriptions();
 };
 
