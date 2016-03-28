@@ -398,7 +398,7 @@ module.exports = function(grunt) {
                 files: [
                     {
                         cwd: "disks/pc/",
-                        src: ["library.xml", "samples.xml"],
+                        src: ["library.xml", "samples.xml", "private/library.xml"],
                         dest: "disks/pc/compiled/",
                         expand: true
                     }
