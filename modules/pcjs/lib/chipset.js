@@ -784,11 +784,9 @@ ChipSet.SWITCH_TYPE = {
     EXPMEM:     6
 };
 
-ChipSet.DIPSW = [{},{}];
-ChipSet.DIPSW[0][ChipSet.MODEL_5150] = {};
-ChipSet.DIPSW[1][ChipSet.MODEL_5150] = {};
-
-ChipSet.DIPSW[0][ChipSet.MODEL_5150][ChipSet.SWITCH_TYPE.FLOPNUM] = {
+ChipSet.DIPSW = {};
+ChipSet.DIPSW[ChipSet.MODEL_5150] = [{},{}];
+ChipSet.DIPSW[ChipSet.MODEL_5150][0][ChipSet.SWITCH_TYPE.FLOPNUM] = {
     MASK:       0xC0,
     VALUES: {
         1:      0x00,
@@ -809,7 +807,7 @@ ChipSet.DIPSW[0][ChipSet.MODEL_5150][ChipSet.SWITCH_TYPE.FLOPNUM] = {
  * warning in their iAPX 86,88 User's Manual, p. S-27, that "[t]he 8087 should not be tied to the CPU's NMI
  * (non-maskable interrupt) line.")
  */
-ChipSet.DIPSW[0][ChipSet.MODEL_5150][ChipSet.SWITCH_TYPE.FPU] = {
+ChipSet.DIPSW[ChipSet.MODEL_5150][0][ChipSet.SWITCH_TYPE.FPU] = {
     MASK:       0x02,
     VALUES: {
         0:      0x00,   // 0 means an FPU is NOT installed
@@ -817,7 +815,7 @@ ChipSet.DIPSW[0][ChipSet.MODEL_5150][ChipSet.SWITCH_TYPE.FPU] = {
     },
     LABEL: "Coprocessor"
 };
-ChipSet.DIPSW[0][ChipSet.MODEL_5150][ChipSet.SWITCH_TYPE.MONITOR] = {
+ChipSet.DIPSW[ChipSet.MODEL_5150][0][ChipSet.SWITCH_TYPE.MONITOR] = {
     MASK:       0x30,
     VALUES: {
         0:      0x00,
@@ -833,7 +831,7 @@ ChipSet.DIPSW[0][ChipSet.MODEL_5150][ChipSet.SWITCH_TYPE.MONITOR] = {
     },
     LABEL: "Monitor Type"
 };
-ChipSet.DIPSW[0][ChipSet.MODEL_5150][ChipSet.SWITCH_TYPE.LOWMEM] = {
+ChipSet.DIPSW[ChipSet.MODEL_5150][0][ChipSet.SWITCH_TYPE.LOWMEM] = {
     MASK:       0x0C,
     VALUES: {
         16:     0x00,
@@ -843,7 +841,7 @@ ChipSet.DIPSW[0][ChipSet.MODEL_5150][ChipSet.SWITCH_TYPE.LOWMEM] = {
     },
     LABEL: "Base Memory (16Kb Increments)"
 };
-ChipSet.DIPSW[1][ChipSet.MODEL_5150][ChipSet.SWITCH_TYPE.EXPMEM] = {
+ChipSet.DIPSW[ChipSet.MODEL_5150][1][ChipSet.SWITCH_TYPE.EXPMEM] = {
     MASK:       0x1F,   // technically, this mask should be 0x0F for ROM revisions prior to 5150_REV3, and 0x1F on 5150_REV3
     VALUES: {
         0:      0x00,
@@ -880,12 +878,11 @@ ChipSet.DIPSW[1][ChipSet.MODEL_5150][ChipSet.SWITCH_TYPE.EXPMEM] = {
     LABEL: "Expansion Memory (32Kb Increments)"
 };
 
-ChipSet.DIPSW[0][ChipSet.MODEL_5160] = {};
-ChipSet.DIPSW[1][ChipSet.MODEL_5160] = {};
-ChipSet.DIPSW[0][ChipSet.MODEL_5160][ChipSet.SWITCH_TYPE.FLOPNUM] = ChipSet.DIPSW[0][ChipSet.MODEL_5150][ChipSet.SWITCH_TYPE.FLOPNUM];
-ChipSet.DIPSW[0][ChipSet.MODEL_5160][ChipSet.SWITCH_TYPE.FPU]     = ChipSet.DIPSW[0][ChipSet.MODEL_5150][ChipSet.SWITCH_TYPE.FPU];
-ChipSet.DIPSW[0][ChipSet.MODEL_5160][ChipSet.SWITCH_TYPE.MONITOR] = ChipSet.DIPSW[0][ChipSet.MODEL_5150][ChipSet.SWITCH_TYPE.MONITOR];
-ChipSet.DIPSW[0][ChipSet.MODEL_5160][ChipSet.SWITCH_TYPE.LOWMEM]  = {
+ChipSet.DIPSW[ChipSet.MODEL_5160] = [{},{}];
+ChipSet.DIPSW[ChipSet.MODEL_5160][0][ChipSet.SWITCH_TYPE.FLOPNUM] = ChipSet.DIPSW[ChipSet.MODEL_5150][0][ChipSet.SWITCH_TYPE.FLOPNUM];
+ChipSet.DIPSW[ChipSet.MODEL_5160][0][ChipSet.SWITCH_TYPE.FPU]     = ChipSet.DIPSW[ChipSet.MODEL_5150][0][ChipSet.SWITCH_TYPE.FPU];
+ChipSet.DIPSW[ChipSet.MODEL_5160][0][ChipSet.SWITCH_TYPE.MONITOR] = ChipSet.DIPSW[ChipSet.MODEL_5150][0][ChipSet.SWITCH_TYPE.MONITOR];
+ChipSet.DIPSW[ChipSet.MODEL_5160][0][ChipSet.SWITCH_TYPE.LOWMEM]  = {
     MASK:       0x0C,
     VALUES: {
         64:     0x00,
@@ -895,11 +892,10 @@ ChipSet.DIPSW[0][ChipSet.MODEL_5160][ChipSet.SWITCH_TYPE.LOWMEM]  = {
     },
     LABEL: "Base Memory (64Kb Increments)"
 };
-ChipSet.DIPSW[1][ChipSet.MODEL_5160][ChipSet.SWITCH_TYPE.EXPMEM]  = ChipSet.DIPSW[1][ChipSet.MODEL_5150][ChipSet.SWITCH_TYPE.EXPMEM];
+ChipSet.DIPSW[ChipSet.MODEL_5160][1][ChipSet.SWITCH_TYPE.EXPMEM]  = ChipSet.DIPSW[ChipSet.MODEL_5150][1][ChipSet.SWITCH_TYPE.EXPMEM];
 
-ChipSet.DIPSW[0][ChipSet.MODEL_ATT_6300] = {};
-ChipSet.DIPSW[1][ChipSet.MODEL_ATT_6300] = {};
-ChipSet.DIPSW[0][ChipSet.MODEL_ATT_6300][ChipSet.SWITCH_TYPE.LOWMEM] = {
+ChipSet.DIPSW[ChipSet.MODEL_ATT_6300] = [{},{}];
+ChipSet.DIPSW[ChipSet.MODEL_ATT_6300][0][ChipSet.SWITCH_TYPE.LOWMEM] = {
     MASK:       0x8F,
     VALUES: {
         128:    0x01,   // "0111xxx1"
@@ -909,7 +905,7 @@ ChipSet.DIPSW[0][ChipSet.MODEL_ATT_6300][ChipSet.SWITCH_TYPE.LOWMEM] = {
     },
     LABEL: "Base Memory (128Kb Increments)"
 };
-ChipSet.DIPSW[0][ChipSet.MODEL_ATT_6300][ChipSet.SWITCH_TYPE.FPU] = {
+ChipSet.DIPSW[ChipSet.MODEL_ATT_6300][0][ChipSet.SWITCH_TYPE.FPU] = {
     MASK:       0x10,
     VALUES: {
         0:      0x00,
@@ -917,7 +913,7 @@ ChipSet.DIPSW[0][ChipSet.MODEL_ATT_6300][ChipSet.SWITCH_TYPE.FPU] = {
     },
     LABEL: "Coprocessor"
 };
-ChipSet.DIPSW[1][ChipSet.MODEL_ATT_6300][ChipSet.SWITCH_TYPE.FLOPTYPE] = {
+ChipSet.DIPSW[ChipSet.MODEL_ATT_6300][1][ChipSet.SWITCH_TYPE.FLOPTYPE] = {
     MASK:       0x01,
     VALUES: {
         0:      0x00,
@@ -925,8 +921,8 @@ ChipSet.DIPSW[1][ChipSet.MODEL_ATT_6300][ChipSet.SWITCH_TYPE.FLOPTYPE] = {
     },
     LABEL: "Floppy Type"
 };
-ChipSet.DIPSW[1][ChipSet.MODEL_ATT_6300][ChipSet.SWITCH_TYPE.FLOPNUM] = ChipSet.DIPSW[0][ChipSet.MODEL_5150][ChipSet.SWITCH_TYPE.FLOPNUM];
-ChipSet.DIPSW[1][ChipSet.MODEL_ATT_6300][ChipSet.SWITCH_TYPE.MONITOR] = ChipSet.DIPSW[0][ChipSet.MODEL_5150][ChipSet.SWITCH_TYPE.MONITOR];
+ChipSet.DIPSW[ChipSet.MODEL_ATT_6300][1][ChipSet.SWITCH_TYPE.FLOPNUM] = ChipSet.DIPSW[ChipSet.MODEL_5150][0][ChipSet.SWITCH_TYPE.FLOPNUM];
+ChipSet.DIPSW[ChipSet.MODEL_ATT_6300][1][ChipSet.SWITCH_TYPE.MONITOR] = ChipSet.DIPSW[ChipSet.MODEL_5150][0][ChipSet.SWITCH_TYPE.MONITOR];
 
 /*
  * 8041 Keyboard Controller I/O ports (MODEL_ATT_6300)
@@ -2430,7 +2426,8 @@ ChipSet.prototype.addDIPSwitches = function(iDIP, sBinding)
  */
 ChipSet.prototype.findDIPSwitch = function(iDIP, iSwitch)
 {
-    var switchTypes = ChipSet.DIPSW[iDIP][this.model|0];
+    var switchDIPs = ChipSet.DIPSW[this.model|0];
+    var switchTypes = switchDIPs && switchDIPs[iDIP];
     if (switchTypes) {
         for (var iType in switchTypes) {
             var switchGroup = switchTypes[iType];
@@ -2473,8 +2470,9 @@ ChipSet.prototype.getDIPLegacyBits = function(iDIP)
 ChipSet.prototype.getDIPSwitches = function(iType, fInit)
 {
     var value = null;
-    for (var iDIP = 0; iDIP < ChipSet.DIPSW.length; iDIP++) {
-        var switchTypes = ChipSet.DIPSW[iDIP][this.model] || ChipSet.DIPSW[iDIP][this.model|0] || ChipSet.DIPSW[iDIP][ChipSet.MODEL_5150];
+    var switchDIPs = ChipSet.DIPSW[this.model] || ChipSet.DIPSW[this.model|0] || ChipSet.DIPSW[ChipSet.MODEL_5150];
+    for (var iDIP = 0; iDIP < switchDIPs.length; iDIP++) {
+        var switchTypes = switchDIPs[iDIP];
         if (switchTypes) {
             var switchGroup = switchTypes[iType];
             if (switchGroup) {
@@ -2639,8 +2637,9 @@ ChipSet.prototype.parseDIPSwitches = function(sBits, bDefault)
  */
 ChipSet.prototype.setDIPSwitches = function(iType, value, fInit)
 {
+    var switchDIPs = ChipSet.DIPSW[this.model] || ChipSet.DIPSW[this.model|0] || ChipSet.DIPSW[ChipSet.MODEL_5150];
     for (var iDIP = 0; iDIP < ChipSet.DIPSW.length; iDIP++) {
-        var switchTypes = ChipSet.DIPSW[iDIP][this.model] || ChipSet.DIPSW[iDIP][this.model|0] || ChipSet.DIPSW[iDIP][ChipSet.MODEL_5150];
+        var switchTypes = switchDIPs[iDIP];
         if (switchTypes) {
             var switchGroup = switchTypes[iType];
             if (switchGroup) {
