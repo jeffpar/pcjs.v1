@@ -1437,6 +1437,8 @@ FDC.prototype.doneLoadDiskette = function onFDCLoadNotify(drive, disk, sDiskette
         drive.nDiskCylinders = aDiskInfo[0];
         drive.nDiskHeads = aDiskInfo[1];
         drive.nDiskSectors = aDiskInfo[2];
+
+        if (this.cpu) this.cpu.setFocus();
     }
     else {
         drive.fLocal = false;
