@@ -2638,7 +2638,7 @@ ChipSet.prototype.parseDIPSwitches = function(sBits, bDefault)
 ChipSet.prototype.setDIPSwitches = function(iType, value, fInit)
 {
     var switchDIPs = ChipSet.DIPSW[this.model] || ChipSet.DIPSW[this.model|0] || ChipSet.DIPSW[ChipSet.MODEL_5150];
-    for (var iDIP = 0; iDIP < ChipSet.DIPSW.length; iDIP++) {
+    for (var iDIP = 0; iDIP < switchDIPs.length; iDIP++) {
         var switchTypes = switchDIPs[iDIP];
         if (switchTypes) {
             var switchGroup = switchTypes[iType];
