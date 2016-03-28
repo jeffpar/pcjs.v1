@@ -5,8 +5,9 @@
 		<disk path="">None</disk>
 		<disk path="/disks/pc/cpm/1.1b/CPM86-DISK1.json">CP/M-86 (Disk 1)</disk>
 		<disk path="/disks/pc/cpm/1.1b/CPM86-DISK2.json">CP/M-86 (Disk 2)</disk>
+		<disk path="/disks/pc/diags/ibm/1.02/5150_ADVDIAG_102.json">IBM PC Diagnostics 1.02</disk>
 		<disk path="/disks/pc/diags/ibm/2.20/5150_5155_5160_ADVDIAG_220.json">IBM PC Diagnostics 2.20</disk>
-		<disk path="/disks/pc/diags/ibm/2.07/5170_ADVDIAG_207.json">IBM PC-AT Diagnostics 2.07</disk>
+		<disk path="/disks/pc/diags/ibm/2.07/5170_ADVDIAG_207.json">IBM PC AT Diagnostics 2.07</disk>
 		<disk path="/disks/pc/dos/ibm/1.00/PCDOS100.json">PC-DOS 1.00</disk>
 		<disk path="/disks/pc/dos/ibm/1.10/PCDOS110.json">PC-DOS 1.10</disk>
 		<disk path="/disks/pc/dos/ibm/2.00/PCDOS200-DISK1.json">PC-DOS 2.00 (Disk 1)</disk>

@@ -128,7 +128,9 @@ diagnostics, and more.
 
 ### IBM Tools
 
-* [IBM Diagnostics v2.20](/disks/pc/diags/ibm/2.20/)
+* [IBM PC Diagnostics 1.02](/disks/pc/diags/ibm/1.02/)
+* [IBM PC Diagnostics 2.20](/disks/pc/diags/ibm/2.20/)
+* [IBM PC AT Diagnostics 2.07](/disks/pc/diags/ibm/2.07/)
 
 ### Microsoft Tools
 
