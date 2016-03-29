@@ -63,7 +63,8 @@ var DumpAPI = {
         FORMAT:     "format",   // value is one of FORMAT values below
         COMMENTS:   "comments", // value is either "true" or "false"
         DECIMAL:    "decimal",  // value is either "true" to force all numbers to decimal, "false" or undefined otherwise
-        MBHD:       "mbhd"      // value is hard disk size in Mb (formerly "mbsize") (DiskDump only)
+        MBHD:       "mbhd",     // value is hard disk size in Mb (formerly "mbsize") (DiskDump only) (DEPRECATED)
+        SIZE:       "size"      // value is target disk size in Kb (supersedes "mbhd") (DiskDump only)
     },
     FORMAT: {
         JSON:       "json",     // default

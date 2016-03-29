@@ -720,13 +720,18 @@ HTTPAPI.processDumpAPI = function(req, res)
 
             sFormat = req.query[DumpAPI.QUERY.FORMAT] || DumpAPI.FORMAT.JSON;
             fComments = (req.query[DumpAPI.QUERY.COMMENTS]? true : false);
-            var mbHD = req.query[DumpAPI.QUERY.MBHD];
+            var sSize = req.query[DumpAPI.QUERY.MBHD];
+            if (sSize) {
+                sSize = (sSize * 1000).toString();
+            } else {
+                sSize = req.query[DumpAPI.QUERY.SIZE];
+            }
 
             /*
              * TODO: Consider adding support for DiskDump's "exclusion" option to the API interface
              * (the command-line interface supports it).
              */
-            var disk = new DiskDump(sDisk, null, sFormat, fComments, mbHD, sServerRoot);
+            var disk = new DiskDump(sDisk, null, sFormat, fComments, sSize, sServerRoot);
             if (aCommand[0] == DumpAPI.QUERY.DISK || aCommand[0] == DumpAPI.QUERY.IMG) {
                 disk.loadFile(function(err) {
                     HTTPAPI.dumpDisk(err, disk, res);

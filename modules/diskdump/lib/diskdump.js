@@ -311,9 +311,6 @@ BufferPF.prototype.slice = function(start, end)
 /**
  * DiskDump()
  *
- * TODO: Honor the caller's mbHD size.  At the moment, any hard disk request translates to 10Mb,
- * since we rely on a "canned" BPB in aDefaultBPBs.
- *
  * TODO: If sServerRoot is set, make sure sDiskPath refers to something in either /apps/ or /disks/,
  * to prevent random enumeration of other server resources.
  *
@@ -322,12 +319,12 @@ BufferPF.prototype.slice = function(start, end)
  * @param {Array|null} [asExclude] contains filename exclusions, if any
  * @param {string} [sFormat] is the output format, one of "json"|"data"|"hex"|"bytes"|"img"
  * @param {boolean|string} [fComments] enables comments and other readability enhancements in the JSON output
- * @param {string} [mbHD] specifies a hard disk size, in megabytes, when building a new image
+ * @param {string} [sSize] specifies a target disk size, in kilobytes, when building a new image
  * @param {string|null} [sServerRoot]
  * @param {string} [sManifestFile]
  * @param {Object} [argv] optional (experimental) arguments, if any
  */
-function DiskDump(sDiskPath, asExclude, sFormat, fComments, mbHD, sServerRoot, sManifestFile, argv)
+function DiskDump(sDiskPath, asExclude, sFormat, fComments, sSize, sServerRoot, sManifestFile, argv)
 {
     /*
      * I used to set this.sServerRoot to "sServerRoot || process.cwd()", but in reality, the
@@ -341,7 +338,7 @@ function DiskDump(sDiskPath, asExclude, sFormat, fComments, mbHD, sServerRoot, s
         this.sDiskPath = path.join(this.sServerRoot, sDiskPath);
     }
     this.asExclude = asExclude || DiskDump.asExclusions;
-    this.mbHD = mbHD? parseInt(mbHD, 10) : 0;
+    this.kbTarget = +sSize || 0;
     this.sFormat = (sFormat || DumpAPI.FORMAT.JSON);
     this.fJSONNative = (this.sFormat == DumpAPI.FORMAT.JSON && !fComments);
     this.nJSONIndent = 0;
@@ -458,6 +455,22 @@ DiskDump.aDefaultBPBs = [
     0x02, 0x00,                 // 0x1A: number of heads (2)
     0x00, 0x00, 0x00, 0x00      // 0x1C: number of hidden sectors (always 0 for non-partitioned media)
   ],
+  [                             // define BPB for 720Kb diskette
+    0xEB, 0xFE, 0x90,           // 0x00: JMP instruction, following by 8-byte OEM signature
+    0x50, 0x43, 0x4A, 0x53, 0x2E, 0x4F, 0x52, 0x47,     // MY_OEM_STRING
+ // 0x49, 0x42, 0x4D, 0x20, 0x20, 0x35, 0x2E, 0x30,     // "IBM  5.0" (this is a real OEM signature)
+    0x00, 0x02,                 // 0x0B: bytes per sector (0x200 or 512)
+    0x02,                       // 0x0D: sectors per cluster (2)
+    0x01, 0x00,                 // 0x0E: reserved sectors; ie, # sectors preceding the first FAT--usually just the boot sector (1)
+    0x02,                       // 0x10: FAT copies (2)
+    0x70, 0x00,                 // 0x11: root directory entries (0x70 or 112)  0x70 * 0x20 = 0xE00 (1 sector is 0x200 bytes, total of 7 sectors)
+    0xA0, 0x05,                 // 0x13: number of sectors (0x5A0 or 1440)
+    0xF9,                       // 0x15: media type
+    0x03, 0x00,                 // 0x16: sectors per FAT (3)
+    0x09, 0x00,                 // 0x18: sectors per track (9)
+    0x02, 0x00,                 // 0x1A: number of heads (2)
+    0x00, 0x00, 0x00, 0x00      // 0x1C: number of hidden sectors (always 0 for non-partitioned media)
+  ],
   [                             // define BPB for 1.2Mb diskette
     0xEB, 0xFE, 0x90,           // 0x00: JMP instruction, following by 8-byte OEM signature
     0x50, 0x43, 0x4A, 0x53, 0x2E, 0x4F, 0x52, 0x47,     // MY_OEM_STRING
@@ -543,7 +556,8 @@ DiskDump.asTextFileExts = [".MD", ".ME", ".ASM", ".BAS", ".TXT", ".XML"];
  *
  *      Additional command-line arguments include:
  *
- *          --mbhd={number}: requests a hard disk image with the given number of megabytes (eg, 10 for a 10mb image)
+ *          --mbhd={number}: requests a hard disk image with the given number of megabytes (DEPRECATED)
+ *          --size={number}: requests a target disk size with the given number of kilobytes (eg, 360, 720, 1200, 1440, 10000)
  *          --exclude={filename}: specifies a filename that should be excluded from the image; repeat as often as needed
  *          --overwrite: allows the --output option to overwrite an existing file; default is to NOT overwrite
  *          --manifest[={filename}]: update the specified manifest.xml file with details about the disk image
@@ -625,7 +639,13 @@ DiskDump.CLI = function()
         var sManifestTitle = argv['title'];
 
         if (sDiskPath) {
-            var disk = new DiskDump(sDiskPath, asExclude, argv['format'], argv['comments'], argv['mbhd'], sServerRoot, sManifestFile, argv);
+            var sSize = argv['mbhd'];
+            if (!sSize) {
+                sSize = argv['size'];
+            } else {
+                sSize = (sSize * 1000).toString();
+            }
+            var disk = new DiskDump(sDiskPath, asExclude, argv['format'], argv['comments'], sSize, sServerRoot, sManifestFile, argv);
             if (sDir) {
                 disk.buildImage(true, function(err) {
                     DiskDump.outputDisk(err, disk, sDiskPath, sOutputFile, fOverwrite, sManifestTitle);
@@ -2246,7 +2266,8 @@ DiskDump.prototype.buildImageFromFiles = function(aFiles, done)
     /*
      * Put reasonable upper limits on both individual file sizes and the total size of all files.
      */
-    var cbMax = (this.mbHD? this.mbHD * 1024 * 1024 : 1440 * 1024);
+    var cbMax = (this.kbTarget || 1440) * 1024;
+    var nTargetSectors = (this.kbTarget? this.kbTarget * 2 : 0);
     var cbTotal = this.calcFileSizes(aFiles);
 
     if (fDebug) DiskDump.logConsole("total calculated size for " + aFiles.length + " files/folders: " + cbTotal + " bytes (0x" + str.toHex(cbTotal) + ")");
@@ -2269,7 +2290,7 @@ DiskDump.prototype.buildImageFromFiles = function(aFiles, done)
          * If this BPB is for a hard disk but a hard disk size was not specified, skip it.
          */
         abBoot = DiskDump.aDefaultBPBs[iBPB];
-        if ((abBoot[0x15] == 0xF8) != (this.mbHD > 0)) continue;
+        if ((abBoot[0x15] == 0xF8) != (this.kbTarget >= 10000)) continue;
         cbSector = abBoot[0x0B] | (abBoot[0x0C] << 8);
         cSectorsPerCluster = abBoot[0x0D];
         cbCluster = cbSector * cSectorsPerCluster;
@@ -2282,7 +2303,7 @@ DiskDump.prototype.buildImageFromFiles = function(aFiles, done)
         cHeads = abBoot[0x1A] | (abBoot[0x1B] << 8);
         cDataSectors = cTotalSectors - cRootSectors - cFATs * cFATSectors + 1;
         cbAvail = cDataSectors * cbSector;
-        if (cbTotal <= cbAvail) break;          // found a BPB that works!
+        if (nTargetSectors && cTotalSectors == nTargetSectors || !nTargetSectors && cbTotal <= cbAvail) break;
     }
 
     if (iBPB == DiskDump.aDefaultBPBs.length) {
@@ -2318,7 +2339,7 @@ DiskDump.prototype.buildImageFromFiles = function(aFiles, done)
     /*
      * Output a Master Boot Record (MBR), if a hard disk image was requested
      */
-    if (this.mbHD > 0) {
+    if (this.kbTarget >= 10000) {
         abSector = this.buildMBR(cHeads, cSectorsPerTrack, cbSector, cTotalSectors);
         offDisk += this.copyData(offDisk, abSector);
     }
