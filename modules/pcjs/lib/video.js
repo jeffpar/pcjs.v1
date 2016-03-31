@@ -5054,7 +5054,7 @@ Video.prototype.checkMode = function(fForce)
  * setMode(nMode, fForce)
  *
  * Set fForce to true to update the mode regardless of previous mode, or false to perform
- * a normal update that bypasses updateScreen() but still calls initCellCache().
+ * a normal update that bypasses updateScreen() but still calls initCache().
  *
  * @this {Video}
  * @param {number|null} nMode
@@ -5125,7 +5125,7 @@ Video.prototype.setMode = function(nMode, fForce)
             }
         }
         this.setDimensions();
-        this.invalidateScreen(true);
+        this.invalidateCache(true);
         this.updateScreen();
     }
     return true;
@@ -5152,17 +5152,17 @@ Video.prototype.setPixel = function(imageData, x, y, rgb)
 };
 
 /**
- * initCellCache()
+ * initCache()
  *
  * Initializes the contents of our internal cell cache.
  *
  * TODO: Consider changing this to a cache of RGB values, so that when the buffer is merely being color-cycled,
- * we don't have to update the entire screen.  This will also allow invalidateScreen() to honor the fModified flag,
- * bypassing initCellCache() when it is false.
+ * we don't have to update the entire screen.  This will also allow invalidateCache() to honor the fModified flag,
+ * bypassing initCache() when it is false.
  *
  * @this {Video}
  */
-Video.prototype.initCellCache = function()
+Video.prototype.initCache = function()
 {
     this.cBlinkVisible = -1;                // invalidate the visible blinking character count, to force updateScreen() to recount
     this.fCellCacheValid = false;
@@ -5173,7 +5173,7 @@ Video.prototype.initCellCache = function()
 };
 
 /**
- * invalidateScreen(fModified)
+ * invalidateCache(fModified)
  *
  * Ensure that the next updateScreen() will update every cell; intended for situations where the entire screen needs
  * to be redrawn, even though the underlying data in the video buffer has not changed (and therefore cleanMemory() will
@@ -5184,10 +5184,10 @@ Video.prototype.initCellCache = function()
  * @this {Video}
  * @param {boolean} [fModified] (true if the buffer may have been modified, false if only color(s) may have changed)
  */
-Video.prototype.invalidateScreen = function(fModified)
+Video.prototype.invalidateCache = function(fModified)
 {
     if (!fModified) this.fRGBValid = false;
-    this.initCellCache();
+    this.initCache();
 };
 
 /**
@@ -5340,7 +5340,7 @@ Video.prototype.updateChar = function(col, row, data, context)
  * are the periodic updates coming from the CPU.
  *
  * For every cell in the video buffer, compare it to the cell stored in the cell cache, render if it differs,
- * and then update the cell cache to match.  Since initCellCache() sets every cell in the cell cache to an
+ * and then update the cell cache to match.  Since initCache() sets every cell in the cell cache to an
  * invalid value, we're assured that the next call to updateScreen() will redraw the entire (visible) video buffer.
  *
  * @this {Video}
@@ -5372,7 +5372,7 @@ Video.prototype.updateScreen = function(fForce)
     if (!fEnabled && !fForce) return;
 
     if (fForce) {
-        this.initCellCache();
+        this.initCache();
     }
     else {
         /*
@@ -5435,7 +5435,14 @@ Video.prototype.updateScreen = function(fForce)
      * multi-display configuration.
      */
     if ((this.getRetraceBits(card) & Card.CGA.STATUS.VRETRACE) || card.nVertPeriodsStartAddr && card.nVertPeriodsStartAddr < card.nVertPeriods) {
-        card.offStartAddr = ((card.regCRTData[Card.CRTC.START_ADDR_HI] << 8) + card.regCRTData[Card.CRTC.START_ADDR_LO])|0;
+        /*
+         * PARANOIA: Don't call invalidateCache() unless the address we're about to "latch" actually changed.
+         */
+        var offStartAddr = ((card.regCRTData[Card.CRTC.START_ADDR_HI] << 8) + card.regCRTData[Card.CRTC.START_ADDR_LO])|0;
+        if (card.offStartAddr !== offStartAddr) {
+            card.offStartAddr = offStartAddr;
+            this.invalidateCache();
+        }
         card.nVertPeriodsStartAddr = 0;
     }
 
@@ -6162,8 +6169,14 @@ Video.prototype.outATC = function(port, bOut, addrFrom)
         /*
          * HACK: offStartAddr is supposed to be "latched" ONLY at the start of every VRETRACE interval, but
          * other "triggers" are helpful; see updateScreen() for details.
+         *
+         * PARANOIA: Don't call invalidateCache() unless the start address we just "latched" actually changed.
          */
-        card.offStartAddr = ((card.regCRTData[Card.CRTC.START_ADDR_HI] << 8) + card.regCRTData[Card.CRTC.START_ADDR_LO])|0;
+        var offStartAddr = ((card.regCRTData[Card.CRTC.START_ADDR_HI] << 8) + card.regCRTData[Card.CRTC.START_ADDR_LO])|0;
+        if (card.offStartAddr != offStartAddr) {
+            card.offStartAddr = offStartAddr;
+            this.invalidateCache();
+        }
         card.nVertPeriodsStartAddr = 0;
     } else {
         card.fATCData = false;
@@ -6174,7 +6187,7 @@ Video.prototype.outATC = function(port, bOut, addrFrom)
                     this.printMessageIO(port, bOut, addrFrom, "ATC." + card.asATCRegs[iReg]);
                 }
                 card.regATCData[iReg] = bOut;
-                this.invalidateScreen(false);
+                this.invalidateCache(false);
             }
         }
     }
@@ -6510,7 +6523,7 @@ Video.prototype.outDACData = function(port, bOut, addrFrom)
     var dwNew = (dw & ~(0x3f << this.cardEGA.regDACShift)) | ((bOut & 0x3f) << this.cardEGA.regDACShift);
     if (dw !== dwNew) {
         this.cardEGA.regDACData[this.cardEGA.regDACAddr] = dwNew;
-        this.invalidateScreen(false);
+        this.invalidateCache(false);
     }
     this.cardEGA.regDACShift += 6;
     if (this.cardEGA.regDACShift > 12) {
@@ -6795,7 +6808,7 @@ Video.prototype.outCGAColor = function(port, bOut, addrFrom)
     }
     if (this.cardColor.regColor !== bOut) {
         this.cardColor.regColor = bOut;
-        this.invalidateScreen(false);
+        this.invalidateCache(false);
     }
 };
 
@@ -6909,7 +6922,14 @@ Video.prototype.outCRTCData = function(card, port, bOut, addrFrom)
              * the vertical period count and latch it later, in updateScreen(), once the count has advanced.
              */
             if (this.getRetraceBits(card) & Card.CGA.STATUS.RETRACE) {
-                card.offStartAddr = ((card.regCRTData[Card.CRTC.START_ADDR_HI] << 8) + card.regCRTData[Card.CRTC.START_ADDR_LO])|0;
+                /*
+                 * PARANOIA: Don't call invalidateCache() unless the address we're about to "latch" actually changed.
+                 */
+                var offStartAddr = ((card.regCRTData[Card.CRTC.START_ADDR_HI] << 8) + card.regCRTData[Card.CRTC.START_ADDR_LO])|0;
+                if (card.offStartAddr !== offStartAddr) {
+                    card.offStartAddr = offStartAddr;
+                    this.invalidateCache();
+                }
             } else if (!card.nVertPeriodsStartAddr) {
                 card.nVertPeriodsStartAddr = card.nVertPeriods;
             }
