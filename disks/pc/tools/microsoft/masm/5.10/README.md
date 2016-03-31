@@ -10,6 +10,9 @@ Microsoft Macro Assembler 5.10
 Directory listings of the five distribution diskettes (plus an update disk issued by Microsoft in March 1990)
 are provided below.
 
+We don't have any documents from this release, but we do have
+[Microsoft Macro Assembler 5.0 Documentation](/pubs/pc/software/tools/microsoft/masm/5.00/).
+
 ### Directory of MS MASM 5.10 (Disk 1)
 
 	 Volume in drive A is MASM       

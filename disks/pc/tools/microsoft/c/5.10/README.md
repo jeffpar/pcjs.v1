@@ -9,6 +9,8 @@ Microsoft C Compiler 5.10
 
 Directory listings of the twelve 360Kb and two 1.2Mb distribution diskettes are provided below.
 
+We also have [Microsoft C Compiler 5.1 Documentation Updates](/pubs/pc/software/tools/microsoft/c/5.10/).
+
 ### Directory of MS C 5.10 (SETUP)
 
 	 Volume in drive A has no label

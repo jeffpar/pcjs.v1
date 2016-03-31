@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Microsoft Macro Assembler 5.0
+title: Microsoft Macro Assembler 5.0 Documentation
 permalink: /pubs/pc/software/tools/microsoft/masm/5.00/
 ---
 

@@ -9,6 +9,8 @@ Microsoft Macro Assembler 5.00
 
 Directory listings of the two 360Kb distribution diskettes are provided below.
 
+We also have [Microsoft Macro Assembler 5.0 Documentation](/pubs/pc/software/tools/microsoft/masm/5.00/).
+
 ### Directory of MS MASM 5.00 (Disk 1)
 
 	 Volume in drive A is MASM 500 #1
