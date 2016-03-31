@@ -756,7 +756,7 @@ CPU.prototype.getSpeedTarget = function()
  *
  * @this {CPU}
  * @param {number} [nMultiplier] is the new proposed multiplier (reverts to 1 if the target was too high)
- * @param {boolean} [fUpdateFocus] is true to give the Computer focus
+ * @param {boolean} [fUpdateFocus] is true to update Computer focus
  * @return {boolean} true if successful, false if not
  *
  * @desc Whenever the speed is changed, the running cycle count and corresponding start time must be reset,

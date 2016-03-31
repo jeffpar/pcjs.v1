@@ -1,7 +1,7 @@
 ---
 layout: page
 title: IBM 5160 Technical Reference, April 1983
-permalink: /pubs/pc/reference/ibm/5160/techref/
+permalink: /pubs/pc/reference/ibm/5160/techref/1983-04/
 ---
 
 [IBM 5160 Technical Reference, April 1983](http://retroarchive.org/dos/docs/ibm5160techref.pdf)

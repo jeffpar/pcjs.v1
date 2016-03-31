@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.21.4/manifest.xsl"?>
 <manifest type="document">
-	<title>IBM 5160 Technical Reference (April 1983)</title>
+	<title>IBM 5160 Technical Reference</title>
 	<source href="http://retroarchive.org">retroarchive.org</source>
-	<document href="http://retroarchive.org/dos/docs/ibm5160techref.pdf"/>
+	<document href="http://retroarchive.org/dos/docs/ibm5160techref.pdf">
+		<name>IBM 5160 Technical Reference (April 1983)</name>
+	</document>
 </manifest>

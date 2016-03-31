@@ -1,7 +1,7 @@
 ---
 layout: page
 title: IBM 5170 Technical Reference, March 1984
-permalink: /pubs/pc/reference/ibm/5170/techref/
+permalink: /pubs/pc/reference/ibm/5170/techref/1984-03/
 ---
 
 [IBM 5170 Technical Reference, March 1984](http://minuszerodegrees.net/manuals/IBM_5170_Technical_Reference_1502243_MAR84.pdf)
