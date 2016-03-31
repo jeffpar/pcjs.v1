@@ -624,21 +624,21 @@ web.downloadFile = function(sData, sType, fBase64, sFileName)
         sURI += (fBase64? sData : encodeURI(sData));
     } else {
         sURI += (fBase64? sData : encodeURIComponent(sData));
-        if (sFileName) {
-            link = document.createElement('a');
-            if (typeof link.download != 'string') link = null;
-        }
+    }
+    if (sFileName) {
+        link = document.createElement('a');
+        if (typeof link.download != 'string') link = null;
     }
     if (link) {
         link.href = sURI;
         link.download = sFileName;
-        document.body.appendChild(link);    // Firefox requires the link to be in the body
+        document.body.appendChild(link);    // Firefox allegedly requires the link to be in the body
         link.click();
         document.body.removeChild(link);
-        sAlert = 'Check your Downloads folder for "' + sFileName + '"';
+        sAlert = 'Check your Downloads folder for ' + sFileName + '.';
     } else {
         window.open(sURI);
-        sAlert = 'Check your browser for a new window/tab containing the requested data';
+        sAlert = 'Check your browser for a new window/tab containing the requested data (' + sFileName + ').';
     }
     return sAlert;
 };

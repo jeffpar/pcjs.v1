@@ -1438,7 +1438,11 @@ FDC.prototype.doneLoadDiskette = function onFDCLoadNotify(drive, disk, sDiskette
         drive.nDiskHeads = aDiskInfo[1];
         drive.nDiskSectors = aDiskInfo[2];
 
-        if (this.cpu) this.cpu.setFocus();
+        /*
+         * Since you usually want the Computer to have focus again after loading a new diskette, let's try automatically
+         * updating the focus after a successful load.
+         */
+        if (this.cmp) this.cmp.updateFocus();
     }
     else {
         drive.fLocal = false;

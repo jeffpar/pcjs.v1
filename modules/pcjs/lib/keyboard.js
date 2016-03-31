@@ -1187,7 +1187,7 @@ Keyboard.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
         case "caps-lock":
             this.bindings[id] = control;
             control.onclick = function onClickCapsLock(event) {
-                if (kbd.cpu) kbd.cpu.setFocus();
+                if (kbd.cmp) kbd.cmp.updateFocus();
                 return kbd.toggleCapsLock();
             };
             return true;
@@ -1195,7 +1195,7 @@ Keyboard.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
         case "num-lock":
             this.bindings[id] = control;
             control.onclick = function onClickNumLock(event) {
-                if (kbd.cpu) kbd.cpu.setFocus();
+                if (kbd.cmp) kbd.cmp.updateFocus();
                 return kbd.toggleNumLock();
             };
             return true;
@@ -1203,7 +1203,7 @@ Keyboard.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
         case "scroll-lock":
             this.bindings[id] = control;
             control.onclick = function onClickScrollLock(event) {
-                if (kbd.cpu) kbd.cpu.setFocus();
+                if (kbd.cmp) kbd.cmp.updateFocus();
                 return kbd.toggleScrollLock();
             };
             return true;
@@ -1218,7 +1218,7 @@ Keyboard.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
                 control.onclick = function(kbd, sKey, simCode) {
                     return function onClickKeyboard(event) {
                         if (!COMPILED && kbd.messageEnabled()) kbd.printMessage(sKey + " clicked", Messages.KEYS);
-                        if (kbd.cpu) kbd.cpu.setFocus();
+                        if (kbd.cmp) kbd.cmp.updateFocus();
                         kbd.updateShiftState(simCode, true);    // future-proofing if/when any LOCK keys are added to CLICKCODES
                         kbd.addActiveKey(simCode, true);
                     };
@@ -1255,7 +1255,7 @@ Keyboard.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
                  */
                 this.bindings[id] = control;
                 control.onclick = function onClickTest(event) {
-                    if (kbd.cpu) kbd.cpu.setFocus();
+                    if (kbd.cmp) kbd.cmp.updateFocus();
                     return kbd.injectKeys(sValue);
                 };
                 return true;
@@ -1323,6 +1323,7 @@ Keyboard.prototype.findBinding = function(simCode, sType, fDown)
  */
 Keyboard.prototype.initBus = function(cmp, bus, cpu, dbg)
 {
+    this.cmp = cmp;
     this.bus = bus;
     this.cpu = cpu;
     this.dbg = dbg;

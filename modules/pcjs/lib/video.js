@@ -5758,28 +5758,20 @@ Video.prototype.updateScreenGraphicsEGA = function(addrBuffer, addrScreen, addrS
             if (x < xDirty) xDirty = x;
             for (iPixel = 0; iPixel < nPixels; iPixel++) {
                 /*
-                 * We must follow the golden JavaScript rule of appending "|0" to all hex constants with bit 31 set.
-                 * The innocuous use of the bit-wise OR operator has the side-effect of producing a negative value,
-                 * matching how entries in Video.aEGADWToByte are initialized (eg, "Video.aEGADWToByte[0x80000000|0]").
+                 * 0x80808080 may LOOK like a 32-bit value, but it is not, because JavaScript treats it as a POSITIVE
+                 * number, and therefore outside the normal 32-bit integer range; however, the AND operator guarantees
+                 * that the result will be a 32-bit value, so it doesn't matter.
                  */
-                var dwPixel = data & (0x80808080|0);
-                /*
-                 * This was the old approach to dealing with negative hex values, by converting them to positive
-                 * values that didn't alter the low 32 bits.  But it's not ideal, because it requires using values here
-                 * and in the array that are outside the signed 32-bit range, potentially triggering floating-point.
-                 *
-                 *      if (dwPixel < 0) dwPixel += 0x100000000;
-                 *
-                 * An even simpler solution would be to use the unsigned right-shift operator:
-                 *
-                 *      dwPixel >>> 0
-                 *
-                 * but again, all that does is produce a value outside the signed 32-bit range, which is sub-optimal.
-                 */
+                var dwPixel = data & 0x80808080;
                 this.assert(Video.aEGADWToByte[dwPixel] !== undefined);
                 /*
                  * Since assertions don't fix problems (only catch them, and only in DEBUG builds), I'm also ensuring
-                 * that bPixel will always default to 0 if an undefined value ever slips through again.
+                 * that bPixel will default to 0 if an undefined value ever slips through again.
+                 *
+                 * How did an undefined value slip through?  We had (incorrectly) initialized entries in aEGADWToByte;
+                 * for example, we used to set aEGADWToByte[0x80808080] instead of aEGADWToByte[0x80808080|0].  The
+                 * former is a POSITIVE index that is outside the 32-bit integer range, whereas the latter is a NEGATIVE
+                 * index, which is what this code requires.
                  */
                 var bPixel = Video.aEGADWToByte[dwPixel] || 0;
                 this.setPixel(this.imageScreenBuffer, x++, y, aPixelColors[bPixel]);
@@ -5923,8 +5915,8 @@ Video.prototype.getRetraceBits = function(card)
 
     /*
      * NOTE: The CGA bits CGA.STATUS.RETRACE (0x01) and CGA.STATUS.VRETRACE (0x08) match the EGA definitions,
-     * and they also correspond to the MDA bits MDA.STATUS.HDRIVE (0x01) and MDA.STATUS.BWVIDEO (0x08); I'm not sure why
-     * the MDA uses different designations, but the bits appear to serve the same purpose.
+     * and they also correspond to the MDA bits MDA.STATUS.HDRIVE (0x01) and MDA.STATUS.BWVIDEO (0x08); I'm not sure
+     * why the MDA uses different designations, but the bits appear to serve the same purpose.
      *
      * TODO: Decide whether this more faithful emulation of the retrace bits should be extended to the MDA/CGA, too;
      * doing so might slow down the BIOS scroll code a bit, though.

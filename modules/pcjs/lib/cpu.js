@@ -122,11 +122,6 @@ function CPU(parmsCPU, nCyclesDefault)
     this.aCounts.nCyclesChecksumInterval = parmsCPU["csInterval"];
     this.aCounts.nCyclesChecksumStop = parmsCPU["csStop"];
 
-    /*
-     * Initially, no video devices are attached that require CPU-driven updates.  initBus() will update this.
-     */
-    this.aVideo = [];
-
     this.onRunTimeout = this.runCPU.bind(this); // function onRunTimeout() { cpu.runCPU(); };
 
     this.setReady();
@@ -179,14 +174,6 @@ CPU.prototype.initBus = function(cmp, bus, cpu, dbg)
     }
 
     this.fpu = cmp.getMachineComponent("FPU");
-
-    /*
-     * Attach the Video component to the CPU, so that the CPU can periodically update
-     * the video display via updateVideo(), as cycles permit.
-     */
-    for (var video = null; (video = cmp.getMachineComponent("Video", video));) {
-        this.aVideo.push(video);
-    }
 
     /*
      * Attach the ChipSet component to the CPU so that it can obtain the IDT vector number
@@ -323,7 +310,7 @@ CPU.prototype.autoStart = function()
      */
     if (this.flags.fAutoStart || (!DEBUGGER || !this.dbg) && this.bindings["run"] === undefined) {
         /*
-         * Now we ALSO set fSetFocus when calling runCPU(), on the assumption that in the "auto-starting" context,
+         * Now we ALSO set fUpdateFocus when calling runCPU(), on the assumption that in the "auto-starting" context,
          * a machine without focus is like a day without sunshine.
          */
         this.runCPU(true);
@@ -480,66 +467,6 @@ CPU.prototype.displayValue = function(sLabel, nValue, cch)
          * too obsessive.
          */
         if (this.bindings[sLabel].textContent != sVal) this.bindings[sLabel].textContent = sVal;
-    }
-};
-
-/**
- * updateStatus(fForce)
- *
- * This provides periodic Control Panel updates (eg, a few times per second; see STATUS_UPDATES_PER_SECOND).
- * The X86CPU subclasses updateStatus() to take care of any DOM updates (eg, register values) while the CPU is running.
- *
- * @this {CPU}
- * @param {boolean} [fForce]
- */
-CPU.prototype.updateStatus = function(fForce)
-{
-    if (this.cmp && this.cmp.panel) this.cmp.panel.updateStatus();
-};
-
-/**
- * updateVideo(fForce)
- *
- * Any high-frequency updates should be performed here.  Avoid DOM updates, since updateVideo() can be called up to
- * 60 times per second (see VIDEO_UPDATES_PER_SECOND).
- *
- * @this {CPU}
- * @param {boolean} [fForce] (true to force a video update)
- */
-CPU.prototype.updateVideo = function(fForce)
-{
-    for (var i = 0; i < this.aVideo.length; i++) {
-        this.aVideo[i].updateScreen(fForce);
-    }
-    if (this.cmp && this.cmp.panel) this.cmp.panel.updateAnimation();
-};
-
-/**
- * setFocus(fScroll)
- *
- * NOTE: When soft keyboard buttons call us to return focus to the machine (and away from the button),
- * the scroll feature has annoying effect on iOS, so we no longer do it by default (fScroll must be true).
- *
- * @this {CPU}
- * @param {boolean} [fScroll]
- */
-CPU.prototype.setFocus = function(fScroll)
-{
-    if (this.aVideo.length) {
-        /*
-         * This seems to be recommended work-around to prevent the browser from scrolling the focused element
-         * into view.  The CPU is not a visual component, so when the CPU wants to set focus, the primary intent
-         * is to ensure that keyboard input is fielded properly.
-         */
-        var x = 0, y = 0;
-        if (fScroll && window) {
-            x = window.scrollX;
-            y = window.scrollY;
-        }
-        this.aVideo[0].setFocus();
-        if (fScroll && window) {
-            window.scrollTo(x, y);
-        }
     }
 };
 
@@ -823,20 +750,20 @@ CPU.prototype.getSpeedTarget = function()
 };
 
 /**
- * setSpeed(nMultiplier, fSetFocus)
+ * setSpeed(nMultiplier, fUpdateFocus)
  *
  * NOTE: This used to return the target speed, in mhz, but no callers appear to care at this point.
  *
  * @this {CPU}
  * @param {number} [nMultiplier] is the new proposed multiplier (reverts to 1 if the target was too high)
- * @param {boolean} [fSetFocus] is true to give the CPU focus
+ * @param {boolean} [fUpdateFocus] is true to give the Computer focus
  * @return {boolean} true if successful, false if not
  *
  * @desc Whenever the speed is changed, the running cycle count and corresponding start time must be reset,
  * so that the next effective speed calculation obtains sensible results.  In fact, when runCPU() initially calls
  * setSpeed() with no parameters, that's all this function does (it doesn't change the current speed setting).
  */
-CPU.prototype.setSpeed = function(nMultiplier, fSetFocus)
+CPU.prototype.setSpeed = function(nMultiplier, fUpdateFocus)
 {
     var fSuccess = false;
     if (nMultiplier !== undefined) {
@@ -857,7 +784,7 @@ CPU.prototype.setSpeed = function(nMultiplier, fSetFocus)
             if (controlSpeed) controlSpeed.textContent = sSpeed;
             this.println("target speed: " + sSpeed);
         }
-        if (fSetFocus) this.setFocus();
+        if (fUpdateFocus && this.cmp) this.cmp.updateFocus();
     }
     this.addCycles(this.nRunCycles);
     this.nRunCycles = 0;
@@ -1014,12 +941,12 @@ CPU.prototype.calcRemainingTime = function()
 };
 
 /**
- * runCPU(fSetFocus)
+ * runCPU(fUpdateFocus)
  *
  * @this {CPU}
- * @param {boolean} [fSetFocus] is true to give the CPU focus
+ * @param {boolean} [fUpdateFocus] is true to update Computer focus
  */
-CPU.prototype.runCPU = function(fSetFocus)
+CPU.prototype.runCPU = function(fUpdateFocus)
 {
     if (!this.setBusy(true)) {
         this.updateCPU();
@@ -1027,7 +954,7 @@ CPU.prototype.runCPU = function(fSetFocus)
         return;
     }
 
-    this.startCPU(fSetFocus);
+    this.startCPU(fUpdateFocus);
 
     /*
      *  calcStartTime() initializes the cycle counter and timestamp for this runCPU() invocation, and optionally
@@ -1078,13 +1005,13 @@ CPU.prototype.runCPU = function(fSetFocus)
             this.aCounts.nCyclesNextVideoUpdate -= nCycles;
             if (this.aCounts.nCyclesNextVideoUpdate <= 0) {
                 this.aCounts.nCyclesNextVideoUpdate += this.aCounts.nCyclesPerVideoUpdate;
-                this.updateVideo();
+                if (this.cmp) this.cmp.updateVideo();
             }
 
             this.aCounts.nCyclesNextStatusUpdate -= nCycles;
             if (this.aCounts.nCyclesNextStatusUpdate <= 0) {
                 this.aCounts.nCyclesNextStatusUpdate += this.aCounts.nCyclesPerStatusUpdate;
-                this.updateStatus();
+                if (this.cmp) this.cmp.updateStatus();
             }
 
             this.aCounts.nCyclesNextYield -= nCycles;
@@ -1106,13 +1033,13 @@ CPU.prototype.runCPU = function(fSetFocus)
 };
 
 /**
- * startCPU(fSetFocus)
+ * startCPU(fUpdateFocus)
  *
  * WARNING: Other components must use runCPU() to get the CPU running; this is a runCPU() helper function only.
  *
- * @param {boolean} [fSetFocus]
+ * @param {boolean} [fUpdateFocus]
  */
-CPU.prototype.startCPU = function(fSetFocus)
+CPU.prototype.startCPU = function(fUpdateFocus)
 {
     if (!this.flags.fRunning) {
         /*
@@ -1128,8 +1055,10 @@ CPU.prototype.startCPU = function(fSetFocus)
         if (this.chipset) this.chipset.setSpeaker();
         var controlRun = this.bindings["run"];
         if (controlRun) controlRun.textContent = "Halt";
-        this.updateStatus(true);
-        if (fSetFocus) this.setFocus(true);
+        if (this.cmp) {
+            this.cmp.updateStatus();
+            if (fUpdateFocus) this.cmp.updateFocus(true);
+        }
     }
 };
 
@@ -1187,8 +1116,10 @@ CPU.prototype.stopCPU = function(fComplete)
  */
 CPU.prototype.updateCPU = function(fForce)
 {
-    this.updateVideo(fForce);
-    this.updateStatus();
+    if (this.cmp) {
+        this.cmp.updateVideo(fForce);
+        this.cmp.updateStatus();
+    }
 };
 
 /**

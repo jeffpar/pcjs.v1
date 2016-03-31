@@ -2,7 +2,7 @@
 <?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.21.4/manifest.xsl"?>
 <manifest type="software">
 	<title>IBM OS/2 1.1</title>
-	<disk id="disk00" size="1474560" chs="80:2:18" img="archive/OS211-INSTALLATION.img" href="/disks/pc/os2/ibm/1.1/OS211-INSTALLATION.json" md5="64b1a50f35385f326e7b59b17b417769" md5json="6510aede5a434ae794a3ee9e8d09d6c9">
+	<disk id="disk00" size="1474560" chs="80:2:18" img="archive/OS211-INSTALL.img" href="/disks/pc/os2/ibm/1.1/OS211-INSTALL.json" md5="64b1a50f35385f326e7b59b17b417769" md5json="6510aede5a434ae794a3ee9e8d09d6c9">
 		<name>IBM OS/2 1.1 (1.44M Install)</name>
 	</disk>
 	<disk id="disk01" size="1474560" chs="80:2:18" img="archive/OS211-DISK01.img" href="/disks/pc/os2/ibm/1.1/OS211-DISK01.json" md5="5b0526049c097e7afa54073f13cf87d1" md5json="f74cb91702c9a502418139601269280d">

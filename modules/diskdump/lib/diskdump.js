@@ -338,7 +338,7 @@ function DiskDump(sDiskPath, asExclude, sFormat, fComments, sSize, sServerRoot, 
         this.sDiskPath = path.join(this.sServerRoot, sDiskPath);
     }
     this.asExclude = asExclude || DiskDump.asExclusions;
-    this.kbTarget = +sSize || 0;
+    this.kbTarget = sSize|0;    // convert the numeric string to a 32-bit number (or 0 if invalid)
     this.sFormat = (sFormat || DumpAPI.FORMAT.JSON);
     this.fJSONNative = (this.sFormat == DumpAPI.FORMAT.JSON && !fComments);
     this.nJSONIndent = 0;
