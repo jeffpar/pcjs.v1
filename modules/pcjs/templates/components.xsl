@@ -1116,7 +1116,8 @@
 		</xsl:call-template>
 	</xsl:template>
 
-	<xsl:template name="comment">
+	<xsl:template match="comment">
+		<xsl:comment><xsl:apply-templates/></xsl:comment>
 	</xsl:template>
 
 </xsl:stylesheet>
