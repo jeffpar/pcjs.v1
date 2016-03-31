@@ -1,6 +1,6 @@
 ---
 layout: page
-title: PC Software Guides
+title: PC Software Documentation
 permalink: /pubs/pc/software/
 ---
 

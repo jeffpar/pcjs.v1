@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Microsoft C Optimizing Compiler 5.1
+title: Microsoft C Optimizing Compiler 5.1 Documentation
 permalink: /pubs/pc/software/tools/microsoft/c/5.10/
 ---
 
