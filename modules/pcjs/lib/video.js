@@ -1000,7 +1000,7 @@ Video.aEGADWToByte[0x80808000|0] = 0xe;
 Video.aEGADWToByte[0x80808080|0] = 0xf;
 
 /**
- * Card(video, iCard, data, cbMemory)
+ * Card(video, nCard, data, cbMemory)
  *
  * Creates an object representing an initial video card state;
  * can also restore a video card from state data created by saveCard().
@@ -1011,25 +1011,25 @@ Video.aEGADWToByte[0x80808080|0] = 0xf;
  *
  * @constructor
  * @param {Video} [video]
- * @param {number} [iCard] (see Video.CARD.*)
+ * @param {number} [nCard] (see Video.CARD.*)
  * @param {Array|null} [data]
  * @param {number} [cbMemory] is specified if the card must allocate its own memory buffer
  */
-function Card(video, iCard, data, cbMemory)
+function Card(video, nCard, data, cbMemory)
 {
     /*
      * If a card was originally not present (eg, EGA), then the state will be empty,
      * so we need to detect that case and continue indicating that the card is not present.
      */
-    if (iCard !== undefined && (!data || data.length)) {
+    if (nCard !== undefined && (!data || data.length)) {
 
         this.video = video;
 
-        var specs = Video.cardSpecs[iCard];
+        var specs = Video.cardSpecs[nCard];
         var nMonitorType = video.nMonitorType || specs[5];
 
         if (!data || data.length < 6) {
-            data = [false, 0, null, null, 0, new Array(iCard < Video.CARD.EGA? Card.CRTC.TOTAL_REGS : Card.CRTC.EGA.TOTAL_REGS)];
+            data = [false, 0, null, null, 0, new Array(nCard < Video.CARD.EGA? Card.CRTC.TOTAL_REGS : Card.CRTC.EGA.TOTAL_REGS)];
         }
 
         /*
@@ -1041,7 +1041,7 @@ function Card(video, iCard, data, cbMemory)
             this.port = specs[1];
         }
 
-        this.nCard = iCard;
+        this.nCard = nCard;
         this.addrBuffer = specs[2];     // default (physical) video buffer address
         this.sizeBuffer = specs[3];     // default video buffer length (this is the total size, not the current visible size; this.cbScreen is calculated on the fly to reflect the latter)
 
@@ -1073,7 +1073,7 @@ function Card(video, iCard, data, cbMemory)
         this.nCRTCRegs  = Card.CRTC.TOTAL_REGS;
         this.asCRTCRegs = DEBUGGER? Card.CRTC.REGS : [];
 
-        if (iCard >= Video.CARD.EGA) {
+        if (nCard >= Video.CARD.EGA) {
             this.nCRTCRegs = Card.CRTC.EGA.TOTAL_REGS;
             this.asCRTCRegs = DEBUGGER? Card.CRTC.EGA_REGS : [];
             this.initEGA(data[6], nMonitorType);
@@ -2500,20 +2500,15 @@ Card.prototype.dumpRegs = function(sName, iReg, aRegs, asRegs)
 {
     if (DEBUGGER) {
         if (!aRegs) {
-            this.dbg.println(sName + ": " + str.toHexByte(iReg));
+            this.dbg.println(sName + ": " + str.toHex(iReg, 2));
             return;
         }
-        var i, cchMax = 19, s = "";
-        /*
-        var s = "", i, cchMax = 0;
+        var i, cchMax = 18, s = "";
         for (i = 0; i < asRegs.length; i++) {
-            if (cchMax < asRegs[i].length) cchMax = asRegs[i].length;
-        }
-        cchMax++;
-         */
-        for (i = 0; i < asRegs.length; i++) {
+            var reg = (aRegs === this.regCRTData)? this.getCRTCReg(i) : aRegs[i];
             if (s) s += '\n';
-            s += sName + "[" + str.toHexByte(i) + "]: " + str.pad(asRegs[i], cchMax) + str.toHexByte(aRegs[i]) + (i === iReg? "*" : "");
+            s += sName + "[" + str.toHex(i, 2) + "]: " + str.pad(asRegs[i], cchMax) + (i === iReg? '*' : ' ') + str.toHex(reg, reg > 0xff? 4 : 2);
+            if (reg != null) s += " (" + reg + ".)"
         }
         this.dbg.println(s);
     }
@@ -2536,11 +2531,11 @@ Card.prototype.dumpVideoCard = function()
             this.dumpRegs(" GRC", this.regGRCIndx, this.regGRCData, this.asGRCRegs);
             this.dumpRegs(" SEQ", this.regSEQIndx, this.regSEQData, this.asSEQRegs);
             this.dumpRegs(" ATC", this.regATCIndx, this.regATCData, this.asATCRegs);
-            this.dumpRegs("   ATCINDX", this.regATCIndx);
-            this.dbg.println("   ATCDATA: " + this.fATCData);
-            this.dumpRegs("      FEAT", this.regFeat);
-            this.dumpRegs("      MISC", this.regMisc);
-            this.dumpRegs("   STATUS0", this.regStatus0);
+            this.dumpRegs(" ATCINDX", this.regATCIndx);
+            this.dbg.println(" ATCDATA: " + this.fATCData);
+            this.dumpRegs("    FEAT", this.regFeat);
+            this.dumpRegs("    MISC", this.regMisc);
+            this.dumpRegs(" STATUS0", this.regStatus0);
             /*
              * There are few more EGA regs we could dump, like GRCPos1, GRCPos2, but does anyone care?
              */
@@ -2550,19 +2545,19 @@ Card.prototype.dumpVideoCard = function()
          * TODO: This simply dumps the last value read from the STATUS1 register, not necessarily
          * its current state; consider dumping getRetraceBits() instead of (or in addition to) this.
          */
-        this.dumpRegs("   STATUS1", this.regStatus);
+        this.dumpRegs(" STATUS1", this.regStatus);
 
         if (this.nCard == Video.CARD.MDA || this.nCard == Video.CARD.CGA) {
-            this.dumpRegs("   MODEREG", this.regMode);
+            this.dumpRegs(" MODEREG", this.regMode);
         }
 
         if (this.nCard == Video.CARD.CGA) {
-            this.dumpRegs("     COLOR", this.regColor);
+            this.dumpRegs("   COLOR", this.regColor);
         }
 
         if (this.nCard >= Video.CARD.EGA) {
-            this.dbg.println("   LATCHES: 0x" + str.toHex(this.latches));
-            this.dbg.println("    ACCESS: " + str.toHexWord(this.nAccess));
+            this.dbg.println(" LATCHES: " + str.toHex(this.latches));
+            this.dbg.println("  ACCESS: " + str.toHex(this.nAccess, 4));
             this.dbg.println("Use 'dump video [addr]' to dump video memory");
             /*
              * There are few more EGA regs we could dump, like GRCPos1, GRCPos2, but does anyone care?
@@ -2780,6 +2775,52 @@ Card.prototype.setMemoryAccess = function(nAccess)
         this.afnAccess[3] = fnWriteByte;
         this.nAccess = nAccess;
     }
+};
+
+/**
+ * getCRTCReg()
+ *
+ * @this {Card}
+ * @param {number} iReg
+ * @return {number}
+ */
+Card.prototype.getCRTCReg = function(iReg)
+{
+    var reg = this.regCRTData[iReg];
+    if (reg != null && this.nCard >= Video.CARD.EGA) {
+        var bOvrflowBit8 = 0, bOvrflowBit9 = 0, bMaxScanBit9 = 0;
+        switch(iReg) {
+        case Card.CRTC.EGA.VTOTAL:              // 0x06
+            bOvrflowBit8 = Card.CRTC.EGA.OVERFLOW.VTOTAL_BIT8;          // 0x01
+            if (this.nCard == Video.CARD.VGA) bOvrflowBit9 = Card.CRTC.EGA.OVERFLOW.VTOTAL_BIT9;
+            break;
+        case Card.CRTC.EGA.CURSOR_START.INDX:   // 0x0A
+            if (this.nCard == Video.CARD.EGA) bOvrflowBit8 = Card.CRTC.EGA.OVERFLOW.CURSOR_START_BIT8;
+            break;
+        case Card.CRTC.EGA.VRETRACE_START:      // 0x10
+            bOvrflowBit8 = Card.CRTC.EGA.OVERFLOW.VRETRACE_START_BIT8;  // 0x04
+            if (this.nCard == Video.CARD.VGA) bOvrflowBit9 = Card.CRTC.EGA.OVERFLOW.VRETRACE_START_BIT9;
+            break;
+        case Card.CRTC.EGA.VDISP_END:           // 0x12
+            bOvrflowBit8 = Card.CRTC.EGA.OVERFLOW.VDISP_END_BIT8;       // 0x02
+            if (this.nCard == Video.CARD.VGA) bOvrflowBit9 = Card.CRTC.EGA.OVERFLOW.VDISP_END_BIT9;
+            break;
+        case Card.CRTC.EGA.VBLANK_START:        // 0x15
+            bOvrflowBit8 = Card.CRTC.EGA.OVERFLOW.VBLANK_START_BIT8;    // 0x08
+            if (this.nCard == Video.CARD.VGA) bMaxScanBit9 = Card.CRTC.EGA.MAX_SCAN.VBLANK_START_BIT9;
+            break;
+        case Card.CRTC.EGA.LINE_COMPARE:        // 0x18
+            bOvrflowBit8 = Card.CRTC.EGA.OVERFLOW.LINE_COMPARE_BIT8;    // 0x10
+            if (this.nCard == Video.CARD.VGA) bMaxScanBit9 = Card.CRTC.EGA.MAX_SCAN.LINE_COMPARE_BIT9;
+            break;
+        }
+        if (bOvrflowBit8) {
+            reg |= ((this.regCRTData[Card.CRTC.EGA.OVERFLOW.INDX] & bOvrflowBit8)? 0x100 : 0);
+            reg |= ((this.regCRTData[Card.CRTC.EGA.OVERFLOW.INDX] & bOvrflowBit9)? 0x200 : 0);
+            reg |= ((this.regCRTData[Card.CRTC.EGA.MAX_SCAN.INDX] & bMaxScanBit9)? 0x200 : 0);
+        }
+    }
+    return reg;
 };
 
 /*
@@ -4695,14 +4736,14 @@ Video.prototype.setDimensions = function()
              * to use the 9x14 "EGA" color font instead.
              *
              * TODO: Can an EGA with a monochrome monitor be programmed for 43-line mode as well?  If so,
-             * then we'll need to load another MDA font variation, because we only load an 9x14 font for MDA.
+             * then we'll need to load another MDA font variation, because we only load the 9x14 font for MDA.
              */
             if (this.cardActive === this.cardEGA && this.nFont == Video.FONT.CGA) {
-                if (this.cardEGA.regCRTData[Card.CRTC.EGA.MAX_SCAN.INDX] == 7) {
+                if ((this.cardEGA.regCRTData[Card.CRTC.EGA.MAX_SCAN.INDX] & Card.CRTC.EGA.MAX_SCAN.SCAN_LINE) == 7) {
                     /*
                      * Vertical resolution of 350 divided by 8 (ie, scan lines 0-7) yields 43 whole rows.
                      */
-                    this.nRows = 43;
+                    this.nRows = this.cardEGA.getCRTCReg(Card.CRTC.EGA.VDISP_END) < 350? 43 : 50;
                 }
                 /*
                  * Since we can also be called before any hardware registers have been initialized,
@@ -4952,16 +4993,11 @@ Video.prototype.checkMode = function(fForce)
                     }
                 }
 
-                var fSEQDotClock = (card.regSEQData[Card.SEQ.CLOCKING.INDX] & Card.SEQ.CLOCKING.DOTCLOCK);
-
-                var nCRTCVertTotal = card.regCRTData[Card.CRTC.EGA.VTOTAL];
-                nCRTCVertTotal |= ((card.regCRTData[Card.CRTC.EGA.OVERFLOW.INDX] & Card.CRTC.EGA.OVERFLOW.VTOTAL_BIT8)? 0x100 : 0);
-                if (card.nCard == Video.CARD.VGA) {
-                    nCRTCVertTotal |= ((card.regCRTData[Card.CRTC.EGA.OVERFLOW.INDX] & Card.CRTC.EGA.OVERFLOW.VTOTAL_BIT9)? 0x200 : 0);
-                }
-
+                var nCRTCVertTotal = card.getCRTCReg(Card.CRTC.EGA.VTOTAL);
                 var nCRTCMaxScan = card.regCRTData[Card.CRTC.EGA.MAX_SCAN.INDX];
                 var nCRTCModeCtrl = card.regCRTData[Card.CRTC.EGA.MODE_CTRL.INDX];
+
+                var fSEQDotClock = (card.regSEQData[Card.SEQ.CLOCKING.INDX] & Card.SEQ.CLOCKING.DOTCLOCK);
 
                 if (nMode != Video.MODE.UNKNOWN) {
                     if (!(regGRCMisc & Card.GRC.MISC.GRAPHICS)) {
