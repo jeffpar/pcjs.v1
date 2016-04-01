@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.21.3/machine.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.21.4/machine.xsl"?>
 <machine id="ibm5160" class="pc" border="1" width="680px" float="left" background="#FAEBD7">
-	<name pos="center">IBM PC XT, 128K EGA, 640K RAM, 10Mb Hard Drive</name>
+	<name pos="center">IBM PC XT, 128K EGA, 640K RAM, 10Mb Hard Disk</name>
 	<computer id="xt-ega-640k" name="IBM PC XT" state="/disks/pc/windows/1.01/ibm5160-ega.json"/>
 	<ram id="ramLow" addr="0x00000" test="false" size="0xa0000" comment="0xa0000 (640Kb) size overrides SW1|ROM BIOS memory test has been disabled"/>
 	<rom id="romHDC" addr="0xc8000" size="0x2000" file="/devices/pc/hdc/ibm-xebec-1982.json"/>

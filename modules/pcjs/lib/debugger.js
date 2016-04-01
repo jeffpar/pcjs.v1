@@ -2182,11 +2182,11 @@ if (DEBUGGER) {
     };
 
     /**
-     * setFocus()
+     * updateFocus()
      *
      * @this {Debugger}
      */
-    Debugger.prototype.setFocus = function()
+    Debugger.prototype.updateFocus = function()
     {
         if (this.controlDebug) this.controlDebug.focus();
     };
@@ -3945,16 +3945,16 @@ if (DEBUGGER) {
     };
 
     /**
-     * runCPU(fSetFocus)
+     * runCPU(fUpdateFocus)
      *
      * @this {Debugger}
-     * @param {boolean} [fSetFocus] is true to give the CPU focus
+     * @param {boolean} [fUpdateFocus] is true to update focus
      * @return {boolean} true if run request successful, false if not
      */
-    Debugger.prototype.runCPU = function(fSetFocus)
+    Debugger.prototype.runCPU = function(fUpdateFocus)
     {
         if (!this.isCPUAvail()) return false;
-        this.cpu.runCPU(fSetFocus);
+        this.cpu.runCPU(fUpdateFocus);
         return true;
     };
 
@@ -4258,7 +4258,7 @@ if (DEBUGGER) {
                 this.println(sStopped);
             }
             this.updateStatus(true);
-            this.setFocus();
+            this.updateFocus();
             this.clearTempBreakpoint(this.cpu.regLIP);
         }
     };
@@ -7618,7 +7618,7 @@ if (DEBUGGER) {
             if (this.nStep) {
                 this.setTempBreakpoint(dbgAddr);
                 if (!this.runCPU()) {
-                    this.cpu.setFocus();
+                    if (this.cmp) this.cmp.updateFocus();
                     this.nStep = 0;
                 }
                 /*

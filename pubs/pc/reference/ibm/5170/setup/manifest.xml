@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.21.3/manifest.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.21.4/manifest.xsl"?>
 <manifest type="document">
-	<title>IBM 5170 Installation and Setup (March 1984)</title>
+	<title>IBM 5170 Installation and Setup</title>
 	<source href="http://minuszerodegrees.net">minuszerodegrees.net</source>
-	<document href="http://minuszerodegrees.net/manuals/IBM_5170_Installation_and_Setup_1502491_MAR84.pdf"/>
+	<document href="http://minuszerodegrees.net/manuals/IBM_5170_Installation_and_Setup_1502491_MAR84.pdf">
+		<name>IBM 5170 Installation and Setup (March 1984)</name>
+	</document>
 </manifest>

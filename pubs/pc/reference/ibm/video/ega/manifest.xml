@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.21.4/manifest.xsl"?>
+<manifest type="document">
+	<title>IBM Enhanced Graphics Adapter</title>
+	<source href="http://minuszerodegrees.net">minuszerodegrees.net</source>
+	<document href="http://minuszerodegrees.net/oa/OA - IBM Enhanced Graphics Adapter.pdf">
+		<name>IBM EGA Technical Reference</name>
+		<cover href="archive/ega/thumbs/IBM-EGA 1.jpeg"/>
+		<page>Misc (3C2/3DA)</page>
+		<page href="#page=16">3C2: Misc Output</page>
+		<page href="#page=19">3C2: Input Status 0</page>
+		<page href="#page=18">3DA: Feature Control</page>
+		<page href="#page=20">3DA: Input Status 1</page>
+		<page>Sequencer (3C4/3C5)</page>
+		<page href="#page=22">00: Reset</page>
+		<page href="#page=23">01: Clocking Mode</page>
+		<page href="#page=25">02: Map Mask</page>
+		<page href="#page=26">03: Char Map Select</page>
+		<page href="#page=27">04: Memory Mode</page>
+		<page>CRTC (3D4/3D5)</page>
+		<page href="#page=29">00: Horz Total</page>
+		<page href="#page=30">01: Horz Disp End</page>
+		<page href="#page=30">02: Horz Blank Start</page>
+		<page href="#page=31">03: Horz Blank End</page>
+		<page href="#page=32">04: Horz Retrace Start</page>
+		<page href="#page=33">05: Horz Retrace End</page>
+		<page href="#page=34">06: Vert Total</page>
+		<page href="#page=35">07: CRTC Overflow</page>
+		<page href="#page=36">08: Preset Row Scan</page>
+		<page href="#page=36">09: Max Scan Line</page>
+		<page href="#page=37">0A: Cursor Start</page>
+		<page href="#page=37">0B: Cursor End</page>
+		<page href="#page=38">0C: Start Addr Hi</page>
+		<page href="#page=38">0D: Start Addr Lo</page>
+		<page href="#page=39">0E: Cursor Addr Hi</page>
+		<page href="#page=39">0F: Cursor Addr Lo</page>
+		<page href="#page=40">10: Vert Retrace Start</page>
+		<page href="#page=40">10: Light Pen Hi</page>
+		<page href="#page=41">11: Vert Retrace End</page>
+		<page href="#page=41">11: Light Pen Lo</page>
+		<page href="#page=42">12: Vert Disp End</page>
+		<page href="#page=43">13: Offset</page>
+		<page href="#page=43">14: Underline</page>
+		<page href="#page=44">15: Vert Blank Start</page>
+		<page href="#page=44">16: Vert Blank End</page>
+		<page href="#page=45">17: Mode Control</page>
+		<page href="#page=47">18: Lone Compare</page>
+		<page>Graphics (3CE/3CF)</page>
+		<page href="#page=51">00: Set/Reset</page>
+		<page href="#page=52">01: Enable Set/Reset</page>
+		<page href="#page=52">02: Color Compare</page>
+		<page href="#page=53">03: Data Rotate</page>
+		<page href="#page=54">04: Read Map Select</page>
+		<page href="#page=55">05: Mode</page>
+		<page href="#page=56">06: Miscellaneous</page>
+		<page href="#page=58">07: Color Don't Care</page>
+		<page href="#page=58">08: Bit Mask</page>
+		<page>Attributes (3C0)</page>
+		<page href="#page=60">00: Address</page>
+		<page href="#page=61">00-0F: Palette</page>
+		<page href="#page=62">10: Mode Control</page>
+		<page href="#page=63">11: Overscan Color</page>
+		<page href="#page=64">12: Color Planes</page>
+		<page href="#page=65">13: Horz Panning</page>
+		<page>BIOS</page>
+		<page href="#page=107">BIOS Listing</page>
+	</document>
+</manifest>

@@ -659,7 +659,7 @@ HTMLOut.logError = function(err, fForce)
 {
     var sError = "";
     if (err) {
-        sError = "htmlout error: " + err.message;
+        sError = "HTMLOut error: " + err.message;
         if (fConsole || fForce) HTMLOut.logConsole(sError);
     }
     return sError;
@@ -1460,6 +1460,15 @@ HTMLOut.prototype.getMachineXML = function(sToken, sIndent, aParms, sXMLFile, sS
         }
 
         /*
+         * If we were called from getManifestXML(), then let's fallback to getMarkdownFile() instead.
+         */
+        if (fFromManifest) {
+            s = sIndent + "<p>" + HTMLOut.logError(err) + " (invalid manifest entry)</p>";
+            obj.getMarkdownFile(obj.sFile, sToken, sIndent, aParms, s);
+            return;
+        }
+
+        /*
          * If we're still here, one of the following happened:
          *
          *      1) there was no "machine.xml"; see err for details
@@ -1468,23 +1477,13 @@ HTMLOut.prototype.getMachineXML = function(sToken, sIndent, aParms, sXMLFile, sS
          *
          * But, instead of displaying a cryptic error message inside our beautiful HTML template, eg:
          *
-         *      htmlout error: ENOENT, open '/Users/Jeff/Sites/pcjs/devices/pc/machine/5160/cga/256kb/win101/debugger/machine.xml'
+         *      HTMLOut error: ENOENT, open '/Users/Jeff/Sites/pcjs/devices/pc/machine/5160/cga/256kb/win101/debugger/machine.xml'
          *
          * we have one more fallback: a random string!  Less useful, but more entertaining.  Well, maybe not even that.
          *
          *      s = HTMLOut.logError(err);
          */
-
-        /*
-         * If we were called from getManifestXML(), then let's fallback to getMarkdownFile() instead.
-         */
-        s = obj.getRandomString(sIndent);
-        if (fFromManifest) {
-            obj.getMarkdownFile(obj.sFile, sToken, sIndent, aParms, s);
-            return;
-        }
-
-        obj.aTokens[sToken] = s;
+        obj.aTokens[sToken] = obj.getRandomString(sIndent);
         obj.replaceTokens();
     });
 };
@@ -1703,7 +1702,7 @@ HTMLOut.prototype.getMarkdownFile = function(sFile, sToken, sIndent, aParms, sPr
             /*
              * Instead of displaying a cryptic error message inside our beautiful HTML template, eg:
              *
-             *      htmlout error: ENOENT, open '/Users/Jeff/Sites/pcjs/devices/pc/machine/5160/cga/256kb/win101/debugger/README.md'
+             *      HTMLOut error: ENOENT, open '/Users/Jeff/Sites/pcjs/devices/pc/machine/5160/cga/256kb/win101/debugger/README.md'
              *
              * which is all this will give us:
              *

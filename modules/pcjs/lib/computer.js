@@ -185,6 +185,14 @@ function Computer(parmsComputer, parmsMachine, fSuspended) {
     this.dbg = /** @type {Debugger} */ (Component.getComponentByType("Debugger", this.id));
 
     /*
+     * Enumerate all Video components for future updateVideo() calls.
+     */
+    this.aVideo = [];
+    for (var video = null; (video = this.getMachineComponent("Video", video));) {
+        this.aVideo.push(video);
+    }
+
+    /*
      * Initialize the Bus component
      */
     this.bus = new Bus({'id': this.idMachine + '.bus', 'buswidth': this.nBusWidth}, this.cpu, this.dbg);
@@ -1435,6 +1443,65 @@ Computer.prototype.getMachineComponent = function(sType, componentPrev)
         if (component.type == sType) return component;
     }
     return null;
+};
+
+/**
+ * updateFocus(fScroll)
+ *
+ * NOTE: When soft keyboard buttons call us to return focus to the machine (and away from the button),
+ * the scroll feature has annoying effect on iOS, so we no longer do it by default (fScroll must be true).
+ *
+ * @this {Computer}
+ * @param {boolean} [fScroll]
+ */
+Computer.prototype.updateFocus = function(fScroll)
+{
+    if (this.aVideo.length) {
+        /*
+         * This seems to be recommended work-around to prevent the browser from scrolling the focused element
+         * into view.  The CPU is not a visual component, so when the CPU wants to set focus, the primary intent
+         * is to ensure that keyboard input is fielded properly.
+         */
+        var x = 0, y = 0;
+        if (fScroll && window) {
+            x = window.scrollX;
+            y = window.scrollY;
+        }
+        /*
+         * TODO: We need a mechanism to determine the "active" display, instead of hard-coding this to aVideo[0].
+         */
+        this.aVideo[0].setFocus();
+        if (fScroll && window) {
+            window.scrollTo(x, y);
+        }
+    }
+};
+
+/**
+ * updateStatus()
+ *
+ * @this {Computer}
+ */
+Computer.prototype.updateStatus = function()
+{
+    if (this.panel) this.panel.updateStatus();
+};
+
+/**
+ * updateVideo(fForce)
+ *
+ * Any high-frequency updates should be performed here.  Avoid DOM updates, since updateVideo() can be called up to
+ * 60 times per second (see VIDEO_UPDATES_PER_SECOND).
+ *
+ * @this {Computer}
+ * @param {boolean} [fForce] (true to force a video update)
+ */
+Computer.prototype.updateVideo = function(fForce)
+{
+    for (var i = 0; i < this.aVideo.length; i++) {
+        this.aVideo[i].updateScreen(fForce);
+    }
+    if (this.panel) this.panel.updateAnimation();
 };
 
 /**

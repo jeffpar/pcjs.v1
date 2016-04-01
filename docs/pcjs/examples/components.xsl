@@ -11,7 +11,7 @@
 
 	<xsl:variable name="MACHINECLASS">pc</xsl:variable>
 	<xsl:variable name="APPCLASS">pcjs</xsl:variable>
-	<xsl:variable name="APPVERSION">1.21.3</xsl:variable>
+	<xsl:variable name="APPVERSION">1.21.4</xsl:variable>
 	<xsl:variable name="SITEHOST">www.pcjs.org</xsl:variable>
 
 	<xsl:template name="componentStyles">
@@ -1112,6 +1112,10 @@
 			<xsl:with-param name="class">computer</xsl:with-param>
 			<xsl:with-param name="parms">,autoPower:<xsl:value-of select="$autoPower"/>,busWidth:<xsl:value-of select="$busWidth"/>,resume:<xsl:value-of select="$resume"/>,state:'<xsl:value-of select="$state"/>'</xsl:with-param>
 		</xsl:call-template>
+	</xsl:template>
+
+	<xsl:template match="comment">
+		<xsl:comment><xsl:apply-templates/></xsl:comment>
 	</xsl:template>
 
 </xsl:stylesheet>

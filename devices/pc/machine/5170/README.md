@@ -9,5 +9,7 @@ IBM PC AT Machines (Model 5170)
 
 All our Model 5170, aka IBM PC AT, configurations are located here, including:
 
+* [IBM PC AT with MDA Display](/devices/pc/machine/5170/mda/)
+* [IBM PC AT with CGA Display](/devices/pc/machine/5170/cga/)
 * [IBM PC AT with EGA Display](/devices/pc/machine/5170/ega/)
 * [IBM PC AT with VGA Display](/devices/pc/machine/5170/vga/)

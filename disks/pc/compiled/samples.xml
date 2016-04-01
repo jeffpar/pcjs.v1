@@ -7,7 +7,7 @@
 		<disk path="/disks/pc/dos/ibm/1.10/PCDOS110.json">PC-DOS 1.10</disk>
 		<disk path="/disks/pc/dos/ibm/2.00/PCDOS200-DISK1.json">PC-DOS 2.00 (Disk 1)</disk>
 		<disk path="/disks/pc/dos/ibm/2.00/PCDOS200-DISK2.json">PC-DOS 2.00 (Disk 2)</disk>
-		<disk path="/disks/pc/games/microsoft/adventure/adventure-1981.json">Microsoft Adventure</disk>
+		<disk path="/disks/pc/games/microsoft/adventure/ADVENTURE-1981.json">Microsoft Adventure</disk>
 		<disk path="/apps/pc/1981/visicalc/disk.json">VisiCalc</disk>
 	</control>
 	<control type="button" binding="loadDrive">Load</control>

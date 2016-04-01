@@ -58,10 +58,10 @@ if (NODE) {
  *      scale: true for font scaling, false (default) to center the display on the screen
  *      charCols: number of character columns
  *      charRows: number of character rows
- *      fontROM: path to .rom file (or a JSON representation) that defines the character set
+ *      fontROM: path to .rom file (or a JSON representation) containing the character set
  *      screenColor: background color of the screen canvas (default is black)
- *      touchScreen: string specifying desired touch-screen support (default is ''); see initBus()
- *      autoLock: true to (attempt to) automatically lock the mouse to the canvas (default is false)
+ *      touchScreen: string specifying desired touch-screen support (default is none)
+ *      autoLock: true to (attempt to) auto-lock the mouse to the canvas (default is false)
  *
  * An EGA may specify the following additional properties:
  *
@@ -73,22 +73,23 @@ if (NODE) {
  * the port level, and whenever reset() is called.  setMode() also invokes updateScreen(true),
  * which forces reallocation of our internal buffer (aCellCache) that mirrors the video buffer.
  *
- * The CPU periodically calls updateScreen(), at an assumed rate of 60 times/second,
- * to update any blinking elements (the cursor and any characters with the blink attribute),
- * to compare/update the contents of our internal buffer with the video buffer, and to render
- * any differences between the two buffers into the associated screen canvas, via either
- * updateChar() or setPixel().
+ * The CPU periodically calls updateVideo(), which in turn calls updateScreen() for each Video
+ * instance.  These updates should occur at a rate of 60 times/second, to update any blinking
+ * elements (the cursor and any cells with the blink attribute), to compare/update the contents
+ * of our internal buffer with the video buffer, and to render any differences between the two
+ * buffers into the associated screen canvas, via either updateChar() or setPixel().
  *
- * Thanks to the CPU's new block-based memory manager that allows us to sparse-allocate memory
+ * Thanks to the Bus' new block-based memory manager that allows us to sparse-allocate memory
  * (in 4Kb increments on 20-bit buses, 16Kb increments on 24-bit buses), updateScreen()
  * can also ask the CPU for the "dirty" state of all the blocks underlying the video buffer,
  * bypassing the update completely if the buffer is still clean.
  *
- * Unfortunately, that optimization is defeated if our count of active blink elements is non-zero,
+ * Sadly, that optimization is defeated if the count of active blink elements is non-zero,
  * because we must rescan the entire buffer to locate and redraw them all; I'm assuming for now
- * that, more often than not, blink attributes will not be present, and therefore they're not worth
- * a separate caching mechanism.  If the only blinking element is the cursor, that's no problem,
- * as we redraw only the one cell containing the cursor (assuming the buffer is otherwise clean).
+ * that, more often than not, very few (if any) blink attributes will be present, and therefore
+ * they're not worth a separate caching mechanism.  If the only blinking element is the cursor,
+ * that's no problem, as we redraw only the one cell containing the cursor (assuming the buffer
+ * is otherwise clean).
  *
  * @constructor
  * @extends Component
@@ -1000,7 +1001,7 @@ Video.aEGADWToByte[0x80808000|0] = 0xe;
 Video.aEGADWToByte[0x80808080|0] = 0xf;
 
 /**
- * Card(video, iCard, data, cbMemory)
+ * Card(video, nCard, data, cbMemory)
  *
  * Creates an object representing an initial video card state;
  * can also restore a video card from state data created by saveCard().
@@ -1011,25 +1012,25 @@ Video.aEGADWToByte[0x80808080|0] = 0xf;
  *
  * @constructor
  * @param {Video} [video]
- * @param {number} [iCard] (see Video.CARD.*)
+ * @param {number} [nCard] (see Video.CARD.*)
  * @param {Array|null} [data]
  * @param {number} [cbMemory] is specified if the card must allocate its own memory buffer
  */
-function Card(video, iCard, data, cbMemory)
+function Card(video, nCard, data, cbMemory)
 {
     /*
      * If a card was originally not present (eg, EGA), then the state will be empty,
      * so we need to detect that case and continue indicating that the card is not present.
      */
-    if (iCard !== undefined && (!data || data.length)) {
+    if (nCard !== undefined && (!data || data.length)) {
 
         this.video = video;
 
-        var specs = Video.cardSpecs[iCard];
+        var specs = Video.cardSpecs[nCard];
         var nMonitorType = video.nMonitorType || specs[5];
 
         if (!data || data.length < 6) {
-            data = [false, 0, null, null, 0, new Array(iCard < Video.CARD.EGA? Card.CRTC.TOTAL_REGS : Card.CRTC.EGA.TOTAL_REGS)];
+            data = [false, 0, null, null, 0, new Array(nCard < Video.CARD.EGA? Card.CRTC.TOTAL_REGS : Card.CRTC.EGA.TOTAL_REGS)];
         }
 
         /*
@@ -1041,7 +1042,7 @@ function Card(video, iCard, data, cbMemory)
             this.port = specs[1];
         }
 
-        this.nCard = iCard;
+        this.nCard = nCard;
         this.addrBuffer = specs[2];     // default (physical) video buffer address
         this.sizeBuffer = specs[3];     // default video buffer length (this is the total size, not the current visible size; this.cbScreen is calculated on the fly to reflect the latter)
 
@@ -1073,7 +1074,7 @@ function Card(video, iCard, data, cbMemory)
         this.nCRTCRegs  = Card.CRTC.TOTAL_REGS;
         this.asCRTCRegs = DEBUGGER? Card.CRTC.REGS : [];
 
-        if (iCard >= Video.CARD.EGA) {
+        if (nCard >= Video.CARD.EGA) {
             this.nCRTCRegs = Card.CRTC.EGA.TOTAL_REGS;
             this.asCRTCRegs = DEBUGGER? Card.CRTC.EGA_REGS : [];
             this.initEGA(data[6], nMonitorType);
@@ -2500,20 +2501,15 @@ Card.prototype.dumpRegs = function(sName, iReg, aRegs, asRegs)
 {
     if (DEBUGGER) {
         if (!aRegs) {
-            this.dbg.println(sName + ": " + str.toHexByte(iReg));
+            this.dbg.println(sName + ": " + str.toHex(iReg, 2));
             return;
         }
-        var i, cchMax = 19, s = "";
-        /*
-        var s = "", i, cchMax = 0;
+        var i, cchMax = 18, s = "";
         for (i = 0; i < asRegs.length; i++) {
-            if (cchMax < asRegs[i].length) cchMax = asRegs[i].length;
-        }
-        cchMax++;
-         */
-        for (i = 0; i < asRegs.length; i++) {
+            var reg = (aRegs === this.regCRTData)? this.getCRTCReg(i) : aRegs[i];
             if (s) s += '\n';
-            s += sName + "[" + str.toHexByte(i) + "]: " + str.pad(asRegs[i], cchMax) + str.toHexByte(aRegs[i]) + (i === iReg? "*" : "");
+            s += sName + "[" + str.toHex(i, 2) + "]: " + str.pad(asRegs[i], cchMax) + (i === iReg? '*' : ' ') + str.toHex(reg, reg > 0xff? 4 : 2);
+            if (reg != null) s += " (" + reg + ".)"
         }
         this.dbg.println(s);
     }
@@ -2536,11 +2532,11 @@ Card.prototype.dumpVideoCard = function()
             this.dumpRegs(" GRC", this.regGRCIndx, this.regGRCData, this.asGRCRegs);
             this.dumpRegs(" SEQ", this.regSEQIndx, this.regSEQData, this.asSEQRegs);
             this.dumpRegs(" ATC", this.regATCIndx, this.regATCData, this.asATCRegs);
-            this.dumpRegs("   ATCINDX", this.regATCIndx);
-            this.dbg.println("   ATCDATA: " + this.fATCData);
-            this.dumpRegs("      FEAT", this.regFeat);
-            this.dumpRegs("      MISC", this.regMisc);
-            this.dumpRegs("   STATUS0", this.regStatus0);
+            this.dumpRegs(" ATCINDX", this.regATCIndx);
+            this.dbg.println(" ATCDATA: " + this.fATCData);
+            this.dumpRegs("    FEAT", this.regFeat);
+            this.dumpRegs("    MISC", this.regMisc);
+            this.dumpRegs(" STATUS0", this.regStatus0);
             /*
              * There are few more EGA regs we could dump, like GRCPos1, GRCPos2, but does anyone care?
              */
@@ -2550,19 +2546,19 @@ Card.prototype.dumpVideoCard = function()
          * TODO: This simply dumps the last value read from the STATUS1 register, not necessarily
          * its current state; consider dumping getRetraceBits() instead of (or in addition to) this.
          */
-        this.dumpRegs("   STATUS1", this.regStatus);
+        this.dumpRegs(" STATUS1", this.regStatus);
 
         if (this.nCard == Video.CARD.MDA || this.nCard == Video.CARD.CGA) {
-            this.dumpRegs("   MODEREG", this.regMode);
+            this.dumpRegs(" MODEREG", this.regMode);
         }
 
         if (this.nCard == Video.CARD.CGA) {
-            this.dumpRegs("     COLOR", this.regColor);
+            this.dumpRegs("   COLOR", this.regColor);
         }
 
         if (this.nCard >= Video.CARD.EGA) {
-            this.dbg.println("   LATCHES: 0x" + str.toHex(this.latches));
-            this.dbg.println("    ACCESS: " + str.toHexWord(this.nAccess));
+            this.dbg.println(" LATCHES: " + str.toHex(this.latches));
+            this.dbg.println("  ACCESS: " + str.toHex(this.nAccess, 4));
             this.dbg.println("Use 'dump video [addr]' to dump video memory");
             /*
              * There are few more EGA regs we could dump, like GRCPos1, GRCPos2, but does anyone care?
@@ -2782,6 +2778,52 @@ Card.prototype.setMemoryAccess = function(nAccess)
     }
 };
 
+/**
+ * getCRTCReg()
+ *
+ * @this {Card}
+ * @param {number} iReg
+ * @return {number}
+ */
+Card.prototype.getCRTCReg = function(iReg)
+{
+    var reg = this.regCRTData[iReg];
+    if (reg != null && this.nCard >= Video.CARD.EGA) {
+        var bOvrflowBit8 = 0, bOvrflowBit9 = 0, bMaxScanBit9 = 0;
+        switch(iReg) {
+        case Card.CRTC.EGA.VTOTAL:              // 0x06
+            bOvrflowBit8 = Card.CRTC.EGA.OVERFLOW.VTOTAL_BIT8;          // 0x01
+            if (this.nCard == Video.CARD.VGA) bOvrflowBit9 = Card.CRTC.EGA.OVERFLOW.VTOTAL_BIT9;
+            break;
+        case Card.CRTC.EGA.CURSOR_START.INDX:   // 0x0A
+            if (this.nCard == Video.CARD.EGA) bOvrflowBit8 = Card.CRTC.EGA.OVERFLOW.CURSOR_START_BIT8;
+            break;
+        case Card.CRTC.EGA.VRETRACE_START:      // 0x10
+            bOvrflowBit8 = Card.CRTC.EGA.OVERFLOW.VRETRACE_START_BIT8;  // 0x04
+            if (this.nCard == Video.CARD.VGA) bOvrflowBit9 = Card.CRTC.EGA.OVERFLOW.VRETRACE_START_BIT9;
+            break;
+        case Card.CRTC.EGA.VDISP_END:           // 0x12
+            bOvrflowBit8 = Card.CRTC.EGA.OVERFLOW.VDISP_END_BIT8;       // 0x02
+            if (this.nCard == Video.CARD.VGA) bOvrflowBit9 = Card.CRTC.EGA.OVERFLOW.VDISP_END_BIT9;
+            break;
+        case Card.CRTC.EGA.VBLANK_START:        // 0x15
+            bOvrflowBit8 = Card.CRTC.EGA.OVERFLOW.VBLANK_START_BIT8;    // 0x08
+            if (this.nCard == Video.CARD.VGA) bMaxScanBit9 = Card.CRTC.EGA.MAX_SCAN.VBLANK_START_BIT9;
+            break;
+        case Card.CRTC.EGA.LINE_COMPARE:        // 0x18
+            bOvrflowBit8 = Card.CRTC.EGA.OVERFLOW.LINE_COMPARE_BIT8;    // 0x10
+            if (this.nCard == Video.CARD.VGA) bMaxScanBit9 = Card.CRTC.EGA.MAX_SCAN.LINE_COMPARE_BIT9;
+            break;
+        }
+        if (bOvrflowBit8) {
+            reg |= ((this.regCRTData[Card.CRTC.EGA.OVERFLOW.INDX] & bOvrflowBit8)? 0x100 : 0);
+            reg |= ((this.regCRTData[Card.CRTC.EGA.OVERFLOW.INDX] & bOvrflowBit9)? 0x200 : 0);
+            reg |= ((this.regCRTData[Card.CRTC.EGA.MAX_SCAN.INDX] & bMaxScanBit9)? 0x200 : 0);
+        }
+    }
+    return reg;
+};
+
 /*
  * Card Specifications
  *
@@ -2904,7 +2946,9 @@ Video.prototype.initBus = function(cmp, bus, cpu, dbg)
     this.bEGASwitches = 0x09;   // our default "switches" setting (see aEGAMonitorSwitches)
     this.chipset = cmp.getMachineComponent("ChipSet");
     if (this.chipset && this.sSwitches) {
-        if (this.nCard == Video.CARD.EGA) this.bEGASwitches = this.chipset.parseSwitches(this.sSwitches, this.bEGASwitches);
+        if (this.nCard == Video.CARD.EGA) {
+            this.bEGASwitches = this.chipset.parseDIPSwitches(this.sSwitches, this.bEGASwitches);
+        }
     }
 
     /*
@@ -3535,7 +3579,7 @@ Video.prototype.reset = function()
      * on the EGA's own switch settings instead.
      */
     if (this.chipset) {
-        nMonitorType = this.chipset.getSWVideoMonitor();
+        nMonitorType = this.chipset.getDIPVideoMonitor();
     }
 
     /*
@@ -4693,14 +4737,14 @@ Video.prototype.setDimensions = function()
              * to use the 9x14 "EGA" color font instead.
              *
              * TODO: Can an EGA with a monochrome monitor be programmed for 43-line mode as well?  If so,
-             * then we'll need to load another MDA font variation, because we only load an 9x14 font for MDA.
+             * then we'll need to load another MDA font variation, because we only load the 9x14 font for MDA.
              */
             if (this.cardActive === this.cardEGA && this.nFont == Video.FONT.CGA) {
-                if (this.cardEGA.regCRTData[Card.CRTC.EGA.MAX_SCAN.INDX] == 7) {
+                if ((this.cardEGA.regCRTData[Card.CRTC.EGA.MAX_SCAN.INDX] & Card.CRTC.EGA.MAX_SCAN.SCAN_LINE) == 7) {
                     /*
                      * Vertical resolution of 350 divided by 8 (ie, scan lines 0-7) yields 43 whole rows.
                      */
-                    this.nRows = 43;
+                    this.nRows = this.cardEGA.getCRTCReg(Card.CRTC.EGA.VDISP_END) < 350? 43 : 50;
                 }
                 /*
                  * Since we can also be called before any hardware registers have been initialized,
@@ -4950,16 +4994,11 @@ Video.prototype.checkMode = function(fForce)
                     }
                 }
 
-                var fSEQDotClock = (card.regSEQData[Card.SEQ.CLOCKING.INDX] & Card.SEQ.CLOCKING.DOTCLOCK);
-
-                var nCRTCVertTotal = card.regCRTData[Card.CRTC.EGA.VTOTAL];
-                nCRTCVertTotal |= ((card.regCRTData[Card.CRTC.EGA.OVERFLOW.INDX] & Card.CRTC.EGA.OVERFLOW.VTOTAL_BIT8)? 0x100 : 0);
-                if (card.nCard == Video.CARD.VGA) {
-                    nCRTCVertTotal |= ((card.regCRTData[Card.CRTC.EGA.OVERFLOW.INDX] & Card.CRTC.EGA.OVERFLOW.VTOTAL_BIT9)? 0x200 : 0);
-                }
-
+                var nCRTCVertTotal = card.getCRTCReg(Card.CRTC.EGA.VTOTAL);
                 var nCRTCMaxScan = card.regCRTData[Card.CRTC.EGA.MAX_SCAN.INDX];
                 var nCRTCModeCtrl = card.regCRTData[Card.CRTC.EGA.MODE_CTRL.INDX];
+
+                var fSEQDotClock = (card.regSEQData[Card.SEQ.CLOCKING.INDX] & Card.SEQ.CLOCKING.DOTCLOCK);
 
                 if (nMode != Video.MODE.UNKNOWN) {
                     if (!(regGRCMisc & Card.GRC.MISC.GRAPHICS)) {
@@ -4991,6 +5030,11 @@ Video.prototype.checkMode = function(fForce)
                          */
                         if (card.regGRCData[Card.GRC.MODE.INDX] & Card.GRC.MODE.COLOR256) {
                             if (nCRTCMaxScan & Card.CRTC.EGA.MAX_SCAN.SCAN_LINE) {
+                                /*
+                                 * NOTE: Technically, VDISP_END is one of those CRTC registers that should be read using
+                                 * card.getCRTCReg(), because there are overflow bits (8 and 9).  However, all known modes
+                                 * always SET bit 8 and CLEAR bit 9, so examining only bits 0-7 is sorta OK.
+                                 */
                                 if (card.regCRTData[Card.CRTC.EGA.VDISP_END] <= 0x8F) {
                                     nMode = Video.MODE.VGA_320X200;
                                 }
@@ -5052,7 +5096,7 @@ Video.prototype.checkMode = function(fForce)
  * setMode(nMode, fForce)
  *
  * Set fForce to true to update the mode regardless of previous mode, or false to perform
- * a normal update that bypasses updateScreen() but still calls initCellCache().
+ * a normal update that bypasses updateScreen() but still calls initCache().
  *
  * @this {Video}
  * @param {number|null} nMode
@@ -5123,7 +5167,7 @@ Video.prototype.setMode = function(nMode, fForce)
             }
         }
         this.setDimensions();
-        this.invalidateScreen(true);
+        this.invalidateCache(true);
         this.updateScreen();
     }
     return true;
@@ -5150,17 +5194,17 @@ Video.prototype.setPixel = function(imageData, x, y, rgb)
 };
 
 /**
- * initCellCache()
+ * initCache()
  *
  * Initializes the contents of our internal cell cache.
  *
  * TODO: Consider changing this to a cache of RGB values, so that when the buffer is merely being color-cycled,
- * we don't have to update the entire screen.  This will also allow invalidateScreen() to honor the fModified flag,
- * bypassing initCellCache() when it is false.
+ * we don't have to update the entire screen.  This will also allow invalidateCache() to honor the fModified flag,
+ * bypassing initCache() when it is false.
  *
  * @this {Video}
  */
-Video.prototype.initCellCache = function()
+Video.prototype.initCache = function()
 {
     this.cBlinkVisible = -1;                // invalidate the visible blinking character count, to force updateScreen() to recount
     this.fCellCacheValid = false;
@@ -5171,7 +5215,7 @@ Video.prototype.initCellCache = function()
 };
 
 /**
- * invalidateScreen(fModified)
+ * invalidateCache(fModified)
  *
  * Ensure that the next updateScreen() will update every cell; intended for situations where the entire screen needs
  * to be redrawn, even though the underlying data in the video buffer has not changed (and therefore cleanMemory() will
@@ -5182,10 +5226,10 @@ Video.prototype.initCellCache = function()
  * @this {Video}
  * @param {boolean} [fModified] (true if the buffer may have been modified, false if only color(s) may have changed)
  */
-Video.prototype.invalidateScreen = function(fModified)
+Video.prototype.invalidateCache = function(fModified)
 {
     if (!fModified) this.fRGBValid = false;
-    this.initCellCache();
+    this.initCache();
 };
 
 /**
@@ -5338,7 +5382,7 @@ Video.prototype.updateChar = function(col, row, data, context)
  * are the periodic updates coming from the CPU.
  *
  * For every cell in the video buffer, compare it to the cell stored in the cell cache, render if it differs,
- * and then update the cell cache to match.  Since initCellCache() sets every cell in the cell cache to an
+ * and then update the cell cache to match.  Since initCache() sets every cell in the cell cache to an
  * invalid value, we're assured that the next call to updateScreen() will redraw the entire (visible) video buffer.
  *
  * @this {Video}
@@ -5370,7 +5414,7 @@ Video.prototype.updateScreen = function(fForce)
     if (!fEnabled && !fForce) return;
 
     if (fForce) {
-        this.initCellCache();
+        this.initCache();
     }
     else {
         /*
@@ -5433,7 +5477,14 @@ Video.prototype.updateScreen = function(fForce)
      * multi-display configuration.
      */
     if ((this.getRetraceBits(card) & Card.CGA.STATUS.VRETRACE) || card.nVertPeriodsStartAddr && card.nVertPeriodsStartAddr < card.nVertPeriods) {
-        card.offStartAddr = ((card.regCRTData[Card.CRTC.START_ADDR_HI] << 8) + card.regCRTData[Card.CRTC.START_ADDR_LO])|0;
+        /*
+         * PARANOIA: Don't call invalidateCache() unless the address we're about to "latch" actually changed.
+         */
+        var offStartAddr = ((card.regCRTData[Card.CRTC.START_ADDR_HI] << 8) + card.regCRTData[Card.CRTC.START_ADDR_LO])|0;
+        if (card.offStartAddr !== offStartAddr) {
+            card.offStartAddr = offStartAddr;
+            this.invalidateCache();
+        }
         card.nVertPeriodsStartAddr = 0;
     }
 
@@ -5495,8 +5546,18 @@ Video.prototype.updateScreen = function(fForce)
     if (!fForce && this.fCellCacheValid && this.bus.cleanMemory(addrScreen, cbScreen)) {
         if (!fBlinkUpdate) return;
         if (!this.cBlinkVisible) {
-            if (this.iCellCursor < 0) return;
-            iCell = this.iCellCursor;
+            /*
+             * Note that since iCellCursor is a cell-based (not byte-based) index, we must subtract
+             * offStartAddr, which is also cell-based; subtracting offScreen would not be appropriate,
+             * as it has already been converted to a byte-based offset (remember that in text modes,
+             * cell are words, not bytes).
+             */
+            iCell = this.iCellCursor - card.offStartAddr;
+            /*
+             * Note that iCellCursor may have already been negative (-1 hides the cursor), and
+             * since offStartAddr should never be negative, we only need one iCell underflow check.
+             */
+            if (iCell < 0) return;
             nCells = iCell + 1;
         }
         // else if (this.cBlinks & 0x1) return;
@@ -5564,6 +5625,12 @@ Video.prototype.updateScreenText = function(addrScreen, addrScreenLimit, iCell, 
         fBlinkEnable = (this.cardActive.regATCData[Card.ATC.MODE.INDX] & Card.ATC.MODE.BLINK_ENABLE);
     }
 
+    /*
+     * Since iCell is always relative to addrScreen, we must make iCellCursor similarly relative,
+     * otherwise the cursor test below fails when the active video page is something other than page 0.
+     */
+    var iCellCursor = this.iCellCursor - this.cardActive.offStartAddr;
+
     if (fBlinkEnable) {
         dataBlink = (Video.ATTRS.BGND_BLINK << 8);
         dataMask &= ~dataBlink;
@@ -5578,7 +5645,7 @@ Video.prototype.updateScreenText = function(addrScreen, addrScreenLimit, iCell, 
             this.cBlinkVisible++;
             data &= dataMask;
         }
-        if (iCell == this.iCellCursor) {
+        if (iCell == iCellCursor) {
             data |= ((this.cBlinks & 0x1)? (Video.ATTRS.DRAW_CURSOR << 8) : 0);
         }
         this.assert(iCell < this.aCellCache.length);
@@ -5756,28 +5823,20 @@ Video.prototype.updateScreenGraphicsEGA = function(addrBuffer, addrScreen, addrS
             if (x < xDirty) xDirty = x;
             for (iPixel = 0; iPixel < nPixels; iPixel++) {
                 /*
-                 * We must follow the golden JavaScript rule of appending "|0" to all hex constants with bit 31 set.
-                 * The innocuous use of the bit-wise OR operator has the side-effect of producing a negative value,
-                 * matching how entries in Video.aEGADWToByte are initialized (eg, "Video.aEGADWToByte[0x80000000|0]").
+                 * 0x80808080 may LOOK like a 32-bit value, but it is not, because JavaScript treats it as a POSITIVE
+                 * number, and therefore outside the normal 32-bit integer range; however, the AND operator guarantees
+                 * that the result will be a 32-bit value, so it doesn't matter.
                  */
-                var dwPixel = data & (0x80808080|0);
-                /*
-                 * This was the old approach to dealing with negative hex values, by converting them to positive
-                 * values that didn't alter the low 32 bits.  But it's not ideal, because it requires using values here
-                 * and in the array that are outside the signed 32-bit range, potentially triggering floating-point.
-                 *
-                 *      if (dwPixel < 0) dwPixel += 0x100000000;
-                 *
-                 * An even simpler solution would be to use the unsigned right-shift operator:
-                 *
-                 *      dwPixel >>> 0
-                 *
-                 * but again, all that does is produce a value outside the signed 32-bit range, which is sub-optimal.
-                 */
+                var dwPixel = data & 0x80808080;
                 this.assert(Video.aEGADWToByte[dwPixel] !== undefined);
                 /*
                  * Since assertions don't fix problems (only catch them, and only in DEBUG builds), I'm also ensuring
-                 * that bPixel will always default to 0 if an undefined value ever slips through again.
+                 * that bPixel will default to 0 if an undefined value ever slips through again.
+                 *
+                 * How did an undefined value slip through?  We had (incorrectly) initialized entries in aEGADWToByte;
+                 * for example, we used to set aEGADWToByte[0x80808080] instead of aEGADWToByte[0x80808080|0].  The
+                 * former is a POSITIVE index that is outside the 32-bit integer range, whereas the latter is a NEGATIVE
+                 * index, which is what this code requires.
                  */
                 var bPixel = Video.aEGADWToByte[dwPixel] || 0;
                 this.setPixel(this.imageScreenBuffer, x++, y, aPixelColors[bPixel]);
@@ -5921,8 +5980,8 @@ Video.prototype.getRetraceBits = function(card)
 
     /*
      * NOTE: The CGA bits CGA.STATUS.RETRACE (0x01) and CGA.STATUS.VRETRACE (0x08) match the EGA definitions,
-     * and they also correspond to the MDA bits MDA.STATUS.HDRIVE (0x01) and MDA.STATUS.BWVIDEO (0x08); I'm not sure why
-     * the MDA uses different designations, but the bits appear to serve the same purpose.
+     * and they also correspond to the MDA bits MDA.STATUS.HDRIVE (0x01) and MDA.STATUS.BWVIDEO (0x08); I'm not sure
+     * why the MDA uses different designations, but the bits appear to serve the same purpose.
      *
      * TODO: Decide whether this more faithful emulation of the retrace bits should be extended to the MDA/CGA, too;
      * doing so might slow down the BIOS scroll code a bit, though.
@@ -6168,8 +6227,14 @@ Video.prototype.outATC = function(port, bOut, addrFrom)
         /*
          * HACK: offStartAddr is supposed to be "latched" ONLY at the start of every VRETRACE interval, but
          * other "triggers" are helpful; see updateScreen() for details.
+         *
+         * PARANOIA: Don't call invalidateCache() unless the start address we just "latched" actually changed.
          */
-        card.offStartAddr = ((card.regCRTData[Card.CRTC.START_ADDR_HI] << 8) + card.regCRTData[Card.CRTC.START_ADDR_LO])|0;
+        var offStartAddr = ((card.regCRTData[Card.CRTC.START_ADDR_HI] << 8) + card.regCRTData[Card.CRTC.START_ADDR_LO])|0;
+        if (card.offStartAddr != offStartAddr) {
+            card.offStartAddr = offStartAddr;
+            this.invalidateCache();
+        }
         card.nVertPeriodsStartAddr = 0;
     } else {
         card.fATCData = false;
@@ -6180,7 +6245,7 @@ Video.prototype.outATC = function(port, bOut, addrFrom)
                     this.printMessageIO(port, bOut, addrFrom, "ATC." + card.asATCRegs[iReg]);
                 }
                 card.regATCData[iReg] = bOut;
-                this.invalidateScreen(false);
+                this.invalidateCache(false);
             }
         }
     }
@@ -6516,7 +6581,7 @@ Video.prototype.outDACData = function(port, bOut, addrFrom)
     var dwNew = (dw & ~(0x3f << this.cardEGA.regDACShift)) | ((bOut & 0x3f) << this.cardEGA.regDACShift);
     if (dw !== dwNew) {
         this.cardEGA.regDACData[this.cardEGA.regDACAddr] = dwNew;
-        this.invalidateScreen(false);
+        this.invalidateCache(false);
     }
     this.cardEGA.regDACShift += 6;
     if (this.cardEGA.regDACShift > 12) {
@@ -6801,7 +6866,7 @@ Video.prototype.outCGAColor = function(port, bOut, addrFrom)
     }
     if (this.cardColor.regColor !== bOut) {
         this.cardColor.regColor = bOut;
-        this.invalidateScreen(false);
+        this.invalidateCache(false);
     }
 };
 
@@ -6915,7 +6980,14 @@ Video.prototype.outCRTCData = function(card, port, bOut, addrFrom)
              * the vertical period count and latch it later, in updateScreen(), once the count has advanced.
              */
             if (this.getRetraceBits(card) & Card.CGA.STATUS.RETRACE) {
-                card.offStartAddr = ((card.regCRTData[Card.CRTC.START_ADDR_HI] << 8) + card.regCRTData[Card.CRTC.START_ADDR_LO])|0;
+                /*
+                 * PARANOIA: Don't call invalidateCache() unless the address we're about to "latch" actually changed.
+                 */
+                var offStartAddr = ((card.regCRTData[Card.CRTC.START_ADDR_HI] << 8) + card.regCRTData[Card.CRTC.START_ADDR_LO])|0;
+                if (card.offStartAddr !== offStartAddr) {
+                    card.offStartAddr = offStartAddr;
+                    this.invalidateCache();
+                }
             } else if (!card.nVertPeriodsStartAddr) {
                 card.nVertPeriodsStartAddr = card.nVertPeriods;
             }
