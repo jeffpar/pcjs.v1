@@ -1740,6 +1740,85 @@ FDC.prototype.outFDCOutput = function(port, bOut, addrFrom)
 };
 
 /**
+ * inFDCDiagnostic(port, addrFrom)
+ *
+ * It turns out that any 5170 configuration without an HDC component that attempts to use either the REV2 or REV3
+ * PC AT ROM BIOS will fail with error "601-Diskette Error", unless we also provide this "D/S/P DIAGNOSTIC REGISTER".
+ * The original 5170 REV1 BIOS didn't have this requirement.
+ *
+ * I'm unable to find any documentation on this so-called "D/S/P DIAGNOSTIC REGISTER" (port 0x3F1) or the "D/S/P CARD"
+ * to which the ROM BIOS refers.  But it seems clear that if we don't provide the expected response from the DIAGNOSTIC
+ * REGISTER, and there's no HDC to respond to the MULTIPLE DATA RATE CAPABLE test that follows, then an error is inevitable.
+ * Clearly, there is a very intimate relationship between the FDC and HDC portions of this card.
+ *
+ * Here's the relevant code from the REV3 PC AT ROM BIOS (TEST2.ASM):
+ *
+ *      ;-----  CHECK FOR MULTIPLE DATA RATE CAPABILITY
+ *
+ *      J_OK:
+ *              MOV     DX,03F1H                ; D/S/P DIAGNOSTIC REGISTER
+ *              IN      AL,DX                   ; READ D/S/P TYPE CODE
+ *              AND     AL,11111000B            ; KEEP ONLY UNIQUE CODE FOR D/S/P
+ *              CMP     AL,01010000B            ; D/S/P CARD - MULTIPLE DATA RATE?
+ *              JZ      J_OK3                   ; IF SO JUMP
+ *
+ *              MOV     DX,05F7H                ; FIXED DISK DIAGNOSTIC REGISTER
+ *              IN      AL,DX                   ; READ FIXED DISK TYPE CODE
+ *              AND     AL,11110000B            ; KEEP ONLY UNIQUE CODE FOR F/D
+ *              CMP     AL,10100000B            ; FIXED DISK ADAPTER ?
+ *              JZ      J_FAIL                  ; MUST BE COMBO ELSE ERROR
+ *
+ *              MOV     BL,0FH                  ; OUTER LOOP COUNT WAIT FOR BUSY OFF
+ *              SUB     CX,CX
+ *              MOV     DX,01F7H                ; HARD FILE STATUS PORT
+ *      J_OK1:
+ *              IN      AL,DX                   ; GET THE STATUS
+ *              TEST    AL,080H                 ; IS THE CONTROLLER BUSY?
+ *              JZ      J_OK2                   ; CONTINUE IF NOT
+ *              LOOP    J_OK1                   ; TRY AGAIN
+ *              DEC     BL                      ; DECREMENT OUTER LOOP
+ *              JNZ     J_OK1                   ; TRY AGAIN IF NOT ZERO
+ *              AND     AL,0CH                  ; BITS 2 & 3 = 0 IF MULTI DATA CAPABLE
+ *              JZ      J_OK3                   ; GO IF YES
+ *              JMP     SHORT J_FAIL            ; NO MULTIPLE DATA RATE CAPABILITY
+ *      J_OK2:
+ *              MOV     DX,1F4H                 ; VERIFY MULTIPLE DATA RATE CAPABLE
+ *              MOV     AL,055H                 ; WRITE TO THE CYLINDER BYTE
+ *              OUT     DX,AL
+ *              JMP     $+2                     ; I/O DELAY
+ *              IN      AL,DX                   ; CHECK DATA WRITTEN = DATA READ
+ *              CMP     AL,055H
+ *              JNZ     J_FAIL                  ; GO IF NOT
+ *              MOV     AL,0AAH                 ; WRITE ANOTHER PATTERN
+ *              OUT     DX,AL
+ *              JMP     $+2                     ; I/O DELAY
+ *              IN      AL,DX
+ *              CMP     AL,0AAH                 ; IS DATA PATTERN THE SAME?
+ *              JZ      J_OK3                   ; GO IF SO
+ *
+ *      J_FAIL:
+ *              OR      @MFG_ERR_FLAG+1,DSK_FAIL;       <><><><><><><><><><><><><>
+ *                                              ;       <><> DISKETTE FAILED  <><>
+ *              MOV     SI,OFFSET E601          ; GET ADDRESS OF MESSAGE
+ *              CALL    E_MSG                   ; GO PRINT ERROR MESSAGE
+ *              JMP     SHORT F15C              ; SKIP SETUP IF ERROR
+ *
+ *      J_OK3:
+ *              OR      @LASTRATE,DUAL          ; TURN ON DSP/COMBO FLAG
+ *
+ * @this {FDC}
+ * @param {number} port (0x3F1, input only)
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
+ * @return {number} simulated port value
+ */
+FDC.prototype.inFDCDiagnostic = function(port, addrFrom)
+{
+    var b = 0x50;       // we simply return the expected pattern (01010000B); see code excerpt above
+    this.printMessageIO(port, null, addrFrom, "DIAG", b);
+    return b;
+};
+
+/**
  * inFDCStatus(port, addrFrom)
  *
  * @this {FDC}
@@ -2545,6 +2624,7 @@ FDC.prototype.writeFormat = function(drive, b)
  * way out and always emulating it.  So, consider an FDC parameter to disable that feature for stricter compatibility.
  */
 FDC.aPortInput = {
+    0x3F1: FDC.prototype.inFDCDiagnostic,
     0x3F4: FDC.prototype.inFDCStatus,
     0x3F5: FDC.prototype.inFDCData,
     0x3F7: FDC.prototype.inFDCInput

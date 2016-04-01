@@ -60,8 +60,8 @@ if (NODE) {
  * As support for IBM-compatible machines grows, we should refrain from adding new model strings (eg, "att6300")
  * and corresponding model checks, and instead add more ChipSet configuration properties, such as:
  *
- *      pit1:           0x48 to enable PIT1 at base port 0x48 (as used by COMPAQ_DESKPRO386); default to undefined
- *      kc:             8041 to select 8041 emulation (eg, for ATT_6300); default to 8255 for MODEL_5150/MODEL_5160, 8042 for MODEL_5170
+ *      pit1port:       0x48 to enable PIT1 at base port 0x48 (as used by COMPAQ_DESKPRO386); default to undefined
+ *      kbdchip:        8041 to select 8041 emulation (eg, for ATT_6300); default to 8255 for MODEL_5150/MODEL_5160, 8042 for MODEL_5170
  *
  * @constructor
  * @extends Component
@@ -823,8 +823,10 @@ ChipSet.DIPSW[ChipSet.MODEL_5150][0][ChipSet.SWITCH_TYPE.MONITOR] = {
         2:      0x20,
         3:      0x30,
         "none": 0x00,
-        "tv":   0x10,
+        "tv":   0x10,   // aka composite
         "color":0x20,
+        "cga":  0x20,   // alias for color
+        "mda":  0x30,   // alias for mono
         "mono": 0x30,
         "ega":  0x00,
         "vga":  0x00

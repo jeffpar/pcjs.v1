@@ -2958,6 +2958,11 @@ HDC.aXTCPortInput = {
     0x322:  HDC.prototype.inXTCConfig
 };
 
+/*
+ * For future reference, the REV2 and REV3 PC AT ROM BIOS also refer to a "FIXED DISK DIAGNOSTIC REGISTER" at
+ * port 0x5F7, but I have no documentation on it, and failure to respond is non-fatal.  See the discussion of the
+ * FDC diagnostic register in inFDCDiagnostic() for more details.
+ */
 HDC.aATCPortInput = {
     0x1F0:  HDC.prototype.inATCData,
     0x1F1:  HDC.prototype.inATCError,

@@ -12,5 +12,7 @@
 		<page href="#page=169">BIOS Listing</page>
 		<page href="#page=175">TEST.01: X286 Processor Test</page>
 		<page href="#page=177">TEST.02: Verify CMOS Shutdown Byte</page>
+		<page href="#page=222">POST7 VERW/VERR</page>
+		<page href="#page=232">DISKETTE_IO_1</page>
 	</document>
 </manifest>
