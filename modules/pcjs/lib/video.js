@@ -58,10 +58,10 @@ if (NODE) {
  *      scale: true for font scaling, false (default) to center the display on the screen
  *      charCols: number of character columns
  *      charRows: number of character rows
- *      fontROM: path to .rom file (or a JSON representation) that defines the character set
+ *      fontROM: path to .rom file (or a JSON representation) containing the character set
  *      screenColor: background color of the screen canvas (default is black)
- *      touchScreen: string specifying desired touch-screen support (default is ''); see initBus()
- *      autoLock: true to (attempt to) automatically lock the mouse to the canvas (default is false)
+ *      touchScreen: string specifying desired touch-screen support (default is none)
+ *      autoLock: true to (attempt to) auto-lock the mouse to the canvas (default is false)
  *
  * An EGA may specify the following additional properties:
  *
@@ -73,22 +73,23 @@ if (NODE) {
  * the port level, and whenever reset() is called.  setMode() also invokes updateScreen(true),
  * which forces reallocation of our internal buffer (aCellCache) that mirrors the video buffer.
  *
- * The CPU periodically calls updateScreen(), at an assumed rate of 60 times/second,
- * to update any blinking elements (the cursor and any characters with the blink attribute),
- * to compare/update the contents of our internal buffer with the video buffer, and to render
- * any differences between the two buffers into the associated screen canvas, via either
- * updateChar() or setPixel().
+ * The CPU periodically calls updateVideo(), which in turn calls updateScreen() for each Video
+ * instance.  These updates should occur at a rate of 60 times/second, to update any blinking
+ * elements (the cursor and any cells with the blink attribute), to compare/update the contents
+ * of our internal buffer with the video buffer, and to render any differences between the two
+ * buffers into the associated screen canvas, via either updateChar() or setPixel().
  *
- * Thanks to the CPU's new block-based memory manager that allows us to sparse-allocate memory
+ * Thanks to the Bus' new block-based memory manager that allows us to sparse-allocate memory
  * (in 4Kb increments on 20-bit buses, 16Kb increments on 24-bit buses), updateScreen()
  * can also ask the CPU for the "dirty" state of all the blocks underlying the video buffer,
  * bypassing the update completely if the buffer is still clean.
  *
- * Unfortunately, that optimization is defeated if our count of active blink elements is non-zero,
+ * Sadly, that optimization is defeated if the count of active blink elements is non-zero,
  * because we must rescan the entire buffer to locate and redraw them all; I'm assuming for now
- * that, more often than not, blink attributes will not be present, and therefore they're not worth
- * a separate caching mechanism.  If the only blinking element is the cursor, that's no problem,
- * as we redraw only the one cell containing the cursor (assuming the buffer is otherwise clean).
+ * that, more often than not, very few (if any) blink attributes will be present, and therefore
+ * they're not worth a separate caching mechanism.  If the only blinking element is the cursor,
+ * that's no problem, as we redraw only the one cell containing the cursor (assuming the buffer
+ * is otherwise clean).
  *
  * @constructor
  * @extends Component
@@ -5029,6 +5030,11 @@ Video.prototype.checkMode = function(fForce)
                          */
                         if (card.regGRCData[Card.GRC.MODE.INDX] & Card.GRC.MODE.COLOR256) {
                             if (nCRTCMaxScan & Card.CRTC.EGA.MAX_SCAN.SCAN_LINE) {
+                                /*
+                                 * NOTE: Technically, VDISP_END is one of those CRTC registers that should be read using
+                                 * card.getCRTCReg(), because there are overflow bits (8 and 9).  However, all known modes
+                                 * always SET bit 8 and CLEAR bit 9, so examining only bits 0-7 is sorta OK.
+                                 */
                                 if (card.regCRTData[Card.CRTC.EGA.VDISP_END] <= 0x8F) {
                                     nMode = Video.MODE.VGA_320X200;
                                 }
@@ -5540,8 +5546,18 @@ Video.prototype.updateScreen = function(fForce)
     if (!fForce && this.fCellCacheValid && this.bus.cleanMemory(addrScreen, cbScreen)) {
         if (!fBlinkUpdate) return;
         if (!this.cBlinkVisible) {
-            if (this.iCellCursor < 0) return;
-            iCell = this.iCellCursor;
+            /*
+             * Note that since iCellCursor is a cell-based (not byte-based) index, we must subtract
+             * offStartAddr, which is also cell-based; subtracting offScreen would not be appropriate,
+             * as it has already been converted to a byte-based offset (remember that in text modes,
+             * cell are words, not bytes).
+             */
+            iCell = this.iCellCursor - card.offStartAddr;
+            /*
+             * Note that iCellCursor may have already been negative (-1 hides the cursor), and
+             * since offStartAddr should never be negative, we only need one iCell underflow check.
+             */
+            if (iCell < 0) return;
             nCells = iCell + 1;
         }
         // else if (this.cBlinks & 0x1) return;
@@ -5609,6 +5625,12 @@ Video.prototype.updateScreenText = function(addrScreen, addrScreenLimit, iCell, 
         fBlinkEnable = (this.cardActive.regATCData[Card.ATC.MODE.INDX] & Card.ATC.MODE.BLINK_ENABLE);
     }
 
+    /*
+     * Since iCell is always relative to addrScreen, we must make iCellCursor similarly relative,
+     * otherwise the cursor test below fails when the active video page is something other than page 0.
+     */
+    var iCellCursor = this.iCellCursor - this.cardActive.offStartAddr;
+
     if (fBlinkEnable) {
         dataBlink = (Video.ATTRS.BGND_BLINK << 8);
         dataMask &= ~dataBlink;
@@ -5623,7 +5645,7 @@ Video.prototype.updateScreenText = function(addrScreen, addrScreenLimit, iCell, 
             this.cBlinkVisible++;
             data &= dataMask;
         }
-        if (iCell == this.iCellCursor) {
+        if (iCell == iCellCursor) {
             data |= ((this.cBlinks & 0x1)? (Video.ATTRS.DRAW_CURSOR << 8) : 0);
         }
         this.assert(iCell < this.aCellCache.length);
