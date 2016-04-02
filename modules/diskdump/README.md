@@ -1,10 +1,10 @@
 ---
 layout: page
-title: DiskDump
+title: DiskDump Module
 permalink: /modules/diskdump/
 ---
 
-DiskDump
+DiskDump Module
 ===
 
 **DiskDump** is a Node module with both a command-line interface and a web server API for converting disk images

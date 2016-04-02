@@ -41,13 +41,14 @@ if (NODE) {
 }
 
 /**
- * savePC(idMachine, sPCJSFile)
+ * savePC(idMachine, sPCJSFile, callback)
  *
  * @param {string} idMachine
  * @param {string} sPCJSFile
+ * @param {function(Object)} [callback]
  * @return {boolean} true if successful, false if error
  */
-function savePC(idMachine, sPCJSFile)
+function savePC(idMachine, sPCJSFile, callback)
 {
     var cmp = /** @type {Computer} */ (Component.getComponentByType("Computer", idMachine));
     var dbg = /** @type {Debugger} */ (Component.getComponentByType("Debugger", idMachine));
@@ -61,6 +62,7 @@ function savePC(idMachine, sPCJSFile)
                 sPCJSFile = "/versions/pcjs/" + (XMLVERSION || APPVERSION) + "/pc" + (dbg? "-dbg" : "") + ".js";
             }
         }
+        if (callback && callback({ state: sState, parms: sParms })) return true;
         web.getResource(sPCJSFile, null, true, function(sURL, sResponse, nErrorCode) {
             downloadCSS(sURL, sResponse, nErrorCode, [idMachine, str.getBaseName(sPCJSFile, true), sParms, sState]);
         });
