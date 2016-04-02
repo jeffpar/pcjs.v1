@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.21.4/machine.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.21.5/machine.xsl"?>
 <machine id="deskpro386" class="pc" border="1" pos="center" background="#FAEBD7">
 	<name pos="center">COMPAQ DeskPro 386, 4Mb RAM, IBM VGA, 20Mb Hard Disk</name>
 	<computer id="deskpro386-vga-4096k" name="COMPAQ DeskPro 386" buswidth="32"/>
@@ -10,8 +10,8 @@
 	<rom id="romBIOS" addr="0xf8000" size="0x8000" alias="[0xf0000,0xffff0000,0xffff8000]" file="/devices/pc/rom/compaq/deskpro386/1988-01-28/1988-01-28.json"/>
 	<video ref="/devices/pc/video/ibm/vga/1986-10-27/256kb-autolockfs.xml"/>
 	<fdc ref="/disks/pc/compiled/library.xml" automount='{A: {name: "PC-DOS 3.30 (Disk 1)", path: "/disks/pc/dos/ibm/3.30/PCDOS330-DISK1.json"}, B: {name: "PC-DOS 3.30 (Disk 2)", path: "/disks/pc/dos/ibm/3.30/PCDOS330-DISK2.json"}}'/>
+	<hdc ref="/disks/pc/fixed/20mb/pcdos330-empty.xml"/>
 	<keyboard id="keyboard"/>
-	<hdc id="hdcAT" type="at" drives='[{name:"20Mb Hard Disk",type:2,path:"/disks/pc/fixed/20mb/PCDOS330-EMPTY.json"}]'/>
 	<chipset id="chipset" model="deskpro386" floppies="[1200,1200]" monitor="vga"/>
 	<serial id="com1" adapter="1"/>
 	<serial id="com2" adapter="2" binding="print"/>

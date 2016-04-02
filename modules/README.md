@@ -7,10 +7,10 @@ permalink: /modules/
 Project Modules
 ===
 
-This folder contains all the JavaScript source code for the PCjs Project, organized into Node modules.
-It is the counterpart to **node_modules**, where all the *public* Node modules are installed.
+The **modules** folder contains all the JavaScript source code for the PCjs Project, organized into Node modules.
+It is our *private* counterpart to the **node_modules** folder, where all *public* Node modules are installed.
 
-The project includes these Emulation Modules:
+The project includes these emulation modules:
 
 * C1Pjs, the 6502-based C1P Emulation Module
 * [PCjs](pcjs/), the x86-based IBM PC Emulation Module

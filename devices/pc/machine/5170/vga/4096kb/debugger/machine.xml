@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.21.4/machine.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.21.5/machine.xsl"?>
 <machine id="ibm5170" class="pc" border="1" pos="center" background="#FAEBD7">
 	<name pos="center">IBM PC AT (8Mhz, 4Mb, 20Mb Hard Disk) with VGA Display</name>
 	<computer id="at-vga-2048k" name="IBM PC AT" buswidth="24"/>
@@ -11,8 +11,8 @@
 	<keyboard ref="/devices/pc/keyboard/us84-buttons-arrows.xml"/>
 	<debugger id="debugger"/>
 	<panel ref="/devices/pc/panel/wide.xml"/>
+	<hdc ref="/disks/pc/fixed/20mb/pcdos330-empty.xml"/>
 	<cpu id="cpu286" model="80286" cycles="8000000"/>
-	<hdc id="hdcAT" type="at" drives='[{name:"20Mb Hard Disk",type:2,path:"/disks/pc/fixed/20mb/PCDOS330-EMPTY.json"}]'/>
 	<chipset id="chipset" model="5170" floppies="[1440,1200]"/>
 	<serial id="com1" adapter="1"/>
 	<serial id="com2" adapter="2" binding="print"/>

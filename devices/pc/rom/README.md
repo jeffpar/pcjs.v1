@@ -3,7 +3,7 @@ layout: page
 title: IBM PC ROMs
 permalink: /devices/pc/rom/
 redirect_from:
-  - /devices/pc/
+  - /devices/pc/bios/
 ---
 
 IBM PC ROMs
