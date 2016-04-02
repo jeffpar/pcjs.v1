@@ -143,7 +143,7 @@ function Component(type, parms, constructor, bitsMessage)
  *
  * Initialized to the set of URL parameters, if any, for the current web page.
  *
- * @type {Object|null}
+ * @type {Object}
  */
 Component.parmsURL = web.getURLParameters();
 

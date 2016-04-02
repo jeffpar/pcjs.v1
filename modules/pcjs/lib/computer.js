@@ -394,7 +394,7 @@ Computer.prototype.getMachineParm = function(sParm, parmsComponent)
      * but there are limits to my paranoia.
      */
     var sParmLC = sParm.toLowerCase();
-    var value = Component.parmsURL && (Component.parmsURL[sParm] || Component.parmsURL[sParmLC]);
+    var value = Component.parmsURL[sParm] || Component.parmsURL[sParmLC];
 
     if (value === undefined && this.parmsMachine) {
         value = this.parmsMachine[sParm];

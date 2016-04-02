@@ -7260,7 +7260,10 @@ Video.init = function()
          *
          * HACK: A canvas style of "auto" provides for excellent responsive canvas scaling in EVERY browser
          * except IE9/IE10, so I recalculate the appropriate CSS height every time the parent DIV is resized;
-         * IE11 works without this hack, so we take advantage of the fact that IE11 doesn't report itself as "MSIE".
+         * IE11 works without this hack, so we take advantage of the fact that IE11 doesn't identify as "MSIE".
+         *
+         * The other reason it's good to keep this particular hack limited to IE9/IE10 is that most other
+         * browsers don't actually support an 'onresize' handler on anything but the window object.
          */
         eCanvas.style.height = "auto";
         if (web.getUserAgent().indexOf("MSIE") >= 0) {
@@ -7270,6 +7273,33 @@ Video.init = function()
                 };
             }(eVideo, eCanvas, parmsVideo['screenWidth'], parmsVideo['screenHeight']);
             eVideo.onresize();
+        }
+        /*
+         * The following is a related hack that allows the user to force the machine to use a particular aspect
+         * ratio if an 'aspect' URL parameter is set.  Initially, it's just for testing purposes until we figure
+         * out a better UI.  And note that we use our web.onPageEvent() helper function to make sure we don't
+         * trample on any other 'onresize' handler(s) attached to the window object.
+         */
+        var aspect = +Component.parmsURL['aspect'];
+        if (aspect) {
+            web.onPageEvent('onresize', function(eParent, eChild, aspectRatio) {
+                return function onResizeWindow() {
+                    /*
+                     * Since aspectRatio is the target width/height, we have:
+                     *
+                     *      eParent.clientWidth / eChild.style.height = aspectRatio
+                     *
+                     * which means that:
+                     *
+                     *      eChild.style.height = eParent.clientWidth / aspectRatio
+                     *
+                     * so for example, if aspectRatio is 16:9, or 1.78, and clientWidth = 640,
+                     * then the calculated height should approximately 360.
+                     */
+                    eChild.style.height = ((eParent.clientWidth / aspectRatio)|0) + "px";
+                };
+            }(eVideo, eCanvas, aspect));
+            window['onresize']();
         }
         eVideo.appendChild(eCanvas);
 
