@@ -286,8 +286,8 @@ HDC.aDriveTypes = [
  * It's important to know that the MODEL_5170 BIOS has a special relationship with the "Combo Hard File/Diskette
  * (HFCOMBO) Card" (see @F000:144C).  Initially, the ChipSet component intercepted reads for HFCOMBO's STATUS port
  * and returned the BUSY bit clear to reduce boot time; however, it turned out that was also a prerequisite for the
- * BIOS to write test patterns to the CYLLO port and set the "DUAL" bit (bit 0) of the "HFCNTRL" byte at 40:8Fh if
- * those CYLLO operations succeeded (now that the HDC is "ATC-aware", those ChipSet port intercepts have been removed).
+ * BIOS to write test patterns to the CYLLO port (0x1F4) and set the "DUAL" bit (bit 0) of the "HFCNTRL" byte at 40:8Fh
+ * if those CYLLO operations succeeded (now that the HDC is "ATC-aware", the ChipSet port intercepts have been removed).
  *
  * Without the "DUAL" bit set, when it came time later to report the diskette drive type, the "DISK_TYPE" function
  * (@F000:273D) would branch to one of two almost-identical blocks of code -- specifically, a block that disallowed
@@ -301,6 +301,11 @@ HDC.aDriveTypes = [
  * eg, was there Diskette-only Controller that could be installed, and if so, did it support high-capacity diskette
  * drives?  Also, consider making the FDC component able to detect when the HDC is missing and provide the same minimal
  * HFCOMBO port intercepts that ChipSet once provided (this is not a requirement, just a usability improvement).
+ *
+ * UPDATE: I later discovered that newer (ie, REV2 and REV3) 5170 ROMs are even less happy when no HDC is installed,
+ * *unless* an undocumented FDC "DIAGNOSTIC" register (port 0x3F1) provides a "MULTIPLE DATA RATE" response, bypassing
+ * the HDC port tests described above.  This may also imply that those newer 5170 revisions are incompatible with FD360
+ * diskette drives, because if none of the "MULTIPLE DATA RATE" tests succeed, a "601-Diskette Error" always occurs.
  */
 HDC.ATC = {
     DATA:   { PORT: 0x1F0},     // no register (read-write)
@@ -554,9 +559,31 @@ if (DEBUG) {
  */
 HDC.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
 {
-    /*
-     * This is reserved for future use; for now, hard disk images can be specified during initialization only (no "hot-swapping")
-     */
+    var hdc = this;
+
+    switch (sBinding) {
+
+    case "saveHD0":
+    case "saveHD1":
+        this.bindings[sBinding] = control;
+        control.onclick = function(iDrive) {
+            return function onClickSaveDrive(event) {
+                var drive = hdc.aDrives && hdc.aDrives[iDrive];
+                if (drive && drive.disk) {
+                    /*
+                     * Note the similarity (and hence factoring opportunity) between this code and the FDC's "saveDrive" binding.
+                     */
+                    var disk = drive.disk;
+                    if (DEBUG) hdc.println("saving disk " + disk.sDiskPath + "...");
+                    var sAlert = web.downloadFile(disk.encodeAsBase64(), "octet-stream", true, disk.sDiskFile.replace(".json", ".img"));
+                    web.alertUser(sAlert);
+                } else {
+                    hdc.notice("Hard disk " + iDrive + " is not available.");
+                }
+            };
+        }(+sBinding.slice(-1));
+        return true;
+    }
     return false;
 };
 

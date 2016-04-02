@@ -14,7 +14,7 @@
 		<control type="button" binding="reset">Reset</control>
 		<control type="button" binding="setSpeed">Speed</control>
 	</cpu>
-	<hdc id="hdcAT" type="at" drives='[{name:"20Mb Hard Disk",type:2,path:"/disks/pc/fixed/20mb/PCDOS330-EMPTY.json"}]'/>
+	<hdc ref="/disks/pc/fixed/20mb/pcdos330-empty.xml"/>
 	<chipset id="chipset" model="5170" floppies="[1440,1200]"/>
 	<serial id="com1" adapter="1"/>
 	<mouse serial="com1"/>

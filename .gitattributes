@@ -1,0 +1,3 @@
+versions/c1pjs/* linguist-vendored
+versions/pcjs/* linguist-vendored
+_includes/google-analytics.html merge=ours

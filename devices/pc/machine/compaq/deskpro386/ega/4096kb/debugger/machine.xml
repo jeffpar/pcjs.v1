@@ -13,7 +13,7 @@
 	<keyboard ref="/devices/pc/keyboard/us84-buttons-arrows.xml"/>
 	<debugger id="debugger" messages="" commands=""/>
 	<panel ref="/devices/pc/panel/wide386.xml"/>
-	<hdc id="hdcAT" type="at" drives='[{name:"20Mb Hard Disk",type:2,path:"/disks/pc/fixed/20mb/PCDOS330-EMPTY.json"}]'/>
+	<hdc ref="/disks/pc/fixed/20mb/pcdos330-empty.xml"/>
 	<chipset id="chipset" model="deskpro386" floppies="[1200,1200]"/>
 	<parallel id="lpt1" adapter="2"/>
 	<serial id="com1" adapter="1"/>

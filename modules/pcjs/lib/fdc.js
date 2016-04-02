@@ -469,6 +469,11 @@ FDC.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
         return true;
 
     case "saveDrive":
+        /*
+         * Yes, technically, this feature does not require "Local disk support" (which is really a reference
+         * to FileReader support), but since fLocalDisks is also false for all mobile devices, and since there
+         * is an "orthogonality" to disabling both features in tandem, let's just let it slide, OK?
+         */
         if (!this.fLocalDisks) {
             if (DEBUG) this.log("Local disk support not available");
             /*
@@ -484,21 +489,25 @@ FDC.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
 
         this.bindings[sBinding] = control;
 
-        control.onclick = function onClickLoadDrive(event) {
+        control.onclick = function onClickSaveDrive(event) {
             var controlDrives = fdc.bindings["listDrives"];
             if (controlDrives && controlDrives.options && fdc.aDrives) {
                 var iDriveSelected = str.parseInt(controlDrives.value, 10);
                 var drive = fdc.aDrives[iDriveSelected];
                 if (drive) {
-                    if (drive.disk) {
-                        if (DEBUG) fdc.println("saving disk " + drive.disk.sDiskPath + "...");
-                        var sAlert = web.downloadFile(drive.disk.encodeAsBase64(), "octet-stream", true, drive.disk.sDiskFile.replace(".json", ".img"));
+                    /*
+                     * Note the similarity (and hence factoring opportunity) between this code and the HDC's "saveHD*" binding.
+                     */
+                    var disk = drive.disk;
+                    if (disk) {
+                        if (DEBUG) fdc.println("saving diskette " + disk.sDiskPath + "...");
+                        var sAlert = web.downloadFile(disk.encodeAsBase64(), "octet-stream", true, disk.sDiskFile.replace(".json", ".img"));
                         web.alertUser(sAlert);
                     } else {
-                        fdc.notice("No disk loaded in drive");
+                        fdc.notice("No diskette loaded in drive.");
                     }
                 } else {
-                    fdc.notice("No drive selected");
+                    fdc.notice("No diskette drive selected.");
                 }
             }
         };
@@ -1749,8 +1758,8 @@ FDC.prototype.outFDCOutput = function(port, bOut, addrFrom)
  *
  * I'm unable to find any documentation on this so-called "D/S/P DIAGNOSTIC REGISTER" (port 0x3F1) or the "D/S/P CARD"
  * to which the ROM BIOS refers.  But it seems clear that if we don't provide the expected response from the DIAGNOSTIC
- * REGISTER, and there's no HDC to respond to the MULTIPLE DATA RATE CAPABLE test that follows, then an error is inevitable.
- * Clearly, there is a very intimate relationship between the FDC and HDC portions of this card.
+ * REGISTER, and there's no HDC to respond to the MULTIPLE DATA RATE CAPABLE test that follows, then an error is
+ * inevitable.  Clearly, there is a very intimate relationship between the FDC and HDC portions of this card.
  *
  * Here's the relevant code from the REV3 PC AT ROM BIOS (TEST2.ASM):
  *
