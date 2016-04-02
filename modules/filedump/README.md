@@ -1,10 +1,10 @@
 ---
 layout: page
-title: FileDump
+title: FileDump Module
 permalink: /modules/filedump/
 ---
 
-FileDump
+FileDump Module
 ===
 
-Module (and command-line utility) for converting the contents of files to JSON.
+This module (and command-line utility) is used to convert the contents of binary files to JSON.

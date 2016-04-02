@@ -15,12 +15,12 @@
 	<xsl:variable name="SITEHOST">www.pcjs.org</xsl:variable>
 
 	<xsl:template name="componentStyles">
-		<link rel="stylesheet" type="text/css" href="components.css"/>
+		<link rel="stylesheet" type="text/css" href="/versions/{$APPCLASS}/{$APPVERSION}/components.css"/>
 	</xsl:template>
 
 	<xsl:template name="componentScripts">
 		<xsl:param name="component"/>
-		<script type="text/javascript" src="{$component}.js"> </script>
+		<script type="text/javascript" src="/versions/{$APPCLASS}/{$APPVERSION}/{$component}.js"> </script>
 	</xsl:template>
 
 	<xsl:template name="componentIncludes">

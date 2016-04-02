@@ -750,7 +750,7 @@ web.fPageEventsEnabled = true;
  * @param {string} sFunc
  * @param {function()} fn
  *
- * Use this instead of setting window['onunload'], window['onunload'], etc.
+ * Use this instead of setting window['onload'], window['onunload'], etc.
  * Allows multiple JavaScript modules to define a handler for the same event.
  *
  * Moreover, it's risky to refer to obscure event handlers with "dot" names, because

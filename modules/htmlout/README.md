@@ -1,5 +1,12 @@
-HTMLOut
+---
+layout: page
+title: HTMLOut Module
+permalink: /modules/htmlout/
+---
+
+HTMLOut Module
 ===
+
 This module provides a filter() function for [server.js](../../../server.js),
 our Express-based web server.  The function is installed like so:
 
