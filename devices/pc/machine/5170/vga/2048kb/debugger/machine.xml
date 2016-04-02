@@ -11,8 +11,8 @@
 	<keyboard ref="/devices/pc/keyboard/us84-buttons-arrows.xml"/>
 	<debugger id="debugger"/>
 	<panel ref="/devices/pc/panel/wide.xml"/>
-	<cpu id="cpu286" model="80286" cycles="8000000"/>
 	<hdc ref="/disks/pc/fixed/20mb/pcdos330-empty.xml"/>
+	<cpu id="cpu286" model="80286" cycles="8000000"/>
 	<chipset id="chipset" model="5170" floppies="[1440,1200]"/>
 	<serial id="com1" adapter="1"/>
 	<serial id="com2" adapter="2" binding="print"/>

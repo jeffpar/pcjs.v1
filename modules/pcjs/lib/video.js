@@ -4825,7 +4825,7 @@ Video.prototype.setDimensions = function()
                     if (DEBUG) this.log("setDimensions(): switching to double-size font, unscaled");
                 }
             }
-            if (font) {
+            if (!this.fScaleFont) {
                 this.cxScreenCell = font.cxCell;
                 this.cyScreenCell = font.cyCell;
             }
