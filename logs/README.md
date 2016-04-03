@@ -1,6 +1,6 @@
 Logs
 ---
-This is where Node web server activity is logged, where bug reports are saved, and where per-user data is stored.
+This is where Node web server activity is logged, bug reports are saved, and per-user data is stored.
 
 Per-user data is still in the experimental phase, and is enabled ONLY for users that have requested and received
 their own per-user directory.

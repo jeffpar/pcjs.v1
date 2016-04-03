@@ -11,10 +11,13 @@
 .settings
 .sass-cache
 _site
+Gemfile.lock
 node_modules
 /videos
 /web
 archive/
+c64/
+ecp/
 private/
 src/
 tmp/
