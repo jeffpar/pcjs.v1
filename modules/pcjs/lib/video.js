@@ -7278,10 +7278,14 @@ Video.init = function()
          * The following is a related hack that allows the user to force the machine to use a particular aspect
          * ratio if an 'aspect' URL parameter is set.  Initially, it's just for testing purposes until we figure
          * out a better UI.  And note that we use our web.onPageEvent() helper function to make sure we don't
-         * trample on any other 'onresize' handler(s) attached to the window object.
+         * trample any other 'onresize' handler(s) attached to the window object.
          */
         var aspect = +Component.parmsURL['aspect'];
-        if (aspect) {
+        /*
+         * No 'aspect' parameter yields NaN, which is falsey, and anything else must satisfy my arbitrary
+         * constraints of 0.3 <= aspect <= 3.33, to prevent any useless (or worse, browser-blowing) results.
+         */
+        if (aspect && aspect >= 0.3 && aspect <= 3.33) {
             web.onPageEvent('onresize', function(eParent, eChild, aspectRatio) {
                 return function onResizeWindow() {
                     /*
