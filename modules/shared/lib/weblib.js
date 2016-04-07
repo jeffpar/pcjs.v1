@@ -644,7 +644,7 @@ web.downloadFile = function(sData, sType, fBase64, sFileName)
         sAlert = 'Check your Downloads folder for ' + sFileName + '.';
     } else {
         window.open(sURI);
-        sAlert = 'Check your browser for a new window/tab containing the requested data (' + sFileName + ').';
+        sAlert = 'Check your browser for a new window/tab containing the requested data' + (sFileName? (' (' + sFileName + ')') : '') + '.';
     }
     return sAlert;
 };

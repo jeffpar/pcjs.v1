@@ -688,28 +688,39 @@ DiskDump.API = function(aParms)
     var sFormat = aParms[DumpAPI.QUERY.FORMAT] || DumpAPI.FORMAT.JSON;
     var fComments = (aParms[DumpAPI.QUERY.COMMENTS]? true : false);
 
-    var disk = new DiskDump(sDisk, null, sFormat, fComments);
-
-    disk.loadFile(function(err) {
-        if (!err) {
-            var sData, sType, fBase64;
-            if (sFormat == DumpAPI.FORMAT.IMG) {
-                sType = "octet-stream";
-                var buf = disk.convertToIMG();
-                if (buf) {
-                    sData = disk.encodeAsBase64(buf);
-                    fBase64 = true;
+    if (sDisk) {
+        var disk = new DiskDump(sDisk, null, sFormat, fComments);
+        disk.loadFile(function(err) {
+            if (!err) {
+                var sData, sType, fBase64;
+                if (sFormat == DumpAPI.FORMAT.IMG) {
+                    sType = "octet-stream";
+                    var buf = disk.convertToIMG();
+                    if (buf) {
+                        sData = disk.encodeAsBase64(buf);
+                        fBase64 = true;
+                    }
+                } else {
+                    sType = "json";
+                    sData = disk.convertToJSON();
+                }
+                if (sData) {
+                    var sFileName = str.getBaseName(disk.sDiskPath, true) + '.' + sFormat;
+                    var sAlert = web.downloadFile(sData, sType, fBase64, sFileName);
+                    web.alertUser(sAlert);
+                } else {
+                    web.alertUser("No data.");
                 }
             } else {
-                sType = "json";
-                sData = disk.convertToJSON();
+                web.alertUser(err.message);
             }
-            if (sData) {
-                var sAlert = web.downloadFile(sData, sType, fBase64);
-                web.alertUser(sAlert);
-            }
-        }
-    });
+        });
+    } else {
+        /*
+         * The client-side API currently supports DumpAPI.QUERY.DISK requests only (eg, not DumpAPI.QUERY.FILE).
+         */
+        web.alertUser("Unsupported API request.");
+    }
 };
 
 /**

@@ -4,7 +4,7 @@ title: Microsoft Languages and Tools
 permalink: /disks/pc/tools/microsoft/
 ---
 
-Microsoft Languages and Tools
+Microsoft Languages
 ---
 
 * Microsoft BASIC
@@ -22,12 +22,15 @@ Microsoft Languages and Tools
 * [Microsoft Macro Assembler 6.00](/disks/pc/tools/microsoft/masm/6.00/)
 * [Microsoft Macro Assembler 6.11](/disks/pc/tools/microsoft/masm/6.11/)
 * [Microsoft Mouse 5.00](/disks/pc/tools/microsoft/mouse/5.00/)
-* [Microsoft OS/2 SDK 1.02](/disks/pc/tools/microsoft/os2/sdk/1.02/)
-* [Microsoft Windows SDK 1.01](/disks/pc/tools/microsoft/windows/sdk/1.01/)
-* [Microsoft Windows SDK 1.03](/disks/pc/tools/microsoft/windows/sdk/1.03/)
-* [Microsoft Windows SDK 1.04](/disks/pc/tools/microsoft/windows/sdk/1.04/)
-* Microsoft Windows SDK 2.03
-* Microsoft Windows SDK 3.00
+
+Microsoft SDKs
+---
+
+* [Microsoft OS/2 SDKs](/disks/pc/tools/microsoft/os2/sdk/)
+* [Microsoft Windows SDKs](/disks/pc/tools/microsoft/windows/sdk/)
+
+Microsoft Languages Newsletters
+---
 
 Below are all the "Microsoft Languages NewsLetters" that Microsoft published in
 [PC Tech Journal](/pubs/pc/magazines/pctj/), before they decided to focus exclusively

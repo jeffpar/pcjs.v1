@@ -5,6 +5,7 @@ permalink: /devices/pc/rom/5170/
 redirect_from:
   - /devices/pc/5170/
   - /devices/pc/bios/5170/
+  - /devices/pc/rom/5170/bios/
 ---
 
 IBM PC AT (Model 5170) BIOS

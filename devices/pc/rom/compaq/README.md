@@ -3,6 +3,8 @@ layout: post
 title: COMPAQ BIOS ROMs
 date: 2016-02-24 14:00:00
 permalink: /devices/pc/rom/compaq/
+redirect_from:
+  - /devices/pc/rom/compaq/bios/
 ---
 
 COMPAQ BIOS ROMs
