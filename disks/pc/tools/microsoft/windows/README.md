@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Microsoft Windows DDKs and SDKs
+title: Microsoft Windows Development Kits
 permalink: /disks/pc/tools/microsoft/windows/
 ---
 

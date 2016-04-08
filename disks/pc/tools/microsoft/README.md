@@ -8,26 +8,15 @@ Microsoft Languages
 ---
 
 * Microsoft BASIC
-* [Microsoft C Compiler 2.03](/disks/pc/tools/microsoft/c/2.03/)
-* [Microsoft C Compiler 3.00](/disks/pc/tools/microsoft/c/3.00/)
-* [Microsoft C Compiler 4.00](/disks/pc/tools/microsoft/c/4.00/)
-* [Microsoft C Compiler 5.00](/disks/pc/tools/microsoft/c/5.00/)
-* [Microsoft C Compiler 5.10](/disks/pc/tools/microsoft/c/5.10/)
-* [Microsoft Macro Assembler 1.00](/disks/pc/tools/microsoft/masm/1.00/)
-* [Microsoft Macro Assembler 3.00](/disks/pc/tools/microsoft/masm/3.00/)
-* [Microsoft Macro Assembler 3.01](/disks/pc/tools/microsoft/masm/3.01/)
-* [Microsoft Macro Assembler 4.00](/disks/pc/tools/microsoft/masm/4.00/)
-* [Microsoft Macro Assembler 5.00](/disks/pc/tools/microsoft/masm/5.00/)
-* [Microsoft Macro Assembler 5.10](/disks/pc/tools/microsoft/masm/5.10/)
-* [Microsoft Macro Assembler 6.00](/disks/pc/tools/microsoft/masm/6.00/)
-* [Microsoft Macro Assembler 6.11](/disks/pc/tools/microsoft/masm/6.11/)
-* [Microsoft Mouse 5.00](/disks/pc/tools/microsoft/mouse/5.00/)
+* [Microsoft C Compilers](/disks/pc/tools/microsoft/c/)
+* [Microsoft Macro Assemblers](/disks/pc/tools/microsoft/masm/)
+* [Microsoft Mouse](/disks/pc/tools/microsoft/mouse/)
 
-Microsoft SDKs
+Microsoft Development Kits
 ---
 
-* [Microsoft OS/2 SDKs](/disks/pc/tools/microsoft/os2/sdk/)
-* [Microsoft Windows SDKs](/disks/pc/tools/microsoft/windows/sdk/)
+* [Microsoft OS/2 Development Kits](/disks/pc/tools/microsoft/os2/)
+* [Microsoft Windows Development Kits](/disks/pc/tools/microsoft/windows/)
 
 Microsoft Languages Newsletters
 ---
