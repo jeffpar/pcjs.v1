@@ -2,12 +2,11 @@
 layout: page
 title: Infocom Games
 permalink: /disks/pc/games/infocom/
-machines:
-  - type: pc
-    id: ibm5150
 ---
 
 Infocom Games
 ---
 
-{% include machine.html id="ibm5150" %}
+* [Zork I](zork1/)
+* [Zork II](zork2/)
+* [Zork III](zork3/)
