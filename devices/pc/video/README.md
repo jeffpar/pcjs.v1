@@ -8,9 +8,7 @@ IBM PC Video Devices
 ---
 
 Video devices are added to machines by including a *[Video](/docs/pcjs/video/)* component in the machine XML
-configuration file.  See one of the following video adapters for  examples of how to do this.
-
-PCjs supports the following IBM PC video adapters:
+configuration file.  See the following [IBM PC Video Configurations](ibm/):
 
 * Monochrome Display Adapter (MDA)
 * [Color Graphics Adapter (CGA)](ibm/cga/)
