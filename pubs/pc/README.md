@@ -13,7 +13,7 @@ We have an assortment of PC-related resources:
 * [Magazines](/pubs/pc/magazines/)
 * [Programming Guides](/pubs/pc/programming/)
 * [Reference Manuals](/pubs/pc/reference/)
-* [Software User and Development Guides](/pubs/pc/software/) (eg, DOS, [OS/2](/pubs/pc/software/os2/), Windows)
+* [Software User and Development Guides](/pubs/pc/software/) (eg, [DOS](/pubs/pc/software/dos/), [OS/2](/pubs/pc/software/os2/), [Windows](/pubs/pc/software/windows/))
 
 [<img src="http://archive.pcjs.org/pubs/pc/datasheets/thumbs/8088-CPU.jpg" width="200" height="260" alt= "8088 CPU"/>](pc/datasheets/)
 [<img src="http://archive.pcjs.org/pubs/pc/magazines/byte/BYTE-1975-11/thumbs/BYTE-1975-11 1.jpeg" width="200" height="260" alt= "Byte Magazine"/>](pc/magazines/byte/)

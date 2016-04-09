@@ -1,5 +1,5 @@
 ;
-;   test386.nasm
+;   test386.asm
 ;   Copyright © 2012-2015 Jeff Parsons <Jeff@pcjs.org>
 ;
 ;   This file is part of PCjs, which is part of the JavaScript Machines Project (aka JSMachines)

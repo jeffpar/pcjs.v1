@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "OS/2 Programming Guides"
+title: OS/2 Software Guides
 permalink: /pubs/pc/software/os2/
 redirect_from:
   - /pubs/pc/programming/os2/

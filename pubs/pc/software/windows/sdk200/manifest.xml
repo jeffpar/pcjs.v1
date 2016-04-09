@@ -2,7 +2,7 @@
 <?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.21.6/manifest.xsl"?>
 <manifest type="document">
 	<title>Microsoft Windows Software Development Kit</title>
-	<version>2.0</version>
+	<version>2.00</version>
 	<source href="http://os2museum.com">os2museum.com</source>
 	<document href="http://www.os2museum.com/files/docs/win20sdk/windows-2.0-sdk-prgref-1987.pdf">
 		<name id="050051053-200-I02-1087">Programmer’s Reference</name>
