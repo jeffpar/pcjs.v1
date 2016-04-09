@@ -1,7 +1,7 @@
 ---
 layout: page
 title: Lotus Applications
-permalink: /disks/pc/apps/lotus/
+permalink: /disks/pc/apps/lotus/123/
 ---
 
 Lotus Applications
