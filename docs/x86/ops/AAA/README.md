@@ -2,6 +2,8 @@
 layout: page
 title: "x86 Instructions: AAA"
 permalink: /docs/x86/ops/AAA/
+redirect_from:
+  - /docs/x86/ops/aaa/
 ---
 
 AAA (0x37)

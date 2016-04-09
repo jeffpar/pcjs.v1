@@ -110,16 +110,13 @@ diagnostics, and more.
 * [Microport's AT&T UNIX System V-AT 2.3](/disks/pc/unix/microport/system-v/2.3/)
 * [SCO Xenix 8086 Operating System v2.1.3](/disks/pc/xenix/sco/8086/2.1.3/)
 
-### Applications
+### [Applications](apps/)
 
-* Lotus 1-2-3 1.0A
-* [MicroPro WordStar 3.30](/disks/pc/apps/micropro/wordstar/3.30/)
-* [MicroPro WordStar 4.00](/disks/pc/apps/micropro/wordstar/4.00/)
-* Microsoft Chart 2.02
-* Microsoft Word 3.0
-* Microsoft Word 3.1
-* Microsoft Word 5.0
-* Microsoft Word for Windows 2.0C
+* [Lotus 1-2-3](apps/lotus/123/)
+* [MicroPro WordStar](apps/micropro/wordstar/)
+* [Microsoft Chart](apps/microsoft/chart/)
+* [Microsoft Word](apps/microsoft/word/)
+* [Microsoft Word for Windows](apps/microsoft/winword/)
 
 ### Borland Tools
 
