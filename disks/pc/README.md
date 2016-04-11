@@ -29,11 +29,11 @@ diagnostics, and more.
 * [DOS](dos/)
 * [OS/2](os2/)
 * [Windows](windows/)
-* [CP/M-86](/disks/pc/cpm/)
+* [CP/M-86](cpm/)
 * Minix 1.1
 * PC/IX 1.0
-* [Microport's AT&T UNIX System V-AT 2.3](/disks/pc/unix/microport/system-v/2.3/)
-* [SCO Xenix 8086 Operating System v2.1.3](/disks/pc/xenix/sco/8086/2.1.3/)
+* [Microport's AT&T UNIX System V-AT 2.3](unix/microport/system-v/2.3/)
+* [SCO Xenix 8086 Operating System v2.1.3](xenix/sco/8086/2.1.3/)
 
 ### [Applications](apps/)
 
@@ -46,13 +46,13 @@ diagnostics, and more.
 ### [Tools](tools/)
 
 * [Borland Tools](tools/borland/)
-* [IBM PC Diagnostics](/disks/pc/diags/ibm/)
+* [IBM PC Diagnostics](diags/ibm/)
 * [Microsoft Tools](tools/microsoft/)
 
-### Games
+### [Games](games/)
 
-* [Infocom Zork I](/disks/pc/games/infocom/zork1/)
-* [Microsoft Adventure](/disks/pc/games/microsoft/adventure/) (1981)
+* [Infocom Games](games/infocom/)
+* [Microsoft Adventure](games/microsoft/adventure/) (1981)
 * Microsoft Flight Simulator (1984)
 
 ### PCjs Test Suites
