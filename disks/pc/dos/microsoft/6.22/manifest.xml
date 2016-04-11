@@ -8,27 +8,27 @@
 	<author>Microsoft</author>
 	<releaseDate/>
 	<disk id="disk01" size="1228800" chs="80:2:15" img="archive/1200K/MSDOS622-DISK1.img" href="/disks/pc/dos/microsoft/6.22/1200K/MSDOS622-DISK1.json" md5="947c32aabd82994e1fab152a1676c02a" md5json="e073fa1a5c69e6abd6e0bcd0519d6148">
-		<name>MS-DOS 6.22 (1200K Disk 1)</name>
+		<name>MS-DOS 6.22 (1.2M Disk 1)</name>
 	</disk>
 	<disk id="disk02" size="1228800" chs="80:2:15" img="archive/1200K/MSDOS622-DISK2.img" href="/disks/pc/dos/microsoft/6.22/1200K/MSDOS622-DISK2.json" md5="2ab6fc8d7d03e1bc9f04adaaced06b56" md5json="4d7ce7bbc2876aa1b459555a2e43873a">
-		<name>MS-DOS 6.22 (1200K Disk 2)</name>
+		<name>MS-DOS 6.22 (1.2M Disk 2)</name>
 	</disk>
 	<disk id="disk03" size="1228800" chs="80:2:15" img="archive/1200K/MSDOS622-DISK3.img" href="/disks/pc/dos/microsoft/6.22/1200K/MSDOS622-DISK3.json" md5="9da423d075fbd7f164f99ae09f2d1298" md5json="154a56146851a721d344d9704740db0a">
-		<name>MS-DOS 6.22 (1200K Disk 3)</name>
+		<name>MS-DOS 6.22 (1.2M Disk 3)</name>
 	</disk>
 	<disk id="disk04" size="1228800" chs="80:2:15" img="archive/1200K/MSDOS622-DISK4.img" href="/disks/pc/dos/microsoft/6.22/1200K/MSDOS622-DISK4.json" md5="bca597564a6afbb9fe2cab0ea6cbbfb1" md5json="2d69b84baa2132ec4fc5119a4fc227c0">
-		<name>MS-DOS 6.22 (1200K Disk 4)</name>
+		<name>MS-DOS 6.22 (1.2M Disk 4)</name>
 	</disk>
 	<disk id="disk05" size="1474560" chs="80:2:18" img="archive/1440K/MSDOS622-DISK1.img" href="/disks/pc/dos/microsoft/6.22/1440K/MSDOS622-DISK1.json" md5="2cbec49c68a11ec06188e23737ab4824" md5json="57d90cd93ad5c3fce44664c4f385a9c9">
-		<name>MS-DOS 6.22 (1440K Disk 1)</name>
+		<name>MS-DOS 6.22 (1.44M Disk 1)</name>
 	</disk>
 	<disk id="disk06" size="1474560" chs="80:2:18" img="archive/1440K/MSDOS622-DISK2.img" href="/disks/pc/dos/microsoft/6.22/1440K/MSDOS622-DISK2.json" md5="2dd8d4b0f47e2c5aa92b7ffd5ae996c2" md5json="862b7ecb55bb59e07a6d05693b4e7d45">
-		<name>MS-DOS 6.22 (1440K Disk 2)</name>
+		<name>MS-DOS 6.22 (1.44M Disk 2)</name>
 	</disk>
 	<disk id="disk07" size="1474560" chs="80:2:18" img="archive/1440K/MSDOS622-DISK3.img" href="/disks/pc/dos/microsoft/6.22/1440K/MSDOS622-DISK3.json" md5="c41dca1ec654b231c97c576e05035b4b" md5json="e5d29acaa8ef9187be4d85fbec05e55c">
-		<name>MS-DOS 6.22 (1440K Disk 3)</name>
+		<name>MS-DOS 6.22 (1.44M Disk 3)</name>
 	</disk>
 	<disk id="disk08" size="1474560" chs="80:2:18" img="archive/1440K/MSDOS622-SUPPDISK.img" href="/disks/pc/dos/microsoft/6.22/1440K/MSDOS622-SUPPDISK.json" md5="4bde87e229f814f3e252ced5f3f6196a" md5json="6f1ee04cc8433b73d3936b3694d0dedb">
-		<name>MS-DOS 6.22 (1440K Supp Disk)</name>
+		<name>MS-DOS 6.22 (1.44M Supp Disk)</name>
 	</disk>
 </manifest>

@@ -7,6 +7,6 @@ permalink: /disks/pc/apps/microsoft/winword/
 Microsoft Word for Windows
 ---
 
-Demos are available for these versions of [Microsoft Word for Windows](https://en.wikipedia.org/wiki/Microsoft_Word#Word_for_Windows):
+Information is available for these versions of [Microsoft Word for Windows](https://en.wikipedia.org/wiki/Microsoft_Word#Word_for_Windows):
 
 * [Microsoft Word for Windows 2.0c](2.0c/)

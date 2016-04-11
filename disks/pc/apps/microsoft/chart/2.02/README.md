@@ -7,7 +7,7 @@ permalink: /disks/pc/apps/microsoft/chart/2.02/
 Microsoft Chart 2.02
 ---
 
-NOTE: The Microsoft Chart 2.02 disk is clearly not an original distribution disk.
+NOTE: The Microsoft Chart 2.02 disk below is *not* an original distribution disk.
 
 The disk image contains "SPERRY Personal Computer MS-DOS 2.11 version 1.11 Copyright 1981,82,83 Microsoft Corp."
 with a COMMAND.COM dated "3-16-87".  It boots but then crashes when COMMAND.COM attempts to display the current date.

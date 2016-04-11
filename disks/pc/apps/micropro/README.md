@@ -7,6 +7,6 @@ permalink: /disks/pc/apps/micropro/
 MicroPro Applications
 ---
 
-Demos are available for these MicroPro applications:
+Information is available for these MicroPro applications:
 
 * [WordStar](wordstar/)

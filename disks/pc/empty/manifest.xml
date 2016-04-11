@@ -9,9 +9,9 @@
 		<name>Empty Diskette (720K)</name>
 	</disk>
 	<disk id="disk03" size="1228800" chs="80:2:15" img="archive/EMPTY-1200K.img" href="/disks/pc/empty/EMPTY-1200K.json" md5="83a86afcd82f0aa926b550dee6dd184d" md5json="d10e2de81b1d49db2c7a0b551f8dc6a0">
-		<name>Empty Diskette (1200K)</name>
+		<name>Empty Diskette (1.2M)</name>
 	</disk>
 	<disk id="disk04" size="1474560" chs="80:2:18" img="archive/EMPTY-1440K.img" href="/disks/pc/empty/EMPTY-1440K.json" md5="d34cf1c8b2c8f77d90b612bb9796cd1c" md5json="aaa6577aceffa56b1e9e427719a341c8">
-		<name>Empty Diskette (1440K)</name>
+		<name>Empty Diskette (1.44M)</name>
 	</disk>
 </manifest>

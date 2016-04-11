@@ -7,6 +7,6 @@ permalink: /disks/pc/apps/lotus/
 Lotus Applications
 ---
 
-Demos are available for these Lotus applications:
+Information is available for these Lotus applications:
 
 * [Lotus 1-2-3](123/)

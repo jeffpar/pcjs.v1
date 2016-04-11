@@ -7,7 +7,7 @@ permalink: /disks/pc/apps/
 PC Applications
 ---
 
-Demos are available for applications from these vendors:
+Information is available for applications from these vendors:
 
 * [Lotus](lotus/)
 * [MicroPro](micropro/)

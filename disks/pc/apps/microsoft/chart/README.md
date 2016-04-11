@@ -7,6 +7,6 @@ permalink: /disks/pc/apps/microsoft/chart/
 Microsoft Chart
 ---
 
-Demos are available for these versions of [Microsoft Chart](https://en.wikipedia.org/wiki/Microsoft_Office_shared_tools#Graph):
+Information is available for these versions of [Microsoft Chart](https://en.wikipedia.org/wiki/Microsoft_Office_shared_tools#Graph):
 
 * [Microsoft Chart 2.02](2.02/)

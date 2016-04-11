@@ -1,6 +1,6 @@
 ---
 layout: page
-title: MS-DOS 4.00
+title: Microsoft MS-DOS 4.00
 permalink: /disks/pc/dos/microsoft/4.00/
 machines:
   - type: pc
@@ -12,7 +12,7 @@ machines:
         path: /disks/pc/dos/microsoft/4.00/MSDOS400-DISK1.json
 ---
 
-MS-DOS 4.00
+Microsoft MS-DOS 4.00
 ---
 
 The PCjs machine below is running PC-DOS 4.00.
