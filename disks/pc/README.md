@@ -37,9 +37,11 @@ diagnostics, and more.
 
 ### [Applications](apps/)
 
+* [Infocom Games](games/infocom/)
 * [Lotus 1-2-3](apps/lotus/123/)
 * [MicroPro WordStar](apps/micropro/wordstar/)
 * [Microsoft Chart](apps/microsoft/chart/)
+* [Microsoft Games](games/microsoft/)
 * [Microsoft Word](apps/microsoft/word/)
 * [Microsoft Word for Windows](apps/microsoft/winword/)
 
@@ -49,13 +51,7 @@ diagnostics, and more.
 * [IBM PC Diagnostics](diags/ibm/)
 * [Microsoft Tools](tools/microsoft/)
 
-### [Games](games/)
-
-* [Infocom Games](games/infocom/)
-* [Microsoft Adventure](games/microsoft/adventure/) (1981)
-* Microsoft Flight Simulator (1984)
-
-### PCjs Test Suites
+### [Tests](tests/)
 
 * [VGA "Black Book" Tests](/tests/pc/vga/)
 
