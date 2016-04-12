@@ -33,26 +33,26 @@ computer diagnostics, programming tools, and more.
 * [MINIX](minix/)
 * [Unix](unix/)
 
-### [Applications](apps/)
+### Applications
 
 * [Lotus 1-2-3](apps/lotus/123/)
 * [MicroPro WordStar](apps/micropro/wordstar/)
 * [Microsoft Chart](apps/microsoft/chart/)
 * [Microsoft Word](apps/microsoft/word/)
 
-### [Games](games/)
+### Games
 
 * [id Software](games/id/)
 * [Infocom](games/infocom/)
 * [Microsoft](games/microsoft/)
 
-### [Tools](tools/)
+### Tools
 
 * [Borland Tools](tools/borland/)
 * [IBM PC Diagnostics](diags/ibm/)
 * [Microsoft Tools](tools/microsoft/)
 
-### [Tests](tests/)
+### Tests
 
 * [VGA "Black Book" Tests](/tests/pc/vga/)
 
