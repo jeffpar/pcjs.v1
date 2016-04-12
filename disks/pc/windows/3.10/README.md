@@ -6,7 +6,7 @@ machines:
   - type: pc
     id: ibm5170-win310
     config: /devices/pc/machine/5170/vga/2048kb/machine.xml
-    drives: '[{name:"20Mb Hard Disk",type:2,path:"/disks/pc/fixed/20mb/PCDOS330-WIN310.json"}]'
+    drives: '[{name:"20Mb Hard Disk",type:2,path:"/disks/pc/fixed/20mb/PCDOS330-WIN310-VGA.json"}]'
     autoMount: ''
 ---
 

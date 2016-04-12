@@ -12,6 +12,7 @@ redirect_from:
   - /configs/pc/machines/5160/ega/640kb/win101/
   - /devices/pc/machine/5160/ega/640kb/win101/
   - /devices/pc/machine/5160/ega/640kb/win101/debugger/
+  - /disks/pc/win/win101/
 ---
 
 Microsoft Windows 1.01

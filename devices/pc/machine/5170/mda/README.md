@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "IBM PC AT (Model 5170) with Monochrome Display"
+title: IBM PC AT (Model 5170) with Monochrome Display
 permalink: /devices/pc/machine/5170/mda/
 ---
 

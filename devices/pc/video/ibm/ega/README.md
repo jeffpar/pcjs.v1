@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "IBM Enhanced Graphics Adapter (EGA)"
+title: IBM Enhanced Graphics Adapter (EGA)
 permalink: /devices/pc/video/ibm/ega/
 ---
 

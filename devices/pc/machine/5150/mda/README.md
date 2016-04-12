@@ -1,7 +1,9 @@
 ---
 layout: page
-title: IBM PC Machines (Model 5150) with Monochrome (MDA) Display
+title: IBM PC (Model 5150) with Monochrome (MDA) Display
 permalink: /devices/pc/machine/5150/mda/
+redirect_from:
+  - /configs/pc/machines/5150/mda/
 machines:
   - type: pc
     id: ibm5150

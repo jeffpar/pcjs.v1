@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "IBM PC XT (Model 5160) with Enhanced Color Display"
+title: IBM PC XT (Model 5160) with Enhanced Color Display
 permalink: /devices/pc/machine/5160/ega/
 ---
 

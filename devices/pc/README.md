@@ -2,6 +2,8 @@
 layout: page
 title: IBM PC Device Configurations
 permalink: /devices/pc/
+redirect_from:
+  - /configs/pc/
 ---
 
 IBM PC Device Configurations

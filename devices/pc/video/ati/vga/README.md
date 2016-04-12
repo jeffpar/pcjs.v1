@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "ATI VGA Wonder-16"
+title: ATI VGA Wonder-16
 permalink: /devices/pc/video/ati/vga/
 ---
 

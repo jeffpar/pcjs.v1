@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Columbia Data Products MPC 1600 with Color Display and Debugger"
+title: Columbia Data Products MPC 1600 with Color Display and Debugger
 permalink: /devices/pc/machine/cdp/mpc1600/cga/640kb/debugger/
 machines:
   - type: pc
