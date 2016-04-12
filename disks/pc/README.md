@@ -51,6 +51,7 @@ computer diagnostics, programming tools, and more.
 * [Borland Tools](tools/borland/)
 * [IBM PC Diagnostics](diags/ibm/)
 * [Microsoft Tools](tools/microsoft/)
+* [Other](tools/misc/)
 
 ### Tests
 
