@@ -3,7 +3,7 @@
 <manifest type="software">
 	<title>Enhanced DEBUG</title>
 	<source href="https://sites.google.com/site/pcdosretro/enhdebug">PC DOS Retro: Enhanced DEBUG for PC DOS and MS-DOS</source>
-	<disk id="disk01" size="737280" chs="80:2:9" dir="archive" href="/disks/pc/tools/misc/debugx/1.32/DEBUGX-132.json" md5="0142cf358fc2fb52f1f03db165ffd843" md5json="bb9e4ddfa0572dfbd7f6cb060e70a19b">
+	<disk id="disk01" size="737280" chs="80:2:9" dir="archive" href="/disks/pc/tools/misc/enhdbg/1.32/DEBUGX-132.json" md5="0142cf358fc2fb52f1f03db165ffd843" md5json="bb9e4ddfa0572dfbd7f6cb060e70a19b">
 		<name>Enhanced DEBUG 1.32</name>
 		<file size="230861" time="2016-04-08 12:48:00" attr="0x20" md5="a265513aff6af2efb1562f04e39bff9c">DEBUG.ASM</file>
 		<file size="20828" time="2016-04-08 12:48:02" attr="0x20" md5="45bbc08a0e38a4ac30d7e2d676344250">DEBUG.COM</file>

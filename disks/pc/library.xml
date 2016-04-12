@@ -91,7 +91,7 @@
 		<manifest ref="/disks/pc/tools/microsoft/windows/sdk/1.04/manifest.xml"/>
 		<manifest ref="/disks/pc/tools/microsoft/windows/sdk/2.03/manifest.xml"/>
 		<manifest ref="/disks/pc/tools/microsoft/windows/sdk/3.00/manifest.xml"/>
-		<manifest ref="/disks/pc/tools/misc/debugx/manifest.xml"/>
+		<manifest ref="/disks/pc/tools/misc/manifest.xml"/>
 		<manifest ref="/disks/pc/games/id/wolf3d/manifest.xml"/>
 		<manifest ref="/disks/pc/games/microsoft/flightsim/1982/manifest.xml"/>
 		<manifest ref="/disks/pc/games/microsoft/flightsim/1984/manifest.xml"/>

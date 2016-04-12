@@ -483,7 +483,7 @@
 		<disk path="/disks/pc/tools/microsoft/windows/sdk/3.00/WIN30SDK_DISK08.json">Windows SDK 3.00 (720K Disk 8)</disk>
 		<disk path="/disks/pc/tools/microsoft/windows/sdk/3.00/WIN30SDK_DISK09.json">Windows SDK 3.00 (720K Disk 9)</disk>
 		<disk path="/disks/pc/tools/microsoft/windows/sdk/3.00/WIN30SDK_DISK10.json">Windows SDK 3.00 (720K Disk 10)</disk>
-		<disk path="/disks/pc/tools/misc/debugx/1.32/DEBUGX-132.json">Enhanced DEBUG 1.32</disk>
+		<disk path="/disks/pc/tools/misc/enhdbg/1.32/DEBUGX-132.json">Enhanced DEBUG 1.32</disk>
 		<disk path="/disks/pc/games/id/wolf3d/1WOLF14.json">Wolfenstein 3D 1.4</disk>
 		<disk path="/disks/pc/games/microsoft/flightsim/1982/FLIGHTSIM-1982.json">MS Flight Simulator (1982)</disk>
 		<disk path="/disks/pc/games/microsoft/flightsim/1984/FLIGHTSIM-1984.json">MS Flight Simulator (1984)</disk>
