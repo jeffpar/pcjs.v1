@@ -1,7 +1,9 @@
 ---
 layout: page
 title: Enhanced DEBUG 1.32
-permalink: /disks/pc/tools/misc/enhdbg/
+permalink: /disks/pc/tools/misc/enhdebug/
+redirect_from:
+  - /disks/pc/tools/misc/enhdbg/
 ---
 
 Enhanced DEBUG for PC DOS and MS-DOS
