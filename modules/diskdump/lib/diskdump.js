@@ -345,6 +345,7 @@ function DiskDump(sDiskPath, asExclude, sFormat, fComments, sSize, sServerRoot, 
     this.fJSONComments = fComments;
     this.sJSONWhitespace = (this.fJSONComments? " " : "");
     this.fXDFSupport = (argv && argv['xdf']);
+    this.sLabel = (argv && argv['label']);
 
     /*
      * The dump operation itself doesn't care about sManifestFile, but we DO need some indication
@@ -678,7 +679,7 @@ DiskDump.CLI = function()
 /**
  * API
  *
- * Client-side version of the server-side function HTTPAPI.processDumpAPI(req, res).
+ * Client-side version of the web-based server-side function HTTPAPI.processDumpAPI(req, res).
  *
  * @param {Object} aParms (analogous to req.query on the server)
  */
@@ -688,28 +689,40 @@ DiskDump.API = function(aParms)
     var sFormat = aParms[DumpAPI.QUERY.FORMAT] || DumpAPI.FORMAT.JSON;
     var fComments = (aParms[DumpAPI.QUERY.COMMENTS]? true : false);
 
-    var disk = new DiskDump(sDisk, null, sFormat, fComments);
-
-    disk.loadFile(function(err) {
-        if (!err) {
-            var sData, sType, fBase64;
-            if (sFormat == DumpAPI.FORMAT.IMG) {
-                sType = "octet-stream";
-                var buf = disk.convertToIMG();
-                if (buf) {
-                    sData = disk.encodeAsBase64(buf);
-                    fBase64 = true;
+    if (sDisk) {
+        var disk = new DiskDump(sDisk, null, sFormat, fComments);
+        disk.loadFile(function(err) {
+            if (!err) {
+                var sData, sType, fBase64;
+                if (sFormat == DumpAPI.FORMAT.IMG) {
+                    sType = "octet-stream";
+                    var buf = disk.convertToIMG();
+                    if (buf) {
+                        sData = disk.encodeAsBase64(buf);
+                        fBase64 = true;
+                    }
+                } else {
+                    sType = "json";
+                    sData = disk.convertToJSON();
+                }
+                if (sData) {
+                    var sFileName = str.getBaseName(disk.sDiskPath, true) + '.' + sFormat;
+                    var sAlert = web.downloadFile(sData, sType, fBase64, sFileName);
+                    web.alertUser(sAlert);
+                } else {
+                    web.alertUser("No data.");
                 }
             } else {
-                sType = "json";
-                sData = disk.convertToJSON();
+                web.alertUser(err.message);
             }
-            if (sData) {
-                var sAlert = web.downloadFile(sData, sType, fBase64);
-                web.alertUser(sAlert);
-            }
-        }
-    });
+        });
+    }
+    else if (aParms[DumpAPI.QUERY.DIR] || aParms[DumpAPI.QUERY.PATH] || aParms[DumpAPI.QUERY.FILE]) {
+        /*
+         * The web-based client-side API currently supports DISK requests only (eg, no DIR, PATH, or FILE requests).
+         */
+        web.alertUser("Unsupported API request.");
+    }
 };
 
 /**
@@ -755,7 +768,7 @@ DiskDump.outputDisk = function(err, disk, sDiskPath, sOutputFile, fOverwrite, sM
                         md5JSON = crypto.createHash('md5').update(data).digest('hex');
                     }
                     if (disk.bufDisk) {
-                        md5Disk = crypto.createHash('md5').update(disk.bufDisk).digest('hex');
+                        md5Disk = crypto.createHash('md5').update(disk.bufDisk.buf || disk.bufDisk).digest('hex');
                     }
                     fUnchanged = DiskDump.updateManifest(disk, disk.sManifestFile, sDiskPath, sOutputFile, true, sManifestTitle, md5Disk, md5JSON);
                 }
@@ -911,7 +924,11 @@ DiskDump.updateManifest = function(disk, sManifestFile, sDiskPath, sOutputFile, 
             sCHS = disk.dataDisk.length + ':' + disk.dataDisk[0].length + ':' + disk.dataDisk[0][0].length;
             size = disk.dataDisk.length * disk.dataDisk[0].length * disk.dataDisk[0][0].length * disk.dataDisk[0][0][0].length;
         }
-        var sXMLDisk = '\t<disk id="' + sIDDisk + '"' + (size? ' size="' + size + '"' : '') + (sCHS? ' chs="' + sCHS + '"' : '') + (sParm? ' ' + sParm + '="' + sDiskPath + '"' : '') + ' href="' + sOutputFile + '"' + (md5Disk? ' md5="' + md5Disk + '"' : '') + (md5JSON? ' md5json="' + md5JSON + '"' : '') + '>\n';
+        var sXMLDisk = '\t<disk id="' + sIDDisk + '"';
+        sXMLDisk += (size? ' size="' + size + '"' : '');
+        sXMLDisk += (sCHS? ' chs="' + sCHS + '"' : '');
+        sXMLDisk += (sParm? ' ' + sParm + '="' + sDiskPath + '"' : '');
+        sXMLDisk += ' href="' + sOutputFile + '"' + (md5Disk? ' md5="' + md5Disk + '"' : '') + (md5JSON? ' md5json="' + md5JSON + '"' : '') + '>\n';
 
         var sName = "";
         if (sMatchDisk && (match = sMatchDisk.match(/<name>([^>]*)<\/name>/))) {
@@ -1516,9 +1533,11 @@ DiskDump.prototype.readDir = function(sDir, fRoot, done)
      * Use the directory name as a candidate for a volume label as well, if it's upper-case and
      * 11 characters or less (after we remove any numeric prefix that we may have added to indicate
      * disk order, that is).
+     *
+     * From the command-line, you can override this by passing --label=<somelabel>.
      */
     if (fRoot) {
-        fileInfo = this.buildVolLabel(sDir);
+        fileInfo = this.buildVolLabel(this.sLabel || sDir);
         if (fileInfo) {
             aFiles.push(fileInfo);
             // this.addManifestInfo(fileInfo);
@@ -2072,7 +2091,7 @@ DiskDump.prototype.buildClusters = function(aFiles, offDisk, cbCluster, iParentC
             } else {
                 cbData = sData.length;
                 bufData = new BufferPF(sData);
-                if (this.sManifestFile) aFiles[iFile].FILE_MD5 = crypto.createHash('md5').update(bufData).digest('hex');
+                if (this.sManifestFile) aFiles[iFile].FILE_MD5 = crypto.createHash('md5').update(bufData.buf || bufData).digest('hex');
             }
         }
         else if (cbData < 0) {

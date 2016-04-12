@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.21.5/machine.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.21.6/machine.xsl"?>
 <machine id="ibm5170" class="pc" border="1" pos="center" background="#FAEBD7">
 	<name pos="center">IBM PC AT (8Mhz, 640Kb, Dual Floppy) with Monochrome Display</name>
 	<computer id="at-mda-640k" name="IBM PC AT" buswidth="24"/>
@@ -28,6 +28,9 @@
 		Finally, there is a "manufacturing jumper" that can be installed, enabling additional diagnostic functions
 		in the ROM; it defaults to UNINSTALLED and stays UNINSTALLED, since no UI or configuration property is currently
 		provided.
+
+		The rest of a 5170 machine's configuration is handled through CMOS settings, which PCjs configures automatically
+		based on other settings (eg, the chipset's *floppies* property).
 	</comment>
 	<chipset id="chipset" model="5170" floppies="[1200,1200]" monitor="mono"/>
 	<serial id="com1" adapter="1"/>

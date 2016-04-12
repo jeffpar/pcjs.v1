@@ -150,7 +150,7 @@ it uses the same machine *id*).
 
 In fact, the [example3b](examples/example3b.html) example (with [XML file](examples/example3b.xml))
 does just that, using JSON dumps created from [example3a](examples/example3a.html) after starting VisiCalc.
-See the *state* attribute on the [Computer](computer/) component for more information on state files.
+See the *state* property on the [Computer](computer/) component for more information on state files.
 
 ### Running PCjs On Your Own Server
 			

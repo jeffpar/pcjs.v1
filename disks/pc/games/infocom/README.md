@@ -2,12 +2,13 @@
 layout: page
 title: Infocom Games
 permalink: /disks/pc/games/infocom/
-machines:
-  - type: pc
-    id: ibm5150
 ---
 
 Infocom Games
 ---
 
-{% include machine.html id="ibm5150" %}
+* [The Hitchhiker's Guide to the Galaxy](hhiker/)
+* [Planetfall](planet/)
+* [Zork I](zork1/) ([Debugger](zork1/debugger/))
+* [Zork II](zork2/)
+* [Zork III](zork3/)

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.21.5/manifest.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.21.6/manifest.xsl"?>
 <manifest type="software">
 	<title>MS-DOS</title>
 	<version>3.31</version>
@@ -8,6 +8,6 @@
 	<author>Microsoft</author>
 	<releaseDate/>
 	<disk id="disk01" size="1474560" chs="80:2:18" img="archive/MSDOS331-1440K.img" href="/disks/pc/dos/microsoft/3.31/MSDOS331-1440K.json" md5="b6e96b0e70b7428904c8abfea74db341" md5json="1a8c3cfa978fbcbf7862c4c91847a267">
-		<name>MS-DOS 3.31 (1440K Disk)</name>
+		<name>MS-DOS 3.31 (1.44M Disk)</name>
 	</disk>
 </manifest>

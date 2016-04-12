@@ -7,6 +7,6 @@ permalink: /disks/pc/cpm/
 CP/M-86
 ---
 
-The following versions of CP/M-86 are available:
+Information is available for these versions of CP/M-86:
 
 * [CP/M-86 1.1B](/disks/pc/cpm/1.1b/)

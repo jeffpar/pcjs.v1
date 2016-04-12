@@ -67,7 +67,7 @@ Attributes
  * *floppies* (optional)
 
 	If no *sw1* setting is provided, *floppies* may be used to specify an array of floppy drive capacities;
-	eg, [360, 360] for two 360Kb drives; default is none.
+	eg, [360, 360] for two 360Kb drives; default is none.  Valid values include: 360, 720, 1200, and 1440.
 
  * *monitor* (optional)
 

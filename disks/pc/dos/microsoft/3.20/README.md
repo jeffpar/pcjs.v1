@@ -1,6 +1,6 @@
 ---
 layout: page
-title: MS-DOS 3.20
+title: Microsoft MS-DOS 3.20
 permalink: /disks/pc/dos/microsoft/3.20/
 machines:
   - type: pc
@@ -12,7 +12,7 @@ machines:
         path: /disks/pc/dos/microsoft/3.20/MSDOS320-DISK1.json
 ---
 
-MS-DOS 3.20
+Microsoft MS-DOS 3.20
 ---
 
 The MS-DOS 3.20 disks in the PCjs collection are the only known non-OEM copies of that release

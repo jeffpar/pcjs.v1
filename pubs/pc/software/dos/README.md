@@ -4,7 +4,7 @@ title: PC-DOS Manuals
 permalink: /pubs/pc/software/dos/
 ---
 
-PC-DOS Manuals
+IBM PC-DOS Manuals
 ---
 
 * [IBM PC Disk Operating System v1.00](PCDOS100/)

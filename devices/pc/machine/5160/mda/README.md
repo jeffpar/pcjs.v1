@@ -2,6 +2,8 @@
 layout: page
 title: IBM PC Machines (Model 5160) with Monochrome (MDA) Display
 permalink: /devices/pc/machine/5160/mda/
+redirect_from:
+  - /configs/pc/machines/5160/mda/
 ---
 
 IBM PC XT with Monochrome (MDA) Display

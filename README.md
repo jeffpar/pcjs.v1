@@ -349,11 +349,14 @@ where PCjs could run amok and destroy the planet.
 Other parameters that can be passed via the URL:
 
 - *autostart*: set it to "true" to allow all machines to start normally, "false" to prevent all machines from starting,
-or "no" to prevent all machines from starting *unless* they have no "Run" button.
-
-For example:
+or "no" to prevent all machines from starting *unless* they have no "Run" button; e.g.:
 
 	http://localhost:8088/?gort=debug&autostart=false
+
+- *aspect*: set it to a numeric value >= 0.3 and <= 3.33 to modify the default aspect ratio of a machine's screen on the
+specified page; e.g.:
+
+	http://localhost:8088/?aspect=2.0
 
 Updating PCjs
 ---

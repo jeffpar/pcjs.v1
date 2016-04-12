@@ -1,26 +1,26 @@
 ---
 layout: page
-title: IBM PC Video Devices
+title: IBM PC Video Adapters
 permalink: /devices/pc/video/
 ---
 
-IBM PC Video Devices
+IBM PC Video Adapters
 ---
 
-Video devices are added to machines by including a *[Video](/docs/pcjs/video/)* component in the machine XML
-configuration file.  See one of the following video adapters for  examples of how to do this.
+Video adapters are added to machines by including a *[Video](/docs/pcjs/video/)* component in the machine XML
+configuration file.
 
-PCjs supports the following IBM PC video adapters:
+See the following [IBM PC Video Configurations](ibm/):
 
 * Monochrome Display Adapter (MDA)
 * [Color Graphics Adapter (CGA)](ibm/cga/)
 * [Enhanced Graphics Adapter (EGA)](ibm/ega/)
 * [Video Graphics Array (VGA)](ibm/vga/)
 
-More detailed information is available for the following IBM-compatible video adapters:
+Information is also available for the following IBM-compatible video adapters:
 
-* [CDP CGA](/devices/pc/video/cdp/cga/)
-* [ATI VGA](/devices/pc/video/ati/vga/)
-* [COMPAQ EGA](/devices/pc/video/compaq/ega/)
-* [COMPAQ VGA](/devices/pc/video/compaq/vga/)
-* [Paradise VGA](/devices/pc/video/paradise/vga/)
+* [CDP CGA](cdp/cga/)
+* [ATI VGA](ati/vga/)
+* [COMPAQ EGA](compaq/ega/)
+* [COMPAQ VGA](compaq/vga/)
+* [Paradise VGA](paradise/vga/)

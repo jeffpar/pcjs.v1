@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Microport's AT&amp;T UNIX System V-AT 2.3
+title: Microport UNIX System V-AT 2.3
 permalink: /disks/pc/unix/microport/system-v/2.3/
 ---
 

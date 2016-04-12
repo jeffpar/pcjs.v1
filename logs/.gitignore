@@ -1,4 +1,5 @@
 *.json
 *.log
 bugs.html
+aws/
 users/

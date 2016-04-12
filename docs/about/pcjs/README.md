@@ -53,7 +53,7 @@ messages, and view instruction history, cycle counts and more.  The Debugger doe
 instructions or the trace flag, and does not alter the machine state in any way, allowing you to debug anything,
 including 8086 debuggers.
 
-+ Machines created with the [Computer](/docs/pcjs/computer/) *resume* attribute set will save their entire machine
++ Machines created with the [Computer](/docs/pcjs/computer/) *resume* property set will save their entire machine
 state using your browser's local storage, so that any changes are preserved when your browser closes, including
 disk modifications. Any files you create or modify *inside* the machine will still be there when you return.
 TIP: To restore a diskette's original contents, simply press the "Download" button again.

@@ -1,6 +1,6 @@
 ---
 layout: page
-title: MS-DOS 4.01
+title: Microsoft MS-DOS 4.01
 permalink: /disks/pc/dos/microsoft/4.01/
 machines:
   - type: pc
@@ -12,7 +12,7 @@ machines:
         path: /disks/pc/dos/microsoft/4.01/MSDOS401-DISK1.json
 ---
 
-MS-DOS 4.01
+Microsoft MS-DOS 4.01
 ---
 
 The PCjs machine below is running PC-DOS 4.01.

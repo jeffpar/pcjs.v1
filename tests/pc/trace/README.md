@@ -1,4 +1,7 @@
-Overview
+---
+layout: page
+title: PC Trace Utility
+permalink: /tests/pc/trace/
 ---
 
 WARNING: This utility is obsolete.  It has been superseded by [test386](/tests/pc/80386/),
@@ -6,6 +9,7 @@ which, going forward, serves as our new model for instruction-level testing.  As
 the **traceLog()** functionality mentioned below has been removed from the PCjs source code
 (but you can always dig it back up if you really want it).
 
+Overview
 ---
 
 TRACE.COM takes an instruction log, as recorded by the PCjs Debugger's traceLog() function, and
@@ -32,6 +36,7 @@ instructions, even though we'll be missing OVERFLOW validation for all single-bi
 
 Operation
 ---
+
 To load TRACE.COM and TRACE.TXT onto a virtual disk image that PCjs can access, you can add an
 "automount" setting to your PCjs <fdc> configuration that will dynamically generate a fresh disk image
 every time the machine is loaded, via the DiskDump API.  This is useful when you're constantly

@@ -1,13 +1,13 @@
 ---
 layout: page
-title: COMPAQ MS-DOS Disks
+title: COMPAQ MS-DOS
 permalink: /disks/pc/dos/compaq/
 ---
 
-COMPAQ DOS
+COMPAQ MS-DOS
 ---
 
-The following versions of COMPAQ MS-DOS are available:
+Information is available for these versions of COMPAQ MS-DOS:
 
 * [COMPAQ MS-DOS 1.11](/disks/pc/dos/compaq/1.11/)
 * [COMPAQ MS-DOS 1.12](/disks/pc/dos/compaq/1.12/)

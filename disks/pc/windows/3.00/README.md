@@ -2,6 +2,8 @@
 layout: page
 title: Microsoft Windows 3.00
 permalink: /disks/pc/windows/3.00/
+redirect_from:
+  - /devices/pc/machine/5170/ega/1152kb/win300/
 machines:
   - type: pc
     id: ibm5170-win300

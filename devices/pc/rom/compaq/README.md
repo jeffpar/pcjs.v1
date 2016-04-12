@@ -1,11 +1,12 @@
 ---
-layout: post
-title: COMPAQ BIOS ROMs
-date: 2016-02-24 14:00:00
+layout: page
+title: COMPAQ ROMs
 permalink: /devices/pc/rom/compaq/
+redirect_from:
+  - /devices/pc/rom/compaq/bios/
 ---
 
-COMPAQ BIOS ROMs
+COMPAQ ROMs
 ---
 
 Since the PCjs Project is focused on the 1980's, this roughly chronological list of COMPAQ machines is limited to

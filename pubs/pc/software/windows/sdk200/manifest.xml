@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.21.6/manifest.xsl"?>
+<manifest type="document">
+	<title>Microsoft Windows Software Development Kit</title>
+	<version>2.00</version>
+	<source href="http://os2museum.com">os2museum.com</source>
+	<document href="http://www.os2museum.com/files/docs/win20sdk/windows-2.0-sdk-prgref-1987.pdf">
+		<name id="050051053-200-I02-1087">Programmer’s Reference</name>
+	</document>
+	<document href="http://www.os2museum.com/files/docs/win20sdk/windows-2.0-sdk-tools-1987.pdf">
+		<name id="050051051-200-I01-1087">Programming Tools</name>
+	</document>
+	<document href="http://www.os2museum.com/files/docs/win20sdk/windows-2.0-sdk-styleguide-1987.pdf">
+		<name id="050051016-200-I01-1087">Application Style Guide</name>
+	</document>
+	<document href="http://www.os2museum.com/files/docs/win20sdk/windows-2.0-sdk-extensions-1987.pdf">
+		<name id="050051010-200-I00-1087">Windows Extensions</name>
+	</document>
+	<document href="http://www.os2museum.com/files/docs/win20sdk/windows-2.0-sdk-lguide-1987.pdf">
+		<name id="050051052-200-I02-1087">Programmer's Learning Guide</name>
+	</document>
+</manifest>
