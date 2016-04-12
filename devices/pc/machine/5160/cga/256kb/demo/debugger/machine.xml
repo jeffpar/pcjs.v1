@@ -8,7 +8,7 @@
 	<rom id="romBASIC" addr="0xf6000" size="0x8000" file="/devices/pc/rom/5160/basic/BASIC110.json"/>
 	<rom id="romBIOS" addr="0xfe000" size="0x2000" file="/devices/pc/rom/5160/1982-11-08/XTBIOS-REV1.json"/>
 	<video ref="/devices/pc/video/ibm/cga/ibm-cga.xml"/>
-	<fdc ref="/disks/pc/samples.xml"/>
+	<fdc ref="/disks/pc/compiled/samples.xml"/>
 	<cpu id="cpu8088" model="8088" autostart="true"/>
 	<keyboard ref="/devices/pc/keyboard/us83-buttons-functions.xml"/>
 	<debugger id="debugger"/>

@@ -8,7 +8,7 @@
 	<rom id="romBASIC" addr="0xf6000" size="0x8000" file="/devices/pc/rom/5150/basic/BASIC100.json"/>
 	<rom id="romBIOS" addr="0xfe000" size="0x2000" file="/devices/pc/rom/5150/1981-04-24/PCBIOS-REV1.json"/>
 	<video ref="/devices/pc/video/ibm/cga/ibm-cga.xml"/>
-	<fdc ref="/disks/pc/samples.xml"/>
+	<fdc ref="/disks/pc/compiled/samples.xml"/>
 	<keyboard ref="/devices/pc/keyboard/us83-softkeys.xml"/>
 	<debugger id="debugger"/>
 	<panel ref="/devices/pc/panel/wide.xml"/>
