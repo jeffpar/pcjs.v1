@@ -7,7 +7,7 @@ permalink: /devices/pc/
 IBM PC Device Configurations
 ---
 
-[IBM PC Machine Configurations](machine/) are built from a collection of devices, including:
+[PC Machines](machine/) are built from a collection of devices, including:
 
 * CPU
 * RAM

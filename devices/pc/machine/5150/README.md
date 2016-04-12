@@ -9,7 +9,7 @@ redirect_from:
 IBM PC (Model 5150) Machines
 ---
 
-All our IBM PC (Model 5150) configurations are located here, including:
+Our IBM PC 5150 configurations include:
 
 * [IBM PC with Monochrome Display](/devices/pc/machine/5150/mda/)
 * [IBM PC with Color Display](/devices/pc/machine/5150/cga/)

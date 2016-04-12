@@ -7,14 +7,14 @@ permalink: /devices/pc/machine/5170/
 IBM PC AT (Model 5170) Machines
 ---
 
-All our IBM PC AT (Model 5170) configurations are located here, including:
+Our IBM PC AT 5170 configurations include:
 
 * [IBM PC AT with MDA Display](/devices/pc/machine/5170/mda/)
 * [IBM PC AT with CGA Display](/devices/pc/machine/5170/cga/)
 * [IBM PC AT with EGA Display](/devices/pc/machine/5170/ega/)
 * [IBM PC AT with VGA Display](/devices/pc/machine/5170/vga/)
 
-The IBM PC AT 5170 came in several different models over a 3-year period, as summarized below.
+The IBM PC AT 5170 came in a variety of its own models over a three-year period.
 
 ### 5170 Models 68 and 99
 
@@ -58,16 +58,16 @@ Models 319 and 339 were introduced in April 1986:
 	- All of the above
 	- Enhanced 101-key keyboard
 
-IBM PC AT Configuration Options
+IBM PC AT 5170 Configuration Options
 ---
 
-The Model 5170 doesn't have DIP switches like previous models, but it still has a few switches and jumpers.
+The IBM PC AT 5170 doesn't have DIP switches like previous models, but it still has a few switches and jumpers.
 
 First and foremost, there is a **Display Switch** near the battery connector that must be pushed "toward the
 front of your system unit" if you have a CGA that is your only (or primary) display adapter, or "toward the
 back of your system unit" if you're using an MDA as your only (or primary) display.
 
-In PCjs, the Model 5170 **Display Switch** is configured with the &lt;[ChipSet](/docs/pcjs/chipset/)&gt; *monitor*
+In PCjs, the 5170 **Display Switch** is configured with the &lt;[ChipSet](/docs/pcjs/chipset/)&gt; *monitor*
 property, which you can set to either "mono" (aka "mda") or "color" (aka "cga").  Unlike the Model 5150/5160 DIP
 switches, there is no UI for this switch, so once the machine has been created, it cannot be changed by the user.
 
@@ -78,7 +78,7 @@ Finally, there is a "manufacturing jumper" that can be installed, enabling addit
 in the ROM; it defaults to UNINSTALLED and stays UNINSTALLED, since no UI or configuration property is currently
 provided.
 
-The rest of a Model 5170 machine's configuration is normally handled through CMOS settings, such as the number and type
+The rest of a 5170 machine's configuration is normally handled through CMOS settings, such as the number and type
 of floppy diskette drives, which can be configured with the &lt;[ChipSet](/docs/pcjs/chipset/)&gt; *floppies* property;
 e.g.:
 
