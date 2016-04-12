@@ -15,7 +15,7 @@
 			<control type="led" label="Caps" binding="caps-lock" padleft="8px"/>
 			<control type="led" label="Num" binding="num-lock" padleft="8px"/>
 			<control type="led" label="Scroll" binding="scroll-lock" padleft="8px"/>
-			<control type="button" binding="fullScreen" padleft="8px">Full Screen</control>
+			<control type="button" binding="fullScreen" padleft="8px;line-height:1em">Full Screen</control>
 		</control>
 	</menu>
 	<rom id="romEGA" addr="0xc0000" size="0x4000" file="/devices/pc/video/ibm/ega/1984-09-13/ibm-ega.json" notify="videoEGA"/>

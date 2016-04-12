@@ -6,7 +6,7 @@
 			<control type="led" label="Caps" binding="caps-lock" padleft="8px"/>
 			<control type="led" label="Num" binding="num-lock" padleft="8px"/>
 			<control type="led" label="Scroll" binding="scroll-lock" padleft="8px"/>
-			<control type="button" binding="fullScreen" padleft="8px">Full Screen</control>
+			<control type="button" binding="fullScreen" padleft="8px;line-height:1em">Full Screen</control>
 		</control>
 	</menu>
 	<rom id="romVGA" addr="0xc0000" size="0x6000" file="/devices/pc/video/ibm/vga/1986-10-27/ibm-vga.json" notify="videoVGA[0x378d,0x3f8d]"/>
