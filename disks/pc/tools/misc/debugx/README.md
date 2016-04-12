@@ -1,7 +1,7 @@
 ---
 layout: page
 title: Enhanced DEBUG 1.32
-permalink: /disks/pc/tools/misc/debugx/1.32/
+permalink: /disks/pc/tools/misc/debugx/
 ---
 
 Enhanced DEBUG for PC DOS and MS-DOS
