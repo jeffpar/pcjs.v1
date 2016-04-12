@@ -7,7 +7,7 @@
 	<category>Simulation</category>
 	<author>Microsoft</author>
 	<releaseDate>1984</releaseDate>
-	<disk id="disk01" dir="archive/" href="/disks/pc/games/microsoft/flightsim/1984/FLIGHTSIM-1984.json" md5="334d3894f0a3ee4d7e9983867f36dc7e" md5json="a9d4eb333180eb5709c2049114c7ad29">
+	<disk id="disk01" size="368640" chs="40:2:9" dir="archive" href="/disks/pc/games/microsoft/flightsim/1984/FLIGHTSIM-1984.json" md5="dc9d35deddfd1389d6cee16993469a16" md5json="14391960fab50856ec09286f26d84ad2">
 		<name>MS Flight Simulator (1984)</name>
 		<file size="6917" time="1987-06-22 17:33:00" attr="0x20" md5="3a7c32594f174ae943c17cc3b23a6c34">FS.EXE</file>
 		<file size="3840" time="1987-06-22 17:33:02" attr="0x20" md5="d94eea83259d1658bb73da1ca3f59c16">FS.HLP</file>

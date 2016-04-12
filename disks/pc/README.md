@@ -41,9 +41,13 @@ diagnostics, and more.
 * [Lotus 1-2-3](apps/lotus/123/)
 * [MicroPro WordStar](apps/micropro/wordstar/)
 * [Microsoft Chart](apps/microsoft/chart/)
-* [Microsoft Games](games/microsoft/)
 * [Microsoft Word](apps/microsoft/word/)
-* [Microsoft Word for Windows](apps/microsoft/winword/)
+
+### [Games](games/)
+
+* [id Software](games/id/)
+* [Infocom](games/infocom/)
+* [Microsoft](games/microsoft/)
 
 ### [Tools](tools/)
 

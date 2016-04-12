@@ -91,8 +91,10 @@
 		<manifest ref="/disks/pc/tools/microsoft/windows/sdk/1.04/manifest.xml"/>
 		<manifest ref="/disks/pc/tools/microsoft/windows/sdk/2.03/manifest.xml"/>
 		<manifest ref="/disks/pc/tools/microsoft/windows/sdk/3.00/manifest.xml"/>
-		<manifest ref="/disks/pc/games/microsoft/flightsim/manifest.xml"/>
-		<disk path="/disks/pc/games/id/wolf3d/1WOLF14.json">Wolfenstein 3D (v1.4)</disk>
+		<manifest ref="/disks/pc/tools/misc/debugx/manifest.xml"/>
+		<manifest ref="/disks/pc/games/id/wolf3d/manifest.xml"/>
+		<manifest ref="/disks/pc/games/microsoft/flightsim/1982/manifest.xml"/>
+		<manifest ref="/disks/pc/games/microsoft/flightsim/1984/manifest.xml"/>
 		<manifest ref="/apps/pc/1981/visicalc/manifest.xml" disk="disk01"/>
 		<manifest ref="/apps/pc/1982/esuite/manifest.xml" disk="disk01"/>
 		<manifest ref="/apps/pc/1985/rogue/manifest.xml" disk="disk01"/>

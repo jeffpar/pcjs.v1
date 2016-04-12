@@ -8,9 +8,25 @@ redirect_from:
   - /devices/pc/rom/5170/bios/
 ---
 
-IBM PC AT (Model 5170) BIOS
+IBM PC AT (Model 5170) ROM Revisions
 ---
-[ATBIOS-REV1.json](1984-01-10/ATBIOS-REV1.json) contains the original IBM PC AT BIOS.
+
+There were three ROM BIOS revisions for the IBM PC AT, which we refer to as **[Rev 1](#ibm-pc-at-rom-bios-rev-1)**,
+**[Rev 2](#ibm-pc-at-rom-bios-rev-2)**, and **[Rev 3](#ibm-pc-at-rom-bios-rev-3)**.  Each revision was used with a
+corresponding motherboard type (**Type 1**, **Type 2**, and **Type 3**, respectively), which in turn were used with
+corresponding 5170 models ([Models 68 and 99](/devices/pc/machine/5170/#models-68-and-99),
+[Model 239](/devices/pc/machine/5170/#model-239), and
+[Models 319 and 339](/devices/pc/machine/5170/#models-319-and-339), respectively).
+
+IBM PC AT ROM BIOS (Rev 1)
+---
+[ATBIOS-REV1.json](1984-01-10/ATBIOS-REV1.json) contains the original IBM PC AT BIOS, dated January 10, 1984
+("01/10/84").  It was produced for [5170 Models 68 and 99](/devices/pc/machine/5170/#models-68-and-99),
+announced August 14, 1984.
+
+Do we really think this PC AT BIOS was "finalized" a full 7 months before the PC AT was even announced, let alone
+available?  I doubt it.  I suspect the BIOS date string was simply never updated to reflect the date of the final
+change(s).
 
 From [http://minuszerodegrees.net/bios/BIOS_5170_10JAN84_6MHZ.zip](http://minuszerodegrees.net/bios/):
 
@@ -48,10 +64,13 @@ either the *merge* option or the appending of MAP data.  For the moment, the API
 
 ---
 
-IBM PC AT (Model 5170) BIOS ("Rev 2")
+IBM PC AT ROM BIOS (Rev 2)
 ---
-[ATBIOS-REV2.json](1985-06-10/ATBIOS-REV2.json) contains the second IBM PC AT BIOS, dated June 10, 1985, which expanded hard disk
-support from 15 to 23 drive types, fixed some bugs, and added support for 720Kb 3.5-inch floppy diskette drives.
+[ATBIOS-REV2.json](1985-06-10/ATBIOS-REV2.json) contains the second IBM PC AT BIOS, dated June 10, 1985.
+
+This BIOS was produced for [5170 Model 239](/devices/pc/machine/5170/#model-239), announced October 10,
+1985.  It increased the number of supported hard disk types from 15 to 23, fixed some bugs, and added support for 720Kb
+3.5-inch floppy diskette drives.
 
 From [http://minuszerodegrees.net/bios/BIOS_5170_10JUN85_6MHZ.zip](http://minuszerodegrees.net/bios/):
 
@@ -78,10 +97,16 @@ The JSON-encoded ROM image that PCjs uses was created using the *FileDump* comma
 
 ---
 
-IBM PC AT (Model 5170) BIOS ("Rev 3")
+IBM PC AT ROM BIOS (Rev 3)
 ---
-[ATBIOS-REV3.json](1985-11-15/ATBIOS-REV3.json) contains the third (and last) IBM PC AT BIOS, dated November 15, 1985,
-which added support for 101-key keyboards and 1.44Mb floppy diskette drives.
+[ATBIOS-REV3.json](1985-11-15/ATBIOS-REV3.json) contains the third (and last) IBM PC AT BIOS, dated November 15, 1985.
+
+This BIOS was produced for [5170 Models 319 and 339](/devices/pc/machine/5170/#models-319-and-339),
+announced April 2, 1986.  It added support for 101-key keyboards and 1.44Mb 3.5-inch floppy diskette drives.
+
+Note that, although minuszerodegrees.net says this revision was found in "type 2 motherboards running at 8 Mhz",
+the [Vintage Computer Federation](http://www.vcfed.org/forum/showthread.php?26480) refers to the 8Mhz motherboards as
+"Type 3".
 
 From [http://minuszerodegrees.net/bios/BIOS_5170_15NOV85_8MHZ_VARIATION_2.zip](http://minuszerodegrees.net/bios/):
 

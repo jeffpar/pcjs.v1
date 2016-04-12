@@ -7,5 +7,5 @@ permalink: /disks/pc/games/microsoft/
 Microsoft Games
 ---
 
-* [Microsoft Adventure](adventure/)
-* Microsoft Flight Simulator (1984)
+* [Microsoft Adventure (1981)](adventure/)
+* [Microsoft Flight Simulator (1984)](flightsim/)

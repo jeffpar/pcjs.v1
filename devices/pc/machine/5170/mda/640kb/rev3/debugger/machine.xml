@@ -28,6 +28,9 @@
 		Finally, there is a "manufacturing jumper" that can be installed, enabling additional diagnostic functions
 		in the ROM; it defaults to UNINSTALLED and stays UNINSTALLED, since no UI or configuration property is currently
 		provided.
+
+		The rest of a 5170 machine's configuration is handled through CMOS settings, which PCjs configures automatically
+		based on other settings (eg, the chipset's *floppies* property).
 	</comment>
 	<chipset id="chipset" model="5170" floppies="[1200,1200]" monitor="mono"/>
 	<serial id="com1" adapter="1"/>

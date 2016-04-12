@@ -4,6 +4,7 @@ title: "IBM PC (Model 5150) running Zork I with Debugger"
 permalink: /disks/pc/games/infocom/zork1/debugger/
 machines:
   - type: pc
+    debugger: true
     id: ibm5150-zork1
 ---
 
