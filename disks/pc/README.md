@@ -22,7 +22,7 @@ but that's not yet a reality.
 
 For application demos, see the [IBM PC Application Archive](/apps/pc/), which focuses excusively on applications.
 The [Disk Library](/disks/pc/library.xml) is a superset, including operating systems, application software,
-diagnostics, and more.
+computer diagnostics, programming tools, and more.
 
 ### Operating Systems
 
@@ -37,7 +37,6 @@ diagnostics, and more.
 
 ### [Applications](apps/)
 
-* [Infocom Games](games/infocom/)
 * [Lotus 1-2-3](apps/lotus/123/)
 * [MicroPro WordStar](apps/micropro/wordstar/)
 * [Microsoft Chart](apps/microsoft/chart/)
