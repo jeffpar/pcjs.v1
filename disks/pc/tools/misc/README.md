@@ -9,4 +9,4 @@ Other PC Tools
 
 Information is available for these miscellaneous tools:
 
-* [Enhanced DEBUG](enhdbg/)
+* [Enhanced DEBUG](enhdebug/)

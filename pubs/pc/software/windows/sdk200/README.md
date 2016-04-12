@@ -2,6 +2,8 @@
 layout: page
 title: Windows SDK 2.00
 permalink: /pubs/pc/software/windows/sdk200/
+redirect_from:
+  - /pubs/pc/software/windows/sdk20/
 ---
 
 Windows Software Development Kit 2.00
