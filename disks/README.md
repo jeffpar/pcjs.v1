@@ -8,6 +8,8 @@ Disk Libraries
 ---
 Browse [IBM PC](pc/) and [Challenger 1P](c1p/) disk libraries.
 
+---
+
 ### PCjs Disk Image Formats
 
 PCjs works best with disk images in a **JSON** format, to save conversion time, so that's the only disk image format

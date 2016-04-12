@@ -4,7 +4,7 @@ title: XENIX Operating Systems from IBM
 permalink: /disks/pc/unix/ibm/xenix/
 ---
 
-XENIX Operating Systems from IBM
+IBM PC XENIX
 ---
 
 Information is available for these versions of XENIX from IBM:

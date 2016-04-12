@@ -1,7 +1,7 @@
 ---
 layout: page
 title: SCO Xenix
-permalink: /disks/pc/unix/sco/xenix/
+permalink: /disks/pc/unix/sco/xenix/8086/
 ---
 
 SCO Xenix for the PC XT
