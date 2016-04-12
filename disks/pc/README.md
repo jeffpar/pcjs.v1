@@ -30,10 +30,8 @@ computer diagnostics, programming tools, and more.
 * [OS/2](os2/)
 * [Windows](windows/)
 * [CP/M-86](cpm/)
-* Minix 1.1
-* PC/IX 1.0
-* [Microport's AT&T UNIX System V-AT 2.3](unix/microport/system-v/2.3/)
-* [SCO Xenix 8086 Operating System v2.1.3](xenix/sco/8086/2.1.3/)
+* [MINIX](minix/)
+* [Unix](unix/)
 
 ### [Applications](apps/)
 

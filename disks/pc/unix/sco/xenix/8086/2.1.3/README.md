@@ -1,7 +1,7 @@
 ---
 layout: page
 title: SCO Xenix 8086 Operating System v2.1.3
-permalink: /disks/pc/xenix/sco/8086/2.1.3/
+permalink: /disks/pc/unix/sco/xenix/8086/2.1.3/
 ---
 
 Installation Notes

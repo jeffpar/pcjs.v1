@@ -59,7 +59,7 @@
 		<manifest ref="/disks/pc/minix/1.1/manifest.xml"/>
 		<manifest ref="/disks/pc/unix/ibm/pcix/1.0/manifest.xml"/>
 		<manifest ref="/disks/pc/unix/microport/system-v/2.3/manifest.xml"/>
-		<manifest ref="/disks/pc/xenix/sco/8086/2.1.3/manifest.xml"/>
+		<manifest ref="/disks/pc/unix/sco/xenix/8086/2.1.3/manifest.xml"/>
 		<manifest ref="/disks/pc/apps/lotus/123/1.0a/manifest.xml"/>
 		<manifest ref="/disks/pc/apps/micropro/wordstar/3.30/manifest.xml"/>
 		<manifest ref="/disks/pc/apps/micropro/wordstar/4.00/manifest.xml"/>
