@@ -8,6 +8,7 @@ machines:
     config: /docs/pcjs/examples/example3b.xml
 redirect_from:
   - /docs/pcjs/demos/
+  - /docs/pcjs/demos/sample1.html/
 ---
 
 PCjs Documentation Examples

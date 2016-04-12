@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "IBM Video Graphics Array (VGA)"
+title: IBM Video Graphics Array (VGA)
 permalink: /devices/pc/video/ibm/vga/
 ---
 

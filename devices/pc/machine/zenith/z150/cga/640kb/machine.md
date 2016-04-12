@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Zenith Z-150 with Color Display"
+title: Zenith Z-150 with Color Display
 permalink: /devices/pc/machine/zenith/z150/cga/640kb/
 machines:
   - type: pc

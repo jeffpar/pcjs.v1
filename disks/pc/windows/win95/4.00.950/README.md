@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Microsoft Windows 95 (First Retail Release)"
+title: Microsoft Windows 95 (First Retail Release)
 permalink: /disks/pc/windows/win95/4.00.950/
 machines:
   - type: pc

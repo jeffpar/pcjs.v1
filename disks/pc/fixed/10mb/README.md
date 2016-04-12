@@ -1,22 +1,25 @@
 ---
 layout: page
-title: 10Mb Disk Image with Windows 1.01
+title: 10Mb Hard Drive (Fixed Disk) Images
 permalink: /disks/pc/fixed/10mb/
 ---
 
-10Mb Disk Image with Windows 1.01
+10Mb Hard Drive (Fixed Disk) Images
 ---
 
-This folder contains a 10Mb hard disk image ([pcdos200-win101.json](pcdos200-win101.json)) with a Windows 1.01 installation.
+This folder contains the following 10Mb disk images:
+ 
+* PC-DOS 2.00 with Windows 1.01 for CGA ([PCDOS200-WIN101-CGA](pcdos200-win101-cga.xml))
+* PC-DOS 2.00 with Windows 1.01 for EGA ([PCDOS200-WIN101-EGA](pcdos200-win101-ega.xml))
 
-This disk image is used by various [Model 5160 CGA](/devices/pc/machine/5160/cga/) machine configurations.
+These disk images are used by various [Model 5160](/devices/pc/machine/5160/) machine configurations.
 
-To use it with a machine configuration, include:
+To use one of these disks with another machine configuration, include:
 
-	<hdc id="hdcXT" drives='[{name:"10Mb Hard Disk",path:"/disks/pc/fixed/10mb/pcdos200-win101.json",type:3}]'/>
+	<hdc id="hdcXT" drives='[{name:"10Mb Hard Disk",path:"/disks/pc/fixed/10mb/PCDOS200-WIN101-CGA.json",type:3}]'/>
 	
-in your machine.xml file.  Alternatively, you can include it by reference:
+in the *machine.xml* file.  Alternatively, you can include it by reference:
 
-	<hdc ref="/disks/pc/fixed/win101.xml"/>
+	<hdc ref="/disks/pc/fixed/10mb/pcdos200-win101-cga.xml"/>
 
 Of course, if your machine configuration file is on a different server, the *ref* path will likely be different.

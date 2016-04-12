@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "IBM PC (Model 5150, 64Kb) with Color Display and Debugger"
+title: IBM PC (Model 5150, 64Kb) with Color Display and Debugger
 permalink: /devices/pc/machine/5150/cga/64kb/donkey/debugger/
 machines:
   - type: pc

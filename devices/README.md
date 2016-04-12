@@ -2,6 +2,8 @@
 layout: page
 title: Device Configurations
 permalink: /devices/
+redirect_from:
+  - /configs/
 ---
 
 Device Configurations

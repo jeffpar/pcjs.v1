@@ -4,6 +4,8 @@ title: IBM PC Disk Library
 menu_title: Disks
 menu_order: 4
 permalink: /disks/pc/
+redirect_from:
+  - /configs/pc/disks/
 ---
 
 IBM PC Disk Library
@@ -43,15 +45,15 @@ computer diagnostics, programming tools, and more.
 ### Games
 
 * [id Software](games/id/)
-* [Infocom](games/infocom/)
-* [Microsoft](games/microsoft/)
+* [Infocom Games](games/infocom/)
+* [Microsoft Games](games/microsoft/)
 
 ### Tools
 
 * [Borland Tools](tools/borland/)
 * [IBM PC Diagnostics](diags/ibm/)
 * [Microsoft Tools](tools/microsoft/)
-* [Other](tools/misc/)
+* [Other Tools](tools/misc/)
 
 ### Tests
 

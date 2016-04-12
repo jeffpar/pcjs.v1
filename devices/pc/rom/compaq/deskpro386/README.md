@@ -3,6 +3,7 @@ layout: page
 title: COMPAQ DeskPro 386 ROMs
 permalink: /devices/pc/rom/compaq/deskpro386/
 redirect_from:
+  - /devices/pc/bios/compaq/deskpro386/
   - /devices/pc/compaq/deskpro386/
   - /devices/pc/rom/compaq/bios/deskpro386/
 ---

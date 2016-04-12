@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "IBM PC AT (Model 5170) with Enhanced Color Display"
+title: IBM PC AT (Model 5170) with Enhanced Color Display
 permalink: /devices/pc/machine/5170/ega/
 redirect_from:
   - /configs/pc/machines/5170/ega/

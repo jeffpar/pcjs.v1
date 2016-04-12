@@ -7,7 +7,7 @@ machines:
     id: ibm5170
     debugger: true
     config: /devices/pc/machine/5170/ega/2048kb/rev3/debugger/machine.xml
-    drives: '[{name:"20Mb Hard Disk",type:2,path:"/disks/pc/fixed/20mb/IBMOS210.json"}]'
+    drives: '[{name:"20Mb Hard Disk",type:2,path:"/disks/pc/fixed/20mb/IBMOS210-EGA.json"}]'
     automount: ''
 ---
 

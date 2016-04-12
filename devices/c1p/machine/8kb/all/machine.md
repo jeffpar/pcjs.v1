@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "OSI Challenger 1P (8Kb) with Additional Software"
+title: OSI Challenger 1P (8Kb) with Additional Software
 permalink: /devices/c1p/machine/8kb/all/
 machines:
   - type: c1p

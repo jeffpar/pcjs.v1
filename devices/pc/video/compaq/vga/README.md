@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "COMPAQ Video Graphics Controller (VGA)"
+title: COMPAQ Video Graphics Controller (VGA)
 permalink: /devices/pc/video/compaq/vga/
 ---
 

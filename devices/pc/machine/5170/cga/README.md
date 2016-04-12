@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "IBM PC AT (Model 5170) with Color Display"
+title: IBM PC AT (Model 5170) with Color Display
 permalink: /devices/pc/machine/5170/cga/
 ---
 
