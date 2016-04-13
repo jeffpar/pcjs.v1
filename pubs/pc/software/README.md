@@ -15,7 +15,7 @@ PC Software Development Guides
 * [OS/2 Software Guides](os2/)
 * [Windows Software Guides](windows/)
 
-PC Software Development Tools
+PC Software Tool Guides
 ---
 
 * [Microsoft Macro Assembler 5.0](tools/microsoft/masm/5.00/)
