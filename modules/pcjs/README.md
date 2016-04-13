@@ -1,13 +1,13 @@
 ---
 layout: page
-title: IBM PC Emulation Module
+title: IBM PC Emulation Module (PCjs)
 permalink: /modules/pcjs/
 ---
 
-IBM PC Emulation Module
+IBM PC Emulation Module (PCjs)
 ===
 
-Structure
+Overview
 ---
 The PCjs IBM PC Emulation Module divides PC functionality into variety of logical and visual components.
 In general, each JavaScript file is responsible for a single component or set of related components (eg,
