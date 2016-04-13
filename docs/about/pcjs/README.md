@@ -10,7 +10,7 @@ redirect_from:
 About PCjs
 ---
 
-PCjs is a IBM PC/XT/AT simulator written entirely in JavaScript.  It's designed to load and run extremely
+PCjs is a IBM PC/XT/AT simulator written entirely in [JavaScript](/modules/pcjs/).  It's designed to load and run
 fast, it works well in all modern web browsers (both desktop and mobile), and it's easy to customize.  It is part of
 the [PCjs Project](https://github.com/jeffpar/pcjs), an open source project on [GitHub](http://github.com/).
 

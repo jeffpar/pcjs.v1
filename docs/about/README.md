@@ -8,7 +8,7 @@ permalink: /docs/about/
 
 ## About JavaScript Machines
 
-The JavaScript Machines Project is a collection of computer simulations [written in JavaScript](/modules/).
+The JavaScript Machines Project is a collection of computer simulations written in [JavaScript](/modules/).
 It has been released on GitHub as the [PCjs Project](https://github.com/jeffpar/pcjs), a copy of which
 is hosted here at [{{ site.pcjs.domain }}]({{ site.url }}/) (formerly [jsmachines.net](http://jsmachines.net/)). 
 
