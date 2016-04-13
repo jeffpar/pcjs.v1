@@ -14,6 +14,7 @@ github_username:  jeffpar
 
 left_brace: "{"
 right_brace: "}"
+encoding: UTF-8
 
 # Build settings
 
