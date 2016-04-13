@@ -8,8 +8,8 @@ permalink: /docs/about/
 
 ## About JavaScript Machines
 
-The JavaScript Machines Project is a collection of computer simulations written in JavaScript.  It has been
-released on [GitHub](https://github.com/) as the [PCjs Project](https://github.com/jeffpar/pcjs), a copy of which
+The JavaScript Machines Project is a collection of computer simulations [written in JavaScript](/modules/).
+It has been released on GitHub as the [PCjs Project](https://github.com/jeffpar/pcjs), a copy of which
 is hosted here at [{{ site.pcjs.domain }}]({{ site.url }}/) (formerly [jsmachines.net](http://jsmachines.net/)). 
 
 The goals of the project are to create fast, full-featured simulations of classic computer
@@ -38,7 +38,7 @@ on the [OSI Discussion Forum](http://osiweb.org/osiforum/index.php) at [osiweb.o
 ### Emulating the IBM PC
 
 The next JavaScript Machines simulation was [PCjs](/docs/about/pcjs/), which simulates the original IBM PC, IBM PC XT,
-and IBM PC AT.
+and IBM PC AT.  Browse the [source code](/modules/pcjs/) here or on [GitHub](https://github.com/jeffpar/pcjs).
 
 [PCjs](/docs/about/pcjs/) emulates the Intel 8088, 80186, 80286 and 80386 CPUs, as well as IBM Monochrome Display
 Adapter (MDA), Color Graphics Adapter (CGA), Enhanced Graphics Adapter (EGA), and Video Graphics Array (VGA) video

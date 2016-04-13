@@ -15,7 +15,7 @@ The project includes these emulation modules:
 * C1Pjs, the 6502-based C1P Emulation Module
 * [PCjs](pcjs/), the x86-based IBM PC Emulation Module
 
-along with variety of support modules, such as:
+along with variety of Node support modules, such as:
 
 * [DiskDump](diskdump/)
 * [FileDump](filedump/)
