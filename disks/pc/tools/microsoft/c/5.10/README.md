@@ -1,15 +1,15 @@
 ---
 layout: page
-title: Microsoft C Compiler 5.10 for DOS
+title: Microsoft C Compiler 5.1 for DOS
 permalink: /disks/pc/tools/microsoft/c/5.10/
 ---
 
-Microsoft C Compiler 5.10 for DOS
+Microsoft C Compiler 5.1 for DOS
 ---
 
-NOTE: Microsoft released the 5.10 C compiler in two different packages: this 11-disk set containing
+NOTE: Microsoft released the 5.1 C compiler in two different packages: this 11-disk set containing
 only files for DOS, and a larger 14-disk set with files for both DOS and OS/2.  For the latter, see
-[Microsoft C Compiler 5.10 for DOS and OS/2](../5.10-os2/).
+[Microsoft C Compiler 5.1 for DOS and OS/2](../5.10-os2/).
 
 Directory listings of the eleven 360Kb distribution diskettes, and a copy of the [PACKING.LST](#packinglst),
 are provided below.
