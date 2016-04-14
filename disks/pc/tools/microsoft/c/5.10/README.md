@@ -404,11 +404,11 @@ We also have [Microsoft C Compiler 5.1 Documentation Updates](/pubs/pc/software/
 
 ### PACKING.LST
 
-							   PACK525.LST File
+	                           PACK525.LST File
 	
-			 Files for the Microsoft(R) C Optimizing Compiler Version 5.10
+	         Files for the Microsoft(R) C Optimizing Compiler Version 5.10
 	
-				 (C) Copyright Microsoft Corporation, 1987, 1988
+	             (C) Copyright Microsoft Corporation, 1987, 1988
 	
 	
 	This file describes the parts of the Microsoft(R) C Optimizing Compiler,
@@ -512,7 +512,7 @@ We also have [Microsoft C Compiler 5.1 Documentation Updates](/pubs/pc/software/
 	SOURCE\GRDEMO.C         Graphics demonstration program (real mode/DOS only)
 	SOURCE\SIEVE.C          Register sieve demonstration program (all modes)
 	SOURCE\SORTDEMO.C       Sort methods demonstration program (protected mode,
-								but this program can be bound for DOS/real mode)
+	                            but this program can be bound for DOS/real mode)
 	
 	
 	Disk 3 : Compiler Disk 1
