@@ -1,13 +1,15 @@
 ---
 layout: page
-title: Microsoft C Compiler v4.00
+title: Microsoft C Compiler 4.0
 permalink: /disks/pc/tools/microsoft/c/4.00/
 ---
 
-Microsoft C Compiler v4.00
+Microsoft C Compiler 4.0
 ---
 
 Directory listings of the eight 360Kb distribution diskettes are provided below.
+
+[Microsoft C Compiler 4.0 Documentation](/pubs/pc/software/tools/microsoft/c/4.00/) is also available.
 
 ### Directory of MS C 4.00 (Disk 1)
 

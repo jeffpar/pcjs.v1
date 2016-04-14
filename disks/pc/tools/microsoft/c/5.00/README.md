@@ -1,10 +1,10 @@
 ---
 layout: page
-title: Microsoft C Compiler 5.00
+title: Microsoft C Compiler 5.0
 permalink: /disks/pc/tools/microsoft/c/5.00/
 ---
 
-Microsoft C Compiler 5.00
+Microsoft C Compiler 5.0
 ---
 
 Directory listings of the four 360Kb distribution diskettes are provided below.
