@@ -64,6 +64,11 @@ var DEBUG = true;               // this @define is overridden by the Closure Com
  */
 var MAXDEBUG = false;           // this @define is overridden by the Closure Compiler (to false) to remove MAXDEBUG-only code
 
+/**
+ * @define {boolean}
+ */
+var PRIVATE = false;            // this @define is overridden by the Closure Compiler (to false) to enable PRIVATE code
+
 /*
  * NODE should be true if we're running under NodeJS (eg, command-line), false if not (eg, web browser)
  */

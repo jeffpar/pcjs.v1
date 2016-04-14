@@ -218,6 +218,7 @@ function parseXML(sXML, sXMLFile, idMachine, sParms, fResolve, display, done)
         done(sXML, xmlDoc);
     };
     if (sXML) {
+        if (PRIVATE) sXML = sXML.replace(/\/library.xml/, "/private/library.xml");
         if (fResolve) {
             resolveXML(sXML, display, buildXML);
             return;

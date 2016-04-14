@@ -104,8 +104,15 @@ of our Markdown or XML documents.  Examples: 'automount' becomes 'autoMount', 'a
         {% capture machine_script %}<script type="text/javascript" src="{{ site.baseurl }}{{ script }}"></script>{% endcapture %}
         {% unless machine_scripts contains machine_script %}
           {{ machine_script }}
-          {% if script contains "js/lib/defines.js" and machine.debugger != true %}
-            {{ machine_script | replace:"defines.js","nodebugger.js" }}
+          {% if script contains "shared/lib/defines.js" %}
+            {% if site.pcjs.private %}
+              {{ machine_script | replace:"defines.js","private.js" }}
+            {% endif %}
+          {% endif %}
+          {% if script contains "js/lib/defines.js" %}
+            {% if machine.debugger != true %}
+              {{ machine_script | replace:"defines.js","nodebugger.js" }}
+            {% endif %}
           {% endif %}
         {% endunless %}
         {% capture machine_scripts %}{{ machine_scripts }}{{ machine_script }}{% endcapture %}
