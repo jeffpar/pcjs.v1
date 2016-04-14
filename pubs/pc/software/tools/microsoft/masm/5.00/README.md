@@ -8,6 +8,7 @@ Microsoft Macro Assembler 5.0 Manuals
 ---
 
 * [MASM 5.0 Reference](http://archive.pcjs.org/pubs/pc/software/tools/microsoft/masm/5.00/MASM50-POCKETREF.pdf)
+* [MASM 5.0 Programmer's Guide](http://archive.pcjs.org/pubs/pc/software/tools/microsoft/masm/5.00/MASM50-PROGGUIDE.pdf)
 * [MASM 5.0 Mixed-Language Programming Guide](http://archive.pcjs.org/pubs/pc/software/tools/microsoft/masm/5.00/MASM50-MLPROGGUIDE.pdf)
 * [MASM 5.0 CodeView and Utilities Guide](http://archive.pcjs.org/pubs/pc/software/tools/microsoft/masm/5.00/MASM50-UTILGUIDE.pdf)
 
