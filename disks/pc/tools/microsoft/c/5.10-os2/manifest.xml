@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.21.6/manifest.xsl"?>
+<manifest type="software">
+	<title>Microsoft C Compiler</title>
+	<version>5.10-OS2</version>
+	<type>Tool</type>
+	<category>C Compiler</category>
+	<author>Microsoft</author>
+	<releaseDate/>
+	<disk id="disk01" size="368640" chs="40:2:9" img="archive/Setup (01521).img" href="/disks/pc/tools/microsoft/c/5.10-os2/MSC510-DISK01-SETUP.json" md5="7aa384feeb2d518b1b302dd33fe48ec3" md5json="67019168e1abf3f9637e00d8b3cf2a2c">
+		<name>MS C 5.10-OS/2 (SETUP)</name>
+	</disk>
+	<disk id="disk02" size="368640" chs="40:2:9" img="archive/Compiler 1 (01522).img" href="/disks/pc/tools/microsoft/c/5.10-os2/MSC510-DISK02-COMPILER1.json" md5="cdf1289187b85f3d6ed520b4c031b218" md5json="f836f7dfa4253e34072ca02d415daaa3">
+		<name>MS C 5.10-OS/2 (COMPILER1)</name>
+	</disk>
+	<disk id="disk03" size="368640" chs="40:2:9" img="archive/Compiler 2 (01523).img" href="/disks/pc/tools/microsoft/c/5.10-os2/MSC510-DISK03-COMPILER2.json" md5="2481ffa7d42ee726ac6ddd5d16687fb9" md5json="11c7157f2dc113a95426070f9e4f1c84">
+		<name>MS C 5.10-OS/2 (COMPILER2)</name>
+	</disk>
+	<disk id="disk04" size="368640" chs="40:2:9" img="archive/Utilities 1 (01524).img" href="/disks/pc/tools/microsoft/c/5.10-os2/MSC510-DISK04-UTILITY1.json" md5="2c1c71ba6bf655e89d6e732d6434f7e5" md5json="ada7fb66fabdda7653a8873a5d5f9303">
+		<name>MS C 5.10-OS/2 (UTILITY1)</name>
+	</disk>
+	<disk id="disk05" size="368640" chs="40:2:9" img="archive/Utilities 2 (01525).img" href="/disks/pc/tools/microsoft/c/5.10-os2/MSC510-DISK05-UTILITY2.json" md5="a35cd3f99c815d624010b634ae80ce19" md5json="cbd53313c0f548337e61a2008ca4a88d">
+		<name>MS C 5.10-OS/2 (UTILITY2)</name>
+	</disk>
+	<disk id="disk06" size="368640" chs="40:2:9" img="archive/Include Files and Startup Source Code (01526).img" href="/disks/pc/tools/microsoft/c/5.10-os2/MSC510-DISK06-INCLUDE.json" md5="f4db0fa546061dae9b0a2bb5fe834b0f" md5json="b593ae6092f60303de429b49df6b2de3">
+		<name>MS C 5.10-OS/2 (INCLUDE)</name>
+	</disk>
+	<disk id="disk07" size="368640" chs="40:2:9" img="archive/Libraries (Small and Medium Models) (01527).img" href="/disks/pc/tools/microsoft/c/5.10-os2/MSC510-DISK07-LIBSM.json" md5="dc9c77ffb22fc0170a0ddaeb6acdd34a" md5json="e289f2599f091e93d773b602979bed6f">
+		<name>MS C 5.10-OS/2 (LIBSM)</name>
+	</disk>
+	<disk id="disk08" size="368640" chs="40:2:9" img="archive/Libraries (Large and Compact Models) (01528).img" href="/disks/pc/tools/microsoft/c/5.10-os2/MSC510-DISK08-LIBLC.json" md5="db2ed332e0760c676b0be3ada376c9f8" md5json="726721269e54a86f0526ee85cf4b4c47">
+		<name>MS C 5.10-OS/2 (LIBLC)</name>
+	</disk>
+	<disk id="disk09" size="368640" chs="40:2:9" img="archive/Floating-Point Libraries (01529).img" href="/disks/pc/tools/microsoft/c/5.10-os2/MSC510-DISK09-LIBFP.json" md5="1e08115c271e8fdc1772cbd09d328216" md5json="1fd3d6c07fa1f113577e6b1f76aa835c">
+		<name>MS C 5.10-OS/2 (LIBFP)</name>
+	</disk>
+	<disk id="disk10" size="368640" chs="40:2:9" img="archive/Microsoft CodeView for MS-DOS with Tutorial (01532).img" href="/disks/pc/tools/microsoft/c/5.10-os2/MSC510-DISK10-CVDOS.json" md5="234b6a1d949cb252641830d4f1f14d9f" md5json="7129e088613315d4f4433ac67940b6ed">
+		<name>MS C 5.10-OS/2 (CVDOS)</name>
+	</disk>
+	<disk id="disk11" size="368640" chs="40:2:9" img="archive/Microsoft QuickC for MS-DOS (01534).img" href="/disks/pc/tools/microsoft/c/5.10-os2/MSC510-DISK11-QCDOS.json" md5="9f9b1dc09cdd7bfcd28c88e2b078ea8e" md5json="d76e9e3b6662309d1d8995979caca06a">
+		<name>MS C 5.10-OS/2 (QCDOS)</name>
+	</disk>
+	<disk id="disk12" size="368640" chs="40:2:9" img="archive/Utilities 3 (02113).img" href="/disks/pc/tools/microsoft/c/5.10-os2/MSC510-DISK12-UTILITY3.json" md5="4be70f82725ae870aeae2ac748f5532f" md5json="db1e2a12c71a5f6b1fbb353cbb6b8faf">
+		<name>MS C 5.10-OS/2 (UTILITY3)</name>
+	</disk>
+	<disk id="disk13" size="1228800" chs="80:2:15" img="archive/MS OS-2 Libraries (02158).img" href="/disks/pc/tools/microsoft/c/5.10-os2/MSC510-DISK13-LIBOS2.json" md5="cca7ebab1da727b206ec43fd3c117951" md5json="2afed121c29e41fdaca957d987a5431a">
+		<name>MS C 5.10-OS/2 (LIBOS2)</name>
+	</disk>
+	<disk id="disk14" size="1228800" chs="80:2:15" img="archive/Microsoft CodeView for MS OS-2 (03157).img" href="/disks/pc/tools/microsoft/c/5.10-os2/MSC510-DISK14-CVOS2.json" md5="a9eebea1f09d2c2e029de468577649aa" md5json="457fe228b5a6d24ba1917456b319edb1">
+		<name>MS C 5.10-OS/2 (CVOS2)</name>
+	</disk>
+</manifest>
