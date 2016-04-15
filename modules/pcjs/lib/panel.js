@@ -582,19 +582,21 @@ Panel.prototype.updateAnimation = function()
 };
 
 /**
- * updateStatus()
+ * updateStatus(fForce)
  *
- * Update function for Control Panels containing DOM elements with low-frequencyxt display requirements.
+ * Update function for Panels containing elements with high-frequency display requirements.
  *
- * For the time being, the X86CPU component has its own updateStatus() handler, and displays all CPU registers itself.
+ * For older (and slower) DOM-based display elements, those are sill being managed by the X86CPU component,
+ * so it has its own updateStatus() handler.
+ *
+ * The Computer's updateStatus() handler is currently responsible for calling both our handler and the CPU's handler.
  *
  * @this {Panel}
+ * @param {boolean} [fForce] (true will display registers even if the CPU is running and "live" registers are not enabled)
  */
-Panel.prototype.updateStatus = function()
+Panel.prototype.updateStatus = function(fForce)
 {
-    if (this.canvas) {
-        this.dumpRegisters();
-    }
+    if (this.canvas) this.dumpRegisters();
 };
 
 /**
@@ -684,6 +686,7 @@ Panel.prototype.dumpRegisters = function()
 {
     if (this.context && this.canvasLiveRegs && this.contextLiveRegs) {
 
+        var cpu = this.cpu;
         var x = 0, y = 0, cx = this.canvasLiveRegs.width, cy = this.canvasLiveRegs.height;
 
         this.contextLiveRegs.fillStyle = Panel.LIVEREGS.COLOR;
@@ -695,32 +698,32 @@ Panel.prototype.dumpRegisters = function()
         this.drawText("Target");
         this.drawText("Current");
         this.skipLines();
-        this.drawText(this.cpu.model);
-        this.drawText(this.cpu.getSpeedTarget());
-        this.drawText(this.cpu.getSpeedCurrent());
+        this.drawText(cpu.model);
+        this.drawText(cpu.getSpeedTarget());
+        this.drawText(cpu.getSpeedCurrent());
         this.skipLines(2);
         this.initCols(8);
-        this.initNumberFormat(16, this.cpu.model < X86.MODEL_80386? 4 : 8);
-        this.drawText("AX", this.cpu.regEAX, 2);
-        this.drawText("DS", this.cpu.getDS(), 0, 1);
-        this.drawText("DX", this.cpu.regEDX, 2);
-        this.drawText("SI", this.cpu.regESI, 0, 1.5);
-        this.drawText("BX", this.cpu.regEBX, 2);
-        this.drawText("ES", this.cpu.getES(), 0, 1);
-        this.drawText("CX", this.cpu.regECX, 2);
-        this.drawText("DI", this.cpu.regEDI, 0, 1.5);
-        this.drawText("CS", this.cpu.getCS(), 2);
-        this.drawText("SS", this.cpu.getSS(), 0, 1);
-        this.drawText("IP", this.cpu.getIP(), 2);
-        this.drawText("SP", this.cpu.getSP(), 0, 1.5);
+        this.initNumberFormat(16, cpu.model < X86.MODEL_80386? 4 : 8);
+        this.drawText("AX", cpu.regEAX, 2);
+        this.drawText("DS", cpu.getDS(), 0, 1);
+        this.drawText("DX", cpu.regEDX, 2);
+        this.drawText("SI", cpu.regESI, 0, 1.5);
+        this.drawText("BX", cpu.regEBX, 2);
+        this.drawText("ES", cpu.getES(), 0, 1);
+        this.drawText("CX", cpu.regECX, 2);
+        this.drawText("DI", cpu.regEDI, 0, 1.5);
+        this.drawText("CS", cpu.getCS(), 2);
+        this.drawText("SS", cpu.getSS(), 0, 1);
+        this.drawText("IP", cpu.getIP(), 2);
+        this.drawText("SP", cpu.getSP(), 0, 1.5);
         var regPS;
-        this.drawText("PS", regPS = this.cpu.getPS(), 2);
-        this.drawText("BP", this.cpu.regEBP, 0, 1.5);
-        if (this.cpu.model >= X86.MODEL_80386) {
-            this.drawText("FS", this.cpu.getFS(), 2);
-            this.drawText("CR0", this.cpu.regCR0, 0, 1);
-            this.drawText("GS", this.cpu.getGS(), 2);
-            this.drawText("CR3", this.cpu.regCR3, 0, 1.5);
+        this.drawText("PS", regPS = cpu.getPS(), 2);
+        this.drawText("BP", cpu.regEBP, 0, 1.5);
+        if (cpu.model >= X86.MODEL_80386) {
+            this.drawText("FS", cpu.getFS(), 2);
+            this.drawText("CR0", cpu.regCR0, 0, 1);
+            this.drawText("GS", cpu.getGS(), 2);
+            this.drawText("CR3", cpu.regCR3, 0, 1.5);
         }
         this.initCols(9);
         this.drawText("V" + ((regPS & X86.PS.OF)? 1 : 0));
