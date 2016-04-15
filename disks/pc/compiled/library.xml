@@ -378,6 +378,8 @@
 		<disk path="/disks/pc/apps/microsoft/winword/2.0c/WINWORD20-DISK6.json">Word for Windows 2.0c (Disk 6)</disk>
 		<disk path="/disks/pc/tools/borland/pascal/3.00b/TURBO-PASCAL-300B.json">Borland Turbo Pascal 3.00B</disk>
 		<disk path="/disks/pc/tools/borland/pascal/3.01a/TURBO-PASCAL-301A.json">Borland Turbo Pascal 3.01A</disk>
+		<disk path="/disks/pc/tools/ibm/bascom/1.00/BASCOM100-DISK1.json">IBM BASIC Compiler 1.00 (Disk 1)</disk>
+		<disk path="/disks/pc/tools/ibm/bascom/1.00/BASCOM100-DISK2.json">IBM BASIC Compiler 1.00 (Disk 2)</disk>
 		<disk path="/disks/pc/tools/microsoft/basic/BASCOM536.json">MS BASIC (Compiler v5.36)</disk>
 		<disk path="/disks/pc/tools/microsoft/basic/QUICKBASIC-DISK1.json">MS BASIC (QuickBASIC v2.0)</disk>
 		<disk path="/disks/pc/tools/microsoft/c/2.03/MSC203-INSTALLED.json">MS C 2.03 (Installed)</disk>

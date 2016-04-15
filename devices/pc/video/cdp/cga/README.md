@@ -36,7 +36,7 @@ Here's what *cdp-cga.xml* currently looks like:
 
 ### Columbia Data Products CGA Character ROM
 
-There is only one known Columbia Data Products CGA Character ROM ([MDP_VID-10.json](MDP_VID-1.0.json)), and it is
+There is only one known Columbia Data Products CGA Character ROM ([MPC_VID-10.json](MPC_VID-1.0.json)), and it is
 *identical* to the CGA portion of the [IBM CGA](/devices/pc/video/ibm/cga/) character ROM.
 
 For reference, here are the first 0x80 bytes at offset 0x0000 from this ROM, which contain the font data for the first

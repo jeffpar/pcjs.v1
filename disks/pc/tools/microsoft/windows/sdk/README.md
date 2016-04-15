@@ -1,7 +1,7 @@
 ---
 layout: page
 title: Microsoft Windows SDKs
-permalink: /disks/pc/tools/microsoft/windows/sdks/
+permalink: /disks/pc/tools/microsoft/windows/sdk/
 ---
 
 Microsoft Windows SDKs
