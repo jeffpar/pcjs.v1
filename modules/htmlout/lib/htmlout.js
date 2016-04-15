@@ -89,7 +89,10 @@ var fServerDebug = false;
 var logFile = null;
 
 /*
- * fPrivate determines the insertion of private.js
+ * fPrivate will be set to true to by setOptions() if the server was started with '--private', giving the Node
+ * server an option comparable to Jekyll's site.pcjs.private setting, and triggering the load of "private.js" as
+ * appropriate.  Currently, the only (checked-in) use of the private setting is to set the client's PRIVATE global
+ * and trigger the loading of alternate (ie, private) XML files in embed.js.
  */
 var fPrivate = false;
 
