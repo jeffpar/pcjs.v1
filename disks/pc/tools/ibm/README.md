@@ -1,10 +1,11 @@
 ---
 layout: page
-title: IBM Languages and Tools
+title: IBM Diagnostics and Tools 
 permalink: /disks/pc/tools/ibm/
 ---
 
-IBM Languages
+IBM Diagnostics and Tools
 ---
 
-* [IBM BASIC Compilers](bascom/)
+* [IBM PC Diagnostics](/disks/pc/diags/ibm/)
+* [IBM BASIC Compilers](/disks/pc/tools/ibm/bascom/)
