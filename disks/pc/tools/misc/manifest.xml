@@ -3,17 +3,17 @@
 <manifest type="software">
 	<title>Enhanced DEBUG</title>
 	<source href="https://sites.google.com/site/pcdosretro/enhdebug">PC DOS Retro: Enhanced DEBUG for PC DOS and MS-DOS</source>
-	<disk id="disk01" size="737280" chs="80:2:9" dir="archive" href="/disks/pc/tools/misc/enhdebug/1.32/DEBUGX-132.json" md5="0142cf358fc2fb52f1f03db165ffd843" md5json="bb9e4ddfa0572dfbd7f6cb060e70a19b">
-		<name>Enhanced DEBUG 1.32</name>
-		<file size="230861" time="2016-04-08 12:48:00" attr="0x20" md5="a265513aff6af2efb1562f04e39bff9c">DEBUG.ASM</file>
-		<file size="20828" time="2016-04-08 12:48:02" attr="0x20" md5="45bbc08a0e38a4ac30d7e2d676344250">DEBUG.COM</file>
-		<file size="28082" time="2016-04-10 16:25:38" attr="0x20" md5="a9878a290c698f64aecd4a98ea727d56">DEBUG.TXT</file>
+	<disk id="disk01" size="737280" chs="80:2:9" dir="enhdebug/archive" href="/disks/pc/tools/misc/enhdebug/ENHDEBUG.json" md5="75ef23cbf63afa1a0badee85d51c23a3" md5json="409331f3cd464987693fbfcc5c6bf954">
+		<name>Enhanced DEBUG 1.32a</name>
+		<file size="230173" time="2016-04-14 21:36:22" attr="0x20" md5="7628ad4ae43334d020e38a81a894f549">DEBUG.ASM</file>
+		<file size="20824" time="2016-04-14 21:36:24" attr="0x20" md5="f7a483dd85dd65c5ece42c2bf85fdb81">DEBUG.COM</file>
+		<file size="27998" time="2016-04-12 11:44:02" attr="0x20" md5="42dca823821dc915dd94abedc5f19c65">DEBUG.TXT</file>
 		<file size="51176" time="2016-03-11 19:27:38" attr="0x20" md5="92522064c892fbce579f435c53858210">DEBUGTBL.INC</file>
-		<file size="26250" time="2016-04-08 12:48:02" attr="0x20" md5="84f9e88cb0bc5d4b1c97666aadaaba46">DEBUGX.COM</file>
-		<file size="3022" time="2016-04-06 17:48:54" attr="0x20" md5="7b3af2e516b53e2c51a4d0ea3aebfb05">DPMICL32.ASM</file>
-		<file size="847" time="2016-04-06 17:48:56" attr="0x20" md5="c29dcd96a8cb1ea69e1c2660d6f3b8af">DPMICL32.EXE</file>
+		<file size="26214" time="2016-04-14 21:36:24" attr="0x20" md5="9d69bf6d2b50f8504a57aac3b1202bb7">DEBUGX.COM</file>
+		<file size="3130" time="2016-04-14 09:05:22" attr="0x20" md5="e83d1a16dfabe5ff5b5d1c287ba87362">DPMICL32.ASM</file>
+		<file size="863" time="2016-04-14 09:05:24" attr="0x20" md5="9e2a390bc4275e251dd85adfa05eb309">DPMICL32.EXE</file>
 		<file size="7908" time="2014-11-28 14:28:56" attr="0x20" md5="e082a5153ffa32bd99502bd72fa3d892">FPTOSTR.INC</file>
-		<file size="18369" time="2016-04-08 12:30:00" attr="0x20" md5="13e2972df976ef8e58b4b321251b11f4">HISTORY.TXT</file>
+		<file size="18639" time="2016-04-14 21:36:42" attr="0x20" md5="d25e4e6e534fdd8bf732f3a469795d5d">HISTORY.TXT</file>
 		<file size="5740" time="2014-03-10 11:09:28" attr="0x20" md5="f72698d37aeb8d9d02e3f85f83b9eaa8">INSTR.KEY</file>
 		<file size="576" time="2014-01-25 10:59:50" attr="0x20" md5="f5d0dba9006b655d481f49f875a0bcf3">INSTR.ORD</file>
 		<file size="9309" time="2016-03-11 19:21:56" attr="0x20" md5="52286ecd1118ce06a9b745b09b8632a3">INSTR.SET</file>
@@ -21,7 +21,7 @@
 		<file size="1320" time="2014-02-04 19:26:56" attr="0x20" md5="4fbdcf8dac8140c70df90b440fa6fb1b">MAKE.BAT</file>
 		<file size="335" time="2014-01-20 14:34:58" attr="0x20" md5="cec3c20285c5adae18a601d6a339ec2a">MAKEC.BAT</file>
 		<file size="31542" time="2014-02-26 13:50:00" attr="0x20" md5="adbf4961a3e4ab7c8c4646e003cbb08b">MKTABLES.C</file>
-		<file size="7268" time="2016-04-10 16:24:42" attr="0x20" md5="762396d950b08bd9deb6f7313f575b83">README.TXT</file>
+		<file size="7175" time="2016-04-12 13:28:16" attr="0x20" md5="f1d0348294406fb623b555b64294a924">README.TXT</file>
 		<file size="48" time="2016-04-03 13:52:33" attr="0x20" md5="3d312a3c98b11e32ec8293b2095fae02">README.MD</file>
 	</disk>
 </manifest>
