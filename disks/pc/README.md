@@ -51,12 +51,13 @@ computer diagnostics, programming tools, and more.
 ### Tools
 
 * [Borland Tools](tools/borland/)
-* [IBM PC Diagnostics](diags/ibm/)
+* [IBM Tools](tools/ibm/)
 * [Microsoft Tools](tools/microsoft/)
 * [Other Tools](tools/misc/)
 
 ### Tests
 
+* [PC Diagnostics](diags/)
 * [VGA "Black Book" Tests](/tests/pc/vga/)
 
 ---
