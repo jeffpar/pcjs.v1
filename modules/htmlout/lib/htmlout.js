@@ -89,6 +89,11 @@ var fServerDebug = false;
 var logFile = null;
 
 /*
+ * fPrivate determines the insertion of private.js
+ */
+var fPrivate = false;
+
+/*
  * fRebuild controls the rebuilding of cached "index.html" files, assuming fCache is true; fRebuild is false
  * by default, and it can be set for all requests using the setOptions() 'rebuild' property, or for individual
  * requests using the fRebuild parameter to HTMLOut().
@@ -674,6 +679,7 @@ HTMLOut.logError = function(err, fForce)
  *      'console'   fConsole
  *      'debug'     fServerDebug
  *      'logfile'   logFile
+ *      'private'   fPrivate
  *      'rebuild'   fRebuild
  *      'senddef'   fSendDefault
  *      'sockets'   fSockets
@@ -697,6 +703,9 @@ HTMLOut.setOptions = function(options)
     if (options['logfile'] !== undefined) {
         logFile = options['logfile'];
         HTTPAPI.setLogFile(logFile);
+    }
+    if (options['private'] !== undefined) {
+        fPrivate = options['private'];
     }
     if (options['rebuild'] !== undefined) {
         fRebuild = options['rebuild'];
@@ -1872,15 +1881,19 @@ HTMLOut.prototype.processMachines = function(aMachines, buildOptions, done)
              */
             if ((asFiles = aMachineFiles[sClass].slice())) {
                 var i;
-                if (fNoDebug) {
-                    /*
-                     * We need to find the shared "defines.js" source file, and follow it with "nodebug.js".
-                     */
-                    for (i = 0; i < asFiles.length; i++) {
-                        if (asFiles[i].indexOf("shared/lib/defines.js") >= 0) {
-                            asFiles.splice(i + 1, 0, asFiles[i].replace("defines.js", "nodebug.js"));
-                            break;
+                /*
+                 * We need to find the shared "defines.js" source file, because we may need to follow it
+                 * with "nodebug.js" and/or "private.js".
+                 */
+                for (i = 0; i < asFiles.length; i++) {
+                    if (asFiles[i].indexOf("shared/lib/defines.js") >= 0) {
+                        if (fPrivate) {
+                            asFiles.splice(i + 1, 0, asFiles[i].replace("defines.js", "private.js"));
                         }
+                        if (fNoDebug) {
+                            asFiles.splice(i + 1, 0, asFiles[i].replace("defines.js", "nodebug.js"));
+                        }
+                        break;
                     }
                 }
                 if (!fDebugger) {
