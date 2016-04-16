@@ -459,10 +459,16 @@ FDC.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
                 aOptions.push(control.options[i]);
             }
             aOptions.sort(function(a, b) {
+                /*
+                 * I've switched to localeCompare() because it offers case-insensitivity by default;
+                 * I'm still a little concerned that we could somehow end up with list elements whose text
+                 * and/or value properties are undefined (because calling a method on an undefined variable
+                 * will throw an exception), but maybe I'm being overly paranoid....
+                 */
                 if (fdc.sortBy != "path") {
-                    return (a.text > b.text)? 1 : ((a.text < b.text)? -1 : 0);
+                    return a.text.localeCompare(b.text);
                 } else {
-                    return (a.value > b.value)? 1 : ((a.value < b.value)? -1 : 0);
+                    return a.value.localeCompare(b.value);
                 }
             });
             for (i = 0; i < aOptions.length; i++)  {
