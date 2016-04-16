@@ -106,6 +106,7 @@ if (NODE) {
  * component-specific property:
  *
  *      autoMount: one or more JSON-encoded objects, each containing 'name' and 'path' properties
+ *      sortBy: "name" to sort disks by name, "path" to sort by path, or "none" to leave as-is (default is "name")
  *
  * Regarding early diskette drives: the IBM PC Model 5150 originally shipped with single-sided drives,
  * and therefore supported only 160Kb diskettes.  That's the only diskette format PC-DOS 1.00 supported, too.
@@ -147,6 +148,18 @@ function FDC(parmsFDC) {
      * getMachineParm() service may have an override for us.
      */
     this.configMount = parmsFDC['autoMount'] || null;
+
+    /*
+     * This establishes "name" as the default; if we decide we'd prefer "none" to be the default (ie, the order
+     * to use when no sortBy value is specified), we can just drop the '|| "name"', because an undefined value is
+     * just as falsey as null.
+     *
+     * The code that actually performs the sorting (in setBinding()) first checks that sortBy is not falsey, and
+     * then assumes that the non-falsey value must be either "path" or "name", and since it explicitly checks for
+     * "path" first, any non-sensical value will be treated as "name" (which is fine, as that's our current default).
+     */
+    this.sortBy = parmsFDC['sortBy'] || "name";
+    if (this.sortBy == "none") this.sortBy = null;
 
     /*
      * The following array keeps track of every disk image we've ever mounted.  Each entry in the
@@ -419,6 +432,44 @@ FDC.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
     case "listDisks":
         this.bindings[sBinding] = control;
 
+        /*
+         * Since binding is a one-time initialization operation, it's also the perfect time to
+         * perform whatever sorting (if any) is indicated by the FDC component's "sortBy" property.
+         *
+         * And since setBinding() is called before initBus(), that means any "special" disk entries
+         * will be added after the sorting, so we won't be "burying" those entries somewhere in the
+         * middle.
+         */
+        if (this.sortBy) {
+            var i;
+            var aOptions = new Array();
+            /*
+             * NOTE: All this monkeying around with copying the elements from control.options to aOptions
+             * and then back again is necessary because control.options isn't a *real* Array (at least not
+             * in all browsers); consequently, it may have no sort() method.  It has a length property,
+             * along with numeric properties 0 to length-1, but it's still probably just an Object, not
+             * an Array.
+             *
+             * Also note that changing the order of the control's options would ordinarily mean that the
+             * control's selectedIndex may now be incorrect, but in our case, it doesn't matter, because
+             * we have a special function, displayDiskette(), that will be called at LEAST once during
+             * initialization, ensuring that selectedIndex is set correctly.
+             */
+            for (i = 0; i < control.options.length; i++)  {
+                aOptions[i] = control.options[i];
+            }
+            aOptions.sort(function(a, b) {
+                if (fdc.sortBy == "path") {
+                    return (a.value > b.value)? 1 : ((a.value < b.value)? -1 : 0);
+                } else {
+                    return (a.textContent > b.textContent)? 1 : ((a.textContent < b.textContent)? -1 : 0);
+                }
+            });
+            for (i = 0; i < control.options.length; i++)  {
+                control.options[i] = aOptions[i];
+            }
+        }
+
         control.onchange = function onChangeListDisks(event) {
             var controlDesc = fdc.bindings["descDisk"];
             var controlOption = control.options[control.selectedIndex];
@@ -647,7 +698,7 @@ FDC.prototype.powerUp = function(data, fRepower)
             controlDrives.textContent = "";
             for (var iDrive = 0; iDrive < this.nDrives; iDrive++) {
                 var controlOption = document.createElement("option");
-                controlOption['value'] = iDrive;
+                controlOption.value = iDrive;
                 /*
                  * TODO: This conversion of drive number to drive letter, starting with A:, is very simplistic
                  * and will NOT match the drive mappings that DOS ultimately uses.  We'll need to spiff this up at
@@ -1479,7 +1530,7 @@ FDC.prototype.addDiskette = function(sName, sPath)
             if (controlDisks.options[i].value == sPath) return;
         }
         var controlOption = document.createElement("option");
-        controlOption['value'] = sPath;
+        controlOption.value = sPath;
         controlOption.textContent = sName;
         controlDisks.appendChild(controlOption);
     }

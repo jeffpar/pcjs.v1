@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- author="Jeff Parsons (@jeffpar)" website="http://www.pcjs.org/" created="2012-05-05" modified="2016-04-15" license="http://www.gnu.org/licenses/gpl.html" -->
 <!DOCTYPE xsl:stylesheet [
-	<!-- XSLT understands these entities only: lt, gt, apos, quot, and amp.  Other required entities may be defined below (see http://www.pcjs.org/modules/shared/templates/entities.dtd). -->
 ]>
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
@@ -12,7 +11,7 @@
 
 	<xsl:variable name="MACHINECLASS">pc</xsl:variable>
 	<xsl:variable name="APPCLASS">pcjs</xsl:variable>
-	<xsl:variable name="APPVERSION">1.x.x</xsl:variable>
+	<xsl:variable name="APPVERSION">1.21.7</xsl:variable>
 	<xsl:variable name="SITEHOST">www.pcjs.org</xsl:variable>
 
 	<xsl:template name="componentStyles">
@@ -497,7 +496,6 @@
 						</xsl:if>
 					</xsl:if>
 				</xsl:variable>
-				<!-- TODO: Think about incorporating the optional "desc" tag into the disk description (see /disks/pc/tools/microsoft/c/4.00/manifest.xml) -->
 				<xsl:if test="@href">
 					<option value="{@href}" data-value="{{{$link}}}"><xsl:value-of select="$name"/></option>
 				</xsl:if>
