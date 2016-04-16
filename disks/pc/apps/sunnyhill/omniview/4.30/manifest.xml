@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.21.7/manifest.xsl"?>
+<manifest type="software">
+	<title>Omniview 386</title>
+	<version>4.30</version>
+	<type>Operating Environment</type>
+	<company>Sunny Hill</company>
+	<releaseDate>October 1991</releaseDate>
+	<disk id="disk01" size="737280" chs="80:2:9" dir="archive" href="/disks/pc/apps/sunnyhill/omniview/4.30/OMNIVIEW386-430.json" md5="176e332a49dc9a7f69d08aa64904c559" md5json="a19037b5bc8c1fc6896b50ed2a42fa5d">
+		<file size="4790" time="1992-01-07 09:25:54" attr="0x20" md5="e5621815315e1eac06bf326e82d06ea0">2</file>
+		<file size="4902" time="1992-01-14 08:56:44" attr="0x20" md5="54d8d2c00aaec70f1194cca1618518ef">3</file>
+		<file size="1691" time="1992-01-18 15:58:08" attr="0x20" md5="63f269a03c04522474d7af304515667d">AD</file>
+		<file size="83" time="1991-10-01 04:30:00" attr="0x20" md5="2247f4188b9f9f1f0bdf71b689ca784b">DISK.ID</file>
+		<file size="99477" time="1991-10-01 04:30:00" attr="0x20" md5="2a9db44fd58d09f4da24b334b292d4b7">INSTALL.EXE</file>
+		<file size="10250" time="1992-01-28 07:32:02" attr="0x20" md5="2b0bf81f914ff2d1f63f797af883629f">MAX</file>
+		<file size="21063" time="1992-02-01 11:33:54" attr="0x20" md5="ffa9b555c903627ebcb3eac90f31e32b">MAX.DOC</file>
+		<file size="1504" time="1991-10-01 04:30:00" attr="0x20" md5="c474146e3c679492fdb11b14eb5812b3">MOUSECHK.EXE</file>
+		<file size="364852" time="1991-10-01 04:30:00" attr="0x20" md5="ca6cc3634cc515cb7fa93b7561b6624b">OV386.001</file>
+		<file size="63280" time="1991-10-01 04:30:00" attr="0x20" md5="8e852bc615d14f139112d588e701f8cb">OV386.INF</file>
+		<file size="753" time="1991-10-01 04:30:00" attr="0x20" md5="8887e4b046dbae730b58f8de8af7cb44">READ.ME</file>
+		<file size="833" time="1991-08-31 12:39:48" attr="0x20" md5="63b38933783ced0095f52b2f7432fa32">SEARCH.CM</file>
+		<file size="1099" time="1991-10-01 04:30:00" attr="0x20" md5="87305d9843aa1f1b39593e6fbee34413">XMSCHECK.EXE</file>
+	</disk>
+</manifest>
