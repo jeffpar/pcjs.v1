@@ -2,7 +2,6 @@
 <fdc id="fdcNEC" width="320px" pos="left" padtop="8px" automount='{A:{name:"PC-DOS 2.00 (Disk 1)",path:"/disks/pc/dos/ibm/2.00/PCDOS200-DISK1.json"}, B:{name:"PC-DOS 2.00 (Disk 2)",path:"/disks/pc/dos/ibm/2.00/PCDOS200-DISK2.json"}}'>
 	<control type="list" binding="listDrives"/>
 	<control type="list" binding="listDisks">
-		<disk path="">None</disk>
 		<manifest ref="/disks/pc/dos/ibm/2.00/manifest.xml" disk="*"/>
 		<disk path="/disks/pc/windows/1.01/01-SETUP/">Windows 1.01 (SETUP)</disk>
 		<disk path="/disks/pc/windows/1.01/02-BUILD/">Windows 1.01 (BUILD)</disk>

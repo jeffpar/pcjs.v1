@@ -9,7 +9,7 @@
 	<releaseDate>1982</releaseDate>
 	<machine href="/devices/pc/machine/5160/mda/256kb/fake188/machine.xml" state="/apps/pc/1982/esuite/state.json"/>
 	<disk id="disk01" size="368640" chs="40:2:9" dir="archive/" href="/apps/pc/1982/esuite/disk.json" md5="7721a7bc9fcbd0005e7c1d87ecc055c5" md5json="dbf0a2c0176b8128d87e2465794764f4">
-		<name>Executive Suite (1982)</name>
+		<name>Demo: Executive Suite (1982)</name>
 		<file size="384" time="2000-02-29 08:04:48" attr="0x20" md5="3e638560a5f483cdbd1be486b07c767e">ESUITE.COM</file>
 		<file size="163840" time="2000-02-29 06:57:40" attr="0x20" md5="dcc72026cdc906109cf0e3b2d07ffd5d">GAME.DAT</file>
 		<link href="http://www.mobygames.com/game/executive-suite">MobyGames</link>

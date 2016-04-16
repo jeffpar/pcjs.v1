@@ -655,6 +655,8 @@ FDC.prototype.initBus = function(cmp, bus, cpu, dbg)
     bus.addPortInputTable(this, FDC.aPortInput);
     bus.addPortOutputTable(this, FDC.aPortOutput);
 
+    this.addDiskette("None", "", true);
+
     if (this.fLocalDisks) {
         this.addDiskette("Local Disk", "?");
     }
@@ -1517,12 +1519,13 @@ FDC.prototype.doneLoadDiskette = function onFDCLoadNotify(drive, disk, sDiskette
 };
 
 /**
- * addDiskette(sName, sPath)
+ * addDiskette(sName, sPath, fTop)
  *
  * @param {string} sName
  * @param {string} sPath
+ * @param {boolean} [fTop] (default is bottom)
  */
-FDC.prototype.addDiskette = function(sName, sPath)
+FDC.prototype.addDiskette = function(sName, sPath, fTop)
 {
     var controlDisks = this.bindings["listDisks"];
     if (controlDisks && controlDisks.options) {
@@ -1532,7 +1535,11 @@ FDC.prototype.addDiskette = function(sName, sPath)
         var controlOption = document.createElement("option");
         controlOption.text = sName;
         controlOption.value = sPath;
-        controlDisks.appendChild(controlOption);
+        if (fTop && controlDisks.childNodes[0]) {
+            controlDisks.insertBefore(controlOption, controlDisks.childNodes[0]);
+        } else {
+            controlDisks.appendChild(controlOption);
+        }
     }
 };
 

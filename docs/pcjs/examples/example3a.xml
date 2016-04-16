@@ -56,7 +56,6 @@
 		<control type="container">
 			<control type="list" binding="listDrives"/>
 			<control type="list" binding="listDisks">
-				<disk path="">None</disk>
 				<disk path="PCDOS100.json">PC-DOS 1.00</disk>
 				<disk path="visicalc.json" href="http://www.bricklin.com/history/vclicense.htm" desc="VisiCalc License">VisiCalc</disk>
 			</control>

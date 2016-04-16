@@ -422,12 +422,13 @@ module.exports = function(grunt) {
                         var contentOrig = content;
                         var reManifest = /([ \t]*)<manifest.*? ref="(.*?)".*?\/>/g, matchManifest;
                         while ((matchManifest = reManifest.exec(contentOrig))) {
-                            var sManifest = grunt.file.read(path.join('.', matchManifest[2]));
+                            var sFile = matchManifest[2];
+                            var sManifest = grunt.file.read(path.join('.', sFile));
                             if (!sManifest) continue;
                             var sDefaultName = "", match;
                             match = sManifest.match(/<title.*?>(.*?)<\/title>/);
                             if (match) {
-                                sDefaultName = match[1];
+                                sDefaultName += match[1];
                                 match = sManifest.match(/<version.*?>(.*?)<\/version>/);
                                 if (match) sDefaultName += ' ' + match[1];
                             }

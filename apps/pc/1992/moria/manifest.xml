@@ -93,7 +93,7 @@
 		<desc>Macintosh port for Think C</desc>
 	</contributor>
 	<disk id="disk01" size="368640" chs="40:2:9" dir="archive/bin/" href="/apps/pc/1992/moria/disk.json" md5="da0023280238bc2ee9053ad2b9548816" md5json="1473be159bb5f9001db31c06b3a366c1">
-		<name>Moria 5.5</name>
+		<name>Demo: Moria 5.5</name>
 		<file size="6074" time="1992-11-01 23:15:36" attr="0x20" md5="078aca44b845ee8a787a324c1e827200">EXP.DOC</file>
 		<file size="2560" time="1992-11-01 23:15:36" attr="0x20" md5="a5c8620efd0dc841956f9cdc2e46220a">MORIA.CNF</file>
 		<file size="49267" time="1992-11-01 23:15:36" attr="0x20" md5="32c9f15c70256f540f531675ad0e217f">MORIA1.TXT</file>

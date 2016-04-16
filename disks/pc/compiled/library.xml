@@ -2,7 +2,6 @@
 <fdc id="fdcNEC" automount='{A:{name:"PC-DOS 2.00 (Disk 1)",path:"/disks/pc/dos/ibm/2.00/PCDOS200-DISK1.json"}, B:{name:"PC-DOS 2.00 (Disk 2)",path:"/disks/pc/dos/ibm/2.00/PCDOS200-DISK2.json"}}' pos="left" padleft="8px" padbottom="8px">
 	<control type="list" binding="listDrives"/>
 	<control type="list" binding="listDisks">
-		<disk path="">None</disk>
 		<disk path="/disks/pc/empty/EMPTY-360K.json">Empty Diskette (360K)</disk>
 		<disk path="/disks/pc/empty/EMPTY-720K.json">Empty Diskette (720K)</disk>
 		<disk path="/disks/pc/empty/EMPTY-1200K.json">Empty Diskette (1.2M)</disk>
@@ -503,11 +502,11 @@
 		<disk path="/disks/pc/games/id/wolf3d/1WOLF14.json">Wolfenstein 3D 1.4</disk>
 		<disk path="/disks/pc/games/microsoft/flightsim/1982/FLIGHTSIM-1982.json">MS Flight Simulator (1982)</disk>
 		<disk path="/disks/pc/games/microsoft/flightsim/1984/FLIGHTSIM-1984.json">MS Flight Simulator (1984)</disk>
-		<disk path="/apps/pc/1981/visicalc/disk.json">VisiCalc</disk>
-		<disk path="/apps/pc/1982/esuite/disk.json">Executive Suite (1982)</disk>
-		<disk path="/apps/pc/1985/rogue/disk.json">Rogue (1985)</disk>
-		<disk path="/apps/pc/1987/thinktank/disk.json">ThinkTank 2.41NP</disk>
-		<disk path="/apps/pc/1992/moria/disk.json">Moria 5.5</disk>
+		<disk path="/apps/pc/1981/visicalc/disk.json">Demo: VisiCalc</disk>
+		<disk path="/apps/pc/1982/esuite/disk.json">Demo: Executive Suite (1982)</disk>
+		<disk path="/apps/pc/1985/rogue/disk.json">Demo: Rogue (1985)</disk>
+		<disk path="/apps/pc/1987/thinktank/disk.json">Demo: ThinkTank 2.41NP</disk>
+		<disk path="/apps/pc/1992/moria/disk.json">Demo: Moria 5.5</disk>
 		<disk path="/pubs/pc/programming/DOS_Internals/DOS-INTERN.json">DOS Internals</disk>
 		<disk path="/pubs/pc/programming/The_Undocumented_PC/UNDOC.json">The Undocumented PC</disk>
 		<disk path="/pubs/pc/programming/Undocumented_DOS/UNDOC-DOS-DISK1.json">Undocumented DOS (Disk 1)</disk>
