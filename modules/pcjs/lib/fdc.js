@@ -156,7 +156,7 @@ function FDC(parmsFDC) {
      *
      * The code that actually performs the sorting (in setBinding()) first checks that sortBy is not falsey, and
      * then assumes that the non-falsey value must be either "path" or "name", and since it explicitly checks for
-     * "path" first, any non-sensical value will be treated as "name" (which is fine, as that's our current default).
+     * "path" first, any non-sensical value will be treated as "name" (which is fine, since that's our current default).
      */
     this.sortBy = parmsFDC['sortBy'] || "name";
     if (this.sortBy == "none") this.sortBy = null;
@@ -456,16 +456,16 @@ FDC.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
              * initialization, ensuring that selectedIndex is set correctly.
              */
             for (i = 0; i < control.options.length; i++)  {
-                aOptions[i] = control.options[i];
+                aOptions.push(control.options[i]);
             }
             aOptions.sort(function(a, b) {
-                if (fdc.sortBy == "path") {
-                    return (a.value > b.value)? 1 : ((a.value < b.value)? -1 : 0);
+                if (fdc.sortBy != "path") {
+                    return (a.text > b.text)? 1 : ((a.text < b.text)? -1 : 0);
                 } else {
-                    return (a.textContent > b.textContent)? 1 : ((a.textContent < b.textContent)? -1 : 0);
+                    return (a.value > b.value)? 1 : ((a.value < b.value)? -1 : 0);
                 }
             });
-            for (i = 0; i < control.options.length; i++)  {
+            for (i = 0; i < aOptions.length; i++)  {
                 control.options[i] = aOptions[i];
             }
         }
@@ -695,7 +695,7 @@ FDC.prototype.powerUp = function(data, fRepower)
             while (controlDrives.firstChild) {
                 controlDrives.removeChild(controlDrives.firstChild);
             }
-            controlDrives.textContent = "";
+            controlDrives.value = "";
             for (var iDrive = 0; iDrive < this.nDrives; iDrive++) {
                 var controlOption = document.createElement("option");
                 controlOption.value = iDrive;
@@ -704,7 +704,7 @@ FDC.prototype.powerUp = function(data, fRepower)
                  * and will NOT match the drive mappings that DOS ultimately uses.  We'll need to spiff this up at
                  * some point.
                  */
-                controlOption.textContent = String.fromCharCode(0x41 + iDrive) + ":";
+                controlOption.text = String.fromCharCode(0x41 + iDrive) + ":";
                 controlDrives.appendChild(controlOption);
             }
             if (this.nDrives > 0) {
@@ -1530,8 +1530,8 @@ FDC.prototype.addDiskette = function(sName, sPath)
             if (controlDisks.options[i].value == sPath) return;
         }
         var controlOption = document.createElement("option");
+        controlOption.text = sName;
         controlOption.value = sPath;
-        controlOption.textContent = sName;
         controlDisks.appendChild(controlOption);
     }
 };
@@ -1551,9 +1551,7 @@ FDC.prototype.findDiskette = function(sPath)
     if (controlDisks && controlDisks.options) {
         for (var i = 0; i < controlDisks.options.length; i++) {
             var control = controlDisks.options[i];
-            if (control.value == sPath) {
-                return control.textContent;
-            }
+            if (control.value == sPath) return control.text;
         }
     }
     return str.getBaseName(sPath, true);
