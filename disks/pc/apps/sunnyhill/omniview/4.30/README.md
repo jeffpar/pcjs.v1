@@ -2,10 +2,24 @@
 layout: page
 title: Omniview 386 4.30
 permalink: /disks/pc/apps/sunnyhill/omniview/4.30/
+machines:
+  - type: pc
+    id: compaq386
+    config: /devices/pc/machine/compaq/deskpro386/vga/4096kb/machine.xml
+    autoMount:
+      A:
+        path: /disks/pc/dos/ibm/3.30/PCDOS330-DISK1-720K.json
+      B:
+        path: /disks/pc/apps/sunnyhill/omniview/4.30/OMNIVIEW386-430.json
 ---
 
 Omniview 386 4.30
 ---
+
+The COMPAQ DeskPro 386 machine below is recommended for Omniview 386 4.30.
+A [directory listing](#directory-of-omniview-386-430) is also provided.
+
+{% include machine.html id="compaq386" %}
 
 ### Directory of Omniview 386 4.30
 

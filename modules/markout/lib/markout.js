@@ -95,10 +95,10 @@ var sDefaultFile = "./README.md";
  * @param {Object} [req] is the web server's (ie, Express) request object, if any
  * @param {Array.<string>|null} [aParms] is an array of overrides to use (see below)
  * @param {boolean} [fDebug] turns on debugging features (eg, debug comments, special URL encodings, etc)
- * @param {boolean} [fMachineXML] true if a machine.xml file has already been processed by the caller
+ * @param {string} [sMachineFile] name of any machine.xml file already processed by the caller
  * @param {boolean} [fAutoHeading] true to automatically generate a page heading
  */
-function MarkOut(sMD, sIndent, req, aParms, fDebug, fMachineXML, fAutoHeading)
+function MarkOut(sMD, sIndent, req, aParms, fDebug, sMachineFile, fAutoHeading)
 {
     this.sMD = sMD;
     this.sIndent = (sIndent || "");
@@ -111,7 +111,7 @@ function MarkOut(sMD, sIndent, req, aParms, fDebug, fMachineXML, fAutoHeading)
         this.sClassImageLabel = this.sClassImage + "-label";
     }
     this.fDebug = fDebug;
-    this.fMachineXML = fMachineXML;
+    this.sMachineFile = sMachineFile;
     this.fAutoHeading = fAutoHeading;
     this.sHTML = null;
     this.aIDs = [];         // this keeps track of auto-generated ID attributes for page elements, to insure uniqueness
@@ -264,6 +264,17 @@ MarkOut.prototype.addMachine = function(infoMachine)
 MarkOut.prototype.getMachines = function()
 {
     return this.aMachines;
+};
+
+/**
+ * hasMachines()
+ *
+ * @this {MarkOut}
+ * @return {boolean} true if machine(s) exist, false if not
+ */
+MarkOut.prototype.hasMachines = function()
+{
+    return this.aMachines.length > 0;
 };
 
 /**
@@ -1136,12 +1147,12 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
     while ((aMatch = reIncludes.exec(sBlock))) {
         sReplacement = "";
         sMachineID = aMatch[2];
-        if (!this.fMachineXML && this.aMachineDefs[sMachineID]) {
+        if (this.aMachineDefs[sMachineID]) {
             var machine = this.aMachineDefs[sMachineID];
             sMachine = machine['type'] || "pc";
             sMachineOptions = ((sMachine.indexOf("-dbg") > 0 || machine['debugger'] == "true")? "debugger" : "");
             sMachine = sMachine.replace("-dbg", "").toUpperCase();
-            sMachineXMLFile = machine['config'] || "machine.xml";
+            sMachineXMLFile = machine['config'] || this.sMachineFile || "machine.xml";
             sMachineXSLFile = machine['template'] || "";
             sMachineVersion = ((machine['uncompiled'] == "true")? "uncompiled" : "");
             sMachineParms = machine['parms'] || "";

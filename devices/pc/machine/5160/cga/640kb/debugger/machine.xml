@@ -18,4 +18,7 @@
 		<control type="description" binding="swdesc" left="0px"/>
 	</chipset>
 	<hdc id="hdcXT" drives='[{name:"10Mb Hard Disk",type:3}]'/>
+	<serial id="com1" adapter="1" binding="print"/>
+	<serial id="com2" adapter="2"/>
+	<mouse serial="com2"/>
 </machine>

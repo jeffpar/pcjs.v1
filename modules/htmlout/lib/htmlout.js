@@ -1464,7 +1464,7 @@ HTMLOut.prototype.getMachineXML = function(sToken, sIndent, aParms, sXMLFile, sS
                     s = m.convertMD("    ").trim();
 
                     obj.processMachines(m.getMachines(), m.getBuildOptions(), function doneProcessXMLMachines() {
-                        obj.getMarkdownFile(obj.sFile, sToken, sIndent, aParms, s, true);
+                        obj.getMarkdownFile(obj.sFile, sToken, sIndent, aParms, s, sXMLFile);
                     });
                     return;
                 }
@@ -1689,7 +1689,7 @@ HTMLOut.prototype.getManifestXML = function(sToken, sIndent, aParms)
 };
 
 /**
- * getMarkdownFile(sFile, sToken, sIndent, aParms, sPrevious, fMachineXML)
+ * getMarkdownFile(sFile, sToken, sIndent, aParms, sPrevious, sMachineFile)
  *
  * If sFile exists in the current directory, open it, convert it, and prepare for replacement.
  *
@@ -1699,9 +1699,9 @@ HTMLOut.prototype.getManifestXML = function(sToken, sIndent, aParms)
  * @param {string} [sIndent]
  * @param {Array.<string>} [aParms]
  * @param {string|null} [sPrevious] is text, if any, that should precede the file
- * @param {boolean} [fMachineXML] true if a machine.xml file has already been processed by the caller
+ * @param {string} [sMachineFile] name (if any) of machine.xml file already processed by the caller
  */
-HTMLOut.prototype.getMarkdownFile = function(sFile, sToken, sIndent, aParms, sPrevious, fMachineXML)
+HTMLOut.prototype.getMarkdownFile = function(sFile, sToken, sIndent, aParms, sPrevious, sMachineFile)
 {
     var obj = this;
 
@@ -1731,8 +1731,11 @@ HTMLOut.prototype.getMarkdownFile = function(sFile, sToken, sIndent, aParms, sPr
                 }
             }
         } else {
-            var m = new MarkOut(s, sIndent, obj.req, aParms, obj.fDebug, fMachineXML, obj.sExt == "md");
+            var m = new MarkOut(s, sIndent, obj.req, aParms, obj.fDebug, sMachineFile, obj.sExt == "md");
             s = m.convertMD("    ").trim();
+
+            if (sMachineFile && m.hasMachines()) sPrevious = null;
+
             /*
              * If the Markdown document begins with a heading, stuff that into the <title> tag;
              * it would be cleaner if this replacement could be performed by getTitle(), but unfortunately,

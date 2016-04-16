@@ -9,6 +9,7 @@ PC Applications
 
 Information is available for applications from these vendors:
 
+* [IBM](ibm/)
 * [Lotus](lotus/)
 * [MicroPro](micropro/)
 * [Microsoft](microsoft/)
