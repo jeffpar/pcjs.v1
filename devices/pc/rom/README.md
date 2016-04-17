@@ -40,7 +40,7 @@ As hinted above, some newer Model 5150 machines with the **Oct 27, 1982** BIOS i
 some even *newer* 5150 machines had a BIOS with a "1982" copyright year instead of "1981", which also changed the checksum
 byte from 0x78 to 0x77.  However, the project includes only the original "1981" version, since the difference was trivial.
 
-In general, IBM BASIC ROM images are 32Kb and IBM BIOS ROM images are 8Kb, and together they provided 40Kb of contiguous
+In general, IBM BASIC ROM images are 32Kb and IBM BIOS ROM images are 8Kb, and together they provide 40Kb of contiguous
 read-only memory, with the BASIC ROM spanning physical addresses 0xF6000-0xFDFFF and the BIOS ROM spanning addresses
 0xFE000-0xFFFFF.
 

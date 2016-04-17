@@ -14,7 +14,9 @@
 		<control type="button" binding="reset">Reset</control>
 	</cpu>
 	<keyboard ref="/devices/pc/keyboard/us83-buttons-minimal.xml"/>
-	<hdc id="hdcXT" drives='[{name:"10Mb Hard Disk",type:3}]'/>
+	<hdc id="hdcXT" drives='[{name:"10Mb Hard Disk",type:3}]'>
+		<control type="button" binding="saveHD0">Save HD</control>
+	</hdc>
 	<chipset id="chipset" model="5160" sw1="01001001"/>
 	<serial id="com1" adapter="1"/>
 	<serial id="com2" adapter="2"/>
