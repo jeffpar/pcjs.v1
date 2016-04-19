@@ -326,7 +326,7 @@ Bus.prototype.reset = function()
  * powerUp(data, fRepower)
  *
  * We don't need a powerDown() handler, because for largely historical reasons, our state (including the A20 state)
- * is saved by the saveMemory(), which called by the CPU.
+ * is saved by saveMemory(), which called by the CPU.
  *
  * However, we do need a powerUp() handler, because on resumable machines, the Computer's onReset() function calls
  * everyone's powerUp() handler rather than their reset() handler.

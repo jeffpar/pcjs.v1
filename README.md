@@ -151,7 +151,8 @@ Using the `--host` option makes it possible to access the web server from other 
 for example, you may want to run PCjs on your iPhone, iPad, or other wireless device.
 
 Another useful variation is `--config _config.yml,_developer.yml` which uses the settings in `_developer.yml`
-to override the defaults in `_config.yml`.
+to override the defaults in `_config.yml`.  Using development (non-production) settings in `_developer.yml` is
+analogous to running the Node web server with certain development options; see [Debugging PCjs](#debugging-pcjs).
 
 GitHub Pages says you can run `jekyll serve` instead of `bundle exec jekyll serve`, but with the addition of
 more gems to `Gemfile` (eg, `jekyll-sitemap`), running `jekyll serve` may trigger dependency errors on some systems.
@@ -294,9 +295,10 @@ to the server, or both.
 Debugging PCjs
 ---
 
-NOTE: The following information assumes you're running Node as your local web server, not Jekyll.  You can still
-debug PCjs while running Jekyll, using `http://localhost:4000/` and your favorite web browser's Developer Tools,
-but none of the special server or client features discussed below will be available.
+NOTE: The following information assumes you're running Node as your local web server, not Jekyll.  You can certainly
+debug PCjs while running Jekyll (ideally with `--config _config.yml,_developer.yml`), using `http://localhost:4000/`
+and your favorite web browser's Developer Tools, but none of the special server or client features discussed below
+will be available.
 
 ### Server Components
 
