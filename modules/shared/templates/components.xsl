@@ -11,6 +11,7 @@
 	<xsl:param name="generator" select="'client'"/>
 
 	<xsl:variable name="MACHINECLASS">pc</xsl:variable>
+	<xsl:variable name="CSSCLASS">pcjs</xsl:variable>
 	<xsl:variable name="APPCLASS">pcjs</xsl:variable>
 	<xsl:variable name="APPVERSION">1.x.x</xsl:variable>
 	<xsl:variable name="SITEHOST">www.pcjs.org</xsl:variable>
@@ -58,7 +59,13 @@
 		<xsl:variable name="machineStyle">
 			<xsl:if test="@float">float:<xsl:value-of select="@float"/></xsl:if>
 		</xsl:variable>
-		<div id="{$machine}" class="machine {@class}js" style="{$machineStyle}">
+		<xsl:variable name="machineClass">
+			<xsl:choose>
+				<xsl:when test="@class = 'pc' or @class = 'c1p'"><xsl:value-of select="@class"/>js</xsl:when>
+				<xsl:otherwise><xsl:value-of select="@class"/></xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
+		<div id="{$machine}" class="machine {$machineClass}" style="{$machineStyle}">
 			<xsl:call-template name="component">
 				<xsl:with-param name="machine" select="$machine"/>
 				<xsl:with-param name="machineState">
@@ -204,7 +211,7 @@
 			<xsl:if test="$component != 'machine'">
 				<xsl:apply-templates select="name" mode="component"/>
 			</xsl:if>
-			<div class="{$APPCLASS}-container" style="{$border}{$style}">
+			<div class="{$CSSCLASS}-container" style="{$border}{$style}">
 				<xsl:if test="$component = 'machine'">
 					<xsl:apply-templates select="menu" mode="machine"/>
 				</xsl:if>
@@ -226,11 +233,11 @@
 			</div>
 			<xsl:if test="$component = 'machine'">
 				<xsl:choose>
-					<xsl:when test="$url != ''"><div class="{$APPCLASS}-reference">[<a href="{$url}">XML</a>]</div></xsl:when>
+					<xsl:when test="$url != ''"><div class="{$CSSCLASS}-reference">[<a href="{$url}">XML</a>]</div></xsl:when>
 					<xsl:otherwise/>
 				</xsl:choose>
-				<xsl:if test="$MACHINECLASS = 'pc'"><div class="{$APPCLASS}-reference" style="padding-left:8px">[<a href="#" onclick="savePC('{$machine}'); return false;">Save Machine</a>]</div></xsl:if>
-				<div class="{$APPCLASS}-copyright">
+				<xsl:if test="$MACHINECLASS = 'pc'"><div class="{$CSSCLASS}-reference" style="padding-left:8px">[<a href="#" onclick="savePC('{$machine}'); return false;">Save Machine</a>]</div></xsl:if>
+				<div class="{$CSSCLASS}-copyright">
 					<a href="http://{$SITEHOST}" target="_blank">PCjs</a> v<xsl:value-of select="$APPVERSION"/> © 2012-2016 by <a href="http://twitter.com/jeffpar" target="_blank">@jeffpar</a>
 				</div>
 				<div style="clear:both"> </div>
@@ -249,7 +256,7 @@
 	</xsl:template>
 
 	<xsl:template match="name" mode="component">
-		<div class="{$APPCLASS}-name"><xsl:apply-templates/></div>
+		<div class="{$CSSCLASS}-name"><xsl:apply-templates/></div>
 	</xsl:template>
 
 	<xsl:template match="menu" mode="component">
@@ -257,7 +264,7 @@
 	</xsl:template>
 
 	<xsl:template match="title" mode="component">
-		<div class="{$APPCLASS}-menu"><xsl:apply-templates/></div>
+		<div class="{$CSSCLASS}-menu"><xsl:apply-templates/></div>
 	</xsl:template>
 
 	<xsl:template match="control" mode="component">
@@ -346,7 +353,7 @@
 				</xsl:choose>
 			</xsl:variable>
 			<xsl:variable name="subClass">
-				<xsl:if test="@label"><xsl:text> </xsl:text><xsl:value-of select="$APPCLASS"/><xsl:text>-label</xsl:text></xsl:if>
+				<xsl:if test="@label"><xsl:text> </xsl:text><xsl:value-of select="$CSSCLASS"/><xsl:text>-label</xsl:text></xsl:if>
 			</xsl:variable>
 			<xsl:variable name="labelWidth">
 				<xsl:choose>
@@ -364,43 +371,43 @@
 			</xsl:variable>
 			<xsl:if test="@label">
 				<xsl:if test="not(@labelpos) or @labelpos = 'left'">
-					<div class="{$APPCLASS}-label" style="{$labelWidth}{$labelStyle}"><xsl:value-of select="@label"/></div>
+					<div class="{$CSSCLASS}-label" style="{$labelWidth}{$labelStyle}"><xsl:value-of select="@label"/></div>
 				</xsl:if>
 			</xsl:if>
 			<xsl:choose>
 				<xsl:when test="@type = 'canvas'">
-					<canvas class="{$APPCLASS}-binding {$APPCLASS}-canvas" width="{@width}" height="{@height}" style="-webkit-user-select:none;{$border}{$fontsize}{$style}" data-value="{{{$type},{$binding}}}"><xsl:apply-templates/></canvas>
+					<canvas class="{$CSSCLASS}-binding {$CSSCLASS}-canvas" width="{@width}" height="{@height}" style="-webkit-user-select:none;{$border}{$fontsize}{$style}" data-value="{{{$type},{$binding}}}"><xsl:apply-templates/></canvas>
 				</xsl:when>
 				<xsl:when test="@type = 'button'">
-					<button class="{$APPCLASS}-binding" style="-webkit-user-select:none;{$border}{$width}{$height}{$fontsize}{$style}" data-value="{{{$type},{$binding},{$value}}}"><xsl:apply-templates/></button>
+					<button class="{$CSSCLASS}-binding" style="-webkit-user-select:none;{$border}{$width}{$height}{$fontsize}{$style}" data-value="{{{$type},{$binding},{$value}}}"><xsl:apply-templates/></button>
 				</xsl:when>
 				<xsl:when test="@type = 'list'">
-					<select class="{$APPCLASS}-binding" style="{$border}{$width}{$height}{$fontsize}{$style}" data-value="{{{$type},{$binding}}}">
+					<select class="{$CSSCLASS}-binding" style="{$border}{$width}{$height}{$fontsize}{$style}" data-value="{{{$type},{$binding}}}">
 						<xsl:apply-templates select="disk|app|manifest" mode="component"/>
 					</select>
 				</xsl:when>
 				<xsl:when test="@type = 'text'">
-					<input class="{$APPCLASS}-binding" type="text" style="{$border}{$width}{$height}{$style}" data-value="{{{$type},{$binding}}}" value="{.}" autocapitalize="off" autocorrect="off"/>
+					<input class="{$CSSCLASS}-binding" type="text" style="{$border}{$width}{$height}{$style}" data-value="{{{$type},{$binding}}}" value="{.}" autocapitalize="off" autocorrect="off"/>
 				</xsl:when>
 				<xsl:when test="@type = 'submit'">
-					<input class="{$APPCLASS}-binding" type="submit" style="{$border}{$fontsize}{$style}" data-value="{{{$type},{$binding}}}" value="{.}"/>
+					<input class="{$CSSCLASS}-binding" type="submit" style="{$border}{$fontsize}{$style}" data-value="{{{$type},{$binding}}}" value="{.}"/>
 				</xsl:when>
 				<xsl:when test="@type = 'textarea'">
-					<textarea class="{$APPCLASS}-binding" style="{$border}{$width}{$height}{$style}" data-value="{{{$type},{$binding}}}" readonly="readonly" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"> </textarea>
+					<textarea class="{$CSSCLASS}-binding" style="{$border}{$width}{$height}{$style}" data-value="{{{$type},{$binding}}}" readonly="readonly" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"> </textarea>
 				</xsl:when>
 				<xsl:when test="@type = 'heading'">
 					<div><xsl:value-of select="."/></div>
 				</xsl:when>
 				<xsl:when test="@type = 'file'">
-					<form class="{$APPCLASS}-binding" data-value="{{{$type},{$binding}}}">
-						<fieldset class="{$APPCLASS}-fieldset">
+					<form class="{$CSSCLASS}-binding" data-value="{{{$type},{$binding}}}">
+						<fieldset class="{$CSSCLASS}-fieldset">
 							<input type="file"/>
 							<input type="submit" value="Mount" disabled="true"/>
 						</fieldset>
 					</form>
 				</xsl:when>
 				<xsl:when test="@type = 'led'">
-					<div class="{$APPCLASS}-binding {$APPCLASS}-{@type}" data-value="{{{$type},{$binding}}}"><xsl:value-of select="."/></div>
+					<div class="{$CSSCLASS}-binding {$CSSCLASS}-{@type}" data-value="{{{$type},{$binding}}}"><xsl:value-of select="."/></div>
 				</xsl:when>
 				<xsl:when test="@type = 'separator'">
 					<hr/>
@@ -412,12 +419,12 @@
 					<div style="clear:both"> </div>
 				</xsl:when>
 				<xsl:otherwise>
-					<div class="{$APPCLASS}-binding{$subClass} {$APPCLASS}-{@type}" style="-webkit-user-select:none;{$border}{$width}{$height}{$fontsize}{$style}" data-value="{{{$type},{$binding}}}"><xsl:apply-templates/></div>
+					<div class="{$CSSCLASS}-binding{$subClass} {$CSSCLASS}-{@type}" style="-webkit-user-select:none;{$border}{$width}{$height}{$fontsize}{$style}" data-value="{{{$type},{$binding}}}"><xsl:apply-templates/></div>
 				</xsl:otherwise>
 			</xsl:choose>
 			<xsl:if test="@label">
 				<xsl:if test="@labelpos = 'right'">
-					<div class="{$APPCLASS}-label" style="{$labelWidth}{$labelStyle}"><xsl:value-of select="@label"/></div>
+					<div class="{$CSSCLASS}-label" style="{$labelWidth}{$labelStyle}"><xsl:value-of select="@label"/></div>
 				</xsl:if>
 				<div style="clear:both"> </div>
 			</xsl:if>

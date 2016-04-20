@@ -1169,7 +1169,7 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
      * Start looking for Markdown-style machine links now...
      */
     var cMatches = 0;
-    var reMachines = /\[(.*?)]\((.*?)\s*"(PC|C1P)js([:!|])(.*?)"\)/gi;
+    var reMachines = /\[(.*?)]\((.*?)\s*"(PC|C1P)([a-z0-9-]*)([:!|])(.*?)"\)/gi;
 
     while ((aMatch = reMachines.exec(sBlock))) {
 
@@ -1177,10 +1177,12 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
         if (sMachineXMLFile.slice(-1) == "/") sMachineXMLFile += "machine.xml";
 
         sMachine = aMatch[3].toUpperCase();
+        if (aMatch[4] != "js") sMachine += aMatch[4];
         var sMachineFunc = "embed" + sMachine;
         var sMachineClass = sMachine.toLowerCase();
-        var aMachineParms = aMatch[5].split(aMatch[4]);
-        var sMachineMessage = "Waiting for " + sMachine + "js to load";
+        var aMachineParms = aMatch[6].split(aMatch[5]);
+        if (aMatch[4] == "js") sMachine += aMatch[4];
+        var sMachineMessage = "Waiting for " + sMachine + " to load";
 
         sMachineID = aMachineParms[0];
         sMachineXSLFile = aMachineParms[1] || "";

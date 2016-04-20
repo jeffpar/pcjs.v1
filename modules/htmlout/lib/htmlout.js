@@ -164,8 +164,9 @@ var sManifestXMLFile = "manifest.xml";
  * the closing </head> tag, and JS files are added just before the closing </body> tag.
  */
 var aMachineFiles = {
-    'c1p':  pkg.c1pCSSFiles.concat(pkg.c1pJSFiles),
-    'pc':   pkg.pcCSSFiles.concat(pkg.pcJSFiles)
+    'c1p':      pkg.c1pCSSFiles.concat(pkg.c1pJSFiles),
+    'pc':       pkg.pcCSSFiles.concat(pkg.pcJSFiles),
+    'pc8080':   pkg.pcCSSFiles.concat(pkg.pc8080Files)
 };
 var aMachineFileTypes = {
     'head': [".css"],           // put BOTH ".css" and ".js" here if convertMDMachineLinks() embeds its own scripts
@@ -1427,10 +1428,11 @@ HTMLOut.prototype.getMachineXML = function(sToken, sIndent, aParms, sXMLFile, sS
                  * or "development" stylesheets in ("/modules/pcjs/templates"|"/modules/c1pjs/templates").
                  *
                  * The common denominator in both sets is either "/pc" or "/c1p", which in turn indicates the class of machine
-                 * (ie, "PC" or "C1P").
+                 * (ie, "PCjs" or "C1Pjs").
                  */
-                var sMachineClass = (sStyleSheet.indexOf("/pc") >= 0? "PC" : (sStyleSheet.indexOf("/c1p") >= 0? "C1P" : null));
-                if (sMachineClass) {
+                aMatch = sStyleSheet.match(/\/(pc|c1p)([^/]*)/);
+                if (aMatch) {
+                    var sMachineClass = aMatch[1].toUpperCase() + aMatch[2];
                     /*
                      * Since the MarkOut module already contains the ability to embed a machine definition with
                      * one simple line of Markdown-like magic, we'll create such a line and let MarkOut do the rest.
@@ -1445,7 +1447,7 @@ HTMLOut.prototype.getMachineXML = function(sToken, sIndent, aParms, sXMLFile, sS
                      * options is a comma-delimited series of, well, options; the only option we currently output is "debugger"
                      * if a <debugger> element is present in the machine XML.
                      */
-                    var sMachineID = "machine" + sMachineClass; // fallback to either "machinePC" or "machineC1P" if no ID found
+                    var sMachineID = "machine" + sMachineClass; // fallback to either "machinePCjs" or "machineC1Pjs" if no ID found
                     aMatch = sXML.match(/<machine.*?\sid=(['"])(.*?)\1[^>]*>/);
                     if (aMatch) sMachineID = aMatch[2];
 
@@ -1455,7 +1457,7 @@ HTMLOut.prototype.getMachineXML = function(sToken, sIndent, aParms, sXMLFile, sS
                      * embedding inside an existing HTML document, so any "machine.xsl" stylesheet must be remapped
                      * to a corresponding "components.xsl" stylesheet (which is what the next line does).
                      */
-                    var sMachineDef = sMachineClass + "js:" + sMachineID + ":" + sStyleSheet.replace("machine.xsl", "components.xsl");
+                    var sMachineDef = sMachineClass + ":" + sMachineID + ":" + sStyleSheet.replace("machine.xsl", "components.xsl");
                     sMachineDef += (sXML.indexOf("<debugger") > 0? ":*:debugger" : ":*:none");
                     sMachineDef += (sStateFile? ":" + sStateFile : "");
 

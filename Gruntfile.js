@@ -321,7 +321,7 @@ module.exports = function(grunt) {
                 },
                 // src: pkg.pcJSFiles,
                 src: tmpPCjs,
-                dest: "./versions/" + pkg.name + "/" + pkg.version + "/pc.js"
+                dest: "./versions/pcjs/" + pkg.version + "/pc.js"
             },
             "pc-dbg.js": {
                 /*
@@ -336,7 +336,7 @@ module.exports = function(grunt) {
                 },
                 // src: pkg.pcJSFiles,
                 src: tmpPCjs,
-                dest: "./versions/" + pkg.name + "/" + pkg.version + "/pc-dbg.js"
+                dest: "./versions/pcjs/" + pkg.version + "/pc-dbg.js"
             },
             "pc8080.js": {
                 TEMPcompilerOpts: {
@@ -348,7 +348,7 @@ module.exports = function(grunt) {
                 },
                 // src: pkg.pc8080Files,
                 src: tmpPC8080,
-                dest: "./versions/" + pkg.name + "/" + pkg.version + "/pc8080.js"
+                dest: "./versions/pc8080/" + pkg.version + "/pc8080.js"
             },
             "pc8080-dbg.js": {
                 /*
@@ -363,7 +363,7 @@ module.exports = function(grunt) {
                 },
                 // src: pkg.pc8080Files,
                 src: tmpPC8080,
-                dest: "./versions/" + pkg.name + "/" + pkg.version + "/pc8080-dbg.js"
+                dest: "./versions/pc8080/" + pkg.version + "/pc8080-dbg.js"
             }
         },
         copy: {
