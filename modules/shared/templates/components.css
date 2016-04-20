@@ -39,7 +39,7 @@
     float: left;
     font-family: "Lucida Console", monospace;
 }
-.pcjs-control textarea {
+.pcjs-controls textarea {
     font-family: Monaco, monospace;
     font-size: x-small;
 }

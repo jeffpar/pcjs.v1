@@ -66,6 +66,7 @@ if (NODE) {
 function Video(parmsVideo, canvas, context, textarea, container)
 {
     Component.call(this, "Video", parmsVideo, Video, Messages.VIDEO);
+    this.setReady();
 }
 
 Component.subclass(Video);

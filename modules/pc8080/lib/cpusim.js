@@ -882,7 +882,7 @@ CPUSim.prototype.updateINTR = function(fRaise)
 };
 
 /**
- * updateReg(sReg, nValue)
+ * updateReg(sReg, nValue, cch)
  *
  * This function helps updateStatus() by massaging the register names and values according to
  * CPU type before passing the call to displayValue(); in the "old days", updateStatus() called
@@ -891,24 +891,11 @@ CPUSim.prototype.updateINTR = function(fRaise)
  * @this {CPUSim}
  * @param {string} sReg
  * @param {number} nValue
+ * @param {number} [cch] (default is 2 hex digits)
  */
-CPUSim.prototype.updateReg = function(sReg, nValue)
+CPUSim.prototype.updateReg = function(sReg, nValue, cch)
 {
-    var cch = 4;
-    if (sReg.length == 1) {
-        cch = 1;
-        nValue = nValue? 1 : 0;
-    }
-    if (this.model < 80386) {
-        if (sReg.length > 2) {
-            sReg = sReg.substr(1, 2);
-        }
-    } else {
-        if (sReg == "PS" || sReg.length > 2) {
-            cch = 8;
-        }
-    }
-    this.displayValue(sReg, nValue, cch);
+    this.displayValue(sReg, nValue, cch || 2);
 };
 
 /**
@@ -934,15 +921,15 @@ CPUSim.prototype.updateStatus = function(fForce)
             this.updateReg("E", this.regE);
             this.updateReg("H", this.regH);
             this.updateReg("L", this.regL);
-            this.updateReg("SP", this.getSP());
-            this.updateReg("PC", this.getPC());
+            this.updateReg("SP", this.getSP(), 4);
+            this.updateReg("PC", this.getPC(), 4);
             var regPS = this.getPS();
-            this.updateReg("PS", regPS);
-            this.updateReg("S", (regPS & CPUDef.PS.SF));
-            this.updateReg("Z", (regPS & CPUDef.PS.ZF));
-            this.updateReg("A", (regPS & CPUDef.PS.AF));
-            this.updateReg("P", (regPS & CPUDef.PS.PF));
-            this.updateReg("C", (regPS & CPUDef.PS.CF));
+            this.updateReg("PS", regPS, 2);
+            this.updateReg("S", (regPS & CPUDef.PS.SF), 1);
+            this.updateReg("Z", (regPS & CPUDef.PS.ZF), 1);
+            this.updateReg("A", (regPS & CPUDef.PS.AF), 1);
+            this.updateReg("P", (regPS & CPUDef.PS.PF), 1);
+            this.updateReg("C", (regPS & CPUDef.PS.CF), 1);
         }
     }
     var controlSpeed = this.bindings["speed"];

@@ -961,7 +961,7 @@ Panel.prototype.centerText = function(sText)
  * any associated HTML controls to the new component.
  *
  * NOTE: Unlike most other component init() functions, this one is designed to be
- * called multiple times: once at load time, so that we can binding our print()
+ * called multiple times: once at load time, so that we can bind our print()
  * function to the panel's output control ASAP, and again when the Computer component
  * is verifying that all components are ready and invoking their powerUp() functions.
  *
