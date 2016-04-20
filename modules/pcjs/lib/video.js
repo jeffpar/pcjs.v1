@@ -7245,7 +7245,7 @@ Video.init = function()
             return;
         }
 
-        eCanvas.setAttribute("class", PCJSCLASS + "-canvas");
+        eCanvas.setAttribute("class", "pcjs-canvas");
         eCanvas.setAttribute("width", parmsVideo['screenWidth']);
         eCanvas.setAttribute("height", parmsVideo['screenHeight']);
         eCanvas.style.backgroundColor = parmsVideo['screenColor'];

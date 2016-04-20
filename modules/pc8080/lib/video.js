@@ -49,7 +49,6 @@ if (NODE) {
  *
  *      screenWidth: width of the screen canvas, in pixels
  *      screenHeight: height of the screen canvas, in pixels
- *      scale: true for font scaling, false (default) to center the display on the screen
  *      aspect
  *      rotate
  *      addr
@@ -92,7 +91,7 @@ Video.init = function()
             return;
         }
 
-        eCanvas.setAttribute("class", PCJSCLASS + "-canvas");
+        eCanvas.setAttribute("class", "pcjs-canvas");
         eCanvas.setAttribute("width", parmsVideo['screenWidth']);
         eCanvas.setAttribute("height", parmsVideo['screenHeight']);
         eCanvas.style.backgroundColor = parmsVideo['screenColor'];

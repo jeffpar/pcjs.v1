@@ -163,6 +163,7 @@
 				<xsl:when test="@width">
 					<xsl:choose>
 						<xsl:when test="$left != '' or $top != ''">width:<xsl:value-of select="@width"/>;</xsl:when>
+						<xsl:when test="@pos = 'left' or @pos = 'right'">width:<xsl:value-of select="@width"/>;max-width:<xsl:value-of select="@width"/>;</xsl:when>
 						<xsl:otherwise>width:auto;max-width:<xsl:value-of select="@width"/>;</xsl:otherwise>
 					</xsl:choose>
 				</xsl:when>
