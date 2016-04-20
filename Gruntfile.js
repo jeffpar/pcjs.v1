@@ -118,6 +118,7 @@ module.exports = function(grunt) {
      * @property {string} version
      * @property {Array.<string>} c1pJSFiles
      * @property {Array.<string>} pcJSFiles
+     * @property {Array.<string>} pc8080Files
      * @property {Array.<string>} closureCompilerExterns
      */
     var pkg = grunt.file.readJSON("package.json");
@@ -166,7 +167,7 @@ module.exports = function(grunt) {
                 dest: "./versions/pcjs/" + pkg.version + "/pc-dbg.js"
             },
             "pc8080.js": {
-                src: pkg.pcJSFiles,
+                src: pkg.pc8080Files,
                 dest: "./versions/pc8080/" + pkg.version + "/pc8080.js",
                 options: {
                     process: function(src, filepath) {
@@ -175,7 +176,7 @@ module.exports = function(grunt) {
                 }
             },
             "pc8080-dbg.js": {
-                src: pkg.pcJSFiles,
+                src: pkg.pc8080Files,
                 dest: "./versions/pc8080/" + pkg.version + "/pc8080-dbg.js"
             },
             "tmp-c1pjs": {
@@ -574,7 +575,7 @@ module.exports = function(grunt) {
     
     grunt.loadTasks("modules/grunts/prepjs/tasks");
 
-    grunt.registerTask("preCompiler", grunt.option("rebuild")? ["concat:tmp-c1pjs", "concat:tmp-pcjs"] : ["newer:concat:tmp-c1pjs", "newer:concat:tmp-pcjs"]);
+    grunt.registerTask("preCompiler", grunt.option("rebuild")? ["concat:tmp-c1pjs", "concat:tmp-pcjs", "concat:tmp-pc8080"] : ["newer:concat:tmp-c1pjs", "newer:concat:tmp-pcjs", "newer:concat:tmp-pc8080"]);
 
     grunt.registerTask("compile", ["preCompiler", "closureCompiler", "replace:fix-source-maps"]);
 
