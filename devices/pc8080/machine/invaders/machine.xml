@@ -9,7 +9,11 @@
 	<rom id="romF" addr="0x1000" size="0x0800" file="/devices/pc8080/rom/invaders/INVADERS-F.json"/>
 	<rom id="romE" addr="0x1800" size="0x0800" file="/devices/pc8080/rom/invaders/INVADERS-E.json"/>
 	<ram id="ram"  addr="0x2000" size="0x2000"/>
-	<video id="video" screenwidth="256" screenheight="244" scale="true" aspect="1.33" rotate="90" addr="0x2000"/>
+	<video id="video" screenwidth="256" screenheight="224" scale="true" aspect="1.33" rotate="90" addr="0x2000" pos="left" padding="8px">
+		<menu>
+			<title>256x224 Screen</title>
+		</menu>
+	</video>
 	<panel ref="/devices/pc8080/panel/default.xml"/>
 	<debugger id="debugger"/>
 </machine>

@@ -111,13 +111,13 @@
     line-height: 19px; /* the equivalent of "vertical-align: middle" for single-line elements */
     background-color: #000000;
 }
-.pcjs-video-object {
+.pcjs-screen {
     clear: both;
     height: auto;
     position: relative;
     line-height: 0; /* this is just an attempt to eliminate the side-effects of any whitespace between inner DIVs */
 }
-.pcjs-video-object textarea {
+.pcjs-screen textarea {
     position: absolute;
     left: 0;
     top: 0;

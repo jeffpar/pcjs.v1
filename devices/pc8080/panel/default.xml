@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<panel id="panel" width="100%" padding="8px">
+<panel id="panel" width="500px" pos="left" padding="8px">
 	<name>Control Panel</name>
 	<control type="container" class="pcjs-textarea" width="58%" padbottom="8px" padright="8px">
 		<control type="textarea" binding="print" width="100%" height="260px" pos="relative" padbottom="4px" style="resize:vertical;"/>
@@ -9,7 +9,7 @@
 			<control type="button" binding="clear">Clear</control>
 		</control>
 	</control>
-	<control type="container" class="pcjs-registers" width="38%" padleft="8px">
+	<control type="container" class="pcjs-registers" width="20%" padleft="8px">
 		<control type="register" label="P" binding="PS" width="20px" padright="8px" padbottom="8px">00</control>
 		<control type="register" label="A" binding="A" width="20px" padright="8px" padbottom="8px">00</control>
 		<control pos=""/>
