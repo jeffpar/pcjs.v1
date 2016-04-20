@@ -124,6 +124,7 @@ module.exports = function(grunt) {
 
     var tmpC1Pjs = "./tmp/c1pjs/" + pkg.version + "/c1p.js";
     var tmpPCjs = "./tmp/pcjs/" + pkg.version + "/pc.js";
+    var tmpPC8080 = "./tmp/pc8080/" + pkg.version + "/pc8080.js";
 
     grunt.initConfig({
         pkg: pkg,               // pass the "package.json" object to initConfig() as a property, too
@@ -164,6 +165,19 @@ module.exports = function(grunt) {
                 src: pkg.pcJSFiles,
                 dest: "./versions/pcjs/" + pkg.version + "/pc-dbg.js"
             },
+            "pc8080.js": {
+                src: pkg.pcJSFiles,
+                dest: "./versions/pc8080/" + pkg.version + "/pc8080.js",
+                options: {
+                    process: function(src, filepath) {
+                        return (path.basename(filepath) == "debugger.js"? "" : src);
+                    }
+                }
+            },
+            "pc8080-dbg.js": {
+                src: pkg.pcJSFiles,
+                dest: "./versions/pc8080/" + pkg.version + "/pc8080-dbg.js"
+            },
             "tmp-c1pjs": {
                 src: pkg.c1pJSFiles,
                 dest: tmpC1Pjs,
@@ -185,7 +199,19 @@ module.exports = function(grunt) {
                             src.replace(/(^|\n)[ \t]*(['"])use strict\2;?\s*/g, '$1').replace(/[ \t]*if\s*\(NODE\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '').replace(/[ \t]*if\s*\(typeof\s+(module|APP_PCJS)\s*!==\s*(['"])undefined\2\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '').replace(/[ \t]*[A-Za-z_][A-Za-z0-9_\.]*\.assert\([^\n]*\);[^\n]*/g, '');
                     }
                 }
+            },
+            "tmp-pc8080": {
+                src: pkg.pc8080Files,
+                dest: tmpPC8080,
+                options: {
+                    banner: '"use strict";\n\n',
+                    process: function(src, filepath) {
+                        return "// " + filepath + "\n\n" +
+                            src.replace(/(^|\n)[ \t]*(['"])use strict\2;?\s*/g, '$1').replace(/[ \t]*if\s*\(NODE\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '').replace(/[ \t]*if\s*\(typeof\s+(module|APP_PCJS)\s*!==\s*(['"])undefined\2\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '').replace(/[ \t]*[A-Za-z_][A-Za-z0-9_\.]*\.assert\([^\n]*\);[^\n]*/g, '');
+                    }
+                }
             }
+
         },
         prepjs: {
             options: {
@@ -201,6 +227,10 @@ module.exports = function(grunt) {
             "pc.js": {
                 src: pkg.pcJSFiles,
                 dest: tmpPCjs
+            },
+            "pc8080.js": {
+                src: pkg.pc8080Files,
+                dest: tmpPC8080
             }
         },
         closureCompiler: {
@@ -306,6 +336,33 @@ module.exports = function(grunt) {
                 // src: pkg.pcJSFiles,
                 src: tmpPCjs,
                 dest: "./versions/" + pkg.name + "/" + pkg.version + "/pc-dbg.js"
+            },
+            "pc8080.js": {
+                TEMPcompilerOpts: {
+                    // create_source_map: "./tmp/pc8080/"  + pkg.version + "/pc8080.map",
+                    define: ["\"APPNAME='PC8080'\"", "\"APPVERSION='" + pkg.version + "'\"",
+                             "\"SITEHOST='www.pcjs.org'\"", "COMPILED=true", "DEBUG=false", "DEBUGGER=false"],
+                    // output_wrapper: "\"(function(){%output%})();//@ sourceMappingURL=/tmp/pc8080/" + pkg.version + "/pc8080.map\""
+                    output_wrapper: "\"(function(){%output%})();\""
+                },
+                // src: pkg.pc8080Files,
+                src: tmpPC8080,
+                dest: "./versions/" + pkg.name + "/" + pkg.version + "/pc8080.js"
+            },
+            "pc8080-dbg.js": {
+                /*
+                 * Technically, this is the one case we don't need to override the default 'define' settings, but maybe it's best to be explicit.
+                 */
+                TEMPcompilerOpts: {
+                    // create_source_map: "./tmp/pc8080/"  + pkg.version + "/pc8080-dbg.map",
+                    define: ["\"APPNAME='PC8080'\"", "\"APPVERSION='" + pkg.version + "'\"",
+                             "\"SITEHOST='www.pcjs.org'\"", "COMPILED=true", "DEBUG=false", "DEBUGGER=true"],
+                    // output_wrapper: "\"(function(){%output%})();//@ sourceMappingURL=/tmp/pc8080/" + pkg.version + "/pc8080-dbg.map\""
+                    output_wrapper: "\"(function(){%output%})();\""
+                },
+                // src: pkg.pc8080Files,
+                src: tmpPC8080,
+                dest: "./versions/" + pkg.name + "/" + pkg.version + "/pc8080-dbg.js"
             }
         },
         copy: {
@@ -340,6 +397,24 @@ module.exports = function(grunt) {
                     process: function(content, srcPath) {
                         var s = content.replace(/(<xsl:variable name="APPVERSION">)[^<]*(<\/xsl:variable>)/g, "$1" + pkg.version + "$2");
                         s = s.replace(/"[^"]*\/?(common.css|common.xsl|components.css|components.xsl|document.css|document.xsl)"/g, '"/versions/pcjs/' + pkg.version + '/$1"');
+                        s = s.replace(/[ \t]*\/\*[^\*][\s\S]*?\*\//g, "").replace(/[ \t]*<!--[^@]*?-->[ \t]*\n?/g, "");
+                        return s;
+                    }
+                }
+            },
+            "pc8080xsl": {
+                files: [
+                    {
+                        cwd: "modules/shared/templates/",
+                        src: ["common.css", "common.xsl", "document.css", "document.xsl", "machine.xsl", "manifest.xsl", "outline.xsl"],
+                        dest: "versions/pc8080/<%= pkg.version %>/",
+                        expand: true
+                    }
+                ],
+                options: {
+                    process: function(content, srcPath) {
+                        var s = content.replace(/(<xsl:variable name="APPVERSION">)[^<]*(<\/xsl:variable>)/g, "$1" + pkg.version + "$2");
+                        s = s.replace(/"[^"]*\/?(common.css|common.xsl|components.css|components.xsl|document.css|document.xsl)"/g, '"/versions/pc8080/' + pkg.version + '/$1"');
                         s = s.replace(/[ \t]*\/\*[^\*][\s\S]*?\*\//g, "").replace(/[ \t]*<!--[^@]*?-->[ \t]*\n?/g, "");
                         return s;
                     }
