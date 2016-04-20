@@ -1205,7 +1205,11 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
          */
         if (!sMachineXSLFile || sMachineXSLFile.indexOf("components.xsl") >= 0) {
             if (this.fDebug) {
-                sMachineXSLFile = "/modules/" + sMachineClass + "js/templates/components.xsl";
+                if (sMachineClass == "c1p") {
+                    sMachineXSLFile = "/modules/c1pjs/templates/components.xsl";
+                } else {
+                    sMachineXSLFile = "/modules/shared/templates/components.xsl";
+                }
             }
         }
 

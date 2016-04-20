@@ -15,6 +15,11 @@ or none of the above.
 [*common.xsl*](common.xsl) is a collection of XSL templates used by *machine.xsl* (and deprecated *outline.xsl*)
 files.
 
+[*components.xsl*](components.xsl) transforms all the elements of a machine XML file into an HTML fragment
+that includes a series of **DIV** tags with corresponding *id* and *data-value* attributes that allow our
+JavaScript components to bind themselves to visual elements (eg, virtual screen, virtual keyboard, control
+panel) on a web page.
+
 [*machine.xsl*](machine.xsl) is an XML stylesheet that takes things a step further and transforms a machine XML
 into a stand-alone HTML document, which also includes all necessary compiled scripts (eg, c1p.js, c1p-dbg.js,
 pc.js or pc-dbg.js).  Most machine XML files explicitly link to this stylesheet, so that simply loading the XML

@@ -365,7 +365,7 @@ module.exports = function(grunt) {
             "pcjs": {
                 files: [
                     {
-                        cwd: "modules/pcjs/templates/",
+                        cwd: "modules/shared/templates/",
                         src: ["components.*"],
                         dest: "versions/pcjs/<%= pkg.version %>/",
                         expand: true
