@@ -1157,7 +1157,8 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
             sMachineVersion = ((machine['uncompiled'] == "true")? "uncompiled" : "");
             sMachineParms = machine['parms'] || "";
             sReplacement = machine['name'] || "Embedded PC";
-            sReplacement = "[" + sReplacement + "](" + sMachineXMLFile + ' "' + sMachine + 'js!' + sMachineID + '!' + sMachineXSLFile + '!!' + sMachineOptions + '!' + sMachineParms + '")';
+            if (sMachine == "pc" || sMachine == "c1p") sMachine += "js";
+            sReplacement = "[" + sReplacement + "](" + sMachineXMLFile + ' "' + sMachine + '!' + sMachineID + '!' + sMachineXSLFile + '!!' + sMachineOptions + '!' + sMachineParms + '")';
         }
         sBlock = sBlock.replace(aMatch[0], sReplacement);
         reIncludes.lastIndex = 0;       // reset lastIndex, since we just modified the string that reIncludes is iterating over

@@ -1,20 +1,32 @@
 ---
 layout: page
-title: Space Invaders (Prototype)
+title: Space Invaders (Under Construction)
 permalink: /devices/pc8080/machine/invaders/
+sitemap: false
 machines:
   - type: pc8080
     id: invaders
+    debugger: true
 ---
 
-Space Invaders (Prototype)
+Space Invaders (Under Construction)
 ---
 
-This is a work-in-progress, with [Development Notes](#development-notes) below.
+This is the first test of [PC8080](/modules/pc8080/), a new 8080-based machine emulator being added to the
+PCjs Project.  It's a work-in-progress, so there's not much to look at yet.
+
+The idea is to make [PC8080](/modules/pc8080/) sufficiently configurable so that it will work with a variety of
+8080-based systems, including those with memory-mapped video displays (like Space Invaders), as well as simpler
+terminal-based systems, like the CP/M-based systems of old.
+
+In fact, as soon as Space Invaders is working, my next adaptation will be a DEC VT-100 terminal emulator, which is
+itself is an 8080-based machine.
+
+Assorted [Space Invaders Hardware Notes](#space-invaders-hardware-notes) are collected below.
 
 {% include machine.html id="invaders" %}
 
-Development Notes
+Space Invaders Hardware Notes
 ---
 
 From [emutalk.net](http://www.emutalk.net/threads/38177-Space-Invaders):

@@ -1881,57 +1881,55 @@ HTMLOut.prototype.processMachines = function(aMachines, buildOptions, done)
             asFiles.push("/versions/" + sScriptFolder + "/" + sVersion + "/" + sScriptFile);
             this.addFilesToHTML(asFiles, sScriptEmbed);
         }
-        else {
+        else if (asFiles = aMachineFiles[sClass]) {
             /*
              * SIDEBAR: Why the "slice()"?  It's a handy way to create a copy of the array, and we need a copy,
              * because if it turns out we need to "cut out" some of the files below (using splice), we don't want that
              * affecting the original array.
              */
-            if ((asFiles = aMachineFiles[sClass].slice())) {
-                var i;
+            asFiles = asFiles.slice();
+            /*
+             * We need to find the shared "defines.js" source file, because we may need to follow it
+             * with "nodebug.js" and/or "private.js".
+             */
+            for (var i = 0; i < asFiles.length; i++) {
+                if (asFiles[i].indexOf("shared/lib/defines.js") >= 0) {
+                    if (fPrivate) {
+                        asFiles.splice(i + 1, 0, asFiles[i].replace("defines.js", "private.js"));
+                    }
+                    if (fNoDebug) {
+                        asFiles.splice(i + 1, 0, asFiles[i].replace("defines.js", "nodebug.js"));
+                    }
+                    break;
+                }
+            }
+            if (!fDebugger) {
                 /*
-                 * We need to find the shared "defines.js" source file, because we may need to follow it
-                 * with "nodebug.js" and/or "private.js".
+                 * Step 1: We need to find the client's "defines.js" source file, and follow it with "nodebugger.js".
                  */
                 for (i = 0; i < asFiles.length; i++) {
-                    if (asFiles[i].indexOf("shared/lib/defines.js") >= 0) {
-                        if (fPrivate) {
-                            asFiles.splice(i + 1, 0, asFiles[i].replace("defines.js", "private.js"));
-                        }
-                        if (fNoDebug) {
-                            asFiles.splice(i + 1, 0, asFiles[i].replace("defines.js", "nodebug.js"));
-                        }
+                    if (asFiles[i].indexOf("js/lib/defines.js") >= 0) {
+                        asFiles.splice(i + 1, 0, asFiles[i].replace("defines.js", "nodebugger.js"));
                         break;
                     }
                 }
-                if (!fDebugger) {
-                    /*
-                     * Step 1: We need to find the client's "defines.js" source file, and follow it with "nodebugger.js".
-                     */
-                    for (i = 0; i < asFiles.length; i++) {
-                        if (asFiles[i].indexOf("js/lib/defines.js") >= 0) {
-                            asFiles.splice(i + 1, 0, asFiles[i].replace("defines.js", "nodebugger.js"));
-                            break;
-                        }
-                    }
-                    /*
-                     * Step 2: If there's a "debugger.js" source file in the list of uncompiled files, we need to remove
-                     * it, which we do by using the Array splice() method, removing the 1 matching element from the array.
-                     */
-                    for (i = 0; i < asFiles.length; i++) {
-                        if (asFiles[i].indexOf("/debugger.js") >= 0) {
-                            asFiles.splice(i, 1);
-                            break;
-                        }
+                /*
+                 * Step 2: If there's a "debugger.js" source file in the list of uncompiled files, we need to remove
+                 * it, which we do by using the Array splice() method, removing the 1 matching element from the array.
+                 */
+                for (i = 0; i < asFiles.length; i++) {
+                    if (asFiles[i].indexOf("/debugger.js") >= 0) {
+                        asFiles.splice(i, 1);
+                        break;
                     }
                 }
+            }
+            this.addFilesToHTML(asFiles, sScriptEmbed);
+            if (buildOptions.id) {
+                asFiles = [];
+                asFiles.push("/modules/build/lib/build.js");
+                sScriptEmbed = '<script type="text/javascript">buildPC("' + buildOptions.id + '")</script>';
                 this.addFilesToHTML(asFiles, sScriptEmbed);
-                if (buildOptions.id) {
-                    asFiles = [];
-                    asFiles.push("/modules/build/lib/build.js");
-                    sScriptEmbed = '<script type="text/javascript">buildPC("' + buildOptions.id + '")</script>';
-                    this.addFilesToHTML(asFiles, sScriptEmbed);
-                }
             }
         }
     }

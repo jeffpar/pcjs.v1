@@ -11,7 +11,7 @@
 	<ram id="ram"  addr="0x2000" size="0x2000"/>
 	<video id="video" screenWidth="224" screenHeight="256" aspect="1.33" rotate="90" addr="0x2400" width="40%" pos="left" padding="8px">
 		<menu>
-			<title>224x256 Screen</title>
+			<title>224x256 Screen (Rotated)</title>
 		</menu>
 	</video>
 	<panel ref="/devices/pc8080/panel/default.xml"/>
