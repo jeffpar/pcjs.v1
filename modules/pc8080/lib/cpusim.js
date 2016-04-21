@@ -213,7 +213,7 @@ CPUSim.prototype.removeMemCheck = function(addr, fWrite)
 CPUSim.prototype.initProcessor = function()
 {
     this.cycleCounts = CPUDef.CYCLES;
-    this.aOps = []; // CPUDef.aOps;
+    this.aOps = CPUDef.aOps;
 };
 
 /**
@@ -682,7 +682,7 @@ CPUSim.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
     case "L":
     case "SP":
     case "PC":
-    case "PS":
+    case "F":
     case "C":
     case "P":
     case "A":
@@ -924,7 +924,7 @@ CPUSim.prototype.updateStatus = function(fForce)
             this.updateReg("SP", this.getSP(), 4);
             this.updateReg("PC", this.getPC(), 4);
             var regPS = this.getPS();
-            this.updateReg("PS", regPS, 2);
+            this.updateReg("F", regPS, 2);
             this.updateReg("S", (regPS & CPUDef.PS.SF), 1);
             this.updateReg("Z", (regPS & CPUDef.PS.ZF), 1);
             this.updateReg("A", (regPS & CPUDef.PS.AF), 1);

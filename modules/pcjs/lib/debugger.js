@@ -2667,7 +2667,7 @@ if (DEBUGGER) {
     };
 
     /**
-     * parseAddrOptions(dbdAddr, sOptions)
+     * parseAddrOptions(dbgAddr, sOptions)
      *
      * @this {Debugger}
      * @param {DbgAddr} dbgAddr
