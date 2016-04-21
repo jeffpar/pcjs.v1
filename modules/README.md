@@ -14,6 +14,7 @@ The project includes these emulation modules:
 
 * C1Pjs, the 6502-based C1P Emulation Module
 * [PCjs](pcjs/), the x86-based IBM PC Emulation Module
+* PC8080, an 8080 CPU Emulation Module (work-in-progress)
 
 along with variety of Node support modules, such as:
 

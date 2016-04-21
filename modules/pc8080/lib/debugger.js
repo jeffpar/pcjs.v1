@@ -2473,11 +2473,11 @@ if (DEBUGGER) {
         }
 
         sLine += str.pad(sBytes, 11);
-        sLine += str.pad(sOpcode, 8);
+        sLine += str.pad(sOpcode, 7);
         if (sOperands) sLine += ' ' + sOperands;
 
         if (sComment) {
-            sLine = str.pad(sLine, 56) + ';' + sComment;
+            sLine = str.pad(sLine, 40) + ';' + sComment;
             if (!this.cpu.flags.fChecksum) {
                 sLine += (nSequence != null? '=' + nSequence.toString() : "");
             } else {

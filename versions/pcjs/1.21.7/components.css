@@ -106,13 +106,13 @@
     line-height: 19px;
     background-color: #000000;
 }
-.pcjs-video-object {
+.pcjs-screen {
     clear: both;
     height: auto;
     position: relative;
     line-height: 0;
 }
-.pcjs-video-object textarea {
+.pcjs-screen textarea {
     position: absolute;
     left: 0;
     top: 0;

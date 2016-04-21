@@ -162,6 +162,7 @@
 				<xsl:when test="@width">
 					<xsl:choose>
 						<xsl:when test="$left != '' or $top != ''">width:<xsl:value-of select="@width"/>;</xsl:when>
+						<xsl:when test="@pos = 'left' or @pos = 'right'">width:<xsl:value-of select="@width"/>;max-width:<xsl:value-of select="@width"/>;</xsl:when>
 						<xsl:otherwise>width:auto;max-width:<xsl:value-of select="@width"/>;</xsl:otherwise>
 					</xsl:choose>
 				</xsl:when>
@@ -217,8 +218,11 @@
 				<xsl:if test="$component != 'machine'">
 					<xsl:apply-templates select="menu" mode="component"/>
 				</xsl:if>
+				<xsl:variable name="objectClass">
+					<xsl:value-of select="$APPCLASS"/><xsl:text>-</xsl:text><xsl:value-of select="$class"/><xsl:text>-object</xsl:text><xsl:if test="$class = 'video'"><xsl:text> </xsl:text><xsl:value-of select="$CSSCLASS"/><xsl:text>-screen</xsl:text></xsl:if>
+				</xsl:variable>
 				<xsl:if test="$class != '' and $component != 'machine'">
-					<div class="{$APPCLASS}-{$class}-object" data-value="{{id:'{$id}',name:'{$name}'{$comment}{$parms}}}"> </div>
+					<div class="{$objectClass}" data-value="{{id:'{$id}',name:'{$name}'{$comment}{$parms}}}"> </div>
 				</xsl:if>
 				<xsl:if test="control">
 					<div class="{$CSSCLASS}-controls">
