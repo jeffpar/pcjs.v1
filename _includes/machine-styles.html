@@ -1,13 +1,18 @@
 {% for machine in page.machines %}
   {% capture machine_type %}{{ machine.type | remove:"-dbg" }}{% endcapture %}
+  {% if machine_type != "pc" and machine_type != "c1p" %}
+      {% capture machine_app %}{{ machine_type }}{% endcapture %}
+    {% else %}
+      {% capture machine_app %}{{ machine_type }}js{% endcapture %}
+  {% endif %}
   {% unless site.pcjs.compiled == true and machine.uncompiled != true %}
-    {% if machine_type != "c1p" %}
+    {% if machine_app != "c1pjs" %}
       {% capture machine_style %}{{ site.baseurl }}/modules/shared/templates/components.css{% endcapture %}
     {% else %}
-      {% capture machine_style %}{{ site.baseurl }}/modules/{{ machine_type }}js/templates/components.css{% endcapture %}
+      {% capture machine_style %}{{ site.baseurl }}/modules/{{ machine_app }}/templates/components.css{% endcapture %}
     {% endif %}
   {% else %}
-    {% capture machine_style %}{{ site.baseurl }}/versions/{{ machine_type }}js/{{ site.pcjs.version }}/components.css{% endcapture %}
+    {% capture machine_style %}{{ site.baseurl }}/versions/{{ machine_app }}/{{ site.pcjs.version }}/components.css{% endcapture %}
   {% endunless %}
   {% unless machine_styles contains machine_style %}
 	<link rel="stylesheet" type="text/css" href="{{ machine_style }}">
