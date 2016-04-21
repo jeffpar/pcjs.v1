@@ -3,12 +3,15 @@ PCjs: The Virtual IBM PC
 
 Welcome to [PCjs](/docs/about/pcjs/), the first IBM PC simulation to run in your web browser without any plugins.
 It was added to the [JavaScript Machines](/docs/about/) project in Fall 2012, and it is now part of the
-[PCjs Project](https://github.com/jeffpar/pcjs) on GitHub.  The project includes:
+[PCjs Project](https://github.com/jeffpar/pcjs) on GitHub.
 
-* [PCjs](/docs/pcjs/), a simulation of the IBM PC and PC compatibles 
-* [C1Pjs](/docs/c1pjs/), a simulation of the 6502-based OSI Challenger 1P
+The project includes the following web-based emulators:
 
-PCjs first simulated the 4.77Mhz 8088-based IBM PC, and has steadily evolved to support more classic machines,
+* [PCjs](/docs/pcjs/): an IBM PC and PC-compatible emulator 
+* [PC8080](/modules/pc8080/): an 8080-based machine emulation module
+* [C1Pjs](/docs/c1pjs/): a simulation of the 6502-based OSI Challenger 1P
+
+PCjs first simulated the 4.77Mhz 8088-based IBM PC, and has steadily evolved to support more classic x86 machines,
 including the IBM PC XT, the 80286-based IBM PC AT, and the 80386-based COMPAQ DeskPro 386.  PCjs fully supports
 the original machine original ROMs, video cards, etc, and all machines run at their original speeds.
 
