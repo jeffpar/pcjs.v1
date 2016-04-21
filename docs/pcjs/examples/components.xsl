@@ -239,7 +239,7 @@
 					<xsl:when test="$url != ''"><div class="{$CSSCLASS}-reference">[<a href="{$url}">XML</a>]</div></xsl:when>
 					<xsl:otherwise/>
 				</xsl:choose>
-				<xsl:if test="$MACHINECLASS = 'pc'"><div class="{$CSSCLASS}-reference" style="padding-left:8px">[<a href="#" onclick="savePC('{$machine}'); return false;">Save Machine</a>]</div></xsl:if>
+				<xsl:if test="$APPCLASS = 'pcjs'"><div class="{$CSSCLASS}-reference" style="padding-left:8px">[<a href="#" onclick="savePC('{$machine}'); return false;">Save Machine</a>]</div></xsl:if>
 				<div class="{$CSSCLASS}-copyright">
 					<a href="http://{$SITEHOST}" target="_blank">PCjs</a> v<xsl:value-of select="$APPVERSION"/> © 2012-2016 by <a href="http://twitter.com/jeffpar" target="_blank">@jeffpar</a>
 				</div>
