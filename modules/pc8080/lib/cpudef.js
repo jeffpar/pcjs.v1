@@ -71,25 +71,7 @@ var CPUDef = {
         SF:     0x0080,         // bit 7: Sign flag
         ALL:    0x00D5,         // CF, PF, AF, ZF, SF
         MASK:   0x00FF,         //
-        IF:     0x0200,         // bit 9: Interrupt flag (for internal use only)
-        OF:     0x0800          // bit 11: Overflow flag (for internal use only)
-    },
-    RESULT: {
-        /*
-         * Flags are computed using the following internal registers:
-         *
-         *      CF: resultZeroCarry & resultSize (ie, 0x100 or 0x10000)
-         *      PF: resultParitySign & 0xff
-         *      AF: (resultParitySign ^ resultAuxOverflow) & 0x0010
-         *      ZF: resultZeroCarry & (resultSize - 1)
-         *      SF: resultParitySign & (resultSize >> 1)
-         *      OF: (resultParitySign ^ resultAuxOverflow ^ (resultParitySign >> 1)) & (resultSize >> 1)
-         */
-        SIZE_BYTE:  0x00100,    // mask for byte arithmetic instructions (after subtracting 1)
-        SIZE_WORD:  0x10000,    // mask for word arithmetic instructions (after subtracting 1)
-        AUXOVF_AF:  0x00010,
-        AUXOVF_OF:  0x08080,
-        AUXOVF_CF:  0x10100
+        IF:     0x0200          // bit 9: Interrupt flag (for internal use only)
     },
     PARITY:  [                  // 256-byte array with a 1 wherever the number of set bits of the array index is EVEN
         1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,
@@ -132,10 +114,6 @@ var CPUDef = {
         ACI:    0xCE,           // PS.ALL
         CALL:   0xCD
         // to be continued....
-    },
-    CYCLES: {
-        ACI:    7               // 2 cycles, 7 states
-        // to be continued....
     }
 };
 
@@ -148,7 +126,7 @@ CPUDef.PS.DIRECT    =   (CPUDef.PS.IF);
  * However, PS "arithmetic" flags are NOT stored in regPS; they are maintained across
  * separate result registers, hence the "indirect" designation.
  */
-CPUDef.PS.INDIRECT  =   (CPUDef.PS.CF | CPUDef.PS.PF | CPUDef.PS.AF | CPUDef.PS.ZF | CPUDef.PS.SF | CPUDef.PS.OF);
+CPUDef.PS.INDIRECT  =   (CPUDef.PS.CF | CPUDef.PS.PF | CPUDef.PS.AF | CPUDef.PS.ZF | CPUDef.PS.SF);
 
 /*
  * These are the default "always set" PS bits for the 8080.

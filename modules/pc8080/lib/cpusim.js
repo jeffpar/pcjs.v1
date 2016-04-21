@@ -212,7 +212,6 @@ CPUSim.prototype.removeMemCheck = function(addr, fWrite)
  */
 CPUSim.prototype.initProcessor = function()
 {
-    this.cycleCounts = CPUDef.CYCLES;
     this.aOps = CPUDef.aOps;
 };
 
@@ -323,37 +322,113 @@ CPUSim.prototype.restore = function(data)
 };
 
 /**
- * getPC()
+ * setBinding(sHTMLType, sBinding, control, sValue)
+ *
+ * @this {CPUSim}
+ * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
+ * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "AX")
+ * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+ * @param {string} [sValue] optional data value
+ * @return {boolean} true if binding was successful, false if unrecognized binding request
+ */
+CPUSim.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
+{
+    var fBound = false;
+    switch (sBinding) {
+    case "A":
+    case "B":
+    case "C":
+    case "D":
+    case "E":
+    case "H":
+    case "L":
+    case "SP":
+    case "PC":
+    case "F":
+    case "CF":
+    case "PF":
+    case "AF":
+    case "ZF":
+    case "SF":
+    case "VF":
+        this.bindings[sBinding] = control;
+        this.cLiveRegs++;
+        fBound = true;
+        break;
+    default:
+        fBound = this.parent.setBinding.call(this, sHTMLType, sBinding, control);
+        break;
+    }
+    return fBound;
+};
+
+/**
+ * getBC()
  *
  * @this {CPUSim}
  * @return {number}
  */
-CPUSim.prototype.getPC = function()
+CPUSim.prototype.getBC = function()
 {
-    return this.regPC;
+    return (this.regB << 8) | this.regC;
 };
 
 /**
- * setPC(off)
+ * setBC(w)
  *
  * @this {CPUSim}
- * @param {number} off
+ * @param {number} w
  */
-CPUSim.prototype.setPC = function(off)
+CPUSim.prototype.setBC = function(w)
 {
-    this.regPC = off & 0xffff;
+    this.regB = (w >> 8) & 0xff;
+    this.regC = w & 0xff;
 };
 
 /**
- * checkPC(inc)
+ * getDE()
  *
  * @this {CPUSim}
- * @param {number} inc (positive)
- * @return {number} new PC
+ * @return {number}
  */
-CPUSim.prototype.checkPC = function(inc)
+CPUSim.prototype.getDE = function()
 {
-    return (this.regPC + inc)|0;
+    return (this.regD << 8) | this.regE;
+};
+
+/**
+ * setDE(w)
+ *
+ * @this {CPUSim}
+ * @param {number} w
+ */
+CPUSim.prototype.setDE = function(w)
+{
+    this.regD = (w >> 8) & 0xff;
+    this.regE = w & 0xff;
+};
+
+/**
+ * getHL()
+ *
+ * @this {CPUSim}
+ * @return {number}
+ */
+CPUSim.prototype.getHL = function()
+{
+    return (this.regH << 8) | this.regL;
+};
+
+/**
+ * setHL(w)
+ *
+ * @this {CPUSim}
+ * @param {number} w
+ */
+CPUSim.prototype.setHL = function(w)
+{
+    this.regH = (w >> 8) & 0xff;
+    this.regL = w & 0xff;
 };
 
 /**
@@ -379,14 +454,25 @@ CPUSim.prototype.setSP = function(off)
 };
 
 /**
- * getCarry()
+ * getPC()
  *
  * @this {CPUSim}
- * @return {number} 0 or 1, depending on whether CF is clear or set
+ * @return {number}
  */
-CPUSim.prototype.getCarry = function()
+CPUSim.prototype.getPC = function()
 {
-    return this.getCF()? 1 : 0;
+    return this.regPC;
+};
+
+/**
+ * setPC(off)
+ *
+ * @this {CPUSim}
+ * @param {number} off
+ */
+CPUSim.prototype.setPC = function(off)
+{
+    this.regPC = off & 0xffff;
 };
 
 /**
@@ -397,7 +483,7 @@ CPUSim.prototype.getCarry = function()
  */
 CPUSim.prototype.getCF = function()
 {
-    return (this.resultValue & this.resultSize)? CPUDef.PS.CF : 0;
+    return (this.resultZeroCarry & 0x100)? CPUDef.PS.CF : 0;
 };
 
 /**
@@ -419,7 +505,7 @@ CPUSim.prototype.getPF = function()
  */
 CPUSim.prototype.getAF = function()
 {
-    return ((this.resultParitySign ^ this.resultAuxOverflow) & CPUDef.RESULT.AUXOVF_AF)? CPUDef.PS.AF : 0;
+    return ((this.resultParitySign ^ this.resultAuxOverflow) & 0x10)? CPUDef.PS.AF : 0;
 };
 
 /**
@@ -430,7 +516,7 @@ CPUSim.prototype.getAF = function()
  */
 CPUSim.prototype.getZF = function()
 {
-    return (this.resultValue & (this.resultSize - 1))? 0 : CPUDef.PS.ZF;
+    return (this.resultZeroCarry & 0xff)? 0 : CPUDef.PS.ZF;
 };
 
 /**
@@ -441,7 +527,7 @@ CPUSim.prototype.getZF = function()
  */
 CPUSim.prototype.getSF = function()
 {
-    return (this.resultParitySign & (this.resultSize >> 1))? CPUDef.PS.SF : 0;
+    return (this.resultParitySign & 0x80)? CPUDef.PS.SF : 0;
 };
 
 /**
@@ -456,24 +542,13 @@ CPUSim.prototype.getIF = function()
 };
 
 /**
- * getOF()
- *
- * @this {CPUSim}
- * @return {number} 0 or CPUDef.PS.OF
- */
-CPUSim.prototype.getOF = function()
-{
-    return ((this.resultParitySign ^ this.resultAuxOverflow ^ (this.resultParitySign >> 1)) & (this.resultSize >> 1))? CPUDef.PS.OF : 0;
-};
-
-/**
  * clearCF()
  *
  * @this {CPUSim}
  */
 CPUSim.prototype.clearCF = function()
 {
-    this.resultValue &= ~this.resultSize;
+    this.resultZeroCarry &= 0xff;
 };
 
 /**
@@ -493,7 +568,7 @@ CPUSim.prototype.clearPF = function()
  */
 CPUSim.prototype.clearAF = function()
 {
-    this.resultAuxOverflow = (this.resultParitySign & CPUDef.RESULT.AUXOVF_AF) | (this.resultAuxOverflow & ~CPUDef.RESULT.AUXOVF_AF);
+    this.resultAuxOverflow = (this.resultParitySign & 0x10) | (this.resultAuxOverflow & ~0x10);
 };
 
 /**
@@ -503,7 +578,7 @@ CPUSim.prototype.clearAF = function()
  */
 CPUSim.prototype.clearZF = function()
 {
-    this.resultValue |= (this.resultSize - 1);
+    this.resultZeroCarry |= 0xff;
 };
 
 /**
@@ -513,10 +588,7 @@ CPUSim.prototype.clearZF = function()
  */
 CPUSim.prototype.clearSF = function()
 {
-    if (this.getSF()) {
-        this.resultParitySign ^= (this.resultSize >> 1) | (this.resultSize >> 2);
-        this.resultAuxOverflow ^= CPUDef.RESULT.AUXOVF_OF;
-    }
+    if (this.getSF()) this.resultParitySign ^= 0xc0;
 };
 
 /**
@@ -530,24 +602,13 @@ CPUSim.prototype.clearIF = function()
 };
 
 /**
- * clearOF()
- *
- * @this {CPUSim}
- */
-CPUSim.prototype.clearOF = function()
-{
-    this.resultParitySign &= ~this.resultSize;
-    this.resultAuxOverflow = (this.resultParitySign & CPUDef.RESULT.AUXOVF_OF) | (this.resultAuxOverflow & ~CPUDef.RESULT.AUXOVF_OF);
-};
-
-/**
  * setCF()
  *
  * @this {CPUSim}
  */
 CPUSim.prototype.setCF = function()
 {
-    this.resultValue |= this.resultSize;
+    this.resultZeroCarry |= 0x100;
 };
 
 /**
@@ -567,7 +628,7 @@ CPUSim.prototype.setPF = function()
  */
 CPUSim.prototype.setAF = function()
 {
-    this.resultAuxOverflow = ~(this.resultParitySign & CPUDef.RESULT.AUXOVF_AF) & CPUDef.RESULT.AUXOVF_AF | (this.resultAuxOverflow & ~CPUDef.RESULT.AUXOVF_AF);
+    this.resultAuxOverflow = (~this.resultParitySign & 0x10) | (this.resultAuxOverflow & ~0x10);
 };
 
 /**
@@ -577,7 +638,7 @@ CPUSim.prototype.setAF = function()
  */
 CPUSim.prototype.setZF = function()
 {
-    this.resultValue &= ~(this.resultSize - 1);
+    this.resultZeroCarry &= ~0xff;
 };
 
 /**
@@ -587,10 +648,7 @@ CPUSim.prototype.setZF = function()
  */
 CPUSim.prototype.setSF = function()
 {
-    if (!this.getSF()) {
-        this.resultParitySign ^= (this.resultSize >> 1) | (this.resultSize >> 2);
-        this.resultAuxOverflow ^= CPUDef.RESULT.AUXOVF_OF;
-    }
+    if (!this.getSF()) this.resultParitySign ^= 0xc0;
 };
 
 /**
@@ -604,17 +662,6 @@ CPUSim.prototype.setIF = function()
 };
 
 /**
- * setOF()
- *
- * @this {CPUSim}
- */
-CPUSim.prototype.setOF = function()
-{
-    this.resultParitySign |= this.resultSize;
-    this.resultAuxOverflow = (this.resultParitySign & CPUDef.RESULT.AUXOVF_OF) | (this.resultAuxOverflow & ~CPUDef.RESULT.AUXOVF_OF);
-};
-
-/**
  * getPS()
  *
  * @this {CPUSim}
@@ -622,7 +669,7 @@ CPUSim.prototype.setOF = function()
  */
 CPUSim.prototype.getPS = function()
 {
-    return (this.regPS & ~CPUDef.PS.INDIRECT) | (this.getCF() | this.getPF() | this.getAF() | this.getZF() | this.getSF());
+    return (this.regPS & ~CPUDef.PS.INDIRECT) | (this.getSF() | this.getZF() | this.getAF() | this.getPF() | this.getCF());
 };
 
 /**
@@ -630,81 +677,51 @@ CPUSim.prototype.getPS = function()
  *
  * @this {CPUSim}
  * @param {number} regPS
- * @param {number} [cpl]
  */
-CPUSim.prototype.setPS = function(regPS, cpl)
+CPUSim.prototype.setPS = function(regPS)
 {
-    this.resultSize = CPUDef.RESULT.SIZE_BYTE;
-    this.resultValue = this.resultParitySign = this.resultAuxOverflow = 0;
-
-    if (regPS & CPUDef.PS.CF) {
-        this.setCF();
-    }
-    if (!(regPS & CPUDef.PS.PF)) {
-        this.resultParitySign |= 0x1;
-    }
-    if (regPS & CPUDef.PS.AF) {
-        this.resultAuxOverflow |= CPUDef.RESULT.AUXOVF_AF;
-    }
-    if (!(regPS & CPUDef.PS.ZF)) {
-        this.clearZF();
-    }
-    if (regPS & CPUDef.PS.SF) {
-        this.setSF();
-    }
+    this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = 0;
+    if (regPS & CPUDef.PS.CF) this.resultZeroCarry |= 0x100;
+    if (!(regPS & CPUDef.PS.PF)) this.resultParitySign |= 0x01;
+    if (regPS & CPUDef.PS.AF) this.resultAuxOverflow |= 0x10;
+    if (!(regPS & CPUDef.PS.ZF)) this.resultZeroCarry |= 0xff;
+    if (regPS & CPUDef.PS.SF) this.resultParitySign ^= 0xc0;
     this.regPS = (this.regPS & ~CPUDef.PS.DIRECT) | (regPS & CPUDef.PS.DIRECT) | CPUDef.PS.SET;
-    /*
-     * Assert that all requested flag bits now agree with our simulated (PS_INDIRECT) bits
-     */
     Component.assert((regPS & CPUDef.PS.INDIRECT) == (this.getPS() & CPUDef.PS.INDIRECT));
 };
 
 /**
- * setBinding(sHTMLType, sBinding, control, sValue)
+ * incByte(b)
  *
  * @this {CPUSim}
- * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
- * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "AX")
- * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
- * @param {string} [sValue] optional data value
- * @return {boolean} true if binding was successful, false if unrecognized binding request
+ * @param {number} b
+ * @return {number}
  */
-CPUSim.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
+CPUSim.prototype.incByte = function(b)
 {
-    var fBound = false;
-    switch (sBinding) {
-    case "A":
-    case "B":
-    case "C":
-    case "D":
-    case "E":
-    case "H":
-    case "L":
-    case "SP":
-    case "PC":
-    case "F":
-    case "C":
-    case "P":
-    case "A":
-    case "Z":
-    case "S":
-    case "V":
-        this.bindings[sBinding] = control;
-        this.cLiveRegs++;
-        fBound = true;
-        break;
-    default:
-        fBound = this.parent.setBinding.call(this, sHTMLType, sBinding, control);
-        break;
-    }
-    return fBound;
+    this.resultAuxOverflow = b;
+    b = (this.resultParitySign = b + 1) & 0xff;
+    this.resultZeroCarry = (this.resultZeroCarry & ~0xff) | b;
+    return b;
+};
+
+/**
+ * decByte(b)
+ *
+ * @this {CPUSim}
+ * @param {number} b
+ * @return {number}
+ */
+CPUSim.prototype.decByte = function(b)
+{
+    this.resultAuxOverflow = b;
+    b = (this.resultParitySign = b - 1) & 0xff;
+    this.resultZeroCarry = (this.resultZeroCarry & ~0xff) | b;
+    return b;
 };
 
 /**
  * getByte(addr)
- *
- * Use bus.getByte() for physical addresses, and cpu.getByte() for linear addresses; the latter takes care
- * of cycle counts, if any.
  *
  * @this {CPUSim}
  * @param {number} addr is a linear address
@@ -773,9 +790,8 @@ CPUSim.prototype.setWord = function(addr, w)
  */
 CPUSim.prototype.getPCByte = function()
 {
-    var newPC = this.checkPC(1);
     var b = this.getByte(this.regPC);
-    this.regPC = newPC;
+    this.setPC(this.regPC + 1);
     return b;
 };
 
@@ -787,35 +803,9 @@ CPUSim.prototype.getPCByte = function()
  */
 CPUSim.prototype.getPCWord = function()
 {
-    var newPC = this.checkPC(2);
     var w = this.getWord(this.regPC);
-    this.regPC = newPC;
+    this.setPC(this.regPC + 2);
     return w;
-};
-
-/**
- * getPCDisp()
- *
- * @this {CPUSim}
- * @return {number} sign-extended (32-bit) value from the byte at the current PC; PC advanced by 1
- */
-CPUSim.prototype.getPCDisp = function()
-{
-    var newPC = this.checkPC(1);
-    var w = ((this.getByte(this.regPC)) << 24) >> 24;
-    this.regPC = newPC;
-    return w;
-};
-
-/**
- * peekPCByte()
- *
- * @this {CPUSim}
- * @return {number} byte at the current PC
- */
-CPUSim.prototype.peekPCByte = function()
-{
-    return this.getByte(this.regPC);
 };
 
 /**
