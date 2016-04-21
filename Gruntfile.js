@@ -414,7 +414,8 @@ module.exports = function(grunt) {
                 ],
                 options: {
                     process: function(content, srcPath) {
-                        var s = content.replace(/(<xsl:variable name="APPVERSION">)[^<]*(<\/xsl:variable>)/g, "$1" + pkg.version + "$2");
+                        var s = content.replace(/(<xsl:variable name="APPCLASS">)[^<]*(<\/xsl:variable>)/g, "$1pc8080$2");
+                        s = s.replace(/(<xsl:variable name="APPVERSION">)[^<]*(<\/xsl:variable>)/g, "$1" + pkg.version + "$2");
                         s = s.replace(/"[^"]*\/?(common.css|common.xsl|components.css|components.xsl|document.css|document.xsl)"/g, '"/versions/pc8080/' + pkg.version + '/$1"');
                         s = s.replace(/[ \t]*\/\*[^\*][\s\S]*?\*\//g, "").replace(/[ \t]*<!--[^@]*?-->[ \t]*\n?/g, "");
                         return s;
@@ -450,6 +451,24 @@ module.exports = function(grunt) {
                 options: {
                     process: function(content, srcPath) {
                         var s = content.replace(/(<xsl:variable name="APPVERSION">)[^<]*(<\/xsl:variable>)/g, "$1" + pkg.version + "$2");
+                        s = s.replace(/[ \t]*\/\*[^\*][\s\S]*?\*\//g, "").replace(/[ \t]*<!--[^@]*?-->[ \t]*\n?/g, "");
+                        return s;
+                    }
+                }
+            },
+            "pc8080": {
+                files: [
+                    {
+                        cwd: "modules/shared/templates/",
+                        src: ["components.*"],
+                        dest: "versions/pc8080/<%= pkg.version %>/",
+                        expand: true
+                    }
+                ],
+                options: {
+                    process: function(content, srcPath) {
+                        var s = content.replace(/(<xsl:variable name="APPCLASS">)[^<]*(<\/xsl:variable>)/g, "$1pc8080$2");
+                        s = s.replace(/(<xsl:variable name="APPVERSION">)[^<]*(<\/xsl:variable>)/g, "$1" + pkg.version + "$2");
                         s = s.replace(/[ \t]*\/\*[^\*][\s\S]*?\*\//g, "").replace(/[ \t]*<!--[^@]*?-->[ \t]*\n?/g, "");
                         return s;
                     }
