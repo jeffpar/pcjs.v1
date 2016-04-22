@@ -4041,6 +4041,7 @@ if (DEBUGGER) {
             return;
         }
 
+        var cpu = this.cpu;
         if (fInstruction == null) fInstruction = true;
 
         if (asArgs != null && asArgs.length > 1) {
@@ -4058,6 +4059,7 @@ if (DEBUGGER) {
                 this.println("missing value for " + asArgs[1]);
                 return;
             }
+
             var fValid = false;
             var w = this.parseExpression(sValue);
 
@@ -4069,62 +4071,62 @@ if (DEBUGGER) {
                 }
                 switch (sRegMatch) {
                 case "A":
-                    this.cpu.regA = w & 0xff;
+                    cpu.regA = w & 0xff;
                     break;
                 case "B":
-                    this.cpu.regB = w & 0xff;
+                    cpu.regB = w & 0xff;
                     break;
                 case "BC":
-                    this.cpu.regB = ((w << 8) & 0xff);
+                    cpu.regB = ((w >> 8) & 0xff);
                     /* falls through */
                 case "C":
-                    this.cpu.regC = w & 0xff;
+                    cpu.regC = w & 0xff;
                     break;
                 case "D":
-                    this.cpu.regD = w & 0xff;
+                    cpu.regD = w & 0xff;
                     break;
                 case "DE":
-                    this.cpu.regD = ((w << 8) & 0xff);
+                    cpu.regD = ((w >> 8) & 0xff);
                     /* falls through */
                 case "E":
-                    this.cpu.regE = w & 0xff;
+                    cpu.regE = w & 0xff;
                     break;
                 case "H":
-                    this.cpu.regH = w & 0xff;
+                    cpu.regH = w & 0xff;
                     break;
                 case "HL":
-                    this.cpu.regH = ((w << 8) & 0xff);
+                    cpu.regH = ((w >> 8) & 0xff);
                     /* falls through */
                 case "L":
-                    this.cpu.regL = w & 0xff;
+                    cpu.regL = w & 0xff;
                     break;
                 case "SP":
-                    this.cpu.setSP(w);
+                    cpu.setSP(w);
                     break;
                 case "PC":
-                    this.cpu.setPC(w);
-                    this.dbgAddrNextCode = this.newAddr(this.cpu.getPC());
+                    cpu.setPC(w);
+                    this.dbgAddrNextCode = this.newAddr(cpu.getPC());
                     break;
                 case "PS":
-                    this.cpu.setPS(w);
+                    cpu.setPS(w);
                     break;
                 case 'C':
-                    if (w) this.cpu.setCF(); else this.cpu.clearCF();
+                    if (w) cpu.setCF(); else cpu.clearCF();
                     break;
                 case 'P':
-                    if (w) this.cpu.setPF(); else this.cpu.clearPF();
+                    if (w) cpu.setPF(); else cpu.clearPF();
                     break;
                 case 'A':
-                    if (w) this.cpu.setAF(); else this.cpu.clearAF();
+                    if (w) cpu.setAF(); else cpu.clearAF();
                     break;
                 case 'Z':
-                    if (w) this.cpu.setZF(); else this.cpu.clearZF();
+                    if (w) cpu.setZF(); else cpu.clearZF();
                     break;
                 case 'S':
-                    if (w) this.cpu.setSF(); else this.cpu.clearSF();
+                    if (w) cpu.setSF(); else cpu.clearSF();
                     break;
                 case 'I':
-                    if (w) this.cpu.setIF(); else this.cpu.clearIF();
+                    if (w) cpu.setIF(); else cpu.clearIF();
                     break;
                 default:
                     this.println("unknown register: " + sReg);
@@ -4135,14 +4137,14 @@ if (DEBUGGER) {
                 this.println("invalid value: " + sValue);
                 return;
             }
-            this.cpu.updateCPU();
+            cpu.updateCPU();
             this.println("updated registers:");
         }
 
         this.println(this.getRegDump());
 
         if (fInstruction) {
-            this.dbgAddrNextCode = this.newAddr(this.cpu.getPC());
+            this.dbgAddrNextCode = this.newAddr(cpu.getPC());
             this.doUnassemble(this.toHexAddr(this.dbgAddrNextCode));
         }
     };
