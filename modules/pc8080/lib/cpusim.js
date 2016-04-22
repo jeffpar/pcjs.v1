@@ -661,6 +661,36 @@ CPUSim.prototype.setIF = function()
 };
 
 /**
+ * updateAF(fAuxCarry)
+ *
+ * @this {CPUSim}
+ * @param {boolean} fAuxCarry
+ */
+CPUSim.prototype.updateAF = function(fAuxCarry)
+{
+    if (fAuxCarry) {
+        this.setAF();
+    } else {
+        this.clearAF();
+    }
+};
+
+/**
+ * updateCF(fCarry)
+ *
+ * @this {CPUSim}
+ * @param {boolean} fCarry
+ */
+CPUSim.prototype.updateCF = function(fCarry)
+{
+    if (fCarry) {
+        this.resultZeroCarry |= 0x100;
+    } else {
+        this.resultZeroCarry &= ~0x100;
+    }
+};
+
+/**
  * getPS()
  *
  * @this {CPUSim}

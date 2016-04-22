@@ -561,10 +561,14 @@ X86.opDAA = function()
     if ((AL & 0xf) > 9 || AF) {
         AL += 0x6;
         AF = X86.PS.AF;
+    } else {
+        AF = 0;
     }
     if (AL > 0x9f || CF) {
         AL += 0x60;
         CF = X86.PS.CF;
+    } else {
+        CF = 0;
     }
     var b = (AL & 0xff);
     this.regEAX = (this.regEAX & ~0xff) | b;
@@ -665,10 +669,14 @@ X86.opDAS = function()
     if ((AL & 0xf) > 9 || AF) {
         AL -= 0x6;
         AF = X86.PS.AF;
+    } else {
+        AF = 0;
     }
     if (AL > 0x9f || CF) {
         AL -= 0x60;
         CF = X86.PS.CF;
+    } else {
+        CF = 0;
     }
     var b = (AL & 0xff);
     this.regEAX = (this.regEAX & ~0xff) | b;

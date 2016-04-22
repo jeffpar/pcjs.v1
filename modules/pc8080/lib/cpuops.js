@@ -369,6 +369,179 @@ CPUDef.opRAR = function()
 };
 
 /**
+ * op=0x21 (LXI H,d16)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opLXIH = function()
+{
+    this.setHL(this.getPCWord());
+    this.nStepCycles -= 10;
+};
+
+/**
+ * op=0x22 (SHLD a16)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opSHLD = function()
+{
+    this.setWord(this.getPCWord(), this.getHL());
+    this.nStepCycles -= 16;
+};
+
+/**
+ * op=0x23 (INX H)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opINXH = function()
+{
+    this.setHL(this.getHL() + 1);
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0x24 (INR H)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opINRH = function()
+{
+    this.regH = this.incByte(this.regH);
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0x25 (DCR H)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opDCRH = function()
+{
+    this.regH = this.decByte(this.regH);
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0x26 (MVI H,d8)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opMVIH = function()
+{
+    this.regH = this.getPCByte();
+    this.nStepCycles -= 7;
+};
+
+/**
+ * op=0x27 (DAA)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opDAA = function()
+{
+    var acc = this.regA;
+    var fCarry = !!this.getCF();
+    var fAuxCarry = !!this.getAF();
+    if ((acc & 0xf) > 9 || fAuxCarry) {
+        acc += 0x6;
+        fAuxCarry = true;
+    } else {
+        fAuxCarry = false;
+    }
+    if (acc >= 0xa0 || fCarry) {
+        acc += 0x60;
+        fCarry = true;
+    } else {
+        fCarry = false;
+    }
+    this.resultZeroCarry = this.resultParitySign = this.regA = (acc & 0xff);
+    this.updateCF(fCarry);
+    this.updateAF(fAuxCarry);
+    this.nStepCycles -= 4;
+};
+
+/**
+ * op=0x29 (DAD H)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opDADH = function()
+{
+    var w;
+    this.setHL(w = this.getHL() + this.getHL());
+    this.resultZeroCarry = (this.resultZeroCarry & 0xff) | ((w >> 8) & 0x100);
+    this.nStepCycles -= 10;
+};
+
+/**
+ * op=0x2A (LHLD a16)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opLHLD = function()
+{
+    this.setHL(this.getWord(this.getPCWord()));
+    this.nStepCycles -= 16;
+};
+
+/**
+ * op=0x2B (DCX H)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opDCXH = function()
+{
+    this.setHL(this.getHL() - 1);
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0x2C (INR L)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opINRL = function()
+{
+    this.regL = this.incByte(this.regL);
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0x2D (DCR L)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opDCRL = function()
+{
+    this.regL = this.decByte(this.regL);
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0x2E (MVI L,d8)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opMVIL = function()
+{
+    this.regL = this.getPCByte();
+    this.nStepCycles -= 7;
+};
+
+/**
+ * op=0x2F (CMA)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opCMA = function()
+{
+    this.regA = ~this.regA & 0xff;
+    this.nStepCycles -= 4;
+};
+
+/**
  * opTBD()
  *
  * @this {CPUSim}
@@ -396,10 +569,10 @@ CPUDef.aOps = [
     /* 0x14-0x17 */ CPUDef.opINRD,  CPUDef.opDCRD,  CPUDef.opMVID,  CPUDef.opRAL,
     /* 0x18-0x1B */ CPUDef.opNOP,   CPUDef.opDADD,  CPUDef.opLDAXD, CPUDef.opDCXD,
     /* 0x1C-0x1F */ CPUDef.opINRE,  CPUDef.opDCRE,  CPUDef.opMVIE,  CPUDef.opRAR,
-    /* 0x20-0x23 */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,
-    /* 0x24-0x27 */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,
-    /* 0x28-0x2B */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,
-    /* 0x2C-0x2F */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,
+    /* 0x20-0x23 */ CPUDef.opNOP,   CPUDef.opLXIH,  CPUDef.opSHLD,  CPUDef.opINXH,
+    /* 0x24-0x27 */ CPUDef.opINRH,  CPUDef.opDCRH,  CPUDef.opMVIH,  CPUDef.opDAA,
+    /* 0x28-0x2B */ CPUDef.opNOP,   CPUDef.opDADH,  CPUDef.opLHLD,  CPUDef.opDCXH,
+    /* 0x2C-0x2F */ CPUDef.opINRL,  CPUDef.opDCRL,  CPUDef.opMVIL,  CPUDef.opCMA,
     /* 0x30-0x33 */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,
     /* 0x34-0x37 */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,
     /* 0x38-0x3B */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,
