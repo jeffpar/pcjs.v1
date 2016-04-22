@@ -345,12 +345,11 @@ CPUSim.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
     case "SP":
     case "PC":
     case "F":
-    case "CF":
-    case "PF":
-    case "AF":
-    case "ZF":
     case "SF":
-    case "VF":
+    case "ZF":
+    case "AF":
+    case "PF":
+    case "CF":
         this.bindings[sBinding] = control;
         this.cLiveRegs++;
         fBound = true;
@@ -915,11 +914,11 @@ CPUSim.prototype.updateStatus = function(fForce)
             this.updateReg("PC", this.getPC(), 4);
             var regPS = this.getPS();
             this.updateReg("F", regPS, 2);
-            this.updateReg("S", (regPS & CPUDef.PS.SF), 1);
-            this.updateReg("Z", (regPS & CPUDef.PS.ZF), 1);
-            this.updateReg("A", (regPS & CPUDef.PS.AF), 1);
-            this.updateReg("P", (regPS & CPUDef.PS.PF), 1);
-            this.updateReg("C", (regPS & CPUDef.PS.CF), 1);
+            this.updateReg("SF", (regPS & CPUDef.PS.SF), 1);
+            this.updateReg("ZF", (regPS & CPUDef.PS.ZF), 1);
+            this.updateReg("AF", (regPS & CPUDef.PS.AF), 1);
+            this.updateReg("PF", (regPS & CPUDef.PS.PF), 1);
+            this.updateReg("CF", (regPS & CPUDef.PS.CF), 1);
         }
     }
     var controlSpeed = this.bindings["speed"];

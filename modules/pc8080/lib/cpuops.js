@@ -121,9 +121,9 @@ CPUDef.opMVIB = function()
  */
 CPUDef.opRLC = function()
 {
-    var b = this.regA << 1;
-    this.regA = (b & 0xff) | (b >> 8);
-    this.resultZeroCarry = (this.resultZeroCarry & 0xff) | (b & 0x100);
+    var carry = this.regA << 1;
+    this.regA = (carry & 0xff) | (carry >> 8);
+    this.resultZeroCarry = (this.resultZeroCarry & 0xff) | (carry & 0x100);
     this.nStepCycles -= 4;
 };
 
@@ -152,6 +152,223 @@ CPUDef.opLDAXB = function()
 };
 
 /**
+ * op=0x0B (DCX B)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opDCXB = function()
+{
+    this.setBC(this.getBC() - 1);
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0x0C (INR C)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opINRC = function()
+{
+    this.regC = this.incByte(this.regC);
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0x0D (DCR C)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opDCRC = function()
+{
+    this.regC = this.decByte(this.regC);
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0x0E (MVI C,d8)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opMVIC = function()
+{
+    this.regC = this.getPCByte();
+    this.nStepCycles -= 7;
+};
+
+/**
+ * op=0x0F (RRC)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opRRC = function()
+{
+    var carry = (this.regA << 8) & 0x100;
+    this.regA = (carry | this.regA) >> 1;
+    this.resultZeroCarry = (this.resultZeroCarry & 0xff) | carry;
+    this.nStepCycles -= 4;
+};
+
+/**
+ * op=0x11 (LXI D,d16)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opLXID = function()
+{
+    this.setDE(this.getPCWord());
+    this.nStepCycles -= 10;
+};
+
+/**
+ * op=0x12 (STAX D)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opSTAXD = function()
+{
+    this.setByte(this.getDE(), this.regA);
+    this.nStepCycles -= 7;
+};
+
+/**
+ * op=0x13 (INX D)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opINXD = function()
+{
+    this.setDE(this.getDE() + 1);
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0x14 (INR D)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opINRD = function()
+{
+    this.regD = this.incByte(this.regD);
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0x15 (DCR D)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opDCRD = function()
+{
+    this.regD = this.decByte(this.regD);
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0x16 (MVI D,d8)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opMVID = function()
+{
+    this.regD = this.getPCByte();
+    this.nStepCycles -= 7;
+};
+
+/**
+ * op=0x17 (RAL)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opRAL = function()
+{
+    var carry = this.regA << 1;
+    this.regA = (carry & 0xff) | (this.resultZeroCarry >> 8);
+    this.resultZeroCarry = (this.resultZeroCarry & 0xff) | (carry & 0x100);
+    this.nStepCycles -= 4;
+};
+
+/**
+ * op=0x19 (DAD D)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opDADD = function()
+{
+    var w;
+    this.setHL(w = this.getHL() + this.getDE());
+    this.resultZeroCarry = (this.resultZeroCarry & 0xff) | ((w >> 8) & 0x100);
+    this.nStepCycles -= 10;
+};
+
+/**
+ * op=0x1A (LDAX D)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opLDAXD = function()
+{
+    this.regA = this.getByte(this.getDE());
+    this.nStepCycles -= 7;
+};
+
+/**
+ * op=0x1B (DCX D)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opDCXD = function()
+{
+    this.setDE(this.getDE() - 1);
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0x1C (INR E)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opINRE = function()
+{
+    this.regE = this.incByte(this.regE);
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0x1D (DCR E)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opDCRE = function()
+{
+    this.regE = this.decByte(this.regE);
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0x1E (MVI E,d8)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opMVIE = function()
+{
+    this.regE = this.getPCByte();
+    this.nStepCycles -= 7;
+};
+
+/**
+ * op=0x1F (RAR)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opRAR = function()
+{
+    var carry = (this.regA << 8) & 0x100;
+    this.regA = ((this.resultZeroCarry & 0x100) | this.regA) >> 1;
+    this.resultZeroCarry = (this.resultZeroCarry & 0xff) | carry;
+    this.nStepCycles -= 4;
+};
+
+/**
  * opTBD()
  *
  * @this {CPUSim}
@@ -173,12 +390,12 @@ CPUDef.opTBD = function()
 CPUDef.aOps = [
     /* 0x00-0x03 */ CPUDef.opNOP,   CPUDef.opLXIB,  CPUDef.opSTAXB, CPUDef.opINXB,
     /* 0x04-0x07 */ CPUDef.opINRB,  CPUDef.opDCRB,  CPUDef.opMVIB,  CPUDef.opRLC,
-    /* 0x08-0x0B */ CPUDef.opNOP,   CPUDef.opDADB,  CPUDef.opLDAXB, CPUDef.opTBD,
-    /* 0x0C-0x0F */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,
-    /* 0x10-0x13 */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,
-    /* 0x14-0x17 */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,
-    /* 0x18-0x1B */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,
-    /* 0x1C-0x1F */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,
+    /* 0x08-0x0B */ CPUDef.opNOP,   CPUDef.opDADB,  CPUDef.opLDAXB, CPUDef.opDCXB,
+    /* 0x0C-0x0F */ CPUDef.opINRC,  CPUDef.opDCRC,  CPUDef.opMVIC,  CPUDef.opRRC,
+    /* 0x10-0x13 */ CPUDef.opNOP,   CPUDef.opLXID,  CPUDef.opSTAXD, CPUDef.opINXD,
+    /* 0x14-0x17 */ CPUDef.opINRD,  CPUDef.opDCRD,  CPUDef.opMVID,  CPUDef.opRAL,
+    /* 0x18-0x1B */ CPUDef.opNOP,   CPUDef.opDADD,  CPUDef.opLDAXD, CPUDef.opDCXD,
+    /* 0x1C-0x1F */ CPUDef.opINRE,  CPUDef.opDCRE,  CPUDef.opMVIE,  CPUDef.opRAR,
     /* 0x20-0x23 */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,
     /* 0x24-0x27 */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,
     /* 0x28-0x2B */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,
