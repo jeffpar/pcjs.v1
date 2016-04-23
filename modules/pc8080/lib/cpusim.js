@@ -750,6 +750,34 @@ CPUSim.prototype.decByte = function(b)
 };
 
 /**
+ * addByte(dst, src)
+ *
+ * @this {CPUSim}
+ * @param {number} dst
+ * @param {number} src
+ * @return {number} dst + src
+ */
+CPUSim.prototype.addByte = function(dst, src)
+{
+    this.resultAuxOverflow = dst ^ src;
+    return (this.resultZeroCarry = this.resultParitySign = dst + src) & 0xff;
+};
+
+/**
+ * addByteCarry(dst, src)
+ *
+ * @this {CPUSim}
+ * @param {number} dst
+ * @param {number} src
+ * @return {number} dst + src + carry
+ */
+CPUSim.prototype.addByteCarry = function(dst, src)
+{
+    this.resultAuxOverflow = dst ^ src;
+    return (this.resultZeroCarry = this.resultParitySign = dst + src + ((this.resultZeroCarry & 0x100)? 1 : 0)) & 0xff;
+};
+
+/**
  * getByte(addr)
  *
  * @this {CPUSim}

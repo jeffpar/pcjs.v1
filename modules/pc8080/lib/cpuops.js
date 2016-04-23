@@ -700,6 +700,901 @@ CPUDef.opCMC = function()
 };
 
 /**
+ * op=0x40 (MOV B,B)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opMOVBB = function()
+{
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0x41 (MOV B,C)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opMOVBC = function()
+{
+    this.regB = this.regC;
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0x42 (MOV B,D)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opMOVBD = function()
+{
+    this.regB = this.regD;
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0x43 (MOV B,E)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opMOVBE = function()
+{
+    this.regB = this.regE;
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0x44 (MOV B,H)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opMOVBH = function()
+{
+    this.regB = this.regH;
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0x45 (MOV B,L)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opMOVBL = function()
+{
+    this.regB = this.regL;
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0x46 (MOV B,M)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opMOVBM = function()
+{
+    this.regB = this.getByte(this.getHL());
+    this.nStepCycles -= 7;
+};
+
+/**
+ * op=0x47 (MOV B,A)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opMOVBA = function()
+{
+    this.regB = this.regA;
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0x48 (MOV C,B)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opMOVCB = function()
+{
+    this.regC = this.regB;
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0x49 (MOV C,C)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opMOVCC = function()
+{
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0x4A (MOV C,D)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opMOVCD = function()
+{
+    this.regC = this.regD;
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0x4B (MOV C,E)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opMOVCE = function()
+{
+    this.regC = this.regE;
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0x4C (MOV C,H)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opMOVCH = function()
+{
+    this.regC = this.regH;
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0x4D (MOV C,L)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opMOVCL = function()
+{
+    this.regC = this.regL;
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0x4E (MOV C,M)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opMOVCM = function()
+{
+    this.regC = this.getByte(this.getHL());
+    this.nStepCycles -= 7;
+};
+
+/**
+ * op=0x4F (MOV C,A)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opMOVCA = function()
+{
+    this.regC = this.regA;
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0x50 (MOV D,B)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opMOVDB = function()
+{
+    this.regD = this.regB;
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0x51 (MOV D,C)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opMOVDC = function()
+{
+    this.regD = this.regC;
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0x52 (MOV D,D)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opMOVDD = function()
+{
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0x53 (MOV D,E)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opMOVDE = function()
+{
+    this.regD = this.regE;
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0x54 (MOV D,H)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opMOVDH = function()
+{
+    this.regD = this.regH;
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0x55 (MOV D,L)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opMOVDL = function()
+{
+    this.regD = this.regL;
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0x56 (MOV D,M)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opMOVDM = function()
+{
+    this.regD = this.getByte(this.getHL());
+    this.nStepCycles -= 7;
+};
+
+/**
+ * op=0x57 (MOV D,A)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opMOVDA = function()
+{
+    this.regD = this.regA;
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0x58 (MOV E,B)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opMOVEB = function()
+{
+    this.regE = this.regB;
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0x59 (MOV E,C)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opMOVEC = function()
+{
+    this.regE = this.regC;
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0x5A (MOV E,D)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opMOVED = function()
+{
+    this.regE = this.regD;
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0x5B (MOV E,E)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opMOVEE = function()
+{
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0x5C (MOV E,H)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opMOVEH = function()
+{
+    this.regE = this.regH;
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0x5D (MOV E,L)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opMOVEL = function()
+{
+    this.regE = this.regL;
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0x5E (MOV E,M)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opMOVEM = function()
+{
+    this.regE = this.getByte(this.getHL());
+    this.nStepCycles -= 7;
+};
+
+/**
+ * op=0x5F (MOV E,A)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opMOVEA = function()
+{
+    this.regE = this.regA;
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0x60 (MOV H,B)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opMOVHB = function()
+{
+    this.regH = this.regB;
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0x61 (MOV H,C)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opMOVHC = function()
+{
+    this.regH = this.regC;
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0x62 (MOV H,D)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opMOVHD = function()
+{
+    this.regH = this.regD;
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0x63 (MOV H,E)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opMOVHE = function()
+{
+    this.regH = this.regE;
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0x64 (MOV H,H)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opMOVHH = function()
+{
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0x65 (MOV H,L)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opMOVHL = function()
+{
+    this.regH = this.regL;
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0x66 (MOV H,M)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opMOVHM = function()
+{
+    this.regH = this.getByte(this.getHL());
+    this.nStepCycles -= 7;
+};
+
+/**
+ * op=0x67 (MOV H,A)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opMOVHA = function()
+{
+    this.regH = this.regA;
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0x68 (MOV L,B)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opMOVLB = function()
+{
+    this.regL = this.regB;
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0x69 (MOV L,C)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opMOVLC = function()
+{
+    this.regL = this.regC;
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0x6A (MOV L,D)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opMOVLD = function()
+{
+    this.regL = this.regD;
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0x6B (MOV L,E)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opMOVLE = function()
+{
+    this.regL = this.regE;
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0x6C (MOV L,H)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opMOVLH = function()
+{
+    this.regL = this.regH;
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0x6D (MOV L,L)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opMOVLL = function()
+{
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0x6E (MOV L,M)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opMOVLM = function()
+{
+    this.regL = this.getByte(this.getHL());
+    this.nStepCycles -= 7;
+};
+
+/**
+ * op=0x6F (MOV L,A)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opMOVLA = function()
+{
+    this.regL = this.regA;
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0x70 (MOV M,B)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opMOVMB = function()
+{
+    this.setByte(this.getHL(), this.regB);
+    this.nStepCycles -= 7;
+};
+
+/**
+ * op=0x71 (MOV M,C)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opMOVMC = function()
+{
+    this.setByte(this.getHL(), this.regC);
+    this.nStepCycles -= 7;
+};
+
+/**
+ * op=0x72 (MOV M,D)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opMOVMD = function()
+{
+    this.setByte(this.getHL(), this.regD);
+    this.nStepCycles -= 7;
+};
+
+/**
+ * op=0x73 (MOV M,E)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opMOVME = function()
+{
+    this.setByte(this.getHL(), this.regE);
+    this.nStepCycles -= 7;
+};
+
+/**
+ * op=0x74 (MOV M,H)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opMOVMH = function()
+{
+    this.setByte(this.getHL(), this.regH);
+    this.nStepCycles -= 7;
+};
+
+/**
+ * op=0x75 (MOV M,L)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opMOVML = function()
+{
+    this.setByte(this.getHL(), this.regL);
+    this.nStepCycles -= 7;
+};
+
+/**
+ * op=0x76 (HLT)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opHLT = function()
+{
+    /*
+     * The CPU is never REALLY halted by a HLT instruction; instead, by setting X86.INTFLAG.HALT,
+     * we are signalling to stepCPU() that it's free to end the current burst AND that it should not
+     * execute any more instructions until checkINTR() indicates a hardware interrupt is requested.
+     */
+    this.intFlags |= CPUDef.INTFLAG.HALT;
+    this.nStepCycles -= 7;
+    /*
+     * If a Debugger is present and the HALT message category is enabled, then we REALLY halt the CPU,
+     * on the theory that whoever's using the Debugger would like to see HLTs.
+     */
+    if (DEBUGGER && this.dbg && this.messageEnabled(Messages.HALT)) {
+        this.setPC(this.getPC() - 1);   // this is purely for the Debugger's benefit, to show the HLT
+        this.dbg.stopCPU();
+        return;
+    }
+    /*
+     * We also REALLY halt the machine if interrupts have been disabled, since that means it's dead
+     * in the water (we have no NMI generation mechanism at the moment).
+     */
+    if (!this.getIF()) {
+        if (DEBUGGER && this.dbg) this.setPC(this.getPC() - 1);
+        this.stopCPU();
+    }
+};
+
+/**
+ * op=0x77 (MOV M,A)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opMOVMA = function()
+{
+    this.setByte(this.getHL(), this.regA);
+    this.nStepCycles -= 7;
+};
+
+/**
+ * op=0x78 (MOV A,B)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opMOVAB = function()
+{
+    this.regA = this.regB;
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0x79 (MOV A,C)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opMOVAC = function()
+{
+    this.regA = this.regC;
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0x7A (MOV A,D)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opMOVAD = function()
+{
+    this.regA = this.regD;
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0x7B (MOV A,E)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opMOVAE = function()
+{
+    this.regA = this.regE;
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0x7C (MOV A,H)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opMOVAH = function()
+{
+    this.regA = this.regH;
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0x7D (MOV A,L)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opMOVAL = function()
+{
+    this.regA = this.regL;
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0x7E (MOV A,M)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opMOVAM = function()
+{
+    this.regA = this.getByte(this.getHL());
+    this.nStepCycles -= 7;
+};
+
+/**
+ * op=0x7F (MOV A,A)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opMOVAA = function()
+{
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0x80 (ADD B)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opADDB = function()
+{
+    this.regA = this.addByte(this.regA, this.regB);
+    this.nStepCycles -= 4;
+};
+
+/**
+ * op=0x81 (ADD C)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opADDC = function()
+{
+    this.regA = this.addByte(this.regA, this.regC);
+    this.nStepCycles -= 4;
+};
+
+/**
+ * op=0x82 (ADD D)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opADDD = function()
+{
+    this.regA = this.addByte(this.regA, this.regD);
+    this.nStepCycles -= 4;
+};
+
+/**
+ * op=0x83 (ADD E)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opADDE = function()
+{
+    this.regA = this.addByte(this.regA, this.regE);
+    this.nStepCycles -= 4;
+};
+
+/**
+ * op=0x84 (ADD H)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opADDH = function()
+{
+    this.regA = this.addByte(this.regA, this.regH);
+    this.nStepCycles -= 4;
+};
+
+/**
+ * op=0x85 (ADD L)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opADDL = function()
+{
+    this.regA = this.addByte(this.regA, this.regL);
+    this.nStepCycles -= 4;
+};
+
+/**
+ * op=0x86 (ADD M)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opADDM = function()
+{
+    this.regA = this.addByte(this.regA, this.getByte(this.getHL()));
+    this.nStepCycles -= 7;
+};
+
+/**
+ * op=0x87 (ADD A)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opADDA = function()
+{
+    this.regA = this.addByte(this.regA, this.regA);
+    this.nStepCycles -= 4;
+};
+
+/**
+ * op=0x88 (ADC B)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opADCB = function()
+{
+    this.regA = this.addByteCarry(this.regA, this.regB);
+    this.nStepCycles -= 4;
+};
+
+/**
+ * op=0x89 (ADC C)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opADCC = function()
+{
+    this.regA = this.addByteCarry(this.regA, this.regC);
+    this.nStepCycles -= 4;
+};
+
+/**
+ * op=0x8A (ADC D)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opADCD = function()
+{
+    this.regA = this.addByteCarry(this.regA, this.regD);
+    this.nStepCycles -= 4;
+};
+
+/**
+ * op=0x8B (ADC E)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opADCE = function()
+{
+    this.regA = this.addByteCarry(this.regA, this.regE);
+    this.nStepCycles -= 4;
+};
+
+/**
+ * op=0x8C (ADC H)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opADCH = function()
+{
+    this.regA = this.addByteCarry(this.regA, this.regH);
+    this.nStepCycles -= 4;
+};
+
+/**
+ * op=0x8D (ADC L)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opADCL = function()
+{
+    this.regA = this.addByteCarry(this.regA, this.regL);
+    this.nStepCycles -= 4;
+};
+
+/**
+ * op=0x8E (ADC M)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opADCM = function()
+{
+    this.regA = this.addByteCarry(this.regA, this.getByte(this.getHL()));
+    this.nStepCycles -= 7;
+};
+
+/**
+ * op=0x8F (ADC A)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opADCA = function()
+{
+    this.regA = this.addByteCarry(this.regA, this.regA);
+    this.nStepCycles -= 4;
+};
+
+/**
  * opTBD()
  *
  * @this {CPUSim}
@@ -735,26 +1630,26 @@ CPUDef.aOps = [
     /* 0x34-0x37 */ CPUDef.opINRM,  CPUDef.opDCRM,  CPUDef.opMVIM,  CPUDef.opSTC,
     /* 0x38-0x3B */ CPUDef.opNOP,   CPUDef.opDADSP, CPUDef.opLDA,   CPUDef.opDCXSP,
     /* 0x3C-0x3F */ CPUDef.opINRA,  CPUDef.opDCRA,  CPUDef.opMVIA,  CPUDef.opCMC,
-    /* 0x40-0x43 */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,
-    /* 0x44-0x47 */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,
-    /* 0x48-0x4B */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,
-    /* 0x4C-0x4F */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,
-    /* 0x50-0x53 */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,
-    /* 0x54-0x57 */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,
-    /* 0x58-0x5B */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,
-    /* 0x5C-0x5F */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,
-    /* 0x60-0x63 */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,
-    /* 0x64-0x67 */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,
-    /* 0x68-0x6B */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,
-    /* 0x6C-0x6F */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,
-    /* 0x70-0x73 */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,
-    /* 0x74-0x77 */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,
-    /* 0x78-0x7B */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,
-    /* 0x7C-0x7F */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,
-    /* 0x80-0x83 */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,
-    /* 0x84-0x87 */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,
-    /* 0x88-0x8B */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,
-    /* 0x8C-0x8F */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,
+    /* 0x40-0x43 */ CPUDef.opMOVBB, CPUDef.opMOVBC, CPUDef.opMOVBD, CPUDef.opMOVBE,
+    /* 0x44-0x47 */ CPUDef.opMOVBH, CPUDef.opMOVBL, CPUDef.opMOVBM, CPUDef.opMOVBA,
+    /* 0x48-0x4B */ CPUDef.opMOVCB, CPUDef.opMOVCC, CPUDef.opMOVCD, CPUDef.opMOVCE,
+    /* 0x4C-0x4F */ CPUDef.opMOVCH, CPUDef.opMOVCL, CPUDef.opMOVCM, CPUDef.opMOVCA,
+    /* 0x50-0x53 */ CPUDef.opMOVDB, CPUDef.opMOVDC, CPUDef.opMOVDD, CPUDef.opMOVDE,
+    /* 0x54-0x57 */ CPUDef.opMOVDH, CPUDef.opMOVDL, CPUDef.opMOVDM, CPUDef.opMOVDA,
+    /* 0x58-0x5B */ CPUDef.opMOVEB, CPUDef.opMOVEC, CPUDef.opMOVED, CPUDef.opMOVEE,
+    /* 0x5C-0x5F */ CPUDef.opMOVEH, CPUDef.opMOVEL, CPUDef.opMOVEM, CPUDef.opMOVEA,
+    /* 0x60-0x63 */ CPUDef.opMOVHB, CPUDef.opMOVHC, CPUDef.opMOVHD, CPUDef.opMOVHE,
+    /* 0x64-0x67 */ CPUDef.opMOVHH, CPUDef.opMOVHL, CPUDef.opMOVHM, CPUDef.opMOVHA,
+    /* 0x68-0x6B */ CPUDef.opMOVLB, CPUDef.opMOVLC, CPUDef.opMOVLD, CPUDef.opMOVLE,
+    /* 0x6C-0x6F */ CPUDef.opMOVLH, CPUDef.opMOVLL, CPUDef.opMOVLM, CPUDef.opMOVLA,
+    /* 0x70-0x73 */ CPUDef.opMOVMB, CPUDef.opMOVMC, CPUDef.opMOVMD, CPUDef.opMOVME,
+    /* 0x74-0x77 */ CPUDef.opMOVMH, CPUDef.opMOVML, CPUDef.opHLT,   CPUDef.opMOVMA,
+    /* 0x78-0x7B */ CPUDef.opMOVAB, CPUDef.opMOVAC, CPUDef.opMOVAD, CPUDef.opMOVAE,
+    /* 0x7C-0x7F */ CPUDef.opMOVAH, CPUDef.opMOVAL, CPUDef.opMOVAM, CPUDef.opMOVAA,
+    /* 0x80-0x83 */ CPUDef.opADDB,  CPUDef.opADDC,  CPUDef.opADDD,  CPUDef.opADDE,
+    /* 0x84-0x87 */ CPUDef.opADDH,  CPUDef.opADDL,  CPUDef.opADDM,  CPUDef.opADDA,
+    /* 0x88-0x8B */ CPUDef.opADCB,  CPUDef.opADCC,  CPUDef.opADCD,  CPUDef.opADCE,
+    /* 0x8C-0x8F */ CPUDef.opADCH,  CPUDef.opADCL,  CPUDef.opADCM,  CPUDef.opADCA,
     /* 0x90-0x93 */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,
     /* 0x94-0x97 */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,
     /* 0x98-0x9B */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,
