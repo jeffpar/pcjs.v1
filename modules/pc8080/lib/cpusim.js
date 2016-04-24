@@ -778,6 +778,47 @@ CPUSim.prototype.addByteCarry = function(dst, src)
 };
 
 /**
+ * subByte(dst, src)
+ *
+ * @this {CPUSim}
+ * @param {number} dst
+ * @param {number} src
+ * @return {number} dst - src
+ */
+CPUSim.prototype.subByte = function(dst, src)
+{
+    this.resultAuxOverflow = dst ^ src;
+    return (this.resultZeroCarry = this.resultParitySign = dst - src) & 0xff;
+};
+
+/**
+ * subByteBorrow(dst, src)
+ *
+ * @this {CPUSim}
+ * @param {number} dst
+ * @param {number} src
+ * @return {number} dst - src - carry
+ */
+CPUSim.prototype.subByteBorrow = function(dst, src)
+{
+    this.resultAuxOverflow = dst ^ src;
+    return (this.resultZeroCarry = this.resultParitySign = dst - src - ((this.resultZeroCarry & 0x100)? 1 : 0)) & 0xff;
+};
+
+/**
+ * andByte(dst, src)
+ *
+ * @this {CPUSim}
+ * @param {number} dst
+ * @param {number} src
+ * @return {number} dst & src
+ */
+CPUSim.prototype.andByte = function(dst, src)
+{
+    return this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = dst & src;
+};
+
+/**
  * getByte(addr)
  *
  * @this {CPUSim}

@@ -1595,6 +1595,193 @@ CPUDef.opADCA = function()
 };
 
 /**
+ * op=0x90 (SUB B)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opSUBB = function()
+{
+    this.regA = this.subByte(this.regA, this.regB);
+    this.nStepCycles -= 4;
+};
+
+/**
+ * op=0x91 (SUB C)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opSUBC = function()
+{
+    this.regA = this.subByte(this.regA, this.regC);
+    this.nStepCycles -= 4;
+};
+
+/**
+ * op=0x92 (SUB D)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opSUBD = function()
+{
+    this.regA = this.subByte(this.regA, this.regD);
+    this.nStepCycles -= 4;
+};
+
+/**
+ * op=0x93 (SUB E)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opSUBE = function()
+{
+    this.regA = this.subByte(this.regA, this.regE);
+    this.nStepCycles -= 4;
+};
+
+/**
+ * op=0x94 (SUB H)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opSUBH = function()
+{
+    this.regA = this.subByte(this.regA, this.regH);
+    this.nStepCycles -= 4;
+};
+
+/**
+ * op=0x95 (SUB L)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opSUBL = function()
+{
+    this.regA = this.subByte(this.regA, this.regL);
+    this.nStepCycles -= 4;
+};
+
+/**
+ * op=0x96 (SUB M)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opSUBM = function()
+{
+    this.regA = this.subByte(this.regA, this.getByte(this.getHL()));
+    this.nStepCycles -= 7;
+};
+
+/**
+ * op=0x97 (SUB A)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opSUBA = function()
+{
+    this.regA = this.subByte(this.regA, this.regA);
+    this.nStepCycles -= 4;
+};
+
+/**
+ * op=0x98 (SBB B)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opSBBB = function()
+{
+    this.regA = this.subByteBorrow(this.regA, this.regB);
+    this.nStepCycles -= 4;
+};
+
+/**
+ * op=0x99 (SBB C)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opSBBC = function()
+{
+    this.regA = this.subByteBorrow(this.regA, this.regC);
+    this.nStepCycles -= 4;
+};
+
+/**
+ * op=0x9A (SBB D)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opSBBD = function()
+{
+    this.regA = this.subByteBorrow(this.regA, this.regD);
+    this.nStepCycles -= 4;
+};
+
+/**
+ * op=0x9B (SBB E)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opSBBE = function()
+{
+    this.regA = this.subByteBorrow(this.regA, this.regE);
+    this.nStepCycles -= 4;
+};
+
+/**
+ * op=0x9C (SBB H)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opSBBH = function()
+{
+    this.regA = this.subByteBorrow(this.regA, this.regH);
+    this.nStepCycles -= 4;
+};
+
+/**
+ * op=0x9D (SBB L)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opSBBL = function()
+{
+    this.regA = this.subByteBorrow(this.regA, this.regL);
+    this.nStepCycles -= 4;
+};
+
+/**
+ * op=0x9E (SBB M)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opSBBM = function()
+{
+    this.regA = this.subByteBorrow(this.regA, this.getByte(this.getHL()));
+    this.nStepCycles -= 7;
+};
+
+/**
+ * op=0x9F (SBB A)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opSBBA = function()
+{
+    this.regA = this.subByteBorrow(this.regA, this.regA);
+    this.nStepCycles -= 4;
+};
+
+/**
+ * op=0xA0 (ANA B)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opANAB = function()
+{
+    this.regA = this.andByte(this.regA, this.regB);
+    this.nStepCycles -= 4;
+};
+
+/**
  * opTBD()
  *
  * @this {CPUSim}
@@ -1650,10 +1837,10 @@ CPUDef.aOps = [
     /* 0x84-0x87 */ CPUDef.opADDH,  CPUDef.opADDL,  CPUDef.opADDM,  CPUDef.opADDA,
     /* 0x88-0x8B */ CPUDef.opADCB,  CPUDef.opADCC,  CPUDef.opADCD,  CPUDef.opADCE,
     /* 0x8C-0x8F */ CPUDef.opADCH,  CPUDef.opADCL,  CPUDef.opADCM,  CPUDef.opADCA,
-    /* 0x90-0x93 */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,
-    /* 0x94-0x97 */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,
-    /* 0x98-0x9B */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,
-    /* 0x9C-0x9F */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,
+    /* 0x90-0x93 */ CPUDef.opSUBB,  CPUDef.opSUBC,  CPUDef.opSUBD,  CPUDef.opSUBE,
+    /* 0x94-0x97 */ CPUDef.opSUBH,  CPUDef.opSUBL,  CPUDef.opSUBM,  CPUDef.opSUBA,
+    /* 0x98-0x9B */ CPUDef.opSBBB,  CPUDef.opSBBC,  CPUDef.opSBBD,  CPUDef.opSBBE,
+    /* 0x9C-0x9F */ CPUDef.opSBBH,  CPUDef.opSBBL,  CPUDef.opSBBM,  CPUDef.opSBBA,
     /* 0xA0-0xA3 */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,
     /* 0xA4-0xA7 */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,
     /* 0xA8-0xAB */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,
