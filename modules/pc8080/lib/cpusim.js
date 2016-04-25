@@ -720,18 +720,53 @@ CPUSim.prototype.setPS = function(regPS)
 };
 
 /**
- * incByte(b)
+ * addByte(src)
  *
  * @this {CPUSim}
- * @param {number} b
- * @return {number}
+ * @param {number} src
+ * @return {number} regA + src
  */
-CPUSim.prototype.incByte = function(b)
+CPUSim.prototype.addByte = function(src)
 {
-    this.resultAuxOverflow = b;
-    b = (this.resultParitySign = b + 1) & 0xff;
-    this.resultZeroCarry = (this.resultZeroCarry & ~0xff) | b;
-    return b;
+    this.resultAuxOverflow = this.regA ^ src;
+    return (this.resultZeroCarry = this.resultParitySign = this.regA + src) & 0xff;
+};
+
+/**
+ * addByteCarry(src)
+ *
+ * @this {CPUSim}
+ * @param {number} src
+ * @return {number} regA + src + carry
+ */
+CPUSim.prototype.addByteCarry = function(src)
+{
+    this.resultAuxOverflow = this.regA ^ src;
+    return (this.resultZeroCarry = this.resultParitySign = this.regA + src + ((this.resultZeroCarry & 0x100)? 1 : 0)) & 0xff;
+};
+
+/**
+ * andByte(src)
+ *
+ * @this {CPUSim}
+ * @param {number} src
+ * @return {number} regA & src
+ */
+CPUSim.prototype.andByte = function(src)
+{
+    return this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = this.regA & src;
+};
+
+/**
+ * cmpByte(src)
+ *
+ * @this {CPUSim}
+ * @param {number} src
+ */
+CPUSim.prototype.cmpByte = function(src)
+{
+    this.resultAuxOverflow = this.regA ^ src;
+    this.resultZeroCarry = this.resultParitySign = this.regA - src;
 };
 
 /**
@@ -750,72 +785,68 @@ CPUSim.prototype.decByte = function(b)
 };
 
 /**
- * addByte(dst, src)
+ * incByte(b)
  *
  * @this {CPUSim}
- * @param {number} dst
- * @param {number} src
- * @return {number} dst + src
+ * @param {number} b
+ * @return {number}
  */
-CPUSim.prototype.addByte = function(dst, src)
+CPUSim.prototype.incByte = function(b)
 {
-    this.resultAuxOverflow = dst ^ src;
-    return (this.resultZeroCarry = this.resultParitySign = dst + src) & 0xff;
+    this.resultAuxOverflow = b;
+    b = (this.resultParitySign = b + 1) & 0xff;
+    this.resultZeroCarry = (this.resultZeroCarry & ~0xff) | b;
+    return b;
 };
 
 /**
- * addByteCarry(dst, src)
+ * orByte(src)
  *
  * @this {CPUSim}
- * @param {number} dst
  * @param {number} src
- * @return {number} dst + src + carry
+ * @return {number} regA | src
  */
-CPUSim.prototype.addByteCarry = function(dst, src)
+CPUSim.prototype.orByte = function(src)
 {
-    this.resultAuxOverflow = dst ^ src;
-    return (this.resultZeroCarry = this.resultParitySign = dst + src + ((this.resultZeroCarry & 0x100)? 1 : 0)) & 0xff;
+    return this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = this.regA | src;
 };
 
 /**
- * subByte(dst, src)
+ * subByte(src)
  *
  * @this {CPUSim}
- * @param {number} dst
  * @param {number} src
- * @return {number} dst - src
+ * @return {number} regA - src
  */
-CPUSim.prototype.subByte = function(dst, src)
+CPUSim.prototype.subByte = function(src)
 {
-    this.resultAuxOverflow = dst ^ src;
-    return (this.resultZeroCarry = this.resultParitySign = dst - src) & 0xff;
+    this.resultAuxOverflow = this.regA ^ src;
+    return (this.resultZeroCarry = this.resultParitySign = this.regA - src) & 0xff;
 };
 
 /**
- * subByteBorrow(dst, src)
+ * subByteBorrow(src)
  *
  * @this {CPUSim}
- * @param {number} dst
  * @param {number} src
- * @return {number} dst - src - carry
+ * @return {number} regA - src - carry
  */
-CPUSim.prototype.subByteBorrow = function(dst, src)
+CPUSim.prototype.subByteBorrow = function(src)
 {
-    this.resultAuxOverflow = dst ^ src;
-    return (this.resultZeroCarry = this.resultParitySign = dst - src - ((this.resultZeroCarry & 0x100)? 1 : 0)) & 0xff;
+    this.resultAuxOverflow = this.regA ^ src;
+    return (this.resultZeroCarry = this.resultParitySign = this.regA - src - ((this.resultZeroCarry & 0x100)? 1 : 0)) & 0xff;
 };
 
 /**
- * andByte(dst, src)
+ * xorByte(src)
  *
  * @this {CPUSim}
- * @param {number} dst
  * @param {number} src
- * @return {number} dst & src
+ * @return {number} regA ^ src
  */
-CPUSim.prototype.andByte = function(dst, src)
+CPUSim.prototype.xorByte = function(src)
 {
-    return this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = dst & src;
+    return this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = this.regA ^ src;
 };
 
 /**

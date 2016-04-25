@@ -1425,7 +1425,7 @@ CPUDef.opMOVAA = function()
  */
 CPUDef.opADDB = function()
 {
-    this.regA = this.addByte(this.regA, this.regB);
+    this.regA = this.addByte(this.regB);
     this.nStepCycles -= 4;
 };
 
@@ -1436,7 +1436,7 @@ CPUDef.opADDB = function()
  */
 CPUDef.opADDC = function()
 {
-    this.regA = this.addByte(this.regA, this.regC);
+    this.regA = this.addByte(this.regC);
     this.nStepCycles -= 4;
 };
 
@@ -1447,7 +1447,7 @@ CPUDef.opADDC = function()
  */
 CPUDef.opADDD = function()
 {
-    this.regA = this.addByte(this.regA, this.regD);
+    this.regA = this.addByte(this.regD);
     this.nStepCycles -= 4;
 };
 
@@ -1458,7 +1458,7 @@ CPUDef.opADDD = function()
  */
 CPUDef.opADDE = function()
 {
-    this.regA = this.addByte(this.regA, this.regE);
+    this.regA = this.addByte(this.regE);
     this.nStepCycles -= 4;
 };
 
@@ -1469,7 +1469,7 @@ CPUDef.opADDE = function()
  */
 CPUDef.opADDH = function()
 {
-    this.regA = this.addByte(this.regA, this.regH);
+    this.regA = this.addByte(this.regH);
     this.nStepCycles -= 4;
 };
 
@@ -1480,7 +1480,7 @@ CPUDef.opADDH = function()
  */
 CPUDef.opADDL = function()
 {
-    this.regA = this.addByte(this.regA, this.regL);
+    this.regA = this.addByte(this.regL);
     this.nStepCycles -= 4;
 };
 
@@ -1491,7 +1491,7 @@ CPUDef.opADDL = function()
  */
 CPUDef.opADDM = function()
 {
-    this.regA = this.addByte(this.regA, this.getByte(this.getHL()));
+    this.regA = this.addByte(this.getByte(this.getHL()));
     this.nStepCycles -= 7;
 };
 
@@ -1502,7 +1502,7 @@ CPUDef.opADDM = function()
  */
 CPUDef.opADDA = function()
 {
-    this.regA = this.addByte(this.regA, this.regA);
+    this.regA = this.addByte(this.regA);
     this.nStepCycles -= 4;
 };
 
@@ -1513,7 +1513,7 @@ CPUDef.opADDA = function()
  */
 CPUDef.opADCB = function()
 {
-    this.regA = this.addByteCarry(this.regA, this.regB);
+    this.regA = this.addByteCarry(this.regB);
     this.nStepCycles -= 4;
 };
 
@@ -1524,7 +1524,7 @@ CPUDef.opADCB = function()
  */
 CPUDef.opADCC = function()
 {
-    this.regA = this.addByteCarry(this.regA, this.regC);
+    this.regA = this.addByteCarry(this.regC);
     this.nStepCycles -= 4;
 };
 
@@ -1535,7 +1535,7 @@ CPUDef.opADCC = function()
  */
 CPUDef.opADCD = function()
 {
-    this.regA = this.addByteCarry(this.regA, this.regD);
+    this.regA = this.addByteCarry(this.regD);
     this.nStepCycles -= 4;
 };
 
@@ -1546,7 +1546,7 @@ CPUDef.opADCD = function()
  */
 CPUDef.opADCE = function()
 {
-    this.regA = this.addByteCarry(this.regA, this.regE);
+    this.regA = this.addByteCarry(this.regE);
     this.nStepCycles -= 4;
 };
 
@@ -1557,7 +1557,7 @@ CPUDef.opADCE = function()
  */
 CPUDef.opADCH = function()
 {
-    this.regA = this.addByteCarry(this.regA, this.regH);
+    this.regA = this.addByteCarry(this.regH);
     this.nStepCycles -= 4;
 };
 
@@ -1568,7 +1568,7 @@ CPUDef.opADCH = function()
  */
 CPUDef.opADCL = function()
 {
-    this.regA = this.addByteCarry(this.regA, this.regL);
+    this.regA = this.addByteCarry(this.regL);
     this.nStepCycles -= 4;
 };
 
@@ -1579,7 +1579,7 @@ CPUDef.opADCL = function()
  */
 CPUDef.opADCM = function()
 {
-    this.regA = this.addByteCarry(this.regA, this.getByte(this.getHL()));
+    this.regA = this.addByteCarry(this.getByte(this.getHL()));
     this.nStepCycles -= 7;
 };
 
@@ -1590,7 +1590,7 @@ CPUDef.opADCM = function()
  */
 CPUDef.opADCA = function()
 {
-    this.regA = this.addByteCarry(this.regA, this.regA);
+    this.regA = this.addByteCarry(this.regA);
     this.nStepCycles -= 4;
 };
 
@@ -1601,7 +1601,7 @@ CPUDef.opADCA = function()
  */
 CPUDef.opSUBB = function()
 {
-    this.regA = this.subByte(this.regA, this.regB);
+    this.regA = this.subByte(this.regB);
     this.nStepCycles -= 4;
 };
 
@@ -1612,7 +1612,7 @@ CPUDef.opSUBB = function()
  */
 CPUDef.opSUBC = function()
 {
-    this.regA = this.subByte(this.regA, this.regC);
+    this.regA = this.subByte(this.regC);
     this.nStepCycles -= 4;
 };
 
@@ -1623,7 +1623,7 @@ CPUDef.opSUBC = function()
  */
 CPUDef.opSUBD = function()
 {
-    this.regA = this.subByte(this.regA, this.regD);
+    this.regA = this.subByte(this.regD);
     this.nStepCycles -= 4;
 };
 
@@ -1634,7 +1634,7 @@ CPUDef.opSUBD = function()
  */
 CPUDef.opSUBE = function()
 {
-    this.regA = this.subByte(this.regA, this.regE);
+    this.regA = this.subByte(this.regE);
     this.nStepCycles -= 4;
 };
 
@@ -1645,7 +1645,7 @@ CPUDef.opSUBE = function()
  */
 CPUDef.opSUBH = function()
 {
-    this.regA = this.subByte(this.regA, this.regH);
+    this.regA = this.subByte(this.regH);
     this.nStepCycles -= 4;
 };
 
@@ -1656,7 +1656,7 @@ CPUDef.opSUBH = function()
  */
 CPUDef.opSUBL = function()
 {
-    this.regA = this.subByte(this.regA, this.regL);
+    this.regA = this.subByte(this.regL);
     this.nStepCycles -= 4;
 };
 
@@ -1667,7 +1667,7 @@ CPUDef.opSUBL = function()
  */
 CPUDef.opSUBM = function()
 {
-    this.regA = this.subByte(this.regA, this.getByte(this.getHL()));
+    this.regA = this.subByte(this.getByte(this.getHL()));
     this.nStepCycles -= 7;
 };
 
@@ -1678,7 +1678,7 @@ CPUDef.opSUBM = function()
  */
 CPUDef.opSUBA = function()
 {
-    this.regA = this.subByte(this.regA, this.regA);
+    this.regA = this.subByte(this.regA);
     this.nStepCycles -= 4;
 };
 
@@ -1689,7 +1689,7 @@ CPUDef.opSUBA = function()
  */
 CPUDef.opSBBB = function()
 {
-    this.regA = this.subByteBorrow(this.regA, this.regB);
+    this.regA = this.subByteBorrow(this.regB);
     this.nStepCycles -= 4;
 };
 
@@ -1700,7 +1700,7 @@ CPUDef.opSBBB = function()
  */
 CPUDef.opSBBC = function()
 {
-    this.regA = this.subByteBorrow(this.regA, this.regC);
+    this.regA = this.subByteBorrow(this.regC);
     this.nStepCycles -= 4;
 };
 
@@ -1711,7 +1711,7 @@ CPUDef.opSBBC = function()
  */
 CPUDef.opSBBD = function()
 {
-    this.regA = this.subByteBorrow(this.regA, this.regD);
+    this.regA = this.subByteBorrow(this.regD);
     this.nStepCycles -= 4;
 };
 
@@ -1722,7 +1722,7 @@ CPUDef.opSBBD = function()
  */
 CPUDef.opSBBE = function()
 {
-    this.regA = this.subByteBorrow(this.regA, this.regE);
+    this.regA = this.subByteBorrow(this.regE);
     this.nStepCycles -= 4;
 };
 
@@ -1733,7 +1733,7 @@ CPUDef.opSBBE = function()
  */
 CPUDef.opSBBH = function()
 {
-    this.regA = this.subByteBorrow(this.regA, this.regH);
+    this.regA = this.subByteBorrow(this.regH);
     this.nStepCycles -= 4;
 };
 
@@ -1744,7 +1744,7 @@ CPUDef.opSBBH = function()
  */
 CPUDef.opSBBL = function()
 {
-    this.regA = this.subByteBorrow(this.regA, this.regL);
+    this.regA = this.subByteBorrow(this.regL);
     this.nStepCycles -= 4;
 };
 
@@ -1755,7 +1755,7 @@ CPUDef.opSBBL = function()
  */
 CPUDef.opSBBM = function()
 {
-    this.regA = this.subByteBorrow(this.regA, this.getByte(this.getHL()));
+    this.regA = this.subByteBorrow(this.getByte(this.getHL()));
     this.nStepCycles -= 7;
 };
 
@@ -1766,7 +1766,7 @@ CPUDef.opSBBM = function()
  */
 CPUDef.opSBBA = function()
 {
-    this.regA = this.subByteBorrow(this.regA, this.regA);
+    this.regA = this.subByteBorrow(this.regA);
     this.nStepCycles -= 4;
 };
 
@@ -1777,20 +1777,1088 @@ CPUDef.opSBBA = function()
  */
 CPUDef.opANAB = function()
 {
-    this.regA = this.andByte(this.regA, this.regB);
+    this.regA = this.andByte(this.regB);
     this.nStepCycles -= 4;
 };
 
 /**
- * opTBD()
+ * op=0xA1 (ANA C)
  *
  * @this {CPUSim}
  */
-CPUDef.opTBD = function()
+CPUDef.opANAC = function()
 {
-    this.setPC(this.getPC() - 1);
-    this.printMessage("unimplemented opcode", true);
-    this.stopCPU();
+    this.regA = this.andByte(this.regC);
+    this.nStepCycles -= 4;
+};
+
+/**
+ * op=0xA2 (ANA D)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opANAD = function()
+{
+    this.regA = this.andByte(this.regD);
+    this.nStepCycles -= 4;
+};
+
+/**
+ * op=0xA3 (ANA E)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opANAE = function()
+{
+    this.regA = this.andByte(this.regE);
+    this.nStepCycles -= 4;
+};
+
+/**
+ * op=0xA4 (ANA H)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opANAH = function()
+{
+    this.regA = this.andByte(this.regH);
+    this.nStepCycles -= 4;
+};
+
+/**
+ * op=0xA5 (ANA L)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opANAL = function()
+{
+    this.regA = this.andByte(this.regL);
+    this.nStepCycles -= 4;
+};
+
+/**
+ * op=0xA6 (ANA M)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opANAM = function()
+{
+    this.regA = this.andByte(this.getByte(this.getHL()));
+    this.nStepCycles -= 7;
+};
+
+/**
+ * op=0xA7 (ANA A)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opANAA = function()
+{
+    this.regA = this.andByte(this.regA);
+    this.nStepCycles -= 4;
+};
+
+/**
+ * op=0xA8 (XRA B)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opXRAB = function()
+{
+    this.regA = this.xorByte(this.regB);
+    this.nStepCycles -= 4;
+};
+
+/**
+ * op=0xA9 (XRA C)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opXRAC = function()
+{
+    this.regA = this.xorByte(this.regC);
+    this.nStepCycles -= 4;
+};
+
+/**
+ * op=0xAA (XRA D)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opXRAD = function()
+{
+    this.regA = this.xorByte(this.regD);
+    this.nStepCycles -= 4;
+};
+
+/**
+ * op=0xAB (XRA E)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opXRAE = function()
+{
+    this.regA = this.xorByte(this.regE);
+    this.nStepCycles -= 4;
+};
+
+/**
+ * op=0xAC (XRA H)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opXRAH = function()
+{
+    this.regA = this.xorByte(this.regH);
+    this.nStepCycles -= 4;
+};
+
+/**
+ * op=0xAD (XRA L)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opXRAL = function()
+{
+    this.regA = this.xorByte(this.regL);
+    this.nStepCycles -= 4;
+};
+
+/**
+ * op=0xAE (XRA M)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opXRAM = function()
+{
+    this.regA = this.xorByte(this.getByte(this.getHL()));
+    this.nStepCycles -= 7;
+};
+
+/**
+ * op=0xAF (XRA A)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opXRAA = function()
+{
+    this.regA = this.xorByte(this.regA);
+    this.nStepCycles -= 4;
+};
+
+/**
+ * op=0xB0 (ORA B)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opORAB = function()
+{
+    this.regA = this.orByte(this.regB);
+    this.nStepCycles -= 4;
+};
+
+/**
+ * op=0xB1 (ORA C)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opORAC = function()
+{
+    this.regA = this.orByte(this.regC);
+    this.nStepCycles -= 4;
+};
+
+/**
+ * op=0xB2 (ORA D)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opORAD = function()
+{
+    this.regA = this.orByte(this.regD);
+    this.nStepCycles -= 4;
+};
+
+/**
+ * op=0xB3 (ORA E)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opORAE = function()
+{
+    this.regA = this.orByte(this.regE);
+    this.nStepCycles -= 4;
+};
+
+/**
+ * op=0xB4 (ORA H)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opORAH = function()
+{
+    this.regA = this.orByte(this.regH);
+    this.nStepCycles -= 4;
+};
+
+/**
+ * op=0xB5 (ORA L)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opORAL = function()
+{
+    this.regA = this.orByte(this.regL);
+    this.nStepCycles -= 4;
+};
+
+/**
+ * op=0xB6 (ORA M)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opORAM = function()
+{
+    this.regA = this.orByte(this.getByte(this.getHL()));
+    this.nStepCycles -= 7;
+};
+
+/**
+ * op=0xB7 (ORA A)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opORAA = function()
+{
+    this.regA = this.orByte(this.regA);
+    this.nStepCycles -= 4;
+};
+
+/**
+ * op=0xB8 (CMP B)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opCMPB = function()
+{
+    this.cmpByte(this.regB);
+    this.nStepCycles -= 4;
+};
+
+/**
+ * op=0xB9 (CMP C)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opCMPC = function()
+{
+    this.cmpByte(this.regC);
+    this.nStepCycles -= 4;
+};
+
+/**
+ * op=0xBA (CMP D)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opCMPD = function()
+{
+    this.cmpByte(this.regD);
+    this.nStepCycles -= 4;
+};
+
+/**
+ * op=0xBB (CMP E)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opCMPE = function()
+{
+    this.cmpByte(this.regE);
+    this.nStepCycles -= 4;
+};
+
+/**
+ * op=0xBC (CMP H)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opCMPH = function()
+{
+    this.cmpByte(this.regH);
+    this.nStepCycles -= 4;
+};
+
+/**
+ * op=0xBD (CMP L)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opCMPL = function()
+{
+    this.cmpByte(this.regL);
+    this.nStepCycles -= 4;
+};
+
+/**
+ * op=0xBE (CMP M)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opCMPM = function()
+{
+    this.cmpByte(this.getByte(this.getHL()));
+    this.nStepCycles -= 7;
+};
+
+/**
+ * op=0xBF (CMP A)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opCMPA = function()
+{
+    this.cmpByte(this.regA);
+    this.nStepCycles -= 4;
+};
+
+/**
+ * op=0xC0 (RNZ)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opRNZ = function()
+{
+    if (!this.getZF()) {
+        this.setPC(this.popWord());
+        this.nStepCycles -= 6;
+    }
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0xC1 (POP B)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opPOPB = function()
+{
+    this.setBC(this.popWord());
+    this.nStepCycles -= 10;
+};
+
+/**
+ * op=0xC2 (JNZ a16)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opJNZ = function()
+{
+    var w = this.getPCWord();
+    if (!this.getZF()) this.setPC(w);
+    this.nStepCycles -= 10;
+};
+
+/**
+ * op=0xC3 (JMP a16)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opJMP = function()
+{
+    this.setPC(this.getPCWord());
+    this.nStepCycles -= 10;
+};
+
+/**
+ * op=0xC4 (CNZ a16)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opCNZ = function()
+{
+    var w = this.getPCWord();
+    if (!this.getZF()) {
+        this.pushWord(this.getPC());
+        this.setPC(w);
+        this.nStepCycles -= 6;
+    }
+    this.nStepCycles -= 11;
+};
+
+/**
+ * op=0xC5 (PUSH B)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opPUSHB = function()
+{
+    this.pushWord(this.getBC());
+    this.nStepCycles -= 11;
+};
+
+/**
+ * op=0xC6 (ADI d8)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opADI = function()
+{
+    this.regA = this.addByte(this.getPCByte());
+    this.nStepCycles -= 7;
+};
+
+/**
+ * op=0xC7 (RST 0)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opRST0 = function()
+{
+    this.pushWord(this.getPC());
+    this.setPC(0);
+    this.nStepCycles -= 11;
+};
+
+/**
+ * op=0xC8 (RZ)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opRZ = function()
+{
+    if (this.getZF()) {
+        this.setPC(this.popWord());
+        this.nStepCycles -= 6;
+    }
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0xC9 (RET)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opRET = function()
+{
+    this.setPC(this.popWord());
+    this.nStepCycles -= 10;
+};
+
+/**
+ * op=0xCA (JZ a16)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opJZ = function()
+{
+    var w = this.getPCWord();
+    if (this.getZF()) this.setPC(w);
+    this.nStepCycles -= 10;
+};
+
+/**
+ * op=0xCC (CZ a16)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opCZ = function()
+{
+    var w = this.getPCWord();
+    if (this.getZF()) {
+        this.pushWord(this.getPC());
+        this.setPC(w);
+        this.nStepCycles -= 6;
+    }
+    this.nStepCycles -= 11;
+};
+
+/**
+ * op=0xCD (CALL a16)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opCALL = function()
+{
+    var w = this.getPCWord();
+    this.pushWord(this.getPC());
+    this.setPC(w);
+    this.nStepCycles -= 17;
+};
+
+/**
+ * op=0xCE (ACI d8)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opACI = function()
+{
+    this.regA = this.addByteCarry(this.getPCByte());
+    this.nStepCycles -= 7;
+};
+
+/**
+ * op=0xCF (RST 1)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opRST1 = function()
+{
+    this.pushWord(this.getPC());
+    this.setPC(0x08);
+    this.nStepCycles -= 11;
+};
+
+/**
+ * op=0xD0 (RNC)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opRNC = function()
+{
+    if (!this.getCF()) {
+        this.setPC(this.popWord());
+        this.nStepCycles -= 6;
+    }
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0xD1 (POP D)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opPOPD = function()
+{
+    this.setDE(this.popWord());
+    this.nStepCycles -= 10;
+};
+
+/**
+ * op=0xD2 (JNC a16)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opJNC = function()
+{
+    var w = this.getPCWord();
+    if (!this.getCF()) this.setPC(w);
+    this.nStepCycles -= 10;
+};
+
+/**
+ * op=0xD3 (OUT d8)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opOUT = function()
+{
+    var port = this.getPCByte();
+    this.bus.checkPortOutputNotify(port, 1, this.regA);
+    this.nStepCycles -= 10;
+};
+
+/**
+ * op=0xD4 (CNC a16)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opCNC = function()
+{
+    var w = this.getPCWord();
+    if (!this.getCF()) {
+        this.pushWord(this.getPC());
+        this.setPC(w);
+        this.nStepCycles -= 6;
+    }
+    this.nStepCycles -= 11;
+};
+
+/**
+ * op=0xD5 (PUSH D)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opPUSHD = function()
+{
+    this.pushWord(this.getDE());
+    this.nStepCycles -= 11;
+};
+
+/**
+ * op=0xD6 (SUI d8)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opSUI = function()
+{
+    this.regA = this.subByte(this.getPCByte());
+    this.nStepCycles -= 7;
+};
+
+/**
+ * op=0xD7 (RST 2)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opRST2 = function()
+{
+    this.pushWord(this.getPC());
+    this.setPC(0x10);
+    this.nStepCycles -= 11;
+};
+
+/**
+ * op=0xD8 (RC)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opRC = function()
+{
+    if (this.getCF()) {
+        this.setPC(this.popWord());
+        this.nStepCycles -= 6;
+    }
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0xDA (JC a16)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opJC = function()
+{
+    var w = this.getPCWord();
+    if (this.getCF()) this.setPC(w);
+    this.nStepCycles -= 10;
+};
+
+/**
+ * op=0xDB (IN d8)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opIN = function()
+{
+    var port = this.getPCByte();
+    this.regA = this.bus.checkPortInputNotify(port, 1) & 0xff;
+    this.nStepCycles -= 10;
+};
+
+/**
+ * op=0xDC (CC a16)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opCC = function()
+{
+    var w = this.getPCWord();
+    if (this.getCF()) {
+        this.pushWord(this.getPC());
+        this.setPC(w);
+        this.nStepCycles -= 6;
+    }
+    this.nStepCycles -= 11;
+};
+
+/**
+ * op=0xDE (SBI d8)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opSBI = function()
+{
+    this.regA = this.subByteBorrow(this.getPCByte());
+    this.nStepCycles -= 7;
+};
+
+/**
+ * op=0xDF (RST 3)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opRST3 = function()
+{
+    this.pushWord(this.getPC());
+    this.setPC(0x18);
+    this.nStepCycles -= 11;
+};
+
+/**
+ * op=0xE0 (RPO)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opRPO = function()
+{
+    if (!this.getPF()) {
+        this.setPC(this.popWord());
+        this.nStepCycles -= 6;
+    }
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0xE1 (POP H)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opPOPH = function()
+{
+    this.setHL(this.popWord());
+    this.nStepCycles -= 10;
+};
+
+/**
+ * op=0xE2 (JPO a16)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opJPO = function()
+{
+    var w = this.getPCWord();
+    if (!this.getPF()) this.setPC(w);
+    this.nStepCycles -= 10;
+};
+
+/**
+ * op=0xE3 (XTHL)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opXTHL = function()
+{
+    var w = this.popWord();
+    this.pushWord(this.getHL());
+    this.setHL(w);
+    this.nStepCycles -= 18;
+};
+
+/**
+ * op=0xE4 (CPO a16)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opCPO = function()
+{
+    var w = this.getPCWord();
+    if (!this.getPF()) {
+        this.pushWord(this.getPC());
+        this.setPC(w);
+        this.nStepCycles -= 6;
+    }
+    this.nStepCycles -= 11;
+};
+
+/**
+ * op=0xE5 (PUSH H)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opPUSHH = function()
+{
+    this.pushWord(this.getHL());
+    this.nStepCycles -= 11;
+};
+
+/**
+ * op=0xE6 (ANI d8)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opANI = function()
+{
+    this.regA = this.andByte(this.getPCByte());
+    this.nStepCycles -= 7;
+};
+
+/**
+ * op=0xE7 (RST 4)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opRST4 = function()
+{
+    this.pushWord(this.getPC());
+    this.setPC(0x20);
+    this.nStepCycles -= 11;
+};
+
+/**
+ * op=0xE8 (RPE)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opRPE = function()
+{
+    if (this.getPF()) {
+        this.setPC(this.popWord());
+        this.nStepCycles -= 6;
+    }
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0xE9 (PCHL)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opPCHL = function()
+{
+    this.setPC(this.getHL());
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0xEA (JPE a16)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opJPE = function()
+{
+    var w = this.getPCWord();
+    if (this.getPF()) this.setPC(w);
+    this.nStepCycles -= 10;
+};
+
+/**
+ * op=0xEB (XCHG)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opXCHG = function()
+{
+    var w = this.getHL();
+    this.setHL(this.getDE());
+    this.setDE(w);
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0xEC (CPE a16)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opCPE = function()
+{
+    var w = this.getPCWord();
+    if (this.getPF()) {
+        this.pushWord(this.getPC());
+        this.setPC(w);
+        this.nStepCycles -= 6;
+    }
+    this.nStepCycles -= 11;
+};
+
+/**
+ * op=0xEE (XRI d8)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opXRI = function()
+{
+    this.regA = this.xorByte(this.getPCByte());
+    this.nStepCycles -= 7;
+};
+
+/**
+ * op=0xEF (RST 5)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opRST5 = function()
+{
+    this.pushWord(this.getPC());
+    this.setPC(0x28);
+    this.nStepCycles -= 11;
+};
+
+/**
+ * op=0xF0 (RP)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opRP = function()
+{
+    if (!this.getSF()) {
+        this.setPC(this.popWord());
+        this.nStepCycles -= 6;
+    }
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0xF1 (POP PSW)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opPOPSW = function()
+{
+    var w = this.popWord();
+    this.setPS(w);
+    this.regA = w >> 8;
+    this.nStepCycles -= 10;
+};
+
+/**
+ * op=0xF2 (JP a16)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opJP = function()
+{
+    var w = this.getPCWord();
+    if (!this.getSF()) this.setPC(w);
+    this.nStepCycles -= 10;
+};
+
+/**
+ * op=0xF3 (DI)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opDI = function()
+{
+    this.clearIF();
+    this.nStepCycles -= 4;
+};
+
+/**
+ * op=0xF4 (CP a16)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opCP = function()
+{
+    var w = this.getPCWord();
+    if (!this.getSF()) {
+        this.pushWord(this.getPC());
+        this.setPC(w);
+        this.nStepCycles -= 6;
+    }
+    this.nStepCycles -= 11;
+};
+
+/**
+ * op=0xF5 (PUSH PSW)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opPUPSW = function()
+{
+    this.pushWord(this.getPS() | (this.regA << 8));
+    this.nStepCycles -= 11;
+};
+
+/**
+ * op=0xF6 (ORI d8)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opORI = function()
+{
+    this.regA = this.orByte(this.getPCByte());
+    this.nStepCycles -= 7;
+};
+
+/**
+ * op=0xF7 (RST 6)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opRST6 = function()
+{
+    this.pushWord(this.getPC());
+    this.setPC(0x30);
+    this.nStepCycles -= 11;
+};
+
+/**
+ * op=0xF8 (RM)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opRM = function()
+{
+    if (this.getSF()) {
+        this.setPC(this.popWord());
+        this.nStepCycles -= 6;
+    }
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0xF9 (SPHL)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opSPHL = function()
+{
+    this.setSP(this.getHL());
+    this.nStepCycles -= 5;
+};
+
+/**
+ * op=0xFA (JM a16)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opJM = function()
+{
+    var w = this.getPCWord();
+    if (this.getSF()) this.setPC(w);
+    this.nStepCycles -= 10;
+};
+
+/**
+ * op=0xFB (EI)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opEI = function()
+{
+    this.setIF();var w = this.getHL();
+    this.nStepCycles -= 4;
+};
+
+/**
+ * op=0xFC (CM a16)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opCM = function()
+{
+    var w = this.getPCWord();
+    if (this.getSF()) {
+        this.pushWord(this.getPC());
+        this.setPC(w);
+        this.nStepCycles -= 6;
+    }
+    this.nStepCycles -= 11;
+};
+
+/**
+ * op=0xFE (CPI d8)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opCPI = function()
+{
+    this.cmpByte(this.getPCByte());
+    this.nStepCycles -= 7;
+};
+
+/**
+ * op=0xFF (RST 7)
+ *
+ * @this {CPUSim}
+ */
+CPUDef.opRST7 = function()
+{
+    this.pushWord(this.getPC());
+    this.setPC(0x38);
+    this.nStepCycles -= 11;
 };
 
 /*
@@ -1841,28 +2909,28 @@ CPUDef.aOps = [
     /* 0x94-0x97 */ CPUDef.opSUBH,  CPUDef.opSUBL,  CPUDef.opSUBM,  CPUDef.opSUBA,
     /* 0x98-0x9B */ CPUDef.opSBBB,  CPUDef.opSBBC,  CPUDef.opSBBD,  CPUDef.opSBBE,
     /* 0x9C-0x9F */ CPUDef.opSBBH,  CPUDef.opSBBL,  CPUDef.opSBBM,  CPUDef.opSBBA,
-    /* 0xA0-0xA3 */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,
-    /* 0xA4-0xA7 */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,
-    /* 0xA8-0xAB */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,
-    /* 0xAC-0xAF */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,
-    /* 0xB0-0xB3 */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,
-    /* 0xB4-0xB7 */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,
-    /* 0xB8-0xBB */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,
-    /* 0xBC-0xBF */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,
-    /* 0xC0-0xC3 */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,
-    /* 0xC4-0xC7 */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,
-    /* 0xC8-0xCB */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,
-    /* 0xCC-0xCF */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,
-    /* 0xD0-0xD3 */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,
-    /* 0xD4-0xD7 */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,
-    /* 0xD8-0xDB */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,
-    /* 0xDC-0xDF */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,
-    /* 0xE0-0xE3 */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,
-    /* 0xE4-0xE7 */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,
-    /* 0xE8-0xEB */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,
-    /* 0xEC-0xEF */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,
-    /* 0xF0-0xF3 */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,
-    /* 0xF4-0xF7 */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,
-    /* 0xF8-0xFB */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,
-    /* 0xFC-0xFF */ CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD,   CPUDef.opTBD
+    /* 0xA0-0xA3 */ CPUDef.opANAB,  CPUDef.opANAC,  CPUDef.opANAD,  CPUDef.opANAE,
+    /* 0xA4-0xA7 */ CPUDef.opANAH,  CPUDef.opANAL,  CPUDef.opANAM,  CPUDef.opANAA,
+    /* 0xA8-0xAB */ CPUDef.opXRAB,  CPUDef.opXRAC,  CPUDef.opXRAD,  CPUDef.opXRAE,
+    /* 0xAC-0xAF */ CPUDef.opXRAH,  CPUDef.opXRAL,  CPUDef.opXRAM,  CPUDef.opXRAA,
+    /* 0xB0-0xB3 */ CPUDef.opORAB,  CPUDef.opORAC,  CPUDef.opORAD,  CPUDef.opORAE,
+    /* 0xB4-0xB7 */ CPUDef.opORAH,  CPUDef.opORAL,  CPUDef.opORAM,  CPUDef.opORAA,
+    /* 0xB8-0xBB */ CPUDef.opCMPB,  CPUDef.opCMPC,  CPUDef.opCMPD,  CPUDef.opCMPE,
+    /* 0xBC-0xBF */ CPUDef.opCMPH,  CPUDef.opCMPL,  CPUDef.opCMPM,  CPUDef.opCMPA,
+    /* 0xC0-0xC3 */ CPUDef.opRNZ,   CPUDef.opPOPB,  CPUDef.opJNZ,   CPUDef.opJMP,
+    /* 0xC4-0xC7 */ CPUDef.opCNZ,   CPUDef.opPUSHB, CPUDef.opADI,   CPUDef.opRST0,
+    /* 0xC8-0xCB */ CPUDef.opRZ,    CPUDef.opRET,   CPUDef.opJZ,    CPUDef.opJMP,
+    /* 0xCC-0xCF */ CPUDef.opCZ,    CPUDef.opCALL,  CPUDef.opACI,   CPUDef.opRST1,
+    /* 0xD0-0xD3 */ CPUDef.opRNC,   CPUDef.opPOPD,  CPUDef.opJNC,   CPUDef.opOUT,
+    /* 0xD4-0xD7 */ CPUDef.opCNC,   CPUDef.opPUSHD, CPUDef.opSUI,   CPUDef.opRST2,
+    /* 0xD8-0xDB */ CPUDef.opRC,    CPUDef.opRET,   CPUDef.opJC,    CPUDef.opIN,
+    /* 0xDC-0xDF */ CPUDef.opCC,    CPUDef.opCALL,  CPUDef.opSBI,   CPUDef.opRST3,
+    /* 0xE0-0xE3 */ CPUDef.opRPO,   CPUDef.opPOPH,  CPUDef.opJPO,   CPUDef.opXTHL,
+    /* 0xE4-0xE7 */ CPUDef.opCPO,   CPUDef.opPUSHH, CPUDef.opANI,   CPUDef.opRST4,
+    /* 0xE8-0xEB */ CPUDef.opRPE,   CPUDef.opPCHL,  CPUDef.opJPE,   CPUDef.opXCHG,
+    /* 0xEC-0xEF */ CPUDef.opCPE,   CPUDef.opCALL,  CPUDef.opXRI,   CPUDef.opRST5,
+    /* 0xF0-0xF3 */ CPUDef.opRP,    CPUDef.opPOPSW, CPUDef.opJP,    CPUDef.opDI,
+    /* 0xF4-0xF7 */ CPUDef.opCP,    CPUDef.opPUPSW, CPUDef.opORI,   CPUDef.opRST6,
+    /* 0xF8-0xFB */ CPUDef.opRM,    CPUDef.opSPHL,  CPUDef.opJM,    CPUDef.opEI,
+    /* 0xFC-0xFF */ CPUDef.opCM,    CPUDef.opCALL,  CPUDef.opCPI,   CPUDef.opRST7
 ];
