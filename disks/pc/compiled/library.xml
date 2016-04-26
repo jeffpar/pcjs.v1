@@ -97,6 +97,7 @@
 		<disk path="/disks/pc/dos/microsoft/6.20/1440K/MSDOS620-DISK2.json">MS-DOS 6.20 (1.44M Disk 2)</disk>
 		<disk path="/disks/pc/dos/microsoft/6.20/1440K/MSDOS620-DISK3.json">MS-DOS 6.20 (1.44M Disk 3)</disk>
 		<disk path="/disks/pc/dos/microsoft/6.20/1440K/MSDOS620-SUPPDISK.json">MS-DOS 6.20 (1.44M Supp Disk)</disk>
+		<disk path="/disks/pc/dos/microsoft/6.22/1200K/MSDOS622-BOOT.json">MS-DOS 6.22 (1.2M Boot)</disk>
 		<disk path="/disks/pc/dos/microsoft/6.22/1200K/MSDOS622-DISK1.json">MS-DOS 6.22 (1.2M Disk 1)</disk>
 		<disk path="/disks/pc/dos/microsoft/6.22/1200K/MSDOS622-DISK2.json">MS-DOS 6.22 (1.2M Disk 2)</disk>
 		<disk path="/disks/pc/dos/microsoft/6.22/1200K/MSDOS622-DISK3.json">MS-DOS 6.22 (1.2M Disk 3)</disk>
