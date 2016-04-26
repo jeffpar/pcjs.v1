@@ -1479,22 +1479,18 @@ Computer.prototype.updateStatus = function(fForce)
 };
 
 /**
- * updateVideo(fForce)
+ * updateVideo(n)
  *
- * Any high-frequency updates should be performed here.  Avoid DOM updates, since updateVideo() can be called up to
- * 60 times per second (see VIDEO_UPDATES_PER_SECOND).
+ * Any high-frequency updates should be performed here (avoid updating DOM elements).
  *
  * @this {Computer}
- * @param {boolean} [fForce] (true to force a video update)
+ * @param {number} n (where 0 <= n < VIDEO_UPDATES_PER_SECOND for a normal update, or -1 for a forced update)
  */
-Computer.prototype.updateVideo = function(fForce)
+Computer.prototype.updateVideo = function(n)
 {
-    /*
     for (var i = 0; i < this.aVideo.length; i++) {
-        this.aVideo[i].updateScreen(fForce);
+        this.aVideo[i].updateScreen(n);
     }
-    if (this.panel) this.panel.updateAnimation();
-    */
 };
 
 /**

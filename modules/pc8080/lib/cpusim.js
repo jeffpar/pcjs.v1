@@ -226,6 +226,7 @@ CPUSim.prototype.reset = function()
     this.resetRegs();
     this.resetCycles();
     this.clearError();      // clear any fatal error/exception that setError() may have flagged
+    this.parent.reset.call(this);
 };
 
 /**
@@ -255,8 +256,6 @@ CPUSim.prototype.resetRegs = function()
      * intFlags contains some internal states we use to indicate whether a hardware interrupt (INTFLAG.INTR) or
      * Trap software interrupt (INTR.TRAP) has been requested, as well as when we're in a "HLT" state (INTFLAG.HALT)
      * that requires us to wait for a hardware interrupt (INTFLAG.INTR) before continuing execution.
-     *
-     * intFlags must be cleared only by checkINTR(), whereas opFlags must be cleared prior to every CPU operation.
      */
     this.intFlags = CPUDef.INTFLAG.NONE;
 };
@@ -286,7 +285,7 @@ CPUSim.prototype.save = function()
 {
     var state = new State(this);
     state.set(0, [this.regA, this.regB, this.regC, this.regD, this.regE, this.regH, this.regL, this.getSP(), this.getPC(), this.getPS()]);
-    state.set(1, [this.opFlags, this.intFlags, this.nTotalCycles, this.getSpeed()]);
+    state.set(1, [this.intFlags, this.nTotalCycles, this.getSpeed()]);
     state.set(2, this.bus.saveMemory());
     return state.data();
 };
@@ -314,9 +313,8 @@ CPUSim.prototype.restore = function(data)
     this.setPC(a[8]);
     this.setPS(a[9]);
     a = data[1];
-    this.opFlags = a[0];
-    this.intFlags = a[1];
-    this.nTotalCycles = a[2];
+    this.intFlags = a[0];
+    this.nTotalCycles = a[1];
     this.setSpeed(a[3]);
     return this.bus.restoreMemory(data[2]);
 };
@@ -965,39 +963,52 @@ CPUSim.prototype.pushWord = function(w)
 /**
  * checkINTR()
  *
- * This must only be called when intFlags (containing the simulated INTFLAG.INTR signal) is known to be set.
- * Note that it's perfectly possible that between the time updateINTR(true) was called and we request the
- * interrupt vector number below, the interrupt could have been cleared or masked, in which case getIRRVector()
- * will return -1 and we'll simply clear INTFLAG.INTR.
- *
  * @this {CPUSim}
- * @return {boolean} true if h/w interrupt (or trap) has just been acknowledged, false if not
+ * @return {boolean} true if h/w interrupt has just been acknowledged, false if not
  */
 CPUSim.prototype.checkINTR = function()
 {
+    if ((this.intFlags & CPUDef.INTFLAG.INTR) && this.getIF()) {
+        var bRST = CPUDef.OPCODE.RST0 | ((this.intFlags & CPUDef.INTFLAG.INTL) << 3);
+        this.clearINTR();
+        this.clearIF();
+        this.aOps[bRST].call(this);
+        return true;
+    }
     return false;
 };
 
 /**
- * updateINTR(fRaise)
- *
- * This is called by the ChipSet component whenever a h/w interrupt needs to be simulated.
- * This is how the PIC component simulates raising the INTFLAG.INTR signal.  We will honor the request
- * only if we have a reference back to the ChipSet component.  The CPU will then "respond" by calling
- * checkINTR() and request the corresponding interrupt vector from the ChipSet.
+ * clearINTR()
  *
  * @this {CPUSim}
- * @param {boolean} fRaise is true to raise INTFLAG.INTR, false to lower
  */
-CPUSim.prototype.updateINTR = function(fRaise)
+CPUSim.prototype.clearINTR = function()
 {
-    if (this.chipset) {
-        if (fRaise) {
-            this.intFlags |= CPUDef.INTFLAG.INTR;
-        } else {
-            this.intFlags &= ~CPUDef.INTFLAG.INTR;
-        }
-    }
+    this.intFlags &= ~(CPUDef.INTFLAG.INTL | CPUDef.INTFLAG.INTR);
+};
+
+/**
+ * requestINTR(nLevel)
+ *
+ * This is called by any component that wants to request a h/w interrupt.
+ *
+ * NOTE: We allow INTR to be set regardless of the current state of interrupt flag (IF), on the theory
+ * that if/when the CPU briefly turns interrupts off, it shouldn't lose the last h/w interrupt requested.
+ * So instead of ignoring INTR here, checkINTR() ignores INTR as long as the interrupt flag (IF) is clear.
+ *
+ * The downside is that, as long as the CPU has interrupts disabled, an active INTR state will slow stepCPU()
+ * down slightly.  We could avoid that by introducing a two-stage interrupt tracking system, where a separate
+ * variable keeps track of the last interrupt requested whenever the interrupt flag (IF) is clear, and when
+ * setIF() finally occurs, that interrupt is propagated to intFlags.  But for now, we're going to assume that
+ * scenario is rare.
+ *
+ * @this {CPUSim}
+ * @param {number} nLevel (0-7)
+ */
+CPUSim.prototype.requestINTR = function(nLevel)
+{
+    this.intFlags = (this.intFlags & ~CPUDef.INTFLAG.INTL) | nLevel | CPUDef.INTFLAG.INTR;
 };
 
 /**
@@ -1110,27 +1121,6 @@ CPUSim.prototype.stepCPU = function(nMinCycles)
      */
     this.nBurstCycles = this.nStepCycles = nMinCycles;
 
-    /*
-     * NOTE: Even though runCPU() calls updateAllTimers(), we need an additional call here if we're being
-     * called from the Debugger, so that any single-stepping will update the timers as well.
-     */
-    if (this.chipset && !nMinCycles) this.chipset.updateAllTimers();
-
-    /*
-     * Let's also suppress h/w interrupts whenever the Debugger is single-stepping an instruction; I'm loathe
-     * to allow Debugger interactions to affect the behavior of the virtual machine in ANY way, but I'm making
-     * this small concession to avoid the occasional and sometimes unexpected Debugger command that ends up
-     * stepping into a hardware interrupt service routine (ISR).
-     *
-     * Note that this is similar to the problem discussed in checkINTR() regarding the priority of external h/w
-     * interrupts vs. Trap interrupts, but they require different solutions, because our Debugger operates
-     * independently of the CPU.
-     *
-     * One exception I make here is when you've asked the Debugger to display PIC messages, the idea being that
-     * if you're watching the PIC that closely, then you want to hardware interrupts to occur regardless.
-     */
-    if (!nMinCycles) this.opFlags |= CPUDef.OPFLAG.NOINTR;
-
     do {
         if (this.intFlags) {
             if (this.checkINTR()) {
@@ -1138,12 +1128,11 @@ CPUSim.prototype.stepCPU = function(nMinCycles)
                     this.assert(DEBUGGER);  // nMinCycles of zero should be generated ONLY by the Debugger
                     if (DEBUGGER) {
                         this.println("interrupt dispatched");
-                        this.opFlags = 0;
                         break;
                     }
                 }
             }
-            if (this.intFlags & CPUDef.INTFLAG.HALT) {
+            else if (this.intFlags & CPUDef.INTFLAG.HALT) {
                 /*
                  * As discussed in opHLT(), the CPU is never REALLY halted by a HLT instruction; instead,
                  * opHLT() sets CPUDef.INTFLAG.HALT, signalling to us that we're free to end the current burst
@@ -1160,7 +1149,6 @@ CPUSim.prototype.stepCPU = function(nMinCycles)
                  * number of cycles during which we did not actually execute any instructions).
                  */
                 this.nStepCycles = 0;
-                this.opFlags = 0;
                 break;
             }
         }
@@ -1172,8 +1160,6 @@ CPUSim.prototype.stepCPU = function(nMinCycles)
             }
             nDebugState = 1;
         }
-
-        this.opFlags = 0;
 
         this.aOps[this.getPCByte()].call(this);
 

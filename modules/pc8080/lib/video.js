@@ -49,10 +49,12 @@ if (NODE) {
  *
  *      screenWidth: width of the screen canvas, in pixels
  *      screenHeight: height of the screen canvas, in pixels
- *      aspect
- *      rotate
- *      addr
  *      screenColor: background color of the screen canvas (default is black)
+ *      aspectRatio
+ *      frameBuffer
+ *      interruptRate (eg, 120)
+ *      refreshRate (eg, 60)
+ *      rotation (eg, 90)
  *
  * @constructor
  * @extends Component
@@ -65,10 +67,71 @@ if (NODE) {
 function Video(parmsVideo, canvas, context, textarea, container)
 {
     Component.call(this, "Video", parmsVideo, Video, Messages.VIDEO);
+    this.interruptRate = parmsVideo['interruptRate'];
+    this.refreshRate = parmsVideo['refreshRate'] || 60;
     this.setReady();
 }
 
 Component.subclass(Video);
+
+/**
+ * initBus(cmp, bus, cpu, dbg)
+ *
+ * @this {Video}
+ * @param {Computer} cmp
+ * @param {Bus} bus
+ * @param {CPUSim} cpu
+ * @param {Debugger} dbg
+ */
+Video.prototype.initBus = function(cmp, bus, cpu, dbg)
+{
+    this.cmp = cmp;
+    this.bus = bus;
+    this.cpu = cpu;
+    this.dbg = dbg;
+};
+
+/**
+ * getRefreshRate()
+ *
+ * @this {Video}
+ * @return {number}
+ */
+Video.prototype.getRefreshRate = function()
+{
+    return Math.max(this.refreshRate, this.interruptRate);
+};
+
+/**
+ * updateScreen(n)
+ *
+ * Propagates the video buffer to the cell cache and updates the screen with any changes.  Forced updates
+ * are generally internal updates triggered by an I/O operation or other state change, while non-forced updates
+ * are the periodic updates coming from the CPU.
+ *
+ * For every cell in the video buffer, compare it to the cell stored in the cell cache, render if it differs,
+ * and then update the cell cache to match.  Since initCache() sets every cell in the cell cache to an
+ * invalid value, we're assured that the next call to updateScreen() will redraw the entire (visible) video buffer.
+ *
+ * @this {Video}
+ * @param {number} n (where 0 <= n < getRefreshRate() for a normal update, or -1 for a forced update)
+ */
+Video.prototype.updateScreen = function(n)
+{
+    if (!(n & 1)) {
+        /*
+         * On even updates, call cpu.requestINTR(1), and also update our copy of the screen.
+         */
+        this.cpu.requestINTR(1);
+    } else {
+        /*
+         * On odd updates, call cpu.requestINTR(2), but do NOT update our copy of the screen, because
+         * the machine has presumably only updated the top half of the frame buffer at this point; it will
+         * update the bottom half of the frame buffer after acknowledging this interrupt.
+         */
+        this.cpu.requestINTR(2);
+    }
+};
 
 /**
  * Video.init()

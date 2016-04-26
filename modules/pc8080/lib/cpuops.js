@@ -2747,7 +2747,7 @@ CPUDef.opCP = function()
  */
 CPUDef.opPUPSW = function()
 {
-    this.pushWord(this.getPS() | (this.regA << 8));
+    this.pushWord((this.getPS() & 0xff) | (this.regA << 8));
     this.nStepCycles -= 11;
 };
 

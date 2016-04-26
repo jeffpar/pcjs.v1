@@ -359,7 +359,7 @@ if (DEBUGGER) {
     Debugger.TYPE_E  = (Debugger.REG_E  << 8 | Debugger.TYPE_REG | Debugger.TYPE_BYTE);
     Debugger.TYPE_H  = (Debugger.REG_H  << 8 | Debugger.TYPE_REG | Debugger.TYPE_BYTE);
     Debugger.TYPE_L  = (Debugger.REG_L  << 8 | Debugger.TYPE_REG | Debugger.TYPE_BYTE);
-    Debugger.TYPE_M  = (Debugger.REG_M  << 8 | Debugger.TYPE_REG | Debugger.TYPE_BYTE);
+    Debugger.TYPE_M  = (Debugger.REG_M  << 8 | Debugger.TYPE_REG | Debugger.TYPE_BYTE | Debugger.TYPE_MEM);
     Debugger.TYPE_BC = (Debugger.REG_BC << 8 | Debugger.TYPE_REG | Debugger.TYPE_WORD);
     Debugger.TYPE_DE = (Debugger.REG_DE << 8 | Debugger.TYPE_REG | Debugger.TYPE_WORD);
     Debugger.TYPE_HL = (Debugger.REG_HL << 8 | Debugger.TYPE_REG | Debugger.TYPE_WORD);
@@ -404,7 +404,7 @@ if (DEBUGGER) {
     /* 0x06 */  [Debugger.INS.MVI,   Debugger.TYPE_B,    Debugger.TYPE_IMM],
     /* 0x07 */  [Debugger.INS.RLC],
     /* 0x08 */  [Debugger.INS.NOP,   Debugger.TYPE_UNDOC],
-    /* 0x09 */  [Debugger.INS.DAD,   Debugger.TYPE_BC  | Debugger.TYPE_IN],  // REG_HL is the implied (unlisted) destination
+    /* 0x09 */  [Debugger.INS.DAD,   Debugger.TYPE_HL,   Debugger.TYPE_BC  | Debugger.TYPE_IN],     // let's be more explicit about the operands
     /* 0x0A */  [Debugger.INS.LDAX,  Debugger.TYPE_BC  | Debugger.TYPE_MEM],
     /* 0x0B */  [Debugger.INS.DCX,   Debugger.TYPE_BC],
     /* 0x0C */  [Debugger.INS.INR,   Debugger.TYPE_C],
@@ -420,7 +420,7 @@ if (DEBUGGER) {
     /* 0x16 */  [Debugger.INS.MVI,   Debugger.TYPE_D,    Debugger.TYPE_IMM],
     /* 0x17 */  [Debugger.INS.RAL],
     /* 0x18 */  [Debugger.INS.NOP,   Debugger.TYPE_UNDOC],
-    /* 0x19 */  [Debugger.INS.DAD,   Debugger.TYPE_DE  | Debugger.TYPE_IN],  // REG_HL is the implied (unlisted) destination
+    /* 0x19 */  [Debugger.INS.DAD,   Debugger.TYPE_HL,   Debugger.TYPE_DE  | Debugger.TYPE_IN],     // let's be more explicit about the operands
     /* 0x1A */  [Debugger.INS.LDAX,  Debugger.TYPE_DE  | Debugger.TYPE_MEM],
     /* 0x1B */  [Debugger.INS.DCX,   Debugger.TYPE_DE],
     /* 0x1C */  [Debugger.INS.INR,   Debugger.TYPE_E],
@@ -436,7 +436,7 @@ if (DEBUGGER) {
     /* 0x26 */  [Debugger.INS.MVI,   Debugger.TYPE_H,    Debugger.TYPE_IMM],
     /* 0x27 */  [Debugger.INS.DAA],
     /* 0x28 */  [Debugger.INS.NOP,   Debugger.TYPE_UNDOC],
-    /* 0x29 */  [Debugger.INS.DAD,   Debugger.TYPE_HL  | Debugger.TYPE_IN],  // REG_HL is the implied (unlisted) destination
+    /* 0x29 */  [Debugger.INS.DAD,   Debugger.TYPE_HL,   Debugger.TYPE_HL  | Debugger.TYPE_IN],     // let's be more explicit about the operands
     /* 0x2A */  [Debugger.INS.LHLD,  Debugger.TYPE_IMM | Debugger.TYPE_WORD | Debugger.TYPE_MEM],
     /* 0x2B */  [Debugger.INS.DCX,   Debugger.TYPE_HL],
     /* 0x2C */  [Debugger.INS.INR,   Debugger.TYPE_L],
@@ -445,15 +445,15 @@ if (DEBUGGER) {
     /* 0x2F */  [Debugger.INS.CMA],
     /* 0x30 */  [Debugger.INS.NOP,   Debugger.TYPE_UNDOC],
     /* 0x31 */  [Debugger.INS.LXI,   Debugger.TYPE_SP,   Debugger.TYPE_IMM],
-    /* 0x32 */  [Debugger.INS.STA,   Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_MEM],
+    /* 0x32 */  [Debugger.INS.STA,   Debugger.TYPE_IMM | Debugger.TYPE_WORD | Debugger.TYPE_MEM],
     /* 0x33 */  [Debugger.INS.INX,   Debugger.TYPE_SP],
     /* 0x34 */  [Debugger.INS.INR,   Debugger.TYPE_M],
     /* 0x35 */  [Debugger.INS.DCR,   Debugger.TYPE_M],
     /* 0x36 */  [Debugger.INS.MVI,   Debugger.TYPE_M,    Debugger.TYPE_IMM],
     /* 0x37 */  [Debugger.INS.STC],
     /* 0x38 */  [Debugger.INS.NOP,   Debugger.TYPE_UNDOC],
-    /* 0x39 */  [Debugger.INS.DAD,   Debugger.TYPE_SP  | Debugger.TYPE_IN],  // REG_HL is the implied (unlisted) destination
-    /* 0x3A */  [Debugger.INS.LDA,   Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_MEM],
+    /* 0x39 */  [Debugger.INS.DAD,   Debugger.TYPE_HL,   Debugger.TYPE_SP  | Debugger.TYPE_IN],     // let's be more explicit about the operands
+    /* 0x3A */  [Debugger.INS.LDA,   Debugger.TYPE_IMM | Debugger.TYPE_WORD | Debugger.TYPE_MEM],
     /* 0x3B */  [Debugger.INS.DCX,   Debugger.TYPE_SP],
     /* 0x3C */  [Debugger.INS.INR,   Debugger.TYPE_A],
     /* 0x3D */  [Debugger.INS.DCR,   Debugger.TYPE_A],
@@ -622,15 +622,15 @@ if (DEBUGGER) {
     /* 0xE0 */  [Debugger.INS.RPO],
     /* 0xE1 */  [Debugger.INS.POP,   Debugger.TYPE_HL],
     /* 0xE2 */  [Debugger.INS.JPO,   Debugger.TYPE_IMM | Debugger.TYPE_WORD],
-    /* 0xE3 */  [Debugger.INS.XTHL],
+    /* 0xE3 */  [Debugger.INS.XTHL,  Debugger.TYPE_SP  | Debugger.TYPE_MEM,  Debugger.TYPE_HL],     // let's be more explicit about the operands
     /* 0xE4 */  [Debugger.INS.CPO,   Debugger.TYPE_IMM | Debugger.TYPE_WORD],
     /* 0xE5 */  [Debugger.INS.PUSH,  Debugger.TYPE_HL],
     /* 0xE6 */  [Debugger.INS.ANI,   Debugger.TYPE_IMM | Debugger.TYPE_BYTE],
     /* 0xE7 */  [Debugger.INS.RST],
     /* 0xE8 */  [Debugger.INS.RPE],
-    /* 0xE9 */  [Debugger.INS.PCHL],
+    /* 0xE9 */  [Debugger.INS.PCHL,  Debugger.TYPE_PC,   Debugger.TYPE_HL],                         // let's be more explicit about the operands
     /* 0xEA */  [Debugger.INS.JPE,   Debugger.TYPE_IMM | Debugger.TYPE_WORD],
-    /* 0xEB */  [Debugger.INS.XCHG],
+    /* 0xEB */  [Debugger.INS.XCHG,  Debugger.TYPE_HL,   Debugger.TYPE_DE],                         // let's be more explicit about the operands
     /* 0xEC */  [Debugger.INS.CPE,   Debugger.TYPE_IMM | Debugger.TYPE_WORD],
     /* 0xED */  [Debugger.INS.CALL,  Debugger.TYPE_IMM | Debugger.TYPE_WORD | Debugger.TYPE_UNDOC],
     /* 0xEE */  [Debugger.INS.XRI,   Debugger.TYPE_IMM | Debugger.TYPE_BYTE],
@@ -644,7 +644,7 @@ if (DEBUGGER) {
     /* 0xF6 */  [Debugger.INS.ORI,   Debugger.TYPE_IMM | Debugger.TYPE_BYTE],
     /* 0xF7 */  [Debugger.INS.RST],
     /* 0xF8 */  [Debugger.INS.RM],
-    /* 0xF9 */  [Debugger.INS.SPHL],
+    /* 0xF9 */  [Debugger.INS.SPHL,  Debugger.TYPE_SP,   Debugger.TYPE_HL],                         // let's be more explicit about the operands
     /* 0xFA */  [Debugger.INS.JM,    Debugger.TYPE_IMM | Debugger.TYPE_WORD],
     /* 0xFB */  [Debugger.INS.EI],
     /* 0xFC */  [Debugger.INS.CM,    Debugger.TYPE_IMM | Debugger.TYPE_WORD],
@@ -672,7 +672,7 @@ if (DEBUGGER) {
         "bus":      Messages.BUS,
         "mem":      Messages.MEM,
         "port":     Messages.PORT,
-        "timer":    Messages.TIMER,
+        "chipset":  Messages.CHIPSET,
         "keyboard": Messages.KEYBOARD,  // "kbd" is also allowed as shorthand for "keyboard"; see doMessages()
         "key":      Messages.KEYS,      // using "key" instead of "keys", since the latter is a method on JavasScript objects
         "video":    Messages.VIDEO,
@@ -1384,6 +1384,7 @@ if (DEBUGGER) {
             case Debugger.REG_E:
             case Debugger.REG_H:
             case Debugger.REG_L:
+            case Debugger.REG_M:
             case Debugger.REG_F:
                 cch = 2;
                 break;
@@ -1417,7 +1418,7 @@ if (DEBUGGER) {
                 n = cpu.regA;
                 break;
             case Debugger.REG_F:
-                n = cpu.getPS() & 0xff;
+                n = cpu.getPS();
                 break;
             case Debugger.REG_B:
                 n = cpu.regB;
@@ -1426,7 +1427,7 @@ if (DEBUGGER) {
                 n = cpu.regC;
                 break;
             case Debugger.REG_BC:
-                n = (cpu.regB << 8) | cpu.regC;
+                n = cpu.getBC();
                 break;
             case Debugger.REG_D:
                 n = cpu.regD;
@@ -1435,7 +1436,7 @@ if (DEBUGGER) {
                 n = cpu.regE;
                 break;
             case Debugger.REG_DE:
-                n = (cpu.regD << 8) | cpu.regE;
+                n = cpu.getDE();
                 break;
             case Debugger.REG_H:
                 n = cpu.regH;
@@ -1444,7 +1445,10 @@ if (DEBUGGER) {
                 n = cpu.regL;
                 break;
             case Debugger.REG_HL:
-                n = (cpu.regH << 8) | cpu.regL;
+                n = cpu.getHL();
+                break;
+            case Debugger.REG_M:
+                n = cpu.getByte(cpu.getHL());
                 break;
             case Debugger.REG_PS:
                 n = (cpu.regA << 8) | (cpu.getPS() & 0xff);
@@ -2430,31 +2434,38 @@ if (DEBUGGER) {
         var iIns = aOpDesc[0];
 
         var sOperands = "";
-        var typeSizeDefault = null;
         var sOpcode = asOpcodes[iIns];
         var cOperands = aOpDesc.length - 1;
+        var typeSizeDefault = Debugger.TYPE_NONE, type;
 
         for (var iOperand = 1; iOperand <= cOperands; iOperand++) {
 
             var disp, off, cch;
             var sOperand = "";
-            var type = aOpDesc[iOperand];
+
+            type = aOpDesc[iOperand];
             if (type === undefined) continue;
 
             var typeSize = type & Debugger.TYPE_SIZE;
-            if (typeSize == Debugger.TYPE_NONE) {
-                if (typeSizeDefault == null) continue;
-                typeSize = typeSizeDefault;
+            if (!typeSize) {
+                type |= typeSizeDefault;
+            } else {
+                typeSizeDefault = typeSize;
             }
-            typeSizeDefault = typeSize;
+
+            var typeOther = type & Debugger.TYPE_OTHER;
+            if (!typeOther) {
+                type |= (iOperand == 1? Debugger.TYPE_OUT : Debugger.TYPE_IN);
+            }
 
             var typeMode = type & Debugger.TYPE_MODE;
-            if (typeMode == Debugger.TYPE_IMM) {
+            if (typeMode & Debugger.TYPE_IMM) {
                 sOperand = this.getImmOperand(type, dbgAddr);
             }
-            else if (typeMode == Debugger.TYPE_REG) {
+            else if (typeMode & Debugger.TYPE_REG) {
                 sOperand = this.getRegOperand((type & Debugger.TYPE_IREG) >> 8, type, dbgAddr);
             }
+
             if (!sOperand || !sOperand.length) {
                 sOperands = "INVALID";
                 break;
@@ -2472,7 +2483,8 @@ if (DEBUGGER) {
             } while (dbgAddrIns.addr != dbgAddr.addr);
         }
 
-        sLine += str.pad(sBytes, 11);
+        sLine += str.pad(sBytes, 10);
+        sLine += (type & Debugger.TYPE_UNDOC)? '*' : ' ';
         sLine += str.pad(sOpcode, 7);
         if (sOperands) sLine += ' ' + sOperands;
 
@@ -2503,14 +2515,7 @@ if (DEBUGGER) {
 
         switch (typeSize) {
         case Debugger.TYPE_BYTE:
-            /*
-             * There's the occasional immediate byte we don't need to display (eg, the 0x0A
-             * following an AAM or AAD instruction), so we suppress the byte if it lacks a TYPE_IN
-             * or TYPE_OUT designation (and TYPE_BOTH, as the name implies, includes both).
-             */
-            if (type & Debugger.TYPE_BOTH) {
-                sOperand = str.toHex(this.getByte(dbgAddr, 1), 2);
-            }
+            sOperand = str.toHex(this.getByte(dbgAddr, 1), 2);
             break;
         case Debugger.TYPE_SBYTE:
             sOperand = str.toHex((this.getByte(dbgAddr, 1) << 24) >> 24, 4);
@@ -2521,6 +2526,9 @@ if (DEBUGGER) {
         default:
             sOperand = "imm(" + str.toHexWord(type) + ')';
             break;
+        }
+        if (type & Debugger.TYPE_MEM) {
+            sOperand = '[' + sOperand + ']';
         }
         return sOperand;
     };
@@ -2536,9 +2544,12 @@ if (DEBUGGER) {
      */
     Debugger.prototype.getRegOperand = function(iReg, type, dbgAddr)
     {
-        var typeMode = type & Debugger.TYPE_MODE;
-        var typeSize = type & Debugger.TYPE_SIZE;
-        return Debugger.REGS[iReg];
+        /*
+         * Although this breaks with assembler conventions, I'm going to experiment with some different
+         * mnemonics; specifically, "[HL]" instead of "M".  This is also more in keeping with how getImmOperand()
+         * displays memory references (ie, by enclosing them in brackets).
+         */
+        return iReg == Debugger.REG_M? "[HL]" : Debugger.REGS[iReg];
     };
 
     /**

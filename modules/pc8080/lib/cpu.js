@@ -82,6 +82,7 @@ function CPU(parmsCPU, nCyclesDefault)
 
     this.aCounts = {};
     this.aCounts.nCyclesPerSecond = nCycles;
+    this.aCounts.nVideoUpdates = 0;
 
     /*
      * nCyclesMultiplier replaces the old "speed" variable (0, 1, 2) and eliminates the need for
@@ -148,7 +149,7 @@ Component.subclass(CPU);
  *      this.aCounts.nCyclesNextStatusUpdate <= this.aCounts.nCyclesPerStatusUpdate
  */
 CPU.YIELDS_PER_SECOND         = 30;
-CPU.VIDEO_UPDATES_PER_SECOND  = 60;     // WARNING: if you change this, beware of side-effects in the Video component
+CPU.VIDEO_UPDATES_PER_SECOND  = 60;
 CPU.STATUS_UPDATES_PER_SECOND = 2;
 
 CPU.BUTTONS = ["power", "reset"];
@@ -173,13 +174,14 @@ CPU.prototype.initBus = function(cmp, bus, cpu, dbg)
         if (control) this.cmp.setBinding(null, CPU.BUTTONS[i], control);
     }
 
-    this.fpu = cmp.getMachineComponent("FPU");
+    /*
+     * We need to know the refresh rate (and corresponding interrupt rate, if any) of the Video component.
+     */
+    var video = cmp.getMachineComponent("Video");
+    this.refreshRate = video && video.getRefreshRate() || CPU.VIDEO_UPDATES_PER_SECOND;
 
     /*
-     * Attach the ChipSet component to the CPU so that it can obtain the IDT vector number
-     * of pending hardware interrupts in response to the ChipSet's updateINTR() notifications.
-     *
-     * We must also call chipset.updateAllTimers() periodically; stepCPU() takes care of that.
+     * Attach the ChipSet component to the CPU so that it can be notified whenever the CPU stops and starts.
      */
     this.chipset = cmp.getMachineComponent("ChipSet");
 
@@ -197,12 +199,11 @@ CPU.prototype.initBus = function(cmp, bus, cpu, dbg)
 /**
  * reset()
  *
- * This is a placeholder for reset (overridden by the CPUSim component).
- *
  * @this {CPU}
  */
 CPU.prototype.reset = function()
 {
+     this.aCounts.nVideoUpdates = 0;
 };
 
 /**
@@ -550,7 +551,7 @@ CPU.prototype.setBurstCycles = function(nCycles)
          * costs are being properly assessed, then we need to update nSnapCycles as well.
          *
          * TODO: If the delta is negative, we could simply ignore the request, but we must first carefully
-         * consider the impact on the ChipSet timers.
+         * consider the impact on the ChipSet timers, if any.
          */
         // if (DEBUG) this.nSnapCycles -= nDelta;
         this.nStepCycles -= nDelta;
@@ -606,7 +607,7 @@ CPU.prototype.calcCycles = function(fRecalc)
      * Calculate the most cycles we're allowed to execute in a single "burst"
      */
     var nMostUpdatesPerSecond = CPU.YIELDS_PER_SECOND;
-    if (nMostUpdatesPerSecond < CPU.VIDEO_UPDATES_PER_SECOND) nMostUpdatesPerSecond = CPU.VIDEO_UPDATES_PER_SECOND;
+    if (nMostUpdatesPerSecond < this.refreshRate) nMostUpdatesPerSecond = this.refreshRate;
     if (nMostUpdatesPerSecond < CPU.STATUS_UPDATES_PER_SECOND) nMostUpdatesPerSecond = CPU.STATUS_UPDATES_PER_SECOND;
 
     /*
@@ -622,7 +623,7 @@ CPU.prototype.calcCycles = function(fRecalc)
     this.aCounts.msPerYield = Math.round(1000 / CPU.YIELDS_PER_SECOND);
     this.aCounts.nCyclesPerBurst = Math.floor(this.aCounts.nCyclesPerSecond / nMostUpdatesPerSecond * vMultiplier);
     this.aCounts.nCyclesPerYield = Math.floor(this.aCounts.nCyclesPerSecond / CPU.YIELDS_PER_SECOND * vMultiplier);
-    this.aCounts.nCyclesPerVideoUpdate = Math.floor(this.aCounts.nCyclesPerSecond / CPU.VIDEO_UPDATES_PER_SECOND * vMultiplier);
+    this.aCounts.nCyclesPerVideoUpdate = Math.floor(this.aCounts.nCyclesPerSecond / this.refreshRate * vMultiplier);
     this.aCounts.nCyclesPerStatusUpdate = Math.floor(this.aCounts.nCyclesPerSecond / CPU.STATUS_UPDATES_PER_SECOND * vMultiplier);
 
     /*
@@ -807,7 +808,6 @@ CPU.prototype.calcSpeed = function(nCycles, msElapsed)
         this.aCounts.mhz = Math.round(nCycles / (msElapsed * 10)) / 100;
         if (msElapsed >= 86400000) {
             this.nTotalCycles = 0;
-            if (this.chipset) this.chipset.updateAllTimers(true);
             this.setSpeed();        // reset all counters once per day so that we never have to worry about overflow
         }
     }
@@ -965,12 +965,6 @@ CPU.prototype.runCPU = function(fUpdateFocus)
         do {
             var nCyclesPerBurst = (this.flags.fChecksum? 1 : this.aCounts.nCyclesPerBurst);
 
-            if (this.chipset) {
-                this.chipset.updateAllTimers();
-                nCyclesPerBurst = this.chipset.getTimerCycleLimit(0, nCyclesPerBurst);
-                nCyclesPerBurst = this.chipset.getRTCCycleLimit(nCyclesPerBurst);
-            }
-
             /*
              * nCyclesPerBurst is how many cycles we WANT to run on each iteration of stepCPU(), but it may run
              * significantly less (or slightly more, since we can't execute partial instructions).
@@ -1005,7 +999,8 @@ CPU.prototype.runCPU = function(fUpdateFocus)
             this.aCounts.nCyclesNextVideoUpdate -= nCycles;
             if (this.aCounts.nCyclesNextVideoUpdate <= 0) {
                 this.aCounts.nCyclesNextVideoUpdate += this.aCounts.nCyclesPerVideoUpdate;
-                if (this.cmp) this.cmp.updateVideo();
+                if (this.cmp) this.cmp.updateVideo(this.aCounts.nVideoUpdates++);
+                if (this.aCounts.nVideoUpdates > this.refreshRate) this.aCounts.nVideoUpdates = 0;
             }
 
             this.aCounts.nCyclesNextStatusUpdate -= nCycles;
@@ -1117,7 +1112,7 @@ CPU.prototype.stopCPU = function(fComplete)
 CPU.prototype.updateCPU = function(fForce)
 {
     if (this.cmp) {
-        this.cmp.updateVideo(fForce);
+        this.cmp.updateVideo(-1);
         this.cmp.updateStatus(fForce);
     }
 };

@@ -148,6 +148,7 @@
     "./modules/pc8080/lib/cpu.js",
     "./modules/pc8080/lib/cpusim.js",
     "./modules/pc8080/lib/cpuops.js",
+    "./modules/pc8080/lib/chipset.js",
     "./modules/pc8080/lib/rom.js",
     "./modules/pc8080/lib/ram.js",
     "./modules/pc8080/lib/keyboard.js",

@@ -92,27 +92,21 @@ var CPUDef = {
         1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1
     ],
     /*
-     * Bit values for opFlags, which are all reset to zero prior to each instruction
-     */
-    OPFLAG: {
-        NOREAD:     0x0001,     // disable memory reads for the remainder of the current instruction
-        NOWRITE:    0x0002,     // disable memory writes for the remainder of the current instruction
-        NOINTR:     0x0004      // a segreg has been set, or a prefix, or an STI (delay INTR acknowledgement)
-    },
-    /*
      * Bit values for intFlags
      */
     INTFLAG: {
         NONE:       0x00,
-        INTR:       0x01,       // h/w interrupt requested
-        HALT:       0x04        // halt (HLT) requested
+        INTL:       0x07,       // last interrupt level requested
+        INTR:       0x08,       // set if interrupt has been requested
+        HALT:       0x10        // halt requested; see the HLT opcode
     },
     /*
      * Opcode definitions
      */
     OPCODE: {
         ACI:    0xCE,           // PS.ALL
-        CALL:   0xCD
+        CALL:   0xCD,
+        RST0:   0xC7
         // to be continued....
     }
 };

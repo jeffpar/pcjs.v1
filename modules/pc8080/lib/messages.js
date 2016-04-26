@@ -37,7 +37,7 @@ var Messages = {
     BUS:        0x00000040,
     MEM:        0x00000080,
     PORT:       0x00000100,
-    TIMER:      0x00000800,
+    CHIPSET:    0x00008000,
     KEYBOARD:   0x00010000,
     KEYS:       0x00020000,
     VIDEO:      0x00040000,
