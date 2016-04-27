@@ -3707,6 +3707,7 @@ if (DEBUGGER) {
             sMsg = "halting";
             this.stopCPU();
         } else {
+            if (this.isBusy(true)) return;
             sMsg = "already halted";
         }
         if (!fQuiet) this.println(sMsg);

@@ -628,7 +628,7 @@ CPUDef.opSTC = function()
 CPUDef.opDADSP = function()
 {
     var w;
-    this.setSP(w = this.getHL() + this.getSP());
+    this.setHL(w = this.getHL() + this.getSP());
     this.resultZeroCarry = (this.resultZeroCarry & 0xff) | ((w >> 8) & 0x100);
     this.nStepCycles -= 10;
 };

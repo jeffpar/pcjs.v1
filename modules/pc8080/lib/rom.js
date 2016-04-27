@@ -115,7 +115,29 @@ function ROM(parmsROM)
 
 Component.subclass(ROM);
 
-ROM.CPM_VECTORS = [0x0000, 0x0005];
+ROM.CPM = {
+    BIOS: {
+        VECTOR:         0x0000
+    },
+    BDOS: {
+        VECTOR:         0x0005,
+        FUNC: {                         // function number (specified in regC)
+            RESET:      0x00,
+            CON_READ:   0x01,           // output: A = L = ASCII character
+            CON_WRITE:  0x02,           // input: E = ASCII character
+            AUX_READ:   0x03,           // output: A = L = ASCII character
+            AUX_WRITE:  0x04,           // input: E = ASCII character
+            PRN_WRITE:  0x05,           // input: E = ASCII character
+            MEM_SIZE:   0x06,           // output: base address of CCP (Console Command Processor), but which register? (perhaps moot if this was CP/M 1.3 only...)
+            CON_IO:     0x06,           // input: E = ASCII character (or 0xFF to return ASCII character in A)
+            GET_IOBYTE: 0x07,
+            SET_IOBYTE: 0x08,
+            STR_WRITE:  0x09            // input: DE = address of string
+        }
+    }
+};
+
+ROM.CPM.VECTORS = [ROM.CPM.BIOS.VECTOR, ROM.CPM.BDOS.VECTOR];
 
 /*
  * NOTE: There's currently no need for this component to have a reset() function, since
@@ -344,12 +366,14 @@ ROM.prototype.addROM = function(addr)
              * (namely, 0x0000, which is the CP/M reset vector, and 0x0005, which is the CP/M system call vector) and
              * then telling the CPU to call us whenever a HLT occurs, so we can check PC for one of these addresses.
              */
-            for (i = 0; i < ROM.CPM_VECTORS.length; i++) {
-                this.bus.setByteDirect(ROM.CPM_VECTORS[i], CPUDef.OPCODE.HLT);
+            for (i = 0; i < ROM.CPM.VECTORS.length; i++) {
+                this.bus.setByteDirect(ROM.CPM.VECTORS[i], CPUDef.OPCODE.HLT);
             }
 
             this.cpu.addHaltCheck(function(rom) {
-                return function(addr) {rom.checkCPMVector(addr)};
+                return function(addr) {
+                    return rom.checkCPMVector(addr)
+                };
             }(this));
 
             this.cpu.setReset(addr);
@@ -371,16 +395,86 @@ ROM.prototype.addROM = function(addr)
  */
 ROM.prototype.checkCPMVector = function(addr)
 {
-    var i = ROM.CPM_VECTORS.indexOf(addr);
+    var i = ROM.CPM.VECTORS.indexOf(addr);
     if (i >= 0) {
-        if (this.dbg) {
-            this.println("CP/M vector " + str.toHexWord(addr));
-            this.cpu.setPC(addr);           // this is purely for the Debugger's benefit, to show the HLT
-            this.dbg.stopCPU();
+        var fCPM = false;
+        var cpu = this.cpu;
+        var dbg = this.dbg;
+        if (addr == ROM.CPM.BDOS.VECTOR) {
+            fCPM = true;
+            switch(cpu.regC) {
+            case ROM.CPM.BDOS.FUNC.CON_WRITE:
+                this.writeCPMString(this.getCPMChar(cpu.regE));
+                break;
+            case ROM.CPM.BDOS.FUNC.STR_WRITE:
+                this.writeCPMString(this.getCPMString(cpu.getDE(), '$'));
+                break;
+            default:
+                fCPM = false;
+                break;
+            }
+        }
+        if (fCPM) {
+            CPUDef.opRET.call(cpu);         // for recognized calls, automatically return
+        }
+        else if (dbg) {
+            this.println("\nCP/M vector " + str.toHexWord(addr));
+            cpu.setPC(addr);                // this is purely for the Debugger's benefit, to show the HLT
+            dbg.stopCPU();
         }
         return true;
     }
     return false;
+};
+
+
+/**
+ * getCPMChar(ch)
+ *
+ * @this {ROM}
+ * @param {number} ch
+ * @return {string}
+ */
+ROM.prototype.getCPMChar = function(ch)
+{
+    return String.fromCharCode(ch);
+};
+
+/**
+ * getCPMString(addr, chEnd)
+ *
+ * @this {ROM}
+ * @param {number} addr (of a string)
+ * @param {string|number} [chEnd] (terminating character, default is 0)
+ * @return {string}
+ */
+ROM.prototype.getCPMString = function(addr, chEnd)
+{
+    var s = "";
+    var cchMax = 255;
+    var bEnd = chEnd && chEnd.length && chEnd.charCodeAt(0) || chEnd || 0;
+    while (cchMax--) {
+        var b = this.cpu.getByte(addr++);
+        if (b == bEnd) break;
+        s += String.fromCharCode(b);
+    }
+    return s;
+};
+
+/**
+ * writeCPMString(s)
+ *
+ * @this {ROM}
+ * @param {string} s
+ */
+ROM.prototype.writeCPMString = function(s)
+{
+    s = s.replace(/\r/g, '');
+    if (this.controlPrint) {
+        this.controlPrint.value += s;
+        this.controlPrint.scrollTop = this.controlPrint.scrollHeight;
+    }
+    this.log(s);
 };
 
 /**

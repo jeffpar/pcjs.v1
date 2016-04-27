@@ -4,8 +4,8 @@
 	<name pos="center">8080 Test Machine</name>
 	<computer id="computer" busWidth="16"/>
 	<cpu id="cpu8080" model="8080" cycles="2000000"/>
-	<rom id="romTest" addr="0x0100" size="0x0400" file="/devices/pc8080/rom/test/8080PRE.json" writable="true"/>
-	<ram id="ramTest" addr="0x0500" size="0xFB00"/>
+	<rom id="romTest" addr="0x0100" size="0x1200" file="/devices/pc8080/rom/test/8080EXER.json" writable="true"/>
+	<ram id="ramTest" addr="0x1300" size="0xED00"/>
 	<panel ref="/devices/pc8080/panel/wide.xml"/>
-	<debugger id="debugger" commands="s 8086"/>
+	<debugger id="debugger"/>
 </machine>
