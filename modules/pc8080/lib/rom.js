@@ -112,7 +112,7 @@ function ROM(parmsROM)
 
 Component.subclass(ROM);
 
-ROM.FAKECPM_VECTORS = [0x0000, 0x0005];
+ROM.CPM_VECTORS = [0x0000, 0x0005];
 
 /*
  * NOTE: There's currently no need for this component to have a reset() function, since
@@ -337,16 +337,16 @@ ROM.prototype.addROM = function(addr)
         if (this.fWritable && addr == 0x100) {
             /*
              * Here's where we enable our "Fake CP/M" support, triggered by the user loading a "writable ROM" image
-             * at offset 0x100.  Fake CP/M support works by installing HLT opcodes at well-known hard-coded CP/M offsets
+             * at offset 0x100.  Fake CP/M support works by installing HLT opcodes at well-known CP/M addresses
              * (namely, 0x0000, which is the CP/M reset vector, and 0x0005, which is the CP/M system call vector) and
-             * then telling the CPU to call us whenever a HLT occurs, so we can check PC for one of these vectors.
+             * then telling the CPU to call us whenever a HLT occurs, so we can check PC for one of these addresses.
              */
-            for (i = 0; i < ROM.FAKECPM_VECTORS.length; i++) {
-                this.bus.setByteDirect(ROM.FAKECPM_VECTORS[i], CPUDef.OPCODE.HLT);
+            for (i = 0; i < ROM.CPM_VECTORS.length; i++) {
+                this.bus.setByteDirect(ROM.CPM_VECTORS[i], CPUDef.OPCODE.HLT);
             }
 
             this.cpu.addHaltCheck(function(rom) {
-                return function(addr) {rom.checkHalt(addr)};
+                return function(addr) {rom.checkCPMVector(addr)};
             }(this));
 
             this.cpu.setReset(addr);
@@ -360,18 +360,21 @@ ROM.prototype.addROM = function(addr)
 };
 
 /**
- * checkHalt(addr)
+ * checkCPMVector(addr)
  *
  * @this {ROM}
  * @param {number} addr (of the HLT opcode)
  * @return {boolean} true if special processing performed, false if not
  */
-ROM.prototype.checkHalt = function(addr)
+ROM.prototype.checkCPMVector = function(addr)
 {
-    if (this.dbg) {
-        this.println("CP/M vector " + str.toHexWord(addr));
-        this.cpu.setPC(addr);           // this is purely for the Debugger's benefit, to show the HLT
-        this.dbg.stopCPU();
+    var i = ROM.CPM_VECTORS.indexOf(addr);
+    if (i >= 0) {
+        if (this.dbg) {
+            this.println("CP/M vector " + str.toHexWord(addr));
+            this.cpu.setPC(addr);           // this is purely for the Debugger's benefit, to show the HLT
+            this.dbg.stopCPU();
+        }
         return true;
     }
     return false;
