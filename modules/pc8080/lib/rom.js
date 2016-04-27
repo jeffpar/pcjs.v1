@@ -60,7 +60,10 @@ if (NODE) {
  *
  * Finally, while making ROM "writable" may seem a contradiction in terms, I want to be able to load selected
  * CP/M binary files into memory purely for testing purposes, and the RAM component has no "file" option, so the
- * simplest solution was to add the option to load binary files into memory as "writable ROMs".
+ * simplest solution was to add the option to load binary files into memory as "writable" ROMs.
+ *
+ * Moreover, if a "writable" ROM is installed at addr 0x100, that triggers our "Fake CP/M" support, providing
+ * a quick-and-dirty means of loading simple CP/M test binaries.  See addROM() for details.
  *
  * @constructor
  * @extends Component
@@ -336,7 +339,7 @@ ROM.prototype.addROM = function(addr)
         }
         if (this.fWritable && addr == 0x100) {
             /*
-             * Here's where we enable our "Fake CP/M" support, triggered by the user loading a "writable ROM" image
+             * Here's where we enable our "Fake CP/M" support, triggered by the user loading a "writable" ROM image
              * at offset 0x100.  Fake CP/M support works by installing HLT opcodes at well-known CP/M addresses
              * (namely, 0x0000, which is the CP/M reset vector, and 0x0005, which is the CP/M system call vector) and
              * then telling the CPU to call us whenever a HLT occurs, so we can check PC for one of these addresses.
