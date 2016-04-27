@@ -101,6 +101,12 @@ function CPUSim(parmsCPU)
     this.nBlockShift = this.nBlockSize = this.nBlockLimit = this.nBlockTotal = this.nBlockMask = 0;
 
     /*
+     * Array of halt handlers, if any (see addHaltCheck)
+     */
+    this.afnHalt = [];
+    this.addrReset = 0x0000;
+
+    /*
      * This initial resetRegs() call is important to create all the registers, so that if/when we call restore(),
      * it will have something to fill in.
      */
@@ -131,12 +137,20 @@ CPUSim.prototype.initMemory = function(aBusBlocks, nBlockShift, nBusMask)
 };
 
 /**
+ * addHaltCheck(fn)
+ *
+ * Records a function that will be called during HLT opcode processing.
+ *
+ * @this {CPUSim}
+ * @param {function(number)} fn
+ */
+CPUSim.prototype.addHaltCheck = function(fn)
+{
+    this.afnHalt.push(fn);
+};
+
+/**
  * addMemBreak(addr, fWrite)
- *
- * NOTE: addMemBreak() could be merged with addMemCheck(), but the new merged interface would
- * have to provide one additional parameter indicating whether the Debugger or the CPU is the client.
- *
- * For now, this is simply a DEBUGGER-only interface.
  *
  * @this {CPUSim}
  * @param {number} addr
@@ -153,11 +167,6 @@ CPUSim.prototype.addMemBreak = function(addr, fWrite)
 /**
  * removeMemBreak(addr, fWrite)
  *
- * NOTE: removeMemBreak() could be merged with removeMemCheck(), but the new merged interface would
- * have to provide one additional parameter indicating whether the Debugger or the CPU is the client.
- *
- * For now, this is simply a DEBUGGER-only interface.
- *
  * @this {CPUSim}
  * @param {number} addr
  * @param {boolean} fWrite is true for a memory write breakpoint, false for a memory read breakpoint
@@ -168,41 +177,6 @@ CPUSim.prototype.removeMemBreak = function(addr, fWrite)
         var iBlock = addr >>> this.nBlockShift;
         this.aBusBlocks[iBlock].removeBreakpoint(addr & this.nBlockLimit, fWrite);
     }
-};
-
-/**
- * addMemCheck(addr, fWrite)
- *
- * These functions provide Debug register functionality to the CPU by leveraging the same Memory block-based
- * breakpoint support originally created for our built-in Debugger.  Only minimal changes were required to the
- * Memory component, by adding additional checkMemoryException() call-outs from the "checked" Memory access
- * functions.
- *
- * Note that those call-outs occur only AFTER our own Debugger (if present) has checked the address and has
- * passed on it, because we want our own Debugger's breakpoints to take precedence over any breakpoints that
- * the emulated machine may have enabled.
- *
- * @this {CPUSim}
- * @param {number} addr
- * @param {boolean} fWrite is true for a memory write check, false for a memory read check
- */
-CPUSim.prototype.addMemCheck = function(addr, fWrite)
-{
-    var iBlock = addr >>> this.nBlockShift;
-    this.aBusBlocks[iBlock].addBreakpoint(addr & this.nBlockLimit, fWrite, this);
-};
-
-/**
- * removeMemCheck(addr, fWrite)
- *
- * @this {CPUSim}
- * @param {number} addr
- * @param {boolean} fWrite is true for a memory write check, false for a memory read check
- */
-CPUSim.prototype.removeMemCheck = function(addr, fWrite)
-{
-    var iBlock = addr >>> this.nBlockShift;
-    this.aBusBlocks[iBlock].removeBreakpoint(addr & this.nBlockLimit, fWrite);
 };
 
 /**
@@ -244,7 +218,7 @@ CPUSim.prototype.resetRegs = function()
     this.regH = 0;
     this.regL = 0;
     this.setSP(0);
-    this.setPC(0);
+    this.setPC(this.addrReset);
 
     /*
      * This resets the Processor Status flags (regPS), along with all the internal "result registers";
@@ -258,6 +232,18 @@ CPUSim.prototype.resetRegs = function()
      * that requires us to wait for a hardware interrupt (INTFLAG.INTR) before continuing execution.
      */
     this.intFlags = CPUDef.INTFLAG.NONE;
+};
+
+/**
+ * setReset(addr)
+ *
+ * @this {CPUSim}
+ * @param {number} addr
+ */
+CPUSim.prototype.setReset = function(addr)
+{
+    this.addrReset = addr;
+    this.setPC(addr);
 };
 
 /**
@@ -336,13 +322,16 @@ CPUSim.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
     case "A":
     case "B":
     case "C":
+    case "BC":
     case "D":
     case "E":
+    case "DE":
     case "H":
     case "L":
+    case "HL":
     case "SP":
     case "PC":
-    case "F":
+    case "PS":
     case "SF":
     case "ZF":
     case "AF":
@@ -1047,14 +1036,17 @@ CPUSim.prototype.updateStatus = function(fForce)
             this.updateReg("A", this.regA);
             this.updateReg("B", this.regB);
             this.updateReg("C", this.regC);
+            this.updateReg("BC", this.getBC(), 4);
             this.updateReg("D", this.regD);
             this.updateReg("E", this.regE);
+            this.updateReg("DE", this.getDE(), 4);
             this.updateReg("H", this.regH);
             this.updateReg("L", this.regL);
+            this.updateReg("HL", this.getHL(), 4);
             this.updateReg("SP", this.getSP(), 4);
             this.updateReg("PC", this.getPC(), 4);
             var regPS = this.getPS();
-            this.updateReg("F", regPS, 2);
+            this.updateReg("PS", regPS, 4);
             this.updateReg("SF", (regPS & CPUDef.PS.SF), 1);
             this.updateReg("ZF", (regPS & CPUDef.PS.ZF), 1);
             this.updateReg("AF", (regPS & CPUDef.PS.AF), 1);

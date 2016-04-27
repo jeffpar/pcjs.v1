@@ -38,6 +38,7 @@ if (NODE) {
     var DumpAPI     = require("../../shared/lib/dumpapi");
     var Component   = require("../../shared/lib/component");
     var Memory      = require("./memory");
+    var CPUDef      = require("./cpudef");
 }
 
 /**
@@ -49,13 +50,17 @@ if (NODE) {
  *      size: amount of ROM, in bytes
  *      alias: physical alias address (null if none)
  *      file: name of ROM data file
- *      notify: ID of a component to notify once the ROM is in place (optional)
+ *      writable: true to make ROM writable (default is false)
  *
  * NOTE: The ROM data will not be copied into place until the Bus is ready (see initBus()) AND the
  * ROM data file has finished loading (see doneLoad()).
  *
  * Also, while the size parameter may seem redundant, I consider it useful to confirm that the ROM you received
  * is the ROM you expected.
+ *
+ * Finally, while making ROM "writable" may seem a contradiction in terms, I want to be able to load selected
+ * CP/M binary files into memory purely for testing purposes, and the RAM component has no "file" option, so the
+ * simplest solution was to add the option to load binary files into memory as "writable ROMs".
  *
  * @constructor
  * @extends Component
@@ -68,6 +73,7 @@ function ROM(parmsROM)
     this.abROM = null;
     this.addrROM = parmsROM['addr'];
     this.sizeROM = parmsROM['size'];
+    this.fWritable = parmsROM['writable'];
 
     /*
      * The new 'alias' property can now be EITHER a single physical address (like 'addr') OR an array of
@@ -105,6 +111,8 @@ function ROM(parmsROM)
 }
 
 Component.subclass(ROM);
+
+ROM.FAKECPM_VECTORS = [0x0000, 0x0005];
 
 /*
  * NOTE: There's currently no need for this component to have a reset() function, since
@@ -268,6 +276,12 @@ ROM.prototype.copyROM = function()
             this.setReady();
         }
         else if (this.abROM && this.bus) {
+            /*
+             * If no explicit size was specified, then use whatever the actual size is.
+             */
+            if (!this.sizeROM) {
+                this.sizeROM = this.abROM.length;
+            }
             if (this.abROM.length != this.sizeROM) {
                 /*
                  * Note that setError() sets the component's fError flag, which in turn prevents setReady() from
@@ -314,17 +328,52 @@ ROM.prototype.copyROM = function()
  */
 ROM.prototype.addROM = function(addr)
 {
-    if (this.bus.addMemory(addr, this.sizeROM, Memory.TYPE.ROM)) {
+    if (this.bus.addMemory(addr, this.sizeROM, this.fWritable?  Memory.TYPE.RAM : Memory.TYPE.ROM)) {
         if (DEBUG) this.log("addROM(): copying ROM to " + str.toHexLong(addr) + " (" + str.toHexLong(this.abROM.length) + " bytes)");
-        var bto = null;
-        for (var off = 0; off < this.abROM.length; off++) {
-            this.bus.setByteDirect(addr + off, this.abROM[off]);
+        var i;
+        for (i = 0; i < this.abROM.length; i++) {
+            this.bus.setByteDirect(addr + i, this.abROM[i]);
+        }
+        if (this.fWritable && addr == 0x100) {
+            /*
+             * Here's where we enable our "Fake CP/M" support, triggered by the user loading a "writable ROM" image
+             * at offset 0x100.  Fake CP/M support works by installing HLT opcodes at well-known hard-coded CP/M offsets
+             * (namely, 0x0000, which is the CP/M reset vector, and 0x0005, which is the CP/M system call vector) and
+             * then telling the CPU to call us whenever a HLT occurs, so we can check PC for one of these vectors.
+             */
+            for (i = 0; i < ROM.FAKECPM_VECTORS.length; i++) {
+                this.bus.setByteDirect(ROM.FAKECPM_VECTORS[i], CPUDef.OPCODE.HLT);
+            }
+
+            this.cpu.addHaltCheck(function(rom) {
+                return function(addr) {rom.checkHalt(addr)};
+            }(this));
+
+            this.cpu.setReset(addr);
         }
         return true;
     }
     /*
      * We don't need to report an error here, because addMemory() already takes care of that.
      */
+    return false;
+};
+
+/**
+ * checkHalt(addr)
+ *
+ * @this {ROM}
+ * @param {number} addr (of the HLT opcode)
+ * @return {boolean} true if special processing performed, false if not
+ */
+ROM.prototype.checkHalt = function(addr)
+{
+    if (this.dbg) {
+        this.println("CP/M vector " + str.toHexWord(addr));
+        this.cpu.setPC(addr);           // this is purely for the Debugger's benefit, to show the HLT
+        this.dbg.stopCPU();
+        return true;
+    }
     return false;
 };
 

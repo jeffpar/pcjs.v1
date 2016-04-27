@@ -305,6 +305,12 @@ ROM.prototype.copyROM = function()
             this.setReady();
         }
         else if (this.abROM && this.bus) {
+            /*
+             * If no explicit size was specified, then use whatever the actual size is.
+             */
+            if (!this.sizeROM) {
+                this.sizeROM = this.abROM.length;
+            }
             if (this.abROM.length != this.sizeROM) {
                 /*
                  * Note that setError() sets the component's fError flag, which in turn prevents setReady() from

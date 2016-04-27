@@ -903,10 +903,16 @@
 				<xsl:otherwise/>
 			</xsl:choose>
 		</xsl:variable>
+		<xsl:variable name="writable">
+			<xsl:choose>
+				<xsl:when test="@writable"><xsl:value-of select="@writable"/></xsl:when>
+				<xsl:otherwise>false</xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
 		<xsl:call-template name="component">
 			<xsl:with-param name="machine" select="$machine"/>
 			<xsl:with-param name="class">rom</xsl:with-param>
-			<xsl:with-param name="parms">,addr:<xsl:value-of select="$addr"/>,size:<xsl:value-of select="$size"/>,alias:<xsl:value-of select="$alias"/>,file:'<xsl:value-of select="$file"/>',notify:'<xsl:value-of select="$notify"/>'</xsl:with-param>
+			<xsl:with-param name="parms">,addr:<xsl:value-of select="$addr"/>,size:<xsl:value-of select="$size"/>,alias:<xsl:value-of select="$alias"/>,file:'<xsl:value-of select="$file"/>',notify:'<xsl:value-of select="$notify"/>',writable:<xsl:value-of select="$writable"/></xsl:with-param>
 		</xsl:call-template>
 	</xsl:template>
 
@@ -1141,7 +1147,7 @@
 			<xsl:choose>
 				<xsl:when test="@buswidth"><xsl:value-of select="@buswidth"/></xsl:when>
 				<xsl:when test="@busWidth"><xsl:value-of select="@busWidth"/></xsl:when>
-				<xsl:otherwise>20</xsl:otherwise>
+				<xsl:otherwise>0</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
 		<xsl:variable name="resume">

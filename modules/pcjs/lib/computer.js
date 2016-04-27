@@ -195,7 +195,7 @@ function Computer(parmsComputer, parmsMachine, fSuspended) {
     /*
      * Initialize the Bus component
      */
-    this.bus = new Bus({'id': this.idMachine + '.bus', 'buswidth': this.nBusWidth}, this.cpu, this.dbg);
+    this.bus = new Bus({'id': this.idMachine + '.bus', 'busWidth': this.nBusWidth}, this.cpu, this.dbg);
 
     /*
      * Iterate through all the components and connect them to the Control Panel, if any

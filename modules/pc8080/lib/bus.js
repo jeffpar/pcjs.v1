@@ -78,7 +78,7 @@ function Bus(parmsBus, cpu, dbg)
     this.cpu = cpu;
     this.dbg = dbg;
 
-    this.nBusWidth = parmsBus['buswidth'] || 16;
+    this.nBusWidth = parmsBus['busWidth'] || 16;
 
     /*
      * Compute all Bus memory block parameters, based on the width of the bus.
@@ -108,6 +108,7 @@ function Bus(parmsBus, cpu, dbg)
      *
      *      Bus Width                       Block Shift     Block Size
      *      ---------                       -----------     ----------
+     *      16 bits (64Kb address space):   10              1Kb (64 maximum blocks)
      *      20 bits (1Mb address space):    12              4Kb (256 maximum blocks)
      *      24 bits (16Mb address space):   14              16Kb (1K maximum blocks)
      *      32 bits (4Gb address space);    15              32Kb (128K maximum blocks)
@@ -119,7 +120,7 @@ function Bus(parmsBus, cpu, dbg)
      */
     this.addrTotal = Math.pow(2, this.nBusWidth);
     this.nBusLimit = this.nBusMask = (this.addrTotal - 1) | 0;
-    this.nBlockShift = (this.nBusWidth <= 20)? 12 : (this.nBusWidth <= 24? 14 : 15);
+    this.nBlockShift = (this.nBusWidth <= 16)? 10 : ((this.nBusWidth <= 20)? 12 : (this.nBusWidth <= 24? 14 : 15));
     this.nBlockSize = 1 << this.nBlockShift;
     this.nBlockLen = this.nBlockSize >> 2;
     this.nBlockLimit = this.nBlockSize - 1;
@@ -268,16 +269,15 @@ Bus.prototype.powerUp = function(data, fRepower)
  * allocations, etc.
  *
  * We've relaxed some of the original requirements (ie, that addresses must start at a
- * block-granular address, or that sizes must be equal to exactly one or more blocks), because
- * machines with large block sizes can make it impossible to load certain ROMs at at their
- * required addresses.
+ * block-granular address, or that sizes must be equal to exactly one or more blocks),
+ * because machines with large block sizes can make it impossible to load certain ROMs at
+ * their required addresses.  Every allocation still allocates a whole number of blocks.
  *
  * Even so, Bus memory management does NOT provide a general-purpose heap.  Most memory
- * allocations occur during machine initialization and never change.  The only notable
- * exception is the Video frame buffer, which ranges from 4Kb (MDA) to 16Kb (CGA) to
- * 32Kb/64Kb/128Kb (EGA), and only the EGA changes its buffer address post-initialization.
+ * allocations occur during machine initialization and never change.  In particular, there
+ * is NO support for removing partial-block allocations.
  *
- * Each Memory block keeps track of a single address (addr) and length (used), indicating
+ * Each Memory block keeps track of a start address (addr) and length (used), indicating
  * the used space within the block; any free space that precedes or follows that used space
  * can be allocated later, by simply extending the beginning or ending of the previously used
  * space.  However, any holes that might have existed between the original allocation and an
@@ -293,17 +293,18 @@ Bus.prototype.addMemory = function(addr, size, type)
 {
     var iBlock = addr >>> this.nBlockShift;
     while (size > 0 && iBlock < this.aMemBlocks.length) {
+
         var block = this.aMemBlocks[iBlock];
         var addrBlock = iBlock * this.nBlockSize;
-        var sizeBlock = size > this.nBlockSize? this.nBlockSize : size;
+        var sizeBlock = this.nBlockSize - (addr - addrBlock);
+        if (sizeBlock > size) sizeBlock = size;
 
         if (block && block.size) {
             if (block.type == type) {
                 /*
-                 * Where there is already a block with a non-zero size, we can allow the allocation only if:
+                 * Where there is already a similar block with a non-zero size, we allow the allocation only if:
                  *
-                 *   1) addr + size <= block.addr (the request precedes the used portion of the current block)
-                 * or:
+                 *   1) addr + size <= block.addr (the request precedes the used portion of the current block), or
                  *   2) addr >= block.addr + block.used (the request follows the used portion of the current block)
                  */
                 if (addr + size <= block.addr) {
@@ -315,23 +316,27 @@ Bus.prototype.addMemory = function(addr, size, type)
                     var sizeAvail = block.size - (addr - addrBlock);
                     if (sizeAvail > size) sizeAvail = size;
                     block.used = addr - block.addr + sizeAvail;
-                    size -= sizeAvail;
                     addr = addrBlock + this.nBlockSize;
+                    size -= sizeAvail;
+                    iBlock++;
                     continue;
                 }
             }
             return this.reportError(Bus.ERROR.ADD_MEM_INUSE, addr, size);
         }
-        var blockOld = this.aMemBlocks[iBlock];
+
         var blockNew = new Memory(addr, sizeBlock, this.nBlockSize, type);
-        blockNew.copyBreakpoints(this.dbg, blockOld);
+        blockNew.copyBreakpoints(this.dbg, block);
         this.aMemBlocks[iBlock++] = blockNew;
+
         addr = addrBlock + this.nBlockSize;
         size -= sizeBlock;
     }
+
     if (size <= 0) {
         return true;
     }
+
     return this.reportError(Bus.ERROR.ADD_MEM_BADRANGE, addr, size);
 };
 

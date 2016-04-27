@@ -1299,23 +1299,37 @@ CPUDef.opHLT = function()
      * we are signalling to stepCPU() that it's free to end the current burst AND that it should not
      * execute any more instructions until checkINTR() indicates a hardware interrupt is requested.
      */
+    var addr = this.getPC() - 1;
+
+    /*
+     * If any HLT check functions are installed, call them, and if any of them return true, then
+     * immediately stop HLT processing.
+     */
+    if (this.afnHalt.length) {
+        for (var i = 0; i < this.afnHalt.length; i++) {
+            if (this.afnHalt[i](addr)) return;
+        }
+    }
+
     this.intFlags |= CPUDef.INTFLAG.HALT;
     this.nStepCycles -= 7;
+
     /*
      * If a Debugger is present and the HALT message category is enabled, then we REALLY halt the CPU,
      * on the theory that whoever's using the Debugger would like to see HLTs.
      */
     if (DEBUGGER && this.dbg && this.messageEnabled(Messages.HALT)) {
-        this.setPC(this.getPC() - 1);   // this is purely for the Debugger's benefit, to show the HLT
+        this.setPC(addr);               // this is purely for the Debugger's benefit, to show the HLT
         this.dbg.stopCPU();
         return;
     }
+
     /*
      * We also REALLY halt the machine if interrupts have been disabled, since that means it's dead
      * in the water (we have no NMI generation mechanism at the moment).
      */
     if (!this.getIF()) {
-        if (DEBUGGER && this.dbg) this.setPC(this.getPC() - 1);
+        if (DEBUGGER && this.dbg) this.setPC(addr);
         this.stopCPU();
     }
 };

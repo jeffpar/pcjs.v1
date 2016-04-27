@@ -104,6 +104,7 @@ var CPUDef = {
      * Opcode definitions
      */
     OPCODE: {
+        HLT:    0x76,
         ACI:    0xCE,           // PS.ALL
         CALL:   0xCD,
         RST0:   0xC7
