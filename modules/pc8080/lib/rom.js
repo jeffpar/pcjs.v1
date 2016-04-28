@@ -474,7 +474,6 @@ ROM.prototype.writeCPMString = function(s)
         this.controlPrint.value += s;
         this.controlPrint.scrollTop = this.controlPrint.scrollHeight;
     }
-    this.log(s);
 };
 
 /**

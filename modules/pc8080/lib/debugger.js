@@ -952,7 +952,7 @@ if (DEBUGGER) {
      */
     Debugger.prototype.newAddr = function(addr)
     {
-        return {addr: addr || 0, fTemporary: false};
+        return {addr: addr, fTemporary: false};
     };
 
     /**

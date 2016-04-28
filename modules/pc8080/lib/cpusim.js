@@ -716,7 +716,7 @@ CPUSim.prototype.setPS = function(regPS)
 CPUSim.prototype.addByte = function(src)
 {
     this.resultAuxOverflow = this.regA ^ src;
-    return (this.resultZeroCarry = this.resultParitySign = this.regA + src) & 0xff;
+    return this.resultParitySign = (this.resultZeroCarry = this.regA + src) & 0xff;
 };
 
 /**
@@ -729,11 +729,14 @@ CPUSim.prototype.addByte = function(src)
 CPUSim.prototype.addByteCarry = function(src)
 {
     this.resultAuxOverflow = this.regA ^ src;
-    return (this.resultZeroCarry = this.resultParitySign = this.regA + src + ((this.resultZeroCarry & 0x100)? 1 : 0)) & 0xff;
+    return this.resultParitySign = (this.resultZeroCarry = this.regA + src + ((this.resultZeroCarry & 0x100)? 1 : 0)) & 0xff;
 };
 
 /**
  * andByte(src)
+ *
+ * Ordinarily, one would expect the Auxiliary Carry flag (AF) to be clear after this operation,
+ * but apparently the 8080 will set AF if bit 3 in either operand is set.
  *
  * @this {CPUSim}
  * @param {number} src
@@ -741,23 +744,39 @@ CPUSim.prototype.addByteCarry = function(src)
  */
 CPUSim.prototype.andByte = function(src)
 {
-    return this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = this.regA & src;
+    this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = this.regA & src;
+    if ((this.regA | src) & 0x8) this.resultAuxOverflow ^= 0x10;        // set AF by inverting bit 4 in resultAuxOverflow
+    return this.resultZeroCarry;
 };
 
 /**
  * cmpByte(src)
+ *
+ * We perform this operation using 8-bit two's complement arithmetic, by negating src, adding,
+ * and then inverting the resulting carry (resultZeroCarry ^ 0x100).  This appears to mimic how
+ * the 8080 manages the Auxiliary Carry flag (AF).
  *
  * @this {CPUSim}
  * @param {number} src
  */
 CPUSim.prototype.cmpByte = function(src)
 {
+    src = -src & 0xff;
     this.resultAuxOverflow = this.regA ^ src;
-    this.resultZeroCarry = this.resultParitySign = this.regA - src;
+    /*
+     * The final AND with 0xff isn't strictly necessary, since the result of the comparison is
+     * not returned, but I like limiting the result variables to tidy 8-bit values (resultZeroCarry
+     * being the 9-bit exception).
+     */
+    this.resultParitySign = (this.resultZeroCarry = (this.regA + src) ^ 0x100) & 0xff;
 };
 
 /**
  * decByte(b)
+ *
+ * We perform this operation using 8-bit two's complement arithmetic, by negating src, adding,
+ * and then inverting the resulting carry (resultZeroCarry ^ 0x100).  This appears to mimic how
+ * the 8080 manages the Auxiliary Carry flag (AF).
  *
  * @this {CPUSim}
  * @param {number} b
@@ -765,8 +784,8 @@ CPUSim.prototype.cmpByte = function(src)
  */
 CPUSim.prototype.decByte = function(b)
 {
-    this.resultAuxOverflow = b;
-    b = (this.resultParitySign = b - 1) & 0xff;
+    this.resultAuxOverflow = b ^ 0xff;
+    b = this.resultParitySign = (b + 0xff) & 0xff;
     this.resultZeroCarry = (this.resultZeroCarry & ~0xff) | b;
     return b;
 };
@@ -781,7 +800,7 @@ CPUSim.prototype.decByte = function(b)
 CPUSim.prototype.incByte = function(b)
 {
     this.resultAuxOverflow = b;
-    b = (this.resultParitySign = b + 1) & 0xff;
+    b = this.resultParitySign = (b + 1) & 0xff;
     this.resultZeroCarry = (this.resultZeroCarry & ~0xff) | b;
     return b;
 };
@@ -795,11 +814,15 @@ CPUSim.prototype.incByte = function(b)
  */
 CPUSim.prototype.orByte = function(src)
 {
-    return this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = this.regA | src;
+    return this.resultParitySign = this.resultZeroCarry = this.resultAuxOverflow = this.regA | src;
 };
 
 /**
  * subByte(src)
+ *
+ * We perform this operation using 8-bit two's complement arithmetic, by negating src, adding,
+ * and then inverting the resulting carry (resultZeroCarry ^ 0x100).  This appears to mimic how
+ * the 8080 manages the Auxiliary Carry flag (AF).
  *
  * @this {CPUSim}
  * @param {number} src
@@ -807,12 +830,17 @@ CPUSim.prototype.orByte = function(src)
  */
 CPUSim.prototype.subByte = function(src)
 {
+    src = -src & 0xff;
     this.resultAuxOverflow = this.regA ^ src;
-    return (this.resultZeroCarry = this.resultParitySign = this.regA - src) & 0xff;
+    return this.resultParitySign = (this.resultZeroCarry = (this.regA + src) ^ 0x100) & 0xff;
 };
 
 /**
  * subByteBorrow(src)
+ *
+ * We perform this operation using 8-bit two's complement arithmetic, by negating (src + carry),
+ * adding, and then inverting the resulting carry (resultZeroCarry ^ 0x100).  This appears to mimic
+ * how the 8080 manages the Auxiliary Carry flag (AF).
  *
  * @this {CPUSim}
  * @param {number} src
@@ -820,8 +848,9 @@ CPUSim.prototype.subByte = function(src)
  */
 CPUSim.prototype.subByteBorrow = function(src)
 {
+    src = -(src + (this.resultZeroCarry & 0x100)? 1 : 0) & 0xff;
     this.resultAuxOverflow = this.regA ^ src;
-    return (this.resultZeroCarry = this.resultParitySign = this.regA - src - ((this.resultZeroCarry & 0x100)? 1 : 0)) & 0xff;
+    return this.resultParitySign = (this.resultZeroCarry = (this.regA + src) ^ 0x100) & 0xff;
 };
 
 /**
@@ -833,7 +862,7 @@ CPUSim.prototype.subByteBorrow = function(src)
  */
 CPUSim.prototype.xorByte = function(src)
 {
-    return this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = this.regA ^ src;
+    return this.resultParitySign = this.resultZeroCarry = this.resultAuxOverflow = this.regA ^ src;
 };
 
 /**
