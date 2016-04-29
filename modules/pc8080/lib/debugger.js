@@ -3523,7 +3523,8 @@ if (DEBUGGER) {
                  *      var nPart = +sBytes;
                  *      if (nPart) sState = sState.substr(1000000 * (nPart-1), 1000000);
                  *
-                 * So, the best way to capture a large machine state is to run your own local server and use
+                 * So, the best way to capture a large machine state is to use the new "Save Machine" link
+                 * that downloads a machine's entire state.  Alternatively, run your own local server and use
                  * server-side storage.  Take a look at the "Save" binding in computer.js, which binds an HTML
                  * control to the computer.powerOff() and computer.saveServerState() functions.
                  */
@@ -3567,34 +3568,37 @@ if (DEBUGGER) {
         var dbgAddr = this.parseAddr(sAddr);
         if (!dbgAddr) return;
 
-        var cb = 0;                             // 0 is not a default; it triggers the appropriate default below
+        var len = 0;                            // 0 is not a default; it triggers the appropriate default below
         if (sLen) {
             if (sLen.charAt(0) == 'l') {
                 sLen = sLen.substr(1) || sBytes;
             }
-            cb = this.parseValue(sLen) >>> 0;   // negative lengths not allowed
-            if (cb > 0x10000) cb = 0x10000;     // prevent bad user (or register) input from producing excessive output
+            len = this.parseValue(sLen) >>> 0;  // negative lengths not allowed
+            if (len > 0x10000) len = 0x10000;   // prevent bad user (or variable) input from producing excessive output
         }
 
         var sDump = "";
-        var cLines = (((cb || 128) + 15) >> 4) || 1;
         var size = (sCmd == "dd"? 4 : (sCmd == "dw"? 2 : 1));
-        for (var iLine = 0; iLine < cLines; iLine++) {
-            var data = 0, iByte = 0;
+        var cb = (size * len) || 128;
+        var cLines = ((cb + 15) >> 4) || 1;
+
+        while (cLines-- && cb > 0) {
+            var data = 0, iByte = 0, i;
             var sData = "", sChars = "";
             sAddr = this.toHexAddr(dbgAddr);
-            for (var i = 0; i < 16; i++) {
+            for (i = 16; i > 0 && cb > 0; i--) {
                 var b = this.getByte(dbgAddr, 1);
                 data |= (b << (iByte++ << 3));
                 if (iByte == size) {
                     sData += str.toHex(data, size * 2);
-                    sData += (size == 1? (i == 7? '-' : ' ') : "  ");
+                    sData += (size == 1? (i == 9? '-' : ' ') : "  ");
                     data = iByte = 0;
                 }
                 sChars += (b >= 32 && b < 128? String.fromCharCode(b) : '.');
+                cb--;
             }
             if (sDump) sDump += '\n';
-            sDump += sAddr + "  " + sData + ' ' + sChars;
+            sDump += sAddr + "  " + sData + ((i == 0)? (' ' + sChars) : "");
         }
 
         if (sDump) this.println(sDump);
@@ -4292,7 +4296,7 @@ if (DEBUGGER) {
             if (n > 2) {
                 dbgAddr.addr = addr;
                 var s = this.getInstruction(dbgAddr);
-                if (s.indexOf("CALL") > 0) {
+                if (s.indexOf("CALL") >= 0) {
                     /*
                      * Verify that the length of this CALL (or INT), when added to the address of the CALL (or INT),
                      * matches the original return address.  We do this by getting the string index of the opcode bytes,
