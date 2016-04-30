@@ -26,6 +26,7 @@ PC8080 is currently comprised of the following non-shared components, as listed 
 * [cpu.js](/modules/pc8080/lib/cpu.js)
 * [cpusim.js](/modules/pc8080/lib/cpusim.js)
 * [cpuops.js](/modules/pc8080/lib/cpuops.js)
+* [chipset.js](/modules/pc8080/lib/chipset.js)
 * [rom.js](/modules/pc8080/lib/rom.js)
 * [ram.js](/modules/pc8080/lib/ram.js)
 * [keyboard.js](/modules/pc8080/lib/keyboard.js)

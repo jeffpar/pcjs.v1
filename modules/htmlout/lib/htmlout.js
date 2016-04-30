@@ -186,7 +186,8 @@ var asNonDirectories = [
 ];
 
 /*
- * A list of plain-text file types that we want the server to serve up with mime-type "text/plain".
+ * A list of plain-text file types that we want the server to serve up with mime-type "text/plain";
+ * all extensions are lower-cased before being checked.
  */
 var asExtsPlainText = [
     "65v",
@@ -194,6 +195,7 @@ var asExtsPlainText = [
     "bas",
     "hex",
     "inc",
+    "mac",
     "map",
     "nasm",
     "txt"
