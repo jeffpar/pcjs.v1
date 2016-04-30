@@ -12,7 +12,7 @@ Overview
 PC8080 is an 8080-based Machine Emulation Module.  The code is derived from [PCjs](/modules/pcjs/),
 the IBM PC Emulation Module.
 
-It is still a work-in-progress, so it likely contains code that will be removed from the finished version.
+It is still a work-in-progress.  The only demo currently available is this [8080 Test Machine](/devices/pc8080/machine/test/). 
 
 PC8080 is currently comprised of the following non-shared components, as listed in [package.json](../../package.json)
 (see the *pc8080Files* property):

@@ -15,7 +15,7 @@
 		<desc>MSDOS port</desc>
 	</author>
 	<disk id="disk01" size="1228800" chs="80:2:15" dir="archive/" href="/apps/pc/1988/moria/disk.json" md5="7bb84a7ac4e9b03e8cd1e6753b1359fb" md5json="7630122397a57af2d0c767141af3817c">
-		<name>Demo: Moria 4.872 (1988)</name>
+		<name>Moria 4.872 (1988)</name>
 		<file size="11143" time="1988-11-01 00:00:00" attr="0x20" md5="dae278b77133f32949d0e8940f944c0d">CONFIG.DOC</file>
 		<file size="91154" time="1991-06-01 14:50:02" attr="0x20" md5="66593e83a2aa3870d7a9e8b43079ce42">GOD</file>
 		<file size="91154" time="1991-06-01 15:13:50" attr="0x20" md5="4a7c6e2ddf649f9700786624aaa91199">MADNESS1</file>

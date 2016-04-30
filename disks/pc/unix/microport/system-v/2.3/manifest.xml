@@ -15,28 +15,28 @@
 		<name>UNIX System V Runtime (Disk 3)</name>
 	</disk>
 	<disk id="disk05" size="1228800" chs="80:2:15" img="archive/05 - Runtime Utility Disk.img" href="/disks/pc/unix/microport/system-v/2.3/SYSTEMV23-DISK05.json" md5="a1c2923f7116a29d1ab68a82ea2ac262" md5json="c19f5dcf0892da7f1372dc8d83d73f26">
-		<name>UNIX System V Runtime Utility Disk</name>
+		<name>UNIX System V Runtime Utilities</name>
 	</disk>
 	<disk id="disk06" size="1228800" chs="80:2:15" img="archive/06 - Runtime System Vision.img" href="/disks/pc/unix/microport/system-v/2.3/SYSTEMV23-DISK06.json" md5="19ffd026dd55bb39645e859a7ba86b06" md5json="104f8e9ef40b13418141674d84cf908f">
-		<name>UNIX System V Runtime System Vision</name>
+		<name>UNIX System V Runtime System</name>
 	</disk>
 	<disk id="disk07" size="1228800" chs="80:2:15" img="archive/07 - Runtime Link Kit Disk.img" href="/disks/pc/unix/microport/system-v/2.3/SYSTEMV23-DISK07.json" md5="d010e85d690a23be6807694dfd99b7cd" md5json="9ca249bd570ad07c94c5c238ab9ca7ca">
 		<name>UNIX System V Runtime Link Kit</name>
 	</disk>
 	<disk id="disk08" size="1228800" chs="80:2:15" img="archive/08 - Software Development Disk 1 EXPROGDEV.1.img" href="/disks/pc/unix/microport/system-v/2.3/SYSTEMV23-DISK08.json" md5="f13ae1e2fb556423bd418b0f336203b9" md5json="74f7c32c7ab7a344fa0afee04a816fef">
-		<name>UNIX System V Software Dev (Disk 1)</name>
+		<name>UNIX System V Software (Disk 1)</name>
 	</disk>
 	<disk id="disk09" size="1228800" chs="80:2:15" img="archive/09 - Software Development Disk 2 PROGDEV.1.img" href="/disks/pc/unix/microport/system-v/2.3/SYSTEMV23-DISK09.json" md5="684d16091cac18152c3259455bc51023" md5json="1a4a0f327831f524ab86d253091b0362">
-		<name>UNIX System V Software Dev (Disk 2)</name>
+		<name>UNIX System V Software (Disk 2)</name>
 	</disk>
 	<disk id="disk10" size="1228800" chs="80:2:15" img="archive/10 - Software Development Disk 3 PROGDEV.2.img" href="/disks/pc/unix/microport/system-v/2.3/SYSTEMV23-DISK10.json" md5="5ae1c5f8ca25564374d74d91b0c08bfc" md5json="e685e80181a017857664c305435d928a">
-		<name>UNIX System V Software Dev (Disk 3)</name>
+		<name>UNIX System V Software (Disk 3)</name>
 	</disk>
 	<disk id="disk11" size="1228800" chs="80:2:15" img="archive/11 - Software Development Disk 4 PROGDEV.3.img" href="/disks/pc/unix/microport/system-v/2.3/SYSTEMV23-DISK11.json" md5="62798053f89cdf8c4012a64e1092629b" md5json="f3e2062d106aeece5c32d3efdd80dcb6">
-		<name>UNIX System V Software Dev (Disk 4)</name>
+		<name>UNIX System V Software (Disk 4)</name>
 	</disk>
 	<disk id="disk12" size="1228800" chs="80:2:15" img="archive/12 - Software Development Upgrade Disk.img" href="/disks/pc/unix/microport/system-v/2.3/SYSTEMV23-DISK12.json" md5="0fd28b9b7110a2455fa32ce94fb24905" md5json="4a005f9c97cb5b39b2d49ab5f3f61c36">
-		<name>UNIX System V Software Dev Upgrade</name>
+		<name>UNIX System V Software Upgrade</name>
 	</disk>
 	<disk id="disk13" size="1228800" chs="80:2:15" img="archive/13 - Text Preparation Disk 1 EXTEXT.1.img" href="/disks/pc/unix/microport/system-v/2.3/SYSTEMV23-DISK13.json" md5="c8ac3211e216dde23523714cb7ae8001" md5json="f378778e542e0c97518a0548ebcaa106">
 		<name>UNIX System V Text Prep (Disk 1)</name>
