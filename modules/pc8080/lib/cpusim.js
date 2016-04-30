@@ -851,7 +851,7 @@ CPUSim.prototype.subByte = function(src)
  */
 CPUSim.prototype.subByteBorrow = function(src)
 {
-    src ^= 0xff
+    src ^= 0xff;
     this.resultAuxOverflow = this.regA ^ src;
     return this.resultParitySign = (this.resultZeroCarry = (this.regA + src + ((this.resultZeroCarry & 0x100)? 0 : 1)) ^ 0x100) & 0xff;
 };
