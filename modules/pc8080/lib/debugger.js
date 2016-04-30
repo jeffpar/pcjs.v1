@@ -56,7 +56,7 @@ if (DEBUGGER) {
  *      aCmds           preprocessed commands (from sCmd)
  *
  * @typedef {{
- *      addr:(number),
+ *      addr:(number|undefined),
  *      fTemporary:(boolean|undefined),
  *      sCmd:(string|undefined),
  *      aCmds:(Array.<string>|undefined)
