@@ -59,6 +59,7 @@ var fCache   = (args.argv['cache']   === undefined? true  : args.argv['cache']);
 var fConsole = (args.argv['console'] === undefined? false : args.argv['console']);
 var fDebug   = (args.argv['debug']   === undefined? false : args.argv['debug']);
 var fLogging = (args.argv['logging'] === undefined? false : args.argv['logging']);
+var fPrivate = (args.argv['private'] === undefined? false : args.argv['private']);
 var fRebuild = (args.argv['rebuild'] === undefined? false : args.argv['rebuild']);
 var fSockets = (args.argv['sockets'] === undefined? false : args.argv['sockets']);
 
@@ -72,7 +73,7 @@ HTMLOut.setRoot(sServerRoot);
  * 'debug' and 'rebuild' options OFF, which is why we warn if they're enabled.
  */
 if (fConsole || fDebug || fRebuild) console.log("warning: non-production options enabled");
-HTMLOut.setOptions({'cache': fCache, 'console': fConsole, 'debug': fDebug, 'rebuild': fRebuild, 'sockets': fSockets});
+HTMLOut.setOptions({'cache': fCache, 'console': fConsole, 'debug': fDebug, 'private': fPrivate, 'rebuild': fRebuild, 'sockets': fSockets});
 
 var app = express();
 app.enable("strict routing");

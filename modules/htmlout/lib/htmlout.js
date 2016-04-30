@@ -89,6 +89,14 @@ var fServerDebug = false;
 var logFile = null;
 
 /*
+ * fPrivate will be set to true to by setOptions() if the server was started with '--private', giving the Node
+ * server an option comparable to Jekyll's site.pcjs.private setting, and triggering the load of "private.js" as
+ * appropriate.  Currently, the only (checked-in) use of the private setting is to set the client's PRIVATE global
+ * and trigger the loading of alternate (ie, private) XML files in embed.js.
+ */
+var fPrivate = false;
+
+/*
  * fRebuild controls the rebuilding of cached "index.html" files, assuming fCache is true; fRebuild is false
  * by default, and it can be set for all requests using the setOptions() 'rebuild' property, or for individual
  * requests using the fRebuild parameter to HTMLOut().
@@ -156,8 +164,9 @@ var sManifestXMLFile = "manifest.xml";
  * the closing </head> tag, and JS files are added just before the closing </body> tag.
  */
 var aMachineFiles = {
-    'c1p':  pkg.c1pCSSFiles.concat(pkg.c1pJSFiles),
-    'pc':   pkg.pcCSSFiles.concat(pkg.pcJSFiles)
+    'c1p':      pkg.c1pCSSFiles.concat(pkg.c1pJSFiles),
+    'pc':       pkg.pcCSSFiles.concat(pkg.pcJSFiles),
+    'pc8080':   pkg.pcCSSFiles.concat(pkg.pc8080Files)
 };
 var aMachineFileTypes = {
     'head': [".css"],           // put BOTH ".css" and ".js" here if convertMDMachineLinks() embeds its own scripts
@@ -177,7 +186,8 @@ var asNonDirectories = [
 ];
 
 /*
- * A list of plain-text file types that we want the server to serve up with mime-type "text/plain".
+ * A list of plain-text file types that we want the server to serve up with mime-type "text/plain";
+ * all extensions are lower-cased before being checked.
  */
 var asExtsPlainText = [
     "65v",
@@ -185,6 +195,7 @@ var asExtsPlainText = [
     "bas",
     "hex",
     "inc",
+    "mac",
     "map",
     "nasm",
     "txt"
@@ -674,6 +685,7 @@ HTMLOut.logError = function(err, fForce)
  *      'console'   fConsole
  *      'debug'     fServerDebug
  *      'logfile'   logFile
+ *      'private'   fPrivate
  *      'rebuild'   fRebuild
  *      'senddef'   fSendDefault
  *      'sockets'   fSockets
@@ -697,6 +709,9 @@ HTMLOut.setOptions = function(options)
     if (options['logfile'] !== undefined) {
         logFile = options['logfile'];
         HTTPAPI.setLogFile(logFile);
+    }
+    if (options['private'] !== undefined) {
+        fPrivate = options['private'];
     }
     if (options['rebuild'] !== undefined) {
         fRebuild = options['rebuild'];
@@ -1415,10 +1430,11 @@ HTMLOut.prototype.getMachineXML = function(sToken, sIndent, aParms, sXMLFile, sS
                  * or "development" stylesheets in ("/modules/pcjs/templates"|"/modules/c1pjs/templates").
                  *
                  * The common denominator in both sets is either "/pc" or "/c1p", which in turn indicates the class of machine
-                 * (ie, "PC" or "C1P").
+                 * (ie, "PCjs" or "C1Pjs").
                  */
-                var sMachineClass = (sStyleSheet.indexOf("/pc") >= 0? "PC" : (sStyleSheet.indexOf("/c1p") >= 0? "C1P" : null));
-                if (sMachineClass) {
+                aMatch = sStyleSheet.match(/\/(pc|c1p)([^/]*)/);
+                if (aMatch) {
+                    var sMachineClass = aMatch[1].toUpperCase() + aMatch[2];
                     /*
                      * Since the MarkOut module already contains the ability to embed a machine definition with
                      * one simple line of Markdown-like magic, we'll create such a line and let MarkOut do the rest.
@@ -1433,7 +1449,7 @@ HTMLOut.prototype.getMachineXML = function(sToken, sIndent, aParms, sXMLFile, sS
                      * options is a comma-delimited series of, well, options; the only option we currently output is "debugger"
                      * if a <debugger> element is present in the machine XML.
                      */
-                    var sMachineID = "machine" + sMachineClass; // fallback to either "machinePC" or "machineC1P" if no ID found
+                    var sMachineID = "machine" + sMachineClass; // fallback to either "machinePCjs" or "machineC1Pjs" if no ID found
                     aMatch = sXML.match(/<machine.*?\sid=(['"])(.*?)\1[^>]*>/);
                     if (aMatch) sMachineID = aMatch[2];
 
@@ -1443,7 +1459,7 @@ HTMLOut.prototype.getMachineXML = function(sToken, sIndent, aParms, sXMLFile, sS
                      * embedding inside an existing HTML document, so any "machine.xsl" stylesheet must be remapped
                      * to a corresponding "components.xsl" stylesheet (which is what the next line does).
                      */
-                    var sMachineDef = sMachineClass + "js:" + sMachineID + ":" + sStyleSheet.replace("machine.xsl", "components.xsl");
+                    var sMachineDef = sMachineClass + ":" + sMachineID + ":" + sStyleSheet.replace("machine.xsl", "components.xsl");
                     sMachineDef += (sXML.indexOf("<debugger") > 0? ":*:debugger" : ":*:none");
                     sMachineDef += (sStateFile? ":" + sStateFile : "");
 
@@ -1452,7 +1468,7 @@ HTMLOut.prototype.getMachineXML = function(sToken, sIndent, aParms, sXMLFile, sS
                     s = m.convertMD("    ").trim();
 
                     obj.processMachines(m.getMachines(), m.getBuildOptions(), function doneProcessXMLMachines() {
-                        obj.getMarkdownFile(obj.sFile, sToken, sIndent, aParms, s, true);
+                        obj.getMarkdownFile(obj.sFile, sToken, sIndent, aParms, s, sXMLFile);
                     });
                     return;
                 }
@@ -1677,7 +1693,7 @@ HTMLOut.prototype.getManifestXML = function(sToken, sIndent, aParms)
 };
 
 /**
- * getMarkdownFile(sFile, sToken, sIndent, aParms, sPrevious, fMachineXML)
+ * getMarkdownFile(sFile, sToken, sIndent, aParms, sPrevious, sMachineFile)
  *
  * If sFile exists in the current directory, open it, convert it, and prepare for replacement.
  *
@@ -1687,9 +1703,9 @@ HTMLOut.prototype.getManifestXML = function(sToken, sIndent, aParms)
  * @param {string} [sIndent]
  * @param {Array.<string>} [aParms]
  * @param {string|null} [sPrevious] is text, if any, that should precede the file
- * @param {boolean} [fMachineXML] true if a machine.xml file has already been processed by the caller
+ * @param {string} [sMachineFile] name (if any) of machine.xml file already processed by the caller
  */
-HTMLOut.prototype.getMarkdownFile = function(sFile, sToken, sIndent, aParms, sPrevious, fMachineXML)
+HTMLOut.prototype.getMarkdownFile = function(sFile, sToken, sIndent, aParms, sPrevious, sMachineFile)
 {
     var obj = this;
 
@@ -1719,8 +1735,11 @@ HTMLOut.prototype.getMarkdownFile = function(sFile, sToken, sIndent, aParms, sPr
                 }
             }
         } else {
-            var m = new MarkOut(s, sIndent, obj.req, aParms, obj.fDebug, fMachineXML, obj.sExt == "md");
+            var m = new MarkOut(s, sIndent, obj.req, aParms, obj.fDebug, sMachineFile, obj.sExt == "md");
             s = m.convertMD("    ").trim();
+
+            if (sMachineFile && m.hasMachines()) sPrevious = null;
+
             /*
              * If the Markdown document begins with a heading, stuff that into the <title> tag;
              * it would be cleaner if this replacement could be performed by getTitle(), but unfortunately,
@@ -1864,53 +1883,55 @@ HTMLOut.prototype.processMachines = function(aMachines, buildOptions, done)
             asFiles.push("/versions/" + sScriptFolder + "/" + sVersion + "/" + sScriptFile);
             this.addFilesToHTML(asFiles, sScriptEmbed);
         }
-        else {
+        else if (asFiles = aMachineFiles[sClass]) {
             /*
              * SIDEBAR: Why the "slice()"?  It's a handy way to create a copy of the array, and we need a copy,
              * because if it turns out we need to "cut out" some of the files below (using splice), we don't want that
              * affecting the original array.
              */
-            if ((asFiles = aMachineFiles[sClass].slice())) {
-                var i;
-                if (fNoDebug) {
-                    /*
-                     * We need to find the shared "defines.js" source file, and follow it with "nodebug.js".
-                     */
-                    for (i = 0; i < asFiles.length; i++) {
-                        if (asFiles[i].indexOf("shared/lib/defines.js") >= 0) {
-                            asFiles.splice(i + 1, 0, asFiles[i].replace("defines.js", "nodebug.js"));
-                            break;
-                        }
+            asFiles = asFiles.slice();
+            /*
+             * We need to find the shared "defines.js" source file, because we may need to follow it
+             * with "nodebug.js" and/or "private.js".
+             */
+            for (var i = 0; i < asFiles.length; i++) {
+                if (asFiles[i].indexOf("shared/lib/defines.js") >= 0) {
+                    if (fPrivate) {
+                        asFiles.splice(i + 1, 0, asFiles[i].replace("defines.js", "private.js"));
+                    }
+                    if (fNoDebug) {
+                        asFiles.splice(i + 1, 0, asFiles[i].replace("defines.js", "nodebug.js"));
+                    }
+                    break;
+                }
+            }
+            if (!fDebugger) {
+                /*
+                 * Step 1: We need to find the client's "defines.js" source file, and follow it with "nodebugger.js".
+                 */
+                for (i = 0; i < asFiles.length; i++) {
+                    if (asFiles[i].indexOf("js/lib/defines.js") >= 0) {
+                        asFiles.splice(i + 1, 0, asFiles[i].replace("defines.js", "nodebugger.js"));
+                        break;
                     }
                 }
-                if (!fDebugger) {
-                    /*
-                     * Step 1: We need to find the client's "defines.js" source file, and follow it with "nodebugger.js".
-                     */
-                    for (i = 0; i < asFiles.length; i++) {
-                        if (asFiles[i].indexOf("js/lib/defines.js") >= 0) {
-                            asFiles.splice(i + 1, 0, asFiles[i].replace("defines.js", "nodebugger.js"));
-                            break;
-                        }
-                    }
-                    /*
-                     * Step 2: If there's a "debugger.js" source file in the list of uncompiled files, we need to remove
-                     * it, which we do by using the Array splice() method, removing the 1 matching element from the array.
-                     */
-                    for (i = 0; i < asFiles.length; i++) {
-                        if (asFiles[i].indexOf("/debugger.js") >= 0) {
-                            asFiles.splice(i, 1);
-                            break;
-                        }
+                /*
+                 * Step 2: If there's a "debugger.js" source file in the list of uncompiled files, we need to remove
+                 * it, which we do by using the Array splice() method, removing the 1 matching element from the array.
+                 */
+                for (i = 0; i < asFiles.length; i++) {
+                    if (asFiles[i].indexOf("/debugger.js") >= 0) {
+                        asFiles.splice(i, 1);
+                        break;
                     }
                 }
+            }
+            this.addFilesToHTML(asFiles, sScriptEmbed);
+            if (buildOptions.id) {
+                asFiles = [];
+                asFiles.push("/modules/build/lib/build.js");
+                sScriptEmbed = '<script type="text/javascript">buildPC("' + buildOptions.id + '")</script>';
                 this.addFilesToHTML(asFiles, sScriptEmbed);
-                if (buildOptions.id) {
-                    asFiles = [];
-                    asFiles.push("/modules/build/lib/build.js");
-                    sScriptEmbed = '<script type="text/javascript">buildPC("' + buildOptions.id + '")</script>';
-                    this.addFilesToHTML(asFiles, sScriptEmbed);
-                }
             }
         }
     }

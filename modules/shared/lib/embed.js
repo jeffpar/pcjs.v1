@@ -56,7 +56,7 @@ var fAsync = true;
 var cAsyncMachines = 0;
 
 /**
- * loadXML(sFile, idMachine, sParms, fResolve, display, done)
+ * loadXML(sFile, idMachine, sAppClass, sParms, fResolve, display, done)
  *
  * This is the preferred way to load all XML and XSL files. It uses getResource()
  * to load them as strings, which parseXML() can massage before parsing/transforming them.
@@ -81,12 +81,13 @@ var cAsyncMachines = 0;
  *
  * @param {string} sXMLFile
  * @param {string|null|undefined} idMachine
+ * @param {string|null|undefined} sAppClass
  * @param {string|null|undefined} sParms
  * @param {boolean} fResolve is true to resolve any "ref" attributes
  * @param {function(string)} display
  * @param {function(string,Object)} done (string contains the unparsed XML string data, and Object contains a parsed XML object)
  */
-function loadXML(sXMLFile, idMachine, sParms, fResolve, display, done)
+function loadXML(sXMLFile, idMachine, sAppClass, sParms, fResolve, display, done)
 {
     var doneLoadXML = function(sURLName, sXML, nErrorCode) {
         if (nErrorCode) {
@@ -94,14 +95,14 @@ function loadXML(sXMLFile, idMachine, sParms, fResolve, display, done)
             done(sXML, null);
             return;
         }
-        parseXML(sXML, sXMLFile, idMachine, sParms, fResolve, display, done);
+        parseXML(sXML, sXMLFile, idMachine, sAppClass, sParms, fResolve, display, done);
     };
     display("Loading " + sXMLFile + "...");
     web.getResource(sXMLFile, null, fAsync, doneLoadXML);
 }
 
 /**
- * parseXML(sXML, sXMLFile, idMachine, sParms, fResolve, display, done)
+ * parseXML(sXML, sXMLFile, idMachine, sAppClass, sParms, fResolve, display, done)
  *
  * Generates an XML document from an XML string. This function also provides a work-around for XSLT's
  * lack of support for the document() function (at least on some browsers), by replacing every reference
@@ -110,12 +111,13 @@ function loadXML(sXMLFile, idMachine, sParms, fResolve, display, done)
  * @param {string} sXML
  * @param {string|null} sXMLFile
  * @param {string|null|undefined} idMachine
+ * @param {string|null|undefined} sAppClass
  * @param {string|null|undefined} sParms
  * @param {boolean} fResolve is true to resolve any "ref" attributes; default is false
  * @param {function(string)} display
  * @param {function(string,Object)} done (string contains the unparsed XML string data, and Object contains a parsed XML object)
  */
-function parseXML(sXML, sXMLFile, idMachine, sParms, fResolve, display, done)
+function parseXML(sXML, sXMLFile, idMachine, sAppClass, sParms, fResolve, display, done)
 {
     var buildXML = function(sXML, sError) {
         if (sError) {
@@ -159,13 +161,23 @@ function parseXML(sXML, sXMLFile, idMachine, sParms, fResolve, display, done)
             if (typeof resources == 'object') sURL = null;      // turn off URL inclusion if we have embedded resources
             sXML = sXML.replace(/(<machine[^>]*\sid=)(['"]).*?\2/, "$1$2" + idMachine + "$2" + (sParms? " parms='" + sParms + "'" : "") + (sURL? ' url="' + sURL + '"' : ''));
         }
-        /*
-         * Non-COMPILED kludge to replace the version number template in the XSL file (which we assume we're reading,
-         * since fResolve is false) with whatever XMLVERSION we extracted from the XML file (see corresponding kludge below).
-         */
-        if (!COMPILED && !fResolve && XMLVERSION) {
-            sXML = sXML.replace(/<xsl:variable name="APPVERSION">1.x.x<\/xsl:variable>/, '<xsl:variable name="APPVERSION">' + XMLVERSION + '</xsl:variable>');
+
+        if (!fResolve) {
+            /*
+             * I'm trying to switch to a shared components.xsl (at least for all PC-class machines),
+             * but in the interim, that means hacking the XSL file on the fly to reflect the actual class.
+             */
+            sXML = sXML.replace(/(<xsl:variable name="APPCLASS">).*?(<\/xsl:variable>)/, "$1" + sAppClass + "$2");
+
+            /*
+             * Non-COMPILED kludge to replace the version number template in the XSL file (which we assume we're reading,
+             * since fResolve is false) with whatever XMLVERSION we extracted from the XML file (see corresponding kludge below).
+             */
+            if (!COMPILED && XMLVERSION) {
+                sXML = sXML.replace(/<xsl:variable name="APPVERSION">1.x.x<\/xsl:variable>/, '<xsl:variable name="APPVERSION">' + XMLVERSION + '</xsl:variable>');
+            }
         }
+
         /*
          * If the resource we requested is not really an XML file (or the file didn't exist and the server simply returned
          * a message like "Cannot GET /devices/pc/machine/5150/cga/64kb/donkey/machine.xml"), we'd like to display a more
@@ -200,7 +212,7 @@ function parseXML(sXML, sXMLFile, idMachine, sParms, fResolve, display, done)
                  * we want to continue supporting older Internet Explorer browsers (ie, back to IE9).
                  */
                 /** @namespace window.ActiveXObject */
-                if (window.ActiveXObject || 'ActiveXObject' in window) {                // second test is required for IE11 on Windows 8.1
+                if (window.ActiveXObject || 'ActiveXObject' in window) {        // second test is required for IE11 on Windows 8.1
                     xmlDoc = new window.ActiveXObject("Microsoft.XMLDOM");
                     xmlDoc.async = false;
                     xmlDoc['loadXML'](sXML);
@@ -404,11 +416,13 @@ function embedMachine(sName, sVersion, idMachine, sXMLFile, sXSLFile, sParms)
                     sXSLFile = "/versions/" + sAppClass + "/" + sVersion + "/components.xsl";
                 }
             }
-            var loadXSL = function(sXML, xml) {
+
+            var processXML = function(sXML, xml) {
                 if (!xml) {
                     displayError(sXML);
                     return;
                 }
+
                 /*
                  * Non-COMPILED kludge to extract the version number from the stylesheet path in the machine XML file;
                  * we don't need this code in COMPILED (non-DEBUG) releases, because APPVERSION is hard-coded into them.
@@ -417,15 +431,18 @@ function embedMachine(sName, sVersion, idMachine, sXMLFile, sXSLFile, sParms)
                     var aMatch = sXML.match(/<\?xml-stylesheet[^>]* href=(['"])[^'"]*?\/([0-9.]*)\/([^'"]*)\1/);
                     if (aMatch) XMLVERSION = aMatch[2];
                 }
+
                 var transformXML = function(sXSL, xsl) {
                     if (!xsl) {
                         displayError(sXSL);
                         return;
                     }
+
                     /*
                      * Record the XSL file, in case someone wants to save the entire machine later.
                      */
                     Component.addMachineResource(idMachine, sXSLFile, sXSL);
+
                     /*
                      * The <machine> template in components.xsl now generates a "machine div" that makes
                      * the div we required the caller of embedMachine() to provide redundant, so instead
@@ -440,6 +457,7 @@ function embedMachine(sName, sVersion, idMachine, sXMLFile, sXSLFile, sParms)
                      * embeddable HTML (and is the most common cause of failure at this final stage).
                      */
                     displayMessage("Processing " + sXMLFile + "...");
+
                     /*
                      * Beginning with Microsoft Edge and the corresponding release of Windows 10, all the
                      * 'ActiveXObject' crud has gone away; but of course, this code must remain in place if
@@ -485,12 +503,13 @@ function embedMachine(sName, sVersion, idMachine, sXMLFile, sXSLFile, sParms)
                         displayError("unable to transform XML: unsupported browser");
                     }
                 };
-                loadXML(sXSLFile, null, null, false, displayMessage, transformXML);
+                loadXML(sXSLFile, null, sAppClass, null, false, displayMessage, transformXML);
             };
+
             if (sXMLFile.charAt(0) != '<') {
-                loadXML(sXMLFile, idMachine, sParms, true, displayMessage, loadXSL);
+                loadXML(sXMLFile, idMachine, sAppClass, sParms, true, displayMessage, processXML);
             } else {
-                parseXML(sXMLFile, null, idMachine, sParms, false, displayMessage, loadXSL);
+                parseXML(sXMLFile, null, idMachine, sAppClass, sParms, false, displayMessage, processXML);
             }
         } else {
             displayError("missing machine element: " + idMachine);
@@ -531,16 +550,27 @@ function embedPC(idMachine, sXMLFile, sXSLFile, sParms)
 }
 
 /**
- * Prevent the Closure Compiler from renaming functions we want to export, by adding them
- * as (named) properties of a global object.
+ * embedPC8080(idMachine, sXMLFile, sXSLFile, sParms)
+ *
+ * @param {string} idMachine
+ * @param {string} sXMLFile
+ * @param {string} sXSLFile
+ * @param {string} [sParms]
+ * @return {boolean} true if successful, false if error
  */
-if (APPNAME == "PCjs") {
-    window['embedPC'] = embedPC;
+function embedPC8080(idMachine, sXMLFile, sXSLFile, sParms)
+{
+    if (fAsync) web.enablePageEvents(false);
+    return embedMachine("PC8080", APPVERSION, idMachine, sXMLFile, sXSLFile, sParms);
 }
 
-if (APPNAME == "C1Pjs") {
-    window['embedC1P'] = embedC1P;
-}
+/**
+ * Prevent the Closure Compiler from renaming functions we want to export,
+ * by adding them as (named) properties of a global object.
+ */
+if (APPNAME == "C1Pjs")  window['embedC1P']    = embedC1P;
+if (APPNAME == "PCjs")   window['embedPC']     = embedPC;
+if (APPNAME == "PC8080") window['embedPC8080'] = embedPC8080;
 
 window['enableEvents'] = web.enablePageEvents;
-window['sendEvent'] = web.sendPageEvent;
+window['sendEvent']    = web.sendPageEvent;

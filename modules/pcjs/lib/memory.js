@@ -110,6 +110,7 @@ function Memory(addr, used, size, type, controller, cpu)
     this.controller = null;
     this.cpu = cpu;             // if a CPU reference is provided, then this must be an UNPAGED Memory block allocation
     this.copyBreakpoints();     // initialize the block's Debugger info (eg, breakpoint totals); the caller will reinitialize
+    
     /*
      * TODO: Study the impact of dirty block tracking.  As noted in the paged block handlers (eg, writeBytePLE),
      * the original purposes were to allow saveMemory() to save only dirty blocks, and to enable the Video component
@@ -119,7 +120,7 @@ function Memory(addr, used, size, type, controller, cpu)
      * which still use conventional memory blocks.  Alternatively, we could restrict the use of dirty block tracking
      * to certain memory types (eg, VIDEO memory).
      *
-     * However, a quick test with with dirty block tracking disabled didn't yield a noticeable improvement in performance,
+     * However, a quick test with dirty block tracking disabled didn't yield a noticeable improvement in performance,
      * so I think the overhead of our block-based architecture is swamping the impact of these micro-updates.
      */
     this.fDirty = this.fDirtyEver = false;

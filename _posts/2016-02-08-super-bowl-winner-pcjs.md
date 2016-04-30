@@ -47,12 +47,8 @@ for example, models 5150 through 5170 refer to IBM PC models.
 
 ---
 
-The IBM BASIC ROMs require a bit more research.  I'm a little unclear on the precise history of the BASIC ROMs and
-exactly which version shipped with each IBM PC machine revision.
-
-The project currently includes only two BASIC ROM versions, 1.00 and 1.10, which were initially released with the
-first model 5150 and 5160 machines, respectively.  However, I've also read reports that later revisions of the model
-5150 included BASIC ROM 1.10 as well.
+The project currently includes only two BASIC ROM versions, C1.00 and C1.10, which were initially released with the
+first model 5150 and 5160 machines, respectively.  For more details, see [IBM PC ROMs](/devices/pc/rom/).
 
 I believe there was also a BASIC ROM version 1.20 released for IBM PCjr, but since PCjs does not yet emulate the PCjr,
 it has not been added to the project.

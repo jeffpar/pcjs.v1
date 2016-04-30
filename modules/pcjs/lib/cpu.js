@@ -1056,7 +1056,7 @@ CPU.prototype.startCPU = function(fUpdateFocus)
         var controlRun = this.bindings["run"];
         if (controlRun) controlRun.textContent = "Halt";
         if (this.cmp) {
-            this.cmp.updateStatus();
+            this.cmp.updateStatus(true);
             if (fUpdateFocus) this.cmp.updateFocus(true);
         }
     }
@@ -1118,7 +1118,7 @@ CPU.prototype.updateCPU = function(fForce)
 {
     if (this.cmp) {
         this.cmp.updateVideo(fForce);
-        this.cmp.updateStatus();
+        this.cmp.updateStatus(fForce);
     }
 };
 

@@ -459,7 +459,9 @@ Component.getComponentByID = function(id, idRelated)
                 return Component.components[i];
             }
         }
-        Component.log("Component ID '" + id + "' not found", "warning");
+        if (Component.components.length) {
+            Component.log("Component ID '" + id + "' not found", "warning");
+        }
     }
     return null;
 };
@@ -582,7 +584,7 @@ Component.bindComponentControls = function(component, element, sAppClass)
                         parms = Component.getComponentParms(control);
                         if (parms && parms['binding']) {
                             component.setBinding(parms['type'], parms['binding'], control, parms['value']);
-                        } else {
+                        } else if (!parms || parms['type'] != "description") {
                             Component.log("Component '" + component.toString() + "' missing binding" + (parms? " for " + parms['type'] : ""), "warning");
                         }
                         iClass = aClasses.length;

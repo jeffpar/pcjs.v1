@@ -2544,7 +2544,7 @@ X86CPU.prototype.getPF = function()
  * getAF()
  *
  * To determine if there's been a carry out of the low 4 bits of an arithmetic operation,
- * we look at all the possible inputs for bit 4, and calculate AF = PS^(D^S):
+ * we look at all the possible inputs for bit 4, and calculate AF = A^(D^S).
  *
  *      D   S   A   D^S AF
  *      -   -   -   --- --
@@ -4145,7 +4145,7 @@ X86CPU.prototype.updateReg = function(sReg, nValue)
 };
 
 /**
- * updateStatus()
+ * updateStatus(fForce)
  *
  * This provides periodic Control Panel updates (eg, a few times per second; see STATUS_UPDATES_PER_SECOND).
  * this is where we take care of any DOM updates (eg, register values) while the CPU is running.
@@ -4196,8 +4196,6 @@ X86CPU.prototype.updateStatus = function(fForce)
 
     var controlSpeed = this.bindings["speed"];
     if (controlSpeed) controlSpeed.textContent = this.getSpeedCurrent();
-
-    this.parent.updateStatus.call(this, fForce);
 };
 
 /**

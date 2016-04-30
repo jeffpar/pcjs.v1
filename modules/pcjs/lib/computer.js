@@ -195,7 +195,7 @@ function Computer(parmsComputer, parmsMachine, fSuspended) {
     /*
      * Initialize the Bus component
      */
-    this.bus = new Bus({'id': this.idMachine + '.bus', 'buswidth': this.nBusWidth}, this.cpu, this.dbg);
+    this.bus = new Bus({'id': this.idMachine + '.bus', 'busWidth': this.nBusWidth}, this.cpu, this.dbg);
 
     /*
      * Iterate through all the components and connect them to the Control Panel, if any
@@ -1478,13 +1478,38 @@ Computer.prototype.updateFocus = function(fScroll)
 };
 
 /**
- * updateStatus()
+ * updateStatus(fForce)
+ *
+ * If any DOM controls were bound to the CPU, then we need to call its updateStatus() handler; if there are no
+ * such bindings, then cpu.updateStatus() does nothing.
+ *
+ * Similarly, if there's a Panel, then we need to call its updateStatus() handler, in case it created its own canvas
+ * and implemented its own register display (eg, dumpRegisters()); if not, then panel.updateStatus() also does nothing.
+ *
+ * In practice, there will *either* be a Panel with a custom canvas *or* a set of DOM controls bound to the CPU *or*
+ * neither.  In theory, there could be BOTH, but that would be unusual.
+ *
+ * TODO: Consider alternate approaches to these largely register-oriented display updates.  Ordinarily, we like to
+ * separate logic from presentation, and currently the X86CPU contains both, since it's the component that intimately
+ * knows the names, number, sizes, etc, of all the active registers.  The Panel component is the logical candidate,
+ * but Panel is an optional component; generally, only machines that include Debugger also include Panel.
  *
  * @this {Computer}
- */
-Computer.prototype.updateStatus = function()
+ * @param {boolean} [fForce] (true will display registers even if the CPU is running and "live" registers are not enabled)
+  */
+Computer.prototype.updateStatus = function(fForce)
 {
-    if (this.panel) this.panel.updateStatus();
+    /*
+     * fForce is generally set to true whenever the CPU is transitioning to/from a running state, in which case
+     * cpu.updateStatus() will definitely want to hide/show register contents; however, at other times, when the
+     * CPU is running, constantly updating the DOM controls too frequently can adversely impact overall performance.
+     *
+     * So fForce serves as a hint to help cpu.updateStatus() make a more informed decision.  panel.updateStatus()
+     * currently doesn't care, on the theory that canvas updates should be significantly faster than DOM updates,
+     * but we still pass fForce on.
+     */
+    if (this.cpu) this.cpu.updateStatus(fForce);
+    if (this.panel) this.panel.updateStatus(fForce);
 };
 
 /**

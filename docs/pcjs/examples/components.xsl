@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- author="Jeff Parsons (@jeffpar)" website="http://www.pcjs.org/" created="2012-05-05" modified="2014-02-23" license="http://www.gnu.org/licenses/gpl.html" -->
+<!-- author="Jeff Parsons (@jeffpar)" website="http://www.pcjs.org/" created="2012-05-05" modified="2016-04-15" license="http://www.gnu.org/licenses/gpl.html" -->
 <!DOCTYPE xsl:stylesheet [
 ]>
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
@@ -10,8 +10,9 @@
 	<xsl:param name="generator" select="'client'"/>
 
 	<xsl:variable name="MACHINECLASS">pc</xsl:variable>
+	<xsl:variable name="CSSCLASS">pcjs</xsl:variable>
 	<xsl:variable name="APPCLASS">pcjs</xsl:variable>
-	<xsl:variable name="APPVERSION">1.21.6</xsl:variable>
+	<xsl:variable name="APPVERSION">1.21.7</xsl:variable>
 	<xsl:variable name="SITEHOST">www.pcjs.org</xsl:variable>
 
 	<xsl:template name="componentStyles">
@@ -57,7 +58,13 @@
 		<xsl:variable name="machineStyle">
 			<xsl:if test="@float">float:<xsl:value-of select="@float"/></xsl:if>
 		</xsl:variable>
-		<div id="{$machine}" class="machine {@class}js" style="{$machineStyle}">
+		<xsl:variable name="machineClass">
+			<xsl:choose>
+				<xsl:when test="@class = 'pc' or @class = 'c1p'"><xsl:value-of select="@class"/>js</xsl:when>
+				<xsl:otherwise><xsl:value-of select="@class"/></xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
+		<div id="{$machine}" class="machine {$machineClass}" style="{$machineStyle}">
 			<xsl:call-template name="component">
 				<xsl:with-param name="machine" select="$machine"/>
 				<xsl:with-param name="machineState">
@@ -155,6 +162,7 @@
 				<xsl:when test="@width">
 					<xsl:choose>
 						<xsl:when test="$left != '' or $top != ''">width:<xsl:value-of select="@width"/>;</xsl:when>
+						<xsl:when test="@pos = 'left' or @pos = 'right'">width:<xsl:value-of select="@width"/>;max-width:<xsl:value-of select="@width"/>;</xsl:when>
 						<xsl:otherwise>width:auto;max-width:<xsl:value-of select="@width"/>;</xsl:otherwise>
 					</xsl:choose>
 				</xsl:when>
@@ -203,18 +211,21 @@
 			<xsl:if test="$component != 'machine'">
 				<xsl:apply-templates select="name" mode="component"/>
 			</xsl:if>
-			<div class="{$APPCLASS}-container" style="{$border}{$style}">
+			<div class="{$CSSCLASS}-container" style="{$border}{$style}">
 				<xsl:if test="$component = 'machine'">
 					<xsl:apply-templates select="menu" mode="machine"/>
 				</xsl:if>
 				<xsl:if test="$component != 'machine'">
 					<xsl:apply-templates select="menu" mode="component"/>
 				</xsl:if>
+				<xsl:variable name="objectClass">
+					<xsl:value-of select="$APPCLASS"/><xsl:text>-</xsl:text><xsl:value-of select="$class"/><xsl:text>-object</xsl:text><xsl:if test="$class = 'video'"><xsl:text> </xsl:text><xsl:value-of select="$CSSCLASS"/><xsl:text>-screen</xsl:text></xsl:if>
+				</xsl:variable>
 				<xsl:if test="$class != '' and $component != 'machine'">
-					<div class="{$APPCLASS}-{$class}-object" data-value="{{id:'{$id}',name:'{$name}'{$comment}{$parms}}}"> </div>
+					<div class="{$objectClass}" data-value="{{id:'{$id}',name:'{$name}'{$comment}{$parms}}}"> </div>
 				</xsl:if>
 				<xsl:if test="control">
-					<div class="{$APPCLASS}-controls">
+					<div class="{$CSSCLASS}-controls">
 						<xsl:apply-templates select="control" mode="component"/>
 					</div>
 				</xsl:if>
@@ -225,11 +236,11 @@
 			</div>
 			<xsl:if test="$component = 'machine'">
 				<xsl:choose>
-					<xsl:when test="$url != ''"><div class="{$APPCLASS}-reference">[<a href="{$url}">XML</a>]</div></xsl:when>
+					<xsl:when test="$url != ''"><div class="{$CSSCLASS}-reference">[<a href="{$url}">XML</a>]</div></xsl:when>
 					<xsl:otherwise/>
 				</xsl:choose>
-				<xsl:if test="$MACHINECLASS = 'pc'"><div class="{$APPCLASS}-reference" style="padding-left:8px">[<a href="#" onclick="savePC('{$machine}'); return false;">Save Machine</a>]</div></xsl:if>
-				<div class="{$APPCLASS}-copyright">
+				<xsl:if test="$APPCLASS = 'pcjs'"><div class="{$CSSCLASS}-reference" style="padding-left:8px">[<a href="#" onclick="savePC('{$machine}'); return false;">Save Machine</a>]</div></xsl:if>
+				<div class="{$CSSCLASS}-copyright">
 					<a href="http://{$SITEHOST}" target="_blank">PCjs</a> v<xsl:value-of select="$APPVERSION"/> © 2012-2016 by <a href="http://twitter.com/jeffpar" target="_blank">@jeffpar</a>
 				</div>
 				<div style="clear:both"> </div>
@@ -248,7 +259,7 @@
 	</xsl:template>
 
 	<xsl:template match="name" mode="component">
-		<div class="{$APPCLASS}-name"><xsl:apply-templates/></div>
+		<div class="{$CSSCLASS}-name"><xsl:apply-templates/></div>
 	</xsl:template>
 
 	<xsl:template match="menu" mode="component">
@@ -256,7 +267,7 @@
 	</xsl:template>
 
 	<xsl:template match="title" mode="component">
-		<div class="{$APPCLASS}-menu"><xsl:apply-templates/></div>
+		<div class="{$CSSCLASS}-menu"><xsl:apply-templates/></div>
 	</xsl:template>
 
 	<xsl:template match="control" mode="component">
@@ -345,7 +356,7 @@
 				</xsl:choose>
 			</xsl:variable>
 			<xsl:variable name="subClass">
-				<xsl:if test="@label"><xsl:text> </xsl:text><xsl:value-of select="$APPCLASS"/><xsl:text>-label</xsl:text></xsl:if>
+				<xsl:if test="@label"><xsl:text> </xsl:text><xsl:value-of select="$CSSCLASS"/><xsl:text>-label</xsl:text></xsl:if>
 			</xsl:variable>
 			<xsl:variable name="labelWidth">
 				<xsl:choose>
@@ -363,12 +374,12 @@
 			</xsl:variable>
 			<xsl:if test="@label">
 				<xsl:if test="not(@labelpos) or @labelpos = 'left'">
-					<div class="{$APPCLASS}-label" style="{$labelWidth}{$labelStyle}"><xsl:value-of select="@label"/></div>
+					<div class="{$CSSCLASS}-label" style="{$labelWidth}{$labelStyle}"><xsl:value-of select="@label"/></div>
 				</xsl:if>
 			</xsl:if>
 			<xsl:choose>
 				<xsl:when test="@type = 'canvas'">
-					<canvas class="{$APPCLASS}-binding {$APPCLASS}-canvas" width="{@width}" height="{@height}" style="-webkit-user-select:none;{$border}{$fontsize}{$style}" data-value="{{{$type},{$binding}}}"><xsl:apply-templates/></canvas>
+					<canvas class="{$APPCLASS}-binding {$CSSCLASS}-canvas" width="{@width}" height="{@height}" style="-webkit-user-select:none;{$border}{$fontsize}{$style}" data-value="{{{$type},{$binding}}}"><xsl:apply-templates/></canvas>
 				</xsl:when>
 				<xsl:when test="@type = 'button'">
 					<button class="{$APPCLASS}-binding" style="-webkit-user-select:none;{$border}{$width}{$height}{$fontsize}{$style}" data-value="{{{$type},{$binding},{$value}}}"><xsl:apply-templates/></button>
@@ -392,14 +403,14 @@
 				</xsl:when>
 				<xsl:when test="@type = 'file'">
 					<form class="{$APPCLASS}-binding" data-value="{{{$type},{$binding}}}">
-						<fieldset class="{$APPCLASS}-fieldset">
+						<fieldset class="{$CSSCLASS}-fieldset">
 							<input type="file"/>
 							<input type="submit" value="Mount" disabled="true"/>
 						</fieldset>
 					</form>
 				</xsl:when>
 				<xsl:when test="@type = 'led'">
-					<div class="{$APPCLASS}-binding {$APPCLASS}-{@type}" data-value="{{{$type},{$binding}}}"><xsl:value-of select="."/></div>
+					<div class="{$APPCLASS}-binding {$CSSCLASS}-{@type}" data-value="{{{$type},{$binding}}}"><xsl:value-of select="."/></div>
 				</xsl:when>
 				<xsl:when test="@type = 'separator'">
 					<hr/>
@@ -411,12 +422,12 @@
 					<div style="clear:both"> </div>
 				</xsl:when>
 				<xsl:otherwise>
-					<div class="{$APPCLASS}-binding{$subClass} {$APPCLASS}-{@type}" style="-webkit-user-select:none;{$border}{$width}{$height}{$fontsize}{$style}" data-value="{{{$type},{$binding}}}"><xsl:apply-templates/></div>
+					<div class="{$APPCLASS}-binding{$subClass} {$CSSCLASS}-{@type}" style="-webkit-user-select:none;{$border}{$width}{$height}{$fontsize}{$style}" data-value="{{{$type},{$binding}}}"><xsl:apply-templates/></div>
 				</xsl:otherwise>
 			</xsl:choose>
 			<xsl:if test="@label">
 				<xsl:if test="@labelpos = 'right'">
-					<div class="{$APPCLASS}-label" style="{$labelWidth}{$labelStyle}"><xsl:value-of select="@label"/></div>
+					<div class="{$CSSCLASS}-label" style="{$labelWidth}{$labelStyle}"><xsl:value-of select="@label"/></div>
 				</xsl:if>
 				<div style="clear:both"> </div>
 			</xsl:if>
@@ -812,10 +823,16 @@
 				<xsl:otherwise><xsl:value-of select="@automount"/></xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
+		<xsl:variable name="sortBy">
+			<xsl:choose>
+				<xsl:when test="@sortBy"><xsl:value-of select="@sortBy"/></xsl:when>
+				<xsl:otherwise/>
+			</xsl:choose>
+		</xsl:variable>
 		<xsl:call-template name="component">
 			<xsl:with-param name="machine" select="$machine"/>
 			<xsl:with-param name="class">fdc</xsl:with-param>
-			<xsl:with-param name="parms">,autoMount:'<xsl:value-of select="$automount"/>'</xsl:with-param>
+			<xsl:with-param name="parms">,autoMount:'<xsl:value-of select="$automount"/>',sortBy:'<xsl:value-of select="$sortBy"/>'</xsl:with-param>
 		</xsl:call-template>
 	</xsl:template>
 
@@ -884,10 +901,16 @@
 				<xsl:otherwise/>
 			</xsl:choose>
 		</xsl:variable>
+		<xsl:variable name="writable">
+			<xsl:choose>
+				<xsl:when test="@writable"><xsl:value-of select="@writable"/></xsl:when>
+				<xsl:otherwise>false</xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
 		<xsl:call-template name="component">
 			<xsl:with-param name="machine" select="$machine"/>
 			<xsl:with-param name="class">rom</xsl:with-param>
-			<xsl:with-param name="parms">,addr:<xsl:value-of select="$addr"/>,size:<xsl:value-of select="$size"/>,alias:<xsl:value-of select="$alias"/>,file:'<xsl:value-of select="$file"/>',notify:'<xsl:value-of select="$notify"/>'</xsl:with-param>
+			<xsl:with-param name="parms">,addr:<xsl:value-of select="$addr"/>,size:<xsl:value-of select="$size"/>,alias:<xsl:value-of select="$alias"/>,file:'<xsl:value-of select="$file"/>',notify:'<xsl:value-of select="$notify"/>',writable:<xsl:value-of select="$writable"/></xsl:with-param>
 		</xsl:call-template>
 	</xsl:template>
 
@@ -1019,10 +1042,41 @@
 				<xsl:otherwise>false</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
+		<xsl:variable name="aspectRatio">
+			<xsl:choose>
+				<xsl:when test="@aspect"><xsl:value-of select="@aspect"/></xsl:when>
+				<xsl:when test="@aspectRatio"><xsl:value-of select="@aspectRatio"/></xsl:when>
+				<xsl:otherwise>0</xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
+		<xsl:variable name="frameBuffer">
+			<xsl:choose>
+				<xsl:when test="@frameBuffer"><xsl:value-of select="@frameBuffer"/></xsl:when>
+				<xsl:otherwise>0</xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
+		<xsl:variable name="interruptRate">
+			<xsl:choose>
+				<xsl:when test="@interruptRate"><xsl:value-of select="@interruptRate"/></xsl:when>
+				<xsl:otherwise>0</xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
+		<xsl:variable name="refreshRate">
+			<xsl:choose>
+				<xsl:when test="@refreshRate"><xsl:value-of select="@refreshRate"/></xsl:when>
+				<xsl:otherwise>60</xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
+		<xsl:variable name="rotation">
+			<xsl:choose>
+				<xsl:when test="@rotation"><xsl:value-of select="@rotation"/></xsl:when>
+				<xsl:otherwise>0</xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
 		<xsl:call-template name="component">
 			<xsl:with-param name="machine" select="$machine"/>
 			<xsl:with-param name="class">video</xsl:with-param>
-			<xsl:with-param name="parms">,model:'<xsl:value-of select="$model"/>',mode:<xsl:value-of select="$mode"/>,screenWidth:<xsl:value-of select="$screenWidth"/>,screenHeight:<xsl:value-of select="$screenHeight"/>,memory:<xsl:value-of select="$memory"/>,switches:'<xsl:value-of select="$switches"/>',scale:<xsl:value-of select="$scale"/>,charCols:<xsl:value-of select="$charCols"/>,charRows:<xsl:value-of select="$charRows"/>,fontROM:'<xsl:value-of select="$fontROM"/>',screenColor:'<xsl:value-of select="$screenColor"/>',touchScreen:'<xsl:value-of select="$touchScreen"/>',autoLock:<xsl:value-of select="$autoLock"/></xsl:with-param>
+			<xsl:with-param name="parms">,model:'<xsl:value-of select="$model"/>',mode:<xsl:value-of select="$mode"/>,screenWidth:<xsl:value-of select="$screenWidth"/>,screenHeight:<xsl:value-of select="$screenHeight"/>,memory:<xsl:value-of select="$memory"/>,switches:'<xsl:value-of select="$switches"/>',scale:<xsl:value-of select="$scale"/>,charCols:<xsl:value-of select="$charCols"/>,charRows:<xsl:value-of select="$charRows"/>,fontROM:'<xsl:value-of select="$fontROM"/>',screenColor:'<xsl:value-of select="$screenColor"/>',touchScreen:'<xsl:value-of select="$touchScreen"/>',autoLock:<xsl:value-of select="$autoLock"/>,aspectRatio:<xsl:value-of select="$aspectRatio"/>,frameBuffer:<xsl:value-of select="$frameBuffer"/>,interruptRate:<xsl:value-of select="$interruptRate"/>,refreshRate:<xsl:value-of select="$refreshRate"/>,rotation:<xsl:value-of select="$rotation"/></xsl:with-param>
 		</xsl:call-template>
 	</xsl:template>
 
@@ -1091,7 +1145,7 @@
 			<xsl:choose>
 				<xsl:when test="@buswidth"><xsl:value-of select="@buswidth"/></xsl:when>
 				<xsl:when test="@busWidth"><xsl:value-of select="@busWidth"/></xsl:when>
-				<xsl:otherwise>20</xsl:otherwise>
+				<xsl:otherwise>0</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
 		<xsl:variable name="resume">

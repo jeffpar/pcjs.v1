@@ -37,10 +37,12 @@ computer diagnostics, programming tools, and more.
 
 ### Applications
 
+* [IBM TopView](apps/ibm/topview/)
 * [Lotus 1-2-3](apps/lotus/123/)
 * [MicroPro WordStar](apps/micropro/wordstar/)
 * [Microsoft Chart](apps/microsoft/chart/)
 * [Microsoft Word](apps/microsoft/word/)
+* [Sunny Hill Omniview](apps/sunnyhill/omniview/)
 
 ### Games
 
