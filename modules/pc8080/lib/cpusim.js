@@ -750,33 +750,10 @@ CPUSim.prototype.andByte = function(src)
 };
 
 /**
- * cmpByte(src)
- *
- * We perform this operation using 8-bit two's complement arithmetic, by negating src, adding,
- * and then inverting the resulting carry (resultZeroCarry ^ 0x100).  This appears to mimic how
- * the 8080 manages the Auxiliary Carry flag (AF).
- *
- * @this {CPUSim}
- * @param {number} src
- */
-CPUSim.prototype.cmpByte = function(src)
-{
-    src = -src & 0xff;
-    this.resultAuxOverflow = this.regA ^ src;
-    /*
-     * The final AND with 0xff isn't strictly necessary, since the result of the comparison is
-     * not returned, but I like limiting the result variables to tidy 8-bit values (resultZeroCarry
-     * being the 9-bit exception).
-     */
-    this.resultParitySign = (this.resultZeroCarry = (this.regA + src) ^ 0x100) & 0xff;
-};
-
-/**
  * decByte(b)
  *
- * We perform this operation using 8-bit two's complement arithmetic, by negating src, adding,
- * and then inverting the resulting carry (resultZeroCarry ^ 0x100).  This appears to mimic how
- * the 8080 manages the Auxiliary Carry flag (AF).
+ * We perform this operation using 8-bit two's complement arithmetic, by negating and then adding
+ * the implied src of 1.  This appears to mimic how the 8080 manages the Auxiliary Carry flag (AF).
  *
  * @this {CPUSim}
  * @param {number} b
@@ -820,9 +797,32 @@ CPUSim.prototype.orByte = function(src)
 /**
  * subByte(src)
  *
- * We perform this operation using 8-bit two's complement arithmetic, by negating src, adding,
- * and then inverting the resulting carry (resultZeroCarry ^ 0x100).  This appears to mimic how
- * the 8080 manages the Auxiliary Carry flag (AF).
+ * We perform this operation using 8-bit two's complement arithmetic, by inverting src, adding
+ * src + 1, and then inverting the resulting carry (resultZeroCarry ^ 0x100).  This appears to mimic
+ * how the 8080 manages the Auxiliary Carry flag (AF).
+ *
+ * This function is also used as a cmpByte() function; compare instructions simply ignore the
+ * return value.
+ *
+ * Example: A=66, SUI $10
+ *
+ * If we created the two's complement of 0x10 by negating it, there would just be one addition:
+ *
+ *      0110 0110   (0x66)
+ *    + 1111 0000   (0xF0)  (ie, -0x10)
+ *      ---------
+ *    1 0101 0110   (0x56)
+ *
+ * But in order to mimic the 8080's AF flag, we must perform the two's complement of src in two steps,
+ * inverting it before the add, and then incrementing after the add; eg:
+ *
+ *      0110 0110   (0x66)
+ *    + 1110 1111   (0xEF)  (ie, ~0x10)
+ *      ---------
+ *    1 0101 0101   (0x55)
+ *    + 0000 0001   (0x01)
+ *      ---------
+ *    1 0101 0110   (0x56)
  *
  * @this {CPUSim}
  * @param {number} src
@@ -830,17 +830,20 @@ CPUSim.prototype.orByte = function(src)
  */
 CPUSim.prototype.subByte = function(src)
 {
-    src = -src & 0xff;
+    src ^= 0xff;
     this.resultAuxOverflow = this.regA ^ src;
-    return this.resultParitySign = (this.resultZeroCarry = (this.regA + src) ^ 0x100) & 0xff;
+    return this.resultParitySign = (this.resultZeroCarry = (this.regA + src + 1) ^ 0x100) & 0xff;
 };
 
 /**
  * subByteBorrow(src)
  *
- * We perform this operation using 8-bit two's complement arithmetic, by negating (src + carry),
- * adding, and then inverting the resulting carry (resultZeroCarry ^ 0x100).  This appears to mimic
- * how the 8080 manages the Auxiliary Carry flag (AF).
+ * We perform this operation using 8-bit two's complement arithmetic, using logic similar to subByte(),
+ * but changing the final increment to a conditional increment, because if the Carry flag (CF) is set, then
+ * we don't need to perform the increment at all.
+ *
+ * This mimics the behavior of subByte() when the Carry flag (CF) is clear, and hopefully also mimics how the
+ * 8080 manages the Auxiliary Carry flag (AF) when the Carry flag (CF) is set.
  *
  * @this {CPUSim}
  * @param {number} src
@@ -848,9 +851,9 @@ CPUSim.prototype.subByte = function(src)
  */
 CPUSim.prototype.subByteBorrow = function(src)
 {
-    src = -(src + ((this.resultZeroCarry & 0x100)? 1 : 0)) & 0xff;
+    src ^= 0xff
     this.resultAuxOverflow = this.regA ^ src;
-    return this.resultParitySign = (this.resultZeroCarry = (this.regA + src) ^ 0x100) & 0xff;
+    return this.resultParitySign = (this.resultZeroCarry = (this.regA + src + ((this.resultZeroCarry & 0x100)? 0 : 1)) ^ 0x100) & 0xff;
 };
 
 /**

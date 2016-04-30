@@ -441,24 +441,18 @@ CPUDef.opMVIH = function()
  */
 CPUDef.opDAA = function()
 {
-    var acc = this.regA;
-    var fCarry = !!this.getCF();
-    var fAuxCarry = !!this.getAF();
-    if ((acc & 0xf) > 9 || fAuxCarry) {
-        acc += 0x6;
-        fAuxCarry = true;
-    } else {
-        fAuxCarry = false;
+    var src = 0;
+    var CF = this.getCF();
+    var AF = this.getAF();
+    if (AF || (this.regA & 0x0F) > 9) {
+        src |= 0x06;
     }
-    if (acc >= 0xa0 || fCarry) {
-        acc += 0x60;
-        fCarry = true;
-    } else {
-        fCarry = false;
+    if (CF || this.regA >= 0x9A) {
+        src |= 0x60;
+        CF = CPUDef.PS.CF;
     }
-    this.resultZeroCarry = this.resultParitySign = this.regA = (acc & 0xff);
-    this.updateCF(fCarry);
-    this.updateAF(fAuxCarry);
+    this.regA = this.addByte(src);
+    this.updateCF(!!CF);
     this.nStepCycles -= 4;
 };
 
@@ -2055,7 +2049,7 @@ CPUDef.opORAA = function()
  */
 CPUDef.opCMPB = function()
 {
-    this.cmpByte(this.regB);
+    this.subByte(this.regB);
     this.nStepCycles -= 4;
 };
 
@@ -2066,7 +2060,7 @@ CPUDef.opCMPB = function()
  */
 CPUDef.opCMPC = function()
 {
-    this.cmpByte(this.regC);
+    this.subByte(this.regC);
     this.nStepCycles -= 4;
 };
 
@@ -2077,7 +2071,7 @@ CPUDef.opCMPC = function()
  */
 CPUDef.opCMPD = function()
 {
-    this.cmpByte(this.regD);
+    this.subByte(this.regD);
     this.nStepCycles -= 4;
 };
 
@@ -2088,7 +2082,7 @@ CPUDef.opCMPD = function()
  */
 CPUDef.opCMPE = function()
 {
-    this.cmpByte(this.regE);
+    this.subByte(this.regE);
     this.nStepCycles -= 4;
 };
 
@@ -2099,7 +2093,7 @@ CPUDef.opCMPE = function()
  */
 CPUDef.opCMPH = function()
 {
-    this.cmpByte(this.regH);
+    this.subByte(this.regH);
     this.nStepCycles -= 4;
 };
 
@@ -2110,7 +2104,7 @@ CPUDef.opCMPH = function()
  */
 CPUDef.opCMPL = function()
 {
-    this.cmpByte(this.regL);
+    this.subByte(this.regL);
     this.nStepCycles -= 4;
 };
 
@@ -2121,7 +2115,7 @@ CPUDef.opCMPL = function()
  */
 CPUDef.opCMPM = function()
 {
-    this.cmpByte(this.getByte(this.getHL()));
+    this.subByte(this.getByte(this.getHL()));
     this.nStepCycles -= 7;
 };
 
@@ -2132,7 +2126,7 @@ CPUDef.opCMPM = function()
  */
 CPUDef.opCMPA = function()
 {
-    this.cmpByte(this.regA);
+    this.subByte(this.regA);
     this.nStepCycles -= 4;
 };
 
@@ -2859,7 +2853,7 @@ CPUDef.opCM = function()
  */
 CPUDef.opCPI = function()
 {
-    this.cmpByte(this.getPCByte());
+    this.subByte(this.getPCByte());
     this.nStepCycles -= 7;
 };
 

@@ -2544,7 +2544,7 @@ X86CPU.prototype.getPF = function()
  * getAF()
  *
  * To determine if there's been a carry out of the low 4 bits of an arithmetic operation,
- * we look at all the possible inputs for bit 4, and calculate AF = PS^(D^S):
+ * we look at all the possible inputs for bit 4, and calculate AF = A^(D^S).
  *
  *      D   S   A   D^S AF
  *      -   -   -   --- --
