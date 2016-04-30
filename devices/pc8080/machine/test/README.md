@@ -21,16 +21,16 @@ calls so that you can see its progress in the Control Panel window.  This is a "
 (no keyboard or display), so that's all you get.
 
 The good news: PC8080 passes all the 8080 Exerciser tests.  And it doesn't do it by using all sorts of weird
-"flags tables", which most other 8080 emulations seem to fall back on.
+"flags tables" that most other 8080 emulators seem to fall back on.
 
 Like all the other CPU emulations in the PCjs Project, PC8080 never "calculates" the flags unless/until they are
 actually required, which considerably speeds up all arithmetic operations.
 
-Of particular note are the 8080's subtract,
-compare, and decrement operations, which actually perform addition, not subtraction, by using two's complement
-arithmetic in "stages": the first stage (inverting the source operand) occurs *before* the addition, and the second
-stage (incrementing the inverted operand) occurs *after* the addition.  And it appears to be the result of the *first*
-stage, not the second, that determines the state of the Auxiliary Carry flag (AF).
+Of particular note are the 8080's subtract, compare, and decrement operations, which actually perform addition,
+not subtraction, by using two's complement arithmetic in "stages": the first stage (inverting the source operand)
+occurs *before* the addition, and the second stage (incrementing the inverted operand) occurs *after* the addition.
+And it appears to be the result of the *first* stage, not the second, that determines the state of the Auxiliary
+Carry flag (AF).
 
 At 2Mhz, the 8080 Exerciser tests take quite a while, but you can click the speed button while the machine is running
 to increase the simulated speed; it will revert to 2Mhz when you exceed the maximum speed that your system supports.
