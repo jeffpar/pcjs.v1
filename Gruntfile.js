@@ -385,43 +385,6 @@ module.exports = function(grunt) {
                     }
                 }
             },
-            "pcxsl": {
-                files: [
-                    {
-                        cwd: "modules/shared/templates/",
-                        src: ["common.css", "common.xsl", "document.css", "document.xsl", "machine.xsl", "manifest.xsl", "outline.xsl"],
-                        dest: "versions/pcjs/<%= pkg.version %>/",
-                        expand: true
-                    }
-                ],
-                options: {
-                    process: function(content, srcPath) {
-                        var s = content.replace(/(<xsl:variable name="APPVERSION">)[^<]*(<\/xsl:variable>)/g, "$1" + pkg.version + "$2");
-                        s = s.replace(/"[^"]*\/?(common.css|common.xsl|components.css|components.xsl|document.css|document.xsl)"/g, '"/versions/pcjs/' + pkg.version + '/$1"');
-                        s = s.replace(/[ \t]*\/\*[^\*][\s\S]*?\*\//g, "").replace(/[ \t]*<!--[^@]*?-->[ \t]*\n?/g, "");
-                        return s;
-                    }
-                }
-            },
-            "pc8080xsl": {
-                files: [
-                    {
-                        cwd: "modules/shared/templates/",
-                        src: ["common.css", "common.xsl", "document.css", "document.xsl", "machine.xsl", "manifest.xsl", "outline.xsl"],
-                        dest: "versions/pc8080/<%= pkg.version %>/",
-                        expand: true
-                    }
-                ],
-                options: {
-                    process: function(content, srcPath) {
-                        var s = content.replace(/(<xsl:variable name="APPCLASS">)[^<]*(<\/xsl:variable>)/g, "$1pc8080$2");
-                        s = s.replace(/(<xsl:variable name="APPVERSION">)[^<]*(<\/xsl:variable>)/g, "$1" + pkg.version + "$2");
-                        s = s.replace(/"[^"]*\/?(common.css|common.xsl|components.css|components.xsl|document.css|document.xsl)"/g, '"/versions/pc8080/' + pkg.version + '/$1"');
-                        s = s.replace(/[ \t]*\/\*[^\*][\s\S]*?\*\//g, "").replace(/[ \t]*<!--[^@]*?-->[ \t]*\n?/g, "");
-                        return s;
-                    }
-                }
-            },
             "c1pjs": {
                 files: [
                     {
@@ -443,7 +406,7 @@ module.exports = function(grunt) {
                 files: [
                     {
                         cwd: "modules/shared/templates/",
-                        src: ["components.*"],
+                        src: ["common.css", "common.xsl", "components.*", "document.css", "document.xsl", "machine.xsl", "manifest.xsl", "outline.xsl"],
                         dest: "versions/pcjs/<%= pkg.version %>/",
                         expand: true
                     }
@@ -451,6 +414,7 @@ module.exports = function(grunt) {
                 options: {
                     process: function(content, srcPath) {
                         var s = content.replace(/(<xsl:variable name="APPVERSION">)[^<]*(<\/xsl:variable>)/g, "$1" + pkg.version + "$2");
+                        s = s.replace(/"[^"]*\/?(common.css|common.xsl|components.css|components.xsl|document.css|document.xsl)"/g, '"/versions/pcjs/' + pkg.version + '/$1"');
                         s = s.replace(/[ \t]*\/\*[^\*][\s\S]*?\*\//g, "").replace(/[ \t]*<!--[^@]*?-->[ \t]*\n?/g, "");
                         return s;
                     }
@@ -460,7 +424,7 @@ module.exports = function(grunt) {
                 files: [
                     {
                         cwd: "modules/shared/templates/",
-                        src: ["components.*"],
+                        src: ["common.css", "common.xsl", "components.*", "document.css", "document.xsl", "machine.xsl", "manifest.xsl", "outline.xsl"],
                         dest: "versions/pc8080/<%= pkg.version %>/",
                         expand: true
                     }
@@ -468,7 +432,9 @@ module.exports = function(grunt) {
                 options: {
                     process: function(content, srcPath) {
                         var s = content.replace(/(<xsl:variable name="APPCLASS">)[^<]*(<\/xsl:variable>)/g, "$1pc8080$2");
+                        s = s.replace(/(<xsl:variable name="APPNAME">)[^<]*(<\/xsl:variable>)/g, "$1PC8080$2");
                         s = s.replace(/(<xsl:variable name="APPVERSION">)[^<]*(<\/xsl:variable>)/g, "$1" + pkg.version + "$2");
+                        s = s.replace(/"[^"]*\/?(common.css|common.xsl|components.css|components.xsl|document.css|document.xsl)"/g, '"/versions/pc8080/' + pkg.version + '/$1"');
                         s = s.replace(/[ \t]*\/\*[^\*][\s\S]*?\*\//g, "").replace(/[ \t]*<!--[^@]*?-->[ \t]*\n?/g, "");
                         return s;
                     }
