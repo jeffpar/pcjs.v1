@@ -12,7 +12,9 @@ PCjs Documentation
 ---
 
 [PCjs](/docs/about/pcjs/) is a full-featured IBM PC, PC XT and PC AT emulator written entirely in JavaScript.
-After you've read the Documentation, play with the [Examples](examples/).
+
+After you've read the Documentation, check out with the [Examples](examples/), read the [Source Code](/modules/pcjs/),
+and experiment!
 
 {% include machine.html id="ibm5150" %}
 
