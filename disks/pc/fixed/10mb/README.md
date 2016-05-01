@@ -16,7 +16,7 @@ These disk images are used by various [Model 5160](/devices/pc/machine/5160/) ma
 
 To use one of these disks with another machine configuration, include:
 
-	<hdc id="hdcXT" drives='[{name:"10Mb Hard Disk",path:"/disks/pc/fixed/10mb/PCDOS200-WIN101-CGA.json",type:3}]'/>
+	<hdc id="hdcXT" drives='[{name:"10Mb Hard Drive",path:"/disks/pc/fixed/10mb/PCDOS200-WIN101-CGA.json",type:3}]'/>
 	
 in the *machine.xml* file.  Alternatively, you can include it by reference:
 

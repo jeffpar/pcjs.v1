@@ -92,11 +92,11 @@
  *
  * An example of #1 is in /devices/pc/machine/5160/cga/256kb/demo/machine.xml:
  *
- *      <hdc id="hdcXT" drives='[{name:"10Mb Hard Disk",type:3}]'/>
+ *      <hdc id="hdcXT" drives='[{name:"10Mb Hard Drive",type:3}]'/>
  *
  * and an example of #2 is in /disks/pc/fixed/win101.xml:
  *
- *      <hdc id="hdcXT" drives='[{name:"10Mb Hard Disk",path:"/disks/pc/fixed/win101/10mb.json",type:3}]'/>
+ *      <hdc id="hdcXT" drives='[{name:"10Mb Hard Drive",path:"/disks/pc/fixed/win101/10mb.json",type:3}]'/>
  *
  * The HDC component expects an array of drive entries.  Array position determines drive numbering
  * (the first entry is drive 0, the second is drive 1, etc), and each entry contains the following
@@ -150,7 +150,7 @@
  * The real challenge here is avoiding revocation of a machine that still has critical changes to commit,
  * but since we can't even solve the problem of a user closing their browser at an inopportune time
  * and potentially leaving a disk image in an inconsistent state, premature revocation is the least of
- * our problems.  Since a real hard disk could suffer the same fate if the machine's power was turned off
+ * our problems.  Since a real hard drive could suffer the same fate if the machine's power was turned off
  * at the wrong time, you could say that we're simply providing a faithful simulation of reality.
  */
 
@@ -1062,7 +1062,7 @@ Disk.prototype.load = function(sDiskName, sDiskPath, file, fnNotify, controller)
                 var sDiskParm = DumpAPI.QUERY.PATH;
                 var sSizeParm = '&' + DumpAPI.QUERY.MBHD + "=10";
                 /*
-                 * 'mbhd' is a new parm added for hard disk support.  In the case of 'file' or 'dir' requests,
+                 * 'mbhd' is a new parm added for hard drive support.  In the case of 'file' or 'dir' requests,
                  * 'mbhd' informs DumpAPI.ENDPOINT that it should create a hard disk image, and one not larger than
                  * the specified size (eg, 10mb).  In fact, until DumpAPI.ENDPOINT is changed to create custom hard
                  * disk BPBs, you'll always get a standard PC XT 10mb disk image, so if the 'file' or 'dir' contains

@@ -11,18 +11,18 @@
 
 	<xsl:variable name="MACHINECLASS">pc</xsl:variable>
 	<xsl:variable name="CSSCLASS">pcjs</xsl:variable>
-	<xsl:variable name="APPCLASS">pcjs</xsl:variable>
-	<xsl:variable name="APPNAME">PCjs</xsl:variable>
+	<xsl:variable name="APPCLASS">pc8080</xsl:variable>
+	<xsl:variable name="APPNAME">PC8080</xsl:variable>
 	<xsl:variable name="APPVERSION">1.22.0</xsl:variable>
 	<xsl:variable name="SITEHOST">www.pcjs.org</xsl:variable>
 
 	<xsl:template name="componentStyles">
-		<link rel="stylesheet" type="text/css" href="/versions/pcjs/1.22.0/components.css"/>
+		<link rel="stylesheet" type="text/css" href="/versions/pc8080/1.22.0/components.css"/>
 	</xsl:template>
 
 	<xsl:template name="componentScripts">
 		<xsl:param name="component"/>
-		<script type="text/javascript" src="{$component}.js"> </script>
+		<script type="text/javascript" src="/versions/{$APPCLASS}/{$APPVERSION}/{$component}.js"> </script>
 	</xsl:template>
 
 	<xsl:template name="componentIncludes">

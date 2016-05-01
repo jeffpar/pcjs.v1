@@ -4,7 +4,7 @@ title: PCjs &lt;fdc&gt; Element
 permalink: /docs/pcjs/fdc/
 ---
 
-PCjs Floppy Disk Controller (FDC) Component
+PCjs Floppy Drive Controller (FDC) Component
 ---
 
 Format
@@ -13,7 +13,7 @@ Format
 
 Purpose
 ---
-Creates an instance of the Floppy Disk Controller (FDC) component. The FDC is responsible for:
+Creates an instance of the Floppy Drive Controller (FDC) component. The FDC is responsible for:
 
 - Automatically loading diskette image files at boot;
 - Simulating the appropriate controller hardware ports;

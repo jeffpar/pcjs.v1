@@ -4,7 +4,7 @@ title: PCjs &lt;hdc&gt; Element
 permalink: /docs/pcjs/hdc/
 ---
 
-PCjs Hard Disk Controller (HDC) Component
+PCjs Hard Drive Controller (HDC) Component
 ---
 
 Format
@@ -13,7 +13,7 @@ Format
 
 Purpose
 ---
-Creates an instance of the Hard Disk Controller (HDC) component. The HDC is responsible for:
+Creates an instance of the Hard Drive Controller (HDC) component. The HDC is responsible for:
 
 - Automatically loading fixed disk image files at boot;
 - Simulating the appropriate controller hardware ports;
@@ -30,7 +30,7 @@ Attributes
 	This is an array definition, with one array entry per fixed disk. Each entry is a drive object definition,
 	each of which may contain 'name', 'path' and 'type' properties. For example:
 	
-		[{name:'10Mb Hard Disk',path:'10mb.json',type:3}]
+		[{name:'10Mb Hard Drive',path:'10mb.json',type:3}]
 		
 	The 'path' property is optional; if omitted, an empty disk matching the specified drive type will be created
 	(10mb in the case of drive type 3).
@@ -62,7 +62,7 @@ This component has no bindings. Fixed disks cannot be loaded or unloaded once th
 
 Example
 ---
-	<hdc id="hdcXT" drives="[{name:'10Mb Hard Disk',type:3}]"/>
+	<hdc id="hdcXT" drives="[{name:'10Mb Hard Drive',type:3}]"/>
 
 Output
 ---

@@ -504,7 +504,7 @@ DiskDump.aDefaultBPBs = [
     0x02, 0x00,                 // 0x1A: number of heads (2)
     0x00, 0x00, 0x00, 0x00      // 0x1C: number of hidden sectors (always 0 for non-partitioned media)
   ],
-  [                             // define BPB for 10Mb hard disk
+  [                             // define BPB for 10Mb hard drive
     0xEB, 0xFE, 0x90,           // 0x00: JMP instruction, following by 8-byte OEM signature
     0x50, 0x43, 0x4A, 0x53, 0x2E, 0x4F, 0x52, 0x47,     // MY_OEM_STRING
  // 0x49, 0x42, 0x4D, 0x20, 0x20, 0x32, 0x2E, 0x30,     // "IBM  2.0" (this is a real OEM signature)
@@ -514,7 +514,7 @@ DiskDump.aDefaultBPBs = [
     0x02,                       // 0x10: FAT copies (2)
     0x00, 0x02,                 // 0x11: root directory entries (0x200 or 512)  0x200 * 0x20 = 0x4000 (1 sector is 0x200 bytes, total of 0x20 or 32 sectors)
     0x03, 0x51,                 // 0x13: number of sectors (0x5103 or 20739; * 512 bytes/sector = 10,618,368 bytes = 10,369Kb = 10Mb)
-    0xF8,                       // 0x15: media type (eg, 0xF8: hard disk w/FAT12)
+    0xF8,                       // 0x15: media type (eg, 0xF8: hard drive w/FAT12)
     0x08, 0x00,                 // 0x16: sectors per FAT (8)
     // Wikipedia (http://en.wikipedia.org/wiki/File_Allocation_Table#BIOS_Parameter_Block) implies everything past this point was introduced
     // post-DOS 2.0.  I think that's wrong, because I just formatted a diskette with PC-DOS 2.0 and it properly initialized the next 3 fields as well.
@@ -557,7 +557,7 @@ DiskDump.asTextFileExts = [".MD", ".ME", ".ASM", ".BAS", ".TXT", ".XML"];
  *
  *      Additional command-line arguments include:
  *
- *          --mbhd={number}: requests a hard disk image with the given number of megabytes (DEPRECATED)
+ *          --mbhd={number}: requests a hard drive image with the given number of megabytes (DEPRECATED)
  *          --size={number}: requests a target disk size with the given number of kilobytes (eg, 360, 720, 1200, 1440, 10000)
  *          --exclude={filename}: specifies a filename that should be excluded from the image; repeat as often as needed
  *          --overwrite: allows the --output option to overwrite an existing file; default is to NOT overwrite
@@ -2306,7 +2306,7 @@ DiskDump.prototype.buildImageFromFiles = function(aFiles, done)
      */
     for (var iBPB = 1; iBPB < DiskDump.aDefaultBPBs.length; iBPB++) {
         /*
-         * If this BPB is for a hard disk but a hard disk size was not specified, skip it.
+         * If this BPB is for a hard drive but a disk size was not specified, skip it.
          */
         abBoot = DiskDump.aDefaultBPBs[iBPB];
         if ((abBoot[0x15] == 0xF8) != (this.kbTarget >= 10000)) continue;
@@ -2356,7 +2356,7 @@ DiskDump.prototype.buildImageFromFiles = function(aFiles, done)
     this.bufDisk.fill(0);
 
     /*
-     * Output a Master Boot Record (MBR), if a hard disk image was requested
+     * Output a Master Boot Record (MBR), if a hard drive image was requested
      */
     if (this.kbTarget >= 10000) {
         abSector = this.buildMBR(cHeads, cSectorsPerTrack, cbSector, cTotalSectors);
@@ -2464,7 +2464,7 @@ DiskDump.prototype.convertToJSON = function()
         var offBootSector = 0;
         var cbDiskData = this.bufDisk.length;
 
-        if (cbDiskData >= 3000000) {        // arbitrary threshold between diskette image sizes and hard disk image sizes
+        if (cbDiskData >= 3000000) {        // arbitrary threshold between diskette image sizes and hard drive image sizes
             var wSig = this.bufDisk.readUInt16LE(0x1FE);
             if (wSig == 0xAA55) {
                 /*
@@ -3084,7 +3084,7 @@ DiskDump.prototype.convertToIMG = function()
              * fJSONComments as another way of disabling "branding" via the API; requesting an IMG file with comments
              * is otherwise a nonsensical request.
              */
-            if (!fDebug && !this.fJSONComments && buf.length < 3000000) {   // arbitrary size threshold between diskette images and hard disk images
+            if (!fDebug && !this.fJSONComments && buf.length < 3000000) {   // arbitrary size threshold between diskette images and hard drive images
                 /*
                  * Mimic the BPB test in convertToJSON(), because we don't want to blast an OEM string into non-DOS diskette images
                  */
