@@ -9,11 +9,12 @@ redirect_from:
 IBM PC Device Configurations
 ---
 
-[PC Machines](machine/) are built from a collection of devices, including:
+[IBM PC Machines](machine/) are built from a collection of [Devices](/devices/), including:
 
-* CPU
+* CPU (e.g., 8088, 80286, 80386)
 * RAM
 * [ROMs](rom/)
+* ChipSets (e.g., 8259, 8253, 8237)
 * [Keyboards](keyboard/)
 * [Video Adapters](video/)
 * Floppy Drive Controllers
@@ -30,8 +31,8 @@ Complete machine configurations are constructed from those devices.  A Machine C
 that lists all the device components to be used.  A Machine XML file can choose to configure every device itself,
 or it can include pre-configured device XML files, such as those provided above or elsewhere.
 
-For example, here's what the machine located at
-[/devices/pc/machine/5150/mda/64kb/machine.xml](/devices/pc/machine/5150/mda/64kb/machine.xml) looks like:
+Here's an example of [IBM 5150](/devices/pc/machine/5150/mda/64kb/)
+[XML](/devices/pc/machine/5150/mda/64kb/machine.xml):
 
 	<machine id="ibm5150" class="pc" border="1" pos="center" background="#FAEBD7">
 	    <name pos="center">IBM PC (Model 5150) with Monochrome Display</name>
@@ -49,7 +50,7 @@ For example, here's what the machine located at
 	    <chipset id="chipset" model="5150" sw1="01000001" sw2="11111000"/>
 	</machine>
 
-All the devices are fully configured within the Machine XML file, except for the
+In this example, all the devices are fully configured within the machine XML file, except for the
 [Video](/docs/pcjs/video/) [XML](/devices/pc/video/ibm/mda/ibm-mda.xml),
 [Floppy Disk Controller (FDC)](/docs/pcjs/fdc/) [XML](/disks/pc/compiled/samples.xml), and
 [Keyboard](/docs/pcjs/keyboard/) [XML](/devices/pc/keyboard/us83-buttons-arrows.xml).

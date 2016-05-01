@@ -17,8 +17,11 @@ Defines all the properties required for the CPU component to initialize, along w
 
 Attributes
 ---
-* *model* (optional; default is 8088)
+* *model* (optional; default is 8088; supported values include: 8086, 8088, 80186, 80286, and 80386)
 	* Defines the CPU model, adjusting the CPU's capabilities accordingly.
+* *stepping* (optional; if specified, it must be a 2-character string, such as "A0" or "B1")
+	* Defines the CPU stepping, adjusting the CPU's capabilities accordingly.
+	* Currently supported only on the 80386 model.
 * *cycles* (optional; default is 4772727)
 	* Defines the simulated CPU speed in terms of cycles. The default is 4.77Mhz. The exact speed will vary, according
 	to the whims of JavaScript, your web browser, and your machine's overall workload.

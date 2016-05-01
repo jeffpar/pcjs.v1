@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href="/versions/pc8080/1.22.0/machine.xsl"?>
 <machine id="test8080" class="pc8080" border="1" pos="center" background="#FAEBD7">
-	<name pos="center">8080 Test Machine</name>
+	<name pos="center">8080 Exerciser Test Machine</name>
 	<computer id="computer" busWidth="16"/>
 	<cpu id="cpu8080" model="8080" cycles="2000000"/>
-	<rom id="romTest" addr="0x0100" size="0x1200" file="/devices/pc8080/rom/test/8080EX1.json" writable="true"/>
+	<rom id="romTest" addr="0x0100" size="0x1200" file="/devices/pc8080/rom/exerciser/8080EX1.json" writable="true"/>
 	<ram id="ramTest" addr="0x1300" size="0xED00"/>
 	<panel ref="/devices/pc8080/panel/wide.xml"/>
 	<debugger id="debugger"/>

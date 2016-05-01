@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Space Invaders (Under Construction)
+title: Space Invaders (1978)
 permalink: /devices/pc8080/machine/invaders/
 machines:
   - type: pc8080
@@ -8,7 +8,7 @@ machines:
     debugger: true
 ---
 
-Space Invaders (Under Construction)
+Space Invaders (1978)
 ---
 
 This is a test of [PC8080](/modules/pc8080/), a new 8080-based machine emulator recently added to the

@@ -1,14 +1,16 @@
 ---
 layout: page
-title: 8080 Test Machine
-permalink: /devices/pc8080/machine/test/
+title: 8080 Exerciser Test Machine
+permalink: /devices/pc8080/machine/exerciser/
+redirect_from:
+  - /devices/pc8080/machine/test/
 machines:
   - type: pc8080
     id: test8080
     debugger: true
 ---
 
-8080 Test Machine
+8080 Exerciser Test Machine
 ---
 
 This is a test of [PC8080](/modules/pc8080/), a new 8080-based machine emulator being added to the
