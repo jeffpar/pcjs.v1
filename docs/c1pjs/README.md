@@ -49,13 +49,10 @@ idiosyncrasies and television-related limitations.
 
 #### Starting the Simulator
 
-Press the **RUN** or **BREAK** button to start the C1Pjs Simulator.
-
-Press **C** to select a COLD START.
-
-At the MEMORY SIZE prompt, press **Return** to use all available memory.
-
-At the TERMINAL WIDTH prompt, press **Return** to select the default screen width.
+* Press the **RUN** or **BREAK** button to start the C1Pjs Simulator.
+* Press **C** to select a COLD START.
+* At the MEMORY SIZE prompt, press **Return** to use all available memory.
+* At the TERMINAL WIDTH prompt, press **Return** to select the default screen width.
 
 Wait for the BASIC "OK" prompt before using the **Load File** button;
 this will allow the Simulator to automatically "LOAD" and "RUN" the selected program.
@@ -95,9 +92,7 @@ presumably this feature was added to prevent the display of passwords or other s
 If the Simulator is not responding to any keys, try clicking on the black display area to restore focus;
 if all else fails, press **BREAK** and then **W** for a WARM START.
 
-#### Operating Tips
-
-##### Using The Control Panel
+#### Using The Control Panel
 
 Press the **Run** button to start the Simulator; it will change to **Halt** while running.
 
@@ -116,7 +111,7 @@ Press the spacebar at the end of the "LOAD" operation to restore keyboard contro
 Press the **Load Disk** button to mount the selected disk image into the simulated floppy disk drive;
 press **BREAK** and then **D** to boot from the image and load the OS-65D operating system.
 
-##### Using The Debugger
+#### Using The Debugger
 
 A built-in Debugger is provided as part of the Control Panel.
 
@@ -126,7 +121,7 @@ The instruction frequency ("f") and history ("p") commands collect data only whi
 running (not stepping) and one or more breakpoints have been set; set a dummy execution breakpoint
 (eg, "bp 0") to enable collection.
 
-##### Controlling The Speed
+#### Controlling The Speed
 
 The default speed of the simulated CPU is roughly 1Mhz, or one million simulated CPU cycles per second.
 
@@ -136,11 +131,15 @@ the default speed of 1Mhz.
 Slow computers, as well as browsers with slow JavaScript interpreters, may not be able to achieve 1Mhz operation;
 in those situations, the speed controls will have no effect.
 
+---
+
 ### Embedding
 
 Want to embed the C1Pjs Simulator on your own web page? Everything you need to know is explained [here](embed/).
 You can even launch multiple simulations on a single page; check out the C1P "Server Array"
 [demo](/devices/c1p/machine/8kb/array/).
+
+---
 
 ### Implementation
 
@@ -154,6 +153,8 @@ to implement the simulation and bind it to the various HTML elements. The C1Pjs 
 This application was tested with current versions of Safari, Firefox, Chrome and Internet Explorer. Somewhat less
 current versions will probably work as well, with the exception of Internet Explorer, which did not add support for
 the &lt;canvas&gt; tag until IE9.
+
+---
 
 ### Challenger 1P Reference Manuals
 

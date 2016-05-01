@@ -18,7 +18,7 @@ It was added to the [JavaScript Machines](/docs/about/) project in Fall 2012, an
 The project includes the following web-based emulators:
 
 * [PCjs](/docs/pcjs/): an IBM PC and PC-compatible emulator 
-* [PC8080](/modules/pc8080/): an 8080-based machine emulation module
+* [PC8080](/modules/pc8080/): an 8080-based machine emulator
 * [C1Pjs](/docs/c1pjs/): a simulation of the 6502-based OSI Challenger 1P
 
 PCjs first simulated the 4.77Mhz 8088-based IBM PC, and has steadily evolved to support more classic x86 machines,
