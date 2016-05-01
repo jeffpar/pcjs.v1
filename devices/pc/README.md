@@ -9,7 +9,7 @@ redirect_from:
 IBM PC Device Configurations
 ---
 
-[IBM PC Machines](machine/) are built from a collection of PC Devices, including:
+[IBM PC Machines](machine/) are built from a collection of devices, including:
 
 * CPU (e.g., 8088, 80286, 80386)
 * RAM
@@ -34,21 +34,23 @@ or it can include pre-configured device XML files, such as those provided above 
 Here's an example of [IBM 5150](/devices/pc/machine/5150/mda/64kb/)
 [XML](/devices/pc/machine/5150/mda/64kb/machine.xml):
 
-	<machine id="ibm5150" class="pc" border="1" pos="center" background="#FAEBD7">
-	    <name pos="center">IBM PC (Model 5150) with Monochrome Display</name>
-	    <computer id="pc-mda-64k" name="IBM PC" resume="1"/>
-	    <ram id="ramLow" addr="0x00000"/>
-	    <rom id="romBASIC" addr="0xf6000" size="0x8000" file="/devices/pc/rom/5150/basic/BASIC100.json"/>
-	    <rom id="romBIOS" addr="0xfe000" size="0x2000" file="/devices/pc/rom/5150/1981-04-24/PCBIOS-REV1.json"/>
-	    <video ref="/devices/pc/video/ibm/mda/ibm-mda.xml"/>
-	    <fdc ref="/disks/pc/compiled/samples.xml"/>
-	    <cpu id="cpu8088" model="8088" autostart="true" pos="left" padleft="8px" padbottom="8px">
-	        <control type="button" binding="run">Run</control>
-	        <control type="button" binding="reset">Reset</control>
-	    </cpu>
-	    <keyboard ref="/devices/pc/keyboard/us83-buttons-arrows.xml"/>
-	    <chipset id="chipset" model="5150" sw1="01000001" sw2="11111000"/>
-	</machine>
+```xml
+<machine id="ibm5150" class="pc" border="1" pos="center" background="#FAEBD7">
+    <name pos="center">IBM PC (Model 5150) with Monochrome Display</name>
+    <computer id="pc-mda-64k" name="IBM PC" resume="1"/>
+    <ram id="ramLow" addr="0x00000"/>
+    <rom id="romBASIC" addr="0xf6000" size="0x8000" file="/devices/pc/rom/5150/basic/BASIC100.json"/>
+    <rom id="romBIOS" addr="0xfe000" size="0x2000" file="/devices/pc/rom/5150/1981-04-24/PCBIOS-REV1.json"/>
+    <video ref="/devices/pc/video/ibm/mda/ibm-mda.xml"/>
+    <fdc ref="/disks/pc/compiled/samples.xml"/>
+    <cpu id="cpu8088" model="8088" autostart="true" pos="left" padleft="8px" padbottom="8px">
+        <control type="button" binding="run">Run</control>
+        <control type="button" binding="reset">Reset</control>
+    </cpu>
+    <keyboard ref="/devices/pc/keyboard/us83-buttons-arrows.xml"/>
+    <chipset id="chipset" model="5150" sw1="01000001" sw2="11111000"/>
+</machine>
+```
 
 In this example, all the devices are fully configured within the machine XML file, except for the
 [Video](/docs/pcjs/video/) [XML](/devices/pc/video/ibm/mda/ibm-mda.xml),

@@ -2,7 +2,7 @@
 layout: page
 title: JavaScript Machines
 menu_title: About
-menu_order: 10
+menu_order: 9
 permalink: /docs/about/
 ---
 

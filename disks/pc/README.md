@@ -78,37 +78,45 @@ making all its disks available to any machine loading that particular configurat
 A simple FDC configuration file, such as [samples.xml](samples.xml), *could* contain individual &lt;disk&gt;
 entries like:
 
-	<disk path="/disks/pc/dos/ibm/1.00/PCDOS100.json">PC-DOS 1.00</disk>
-	<disk path="/disks/pc/dos/ibm/1.10/PCDOS110.json">PC-DOS 1.10</disk>
-	<disk path="/disks/pc/dos/ibm/2.00/PCDOS200-DISK1.json">PC-DOS 2.00 (Disk 1)</disk>
-	<disk path="/disks/pc/dos/ibm/2.00/PCDOS200-DISK2.json">PC-DOS 2.00 (Disk 2)</disk>
-	...
+```xml
+<disk path="/disks/pc/dos/ibm/1.00/PCDOS100.json">PC-DOS 1.00</disk>
+<disk path="/disks/pc/dos/ibm/1.10/PCDOS110.json">PC-DOS 1.10</disk>
+<disk path="/disks/pc/dos/ibm/2.00/PCDOS200-DISK1.json">PC-DOS 2.00 (Disk 1)</disk>
+<disk path="/disks/pc/dos/ibm/2.00/PCDOS200-DISK2.json">PC-DOS 2.00 (Disk 2)</disk>
+...
+```
 
 However, listing individual diskettes like that is tedious, so support was added for Disk Manifest references:
 
 Instead of listing the PC-DOS 2.00 diskettes individually, they can now be added to an XML configuration file
 with a single Disk Manifest reference:
 
-	<manifest ref="/disks/pc/dos/ibm/2.00/manifest.xml" disk="*"/>
+```xml
+<manifest ref="/disks/pc/dos/ibm/2.00/manifest.xml" disk="*"/>
+```
 
 When you want to include only one particular disk from a manifest, set the *disk* value to the *id* of the disk.
 Here's how you would include only the *first* disk from PC-DOS 2.00:
 
-	<manifest ref="/disks/pc/dos/ibm/2.00/manifest.xml" disk="disk01"/>
+```xml
+<manifest ref="/disks/pc/dos/ibm/2.00/manifest.xml" disk="disk01"/>
+```
 
 Here's what the entire Disk Manifest for PC-DOS 2.00 currently looks like:
 
-	<manifest type="software">
-	    <title>PC-DOS</title>
-	    <version>2.00</version>
-	    <type>DOS</type>
-	    <category>Operating System</category>
-	    <author>IBM/Microsoft</author>
-	    <releaseDate/>
-	    <disk id="disk01" size="184320" chs="40:1:9" img="archive/PCDOS200-DISK1.img" href="/disks/pc/dos/ibm/2.00/PCDOS200-DISK1.json" md5="d57ceef82122790d1c0ff7bebc12f90a" md5json="2507c02da6cbafe9a94a35cbdd993be2">
-	        <name>PC-DOS 2.00 (Disk 1)</name>
-	    </disk>
-	    <disk id="disk02" size="184320" chs="40:1:9" img="archive/PCDOS200-DISK2.img" href="/disks/pc/dos/ibm/2.00/PCDOS200-DISK2.json" md5="1c7aac53c78446992f8821cf42d04c4a" md5json="b66e296319c1f97990b596b1aa376d39">
-	        <name>PC-DOS 2.00 (Disk 2)</name>
-	    </disk>
-	</manifest>
+```xml
+<manifest type="software">
+    <title>PC-DOS</title>
+    <version>2.00</version>
+    <type>DOS</type>
+    <category>Operating System</category>
+    <author>IBM/Microsoft</author>
+    <releaseDate/>
+    <disk id="disk01" size="184320" chs="40:1:9" img="archive/PCDOS200-DISK1.img" href="/disks/pc/dos/ibm/2.00/PCDOS200-DISK1.json" md5="d57ceef82122790d1c0ff7bebc12f90a" md5json="2507c02da6cbafe9a94a35cbdd993be2">
+        <name>PC-DOS 2.00 (Disk 1)</name>
+    </disk>
+    <disk id="disk02" size="184320" chs="40:1:9" img="archive/PCDOS200-DISK2.img" href="/disks/pc/dos/ibm/2.00/PCDOS200-DISK2.json" md5="1c7aac53c78446992f8821cf42d04c4a" md5json="b66e296319c1f97990b596b1aa376d39">
+        <name>PC-DOS 2.00 (Disk 2)</name>
+    </disk>
+</manifest>
+```

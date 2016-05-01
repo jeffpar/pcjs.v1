@@ -1,8 +1,6 @@
 ---
 layout: page
 title: IBM PC Machine Configurations
-menu_title: Machines
-menu_order: 6
 permalink: /devices/pc/machine/
 redirect_from:
   - /configs/pc/machines/
@@ -11,7 +9,7 @@ redirect_from:
 IBM PC Machine Configurations
 ---
 
-[PC Devices](/devices/pc/) are the building blocks of these early [IBM PC Machines](#ibm-pc-machines):
+PCjs supports these early [IBM PC Machines](#ibm-pc-machines):
 
 * [IBM PC](/devices/pc/machine/5150/) (Model 5150)
 * [IBM PC XT](/devices/pc/machine/5160/) (Model 5160)
