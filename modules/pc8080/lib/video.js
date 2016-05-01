@@ -50,11 +50,19 @@ if (NODE) {
  *      screenWidth: width of the screen canvas, in pixels
  *      screenHeight: height of the screen canvas, in pixels
  *      screenColor: background color of the screen canvas (default is black)
- *      aspectRatio
- *      frameBuffer
- *      interruptRate (eg, 120)
- *      refreshRate (eg, 60)
- *      rotation (eg, 90)
+ *      screenRotation: the amount of counter-clockwise rotation required (eg, 90)
+ *      aspectRatio (eg, 1.33)
+ *      bufferAddr: the starting address of the frame buffer (eg, 0x2400)
+ *      bufferCols: the width of a single frame buffer row, in pixels (eg, 256)
+ *      bufferRows: the number of frame buffer rows (eg, 224)
+ *      bufferBits: the number of bits per pixel (eg, 1)
+ *      interruptRate: normally the same as (or some multiple of) the refreshRate (eg, 120)
+ *      refreshRate: how many times updateScreen() should be called per second (eg, 60)
+ *
+ * We record all the above values now, but we defer creation of the frame buffer until our initBus()
+ * handler is called.  At that point, we will also compute the extent of the frame buffer, determine the
+ * appropriate "cell" size (ie, the number of pixels that updateScreen() will fetch and process at once),
+ * and allocate our cell cache.
  *
  * @constructor
  * @extends Component

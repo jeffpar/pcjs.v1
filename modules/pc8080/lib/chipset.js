@@ -68,7 +68,7 @@ function ChipSet(parmsChipSet)
         Component.notice("Unrecognized ChipSet model: " + model);
     }
 
-    this.model = ChipSet.MODELS[model];
+    this.model = ChipSet.MODELS[model] || ChipSet.SI_1978.MODEL;
 
     this.bSwitches = this.parseDIPSwitches(parmsChipSet['swDIP']);
 
@@ -276,7 +276,7 @@ ChipSet.prototype.reset = function()
     this.bStatus0 = 0;
     this.bStatus1 = 0;
     this.bStatus2 = 0;
-    this.bShiftData = 0;
+    this.wShiftData = 0;
     this.bShiftCount = 0;
     this.bSound1 = this.bSound2 = 0;
 };
@@ -293,7 +293,7 @@ ChipSet.prototype.save = function()
 {
     var state = new State(this);
     if (this.model == ChipSet.SI_1978.MODEL) {
-        state.set(0, [this.bStatus0, this.bStatus1, this.bStatus2, this.bShiftData, this.bShiftCount, this.bSound1, this.bSound2]);
+        state.set(0, [this.bStatus0, this.bStatus1, this.bStatus2, this.wShiftData, this.bShiftCount, this.bSound1, this.bSound2]);
     }
     return state.data();
 };
@@ -315,12 +315,40 @@ ChipSet.prototype.restore = function(data)
         this.bStatus0 = a[0];
         this.bStatus1 = a[1];
         this.bStatus2 = a[2];
-        this.bShiftData = a[3];
+        this.wShiftData = a[3];
         this.bShiftCount = a[4];
         this.bSound1 = a[5];
         this.bSound2 = a[6];
     }
     return true;
+};
+
+/**
+ * start()
+ *
+ * Notification from the CPU that it's starting.
+ *
+ * @this {ChipSet}
+ */
+ChipSet.prototype.start = function()
+{
+    /*
+     * Currently, all we (may) do with this notification is allow the speaker to make noise.
+     */
+};
+
+/**
+ * stop()
+ *
+ * Notification from the CPU that it's stopping.
+ *
+ * @this {ChipSet}
+ */
+ChipSet.prototype.stop = function()
+{
+    /*
+     * Currently, all we (may) do with this notification is prevent the speaker from making noise.
+     */
 };
 
 /**
@@ -378,7 +406,7 @@ ChipSet.prototype.inSIStatus2 = function(port, addrFrom)
  */
 ChipSet.prototype.inSIShiftResult = function(port, addrFrom)
 {
-    var b = ((this.bShiftData << this.bShiftCount) >> 8) & 0xff;
+    var b = (this.wShiftData >> (8 - this.bShiftCount)) & 0xff;
     this.printMessageIO(port, null, addrFrom, "SHIFT.RESULT", b, true);
     return b;
 };
@@ -422,7 +450,7 @@ ChipSet.prototype.outSISound1 = function(port, b, addrFrom)
 ChipSet.prototype.outSIShiftData = function(port, b, addrFrom)
 {
     this.printMessageIO(port, b, addrFrom, "SHIFT.DATA", null, true);
-    this.bShiftData = b;
+    this.wShiftData = (b << 8) | (this.wShiftData >> 8);
 };
 
 /**
@@ -437,6 +465,19 @@ ChipSet.prototype.outSISound2 = function(port, b, addrFrom)
 {
     this.printMessageIO(port, b, addrFrom, "SOUND2", null, true);
     this.bSound2 = b;
+};
+
+/**
+ * outSIWatchdog(port, b, addrFrom)
+ *
+ * @this {ChipSet}
+ * @param {number} port (0x06)
+ * @param {number} b
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to write the specified port)
+ */
+ChipSet.prototype.outSIWatchdog = function(port, b, addrFrom)
+{
+    this.printMessageIO(port, b, addrFrom, "WATCHDOG", null, true);
 };
 
 /*
@@ -456,7 +497,8 @@ ChipSet.aPortOutput = {
     0x02: ChipSet.prototype.outSIShiftCount,
     0x03: ChipSet.prototype.outSISound1,
     0x04: ChipSet.prototype.outSIShiftData,
-    0x05: ChipSet.prototype.outSISound2
+    0x05: ChipSet.prototype.outSISound2,
+    0x06: ChipSet.prototype.outSIWatchdog
 };
 
 /**

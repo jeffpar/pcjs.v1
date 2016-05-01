@@ -1578,6 +1578,9 @@ if (DEBUGGER) {
     /**
      * messageIO(component, port, bOut, addrFrom, name, bIn, bitsMessage)
      *
+     * Most (if not all) port handlers should provide a name for their respective ports, so if no name is provided,
+     * we assume this is an unknown port, and display a message by default.
+     *
      * @this {Debugger}
      * @param {Component} component
      * @param {number} port
@@ -1590,7 +1593,7 @@ if (DEBUGGER) {
     Debugger.prototype.messageIO = function(component, port, bOut, addrFrom, name, bIn, bitsMessage)
     {
         bitsMessage |= Messages.PORT;
-        if (addrFrom == null || (this.bitsMessage & bitsMessage) == bitsMessage) {
+        if (name == null || (this.bitsMessage & bitsMessage) == bitsMessage) {
             this.message(component.idComponent + '.' + (bOut != null? "outPort" : "inPort") + '(' + str.toHexWord(port) + ',' + (name? name : "unknown") + (bOut != null? ',' + str.toHexByte(bOut) : "") + ')' + (bIn != null? (": " + str.toHexByte(bIn)) : "") + (addrFrom != null? (" at " + this.toHexOffset(addrFrom)) : ""));
         }
     };
@@ -4499,7 +4502,11 @@ if (DEBUGGER) {
     {
         if (fSave) {
             if (!sCmd) {
-                sCmd = this.aPrevCmds[this.iPrevCmd+1];
+                if (this.fAssemble) {
+                    sCmd = "end";
+                } else {
+                    sCmd = this.aPrevCmds[this.iPrevCmd+1];
+                }
             } else {
                 if (this.iPrevCmd < 0 && this.aPrevCmds.length) {
                     this.iPrevCmd = 0;

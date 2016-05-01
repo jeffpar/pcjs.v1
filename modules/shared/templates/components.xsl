@@ -604,7 +604,7 @@
 		<xsl:call-template name="component">
 			<xsl:with-param name="machine" select="$machine"/>
 			<xsl:with-param name="class" select="'cpu'"/>
-			<xsl:with-param name="parms">,model:<xsl:value-of select="$model"/>,stepping:'<xsl:value-of select="$stepping"/>',fpu:<xsl:value-of select="$fpu"/>,cycles:<xsl:value-of select="$cycles"/>,multiplier:<xsl:value-of select="$multiplier"/>,autoStart:<xsl:value-of select="$autoStart"/>,csStart:<xsl:value-of select="$csStart"/>,csInterval:<xsl:value-of select="$csInterval"/>,csStop:<xsl:value-of select="$csStop"/></xsl:with-param>
+			<xsl:with-param name="parms">,model:'<xsl:value-of select="$model"/>',stepping:'<xsl:value-of select="$stepping"/>',fpu:<xsl:value-of select="$fpu"/>,cycles:<xsl:value-of select="$cycles"/>,multiplier:<xsl:value-of select="$multiplier"/>,autoStart:<xsl:value-of select="$autoStart"/>,csStart:<xsl:value-of select="$csStart"/>,csInterval:<xsl:value-of select="$csInterval"/>,csStop:<xsl:value-of select="$csStop"/></xsl:with-param>
 		</xsl:call-template>
 	</xsl:template>
 
@@ -631,7 +631,7 @@
 		<xsl:call-template name="component">
 			<xsl:with-param name="machine" select="$machine"/>
 			<xsl:with-param name="class" select="'fpu'"/>
-			<xsl:with-param name="parms">,model:<xsl:value-of select="$model"/>,stepping:'<xsl:value-of select="$stepping"/>'</xsl:with-param>
+			<xsl:with-param name="parms">,model:'<xsl:value-of select="$model"/>',stepping:'<xsl:value-of select="$stepping"/>'</xsl:with-param>
 		</xsl:call-template>
 	</xsl:template>
 
@@ -646,7 +646,7 @@
 		<xsl:variable name="model">
 			<xsl:choose>
 				<xsl:when test="@model"><xsl:value-of select="@model"/></xsl:when>
-				<xsl:otherwise>5150</xsl:otherwise>
+				<xsl:otherwise>0</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
 		<xsl:variable name="sw1">
@@ -984,7 +984,49 @@
 				<xsl:otherwise>224</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
+		<xsl:variable name="screenColor">
+			<xsl:choose>
+				<xsl:when test="@screencolor"><xsl:value-of select="@screencolor"/></xsl:when>
+				<xsl:when test="@screenColor"><xsl:value-of select="@screenColor"/></xsl:when>
+				<xsl:otherwise>black</xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
+		<xsl:variable name="screenRotation">
+			<xsl:choose>
+				<xsl:when test="@screenRotation"><xsl:value-of select="@screenRotation"/></xsl:when>
+				<xsl:otherwise>0</xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
+		<xsl:variable name="bufferAddr">
+			<xsl:choose>
+				<xsl:when test="@bufferAddr"><xsl:value-of select="@bufferAddr"/></xsl:when>
+				<xsl:otherwise>0</xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
+		<xsl:variable name="bufferCols">
+			<xsl:choose>
+				<xsl:when test="@bufferCols"><xsl:value-of select="@bufferCols"/></xsl:when>
+				<xsl:otherwise>0</xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
+		<xsl:variable name="bufferRows">
+			<xsl:choose>
+				<xsl:when test="@bufferRows"><xsl:value-of select="@bufferRows"/></xsl:when>
+				<xsl:otherwise>0</xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
+		<xsl:variable name="bufferBits">
+			<xsl:choose>
+				<xsl:when test="@bufferBits"><xsl:value-of select="@bufferBits"/></xsl:when>
+				<xsl:otherwise>0</xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
 		<xsl:variable name="memory">
+			<!-- PCjs uses this to determine the amount of Video memory installed; in retrospect, "bufferSize"
+			might seem like	a better choice for the name, but PCjs doesn't use ANY of the "buffer" properties,
+			because it supports dynamic frame buffers (ie, frame buffers whose location and size change according
+			to the programmed mode).  PC8080 machines use the "buffer" properties instead, because their frame
+			buffers generally have a fixed location, size, and format. -->
 			<xsl:choose>
 				<xsl:when test="@memory"><xsl:value-of select="@memory"/></xsl:when>
 				<xsl:otherwise>0</xsl:otherwise>
@@ -1024,13 +1066,6 @@
 				<xsl:otherwise/>
 			</xsl:choose>
 		</xsl:variable>
-		<xsl:variable name="screenColor">
-			<xsl:choose>
-				<xsl:when test="@screencolor"><xsl:value-of select="@screencolor"/></xsl:when>
-				<xsl:when test="@screenColor"><xsl:value-of select="@screenColor"/></xsl:when>
-				<xsl:otherwise>black</xsl:otherwise>
-			</xsl:choose>
-		</xsl:variable>
 		<xsl:variable name="touchScreen">
 			<xsl:choose>
 				<xsl:when test="@touchscreen"><xsl:value-of select="@touchscreen"/></xsl:when>
@@ -1052,12 +1087,6 @@
 				<xsl:otherwise>0</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
-		<xsl:variable name="frameBuffer">
-			<xsl:choose>
-				<xsl:when test="@frameBuffer"><xsl:value-of select="@frameBuffer"/></xsl:when>
-				<xsl:otherwise>0</xsl:otherwise>
-			</xsl:choose>
-		</xsl:variable>
 		<xsl:variable name="interruptRate">
 			<xsl:choose>
 				<xsl:when test="@interruptRate"><xsl:value-of select="@interruptRate"/></xsl:when>
@@ -1070,16 +1099,10 @@
 				<xsl:otherwise>60</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
-		<xsl:variable name="rotation">
-			<xsl:choose>
-				<xsl:when test="@rotation"><xsl:value-of select="@rotation"/></xsl:when>
-				<xsl:otherwise>0</xsl:otherwise>
-			</xsl:choose>
-		</xsl:variable>
 		<xsl:call-template name="component">
 			<xsl:with-param name="machine" select="$machine"/>
 			<xsl:with-param name="class">video</xsl:with-param>
-			<xsl:with-param name="parms">,model:'<xsl:value-of select="$model"/>',mode:<xsl:value-of select="$mode"/>,screenWidth:<xsl:value-of select="$screenWidth"/>,screenHeight:<xsl:value-of select="$screenHeight"/>,memory:<xsl:value-of select="$memory"/>,switches:'<xsl:value-of select="$switches"/>',scale:<xsl:value-of select="$scale"/>,charCols:<xsl:value-of select="$charCols"/>,charRows:<xsl:value-of select="$charRows"/>,fontROM:'<xsl:value-of select="$fontROM"/>',screenColor:'<xsl:value-of select="$screenColor"/>',touchScreen:'<xsl:value-of select="$touchScreen"/>',autoLock:<xsl:value-of select="$autoLock"/>,aspectRatio:<xsl:value-of select="$aspectRatio"/>,frameBuffer:<xsl:value-of select="$frameBuffer"/>,interruptRate:<xsl:value-of select="$interruptRate"/>,refreshRate:<xsl:value-of select="$refreshRate"/>,rotation:<xsl:value-of select="$rotation"/></xsl:with-param>
+			<xsl:with-param name="parms">,model:'<xsl:value-of select="$model"/>',mode:<xsl:value-of select="$mode"/>,screenWidth:<xsl:value-of select="$screenWidth"/>,screenHeight:<xsl:value-of select="$screenHeight"/>,screenColor:'<xsl:value-of select="$screenColor"/>',screenRotation:<xsl:value-of select="$screenRotation"/>,bufferAddr:<xsl:value-of select="$bufferAddr"/>,bufferCols:<xsl:value-of select="$bufferCols"/>,bufferRows:<xsl:value-of select="$bufferRows"/>,bufferBits:<xsl:value-of select="$bufferBits"/>,memory:<xsl:value-of select="$memory"/>,switches:'<xsl:value-of select="$switches"/>',scale:<xsl:value-of select="$scale"/>,charCols:<xsl:value-of select="$charCols"/>,charRows:<xsl:value-of select="$charRows"/>,fontROM:'<xsl:value-of select="$fontROM"/>',touchScreen:'<xsl:value-of select="$touchScreen"/>',autoLock:<xsl:value-of select="$autoLock"/>,aspectRatio:<xsl:value-of select="$aspectRatio"/>,interruptRate:<xsl:value-of select="$interruptRate"/>,refreshRate:<xsl:value-of select="$refreshRate"/></xsl:with-param>
 		</xsl:call-template>
 	</xsl:template>
 

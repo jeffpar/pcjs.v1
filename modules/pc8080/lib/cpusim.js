@@ -451,6 +451,18 @@ CPUSim.prototype.getPC = function()
 };
 
 /**
+ * offPC()
+ *
+ * @this {CPUSim}
+ * @param {number} off
+ * @return {number}
+ */
+CPUSim.prototype.offPC = function(off)
+{
+    return (this.regPC + off) & 0xffff;
+};
+
+/**
  * setPC(off)
  *
  * @this {CPUSim}

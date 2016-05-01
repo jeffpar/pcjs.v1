@@ -52,18 +52,17 @@ if (NODE) {
  *
  *      model: model (eg, "mda" for Monochrome Display Adapter)
  *      mode: initial video mode (default is null, which selects a mode based on model)
- *      memory: amount of installed memory (ignored for MDA/CGA)
  *      screenWidth: width of the screen canvas, in pixels
  *      screenHeight: height of the screen canvas, in pixels
+ *      screenColor: background color of the screen canvas (default is black)
  *      scale: true for font scaling, false (default) to center the display on the screen
  *      charCols: number of character columns
  *      charRows: number of character rows
  *      fontROM: path to .rom file (or a JSON representation) containing the character set
- *      screenColor: background color of the screen canvas (default is black)
  *      touchScreen: string specifying desired touch-screen support (default is none)
  *      autoLock: true to (attempt to) auto-lock the mouse to the canvas (default is false)
  *
- * An EGA may specify the following additional properties:
+ * An EGA/VGA may specify the following additional properties:
  *
  *      switches: string representing EGA switches (see "SW1-SW4" documentation below)
  *      memory: the size of the EGA's on-board memory (overrides EGA's Video.cardSpecs)

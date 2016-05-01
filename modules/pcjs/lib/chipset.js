@@ -81,7 +81,7 @@ function ChipSet(parmsChipSet)
         Component.notice("Unrecognized ChipSet model: " + model);
     }
 
-    this.model = model && ChipSet.MODELS[model] || ChipSet.MODEL_5150_OTHER;
+    this.model = ChipSet.MODELS[model] || ChipSet.MODEL_5150_OTHER;
 
     var bSwitches;
     this.aDIPSwitches = [];
@@ -2124,6 +2124,36 @@ ChipSet.prototype.restore = function(data)
         this.initRTCTime();
     }
     return true;
+};
+
+/**
+ * start()
+ *
+ * Notification from the CPU that it's starting.
+ *
+ * @this {ChipSet}
+ */
+ChipSet.prototype.start = function()
+{
+    /*
+     * Currently, all we do with this notification is allow the speaker to make noise.
+     */
+    this.setSpeaker();
+};
+
+/**
+ * stop()
+ *
+ * Notification from the CPU that it's stopping.
+ *
+ * @this {ChipSet}
+ */
+ChipSet.prototype.stop = function()
+{
+    /*
+     * Currently, all we do with this notification is prevent the speaker from making noise.
+     */
+    this.setSpeaker();
 };
 
 ChipSet.aDMAControllerInit = [0, null, null, 0, new Array(4), 0];

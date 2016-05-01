@@ -1047,7 +1047,7 @@ CPU.prototype.startCPU = function(fUpdateFocus)
         if (this.cmp) this.cmp.start(this.aCounts.msStartRun, this.getCycles());
         this.flags.fRunning = true;
         this.flags.fStarting = true;
-        if (this.chipset) this.chipset.setSpeaker();
+        if (this.chipset) this.chipset.start();
         var controlRun = this.bindings["run"];
         if (controlRun) controlRun.textContent = "Halt";
         if (this.cmp) {
@@ -1091,7 +1091,7 @@ CPU.prototype.stopCPU = function(fComplete)
     this.nRunCycles = 0;
     if (this.flags.fRunning) {
         this.flags.fRunning = false;
-        if (this.chipset) this.chipset.setSpeaker();
+        if (this.chipset) this.chipset.stop();
         var controlRun = this.bindings["run"];
         if (controlRun) controlRun.textContent = "Run";
     }
