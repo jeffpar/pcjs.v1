@@ -54,7 +54,7 @@ Output
 ```html
 <div id="..." class="pc-rom pc-component">
     <div class="pc-container">
-        <div class="pcjs-rom" data-value="id:'...',name:'...',addr:'...',size:'...',test:'...'">
+        <div class="pcjs-rom" data-value="id:'...',name:'...',addr:'...',size:'...',file:'...'">
         </div>
     </div>
 </div>

@@ -55,7 +55,7 @@ Output
 ```html
 <div id="..." class="pc-keyboard pc-component">
     <div class="pc-container">
-        <div class="pcjs-keyboard" data-value="id:'...',name:'...',model:'...',sw1:'...',sw2:'...'">
+        <div class="pcjs-keyboard" data-value="id:'...',name:'...',model:'...',...">
         </div>
     </div>
 </div>
