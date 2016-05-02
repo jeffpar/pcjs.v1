@@ -92,17 +92,23 @@ function Video(parmsVideo, canvas, context, textarea, container)
     this.textareaScreen = textarea;
     this.inputScreen = textarea || canvas || null;
 
+    this.rotateScreen = parmsVideo['screenRotation'];
+    if (this.rotateScreen == 90) {
+        this.contextScreen.translate(0, this.cyScreen);
+        this.contextScreen.rotate((-this.rotateScreen * Math.PI)/180);
+        this.contextScreen.scale(this.cyScreen/this.cxScreen, this.cxScreen/this.cyScreen);
+    }
+
     this.initColors();
 
     /*
      * Allocate off-screen buffers.
-     *
-     * TODO: Do this only if there is a mismatch between the screen's (canvas) dimensions and the frame buffer's.
      */
     this.imageBuffer = this.contextScreen.createImageData(this.cxBuffer, this.cyBuffer);
     this.canvasBuffer = document.createElement("canvas");
     this.canvasBuffer.width = this.cxBuffer;
     this.canvasBuffer.height = this.cyBuffer;
+    // this.canvasBuffer.style['image-rendering'] = "pixelated";
     this.contextBuffer = this.canvasBuffer.getContext("2d");
 }
 
@@ -246,11 +252,6 @@ Video.prototype.updateScreen = function(n)
         }
     }
 
-    /*
-     * If we're still here, then either this is a forced update, or our cell cache hasn't been filled yet, or
-     * the frame buffer is dirty.  Time to actually update the screen.
-     */
-
     var addr = this.addrBuffer;
     var addrLimit = addr + this.sizeBuffer;
 
@@ -259,33 +260,33 @@ Video.prototype.updateScreen = function(n)
     var nPixelShift = 1;
     var aPixelColors = this.getColors();
 
-    var x = 0, y = 0;
+    var xBuffer = 0, yBuffer = 0;
     var xDirty = this.cxBuffer, xMaxDirty = 0, yDirty = this.cyBuffer, yMaxDirty = 0;
 
     while (addr < addrLimit) {
         var data = this.bus.getShortDirect(addr);
         this.assert(iCell < this.aCellCache.length);
         if (this.fCellCacheValid && data === this.aCellCache[iCell]) {
-            x += this.nPixelsPerCell;
+            xBuffer += this.nPixelsPerCell;
         } else {
             this.aCellCache[iCell] = data;
             var wPixels = (data >> 8) | ((data & 0xff) << 8);
             var wMask = wPixelMask, nShift = 16;
-            if (x < xDirty) xDirty = x;
+            if (xBuffer < xDirty) xDirty = xBuffer;
             for (var iPixel = 0; iPixel < this.nPixelsPerCell; iPixel++) {
                 var bPixel = (wPixels & (wMask >>= nPixelShift)) >> (nShift -= nPixelShift);
-                this.setPixel(this.imageBuffer, x++, y, aPixelColors[bPixel]);
+                this.setPixel(this.imageBuffer, xBuffer++, yBuffer, aPixelColors[bPixel]);
             }
-            if (x > xMaxDirty) xMaxDirty = x;
-            if (y < yDirty) yDirty = y;
-            if (y >= yMaxDirty) yMaxDirty = y + 1;
+            if (xBuffer > xMaxDirty) xMaxDirty = xBuffer;
+            if (yBuffer < yDirty) yDirty = yBuffer;
+            if (yBuffer >= yMaxDirty) yMaxDirty = yBuffer + 1;
         }
         addr += 2;
         iCell++;
-        if (x >= this.cxBuffer) {
-            x = 0;
-            y++;
-            if (y > this.cyBuffer) break;
+        if (xBuffer >= this.cxBuffer) {
+            xBuffer = 0;
+            yBuffer++;
+            if (yBuffer > this.cyBuffer) break;
         }
     }
 
@@ -299,22 +300,7 @@ Video.prototype.updateScreen = function(n)
     if (xDirty < this.cxBuffer) {
         var cxDirty = xMaxDirty - xDirty;
         var cyDirty = yMaxDirty - yDirty;
-        // this.contextBuffer.putImageData(this.imageBuffer, 0, 0);
         this.contextBuffer.putImageData(this.imageBuffer, 0, 0, xDirty, yDirty, cxDirty, cyDirty);
-        /*
-         * While ideally I would draw only the dirty portion of canvasBuffer, there usually isn't a 1-1 pixel mapping
-         * between canvasBuffer and contextScreen.  In fact, the WHOLE POINT of the canvasBuffer is to leverage
-         * drawImage()'s scaling ability; for example, a CGA graphics mode might be 640x200, whereas the canvas representing
-         * the screen might be 960x400.  In those situations, if we draw interior rectangles, we often end up with subpixel
-         * artifacts along the edges of those rectangles.  So it appears I must continue to redraw the entire canvasBuffer
-         * on every change.
-         *
-        var xScreen = (((xDirty * this.cxScreen) / this.cxBuffer) | 0);
-        var yScreen = (((yDirty * this.cyScreen) / this.cyBuffer) | 0);
-        var cxScreen = (((cxDirty * this.cxScreen) / this.cxBuffer) | 0);
-        var cyScreen = (((cyDirty * this.cyScreen) / this.cyBuffer) | 0);
-        this.contextScreen.drawImage(this.canvasBuffer, xDirty, yDirty, cxDirty, cyDirty, xScreen, yScreen, cxScreen, cyScreen);
-         */
         this.contextScreen.drawImage(this.canvasBuffer, 0, 0, this.cxBuffer, this.cyBuffer, 0, 0, this.cxScreen, this.cyScreen);
     }
 };
@@ -344,6 +330,7 @@ Video.init = function()
         eCanvas.setAttribute("width", parmsVideo['screenWidth']);
         eCanvas.setAttribute("height", parmsVideo['screenHeight']);
         eCanvas.style.backgroundColor = parmsVideo['screenColor'];
+        // eCanvas.style['image-rendering'] = "pixelated";
 
         /*
          * The "contenteditable" attribute on a canvas element NOTICEABLY slows down canvas drawing on

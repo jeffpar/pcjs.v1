@@ -9,7 +9,7 @@
 	<rom id="romF" addr="0x1000" size="0x0800" file="/devices/pc8080/rom/invaders/INVADERS-F.json"/>
 	<rom id="romE" addr="0x1800" size="0x0800" file="/devices/pc8080/rom/invaders/INVADERS-E.json"/>
 	<ram id="ram"  addr="0x2000" size="0x0400"/>
-	<video id="video" screenWidth="896" screenHeight="1024" bufferAddr="0x2400" bufferCols="256" bufferRows="224" bufferBits="1" interruptRate="120" rotation="90" width="40%" pos="left" padding="8px">
+	<video id="video" screenWidth="896" screenHeight="1024" screenRotation="90" bufferAddr="0x2400" bufferCols="256" bufferRows="224" bufferBits="1" interruptRate="120" width="40%" pos="left" padding="8px">
 		<menu>
 			<title>224x256 Screen (Rotated)</title>
 		</menu>
