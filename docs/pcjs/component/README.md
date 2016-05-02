@@ -9,7 +9,9 @@ PCjs Component
 
 Format
 ---
-	<component>...</component>
+```xml
+<component>...</component>
+```
 
 Purpose
 ---
@@ -35,14 +37,20 @@ Attributes
 
 Example
 ---
-	<component id="ibm5150" class="pcjs" width="740px" pos="center" border="1">...</component>
+```xml
+<component id="ibm5150" class="pcjs" width="740px" pos="center" border="1">
+    ...
+</component>
+```
 
 Output
 ---
-	<div id="..." class="pc-component">
-		<div class="pc-container">
-			...
-		</div>
-	</div>
+```html
+<div id="..." class="pc-component">
+    <div class="pc-container">
+        ...
+    </div>
+</div>
+```
 
 [Return to [PCjs Documentation](..)]

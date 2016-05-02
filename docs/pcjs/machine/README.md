@@ -9,7 +9,9 @@ PCjs Machine Component
 
 Format
 ---
-	<machine>...</machine>
+```xml
+<machine>...</machine>
+```
 
 Purpose
 ---
@@ -32,14 +34,18 @@ None.
 
 Example
 ---
-	<machine id="ibm5150" class="pcjs" width="740px" pos="center" border="1" style="background-color:#FAEBD7">...</machine>
+```xml
+<machine id="ibm5150" class="pcjs" width="740px" pos="center" border="1" style="background-color:#FAEBD7">...</machine>
+```
 
 Output
 ---
-	<div id="..." class="pc-machine pc-component" style="">
-		<div class="pc-container" style="">
-			...
-		</div>
-	</div>
+```html
+<div id="..." class="pc-machine pc-component" style="">
+    <div class="pc-container" style="">
+        ...
+    </div>
+</div>
+```
 
 [Return to [PCjs Documentation](..)]

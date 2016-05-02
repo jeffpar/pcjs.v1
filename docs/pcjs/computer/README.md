@@ -9,7 +9,9 @@ PCjs Computer Component
 
 Format
 ---
-	<computer>...</computer>
+```xml
+<computer>...</computer>
+```
 
 Purpose
 ---
@@ -51,16 +53,20 @@ Bindings
 
 Example
 ---
-	<computer id="pc" name="IBM PC"/>
+```xml
+<computer id="pc" name="IBM PC"/>
+```
 
 Output
 ---
-	<div id="..." class="pc-computer pc-component" style="">
-		<div class="pc-container" style="">
-			<div class="pcjs-computer" data-value="id:'...',name:'...',resume:'...',state:'...'">
-			</div>
-		</div>
-	</div>
+```html
+<div id="..." class="pc-computer pc-component" style="">
+    <div class="pc-container" style="">
+        <div class="pcjs-computer" data-value="id:'...',name:'...',resume:'...',state:'...'">
+        </div>
+    </div>
+</div>
+```
 
 Also, if any controls are defined, another &lt;div&gt; of class="pc-controls" is created in the container &lt;div&gt;,
 with each control inside a &lt;div&gt; of class="pc-control".

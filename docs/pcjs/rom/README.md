@@ -9,7 +9,9 @@ PCjs Read-Only Memory (ROM) Component
 
 Format
 ---
-	<rom>...</rom>
+```xml
+<rom>...</rom>
+```
 
 Purpose
 ---
@@ -43,14 +45,19 @@ None.
 
 Example
 ---
-	<rom id="romBIOS" addr="0xfe000" size="0x02000" file="/devices/pc/rom/5150/bios/1981-04-24.json"/>
+```xml
+<rom id="romBIOS" addr="0xfe000" size="0x02000" file="/devices/pc/rom/5150/bios/1981-04-24.json"/>
+```
 
 Output
 ---
-	<div id="..." class="pc-rom pc-component">
-		<div class="pc-container">
-			<div class="pcjs-rom" data-value="id:'...',name:'...',addr:'...',size:'...',test:'...'"></div>
-		</div>
-	</div>
+```html
+<div id="..." class="pc-rom pc-component">
+    <div class="pc-container">
+        <div class="pcjs-rom" data-value="id:'...',name:'...',addr:'...',size:'...',test:'...'">
+        </div>
+    </div>
+</div>
+```
 
 [Return to [PCjs Documentation](..)]

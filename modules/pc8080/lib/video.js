@@ -55,7 +55,7 @@ if (NODE) {
  *      bufferAddr: the starting address of the frame buffer (eg, 0x2400)
  *      bufferCols: the width of a single frame buffer row, in pixels (eg, 256)
  *      bufferRows: the number of frame buffer rows (eg, 224)
- *      bufferBits: the number of bits per pixel (eg, 1)
+ *      bufferBits: the number of bits per pixel (default is 1 if omitted)
  *      interruptRate: normally the same as (or some multiple of) the refreshRate (eg, 120)
  *      refreshRate: how many times updateScreen() should be called per second (eg, 60)
  *
@@ -75,9 +75,35 @@ if (NODE) {
 function Video(parmsVideo, canvas, context, textarea, container)
 {
     Component.call(this, "Video", parmsVideo, Video, Messages.VIDEO);
+
+    this.cxScreen = parmsVideo['screenWidth'];
+    this.cyScreen = parmsVideo['screenHeight'];
+
+    this.addrBuffer = parmsVideo['bufferAddr'];
+    this.cxBuffer = parmsVideo['bufferCols'];
+    this.cyBuffer = parmsVideo['bufferRows'];
+    this.nBitsPerPixel = parmsVideo['bufferBits'] || 1;
+
     this.interruptRate = parmsVideo['interruptRate'];
     this.refreshRate = parmsVideo['refreshRate'] || 60;
-    this.setReady();
+
+    this.canvasScreen = canvas;
+    this.contextScreen = context;
+    this.textareaScreen = textarea;
+    this.inputScreen = textarea || canvas || null;
+
+    this.initColors();
+
+    /*
+     * Allocate off-screen buffers.
+     *
+     * TODO: Do this only if there is a mismatch between the screen's (canvas) dimensions and the frame buffer's.
+     */
+    this.imageBuffer = this.contextScreen.createImageData(this.cxBuffer, this.cyBuffer);
+    this.canvasBuffer = document.createElement("canvas");
+    this.canvasBuffer.width = this.cxBuffer;
+    this.canvasBuffer.height = this.cyBuffer;
+    this.contextBuffer = this.canvasBuffer.getContext("2d");
 }
 
 Component.subclass(Video);
@@ -97,6 +123,20 @@ Video.prototype.initBus = function(cmp, bus, cpu, dbg)
     this.bus = bus;
     this.cpu = cpu;
     this.dbg = dbg;
+
+    /*
+     * Compute the size of the frame buffer and allocate.
+     */
+    this.sizeBuffer = ((this.cxBuffer * this.nBitsPerPixel) >> 3) * this.cyBuffer;
+    if (this.bus.addMemory(this.addrBuffer, this.sizeBuffer, Memory.TYPE.VIDEO)) {
+        /*
+         * Compute the number of cells and initialize the cell cache.
+         */
+        this.nCellCache = this.sizeBuffer >> 1;
+        this.nPixelsPerCell = (16 / this.nBitsPerPixel)|0;
+        this.initCache();
+    }
+    this.setReady();
 };
 
 /**
@@ -108,6 +148,62 @@ Video.prototype.initBus = function(cmp, bus, cpu, dbg)
 Video.prototype.getRefreshRate = function()
 {
     return Math.max(this.refreshRate, this.interruptRate);
+};
+
+/**
+ * initCache()
+ *
+ * Initializes the contents of our internal cell cache.
+ *
+ * @this {Video}
+ */
+Video.prototype.initCache = function()
+{
+    this.fCellCacheValid = false;
+    if (this.aCellCache === undefined || this.aCellCache.length != this.nCellCache) {
+        this.aCellCache = new Array(this.nCellCache);
+    }
+};
+
+/**
+ * initColors()
+ *
+ * @this {Video}
+ */
+Video.prototype.initColors = function()
+{
+    this.aRGB = [
+        [0x00, 0x00, 0x00, 0xff],       // black
+        [0xff, 0xff, 0xff, 0xff]        // white
+    ];
+};
+
+/**
+ * getColors()
+ *
+ * @this {Video}
+ */
+Video.prototype.getColors = function()
+{
+    return this.aRGB;
+};
+
+/**
+ * setPixel(imageData, x, y, rgb)
+ *
+ * @this {Video}
+ * @param {Object} imageData
+ * @param {number} x
+ * @param {number} y
+ * @param {Array.<number>} rgb is a 4-element array containing the red, green, blue and alpha values
+ */
+Video.prototype.setPixel = function(imageData, x, y, rgb)
+{
+    var index = (x + y * imageData.width) * rgb.length;
+    imageData.data[index]   = rgb[0];
+    imageData.data[index+1] = rgb[1];
+    imageData.data[index+2] = rgb[2];
+    imageData.data[index+3] = rgb[3];
 };
 
 /**
@@ -126,18 +222,100 @@ Video.prototype.getRefreshRate = function()
  */
 Video.prototype.updateScreen = function(n)
 {
-    if (!(n & 1)) {
+    if (n >= 0) {
+        if (!(n & 1)) {
+            /*
+             * On even updates, call cpu.requestINTR(1), and also update our copy of the screen.
+             */
+            this.cpu.requestINTR(1);
+        } else {
+            /*
+             * On odd updates, call cpu.requestINTR(2), but do NOT update our copy of the screen, because
+             * the machine has presumably only updated the top half of the frame buffer at this point; it will
+             * update the bottom half of the frame buffer after acknowledging this interrupt.
+             */
+            this.cpu.requestINTR(2);
+            return;
+        }
+
         /*
-         * On even updates, call cpu.requestINTR(1), and also update our copy of the screen.
+         * Since this is not a forced update, if our cell cache is valid AND the buffer is clean, then do nothing.
          */
-        this.cpu.requestINTR(1);
-    } else {
+        if (this.fCellCacheValid && this.bus.cleanMemory(this.addrBuffer, this.sizeBuffer)) {
+            return;
+        }
+    }
+
+    /*
+     * If we're still here, then either this is a forced update, or our cell cache hasn't been filled yet, or
+     * the frame buffer is dirty.  Time to actually update the screen.
+     */
+
+    var addr = this.addrBuffer;
+    var addrLimit = addr + this.sizeBuffer;
+
+    var iCell = 0;
+    var wPixelMask = 0x10000;
+    var nPixelShift = 1;
+    var aPixelColors = this.getColors();
+
+    var x = 0, y = 0;
+    var xDirty = this.cxBuffer, xMaxDirty = 0, yDirty = this.cyBuffer, yMaxDirty = 0;
+
+    while (addr < addrLimit) {
+        var data = this.bus.getShortDirect(addr);
+        this.assert(iCell < this.aCellCache.length);
+        if (this.fCellCacheValid && data === this.aCellCache[iCell]) {
+            x += this.nPixelsPerCell;
+        } else {
+            this.aCellCache[iCell] = data;
+            var wPixels = (data >> 8) | ((data & 0xff) << 8);
+            var wMask = wPixelMask, nShift = 16;
+            if (x < xDirty) xDirty = x;
+            for (var iPixel = 0; iPixel < this.nPixelsPerCell; iPixel++) {
+                var bPixel = (wPixels & (wMask >>= nPixelShift)) >> (nShift -= nPixelShift);
+                this.setPixel(this.imageBuffer, x++, y, aPixelColors[bPixel]);
+            }
+            if (x > xMaxDirty) xMaxDirty = x;
+            if (y < yDirty) yDirty = y;
+            if (y >= yMaxDirty) yMaxDirty = y + 1;
+        }
+        addr += 2;
+        iCell++;
+        if (x >= this.cxBuffer) {
+            x = 0;
+            y++;
+            if (y > this.cyBuffer) break;
+        }
+    }
+
+    this.fCellCacheValid = true;
+
+    /*
+     * Instead of blasting the ENTIRE imageBuffer into contextBuffer, and then blasting the ENTIRE
+     * canvasBuffer onto contextScreen, even for the smallest change, let's try to be a bit smarter about
+     * the update (well, to the extent that the canvas APIs permit).
+     */
+    if (xDirty < this.cxBuffer) {
+        var cxDirty = xMaxDirty - xDirty;
+        var cyDirty = yMaxDirty - yDirty;
+        // this.contextBuffer.putImageData(this.imageBuffer, 0, 0);
+        this.contextBuffer.putImageData(this.imageBuffer, 0, 0, xDirty, yDirty, cxDirty, cyDirty);
         /*
-         * On odd updates, call cpu.requestINTR(2), but do NOT update our copy of the screen, because
-         * the machine has presumably only updated the top half of the frame buffer at this point; it will
-         * update the bottom half of the frame buffer after acknowledging this interrupt.
+         * While ideally I would draw only the dirty portion of canvasBuffer, there usually isn't a 1-1 pixel mapping
+         * between canvasBuffer and contextScreen.  In fact, the WHOLE POINT of the canvasBuffer is to leverage
+         * drawImage()'s scaling ability; for example, a CGA graphics mode might be 640x200, whereas the canvas representing
+         * the screen might be 960x400.  In those situations, if we draw interior rectangles, we often end up with subpixel
+         * artifacts along the edges of those rectangles.  So it appears I must continue to redraw the entire canvasBuffer
+         * on every change.
+         *
+        var xScreen = (((xDirty * this.cxScreen) / this.cxBuffer) | 0);
+        var yScreen = (((yDirty * this.cyScreen) / this.cyBuffer) | 0);
+        var cxScreen = (((cxDirty * this.cxScreen) / this.cxBuffer) | 0);
+        var cyScreen = (((cyDirty * this.cyScreen) / this.cyBuffer) | 0);
+        this.contextScreen.drawImage(this.canvasBuffer, xDirty, yDirty, cxDirty, cyDirty, xScreen, yScreen, cxScreen, cyScreen);
          */
-        this.cpu.requestINTR(2);
+        this.contextScreen.drawImage(this.canvasBuffer, 0, 0, this.cxBuffer, this.cyBuffer, 0, 0, this.cxScreen, this.cyScreen);
     }
 };
 

@@ -1091,11 +1091,11 @@ CPUSim.prototype.updateStatus = function(fForce)
             this.updateReg("PC", this.getPC(), 4);
             var regPS = this.getPS();
             this.updateReg("PS", regPS, 4);
-            this.updateReg("SF", (regPS & CPUDef.PS.SF), 1);
-            this.updateReg("ZF", (regPS & CPUDef.PS.ZF), 1);
-            this.updateReg("AF", (regPS & CPUDef.PS.AF), 1);
-            this.updateReg("PF", (regPS & CPUDef.PS.PF), 1);
-            this.updateReg("CF", (regPS & CPUDef.PS.CF), 1);
+            this.updateReg("SF", (regPS & CPUDef.PS.SF)? 1 : 0, 1);
+            this.updateReg("ZF", (regPS & CPUDef.PS.ZF)? 1 : 0, 1);
+            this.updateReg("AF", (regPS & CPUDef.PS.AF)? 1 : 0, 1);
+            this.updateReg("PF", (regPS & CPUDef.PS.PF)? 1 : 0, 1);
+            this.updateReg("CF", (regPS & CPUDef.PS.CF)? 1 : 0, 1);
         }
     }
     var controlSpeed = this.bindings["speed"];

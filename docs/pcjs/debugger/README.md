@@ -9,7 +9,9 @@ PCjs Debugger Component
 
 Format
 ---
-	<debugger>...</debugger>
+```xml
+<debugger>...</debugger>
+```
 
 Purpose
 ---
@@ -17,7 +19,7 @@ Creates an instance of the Debugger component.
 
 Attributes
 ---
-* *message* (optional)
+* *messages* (optional)
 	* One or more message categories to enable, separated by |. By default, all message categories are disabled.
 	See the Debugger's "m" command for a current list of message categories.
 
@@ -40,16 +42,20 @@ Use the Debugger's built-in help for a list of commands.
 
 Example
 ---
-	<debugger/>
+```xml
+<debugger/>
+```
 
 Output
 ---
-	<div id="..." class="pc-debugger pc-component" style="">
-		<div class="pc-container" style="">
-			<div class="pcjs-debugger" data-value="id:'...',name:'...',message:'...'">
-			</div>
-		</div>
-	</div>
+```html
+<div id="..." class="pc-debugger pc-component" style="">
+    <div class="pc-container" style="">
+        <div class="pcjs-debugger" data-value="id:'...',name:'...',messages:'...'">
+        </div>
+    </div>
+</div>
+```
 
 Also, if any controls are defined, another &lt;div&gt; of class="pc-controls" is created in the container &lt;div&gt;,
 with each control inside a &lt;div&gt; of class="pc-control".
