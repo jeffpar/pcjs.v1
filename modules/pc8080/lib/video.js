@@ -56,13 +56,23 @@ if (NODE) {
  *      bufferCols: the width of a single frame buffer row, in pixels (eg, 256)
  *      bufferRows: the number of frame buffer rows (eg, 224)
  *      bufferBits: the number of bits per pixel (default is 1 if omitted)
- *      interruptRate: normally the same as (or some multiple of) the refreshRate (eg, 120)
- *      refreshRate: how many times updateScreen() should be called per second (eg, 60)
+ *      interruptRate: normally the same as (or some multiple of) refreshRate (eg, 120)
+ *      refreshRate: how many times updateScreen() should be performed per second (eg, 60)
  *
  * We record all the above values now, but we defer creation of the frame buffer until our initBus()
  * handler is called.  At that point, we will also compute the extent of the frame buffer, determine the
  * appropriate "cell" size (ie, the number of pixels that updateScreen() will fetch and process at once),
  * and allocate our cell cache.
+ *
+ * Why interruptRate in addition to refreshRate?  A higher interrupt rate is required for Space Invaders,
+ * because even though the CRT refreshes at 60Hz, the CRT controller interrupts the CPU *twice* per
+ * refresh (once after the top half of the screen has been redrawn, and again after the bottom half has
+ * been redrawn), so we need an interrupt rate of 120Hz.  We pass the higher rate on to the CPU, so that
+ * it will call updateScreen() more frequently, but we limit our screen updates to every *other* call.
+ *
+ * TODO: Consider alternatives to screenRotation; it's expedient, but I'm not sure how efficient it is,
+ * and it might be nice (especially for debugging) if we created our own rotated image buffer which we could
+ * then blast directly to the screen canvas.
  *
  * @constructor
  * @extends Component

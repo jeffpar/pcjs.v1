@@ -1114,14 +1114,13 @@ if (DEBUGGER) {
     };
 
     /**
-     * dumpBlocks(aBlocks, sAddr, fLinear)
+     * dumpBlocks(aBlocks, sAddr)
      *
      * @this {Debugger}
      * @param {Array} aBlocks
      * @param {string} [sAddr] (optional block address)
-     * @param {boolean} [fLinear] (true if linear, physical otherwise)
      */
-    Debugger.prototype.dumpBlocks = function(aBlocks, sAddr, fLinear)
+    Debugger.prototype.dumpBlocks = function(aBlocks, sAddr)
     {
         var addr = 0, i = 0, n = aBlocks.length;
 
@@ -1131,11 +1130,11 @@ if (DEBUGGER) {
                 this.println("invalid address: " + sAddr);
                 return;
             }
-            i = addr >>> this.cpu.nBlockShift;
+            i = addr >>> this.bus.nBlockShift;
             n = 1;
         }
 
-        this.println("blockid   " + (fLinear? "linear  " : "physical") + "   blockaddr   used    size    type");
+        this.println("blockid   physical   blockaddr   used    size    type");
         this.println("--------  ---------  ----------  ------  ------  ----");
 
         var typePrev = -1, cPrev = 0;
@@ -1147,12 +1146,12 @@ if (DEBUGGER) {
                 typePrev = block.type;
                 var sType = Memory.TYPE.NAMES[typePrev];
                 if (block) {
-                    this.println(str.toHex(block.id) + "  %" + str.toHex(i << this.cpu.nBlockShift) + "  %%" + str.toHex(block.addr) + "  " + str.toHexWord(block.used) + "  " + str.toHexWord(block.size) + "  " + sType);
+                    this.println(str.toHex(block.id) + "  %" + str.toHex(i << this.bus.nBlockShift) + "  %%" + str.toHex(block.addr) + "  " + str.toHexWord(block.used) + "  " + str.toHexWord(block.size) + "  " + sType);
                 }
                 if (typePrev != Memory.TYPE.NONE) typePrev = -1;
                 cPrev = 0;
             }
-            addr += this.cpu.nBlockSize;
+            addr += this.bus.nBlockSize;
             i++;
         }
     };
@@ -1167,20 +1166,7 @@ if (DEBUGGER) {
      */
     Debugger.prototype.dumpBus = function(asArgs)
     {
-        this.dumpBlocks(this.cpu.aBusBlocks, asArgs[0]);
-    };
-
-    /**
-     * dumpMem(asArgs)
-     *
-     * Dumps page allocations.
-     *
-     * @this {Debugger}
-     * @param {Array.<string>} asArgs (asArgs[0] is an optional block address)
-     */
-    Debugger.prototype.dumpMem = function(asArgs)
-    {
-        this.dumpBlocks(this.cpu.aMemBlocks, asArgs[0], this.cpu.aMemBlocks !== this.cpu.aBusBlocks);
+        this.dumpBlocks(this.bus.aMemBlocks, asArgs[0]);
     };
 
     /**
@@ -2122,14 +2108,14 @@ if (DEBUGGER) {
         if (this.aBreakRead !== undefined) {
             for (i = 1; i < this.aBreakRead.length; i++) {
                 dbgAddr = this.aBreakRead[i];
-                this.cpu.removeMemBreak(this.getAddr(dbgAddr), false);
+                this.bus.removeMemBreak(this.getAddr(dbgAddr), false);
             }
         }
         this.aBreakRead = ["br"];
         if (this.aBreakWrite !== undefined) {
             for (i = 1; i < this.aBreakWrite.length; i++) {
                 dbgAddr = this.aBreakWrite[i];
-                this.cpu.removeMemBreak(this.getAddr(dbgAddr), true);
+                this.bus.removeMemBreak(this.getAddr(dbgAddr), true);
             }
         }
         this.aBreakWrite = ["bw"];
@@ -2192,7 +2178,7 @@ if (DEBUGGER) {
                 this.println("invalid address: " + this.toHexAddr(dbgAddr));
                 fSuccess = false;
             } else {
-                this.cpu.addMemBreak(addr, aBreak == this.aBreakWrite);
+                this.bus.addMemBreak(addr, aBreak == this.aBreakWrite);
             }
         }
 
@@ -2238,7 +2224,7 @@ if (DEBUGGER) {
                         }
                         aBreak.splice(i, 1);
                         if (aBreak != this.aBreakExec) {
-                            this.cpu.removeMemBreak(addr, aBreak == this.aBreakWrite);
+                            this.bus.removeMemBreak(addr, aBreak == this.aBreakWrite);
                         }
                         /*
                          * We'll mirror the logic in addBreakpoint() and leave the history buffer alone if this
@@ -2274,8 +2260,6 @@ if (DEBUGGER) {
 
     /**
      * printBreakpoint(aBreak, i, sAction)
-     *
-     * TODO: We may need to start printing linear addresses also (if any), because segmented address can be ambiguous.
      *
      * @this {Debugger}
      * @param {Array} aBreak
