@@ -235,28 +235,6 @@ Video.prototype.setPixel = function(imageData, x, y, rgb)
  * and then update the cell cache to match.  Since initCache() sets every cell in the cell cache to an
  * invalid value, we're assured that the next call to updateScreen() will redraw the entire (visible) video buffer.
  *
- * Example
- * -------
- *
- * The initial Space Invaders screen displays an "S" (part of the word "SCORE") at the end of these rows:
- *
- *      2520  00 42 01 00 00 00 00 00-00 00 00 00 00 00 00 00  .B..............
- *      2530  00 00 00 00 00 00 00 00-00 00 00 00 00 00 32 00  ..............2.
- *      2540  00 41 01 00 00 00 00 00-00 00 00 00 00 00 00 00  .A..............
- *      2550  00 00 00 00 00 00 00 00-00 00 00 00 00 00 49 00  ..............I.
- *      2560  00 49 01 00 00 00 00 00-00 00 00 00 00 00 00 00  .I..............
- *      2570  00 00 00 00 00 00 00 00-00 00 00 00 00 00 49 00  ..............I.
- *      2580  00 59 01 00 00 00 00 00-00 00 00 00 00 00 00 00  .Y..............
- *      2590  00 00 00 00 00 00 00 00-00 00 00 00 00 00 49 00  ..............I.
- *      25A0  00 66 01 00 00 00 00 00-00 00 00 00 00 00 00 00  .f..............
- *      25B0  00 00 00 00 00 00 00 00-00 00 00 00 00 00 26 00  ..............&.
- *
- *  32      ..11..1.        .1..11..
- *  49      .1..1..1
- *  49      .1..1..1
- *  49      .1..1..1
- *  26      ..1..11.
- *
  * @this {Video}
  * @param {number} n (where 0 <= n < getRefreshRate() for a normal update, or -1 for a forced update)
  */
