@@ -274,6 +274,14 @@ Video.prototype.updateScreen = function(n)
     var xBuffer = 0, yBuffer = 0;
     var xDirty = this.cxBuffer, xMaxDirty = 0, yDirty = this.cyBuffer, yMaxDirty = 0;
 
+    var nShiftInit = 0;
+    var nShiftPixel = this.nBitsPerPixel;
+    var nMask = (1 << nShiftPixel) - 1;
+    if (this.iBitFirstPixel) {
+        nShiftPixel = -nShiftPixel;
+        nShiftInit = 16 + nShiftPixel;
+    }
+
     while (addr < addrLimit) {
         var data = this.bus.getShortDirect(addr);
         this.assert(iCell < this.aCellCache.length);
@@ -281,14 +289,8 @@ Video.prototype.updateScreen = function(n)
             xBuffer += this.nPixelsPerCell;
         } else {
             this.aCellCache[iCell] = data;
-            var nShift = 0;
-            var nShiftPixel = this.nBitsPerPixel;
-            var nMask = (1 << nShiftPixel) - 1;
-            if (this.iBitFirstPixel) {
-                nShift = 16 - nShiftPixel;
-                nShiftPixel = -nShiftPixel;
-                data = ((data >> 8) | ((data & 0xff) << 8));
-            }
+            var nShift = nShiftInit;
+            if (nShiftInit) data = ((data >> 8) | ((data & 0xff) << 8));
             if (xBuffer < xDirty) xDirty = xBuffer;
             for (var iPixel = 0; iPixel < this.nPixelsPerCell; iPixel++) {
                 var bPixel = (data >> nShift) & nMask;
