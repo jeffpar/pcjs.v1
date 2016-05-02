@@ -55,20 +55,21 @@ if (NODE) {
  *      bufferAddr: the starting address of the frame buffer (eg, 0x2400)
  *      bufferCols: the width of a single frame buffer row, in pixels (eg, 256)
  *      bufferRows: the number of frame buffer rows (eg, 224)
- *      bufferBits: the number of bits per pixel (default is 1 if omitted)
+ *      bufferBits: the number of bits per column (default is 1 if omitted)
+ *      bufferLeft: the bit position of the left-most pixel in a byte (eg, 0)
  *      interruptRate: normally the same as (or some multiple of) refreshRate (eg, 120)
  *      refreshRate: how many times updateScreen() should be performed per second (eg, 60)
  *
  * We record all the above values now, but we defer creation of the frame buffer until our initBus()
  * handler is called.  At that point, we will also compute the extent of the frame buffer, determine the
  * appropriate "cell" size (ie, the number of pixels that updateScreen() will fetch and process at once),
- * and allocate our cell cache.
+ * and then allocate our cell cache.
  *
  * Why interruptRate in addition to refreshRate?  A higher interrupt rate is required for Space Invaders,
  * because even though the CRT refreshes at 60Hz, the CRT controller interrupts the CPU *twice* per
  * refresh (once after the top half of the screen has been redrawn, and again after the bottom half has
  * been redrawn), so we need an interrupt rate of 120Hz.  We pass the higher rate on to the CPU, so that
- * it will call updateScreen() more frequently, but we limit our screen updates to every *other* call.
+ * it will call updateScreen() more frequently, but we still limit our screen updates to every *other* call.
  *
  * TODO: Consider alternatives to screenRotation; it's expedient, but I'm not sure how efficient it is,
  * and it might be nice (especially for debugging) if we created our own rotated image buffer which we could
@@ -93,6 +94,7 @@ function Video(parmsVideo, canvas, context, textarea, container)
     this.cxBuffer = parmsVideo['bufferCols'];
     this.cyBuffer = parmsVideo['bufferRows'];
     this.nBitsPerPixel = parmsVideo['bufferBits'] || 1;
+    this.iBitFirstPixel = parmsVideo['bufferLeft'] || 0;
 
     this.interruptRate = parmsVideo['interruptRate'];
     this.refreshRate = parmsVideo['refreshRate'] || 60;
@@ -233,6 +235,28 @@ Video.prototype.setPixel = function(imageData, x, y, rgb)
  * and then update the cell cache to match.  Since initCache() sets every cell in the cell cache to an
  * invalid value, we're assured that the next call to updateScreen() will redraw the entire (visible) video buffer.
  *
+ * Example
+ * -------
+ *
+ * The initial Space Invaders screen displays an "S" (part of the word "SCORE") at the end of these rows:
+ *
+ *      2520  00 42 01 00 00 00 00 00-00 00 00 00 00 00 00 00  .B..............
+ *      2530  00 00 00 00 00 00 00 00-00 00 00 00 00 00 32 00  ..............2.
+ *      2540  00 41 01 00 00 00 00 00-00 00 00 00 00 00 00 00  .A..............
+ *      2550  00 00 00 00 00 00 00 00-00 00 00 00 00 00 49 00  ..............I.
+ *      2560  00 49 01 00 00 00 00 00-00 00 00 00 00 00 00 00  .I..............
+ *      2570  00 00 00 00 00 00 00 00-00 00 00 00 00 00 49 00  ..............I.
+ *      2580  00 59 01 00 00 00 00 00-00 00 00 00 00 00 00 00  .Y..............
+ *      2590  00 00 00 00 00 00 00 00-00 00 00 00 00 00 49 00  ..............I.
+ *      25A0  00 66 01 00 00 00 00 00-00 00 00 00 00 00 00 00  .f..............
+ *      25B0  00 00 00 00 00 00 00 00-00 00 00 00 00 00 26 00  ..............&.
+ *
+ *  32      ..11..1.        .1..11..
+ *  49      .1..1..1
+ *  49      .1..1..1
+ *  49      .1..1..1
+ *  26      ..1..11.
+ *
  * @this {Video}
  * @param {number} n (where 0 <= n < getRefreshRate() for a normal update, or -1 for a forced update)
  */
@@ -266,7 +290,6 @@ Video.prototype.updateScreen = function(n)
     var addrLimit = addr + this.sizeBuffer;
 
     var iCell = 0;
-    var wPixelMask = 0x10000;
     var nPixelShift = 1;
     var aPixelColors = this.getColors();
 
@@ -280,22 +303,27 @@ Video.prototype.updateScreen = function(n)
             xBuffer += this.nPixelsPerCell;
         } else {
             this.aCellCache[iCell] = data;
-            var wPixels = (data >> 8) | ((data & 0xff) << 8);
-            var wMask = wPixelMask, nShift = 16;
+            var nShift = 0;
+            var nShiftPixel = this.nBitsPerPixel;
+            var nMask = (1 << nShiftPixel) - 1;
+            if (this.iBitFirstPixel) {
+                nShift = 16 - nShiftPixel;
+                nShiftPixel = -nShiftPixel;
+                data = ((data >> 8) | ((data & 0xff) << 8));
+            }
             if (xBuffer < xDirty) xDirty = xBuffer;
             for (var iPixel = 0; iPixel < this.nPixelsPerCell; iPixel++) {
-                var bPixel = (wPixels & (wMask >>= nPixelShift)) >> (nShift -= nPixelShift);
+                var bPixel = (data >> nShift) & nMask;
                 this.setPixel(this.imageBuffer, xBuffer++, yBuffer, aPixelColors[bPixel]);
+                nShift += nShiftPixel;
             }
             if (xBuffer > xMaxDirty) xMaxDirty = xBuffer;
             if (yBuffer < yDirty) yDirty = yBuffer;
             if (yBuffer >= yMaxDirty) yMaxDirty = yBuffer + 1;
         }
-        addr += 2;
-        iCell++;
+        addr += 2; iCell++;
         if (xBuffer >= this.cxBuffer) {
-            xBuffer = 0;
-            yBuffer++;
+            xBuffer = 0; yBuffer++;
             if (yBuffer > this.cyBuffer) break;
         }
     }
