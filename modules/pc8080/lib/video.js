@@ -539,14 +539,19 @@ Video.prototype.updateScreen = function(n)
         var cyDirty = yMaxDirty - yDirty;
         if (this.rotateBuffer) {
             /*
-             * TODO: One last bit of work required for "bufferRotate" (if you really don't want to use
-             * "screenRotate"): the dirty coordinates must be "rotated" as well, because they are relative
-             * to the frame buffer, not the image buffer.  That's why this code copies the ENTIRE imageBuffer.
+             * If rotateBuffer is set, then it must be -90, so we must "rotate" the dirty coordinates as well,
+             * because they are relative to the frame buffer, not the rotated image buffer.  Alternatively, you
+             * can use the following call to blast the ENTIRE imageBuffer into contextBuffer instead:
+             *
+             *      this.contextBuffer.putImageData(this.imageBuffer, 0, 0);
              */
-            this.contextBuffer.putImageData(this.imageBuffer, 0, 0);
-        } else {
-            this.contextBuffer.putImageData(this.imageBuffer, 0, 0, xDirty, yDirty, cxDirty, cyDirty);
+            var xDirtyOrig = xDirty, cxDirtyOrig = cxDirty;
+            xDirty = yDirty;
+            cxDirty = cyDirty;
+            yDirty = this.cxBuffer - (xDirtyOrig + cxDirtyOrig);
+            cyDirty = cxDirtyOrig;
         }
+        this.contextBuffer.putImageData(this.imageBuffer, 0, 0, xDirty, yDirty, cxDirty, cyDirty);
         this.contextScreen.drawImage(this.canvasBuffer, 0, 0, this.canvasBuffer.width, this.canvasBuffer.height, 0, 0, this.cxScreen, this.cyScreen);
     }
 };
