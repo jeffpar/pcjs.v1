@@ -107,6 +107,11 @@ function Video(parmsVideo, canvas, context, textarea, container)
     this.textareaScreen = textarea;
     this.inputScreen = textarea || canvas || null;
 
+    this.contextScreen['webkitImageSmoothingEnabled'] = false;
+    this.contextScreen['mozImageSmoothingEnabled'] = false;
+    this.contextScreen['msImageSmoothingEnabled'] = false;
+    this.contextScreen['imageSmoothingEnabled'] = false;
+
     this.rotateScreen = parmsVideo['screenRotate'];
     if (this.rotateScreen == 90) {
         this.contextScreen.translate(0, this.cyScreen);
@@ -129,7 +134,6 @@ function Video(parmsVideo, canvas, context, textarea, container)
     this.canvasBuffer = document.createElement("canvas");
     this.canvasBuffer.width = cxBuffer;
     this.canvasBuffer.height = cyBuffer;
-    // this.canvasBuffer.style['image-rendering'] = "pixelated";
     this.contextBuffer = this.canvasBuffer.getContext("2d");
 }
 
@@ -372,7 +376,6 @@ Video.init = function()
         eCanvas.setAttribute("width", parmsVideo['screenWidth']);
         eCanvas.setAttribute("height", parmsVideo['screenHeight']);
         eCanvas.style.backgroundColor = parmsVideo['screenColor'];
-        // eCanvas.style['image-rendering'] = "pixelated";
 
         /*
          * The "contenteditable" attribute on a canvas element NOTICEABLY slows down canvas drawing on

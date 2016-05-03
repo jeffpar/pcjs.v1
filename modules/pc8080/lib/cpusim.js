@@ -273,6 +273,7 @@ CPUSim.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
     case "SP":
     case "PC":
     case "PS":
+    case "IF":
     case "SF":
     case "ZF":
     case "AF":
@@ -1018,6 +1019,7 @@ CPUSim.prototype.updateStatus = function(fForce)
             this.updateReg("PC", this.getPC(), 4);
             var regPS = this.getPS();
             this.updateReg("PS", regPS, 4);
+            this.updateReg("IF", (regPS & CPUDef.PS.IF)? 1 : 0, 1);
             this.updateReg("SF", (regPS & CPUDef.PS.SF)? 1 : 0, 1);
             this.updateReg("ZF", (regPS & CPUDef.PS.ZF)? 1 : 0, 1);
             this.updateReg("AF", (regPS & CPUDef.PS.AF)? 1 : 0, 1);
