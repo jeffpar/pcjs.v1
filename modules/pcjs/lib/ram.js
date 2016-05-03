@@ -169,8 +169,6 @@ RAM.prototype.reset = function()
         if (this.bus.addMemory(this.addrRAM, this.sizeRAM, Memory.TYPE.RAM)) {
             this.fAllocated = true;
 
-            this.status(Math.floor(this.sizeRAM / 1024) + "Kb allocated");
-
             /*
              * NOTE: I'm specifying MAXDEBUG for status() messages because I'm not yet sure I want these
              * messages buried in the app, since they're seen only when a Control Panel is active.  Another

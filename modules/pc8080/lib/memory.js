@@ -194,7 +194,7 @@ Memory.TYPE = {
     VIDEO:      3,
     CTRL:       4,
     COLORS:     ["black", "blue", "green", "cyan"],
-    NAMES:      ["N/A", "RAM", "ROM", "VID", "H/W"]
+    NAMES:      ["NONE",  "RAM",  "ROM",   "VID",  "H/W"]
 };
 
 /*

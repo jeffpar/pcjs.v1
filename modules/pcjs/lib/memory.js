@@ -110,7 +110,7 @@ function Memory(addr, used, size, type, controller, cpu)
     this.controller = null;
     this.cpu = cpu;             // if a CPU reference is provided, then this must be an UNPAGED Memory block allocation
     this.copyBreakpoints();     // initialize the block's Debugger info (eg, breakpoint totals); the caller will reinitialize
-    
+
     /*
      * TODO: Study the impact of dirty block tracking.  As noted in the paged block handlers (eg, writeBytePLE),
      * the original purposes were to allow saveMemory() to save only dirty blocks, and to enable the Video component
@@ -244,8 +244,8 @@ Memory.TYPE = {
     CTRL:       4,
     UNPAGED:    5,
     PAGED:      6,
-    NAMES:      ["NONE",  "RAM",  "ROM",   "VIDEO", "H/W", "UNPAGED", "PAGED"],
-    COLORS:     ["black", "blue", "green", "cyan"]
+    COLORS:     ["black", "blue", "green", "cyan"],
+    NAMES:      ["NONE",  "RAM",  "ROM",   "VIDEO", "H/W", "UNPAGED", "PAGED"]
 };
 
 /*
