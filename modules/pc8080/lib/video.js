@@ -50,13 +50,14 @@ if (NODE) {
  *      screenWidth: width of the screen canvas, in pixels
  *      screenHeight: height of the screen canvas, in pixels
  *      screenColor: background color of the screen canvas (default is black)
- *      screenRotation: the amount of counter-clockwise rotation required (eg, 90)
+ *      screenRotate: the amount of counter-clockwise screen rotation required (eg, 90)
  *      aspectRatio (eg, 1.33)
  *      bufferAddr: the starting address of the frame buffer (eg, 0x2400)
  *      bufferCols: the width of a single frame buffer row, in pixels (eg, 256)
  *      bufferRows: the number of frame buffer rows (eg, 224)
- *      bufferBits: the number of bits per column (default is 1 if omitted)
- *      bufferLeft: the bit position of the left-most pixel in a byte (eg, 0)
+ *      bufferBits: the number of bits per column (default is 1)
+ *      bufferLeft: the bit position of the left-most pixel in a byte (default is 0; CGA uses 7)
+ *      bufferRotate: the amount of counter-clockwise buffer rotation required (eg, 90)
  *      interruptRate: normally the same as (or some multiple of) refreshRate (eg, 120)
  *      refreshRate: how many times updateScreen() should be performed per second (eg, 60)
  *
@@ -71,9 +72,10 @@ if (NODE) {
  * been redrawn), so we need an interrupt rate of 120Hz.  We pass the higher rate on to the CPU, so that
  * it will call updateScreen() more frequently, but we still limit our screen updates to every *other* call.
  *
- * TODO: Consider alternatives to screenRotation; it's expedient, but I'm not sure how efficient it is,
- * and it might be nice (especially for debugging) if we created our own rotated image buffer which we could
- * then blast directly to the screen canvas.
+ * bufferRotate is an alternative to screenRotate; you may set one or the other (but not both) to 90 to
+ * enable different approaches to 90-degree image rotation.  screenRotate uses canvas transformation methods
+ * (ie, translate(), rotate(), and scale()), while bufferRotate inverts the dimensions of the off-screen
+ * buffer and then relies on setPixel() to rotate the data into it.
  *
  * @constructor
  * @extends Component
@@ -95,6 +97,7 @@ function Video(parmsVideo, canvas, context, textarea, container)
     this.cyBuffer = parmsVideo['bufferRows'];
     this.nBitsPerPixel = parmsVideo['bufferBits'] || 1;
     this.iBitFirstPixel = parmsVideo['bufferLeft'] || 0;
+    this.rotateBuffer = parmsVideo['bufferRotate'];
 
     this.interruptRate = parmsVideo['interruptRate'];
     this.refreshRate = parmsVideo['refreshRate'] || 60;
@@ -104,7 +107,7 @@ function Video(parmsVideo, canvas, context, textarea, container)
     this.textareaScreen = textarea;
     this.inputScreen = textarea || canvas || null;
 
-    this.rotateScreen = parmsVideo['screenRotation'];
+    this.rotateScreen = parmsVideo['screenRotate'];
     if (this.rotateScreen == 90) {
         this.contextScreen.translate(0, this.cyScreen);
         this.contextScreen.rotate((-this.rotateScreen * Math.PI)/180);
@@ -116,10 +119,16 @@ function Video(parmsVideo, canvas, context, textarea, container)
     /*
      * Allocate off-screen buffers.
      */
-    this.imageBuffer = this.contextScreen.createImageData(this.cxBuffer, this.cyBuffer);
+    var cxBuffer = this.cxBuffer;
+    var cyBuffer = this.cyBuffer;
+    if (this.rotateBuffer) {
+        cxBuffer = this.cyBuffer;
+        cyBuffer = this.cxBuffer;
+    }
+    this.imageBuffer = this.contextScreen.createImageData(cxBuffer, cyBuffer);
     this.canvasBuffer = document.createElement("canvas");
-    this.canvasBuffer.width = this.cxBuffer;
-    this.canvasBuffer.height = this.cyBuffer;
+    this.canvasBuffer.width = cxBuffer;
+    this.canvasBuffer.height = cyBuffer;
     // this.canvasBuffer.style['image-rendering'] = "pixelated";
     this.contextBuffer = this.canvasBuffer.getContext("2d");
 }
@@ -207,21 +216,27 @@ Video.prototype.getColors = function()
 };
 
 /**
- * setPixel(imageData, x, y, rgb)
+ * setPixel(imageBuffer, x, y, rgb)
  *
  * @this {Video}
- * @param {Object} imageData
+ * @param {Object} imageBuffer
  * @param {number} x
  * @param {number} y
  * @param {Array.<number>} rgb is a 4-element array containing the red, green, blue and alpha values
  */
-Video.prototype.setPixel = function(imageData, x, y, rgb)
+Video.prototype.setPixel = function(imageBuffer, x, y, rgb)
 {
-    var index = (x + y * imageData.width) * rgb.length;
-    imageData.data[index]   = rgb[0];
-    imageData.data[index+1] = rgb[1];
-    imageData.data[index+2] = rgb[2];
-    imageData.data[index+3] = rgb[3];
+    var index;
+    if (!this.rotateBuffer) {
+        index = (x + y * imageBuffer.width);
+    } else {
+        index = (imageBuffer.height - x - 1) * imageBuffer.width + y;
+    }
+    index *= rgb.length;
+    imageBuffer.data[index] = rgb[0];
+    imageBuffer.data[index+1] = rgb[1];
+    imageBuffer.data[index+2] = rgb[2];
+    imageBuffer.data[index+3] = rgb[3];
 };
 
 /**
@@ -318,8 +333,17 @@ Video.prototype.updateScreen = function(n)
     if (xDirty < this.cxBuffer) {
         var cxDirty = xMaxDirty - xDirty;
         var cyDirty = yMaxDirty - yDirty;
-        this.contextBuffer.putImageData(this.imageBuffer, 0, 0, xDirty, yDirty, cxDirty, cyDirty);
-        this.contextScreen.drawImage(this.canvasBuffer, 0, 0, this.cxBuffer, this.cyBuffer, 0, 0, this.cxScreen, this.cyScreen);
+        if (this.rotateBuffer) {
+            /*
+             * TODO: One last bit of work required for "bufferRotate" (if you really don't want to use
+             * "screenRotate"): the dirty coordinates must be "rotated" as well, because they are relative
+             * to the frame buffer, not the image buffer.  That's why this code copies the ENTIRE imageBuffer.
+             */
+            this.contextBuffer.putImageData(this.imageBuffer, 0, 0);
+        } else {
+            this.contextBuffer.putImageData(this.imageBuffer, 0, 0, xDirty, yDirty, cxDirty, cyDirty);
+        }
+        this.contextScreen.drawImage(this.canvasBuffer, 0, 0, this.canvasBuffer.width, this.canvasBuffer.height, 0, 0, this.cxScreen, this.cyScreen);
     }
 };
 
