@@ -100,6 +100,10 @@ if (NODE) {
  */
 function Video(parmsVideo, canvas, context, textarea, container)
 {
+    var video = this;
+    this.fGecko = web.isUserAgent("Gecko/");
+    var i, sEvent, asWebPrefixes = ['', 'moz', 'webkit', 'ms'];
+
     Component.call(this, "Video", parmsVideo, Video, Messages.VIDEO);
 
     /*
@@ -151,6 +155,28 @@ function Video(parmsVideo, canvas, context, textarea, container)
     this.contextScreen = context;
     this.textareaScreen = textarea;
     this.inputScreen = textarea || canvas || null;
+
+    /*
+     * Support for disabling (or, less commonly, enabling) image smoothing, which all browsers
+     * seem to support now (well, OK, I still have to test the latest MS Edge browser), despite
+     * it still being labelled "experimental technology".  Let's hope the browsers standardize
+     * on this.  I see other options emerging, like the CSS property "image-rendering: pixelated"
+     * that's apparently been added to Chrome.  Sigh.
+     */
+    var fSmoothing = parmsVideo['smoothing'];
+    var sSmoothing = Component.parmsURL['smoothing'];
+    if (sSmoothing) fSmoothing = (sSmoothing == "true")? true : false;
+    if (fSmoothing != null) {
+        for (i = 0; i < asWebPrefixes.length; i++) {
+            sEvent = asWebPrefixes[i];
+            if (!sEvent) {
+                sEvent = 'imageSmoothingEnabled';
+            } else {
+                sEvent += 'ImageSmoothingEnabled';
+            }
+            this.contextScreen[sEvent] = fSmoothing;
+        }
+    }
 
     /*
      * initBus() will determine touch-screen support; for now, just record values and set defaults.
@@ -206,16 +232,12 @@ function Video(parmsVideo, canvas, context, textarea, container)
      * is exasperating; browsers can't agree on 'full' or 'Full, 'request' or 'Request', 'screen' or 'Screen', and
      * while some browsers honor other browser prefixes, most browsers don't.
      */
-    var video = this;
-    this.fGecko = web.isUserAgent("Gecko/");
-    var i, sEvent, asPrefixes = ['', 'moz', 'webkit', 'ms'];
-
     this.container = container;
     if (this.container) {
         this.container.doFullScreen = container['requestFullscreen'] || container['msRequestFullscreen'] || container['mozRequestFullScreen'] || container['webkitRequestFullscreen'];
         if (this.container.doFullScreen) {
-            for (i = 0; i < asPrefixes.length; i++) {
-                sEvent = asPrefixes[i] + 'fullscreenchange';
+            for (i = 0; i < asWebPrefixes.length; i++) {
+                sEvent = asWebPrefixes[i] + 'fullscreenchange';
                 if ('on' + sEvent in document) {
                     var onFullScreenChange = function() {
                         var fFullScreen = (document['fullscreenElement'] || document['mozFullScreenElement'] || document['webkitFullscreenElement'] || document['msFullscreenElement']);
@@ -225,8 +247,8 @@ function Video(parmsVideo, canvas, context, textarea, container)
                     break;
                 }
             }
-            for (i = 0; i < asPrefixes.length; i++) {
-                sEvent = asPrefixes[i] + 'fullscreenerror';
+            for (i = 0; i < asWebPrefixes.length; i++) {
+                sEvent = asWebPrefixes[i] + 'fullscreenerror';
                 if ('on' + sEvent in document) {
                     var onFullScreenError = function() {
                         video.notifyFullScreen(null);
@@ -241,7 +263,7 @@ function Video(parmsVideo, canvas, context, textarea, container)
     /*
      * More gross code to handle pointer-locking support across all supported browsers.
      *
-     * TODO: Consider "upgrading" this code to use the same asPrefixes array as above, especially once Microsoft
+     * TODO: Consider "upgrading" this code to use the same asWebPrefixes array as above, especially once Microsoft
      * finally releases a browser that supports pointer-locking (post-Windows 10?)
      */
     if (this.inputScreen) {

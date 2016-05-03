@@ -87,6 +87,10 @@ if (NODE) {
  */
 function Video(parmsVideo, canvas, context, textarea, container)
 {
+    var video = this;
+    this.fGecko = web.isUserAgent("Gecko/");
+    var i, sEvent, asWebPrefixes = ['', 'moz', 'webkit', 'ms'];
+
     Component.call(this, "Video", parmsVideo, Video, Messages.VIDEO);
 
     this.cxScreen = parmsVideo['screenWidth'];
@@ -107,10 +111,27 @@ function Video(parmsVideo, canvas, context, textarea, container)
     this.textareaScreen = textarea;
     this.inputScreen = textarea || canvas || null;
 
-    this.contextScreen['webkitImageSmoothingEnabled'] = false;
-    this.contextScreen['mozImageSmoothingEnabled'] = false;
-    this.contextScreen['msImageSmoothingEnabled'] = false;
-    this.contextScreen['imageSmoothingEnabled'] = false;
+    /*
+     * Support for disabling (or, less commonly, enabling) image smoothing, which all browsers
+     * seem to support now (well, OK, I still have to test the latest MS Edge browser), despite
+     * it still being labelled "experimental technology".  Let's hope the browsers standardize
+     * on this.  I see other options emerging, like the CSS property "image-rendering: pixelated"
+     * that's apparently been added to Chrome.  Sigh.
+     */
+    var fSmoothing = parmsVideo['smoothing'];
+    var sSmoothing = Component.parmsURL['smoothing'];
+    if (sSmoothing) fSmoothing = (sSmoothing == "true")? true : false;
+    if (fSmoothing != null) {
+        for (i = 0; i < asWebPrefixes.length; i++) {
+            sEvent = asWebPrefixes[i];
+            if (!sEvent) {
+                sEvent = 'imageSmoothingEnabled';
+            } else {
+                sEvent += 'ImageSmoothingEnabled';
+            }
+            this.contextScreen[sEvent] = fSmoothing;
+        }
+    }
 
     this.rotateScreen = parmsVideo['screenRotate'];
     if (this.rotateScreen == 90) {
@@ -135,6 +156,39 @@ function Video(parmsVideo, canvas, context, textarea, container)
     this.canvasBuffer.width = cxBuffer;
     this.canvasBuffer.height = cyBuffer;
     this.contextBuffer = this.canvasBuffer.getContext("2d");
+
+    /*
+     * Here's the gross code to handle full-screen support across all supported browsers.  The lack of standards
+     * is exasperating; browsers can't agree on 'full' or 'Full, 'request' or 'Request', 'screen' or 'Screen', and
+     * while some browsers honor other browser prefixes, most browsers don't.
+     */
+    this.container = container;
+    if (this.container) {
+        this.container.doFullScreen = container['requestFullscreen'] || container['msRequestFullscreen'] || container['mozRequestFullScreen'] || container['webkitRequestFullscreen'];
+        if (this.container.doFullScreen) {
+            for (i = 0; i < asWebPrefixes.length; i++) {
+                sEvent = asWebPrefixes[i] + 'fullscreenchange';
+                if ('on' + sEvent in document) {
+                    var onFullScreenChange = function() {
+                        var fFullScreen = (document['fullscreenElement'] || document['mozFullScreenElement'] || document['webkitFullscreenElement'] || document['msFullscreenElement']);
+                        video.notifyFullScreen(fFullScreen? true : false);
+                    };
+                    document.addEventListener(sEvent, onFullScreenChange, false);
+                    break;
+                }
+            }
+            for (i = 0; i < asWebPrefixes.length; i++) {
+                sEvent = asWebPrefixes[i] + 'fullscreenerror';
+                if ('on' + sEvent in document) {
+                    var onFullScreenError = function() {
+                        video.notifyFullScreen(null);
+                    };
+                    document.addEventListener(sEvent, onFullScreenError, false);
+                    break;
+                }
+            }
+        }
+    }
 }
 
 Component.subclass(Video);
@@ -168,6 +222,137 @@ Video.prototype.initBus = function(cmp, bus, cpu, dbg)
         this.initCache();
     }
     this.setReady();
+};
+
+/**
+ * setBinding(sHTMLType, sBinding, control, sValue)
+ *
+ * @this {Video}
+ * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
+ * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "refresh")
+ * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+ * @param {string} [sValue] optional data value
+ * @return {boolean} true if binding was successful, false if unrecognized binding request
+ */
+Video.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
+{
+    var video = this;
+
+    switch (sBinding) {
+    case "fullScreen":
+        this.bindings[sBinding] = control;
+        if (this.container && this.container.doFullScreen) {
+            control.onclick = function onClickFullScreen() {
+                if (DEBUG) video.printMessage("fullScreen()");
+                video.doFullScreen();
+            };
+        } else {
+            if (DEBUG) this.log("FullScreen API not available");
+            control.parentNode.removeChild(/** @type {Node} */ (control));
+        }
+        return true;
+
+    default:
+        break;
+    }
+    return false;
+};
+
+/**
+ * doFullScreen()
+ *
+ * @this {Video}
+ * @return {boolean} true if request successful, false if not (eg, failed OR not supported)
+ */
+Video.prototype.doFullScreen = function()
+{
+    var fSuccess = false;
+    if (this.container) {
+        if (this.container.doFullScreen) {
+            /*
+             * Styling the container with a width of "100%" and a height of "auto" works great when the aspect ratio
+             * of our virtual screen is at least roughly equivalent to the physical screen's aspect ratio, but now that
+             * we support virtual VGA screens with an aspect ratio of 1.33, that's very much out of step with modern
+             * wide-screen monitors, which usually have an aspect ratio of 1.6 or greater.
+             *
+             * And unfortunately, none of the browsers I've tested appear to make any attempt to scale our container to
+             * the physical screen's dimensions, so the bottom of our screen gets clipped.  To prevent that, I reduce
+             * the width from 100% to whatever percentage will accommodate the entire height of the virtual screen.
+             *
+             * NOTE: Mozilla recommends both a width and a height of "100%", but all my tests suggest that using "auto"
+             * for height works equally well, so I'm sticking with it, because "auto" is also consistent with how I've
+             * implemented a responsive canvas when the browser window is being resized.
+             */
+            var sWidth = "100%";
+            var sHeight = "auto";
+            if (screen && screen.width && screen.height) {
+                var aspectPhys = screen.width / screen.height;
+                var aspectVirt = this.cxScreen / this.cyScreen;
+                if (aspectPhys > aspectVirt) {
+                    sWidth = Math.round(aspectVirt / aspectPhys * 100) + '%';
+                }
+                // TODO: We may need to someday consider the case of a physical screen with an aspect ratio < 1.0....
+            }
+            if (!this.fGecko) {
+                this.container.style.width = sWidth;
+                this.container.style.height = sHeight;
+            } else {
+                /*
+                 * Sadly, the above code doesn't work for Firefox, because as http://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM/Using_full_screen_mode
+                 * explains:
+                 *
+                 *      'It's worth noting a key difference here between the Gecko and WebKit implementations at this time:
+                 *      Gecko automatically adds CSS rules to the element to stretch it to fill the screen: "width: 100%; height: 100%".
+                 *
+                 * Which would be OK if Gecko did that BEFORE we're called, but apparently it does that AFTER, effectively
+                 * overwriting our careful calculations.  So we style the inner element (canvasScreen) instead, which
+                 * requires even more work to ensure that the canvas is properly centered.  FYI, this solution is consistent
+                 * with Mozilla's recommendation for working around their automatic CSS rules:
+                 *
+                 *      '[I]f you're trying to emulate WebKit's behavior on Gecko, you need to place the element you want
+                 *      to present inside another element, which you'll make fullscreen instead, and use CSS rules to adjust
+                 *      the inner element to match the appearance you want.'
+                 */
+                this.canvasScreen.style.width = sWidth;
+                this.canvasScreen.style.width = sWidth;
+                this.canvasScreen.style.display = "block";
+                this.canvasScreen.style.margin = "auto";
+            }
+            this.container.style.backgroundColor = "black";
+            this.container.doFullScreen();
+            fSuccess = true;
+        }
+        this.setFocus();
+    }
+    return fSuccess;
+};
+
+/**
+ * notifyFullScreen(fFullScreen)
+ *
+ * @this {Video}
+ * @param {boolean|null} fFullScreen (null if there was a full-screen error)
+ */
+Video.prototype.notifyFullScreen = function(fFullScreen)
+{
+    if (!fFullScreen && this.container) {
+        if (!this.fGecko) {
+            this.container.style.width = this.container.style.height = "";
+        } else {
+            this.canvasScreen.style.width = this.canvasScreen.style.height = "";
+        }
+    }
+    this.printMessage("notifyFullScreen(" + fFullScreen + ")", true);
+};
+
+/**
+ * setFocus()
+ *
+ * @this {Video}
+ */
+Video.prototype.setFocus = function()
+{
+    if (this.inputScreen) this.inputScreen.focus();
 };
 
 /**

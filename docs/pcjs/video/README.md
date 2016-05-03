@@ -53,6 +53,10 @@ Attributes
 	true scales text modes to fill the canvas;  
 	false centers text modes on the canvas (this generally provides the sharpest rendering).
 	
+ * *smoothing* (optional; default depends on the browser)
+ 
+	true enables HTML5 canvas image smoothing, false disables it; if not specified, then the browser's default is used.
+	
 Also supports the attributes of *[Component](/docs/pcjs/component/)*.
 
 Bindings
