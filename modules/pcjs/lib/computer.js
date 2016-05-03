@@ -218,6 +218,8 @@ function Computer(parmsComputer, parmsMachine, fSuspended) {
         }
     }
 
+    this.println(Computer.APPNAME + " v" + Computer.APPVERSION + "\n" + Computer.COPYRIGHT + "\n" + Computer.LICENSE);
+
     if (DEBUG && this.messageEnabled()) this.printMessage("PREFETCH: " + PREFETCH + ", TYPEDARRAYS: " + TYPEDARRAYS);
 
     /*
@@ -778,14 +780,10 @@ Computer.prototype.donePowerOn = function(aParms)
         this.printMessage("Computer.donePowerOn(): redundant");
     }
 
+    this.fInitialized = true;
     this.flags.fPowered = true;
     var controlPower = this.bindings["power"];
     if (controlPower) controlPower.textContent = "Shutdown";
-
-    if (!this.fInitialized) {
-        this.println(Computer.APPNAME + " v" + Computer.APPVERSION + "\n" + Computer.COPYRIGHT + "\n" + Computer.LICENSE);
-        this.fInitialized = true;
-    }
 
     /*
      * Once we get to this point, we're guaranteed that all components are ready, so it's safe to power the CPU;

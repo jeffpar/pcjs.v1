@@ -50,14 +50,14 @@ if (NODE) {
  *      screenWidth: width of the screen canvas, in pixels
  *      screenHeight: height of the screen canvas, in pixels
  *      screenColor: background color of the screen canvas (default is black)
- *      screenRotate: the amount of counter-clockwise screen rotation required (eg, 90)
+ *      screenRotate: the amount of counter-clockwise screen rotation required (eg, -90 or 270)
  *      aspectRatio (eg, 1.33)
  *      bufferAddr: the starting address of the frame buffer (eg, 0x2400)
  *      bufferCols: the width of a single frame buffer row, in pixels (eg, 256)
  *      bufferRows: the number of frame buffer rows (eg, 224)
  *      bufferBits: the number of bits per column (default is 1)
  *      bufferLeft: the bit position of the left-most pixel in a byte (default is 0; CGA uses 7)
- *      bufferRotate: the amount of counter-clockwise buffer rotation required (eg, 90)
+ *      bufferRotate: the amount of counter-clockwise buffer rotation required (eg, -90 or 270)
  *      interruptRate: normally the same as (or some multiple of) refreshRate (eg, 120)
  *      refreshRate: how many times updateScreen() should be performed per second (eg, 60)
  *
@@ -72,10 +72,10 @@ if (NODE) {
  * been redrawn), so we need an interrupt rate of 120Hz.  We pass the higher rate on to the CPU, so that
  * it will call updateScreen() more frequently, but we still limit our screen updates to every *other* call.
  *
- * bufferRotate is an alternative to screenRotate; you may set one or the other (but not both) to 90 to
- * enable different approaches to 90-degree image rotation.  screenRotate uses canvas transformation methods
- * (ie, translate(), rotate(), and scale()), while bufferRotate inverts the dimensions of the off-screen
- * buffer and then relies on setPixel() to rotate the data into it.
+ * bufferRotate is an alternative to screenRotate; you may set one or the other (but not both) to -90 to
+ * enable different approaches to counter-clockwise 90-degree image rotation.  screenRotate uses canvas
+ * transformation methods (translate(), rotate(), and scale()), while bufferRotate inverts the dimensions
+ * of the off-screen buffer and then relies on setPixel() to rotate the data into it.
  *
  * @constructor
  * @extends Component
@@ -102,6 +102,14 @@ function Video(parmsVideo, canvas, context, textarea, container)
     this.nBitsPerPixel = parmsVideo['bufferBits'] || 1;
     this.iBitFirstPixel = parmsVideo['bufferLeft'] || 0;
     this.rotateBuffer = parmsVideo['bufferRotate'];
+    if (this.rotateBuffer) {
+        this.rotateBuffer = this.rotateBuffer % 360;
+        if (this.rotateBuffer > 0) this.rotateBuffer -= 360;
+        if (this.rotateBuffer != -90) {
+            this.notice("unsupported buffer rotation: " + this.rotateBuffer);
+            this.rotateBuffer = 0;
+        }
+    }
 
     this.interruptRate = parmsVideo['interruptRate'];
     this.refreshRate = parmsVideo['refreshRate'] || 60;
@@ -134,10 +142,17 @@ function Video(parmsVideo, canvas, context, textarea, container)
     }
 
     this.rotateScreen = parmsVideo['screenRotate'];
-    if (this.rotateScreen == 90) {
-        this.contextScreen.translate(0, this.cyScreen);
-        this.contextScreen.rotate((-this.rotateScreen * Math.PI)/180);
-        this.contextScreen.scale(this.cyScreen/this.cxScreen, this.cxScreen/this.cyScreen);
+    if (this.rotateScreen) {
+        this.rotateScreen = this.rotateScreen % 360;
+        if (this.rotateScreen > 0) this.rotateScreen -= 360;
+        if (this.rotateScreen != -90) {
+            this.notice("unsupported screen rotation: " + this.rotateScreen);
+            this.rotateScreen = 0;
+        } else {
+            this.contextScreen.translate(0, this.cyScreen);
+            this.contextScreen.rotate((this.rotateScreen * Math.PI)/180);
+            this.contextScreen.scale(this.cyScreen/this.cxScreen, this.cxScreen/this.cyScreen);
+        }
     }
 
     this.initColors();
