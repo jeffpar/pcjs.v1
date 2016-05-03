@@ -75,7 +75,7 @@ if (NODE) {
  * bufferRotate is an alternative to screenRotate; you may set one or the other (but not both) to -90 to
  * enable different approaches to counter-clockwise 90-degree image rotation.  screenRotate uses canvas
  * transformation methods (translate(), rotate(), and scale()), while bufferRotate inverts the dimensions
- * of the off-screen buffer and then relies on setPixel() to rotate the data into it.
+ * of the off-screen buffer and then relies on setPixel() to "rotate" the data into it.
  *
  * @constructor
  * @extends Component
@@ -128,7 +128,7 @@ function Video(parmsVideo, canvas, context, textarea, container)
      */
     var fSmoothing = parmsVideo['smoothing'];
     var sSmoothing = Component.parmsURL['smoothing'];
-    if (sSmoothing) fSmoothing = (sSmoothing == "true")? true : false;
+    if (sSmoothing) fSmoothing = (sSmoothing == "true");
     if (fSmoothing != null) {
         for (i = 0; i < asWebPrefixes.length; i++) {
             sEvent = asWebPrefixes[i];
@@ -207,6 +207,12 @@ function Video(parmsVideo, canvas, context, textarea, container)
 }
 
 Component.subclass(Video);
+
+Video.COLORS = {
+    OVERLAY_TOP:    0,
+    OVERLAY_BOTTOM: 1,
+    OVERLAY_TOTAL:  2
+};
 
 /**
  * initBus(cmp, bus, cpu, dbg)
@@ -399,36 +405,34 @@ Video.prototype.initCache = function()
 /**
  * initColors()
  *
+ * This creates an array of nColors, with additional OVERLAY_TOTAL colors tacked on to the end of the array.
+ *
  * @this {Video}
  */
 Video.prototype.initColors = function()
 {
-    this.aRGB = [
-        [0x00, 0x00, 0x00, 0xff],       // black
-        [0xff, 0xff, 0xff, 0xff]        // white
-    ];
+    var rgbBlack  = [0x00, 0x00, 0x00, 0xff];
+    var rgbWhite  = [0xff, 0xff, 0xff, 0xff];
+    var rgbGreen  = [0x00, 0xff, 0x00, 0xff];
+    var rgbYellow = [0xff, 0xff, 0x00, 0xff];
+    this.nColors = (1 << this.nBitsPerPixel);
+    this.aRGB = new Array(this.nColors + Video.COLORS.OVERLAY_TOTAL);
+    this.aRGB[0] = rgbBlack;
+    this.aRGB[1] = rgbWhite;
+    this.aRGB[this.nColors + Video.COLORS.OVERLAY_TOP] = rgbYellow;
+    this.aRGB[this.nColors + Video.COLORS.OVERLAY_BOTTOM] = rgbGreen;
 };
 
 /**
- * getColors()
- *
- * @this {Video}
- */
-Video.prototype.getColors = function()
-{
-    return this.aRGB;
-};
-
-/**
- * setPixel(imageBuffer, x, y, rgb)
+ * setPixel(imageBuffer, x, y, bPixel)
  *
  * @this {Video}
  * @param {Object} imageBuffer
  * @param {number} x
  * @param {number} y
- * @param {Array.<number>} rgb is a 4-element array containing the red, green, blue and alpha values
+ * @param {number} bPixel (ie, an index into aRGB)
  */
-Video.prototype.setPixel = function(imageBuffer, x, y, rgb)
+Video.prototype.setPixel = function(imageBuffer, x, y, bPixel)
 {
     var index;
     if (!this.rotateBuffer) {
@@ -436,6 +440,15 @@ Video.prototype.setPixel = function(imageBuffer, x, y, rgb)
     } else {
         index = (imageBuffer.height - x - 1) * imageBuffer.width + y;
     }
+    if (bPixel) {
+        if (x >= 208 && x < 236) {
+            bPixel = this.nColors + Video.COLORS.OVERLAY_TOP;
+        }
+        else if (x >= 28 && x < 72) {
+            bPixel = this.nColors + Video.COLORS.OVERLAY_BOTTOM;
+        }
+    }
+    var rgb = this.aRGB[bPixel];
     index *= rgb.length;
     imageBuffer.data[index] = rgb[0];
     imageBuffer.data[index+1] = rgb[1];
@@ -488,7 +501,6 @@ Video.prototype.updateScreen = function(n)
 
     var iCell = 0;
     var nPixelShift = 1;
-    var aPixelColors = this.getColors();
 
     var xBuffer = 0, yBuffer = 0;
     var xDirty = this.cxBuffer, xMaxDirty = 0, yDirty = this.cyBuffer, yMaxDirty = 0;
@@ -509,11 +521,12 @@ Video.prototype.updateScreen = function(n)
         } else {
             this.aCellCache[iCell] = data;
             var nShift = nShiftInit;
-            if (nShiftInit) data = ((data >> 8) | ((data & 0xff) << 8));
+            if (nShift) data = ((data >> 8) | ((data & 0xff) << 8));
             if (xBuffer < xDirty) xDirty = xBuffer;
-            for (var iPixel = 0; iPixel < this.nPixelsPerCell; iPixel++) {
+            var cPixels = this.nPixelsPerCell;
+            while (cPixels--) {
                 var bPixel = (data >> nShift) & nMask;
-                this.setPixel(this.imageBuffer, xBuffer++, yBuffer, aPixelColors[bPixel]);
+                this.setPixel(this.imageBuffer, xBuffer++, yBuffer, bPixel);
                 nShift += nShiftPixel;
             }
             if (xBuffer > xMaxDirty) xMaxDirty = xBuffer;
@@ -546,6 +559,7 @@ Video.prototype.updateScreen = function(n)
              *      this.contextBuffer.putImageData(this.imageBuffer, 0, 0);
              */
             var xDirtyOrig = xDirty, cxDirtyOrig = cxDirty;
+            //noinspection JSSuspiciousNameCombination
             xDirty = yDirty;
             cxDirty = cyDirty;
             yDirty = this.cxBuffer - (xDirtyOrig + cxDirtyOrig);
