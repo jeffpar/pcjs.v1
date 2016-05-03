@@ -12,7 +12,7 @@ Space Invaders (1978)
 ---
 
 This is a test of [PC8080](/modules/pc8080/), a new 8080-based machine emulator recently added to the
-PCjs Project.  It's a work-in-progress, so there's not much to look at yet.  And the goal is not to build
+PCjs Project.  It's a work-in-progress, so it's not playable yet.  And the goal is not to build
 yet-another Space Invaders/Arcade Machine emulator -- that's been done many times over -- but to start with
 a well-understood 8080-based machine architecture that doesn't need a lot of peripherals, and use it as an
 early test case for another classic CPU that we can add to the PCjs toolbox.
