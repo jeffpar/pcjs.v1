@@ -1,13 +1,13 @@
 ---
 layout: page
-title: 8080-Based Device Configurations
+title: PC8080 Device Configurations
 permalink: /devices/pc8080/
 ---
 
-8080-Based Device Configurations
+PC8080 Device Configurations
 ---
 
-[8080-Based Machines](machine/) are built from a collection of devices, including:
+All our [8080-Based Machines](machine/) are built from a collection of devices, including:
 
 * CPU (8080)
 * RAM

@@ -11,10 +11,9 @@ A while back, I updated most of the machines to use higher-resolution "screens".
 [EGA video configuration](/devices/pc/video/ibm/ega/1984-09-13/128kb-autolockfs.xml) now specifies a *screenWidth*
 of 1280 and *screenHeight* of 700, dimensions which are exactly twice the standard EGA resolution.
 
-That change had no effect on the machine or its EGA card, but it did improve the machine's appearance, because
-most people are using much higher resolution monitors today, so by using a higher-resolution "screen" (ie, HTML canvas),
-less interpolation is happening when a machine's fairly low-resolution screen image is scaled up to fill your
-browser window.
+That change had no effect on the machine's operation, but it did improve the machine's appearance, because
+most people are using much higher resolution monitors today, so by using a higher-resolution "screen" (canvas),
+less interpolation is happening when a machine's screen image is scaled up to fill your browser window.
 
 The amount of scaling *also* depends on whether the machine allows itself to be stretched to fill the browser window.
 For example, this [machine](/devices/pc/machine/5160/ega/640kb/array/machine.xml) (used by the
@@ -26,19 +25,19 @@ no matter how large you make your browser window:
 ```
 
 but most machines don't specify a (maximum) overall width, so their screen canvas is allowed to stretch far beyond
-the initial *screenWidth* and *screenHeight*.
+the initial *screenWidth* and *screenHeight*, thanks to some additional CSS settings.
 
-Less interpolation is a good thing, if you want the screens to look less "fuzzy."  Unfortunately, interpolation
-also happens at a deeper level, because internally, PCjs uses two canvases to move pixels from the machine's frame
-buffer to your browser: the screen canvas, which I already touched on, and an *off-screen* canvas -- also called the
-*buffer* canvas, because it's where detected changes to the machine's frame buffer are, um, buffered.
+Larger screens mean less interpolation, which is a good thing if you want the screens to look less "fuzzy." 
+However, interpolation also happens at a deeper level, because internally, PCjs uses two canvases to move pixels
+from the machine's frame buffer to your browser: the screen canvas, which I've already discussed, and another
+canvas called the *buffer* canvas, where changes to the machine's frame buffer are, um, buffered.
 
 The *buffer* canvas has the same dimensions as the machine's frame buffer, whereas the *screen* canvas
-has generally higher dimensions, as defined by the video configuration, which your browser may then be stretching to
-even higher dimensions, depending on your monitor resolution and browser size.
+has generally higher dimensions (as explained above), which your browser may then be stretching to even higher
+dimensions, depending on your monitor resolution and browser size.
 
-Roughly 60 times per second, if anything has changed in the *buffer* canvas, it is copied to the *screen* canvas.
-And that is where The Sharpening now occurs.
+The differential between the *buffer* canvas and *screen* canvas is where additional interpolation (fuzziness)
+creeps in.  That is where The Sharpening now occurs.
 
 All the browsers I've tested so far (Chrome, Firefox, and Safari) support a
 [Canvas](https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API)
@@ -47,25 +46,30 @@ All the browsers I've tested so far (Chrome, Firefox, and Safari) support a
 which eliminates much of the fuzziness that would occur when copying pixels from the lower-resolution *buffer* canvas
 to the higher-resolution *screen* canvas.
 
-I liked what I saw, so I added a new [Video](/docs/pcjs/video/) property
-named *smoothing* that can be set to "true" or "false", and I've set it to "false" for most machines in the project.
-If *smoothing* is not set, your browser continues to use its default interpolation method.
+So I've added a new [Video](/docs/pcjs/video/) property named *smoothing* that can be set to "true" or "false",
+and I've set it to "false" for most machines in the project.  If *smoothing* is not set, your browser continues to
+use its default interpolation method.
 
-{% include screenshot.html src="/blog/images/si1978-fuzzier.png" width="339" height="388" title="Space Invaders (Fuzzier)" link="http://www.pcjs.org/devices/pc8080/machine/invaders/?smoothing=true" %}
-{% include screenshot.html src="/blog/images/si1978-sharper.png" width="339" height="388" title="Space Invaders (Sharper)" link="http://www.pcjs.org/devices/pc8080/machine/invaders/?smoothing=false" %}
+{% include screenshot.html src="/blog/images/si1978-fuzzier.png" width="339" height="388" title="Space Invaders (Fuzzier)" link="/devices/pc8080/machine/invaders/?smoothing=true" %}
+{% include screenshot.html src="/blog/images/si1978-sharper.png" width="339" height="388" title="Space Invaders (Sharper)" link="/devices/pc8080/machine/invaders/?smoothing=false" %}
 
 For some people, this might be a matter of taste, because less fuzziness necessarily means more pixelation (ie, you
-can see individual pixels more clearly).  So I've also added a URL *smoothing* parameter that you can use to override
-a machine's default setting; eg:
+can see individual pixels more clearly), which becomes more noticeable when switching a machine **Full Screen**.
+So I've also added a URL *smoothing* parameter you can use to override a machine's default setting; eg:
 
 	http://www.pcjs.org/devices/pc8080/machine/invaders/?smoothing=true
 
+See for yourself, by clicking on each of the [Space Invaders](/devices/pc8080/machine/invaders/) images above and
+then clicking the **Full Screen** button; both images link to the same machine, but left one enables image smoothing,
+while the right one does not.
+
+Aspect Ratio
 ---
 
 The *smoothing* property joins another recent [Video](/docs/pcjs/video/) property, *aspect*, that was added in a
 [release](https://github.com/jeffpar/pcjs/releases/tag/v1.21.5) last month.
 
-To recap: aspect ratio is display width divided by display height, but the choice of aspect ratio is complicated by
+To recap, aspect ratio is display width divided by display height, but the choice of aspect ratio is complicated by
 the fact that none of the early IBM video card/monitor combinations (with the exception of the VGA) displayed square
 pixels, and (with the exception of the MDA) they could display text and graphics at a variety of resolutions.
 
@@ -82,8 +86,10 @@ be responsive to any browser resizing while still retaining that aspect ratio.
 
 ---
 
-That's all for now.  Work continues on the new [PC8080](/modules/pc8080/) emulator and
-[Space Invaders](/devices/pc8080/machine/invaders/).  More on that later, when it's finished.
+That's all for now.  Work continues on the new [PC8080](/modules/pc8080/) emulator and the
+[Space Invaders](/devices/pc8080/machine/invaders/) test machine.  More on that later, when it's finished.
+
+Until then, May the 4th be with you!
 
 *[@jeffpar](http://twitter.com/jeffpar)*  
 *May 4, 2016*

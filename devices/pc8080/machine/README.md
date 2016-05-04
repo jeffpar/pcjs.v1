@@ -1,10 +1,10 @@
 ---
 layout: page
-title: 8080-Based Machine Configurations
+title: PC8080 Machine Configurations
 permalink: /devices/pc8080/machine/
 ---
 
-8080-Based Machine Configurations
+PC8080 Machine Configurations
 ---
 
 The following 8080-based machines are currently available:

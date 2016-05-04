@@ -9,7 +9,7 @@ redirect_from:
 IBM PC Device Configurations
 ---
 
-[IBM PC Machines](machine/) are built from a collection of devices, including:
+All our [IBM PC Machines](machine/) are built from a collection of devices, including:
 
 * CPU (e.g., 8088, 80286, 80386)
 * RAM

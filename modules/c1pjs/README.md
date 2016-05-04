@@ -9,7 +9,7 @@ Challenger 1P Emulation Module (C1Pjs)
 
 Overview
 ---
-C1Pjs is an 6502-based Machine Emulation Module for the Ohio Scientific Challenger 1P.
+C1Pjs is an 6502-based Machine Emulation Module for the [Ohio Scientific Challenger 1P](/docs/c1pjs/).
 
 C1Pjs is currently comprised of the following non-shared components, as listed in [package.json](../../package.json)
 (see the *c1pJSFiles* property):
