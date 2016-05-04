@@ -102,7 +102,7 @@ function Video(parmsVideo, canvas, context, textarea, container)
 {
     var video = this;
     this.fGecko = web.isUserAgent("Gecko/");
-    var i, sEvent, asWebPrefixes = ['', 'moz', 'webkit', 'ms'];
+    var i, sEvent, asWebPrefixes = ['', 'moz', 'ms', 'webkit'];
 
     Component.call(this, "Video", parmsVideo, Video, Messages.VIDEO);
 
@@ -174,7 +174,10 @@ function Video(parmsVideo, canvas, context, textarea, container)
             } else {
                 sEvent += 'ImageSmoothingEnabled';
             }
-            this.contextScreen[sEvent] = fSmoothing;
+            if (this.contextScreen[sEvent] !== undefined) {
+                this.contextScreen[sEvent] = fSmoothing;
+                break;
+            }
         }
     }
 
@@ -240,7 +243,7 @@ function Video(parmsVideo, canvas, context, textarea, container)
                 sEvent = asWebPrefixes[i] + 'fullscreenchange';
                 if ('on' + sEvent in document) {
                     var onFullScreenChange = function() {
-                        var fFullScreen = (document['fullscreenElement'] || document['mozFullScreenElement'] || document['webkitFullscreenElement'] || document['msFullscreenElement']);
+                        var fFullScreen = (document['fullscreenElement'] || document['msFullscreenElement'] || document['mozFullScreenElement'] || document['webkitFullscreenElement']);
                         video.notifyFullScreen(fFullScreen? true : false);
                     };
                     document.addEventListener(sEvent, onFullScreenChange, false);
