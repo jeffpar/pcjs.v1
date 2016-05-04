@@ -8,6 +8,7 @@
 		But testing reveals that round images appear roundest when we stick with a screen size proportional to 640x350.
 		Also note that 1280x700 produces crisper results than 640x350, and 2560x1400 is sharper still (at least when
 		using Chrome).  I'm going to split the difference and go with 1280x700.
+		UPDATE: With the new smoothing option (set to false), sharpness is even better (hopefully on all browsers).
 	</comment>
 	<menu>
 		<title>IBM Enhanced Color Display</title>

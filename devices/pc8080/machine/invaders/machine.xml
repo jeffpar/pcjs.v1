@@ -3,7 +3,7 @@
 <machine id="invaders" class="pc8080" border="1" pos="center" background="#FAEBD7">
 	<name pos="center">Space Invaders</name>
 	<computer id="computer" busWidth="16"/>
-	<cpu id="cpu8080" model="8080" cycles="2000000"/>
+	<cpu id="cpu8080" model="8080" cycles="2000000" autoStart="true"/>
 	<rom id="romH" addr="0x0000" size="0x0800" file="/devices/pc8080/rom/invaders/INVADERS-H.json"/>
 	<rom id="romG" addr="0x0800" size="0x0800" file="/devices/pc8080/rom/invaders/INVADERS-G.json"/>
 	<rom id="romF" addr="0x1000" size="0x0800" file="/devices/pc8080/rom/invaders/INVADERS-F.json"/>

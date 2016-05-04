@@ -48,14 +48,20 @@ Attributes
 	The EGA uses font data stored in its system ROM, which is loaded by the ROM component, so do not use this
 	setting with model "ega".
 
+ * *aspect* (optional)
+ 
+	Defines an aspect ratio that overrides the default aspect (ie, width-to-height) ratio normally determined
+	by the *screenWidth* and *screenHeight* parameters; can also be present as a URL parameter.
+	
  * *scale* (optional; default is false)
  
-	true scales text modes to fill the canvas;  
+	true scales text modes to fill the canvas (eg, scales 40-column modes to fill 80-column screens);
 	false centers text modes on the canvas (this generally provides the sharpest rendering).
 	
  * *smoothing* (optional; default depends on the browser)
  
-	true enables HTML5 canvas image smoothing, false disables it; if not specified, then the browser's default is used.
+	true enables HTML5 canvas image smoothing, false disables it (if not specified, the browser's default is used);
+	can also be present as a URL parameter.
 	
 Also supports the attributes of *[Component](/docs/pcjs/component/)*.
 
