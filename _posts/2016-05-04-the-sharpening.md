@@ -7,7 +7,7 @@ permalink: /blog/2016/05/04/
 
 This was the week of The Sharpening.
 
-A month or two ago, I updated most of the machines to use higher-resolution "screens".  For example, a typical
+A while back, I updated most of the machines to use higher-resolution "screens".  For example, a typical
 [EGA video configuration](/devices/pc/video/ibm/ega/1984-09-13/128kb-autolockfs.xml) now specifies a *screenWidth*
 of 1280 and *screenHeight* of 700, dimensions which are exactly twice the standard EGA resolution.
 
@@ -33,23 +33,28 @@ also happens at a deeper level, because internally, PCjs uses two canvases to mo
 buffer to your browser: the screen canvas, which I already touched on, and an *off-screen* canvas -- also called the
 *buffer* canvas, because it's where detected changes to the machine's frame buffer are, um, buffered.
 
-So to recap: the *buffer* canvas has the same dimensions as the machine's frame buffer, whereas the *screen* canvas
+The *buffer* canvas has the same dimensions as the machine's frame buffer, whereas the *screen* canvas
 has generally higher dimensions, as defined by the video configuration, which your browser may then be stretching to
 even higher dimensions, depending on your monitor resolution and browser size.
 
 Roughly 60 times per second, if anything has changed in the *buffer* canvas, it is copied to the *screen* canvas.
 And that is where The Sharpening now occurs.
 
-All the browsers I've tested so far (ie, Chrome, Firefox, and Safari) support a
+All the browsers I've tested so far (Chrome, Firefox, and Safari) support a
 [Canvas](https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API)
 [Context](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D) property named
 [imageSmoothingEnabled](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/imageSmoothingEnabled),
 which eliminates much of the fuzziness that would occur when copying pixels from the lower-resolution *buffer* canvas
-to the higher-resolution *screen* canvas.  I liked what I saw, so I added a new [Video](/docs/pcjs/video/) property
+to the higher-resolution *screen* canvas.
+
+I liked what I saw, so I added a new [Video](/docs/pcjs/video/) property
 named *smoothing* that can be set to "true" or "false", and I've set it to "false" for most machines in the project.
 If *smoothing* is not set, your browser continues to use its default interpolation method.
 
-For some people, this might be matter of taste, because less fuzziness necessarily means more pixelation (ie, you
+{% include screenshot.html src="/blog/images/si1978-fuzzier.png" width="339" height="388" title="Space Invaders (Fuzzier)" link="http://www.pcjs.org/devices/pc8080/machine/invaders/?smoothing=true" %}
+{% include screenshot.html src="/blog/images/si1978-sharper.png" width="339" height="388" title="Space Invaders (Sharper)" link="http://www.pcjs.org/devices/pc8080/machine/invaders/?smoothing=false" %}
+
+For some people, this might be a matter of taste, because less fuzziness necessarily means more pixelation (ie, you
 can see individual pixels more clearly).  So I've also added a URL *smoothing* parameter that you can use to override
 a machine's default setting; eg:
 
@@ -77,7 +82,7 @@ be responsive to any browser resizing while still retaining that aspect ratio.
 
 ---
 
-That's all for now.  Work continues on the new [PC8080](/modules/pc8080/) component and
+That's all for now.  Work continues on the new [PC8080](/modules/pc8080/) emulator and
 [Space Invaders](/devices/pc8080/machine/invaders/).  More on that later, when it's finished.
 
 *[@jeffpar](http://twitter.com/jeffpar)*  
