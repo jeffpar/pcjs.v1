@@ -9,7 +9,7 @@ IBM PC Emulation Module (PCjs)
 
 Overview
 ---
-The PCjs IBM PC Emulation Module is the engine underlying all our [IBM PC Machines](/devices/pc/machine/).
+The PCjs IBM PC emulation module is the engine powering all our [IBM PC Machines](/devices/pc/machine/).
 
 This module divides PC functionality into variety of logical and visual components.
 In general, each JavaScript file is responsible for a single component or set of related components (eg,
