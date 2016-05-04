@@ -32,6 +32,7 @@
 		<manifest ref="/disks/pc/dos/compaq/1.11/manifest.xml"/>
 		<manifest ref="/disks/pc/dos/compaq/1.12/manifest.xml"/>
 		<manifest ref="/disks/pc/dos/compaq/2.12/manifest.xml"/>
+		<manifest ref="/disks/pc/dos/compaq/3.00/manifest.xml"/>
 		<manifest ref="/disks/pc/dos/compaq/3.10/manifest.xml"/>
 		<manifest ref="/disks/pc/dos/compaq/3.31/manifest.xml"/>
 		<manifest ref="/disks/pc/os2/ibm/1.0/manifest.xml"/>

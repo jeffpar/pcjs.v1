@@ -433,7 +433,9 @@ Bus.prototype.addMemory = function(addr, size, type, controller)
          * to warrant it.
          */
         this.cpu.flushPageBlocks();
-        this.status(Math.floor(size / 1024) + "Kb " + Memory.TYPE.NAMES[type] + " at " + str.toHex(addr));
+        if (!this.cpu.isRunning()) {        // allocation messages at "run time" are bit too much
+            this.status(Math.floor(size / 1024) + "Kb " + Memory.TYPE.NAMES[type] + " at " + str.toHex(addr));
+        }
         return true;
     }
     return this.reportError(Bus.ERROR.ADD_MEM_BADRANGE, addr, size);
