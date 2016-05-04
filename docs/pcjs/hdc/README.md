@@ -4,16 +4,18 @@ title: PCjs &lt;hdc&gt; Element
 permalink: /docs/pcjs/hdc/
 ---
 
-PCjs Hard Disk Controller (HDC) Component
+PCjs Hard Drive Controller (HDC) Component
 ---
 
 Format
 ---
-	<hdc>...</hdc>
+```xml
+<hdc>...</hdc>
+```
 
 Purpose
 ---
-Creates an instance of the Hard Disk Controller (HDC) component. The HDC is responsible for:
+Creates an instance of the Hard Drive Controller (HDC) component. The HDC is responsible for:
 
 - Automatically loading fixed disk image files at boot;
 - Simulating the appropriate controller hardware ports;
@@ -30,7 +32,7 @@ Attributes
 	This is an array definition, with one array entry per fixed disk. Each entry is a drive object definition,
 	each of which may contain 'name', 'path' and 'type' properties. For example:
 	
-		[{name:'10Mb Hard Disk',path:'10mb.json',type:3}]
+		[{name:'10Mb Hard Drive',path:'10mb.json',type:3}]
 		
 	The 'path' property is optional; if omitted, an empty disk matching the specified drive type will be created
 	(10mb in the case of drive type 3).
@@ -46,11 +48,15 @@ Attributes
 	
 	For the Xebec (*'xt'*) controller, you should install the Xebec ROM; eg:
 	
+		```xml
 		<rom id="romHDC" addr="0xc8000" size="0x2000" file="/devices/pc/hdc/ibm-xebec-1982.json"/>
+		```
 
 	For the Western Digital (*'at'*) controller, use a Model 5170 (or newer) ROM module; eg:
 
+		```xml
 		<rom id="romBIOS" addr="0xf0000" size="0x10000" alias="0xff0000" file="/devices/pc/rom/5170/1984-01-10/1984-01-10.json"/>
+		```
 
 	The default *type* setting is *'xt'*.
 
@@ -62,15 +68,20 @@ This component has no bindings. Fixed disks cannot be loaded or unloaded once th
 
 Example
 ---
-	<hdc id="hdcXT" drives="[{name:'10Mb Hard Disk',type:3}]"/>
+```xml
+<hdc id="hdcXT" drives="[{name:'10Mb Hard Drive',type:3}]"/>
+```
 
 Output
 ---
-	<div id="..." class="pc-hdc pc-component">
-		<div class="pc-container">
-			<div class="pcjs-hdc" data-value="id:'...',name:'...',drives:'...'"></div>
-		</div>
-	</div>
+```html
+<div id="..." class="pc-hdc pc-component">
+    <div class="pc-container">
+        <div class="pcjs-hdc" data-value="id:'...',name:'...',drives:'...'">
+        </div>
+    </div>
+</div>
+```
 
 Also, if any controls are defined, another &lt;div&gt; of class="pc-controls" is created in the container &lt;div&gt;,
 with each control inside a &lt;div&gt; of class="pc-control".

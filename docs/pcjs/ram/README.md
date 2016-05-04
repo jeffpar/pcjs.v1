@@ -9,7 +9,9 @@ PCjs Random-Access Memory (RAM) Component
 
 Format
 ---
-	<ram>...</ram>
+```xml
+<ram>...</ram>
+```
 
 Purpose
 ---
@@ -43,15 +45,20 @@ Bindings
 
 Example
 ---
-	<ram id="ramLow" addr="0x00000"/>
+```xml
+<ram id="ramLow" addr="0x00000"/>
+```
 
 Output
 ---
-	<div id="..." class="pc-ram pc-component">
-		<div class="pc-container">
-			<div class="pcjs-ram" data-value="id:'...',name:'...',addr:'...',size:'...',test:'...'"></div>
-		</div>
-	</div>
+```html
+<div id="..." class="pc-ram pc-component">
+    <div class="pc-container">
+        <div class="pcjs-ram" data-value="id:'...',name:'...',addr:'...',size:'...',test:'...'">
+        </div>
+    </div>
+</div>
+```
 
 Also, if any controls are defined, another &lt;div&gt; of class="pc-controls" is created in the container &lt;div&gt;,
 with each control inside a &lt;div&gt; of class="pc-control".

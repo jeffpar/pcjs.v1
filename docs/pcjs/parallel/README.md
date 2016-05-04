@@ -9,7 +9,9 @@ PCjs ParallelPort Component
 
 Format
 ---
-	<parallel>...</parallel>
+```xml
+<parallel>...</parallel>
+```
 
 Purpose
 ---
@@ -39,14 +41,19 @@ Bindings
 
 Example
 ---
-	<parallel id="lpt1" adapter="2" binding="print"/>
+```xml
+<parallel id="lpt1" adapter="2" binding="print"/>
+```
 
 Output
 ---
-	<div id="..." class="pc-parallel pc-component">
-		<div class="pc-container">
-			<div class="pcjs-parallel" data-value="id:'...',name:'...',adapter:'...',binding:'...'"></div>
-		</div>
-	</div>
+```html
+<div id="..." class="pc-parallel pc-component">
+    <div class="pc-container">
+        <div class="pcjs-parallel" data-value="id:'...',name:'...',adapter:'...',binding:'...'">
+        </div>
+    </div>
+</div>
+```
 
 [Return to [PCjs Documentation](..)]

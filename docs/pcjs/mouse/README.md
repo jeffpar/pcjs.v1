@@ -9,7 +9,9 @@ PCjs Mouse Component
 
 Format
 ---
-	<mouse>...</mouse>
+```xml
+<mouse>...</mouse>
+```
 
 Purpose
 ---
@@ -30,14 +32,19 @@ None.
 
 Example
 ---
-	<mouse serial="com1"/>
+```xml
+<mouse serial="com1"/>
+```
 
 Output
 ---
-	<div id="..." class="pc-mouse pc-component">
-		<div class="pc-container">
-			<div class="pcjs-mouse" data-value="id:'...',name:'...',serial:'...'></div>
-		</div>
-	</div>
+```html
+<div id="..." class="pc-mouse pc-component">
+    <div class="pc-container">
+        <div class="pcjs-mouse" data-value="id:'...',name:'...',serial:'...'>
+        </div>
+    </div>
+</div>
+```
 
 [Return to [PCjs Documentation](..)]

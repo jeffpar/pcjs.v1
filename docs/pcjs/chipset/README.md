@@ -9,7 +9,9 @@ PCjs ChipSet Component
 
 Format
 ---
-	<chipset>...</chipset>
+```xml
+<chipset>...</chipset>
+```
 
 Purpose
 ---
@@ -103,15 +105,20 @@ Bindings
 
 Example
 ---
-	<chipset id="chipset" model="5150" sw1="01000001" sw2="11110000"/>
+```xml
+<chipset id="chipset" model="5150" sw1="01000001" sw2="11110000"/>
+```
 
 Output
 ---
-	<div id="..." class="pc-chipset pc-component">
-		<div class="pc-container">
-			<div class="pcjs-chipset" data-value="id:'...',name:'...',model:'...',sw1:'...',sw2:'...'"></div>
-		</div>
-	</div>
+```html
+<div id="..." class="pc-chipset pc-component">
+    <div class="pc-container">
+        <div class="pcjs-chipset" data-value="id:'...',name:'...',model:'...',sw1:'...',sw2:'...'">
+        </div>
+    </div>
+</div>
+```
 
 Also, if any controls are defined, another &lt;div&gt; of class="pc-controls" is created in the container &lt;div&gt;,
 with each control inside a &lt;div&gt; of class="pc-control".

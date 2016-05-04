@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<video id="videoEGA" model="ega" memory="0x40000" screenwidth="1280" screenheight="700" scale="true" touchscreen="mouse" autolock="true" pos="center" padding="8px">
+<video id="videoEGA" model="ega" memory="0x40000" screenWidth="1280" screenHeight="700" scale="true" smoothing="false" touchScreen="mouse" autoLock="true" pos="center" padding="8px">
 	<comment>
 		If [Wikipedia](https://en.wikipedia.org/wiki/Enhanced_Graphics_Adapter) is correct that the IBM EGA
 		(presumably when paired with an IBM 5154 EGA monitor) has a "pixel aspect ratio" of 1:1.37 at its highest
@@ -8,6 +8,7 @@
 		But testing reveals that round images appear roundest when we stick with a screen size proportional to 640x350.
 		Also note that 1280x700 produces crisper results than 640x350, and 2560x1400 is sharper still (at least when
 		using Chrome).  I'm going to split the difference and go with 1280x700.
+		UPDATE: With the new smoothing option (set to false), sharpness is even better (hopefully on all browsers).
 	</comment>
 	<menu>
 		<title>IBM Enhanced Color Display</title>

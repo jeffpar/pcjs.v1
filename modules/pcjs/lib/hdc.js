@@ -132,7 +132,7 @@ HDC.DEFAULT_DRIVE_NAME = "Hard Drive";
  * perfectly justified in retaining my original understanding of Kb and Mb and completely ignoring the
  * existence of KiB and MiB.
  *
- * Besides, I suspect these changes were nothing more than a self-serving push by hard disk manufacturers,
+ * Besides, I suspect these changes were nothing more than a self-serving push by hard drive manufacturers,
  * who wanted to exaggerate their disk capacities by treating Mb as 1,000,000 bytes.
  *
  * Also, I capitalize only the first letter of units like Kb and Mb, because kilobyte and megabyte are
@@ -578,7 +578,7 @@ HDC.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
                     var sAlert = web.downloadFile(disk.encodeAsBase64(), "octet-stream", true, disk.sDiskFile.replace(".json", ".img"));
                     web.alertUser(sAlert);
                 } else {
-                    hdc.notice("Hard disk " + iDrive + " is not available.");
+                    hdc.notice("Hard drive " + iDrive + " is not available.");
                 }
             };
         }(+sBinding.slice(-1));
@@ -1195,7 +1195,7 @@ HDC.prototype.seekDrive = function(drive, iSector, nSectors)
                 /*
                  * Important difference between the FDC and the XTC: the XTC uses 0-based sector numbers, so unlike
                  * FDC.seekDrive(), we must NOT add 1 to bSector below.  I could change how sector numbers are stored in
-                 * hard disk images, but it seems preferable to keep the image format consistent and controller-independent.
+                 * hard drive images, but it seems preferable to keep the image format consistent and controller-independent.
                  */
                 drive.bSector = (iSector % nSectorsPerTrack);
                 drive.nBytes = nSectors * aDiskInfo[3];
@@ -1324,8 +1324,8 @@ HDC.prototype.doneLoadDisk = function(drive, disk, sDiskName, sDiskPath)
 /**
  * unloadDrive(iDrive)
  *
- * NOTE: At the moment, we support only auto-mounts; there is no user interface for selecting hard disk images,
- * let alone unloading them, so there is currently no need for the following function.
+ * NOTE: At the moment, we support only auto-mounts; there is no user interface for selecting hard drive
+ * images, let alone unloading them, so there is currently no need for the following function.
  *
  * @this {HDC}
  * @param {number} iDrive
@@ -2158,7 +2158,7 @@ HDC.prototype.setATCIRR = function(fWrite)
         if (!(this.regFDR & HDC.ATC.FDR.INT_DISABLE)) {
             /*
              * TODO: Determine what the "correct" instruction delay should be here.  When the OS/2 1.0 Install Disk
-             * begins copying files to the hard disk, at one point it performs the following 125-sector write (use the
+             * begins copying files to the hard drive, at one point it performs the following 125-sector write (use the
              * Debugger's "m hdc on" and "m pic on" commands to enable HDC and PIC messages, along with "m data on"
              * if you also want to see the actual sector data being written):
              *
@@ -2953,7 +2953,7 @@ HDC.prototype.intBIOSDisk = function(addr)
  * controller the caller really wants to reset.
  *
  * An unfortunate side-effect of this behavior: when the HDC BIOS is initialized for the first time, it may
- * issue several resets internally, depending on whether there are 0, 1 or 2 hard disks installed, and each
+ * issue several resets internally, depending on whether there are 0, 1 or 2 hard drives installed, and each
  * of those resets also triggers completely useless diskette resets, each wasting up to two seconds waiting
  * for the FDC to interrupt.  The FDC tries to interrupt, but it can't, because at this early stage of
  * ROM BIOS initialization, IRQ.FDC hasn't been unmasked yet.

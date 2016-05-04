@@ -50,11 +50,32 @@ if (NODE) {
  *      screenWidth: width of the screen canvas, in pixels
  *      screenHeight: height of the screen canvas, in pixels
  *      screenColor: background color of the screen canvas (default is black)
- *      aspectRatio
- *      frameBuffer
- *      interruptRate (eg, 120)
- *      refreshRate (eg, 60)
- *      rotation (eg, 90)
+ *      screenRotate: the amount of counter-clockwise screen rotation required (eg, -90 or 270)
+ *      aspectRatio (eg, 1.33)
+ *      bufferAddr: the starting address of the frame buffer (eg, 0x2400)
+ *      bufferCols: the width of a single frame buffer row, in pixels (eg, 256)
+ *      bufferRows: the number of frame buffer rows (eg, 224)
+ *      bufferBits: the number of bits per column (default is 1)
+ *      bufferLeft: the bit position of the left-most pixel in a byte (default is 0; CGA uses 7)
+ *      bufferRotate: the amount of counter-clockwise buffer rotation required (eg, -90 or 270)
+ *      interruptRate: normally the same as (or some multiple of) refreshRate (eg, 120)
+ *      refreshRate: how many times updateScreen() should be performed per second (eg, 60)
+ *
+ * We record all the above values now, but we defer creation of the frame buffer until our initBus()
+ * handler is called.  At that point, we will also compute the extent of the frame buffer, determine the
+ * appropriate "cell" size (ie, the number of pixels that updateScreen() will fetch and process at once),
+ * and then allocate our cell cache.
+ *
+ * Why interruptRate in addition to refreshRate?  A higher interrupt rate is required for Space Invaders,
+ * because even though the CRT refreshes at 60Hz, the CRT controller interrupts the CPU *twice* per
+ * refresh (once after the top half of the screen has been redrawn, and again after the bottom half has
+ * been redrawn), so we need an interrupt rate of 120Hz.  We pass the higher rate on to the CPU, so that
+ * it will call updateScreen() more frequently, but we still limit our screen updates to every *other* call.
+ *
+ * bufferRotate is an alternative to screenRotate; you may set one or the other (but not both) to -90 to
+ * enable different approaches to counter-clockwise 90-degree image rotation.  screenRotate uses canvas
+ * transformation methods (translate(), rotate(), and scale()), while bufferRotate inverts the dimensions
+ * of the off-screen buffer and then relies on setPixel() to "rotate" the data into it.
  *
  * @constructor
  * @extends Component
@@ -66,13 +87,135 @@ if (NODE) {
  */
 function Video(parmsVideo, canvas, context, textarea, container)
 {
+    var video = this;
+    this.fGecko = web.isUserAgent("Gecko/");
+    var i, sEvent, asWebPrefixes = ['', 'moz', 'ms', 'webkit'];
+
     Component.call(this, "Video", parmsVideo, Video, Messages.VIDEO);
+
+    this.cxScreen = parmsVideo['screenWidth'];
+    this.cyScreen = parmsVideo['screenHeight'];
+
+    this.addrBuffer = parmsVideo['bufferAddr'];
+    this.cxBuffer = parmsVideo['bufferCols'];
+    this.cyBuffer = parmsVideo['bufferRows'];
+    this.nBitsPerPixel = parmsVideo['bufferBits'] || 1;
+    this.iBitFirstPixel = parmsVideo['bufferLeft'] || 0;
+    this.rotateBuffer = parmsVideo['bufferRotate'];
+    if (this.rotateBuffer) {
+        this.rotateBuffer = this.rotateBuffer % 360;
+        if (this.rotateBuffer > 0) this.rotateBuffer -= 360;
+        if (this.rotateBuffer != -90) {
+            this.notice("unsupported buffer rotation: " + this.rotateBuffer);
+            this.rotateBuffer = 0;
+        }
+    }
+
     this.interruptRate = parmsVideo['interruptRate'];
     this.refreshRate = parmsVideo['refreshRate'] || 60;
-    this.setReady();
+
+    this.canvasScreen = canvas;
+    this.contextScreen = context;
+    this.textareaScreen = textarea;
+    this.inputScreen = textarea || canvas || null;
+
+    /*
+     * Support for disabling (or, less commonly, enabling) image smoothing, which all browsers
+     * seem to support now (well, OK, I still have to test the latest MS Edge browser), despite
+     * it still being labelled "experimental technology".  Let's hope the browsers standardize
+     * on this.  I see other options emerging, like the CSS property "image-rendering: pixelated"
+     * that's apparently been added to Chrome.  Sigh.
+     */
+    var fSmoothing = parmsVideo['smoothing'];
+    var sSmoothing = Component.parmsURL['smoothing'];
+    if (sSmoothing) fSmoothing = (sSmoothing == "true");
+    if (fSmoothing != null) {
+        for (i = 0; i < asWebPrefixes.length; i++) {
+            sEvent = asWebPrefixes[i];
+            if (!sEvent) {
+                sEvent = 'imageSmoothingEnabled';
+            } else {
+                sEvent += 'ImageSmoothingEnabled';
+            }
+            if (this.contextScreen[sEvent] !== undefined) {
+                this.contextScreen[sEvent] = fSmoothing;
+                break;
+            }
+        }
+    }
+
+    this.rotateScreen = parmsVideo['screenRotate'];
+    if (this.rotateScreen) {
+        this.rotateScreen = this.rotateScreen % 360;
+        if (this.rotateScreen > 0) this.rotateScreen -= 360;
+        if (this.rotateScreen != -90) {
+            this.notice("unsupported screen rotation: " + this.rotateScreen);
+            this.rotateScreen = 0;
+        } else {
+            this.contextScreen.translate(0, this.cyScreen);
+            this.contextScreen.rotate((this.rotateScreen * Math.PI)/180);
+            this.contextScreen.scale(this.cyScreen/this.cxScreen, this.cxScreen/this.cyScreen);
+        }
+    }
+
+    this.initColors();
+
+    /*
+     * Allocate off-screen buffers.
+     */
+    var cxBuffer = this.cxBuffer;
+    var cyBuffer = this.cyBuffer;
+    if (this.rotateBuffer) {
+        cxBuffer = this.cyBuffer;
+        cyBuffer = this.cxBuffer;
+    }
+    this.imageBuffer = this.contextScreen.createImageData(cxBuffer, cyBuffer);
+    this.canvasBuffer = document.createElement("canvas");
+    this.canvasBuffer.width = cxBuffer;
+    this.canvasBuffer.height = cyBuffer;
+    this.contextBuffer = this.canvasBuffer.getContext("2d");
+
+    /*
+     * Here's the gross code to handle full-screen support across all supported browsers.  The lack of standards
+     * is exasperating; browsers can't agree on 'full' or 'Full, 'request' or 'Request', 'screen' or 'Screen', and
+     * while some browsers honor other browser prefixes, most browsers don't.
+     */
+    this.container = container;
+    if (this.container) {
+        this.container.doFullScreen = container['requestFullscreen'] || container['msRequestFullscreen'] || container['mozRequestFullScreen'] || container['webkitRequestFullscreen'];
+        if (this.container.doFullScreen) {
+            for (i = 0; i < asWebPrefixes.length; i++) {
+                sEvent = asWebPrefixes[i] + 'fullscreenchange';
+                if ('on' + sEvent in document) {
+                    var onFullScreenChange = function() {
+                        var fFullScreen = (document['fullscreenElement'] || document['msFullscreenElement'] || document['mozFullScreenElement'] || document['webkitFullscreenElement']);
+                        video.notifyFullScreen(fFullScreen? true : false);
+                    };
+                    document.addEventListener(sEvent, onFullScreenChange, false);
+                    break;
+                }
+            }
+            for (i = 0; i < asWebPrefixes.length; i++) {
+                sEvent = asWebPrefixes[i] + 'fullscreenerror';
+                if ('on' + sEvent in document) {
+                    var onFullScreenError = function() {
+                        video.notifyFullScreen(null);
+                    };
+                    document.addEventListener(sEvent, onFullScreenError, false);
+                    break;
+                }
+            }
+        }
+    }
 }
 
 Component.subclass(Video);
+
+Video.COLORS = {
+    OVERLAY_TOP:    0,
+    OVERLAY_BOTTOM: 1,
+    OVERLAY_TOTAL:  2
+};
 
 /**
  * initBus(cmp, bus, cpu, dbg)
@@ -89,6 +232,151 @@ Video.prototype.initBus = function(cmp, bus, cpu, dbg)
     this.bus = bus;
     this.cpu = cpu;
     this.dbg = dbg;
+
+    /*
+     * Compute the size of the frame buffer and allocate.
+     */
+    this.sizeBuffer = ((this.cxBuffer * this.nBitsPerPixel) >> 3) * this.cyBuffer;
+    if (this.bus.addMemory(this.addrBuffer, this.sizeBuffer, Memory.TYPE.VIDEO)) {
+        /*
+         * Compute the number of cells and initialize the cell cache.
+         */
+        this.nCellCache = this.sizeBuffer >> 1;
+        this.nPixelsPerCell = (16 / this.nBitsPerPixel)|0;
+        this.initCache();
+    }
+    this.setReady();
+};
+
+/**
+ * setBinding(sHTMLType, sBinding, control, sValue)
+ *
+ * @this {Video}
+ * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
+ * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "refresh")
+ * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+ * @param {string} [sValue] optional data value
+ * @return {boolean} true if binding was successful, false if unrecognized binding request
+ */
+Video.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
+{
+    var video = this;
+
+    switch (sBinding) {
+    case "fullScreen":
+        this.bindings[sBinding] = control;
+        if (this.container && this.container.doFullScreen) {
+            control.onclick = function onClickFullScreen() {
+                if (DEBUG) video.printMessage("fullScreen()");
+                video.doFullScreen();
+            };
+        } else {
+            if (DEBUG) this.log("FullScreen API not available");
+            control.parentNode.removeChild(/** @type {Node} */ (control));
+        }
+        return true;
+
+    default:
+        break;
+    }
+    return false;
+};
+
+/**
+ * doFullScreen()
+ *
+ * @this {Video}
+ * @return {boolean} true if request successful, false if not (eg, failed OR not supported)
+ */
+Video.prototype.doFullScreen = function()
+{
+    var fSuccess = false;
+    if (this.container) {
+        if (this.container.doFullScreen) {
+            /*
+             * Styling the container with a width of "100%" and a height of "auto" works great when the aspect ratio
+             * of our virtual screen is at least roughly equivalent to the physical screen's aspect ratio, but now that
+             * we support virtual VGA screens with an aspect ratio of 1.33, that's very much out of step with modern
+             * wide-screen monitors, which usually have an aspect ratio of 1.6 or greater.
+             *
+             * And unfortunately, none of the browsers I've tested appear to make any attempt to scale our container to
+             * the physical screen's dimensions, so the bottom of our screen gets clipped.  To prevent that, I reduce
+             * the width from 100% to whatever percentage will accommodate the entire height of the virtual screen.
+             *
+             * NOTE: Mozilla recommends both a width and a height of "100%", but all my tests suggest that using "auto"
+             * for height works equally well, so I'm sticking with it, because "auto" is also consistent with how I've
+             * implemented a responsive canvas when the browser window is being resized.
+             */
+            var sWidth = "100%";
+            var sHeight = "auto";
+            if (screen && screen.width && screen.height) {
+                var aspectPhys = screen.width / screen.height;
+                var aspectVirt = this.cxScreen / this.cyScreen;
+                if (aspectPhys > aspectVirt) {
+                    sWidth = Math.round(aspectVirt / aspectPhys * 100) + '%';
+                }
+                // TODO: We may need to someday consider the case of a physical screen with an aspect ratio < 1.0....
+            }
+            if (!this.fGecko) {
+                this.container.style.width = sWidth;
+                this.container.style.height = sHeight;
+            } else {
+                /*
+                 * Sadly, the above code doesn't work for Firefox, because as http://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM/Using_full_screen_mode
+                 * explains:
+                 *
+                 *      'It's worth noting a key difference here between the Gecko and WebKit implementations at this time:
+                 *      Gecko automatically adds CSS rules to the element to stretch it to fill the screen: "width: 100%; height: 100%".
+                 *
+                 * Which would be OK if Gecko did that BEFORE we're called, but apparently it does that AFTER, effectively
+                 * overwriting our careful calculations.  So we style the inner element (canvasScreen) instead, which
+                 * requires even more work to ensure that the canvas is properly centered.  FYI, this solution is consistent
+                 * with Mozilla's recommendation for working around their automatic CSS rules:
+                 *
+                 *      '[I]f you're trying to emulate WebKit's behavior on Gecko, you need to place the element you want
+                 *      to present inside another element, which you'll make fullscreen instead, and use CSS rules to adjust
+                 *      the inner element to match the appearance you want.'
+                 */
+                this.canvasScreen.style.width = sWidth;
+                this.canvasScreen.style.width = sWidth;
+                this.canvasScreen.style.display = "block";
+                this.canvasScreen.style.margin = "auto";
+            }
+            this.container.style.backgroundColor = "black";
+            this.container.doFullScreen();
+            fSuccess = true;
+        }
+        this.setFocus();
+    }
+    return fSuccess;
+};
+
+/**
+ * notifyFullScreen(fFullScreen)
+ *
+ * @this {Video}
+ * @param {boolean|null} fFullScreen (null if there was a full-screen error)
+ */
+Video.prototype.notifyFullScreen = function(fFullScreen)
+{
+    if (!fFullScreen && this.container) {
+        if (!this.fGecko) {
+            this.container.style.width = this.container.style.height = "";
+        } else {
+            this.canvasScreen.style.width = this.canvasScreen.style.height = "";
+        }
+    }
+    this.printMessage("notifyFullScreen(" + fFullScreen + ")", true);
+};
+
+/**
+ * setFocus()
+ *
+ * @this {Video}
+ */
+Video.prototype.setFocus = function()
+{
+    if (this.inputScreen) this.inputScreen.focus();
 };
 
 /**
@@ -100,6 +388,75 @@ Video.prototype.initBus = function(cmp, bus, cpu, dbg)
 Video.prototype.getRefreshRate = function()
 {
     return Math.max(this.refreshRate, this.interruptRate);
+};
+
+/**
+ * initCache()
+ *
+ * Initializes the contents of our internal cell cache.
+ *
+ * @this {Video}
+ */
+Video.prototype.initCache = function()
+{
+    this.fCellCacheValid = false;
+    if (this.aCellCache === undefined || this.aCellCache.length != this.nCellCache) {
+        this.aCellCache = new Array(this.nCellCache);
+    }
+};
+
+/**
+ * initColors()
+ *
+ * This creates an array of nColors, with additional OVERLAY_TOTAL colors tacked on to the end of the array.
+ *
+ * @this {Video}
+ */
+Video.prototype.initColors = function()
+{
+    var rgbBlack  = [0x00, 0x00, 0x00, 0xff];
+    var rgbWhite  = [0xff, 0xff, 0xff, 0xff];
+    var rgbGreen  = [0x00, 0xff, 0x00, 0xff];
+    var rgbYellow = [0xff, 0xff, 0x00, 0xff];
+    this.nColors = (1 << this.nBitsPerPixel);
+    this.aRGB = new Array(this.nColors + Video.COLORS.OVERLAY_TOTAL);
+    this.aRGB[0] = rgbBlack;
+    this.aRGB[1] = rgbWhite;
+    this.aRGB[this.nColors + Video.COLORS.OVERLAY_TOP] = rgbYellow;
+    this.aRGB[this.nColors + Video.COLORS.OVERLAY_BOTTOM] = rgbGreen;
+};
+
+/**
+ * setPixel(imageBuffer, x, y, bPixel)
+ *
+ * @this {Video}
+ * @param {Object} imageBuffer
+ * @param {number} x
+ * @param {number} y
+ * @param {number} bPixel (ie, an index into aRGB)
+ */
+Video.prototype.setPixel = function(imageBuffer, x, y, bPixel)
+{
+    var index;
+    if (!this.rotateBuffer) {
+        index = (x + y * imageBuffer.width);
+    } else {
+        index = (imageBuffer.height - x - 1) * imageBuffer.width + y;
+    }
+    if (bPixel) {
+        if (x >= 208 && x < 236) {
+            bPixel = this.nColors + Video.COLORS.OVERLAY_TOP;
+        }
+        else if (x >= 28 && x < 72) {
+            bPixel = this.nColors + Video.COLORS.OVERLAY_BOTTOM;
+        }
+    }
+    var rgb = this.aRGB[bPixel];
+    index *= rgb.length;
+    imageBuffer.data[index] = rgb[0];
+    imageBuffer.data[index+1] = rgb[1];
+    imageBuffer.data[index+2] = rgb[2];
+    imageBuffer.data[index+3] = rgb[3];
 };
 
 /**
@@ -118,18 +475,101 @@ Video.prototype.getRefreshRate = function()
  */
 Video.prototype.updateScreen = function(n)
 {
-    if (!(n & 1)) {
+    if (n >= 0) {
+        if (!(n & 1)) {
+            /*
+             * On even updates, call cpu.requestINTR(1), and also update our copy of the screen.
+             */
+            this.cpu.requestINTR(1);
+        } else {
+            /*
+             * On odd updates, call cpu.requestINTR(2), but do NOT update our copy of the screen, because
+             * the machine has presumably only updated the top half of the frame buffer at this point; it will
+             * update the bottom half of the frame buffer after acknowledging this interrupt.
+             */
+            this.cpu.requestINTR(2);
+            return;
+        }
+
         /*
-         * On even updates, call cpu.requestINTR(1), and also update our copy of the screen.
+         * Since this is not a forced update, if our cell cache is valid AND the buffer is clean, then do nothing.
          */
-        this.cpu.requestINTR(1);
-    } else {
-        /*
-         * On odd updates, call cpu.requestINTR(2), but do NOT update our copy of the screen, because
-         * the machine has presumably only updated the top half of the frame buffer at this point; it will
-         * update the bottom half of the frame buffer after acknowledging this interrupt.
-         */
-        this.cpu.requestINTR(2);
+        if (this.fCellCacheValid && this.bus.cleanMemory(this.addrBuffer, this.sizeBuffer)) {
+            return;
+        }
+    }
+
+    var addr = this.addrBuffer;
+    var addrLimit = addr + this.sizeBuffer;
+
+    var iCell = 0;
+    var nPixelShift = 1;
+
+    var xBuffer = 0, yBuffer = 0;
+    var xDirty = this.cxBuffer, xMaxDirty = 0, yDirty = this.cyBuffer, yMaxDirty = 0;
+
+    var nShiftInit = 0;
+    var nShiftPixel = this.nBitsPerPixel;
+    var nMask = (1 << nShiftPixel) - 1;
+    if (this.iBitFirstPixel) {
+        nShiftPixel = -nShiftPixel;
+        nShiftInit = 16 + nShiftPixel;
+    }
+
+    while (addr < addrLimit) {
+        var data = this.bus.getShortDirect(addr);
+        this.assert(iCell < this.aCellCache.length);
+        if (this.fCellCacheValid && data === this.aCellCache[iCell]) {
+            xBuffer += this.nPixelsPerCell;
+        } else {
+            this.aCellCache[iCell] = data;
+            var nShift = nShiftInit;
+            if (nShift) data = ((data >> 8) | ((data & 0xff) << 8));
+            if (xBuffer < xDirty) xDirty = xBuffer;
+            var cPixels = this.nPixelsPerCell;
+            while (cPixels--) {
+                var bPixel = (data >> nShift) & nMask;
+                this.setPixel(this.imageBuffer, xBuffer++, yBuffer, bPixel);
+                nShift += nShiftPixel;
+            }
+            if (xBuffer > xMaxDirty) xMaxDirty = xBuffer;
+            if (yBuffer < yDirty) yDirty = yBuffer;
+            if (yBuffer >= yMaxDirty) yMaxDirty = yBuffer + 1;
+        }
+        addr += 2; iCell++;
+        if (xBuffer >= this.cxBuffer) {
+            xBuffer = 0; yBuffer++;
+            if (yBuffer > this.cyBuffer) break;
+        }
+    }
+
+    this.fCellCacheValid = true;
+
+    /*
+     * Instead of blasting the ENTIRE imageBuffer into contextBuffer, and then blasting the ENTIRE
+     * canvasBuffer onto contextScreen, even for the smallest change, let's try to be a bit smarter about
+     * the update (well, to the extent that the canvas APIs permit).
+     */
+    if (xDirty < this.cxBuffer) {
+        var cxDirty = xMaxDirty - xDirty;
+        var cyDirty = yMaxDirty - yDirty;
+        if (this.rotateBuffer) {
+            /*
+             * If rotateBuffer is set, then it must be -90, so we must "rotate" the dirty coordinates as well,
+             * because they are relative to the frame buffer, not the rotated image buffer.  Alternatively, you
+             * can use the following call to blast the ENTIRE imageBuffer into contextBuffer instead:
+             *
+             *      this.contextBuffer.putImageData(this.imageBuffer, 0, 0);
+             */
+            var xDirtyOrig = xDirty, cxDirtyOrig = cxDirty;
+            //noinspection JSSuspiciousNameCombination
+            xDirty = yDirty;
+            cxDirty = cyDirty;
+            yDirty = this.cxBuffer - (xDirtyOrig + cxDirtyOrig);
+            cyDirty = cxDirtyOrig;
+        }
+        this.contextBuffer.putImageData(this.imageBuffer, 0, 0, xDirty, yDirty, cxDirty, cyDirty);
+        this.contextScreen.drawImage(this.canvasBuffer, 0, 0, this.canvasBuffer.width, this.canvasBuffer.height, 0, 0, this.cxScreen, this.cyScreen);
     }
 };
 

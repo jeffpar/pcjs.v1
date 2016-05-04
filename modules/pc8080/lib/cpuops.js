@@ -2362,7 +2362,7 @@ CPUDef.opJNC = function()
 CPUDef.opOUT = function()
 {
     var port = this.getPCByte();
-    this.bus.checkPortOutputNotify(port, 1, this.regA);
+    this.bus.checkPortOutputNotify(port, 1, this.regA, this.offPC(-2));
     this.nStepCycles -= 10;
 };
 
@@ -2450,7 +2450,7 @@ CPUDef.opJC = function()
 CPUDef.opIN = function()
 {
     var port = this.getPCByte();
-    this.regA = this.bus.checkPortInputNotify(port, 1) & 0xff;
+    this.regA = this.bus.checkPortInputNotify(port, 1, this.offPC(-2)) & 0xff;
     this.nStepCycles -= 10;
 };
 

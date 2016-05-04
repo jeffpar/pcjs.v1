@@ -343,7 +343,7 @@ FDC.REG_DATA = {
 /*
  * FDC "Fixed Disk" Register (0x3F6, write-only)
  *
- * Since this register's functions are all specific to the Hard Disk Controller, see the HDC component for details.
+ * Since this register's functions are all specific to the Hard Drive Controller, see the HDC component for details.
  * The fact that this HDC register is in the middle of the FDC I/O port range is an oddity of the "HFCOMBO" controller.
  */
 
@@ -351,8 +351,8 @@ FDC.REG_DATA = {
  * FDC Digital Input Register (0x3F7, read-only, MODEL_5170 only)
  *
  * Bit 7 indicates a diskette change (the MODEL_5170 introduced change-line support).  Bits 0-6 are for the selected
- * hard disk drive, so this port must be shared with the HDC; bits 0-6 are valid for 50 microseconds after a write to
- * the Drive Head Register.
+ * hard drive, so this port must be shared with the HDC; bits 0-6 are valid for 50 microseconds after a write to the
+ * Drive Head Register.
  */
 FDC.REG_INPUT = {
     PORT:      0x3F7,

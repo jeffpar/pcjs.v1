@@ -344,7 +344,7 @@ MarkOut.aHTMLEntities = {
  *      'template' (eg, "machine.xsl")
  *      'uncompiled' (eg, true)
  *      'autoMount' (eg, {"A":{"name":"OS/2 FOOTBALL Boot Disk (v7.68.17)","path":"/disks/pc/os2/misc/football/debugger/FOOTBALL-7.68.17.json"}})
- *      'drives' (eg, [{name:"68Mb Hard Disk",type:4,path:"http://archive.pcjs.org/disks/pc/fixed/68mb/win95.json"}])
+ *      'drives' (eg, [{name:"68Mb Hard Drive",type:4,path:"http://archive.pcjs.org/disks/pc/fixed/68mb/win95.json"}])
  *      'parms'
  *
  * Non-reserved properties include:

@@ -4,16 +4,18 @@ title: PCjs &lt;fdc&gt; Element
 permalink: /docs/pcjs/fdc/
 ---
 
-PCjs Floppy Disk Controller (FDC) Component
+PCjs Floppy Drive Controller (FDC) Component
 ---
 
 Format
 ---
-	<fdc>...</fdc>
+```xml
+<fdc>...</fdc>
+```
 
 Purpose
 ---
-Creates an instance of the Floppy Disk Controller (FDC) component. The FDC is responsible for:
+Creates an instance of the Floppy Drive Controller (FDC) component. The FDC is responsible for:
 
 - Automatically loading diskette image files at boot;
 - Simulating the appropriate controller hardware ports;
@@ -53,24 +55,28 @@ Bindings
 
 Example
 ---
-	<fdc id="fdcNEC" autoMount="'{A: {name: "PC-DOS 1.0", path: "pcdos-1.00.json"}}'">
-    	<control type="container">
-    		<control type="list" class="input" binding="listDrives"/>
-    		<control type="list" class="input" binding="listDisks">
-    			<disk path="">None</disk>
-    			<disk path="pcdos-1.00.json">PC-DOS 1.0</disk>
-    		</control>
-    		<control type="button" class="input" binding="loadDrive">Load Drive</control>
-    	</control>
-    </fdc>
+```xml
+<fdc id="fdcNEC" autoMount="'{A: {name: "PC-DOS 1.0", path: "pcdos-1.00.json"}}'">
+    <control type="container">
+        <control type="list" class="input" binding="listDrives"/>
+        <control type="list" class="input" binding="listDisks">
+            <disk path="pcdos-1.00.json">PC-DOS 1.0</disk>
+        </control>
+        <control type="button" class="input" binding="loadDrive">Load Drive</control>
+    </control>
+</fdc>
+```
 
 Output
 ---
-	<div id="..." class="pc-fdc pc-component">
-		<div class="pc-container">
-			<div class="pcjs-fdc" data-value="id:'...',name:'...',listDrives:'...',listDisks:'...',loadDrive:'...'"></div>
-		</div>
-	</div>
+```html
+<div id="..." class="pc-fdc pc-component">
+    <div class="pc-container">
+        <div class="pcjs-fdc" data-value="id:'...',name:'...',listDrives:'...',listDisks:'...',loadDrive:'...'">
+        </div>
+    </div>
+</div>
+```
 
 Also, if any controls are defined, another &lt;div&gt; of class="pc-controls" is created in the container &lt;div&gt;,
 with each control inside a &lt;div&gt; of class="pc-control".

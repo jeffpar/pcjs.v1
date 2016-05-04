@@ -378,48 +378,51 @@ Bus.prototype.powerUp = function(data, fRepower)
  */
 Bus.prototype.addMemory = function(addr, size, type, controller)
 {
-    var iBlock = addr >>> this.nBlockShift;
-    while (size > 0 && iBlock < this.aMemBlocks.length) {
+    var addrNext = addr;
+    var sizeLeft = size;
+    var iBlock = addrNext >>> this.nBlockShift;
+
+    while (sizeLeft > 0 && iBlock < this.aMemBlocks.length) {
 
         var block = this.aMemBlocks[iBlock];
         var addrBlock = iBlock * this.nBlockSize;
-        var sizeBlock = this.nBlockSize - (addr - addrBlock);
-        if (sizeBlock > size) sizeBlock = size;
+        var sizeBlock = this.nBlockSize - (addrNext - addrBlock);
+        if (sizeBlock > sizeLeft) sizeBlock = sizeLeft;
 
         if (block && block.size) {
             if (block.type == type && block.controller == controller) {
                 /*
                  * Where there is already a similar block with a non-zero size, we allow the allocation only if:
                  *
-                 *   1) addr + size <= block.addr (the request precedes the used portion of the current block), or
-                 *   2) addr >= block.addr + block.used (the request follows the used portion of the current block)
+                 *   1) addrNext + sizeLeft <= block.addr (the request precedes the used portion of the current block), or
+                 *   2) addrNext >= block.addr + block.used (the request follows the used portion of the current block)
                  */
-                if (addr + size <= block.addr) {
-                    block.used += (block.addr - addr);
-                    block.addr = addr;
+                if (addrNext + sizeLeft <= block.addr) {
+                    block.used += (block.addr - addrNext);
+                    block.addr = addrNext;
                     return true;
                 }
-                if (addr >= block.addr + block.used) {
-                    var sizeAvail = block.size - (addr - addrBlock);
-                    if (sizeAvail > size) sizeAvail = size;
-                    block.used = addr - block.addr + sizeAvail;
-                    addr = addrBlock + this.nBlockSize;
-                    size -= sizeAvail;
+                if (addrNext >= block.addr + block.used) {
+                    var sizeAvail = block.size - (addrNext - addrBlock);
+                    if (sizeAvail > sizeLeft) sizeAvail = sizeLeft;
+                    block.used = addrNext - block.addr + sizeAvail;
+                    addrNext = addrBlock + this.nBlockSize;
+                    sizeLeft -= sizeAvail;
                     iBlock++;
                     continue;
                 }
             }
-            return this.reportError(Bus.ERROR.ADD_MEM_INUSE, addr, size);
+            return this.reportError(Bus.ERROR.ADD_MEM_INUSE, addrNext, sizeLeft);
         }
 
-        var blockNew = new Memory(addr, sizeBlock, this.nBlockSize, type, controller);
+        var blockNew = new Memory(addrNext, sizeBlock, this.nBlockSize, type, controller);
         blockNew.copyBreakpoints(this.dbg, block);
         this.aMemBlocks[iBlock++] = blockNew;
 
-        addr = addrBlock + this.nBlockSize;
-        size -= sizeBlock;
+        addrNext = addrBlock + this.nBlockSize;
+        sizeLeft -= sizeBlock;
     }
-    if (size <= 0) {
+    if (sizeLeft <= 0) {
         /*
          * If all addMemory() calls happened ONLY during device initialization, the following code would not
          * be necessary; unfortunately, the Video component can add and remove physical memory blocks during video
@@ -430,6 +433,9 @@ Bus.prototype.addMemory = function(addr, size, type, controller)
          * to warrant it.
          */
         this.cpu.flushPageBlocks();
+        if (!this.cpu.isRunning()) {        // allocation messages at "run time" are bit too much
+            this.status(Math.floor(size / 1024) + "Kb " + Memory.TYPE.NAMES[type] + " at " + str.toHex(addr));
+        }
         return true;
     }
     return this.reportError(Bus.ERROR.ADD_MEM_BADRANGE, addr, size);

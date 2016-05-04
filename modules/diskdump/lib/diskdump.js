@@ -408,11 +408,11 @@ DiskDump.sNotice = DiskDump.sAPIURL + " " + DiskDump.sCopyright;
 DiskDump.sUsage = "Usage: " + DiskDump.sAPIURL + "?" + DumpAPI.QUERY.PATH + "={url}&amp;" + DumpAPI.QUERY.FORMAT + "=json|data|hex|bytes|img";
 
 /*
- * MY_VOL_LABEL is our default label, used whenever a more suitable label (eg, the disk image's folder name)
- * is not available or not supplied, and MY_OEM_STRING is inserted into any DiskDump-generated diskette images.
+ * PCJS_LABEL is our default label, used whenever a more suitable label (eg, the disk image's folder name)
+ * is not available or not supplied, and PCJS_OEM is inserted into any DiskDump-generated diskette images.
  */
-DiskDump.MY_VOL_LABEL = "PCJSDISK";
-DiskDump.MY_OEM_STRING = "PCJS.ORG";
+DiskDump.PCJS_LABEL = "PCJSDISK";
+DiskDump.PCJS_OEM   = "PCJS.ORG";
 
 /**
  * The BPBs that buildImage() currently supports; these BPBs should be in order of smallest to largest capacity,
@@ -426,7 +426,7 @@ DiskDump.MY_OEM_STRING = "PCJS.ORG";
 DiskDump.aDefaultBPBs = [
   [                             // define BPB for 160Kb diskette
     0xEB, 0xFE, 0x90,           // 0x00: JMP instruction, following by 8-byte OEM signature
-    0x50, 0x43, 0x4A, 0x53, 0x2E, 0x4F, 0x52, 0x47,     // MY_OEM_STRING
+    0x50, 0x43, 0x4A, 0x53, 0x2E, 0x4F, 0x52, 0x47,     // PCJS_OEM
  // 0x49, 0x42, 0x4D, 0x20, 0x20, 0x31, 0x2E, 0x30,     // "IBM  1.0" (this is a fake OEM signature)
     0x00, 0x02,                 // 0x0B: bytes per sector (0x200 or 512)
     0x01,                       // 0x0D: sectors per cluster (1)
@@ -442,7 +442,7 @@ DiskDump.aDefaultBPBs = [
   ],
   [                             // define BPB for 360Kb diskette
     0xEB, 0xFE, 0x90,           // 0x00: JMP instruction, following by 8-byte OEM signature
-    0x50, 0x43, 0x4A, 0x53, 0x2E, 0x4F, 0x52, 0x47,     // MY_OEM_STRING
+    0x50, 0x43, 0x4A, 0x53, 0x2E, 0x4F, 0x52, 0x47,     // PCJS_OEM
  // 0x49, 0x42, 0x4D, 0x20, 0x20, 0x32, 0x2E, 0x30,     // "IBM  2.0" (this is a real OEM signature)
     0x00, 0x02,                 // 0x0B: bytes per sector (0x200 or 512)
     0x02,                       // 0x0D: sectors per cluster (2)
@@ -458,7 +458,7 @@ DiskDump.aDefaultBPBs = [
   ],
   [                             // define BPB for 720Kb diskette
     0xEB, 0xFE, 0x90,           // 0x00: JMP instruction, following by 8-byte OEM signature
-    0x50, 0x43, 0x4A, 0x53, 0x2E, 0x4F, 0x52, 0x47,     // MY_OEM_STRING
+    0x50, 0x43, 0x4A, 0x53, 0x2E, 0x4F, 0x52, 0x47,     // PCJS_OEM
  // 0x49, 0x42, 0x4D, 0x20, 0x20, 0x35, 0x2E, 0x30,     // "IBM  5.0" (this is a real OEM signature)
     0x00, 0x02,                 // 0x0B: bytes per sector (0x200 or 512)
     0x02,                       // 0x0D: sectors per cluster (2)
@@ -474,7 +474,7 @@ DiskDump.aDefaultBPBs = [
   ],
   [                             // define BPB for 1.2Mb diskette
     0xEB, 0xFE, 0x90,           // 0x00: JMP instruction, following by 8-byte OEM signature
-    0x50, 0x43, 0x4A, 0x53, 0x2E, 0x4F, 0x52, 0x47,     // MY_OEM_STRING
+    0x50, 0x43, 0x4A, 0x53, 0x2E, 0x4F, 0x52, 0x47,     // PCJS_OEM
  // 0x49, 0x42, 0x4D, 0x20, 0x31, 0x30, 0x2E, 0x31,     // "10.0" (which I believe was used on IBM OS/2 1.0 diskettes)
     0x00, 0x02,                 // 0x0B: bytes per sector (0x200 or 512)
     0x01,                       // 0x0D: sectors per cluster (1)
@@ -490,7 +490,7 @@ DiskDump.aDefaultBPBs = [
   ],
   [                             // define BPB for 1.44Mb diskette
     0xEB, 0xFE, 0x90,           // 0x00: JMP instruction, following by 8-byte OEM signature
-    0x50, 0x43, 0x4A, 0x53, 0x2E, 0x4F, 0x52, 0x47,     // MY_OEM_STRING
+    0x50, 0x43, 0x4A, 0x53, 0x2E, 0x4F, 0x52, 0x47,     // PCJS_OEM
  // 0x4d, 0x53, 0x44, 0x4F, 0x53, 0x35, 0x2E, 0x30,     // "MSDOS5.0" (an actual OEM signature, arbitrarily chosen for use here)
     0x00, 0x02,                 // 0x0B: bytes per sector (0x200 or 512)
     0x01,                       // 0x0D: sectors per cluster (1)
@@ -504,9 +504,9 @@ DiskDump.aDefaultBPBs = [
     0x02, 0x00,                 // 0x1A: number of heads (2)
     0x00, 0x00, 0x00, 0x00      // 0x1C: number of hidden sectors (always 0 for non-partitioned media)
   ],
-  [                             // define BPB for 10Mb hard disk
+  [                             // define BPB for 10Mb hard drive
     0xEB, 0xFE, 0x90,           // 0x00: JMP instruction, following by 8-byte OEM signature
-    0x50, 0x43, 0x4A, 0x53, 0x2E, 0x4F, 0x52, 0x47,     // MY_OEM_STRING
+    0x50, 0x43, 0x4A, 0x53, 0x2E, 0x4F, 0x52, 0x47,     // PCJS_OEM
  // 0x49, 0x42, 0x4D, 0x20, 0x20, 0x32, 0x2E, 0x30,     // "IBM  2.0" (this is a real OEM signature)
     0x00, 0x02,                 // 0x0B: bytes per sector (0x200 or 512)
     0x08,                       // 0x0D: sectors per cluster (8)
@@ -514,7 +514,7 @@ DiskDump.aDefaultBPBs = [
     0x02,                       // 0x10: FAT copies (2)
     0x00, 0x02,                 // 0x11: root directory entries (0x200 or 512)  0x200 * 0x20 = 0x4000 (1 sector is 0x200 bytes, total of 0x20 or 32 sectors)
     0x03, 0x51,                 // 0x13: number of sectors (0x5103 or 20739; * 512 bytes/sector = 10,618,368 bytes = 10,369Kb = 10Mb)
-    0xF8,                       // 0x15: media type (eg, 0xF8: hard disk w/FAT12)
+    0xF8,                       // 0x15: media type (eg, 0xF8: hard drive w/FAT12)
     0x08, 0x00,                 // 0x16: sectors per FAT (8)
     // Wikipedia (http://en.wikipedia.org/wiki/File_Allocation_Table#BIOS_Parameter_Block) implies everything past this point was introduced
     // post-DOS 2.0.  I think that's wrong, because I just formatted a diskette with PC-DOS 2.0 and it properly initialized the next 3 fields as well.
@@ -557,7 +557,7 @@ DiskDump.asTextFileExts = [".MD", ".ME", ".ASM", ".BAS", ".TXT", ".XML"];
  *
  *      Additional command-line arguments include:
  *
- *          --mbhd={number}: requests a hard disk image with the given number of megabytes (DEPRECATED)
+ *          --mbhd={number}: requests a hard drive image with the given number of megabytes (DEPRECATED)
  *          --size={number}: requests a target disk size with the given number of kilobytes (eg, 360, 720, 1200, 1440, 10000)
  *          --exclude={filename}: specifies a filename that should be excluded from the image; repeat as often as needed
  *          --overwrite: allows the --output option to overwrite an existing file; default is to NOT overwrite
@@ -1661,7 +1661,7 @@ DiskDump.prototype.readPath = function(sPath, done)
     var asFiles = sPath.split(';');
     var sDefaultPath = "";
 
-    var fileInfo = this.buildVolLabel();
+    var fileInfo = this.buildVolLabel(this.sLabel);
     if (fileInfo) {
         aFiles.push(fileInfo);
         // this.addManifestInfo(fileInfo);
@@ -1832,7 +1832,7 @@ DiskDump.prototype.buildVolLabel = function(sDir)
         }
     }
     if (!sVolume) {
-        sVolume = DiskDump.MY_VOL_LABEL;
+        sVolume = DiskDump.PCJS_LABEL;
     }
     if (sVolume && sVolume.length <= 11) {
         fileInfo = {};
@@ -2306,7 +2306,7 @@ DiskDump.prototype.buildImageFromFiles = function(aFiles, done)
      */
     for (var iBPB = 1; iBPB < DiskDump.aDefaultBPBs.length; iBPB++) {
         /*
-         * If this BPB is for a hard disk but a hard disk size was not specified, skip it.
+         * If this BPB is for a hard drive but a disk size was not specified, skip it.
          */
         abBoot = DiskDump.aDefaultBPBs[iBPB];
         if ((abBoot[0x15] == 0xF8) != (this.kbTarget >= 10000)) continue;
@@ -2356,7 +2356,7 @@ DiskDump.prototype.buildImageFromFiles = function(aFiles, done)
     this.bufDisk.fill(0);
 
     /*
-     * Output a Master Boot Record (MBR), if a hard disk image was requested
+     * Output a Master Boot Record (MBR), if a hard drive image was requested
      */
     if (this.kbTarget >= 10000) {
         abSector = this.buildMBR(cHeads, cSectorsPerTrack, cbSector, cTotalSectors);
@@ -2464,7 +2464,7 @@ DiskDump.prototype.convertToJSON = function()
         var offBootSector = 0;
         var cbDiskData = this.bufDisk.length;
 
-        if (cbDiskData >= 3000000) {        // arbitrary threshold between diskette image sizes and hard disk image sizes
+        if (cbDiskData >= 3000000) {        // arbitrary threshold between diskette image sizes and hard drive image sizes
             var wSig = this.bufDisk.readUInt16LE(0x1FE);
             if (wSig == 0xAA55) {
                 /*
@@ -3084,7 +3084,7 @@ DiskDump.prototype.convertToIMG = function()
              * fJSONComments as another way of disabling "branding" via the API; requesting an IMG file with comments
              * is otherwise a nonsensical request.
              */
-            if (!fDebug && !this.fJSONComments && buf.length < 3000000) {   // arbitrary size threshold between diskette images and hard disk images
+            if (!fDebug && !this.fJSONComments && buf.length < 3000000) {   // arbitrary size threshold between diskette images and hard drive images
                 /*
                  * Mimic the BPB test in convertToJSON(), because we don't want to blast an OEM string into non-DOS diskette images
                  */
@@ -3094,7 +3094,7 @@ DiskDump.prototype.convertToIMG = function()
                     /*
                      * Overwrite the OEM string with our own, so that people know how the image originated
                      */
-                    buf.write(DiskDump.MY_OEM_STRING, DiskAPI.BOOT.OEM_STRING, DiskDump.MY_OEM_STRING.length);
+                    buf.write(DiskDump.PCJS_OEM, DiskAPI.BOOT.OEM_STRING, DiskDump.PCJS_OEM.length);
                 }
             }
         } catch(err) {

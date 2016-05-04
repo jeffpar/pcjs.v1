@@ -9,7 +9,9 @@ PCjs Keyboard Component
 
 Format
 ---
-	<keyboard>...</keyboard>
+```xml
+<keyboard>...</keyboard>
+```
 
 Purpose
 ---
@@ -41,18 +43,23 @@ for the specified model.
 
 Example
 ---
-	<keyboard id="keyboard" model="us83"/>
+```xml
+<keyboard id="keyboard" model="us83"/>
+```
 
 See [/devices/pc/keyboard/us83-softkeys.xml](/devices/pc/keyboard/us83-softkeys.xml) for an example that provides a
 complete "soft keyboard".
 
 Output
 ---
-	<div id="..." class="pc-keyboard pc-component">
-		<div class="pc-container">
-			<div class="pcjs-keyboard" data-value="id:'...',name:'...',model:'...',sw1:'...',sw2:'...'"></div>
-		</div>
-	</div>
+```html
+<div id="..." class="pc-keyboard pc-component">
+    <div class="pc-container">
+        <div class="pcjs-keyboard" data-value="id:'...',name:'...',model:'...',...">
+        </div>
+    </div>
+</div>
+```
 
 Also, if any controls are defined, another &lt;div&gt; of class="pc-controls" is created in the container &lt;div&gt;,
 with each control inside a &lt;div&gt; of class="pc-control".

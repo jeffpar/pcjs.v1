@@ -18,17 +18,19 @@ Embedding The C1Pjs Simulator
 
 If you want to read as little as possible, then just paste the following code onto a web page:
 
-	<div id="myC1P"/></div><div style="clear:both"></div>
-	<script type="text/javascript"
-		src="http://www.pcjs.org/versions/c1pjs/1.21.6/c1p.js">
-	</script>
-	<script type="text/javascript">
-		window.embedC1P(
-			"myC1P",
-			"http://www.pcjs.org/devices/c1p/machine/8kb/embed/machine.xml",
-			"http://www.pcjs.org/versions/c1pjs/1.21.6/components.xsl"
-		);
-	</script>
+```html
+<div id="myC1P"/></div><div style="clear:both"></div>
+<script type="text/javascript"
+    src="http://www.pcjs.org/versions/c1pjs/1.21.6/c1p.js">
+</script>
+<script type="text/javascript">
+    window.embedC1P(
+        "myC1P",
+        "http://www.pcjs.org/devices/c1p/machine/8kb/embed/machine.xml",
+        "http://www.pcjs.org/versions/c1pjs/1.21.6/components.xsl"
+    );
+</script>
+```
 
 Otherwise, read on to learn how embedding works, and how you can create your own machine configuration and customize
 its appearance.
@@ -46,37 +48,41 @@ there's no documentation beyond the sample XML files and the default [XML styles
 
 The example at the top of this page uses an [XML file](/devices/c1p/machine/8kb/embed/machine.xml) that looks like:
 
-		<?xml version="1.0" encoding="UTF-8"?>
-		<machine id="OSI" class="c1pjs" border="1" width="272px" pos="right" padleft="16px" padright="16px" padbottom="16px">
-			<computer id="c1p" name="Challenger 1P">
-				<module type="cpu" refid="cpu6502" start="0x0000" end="0xffff"/>
-				<module type="ram" refid="ram8K" start="0x0000" end="0x1fff"/>
-				<module type="rom" refid="romNull" start="0x2000" end="0x9fff"/>
-				<module type="rom" refid="romBasic" start="0xa000" end="0xbfff"/>
-				<module type="video" refid="video" start="0xd000" end="0xd3ff"/>
-				<module type="keyboard" refid="keyboard" start="0xdf00" end="0xdfff"/>
-				<module type="serial" refid="serialPort" start="0xf000" end="0xf0ff"/>
-				<module type="rom" refid="romSystem" start="0xf800" end="0xffff"/>
-			</computer>
-			<cpu id="cpu6502"/>
-			<ram id="ram8K" size="0x2000"/>
-			<rom id="romNull" size="0x8000"/>
-			<rom id="romBasic" size="0x2000" image="http://www.pcjs.org/devices/c1p/rom/basic-gcpatch.hex"/>
-			<rom id="romSystem" size="0x0800" image="http://www.pcjs.org/devices/c1p/rom/system.hex"/>
-			<video id="video" screenwidth="256" screenheight="192" cols="32" rows="32"
-				charset="http://www.pcjs.org/devices/c1p/video/chargen1x.png" padtop="8px" padleft="8px" padbottom="8px"/>
-			<keyboard id="keyboard" pos="center">
-				<control type="button" class="input" binding="ctrl-c">CTRL-C</control>
-				<control type="button" class="input" binding="ctrl-o">CTRL-O</control>
-				<control type="button" class="input" binding="break">BREAK</control>
-			</keyboard>
-			<serial id="serialPort" demo="true"/>
-		</machine>
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<machine id="OSI" class="c1pjs" border="1" width="272px" pos="right" padleft="16px" padright="16px" padbottom="16px">
+    <computer id="c1p" name="Challenger 1P">
+        <module type="cpu" refid="cpu6502" start="0x0000" end="0xffff"/>
+        <module type="ram" refid="ram8K" start="0x0000" end="0x1fff"/>
+        <module type="rom" refid="romNull" start="0x2000" end="0x9fff"/>
+        <module type="rom" refid="romBasic" start="0xa000" end="0xbfff"/>
+        <module type="video" refid="video" start="0xd000" end="0xd3ff"/>
+        <module type="keyboard" refid="keyboard" start="0xdf00" end="0xdfff"/>
+        <module type="serial" refid="serialPort" start="0xf000" end="0xf0ff"/>
+        <module type="rom" refid="romSystem" start="0xf800" end="0xffff"/>
+    </computer>
+    <cpu id="cpu6502"/>
+    <ram id="ram8K" size="0x2000"/>
+    <rom id="romNull" size="0x8000"/>
+    <rom id="romBasic" size="0x2000" image="http://www.pcjs.org/devices/c1p/rom/basic-gcpatch.hex"/>
+    <rom id="romSystem" size="0x0800" image="http://www.pcjs.org/devices/c1p/rom/system.hex"/>
+    <video id="video" screenwidth="256" screenheight="192" cols="32" rows="32"
+        charset="http://www.pcjs.org/devices/c1p/video/chargen1x.png" padtop="8px" padleft="8px" padbottom="8px"/>
+    <keyboard id="keyboard" pos="center">
+        <control type="button" class="input" binding="ctrl-c">CTRL-C</control>
+        <control type="button" class="input" binding="ctrl-o">CTRL-O</control>
+        <control type="button" class="input" binding="break">BREAK</control>
+    </keyboard>
+    <serial id="serialPort" demo="true"/>
+</machine>
+```
 
 Machine configuration files can also be "self-starting" if they contain the following XML stylesheet reference at the
 top of the file:
 
-		<?xml-stylesheet type="text/xsl" href="http://www.pcjs.org/versions/c1pjs/1.21.6/machine.xsl"?>
+```xml
+<?xml-stylesheet type="text/xsl" href="http://www.pcjs.org/versions/c1pjs/1.21.6/machine.xsl"?>
+```
 
 For example, here's a self-starting [machine.xml](/devices/c1p/machine/8kb/large/machine.xml) configuration.
 After it loads, use your browser's "View Source" command and you'll see that it's very similar to the
@@ -102,40 +108,46 @@ NOTE: For larger simulator windows (eg, screenwidth of 512 and screenheight of 3
 If you decide to include the &lt;disk&gt; component, you can simply link to an existing component definition XML file,
 such as samples.xml:
 
-		<machine id="OSI" border="1" width="272px">
-			<computer id="c1p" name="Challenger 1P">
-				...
-				<module type="ram" refid="ram32K" start="0x0000" end="0x7fff"/>
-				<module type="rom" refid="romNull" start="0x8000" end="0x9fff"/>
-				<module type="rom" refid="romBasic" start="0xa000" end="0xbfff"/>
-				<module type="disk" refid="disk" start="0xc000" end="0xc0ff"/>
-				<module type="video" refid="video" start="0xd000" end="0xd7ff"/>
-				...
-			</computer>
-			...
-			<disk ref="http://www.pcjs.org/apps/c1p/samples.xml"/>
-			...
-		</machine>
+```xml
+<machine id="OSI" border="1" width="272px">
+    <computer id="c1p" name="Challenger 1P">
+        ...
+        <module type="ram" refid="ram32K" start="0x0000" end="0x7fff"/>
+        <module type="rom" refid="romNull" start="0x8000" end="0x9fff"/>
+        <module type="rom" refid="romBasic" start="0xa000" end="0xbfff"/>
+        <module type="disk" refid="disk" start="0xc000" end="0xc0ff"/>
+        <module type="video" refid="video" start="0xd000" end="0xd7ff"/>
+        ...
+    </computer>
+    ...
+    <disk ref="http://www.pcjs.org/apps/c1p/samples.xml"/>
+    ...
+</machine>
+```
 
 Step 3: Add the C1Pjs Simulator to your web page
 ---
 Somewhere on your page, you need to add the following **&lt;script&gt;** element:
 
-		<script type="text/javascript" src="http://www.pcjs.org/versions/c1pjs/1.21.6/c1p.js"></script>
+```html
+<script type="text/javascript" src="http://www.pcjs.org/versions/c1pjs/1.21.6/c1p.js"></script>
+```
 
 To include the C1Pjs Debugger, use [c1p-dbg.js](/versions/c1pjs/1.21.6/c1p-dbg.js) instead of
 [c1p.js](/versions/c1pjs/1.21.6/c1p.js), and include some additional definitions in your machine
 definition XML file:
 
-		<machine id="OSI" border="1" width="272px">
-			<computer id="c1p" name="Challenger 1P">
-				...
-			</computer>
-			...
-			<debugger id="debugger"/>
-			<panel ref="http://www.pcjs.org/devices/c1p/panel/default.xml"/>
-			...
-		</machine>
+```xml
+<machine id="OSI" border="1" width="272px">
+    <computer id="c1p" name="Challenger 1P">
+        ...
+    </computer>
+    ...
+    <debugger id="debugger"/>
+    <panel ref="http://www.pcjs.org/devices/c1p/panel/default.xml"/>
+    ...
+</machine>
+```
 
 The [Panel](/devices/c1p/panel/default.xml) XML file included above defines a variety of buttons and
 input/output controls that are bound to the CPU and Debugger components according to their *binding*
@@ -149,7 +161,9 @@ Step 4: Activate the C1Pjs Simulator
 ---
 Add the following to your page's **&lt;body&gt;** element:
 
-		<body onload="window.embedC1P('myC1P','embed.xml')">
+```html
+<body onload="window.embedC1P('myC1P','embed.xml')">
+```
 
 and insert a **&lt;div id="myC1P"&gt;&lt;/div&gt;** where you want the simulator to appear.
 

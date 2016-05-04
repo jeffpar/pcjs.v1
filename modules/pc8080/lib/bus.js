@@ -135,7 +135,7 @@ function Bus(parmsBus, cpu, dbg)
      *      [0]: registered function to call for every I/O access
      *
      * The registered function is called with the port address, and if the access was triggered by the CPU,
-     * the linear instruction pointer (LIP) at the point of access.
+     * the instruction pointer (IP) at the point of access.
      *
      * WARNING: Unlike the (old) read and write memory notification functions, these support only one
      * pair of input/output functions per port.  A more sophisticated architecture could support a list
@@ -225,7 +225,6 @@ Bus.prototype.initMemory = function()
     for (var iBlock = 0; iBlock < this.nBlockTotal; iBlock++) {
         this.aMemBlocks[iBlock] = block;
     }
-    this.cpu.initMemory(this.aMemBlocks, this.nBlockShift, this.nBusMask);
 };
 
 /**
@@ -291,49 +290,53 @@ Bus.prototype.powerUp = function(data, fRepower)
  */
 Bus.prototype.addMemory = function(addr, size, type)
 {
-    var iBlock = addr >>> this.nBlockShift;
-    while (size > 0 && iBlock < this.aMemBlocks.length) {
+    var addrNext = addr;
+    var sizeLeft = size;
+    var iBlock = addrNext >>> this.nBlockShift;
+
+    while (sizeLeft > 0 && iBlock < this.aMemBlocks.length) {
 
         var block = this.aMemBlocks[iBlock];
         var addrBlock = iBlock * this.nBlockSize;
-        var sizeBlock = this.nBlockSize - (addr - addrBlock);
-        if (sizeBlock > size) sizeBlock = size;
+        var sizeBlock = this.nBlockSize - (addrNext - addrBlock);
+        if (sizeBlock > sizeLeft) sizeBlock = sizeLeft;
 
         if (block && block.size) {
             if (block.type == type) {
                 /*
                  * Where there is already a similar block with a non-zero size, we allow the allocation only if:
                  *
-                 *   1) addr + size <= block.addr (the request precedes the used portion of the current block), or
-                 *   2) addr >= block.addr + block.used (the request follows the used portion of the current block)
+                 *   1) addrNext + sizeLeft <= block.addr (the request precedes the used portion of the current block), or
+                 *   2) addrNext >= block.addr + block.used (the request follows the used portion of the current block)
                  */
-                if (addr + size <= block.addr) {
-                    block.used += (block.addr - addr);
-                    block.addr = addr;
+                if (addrNext + sizeLeft <= block.addr) {
+                    block.used += (block.addr - addrNext);
+                    block.addr = addrNext;
                     return true;
                 }
-                if (addr >= block.addr + block.used) {
-                    var sizeAvail = block.size - (addr - addrBlock);
-                    if (sizeAvail > size) sizeAvail = size;
-                    block.used = addr - block.addr + sizeAvail;
-                    addr = addrBlock + this.nBlockSize;
-                    size -= sizeAvail;
+                if (addrNext >= block.addr + block.used) {
+                    var sizeAvail = block.size - (addrNext - addrBlock);
+                    if (sizeAvail > sizeLeft) sizeAvail = sizeLeft;
+                    block.used = addrNext - block.addr + sizeAvail;
+                    addrNext = addrBlock + this.nBlockSize;
+                    sizeLeft -= sizeAvail;
                     iBlock++;
                     continue;
                 }
             }
-            return this.reportError(Bus.ERROR.ADD_MEM_INUSE, addr, size);
+            return this.reportError(Bus.ERROR.ADD_MEM_INUSE, addrNext, sizeLeft);
         }
 
-        var blockNew = new Memory(addr, sizeBlock, this.nBlockSize, type);
+        var blockNew = new Memory(addrNext, sizeBlock, this.nBlockSize, type);
         blockNew.copyBreakpoints(this.dbg, block);
         this.aMemBlocks[iBlock++] = blockNew;
 
-        addr = addrBlock + this.nBlockSize;
-        size -= sizeBlock;
+        addrNext = addrBlock + this.nBlockSize;
+        sizeLeft -= sizeBlock;
     }
 
-    if (size <= 0) {
+    if (sizeLeft <= 0) {
+        this.status(Math.floor(size / 1024) + "Kb " + Memory.TYPE.NAMES[type] + " at " + str.toHexWord(addr));
         return true;
     }
 
@@ -492,8 +495,6 @@ Bus.prototype.setMemoryBlocks = function(addr, size, aBlocks, type)
 /**
  * getByte(addr)
  *
- * For physical addresses only; for linear addresses, use cpu.getByte().
- *
  * @this {Bus}
  * @param {number} addr is a physical address
  * @return {number} byte (8-bit) value at that address
@@ -519,8 +520,6 @@ Bus.prototype.getByteDirect = function(addr)
 
 /**
  * getShort(addr)
- *
- * For physical addresses only; for linear addresses, use cpu.getShort().
  *
  * @this {Bus}
  * @param {number} addr is a physical address
@@ -558,8 +557,6 @@ Bus.prototype.getShortDirect = function(addr)
 /**
  * setByte(addr, b)
  *
- * For physical addresses only; for linear addresses, use cpu.setByte().
- *
  * @this {Bus}
  * @param {number} addr is a physical address
  * @param {number} b is the byte (8-bit) value to write (we truncate it to 8 bits to be safe)
@@ -586,8 +583,6 @@ Bus.prototype.setByteDirect = function(addr, b)
 
 /**
  * setShort(addr, w)
- *
- * For physical addresses only; for linear addresses, use cpu.setShort().
  *
  * @this {Bus}
  * @param {number} addr is a physical address
@@ -625,6 +620,36 @@ Bus.prototype.setShortDirect = function(addr, w)
     }
     this.aMemBlocks[iBlock++].writeByteDirect(off, w & 0xff, addr);
     this.aMemBlocks[iBlock & this.nBlockMask].writeByteDirect(0, (w >> 8) & 0xff, addr + 1);
+};
+
+/**
+ * addMemBreak(addr, fWrite)
+ *
+ * @this {Bus}
+ * @param {number} addr
+ * @param {boolean} fWrite is true for a memory write breakpoint, false for a memory read breakpoint
+ */
+Bus.prototype.addMemBreak = function(addr, fWrite)
+{
+    if (DEBUGGER) {
+        var iBlock = addr >>> this.nBlockShift;
+        this.aMemBlocks[iBlock].addBreakpoint(addr & this.nBlockLimit, fWrite);
+    }
+};
+
+/**
+ * removeMemBreak(addr, fWrite)
+ *
+ * @this {Bus}
+ * @param {number} addr
+ * @param {boolean} fWrite is true for a memory write breakpoint, false for a memory read breakpoint
+ */
+Bus.prototype.removeMemBreak = function(addr, fWrite)
+{
+    if (DEBUGGER) {
+        var iBlock = addr >>> this.nBlockShift;
+        this.aMemBlocks[iBlock].removeBreakpoint(addr & this.nBlockLimit, fWrite);
+    }
 };
 
 /**
@@ -745,7 +770,7 @@ Bus.prototype.addPortInputBreak = function(port)
  * @this {Bus}
  * @param {number} start port address
  * @param {number} end port address
- * @param {function(number,number)} fn is called with the port and LIP values at the time of the input
+ * @param {function(number,number)} fn is called with the port and IP values at the time of the input
  */
 Bus.prototype.addPortInputNotify = function(start, end, fn)
 {
@@ -794,18 +819,18 @@ Bus.prototype.addPortInputWidth = function(port, size)
 };
 
 /**
- * checkPortInputNotify(port, size, addrLIP)
+ * checkPortInputNotify(port, size, addrIP)
  *
  * @this {Bus}
  * @param {number} port
  * @param {number} size (1, 2 or 4)
- * @param {number} [addrLIP] is the LIP value at the time of the input
+ * @param {number} [addrIP] is the IP value at the time of the input
  * @return {number} simulated port data
  *
  * NOTE: It seems that parts of the ROM BIOS (like the RS-232 probes around F000:E5D7 in the 5150 BIOS)
  * assume that ports for non-existent hardware return 0xff rather than 0x00, hence my new default (0xff) below.
  */
-Bus.prototype.checkPortInputNotify = function(port, size, addrLIP)
+Bus.prototype.checkPortInputNotify = function(port, size, addrIP)
 {
     var data = 0, shift = 0;
 
@@ -827,7 +852,7 @@ Bus.prototype.checkPortInputNotify = function(port, size, addrLIP)
 
         if (aNotify !== undefined) {
             if (aNotify[0]) {
-                dataPort = aNotify[0](port, addrLIP);
+                dataPort = aNotify[0](port, addrIP);
                 if (dataPort === undefined) {
                     dataPort = maskPort;
                 } else {
@@ -840,7 +865,7 @@ Bus.prototype.checkPortInputNotify = function(port, size, addrLIP)
         }
         else {
             if (DEBUGGER && this.dbg) {
-                this.dbg.messageIO(this, port, null, addrLIP);
+                this.dbg.messageIO(this, port, null, addrIP);
                 if (this.fPortInputBreakAll) this.dbg.checkPortInput(port, size, dataPort);
             }
         }
@@ -902,7 +927,7 @@ Bus.prototype.addPortOutputBreak = function(port)
  * @this {Bus}
  * @param {number} start port address
  * @param {number} end port address
- * @param {function(number,number)} fn is called with the port and LIP values at the time of the output
+ * @param {function(number,number)} fn is called with the port and IP values at the time of the output
  */
 Bus.prototype.addPortOutputNotify = function(start, end, fn)
 {
@@ -951,15 +976,15 @@ Bus.prototype.addPortOutputWidth = function(port, size)
 };
 
 /**
- * checkPortOutputNotify(port, size, data, addrLIP)
+ * checkPortOutputNotify(port, size, data, addrIP)
  *
  * @this {Bus}
  * @param {number} port
  * @param {number} size
  * @param {number} data
- * @param {number} [addrLIP] is the LIP value at the time of the output
+ * @param {number} [addrIP] is the IP value at the time of the output
  */
-Bus.prototype.checkPortOutputNotify = function(port, size, data, addrLIP)
+Bus.prototype.checkPortOutputNotify = function(port, size, data, addrIP)
 {
     var shift = 0;
 
@@ -981,7 +1006,7 @@ Bus.prototype.checkPortOutputNotify = function(port, size, data, addrLIP)
 
         if (aNotify !== undefined) {
             if (aNotify[0]) {
-                aNotify[0](port, dataPort, addrLIP);
+                aNotify[0](port, dataPort, addrIP);
             }
             if (DEBUGGER && this.dbg && this.fPortOutputBreakAll != aNotify[1]) {
                 this.dbg.checkPortOutput(port, size, dataPort);
@@ -989,7 +1014,7 @@ Bus.prototype.checkPortOutputNotify = function(port, size, data, addrLIP)
         }
         else {
             if (DEBUGGER && this.dbg) {
-                this.dbg.messageIO(this, port, dataPort, addrLIP);
+                this.dbg.messageIO(this, port, dataPort, addrIP);
                 if (this.fPortOutputBreakAll) this.dbg.checkPortOutput(port, size, dataPort);
             }
         }

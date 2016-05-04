@@ -13,7 +13,7 @@ PCjs Documentation
 
 [PCjs](/docs/about/pcjs/) is a full-featured IBM PC, PC XT and PC AT emulator written entirely in JavaScript.
 
-After you've read the Documentation, check out with the [Examples](examples/), read the [Source Code](/modules/pcjs/),
+After you've read the Documentation, check out the [Examples](examples/), read the [Source Code](/modules/pcjs/),
 and experiment!
 
 {% include machine.html id="ibm5150" %}
@@ -32,8 +32,8 @@ A PCjs machine XML file defines all a machine's components, including:
 * [Control Panel](panel/)
 * [CPU](cpu/)
 * [Debugger](debugger/)
-* [Floppy Disk Controller](fdc/)
-* [Hard Disk Controller](hdc/)
+* [Floppy Drive Controller](fdc/)
+* [Hard Drive Controller](hdc/)
 * [Keyboard](keyboard/)
 * [Mouse](mouse/)
 * [RAM](ram/)
@@ -44,58 +44,66 @@ A PCjs machine XML file defines all a machine's components, including:
 
 Here's a simple machine XML file that includes an 8088 CPU and 16Kb of RAM:
 
-	<machine id="ibm">
-	    <computer id="pc" name="IBM PC"/>
-	    <cpu id="cpu8088" model="8088"/>
-	    <ram id="ramLow" addr="0x00000" size="0x04000"/>
-	</machine>
+```xml
+<machine id="ibm">
+    <computer id="pc" name="IBM PC"/>
+    <cpu id="cpu8088" model="8088"/>
+    <ram id="ramLow" addr="0x00000" size="0x04000"/>
+</machine>
+```
 
 However, that machine isn't usable, since it lacks a keyboard, screen, or any code (ROMs) to execute.
 
 A simple machine definition that actually works might look like:
 
-	<machine id="ibm" class="pc" width="720px">
-	    <computer id="pc" name="IBM PC"/>
-	    <cpu id="cpu8088" model="8088"/>
-	    <ram id="ramLow" addr="0x00000" size="0x04000"/>
-	    <rom id="romBASIC" addr="0xf6000" size="0x8000" file="ibm-basic-1.00.json"/>
-	    <rom id="romBIOS" addr="0xfe000" size="0x2000" file="1981-04-24.json"/>
-	    <keyboard id="keyboard"/>
-	    <video id="videoMDA" model="mda" screenwidth="720" screenheight="350" charset="ibm-mda-cga.json">
-	        <name>Monochrome Display</name>
-	    </video>
-	    <chipset id="chipset" model="5150" sw1="01000001" sw2="11110000"/>
-	</machine>
+```xml
+<machine id="ibm" class="pc" width="720px">
+    <computer id="pc" name="IBM PC"/>
+    <cpu id="cpu8088" model="8088"/>
+    <ram id="ramLow" addr="0x00000" size="0x04000"/>
+    <rom id="romBASIC" addr="0xf6000" size="0x8000" file="ibm-basic-1.00.json"/>
+    <rom id="romBIOS" addr="0xfe000" size="0x2000" file="1981-04-24.json"/>
+    <keyboard id="keyboard"/>
+    <video id="videoMDA" model="mda" screenwidth="720" screenheight="350" charset="ibm-mda-cga.json">
+        <name>Monochrome Display</name>
+    </video>
+    <chipset id="chipset" model="5150" sw1="01000001" sw2="11110000"/>
+</machine>
+```
 
 Here is an [example](examples/example1.html) of this machine's [XML](examples/example1.xml) file.
 
 Machine definitions can also include visual elements.  For example, we can include a "Run" button with the CPU component.
 Note that as soon as the machine is ready and the CPU starts running, the "Run" button will change to "Halt".
 
-	<machine id="ibm" class="pc" width="720px">
-	    <computer id="pc" name="IBM PC"/>
-	    <cpu id="cpu8088" model="8088">
-	        <control type="button" class="input" binding="run">Run</control>
-	    </cpu>
-	    ...
-	</machine>
+```xml
+<machine id="ibm" class="pc" width="720px">
+    <computer id="pc" name="IBM PC"/>
+    <cpu id="cpu8088" model="8088">
+        <control type="button" class="input" binding="run">Run</control>
+    </cpu>
+    ...
+</machine>
+```
 
 Next, we can add a Floppy Disk Controller (FDC) component.  And since we want to be able to "load" and "unload" floppy
 disks at will, we'll include some UI controls.
 
-	<machine id="ibm" class="pc" width="720px">
-	    <fdc id="fdcNEC" autoMount="{A: {name: 'PC-DOS 1.0', path: 'pcdos-1.00.json'}}">
-	        <control type="container">
-	            <control type="list" class="input" binding="listDrives"/>
-	            <control type="list" class="input" binding="listDisks">
-	                <disk path="">None</disk>
-	                <disk path="pcdos-1.00.json">PC-DOS 1.0</disk>
-	            </control>
-	            <control type="button" class="input" binding="loadDrive">Load</control>
-	        </control>
-	    </fdc>
-	    ...
-	</machine>
+```xml
+<machine id="ibm" class="pc" width="720px">
+    <fdc id="fdcNEC" autoMount="{A: {name: 'PC-DOS 1.0', path: 'pcdos-1.00.json'}}">
+        <control type="container">
+            <control type="list" class="input" binding="listDrives"/>
+            <control type="list" class="input" binding="listDisks">
+                <disk path="">None</disk>
+                <disk path="pcdos-1.00.json">PC-DOS 1.0</disk>
+            </control>
+            <control type="button" class="input" binding="loadDrive">Load</control>
+        </control>
+    </fdc>
+    ...
+</machine>
+```
 
 Here is an [example](examples/example2.html) of the updated machine's [XML](examples/example2.xml)
 file.
@@ -105,11 +113,13 @@ file.
 Inside a web page, add a &lt;div&gt; to contain the machine, load the *pc.js* script
 (*pc-dbg.js* if you need the PCjs [Debugger](debugger/)), and then call *embedPC()*:
 
-	<div id="example2"/>
-	<script type="text/javascript" src="pc.js"/>
-	<script type="text/javascript">
-	    embedPC("example2", "example2.xml", "components.xsl");
-	</script>
+```xml
+<div id="example2"/>
+<script type="text/javascript" src="pc.js"/>
+<script type="text/javascript">
+    embedPC("example2", "example2.xml", "components.xsl");
+</script>
+```
 
 In fact, this is exactly what we did in the previous [example](examples/example2.html).
 
@@ -131,7 +141,9 @@ machine XML file; eg:
 *components.css*, which your web page should also load, usually with a &lt;link&gt; tag inside the &lt;head&gt;
 element; eg:
 
-	<link rel="stylesheet" type="text/css" href="components.css">
+```xml
+<link rel="stylesheet" type="text/css" href="components.css">
+```
 
 ### Using the PCjs Debugger
 

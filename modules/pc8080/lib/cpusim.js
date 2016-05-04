@@ -93,14 +93,6 @@ function CPUSim(parmsCPU)
     this.cLiveRegs = 0;
 
     /*
-     * We're just declaring aBusBlocks and associated Bus parameters here; they'll be initialized by initMemory()
-     * when the Bus is initialized.
-     */
-    this.aBusBlocks = [];
-    this.nBusMask = 0;
-    this.nBlockShift = this.nBlockSize = this.nBlockLimit = this.nBlockTotal = this.nBlockMask = 0;
-
-    /*
      * Array of halt handlers, if any (see addHaltCheck)
      */
     this.afnHalt = [];
@@ -116,27 +108,6 @@ function CPUSim(parmsCPU)
 Component.subclass(CPUSim, CPU);
 
 /**
- * initMemory(aBusBlocks, nBlockShift, nBusMask)
- *
- * Notification from Bus.initMemory(), giving us direct access to the entire memory space.
- *
- * @this {CPUSim}
- * @param {Array} aBusBlocks
- * @param {number} nBlockShift
- * @param {number} nBusMask
- */
-CPUSim.prototype.initMemory = function(aBusBlocks, nBlockShift, nBusMask)
-{
-    this.aBusBlocks = aBusBlocks;
-    this.nBlockShift = nBlockShift;
-    this.nBlockSize = 1 << this.nBlockShift;
-    this.nBlockLimit = this.nBlockSize - 1;
-    this.nBlockTotal = aBusBlocks.length;
-    this.nBlockMask = this.nBlockTotal - 1;
-    this.nBusMask = nBusMask;
-};
-
-/**
  * addHaltCheck(fn)
  *
  * Records a function that will be called during HLT opcode processing.
@@ -147,36 +118,6 @@ CPUSim.prototype.initMemory = function(aBusBlocks, nBlockShift, nBusMask)
 CPUSim.prototype.addHaltCheck = function(fn)
 {
     this.afnHalt.push(fn);
-};
-
-/**
- * addMemBreak(addr, fWrite)
- *
- * @this {CPUSim}
- * @param {number} addr
- * @param {boolean} fWrite is true for a memory write breakpoint, false for a memory read breakpoint
- */
-CPUSim.prototype.addMemBreak = function(addr, fWrite)
-{
-    if (DEBUGGER) {
-        var iBlock = addr >>> this.nBlockShift;
-        this.aBusBlocks[iBlock].addBreakpoint(addr & this.nBlockLimit, fWrite);
-    }
-};
-
-/**
- * removeMemBreak(addr, fWrite)
- *
- * @this {CPUSim}
- * @param {number} addr
- * @param {boolean} fWrite is true for a memory write breakpoint, false for a memory read breakpoint
- */
-CPUSim.prototype.removeMemBreak = function(addr, fWrite)
-{
-    if (DEBUGGER) {
-        var iBlock = addr >>> this.nBlockShift;
-        this.aBusBlocks[iBlock].removeBreakpoint(addr & this.nBlockLimit, fWrite);
-    }
 };
 
 /**
@@ -332,6 +273,7 @@ CPUSim.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
     case "SP":
     case "PC":
     case "PS":
+    case "IF":
     case "SF":
     case "ZF":
     case "AF":
@@ -448,6 +390,18 @@ CPUSim.prototype.setSP = function(off)
 CPUSim.prototype.getPC = function()
 {
     return this.regPC;
+};
+
+/**
+ * offPC()
+ *
+ * @this {CPUSim}
+ * @param {number} off
+ * @return {number}
+ */
+CPUSim.prototype.offPC = function(off)
+{
+    return (this.regPC + off) & 0xffff;
 };
 
 /**
@@ -877,7 +831,7 @@ CPUSim.prototype.xorByte = function(src)
  */
 CPUSim.prototype.getByte = function(addr)
 {
-    return this.aBusBlocks[(addr & this.nBusMask) >>> this.nBlockShift].readByte(addr & this.nBlockLimit, addr);
+    return this.bus.getByte(addr);
 };
 
 /**
@@ -889,14 +843,7 @@ CPUSim.prototype.getByte = function(addr)
  */
 CPUSim.prototype.getWord = function(addr)
 {
-    var off = addr & this.nBlockLimit;
-    var iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
-    if (off < this.nBlockLimit) {
-        return this.aBusBlocks[iBlock].readShort(off, addr);
-    }
-    var w = this.aBusBlocks[iBlock].readByte(off, addr);
-    w |= this.aBusBlocks[(iBlock + 1) & this.nBlockMask].readByte(0, addr + 1) << 8;
-    return w;
+    return this.bus.getShort(addr);
 };
 
 /**
@@ -908,7 +855,7 @@ CPUSim.prototype.getWord = function(addr)
  */
 CPUSim.prototype.setByte = function(addr, b)
 {
-    this.aBusBlocks[(addr & this.nBusMask) >>> this.nBlockShift].writeByte(addr & this.nBlockLimit, b & 0xff, addr);
+    this.bus.setByte(addr, b);
 };
 
 /**
@@ -920,14 +867,7 @@ CPUSim.prototype.setByte = function(addr, b)
  */
 CPUSim.prototype.setWord = function(addr, w)
 {
-    var off = addr & this.nBlockLimit;
-    var iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
-    if (off < this.nBlockLimit) {
-        this.aBusBlocks[iBlock].writeShort(off, w & 0xffff, addr);
-        return;
-    }
-    this.aBusBlocks[iBlock++].writeByte(off, w & 0xff, addr);
-    this.aBusBlocks[iBlock & this.nBlockMask].writeByte(0, (w >> 8) & 0xff, addr + 1);
+    this.bus.setShort(addr, w);
 };
 
 /**
@@ -1079,11 +1019,12 @@ CPUSim.prototype.updateStatus = function(fForce)
             this.updateReg("PC", this.getPC(), 4);
             var regPS = this.getPS();
             this.updateReg("PS", regPS, 4);
-            this.updateReg("SF", (regPS & CPUDef.PS.SF), 1);
-            this.updateReg("ZF", (regPS & CPUDef.PS.ZF), 1);
-            this.updateReg("AF", (regPS & CPUDef.PS.AF), 1);
-            this.updateReg("PF", (regPS & CPUDef.PS.PF), 1);
-            this.updateReg("CF", (regPS & CPUDef.PS.CF), 1);
+            this.updateReg("IF", (regPS & CPUDef.PS.IF)? 1 : 0, 1);
+            this.updateReg("SF", (regPS & CPUDef.PS.SF)? 1 : 0, 1);
+            this.updateReg("ZF", (regPS & CPUDef.PS.ZF)? 1 : 0, 1);
+            this.updateReg("AF", (regPS & CPUDef.PS.AF)? 1 : 0, 1);
+            this.updateReg("PF", (regPS & CPUDef.PS.PF)? 1 : 0, 1);
+            this.updateReg("CF", (regPS & CPUDef.PS.CF)? 1 : 0, 1);
         }
     }
     var controlSpeed = this.bindings["speed"];

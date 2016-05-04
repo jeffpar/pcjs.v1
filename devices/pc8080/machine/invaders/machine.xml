@@ -1,19 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pc8080/1.21.7/machine.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pc8080/1.22.0/machine.xsl"?>
 <machine id="invaders" class="pc8080" border="1" pos="center" background="#FAEBD7">
 	<name pos="center">Space Invaders</name>
 	<computer id="computer" busWidth="16"/>
-	<cpu id="cpu8080" model="8080" cycles="2000000"/>
+	<cpu id="cpu8080" model="8080" cycles="2000000" autoStart="true"/>
 	<rom id="romH" addr="0x0000" size="0x0800" file="/devices/pc8080/rom/invaders/INVADERS-H.json"/>
 	<rom id="romG" addr="0x0800" size="0x0800" file="/devices/pc8080/rom/invaders/INVADERS-G.json"/>
 	<rom id="romF" addr="0x1000" size="0x0800" file="/devices/pc8080/rom/invaders/INVADERS-F.json"/>
 	<rom id="romE" addr="0x1800" size="0x0800" file="/devices/pc8080/rom/invaders/INVADERS-E.json"/>
-	<ram id="ram"  addr="0x2000" size="0x2000"/>
-	<video id="video" screenWidth="224" screenHeight="256" frameBuffer="0x2400" interruptRate="120" rotation="90" width="40%" pos="left" padding="8px">
+	<ram id="ram"  addr="0x2000" size="0x0400"/>
+	<video id="video" screenWidth="896" screenHeight="1024" bufferRotate="-90" smoothing="false" bufferAddr="0x2400" bufferCols="256" bufferRows="224" bufferBits="1" bufferLeft="0" interruptRate="120" width="40%" pos="left" padding="8px">
 		<menu>
 			<title>224x256 Screen (Rotated)</title>
+			<control type="container" pos="right">
+				<control type="button" binding="fullScreen" padleft="8px;line-height:1em">Full Screen</control>
+			</control>
 		</menu>
 	</video>
+	<chipset id="chipset" model="SI1978"/>
 	<panel ref="/devices/pc8080/panel/left.xml"/>
 	<debugger id="debugger" commands="s 8086"/>
 </machine>

@@ -12,9 +12,9 @@ It is our *private* counterpart to the **node_modules** folder, where all *publi
 
 The project includes these emulation modules:
 
-* C1Pjs, the 6502-based C1P Emulation Module
-* [PCjs](pcjs/), the x86-based IBM PC Emulation Module
-* PC8080, an 8080 CPU Emulation Module (work-in-progress)
+* [PCjs](pcjs/), the x86-based PC Emulation Module
+* [PC8080](pc8080/), the 8080-based Machine Emulation Module
+* [C1Pjs](c1pjs/), the 6502-based Challenger 1P Emulation Module
 
 along with variety of Node support modules, such as:
 

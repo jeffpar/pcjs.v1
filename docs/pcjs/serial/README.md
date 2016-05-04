@@ -9,7 +9,9 @@ PCjs SerialPort Component
 
 Format
 ---
-	<serial>...</serial>
+```xml
+<serial>...</serial>
+```
 
 Purpose
 ---
@@ -39,14 +41,19 @@ Bindings
 
 Example
 ---
-	<serial id="com1" adapter="1" binding="print"/>
+```xml
+<serial id="com1" adapter="1" binding="print"/>
+```
 
 Output
 ---
-	<div id="..." class="pc-serial pc-component">
-		<div class="pc-container">
-			<div class="pcjs-serial" data-value="id:'...',name:'...',adapter:'...',binding:'...'"></div>
-		</div>
-	</div>
+```html
+<div id="..." class="pc-serial pc-component">
+    <div class="pc-container">
+        <div class="pcjs-serial" data-value="id:'...',name:'...',adapter:'...',binding:'...'">
+        </div>
+    </div>
+</div>
+```
 
 [Return to [PCjs Documentation](..)]
