@@ -321,10 +321,15 @@ if (DEBUGGER) {
     Debugger.REG_HL     = 0x0A;
     Debugger.REG_SP     = 0x0B;
     Debugger.REG_PC     = 0x0C;
-    Debugger.REG_PS     = 0x0D;         // aka PSW (aka AF if Z80-style mnemonics)
+    Debugger.REG_PS     = 0x0D;
+    Debugger.REG_PSW    = 0x0E;         // aka AF if Z80-style mnemonics
 
+    /*
+     * NOTE: "PS" is the complete processor status, which includes bits like the Interrupt flag (IF),
+     * which is NOT the same as "PSW", which is the low 8 bits of "PS" combined with "A" in the high byte.
+     */
     Debugger.REGS = [
-        "B", "C", "D", "E", "H", "L", "M", "A", "BC", "DE", "HL", "SP", "PC", "PSW"
+        "B", "C", "D", "E", "H", "L", "M", "A", "BC", "DE", "HL", "SP", "PC", "PS", "PSW"
     ];
 
     /*
@@ -370,7 +375,7 @@ if (DEBUGGER) {
     Debugger.TYPE_HL    = (Debugger.REG_HL << 8 | Debugger.TYPE_REG | Debugger.TYPE_WORD);
     Debugger.TYPE_SP    = (Debugger.REG_SP << 8 | Debugger.TYPE_REG | Debugger.TYPE_WORD);
     Debugger.TYPE_PC    = (Debugger.REG_PC << 8 | Debugger.TYPE_REG | Debugger.TYPE_WORD);
-    Debugger.TYPE_PS    = (Debugger.REG_PS << 8 | Debugger.TYPE_REG | Debugger.TYPE_WORD);
+    Debugger.TYPE_PSW   = (Debugger.REG_PSW<< 8 | Debugger.TYPE_REG | Debugger.TYPE_WORD);
 
     /*
      * TYPE_OTHER bit definitions
@@ -642,11 +647,11 @@ if (DEBUGGER) {
     /* 0xEE */  [Debugger.INS.XRI,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_IMM | Debugger.TYPE_BYTE],
     /* 0xEF */  [Debugger.INS.RST,   Debugger.TYPE_INT],
     /* 0xF0 */  [Debugger.INS.RP],
-    /* 0xF1 */  [Debugger.INS.POP,   Debugger.TYPE_PS],
+    /* 0xF1 */  [Debugger.INS.POP,   Debugger.TYPE_PSW],
     /* 0xF2 */  [Debugger.INS.JP,    Debugger.TYPE_ADDR],
     /* 0xF3 */  [Debugger.INS.DI],
     /* 0xF4 */  [Debugger.INS.CP,    Debugger.TYPE_ADDR],
-    /* 0xF5 */  [Debugger.INS.PUSH,  Debugger.TYPE_PS],
+    /* 0xF5 */  [Debugger.INS.PUSH,  Debugger.TYPE_PSW],
     /* 0xF6 */  [Debugger.INS.ORI,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_IMM | Debugger.TYPE_BYTE],
     /* 0xF7 */  [Debugger.INS.RST,   Debugger.TYPE_INT],
     /* 0xF8 */  [Debugger.INS.RM],
@@ -1347,8 +1352,8 @@ if (DEBUGGER) {
         if (off == null) {
             i = usr.indexOf(Debugger.REGS, sReg);
         } else {
-            i = usr.indexOf(Debugger.REGS, sReg.substr(off, 3));
-            if (i < 0) i = usr.indexOf(Debugger.REGS, sReg.substr(off, 2));
+            i = usr.indexOf(Debugger.REGS, sReg.substr(off, 2));
+            if (i < 0) i = usr.indexOf(Debugger.REGS, sReg.substr(off, 1));
         }
         return i;
     };
@@ -1382,6 +1387,7 @@ if (DEBUGGER) {
             case Debugger.REG_SP:
             case Debugger.REG_PC:
             case Debugger.REG_PS:
+            case Debugger.REG_PSW:
                 cch = 4;
                 break;
             }
@@ -1442,7 +1448,10 @@ if (DEBUGGER) {
                 n = cpu.getPC();
                 break;
             case Debugger.REG_PS:
-                n = (cpu.regA << 8) | (cpu.getPS() & 0xff);
+                n = cpu.getPS();
+                break;
+            case Debugger.REG_PSW:
+                n = cpu.getPSW();
                 break;
             default:
                 break;
@@ -2581,29 +2590,29 @@ if (DEBUGGER) {
     {
         var b;
         switch (sFlag) {
-        case 'I':
+        case "IF":
             b = this.cpu.getIF();
             break;
-        case 'S':
+        case "SF":
             b = this.cpu.getSF();
             break;
-        case 'Z':
+        case "ZF":
             b = this.cpu.getZF();
             break;
-        case 'A':
+        case "AF":
             b = this.cpu.getAF();
             break;
-        case 'P':
+        case "PF":
             b = this.cpu.getPF();
             break;
-        case 'C':
+        case "CF":
             b = this.cpu.getCF();
             break;
         default:
             b = 0;
             break;
         }
-        return sFlag + (b? '1' : '0') + ' ';
+        return sFlag.charAt(0) + (b? '1' : '0') + ' ';
     };
 
     /**
@@ -2624,7 +2633,7 @@ if (DEBUGGER) {
      *
      * Sample 8080 register dump:
      *
-     *      A=00 BC=0000 DE=0000 HL=0000 SP=0000 PSW=0002 I0 S0 Z0 A0 P0 C0
+     *      A=00 BC=0000 DE=0000 HL=0000 SP=0000 I0 S0 Z0 A0 P0 C0
      *      0000 00         NOP
      *
      * @this {Debugger}
@@ -2638,8 +2647,8 @@ if (DEBUGGER) {
             this.getRegOutput(Debugger.REG_DE) +
             this.getRegOutput(Debugger.REG_HL) +
             this.getRegOutput(Debugger.REG_SP) +
-            this.getFlagOutput('I') + this.getFlagOutput('S') + this.getFlagOutput('Z') +
-            this.getFlagOutput('A') + this.getFlagOutput('P') + this.getFlagOutput('C');
+            this.getFlagOutput("IF") + this.getFlagOutput("SF") + this.getFlagOutput("ZF") +
+            this.getFlagOutput("AF") + this.getFlagOutput("PF") + this.getFlagOutput("CF");
         return s;
     };
 
@@ -4131,22 +4140,25 @@ if (DEBUGGER) {
                 case "PS":
                     cpu.setPS(w);
                     break;
-                case 'C':
+                case "PSW":
+                    cpu.setPSW(w);
+                    break;
+                case "CF":
                     if (w) cpu.setCF(); else cpu.clearCF();
                     break;
-                case 'P':
+                case "PF":
                     if (w) cpu.setPF(); else cpu.clearPF();
                     break;
-                case 'A':
+                case "AF":
                     if (w) cpu.setAF(); else cpu.clearAF();
                     break;
-                case 'Z':
+                case "ZF":
                     if (w) cpu.setZF(); else cpu.clearZF();
                     break;
-                case 'S':
+                case "SF":
                     if (w) cpu.setSF(); else cpu.clearSF();
                     break;
-                case 'I':
+                case "IF":
                     if (w) cpu.setIF(); else cpu.clearIF();
                     break;
                 default:

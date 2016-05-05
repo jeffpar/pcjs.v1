@@ -2703,9 +2703,7 @@ CPUDef.opRP = function()
  */
 CPUDef.opPOPSW = function()
 {
-    var w = this.popWord();
-    this.setPS(w);
-    this.regA = w >> 8;
+    this.setPSW(this.popWord());
     this.nStepCycles -= 10;
 };
 
@@ -2755,7 +2753,7 @@ CPUDef.opCP = function()
  */
 CPUDef.opPUPSW = function()
 {
-    this.pushWord((this.getPS() & 0xff) | (this.regA << 8));
+    this.pushWord(this.getPSW());
     this.nStepCycles -= 11;
 };
 

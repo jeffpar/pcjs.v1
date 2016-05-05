@@ -162,8 +162,7 @@ CPUSim.prototype.resetRegs = function()
     this.setPC(this.addrReset);
 
     /*
-     * This resets the Processor Status flags (regPS), along with all the internal "result registers";
-     * we've taken care to ensure that both CPL and IOPL are initialized before this first setPS() call.
+     * This resets the Processor Status flags (regPS), along with all the internal "result registers".
      */
     this.setPS(0);
 
@@ -416,6 +415,16 @@ CPUSim.prototype.setPC = function(off)
 };
 
 /**
+ * clearCF()
+ *
+ * @this {CPUSim}
+ */
+CPUSim.prototype.clearCF = function()
+{
+    this.resultZeroCarry &= 0xff;
+};
+
+/**
  * getCF()
  *
  * @this {CPUSim}
@@ -427,121 +436,6 @@ CPUSim.prototype.getCF = function()
 };
 
 /**
- * getPF()
- *
- * @this {CPUSim}
- * @return {number} 0 or CPUDef.PS.PF
- */
-CPUSim.prototype.getPF = function()
-{
-    return (CPUDef.PARITY[this.resultParitySign & 0xff])? CPUDef.PS.PF : 0;
-};
-
-/**
- * getAF()
- *
- * @this {CPUSim}
- * @return {number} 0 or CPUDef.PS.AF
- */
-CPUSim.prototype.getAF = function()
-{
-    return ((this.resultParitySign ^ this.resultAuxOverflow) & 0x10)? CPUDef.PS.AF : 0;
-};
-
-/**
- * getZF()
- *
- * @this {CPUSim}
- * @return {number} 0 or CPUDef.PS.ZF
- */
-CPUSim.prototype.getZF = function()
-{
-    return (this.resultZeroCarry & 0xff)? 0 : CPUDef.PS.ZF;
-};
-
-/**
- * getSF()
- *
- * @this {CPUSim}
- * @return {number} 0 or CPUDef.PS.SF
- */
-CPUSim.prototype.getSF = function()
-{
-    return (this.resultParitySign & 0x80)? CPUDef.PS.SF : 0;
-};
-
-/**
- * getIF()
- *
- * @this {CPUSim}
- * @return {number} 0 or CPUDef.PS.IF
- */
-CPUSim.prototype.getIF = function()
-{
-    return (this.regPS & CPUDef.PS.IF);
-};
-
-/**
- * clearCF()
- *
- * @this {CPUSim}
- */
-CPUSim.prototype.clearCF = function()
-{
-    this.resultZeroCarry &= 0xff;
-};
-
-/**
- * clearPF()
- *
- * @this {CPUSim}
- */
-CPUSim.prototype.clearPF = function()
-{
-    if (this.getPF()) this.resultParitySign ^= 0x1;
-};
-
-/**
- * clearAF()
- *
- * @this {CPUSim}
- */
-CPUSim.prototype.clearAF = function()
-{
-    this.resultAuxOverflow = (this.resultParitySign & 0x10) | (this.resultAuxOverflow & ~0x10);
-};
-
-/**
- * clearZF()
- *
- * @this {CPUSim}
- */
-CPUSim.prototype.clearZF = function()
-{
-    this.resultZeroCarry |= 0xff;
-};
-
-/**
- * clearSF()
- *
- * @this {CPUSim}
- */
-CPUSim.prototype.clearSF = function()
-{
-    if (this.getSF()) this.resultParitySign ^= 0xc0;
-};
-
-/**
- * clearIF()
- *
- * @this {CPUSim}
- */
-CPUSim.prototype.clearIF = function()
-{
-    this.regPS &= ~CPUDef.PS.IF;
-};
-
-/**
  * setCF()
  *
  * @this {CPUSim}
@@ -549,71 +443,6 @@ CPUSim.prototype.clearIF = function()
 CPUSim.prototype.setCF = function()
 {
     this.resultZeroCarry |= 0x100;
-};
-
-/**
- * setPF()
- *
- * @this {CPUSim}
- */
-CPUSim.prototype.setPF = function()
-{
-    if (!this.getPF()) this.resultParitySign ^= 0x1;
-};
-
-/**
- * setAF()
- *
- * @this {CPUSim}
- */
-CPUSim.prototype.setAF = function()
-{
-    this.resultAuxOverflow = (~this.resultParitySign & 0x10) | (this.resultAuxOverflow & ~0x10);
-};
-
-/**
- * setZF()
- *
- * @this {CPUSim}
- */
-CPUSim.prototype.setZF = function()
-{
-    this.resultZeroCarry &= ~0xff;
-};
-
-/**
- * setSF()
- *
- * @this {CPUSim}
- */
-CPUSim.prototype.setSF = function()
-{
-    if (!this.getSF()) this.resultParitySign ^= 0xc0;
-};
-
-/**
- * setIF()
- *
- * @this {CPUSim}
- */
-CPUSim.prototype.setIF = function()
-{
-    this.regPS |= CPUDef.PS.IF;
-};
-
-/**
- * updateAF(fAuxCarry)
- *
- * @this {CPUSim}
- * @param {boolean} fAuxCarry
- */
-CPUSim.prototype.updateAF = function(fAuxCarry)
-{
-    if (fAuxCarry) {
-        this.setAF();
-    } else {
-        this.clearAF();
-    }
 };
 
 /**
@@ -632,6 +461,176 @@ CPUSim.prototype.updateCF = function(fCarry)
 };
 
 /**
+ * clearPF()
+ *
+ * @this {CPUSim}
+ */
+CPUSim.prototype.clearPF = function()
+{
+    if (this.getPF()) this.resultParitySign ^= 0x1;
+};
+
+/**
+ * getPF()
+ *
+ * @this {CPUSim}
+ * @return {number} 0 or CPUDef.PS.PF
+ */
+CPUSim.prototype.getPF = function()
+{
+    return (CPUDef.PARITY[this.resultParitySign & 0xff])? CPUDef.PS.PF : 0;
+};
+
+/**
+ * setPF()
+ *
+ * @this {CPUSim}
+ */
+CPUSim.prototype.setPF = function()
+{
+    if (!this.getPF()) this.resultParitySign ^= 0x1;
+};
+
+/**
+ * clearAF()
+ *
+ * @this {CPUSim}
+ */
+CPUSim.prototype.clearAF = function()
+{
+    this.resultAuxOverflow = (this.resultParitySign & 0x10) | (this.resultAuxOverflow & ~0x10);
+};
+
+/**
+ * getAF()
+ *
+ * @this {CPUSim}
+ * @return {number} 0 or CPUDef.PS.AF
+ */
+CPUSim.prototype.getAF = function()
+{
+    return ((this.resultParitySign ^ this.resultAuxOverflow) & 0x10)? CPUDef.PS.AF : 0;
+};
+
+/**
+ * setAF()
+ *
+ * @this {CPUSim}
+ */
+CPUSim.prototype.setAF = function()
+{
+    this.resultAuxOverflow = (~this.resultParitySign & 0x10) | (this.resultAuxOverflow & ~0x10);
+};
+
+/**
+ * updateAF(fAuxCarry)
+ *
+ * @this {CPUSim}
+ * @param {boolean} fAuxCarry
+ */
+CPUSim.prototype.updateAF = function(fAuxCarry)
+{
+    if (fAuxCarry) {
+        this.setAF();
+    } else {
+        this.clearAF();
+    }
+};
+
+/**
+ * clearZF()
+ *
+ * @this {CPUSim}
+ */
+CPUSim.prototype.clearZF = function()
+{
+    this.resultZeroCarry |= 0xff;
+};
+
+/**
+ * getZF()
+ *
+ * @this {CPUSim}
+ * @return {number} 0 or CPUDef.PS.ZF
+ */
+CPUSim.prototype.getZF = function()
+{
+    return (this.resultZeroCarry & 0xff)? 0 : CPUDef.PS.ZF;
+};
+
+/**
+ * setZF()
+ *
+ * @this {CPUSim}
+ */
+CPUSim.prototype.setZF = function()
+{
+    this.resultZeroCarry &= ~0xff;
+};
+
+/**
+ * clearSF()
+ *
+ * @this {CPUSim}
+ */
+CPUSim.prototype.clearSF = function()
+{
+    if (this.getSF()) this.resultParitySign ^= 0xc0;
+};
+
+/**
+ * getSF()
+ *
+ * @this {CPUSim}
+ * @return {number} 0 or CPUDef.PS.SF
+ */
+CPUSim.prototype.getSF = function()
+{
+    return (this.resultParitySign & 0x80)? CPUDef.PS.SF : 0;
+};
+
+/**
+ * setSF()
+ *
+ * @this {CPUSim}
+ */
+CPUSim.prototype.setSF = function()
+{
+    if (!this.getSF()) this.resultParitySign ^= 0xc0;
+};
+
+/**
+ * clearIF()
+ *
+ * @this {CPUSim}
+ */
+CPUSim.prototype.clearIF = function()
+{
+    this.regPS &= ~CPUDef.PS.IF;
+};
+
+/**
+ * getIF()
+ *
+ * @this {CPUSim}
+ * @return {number} 0 or CPUDef.PS.IF
+ */
+CPUSim.prototype.getIF = function()
+{
+    return (this.regPS & CPUDef.PS.IF);
+};
+
+/**
+ * setIF()
+ *
+ * @this {CPUSim}
+ */
+CPUSim.prototype.setIF = function()
+{
+    this.regPS |= CPUDef.PS.IF;
+};
+
+/**
  * getPS()
  *
  * @this {CPUSim}
@@ -639,7 +638,7 @@ CPUSim.prototype.updateCF = function(fCarry)
  */
 CPUSim.prototype.getPS = function()
 {
-    return (this.regPS & ~CPUDef.PS.INDIRECT) | (this.getSF() | this.getZF() | this.getAF() | this.getPF() | this.getCF());
+    return (this.regPS & ~CPUDef.PS.RESULT) | (this.getSF() | this.getZF() | this.getAF() | this.getPF() | this.getCF());
 };
 
 /**
@@ -656,8 +655,31 @@ CPUSim.prototype.setPS = function(regPS)
     if (regPS & CPUDef.PS.AF) this.resultAuxOverflow |= 0x10;
     if (!(regPS & CPUDef.PS.ZF)) this.resultZeroCarry |= 0xff;
     if (regPS & CPUDef.PS.SF) this.resultParitySign ^= 0xc0;
-    this.regPS = (this.regPS & ~CPUDef.PS.DIRECT) | (regPS & CPUDef.PS.DIRECT) | CPUDef.PS.SET;
-    Component.assert((regPS & CPUDef.PS.INDIRECT) == (this.getPS() & CPUDef.PS.INDIRECT));
+    this.regPS = (this.regPS & ~(CPUDef.PS.RESULT | CPUDef.PS.INTERNAL)) | (regPS & CPUDef.PS.INTERNAL) | CPUDef.PS.SET;
+    Component.assert((regPS & CPUDef.PS.RESULT) == (this.getPS() & CPUDef.PS.RESULT));
+};
+
+/**
+ * getPSW()
+ *
+ * @this {CPUSim}
+ * @return {number}
+ */
+CPUSim.prototype.getPSW = function()
+{
+    return (this.getPS() & CPUDef.PS.MASK) | (this.regA << 8);
+};
+
+/**
+ * setPSW(w)
+ *
+ * @this {CPUSim}
+ * @param {number} w
+ */
+CPUSim.prototype.setPSW = function(w)
+{
+    this.setPS((w & CPUDef.PS.MASK) | (this.regPS & ~CPUDef.PS.MASK));
+    this.regA = w >> 8;
 };
 
 /**
