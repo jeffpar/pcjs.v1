@@ -69,7 +69,7 @@ var CPUDef = {
         BIT5:   0x0020,         // bit 5: reserved, always clear
         ZF:     0x0040,         // bit 6: Zero flag
         SF:     0x0080,         // bit 7: Sign flag
-        ALL:    0x00D5,         // CF, PF, AF, ZF, SF
+        ALL:    0x00D5,         // all "arithmetic" flags (CF, PF, AF, ZF, SF)
         MASK:   0x00FF,         //
         IF:     0x0200          // bit 9: Interrupt flag (for internal use only)
     },
@@ -113,18 +113,19 @@ var CPUDef = {
 };
 
 /*
- * Some PS flags are stored directly in regPS, hence the "direct" designation.
+ * These are the internal PS bits (outside of PS.MASK) that getPS() and setPS() can get and set,
+ * but which cannot be seen with any of the documented instructions.
  */
-CPUDef.PS.DIRECT    =   (CPUDef.PS.IF);
+CPUDef.PS.INTERNAL  =   (CPUDef.PS.IF);
 
 /*
- * However, PS "arithmetic" flags are NOT stored in regPS; they are maintained across
- * separate result registers, hence the "indirect" designation.
+ * PS "arithmetic" flags are NOT stored in regPS; they are maintained across separate result registers,
+ * hence the RESULT designation.
  */
-CPUDef.PS.INDIRECT  =   (CPUDef.PS.CF | CPUDef.PS.PF | CPUDef.PS.AF | CPUDef.PS.ZF | CPUDef.PS.SF);
+CPUDef.PS.RESULT    =   (CPUDef.PS.CF | CPUDef.PS.PF | CPUDef.PS.AF | CPUDef.PS.ZF | CPUDef.PS.SF);
 
 /*
- * These are the default "always set" PS bits for the 8080.
+ * These are the "always set" PS bits for the 8080.
  */
 CPUDef.PS.SET       =   (CPUDef.PS.BIT1);
 
