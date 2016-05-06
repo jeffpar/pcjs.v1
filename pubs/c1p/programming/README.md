@@ -22,6 +22,7 @@ of things.  I had never even used tools like that before, which is why the **650
 bit of an odd duck.  I'll post some screenshots and a demo eventually, and you'll see what I mean.
 
 Anyway, to satisfy the buyer, I sat down at my old manual typewriter and banged out my version of a "source
-code" listing.  Here it is, many decades later, for your amusement.
+code" listing.  I produced it mostly by using using the program to disassemble itself, combined with information
+from hand-written notes (which I may still have somewhere).  Here it is, many decades later, for your amusement.
 
 [<img src="http://archive.pcjs.org/pubs/c1p/programming/thumbs/OSI_Assembler-Disassembler_Listing-thumb.jpg" width="200" height="260" alt="6502 Disassembler Listing (by Jeff Parsons, June 1980)"/>](http://archive.pcjs.org/pubs/c1p/programming/pdfs/OSI_Assembler-Disassembler_Listing.pdf)
