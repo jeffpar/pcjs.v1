@@ -4,7 +4,10 @@ title: Challenger 1P Programming Guides/Samples
 permalink: /pubs/c1p/programming/
 ---
 
-Challenger 1P Programming Guides/Samples
+Challenger 1P Programming Guides
+---
+
+Challenger 1P Programming Samples
 ---
 
 ### 6502 ASSEMBLER/DISASSEMBLER
