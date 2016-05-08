@@ -38,7 +38,7 @@ if (NODE) {
 }
 
 /**
- * C1PVideo(parmsVideo, eCanvas, context, imgChars)
+ * C1PVideo(parmsVideo, canvas, context, imgChars)
  *
  * The Video component can be configured with the following (parmsVideo) properties:
  *
@@ -118,7 +118,7 @@ if (NODE) {
  * @constructor
  * @extends Component
  */
-function C1PVideo(parmsVideo, eCanvas, context, imgChars)
+function C1PVideo(parmsVideo, canvas, context, imgChars)
 {
     Component.call(this, "C1PVideo", parmsVideo);
 
@@ -147,9 +147,38 @@ function C1PVideo(parmsVideo, eCanvas, context, imgChars)
      */
     this.setDimensions();
 
-    this.eCanvas = eCanvas;
-    this.context = context;
+    this.canvasScreen = canvas;
+    this.contextScreen = context;
     this.imgChars = imgChars;
+
+    /*
+     * Support for disabling (or, less commonly, enabling) image smoothing, which all browsers
+     * seem to support now (well, OK, I still have to test the latest MS Edge browser), despite
+     * it still being labelled "experimental technology".  Let's hope the browsers standardize
+     * on this.  I see other options emerging, like the CSS property "image-rendering: pixelated"
+     * that's apparently been added to Chrome.  Sigh.
+     *
+     * TODO: Investigate why imageSmoothingEnabled seems to have little effect on the imgChars
+     * images we draw in updateWindow().
+     */
+    var i, sEvent, asWebPrefixes = ['', 'moz', 'ms', 'webkit'];
+    var fSmoothing = parmsVideo['smoothing'];
+    var sSmoothing = Component.parmsURL['smoothing'];
+    if (sSmoothing) fSmoothing = (sSmoothing == "true");
+    if (fSmoothing != null) {
+        for (i = 0; i < asWebPrefixes.length; i++) {
+            sEvent = asWebPrefixes[i];
+            if (!sEvent) {
+                sEvent = 'imageSmoothingEnabled';
+            } else {
+                sEvent += 'ImageSmoothingEnabled';
+            }
+            if (this.contextScreen[sEvent] !== undefined) {
+                this.contextScreen[sEvent] = fSmoothing;
+                break;
+            }
+        }
+    }
 
     /*
      * QUESTION: Does this video port exist only on the Model 540?
@@ -273,7 +302,7 @@ C1PVideo.prototype.setDrawingDimensions = function()
  */
 C1PVideo.prototype.setFocus = function()
 {
-    this.eCanvas.focus();
+    this.canvasScreen.focus();
 };
 
 /**
@@ -335,9 +364,9 @@ C1PVideo.prototype.setPower = function(fOn, cmp)
          */
         this.kbd = cmp.getComponentByType("keyboard");
         if (this.kbd) {
-            this.kbd.setBinding("canvas", "keyDown", this.eCanvas);
-            this.kbd.setBinding("canvas", "keyPress", this.eCanvas);
-            this.kbd.setBinding("canvas", "keyUp", this.eCanvas);
+            this.kbd.setBinding("canvas", "keyDown", this.canvasScreen);
+            this.kbd.setBinding("canvas", "keyPress", this.canvasScreen);
+            this.kbd.setBinding("canvas", "keyUp", this.canvasScreen);
         }
     }
     else
@@ -351,11 +380,11 @@ C1PVideo.prototype.setPower = function(fOn, cmp)
 };
 
 /**
- * cxChar and cyChar are the source cell size. Originally, those values came strictly from the parmsVideo
- * 'charWidth' and 'charHeight' properties. Now, if those aren't defined (which is normally the case now),
+ * cxChar and cyChar are the source cell size.  Originally, those values came strictly from the parmsVideo
+ * 'charWidth' and 'charHeight' properties.  Now, if those aren't defined (which is normally the case now),
  * then we infer the source cell size from the dimensions of imgChars, which is expected to be a 16x16 array of
  * character bitmaps.  We could be even more flexible, by allowing imgChars to be any rectangular dimension
- * (eg, 1x256) as long as we can assume it contains exactly 256 characters, but there's no need to get carried away....
+ * (eg, 1x256) as long as we can assume it contains exactly 256 characters, but there's no need to get carried away.
  *
  * @this {C1PVideo}
  * @param {boolean} [fReady] is assumed to indicate "ready" unless EXPLICITLY set to false
@@ -485,7 +514,9 @@ C1PVideo.prototype.writeByte = function(offset, b)
 };
 
 /**
- * updateWindow() updates a particular position (row,col) in the associated window with the given byte (b)
+ * updateWindow(col, row, b)
+ *
+ * Updates a particular position (row,col) in the associated window with the given byte (b)
  *
  * @this {C1PVideo}
  * @param {number} col
@@ -494,17 +525,17 @@ C1PVideo.prototype.writeByte = function(offset, b)
  * @return {boolean} true if successful, false if not
  *
  * I originally used (screenWidth,screenHeight) == (512,448) and (cols,rows) == (32,32) and (cxChar,cyChar) == (16,16),
- * and I simply copied the source cells 1-to-1 to the destination (16,16), knowing that we would never try to display more
- * than 28 rows (the last 4 rows of the 32 possible rows were never used to display any content).  However, I should still
- * have ignored any attempt to draw past row 28 (aka screenHeight 448).  I now perform row clipping and biasing, according
- * to the first visible row (iRowTop) and total visible rows (nRowsVisible).
+ * and I simply copied the source cells 1-to-1 to the destination (16,16), knowing that we would never try to display
+ * more than 28 rows (the last 4 rows of the 32 possible rows were never used to display any content).  However, I should
+ * still have ignored any attempt to draw past row 28 (aka screenHeight 448).  I now perform row clipping and biasing,
+ * according to the first visible row (iRowTop) and total visible rows (nRowsVisible).
  *
- * Moreover, I no longer copy the source cell images to the destination 1-to-1.  I calculate (cxCharDst,cyCharDst) separately
- * (see setDrawingDimensions).  And I no longer assume that (cxChar,cyChar) are (16,16); once the source image file has finished
- * loading, I calculate (cxChar,cyChar) based on the size of image file (see setReady).  I made this change when I created
- * chargen1x.png.  In fact, at first I thought I might be able to eliminate chargen2x.png and just let drawImage() scale up
- * the individual character images from (8,8) to (16,16) or whatever (cxCharDst,cyCharDst) size was needed, but the results were
- * fuzzy, so it's still best to use chargen2x.png when using larger window sizes.
+ * Moreover, I no longer copy the source cell images to the destination 1-to-1.  I calculate (cxCharDst,cyCharDst)
+ * separately (see setDrawingDimensions).  And I no longer assume that (cxChar,cyChar) are (16,16); once the source
+ * image file has finished loading, I calculate (cxChar,cyChar) based on the size of image file (see setReady).  I made
+ * this change when I created chargen1x.png.  In fact, at first I thought I might be able to eliminate chargen2x.png
+ * and just let drawImage() scale up the individual character images from (8,8) to (16,16) or whatever (cxCharDst,cyCharDst)
+ * size was needed, but the results were fuzzy, so it's still best to use chargen2x.png when using larger window sizes.
  */
 C1PVideo.prototype.updateWindow = function(col, row, b)
 {
@@ -517,7 +548,7 @@ C1PVideo.prototype.updateWindow = function(col, row, b)
             var xDst = col * this.cxCharDst;
             var yDst = row * this.cyCharDst;
             // if (DEBUG) this.log("updateWindow(" + col + "," + row + "," + b +"): drawing from " + xSrc + "," + ySrc + " to " + xDst + "," + yDst);
-            this.context.drawImage(this.imgChars, xSrc, ySrc, this.cxChar, this.cyChar, xDst, yDst, this.cxCharDst, this.cyCharDst);
+            this.contextScreen.drawImage(this.imgChars, xSrc, ySrc, this.cxChar, this.cyChar, xDst, yDst, this.cxCharDst, this.cyCharDst);
         }
     }
     return true;
@@ -586,8 +617,8 @@ C1PVideo.init = function()
          *      document.createElement('img') would.
          */
         var imgCharSet = new Image();
-        var contextVideo = eCanvas.getContext("2d");
-        var video = new C1PVideo(parmsVideo, eCanvas, contextVideo, imgCharSet);
+        var eContext = eCanvas.getContext("2d");
+        var video = new C1PVideo(parmsVideo, eCanvas, eContext, imgCharSet);
         imgCharSet.onload = function(video, sCharSet) {
             return function() {
                 if (DEBUG) video.log("onload(): finished loading " + sCharSet);

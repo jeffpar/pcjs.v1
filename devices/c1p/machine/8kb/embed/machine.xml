@@ -15,7 +15,7 @@
 	<rom id="romNull" size="0x8000"/>
 	<rom id="romBasic" size="0x2000" image="/devices/c1p/rom/basic-gcpatch.hex"/>
 	<rom id="romSystem" size="0x0800" image="/devices/c1p/rom/system.hex"/>
-	<video id="video" screenwidth="256" screenheight="200" cols="32" rows="32" charset="/devices/c1p/video/chargen1x.png" width="256px" padding="8px"/>
+	<video id="video" screenWidth="256" screenHeight="200" cols="32" rows="32" smoothing="false" charset="/devices/c1p/video/chargen1x.png" width="256px" padding="8px"/>
 	<keyboard id="keyboard" pos="center" padleft="8px">
 		<control type="button" binding="ctrl-c">CTRL-C</control>
 		<control type="button" binding="ctrl-o">CTRL-O</control>

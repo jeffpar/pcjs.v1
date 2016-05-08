@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/c1pjs/1.22.0/machine.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/c1pjs/1.22.1/machine.xsl"?>
 <machine id="c1pSmall" class="c1p" border="1" width="272px" pos="left" padding="16px" background="#FAEBD7" style="padding-bottom:8px">
 	<computer id="c1p" name="Challenger 1P">
 		<module type="cpu" refid="cpu6502" start="0x0000" end="0xffff"/>
@@ -16,7 +16,7 @@
 	<rom id="romNull" size="0x8000"/>
 	<rom id="romBasic" size="0x2000" image="/devices/c1p/rom/basic-gcpatch.hex"/>
 	<rom id="romSystem" size="0x0800" image="/devices/c1p/rom/system.hex"/>
-	<video id="video" screenwidth="256" screenheight="200" cols="32" rows="32" charset="/devices/c1p/video/chargen1x.png" width="256px" padding="8px"/>
+	<video id="video" screenWidth="256" screenHeight="200" cols="32" rows="32" smoothing="false" charset="/devices/c1p/video/chargen1x.png" width="256px" padding="8px"/>
 	<keyboard id="keyboard" padleft="8px">
 		<control type="button" binding="ctrl-c">CTRL-C</control>
 		<control type="button" binding="ctrl-o">CTRL-O</control>
