@@ -7,10 +7,15 @@ permalink: /apps/c1p/
 Challenger 1P Applications
 ---
 
-See [GitHub](https://github.com/jeffpar/pcjs/tree/master/apps/c1p) for program listings and configuration files.
+All C1P applications come in two flavors:
 
-The C1P serial port has no configurable hardware features.  However, there is a "demo" property that can
-be set, causing the machine to load some built-in demonstration code via the serial port when it starts up.
+- [BASIC](BASIC/)
+- [6502 Machine-Language](6502/)
 
-The purpose of the configuration files is to create UI controls that allow you to choose from a set of programs
-(eg, BASIC programs, 6502 machine code files) and send them to the C1P through the serial port.
+To make it easy for our machines to load our applications, we provide the following **Serial** configuration files:
+
+- [all.xml](all.xml)
+- [samples.xml](samples.xml)
+
+These configuration files create UI controls that allow you to choose from a set of BASIC and/or 6502 machine-language
+programs that are automatically sent to the C1P's serial port.

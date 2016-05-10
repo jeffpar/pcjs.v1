@@ -237,12 +237,40 @@ C1PSerialPort.prototype.startLoad = function()
 C1PSerialPort.prototype.loadFile = function(sFileName, sFileData, nResponse)
 {
     if (!sFileData) {
-        this.println(sFileName + " load error (" + nResponse + ")");
+        this.println("Error loading file \"" + sFileName + "\" (" + nResponse + ")");
         return;
     }
-    this.sInput = sFileData;
-    this.iInputNext = 0;
+
     this.autoLoad = 0;
+    this.iInputNext = 0;
+    this.sInput = sFileData;
+
+    /*
+     * The following code adds support for loading "65V" files encoded as JSON, which is a cleaner
+     * way to deliver those files when they contain binary (non-ASCII) data.
+     *
+     * For example, my 6502 ASSEMBLER/DISASSEMBLER program starts with a conventional "65V" loading
+     * sequence, which loads and launches a small program loader that loads the rest of the program
+     * using a raw (1-to-1) binary format instead of the usual (3-to-1) HEX format used by "65V" files.
+     */
+    if (str.endsWith(sFileName, ".json")) {
+        try {
+            /*
+             * The most likely source of any exception will be here: parsing the JSON-encoded data.
+             */
+            var s = "";
+            var data = eval("(" + sFileData + ")");
+            var ab = data['bytes'];
+            for (var i = 0; i < ab.length; i++) {
+                s += String.fromCharCode(ab[i]);
+            }
+            this.sInput = s;
+        } catch (e) {
+            this.println("Error processing file \"" + sFileName + "\": " + e.message);
+            return;
+        }
+    }
+
     if (this.cmp && this.kbd && this.cpu.isRunning()) {
         this.println("auto-loading " + sFileName);
         /*
@@ -260,7 +288,7 @@ C1PSerialPort.prototype.loadFile = function(sFileName, sFileData, nResponse)
          * and then start it running again.  BASIC will start reading the data as soon as you type
          * LOAD.
          */
-        if (this.sInput.charAt(0) != ".") {
+        if (this.sInput.charAt(0) != '.') {
             this.autoLoad = 1;
             this.kbd.injectKeys("NEW\nLOAD\n");
         }
@@ -347,7 +375,7 @@ C1PSerialPort.prototype.advanceInput = function()
         this.bInput = 0;
         this.cbInput = 0;
         if (this.iInputNext < this.sInput.length) {
-            var b = this.sInput.charCodeAt(this.iInputNext++);
+            var b = this.sInput.charCodeAt(this.iInputNext++) & 0xff;
             if (b == 0x0a) b = 0x0d;
             this.bInput = b;
             this.cbInput = 1;
@@ -374,13 +402,15 @@ C1PSerialPort.prototype.updateMemory = function()
     /*
      * Update all the status (even) bytes
      */
-    for (offset = this.offPort+0; offset < this.offPortLimit; offset+=2)
+    for (offset = this.offPort+0; offset < this.offPortLimit; offset+=2) {
         this.abMem[offset] = (this.cbInput? this.STATUS_DATA : this.STATUS_NONE);
+    }
     /*
      * Update all the data (odd) bytes
      */
-    for (offset = this.offPort+1; offset < this.offPortLimit; offset+=2)
+    for (offset = this.offPort+1; offset < this.offPortLimit; offset+=2) {
         this.abMem[offset] = (this.cbInput? this.bInput : 0);
+    }
 };
 
 /**
