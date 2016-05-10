@@ -75,8 +75,8 @@ C1PSerialPort.prototype.reset = function()
         this.bInput = 0;
         this.cbInput = 0;
 
+        this.iInput = 0;
         this.sInput = "10 PRINT \"HELLO OSI #" + this.getMachineNum() + "\"\n";
-        this.iInputNext = 0;
 
      // this.sOutput = new Array(0);
      // this.iOutputNext = 0;
@@ -242,12 +242,12 @@ C1PSerialPort.prototype.loadFile = function(sFileName, sFileData, nResponse)
     }
 
     this.autoLoad = 0;
-    this.iInputNext = 0;
+    this.iInput = 0;
     this.sInput = sFileData;
 
     /*
      * The following code adds support for loading "65V" files encoded as JSON, which is a cleaner
-     * way to deliver those files when they contain binary (non-ASCII) data.
+     * way to store and deliver those files when they contain binary (non-ASCII) data.
      *
      * For example, my 6502 ASSEMBLER/DISASSEMBLER program starts with a conventional "65V" loading
      * sequence, which loads and launches a small program loader that loads the rest of the program
@@ -335,7 +335,7 @@ C1PSerialPort.prototype.getByte = function(addr, addrFrom)
              * An EVEN address implies they're looking, so if we have a fresh buffer,
              * then prime the pump.
              */
-            if (this.sInput && !this.iInputNext)
+            if (this.sInput && !this.iInput)
                 this.advanceInput();
         } else {
             /*
@@ -374,14 +374,16 @@ C1PSerialPort.prototype.advanceInput = function()
     if (this.sInput !== undefined) {
         this.bInput = 0;
         this.cbInput = 0;
-        if (this.iInputNext < this.sInput.length) {
-            var b = this.sInput.charCodeAt(this.iInputNext++) & 0xff;
+        if (this.iInput < this.sInput.length) {
+            var b = this.sInput.charCodeAt(this.iInput++) & 0xff;
             if (b == 0x0a) b = 0x0d;
             this.bInput = b;
             this.cbInput = 1;
             // if (DEBUG) this.log("advanceInput(" + str.toHexByte(b) + ")");
         }
         else {
+            this.sInput = "";
+            this.iInput = 0;
             if (DEBUG) this.log("advanceInput(): out of data");
             if (this.autoLoad == 1 && this.kbd) {
                 this.kbd.injectKeys(" \nRUN\n");

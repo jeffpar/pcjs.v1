@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <serial id="serialPort" pos="left" padleft="8px">
 	<control type="list" binding="listSerial">
-		<item ref="/apps/c1p/6502/jeffpar/ASSEMBLER-1.json">6502 DISASSEMBLER-1 (JP)</item>
-		<item ref="/apps/c1p/6502/jeffpar/ASSEMBLER-2.json">6502 DISASSEMBLER-2 (JP)</item>
-		<item ref="/apps/c1p/6502/jeffpar/BASICEXT.json">6502 BASIC MODS (JP)</item>
-		<item ref="/apps/c1p/6502/jeffpar/LIFE.json">6502 LIFE (JP)</item>
+		<item ref="/apps/c1p/6502/jeffpar/assembler/ASSEMBLER-1.json">6502 DISASSEMBLER-1 (JP)</item>
+		<item ref="/apps/c1p/6502/jeffpar/assembler/ASSEMBLER-2.json">6502 DISASSEMBLER-2 (JP)</item>
+		<item ref="/apps/c1p/6502/jeffpar/basicext/BASICEXT.json">6502 BASIC MODS (JP)</item>
+		<item ref="/apps/c1p/6502/jeffpar/life/LIFE.json">6502 LIFE (JP)</item>
 		<item ref="/apps/c1p/6502/tests/bcd/bcd.json">6502 BCD TESTS</item>
 		<item ref="/apps/c1p/6502/tests/vflag/vflag.json">6502 VFLAG TESTS</item>
 		<item ref="/apps/c1p/BASIC/jeffpar/CHECKERS.BAS">CHECKERS (JP)</item>
