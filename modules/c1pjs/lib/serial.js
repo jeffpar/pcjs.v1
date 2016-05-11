@@ -53,42 +53,49 @@ function C1PSerialPort(parmsSerial)
     this.flags.fPowered = false;
     this.fDemo = parmsSerial['demo'];
 
-    this.STATUS_NONE = 0x00;
-    this.STATUS_DATA = 0x01;    // indicates data available
-
-    this.reset();
+    this.reset(true);
 }
 
 Component.subclass(C1PSerialPort);
 
+C1PSerialPort.STATUS_NONE   = 0x00;
+C1PSerialPort.STATUS_DATA   = 0x01;     // indicates data available
+
+/*
+ * Values for autoLoad:
+ *
+ *      0: no auto-load active
+ *      1: BASIC command file auto-load in progress
+ *      2: 6502 HEX command file auto-load in progress
+ */
+C1PSerialPort.AUTOLOAD_NONE  = 0;
+C1PSerialPort.AUTOLOAD_BASIC = 1;
+C1PSerialPort.AUTOLOAD_6502  = 2;
+
 /**
  * @this {C1PSerialPort}
+ * @param {boolean} [fHard]
  */
-C1PSerialPort.prototype.reset = function()
+C1PSerialPort.prototype.reset = function(fHard)
 {
     /*
      * Because we reset the machine at the start of a 6502 HEX command file auto-load,
      * we must avoid tossing the serial port's input buffer in that particular case (2).
      */
-    if (this.autoLoad != 2) {
+    if (fHard || this.autoLoad != C1PSerialPort.AUTOLOAD_6502) {
 
-        this.bInput = 0;
-        this.cbInput = 0;
-
+        this.bInput = -1;
         this.iInput = 0;
-        this.sInput = "10 PRINT \"HELLO OSI #" + this.getMachineNum() + "\"\n";
+        this.sInput = "";
+        if (this.fDemo) {
+            this.sInput = "10 PRINT \"HELLO OSI #" + this.getMachineNum() + "\"\n";
+        }
 
      // this.sOutput = new Array(0);
      // this.iOutputNext = 0;
 
-        /*
-         * Values for autoLoad:
-         *
-         *      0: no auto-load active
-         *      1: BASIC command file auto-load in progress
-         *      2: 6502 HEX command file auto-load in progress
-         */
-        this.autoLoad = 0;
+        this.fConvertLF = true;
+        this.autoLoad = C1PSerialPort.AUTOLOAD_NONE;
     }
 };
 
@@ -224,7 +231,7 @@ C1PSerialPort.prototype.setPower = function(fOn, cmp)
  */
 C1PSerialPort.prototype.startLoad = function()
 {
-    this.autoLoad = 1;
+    this.autoLoad = C1PSerialPort.AUTOLOAD_BASIC;
     this.kbd.injectKeys("LOAD\n");
 };
 
@@ -241,9 +248,10 @@ C1PSerialPort.prototype.loadFile = function(sFileName, sFileData, nResponse)
         return;
     }
 
-    this.autoLoad = 0;
     this.iInput = 0;
     this.sInput = sFileData;
+    this.fConvertLF = true;
+    this.autoLoad = C1PSerialPort.AUTOLOAD_NONE;
 
     /*
      * The following code adds support for loading "65V" files encoded as JSON, which is a cleaner
@@ -252,6 +260,8 @@ C1PSerialPort.prototype.loadFile = function(sFileName, sFileData, nResponse)
      * For example, my 6502 ASSEMBLER/DISASSEMBLER program starts with a conventional "65V" loading
      * sequence, which loads and launches a small program loader that loads the rest of the program
      * using a raw (1-to-1) binary format instead of the usual (3-to-1) HEX format used by "65V" files.
+     *
+     * The "rawness" of the binary format also necessitates disabling fConvertLF.
      */
     if (str.endsWith(sFileName, ".json")) {
         try {
@@ -265,6 +275,7 @@ C1PSerialPort.prototype.loadFile = function(sFileName, sFileData, nResponse)
                 s += String.fromCharCode(ab[i]);
             }
             this.sInput = s;
+            this.fConvertLF = false;
         } catch (e) {
             this.println("Error processing file \"" + sFileName + "\": " + e.message);
             return;
@@ -289,15 +300,15 @@ C1PSerialPort.prototype.loadFile = function(sFileName, sFileData, nResponse)
          * LOAD.
          */
         if (this.sInput.charAt(0) != '.') {
-            this.autoLoad = 1;
+            this.autoLoad = C1PSerialPort.AUTOLOAD_BASIC;
             this.kbd.injectKeys("NEW\nLOAD\n");
         }
         else {
             /*
-             * Set autoLoad to 2 before the reset, so that when our reset() method is called,
+             * Set autoLoad to AUTOLOAD_6502 before the reset, so that when our reset() method is called,
              * we'll take care to preserve all the data we just loaded.
              */
-            this.autoLoad = 2;
+            this.autoLoad = C1PSerialPort.AUTOLOAD_6502;
             /*
              * Although the Keyboard allows us to inject any key, even the BREAK key, like so:
              *
@@ -372,23 +383,23 @@ C1PSerialPort.prototype.setByte = function(addr, addrFrom)
 C1PSerialPort.prototype.advanceInput = function()
 {
     if (this.sInput !== undefined) {
-        this.bInput = 0;
-        this.cbInput = 0;
+        this.bInput = -1;
         if (this.iInput < this.sInput.length) {
             var b = this.sInput.charCodeAt(this.iInput++) & 0xff;
-            if (b == 0x0a) b = 0x0d;
+            if (this.fConvertLF) {
+                if (b == 0x0a) b = 0x0d;
+            }
             this.bInput = b;
-            this.cbInput = 1;
             // if (DEBUG) this.log("advanceInput(" + str.toHexByte(b) + ")");
         }
         else {
             this.sInput = "";
             this.iInput = 0;
             if (DEBUG) this.log("advanceInput(): out of data");
-            if (this.autoLoad == 1 && this.kbd) {
+            if (this.autoLoad == C1PSerialPort.AUTOLOAD_BASIC && this.kbd) {
                 this.kbd.injectKeys(" \nRUN\n");
             }
-            this.autoLoad = 0;
+            this.autoLoad = C1PSerialPort.AUTOLOAD_NONE;
         }
         this.updateMemory();
     }
@@ -405,13 +416,13 @@ C1PSerialPort.prototype.updateMemory = function()
      * Update all the status (even) bytes
      */
     for (offset = this.offPort+0; offset < this.offPortLimit; offset+=2) {
-        this.abMem[offset] = (this.cbInput? this.STATUS_DATA : this.STATUS_NONE);
+        this.abMem[offset] = (this.bInput >= 0? C1PSerialPort.STATUS_DATA : C1PSerialPort.STATUS_NONE);
     }
     /*
      * Update all the data (odd) bytes
      */
     for (offset = this.offPort+1; offset < this.offPortLimit; offset+=2) {
-        this.abMem[offset] = (this.cbInput? this.bInput : 0);
+        this.abMem[offset] = (this.bInput >= 0? this.bInput : 0);
     }
 };
 
