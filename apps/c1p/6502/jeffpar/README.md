@@ -1,10 +1,10 @@
 ---
 layout: page
-title: Challenger 1P Machine-Language (6502) Programs
+title: Challenger 1P Machine-Language Programs
 permalink: /apps/c1p/6502/jeffpar/
 ---
 
-Challenger 1P Machine-Language (6502) Programs
+Challenger 1P Machine-Language Programs
 ---
 
 The project contains the following 6502 machine-language programs written by [Jeff Parsons](https://twitter.com/jeffpar)

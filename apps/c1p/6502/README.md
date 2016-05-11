@@ -1,10 +1,10 @@
 ---
 layout: page
-title: Challenger 1P Machine-Language (6502) Applications
+title: Challenger 1P Machine-Language Applications
 permalink: /apps/c1p/6502/
 ---
 
-Challenger 1P Machine-Language (6502) Applications
+Challenger 1P Machine-Language Applications
 ---
 
 The project contains the following 6502 machine-language tests:

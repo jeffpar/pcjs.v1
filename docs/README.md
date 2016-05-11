@@ -32,7 +32,7 @@ Our [Publication Archive](/pubs/) includes these PC-related resources:
 * [Reference Manuals](/pubs/pc/reference/)
 * [Software User and Development Guides](/pubs/pc/software/) (eg, [DOS](/pubs/pc/software/dos/), [OS/2](/pubs/pc/software/os2/), [Windows](/pubs/pc/software/windows/))
 
-And publications related to Ohio Scientific's 6502-based Challenger 1P:
+And publications related to Ohio Scientific's 6502-based [Challenger 1P](/devices/c1p/machine/):
 
 * [Datasheets](/pubs/c1p/datasheets/)
 * [Programming Guides/Samples](/pubs/c1p/programming/)
