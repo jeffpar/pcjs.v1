@@ -25,4 +25,4 @@ Anyway, to satisfy the buyer, I sat down at my old manual typewriter and banged 
 code" listing.  I produced it mostly by using the program to disassemble itself, combined with information
 from hand-written notes (which I may still have somewhere).  Here it is, many decades later, for your amusement.
 
-[<img src="http://archive.pcjs.org/pubs/c1p/programming/thumbs/OSI_Assembler-Disassembler_Listing-thumb.jpg" width="200" height="260" alt="6502 Disassembler Listing (by Jeff Parsons, June 1980)"/>](http://archive.pcjs.org/pubs/c1p/programming/pdfs/OSI_Assembler-Disassembler_Listing.pdf)
+[<img src="http://archive.pcjs.org/apps/c1p/6502/jeffpar/assembler/thumbs/OSI_Assembler-Disassembler_Listing-thumb.jpg" width="200" height="260" alt="6502 Disassembler Listing (by Jeff Parsons, June 1980)"/>](http://archive.pcjs.org/apps/c1p/6502/jeffpar/assembler/pdfs/OSI_Assembler-Disassembler_Listing.pdf)
