@@ -71,7 +71,7 @@ var CPUDef = {
         SF:     0x0080,         // bit 7: Sign flag
         ALL:    0x00D5,         // all "arithmetic" flags (CF, PF, AF, ZF, SF)
         MASK:   0x00FF,         //
-        IF:     0x0200          // bit 9: Interrupt flag (for internal use only)
+        IF:     0x0200          // bit 9: Interrupt flag (set if interrupts enabled; for internal use only)
     },
     PARITY:  [                  // 256-byte array with a 1 wherever the number of set bits of the array index is EVEN
         1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,
@@ -92,21 +92,21 @@ var CPUDef = {
         1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1
     ],
     /*
-     * Bit values for intFlags
+     * Interrupt-related flags (stored in intFlags)
      */
     INTFLAG: {
         NONE:       0x00,
         INTL:       0x07,       // last interrupt level requested
         INTR:       0x08,       // set if interrupt has been requested
-        HALT:       0x10        // halt requested; see the HLT opcode
+        HALT:       0x10        // halt requested; see opHLT()
     },
     /*
      * Opcode definitions
      */
     OPCODE: {
-        HLT:    0x76,
-        ACI:    0xCE,           // PS.ALL
-        CALL:   0xCD,
+        HLT:    0x76,           // Halt
+        ACI:    0xCE,           // Add with Carry Immediate (affects PS.ALL)
+        CALL:   0xCD,           // Call
         RST0:   0xC7
         // to be continued....
     }

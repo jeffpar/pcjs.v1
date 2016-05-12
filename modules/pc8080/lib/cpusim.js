@@ -434,7 +434,7 @@ CPUSim.prototype.clearCF = function()
  * getCF()
  *
  * @this {CPUSim}
- * @return {number} 0 or CPUDef.PS.CF
+ * @return {number} 0 or 1 (CPUDef.PS.CF)
  */
 CPUSim.prototype.getCF = function()
 {
@@ -452,18 +452,14 @@ CPUSim.prototype.setCF = function()
 };
 
 /**
- * updateCF(fCarry)
+ * updateCF(CF)
  *
  * @this {CPUSim}
- * @param {boolean} fCarry
+ * @param {number} CF (0x000 or 0x100)
  */
-CPUSim.prototype.updateCF = function(fCarry)
+CPUSim.prototype.updateCF = function(CF)
 {
-    if (fCarry) {
-        this.resultZeroCarry |= 0x100;
-    } else {
-        this.resultZeroCarry &= ~0x100;
-    }
+    this.resultZeroCarry = (this.resultZeroCarry & 0xff) | CF;
 };
 
 /**
@@ -526,21 +522,6 @@ CPUSim.prototype.getAF = function()
 CPUSim.prototype.setAF = function()
 {
     this.resultAuxOverflow = (~this.resultParitySign & 0x10) | (this.resultAuxOverflow & ~0x10);
-};
-
-/**
- * updateAF(fAuxCarry)
- *
- * @this {CPUSim}
- * @param {boolean} fAuxCarry
- */
-CPUSim.prototype.updateAF = function(fAuxCarry)
-{
-    if (fAuxCarry) {
-        this.setAF();
-    } else {
-        this.clearAF();
-    }
 };
 
 /**

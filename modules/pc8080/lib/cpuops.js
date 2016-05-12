@@ -123,7 +123,7 @@ CPUDef.opRLC = function()
 {
     var carry = this.regA << 1;
     this.regA = (carry & 0xff) | (carry >> 8);
-    this.resultZeroCarry = (this.resultZeroCarry & 0xff) | (carry & 0x100);
+    this.updateCF(carry & 0x100);
     this.nStepCycles -= 4;
 };
 
@@ -136,7 +136,7 @@ CPUDef.opDADB = function()
 {
     var w;
     this.setHL(w = this.getHL() + this.getBC());
-    this.resultZeroCarry = (this.resultZeroCarry & 0xff) | ((w >> 8) & 0x100);
+    this.updateCF((w >> 8) & 0x100);
     this.nStepCycles -= 10;
 };
 
@@ -204,7 +204,7 @@ CPUDef.opRRC = function()
 {
     var carry = (this.regA << 8) & 0x100;
     this.regA = (carry | this.regA) >> 1;
-    this.resultZeroCarry = (this.resultZeroCarry & 0xff) | carry;
+    this.updateCF(carry);
     this.nStepCycles -= 4;
 };
 
@@ -282,8 +282,8 @@ CPUDef.opMVID = function()
 CPUDef.opRAL = function()
 {
     var carry = this.regA << 1;
-    this.regA = (carry & 0xff) | (this.resultZeroCarry >> 8);
-    this.resultZeroCarry = (this.resultZeroCarry & 0xff) | (carry & 0x100);
+    this.regA = (carry & 0xff) | this.getCF();
+    this.updateCF(carry & 0x100);
     this.nStepCycles -= 4;
 };
 
@@ -296,7 +296,7 @@ CPUDef.opDADD = function()
 {
     var w;
     this.setHL(w = this.getHL() + this.getDE());
-    this.resultZeroCarry = (this.resultZeroCarry & 0xff) | ((w >> 8) & 0x100);
+    this.updateCF((w >> 8) & 0x100);
     this.nStepCycles -= 10;
 };
 
@@ -362,9 +362,9 @@ CPUDef.opMVIE = function()
  */
 CPUDef.opRAR = function()
 {
-    var carry = (this.regA << 8) & 0x100;
-    this.regA = ((this.resultZeroCarry & 0x100) | this.regA) >> 1;
-    this.resultZeroCarry = (this.resultZeroCarry & 0xff) | carry;
+    var carry = (this.regA << 8);
+    this.regA = ((this.getCF() << 8) | this.regA) >> 1;
+    this.updateCF(carry & 0x100);
     this.nStepCycles -= 4;
 };
 
@@ -452,7 +452,7 @@ CPUDef.opDAA = function()
         CF = CPUDef.PS.CF;
     }
     this.regA = this.addByte(src);
-    this.updateCF(!!CF);
+    this.updateCF(CF? 0x100 : 0);
     this.nStepCycles -= 4;
 };
 
@@ -465,7 +465,7 @@ CPUDef.opDADH = function()
 {
     var w;
     this.setHL(w = this.getHL() + this.getHL());
-    this.resultZeroCarry = (this.resultZeroCarry & 0xff) | ((w >> 8) & 0x100);
+    this.updateCF((w >> 8) & 0x100);
     this.nStepCycles -= 10;
 };
 
@@ -623,7 +623,7 @@ CPUDef.opDADSP = function()
 {
     var w;
     this.setHL(w = this.getHL() + this.getSP());
-    this.resultZeroCarry = (this.resultZeroCarry & 0xff) | ((w >> 8) & 0x100);
+    this.updateCF((w >> 8) & 0x100);
     this.nStepCycles -= 10;
 };
 
@@ -689,7 +689,7 @@ CPUDef.opMVIA = function()
  */
 CPUDef.opCMC = function()
 {
-    this.updateCF(!this.getCF());
+    this.updateCF(this.getCF()? 0 : 0x100);
     this.nStepCycles -= 4;
 };
 
