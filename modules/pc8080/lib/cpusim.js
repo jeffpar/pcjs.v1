@@ -1,5 +1,5 @@
 /**
- * @fileoverview Implements the PC8080 CPU module.
+ * @fileoverview Implements the PC8080 CPU component.
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @version 1.0
  * Created 2016-Apr-18
@@ -123,11 +123,17 @@ CPUSim.prototype.addHaltCheck = function(fn)
 /**
  * initProcessor()
  *
+ * Interestingly, if I dynamically generate aOps as an array of functions bound to "this", using the bind()
+ * method, overall performance is worse.  You would think that eliminating the need to use the call() method
+ * on every opcode function invocation would be helpful, but it's not.  I'm not sure exactly why yet; perhaps
+ * a Closure Compiler optimization is defeated when generating the function array at run-time instead of at
+ * compile-time.
+ *
  * @this {CPUSim}
  */
 CPUSim.prototype.initProcessor = function()
 {
-    this.aOps = CPUDef.aOps;
+    this.aOps = CPUDef.aOps8080;
 };
 
 /**

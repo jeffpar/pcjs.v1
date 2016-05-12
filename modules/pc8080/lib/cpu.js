@@ -1,5 +1,5 @@
 /**
- * @fileoverview Implements the PC8080 CPU component.
+ * @fileoverview Controls the PC8080 CPU component.
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @version 1.0
  * Created 2016-Apr-18

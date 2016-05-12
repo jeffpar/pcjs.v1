@@ -157,9 +157,6 @@ function C1PVideo(parmsVideo, canvas, context, imgChars)
      * it still being labelled "experimental technology".  Let's hope the browsers standardize
      * on this.  I see other options emerging, like the CSS property "image-rendering: pixelated"
      * that's apparently been added to Chrome.  Sigh.
-     *
-     * TODO: Investigate why imageSmoothingEnabled seems to have little effect on the imgChars
-     * images we draw in updateWindow().
      */
     var i, sEvent, asWebPrefixes = ['', 'moz', 'ms', 'webkit'];
     var fSmoothing = parmsVideo['smoothing'];

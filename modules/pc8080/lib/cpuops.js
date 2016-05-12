@@ -2874,7 +2874,7 @@ CPUDef.opRST7 = function()
  * but I suspect that would vary quite a bit across JavaScript engines; for now, I'm putting my
  * money on array lookup.
  */
-CPUDef.aOps = [
+CPUDef.aOps8080 = [
     /* 0x00-0x03 */ CPUDef.opNOP,   CPUDef.opLXIB,  CPUDef.opSTAXB, CPUDef.opINXB,
     /* 0x04-0x07 */ CPUDef.opINRB,  CPUDef.opDCRB,  CPUDef.opMVIB,  CPUDef.opRLC,
     /* 0x08-0x0B */ CPUDef.opNOP,   CPUDef.opDADB,  CPUDef.opLDAXB, CPUDef.opDCXB,
