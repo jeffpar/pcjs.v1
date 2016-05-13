@@ -969,21 +969,7 @@ CPU.prototype.runCPU = function(fUpdateFocus)
              * nCyclesPerBurst is how many cycles we WANT to run on each iteration of stepCPU(), but it may run
              * significantly less (or slightly more, since we can't execute partial instructions).
              */
-            try {
-                this.stepCPU(nCyclesPerBurst);
-            }
-            catch(exception) {
-                if (typeof exception != "number") throw exception;
-                if (MAXDEBUG) this.println("CPU exception " + str.toHexByte(exception));
-                /*
-                 * TODO: If we ever get into a situation where every single instruction is generating a fault
-                 * (eg, if an 8088 executes opcode 0xFF 0xFF, which is incorrectly routed to helpFault() instead
-                 * of fnGRPUndefined()), the browser may hang because we're failing to yield often enough.
-                 * This is likely because the thrown exceptions are taking MUCH longer than normal instructions,
-                 * throwing off our burst calculations.  We need to either adjust the burst or break out of the
-                 * DO-WHILE loop on every exception.
-                 */
-            }
+            this.stepCPU(nCyclesPerBurst);
 
             /*
              * nBurstCycles, less any remaining nStepCycles, is how many cycles stepCPU() ACTUALLY ran (nCycles).
