@@ -1,5 +1,5 @@
 /**
- * @fileoverview PCjs-specific message definitions.
+ * @fileoverview Defines message categories.
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @version 1.0
  * Created 2014-Dec-11

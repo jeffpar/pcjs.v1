@@ -1,5 +1,5 @@
 /**
- * @fileoverview Defines PC8080 constants.
+ * @fileoverview Defines PC8080 CPU constants.
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @version 1.0
  * Created 2016-Apr-18
