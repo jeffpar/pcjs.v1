@@ -7,7 +7,7 @@ permalink: /apps/c1p/
 Challenger 1P Applications
 ---
 
-All C1P applications come in two flavors:
+[C1Pjs](/docs/c1pjs/) runs Challenger 1P (C1P) applications written in:
 
 - [BASIC](BASIC/)
 - [6502 Machine-Language](6502/)

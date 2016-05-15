@@ -229,7 +229,7 @@ Keyboard.STUPID_KEYCODES[Keyboard.KEYCODE.FF_DASH] = Keyboard.ASCII['-'];
 Keyboard.SOFTCODES = {
     '1p':       Keyboard.KEYCODE.ONE,
     '2p':       Keyboard.KEYCODE.TWO,
-    'coin':     Keyboard.KEYCODE.FIVE,
+    'coin':     Keyboard.KEYCODE.THREE,
     'left':     Keyboard.KEYCODE.LEFT,
     'right':    Keyboard.KEYCODE.RIGHT,
     'fire':     Keyboard.KEYCODE.SPACE

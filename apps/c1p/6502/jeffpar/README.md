@@ -8,7 +8,7 @@ Challenger 1P Machine-Language Programs
 ---
 
 The project contains the following 6502 machine-language programs written by [Jeff Parsons](https://twitter.com/jeffpar)
-in 1979-1980:
+from 1979 to 1980:
 
 - [6502 Assembler/Disassembler](assembler/)
 - [BASIC Extensions](basicext/BASICEXT.json)

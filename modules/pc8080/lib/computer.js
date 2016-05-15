@@ -1432,12 +1432,11 @@ Computer.prototype.updateFocus = function(fScroll)
         }
         /*
          * TODO: We need a mechanism to determine the "active" display, instead of hard-coding this to aVideo[0].
-         *
+         */
         this.aVideo[0].setFocus();
         if (fScroll && window) {
             window.scrollTo(x, y);
         }
-         */
     }
 };
 
