@@ -17,7 +17,7 @@ The following BASIC applications were supplied by Ohio Scientific:
 - [STAR WARS](OSI/STARWARS.BAS)
 - [TRIG TUTOR](OSI/TRIGTUTOR.BAS)
 
-We also have a variety of BASIC programs written by [Jeff Parsons](https://twitter.com/jeffpar) from 1979 to 1980:
+The project also includes some eclectic BASIC programs written by [Jeff Parsons](https://twitter.com/jeffpar) from 1979 to 1980:
 
 - [CHECKERS](jeffpar/CHECKERS.BAS)
 - [HANG WOMAN](jeffpar/HANGWOMAN.BAS)
