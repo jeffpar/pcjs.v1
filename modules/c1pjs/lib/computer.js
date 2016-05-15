@@ -265,6 +265,11 @@ C1PComputer.power = function(computer)
  */
 C1PComputer.init = function()
 {
+    /*
+     * In non-COMPILED builds, embedMachine() may have set XMLVERSION.
+     */
+    if (!COMPILED && XMLVERSION) C1PComputer.APPVERSION = XMLVERSION;
+
     var aeComputers = Component.getElementsByClass(document, C1PJSCLASS, "computer");
 
     for (var iComputer=0; iComputer < aeComputers.length; iComputer++) {

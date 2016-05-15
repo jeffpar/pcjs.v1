@@ -1,6 +1,6 @@
 {
   "name": "pcjs",
-  "version": "1.22.0",
+  "version": "1.22.1",
   "description": "Node-enabled version of PCjs",
   "engine": "node ^0.12.7",
   "main": "server.js",
@@ -146,7 +146,7 @@
     "./modules/pc8080/lib/bus.js",
     "./modules/pc8080/lib/memory.js",
     "./modules/pc8080/lib/cpu.js",
-    "./modules/pc8080/lib/cpusim.js",
+    "./modules/pc8080/lib/cpustate.js",
     "./modules/pc8080/lib/cpuops.js",
     "./modules/pc8080/lib/chipset.js",
     "./modules/pc8080/lib/rom.js",

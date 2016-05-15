@@ -41,7 +41,7 @@ if (NODE) {
 /**
  * op=0x00 (NOP)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opNOP = function()
 {
@@ -51,7 +51,7 @@ CPUDef.opNOP = function()
 /**
  * op=0x01 (LXI B,d16)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opLXIB = function()
 {
@@ -62,7 +62,7 @@ CPUDef.opLXIB = function()
 /**
  * op=0x02 (STAX B)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opSTAXB = function()
 {
@@ -73,7 +73,7 @@ CPUDef.opSTAXB = function()
 /**
  * op=0x03 (INX B)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opINXB = function()
 {
@@ -84,7 +84,7 @@ CPUDef.opINXB = function()
 /**
  * op=0x04 (INR B)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opINRB = function()
 {
@@ -95,7 +95,7 @@ CPUDef.opINRB = function()
 /**
  * op=0x05 (DCR B)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opDCRB = function()
 {
@@ -106,7 +106,7 @@ CPUDef.opDCRB = function()
 /**
  * op=0x06 (MVI B,d8)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMVIB = function()
 {
@@ -117,33 +117,33 @@ CPUDef.opMVIB = function()
 /**
  * op=0x07 (RLC)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opRLC = function()
 {
     var carry = this.regA << 1;
     this.regA = (carry & 0xff) | (carry >> 8);
-    this.resultZeroCarry = (this.resultZeroCarry & 0xff) | (carry & 0x100);
+    this.updateCF(carry & 0x100);
     this.nStepCycles -= 4;
 };
 
 /**
  * op=0x09 (DAD B)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opDADB = function()
 {
     var w;
     this.setHL(w = this.getHL() + this.getBC());
-    this.resultZeroCarry = (this.resultZeroCarry & 0xff) | ((w >> 8) & 0x100);
+    this.updateCF((w >> 8) & 0x100);
     this.nStepCycles -= 10;
 };
 
 /**
  * op=0x0A (LDAX B)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opLDAXB = function()
 {
@@ -154,7 +154,7 @@ CPUDef.opLDAXB = function()
 /**
  * op=0x0B (DCX B)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opDCXB = function()
 {
@@ -165,7 +165,7 @@ CPUDef.opDCXB = function()
 /**
  * op=0x0C (INR C)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opINRC = function()
 {
@@ -176,7 +176,7 @@ CPUDef.opINRC = function()
 /**
  * op=0x0D (DCR C)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opDCRC = function()
 {
@@ -187,7 +187,7 @@ CPUDef.opDCRC = function()
 /**
  * op=0x0E (MVI C,d8)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMVIC = function()
 {
@@ -198,20 +198,20 @@ CPUDef.opMVIC = function()
 /**
  * op=0x0F (RRC)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opRRC = function()
 {
     var carry = (this.regA << 8) & 0x100;
     this.regA = (carry | this.regA) >> 1;
-    this.resultZeroCarry = (this.resultZeroCarry & 0xff) | carry;
+    this.updateCF(carry);
     this.nStepCycles -= 4;
 };
 
 /**
  * op=0x11 (LXI D,d16)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opLXID = function()
 {
@@ -222,7 +222,7 @@ CPUDef.opLXID = function()
 /**
  * op=0x12 (STAX D)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opSTAXD = function()
 {
@@ -233,7 +233,7 @@ CPUDef.opSTAXD = function()
 /**
  * op=0x13 (INX D)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opINXD = function()
 {
@@ -244,7 +244,7 @@ CPUDef.opINXD = function()
 /**
  * op=0x14 (INR D)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opINRD = function()
 {
@@ -255,7 +255,7 @@ CPUDef.opINRD = function()
 /**
  * op=0x15 (DCR D)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opDCRD = function()
 {
@@ -266,7 +266,7 @@ CPUDef.opDCRD = function()
 /**
  * op=0x16 (MVI D,d8)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMVID = function()
 {
@@ -277,33 +277,33 @@ CPUDef.opMVID = function()
 /**
  * op=0x17 (RAL)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opRAL = function()
 {
     var carry = this.regA << 1;
-    this.regA = (carry & 0xff) | (this.resultZeroCarry >> 8);
-    this.resultZeroCarry = (this.resultZeroCarry & 0xff) | (carry & 0x100);
+    this.regA = (carry & 0xff) | this.getCF();
+    this.updateCF(carry & 0x100);
     this.nStepCycles -= 4;
 };
 
 /**
  * op=0x19 (DAD D)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opDADD = function()
 {
     var w;
     this.setHL(w = this.getHL() + this.getDE());
-    this.resultZeroCarry = (this.resultZeroCarry & 0xff) | ((w >> 8) & 0x100);
+    this.updateCF((w >> 8) & 0x100);
     this.nStepCycles -= 10;
 };
 
 /**
  * op=0x1A (LDAX D)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opLDAXD = function()
 {
@@ -314,7 +314,7 @@ CPUDef.opLDAXD = function()
 /**
  * op=0x1B (DCX D)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opDCXD = function()
 {
@@ -325,7 +325,7 @@ CPUDef.opDCXD = function()
 /**
  * op=0x1C (INR E)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opINRE = function()
 {
@@ -336,7 +336,7 @@ CPUDef.opINRE = function()
 /**
  * op=0x1D (DCR E)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opDCRE = function()
 {
@@ -347,7 +347,7 @@ CPUDef.opDCRE = function()
 /**
  * op=0x1E (MVI E,d8)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMVIE = function()
 {
@@ -358,20 +358,20 @@ CPUDef.opMVIE = function()
 /**
  * op=0x1F (RAR)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opRAR = function()
 {
-    var carry = (this.regA << 8) & 0x100;
-    this.regA = ((this.resultZeroCarry & 0x100) | this.regA) >> 1;
-    this.resultZeroCarry = (this.resultZeroCarry & 0xff) | carry;
+    var carry = (this.regA << 8);
+    this.regA = ((this.getCF() << 8) | this.regA) >> 1;
+    this.updateCF(carry & 0x100);
     this.nStepCycles -= 4;
 };
 
 /**
  * op=0x21 (LXI H,d16)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opLXIH = function()
 {
@@ -382,7 +382,7 @@ CPUDef.opLXIH = function()
 /**
  * op=0x22 (SHLD a16)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opSHLD = function()
 {
@@ -393,7 +393,7 @@ CPUDef.opSHLD = function()
 /**
  * op=0x23 (INX H)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opINXH = function()
 {
@@ -404,7 +404,7 @@ CPUDef.opINXH = function()
 /**
  * op=0x24 (INR H)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opINRH = function()
 {
@@ -415,7 +415,7 @@ CPUDef.opINRH = function()
 /**
  * op=0x25 (DCR H)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opDCRH = function()
 {
@@ -426,7 +426,7 @@ CPUDef.opDCRH = function()
 /**
  * op=0x26 (MVI H,d8)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMVIH = function()
 {
@@ -437,7 +437,7 @@ CPUDef.opMVIH = function()
 /**
  * op=0x27 (DAA)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opDAA = function()
 {
@@ -452,27 +452,27 @@ CPUDef.opDAA = function()
         CF = CPUDef.PS.CF;
     }
     this.regA = this.addByte(src);
-    this.updateCF(!!CF);
+    this.updateCF(CF? 0x100 : 0);
     this.nStepCycles -= 4;
 };
 
 /**
  * op=0x29 (DAD H)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opDADH = function()
 {
     var w;
     this.setHL(w = this.getHL() + this.getHL());
-    this.resultZeroCarry = (this.resultZeroCarry & 0xff) | ((w >> 8) & 0x100);
+    this.updateCF((w >> 8) & 0x100);
     this.nStepCycles -= 10;
 };
 
 /**
  * op=0x2A (LHLD a16)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opLHLD = function()
 {
@@ -483,7 +483,7 @@ CPUDef.opLHLD = function()
 /**
  * op=0x2B (DCX H)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opDCXH = function()
 {
@@ -494,7 +494,7 @@ CPUDef.opDCXH = function()
 /**
  * op=0x2C (INR L)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opINRL = function()
 {
@@ -505,7 +505,7 @@ CPUDef.opINRL = function()
 /**
  * op=0x2D (DCR L)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opDCRL = function()
 {
@@ -516,7 +516,7 @@ CPUDef.opDCRL = function()
 /**
  * op=0x2E (MVI L,d8)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMVIL = function()
 {
@@ -527,7 +527,7 @@ CPUDef.opMVIL = function()
 /**
  * op=0x2F (CMA)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opCMA = function()
 {
@@ -538,7 +538,7 @@ CPUDef.opCMA = function()
 /**
  * op=0x31 (LXI SP,d16)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opLXISP = function()
 {
@@ -549,7 +549,7 @@ CPUDef.opLXISP = function()
 /**
  * op=0x32 (STA a16)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opSTA = function()
 {
@@ -560,7 +560,7 @@ CPUDef.opSTA = function()
 /**
  * op=0x33 (INX SP)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opINXSP = function()
 {
@@ -571,7 +571,7 @@ CPUDef.opINXSP = function()
 /**
  * op=0x34 (INR M)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opINRM = function()
 {
@@ -583,7 +583,7 @@ CPUDef.opINRM = function()
 /**
  * op=0x35 (DCR M)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opDCRM = function()
 {
@@ -595,7 +595,7 @@ CPUDef.opDCRM = function()
 /**
  * op=0x36 (MVI M,d8)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMVIM = function()
 {
@@ -606,7 +606,7 @@ CPUDef.opMVIM = function()
 /**
  * op=0x37 (STC)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opSTC = function()
 {
@@ -617,20 +617,20 @@ CPUDef.opSTC = function()
 /**
  * op=0x39 (DAD SP)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opDADSP = function()
 {
     var w;
     this.setHL(w = this.getHL() + this.getSP());
-    this.resultZeroCarry = (this.resultZeroCarry & 0xff) | ((w >> 8) & 0x100);
+    this.updateCF((w >> 8) & 0x100);
     this.nStepCycles -= 10;
 };
 
 /**
  * op=0x3A (LDA a16)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opLDA = function()
 {
@@ -641,7 +641,7 @@ CPUDef.opLDA = function()
 /**
  * op=0x3B (DCX SP)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opDCXSP = function()
 {
@@ -652,7 +652,7 @@ CPUDef.opDCXSP = function()
 /**
  * op=0x3C (INR A)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opINRA = function()
 {
@@ -663,7 +663,7 @@ CPUDef.opINRA = function()
 /**
  * op=0x3D (DCR A)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opDCRA = function()
 {
@@ -674,7 +674,7 @@ CPUDef.opDCRA = function()
 /**
  * op=0x3E (MVI A,d8)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMVIA = function()
 {
@@ -685,18 +685,18 @@ CPUDef.opMVIA = function()
 /**
  * op=0x3F (CMC)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opCMC = function()
 {
-    this.updateCF(!this.getCF());
+    this.updateCF(this.getCF()? 0 : 0x100);
     this.nStepCycles -= 4;
 };
 
 /**
  * op=0x40 (MOV B,B)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMOVBB = function()
 {
@@ -706,7 +706,7 @@ CPUDef.opMOVBB = function()
 /**
  * op=0x41 (MOV B,C)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMOVBC = function()
 {
@@ -717,7 +717,7 @@ CPUDef.opMOVBC = function()
 /**
  * op=0x42 (MOV B,D)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMOVBD = function()
 {
@@ -728,7 +728,7 @@ CPUDef.opMOVBD = function()
 /**
  * op=0x43 (MOV B,E)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMOVBE = function()
 {
@@ -739,7 +739,7 @@ CPUDef.opMOVBE = function()
 /**
  * op=0x44 (MOV B,H)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMOVBH = function()
 {
@@ -750,7 +750,7 @@ CPUDef.opMOVBH = function()
 /**
  * op=0x45 (MOV B,L)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMOVBL = function()
 {
@@ -761,7 +761,7 @@ CPUDef.opMOVBL = function()
 /**
  * op=0x46 (MOV B,M)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMOVBM = function()
 {
@@ -772,7 +772,7 @@ CPUDef.opMOVBM = function()
 /**
  * op=0x47 (MOV B,A)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMOVBA = function()
 {
@@ -783,7 +783,7 @@ CPUDef.opMOVBA = function()
 /**
  * op=0x48 (MOV C,B)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMOVCB = function()
 {
@@ -794,7 +794,7 @@ CPUDef.opMOVCB = function()
 /**
  * op=0x49 (MOV C,C)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMOVCC = function()
 {
@@ -804,7 +804,7 @@ CPUDef.opMOVCC = function()
 /**
  * op=0x4A (MOV C,D)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMOVCD = function()
 {
@@ -815,7 +815,7 @@ CPUDef.opMOVCD = function()
 /**
  * op=0x4B (MOV C,E)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMOVCE = function()
 {
@@ -826,7 +826,7 @@ CPUDef.opMOVCE = function()
 /**
  * op=0x4C (MOV C,H)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMOVCH = function()
 {
@@ -837,7 +837,7 @@ CPUDef.opMOVCH = function()
 /**
  * op=0x4D (MOV C,L)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMOVCL = function()
 {
@@ -848,7 +848,7 @@ CPUDef.opMOVCL = function()
 /**
  * op=0x4E (MOV C,M)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMOVCM = function()
 {
@@ -859,7 +859,7 @@ CPUDef.opMOVCM = function()
 /**
  * op=0x4F (MOV C,A)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMOVCA = function()
 {
@@ -870,7 +870,7 @@ CPUDef.opMOVCA = function()
 /**
  * op=0x50 (MOV D,B)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMOVDB = function()
 {
@@ -881,7 +881,7 @@ CPUDef.opMOVDB = function()
 /**
  * op=0x51 (MOV D,C)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMOVDC = function()
 {
@@ -892,7 +892,7 @@ CPUDef.opMOVDC = function()
 /**
  * op=0x52 (MOV D,D)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMOVDD = function()
 {
@@ -902,7 +902,7 @@ CPUDef.opMOVDD = function()
 /**
  * op=0x53 (MOV D,E)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMOVDE = function()
 {
@@ -913,7 +913,7 @@ CPUDef.opMOVDE = function()
 /**
  * op=0x54 (MOV D,H)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMOVDH = function()
 {
@@ -924,7 +924,7 @@ CPUDef.opMOVDH = function()
 /**
  * op=0x55 (MOV D,L)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMOVDL = function()
 {
@@ -935,7 +935,7 @@ CPUDef.opMOVDL = function()
 /**
  * op=0x56 (MOV D,M)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMOVDM = function()
 {
@@ -946,7 +946,7 @@ CPUDef.opMOVDM = function()
 /**
  * op=0x57 (MOV D,A)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMOVDA = function()
 {
@@ -957,7 +957,7 @@ CPUDef.opMOVDA = function()
 /**
  * op=0x58 (MOV E,B)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMOVEB = function()
 {
@@ -968,7 +968,7 @@ CPUDef.opMOVEB = function()
 /**
  * op=0x59 (MOV E,C)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMOVEC = function()
 {
@@ -979,7 +979,7 @@ CPUDef.opMOVEC = function()
 /**
  * op=0x5A (MOV E,D)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMOVED = function()
 {
@@ -990,7 +990,7 @@ CPUDef.opMOVED = function()
 /**
  * op=0x5B (MOV E,E)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMOVEE = function()
 {
@@ -1000,7 +1000,7 @@ CPUDef.opMOVEE = function()
 /**
  * op=0x5C (MOV E,H)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMOVEH = function()
 {
@@ -1011,7 +1011,7 @@ CPUDef.opMOVEH = function()
 /**
  * op=0x5D (MOV E,L)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMOVEL = function()
 {
@@ -1022,7 +1022,7 @@ CPUDef.opMOVEL = function()
 /**
  * op=0x5E (MOV E,M)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMOVEM = function()
 {
@@ -1033,7 +1033,7 @@ CPUDef.opMOVEM = function()
 /**
  * op=0x5F (MOV E,A)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMOVEA = function()
 {
@@ -1044,7 +1044,7 @@ CPUDef.opMOVEA = function()
 /**
  * op=0x60 (MOV H,B)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMOVHB = function()
 {
@@ -1055,7 +1055,7 @@ CPUDef.opMOVHB = function()
 /**
  * op=0x61 (MOV H,C)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMOVHC = function()
 {
@@ -1066,7 +1066,7 @@ CPUDef.opMOVHC = function()
 /**
  * op=0x62 (MOV H,D)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMOVHD = function()
 {
@@ -1077,7 +1077,7 @@ CPUDef.opMOVHD = function()
 /**
  * op=0x63 (MOV H,E)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMOVHE = function()
 {
@@ -1088,7 +1088,7 @@ CPUDef.opMOVHE = function()
 /**
  * op=0x64 (MOV H,H)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMOVHH = function()
 {
@@ -1098,7 +1098,7 @@ CPUDef.opMOVHH = function()
 /**
  * op=0x65 (MOV H,L)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMOVHL = function()
 {
@@ -1109,7 +1109,7 @@ CPUDef.opMOVHL = function()
 /**
  * op=0x66 (MOV H,M)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMOVHM = function()
 {
@@ -1120,7 +1120,7 @@ CPUDef.opMOVHM = function()
 /**
  * op=0x67 (MOV H,A)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMOVHA = function()
 {
@@ -1131,7 +1131,7 @@ CPUDef.opMOVHA = function()
 /**
  * op=0x68 (MOV L,B)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMOVLB = function()
 {
@@ -1142,7 +1142,7 @@ CPUDef.opMOVLB = function()
 /**
  * op=0x69 (MOV L,C)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMOVLC = function()
 {
@@ -1153,7 +1153,7 @@ CPUDef.opMOVLC = function()
 /**
  * op=0x6A (MOV L,D)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMOVLD = function()
 {
@@ -1164,7 +1164,7 @@ CPUDef.opMOVLD = function()
 /**
  * op=0x6B (MOV L,E)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMOVLE = function()
 {
@@ -1175,7 +1175,7 @@ CPUDef.opMOVLE = function()
 /**
  * op=0x6C (MOV L,H)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMOVLH = function()
 {
@@ -1186,7 +1186,7 @@ CPUDef.opMOVLH = function()
 /**
  * op=0x6D (MOV L,L)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMOVLL = function()
 {
@@ -1196,7 +1196,7 @@ CPUDef.opMOVLL = function()
 /**
  * op=0x6E (MOV L,M)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMOVLM = function()
 {
@@ -1207,7 +1207,7 @@ CPUDef.opMOVLM = function()
 /**
  * op=0x6F (MOV L,A)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMOVLA = function()
 {
@@ -1218,7 +1218,7 @@ CPUDef.opMOVLA = function()
 /**
  * op=0x70 (MOV M,B)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMOVMB = function()
 {
@@ -1229,7 +1229,7 @@ CPUDef.opMOVMB = function()
 /**
  * op=0x71 (MOV M,C)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMOVMC = function()
 {
@@ -1240,7 +1240,7 @@ CPUDef.opMOVMC = function()
 /**
  * op=0x72 (MOV M,D)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMOVMD = function()
 {
@@ -1251,7 +1251,7 @@ CPUDef.opMOVMD = function()
 /**
  * op=0x73 (MOV M,E)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMOVME = function()
 {
@@ -1262,7 +1262,7 @@ CPUDef.opMOVME = function()
 /**
  * op=0x74 (MOV M,H)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMOVMH = function()
 {
@@ -1273,7 +1273,7 @@ CPUDef.opMOVMH = function()
 /**
  * op=0x75 (MOV M,L)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMOVML = function()
 {
@@ -1284,7 +1284,7 @@ CPUDef.opMOVML = function()
 /**
  * op=0x76 (HLT)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opHLT = function()
 {
@@ -1331,7 +1331,7 @@ CPUDef.opHLT = function()
 /**
  * op=0x77 (MOV M,A)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMOVMA = function()
 {
@@ -1342,7 +1342,7 @@ CPUDef.opMOVMA = function()
 /**
  * op=0x78 (MOV A,B)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMOVAB = function()
 {
@@ -1353,7 +1353,7 @@ CPUDef.opMOVAB = function()
 /**
  * op=0x79 (MOV A,C)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMOVAC = function()
 {
@@ -1364,7 +1364,7 @@ CPUDef.opMOVAC = function()
 /**
  * op=0x7A (MOV A,D)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMOVAD = function()
 {
@@ -1375,7 +1375,7 @@ CPUDef.opMOVAD = function()
 /**
  * op=0x7B (MOV A,E)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMOVAE = function()
 {
@@ -1386,7 +1386,7 @@ CPUDef.opMOVAE = function()
 /**
  * op=0x7C (MOV A,H)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMOVAH = function()
 {
@@ -1397,7 +1397,7 @@ CPUDef.opMOVAH = function()
 /**
  * op=0x7D (MOV A,L)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMOVAL = function()
 {
@@ -1408,7 +1408,7 @@ CPUDef.opMOVAL = function()
 /**
  * op=0x7E (MOV A,M)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMOVAM = function()
 {
@@ -1419,7 +1419,7 @@ CPUDef.opMOVAM = function()
 /**
  * op=0x7F (MOV A,A)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opMOVAA = function()
 {
@@ -1429,7 +1429,7 @@ CPUDef.opMOVAA = function()
 /**
  * op=0x80 (ADD B)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opADDB = function()
 {
@@ -1440,7 +1440,7 @@ CPUDef.opADDB = function()
 /**
  * op=0x81 (ADD C)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opADDC = function()
 {
@@ -1451,7 +1451,7 @@ CPUDef.opADDC = function()
 /**
  * op=0x82 (ADD D)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opADDD = function()
 {
@@ -1462,7 +1462,7 @@ CPUDef.opADDD = function()
 /**
  * op=0x83 (ADD E)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opADDE = function()
 {
@@ -1473,7 +1473,7 @@ CPUDef.opADDE = function()
 /**
  * op=0x84 (ADD H)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opADDH = function()
 {
@@ -1484,7 +1484,7 @@ CPUDef.opADDH = function()
 /**
  * op=0x85 (ADD L)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opADDL = function()
 {
@@ -1495,7 +1495,7 @@ CPUDef.opADDL = function()
 /**
  * op=0x86 (ADD M)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opADDM = function()
 {
@@ -1506,7 +1506,7 @@ CPUDef.opADDM = function()
 /**
  * op=0x87 (ADD A)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opADDA = function()
 {
@@ -1517,7 +1517,7 @@ CPUDef.opADDA = function()
 /**
  * op=0x88 (ADC B)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opADCB = function()
 {
@@ -1528,7 +1528,7 @@ CPUDef.opADCB = function()
 /**
  * op=0x89 (ADC C)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opADCC = function()
 {
@@ -1539,7 +1539,7 @@ CPUDef.opADCC = function()
 /**
  * op=0x8A (ADC D)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opADCD = function()
 {
@@ -1550,7 +1550,7 @@ CPUDef.opADCD = function()
 /**
  * op=0x8B (ADC E)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opADCE = function()
 {
@@ -1561,7 +1561,7 @@ CPUDef.opADCE = function()
 /**
  * op=0x8C (ADC H)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opADCH = function()
 {
@@ -1572,7 +1572,7 @@ CPUDef.opADCH = function()
 /**
  * op=0x8D (ADC L)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opADCL = function()
 {
@@ -1583,7 +1583,7 @@ CPUDef.opADCL = function()
 /**
  * op=0x8E (ADC M)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opADCM = function()
 {
@@ -1594,7 +1594,7 @@ CPUDef.opADCM = function()
 /**
  * op=0x8F (ADC A)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opADCA = function()
 {
@@ -1605,7 +1605,7 @@ CPUDef.opADCA = function()
 /**
  * op=0x90 (SUB B)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opSUBB = function()
 {
@@ -1616,7 +1616,7 @@ CPUDef.opSUBB = function()
 /**
  * op=0x91 (SUB C)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opSUBC = function()
 {
@@ -1627,7 +1627,7 @@ CPUDef.opSUBC = function()
 /**
  * op=0x92 (SUB D)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opSUBD = function()
 {
@@ -1638,7 +1638,7 @@ CPUDef.opSUBD = function()
 /**
  * op=0x93 (SUB E)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opSUBE = function()
 {
@@ -1649,7 +1649,7 @@ CPUDef.opSUBE = function()
 /**
  * op=0x94 (SUB H)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opSUBH = function()
 {
@@ -1660,7 +1660,7 @@ CPUDef.opSUBH = function()
 /**
  * op=0x95 (SUB L)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opSUBL = function()
 {
@@ -1671,7 +1671,7 @@ CPUDef.opSUBL = function()
 /**
  * op=0x96 (SUB M)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opSUBM = function()
 {
@@ -1682,7 +1682,7 @@ CPUDef.opSUBM = function()
 /**
  * op=0x97 (SUB A)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opSUBA = function()
 {
@@ -1693,7 +1693,7 @@ CPUDef.opSUBA = function()
 /**
  * op=0x98 (SBB B)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opSBBB = function()
 {
@@ -1704,7 +1704,7 @@ CPUDef.opSBBB = function()
 /**
  * op=0x99 (SBB C)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opSBBC = function()
 {
@@ -1715,7 +1715,7 @@ CPUDef.opSBBC = function()
 /**
  * op=0x9A (SBB D)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opSBBD = function()
 {
@@ -1726,7 +1726,7 @@ CPUDef.opSBBD = function()
 /**
  * op=0x9B (SBB E)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opSBBE = function()
 {
@@ -1737,7 +1737,7 @@ CPUDef.opSBBE = function()
 /**
  * op=0x9C (SBB H)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opSBBH = function()
 {
@@ -1748,7 +1748,7 @@ CPUDef.opSBBH = function()
 /**
  * op=0x9D (SBB L)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opSBBL = function()
 {
@@ -1759,7 +1759,7 @@ CPUDef.opSBBL = function()
 /**
  * op=0x9E (SBB M)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opSBBM = function()
 {
@@ -1770,7 +1770,7 @@ CPUDef.opSBBM = function()
 /**
  * op=0x9F (SBB A)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opSBBA = function()
 {
@@ -1781,7 +1781,7 @@ CPUDef.opSBBA = function()
 /**
  * op=0xA0 (ANA B)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opANAB = function()
 {
@@ -1792,7 +1792,7 @@ CPUDef.opANAB = function()
 /**
  * op=0xA1 (ANA C)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opANAC = function()
 {
@@ -1803,7 +1803,7 @@ CPUDef.opANAC = function()
 /**
  * op=0xA2 (ANA D)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opANAD = function()
 {
@@ -1814,7 +1814,7 @@ CPUDef.opANAD = function()
 /**
  * op=0xA3 (ANA E)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opANAE = function()
 {
@@ -1825,7 +1825,7 @@ CPUDef.opANAE = function()
 /**
  * op=0xA4 (ANA H)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opANAH = function()
 {
@@ -1836,7 +1836,7 @@ CPUDef.opANAH = function()
 /**
  * op=0xA5 (ANA L)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opANAL = function()
 {
@@ -1847,7 +1847,7 @@ CPUDef.opANAL = function()
 /**
  * op=0xA6 (ANA M)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opANAM = function()
 {
@@ -1858,7 +1858,7 @@ CPUDef.opANAM = function()
 /**
  * op=0xA7 (ANA A)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opANAA = function()
 {
@@ -1869,7 +1869,7 @@ CPUDef.opANAA = function()
 /**
  * op=0xA8 (XRA B)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opXRAB = function()
 {
@@ -1880,7 +1880,7 @@ CPUDef.opXRAB = function()
 /**
  * op=0xA9 (XRA C)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opXRAC = function()
 {
@@ -1891,7 +1891,7 @@ CPUDef.opXRAC = function()
 /**
  * op=0xAA (XRA D)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opXRAD = function()
 {
@@ -1902,7 +1902,7 @@ CPUDef.opXRAD = function()
 /**
  * op=0xAB (XRA E)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opXRAE = function()
 {
@@ -1913,7 +1913,7 @@ CPUDef.opXRAE = function()
 /**
  * op=0xAC (XRA H)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opXRAH = function()
 {
@@ -1924,7 +1924,7 @@ CPUDef.opXRAH = function()
 /**
  * op=0xAD (XRA L)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opXRAL = function()
 {
@@ -1935,7 +1935,7 @@ CPUDef.opXRAL = function()
 /**
  * op=0xAE (XRA M)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opXRAM = function()
 {
@@ -1946,7 +1946,7 @@ CPUDef.opXRAM = function()
 /**
  * op=0xAF (XRA A)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opXRAA = function()
 {
@@ -1957,7 +1957,7 @@ CPUDef.opXRAA = function()
 /**
  * op=0xB0 (ORA B)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opORAB = function()
 {
@@ -1968,7 +1968,7 @@ CPUDef.opORAB = function()
 /**
  * op=0xB1 (ORA C)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opORAC = function()
 {
@@ -1979,7 +1979,7 @@ CPUDef.opORAC = function()
 /**
  * op=0xB2 (ORA D)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opORAD = function()
 {
@@ -1990,7 +1990,7 @@ CPUDef.opORAD = function()
 /**
  * op=0xB3 (ORA E)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opORAE = function()
 {
@@ -2001,7 +2001,7 @@ CPUDef.opORAE = function()
 /**
  * op=0xB4 (ORA H)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opORAH = function()
 {
@@ -2012,7 +2012,7 @@ CPUDef.opORAH = function()
 /**
  * op=0xB5 (ORA L)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opORAL = function()
 {
@@ -2023,7 +2023,7 @@ CPUDef.opORAL = function()
 /**
  * op=0xB6 (ORA M)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opORAM = function()
 {
@@ -2034,7 +2034,7 @@ CPUDef.opORAM = function()
 /**
  * op=0xB7 (ORA A)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opORAA = function()
 {
@@ -2045,7 +2045,7 @@ CPUDef.opORAA = function()
 /**
  * op=0xB8 (CMP B)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opCMPB = function()
 {
@@ -2056,7 +2056,7 @@ CPUDef.opCMPB = function()
 /**
  * op=0xB9 (CMP C)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opCMPC = function()
 {
@@ -2067,7 +2067,7 @@ CPUDef.opCMPC = function()
 /**
  * op=0xBA (CMP D)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opCMPD = function()
 {
@@ -2078,7 +2078,7 @@ CPUDef.opCMPD = function()
 /**
  * op=0xBB (CMP E)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opCMPE = function()
 {
@@ -2089,7 +2089,7 @@ CPUDef.opCMPE = function()
 /**
  * op=0xBC (CMP H)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opCMPH = function()
 {
@@ -2100,7 +2100,7 @@ CPUDef.opCMPH = function()
 /**
  * op=0xBD (CMP L)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opCMPL = function()
 {
@@ -2111,7 +2111,7 @@ CPUDef.opCMPL = function()
 /**
  * op=0xBE (CMP M)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opCMPM = function()
 {
@@ -2122,7 +2122,7 @@ CPUDef.opCMPM = function()
 /**
  * op=0xBF (CMP A)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opCMPA = function()
 {
@@ -2133,7 +2133,7 @@ CPUDef.opCMPA = function()
 /**
  * op=0xC0 (RNZ)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opRNZ = function()
 {
@@ -2147,7 +2147,7 @@ CPUDef.opRNZ = function()
 /**
  * op=0xC1 (POP B)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opPOPB = function()
 {
@@ -2158,7 +2158,7 @@ CPUDef.opPOPB = function()
 /**
  * op=0xC2 (JNZ a16)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opJNZ = function()
 {
@@ -2170,7 +2170,7 @@ CPUDef.opJNZ = function()
 /**
  * op=0xC3 (JMP a16)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opJMP = function()
 {
@@ -2181,7 +2181,7 @@ CPUDef.opJMP = function()
 /**
  * op=0xC4 (CNZ a16)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opCNZ = function()
 {
@@ -2197,7 +2197,7 @@ CPUDef.opCNZ = function()
 /**
  * op=0xC5 (PUSH B)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opPUSHB = function()
 {
@@ -2208,7 +2208,7 @@ CPUDef.opPUSHB = function()
 /**
  * op=0xC6 (ADI d8)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opADI = function()
 {
@@ -2219,7 +2219,7 @@ CPUDef.opADI = function()
 /**
  * op=0xC7 (RST 0)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opRST0 = function()
 {
@@ -2231,7 +2231,7 @@ CPUDef.opRST0 = function()
 /**
  * op=0xC8 (RZ)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opRZ = function()
 {
@@ -2245,7 +2245,7 @@ CPUDef.opRZ = function()
 /**
  * op=0xC9 (RET)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opRET = function()
 {
@@ -2256,7 +2256,7 @@ CPUDef.opRET = function()
 /**
  * op=0xCA (JZ a16)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opJZ = function()
 {
@@ -2268,7 +2268,7 @@ CPUDef.opJZ = function()
 /**
  * op=0xCC (CZ a16)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opCZ = function()
 {
@@ -2284,7 +2284,7 @@ CPUDef.opCZ = function()
 /**
  * op=0xCD (CALL a16)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opCALL = function()
 {
@@ -2297,7 +2297,7 @@ CPUDef.opCALL = function()
 /**
  * op=0xCE (ACI d8)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opACI = function()
 {
@@ -2308,7 +2308,7 @@ CPUDef.opACI = function()
 /**
  * op=0xCF (RST 1)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opRST1 = function()
 {
@@ -2320,7 +2320,7 @@ CPUDef.opRST1 = function()
 /**
  * op=0xD0 (RNC)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opRNC = function()
 {
@@ -2334,7 +2334,7 @@ CPUDef.opRNC = function()
 /**
  * op=0xD1 (POP D)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opPOPD = function()
 {
@@ -2345,7 +2345,7 @@ CPUDef.opPOPD = function()
 /**
  * op=0xD2 (JNC a16)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opJNC = function()
 {
@@ -2357,7 +2357,7 @@ CPUDef.opJNC = function()
 /**
  * op=0xD3 (OUT d8)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opOUT = function()
 {
@@ -2369,7 +2369,7 @@ CPUDef.opOUT = function()
 /**
  * op=0xD4 (CNC a16)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opCNC = function()
 {
@@ -2385,7 +2385,7 @@ CPUDef.opCNC = function()
 /**
  * op=0xD5 (PUSH D)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opPUSHD = function()
 {
@@ -2396,7 +2396,7 @@ CPUDef.opPUSHD = function()
 /**
  * op=0xD6 (SUI d8)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opSUI = function()
 {
@@ -2407,7 +2407,7 @@ CPUDef.opSUI = function()
 /**
  * op=0xD7 (RST 2)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opRST2 = function()
 {
@@ -2419,7 +2419,7 @@ CPUDef.opRST2 = function()
 /**
  * op=0xD8 (RC)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opRC = function()
 {
@@ -2433,7 +2433,7 @@ CPUDef.opRC = function()
 /**
  * op=0xDA (JC a16)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opJC = function()
 {
@@ -2445,7 +2445,7 @@ CPUDef.opJC = function()
 /**
  * op=0xDB (IN d8)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opIN = function()
 {
@@ -2457,7 +2457,7 @@ CPUDef.opIN = function()
 /**
  * op=0xDC (CC a16)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opCC = function()
 {
@@ -2473,7 +2473,7 @@ CPUDef.opCC = function()
 /**
  * op=0xDE (SBI d8)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opSBI = function()
 {
@@ -2484,7 +2484,7 @@ CPUDef.opSBI = function()
 /**
  * op=0xDF (RST 3)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opRST3 = function()
 {
@@ -2496,7 +2496,7 @@ CPUDef.opRST3 = function()
 /**
  * op=0xE0 (RPO)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opRPO = function()
 {
@@ -2510,7 +2510,7 @@ CPUDef.opRPO = function()
 /**
  * op=0xE1 (POP H)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opPOPH = function()
 {
@@ -2521,7 +2521,7 @@ CPUDef.opPOPH = function()
 /**
  * op=0xE2 (JPO a16)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opJPO = function()
 {
@@ -2533,7 +2533,7 @@ CPUDef.opJPO = function()
 /**
  * op=0xE3 (XTHL)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opXTHL = function()
 {
@@ -2546,7 +2546,7 @@ CPUDef.opXTHL = function()
 /**
  * op=0xE4 (CPO a16)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opCPO = function()
 {
@@ -2562,7 +2562,7 @@ CPUDef.opCPO = function()
 /**
  * op=0xE5 (PUSH H)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opPUSHH = function()
 {
@@ -2573,7 +2573,7 @@ CPUDef.opPUSHH = function()
 /**
  * op=0xE6 (ANI d8)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opANI = function()
 {
@@ -2584,7 +2584,7 @@ CPUDef.opANI = function()
 /**
  * op=0xE7 (RST 4)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opRST4 = function()
 {
@@ -2596,7 +2596,7 @@ CPUDef.opRST4 = function()
 /**
  * op=0xE8 (RPE)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opRPE = function()
 {
@@ -2610,7 +2610,7 @@ CPUDef.opRPE = function()
 /**
  * op=0xE9 (PCHL)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opPCHL = function()
 {
@@ -2621,7 +2621,7 @@ CPUDef.opPCHL = function()
 /**
  * op=0xEA (JPE a16)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opJPE = function()
 {
@@ -2633,7 +2633,7 @@ CPUDef.opJPE = function()
 /**
  * op=0xEB (XCHG)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opXCHG = function()
 {
@@ -2646,7 +2646,7 @@ CPUDef.opXCHG = function()
 /**
  * op=0xEC (CPE a16)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opCPE = function()
 {
@@ -2662,7 +2662,7 @@ CPUDef.opCPE = function()
 /**
  * op=0xEE (XRI d8)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opXRI = function()
 {
@@ -2673,7 +2673,7 @@ CPUDef.opXRI = function()
 /**
  * op=0xEF (RST 5)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opRST5 = function()
 {
@@ -2685,7 +2685,7 @@ CPUDef.opRST5 = function()
 /**
  * op=0xF0 (RP)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opRP = function()
 {
@@ -2699,7 +2699,7 @@ CPUDef.opRP = function()
 /**
  * op=0xF1 (POP PSW)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opPOPSW = function()
 {
@@ -2710,7 +2710,7 @@ CPUDef.opPOPSW = function()
 /**
  * op=0xF2 (JP a16)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opJP = function()
 {
@@ -2722,7 +2722,7 @@ CPUDef.opJP = function()
 /**
  * op=0xF3 (DI)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opDI = function()
 {
@@ -2733,7 +2733,7 @@ CPUDef.opDI = function()
 /**
  * op=0xF4 (CP a16)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opCP = function()
 {
@@ -2749,7 +2749,7 @@ CPUDef.opCP = function()
 /**
  * op=0xF5 (PUSH PSW)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opPUPSW = function()
 {
@@ -2760,7 +2760,7 @@ CPUDef.opPUPSW = function()
 /**
  * op=0xF6 (ORI d8)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opORI = function()
 {
@@ -2771,7 +2771,7 @@ CPUDef.opORI = function()
 /**
  * op=0xF7 (RST 6)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opRST6 = function()
 {
@@ -2783,7 +2783,7 @@ CPUDef.opRST6 = function()
 /**
  * op=0xF8 (RM)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opRM = function()
 {
@@ -2797,7 +2797,7 @@ CPUDef.opRM = function()
 /**
  * op=0xF9 (SPHL)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opSPHL = function()
 {
@@ -2808,7 +2808,7 @@ CPUDef.opSPHL = function()
 /**
  * op=0xFA (JM a16)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opJM = function()
 {
@@ -2820,7 +2820,7 @@ CPUDef.opJM = function()
 /**
  * op=0xFB (EI)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opEI = function()
 {
@@ -2831,7 +2831,7 @@ CPUDef.opEI = function()
 /**
  * op=0xFC (CM a16)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opCM = function()
 {
@@ -2847,7 +2847,7 @@ CPUDef.opCM = function()
 /**
  * op=0xFE (CPI d8)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opCPI = function()
 {
@@ -2858,7 +2858,7 @@ CPUDef.opCPI = function()
 /**
  * op=0xFF (RST 7)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
 CPUDef.opRST7 = function()
 {
@@ -2874,7 +2874,7 @@ CPUDef.opRST7 = function()
  * but I suspect that would vary quite a bit across JavaScript engines; for now, I'm putting my
  * money on array lookup.
  */
-CPUDef.aOps = [
+CPUDef.aOps8080 = [
     /* 0x00-0x03 */ CPUDef.opNOP,   CPUDef.opLXIB,  CPUDef.opSTAXB, CPUDef.opINXB,
     /* 0x04-0x07 */ CPUDef.opINRB,  CPUDef.opDCRB,  CPUDef.opMVIB,  CPUDef.opRLC,
     /* 0x08-0x0B */ CPUDef.opNOP,   CPUDef.opDADB,  CPUDef.opLDAXB, CPUDef.opDCXB,

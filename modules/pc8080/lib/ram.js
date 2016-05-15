@@ -74,7 +74,7 @@ Component.subclass(RAM);
  * @this {RAM}
  * @param {Computer} cmp
  * @param {Bus} bus
- * @param {CPUSim} cpu
+ * @param {CPUState} cpu
  * @param {Debugger} dbg
  */
 RAM.prototype.initBus = function(cmp, bus, cpu, dbg)
@@ -97,7 +97,7 @@ RAM.prototype.powerUp = function(data, fRepower)
 {
     if (!fRepower) {
         /*
-         * The Computer powers up the CPU last, at which point CPUSim state is restored,
+         * The Computer powers up the CPU last, at which point CPUState state is restored,
          * which includes the Bus state, and since we use the Bus to allocate all our memory,
          * memory contents are already restored for us, so we don't need the usual restore
          * logic.  We just need to call reset(), to allocate memory for the RAM.
@@ -118,7 +118,7 @@ RAM.prototype.powerUp = function(data, fRepower)
 RAM.prototype.powerDown = function(fSave, fShutdown)
 {
     /*
-     * The Computer powers down the CPU first, at which point CPUSim state is saved,
+     * The Computer powers down the CPU first, at which point CPUState state is saved,
      * which includes the Bus state, and since we use the Bus component to allocate all
      * our memory, memory contents are already saved for us, so we don't need the usual
      * save logic.

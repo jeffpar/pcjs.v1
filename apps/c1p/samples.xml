@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <serial id="serialPort" pos="left" padleft="8px">
 	<control type="list" binding="listSerial">
+		<item ref="/apps/c1p/BASIC/OSI/MATH.BAS">BASIC MATH</item>
+		<item ref="/apps/c1p/BASIC/OSI/CHECKING.BAS">CHECKING</item>
+		<item ref="/apps/c1p/BASIC/OSI/COUNTER.BAS">COUNTER</item>
 		<item ref="/apps/c1p/BASIC/OSI/POKER.BAS">POKER</item>
-		<item ref="/apps/c1p/BASIC/OSI/SAMPLE1.BAS">BASIC MATH</item>
-		<item ref="/apps/c1p/BASIC/OSI/SAMPLE2.BAS">CHECKING</item>
-		<item ref="/apps/c1p/BASIC/OSI/SAMPLE3.BAS">TRIG TUTOR</item>
-		<item ref="/apps/c1p/BASIC/OSI/SAMPLE4.BAS">STAR WARS</item>
-		<item ref="/apps/c1p/BASIC/OSI/SAMPLE5.BAS">COUNTER</item>
-		<item ref="/apps/c1p/BASIC/OSI/SAMPLE6.BAS">PRESIDENTS</item>
+		<item ref="/apps/c1p/BASIC/OSI/PRESIDENTS.BAS">PRESIDENTS</item>
+		<item ref="/apps/c1p/BASIC/OSI/STARWARS.BAS">STAR WARS</item>
+		<item ref="/apps/c1p/BASIC/OSI/TRIGTUTOR.BAS">TRIG TUTOR</item>
 	</control>
 	<control type="button" binding="loadSerial">Load</control>
 	<control type="file" binding="mountSerial" style="padding-left:16px"/>

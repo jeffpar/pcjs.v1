@@ -6,7 +6,8 @@ description: >
   PCjs: The Original IBM PC in a Browser.
   Classic computer simulations in JavaScript.
   Includes an archive of historical PC software and publications.
-  Additional computer simulations in JavaScript include the 6502-based Ohio Scientific Challenger 1P.
+  Additional computer simulations in JavaScript include the 6502-based Ohio Scientific Challenger 1P and 8080-based
+  machines, including arcade machines such as Space Invaders.
 baseurl: ""                 # "/pcjs" when using http://jeffpar.github.io or "" when using http://www.pcjs.org 
 url: "http://www.pcjs.org"  # "http://jeffpar.github.io" or "http://www.pcjs.org"
 twitter_username: jeffpar
@@ -18,7 +19,7 @@ encoding: UTF-8
 
 # Build settings
 
-exclude: ["index.html", "**/index.html", "archive", "**/archive", "**/c64", "logs", "node_modules", "src", "**/src", "tmp", "**/tmp", "videos", "web", ".git", ".idea"]
+exclude: ["**/index.html", "**/archive", "**/c64", "logs", "node_modules", "projects", "src", "**/src", "tmp", "**/tmp", "videos", "web", ".git", ".idea"]
 markdown: kramdown
 kramdown:
   input: GFM
@@ -32,7 +33,7 @@ gems:
 
 pcjs:
   domain: pcjs.org    # whereas site.url is used for linking purposes, site.pcjs.domain is used for display purposes
-  version: 1.22.0     # IMPORTANT: keep pcjs.version in sync with package.json:version
+  version: 1.22.1     # IMPORTANT: keep pcjs.version in sync with package.json:version
   compiled: true      # by default, the compiled pcjs.version scripts will be used (eg, pc.js or pc-dbg.js)
   pc_scripts:         # if pcjs.compiled is false, the following scripts will be included instead, in the order listed
     - /modules/shared/lib/defines.js
@@ -114,7 +115,7 @@ pcjs:
     - /modules/pc8080/lib/bus.js
     - /modules/pc8080/lib/memory.js
     - /modules/pc8080/lib/cpu.js
-    - /modules/pc8080/lib/cpusim.js
+    - /modules/pc8080/lib/cpustate.js
     - /modules/pc8080/lib/cpuops.js
     - /modules/pc8080/lib/chipset.js
     - /modules/pc8080/lib/rom.js

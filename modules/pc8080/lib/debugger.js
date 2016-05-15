@@ -709,7 +709,7 @@ if (DEBUGGER) {
      * @this {Debugger}
      * @param {Computer} cmp
      * @param {Bus} bus
-     * @param {CPUSim} cpu
+     * @param {CPUState} cpu
      * @param {Debugger} dbg
      */
     Debugger.prototype.initBus = function(cmp, bus, cpu, dbg)
