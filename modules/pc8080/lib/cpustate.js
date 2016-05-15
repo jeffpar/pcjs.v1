@@ -44,9 +44,9 @@ if (NODE) {
 }
 
 /**
- * CPUSim(parmsCPU)
+ * CPUState(parmsCPU)
  *
- * The CPUSim class uses the following (parmsCPU) properties:
+ * The CPUState class uses the following (parmsCPU) properties:
  *
  *      model: a number (eg, 8080) that should match one of the CPUDef.MODEL_* values
  *
@@ -54,16 +54,16 @@ if (NODE) {
  * constructor, along with a default speed (cycles per second) based on the specified (or default)
  * CPU model number.
  *
- * The CPUSim class was initially written to simulate a 8080 microprocessor, although over time
+ * The CPUState class was initially written to simulate a 8080 microprocessor, although over time
  * it may evolved to support other microprocessors (eg, the Zilog Z80).
  *
  * @constructor
  * @extends CPU
  * @param {Object} parmsCPU
  */
-function CPUSim(parmsCPU)
+function CPUState(parmsCPU)
 {
-    this.model = parmsCPU['model'] || CPUDef.MODEL_8080;
+    this.model = +parmsCPU['model'] || CPUDef.MODEL_8080;
 
     var nCyclesDefault = 0;
     switch(this.model) {
@@ -105,17 +105,17 @@ function CPUSim(parmsCPU)
     this.resetRegs();
 }
 
-Component.subclass(CPUSim, CPU);
+Component.subclass(CPUState, CPU);
 
 /**
  * addHaltCheck(fn)
  *
  * Records a function that will be called during HLT opcode processing.
  *
- * @this {CPUSim}
+ * @this {CPUState}
  * @param {function(number)} fn
  */
-CPUSim.prototype.addHaltCheck = function(fn)
+CPUState.prototype.addHaltCheck = function(fn)
 {
     this.afnHalt.push(fn);
 };
@@ -129,9 +129,9 @@ CPUSim.prototype.addHaltCheck = function(fn)
  * a Closure Compiler optimization is defeated when generating the function array at run-time instead of at
  * compile-time.
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
-CPUSim.prototype.initProcessor = function()
+CPUState.prototype.initProcessor = function()
 {
     this.aOps = CPUDef.aOps8080;
 };
@@ -139,9 +139,9 @@ CPUSim.prototype.initProcessor = function()
 /**
  * reset()
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
-CPUSim.prototype.reset = function()
+CPUState.prototype.reset = function()
 {
     if (this.flags.fRunning) this.stopCPU();
     this.resetRegs();
@@ -153,9 +153,9 @@ CPUSim.prototype.reset = function()
 /**
  * resetRegs()
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
-CPUSim.prototype.resetRegs = function()
+CPUState.prototype.resetRegs = function()
 {
     this.regA = 0;
     this.regB = 0;
@@ -183,10 +183,10 @@ CPUSim.prototype.resetRegs = function()
 /**
  * setReset(addr)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  * @param {number} addr
  */
-CPUSim.prototype.setReset = function(addr)
+CPUState.prototype.setReset = function(addr)
 {
     this.addrReset = addr;
     this.setPC(addr);
@@ -195,10 +195,10 @@ CPUSim.prototype.setReset = function(addr)
 /**
  * getChecksum()
  *
- * @this {CPUSim}
+ * @this {CPUState}
  * @return {number} a 32-bit summation of key elements of the current CPU state (used by the CPU checksum code)
  */
-CPUSim.prototype.getChecksum = function()
+CPUState.prototype.getChecksum = function()
 {
     var sum = (this.regA + this.regB + this.regC + this.regD + this.regE + this.regH + this.regL)|0;
     sum = (sum + this.getSP() + this.getPC() + this.getPS())|0;
@@ -208,12 +208,12 @@ CPUSim.prototype.getChecksum = function()
 /**
  * save()
  *
- * This implements save support for the CPUSim component.
+ * This implements save support for the CPUState component.
  *
- * @this {CPUSim}
+ * @this {CPUState}
  * @return {Object|null}
  */
-CPUSim.prototype.save = function()
+CPUState.prototype.save = function()
 {
     var state = new State(this);
     state.set(0, [this.regA, this.regB, this.regC, this.regD, this.regE, this.regH, this.regL, this.getSP(), this.getPC(), this.getPS()]);
@@ -225,13 +225,13 @@ CPUSim.prototype.save = function()
 /**
  * restore(data)
  *
- * This implements restore support for the CPUSim component.
+ * This implements restore support for the CPUState component.
  *
- * @this {CPUSim}
+ * @this {CPUState}
  * @param {Object} data
  * @return {boolean} true if restore successful, false if not
  */
-CPUSim.prototype.restore = function(data)
+CPUState.prototype.restore = function(data)
 {
     var a = data[0];
     this.regA = a[0];
@@ -254,14 +254,14 @@ CPUSim.prototype.restore = function(data)
 /**
  * setBinding(sHTMLType, sBinding, control, sValue)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
  * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "AX")
  * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
  * @param {string} [sValue] optional data value
  * @return {boolean} true if binding was successful, false if unrecognized binding request
  */
-CPUSim.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
+CPUState.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
 {
     var fBound = false;
     switch (sBinding) {
@@ -298,10 +298,10 @@ CPUSim.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
 /**
  * getBC()
  *
- * @this {CPUSim}
+ * @this {CPUState}
  * @return {number}
  */
-CPUSim.prototype.getBC = function()
+CPUState.prototype.getBC = function()
 {
     return (this.regB << 8) | this.regC;
 };
@@ -309,10 +309,10 @@ CPUSim.prototype.getBC = function()
 /**
  * setBC(w)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  * @param {number} w
  */
-CPUSim.prototype.setBC = function(w)
+CPUState.prototype.setBC = function(w)
 {
     this.regB = (w >> 8) & 0xff;
     this.regC = w & 0xff;
@@ -321,10 +321,10 @@ CPUSim.prototype.setBC = function(w)
 /**
  * getDE()
  *
- * @this {CPUSim}
+ * @this {CPUState}
  * @return {number}
  */
-CPUSim.prototype.getDE = function()
+CPUState.prototype.getDE = function()
 {
     return (this.regD << 8) | this.regE;
 };
@@ -332,10 +332,10 @@ CPUSim.prototype.getDE = function()
 /**
  * setDE(w)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  * @param {number} w
  */
-CPUSim.prototype.setDE = function(w)
+CPUState.prototype.setDE = function(w)
 {
     this.regD = (w >> 8) & 0xff;
     this.regE = w & 0xff;
@@ -344,10 +344,10 @@ CPUSim.prototype.setDE = function(w)
 /**
  * getHL()
  *
- * @this {CPUSim}
+ * @this {CPUState}
  * @return {number}
  */
-CPUSim.prototype.getHL = function()
+CPUState.prototype.getHL = function()
 {
     return (this.regH << 8) | this.regL;
 };
@@ -355,10 +355,10 @@ CPUSim.prototype.getHL = function()
 /**
  * setHL(w)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  * @param {number} w
  */
-CPUSim.prototype.setHL = function(w)
+CPUState.prototype.setHL = function(w)
 {
     this.regH = (w >> 8) & 0xff;
     this.regL = w & 0xff;
@@ -367,10 +367,10 @@ CPUSim.prototype.setHL = function(w)
 /**
  * getSP()
  *
- * @this {CPUSim}
+ * @this {CPUState}
  * @return {number}
  */
-CPUSim.prototype.getSP = function()
+CPUState.prototype.getSP = function()
 {
     return this.regSP;
 };
@@ -378,10 +378,10 @@ CPUSim.prototype.getSP = function()
 /**
  * setSP(off)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  * @param {number} off
  */
-CPUSim.prototype.setSP = function(off)
+CPUState.prototype.setSP = function(off)
 {
     this.regSP = off & 0xffff;
 };
@@ -389,10 +389,10 @@ CPUSim.prototype.setSP = function(off)
 /**
  * getPC()
  *
- * @this {CPUSim}
+ * @this {CPUState}
  * @return {number}
  */
-CPUSim.prototype.getPC = function()
+CPUState.prototype.getPC = function()
 {
     return this.regPC;
 };
@@ -400,11 +400,11 @@ CPUSim.prototype.getPC = function()
 /**
  * offPC()
  *
- * @this {CPUSim}
+ * @this {CPUState}
  * @param {number} off
  * @return {number}
  */
-CPUSim.prototype.offPC = function(off)
+CPUState.prototype.offPC = function(off)
 {
     return (this.regPC + off) & 0xffff;
 };
@@ -412,10 +412,10 @@ CPUSim.prototype.offPC = function(off)
 /**
  * setPC(off)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  * @param {number} off
  */
-CPUSim.prototype.setPC = function(off)
+CPUState.prototype.setPC = function(off)
 {
     this.regPC = off & 0xffff;
 };
@@ -423,9 +423,9 @@ CPUSim.prototype.setPC = function(off)
 /**
  * clearCF()
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
-CPUSim.prototype.clearCF = function()
+CPUState.prototype.clearCF = function()
 {
     this.resultZeroCarry &= 0xff;
 };
@@ -433,10 +433,10 @@ CPUSim.prototype.clearCF = function()
 /**
  * getCF()
  *
- * @this {CPUSim}
+ * @this {CPUState}
  * @return {number} 0 or 1 (CPUDef.PS.CF)
  */
-CPUSim.prototype.getCF = function()
+CPUState.prototype.getCF = function()
 {
     return (this.resultZeroCarry & 0x100)? CPUDef.PS.CF : 0;
 };
@@ -444,9 +444,9 @@ CPUSim.prototype.getCF = function()
 /**
  * setCF()
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
-CPUSim.prototype.setCF = function()
+CPUState.prototype.setCF = function()
 {
     this.resultZeroCarry |= 0x100;
 };
@@ -454,10 +454,10 @@ CPUSim.prototype.setCF = function()
 /**
  * updateCF(CF)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  * @param {number} CF (0x000 or 0x100)
  */
-CPUSim.prototype.updateCF = function(CF)
+CPUState.prototype.updateCF = function(CF)
 {
     this.resultZeroCarry = (this.resultZeroCarry & 0xff) | CF;
 };
@@ -465,9 +465,9 @@ CPUSim.prototype.updateCF = function(CF)
 /**
  * clearPF()
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
-CPUSim.prototype.clearPF = function()
+CPUState.prototype.clearPF = function()
 {
     if (this.getPF()) this.resultParitySign ^= 0x1;
 };
@@ -475,10 +475,10 @@ CPUSim.prototype.clearPF = function()
 /**
  * getPF()
  *
- * @this {CPUSim}
+ * @this {CPUState}
  * @return {number} 0 or CPUDef.PS.PF
  */
-CPUSim.prototype.getPF = function()
+CPUState.prototype.getPF = function()
 {
     return (CPUDef.PARITY[this.resultParitySign & 0xff])? CPUDef.PS.PF : 0;
 };
@@ -486,9 +486,9 @@ CPUSim.prototype.getPF = function()
 /**
  * setPF()
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
-CPUSim.prototype.setPF = function()
+CPUState.prototype.setPF = function()
 {
     if (!this.getPF()) this.resultParitySign ^= 0x1;
 };
@@ -496,9 +496,9 @@ CPUSim.prototype.setPF = function()
 /**
  * clearAF()
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
-CPUSim.prototype.clearAF = function()
+CPUState.prototype.clearAF = function()
 {
     this.resultAuxOverflow = (this.resultParitySign & 0x10) | (this.resultAuxOverflow & ~0x10);
 };
@@ -506,10 +506,10 @@ CPUSim.prototype.clearAF = function()
 /**
  * getAF()
  *
- * @this {CPUSim}
+ * @this {CPUState}
  * @return {number} 0 or CPUDef.PS.AF
  */
-CPUSim.prototype.getAF = function()
+CPUState.prototype.getAF = function()
 {
     return ((this.resultParitySign ^ this.resultAuxOverflow) & 0x10)? CPUDef.PS.AF : 0;
 };
@@ -517,9 +517,9 @@ CPUSim.prototype.getAF = function()
 /**
  * setAF()
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
-CPUSim.prototype.setAF = function()
+CPUState.prototype.setAF = function()
 {
     this.resultAuxOverflow = (~this.resultParitySign & 0x10) | (this.resultAuxOverflow & ~0x10);
 };
@@ -527,9 +527,9 @@ CPUSim.prototype.setAF = function()
 /**
  * clearZF()
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
-CPUSim.prototype.clearZF = function()
+CPUState.prototype.clearZF = function()
 {
     this.resultZeroCarry |= 0xff;
 };
@@ -537,10 +537,10 @@ CPUSim.prototype.clearZF = function()
 /**
  * getZF()
  *
- * @this {CPUSim}
+ * @this {CPUState}
  * @return {number} 0 or CPUDef.PS.ZF
  */
-CPUSim.prototype.getZF = function()
+CPUState.prototype.getZF = function()
 {
     return (this.resultZeroCarry & 0xff)? 0 : CPUDef.PS.ZF;
 };
@@ -548,9 +548,9 @@ CPUSim.prototype.getZF = function()
 /**
  * setZF()
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
-CPUSim.prototype.setZF = function()
+CPUState.prototype.setZF = function()
 {
     this.resultZeroCarry &= ~0xff;
 };
@@ -558,9 +558,9 @@ CPUSim.prototype.setZF = function()
 /**
  * clearSF()
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
-CPUSim.prototype.clearSF = function()
+CPUState.prototype.clearSF = function()
 {
     if (this.getSF()) this.resultParitySign ^= 0xc0;
 };
@@ -568,10 +568,10 @@ CPUSim.prototype.clearSF = function()
 /**
  * getSF()
  *
- * @this {CPUSim}
+ * @this {CPUState}
  * @return {number} 0 or CPUDef.PS.SF
  */
-CPUSim.prototype.getSF = function()
+CPUState.prototype.getSF = function()
 {
     return (this.resultParitySign & 0x80)? CPUDef.PS.SF : 0;
 };
@@ -579,9 +579,9 @@ CPUSim.prototype.getSF = function()
 /**
  * setSF()
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
-CPUSim.prototype.setSF = function()
+CPUState.prototype.setSF = function()
 {
     if (!this.getSF()) this.resultParitySign ^= 0xc0;
 };
@@ -589,9 +589,9 @@ CPUSim.prototype.setSF = function()
 /**
  * clearIF()
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
-CPUSim.prototype.clearIF = function()
+CPUState.prototype.clearIF = function()
 {
     this.regPS &= ~CPUDef.PS.IF;
 };
@@ -599,10 +599,10 @@ CPUSim.prototype.clearIF = function()
 /**
  * getIF()
  *
- * @this {CPUSim}
+ * @this {CPUState}
  * @return {number} 0 or CPUDef.PS.IF
  */
-CPUSim.prototype.getIF = function()
+CPUState.prototype.getIF = function()
 {
     return (this.regPS & CPUDef.PS.IF);
 };
@@ -610,9 +610,9 @@ CPUSim.prototype.getIF = function()
 /**
  * setIF()
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
-CPUSim.prototype.setIF = function()
+CPUState.prototype.setIF = function()
 {
     this.regPS |= CPUDef.PS.IF;
 };
@@ -620,10 +620,10 @@ CPUSim.prototype.setIF = function()
 /**
  * getPS()
  *
- * @this {CPUSim}
+ * @this {CPUState}
  * @return {number}
  */
-CPUSim.prototype.getPS = function()
+CPUState.prototype.getPS = function()
 {
     return (this.regPS & ~CPUDef.PS.RESULT) | (this.getSF() | this.getZF() | this.getAF() | this.getPF() | this.getCF());
 };
@@ -631,10 +631,10 @@ CPUSim.prototype.getPS = function()
 /**
  * setPS(regPS)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  * @param {number} regPS
  */
-CPUSim.prototype.setPS = function(regPS)
+CPUState.prototype.setPS = function(regPS)
 {
     this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = 0;
     if (regPS & CPUDef.PS.CF) this.resultZeroCarry |= 0x100;
@@ -649,10 +649,10 @@ CPUSim.prototype.setPS = function(regPS)
 /**
  * getPSW()
  *
- * @this {CPUSim}
+ * @this {CPUState}
  * @return {number}
  */
-CPUSim.prototype.getPSW = function()
+CPUState.prototype.getPSW = function()
 {
     return (this.getPS() & CPUDef.PS.MASK) | (this.regA << 8);
 };
@@ -660,10 +660,10 @@ CPUSim.prototype.getPSW = function()
 /**
  * setPSW(w)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  * @param {number} w
  */
-CPUSim.prototype.setPSW = function(w)
+CPUState.prototype.setPSW = function(w)
 {
     this.setPS((w & CPUDef.PS.MASK) | (this.regPS & ~CPUDef.PS.MASK));
     this.regA = w >> 8;
@@ -672,11 +672,11 @@ CPUSim.prototype.setPSW = function(w)
 /**
  * addByte(src)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  * @param {number} src
  * @return {number} regA + src
  */
-CPUSim.prototype.addByte = function(src)
+CPUState.prototype.addByte = function(src)
 {
     this.resultAuxOverflow = this.regA ^ src;
     return this.resultParitySign = (this.resultZeroCarry = this.regA + src) & 0xff;
@@ -685,11 +685,11 @@ CPUSim.prototype.addByte = function(src)
 /**
  * addByteCarry(src)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  * @param {number} src
  * @return {number} regA + src + carry
  */
-CPUSim.prototype.addByteCarry = function(src)
+CPUState.prototype.addByteCarry = function(src)
 {
     this.resultAuxOverflow = this.regA ^ src;
     return this.resultParitySign = (this.resultZeroCarry = this.regA + src + ((this.resultZeroCarry & 0x100)? 1 : 0)) & 0xff;
@@ -701,11 +701,11 @@ CPUSim.prototype.addByteCarry = function(src)
  * Ordinarily, one would expect the Auxiliary Carry flag (AF) to be clear after this operation,
  * but apparently the 8080 will set AF if bit 3 in either operand is set.
  *
- * @this {CPUSim}
+ * @this {CPUState}
  * @param {number} src
  * @return {number} regA & src
  */
-CPUSim.prototype.andByte = function(src)
+CPUState.prototype.andByte = function(src)
 {
     this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = this.regA & src;
     if ((this.regA | src) & 0x8) this.resultAuxOverflow ^= 0x10;        // set AF by inverting bit 4 in resultAuxOverflow
@@ -718,11 +718,11 @@ CPUSim.prototype.andByte = function(src)
  * We perform this operation using 8-bit two's complement arithmetic, by negating and then adding
  * the implied src of 1.  This appears to mimic how the 8080 manages the Auxiliary Carry flag (AF).
  *
- * @this {CPUSim}
+ * @this {CPUState}
  * @param {number} b
  * @return {number}
  */
-CPUSim.prototype.decByte = function(b)
+CPUState.prototype.decByte = function(b)
 {
     this.resultAuxOverflow = b ^ 0xff;
     b = this.resultParitySign = (b + 0xff) & 0xff;
@@ -733,11 +733,11 @@ CPUSim.prototype.decByte = function(b)
 /**
  * incByte(b)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  * @param {number} b
  * @return {number}
  */
-CPUSim.prototype.incByte = function(b)
+CPUState.prototype.incByte = function(b)
 {
     this.resultAuxOverflow = b;
     b = this.resultParitySign = (b + 1) & 0xff;
@@ -748,11 +748,11 @@ CPUSim.prototype.incByte = function(b)
 /**
  * orByte(src)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  * @param {number} src
  * @return {number} regA | src
  */
-CPUSim.prototype.orByte = function(src)
+CPUState.prototype.orByte = function(src)
 {
     return this.resultParitySign = this.resultZeroCarry = this.resultAuxOverflow = this.regA | src;
 };
@@ -787,11 +787,11 @@ CPUSim.prototype.orByte = function(src)
  *      ---------
  *    1 0101 0110   (0x56)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  * @param {number} src
  * @return {number} regA - src
  */
-CPUSim.prototype.subByte = function(src)
+CPUState.prototype.subByte = function(src)
 {
     src ^= 0xff;
     this.resultAuxOverflow = this.regA ^ src;
@@ -808,11 +808,11 @@ CPUSim.prototype.subByte = function(src)
  * This mimics the behavior of subByte() when the Carry flag (CF) is clear, and hopefully also mimics how the
  * 8080 manages the Auxiliary Carry flag (AF) when the Carry flag (CF) is set.
  *
- * @this {CPUSim}
+ * @this {CPUState}
  * @param {number} src
  * @return {number} regA - src - carry
  */
-CPUSim.prototype.subByteBorrow = function(src)
+CPUState.prototype.subByteBorrow = function(src)
 {
     src ^= 0xff;
     this.resultAuxOverflow = this.regA ^ src;
@@ -822,11 +822,11 @@ CPUSim.prototype.subByteBorrow = function(src)
 /**
  * xorByte(src)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  * @param {number} src
  * @return {number} regA ^ src
  */
-CPUSim.prototype.xorByte = function(src)
+CPUState.prototype.xorByte = function(src)
 {
     return this.resultParitySign = this.resultZeroCarry = this.resultAuxOverflow = this.regA ^ src;
 };
@@ -834,11 +834,11 @@ CPUSim.prototype.xorByte = function(src)
 /**
  * getByte(addr)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  * @param {number} addr is a linear address
  * @return {number} byte (8-bit) value at that address
  */
-CPUSim.prototype.getByte = function(addr)
+CPUState.prototype.getByte = function(addr)
 {
     return this.bus.getByte(addr);
 };
@@ -846,11 +846,11 @@ CPUSim.prototype.getByte = function(addr)
 /**
  * getWord(addr)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  * @param {number} addr is a linear address
  * @return {number} word (16-bit) value at that address
  */
-CPUSim.prototype.getWord = function(addr)
+CPUState.prototype.getWord = function(addr)
 {
     return this.bus.getShort(addr);
 };
@@ -858,11 +858,11 @@ CPUSim.prototype.getWord = function(addr)
 /**
  * setByte(addr, b)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  * @param {number} addr is a linear address
  * @param {number} b is the byte (8-bit) value to write (which we truncate to 8 bits; required by opSTOSb)
  */
-CPUSim.prototype.setByte = function(addr, b)
+CPUState.prototype.setByte = function(addr, b)
 {
     this.bus.setByte(addr, b);
 };
@@ -870,11 +870,11 @@ CPUSim.prototype.setByte = function(addr, b)
 /**
  * setWord(addr, w)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  * @param {number} addr is a linear address
  * @param {number} w is the word (16-bit) value to write (which we truncate to 16 bits to be safe)
  */
-CPUSim.prototype.setWord = function(addr, w)
+CPUState.prototype.setWord = function(addr, w)
 {
     this.bus.setShort(addr, w);
 };
@@ -882,10 +882,10 @@ CPUSim.prototype.setWord = function(addr, w)
 /**
  * getPCByte()
  *
- * @this {CPUSim}
+ * @this {CPUState}
  * @return {number} byte at the current PC; PC advanced by 1
  */
-CPUSim.prototype.getPCByte = function()
+CPUState.prototype.getPCByte = function()
 {
     var b = this.getByte(this.regPC);
     this.setPC(this.regPC + 1);
@@ -895,10 +895,10 @@ CPUSim.prototype.getPCByte = function()
 /**
  * getPCWord()
  *
- * @this {CPUSim}
+ * @this {CPUState}
  * @return {number} word at the current PC; PC advanced by 2
  */
-CPUSim.prototype.getPCWord = function()
+CPUState.prototype.getPCWord = function()
 {
     var w = this.getWord(this.regPC);
     this.setPC(this.regPC + 2);
@@ -908,10 +908,10 @@ CPUSim.prototype.getPCWord = function()
 /**
  * popWord()
  *
- * @this {CPUSim}
+ * @this {CPUState}
  * @return {number} word popped from the current SP; SP increased by 2
  */
-CPUSim.prototype.popWord = function()
+CPUState.prototype.popWord = function()
 {
     var w = this.getWord(this.regSP);
     this.setSP(this.regSP + 2);
@@ -921,10 +921,10 @@ CPUSim.prototype.popWord = function()
 /**
  * pushWord(w)
  *
- * @this {CPUSim}
+ * @this {CPUState}
  * @param {number} w is the word (16-bit) value to push at current SP; SP decreased by 2
  */
-CPUSim.prototype.pushWord = function(w)
+CPUState.prototype.pushWord = function(w)
 {
     this.setSP(this.regSP - 2);
     this.setWord(this.regSP, w);
@@ -933,10 +933,10 @@ CPUSim.prototype.pushWord = function(w)
 /**
  * checkINTR()
  *
- * @this {CPUSim}
+ * @this {CPUState}
  * @return {boolean} true if h/w interrupt has just been acknowledged, false if not
  */
-CPUSim.prototype.checkINTR = function()
+CPUState.prototype.checkINTR = function()
 {
     if ((this.intFlags & CPUDef.INTFLAG.INTR) && this.getIF()) {
         var bRST = CPUDef.OPCODE.RST0 | ((this.intFlags & CPUDef.INTFLAG.INTL) << 3);
@@ -951,9 +951,9 @@ CPUSim.prototype.checkINTR = function()
 /**
  * clearINTR()
  *
- * @this {CPUSim}
+ * @this {CPUState}
  */
-CPUSim.prototype.clearINTR = function()
+CPUState.prototype.clearINTR = function()
 {
     this.intFlags &= ~(CPUDef.INTFLAG.INTL | CPUDef.INTFLAG.INTR);
 };
@@ -973,10 +973,10 @@ CPUSim.prototype.clearINTR = function()
  * setIF() finally occurs, that interrupt is propagated to intFlags.  But for now, we're going to assume that
  * scenario is rare.
  *
- * @this {CPUSim}
+ * @this {CPUState}
  * @param {number} nLevel (0-7)
  */
-CPUSim.prototype.requestINTR = function(nLevel)
+CPUState.prototype.requestINTR = function(nLevel)
 {
     this.intFlags = (this.intFlags & ~CPUDef.INTFLAG.INTL) | nLevel | CPUDef.INTFLAG.INTR;
 };
@@ -988,12 +988,12 @@ CPUSim.prototype.requestINTR = function(nLevel)
  * CPU type before passing the call to displayValue(); in the "old days", updateStatus() called
  * displayValue() directly (although then it was called displayReg()).
  *
- * @this {CPUSim}
+ * @this {CPUState}
  * @param {string} sReg
  * @param {number} nValue
  * @param {number} [cch] (default is 2 hex digits)
  */
-CPUSim.prototype.updateReg = function(sReg, nValue, cch)
+CPUState.prototype.updateReg = function(sReg, nValue, cch)
 {
     this.displayValue(sReg, nValue, cch || 2);
 };
@@ -1007,10 +1007,10 @@ CPUSim.prototype.updateReg = function(sReg, nValue, cch)
  * Any high-frequency updates should be performed in updateVideo(), which should avoid DOM updates, since updateVideo()
  * can be called up to 60 times per second (see VIDEO_UPDATES_PER_SECOND).
  *
- * @this {CPUSim}
+ * @this {CPUState}
  * @param {boolean} [fForce] (true will display registers even if the CPU is running and "live" registers are not enabled)
  */
-CPUSim.prototype.updateStatus = function(fForce)
+CPUState.prototype.updateStatus = function(fForce)
 {
     if (this.cLiveRegs) {
         if (fForce || !this.flags.fRunning || this.flags.fDisplayLiveRegs) {
@@ -1052,13 +1052,13 @@ CPUSim.prototype.updateStatus = function(fForce)
  * As a result, the Debugger's complete independence means you can run other 8086/8088 debuggers
  * (eg, DEBUG) inside the simulation without interference; you can even "debug" them with the Debugger.
  *
- * @this {CPUSim}
+ * @this {CPUState}
  * @param {number} nMinCycles (0 implies a single-step, and therefore breakpoints should be ignored)
  * @return {number} of cycles executed; 0 indicates a pre-execution condition (ie, an execution breakpoint
  * was hit), -1 indicates a post-execution condition (eg, a read or write breakpoint was hit), and a positive
  * number indicates successful completion of that many cycles (which should always be >= nMinCycles).
  */
-CPUSim.prototype.stepCPU = function(nMinCycles)
+CPUState.prototype.stepCPU = function(nMinCycles)
 {
     /*
      * The Debugger uses fComplete to determine if the instruction completed (true) or was interrupted
@@ -1143,21 +1143,21 @@ CPUSim.prototype.stepCPU = function(nMinCycles)
 };
 
 /**
- * CPUSim.init()
+ * CPUState.init()
  *
  * This function operates on every HTML element of class "cpu", extracting the
- * JSON-encoded parameters for the CPUSim constructor from the element's "data-value"
+ * JSON-encoded parameters for the CPUState constructor from the element's "data-value"
  * attribute, invoking the constructor (which in turn invokes the CPU constructor)
- * to create a CPUSim component, and then binding any associated HTML controls to the
+ * to create a CPUState component, and then binding any associated HTML controls to the
  * new component.
  */
-CPUSim.init = function()
+CPUState.init = function()
 {
     var aeCPUs = Component.getElementsByClass(document, PCJSCLASS, "cpu");
     for (var iCPU = 0; iCPU < aeCPUs.length; iCPU++) {
         var eCPU = aeCPUs[iCPU];
         var parmsCPU = Component.getComponentParms(eCPU);
-        var cpu = new CPUSim(parmsCPU);
+        var cpu = new CPUState(parmsCPU);
         Component.bindComponentControls(cpu, eCPU, PCJSCLASS);
     }
 };
@@ -1165,6 +1165,6 @@ CPUSim.init = function()
 /*
  * Initialize every CPU module on the page
  */
-web.onInit(CPUSim.init);
+web.onInit(CPUState.init);
 
-if (NODE) module.exports = CPUSim;
+if (NODE) module.exports = CPUState;

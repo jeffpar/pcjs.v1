@@ -211,6 +211,143 @@ Keyboard.STUPID_KEYCODES[Keyboard.KEYCODE.QUOTE]   = Keyboard.ASCII["'"];   // 2
 Keyboard.STUPID_KEYCODES[Keyboard.KEYCODE.FF_DASH] = Keyboard.ASCII['-'];
 
 /**
+ * setBinding(sHTMLType, sBinding, control, sValue)
+ *
+ * @this {Keyboard}
+ * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
+ * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "esc")
+ * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+ * @param {string} [sValue] optional data value
+ * @return {boolean} true if binding was successful, false if unrecognized binding request
+ */
+Keyboard.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
+{
+    /*
+     * There's a special binding that the Video component uses ("kbd") to effectively bind its
+     * screen to the entire keyboard, in Video.powerUp(); ie:
+     *
+     *      video.kbd.setBinding("canvas", "kbd", video.canvasScreen);
+     * or:
+     *      video.kbd.setBinding("textarea", "kbd", video.textareaScreen);
+     *
+     * However, it's also possible for the keyboard XML definition to define a control that serves
+     * a similar purpose; eg:
+     *
+     *      <control type="text" binding="kbd" width="2em">Kbd</control>
+     *
+     * The latter is purely experimental, while we work on finding ways to trigger the soft keyboard on
+     * certain pesky devices (like the Kindle Fire).  Note that even if you use the latter, the former will
+     * still be enabled (there's currently no way to configure the Video component to not bind its screen,
+     * but we could certainly add one if the need ever arose).
+     */
+    var kbd = this;
+    var id = sHTMLType + '-' + sBinding;
+
+    if (this.bindings[id] === undefined) {
+        switch (sBinding) {
+        case "kbd":
+            /*
+             * Recording the binding ID prevents multiple controls (or components) from attempting to erroneously
+             * bind a control to the same ID, but in the case of a "dual display" configuration, we actually want
+             * to allow BOTH video components to call setBinding() for "kbd", so that it doesn't matter which
+             * display the user gives focus to.
+             *
+             *      this.bindings[id] = control;
+             */
+            control.onkeydown = function onKeyDown(event) {
+                return kbd.onKeyDown(event, true);
+            };
+            control.onkeypress = function onKeyPressKbd(event) {
+                return kbd.onKeyPress(event);
+            };
+            control.onkeyup = function onKeyUp(event) {
+                return kbd.onKeyDown(event, false);
+            };
+            return true;
+
+        case "caps-lock":
+            this.bindings[id] = control;
+            control.onclick = function onClickCapsLock(event) {
+                if (kbd.cmp) kbd.cmp.updateFocus();
+                return kbd.toggleCapsLock();
+            };
+            return true;
+
+        case "num-lock":
+            this.bindings[id] = control;
+            control.onclick = function onClickNumLock(event) {
+                if (kbd.cmp) kbd.cmp.updateFocus();
+                return kbd.toggleNumLock();
+            };
+            return true;
+
+        case "scroll-lock":
+            this.bindings[id] = control;
+            control.onclick = function onClickScrollLock(event) {
+                if (kbd.cmp) kbd.cmp.updateFocus();
+                return kbd.toggleScrollLock();
+            };
+            return true;
+
+        default:
+            /*
+             * Maintain support for older button codes; eg, map button code "ctrl-c" to CLICKCODE "CTRL_C"
+             */
+            var sCode = sBinding.toUpperCase().replace(/-/g, '_');
+            if (Keyboard.CLICKCODES[sCode] !== undefined && sHTMLType == "button") {
+                this.bindings[id] = control;
+                control.onclick = function(kbd, sKey, simCode) {
+                    return function onClickKeyboard(event) {
+                        if (!COMPILED && kbd.messageEnabled()) kbd.printMessage(sKey + " clicked", Messages.KEYS);
+                        if (kbd.cmp) kbd.cmp.updateFocus();
+                        kbd.updateShiftState(simCode, true);    // future-proofing if/when any LOCK keys are added to CLICKCODES
+                        kbd.addActiveKey(simCode, true);
+                    };
+                }(this, sCode, Keyboard.CLICKCODES[sCode]);
+                return true;
+            }
+            else if (Keyboard.SOFTCODES[sBinding] !== undefined) {
+                this.cSoftCodes++;
+                this.bindings[id] = control;
+                var fnDown = function(kbd, sKey, simCode) {
+                    return function onMouseOrTouchDownKeyboard(event) {
+                        kbd.addActiveKey(simCode);
+                    };
+                }(this, sBinding, Keyboard.SOFTCODES[sBinding]);
+                var fnUp = function (kbd, sKey, simCode) {
+                    return function onMouseOrTouchUpKeyboard(event) {
+                        kbd.removeActiveKey(simCode);
+                    };
+                }(this, sBinding, Keyboard.SOFTCODES[sBinding]);
+                if ('ontouchstart' in window) {
+                    control.ontouchstart = fnDown;
+                    control.ontouchend = fnUp;
+                } else {
+                    control.onmousedown = fnDown;
+                    control.onmouseup = control.onmouseout = fnUp;
+                }
+                return true;
+            }
+            else if (sValue) {
+                /*
+                 * Instead of just having a dedicated "test" control, we now treat any unrecognized control with
+                 * a data value as a test control.  The only caveat is that such controls must have binding IDs that
+                 * do not conflict with predefined controls (which, of course, is the only way you can get here).
+                 */
+                this.bindings[id] = control;
+                control.onclick = function onClickTest(event) {
+                    if (kbd.cmp) kbd.cmp.updateFocus();
+                    return kbd.injectKeys(sValue);
+                };
+                return true;
+            }
+            break;
+        }
+    }
+    return false;
+};
+
+/**
  * Keyboard.init()
  *
  * This function operates on every HTML element of class "keyboard", extracting the

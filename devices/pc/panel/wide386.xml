@@ -11,7 +11,7 @@
 			<control type="button" binding="step">Step</control>
 			<control type="button" binding="reset">Reset</control>
 			<control type="button" binding="save">Save</control>
-			<control type="button" binding="setSpeed" padleft="16px">Fast</control>
+			<control type="button" binding="setSpeed" padleft="16px">Speed</control>
 			<control type="description" binding="speed" padleft="8px">Stopped</control>
 		</control>
 	</control>

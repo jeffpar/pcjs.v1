@@ -158,7 +158,7 @@ ROM.CPM.VECTORS = [ROM.CPM.BIOS.VECTOR, ROM.CPM.BDOS.VECTOR];
  * @this {ROM}
  * @param {Computer} cmp
  * @param {Bus} bus
- * @param {CPUSim} cpu
+ * @param {CPUState} cpu
  * @param {Debugger} dbg
  */
 ROM.prototype.initBus = function(cmp, bus, cpu, dbg)

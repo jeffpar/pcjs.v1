@@ -44,7 +44,7 @@ if (NODE) {
  *
  * The CPU class supports the following (parmsCPU) properties:
  *
- *      cycles: the machine's base cycles per second; the CPUSim constructor will
+ *      cycles: the machine's base cycles per second; the CPUState constructor will
  *      provide us with a default (based on the CPU model) to use as a fallback.
  *
  *      multiplier: base cycle multiplier; default is 1.
@@ -65,7 +65,7 @@ if (NODE) {
  * This component is primarily responsible for interfacing the CPU with the outside
  * world (eg, Panel and Debugger components), and managing overall CPU operation.
  *
- * It is extended by the CPUSim component, where the simulation control logic resides.
+ * It is extended by the CPUState component, where the simulation control logic resides.
  *
  * @constructor
  * @extends Component
@@ -209,7 +209,7 @@ CPU.prototype.reset = function()
 /**
  * save()
  *
- * This is a placeholder for save support (overridden by the CPUSim component).
+ * This is a placeholder for save support (overridden by the CPUState component).
  *
  * @this {CPU}
  * @return {Object|null}
@@ -222,7 +222,7 @@ CPU.prototype.save = function()
 /**
  * restore(data)
  *
- * This is a placeholder for restore support (overridden by the CPUSim component).
+ * This is a placeholder for restore support (overridden by the CPUState component).
  *
  * @this {CPU}
  * @param {Object} data
@@ -349,7 +349,7 @@ CPU.prototype.isRunning = function()
 /**
  * getChecksum()
  *
- * This will be implemented by the CPUSim component.
+ * This will be implemented by the CPUState component.
  *
  * @this {CPU}
  * @return {number} a 32-bit summation of key elements of the current CPU state (used by the CPU checksum code)
@@ -1046,7 +1046,7 @@ CPU.prototype.startCPU = function(fUpdateFocus)
 /**
  * stepCPU(nMinCycles)
  *
- * This will be implemented by the CPUSim component.
+ * This will be implemented by the CPUState component.
  *
  * @this {CPU}
  * @param {number} nMinCycles (0 implies a single-step, and therefore breakpoints should be ignored)

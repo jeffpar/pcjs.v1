@@ -87,7 +87,7 @@ Panel.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
  * @this {Panel}
  * @param {Computer} cmp
  * @param {Bus} bus
- * @param {CPUSim} cpu
+ * @param {CPUState} cpu
  * @param {Debugger} dbg
  */
 Panel.prototype.initBus = function(cmp, bus, cpu, dbg)
@@ -131,7 +131,7 @@ Panel.prototype.powerDown = function(fSave, fShutdown)
  *
  * Update function for Panels containing elements with high-frequency display requirements.
  *
- * For older (and slower) DOM-based display elements, those are sill being managed by the CPUSim component,
+ * For older (and slower) DOM-based display elements, those are sill being managed by the CPUState component,
  * so it has its own updateStatus() handler.
  *
  * The Computer's updateStatus() handler is currently responsible for calling both our handler and the CPU's handler.

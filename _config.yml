@@ -114,7 +114,7 @@ pcjs:
     - /modules/pc8080/lib/bus.js
     - /modules/pc8080/lib/memory.js
     - /modules/pc8080/lib/cpu.js
-    - /modules/pc8080/lib/cpusim.js
+    - /modules/pc8080/lib/cpustate.js
     - /modules/pc8080/lib/cpuops.js
     - /modules/pc8080/lib/chipset.js
     - /modules/pc8080/lib/rom.js

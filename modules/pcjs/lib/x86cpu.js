@@ -49,7 +49,7 @@ if (NODE) {
  *
  * The X86CPU class uses the following (parmsCPU) properties:
  *
- *      model: a number (eg, 8088) that should match one of the X86.MODEL values (default is 8088)
+ *      model: a string (eg, "8088") that should match one of the X86.MODEL values (default is "8088")
  *      stepping: a string (eg, "B1") that should match one of the X86.STEPPING values (default is "")
  *
  * This extends the CPU class and passes any remaining parmsCPU properties to the CPU class
@@ -82,7 +82,7 @@ if (NODE) {
  */
 function X86CPU(parmsCPU)
 {
-    this.model = parmsCPU['model'] || X86.MODEL_8088;
+    this.model = +parmsCPU['model'] || X86.MODEL_8088;
 
     /*
      * We take the 'stepping' value, convert it to a hex value, and then add that to the model to provide

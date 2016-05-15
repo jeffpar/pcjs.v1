@@ -223,7 +223,7 @@ Video.COLORS = {
  * @this {Video}
  * @param {Computer} cmp
  * @param {Bus} bus
- * @param {CPUSim} cpu
+ * @param {CPUState} cpu
  * @param {Debugger} dbg
  */
 Video.prototype.initBus = function(cmp, bus, cpu, dbg)
