@@ -165,7 +165,7 @@ function Video(parmsVideo, canvas, context, textarea, container)
      */
     var fSmoothing = parmsVideo['smoothing'];
     var sSmoothing = Component.parmsURL['smoothing'];
-    if (sSmoothing) fSmoothing = (sSmoothing == "true")? true : false;
+    if (sSmoothing) fSmoothing = (sSmoothing == "true");
     if (fSmoothing != null) {
         for (i = 0; i < asWebPrefixes.length; i++) {
             sEvent = asWebPrefixes[i];
@@ -4560,8 +4560,8 @@ Video.prototype.removeCursor = function()
                     /*
                      * If we're using an off-screen buffer in text mode, then we need to keep it in sync with "reality".
                      */
-                    if (this.contextScreenBuffer) {
-                        this.updateChar(col, row, data, this.contextScreenBuffer);
+                    if (this.contextBuffer) {
+                        this.updateChar(col, row, data, this.contextBuffer);
                     }
                     /*
                      * While updating the on-screen canvas directly could open us up to potential subpixel artifacts again,
@@ -4856,11 +4856,11 @@ Video.prototype.setDimensions = function()
         }
 
         /*
-         * In text modes, we have the option of setting all the *ScreenBuffer variables to null instead of
+         * In text modes, we have the option of setting all the *Buffer variables to null instead of
          * allocating them, because updateChar(), as currently written, is capable of writing characters to
          * either an off-screen or on-screen context.
          *
-         *      this.imageScreenBuffer = this.canvasScreenBuffer = this.contextScreenBuffer = null;
+         *      this.imageBuffer = this.canvasBuffer = this.contextBuffer = null;
          */
         this.cxBuffer = this.cyBuffer = 0;
         if (font) {
@@ -4888,11 +4888,11 @@ Video.prototype.setDimensions = function()
     /*
      * Allocate the off-screen buffers
      */
-    this.imageScreenBuffer = this.contextScreen.createImageData(this.cxBuffer, this.cyBuffer);
-    this.canvasScreenBuffer = document.createElement("canvas");
-    this.canvasScreenBuffer.width = this.cxBuffer;
-    this.canvasScreenBuffer.height = this.cyBuffer;
-    this.contextScreenBuffer = this.canvasScreenBuffer.getContext("2d");
+    this.imageBuffer = this.contextScreen.createImageData(this.cxBuffer, this.cyBuffer);
+    this.canvasBuffer = document.createElement("canvas");
+    this.canvasBuffer.width = this.cxBuffer;
+    this.canvasBuffer.height = this.cyBuffer;
+    this.contextBuffer = this.canvasBuffer.getContext("2d");
 
     /*
      * Since cxCell and cyCell were originally defined in terms of cxScreen/nCols and cyScreen/nRows, you might think
@@ -5676,7 +5676,7 @@ Video.prototype.updateScreenText = function(addrScreen, addrScreenLimit, iCell, 
         if (!this.fCellCacheValid || data !== this.aCellCache[iCell]) {
             var col = iCell % this.nCols;
             var row = (iCell / this.nCols)|0;
-            this.updateChar(col, row, data, this.contextScreenBuffer);
+            this.updateChar(col, row, data, this.contextBuffer);
             this.aCellCache[iCell] = data;
             cUpdated++;
         }
@@ -5686,8 +5686,8 @@ Video.prototype.updateScreenText = function(addrScreen, addrScreenLimit, iCell, 
 
     this.fCellCacheValid = true;
 
-    if (cUpdated && this.contextScreenBuffer) {
-        this.contextScreen.drawImage(this.canvasScreenBuffer, 0, 0, this.cxBuffer, this.cyBuffer, this.xScreenOffset, this.yScreenOffset, this.cxScreenOffset, this.cyScreenOffset);
+    if (cUpdated && this.contextBuffer) {
+        this.contextScreen.drawImage(this.canvasBuffer, 0, 0, this.cxBuffer, this.cyBuffer, this.xScreenOffset, this.yScreenOffset, this.cxScreenOffset, this.cyScreenOffset);
     }
 };
 
@@ -5725,7 +5725,7 @@ Video.prototype.updateScreenGraphicsCGA = function(addrScreen, addrScreenLimit)
             if (x < xDirty) xDirty = x;
             for (var iPixel = 0; iPixel < nPixelsPerCell; iPixel++) {
                 var bPixel = (wPixels & (wMask >>= nPixelShift)) >> (nShift -= nPixelShift);
-                this.setPixel(this.imageScreenBuffer, x++, y, aPixelColors[bPixel]);
+                this.setPixel(this.imageBuffer, x++, y, aPixelColors[bPixel]);
             }
             if (x > xMaxDirty) xMaxDirty = x;
             if (y < yDirty) yDirty = y;
@@ -5748,30 +5748,30 @@ Video.prototype.updateScreenGraphicsCGA = function(addrScreen, addrScreenLimit)
     this.fCellCacheValid = true;
 
     /*
-     * Instead of blasting the ENTIRE imageScreenBuffer into contextScreenBuffer, and then blasting the ENTIRE
-     * canvasScreenBuffer onto contextScreen, even for the smallest change, let's try to be a bit smarter about
+     * Instead of blasting the ENTIRE imageBuffer into contextBuffer, and then blasting the ENTIRE
+     * canvasBuffer onto contextScreen, even for the smallest change, let's try to be a bit smarter about
      * the update (well, to the extent that the canvas APIs permit).
      */
     if (xDirty < this.nCols) {
         var cxDirty = xMaxDirty - xDirty;
         var cyDirty = yMaxDirty - yDirty;
-        // this.contextScreenBuffer.putImageData(this.imageScreenBuffer, 0, 0);
-        this.contextScreenBuffer.putImageData(this.imageScreenBuffer, 0, 0, xDirty, yDirty, cxDirty, cyDirty);
+        // this.contextBuffer.putImageData(this.imageBuffer, 0, 0);
+        this.contextBuffer.putImageData(this.imageBuffer, 0, 0, xDirty, yDirty, cxDirty, cyDirty);
         /*
-         * While ideally I would draw only the dirty portion of canvasScreenBuffer, there usually isn't a 1-1 pixel mapping
-         * between canvasScreenBuffer and contextScreen.  In fact, the WHOLE POINT of the canvasScreenBuffer is to leverage
+         * While ideally I would draw only the dirty portion of canvasBuffer, there usually isn't a 1-1 pixel mapping
+         * between canvasBuffer and contextScreen.  In fact, the WHOLE POINT of the canvasBuffer is to leverage
          * drawImage()'s scaling ability; for example, a CGA graphics mode might be 640x200, whereas the canvas representing
          * the screen might be 960x400.  In those situations, if we draw interior rectangles, we often end up with subpixel
-         * artifacts along the edges of those rectangles.  So it appears I must continue to redraw the entire canvasScreenBuffer
+         * artifacts along the edges of those rectangles.  So it appears I must continue to redraw the entire canvasBuffer
          * on every change.
          *
         var xScreen = (((xDirty * this.cxScreen) / this.nCols) | 0);
         var yScreen = (((yDirty * this.cyScreen) / this.nRows) | 0);
         var cxScreen = (((cxDirty * this.cxScreen) / this.nCols) | 0);
         var cyScreen = (((cyDirty * this.cyScreen) / this.nRows) | 0);
-        this.contextScreen.drawImage(this.canvasScreenBuffer, xDirty, yDirty, cxDirty, cyDirty, xScreen, yScreen, cxScreen, cyScreen);
+        this.contextScreen.drawImage(this.canvasBuffer, xDirty, yDirty, cxDirty, cyDirty, xScreen, yScreen, cxScreen, cyScreen);
          */
-        this.contextScreen.drawImage(this.canvasScreenBuffer, 0, 0, this.nCols, this.nRows, 0, 0, this.cxScreen, this.cyScreen);
+        this.contextScreen.drawImage(this.canvasBuffer, 0, 0, this.nCols, this.nRows, 0, 0, this.cxScreen, this.cyScreen);
     }
 };
 
@@ -5863,7 +5863,7 @@ Video.prototype.updateScreenGraphicsEGA = function(addrBuffer, addrScreen, addrS
                  * index, which is what this code requires.
                  */
                 var bPixel = Video.aEGADWToByte[dwPixel] || 0;
-                this.setPixel(this.imageScreenBuffer, x++, y, aPixelColors[bPixel]);
+                this.setPixel(this.imageBuffer, x++, y, aPixelColors[bPixel]);
                 data <<= 1;
             }
             if (x > xMaxDirty) xMaxDirty = x;
@@ -5888,8 +5888,8 @@ Video.prototype.updateScreenGraphicsEGA = function(addrBuffer, addrScreen, addrS
     if (xDirty < this.nCols) {
         var cxDirty = xMaxDirty - xDirty;
         var cyDirty = yMaxDirty - yDirty;
-        this.contextScreenBuffer.putImageData(this.imageScreenBuffer, 0, 0, xDirty, yDirty, cxDirty, cyDirty);
-        this.contextScreen.drawImage(this.canvasScreenBuffer, 0, 0, this.nCols, this.nRows, 0, 0, this.cxScreen, this.cyScreen);
+        this.contextBuffer.putImageData(this.imageBuffer, 0, 0, xDirty, yDirty, cxDirty, cyDirty);
+        this.contextScreen.drawImage(this.canvasBuffer, 0, 0, this.nCols, this.nRows, 0, 0, this.cxScreen, this.cyScreen);
     }
 };
 
@@ -5957,7 +5957,7 @@ Video.prototype.updateScreenGraphicsVGA = function(addrBuffer, addrScreen, addrS
         if (nPixels) {
             if (x < xDirty) xDirty = x;
             for (iPixel = 0; iPixel < nPixels; iPixel++) {
-                this.setPixel(this.imageScreenBuffer, x++, y, aPixelColors[data & 0xff]);
+                this.setPixel(this.imageBuffer, x++, y, aPixelColors[data & 0xff]);
                 data >>= 8;
             }
             if (x > xMaxDirty) xMaxDirty = x;
@@ -5984,8 +5984,8 @@ Video.prototype.updateScreenGraphicsVGA = function(addrBuffer, addrScreen, addrS
     if (xDirty < this.nCols) {
         var cxDirty = xMaxDirty - xDirty;
         var cyDirty = yMaxDirty - yDirty;
-        this.contextScreenBuffer.putImageData(this.imageScreenBuffer, 0, 0, xDirty, yDirty, cxDirty, cyDirty);
-        this.contextScreen.drawImage(this.canvasScreenBuffer, 0, 0, this.nCols, this.nRows, 0, 0, this.cxScreen, this.cyScreen);
+        this.contextBuffer.putImageData(this.imageBuffer, 0, 0, xDirty, yDirty, cxDirty, cyDirty);
+        this.contextScreen.drawImage(this.canvasBuffer, 0, 0, this.nCols, this.nRows, 0, 0, this.cxScreen, this.cyScreen);
     }
 };
 

@@ -566,6 +566,11 @@ Keyboard.KEYSTATES[Keyboard.SIMCODE.SCROLL_LOCK] = Keyboard.STATE.SCROLL_LOCK;
 /**
  * Maps CLICKCODE (string) to SIMCODE (number).
  *
+ * NOTE: Unlike SOFTCODES, CLICKCODES are upper-case and use underscores instead of dashes, so that this
+ * and other components can reference them using "dot" property syntax; using upper-case merely adheres to
+ * our convention for constants.  setBinding() will automatically convert any incoming CLICKCODE bindings
+ * that use lower-case and dashes to upper-case and underscores before performing property lookup.
+ *
  * @enum {number}
  */
 Keyboard.CLICKCODES = {

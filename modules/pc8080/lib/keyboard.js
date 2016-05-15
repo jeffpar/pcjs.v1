@@ -37,8 +37,7 @@ if (NODE) {
     var web         = require("../../shared/lib/weblib");
     var Component   = require("../../shared/lib/component");
     var Messages    = require("./messages");
-    var State       = require("./state");
-    var CPU         = require("./cpu");
+    var ChipSet     = require("./chipset");
 }
 
 /**
@@ -51,6 +50,8 @@ if (NODE) {
 function Keyboard(parmsKbd)
 {
     Component.call(this, "Keyboard", parmsKbd, Keyboard, Messages.KEYBOARD);
+
+    this.reset();
 
     this.setReady();
 }
@@ -122,6 +123,16 @@ Keyboard.KEYCODE = {
     /* 0x2E */ DEL:         46,
     /* 0x2E */ FF_PERIOD:   46,
     /* 0x2F */ FF_SLASH:    47,
+    /* 0x30 */ ZERO:        48,
+    /* 0x31 */ ONE:         49,
+    /* 0x32 */ TWO:         50,
+    /* 0x33 */ THREE:       51,
+    /* 0x34 */ FOUR:        52,
+    /* 0x35 */ FIVE:        53,
+    /* 0x36 */ SIX:         54,
+    /* 0x37 */ SEVEN:       55,
+    /* 0x38 */ EIGHT:       56,
+    /* 0x39 */ NINE:        57,
     /* 0x3B */ FF_SEMI:     59,
     /* 0x3D */ FF_EQUALS:   61,
     /* 0x5B */ CMD:         91,         // aka WIN
@@ -211,6 +222,62 @@ Keyboard.STUPID_KEYCODES[Keyboard.KEYCODE.QUOTE]   = Keyboard.ASCII["'"];   // 2
 Keyboard.STUPID_KEYCODES[Keyboard.KEYCODE.FF_DASH] = Keyboard.ASCII['-'];
 
 /**
+ * Maps SOFTCODE (string) to KEYCODE (number).
+ *
+ * @enum {number}
+ */
+Keyboard.SOFTCODES = {
+    '1p':       Keyboard.KEYCODE.ONE,
+    '2p':       Keyboard.KEYCODE.TWO,
+    'coin':     Keyboard.KEYCODE.FIVE,
+    'left':     Keyboard.KEYCODE.LEFT,
+    'right':    Keyboard.KEYCODE.RIGHT,
+    'fire':     Keyboard.KEYCODE.SPACE
+};
+
+/**
+ * Alternate keyCode mappings (to support the popular WASD directional mappings)
+ *
+ * TODO: ES6 computed property name support may now be in all mainstream browsers, allowing us to use
+ * a simple object literal for this and all other object initializations.
+ */
+Keyboard.ALTCODES = {};
+Keyboard.ALTCODES[Keyboard.ASCII.A] = Keyboard.KEYCODE.LEFT;
+Keyboard.ALTCODES[Keyboard.ASCII.D] = Keyboard.KEYCODE.RIGHT;
+Keyboard.ALTCODES[Keyboard.ASCII.L] = Keyboard.KEYCODE.SPACE;
+
+/**
+ * getSoftCode(keyCode)
+ *
+ * @this {Keyboard}
+ * @return {string|null}
+ */
+Keyboard.prototype.getSoftCode = function(keyCode)
+{
+    keyCode = Keyboard.ALTCODES[keyCode] || keyCode;
+    for (var sSoftCode in Keyboard.SOFTCODES) {
+        if (Keyboard.SOFTCODES[sSoftCode] === keyCode) {
+            return sSoftCode;
+        }
+    }
+    return null;
+};
+
+/**
+ * reset()
+ *
+ * @this {Keyboard}
+ */
+Keyboard.prototype.reset = function()
+{
+    /*
+     * As SOFTCODE keyDown events are encountered, a corresponding property is set to true in
+     * keysPressed, and as SOFTCODE keyUp events are encountered, the property is set to false.
+     */
+    this.keysPressed = {};
+};
+
+/**
  * setBinding(sHTMLType, sBinding, control, sValue)
  *
  * @this {Keyboard}
@@ -257,68 +324,24 @@ Keyboard.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
             control.onkeydown = function onKeyDown(event) {
                 return kbd.onKeyDown(event, true);
             };
-            control.onkeypress = function onKeyPressKbd(event) {
-                return kbd.onKeyPress(event);
-            };
             control.onkeyup = function onKeyUp(event) {
                 return kbd.onKeyDown(event, false);
             };
             return true;
 
-        case "caps-lock":
-            this.bindings[id] = control;
-            control.onclick = function onClickCapsLock(event) {
-                if (kbd.cmp) kbd.cmp.updateFocus();
-                return kbd.toggleCapsLock();
-            };
-            return true;
-
-        case "num-lock":
-            this.bindings[id] = control;
-            control.onclick = function onClickNumLock(event) {
-                if (kbd.cmp) kbd.cmp.updateFocus();
-                return kbd.toggleNumLock();
-            };
-            return true;
-
-        case "scroll-lock":
-            this.bindings[id] = control;
-            control.onclick = function onClickScrollLock(event) {
-                if (kbd.cmp) kbd.cmp.updateFocus();
-                return kbd.toggleScrollLock();
-            };
-            return true;
-
         default:
-            /*
-             * Maintain support for older button codes; eg, map button code "ctrl-c" to CLICKCODE "CTRL_C"
-             */
-            var sCode = sBinding.toUpperCase().replace(/-/g, '_');
-            if (Keyboard.CLICKCODES[sCode] !== undefined && sHTMLType == "button") {
+            if (Keyboard.SOFTCODES[sBinding] !== undefined) {
                 this.bindings[id] = control;
-                control.onclick = function(kbd, sKey, simCode) {
-                    return function onClickKeyboard(event) {
-                        if (!COMPILED && kbd.messageEnabled()) kbd.printMessage(sKey + " clicked", Messages.KEYS);
-                        if (kbd.cmp) kbd.cmp.updateFocus();
-                        kbd.updateShiftState(simCode, true);    // future-proofing if/when any LOCK keys are added to CLICKCODES
-                        kbd.addActiveKey(simCode, true);
-                    };
-                }(this, sCode, Keyboard.CLICKCODES[sCode]);
-                return true;
-            }
-            else if (Keyboard.SOFTCODES[sBinding] !== undefined) {
-                this.cSoftCodes++;
-                this.bindings[id] = control;
-                var fnDown = function(kbd, sKey, simCode) {
+                var fnDown = function(kbd, sSoftCode) {
                     return function onMouseOrTouchDownKeyboard(event) {
-                        kbd.addActiveKey(simCode);
+                        kbd.onSoftKeyDown(sSoftCode, true);
                     };
-                }(this, sBinding, Keyboard.SOFTCODES[sBinding]);
-                var fnUp = function (kbd, sKey, simCode) {
+                }(this, sBinding);
+                var fnUp = function (kbd, sSoftCode) {
                     return function onMouseOrTouchUpKeyboard(event) {
-                        kbd.removeActiveKey(simCode);
+                        kbd.onSoftKeyDown(sSoftCode, false);
                     };
-                }(this, sBinding, Keyboard.SOFTCODES[sBinding]);
+                }(this, sBinding);
                 if ('ontouchstart' in window) {
                     control.ontouchstart = fnDown;
                     control.ontouchend = fnUp;
@@ -328,19 +351,92 @@ Keyboard.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
                 }
                 return true;
             }
-            else if (sValue) {
-                /*
-                 * Instead of just having a dedicated "test" control, we now treat any unrecognized control with
-                 * a data value as a test control.  The only caveat is that such controls must have binding IDs that
-                 * do not conflict with predefined controls (which, of course, is the only way you can get here).
-                 */
-                this.bindings[id] = control;
-                control.onclick = function onClickTest(event) {
-                    if (kbd.cmp) kbd.cmp.updateFocus();
-                    return kbd.injectKeys(sValue);
-                };
-                return true;
-            }
+            break;
+        }
+    }
+    return false;
+};
+
+/**
+ * initBus(cmp, bus, cpu, dbg)
+ *
+ * @this {Keyboard}
+ * @param {Computer} cmp
+ * @param {Bus} bus
+ * @param {CPUState} cpu
+ * @param {Debugger} dbg
+ */
+Keyboard.prototype.initBus = function(cmp, bus, cpu, dbg)
+{
+    this.dbg = dbg;     // NOTE: The "dbg" property must be set for the message functions to work
+    this.chipset = cmp.getMachineComponent("ChipSet");
+};
+
+/**
+ * onKeyDown(event, fDown)
+ *
+ * @this {Keyboard}
+ * @param {Object} event
+ * @param {boolean} fDown is true for a keyDown event, false for a keyUp event
+ * @return {boolean} true to pass the event along, false to consume it
+ */
+Keyboard.prototype.onKeyDown = function(event, fDown)
+{
+    var fPass = true;
+    var keyCode = event.keyCode;
+    var sSoftCode = this.getSoftCode(keyCode);
+
+    if (sSoftCode) {
+        fPass = this.onSoftKeyDown(sSoftCode, fDown);
+    }
+
+    if (!fPass) {
+        event.preventDefault();
+    }
+
+    if (!COMPILED && this.messageEnabled(Messages.KEYS)) {
+        this.printMessage("onKey" + (fDown? "Down" : "Up") + "(" + keyCode + "): " + (fPass? "true" : "false"), true);
+    }
+
+    return fPass;
+};
+
+/**
+ * onSoftKeyDown(sSoftCode, fDown)
+ *
+ * @this {Keyboard}
+ * @param {string} sSoftCode
+ * @param {boolean} fDown is true for a down event, false for an up event
+ * @return {boolean} true to pass the event along, false to consume it
+ */
+Keyboard.prototype.onSoftKeyDown = function(sSoftCode, fDown)
+{
+    this.keysPressed[sSoftCode] = fDown;
+
+    if (this.chipset) {
+        switch(sSoftCode) {
+        case '1p':
+            this.chipset.updateStatus1(ChipSet.SI_1978.STATUS1.P1, fDown);
+            break;
+
+        case '2p':
+            this.chipset.updateStatus1(ChipSet.SI_1978.STATUS1.P2, fDown);
+            break;
+
+        case 'coin':
+            this.chipset.updateStatus1(ChipSet.SI_1978.STATUS1.CREDIT, fDown);
+            break;
+
+        case 'left':
+            this.chipset.updateStatus1(ChipSet.SI_1978.STATUS1.P1_LEFT, fDown);
+            break;
+
+        case 'right':
+            this.chipset.updateStatus1(ChipSet.SI_1978.STATUS1.P1_RIGHT, fDown);
+            break;
+
+        case 'fire':
+            this.chipset.updateStatus1(ChipSet.SI_1978.STATUS1.P1_FIRE, fDown);
             break;
         }
     }

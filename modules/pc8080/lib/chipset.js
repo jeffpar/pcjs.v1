@@ -107,24 +107,24 @@ Component.subclass(ChipSet);
 
 ChipSet.SI_1978 = {
     MODEL:          1978.1,
-    STATUS0: {
+    STATUS0: {                          // NOTE: STATUS0 not used by the SI_1978 ROMs; refer to STATUS1 instead
         PORT:       0,
         DIP4:       0x01,               // self-test request at power up?
-        ALWAYS_SET: 0x0E,               // always set
         FIRE:       0x10,               // 1 = fire
-        LEFT:       0x20,               // 1 = move left
-        RIGHT:      0x40,               // 1 = move right
-        PORT7:      0x80                // some connection to (undocumented) port 7
+        LEFT:       0x20,               // 1 = left
+        RIGHT:      0x40,               // 1 = right
+        PORT7:      0x80,               // some connection to (undocumented) port 7
+        ALWAYS_SET: 0x0E                // always set
     },
     STATUS1: {
         PORT:       1,
         CREDIT:     0x01,               // credit (coin slot)
         P2:         0x02,               // 1 = 2P start
         P1:         0x04,               // 1 = 1P start
-        ALWAYS_SET: 0x08,               // always set
-        P1_FIRE:    0x10,               // 1 = P1 fire (cocktail machines only?)
-        P1_LEFT:    0x20,               // 1 = P1 left (cocktail machines only?)
-        P1_RIGHT:   0x40                // 1 = P1 right (cocktail machines only?)
+        P1_FIRE:    0x10,               // 1 = fire (P1 fire if cocktail machine?)
+        P1_LEFT:    0x20,               // 1 = left (P1 left if cocktail machine?)
+        P1_RIGHT:   0x40,               // 1 = right (P1 right if cocktail machine?)
+        ALWAYS_SET: 0x08                // always set
     },
     STATUS2: {
         PORT:       2,
@@ -134,7 +134,8 @@ ChipSet.SI_1978 = {
         P2_FIRE:    0x10,               // 1 = P2 fire (cocktail machines only?)
         P2_LEFT:    0x20,               // 1 = P2 left (cocktail machines only?)
         P2_RIGHT:   0x40,               // 1 = P2 right (cocktail machines only?)
-        DIP7:       0x80                // 0 = display coin info on demo ("attract") screen
+        DIP7:       0x80,               // 0 = display coin info on demo ("attract") screen
+        ALWAYS_SET: 0x00
     },
     SHIFT_RESULT: {                     // bits 0-7 of barrel shifter result
         PORT:       3
@@ -273,9 +274,9 @@ ChipSet.prototype.powerDown = function(fSave, fShutdown)
  */
 ChipSet.prototype.reset = function()
 {
-    this.bStatus0 = 0;
-    this.bStatus1 = 0;
-    this.bStatus2 = 0;
+    this.bStatus0 = ChipSet.SI_1978.STATUS0.ALWAYS_SET;
+    this.bStatus1 = ChipSet.SI_1978.STATUS1.ALWAYS_SET;
+    this.bStatus2 = ChipSet.SI_1978.STATUS2.ALWAYS_SET;
     this.wShiftData = 0;
     this.bShiftCount = 0;
     this.bSound1 = this.bSound2 = 0;
@@ -349,6 +350,45 @@ ChipSet.prototype.stop = function()
     /*
      * Currently, all we (may) do with this notification is prevent the speaker from making noise.
      */
+};
+
+/**
+ * updateStatus0(bit, fSet)
+ *
+ * @this {ChipSet}
+ * @param {number} bit
+ * @param {boolean} fSet
+ */
+ChipSet.prototype.updateStatus0 = function(bit, fSet)
+{
+    this.bStatus0 &= ~bit;
+    if (fSet) this.bStatus0 |= bit;
+};
+
+/**
+ * updateStatus1(bit, fSet)
+ *
+ * @this {ChipSet}
+ * @param {number} bit
+ * @param {boolean} fSet
+ */
+ChipSet.prototype.updateStatus1 = function(bit, fSet)
+{
+    this.bStatus1 &= ~bit;
+    if (fSet) this.bStatus1 |= bit;
+};
+
+/**
+ * updateStatus2(bit, fSet)
+ *
+ * @this {ChipSet}
+ * @param {number} bit
+ * @param {boolean} fSet
+ */
+ChipSet.prototype.updateStatus2 = function(bit, fSet)
+{
+    this.bStatus2 &= ~bit;
+    if (fSet) this.bStatus2 |= bit;
 };
 
 /**

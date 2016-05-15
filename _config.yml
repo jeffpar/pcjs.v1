@@ -6,7 +6,8 @@ description: >
   PCjs: The Original IBM PC in a Browser.
   Classic computer simulations in JavaScript.
   Includes an archive of historical PC software and publications.
-  Additional computer simulations in JavaScript include the 6502-based Ohio Scientific Challenger 1P.
+  Additional computer simulations in JavaScript include the 6502-based Ohio Scientific Challenger 1P and 8080-based
+  machines, including arcade machines such as Space Invaders.
 baseurl: ""                 # "/pcjs" when using http://jeffpar.github.io or "" when using http://www.pcjs.org 
 url: "http://www.pcjs.org"  # "http://jeffpar.github.io" or "http://www.pcjs.org"
 twitter_username: jeffpar

@@ -18,6 +18,7 @@
 		</menu>
 	</video>
 	<chipset id="chipset" model="SI1978"/>
+	<keyboard id="keyboard"/>
 	<panel ref="/devices/pc8080/panel/left.xml"/>
 	<debugger id="debugger" commands="s 8086"/>
 </machine>
