@@ -223,7 +223,7 @@ Video.COLORS = {
  * @this {Video}
  * @param {Computer} cmp
  * @param {Bus} bus
- * @param {CPUSim} cpu
+ * @param {CPUState} cpu
  * @param {Debugger} dbg
  */
 Video.prototype.initBus = function(cmp, bus, cpu, dbg)
@@ -245,6 +245,16 @@ Video.prototype.initBus = function(cmp, bus, cpu, dbg)
         this.nPixelsPerCell = (16 / this.nBitsPerPixel)|0;
         this.initCache();
     }
+
+    /*
+     * If we have an associated keyboard, then ensure that the keyboard will be notified whenever the canvas
+     * gets focus and receives input.
+     */
+    this.kbd = cmp.getMachineComponent("Keyboard");
+    if (this.kbd && this.canvasScreen) {
+        this.kbd.setBinding(this.textareaScreen? "textarea" : "canvas", "kbd", this.inputScreen);
+    }
+
     this.setReady();
 };
 

@@ -145,10 +145,10 @@ function Computer(parmsComputer, parmsMachine, fSuspended) {
      * Find the appropriate CPU (and Debugger and Control Panel, if any)
      *
      * CLOSURE COMPILER TIP: To override the type of a right-hand expression (as we need to do here,
-     * where we know getComponentByType() will only return an CPUSim object or null), wrap the expression
+     * where we know getComponentByType() will only return an CPUState object or null), wrap the expression
      * in parentheses.  I never knew this until I stumbled across it in "Closure: The Definitive Guide".
      */
-    this.cpu = /** @type {CPUSim} */ (Component.getComponentByType("CPU", this.id));
+    this.cpu = /** @type {CPUState} */ (Component.getComponentByType("CPU", this.id));
     if (!this.cpu) {
         Component.error("Unable to find CPU component");
         return;
@@ -1432,12 +1432,11 @@ Computer.prototype.updateFocus = function(fScroll)
         }
         /*
          * TODO: We need a mechanism to determine the "active" display, instead of hard-coding this to aVideo[0].
-         *
+         */
         this.aVideo[0].setFocus();
         if (fScroll && window) {
             window.scrollTo(x, y);
         }
-         */
     }
 };
 
@@ -1454,7 +1453,7 @@ Computer.prototype.updateFocus = function(fScroll)
  * neither.  In theory, there could be BOTH, but that would be unusual.
  *
  * TODO: Consider alternate approaches to these largely register-oriented display updates.  Ordinarily, we like to
- * separate logic from presentation, and currently the CPUSim contains both, since it's the component that intimately
+ * separate logic from presentation, and currently the CPUState contains both, since it's the component that intimately
  * knows the names, number, sizes, etc, of all the active registers.  The Panel component is the logical candidate,
  * but Panel is an optional component; generally, only machines that include Debugger also include Panel.
  *

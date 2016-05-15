@@ -42,7 +42,7 @@
 		<control type="button" binding="run">Run</control>
 		<control type="button" binding="step">Step</control>
 		<control type="button" binding="reset">Reset</control>
-		<control type="button" binding="setSpeed">Fast</control>
+		<control type="button" binding="setSpeed">Speed</control>
 		<control type="button" binding="save">Save</control>
 	</control>
 </panel>

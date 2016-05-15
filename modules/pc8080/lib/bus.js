@@ -68,7 +68,7 @@ if (NODE) {
  * @constructor
  * @extends Component
  * @param {Object} parmsBus
- * @param {CPUSim} cpu
+ * @param {CPUState} cpu
  * @param {Debugger} dbg
  */
 function Bus(parmsBus, cpu, dbg)
@@ -705,7 +705,7 @@ Bus.prototype.saveMemory = function(fAll)
 /**
  * restoreMemory(a)
  *
- * This restores the contents of all Memory blocks; called by CPUSim.restore().
+ * This restores the contents of all Memory blocks; called by CPUState.restore().
  *
  * In theory, we ONLY have to save/restore block contents.  Other block attributes,
  * like the type, the memory controller (if any), and the active memory access functions,

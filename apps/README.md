@@ -6,9 +6,11 @@ permalink: /apps/
 
 Application Archives
 ---
-Browse classic [IBM PC](pc/) and [Challenger 1P](c1p/) software that you can run with [PCjs](/docs/about/pcjs/)
-and [C1Pjs](/docs/c1pjs/).
+Browse classic application software for the following machines:
 
+- [IBM PC](pc/)
+- [Challenger 1P](c1p/)
+ 
 ### Software Application Manifests
 
 In the PCjs Project, every complete software package is stored in its own folder, either as a set of individual

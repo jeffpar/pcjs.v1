@@ -13,7 +13,7 @@ machines:
 8080 Exerciser Test Machine
 ---
 
-This is a test of [PC8080](/modules/pc8080/), a new 8080-based machine emulator being added to the
+This is a test of [PC8080](/modules/pc8080/), a new 8080-based machine emulator recently added to the
 PCjs Project.
 
 The test machine below loads a copy of the

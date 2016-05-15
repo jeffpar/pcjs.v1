@@ -468,13 +468,22 @@
 		<xsl:variable name="screenWidth">
 			<xsl:choose>
 				<xsl:when test="@screenwidth"><xsl:value-of select="@screenwidth"/></xsl:when>
+				<xsl:when test="@screenWidth"><xsl:value-of select="@screenWidth"/></xsl:when>
 				<xsl:otherwise>256</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
 		<xsl:variable name="screenHeight">
 			<xsl:choose>
 				<xsl:when test="@screenheight"><xsl:value-of select="@screenheight"/></xsl:when>
+				<xsl:when test="@screenHeight"><xsl:value-of select="@screenHeight"/></xsl:when>
 				<xsl:otherwise>224</xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
+		<xsl:variable name="screenColor">
+			<xsl:choose>
+				<xsl:when test="@screencolor"><xsl:value-of select="@screencolor"/></xsl:when>
+				<xsl:when test="@screenColor"><xsl:value-of select="@screenColor"/></xsl:when>
+				<xsl:otherwise>black</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
 		<xsl:variable name="charCols">
@@ -492,31 +501,35 @@
 		<xsl:variable name="charWidth">
 			<xsl:choose>
 				<xsl:when test="@charwidth"><xsl:value-of select="@charwidth"/></xsl:when>
+				<xsl:when test="@charWidth"><xsl:value-of select="@charWidth"/></xsl:when>
 				<xsl:otherwise>0</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
 		<xsl:variable name="charHeight">
 			<xsl:choose>
 				<xsl:when test="@charheight"><xsl:value-of select="@charheight"/></xsl:when>
+				<xsl:when test="@charHeight"><xsl:value-of select="@charHeight"/></xsl:when>
 				<xsl:otherwise>0</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
 		<xsl:variable name="charSet">
 			<xsl:choose>
 				<xsl:when test="@charset"><xsl:value-of select="@charset"/></xsl:when>
+				<xsl:when test="@charSet"><xsl:value-of select="@charSet"/></xsl:when>
+				<xsl:when test="@fontROM"><xsl:value-of select="@fontROM"/></xsl:when>
 				<xsl:otherwise/>
 			</xsl:choose>
 		</xsl:variable>
-		<xsl:variable name="screenColor">
+		<xsl:variable name="smoothing">
 			<xsl:choose>
-				<xsl:when test="@screencolor"><xsl:value-of select="@screencolor"/></xsl:when>
-				<xsl:otherwise>black</xsl:otherwise>
+				<xsl:when test="@smoothing"><xsl:value-of select="@smoothing"/></xsl:when>
+				<xsl:otherwise>null</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
 		<xsl:call-template name="component">
 			<xsl:with-param name="machine" select="$machine"/>
 			<xsl:with-param name="class">video</xsl:with-param>
-			<xsl:with-param name="parms">,model:<xsl:value-of select="$model"/>,screenWidth:<xsl:value-of select="$screenWidth"/>,screenHeight:<xsl:value-of select="$screenHeight"/>,charCols:<xsl:value-of select="$charCols"/>,charRows:<xsl:value-of select="$charRows"/>,charWidth:<xsl:value-of select="$charWidth"/>,charHeight:<xsl:value-of select="$charHeight"/>,charSet:'<xsl:value-of select="$charSet"/>',screenColor:'<xsl:value-of select="$screenColor"/>'</xsl:with-param>
+			<xsl:with-param name="parms">,model:<xsl:value-of select="$model"/>,screenWidth:<xsl:value-of select="$screenWidth"/>,screenHeight:<xsl:value-of select="$screenHeight"/>,charCols:<xsl:value-of select="$charCols"/>,charRows:<xsl:value-of select="$charRows"/>,charWidth:<xsl:value-of select="$charWidth"/>,charHeight:<xsl:value-of select="$charHeight"/>,charSet:'<xsl:value-of select="$charSet"/>',screenColor:'<xsl:value-of select="$screenColor"/>',smoothing:<xsl:value-of select="$smoothing"/></xsl:with-param>
 		</xsl:call-template>
 	</xsl:template>
 

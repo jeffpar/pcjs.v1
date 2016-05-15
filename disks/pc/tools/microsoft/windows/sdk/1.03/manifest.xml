@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.22.0/manifest.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.22.1/manifest.xsl"?>
 <manifest type="software">
 	<title>Windows SDK 1.03 </title>
 	<disk id="disk01" size="368640" chs="40:2:9" img="archive/WINSDK103-DISK1-UTILS1.img" href="/disks/pc/tools/microsoft/windows/sdk/1.03/WINSDK103-DISK1-UTILS1.json" md5="2056640bad0ce932b5ca1e4ea18e079e" md5json="ddb0f1b6e36f938b9b6fae36ca07dcea">

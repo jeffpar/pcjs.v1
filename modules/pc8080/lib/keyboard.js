@@ -37,8 +37,7 @@ if (NODE) {
     var web         = require("../../shared/lib/weblib");
     var Component   = require("../../shared/lib/component");
     var Messages    = require("./messages");
-    var State       = require("./state");
-    var CPU         = require("./cpu");
+    var ChipSet     = require("./chipset");
 }
 
 /**
@@ -51,6 +50,8 @@ if (NODE) {
 function Keyboard(parmsKbd)
 {
     Component.call(this, "Keyboard", parmsKbd, Keyboard, Messages.KEYBOARD);
+
+    this.reset();
 
     this.setReady();
 }
@@ -122,6 +123,16 @@ Keyboard.KEYCODE = {
     /* 0x2E */ DEL:         46,
     /* 0x2E */ FF_PERIOD:   46,
     /* 0x2F */ FF_SLASH:    47,
+    /* 0x30 */ ZERO:        48,
+    /* 0x31 */ ONE:         49,
+    /* 0x32 */ TWO:         50,
+    /* 0x33 */ THREE:       51,
+    /* 0x34 */ FOUR:        52,
+    /* 0x35 */ FIVE:        53,
+    /* 0x36 */ SIX:         54,
+    /* 0x37 */ SEVEN:       55,
+    /* 0x38 */ EIGHT:       56,
+    /* 0x39 */ NINE:        57,
     /* 0x3B */ FF_SEMI:     59,
     /* 0x3D */ FF_EQUALS:   61,
     /* 0x5B */ CMD:         91,         // aka WIN
@@ -209,6 +220,228 @@ Keyboard.STUPID_KEYCODES[Keyboard.KEYCODE.BSLASH]  = Keyboard.ASCII['\\'];  // 2
 Keyboard.STUPID_KEYCODES[Keyboard.KEYCODE.RBRACK]  = Keyboard.ASCII[']'];   // 221 -> 93
 Keyboard.STUPID_KEYCODES[Keyboard.KEYCODE.QUOTE]   = Keyboard.ASCII["'"];   // 222 -> 39
 Keyboard.STUPID_KEYCODES[Keyboard.KEYCODE.FF_DASH] = Keyboard.ASCII['-'];
+
+/**
+ * Maps SOFTCODE (string) to KEYCODE (number).
+ *
+ * @enum {number}
+ */
+Keyboard.SOFTCODES = {
+    '1p':       Keyboard.KEYCODE.ONE,
+    '2p':       Keyboard.KEYCODE.TWO,
+    'coin':     Keyboard.KEYCODE.THREE,
+    'left':     Keyboard.KEYCODE.LEFT,
+    'right':    Keyboard.KEYCODE.RIGHT,
+    'fire':     Keyboard.KEYCODE.SPACE
+};
+
+/**
+ * Alternate keyCode mappings (to support the popular WASD directional mappings)
+ *
+ * TODO: ES6 computed property name support may now be in all mainstream browsers, allowing us to use
+ * a simple object literal for this and all other object initializations.
+ */
+Keyboard.ALTCODES = {};
+Keyboard.ALTCODES[Keyboard.ASCII.A] = Keyboard.KEYCODE.LEFT;
+Keyboard.ALTCODES[Keyboard.ASCII.D] = Keyboard.KEYCODE.RIGHT;
+Keyboard.ALTCODES[Keyboard.ASCII.L] = Keyboard.KEYCODE.SPACE;
+
+/**
+ * getSoftCode(keyCode)
+ *
+ * @this {Keyboard}
+ * @return {string|null}
+ */
+Keyboard.prototype.getSoftCode = function(keyCode)
+{
+    keyCode = Keyboard.ALTCODES[keyCode] || keyCode;
+    for (var sSoftCode in Keyboard.SOFTCODES) {
+        if (Keyboard.SOFTCODES[sSoftCode] === keyCode) {
+            return sSoftCode;
+        }
+    }
+    return null;
+};
+
+/**
+ * reset()
+ *
+ * @this {Keyboard}
+ */
+Keyboard.prototype.reset = function()
+{
+    /*
+     * As SOFTCODE keyDown events are encountered, a corresponding property is set to true in
+     * keysPressed, and as SOFTCODE keyUp events are encountered, the property is set to false.
+     */
+    this.keysPressed = {};
+};
+
+/**
+ * setBinding(sHTMLType, sBinding, control, sValue)
+ *
+ * @this {Keyboard}
+ * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
+ * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "esc")
+ * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+ * @param {string} [sValue] optional data value
+ * @return {boolean} true if binding was successful, false if unrecognized binding request
+ */
+Keyboard.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
+{
+    /*
+     * There's a special binding that the Video component uses ("kbd") to effectively bind its
+     * screen to the entire keyboard, in Video.powerUp(); ie:
+     *
+     *      video.kbd.setBinding("canvas", "kbd", video.canvasScreen);
+     * or:
+     *      video.kbd.setBinding("textarea", "kbd", video.textareaScreen);
+     *
+     * However, it's also possible for the keyboard XML definition to define a control that serves
+     * a similar purpose; eg:
+     *
+     *      <control type="text" binding="kbd" width="2em">Kbd</control>
+     *
+     * The latter is purely experimental, while we work on finding ways to trigger the soft keyboard on
+     * certain pesky devices (like the Kindle Fire).  Note that even if you use the latter, the former will
+     * still be enabled (there's currently no way to configure the Video component to not bind its screen,
+     * but we could certainly add one if the need ever arose).
+     */
+    var kbd = this;
+    var id = sHTMLType + '-' + sBinding;
+
+    if (this.bindings[id] === undefined) {
+        switch (sBinding) {
+        case "kbd":
+            /*
+             * Recording the binding ID prevents multiple controls (or components) from attempting to erroneously
+             * bind a control to the same ID, but in the case of a "dual display" configuration, we actually want
+             * to allow BOTH video components to call setBinding() for "kbd", so that it doesn't matter which
+             * display the user gives focus to.
+             *
+             *      this.bindings[id] = control;
+             */
+            control.onkeydown = function onKeyDown(event) {
+                return kbd.onKeyDown(event, true);
+            };
+            control.onkeyup = function onKeyUp(event) {
+                return kbd.onKeyDown(event, false);
+            };
+            return true;
+
+        default:
+            if (Keyboard.SOFTCODES[sBinding] !== undefined) {
+                this.bindings[id] = control;
+                var fnDown = function(kbd, sSoftCode) {
+                    return function onMouseOrTouchDownKeyboard(event) {
+                        kbd.onSoftKeyDown(sSoftCode, true);
+                    };
+                }(this, sBinding);
+                var fnUp = function (kbd, sSoftCode) {
+                    return function onMouseOrTouchUpKeyboard(event) {
+                        kbd.onSoftKeyDown(sSoftCode, false);
+                    };
+                }(this, sBinding);
+                if ('ontouchstart' in window) {
+                    control.ontouchstart = fnDown;
+                    control.ontouchend = fnUp;
+                } else {
+                    control.onmousedown = fnDown;
+                    control.onmouseup = control.onmouseout = fnUp;
+                }
+                return true;
+            }
+            break;
+        }
+    }
+    return false;
+};
+
+/**
+ * initBus(cmp, bus, cpu, dbg)
+ *
+ * @this {Keyboard}
+ * @param {Computer} cmp
+ * @param {Bus} bus
+ * @param {CPUState} cpu
+ * @param {Debugger} dbg
+ */
+Keyboard.prototype.initBus = function(cmp, bus, cpu, dbg)
+{
+    this.dbg = dbg;     // NOTE: The "dbg" property must be set for the message functions to work
+    this.chipset = cmp.getMachineComponent("ChipSet");
+};
+
+/**
+ * onKeyDown(event, fDown)
+ *
+ * @this {Keyboard}
+ * @param {Object} event
+ * @param {boolean} fDown is true for a keyDown event, false for a keyUp event
+ * @return {boolean} true to pass the event along, false to consume it
+ */
+Keyboard.prototype.onKeyDown = function(event, fDown)
+{
+    var fPass = true;
+    var keyCode = event.keyCode;
+    var sSoftCode = this.getSoftCode(keyCode);
+
+    if (sSoftCode) {
+        fPass = this.onSoftKeyDown(sSoftCode, fDown);
+    }
+
+    if (!fPass) {
+        event.preventDefault();
+    }
+
+    if (!COMPILED && this.messageEnabled(Messages.KEYS)) {
+        this.printMessage("onKey" + (fDown? "Down" : "Up") + "(" + keyCode + "): " + (fPass? "true" : "false"), true);
+    }
+
+    return fPass;
+};
+
+/**
+ * onSoftKeyDown(sSoftCode, fDown)
+ *
+ * @this {Keyboard}
+ * @param {string} sSoftCode
+ * @param {boolean} fDown is true for a down event, false for an up event
+ * @return {boolean} true to pass the event along, false to consume it
+ */
+Keyboard.prototype.onSoftKeyDown = function(sSoftCode, fDown)
+{
+    this.keysPressed[sSoftCode] = fDown;
+
+    if (this.chipset) {
+        switch(sSoftCode) {
+        case '1p':
+            this.chipset.updateStatus1(ChipSet.SI_1978.STATUS1.P1, fDown);
+            break;
+
+        case '2p':
+            this.chipset.updateStatus1(ChipSet.SI_1978.STATUS1.P2, fDown);
+            break;
+
+        case 'coin':
+            this.chipset.updateStatus1(ChipSet.SI_1978.STATUS1.CREDIT, fDown);
+            break;
+
+        case 'left':
+            this.chipset.updateStatus1(ChipSet.SI_1978.STATUS1.P1_LEFT, fDown);
+            break;
+
+        case 'right':
+            this.chipset.updateStatus1(ChipSet.SI_1978.STATUS1.P1_RIGHT, fDown);
+            break;
+
+        case 'fire':
+            this.chipset.updateStatus1(ChipSet.SI_1978.STATUS1.P1_FIRE, fDown);
+            break;
+        }
+    }
+    return false;
+};
 
 /**
  * Keyboard.init()

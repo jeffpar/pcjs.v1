@@ -55,6 +55,7 @@ var usr     = require("../../shared/lib/usrlib");
  * @property {Array.<string>} c1pJSFiles
  * @property {Array.<string>} pcCSSFiles
  * @property {Array.<string>} pcJSFiles
+ * @property {Array.<string>} pc8080Files
  */
 var pkg = require("../../../package.json");
 

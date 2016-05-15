@@ -274,7 +274,7 @@ Memory.prototype = {
      * save()
      *
      * This gets the contents of a Memory block as an array of 32-bit values; used by Bus.saveMemory(),
-     * which in turn is called by CPUSim.save().
+     * which in turn is called by CPUState.save().
      *
      * Memory blocks with custom memory controllers do NOT save their contents; that's the responsibility
      * of the controller component.
@@ -317,7 +317,7 @@ Memory.prototype = {
      * restore(adw)
      *
      * This restores the contents of a Memory block from an array of 32-bit values;
-     * used by Bus.restoreMemory(), which is called by CPUSim.restore(), after all other
+     * used by Bus.restoreMemory(), which is called by CPUState.restore(), after all other
      * components have been restored and thus all Memory blocks have been allocated
      * by their respective components.
      *

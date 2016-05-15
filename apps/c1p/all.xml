@@ -1,23 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <serial id="serialPort" pos="left" padleft="8px">
 	<control type="list" binding="listSerial">
-		<item ref="/apps/c1p/BASIC/JP/TUBELIST.BAS">TUBELIST (JP)</item>
-		<item ref="/apps/c1p/BASIC/JP/HANGWOMAN.BAS">HANGWOMAN (JP)</item>
-		<item ref="/apps/c1p/BASIC/JP/CHECKERS.BAS">CHECKERS (JP)</item>
-		<item ref="/apps/c1p/BASIC/JP/LIFE.BAS">LIFE (JP)</item>
-		<item ref="/apps/c1p/BASIC/JP/OTHELLO.BAS">OTHELLO (JP)</item>
-		<item ref="/apps/c1p/BASIC/JP/SOFORECAST.BAS">SOFORECAST (JP)</item>
-		<item ref="/apps/c1p/6502/JP/BASICEXT.65V">6502 BASIC MODS (JP)</item>
-		<item ref="/apps/c1p/6502/JP/LIFE.65V">6502 LIFE (JP)</item>
-		<item ref="/apps/c1p/6502/tests/bcd/bcd.65v">6502 BCD TESTS</item>
-		<item ref="/apps/c1p/6502/tests/vflag/vflag.65v">6502 VFLAG TESTS</item>
+		<item ref="/apps/c1p/6502/jeffpar/assembler/ASSEMBLER-4K.json">6502 4K Assembler (JP)</item>
+		<item ref="/apps/c1p/6502/jeffpar/assembler/ASSEMBLER-8K.json">6502 8K Assembler (JP)</item>
+		<item ref="/apps/c1p/6502/jeffpar/basicext/BASICEXT.json">6502 BASIC Extensions (JP)</item>
+		<item ref="/apps/c1p/6502/jeffpar/life/LIFE.json">6502 Game of Life (JP)</item>
+		<item ref="/apps/c1p/6502/tests/bcd/bcd.json">6502 BCD Tests</item>
+		<item ref="/apps/c1p/6502/tests/vflag/vflag.json">6502 VFLAG Tests</item>
+		<item ref="/apps/c1p/BASIC/jeffpar/CHECKERS.BAS">CHECKERS (JP)</item>
+		<item ref="/apps/c1p/BASIC/jeffpar/HANGWOMAN.BAS">HANGWOMAN (JP)</item>
+		<item ref="/apps/c1p/BASIC/jeffpar/LIFE.BAS">LIFE (JP)</item>
+		<item ref="/apps/c1p/BASIC/jeffpar/OTHELLO.BAS">OTHELLO (JP)</item>
+		<item ref="/apps/c1p/BASIC/jeffpar/SOFORECAST.BAS">SOFORECAST (JP)</item>
+		<item ref="/apps/c1p/BASIC/jeffpar/TUBELIST.BAS">TUBELIST (JP)</item>
+		<item ref="/apps/c1p/BASIC/OSI/MATH.BAS">BASIC MATH</item>
+		<item ref="/apps/c1p/BASIC/OSI/CHECKING.BAS">CHECKING</item>
+		<item ref="/apps/c1p/BASIC/OSI/COUNTER.BAS">COUNTER</item>
 		<item ref="/apps/c1p/BASIC/OSI/POKER.BAS">POKER</item>
-		<item ref="/apps/c1p/BASIC/OSI/SAMPLE1.BAS">BASIC MATH</item>
-		<item ref="/apps/c1p/BASIC/OSI/SAMPLE2.BAS">CHECKING</item>
-		<item ref="/apps/c1p/BASIC/OSI/SAMPLE3.BAS">TRIG TUTOR</item>
-		<item ref="/apps/c1p/BASIC/OSI/SAMPLE4.BAS">STAR WARS</item>
-		<item ref="/apps/c1p/BASIC/OSI/SAMPLE5.BAS">COUNTER</item>
-		<item ref="/apps/c1p/BASIC/OSI/SAMPLE6.BAS">PRESIDENTS</item>
+		<item ref="/apps/c1p/BASIC/OSI/PRESIDENTS.BAS">PRESIDENTS</item>
+		<item ref="/apps/c1p/BASIC/OSI/STARWARS.BAS">STAR WARS</item>
+		<item ref="/apps/c1p/BASIC/OSI/TRIGTUTOR.BAS">TRIG TUTOR</item>
 		<item ref="/sites/www.osiweb.org/programs/basic/OsiBas/spacewar.bas">SPACEWAR</item>
 	</control>
 	<control type="button" binding="loadSerial">Load</control>

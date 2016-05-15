@@ -22,7 +22,7 @@ machines that automatically run the software.  Ideally, everything in the librar
 and linked to a page that describes the software in more detail, along with a live demonstration of the software,
 but that's not yet a reality.
 
-For application demos, see the [IBM PC Application Archive](/apps/pc/), which focuses excusively on applications.
+For application demos, see the [Application Archive](/apps/), which focuses excusively on applications.
 The [Disk Library](/disks/pc/library.xml) is a superset, including operating systems, application software,
 computer diagnostics, programming tools, and more.
 

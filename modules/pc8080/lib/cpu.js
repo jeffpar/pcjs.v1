@@ -1,5 +1,5 @@
 /**
- * @fileoverview Implements the PC8080 CPU component.
+ * @fileoverview Controls the PC8080 CPU component.
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @version 1.0
  * Created 2016-Apr-18
@@ -44,7 +44,7 @@ if (NODE) {
  *
  * The CPU class supports the following (parmsCPU) properties:
  *
- *      cycles: the machine's base cycles per second; the CPUSim constructor will
+ *      cycles: the machine's base cycles per second; the CPUState constructor will
  *      provide us with a default (based on the CPU model) to use as a fallback.
  *
  *      multiplier: base cycle multiplier; default is 1.
@@ -65,7 +65,7 @@ if (NODE) {
  * This component is primarily responsible for interfacing the CPU with the outside
  * world (eg, Panel and Debugger components), and managing overall CPU operation.
  *
- * It is extended by the CPUSim component, where the simulation control logic resides.
+ * It is extended by the CPUState component, where the simulation control logic resides.
  *
  * @constructor
  * @extends Component
@@ -209,7 +209,7 @@ CPU.prototype.reset = function()
 /**
  * save()
  *
- * This is a placeholder for save support (overridden by the CPUSim component).
+ * This is a placeholder for save support (overridden by the CPUState component).
  *
  * @this {CPU}
  * @return {Object|null}
@@ -222,7 +222,7 @@ CPU.prototype.save = function()
 /**
  * restore(data)
  *
- * This is a placeholder for restore support (overridden by the CPUSim component).
+ * This is a placeholder for restore support (overridden by the CPUState component).
  *
  * @this {CPU}
  * @param {Object} data
@@ -349,7 +349,7 @@ CPU.prototype.isRunning = function()
 /**
  * getChecksum()
  *
- * This will be implemented by the CPUSim component.
+ * This will be implemented by the CPUState component.
  *
  * @this {CPU}
  * @return {number} a 32-bit summation of key elements of the current CPU state (used by the CPU checksum code)
@@ -969,21 +969,7 @@ CPU.prototype.runCPU = function(fUpdateFocus)
              * nCyclesPerBurst is how many cycles we WANT to run on each iteration of stepCPU(), but it may run
              * significantly less (or slightly more, since we can't execute partial instructions).
              */
-            try {
-                this.stepCPU(nCyclesPerBurst);
-            }
-            catch(exception) {
-                if (typeof exception != "number") throw exception;
-                if (MAXDEBUG) this.println("CPU exception " + str.toHexByte(exception));
-                /*
-                 * TODO: If we ever get into a situation where every single instruction is generating a fault
-                 * (eg, if an 8088 executes opcode 0xFF 0xFF, which is incorrectly routed to helpFault() instead
-                 * of fnGRPUndefined()), the browser may hang because we're failing to yield often enough.
-                 * This is likely because the thrown exceptions are taking MUCH longer than normal instructions,
-                 * throwing off our burst calculations.  We need to either adjust the burst or break out of the
-                 * DO-WHILE loop on every exception.
-                 */
-            }
+            this.stepCPU(nCyclesPerBurst);
 
             /*
              * nBurstCycles, less any remaining nStepCycles, is how many cycles stepCPU() ACTUALLY ran (nCycles).
@@ -1060,7 +1046,7 @@ CPU.prototype.startCPU = function(fUpdateFocus)
 /**
  * stepCPU(nMinCycles)
  *
- * This will be implemented by the CPUSim component.
+ * This will be implemented by the CPUState component.
  *
  * @this {CPU}
  * @param {number} nMinCycles (0 implies a single-step, and therefore breakpoints should be ignored)

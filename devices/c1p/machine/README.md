@@ -15,4 +15,9 @@ Here are some sample C1P Machine Configurations:
 * [8kb "Server Array" Demo](8kb/array/)
 * [32kb with Diskette Support](32kb/)
 
-See the [C1Pjs Documentation](/docs/c1pjs/) for operational details of our Challenger 1P emulator.
+See the [C1Pjs Documentation](/docs/c1pjs/) for operational details of the emulator.
+
+Browse our collection of [Challenger 1P Applications](/apps/c1p/), which come in two flavors:
+
+- [BASIC](/apps/c1p/BASIC/)
+- [6502 Machine-Language](/apps/c1p/6502/)
