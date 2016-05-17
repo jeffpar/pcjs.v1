@@ -1,13 +1,12 @@
 # Site settings
 
-title: "PCjs: The Virtual IBM PC"
+title: "PCjs: PC Simulations in JavaScript"
 email: Jeff@pcjs.org
 description: >
-  PCjs: The Original IBM PC in a Browser.
-  Classic computer simulations in JavaScript.
+  PCjs: Home of the original IBM PC emulator in a browser.
+  Classic computer simulations in JavaScript, including the IBM PC and other x86-based machines, 6502-based
+  machines such as the Ohio Scientific Challenger 1P, and 8080-based machines such as Space Invaders. 
   Includes an archive of historical PC software and publications.
-  Additional computer simulations in JavaScript include the 6502-based Ohio Scientific Challenger 1P and 8080-based
-  machines, including arcade machines such as Space Invaders.
 baseurl: ""                 # "/pcjs" when using http://jeffpar.github.io or "" when using http://www.pcjs.org 
 url: "http://www.pcjs.org"  # "http://jeffpar.github.io" or "http://www.pcjs.org"
 twitter_username: jeffpar

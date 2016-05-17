@@ -12,8 +12,8 @@
 
 	<xsl:variable name="MACHINECLASS">pc</xsl:variable>
 	<xsl:variable name="CSSCLASS">pcjs</xsl:variable>
-	<xsl:variable name="APPCLASS">pcjs</xsl:variable>
-	<xsl:variable name="APPNAME">PCjs</xsl:variable>
+	<xsl:variable name="APPCLASS">pcx86</xsl:variable>
+	<xsl:variable name="APPNAME">PCx86</xsl:variable>
 	<xsl:variable name="APPVERSION">1.x.x</xsl:variable>
 	<xsl:variable name="SITEHOST">www.pcjs.org</xsl:variable>
 

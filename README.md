@@ -1,21 +1,20 @@
-PCjs: Home of the Virtual IBM PC
+PC Simulations in JavaScript
 ===
 
-Welcome to PCjs, home of [PCx86](/docs/about/pcx86/), the first IBM PC simulation to run in your web browser without
-any plugins.  It was added to the [PCjs Project](https://github.com/jeffpar/pcjs) in Fall 2012.
-
-PCjs includes the following web-based emulators:
+Welcome to PCjs, home of the first IBM PC simulation to run in your web browser without
+any plugins.  It was released in Fall 2012 as part of the [PCjs Project](https://github.com/jeffpar/pcjs),
+which includes:
 
 * [PCx86](/docs/pcx86/), an x86-based IBM PC and PC-compatible emulator 
 * [PC8080](/modules/pc8080/), a 8080-based generic machine emulator
 * [C1Pjs](/docs/c1pjs/), a 6502-based Ohio Scientific Challenger 1P emulator
 
-PCx86 first simulated the 4.77Mhz 8088-based IBM PC, and has steadily evolved to support more classic x86 machines,
+PCx86 originally simulated the 4.77Mhz 8088-based IBM PC and has steadily evolved to support more classic x86 machines,
 including the IBM PC XT, the 80286-based IBM PC AT, and the 80386-based COMPAQ DeskPro 386.  PCx86 fully supports
 the original machine ROMs, video cards, etc, and all machines run at their original speeds.
 
-All the simulations are written entirely in [JavaScript](/modules/).  No Flash, Java or other plugins are required.
-Supported browsers include modern versions of Chrome, Safari, Firefox, Internet Explorer (v9.0 and up), Edge,
+All PCjs computer simulations are written entirely in [JavaScript](/modules/).  No Flash, Java or other plugins are
+required.  Supported browsers include modern versions of Chrome, Safari, Firefox, Internet Explorer (v9.0 and up), Edge,
 and assorted mobile browsers.
 
 [Embedded IBM PC](/devices/pcx86/machine/5150/mda/64kb/ "PCx86:ibm5150")
@@ -34,7 +33,7 @@ Demos
 ---
 Some pre-configured machines are shown below, ready to run BASIC, DOS, Windows, OS/2, and other assorted software.
 
-![IBM PC running VisiCalc](/apps/pcx86/1981/visicalc/thumbnail.jpg "link:/apps/pc/1981/visicalc/:200:120")
+![IBM PC running VisiCalc](/apps/pcx86/1981/visicalc/thumbnail.jpg "link:/apps/pcx86/1981/visicalc/:200:120")
 ![IBM PC running DONKEY.BAS](/devices/pcx86/machine/5150/cga/64kb/donkey/thumbnail.jpg "link:/devices/pcx86/machine/5150/cga/64kb/donkey/:200:120")
 ![IBM PC AT w/EGA, OS/2 1.0](/disks/pcx86/os2/ibm/1.0/thumbnail.jpg "link:/disks/pcx86/os2/ibm/1.0/:200:120")
 ![IBM PC XT w/CGA, Windows 1.01](/devices/pcx86/machine/5160/cga/256kb/win101/thumbnail.jpg "link:/devices/pcx86/machine/5160/cga/256kb/win101/:200:120")
@@ -267,7 +266,7 @@ the command, then it's passed on to *eval()*, like a good little REPL.
 
 Use the "load" command to load a JSON machine configuration file.  A sample
 [ibm5150.json](modules/pcx86/bin/ibm5150.json) is provided in the *bin* directory, which is a "JSON-ified" version
-of the [machine.xml](devices/pc/machine/5150/mda/64kb/machine.xml) displayed on the [pcjs.org](http://www.pcjs.org/)
+of the [machine.xml](devices/pcx86/machine/5150/mda/64kb/machine.xml) displayed on the [pcjs.org](http://www.pcjs.org/)
 home page.
 
 The command-line loader creates all the JSON-defined machine components in the same order that the browser creates

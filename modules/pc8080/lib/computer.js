@@ -6,8 +6,7 @@
  *
  * Copyright © 2012-2016 Jeff Parsons <Jeff@pcjs.org>
  *
- * This file is part of PCjs, which is part of the JavaScript Machines Project (aka JSMachines)
- * at <http://jsmachines.net/> and <http://pcjs.org/>.
+ * This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
  *
  * PCjs is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3
@@ -22,12 +21,12 @@
  *
  * You are required to include the above copyright notice in every source code file of every
  * copy or modified version of this work, and to display that copyright notice on every screen
- * that loads or runs any version of this software (see Computer.COPYRIGHT).
+ * that loads or runs any version of this software (see COPYRIGHT in /modules/shared/lib/defines.js).
  *
  * Some PCjs files also attempt to load external resource files, such as character-image files,
- * ROM files, and disk image files. Those external resource files are not considered part of the
- * PCjs program for purposes of the GNU General Public License, and the author does not claim
- * any copyright as to their contents.
+ * ROM files, and disk image files. Those external resource files are not considered part of PCjs
+ * for purposes of the GNU General Public License, and the author does not claim any copyright
+ * as to their contents.
  */
 
 "use strict";
@@ -189,7 +188,7 @@ function Computer(parmsComputer, parmsMachine, fSuspended) {
         }
     }
 
-    this.println(Computer.APPNAME + " v" + Computer.APPVERSION + "\n" + Computer.COPYRIGHT + "\n" + Computer.LICENSE);
+    this.println(PC8080.APPNAME + " v" + PC8080.APPVERSION + "\n" + COPYRIGHT + "\n" + LICENSE);
 
     if (DEBUG && this.messageEnabled()) this.printMessage("TYPEDARRAYS: " + TYPEDARRAYS);
 
@@ -240,7 +239,7 @@ function Computer(parmsComputer, parmsMachine, fSuspended) {
             this.resume = Computer.RESUME_NONE;
         }
         if (this.resume) {
-            this.stateComputer = new State(this, Computer.APPVERSION);
+            this.stateComputer = new State(this, PC8080.APPVERSION);
             if (this.stateComputer.load()) {
                 sStatePath = null;
             } else {
@@ -276,16 +275,6 @@ function Computer(parmsComputer, parmsMachine, fSuspended) {
 }
 
 Component.subclass(Computer);
-
-Computer.APPNAME = APPNAME || "PC8080";
-Computer.APPVERSION = APPVERSION;
-Computer.COPYRIGHT = "Copyright © 2012-2016 Jeff Parsons <Jeff@pcjs.org>";
-
-/*
- * I think it's a good idea to also display a GPL notice, putting people on notice that even
- * the "compiled" source code has all the same GPL requirements as the uncompiled source code.
- */
-Computer.LICENSE = "License: GPL version 3 or later <http://gnu.org/licenses/gpl.html>";
 
 Computer.STATE_FAILSAFE  = "failsafe";
 Computer.STATE_VALIDATE  = "validate";
@@ -466,7 +455,7 @@ Computer.prototype.wait = function(fn, parms)
 Computer.prototype.validateState = function(stateComputer)
 {
     var fValid = true;
-    var stateValidate = new State(this, Computer.APPVERSION, Computer.STATE_VALIDATE);
+    var stateValidate = new State(this, PC8080.APPVERSION, Computer.STATE_VALIDATE);
     if (stateValidate.load() && stateValidate.parse()) {
         var sTimestampValidate = stateValidate.get(Computer.STATE_TIMESTAMP);
         var sTimestampComputer = stateComputer ? stateComputer.get(Computer.STATE_TIMESTAMP) : "unknown";
@@ -509,7 +498,7 @@ Computer.prototype.powerOn = function(resume)
     var fRepower = false;
     var fRestore = false;
     this.fRestoreError = false;
-    var stateComputer = this.stateComputer || new State(this, Computer.APPVERSION);
+    var stateComputer = this.stateComputer || new State(this, PC8080.APPVERSION);
 
     if (resume == Computer.RESUME_REPOWER) {
         fRepower = true;
@@ -522,7 +511,7 @@ Computer.prototype.powerOn = function(resume)
              * Which means, of course, that if a previous "failsafe" checkpoint already exists, something bad
              * may have happened the last time around.
              */
-            this.stateFailSafe = new State(this, Computer.APPVERSION, Computer.STATE_FAILSAFE);
+            this.stateFailSafe = new State(this, PC8080.APPVERSION, Computer.STATE_FAILSAFE);
             if (this.stateFailSafe.load()) {
                 this.powerReport(stateComputer);
                 /*
@@ -542,7 +531,7 @@ Computer.prototype.powerOn = function(resume)
             this.stateFailSafe.store();
 
             var fValidate = this.resume && !this.fServerState;
-            if (resume == Computer.RESUME_AUTO || web.confirmUser("Click OK to restore the previous " + Computer.APPNAME + " machine state, or CANCEL to reset the machine.")) {
+            if (resume == Computer.RESUME_AUTO || web.confirmUser("Click OK to restore the previous " + PC8080.APPNAME + " machine state, or CANCEL to reset the machine.")) {
                 fRestore = stateComputer.parse();
                 if (fRestore) {
                     var sCode = stateComputer.get(UserAPI.RES.CODE);
@@ -815,8 +804,8 @@ Computer.prototype.checkPower = function()
  */
 Computer.prototype.powerReport = function(stateComputer)
 {
-    if (web.confirmUser("There may be a problem with your " + Computer.APPNAME + " machine.\n\nTo help us diagnose it, click OK to send this " + Computer.APPNAME + " machine state to http://" + SITEHOST + ".")) {
-        web.sendReport(Computer.APPNAME, Computer.APPVERSION, this.url, this.getUserID(), ReportAPI.TYPE.BUG, stateComputer.toString());
+    if (web.confirmUser("There may be a problem with your " + PC8080.APPNAME + " machine.\n\nTo help us diagnose it, click OK to send this " + PC8080.APPNAME + " machine state to http://" + SITEHOST + ".")) {
+        web.sendReport(PC8080.APPNAME, PC8080.APPVERSION, this.url, this.getUserID(), ReportAPI.TYPE.BUG, stateComputer.toString());
     }
 };
 
@@ -865,8 +854,8 @@ Computer.prototype.powerOff = function(fSave, fShutdown)
     }
     this.nPowerChange--;
 
-    var stateComputer = new State(this, Computer.APPVERSION);
-    var stateValidate = new State(this, Computer.APPVERSION, Computer.STATE_VALIDATE);
+    var stateComputer = new State(this, PC8080.APPVERSION);
+    var stateValidate = new State(this, PC8080.APPVERSION, Computer.STATE_VALIDATE);
 
     var sTimestamp = usr.getTimestamp();
     stateValidate.set(Computer.STATE_TIMESTAMP, sTimestamp);
@@ -1222,7 +1211,7 @@ Computer.prototype.getServerStatePath = function()
         if (DEBUG && this.messageEnabled()) {
             this.printMessage(Computer.STATE_USERID + " for load: " + this.sUserID);
         }
-        sStatePath = web.getHost() + UserAPI.ENDPOINT + '?' + UserAPI.QUERY.REQ + '=' + UserAPI.REQ.LOAD + '&' + UserAPI.QUERY.USER + '=' + this.sUserID + '&' + UserAPI.QUERY.STATE + '=' + State.key(this, Computer.APPVERSION);
+        sStatePath = web.getHost() + UserAPI.ENDPOINT + '?' + UserAPI.QUERY.REQ + '=' + UserAPI.REQ.LOAD + '&' + UserAPI.QUERY.USER + '=' + this.sUserID + '&' + UserAPI.QUERY.STATE + '=' + State.key(this, PC8080.APPVERSION);
     } else {
         if (DEBUG && this.messageEnabled()) {
             this.printMessage(Computer.STATE_USERID + " unavailable");
@@ -1290,7 +1279,7 @@ Computer.prototype.storeServerState = function(sUserID, sState, fSync)
     var dataPost = {};
     dataPost[UserAPI.QUERY.REQ] = UserAPI.REQ.STORE;
     dataPost[UserAPI.QUERY.USER] = sUserID;
-    dataPost[UserAPI.QUERY.STATE] = State.key(this, Computer.APPVERSION);
+    dataPost[UserAPI.QUERY.STATE] = State.key(this, PC8080.APPVERSION);
     dataPost[UserAPI.QUERY.DATA] = sState;
     var sRequest = web.getHost() + UserAPI.ENDPOINT;
     if (!fSync) {
@@ -1359,7 +1348,7 @@ Computer.prototype.onReset = function()
          * I used to bypass the prompt if this.resume == Computer.RESUME_AUTO, setting fSave to true automatically,
          * but that gives the user no means of resetting a resumable machine that contains errors in its resume state.
          */
-        var fSave = (/* this.resume == Computer.RESUME_AUTO || */ web.confirmUser("Click OK to save changes to this " + Computer.APPNAME + " machine.\n\nWARNING: If you CANCEL, all disk changes will be discarded."));
+        var fSave = (/* this.resume == Computer.RESUME_AUTO || */ web.confirmUser("Click OK to save changes to this " + PC8080.APPNAME + " machine.\n\nWARNING: If you CANCEL, all disk changes will be discarded."));
         this.powerOff(fSave, true);
         /*
          * Forcing the page to reload is an expedient option, but ugly. It's preferable to call powerOn()
@@ -1503,16 +1492,16 @@ Computer.init = function()
     /*
      * In non-COMPILED builds, embedMachine() may have set XMLVERSION.
      */
-    if (!COMPILED && XMLVERSION) Computer.APPVERSION = XMLVERSION;
+    if (!COMPILED && PC8080.XMLVERSION) PC8080.APPVERSION = PC8080.XMLVERSION;
 
-    var aeMachines = Component.getElementsByClass(document, APPCLASS + "-machine");
+    var aeMachines = Component.getElementsByClass(document, PC8080.APPCLASS + "-machine");
 
     for (var iMachine = 0; iMachine < aeMachines.length; iMachine++) {
 
         var eMachine = aeMachines[iMachine];
         var parmsMachine = Component.getComponentParms(eMachine);
 
-        var aeComputers = Component.getElementsByClass(eMachine, APPCLASS, "computer");
+        var aeComputers = Component.getElementsByClass(eMachine, PC8080.APPCLASS, "computer");
 
         for (var iComputer = 0; iComputer < aeComputers.length; iComputer++) {
 
@@ -1534,7 +1523,7 @@ Computer.init = function()
              * but "reset" now provides a way to force the machine to start from scratch again, so "erase"
              * may be redundant now.
              */
-            Component.bindComponentControls(computer, eComputer, APPCLASS);
+            Component.bindComponentControls(computer, eComputer, PC8080.APPCLASS);
 
             /*
              * Power on the computer, giving every component the opportunity to reset or restore itself.
@@ -1555,7 +1544,7 @@ Computer.init = function()
  */
 Computer.show = function()
 {
-    var aeComputers = Component.getElementsByClass(document, APPCLASS, "computer");
+    var aeComputers = Component.getElementsByClass(document, PC8080.APPCLASS, "computer");
     for (var iComputer = 0; iComputer < aeComputers.length; iComputer++) {
         var eComputer = aeComputers[iComputer];
         var parmsComputer = Component.getComponentParms(eComputer);
@@ -1604,7 +1593,7 @@ Computer.show = function()
  */
 Computer.exit = function()
 {
-    var aeComputers = Component.getElementsByClass(document, APPCLASS, "computer");
+    var aeComputers = Component.getElementsByClass(document, PC8080.APPCLASS, "computer");
     for (var iComputer = 0; iComputer < aeComputers.length; iComputer++) {
         var eComputer = aeComputers[iComputer];
         var parmsComputer = Component.getComponentParms(eComputer);

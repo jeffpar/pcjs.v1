@@ -229,12 +229,12 @@ to the virtual serial port.  And *nc* is included with OS X, whereas *socat* mus
 TODO
 ===
 
-- Fix all *class="pc"* in machine XML files.
+- Fix all *class="pc"* in machine XML files
 - Fix all paths:
 	- /apps/pc -> /apps/pcx86
 	- /devices/pc -> /devices/pcx86
 	- /disks/pc -> /disks/pcx86
 	- etc
-- Should we rename PCJSCLASS back to APPCLASS? Yes
+- Rename PCJSCLASS to APPCLASS
 - Remove C1PJSCLASS
 - Look for XML files that still refer to /configs

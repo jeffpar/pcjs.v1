@@ -6,8 +6,7 @@
  *
  * Copyright © 2012-2016 Jeff Parsons <Jeff@pcjs.org>
  *
- * This file is part of PCjs, which is part of the JavaScript Machines Project (aka JSMachines)
- * at <http://jsmachines.net/> and <http://pcjs.org/>.
+ * This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
  *
  * PCjs is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3
@@ -22,12 +21,12 @@
  *
  * You are required to include the above copyright notice in every source code file of every
  * copy or modified version of this work, and to display that copyright notice on every screen
- * that loads or runs any version of this software (see Computer.COPYRIGHT).
+ * that loads or runs any version of this software (see COPYRIGHT in /modules/shared/lib/defines.js).
  *
  * Some PCjs files also attempt to load external resource files, such as character-image files,
- * ROM files, and disk image files. Those external resource files are not considered part of the
- * PCjs program for purposes of the GNU General Public License, and the author does not claim
- * any copyright as to their contents.
+ * ROM files, and disk image files. Those external resource files are not considered part of PCjs
+ * for purposes of the GNU General Public License, and the author does not claim any copyright
+ * as to their contents.
  */
 
 "use strict";
@@ -43,16 +42,20 @@ if (NODE) {
  *
  * State objects are used by components to save/restore their state.
  *
- * During a save operation, components add data to a State object via set(),
- * and then return the resulting data using data().
+ * During a save operation, components add data to a State object via set(), and then return
+ * the resulting data using data().
  *
- * During a restore operation, the Computer component passes the results of each
- * data() call back to the originating component.
+ * During a restore operation, the Computer component passes the results of each data() call
+ * back to the originating component.
  *
- * WARNING: Since State objects are low-level objects that have no UI requirements,
- * they do not inherit from the Component class, so you should only use class methods
- * of Component, such as Component.assert(), or Debugger methods if the Debugger
- * is available.
+ * WARNING: Since State objects are low-level objects that have no UI requirements, they do not
+ * inherit from the Component class, so you should only use class methods of Component, such as
+ * Component.assert(), or Debugger methods if the Debugger is available.
+ *
+ * NOTE: 1.01 is the first version to provide limited save/restore support using localStorage.
+ * From that point on, care must be taken to insure that any new version that's incompatible with
+ * previous localStorage data be released with a version number that is at least 1 greater,
+ * since we're tagging the localStorage data with the integer portion of the version string.
  *
  * @constructor
  * @param {Component} component

@@ -11,8 +11,8 @@
 
 	<xsl:variable name="MACHINECLASS">pc</xsl:variable>
 	<xsl:variable name="CSSCLASS">pcjs</xsl:variable>
-	<xsl:variable name="APPCLASS">pcjs</xsl:variable>
-	<xsl:variable name="APPNAME">PCjs</xsl:variable>
+	<xsl:variable name="APPCLASS">pcx86</xsl:variable>
+	<xsl:variable name="APPNAME">PCx86</xsl:variable>
 	<xsl:variable name="APPVERSION">1.23.0</xsl:variable>
 	<xsl:variable name="SITEHOST">www.pcjs.org</xsl:variable>
 
@@ -31,7 +31,7 @@
 	</xsl:template>
 
 	<xsl:template name="machine">
-		<xsl:param name="href">/devices/pc/machine/5150/mda/64kb/machine.xml</xsl:param>
+		<xsl:param name="href" select="''"/>
 		<xsl:param name="state" select="''"/>
 		<xsl:variable name="componentFile"><xsl:value-of select="$rootDir"/><xsl:value-of select="$href"/></xsl:variable>
 		<xsl:apply-templates select="document($componentFile)/machine">

@@ -11,21 +11,20 @@ machines:
     config: /devices/c1p/machine/8kb/large/machine.xml
 ---
 
-Welcome to PCjs, home of [PCx86](/docs/about/pcx86/), the first IBM PC simulation to run in your web browser without
-any plugins.  It was added to the [PCjs Project](https://github.com/jeffpar/pcjs) in Fall 2012.
-
-PCjs includes the following web-based emulators:
+Welcome to PCjs, home of the first IBM PC simulation to run in your web browser without
+any plugins.  It was released in Fall 2012 as part of the [PCjs Project](https://github.com/jeffpar/pcjs),
+which includes:
 
 * [PCx86](/docs/pcx86/), an x86-based IBM PC and PC-compatible emulator 
 * [PC8080](/modules/pc8080/), an 8080-based generic machine emulator
 * [C1Pjs](/docs/c1pjs/), a 6502-based Ohio Scientific Challenger 1P emulator
 
-PCx86 first simulated the 4.77Mhz 8088-based IBM PC, and has steadily evolved to support more classic x86 machines,
+PCx86 orginally simulated the 4.77Mhz 8088-based IBM PC and has steadily evolved to support more classic x86 machines,
 including the IBM PC XT, the 80286-based IBM PC AT, and the 80386-based COMPAQ DeskPro 386.  PCx86 fully supports
 the original machine ROMs, video cards, etc, and all machines run at their original speeds.
 
-All the simulations are written entirely in [JavaScript](/modules/).  No Flash, Java or other plugins are required.
-Supported browsers include modern versions of Chrome, Safari, Firefox, Internet Explorer (v9.0 and up), Edge,
+All PCjs computer simulations are written entirely in [JavaScript](/modules/).  No Flash, Java or other plugins are
+required.  Supported browsers include modern versions of Chrome, Safari, Firefox, Internet Explorer (v9.0 and up), Edge,
 and assorted mobile browsers.
 
 {% include machine.html id="ibm5150" %}
@@ -44,7 +43,7 @@ Demos
 ---
 Some pre-configured machines are shown below, ready to run BASIC, DOS, Windows, OS/2, and other assorted software.
 
-{% include screenshot.html src="/apps/pcx86/1981/visicalc/thumbnail.jpg" width="200" height="120" title="IBM PC running VisiCalc" link="/apps/pc/1981/visicalc/" %}
+{% include screenshot.html src="/apps/pcx86/1981/visicalc/thumbnail.jpg" width="200" height="120" title="IBM PC running VisiCalc" link="/apps/pcx86/1981/visicalc/" %}
 {% include screenshot.html src="/devices/pcx86/machine/5150/cga/64kb/donkey/thumbnail.jpg" width="200" height="120" title="IBM PC running DONKEY.BAS" link="/devices/pcx86/machine/5150/cga/64kb/donkey/" %}
 {% include screenshot.html src="/disks/pcx86/os2/ibm/1.0/thumbnail.jpg" width="200" height="120" title="IBM PC AT w/EGA, OS/2 1.0" link="/disks/pcx86/os2/ibm/1.0/" %}
 {% include screenshot.html src="/devices/pcx86/machine/5160/cga/256kb/win101/thumbnail.jpg" width="200" height="120" title="IBM PC XT w/CGA, Windows 1.01" link="/devices/pcx86/machine/5160/cga/256kb/win101/" %}
