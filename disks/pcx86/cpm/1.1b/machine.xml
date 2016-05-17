@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.23.0/machine.xsl"?>
+<machine id="ibm5150" class="pcx86" border="1" pos="center" background="#FAEBD7">
+	<name pos="center">IBM PC (Model 5150) running CP/M-86</name>
+	<computer id="cpm-mda-64k" name="IBM PC" resume="1"/>
+	<ram id="ramLow" addr="0x00000"/>
+	<rom id="romBASIC" addr="0xf6000" size="0x8000" file="/devices/pcx86/rom/5150/basic/BASIC100.json"/>
+	<rom id="romBIOS"  addr="0xfe000" size="0x2000" file="/devices/pcx86/rom/5150/1981-04-24/PCBIOS-REV1.json"/>
+	<video ref="/devices/pcx86/video/ibm/mda/ibm-mda.xml"/>
+	<fdc id="fdcNEC" automount='{A: {name: "CP/M-86 (Disk 1)", path: "/disks/pcx86/cpm/1.1b/CPM86-DISK1.json"}, B: {name: "CP/M-86 (Disk 2)", path: "/disks/pcx86/cpm/1.1b/CPM86-DISK2.json"}}' pos="right">
+		<control type="list" binding="listDrives"/>
+		<control type="list" binding="listDisks">
+			<manifest ref="/disks/pcx86/cpm/1.1b/manifest.xml" disk="*"/>
+		</control>
+		<control type="button" binding="loadDrive">Load</control>
+		<control type="description" binding="descDisk" padleft="8px"/>
+	</fdc>
+	<cpu id="cpu8088" model="8088" autostart="true" pos="left" padleft="8px" padbottom="8px">
+		<control type="button" binding="run">Run</control>
+		<control type="button" binding="reset">Reset</control>
+	</cpu>
+	<keyboard ref="/devices/pcx86/keyboard/us83-buttons-minimal.xml"/>
+	<chipset id="chipset" model="5150" sw1="01000001" sw2="11110000"/>
+</machine>

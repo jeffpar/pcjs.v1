@@ -163,7 +163,7 @@ Panel.prototype.updateStatus = function(fForce)
 Panel.init = function()
 {
     var fReady = false;
-    var aePanels = Component.getElementsByClass(document, PCJSCLASS, "panel");
+    var aePanels = Component.getElementsByClass(document, APPCLASS, "panel");
     for (var iPanel=0; iPanel < aePanels.length; iPanel++) {
         var ePanel = aePanels[iPanel];
         var parmsPanel = Component.getComponentParms(ePanel);
@@ -172,7 +172,7 @@ Panel.init = function()
             fReady = true;
             panel = new Panel(parmsPanel);
         }
-        Component.bindComponentControls(panel, ePanel, PCJSCLASS);
+        Component.bindComponentControls(panel, ePanel, APPCLASS);
         if (fReady) panel.setReady();
     }
 };

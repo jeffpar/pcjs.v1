@@ -232,7 +232,7 @@ MarkOut.setOptions = function(options)
  * The infoMachine object should contain, at a minimum:
  *
  *      {
- *          'class':    sMachineClass,  // eg, "pc"
+ *          'class':    sMachineClass,  // eg, "pcx86"
  *          'func':     sMachineFunc,
  *          'id':       sMachineID,
  *          'xml':      sMachineXMLFile,
@@ -343,8 +343,8 @@ MarkOut.aHTMLEntities = {
  *      'config' (eg, "machine.xml")
  *      'template' (eg, "machine.xsl")
  *      'uncompiled' (eg, true)
- *      'autoMount' (eg, {"A":{"name":"OS/2 FOOTBALL Boot Disk (v7.68.17)","path":"/disks/pc/os2/misc/football/debugger/FOOTBALL-7.68.17.json"}})
- *      'drives' (eg, [{name:"68Mb Hard Drive",type:4,path:"http://archive.pcjs.org/disks/pc/fixed/68mb/win95.json"}])
+ *      'autoMount' (eg, {"A":{"name":"OS/2 FOOTBALL Boot Disk (v7.68.17)","path":"/disks/pcx86/os2/misc/football/debugger/FOOTBALL-7.68.17.json"}})
+ *      'drives' (eg, [{name:"68Mb Hard Drive",type:4,path:"http://archive.pcjs.org/disks/pcx86/fixed/68mb/win95.json"}])
  *      'parms'
  *
  * Non-reserved properties include:
@@ -463,7 +463,7 @@ MarkOut.prototype.convertMD = function(sIndent)
                              *
                              * Here's an example of "autoMount" output:
                              *
-                             *      {"A":{"name":"OS/2 FOOTBALL Boot Disk (v7.68.17)","path":"/disks/pc/os2/misc/football/debugger/FOOTBALL-7.68.17.json"}}
+                             *      {"A":{"name":"OS/2 FOOTBALL Boot Disk (v7.68.17)","path":"/disks/pcx86/os2/misc/football/debugger/FOOTBALL-7.68.17.json"}}
                              *
                              * Note that the the only required property for a drive object is 'path'; if 'name' is omitted,
                              * the FDC component will search for the given 'path' and use whatever name it can find.
@@ -1093,23 +1093,23 @@ MarkOut.prototype.convertMDImageLinks = function(sBlock, sIndent)
  * Before we call convertMDLinks() to process any normal Markdown-style links, we first look for our own
  * special flavor of "machine" Markdown links; ie:
  *
- *      [IBM PC](/devices/pc/machine/5150/mda/64kb/ "PCjs:demoPC:stylesheet:version:options:parms")
+ *      [IBM PC](/devices/pcx86/machine/5150/mda/64kb/ "PCx86:demoPC:stylesheet:version:options:parms")
  *
  * where a special title attribute triggers generation of an embedded machine rather than a link.
  *
- * Use "PCjs" or "C1Pjs" to automatically include the latest version of either "pc.js" or "c1p.js", followed
+ * Use "PCx86" or "C1Pjs" to automatically include the latest version of either "pcx86.js" or "c1p.js", followed
  * by a colon and the ID you want to use for the embedded <div>.  If you need to use the script with the built-in
  * Debugger (ie, either "pc-dbg.js" or "c1p-dbg.js"), then include "debugger" in the list of comma-delimited
  * options, as in:
  *
- *      [IBM PC](/devices/pc/machine/5150/mda/64kb/ "PCjs:demoPC:::debugger")
+ *      [IBM PC](/devices/pcx86/machine/5150/mda/64kb/ "PCx86:demoPC:::debugger")
  *
  * If the link ends with a slash, then it's an implied reference to a "machine.xml".
  *
  * UPDATE: Since parms containing JSON may also contain colons, machine Markdown links may now use '!' or '|'
  * instead of ':' as separators.  In fact, whichever separator is used first will be used throughout; eg:
  *
- *      [IBM PC](/devices/pc/machine/5150/mda/64kb/ "PCjs!demoPC!stylesheet!version!options!parms")
+ *      [IBM PC](/devices/pcx86/machine/5150/mda/64kb/ "PCx86!demoPC!stylesheet!version!options!parms")
  *
  * Granted, there are a number of things we could be smarter about.  First, you probably don't care about the
  * ID for the <div>; it's purely a mechanism for telling the script where to embed the machine, so we could
@@ -1149,7 +1149,7 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
         sMachineID = aMatch[2];
         if (this.aMachineDefs[sMachineID]) {
             var machine = this.aMachineDefs[sMachineID];
-            sMachine = machine['type'] || "pc";
+            sMachine = machine['type'] || "pcx86";
             sMachineOptions = ((sMachine.indexOf("-dbg") > 0 || machine['debugger'] == "true")? "debugger" : "");
             sMachine = sMachine.replace("-dbg", "").toUpperCase();
             sMachineXMLFile = machine['config'] || this.sMachineFile || "machine.xml";

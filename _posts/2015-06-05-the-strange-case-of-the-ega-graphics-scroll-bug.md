@@ -6,7 +6,7 @@ category: Video
 permalink: /blog/2015/06/05/
 ---
 
-I was playing with different video modes using this [IBM PC AT w/EGA](/devices/pc/machine/5170/ega/640kb/rev1/debugger/),
+I was playing with different video modes using this [IBM PC AT w/EGA](/devices/pcx86/machine/5170/ega/640kb/rev1/debugger/),
 and I discovered an odd problem.
 
 For example, when I ran this code:

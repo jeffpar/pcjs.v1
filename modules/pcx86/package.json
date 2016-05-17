@@ -1,0 +1,14 @@
+{
+  "name": "PCx86",
+  "description": "IBM PC Emulator",
+  "author": "Jeff Parsons <Jeff@pcjs.org>",
+  "licenses": [
+    {
+      "type": "GPLv3",
+      "url": "http://www.gnu.org/licenses/gpl.html"
+    }
+  ],
+  "bin": {
+    "example": "./bin/pcx86"
+  }
+}

@@ -12,7 +12,7 @@ It is our *private* counterpart to the **node_modules** folder, where all *publi
 
 The project includes these emulation modules:
 
-* [PCjs](pcjs/), the x86-based PC emulation module
+* [PCx86](pcx86/), the x86-based PC emulation module
 * [PC8080](pc8080/), the 8080-based machine emulation module
 * [C1Pjs](c1pjs/), the 6502-based Challenger 1P emulation module
 

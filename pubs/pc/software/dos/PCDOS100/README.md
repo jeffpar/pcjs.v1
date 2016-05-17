@@ -7,7 +7,7 @@ permalink: /pubs/pc/software/dos/PCDOS100/
 PC-DOS 1.00 Documentation
 ---
 
-Below is a copy of the IBM PC-DOS 1.00 manual.  The original [PC-DOS 1.00](/disks/pc/dos/ibm/1.00/) diskette is also available.
+Below is a copy of the IBM PC-DOS 1.00 manual.  The original [PC-DOS 1.00](/disks/pcx86/dos/ibm/1.00/) diskette is also available.
 
 [<img src="http://archive.pcjs.org/pubs/pc/software/dos/PCDOS100/thumbs/PCDOS100.jpg" width="200" height="260" alt="IBM PC Disk Operating System v1.00"/>](http://bitsavers.trailing-edge.com/pdf/ibm/pc/dos/6172220_DOS_1.0_Jan82.pdf)
 

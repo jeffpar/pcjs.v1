@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fdc id="fdcNEC" automount='{A:{name:"PC-DOS 2.00 (Disk 1)",path:"/disks/pcx86/dos/ibm/2.00/PCDOS200-DISK1.json"}, B:{name:"PC-DOS 2.00 (Disk 2)",path:"/disks/pcx86/dos/ibm/2.00/PCDOS200-DISK2.json"}}' pos="left" padleft="8px" padbottom="8px">
+	<control type="list" binding="listDrives"/>
+	<control type="list" binding="listDisks">
+		<disk path="/disks/pcx86/dos/ibm/1.00/PCDOS100.json">PC-DOS 1.00</disk>
+		<disk path="/disks/pcx86/dos/ibm/1.10/PCDOS110.json">PC-DOS 1.10</disk>
+		<disk path="/disks/pcx86/dos/ibm/2.00/PCDOS200-DISK1.json">PC-DOS 2.00 (Disk 1)</disk>
+		<disk path="/disks/pcx86/dos/ibm/2.00/PCDOS200-DISK2.json">PC-DOS 2.00 (Disk 2)</disk>
+		<disk path="/disks/pcx86/games/microsoft/adventure/ADVENTURE-1981.json">Microsoft Adventure</disk>
+		<disk path="/apps/pcx86/1981/visicalc/disk.json">VisiCalc (1981)</disk>
+	</control>
+	<control type="button" binding="loadDrive">Load</control>
+	<control type="button" binding="saveDrive" padright="8px">Save</control>
+	<control type="description" binding="descDisk" padright="8px"/>
+	<control type="file" binding="mountDrive"/>
+</fdc>

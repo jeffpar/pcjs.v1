@@ -37,18 +37,18 @@ on the [OSI Discussion Forum](http://osiweb.org/osiforum/index.php) at [osiweb.o
 
 ### Emulating the IBM PC
 
-The next JavaScript Machines simulation was [PCjs](/docs/about/pcjs/), which simulates the original IBM PC, IBM PC XT,
-and IBM PC AT.  Browse the [source code](/modules/pcjs/) here or on [GitHub](https://github.com/jeffpar/pcjs).
+The next JavaScript Machines simulation was [PCx86](/docs/about/pcx86/), which simulates the original IBM PC, IBM PC XT,
+and IBM PC AT.  Browse the [source code](/modules/pcx86/) here or on [GitHub](https://github.com/jeffpar/pcjs).
 
-[PCjs](/docs/about/pcjs/) emulates the Intel 8088, 80186, 80286 and 80386 CPUs, as well as IBM Monochrome Display
+[PCx86](/docs/about/pcx86/) emulates the Intel 8088, 80186, 80286 and 80386 CPUs, as well as IBM Monochrome Display
 Adapter (MDA), Color Graphics Adapter (CGA), Enhanced Graphics Adapter (EGA), and Video Graphics Array (VGA) video
 cards, along with assorted motherboard and expansion bus components.  It also includes an optional
-[Debugger](/docs/pcjs/debugger/) and a user-configurable [Control Panel](/docs/pcjs/panel/).
+[Debugger](/docs/pcx86/debugger/) and a user-configurable [Control Panel](/docs/pcx86/panel/).
 
-PCjs v1.0 was released on [jsmachines.net](http://jsmachines.net/) in late 2012, and the JavaScript Machines Project,
+PCx86 v1.0 was released on [jsmachines.net](http://jsmachines.net/) in late 2012, and the JavaScript Machines Project,
 with its second full-featured machine emulation, was launched.
 
-Read [About PCjs](/docs/about/pcjs/) to learn more about its history, features, and upcoming improvements.
+Read [About PCx86](/docs/about/pcx86/) to learn more about its history, features, and upcoming improvements.
 
 ---
 
@@ -66,7 +66,7 @@ The goals included:
 The PCjs web server includes a number of custom Node modules that provide many of the same server-side features
 found on [jsmachines.net](http://jsmachines.net/), including new ROM and disk image conversion APIs, and a
 Markdown module that supports a subset of the [Markdown syntax](http://daringfireball.net/projects/markdown/syntax),
-including extensions to the link syntax that make it easy to embed C1Pjs and PCjs machine files in Markdown documents.
+including extensions to the link syntax that make it easy to embed C1Pjs and PCx86 machine files in Markdown documents.
 
 ---
 

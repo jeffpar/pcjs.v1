@@ -1,5 +1,5 @@
 /**
- * @fileoverview The Component class used by C1Pjs and PCjs.
+ * @fileoverview The Component class used by C1Pjs and PCx86.
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @version 1.0
  * Created 2012-May-14

@@ -7,8 +7,8 @@ permalink: /blog/2014/07/30/
 ---
 
 PCjs v1.14.0 now includes basic EGA support.  It emulates the EGA hardware well enough to pass the IBM EGA BIOS
-diagnostics and run [Windows 1.01](/devices/pc/machine/5160/ega/640kb/win101/) in color.  Check out our
-[Windows 1.01 "Server Array"](/devices/pc/machine/5160/ega/640kb/array/) demo.
+diagnostics and run [Windows 1.01](/devices/pcx86/machine/5160/ega/640kb/win101/) in color.  Check out our
+[Windows 1.01 "Server Array"](/devices/pcx86/machine/5160/ega/640kb/array/) demo.
 
 [<img src="/blog/images/win101-array-demo-small.jpg" alt='Windows 1.01 "Server Array" Demo'/>](/blog/images/win101-array-demo.jpg)
 
@@ -29,7 +29,7 @@ window, which the browser will then scale up or down, unless a specific overall 
 
 The second required XML element is a &lt;rom&gt; element to load the EGA ROM; eg:
 
-	<rom id="romEGA" addr="0xc0000" size="0x4000" file="/devices/pc/video/ibm-ega.json" notify="videoEGA"/>
+	<rom id="romEGA" addr="0xc0000" size="0x4000" file="/devices/pcx86/video/ibm-ega.json" notify="videoEGA"/>
 
 The *notify* attribute must match the *id* of the &lt;video&gt; element, so that the Video component can load
 the initial 8x14 and 8x8 fonts from the ROM.  Support for dynamic loading of fonts from plane 2 of the EGA's memory

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.23.0/manifest.xsl"?>
+<manifest type="software">
+	<title>The Dungeons of Moria</title>
+    <version>4.872</version>
+    <type>Game</type>
+    <category>ASCII Adventure</category>
+	<creator>
+		<name>Robert Alan Koeneke</name>
+	</creator>
+	<creationDate>March 25, 1983</creationDate>
+	<releaseDate>November 1, 1988</releaseDate>
+	<author>
+		<name>D. G. Kneller</name>
+		<desc>MSDOS port</desc>
+	</author>
+	<disk id="disk01" size="1228800" chs="80:2:15" dir="archive/" href="/apps/pcx86/1988/moria/disk.json" md5="7bb84a7ac4e9b03e8cd1e6753b1359fb" md5json="7630122397a57af2d0c767141af3817c">
+		<name>Moria 4.872 (1988)</name>
+		<file size="11143" time="1988-11-01 00:00:00" attr="0x20" md5="dae278b77133f32949d0e8940f944c0d">CONFIG.DOC</file>
+		<file size="91154" time="1991-06-01 14:50:02" attr="0x20" md5="66593e83a2aa3870d7a9e8b43079ce42">GOD</file>
+		<file size="91154" time="1991-06-01 15:13:50" attr="0x20" md5="4a7c6e2ddf649f9700786624aaa91199">MADNESS1</file>
+		<file size="2561" time="1990-02-09 20:27:08" attr="0x20" md5="d1376a601fea671e7a0c39752bb58fbf">MORIA.CNF</file>
+		<file size="92662" time="1990-12-22 19:46:22" attr="0x20" md5="c6f8dfb312ef8cc559889a14eeabd32e">MORIA.DOC</file>
+		<file size="350791" time="1988-12-14 00:00:00" attr="0x20" md5="a0be481e957d2cfcc57eebad6be6ccf2">MORIA.EXE</file>
+		<file size="3720" time="1991-06-02 14:07:28" attr="0x20" md5="e65b63da5543d9c43d32c20189a32d08">MORIA.SCR</file>
+		<file size="1060" time="1991-03-08 16:39:16" attr="0x20" md5="4bd3586953db841ed0e2b28865fc933e">MORIACHR.DIE</file>
+		<file size="91154" time="1991-05-09 14:34:42" attr="0x20" md5="f8d1494a0b9b809c0347a9be08d59318">ORC2</file>
+		<file size="34296" time="1990-03-15 01:10:00" attr="0x20" md5="5036d372ac010331a78071a574354cf0">PKZIP.EXE</file>
+	</disk>
+</manifest>

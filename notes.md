@@ -95,7 +95,7 @@ Markdown "Cheat Sheet"
 
 To convert PCjs' special links, such as:
 
-	![IBM PC XT w/CGA, 10Mb Hard Drive](/devices/pc/machine/5160/cga/256kb/demo/thumbnail.jpg "link:/devices/pc/machine/5160/cga/256kb/demo/:200:100")
+	![IBM PC XT w/CGA, 10Mb Hard Drive](/devices/pcx86/machine/5160/cga/256kb/demo/thumbnail.jpg "link:/devices/pcx86/machine/5160/cga/256kb/demo/:200:100")
 
 to normal Markdown links, search using this regex:
 
@@ -170,11 +170,11 @@ Embedding Screenshots with Jekyll
 
 I created screenshot.html in the **_includes** folder, so that I could do this:
 
-	{% include screenshot.html src="/devices/pc/machine/5150/cga/64kb/donkey/thumbnail.jpg" width="200" height="100" link="/devices/pc/machine/5150/cga/64kb/donkey/" title="IBM PC running DONKEY.BAS" %}
+	{% include screenshot.html src="/devices/pcx86/machine/5150/cga/64kb/donkey/thumbnail.jpg" width="200" height="100" link="/devices/pcx86/machine/5150/cga/64kb/donkey/" title="IBM PC running DONKEY.BAS" %}
 
 instead of this:
 
-	[<img src="/devices/pc/machine/5150/cga/64kb/donkey/thumbnail.jpg" width="200" height="100"/>](/devices/pc/machine/5150/cga/64kb/donkey/ "IBM PC running DONKEY.BAS")
+	[<img src="/devices/pcx86/machine/5150/cga/64kb/donkey/thumbnail.jpg" width="200" height="100"/>](/devices/pcx86/machine/5150/cga/64kb/donkey/ "IBM PC running DONKEY.BAS")
 
 The latter is better for pure Markdown environments, but the former enables Jekyll to properly style screenshots.
 
@@ -225,3 +225,16 @@ indicating the name of serial device to connect to:
 The advantage of using *nc* is that no "middle man" is required: your terminal window will be connected directly
 to the virtual serial port.  And *nc* is included with OS X, whereas *socat* must installed separately (see
 [http://www.dest-unreach.org/socat/](http://www.dest-unreach.org/socat/)).
+
+TODO
+===
+
+- Fix all *class="pc"* in machine XML files.
+- Fix all paths:
+	- /apps/pc -> /apps/pcx86
+	- /devices/pc -> /devices/pcx86
+	- /disks/pc -> /disks/pcx86
+	- etc
+- Should we rename PCJSCLASS back to APPCLASS? Yes
+- Remove C1PJSCLASS
+- Look for XML files that still refer to /configs

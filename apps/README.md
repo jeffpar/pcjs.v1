@@ -8,7 +8,7 @@ Application Archives
 ---
 Browse classic application software for the following machines:
 
-- [IBM PC](pc/)
+- [IBM PC](pcx86/)
 - [Challenger 1P](c1p/)
  
 ### Software Application Manifests
@@ -34,13 +34,13 @@ the following information about the software:
 - Disk(s) (one or more entries describing sets of files and/or disk images)
 
 The distinctions made by Type and Category are a bit arbitrary and likely to change.  For now,
-Type is merely a reflection of how we initially filed the original [disks](/disks/pc/), while Category
+Type is merely a reflection of how we initially filed the original [disks](/disks/pcx86/), while Category
 provides more detail.
 
 ### Example: VisiCalc
 
-VisiCalc is stored in an [/apps folder](/apps/pc/1981/visicalc/), and two relevant files are
-described by &lt;file&gt; entries in its [manifest](/apps/pc/1981/visicalc/manifest.xml):
+VisiCalc is stored in an [/apps folder](/apps/pcx86/1981/visicalc/), and two relevant files are
+described by &lt;file&gt; entries in its [manifest](/apps/pcx86/1981/visicalc/manifest.xml):
 
 	<manifest>
 		<title>VisiCalc</title>
@@ -49,32 +49,32 @@ described by &lt;file&gt; entries in its [manifest](/apps/pc/1981/visicalc/manif
 		<category>Productivity</category>
 		<company>Software Arts</company>
     	<releaseDate>December 16, 1981</releaseDate>
-		<machine href="/devices/pc/machine/5150/mda/64kb/machine.xml" state="/apps/pc/1981/visicalc/state.json"/>
-		<disk id="disk" dir="/apps/pc/1981/visicalc/bin/">
+		<machine href="/devices/pcx86/machine/5150/mda/64kb/machine.xml" state="/apps/pcx86/1981/visicalc/state.json"/>
+		<disk id="disk" dir="/apps/pcx86/1981/visicalc/bin/">
 			<file>VC.COM</file>
 			<file dir="../">README.md</file>
 			<link href="http://www.bricklin.com/history/vclicense.htm">VisiCalc License</link>
 		</disk>
 	</manifest>
 
-Since this [manifest](/apps/pc/1981/visicalc/manifest.xml) also contains a &lt;machine&gt; entry,
+Since this [manifest](/apps/pcx86/1981/visicalc/manifest.xml) also contains a &lt;machine&gt; entry,
 the default manifest stylesheet will automatically load and launch the associated
-[PCjs machine](/devices/pc/machine/5150/mda/64kb/machine.xml).  The machine will boot or resume according
-to its own &lt;[computer](/docs/pcjs/computer/)&gt; settings, unless the manifest overrides the machine's
+[PCjs machine](/devices/pcx86/machine/5150/mda/64kb/machine.xml).  The machine will boot or resume according
+to its own &lt;[computer](/docs/pcx86/computer/)&gt; settings, unless the manifest overrides the machine's
 default state with its own *state* setting; eg:
 
-	<machine href="/devices/pc/machine/5150/mda/64kb/machine.xml" state="/apps/pc/1981/visicalc/state.json"/>
+	<machine href="/devices/pcx86/machine/5150/mda/64kb/machine.xml" state="/apps/pcx86/1981/visicalc/state.json"/>
 
-The machine.xml file, in turn, refers to a [sample set](/disks/pc/samples.xml) of disk images, one of which is:
+The machine.xml file, in turn, refers to a [sample set](/disks/pcx86/samples.xml) of disk images, one of which is:
  
-	<manifest ref="/apps/pc/1981/visicalc/manifest.xml" disk="*"/>
+	<manifest ref="/apps/pcx86/1981/visicalc/manifest.xml" disk="*"/>
  	
 which refers to the &lt;disk&gt; entry in the VisiCalc manifest -- which brings us full circle.
 
 Since that &lt;disk&gt; entry is just a reference to a folder, PCjs must first convert it to a disk image,
 using the following API request:
 
-	http://localhost:8088/api/v1/dump?path=/apps/pc/1981/visicalc/bin/VC.COM;../README.md&format=json
+	http://localhost:8088/api/v1/dump?path=/apps/pcx86/1981/visicalc/bin/VC.COM;../README.md&format=json
 
 The PCjs DiskDump module processes the dump request and generates a JSON-encoded DOS 2.x-compatible disk image
 containing all the specified files.
@@ -84,7 +84,7 @@ have saved that JSON-encoded image as static file on the server, and then added 
 &lt;disk&gt; entry:
 
 	<manifest>
-		<disk id="disk01" dir="/apps/pc/1981/visicalc/archive/" href="/apps/pc/1981/visicalc/disk.json">
+		<disk id="disk01" dir="/apps/pcx86/1981/visicalc/archive/" href="/apps/pcx86/1981/visicalc/disk.json">
 			...
 		</disk>
 	</manifest>
@@ -95,8 +95,8 @@ be re-generated.
 
 ### Example: CP/M-86
 
-CPM-86 is stored as two disk images in a [/disks folder](/disks/pc/cpm/1.1b/). The disk images are described in that
-folder's [manifest](/disks/pc/cpm/1.1b/manifest.xml):
+CPM-86 is stored as two disk images in a [/disks folder](/disks/pcx86/cpm/1.1b/). The disk images are described in that
+folder's [manifest](/disks/pcx86/cpm/1.1b/manifest.xml):
 
 	<manifest>
 		<title>CP/M-86</title>
@@ -106,11 +106,11 @@ folder's [manifest](/disks/pc/cpm/1.1b/manifest.xml):
 		<company href="http://en.wikipedia.org/wiki/Digital_Research">Digital Research</company>
 		<publisher href="http://en.wikipedia.org/wiki/Eagle_Computer">Eagle Computer</publisher>
 		<releaseDate>May 20, 1983</releaseDate>
-		<machine href="/disks/pc/cpm/1.1b/machine.xml"/>
-		<disk id="disk01" href="/disks/pc/cpm/1.1b/cpm86-disk1.json">
+		<machine href="/disks/pcx86/cpm/1.1b/machine.xml"/>
+		<disk id="disk01" href="/disks/pcx86/cpm/1.1b/cpm86-disk1.json">
 			<name>CP/M-86 (Disk 1)</name>
 		</disk>
-		<disk id="disk02" href="/disks/pc/cpm/1.1b/cpm86-disk2.json">
+		<disk id="disk02" href="/disks/pcx86/cpm/1.1b/cpm86-disk2.json">
 			<name>CP/M-86 (Disk 2)</name>
 		</disk>
 	</manifest>
@@ -123,10 +123,10 @@ the disk images.
 
 If a machine file wanted to use only the first disk, then it would specify:
 
-	<manifest ref="/disks/pc/cpm/1.1b/manifest.xml" disk="disk01"/>
+	<manifest ref="/disks/pcx86/cpm/1.1b/manifest.xml" disk="disk01"/>
 	
 and if it wanted to use all the disks listed in the manifest, it would specify:
 
-	<manifest ref="/disks/pc/cpm/1.1b/manifest.xml" disk="*"/>
+	<manifest ref="/disks/pcx86/cpm/1.1b/manifest.xml" disk="*"/>
 
-which is what our [CP/M Machine Configuration](/disks/pc/cpm/1.1b/machine.xml) does.
+which is what our [CP/M Machine Configuration](/disks/pcx86/cpm/1.1b/machine.xml) does.

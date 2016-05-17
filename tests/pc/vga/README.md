@@ -3,13 +3,13 @@ layout: page
 title: VGA "Black Book" Tests
 permalink: /tests/pc/vga/
 machines:
-  - type: pc
+  - type: pcx86
     id: deskpro386
     debugger: true
-    config: /devices/pc/machine/compaq/deskpro386/vga/2048kb/debugger/machine.xml
+    config: /devices/pcx86/machine/compaq/deskpro386/vga/2048kb/debugger/machine.xml
     autoMount:
       A:
-        path: /disks/pc/dos/compaq/3.31/COMPAQ-DOS331-DISK2.json
+        path: /disks/pcx86/dos/compaq/3.31/COMPAQ-DOS331-DISK2.json
       B:
         path: /tests/pc/vga/VGABIN.json
 ---
@@ -96,7 +96,7 @@ List of VGA Samples from [Michael Abrash's Graphics Programming Black Book](http
 
 ---
 
-Also, I've updated the PCjs [Library](/disks/pc/library.xml) disk collection to include a disk containing executables
+Also, I've updated the PCjs [Library](/disks/pcx86/library.xml) disk collection to include a disk containing executables
 built from the sources in this directory:
 
 	<disk path="/tests/pc/vga/VGABIN.json">VGA Tests (Black Book)</disk>
@@ -118,8 +118,8 @@ One advantage of using [DiskDump](/modules/diskdump/) is that it automatically c
 VGA "Black Book" Test Machine
 ---
 
-The [Compaq DeskPro 386](/devices/pc/machine/compaq/deskpro386/vga/2048kb/) machine below loads the
-"VGA Tests (Black Book)" disk from the PCjs [Library](/disks/pc/library.xml) disk collection into Drive B.
+The [Compaq DeskPro 386](/devices/pcx86/machine/compaq/deskpro386/vga/2048kb/) machine below loads the
+"VGA Tests (Black Book)" disk from the PCjs [Library](/disks/pcx86/library.xml) disk collection into Drive B.
 Click the "Run" button to start the machine.
 
 {% include machine.html id="deskpro386" %}

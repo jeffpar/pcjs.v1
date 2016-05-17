@@ -19,6 +19,16 @@ redirect_from:
   - /versions/pcjs/1.19.4/
   - /versions/pcjs/1.19.5/
   - /versions/pcjs/1.19.6/
+  - /versions/pcjs/1.21.0/
+  - /versions/pcjs/1.21.1/
+  - /versions/pcjs/1.21.2/
+  - /versions/pcjs/1.21.3/
+  - /versions/pcjs/1.21.4/
+  - /versions/pcjs/1.21.5/
+  - /versions/pcjs/1.21.6/
+  - /versions/pcjs/1.21.7/
+  - /versions/pcjs/1.22.0/
+  - /versions/pcjs/1.22.1/
 ---
 
 PCjs Emulator Releases

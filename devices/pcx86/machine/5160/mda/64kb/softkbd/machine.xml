@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.23.0/machine.xsl"?>
+<machine id="ibm5160" class="pcx86" border="1" pos="center" background="white">
+	<name pos="center">IBM PC XT (Model 5160), MDA, 64K, 10Mb Drive</name>
+	<computer id="xt-mda-64k" name="IBM PC XT"/>
+	<cpu id="cpu8088" model="8088"/>
+	<ram id="ramLow" addr="0x00000"/>
+	<rom id="romHDC" addr="0xc8000" size="0x2000" file="/devices/pcx86/hdc/ibm-xebec-1982.json"/>
+	<rom id="romBASIC" addr="0xf6000" size="0x8000" file="/devices/pcx86/rom/5160/basic/BASIC110.json"/>
+	<rom id="romBIOS" addr="0xfe000" size="0x2000" file="/devices/pcx86/rom/5160/1982-11-08/XTBIOS-REV1.json"/>
+	<video ref="/devices/pcx86/video/ibm/mda/ibm-mda.xml"/>
+	<keyboard ref="/devices/pcx86/keyboard/us83-softkeys.xml"/>
+	<debugger id="debugger"/>
+	<panel ref="/devices/pcx86/panel/default.xml"/>
+	<fdc ref="/disks/pcx86/compiled/samples.xml" width="280px"/>
+	<chipset id="chipset" model="5160" sw1="01110001" pos="left" padleft="8px" padbottom="8px">
+		<control type="switches" label="SW1" binding="sw1" left="0px"/>
+		<control type="description" binding="swdesc" left="0px"/>
+	</chipset>
+	<hdc id="hdcXT" drives='[{name:"10Mb Hard Disk",type:3}]'/>
+</machine>

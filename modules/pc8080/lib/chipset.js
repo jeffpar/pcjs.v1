@@ -551,12 +551,12 @@ ChipSet.aPortOutput = {
  */
 ChipSet.init = function()
 {
-    var aeChipSet = Component.getElementsByClass(document, PCJSCLASS, "chipset");
+    var aeChipSet = Component.getElementsByClass(document, APPCLASS, "chipset");
     for (var iChip = 0; iChip < aeChipSet.length; iChip++) {
         var eChipSet = aeChipSet[iChip];
         var parmsChipSet = Component.getComponentParms(eChipSet);
         var chipset = new ChipSet(parmsChipSet);
-        Component.bindComponentControls(chipset, eChipSet, PCJSCLASS);
+        Component.bindComponentControls(chipset, eChipSet, APPCLASS);
     }
 };
 

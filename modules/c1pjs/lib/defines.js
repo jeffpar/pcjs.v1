@@ -35,7 +35,17 @@
 /**
  * @define {string}
  */
-var C1PJSCLASS = "c1pjs";       // this @define is the default application class (formerly APPCLASS) to use for C1Pjs
+var APPCLASS = "c1pjs";         // this @define is the default application class (eg, "pcx86", "c1pjs")
+
+/**
+ * @define {string}
+ */
+var APPNAME = "C1Pjs";          // this @define is the default application name (eg, "PCx86", "C1Pjs")
+
+/**
+ * @define {string}
+ */
+var C1PJSCLASS = "c1pjs";       // this @define is the default application class (formerly APPCLASS) to use for C1Pjs; TODO: Remove
 
 /**
  * @define {boolean}

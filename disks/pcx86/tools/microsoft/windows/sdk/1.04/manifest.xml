@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.23.0/manifest.xsl"?>
+<manifest type="software">
+	<title>Windows SDK 1.04</title>
+	<source href="http://os2museum.com">os2museum.com</source>
+	<disk id="disk01" size="368640" chs="40:2:9" img="archive/WINSDK104-DISK1-UTILS1.img" href="/disks/pcx86/tools/microsoft/windows/sdk/1.04/WINSDK104-DISK1-UTILS1.json" md5="024a5199c2e7cd7b3229be967f892c41" md5json="a0c5e7cb0f8befb1a1bf7fcf0400220e">
+		<name>Windows SDK 1.04 (UTIL 1)</name>
+	</disk>
+	<disk id="disk02" size="368640" chs="40:2:9" img="archive/WINSDK104-DISK2-UTILS2.img" href="/disks/pcx86/tools/microsoft/windows/sdk/1.04/WINSDK104-DISK2-UTILS2.json" md5="4f5b15a83e132beb5066991ca408e6da" md5json="69ba8b679c678bd2ac8f3bb66108d28a">
+		<name>Windows SDK 1.04 (UTIL 2)</name>
+	</disk>
+	<disk id="disk03" size="368640" chs="40:2:9" img="archive/WINSDK104-DISK3-LIBC.img" href="/disks/pcx86/tools/microsoft/windows/sdk/1.04/WINSDK104-DISK3-LIBC.json" md5="5e4f3c6a37a678d27988cff7cf006314" md5json="95dc9a7aa789f513940f838392a2f0aa">
+		<name>Windows SDK 1.04 (LIB C)</name>
+	</disk>
+	<disk id="disk04" size="368640" chs="40:2:9" img="archive/WINSDK104-DISK4-LIBPASCAL.img" href="/disks/pcx86/tools/microsoft/windows/sdk/1.04/WINSDK104-DISK4-LIBPASCAL.json" md5="fb85f6f592d1cc86a32b0ba2d73a119e" md5json="b351efad60af93ae63adac74a8e123d7">
+		<name>Windows SDK 1.04 (LIB PASCAL)</name>
+	</disk>
+	<disk id="disk05" size="368640" chs="40:2:9" img="archive/WINSDK104-DISK5-SYMBOLS.img" href="/disks/pcx86/tools/microsoft/windows/sdk/1.04/WINSDK104-DISK5-SYMBOLS.json" md5="4374882b81732d20795db86c6b1173d1" md5json="0b80f7fe03f4f46a2812ec1e6ad331d9">
+		<name>Windows SDK 1.04 (SYMBOLS)</name>
+	</disk>
+	<disk id="disk06" size="368640" chs="40:2:9" img="archive/WINSDK104-DISK6-SAMPLES1.img" href="/disks/pcx86/tools/microsoft/windows/sdk/1.04/WINSDK104-DISK6-SAMPLES1.json" md5="64d97724b6901ba5a8b9f6fb579a8ff4" md5json="3764e9e04a21f12cadc46df78a5cca93">
+		<name>Windows SDK 1.04 (SAMPLE1)</name>
+	</disk>
+	<disk id="disk07" size="368640" chs="40:2:9" img="archive/WINSDK104-DISK7-SAMPLES2.img" href="/disks/pcx86/tools/microsoft/windows/sdk/1.04/WINSDK104-DISK7-SAMPLES2.json" md5="36449cea8c1a67cac15a48e087dd4f87" md5json="98b3e860907e7a7423dff301c036eaf2">
+		<name>Windows SDK 1.04 (SAMPLE2)</name>
+	</disk>
+</manifest>

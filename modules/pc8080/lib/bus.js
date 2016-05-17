@@ -890,7 +890,7 @@ Bus.prototype.checkPortInputNotify = function(port, size, addrIP)
  * @param {number} end address
  *
 Bus.prototype.removePortInputNotify = function(start, end)
- {
+{
     for (var port = start; port < end; port++) {
         if (this.aPortInputNotify[port]) {
             delete this.aPortInputNotify[port];
@@ -1036,7 +1036,7 @@ Bus.prototype.checkPortOutputNotify = function(port, size, data, addrIP)
  * @param {number} end address
  *
 Bus.prototype.removePortOutputNotify = function(start, end)
- {
+{
     for (var port = start; port < end; port++) {
         if (this.aPortOutputNotify[port]) {
             delete this.aPortOutputNotify[port];

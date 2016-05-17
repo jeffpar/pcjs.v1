@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.23.0/manifest.xsl"?>
+<manifest type="software">
+	<title>Planetfall</title>
+	<version/>
+	<type>Game</type>
+	<category>Text Adventure</category>
+	<author>Infocom</author>
+	<releaseDate>1983</releaseDate>
+	<machine href="/disks/pcx86/games/infocom/machine.xml"/>
+	<disk id="disk01" href="/disks/pcx86/games/infocom/planet/PLANET-READONLY.json" md5="2f3e4f21a734d84529653496c7116a29" md5json="f485862cd51642d6834dfa28696b670d"/>
+</manifest>

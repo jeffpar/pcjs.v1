@@ -373,7 +373,7 @@ function embedMachine(sName, sVersion, idMachine, sXMLFile, sXSLFile, sParms)
              * *something* will have happened.
              *
              * Note that it is the HTMLOut module (in processMachines()) that ultimately decides which scripts to
-             * include and then generates the embedPC() and/or embedC1P() calls.
+             * include and then generates the embedXXX() call.
              */
             var aeWarning = (eMachine && Component.getElementsByClass(eMachine, "machine-warning"));
             eWarning = (aeWarning && aeWarning[0]) || eMachine;
@@ -401,7 +401,7 @@ function embedMachine(sName, sVersion, idMachine, sXMLFile, sXSLFile, sParms)
                 head.appendChild(style);
             }
 
-            var sAppClass = sName.toLowerCase();        // eg, "pcjs" or "c1pjs"
+            var sAppClass = sName.toLowerCase();        // eg, "pcx86" or "c1pjs"
             if (!sXSLFile) {
                 /*
                  * Now that PCjs is an open-source project, we can make the following test more flexible,
@@ -535,7 +535,7 @@ function embedC1P(idMachine, sXMLFile, sXSLFile)
 }
 
 /**
- * embedPC(idMachine, sXMLFile, sXSLFile, sParms)
+ * embedPCx86(idMachine, sXMLFile, sXSLFile, sParms)
  *
  * @param {string} idMachine
  * @param {string} sXMLFile
@@ -543,10 +543,10 @@ function embedC1P(idMachine, sXMLFile, sXSLFile)
  * @param {string} [sParms]
  * @return {boolean} true if successful, false if error
  */
-function embedPC(idMachine, sXMLFile, sXSLFile, sParms)
+function embedPCx86(idMachine, sXMLFile, sXSLFile, sParms)
 {
     if (fAsync) web.enablePageEvents(false);
-    return embedMachine("PCjs", APPVERSION, idMachine, sXMLFile, sXSLFile, sParms);
+    return embedMachine("PCx86", APPVERSION, idMachine, sXMLFile, sXSLFile, sParms);
 }
 
 /**
@@ -569,7 +569,7 @@ function embedPC8080(idMachine, sXMLFile, sXSLFile, sParms)
  * by adding them as (named) properties of a global object.
  */
 if (APPNAME == "C1Pjs")  window['embedC1P']    = embedC1P;
-if (APPNAME == "PCjs")   window['embedPC']     = embedPC;
+if (APPNAME == "PCx86")  window['embedPCx86']  = embedPCx86;
 if (APPNAME == "PC8080") window['embedPC8080'] = embedPC8080;
 
 window['enableEvents'] = web.enablePageEvents;

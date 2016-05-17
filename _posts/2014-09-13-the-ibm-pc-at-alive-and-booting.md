@@ -6,8 +6,8 @@ category: Releases
 permalink: /blog/2014/09/13/
 ---
 
-My first IBM PC AT (Model 5170) [Test Configuration](/devices/pc/machine/5170/ega/640kb/rev1/debugger/) finally
-boots to a PC-DOS prompt.  The configuration uses the original [IBM Model 5170 ROM BIOS](/devices/pc/rom/5170/),
+My first IBM PC AT (Model 5170) [Test Configuration](/devices/pcx86/machine/5170/ega/640kb/rev1/debugger/) finally
+boots to a PC-DOS prompt.  The configuration uses the original [IBM Model 5170 ROM BIOS](/devices/pcx86/rom/5170/),
 dated January 10, 1984.
  
 Getting through the BIOS "POST" (Power-On Self Test) diagnostics was like running an obstacle course, with various

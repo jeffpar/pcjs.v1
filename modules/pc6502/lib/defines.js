@@ -35,7 +35,7 @@
 /**
  * @define {string}
  */
-var PCJSCLASS = "pc8080";       // this @define is the default application class (formerly APPCLASS) to use
+var APPCLASS = "pc8080";       // this @define is the default application class (formerly APPCLASS) to use
 
 /**
  * @define {boolean}
@@ -71,7 +71,7 @@ var BYTEARRAYS = false;
 var TYPEDARRAYS = (typeof ArrayBuffer !== 'undefined');
 
 if (NODE) {
-    global.PCJSCLASS = PCJSCLASS;
+    global.APPCLASS = APPCLASS;
     global.DEBUGGER = DEBUGGER;
     global.BYTEARRAYS = BYTEARRAYS;
     global.TYPEDARRAYS = TYPEDARRAYS;

@@ -583,7 +583,7 @@ Video.prototype.updateScreen = function(n)
  */
 Video.init = function()
 {
-    var aeVideo = Component.getElementsByClass(document, PCJSCLASS, "video");
+    var aeVideo = Component.getElementsByClass(document, APPCLASS, "video");
     for (var iVideo = 0; iVideo < aeVideo.length; iVideo++) {
         var eVideo = aeVideo[iVideo];
         var parmsVideo = Component.getComponentParms(eVideo);
@@ -707,7 +707,7 @@ Video.init = function()
          * Bind any video-specific controls (eg, the Refresh button). There are no essential controls, however;
          * even the "Refresh" button is just a diagnostic tool, to ensure that the screen contents are up-to-date.
          */
-        Component.bindComponentControls(video, eVideo, PCJSCLASS);
+        Component.bindComponentControls(video, eVideo, APPCLASS);
     }
 };
 

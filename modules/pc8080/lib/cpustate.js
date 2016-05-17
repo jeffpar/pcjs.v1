@@ -1153,12 +1153,12 @@ CPUState.prototype.stepCPU = function(nMinCycles)
  */
 CPUState.init = function()
 {
-    var aeCPUs = Component.getElementsByClass(document, PCJSCLASS, "cpu");
+    var aeCPUs = Component.getElementsByClass(document, APPCLASS, "cpu");
     for (var iCPU = 0; iCPU < aeCPUs.length; iCPU++) {
         var eCPU = aeCPUs[iCPU];
         var parmsCPU = Component.getComponentParms(eCPU);
         var cpu = new CPUState(parmsCPU);
-        Component.bindComponentControls(cpu, eCPU, PCJSCLASS);
+        Component.bindComponentControls(cpu, eCPU, APPCLASS);
     }
 };
 

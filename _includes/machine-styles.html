@@ -1,12 +1,12 @@
 {% for machine in page.machines %}
   {% capture machine_type %}{{ machine.type | remove:"-dbg" }}{% endcapture %}
-  {% if machine_type != "pc" and machine_type != "c1p" %}
+  {% if machine_type != "c1p" %}
       {% capture machine_app %}{{ machine_type }}{% endcapture %}
     {% else %}
       {% capture machine_app %}{{ machine_type }}js{% endcapture %}
   {% endif %}
   {% unless site.pcjs.compiled == true and machine.uncompiled != true %}
-    {% if machine_app != "c1pjs" %}
+    {% if machine_type != "c1p" %}
       {% capture machine_style %}{{ site.baseurl }}/modules/shared/templates/components.css{% endcapture %}
     {% else %}
       {% capture machine_style %}{{ site.baseurl }}/modules/{{ machine_app }}/templates/components.css{% endcapture %}

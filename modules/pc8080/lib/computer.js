@@ -1505,14 +1505,14 @@ Computer.init = function()
      */
     if (!COMPILED && XMLVERSION) Computer.APPVERSION = XMLVERSION;
 
-    var aeMachines = Component.getElementsByClass(document, PCJSCLASS + "-machine");
+    var aeMachines = Component.getElementsByClass(document, APPCLASS + "-machine");
 
     for (var iMachine = 0; iMachine < aeMachines.length; iMachine++) {
 
         var eMachine = aeMachines[iMachine];
         var parmsMachine = Component.getComponentParms(eMachine);
 
-        var aeComputers = Component.getElementsByClass(eMachine, PCJSCLASS, "computer");
+        var aeComputers = Component.getElementsByClass(eMachine, APPCLASS, "computer");
 
         for (var iComputer = 0; iComputer < aeComputers.length; iComputer++) {
 
@@ -1534,7 +1534,7 @@ Computer.init = function()
              * but "reset" now provides a way to force the machine to start from scratch again, so "erase"
              * may be redundant now.
              */
-            Component.bindComponentControls(computer, eComputer, PCJSCLASS);
+            Component.bindComponentControls(computer, eComputer, APPCLASS);
 
             /*
              * Power on the computer, giving every component the opportunity to reset or restore itself.
@@ -1555,7 +1555,7 @@ Computer.init = function()
  */
 Computer.show = function()
 {
-    var aeComputers = Component.getElementsByClass(document, PCJSCLASS, "computer");
+    var aeComputers = Component.getElementsByClass(document, APPCLASS, "computer");
     for (var iComputer = 0; iComputer < aeComputers.length; iComputer++) {
         var eComputer = aeComputers[iComputer];
         var parmsComputer = Component.getComponentParms(eComputer);
@@ -1604,7 +1604,7 @@ Computer.show = function()
  */
 Computer.exit = function()
 {
-    var aeComputers = Component.getElementsByClass(document, PCJSCLASS, "computer");
+    var aeComputers = Component.getElementsByClass(document, APPCLASS, "computer");
     for (var iComputer = 0; iComputer < aeComputers.length; iComputer++) {
         var eComputer = aeComputers[iComputer];
         var parmsComputer = Component.getComponentParms(eComputer);

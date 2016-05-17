@@ -1,31 +1,30 @@
-PCjs: The Virtual IBM PC
+PCjs: Home of the Virtual IBM PC
 ===
 
-Welcome to [PCjs](/docs/about/pcjs/), the first IBM PC simulation to run in your web browser without any plugins.
-It was added to the [JavaScript Machines](/docs/about/) project in Fall 2012, and it is now part of the
-[PCjs Project](https://github.com/jeffpar/pcjs) on GitHub.
+Welcome to PCjs, home of [PCx86](/docs/about/pcx86/), the first IBM PC simulation to run in your web browser without
+any plugins.  It was added to the [PCjs Project](https://github.com/jeffpar/pcjs) in Fall 2012.
 
-The project includes the following web-based emulators:
+PCjs includes the following web-based emulators:
 
-* [PCjs](/docs/pcjs/), an x86-based IBM PC and PC-compatible emulator 
+* [PCx86](/docs/pcx86/), an x86-based IBM PC and PC-compatible emulator 
 * [PC8080](/modules/pc8080/), a 8080-based generic machine emulator
 * [C1Pjs](/docs/c1pjs/), a 6502-based Ohio Scientific Challenger 1P emulator
 
-PCjs first simulated the 4.77Mhz 8088-based IBM PC, and has steadily evolved to support more classic x86 machines,
-including the IBM PC XT, the 80286-based IBM PC AT, and the 80386-based COMPAQ DeskPro 386.  PCjs fully supports
+PCx86 first simulated the 4.77Mhz 8088-based IBM PC, and has steadily evolved to support more classic x86 machines,
+including the IBM PC XT, the 80286-based IBM PC AT, and the 80386-based COMPAQ DeskPro 386.  PCx86 fully supports
 the original machine ROMs, video cards, etc, and all machines run at their original speeds.
 
 All the simulations are written entirely in [JavaScript](/modules/).  No Flash, Java or other plugins are required.
 Supported browsers include modern versions of Chrome, Safari, Firefox, Internet Explorer (v9.0 and up), Edge,
 and assorted mobile browsers.
 
-[Embedded IBM PC](/devices/pc/machine/5150/mda/64kb/ "PCjs:ibm5150")
+[Embedded IBM PC](/devices/pcx86/machine/5150/mda/64kb/ "PCx86:ibm5150")
 
-The [simulation](/devices/pc/machine/5150/mda/64kb/) above features an Intel 8088 running at 4.77Mhz,
+The [simulation](/devices/pcx86/machine/5150/mda/64kb/) above features an Intel 8088 running at 4.77Mhz,
 with 64Kb of RAM and an IBM Monochrome Display Adapter.  For more control, there are also
-[Control Panel](/devices/pc/machine/5150/mda/64kb/debugger/) and [Soft Keyboard](/devices/pc/machine/5150/mda/64kb/softkbd/)
-configurations, featuring the built-in PCjs Debugger.  For even greater control, build your own PC. The
-[PCjs Documentation](/docs/pcjs/) will help you get started.
+[Control Panel](/devices/pcx86/machine/5150/mda/64kb/debugger/) and [Soft Keyboard](/devices/pcx86/machine/5150/mda/64kb/softkbd/)
+configurations, featuring the built-in PCx86 Debugger.  For even greater control, build your own PC. The
+[PCx86 Documentation](/docs/pcx86/) will help you get started.
 
 The goals of the [JavaScript Machines](/docs/about/) project are to create fast, full-featured simulations of classic
 computer hardware, help people understand how these early machines worked, make it easy to experiment with different
@@ -35,23 +34,23 @@ Demos
 ---
 Some pre-configured machines are shown below, ready to run BASIC, DOS, Windows, OS/2, and other assorted software.
 
-![IBM PC running VisiCalc](/apps/pc/1981/visicalc/thumbnail.jpg "link:/apps/pc/1981/visicalc/:200:120")
-![IBM PC running DONKEY.BAS](/devices/pc/machine/5150/cga/64kb/donkey/thumbnail.jpg "link:/devices/pc/machine/5150/cga/64kb/donkey/:200:120")
-![IBM PC AT w/EGA, OS/2 1.0](/disks/pc/os2/ibm/1.0/thumbnail.jpg "link:/disks/pc/os2/ibm/1.0/:200:120")
-![IBM PC XT w/CGA, Windows 1.01](/devices/pc/machine/5160/cga/256kb/win101/thumbnail.jpg "link:/devices/pc/machine/5160/cga/256kb/win101/:200:120")
-![IBM PC XT w/EGA, Windows 1.01](/disks/pc/windows/1.01/thumbnail.jpg "link:/disks/pc/windows/1.01/:200:120")
-![COMPAQ DeskPro 386, Windows/386](/disks/pc/windows/2.0x/thumbnail.jpg "link:/disks/pc/windows/2.0x/:200:120")
-![IBM PC AT w/EGA, Windows 3.00](/disks/pc/windows/3.00/thumbnail.jpg "link:/disks/pc/windows/3.00/:200:120")
-![IBM PC AT w/VGA, Windows 3.10](/disks/pc/windows/3.10/thumbnail.jpg "link:/disks/pc/windows/3.10/:200:120")
-![COMPAQ DeskPro 386, Windows 95](/disks/pc/windows/win95/4.00.950/thumbnail.jpg "link:/disks/pc/windows/win95/4.00.950/:200:120")
-![IBM PC w/MDA, CP/M-86](/disks/pc/cpm/1.1b/thumbnail.jpg "link:/disks/pc/cpm/1.1b/:200:120")
-![IBM PC w/MDA, Microsoft Adventure](/disks/pc/games/microsoft/adventure/thumbnail.jpg "link:/disks/pc/games/microsoft/adventure/:200:120")
-![IBM PC w/CGA, Zork I](/disks/pc/games/infocom/zork1/thumbnail.jpg "link:/disks/pc/games/infocom/zork1/:200:120")
+![IBM PC running VisiCalc](/apps/pcx86/1981/visicalc/thumbnail.jpg "link:/apps/pc/1981/visicalc/:200:120")
+![IBM PC running DONKEY.BAS](/devices/pcx86/machine/5150/cga/64kb/donkey/thumbnail.jpg "link:/devices/pcx86/machine/5150/cga/64kb/donkey/:200:120")
+![IBM PC AT w/EGA, OS/2 1.0](/disks/pcx86/os2/ibm/1.0/thumbnail.jpg "link:/disks/pcx86/os2/ibm/1.0/:200:120")
+![IBM PC XT w/CGA, Windows 1.01](/devices/pcx86/machine/5160/cga/256kb/win101/thumbnail.jpg "link:/devices/pcx86/machine/5160/cga/256kb/win101/:200:120")
+![IBM PC XT w/EGA, Windows 1.01](/disks/pcx86/windows/1.01/thumbnail.jpg "link:/disks/pcx86/windows/1.01/:200:120")
+![COMPAQ DeskPro 386, Windows/386](/disks/pcx86/windows/2.0x/thumbnail.jpg "link:/disks/pcx86/windows/2.0x/:200:120")
+![IBM PC AT w/EGA, Windows 3.00](/disks/pcx86/windows/3.00/thumbnail.jpg "link:/disks/pcx86/windows/3.00/:200:120")
+![IBM PC AT w/VGA, Windows 3.10](/disks/pcx86/windows/3.10/thumbnail.jpg "link:/disks/pcx86/windows/3.10/:200:120")
+![COMPAQ DeskPro 386, Windows 95](/disks/pcx86/windows/win95/4.00.950/thumbnail.jpg "link:/disks/pcx86/windows/win95/4.00.950/:200:120")
+![IBM PC w/MDA, CP/M-86](/disks/pcx86/cpm/1.1b/thumbnail.jpg "link:/disks/pcx86/cpm/1.1b/:200:120")
+![IBM PC w/MDA, Microsoft Adventure](/disks/pcx86/games/microsoft/adventure/thumbnail.jpg "link:/disks/pcx86/games/microsoft/adventure/:200:120")
+![IBM PC w/CGA, Zork I](/disks/pcx86/games/infocom/zork1/thumbnail.jpg "link:/disks/pcx86/games/infocom/zork1/:200:120")
 
-There are many more [PCjs Demos](/devices/pc/machine/#ready-to-run-app-demos), including an
-[IBM PC with Dual Displays](/devices/pc/machine/5150/dual/64kb/) demonstrating early multi-monitor support,
-and multiple IBM PC XT machines running side-by-side with [CGA Displays](/devices/pc/machine/5160/cga/256kb/array/)
-and [EGA Displays](/devices/pc/machine/5160/ega/640kb/array/).
+There are many more [PCx86 Demos](/devices/pcx86/machine/#ready-to-run-app-demos), including an
+[IBM PC with Dual Displays](/devices/pcx86/machine/5150/dual/64kb/) demonstrating early multi-monitor support,
+and multiple IBM PC XT machines running side-by-side with [CGA Displays](/devices/pcx86/machine/5160/cga/256kb/array/)
+and [EGA Displays](/devices/pcx86/machine/5160/ega/640kb/array/).
 
 C1Pjs
 ---
@@ -69,8 +68,8 @@ Developer Notes
 ---
 
 The [PCjs repository](https://github.com/jeffpar/pcjs) on GitHub contains everything needed to run PCjs
-computer simulations.  The [PCjs](/docs/pcjs/) and [C1Pjs](/docs/c1pjs/) emulators run in any modern web browser,
-with or without a web server, and examples are provided for both [local](/docs/pcjs/examples/) and
+computer simulations.  The [PCx86](/docs/pcx86/) and [C1Pjs](/docs/c1pjs/) emulators run in any modern web browser,
+with or without a web server, and examples are provided for both [local](/docs/pcx86/examples/) and
 [remote](http://www.pcjs.org/) operation.
 
 The project includes:
@@ -78,8 +77,8 @@ The project includes:
 - A simple Node-based web server ([server.js](server.js))
 - Custom Node modules used by the web server ([HTMLOut](modules/htmlout/), [MarkOut](modules/markout/), [DiskDump](modules/diskdump/), [FileDump](modules/filedump/))
 - A variety of IBM PC and C1P configuration and resource files (see [/apps](apps/), [/devices](devices/) and [/disks](disks/))
-- The [PCjs](modules/pcjs/lib/) and [C1Pjs](modules/c1pjs/lib/) client applications, both "compiled" and uncompiled
-- A smattering of [PCjs](docs/pcjs/) and [C1Pjs](docs/c1pjs/) documentation, along with [blog posts](blog/), related [publications](pubs/) and more
+- The [PCx86](modules/pcjs/lib/) and [C1Pjs](modules/c1pjs/lib/) client applications, both "compiled" and uncompiled
+- A smattering of [PCx86](docs/pcx86/) and [C1Pjs](docs/c1pjs/) documentation, along with [blog posts](blog/), related [publications](pubs/) and more
 
 The bundled web server is not strictly required.  Any web server (Node, Apache, Nginx, etc) that can serve the necessary
 JavaScript files to your browser will work.  However, instructions for doing that are beyond the scope of this introduction.
@@ -87,7 +86,7 @@ JavaScript files to your browser will work.  However, instructions for doing tha
 In fact, you can run PCjs simulations without a web server at all, using the "file:" protocol instead of "http:".
 However, most of the machine configurations require additional resource files (ROMs, disk images, etc), which are
 included in the project, but unless all the resource files are moved into a single directory (as they are in these
-[Demos](/docs/pcjs/examples/)), your browser will probably be unable to load all of them, due to security restrictions.
+[Demos](/docs/pcx86/examples/)), your browser will probably be unable to load all of them, due to security restrictions.
 Using the bundled web server is the preferred solution.
 
 The project includes a large selection of disk images, and a powerful [DiskDump](modules/diskdump/) utility that
@@ -180,8 +179,8 @@ OS X users may also need to preface this command with `sudo`:
 
 Now you can run `grunt` anywhere within the PCjs project to build an updated version.  If no command-line arguments
 are specified, `grunt` runs the "default" task defined by [Gruntfile.js](Gruntfile.js); that task runs Google's
-[Closure Compiler](https://developers.google.com/closure/compiler/) if any of the target files (eg, pc.js or pc-dbg.js
-in the [/versions](versions/) directory) are out-of date.
+[Closure Compiler](https://developers.google.com/closure/compiler/) if any of the target files (eg, pcx86.js or
+pcx86-dbg.js in the [/versions](versions/) directory) are out-of date.
 
 To ensure consistent compilation results, a copy of the Closure Compiler has been checked into the
 [/bin](bin/) folder.  This version of Closure Compiler, in turn, requires Java v7 or later.  Use the following
@@ -234,10 +233,10 @@ pcjs.org home page ([index.md](index.md)):
 	layout: page
 	permalink: /
 	machines:
-	  - type: pc
+	  - type: pcx86
 	    id: ibm5150
 	    name: "IBM PC (Model 5150) with Monochrome Display"
-	    config: /devices/pc/machine/5150/mda/64kb/machine.xml
+	    config: /devices/pcx86/machine/5150/mda/64kb/machine.xml
 	  - type: c1p
 	    id: demoC1P
 	    config: /devices/c1p/machine/8kb/large/machine.xml
@@ -254,43 +253,43 @@ For more information on all the machine options supported in a Markdown file, se
 
 ### From The Command-Line
 
-The PCjs client app can also be run from the command-line mode using Node, making it possible to script the application,
+The PCx86 client app can also be run from the command-line mode using Node, making it possible to script the application,
 run a series of automated tests, etc:
 
-    cd modules/pcjs/bin
-    node pcjs
+    cd modules/pcx86/bin
+    node pcx86
 
-The [pcjs](modules/pcjs/bin/pcjs) script in [modules/pcjs/bin](modules/pcjs/bin) loads
-all the PCjs browser scripts listed in the root [package.json](/package.json) and then starts a Node REPL
+The [pcx86](modules/pcx86/bin/pcx86) script in [modules/pcx86/bin](modules/pcx86/bin) loads
+all the PCx86 browser scripts listed in the root [package.json](/package.json) and then starts a Node REPL
 ("read-eval-print loop").  The REPL handles a few special commands (eg, "load", "quit") and passes anything else
-to the PCjs Debugger component.  If no Debugger component has been created yet, or if the Debugger didn't recognize
+to the PCx86 Debugger component.  If no Debugger component has been created yet, or if the Debugger didn't recognize
 the command, then it's passed on to *eval()*, like a good little REPL.
 
 Use the "load" command to load a JSON machine configuration file.  A sample
-[ibm5150.json](modules/pcjs/bin/ibm5150.json) is provided in the *bin* directory, which is a "JSON-ified" version
+[ibm5150.json](modules/pcx86/bin/ibm5150.json) is provided in the *bin* directory, which is a "JSON-ified" version
 of the [machine.xml](devices/pc/machine/5150/mda/64kb/machine.xml) displayed on the [pcjs.org](http://www.pcjs.org/)
 home page.
 
 The command-line loader creates all the JSON-defined machine components in the same order that the browser creates
 XML-defined components.  You can also issue the "load" command directly from the command-line:
 
-    node pcjs --cmd="load ibm5150.json"
+    node pcx86 --cmd="load ibm5150.json"
 
 In fact, any number of "--cmd" arguments can be included on the command-line.  A batch file syntax will eventually be
 added, too.
 
-When PCjs runs in a browser, an XML machine configuration file is transformed into HTML with a set of DIVs for each
-component: an "object" DIV whose *data-value* attribute provides the initialization parameters for the corresponding
-component, along with a set of optional "control" DIVs that the component can bind to (eg, a "Run" button, or a visual
-representation of DIP switches, or whatever).
+When a PCjs machine runs in a browser, an XML machine configuration file is transformed into HTML with a set of DIVs
+for each component: an "object" DIV whose *data-value* attribute provides the initialization parameters for the
+corresponding component, along with a set of optional "control" DIVs that the component can bind to (eg, a "Run" button,
+or a visual representation of DIP switches, or whatever).
 
-When PCjs is run from the command-line, there is no XML, HTML, or DIVs involved; this is basically a "headless" version
-of PCjs, so there is no simple way to view a machine's video display or interact with its keyboard, mouse, etc.
-You have to use Debugger commands to dump the machine's video buffer.
+When a PCjs machine is run from the command-line, there is no XML, HTML, or DIVs involved; this is basically a
+"headless" version of the machine, so there is no simple way to view its video display or interact with its keyboard,
+mouse, etc.  You have to use Debugger commands to dump the machine's video buffer.
 
 Since I was not inclined to add XML support to my Node environment, this has created some divergence between client
-and server operation: PCjs on the client supports *only* XML machine configuration files, whereas PCjs on the server
-supports *only* JSON machine configuration files.
+and server operation: PCjs machines on the client supports *only* XML machine configuration files, whereas PCjs machines
+on the server supports *only* JSON machine configuration files.
 
 I haven't decided whether I'll add support for JSON configuration files to the client, or add some XML-to-JSON conversion
 to the server, or both.
@@ -327,7 +326,7 @@ A complete list of command-line options can be found in [server.js](server.js).
 
 ### Client Components
 
-A special command parameter ("gort") can be appended to the URL to request uncompiled client source files, making PCjs
+A special command parameter ("gort") can be appended to the URL to request uncompiled client source files, making PCx86
 and C1Pjs much easier to debug, albeit much slower:
 
 	http://localhost:8088/?gort=debug
@@ -335,7 +334,7 @@ and C1Pjs much easier to debug, albeit much slower:
 The "gort=debug" command is unnecessary if the server is started with `--debug`; the server always serves uncompiled
 files when running in debug mode.
 
-Conversely, if the server is in debug mode but you want to test a compiled version of PCjs, use:
+Conversely, if the server is in debug mode but you want to test a compiled version of PCx86, use:
 
 	http://localhost:8088/?gort=release
 
@@ -373,7 +372,7 @@ To start developing features for a new version of PCjs, here are the recommended
 1. Change the version number in the root [package.json](package.json) and [_config.yml](_config.yml)
 2. Run the "grunt promote" task to bump the version in all the machine XML files
 3. Make changes
-4. Run "grunt" to build new versions of the apps (eg, "/versions/pcjs/1.x.x/pc.js")
+4. Run "grunt" to build new versions of the apps (eg, "/versions/pcx86/1.x.x/pcx86.js")
  
 You might also want to check out the blog post on [PCjs Coding Conventions](http://www.pcjs.org/blog/2014/09/30/).
 
@@ -419,8 +418,8 @@ See [LICENSE](/LICENSE) for details.
 
 More Information
 ---
-Learn more about the [JavaScript Machines](/docs/about/) Project and [PCjs](/docs/about/pcjs/).  To
-create your own PCjs machines, see the [Documentation](/docs/pcjs/) for details.
+Learn more about the [PCjs Project](/docs/about/) and [PCx86](/docs/about/pcx86/).  To
+create your own PCx86 machines, see the [PCx86 Documentation](/docs/pcx86/) for details.
 
 If you have questions or run into any problems, feel free to [tweet](http://twitter.com/jeffpar) or
 [email](mailto:Jeff@pcjs.org).

@@ -54,7 +54,7 @@ var usr     = require("../../shared/lib/usrlib");
  * @property {Array.<string>} c1pCSSFiles
  * @property {Array.<string>} c1pJSFiles
  * @property {Array.<string>} pcCSSFiles
- * @property {Array.<string>} pcJSFiles
+ * @property {Array.<string>} pcX86Files
  * @property {Array.<string>} pc8080Files
  */
 var pkg = require("../../../package.json");
@@ -153,7 +153,7 @@ var sMachineXMLFile = "machine.xml";
 var sManifestXMLFile = "manifest.xml";
 
 /*
- * We need lists of the uncompiled scripts for C1Pjs and PCjs, indexed by machine class, so that if we have
+ * We need lists of the uncompiled scripts for C1Pjs and PCx86, indexed by machine class, so that if we have
  * to inject those individual scripts into the current document, all the ordering dependencies will be honored
  * (which is why processMachines() can't simply enumerate all the .js files in the respective script folder).
  *
@@ -166,7 +166,7 @@ var sManifestXMLFile = "manifest.xml";
  */
 var aMachineFiles = {
     'c1p':      pkg.c1pCSSFiles.concat(pkg.c1pJSFiles),
-    'pc':       pkg.pcCSSFiles.concat(pkg.pcJSFiles),
+    'pcx86':    pkg.pcCSSFiles.concat(pkg.pcX86Files),
     'pc8080':   pkg.pcCSSFiles.concat(pkg.pc8080Files)
 };
 var aMachineFileTypes = {
@@ -546,7 +546,7 @@ HTMLOut.filter = function(req, res, next)
     }
 
     /*
-     * Next, check for API requests (eg, "/api/v1/dump?disk=/disks/pc/dos/ibm/2.00/PCDOS200-DISK1.json&format=img")
+     * Next, check for API requests (eg, "/api/v1/dump?disk=/disks/pcx86/dos/ibm/2.00/PCDOS200-DISK1.json&format=img")
      *
      * We perform this before the trailing-slash-redirect check below, because we don't require our API endpoints to
      * have a trailing slash.
@@ -565,7 +565,7 @@ HTMLOut.filter = function(req, res, next)
      * crack at the URL and redirect with a trailing slash as appropriate.
      *
      * This isn't just a cosmetic issue, because without "strict routing" and the "express-slash" module,
-     * URLs like "http://localhost:8088/devices/pc/machine/5150/mda/64kb/debugger" will cause problems for
+     * URLs like "http://localhost:8088/devices/pcx86/machine/5150/mda/64kb/debugger" will cause problems for
      * client-side JavaScript when it tries to do an XMLHttpRequest with a relative filename (eg, "machine.xml");
      * that request will fetch the "machine.xml" in the parent directory instead of the "debugger" directory.
      *
@@ -793,7 +793,7 @@ HTMLOut.prototype.setData = function(err, sData, sFile, fTemplate)
      * We cheat slightly and insert one of those tokens right now, because otherwise
      * the template file itself would not render correctly in your web browser.
      */
-    this.sTemplate = sData.replace("/modules/shared/templates/common.css", "/versions/pcjs/<!-- pcjs:version -->/common.css");
+    this.sTemplate = sData.replace("/modules/shared/templates/common.css", "/versions/pcx86/<!-- pcjs:version -->/common.css");
     this.sHTML = this.sTemplate;
 
     /*
@@ -967,7 +967,7 @@ HTMLOut.prototype.getVersion = function(sToken, sIndent, aParms)
      * Use the same test that processMachines() uses for setting fCompiled: if we're not using compiled code,
      * then we should be using "current" CSS and template files (as opposed to version-specific template files).
      *
-     * NOTE: I used to create a symlink in each app's "versions" directory (eg, /versions/pcjs/current ->
+     * NOTE: I used to create a symlink in each app's "versions" directory (eg, /versions/pcx86/current ->
      * ../../modules/shared/templates), so that when fDebug was true, I could simply insert "current" in
      * place of a version number.  However, that symlink didn't get added to the repository, and I'm not sure
      * all operating systems would deal with it properly even if was added, so now I'm treating the "version"
@@ -1330,7 +1330,7 @@ HTMLOut.prototype.getBlog = function(sToken, sIndent, aParms)
  *
  * getBlog() gets first crack; if we're in a blog folder, it will display the appropriate blog entries.
  * If getBlog() declines the request, we move on to getManifestXML(), because we have some folders where
- * there's BOTH a manifest and a README, such as /apps/pc/1981/visicalc, and we want the manifest to take
+ * there's BOTH a manifest and a README, such as /apps/pcx86/1981/visicalc, and we want the manifest to take
  * priority.  getManifestXML() will, in turn, pass the request on to getMarkdownFile(), which will, in turn,
  * pass the request on to getMachineXML().
  *
@@ -1427,11 +1427,11 @@ HTMLOut.prototype.getMachineXML = function(sToken, sIndent, aParms, sXMLFile, sS
             if (aMatch) {
                 var sStyleSheet = aMatch[1];
                 /*
-                 * Recognized machine stylesheets are either "production" stylesheets in ("/versions/pcjs"|"/versions/c1pjs")
-                 * or "development" stylesheets in ("/modules/pcjs/templates"|"/modules/c1pjs/templates").
+                 * Recognized machine stylesheets are either "production" stylesheets in ("/versions/pcx86"|"/versions/c1pjs")
+                 * or "development" stylesheets in ("/modules/pcx86/templates"|"/modules/c1pjs/templates").
                  *
                  * The common denominator in both sets is either "/pc" or "/c1p", which in turn indicates the class of machine
-                 * (ie, "PCjs" or "C1Pjs").
+                 * (ie, "PCx86" or "C1Pjs").
                  */
                 aMatch = sStyleSheet.match(/\/(pc|c1p)([^/]*)/);
                 if (aMatch) {
@@ -1442,7 +1442,7 @@ HTMLOut.prototype.getMachineXML = function(sToken, sIndent, aParms, sXMLFile, sS
                      *
                      * The string we initialize the MarkOut object should look like one of
                      *
-                     *      '[Embedded PC](machine.xml "PCjs:machineID:stylesheet:version:options:state")'
+                     *      '[Embedded PC](machine.xml "PCx86:machineID:stylesheet:version:options:state")'
                      *      '[Embedded C1P](machine.xml "C1Pjs:machineID:stylesheet:version:options:state")'
                      *
                      * where machineID is the machine "id" embedded in the XML, stylesheet is the path to the XML stylesheet,
@@ -1450,7 +1450,7 @@ HTMLOut.prototype.getMachineXML = function(sToken, sIndent, aParms, sXMLFile, sS
                      * options is a comma-delimited series of, well, options; the only option we currently output is "debugger"
                      * if a <debugger> element is present in the machine XML.
                      */
-                    var sMachineID = "machine" + sMachineClass; // fallback to either "machinePCjs" or "machineC1Pjs" if no ID found
+                    var sMachineID = "machine" + sMachineClass; // fallback to either "machinePCx86" or "machineC1Pjs" if no ID found
                     aMatch = sXML.match(/<machine.*?\sid=(['"])(.*?)\1[^>]*>/);
                     if (aMatch) sMachineID = aMatch[2];
 
@@ -1494,7 +1494,7 @@ HTMLOut.prototype.getMachineXML = function(sToken, sIndent, aParms, sXMLFile, sS
          *
          * But, instead of displaying a cryptic error message inside our beautiful HTML template, eg:
          *
-         *      HTMLOut error: ENOENT, open '/Users/Jeff/Sites/pcjs/devices/pc/machine/5160/cga/256kb/win101/debugger/machine.xml'
+         *      HTMLOut error: ENOENT, open '/Users/Jeff/Sites/pcjs/devices/pcx86/machine/5160/cga/256kb/win101/debugger/machine.xml'
          *
          * we have one more fallback: a random string!  Less useful, but more entertaining.  Well, maybe not even that.
          *
@@ -1719,7 +1719,7 @@ HTMLOut.prototype.getMarkdownFile = function(sFile, sToken, sIndent, aParms, sPr
             /*
              * Instead of displaying a cryptic error message inside our beautiful HTML template, eg:
              *
-             *      HTMLOut error: ENOENT, open '/Users/Jeff/Sites/pcjs/devices/pc/machine/5160/cga/256kb/win101/debugger/README.md'
+             *      HTMLOut error: ENOENT, open '/Users/Jeff/Sites/pcjs/devices/pcx86/machine/5160/cga/256kb/win101/debugger/README.md'
              *
              * which is all this will give us:
              *

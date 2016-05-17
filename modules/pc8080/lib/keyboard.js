@@ -453,12 +453,12 @@ Keyboard.prototype.onSoftKeyDown = function(sSoftCode, fDown)
  */
 Keyboard.init = function()
 {
-    var aeKbd = Component.getElementsByClass(document, PCJSCLASS, "keyboard");
+    var aeKbd = Component.getElementsByClass(document, APPCLASS, "keyboard");
     for (var iKbd = 0; iKbd < aeKbd.length; iKbd++) {
         var eKbd = aeKbd[iKbd];
         var parmsKbd = Component.getComponentParms(eKbd);
         var kbd = new Keyboard(parmsKbd);
-        Component.bindComponentControls(kbd, eKbd, PCJSCLASS);
+        Component.bindComponentControls(kbd, eKbd, APPCLASS);
     }
 };
 

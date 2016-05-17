@@ -35,11 +35,6 @@
 /**
  * @define {string}
  */
-var APPNAME = "";               // this @define is overridden by the Closure Compiler with either "PCjs" or "C1Pjs"
-
-/**
- * @define {string}
- */
 var APPVERSION = "1.x.x";       // this @define is overridden by the Closure Compiler with the version in package.json
 
 var XMLVERSION = null;          // this is set in non-COMPILED builds by embedMachine() if a version number was found in the machine XML
@@ -79,7 +74,6 @@ if (typeof module !== 'undefined') {
 
 if (NODE) {
     global.window = false;      // provides an alternative "if (typeof window === 'undefined')" (ie, "if (window) ...")
-    global.APPNAME = APPNAME;
     global.APPVERSION = APPVERSION;
     global.XMLVERSION = XMLVERSION;
     global.SITEHOST = SITEHOST;

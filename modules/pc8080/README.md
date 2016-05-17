@@ -9,7 +9,7 @@ permalink: /modules/pc8080/
 
 Overview
 ---
-PC8080 is our 8080-based machine emulation module.  The code is derived from [PCjs](/modules/pcjs/).
+PC8080 is our 8080-based machine emulation module.  The code is derived from [PCx86](/modules/pcx86/).
 
 It is still a work-in-progress.  See the list of available [PC8080 Machines](/devices/pc8080/machine/), including
 [Space Invaders (1978)](/devices/pc8080/machine/invaders/).

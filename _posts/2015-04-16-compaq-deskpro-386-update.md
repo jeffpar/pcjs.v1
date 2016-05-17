@@ -5,22 +5,22 @@ date: 2015-04-16 11:00:00
 category: 80386
 permalink: /blog/2015/04/16/
 machines:
-  - type: pc
+  - type: pcx86
     id: deskpro386
     debugger: true
     uncompiled: true
-    config: /devices/pc/machine/compaq/deskpro386/ega/2048kb/debugger/machine.xml
+    config: /devices/pcx86/machine/compaq/deskpro386/ega/2048kb/debugger/machine.xml
 ---
 
-PCjs can now boot the [COMPAQ DeskPro 386/16 ROM BIOS](/devices/pc/rom/compaq/deskpro386/).
+PCx86 can now boot the [COMPAQ DeskPro 386/16 ROM BIOS](/devices/pcx86/rom/compaq/deskpro386/).
 
 There's still a problem with the hard disk controller, which I haven't looked into yet,
 but booting from a floppy works.
 
 While working through issues with this ROM BIOS, I created some lightly-annotated
-[source code](/devices/pc/rom/compaq/deskpro386/1988-01-28/1988-01-28.asm) that can be re-assembled
+[source code](/devices/pcx86/rom/compaq/deskpro386/1988-01-28/1988-01-28.asm) that can be re-assembled
 with [NASM](http://www.nasm.us/).  The initial process of creating the source code is
-explained [here](/devices/pc/rom/compaq/deskpro386/#recreating-rom-source-code).
+explained [here](/devices/pcx86/rom/compaq/deskpro386/#recreating-rom-source-code).
 
 At the top of the source code, I explain a few important details about ROM addresses that
 are worth recapping here:
@@ -129,7 +129,7 @@ protected-mode with A20 disabled -- an unwise thing to do on most machines:
 	        mov     cr0,eax         ; 0000F4A4  0F2200
 	        jmp     0x28:xf4ac      ; 0000F4A7  EAACF42800
 
-Before fully understanding the DeskPro's unusual A20 management, PCjs worked around it by
+Before fully understanding the DeskPro's unusual A20 management, PCx86 worked around it by
 redirecting all A20 changes from the Bus component to the CPU component, giving the CPU first
 crack at any changes to A20.  If the CPU was in real-mode, it would simply pass the A20 request
 on to the Bus. However, if the CPU was in protected-mode, it would maintain the requested
@@ -143,7 +143,7 @@ to match that of the 1st megabyte whenever A20 is disabled.  I could probably ge
 only the first 64Kb of the 2nd megabyte, but until I'm actually able to run some tests on a real
 DeskPro 386, I'm going to assume COMPAQ's A20 implementation affected the entire 2nd megabyte.
 
-Here's my [COMPAQ DeskPro 386/16](/devices/pc/machine/compaq/deskpro386/ega/2048kb/debugger/) test
+Here's my [COMPAQ DeskPro 386/16](/devices/pcx86/machine/compaq/deskpro386/ega/2048kb/debugger/) test
 configuration.  Set a breakpoint at F000:F498 ("bp f000:f498") in the Debugger panel to see the above
 code in action.  When the machine is operating in real-mode, you can use the "rp" command to dump all
 the registers, including the current base and limit values loaded into the segment registers.
