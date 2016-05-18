@@ -6,6 +6,7 @@ redirect_from:
   - /configs/pc/machines/5150/mda/64kb/
   - /configs/pc/machines/5150/mda/64kb/index.xml/
   - /configs/pc/machines/5150/mda/64kb/machine.xml/
+  - /devices/pc/machine/5150/mda/64kb/
 machines:
   - type: pcx86
     id: ibm5150

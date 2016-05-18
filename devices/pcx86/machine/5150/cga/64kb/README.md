@@ -4,6 +4,7 @@ title: IBM PC (Model 5150, 64Kb) with Color Display
 permalink: /devices/pcx86/machine/5150/cga/64kb/
 redirect_from:
   - /configs/pc/machines/5150/cga/64kb/
+  - /devices/pc/machine/5150/cga/64kb/
 ---
 
 IBM PC with Color Graphics (CGA) Display

@@ -153,7 +153,7 @@ var sMachineXMLFile = "machine.xml";
 var sManifestXMLFile = "manifest.xml";
 
 /*
- * We need lists of the uncompiled scripts for C1Pjs and PCx86, indexed by machine class, so that if we have
+ * We need lists of the uncompiled scripts for C1P and PCx86, indexed by machine type, so that if we have
  * to inject those individual scripts into the current document, all the ordering dependencies will be honored
  * (which is why processMachines() can't simply enumerate all the .js files in the respective script folder).
  *
@@ -165,9 +165,10 @@ var sManifestXMLFile = "manifest.xml";
  * the closing </head> tag, and JS files are added just before the closing </body> tag.
  */
 var aMachineFiles = {
-    'c1p':      pkg.c1pCSSFiles.concat(pkg.c1pJSFiles),
-    'pcx86':    pkg.pcCSSFiles.concat(pkg.pcX86Files),
-    'pc8080':   pkg.pcCSSFiles.concat(pkg.pc8080Files)
+    'C1P':      pkg.c1pCSSFiles.concat(pkg.c1pJSFiles),     // will be deprecated when PC6502 becomes available
+    'PC':       pkg.pcCSSFiles.concat(pkg.pcX86Files),      // deprecated (same as PCx86)
+    'PCx86':    pkg.pcCSSFiles.concat(pkg.pcX86Files),
+    'PC8080':   pkg.pcCSSFiles.concat(pkg.pc8080Files)
 };
 var aMachineFileTypes = {
     'head': [".css"],           // put BOTH ".css" and ".js" here if convertMDMachineLinks() embeds its own scripts
@@ -1427,15 +1428,15 @@ HTMLOut.prototype.getMachineXML = function(sToken, sIndent, aParms, sXMLFile, sS
             if (aMatch) {
                 var sStyleSheet = aMatch[1];
                 /*
-                 * Recognized machine stylesheets are either "production" stylesheets in ("/versions/pcx86"|"/versions/c1pjs")
-                 * or "development" stylesheets in ("/modules/pcx86/templates"|"/modules/c1pjs/templates").
+                 * Recognized machine stylesheets are either production stylesheets in ("/versions/pcx86"|"/versions/c1pjs")
+                 * or development stylesheets in ("/modules/pcx86/templates"|"/modules/c1pjs/templates").
                  *
-                 * The common denominator in both sets is either "/pc" or "/c1p", which in turn indicates the class of machine
-                 * (ie, "PCx86" or "C1Pjs").
+                 * The common denominator in both sets is either "/pc" or "/c1p", which in turn indicates the type of machine
+                 * (eg, "PC", "C1P", etc).
                  */
                 aMatch = sStyleSheet.match(/\/(pc|c1p)([^/]*)/);
                 if (aMatch) {
-                    var sMachineClass = aMatch[1].toUpperCase() + aMatch[2];
+                    var sMachineType = aMatch[1].toUpperCase() + (aMatch[2] != "js"? aMatch[2] : "");
                     /*
                      * Since the MarkOut module already contains the ability to embed a machine definition with
                      * one simple line of Markdown-like magic, we'll create such a line and let MarkOut do the rest.
@@ -1443,14 +1444,14 @@ HTMLOut.prototype.getMachineXML = function(sToken, sIndent, aParms, sXMLFile, sS
                      * The string we initialize the MarkOut object should look like one of
                      *
                      *      '[Embedded PC](machine.xml "PCx86:machineID:stylesheet:version:options:state")'
-                     *      '[Embedded C1P](machine.xml "C1Pjs:machineID:stylesheet:version:options:state")'
+                     *      '[Embedded C1P](machine.xml "C1P:machineID:stylesheet:version:options:state")'
                      *
                      * where machineID is the machine "id" embedded in the XML, stylesheet is the path to the XML stylesheet,
                      * version is a version number ('*' or blank for the latest version, which is all we support here), and
                      * options is a comma-delimited series of, well, options; the only option we currently output is "debugger"
                      * if a <debugger> element is present in the machine XML.
                      */
-                    var sMachineID = "machine" + sMachineClass; // fallback to either "machinePCx86" or "machineC1Pjs" if no ID found
+                    var sMachineID = "machine" + sMachineType;  // fallback to either "machinePCx86" or "machineC1P" if no ID found
                     aMatch = sXML.match(/<machine.*?\sid=(['"])(.*?)\1[^>]*>/);
                     if (aMatch) sMachineID = aMatch[2];
 
@@ -1460,11 +1461,11 @@ HTMLOut.prototype.getMachineXML = function(sToken, sIndent, aParms, sXMLFile, sS
                      * embedding inside an existing HTML document, so any "machine.xsl" stylesheet must be remapped
                      * to a corresponding "components.xsl" stylesheet (which is what the next line does).
                      */
-                    var sMachineDef = sMachineClass + ":" + sMachineID + ":" + sStyleSheet.replace("machine.xsl", "components.xsl");
+                    var sMachineDef = sMachineType + ":" + sMachineID + ":" + sStyleSheet.replace("machine.xsl", "components.xsl");
                     sMachineDef += (sXML.indexOf("<debugger") > 0? ":*:debugger" : ":*:none");
                     sMachineDef += (sStateFile? ":" + sStateFile : "");
 
-                    s = '[Embedded ' + sMachineClass + '](' + sXMLFile + ' "' + sMachineDef + '")';
+                    s = '[Embedded ' + sMachineType + '](' + sXMLFile + ' "' + sMachineDef + '")';
                     var m = new MarkOut(s, sIndent, obj.req, null, obj.fDebug);
                     s = m.convertMD("    ").trim();
 
@@ -1832,7 +1833,7 @@ HTMLOut.prototype.getRandomString = function(sIndent)
  *
  * At a minimum, each machine object should contain the following properties:
  *
- *      'class' (eg, a machine class, such as "pc" or "c1p")
+ *      'type' (eg, a machine type, such as "PCx86" or "C1P")
  *      'version' (eg, "1.10", "*" to select the current version, or "uncompiled"; "*" is the default)
  *      'debugger' (eg, true or false; false is the default)
  *
@@ -1849,7 +1850,7 @@ HTMLOut.prototype.processMachines = function(aMachines, buildOptions, done)
 
         HTMLOut.logDebug('HTMLOut.processMachines(' + JSON.stringify(infoMachine) + ')');
 
-        var sClass = infoMachine['class'];                      // aka the machine class
+        var sType = infoMachine['type'];
 
         var fCompiled = !this.fDebug;
         var sVersion = infoMachine['version'];
@@ -1878,13 +1879,14 @@ HTMLOut.prototype.processMachines = function(aMachines, buildOptions, done)
 
         var asFiles = [];
         if (fCompiled) {
-            var sScriptFolder = sClass + "js";                  // aka the app class
-            var sScriptFile = sClass + (fDebugger? "-dbg" : "") + ".js";
+            var sScriptName = sType.toLowerCase();
+            var sScriptFile = sScriptName + (fDebugger? "-dbg" : "") + ".js";
+            var sScriptFolder = sScriptName + ((sType == "C1P" || sType == "PC")? "js" : "");
             asFiles.push("/versions/" + sScriptFolder + "/" + sVersion + "/components.css");
             asFiles.push("/versions/" + sScriptFolder + "/" + sVersion + "/" + sScriptFile);
             this.addFilesToHTML(asFiles, sScriptEmbed);
         }
-        else if (asFiles = aMachineFiles[sClass]) {
+        else if (asFiles = aMachineFiles[sType]) {
             /*
              * SIDEBAR: Why the "slice()"?  It's a handy way to create a copy of the array, and we need a copy,
              * because if it turns out we need to "cut out" some of the files below (using splice), we don't want that
@@ -1934,6 +1936,9 @@ HTMLOut.prototype.processMachines = function(aMachines, buildOptions, done)
                 sScriptEmbed = '<script type="text/javascript">buildPC("' + buildOptions.id + '")</script>';
                 this.addFilesToHTML(asFiles, sScriptEmbed);
             }
+        }
+        else {
+            HTMLOut.logDebug('HTMLOut.processMachines(): unrecognized machine type "' + sType + '"');
         }
     }
     if (done) done();

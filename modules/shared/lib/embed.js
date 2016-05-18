@@ -488,6 +488,20 @@ function embedMachine(sName, sVersion, idMachine, sXMLFile, sXSLFile, sParms)
                                 eMachine.parentNode.replaceChild(eFragment, eMachine);
                                 doneMachine();
                             } else {
+                                /*
+                                 * NOTE: This error can occur if our Node web server, when processing a folder with
+                                 * both a manifest.xml with a machine.xml reference AND a README.md containing a
+                                 * machine link, generates duplicate embedXXX() calls for the same machine; if the
+                                 * first embedXXX() call finds its target, subsequent calls for the same target will
+                                 * fail.
+                                 *
+                                 * Technically, such a folder is in a misconfigured state, but it happens, in part
+                                 * because when we switched to the Jekyll web server, we had to add machine links to
+                                 * all README.md files where we had previously relied on manifest.xml or machine.xml
+                                 * processing.  This is because the Jekyll web server currently doesn't process XML
+                                 * files, nor is support for that likely to be added any time soon; it was a nice
+                                 * feature of the Node web server, but it's not clear that it's worth doing for Jekyll.
+                                 */
                                 displayError("invalid machine element: " + idMachine);
                             }
                         } else {

@@ -3,7 +3,7 @@ layout: page
 title: IBM PC (Model 5150, 64Kb) with Color Display and Debugger
 permalink: /devices/pcx86/machine/5150/cga/64kb/donkey/debugger/
 redirect_from:
-  - /devices/pcx86/machine/5150/cga/64kb/donkey/debugger/
+  - /devices/pc/machine/5150/cga/64kb/donkey/debugger/
 machines:
   - type: pcx86
     id: ibm5150

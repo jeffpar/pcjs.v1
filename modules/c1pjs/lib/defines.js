@@ -65,6 +65,7 @@ var C1PJS = {
     APPNAME:     APPNAME,
     APPVERSION:  APPVERSION,    // shared
     COMPILED:    COMPILED,      // shared
+    CSSCLASS:    CSSCLASS,      // shared
     DEBUG:       DEBUG,         // shared
     DEBUGGER:    DEBUGGER,
     MAXDEBUG:    MAXDEBUG,      // shared

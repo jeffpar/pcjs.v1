@@ -61,7 +61,7 @@
 		<xsl:variable name="machineClass">
 			<xsl:choose>
 				<xsl:when test="machine/@class"><xsl:value-of select="machine/@class"/></xsl:when>
-				<xsl:otherwise><xsl:value-of select="$MACHINECLASS"/></xsl:otherwise>
+				<xsl:otherwise><xsl:value-of select="$APPCLASS"/></xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
 		<html lang="en">

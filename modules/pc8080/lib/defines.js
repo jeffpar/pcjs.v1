@@ -84,6 +84,7 @@ var PC8080 = {
     APPVERSION:  APPVERSION,    // shared
     BYTEARRAYS:  BYTEARRAYS,
     COMPILED:    COMPILED,      // shared
+    CSSCLASS:    CSSCLASS,      // shared
     DEBUG:       DEBUG,         // shared
     DEBUGGER:    DEBUGGER,
     MAXDEBUG:    MAXDEBUG,      // shared

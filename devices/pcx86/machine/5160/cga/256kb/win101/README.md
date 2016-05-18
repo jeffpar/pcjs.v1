@@ -7,6 +7,7 @@ redirect_from:
   - /configs/pc/machines/5160/cga/256kb/win101/machine.xml/
   - /demos/pc/cga-win101/xt-cga-win101.xml/
   - /demos/pc/cga-win101/
+  - /devices/pc/machine/5160/cga/256kb/win101/
 machines:
   - type: pcx86
     id: ibm5160

@@ -130,7 +130,7 @@ function ChipSet(parmsChipSet)
     bSwitches = this.parseDIPSwitches(parmsChipSet[ChipSet.CONTROLS.SW2]);
     this.aDIPSwitches[1] = [bSwitches, bSwitches];
 
-    this.sCellClass = PCX86.APPCLASS + "-bitCell";
+    this.sCellClass = PCX86.CSSCLASS + "-bitCell";
 
     this.cDMACs = this.cPICs = 1;
     if (this.model >= ChipSet.MODEL_5170) {

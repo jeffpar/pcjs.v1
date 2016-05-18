@@ -5,7 +5,7 @@ in the Front Matter of our Markdown documents, for compatibility with the Jekyll
 
     'id' (eg, "ibm5150")
     'name' (eg, "IBM PC (Model 5150) with Monochrome Display")
-    'type' (eg. "c1p", "pcx86", "pc8080")
+    'type' (eg, "c1p", "pcx86", "pc8080")
     'debugger' (default is false)
     'config' (default is "machine.xml")
     'template' (default is "machine.xsl")
@@ -35,16 +35,22 @@ of our Markdown or XML documents.  Examples: 'automount' becomes 'autoMount', 'a
 {% for machine in page.machines %}
   {% capture machine_type %}{{ machine.type | remove:"-dbg" }}{% endcapture %}
   {% if machine_type != "c1p" %}
-      {% capture machine_app %}{{ machine_type }}{% endcapture %}
-    {% else %}
-      {% capture machine_app %}{{ machine_type }}js{% endcapture %}
+    {% capture machine_app %}{{ machine_type }}{% endcapture %}
+  {% else %}
+    {% capture machine_app %}{{ machine_type }}js{% endcapture %}
   {% endif %}
   {% if machine.debugger %}
     {% capture machine_file %}{{ machine_type }}-dbg{% endcapture %}
+    {% assign machine_debugger = true %}
   {% else %}
     {% capture machine_file %}{{ machine.type }}{% endcapture %}
+    {% if machine.type != machine_type %}
+      {% assign machine_debugger = true %}
+    {% else %}
+      {% assign machine_debugger = false %}
+    {% endif %}
   {% endif %}
-  {% capture machine_embed %}embed{{ machine_type | upcase }}{% endcapture %}
+  {% capture machine_embed %}embed{{ machine_type | upcase | replace:"X86","x86" }}{% endcapture %}
   {% if machine.automount != nil %}
     {% if machine.automount == "" %}
       {% assign machine_autoMount = "{}" %}
@@ -116,7 +122,7 @@ of our Markdown or XML documents.  Examples: 'automount' becomes 'autoMount', 'a
             {% endif %}
           {% endif %}
           {% if script contains "js/lib/defines.js" %}
-            {% if machine.debugger != true %}
+            {% if machine_debugger != true %}
               {{ machine_script | replace:"defines.js","nodebugger.js" }}
             {% endif %}
           {% endif %}

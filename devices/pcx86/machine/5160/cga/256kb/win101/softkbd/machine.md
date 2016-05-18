@@ -5,6 +5,7 @@ permalink: /devices/pcx86/machine/5160/cga/256kb/win101/softkbd/
 redirect_from:
   - /configs/pc/machines/5160/cga/256kb/win101/softkbd/index.xml/
   - /configs/pc/machines/5160/cga/256kb/win101/softkbd/machine.xml/
+  - /devices/pc/machine/5160/cga/256kb/win101/softkbd/
 machines:
   - type: pcx86
     id: ibm5160

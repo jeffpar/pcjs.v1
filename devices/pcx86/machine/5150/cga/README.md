@@ -5,6 +5,7 @@ permalink: /devices/pcx86/machine/5150/cga/
 redirect_from:
   - /configs/pc/machines/5150/cga/
   - /demos/pc/cga/
+  - /devices/pc/machine/5150/cga/
 ---
 
 IBM PC with Color Graphics (CGA) Display

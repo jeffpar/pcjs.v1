@@ -1399,24 +1399,27 @@ FDC.prototype.mountDiskette = function(iDrive, sDisketteName, sDiskettePath)
 FDC.prototype.loadDiskette = function(iDrive, sDisketteName, sDiskettePath, fAutoMount, file)
 {
     var drive = this.aDrives[iDrive];
-    if (sDiskettePath && drive.sDiskettePath != sDiskettePath) {
-        this.unloadDrive(iDrive, fAutoMount, true);
-        if (drive.fBusy) {
-            this.notice("Drive " + iDrive + " busy");
-            return 0;
+    if (sDiskettePath) {
+        sDiskettePath = sDiskettePath.replace("/disks/pc/", "/disks/pcx86/");
+        if (drive.sDiskettePath != sDiskettePath) {
+            this.unloadDrive(iDrive, fAutoMount, true);
+            if (drive.fBusy) {
+                this.notice("Drive " + iDrive + " busy");
+                return 0;
+            }
+            drive.fBusy = true;
+            if (fAutoMount) {
+                drive.fAutoMount = true;
+                this.cAutoMount++;
+                if (this.messageEnabled()) this.printMessage("loading diskette '" + sDisketteName + "'");
+            }
+            drive.fLocal = !!file;
+            var disk = new Disk(this, drive, DiskAPI.MODE.PRELOAD);
+            if (!disk.load(sDisketteName, sDiskettePath, file, this.doneLoadDiskette)) {
+                return 0;
+            }
+            return 1;
         }
-        drive.fBusy = true;
-        if (fAutoMount) {
-            drive.fAutoMount = true;
-            this.cAutoMount++;
-            if (this.messageEnabled()) this.printMessage("loading diskette '" + sDisketteName + "'");
-        }
-        drive.fLocal = !!file;
-        var disk = new Disk(this, drive, DiskAPI.MODE.PRELOAD);
-        if (!disk.load(sDisketteName, sDiskettePath, file, this.doneLoadDiskette)) {
-            return 0;
-        }
-        return 1;
     }
     return -1;
 };

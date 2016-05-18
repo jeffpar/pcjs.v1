@@ -42,6 +42,8 @@ var COPYRIGHT = "Copyright © 2012-2016 Jeff Parsons <Jeff@pcjs.org>";
 
 var LICENSE = "License: GPL version 3 or later <http://gnu.org/licenses/gpl.html>";
 
+var CSSCLASS = "pcjs";
+
 /**
  * @define {string}
  */
@@ -80,6 +82,8 @@ if (NODE) {
     global.APPVERSION = APPVERSION;
     global.XMLVERSION = XMLVERSION;
     global.COPYRIGHT  = COPYRIGHT;
+    global.LICENSE    = LICENSE;
+    global.CSSCLASS   = CSSCLASS;
     global.SITEHOST   = SITEHOST;
     global.COMPILED   = COMPILED;
     global.DEBUG      = DEBUG;

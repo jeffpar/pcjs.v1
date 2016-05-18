@@ -3,7 +3,7 @@ layout: page
 title: IBM PC Keyboard Devices
 permalink: /devices/pcx86/keyboard/
 redirect_from:
-  - /devices/pcx86/keyboard/
+  - /devices/pc/keyboard/
 ---
 
 IBM PC Keyboard Devices

@@ -159,6 +159,7 @@ var PCX86 = {
     BUGS_8086:   BUGS_8086,
     BYTEARRAYS:  BYTEARRAYS,
     COMPILED:    COMPILED,      // shared
+    CSSCLASS:    CSSCLASS,      // shared
     DEBUG:       DEBUG,         // shared
     DEBUGGER:    DEBUGGER,
     DESKPRO386:  DESKPRO386,
