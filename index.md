@@ -11,17 +11,14 @@ machines:
     config: /devices/c1p/machine/8kb/large/machine.xml
 ---
 
-Welcome to PCjs, home of [PCx86](/docs/pcx86/), the original IBM PC simulation written entirely JavaScript.
-It was added in Fall 2012 to the [PCjs Project](https://github.com/jeffpar/pcjs), which now includes the following
-JavaScript Machines:
+Welcome to PCjs, home of JavaScript Machines such as [PCx86](/docs/pcx86/), the original IBM PC simulation written
+entirely JavaScript and first released in Fall 2012.
+ 
+The [PCjs Project](https://github.com/jeffpar/pcjs) is an open-source project that includes these JavaScript Machines:
 
 * [PCx86](/docs/pcx86/), an x86-based IBM PC and PC-compatible emulator 
-* [PC8080](/modules/pc8080/), an 8080-based generic machine emulator
+* [PC8080](/modules/pc8080/), a 8080-based emulator with support for [Space Invaders (1978)](/devices/pc8080/machine/invaders/)
 * [C1Pjs](/docs/c1pjs/), a 6502-based Ohio Scientific Challenger 1P emulator
-
-PCx86 orginally simulated the 4.77Mhz 8088-based IBM PC and has steadily evolved to support more classic x86 machines,
-including the IBM PC XT, the 80286-based IBM PC AT, and the 80386-based COMPAQ DeskPro 386.  PCx86 fully supports
-the original machine ROMs, video cards, etc, and all machines run at their original speeds.
 
 All PCjs computer simulations are written entirely in [JavaScript](/modules/).  No Flash, Java or other plugins are
 required.  Supported browsers include modern versions of Chrome, Safari, Firefox, Internet Explorer (v9.0 and up), Edge,
@@ -29,13 +26,17 @@ and assorted mobile browsers.
 
 {% include machine.html id="ibm5150" %}
 
-The [simulation](/devices/pcx86/machine/5150/mda/64kb/) above features an Intel 8088 running at 4.77Mhz,
+The [PCx86 Simulation](/devices/pcx86/machine/5150/mda/64kb/) above features an Intel 8088 running at 4.77Mhz,
 with 64Kb of RAM and an IBM Monochrome Display Adapter.  For more control, there are also
 [Control Panel](/devices/pcx86/machine/5150/mda/64kb/debugger/) and [Soft Keyboard](/devices/pcx86/machine/5150/mda/64kb/softkbd/)
 configurations, featuring the built-in PCx86 Debugger.  For even greater control, build your own PC. The
 [PCx86 Documentation](/docs/pcx86/) will help you get started.
 
-The goals of the [JavaScript Machines](/docs/about/) project are to create fast, full-featured simulations of classic
+PCx86 has steadily evolved to support more classic x86-based machines, including the IBM PC XT, the 80286-based IBM PC AT,
+and the 80386-based COMPAQ DeskPro 386.  PCx86 fully supports the original machine ROMs, video cards, etc, and all
+machines run at their original speeds.
+
+The goals of the [PCjs Project](/docs/about/) are to create fast, full-featured simulations of classic
 computer hardware, help people understand how these early machines worked, make it easy to experiment with different
 machine configurations, and provide a platform for running and analyzing old computer software.
 
@@ -63,7 +64,7 @@ and [EGA Displays](/devices/pcx86/machine/5160/ega/640kb/array/).
 
 C1Pjs
 ---
-Below is the [OSI Challenger C1P](/docs/c1pjs/), another simulation in the JavaScript Machines project.
+Below is the [OSI Challenger C1P](/docs/c1pjs/), another simulation in the PCjs Project.
 It simulates Ohio Scientific's 6502-based microcomputer, released in 1978.  More details about this simulation
 and the original machine are available in the [C1Pjs Documentation](/docs/c1pjs/).
 

@@ -10,13 +10,13 @@ redirect_from:
 IBM PC Machine Configurations
 ---
 
-PCjs supports these early [IBM PC Machines](#ibm-pc-machines):
+PCx86 supports these early [IBM PC Machines](#ibm-pc-machines):
 
 * [IBM PC](/devices/pcx86/machine/5150/) (Model 5150)
 * [IBM PC XT](/devices/pcx86/machine/5160/) (Model 5160)
 * [IBM PC AT](/devices/pcx86/machine/5170/) (Model 5170)
 
-PCjs also supports IBM PC-compatibles, such as:
+PCx86 also supports IBM PC-compatibles, such as:
 
 * [AT&amp;T](/devices/pcx86/machine/att/) ([AT&amp;T 6300](/devices/pcx86/machine/att/6300/))
 * [Columbia Data Products](/devices/pcx86/machine/cdp/) ([MPC 1600](/devices/pcx86/machine/cdp/mpc1600/cga/640kb/))
