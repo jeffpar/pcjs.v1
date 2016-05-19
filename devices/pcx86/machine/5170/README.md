@@ -2,6 +2,8 @@
 layout: page
 title: IBM PC AT (Model 5170) Machines
 permalink: /devices/pcx86/machine/5170/
+redirect_from:
+  - /devices/pc/machine/5170/
 ---
 
 IBM PC AT (Model 5170) Machines

@@ -2,6 +2,11 @@
 layout: page
 title: Multitasking MS-DOS 4.00
 permalink: /disks/pcx86/dos/microsoft/4.0M/
+redirect_from:
+  - /configs/pc/machines/5160/cga/640kb/dos400m/
+  - /devices/pc/machine/5160/cga/640kb/dos400m/
+  - /disks/pc/dos/microsoft/4.0M/
+  - /videos/pcjs/
 machines:
   - type: pcx86
     id: ibm5160
@@ -12,10 +17,6 @@ machines:
         path: /disks/pcx86/dos/microsoft/4.0M/MSDOS400M-DISK1.json
       B:
         path: /disks/pcx86/dos/microsoft/4.0M/MSDOS400M-DISK2.json
-redirect_from:
-  - /devices/pcx86/machine/5160/cga/640kb/dos400m/
-  - /configs/pc/machines/5160/cga/640kb/dos400m/
-  - /videos/pcjs/
 ---
 
 Multitasking MS-DOS 4.00

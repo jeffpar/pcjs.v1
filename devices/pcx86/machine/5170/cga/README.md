@@ -2,6 +2,8 @@
 layout: page
 title: IBM PC AT (Model 5170) with Color Display
 permalink: /devices/pcx86/machine/5170/cga/
+redirect_from:
+  - /devices/pc/machine/5170/cga/
 ---
 
 IBM PC AT with Color (CGA) Display

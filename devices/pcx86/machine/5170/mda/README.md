@@ -2,6 +2,8 @@
 layout: page
 title: IBM PC AT (Model 5170) with Monochrome Display
 permalink: /devices/pcx86/machine/5170/mda/
+redirect_from:
+  - /devices/pc/machine/5170/mda/
 ---
 
 IBM PC AT with Monochrome (MDA) Display

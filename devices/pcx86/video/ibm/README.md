@@ -2,6 +2,8 @@
 layout: page
 title: IBM PC Video Configurations
 permalink: /devices/pcx86/video/ibm/
+redirect_from:
+  - /devices/pc/video/ibm/
 ---
 
 IBM PC Video Configurations

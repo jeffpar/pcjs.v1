@@ -2,6 +2,8 @@
 layout: page
 title: IBM PC XT (Model 5160, 256Kb, 10Mb Drive) Machine Array with EGA Displays
 permalink: /devices/pcx86/machine/5160/ega/640kb/array/
+redirect_from:
+  - /devices/pc/machine/5160/ega/640kb/array/
 machines:
   - type: pcx86
     id: ibm5160a

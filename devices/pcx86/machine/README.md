@@ -4,6 +4,7 @@ title: IBM PC Machine Configurations
 permalink: /devices/pcx86/machine/
 redirect_from:
   - /configs/pc/machines/
+  - /devices/pc/machine/
 ---
 
 IBM PC Machine Configurations

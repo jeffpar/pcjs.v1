@@ -2,6 +2,8 @@
 layout: page
 title: IBM Color Graphics Adapter (CGA)
 permalink: /devices/pcx86/video/ibm/cga/
+redirect_from:
+  - /devices/pc/video/ibm/cga/
 ---
 
 IBM Color Graphics Adapter (CGA)

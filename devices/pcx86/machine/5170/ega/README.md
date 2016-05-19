@@ -4,6 +4,7 @@ title: IBM PC AT (Model 5170) with Enhanced Color Display
 permalink: /devices/pcx86/machine/5170/ega/
 redirect_from:
   - /configs/pc/machines/5170/ega/
+  - /devices/pc/machine/5170/ega/
 ---
 
 IBM PC AT with Enhanced Color Graphics (EGA) Display

@@ -2,6 +2,8 @@
 layout: page
 title: Compaq Portable Computer ROMs
 permalink: /devices/pcx86/rom/compaq/portable/
+redirect_from:
+  - /devices/pc/rom/compaq/portable/
 ---
 
 Compaq Portable Computer ROMs

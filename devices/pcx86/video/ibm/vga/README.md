@@ -2,6 +2,8 @@
 layout: page
 title: IBM Video Graphics Array (VGA)
 permalink: /devices/pcx86/video/ibm/vga/
+redirect_from:
+  - /devices/pc/video/ibm/vga/
 ---
 
 IBM Video Graphics Array (VGA)

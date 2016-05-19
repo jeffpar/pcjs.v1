@@ -2,6 +2,8 @@
 layout: page
 title: IBM PC Video Adapters
 permalink: /devices/pcx86/video/
+redirect_from:
+  - /devices/pc/video/
 ---
 
 IBM PC Video Adapters

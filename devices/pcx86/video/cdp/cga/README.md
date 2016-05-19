@@ -2,6 +2,8 @@
 layout: page
 title: Columbia Data Products Color Graphics Adapter (CGA)
 permalink: /devices/pcx86/video/cdp/cga/
+redirect_from:
+  - /devices/pc/video/cdp/cga/
 ---
 
 Columbia Data Products Color Graphics Adapter (CGA)

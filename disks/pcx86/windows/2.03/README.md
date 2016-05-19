@@ -3,7 +3,8 @@ layout: page
 title: Microsoft Windows 2.03
 permalink: /disks/pcx86/windows/2.03/
 redirect_from:
-  - /disks/pcx86/win/win203/
+  - /disks/pc/win/win203/
+  - /disks/pc/windows/2.03/
 ---
 
 Microsoft Windows 2.03

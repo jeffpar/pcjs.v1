@@ -2,17 +2,18 @@
 layout: page
 title: Microsoft Windows 1.01
 permalink: /disks/pcx86/windows/1.01/
+redirect_from:
+  - /configs/pc/machines/5160/ega/640kb/win101/
+  - /devices/pc/machine/5160/ega/640kb/win101/
+  - /devices/pc/machine/5160/ega/640kb/win101/debugger/
+  - /disks/pc/win/win101/
+  - /disks/pc/windows/1.01/
 machines:
   - type: pcx86
     id: ibm5160
     state: ibm5160-ega.json
     config: /devices/pcx86/machine/5160/ega/640kb/machine.xml
     drives: '[{name:"10Mb Hard Disk",type:3,path:"/disks/pcx86/fixed/10mb/PCDOS200-WIN101-EGA.json"}]'
-redirect_from:
-  - /configs/pc/machines/5160/ega/640kb/win101/
-  - /devices/pcx86/machine/5160/ega/640kb/win101/
-  - /devices/pcx86/machine/5160/ega/640kb/win101/debugger/
-  - /disks/pcx86/win/win101/
 ---
 
 Microsoft Windows 1.01

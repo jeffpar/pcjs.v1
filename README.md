@@ -1,9 +1,9 @@
-PC Simulations in JavaScript
+PCjs: JavaScript Machines
 ===
 
-Welcome to PCjs, home of the first IBM PC simulation to run in your web browser without
-any plugins.  It was released in Fall 2012 as part of the [PCjs Project](https://github.com/jeffpar/pcjs),
-which includes:
+Welcome to PCjs, home of [PCx86](/docs/pcx86/), the original IBM PC simulation written entirely JavaScript.
+It was added in Fall 2012 to the [PCjs Project](https://github.com/jeffpar/pcjs), which now includes the following
+JavaScript Machines:
 
 * [PCx86](/docs/pcx86/), an x86-based IBM PC and PC-compatible emulator 
 * [PC8080](/modules/pc8080/), a 8080-based generic machine emulator

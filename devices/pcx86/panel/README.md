@@ -2,6 +2,8 @@
 layout: page
 title: IBM PC Control Panels
 permalink: /devices/pcx86/panel/
+redirect_from:
+  - /devices/pc/panel/
 ---
 
 IBM PC Control Panels

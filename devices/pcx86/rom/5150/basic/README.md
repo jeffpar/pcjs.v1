@@ -3,7 +3,8 @@ layout: page
 title: IBM PC BASIC ROMs
 permalink: /devices/pcx86/rom/5150/basic/
 redirect_from:
-  - /devices/pcx86/basic/
+  - /devices/pc/basic/
+  - /devices/pc/rom/5150/basic/
 ---
 
 IBM PC BASIC ROMs

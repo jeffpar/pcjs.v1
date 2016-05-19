@@ -2,6 +2,8 @@
 layout: page
 title: AT&amp;T Personal Computer 6300
 permalink: /devices/pcx86/machine/att/6300/
+redirect_from:
+  - /devices/pc/machine/att/6300/
 ---
 
 AT&amp;T Personal Computer 6300

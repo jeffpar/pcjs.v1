@@ -2,6 +2,9 @@
 layout: page
 title: Microsoft Windows/386 2.0x
 permalink: /disks/pcx86/windows/2.0x/
+redirect_from:
+  - /disks/pc/windows/2.01/
+  - /disks/pc/windows/2.0x/
 machines:
   - type: pcx86
     id: deskpro386
@@ -9,8 +12,6 @@ machines:
     config: /devices/pcx86/machine/compaq/deskpro386/vga/2048kb/machine.xml
     drives: '[{name:"20Mb Hard Disk",type:2,path:"/disks/pcx86/fixed/20mb/COMPAQ310-WIN386201-VGA.json"}]'
     autoMount: ''
-redirect_from:
-  - /disks/pcx86/windows/2.01/
 ---
 
 Microsoft Windows/386 2.0 existed as the following "point releases":

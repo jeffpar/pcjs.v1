@@ -2,6 +2,8 @@
 layout: page
 title: "Paradise VGA Board: WDVGA PLUS 16"
 permalink: /devices/pcx86/video/paradise/vga/
+redirect_from:
+  - /devices/pc/video/paradise/vga/
 ---
 
 Paradise VGA Board: WDVGA PLUS 16

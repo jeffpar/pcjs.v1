@@ -2,6 +2,8 @@
 layout: page
 title: ATI VGA Wonder-16
 permalink: /devices/pcx86/video/ati/vga/
+redirect_from:
+  - /devices/pc/video/ati/vga/
 ---
 
 ATI VGA Wonder-16

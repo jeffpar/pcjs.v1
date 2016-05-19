@@ -5,6 +5,7 @@ permalink: /devices/pcx86/machine/5170/ega/640kb/rev1/
 redirect_from:
   - /configs/pc/machines/5170/ega/640kb/
   - /configs/pc/machines/5170/ega/640kb/rev1/
+  - /devices/pc/machine/5170/ega/640kb/rev1/
 machines:
   - type: pcx86
     id: ibm5170

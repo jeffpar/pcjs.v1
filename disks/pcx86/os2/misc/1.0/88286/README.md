@@ -2,6 +2,8 @@
 layout: page
 title: OS/2 1.0 Debugger Boot Disk
 permalink: /disks/pcx86/os2/misc/1.0/88286/
+redirect_from:
+  - /disks/pc/os2/misc/1.0/debugger/
 machines:
   - id: ibm5170
     type: pcx86
@@ -10,8 +12,6 @@ machines:
     autoMount:
       A:
         path: /disks/pcx86/os2/misc/1.0/OS210-88286.json
-redirect_from:
-  - /disks/pcx86/os2/misc/1.0/debugger/
 ---
 
 OS/2 1.0 Debugger Boot Disk

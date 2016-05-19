@@ -2,6 +2,8 @@
 layout: page
 title: AT&amp;T 6300 ROM BIOS
 permalink: /devices/pcx86/rom/att/6300/
+redirect_from:
+  - /devices/pc/rom/att/6300/
 ---
 
 AT&amp;T 6300 ROM BIOS
