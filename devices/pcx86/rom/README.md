@@ -15,14 +15,16 @@ IBM PC ROMs
 ROMs are added to machines by including one *[ROM](/docs/pcx86/rom/)* component in the machine XML configuration file
 for each ROM in the machine; eg:
 
-	<rom id="romBIOS" addr="0xf0000" size="0x10000" alias="0xff0000" file="/devices/pcx86/rom/5170/1984-01-10/ATBIOS-REV1.json"/>
+```xml
+<rom id="romBIOS" addr="0xf0000" size="0x10000" alias="0xff0000" file="/devices/pcx86/rom/5170/1984-01-10/ATBIOS-REV1.json"/>
+```
 
 ### BASIC ROMs
 
 The project contains the following [IBM PC BASIC ROMs](/devices/pcx86/rom/5150/basic/):
 
- * [IBM BASIC C1.00](5150/basic/BASIC100.json)
- * [IBM BASIC C1.10](5160/basic/BASIC110.json)
+- [IBM BASIC C1.00](5150/basic/BASIC100.json)
+- [IBM BASIC C1.10](5160/basic/BASIC110.json)
 
 We informally refer to version C1.00 as the Model 5150 version, and C1.10 as the Model 5160 (and later) version of
 Cassette BASIC.  It's true that the last few Model 5150 machines produced were upgraded with version C1.10, but we
@@ -32,12 +34,12 @@ are simply referring to the respective model with which each version of Cassette
 
 The project contains the following IBM PC BIOS ROMs:
 
- * [Model 5150: Apr 24, 1981](5150/1981-04-24/PCBIOS-REV1.json) (included with [IBM BASIC C1.00](5150/basic/BASIC100.json))
- * [Model 5150: Oct 19, 1981](5150/1981-10-19/PCBIOS-REV2.json) (included with [IBM BASIC C1.00](5150/basic/BASIC100.json))
- * [Model 5150: Oct 27, 1982](5150/1982-10-27/PCBIOS-REV3.json) (included with [IBM BASIC C1.00](5150/basic/BASIC100.json) *or* [IBM BASIC C1.10](5160/basic/BASIC110.json))
- * [Model 5160: Nov 08, 1982](5160/1982-11-08/XTBIOS-REV1.json) (included with [IBM BASIC C1.10](5160/basic/BASIC110.json))
- * [Model 5160: Jan 10, 1986](5160/1986-01-10/XTBIOS-REV2.json) (includes [IBM BASIC C1.10](5160/basic/BASIC110.json))
- * [Model 5160: May 09, 1986](5160/1986-05-09/XTBIOS-REV3.json) (includes [IBM BASIC C1.10](5160/basic/BASIC110.json))
+- [Model 5150: Apr 24, 1981](5150/1981-04-24/PCBIOS-REV1.json) (included with [IBM BASIC C1.00](5150/basic/BASIC100.json))
+- [Model 5150: Oct 19, 1981](5150/1981-10-19/PCBIOS-REV2.json) (included with [IBM BASIC C1.00](5150/basic/BASIC100.json))
+- [Model 5150: Oct 27, 1982](5150/1982-10-27/PCBIOS-REV3.json) (included with [IBM BASIC C1.00](5150/basic/BASIC100.json) *or* [IBM BASIC C1.10](5160/basic/BASIC110.json))
+- [Model 5160: Nov 08, 1982](5160/1982-11-08/XTBIOS-REV1.json) (included with [IBM BASIC C1.10](5160/basic/BASIC110.json))
+- [Model 5160: Jan 10, 1986](5160/1986-01-10/XTBIOS-REV2.json) (includes [IBM BASIC C1.10](5160/basic/BASIC110.json))
+- [Model 5160: May 09, 1986](5160/1986-05-09/XTBIOS-REV3.json) (includes [IBM BASIC C1.10](5160/basic/BASIC110.json))
 
 As hinted above, some newer Model 5150 machines with the **Oct 27, 1982** BIOS included IBM BASIC C1.10.  And
 some even *newer* 5150 machines had a BIOS with a "1982" copyright year instead of "1981", which also changed the checksum
@@ -65,8 +67,8 @@ visual description of the Model 5160's ROM layout.
 
 The project also contains BIOS ROMs, along with more detailed information, for the following machines:
 
- * [IBM PC AT Model 5170](5170/)
- * [COMPAQ Portable and DeskPro Machines](compaq/)
+- [IBM PC AT Model 5170](5170/)
+- [COMPAQ Portable and DeskPro Machines](compaq/)
 
 ### Other ROMs
 
