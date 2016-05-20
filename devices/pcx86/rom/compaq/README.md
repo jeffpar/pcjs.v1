@@ -3,8 +3,8 @@ layout: page
 title: COMPAQ ROMs
 permalink: /devices/pcx86/rom/compaq/
 redirect_from:
-  - /devices/pc/rom/compaq/bios/
   - /devices/pc/rom/compaq/
+  - /devices/pc/rom/compaq/bios/
 ---
 
 COMPAQ ROMs

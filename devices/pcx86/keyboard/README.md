@@ -29,12 +29,12 @@ Here's what *us83-buttons-minimal.xml* currently looks like:
 
 The following IBM keyboard configuration files are currently available:
 
- - [us83-buttons-arrows.xml](us83-buttons-arrows.xml)
- - [us83-buttons-functions.xml](us83-buttons-functions.xml)
- - [us83-buttons-minimal.xml](us83-buttons-minimal.xml)
- - [us83-softkeys.xml](us83-softkeys.xml)
- - [us84-buttons-arrows.xml](us84-buttons-arrows.xml)
- - [us84-buttons-functions.xml](us84-buttons-functions.xml)
+- [us83-buttons-arrows.xml](us83-buttons-arrows.xml)
+- [us83-buttons-functions.xml](us83-buttons-functions.xml)
+- [us83-buttons-minimal.xml](us83-buttons-minimal.xml)
+- [us83-softkeys.xml](us83-softkeys.xml)
+- [us84-buttons-arrows.xml](us84-buttons-arrows.xml)
+- [us84-buttons-functions.xml](us84-buttons-functions.xml)
 
 ### 8042 Keyboard Controller Internals
 

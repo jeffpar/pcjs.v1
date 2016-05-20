@@ -14,7 +14,7 @@ configuration file.
 
 See the following [IBM PC Video Configurations](ibm/):
 
-* Monochrome Display Adapter (MDA)
+* [Monochrome Display Adapter (MDA)](ibm/mda/)
 * [Color Graphics Adapter (CGA)](ibm/cga/)
 * [Enhanced Graphics Adapter (EGA)](ibm/ega/)
 * [Video Graphics Array (VGA)](ibm/vga/)

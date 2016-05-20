@@ -1,14 +1,13 @@
 PCjs: JavaScript Machines
 ===
 
-Welcome to PCjs, home of JavaScript Machines such as [PCx86](/docs/pcx86/), the original IBM PC simulation written
-entirely JavaScript and first released in Fall 2012.
- 
-The [PCjs Project](https://github.com/jeffpar/pcjs) is an open-source project that includes these JavaScript Machines:
+Welcome to PCjs, home of [PCx86](/docs/pcx86/), the original IBM PC simulation written entirely JavaScript.  It is
+one of several JavaScript Machines in the [PCjs Project](https://github.com/jeffpar/pcjs), an open-source project that
+includes:
 
-* [PCx86](/docs/pcx86/), an x86-based IBM PC and PC-compatible emulator 
-* [PC8080](/modules/pc8080/), a 8080-based emulator with support for [Space Invaders (1978)](/devices/pc8080/machine/invaders/)
-* [C1Pjs](/docs/c1pjs/), a 6502-based Ohio Scientific Challenger 1P emulator
+* [PCx86](/docs/pcx86/), an x86-based IBM PC and PC-compatible emulator
+* [PC8080](/modules/pc8080/), a 8080-based machine emulator (e.g., [Space Invaders](/devices/pc8080/machine/invaders/))
+* [C1Pjs](/docs/c1pjs/), a 6502-based emulation of the Ohio Scientific [Challenger 1P](/devices/c1p/)
 
 All PCjs computer simulations are written entirely in [JavaScript](/modules/).  No Flash, Java or other plugins are
 required.  Supported browsers include modern versions of Chrome, Safari, Firefox, Internet Explorer (v9.0 and up), Edge,

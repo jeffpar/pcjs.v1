@@ -3,11 +3,11 @@ layout: page
 title: IBM PC XT (Model 5160, 256Kb, 10Mb Drive) with Color Display running Windows 1.01
 permalink: /devices/pcx86/machine/5160/cga/256kb/win101/
 redirect_from:
+  - /devices/pc/machine/5160/cga/256kb/win101/
   - /configs/pc/machines/5160/cga/256kb/win101/
   - /configs/pc/machines/5160/cga/256kb/win101/machine.xml/
   - /demos/pc/cga-win101/xt-cga-win101.xml/
   - /demos/pc/cga-win101/
-  - /devices/pc/machine/5160/cga/256kb/win101/
 machines:
   - type: pcx86
     id: ibm5160

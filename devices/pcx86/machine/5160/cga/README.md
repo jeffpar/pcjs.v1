@@ -3,8 +3,8 @@ layout: page
 title: IBM PC (Model 5160) with Color Display
 permalink: /devices/pcx86/machine/5160/cga/
 redirect_from:
-  - /configs/pc/machines/5160/cga/
   - /devices/pc/machine/5160/cga/
+  - /configs/pc/machines/5160/cga/
 ---
 
 IBM PC XT with Color Graphics (CGA) Display
