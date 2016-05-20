@@ -21,22 +21,18 @@ desktop and mobile devices.  Machines are created with simple XML files that def
 along with the features that each component should enable.  More details about machine definitions and component
 capabilities can be found in the [Documentation](/docs/).
 
----
-
 ### Emulating the Challenger 1P
 
-The first PCjs simulation was [C1Pjs](/docs/c1pjs/), a simulation of the
+The first PCjs emulator was [C1Pjs](/docs/c1pjs/), a simulation of the
 Challenger 1P, which was a 6502-based microcomputer introduced by Ohio Scientific in 1978.
 
 C1Pjs v1.0 was released in July 2012.  More information about the first release of C1Pjs was
 [posted](http://osiweb.org/osiforum/viewtopic.php?f=3&t=103) on the
 [OSI Discussion Forum](http://osiweb.org/osiforum/index.php) at [osiweb.org](http://osiweb.org/).
 
----
-
 ### Emulating the IBM PC
 
-The next PCjs simulation was [PCx86](/docs/about/pcx86/), which simulates the original IBM PC, IBM PC XT,
+The next PCjs emulator was [PCx86](/docs/about/pcx86/), which simulates the original IBM PC, IBM PC XT,
 and IBM PC AT.  PCx86 v1.0 was released in late 2012.  Browse the source code [here](/modules/pcx86/) or on
 [GitHub](https://github.com/jeffpar/pcjs).
 
@@ -46,8 +42,6 @@ cards, along with assorted motherboard and expansion bus components.  It also in
 [Debugger](/docs/pcx86/debugger/) and a user-configurable [Control Panel](/docs/pcx86/panel/).
 
 Read [About PCx86](/docs/about/pcx86/) to learn more about its history, features, and upcoming improvements.
-
----
 
 ### Migrating to Node
 

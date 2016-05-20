@@ -1,4 +1,4 @@
-PCjs: JavaScript Machines
+PCjs Machines
 ===
 
 Welcome to PCjs, home of [PCx86](/docs/pcx86/), the original IBM PC simulation written entirely JavaScript.  It is
@@ -15,8 +15,8 @@ and assorted mobile browsers.
 
 [Embedded IBM PC](/devices/pcx86/machine/5150/mda/64kb/ "PCx86:ibm5150")
 
-The [PCx86 Simulation](/devices/pcx86/machine/5150/mda/64kb/) above features an Intel 8088 running at 4.77Mhz,
-with 64Kb of RAM and an IBM Monochrome Display Adapter.  For more control, there are also
+The [JavaScript Machine](/devices/pcx86/machine/5150/mda/64kb/) above uses [PCx86](/docs/pcx86/) configured with an Intel
+8088 running at 4.77Mhz, with 64Kb of RAM and an IBM Monochrome Display Adapter.  For more control, there are also
 [Control Panel](/devices/pcx86/machine/5150/mda/64kb/debugger/) and [Soft Keyboard](/devices/pcx86/machine/5150/mda/64kb/softkbd/)
 configurations, featuring the built-in PCx86 Debugger.  For even greater control, build your own PC. The
 [PCx86 Documentation](/docs/pcx86/) will help you get started.
