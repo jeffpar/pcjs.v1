@@ -18,23 +18,27 @@ and it is *identical* the CGA portion of the [IBM CGA](/devices/pcx86/video/ibm/
 The easiest way for a machine to include an CGA *[Video](/docs/pcx86/video/)* component in its XML configuration file
 is to reference the project's predefined CGA configuration file, using the *ref* attribute; eg:
 
-	<video ref="/devices/pcx86/video/cdp/cga/cdp-cga.xml"/>
+```xml
+<video ref="/devices/pcx86/video/cdp/cga/cdp-cga.xml"/>
+```
 
 The referenced XML file automatically defines visual elements (eg, dimensions of the display window and other
 visual indicators), display behaviors (eg, touchscreen support, mouse pointer locking), and the character ROM to load. 
 
 Here's what *cdp-cga.xml* currently looks like:
 
-	<video id="videoCGA" model="cga" screenwidth="960" screenheight="480" scale="true" charset="/devices/pcx86/video/cdp/cga/MPC_VID-1.0.json" pos="center" padding="8px">
-		<menu>
-			<title>Color Display</title>
-			<control type="container" pos="right">
-				<control type="led" label="Caps" binding="caps-lock" padleft="8px"/>
-				<control type="led" label="Num" binding="num-lock" padleft="8px"/>
-				<control type="led" label="Scroll" binding="scroll-lock" padleft="8px"/>
-			</control>
-		</menu>
-	</video>
+```xml
+<video id="videoCGA" model="cga" screenwidth="960" screenheight="480" scale="true" charset="/devices/pcx86/video/cdp/cga/MPC_VID-1.0.json" pos="center" padding="8px">
+    <menu>
+        <title>Color Display</title>
+        <control type="container" pos="right">
+            <control type="led" label="Caps" binding="caps-lock" padleft="8px"/>
+            <control type="led" label="Num" binding="num-lock" padleft="8px"/>
+            <control type="led" label="Scroll" binding="scroll-lock" padleft="8px"/>
+        </control>
+    </menu>
+</video>
+```
 
 ### Columbia Data Products CGA Character ROM
 

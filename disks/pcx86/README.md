@@ -12,7 +12,7 @@ IBM PC Disk Library
 ---
 
 This [Disk Library](/disks/pcx86/library.xml) lists all the [Disk Manifests](#disk-manifests) in the
-[PCjs Project](/docs/about/pcjs/), and makes those disks available to any [IBM PC Machine](/devices/pcx86/machine/)
+[PCjs Project](/docs/about/), and makes those disks available to any [IBM PC Machine](/devices/pcx86/machine/)
 in the project that uses the library.  However, most machines use the *[compiled](/disks/pcx86/compiled/library.xml)*
 form of the library in order to reduce machine load time.
 

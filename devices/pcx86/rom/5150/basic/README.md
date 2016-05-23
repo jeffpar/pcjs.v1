@@ -25,4 +25,6 @@ Microsoft, and unlike the IBM PC BIOS ROMs, no source code listings of these BAS
 
 Here's an [IBM PC Machine](/devices/pcx86/machine/) XML excerpt that shows how to include a BASIC ROM:
 
-	<rom id="romBASIC" addr="0xf6000" size="0x8000" file="/devices/pcx86/rom/5150/basic/BASIC100.json"/>
+```xml
+<rom id="romBASIC" addr="0xf6000" size="0x8000" file="/devices/pcx86/rom/5150/basic/BASIC100.json"/>
+```

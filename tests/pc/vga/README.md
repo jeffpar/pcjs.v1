@@ -99,7 +99,9 @@ List of VGA Samples from [Michael Abrash's Graphics Programming Black Book](http
 Also, I've updated the PCjs [Library](/disks/pcx86/library.xml) disk collection to include a disk containing executables
 built from the sources in this directory:
 
-	<disk path="/tests/pc/vga/VGABIN.json">VGA Tests (Black Book)</disk>
+```xml
+<disk path="/tests/pc/vga/VGABIN.json">VGA Tests (Black Book)</disk>
+```
 
 The "VGA Tests (Black Book)" disk image (VGABIN) was built with this command:
 
@@ -110,7 +112,9 @@ the PCjs web server to enumerate the contents of that directory and send back a 
 the files in that directory (including any subdirectories) every time that disk is requested.  Since this puts an added
 burden on the server, it's best to do this only when running PCjs from a local PCjs web server.
 
-	<disk path="/tests/pc/vga/">VGA Tests (Black Book)</disk>
+```xml
+<disk path="/tests/pc/vga/">VGA Tests (Black Book)</disk>
+```
 
 One advantage of using [DiskDump](/modules/diskdump/) is that it automatically converts linefeeds in known text files
 (including ASM files) into DOS-compatible CR/LF sequences.

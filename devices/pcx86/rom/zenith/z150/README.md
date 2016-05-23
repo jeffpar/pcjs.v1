@@ -17,4 +17,4 @@ The dump was produced by concatenating the two 16Kb ROM images to produce a sing
 [FileDump](/modules/filedump/):
 
 	cat archive/444-260-18.BIN archive/444-229-18.BIN >archive/BIOS-Z150-1988.rom
-	filedump --file=archive/BIOS-Z150-1988.rom --output=BIOS-Z150-1988.json
+	filedump --file=archive/BIOS-Z150-1988.rom --output=BIOS-Z150-1988.json --comments --format=bytes

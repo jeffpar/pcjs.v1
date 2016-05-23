@@ -84,7 +84,9 @@ The rest of a 5170 machine's configuration is normally handled through CMOS sett
 of floppy diskette drives, which can be configured with the &lt;[ChipSet](/docs/pcx86/chipset/)&gt; *floppies* property;
 e.g.:
 
-	<chipset id="chipset" model="5170" floppies="[1200,1200]" monitor="color"/>
+```xml
+<chipset id="chipset" model="5170" floppies="[1200,1200]" monitor="color"/>
+```
 
 The number of elements in the array determines the number of drives, and the value of each element
 determines the type of drive; the value corresponds to the maximum supported diskette size, in Kb: 

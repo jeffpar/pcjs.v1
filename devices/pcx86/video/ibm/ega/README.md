@@ -14,7 +14,9 @@ IBM Enhanced Graphics Adapter (EGA)
 The easiest way for a machine to include an EGA *[Video](/docs/pcx86/video/)* component in its XML configuration file
 is to reference one of the project's predefined EGA configuration files, using the *ref* attribute; eg:
 
-	<video ref="/devices/pcx86/video/ibm/ega/1984-09-13/64kb.xml"/>
+```xml
+<video ref="/devices/pcx86/video/ibm/ega/1984-09-13/64kb.xml"/>
+```
 
 The referenced XML file automatically defines visual elements (eg, dimensions of the display window and other
 visual indicators), display behaviors (eg, touchscreen support, mouse pointer locking), the ROM to load (and where
@@ -22,17 +24,19 @@ to load it), and other video card hardware features (eg, *memory* and *switches*
 
 Here's what *64kb.xml* currently looks like:
 
-	<video id="videoEGA" model="ega" memory="0x10000" screenwidth="640" screenheight="350" touchscreen="mouse" pos="center" padding="8px">
-	    <menu>
-	        <title>IBM Enhanced Color Display</title>
-	        <control type="container" pos="right">
-	            <control type="led" label="Caps" binding="caps-lock" padleft="8px"/>
-	            <control type="led" label="Num" binding="num-lock" padleft="8px"/>
-	            <control type="led" label="Scroll" binding="scroll-lock" padleft="8px"/>
-	        </control>
-	    </menu>
-	    <rom id="romEGA" addr="0xc0000" size="0x4000" file="/devices/pcx86/video/ibm/ega/1984-09-13/ibm-ega.json" notify="videoEGA"/>
-	</video>
+```xml
+<video id="videoEGA" model="ega" memory="0x10000" screenwidth="640" screenheight="350" touchscreen="mouse" pos="center" padding="8px">
+    <menu>
+        <title>IBM Enhanced Color Display</title>
+        <control type="container" pos="right">
+            <control type="led" label="Caps" binding="caps-lock" padleft="8px"/>
+            <control type="led" label="Num" binding="num-lock" padleft="8px"/>
+            <control type="led" label="Scroll" binding="scroll-lock" padleft="8px"/>
+        </control>
+    </menu>
+    <rom id="romEGA" addr="0xc0000" size="0x4000" file="/devices/pcx86/video/ibm/ega/1984-09-13/ibm-ega.json" notify="videoEGA"/>
+</video>
+```
 
 The following IBM EGA configuration files are currently available:
 

@@ -12,23 +12,27 @@ IBM Monochrome Display Adapter (MDA)
 The easiest way for a machine to include an MDA *[Video](/docs/pcx86/video/)* component in its XML configuration file
 is to reference one of the project's predefined MDA configuration files, using the *ref* attribute; eg:
 
-	<video ref="/devices/pcx86/video/ibm/mda/ibm-mda.xml"/>
+```xml
+<video ref="/devices/pcx86/video/ibm/mda/ibm-mda.xml"/>
+```
 
 The referenced XML file automatically defines visual elements (eg, dimensions of the display window and other
 visual indicators), display behaviors (eg, touchscreen support, mouse pointer locking), and the character ROM to load. 
 
 Here's what *ibm-mda.xml* currently looks like:
 
-	<video id="videoMDA" screenWidth="1440" screenHeight="900" scale="true" smoothing="false" fontROM="/devices/pcx86/video/ibm/mda/ibm-mda.json" pos="center" padding="8px">
-	    <menu>
-	    <title>Monochrome Display</title>
-	    <control type="container" pos="right">
-	        <control type="led" label="Caps" binding="caps-lock" padleft="8px"/>
-	        <control type="led" label="Num" binding="num-lock" padleft="8px"/>
-	        <control type="led" label="Scroll" binding="scroll-lock" padleft="8px"/>
-	    </control>
-	    </menu>
-	</video>
+```xml
+<video id="videoMDA" screenWidth="1440" screenHeight="900" scale="true" smoothing="false" fontROM="/devices/pcx86/video/ibm/mda/ibm-mda.json" pos="center" padding="8px">
+    <menu>
+    <title>Monochrome Display</title>
+    <control type="container" pos="right">
+        <control type="led" label="Caps" binding="caps-lock" padleft="8px"/>
+        <control type="led" label="Num" binding="num-lock" padleft="8px"/>
+        <control type="led" label="Scroll" binding="scroll-lock" padleft="8px"/>
+    </control>
+    </menu>
+</video>
+```
 
 The following IBM MDA configuration files are currently available:
 

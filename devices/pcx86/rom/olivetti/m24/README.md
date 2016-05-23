@@ -16,4 +16,4 @@ and OLIVETTI_M24_VERSION_1.43_HIGH.BIN) obtained from the
 The dump was produced by running [FileDump](/modules/filedump/) to merge the even and odd portions (8Kb each)
 to produce a single 16Kb ROM image:
 
-	filedump --file=archive/OLIVETTI_M24_VERSION_1.43_LOW.BIN --merge=archive/OLIVETTI_M24_VERSION_1.43_HIGH.BIN --output=BIOS-143.json
+	filedump --file=archive/OLIVETTI_M24_VERSION_1.43_LOW.BIN --merge=archive/OLIVETTI_M24_VERSION_1.43_HIGH.BIN --output=BIOS-143.json --comments --format=bytes

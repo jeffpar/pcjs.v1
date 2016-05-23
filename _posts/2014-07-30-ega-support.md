@@ -14,7 +14,9 @@ diagnostics and run [Windows 1.01](/devices/pcx86/machine/5160/ega/640kb/win101/
 
 EGA support is added to a **machine.xml** file using two XML elements; eg:
 
-	<video id="videoEGA" model="ega" memory="0x20000" screenwidth="640" screenheight="350"/>
+```xml
+<video id="videoEGA" model="ega" memory="0x20000" screenwidth="640" screenheight="350"/>
+```
 
 The *model* attribute must be set to "ega" and the *memory* attribute should be set to the amount of memory
 desired on the card; valid memory sizes are:
@@ -29,7 +31,9 @@ window, which the browser will then scale up or down, unless a specific overall 
 
 The second required XML element is a &lt;rom&gt; element to load the EGA ROM; eg:
 
-	<rom id="romEGA" addr="0xc0000" size="0x4000" file="/devices/pcx86/video/ibm-ega.json" notify="videoEGA"/>
+```xml
+<rom id="romEGA" addr="0xc0000" size="0x4000" file="/devices/pcx86/video/ibm-ega.json" notify="videoEGA"/>
+```
 
 The *notify* attribute must match the *id* of the &lt;video&gt; element, so that the Video component can load
 the initial 8x14 and 8x8 fonts from the ROM.  Support for dynamic loading of fonts from plane 2 of the EGA's memory

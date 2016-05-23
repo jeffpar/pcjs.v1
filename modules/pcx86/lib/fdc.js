@@ -1088,7 +1088,7 @@ FDC.prototype.initDrive = function(drive, iDrive, data)
                 if (sDiskettePath) {
                     this.addDiskHistory(sDisketteName, sDiskettePath, drive.disk);
                 } else {
-                    if (DEBUG) Component.warning("Disk '" + (drive.disk.sDiskName || sDisketteName) + "' not recorded properly in drive " + iDrive);
+                    if (MAXDEBUG) Component.warning("Disk '" + (drive.disk.sDiskName || sDisketteName) + "' not recorded properly in drive " + iDrive);
                 }
             }
         } else {

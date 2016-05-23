@@ -73,10 +73,10 @@ The dialog box should provide the following information:
 	Check your Downloads folder for "pcx86.js", copy it to your web server as "pcx86.js",
 	and then add the following to your web page:
 
-		<div id="ibm5150"></div>
-		...
-		<script type="text/javascript" src="pcx86.js"></script>
-		<script type="text/javascript">embedPC("ibm5150","machine.xml","components.xsl");</script>
+	    <div id="ibm5150"></div>
+	    ...
+	    <script type="text/javascript" src="pcx86.js"></script>
+	    <script type="text/javascript">embedPC("ibm5150","machine.xml","components.xsl");</script>
 	
 	The machine should appear where the <div> is located.
 
@@ -110,8 +110,10 @@ Some notes:
  So, even if the original machine always powers on from scratch, the *copied* machine will always resume at the point
  it was saved.  This behavior, however, can be disabled by passing a *parms* object as the 4th parameter to the
  *embedPC()* call, overriding the 'state' property:
- 
-		<script type="text/javascript">embedPC("ibm5150","machine.xml","components.xsl","{state:null}");</script>
+
+	```xml
+	<script type="text/javascript">embedPC("ibm5150","machine.xml","components.xsl","{state:null}");</script>
+	```
 
 While the [PCx86 Documentation](/docs/pcx86/) explains how to create a *new* machine, by writing your own machine
 XML file and manually copying all the other pieces, the new **Save Machine** feature is the best way to save

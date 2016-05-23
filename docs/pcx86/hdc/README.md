@@ -48,15 +48,11 @@ Attributes
 	
 	For the Xebec (*'xt'*) controller, you should install the Xebec ROM; eg:
 	
-		```xml
 		<rom id="romHDC" addr="0xc8000" size="0x2000" file="/devices/pcx86/hdc/ibm-xebec-1982.json"/>
-		```
 
 	For the Western Digital (*'at'*) controller, use a Model 5170 (or newer) ROM module; eg:
 
-		```xml
 		<rom id="romBIOS" addr="0xf0000" size="0x10000" alias="0xff0000" file="/devices/pcx86/rom/5170/1984-01-10/1984-01-10.json"/>
-		```
 
 	The default *type* setting is *'xt'*.
 
