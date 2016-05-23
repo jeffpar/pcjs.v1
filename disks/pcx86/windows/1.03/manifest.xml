@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.23.0/manifest.xsl"?>
+<manifest type="software">
+	<title>Microsoft Windows 1.03</title>
+	<disk id="disk01" size="368640" chs="40:2:9" img="archive/WIN103-DISK1-SETUP.img" href="/disks/pcx86/windows/1.03/WIN103-DISK1-SETUP.json" md5="99939d58ff8cadd532b3c819596a0c73" md5json="8ebcbb9c5a8f322f5246c6661a0a6a9f">
+		<name>Windows 1.03 (SETUP)</name>
+	</disk>
+	<disk id="disk02" size="368640" chs="40:2:9" img="archive/WIN103-DISK2-BUILD.img" href="/disks/pcx86/windows/1.03/WIN103-DISK2-BUILD.json" md5="e81e8e1cff25c4625a5651920b2197b2" md5json="15d053ce1341e007e5ffd0beabfb1353">
+		<name>Windows 1.03 (BUILD)</name>
+	</disk>
+	<disk id="disk03" size="368640" chs="40:2:9" img="archive/WIN103-DISK3-UTILITY.img" href="/disks/pcx86/windows/1.03/WIN103-DISK3-UTILITY.json" md5="44e1e5cc1ff3a43f7f3590e7b5c634a8" md5json="babc785e32b088f474740f804b74e6f4">
+		<name>Windows 1.03 (UTILITY)</name>
+	</disk>
+	<disk id="disk04" size="368640" chs="40:2:9" img="archive/WIN103-DISK4-FONT.img" href="/disks/pcx86/windows/1.03/WIN103-DISK4-FONT.json" md5="9054b8c1da0034f2c87d989b2f87c5b3" md5json="1388bc02c9251f53dfa9ef7878d3a817">
+		<name>Windows 1.03 (FONT)</name>
+	</disk>
+	<disk id="disk05" size="368640" chs="40:2:9" img="archive/WIN103-DISK5-APPS.img" href="/disks/pcx86/windows/1.03/WIN103-DISK5-APPS.json" md5="cccf53de1ffd4ff3346a7f13abf740b0" md5json="7485d50f897205c68efef8c1835a9fd9">
+		<name>Windows 1.03 (APPS)</name>
+	</disk>
+	<disk id="disk06" size="368640" chs="40:2:9" img="archive/WIN103-DISK6-PROGRAM.img" href="/disks/pcx86/windows/1.03/WIN103-DISK6-PROGRAM.json" md5="04421789cb2feac58c3dad541164017d" md5json="b3d0cadf46e5115c4a5ed48e6095aa9e">
+		<name>Windows 1.03 (PROGRAM)</name>
+	</disk>
+</manifest>

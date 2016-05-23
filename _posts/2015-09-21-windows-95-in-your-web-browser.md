@@ -5,11 +5,11 @@ date: 2015-09-21 11:00:00
 category: Windows 95
 permalink: /blog/2015/09/21/
 machines:
-  - type: pc
+  - type: pcx86
     id: deskpro386
-    state: /disks/pc/windows/win95/4.00.950/deskpro386.json
-    config: /devices/pc/machine/compaq/deskpro386/vga/4096kb/machine.xml
-    drives: '[{name:"68Mb Hard Disk",type:4,path:"http://archive.pcjs.org/disks/pc/fixed/68mb/win95.json"}]'
+    state: /disks/pcx86/windows/win95/4.00.950/deskpro386.json
+    config: /devices/pcx86/machine/compaq/deskpro386/vga/4096kb/machine.xml
+    drives: '[{name:"68Mb Hard Disk",type:4,path:"http://archive.pcjs.org/disks/pcx86/fixed/68mb/win95.json"}]'
     autoMount: ''
 ---
 
@@ -21,7 +21,7 @@ converts an immediate signed byte into a signed word.  Those variations were fai
 a 16-bit operand size was in effect, and if the destination was a register, the upper 16 bits of that register
 could become corrupted.
 
-The [Windows 95 Test Machine](/disks/pc/windows/win95/4.00.950/) hard disk has been updated
+The [Windows 95 Test Machine](/disks/pcx86/windows/win95/4.00.950/) hard disk has been updated
 with a complete set of Windows 95 files from a "Compact" installation, and first boot has finished, so instead
 of the initial "Getting ready to run Windows 95 for the first time..." splash screen, you'll see the normal
 Windows 95 startup screen.

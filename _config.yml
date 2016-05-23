@@ -1,13 +1,12 @@
 # Site settings
 
-title: "PCjs: The Virtual IBM PC"
+title: "PCjs Machines"
 email: Jeff@pcjs.org
 description: >
-  PCjs: The Original IBM PC in a Browser.
-  Classic computer simulations in JavaScript.
+  PCjs: Home of the original IBM PC emulator in a browser.
+  Classic computer simulations in JavaScript, including the IBM PC and other x86-based machines, 6502-based
+  machines such as the Ohio Scientific Challenger 1P, and 8080-based machines such as Space Invaders. 
   Includes an archive of historical PC software and publications.
-  Additional computer simulations in JavaScript include the 6502-based Ohio Scientific Challenger 1P and 8080-based
-  machines, including arcade machines such as Space Invaders.
 baseurl: ""                 # "/pcjs" when using http://jeffpar.github.io or "" when using http://www.pcjs.org 
 url: "http://www.pcjs.org"  # "http://jeffpar.github.io" or "http://www.pcjs.org"
 twitter_username: jeffpar
@@ -33,52 +32,9 @@ gems:
 
 pcjs:
   domain: pcjs.org    # whereas site.url is used for linking purposes, site.pcjs.domain is used for display purposes
-  version: 1.22.1     # IMPORTANT: keep pcjs.version in sync with package.json:version
-  compiled: true      # by default, the compiled pcjs.version scripts will be used (eg, pc.js or pc-dbg.js)
-  pc_scripts:         # if pcjs.compiled is false, the following scripts will be included instead, in the order listed
-    - /modules/shared/lib/defines.js
-    - /modules/shared/lib/nodebug.js
-    - /modules/shared/lib/diskapi.js
-    - /modules/shared/lib/dumpapi.js
-    - /modules/shared/lib/reportapi.js
-    - /modules/shared/lib/userapi.js
-    - /modules/shared/lib/strlib.js
-    - /modules/shared/lib/usrlib.js
-    - /modules/shared/lib/weblib.js
-    - /modules/shared/lib/component.js
-    - /modules/pcjs/lib/defines.js
-    - /modules/pcjs/lib/x86.js
-    - /modules/pcjs/lib/interrupts.js
-    - /modules/pcjs/lib/messages.js
-    - /modules/pcjs/lib/panel.js
-    - /modules/pcjs/lib/bus.js
-    - /modules/pcjs/lib/memory.js
-    - /modules/pcjs/lib/cpu.js
-    - /modules/pcjs/lib/x86seg.js
-    - /modules/pcjs/lib/x86cpu.js
-    - /modules/pcjs/lib/x86fpu.js
-    - /modules/pcjs/lib/x86func.js
-    - /modules/pcjs/lib/x86help.js
-    - /modules/pcjs/lib/x86mods.js
-    - /modules/pcjs/lib/x86ops.js
-    - /modules/pcjs/lib/x86op0f.js
-    - /modules/pcjs/lib/chipset.js
-    - /modules/pcjs/lib/rom.js
-    - /modules/pcjs/lib/ram.js
-    - /modules/pcjs/lib/keyboard.js
-    - /modules/pcjs/lib/video.js
-    - /modules/pcjs/lib/parallelport.js
-    - /modules/pcjs/lib/serialport.js
-    - /modules/pcjs/lib/mouse.js
-    - /modules/pcjs/lib/disk.js
-    - /modules/pcjs/lib/fdc.js
-    - /modules/pcjs/lib/hdc.js
-    - /modules/pcjs/lib/debugger.js
-    - /modules/pcjs/lib/state.js
-    - /modules/pcjs/lib/computer.js
-    - /modules/shared/lib/embed.js
-    - /modules/shared/lib/save.js
-  c1p_scripts:
+  version: 1.23.0     # IMPORTANT: keep pcjs.version in sync with package.json:version
+  compiled: true      # by default, the compiled pcjs.version scripts will be used (eg, pcx86.js or pcx86-dbg.js)
+  c1p_scripts:        # if pcjs.compiled is false, the following scripts will be included instead, in the order listed
     - /modules/shared/lib/defines.js
     - /modules/shared/lib/nodebug.js
     - /modules/shared/lib/dumpapi.js
@@ -99,6 +55,49 @@ pcjs:
     - /modules/c1pjs/lib/debugger.js
     - /modules/c1pjs/lib/computer.js
     - /modules/shared/lib/embed.js
+  pcx86_scripts:
+    - /modules/shared/lib/defines.js
+    - /modules/shared/lib/nodebug.js
+    - /modules/shared/lib/diskapi.js
+    - /modules/shared/lib/dumpapi.js
+    - /modules/shared/lib/reportapi.js
+    - /modules/shared/lib/userapi.js
+    - /modules/shared/lib/strlib.js
+    - /modules/shared/lib/usrlib.js
+    - /modules/shared/lib/weblib.js
+    - /modules/shared/lib/component.js
+    - /modules/pcx86/lib/defines.js
+    - /modules/pcx86/lib/x86.js
+    - /modules/pcx86/lib/interrupts.js
+    - /modules/pcx86/lib/messages.js
+    - /modules/pcx86/lib/panel.js
+    - /modules/pcx86/lib/bus.js
+    - /modules/pcx86/lib/memory.js
+    - /modules/pcx86/lib/cpu.js
+    - /modules/pcx86/lib/x86seg.js
+    - /modules/pcx86/lib/x86cpu.js
+    - /modules/pcx86/lib/x86fpu.js
+    - /modules/pcx86/lib/x86func.js
+    - /modules/pcx86/lib/x86help.js
+    - /modules/pcx86/lib/x86mods.js
+    - /modules/pcx86/lib/x86ops.js
+    - /modules/pcx86/lib/x86op0f.js
+    - /modules/pcx86/lib/chipset.js
+    - /modules/pcx86/lib/rom.js
+    - /modules/pcx86/lib/ram.js
+    - /modules/pcx86/lib/keyboard.js
+    - /modules/pcx86/lib/video.js
+    - /modules/pcx86/lib/parallelport.js
+    - /modules/pcx86/lib/serialport.js
+    - /modules/pcx86/lib/mouse.js
+    - /modules/pcx86/lib/disk.js
+    - /modules/pcx86/lib/fdc.js
+    - /modules/pcx86/lib/hdc.js
+    - /modules/pcx86/lib/debugger.js
+    - /modules/pcx86/lib/state.js
+    - /modules/pcx86/lib/computer.js
+    - /modules/shared/lib/embed.js
+    - /modules/shared/lib/save.js
   pc8080_scripts:
     - /modules/shared/lib/defines.js
     - /modules/shared/lib/dumpapi.js

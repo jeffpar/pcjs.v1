@@ -11,7 +11,7 @@ Overview
 ---
 C1Pjs is our 6502-based machine emulation module for the [Ohio Scientific Challenger 1P](/docs/c1pjs/).
 
-C1Pjs is currently comprised of the following non-shared components, as listed in [package.json](../../package.json)
+C1Pjs is comprised of the following non-shared components, as listed in [package.json](../../package.json)
 (see the *c1pJSFiles* property):
 
 * [defines.js](lib/defines.js)

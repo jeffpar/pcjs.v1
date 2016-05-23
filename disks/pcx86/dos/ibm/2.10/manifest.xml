@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.23.0/manifest.xsl"?>
+<manifest type="software">
+	<title>PC-DOS</title>
+	<version>2.10</version>
+	<type>DOS</type>
+	<category>Operating System</category>
+	<author>IBM/Microsoft</author>
+	<releaseDate/>
+	<disk id="disk01" size="184320" chs="40:1:9" img="archive/PCDOS210-DISK1.img" href="/disks/pcx86/dos/ibm/2.10/PCDOS210-DISK1.json" md5="b1619fb749fada3720daac99a7c1a8df" md5json="f6c9f4bd063b3dbdee29b8b97aa4fe48">
+		<name>PC-DOS 2.10 (Disk 1)</name>
+	</disk>
+	<disk id="disk02" size="184320" chs="40:1:9" img="archive/PCDOS210-DISK2.img" href="/disks/pcx86/dos/ibm/2.10/PCDOS210-DISK2.json" md5="52146e5373f8a969f807f0fe63713e29" md5json="348286964aeb589301c8f721506af583">
+		<name>PC-DOS 2.10 (Disk 2)</name>
+	</disk>
+</manifest>

@@ -18,4 +18,4 @@ Note: the above guides are a work-in-progress (we're converting the PDFs to Mark
 OS/2 Software Development Kit (SDK) Disks
 ---
 
-* [Microsoft OS/2 SDK 1.02](/disks/pc/tools/microsoft/os2/sdk/1.02/)
+* [Microsoft OS/2 SDK 1.02](/disks/pcx86/tools/microsoft/os2/sdk/1.02/)

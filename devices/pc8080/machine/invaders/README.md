@@ -72,7 +72,7 @@ Space Invaders Hardware Notes
 	                bit 0    invader movement 1
 	06          w  watchdog timer clear
 
-Note that, unlike most emulators, PC8080 (like PCjs) has a *[Bus](/modules/pc8080/lib/bus.js)* architecture,
+Note that, unlike most emulators, PC8080 (like PCx86) has a *[Bus](/modules/pc8080/lib/bus.js)* architecture,
 allowing components to "plug in" different kinds of memory or memory-mapped devices at different addresses,
 and to register specific functions for specific I/O ports.	
 
@@ -81,7 +81,7 @@ attempts to write to those addresses, nothing should happen.  Unfortunately, mos
 space as one contiguous array of bytes.  Which means either that the ROM is susceptible to corruption *or* that every
 write operation must check the address to determine its validity, which hurts the performance of *all* writes.
 
-In PC8080 (and PCjs), all writes are equally fast, and all ROMs are fully protected.  An exception is made for the
+In PC8080 (and PCx86), all writes are equally fast, and all ROMs are fully protected.  An exception is made for the
 Debugger, which allows you to use the "e" command to modify ("patch") ROM code on the fly, but that is completely
 outside and independent of the 8080 code being emulated.
 

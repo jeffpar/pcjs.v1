@@ -1,19 +1,19 @@
 ---
 layout: post
-title: PCjs Uncompiled
+title: PCx86 Uncompiled
 date: 2015-01-17 11:00:00
 category: Features
 permalink: /blog/2015/01/17/
 machines:
-  - type: pc
+  - type: pcx86
     id: at-ega-1152k-rev3
     debugger: true
     uncompiled: true
-    config: /devices/pc/machine/5170/ega/1152kb/rev3/debugger/machine.xml
+    config: /devices/pcx86/machine/5170/ega/1152kb/rev3/debugger/machine.xml
 ---
 
-Most machines on [{{ site.pcjs.domain }}](/) run with a compiled version of PCjs, which is produced
-by running PCjs JavaScript source code through Google's Closure Compiler, yielding a smaller (minified)
+Most PCx86 machines on [{{ site.pcjs.domain }}](/) run with a compiled version of PCx86, which is produced
+by running the PCx86 JavaScript source code through Google's Closure Compiler, yielding a smaller (minified)
 version that loads and runs much faster than the original source code.
 
 However, certain features are disabled in the compiled versions, including a new BACKTRACK feature that
@@ -21,7 +21,7 @@ makes it possible to track the contents of memory locations and registers back t
 or file location).  Once the BACKTRACK feature is finished, it will be folded into the compiled code, but until
 then, the only way to experiment with it is by running the uncompiled code.
 
-To make it easier to launch machines with uncompiled code, a PCjs machine definition can now set `uncompiled`
+To make it easier to launch machines with uncompiled code, a PCx86 machine definition can now set `uncompiled`
 to *true*, overriding the value of `site.pcjs.compiled` in **_config.yml**.
 
 Here's what a typical Markdown file would look like:
@@ -30,11 +30,11 @@ Here's what a typical Markdown file would look like:
 	---
 	...
 	machines:
-	  - type: pc
+	  - type: pcx86
 	    id: at-ega-1152k-rev3
 	    debugger: true
 	    uncompiled: true
-	    config: /devices/pc/machine/5170/ega/1152kb/rev3/debugger/backtrack/machine.xml
+	    config: /devices/pcx86/machine/5170/ega/1152kb/rev3/debugger/backtrack/machine.xml
 	---
 	...
 	{% include machine.html id="at-ega-1152k-rev3" %}

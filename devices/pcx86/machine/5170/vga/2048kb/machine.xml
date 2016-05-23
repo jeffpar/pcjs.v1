@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.23.0/machine.xsl"?>
+<machine id="ibm5170" class="pcx86" border="1" pos="center" background="#FAEBD7">
+	<name pos="center">IBM PC AT (8Mhz, 2Mb, 20Mb Hard Disk) with VGA Display</name>
+	<computer id="at-vga-2048k" name="IBM PC AT" buswidth="24"/>
+	<ram id="ramLow" addr="0x00000" test="false" size="0xa0000" comment="ROM BIOS memory test has been disabled"/>
+	<ram id="ramExt" addr="0x100000" size="0x160000" comment=""/>
+	<rom id="romBIOS" addr="0xf0000" size="0x10000" alias="0xff0000" file="/devices/pcx86/rom/5170/1985-11-15/ATBIOS-REV3.json"/>
+	<video ref="/devices/pcx86/video/ibm/vga/1986-10-27/256kb-autolockfs.xml"/>
+	<fdc ref="/disks/pcx86/compiled/library.xml" automount='{A:{name:"PC-DOS 3.30 (Disk 1)",path:"/disks/pcx86/dos/ibm/3.30/PCDOS330-DISK1.json"}, B:{name:"PC-DOS 3.30 (Disk 2)",path:"/disks/pcx86/dos/ibm/3.30/PCDOS330-DISK2.json"}}'/>
+	<hdc ref="/disks/pcx86/fixed/20mb/pcdos330-empty.xml"/>
+	<keyboard ref="/devices/pcx86/keyboard/us84-buttons-arrows.xml"/>
+	<cpu id="cpu286" model="80286" cycles="8000000" autostart="true" pos="right" padright="8px" padbottom="8px">
+		<control type="button" binding="run">Run</control>
+		<control type="button" binding="reset">Reset</control>
+		<control type="button" binding="setSpeed">Speed</control>
+	</cpu>
+	<chipset id="chipset" model="5170" floppies="[1440,1200]"/>
+	<serial id="com1" adapter="1"/>
+	<mouse serial="com1"/>
+</machine>

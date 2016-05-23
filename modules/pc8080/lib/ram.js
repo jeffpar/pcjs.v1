@@ -6,8 +6,7 @@
  *
  * Copyright © 2012-2016 Jeff Parsons <Jeff@pcjs.org>
  *
- * This file is part of PCjs, which is part of the JavaScript Machines Project (aka JSMachines)
- * at <http://jsmachines.net/> and <http://pcjs.org/>.
+ * This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
  *
  * PCjs is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3
@@ -22,12 +21,12 @@
  *
  * You are required to include the above copyright notice in every source code file of every
  * copy or modified version of this work, and to display that copyright notice on every screen
- * that loads or runs any version of this software (see Computer.COPYRIGHT).
+ * that loads or runs any version of this software (see COPYRIGHT in /modules/shared/lib/defines.js).
  *
  * Some PCjs files also attempt to load external resource files, such as character-image files,
- * ROM files, and disk image files. Those external resource files are not considered part of the
- * PCjs program for purposes of the GNU General Public License, and the author does not claim
- * any copyright as to their contents.
+ * ROM files, and disk image files. Those external resource files are not considered part of PCjs
+ * for purposes of the GNU General Public License, and the author does not claim any copyright
+ * as to their contents.
  */
 
 "use strict";
@@ -180,12 +179,12 @@ RAM.prototype.restore = function(data)
  */
 RAM.init = function()
 {
-    var aeRAM = Component.getElementsByClass(document, PCJSCLASS, "ram");
+    var aeRAM = Component.getElementsByClass(document, PC8080.APPCLASS, "ram");
     for (var iRAM = 0; iRAM < aeRAM.length; iRAM++) {
         var eRAM = aeRAM[iRAM];
         var parmsRAM = Component.getComponentParms(eRAM);
         var ram = new RAM(parmsRAM);
-        Component.bindComponentControls(ram, eRAM, PCJSCLASS);
+        Component.bindComponentControls(ram, eRAM, PC8080.APPCLASS);
     }
 };
 

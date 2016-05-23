@@ -178,18 +178,24 @@ still continue to run, and if there was no multiplication problem, you would not
 PCjs v1.20.0 now supports a "stepping" attribute on the &lt;cpu&gt; element, which you can use to simulate specific
 stepping behavior.  For example, a *machine.xml* file with the following CPU definition: 
 
-	<cpu id="cpu386" model="80386" stepping="b0"/>
+```xml
+<cpu id="cpu386" model="80386" stepping="b0"/>
+```
 
 will cause Windows 95 to abort exactly as described as above.  Similarly, selecting a 80386 B1 stepping:
 
-	<cpu id="cpu386" model="80386" stepping="b1"/>
+```xml
+<cpu id="cpu386" model="80386" stepping="b1"/>
+```
 
 will cause Windows 95 to display the 32-bit multiplication warning shown above (PCjs deliberately fails the exact
 multiplication test that Windows 95 performs).
 
 If you want to simulate a B1 stepping that does *not* have the 32-bit multiplication flaw, set the stepping to B2:
 
-	<cpu id="cpu386" model="80386" stepping="b2"/>
+```xml
+<cpu id="cpu386" model="80386" stepping="b2"/>
+```
 
 B2 was not an actual 80386 stepping; it is a *pseudo-stepping* that provides a simple way of specifying a B1 80386 that
 passes all 32-bit multiplication tests.

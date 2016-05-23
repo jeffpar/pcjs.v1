@@ -1,0 +1,12 @@
+---
+layout: page
+title: IBM PC AT (Model 5170, 4Mb, 20Mb Drive) with VGA Display
+permalink: /devices/pcx86/machine/5170/vga/4096kb/
+redirect_from:
+  - /devices/pc/machine/5170/vga/4096kb/
+machines:
+  - type: pcx86
+    id: ibm5170
+---
+
+{% include machine.html id="ibm5170" %}

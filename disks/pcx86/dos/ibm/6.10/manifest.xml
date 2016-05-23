@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.23.0/manifest.xsl"?>
+<manifest type="software">
+	<title>PC-DOS</title>
+	<version>6.10</version>
+	<type>DOS</type>
+	<category>Operating System</category>
+	<author>IBM/Microsoft</author>
+	<releaseDate/>
+	<disk id="disk01" size="1474560" chs="80:2:18" img="archive/PCDOS610-DISK1-1440K.img" href="/disks/pcx86/dos/ibm/6.10/PCDOS610-DISK1-1440K.json" md5="1352a89386e537fdf17e45bc9e059e46" md5json="c1411e57a01e0b28acc4f05c70cb6e01">
+		<name>PC-DOS 6.10 (Disk 1)</name>
+	</disk>
+	<disk id="disk02" size="1474560" chs="80:2:18" img="archive/PCDOS610-DISK2-1440K.img" href="/disks/pcx86/dos/ibm/6.10/PCDOS610-DISK2-1440K.json" md5="55081c8a2af6fc80bdb68dab6abdcb73" md5json="f64d0d7536f87aecdce21b8b054b2780">
+		<name>PC-DOS 6.10 (Disk 2)</name>
+	</disk>
+	<disk id="disk03" size="1474560" chs="80:2:18" img="archive/PCDOS610-DISK3-1440K.img" href="/disks/pcx86/dos/ibm/6.10/PCDOS610-DISK3-1440K.json" md5="cdb0c178340005c05a554d3ec2d6787a" md5json="45ba66207149f3ea2148414f5d62916a">
+		<name>PC-DOS 6.10 (Disk 3)</name>
+	</disk>
+	<disk id="disk04" size="1474560" chs="80:2:18" img="archive/PCDOS610-DISK4-1440K.img" href="/disks/pcx86/dos/ibm/6.10/PCDOS610-DISK4-1440K.json" md5="72d1faf196a0dfb6ca3e409727d79a38" md5json="bfbecaf8cd367a7610c96d96e5ca6b1f">
+		<name>PC-DOS 6.10 (Disk 4)</name>
+	</disk>
+</manifest>

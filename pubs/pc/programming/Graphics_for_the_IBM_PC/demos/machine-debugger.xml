@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.22.1/machine.xsl"?>
-<machine id="ibm5160" class="pc" border="1" width="980px" pos="center" background="#FAEBD7">
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.23.0/machine.xsl"?>
+<machine id="ibm5160" class="pcx86" border="1" width="980px" pos="center" background="#FAEBD7">
 	<name pos="center">IBM PC XT (Model 5160), CGA, 256Kb, 10Mb Drive</name>
 	<computer id="xt-cga-256k" name="IBM PC XT" resume="1"/>
 	<ram id="ramLow" addr="0x00000" test="false"/>
-	<rom id="romHDC" addr="0xc8000" size="0x2000" file="/devices/pc/hdc/ibm-xebec-1982.json"/>
-	<rom id="romBASIC" addr="0xf6000" size="0x8000" file="/devices/pc/rom/5160/basic/BASIC110.json"/>
-	<rom id="romBIOS" addr="0xfe000" size="0x2000" file="/devices/pc/rom/5160/1982-11-08/XTBIOS-REV1.json"/>
-	<video ref="/devices/pc/video/ibm/cga/ibm-cga.xml"/>
+	<rom id="romHDC" addr="0xc8000" size="0x2000" file="/devices/pcx86/hdc/ibm-xebec-1982.json"/>
+	<rom id="romBASIC" addr="0xf6000" size="0x8000" file="/devices/pcx86/rom/5160/basic/BASIC110.json"/>
+	<rom id="romBIOS" addr="0xfe000" size="0x2000" file="/devices/pcx86/rom/5160/1982-11-08/XTBIOS-REV1.json"/>
+	<video ref="/devices/pcx86/video/ibm/cga/ibm-cga.xml"/>
 	<keyboard id="keyboard" padleft="8px">
 		<control type="button" binding="esc">ESC</control>
 		<control type="button" binding="ctrl-c">CTRL-C</control>
@@ -19,7 +19,7 @@
 	</cpu>
 	<fdc ref="/pubs/pc/programming/Graphics_for_the_IBM_PC/demos/basic.xml" pos="right"/>
 	<debugger id="debugger"/>
-	<panel ref="/devices/pc/panel/wide.xml"/>
+	<panel ref="/devices/pcx86/panel/wide.xml"/>
 	<hdc id="hdcXT" drives='[{name:"10Mb Hard Disk",type:3}]'/>
 	<chipset id="chipset" model="5160" sw1="01001001"/>
 </machine>

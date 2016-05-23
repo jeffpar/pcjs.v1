@@ -12,7 +12,7 @@ Browse our collection of PC-related magazines.
 [<img src="http://archive.pcjs.org/pubs/pc/magazines/msj/MSJ-1986-10/thumbs/MSJ-1986-10 1.jpeg" width="200" height="260" alt= "Microsoft Systems Journal"/>](msj/)
 [<img src="http://archive.pcjs.org/pubs/pc/magazines/pctj/PCTJ-1983-07/thumbs/PCTJ-1983-07 1.jpeg" width="200" height="260" alt= "PC Tech Journal"/>](pctj/)
 
-From [PC Tech Journal](/pubs/pc/magazines/pctj/), we also have all the [Microsoft Languages NewsLetters](/disks/pc/tools/microsoft/).
+From [PC Tech Journal](/pubs/pc/magazines/pctj/), we also have all the [Microsoft Languages NewsLetters](/disks/pcx86/tools/microsoft/).
 
 And we have an assortment of selected articles:
 

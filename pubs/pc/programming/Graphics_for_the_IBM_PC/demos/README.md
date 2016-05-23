@@ -3,10 +3,10 @@ layout: page
 title: 'Selected Live Demos from "Graphics for the IBM PC"'
 permalink: /pubs/pc/programming/Graphics_for_the_IBM_PC/demos/
 machines:
-  - type: pc
+  - type: pcx86
     id: xt-cga-256k-1
     state: 02-03.json
-  - type: pc
+  - type: pcx86
     id: xt-cga-256k-2
     state: 04-01.json
 ---

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.23.0/manifest.xsl"?>
+<manifest type="software">
+	<title>Enhanced DEBUG</title>
+	<source href="https://sites.google.com/site/pcdosretro/enhdebug">PC DOS Retro: Enhanced DEBUG for PC DOS and MS-DOS</source>
+	<disk id="disk01" size="368640" chs="40:2:9" href="/disks/pcx86/tools/misc/enhdebug/ENHDEBUG.json" md5="6e1456527e463c81bb5c9b4bd3d28bd9" md5json="71a18c0b921741f183cb90c2df1d4d03">
+		<name>Enhanced DEBUG 1.32a</name>
+		<file size="20816" time="2016-04-21 09:40:04" attr="0x20" md5="0b9614b461b8287e536bf77bf7e26329">DEBUG.COM</file>
+		<file size="26198" time="2016-04-21 09:40:04" attr="0x20" md5="98e9b7fec9e2b5c736fd558114c312db">DEBUGX.COM</file>
+		<file size="27998" time="2016-04-12 11:44:02" attr="0x20" md5="42dca823821dc915dd94abedc5f19c65">DEBUG.TXT</file>
+		<file size="7118" time="2016-04-15 21:44:30" attr="0x20" md5="1591e603c2b4587ff0f9e26e66448907">README.TXT</file>
+		<file size="18800" time="2016-04-21 09:41:42" attr="0x20" md5="b487ba737d363a2d103698a215bfcbc1">HISTORY.TXT</file>
+	</disk>
+</manifest>

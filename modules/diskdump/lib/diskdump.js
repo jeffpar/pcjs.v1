@@ -50,7 +50,7 @@ if (typeof module != "undefined") {     // we can't simply test for NODE, since 
     var web     = require("../../shared/lib/weblib");
     var DiskAPI = require("../../shared/lib/diskapi");
     var DumpAPI = require("../../shared/lib/dumpapi");
-    var X86     = require("../../pcjs/lib/x86");
+    var X86     = require("../../pcx86/lib/x86");
     /**
      * @class exports
      * @property {string} name
@@ -566,9 +566,9 @@ DiskDump.asTextFileExts = [".MD", ".ME", ".ASM", ".BAS", ".TXT", ".XML"];
  *
  * Examples
  * ---
- *      node modules/diskdump/bin/diskdump --disk=../jsmachines/disks/pc/games/infocom/zork1/zork1.dsk
- *      node modules/diskdump/bin/diskdump --dir=./apps/pc/1981/visicalc/ --format=img --output=./apps/pc/1981/visicalc/disk.img
- *      node modules/diskdump/bin/diskdump --path=./apps/pc/1981/visicalc/bin/vc.com;../README.md --format=json --output=./apps/pc/1981/visicalc/disk.json
+ *      node modules/diskdump/bin/diskdump --disk=../jsmachines/disks/pcx86/games/infocom/zork1/zork1.dsk
+ *      node modules/diskdump/bin/diskdump --dir=./apps/pcx86/1981/visicalc/ --format=img --output=./apps/pcx86/1981/visicalc/disk.img
+ *      node modules/diskdump/bin/diskdump --path=./apps/pcx86/1981/visicalc/bin/vc.com;../README.md --format=json --output=./apps/pcx86/1981/visicalc/disk.json
  */
 DiskDump.CLI = function()
 {
@@ -866,7 +866,7 @@ DiskDump.updateManifest = function(disk, sManifestFile, sDiskPath, sOutputFile, 
             if (i > 0) sPrefix = ' prefix="' + sTitle.substr(0, i) + '"';
         }
         sXML = '<?xml version="1.0" encoding="UTF-8"?>\n';
-        sXML += '<?xml-stylesheet type="text/xsl" href="/versions/pcjs/' + pkg.version + '/manifest.xsl"?>\n';
+        sXML += '<?xml-stylesheet type="text/xsl" href="/versions/pcx86/' + pkg.version + '/manifest.xsl"?>\n';
         sXML += '<manifest type="software">\n';
         sXML += '\t<title' + sPrefix + '>' + sTitle + '</title>\n';
         sXML += '</manifest>';

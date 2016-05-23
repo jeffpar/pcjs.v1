@@ -50,12 +50,12 @@ all we have are the memories.
 ### Speaking of Memories
 
 In particular, Read-Only Memories: we have precious few of those, too.  I finally obtained
-a [ROM Dump](/devices/pc/rom/compaq/portable/) from COMPAQ's first machine, the COMPAQ Portable, but I had to buy
+a [ROM Dump](/devices/pcx86/rom/compaq/portable/) from COMPAQ's first machine, the COMPAQ Portable, but I had to buy
 a system board on ebay to get it.  Considering all the effort (and money) that COMPAQ invested in writing that code,
 it's a bit depressing that these things haven't been properly preserved and memorialized.
 
 Looking ahead to the day when PCjs will be able to simulate the original COMPAQ Portable, I thought it would be a good
-idea to create my own roughly chronological list of [COMPAQ Machines](/devices/pc/machine/compaq/) from the 1980s,
+idea to create my own roughly chronological list of [COMPAQ Machines](/devices/pcx86/machine/compaq/) from the 1980s,
 since they are all machines I would like to see PCjs eventually support:
 
  - COMPAQ Portable
@@ -64,7 +64,7 @@ since they are all machines I would like to see PCjs eventually support:
  - COMPAQ DeskPro 286
  - COMPAQ Portable 286
  - COMPAQ Portable II
- - [COMPAQ DeskPro 386](/devices/pc/machine/compaq/deskpro386/)
+ - [COMPAQ DeskPro 386](/devices/pcx86/machine/compaq/deskpro386/)
  - COMPAQ Portable III
  - COMPAQ DeskPro 386/20
  - COMPAQ Portable 386
@@ -82,8 +82,8 @@ and LTE Lite series.  But I think I need to stick to my original plan and draw a
 
 As best I can tell, COMPAQ preferred to print its company name in all-caps, so that's my practice as well.
 
-However, it seems that sometime between the release of [COMPAQ MS-DOS 3.10](/disks/pc/dos/compaq/3.10/) and
-[COMPAQ MS-DOS 3.31](/disks/pc/dos/compaq/3.31/), there may have been a shift in policy.  Both products still
+However, it seems that sometime between the release of [COMPAQ MS-DOS 3.10](/disks/pcx86/dos/compaq/3.10/) and
+[COMPAQ MS-DOS 3.31](/disks/pcx86/dos/compaq/3.31/), there may have been a shift in policy.  Both products still
 called themselves `The COMPAQ Personal Computer MS-DOS`, but in 3.31, the copyright string changed to
 `Compaq Computer Corp.`
 

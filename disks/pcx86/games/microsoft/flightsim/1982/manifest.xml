@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.23.0/manifest.xsl"?>
+<manifest type="software">
+	<title>Microsoft Flight Simulator</title>
+	<version/>
+	<type>Game</type>
+	<category>Simulation</category>
+	<author>Microsoft</author>
+	<releaseDate>1982</releaseDate>
+	<disk id="disk01" size="163840" chs="40:1:8" img="1982/archive/FLIGHTSIM-1982.img" href="/disks/pcx86/games/microsoft/flightsim/1982/FLIGHTSIM-1982.json" md5="3f4df6bfc9a6490b81d60daeca5865fe" md5json="273d49724e6ba857de680f5c6bed49e9">
+		<name>MS Flight Simulator (1982)</name>
+	</disk>
+</manifest>

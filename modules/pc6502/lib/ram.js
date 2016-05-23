@@ -180,12 +180,12 @@ RAM.prototype.restore = function(data)
  */
 RAM.init = function()
 {
-    var aeRAM = Component.getElementsByClass(document, PCJSCLASS, "ram");
+    var aeRAM = Component.getElementsByClass(document, APPCLASS, "ram");
     for (var iRAM = 0; iRAM < aeRAM.length; iRAM++) {
         var eRAM = aeRAM[iRAM];
         var parmsRAM = Component.getComponentParms(eRAM);
         var ram = new RAM(parmsRAM);
-        Component.bindComponentControls(ram, eRAM, PCJSCLASS);
+        Component.bindComponentControls(ram, eRAM, APPCLASS);
     }
 };
 

@@ -93,35 +93,35 @@ var logFile = null;
 var aExternalRedirects = {
     "/c1p":                                                     "/docs/c1pjs/",
     "/c1pjs":                                                   "/docs/c1pjs/",
-    "/pc":                                                      "/docs/about/pcjs/",
-    "/pcjs":                                                    "/docs/about/pcjs/",
+    "/pc":                                                      "/docs/about/pcx86/",
+    "/pcjs":                                                    "/docs/about/pcx86/",
     "/configs/c1p/embed":                                       "/docs/c1pjs/embed/",
     "/configs/c1p/machines/array":                              "/devices/c1p/machine/8kb/array/",
     "/configs/c1p/machines/array.xml":                          "/devices/c1p/machine/8kb/array/",
     "/configs/c1p/machines/machine.xml":                        "/devices/c1p/machine/8kb/large/",
-    "/configs/pc/disks":                                        "/disks/pc/",
-    "/configs/pc/machines/5150/mda/demo/pc-mda-64k.xml":        "/devices/pc/machine/5150/mda/64kb/",
-    "/configs/pc/machines/5150/cga/donkey/pc-cga-64k.xml":      "/devices/pc/machine/5150/cga/64kb/donkey/",
-    "/configs/pc/machines/5150/cga/donkey/pc-dbg-64k.xml":      "/devices/pc/machine/5150/cga/64kb/donkey/debugger/",
-    "/configs/pc/machines/5160/cga/demo":                       "/devices/pc/machine/5160/cga/256kb/demo/",
-    "/configs/pc/machines/5160/cga/demo/xt-cga-256k.xml":       "/devices/pc/machine/5160/cga/256kb/demo/",
-    "/configs/pc/machines/5160/cga/demo/xt-dbg-256k.xml":       "/devices/pc/machine/5160/cga/256kb/demo/debugger/",
-    "/configs/pc/machines/5160/cga/win101/xt-cga-win101.xml":   "/devices/pc/machine/5160/cga/256kb/win101/",
-    "/configs/pc/machines/5160/cga/machine-512k-win101.xml":    "/devices/pc/machine/5160/cga/512kb/win101/softkbd/",
+    "/configs/pc/disks":                                        "/disks/pcx86/",
+    "/configs/pc/machines/5150/mda/demo/pc-mda-64k.xml":        "/devices/pcx86/machine/5150/mda/64kb/",
+    "/configs/pc/machines/5150/cga/donkey/pc-cga-64k.xml":      "/devices/pcx86/machine/5150/cga/64kb/donkey/",
+    "/configs/pc/machines/5150/cga/donkey/pc-dbg-64k.xml":      "/devices/pcx86/machine/5150/cga/64kb/donkey/debugger/",
+    "/configs/pc/machines/5160/cga/demo":                       "/devices/pcx86/machine/5160/cga/256kb/demo/",
+    "/configs/pc/machines/5160/cga/demo/xt-cga-256k.xml":       "/devices/pcx86/machine/5160/cga/256kb/demo/",
+    "/configs/pc/machines/5160/cga/demo/xt-dbg-256k.xml":       "/devices/pcx86/machine/5160/cga/256kb/demo/debugger/",
+    "/configs/pc/machines/5160/cga/win101/xt-cga-win101.xml":   "/devices/pcx86/machine/5160/cga/256kb/win101/",
+    "/configs/pc/machines/5160/cga/machine-512k-win101.xml":    "/devices/pcx86/machine/5160/cga/512kb/win101/softkbd/",
     "/demos/c1p/embed.html":                                    "/docs/c1pjs/embed/",
     "/demos/c1p/embed.xml":                                     "/devices/c1p/machine/8kb/embed/machine.xml",
-    "/demos/pc/cga":                                            "/devices/pc/machine/5150/cga/",
-    "/demos/pc/donkey/pc-cga-64k.xml":                          "/devices/pc/machine/5150/cga/64kb/donkey/",
-    "/demos/pc/cga-win101":                                     "/devices/pc/machine/5160/cga/256kb/win101/",
-    "/demos/pc/cga-win101/xt-cga-win101.xml":                   "/devices/pc/machine/5160/cga/256kb/win101/",
+    "/demos/pc/cga":                                            "/devices/pcx86/machine/5150/cga/",
+    "/demos/pc/donkey/pc-cga-64k.xml":                          "/devices/pcx86/machine/5150/cga/64kb/donkey/",
+    "/demos/pc/cga-win101":                                     "/devices/pcx86/machine/5160/cga/256kb/win101/",
+    "/demos/pc/cga-win101/xt-cga-win101.xml":                   "/devices/pcx86/machine/5160/cga/256kb/win101/",
     "/devices/c1p/array.xml":                                   "/devices/c1p/machine/8kb/array/",
-    "/devices/pc/5160/cga/machine-dos400m.xml":                 "/devices/pc/machine/5160/cga/640kb/dos400m/",
-    "/videos/pcjs":                                             "/devices/pc/machine/5160/cga/640kb/dos400m/"
+    "/devices/pc/5160/cga/machine-dos400m.xml":                 "/devices/pcx86/machine/5160/cga/640kb/dos400m/",
+    "/videos/pcjs":                                             "/devices/pcx86/machine/5160/cga/640kb/dos400m/"
 };
 
 var aExternalRedirectPatterns = {
     "^/configs/c1p/machines/?(.*)":                             "/devices/c1p/machine/$1",
-    "^/configs/pc/machines/?(.*)":                              "/devices/pc/machine/$1"
+    "^/configs/pc/machines/?(.*)":                              "/devices/pcx86/machine/$1"
 };
 
 /*
@@ -133,8 +133,8 @@ var aExternalRedirectPatterns = {
  * Feel free to use subgroups on the left-hand side, and references to them (eg, $1, $2, etc) on the right.
  */
 var aInternalRedirectPatterns = {
-//  "^/apps/pc/visicalc/":      "/apps/pc/1981/visicalc/",
-//  "^/demos/pc/.*":            "/devices/pc/machine/"
+//  "^/apps/pc/visicalc/":      "/apps/pcx86/1981/visicalc/",
+//  "^/demos/pc/.*":            "/devices/pcx86/machine/"
 };
 
 /**
@@ -253,7 +253,7 @@ HTTPAPI.filterAPI = function(req, res, next)
          * If we're still here, the API request didn't pass muster.
          *
          * TODO: Consider providing some simple usage info, and changing the nResponse to 200,
-         * since the API endpoints will eventually be documented in /docs/pcjs/.
+         * since the API endpoints will eventually be documented in /docs/pcx86/.
          */
         var nResponse = 400;                // default to "Bad Request"
         var sResponse = "unrecognized API request: " + asURL[0] + "\n";

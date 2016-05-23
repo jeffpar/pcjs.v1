@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.23.0/manifest.xsl"?>
+<manifest type="software">
+	<title>WordStar 3.30</title>
+	<disk id="disk01" size="163840" chs="40:1:8" img="archive/D1_INST.IMG" href="/disks/pcx86/apps/micropro/wordstar/3.30/WS330-DISK1-INST.json" md5="575fb69854700aa0e80768346d3b53dd" md5json="4218599d958f843abc02f589b58cee8e">
+		<name>WordStar 3.30 (Disk 1)</name>
+	</disk>
+	<disk id="disk02" size="163840" chs="40:1:8" img="archive/D2_PROG.IMG" href="/disks/pcx86/apps/micropro/wordstar/3.30/WS330-DISK2-PROG.json" md5="4f11ef42beb6221dcd3067fdffaeaa8e" md5json="bcc65f4efb80bad2043d4301f0c7f5b9">
+		<name>WordStar 3.30 (Disk 2)</name>
+	</disk>
+	<disk id="disk03" size="163840" chs="40:1:8" img="archive/D3_SPELL.IMG" href="/disks/pcx86/apps/micropro/wordstar/3.30/WS330-DISK3-SPELL.json" md5="553614255e6d117092818bef5fb3ab76" md5json="03de2a46e9c1874d92ba463baf52c3f0">
+		<name>WordStar 3.30 (Disk 3)</name>
+	</disk>
+	<disk id="disk04" size="163840" chs="40:1:8" img="archive/D4_STIDX.IMG" href="/disks/pcx86/apps/micropro/wordstar/3.30/WS330-DISK4-STIDX.json" md5="33c1a2728d74cad5329d5adced701799" md5json="a891ec8e11c167a12d8c5e6629c5c5ac">
+		<name>WordStar 3.30 (Disk 4)</name>
+	</disk>
+	<disk id="disk05" size="163840" chs="40:1:8" img="archive/D5_MMRG.IMG" href="/disks/pcx86/apps/micropro/wordstar/3.30/WS330-DISK5-MMRG.json" md5="b61b5eadc6cc7d766128c2cefc399fe7" md5json="68415675b7e252aba563336024f7631a">
+		<name>WordStar 3.30 (Disk 5)</name>
+	</disk>
+</manifest>
