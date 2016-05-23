@@ -4,8 +4,6 @@ title: Lotus 1-2-3
 permalink: /disks/pcx86/apps/lotus/123/
 redirect_from:
   - /disks/pc/apps/lotus/123/
-redirect_from:
-  - /disks/pc/apps/lotus/123/
 ---
 
 Lotus 1-2-3

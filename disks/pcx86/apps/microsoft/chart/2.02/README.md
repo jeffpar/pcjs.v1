@@ -4,8 +4,6 @@ title: Microsoft Chart 2.02
 permalink: /disks/pcx86/apps/microsoft/chart/2.02/
 redirect_from:
   - /disks/pc/apps/microsoft/chart/2.02/
-redirect_from:
-  - /disks/pc/apps/microsoft/chart/2.02/
 ---
 
 Microsoft Chart 2.02

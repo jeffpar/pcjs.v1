@@ -4,8 +4,6 @@ title: TopView
 permalink: /disks/pcx86/apps/ibm/topview/
 redirect_from:
   - /disks/pc/apps/ibm/topview/
-redirect_from:
-  - /disks/pc/apps/ibm/topview/
 ---
 
 TopView

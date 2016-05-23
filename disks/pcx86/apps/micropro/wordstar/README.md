@@ -4,8 +4,6 @@ title: MicroPro WordStar
 permalink: /disks/pcx86/apps/micropro/wordstar/
 redirect_from:
   - /disks/pc/apps/micropro/wordstar/
-redirect_from:
-  - /disks/pc/apps/micropro/wordstar/
 ---
 
 MicroPro WordStar

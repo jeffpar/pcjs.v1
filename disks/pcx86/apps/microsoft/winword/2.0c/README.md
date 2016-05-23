@@ -4,8 +4,6 @@ title: Microsoft Word for Windows 2.0c
 permalink: /disks/pcx86/apps/microsoft/winword/2.0c/
 redirect_from:
   - /disks/pc/apps/microsoft/winword/2.0c/
-redirect_from:
-  - /disks/pc/apps/microsoft/winword/2.0c/
 ---
 
 Microsoft Word for Windows 2.0c

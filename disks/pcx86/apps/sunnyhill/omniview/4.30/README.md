@@ -4,8 +4,6 @@ title: Omniview 386 4.30
 permalink: /disks/pcx86/apps/sunnyhill/omniview/4.30/
 redirect_from:
   - /disks/pc/apps/sunnyhill/omniview/4.30/
-redirect_from:
-  - /disks/pc/apps/sunnyhill/omniview/4.30/
 machines:
   - type: pcx86
     id: compaq386
