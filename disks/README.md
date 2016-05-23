@@ -8,7 +8,10 @@ permalink: /disks/
 
 Disk Libraries
 ---
-Browse the project's [IBM PC](pcx86/) and [Challenger 1P](c1p/) disk libraries.
+Browse these PCjs Disk Libraries:
+
+- [IBM PC](pcx86/)
+- [Challenger 1P](c1p/)
 
 ---
 
