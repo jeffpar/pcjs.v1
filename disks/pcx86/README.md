@@ -1,8 +1,6 @@
 ---
 layout: page
 title: IBM PC Disk Library
-menu_title: Disks
-menu_order: 4
 permalink: /disks/pcx86/
 redirect_from:
   - /disks/pc/
@@ -13,11 +11,11 @@ IBM PC Disk Library
 ---
 
 This [Disk Library](/disks/pcx86/library.xml) lists all the [Disk Manifests](#disk-manifests) in the
-[PCjs Project](/docs/about/), and makes those disks available to any [IBM PC Machine](/devices/pcx86/machine/)
-in the project that uses the library.  However, most machines use the *[compiled](/disks/pcx86/compiled/library.xml)*
-form of the library in order to reduce machine load time.
+[PCjs Project](/docs/about/) and makes those disks available to any [IBM PC Machine](/devices/pcx86/machine/)
+in the project that uses the library.  Note that most machines use the *[compiled](/disks/pcx86/compiled/library.xml)*
+form of the library, to reduce machine load time.
 
-The [Disk Library](/disks/pcx86/library.xml) summary below is not a complete list of everything in the library,
+The summary below is not a complete list of everything in the library,
 just highlights.  For some of the disks, we have provided more information about the software, and in some cases,
 machines that automatically run the software.  Ideally, everything in the library would also be listed below,
 and linked to a page that describes the software in more detail, along with a live demonstration of the software,

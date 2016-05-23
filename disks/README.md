@@ -1,12 +1,14 @@
 ---
 layout: page
 title: Disk Libraries
+menu_title: Disks
+menu_order: 4
 permalink: /disks/
 ---
 
 Disk Libraries
 ---
-Browse [IBM PC](pcx86/) and [Challenger 1P](c1p/) disk libraries.
+Browse the project's [IBM PC](pcx86/) and [Challenger 1P](c1p/) disk libraries.
 
 ---
 
