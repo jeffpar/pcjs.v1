@@ -232,7 +232,7 @@ MarkOut.setOptions = function(options)
  * The infoMachine object should contain, at a minimum:
  *
  *      {
- *          'class':    sMachineClass,  // eg, "pc"
+ *          'type':     sMachineType,   // eg, "PCx86"
  *          'func':     sMachineFunc,
  *          'id':       sMachineID,
  *          'xml':      sMachineXMLFile,
@@ -343,8 +343,8 @@ MarkOut.aHTMLEntities = {
  *      'config' (eg, "machine.xml")
  *      'template' (eg, "machine.xsl")
  *      'uncompiled' (eg, true)
- *      'autoMount' (eg, {"A":{"name":"OS/2 FOOTBALL Boot Disk (v7.68.17)","path":"/disks/pc/os2/misc/football/debugger/FOOTBALL-7.68.17.json"}})
- *      'drives' (eg, [{name:"68Mb Hard Drive",type:4,path:"http://archive.pcjs.org/disks/pc/fixed/68mb/win95.json"}])
+ *      'autoMount' (eg, {"A":{"name":"OS/2 FOOTBALL Boot Disk (v7.68.17)","path":"/disks/pcx86/os2/misc/football/debugger/FOOTBALL-7.68.17.json"}})
+ *      'drives' (eg, [{name:"68Mb Hard Drive",type:4,path:"http://archive.pcjs.org/disks/pcx86/fixed/68mb/win95.json"}])
  *      'parms'
  *
  * Non-reserved properties include:
@@ -463,7 +463,7 @@ MarkOut.prototype.convertMD = function(sIndent)
                              *
                              * Here's an example of "autoMount" output:
                              *
-                             *      {"A":{"name":"OS/2 FOOTBALL Boot Disk (v7.68.17)","path":"/disks/pc/os2/misc/football/debugger/FOOTBALL-7.68.17.json"}}
+                             *      {"A":{"name":"OS/2 FOOTBALL Boot Disk (v7.68.17)","path":"/disks/pcx86/os2/misc/football/debugger/FOOTBALL-7.68.17.json"}}
                              *
                              * Note that the the only required property for a drive object is 'path'; if 'name' is omitted,
                              * the FDC component will search for the given 'path' and use whatever name it can find.
@@ -951,7 +951,7 @@ MarkOut.prototype.convertMDLinks = function(sBlock)
         }
         sURL = sURL.replace(/\*/g, pkg.version);
         /*
-         * My own goofy way of defining a named anchor (by using an exclamation point) in Markdown....
+         * Check for my own syntax for defining a named anchor (by using an exclamation point) in Markdown....
          */
         if (sURL.charAt(0) == '!') {
             sTag = "span";      // using <a> to name an anchor is deprecated
@@ -1093,23 +1093,23 @@ MarkOut.prototype.convertMDImageLinks = function(sBlock, sIndent)
  * Before we call convertMDLinks() to process any normal Markdown-style links, we first look for our own
  * special flavor of "machine" Markdown links; ie:
  *
- *      [IBM PC](/devices/pc/machine/5150/mda/64kb/ "PCjs:demoPC:stylesheet:version:options:parms")
+ *      [IBM PC](/devices/pcx86/machine/5150/mda/64kb/ "PCx86:demoPC:stylesheet:version:options:parms")
  *
  * where a special title attribute triggers generation of an embedded machine rather than a link.
  *
- * Use "PCjs" or "C1Pjs" to automatically include the latest version of either "pc.js" or "c1p.js", followed
+ * Use "PCx86" or "C1P" to automatically include the latest version of either "pcx86.js" or "c1p.js", followed
  * by a colon and the ID you want to use for the embedded <div>.  If you need to use the script with the built-in
- * Debugger (ie, either "pc-dbg.js" or "c1p-dbg.js"), then include "debugger" in the list of comma-delimited
+ * Debugger (ie, either "pcx86-dbg.js" or "c1p-dbg.js"), then include "debugger" in the list of comma-delimited
  * options, as in:
  *
- *      [IBM PC](/devices/pc/machine/5150/mda/64kb/ "PCjs:demoPC:::debugger")
+ *      [IBM PC](/devices/pcx86/machine/5150/mda/64kb/ "PCx86:demoPC:::debugger")
  *
  * If the link ends with a slash, then it's an implied reference to a "machine.xml".
  *
  * UPDATE: Since parms containing JSON may also contain colons, machine Markdown links may now use '!' or '|'
  * instead of ':' as separators.  In fact, whichever separator is used first will be used throughout; eg:
  *
- *      [IBM PC](/devices/pc/machine/5150/mda/64kb/ "PCjs!demoPC!stylesheet!version!options!parms")
+ *      [IBM PC](/devices/pcx86/machine/5150/mda/64kb/ "PCx86!demoPC!stylesheet!version!options!parms")
  *
  * Granted, there are a number of things we could be smarter about.  First, you probably don't care about the
  * ID for the <div>; it's purely a mechanism for telling the script where to embed the machine, so we could
@@ -1135,7 +1135,7 @@ MarkOut.prototype.convertMDImageLinks = function(sBlock, sIndent)
 MarkOut.prototype.convertMDMachineLinks = function(sBlock)
 {
     var aMatch, sReplacement;
-    var sMachine, sMachineID, sMachineXMLFile, sMachineXSLFile, sMachineVersion, sMachineOptions, sMachineParms;
+    var sMachineType, sMachineID, sMachineXMLFile, sMachineXSLFile, sMachineVersion, sMachineOptions, sMachineParms;
 
     /*
      * Before we start looking for Markdown-style machine links, see if there are any Liquid-style machines,
@@ -1149,16 +1149,15 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
         sMachineID = aMatch[2];
         if (this.aMachineDefs[sMachineID]) {
             var machine = this.aMachineDefs[sMachineID];
-            sMachine = machine['type'] || "pc";
-            sMachineOptions = ((sMachine.indexOf("-dbg") > 0 || machine['debugger'] == "true")? "debugger" : "");
-            sMachine = sMachine.replace("-dbg", "").toUpperCase();
+            sMachineType = machine['type'] || "PCx86";
+            sMachineOptions = ((sMachineType.indexOf("-dbg") > 0 || machine['debugger'] == "true")? "debugger" : "");
+            sMachineType = sMachineType.replace("-dbg", "");
             sMachineXMLFile = machine['config'] || this.sMachineFile || "machine.xml";
             sMachineXSLFile = machine['template'] || "";
             sMachineVersion = ((machine['uncompiled'] == "true")? "uncompiled" : "");
             sMachineParms = machine['parms'] || "";
             sReplacement = machine['name'] || "Embedded PC";
-            if (sMachine == "pc" || sMachine == "c1p") sMachine += "js";
-            sReplacement = "[" + sReplacement + "](" + sMachineXMLFile + ' "' + sMachine + '!' + sMachineID + '!' + sMachineXSLFile + '!!' + sMachineOptions + '!' + sMachineParms + '")';
+            sReplacement = "[" + sReplacement + "](" + sMachineXMLFile + ' "' + sMachineType + '!' + sMachineID + '!' + sMachineXSLFile + '!!' + sMachineOptions + '!' + sMachineParms + '")';
         }
         sBlock = sBlock.replace(aMatch[0], sReplacement);
         reIncludes.lastIndex = 0;       // reset lastIndex, since we just modified the string that reIncludes is iterating over
@@ -1170,20 +1169,17 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
      * Start looking for Markdown-style machine links now...
      */
     var cMatches = 0;
-    var reMachines = /\[(.*?)]\((.*?)\s*"(PC|C1P)([a-z0-9-]*)([:!|])(.*?)"\)/gi;
+    var reMachines = /\[(.*?)]\((.*?)\s*"(PC|C1P)([^:!|]*)([:!|])(.*?)"\)/gi;
 
     while ((aMatch = reMachines.exec(sBlock))) {
 
         sMachineXMLFile = aMatch[2];
         if (sMachineXMLFile.slice(-1) == "/") sMachineXMLFile += "machine.xml";
 
-        sMachine = aMatch[3].toUpperCase();
-        if (aMatch[4] != "js") sMachine += aMatch[4];
-        var sMachineFunc = "embed" + sMachine;
-        var sMachineClass = sMachine.toLowerCase();
+        sMachineType = aMatch[3].toUpperCase() + (aMatch[4] != "js"? aMatch[4] : "");
+        var sMachineFunc = "embed" + sMachineType;
         var aMachineParms = aMatch[6].split(aMatch[5]);
-        if (aMatch[4] == "js") sMachine += aMatch[4];
-        var sMachineMessage = "Waiting for " + sMachine + " to load";
+        var sMachineMessage = "Waiting for " + sMachineType + " to load";
 
         sMachineID = aMachineParms[0];
         sMachineXSLFile = aMachineParms[1] || "";
@@ -1199,7 +1195,7 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
         sReplacement = '<div id="' + sMachineID + '" class="machine-placeholder"><p>' + aMatch[1] + '</p><p class="machine-warning">' + sMachineMessage + '</p></div>\n';
 
         /*
-         * The embedPC()/embedC1P functions take an XSL file as the 3rd parameter, which defaults to:
+         * The embedXXX() functions take an XSL file as the 3rd parameter, which defaults to:
          *
          *      "/versions/" + APPCLASS + "/" + APPVERSION + "/components.xsl"
          *
@@ -1208,7 +1204,7 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
          */
         if (!sMachineXSLFile || sMachineXSLFile.indexOf("components.xsl") >= 0) {
             if (this.fDebug) {
-                if (sMachineClass == "c1p") {
+                if (sMachineType == "C1P") {
                     sMachineXSLFile = "/modules/c1pjs/templates/components.xsl";
                 } else {
                     sMachineXSLFile = "/modules/shared/templates/components.xsl";
@@ -1228,7 +1224,7 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
         cMatches++;
 
         this.addMachine({
-            'class':    sMachineClass,  // eg, a machine class, such as "pc" or "c1p"
+            'type':     sMachineType,   // eg, a machine type, such as "PCx86" or "C1P"
             'func':     sMachineFunc,
             'id':       sMachineID,
             'xml':      sMachineXMLFile,

@@ -371,12 +371,12 @@ ROM.prototype.cloneROM = function(addr)
  */
 ROM.init = function()
 {
-    var aeROM = Component.getElementsByClass(document, PCJSCLASS, "rom");
+    var aeROM = Component.getElementsByClass(document, APPCLASS, "rom");
     for (var iROM = 0; iROM < aeROM.length; iROM++) {
         var eROM = aeROM[iROM];
         var parmsROM = Component.getComponentParms(eROM);
         var rom = new ROM(parmsROM);
-        Component.bindComponentControls(rom, eROM, PCJSCLASS);
+        Component.bindComponentControls(rom, eROM, APPCLASS);
     }
 };
 

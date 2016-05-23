@@ -10,7 +10,7 @@ scripts: # the following list of scripts should mirror what /modules/diskdump/li
   - /modules/shared/lib/diskapi.js
   - /modules/shared/lib/dumpapi.js
   - /modules/shared/lib/component.js
-  - /modules/pcjs/lib/x86.js
+  - /modules/pcx86/lib/x86.js
   - /modules/diskdump/lib/diskdump.js
 ---
 

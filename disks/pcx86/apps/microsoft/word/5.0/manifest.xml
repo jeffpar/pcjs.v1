@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.23.0/manifest.xsl"?>
+<manifest type="software">
+	<title>MS Word</title>
+	<version>5.0</version>
+	<type>Application</type>
+	<category>Word Processor</category>
+	<author>Microsoft</author>
+	<releaseDate/>
+	<disk id="disk01" size="368640" chs="40:2:9" img="archive/WORD50-PROGRAM1.img" href="/disks/pcx86/apps/microsoft/word/5.0/WORD50-PROGRAM1.json" md5="ec384fe9bc27b518f86fdd47b1fefffd" md5json="d5574356b39c7b5737163aca21eed107">
+		<name>MS Word 5.0 (Program 1)</name>
+	</disk>
+	<disk id="disk02" size="368640" chs="40:2:9" img="archive/WORD50-PROGRAM2.img" href="/disks/pcx86/apps/microsoft/word/5.0/WORD50-PROGRAM2.json" md5="537d3dc0c3bc41dd9f16db02fc40094c" md5json="1b5a0fc630596ba53c7751d4aec4690e">
+		<name>MS Word 5.0 (Program 2)</name>
+	</disk>
+	<disk id="disk03" size="368640" chs="40:2:9" img="archive/WORD50-SPELL.img" href="/disks/pcx86/apps/microsoft/word/5.0/WORD50-SPELL.json" md5="c81b0c62f2bfe394814a126bd9b382d1" md5json="2c56807a3f9bfacaeeaa06ea8d9a97c7">
+		<name>MS Word 5.0 (Spell)</name>
+	</disk>
+	<disk id="disk04" size="368640" chs="40:2:9" img="archive/WORD50-THESAURUS.img" href="/disks/pcx86/apps/microsoft/word/5.0/WORD50-THESAURUS.json" md5="939c39241e2481ae4a332d651f15645c" md5json="98566758db1a80c30e3fcd2ffb2cbb24">
+		<name>MS Word 5.0 (Thesaurus)</name>
+	</disk>
+	<disk id="disk05" size="368640" chs="40:2:9" img="archive/WORD50-UTILITIES1.img" href="/disks/pcx86/apps/microsoft/word/5.0/WORD50-UTILITIES1.json" md5="258268a207f5fa813443700c36b6d5a0" md5json="95acace912092a6d167bef346988fd6e">
+		<name>MS Word 5.0 (Utilities 1)</name>
+	</disk>
+	<disk id="disk06" size="368640" chs="40:2:9" img="archive/WORD50-UTILITIES2.img" href="/disks/pcx86/apps/microsoft/word/5.0/WORD50-UTILITIES2.json" md5="604713de5d1f7c10ab5df852ebdc747e" md5json="f07f2b13111dd0923730d063bec18af6">
+		<name>MS Word 5.0 (Utilities 2)</name>
+	</disk>
+	<disk id="disk07" size="368640" chs="40:2:9" img="archive/WORD50-UTILITIES3.img" href="/disks/pcx86/apps/microsoft/word/5.0/WORD50-UTILITIES3.json" md5="1bc12154a9bb5523e9551bcc04e9aec6" md5json="68e5d654ff88fdc0533e74c4a9b56317">
+		<name>MS Word 5.0 (Utilities 3)</name>
+	</disk>
+	<disk id="disk08" size="368640" chs="40:2:9" img="archive/WORD50-UTILPRINT.img" href="/disks/pcx86/apps/microsoft/word/5.0/WORD50-UTILPRINT.json" md5="22b6c584ac8bb03c4cfe8874ebd131c8" md5json="0b6f2df39ac94d5592da99e55a5ab787">
+		<name>MS Word 5.0 (Utilities/Print)</name>
+	</disk>
+	<disk id="disk09" size="368640" chs="40:2:9" img="archive/WORD50-PRINTERS1.img" href="/disks/pcx86/apps/microsoft/word/5.0/WORD50-PRINTERS1.json" md5="97c904815815535b852039fe7de4092e" md5json="4c670002d9d68776045517d67f62606e">
+		<name>MS Word 5.0 (Printers 1)</name>
+	</disk>
+	<disk id="disk10" size="368640" chs="40:2:9" img="archive/WORD50-PRINTERS2.img" href="/disks/pcx86/apps/microsoft/word/5.0/WORD50-PRINTERS2.json" md5="9d8a6b158c964890ad3a46f11e8d66a1" md5json="710fe58bf85e4f66b0c6620f6e106cfb">
+		<name>MS Word 5.0 (Printers 2)</name>
+	</disk>
+	<disk id="disk11" size="368640" chs="40:2:9" img="archive/WORD50-LEARNKBD.img" href="/disks/pcx86/apps/microsoft/word/5.0/WORD50-LEARNKBD.json" md5="d8aa737b6b3f1bfa982fbee8d6493c69" md5json="83fd5275f77367742880f5af60fa2281">
+		<name>MS Word 5.0 (Learning Kbd)</name>
+	</disk>
+	<disk id="disk12" size="368640" chs="40:2:9" img="archive/WORD50-LEARNMOU.img" href="/disks/pcx86/apps/microsoft/word/5.0/WORD50-LEARNMOU.json" md5="d63043c19c860498798ecb8470a1d24a" md5json="d7dcfbe52791d2fee7ae70c51bbec48f">
+		<name>MS Word 5.0 (Learning Mouse)</name>
+	</disk>
+	<disk id="disk13" size="368640" chs="40:2:9" img="archive/WORD50-LEARNADV.img" href="/disks/pcx86/apps/microsoft/word/5.0/WORD50-LEARNADV.json" md5="e23e15685bd2c5b2eb0ec16a162683cd" md5json="8bfd4ebc182253ebcea2d3b8afae095d">
+		<name>MS Word 5.0 (Learning Adv)</name>
+	</disk>
+</manifest>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.23.0/manifest.xsl"?>
+<manifest type="software">
+	<title>Microsoft Windows 2.11</title>
+	<disk id="disk01" size="1228800" chs="80:2:15" img="archive/1200K/WIN211-286-DISK1.img" href="/disks/pcx86/windows/2.11/WIN211-286-DISK1.json" md5="fde6162baee91801637d4d559c54fba5" md5json="d11f37f005b3735976d39ee8c5c6d0ba">
+		<name>Windows/286 2.11 (SETUP)</name>
+	</disk>
+	<disk id="disk02" size="1228800" chs="80:2:15" img="archive/1200K/WIN211-286-DISK2.img" href="/disks/pcx86/windows/2.11/WIN211-286-DISK2.json" md5="75fddc90338e3a4754007f458388480a" md5json="3604902508d4f065f17a5e4270b080d8">
+		<name>Windows/286 2.11 (UTIL 1)</name>
+	</disk>
+	<disk id="disk03" size="1228800" chs="80:2:15" img="archive/1200K/WIN211-286-DISK3.img" href="/disks/pcx86/windows/2.11/WIN211-286-DISK3.json" md5="581f5bdd4e416e2e9b0a677e28644ea4" md5json="3742d08947b26729b07a41c82cb5e058">
+		<name>Windows/286 2.11 (UTIL 2)</name>
+	</disk>
+	<disk id="disk04" size="1228800" chs="80:2:15" img="archive/1200K/WIN211-286-DISK4.img" href="/disks/pcx86/windows/2.11/WIN211-286-DISK4.json" md5="5bd857cb6e61f3d452ba86caa8ae26d0" md5json="2eafa2b6ad2f707b0e878c9ebd1cf4e0">
+		<name>Windows/286 2.11 (APPS)</name>
+	</disk>
+	<disk id="disk05" size="1228800" chs="80:2:15" img="archive/1200K/WIN211-386-DISK1.img" href="/disks/pcx86/windows/2.11/WIN211-386-DISK1.json" md5="f8010c2759115388714a6c56760e2642" md5json="216962593dd5fbdedf327f84e3eb5327">
+		<name>Windows/386 2.11 (SETUP)</name>
+	</disk>
+	<disk id="disk06" size="1228800" chs="80:2:15" img="archive/1200K/WIN211-386-DISK2.img" href="/disks/pcx86/windows/2.11/WIN211-386-DISK2.json" md5="b109acb1bc82f20f62c72ce9bc38d7ad" md5json="0d6d893e05530acdbf5bc96875974642">
+		<name>Windows/386 2.11 (UTIL 1)</name>
+	</disk>
+	<disk id="disk07" size="1228800" chs="80:2:15" img="archive/1200K/WIN211-386-DISK3.img" href="/disks/pcx86/windows/2.11/WIN211-386-DISK3.json" md5="9b907eecfe1e767b20233d696fc92eb9" md5json="70c16d1352244e3b44795ec2a8f7e329">
+		<name>Windows/386 2.11 (UTIL 2)</name>
+	</disk>
+	<disk id="disk08" size="1228800" chs="80:2:15" img="archive/1200K/WIN211-386-DISK4.img" href="/disks/pcx86/windows/2.11/WIN211-386-DISK4.json" md5="bedae83e8e777e65602f8fd180794195" md5json="c92a95e0b5c9b51c82409deac518c71f">
+		<name>Windows/386 2.11 (APPS)</name>
+	</disk>
+</manifest>

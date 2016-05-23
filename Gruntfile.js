@@ -108,7 +108,7 @@ module.exports = function(grunt) {
      *      "<%= pkg.name %>"
      *
      * which would be fine for most of my needs, but some of the information I need
-     * from the package.json is not in string form (eg, pcJSFiles, which is an array of
+     * from the package.json is not in string form (eg, pcX86Files, which is an array of
      * file names).  So I create a "pkg" variable first, which allows me to do both.
      */
 
@@ -117,14 +117,14 @@ module.exports = function(grunt) {
      * @property {string} name
      * @property {string} version
      * @property {Array.<string>} c1pJSFiles
-     * @property {Array.<string>} pcJSFiles
+     * @property {Array.<string>} pcX86Files
      * @property {Array.<string>} pc8080Files
      * @property {Array.<string>} closureCompilerExterns
      */
     var pkg = grunt.file.readJSON("package.json");
 
     var tmpC1Pjs = "./tmp/c1pjs/" + pkg.version + "/c1p.js";
-    var tmpPCjs = "./tmp/pcjs/" + pkg.version + "/pc.js";
+    var tmpPCx86 = "./tmp/pcx86/" + pkg.version + "/pcx86.js";
     var tmpPC8080 = "./tmp/pc8080/" + pkg.version + "/pc8080.js";
 
     grunt.initConfig({
@@ -153,18 +153,18 @@ module.exports = function(grunt) {
                 src: pkg.c1pJSFiles,
                 dest: "./versions/c1pjs/" + pkg.version + "/c1p-dbg.js"
             },
-            "pc.js": {
-                src: pkg.pcJSFiles,
-                dest: "./versions/pcjs/" + pkg.version + "/pc.js",
+            "pcx86.js": {
+                src: pkg.pcX86Files,
+                dest: "./versions/pcx86/" + pkg.version + "/pcx86.js",
                 options: {
                     process: function(src, filepath) {
                         return (path.basename(filepath) == "debugger.js"? "" : src);
                     }
                 }
             },
-            "pc-dbg.js": {
-                src: pkg.pcJSFiles,
-                dest: "./versions/pcjs/" + pkg.version + "/pc-dbg.js"
+            "pcx86-dbg.js": {
+                src: pkg.pcX86Files,
+                dest: "./versions/pcx86/" + pkg.version + "/pcx86-dbg.js"
             },
             "pc8080.js": {
                 src: pkg.pc8080Files,
@@ -190,9 +190,9 @@ module.exports = function(grunt) {
                     }
                 }
             },
-            "tmp-pcjs": {
-                src: pkg.pcJSFiles,
-                dest: tmpPCjs,
+            "tmp-pcx86": {
+                src: pkg.pcX86Files,
+                dest: tmpPCx86,
                 options: {
                     banner: '"use strict";\n\n',
                     process: function(src, filepath) {
@@ -225,9 +225,9 @@ module.exports = function(grunt) {
                 src: pkg.c1pJSFiles,
                 dest: tmpC1Pjs
             },
-            "pc.js": {
-                src: pkg.pcJSFiles,
-                dest: tmpPCjs
+            "pcx86.js": {
+                src: pkg.pcX86Files,
+                dest: tmpPCx86
             },
             "pc8080.js": {
                 src: pkg.pc8080Files,
@@ -290,7 +290,7 @@ module.exports = function(grunt) {
                  */
                 TEMPcompilerOpts: {
                     // create_source_map: "./tmp/c1pjs/"  + pkg.version + "/c1p.map",
-                    define: ["\"APPNAME='C1Pjs'\"", "\"APPVERSION='" + pkg.version + "'\"", "DEBUGGER=false",
+                    define: ["\"APPVERSION='" + pkg.version + "'\"", "DEBUGGER=false",
                              "\"SITEHOST='www.pcjs.org'\"", "COMPILED=true", "DEBUG=false"],
                     // output_wrapper: "\"(function(){%output%})();//@ sourceMappingURL=/tmp/c1pjs/" + pkg.version + "/c1p.map\""
                     output_wrapper: "\"(function(){%output%})();\""
@@ -302,7 +302,7 @@ module.exports = function(grunt) {
             "c1p-dbg.js": {
                 TEMPcompilerOpts: {
                     // create_source_map: "./tmp/c1pjs/"  + pkg.version + "/c1p-dbg.map",
-                    define: ["\"APPNAME='C1Pjs'\"", "\"APPVERSION='" + pkg.version + "'\"",
+                    define: ["\"APPVERSION='" + pkg.version + "'\"",
                              "\"SITEHOST='www.pcjs.org'\"", "COMPILED=true", "DEBUG=false"],
                     // output_wrapper: "\"(function(){%output%})();//@ sourceMappingURL=/tmp/c1pjs/" + pkg.version + "/c1p-dbg.map\""
                     output_wrapper: "\"(function(){%output%})();\""
@@ -311,37 +311,37 @@ module.exports = function(grunt) {
                 src: tmpC1Pjs,
                 dest: "./versions/c1pjs/"  + pkg.version + "/c1p-dbg.js"
             },
-            "pc.js": {
+            "pcx86.js": {
                 TEMPcompilerOpts: {
-                    // create_source_map: "./tmp/pcjs/"  + pkg.version + "/pc.map",
-                    define: ["\"APPNAME='PCjs'\"", "\"APPVERSION='" + pkg.version + "'\"", "DEBUGGER=false",
+                    // create_source_map: "./tmp/pcx86/"  + pkg.version + "/pcx86.map",
+                    define: ["\"APPVERSION='" + pkg.version + "'\"", "DEBUGGER=false",
                              "\"SITEHOST='www.pcjs.org'\"", "COMPILED=true", "DEBUG=false", "BACKTRACK=false", "I386=true"],
-                    // output_wrapper: "\"(function(){%output%})();//@ sourceMappingURL=/tmp/pcjs/" + pkg.version + "/pc.map\""
+                    // output_wrapper: "\"(function(){%output%})();//@ sourceMappingURL=/tmp/pcx86/" + pkg.version + "/pcx86.map\""
                     output_wrapper: "\"(function(){%output%})();\""
                 },
-                // src: pkg.pcJSFiles,
-                src: tmpPCjs,
-                dest: "./versions/pcjs/" + pkg.version + "/pc.js"
+                // src: pkg.pcX86Files,
+                src: tmpPCx86,
+                dest: "./versions/pcx86/" + pkg.version + "/pcx86.js"
             },
-            "pc-dbg.js": {
+            "pcx86-dbg.js": {
                 /*
                  * Technically, this is the one case we don't need to override the default 'define' settings, but maybe it's best to be explicit.
                  */
                 TEMPcompilerOpts: {
-                    // create_source_map: "./tmp/pcjs/"  + pkg.version + "/pc-dbg.map",
-                    define: ["\"APPNAME='PCjs'\"", "\"APPVERSION='" + pkg.version + "'\"",
+                    // create_source_map: "./tmp/pcx86/"  + pkg.version + "/pcx86-dbg.map",
+                    define: ["\"APPVERSION='" + pkg.version + "'\"",
                              "\"SITEHOST='www.pcjs.org'\"", "COMPILED=true", "DEBUG=false", "BACKTRACK=false", "I386=true"],
-                    // output_wrapper: "\"(function(){%output%})();//@ sourceMappingURL=/tmp/pcjs/" + pkg.version + "/pc-dbg.map\""
+                    // output_wrapper: "\"(function(){%output%})();//@ sourceMappingURL=/tmp/pcx86/" + pkg.version + "/pcx86-dbg.map\""
                     output_wrapper: "\"(function(){%output%})();\""
                 },
-                // src: pkg.pcJSFiles,
-                src: tmpPCjs,
-                dest: "./versions/pcjs/" + pkg.version + "/pc-dbg.js"
+                // src: pkg.pcX86Files,
+                src: tmpPCx86,
+                dest: "./versions/pcx86/" + pkg.version + "/pcx86-dbg.js"
             },
             "pc8080.js": {
                 TEMPcompilerOpts: {
                     // create_source_map: "./tmp/pc8080/"  + pkg.version + "/pc8080.map",
-                    define: ["\"APPNAME='PC8080'\"", "\"APPVERSION='" + pkg.version + "'\"",
+                    define: ["\"APPVERSION='" + pkg.version + "'\"",
                              "\"SITEHOST='www.pcjs.org'\"", "COMPILED=true", "DEBUG=false", "DEBUGGER=false"],
                     // output_wrapper: "\"(function(){%output%})();//@ sourceMappingURL=/tmp/pc8080/" + pkg.version + "/pc8080.map\""
                     output_wrapper: "\"(function(){%output%})();\""
@@ -356,7 +356,7 @@ module.exports = function(grunt) {
                  */
                 TEMPcompilerOpts: {
                     // create_source_map: "./tmp/pc8080/"  + pkg.version + "/pc8080-dbg.map",
-                    define: ["\"APPNAME='PC8080'\"", "\"APPVERSION='" + pkg.version + "'\"",
+                    define: ["\"APPVERSION='" + pkg.version + "'\"",
                              "\"SITEHOST='www.pcjs.org'\"", "COMPILED=true", "DEBUG=false", "DEBUGGER=true"],
                     // output_wrapper: "\"(function(){%output%})();//@ sourceMappingURL=/tmp/pc8080/" + pkg.version + "/pc8080-dbg.map\""
                     output_wrapper: "\"(function(){%output%})();\""
@@ -402,19 +402,19 @@ module.exports = function(grunt) {
                     }
                 }
             },
-            "pcjs": {
+            "pcx86": {
                 files: [
                     {
                         cwd: "modules/shared/templates/",
                         src: ["common.css", "common.xsl", "components.*", "document.css", "document.xsl", "machine.xsl", "manifest.xsl", "outline.xsl"],
-                        dest: "versions/pcjs/<%= pkg.version %>/",
+                        dest: "versions/pcx86/<%= pkg.version %>/",
                         expand: true
                     }
                 ],
                 options: {
                     process: function(content, srcPath) {
                         var s = content.replace(/(<xsl:variable name="APPVERSION">)[^<]*(<\/xsl:variable>)/g, "$1" + pkg.version + "$2");
-                        s = s.replace(/"[^"]*\/?(common.css|common.xsl|components.css|components.xsl|document.css|document.xsl)"/g, '"/versions/pcjs/' + pkg.version + '/$1"');
+                        s = s.replace(/"[^"]*\/?(common.css|common.xsl|components.css|components.xsl|document.css|document.xsl)"/g, '"/versions/pcx86/' + pkg.version + '/$1"');
                         s = s.replace(/[ \t]*\/\*[^\*][\s\S]*?\*\//g, "").replace(/[ \t]*<!--[^@]*?-->[ \t]*\n?/g, "");
                         return s;
                     }
@@ -443,9 +443,9 @@ module.exports = function(grunt) {
             "examples": {
                 files: [
                     {
-                        cwd: "versions/pcjs/<%= pkg.version %>/",
-                        src: ["pc.js", "pc-dbg.js", "components.css", "components.xsl"],
-                        dest: "docs/pcjs/examples/",
+                        cwd: "versions/pcx86/<%= pkg.version %>/",
+                        src: ["pcx86.js", "pcx86-dbg.js", "components.css", "components.xsl"],
+                        dest: "docs/pcx86/examples/",
                         expand: true
                     }
                 ],
@@ -520,14 +520,14 @@ module.exports = function(grunt) {
                 args: []
             },
             "zip-examples": {
-                options: {cwd: "docs/pcjs/examples"},
+                options: {cwd: "docs/pcx86/examples"},
                 cmd: "./zip.sh",
                 args: ["v" + pkg.version + ".zip"]
             }
         },
         replace: {
             "fix-source-maps": {
-                src: ["./tmp/c1pjs/" + pkg.version + "/c1p*.map", "./tmp/pcjs/" + pkg.version + "/pc*.map"],
+                src: ["./tmp/c1pjs/" + pkg.version + "/c1p*.map", "./tmp/pcx86/" + pkg.version + "/pc*.map"],
                 overwrite: true,
                 replacements: [
                     {
@@ -560,13 +560,13 @@ module.exports = function(grunt) {
     
     grunt.loadTasks("modules/grunts/prepjs/tasks");
 
-    grunt.registerTask("preCompiler", grunt.option("rebuild")? ["concat:tmp-c1pjs", "concat:tmp-pcjs", "concat:tmp-pc8080"] : ["newer:concat:tmp-c1pjs", "newer:concat:tmp-pcjs", "newer:concat:tmp-pc8080"]);
+    grunt.registerTask("preCompiler", grunt.option("rebuild")? ["concat:tmp-c1pjs", "concat:tmp-pcx86", "concat:tmp-pc8080"] : ["newer:concat:tmp-c1pjs", "newer:concat:tmp-pcx86", "newer:concat:tmp-pc8080"]);
 
     grunt.registerTask("compile", ["preCompiler", "closureCompiler", "replace:fix-source-maps"]);
 
     grunt.registerTask('nocompile', function(target) {
         if (!target) {
-            grunt.task.run(["concat:c1p.js", "concat:c1p-dbg.js", "concat:pc.js", "concat:pc-dbg.js"]);
+            grunt.task.run(["concat:c1p.js", "concat:c1p-dbg.js", "concat:pcx86.js", "concat:pcx86-dbg.js"]);
         } else {
             grunt.task.run("concat:" + target);
         }

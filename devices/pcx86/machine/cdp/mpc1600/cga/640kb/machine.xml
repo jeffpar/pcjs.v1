@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.23.0/machine.xsl"?>
+<machine id="mpc1600" class="pcx86" border="1" pos="center" background="#FAEBD7">
+	<name pos="center">Columbia Data Products MPC 1600 with Color Display</name>
+	<computer id="mpc1600-640k" name="MPC 1600"/>
+	<ram id="ramLow" addr="0x00000" size="0xa0000"/>
+	<rom ref="/devices/pcx86/rom/cdp/mpc1600/bios-434.xml"/>
+	<video ref="/devices/pcx86/video/cdp/cga/cdp-cga.xml"/>
+	<fdc ref="/disks/pcx86/compiled/library.xml"/>
+	<cpu id="cpu8088" model="8088" autostart="true" pos="left" padleft="8px" padbottom="8px">
+		<control type="button" binding="run">Run</control>
+		<control type="button" binding="reset">Reset</control>
+	</cpu>
+	<keyboard ref="/devices/pcx86/keyboard/us83-buttons-mpc1600.xml"/>
+	<chipset id="chipset" model="mpc1600" sw1="01001001" sw2="11110000"/>
+</machine>

@@ -121,7 +121,7 @@ if (DEBUG) this.log('load("' + sFileURL + '")');
 ```
 
 There are a number of other important shared constants in [/modules/shared/lib/defines.js](/modules/shared/lib/defines.js)
-and PCjs-specific constants in [/modules/pcjs/lib/defines.js](/modules/pcjs/lib/defines.js); refer
+and PCjs-specific constants in [/modules/pcx86/lib/defines.js](/modules/pcx86/lib/defines.js); refer
 to those files for more information.
 
 ### Braces and Parentheses

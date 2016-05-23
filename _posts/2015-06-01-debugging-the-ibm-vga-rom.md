@@ -21,10 +21,10 @@ could only be used in PC, XT, and AT-compatible systems.  I'll refer to it here 
 The VGA ROM used here is assumed to have come from an original IBM VGA.  It's unknown if IBM ever made any
 revisions to the VGA ROM.  With the introduction of the PS/2 family and the VGA, IBM decided to no longer publish
 the source code for its ROMs, so I've created some assemblable source code from the IBM VGA ROM
-[here](/devices/pc/video/ibm/vga/).
+[here](/devices/pcx86/video/ibm/vga/).
 
 I've finally started debugging a machine configuration that uses the IBM VGA ROM.  Since the VGA and the 80386 are
-contemporaries, I'm using an [80386 machine configuration](/devices/pc/machine/compaq/deskpro386/vga/2048kb/debugger/).
+contemporaries, I'm using an [80386 machine configuration](/devices/pcx86/machine/compaq/deskpro386/vga/2048kb/debugger/).
 However, I don't expect the IBM VGA ROM to require any 80386 support or PS/2-specific features.  
 
 The first problem I ran into was here:

@@ -17,7 +17,7 @@ can boot and run in real-mode now, but there's still a lot of protected-mode wor
 this year is to boot OS/2 1.0.
 
 There are also a lot of rough edges left to polish.  Holes in EGA emulation remain to be filled (support for dynamically
-loaded fonts is one of the bigger ones).  And the PC AT Keyboard, along with the 8042 and Hard Disk controllers, are all
+loaded fonts is one of the bigger ones).  And the PC AT Keyboard, along with the 8042 and Hard Drive controllers, are all
 just limping along at the moment.
 
 Longer term, I'm looking forward to building some new tools, including an "IBM PC Configurator" that will take some

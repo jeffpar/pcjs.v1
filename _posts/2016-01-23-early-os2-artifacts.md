@@ -15,9 +15,9 @@ performance improvements were tested before being merged back into the main bran
 Another branch was **FOOTBALL** (aka **PIGSKIN**), an early 80386-based prototype intended to test the viability
 of the running multiple DOS applications in V86-mode.  Sometimes this 80386 version was also called **386DOS**,
 to distinguish it from **286DOS**.  More details are in this
-[FOOTBALL Design Document](/disks/pc/os2/misc/football/87058/#football-design-document).
+[FOOTBALL Design Document](/disks/pcx86/os2/misc/football/87058/#football-design-document).
 
-To shed some light on those efforts, I recently added a few [OS/2 Prototype Disks](/disks/pc/os2/misc/): a small
+To shed some light on those efforts, I recently added a few [OS/2 Prototype Disks](/disks/pcx86/os2/misc/): a small
 collection of early (mostly pre-1.0) OS/2 boot disks that provide a glimpse of what some of those early OS/2 builds
 looked like.
 
@@ -25,7 +25,7 @@ Getting these early versions of OS/2 to run in **PCjs** has been a bit of a chal
 but also some lingering issues.  Debugging continues.
 
 Part of the problem is that these pre-1.0 builds still contain a few bugs.  Also, the original
-[OS/2 FOOTBALL Boot Disk](/disks/pc/os2/misc/football/87058/) from February 1987 was developed and
+[OS/2 FOOTBALL Boot Disk](/disks/pcx86/os2/misc/football/87058/) from February 1987 was developed and
 tested exclusively on Compaq DeskPro 386 machines from late 1986, so it has some uncommon 80386 dependencies:
 
 * The [80386 LOADALL](/pubs/pc/reference/intel/80386/loadall/) instruction

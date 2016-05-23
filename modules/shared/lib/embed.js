@@ -6,28 +6,27 @@
  *
  * Copyright © 2012-2016 Jeff Parsons <Jeff@pcjs.org>
  *
- * This file is part of the JavaScript Machines Project (aka JSMachines) at <http://jsmachines.net/>
- * and <http://pcjs.org/>.
+ * This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
  *
- * JSMachines is free software: you can redistribute it and/or modify it under the terms of the
+ * PCjs is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3
  * of the License, or (at your option) any later version.
  *
- * JSMachines is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * PCjs is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along with JSMachines.
- * If not, see <http://www.gnu.org/licenses/gpl.html>.
+ * You should have received a copy of the GNU General Public License along with PCjs.  If not,
+ * see <http://www.gnu.org/licenses/gpl.html>.
  *
  * You are required to include the above copyright notice in every source code file of every
  * copy or modified version of this work, and to display that copyright notice on every screen
- * that loads or runs any version of this software (see Computer.COPYRIGHT).
+ * that loads or runs any version of this software (see COPYRIGHT in /modules/shared/lib/defines.js).
  *
- * Some JSMachines files also attempt to load external resource files, such as character-image files,
- * ROM files, and disk image files. Those external resource files are not considered part of the
- * JSMachines Project for purposes of the GNU General Public License, and the author does not claim
- * any copyright as to their contents.
+ * Some PCjs files also attempt to load external resource files, such as character-image files,
+ * ROM files, and disk image files. Those external resource files are not considered part of PCjs
+ * for purposes of the GNU General Public License, and the author does not claim any copyright
+ * as to their contents.
  */
 
 "use strict";
@@ -373,7 +372,7 @@ function embedMachine(sName, sVersion, idMachine, sXMLFile, sXSLFile, sParms)
              * *something* will have happened.
              *
              * Note that it is the HTMLOut module (in processMachines()) that ultimately decides which scripts to
-             * include and then generates the embedPC() and/or embedC1P() calls.
+             * include and then generates the embedXXX() call.
              */
             var aeWarning = (eMachine && Component.getElementsByClass(eMachine, "machine-warning"));
             eWarning = (aeWarning && aeWarning[0]) || eMachine;
@@ -401,7 +400,7 @@ function embedMachine(sName, sVersion, idMachine, sXMLFile, sXSLFile, sParms)
                 head.appendChild(style);
             }
 
-            var sAppClass = sName.toLowerCase();        // eg, "pcjs" or "c1pjs"
+            var sAppClass = sName.toLowerCase();        // eg, "pcx86" or "c1pjs"
             if (!sXSLFile) {
                 /*
                  * Now that PCjs is an open-source project, we can make the following test more flexible,
@@ -489,6 +488,20 @@ function embedMachine(sName, sVersion, idMachine, sXMLFile, sXSLFile, sParms)
                                 eMachine.parentNode.replaceChild(eFragment, eMachine);
                                 doneMachine();
                             } else {
+                                /*
+                                 * NOTE: This error can occur if our Node web server, when processing a folder with
+                                 * both a manifest.xml with a machine.xml reference AND a README.md containing a
+                                 * machine link, generates duplicate embedXXX() calls for the same machine; if the
+                                 * first embedXXX() call finds its target, subsequent calls for the same target will
+                                 * fail.
+                                 *
+                                 * Technically, such a folder is in a misconfigured state, but it happens, in part
+                                 * because when we switched to the Jekyll web server, we had to add machine links to
+                                 * all README.md files where we had previously relied on manifest.xml or machine.xml
+                                 * processing.  This is because the Jekyll web server currently doesn't process XML
+                                 * files, nor is support for that likely to be added any time soon; it was a nice
+                                 * feature of the Node web server, but it's not clear that it's worth doing for Jekyll.
+                                 */
                                 displayError("invalid machine element: " + idMachine);
                             }
                         } else {
@@ -535,7 +548,7 @@ function embedC1P(idMachine, sXMLFile, sXSLFile)
 }
 
 /**
- * embedPC(idMachine, sXMLFile, sXSLFile, sParms)
+ * embedPCx86(idMachine, sXMLFile, sXSLFile, sParms)
  *
  * @param {string} idMachine
  * @param {string} sXMLFile
@@ -543,10 +556,10 @@ function embedC1P(idMachine, sXMLFile, sXSLFile)
  * @param {string} [sParms]
  * @return {boolean} true if successful, false if error
  */
-function embedPC(idMachine, sXMLFile, sXSLFile, sParms)
+function embedPCx86(idMachine, sXMLFile, sXSLFile, sParms)
 {
     if (fAsync) web.enablePageEvents(false);
-    return embedMachine("PCjs", APPVERSION, idMachine, sXMLFile, sXSLFile, sParms);
+    return embedMachine("PCx86", APPVERSION, idMachine, sXMLFile, sXSLFile, sParms);
 }
 
 /**
@@ -568,9 +581,16 @@ function embedPC8080(idMachine, sXMLFile, sXSLFile, sParms)
  * Prevent the Closure Compiler from renaming functions we want to export,
  * by adding them as (named) properties of a global object.
  */
-if (APPNAME == "C1Pjs")  window['embedC1P']    = embedC1P;
-if (APPNAME == "PCjs")   window['embedPC']     = embedPC;
-if (APPNAME == "PC8080") window['embedPC8080'] = embedPC8080;
+if (APPNAME == "C1Pjs") {
+    window['embedC1P']    = embedC1P;
+}
+if (APPNAME == "PCx86") {
+    window['embedPC']     = embedPCx86;         // WARNING: embedPC() deprecated as of v1.23.0
+    window['embedPCx86']  = embedPCx86;
+}
+if (APPNAME == "PC8080") {
+    window['embedPC8080'] = embedPC8080;
+}
 
 window['enableEvents'] = web.enablePageEvents;
 window['sendEvent']    = web.sendPageEvent;

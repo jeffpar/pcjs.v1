@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.23.0/manifest.xsl"?>
+<manifest type="software">
+	<title>ThinkTank</title>
+	<version>2.41NP</version>
+	<type>Application</type>
+	<category>Productivity</category>
+	<company>Living Videotext</company>
+	<releaseDate>September 25, 1987</releaseDate>
+	<disk id="disk01" size="368640" chs="40:2:9" dir="archive/" href="/apps/pcx86/1987/thinktank/disk.json" md5="94053339672452fba42da85481893d68" md5json="bd39020bff244db9af3ac9eb656e7878">
+		<name>ThinkTank (1987)</name>
+		<file size="6" time="2012-11-20 15:29:40" attr="0x20" md5="50b68f3f99eda119c661b2b50cb9f4de">AUTOEXEC.BAT</file>
+		<file size="8192" time="2012-11-20 15:29:35" attr="0x20" md5="3355afbc122700f13647ee0d1bbf9ed7">READ_ME.DB</file>
+		<file size="512" time="2012-11-20 15:29:31" attr="0x20" md5="8b989397eb275032eb8cf929def9c6cc">READ_ME.SAV</file>
+		<file size="140952" time="2012-11-20 15:29:16" attr="0x20" md5="632b018ae314ef969aaa3856c0828c7e">TANK.EXE</file>
+		<file size="512" time="2012-11-20 15:29:35" attr="0x20" md5="c94027de16d2dc418d4f101a0b045ff2">TANKCLIP.BRD</file>
+		<file size="4608" time="2012-11-20 15:29:31" attr="0x20" md5="eb2fe013fb3a830e17d8c6967c163e13">TANKOPTS.DAT</file>
+		<file size="3584" time="2012-11-20 15:32:15" attr="0x20" md5="6f441578c928a954f924c7be2517b811" dir="TMPLATES/">123FNCTN.TXT</file>
+		<file size="512" time="2012-11-20 15:32:10" attr="0x20" md5="e09b6bd4a4dec04e0ba4a9d4c5018489" dir="TMPLATES/">ADDRESS.TXT</file>
+		<file size="10240" time="2012-11-20 15:32:13" attr="0x20" md5="7e1bd4db4677fdfa952598ec9360c0c6" dir="TMPLATES/">AREACODE.TXT</file>
+		<file size="2048" time="2012-11-20 15:32:45" attr="0x20" md5="43ea24743fc8296561bab87f16f904c7" dir="TMPLATES/">BALANCE.TXT</file>
+		<file size="1536" time="2012-11-20 15:32:09" attr="0x20" md5="a1bf5b9c5d28d298851cf5ff1dee2b76" dir="TMPLATES/">BNKRCNCL.TXT</file>
+		<file size="2048" time="2012-11-20 15:32:04" attr="0x20" md5="7d46466454f0d8273a862bd01ac42e46" dir="TMPLATES/">CALENDAR.TXT</file>
+		<file size="1536" time="2012-11-20 15:32:19" attr="0x20" md5="2f9c612c20493415a2946a9b831e344f" dir="TMPLATES/">CORPARNG.TXT</file>
+		<file size="1536" time="2012-11-20 15:32:19" attr="0x20" md5="e80caf2e19f758c2912654f457cdf583" dir="TMPLATES/">DEFENDNT.TXT</file>
+		<file size="1536" time="2012-11-20 15:32:46" attr="0x20" md5="8855ada2b80cf3fe7efdf02e3605b543" dir="TMPLATES/">EVNTQUAL.TXT</file>
+		<file size="512" time="2012-11-20 15:32:45" attr="0x20" md5="d66495d4ff8c2756b3441506c8aa529f" dir="TMPLATES/">INCALLOG.TXT</file>
+		<file size="1024" time="2012-11-20 15:32:44" attr="0x20" md5="a316044fbe9d0d80e8db79e9aaa7b6ad" dir="TMPLATES/">JOBRVIEW.TXT</file>
+		<file size="1024" time="2012-11-20 15:32:42" attr="0x20" md5="33a45e571b45b7f00951b9a74c249752" dir="TMPLATES/">JOBSPEC.TXT</file>
+		<file size="1536" time="2012-11-20 15:32:19" attr="0x20" md5="008207e70668e3e2ff48c38cb64417c8" dir="TMPLATES/">LITIGATE.TXT</file>
+		<file size="1536" time="2012-11-20 15:33:04" attr="0x20" md5="ba2fcb14e94d956b94f0a7a2766058b4" dir="TMPLATES/">MKTINTRO.TXT</file>
+		<file size="1536" time="2012-11-20 15:32:39" attr="0x20" md5="893147ea22290aa51db013fe7f21b946" dir="TMPLATES/">MKTRSRCH.TXT</file>
+		<file size="7168" time="2012-11-20 15:32:00" attr="0x20" md5="27586ec7eed85085488045fb44f2dc1e" dir="TMPLATES/">NEWS.DB</file>
+		<file size="512" time="2012-11-20 15:31:59" attr="0x20" md5="1b4567386a02f254d8c05ca2aa8b4fe4" dir="TMPLATES/">NEWS.SAV</file>
+		<file size="512" time="2012-11-20 15:33:01" attr="0x20" md5="a1ca2fa01a9388267ffcff7be965a289" dir="TMPLATES/">ORDRNTRY.TXT</file>
+		<file size="1024" time="2012-11-20 15:32:35" attr="0x20" md5="6f9f94fab18690bc3e6606d9c6f1257e" dir="TMPLATES/">ORGCHART.TXT</file>
+		<file size="512" time="2012-11-20 15:32:21" attr="0x20" md5="d183eb971de36383cdb1b89b26014403" dir="TMPLATES/">OUTCLLOG.TXT</file>
+		<file size="3584" time="2012-11-20 15:32:03" attr="0x20" md5="af2b2e1bcc2f0a855ed0cb91dc1dddf3" dir="TMPLATES/">PERSONAL.TXT</file>
+		<file size="1536" time="2012-11-20 15:32:16" attr="0x20" md5="e407c1fb333c51da9b1ae3bbea9cadfc" dir="TMPLATES/">PLANTIFF.TXT</file>
+		<file size="1024" time="2012-11-20 15:32:58" attr="0x20" md5="6145f26be74b81219774865640a9ae21" dir="TMPLATES/">PRELEASE.TXT</file>
+		<file size="6656" time="2012-11-20 15:32:12" attr="0x20" md5="13cd023b567cc59eadc606cb00203385" dir="TMPLATES/">PRNTRCOD.TXT</file>
+		<file size="2560" time="2012-11-20 15:32:25" attr="0x20" md5="4b2764edbea6001b0d59f092dfba82a6" dir="TMPLATES/">PRODPLAN.TXT</file>
+		<file size="1024" time="2012-11-20 15:32:02" attr="0x20" md5="023d6a310523f803ed1b7f4f9cc53dd5" dir="TMPLATES/">RESUME.TXT</file>
+		<file size="1024" time="2012-11-20 15:32:54" attr="0x20" md5="9cf051b9b9051429e778f84d14e858d0" dir="TMPLATES/">SALELEAD.TXT</file>
+		<file size="512" time="2012-11-20 15:32:49" attr="0x20" md5="56bb93d56f30989fd343314dad33091f" dir="TMPLATES/">SALESCAL.TXT</file>
+		<file size="512" time="2012-11-20 15:32:48" attr="0x20" md5="2df41d04290e16f9916309f7ea00ee11" dir="TMPLATES/">SRVCCALL.TXT</file>
+		<file size="3072" time="2012-11-20 15:32:12" attr="0x20" md5="18236635ffefa9388460e8944000da0b" dir="TMPLATES/">STATABBR.TXT</file>
+		<file size="2048" time="2012-11-20 15:32:01" attr="0x20" md5="53d4f06b9d18bd3dd95407b3499f930a" dir="TMPLATES/">STATCNTR.TXT</file>
+		<file size="512" time="2012-11-20 15:32:46" attr="0x20" md5="05f711f1c096454617eb18b31a48905f" dir="TMPLATES/">UPGRADE.TXT</file>
+		<file size="3072" time="2012-11-20 15:32:11" attr="0x20" md5="20ded226630726d7b26d0ec7832753d0" dir="TMPLATES/">WTMEASUR.TXT</file>
+	</disk>
+	<machine href="/devices/pcx86/machine/5160/cga/640kb/machine.xml" state="/apps/pcx86/1987/thinktank/state.json"/>
+</manifest>

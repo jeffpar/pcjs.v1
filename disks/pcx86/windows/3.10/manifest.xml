@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.23.0/manifest.xsl"?>
+<manifest type="software">
+	<title>Microsoft Windows 3.10</title>
+	<disk id="disk01" size="1228800" chs="80:2:15" img="archive/1200K/WIN310-DISK1.img" href="/disks/pcx86/windows/3.10/WIN310-DISK1.json" md5="63f44a1c581f582d42a89f535dff0bf5" md5json="4fe1e71992b3eea90dff11888cd8ad3d">
+		<name>Windows 3.10 (Disk 1)</name>
+	</disk>
+	<disk id="disk02" size="1228800" chs="80:2:15" img="archive/1200K/WIN310-DISK2.img" href="/disks/pcx86/windows/3.10/WIN310-DISK2.json" md5="01f052d61c396687c13610793064b54d" md5json="fd0be5b6fad9e33ed79a7a979147be84">
+		<name>Windows 3.10 (Disk 2)</name>
+	</disk>
+	<disk id="disk03" size="1228800" chs="80:2:15" img="archive/1200K/WIN310-DISK3.img" href="/disks/pcx86/windows/3.10/WIN310-DISK3.json" md5="7c53d9759b56f79e4247b8eee36cd688" md5json="ae5ffac326c4ddc64cc0e541d09aafa1">
+		<name>Windows 3.10 (Disk 3)</name>
+	</disk>
+	<disk id="disk04" size="1228800" chs="80:2:15" img="archive/1200K/WIN310-DISK4.img" href="/disks/pcx86/windows/3.10/WIN310-DISK4.json" md5="be65e584b75f8395828c672a176acfe8" md5json="30ea235aaba761d3025dffccf4c00a2b">
+		<name>Windows 3.10 (Disk 4)</name>
+	</disk>
+	<disk id="disk05" size="1228800" chs="80:2:15" img="archive/1200K/WIN310-DISK5.img" href="/disks/pcx86/windows/3.10/WIN310-DISK5.json" md5="6bca10304083546da7f400b909fb5e8d" md5json="ce505c8425388aff13949b32461279bd">
+		<name>Windows 3.10 (Disk 5)</name>
+	</disk>
+	<disk id="disk06" size="1228800" chs="80:2:15" img="archive/1200K/WIN310-DISK6.img" href="/disks/pcx86/windows/3.10/WIN310-DISK6.json" md5="e40a4d1c97e27d4f3a3bc7484c172853" md5json="1d0ff4475326b0b6d499313595833d38">
+		<name>Windows 3.10 (Disk 6)</name>
+	</disk>
+	<disk id="disk07" size="1228800" chs="80:2:15" img="archive/1200K/WIN310-DISK7.img" href="/disks/pcx86/windows/3.10/WIN310-DISK7.json" md5="5a404333acda46186e1574ca5f713dc2" md5json="b2cad11f6815dcabf772a99e2f44948a">
+		<name>Windows 3.10 (Disk 7)</name>
+	</disk>
+</manifest>

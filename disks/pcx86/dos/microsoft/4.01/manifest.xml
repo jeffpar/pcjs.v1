@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.23.0/manifest.xsl"?>
+<manifest type="software">
+	<title>MS-DOS</title>
+	<version>4.01</version>
+	<type>DOS</type>
+	<category>Operating System</category>
+	<author>Microsoft</author>
+	<releaseDate>April 1989</releaseDate>
+	<source url="http://www.hampa.ch/pub/software/DOS/DOS/MS-DOS%204.01%20360K.7z"/>
+	<disk id="disk01" size="368640" chs="40:2:9" img="archive/360K/MSDOS401-DISK1.img" href="/disks/pcx86/dos/microsoft/4.01/MSDOS401-DISK1.json" md5="a450b5bf241c6d3b50875b024dec4de3" md5json="e5fc0477c73e6e291661d9d492b0aa24">
+		<name>MS-DOS 4.01 (Disk 1)</name>
+	</disk>
+	<disk id="disk02" size="368640" chs="40:2:9" img="archive/360K/MSDOS401-DISK2.img" href="/disks/pcx86/dos/microsoft/4.01/MSDOS401-DISK2.json" md5="9f23761dbd1e12a713997c21342a6828" md5json="84b758ff65bcf0f74d980a4b62a2fa97">
+		<name>MS-DOS 4.01 (Disk 2)</name>
+	</disk>
+	<disk id="disk03" size="368640" chs="40:2:9" img="archive/360K/MSDOS401-DISK3.img" href="/disks/pcx86/dos/microsoft/4.01/MSDOS401-DISK3.json" md5="0db9d11e7705022be3538ce197d2fcca" md5json="b62e0d32fe65ef81db9bc0dc8db1ebb7">
+		<name>MS-DOS 4.01 (Disk 3)</name>
+	</disk>
+	<disk id="disk04" size="368640" chs="40:2:9" img="archive/360K/MSDOS401-DISK4.img" href="/disks/pcx86/dos/microsoft/4.01/MSDOS401-DISK4.json" md5="14039200d02f68f8e17f709642b48572" md5json="7f8f079f8e7783a5acf95c7008266e0a">
+		<name>MS-DOS 4.01 (Disk 4)</name>
+	</disk>
+	<disk id="disk05" size="368640" chs="40:2:9" img="archive/360K/MSDOS401-DISK5.img" href="/disks/pcx86/dos/microsoft/4.01/MSDOS401-DISK5.json" md5="b61b231f1b0dfc7acc629c30c93b49a6" md5json="7f1c78c7cba2f34b94edab25b910be79">
+		<name>MS-DOS 4.01 (Disk 5)</name>
+	</disk>
+	<disk id="disk06" size="368640" chs="40:2:9" img="archive/360K/MSDOS401-DISK6.img" href="/disks/pcx86/dos/microsoft/4.01/MSDOS401-DISK6.json" md5="5be94fd74f9948d6d182e1e864b5a166" md5json="c15dd3be506ea73ba60e67d604a8d276">
+		<name>MS-DOS 4.01 (Disk 6)</name>
+	</disk>
+</manifest>

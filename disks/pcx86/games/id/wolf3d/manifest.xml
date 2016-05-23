@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.23.0/manifest.xsl"?>
+<manifest type="software">
+	<title>Wolfenstein 3D</title>
+	<disk id="disk01" size="1228800" chs="80:2:15" dir="archive/1WOLF14" href="/disks/pcx86/games/id/wolf3d/1WOLF14.json" md5="f834555a36cc2d99b100ca8bbb7309b0" md5json="2ba049953af759e891a285db38a143de">
+		<name>Wolfenstein 3D 1.4</name>
+		<file size="350" time="1993-01-01 12:40:00" attr="0x20" md5="01b4e263c6a41a9159aa4332e1cb8592">FILE_ID.DIZ</file>
+		<file size="142181" time="1993-01-01 12:40:00" attr="0x20" md5="341334d8dd43ffa9cb215bbc6504d8d3">INSTALL.EXE</file>
+		<file size="790409" time="1993-01-01 12:40:00" attr="0x20" md5="229402f7d893b91beb15c8794f2d6fdf">W3DSW14.SHR</file>
+	</disk>
+</manifest>

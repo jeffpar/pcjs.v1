@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fdc id="fdcNEC" automount='{A:{name:"PC-DOS 2.00 (Disk 1)",path:"/disks/pcx86/dos/ibm/2.00/PCDOS200-DISK1.json"}, B:{name:"PC-DOS 2.00 (Disk 2)",path:"/disks/pcx86/dos/ibm/2.00/PCDOS200-DISK2.json"}}' pos="left" padleft="8px" padbottom="8px">
+	<control type="list" binding="listDrives"/>
+	<control type="list" binding="listDisks">
+		<manifest ref="/disks/pcx86/empty/manifest.xml"/>
+		<manifest ref="/disks/pcx86/cpm/1.1b/manifest.xml"/>
+		<manifest ref="/disks/pcx86/diags/ibm/manifest.xml"/>
+		<manifest ref="/disks/pcx86/dos/ibm/1.00/manifest.xml"/>
+		<manifest ref="/disks/pcx86/dos/ibm/1.10/manifest.xml"/>
+		<manifest ref="/disks/pcx86/dos/ibm/2.00/manifest.xml"/>
+		<manifest ref="/disks/pcx86/dos/ibm/2.10/manifest.xml"/>
+		<manifest ref="/disks/pcx86/dos/ibm/3.00/manifest.xml"/>
+		<manifest ref="/disks/pcx86/dos/ibm/3.10/manifest.xml"/>
+		<manifest ref="/disks/pcx86/dos/ibm/3.20/manifest.xml"/>
+		<manifest ref="/disks/pcx86/dos/ibm/3.30/manifest.xml"/>
+		<manifest ref="/disks/pcx86/dos/ibm/4.00/manifest.xml"/>
+		<manifest ref="/disks/pcx86/dos/ibm/5.00/manifest.xml"/>
+		<manifest ref="/disks/pcx86/dos/ibm/6.10/manifest.xml"/>
+		<manifest ref="/disks/pcx86/dos/ibm/6.30/manifest.xml"/>
+		<manifest ref="/disks/pcx86/dos/ibm/7.00/manifest.xml"/>
+		<manifest ref="/disks/pcx86/dos/microsoft/3.20/manifest.xml"/>
+		<manifest ref="/disks/pcx86/dos/microsoft/3.21/manifest.xml"/>
+		<manifest ref="/disks/pcx86/dos/microsoft/3.30/manifest.xml"/>
+		<manifest ref="/disks/pcx86/dos/microsoft/3.31/manifest.xml"/>
+		<manifest ref="/disks/pcx86/dos/microsoft/4.00/manifest.xml"/>
+		<manifest ref="/disks/pcx86/dos/microsoft/4.01/manifest.xml"/>
+		<manifest ref="/disks/pcx86/dos/microsoft/4.0M/manifest.xml"/>
+		<manifest ref="/disks/pcx86/dos/microsoft/5.00/manifest.xml"/>
+		<manifest ref="/disks/pcx86/dos/microsoft/6.00/manifest.xml"/>
+		<manifest ref="/disks/pcx86/dos/microsoft/6.20/manifest.xml"/>
+		<manifest ref="/disks/pcx86/dos/microsoft/6.22/manifest.xml"/>
+		<manifest ref="/disks/pcx86/dos/compaq/1.11/manifest.xml"/>
+		<manifest ref="/disks/pcx86/dos/compaq/1.12/manifest.xml"/>
+		<manifest ref="/disks/pcx86/dos/compaq/2.12/manifest.xml"/>
+		<manifest ref="/disks/pcx86/dos/compaq/3.00/manifest.xml"/>
+		<manifest ref="/disks/pcx86/dos/compaq/3.10/manifest.xml"/>
+		<manifest ref="/disks/pcx86/dos/compaq/3.31/manifest.xml"/>
+		<manifest ref="/disks/pcx86/os2/ibm/1.0/manifest.xml"/>
+		<manifest ref="/disks/pcx86/os2/ibm/1.1/manifest.xml"/>
+		<manifest ref="/disks/pcx86/os2/ibm/1.3/manifest.xml"/>
+		<manifest ref="/disks/pcx86/os2/microsoft/1.0/manifest.xml"/>
+		<manifest ref="/disks/pcx86/os2/misc/manifest.xml"/>
+		<manifest ref="/disks/pcx86/windows/1.00/manifest.xml"/>
+		<manifest ref="/disks/pcx86/windows/1.01/manifest.xml"/>
+		<manifest ref="/disks/pcx86/windows/1.02/manifest.xml"/>
+		<manifest ref="/disks/pcx86/windows/1.03/manifest.xml"/>
+		<manifest ref="/disks/pcx86/windows/1.03a/manifest.xml"/>
+		<manifest ref="/disks/pcx86/windows/1.03b/manifest.xml"/>
+		<manifest ref="/disks/pcx86/windows/1.04/manifest.xml"/>
+		<manifest ref="/disks/pcx86/windows/2.0x/manifest.xml"/>
+		<manifest ref="/disks/pcx86/windows/2.03/manifest.xml"/>
+		<manifest ref="/disks/pcx86/windows/2.10/manifest.xml"/>
+		<manifest ref="/disks/pcx86/windows/2.11/manifest.xml"/>
+		<manifest ref="/disks/pcx86/windows/3.00/manifest.xml"/>
+		<manifest ref="/disks/pcx86/windows/3.10/manifest.xml"/>
+		<manifest ref="/disks/pcx86/windows/3.11/manifest.xml"/>
+		<manifest ref="/disks/pcx86/windows/win95/4.00.499/manifest.xml"/>
+		<manifest ref="/disks/pcx86/windows/win95/4.00.950/manifest.xml"/>
+		<manifest ref="/disks/pcx86/minix/1.1/manifest.xml"/>
+		<manifest ref="/disks/pcx86/unix/ibm/pcix/1.0/manifest.xml"/>
+		<manifest ref="/disks/pcx86/unix/microport/system-v/2.3/manifest.xml"/>
+		<manifest ref="/disks/pcx86/unix/sco/xenix/8086/2.1.3/manifest.xml"/>
+		<manifest ref="/disks/pcx86/apps/ibm/topview/1.01/manifest.xml"/>
+		<manifest ref="/disks/pcx86/apps/lotus/123/1.0a/manifest.xml"/>
+		<manifest ref="/disks/pcx86/apps/micropro/wordstar/3.30/manifest.xml"/>
+		<manifest ref="/disks/pcx86/apps/micropro/wordstar/4.00/manifest.xml"/>
+		<manifest ref="/disks/pcx86/apps/microsoft/chart/2.02/manifest.xml"/>
+		<manifest ref="/disks/pcx86/apps/microsoft/word/3.0/manifest.xml"/>
+		<manifest ref="/disks/pcx86/apps/microsoft/word/3.1/manifest.xml"/>
+		<manifest ref="/disks/pcx86/apps/microsoft/word/5.0/manifest.xml"/>
+		<manifest ref="/disks/pcx86/apps/microsoft/winword/2.0c/manifest.xml"/>
+		<manifest ref="/disks/pcx86/apps/sunnyhill/omniview/4.30/manifest.xml"/>
+		<manifest ref="/disks/pcx86/tools/borland/pascal/3.00b/manifest.xml"/>
+		<manifest ref="/disks/pcx86/tools/borland/pascal/3.01a/manifest.xml"/>
+		<manifest ref="/disks/pcx86/tools/ibm/bascom/1.00/manifest.xml"/>
+		<manifest ref="/disks/pcx86/tools/microsoft/basic/manifest.xml"/>
+		<manifest ref="/disks/pcx86/tools/microsoft/c/2.03/manifest.xml"/>
+		<manifest ref="/disks/pcx86/tools/microsoft/c/3.00/manifest.xml"/>
+		<manifest ref="/disks/pcx86/tools/microsoft/c/4.00/manifest.xml"/>
+		<manifest ref="/disks/pcx86/tools/microsoft/c/5.00/manifest.xml"/>
+		<manifest ref="/disks/pcx86/tools/microsoft/c/5.10/manifest.xml"/>
+		<manifest ref="/disks/pcx86/tools/microsoft/c/5.10-os2/manifest.xml"/>
+		<manifest ref="/disks/pcx86/tools/microsoft/masm/1.00/manifest.xml"/>
+		<manifest ref="/disks/pcx86/tools/microsoft/masm/3.00/manifest.xml"/>
+		<manifest ref="/disks/pcx86/tools/microsoft/masm/3.01/manifest.xml"/>
+		<manifest ref="/disks/pcx86/tools/microsoft/masm/4.00/manifest.xml"/>
+		<manifest ref="/disks/pcx86/tools/microsoft/masm/5.00/manifest.xml"/>
+		<manifest ref="/disks/pcx86/tools/microsoft/masm/5.10/manifest.xml"/>
+		<manifest ref="/disks/pcx86/tools/microsoft/masm/6.00/manifest.xml"/>
+		<manifest ref="/disks/pcx86/tools/microsoft/masm/6.11/manifest.xml"/>
+		<manifest ref="/disks/pcx86/tools/microsoft/mouse/5.00/manifest.xml"/>
+		<manifest ref="/disks/pcx86/tools/microsoft/os2/sdk/1.02/manifest.xml"/>
+		<manifest ref="/disks/pcx86/tools/microsoft/windows/sdk/1.01/manifest.xml"/>
+		<manifest ref="/disks/pcx86/tools/microsoft/windows/sdk/1.03/manifest.xml"/>
+		<manifest ref="/disks/pcx86/tools/microsoft/windows/sdk/1.04/manifest.xml"/>
+		<manifest ref="/disks/pcx86/tools/microsoft/windows/sdk/2.03/manifest.xml"/>
+		<manifest ref="/disks/pcx86/tools/microsoft/windows/sdk/3.00/manifest.xml"/>
+		<manifest ref="/disks/pcx86/tools/misc/manifest.xml"/>
+		<manifest ref="/disks/pcx86/games/id/wolf3d/manifest.xml"/>
+		<manifest ref="/disks/pcx86/games/microsoft/flightsim/1982/manifest.xml"/>
+		<manifest ref="/disks/pcx86/games/microsoft/flightsim/1984/manifest.xml"/>
+		<manifest ref="/apps/pcx86/1981/visicalc/manifest.xml" disk="disk01"/>
+		<manifest ref="/apps/pcx86/1982/esuite/manifest.xml" disk="disk01"/>
+		<manifest ref="/apps/pcx86/1985/rogue/manifest.xml" disk="disk01"/>
+		<manifest ref="/apps/pcx86/1987/thinktank/manifest.xml" disk="disk01"/>
+		<manifest ref="/apps/pcx86/1992/moria/manifest.xml" disk="disk01"/>
+		<manifest ref="/pubs/pc/programming/manifest.xml"/>
+		<disk path="/tests/pc/vga/VGABIN.json">VGA Tests (Black Book)</disk>
+	</control>
+	<control type="button" binding="loadDrive">Load</control>
+	<control type="button" binding="saveDrive" padright="8px">Save</control>
+	<control type="description" binding="descDisk" padright="8px"/>
+	<control type="file" binding="mountDrive"/>
+</fdc>

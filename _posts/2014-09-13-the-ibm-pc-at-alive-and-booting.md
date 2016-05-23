@@ -6,8 +6,8 @@ category: Releases
 permalink: /blog/2014/09/13/
 ---
 
-My first IBM PC AT (Model 5170) [Test Configuration](/devices/pc/machine/5170/ega/640kb/rev1/debugger/) finally
-boots to a PC-DOS prompt.  The configuration uses the original [IBM Model 5170 ROM BIOS](/devices/pc/rom/5170/),
+My first IBM PC AT (Model 5170) [Test Configuration](/devices/pcx86/machine/5170/ega/640kb/rev1/debugger/) finally
+boots to a PC-DOS prompt.  The configuration uses the original [IBM Model 5170 ROM BIOS](/devices/pcx86/rom/5170/),
 dated January 10, 1984.
  
 Getting through the BIOS "POST" (Power-On Self Test) diagnostics was like running an obstacle course, with various
@@ -55,8 +55,8 @@ There's still no support for [LOADALL](/pubs/pc/reference/intel/80286/loadall/) 
 call gates or task gates, nor for conforming code segments or expand-down data segments.  80286-specific cycle
 counts haven't been incorporated yet, either.  The list of remaining 80286 features is long.
 
-And there's plenty of hardware support left to do: I haven't looked at the AT hard disk controller yet (which
-I believe is significantly different from the XT hard disk controller), and the keyboard *barely* works; the 8042
+And there's plenty of hardware support left to do: I haven't looked at the AT hard drive controller yet (which
+I believe is significantly different from the XT hard drive controller), and the keyboard *barely* works; the 8042
 Keyboard Controller and AT keyboard had a number of features that older PC/XT keyboards did not (like LEDs and
 programmable repeat rate).
 

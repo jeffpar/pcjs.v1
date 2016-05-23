@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.23.0/manifest.xsl"?>
+<manifest type="software">
+	<title>IBM BASIC Compiler</title>
+	<version>1.00</version>
+	<disk id="disk01" size="163840" chs="40:1:8" img="archive/disk01.img" href="/disks/pcx86/tools/ibm/bascom/1.00/BASCOM100-DISK1.json" md5="0fd1b2d2c9bbde046f48cd205c5c2a7c" md5json="b66953dadf13baa208315ecdd9ea586a">
+		<name>IBM BASIC Compiler 1.00 (Disk 1)</name>
+	</disk>
+	<disk id="disk02" size="163840" chs="40:1:8" img="archive/disk02.img" href="/disks/pcx86/tools/ibm/bascom/1.00/BASCOM100-DISK2.json" md5="7fffeb1e21835ffbe9a0bea4bab5af23" md5json="17b390f65ba7aa6e4535d433b8fbf5d3">
+		<name>IBM BASIC Compiler 1.00 (Disk 2)</name>
+	</disk>
+</manifest>

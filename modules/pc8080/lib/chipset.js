@@ -6,8 +6,7 @@
  *
  * Copyright © 2012-2016 Jeff Parsons <Jeff@pcjs.org>
  *
- * This file is part of PCjs, which is part of the JavaScript Machines Project (aka JSMachines)
- * at <http://jsmachines.net/> and <http://pcjs.org/>.
+ * This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
  *
  * PCjs is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3
@@ -22,12 +21,12 @@
  *
  * You are required to include the above copyright notice in every source code file of every
  * copy or modified version of this work, and to display that copyright notice on every screen
- * that loads or runs any version of this software (see Computer.COPYRIGHT).
+ * that loads or runs any version of this software (see COPYRIGHT in /modules/shared/lib/defines.js).
  *
  * Some PCjs files also attempt to load external resource files, such as character-image files,
- * ROM files, and disk image files. Those external resource files are not considered part of the
- * PCjs program for purposes of the GNU General Public License, and the author does not claim
- * any copyright as to their contents.
+ * ROM files, and disk image files. Those external resource files are not considered part of PCjs
+ * for purposes of the GNU General Public License, and the author does not claim any copyright
+ * as to their contents.
  */
 
 "use strict";
@@ -551,12 +550,12 @@ ChipSet.aPortOutput = {
  */
 ChipSet.init = function()
 {
-    var aeChipSet = Component.getElementsByClass(document, PCJSCLASS, "chipset");
+    var aeChipSet = Component.getElementsByClass(document, PC8080.APPCLASS, "chipset");
     for (var iChip = 0; iChip < aeChipSet.length; iChip++) {
         var eChipSet = aeChipSet[iChip];
         var parmsChipSet = Component.getComponentParms(eChipSet);
         var chipset = new ChipSet(parmsChipSet);
-        Component.bindComponentControls(chipset, eChipSet, PCJSCLASS);
+        Component.bindComponentControls(chipset, eChipSet, PC8080.APPCLASS);
     }
 };
 

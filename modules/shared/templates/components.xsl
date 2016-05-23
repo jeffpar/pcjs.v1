@@ -12,8 +12,8 @@
 
 	<xsl:variable name="MACHINECLASS">pc</xsl:variable>
 	<xsl:variable name="CSSCLASS">pcjs</xsl:variable>
-	<xsl:variable name="APPCLASS">pcjs</xsl:variable>
-	<xsl:variable name="APPNAME">PCjs</xsl:variable>
+	<xsl:variable name="APPCLASS">pcx86</xsl:variable>
+	<xsl:variable name="APPNAME">PCx86</xsl:variable>
 	<xsl:variable name="APPVERSION">1.x.x</xsl:variable>
 	<xsl:variable name="SITEHOST">www.pcjs.org</xsl:variable>
 
@@ -32,7 +32,7 @@
 	</xsl:template>
 
 	<xsl:template name="machine">
-		<xsl:param name="href">/devices/pc/machine/5150/mda/64kb/machine.xml</xsl:param>
+		<xsl:param name="href" select="''"/>
 		<xsl:param name="state" select="''"/>
 		<xsl:variable name="componentFile"><xsl:value-of select="$rootDir"/><xsl:value-of select="$href"/></xsl:variable>
 		<xsl:apply-templates select="document($componentFile)/machine">
@@ -509,7 +509,7 @@
 						</xsl:if>
 					</xsl:if>
 				</xsl:variable>
-				<!-- TODO: Think about incorporating the optional "desc" tag into the disk description (see /disks/pc/tools/microsoft/c/4.00/manifest.xml) -->
+				<!-- TODO: Think about incorporating the optional "desc" tag into the disk description (see /disks/pcx86/tools/microsoft/c/4.00/manifest.xml) -->
 				<xsl:if test="@href">
 					<option value="{@href}" data-value="{{{$link}}}"><xsl:value-of select="$name"/></option>
 				</xsl:if>

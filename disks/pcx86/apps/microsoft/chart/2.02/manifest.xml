@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.23.0/manifest.xsl"?>
+<manifest type="software">
+	<title>Microsoft Chart</title>
+	<version>2.02</version>
+	<type>Application</type>
+	<category>Productivity</category>
+	<author>Microsoft</author>
+	<releaseDate date="1986-05-23">May 23, 1986</releaseDate>
+	<notes>
+		This is obviously not a Microsoft Chart 2.02 distribution disk.
+
+		The disk image contains "SPERRY Personal Computer MS-DOS 2.11 version 1.11 Copyright 1981,82,83 Microsoft Corp."
+		with a COMMAND.COM dated "3-16-87".  It boots but then crashes when COMMAND.COM attempts to display the current date.
+
+		COMMAND.COM appears to be loaded too high in conventional memory, because it builds the current date string above
+		segment 0xA000, so when it attempts to print that string, DOS finds only garbage (0xFF bytes, and no terminating $).
+		This suggests that either there is a mismatch between the IBMBIO.COM, IBMDOS.COM and COMMAND.COM files on this disk,
+		or that there is something special about the BIOS found on a SPERRY computer that is critical to booting these files.
+
+		I'm sure with further debugging we could find out one way or the other, but let's leave that for another day.  It's not
+		clear it's really worth the effort.  To start, the IBMBIO.COM, IBMDOS.COM and COMMAND.COM files should be placed onto
+		their own MS-DOS disk image and archived appropriately.  A search for the rest of the SPERRY OEM distribution files
+		should also be conducted.
+
+		I would much rather post copies of original distribution disks here, but this is all we've currently got.
+	</notes>
+	<disk id="disk01" size="368640" chs="40:2:9" img="archive/CHART202.img" href="/disks/pcx86/apps/microsoft/chart/2.02/CHART202.json" md5="cc155799da50666f6233a21d1d81fe6e" md5json="bd8a3be09c88ee917b3d7f02f0add7a9">
+		<name>MS Chart 2.02 (Unofficial)</name>
+	</disk>
+</manifest>
