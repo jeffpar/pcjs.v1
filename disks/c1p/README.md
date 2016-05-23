@@ -7,4 +7,5 @@ permalink: /disks/c1p/
 Challenger 1P Disks
 ---
 
-An assortment of Challenger 1P Disk Images, for use by [C1P Machine Configurations](/devices/c1p/machine/).
+The project currently includes an [OS-65D Diskette](OS65D33.json), which can be loaded by the
+[OSI Challenger 1P (32Kb) with Disk Support](/devices/c1p/machine/32kb/).
