@@ -11,7 +11,7 @@ IBM PC Video Configurations
 
 Sample XML configurations are available for the following IBM PC Video Adapters:
 
-* Monochrome Display Adapter (MDA)
+* [Monochrome Display Adapter (MDA)](mda/)
 * [Color Graphics Adapter (CGA)](cga/)
 * [Enhanced Graphics Adapter (EGA)](ega/)
 * [Video Graphics Array (VGA)](vga/)

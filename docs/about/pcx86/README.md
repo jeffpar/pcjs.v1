@@ -28,7 +28,7 @@ pre-loaded), what kind of video adapter (MDA, CGA, EGA or VGA), serial ports, mo
 [Documentation](/docs/pcx86/) for details.
 
 + Excellent IBM hardware compatibility ensures all the original IBM BIOS ROMs operate properly, and that the
-machines run at their original speed.  Even obsolete hardware, such as the original PC XT hard disk controller,
+machines run at their original speed.  Even obsolete hardware, such as the original PC XT hard drive controller,
 is supported.
 
 + The CPU component is easily configured to emulate an 8088, 80186, 80286, or 80386.  A target speed can also

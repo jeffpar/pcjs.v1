@@ -48,7 +48,7 @@ The following IBM CGA configuration files are currently available:
 There is only one known CGA Character ROM ([ibm-cga.json](ibm-cga.json)), and it is identical to the MDA Character ROM,
 because the ROM contains both the 8x14 MDA and 8x8 CGA fonts.
 
-As documented in [Video.doneLoad()](/modules/pcjs/lib/video.js):
+As documented in [Video.doneLoad()](/modules/pcx86/lib/video.js):
 
 	[T]here are TWO CGA fonts in the ROM: a thin 5x7 "single dot" font located at offset 0x1000, and a thick 7x7
 	"double dot" font at offset 0x1800.  The latter is the default font, unless overridden by a jumper setting on

@@ -40,7 +40,7 @@ Bindings
  
 	For use with a control of type *list*. The list will be populated automatically with a series of &lt;option&gt;
 	elements based on the number of floppy drives, as determined by the SW1 settings obtained from the
-	[ChipSet](/docs/pcx86/chipset/) component.
+	*[ChipSet](/docs/pcx86/chipset/)* component.
 	
  * *listDisks*
  

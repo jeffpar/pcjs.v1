@@ -7,7 +7,7 @@ permalink: /blog/2014/10/23/
 ---
 
 [PCjs v1.15.6](https://github.com/jeffpar/pcjs/releases/tag/v1.15.6) is a fairly minor update that fixes a few
-Floppy Disk Controller (FDC) issues and one CPU emulation bug that prevented [PC-DOS 7.00](/disks/pcx86/dos/ibm/7.00/)
+Floppy Drive Controller (FDC) issues and one CPU emulation bug that prevented [PC-DOS 7.00](/disks/pcx86/dos/ibm/7.00/)
 from working properly.
 
 There are also some Debugger improvements; for example, if you turn on "fdc" and "int" messages in the

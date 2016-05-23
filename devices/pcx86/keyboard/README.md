@@ -11,8 +11,8 @@ IBM PC Keyboard Devices
 
 ### Keyboard Configuration Files
 
-The easiest way for a machine to include a *[Keyboard](/docs/pcx86/keyboard/)* component in its XML configuration file
-is to reference one of the project's keyboard configuration files, using the *ref* attribute; eg:
+The easiest way for a machine to add a *[Keyboard](/docs/pcx86/keyboard/)* component to its XML configuration file
+is to use one of the project's predefined configuration files, with the *ref* attribute; e.g.:
 
 ```xml
 <keyboard ref="/devices/pcx86/keyboard/us83-buttons-minimal.xml"/>

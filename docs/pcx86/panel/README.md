@@ -16,8 +16,8 @@ Format
 Purpose
 ---
 Creates an instance of the Control Panel component, which simply acts as a container for controls that the
-machine wants to bind to the [Computer](/docs/pcx86/computer/), [CPU](/docs/pcx86/cpu/), [Keyboard](/docs/pcx86/keyboard/)
-and/or [Debugger](/docs/pcx86/debugger/) components.
+machine wants to bind to the *[Computer](/docs/pcx86/computer/)*, *[CPU](/docs/pcx86/cpu/)*,
+*[Keyboard](/docs/pcx86/keyboard/)* and/or *[Debugger](/docs/pcx86/debugger/)* components.
 
 Attributes
 ---
@@ -25,8 +25,8 @@ None.
 
 Bindings
 ---
-Refer to available bindings in the [Computer](/docs/pcx86/computer/), [CPU](/docs/pcx86/cpu/), [Keyboard](/docs/pcx86/keyboard/)
-and [Debugger](/docs/pcx86/debugger/) components.
+Refer to available bindings in the *[Computer](/docs/pcx86/computer/)*, *[CPU](/docs/pcx86/cpu/)*,
+*[Keyboard](/docs/pcx86/keyboard/)* and *[Debugger](/docs/pcx86/debugger/)* components.
 
 Example
 ---

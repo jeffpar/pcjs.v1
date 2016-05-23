@@ -14,7 +14,7 @@ machines:
 
 PCx86 can now boot the [COMPAQ DeskPro 386/16 ROM BIOS](/devices/pcx86/rom/compaq/deskpro386/).
 
-There's still a problem with the hard disk controller, which I haven't looked into yet,
+There's still a problem with the Hard Drive Controller, which I haven't looked into yet,
 but booting from a floppy works.
 
 While working through issues with this ROM BIOS, I created some lightly-annotated

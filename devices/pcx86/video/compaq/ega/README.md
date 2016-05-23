@@ -17,7 +17,7 @@ Our COMPAQ [EGA ROM BIOS](000412-001B/compaq-ega.json) comes from
 
 ### Font Information
 
-As noted in [Video.onROMLoad()](/modules/pcjs/lib/video.js), the Video component needs to know where the card's
+As noted in [Video.onROMLoad()](/modules/pcx86/lib/video.js), the Video component needs to know where the card's
 font data is located:
 
 	For EGA cards, in the absence of any parameters, we assume that we're receiving the original

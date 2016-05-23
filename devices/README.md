@@ -18,4 +18,4 @@ All PCjs machines are built from the following collections of devices:
 * [8086-based Devices](pcx86/) (e.g., [IBM PC, including 80286 and 80386-based compatibles](pcx86/machine/))
 
 These devices are user-installable components that you would typically find in a real personal computer,
-such as keyboards, disk controllers with one or more disk drives, video cards, etc.
+such as keyboards, disk drive controllers with one or more drives, video cards, etc.

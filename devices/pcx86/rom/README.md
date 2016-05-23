@@ -73,6 +73,6 @@ The project also contains BIOS ROMs, along with more detailed information, for t
 ### Other ROMs
 
 The project contains other ROMs, including IBM [EGA](/devices/pcx86/video/ibm/ega/#ibm-ega-rom) and
-[VGA](/devices/pcx86/video/ibm/vga/#ibm-vga-rom) ROMs, the Xebec Hard Disk Controller ROM used in
+[VGA](/devices/pcx86/video/ibm/vga/#ibm-vga-rom) ROMs, the Xebec Hard Drive Controller ROM used in
 the PC XT, etc, but those ROMs seemed more appropriately filed in their respective component folders;
 eg, [IBM PC Video Devices](/devices/pcx86/video/).

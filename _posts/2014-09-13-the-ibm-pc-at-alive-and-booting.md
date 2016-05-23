@@ -55,8 +55,8 @@ There's still no support for [LOADALL](/pubs/pc/reference/intel/80286/loadall/) 
 call gates or task gates, nor for conforming code segments or expand-down data segments.  80286-specific cycle
 counts haven't been incorporated yet, either.  The list of remaining 80286 features is long.
 
-And there's plenty of hardware support left to do: I haven't looked at the AT hard disk controller yet (which
-I believe is significantly different from the XT hard disk controller), and the keyboard *barely* works; the 8042
+And there's plenty of hardware support left to do: I haven't looked at the AT hard drive controller yet (which
+I believe is significantly different from the XT hard drive controller), and the keyboard *barely* works; the 8042
 Keyboard Controller and AT keyboard had a number of features that older PC/XT keyboards did not (like LEDs and
 programmable repeat rate).
 

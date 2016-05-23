@@ -72,7 +72,7 @@ folder, along with a **manifest.xml** file containing metadata about the softwar
 disks.  This is generally referred to as a [Software Manifest](/apps/), but in the context of the Disk Library,
 it's simply known as a Disk Manifest.
 
-A Disk Manifest can then be added to a *[Floppy Disk Controller (FDC)](/docs/pcx86/fdc/)* configuration file,
+A Disk Manifest can then be added to a *[Floppy Drive Controller (FDC)](/docs/pcx86/fdc/)* configuration file,
 making all its disks available to any machine loading that particular configuration file.
 
 A simple FDC configuration file, such as [samples.xml](samples.xml), *could* contain individual &lt;disk&gt;

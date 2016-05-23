@@ -26,7 +26,7 @@ Attributes
 	 
  * *size* (optional; default is 0x00000)
  
-	The amount of RAM, in bytes. If the size is omitted (or 0), the [ChipSet](/docs/pcx86/chipset/) component
+	The amount of RAM, in bytes. If the size is omitted (or 0), the *[ChipSet](/docs/pcx86/chipset/)* component
 	is queried for the amount of RAM indicated by SW1/SW2.
 	
  * *test* (optional; default is true)

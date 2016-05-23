@@ -12,28 +12,32 @@ IBM PC Device Configurations
 
 All our [IBM PC Machines](machine/) are built from a collection of devices, including:
 
-* CPU (e.g., 8088, 80286, 80386)
-* RAM
-* [ROMs](rom/)
-* ChipSets (e.g., 8259, 8253, 8237)
-* [Keyboards](keyboard/)
-* [Video Adapters](video/)
-* Floppy Drive Controllers
-* Hard Drive Controllers
-* [Control Panels](panel/)
+* [ChipSet](chipset/)
+* [Control Panel](panel/)
+* [CPU](/docs/pcx86/cpu/)
+* [Debugger](/docs/pcx86/debugger/)
+* [Floppy Drive Controller](/docs/pcx86/fdc/)
+* [Hard Drive Controller](/docs/pcx86/hdc/)
+* [Keyboard](keyboard/)
+* [Mouse](/docs/pcx86/mouse/)
+* [RAM](/docs/pcx86/ram/)
+* [ROM](rom/)
+* [Parallel Port](/docs/pcx86/parallel/)
+* [Serial Port](/docs/pcx86/serial/)
+* [Video](video/)
 
 Each of those devices can be configured in multiple ways, and some support external UI controls.
 
-For example, the IBM PC Keyboard component supports different keyboard models (eg, 83-key, 84-key, 101-key),
-and each of those models can also be configured to have dedicated buttons for selected key combinations,
-or even entire keyboard layouts.
+For example, the IBM PC *[Keyboard](/docs/pcx86/keyboard/)* component supports different keyboard models
+(eg, 83-key, 84-key, 101-key), and each of those models can also be configured to have dedicated buttons for
+selected key combinations, or even entire keyboard layouts.
 
 Complete machine configurations are constructed from those devices.  A Machine Configuration is a single XML file
 that lists all the device components to be used.  A Machine XML file can choose to configure every device itself,
 or it can include pre-configured device XML files, such as those provided above or elsewhere.
 
-Here's an example of [IBM 5150](/devices/pcx86/machine/5150/mda/64kb/)
-[XML](/devices/pcx86/machine/5150/mda/64kb/machine.xml):
+Here's an [IBM 5150](/devices/pcx86/machine/5150/mda/64kb/) [XML](/devices/pcx86/machine/5150/mda/64kb/machine.xml)
+example:
 
 ```xml
 <machine id="ibm5150" class="pcx86" border="1" pos="center" background="#FAEBD7">
@@ -54,6 +58,7 @@ Here's an example of [IBM 5150](/devices/pcx86/machine/5150/mda/64kb/)
 ```
 
 In this example, all the devices are fully configured within the machine XML file, except for the
-[Video](/docs/pcx86/video/) [XML](/devices/pcx86/video/ibm/mda/ibm-mda.xml),
-[Floppy Disk Controller (FDC)](/docs/pcx86/fdc/) [XML](/disks/pcx86/compiled/samples.xml), and
-[Keyboard](/docs/pcx86/keyboard/) [XML](/devices/pcx86/keyboard/us83-buttons-arrows.xml).
+*[Video](/docs/pcx86/video/)* ([XML](/devices/pcx86/video/ibm/mda/ibm-mda.xml)),
+*[Floppy Drive Controller](/docs/pcx86/fdc/)* ([XML](/disks/pcx86/compiled/samples.xml)), and
+*[Keyboard](/docs/pcx86/keyboard/)* ([XML](/devices/pcx86/keyboard/us83-buttons-arrows.xml)) components,
+which refer to separate XML configuration files.

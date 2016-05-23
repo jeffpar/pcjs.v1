@@ -9,7 +9,7 @@ redirect_from:
 IBM PC Application Archive
 ---
 
-Below are selected [PCjs](/docs/about/pcjs/) demos of classic IBM PC applications:
+Below are selected [PCx86](/docs/about/pcx86/) demos of classic IBM PC applications:
 
 * [VisiCalc (1981)](1981/visicalc/)
 * [Executive Suite (1982)](1982/esuite/)

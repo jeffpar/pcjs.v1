@@ -29,7 +29,7 @@ of XSL and CSS support files (included in the ZIP file below).
 
 A PCx86 machine XML file defines all a machine's components, including:
 
-* [Chipset](chipset/)
+* [ChipSet](chipset/)
 * [Computer](computer/)
 * [Control Panel](panel/)
 * [CPU](cpu/)
@@ -42,7 +42,7 @@ A PCx86 machine XML file defines all a machine's components, including:
 * [ROM](rom/)
 * [Parallel Port](parallel/)
 * [Serial Port](serial/)
-* [Video Adapter](video/)
+* [Video](video/)
 
 Here's a simple machine XML file that includes an 8088 CPU and 16Kb of RAM:
 
@@ -88,7 +88,7 @@ Note that as soon as the machine is ready and the CPU starts running, the "Run" 
 </machine>
 ```
 
-Next, we can add a Floppy Disk Controller (FDC) component.  And since we want to be able to "load" and "unload" floppy
+Next, we can add a Floppy Drive Controller (FDC) component.  And since we want to be able to "load" and "unload" floppy
 disks at will, we'll include some UI controls.
 
 ```xml
