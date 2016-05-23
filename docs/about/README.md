@@ -63,7 +63,7 @@ including extensions to the link syntax that make it easy to embed C1Pjs and PCx
 
 To simplify hosting requirements, the PCjs Project was migrated to GitHub Pages in late 2015.  The project still
 includes the original Node-based web server, which is useful for development and debugging, but for production sites
-(including [pcjs.org](http://www.pcjs.org/), using Jekyll to generate a static copy of the project for the web is the
+(including [pcjs.org](http://www.pcjs.org/)), using Jekyll to generate a static copy of the project for the web is the
 preferred solution.
 
 ---
