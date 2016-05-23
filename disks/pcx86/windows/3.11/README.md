@@ -2,6 +2,8 @@
 layout: page
 title: Microsoft Windows 3.11
 permalink: /disks/pcx86/windows/3.11/
+redirect_from:
+  - /disks/pc/windows/3.11/
 ---
 
 Microsoft Windows 3.11 (aka Windows For Workgroups)

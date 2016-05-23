@@ -2,6 +2,8 @@
 layout: page
 title: Microsoft Flight Simulator
 permalink: /disks/pcx86/games/microsoft/flightsim/
+redirect_from:
+  - /disks/pc/games/microsoft/flightsim/
 ---
 
 Microsoft Flight Simulator

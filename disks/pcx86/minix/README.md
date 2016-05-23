@@ -2,6 +2,8 @@
 layout: page
 title: MINIX Operating Systems
 permalink: /disks/pcx86/minix/
+redirect_from:
+  - /disks/pc/minix/
 ---
 
 MINIX Operating Systems

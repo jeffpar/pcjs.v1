@@ -2,6 +2,10 @@
 layout: page
 title: MicroPro WordStar 4.00
 permalink: /disks/pcx86/apps/micropro/wordstar/4.00/
+redirect_from:
+  - /disks/pc/apps/micropro/wordstar/4.00/
+redirect_from:
+  - /disks/pc/apps/micropro/wordstar/4.00/
 ---
 
 MicroPro WordStar 4.00

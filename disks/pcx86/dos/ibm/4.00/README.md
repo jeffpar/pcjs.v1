@@ -2,6 +2,8 @@
 layout: page
 title: PC-DOS 4.00
 permalink: /disks/pcx86/dos/ibm/4.00/
+redirect_from:
+  - /disks/pc/dos/ibm/4.00/
 machines:
   - type: pcx86
     id: ibm5170-pcdos400

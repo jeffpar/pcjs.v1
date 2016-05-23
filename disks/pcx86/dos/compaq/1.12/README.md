@@ -2,6 +2,8 @@
 layout: page
 title: COMPAQ MS-DOS 1.12
 permalink: /disks/pcx86/dos/compaq/1.12/
+redirect_from:
+  - /disks/pc/dos/compaq/1.12/
 machines:
   - type: pcx86
     id: ibm5150-compaq112

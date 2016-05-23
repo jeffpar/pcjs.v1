@@ -2,6 +2,8 @@
 layout: page
 title: Infocom Games
 permalink: /disks/pcx86/games/infocom/
+redirect_from:
+  - /disks/pc/games/infocom/
 ---
 
 Infocom Games

@@ -2,6 +2,8 @@
 layout: page
 title: PCx86 &lt;hdc&gt; Element
 permalink: /docs/pcx86/hdc/
+redirect_from:
+  - /docs/pcjs/hdc/
 ---
 
 PCx86 Hard Drive Controller (HDC) Component

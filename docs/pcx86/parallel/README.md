@@ -2,6 +2,8 @@
 layout: page
 title: PCx86 &lt;parallel&gt; Element
 permalink: /docs/pcx86/parallel/
+redirect_from:
+  - /docs/pcjs/parallel/
 ---
 
 PCx86 ParallelPort Component

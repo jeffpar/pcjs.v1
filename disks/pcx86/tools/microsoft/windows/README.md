@@ -2,6 +2,8 @@
 layout: page
 title: Microsoft Windows Development Kits
 permalink: /disks/pcx86/tools/microsoft/windows/
+redirect_from:
+  - /disks/pc/tools/microsoft/windows/
 ---
 
 Microsoft Windows DDKs

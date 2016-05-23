@@ -2,6 +2,8 @@
 layout: page
 title: Microsoft MS-DOS 6.22
 permalink: /disks/pcx86/dos/microsoft/6.22/
+redirect_from:
+  - /disks/pc/dos/microsoft/6.22/
 ---
 
 Microsoft MS-DOS 6.22

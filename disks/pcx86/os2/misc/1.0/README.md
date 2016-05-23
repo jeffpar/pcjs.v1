@@ -2,6 +2,8 @@
 layout: page
 title: OS/2 1.0 Debugger Disk
 permalink: /disks/pcx86/os2/misc/1.0/
+redirect_from:
+  - /disks/pc/os2/misc/1.0/
 ---
 
 OS/2 1.0 Debugger Disk

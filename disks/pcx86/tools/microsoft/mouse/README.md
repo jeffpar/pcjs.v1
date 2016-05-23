@@ -2,6 +2,8 @@
 layout: page
 title: Microsoft Mouse
 permalink: /disks/pcx86/tools/microsoft/mouse/
+redirect_from:
+  - /disks/pc/tools/microsoft/mouse/
 ---
 
 Microsoft Mouse

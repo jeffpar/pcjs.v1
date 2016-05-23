@@ -2,6 +2,8 @@
 layout: page
 title: Microsoft Windows
 permalink: /disks/pcx86/windows/
+redirect_from:
+  - /disks/pc/windows/
 ---
 
 Microsoft Windows

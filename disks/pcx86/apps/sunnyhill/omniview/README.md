@@ -2,6 +2,10 @@
 layout: page
 title: Omniview
 permalink: /disks/pcx86/apps/sunnyhill/omniview/
+redirect_from:
+  - /disks/pc/apps/sunnyhill/omniview/
+redirect_from:
+  - /disks/pc/apps/sunnyhill/omniview/
 ---
 
 Omniview

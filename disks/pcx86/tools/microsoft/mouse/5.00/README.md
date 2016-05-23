@@ -2,6 +2,8 @@
 layout: page
 title: Microsoft Mouse 5.00
 permalink: /disks/pcx86/tools/microsoft/mouse/5.00/
+redirect_from:
+  - /disks/pc/tools/microsoft/mouse/5.00/
 ---
 
 Microsoft Mouse 5.00

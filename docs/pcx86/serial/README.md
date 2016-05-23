@@ -2,6 +2,8 @@
 layout: page
 title: PCx86 &lt;serial&gt; Element
 permalink: /docs/pcx86/serial/
+redirect_from:
+  - /docs/pcjs/serial/
 ---
 
 PCx86 SerialPort Component

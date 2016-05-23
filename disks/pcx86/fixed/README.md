@@ -2,6 +2,8 @@
 layout: page
 title: PC Hard Drive (Fixed Disk) Images
 permalink: /disks/pcx86/fixed/
+redirect_from:
+  - /disks/pc/fixed/
 ---
 
 PC Hard Drive (Fixed Disk) Images

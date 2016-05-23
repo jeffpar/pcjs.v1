@@ -2,6 +2,8 @@
 layout: page
 title: Microsoft Macro Assemblers
 permalink: /disks/pcx86/tools/microsoft/masm/
+redirect_from:
+  - /disks/pc/tools/microsoft/masm/
 ---
 
 Microsoft Macro Assemblers

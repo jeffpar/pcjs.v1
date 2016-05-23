@@ -2,6 +2,8 @@
 layout: page
 title: Microsoft MS-DOS 3.21
 permalink: /disks/pcx86/dos/microsoft/3.21/
+redirect_from:
+  - /disks/pc/dos/microsoft/3.21/
 ---
 
 Microsoft MS-DOS 3.21

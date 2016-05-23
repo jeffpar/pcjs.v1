@@ -2,6 +2,8 @@
 layout: page
 title: Microsoft Windows 2.11
 permalink: /disks/pcx86/windows/2.11/
+redirect_from:
+  - /disks/pc/windows/2.11/
 ---
 
 Microsoft Windows 2.11, like [Windows 2.10](/disks/pcx86/windows/2.10/), was again released as two separate products:

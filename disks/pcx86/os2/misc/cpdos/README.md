@@ -2,6 +2,8 @@
 layout: page
 title: OS/2 CP-DOS Disks
 permalink: /disks/pcx86/os2/misc/cpdos/
+redirect_from:
+  - /disks/pc/os2/misc/cpdos/
 ---
 
 OS/2 CP-DOS Disks

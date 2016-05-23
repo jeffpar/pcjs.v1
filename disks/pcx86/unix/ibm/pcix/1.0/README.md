@@ -2,6 +2,8 @@
 layout: page
 title: PC/IX 1.0
 permalink: /disks/pcx86/unix/ibm/pcix/1.0/
+redirect_from:
+  - /disks/pc/unix/ibm/pcix/1.0/
 ---
 
 PC/IX 1.0

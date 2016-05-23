@@ -2,6 +2,8 @@
 layout: page
 title: Microsoft Macro Assembler 4.00
 permalink: /disks/pcx86/tools/microsoft/masm/4.00/
+redirect_from:
+  - /disks/pc/tools/microsoft/masm/4.00/
 ---
 
 Microsoft Macro Assembler 4.00

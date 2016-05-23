@@ -2,6 +2,8 @@
 layout: page
 title: Microsoft Windows 1.03a
 permalink: /disks/pcx86/windows/1.03a/
+redirect_from:
+  - /disks/pc/windows/1.03a/
 ---
 
 Microsoft Windows 1.03a

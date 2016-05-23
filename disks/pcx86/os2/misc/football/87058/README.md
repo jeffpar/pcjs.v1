@@ -2,6 +2,8 @@
 layout: page
 title: "OS/2 FOOTBALL Boot Disk (v7.68.17)"
 permalink: /disks/pcx86/os2/misc/football/87058/
+redirect_from:
+  - /disks/pc/os2/misc/football/87058/
 machines:
   - id: deskpro386
     type: pcx86

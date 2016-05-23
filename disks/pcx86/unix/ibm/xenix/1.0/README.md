@@ -2,6 +2,8 @@
 layout: page
 title: IBM PC XENIX 1.0
 permalink: /disks/pcx86/unix/ibm/xenix/1.0/
+redirect_from:
+  - /disks/pc/unix/ibm/xenix/1.0/
 ---
 
 IBM PC XENIX 1.0

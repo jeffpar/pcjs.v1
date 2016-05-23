@@ -2,6 +2,8 @@
 layout: page
 title: PC-DOS 1.10
 permalink: /disks/pcx86/dos/ibm/1.10/
+redirect_from:
+  - /disks/pc/dos/ibm/1.10/
 machines:
   - type: pcx86
     id: ibm5150-pcdos110

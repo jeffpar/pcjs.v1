@@ -2,6 +2,8 @@
 layout: page
 title: "IBM PC (Model 5150) running The Hitchhiker's Guide to the Galaxy"
 permalink: /disks/pcx86/games/infocom/hhiker/
+redirect_from:
+  - /disks/pc/games/infocom/hhiker/
 machines:
   - type: pcx86
     id: ibm5150-hhiker

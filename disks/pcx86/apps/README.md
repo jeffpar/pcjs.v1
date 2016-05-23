@@ -2,6 +2,10 @@
 layout: page
 title: PC Applications
 permalink: /disks/pcx86/apps/
+redirect_from:
+  - /disks/pc/apps/
+redirect_from:
+  - /disks/pc/apps/
 ---
 
 PC Applications

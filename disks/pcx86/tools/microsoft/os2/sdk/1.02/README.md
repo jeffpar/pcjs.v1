@@ -2,6 +2,8 @@
 layout: page
 title: Microsoft OS/2 SDK 1.02
 permalink: /disks/pcx86/tools/microsoft/os2/sdk/1.02/
+redirect_from:
+  - /disks/pc/tools/microsoft/os2/sdk/1.02/
 ---
 
 Microsoft OS/2 SDK 1.02

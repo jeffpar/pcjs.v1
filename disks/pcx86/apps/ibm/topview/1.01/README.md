@@ -2,6 +2,10 @@
 layout: page
 title: TopView 1.01
 permalink: /disks/pcx86/apps/ibm/topview/1.01/
+redirect_from:
+  - /disks/pc/apps/ibm/topview/1.01/
+redirect_from:
+  - /disks/pc/apps/ibm/topview/1.01/
 machines:
   - type: pcx86
     id: ibm5160

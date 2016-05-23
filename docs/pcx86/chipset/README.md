@@ -2,6 +2,8 @@
 layout: page
 title: PCx86 &lt;chipset&gt; Element
 permalink: /docs/pcx86/chipset/
+redirect_from:
+  - /docs/pcjs/chipset/
 ---
 
 PCx86 ChipSet Component

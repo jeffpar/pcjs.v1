@@ -2,6 +2,8 @@
 layout: page
 title: Microsoft OS/2 SDKs
 permalink: /disks/pcx86/tools/microsoft/os2/sdk/
+redirect_from:
+  - /disks/pc/tools/microsoft/os2/sdk/
 ---
 
 Microsoft OS/2 SDKs

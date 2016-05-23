@@ -2,6 +2,8 @@
 layout: page
 title: Microsoft Windows SDK 1.04
 permalink: /disks/pcx86/tools/microsoft/windows/sdk/1.04/
+redirect_from:
+  - /disks/pc/tools/microsoft/windows/sdk/1.04/
 ---
 
 Microsoft Windows SDK 1.04

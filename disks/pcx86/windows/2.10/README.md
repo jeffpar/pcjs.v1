@@ -2,6 +2,8 @@
 layout: page
 title: Microsoft Windows/386 2.10
 permalink: /disks/pcx86/windows/2.10/
+redirect_from:
+  - /disks/pc/windows/2.10/
 ---
 
 Microsoft Windows 2.10 was actually released as two separate products:

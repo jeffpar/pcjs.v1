@@ -2,6 +2,8 @@
 layout: page
 title: Microport UNIX System V
 permalink: /disks/pcx86/unix/microport/system-v/
+redirect_from:
+  - /disks/pc/unix/microport/system-v/
 ---
 
 Microport UNIX System V

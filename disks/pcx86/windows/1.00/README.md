@@ -2,6 +2,8 @@
 layout: page
 title: Microsoft Windows 1.00
 permalink: /disks/pcx86/windows/1.00/
+redirect_from:
+  - /disks/pc/windows/1.00/
 ---
 
 Microsoft Windows 1.00 ("Premiere Edition")

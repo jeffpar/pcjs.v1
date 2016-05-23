@@ -3,6 +3,7 @@ layout: page
 title: OS/2 1.0 Debugger Boot Disk
 permalink: /disks/pcx86/os2/misc/1.0/88286/
 redirect_from:
+  - /disks/pc/os2/misc/1.0/88286/
   - /disks/pc/os2/misc/1.0/debugger/
 machines:
   - id: ibm5170

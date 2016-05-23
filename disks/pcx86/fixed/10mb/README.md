@@ -2,6 +2,8 @@
 layout: page
 title: 10Mb Hard Drive (Fixed Disk) Images
 permalink: /disks/pcx86/fixed/10mb/
+redirect_from:
+  - /disks/pc/fixed/10mb/
 ---
 
 10Mb Hard Drive (Fixed Disk) Images

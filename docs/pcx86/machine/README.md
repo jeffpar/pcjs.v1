@@ -2,6 +2,8 @@
 layout: page
 title: PCx86 &lt;machine&gt; Element
 permalink: /docs/pcx86/machine/
+redirect_from:
+  - /docs/pcjs/machine/
 ---
 
 PCx86 Machine Component

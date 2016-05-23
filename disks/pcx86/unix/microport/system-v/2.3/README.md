@@ -2,6 +2,8 @@
 layout: page
 title: Microport UNIX System V-AT 2.3
 permalink: /disks/pcx86/unix/microport/system-v/2.3/
+redirect_from:
+  - /disks/pc/unix/microport/system-v/2.3/
 ---
 
 Microport's AT&amp;T UNIX System V-AT 2.3

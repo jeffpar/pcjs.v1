@@ -2,6 +2,10 @@
 layout: page
 title: Microsoft Word
 permalink: /disks/pcx86/apps/microsoft/word/
+redirect_from:
+  - /disks/pc/apps/microsoft/word/
+redirect_from:
+  - /disks/pc/apps/microsoft/word/
 ---
 
 Microsoft Word

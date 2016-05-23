@@ -2,6 +2,8 @@
 layout: page
 title: Microsoft C Compiler 5.1 for DOS
 permalink: /disks/pcx86/tools/microsoft/c/5.10/
+redirect_from:
+  - /disks/pc/tools/microsoft/c/5.10/
 ---
 
 Microsoft C Compiler 5.1 for DOS

@@ -2,6 +2,8 @@
 layout: page
 title: PCx86 &lt;cpu&gt; Element
 permalink: /docs/pcx86/cpu/
+redirect_from:
+  - /docs/pcjs/cpu/
 ---
 
 PCx86 CPU Component

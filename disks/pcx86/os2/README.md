@@ -2,6 +2,8 @@
 layout: page
 title: OS/2 Disks
 permalink: /disks/pcx86/os2/
+redirect_from:
+  - /disks/pc/os2/
 ---
 
 IBM OS/2 and Microsoft MS OS/2

@@ -2,6 +2,10 @@
 layout: page
 title: Microsoft Word for Windows
 permalink: /disks/pcx86/apps/microsoft/winword/
+redirect_from:
+  - /disks/pc/apps/microsoft/winword/
+redirect_from:
+  - /disks/pc/apps/microsoft/winword/
 ---
 
 Microsoft Word for Windows

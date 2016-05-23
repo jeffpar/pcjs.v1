@@ -2,6 +2,8 @@
 layout: page
 title: Microsoft MS-DOS 5.00 (360K Disks)
 permalink: /disks/pcx86/dos/microsoft/5.00/360K/
+redirect_from:
+  - /disks/pc/dos/microsoft/5.00/360K/
 ---
 
 Microsoft MS-DOS 5.00 (360K Disks)

@@ -2,6 +2,8 @@
 layout: page
 title: Unix Operating Systems from Microport
 permalink: /disks/pcx86/unix/microport/
+redirect_from:
+  - /disks/pc/unix/microport/
 ---
 
 Unix Operating Systems from Microport

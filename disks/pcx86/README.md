@@ -5,6 +5,7 @@ menu_title: Disks
 menu_order: 4
 permalink: /disks/pcx86/
 redirect_from:
+  - /disks/pc/
   - /configs/pc/disks/
 ---
 

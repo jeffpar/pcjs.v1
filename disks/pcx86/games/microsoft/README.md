@@ -2,6 +2,8 @@
 layout: page
 title: Microsoft Games
 permalink: /disks/pcx86/games/microsoft/
+redirect_from:
+  - /disks/pc/games/microsoft/
 ---
 
 Microsoft Games

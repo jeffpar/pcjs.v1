@@ -2,6 +2,8 @@
 layout: page
 title: IBM PC Diagnostics
 permalink: /disks/pcx86/diags/ibm/
+redirect_from:
+  - /disks/pc/diags/ibm/
 ---
 
 IBM PC Diagnostics

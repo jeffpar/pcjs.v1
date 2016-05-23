@@ -2,6 +2,8 @@
 layout: page
 title: PC-DOS 3.30
 permalink: /disks/pcx86/dos/ibm/3.30/
+redirect_from:
+  - /disks/pc/dos/ibm/3.30/
 ---
 
 PC-DOS 3.30

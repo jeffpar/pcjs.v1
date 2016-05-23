@@ -2,6 +2,8 @@
 layout: page
 title: PC-DOS 2.10
 permalink: /disks/pcx86/dos/ibm/2.10/
+redirect_from:
+  - /disks/pc/dos/ibm/2.10/
 ---
 
 PC-DOS 2.10

@@ -2,6 +2,8 @@
 layout: page
 title: Microsoft Windows 95 (First Retail Release)
 permalink: /disks/pcx86/windows/win95/4.00.950/
+redirect_from:
+  - /disks/pc/windows/win95/4.00.950/
 machines:
   - type: pcx86
     id: deskpro386

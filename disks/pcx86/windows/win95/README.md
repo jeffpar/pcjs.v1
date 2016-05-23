@@ -2,6 +2,8 @@
 layout: page
 title: Microsoft Windows 95
 permalink: /disks/pcx86/windows/win95/
+redirect_from:
+  - /disks/pc/windows/win95/
 ---
 
 Microsoft Windows 95
