@@ -9,7 +9,7 @@ permalink: /docs/
 Documentation
 ---
 
-Help is available for the following JavaScript Machines:
+Help is available for the following PCjs Machines:
 
 * [C1Pjs](/docs/c1pjs/)
 * [PCx86](/docs/pcx86/)

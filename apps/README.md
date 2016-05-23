@@ -6,11 +6,13 @@ permalink: /apps/
 
 Application Archives
 ---
-Browse classic application software for the following machines:
+Browse these PCjs Application Archives:
 
 - [IBM PC](pcx86/)
 - [Challenger 1P](c1p/)
- 
+
+---
+
 ### Software Application Manifests
 
 In the PCjs Project, every complete software package is stored in its own folder, either as a set of individual
