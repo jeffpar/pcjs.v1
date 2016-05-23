@@ -13,7 +13,7 @@ About PCx86
 
 PCx86 is a IBM PC/XT/AT simulator written entirely in [JavaScript](/modules/pcx86/).  It's designed to load and run
 fast, it works well in all modern web browsers (both desktop and mobile), and it's easy to customize.  It is part of
-the [PCjs Project](https://github.com/jeffpar/pcjs), an open source project on [GitHub](http://github.com/).
+the [PCjs Project](https://github.com/jeffpar/pcjs), an open-source project on [GitHub](http://github.com/).
 
 Check out the [Demos](/#demos) on the home page, and all the other PCx86 [Application](/apps/pcx86/), [Disk](/disks/pcx86/),
 and [Machine](/devices/pcx86/machine/) demos, including an [IBM PC Dual Display System](/devices/pcx86/machine/5150/dual/64kb/)

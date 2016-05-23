@@ -11,10 +11,10 @@ Overview
 ---
 PC8080 is our 8080-based machine emulation module.  The code is derived from [PCx86](/modules/pcx86/).
 
-It is still a work-in-progress.  See the list of available [PC8080 Machines](/devices/pc8080/machine/), including
+See the list of available [PC8080 Machines](/devices/pc8080/machine/), which includes
 [Space Invaders (1978)](/devices/pc8080/machine/invaders/).
 
-PC8080 is currently comprised of the following non-shared components, as listed in [package.json](../../package.json)
+PC8080 is comprised of the following non-shared components, as listed in [package.json](../../package.json)
 (see the *pc8080Files* property):
 
 * [defines.js](/modules/pc8080/lib/defines.js)

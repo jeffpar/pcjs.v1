@@ -71,7 +71,7 @@ and the original machine are available in the [C1Pjs Documentation](/docs/c1pjs/
 
 License
 ---
-The [PCjs Project](https://github.com/jeffpar/pcjs) is now an open source project on [GitHub](http://github.com/).
+The [PCjs Project](https://github.com/jeffpar/pcjs) is now an open-source project on [GitHub](http://github.com/).
 All published portions are free for redistribution and/or modification under the terms of the
 [GNU General Public License](/LICENSE) as published by the Free Software Foundation, either version 3 of the License,
 or (at your option) any later version.

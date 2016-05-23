@@ -15,7 +15,7 @@ PCx86 Documentation
 
 [PCx86](/docs/about/pcx86/) is a full-featured IBM PC, PC XT and PC AT emulator written entirely in JavaScript.
 
-After you've read the Documentation, check out the [Examples](examples/), read the [Source Code](/modules/pcx86/),
+After you've read the Documentation, check out the [Examples](examples/), browse the [Source Code](/modules/pcx86/),
 and experiment!
 
 {% include machine.html id="ibm5150" %}

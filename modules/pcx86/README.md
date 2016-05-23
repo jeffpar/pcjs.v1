@@ -11,7 +11,7 @@ IBM PC Emulation Module (PCx86)
 
 Overview
 ---
-PCx86, the PCjs IBM PC emulation module, is the engine powering all our [IBM PC Machines](/devices/pcx86/machine/).
+PCx86 is the IBM PC emulation module powering all our [IBM PC Machines](/devices/pcx86/machine/).
 
 This module divides PC functionality into variety of logical and visual components.
 In general, each JavaScript file is responsible for a single component or set of related components (eg,

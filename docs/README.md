@@ -11,8 +11,8 @@ Documentation
 
 Help is available for the following JavaScript Machines:
 
-* [PCx86](/docs/pcx86/)
 * [C1Pjs](/docs/c1pjs/)
+* [PCx86](/docs/pcx86/)
 
 {% if site.developer %}
 
