@@ -50,10 +50,6 @@ if (NODE) {
  * other device component.  It's currently allocated by the Computer's init() handler,
  * which then calls the initBus() method of all the other components.
  *
- * When initMemory() initializes the entire address space, it also passes aMemBlocks
- * to the CPU object, so that the CPU can perform its own address-to-block calculations
- * (essential, for example, when the CPU enables paging).
- *
  * For memory beyond the simple needs of the ROM and RAM components (ie, memory-mapped
  * devices), the address space must still be allocated through the Bus component via
  * addMemory().  If the component needs something more than simple read/write storage,
