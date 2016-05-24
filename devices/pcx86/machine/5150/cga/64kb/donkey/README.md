@@ -1,6 +1,6 @@
 ---
 layout: page
-title: IBM PC (Model 5150, 64Kb) with Color Display
+title: IBM PC (Model 5150, 64Kb, Color Display) running Donkey 1.00
 permalink: /devices/pcx86/machine/5150/cga/64kb/donkey/
 redirect_from:
   - /devices/pc/machine/5150/cga/64kb/donkey/
@@ -12,7 +12,7 @@ machines:
     id: ibm5150
 ---
 
-IBM PC with Color Display
+IBM PC Running Donkey 1.00
 ---
 
 {% include machine.html id="ibm5150" %}
