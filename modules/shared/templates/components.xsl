@@ -241,7 +241,7 @@
 					<xsl:when test="$url != ''"><div class="{$CSSCLASS}-reference">[<a href="{$url}">XML</a>]</div></xsl:when>
 					<xsl:otherwise/>
 				</xsl:choose>
-				<xsl:if test="$APPCLASS = 'pcjs'"><div class="{$CSSCLASS}-reference" style="padding-left:8px">[<a href="#" onclick="savePC('{$machine}'); return false;">Save Machine</a>]</div></xsl:if>
+				<xsl:if test="$APPCLASS = 'pcx86'"><div class="{$CSSCLASS}-reference" style="padding-left:8px">[<a href="#" onclick="savePC('{$machine}'); return false;">Save Machine</a>]</div></xsl:if>
 				<div class="{$CSSCLASS}-copyright">
 					<a href="http://{$SITEHOST}" target="_blank"><xsl:value-of select="$APPNAME"/></a> v<xsl:value-of select="$APPVERSION"/> © 2012-2016 by <a href="http://twitter.com/jeffpar" target="_blank">@jeffpar</a>
 				</div>
@@ -1034,8 +1034,8 @@
 			</xsl:choose>
 		</xsl:variable>
 		<xsl:variable name="memory">
-			<!-- PCjs uses this to determine the amount of Video memory installed; in retrospect, "bufferSize"
-			might seem like	a better choice for the name, but PCjs doesn't use ANY of the "buffer" properties,
+			<!-- PCx86 uses this to determine the amount of Video memory installed; in retrospect, "bufferSize"
+			might seem like	a better choice for the name, but PCx86 doesn't use ANY of the "buffer" properties,
 			because it supports dynamic frame buffers (ie, frame buffers whose location and size change according
 			to the programmed mode).  PC8080 machines use the "buffer" properties instead, because their frame
 			buffers generally have a fixed location, size, and format. -->
