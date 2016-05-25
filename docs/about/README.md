@@ -25,7 +25,6 @@ capabilities can be found in the [Documentation](/docs/).
 
 The first PCjs simulation was [C1Pjs](/docs/c1pjs/), which emulates the
 Challenger 1P, a 6502-based microcomputer introduced by Ohio Scientific in 1978.
-
 C1Pjs v1.0 was released in July 2012.  More information about the first release of C1Pjs was
 [posted](http://osiweb.org/osiforum/viewtopic.php?f=3&t=103) on the
 [OSI Discussion Forum](http://osiweb.org/osiforum/index.php) at [osiweb.org](http://osiweb.org/).
