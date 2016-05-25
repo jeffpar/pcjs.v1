@@ -56,9 +56,9 @@ function savePC(idMachine, sPCJSFile, callback)
         var sParms = cmp.saveMachineParms();
         if (!sPCJSFile) {
             if (DEBUG) {
-                sPCJSFile = "/tmp/pcjs/" + (XMLVERSION || APPVERSION) + "/pc.js"
+                sPCJSFile = "/tmp/pcx86/" + (XMLVERSION || APPVERSION) + "/pcx86.js"
             } else {
-                sPCJSFile = "/versions/pcjs/" + (XMLVERSION || APPVERSION) + "/pc" + (dbg? "-dbg" : "") + ".js";
+                sPCJSFile = "/versions/pcx86/" + (XMLVERSION || APPVERSION) + "/pcx86" + (dbg? "-dbg" : "") + ".js";
             }
         }
         if (callback && callback({ state: sState, parms: sParms })) return true;
