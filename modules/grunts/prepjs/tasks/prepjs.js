@@ -6,51 +6,45 @@
  *
  * Copyright © 2012-2016 Jeff Parsons <Jeff@pcjs.org>
  *
- * This file is part of C1Pjs, PCjs, and other related components written
- * by Jeff Parsons and originally published at cpusim.org and jsmachines.net.
+ * This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
  *
- * C1Pjs and PCjs are free software: you can redistribute them and/or modify
- * them under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * PCjs is free software: you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation, either version 3
+ * of the License, or (at your option) any later version.
  *
- * C1Pjs and PCjs are distributed in the hope that they will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * PCjs is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with C1Pjs and PCjs.  If not, see <http://www.gnu.org/licenses/gpl.html>.
+ * You should have received a copy of the GNU General Public License along with PCjs.  If not,
+ * see <http://www.gnu.org/licenses/gpl.html>.
  *
- * You are required to include the above copyright notice in every source
- * code file of every copy or modified version of this work, and to display
- * that copyright notice on every screen that loads or runs any version
- * of this software (see Computer.COPYRIGHT).
+ * You are required to include the above copyright notice in every source code file of every
+ * copy or modified version of this work, and to display that copyright notice on every screen
+ * that loads or runs any version of this software (see COPYRIGHT in /modules/shared/lib/defines.js).
  *
- * Some C1Pjs and PCjs files also attempt to load external resource files, such
- * as character-image files and ROM files. Those external resource files are
- * not considered part of the PCjs program for purposes of the GNU General Public
- * License, and the author does not claim any copyright as to their contents.
+ * Some PCjs files also attempt to load external resource files, such as character-image files,
+ * ROM files, and disk image files. Those external resource files are not considered part of PCjs
+ * for purposes of the GNU General Public License, and the author does not claim any copyright
+ * as to their contents.
  */
 
 /*
  * Options
  * ---
- * The 'includeObjectConstants' option allows replacement of constants defined
- * within objects, instead of only global constants. Use with caution, because
- * constants defined within an object scope may not be unique.  This does attempt
- * to catch any constant collisions and completely disable their replacement, but
- * it's not foolproof.
+ * The 'includeObjectConstants' option allows replacement of constants defined within objects,
+ * instead of only global constants. Use with caution, because constants defined within an object
+ * scope may not be unique.  This does attempt to catch any constant collisions and completely
+ * disable their replacement, but it's not foolproof.
  *
  * History
  * ---
- * Although we run all our code through Google's Closure Compiler, which does a
- * great job of inlining not only variables but also code to improve performance,
- * JavaScript doesn't have the notion of "constants", so we have to define all our
- * constants as properties and simply trust that the Closure Compiler will inline
- * them all.  I'm not completely trusting, so I've created this script that allows
- * us to verify the compiler produces substantially the same code whether or not
- * we inline all our constants first.
+ * Although we run all our code through Google's Closure Compiler, which does a great job of inlining
+ * not only variables but also code to improve performance, JavaScript doesn't have the notion of
+ * "constants", so we have to define all our constants as properties and simply trust that the Closure
+ * Compiler will inline them all.  I'm not completely trusting, so I've created this script that allows
+ * us to verify the compiler produces substantially the same code whether or not we inline all our
+ * constants first.
  *
  * See "inline.php" for the original PHP version of this module.
  *
@@ -58,18 +52,17 @@
  * ---
  * This script looks for global constant definitions of the form "Component.XXX = YYY;".
  *
- * The current approach requires all inlined constants to be defined as properties on
- * the associated class constructor (ie, as "class constants").  Life might be simpler
- * if the Closure Compiler honored "@const" references for properties, and who knows,
- * perhaps the latest version does now; but on the other hand, having my own convention
- * relieves me from having to annotate every single constant with a "@const" JSDoc tag.
+ * The current approach requires all inlined constants to be defined as properties on the associated
+ * class constructor (ie, as "class constants").  Life might be simpler if the Closure Compiler honored
+ * "@const" references for properties, and who knows, perhaps the latest version does now; but on the
+ * other hand, having my own convention relieves me from having to annotate every single constant with
+ * a "@const" JSDoc tag.
  *
- * TODO: Update the C1Pjs sources to use class constants instead of "object constants",
- * because in order for C1Pjs to benefit from constant inlining, we must reply on the
- * 'includeObjectConstants' option (hack) to expand the contexts that constants may live
- * in, which is inherently less safe.  Moreover, that option prevents us from removing
- * the original constant definitions, because constants like "this.PORT_CRA" could be used
- * in other contexts that this script will NOT catch (eg, "controller.PORT_CRA").
+ * TODO: Update the C1Pjs sources to use class constants instead of "object constants", because in order
+ * for C1Pjs to benefit from constant inlining, we must reply on the 'includeObjectConstants' option
+ * (hack) to expand the contexts that constants may live in, which is inherently less safe.  Moreover,
+ * that option prevents us from removing the original constant definitions, because constants like
+ * "this.PORT_CRA" could be used in other contexts that this script will NOT catch (eg, "controller.PORT_CRA").
  *
  * TODO: Think about adding another quick hack to this tool, to convert all:
  *
@@ -77,20 +70,19 @@
  * to:
  *      at-param {Component} dbg
  *
- * prior to compilation.  The only reason I declared my "dbg" variables generically,
- * as Component objects rather than Debugger objects, was to work around compilation
- * errors in the non-Debugger builds.
+ * prior to compilation.  The only reason I declared my "dbg" variables generically, as Component objects
+ * rather than Debugger objects, was to work around compilation errors in the non-Debugger builds.
  *
  * Implementation
  * ---
- * This script uses a very simplistic replacement approach that doesn't perform any
- * parsing, tokenizing or other pre-processing of the source code, which would otherwise
- * be required if we wanted to guarantee that all our replacements precisely mirrored what
- * JavaScript actually replaces at run-time.  For example, JavaScript allows any so-called
- * constant to be redefined at any point, and we don't attempt to catch modifications. 
+ * This script uses a very simplistic replacement approach that doesn't perform any parsing, tokenizing
+ * or other pre-processing of the source code, which would otherwise be required if we wanted to guarantee
+ * that all our replacements precisely mirrored what JavaScript actually replaces at run-time.  For example,
+ * JavaScript allows any so-called constant to be redefined at any point, and we don't attempt to catch
+ * modifications.
  *
- * This is why it's important that we limit inlining to only those constants described
- * above, and why such constants must never be altered by the code using them.
+ * This is why it's important that we limit inlining to only those constants described above, and why such
+ * constants must never be altered by the code using them.
  *
  * Debugging
  * ===
@@ -106,8 +98,8 @@
  *
  *      npm install heapdump --save-dev
  *
- * TODO: Resolve once and for all the "process out of memory" error that occurs if we don't divide
- * the src input into smaller chunks.  See the WARNING below.
+ * TODO: Resolve once and for all the "process out of memory" error that occurs if we don't divide the src input
+ * into smaller chunks.  See the WARNING below.
  */
 
 'use strict';
