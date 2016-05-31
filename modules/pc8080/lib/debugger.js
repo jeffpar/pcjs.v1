@@ -696,7 +696,11 @@ if (DEBUGGER) {
         /*
          * Now we turn to message actions rather than message types; for example, setting "halt"
          * on or off doesn't enable "halt" messages, but rather halts the CPU on any message above.
+         *
+         * Similarly, "m buffer on" turns on message buffering, defering the display of all messages
+         * until "m buffer off" is issued.
          */
+        "buffer":   Messages.BUFFER,
         "halt":     Messages.HALT
     };
 
@@ -1302,6 +1306,7 @@ if (DEBUGGER) {
         this.dbg = this;
         this.bitsMessage = this.bitsWarning = Messages.WARN;
         this.sMessagePrev = null;
+        this.aMessageBuffer = [];
         /*
          * Internally, we use "key" instead of "keys", since the latter is a method on JavasScript objects,
          * but externally, we allow the user to specify "keys"; "kbd" is also allowed as shorthand for "keyboard".
@@ -1546,6 +1551,11 @@ if (DEBUGGER) {
     {
         if (fAddress) {
             sMessage += " at " + this.toHexAddr(this.newAddr(this.cpu.getPC()));
+        }
+
+        if (this.bitsMessage & Messages.BUFFER) {
+            this.aMessageBuffer.push(sMessage);
+            return;
         }
 
         if (this.sMessagePrev && sMessage == this.sMessagePrev) return;
@@ -3921,6 +3931,12 @@ if (DEBUGGER) {
                 else if (asArgs[2] == "off") {
                     this.bitsMessage &= ~bitsMessage;
                     fCriteria = false;
+                    if (bitsMessage == Messages.BUFFER) {
+                        for (var i = 0; i < this.aMessageBuffer.length; i++) {
+                            this.println(this.aMessageBuffer[i]);
+                        }
+                        this.aMessageBuffer = [];
+                    }
                 }
             }
         }
