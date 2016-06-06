@@ -16,15 +16,12 @@ PCjs supports these early [IBM PC Machines](#ibm-pc-machines):
 * [IBM PC XT](/devices/pcx86/machine/5160/) (Model 5160)
 * [IBM PC AT](/devices/pcx86/machine/5170/) (Model 5170)
 
-PCjs also supports IBM PC-compatibles, such as:
+PCjs also supports IBM PC-compatibles such as:
 
 * [AT&amp;T](/devices/pcx86/machine/att/) ([AT&amp;T 6300](/devices/pcx86/machine/att/6300/))
 * [Columbia Data Products](/devices/pcx86/machine/cdp/) ([MPC 1600](/devices/pcx86/machine/cdp/mpc1600/cga/640kb/))
 * [COMPAQ](/devices/pcx86/machine/compaq/) ([DeskPro 386](/devices/pcx86/machine/compaq/deskpro386/))
 * [Zenith Data Systems](/devices/pcx86/machine/zenith/) ([Z-150](/devices/pcx86/machine/zenith/z150/cga/640kb/))
-
-Learn more about the [Devices](/devices/) used to build all our machines, such as the 6502-based
-[Ohio Scientific Challenger 1P](/devices/c1p/machine/).
 
 ### Ready-To-Run App Demos
 
