@@ -2369,7 +2369,7 @@ if (DEBUGGER) {
     };
 
     /**
-     * setByte(dbgAddr, b, inc)
+     * setByte(dbgAddr, b, inc, fNoUpdate)
      *
      * NOTE: If you need to patch a ROM, you MUST use the ROM location's physical address.
      *
@@ -2380,8 +2380,9 @@ if (DEBUGGER) {
      * @param {DbgAddr} dbgAddr
      * @param {number} b
      * @param {number} [inc]
+     * @param {boolean} [fNoUpdate] (when doing a large number of setByte() calls, set this to true and call cpu.updateCPU() when you're done)
      */
-    Debugger.prototype.setByte = function(dbgAddr, b, inc)
+    Debugger.prototype.setByte = function(dbgAddr, b, inc, fNoUpdate)
     {
         var addr = this.getAddr(dbgAddr, true, 1);
         if (addr !== X86.ADDR_INVALID) {
@@ -2391,7 +2392,7 @@ if (DEBUGGER) {
                 this.bus.setByteDirect(addr, b);
             }
             if (inc) this.incAddr(dbgAddr, inc);
-            this.cpu.updateCPU(true);           // we set fForce to true in case video memory was the target
+            if (!fNoUpdate) this.cpu.updateCPU(true);   // we set fForce to true in case video memory was the target
         }
     };
 
@@ -6887,7 +6888,7 @@ if (DEBUGGER) {
     Debugger.prototype.doLoad = function(asArgs)
     {
         if (!asArgs[1] || asArgs[1] == '?') {
-            this.println("list/load commands:");
+            this.println("load commands:");
             this.println("\tl [address] [drive #] [sector #] [# sectors]");
             return;
         }
@@ -6912,7 +6913,7 @@ if (DEBUGGER) {
          * and up, unless no HDC is present, in which case we assume FDC for all drive numbers.
          *
          * Both controllers must obviously support the same interfaces; ie, copyDrive(), seekDrive(),
-         * and readByte().  We also rely on the disk property to determine whether the drive is "loaded".
+         * and readData().  We also rely on the disk property to determine whether the drive is "loaded".
          *
          * In the case of the HDC, if the drive is valid, then by definition it is also "loaded", since an HDC
          * drive and its disk are inseparable; it's certainly possible that the disk object may be empty at
@@ -6944,17 +6945,21 @@ if (DEBUGGER) {
                         var sAddr = this.toHexAddr(dbgAddr);
                         while (!fAbort && drive.nBytes-- > 0) {
                             (function(dbg, dbgAddrCur) {
-                                dc.readByte(drive, function(b, fAsync) {
+                                dc.readData(drive, function(b, fAsync) {
                                     if (b < 0) {
                                         dbg.println("out of data at address " + dbg.toHexAddr(dbgAddrCur));
                                         fAbort = true;
                                         return;
                                     }
-                                    dbg.setByte(dbgAddrCur, b, 1);
+                                    dbg.setByte(dbgAddrCur, b, 1, true);
                                     cb++;
                                 });
                             }(this, dbgAddr));
                         }
+                        /*
+                         * Call updateCPU() now, since we forced setByte() to defer all updates
+                         */
+                        this.cpu.updateCPU(true);
                         this.println(cb + " bytes read at " + sAddr);
                     } else {
                         this.println("sector " + iSector + " request out of range");
