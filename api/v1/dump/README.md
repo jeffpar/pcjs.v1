@@ -18,14 +18,13 @@ PCjs DiskDump and FileDump API
 ===
 
 The PCjs [DiskDump](/modules/diskdump/) and [FileDump](/modules/filedump/) API are not fully supported
-by the current PCjs web server.
-When **pcjs.org** switched from a Node-based web server running on
-[Amazon Web Services](https://aws.amazon.com/elasticbeanstalk/) to
-[GitHub Pages](https://pages.github.com/), the original server-side API had to be abandoned.
+by the current PCjs web server.  When [pcjs.org](http://www.pcjs.org/) switched from a Node-based web server running on
+[Amazon Web Services](https://aws.amazon.com/elasticbeanstalk/) to [GitHub Pages](https://pages.github.com/),
+the original server-side API had to be abandoned.
 
 However, we're working on a client-side replacement of the API that will run
 entirely in your browser, so hopefully portions of the original API will be available in the near future.
 In the meantime, check out the
 [Developer Notes](https://github.com/jeffpar/pcjs#user-content-developer-notes) section of the
-[PCjs Project](https://github.com/jeffpar/pcjs) for instructions on running your own local copy of Node.js and the
+[PCjs Project](https://github.com/jeffpar/pcjs) for instructions on running your own local copy of Node and the
 PCjs web server.

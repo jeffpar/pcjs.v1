@@ -1,8 +1,8 @@
 /*
  * grunt-prepjs
- * https://github.com/jeffpar/jsmachines
+ * https://github.com/jeffpar/pcjs
  *
- * Copyright (c) 2014 jeffpar
+ * Copyright (c) 2014-2016 jeffpar
  * Licensed under the MIT license.
  *
  * Genesis:
