@@ -45,8 +45,9 @@ var Messages = {
     SERIAL:     0x00800000,
     SPEAKER:    0x02000000,
     COMPUTER:   0x04000000,
-    LOG:        0x20000000,
-    WARN:       0x40000000,
+    LOG:        0x10000000,
+    WARN:       0x20000000,
+    BUFFER:     0x40000000,
     HALT:       0x80000000|0
 };
 

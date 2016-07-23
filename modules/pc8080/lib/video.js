@@ -206,6 +206,8 @@ function Video(parmsVideo, canvas, context, textarea, container)
             }
         }
     }
+
+    if (DEBUG) this.nCyclesPrev = 0;
 }
 
 Component.subclass(Video);
@@ -484,6 +486,9 @@ Video.prototype.setPixel = function(imageBuffer, x, y, bPixel)
  */
 Video.prototype.updateScreen = function(n)
 {
+    var fClean;
+    var fUpdate = true;
+
     if (n >= 0) {
         if (!(n & 1)) {
             /*
@@ -497,16 +502,26 @@ Video.prototype.updateScreen = function(n)
              * update the bottom half of the frame buffer after acknowledging this interrupt.
              */
             this.cpu.requestINTR(2);
-            return;
+            fUpdate = false;
         }
 
         /*
          * Since this is not a forced update, if our cell cache is valid AND the buffer is clean, then do nothing.
          */
-        if (this.fCellCacheValid && this.bus.cleanMemory(this.addrBuffer, this.sizeBuffer)) {
-            return;
+        if (fUpdate && this.fCellCacheValid) {
+            if ((fClean = this.bus.cleanMemory(this.addrBuffer, this.sizeBuffer))) {
+                fUpdate = false;
+            }
         }
     }
+
+    if (DEBUG) {
+        var nCycles = this.cpu.getCycles();
+        var nCyclesDelta = nCycles - this.nCyclesPrev;
+        this.nCyclesPrev = nCycles;
+        this.printMessage("updateScreen(" + n + "): clean=" + fClean + ", update=" + fUpdate + ", cycles=" + nCycles + ", delta=" + nCyclesDelta);
+    }
+    if (!fUpdate) return;
 
     var addr = this.addrBuffer;
     var addrLimit = addr + this.sizeBuffer;

@@ -54,9 +54,9 @@ Here's a simple machine XML file that includes an 8088 CPU and 16Kb of RAM:
 </machine>
 ```
 
-However, that machine isn't usable, since it lacks a keyboard, screen, or any code (ROMs) to execute.
+However, that machine isn't really usable, since it lacks a keyboard, screen, or any code (ROMs) to execute.
 
-A simple machine definition that actually works might look like:
+Here's a simple machine XML definition that's more useful:
 
 ```xml
 <machine id="ibm" class="pc" width="720px">
@@ -73,7 +73,7 @@ A simple machine definition that actually works might look like:
 </machine>
 ```
 
-Here is an [example](examples/example1.html) of this machine's [XML](examples/example1.xml) file.
+[Example 1](examples/example1.html) shows the [XML](examples/example1.xml) in action.
 
 Machine definitions can also include visual elements.  For example, we can include a "Run" button with the CPU component.
 Note that as soon as the machine is ready and the CPU starts running, the "Run" button will change to "Halt".
@@ -107,25 +107,24 @@ disks at will, we'll include some UI controls.
 </machine>
 ```
 
-Here is an [example](examples/example2.html) of the updated machine's [XML](examples/example2.xml)
-file.
+[Example 2](examples/example2.html) shows the updated [XML](examples/example2.xml) in action.
 
 ### Loading Machine XML Files
 
 Inside a web page, add a &lt;div&gt; to contain the machine, load the *pcx86.js* script
-(*pcx86-dbg.js* if you need the PCx86 [Debugger](debugger/)), and then call *embedPC()*:
+(*pcx86-dbg.js* if you need the PCx86 [Debugger](debugger/)), and then call *embedPCx86()*:
 
 ```xml
 <div id="example2"/>
 <script type="text/javascript" src="pcx86.js"/>
 <script type="text/javascript">
-    embedPC("example2", "example2.xml", "components.xsl");
+    embedPCx86("example2", "example2.xml", "components.xsl");
 </script>
 ```
 
-In fact, this is exactly what we did in the previous [example](examples/example2.html).
+In fact, this is exactly what we did in [Example 2](examples/example2.html).
 
-*embedPC()* accepts 4 parameters:
+*embedPCx86()* accepts 4 parameters:
 
 - The *id* of the machine &lt;div&gt; (e.g., "example2");
 - The *url* of the machine XML file (e.g., "example2.xml");
@@ -155,8 +154,7 @@ To create a configuration that includes the PCx86 Debugger, you need to:
 - Add debugger controls to the Control Panel, such as Run, Step, Reset, etc;
 - Change your web page to load *pcx86-dbg.js* instead of *pcx86.js*.
 
-Take a look at the [example3a](examples/example3a.html) example
-(with [XML file](examples/example3a.xml)).
+Take a look at [Example 3A](examples/example3a.html) ([XML](examples/example3a.xml)).
 
 The debugger gives you access to more capabilities than mere debugging. For example, you can use the **load**
 command to load diskette sectors into memory ("l [addr] [drive #] ...") or the **dump** command to dump an entire
@@ -164,8 +162,8 @@ diskette as JSON ("d disk [drive #]").  You can also **halt** a machine ("h") an
 ("d state"). You can save that state in a .json file, and then use that state to initialize a new machine (as long as
 it uses the same machine *id*).
 
-In fact, the [example3b](examples/example3b.html) example (with [XML file](examples/example3b.xml))
-does just that, using JSON dumps created from [example3a](examples/example3a.html) after starting VisiCalc.
+In fact, [Example 3B](examples/example3b.html) ([XML](examples/example3b.xml))
+does just that, using JSON dumps created from [Example 3A](examples/example3a.html) after starting VisiCalc.
 See the *state* property on the [Computer](computer/) component for more information on state files.
 
 ### Running PCx86 On Your Own Server

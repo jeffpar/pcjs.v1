@@ -18,7 +18,7 @@ PCjs Project.
 
 The test machine below loads a copy of the
 [8080 Exerciser](https://web.archive.org/web/20151006085348/http://www.idb.me.uk/sunhillow/8080.html)
-(specifically, [8080EX1](/devices/pc8080/rom/test/8080EX1.MAC)) and intercepts the exerciser's CP/M console
+(specifically, [8080EX1](/devices/pc8080/rom/exerciser/8080EX1.MAC)) and intercepts the exerciser's CP/M console
 calls so that you can see its progress in the Control Panel window.  This is a "headless" test machine
 (no keyboard or display), so that's all you get.
 
@@ -37,8 +37,8 @@ Carry flag (AF).
 At 2Mhz, the 8080 Exerciser tests take quite a while, but you can click the speed button while the machine is running
 to increase the simulated speed; it will revert to 2Mhz when you exceed the maximum speed that your system supports.
 
-NOTE: The original [8080 Exerciser website](http://www.idb.me.uk/sunhillow/8080.html) is currently unavailable,
-so we refer you to the copy on
+NOTE: The original [8080 Exerciser website](http://www.idb.me.uk/sunhillow/8080.html)
+is currently unavailable, so we refer you to the copy on
 [archive.org](https://web.archive.org/web/20151006085348/http://www.idb.me.uk/sunhillow/8080.html).
 The 8080 Exerciser source code has also been "forked" on [GitHub](https://github.com/begoon/8080ex1).
 
