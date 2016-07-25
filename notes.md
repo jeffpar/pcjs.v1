@@ -225,16 +225,3 @@ indicating the name of serial device to connect to:
 The advantage of using *nc* is that no "middle man" is required: your terminal window will be connected directly
 to the virtual serial port.  And *nc* is included with OS X, whereas *socat* must installed separately (see
 [http://www.dest-unreach.org/socat/](http://www.dest-unreach.org/socat/)).
-
-TODO
-===
-
-- Fix all *class="pc"* in machine XML files
-- Fix all paths:
-	- /apps/pc -> /apps/pcx86
-	- /devices/pc -> /devices/pcx86
-	- /disks/pc -> /disks/pcx86
-	- etc
-- Rename PCJSCLASS to APPCLASS
-- Remove C1PJSCLASS
-- Look for XML files that still refer to /configs
