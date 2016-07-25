@@ -144,7 +144,8 @@ To install Jekyll for use with PCjs:
  2. Install Bundler (on OS X, run `sudo gem install bundler`)
  3. Create a `Gemfile` containing `gem 'github-pages'` (this is already checked in)
  4. Run `bundle install` (GitHub Pages alternatively suggests: `bundle exec jekyll build --safe`)
- 5. Run `bundle exec jekyll serve --host=0.0.0.0 --config _config.yml` to start the web server
+ 5. Checkout the `gh-pages` branch, since only that branch contains all the Jekyll-related files
+ 6. Run `bundle exec jekyll serve --host=0.0.0.0 --config _config.yml` to start the web server
 
 Now open a web browser and go to `http://localhost:4000/`.  You're done!
 
@@ -154,6 +155,10 @@ for example, you may want to run PCjs on your iPhone, iPad, or other wireless de
 Another useful variation is `--config _config.yml,_developer.yml` which uses the settings in `_developer.yml`
 to override the defaults in `_config.yml`.  Using development (non-production) settings in `_developer.yml` is
 analogous to running the Node web server with certain development options; see [Debugging PCjs](#debugging-pcjs).
+
+Don't see any YML files in the root of your project?  You probably forgot to switch to the `gh-pages` branch:
+
+	git checkout gh-pages
 
 GitHub Pages says you can run `jekyll serve` instead of `bundle exec jekyll serve`, but with the addition of
 more gems to `Gemfile` (eg, `jekyll-sitemap`), running `jekyll serve` may trigger dependency errors on some systems.
