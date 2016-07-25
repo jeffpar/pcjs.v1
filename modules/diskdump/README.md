@@ -17,7 +17,7 @@ files/folders.
 
 For example, from the root directory of the project, you could run:
 
-	node modules/diskdump/bin/diskdump --path="apps/pc/1981/visicalc/README.md" --format=img --output=disk.img
+	node modules/diskdump/bin/diskdump --path="apps/pcx86/1981/visicalc/README.md" --format=img --output=disk.img
 
 to produce a `disk.img` containing one file, "README.md", which you could then mount on your local operating
 system *or* inside a PCjs machine.
@@ -25,13 +25,13 @@ system *or* inside a PCjs machine.
 To make the disk image more useful, you might want to download a copy of [VisiCalc](http://www.bricklin.com/history/vcexecutable.htm)
 into that folder as well, so that you could then run:
 
-	node modules/diskdump/bin/diskdump --path="apps/pc/1981/visicalc/vc.com;README.md" --format=img --output=disk.img
+	node modules/diskdump/bin/diskdump --path="apps/pcx86/1981/visicalc/vc.com;README.md" --format=img --output=disk.img
 
 to produce a `disk.img` containing both "VC.COM" and "README.md".  In fact, this is exactly how the
-[disk.json](/apps/pc/1981/visicalc/disk.json) stored in the [VisiCalc](/apps/pc/1981/visicalc/) folder was generated.
+[disk.json](/apps/pcx86/1981/visicalc/disk.json) stored in the [VisiCalc](/apps/pcx86/1981/visicalc/) folder was generated.
 
 The equivalent web server API request would look like:
 
-	http://localhost:8088/api/v1/dump?path=/apps/pc/1981/visicalc/vc.com;README.md&format=img
+	http://localhost:8088/api/v1/dump?path=/apps/pcx86/1981/visicalc/vc.com;README.md&format=img
 	
 DiskDump is a port of the original [JavaScript Machines](http://jsmachines.net/) **convdisk.php** utility.
