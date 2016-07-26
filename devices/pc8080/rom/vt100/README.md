@@ -1,13 +1,13 @@
 ---
 layout: page
-title: VT100 ROMs
-permalink: /devices/vt100/rom/
+title: DEC VT100 ROMs
+permalink: /devices/pc8080/rom/vt100/
 ---
 
-VT100 ROMs
-----------
+DEC VT100 ROMs
+--------------
 
-The VT100 used four 2Kb ROMs to store the code used by its 8080 processor.
+The DEC VT100 Terminal used four 2Kb ROMs to store the code used by its 8080 processor.
 Their combined contents are stored in [VT100.json](VT100.json).
 
 As Trammell Hudson's [VT100 Page](https://trmm.net/VT100) explains:
