@@ -17,5 +17,9 @@ All PCjs machines are built from the following sets of devices:
 * [8080-based Devices](pc8080/) (e.g., [Space Invaders](pc8080/machine/invaders/))
 * [8086-based Devices](pcx86/) (e.g., [IBM PC and compatibles](pcx86/machine/))
 
+The directory also contains an assortment of [ROMs](roms/) and other devices, including:
+
+* [VT100 Terminal](vt100/)
+
 These devices are user-installable components that you would typically find in a real personal computer,
 such as keyboards, disk drive controllers with one or more drives, video cards, etc.
