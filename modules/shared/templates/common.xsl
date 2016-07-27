@@ -35,10 +35,9 @@
 					<li><a href="/">PCjs</a></li>
 					<li><a href="/apps/pcx86/">Demos</a></li>
 					<li><a href="/devices/">Devices</a></li>
-					<li><a href="/disks/pcx86/">Disks</a></li>
+					<li><a href="/disks/">Disks</a></li>
 					<li><a href="/docs/">Docs</a></li>
 					<li><a href="/pubs/">Pubs</a></li>
-					<li><a href="/blog/">Blog</a></li>
 					<li><a href="/docs/about/">About</a></li>
 				</ul>
 			</div>
