@@ -52,6 +52,8 @@ if (NODE) {
  *      screenRotate: the amount of counter-clockwise screen rotation required (eg, -90 or 270)
  *      aspectRatio (eg, 1.33)
  *      bufferAddr: the starting address of the frame buffer (eg, 0x2400)
+ *      bufferRAM: true to use existing RAM (default is false)
+ *      bufferFormat: can be set to anything, but the only recognized format is currently "vt100"
  *      bufferCols: the width of a single frame buffer row, in pixels (eg, 256)
  *      bufferRows: the number of frame buffer rows (eg, 224)
  *      bufferBits: the number of bits per column (default is 1)
@@ -96,6 +98,8 @@ function Video(parmsVideo, canvas, context, textarea, container)
     this.cyScreen = parmsVideo['screenHeight'];
 
     this.addrBuffer = parmsVideo['bufferAddr'];
+    this.fUseRAM = parmsVideo['bufferRAM'];
+    this.sFormat = parmsVideo['bufferFormat'];
     this.cxBuffer = parmsVideo['bufferCols'];
     this.cyBuffer = parmsVideo['bufferRows'];
     this.nBitsPerPixel = parmsVideo['bufferBits'] || 1;
@@ -212,6 +216,10 @@ function Video(parmsVideo, canvas, context, textarea, container)
 
 Component.subclass(Video);
 
+/*
+ * TODO: Use of these overlay colors should be limited to machine's that require/request them (ie, Space Invaders),
+ * using an additional parmsVideo property.
+ */
 Video.COLORS = {
     OVERLAY_TOP:    0,
     OVERLAY_BOTTOM: 1,
@@ -237,14 +245,18 @@ Video.prototype.initBus = function(cmp, bus, cpu, dbg)
     /*
      * Compute the size of the frame buffer and allocate.
      */
-    this.sizeBuffer = ((this.cxBuffer * this.nBitsPerPixel) >> 3) * this.cyBuffer;
-    if (this.bus.addMemory(this.addrBuffer, this.sizeBuffer, Memory.TYPE.VIDEO)) {
-        /*
-         * Compute the number of cells and initialize the cell cache.
-         */
-        this.nCellCache = this.sizeBuffer >> 1;
-        this.nPixelsPerCell = (16 / this.nBitsPerPixel)|0;
-        this.initCache();
+    if (!this.fUseRAM) {
+        this.sizeBuffer = ((this.cxBuffer * this.nBitsPerPixel) >> 3) * this.cyBuffer;
+        if (this.bus.addMemory(this.addrBuffer, this.sizeBuffer, Memory.TYPE.VIDEO)) {
+            /*
+             * Compute the number of cells and initialize the cell cache; note that sizeBuffer is a number of
+             * bytes, whereas nCellCache is a number of 16-bit words (aka shorts) because we fetch memory 16 bits
+             * at a time during screen updates.
+             */
+            this.nCellCache = this.sizeBuffer >> 1;
+            this.nPixelsPerCell = (16 / this.nBitsPerPixel)|0;
+            this.initCache();
+        }
     }
 
     /*

@@ -17,5 +17,5 @@ for each ROM in the machine; eg:
 The project currently contains the following 8080-based ROMs:
 
 * [8080 Exerciser Tests](exerciser/)
-* [DEC VT100](vt100/)
 * [Space Invaders (1978)](invaders/)
+* [DEC VT100 Terminal](vt100/)

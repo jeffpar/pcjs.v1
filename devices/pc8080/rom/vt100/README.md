@@ -31,7 +31,7 @@ The above PCB chip locations correspond to the following [DEC ROM](/devices/roms
 * E45: [23-033E2.bin](https://web.archive.org/web/20140723115846/http://www.dunnington.u-net.com/public/DECROMs/23-033E2.bin)
 * E40: [23-034E2.bin](https://web.archive.org/web/20140723115846/http://www.dunnington.u-net.com/public/DECROMs/23-034E2.bin)
 
-And sure enough, concatenating those DEC ROM four dumps produces a perfect match for Trammell Hudson's
+And sure enough, concatenating those four DEC ROM dumps produces a perfect match for Trammell Hudson's
 [VT100.bin](http://trmm.net/images/2/20/VT100.bin).
 
 The VT100 also used one 2Kb character generator ROM, which is stored in [23-018E2.json](23-018E2.json).
