@@ -176,6 +176,7 @@ function Video(parmsVideo, canvas, context, textarea, container)
         cxBuffer = this.cyBuffer;
         cyBuffer = this.cxBuffer;
     }
+
     this.imageBuffer = this.contextScreen.createImageData(cxBuffer, cyBuffer);
     this.canvasBuffer = document.createElement("canvas");
     this.canvasBuffer.width = cxBuffer;
@@ -213,6 +214,17 @@ function Video(parmsVideo, canvas, context, textarea, container)
                 }
             }
         }
+    }
+
+    this.sFontROM = parmsVideo['fontROM'];
+    if (this.sFontROM) {
+        var sFileExt = str.getExtension(this.sFontROM);
+        if (sFileExt != "json") {
+            this.sFontROM = web.getHost() + DumpAPI.ENDPOINT + '?' + DumpAPI.QUERY.FILE + '=' + this.sFontROM + '&' + DumpAPI.QUERY.FORMAT + '=' + DumpAPI.FORMAT.BYTES;
+        }
+        web.getResource(this.sFontROM, null, true, function(sURL, sResponse, nErrorCode) {
+            video.doneLoad(sURL, sResponse, nErrorCode);
+        });
     }
 
     if (DEBUG) this.nCyclesPrev = 0;
@@ -256,6 +268,7 @@ Video.prototype.initBus = function(cmp, bus, cpu, dbg)
         this.chipset = cmp.getMachineComponent("ChipSet");
         if (this.chipset && this.chipset.model == ChipSet.SI_1978.MODEL) {
             this.nFormat = Video.FORMAT.SI1978;
+            this.initColors();  // this needs to be called whenever nFormat may changed
         }
     }
 
@@ -285,7 +298,130 @@ Video.prototype.initBus = function(cmp, bus, cpu, dbg)
         this.kbd.setBinding(this.textareaScreen? "textarea" : "canvas", "kbd", this.inputScreen);
     }
 
-    this.setReady();
+    if (!this.sFontROM) this.setReady();
+};
+
+/**
+ * doneLoad(sURL, sFontData, nErrorCode)
+ *
+ * @this {Video}
+ * @param {string} sURL
+ * @param {string} sFontData
+ * @param {number} nErrorCode (response from server if anything other than 200)
+ */
+Video.prototype.doneLoad = function(sURL, sFontData, nErrorCode)
+{
+    if (nErrorCode) {
+        this.notice("Unable to load font ROM (error " + nErrorCode + ": " + sURL + ")");
+        return;
+    }
+
+    Component.addMachineResource(this.idMachine, sURL, sFontData);
+
+    try {
+        /*
+         * The most likely source of any exception will be right here, where we're parsing the JSON-encoded data.
+         */
+        var abFontData = eval("(" + sFontData + ")");
+
+        var ab = abFontData['bytes'] || abFontData;
+
+        if (!ab.length) {
+            Component.error("Empty font ROM: " + sURL);
+            return;
+        }
+        else if (ab.length == 1) {
+            Component.error(ab[0]);
+            return;
+        }
+
+        /*
+         * Translate the character data into separate "fonts", each of which will be a separate canvas object, with all
+         * 256 characters arranged in a 16x16 grid.
+         */
+        if (ab.length == 2048) {
+            /*
+             * The assumption here is that we're dealing with the original (IBM) MDA/CGA font data, which apparently
+             * was identical on both MDA and CGA cards (even though the former had no use for the latter, and vice versa).
+             *
+             * First, let's take a look at the MDA portion of the data.  Here are the first few rows of MDA font data,
+             * at the 0K and 2K boundaries:
+             *
+             *      00000000  00 00 00 00 00 00 00 00  00 00 7e 81 a5 81 81 bd  |..........~.....|
+             *      00000010  00 00 7e ff db ff ff c3  00 00 00 36 7f 7f 7f 7f  |..~........6....|
+             *      ...
+             *      00000800  00 00 00 00 00 00 00 00  99 81 7e 00 00 00 00 00  |..........~.....|
+             *      00000810  e7 ff 7e 00 00 00 00 00  3e 1c 08 00 00 00 00 00  |..~.....>.......|
+             *
+             * 8 bytes of data from a row in each of the 2K chunks are combined to form a 8-bit wide character with
+             * a maximum height of 16 bits.  Assembling the bits for character 0x01 (a happy face), we observe the following:
+             *
+             *      0 0 0 0 0 0 0 0  <== 00 from offset 0x0008
+             *      0 0 0 0 0 0 0 0  <== 00 from offset 0x0009
+             *      0 1 1 1 1 1 1 0  <== 7e from offset 0x000A
+             *      1 0 0 0 0 0 0 1  <== 81 from offset 0x000B
+             *      1 0 1 0 0 1 0 1  <== a5 from offset 0x000C
+             *      1 0 0 0 0 0 0 1  <== 81 from offset 0x000D
+             *      1 0 0 0 0 0 0 1  <== 81 from offset 0x000E
+             *      1 0 1 1 1 1 0 1  <== bd from offset 0x000F
+             *      1 0 0 1 1 0 0 1  <== 99 from offset 0x0808
+             *      1 0 0 0 0 0 0 1  <== 81 from offset 0x0809
+             *      0 1 1 1 1 1 1 0  <== 7e from offset 0x080A
+             *      0 0 0 0 0 0 0 0  <== 00 from offset 0x080B
+             *      0 0 0 0 0 0 0 0  <== 00 from offset 0x080C
+             *      0 0 0 0 0 0 0 0  <== 00 from offset 0x080D
+             *      0 0 0 0 0 0 0 0  <== 00 from offset 0x080E
+             *      0 0 0 0 0 0 0 0  <== 00 from offset 0x080F
+             *
+             * In the second 2K chunk, we observe that the last two bytes of every font cell definition are zero;
+             * this confirms our understanding that MDA font cell size is 8x14.
+             *
+             * Finally, there's the issue of screen cell size, which is actually 9x14 on the MDA.  We compensate for that
+             * by building a 9x14 font, even though there's only 8x14 bits of data. As http://www.seasip.info/VintagePC/mda.html
+             * explains:
+             *
+             *      "For characters C0h-DFh, the ninth pixel column is a duplicate of the eighth; for others, it's blank."
+             *
+             * This last point is confirmed by "The IBM Personal Computer From The Inside Out", p.295:
+             *
+             *      "Another unique feature of the monochrome adapter is a set of line-drawing and area-fill characters
+             *      that give continuous lines and filled areas. This is unusual for a display with a 9x14 character box
+             *      because the character generator provides a row only eight dots wide. On most displays, a blank 9th
+             *      dot is then inserted between characters. On the monochrome display, there is circuitry that duplicates
+             *      the 8th dot into the 9th dot position for characters whose ASCII codes are 0xB0 [sic] through 0xDF."
+             *
+             * However, the above text is mistaken about the start of the range.  While there ARE line-drawing characters
+             * in the range 0xB0-0xBF, none of them extend all the way to the right edge; IBM carefully segregated them.
+             * And in fact, characters 0xB0-0xB2 contain hash patterns that you would NOT want extended into the 9th column.
+             *
+             * The CGA font is part of the same ROM.  In fact, there are TWO CGA fonts in the ROM: a thin 5x7 "single dot"
+             * font located at offset 0x1000, and a thick 7x7 "double dot" font at offset 0x1800.  The latter is the default
+             * font, unless overridden by a jumper setting on the CGA card, so it is our default CGA font as well (although
+             * someday we may provide a virtual jumper setting that allows you to select the thinner font).
+             *
+             * The first offset we must pass to setFontData() is the offset of the CGA font; we choose the thicker "double dot"
+             * CGA font at 0x1800 (which was the PC's default font as well), instead of the thinner "single dot" font at 0x1000.
+             * The second offset is for the MDA font.
+             */
+            // this.setFontData(ab);
+        }
+        else {
+            this.notice("Unrecognized font data length (" + ab.length + ")");
+            return;
+        }
+
+    } catch (e) {
+        this.notice("Font ROM data error: " + e.message);
+        return;
+    }
+    /*
+     * If we're still here, then we're ready!
+     *
+     * UPDATE: Per issue #21, I'm issuing setReady() *only* if a valid contextScreen exists *or* a Debugger is attached.
+     *
+     * TODO: Consider a more general-purpose solution for deciding whether or not the user wants to run in a "headless" mode.
+     */
+    if (this.contextScreen || this.dbg) this.setReady();
 };
 
 /**

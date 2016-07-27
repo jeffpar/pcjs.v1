@@ -11,11 +11,13 @@ machines:
 VT100 Terminal
 --------------
 
-This is where we'll be testing another 8080-based machine: a VT100 Terminal. Unlike other VT100 emulations,
+This is where we'll be testing another 8080-based machine: the VT100 Terminal. Unlike other VT100 emulations,
 this will simulate a VT100 by running the terminal's original firmware inside the [PC8080](/modules/pc8080/) CPU emulator.
 
 As described in the [Technical Manual (July 1982)](http://bitsavers.informatik.uni-stuttgart.de/pdf/dec/terminal/vt100/EK-VT100-TM-003_VT100_Technical_Manual_Jul82.pdf),
-p. 4-15, 8Kb (0x2000) of ROM is located at 0x0000, and 3Kb (0x0C00) of RAM immediately follows it at 0x2000.  
+p. 4-15, 8Kb (0x2000) of ROM is located at 0x0000, and 3Kb (0x0C00) of RAM immediately follows it at 0x2000.  The ROM at
+0x0000 contains all the VT100's 8080 code.  The VT100 also contains a 2Kb character generator ROM, but it is not
+mapped into the 8080's address space.
 
 [vt100romhax](http://vt100romhax.tumblr.com/post/90697428973/the-vt100-memory-map-and-8080-disassembly)
 (aka [phooky](https://github.com/phooky)) further explains VT100 memory usage:
