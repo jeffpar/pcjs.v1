@@ -36,6 +36,7 @@ if (NODE) {
     var web         = require("../../shared/lib/weblib");
     var DumpAPI     = require("../../shared/lib/dumpapi");
     var Component   = require("../../shared/lib/component");
+    var ChipSet     = require("./chipset");
     var Memory      = require("./memory");
     var Messages    = require("./messages");
     var State       = require("./state");
@@ -53,7 +54,7 @@ if (NODE) {
  *      aspectRatio (eg, 1.33)
  *      bufferAddr: the starting address of the frame buffer (eg, 0x2400)
  *      bufferRAM: true to use existing RAM (default is false)
- *      bufferFormat: can be set to anything, but the only recognized format is currently "vt100"
+ *      bufferFormat: if defined, one of the recognized formats in Video.FORMATS (eg, "vt100")
  *      bufferCols: the width of a single frame buffer row, in pixels (eg, 256)
  *      bufferRows: the number of frame buffer rows (eg, 224)
  *      bufferBits: the number of bits per column (default is 1)
@@ -99,7 +100,10 @@ function Video(parmsVideo, canvas, context, textarea, container)
 
     this.addrBuffer = parmsVideo['bufferAddr'];
     this.fUseRAM = parmsVideo['bufferRAM'];
-    this.sFormat = parmsVideo['bufferFormat'];
+
+    var sFormat = parmsVideo['bufferFormat'];
+    this.nFormat = sFormat && Video.FORMATS[sFormat.toLowerCase()] || Video.FORMAT.UNKNOWN;
+
     this.cxBuffer = parmsVideo['bufferCols'];
     this.cyBuffer = parmsVideo['bufferRows'];
     this.nBitsPerPixel = parmsVideo['bufferBits'] || 1;
@@ -216,14 +220,20 @@ function Video(parmsVideo, canvas, context, textarea, container)
 
 Component.subclass(Video);
 
-/*
- * TODO: Use of these overlay colors should be limited to machine's that require/request them (ie, Space Invaders),
- * using an additional parmsVideo property.
- */
 Video.COLORS = {
     OVERLAY_TOP:    0,
     OVERLAY_BOTTOM: 1,
     OVERLAY_TOTAL:  2
+};
+
+Video.FORMAT = {
+    UNKNOWN:        0,
+    SI1978:         1,
+    VT100:          2
+};
+
+Video.FORMATS = {
+    "vt100":        Video.FORMAT.VT100
 };
 
 /**
@@ -241,6 +251,13 @@ Video.prototype.initBus = function(cmp, bus, cpu, dbg)
     this.bus = bus;
     this.cpu = cpu;
     this.dbg = dbg;
+
+    if (!this.nFormat) {
+        this.chipset = cmp.getMachineComponent("ChipSet");
+        if (this.chipset && this.chipset.model == ChipSet.SI_1978.MODEL) {
+            this.nFormat = Video.FORMAT.SI1978;
+        }
+    }
 
     /*
      * Compute the size of the frame buffer and allocate.
@@ -439,14 +456,16 @@ Video.prototype.initColors = function()
 {
     var rgbBlack  = [0x00, 0x00, 0x00, 0xff];
     var rgbWhite  = [0xff, 0xff, 0xff, 0xff];
-    var rgbGreen  = [0x00, 0xff, 0x00, 0xff];
-    var rgbYellow = [0xff, 0xff, 0x00, 0xff];
     this.nColors = (1 << this.nBitsPerPixel);
     this.aRGB = new Array(this.nColors + Video.COLORS.OVERLAY_TOTAL);
     this.aRGB[0] = rgbBlack;
     this.aRGB[1] = rgbWhite;
-    this.aRGB[this.nColors + Video.COLORS.OVERLAY_TOP] = rgbYellow;
-    this.aRGB[this.nColors + Video.COLORS.OVERLAY_BOTTOM] = rgbGreen;
+    if (this.nFormat == Video.FORMAT.SI1978) {
+        var rgbGreen  = [0x00, 0xff, 0x00, 0xff];
+        var rgbYellow = [0xff, 0xff, 0x00, 0xff];
+        this.aRGB[this.nColors + Video.COLORS.OVERLAY_TOP] = rgbYellow;
+        this.aRGB[this.nColors + Video.COLORS.OVERLAY_BOTTOM] = rgbGreen;
+    }
 };
 
 /**
@@ -466,7 +485,7 @@ Video.prototype.setPixel = function(imageBuffer, x, y, bPixel)
     } else {
         index = (imageBuffer.height - x - 1) * imageBuffer.width + y;
     }
-    if (bPixel) {
+    if (bPixel && this.nFormat == Video.FORMAT.SI1978) {
         if (x >= 208 && x < 236) {
             bPixel = this.nColors + Video.COLORS.OVERLAY_TOP;
         }
