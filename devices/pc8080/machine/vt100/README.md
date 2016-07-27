@@ -34,22 +34,30 @@ It always defaults to address 0x2000 for the first line of character data, but e
 containing line attributes and the address of the next line, so the location of subsequent lines will vary,
 depending on the following line attributes:
 
-* Single-width characters (80 or 132 columns)
-* Double-width characters (40 or 66 columns)
+- Single-width characters (80 or 132 columns)
+- Double-width characters (40 or 66 columns)
 
 In addition to single vs. double width, line attributes can also specify double height (along with whether the
 top half or bottom half of the character should be displayed).
-
-The VT100 screen displays 800 dots per horizontal scan, and a total of 240 horizontal scans,
-so for optimum scaling, we define our own screen using multiples of those dimensions (currently 1600x480),
-and by default, it uses a 10x10 character cell, so the default display dimensions are 80 columns by 24 rows.
 
 In light of the above, the [machine XML file](machine.xml) must set the Video component's *bufferRAM* property
 to "true", indicating that existing RAM should be used, and a new property, *bufferFormat* must be set to "vt100",
 enabling support for the VT100's line data format; eg:
 
 	<ram id="ram" addr="0x2000" size="0x0C00"/>
-	<video id="video" screenWidth="1600" screenHeight="480" bufferAddr="0x2000" bufferRAM="true" bufferFormat="vt100" bufferCols="80" bufferRows="24" ...>
+	<video id="video" screenWidth="1600" screenHeight="800" bufferAddr="0x2000" bufferRAM="true" bufferFormat="vt100" bufferCols="80" bufferRows="24" ...>
+
+The VT100 screen displays 800 dots per horizontal scan, and a total of 240 horizontal scans, and by default,
+it uses a 10x10 character cell, for a total of 80 columns and 24 rows of characters.
+
+For optimum scaling, I would normally define the virtual screen size using multiples of the VT100's "dot" dimensions;
+eg, 1600x960 (a horizontal multiplier of 2 and a vertical multiplier of 4).  However, that would give us a virtual screen
+aspect ratio of 1.67, which is less than the (apparent) 2.0 aspect ratio of a physical screen, so I've changed the test
+machine's screen dimensions to 1600x800.
+
+Regarding physical dimensions, a VT100 screen measures 12 inches diagonally, and in 80-column mode, characters measure
+2.0mm x 3.35mm (in 132-column mode, they measure 1.3mm x 3.35mm).  This means that the text area of the screen is roughly
+160mm x 80mm, implying a screen aspect ratio of 2.0.
 
 {% include machine.html id="vt100" %}
 
