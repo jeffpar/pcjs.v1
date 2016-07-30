@@ -1061,6 +1061,18 @@
 				<xsl:otherwise>false</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
+		<xsl:variable name="cellWidth">
+			<xsl:choose>
+				<xsl:when test="@cellWidth"><xsl:value-of select="@cellWidth"/></xsl:when>
+				<xsl:otherwise>1</xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
+		<xsl:variable name="cellHeight">
+			<xsl:choose>
+				<xsl:when test="@cellHeight"><xsl:value-of select="@cellHeight"/></xsl:when>
+				<xsl:otherwise>1</xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
 		<xsl:variable name="charCols">
 			<xsl:choose>
 				<xsl:when test="@cols"><xsl:value-of select="@cols"/></xsl:when>
@@ -1080,6 +1092,12 @@
 				<xsl:when test="@charset"><xsl:value-of select="@charset"/></xsl:when>
 				<xsl:when test="@fontrom"><xsl:value-of select="@fontrom"/></xsl:when>
 				<xsl:when test="@fontROM"><xsl:value-of select="@fontROM"/></xsl:when>
+				<xsl:otherwise/>
+			</xsl:choose>
+		</xsl:variable>
+		<xsl:variable name="fontColor">
+			<xsl:choose>
+				<xsl:when test="@fontColor"><xsl:value-of select="@fontColor"/></xsl:when>
 				<xsl:otherwise/>
 			</xsl:choose>
 		</xsl:variable>
@@ -1125,7 +1143,7 @@
 		<xsl:call-template name="component">
 			<xsl:with-param name="machine" select="$machine"/>
 			<xsl:with-param name="class">video</xsl:with-param>
-			<xsl:with-param name="parms">,model:'<xsl:value-of select="$model"/>',mode:<xsl:value-of select="$mode"/>,screenWidth:<xsl:value-of select="$screenWidth"/>,screenHeight:<xsl:value-of select="$screenHeight"/>,screenColor:'<xsl:value-of select="$screenColor"/>',screenRotate:<xsl:value-of select="$screenRotate"/>,bufferAddr:<xsl:value-of select="$bufferAddr"/>,bufferRAM:<xsl:value-of select="$bufferRAM"/>,bufferFormat:'<xsl:value-of select="$bufferFormat"/>',bufferCols:<xsl:value-of select="$bufferCols"/>,bufferRows:<xsl:value-of select="$bufferRows"/>,bufferBits:<xsl:value-of select="$bufferBits"/>,bufferLeft:<xsl:value-of select="$bufferLeft"/>,bufferRotate:<xsl:value-of select="$bufferRotate"/>,memory:<xsl:value-of select="$memory"/>,switches:'<xsl:value-of select="$switches"/>',scale:<xsl:value-of select="$scale"/>,charCols:<xsl:value-of select="$charCols"/>,charRows:<xsl:value-of select="$charRows"/>,fontROM:'<xsl:value-of select="$fontROM"/>',touchScreen:'<xsl:value-of select="$touchScreen"/>',autoLock:<xsl:value-of select="$autoLock"/>,aspectRatio:<xsl:value-of select="$aspectRatio"/>,smoothing:<xsl:value-of select="$smoothing"/>,interruptRate:<xsl:value-of select="$interruptRate"/>,refreshRate:<xsl:value-of select="$refreshRate"/></xsl:with-param>
+			<xsl:with-param name="parms">,model:'<xsl:value-of select="$model"/>',mode:<xsl:value-of select="$mode"/>,screenWidth:<xsl:value-of select="$screenWidth"/>,screenHeight:<xsl:value-of select="$screenHeight"/>,screenColor:'<xsl:value-of select="$screenColor"/>',screenRotate:<xsl:value-of select="$screenRotate"/>,bufferAddr:<xsl:value-of select="$bufferAddr"/>,bufferRAM:<xsl:value-of select="$bufferRAM"/>,bufferFormat:'<xsl:value-of select="$bufferFormat"/>',bufferCols:<xsl:value-of select="$bufferCols"/>,bufferRows:<xsl:value-of select="$bufferRows"/>,bufferBits:<xsl:value-of select="$bufferBits"/>,bufferLeft:<xsl:value-of select="$bufferLeft"/>,bufferRotate:<xsl:value-of select="$bufferRotate"/>,memory:<xsl:value-of select="$memory"/>,switches:'<xsl:value-of select="$switches"/>',scale:<xsl:value-of select="$scale"/>,cellWidth:<xsl:value-of select="$cellWidth"/>,cellHeight:<xsl:value-of select="$cellHeight"/>,charCols:<xsl:value-of select="$charCols"/>,charRows:<xsl:value-of select="$charRows"/>,fontROM:'<xsl:value-of select="$fontROM"/>',fontColor:'<xsl:value-of select="$fontColor"/>',touchScreen:'<xsl:value-of select="$touchScreen"/>',autoLock:<xsl:value-of select="$autoLock"/>,aspectRatio:<xsl:value-of select="$aspectRatio"/>,smoothing:<xsl:value-of select="$smoothing"/>,interruptRate:<xsl:value-of select="$interruptRate"/>,refreshRate:<xsl:value-of select="$refreshRate"/></xsl:with-param>
 		</xsl:call-template>
 	</xsl:template>
 

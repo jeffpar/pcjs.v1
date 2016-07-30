@@ -6,7 +6,8 @@
 	<cpu id="cpu8080" model="8080" cycles="2000000"/>
 	<rom id="rom" addr="0x0000" size="0x2000" file="/devices/pc8080/rom/vt100/VT100.json"/>
 	<ram id="ram" addr="0x2000" size="0x0C00"/>
-	<video id="video" screenWidth="1600" screenHeight="800" smoothing="false" fontROM="/devices/pc8080/rom/vt100/23-018E2.json"
+	<video id="video" screenWidth="1600" screenHeight="800" smoothing="false"
+		   fontROM="/devices/pc8080/rom/vt100/23-018E2.json" fontColor="white" cellWidth="10" cellHeight="10"
 		   bufferAddr="0x2000" bufferRAM="true" bufferFormat="vt100" bufferCols="80" bufferRows="24" pos="left" padding="8px">
 		<menu>
 			<title>VT100 Screen</title>

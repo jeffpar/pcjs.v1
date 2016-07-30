@@ -63,6 +63,13 @@ if (NODE) {
  *      interruptRate: normally the same as (or some multiple of) refreshRate (eg, 120)
  *      refreshRate: how many times updateScreen() should be performed per second (eg, 60)
  *
+ *  In addition, if a text-only display is being emulated, define the following properties:
+ *
+ *      fontROM: URL of font ROM
+ *      fontColor: default is white
+ *      cellWidth: number (eg, 10 for VT100)
+ *      cellHeight: number (eg, 10 for VT100)
+ *
  * We record all the above values now, but we defer creation of the frame buffer until our initBus()
  * handler is called.  At that point, we will also compute the extent of the frame buffer, determine the
  * appropriate "cell" size (ie, the number of pixels that updateScreen() will fetch and process at once),
@@ -77,7 +84,7 @@ if (NODE) {
  * bufferRotate is an alternative to screenRotate; you may set one or the other (but not both) to -90 to
  * enable different approaches to counter-clockwise 90-degree image rotation.  screenRotate uses canvas
  * transformation methods (translate(), rotate(), and scale()), while bufferRotate inverts the dimensions
- * of the off-screen buffer and then relies on setPixel() to "rotate" the data into it.
+ * of the off-screen buffer and then relies on setPixel() to "rotate" the data into the proper location.
  *
  * @constructor
  * @extends Component
@@ -104,10 +111,16 @@ function Video(parmsVideo, canvas, context, textarea, container)
     var sFormat = parmsVideo['bufferFormat'];
     this.nFormat = sFormat && Video.FORMATS[sFormat.toLowerCase()] || Video.FORMAT.UNKNOWN;
 
-    this.cxBuffer = parmsVideo['bufferCols'];
-    this.cyBuffer = parmsVideo['bufferRows'];
+    this.nColsBuffer = parmsVideo['bufferCols'];
+    this.nRowsBuffer = parmsVideo['bufferRows'];
+
+    this.cxCellDefault = this.cxCell = parmsVideo['cellWidth'] || 1;
+    this.cyCellDefault = this.cyCell = parmsVideo['cellHeight'] || 1;
+    this.abFontData = null;
+
     this.nBitsPerPixel = parmsVideo['bufferBits'] || 1;
     this.iBitFirstPixel = parmsVideo['bufferLeft'] || 0;
+
     this.rotateBuffer = parmsVideo['bufferRotate'];
     if (this.rotateBuffer) {
         this.rotateBuffer = this.rotateBuffer % 360;
@@ -125,6 +138,10 @@ function Video(parmsVideo, canvas, context, textarea, container)
     this.contextScreen = context;
     this.textareaScreen = textarea;
     this.inputScreen = textarea || canvas || null;
+
+    this.xScreenOffset = this.yScreenOffset = 0;
+    this.cxScreenCell = (this.cxScreen / this.nColsBuffer)|0;
+    this.cyScreenCell = (this.cyScreen / this.nRowsBuffer)|0;
 
     /*
      * Support for disabling (or, less commonly, enabling) image smoothing, which all browsers
@@ -155,6 +172,10 @@ function Video(parmsVideo, canvas, context, textarea, container)
     if (this.rotateScreen) {
         this.rotateScreen = this.rotateScreen % 360;
         if (this.rotateScreen > 0) this.rotateScreen -= 360;
+        /*
+         * TODO: Consider also disallowing any rotateScreen value if bufferRotate was already set; setting
+         * both is most likely a mistake, but perhaps it's also a legitimate way of enabling 180-degree rotation?
+         */
         if (this.rotateScreen != -90) {
             this.notice("unsupported screen rotation: " + this.rotateScreen);
             this.rotateScreen = 0;
@@ -165,23 +186,7 @@ function Video(parmsVideo, canvas, context, textarea, container)
         }
     }
 
-    this.initColors();
-
-    /*
-     * Allocate off-screen buffers.
-     */
-    var cxBuffer = this.cxBuffer;
-    var cyBuffer = this.cyBuffer;
-    if (this.rotateBuffer) {
-        cxBuffer = this.cyBuffer;
-        cyBuffer = this.cxBuffer;
-    }
-
-    this.imageBuffer = this.contextScreen.createImageData(cxBuffer, cyBuffer);
-    this.canvasBuffer = document.createElement("canvas");
-    this.canvasBuffer.width = cxBuffer;
-    this.canvasBuffer.height = cyBuffer;
-    this.contextBuffer = this.canvasBuffer.getContext("2d");
+    this.initBuffers();
 
     /*
      * Here's the gross code to handle full-screen support across all supported browsers.  The lack of standards
@@ -246,6 +251,61 @@ Video.FORMAT = {
 
 Video.FORMATS = {
     "vt100":        Video.FORMAT.VT100
+};
+
+
+Video.VT100 = {
+    FONT: {
+        NORML:      0,
+        DWIDE:      1,
+        DHIGH:      2
+    },
+    LINETERM:       0x7F,
+    LINEATTR: {
+        MASK:       0xE0,
+        SCROLL:     0x80,
+        ADDRMASK:   0x1F,
+        FONTMASK:   0x60,
+        NORML:      0x60,
+        DWIDE:      0x40,
+        DHIGH_TOP:  0x20,
+        DHIGH_BOT:  0x00
+    }
+};
+
+/**
+ * initBuffers()
+ */
+Video.prototype.initBuffers = function()
+{
+    /*
+     * Allocate off-screen buffers now
+     */
+    this.cxBuffer = this.nColsBuffer * this.cxCell;
+    this.cyBuffer = this.nRowsBuffer * this.cyCell;
+
+    var cxBuffer = this.cxBuffer;
+    var cyBuffer = this.cyBuffer;
+    if (this.rotateBuffer) {
+        cxBuffer = this.cyBuffer;
+        cyBuffer = this.cxBuffer;
+    }
+
+    this.imageBuffer = this.contextScreen.createImageData(cxBuffer, cyBuffer);
+    this.canvasBuffer = document.createElement("canvas");
+    this.canvasBuffer.width = cxBuffer;
+    this.canvasBuffer.height = cyBuffer;
+    this.contextBuffer = this.canvasBuffer.getContext("2d");
+
+    this.initColors();
+
+    if (this.cxCell > 1) {
+        this.aFonts = {};
+        this.abLineBuffer = new Array(132);
+        this.aFonts[Video.VT100.FONT.NORML] = this.createFontVariation(this.cxCell, this.cyCell);
+        this.aFonts[Video.VT100.FONT.DWIDE] = this.createFontVariation(this.cxCell*2, this.cyCell);
+        this.aFonts[Video.VT100.FONT.DHIGH] = this.createFontVariation(this.cxCell*2, this.cyCell*2);
+    }
 };
 
 /**
@@ -336,74 +396,10 @@ Video.prototype.doneLoad = function(sURL, sFontData, nErrorCode)
         }
 
         /*
-         * Translate the character data into separate "fonts", each of which will be a separate canvas object, with all
-         * 256 characters arranged in a 16x16 grid.
+         * Minimal font data validation, just to make sure we're not getting garbage from the server...
          */
         if (ab.length == 2048) {
-            /*
-             * The assumption here is that we're dealing with the original (IBM) MDA/CGA font data, which apparently
-             * was identical on both MDA and CGA cards (even though the former had no use for the latter, and vice versa).
-             *
-             * First, let's take a look at the MDA portion of the data.  Here are the first few rows of MDA font data,
-             * at the 0K and 2K boundaries:
-             *
-             *      00000000  00 00 00 00 00 00 00 00  00 00 7e 81 a5 81 81 bd  |..........~.....|
-             *      00000010  00 00 7e ff db ff ff c3  00 00 00 36 7f 7f 7f 7f  |..~........6....|
-             *      ...
-             *      00000800  00 00 00 00 00 00 00 00  99 81 7e 00 00 00 00 00  |..........~.....|
-             *      00000810  e7 ff 7e 00 00 00 00 00  3e 1c 08 00 00 00 00 00  |..~.....>.......|
-             *
-             * 8 bytes of data from a row in each of the 2K chunks are combined to form a 8-bit wide character with
-             * a maximum height of 16 bits.  Assembling the bits for character 0x01 (a happy face), we observe the following:
-             *
-             *      0 0 0 0 0 0 0 0  <== 00 from offset 0x0008
-             *      0 0 0 0 0 0 0 0  <== 00 from offset 0x0009
-             *      0 1 1 1 1 1 1 0  <== 7e from offset 0x000A
-             *      1 0 0 0 0 0 0 1  <== 81 from offset 0x000B
-             *      1 0 1 0 0 1 0 1  <== a5 from offset 0x000C
-             *      1 0 0 0 0 0 0 1  <== 81 from offset 0x000D
-             *      1 0 0 0 0 0 0 1  <== 81 from offset 0x000E
-             *      1 0 1 1 1 1 0 1  <== bd from offset 0x000F
-             *      1 0 0 1 1 0 0 1  <== 99 from offset 0x0808
-             *      1 0 0 0 0 0 0 1  <== 81 from offset 0x0809
-             *      0 1 1 1 1 1 1 0  <== 7e from offset 0x080A
-             *      0 0 0 0 0 0 0 0  <== 00 from offset 0x080B
-             *      0 0 0 0 0 0 0 0  <== 00 from offset 0x080C
-             *      0 0 0 0 0 0 0 0  <== 00 from offset 0x080D
-             *      0 0 0 0 0 0 0 0  <== 00 from offset 0x080E
-             *      0 0 0 0 0 0 0 0  <== 00 from offset 0x080F
-             *
-             * In the second 2K chunk, we observe that the last two bytes of every font cell definition are zero;
-             * this confirms our understanding that MDA font cell size is 8x14.
-             *
-             * Finally, there's the issue of screen cell size, which is actually 9x14 on the MDA.  We compensate for that
-             * by building a 9x14 font, even though there's only 8x14 bits of data. As http://www.seasip.info/VintagePC/mda.html
-             * explains:
-             *
-             *      "For characters C0h-DFh, the ninth pixel column is a duplicate of the eighth; for others, it's blank."
-             *
-             * This last point is confirmed by "The IBM Personal Computer From The Inside Out", p.295:
-             *
-             *      "Another unique feature of the monochrome adapter is a set of line-drawing and area-fill characters
-             *      that give continuous lines and filled areas. This is unusual for a display with a 9x14 character box
-             *      because the character generator provides a row only eight dots wide. On most displays, a blank 9th
-             *      dot is then inserted between characters. On the monochrome display, there is circuitry that duplicates
-             *      the 8th dot into the 9th dot position for characters whose ASCII codes are 0xB0 [sic] through 0xDF."
-             *
-             * However, the above text is mistaken about the start of the range.  While there ARE line-drawing characters
-             * in the range 0xB0-0xBF, none of them extend all the way to the right edge; IBM carefully segregated them.
-             * And in fact, characters 0xB0-0xB2 contain hash patterns that you would NOT want extended into the 9th column.
-             *
-             * The CGA font is part of the same ROM.  In fact, there are TWO CGA fonts in the ROM: a thin 5x7 "single dot"
-             * font located at offset 0x1000, and a thick 7x7 "double dot" font at offset 0x1800.  The latter is the default
-             * font, unless overridden by a jumper setting on the CGA card, so it is our default CGA font as well (although
-             * someday we may provide a virtual jumper setting that allows you to select the thinner font).
-             *
-             * The first offset we must pass to setFontData() is the offset of the CGA font; we choose the thicker "double dot"
-             * CGA font at 0x1800 (which was the PC's default font as well), instead of the thinner "single dot" font at 0x1000.
-             * The second offset is for the MDA font.
-             */
-            // this.setFontData(ab);
+            this.abFontdata = ab;
         }
         else {
             this.notice("Unrecognized font data length (" + ab.length + ")");
@@ -422,6 +418,87 @@ Video.prototype.doneLoad = function(sURL, sFontData, nErrorCode)
      * TODO: Consider a more general-purpose solution for deciding whether or not the user wants to run in a "headless" mode.
      */
     if (this.contextScreen || this.dbg) this.setReady();
+};
+
+/**
+ * createFontVariation(cxCell, cyCell, rgbOn, fUnderline, fReverse)
+ *
+ * This creates a 16x16 character grid for the requested font variation.  Variations include:
+ *
+ *      1) no variation (cell size is this.cxCell x this.cyCell)
+ *      2) double-wide characters (cell size is this.cxCell*2 x this.cyCell)
+ *      3) double-high characters (cell size is this.cxCell x this.cyCell*2)
+ *      4) double-both characters (cell size is this.cxCell*2 x this.cyCell*2)
+ *      5) all of the above with underlining enabled
+ *      6) all of the above with reverse video enabled
+ *
+ * @this {Video}
+ * @param {number} cxCell is the target width of each character in the grid
+ * @param {number} cyCell is the target height of each character in the grid
+ * @param {Array} [rgbOn] contains the RGB values for the font (default is white)
+ * @param {boolean} [fUnderline]
+ * @param {boolean} [fReverse]
+ * @return {Object}
+ */
+Video.prototype.createFontVariation = function(cxCell, cyCell, rgbOn, fUnderline, fReverse)
+{
+    /*
+     * On a VT100, cxCell,cyCell is initially 10,10, but may change to 9,10 for 132-column mode.
+     * However, regardless of mode, cxCellDefault,cyCellDefault retain the initial values of 10,10.
+     */
+    this.assert(cxCell == this.cxCell || cxCell == this.cxCell*2);
+    this.assert(cyCell == this.cyCell || cyCell == this.cyCell*2);
+
+    /*
+     * Create a font canvas that is both 16 times the target character width and the target character height,
+     * ensuring that it will accommodate 16x16 characters (for a maximum of 256).  Note that the VT100 font ROM
+     * defines only 128 characters, so that canvas will contain only 16x8 entries.
+     */
+    var nFontBytesPerChar = this.cxCellDefault <= 8? 8 : 16;
+    var nFontByteOffset = nFontBytesPerChar > 8? 15 : 0;
+    var nChars = this.abFontData.length / nFontBytesPerChar;
+
+    var font = {cxCell: cxCell, cyCell: cyCell};
+    font.canvas = document.createElement("canvas");
+    font.canvas.width = cxCell * 16;
+    font.canvas.height = cyCell * (nChars / 16);
+    font.context = font.canvas.getContext("2d");
+
+    var imageChar = font.context.createImageData(cxCell, cyCell);
+
+    for (var iChar = 0; iChar < nChars; iChar++) {
+        for (var y = 0, yDst = y; y < this.cyCell; y++) {
+            var offFontData = iChar * nFontBytesPerChar + ((nFontByteOffset + y) & (nFontBytesPerChar - 1));
+            var b = this.abFontData[offFontData];
+            for (var nRows = 0; nRows < (cyCell / this.cyCell); nRows++) {
+                for (var x = 0, xDst = x; x < this.cxCell; x++) {
+                    var bit = b & (0x80 >> x);
+                    for (var nCols = 0; nCols < (cxCell / this.cxCell); nCols++) {
+                        this.setPixel(imageChar, xDst, yDst, bit? 1 : 0);
+                        xDst++;
+                    }
+                }
+                yDst++;
+            }
+        }
+        /*
+         * (iChar >> 4) performs the integer equivalent of Math.floor(iChar / 16), and (iChar & 0xf) is the equivalent of (iChar % 16).
+         */
+        font.context.putImageData(imageChar, (iChar & 0xf) * cxCell, (iChar >> 4) * cyCell);
+    }
+
+    /*
+     * Enable this code if you want to see what the generated font looks like....
+     *
+    if (MAXDEBUG) {
+        var iSrcColor = (iColor == 15? 0 : iColor + 1);
+        this.contextScreen.fillStyle = aCSSColors[iSrcColor];
+        this.contextScreen.fillRect(iColor*(font.cxCell<<2), 0, font.canvas.width>>2, font.cyCell<<4);
+        this.contextScreen.drawImage(font.canvas, 0, iColor*(font.cyCell<<4), font.canvas.width>>2, font.cyCell<<4, iColor*(font.cxCell<<2), 0, font.canvas.width>>2, font.cyCell<<4);
+    }
+     */
+
+    return font;
 };
 
 /**
@@ -638,6 +715,47 @@ Video.prototype.setPixel = function(imageBuffer, x, y, bPixel)
 };
 
 /**
+ * updateChar(font, col, row, data, context)
+ *
+ * Updates a particular character cell (row,col) in the associated window.
+ *
+ * @this {Video}
+ * @param {Object} font
+ * @param {number} col
+ * @param {number} row
+ * @param {number} data
+ * @param {Object} [context]
+ */
+Video.prototype.updateChar = function(font, col, row, data, context)
+{
+    /*
+     * The caller MUST promise this.nFont is defined, and that the font in this.aFonts[this.nFont] has been loaded.
+     */
+    var xDst, yDst;
+    var bChar = data & 0x7f;
+
+    if (context) {
+        xDst = col * font.cxCell;
+        yDst = row * font.cyCell;
+    } else {
+        xDst = col * this.cxScreenCell + this.xScreenOffset;
+        yDst = row * this.cyScreenCell + this.yScreenOffset;
+    }
+
+    /*
+     * (bChar & 0xf) is the equivalent of (bChar % 16), and (bChar >> 4) is the equivalent of Math.floor(bChar / 16)
+     */
+    var xSrc = (bChar & 0xf) * font.cxCell;
+    var ySrc = (bChar >> 4) * font.cyCell;
+
+    if (context) {
+        context.drawImage(font.canvas, xSrc, ySrc, font.cxCell, font.cyCell, xDst, yDst, font.cxCell, font.cyCell);
+    } else {
+        this.contextScreen.drawImage(font.canvas, xSrc, ySrc, font.cxCell, font.cyCell, xDst, yDst, this.cxScreenCell, this.cyScreenCell);
+    }
+};
+
+/**
  * updateScreen(n)
  *
  * Propagates the video buffer to the cell cache and updates the screen with any changes.  Forced updates
@@ -657,19 +775,22 @@ Video.prototype.updateScreen = function(n)
     var fUpdate = true;
 
     if (n >= 0) {
-        if (!(n & 1)) {
-            /*
-             * On even updates, call cpu.requestINTR(1), and also update our copy of the screen.
-             */
-            this.cpu.requestINTR(1);
-        } else {
-            /*
-             * On odd updates, call cpu.requestINTR(2), but do NOT update our copy of the screen, because
-             * the machine has presumably only updated the top half of the frame buffer at this point; it will
-             * update the bottom half of the frame buffer after acknowledging this interrupt.
-             */
-            this.cpu.requestINTR(2);
-            fUpdate = false;
+
+        if (this.interruptRate) {
+            if (!(n & 1)) {
+                /*
+                 * On even updates, call cpu.requestINTR(1), and also update our copy of the screen.
+                 */
+                this.cpu.requestINTR(1);
+            } else {
+                /*
+                 * On odd updates, call cpu.requestINTR(2), but do NOT update our copy of the screen, because
+                 * the machine has presumably only updated the top half of the frame buffer at this point; it will
+                 * update the bottom half of the frame buffer after acknowledging this interrupt.
+                 */
+                this.cpu.requestINTR(2);
+                fUpdate = false;
+            }
         }
 
         /*
@@ -688,8 +809,93 @@ Video.prototype.updateScreen = function(n)
         this.nCyclesPrev = nCycles;
         this.printMessage("updateScreen(" + n + "): clean=" + fClean + ", update=" + fUpdate + ", cycles=" + nCycles + ", delta=" + nCyclesDelta);
     }
+
     if (!fUpdate) return;
 
+    if (this.cxCell > 1) {
+        this.updateScreenText();
+    } else {
+        this.updateScreenGraphics();
+    }
+};
+
+/**
+ * updateScreenText()
+ *
+ * @this {Video}
+ */
+Video.prototype.updateScreenText = function()
+{
+    switch(this.nFormat) {
+    case Video.FORMAT.VT100:
+        this.updateScreenVT100();
+        break;
+    }
+};
+
+/**
+ * updateScreenVT100()
+ *
+ * @this {Video}
+ */
+Video.prototype.updateScreenVT100 = function()
+{
+    var addrNext = this.addrBuffer, attrNext = -1;
+
+    for (var iRow = 0; iRow < this.nRowsBuffer+1; iRow++) {
+        /*
+         * Fill the line buffer
+         */
+        var cbCols = 0;
+        var addr = addrNext;
+        var attr = attrNext;
+        while (cbCols < this.abLineBuffer.length) {
+            var data = this.bus.getByteDirect(addr++);
+            if ((data & Video.VT100.LINETERM) == Video.VT100.LINETERM) {
+                var b = this.bus.getByteDirect(addr++);
+                attrNext = b & Video.VT100.LINEATTR.FONTMASK;
+                addrNext = this.addrBuffer | ((b & Video.VT100.LINEATTR.ADDRMASK) << 8) | this.bus.getByteDirect(addr);
+                break;
+            }
+            this.abLineBuffer[cbCols++] = data;
+        }
+        /*
+         * Display the line buffer
+         */
+        if (attr >= 0) {
+            var idFont, cyClip = 0;
+            switch(attr) {
+            case Video.VT100.LINEATTR.NORML:
+                idFont = Video.VT100.FONT.NORML;
+                break;
+            case Video.VT100.LINEATTR.DWIDE:
+                idFont = Video.VT100.FONT.DWIDE;
+                break;
+            case Video.VT100.LINEATTR.DHIGH_TOP:
+                idFont = Video.VT100.FONT.DHIGH;
+                break;
+            case Video.VT100.LINEATTR.DHIGH_BOT:
+                idFont = Video.VT100.FONT.DHIGH;
+                cyClip = this.cyCell;
+                break;
+            }
+            var font = this.aFonts[idFont];
+            if (font) {
+                for (var iCol = 0; iCol < cbCols; iCol++) {
+                    this.updateChar(font, iCol, iRow-1, this.abLineBuffer[iCol], this.contextBuffer);
+                }
+            }
+        }
+    }
+};
+
+/**
+ * updateScreenGraphics()
+ *
+ * @this {Video}
+ */
+Video.prototype.updateScreenGraphics = function()
+{
     var addr = this.addrBuffer;
     var addrLimit = addr + this.sizeBuffer;
 
