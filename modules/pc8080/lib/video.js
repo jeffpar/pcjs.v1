@@ -255,21 +255,21 @@ Video.FORMATS = {
 
 
 Video.VT100 = {
+    /*
+     * The following font IDs are nothing more than all the possible LINEATTR values masked with FONTMASK;
+     * it's also worth noting that double-high implies double-wide; the VT100 doesn't support double-high single-wide.
+     */
     FONT: {
-        NORML:      0,
-        DWIDE:      1,
-        DHIGH:      2
-    },
-    LINETERM:       0x7F,
-    LINEATTR: {
-        MASK:       0xE0,
-        SCROLL:     0x80,
-        ADDRMASK:   0x1F,
-        FONTMASK:   0x60,
         NORML:      0x60,
         DWIDE:      0x40,
         DHIGH_TOP:  0x20,
         DHIGH_BOT:  0x00
+    },
+    LINETERM:       0x7F,
+    LINEATTR: {
+        ADDRMASK:   0x1F,
+        FONTMASK:   0x60,
+        SCROLL:     0x80
     }
 };
 
@@ -291,7 +291,14 @@ Video.prototype.initBuffers = function()
         cyBuffer = this.cxBuffer;
     }
 
-    this.imageBuffer = this.contextScreen.createImageData(cxBuffer, cyBuffer);
+    /*
+     * imageBuffer is only used for graphics modes.  For text modes, we create a canvas
+     * for each font and draw characters by drawing from the font canvas to the target canvas.
+     */
+    if (this.cxCell == 1) {
+        this.imageBuffer = this.contextScreen.createImageData(cxBuffer, cyBuffer);
+    }
+
     this.canvasBuffer = document.createElement("canvas");
     this.canvasBuffer.width = cxBuffer;
     this.canvasBuffer.height = cyBuffer;
@@ -299,12 +306,12 @@ Video.prototype.initBuffers = function()
 
     this.initColors();
 
-    if (this.cxCell > 1) {
+    if (this.nFormat == Video.FORMAT.VT100) {
         this.aFonts = {};
-        this.abLineBuffer = new Array(132);
+        this.abLineBuffer = new Array(132);     // allocated to the maximum line length supported (132 columns)
         this.aFonts[Video.VT100.FONT.NORML] = this.createFontVariation(this.cxCell, this.cyCell);
         this.aFonts[Video.VT100.FONT.DWIDE] = this.createFontVariation(this.cxCell*2, this.cyCell);
-        this.aFonts[Video.VT100.FONT.DHIGH] = this.createFontVariation(this.cxCell*2, this.cyCell*2);
+        this.aFonts[Video.VT100.FONT.DHIGH_TOP] = this.aFonts[Video.VT100.FONT.DHIGH_BOT] = this.createFontVariation(this.cxCell*2, this.cyCell*2);
     }
 };
 
@@ -444,7 +451,6 @@ Video.prototype.createFontVariation = function(cxCell, cyCell, rgbOn, fUnderline
 {
     /*
      * On a VT100, cxCell,cyCell is initially 10,10, but may change to 9,10 for 132-column mode.
-     * However, regardless of mode, cxCellDefault,cyCellDefault retain the initial values of 10,10.
      */
     this.assert(cxCell == this.cxCell || cxCell == this.cxCell*2);
     this.assert(cyCell == this.cyCell || cyCell == this.cyCell*2);
@@ -469,10 +475,16 @@ Video.prototype.createFontVariation = function(cxCell, cyCell, rgbOn, fUnderline
     for (var iChar = 0; iChar < nChars; iChar++) {
         for (var y = 0, yDst = y; y < this.cyCell; y++) {
             var offFontData = iChar * nFontBytesPerChar + ((nFontByteOffset + y) & (nFontBytesPerChar - 1));
-            var b = this.abFontData[offFontData];
+            var bits = this.abFontData[offFontData];
             for (var nRows = 0; nRows < (cyCell / this.cyCell); nRows++) {
                 for (var x = 0, xDst = x; x < this.cxCell; x++) {
-                    var bit = b & (0x80 >> x);
+                    /*
+                     * While x goes from 0 to cxCell-1, obviously we will run out of bits after x is 7;
+                     * since the final bit must be replicated all the way to the right edge of the cell
+                     * (so that line-drawing characters seamlessly connect), we ensure that the effective
+                     * shift count remains stuck at 7.
+                     */
+                    var bit = bits & (0x80 >> (x > 7? 7 : x));
                     for (var nCols = 0; nCols < (cxCell / this.cxCell); nCols++) {
                         this.setPixel(imageChar, xDst, yDst, bit? 1 : 0);
                         xDst++;
@@ -675,6 +687,7 @@ Video.prototype.initColors = function()
     this.aRGB[1] = rgbWhite;
     if (this.nFormat == Video.FORMAT.SI1978) {
         var rgbGreen  = [0x00, 0xff, 0x00, 0xff];
+        //noinspection UnnecessaryLocalVariableJS
         var rgbYellow = [0xff, 0xff, 0x00, 0xff];
         this.aRGB[this.nColors + Video.COLORS.OVERLAY_TOP] = rgbYellow;
         this.aRGB[this.nColors + Video.COLORS.OVERLAY_BOTTOM] = rgbGreen;
@@ -682,21 +695,21 @@ Video.prototype.initColors = function()
 };
 
 /**
- * setPixel(imageBuffer, x, y, bPixel)
+ * setPixel(image, x, y, bPixel)
  *
  * @this {Video}
- * @param {Object} imageBuffer
+ * @param {Object} image
  * @param {number} x
  * @param {number} y
  * @param {number} bPixel (ie, an index into aRGB)
  */
-Video.prototype.setPixel = function(imageBuffer, x, y, bPixel)
+Video.prototype.setPixel = function(image, x, y, bPixel)
 {
     var index;
     if (!this.rotateBuffer) {
-        index = (x + y * imageBuffer.width);
+        index = (x + y * image.width);
     } else {
-        index = (imageBuffer.height - x - 1) * imageBuffer.width + y;
+        index = (image.height - x - 1) * image.width + y;
     }
     if (bPixel && this.nFormat == Video.FORMAT.SI1978) {
         if (x >= 208 && x < 236) {
@@ -708,50 +721,75 @@ Video.prototype.setPixel = function(imageBuffer, x, y, bPixel)
     }
     var rgb = this.aRGB[bPixel];
     index *= rgb.length;
-    imageBuffer.data[index] = rgb[0];
-    imageBuffer.data[index+1] = rgb[1];
-    imageBuffer.data[index+2] = rgb[2];
-    imageBuffer.data[index+3] = rgb[3];
+    image.data[index] = rgb[0];
+    image.data[index+1] = rgb[1];
+    image.data[index+2] = rgb[2];
+    image.data[index+3] = rgb[3];
 };
 
 /**
- * updateChar(font, col, row, data, context)
+ * updateChar(idFont, col, row, data, context)
  *
  * Updates a particular character cell (row,col) in the associated window.
  *
  * @this {Video}
- * @param {Object} font
+ * @param {number} idFont
  * @param {number} col
  * @param {number} row
  * @param {number} data
  * @param {Object} [context]
  */
-Video.prototype.updateChar = function(font, col, row, data, context)
+Video.prototype.updateChar = function(idFont, col, row, data, context)
 {
-    /*
-     * The caller MUST promise this.nFont is defined, and that the font in this.aFonts[this.nFont] has been loaded.
-     */
-    var xDst, yDst;
     var bChar = data & 0x7f;
+    var font = this.aFonts[idFont];
 
-    if (context) {
-        xDst = col * font.cxCell;
-        yDst = row * font.cyCell;
-    } else {
-        xDst = col * this.cxScreenCell + this.xScreenOffset;
-        yDst = row * this.cyScreenCell + this.yScreenOffset;
-    }
-
-    /*
-     * (bChar & 0xf) is the equivalent of (bChar % 16), and (bChar >> 4) is the equivalent of Math.floor(bChar / 16)
-     */
     var xSrc = (bChar & 0xf) * font.cxCell;
     var ySrc = (bChar >> 4) * font.cyCell;
 
+    var xDst, yDst, cxDst, cyDst;
+
+    var cxSrc = font.cxCell;
+    var cySrc = font.cyCell;
+
     if (context) {
-        context.drawImage(font.canvas, xSrc, ySrc, font.cxCell, font.cyCell, xDst, yDst, font.cxCell, font.cyCell);
+        xDst = col * this.cxCell;
+        yDst = row * this.cyCell;
+        cxDst = this.cxCell;
+        cyDst = this.cyCell;
     } else {
-        this.contextScreen.drawImage(font.canvas, xSrc, ySrc, font.cxCell, font.cyCell, xDst, yDst, this.cxScreenCell, this.cyScreenCell);
+        xDst = col * this.cxScreenCell;
+        yDst = row * this.cyScreenCell;
+        cxDst = this.cxScreenCell;
+        cyDst = this.cyScreenCell;
+    }
+
+    /*
+     * If font.cxCell > this.cxCell, then we assume the caller wants to draw a double-wide character,
+     * so we will double xDst and cxDst.
+     */
+    if (font.cxCell > this.cxCell) {
+        xDst *= 2;
+        cxDst *= 2;
+        this.assert(font.cxCell == this.cxCell * 2);
+    }
+
+    /*
+     * If font.cyCell > this.cyCell, then we rely on idFont to indicate whether the top half or bottom half
+     * of the character should be drawn.
+     */
+    if (font.cyCell > this.cyCell) {
+        if (idFont == Video.VT100.FONT.DHIGH_BOT) ySrc += this.cyCell;
+        cySrc = this.cyCell;
+        this.assert(font.cyCell == this.cyCell * 2);
+    }
+
+    if (context) {
+        context.drawImage(font.canvas, xSrc, ySrc, cxSrc, cySrc, xDst, yDst, cxDst, cyDst);
+    } else {
+        xDst += this.xScreenOffset;
+        yDst += this.yScreenOffset;
+        this.contextScreen.drawImage(font.canvas, xSrc, ySrc, cxSrc, cySrc, xDst, yDst, cxDst, cyDst);
     }
 };
 
@@ -840,7 +878,7 @@ Video.prototype.updateScreenText = function()
  */
 Video.prototype.updateScreenVT100 = function()
 {
-    var addrNext = this.addrBuffer, attrNext = -1;
+    var addrNext = this.addrBuffer, fontNext = -1;
 
     for (var iRow = 0; iRow < this.nRowsBuffer+1; iRow++) {
         /*
@@ -848,12 +886,12 @@ Video.prototype.updateScreenVT100 = function()
          */
         var cbCols = 0;
         var addr = addrNext;
-        var attr = attrNext;
+        var font = fontNext;
         while (cbCols < this.abLineBuffer.length) {
             var data = this.bus.getByteDirect(addr++);
             if ((data & Video.VT100.LINETERM) == Video.VT100.LINETERM) {
                 var b = this.bus.getByteDirect(addr++);
-                attrNext = b & Video.VT100.LINEATTR.FONTMASK;
+                fontNext = b & Video.VT100.LINEATTR.FONTMASK;
                 addrNext = this.addrBuffer | ((b & Video.VT100.LINEATTR.ADDRMASK) << 8) | this.bus.getByteDirect(addr);
                 break;
             }
@@ -862,28 +900,14 @@ Video.prototype.updateScreenVT100 = function()
         /*
          * Display the line buffer
          */
-        if (attr >= 0) {
-            var idFont, cyClip = 0;
-            switch(attr) {
-            case Video.VT100.LINEATTR.NORML:
-                idFont = Video.VT100.FONT.NORML;
-                break;
-            case Video.VT100.LINEATTR.DWIDE:
-                idFont = Video.VT100.FONT.DWIDE;
-                break;
-            case Video.VT100.LINEATTR.DHIGH_TOP:
-                idFont = Video.VT100.FONT.DHIGH;
-                break;
-            case Video.VT100.LINEATTR.DHIGH_BOT:
-                idFont = Video.VT100.FONT.DHIGH;
-                cyClip = this.cyCell;
-                break;
-            }
-            var font = this.aFonts[idFont];
-            if (font) {
-                for (var iCol = 0; iCol < cbCols; iCol++) {
-                    this.updateChar(font, iCol, iRow-1, this.abLineBuffer[iCol], this.contextBuffer);
-                }
+        if (font >= 0) {
+            for (var iCol = 0; iCol < cbCols; iCol++) {
+                /*
+                 * TODO: Until support is added for a cell cache, we update the screen buffer directly.
+                 *
+                 *      this.updateChar(font, iCol, iRow-1, this.abLineBuffer[iCol], this.contextBuffer);
+                 */
+                this.updateChar(font, iCol, iRow-1, this.abLineBuffer[iCol]);
             }
         }
     }
@@ -966,6 +990,11 @@ Video.prototype.updateScreenGraphics = function()
             cyDirty = cxDirtyOrig;
         }
         this.contextBuffer.putImageData(this.imageBuffer, 0, 0, xDirty, yDirty, cxDirty, cyDirty);
+        /*
+         * As noted originally in /modules/pcx86/lib/video.js, I would prefer to draw only the dirty portion of
+         * canvasBuffer, but there usually isn't a 1-1 pixel mapping between canvasBuffer and contextScreen, so
+         * if we draw interior rectangles, we can end up with subpixel artifacts along the edges of those rectangles.
+         */
         this.contextScreen.drawImage(this.canvasBuffer, 0, 0, this.canvasBuffer.width, this.canvasBuffer.height, 0, 0, this.cxScreen, this.cyScreen);
     }
 };
