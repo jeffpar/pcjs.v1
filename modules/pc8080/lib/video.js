@@ -139,9 +139,21 @@ function Video(parmsVideo, canvas, context, textarea, container)
     this.textareaScreen = textarea;
     this.inputScreen = textarea || canvas || null;
 
+    /*
+     * These variables are here in case we want/need to add support for borders later...
+     */
     this.xScreenOffset = this.yScreenOffset = 0;
+    this.cxScreenOffset = this.cxScreen;
+    this.cyScreenOffset = this.cyScreen;
+
     this.cxScreenCell = (this.cxScreen / this.nColsBuffer)|0;
     this.cyScreenCell = (this.cyScreen / this.nRowsBuffer)|0;
+
+    /*
+     * Now that we've finished using nRowsBuffer to help define the screen size, we add one more
+     * row for text modes, to simplify smooth-scrolling down the road.
+     */
+    if (this.cyCell > 1) this.nRowsBuffer++;
 
     /*
      * Support for disabling (or, less commonly, enabling) image smoothing, which all browsers
@@ -174,7 +186,7 @@ function Video(parmsVideo, canvas, context, textarea, container)
         if (this.rotateScreen > 0) this.rotateScreen -= 360;
         /*
          * TODO: Consider also disallowing any rotateScreen value if bufferRotate was already set; setting
-         * both is most likely a mistake, but perhaps it's also a legitimate way of enabling 180-degree rotation?
+         * both is most likely a mistake, but who knows, maybe someone wants to use both for 180-degree rotation?
          */
         if (this.rotateScreen != -90) {
             this.notice("unsupported screen rotation: " + this.rotateScreen);
@@ -185,8 +197,6 @@ function Video(parmsVideo, canvas, context, textarea, container)
             this.contextScreen.scale(this.cyScreen/this.cxScreen, this.cxScreen/this.cyScreen);
         }
     }
-
-    this.initBuffers();
 
     /*
      * Here's the gross code to handle full-screen support across all supported browsers.  The lack of standards
@@ -291,12 +301,23 @@ Video.prototype.initBuffers = function()
         cyBuffer = this.cxBuffer;
     }
 
+    this.sizeBuffer = ((this.cxBuffer * this.nBitsPerPixel) >> 3) * this.cyBuffer;
+    if (!this.fUseRAM) {
+        if (!this.bus.addMemory(this.addrBuffer, this.sizeBuffer, Memory.TYPE.VIDEO)) {
+            return;
+        }
+    }
+
     /*
      * imageBuffer is only used for graphics modes.  For text modes, we create a canvas
      * for each font and draw characters by drawing from the font canvas to the target canvas.
      */
-    if (this.cxCell == 1) {
+    if (this.cxCell > 1) {
+        this.initCellCache(this.nColsBuffer * this.nRowsBuffer);
+    } else {
         this.imageBuffer = this.contextScreen.createImageData(cxBuffer, cyBuffer);
+        this.nPixelsPerCell = (16 / this.nBitsPerPixel)|0;
+        this.initCellCache(this.sizeBuffer >> 1);
     }
 
     this.canvasBuffer = document.createElement("canvas");
@@ -308,10 +329,45 @@ Video.prototype.initBuffers = function()
 
     if (this.nFormat == Video.FORMAT.VT100) {
         this.aFonts = {};
-        this.abLineBuffer = new Array(132);     // allocated to the maximum line length supported (132 columns)
         this.aFonts[Video.VT100.FONT.NORML] = this.createFontVariation(this.cxCell, this.cyCell);
         this.aFonts[Video.VT100.FONT.DWIDE] = this.createFontVariation(this.cxCell*2, this.cyCell);
         this.aFonts[Video.VT100.FONT.DHIGH_TOP] = this.aFonts[Video.VT100.FONT.DHIGH_BOT] = this.createFontVariation(this.cxCell*2, this.cyCell*2);
+        /*
+         * Beyond fonts, VT100 support requires that we maintain a number of additional properties:
+         *
+         *      nRefreshRate: must be either 50 or 60 (defaults to 60); we don't emulate any particular refresh rate,
+         *      but we do need to keep track of which rate has been selected, because that affects the number of "fill
+         *      lines" that are present at the top of the VT100's frame buffer: 2 lines for 60Hz, 5 lines for 50Hz.
+         *
+         *      The VT100 July 1982 Technical Manual, p. 4-89, shows the following sample frame buffer layout:
+         *
+         *                  00  01  02  03  04  05  06  07  08  09  0A  0B  0C  0D  0E  0F
+         *                  --------------------------------------------------------------
+         *          0x2000: 7F  70  03  7F  F2  D0  7F  70  06  7F  70  0C  7F  70  0F  7F
+         *          0x2010: 70  03  ..  ..  ..  ..  ..  ..  ..  ..  ..  ..  ..  ..  ..  ..
+         *          ...
+         *          0x22D0: 'D' 'A' 'T' 'A' ' ' 'F' 'O' 'R' ' ' 'F' 'I' 'R' 'S' 'T' ' ' 'L'
+         *          0x22E0: 'I' 'N' 'E' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' '
+         *          ...
+         *          0x2320: 7F  F3  23  'D' 'A' 'T' 'A' ' ' 'F' 'O' 'R' ' ' 'S' 'E' 'C' 'O'
+         *          0x2330: 'N' 'D' ' ' 'L' 'I' 'N' 'E' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' '
+         *          ...
+         *          0x2BE0: ' ' ' ' 'E' 'N' 'D' ' ' 'O' 'F' ' ' 'L' 'A' 'S' 'T' ' ' 'L' 'I'
+         *          0x2BF0: 'N' 'E' 7F  70  06  ..  ..  ..  ..  ..  ..  ..  ..  ..  ..  ..
+         *          0x2C00: [AVO SCREEN RAM, IF ANY, BEGINS HERE]
+         *
+         *      ERRATA: The manual claims that if you change the byte at 0x2002 from 03 to 09, the number of "fill
+         *      lines" will change from 2 to 5 (for 50Hz operation), but it shows 06 instead of 0C at location 0x200B;
+         *      if you follow the links, it's pretty clear that byte has to be 0C to yield a 5-line delay.  Since the
+         *      address following the terminator at 0x2006 points to itself, it only makes sense for that terminator
+         *      to be used at the end of the frame buffer.
+         *
+         *      As an alternative to tracking the refresh rate setting, we could hard-code some knowledge about how
+         *      the VT100's 8080 code uses memory, and simply ignore lines below address 0x22D0.  But that seems cheesy.
+         */
+        this.nRefreshRate = 60;
+
+        this.abLineBuffer = new Array(this.nColsBuffer);
     }
 };
 
@@ -335,26 +391,13 @@ Video.prototype.initBus = function(cmp, bus, cpu, dbg)
         this.chipset = cmp.getMachineComponent("ChipSet");
         if (this.chipset && this.chipset.model == ChipSet.SI_1978.MODEL) {
             this.nFormat = Video.FORMAT.SI1978;
-            this.initColors();  // this needs to be called whenever nFormat may changed
         }
     }
 
     /*
-     * Compute the size of the frame buffer and allocate.
+     * Allocate the frame buffer (as needed) along with all other buffers
      */
-    if (!this.fUseRAM) {
-        this.sizeBuffer = ((this.cxBuffer * this.nBitsPerPixel) >> 3) * this.cyBuffer;
-        if (this.bus.addMemory(this.addrBuffer, this.sizeBuffer, Memory.TYPE.VIDEO)) {
-            /*
-             * Compute the number of cells and initialize the cell cache; note that sizeBuffer is a number of
-             * bytes, whereas nCellCache is a number of 16-bit words (aka shorts) because we fetch memory 16 bits
-             * at a time during screen updates.
-             */
-            this.nCellCache = this.sizeBuffer >> 1;
-            this.nPixelsPerCell = (16 / this.nBitsPerPixel)|0;
-            this.initCache();
-        }
-    }
+    this.initBuffers();
 
     /*
      * If we have an associated keyboard, then ensure that the keyboard will be notified whenever the canvas
@@ -656,14 +699,16 @@ Video.prototype.getRefreshRate = function()
 };
 
 /**
- * initCache()
+ * initCellCache(nCells)
  *
  * Initializes the contents of our internal cell cache.
  *
  * @this {Video}
+ * @param {number} nCells
  */
-Video.prototype.initCache = function()
+Video.prototype.initCellCache = function(nCells)
 {
+    this.nCellCache = nCells;
     this.fCellCacheValid = false;
     if (this.aCellCache === undefined || this.aCellCache.length != this.nCellCache) {
         this.aCellCache = new Array(this.nCellCache);
@@ -794,6 +839,77 @@ Video.prototype.updateChar = function(idFont, col, row, data, context)
 };
 
 /**
+ * updateVT100()
+ *
+ * @this {Video}
+ */
+Video.prototype.updateVT100 = function()
+{
+    var addrNext = this.addrBuffer, fontNext = -1;
+
+    var nRows = 0;
+    var nFill = (this.nRefreshRate == 60? 2 : 5);
+    this.assert(this.abLineBuffer.length == this.nColsBuffer);
+
+    var iCell = 0, cUpdated = 0;
+    while (nRows < this.nRowsBuffer) {
+        /*
+         * Populate the line buffer
+         */
+        var nCols = 0;
+        var addr = addrNext;
+        var font = fontNext;
+        while (nCols < this.abLineBuffer.length) {
+            var data = this.bus.getByteDirect(addr++);
+            if ((data & Video.VT100.LINETERM) == Video.VT100.LINETERM) {
+                var b = this.bus.getByteDirect(addr++);
+                fontNext = b & Video.VT100.LINEATTR.FONTMASK;
+                addrNext = this.addrBuffer | ((b & Video.VT100.LINEATTR.ADDRMASK) << 8) | this.bus.getByteDirect(addr);
+                break;
+            }
+            this.abLineBuffer[nCols++] = data;
+        }
+
+        /*
+         * Skip the first few "fill lines"
+         */
+        if (nFill) {
+            this.assert(nCols === 0);           // "fill lines" are typically zero-length
+            nFill--;
+            continue;
+        }
+
+        /*
+         * Pad the line buffer as needed
+         */
+        while (nCols < this.abLineBuffer.length) {
+            this.abLineBuffer[nCols++] = 0;     // character code 0 is a empty font character
+        }
+
+        this.assert(font >= 0);                 // font isn't valid on the first line, but that's always a "fill line"
+
+        /*
+         * Display the line buffer
+         */
+        for (var iCol = 0; iCol < nCols; iCol++) {
+            data = this.abLineBuffer[iCol];
+            if (!this.fCellCacheValid || data !== this.aCellCache[iCell]) {
+                this.updateChar(font, iCol, nRows, data, this.contextBuffer);
+                cUpdated++;
+            }
+            iCell++;
+        }
+        nRows++;
+    }
+
+    this.fCellCacheValid = true;
+
+    if (cUpdated && this.contextBuffer) {
+        this.contextScreen.drawImage(this.canvasBuffer, 0, 0, this.cxBuffer, this.cyBuffer, this.xScreenOffset, this.yScreenOffset, this.cxScreenOffset, this.cyScreenOffset);
+    }
+};
+
+/**
  * updateScreen(n)
  *
  * Propagates the video buffer to the cell cache and updates the screen with any changes.  Forced updates
@@ -801,7 +917,7 @@ Video.prototype.updateChar = function(idFont, col, row, data, context)
  * are the periodic updates coming from the CPU.
  *
  * For every cell in the video buffer, compare it to the cell stored in the cell cache, render if it differs,
- * and then update the cell cache to match.  Since initCache() sets every cell in the cell cache to an
+ * and then update the cell cache to match.  Since initCellCache() sets every cell in the cell cache to an
  * invalid value, we're assured that the next call to updateScreen() will redraw the entire (visible) video buffer.
  *
  * @this {Video}
@@ -866,50 +982,8 @@ Video.prototype.updateScreenText = function()
 {
     switch(this.nFormat) {
     case Video.FORMAT.VT100:
-        this.updateScreenVT100();
+        this.updateVT100();
         break;
-    }
-};
-
-/**
- * updateScreenVT100()
- *
- * @this {Video}
- */
-Video.prototype.updateScreenVT100 = function()
-{
-    var addrNext = this.addrBuffer, fontNext = -1;
-
-    for (var iRow = 0; iRow < this.nRowsBuffer+1; iRow++) {
-        /*
-         * Fill the line buffer
-         */
-        var cbCols = 0;
-        var addr = addrNext;
-        var font = fontNext;
-        while (cbCols < this.abLineBuffer.length) {
-            var data = this.bus.getByteDirect(addr++);
-            if ((data & Video.VT100.LINETERM) == Video.VT100.LINETERM) {
-                var b = this.bus.getByteDirect(addr++);
-                fontNext = b & Video.VT100.LINEATTR.FONTMASK;
-                addrNext = this.addrBuffer | ((b & Video.VT100.LINEATTR.ADDRMASK) << 8) | this.bus.getByteDirect(addr);
-                break;
-            }
-            this.abLineBuffer[cbCols++] = data;
-        }
-        /*
-         * Display the line buffer
-         */
-        if (font >= 0) {
-            for (var iCol = 0; iCol < cbCols; iCol++) {
-                /*
-                 * TODO: Until support is added for a cell cache, we update the screen buffer directly.
-                 *
-                 *      this.updateChar(font, iCol, iRow-1, this.abLineBuffer[iCol], this.contextBuffer);
-                 */
-                this.updateChar(font, iCol, iRow-1, this.abLineBuffer[iCol]);
-            }
-        }
     }
 };
 
@@ -991,7 +1065,7 @@ Video.prototype.updateScreenGraphics = function()
         }
         this.contextBuffer.putImageData(this.imageBuffer, 0, 0, xDirty, yDirty, cxDirty, cyDirty);
         /*
-         * As noted originally in /modules/pcx86/lib/video.js, I would prefer to draw only the dirty portion of
+         * As originally noted in /modules/pcx86/lib/video.js, I would prefer to draw only the dirty portion of
          * canvasBuffer, but there usually isn't a 1-1 pixel mapping between canvasBuffer and contextScreen, so
          * if we draw interior rectangles, we can end up with subpixel artifacts along the edges of those rectangles.
          */
