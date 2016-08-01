@@ -131,8 +131,8 @@ function Video(parmsVideo, canvas, context, textarea, container)
         }
     }
 
-    this.interruptRate = parmsVideo['interruptRate'];
-    this.refreshRate = parmsVideo['refreshRate'] || 60;
+    this.rateInterrupt = parmsVideo['interruptRate'];
+    this.rateRefresh = parmsVideo['refreshRate'] || 60;
 
     this.canvasScreen = canvas;
     this.contextScreen = context;
@@ -267,13 +267,13 @@ Video.FORMATS = {
 Video.VT100 = {
     /*
      * The following font IDs are nothing more than all the possible LINEATTR values masked with FONTMASK;
-     * it's also worth noting that double-high implies double-wide; the VT100 doesn't support double-high single-wide.
+     * also, note that double-high implies double-wide; the VT100 doesn't support a double-high single-wide font.
      */
     FONT: {
-        NORML:      0x60,
-        DWIDE:      0x40,
-        DHIGH_TOP:  0x20,
-        DHIGH_BOT:  0x00
+        NORML:      0x60,       // normal font (eg, 10x10)
+        DWIDE:      0x40,       // double-wide, single-high font (eg, 20x10)
+        DHIGH:      0x20,       // technically, this means display only the TOP half of the double-high font (eg, 20x20)
+        DHIGH_BOT:  0x00        // technically, this means display only the BOTTOM half of the double-high font (eg, 20x20)
     },
     LINETERM:       0x7F,
     LINEATTR: {
@@ -325,19 +325,16 @@ Video.prototype.initBuffers = function()
     this.canvasBuffer.height = cyBuffer;
     this.contextBuffer = this.canvasBuffer.getContext("2d");
 
+    this.aFonts = {};
     this.initColors();
 
     if (this.nFormat == Video.FORMAT.VT100) {
-        this.aFonts = {};
-        this.aFonts[Video.VT100.FONT.NORML] = this.createFontVariation(this.cxCell, this.cyCell);
-        this.aFonts[Video.VT100.FONT.DWIDE] = this.createFontVariation(this.cxCell*2, this.cyCell);
-        this.aFonts[Video.VT100.FONT.DHIGH_TOP] = this.aFonts[Video.VT100.FONT.DHIGH_BOT] = this.createFontVariation(this.cxCell*2, this.cyCell*2);
         /*
          * Beyond fonts, VT100 support requires that we maintain a number of additional properties:
          *
-         *      nRefreshRate: must be either 50 or 60 (defaults to 60); we don't emulate any particular refresh rate,
-         *      but we do need to keep track of which rate has been selected, because that affects the number of "fill
-         *      lines" that are present at the top of the VT100's frame buffer: 2 lines for 60Hz, 5 lines for 50Hz.
+         *      rateMonitor: must be either 50 or 60 (defaults to 60); we don't emulate the monitor refresh rate,
+         *      but we do need to keep track of which rate has been selected, because that affects the number of
+         *      "fill lines" present at the top of the VT100's frame buffer: 2 lines for 60Hz, 5 lines for 50Hz.
          *
          *      The VT100 July 1982 Technical Manual, p. 4-89, shows the following sample frame buffer layout:
          *
@@ -358,15 +355,16 @@ Video.prototype.initBuffers = function()
          *
          *      ERRATA: The manual claims that if you change the byte at 0x2002 from 03 to 09, the number of "fill
          *      lines" will change from 2 to 5 (for 50Hz operation), but it shows 06 instead of 0C at location 0x200B;
-         *      if you follow the links, it's pretty clear that byte has to be 0C to yield a 5-line delay.  Since the
-         *      address following the terminator at 0x2006 points to itself, it only makes sense for that terminator
-         *      to be used at the end of the frame buffer.
+         *      if you follow the links, it's pretty clear that byte has to be 0C to yield 5 "fill lines".  Since the
+         *      address following the terminator at 0x2006 points to itself, it never makes sense for that terminator
+         *      to be used EXCEPT at the end of the frame buffer.
          *
-         *      As an alternative to tracking the refresh rate setting, we could hard-code some knowledge about how
-         *      the VT100's 8080 code uses memory, and simply ignore lines below address 0x22D0.  But that seems cheesy.
+         *      As an alternative to tracking the monitor refresh rate, we could hard-code some knowledge about how
+         *      the VT100's 8080 code uses memory, and simply ignore lines below address 0x22D0.  But the VT100 Video
+         *      Processor makes no such assumption, and it would also break our test code in createFonts(), which
+         *      builds a contiguous screen of test data starting at the default frame buffer address (0x2000).
          */
-        this.nRefreshRate = 60;
-
+        this.rateMonitor = 60;
         this.abLineBuffer = new Array(this.nColsBuffer);
     }
 };
@@ -395,7 +393,7 @@ Video.prototype.initBus = function(cmp, bus, cpu, dbg)
     }
 
     /*
-     * Allocate the frame buffer (as needed) along with all other buffers
+     * Allocate the frame buffer (as needed) along with all other buffers.
      */
     this.initBuffers();
 
@@ -430,29 +428,29 @@ Video.prototype.doneLoad = function(sURL, sFontData, nErrorCode)
 
     try {
         /*
-         * The most likely source of any exception will be right here, where we're parsing the JSON-encoded data.
+         * The most likely source of any exception will be here: parsing the JSON-encoded data.
          */
-        var abFontData = eval("(" + sFontData + ")");
+        var ab = eval("(" + sFontData + ")");
 
-        var ab = abFontData['bytes'] || abFontData;
+        var abFontData = ab['bytes'] || ab;
 
-        if (!ab.length) {
+        if (!abFontData || !abFontData.length) {
             Component.error("Empty font ROM: " + sURL);
             return;
         }
-        else if (ab.length == 1) {
-            Component.error(ab[0]);
+        else if (abFontData.length == 1) {
+            Component.error(abFontData[0]);
             return;
         }
 
         /*
          * Minimal font data validation, just to make sure we're not getting garbage from the server...
          */
-        if (ab.length == 2048) {
-            this.abFontdata = ab;
+        if (abFontData.length == 2048) {
+            this.createFonts(abFontData);
         }
         else {
-            this.notice("Unrecognized font data length (" + ab.length + ")");
+            this.notice("Unrecognized font data length (" + abFontData.length + ")");
             return;
         }
 
@@ -471,7 +469,24 @@ Video.prototype.doneLoad = function(sURL, sFontData, nErrorCode)
 };
 
 /**
- * createFontVariation(cxCell, cyCell, rgbOn, fUnderline, fReverse)
+ * createFonts(abFontData)
+ *
+ * @this {Video}
+ * @param {Array.<number>} abFontData
+ */
+Video.prototype.createFonts = function(abFontData)
+{
+    /*
+     * We retain abFontData in case we have to rebuild the fonts (eg, we switch from 80 to 132 columns)
+     */
+    this.abFontData = abFontData;
+    this.aFonts[Video.VT100.FONT.NORML] = this.createFontVariation(this.cxCell, this.cyCell);
+    this.aFonts[Video.VT100.FONT.DWIDE] = this.createFontVariation(this.cxCell*2, this.cyCell);
+    this.aFonts[Video.VT100.FONT.DHIGH] = this.aFonts[Video.VT100.FONT.DHIGH_BOT] = this.createFontVariation(this.cxCell*2, this.cyCell*2);
+};
+
+/**
+ * createFontVariation(cxCell, cyCell, rgbOn, fReverse, fUnderline)
  *
  * This creates a 16x16 character grid for the requested font variation.  Variations include:
  *
@@ -479,18 +494,18 @@ Video.prototype.doneLoad = function(sURL, sFontData, nErrorCode)
  *      2) double-wide characters (cell size is this.cxCell*2 x this.cyCell)
  *      3) double-high characters (cell size is this.cxCell x this.cyCell*2)
  *      4) double-both characters (cell size is this.cxCell*2 x this.cyCell*2)
- *      5) all of the above with underlining enabled
- *      6) all of the above with reverse video enabled
+ *      5) all of the above with reverse video enabled
+ *      6) all of the above with underlining enabled
  *
  * @this {Video}
  * @param {number} cxCell is the target width of each character in the grid
  * @param {number} cyCell is the target height of each character in the grid
  * @param {Array} [rgbOn] contains the RGB values for the font (default is white)
- * @param {boolean} [fUnderline]
  * @param {boolean} [fReverse]
+ * @param {boolean} [fUnderline]
  * @return {Object}
  */
-Video.prototype.createFontVariation = function(cxCell, cyCell, rgbOn, fUnderline, fReverse)
+Video.prototype.createFontVariation = function(cxCell, cyCell, rgbOn, fReverse, fUnderline)
 {
     /*
      * On a VT100, cxCell,cyCell is initially 10,10, but may change to 9,10 for 132-column mode.
@@ -541,19 +556,98 @@ Video.prototype.createFontVariation = function(cxCell, cyCell, rgbOn, fUnderline
          */
         font.context.putImageData(imageChar, (iChar & 0xf) * cxCell, (iChar >> 4) * cyCell);
     }
-
-    /*
-     * Enable this code if you want to see what the generated font looks like....
-     *
-    if (MAXDEBUG) {
-        var iSrcColor = (iColor == 15? 0 : iColor + 1);
-        this.contextScreen.fillStyle = aCSSColors[iSrcColor];
-        this.contextScreen.fillRect(iColor*(font.cxCell<<2), 0, font.canvas.width>>2, font.cyCell<<4);
-        this.contextScreen.drawImage(font.canvas, 0, iColor*(font.cyCell<<4), font.canvas.width>>2, font.cyCell<<4, iColor*(font.cxCell<<2), 0, font.canvas.width>>2, font.cyCell<<4);
-    }
-     */
-
     return font;
+};
+
+/**
+ * powerUp(data, fRepower)
+ *
+ * @this {Video}
+ * @param {Object|null} data
+ * @param {boolean} [fRepower]
+ * @return {boolean} true if successful, false if failure
+ */
+Video.prototype.powerUp = function(data, fRepower)
+{
+    /*
+     * Because the VT100 frame buffer can be located anywhere in RAM (above 0x2000), we must defer this
+     * test code until the powerUp() notification handler is called, when all RAM has (hopefully) been allocated.
+     */
+    if (DEBUG && this.nFormat == Video.FORMAT.VT100) {
+        /*
+         * Build a test screen in the VT100 frame buffer; we'll mimic the "SET-UP A" screen, since it uses
+         * all the font variations.
+         */
+        var aLineData = {
+             0: [Video.VT100.FONT.DHIGH, 'SET-UP A'],
+             2: [Video.VT100.FONT.DWIDE, 'TO EXIT PRESS "SET-UP"'],
+            /*
+             3: [Video.VT100.FONT.NORML, '4'],
+             4: [Video.VT100.FONT.NORML, '5'],
+             5: [Video.VT100.FONT.NORML, '6'],
+             6: [Video.VT100.FONT.NORML, '7'],
+             7: [Video.VT100.FONT.NORML, '8'],
+             8: [Video.VT100.FONT.NORML, '9'],
+             9: [Video.VT100.FONT.NORML, '10'],
+            10: [Video.VT100.FONT.NORML, '11'],
+            11: [Video.VT100.FONT.NORML, '12'],
+            12: [Video.VT100.FONT.NORML, '13'],
+            13: [Video.VT100.FONT.NORML, '14'],
+            14: [Video.VT100.FONT.NORML, '15'],
+            15: [Video.VT100.FONT.NORML, '16'],
+            16: [Video.VT100.FONT.NORML, '17'],
+            17: [Video.VT100.FONT.NORML, '18'],
+            18: [Video.VT100.FONT.NORML, '19'],
+            19: [Video.VT100.FONT.NORML, '20'],
+            20: [Video.VT100.FONT.NORML, '21'],
+            21: [Video.VT100.FONT.NORML, '22'],
+            */
+            22: [Video.VT100.FONT.NORML, '        T       T       T       T       T       T       T       T       T'],
+            23: [Video.VT100.FONT.NORML, '1234567890', '1234567890', '1234567890', '1234567890', '1234567890', '1234567890', '1234567890', '1234567890'],
+            24: []
+        };
+        var addr = this.addrBuffer;
+        var addrNext = -1, font = -1;
+        var b, nFill = (this.rateMonitor == 60? 2 : 5);
+        for (var iRow = -nFill; iRow < this.nRowsBuffer; iRow++) {
+            var lineData = aLineData[iRow];
+            if (addrNext >= 0) {
+                var fBreak = false;
+                addrNext = addr + 2;
+                if (!lineData) {
+                    if (font == Video.VT100.FONT.DHIGH) {
+                        lineData = aLineData[iRow-1];
+                        font = Video.VT100.FONT.DHIGH_BOT;
+                    }
+                }
+                else {
+                    if (lineData.length) {
+                        font = lineData[0];
+                    } else {
+                        addrNext = addr - 1;
+                        fBreak = true;
+                    }
+                }
+                b = (font & Video.VT100.LINEATTR.FONTMASK) | ((addrNext >> 8) & Video.VT100.LINEATTR.ADDRMASK);
+                this.bus.setByteDirect(addr++, b);
+                this.bus.setByteDirect(addr++, addrNext & 0xff);
+                if (fBreak) break;
+            }
+            if (lineData) {
+                var attr = 0;
+                for (var j = 1; j < lineData.length; j++) {
+                    var s = lineData[j];
+                    for (var k = 0; k < s.length; k++) {
+                        this.bus.setByteDirect(addr++, s.charCodeAt(k) | attr);
+                    }
+                    attr ^= 0x80;
+                }
+            }
+            this.bus.setByteDirect(addr++, Video.VT100.LINETERM);
+            addrNext = addr;
+        }
+    }
+    return true;
 };
 
 /**
@@ -695,7 +789,7 @@ Video.prototype.setFocus = function()
  */
 Video.prototype.getRefreshRate = function()
 {
-    return Math.max(this.refreshRate, this.interruptRate);
+    return Math.max(this.rateRefresh, this.rateInterrupt);
 };
 
 /**
@@ -788,6 +882,7 @@ Video.prototype.updateChar = function(idFont, col, row, data, context)
 {
     var bChar = data & 0x7f;
     var font = this.aFonts[idFont];
+    if (!font) return;
 
     var xSrc = (bChar & 0xf) * font.cxCell;
     var ySrc = (bChar >> 4) * font.cyCell;
@@ -848,7 +943,7 @@ Video.prototype.updateVT100 = function()
     var addrNext = this.addrBuffer, fontNext = -1;
 
     var nRows = 0;
-    var nFill = (this.nRefreshRate == 60? 2 : 5);
+    var nFill = (this.rateMonitor == 60? 2 : 5);
     this.assert(this.abLineBuffer.length == this.nColsBuffer);
 
     var iCell = 0, cUpdated = 0;
@@ -859,7 +954,7 @@ Video.prototype.updateVT100 = function()
         var nCols = 0;
         var addr = addrNext;
         var font = fontNext;
-        while (nCols < this.abLineBuffer.length) {
+        while (true) {
             var data = this.bus.getByteDirect(addr++);
             if ((data & Video.VT100.LINETERM) == Video.VT100.LINETERM) {
                 var b = this.bus.getByteDirect(addr++);
@@ -867,7 +962,11 @@ Video.prototype.updateVT100 = function()
                 addrNext = this.addrBuffer | ((b & Video.VT100.LINEATTR.ADDRMASK) << 8) | this.bus.getByteDirect(addr);
                 break;
             }
-            this.abLineBuffer[nCols++] = data;
+            if (nCols < this.abLineBuffer.length) {
+                this.abLineBuffer[nCols++] = data;
+            } else {
+                break;                          // ideally, we would wait for a LINETERM byte, but it's not safe to loop without limit
+            }
         }
 
         /*
@@ -894,7 +993,11 @@ Video.prototype.updateVT100 = function()
         for (var iCol = 0; iCol < nCols; iCol++) {
             data = this.abLineBuffer[iCol];
             if (!this.fCellCacheValid || data !== this.aCellCache[iCell]) {
-                this.updateChar(font, iCol, nRows, data, this.contextBuffer);
+                /*
+                 * TODO: If bit 8 is set, we must select a different font variation, depending on which per-character
+                 * screen attribute is currently enabled (ie, reverse video or underline).
+                 */
+                this.updateChar(font, iCol, nRows, data & 0x7f, this.contextBuffer);
                 cUpdated++;
             }
             iCell++;
@@ -905,7 +1008,11 @@ Video.prototype.updateVT100 = function()
     this.fCellCacheValid = true;
 
     if (cUpdated && this.contextBuffer) {
-        this.contextScreen.drawImage(this.canvasBuffer, 0, 0, this.cxBuffer, this.cyBuffer, this.xScreenOffset, this.yScreenOffset, this.cxScreenOffset, this.cyScreenOffset);
+        /*
+         * NOTE: We must subtract cyCell from cyBuffer to avoid displaying the extra row that we normally buffer
+         * in support of smooth-scrolling.
+         */
+        this.contextScreen.drawImage(this.canvasBuffer, 0, 0, this.cxBuffer, this.cyBuffer - this.cyCell, this.xScreenOffset, this.yScreenOffset, this.cxScreenOffset, this.cyScreenOffset);
     }
 };
 
@@ -930,7 +1037,7 @@ Video.prototype.updateScreen = function(n)
 
     if (n >= 0) {
 
-        if (this.interruptRate) {
+        if (this.rateInterrupt) {
             if (!(n & 1)) {
                 /*
                  * On even updates, call cpu.requestINTR(1), and also update our copy of the screen.

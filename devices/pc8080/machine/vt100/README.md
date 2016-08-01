@@ -47,7 +47,7 @@ to "true", indicating that existing RAM should be used, and a new property, *buf
 enabling support for the VT100's line data format; eg:
 
 	<ram id="ram" addr="0x2000" size="0x0C00"/>
-	<video id="video" screenWidth="1600" screenHeight="800" bufferAddr="0x2000" bufferRAM="true" bufferFormat="vt100" bufferCols="80" bufferRows="24" ...>
+	<video id="video" screenWidth="1600" screenHeight="960" bufferAddr="0x2000" bufferRAM="true" bufferFormat="vt100" bufferCols="80" bufferRows="24" ...>
 
 Ordinarily, the VT100 screen displays 800 dots per horizontal scan, and a total of 240 horizontal scans, and by default,
 it uses a 10x10 character cell, for a total of 80 columns and 24 rows of characters.  However, in 132-column mode, it
@@ -56,14 +56,14 @@ for 14 rows of characters; this implies a total of 1188 dots displayed per horiz
 scans.  This means we will have to dynamically reallocate the buffer display context whenever the horizontal dimensions change
 (ie, from 800 to 1188, or from 1188 back to 800).
 
-For optimum scaling, I would normally define the virtual screen size using multiples of the VT100's "dot" dimensions;
-eg, 1600x960 (a horizontal multiplier of 2 and a vertical multiplier of 4).  However, that would give us a virtual screen
-aspect ratio of 1.67, which is less than the (apparent) 2.0 aspect ratio of a physical VT100 screen, so I've changed the
-test machine's screen dimensions to 1600x800.
+For optimum scaling, I define the virtual screen size using multiples of the VT100's default "dot" dimensions; eg, 1600x960
+(a horizontal multiplier of 2 and a vertical multiplier of 4).  However, that gives us a virtual screen aspect ratio of 1.67,
+which is less than the (apparent) 2.0 aspect ratio of a physical VT100 screen.  But I'm resisting changing the test machine's
+virtual screen dimensions (to, say, 1600x800) until I've done more "aspect ratio research".
 
-Regarding physical dimensions, a VT100 screen measures 12 inches diagonally, and in 80-column mode, characters measure
-2.0mm x 3.35mm (in 132-column mode, they measure 1.3mm x 3.35mm).  This means that the text area of the screen is roughly
-160mm x 80mm, implying a screen aspect ratio of 2.0.
+Here's what we know from the Technical Manual: a physical VT100 screen measures 12 inches diagonally, and in 80-column mode,
+characters measure 2.0mm x 3.35mm (in 132-column mode, they measure 1.3mm x 3.35mm).  This means that the text area of the
+screen is roughly 160mm x 80mm, implying a screen aspect ratio of 2.0.
 
 {% include machine.html id="vt100" %}
 

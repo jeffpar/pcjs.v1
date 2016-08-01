@@ -172,7 +172,7 @@ var PCX86 = {
     SITEHOST:    SITEHOST,      // shared
     SYMBOLS:     SYMBOLS,
     XMLVERSION:  XMLVERSION     // shared
-}
+};
 
 if (NODE) {
     global.APPCLASS    = APPCLASS;

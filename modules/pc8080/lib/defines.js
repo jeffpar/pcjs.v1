@@ -92,7 +92,7 @@ var PC8080 = {
     TYPEDARRAYS: TYPEDARRAYS,
     SITEHOST:    SITEHOST,      // shared
     XMLVERSION:  XMLVERSION     // shared
-}
+};
 
 if (NODE) {
     global.APPCLASS    = APPCLASS;
