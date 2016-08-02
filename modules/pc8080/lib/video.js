@@ -550,7 +550,7 @@ Video.prototype.createFontVariation = function(cxCell, cyCell, fUnderline)
     for (var iChar = 0; iChar < nChars; iChar++) {
         for (var y = 0, yDst = y; y < this.cyCell; y++) {
             var offFontData = iChar * nFontBytesPerChar + ((nFontByteOffset + y) & (nFontBytesPerChar - 1));
-            var bits = this.abFontData[offFontData];
+            var bits = (fUnderline && y == 8? 0xff : this.abFontData[offFontData]);
             for (var nRows = 0; nRows < (cyCell / this.cyCell); nRows++) {
                 for (var x = 0, xDst = x; x < this.cxCell; x++) {
                     /*
