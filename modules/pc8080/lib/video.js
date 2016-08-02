@@ -365,6 +365,12 @@ Video.prototype.initBuffers = function()
          *      builds a contiguous screen of test data starting at the default frame buffer address (0x2000).
          */
         this.rateMonitor = 60;
+
+        /*
+         * The default character-selectable attribute (reverse video vs. underline) is controlled by fUnderline.
+         */
+        this.fUnderline = false;
+
         this.abLineBuffer = new Array(this.nColsBuffer);
     }
 };
@@ -480,31 +486,37 @@ Video.prototype.createFonts = function(abFontData)
      * We retain abFontData in case we have to rebuild the fonts (eg, when we switch from 80 to 132 columns)
      */
     this.abFontData = abFontData;
-    this.aFonts[Video.VT100.FONT.NORML] = this.createFontVariation(this.cxCell, this.cyCell);
-    this.aFonts[Video.VT100.FONT.DWIDE] = this.createFontVariation(this.cxCell*2, this.cyCell);
-    this.aFonts[Video.VT100.FONT.DHIGH] = this.aFonts[Video.VT100.FONT.DHIGH_BOT] = this.createFontVariation(this.cxCell*2, this.cyCell*2);
+    this.aFonts[Video.VT100.FONT.NORML] = [
+        this.createFontVariation(this.cxCell, this.cyCell),
+        this.createFontVariation(this.cxCell, this.cyCell, this.fUnderline)
+    ];
+    this.aFonts[Video.VT100.FONT.DWIDE] = [
+        this.createFontVariation(this.cxCell*2, this.cyCell),
+        this.createFontVariation(this.cxCell*2, this.cyCell, this.fUnderline)
+    ];
+    this.aFonts[Video.VT100.FONT.DHIGH] = this.aFonts[Video.VT100.FONT.DHIGH_BOT] = [
+        this.createFontVariation(this.cxCell*2, this.cyCell*2),
+        this.createFontVariation(this.cxCell*2, this.cyCell*2, this.fUnderline)
+    ];
 };
 
 /**
- * createFontVariation(cxCell, cyCell, rgbOn, fReverse, fUnderline)
+ * createFontVariation(cxCell, cyCell, fUnderline)
  *
  * This creates a 16x16 character grid for the requested font variation.  Variations include:
  *
  *      1) no variation (cell size is this.cxCell x this.cyCell)
  *      2) double-wide characters (cell size is this.cxCell*2 x this.cyCell)
  *      3) double-high double-wide characters (cell size is this.cxCell*2 x this.cyCell*2)
- *      4) variations 1-3 with reverse video enabled
- *      5) variations 1-3 with underlining enabled
+ *      4) all of the above with either reverse video or underline enabled (default is reverse video)
  *
  * @this {Video}
  * @param {number} cxCell is the target width of each character in the grid
  * @param {number} cyCell is the target height of each character in the grid
- * @param {Array} [rgbOn] contains the RGB values for the font (default is white)
- * @param {boolean} [fReverse]
  * @param {boolean} [fUnderline]
  * @return {Object}
  */
-Video.prototype.createFontVariation = function(cxCell, cyCell, rgbOn, fReverse, fUnderline)
+Video.prototype.createFontVariation = function(cxCell, cyCell, fUnderline)
 {
     /*
      * On a VT100, cxCell,cyCell is initially 10,10, but may change to 9,10 for 132-column mode.
@@ -520,6 +532,12 @@ Video.prototype.createFontVariation = function(cxCell, cyCell, rgbOn, fReverse, 
     var nFontBytesPerChar = this.cxCellDefault <= 8? 8 : 16;
     var nFontByteOffset = nFontBytesPerChar > 8? 15 : 0;
     var nChars = this.abFontData.length / nFontBytesPerChar;
+
+    /*
+     * The absence of a boolean for fUnderline means that both fReverse and fUnderline are "falsey".  The presence
+     * of a boolean means that fReverse will be true OR fUnderline will be true, but NOT both.
+     */
+    var fReverse = (fUnderline === false);
 
     var font = {cxCell: cxCell, cyCell: cyCell};
     font.canvas = document.createElement("canvas");
@@ -543,6 +561,7 @@ Video.prototype.createFontVariation = function(cxCell, cyCell, rgbOn, fReverse, 
                      */
                     var bit = bits & (0x80 >> (x > 7? 7 : x));
                     for (var nCols = 0; nCols < (cxCell / this.cxCell); nCols++) {
+                        if (fReverse) bit = !bit;
                         this.setPixel(imageChar, xDst, yDst, bit? 1 : 0);
                         xDst++;
                     }
@@ -880,7 +899,7 @@ Video.prototype.setPixel = function(image, x, y, bPixel)
 Video.prototype.updateChar = function(idFont, col, row, data, context)
 {
     var bChar = data & 0x7f;
-    var font = this.aFonts[idFont];
+    var font = this.aFonts[idFont][(data & 0x80)? 1 : 0];
     if (!font) return;
 
     var xSrc = (bChar & 0xf) * font.cxCell;
@@ -996,7 +1015,7 @@ Video.prototype.updateVT100 = function()
                  * TODO: If bit 8 is set, we must select a different font variation, depending on which per-character
                  * screen attribute is currently enabled (ie, reverse video or underline).
                  */
-                this.updateChar(font, iCol, nRows, data & 0x7f, this.contextBuffer);
+                this.updateChar(font, iCol, nRows, data, this.contextBuffer);
                 cUpdated++;
             }
             iCell++;
