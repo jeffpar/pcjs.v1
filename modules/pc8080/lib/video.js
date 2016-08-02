@@ -450,7 +450,7 @@ Video.prototype.doneLoad = function(sURL, sFontData, nErrorCode)
         }
 
         /*
-         * Minimal font data validation, just to make sure we're not getting garbage from the server...
+         * Minimal font data validation, just to make sure we're not getting garbage from the server.
          */
         if (abFontData.length == 2048) {
             this.createFonts(abFontData);
@@ -464,6 +464,7 @@ Video.prototype.doneLoad = function(sURL, sFontData, nErrorCode)
         this.notice("Font ROM data error: " + e.message);
         return;
     }
+
     /*
      * If we're still here, then we're ready!
      *
@@ -508,12 +509,12 @@ Video.prototype.createFonts = function(abFontData)
  *      1) no variation (cell size is this.cxCell x this.cyCell)
  *      2) double-wide characters (cell size is this.cxCell*2 x this.cyCell)
  *      3) double-high double-wide characters (cell size is this.cxCell*2 x this.cyCell*2)
- *      4) all of the above with either reverse video or underline enabled (default is reverse video)
+ *      4) any of the above with either reverse video or underline enabled (default is neither)
  *
  * @this {Video}
  * @param {number} cxCell is the target width of each character in the grid
  * @param {number} cyCell is the target height of each character in the grid
- * @param {boolean} [fUnderline]
+ * @param {boolean} [fUnderline] (null for unmodified font, false for reverse video, true for underline)
  * @return {Object}
  */
 Video.prototype.createFontVariation = function(cxCell, cyCell, fUnderline)
