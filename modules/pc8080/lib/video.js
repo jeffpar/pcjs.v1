@@ -242,6 +242,8 @@ function Video(parmsVideo, canvas, context, textarea, container)
         });
     }
 
+    this.ledBindings = {};
+
     if (DEBUG) this.nCyclesPrev = 0;
 }
 
@@ -404,12 +406,17 @@ Video.prototype.initBus = function(cmp, bus, cpu, dbg)
     this.initBuffers();
 
     /*
-     * If we have an associated keyboard, then ensure that the keyboard will be notified whenever the canvas
-     * gets focus and receives input.
+     * If we have an associated keyboard, then ensure that the keyboard will be notified
+     * whenever the canvas gets focus and receives input.
      */
     this.kbd = cmp.getMachineComponent("Keyboard");
-    if (this.kbd && this.canvasScreen) {
-        this.kbd.setBinding(this.textareaScreen? "textarea" : "canvas", "kbd", this.inputScreen);
+    if (this.kbd) {
+        for (var s in this.ledBindings) {
+            this.kbd.setBinding("led", s, this.ledBindings[s]);
+        }
+        if (this.canvasScreen) {
+            this.kbd.setBinding(this.textareaScreen? "textarea" : "canvas", "kbd", this.inputScreen);
+        }
     }
 
     if (!this.sFontROM) this.setReady();
@@ -665,6 +672,14 @@ Video.prototype.powerUp = function(data, fRepower)
 Video.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
 {
     var video = this;
+
+    /*
+     * TODO: A more general-purpose binding mechanism would be nice someday....
+     */
+    if (sHTMLType == "led" || sHTMLType == "rled") {
+        this.ledBindings[sBinding] = control;
+        return true;
+    }
 
     switch (sBinding) {
     case "fullScreen":

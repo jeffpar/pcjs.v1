@@ -245,6 +245,16 @@ Keyboard.ALTCODES[Keyboard.ASCII.A] = Keyboard.KEYCODE.LEFT;
 Keyboard.ALTCODES[Keyboard.ASCII.D] = Keyboard.KEYCODE.RIGHT;
 Keyboard.ALTCODES[Keyboard.ASCII.L] = Keyboard.KEYCODE.SPACE;
 
+Keyboard.LEDSTATES = {
+    'l1':       0x01,
+    'l2':       0x02,
+    'l3':       0x04,
+    'l4':       0x08,
+    'locked':   0x10,
+    'local':    0x20,
+    'online':   0x40
+};
+
 /**
  * getSoftCode(keyCode)
  *
@@ -310,6 +320,12 @@ Keyboard.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
     var id = sHTMLType + '-' + sBinding;
 
     if (this.bindings[id] === undefined) {
+
+        if (sHTMLType == "led" && Keyboard.LEDSTATES[sBinding]) {
+            this.bindings[id] = control;
+            return true;
+        }
+
         switch (sBinding) {
         case "kbd":
             /*
@@ -354,6 +370,39 @@ Keyboard.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
         }
     }
     return false;
+};
+
+/**
+ * setLED(control, f)
+ *
+ * @this {Keyboard}
+ * @param {Object} control is an HTML control DOM object
+ * @param {boolean} f is true if the LED represented by control should be "on", false if "off"
+ */
+Keyboard.prototype.setLED = function(control, f)
+{
+    /*
+     * TODO: Add support for user-definable LED colors
+     */
+    control.style.backgroundColor = (f? "#ff0000" : "#000000");
+};
+
+/**
+ * updateLEDs(bitState)
+ *
+ * @this {Keyboard}
+ * @param {number} [bitState] is the bit in bitsStateSim that may have changed, if known; undefined if not
+ */
+Keyboard.prototype.updateLEDs = function(bitState)
+{
+    var control;
+    for (var sBinding in Keyboard.LEDSTATES) {
+        var id = "led-" + sBinding;
+        var bitLED = Keyboard.LEDSTATES[sBinding];
+        if ((!bitState || bitState == bitLED) && (control = this.bindings[id])) {
+            this.setLED(control, !!bitLED);     // !!(this.bKeyboardState & bitLED)
+        }
+    }
 };
 
 /**

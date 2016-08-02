@@ -106,6 +106,17 @@
     line-height: 19px;
     background-color: #000000;
 }
+.pcjs-rled {
+    float: left;
+    width: 8px;
+    height: 8px;
+    margin: 4px;
+    border: 1px solid black;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 19px;
+    background-color: #000000;
+}
 .pcjs-screen {
     clear: both;
     height: auto;

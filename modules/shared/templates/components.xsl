@@ -411,7 +411,7 @@
 						</fieldset>
 					</form>
 				</xsl:when>
-				<xsl:when test="@type = 'led'">
+				<xsl:when test="@type = 'led' or @type = 'rled'">
 					<div class="{$APPCLASS}-binding {$CSSCLASS}-{@type}" data-value="{{{$type},{$binding}}}"><xsl:value-of select="."/></div>
 				</xsl:when>
 				<xsl:when test="@type = 'separator'">

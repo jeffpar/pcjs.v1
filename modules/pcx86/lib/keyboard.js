@@ -1867,6 +1867,9 @@ Keyboard.prototype.injectKeysFromBuffer = function(msDelay)
  */
 Keyboard.prototype.setLED = function(control, f)
 {
+    /*
+     * TODO: Add support for user-definable LED colors
+     */
     control.style.backgroundColor = (f? "#00ff00" : "#000000");
 };
 
