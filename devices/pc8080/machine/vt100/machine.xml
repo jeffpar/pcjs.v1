@@ -18,5 +18,5 @@
 	</video>
 	<keyboard id="keyboard"/>
 	<panel ref="/devices/pc8080/panel/wide.xml"/>
-	<debugger id="debugger" commands="s 8086"/>
+	<debugger id="debugger" messages="mem|halt" commands="s 8086"/>
 </machine>
