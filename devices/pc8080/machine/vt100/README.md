@@ -31,7 +31,7 @@ mapped into the 8080's address space.
 
 Normally, the PC8080 Video component allocates its own video buffer, based on the specified buffer address
 (*bufferAddr*) and other dimensions (eg, *bufferCols* and *bufferRows*), but the VT100 is a little unusual:
-it has a custom video processor that uses DMA to request character data from any region of RAM, one line at a time.
+it has a custom Video Processor that uses DMA to request character data from any region of RAM, one line at a time.
 It always defaults to address 0x2000 for the first line of character data, but each line terminates with 3 bytes
 containing line attributes and the address of the next line, so the location of subsequent lines will vary,
 depending on the following line attributes:
@@ -39,10 +39,11 @@ depending on the following line attributes:
 - Single-width characters (80 or 132 columns)
 - Double-width characters (40 or 66 columns)
 
-In addition to single vs. double width, line attributes can also specify double height (along with whether the
-top half or bottom half of the character should be displayed).
+In addition to single-width vs. double-width, line attributes can also specify double-height, along with whether the
+top or bottom halves of the double-high characters should be displayed.  Also, double-high always implies double-wide
+(ie, there is no support for double-high, single-wide characters).
 
-In light of the above, the [machine XML file](machine.xml) must set the Video component's *bufferRAM* property
+Conssequently, a VT100 [machine XML file](machine.xml) must set the Video component's *bufferRAM* property
 to "true", indicating that existing RAM should be used, and a new property, *bufferFormat* must be set to "vt100",
 enabling support for the VT100's line data format; eg:
 
@@ -51,19 +52,17 @@ enabling support for the VT100's line data format; eg:
 
 Ordinarily, the VT100 screen displays 800 dots per horizontal scan, and a total of 240 horizontal scans, and by default,
 it uses a 10x10 character cell, for a total of 80 columns and 24 rows of characters.  However, in 132-column mode, it
-uses a 9x10 character cell instead, and assuming no AVO expansion card is present, there is only enough screen RAM available
-for 14 rows of characters; this implies a total of 1188 dots displayed per horizontal scan, and a total of only 140 horizontal
-scans.  This means we will have to dynamically reallocate the buffer display context whenever the horizontal dimensions change
-(ie, from 800 to 1188, or from 1188 back to 800).
+uses a 9x10 character cell instead, implying a total of 1188 dots displayed per horizontal scan.  This means we will have
+to dynamically reallocate our internal buffers whenever the horizontal dimensions change.  Also, if no AVO expansion
+card is present, there is only enough RAM available for 14 rows of characters in 132-column mode. 
 
 For optimum scaling, I define the virtual screen size using multiples of the VT100's default "dot" dimensions; eg, 1600x960
-(a horizontal multiplier of 2 and a vertical multiplier of 4).  However, that gives us a virtual screen aspect ratio of 1.67,
-which is less than the (apparent) 2.0 aspect ratio of a physical VT100 screen.  But I'm resisting changing the test machine's
-virtual screen dimensions (to, say, 1600x800) until I've done more "aspect ratio research".
+(a horizontal multiplier of 2 and a vertical multiplier of 4).  That gives us a virtual screen aspect ratio of 1.67.
 
-Here's what we know from the Technical Manual: a physical VT100 screen measures 12 inches diagonally, and in 80-column mode,
-characters measure 2.0mm x 3.35mm (in 132-column mode, they measure 1.3mm x 3.35mm).  This means that the text area of the
-screen is roughly 160mm x 80mm, implying a screen aspect ratio of 2.0.
+According to the Technical Manual, a physical VT100 screen measures 12 inches diagonally, and in 80-column mode, characters
+measure 2.0mm x 3.35mm (in 132-column mode, they measure 1.3mm x 3.35mm), which suggests that the text area of the screen is
+roughly 160mm x 80mm, implying a screen aspect ratio of 2.0.  However, after visually comparing the Technical Manual's SET-UP
+screenshots to our test screens, 1.67 appears to be closer to reality than 2.0.  I'll revisit this issue at a later date.  
 
 {% include machine.html id="vt100" %}
 

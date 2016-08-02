@@ -477,7 +477,7 @@ Video.prototype.doneLoad = function(sURL, sFontData, nErrorCode)
 Video.prototype.createFonts = function(abFontData)
 {
     /*
-     * We retain abFontData in case we have to rebuild the fonts (eg, we switch from 80 to 132 columns)
+     * We retain abFontData in case we have to rebuild the fonts (eg, when we switch from 80 to 132 columns)
      */
     this.abFontData = abFontData;
     this.aFonts[Video.VT100.FONT.NORML] = this.createFontVariation(this.cxCell, this.cyCell);
@@ -492,10 +492,9 @@ Video.prototype.createFonts = function(abFontData)
  *
  *      1) no variation (cell size is this.cxCell x this.cyCell)
  *      2) double-wide characters (cell size is this.cxCell*2 x this.cyCell)
- *      3) double-high characters (cell size is this.cxCell x this.cyCell*2)
- *      4) double-both characters (cell size is this.cxCell*2 x this.cyCell*2)
- *      5) all of the above with reverse video enabled
- *      6) all of the above with underlining enabled
+ *      3) double-high double-wide characters (cell size is this.cxCell*2 x this.cyCell*2)
+ *      4) variations 1-3 with reverse video enabled
+ *      5) variations 1-3 with underlining enabled
  *
  * @this {Video}
  * @param {number} cxCell is the target width of each character in the grid
@@ -540,7 +539,7 @@ Video.prototype.createFontVariation = function(cxCell, cyCell, rgbOn, fReverse, 
                      * While x goes from 0 to cxCell-1, obviously we will run out of bits after x is 7;
                      * since the final bit must be replicated all the way to the right edge of the cell
                      * (so that line-drawing characters seamlessly connect), we ensure that the effective
-                     * shift count remains stuck at 7.
+                     * shift count remains stuck at 7 once it reaches 7.
                      */
                     var bit = bits & (0x80 >> (x > 7? 7 : x));
                     for (var nCols = 0; nCols < (cxCell / this.cxCell); nCols++) {
