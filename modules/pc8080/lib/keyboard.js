@@ -415,27 +415,27 @@ Keyboard.prototype.onSoftKeyDown = function(sSoftCode, fDown)
     if (this.chipset) {
         switch(sSoftCode) {
         case '1p':
-            this.chipset.updateStatus1(ChipSet.SI_1978.STATUS1.P1, fDown);
+            this.chipset.updateStatus1(ChipSet.SI1978.STATUS1.P1, fDown);
             break;
 
         case '2p':
-            this.chipset.updateStatus1(ChipSet.SI_1978.STATUS1.P2, fDown);
+            this.chipset.updateStatus1(ChipSet.SI1978.STATUS1.P2, fDown);
             break;
 
         case 'coin':
-            this.chipset.updateStatus1(ChipSet.SI_1978.STATUS1.CREDIT, fDown);
+            this.chipset.updateStatus1(ChipSet.SI1978.STATUS1.CREDIT, fDown);
             break;
 
         case 'left':
-            this.chipset.updateStatus1(ChipSet.SI_1978.STATUS1.P1_LEFT, fDown);
+            this.chipset.updateStatus1(ChipSet.SI1978.STATUS1.P1_LEFT, fDown);
             break;
 
         case 'right':
-            this.chipset.updateStatus1(ChipSet.SI_1978.STATUS1.P1_RIGHT, fDown);
+            this.chipset.updateStatus1(ChipSet.SI1978.STATUS1.P1_RIGHT, fDown);
             break;
 
         case 'fire':
-            this.chipset.updateStatus1(ChipSet.SI_1978.STATUS1.P1_FIRE, fDown);
+            this.chipset.updateStatus1(ChipSet.SI1978.STATUS1.P1_FIRE, fDown);
             break;
         }
     }

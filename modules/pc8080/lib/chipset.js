@@ -67,7 +67,8 @@ function ChipSet(parmsChipSet)
         Component.notice("Unrecognized ChipSet model: " + model);
     }
 
-    this.model = ChipSet.MODELS[model] || ChipSet.SI_1978.MODEL;
+    this.config = ChipSet.MODELS[model] || ChipSet.SI1978;
+    this.model = this.config.MODEL;
 
     this.bSwitches = this.parseDIPSwitches(parmsChipSet['swDIP']);
 
@@ -104,9 +105,9 @@ function ChipSet(parmsChipSet)
 
 Component.subclass(ChipSet);
 
-ChipSet.SI_1978 = {
+ChipSet.SI1978 = {
     MODEL:          1978.1,
-    STATUS0: {                          // NOTE: STATUS0 not used by the SI_1978 ROMs; refer to STATUS1 instead
+    STATUS0: {                          // NOTE: STATUS0 not used by the SI1978 ROMs; refer to STATUS1 instead
         PORT:       0,
         DIP4:       0x01,               // self-test request at power up?
         FIRE:       0x10,               // 1 = fire
@@ -165,11 +166,22 @@ ChipSet.SI_1978 = {
     }
 };
 
+ChipSet.VT100 = {
+    MODEL:          100.0,
+    BRIGHTNESS_LATCH: {
+        PORT:       0x42                // write-only
+    },
+    NVR_LATCH: {
+        PORT:       0x62                // write-only
+    }
+};
+
 /*
  * Supported model strings
  */
 ChipSet.MODELS = {
-    "SI1978":       ChipSet.SI_1978.MODEL
+    "SI1978":       ChipSet.SI1978,
+    "VT100":        ChipSet.VT100
 };
 
 /**
@@ -227,10 +239,8 @@ ChipSet.prototype.initBus = function(cmp, bus, cpu, dbg)
     this.cpu = cpu;
     this.dbg = dbg;
     this.cmp = cmp;
-    if (this.model == ChipSet.SI_1978.MODEL) {
-        bus.addPortInputTable(this, ChipSet.aPortInput);
-        bus.addPortOutputTable(this, ChipSet.aPortOutput);
-    }
+    bus.addPortInputTable(this, this.config.portsInput);
+    bus.addPortOutputTable(this, this.config.portsOutput);
 };
 
 /**
@@ -266,6 +276,21 @@ ChipSet.prototype.powerDown = function(fSave, fShutdown)
     return fSave? this.save() : true;
 };
 
+ChipSet.SI1978.init = [
+    [
+        ChipSet.SI1978.STATUS0.ALWAYS_SET,
+        ChipSet.SI1978.STATUS1.ALWAYS_SET,
+        ChipSet.SI1978.STATUS2.ALWAYS_SET,
+        0, 0, 0, 0
+    ]
+];
+
+ChipSet.VT100.init = [
+    [
+        0, 0
+    ]
+];
+
 /**
  * reset()
  *
@@ -273,12 +298,9 @@ ChipSet.prototype.powerDown = function(fSave, fShutdown)
  */
 ChipSet.prototype.reset = function()
 {
-    this.bStatus0 = ChipSet.SI_1978.STATUS0.ALWAYS_SET;
-    this.bStatus1 = ChipSet.SI_1978.STATUS1.ALWAYS_SET;
-    this.bStatus2 = ChipSet.SI_1978.STATUS2.ALWAYS_SET;
-    this.wShiftData = 0;
-    this.bShiftCount = 0;
-    this.bSound1 = this.bSound2 = 0;
+    if (!this.restore(this.config.init)) {
+        this.notice("reset error");
+    }
 };
 
 /**
@@ -292,8 +314,13 @@ ChipSet.prototype.reset = function()
 ChipSet.prototype.save = function()
 {
     var state = new State(this);
-    if (this.model == ChipSet.SI_1978.MODEL) {
+    switch(this.model) {
+    case ChipSet.SI1978.MODEL:
         state.set(0, [this.bStatus0, this.bStatus1, this.bStatus2, this.wShiftData, this.bShiftCount, this.bSound1, this.bSound2]);
+        break;
+    case ChipSet.VT100.MODEL:
+        state.set(0, [this.bBrightnessLatch, this.bNVRLatch]);
+        break;
     }
     return state.data();
 };
@@ -309,18 +336,25 @@ ChipSet.prototype.save = function()
  */
 ChipSet.prototype.restore = function(data)
 {
-    var a, i;
-    a = data[0];
-    if (this.model == ChipSet.SI_1978.MODEL) {
-        this.bStatus0 = a[0];
-        this.bStatus1 = a[1];
-        this.bStatus2 = a[2];
-        this.wShiftData = a[3];
-        this.bShiftCount = a[4];
-        this.bSound1 = a[5];
-        this.bSound2 = a[6];
+    var a;
+    if (data && (a = data[0]) && a.length) {
+        switch(this.model) {
+        case ChipSet.SI1978.MODEL:
+            this.bStatus0 = a[0];
+            this.bStatus1 = a[1];
+            this.bStatus2 = a[2];
+            this.wShiftData = a[3];
+            this.bShiftCount = a[4];
+            this.bSound1 = a[5];
+            this.bSound2 = a[6];
+            return true;
+        case ChipSet.VT100.MODEL:
+            this.bBrightnessLatch = a[0];
+            this.bNVRLatch = a[1];
+            return true;
+        }
     }
-    return true;
+    return false;
 };
 
 /**
@@ -519,25 +553,58 @@ ChipSet.prototype.outSIWatchdog = function(port, b, addrFrom)
     this.printMessageIO(port, b, addrFrom, "WATCHDOG", null, true);
 };
 
-/*
- * Port input notification tables
+/**
+ * outVT100BrightnessLatch(port, b, addrFrom)
+ *
+ * @this {ChipSet}
+ * @param {number} port (0x42)
+ * @param {number} b
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to write the specified port)
  */
-ChipSet.aPortInput = {
+ChipSet.prototype.outVT100BrightnessLatch = function(port, b, addrFrom)
+{
+    this.printMessageIO(port, b, addrFrom, "BRIGHTNESS.LATCH", null, true);
+    this.bBrightnessLatch = b;
+};
+
+/**
+ * outVT100BrightnessLatch(port, b, addrFrom)
+ *
+ * @this {ChipSet}
+ * @param {number} port (0x62)
+ * @param {number} b
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to write the specified port)
+ */
+ChipSet.prototype.outVT100NVRLatch = function(port, b, addrFrom)
+{
+    this.printMessageIO(port, b, addrFrom, "NVR.LATCH", null, true);
+    this.bNVRLatch = b;
+};
+
+/*
+ * Port notification tables
+ */
+ChipSet.SI1978.portsInput = {
     0x00: ChipSet.prototype.inSIStatus0,
     0x01: ChipSet.prototype.inSIStatus1,
     0x02: ChipSet.prototype.inSIStatus2,
     0x03: ChipSet.prototype.inSIShiftResult
 };
 
-/*
- * Port output notification tables
- */
-ChipSet.aPortOutput = {
+ChipSet.SI1978.portsOutput = {
     0x02: ChipSet.prototype.outSIShiftCount,
     0x03: ChipSet.prototype.outSISound1,
     0x04: ChipSet.prototype.outSIShiftData,
     0x05: ChipSet.prototype.outSISound2,
     0x06: ChipSet.prototype.outSIWatchdog
+};
+
+ChipSet.VT100.portsInput = {
+};
+
+ChipSet.VT100.portsOutput = {
+    0x42: ChipSet.prototype.outVT100BrightnessLatch,
+    0x62: ChipSet.prototype.outVT100NVRLatch
 };
 
 /**

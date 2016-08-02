@@ -393,7 +393,7 @@ Video.prototype.initBus = function(cmp, bus, cpu, dbg)
 
     if (!this.nFormat) {
         this.chipset = cmp.getMachineComponent("ChipSet");
-        if (this.chipset && this.chipset.model == ChipSet.SI_1978.MODEL) {
+        if (this.chipset && this.chipset.model == ChipSet.SI1978.MODEL) {
             this.nFormat = Video.FORMAT.SI1978;
         }
     }
@@ -595,32 +595,15 @@ Video.prototype.powerUp = function(data, fRepower)
     if (DEBUG && this.nFormat == Video.FORMAT.VT100) {
         /*
          * Build a test screen in the VT100 frame buffer; we'll mimic the "SET-UP A" screen, since it uses
-         * all the font variations.
+         * all the font variations.  The process involves iterating over 0-based row numbers -2 (or -5 if 50Hz
+         * operation is selected) through 24, checking aLineData for a matching row number, and converting the
+         * corresponding string(s) to appropriate byte values.  Negative row numbers correspond to "fill lines"
+         * and do not require a row entry.  If multiple strings are present for a given row, we invert the
+         * default character attribute for subsequent strings.  An empty array ends the screen build process.
          */
         var aLineData = {
              0: [Video.VT100.FONT.DHIGH, 'SET-UP A'],
              2: [Video.VT100.FONT.DWIDE, 'TO EXIT PRESS "SET-UP"'],
-            /*
-             3: [Video.VT100.FONT.NORML, '4'],
-             4: [Video.VT100.FONT.NORML, '5'],
-             5: [Video.VT100.FONT.NORML, '6'],
-             6: [Video.VT100.FONT.NORML, '7'],
-             7: [Video.VT100.FONT.NORML, '8'],
-             8: [Video.VT100.FONT.NORML, '9'],
-             9: [Video.VT100.FONT.NORML, '10'],
-            10: [Video.VT100.FONT.NORML, '11'],
-            11: [Video.VT100.FONT.NORML, '12'],
-            12: [Video.VT100.FONT.NORML, '13'],
-            13: [Video.VT100.FONT.NORML, '14'],
-            14: [Video.VT100.FONT.NORML, '15'],
-            15: [Video.VT100.FONT.NORML, '16'],
-            16: [Video.VT100.FONT.NORML, '17'],
-            17: [Video.VT100.FONT.NORML, '18'],
-            18: [Video.VT100.FONT.NORML, '19'],
-            19: [Video.VT100.FONT.NORML, '20'],
-            20: [Video.VT100.FONT.NORML, '21'],
-            21: [Video.VT100.FONT.NORML, '22'],
-            */
             22: [Video.VT100.FONT.NORML, '        T       T       T       T       T       T       T       T       T'],
             23: [Video.VT100.FONT.NORML, '1234567890', '1234567890', '1234567890', '1234567890', '1234567890', '1234567890', '1234567890', '1234567890'],
             24: []
