@@ -558,9 +558,6 @@ Keyboard.prototype.onKeyDown = function(event, fDown)
 
     if (sSoftCode) {
         fPass = this.onSoftKeyDown(sSoftCode, fDown);
-    }
-
-    if (!fPass) {
         event.preventDefault();
     }
 
@@ -582,14 +579,16 @@ Keyboard.prototype.onKeyDown = function(event, fDown)
 Keyboard.prototype.onSoftKeyDown = function(sSoftCode, fDown)
 {
     if (fDown) {
+        // this.println(sSoftCode + " down");
         this.keysPressed[sSoftCode] = Date.now();
         delete this.keysToRelease[sSoftCode];
     } else {
+        // this.println(sSoftCode + " up");
         var msDown = this.keysPressed[sSoftCode];
-        this.assert(msDown);
         if (msDown) {
             var msElapsed = Date.now() - msDown;
             if (msElapsed < Keyboard.MINPRESSTIME) {
+                // this.println(sSoftCode + " released after only " + msElapsed + "ms");
                 this.keysToRelease[sSoftCode] = msDown;
                 this.checkSoftKeysToRelease();
                 return true;
@@ -637,7 +636,8 @@ Keyboard.prototype.checkSoftKeysToRelease = function()
 {
     var msDelayMin = -1;
     var asSoftCodes = Object.keys(this.keysToRelease);
-    for (var sSoftCode in asSoftCodes) {
+    for (var i = 0; i < asSoftCodes.length; i++) {
+        var sSoftCode = asSoftCodes[i];
         var msDown = this.keysToRelease[sSoftCode];
         var msElapsed = Date.now() - msDown;
         var msDelay = Keyboard.MINPRESSTIME - msElapsed;
