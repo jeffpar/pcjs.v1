@@ -25,7 +25,7 @@ p. 4-15, 8Kb (0x2000) of ROM is located at 0x0000, and 3Kb (0x0C00) of RAM immed
 addressable by the CPU; it is used directly by the Video Processor.
 
 [vt100romhax](http://vt100romhax.tumblr.com/post/90697428973/the-vt100-memory-map-and-8080-disassembly)
-(aka [phooky](https://github.com/phooky)) further explains VT100 memory usage:
+(aka [phooky](https://github.com/phooky) aka Adam Mayer) further explains VT100 memory usage:
 
 	Start   End     Size    Description
 	0x0000  0x1fff  8K      Basic ROM
@@ -57,8 +57,28 @@ From p. 4-17 of the Technical Manual:
 	42H     Flags buffer
 	82H     Keyboard UART data output
 
-The PC8080 ChipSet component deals with the ER1400's Non-volatile RAM (NVR) ports, while the Keyboard component
-deals with the Keyboard UART ports.
+The PC8080 ChipSet component deals with the ER1400's Non-volatile RAM (NVR) ports, the Flags buffer, and the
+DC011 and DC012 circuits, while the Keyboard component deals with the Keyboard UART.
+
+You might wonder why the PC8080 Video component doesn't manage the DC011 and DC012.  In fact, the above labels are misleading.
+If you look at the Functional Diagram on p. 4-53 of the Technical Manual, you'll see that DC011 and DC012 are really
+peripheral components providing inputs to the Video Processor.  Moreover, they are not exclusive to the Video Processor.
+For example, the LBA7 output of the DC011 is also used to clock the NVR chip.
+
+In most respects, the VT100 Technical Manual provides a phenomenal amount of detail.
+However, documentation for some of the above ports is almost non-existent.  It's only thanks to
+[third parties](https://github.com/phooky/VT100-Hax/blob/master/Platform%20Notes.md) that we have, for example, the following
+information about the Flags buffer (port 0x42):
+
+	Bit Active? Description
+	7   H       KBD Transmit Buffer Empty
+	6   H       LBA 7(?) (It's a pin on the backplane connector...) - used to clock NVR - line buffer address
+	5   H       NVR DATA
+	4   L       EVEN FIELD (comes out of the video timing generator)
+	3   H       OPTION PRESENT (terminal output option???)
+	2   L       GRAPHICS FLAG (is VT52 graphics card present) [I think he meant VT125 -JP]
+	1   L       ADVANCED VIDEO (is AVO present)
+	0   H       XMIT FLAG
 
 VT100 Video Processor
 ---------------------
