@@ -280,7 +280,7 @@ Video.VT100 = {
     LINETERM:       0x7F,
     LINEATTR: {
         ADDRMASK:   0x0F,
-        ADDRBIAS:   0x10,       // 1 == ADDRBIAS_LO, 0 = ADDRBIAS_HI
+        ADDRBIAS:   0x10,       // 0x10 == ADDRBIAS_LO, 0x00 = ADDRBIAS_HI
         FONTMASK:   0x60,
         SCROLL:     0x80
     },

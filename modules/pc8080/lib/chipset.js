@@ -172,6 +172,9 @@ ChipSet.SI1978 = {
  * Hence the CPU component in the VT100's machine.xml is defined as:
  *
  *      <cpu id="cpu8080" model="8080" cycles="2764798"/>
+ *
+ * Beyond that, we don't really care about that particular 8224.  I only mention it because knowing the CPU frequency
+ * is helpful for simulating some of the other circuits below that we DO care about.
  */
 ChipSet.VT100 = {
     MODEL:          100.0,
@@ -223,7 +226,7 @@ ChipSet.VT100 = {
      * If we assume that the CPU cycle count increments once every 361.69ns, it will increment roughly 88 times every
      * time LBA7 toggles.  So we can divide the CPU cycle count by 88 and set LBA to the low bit of that truncated
      * result.  An even faster (but less accurate) solution would be to mask bit 6 of the CPU cycle count, which will
-     * doesn't change until the count has been incremented 64 times.  See getVT100LBA() to see the chosen implementation.
+     * doesn't change until the count has been incremented 64 times.  See getVT100LBA() for the chosen implementation.
      */
     DC011: {                            // generates Line Buffer Addresses (LBAs) for the Video Processor
         PORT:       0xC2,               // write-only

@@ -24,6 +24,8 @@ p. 4-15, 8Kb (0x2000) of ROM is located at 0x0000, and 3Kb (0x0C00) of RAM immed
 0x0000 contains all the VT100's 8080 code.  The VT100 also contains a 2Kb character generator ROM, but that ROM is not
 addressable by the CPU; it is used directly by the Video Processor.
 
+See [DEC VT100 ROMs](/devices/pc8080/rom/vt100/) for more information about the ROMs.
+
 [vt100romhax](http://vt100romhax.tumblr.com/post/90697428973/the-vt100-memory-map-and-8080-disassembly)
 (aka [phooky](https://github.com/phooky) aka Adam Mayer) further explains VT100 memory usage:
 
@@ -125,3 +127,5 @@ Additional VT100 Resources
 --------------------------
 
 [VT100 Publications](/pubs/dec/vt100/)
+
+[D52 Microcontroller Disassemblers](http://www.brouhaha.com/~eric/software/d52/) ([Manual](http://www.bipom.com/documents/dis51/d52manual.html))
