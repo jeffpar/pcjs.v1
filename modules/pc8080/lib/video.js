@@ -392,12 +392,10 @@ Video.prototype.initBus = function(cmp, bus, cpu, dbg)
     this.bus = bus;
     this.cpu = cpu;
     this.dbg = dbg;
+    this.chipset = cmp.getMachineComponent("ChipSet");
 
-    if (!this.nFormat) {
-        this.chipset = cmp.getMachineComponent("ChipSet");
-        if (this.chipset && this.chipset.model == ChipSet.SI1978.MODEL) {
-            this.nFormat = Video.FORMAT.SI1978;
-        }
+    if (!this.nFormat && this.chipset && this.chipset.model == ChipSet.SI1978.MODEL) {
+        this.nFormat = Video.FORMAT.SI1978;
     }
 
     /*
@@ -655,6 +653,10 @@ Video.prototype.powerUp = function(data, fRepower)
             this.bus.setByteDirect(addr++, Video.VT100.LINETERM);
             addrNext = addr;
         }
+        /*
+         * NOTE: By calling updateVT100() directly, we are bypassing the normal checks (eg, isVideoEnabled())
+         */
+        this.updateVT100();
     }
     return true;
 };
@@ -1088,7 +1090,9 @@ Video.prototype.updateScreen = function(n)
         this.printMessage("updateScreen(" + n + "): clean=" + fClean + ", update=" + fUpdate + ", cycles=" + nCycles + ", delta=" + nCyclesDelta);
     }
 
-    if (!fUpdate) return;
+    if (!fUpdate || this.chipset && !this.chipset.isVideoEnabled()) {
+        return;
+    }
 
     if (this.cxCell > 1) {
         this.updateScreenText();

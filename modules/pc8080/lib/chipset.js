@@ -168,11 +168,32 @@ ChipSet.SI1978 = {
 
 ChipSet.VT100 = {
     MODEL:          100.0,
+    FLAGS_BUFFER: {
+        PORT:       0x42,               // read-only
+        XMIT:       0x01,               // active if SET
+        NO_AVO:     0x02,               // AVO present if CLEAR
+        NO_GFX:     0x04,               // VT125 graphics board present if CLEAR
+        OPTION:     0x08,               // OPTION present if SET
+        NO_EVEN:    0x10,               // EVEN FIELD active if CLEAR
+        NVR_DATA:   0x20,               // NVR DATA if SET
+        NVR_CLK:    0x40,               // NVR CLOCK if SET
+        KBD_XMIT:   0x80                // KBD XMIT BUFFER empty if SET
+    },
     BRIGHTNESS_LATCH: {
-        PORT:       0x42                // write-only
+        PORT:       0x42,               // write-only
+        INIT:       0x00
     },
     NVR_LATCH: {
-        PORT:       0x62                // write-only
+        PORT:       0x62,               // write-only
+        INIT:       0x00
+    },
+    DC012: {                            // write-only
+        PORT:       0xA2,
+        INIT:       0x00
+    },
+    DC011: {                            // write-only
+        PORT:       0xC2,
+        INIT:       0x00
     }
 };
 
@@ -287,7 +308,11 @@ ChipSet.SI1978.init = [
 
 ChipSet.VT100.init = [
     [
-        0, 0
+        ChipSet.VT100.BRIGHTNESS_LATCH.INIT,
+        ChipSet.VT100.NVR_LATCH.INIT,
+        ChipSet.VT100.FLAGS_BUFFER.NO_AVO | ChipSet.VT100.FLAGS_BUFFER.NO_GFX,
+        ChipSet.VT100.DC012.INIT,
+        ChipSet.VT100.DC011.INIT
     ]
 ];
 
@@ -351,6 +376,9 @@ ChipSet.prototype.restore = function(data)
         case ChipSet.VT100.MODEL:
             this.bBrightnessLatch = a[0];
             this.bNVRLatch = a[1];
+            this.bFlagsBuffer = a[2];
+            this.bDC012 = a[3];
+            this.bDC011 = a[4];
             return true;
         }
     }
@@ -383,6 +411,19 @@ ChipSet.prototype.stop = function()
     /*
      * Currently, all we (may) do with this notification is prevent the speaker from making noise.
      */
+};
+
+/**
+ * isVideoEnabled()
+ *
+ * TODO: Consider moving this and the related ports (ie, DC011 and DC012) into the Video component.
+ *
+ * @this {ChipSet}
+ * @return {boolean}
+ */
+ChipSet.prototype.isVideoEnabled = function()
+{
+    return this.model != ChipSet.VT100.MODEL || this.bDC011 != 0;
 };
 
 /**
@@ -554,6 +595,21 @@ ChipSet.prototype.outSIWatchdog = function(port, b, addrFrom)
 };
 
 /**
+ * inVT100FlagsBuffer(port, addrFrom)
+ *
+ * @this {ChipSet}
+ * @param {number} port (0x42)
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
+ * @return {number} simulated port value
+ */
+ChipSet.prototype.inVT100FlagsBuffer = function(port, addrFrom)
+{
+    var b = this.bFlagsBuffer;
+    this.printMessageIO(port, null, addrFrom, "FLAGS.BUFFER", b, true);
+    return b;
+};
+
+/**
  * outVT100BrightnessLatch(port, b, addrFrom)
  *
  * @this {ChipSet}
@@ -568,7 +624,7 @@ ChipSet.prototype.outVT100BrightnessLatch = function(port, b, addrFrom)
 };
 
 /**
- * outVT100BrightnessLatch(port, b, addrFrom)
+ * outVT100NVRLatch(port, b, addrFrom)
  *
  * @this {ChipSet}
  * @param {number} port (0x62)
@@ -579,6 +635,34 @@ ChipSet.prototype.outVT100NVRLatch = function(port, b, addrFrom)
 {
     this.printMessageIO(port, b, addrFrom, "NVR.LATCH", null, true);
     this.bNVRLatch = b;
+};
+
+/**
+ * outVT100DC012(port, b, addrFrom)
+ *
+ * @this {ChipSet}
+ * @param {number} port (0xA2)
+ * @param {number} b
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to write the specified port)
+ */
+ChipSet.prototype.outVT100DC012 = function(port, b, addrFrom)
+{
+    this.printMessageIO(port, b, addrFrom, "DC012", null, true);
+    this.bDC012 = b;
+};
+
+/**
+ * outVT100DC011(port, b, addrFrom)
+ *
+ * @this {ChipSet}
+ * @param {number} port (0xC2)
+ * @param {number} b
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to write the specified port)
+ */
+ChipSet.prototype.outVT100DC011 = function(port, b, addrFrom)
+{
+    this.printMessageIO(port, b, addrFrom, "DC011", null, true);
+    this.bDC011 = b;
 };
 
 /*
@@ -600,11 +684,14 @@ ChipSet.SI1978.portsOutput = {
 };
 
 ChipSet.VT100.portsInput = {
+    0x42: ChipSet.prototype.inVT100FlagsBuffer
 };
 
 ChipSet.VT100.portsOutput = {
     0x42: ChipSet.prototype.outVT100BrightnessLatch,
-    0x62: ChipSet.prototype.outVT100NVRLatch
+    0x62: ChipSet.prototype.outVT100NVRLatch,
+    0xA2: ChipSet.prototype.outVT100DC012,
+    0xC2: ChipSet.prototype.outVT100DC011
 };
 
 /**
