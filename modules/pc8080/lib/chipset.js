@@ -194,6 +194,9 @@ ChipSet.VT100 = {
     DC011: {                            // generates Line Buffer Addresses (LBAs) for the Video Processor
         PORT:       0xC2,               // write-only
         INIT:       0x00
+    },
+    LBA: {                              // used to simulate LBA0 through LBA7 (LBA7 is used to drive NVR_CLK)
+        INIT:       0x00
     }
 };
 
@@ -312,7 +315,8 @@ ChipSet.VT100.init = [
         ChipSet.VT100.NVR_LATCH.INIT,
         ChipSet.VT100.FLAGS_BUFFER.NO_AVO | ChipSet.VT100.FLAGS_BUFFER.NO_GFX,
         ChipSet.VT100.DC012.INIT,
-        ChipSet.VT100.DC011.INIT
+        ChipSet.VT100.DC011.INIT,
+        ChipSet.VT100.LBA.INIT
     ]
 ];
 
@@ -344,7 +348,7 @@ ChipSet.prototype.save = function()
         state.set(0, [this.bStatus0, this.bStatus1, this.bStatus2, this.wShiftData, this.bShiftCount, this.bSound1, this.bSound2]);
         break;
     case ChipSet.VT100.MODEL:
-        state.set(0, [this.bBrightnessLatch, this.bNVRLatch]);
+        state.set(0, [this.bBrightnessLatch, this.bNVRLatch, this.bFlagsBuffer, this.bDC012, this.bDC011, this.bLBA]);
         break;
     }
     return state.data();
@@ -379,6 +383,7 @@ ChipSet.prototype.restore = function(data)
             this.bFlagsBuffer = a[2];
             this.bDC012 = a[3];
             this.bDC011 = a[4];
+            this.bLBA = a[5];
             return true;
         }
     }
@@ -411,19 +416,6 @@ ChipSet.prototype.stop = function()
     /*
      * Currently, all we (may) do with this notification is prevent the speaker from making noise.
      */
-};
-
-/**
- * isVideoEnabled()
- *
- * TODO: Consider moving this and the related ports (ie, DC011 and DC012) into the Video component.
- *
- * @this {ChipSet}
- * @return {boolean}
- */
-ChipSet.prototype.isVideoEnabled = function()
-{
-    return this.model != ChipSet.VT100.MODEL || this.bDC011 != 0;
 };
 
 /**
@@ -604,7 +596,8 @@ ChipSet.prototype.outSIWatchdog = function(port, b, addrFrom)
  */
 ChipSet.prototype.inVT100FlagsBuffer = function(port, addrFrom)
 {
-    var b = this.bFlagsBuffer;
+    this.bLBA++;
+    var b = this.bFlagsBuffer = (this.bFlagsBuffer & ~ChipSet.VT100.FLAGS_BUFFER.NVR_CLK) | ((this.bLBA & 0x80)? ChipSet.VT100.FLAGS_BUFFER.NVR_CLK : 0);
     this.printMessageIO(port, null, addrFrom, "FLAGS.BUFFER", b, true);
     return b;
 };

@@ -279,10 +279,13 @@ Video.VT100 = {
     },
     LINETERM:       0x7F,
     LINEATTR: {
-        ADDRMASK:   0x1F,
+        ADDRMASK:   0x0F,
+        ADDRBIAS:   0x10,       // 1 == ADDRBIAS_LO, 0 = ADDRBIAS_HI
         FONTMASK:   0x60,
         SCROLL:     0x80
-    }
+    },
+    ADDRBIAS_LO:    0x2000,
+    ADDRBIAS_HI:    0x4000
 };
 
 /**
@@ -635,7 +638,7 @@ Video.prototype.powerUp = function(data, fRepower)
                         fBreak = true;
                     }
                 }
-                b = (font & Video.VT100.LINEATTR.FONTMASK) | ((addrNext >> 8) & Video.VT100.LINEATTR.ADDRMASK);
+                b = (font & Video.VT100.LINEATTR.FONTMASK) | ((addrNext >> 8) & Video.VT100.LINEATTR.ADDRMASK) | Video.VT100.LINEATTR.ADDRBIAS;
                 this.bus.setByteDirect(addr++, b);
                 this.bus.setByteDirect(addr++, addrNext & 0xff);
                 if (fBreak) break;
@@ -978,7 +981,8 @@ Video.prototype.updateVT100 = function()
             if ((data & Video.VT100.LINETERM) == Video.VT100.LINETERM) {
                 var b = this.bus.getByteDirect(addr++);
                 fontNext = b & Video.VT100.LINEATTR.FONTMASK;
-                addrNext = this.addrBuffer | ((b & Video.VT100.LINEATTR.ADDRMASK) << 8) | this.bus.getByteDirect(addr);
+                addrNext = ((b & Video.VT100.LINEATTR.ADDRMASK) << 8) | this.bus.getByteDirect(addr);
+                addrNext += (b & Video.VT100.LINEATTR.ADDRBIAS)? Video.VT100.ADDRBIAS_LO : Video.VT100.ADDRBIAS_HI;
                 break;
             }
             if (nCols < this.abLineBuffer.length) {
@@ -992,7 +996,6 @@ Video.prototype.updateVT100 = function()
          * Skip the first few "fill lines"
          */
         if (nFill) {
-            this.assert(nCols === 0);           // "fill lines" are typically zero-length
             nFill--;
             continue;
         }
@@ -1004,22 +1007,19 @@ Video.prototype.updateVT100 = function()
             this.abLineBuffer[nCols++] = 0;     // character code 0 is a empty font character
         }
 
-        this.assert(font >= 0);                 // font isn't valid on the first line, but that's always a "fill line"
-
         /*
-         * Display the line buffer
+         * Display the line buffer; ordinarily, font would always be valid after processing the "fill lines",
+         * but if the buffer was filled with garbage, the usual LINETERM might be missing, so font might not be set.
          */
-        for (var iCol = 0; iCol < nCols; iCol++) {
-            data = this.abLineBuffer[iCol];
-            if (!this.fCellCacheValid || data !== this.aCellCache[iCell]) {
-                /*
-                 * TODO: If bit 8 is set, we must select a different font variation, depending on which per-character
-                 * screen attribute is currently enabled (ie, reverse video or underline).
-                 */
-                this.updateChar(font, iCol, nRows, data, this.contextBuffer);
-                cUpdated++;
+        if (font >= 0) {
+            for (var iCol = 0; iCol < nCols; iCol++) {
+                data = this.abLineBuffer[iCol];
+                if (!this.fCellCacheValid || data !== this.aCellCache[iCell]) {
+                    this.updateChar(font, iCol, nRows, data, this.contextBuffer);
+                    cUpdated++;
+                }
+                iCell++;
             }
-            iCell++;
         }
         nRows++;
     }
@@ -1090,7 +1090,7 @@ Video.prototype.updateScreen = function(n)
         this.printMessage("updateScreen(" + n + "): clean=" + fClean + ", update=" + fUpdate + ", cycles=" + nCycles + ", delta=" + nCyclesDelta);
     }
 
-    if (!fUpdate || this.chipset && !this.chipset.isVideoEnabled()) {
+    if (!fUpdate) {
         return;
     }
 

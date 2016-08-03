@@ -26,5 +26,5 @@
 	<chipset id="chipset" model="VT100"/>
 	<keyboard id="keyboard"/>
 	<panel ref="/devices/pc8080/panel/wide.xml"/>
-	<debugger id="debugger" messages="port|mem|halt" commands="s 8086"/>
+	<debugger id="debugger" messages="port|mem" commands="s 8086"/>
 </machine>
