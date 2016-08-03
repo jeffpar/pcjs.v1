@@ -166,6 +166,13 @@ ChipSet.SI1978 = {
     }
 };
 
+/*
+ * One of the many chips in the VT100 is an 8224, which operates at 24.8832MHz.  That frequency is divided by 9
+ * to yield a 361.69ns clock period for the 8080 CPU, which means the CPU is running at 2.76Mhz (cycles per second).
+ * Hence the CPU component in the VT100's machine.xml is defined as:
+ *
+ *      <cpu id="cpu8080" model="8080" cycles="2764798"/>
+ */
 ChipSet.VT100 = {
     MODEL:          100.0,
     FLAGS_BUFFER: {
@@ -181,22 +188,46 @@ ChipSet.VT100 = {
     },
     BRIGHTNESS_LATCH: {
         PORT:       0x42,               // write-only
-        INIT:       0x00
+        INIT:       0x00                // for lack of a better guess
     },
     NVR_LATCH: {
         PORT:       0x62,               // write-only
-        INIT:       0x00
+        INIT:       0x00                // for lack of a better guess
     },
     DC012: {                            // generates scan counts for the Video Processor
         PORT:       0xA2,               // write-only
-        INIT:       0x00
+        INIT:       0x00                // for lack of a better guess
     },
+    /*
+     * As p. 4-55 (105) of the July 1982 Technical Manual explains:
+     *
+     *      The DCO11 is a custom designed bipolar circuit that provides most of the timing signals required by the
+     *      video processor. Internal counters divide the output of a 24.0734 MHz oscillator (located elsewhere on the
+     *      terminal controller module) into the lower frequencies that define dot, character, scan, and frame timing.
+     *      The counters are programmable through various input pins to control the number of characters per line,
+     *      the frequency at which the screen is refreshed, and whether the display is interlaced or noninterlaced.
+     *      These parameters can be controlled through SET-UP mode or by the host.
+     *
+     * On p. 4-56, the DC011 Block Diagram shows 8 outputs labeled LBA0 through LBA7.  From p. 4-61:
+     *
+     *      Several of the LBAs are used as general purpose clocks in the VT100. LBA 3 and LBA 4 are used to generate
+     *      timing for the keyboard. These signals satisfy the keyboard's requirement of two square-waves, one twice the
+     *      frequency of the other, even though every 16th transition is delayed (the second stage of the horizontal
+     *      counter divides by 17, not 16). LBA 7 is used by the nonvolatile RAM.
+     *
+     * And on p. 4-62, timings are provided for the LBA0 through LBA7 when the VT100 is in 80-column mode; in particular:
+     *
+     *      LBA6:   16.82353us (when LBA6 is low, for a period is 33.64706us)
+     *      LBA7:   31.77778us (when LBA7 is high, for a period is 63.55556us)
+     *
+     * If we assume that the CPU cycle count increments once every 361.69ns, it will increment roughly 88 times every
+     * time LBA7 toggles.  So we can divide the CPU cycle count by 88 and set LBA to the low bit of that truncated
+     * result.  An even faster (but less accurate) solution would be to mask bit 6 of the CPU cycle count, which will
+     * doesn't change until the count has been incremented 64 times.  See getVT100LBA() to see the chosen implementation.
+     */
     DC011: {                            // generates Line Buffer Addresses (LBAs) for the Video Processor
         PORT:       0xC2,               // write-only
-        INIT:       0x00
-    },
-    LBA: {                              // used to simulate LBA0 through LBA7 (LBA7 is used to drive NVR_CLK)
-        INIT:       0x00
+        INIT:       0x00                // for lack of a better guess
     }
 };
 
@@ -315,8 +346,7 @@ ChipSet.VT100.init = [
         ChipSet.VT100.NVR_LATCH.INIT,
         ChipSet.VT100.FLAGS_BUFFER.NO_AVO | ChipSet.VT100.FLAGS_BUFFER.NO_GFX,
         ChipSet.VT100.DC012.INIT,
-        ChipSet.VT100.DC011.INIT,
-        ChipSet.VT100.LBA.INIT
+        ChipSet.VT100.DC011.INIT
     ]
 ];
 
@@ -348,7 +378,7 @@ ChipSet.prototype.save = function()
         state.set(0, [this.bStatus0, this.bStatus1, this.bStatus2, this.wShiftData, this.bShiftCount, this.bSound1, this.bSound2]);
         break;
     case ChipSet.VT100.MODEL:
-        state.set(0, [this.bBrightnessLatch, this.bNVRLatch, this.bFlagsBuffer, this.bDC012, this.bDC011, this.bLBA]);
+        state.set(0, [this.bBrightnessLatch, this.bNVRLatch, this.bFlagsBuffer, this.bDC012, this.bDC011]);
         break;
     }
     return state.data();
@@ -383,7 +413,6 @@ ChipSet.prototype.restore = function(data)
             this.bFlagsBuffer = a[2];
             this.bDC012 = a[3];
             this.bDC011 = a[4];
-            this.bLBA = a[5];
             return true;
         }
     }
@@ -587,6 +616,24 @@ ChipSet.prototype.outSIWatchdog = function(port, b, addrFrom)
 };
 
 /**
+ * getVT100LBA(nBit)
+ *
+ * Returns the state of the requested (simulated) LBA bit.
+ *
+ * NOTE: This is currently only used to obtain LBA7, which we approximate with the slightly faster approach
+ * of masking bit 6 of the CPU cycle count (see the DC011 discussion above).  This will result in a shorter LBA7
+ * period than if we divided the cycle count by 88, but a shorter LBA7 period is probably helpful in terms of
+ * overall performance.
+ *
+ * @param {number} nBit
+ * @return {number}
+ */
+ChipSet.prototype.getVT100LBA = function(nBit)
+{
+    return (this.cpu.getCycles() & (1 << (nBit - 1))) << 1;
+};
+
+/**
  * inVT100FlagsBuffer(port, addrFrom)
  *
  * @this {ChipSet}
@@ -596,8 +643,10 @@ ChipSet.prototype.outSIWatchdog = function(port, b, addrFrom)
  */
 ChipSet.prototype.inVT100FlagsBuffer = function(port, addrFrom)
 {
-    this.bLBA++;
-    var b = this.bFlagsBuffer = (this.bFlagsBuffer & ~ChipSet.VT100.FLAGS_BUFFER.NVR_CLK) | ((this.bLBA & 0x80)? ChipSet.VT100.FLAGS_BUFFER.NVR_CLK : 0);
+    /*
+     * The NVR_CLK bit is driven by LBA7 (ie, bit 7 from Line Buffer Address generation); see the DC011 discussion above.
+     */
+    var b = this.bFlagsBuffer = (this.bFlagsBuffer & ~ChipSet.VT100.FLAGS_BUFFER.NVR_CLK) | (this.getVT100LBA(7)? ChipSet.VT100.FLAGS_BUFFER.NVR_CLK : 0);
     this.printMessageIO(port, null, addrFrom, "FLAGS.BUFFER", b, true);
     return b;
 };
