@@ -187,12 +187,12 @@ ChipSet.VT100 = {
         PORT:       0x62,               // write-only
         INIT:       0x00
     },
-    DC012: {                            // write-only
-        PORT:       0xA2,
+    DC012: {                            // generates scan counts for the Video Processor
+        PORT:       0xA2,               // write-only
         INIT:       0x00
     },
-    DC011: {                            // write-only
-        PORT:       0xC2,
+    DC011: {                            // generates Line Buffer Addresses (LBAs) for the Video Processor
+        PORT:       0xC2,               // write-only
         INIT:       0x00
     }
 };
