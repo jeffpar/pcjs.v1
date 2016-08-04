@@ -659,7 +659,7 @@ Video.prototype.powerUp = function(data, fRepower)
             addrNext = addr;
         }
         /*
-         * NOTE: By calling updateVT100() directly, we are bypassing the normal checks (eg, isVideoEnabled())
+         * NOTE: By calling updateVT100() directly, we are bypassing any checks that might block the update.
          */
         this.updateVT100();
     }
@@ -1010,8 +1010,8 @@ Video.prototype.updateVT100 = function()
         }
 
         /*
-         * Display the line buffer; ordinarily, font would always be valid after processing the "fill lines",
-         * but if the buffer was filled with garbage, the usual LINETERM might be missing, so font might not be set.
+         * Display the line buffer; ordinarily, the font number would always be valid after processing the "fill lines",
+         * but if the buffer isn't initialized yet, the usual LINETERM might be missing, so the font number might not be set.
          */
         if (font >= 0) {
             for (var iCol = 0; iCol < nCols; iCol++) {
