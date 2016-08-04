@@ -3744,48 +3744,60 @@ X1916:	dad	h		;;
 ;;
 ;;  Loads address A into NVR address register
 ;;
-X1928:	lda	X21ae		; Load accumulator from 0x21ae -- (0x42)
-X192b:	mvi	b,0ffh		; B = 0xff
-X192d:	inr	b		; increment B
-	sui	0ah		; subtract 0x0a from accumulator
-	jp	X192d		; repeat while accumulator is positive
-	adi	0ah		; add 0x0a to accumulator
-	;; B = A/10, A = A%10 -- this is almost certainly related to NVR!
-	;; First, fill the buffer at 21d3 with 20 bytes of 0x23 (accept address 1)
-	lxi	h,X21d3		; HL = 0x21d3
-	mvi	e,23h		; E = 0x23
-	mvi	d,14h		; D = 0x14
-X193c:	mov	m,e		;
-	inx	h		; HL++
-	dcr	d		; D--
-	jnz	X193c		; repeat until D is zero
-	;; End buffer with 0x2f -- put in standby
-	mvi	m,2fh		; Store 0x2f in 21e7
-	;; Set 21d3 + a to 0x22 (accept address 0)
-	lxi	h,X21d3		; HL = 0x21d3
-	mov	e,a		; copy A to E
-	mvi	d,0		; clear D
-	dad	d		; add DE to HL -- calculate address of bit A
-	mvi	m,22h		; Store 0x22 in M
-	;; Set 21d3 + 10 + b to 0x22 (accept address 0)
-	lxi	h,X21d3		; HL = 0x21d3
-	mvi	a,0ah		; A = 0x0a
-	add	b		; A = 0x0a + B
+X1928:	lda	X21ae		;; Load accumulator from 0x21ae -- (0x42)
+X192b:	mvi	b,0ffh		;; B = 0xff
+X192d:	inr	b		;; increment B
+	sui	0ah		;; subtract 0x0a from accumulator
+	jp	X192d		;; repeat while accumulator is positive
+	adi	0ah		;; add 0x0a to accumulator
+
+	;;  B = A/10, A = A%10 -- this is almost certainly related to NVR!
+	;;  First, fill the buffer at 21d3 with 20 bytes of 0x23 (accept address 1)
+
+	lxi	h,X21d3		;; HL = 0x21d3
+	mvi	e,23h		;; E = 0x23
+	mvi	d,14h		;; D = 0x14
+X193c:	mov	m,e		;;
+	inx	h		;; HL++
+	dcr	d		;; D--
+	jnz	X193c		;; repeat until D is zero
+
+	;;  End buffer with 0x2f -- put in standby
+
+	mvi	m,2fh		;; Store 0x2f in 21e7
+
+	;;  Set 21d3 + a to 0x22 (accept address 0)
+
+	lxi	h,X21d3		;; HL = 0x21d3
+	mov	e,a		;; copy A to E
+	mvi	d,0		;; clear D
+	dad	d		;; add DE to HL -- calculate address of bit A
+	mvi	m,22h		;; Store 0x22 in M
+
+	;;  Set 21d3 + 10 + b to 0x22 (accept address 0)
+
+	lxi	h,X21d3		;; HL = 0x21d3
+	mvi	a,0ah		;; A = 0x0a
+	add	b		;; A = 0x0a + B
 	mov	e,a
 	dad	d
 	mvi	m,22h
+
 	;; Wait for horiz latch
+
 X1957:	in	42h
 	ana	c
 	jnz	X1957
+
 	;; Now copy from 21d3 to nvr latch, one per edge, 21 bytes
+
 	lxi	h,X21d3
-	mvi	b,15h		;
+	mvi	b,15h		;;
 X1962:	in	42h
-	ana	c		; Flags Buffer & C
+	ana	c		;; Flags Buffer & C
 	jz	X1962
 	dcr	b
-	rm			; Return if B is negative
+	rm			;; Return if B is negative
 X196a:	in	42h
 	ana	c
 	jnz	X196a
@@ -4713,6 +4725,8 @@ X1fd4:	ora	a
 	mov	a,c
 	ret
 ;
+; Last but not least, pad out to 8K (8192) bytes
+;
 	nop
 	nop
 	nop
@@ -4936,7 +4950,6 @@ Xcd0b	equ	0cd0bh
 Xd0f2	equ	0d0f2h
 Xfe1a	equ	0fe1ah
 Xff01	equ	0ff01h
-;
+
 	end
-;
 
