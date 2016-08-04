@@ -2955,8 +2955,8 @@ Video.prototype.initBus = function(cmp, bus, cpu, dbg)
     }
 
     /*
-     * If we have an associated keyboard, then ensure that the keyboard will be notified whenever the canvas
-     * gets focus and receives input.
+     * If we have an associated keyboard, then ensure that the keyboard will be notified
+     * whenever the canvas gets focus and receives input.
      */
     this.kbd = cmp.getMachineComponent("Keyboard");
     if (this.kbd && this.canvasScreen) {
@@ -3006,7 +3006,9 @@ Video.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
 
         /*
          * We now save every binding that comes in, so that if there are bindings for "caps-lock' and the like,
-         * we can forward them to the Keyboard.
+         * we can forward them to the Keyboard.  TODO: Perhaps we should limit this to sHTMLType == "led", and collect
+         * them in a separate object (eg, ledBindings), so that initBus() can safely enumerate JUST the LEDs.  This
+         * is what we do in PC8080.  Be aware that's there's also sHTMLType == "rled" now, too.
          */
         this.bindings[sBinding] = control;
 

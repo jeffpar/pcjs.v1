@@ -67,7 +67,8 @@ function ChipSet(parmsChipSet)
         Component.notice("Unrecognized ChipSet model: " + model);
     }
 
-    this.model = ChipSet.MODELS[model] || ChipSet.SI_1978.MODEL;
+    this.config = ChipSet.MODELS[model] || ChipSet.SI1978;
+    this.model = this.config.MODEL;
 
     this.bSwitches = this.parseDIPSwitches(parmsChipSet['swDIP']);
 
@@ -104,9 +105,9 @@ function ChipSet(parmsChipSet)
 
 Component.subclass(ChipSet);
 
-ChipSet.SI_1978 = {
+ChipSet.SI1978 = {
     MODEL:          1978.1,
-    STATUS0: {                          // NOTE: STATUS0 not used by the SI_1978 ROMs; refer to STATUS1 instead
+    STATUS0: {                          // NOTE: STATUS0 not used by the SI1978 ROMs; refer to STATUS1 instead
         PORT:       0,
         DIP4:       0x01,               // self-test request at power up?
         FIRE:       0x10,               // 1 = fire
@@ -166,10 +167,79 @@ ChipSet.SI_1978 = {
 };
 
 /*
+ * One of the many chips in the VT100 is an 8224, which operates at 24.8832MHz.  That frequency is divided by 9
+ * to yield a 361.69ns clock period for the 8080 CPU, which means the CPU is running at 2.76Mhz (cycles per second).
+ * Hence the CPU component in the VT100's machine.xml is defined as:
+ *
+ *      <cpu id="cpu8080" model="8080" cycles="2764798"/>
+ *
+ * Beyond that, we don't really care about that particular 8224.  I only mention it because knowing the CPU frequency
+ * is helpful for simulating some of the other circuits below that we DO care about.
+ */
+ChipSet.VT100 = {
+    MODEL:          100.0,
+    FLAGS_BUFFER: {
+        PORT:       0x42,               // read-only
+        XMIT:       0x01,               // active if SET
+        NO_AVO:     0x02,               // AVO present if CLEAR
+        NO_GFX:     0x04,               // VT125 graphics board present if CLEAR
+        OPTION:     0x08,               // OPTION present if SET
+        NO_EVEN:    0x10,               // EVEN FIELD active if CLEAR
+        NVR_DATA:   0x20,               // NVR DATA if SET
+        NVR_CLK:    0x40,               // NVR CLOCK if SET
+        KBD_XMIT:   0x80                // KBD XMIT BUFFER empty if SET
+    },
+    BRIGHTNESS_LATCH: {
+        PORT:       0x42,               // write-only
+        INIT:       0x00                // for lack of a better guess
+    },
+    NVR_LATCH: {
+        PORT:       0x62,               // write-only
+        INIT:       0x00                // for lack of a better guess
+    },
+    DC012: {                            // generates scan counts for the Video Processor
+        PORT:       0xA2,               // write-only
+        INIT:       0x00                // for lack of a better guess
+    },
+    /*
+     * As p. 4-55 (105) of the July 1982 Technical Manual explains:
+     *
+     *      The DCO11 is a custom designed bipolar circuit that provides most of the timing signals required by the
+     *      video processor. Internal counters divide the output of a 24.0734 MHz oscillator (located elsewhere on the
+     *      terminal controller module) into the lower frequencies that define dot, character, scan, and frame timing.
+     *      The counters are programmable through various input pins to control the number of characters per line,
+     *      the frequency at which the screen is refreshed, and whether the display is interlaced or noninterlaced.
+     *      These parameters can be controlled through SET-UP mode or by the host.
+     *
+     * On p. 4-56, the DC011 Block Diagram shows 8 outputs labeled LBA0 through LBA7.  From p. 4-61:
+     *
+     *      Several of the LBAs are used as general purpose clocks in the VT100. LBA 3 and LBA 4 are used to generate
+     *      timing for the keyboard. These signals satisfy the keyboard's requirement of two square-waves, one twice the
+     *      frequency of the other, even though every 16th transition is delayed (the second stage of the horizontal
+     *      counter divides by 17, not 16). LBA 7 is used by the nonvolatile RAM.
+     *
+     * And on p. 4-62, timings are provided for the LBA0 through LBA7 when the VT100 is in 80-column mode; in particular:
+     *
+     *      LBA6:   16.82353us (when LBA6 is low, for a period is 33.64706us)
+     *      LBA7:   31.77778us (when LBA7 is high, for a period is 63.55556us)
+     *
+     * If we assume that the CPU cycle count increments once every 361.69ns, it will increment roughly 88 times every
+     * time LBA7 toggles.  So we can divide the CPU cycle count by 88 and set LBA to the low bit of that truncated
+     * result.  An even faster (but less accurate) solution would be to mask bit 6 of the CPU cycle count, which will
+     * doesn't change until the count has been incremented 64 times.  See getVT100LBA() for the chosen implementation.
+     */
+    DC011: {                            // generates Line Buffer Addresses (LBAs) for the Video Processor
+        PORT:       0xC2,               // write-only
+        INIT:       0x00                // for lack of a better guess
+    }
+};
+
+/*
  * Supported model strings
  */
 ChipSet.MODELS = {
-    "SI1978":       ChipSet.SI_1978.MODEL
+    "SI1978":       ChipSet.SI1978,
+    "VT100":        ChipSet.VT100
 };
 
 /**
@@ -227,10 +297,8 @@ ChipSet.prototype.initBus = function(cmp, bus, cpu, dbg)
     this.cpu = cpu;
     this.dbg = dbg;
     this.cmp = cmp;
-    if (this.model == ChipSet.SI_1978.MODEL) {
-        bus.addPortInputTable(this, ChipSet.aPortInput);
-        bus.addPortOutputTable(this, ChipSet.aPortOutput);
-    }
+    bus.addPortInputTable(this, this.config.portsInput);
+    bus.addPortOutputTable(this, this.config.portsOutput);
 };
 
 /**
@@ -266,6 +334,25 @@ ChipSet.prototype.powerDown = function(fSave, fShutdown)
     return fSave? this.save() : true;
 };
 
+ChipSet.SI1978.init = [
+    [
+        ChipSet.SI1978.STATUS0.ALWAYS_SET,
+        ChipSet.SI1978.STATUS1.ALWAYS_SET,
+        ChipSet.SI1978.STATUS2.ALWAYS_SET,
+        0, 0, 0, 0
+    ]
+];
+
+ChipSet.VT100.init = [
+    [
+        ChipSet.VT100.BRIGHTNESS_LATCH.INIT,
+        ChipSet.VT100.NVR_LATCH.INIT,
+        ChipSet.VT100.FLAGS_BUFFER.NO_AVO | ChipSet.VT100.FLAGS_BUFFER.NO_GFX,
+        ChipSet.VT100.DC012.INIT,
+        ChipSet.VT100.DC011.INIT
+    ]
+];
+
 /**
  * reset()
  *
@@ -273,12 +360,9 @@ ChipSet.prototype.powerDown = function(fSave, fShutdown)
  */
 ChipSet.prototype.reset = function()
 {
-    this.bStatus0 = ChipSet.SI_1978.STATUS0.ALWAYS_SET;
-    this.bStatus1 = ChipSet.SI_1978.STATUS1.ALWAYS_SET;
-    this.bStatus2 = ChipSet.SI_1978.STATUS2.ALWAYS_SET;
-    this.wShiftData = 0;
-    this.bShiftCount = 0;
-    this.bSound1 = this.bSound2 = 0;
+    if (!this.restore(this.config.init)) {
+        this.notice("reset error");
+    }
 };
 
 /**
@@ -292,8 +376,13 @@ ChipSet.prototype.reset = function()
 ChipSet.prototype.save = function()
 {
     var state = new State(this);
-    if (this.model == ChipSet.SI_1978.MODEL) {
+    switch(this.model) {
+    case ChipSet.SI1978.MODEL:
         state.set(0, [this.bStatus0, this.bStatus1, this.bStatus2, this.wShiftData, this.bShiftCount, this.bSound1, this.bSound2]);
+        break;
+    case ChipSet.VT100.MODEL:
+        state.set(0, [this.bBrightnessLatch, this.bNVRLatch, this.bFlagsBuffer, this.bDC012, this.bDC011]);
+        break;
     }
     return state.data();
 };
@@ -309,18 +398,28 @@ ChipSet.prototype.save = function()
  */
 ChipSet.prototype.restore = function(data)
 {
-    var a, i;
-    a = data[0];
-    if (this.model == ChipSet.SI_1978.MODEL) {
-        this.bStatus0 = a[0];
-        this.bStatus1 = a[1];
-        this.bStatus2 = a[2];
-        this.wShiftData = a[3];
-        this.bShiftCount = a[4];
-        this.bSound1 = a[5];
-        this.bSound2 = a[6];
+    var a;
+    if (data && (a = data[0]) && a.length) {
+        switch(this.model) {
+        case ChipSet.SI1978.MODEL:
+            this.bStatus0 = a[0];
+            this.bStatus1 = a[1];
+            this.bStatus2 = a[2];
+            this.wShiftData = a[3];
+            this.bShiftCount = a[4];
+            this.bSound1 = a[5];
+            this.bSound2 = a[6];
+            return true;
+        case ChipSet.VT100.MODEL:
+            this.bBrightnessLatch = a[0];
+            this.bNVRLatch = a[1];
+            this.bFlagsBuffer = a[2];
+            this.bDC012 = a[3];
+            this.bDC011 = a[4];
+            return true;
+        }
     }
-    return true;
+    return false;
 };
 
 /**
@@ -519,25 +618,125 @@ ChipSet.prototype.outSIWatchdog = function(port, b, addrFrom)
     this.printMessageIO(port, b, addrFrom, "WATCHDOG", null, true);
 };
 
-/*
- * Port input notification tables
+/**
+ * getVT100LBA(nBit)
+ *
+ * Returns the state of the requested (simulated) LBA bit.
+ *
+ * NOTE: This is currently only used to obtain LBA7, which we approximate with the slightly faster approach
+ * of masking bit 6 of the CPU cycle count (see the DC011 discussion above).  This will result in a shorter LBA7
+ * period than if we divided the cycle count by 88, but a shorter LBA7 period is probably helpful in terms of
+ * overall performance.
+ *
+ * @param {number} nBit
+ * @return {number}
  */
-ChipSet.aPortInput = {
+ChipSet.prototype.getVT100LBA = function(nBit)
+{
+    return (this.cpu.getCycles() & (1 << (nBit - 1))) << 1;
+};
+
+/**
+ * inVT100FlagsBuffer(port, addrFrom)
+ *
+ * @this {ChipSet}
+ * @param {number} port (0x42)
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
+ * @return {number} simulated port value
+ */
+ChipSet.prototype.inVT100FlagsBuffer = function(port, addrFrom)
+{
+    /*
+     * The NVR_CLK bit is driven by LBA7 (ie, bit 7 from Line Buffer Address generation); see the DC011 discussion above.
+     */
+    var b = this.bFlagsBuffer = (this.bFlagsBuffer & ~ChipSet.VT100.FLAGS_BUFFER.NVR_CLK) | (this.getVT100LBA(7)? ChipSet.VT100.FLAGS_BUFFER.NVR_CLK : 0);
+    this.printMessageIO(port, null, addrFrom, "FLAGS.BUFFER", b, true);
+    return b;
+};
+
+/**
+ * outVT100BrightnessLatch(port, b, addrFrom)
+ *
+ * @this {ChipSet}
+ * @param {number} port (0x42)
+ * @param {number} b
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to write the specified port)
+ */
+ChipSet.prototype.outVT100BrightnessLatch = function(port, b, addrFrom)
+{
+    this.printMessageIO(port, b, addrFrom, "BRIGHTNESS.LATCH", null, true);
+    this.bBrightnessLatch = b;
+};
+
+/**
+ * outVT100NVRLatch(port, b, addrFrom)
+ *
+ * @this {ChipSet}
+ * @param {number} port (0x62)
+ * @param {number} b
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to write the specified port)
+ */
+ChipSet.prototype.outVT100NVRLatch = function(port, b, addrFrom)
+{
+    this.printMessageIO(port, b, addrFrom, "NVR.LATCH", null, true);
+    this.bNVRLatch = b;
+};
+
+/**
+ * outVT100DC012(port, b, addrFrom)
+ *
+ * @this {ChipSet}
+ * @param {number} port (0xA2)
+ * @param {number} b
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to write the specified port)
+ */
+ChipSet.prototype.outVT100DC012 = function(port, b, addrFrom)
+{
+    this.printMessageIO(port, b, addrFrom, "DC012", null, true);
+    this.bDC012 = b;
+};
+
+/**
+ * outVT100DC011(port, b, addrFrom)
+ *
+ * @this {ChipSet}
+ * @param {number} port (0xC2)
+ * @param {number} b
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to write the specified port)
+ */
+ChipSet.prototype.outVT100DC011 = function(port, b, addrFrom)
+{
+    this.printMessageIO(port, b, addrFrom, "DC011", null, true);
+    this.bDC011 = b;
+};
+
+/*
+ * Port notification tables
+ */
+ChipSet.SI1978.portsInput = {
     0x00: ChipSet.prototype.inSIStatus0,
     0x01: ChipSet.prototype.inSIStatus1,
     0x02: ChipSet.prototype.inSIStatus2,
     0x03: ChipSet.prototype.inSIShiftResult
 };
 
-/*
- * Port output notification tables
- */
-ChipSet.aPortOutput = {
+ChipSet.SI1978.portsOutput = {
     0x02: ChipSet.prototype.outSIShiftCount,
     0x03: ChipSet.prototype.outSISound1,
     0x04: ChipSet.prototype.outSIShiftData,
     0x05: ChipSet.prototype.outSISound2,
     0x06: ChipSet.prototype.outSIWatchdog
+};
+
+ChipSet.VT100.portsInput = {
+    0x42: ChipSet.prototype.inVT100FlagsBuffer
+};
+
+ChipSet.VT100.portsOutput = {
+    0x42: ChipSet.prototype.outVT100BrightnessLatch,
+    0x62: ChipSet.prototype.outVT100NVRLatch,
+    0xA2: ChipSet.prototype.outVT100DC012,
+    0xC2: ChipSet.prototype.outVT100DC011
 };
 
 /**

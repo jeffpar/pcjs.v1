@@ -9,5 +9,6 @@ PC8080 Machine Configurations
 
 The following 8080-based machines are currently available:
 
+* [8080 Exerciser](exerciser/)
 * [Space Invaders (1978)](invaders/)
-* [8080 Exerciser Test Machine](exerciser/)
+* [DEC VT100 Terminal](vt100/)
