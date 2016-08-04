@@ -599,8 +599,10 @@ Video.prototype.powerUp = function(data, fRepower)
     /*
      * Because the VT100 frame buffer can be located anywhere in RAM (above 0x2000), we must defer this
      * test code until the powerUp() notification handler is called, when all RAM has (hopefully) been allocated.
+     *
+     * TODO: Remove this display test code once the VT100 is fully operational.
      */
-    if (DEBUG && this.nFormat == Video.FORMAT.VT100) {
+    if (this.nFormat == Video.FORMAT.VT100) {
         /*
          * Build a test screen in the VT100 frame buffer; we'll mimic the "SET-UP A" screen, since it uses
          * all the font variations.  The process involves iterating over 0-based row numbers -2 (or -5 if 50Hz
