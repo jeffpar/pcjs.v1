@@ -794,8 +794,10 @@ Bus.prototype.addPortInputNotify = function(start, end, fn)
 Bus.prototype.addPortInputTable = function(component, table, offset)
 {
     if (offset === undefined) offset = 0;
-    for (var port in table) {
-        this.addPortInputNotify(+port + offset, +port + offset, table[port].bind(component));
+    if (table) {
+        for (var port in table) {
+            this.addPortInputNotify(+port + offset, +port + offset, table[port].bind(component));
+        }
     }
 };
 
@@ -951,8 +953,10 @@ Bus.prototype.addPortOutputNotify = function(start, end, fn)
 Bus.prototype.addPortOutputTable = function(component, table, offset)
 {
     if (offset === undefined) offset = 0;
-    for (var port in table) {
-        this.addPortOutputNotify(+port + offset, +port + offset, table[port].bind(component));
+    if (table) {
+        for (var port in table) {
+            this.addPortOutputNotify(+port + offset, +port + offset, table[port].bind(component));
+        }
     }
 };
 

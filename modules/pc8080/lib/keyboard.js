@@ -57,6 +57,20 @@ function Keyboard(parmsKbd)
 
 Component.subclass(Keyboard);
 
+Keyboard.VT100 = {
+    STATUS: {
+        PORT:       0x82,               // write-only
+        LED4:       0x01,
+        LED3:       0x02,
+        LED2:       0x04,
+        LED1:       0x08,
+        LOCKED:     0x10,
+        ONLINE:     0x20,
+        START:      0x40,
+        CLICK:      0x80
+    }
+};
+
 /**
  * Alphanumeric and other common (printable) ASCII codes.
  *
@@ -234,6 +248,8 @@ Keyboard.SOFTCODES = {
     'fire':     Keyboard.KEYCODE.SPACE
 };
 
+Keyboard.MINPRESSTIME = 100;            // 100ms
+
 /**
  * Alternate keyCode mappings (to support the popular WASD directional mappings)
  *
@@ -245,35 +261,14 @@ Keyboard.ALTCODES[Keyboard.ASCII.A] = Keyboard.KEYCODE.LEFT;
 Keyboard.ALTCODES[Keyboard.ASCII.D] = Keyboard.KEYCODE.RIGHT;
 Keyboard.ALTCODES[Keyboard.ASCII.L] = Keyboard.KEYCODE.SPACE;
 
-/**
- * getSoftCode(keyCode)
- *
- * @this {Keyboard}
- * @return {string|null}
- */
-Keyboard.prototype.getSoftCode = function(keyCode)
-{
-    keyCode = Keyboard.ALTCODES[keyCode] || keyCode;
-    for (var sSoftCode in Keyboard.SOFTCODES) {
-        if (Keyboard.SOFTCODES[sSoftCode] === keyCode) {
-            return sSoftCode;
-        }
-    }
-    return null;
-};
-
-/**
- * reset()
- *
- * @this {Keyboard}
- */
-Keyboard.prototype.reset = function()
-{
-    /*
-     * As SOFTCODE keyDown events are encountered, a corresponding property is set to true in
-     * keysPressed, and as SOFTCODE keyUp events are encountered, the property is set to false.
-     */
-    this.keysPressed = {};
+Keyboard.LEDSTATES = {
+    'l4':       Keyboard.VT100.STATUS.LED4,
+    'l3':       Keyboard.VT100.STATUS.LED3,
+    'l2':       Keyboard.VT100.STATUS.LED2,
+    'l1':       Keyboard.VT100.STATUS.LED1,
+    'locked':   Keyboard.VT100.STATUS.LOCKED,
+    'online':   Keyboard.VT100.STATUS.ONLINE,
+    'local':   ~Keyboard.VT100.STATUS.ONLINE
 };
 
 /**
@@ -310,6 +305,12 @@ Keyboard.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
     var id = sHTMLType + '-' + sBinding;
 
     if (this.bindings[id] === undefined) {
+
+        if (sHTMLType == "led" && Keyboard.LEDSTATES[sBinding]) {
+            this.bindings[id] = control;
+            return true;
+        }
+
         switch (sBinding) {
         case "kbd":
             /*
@@ -369,6 +370,176 @@ Keyboard.prototype.initBus = function(cmp, bus, cpu, dbg)
 {
     this.dbg = dbg;     // NOTE: The "dbg" property must be set for the message functions to work
     this.chipset = cmp.getMachineComponent("ChipSet");
+    this.model = this.chipset.model;
+    switch(this.model) {
+    case ChipSet.VT100.MODEL:
+        this.config = Keyboard.VT100;
+        break;
+    }
+    if (this.config) {
+        bus.addPortInputTable(this, this.config.portsInput);
+        bus.addPortOutputTable(this, this.config.portsOutput);
+    }
+};
+
+/**
+ * powerUp(data, fRepower)
+ *
+ * @this {Keyboard}
+ * @param {Object|null} data
+ * @param {boolean} [fRepower]
+ * @return {boolean} true if successful, false if failure
+ */
+Keyboard.prototype.powerUp = function(data, fRepower)
+{
+    if (!fRepower) {
+        if (!data) {
+            this.reset();
+        } else {
+            if (!this.restore(data)) return false;
+        }
+    }
+    return true;
+};
+
+/**
+ * powerDown(fSave, fShutdown)
+ *
+ * @this {Keyboard}
+ * @param {boolean} [fSave]
+ * @param {boolean} [fShutdown]
+ * @return {Object|boolean} component state if fSave; otherwise, true if successful, false if failure
+ */
+Keyboard.prototype.powerDown = function(fSave, fShutdown)
+{
+    return fSave? this.save() : true;
+};
+
+Keyboard.VT100.init = [
+    [
+        0
+    ]
+];
+
+/**
+ * reset()
+ *
+ * @this {Keyboard}
+ */
+Keyboard.prototype.reset = function()
+{
+    /*
+     * As keyDown events are encountered, a corresponding "softcode" property in keysPressed
+     * is set to the timestamp of the keyDown event.  When the corresponding keyUp event occurs,
+     * we look at the elapsed time: if it is less than MINPRESSTIME, then we move the key
+     * to keysToRelease and set a timeout handler to release the key later; otherwise, we process
+     * the keyUp event immediately.
+     */
+    this.keysPressed = {};
+    this.keysToRelease = {};
+
+    if (this.config && !this.restore(this.config.init)) {
+        this.notice("reset error");
+    }
+};
+
+/**
+ * save()
+ *
+ * This implements save support for the Keyboard component.
+ *
+ * @this {Keyboard}
+ * @return {Object}
+ */
+Keyboard.prototype.save = function()
+{
+    var state = new State(this);
+    switch(this.model) {
+    case ChipSet.SI1978.MODEL:
+        break;
+    case ChipSet.VT100.MODEL:
+        state.set(0, [this.bLEDs]);
+        break;
+    }
+    return state.data();
+};
+
+/**
+ * restore(data)
+ *
+ * This implements restore support for the Keyboard component.
+ *
+ * @this {Keyboard}
+ * @param {Object} data
+ * @return {boolean} true if successful, false if failure
+ */
+Keyboard.prototype.restore = function(data)
+{
+    var a;
+    if (data && (a = data[0]) && a.length) {
+        switch(this.model) {
+        case ChipSet.SI1978.MODEL:
+            return true;
+        case ChipSet.VT100.MODEL:
+            this.bLEDs = a[0];
+            this.updateLEDs();
+            return true;
+        }
+    }
+    return false;
+};
+
+/**
+ * setLED(control, f)
+ *
+ * @this {Keyboard}
+ * @param {Object} control is an HTML control DOM object
+ * @param {boolean} f is true if the LED represented by control should be "on", false if "off"
+ */
+Keyboard.prototype.setLED = function(control, f)
+{
+    /*
+     * TODO: Add support for user-definable LED colors
+     */
+    control.style.backgroundColor = (f? "#ff0000" : "#000000");
+};
+
+/**
+ * updateLEDs()
+ *
+ * @this {Keyboard}
+ */
+Keyboard.prototype.updateLEDs = function()
+{
+    for (var sBinding in Keyboard.LEDSTATES) {
+        var id = "led-" + sBinding;
+        var control = this.bindings[id];
+        if (control) {
+            var bitLED = Keyboard.LEDSTATES[sBinding];
+            var fOn = !!(this.bLEDs & bitLED);
+            if (bitLED & (bitLED-1)) {
+                fOn = !(this.bLEDs & ~bitLED);
+            }
+            this.setLED(control, fOn);
+        }
+    }
+};
+
+/**
+ * getSoftCode(keyCode)
+ *
+ * @this {Keyboard}
+ * @return {string|null}
+ */
+Keyboard.prototype.getSoftCode = function(keyCode)
+{
+    keyCode = Keyboard.ALTCODES[keyCode] || keyCode;
+    for (var sSoftCode in Keyboard.SOFTCODES) {
+        if (Keyboard.SOFTCODES[sSoftCode] === keyCode) {
+            return sSoftCode;
+        }
+    }
+    return null;
 };
 
 /**
@@ -376,7 +547,7 @@ Keyboard.prototype.initBus = function(cmp, bus, cpu, dbg)
  *
  * @this {Keyboard}
  * @param {Object} event
- * @param {boolean} fDown is true for a keyDown event, false for a keyUp event
+ * @param {boolean} fDown is true for a keyDown event, false for up
  * @return {boolean} true to pass the event along, false to consume it
  */
 Keyboard.prototype.onKeyDown = function(event, fDown)
@@ -387,9 +558,6 @@ Keyboard.prototype.onKeyDown = function(event, fDown)
 
     if (sSoftCode) {
         fPass = this.onSoftKeyDown(sSoftCode, fDown);
-    }
-
-    if (!fPass) {
         event.preventDefault();
     }
 
@@ -405,41 +573,112 @@ Keyboard.prototype.onKeyDown = function(event, fDown)
  *
  * @this {Keyboard}
  * @param {string} sSoftCode
- * @param {boolean} fDown is true for a down event, false for an up event
+ * @param {boolean} fDown is true for a down event, false for up
  * @return {boolean} true to pass the event along, false to consume it
  */
 Keyboard.prototype.onSoftKeyDown = function(sSoftCode, fDown)
 {
-    this.keysPressed[sSoftCode] = fDown;
+    if (fDown) {
+        // this.println(sSoftCode + " down");
+        this.keysPressed[sSoftCode] = Date.now();
+        delete this.keysToRelease[sSoftCode];
+    } else {
+        // this.println(sSoftCode + " up");
+        var msDown = this.keysPressed[sSoftCode];
+        if (msDown) {
+            var msElapsed = Date.now() - msDown;
+            if (msElapsed < Keyboard.MINPRESSTIME) {
+                // this.println(sSoftCode + " released after only " + msElapsed + "ms");
+                this.keysToRelease[sSoftCode] = msDown;
+                this.checkSoftKeysToRelease();
+                return true;
+            }
+        }
+        delete this.keysPressed[sSoftCode];
+    }
 
     if (this.chipset) {
         switch(sSoftCode) {
         case '1p':
-            this.chipset.updateStatus1(ChipSet.SI_1978.STATUS1.P1, fDown);
+            this.chipset.updateStatus1(ChipSet.SI1978.STATUS1.P1, fDown);
             break;
 
         case '2p':
-            this.chipset.updateStatus1(ChipSet.SI_1978.STATUS1.P2, fDown);
+            this.chipset.updateStatus1(ChipSet.SI1978.STATUS1.P2, fDown);
             break;
 
         case 'coin':
-            this.chipset.updateStatus1(ChipSet.SI_1978.STATUS1.CREDIT, fDown);
+            this.chipset.updateStatus1(ChipSet.SI1978.STATUS1.CREDIT, fDown);
             break;
 
         case 'left':
-            this.chipset.updateStatus1(ChipSet.SI_1978.STATUS1.P1_LEFT, fDown);
+            this.chipset.updateStatus1(ChipSet.SI1978.STATUS1.P1_LEFT, fDown);
             break;
 
         case 'right':
-            this.chipset.updateStatus1(ChipSet.SI_1978.STATUS1.P1_RIGHT, fDown);
+            this.chipset.updateStatus1(ChipSet.SI1978.STATUS1.P1_RIGHT, fDown);
             break;
 
         case 'fire':
-            this.chipset.updateStatus1(ChipSet.SI_1978.STATUS1.P1_FIRE, fDown);
+            this.chipset.updateStatus1(ChipSet.SI1978.STATUS1.P1_FIRE, fDown);
             break;
         }
     }
-    return false;
+    return true;
+};
+
+/**
+ * checkSoftKeysToRelease()
+ *
+ * @this {Keyboard}
+ */
+Keyboard.prototype.checkSoftKeysToRelease = function()
+{
+    var msDelayMin = -1;
+    var asSoftCodes = Object.keys(this.keysToRelease);
+    for (var i = 0; i < asSoftCodes.length; i++) {
+        var sSoftCode = asSoftCodes[i];
+        var msDown = this.keysToRelease[sSoftCode];
+        var msElapsed = Date.now() - msDown;
+        var msDelay = Keyboard.MINPRESSTIME - msElapsed;
+        if (msDelay > 0) {
+            if (msDelayMin < 0 || msDelayMin > msDelay) {
+                msDelayMin = msDelay;
+            }
+        } else {
+            delete this.keysToRelease[sSoftCode];
+            this.onSoftKeyDown(sSoftCode, false);
+        }
+    }
+    if (msDelayMin >= 0) {
+        var kbd = this;
+        setTimeout(function() { kbd.checkSoftKeysToRelease(); }, msDelayMin);
+    }
+};
+
+/**
+ * outVT100UARTStatus(port, b, addrFrom)
+ *
+ * @this {Keyboard}
+ * @param {number} port (0x82)
+ * @param {number} b
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to write the specified port)
+ */
+Keyboard.prototype.outVT100UARTStatus = function(port, b, addrFrom)
+{
+    this.printMessageIO(port, b, addrFrom, "KBDUART.STATUS", null, true);
+    this.bLEDs = b;
+    this.updateLEDs();
+};
+
+/*
+ * Port notification tables
+ */
+Keyboard.VT100.portsInput = {
+};
+
+Keyboard.VT100.portsOutput = {
+    0x82: Keyboard.prototype.outVT100UARTStatus
 };
 
 /**

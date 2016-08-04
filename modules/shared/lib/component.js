@@ -367,7 +367,7 @@ Component.notice = function(s, fPrintOnly, id)
     if (DEBUG) {
         Component.println(s, "notice", id);
     }
-    if (!fPrintOnly) web.alertUser(s);
+    if (!fPrintOnly) web.alertUser((id? (id + ": ") : "") + s);
 };
 
 /**
@@ -724,7 +724,7 @@ Component.prototype = {
                  * @param {string} [id]
                  */
                 this.notice = function noticePanel(s, fPrintOnly, id) {
-                    this.println(s, "notice", id);
+                    this.println(s, this.idComponent);
                 };
             }
             return true;
@@ -838,7 +838,7 @@ Component.prototype = {
      * @param {string} [id] is the caller's ID, if any
      */
     notice: function(s, fPrintOnly, id) {
-        Component.notice(s, fPrintOnly, id || this.id);
+        Component.notice(s, fPrintOnly, id || this.type);
     },
     /**
      * setError(s)

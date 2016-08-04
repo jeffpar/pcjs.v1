@@ -5,7 +5,7 @@
 ;
 ;   Listing produced by NDISASM, 2015-Apr-04
 ;   Additional post-processing performed by the PCjs TextOut module
-;   All post-processing, comments, etc., copyright © 2012-2015 Jeff Parsons <Jeff@pcjs.org>
+;   All post-processing, comments, etc., copyright © 2012-2016 Jeff Parsons <Jeff@pcjs.org>
 ;
 ;   This file is part of PCjs, which is part of the JavaScript Machines Project (aka JSMachines)
 ;   at <http://jsmachines.net/> and <http://pcjs.org/>.

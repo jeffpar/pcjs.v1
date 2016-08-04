@@ -72,4 +72,4 @@ var C1PJS = {
     PRIVATE:     PRIVATE,       // shared
     SITEHOST:    SITEHOST,      // shared
     XMLVERSION:  XMLVERSION     // shared
-}
+};
