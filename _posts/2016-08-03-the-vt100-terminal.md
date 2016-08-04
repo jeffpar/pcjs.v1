@@ -15,10 +15,10 @@ Summer has been filled with distractions, but I've finally begun making headway 
 
 Unlike other VT100 emulators, this isn't simply an emulation of VT100 protocols.  It's a simulation of the terminal's
 8080 CPU, running the original [VT100 Firmware](/devices/pc8080/rom/vt100/) inside the [PC8080](/modules/pc8080/)
-CPU emulator, along with other key components that the CPU interacts with to drive the display, keyboard, and serial UART.
+CPU emulator, along with other key components that the CPU interacts with to drive the display, keyboard, and serial port.
 
 It's not operational yet, but as you can see below, pieces are starting to fall into place, including a test screen that
-displays most of the VT100 font variations, built on-the-fly from the original VT100 Character Generation ROM, and LEDs that
+displays most of the VT100 font variations, built on-the-fly from the original VT100 Character Generator ROM, and LEDs that
 respond to the firmware's commands.  When you start the simulation, it briefly displays a "WAIT" message as it processes the
 VT100's Non-Volatile RAM (NVR), and then it spins, awaiting further stimulus.
 
