@@ -13,9 +13,8 @@ DEC VT100 Terminal
 
 This is a work-in-progress emulation of another 8080-based machine: the VT100 Terminal.
 
-Unlike other VT100 emulators, this is not simply an emulation of VT100 protocols.  It is a simulation of the entire
-8080-based machine, running the original [VT100 Firmware](/devices/pc8080/rom/vt100/) inside the [PC8080](/modules/pc8080/)
-CPU emulator.
+Unlike other VT100 emulators, this is not simply an emulation of VT100 protocols.  It is a simulation of the original VT100
+machine, running the [VT100 Firmware](/devices/pc8080/rom/vt100/) inside the [PC8080](/modules/pc8080/) CPU emulator.
 
 {% include machine.html id="vt100" %}
 
