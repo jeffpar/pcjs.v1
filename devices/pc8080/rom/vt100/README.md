@@ -7,8 +7,10 @@ permalink: /devices/pc8080/rom/vt100/
 DEC VT100 ROMs
 --------------
 
-The DEC VT100 Terminal used four 2Kb ROMs to store the code used by its 8080 processor.
-Their combined contents are stored in [VT100.json](VT100.json).
+### 8080 Firmware (8Kb)
+
+The DEC VT100 Terminal used four 2Kb ROMs to store all the firmware used by the 8080 processor.
+The combined contents of those ROMs have been stored as an 8Kb JSON image in [VT100.json](VT100.json).
 
 As Trammell Hudson's [VT100 Page](https://trmm.net/VT100) explains:
 
@@ -16,7 +18,7 @@ As Trammell Hudson's [VT100 Page](https://trmm.net/VT100) explains:
 	Digital was able to have a different chip-select bit pattern and avoided having separate NOT gates on the inputs.
 	Note that the schematic appears to be incorrect -- E56 is the low order, and E40 is the high order address bits.
 
-He then describes the memory mapping as follows:
+He then describes the memory map as follows:
 
 	ROM chip    CS1 (20)    A11/CS2 (18)    A12/CS3 (21)    Mapped address
 	E40         H           H               H               0x1800
@@ -31,19 +33,29 @@ The above PCB chip locations correspond to the following [DEC ROM](/devices/roms
 * E45: [23-033E2.bin](https://web.archive.org/web/20140723115846/http://www.dunnington.u-net.com/public/DECROMs/23-033E2.bin)
 * E40: [23-034E2.bin](https://web.archive.org/web/20140723115846/http://www.dunnington.u-net.com/public/DECROMs/23-034E2.bin)
 
-And sure enough, concatenating those four DEC ROM dumps produces a perfect match for Trammell Hudson's
+And sure enough, concatenating those four DEC ROM dumps produced a perfect match for Trammell Hudson's
 [VT100.bin](http://trmm.net/images/2/20/VT100.bin).
 
-The VT100 also used one 2Kb character generator ROM, which is stored in [23-018E2.json](23-018E2.json).
+### Character Generator (2Kb)
 
-Disassembling the 8080 Code
----------------------------
+The VT100 also used one 2Kb character generator ROM, which is stored in [23-018E2.json](23-018E2.json).
+The ROM contains 128 rows of character data, 16 bytes per character.  More on the format of that data later.
+
+### Disassembling the 8080 Firmware
 
 Following in the footsteps of [vt100romhax](http://vt100romhax.tumblr.com/post/90697428973/the-vt100-memory-map-and-8080-disassembly),
-I disassembled the ROM, using `dz80` from [D52 source code](http://www.brouhaha.com/~eric/software/d52/) ([manual](http://www.bipom.com/documents/dis51/d52manual.html)):
+I disassembled the ROM, using `dz80` from [D52](http://www.brouhaha.com/~eric/software/d52/) ([manual](http://www.bipom.com/documents/dis51/d52manual.html)):
 
 	dz80 -80 archive/VT100.bin
 
-This produced VT100.d80, which I renamed to [VT100.asm](VT100.asm).  I also appeared to run into the same problem that
-**vt100romhax** did: references to `X2000` that needed to be changed to `2000h`.
+This produced VT100.d80, which I renamed to [VT100.asm](VT100.asm).  I fixed one `dz80` bug, replacing references to
+`X2000` with `2000h`, and then hand-merged most of the comments from [haxrom.d80](https://github.com/phooky/VT100-Hax/blob/master/ROMs/haxrom.d80).
+This required some selectivity, because I didn't want to inadvertently include any of [phooky's](https://github.com/phooky)
+screensaver-related mods to the ROM.
 
+Finally, I verified that re-assembling [VT100.asm](VT100.asm) with [asm8080](https://github.com/begoon/asm8080) produced the
+original VT100.bin; after adding the correct number of `nop` instructions to the end to the source file, the binaries matched.
+
+Some additional clean-up remains, because there are still chunks of data that were incorrectly disassembled as code.  From a
+re-assembly standpoint, it doesn't matter too much, because such instructions get reassembled into the same original binary
+patterns, but from a readability standpoint, it's a problem.

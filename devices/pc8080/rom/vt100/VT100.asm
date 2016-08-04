@@ -2,6 +2,10 @@
 ;  DZ80 V3.4.1 8080 Disassembly of archive/VT100.bin
 ;  2016/08/03 14:55
 ;
+;   Code annotations beginning with ";;" borrowed from Adam Mayer (https://github.com/phooky)
+;   See https://github.com/phooky/VT100-Hax/blob/master/ROMs/haxrom.d80
+;   More information at http://vt100romhax.tumblr.com/post/90789754818/day-four-rom-checksums
+;
 	org	0
 ;
 X0000:	di
@@ -55,65 +59,80 @@ X0030:	call	X03cc
 X003b:	mvi	e,1
 X003d:	di
 	mvi	a,0fh
-	out	62h
-	cma
-	out	42h
-	xra	a
-	mov	d,a
+	out	62h		;; 0x0f to NVR latch
+	cma			;; invert A (0xf0)
+	out	42h		;; 0xf0 to brightness
+;;
+;;  Run checksum on each 2K ROM, indicating with
+;;  the keyboard LEDs which is being scanned.
+;;  The # of the chip being scanned is stored in B.
+;;
+	xra	a		;; zero A
+	mov	d,a		;; zero D, L, H
 	mov	l,a
 	mov	h,a
-X0049:	inr	a
-	mov	b,a
-	out	82h
-	mvi	c,8
-X004f:	rlc
-	xra	m
-	inr	l
-	jnz	X004f
-	inr	h
-	dcr	c
-	jnz	X004f
-	ora	a
-X005b:	jnz	X005b
-	mov	a,b
-	cpi	4
-	jnz	X0049
+X0049:	inr	a		;; next 2K ROM
+	mov	b,a		;; store the current ROM # in B
+	out	82h		;; show current ROM on LEDs
+	mvi	c,8		;; Checksum over 8 256B blocks
+X004f:	rlc			;;    Rotate A left
+	xra	m		;;    A <- A ^ memory
+	inr	l		;;    next memory address
+	jnz	X004f		;;    ... repeat until end of block
+	inr	h		;; next block
+	dcr	c		;; decrement block count
+	jnz	X004f		;; ... repeat until end of chip
+	ora	a		;; Check the value of the accumulator
+X005b:	jnz	X005b		;; If it's not zero, hang forever
+	mov	a,b		;; Put the ROM # back in the accumulator
+	cpi	4		;; If it's not 4...
+	jnz	X0049		;; repeat for the next ROM
+
 	inr	a
-	out	82h
-	mvi	c,0aah
-	mvi	b,2ch
-	in	42h
-	ani	2
-	jnz	X0074
-	mvi	b,40h
-X0074:	mov	h,b
-	dcx	h
-X0076:	mvi	m,0
-	dcx	h
-	mov	a,h
-	cpi	1fh
-	jnz	X0076
+	out	82h		;; write 5 to LEDs (turns on L2 and L4)
+
+	mvi	c,0aah		;; Test pattern: 0xaa
+	mvi	b,2ch		;; 0x2c is the top of RAM on the basic board
+	in	42h		;;
+	ani	2		;; flags buffer &= 0x02 : is AVO installed?
+	jnz	X0074		;; if bit 2 is not set, AVO is installed
+	mvi	b,40h		;; 0x40 is the top of RAM on the AVO
+X0074:	mov	h,b		;; load HL with top of RAM
+	dcx	h		;; dec HL
+X0076:	mvi	m,0		;; M <- 0
+	dcx	h		;; dec HL
+	mov	a,h		;; a <- h
+	cpi	1fh		;; compare to 1f (top of ROM)
+	jnz	X0076		;; continue to zero if not at ROM
+
 	inx	h
-X0080:	mov	a,m
+;;
+;;  Zero all RAM. C gets the high byte of the address of the top of
+;;  RAM, HL is loaded with it, and it zeros memory all the way down,
+;;  leaving the start of RAM in HL
+;;
+;;  From start of RAM, test that it's all zero
+;;
+X0080:	mov	a,m		;; read a byte of memory
 	ora	a
-	jz	X0090
+	jz	X0090		;; if it's zero, skip ahead
 	ani	0fh
 	mov	a,h
-	jnz	X00a1
+	jnz	X00a1		;; err
 	cpi	30h
-	jc	X00a1
-X0090:	mov	m,c
+	jc	X00a1		;; err
+X0090:	mov	m,c		;; run test pattern through ram
 	mov	a,m
 	xra	c
-	jz	X00a8
+	jz	X00a8		;; jump to 00a8 if ok
 	ani	0fh
 	mov	a,h
-	jnz	X00a1
+	jnz	X00a1		;; err
 	cpi	30h
-	jnc	X00a8
+	jnc	X00a8		;; ok
 X00a1:	mvi	d,1
 	cpi	2ch
-X00a5:	jc	X00a5
+X00a5:	jc	X00a5		;; Hang if non-AVO memory
 X00a8:	xra	a
 	inx	h
 	ora	l
@@ -121,14 +140,17 @@ X00a8:	xra	a
 	ora	h
 	cmp	b
 	jnz	X0080
-	mov	a,c
+	mov	a,c		;; Repeat mem test with pattern 0x55
 	rlc
 	mov	c,a
 	jc	X0074
+;;
+;;  Memory test is done
+;;
 	push	d
-	call	X02a4
-	call	X02eb
-	call	X175b
+	call	X02a4		;; zero scratch and screen mem
+	call	X02eb		;; Set a number of scratch values to fixed values
+	call	X175b		;; .... more memory initialization
 	pop	d
 X00c4:	jz	X00cb
 	mov	a,d
@@ -160,40 +182,44 @@ X00f5:	push	d
 	call	X03a2
 	pop	d
 	jmp	X0875
-;
+;;
+;;  Keyboard interrupt handler
+;;
 X00fd:	push	psw
-	in	82h
+	in	82h		;; Read from keyboard port
 	push	h
 	push	b
-	mov	b,a
-	sui	7ch
-	jm	X011a
-	mov	h,a
-X0109:	inr	h
-	mvi	a,10h
+	mov	b,a		;; copy b <- a
+	sui	7ch		;; subtract 0x7c from a
+	jm	X011a		;; jump to 011a if a is a normal key
+	mov	h,a		;; otherwise h <- a
+X0109:	inr	h		;; h++
+	mvi	a,10h		;; a <- 0x10
 	rrc
 X010d:	rlc
 	dcr	h
 	jnz	X010d
-	lxi	h,X2068
-	ora	m
-	mov	m,a
-	jmp	X012d
+	lxi	h,X2068		;; load keys flag addresss
+	ora	m		;; or in control bit
+	mov	m,a		;; store again
+	jmp	X012d		;; jump to end to interrupt
 ;
-X011a:	lxi	h,X2068
+X011a:	lxi	h,X2068		;; load keys flag address
 	mvi	a,7
-	ana	m
-	cpi	4
-	jp	X012d
-	inr	m
-	lxi	h,X206a
-	call	X13de
-	mov	m,b
+	ana	m		;; load key counter
+	cpi	4		;; if overflow.. (>3 keys)
+	jp	X012d		;; discard keypress and end interrupt
+	inr	m		;; otherwise increment key counter
+	lxi	h,X206a		;; load key address buffer?
+	call	X13de		;; add key counter to address buffer
+	mov	m,b		;; save key to address buffer
 X012d:	pop	b
 	pop	h
 	pop	psw
 	ret
-;
+;;
+;;  End of keyboard interrupt handler
+;;
 X0131:	ani	7fh
 	mov	c,a
 	lda	X207b
@@ -378,68 +404,70 @@ X0298:	call	X0bf2
 	lxi	b,X0011
 	call	X0f7e
 	jmp	X03ae
-;
-X02a4:	lxi	h,X204e
-	lxi	d,X0fb2
-	mvi	b,0
-	call	X1083
-	cma
-	sta	X2104
-	lxi	h,X2004
-	shld	X2052
-	lxi	h,X22d0
-	shld	X20f6
+;;
+;;  Zero all scratch and screen RAM above stack
+;;
+X02a4:	lxi	h,X204e		;; HL <- 0x204e (top of stack)
+	lxi	d,X0fb2		;; DE <- 0x0fb2
+	mvi	b,0		;; B  <- 0
+	call	X1083		;; memset(0x204e,0,0xfb2)
+	cma			;; invert A
+	sta	X2104		;; store A in 0x2104
+	lxi	h,X2004		;; HL <- 0x2004
+	shld	X2052		;; *(0x2052) = 0x2004
+	lxi	h,X22d0		;; HL <- 0x22d0
+	shld	X20f6		;; *(20f6) = 0x22d0
 	ret
-;
-X02c0:	call	X0a15
-	lxi	h,2000h
-	lxi	d,X02d9
-	mvi	b,12h
-	call	X038b
-	lxi	h,X3000
-	lxi	d,X1000
-	mvi	b,0ffh
-	jmp	X1083
-;
-X02d9:	mov	a,a
-	mov	m,b
-	inx	b
-	mov	a,a
-	jp	X7fd0
-	mov	m,b
-	mvi	b,7fh
-	mov	m,b
-	inr	c
-	mov	a,a
-	mov	m,b
-	rrc
-	mov	a,a
-	mov	m,b
-	inx	b
-X02eb:	lxi	h,X0212
-	shld	X212d
-	mvi	a,35h
-	sta	X212c
-	mvi	a,1
-	sta	X205b
-	sta	X2176
-	lxi	h,X07ff
-	shld	X2149
-	mvi	a,2
-	sta	X2073
-	mvi	a,0f7h
-	sta	X20fa
-	in	42h
-	ani	4
-	mvi	a,1
-	jnz	X031a
-	sta	X2079
-X031a:	mvi	a,0ffh
-	sta	X210e
-	sta	X21ba
-	mvi	h,80h
-	mov	l,h
-	shld	X20c0
+;;
+;;  Initialize start of screen RAM and wipe attribute RAM to 0xff
+;;
+X02c0:	call	X0a15		;; 0x2140 = 0xe605
+	lxi	h,2000h		;; HL = 0x2000
+	lxi	d,X02d9		;; DE = 0x02d9
+	mvi	b,12h		;; B = 18
+	call	memmov		;; copy 18 bytes from 0x02d9 to 0x2000
+	lxi	h,X3000		;; HL = 0x3000
+	lxi	d,X1000		;; DE = 0x1000
+	mvi	b,0ffh		;; B = 0xFF
+	jmp	X1083		;; Set all of attribute RAM to 0xFF and return
+;;
+;;  0x02d9 through 0x02eb are the initial values for the screen RAM;
+;;  it's copied into low RAM at 0x2000 during init.
+;;
+X02d9:
+	db	07fh,070h,003h
+	db	07fh,0f2h,0d0h
+	db	07fh,070h,006h
+	db	07fh,070h,00ch
+	db	07fh,070h,00fh
+	db	07fh,070h,003h
+;;
+;;  Initialize several scratch values. We don't know what all of these are for yet.
+;;
+X02eb:	lxi	h,X0212		;; HL = 0x0212
+	shld	X212d		;; Store 0x1202 at 0x212d
+	mvi	a,35h		;; A = 0x35
+	sta	X212c		;; 0x212c = 0x35
+	mvi	a,1		;; A = 1
+	sta	X205b		;; 0x205b = 1
+	sta	X2176		;; 0x2176 = 1
+	lxi	h,X07ff		;; HL = 0x07ff
+	shld	X2149		;; store 0xff07 at 0x2149
+	mvi	a,2		;; A = 2
+	sta	X2073		;; 0x2073 = 2
+	mvi	a,0f7h		;; A = 0xf7
+	sta	X20fa		;; 0x20fa = 0xf7
+	in	42h		;; read flags buffer
+	ani	4		;; And it with 0x04 (check graphics flag)
+	mvi	a,1		;; A=1
+	jnz	X031a		;; if no graphics skip
+	sta	X2079		;; else store 1 in 0x2079
+X031a:	mvi	a,0ffh		;; A = 0xff
+	sta	X210e		;; 0x210e = 0xff
+	sta	X21ba		;; 0x21ba = 0xff
+	mvi	h,80h		;; H = 0x80
+	mov	l,h		;; L = 0x80
+	shld	X20c0		;; Store 0x8080 at 0x20c0
 	ret
 ;
 X0329:	mvi	a,40h
@@ -489,13 +517,16 @@ X0381:	lda	X21a2
 	ora	a
 	jz	X0b63
 	jmp	X0b77
-;
-X038b:	ldax	d
-	mov	m,a
-	inx	h
-	inx	d
-	dcr	b
-	jnz	X038b
+;;
+;;  Performs a memmove(HL,DE,B)
+;;
+memmov:
+X038b:	ldax	d		;; Load memory at DE into accumulator
+	mov	m,a		;; Store it at HL
+	inx	h		;; HL++
+	inx	d		;; DE++
+	dcr	b		;; B--
+	jnz	X038b		;; until B is zero
 	ret
 ;
 X0394:	lda	X21a5
@@ -523,18 +554,20 @@ X03ae:	call	X1488
 	xra	a
 	sta	X2144
 	jmp	X03ae
-;
+;;
+;;  Receiver interrupt handler
+;;
 X03cc:	push	psw
 	push	b
 	push	h
-	in	0
+	in	0		;; Read from PUSART data
 	ani	7fh
 	jz	X043a
 	mov	c,a
 	lda	X21a5
 	ora	a
 	jnz	X043a
-	in	1
+	in	1		;; Read from PUSART ctrl
 	ani	38h
 	jz	X03ed
 	mvi	c,1ah
@@ -584,7 +617,9 @@ X043a:	pop	h
 	pop	b
 	pop	psw
 	ret
-;
+;;
+;;  End of keyboard interrupt handler
+;;
 X043e:	mvi	a,0feh
 	ana	m
 	jmp	X0447
@@ -626,85 +661,19 @@ X044b:	db	30h
 	mov	e,h
 	mov	a,h
 	db	20h
-X0476:	db	20h
-	mov	a,a
-	mov	a,a
-	mov	a,a
-	nop
-	mov	m,b
-	mov	l,a
-	mov	a,c
-	mov	m,h
-	mov	m,a
-	mov	m,c
-	jmp	X0000
-;
-	org	485h
-;
-	mov	e,l
-	mov	e,e
-	mov	l,c
-	mov	m,l
-	mov	m,d
-	mov	h,l
-	lxi	sp,X00c4
-	jnz	X6081
-	dcr	l
-	dad	sp
-	stc
-	inr	m
-	inx	sp
-	dcx	d
-	pop	b
-	jnc	X08d0
-	dcr	a
-	db	30h
-	db	38h
-	mvi	m,35h
-	sta	Xb709
-	out	0d1h
-	ora	b
-	ldax	b
-	mov	e,h
-	mov	l,h
-	mov	l,e
-	mov	h,a
-	mov	h,m
-	mov	h,c
-	cmp	b
-	adc	l
-	ora	d
-	ora	c
-	nop
-	daa
-	dcx	sp
-	mov	l,d
-	mov	l,b
-	mov	h,h
-	mov	m,e
-	xra	m
-	xra	h
-	ora	l
-	ora	h
-	dcr	c
-	mvi	l,2ch
-	mov	l,m
-	mov	h,d
-	mov	a,b
-	add	d
-	cmp	c
-	ora	e
-	ora	m
-	xra	l
-	nop
-	cma
-	mov	l,l
-	db	20h
-	hlt
-;
-	mov	h,e
-	mov	a,d
+X0476:
+KBTab:	db	 20h,  7fh,  7fh,  7fh, 00h, 'p', 'o', 'y', 't', 'w', 'q'
+	db	0c3h,  00h,  00h,  00h, ']', '[', 'i', 'u', 'r', 'e', '1'
+	db	0c4h,  00h, 0c2h, 081h, '`', '-', '9', '7', '4', '3', 1bh
+	db	0c1h, 0d2h, 0d0h,  08h, '=', '0', '8', '6', '5', '2', 09h
+	db	0b7h, 0d3h, 0d1h, 0b0h, 0ah, '\', 'l', 'k', 'g', 'f', 'a'
+	db	0b8h,  8dh, 0b2h, 0b1h, 00h, 27h, 3bh, 'j', 'h', 'd', 's'
+	db	0aeh, 0ach, 0b5h, 0b4h, 0dh, '.', ',', 'n', 'b', 'x', 82h
+	db	0b9h, 0b3h, 0b6h, 0adh, 00h, '/', 'm', ' ', 'v', 'c', 'z'
 	rst	7
+;;
+;; Vertical interrupt handler
+;;
 X04cf:	push	psw
 	push	h
 	push	d
@@ -1279,42 +1248,34 @@ X08d0:	jmp	X05e6
 ;
 	ret
 ;
-X08d4:	sui	5
+X08d4:	sui	5		;; subtract 5 from A and return if negative
 	rm
-	lxi	h,X08e5
-	add	a
+	lxi	h,X08e5		;; load jump table at 8e5
+	add	a		;; double a
 	mov	e,a
 	mvi	d,0
-	dad	d
-	mov	e,m
+	dad	d		;; hl = X08e5 + 2A
+	mov	e,m		;; load DE from (HL) little-endian
 	inx	h
 	mov	d,m
 	xchg
-	xra	a
-	pchl
+	xra	a		;; zero A
+	pchl			;; jump to address
 ;
-X08e5:	nop
-	dad	b
-	sub	a
-	dad	b
-	db	38h
-	dad	b
-	mov	b,c
-	dad	b
-	sphl
-	dcr	c
-	mov	d,l
-	dad	b
-	mov	d,l
-	dad	b
-	mov	d,l
-	dad	b
-	mov	c,e
-	dad	b
-	ei
-	db	8
-	cm	X3c08
-	sta	X20fc
+X08e5:	dw	X0900
+	dw	X0997		;; immediate return
+	dw	X0938
+	dw	X0941
+	dw	0df9h		;; MYSTERY ADDRESS: this isn't even in AVO!!!
+	dw	X0955
+	dw	X0955
+	dw	X0955
+	dw	094bh
+	dw	X08fb
+	dw	X08fc
+
+X08fb:	inr	a
+X08fc:	sta	X20fc
 	ret
 ;
 X0900:	lda	X21a5
@@ -1360,7 +1321,7 @@ X0938:	lxi	h,X2078
 	mov	m,a
 	ret
 ;
-	lxi	h,X20f8
+X0941:	lxi	h,X20f8
 	mov	a,m
 	ora	a
 	rz
@@ -1403,7 +1364,7 @@ X0989:	lda	X21c3
 	sta	X20f4
 	dcr	a
 	sta	X20f5
-	ret
+X0997:	ret
 ;
 X0998:	call	X101a
 	jmp	X1012
@@ -1475,10 +1436,12 @@ X0a0d:	stax	d
 	pchl
 ;
 X0a14:	pop	h
-X0a15:	lxi	h,X05e6
-X0a18:	shld	X2140
+X0a15:	lxi	h,X05e6		;; HL = 0x05e6
+X0a18:	shld	X2140		;; 0x2140 = 0xe605
 	ret
-;
+;;
+;;  This is a table of some sort.
+;;
 X0a1c:	mov	b,c
 	sbb	e
 	ldax	b
@@ -1527,9 +1490,7 @@ X0a1c:	mov	b,c
 	nop
 X0a50:	mov	h,e
 	nop
-;
-	org	0a53h
-;
+	nop
 	mov	b,l
 	mov	d,d
 	dad	b
@@ -1873,7 +1834,7 @@ X0c62:	lxi	h,X05ad
 	lxi	h,X20f8
 	lxi	d,X2102
 X0c77:	mvi	b,0bh
-	call	X038b
+	call	memmov
 	jmp	X1636
 ;
 	lxi	h,X0c8a
@@ -2504,13 +2465,16 @@ X1074:	call	X13e3
 	call	X138d
 	shld	X214e
 	ret
-;
-X1083:	mov	m,b
-	inx	h
-	dcx	d
-	mov	a,d
-	ora	e
-	jnz	X1083
+;;
+;; memset: Set memory from HL to HL+DE-1 to value B
+;;
+memset:
+X1083:	mov	m,b		;; M <- B
+	inx	h		;; HL++
+	dcx	d		;; DE--
+	mov	a,d		;;
+	ora	e		;; A = D | E
+	jnz	X1083		;; repeat if A != 0
 	ret
 ;
 	mvi	c,0
@@ -3123,36 +3087,38 @@ X1488:	call	X1493
 	ani	10h
 	cz	X06aa
 	jmp	X0e59
-;
-X1493:	in	42h
-	ani	80h
-	rz
-	lxi	h,X2144
-	mov	a,m
-	ora	a
-	jz	X14a2
-	mvi	a,10h
-X14a2:	lxi	h,X21a5
-	ora	m
-	lxi	h,X2145
-	ora	m
-	inx	h
-	ora	m
-	inx	h
-	ora	m
-	mvi	m,0
-	inx	h
-	ora	m
-	mvi	m,0
-	out	82h
-	lxi	h,X2074
-	inr	m
-	lda	X2077
-	ora	a
-	rnz
-	lda	X2065
-	lxi	h,X2051
-	ora	m
+;;
+;; SUBROUTINE A
+;;
+X1493:	in	42h		;; Read flags buffer
+	ani	80h		;; check if transmit buffer is empty
+	rz			;; if zero, return
+	lxi	h,X2144		;; HL = 0x2144
+	mov	a,m		;; Load from 2144
+	ora	a		;; Check if zero
+	jz	X14a2		;;
+	mvi	a,10h		;; If not, A = 10 (else A is zero)
+X14a2:	lxi	h,X21a5		;;
+	ora	m		;; or bits from 0x21a5
+	lxi	h,X2145		;;
+	ora	m		;; or bits from 0x2145
+	inx	h		;;
+	ora	m		;; ... and 0x2146
+	inx	h		;;
+	ora	m		;; ... and 0x2147
+	mvi	m,0		;; zero 0x2147
+	inx	h		;;
+	ora	m		;; ... and 0x2148
+	mvi	m,0		;; zero 0x2148
+	out	82h		;; Write to keyboard buffer
+	lxi	h,X2074		;;
+	inr	m		;; Increment what's at 0x2074
+	lda	X2077		;; load what's at 0x2077
+	ora	a		;; return if it's not zero
+	rnz			;;
+	lda	X2065		;; A =  0x2065
+	lxi	h,X2051		;;
+	ora	m		;; return if [0x2065] | [0x2051] != 0
 	rnz
 	lhld	X212d
 	dcx	h
@@ -3527,31 +3493,33 @@ X174c:	mov	m,a
 X1754:	mvi	d,0
 	mvi	b,1
 	jmp	X1762
-;
-X175b:	call	X02c0
-	mvi	b,0ah
-	mvi	d,1
-X1762:	push	b
-	push	d
-	call	X17be
-	pop	d
-	di
-	lxi	h,X217b
-	mvi	e,33h
-	mvi	c,1
-	xra	a
-X1771:	sta	X21ae
-	mov	a,c
-	sta	X21ad
-	push	d
-	push	h
-	mov	a,d
-	ora	a
-	mov	a,m
-	sta	X21af
-	cz	X18ae
-	call	X18a3
-	pop	h
+;;
+;;  Third initialization call?
+;;
+X175b:	call	X02c0		;; Initialize start of screen RAM and wipe attribute RAM to 0xff
+	mvi	b,0ah		;; B = 0x0a
+	mvi	d,1		;; D = 1
+X1762:	push	b		;; push B, D
+	push	d		;;
+	call	X17be		;; Display wait message
+	pop	d		;; pop D
+	di			;; disable interrupts(???)
+	lxi	h,X217b		;; HL = 0x217b
+	mvi	e,33h		;; E = 0x33
+	mvi	c,1		;; C = 1
+	xra	a		;; A = 0
+X1771:	sta	X21ae		;; 0x21ae = A
+	mov	a,c		;; A = C
+	sta	X21ad		;; 0x21ad = A
+	push	d		;; push D,H
+	push	h		;;
+	mov	a,d		;; A=D
+	ora	a		;; or A
+	mov	a,m		;; load A from HL
+	sta	X21af		;; store it in 0x21af
+	cz	X18ae		;; if A is 0 call X18ae
+	call	X18a3		;; call X18a3
+	pop	h		;; pop H,D
 	pop	d
 	lda	X21af
 	dcr	e
@@ -3583,13 +3551,15 @@ X17ac:	mov	a,c
 	shld	X2004
 	pop	psw
 	ret
-;
-X17be:	lxi	d,X17ec
-	mvi	b,7
-	lxi	h,X21cc
-	call	X038b
-	lxi	h,Xcc71
-	shld	X2004
+;;
+;;  Show wait message
+;;
+X17be:	lxi	d,X17ec		;; DE = 0x17ec
+	mvi	b,7		;; B = 7
+	lxi	h,X21cc		;; HL = 0x21cc
+	call	memmov		;; Initialize 0x21cc to Wait message
+	lxi	h,Xcc71		;; HL = 0xcc71
+	shld	X2004		;; retarget screen ram to display wait message
 	ret
 ;
 X17d0:	lxi	h,X217b
@@ -3598,31 +3568,21 @@ X17d5:	mvi	m,80h
 	inx	h
 	dcr	b
 	jnz	X17d5
-	lxi	d,X17f3
-	mvi	b,0bh
-	call	X038b
+	lxi	d,X17f3		;; DE = 0x17f3
+	mvi	b,0bh		;; B = 11
+	call	memmov		;; store
 	mvi	c,1
 	mvi	a,30h
 	sta	X2078
 	ret
-;
-X17ec:	mov	d,a
-	mov	h,c
-	mov	l,c
-	mov	m,h
-	mov	a,a
-	mov	m,b
-	mvi	b,0
-	db	8
-	mov	l,m
-	db	20h
-	rnc
-	mov	d,b
-	nop
-	db	20h
-	nop
-	rpo
-	rpo
+X17ec:
+	db	'Wait'
+	db	07fh,070h,06h
+X17f3:
+	db	0,8,06eh,020h
+	db	0d0h,050h,0,020h
+	db	0,0e0h,0e0h
+X17fe:
 	lda	X2155
 	lxi	b,X00ff
 	jmp	X180f
@@ -3723,14 +3683,16 @@ X18ae:	mvi	c,40h
 X18bc:	mvi	a,30h
 	out	62h
 	ret
-;
+;;
+;;  On h pulse, write 0x2d to NVR... this looks like it's doing a read
+;;
 X18c1:	in	42h
 	ana	c
 	jz	X18c1
 X18c7:	in	42h
 	ana	c
 	jnz	X18c7
-	mvi	a,2dh
+	mvi	a,2dh		;; Write READ command to NVR latch
 	out	62h
 X18d1:	in	42h
 	ana	c
@@ -3738,38 +3700,38 @@ X18d1:	in	42h
 X18d7:	in	42h
 	ana	c
 	jnz	X18d7
-	mvi	a,2fh
+	mvi	a,2fh		;; Write 0x2fh (standby) to nvr latch
 	out	62h
-	lxi	h,X21d3
-	mvi	b,0eh
+	lxi	h,X21d3		;; HL=X21d3
+	mvi	b,0eh		;; B= 14 -- we're reading 14 bits
 X18e6:	in	42h
 	ana	c
 	jz	X18e6
 X18ec:	in	42h
 	ana	c
-	jnz	X18ec
-	mvi	a,25h
+	jnz	X18ec		;; wait for NVR clock L
+	mvi	a,25h		;; shft bit out of nvr
 	out	62h
 X18f6:	in	42h
 	ana	c
-	jz	X18f6
-	in	42h
+	jz	X18f6		;; wait for NVR clock H
+	in	42h		;; read bit and store it in memory
 	mov	m,a
 	inx	h
 X1900:	in	42h
 	ana	c
-	jnz	X1900
+	jnz	X1900		;; wait for NVR clock L
 	dcr	b
-	jnz	X18f6
-	mvi	a,2fh
+	jnz	X18f6		;; read next bit
+	mvi	a,2fh		;; send standby
 	out	62h
-	lxi	d,X21d3
-	mvi	b,0eh
-	lxi	h,X0000
-X1916:	dad	h
-	ldax	d
-	ani	20h
-	rlc
+	lxi	d,X21d3		;; DE=0x21d3
+	mvi	b,0eh		;; B = 14
+	lxi	h,X0000		;; HL = 0
+X1916:	dad	h		;;
+	ldax	d		;; load next char
+	ani	20h		;; and with NVR data bit
+	rlc			;; rotate NVR bit to high bit
 	rlc
 	rlc
 	ora	l
@@ -3777,44 +3739,53 @@ X1916:	dad	h
 	inx	d
 	dcr	b
 	jnz	X1916
-	shld	X21af
+	shld	X21af		;; Store the finished data in 21af and 21ae
 	ret
-;
-X1928:	lda	X21ae
-X192b:	mvi	b,0ffh
-X192d:	inr	b
-	sui	0ah
-	jp	X192d
-	adi	0ah
-	lxi	h,X21d3
-	mvi	e,23h
-	mvi	d,14h
-X193c:	mov	m,e
-	inx	h
-	dcr	d
-	jnz	X193c
-	mvi	m,2fh
-	lxi	h,X21d3
+;;
+;;  Loads address A into NVR address register
+;;
+X1928:	lda	X21ae		; Load accumulator from 0x21ae -- (0x42)
+X192b:	mvi	b,0ffh		; B = 0xff
+X192d:	inr	b		; increment B
+	sui	0ah		; subtract 0x0a from accumulator
+	jp	X192d		; repeat while accumulator is positive
+	adi	0ah		; add 0x0a to accumulator
+	;; B = A/10, A = A%10 -- this is almost certainly related to NVR!
+	;; First, fill the buffer at 21d3 with 20 bytes of 0x23 (accept address 1)
+	lxi	h,X21d3		; HL = 0x21d3
+	mvi	e,23h		; E = 0x23
+	mvi	d,14h		; D = 0x14
+X193c:	mov	m,e		;
+	inx	h		; HL++
+	dcr	d		; D--
+	jnz	X193c		; repeat until D is zero
+	;; End buffer with 0x2f -- put in standby
+	mvi	m,2fh		; Store 0x2f in 21e7
+	;; Set 21d3 + a to 0x22 (accept address 0)
+	lxi	h,X21d3		; HL = 0x21d3
+	mov	e,a		; copy A to E
+	mvi	d,0		; clear D
+	dad	d		; add DE to HL -- calculate address of bit A
+	mvi	m,22h		; Store 0x22 in M
+	;; Set 21d3 + 10 + b to 0x22 (accept address 0)
+	lxi	h,X21d3		; HL = 0x21d3
+	mvi	a,0ah		; A = 0x0a
+	add	b		; A = 0x0a + B
 	mov	e,a
-	mvi	d,0
 	dad	d
 	mvi	m,22h
-	lxi	h,X21d3
-	mvi	a,0ah
-	add	b
-	mov	e,a
-	dad	d
-	mvi	m,22h
+	;; Wait for horiz latch
 X1957:	in	42h
 	ana	c
 	jnz	X1957
+	;; Now copy from 21d3 to nvr latch, one per edge, 21 bytes
 	lxi	h,X21d3
-	mvi	b,15h
+	mvi	b,15h		;
 X1962:	in	42h
-	ana	c
+	ana	c		; Flags Buffer & C
 	jz	X1962
 	dcr	b
-	rm
+	rm			; Return if B is negative
 X196a:	in	42h
 	ana	c
 	jnz	X196a
@@ -4014,7 +3985,10 @@ X1ae8:	mov	a,b
 	sta	X20f4
 	lda	X20f8
 	jmp	X1eea
-;
+;;
+;;  Below is what appears to be a bunch of dead code-- unreferenced functions (meant for use
+;;  by an expansion rom or patch, perhaps?).
+;;
 	call	X1b52
 	call	X0dec
 	call	X1ccd
@@ -4272,38 +4246,11 @@ X1c9f:	mvi	m,7fh
 	inx	h
 	mov	m,e
 	ret
-;
-X1cad:	mov	d,e
-	mov	b,l
-	mov	d,h
-	dcr	l
-	mov	d,l
-	mov	d,b
-	db	20h
-	mov	b,c
-	nop
-X1cb6:	mov	d,h
-	mov	c,a
-	db	20h
-	mov	b,l
-	mov	e,b
-	mov	c,c
-	mov	d,h
-	db	20h
-	mov	d,b
-	mov	d,d
-	mov	b,l
-	mov	d,e
-	mov	d,e
-	db	20h
-	shld	X4553
-	mov	d,h
-	dcr	l
-	mov	d,l
-	mov	d,b
-	shld	Xcd00
-	cmp	d
-	dcx	d
+X1cad:
+	db	'SET-UP A',0
+X1cb6:
+	db	'TO EXIT PRESS ',022h,'SET-UP',022h,0
+	call	X1bba
 	jmp	X0fc8
 ;
 X1cd3:	call	X1ccd
@@ -4395,7 +4342,7 @@ X1d56:	db	20h
 	db	20h
 X1d61:	mov	c,a
 	mvi	b,0bh
-	call	X038b
+	call	memmov
 	mov	a,c
 	rrc
 	rrc
@@ -4410,7 +4357,7 @@ X1d61:	mov	c,a
 	dad	b
 	xchg
 	mvi	b,5
-	jmp	X038b
+	jmp	memmov
 ;
 X1d7c:	db	20h
 	db	20h
@@ -4767,6 +4714,46 @@ X1fd4:	ora	a
 	ret
 ;
 	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
 ;
 ;	Miscellaneous equates
 ;
@@ -4779,7 +4766,6 @@ X00ff	equ	0ffh
 X0111	equ	111h
 X0113	equ	113h
 X0ea0	equ	0ea0h
-X17f3	equ	17f3h
 X1ccd	equ	1ccdh
 X2001	equ	2001h
 X2002	equ	2002h

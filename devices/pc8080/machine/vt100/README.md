@@ -1,6 +1,6 @@
 ---
 layout: page
-title: VT100 Terminal
+title: DEC VT100 Terminal
 permalink: /devices/pc8080/machine/vt100/
 machines:
   - type: pc8080
@@ -8,11 +8,13 @@ machines:
     debugger: true
 ---
 
-VT100 Terminal
---------------
+DEC VT100 Terminal
+------------------
 
-This is where we'll be testing another 8080-based machine: the VT100 Terminal. Unlike other VT100 emulations,
-this will simulate a VT100 by running the terminal's original firmware inside the [PC8080](/modules/pc8080/) CPU emulator.
+This is a work-in-progress emulation of another 8080-based machine: the VT100 Terminal.
+
+Unlike other VT100 emulators, this is not simply an emulation of VT100 protocols.  It is a simulation of the entire
+machine, running the orginal [VT100 Firmware](/devices/pc8080/rom/vt100/) inside the [PC8080](/modules/pc8080/) CPU emulator.
 
 {% include machine.html id="vt100" %}
 
@@ -127,5 +129,3 @@ Additional VT100 Resources
 --------------------------
 
 [VT100 Publications](/pubs/dec/vt100/)
-
-[D52 Microcontroller Disassemblers](http://www.brouhaha.com/~eric/software/d52/) ([Manual](http://www.bipom.com/documents/dis51/d52manual.html))
