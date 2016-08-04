@@ -1,0 +1,5816 @@
+			;
+			;   DZ80 V3.4.1 8080 Disassembly of archive/VT100.bin
+			;   2016/08/03 14:55
+			;
+			;   Comments beginning with ";;" borrowed from Adam Mayer's (https://github.com/phooky)
+			;   work at https://github.com/phooky/VT100-Hax/blob/master/ROMs/haxrom.d80 and http://vt100romhax.tumblr.com
+			;
+			;   All other comments/annotations by Jeff Parsons (@jeffpar) <Jeff@pcjs.org>
+			;
+            00 00		org	0
+			
+    12 0000 F3		X0000:	di
+    13 0001 31 4E 20		lxi	sp,X204e
+    14 0004 C3 3B 00		jmp	X003b
+			
+            00 08		org	8
+			
+    18 0008 CD FD 00	X0008:	call	X00fd
+    19 000B FB			ei
+    20 000C C9			ret
+			
+    22 000D 00		X000d:	nop
+			
+            00 10		org	10h
+			
+    26 0010 CD CC 03		call	X03cc
+    27 0013 FB			ei
+    28 0014 C9		X0014:	ret
+			
+    30 0015 00			nop
+			
+            00 18		org	18h
+			
+    34 0018 CD CC 03		call	X03cc
+    35 001B CD FD 00		call	X00fd
+    36 001E FB			ei
+    37 001F C9			ret
+			
+    39 0020 CD CF 04		call	X04cf
+    40 0023 C9			ret
+			
+    42 0024 00			nop
+			
+            00 28		org	28h
+			
+    46 0028 CD CF 04		call	X04cf
+    47 002B C9			ret
+			
+    49 002C 00			nop
+			
+            00 30		org	30h
+			
+    53 0030 CD CC 03	X0030:	call	X03cc
+    54 0033 CD CF 04		call	X04cf
+    55 0036 FB			ei
+    56 0037 C9			ret
+			
+    58 0038 C3 30 00		jmp	X0030
+			
+    60 003B 1E 01	X003b:	mvi	e,1
+    61 003D F3		X003d:	di
+    62 003E 3E 0F		mvi	a,0fh
+    63 0040 D3 62		out	62h		;; 0x0f to NVR latch
+    64 0042 2F			cma			;; invert A (0xf0)
+    65 0043 D3 42		out	42h		;; 0xf0 to brightness
+			;;
+			;;  Run checksum on each 2K ROM, indicating with
+			;;  the keyboard LEDs which is being scanned.
+			;;  The # of the chip being scanned is stored in B.
+			;;
+    71 0045 AF			xra	a		;; zero A
+    72 0046 57			mov	d,a		;; zero D, L, H
+    73 0047 6F			mov	l,a
+    74 0048 67			mov	h,a
+    75 0049 3C		X0049:	inr	a		;; next 2K ROM
+    76 004A 47			mov	b,a		;; store the current ROM # in B
+    77 004B D3 82		out	82h		;; show current ROM on LEDs
+    78 004D 0E 08		mvi	c,8		;; Checksum over 8 256B blocks
+    79 004F 07		X004f:	rlc			;;    Rotate A left
+    80 0050 AE			xra	m		;;    A <- A ^ memory
+    81 0051 2C			inr	l		;;    next memory address
+    82 0052 C2 4F 00		jnz	X004f		;;    ... repeat until end of block
+    83 0055 24			inr	h		;; next block
+    84 0056 0D			dcr	c		;; decrement block count
+    85 0057 C2 4F 00		jnz	X004f		;; ... repeat until end of chip
+    86 005A B7			ora	a		;; Check the value of the accumulator
+    87 005B C2 5B 00	X005b:	jnz	X005b		;; If it's not zero, hang forever
+    88 005E 78			mov	a,b		;; Put the ROM # back in the accumulator
+    89 005F FE 04		cpi	4		;; If it's not 4...
+    90 0061 C2 49 00		jnz	X0049		;; repeat for the next ROM
+			
+    92 0064 3C			inr	a
+    93 0065 D3 82		out	82h		;; write 5 to LEDs (turns on L2 and L4)
+			
+    95 0067 0E AA		mvi	c,0aah		;; Test pattern: 0xaa
+    96 0069 06 2C		mvi	b,2ch		;; 0x2c is the top of RAM on the basic board
+    97 006B DB 42		in	42h		;;
+    98 006D E6 02		ani	2		;; flags buffer &= 0x02 : is AVO installed?
+    99 006F C2 74 00		jnz	X0074		;; if bit 2 is not set, AVO is installed
+   100 0072 06 40		mvi	b,40h		;; 0x40 is the top of RAM on the AVO
+   101 0074 60		X0074:	mov	h,b		;; load HL with top of RAM
+   102 0075 2B			dcx	h		;; dec HL
+   103 0076 36 00	X0076:	mvi	m,0		;; M <- 0
+   104 0078 2B			dcx	h		;; dec HL
+   105 0079 7C			mov	a,h		;; a <- h
+   106 007A FE 1F		cpi	1fh		;; compare to 1f (top of ROM)
+   107 007C C2 76 00		jnz	X0076		;; continue to zero if not at ROM
+			
+   109 007F 23			inx	h
+			;;
+			;;  Zero all RAM. C gets the high byte of the address of the top of
+			;;  RAM, HL is loaded with it, and it zeros memory all the way down,
+			;;  leaving the start of RAM in HL
+			;;
+			;;  From start of RAM, test that it's all zero
+			;;
+   117 0080 7E		X0080:	mov	a,m		;; read a byte of memory
+   118 0081 B7			ora	a
+   119 0082 CA 90 00		jz	X0090		;; if it's zero, skip ahead
+   120 0085 E6 0F		ani	0fh
+   121 0087 7C			mov	a,h
+   122 0088 C2 A1 00		jnz	X00a1		;; err
+   123 008B FE 30		cpi	30h
+   124 008D DA A1 00		jc	X00a1		;; err
+   125 0090 71		X0090:	mov	m,c		;; run test pattern through ram
+   126 0091 7E			mov	a,m
+   127 0092 A9			xra	c
+   128 0093 CA A8 00		jz	X00a8		;; jump to 00a8 if ok
+   129 0096 E6 0F		ani	0fh
+   130 0098 7C			mov	a,h
+   131 0099 C2 A1 00		jnz	X00a1		;; err
+   132 009C FE 30		cpi	30h
+   133 009E D2 A8 00		jnc	X00a8		;; ok
+   134 00A1 16 01	X00a1:	mvi	d,1
+   135 00A3 FE 2C		cpi	2ch
+   136 00A5 DA A5 00	X00a5:	jc	X00a5		;; Hang if non-AVO memory
+   137 00A8 AF		X00a8:	xra	a
+   138 00A9 23			inx	h
+   139 00AA B5			ora	l
+   140 00AB C2 80 00		jnz	X0080
+   141 00AE B4			ora	h
+   142 00AF B8			cmp	b
+   143 00B0 C2 80 00		jnz	X0080
+   144 00B3 79			mov	a,c		;; Repeat mem test with pattern 0x55
+   145 00B4 07			rlc
+   146 00B5 4F			mov	c,a
+   147 00B6 DA 74 00		jc	X0074
+			;;
+			;;  Memory test is done
+			;;
+   151 00B9 D5			push	d
+   152 00BA CD A4 02		call	X02a4		;; zero scratch and screen mem
+   153 00BD CD EB 02		call	X02eb		;; Set a number of scratch values to fixed values
+   154 00C0 CD 5B 17		call	X175b		;; .... more memory initialization
+   155 00C3 D1			pop	d
+   156 00C4 CA CB 00	X00c4:	jz	X00cb
+   157 00C7 7A			mov	a,d
+   158 00C8 F6 02		ori	2
+   159 00CA 57			mov	d,a
+   160 00CB 3E 2F	X00cb:	mvi	a,2fh
+   161 00CD 32 C9 21		sta	X21c9
+   162 00D0 D3 62		out	62h
+   163 00D2 01 FF 0F	X00d2:	lxi	b,X0fff
+   164 00D5 FB			ei
+   165 00D6 3E 08	X00d6:	mvi	a,8
+   166 00D8 A3			ana	e
+   167 00D9 3E 7F		mvi	a,7fh
+   168 00DB C2 E0 00		jnz	X00e0
+   169 00DE 3E FF		mvi	a,0ffh
+   170 00E0 D3 82	X00e0:	out	82h
+   171 00E2 0B			dcx	b
+   172 00E3 78			mov	a,b
+   173 00E4 B1			ora	c
+   174 00E5 C2 D6 00		jnz	X00d6
+   175 00E8 D3 82		out	82h
+   176 00EA 3A 68 20		lda	X2068
+   177 00ED B7			ora	a
+   178 00EE FA F5 00		jm	X00f5
+   179 00F1 7A			mov	a,d
+   180 00F2 F6 04		ori	4
+   181 00F4 57			mov	d,a
+   182 00F5 D5		X00f5:	push	d
+   183 00F6 CD A2 03		call	X03a2
+   184 00F9 D1			pop	d
+   185 00FA C3 75 08		jmp	X0875
+			;;
+			;;  Keyboard interrupt handler
+			;;
+   189 00FD F5		X00fd:	push	psw
+   190 00FE DB 82		in	82h		;; Read from keyboard port
+   191 0100 E5			push	h
+   192 0101 C5			push	b
+   193 0102 47			mov	b,a		;; copy b <- a
+   194 0103 D6 7C		sui	7ch		;; subtract 0x7c from a
+   195 0105 FA 1A 01		jm	X011a		;; jump to 011a if a is a normal key
+   196 0108 67			mov	h,a		;; otherwise h <- a
+   197 0109 24		X0109:	inr	h		;; h++
+   198 010A 3E 10		mvi	a,10h		;; a <- 0x10
+   199 010C 0F			rrc
+   200 010D 07		X010d:	rlc
+   201 010E 25			dcr	h
+   202 010F C2 0D 01		jnz	X010d
+   203 0112 21 68 20		lxi	h,X2068		;; load keys flag addresss
+   204 0115 B6			ora	m		;; or in control bit
+   205 0116 77			mov	m,a		;; store again
+   206 0117 C3 2D 01		jmp	X012d		;; jump to end to interrupt
+			
+   208 011A 21 68 20	X011a:	lxi	h,X2068		;; load keys flag address
+   209 011D 3E 07		mvi	a,7
+   210 011F A6			ana	m		;; load key counter
+   211 0120 FE 04		cpi	4		;; if overflow.. (>3 keys)
+   212 0122 F2 2D 01		jp	X012d		;; discard keypress and end interrupt
+   213 0125 34			inr	m		;; otherwise increment key counter
+   214 0126 21 6A 20		lxi	h,X206a		;; load key address buffer?
+   215 0129 CD DE 13		call	X13de		;; add key counter to address buffer
+   216 012C 70			mov	m,b		;; save key to address buffer
+   217 012D C1		X012d:	pop	b
+   218 012E E1			pop	h
+   219 012F F1			pop	psw
+   220 0130 C9			ret
+			;;
+			;;  End of keyboard interrupt handler
+			;;
+   224 0131 E6 7F	X0131:	ani	7fh
+   225 0133 4F			mov	c,a
+   226 0134 3A 7B 20		lda	X207b
+   227 0137 B7			ora	a
+   228 0138 C2 FF 01		jnz	X01ff
+   229 013B 79		X013b:	mov	a,c
+   230 013C FE 01		cpi	1
+   231 013E CA C3 01		jz	X01c3
+   232 0141 3A A7 21		lda	X21a7
+   233 0144 E6 20		ani	20h
+   234 0146 C2 75 01		jnz	X0175
+   235 0149 3A 78 21		lda	X2178
+   236 014C B7			ora	a
+   237 014D C2 5F 01		jnz	X015f
+   238 0150 79			mov	a,c
+   239 0151 FE 41		cpi	41h
+   240 0153 FA 5B 01		jm	X015b
+   241 0156 3E 1B		mvi	a,1bh
+   242 0158 CD 18 0F		call	X0f18
+   243 015B 79		X015b:	mov	a,c
+   244 015C C3 0D 08		jmp	X080d
+			
+   246 015F 3E 1B	X015f:	mvi	a,1bh
+   247 0161 CD 18 0F		call	X0f18
+   248 0164 79			mov	a,c
+   249 0165 FE 41		cpi	41h
+   250 0167 F2 5B 01		jp	X015b
+   251 016A 3E 3F		mvi	a,3fh
+   252 016C CD 18 0F	X016c:	call	X0f18
+   253 016F 79			mov	a,c
+   254 0170 C6 40		adi	40h
+   255 0172 C3 0D 08		jmp	X080d
+			
+   257 0175 3A 78 21	X0175:	lda	X2178
+   258 0178 B7			ora	a
+   259 0179 C2 9E 01		jnz	X019e
+   260 017C 79			mov	a,c
+   261 017D FE 41		cpi	41h
+   262 017F FA 5B 01		jm	X015b
+   263 0182 FE 50		cpi	50h
+   264 0184 FA 9E 01		jm	X019e
+   265 0187 3E 1B	X0187:	mvi	a,1bh
+   266 0189 CD 18 0F		call	X0f18
+   267 018C 3E 4F		mvi	a,4fh
+   268 018E CD 18 0F	X018e:	call	X0f18
+   269 0191 C3 5B 01		jmp	X015b
+			
+   271 0194 3E 1B	X0194:	mvi	a,1bh
+   272 0196 CD 18 0F		call	X0f18
+   273 0199 3E 5B		mvi	a,5bh
+   274 019B C3 8E 01		jmp	X018e
+			
+   276 019E 3A BC 21	X019e:	lda	X21bc
+   277 01A1 B7			ora	a
+   278 01A2 CA B5 01		jz	X01b5
+   279 01A5 79			mov	a,c
+   280 01A6 FE 41		cpi	41h
+   281 01A8 F2 87 01		jp	X0187
+   282 01AB 3E 1B	X01ab:	mvi	a,1bh
+   283 01AD CD 18 0F		call	X0f18
+   284 01B0 3E 4F		mvi	a,4fh
+   285 01B2 C3 6C 01		jmp	X016c
+			
+   287 01B5 79		X01b5:	mov	a,c
+   288 01B6 FE 41		cpi	41h
+   289 01B8 FA AB 01		jm	X01ab
+   290 01BB FE 50		cpi	50h
+   291 01BD FA 94 01		jm	X0194
+   292 01C0 C3 87 01		jmp	X0187
+			
+   294 01C3 21 15 08	X01c3:	lxi	h,X0815
+   295 01C6 E5			push	h
+   296 01C7 3A A5 21		lda	X21a5
+   297 01CA B7			ora	a
+   298 01CB C0			rnz
+   299 01CC CD 53 08		call	X0853
+   300 01CF 01 0E 02		lxi	b,X020e
+   301 01D2 21 68 20		lxi	h,X2068
+   302 01D5 7E			mov	a,m
+   303 01D6 E6 10		ani	10h
+   304 01D8 C2 00 09		jnz	X0900
+   305 01DB 7E			mov	a,m
+   306 01DC E6 20		ani	20h
+   307 01DE CA E4 01		jz	X01e4
+   308 01E1 01 D2 00		lxi	b,X00d2
+   309 01E4 3E 25	X01e4:	mvi	a,25h
+   310 01E6 F6 08		ori	8
+   311 01E8 B0			ora	b
+   312 01E9 D3 01		out	1
+   313 01EB 3A 7F 20		lda	X207f
+   314 01EE 81			add	c
+   315 01EF 4F			mov	c,a
+   316 01F0 C5		X01f0:	push	b
+   317 01F1 CD 93 14		call	X1493
+   318 01F4 C1			pop	b
+   319 01F5 3A 7F 20		lda	X207f
+   320 01F8 B9			cmp	c
+   321 01F9 C2 F0 01		jnz	X01f0
+   322 01FC C3 94 03		jmp	X0394
+			
+   324 01FF 21 12 08	X01ff:	lxi	h,X0812
+   325 0202 E5			push	h
+   326 0203 AF			xra	a
+   327 0204 32 30 21		sta	X2130
+   328 0207 32 B8 21		sta	X21b8
+   329 020A 21 A3 21		lxi	h,X21a3
+   330 020D 79			mov	a,c
+   331 020E D6 41	X020e:	sui	41h
+   332 0210 47			mov	b,a
+   333 0211 7E		X0211:	mov	a,m
+   334 0212 CA 22 02	X0212:	jz	X0222
+   335 0215 05			dcr	b
+   336 0216 CA 26 02		jz	X0226
+   337 0219 05			dcr	b
+   338 021A CA 15 18		jz	X1815
+   339 021D 05			dcr	b
+   340 021E CA 1E 18		jz	X181e
+   341 0221 C9			ret
+			
+   343 0222 3D		X0222:	dcr	a
+   344 0223 F8			rm
+   345 0224 77			mov	m,a
+   346 0225 C9			ret
+			
+   348 0226 3C		X0226:	inr	a
+   349 0227 FE 20		cpi	20h
+   350 0229 C8			rz
+   351 022A 77			mov	m,a
+   352 022B C9			ret
+			
+   354 022C 3A A7 21	X022c:	lda	X21a7
+   355 022F 2F			cma
+   356 0230 E6 10		ani	10h
+   357 0232 21 A5 21		lxi	h,X21a5
+   358 0235 B6			ora	m
+   359 0236 C2 41 08		jnz	X0841
+   360 0239 3A BF 21		lda	X21bf
+   361 023C 01 11 02		lxi	b,X0211
+   362 023F A0			ana	b
+   363 0240 C2 45 02		jnz	X0245
+   364 0243 0E 13		mvi	c,13h
+   365 0245 79		X0245:	mov	a,c
+   366 0246 D6 11		sui	11h
+   367 0248 32 C4 21		sta	X21c4
+   368 024B CD 7E 0F		call	X0f7e
+   369 024E C3 12 08		jmp	X0812
+			
+   371 0251 F3		X0251:	di
+   372 0252 31 4E 20		lxi	sp,X204e
+   373 0255 21 00 20		lxi	h,2000h
+   374 0258 E5			push	h
+   375 0259 7E			mov	a,m
+   376 025A 1F			rar
+   377 025B DA 65 02		jc	X0265
+   378 025E DB 42		in	42h
+   379 0260 E6 02		ani	2
+   380 0262 CA 69 02		jz	X0269
+   381 0265 3C		X0265:	inr	a
+   382 0266 32 C8 21		sta	X21c8
+   383 0269 CD A2 03	X0269:	call	X03a2
+   384 026C 3A 50 20		lda	X2050
+   385 026F 3D			dcr	a
+   386 0270 32 53 21		sta	X2153
+   387 0273 E1			pop	h
+   388 0274 7E			mov	a,m
+   389 0275 36 7F		mvi	m,7fh
+   390 0277 B7			ora	a
+   391 0278 CA 98 02		jz	X0298
+   392 027B F2 85 02		jp	X0285
+   393 027E 21 CB 21		lxi	h,X21cb
+   394 0281 36 0A		mvi	m,0ah
+   395 0283 E6 7F		ani	7fh
+   396 0285 32 BD 21	X0285:	sta	X21bd
+   397 0288 C6 30		adi	30h
+   398 028A 2A F6 20		lhld	X20f6
+   399 028D 77			mov	m,a
+   400 028E FE 34		cpi	34h
+   401 0290 CA 98 02		jz	X0298
+   402 0293 3E 20		mvi	a,20h
+   403 0295 32 A5 21		sta	X21a5
+   404 0298 CD F2 0B	X0298:	call	X0bf2
+   405 029B 01 11 00		lxi	b,X0011
+   406 029E CD 7E 0F		call	X0f7e
+   407 02A1 C3 AE 03		jmp	X03ae
+			;;
+			;;  Zero all scratch and screen RAM above stack
+			;;
+   411 02A4 21 4E 20	X02a4:	lxi	h,X204e		;; HL <- 0x204e (top of stack)
+   412 02A7 11 B2 0F		lxi	d,X0fb2		;; DE <- 0x0fb2
+   413 02AA 06 00		mvi	b,0		;; B  <- 0
+   414 02AC CD 83 10		call	X1083		;; memset(0x204e,0,0xfb2)
+   415 02AF 2F			cma			;; invert A
+   416 02B0 32 04 21		sta	X2104		;; store A in 0x2104
+   417 02B3 21 04 20		lxi	h,X2004		;; HL <- 0x2004
+   418 02B6 22 52 20		shld	X2052		;; *(0x2052) = 0x2004
+   419 02B9 21 D0 22		lxi	h,X22d0		;; HL <- 0x22d0
+   420 02BC 22 F6 20		shld	X20f6		;; *(20f6) = 0x22d0
+   421 02BF C9			ret
+			;;
+			;;  Initialize start of screen RAM and wipe attribute RAM to 0xff
+			;;
+   425 02C0 CD 15 0A	X02c0:	call	X0a15		;; 0x2140 = 0xe605
+   426 02C3 21 00 20		lxi	h,2000h		;; HL = 0x2000
+   427 02C6 11 D9 02		lxi	d,X02d9		;; DE = 0x02d9
+   428 02C9 06 12		mvi	b,12h		;; B = 18
+   429 02CB CD 8B 03		call	memmov		;; copy 18 bytes from 0x02d9 to 0x2000
+   430 02CE 21 00 30		lxi	h,X3000		;; HL = 0x3000
+   431 02D1 11 00 10		lxi	d,X1000		;; DE = 0x1000
+   432 02D4 06 FF		mvi	b,0ffh		;; B = 0xFF
+   433 02D6 C3 83 10		jmp	X1083		;; Set all of attribute RAM to 0xFF and return
+			;;
+			;;  0x02d9 through 0x02eb are the initial values for the screen RAM;
+			;;  it's copied into low RAM at 0x2000 during init.
+			;;
+			X02d9:
+   439 02D9			db	07fh,070h,003h
+            7F 70 03 
+   440 02DC			db	07fh,0f2h,0d0h
+            7F F2 D0 
+   441 02DF			db	07fh,070h,006h
+            7F 70 06 
+   442 02E2			db	07fh,070h,00ch
+            7F 70 0C 
+   443 02E5			db	07fh,070h,00fh
+            7F 70 0F 
+   444 02E8			db	07fh,070h,003h
+            7F 70 03 
+			;;
+			;;  Initialize several scratch values. We don't know what all of these are for yet.
+			;;
+   448 02EB 21 12 02	X02eb:	lxi	h,X0212		;; HL = 0x0212
+   449 02EE 22 2D 21		shld	X212d		;; Store 0x1202 at 0x212d
+   450 02F1 3E 35		mvi	a,35h		;; A = 0x35
+   451 02F3 32 2C 21		sta	X212c		;; 0x212c = 0x35
+   452 02F6 3E 01		mvi	a,1		;; A = 1
+   453 02F8 32 5B 20		sta	X205b		;; 0x205b = 1
+   454 02FB 32 76 21		sta	X2176		;; 0x2176 = 1
+   455 02FE 21 FF 07		lxi	h,X07ff		;; HL = 0x07ff
+   456 0301 22 49 21		shld	X2149		;; store 0xff07 at 0x2149
+   457 0304 3E 02		mvi	a,2		;; A = 2
+   458 0306 32 73 20		sta	X2073		;; 0x2073 = 2
+   459 0309 3E F7		mvi	a,0f7h		;; A = 0xf7
+   460 030B 32 FA 20		sta	X20fa		;; 0x20fa = 0xf7
+   461 030E DB 42		in	42h		;; read flags buffer
+   462 0310 E6 04		ani	4		;; And it with 0x04 (check graphics flag)
+   463 0312 3E 01		mvi	a,1		;; A=1
+   464 0314 C2 1A 03		jnz	X031a		;; if no graphics skip
+   465 0317 32 79 20		sta	X2079		;; else store 1 in 0x2079
+   466 031A 3E FF	X031a:	mvi	a,0ffh		;; A = 0xff
+   467 031C 32 0E 21		sta	X210e		;; 0x210e = 0xff
+   468 031F 32 BA 21		sta	X21ba		;; 0x21ba = 0xff
+   469 0322 26 80		mvi	h,80h		;; H = 0x80
+   470 0324 6C			mov	l,h		;; L = 0x80
+   471 0325 22 C0 20		shld	X20c0		;; Store 0x8080 at 0x20c0
+   472 0328 C9			ret
+			
+   474 0329 3E 40	X0329:	mvi	a,40h
+   475 032B D3 01		out	1
+   476 032D 3A 58 21		lda	X2158
+   477 0330 D3 02		out	2
+   478 0332 3A A4 21		lda	X21a4
+   479 0335 D3 01		out	1
+   480 0337 CD 94 03		call	X0394
+   481 033A 3E 10		mvi	a,10h
+   482 033C 32 C9 21		sta	X21c9
+   483 033F D3 62		out	62h
+   484 0341 C9			ret
+			
+   486 0342 3A A2 21	X0342:	lda	X21a2
+   487 0345 B7			ora	a
+   488 0346 CA 4B 03		jz	X034b
+   489 0349 3E 10		mvi	a,10h
+   490 034B 47		X034b:	mov	b,a
+   491 034C D3 C2		out	0c2h
+   492 034E 3A 7C 20		lda	X207c
+   493 0351 D3 C2		out	0c2h
+   494 0353 FE 20		cpi	20h
+   495 0355 21 70 09		lxi	h,X0970
+   496 0358 C2 5E 03		jnz	X035e
+   497 035B 21 70 03		lxi	h,X0370
+   498 035E 22 01 20	X035e:	shld	X2001
+   499 0361 3A A8 21		lda	X21a8
+   500 0364 E6 10		ani	10h
+   501 0366 C8			rz
+   502 0367 78			mov	a,b
+   503 0368 D3 C2		out	0c2h
+   504 036A C9			ret
+			
+   506 036B 3A A6 21	X036b:	lda	X21a6
+   507 036E E6 20		ani	20h
+   508 0370 C2 75 03	X0370:	jnz	X0375
+   509 0373 3E 01		mvi	a,1
+   510 0375 F6 0A	X0375:	ori	0ah
+   511 0377 D3 A2		out	0a2h
+   512 0379 3A 5B 21		lda	X215b
+   513 037C F6 0C		ori	0ch
+   514 037E D3 A2		out	0a2h
+   515 0380 C9			ret
+			
+   517 0381 3A A2 21	X0381:	lda	X21a2
+   518 0384 B7			ora	a
+   519 0385 CA 63 0B		jz	X0b63
+   520 0388 C3 77 0B		jmp	X0b77
+			;;
+			;;  Performs a memmove(HL,DE,B)
+			;;
+			memmov:
+   525 038B 1A		X038b:	ldax	d		;; Load memory at DE into accumulator
+   526 038C 77			mov	m,a		;; Store it at HL
+   527 038D 23			inx	h		;; HL++
+   528 038E 13			inx	d		;; DE++
+   529 038F 05			dcr	b		;; B--
+   530 0390 C2 8B 03		jnz	X038b		;; until B is zero
+   531 0393 C9			ret
+			
+   533 0394 3A A5 21	X0394:	lda	X21a5
+   534 0397 B7			ora	a
+   535 0398 3E 01		mvi	a,1
+   536 039A C2 9F 03		jnz	X039f
+   537 039D 3E 05		mvi	a,5
+   538 039F C3 7B 1F	X039f:	jmp	X1f7b
+			
+   540 03A2 CD 81 03	X03a2:	call	X0381
+   541 03A5 CD DB 1D		call	X1ddb
+   542 03A8 CD 6B 03		call	X036b
+   543 03AB C3 42 03		jmp	X0342
+			
+   545 03AE CD 88 14	X03ae:	call	X1488
+   546 03B1 CD 87 05		call	X0587
+   547 03B4 21 77 21		lxi	h,X2177
+   548 03B7 7E			mov	a,m
+   549 03B8 B7			ora	a
+   550 03B9 36 00		mvi	m,0
+   551 03BB C4 20 1A		cnz	X1a20
+   552 03BE 3A A5 21		lda	X21a5
+   553 03C1 B7			ora	a
+   554 03C2 CA AE 03		jz	X03ae
+   555 03C5 AF			xra	a
+   556 03C6 32 44 21		sta	X2144
+   557 03C9 C3 AE 03		jmp	X03ae
+			;;
+			;;  Receiver interrupt handler
+			;;
+   561 03CC F5		X03cc:	push	psw
+   562 03CD C5			push	b
+   563 03CE E5			push	h
+   564 03CF DB 00		in	0		;; Read from PUSART data
+   565 03D1 E6 7F		ani	7fh
+   566 03D3 CA 3A 04		jz	X043a
+   567 03D6 4F			mov	c,a
+   568 03D7 3A A5 21		lda	X21a5
+   569 03DA B7			ora	a
+   570 03DB C2 3A 04		jnz	X043a
+   571 03DE DB 01		in	1		;; Read from PUSART ctrl
+   572 03E0 E6 38		ani	38h
+   573 03E2 CA ED 03		jz	X03ed
+   574 03E5 0E 1A		mvi	c,1ah
+   575 03E7 3E 27		mvi	a,27h
+   576 03E9 F6 10		ori	10h
+   577 03EB D3 01		out	1
+   578 03ED 79		X03ed:	mov	a,c
+   579 03EE FE 7F		cpi	7fh
+   580 03F0 CA 37 04		jz	X0437
+   581 03F3 3A A7 21		lda	X21a7
+   582 03F6 E6 10		ani	10h
+   583 03F8 79			mov	a,c
+   584 03F9 CA 09 04		jz	X0409
+   585 03FC 21 C2 21		lxi	h,X21c2
+   586 03FF FE 11		cpi	11h
+   587 0401 CA 3E 04		jz	X043e
+   588 0404 FE 13		cpi	13h
+   589 0406 CA 44 04		jz	X0444
+   590 0409 21 C0 20	X0409:	lxi	h,X20c0
+   591 040C 4E			mov	c,m
+   592 040D 44			mov	b,h
+   593 040E 02			stax	b
+   594 040F 79			mov	a,c
+   595 0410 3C			inr	a
+   596 0411 E6 BF		ani	0bfh
+   597 0413 77			mov	m,a
+   598 0414 47			mov	b,a
+   599 0415 3A C1 20		lda	X20c1
+   600 0418 90			sub	b
+   601 0419 C2 27 04		jnz	X0427
+   602 041C 71			mov	m,c
+   603 041D 78			mov	a,b
+   604 041E 3C			inr	a
+   605 041F E6 BF		ani	0bfh
+   606 0421 6F			mov	l,a
+   607 0422 36 1A		mvi	m,1ah
+   608 0424 C3 31 04		jmp	X0431
+			
+   610 0427 F2 2C 04	X0427:	jp	X042c
+   611 042A C6 40		adi	40h
+   612 042C FE 20	X042c:	cpi	20h
+   613 042E C2 37 04		jnz	X0437
+   614 0431 01 13 01	X0431:	lxi	b,X0113
+   615 0434 CD 7E 0F		call	X0f7e
+   616 0437 CD 47 0E	X0437:	call	X0e47
+   617 043A E1		X043a:	pop	h
+   618 043B C1			pop	b
+   619 043C F1			pop	psw
+   620 043D C9			ret
+			;;
+			;;  End of keyboard interrupt handler
+			;;
+   624 043E 3E FE	X043e:	mvi	a,0feh
+   625 0440 A6			ana	m
+   626 0441 C3 47 04		jmp	X0447
+			
+   628 0444 3E 01	X0444:	mvi	a,1
+   629 0446 B6			ora	m
+   630 0447 77		X0447:	mov	m,a
+   631 0448 C3 37 04		jmp	X0437
+			
+   633 044B		X044b:	db	30h
+            30 
+   634 044C 29			dad	h
+   635 044D 31 21 32		lxi	sp,X3221
+   636 0450 40			mov	b,b
+   637 0451 33			inx	sp
+   638 0452 23			inx	h
+   639 0453 34			inr	m
+   640 0454 24			inr	h
+   641 0455 35			dcr	m
+   642 0456 25			dcr	h
+   643 0457 36 5E		mvi	m,5eh
+   644 0459 37			stc
+   645 045A 26 38		mvi	h,38h
+   646 045C 2A 39 28		lhld	X2839
+   647 045F 2D			dcr	l
+   648 0460 5F			mov	e,a
+   649 0461 3D			dcr	a
+   650 0462 2B			dcx	h
+   651 0463 60			mov	h,b
+   652 0464 7E			mov	a,m
+   653 0465 5B			mov	e,e
+   654 0466 7B			mov	a,e
+   655 0467 5D			mov	e,l
+   656 0468 7D			mov	a,l
+   657 0469 3B			dcx	sp
+   658 046A 3A 2F 3F		lda	X3f2f
+   659 046D 27			daa
+   660 046E 22 2C 3C		shld	X3c2c
+   661 0471 2E 3E		mvi	l,3eh
+   662 0473 5C			mov	e,h
+   663 0474 7C			mov	a,h
+   664 0475			db	20h
+            20 
+			X0476:
+   666 0476		KBTab:	db	 20h,  7fh,  7fh,  7fh, 00h, 'p', 'o', 'y', 't', 'w', 'q'
+            20 7F 7F 7F 
+            00 70 6F 79 
+            74 77 71 
+   667 0481			db	0c3h,  00h,  00h,  00h, ']', '[', 'i', 'u', 'r', 'e', '1'
+            C3 00 00 00 
+            5D 5B 69 75 
+            72 65 31 
+   668 048C			db	0c4h,  00h, 0c2h, 081h, '`', '-', '9', '7', '4', '3', 1bh
+            C4 00 C2 81 
+            60 2D 39 37 
+            34 33 1B 
+   669 0497			db	0c1h, 0d2h, 0d0h,  08h, '=', '0', '8', '6', '5', '2', 09h
+            C1 D2 D0 08 
+            3D 30 38 36 
+            35 32 09 
+   670 04A2			db	0b7h, 0d3h, 0d1h, 0b0h, 0ah, '\', 'l', 'k', 'g', 'f', 'a'
+            B7 D3 D1 B0 
+            0A 5C 6C 6B 
+            67 66 61 
+   671 04AD			db	0b8h,  8dh, 0b2h, 0b1h, 00h, 27h, 3bh, 'j', 'h', 'd', 's'
+            B8 8D B2 B1 
+            00 27 3B 6A 
+            68 64 73 
+   672 04B8			db	0aeh, 0ach, 0b5h, 0b4h, 0dh, '.', ',', 'n', 'b', 'x', 82h
+            AE AC B5 B4 
+            0D 2E 2C 6E 
+            62 78 82 
+   673 04C3			db	0b9h, 0b3h, 0b6h, 0adh, 00h, '/', 'm', ' ', 'v', 'c', 'z'
+            B9 B3 B6 AD 
+            00 2F 6D 20 
+            76 63 7A 
+   674 04CE FF			rst	7
+			;;
+			;; Vertical interrupt handler
+			;;
+   678 04CF F5		X04cf:	push	psw
+   679 04D0 E5			push	h
+   680 04D1 D5			push	d
+   681 04D2 CD 4E 10		call	X104e
+   682 04D5 C5			push	b
+   683 04D6 3E 09		mvi	a,9
+   684 04D8 D3 A2		out	0a2h
+   685 04DA FB			ei
+   686 04DB 3A 65 20		lda	X2065
+   687 04DE B7			ora	a
+   688 04DF C2 0B 05		jnz	X050b
+   689 04E2 21 51 20		lxi	h,X2051
+   690 04E5 B6			ora	m
+   691 04E6 CA 3E 05		jz	X053e
+   692 04E9 3E 01		mvi	a,1
+   693 04EB 32 65 20		sta	X2065
+   694 04EE B6			ora	m
+   695 04EF 36 00		mvi	m,0
+   696 04F1 3E 01		mvi	a,1
+   697 04F3 32 5B 20		sta	X205b
+   698 04F6 3A 56 21		lda	X2156
+   699 04F9 F2 05 05		jp	X0505
+   700 04FC 3E 99		mvi	a,99h
+   701 04FE 32 5B 20		sta	X205b
+   702 0501 3A 55 21		lda	X2155
+   703 0504 3D			dcr	a
+   704 0505 CD 2F 12	X0505:	call	X122f
+   705 0508 32 7A 20		sta	X207a
+   706 050B 01 5B 20	X050b:	lxi	b,X205b
+   707 050E 0A			ldax	b
+   708 050F 21 5A 20		lxi	h,X205a
+   709 0512 86			add	m
+   710 0513 27			daa
+   711 0514 E6 0F		ani	0fh
+   712 0516 77			mov	m,a
+   713 0517 57			mov	d,a
+   714 0518 E6 03		ani	3
+   715 051A D3 A2		out	0a2h
+   716 051C 7A			mov	a,d
+   717 051D 1F			rar
+   718 051E A7			ana	a
+   719 051F 1F			rar
+   720 0520 F6 04		ori	4
+   721 0522 D3 A2		out	0a2h
+   722 0524 7A			mov	a,d
+   723 0525 B7			ora	a
+   724 0526 C2 3E 05		jnz	X053e
+   725 0529 32 65 20		sta	X2065
+   726 052C 0A			ldax	b
+   727 052D B7			ora	a
+   728 052E 3A 56 21		lda	X2156
+   729 0531 FA 38 05		jm	X0538
+   730 0534 3A 55 21		lda	X2155
+   731 0537 3D			dcr	a
+   732 0538 CD CE 11	X0538:	call	X11ce
+   733 053B 32 7A 20		sta	X207a
+   734 053E 21 78 20	X053e:	lxi	h,X2078
+   735 0541 7E			mov	a,m
+   736 0542 B7			ora	a
+   737 0543 CA 4F 05		jz	X054f
+   738 0546 35			dcr	m
+   739 0547 E6 04		ani	4
+   740 0549 0F			rrc
+   741 054A 0F			rrc
+   742 054B 0F			rrc
+   743 054C 32 46 21		sta	X2146
+   744 054F 21 2C 21	X054f:	lxi	h,X212c
+   745 0552 7E			mov	a,m
+   746 0553 3D			dcr	a
+   747 0554 C2 69 05		jnz	X0569
+   748 0557 36 35		mvi	m,35h
+   749 0559 3E 08		mvi	a,8
+   750 055B D3 A2		out	0a2h
+   751 055D 21 CB 21		lxi	h,X21cb
+   752 0560 7E			mov	a,m
+   753 0561 B7			ora	a
+   754 0562 CA 6A 05		jz	X056a
+   755 0565 D3 A2		out	0a2h
+   756 0567 EE 01		xri	1
+   757 0569 77		X0569:	mov	m,a
+   758 056A 3E 40	X056a:	mvi	a,40h
+   759 056C 32 48 21		sta	X2148
+   760 056F 21 7F 20		lxi	h,X207f
+   761 0572 34			inr	m
+   762 0573 3A A3 21		lda	X21a3
+   763 0576 D3 42		out	42h
+   764 0578 3A 58 21		lda	X2158
+   765 057B D3 02		out	2
+   766 057D 3A C9 21		lda	X21c9
+   767 0580 D3 62		out	62h
+   768 0582 C1			pop	b
+   769 0583 D1			pop	d
+   770 0584 E1			pop	h
+   771 0585 F1			pop	psw
+   772 0586 C9			ret
+			
+   774 0587 3A A5 21	X0587:	lda	X21a5
+   775 058A 21 7B 20		lxi	h,X207b
+   776 058D B6			ora	m
+   777 058E C0			rnz
+   778 058F CD 75 06		call	X0675
+   779 0592 C8			rz
+   780 0593 47		X0593:	mov	b,a
+   781 0594 3A 7B 20		lda	X207b
+   782 0597 B7			ora	a
+   783 0598 78			mov	a,b
+   784 0599 C2 A9 05		jnz	X05a9
+   785 059C 3A 79 20		lda	X2079
+   786 059F 07			rlc
+   787 05A0 78			mov	a,b
+   788 05A1 DA A9 05		jc	X05a9
+   789 05A4 FE 20		cpi	20h
+   790 05A6 DA B2 08		jc	X08b2
+   791 05A9 2A 40 21	X05a9:	lhld	X2140
+   792 05AC E9			pchl
+			
+   794 05AD FE 1B	X05ad:	cpi	1bh
+   795 05AF C2 CC 05		jnz	X05cc
+   796 05B2 21 B8 05		lxi	h,X05b8
+   797 05B5 C3 18 0A		jmp	X0a18
+			
+   799 05B8 FE 32	X05b8:	cpi	32h
+   800 05BA C2 C5 05		jnz	X05c5
+   801 05BD 3E 01		mvi	a,1
+   802 05BF 32 79 20		sta	X2079
+   803 05C2 C3 15 0A		jmp	X0a15
+			
+   805 05C5 47		X05c5:	mov	b,a
+   806 05C6 3E 1B		mvi	a,1bh
+   807 05C8 CD D2 05		call	X05d2
+   808 05CB 78			mov	a,b
+   809 05CC CD D2 05	X05cc:	call	X05d2
+   810 05CF C3 62 0C		jmp	X0c62
+			
+   812 05D2 4F		X05d2:	mov	c,a
+   813 05D3 C5		X05d3:	push	b
+   814 05D4 CD 88 14		call	X1488
+   815 05D7 C1			pop	b
+   816 05D8 DB 42		in	42h
+   817 05DA E6 04		ani	4
+   818 05DC C2 D3 05		jnz	X05d3
+   819 05DF 79			mov	a,c
+   820 05E0 D3 E2		out	0e2h
+   821 05E2 C9			ret
+			
+   823 05E3 CD 46 0C	X05e3:	call	X0c46
+   824 05E6 F5		X05e6:	push	psw
+   825 05E7 FE 7F		cpi	7fh
+   826 05E9 CA 73 06		jz	X0673
+   827 05EC E5			push	h
+   828 05ED D5			push	d
+   829 05EE C5			push	b
+   830 05EF 4F			mov	c,a
+   831 05F0 21 FC 20		lxi	h,X20fc
+   832 05F3 56			mov	d,m
+   833 05F4 23			inx	h
+   834 05F5 7A			mov	a,d
+   835 05F6 85			add	l
+   836 05F7 6F			mov	l,a
+   837 05F8 7A			mov	a,d
+   838 05F9 D6 02		sui	2
+   839 05FB F2 FF 05		jp	X05ff
+   840 05FE 7A			mov	a,d
+   841 05FF 32 FC 20	X05ff:	sta	X20fc
+   842 0602 56			mov	d,m
+   843 0603 3A FA 20		lda	X20fa
+   844 0606 B2			ora	d
+   845 0607 47			mov	b,a
+   846 0608 7A			mov	a,d
+   847 0609 07			rlc
+   848 060A 79			mov	a,c
+   849 060B D2 16 06		jnc	X0616
+   850 060E D6 5F		sui	5fh
+   851 0610 FE 20		cpi	20h
+   852 0612 D2 16 06		jnc	X0616
+   853 0615 4F			mov	c,a
+   854 0616 7A		X0616:	mov	a,d
+   855 0617 E6 40		ani	40h
+   856 0619 79			mov	a,c
+   857 061A CA 24 06		jz	X0624
+   858 061D FE 23		cpi	23h
+   859 061F C2 24 06		jnz	X0624
+   860 0622 0E 1E		mvi	c,1eh
+   861 0624 3A FB 20	X0624:	lda	X20fb
+   862 0627 B1			ora	c
+   863 0628 4F			mov	c,a
+   864 0629 3A 42 21		lda	X2142
+   865 062C B7			ora	a
+   866 062D CA 41 06		jz	X0641
+   867 0630 21 F8 20		lxi	h,X20f8
+   868 0633 3A 53 21		lda	X2153
+   869 0636 BE			cmp	m
+   870 0637 C2 41 06		jnz	X0641
+   871 063A 36 00		mvi	m,0
+   872 063C C5			push	b
+   873 063D CD 55 09		call	X0955
+   874 0640 C1			pop	b
+   875 0641 2A F6 20	X0641:	lhld	X20f6
+   876 0644 71			mov	m,c
+   877 0645 7C			mov	a,h
+   878 0646 C6 10		adi	10h
+   879 0648 67			mov	h,a
+   880 0649 70			mov	m,b
+   881 064A 78			mov	a,b
+   882 064B 32 F5 20		sta	X20f5
+   883 064E 21 F4 20		lxi	h,X20f4
+   884 0651 71			mov	m,c
+   885 0652 21 F8 20		lxi	h,X20f8
+   886 0655 3A 53 21		lda	X2153
+   887 0658 BE			cmp	m
+   888 0659 C2 68 06		jnz	X0668
+   889 065C 79			mov	a,c
+   890 065D 32 F4 20		sta	X20f4
+   891 0660 3A A8 21		lda	X21a8
+   892 0663 E6 40		ani	40h
+   893 0665 C3 6D 06		jmp	X066d
+			
+   895 0668 34		X0668:	inr	m
+   896 0669 CD 36 16		call	X1636
+   897 066C AF			xra	a
+   898 066D 32 42 21	X066d:	sta	X2142
+   899 0670 C1		X0670:	pop	b
+   900 0671 D1			pop	d
+   901 0672 E1			pop	h
+   902 0673 F1		X0673:	pop	psw
+   903 0674 C9			ret
+			
+   905 0675 3A C4 21	X0675:	lda	X21c4
+   906 0678 B7			ora	a
+   907 0679 C2 85 06		jnz	X0685
+   908 067C 21 C0 20		lxi	h,X20c0
+   909 067F 7E			mov	a,m
+   910 0680 23			inx	h
+   911 0681 96			sub	m
+   912 0682 C2 87 06		jnz	X0687
+   913 0685 AF		X0685:	xra	a
+   914 0686 C9			ret
+			
+   916 0687 6E		X0687:	mov	l,m
+   917 0688 26 20		mvi	h,20h
+   918 068A 56			mov	d,m
+   919 068B 21 C1 20		lxi	h,X20c1
+   920 068E 7E			mov	a,m
+   921 068F 3C			inr	a
+   922 0690 E6 BF		ani	0bfh
+   923 0692 F6 80		ori	80h
+   924 0694 77			mov	m,a
+   925 0695 2B			dcx	h
+   926 0696 96			sub	m
+   927 0697 F2 9C 06		jp	X069c
+   928 069A C6 40		adi	40h
+   929 069C FE 30	X069c:	cpi	30h
+   930 069E C2 A7 06		jnz	X06a7
+   931 06A1 01 11 01		lxi	b,X0111
+   932 06A4 CD 7E 0F		call	X0f7e
+   933 06A7 7A		X06a7:	mov	a,d
+   934 06A8 B7			ora	a
+   935 06A9 C9			ret
+			
+   937 06AA 3A 68 20	X06aa:	lda	X2068
+   938 06AD 5F			mov	e,a
+   939 06AE E6 80		ani	80h
+   940 06B0 C8			rz
+   941 06B1 21 41 08		lxi	h,X0841
+   942 06B4 E5			push	h
+   943 06B5 7B			mov	a,e
+   944 06B6 E6 07		ani	7
+   945 06B8 FE 04		cpi	4
+   946 06BA FA C2 06		jm	X06c2
+   947 06BD AF			xra	a
+   948 06BE 32 67 20		sta	X2067
+   949 06C1 C9			ret
+			
+   951 06C2 57		X06c2:	mov	d,a
+   952 06C3 0E 00		mvi	c,0
+   953 06C5 06 04		mvi	b,4
+   954 06C7 21 6E 20		lxi	h,X206e
+   955 06CA 7E		X06ca:	mov	a,m
+   956 06CB B7			ora	a
+   957 06CC CA E8 06		jz	X06e8
+   958 06CF E5			push	h
+   959 06D0 C5			push	b
+   960 06D1 06 03		mvi	b,3
+   961 06D3 21 6A 20		lxi	h,X206a
+   962 06D6 BE		X06d6:	cmp	m
+   963 06D7 CA DF 06		jz	X06df
+   964 06DA 23			inx	h
+   965 06DB 05			dcr	b
+   966 06DC F2 D6 06		jp	X06d6
+   967 06DF C1		X06df:	pop	b
+   968 06E0 E1			pop	h
+   969 06E1 CA E7 06		jz	X06e7
+   970 06E4 36 00		mvi	m,0
+   971 06E6 0D			dcr	c
+   972 06E7 0C		X06e7:	inr	c
+   973 06E8 23		X06e8:	inx	h
+   974 06E9 05			dcr	b
+   975 06EA C2 CA 06		jnz	X06ca
+   976 06ED 7B			mov	a,e
+   977 06EE E6 08		ani	8
+   978 06F0 C0			rnz
+   979 06F1 B2			ora	d
+   980 06F2 C2 FB 06		jnz	X06fb
+   981 06F5 3E E1		mvi	a,0e1h
+   982 06F7 32 72 20		sta	X2072
+   983 06FA C9			ret
+			
+   985 06FB 21 47 07	X06fb:	lxi	h,X0747
+   986 06FE E5			push	h
+   987 06FF 3A 72 20		lda	X2072
+   988 0702 3C			inr	a
+   989 0703 CA 09 07		jz	X0709
+   990 0706 32 72 20		sta	X2072
+   991 0709 3A A6 21	X0709:	lda	X21a6
+   992 070C E6 40		ani	40h
+   993 070E C8			rz
+   994 070F 7B			mov	a,e
+   995 0710 E6 10		ani	10h
+   996 0712 C0			rnz
+   997 0713 3A 50 21		lda	X2150
+   998 0716 21 5F 08		lxi	h,X085f
+   999 0719 06 05		mvi	b,5
+  1000 071B BE		X071b:	cmp	m
+  1001 071C C8			rz
+  1002 071D 23			inx	h
+  1003 071E 05			dcr	b
+  1004 071F C2 1B 07		jnz	X071b
+  1005 0722 21 73 20		lxi	h,X2073
+  1006 0725 35			dcr	m
+  1007 0726 C0			rnz
+  1008 0727 36 02		mvi	m,2
+  1009 0729 3A 72 20		lda	X2072
+  1010 072C FE FF		cpi	0ffh
+  1011 072E C0			rnz
+  1012 072F 79			mov	a,c
+  1013 0730 FE 01		cpi	1
+  1014 0732 C0			rnz
+  1015 0733 06 04		mvi	b,4
+  1016 0735 21 6E 20		lxi	h,X206e
+  1017 0738 7E		X0738:	mov	a,m
+  1018 0739 B7			ora	a
+  1019 073A C2 43 07		jnz	X0743
+  1020 073D 23			inx	h
+  1021 073E 05			dcr	b
+  1022 073F C2 38 07		jnz	X0738
+  1023 0742 C9			ret
+			
+  1025 0743 E1		X0743:	pop	h
+  1026 0744 C3 76 07		jmp	X0776
+			
+  1028 0747 79		X0747:	mov	a,c
+  1029 0748 FE 04		cpi	4
+  1030 074A F0			rp
+  1031 074B 01 6A 20		lxi	b,X206a
+  1032 074E 21 6E 20	X074e:	lxi	h,X206e
+  1033 0751 7E		X0751:	mov	a,m
+  1034 0752 B7			ora	a
+  1035 0753 CA 5B 07		jz	X075b
+  1036 0756 0A			ldax	b
+  1037 0757 BE			cmp	m
+  1038 0758 CA 66 07		jz	X0766
+  1039 075B 23		X075b:	inx	h
+  1040 075C 7D			mov	a,l
+  1041 075D FE 72		cpi	72h
+  1042 075F C2 51 07		jnz	X0751
+  1043 0762 0A			ldax	b
+  1044 0763 C3 6C 07		jmp	X076c
+			
+  1046 0766 03		X0766:	inx	b
+  1047 0767 15			dcr	d
+  1048 0768 C2 4E 07		jnz	X074e
+  1049 076B C9			ret
+			
+  1051 076C 47		X076c:	mov	b,a
+  1052 076D 3A 67 20		lda	X2067
+  1053 0770 B8			cmp	b
+  1054 0771 78			mov	a,b
+  1055 0772 32 67 20		sta	X2067
+  1056 0775 C0			rnz
+  1057 0776 E1		X0776:	pop	h
+  1058 0777 32 50 21		sta	X2150
+  1059 077A FE 7B		cpi	7bh
+  1060 077C CA 1A 1A		jz	X1a1a
+  1061 077F FE 6A		cpi	6ah
+  1062 0781 CA 2C 02		jz	X022c
+  1063 0784 43			mov	b,e
+  1064 0785 5F			mov	e,a
+  1065 0786 3A 44 21		lda	X2144
+  1066 0789 B7			ora	a
+  1067 078A C2 41 08		jnz	X0841
+  1068 078D 7B			mov	a,e
+  1069 078E E6 F0		ani	0f0h
+  1070 0790 0F			rrc
+  1071 0791 0F			rrc
+  1072 0792 57			mov	d,a
+  1073 0793 0F			rrc
+  1074 0794 0F			rrc
+  1075 0795 82			add	d
+  1076 0796 57			mov	d,a
+  1077 0797 7B			mov	a,e
+  1078 0798 92			sub	d
+  1079 0799 21 76 04		lxi	h,X0476
+  1080 079C 5F			mov	e,a
+  1081 079D 16 00		mvi	d,0
+  1082 079F 19			dad	d
+  1083 07A0 4E			mov	c,m
+  1084 07A1 79			mov	a,c
+  1085 07A2 B7			ora	a
+  1086 07A3 FA 31 01		jm	X0131
+  1087 07A6 FE 20		cpi	20h
+  1088 07A8 DA FF 07		jc	X07ff
+  1089 07AB 78			mov	a,b
+  1090 07AC E6 70		ani	70h
+  1091 07AE CA FF 07		jz	X07ff
+  1092 07B1 79			mov	a,c
+  1093 07B2 FE 7B		cpi	7bh
+  1094 07B4 D2 C2 07		jnc	X07c2
+  1095 07B7 FE 61		cpi	61h
+  1096 07B9 DA C2 07		jc	X07c2
+  1097 07BC E6 DF		ani	0dfh
+  1098 07BE 4F			mov	c,a
+  1099 07BF C3 D7 07		jmp	X07d7
+			
+  1101 07C2 78		X07c2:	mov	a,b
+  1102 07C3 E6 30		ani	30h
+  1103 07C5 CA D7 07		jz	X07d7
+  1104 07C8 21 4B 04		lxi	h,X044b
+  1105 07CB 7E		X07cb:	mov	a,m
+  1106 07CC B9			cmp	c
+  1107 07CD CA D5 07		jz	X07d5
+  1108 07D0 23			inx	h
+  1109 07D1 23			inx	h
+  1110 07D2 C3 CB 07		jmp	X07cb
+			
+  1112 07D5 23		X07d5:	inx	h
+  1113 07D6 4E			mov	c,m
+  1114 07D7 78		X07d7:	mov	a,b
+  1115 07D8 E6 10		ani	10h
+  1116 07DA CA FF 07		jz	X07ff
+  1117 07DD 79			mov	a,c
+  1118 07DE FE 41		cpi	41h
+  1119 07E0 DA E8 07		jc	X07e8
+  1120 07E3 FE 5B		cpi	5bh
+  1121 07E5 DA FC 07		jc	X07fc
+  1122 07E8 FE 3F	X07e8:	cpi	3fh
+  1123 07EA CA FC 07		jz	X07fc
+  1124 07ED FE 20		cpi	20h
+  1125 07EF CA FC 07		jz	X07fc
+  1126 07F2 FE 7B		cpi	7bh
+  1127 07F4 DA 41 08		jc	X0841
+  1128 07F7 FE 7F		cpi	7fh
+  1129 07F9 D2 41 08		jnc	X0841
+  1130 07FC E6 9F	X07fc:	ani	9fh
+  1131 07FE 4F			mov	c,a
+  1132 07FF B1		X07ff:	ora	c
+  1133 0800 F5			push	psw
+  1134 0801 3A A7 21		lda	X21a7
+  1135 0804 E6 80		ani	80h
+  1136 0806 CA 0C 08		jz	X080c
+  1137 0809 32 54 21		sta	X2154
+  1138 080C F1		X080c:	pop	psw
+  1139 080D F6 80	X080d:	ori	80h
+  1140 080F CD 18 0F		call	X0f18
+  1141 0812 CD 53 08	X0812:	call	X0853
+  1142 0815 3A 50 21	X0815:	lda	X2150
+  1143 0818 16 04		mvi	d,4
+  1144 081A 21 6E 20		lxi	h,X206e
+  1145 081D BE		X081d:	cmp	m
+  1146 081E CA 41 08		jz	X0841
+  1147 0821 23			inx	h
+  1148 0822 15			dcr	d
+  1149 0823 C2 1D 08		jnz	X081d
+  1150 0826 16 04		mvi	d,4
+  1151 0828 21 6E 20		lxi	h,X206e
+  1152 082B 7E		X082b:	mov	a,m
+  1153 082C B7			ora	a
+  1154 082D CA 38 08		jz	X0838
+  1155 0830 23			inx	h
+  1156 0831 15			dcr	d
+  1157 0832 C2 2B 08		jnz	X082b
+  1158 0835 C3 41 08		jmp	X0841
+			
+  1160 0838 3A 50 21	X0838:	lda	X2150
+  1161 083B 77			mov	m,a
+  1162 083C 3E E1		mvi	a,0e1h
+  1163 083E 32 72 20		sta	X2072
+  1164 0841 AF		X0841:	xra	a
+  1165 0842 21 68 20		lxi	h,X2068
+  1166 0845 56			mov	d,m
+  1167 0846 77			mov	m,a
+  1168 0847 23			inx	h
+  1169 0848 72			mov	m,d
+  1170 0849 23			inx	h
+  1171 084A 16 04		mvi	d,4
+  1172 084C 77		X084c:	mov	m,a
+  1173 084D 23			inx	h
+  1174 084E 15			dcr	d
+  1175 084F C2 4C 08		jnz	X084c
+  1176 0852 C9			ret
+			
+  1178 0853 3A A7 21	X0853:	lda	X21a7
+  1179 0856 E6 40		ani	40h
+  1180 0858 C8			rz
+  1181 0859 3E 80		mvi	a,80h
+  1182 085B 32 47 21		sta	X2147
+  1183 085E C9			ret
+			
+  1185 085F 7B		X085f:	mov	a,e
+  1186 0860 2A 6A 3A		lhld	X3a6a
+  1187 0863 64			mov	h,h
+  1188 0864 3A 30 21		lda	X2130
+  1189 0867 D6 02		sui	2
+  1190 0869 C0			rnz
+  1191 086A 57			mov	d,a
+  1192 086B 3A 31 21		lda	X2131
+  1193 086E 5F			mov	e,a
+  1194 086F 3E 01	X086f:	mvi	a,1
+  1195 0871 A3			ana	e
+  1196 0872 C2 3D 00		jnz	X003d
+  1197 0875 7A		X0875:	mov	a,d
+  1198 0876 B7			ora	a
+  1199 0877 C4 A7 08		cnz	X08a7
+  1200 087A D5			push	d
+  1201 087B CD BE 17		call	X17be
+  1202 087E D1			pop	d
+  1203 087F 3E 02		mvi	a,2
+  1204 0881 A3			ana	e
+  1205 0882 C4 11 1F		cnz	X1f11
+  1206 0885 3E 08		mvi	a,8
+  1207 0887 DC A7 08		cc	X08a7
+  1208 088A 3E 04		mvi	a,4
+  1209 088C A3			ana	e
+  1210 088D C4 62 1F		cnz	X1f62
+  1211 0890 3E 10		mvi	a,10h
+  1212 0892 DC A7 08		cc	X08a7
+  1213 0895 7A			mov	a,d
+  1214 0896 B7			ora	a
+  1215 0897 C2 A0 08		jnz	X08a0
+  1216 089A 3E 08		mvi	a,8
+  1217 089C A3			ana	e
+  1218 089D C2 6F 08		jnz	X086f
+  1219 08A0 7A		X08a0:	mov	a,d
+  1220 08A1 32 00 20		sta	2000h
+  1221 08A4 C3 51 02		jmp	X0251
+			
+  1223 08A7 B2		X08a7:	ora	d
+  1224 08A8 57			mov	d,a
+  1225 08A9 3E 08		mvi	a,8
+  1226 08AB A3			ana	e
+  1227 08AC C8			rz
+  1228 08AD 3E 80		mvi	a,80h
+  1229 08AF B2			ora	d
+  1230 08B0 57			mov	d,a
+  1231 08B1 C9			ret
+			
+  1233 08B2 FE 1B	X08b2:	cpi	1bh
+  1234 08B4 CA 9E 09		jz	X099e
+  1235 08B7 FE 10		cpi	10h
+  1236 08B9 DA D4 08		jc	X08d4
+  1237 08BC 5F			mov	e,a
+  1238 08BD D6 18		sui	18h
+  1239 08BF E6 FD		ani	0fdh
+  1240 08C1 C0			rnz
+  1241 08C2 7B			mov	a,e
+  1242 08C3 FE 1A		cpi	1ah
+  1243 08C5 CA CB 08		jz	X08cb
+  1244 08C8 FE 18		cpi	18h
+  1245 08CA C0			rnz
+  1246 08CB CD 15 0A	X08cb:	call	X0a15
+  1247 08CE 3E 02		mvi	a,2
+  1248 08D0 C3 E6 05	X08d0:	jmp	X05e6
+			
+  1250 08D3 C9			ret
+			
+  1252 08D4 D6 05	X08d4:	sui	5		;; subtract 5 from A and return if negative
+  1253 08D6 F8			rm
+  1254 08D7 21 E5 08		lxi	h,X08e5		;; load jump table at 8e5
+  1255 08DA 87			add	a		;; double a
+  1256 08DB 5F			mov	e,a
+  1257 08DC 16 00		mvi	d,0
+  1258 08DE 19			dad	d		;; hl = X08e5 + 2A
+  1259 08DF 5E			mov	e,m		;; load DE from (HL) little-endian
+  1260 08E0 23			inx	h
+  1261 08E1 56			mov	d,m
+  1262 08E2 EB			xchg
+  1263 08E3 AF			xra	a		;; zero A
+  1264 08E4 E9			pchl			;; jump to address
+			
+  1266 08E5		X08e5:	dw	X0900
+            0009 
+  1267 08E7			dw	X0997		;; immediate return
+            9709 
+  1268 08E9			dw	X0938
+            3809 
+  1269 08EB			dw	X0941
+            4109 
+  1270 08ED			dw	0df9h		;; MYSTERY ADDRESS: this isn't even in AVO!!!
+            F90D 
+  1271 08EF			dw	X0955
+            5509 
+  1272 08F1			dw	X0955
+            5509 
+  1273 08F3			dw	X0955
+            5509 
+  1274 08F5			dw	094bh
+            4B09 
+  1275 08F7			dw	X08fb
+            FB08 
+  1276 08F9			dw	X08fc
+            FC08 
+			
+  1278 08FB 3C		X08fb:	inr	a
+  1279 08FC 32 FC 20	X08fc:	sta	X20fc
+  1280 08FF C9			ret
+			
+  1282 0900 3A A5 21	X0900:	lda	X21a5
+  1283 0903 B7			ora	a
+  1284 0904 C0			rnz
+  1285 0905 2A 7B 21		lhld	X217b
+  1286 0908 7C			mov	a,h
+  1287 0909 BD			cmp	l
+  1288 090A C8			rz
+  1289 090B 21 72 21		lxi	h,X2172
+  1290 090E 3E 10		mvi	a,10h
+  1291 0910 B6			ora	m
+  1292 0911 77			mov	m,a
+  1293 0912 C9			ret
+			
+  1295 0913 21 72 21		lxi	h,X2172
+  1296 0916 7E			mov	a,m
+  1297 0917 E6 EF		ani	0efh
+  1298 0919 77			mov	m,a
+  1299 091A 21 7B 21		lxi	h,X217b
+  1300 091D 46			mov	b,m
+  1301 091E 23			inx	h
+  1302 091F 0E 14		mvi	c,14h
+  1303 0921 11 5C 21		lxi	d,X215c
+  1304 0924 7E		X0924:	mov	a,m
+  1305 0925 B8			cmp	b
+  1306 0926 CA 30 09		jz	X0930
+  1307 0929 12			stax	d
+  1308 092A 13			inx	d
+  1309 092B 23			inx	h
+  1310 092C 0D			dcr	c
+  1311 092D C2 24 09		jnz	X0924
+  1312 0930 1B		X0930:	dcx	d
+  1313 0931 1A			ldax	d
+  1314 0932 F6 80		ori	80h
+  1315 0934 12			stax	d
+  1316 0935 C3 F3 0E		jmp	X0ef3
+			
+  1318 0938 21 78 20	X0938:	lxi	h,X2078
+  1319 093B 7E			mov	a,m
+  1320 093C C6 08		adi	8
+  1321 093E D8			rc
+  1322 093F 77			mov	m,a
+  1323 0940 C9			ret
+			
+  1325 0941 21 F8 20	X0941:	lxi	h,X20f8
+  1326 0944 7E			mov	a,m
+  1327 0945 B7			ora	a
+  1328 0946 C8			rz
+  1329 0947 35			dcr	m
+  1330 0948 C3 36 16		jmp	X1636
+			
+  1332 094B AF		X094b:	xra	a
+  1333 094C 32 F8 20		sta	X20f8
+  1334 094F C3 36 16		jmp	X1636
+			
+  1336 0952 CD 4B 09		call	X094b
+  1337 0955 3A A8 21	X0955:	lda	X21a8
+  1338 0958 E6 20		ani	20h
+  1339 095A C4 4B 09		cnz	X094b
+  1340 095D 21 F9 20		lxi	h,X20f9
+  1341 0960 56			mov	d,m
+  1342 0961 3A 56 21		lda	X2156
+  1343 0964 BA			cmp	d
+  1344 0965 CA 73 09		jz	X0973
+  1345 0968 CD BF 11		call	X11bf
+  1346 096B 78			mov	a,b
+  1347 096C BA			cmp	d
+  1348 096D C8			rz
+  1349 096E 14			inr	d
+  1350 096F 72			mov	m,d
+  1351 0970 C3 36 16	X0970:	jmp	X1636
+			
+  1353 0973 3A A6 21	X0973:	lda	X21a6
+  1354 0976 E6 80		ani	80h
+  1355 0978 CA 98 09		jz	X0998
+  1356 097B 0E 01		mvi	c,1
+  1357 097D CD 8E 10		call	X108e
+  1358 0980 3E FF		mvi	a,0ffh
+  1359 0982 32 C3 21		sta	X21c3
+  1360 0985 34			inr	m
+  1361 0986 CD E6 0F		call	X0fe6
+  1362 0989 3A C3 21	X0989:	lda	X21c3
+  1363 098C B7			ora	a
+  1364 098D C2 89 09		jnz	X0989
+  1365 0990 32 F4 20		sta	X20f4
+  1366 0993 3D			dcr	a
+  1367 0994 32 F5 20		sta	X20f5
+  1368 0997 C9		X0997:	ret
+			
+  1370 0998 CD 1A 10	X0998:	call	X101a
+  1371 099B C3 12 10		jmp	X1012
+			
+  1373 099E AF		X099e:	xra	a
+  1374 099F 32 7D 20		sta	X207d
+  1375 09A2 32 B8 21		sta	X21b8
+  1376 09A5 21 AB 09		lxi	h,X09ab
+  1377 09A8 C3 18 0A		jmp	X0a18
+			
+  1379 09AB FE 30	X09ab:	cpi	30h
+  1380 09AD D2 BD 09		jnc	X09bd
+  1381 09B0 21 7D 20		lxi	h,X207d
+  1382 09B3 4F			mov	c,a
+  1383 09B4 7E			mov	a,m
+  1384 09B5 B7			ora	a
+  1385 09B6 CA BB 09		jz	X09bb
+  1386 09B9 0E FF		mvi	c,0ffh
+  1387 09BB 71		X09bb:	mov	m,c
+  1388 09BC C9			ret
+			
+  1390 09BD 32 7E 20	X09bd:	sta	X207e
+  1391 09C0 21 15 0A		lxi	h,X0a15
+  1392 09C3 E5			push	h
+  1393 09C4 3A 7D 20		lda	X207d
+  1394 09C7 B7			ora	a
+  1395 09C8 C2 DC 09		jnz	X09dc
+  1396 09CB 3A A7 21		lda	X21a7
+  1397 09CE E6 20		ani	20h
+  1398 09D0 21 50 0A		lxi	h,X0a50
+  1399 09D3 C2 D9 09		jnz	X09d9
+  1400 09D6 21 1C 0A		lxi	h,X0a1c
+  1401 09D9 C3 F7 09	X09d9:	jmp	X09f7
+			
+  1403 09DC 47		X09dc:	mov	b,a
+  1404 09DD 3A A7 21		lda	X21a7
+  1405 09E0 E6 20		ani	20h
+  1406 09E2 78			mov	a,b
+  1407 09E3 C8			rz
+  1408 09E4 FE 28		cpi	28h
+  1409 09E6 11 FD 20		lxi	d,X20fd
+  1410 09E9 CA 32 0C		jz	X0c32
+  1411 09EC FE 29		cpi	29h
+  1412 09EE CA 31 0C		jz	X0c31
+  1413 09F1 FE 23		cpi	23h
+  1414 09F3 21 7B 0A		lxi	h,X0a7b
+  1415 09F6 C0			rnz
+  1416 09F7 11 B9 21	X09f7:	lxi	d,X21b9
+  1417 09FA AF			xra	a
+  1418 09FB 12			stax	d
+  1419 09FC 3A 7E 20		lda	X207e
+  1420 09FF 4F		X09ff:	mov	c,a
+  1421 0A00 AF		X0a00:	xra	a
+  1422 0A01 86			add	m
+  1423 0A02 C8			rz
+  1424 0A03 23			inx	h
+  1425 0A04 B9			cmp	c
+  1426 0A05 CA 0D 0A		jz	X0a0d
+  1427 0A08 23			inx	h
+  1428 0A09 23			inx	h
+  1429 0A0A C3 00 0A		jmp	X0a00
+			
+  1431 0A0D 12		X0a0d:	stax	d
+  1432 0A0E 7E			mov	a,m
+  1433 0A0F 23			inx	h
+  1434 0A10 66			mov	h,m
+  1435 0A11 6F			mov	l,a
+  1436 0A12 AF			xra	a
+  1437 0A13 E9			pchl
+			
+  1439 0A14 E1		X0a14:	pop	h
+  1440 0A15 21 E6 05	X0a15:	lxi	h,X05e6		;; HL = 0x05e6
+  1441 0A18 22 40 21	X0a18:	shld	X2140		;; 0x2140 = 0xe605
+  1442 0A1B C9			ret
+			;;
+			;;  This is a table of some sort.
+			;;
+  1446 0A1C 41		X0a1c:	mov	b,c
+  1447 0A1D 9B			sbb	e
+  1448 0A1E 0A			ldax	b
+  1449 0A1F 42			mov	b,d
+  1450 0A20 9B			sbb	e
+  1451 0A21 0A			ldax	b
+  1452 0A22 43			mov	b,e
+  1453 0A23 9B			sbb	e
+  1454 0A24 0A			ldax	b
+  1455 0A25 44			mov	b,h
+  1456 0A26 9B			sbb	e
+  1457 0A27 0A			ldax	b
+  1458 0A28 46			mov	b,m
+  1459 0A29 0A			ldax	b
+  1460 0A2A 0C			inr	c
+  1461 0A2B 47			mov	b,a
+  1462 0A2C 0F			rrc
+  1463 0A2D 0C			inr	c
+  1464 0A2E 48			mov	c,b
+  1465 0A2F 96			sub	m
+  1466 0A30 0A			ldax	b
+  1467 0A31 49			mov	c,c
+  1468 0A32 A3			ana	e
+  1469 0A33 0B			dcx	b
+  1470 0A34 4A			mov	c,d
+  1471 0A35 9B			sbb	e
+  1472 0A36 0A			ldax	b
+  1473 0A37 4B			mov	c,e
+  1474 0A38 9B			sbb	e
+  1475 0A39 0A			ldax	b
+  1476 0A3A 59			mov	e,c
+  1477 0A3B 11 0B 5A		lxi	d,X5a0b
+  1478 0A3E C6 0C		adi	0ch
+  1479 0A40 3D			dcr	a
+  1480 0A41 DF			rst	3
+  1481 0A42 0B			dcx	b
+  1482 0A43 3E E5		mvi	a,0e5h
+  1483 0A45 0B			dcx	b
+  1484 0A46 31 57 0C		lxi	sp,X0c57
+  1485 0A49 3C			inr	a
+  1486 0A4A EB			xchg
+  1487 0A4B 0B			dcx	b
+  1488 0A4C 5D			mov	e,l
+  1489 0A4D 60			mov	h,b
+  1490 0A4E 0D			dcr	c
+  1491 0A4F 00			nop
+  1492 0A50 63		X0a50:	mov	h,e
+  1493 0A51 00			nop
+  1494 0A52 00			nop
+  1495 0A53 45			mov	b,l
+  1496 0A54 52			mov	d,d
+  1497 0A55 09			dad	b
+  1498 0A56 4D			mov	c,l
+  1499 0A57 A3			ana	e
+  1500 0A58 0B			dcx	b
+  1501 0A59 31 57 0C		lxi	sp,X0c57
+  1502 0A5C 5B			mov	e,e
+  1503 0A5D 8E			adc	m
+  1504 0A5E 0A			ldax	b
+  1505 0A5F 48			mov	c,b
+  1506 0A60 DF			rst	3
+  1507 0A61 0D			dcr	c
+  1508 0A62 44			mov	b,h
+  1509 0A63 55			mov	d,l
+  1510 0A64 09			dad	b
+  1511 0A65 37			stc
+  1512 0A66 68			mov	l,b
+  1513 0A67 0C			inr	c
+  1514 0A68			db	38h
+            38 
+  1515 0A69 71			mov	m,c
+  1516 0A6A 0C			inr	c
+  1517 0A6B 3D			dcr	a
+  1518 0A6C DF			rst	3
+  1519 0A6D 0B			dcx	b
+  1520 0A6E 3E E5		mvi	a,0e5h
+  1521 0A70 0B			dcx	b
+  1522 0A71 5A			mov	e,d
+  1523 0A72 C6 0C		adi	0ch
+  1524 0A74 4E			mov	c,m
+  1525 0A75 46			mov	b,m
+  1526 0A76 0C			inr	c
+  1527 0A77 4F			mov	c,a
+  1528 0A78 46			mov	b,m
+  1529 0A79 0C			inr	c
+  1530 0A7A 00			nop
+  1531 0A7B 33		X0a7b:	inx	sp
+  1532 0A7C A8			xra	b
+  1533 0A7D 12			stax	d
+  1534 0A7E 34			inr	m
+  1535 0A7F AC			xra	h
+  1536 0A80 12			stax	d
+  1537 0A81 35			dcr	m
+  1538 0A82 4A			mov	c,d
+  1539 0A83 13			inx	d
+  1540 0A84 36 A4		mvi	m,0a4h
+  1541 0A86 12			stax	d
+  1542 0A87 37			stc
+  1543 0A88 60			mov	h,b
+  1544 0A89 0D			dcr	c
+  1545 0A8A			db	38h
+            38 
+  1546 0A8B A7			ana	a
+  1547 0A8C 0D			dcr	c
+  1548 0A8D 00			nop
+  1549 0A8E 21 C2 16		lxi	h,X16c2
+  1550 0A91 22 40 21		shld	X2140
+  1551 0A94 E1			pop	h
+  1552 0A95 C9			ret
+			
+  1554 0A96 3E 48		mvi	a,48h
+  1555 0A98 32 7E 20		sta	X207e
+  1556 0A9B 21 00 00		lxi	h,X0000
+  1557 0A9E 22 30 21		shld	X2130
+  1558 0AA1 E1			pop	h
+  1559 0AA2 21 15 0A	X0aa2:	lxi	h,X0a15
+  1560 0AA5 E5			push	h
+  1561 0AA6 3A 7D 20		lda	X207d
+  1562 0AA9 B7			ora	a
+  1563 0AAA C0			rnz
+  1564 0AAB 21 D9 0A		lxi	h,X0ad9
+  1565 0AAE CD F7 09		call	X09f7
+  1566 0AB1 3A B9 21		lda	X21b9
+  1567 0AB4 B7			ora	a
+  1568 0AB5 C0			rnz
+  1569 0AB6 21 30 21		lxi	h,X2130
+  1570 0AB9 3A 4B 21		lda	X214b
+  1571 0ABC B7			ora	a
+  1572 0ABD 5F			mov	e,a
+  1573 0ABE C2 C2 0A		jnz	X0ac2
+  1574 0AC1 1C			inr	e
+  1575 0AC2 7E		X0ac2:	mov	a,m
+  1576 0AC3 E5			push	h
+  1577 0AC4 D5			push	d
+  1578 0AC5 21 F5 0A		lxi	h,X0af5
+  1579 0AC8 47			mov	b,a
+  1580 0AC9 CD F7 09		call	X09f7
+  1581 0ACC D1			pop	d
+  1582 0ACD E1			pop	h
+  1583 0ACE 3A B9 21		lda	X21b9
+  1584 0AD1 B7			ora	a
+  1585 0AD2 C8			rz
+  1586 0AD3 23			inx	h
+  1587 0AD4 1D			dcr	e
+  1588 0AD5 C2 C2 0A		jnz	X0ac2
+  1589 0AD8 C9			ret
+			
+  1591 0AD9 44		X0ad9:	mov	b,h
+  1592 0ADA 1E 18		mvi	e,18h
+  1593 0ADC 42			mov	b,d
+  1594 0ADD 07			rlc
+  1595 0ADE			db	18h
+            18 
+  1596 0ADF 43			mov	b,e
+  1597 0AE0 15			dcr	d
+  1598 0AE1			db	18h
+            18 
+  1599 0AE2 48			mov	c,b
+  1600 0AE3 53			mov	d,e
+  1601 0AE4			db	18h
+            18 
+  1602 0AE5 41			mov	b,c
+  1603 0AE6 FE 17		cpi	17h
+  1604 0AE8 72			mov	m,d
+  1605 0AE9 A6			ana	m
+  1606 0AEA 15			dcr	d
+  1607 0AEB 66			mov	h,m
+  1608 0AEC 53			mov	d,e
+  1609 0AED			db	18h
+            18 
+  1610 0AEE 78			mov	a,b
+  1611 0AEF DF			rst	3
+  1612 0AF0 12			stax	d
+  1613 0AF1 79			mov	a,c
+  1614 0AF2 64			mov	h,h
+  1615 0AF3			db	8
+            08 
+  1616 0AF4 00			nop
+  1617 0AF5 63		X0af5:	mov	h,e
+  1618 0AF6 C1			pop	b
+  1619 0AF7 0C			inr	c
+  1620 0AF8 71			mov	m,c
+  1621 0AF9 16 0C		mvi	d,0ch
+  1622 0AFB 6E			mov	l,m
+  1623 0AFC 03			inx	b
+  1624 0AFD 0D			dcr	c
+  1625 0AFE 4A			mov	c,d
+  1626 0AFF 41			mov	b,c
+  1627 0B00 15			dcr	d
+  1628 0B01 4B			mov	c,e
+  1629 0B02 FC 14 6C		cm	X6c14
+  1630 0B05			db	0edh
+            ED 
+  1631 0B06 13			inx	d
+  1632 0B07 6D			mov	l,l
+  1633 0B08 7F			mov	a,a
+  1634 0B09 0C			inr	c
+  1635 0B0A 68			mov	l,b
+  1636 0B0B F2 13 67		jp	X6713
+  1637 0B0E CF			rst	1
+  1638 0B0F 0D			dcr	c
+  1639 0B10 00			nop
+  1640 0B11 21 19 0B		lxi	h,X0b19
+  1641 0B14 22 40 21		shld	X2140
+  1642 0B17 E1			pop	h
+  1643 0B18 C9			ret
+			
+  1645 0B19 47		X0b19:	mov	b,a
+  1646 0B1A FE 20		cpi	20h
+  1647 0B1C DA B2 08		jc	X08b2
+  1648 0B1F FE 1B		cpi	1bh
+  1649 0B21 21 51 21		lxi	h,X2151
+  1650 0B24 C2 2E 0B		jnz	X0b2e
+  1651 0B27 21 AB 09		lxi	h,X09ab
+  1652 0B2A 22 40 21		shld	X2140
+  1653 0B2D C9			ret
+			
+  1655 0B2E 7E		X0b2e:	mov	a,m
+  1656 0B2F B7			ora	a
+  1657 0B30 C2 42 0B		jnz	X0b42
+  1658 0B33 36 01		mvi	m,1
+  1659 0B35 78			mov	a,b
+  1660 0B36 D6 20		sui	20h
+  1661 0B38 32 52 21		sta	X2152
+  1662 0B3B 21 19 0B		lxi	h,X0b19
+  1663 0B3E 22 40 21		shld	X2140
+  1664 0B41 C9			ret
+			
+  1666 0B42 36 00	X0b42:	mvi	m,0
+  1667 0B44 78			mov	a,b
+  1668 0B45 D6 20		sui	20h
+  1669 0B47 FE 50		cpi	50h
+  1670 0B49 D2 4F 0B		jnc	X0b4f
+  1671 0B4C 32 F8 20		sta	X20f8
+  1672 0B4F CD BF 11	X0b4f:	call	X11bf
+  1673 0B52 3A 52 21		lda	X2152
+  1674 0B55 04			inr	b
+  1675 0B56 B8			cmp	b
+  1676 0B57 D2 5D 0B		jnc	X0b5d
+  1677 0B5A 32 F9 20		sta	X20f9
+  1678 0B5D CD 15 0A	X0b5d:	call	X0a15
+  1679 0B60 C3 36 16		jmp	X1636
+			
+  1681 0B63 AF		X0b63:	xra	a
+  1682 0B64 32 A2 21		sta	X21a2
+  1683 0B67 CD AD 10		call	X10ad
+  1684 0B6A 0E 50		mvi	c,50h
+  1685 0B6C CD F9 10		call	X10f9
+  1686 0B6F CD 4C 11		call	X114c
+  1687 0B72 0E 50		mvi	c,50h
+  1688 0B74 C3 89 0B		jmp	X0b89
+			
+  1690 0B77 3E 01	X0b77:	mvi	a,1
+  1691 0B79 32 A2 21		sta	X21a2
+  1692 0B7C CD AD 10		call	X10ad
+  1693 0B7F 0E 84		mvi	c,84h
+  1694 0B81 CD F9 10		call	X10f9
+  1695 0B84 CD 4C 11		call	X114c
+  1696 0B87 0E 84		mvi	c,84h
+  1697 0B89 AF		X0b89:	xra	a
+  1698 0B8A 32 55 21		sta	X2155
+  1699 0B8D CD BF 11		call	X11bf
+  1700 0B90 78			mov	a,b
+  1701 0B91 32 56 21		sta	X2156
+  1702 0B94 79			mov	a,c
+  1703 0B95 32 50 20		sta	X2050
+  1704 0B98 CD 42 03		call	X0342
+  1705 0B9B CD 48 18		call	X1848
+  1706 0B9E 3E 01		mvi	a,1
+  1707 0BA0 C3 AA 0F		jmp	X0faa
+			
+  1709 0BA3 21 F9 20		lxi	h,X20f9
+  1710 0BA6 3A 55 21		lda	X2155
+  1711 0BA9 47			mov	b,a
+  1712 0BAA 7E			mov	a,m
+  1713 0BAB B8			cmp	b
+  1714 0BAC CA B8 0B		jz	X0bb8
+  1715 0BAF B7			ora	a
+  1716 0BB0 C8			rz
+  1717 0BB1 21 F9 20		lxi	h,X20f9
+  1718 0BB4 35			dcr	m
+  1719 0BB5 C3 36 16		jmp	X1636
+			
+  1721 0BB8 3A A6 21	X0bb8:	lda	X21a6
+  1722 0BBB E6 80		ani	80h
+  1723 0BBD CA D9 0B		jz	X0bd9
+  1724 0BC0 0E 01		mvi	c,1
+  1725 0BC2 CD 8E 10		call	X108e
+  1726 0BC5 3E FF		mvi	a,0ffh
+  1727 0BC7 32 C3 21		sta	X21c3
+  1728 0BCA 35			dcr	m
+  1729 0BCB CD EB 0F		call	X0feb
+  1730 0BCE 3A C3 21	X0bce:	lda	X21c3
+  1731 0BD1 B7			ora	a
+  1732 0BD2 C2 CE 0B		jnz	X0bce
+  1733 0BD5 32 F4 20		sta	X20f4
+  1734 0BD8 C9			ret
+			
+  1736 0BD9 CD 2D 10	X0bd9:	call	X102d
+  1737 0BDC C3 12 10		jmp	X1012
+			
+  1739 0BDF 21 78 21		lxi	h,X2178
+  1740 0BE2 36 01		mvi	m,1
+  1741 0BE4 C9			ret
+			
+  1743 0BE5 21 78 21		lxi	h,X2178
+  1744 0BE8 36 00		mvi	m,0
+  1745 0BEA C9			ret
+			
+  1747 0BEB 21 A7 21		lxi	h,X21a7
+  1748 0BEE 7E			mov	a,m
+  1749 0BEF F6 20		ori	20h
+  1750 0BF1 77			mov	m,a
+  1751 0BF2 3A A8 21	X0bf2:	lda	X21a8
+  1752 0BF5 E6 80		ani	80h
+  1753 0BF7 26 08		mvi	h,8
+  1754 0BF9 CA FE 0B		jz	X0bfe
+  1755 0BFC 26 48		mvi	h,48h
+  1756 0BFE 6C		X0bfe:	mov	l,h
+  1757 0BFF 22 FD 20		shld	X20fd
+  1758 0C02 22 FF 20		shld	X20ff
+  1759 0C05 AF			xra	a
+  1760 0C06 32 FC 20		sta	X20fc
+  1761 0C09 C9			ret
+			
+  1763 0C0A 26 88		mvi	h,88h
+  1764 0C0C C3 11 0C		jmp	X0c11
+			
+  1766 0C0F 26 08		mvi	h,8
+  1767 0C11 6C		X0c11:	mov	l,h
+  1768 0C12 22 FD 20		shld	X20fd
+  1769 0C15 C9			ret
+			
+  1771 0C16 21 45 21		lxi	h,X2145
+  1772 0C19 78			mov	a,b
+  1773 0C1A B7			ora	a
+  1774 0C1B C2 23 0C		jnz	X0c23
+  1775 0C1E 7E			mov	a,m
+  1776 0C1F E6 F0		ani	0f0h
+  1777 0C21 77			mov	m,a
+  1778 0C22 C9			ret
+			
+  1780 0C23 D6 05	X0c23:	sui	5
+  1781 0C25 F0			rp
+  1782 0C26 47			mov	b,a
+  1783 0C27 AF			xra	a
+  1784 0C28 37			stc
+  1785 0C29 17		X0c29:	ral
+  1786 0C2A 04			inr	b
+  1787 0C2B C2 29 0C		jnz	X0c29
+  1788 0C2E B6			ora	m
+  1789 0C2F 77			mov	m,a
+  1790 0C30 C9			ret
+			
+  1792 0C31 13		X0c31:	inx	d
+  1793 0C32 3A 7E 20	X0c32:	lda	X207e
+  1794 0C35 47			mov	b,a
+  1795 0C36 21 4A 0C		lxi	h,X0c4a
+  1796 0C39 23		X0c39:	inx	h
+  1797 0C3A 23			inx	h
+  1798 0C3B 7E			mov	a,m
+  1799 0C3C B7			ora	a
+  1800 0C3D C8			rz
+  1801 0C3E B8			cmp	b
+  1802 0C3F C2 39 0C		jnz	X0c39
+  1803 0C42 23			inx	h
+  1804 0C43 7E			mov	a,m
+  1805 0C44 12			stax	d
+  1806 0C45 C9			ret
+			
+  1808 0C46 21 FC 20	X0c46:	lxi	h,X20fc
+  1809 0C49 34			inr	m
+  1810 0C4A 34		X0c4a:	inr	m
+  1811 0C4B C9			ret
+			
+  1813 0C4C 41			mov	b,c
+  1814 0C4D 48			mov	c,b
+  1815 0C4E 42			mov	b,d
+  1816 0C4F			db	8
+            08 
+  1817 0C50			db	30h
+            30 
+  1818 0C51 88			adc	b
+  1819 0C52 31 00 32		lxi	sp,X3200
+  1820 0C55 80			add	b
+  1821 0C56 00			nop
+  1822 0C57 21 79 20	X0c57:	lxi	h,X2079
+  1823 0C5A 7E			mov	a,m
+  1824 0C5B B7			ora	a
+  1825 0C5C CA 14 0A		jz	X0a14
+  1826 0C5F 36 81		mvi	m,81h
+  1827 0C61 E1			pop	h
+  1828 0C62 21 AD 05	X0c62:	lxi	h,X05ad
+  1829 0C65 C3 18 0A		jmp	X0a18
+			
+  1831 0C68 21 02 21		lxi	h,X2102
+  1832 0C6B 11 F8 20		lxi	d,X20f8
+  1833 0C6E C3 77 0C		jmp	X0c77
+			
+  1835 0C71 21 F8 20		lxi	h,X20f8
+  1836 0C74 11 02 21		lxi	d,X2102
+  1837 0C77 06 0B	X0c77:	mvi	b,0bh
+  1838 0C79 CD 8B 03		call	memmov
+  1839 0C7C C3 36 16		jmp	X1636
+			
+  1841 0C7F 21 8A 0C		lxi	h,X0c8a
+  1842 0C82 78			mov	a,b
+  1843 0C83 B7			ora	a
+  1844 0C84 CA 97 0C		jz	X0c97
+  1845 0C87 C3 FF 09		jmp	X09ff
+			
+  1847 0C8A 01 A2 0C	X0c8a:	lxi	b,X0ca2
+  1848 0C8D 04			inr	b
+  1849 0C8E A7			ana	a
+  1850 0C8F 0C			inr	c
+  1851 0C90 05			dcr	b
+  1852 0C91 B3			ora	e
+  1853 0C92 0C			inr	c
+  1854 0C93 07			rlc
+  1855 0C94 BB			cmp	e
+  1856 0C95 0C			inr	c
+  1857 0C96 00			nop
+  1858 0C97 32 FB 20	X0c97:	sta	X20fb
+  1859 0C9A 21 FA 20		lxi	h,X20fa
+  1860 0C9D 7E			mov	a,m
+  1861 0C9E F6 F7		ori	0f7h
+  1862 0CA0 77			mov	m,a
+  1863 0CA1 C9			ret
+			
+  1865 0CA2 3E FB	X0ca2:	mvi	a,0fbh
+  1866 0CA4 C3 B5 0C		jmp	X0cb5
+			
+  1868 0CA7 3A C8 21		lda	X21c8
+  1869 0CAA B7			ora	a
+  1870 0CAB C2 BB 0C		jnz	X0cbb
+  1871 0CAE 3E FD		mvi	a,0fdh
+  1872 0CB0 C3 B5 0C		jmp	X0cb5
+			
+  1874 0CB3 3E FE		mvi	a,0feh
+  1875 0CB5 21 FA 20	X0cb5:	lxi	h,X20fa
+  1876 0CB8 A6			ana	m
+  1877 0CB9 77			mov	m,a
+  1878 0CBA C9			ret
+			
+  1880 0CBB 3E 80	X0cbb:	mvi	a,80h
+  1881 0CBD 32 FB 20		sta	X20fb
+  1882 0CC0 C9			ret
+			
+  1884 0CC1 3A 30 21		lda	X2130
+  1885 0CC4 B7			ora	a
+  1886 0CC5 C0			rnz
+  1887 0CC6 21 72 21		lxi	h,X2172
+  1888 0CC9 7E			mov	a,m
+  1889 0CCA F6 04		ori	4
+  1890 0CCC 77			mov	m,a
+  1891 0CCD C9			ret
+			
+  1893 0CCE 3E FB		mvi	a,0fbh
+  1894 0CD0 CD BF 0D		call	X0dbf
+  1895 0CD3 3A A7 21		lda	X21a7
+  1896 0CD6 E6 20		ani	20h
+  1897 0CD8 C2 E3 0C		jnz	X0ce3
+  1898 0CDB 36 DA		mvi	m,0dah
+  1899 0CDD 2B			dcx	h
+  1900 0CDE 36 2F		mvi	m,2fh
+  1901 0CE0 C3 F3 0E		jmp	X0ef3
+			
+  1903 0CE3 36 3F	X0ce3:	mvi	m,3fh
+  1904 0CE5 23			inx	h
+  1905 0CE6 3E 31		mvi	a,31h
+  1906 0CE8 CD B9 0D		call	X0db9
+  1907 0CEB DB 42		in	42h
+  1908 0CED 47			mov	b,a
+  1909 0CEE 2F			cma
+  1910 0CEF E6 06		ani	6
+  1911 0CF1 4F			mov	c,a
+  1912 0CF2 78			mov	a,b
+  1913 0CF3 E6 08		ani	8
+  1914 0CF5 CA F9 0C		jz	X0cf9
+  1915 0CF8 0C			inr	c
+  1916 0CF9 79		X0cf9:	mov	a,c
+  1917 0CFA F6 30		ori	30h
+  1918 0CFC 77			mov	m,a
+  1919 0CFD 23			inx	h
+  1920 0CFE 36 E3		mvi	m,0e3h
+  1921 0D00 C3 F3 0E		jmp	X0ef3
+			
+  1923 0D03 3A B8 21		lda	X21b8
+  1924 0D06 B7			ora	a
+  1925 0D07 C0			rnz
+  1926 0D08 78			mov	a,b
+  1927 0D09 21 72 21		lxi	h,X2172
+  1928 0D0C FE 06		cpi	6
+  1929 0D0E CA 32 0D		jz	X0d32
+  1930 0D11 FE 05		cpi	5
+  1931 0D13 C0			rnz
+  1932 0D14 7E			mov	a,m
+  1933 0D15 F6 08		ori	8
+  1934 0D17 77			mov	m,a
+  1935 0D18 C9			ret
+			
+  1937 0D19 3E F7		mvi	a,0f7h
+  1938 0D1B CD BF 0D		call	X0dbf
+  1939 0D1E 06 03		mvi	b,3
+  1940 0D20 3A BD 21		lda	X21bd
+  1941 0D23 B7			ora	a
+  1942 0D24 78			mov	a,b
+  1943 0D25 C2 29 0D		jnz	X0d29
+  1944 0D28 AF			xra	a
+  1945 0D29 F6 30	X0d29:	ori	30h
+  1946 0D2B 77			mov	m,a
+  1947 0D2C 23			inx	h
+  1948 0D2D 36 EE		mvi	m,0eeh
+  1949 0D2F C3 F3 0E	X0d2f:	jmp	X0ef3
+			
+  1951 0D32 7E		X0d32:	mov	a,m
+  1952 0D33 F6 01		ori	1
+  1953 0D35 77			mov	m,a
+  1954 0D36 C9			ret
+			
+  1956 0D37 3E FE		mvi	a,0feh
+  1957 0D39 CD BF 0D		call	X0dbf
+  1958 0D3C 3A F9 20		lda	X20f9
+  1959 0D3F 47			mov	b,a
+  1960 0D40 3A 01 21		lda	X2101
+  1961 0D43 B7			ora	a
+  1962 0D44 CA 4A 0D		jz	X0d4a
+  1963 0D47 3A 55 21		lda	X2155
+  1964 0D4A 4F		X0d4a:	mov	c,a
+  1965 0D4B 78			mov	a,b
+  1966 0D4C 91			sub	c
+  1967 0D4D 3C			inr	a
+  1968 0D4E CD 7A 0D		call	X0d7a
+  1969 0D51 CD BB 0D		call	X0dbb
+  1970 0D54 3A F8 20		lda	X20f8
+  1971 0D57 3C			inr	a
+  1972 0D58 CD 7A 0D		call	X0d7a
+  1973 0D5B 36 D2		mvi	m,0d2h
+  1974 0D5D C3 F3 0E		jmp	X0ef3
+			
+  1976 0D60 DB 42		in	42h
+  1977 0D62 E6 04		ani	4
+  1978 0D64 C0			rnz
+  1979 0D65 0E 81		mvi	c,81h
+  1980 0D67 CD 8E 10		call	X108e
+  1981 0D6A 3E FF		mvi	a,0ffh
+  1982 0D6C D3 E2		out	0e2h
+  1983 0D6E 00			nop
+  1984 0D6F CD 88 14	X0d6f:	call	X1488
+  1985 0D72 DB 42		in	42h
+  1986 0D74 E6 04		ani	4
+  1987 0D76 C2 6F 0D		jnz	X0d6f
+  1988 0D79 C9			ret
+			
+  1990 0D7A 5F		X0d7a:	mov	e,a
+  1991 0D7B 16 30		mvi	d,30h
+  1992 0D7D 0E 64		mvi	c,64h
+  1993 0D7F CD 99 0D		call	X0d99
+  1994 0D82 CA 88 0D		jz	X0d88
+  1995 0D85 77			mov	m,a
+  1996 0D86 23			inx	h
+  1997 0D87 15			dcr	d
+  1998 0D88 0E 0A	X0d88:	mvi	c,0ah
+  1999 0D8A CD 99 0D		call	X0d99
+  2000 0D8D CA 93 0D		jz	X0d93
+  2001 0D90 15			dcr	d
+  2002 0D91 77			mov	m,a
+  2003 0D92 23			inx	h
+  2004 0D93 7B		X0d93:	mov	a,e
+  2005 0D94 F6 30		ori	30h
+  2006 0D96 77			mov	m,a
+  2007 0D97 23			inx	h
+  2008 0D98 C9			ret
+			
+  2010 0D99 7B		X0d99:	mov	a,e
+  2011 0D9A 06 30		mvi	b,30h
+  2012 0D9C 04		X0d9c:	inr	b
+  2013 0D9D 91			sub	c
+  2014 0D9E F2 9C 0D		jp	X0d9c
+  2015 0DA1 81			add	c
+  2016 0DA2 05			dcr	b
+  2017 0DA3 5F			mov	e,a
+  2018 0DA4 78			mov	a,b
+  2019 0DA5 BA			cmp	d
+  2020 0DA6 C9			ret
+			
+  2022 0DA7 3E 45		mvi	a,45h
+  2023 0DA9 32 C7 21		sta	X21c7
+  2024 0DAC CD 81 03		call	X0381
+  2025 0DAF 3E 45		mvi	a,45h
+  2026 0DB1 32 F4 20		sta	X20f4
+  2027 0DB4 AF			xra	a
+  2028 0DB5 32 C7 21		sta	X21c7
+  2029 0DB8 C9			ret
+			
+  2031 0DB9 77		X0db9:	mov	m,a
+  2032 0DBA 23			inx	h
+  2033 0DBB 36 3B	X0dbb:	mvi	m,3bh
+  2034 0DBD 23			inx	h
+  2035 0DBE C9			ret
+			
+  2037 0DBF 21 72 21	X0dbf:	lxi	h,X2172
+  2038 0DC2 A6			ana	m
+  2039 0DC3 77			mov	m,a
+  2040 0DC4 21 5C 21		lxi	h,X215c
+  2041 0DC7 36 1B		mvi	m,1bh
+  2042 0DC9 23			inx	h
+  2043 0DCA 36 5B		mvi	m,5bh
+  2044 0DCC 23			inx	h
+  2045 0DCD C9			ret
+			
+  2047 0DCE 42			mov	b,d
+  2048 0DCF 78			mov	a,b
+  2049 0DD0 B7			ora	a
+  2050 0DD1 C2 D8 0D		jnz	X0dd8
+  2051 0DD4 CD E5 0D		call	X0de5
+  2052 0DD7 C9			ret
+			
+  2054 0DD8 FE 03	X0dd8:	cpi	3
+  2055 0DDA C0			rnz
+  2056 0DDB CD EC 0D		call	X0dec
+  2057 0DDE C9			ret
+			
+  2059 0DDF CD 23 0E		call	X0e23
+  2060 0DE2 B6			ora	m
+  2061 0DE3 77			mov	m,a
+  2062 0DE4 C9			ret
+			
+  2064 0DE5 CD 23 0E	X0de5:	call	X0e23
+  2065 0DE8 2F			cma
+  2066 0DE9 A6			ana	m
+  2067 0DEA 77			mov	m,a
+  2068 0DEB C9			ret
+			
+  2070 0DEC 21 91 21	X0dec:	lxi	h,X2191
+  2071 0DEF AF		X0def:	xra	a
+  2072 0DF0 77			mov	m,a
+  2073 0DF1 23			inx	h
+  2074 0DF2 7D			mov	a,l
+  2075 0DF3 FE A2		cpi	0a2h
+  2076 0DF5 C2 EF 0D		jnz	X0def
+  2077 0DF8 C9			ret
+			
+  2079 0DF9 CD 23 0E	X0df9:	call	X0e23
+  2080 0DFC 0C		X0dfc:	inr	c
+  2081 0DFD B7			ora	a
+  2082 0DFE 1F			rar
+  2083 0DFF DA 0B 0E		jc	X0e0b
+  2084 0E02 57		X0e02:	mov	d,a
+  2085 0E03 A6			ana	m
+  2086 0E04 7A			mov	a,d
+  2087 0E05 CA FC 0D		jz	X0dfc
+  2088 0E08 C3 15 0E		jmp	X0e15
+			
+  2090 0E0B 23		X0e0b:	inx	h
+  2091 0E0C 7D			mov	a,l
+  2092 0E0D FE A2		cpi	0a2h
+  2093 0E0F 3E 80		mvi	a,80h
+  2094 0E11 C2 02 0E		jnz	X0e02
+  2095 0E14 0D			dcr	c
+  2096 0E15 3A 53 21	X0e15:	lda	X2153
+  2097 0E18 B9			cmp	c
+  2098 0E19 DA 1D 0E		jc	X0e1d
+  2099 0E1C 79			mov	a,c
+  2100 0E1D 32 F8 20	X0e1d:	sta	X20f8
+  2101 0E20 C3 36 16		jmp	X1636
+			
+  2103 0E23 3A F8 20	X0e23:	lda	X20f8
+  2104 0E26 4F			mov	c,a
+  2105 0E27 57		X0e27:	mov	d,a
+  2106 0E28 21 91 21		lxi	h,X2191
+  2107 0E2B 0F		X0e2b:	rrc
+  2108 0E2C 0F			rrc
+  2109 0E2D 0F			rrc
+  2110 0E2E E6 1F		ani	1fh
+  2111 0E30 85			add	l
+  2112 0E31 6F			mov	l,a
+  2113 0E32 7A			mov	a,d
+  2114 0E33 E6 07		ani	7
+  2115 0E35 57			mov	d,a
+  2116 0E36 3E 80		mvi	a,80h
+  2117 0E38 15		X0e38:	dcr	d
+  2118 0E39 F8			rm
+  2119 0E3A 0F			rrc
+  2120 0E3B C3 38 0E		jmp	X0e38
+			
+  2122 0E3E 3A A5 21	X0e3e:	lda	X21a5
+  2123 0E41 21 7B 20		lxi	h,X207b
+  2124 0E44 B6			ora	m
+  2125 0E45 47			mov	b,a
+  2126 0E46 C0			rnz
+  2127 0E47 DB 42	X0e47:	in	42h
+  2128 0E49 E6 01		ani	1
+  2129 0E4B C8			rz
+  2130 0E4C 21 C1 21		lxi	h,X21c1
+  2131 0E4F 7E			mov	a,m
+  2132 0E50 B7			ora	a
+  2133 0E51 36 00		mvi	m,0
+  2134 0E53 2B			dcx	h
+  2135 0E54 C8			rz
+  2136 0E55 7E			mov	a,m
+  2137 0E56 D3 00		out	0
+  2138 0E58 C9			ret
+			
+  2140 0E59 F3		X0e59:	di
+  2141 0E5A CD 3E 0E		call	X0e3e
+  2142 0E5D FB			ei
+  2143 0E5E 78			mov	a,b
+  2144 0E5F B7			ora	a
+  2145 0E60 C2 6D 0E		jnz	X0e6d
+  2146 0E63 DB 42		in	42h
+  2147 0E65 E6 01		ani	1
+  2148 0E67 C8			rz
+  2149 0E68 3A C2 21		lda	X21c2
+  2150 0E6B B7			ora	a
+  2151 0E6C C0			rnz
+  2152 0E6D 21 73 21	X0e6d:	lxi	h,X2173
+  2153 0E70 7E			mov	a,m
+  2154 0E71 B7			ora	a
+  2155 0E72 CA 79 0E		jz	X0e79
+  2156 0E75 2A 74 21		lhld	X2174
+  2157 0E78 E9			pchl
+			
+  2159 0E79 3A 72 21	X0e79:	lda	X2172
+  2160 0E7C B7			ora	a
+  2161 0E7D C8			rz
+  2162 0E7E 1E 00		mvi	e,0
+  2163 0E80 1F		X0e80:	rar
+  2164 0E81 DA 89 0E		jc	X0e89
+  2165 0E84 1C			inr	e
+  2166 0E85 1C			inr	e
+  2167 0E86 C3 80 0E		jmp	X0e80
+			
+  2169 0E89 16 00	X0e89:	mvi	d,0
+  2170 0E8B 21 94 0E		lxi	h,X0e94
+  2171 0E8E 19			dad	d
+  2172 0E8F 7E			mov	a,m
+  2173 0E90 23			inx	h
+  2174 0E91 66			mov	h,m
+  2175 0E92 6F			mov	l,a
+  2176 0E93 E9			pchl
+			
+  2178 0E94 37		X0e94:	stc
+  2179 0E95 0D			dcr	c
+  2180 0E96 F0			rp
+  2181 0E97 12			stax	d
+  2182 0E98 CE 0C		aci	0ch
+  2183 0E9A 19			dad	d
+  2184 0E9B 0D			dcr	c
+  2185 0E9C 13			inx	d
+  2186 0E9D 09			dad	b
+  2187 0E9E A0			ana	b
+  2188 0E9F 0E 21		mvi	c,21h
+  2189 0EA1 5C			mov	e,h
+  2190 0EA2			db	20h
+            20 
+  2191 0EA3 46			mov	b,m
+  2192 0EA4 54			mov	d,h
+  2193 0EA5 5D			mov	e,l
+  2194 0EA6 13			inx	d
+  2195 0EA7 0E 08		mvi	c,8
+  2196 0EA9 1A		X0ea9:	ldax	d
+  2197 0EAA 77			mov	m,a
+  2198 0EAB 23			inx	h
+  2199 0EAC 13			inx	d
+  2200 0EAD 0D			dcr	c
+  2201 0EAE C2 A9 0E		jnz	X0ea9
+  2202 0EB1 21 43 21		lxi	h,X2143
+  2203 0EB4 35			dcr	m
+  2204 0EB5 7E			mov	a,m
+  2205 0EB6 4F			mov	c,a
+  2206 0EB7 C2 C1 0E		jnz	X0ec1
+  2207 0EBA 21 72 21		lxi	h,X2172
+  2208 0EBD 7E			mov	a,m
+  2209 0EBE E6 DF		ani	0dfh
+  2210 0EC0 77			mov	m,a
+  2211 0EC1 3A A5 21	X0ec1:	lda	X21a5
+  2212 0EC4 B7			ora	a
+  2213 0EC5 C2 CF 0E		jnz	X0ecf
+  2214 0EC8 79			mov	a,c
+  2215 0EC9 FE 05		cpi	5
+  2216 0ECB D2 D2 0E		jnc	X0ed2
+  2217 0ECE AF			xra	a
+  2218 0ECF 32 44 21	X0ecf:	sta	X2144
+  2219 0ED2 78		X0ed2:	mov	a,b
+  2220 0ED3 E6 80		ani	80h
+  2221 0ED5 17			ral
+  2222 0ED6 3F			cmc
+  2223 0ED7 1F			rar
+  2224 0ED8 32 73 21		sta	X2173
+  2225 0EDB 21 A0 0E		lxi	h,X0ea0
+  2226 0EDE 22 74 21		shld	X2174
+  2227 0EE1 78		X0ee1:	mov	a,b
+  2228 0EE2 E6 7F		ani	7fh
+  2229 0EE4 47			mov	b,a
+  2230 0EE5 3A A5 21		lda	X21a5
+  2231 0EE8 21 7B 20		lxi	h,X207b
+  2232 0EEB B6			ora	m
+  2233 0EEC 78			mov	a,b
+  2234 0EED C2 93 05		jnz	X0593
+  2235 0EF0 D3 00		out	0
+  2236 0EF2 C9			ret
+			
+  2238 0EF3 21 01 0F	X0ef3:	lxi	h,X0f01
+  2239 0EF6 22 74 21		shld	X2174
+  2240 0EF9 AF			xra	a
+  2241 0EFA 32 71 21		sta	X2171
+  2242 0EFD 3C			inr	a
+  2243 0EFE 32 73 21		sta	X2173
+  2244 0F01 21 71 21	X0f01:	lxi	h,X2171
+  2245 0F04 7E			mov	a,m
+  2246 0F05 34			inr	m
+  2247 0F06 21 5C 21		lxi	h,X215c
+  2248 0F09 85			add	l
+  2249 0F0A 6F			mov	l,a
+  2250 0F0B 46			mov	b,m
+  2251 0F0C 78			mov	a,b
+  2252 0F0D B7			ora	a
+  2253 0F0E F2 E1 0E		jp	X0ee1
+  2254 0F11 AF			xra	a
+  2255 0F12 32 73 21		sta	X2173
+  2256 0F15 C3 E1 0E		jmp	X0ee1
+			
+  2258 0F18 E5		X0f18:	push	h
+  2259 0F19 D5			push	d
+  2260 0F1A 57			mov	d,a
+  2261 0F1B 3A A7 21		lda	X21a7
+  2262 0F1E E6 10		ani	10h
+  2263 0F20 CA 2B 0F		jz	X0f2b
+  2264 0F23 7A			mov	a,d
+  2265 0F24 D6 91		sui	91h
+  2266 0F26 E6 FD		ani	0fdh
+  2267 0F28 CA 61 0F		jz	X0f61
+  2268 0F2B 21 72 21	X0f2b:	lxi	h,X2172
+  2269 0F2E 7E			mov	a,m
+  2270 0F2F F6 20		ori	20h
+  2271 0F31 77			mov	m,a
+  2272 0F32 21 43 21	X0f32:	lxi	h,X2143
+  2273 0F35 7E			mov	a,m
+  2274 0F36 34			inr	m
+  2275 0F37 21 5C 20		lxi	h,X205c
+  2276 0F3A 5F			mov	e,a
+  2277 0F3B 85			add	l
+  2278 0F3C 6F			mov	l,a
+  2279 0F3D 72			mov	m,d
+  2280 0F3E 3E 8D		mvi	a,8dh
+  2281 0F40 BA			cmp	d
+  2282 0F41 C2 4E 0F		jnz	X0f4e
+  2283 0F44 3A A8 21		lda	X21a8
+  2284 0F47 E6 20		ani	20h
+  2285 0F49 16 8A		mvi	d,8ah
+  2286 0F4B C2 32 0F		jnz	X0f32
+  2287 0F4E 3A A5 21	X0f4e:	lda	X21a5
+  2288 0F51 B7			ora	a
+  2289 0F52 C2 5B 0F		jnz	X0f5b
+  2290 0F55 3E 05		mvi	a,5
+  2291 0F57 BB			cmp	e
+  2292 0F58 3E 00		mvi	a,0
+  2293 0F5A 1F			rar
+  2294 0F5B 32 44 21	X0f5b:	sta	X2144
+  2295 0F5E D1		X0f5e:	pop	d
+  2296 0F5F E1			pop	h
+  2297 0F60 C9			ret
+			
+  2299 0F61 7A		X0f61:	mov	a,d
+  2300 0F62 E6 7F		ani	7fh
+  2301 0F64 57			mov	d,a
+  2302 0F65 21 C1 21		lxi	h,X21c1
+  2303 0F68 7E			mov	a,m
+  2304 0F69 B7			ora	a
+  2305 0F6A C2 75 0F		jnz	X0f75
+  2306 0F6D 2B			dcx	h
+  2307 0F6E 7E			mov	a,m
+  2308 0F6F BA			cmp	d
+  2309 0F70 C2 75 0F		jnz	X0f75
+  2310 0F73 23			inx	h
+  2311 0F74 72			mov	m,d
+  2312 0F75 4A		X0f75:	mov	c,d
+  2313 0F76 06 02		mvi	b,2
+  2314 0F78 CD 7E 0F		call	X0f7e
+  2315 0F7B C3 5E 0F		jmp	X0f5e
+			
+  2317 0F7E 3A A7 21	X0f7e:	lda	X21a7
+  2318 0F81 E6 10		ani	10h
+  2319 0F83 C8			rz
+  2320 0F84 3A A5 21		lda	X21a5
+  2321 0F87 B7			ora	a
+  2322 0F88 C0			rnz
+  2323 0F89 79			mov	a,c
+  2324 0F8A 21 BF 21		lxi	h,X21bf
+  2325 0F8D FE 13		cpi	13h
+  2326 0F8F 78			mov	a,b
+  2327 0F90 CA 9E 0F		jz	X0f9e
+  2328 0F93 2F			cma
+  2329 0F94 A6			ana	m
+  2330 0F95 77			mov	m,a
+  2331 0F96 F5			push	psw
+  2332 0F97 E6 02		ani	2
+  2333 0F99 32 C4 21		sta	X21c4
+  2334 0F9C F1			pop	psw
+  2335 0F9D C0			rnz
+  2336 0F9E B6		X0f9e:	ora	m
+  2337 0F9F 77			mov	m,a
+  2338 0FA0 79			mov	a,c
+  2339 0FA1 21 C0 21		lxi	h,X21c0
+  2340 0FA4 BE			cmp	m
+  2341 0FA5 C8			rz
+  2342 0FA6 77			mov	m,a
+  2343 0FA7 23			inx	h
+  2344 0FA8 77			mov	m,a
+  2345 0FA9 C9			ret
+			
+  2347 0FAA 21 7F 20	X0faa:	lxi	h,X207f
+  2348 0FAD 86			add	m
+  2349 0FAE BE		X0fae:	cmp	m
+  2350 0FAF C8			rz
+  2351 0FB0 E5			push	h
+  2352 0FB1 F5			push	psw
+  2353 0FB2 3A 7B 20	X0fb2:	lda	X207b
+  2354 0FB5 B7			ora	a
+  2355 0FB6 CC 88 14		cz	X1488
+  2356 0FB9 F1			pop	psw
+  2357 0FBA E1			pop	h
+  2358 0FBB C3 AE 0F		jmp	X0fae
+			
+  2360 0FBE 2A 4E 20	X0fbe:	lhld	X204e
+  2361 0FC1 7C			mov	a,h
+  2362 0FC2 F6 F0		ori	0f0h
+  2363 0FC4 67			mov	h,a
+  2364 0FC5 22 4E 20		shld	X204e
+  2365 0FC8 3A 50 20	X0fc8:	lda	X2050
+  2366 0FCB 47		X0fcb:	mov	b,a
+  2367 0FCC 7C			mov	a,h
+  2368 0FCD E6 0F		ani	0fh
+  2369 0FCF F6 20		ori	20h
+  2370 0FD1 67			mov	h,a
+  2371 0FD2 C6 10		adi	10h
+  2372 0FD4 57			mov	d,a
+  2373 0FD5 5D			mov	e,l
+  2374 0FD6 3E FF		mvi	a,0ffh
+  2375 0FD8 36 00	X0fd8:	mvi	m,0
+  2376 0FDA 12			stax	d
+  2377 0FDB 13			inx	d
+  2378 0FDC 23			inx	h
+  2379 0FDD 05			dcr	b
+  2380 0FDE C2 D8 0F		jnz	X0fd8
+  2381 0FE1 3C			inr	a
+  2382 0FE2 32 C3 21		sta	X21c3
+  2383 0FE5 C9			ret
+			
+  2385 0FE6 06 FF	X0fe6:	mvi	b,0ffh
+  2386 0FE8 C3 ED 0F		jmp	X0fed
+			
+  2388 0FEB 06 01	X0feb:	mvi	b,1
+  2389 0FED 21 55 21	X0fed:	lxi	h,X2155
+  2390 0FF0 56			mov	d,m
+  2391 0FF1 23			inx	h
+  2392 0FF2 5E			mov	e,m
+  2393 0FF3 78			mov	a,b
+  2394 0FF4 B7			ora	a
+  2395 0FF5 7A			mov	a,d
+  2396 0FF6 F2 FA 0F		jp	X0ffa
+  2397 0FF9 7B			mov	a,e
+  2398 0FFA CD E6 13	X0ffa:	call	X13e6
+  2399 0FFD 7B			mov	a,e
+  2400 0FFE 92			sub	d
+  2401 0FFF 4F		X0fff:	mov	c,a
+  2402 1000 3A 2B 21	X1000:	lda	X212b
+  2403 1003 56		X1003:	mov	d,m
+  2404 1004 77			mov	m,a
+  2405 1005 78			mov	a,b
+  2406 1006 85			add	l
+  2407 1007 6F			mov	l,a
+  2408 1008 0D			dcr	c
+  2409 1009 7A			mov	a,d
+  2410 100A F2 03 10		jp	X1003
+  2411 100D E6 7F		ani	7fh
+  2412 100F 32 2B 21		sta	X212b
+  2413 1012 3E FF	X1012:	mvi	a,0ffh
+  2414 1014 32 0E 21		sta	X210e
+  2415 1017 C3 36 16		jmp	X1636
+			
+  2417 101A CD 91 11	X101a:	call	X1191
+  2418 101D 3A 56 21		lda	X2156
+  2419 1020 CD 2F 12		call	X122f
+  2420 1023 CD E6 0F		call	X0fe6
+  2421 1026 3A 55 21		lda	X2155
+  2422 1029 3D			dcr	a
+  2423 102A C3 3E 10		jmp	X103e
+			
+  2425 102D CD 91 11	X102d:	call	X1191
+  2426 1030 3A 55 21		lda	X2155
+  2427 1033 3D			dcr	a
+  2428 1034 CD 2F 12		call	X122f
+  2429 1037 CD EB 0F		call	X0feb
+  2430 103A 3A 56 21		lda	X2156
+  2431 103D 3D			dcr	a
+  2432 103E CD CE 11	X103e:	call	X11ce
+  2433 1041 FB			ei
+  2434 1042 32 7A 20		sta	X207a
+  2435 1045 21 56 21		lxi	h,X2156
+  2436 1048 7E			mov	a,m
+  2437 1049 2B			dcx	h
+  2438 104A 96			sub	m
+  2439 104B FE 17		cpi	17h
+  2440 104D C0			rnz
+  2441 104E 21 7A 20	X104e:	lxi	h,X207a
+  2442 1051 7E			mov	a,m
+  2443 1052 36 00		mvi	m,0
+  2444 1054 B7			ora	a
+  2445 1055 C8			rz
+  2446 1056 2A 56 20		lhld	X2056
+  2447 1059 EB			xchg
+  2448 105A 2A 58 20		lhld	X2058
+  2449 105D 72			mov	m,d
+  2450 105E 23			inx	h
+  2451 105F 73			mov	m,e
+  2452 1060 2A 79 21		lhld	X2179
+  2453 1063 EB			xchg
+  2454 1064 2A 75 20		lhld	X2075
+  2455 1067 72			mov	m,d
+  2456 1068 23			inx	h
+  2457 1069 73			mov	m,e
+  2458 106A 21 56 20	X106a:	lxi	h,X2056
+  2459 106D 22 58 20		shld	X2058
+  2460 1070 22 75 20		shld	X2075
+  2461 1073 C9			ret
+			
+  2463 1074 CD E3 13	X1074:	call	X13e3
+  2464 1077 E6 80		ani	80h
+  2465 1079 32 57 21		sta	X2157
+  2466 107C CD 8D 13		call	X138d
+  2467 107F 22 4E 21		shld	X214e
+  2468 1082 C9			ret
+			;;
+			;; memset: Set memory from HL to HL+DE-1 to value B
+			;;
+			memset:
+  2473 1083 70		X1083:	mov	m,b		;; M <- B
+  2474 1084 23			inx	h		;; HL++
+  2475 1085 1B			dcx	d		;; DE--
+  2476 1086 7A			mov	a,d		;;
+  2477 1087 B3			ora	e		;; A = D | E
+  2478 1088 C2 83 10		jnz	X1083		;; repeat if A != 0
+  2479 108B C9			ret
+			
+  2481 108C 0E 00		mvi	c,0
+  2482 108E 21 51 20	X108e:	lxi	h,X2051
+  2483 1091 F3			di
+  2484 1092 3A 65 20		lda	X2065
+  2485 1095 B6			ora	m
+  2486 1096 FB			ei
+  2487 1097 CA A7 10		jz	X10a7
+  2488 109A 79			mov	a,c
+  2489 109B 1F			rar
+  2490 109C C5			push	b
+  2491 109D DC 88 14		cc	X1488
+  2492 10A0 CD 93 14		call	X1493
+  2493 10A3 C1			pop	b
+  2494 10A4 C3 8E 10		jmp	X108e
+			
+  2496 10A7 79		X10a7:	mov	a,c
+  2497 10A8 17			ral
+  2498 10A9 D0			rnc
+  2499 10AA C3 91 11		jmp	X1191
+			
+  2501 10AD 21 70 06	X10ad:	lxi	h,X0670
+  2502 10B0 22 04 20		shld	X2004
+  2503 10B3 AF			xra	a
+  2504 10B4 32 51 20		sta	X2051
+  2505 10B7 32 65 20		sta	X2065
+  2506 10BA 32 5A 20		sta	X205a
+  2507 10BD D3 A2		out	0a2h
+  2508 10BF 3E 04		mvi	a,4
+  2509 10C1 D3 A2		out	0a2h
+  2510 10C3 CD 6A 10		call	X106a
+  2511 10C6 FB			ei
+  2512 10C7 3E 01		mvi	a,1
+  2513 10C9 CD AA 0F		call	X0faa
+  2514 10CC 21 D0 22		lxi	h,X22d0
+  2515 10CF 7C			mov	a,h
+  2516 10D0 C6 10		adi	10h
+  2517 10D2 57			mov	d,a
+  2518 10D3 5D			mov	e,l
+  2519 10D4 01 2F 0D		lxi	b,X0d2f
+  2520 10D7 3A C7 21	X10d7:	lda	X21c7
+  2521 10DA 77			mov	m,a
+  2522 10DB 23			inx	h
+  2523 10DC 3E FF		mvi	a,0ffh
+  2524 10DE 12			stax	d
+  2525 10DF 13			inx	d
+  2526 10E0 0B			dcx	b
+  2527 10E1 78			mov	a,b
+  2528 10E2 B1			ora	c
+  2529 10E3 C2 D7 10		jnz	X10d7
+  2530 10E6 3A C7 21		lda	X21c7
+  2531 10E9 32 F4 20		sta	X20f4
+  2532 10EC AF			xra	a
+  2533 10ED 32 F9 20		sta	X20f9
+  2534 10F0 32 F8 20		sta	X20f8
+  2535 10F3 3E FF		mvi	a,0ffh
+  2536 10F5 32 F5 20		sta	X20f5
+  2537 10F8 C9			ret
+			
+  2539 10F9 AF		X10f9:	xra	a
+  2540 10FA 32 51 20		sta	X2051
+  2541 10FD 3A 65 20	X10fd:	lda	X2065
+  2542 1100 B7			ora	a
+  2543 1101 C2 FD 10		jnz	X10fd
+  2544 1104 21 D0 22		lxi	h,X22d0
+  2545 1107 06 00		mvi	b,0
+  2546 1109 09			dad	b
+  2547 110A CD BF 11		call	X11bf
+  2548 110D 0C			inr	c
+  2549 110E CD 36 11		call	X1136
+  2550 1111 E5			push	h
+  2551 1112 06 01		mvi	b,1
+  2552 1114 CD 36 11		call	X1136
+  2553 1117 E1			pop	h
+  2554 1118 36 7F		mvi	m,7fh
+  2555 111A 23			inx	h
+  2556 111B 22 54 20		shld	X2054
+  2557 111E 36 70		mvi	m,70h
+  2558 1120 23			inx	h
+  2559 1121 36 06		mvi	m,6
+  2560 1123 79			mov	a,c
+  2561 1124 CD DE 13		call	X13de
+  2562 1127 36 7F		mvi	m,7fh
+  2563 1129 0D			dcr	c
+  2564 112A 3E 03		mvi	a,3
+  2565 112C 32 02 20		sta	X2002
+  2566 112F 21 F2 D0		lxi	h,Xd0f2
+  2567 1132 22 04 20		shld	X2004
+  2568 1135 C9			ret
+			
+  2570 1136 36 7F	X1136:	mvi	m,7fh
+  2571 1138 23			inx	h
+  2572 1139 54			mov	d,h
+  2573 113A 5D			mov	e,l
+  2574 113B 13			inx	d
+  2575 113C 13			inx	d
+  2576 113D 7A			mov	a,d
+  2577 113E F6 F0		ori	0f0h
+  2578 1140 77			mov	m,a
+  2579 1141 23			inx	h
+  2580 1142 73			mov	m,e
+  2581 1143 79			mov	a,c
+  2582 1144 CD DE 13		call	X13de
+  2583 1147 05			dcr	b
+  2584 1148 C2 36 11		jnz	X1136
+  2585 114B C9			ret
+			
+  2587 114C 21 C2 20	X114c:	lxi	h,X20c2
+  2588 114F 0C			inr	c
+  2589 1150 0C			inr	c
+  2590 1151 0C			inr	c
+  2591 1152 11 D0 22		lxi	d,X22d0
+  2592 1155 06 00		mvi	b,0
+  2593 1157 3E 19		mvi	a,19h
+  2594 1159 73		X1159:	mov	m,e
+  2595 115A 23			inx	h
+  2596 115B 72			mov	m,d
+  2597 115C 23			inx	h
+  2598 115D EB			xchg
+  2599 115E 09			dad	b
+  2600 115F EB			xchg
+  2601 1160 3D			dcr	a
+  2602 1161 C2 59 11		jnz	X1159
+  2603 1164 32 55 21		sta	X2155
+  2604 1167 CD BF 11		call	X11bf
+  2605 116A 78			mov	a,b
+  2606 116B 32 56 21		sta	X2156
+  2607 116E 3C			inr	a
+  2608 116F 32 2B 21		sta	X212b
+  2609 1172 2A F2 20		lhld	X20f2
+  2610 1175 3E 17		mvi	a,17h
+  2611 1177 B8			cmp	b
+  2612 1178 CA 7E 11		jz	X117e
+  2613 117B 2A DE 20		lhld	X20de
+  2614 117E 7C		X117e:	mov	a,h
+  2615 117F F6 F0		ori	0f0h
+  2616 1181 67			mov	h,a
+  2617 1182 22 4E 20		shld	X204e
+  2618 1185 21 13 21		lxi	h,X2113
+  2619 1188 AF			xra	a
+  2620 1189 77		X1189:	mov	m,a
+  2621 118A 2C			inr	l
+  2622 118B 3C			inr	a
+  2623 118C 05			dcr	b
+  2624 118D F2 89 11		jp	X1189
+  2625 1190 C9			ret
+			
+  2627 1191 F3		X1191:	di
+  2628 1192 3A 7A 20		lda	X207a
+  2629 1195 B7			ora	a
+  2630 1196 CA A0 11		jz	X11a0
+  2631 1199 FB		X1199:	ei
+  2632 119A CD 88 14		call	X1488
+  2633 119D C3 91 11		jmp	X1191
+			
+  2635 11A0 3A 65 20	X11a0:	lda	X2065
+  2636 11A3 B7			ora	a
+  2637 11A4 C2 B0 11		jnz	X11b0
+  2638 11A7 3A 51 20		lda	X2051
+  2639 11AA B7			ora	a
+  2640 11AB FB			ei
+  2641 11AC C8			rz
+  2642 11AD C3 99 11		jmp	X1199
+			
+  2644 11B0 3A 5B 20	X11b0:	lda	X205b
+  2645 11B3 21 5A 20		lxi	h,X205a
+  2646 11B6 86			add	m
+  2647 11B7 27			daa
+  2648 11B8 E6 0F		ani	0fh
+  2649 11BA CA 99 11		jz	X1199
+  2650 11BD FB			ei
+  2651 11BE C9			ret
+			
+  2653 11BF E5		X11bf:	push	h
+  2654 11C0 06 17		mvi	b,17h
+  2655 11C2 3A A2 21		lda	X21a2
+  2656 11C5 21 C8 21		lxi	h,X21c8
+  2657 11C8 A6			ana	m
+  2658 11C9 E1			pop	h
+  2659 11CA C8			rz
+  2660 11CB 06 0D		mvi	b,0dh
+  2661 11CD C9			ret
+			
+  2663 11CE B7		X11ce:	ora	a
+  2664 11CF F2 E8 11		jp	X11e8
+  2665 11D2 21 04 20		lxi	h,X2004
+  2666 11D5 E5			push	h
+  2667 11D6 7E			mov	a,m
+  2668 11D7 23			inx	h
+  2669 11D8 6E			mov	l,m
+  2670 11D9 F6 F0		ori	0f0h
+  2671 11DB 67			mov	h,a
+  2672 11DC 22 4E 20		shld	X204e
+  2673 11DF CD 90 12		call	X1290
+  2674 11E2 E1			pop	h
+  2675 11E3 42			mov	b,d
+  2676 11E4 4B			mov	c,e
+  2677 11E5 C3 0A 12		jmp	X120a
+			
+  2679 11E8 CD 7F 12	X11e8:	call	X127f
+  2680 11EB CD 90 12		call	X1290
+  2681 11EE E5			push	h
+  2682 11EF D5			push	d
+  2683 11F0 EB			xchg
+  2684 11F1 CD 90 12		call	X1290
+  2685 11F4 42			mov	b,d
+  2686 11F5 4B			mov	c,e
+  2687 11F6 D1			pop	d
+  2688 11F7 7A			mov	a,d
+  2689 11F8 F6 F0		ori	0f0h
+  2690 11FA 67			mov	h,a
+  2691 11FB 6B			mov	l,e
+  2692 11FC 22 4E 20		shld	X204e
+  2693 11FF E1			pop	h
+  2694 1200 7C			mov	a,h
+  2695 1201 F6 9F		ori	9fh
+  2696 1203 3C			inr	a
+  2697 1204 C2 11 12		jnz	X1211
+  2698 1207 CD 99 12		call	X1299
+  2699 120A F3		X120a:	di
+  2700 120B 22 75 20		shld	X2075
+  2701 120E C3 28 12		jmp	X1228
+			
+  2703 1211 CD 9D 12	X1211:	call	X129d
+  2704 1214 3A 50 20		lda	X2050
+  2705 1217 0F			rrc
+  2706 1218 57			mov	d,a
+  2707 1219 CD DE 13		call	X13de
+  2708 121C 23			inx	h
+  2709 121D F3			di
+  2710 121E 22 75 20		shld	X2075
+  2711 1221 7A			mov	a,d
+  2712 1222 CD DE 13		call	X13de
+  2713 1225 70			mov	m,b
+  2714 1226 23			inx	h
+  2715 1227 71			mov	m,c
+  2716 1228 60		X1228:	mov	h,b
+  2717 1229 69			mov	l,c
+  2718 122A 22 79 21		shld	X2179
+  2719 122D FB			ei
+  2720 122E C9			ret
+			
+  2722 122F F5		X122f:	push	psw
+  2723 1230 CD BE 0F		call	X0fbe
+  2724 1233 F1			pop	psw
+  2725 1234 B7			ora	a
+  2726 1235 21 04 20		lxi	h,X2004
+  2727 1238 FA 48 12		jm	X1248
+  2728 123B CD 7F 12		call	X127f
+  2729 123E 7C			mov	a,h
+  2730 123F F6 9F		ori	9fh
+  2731 1241 3C			inr	a
+  2732 1242 C2 52 12		jnz	X1252
+  2733 1245 CD 99 12		call	X1299
+  2734 1248 F3		X1248:	di
+  2735 1249 22 58 20		shld	X2058
+  2736 124C 46			mov	b,m
+  2737 124D 23			inx	h
+  2738 124E 4E			mov	c,m
+  2739 124F C3 71 12		jmp	X1271
+			
+  2741 1252 CD 9D 12	X1252:	call	X129d
+  2742 1255 3A 50 20		lda	X2050
+  2743 1258 0F			rrc
+  2744 1259 47			mov	b,a
+  2745 125A CD DE 13		call	X13de
+  2746 125D 23			inx	h
+  2747 125E F3			di
+  2748 125F 22 58 20		shld	X2058
+  2749 1262 78			mov	a,b
+  2750 1263 46			mov	b,m
+  2751 1264 23			inx	h
+  2752 1265 4E			mov	c,m
+  2753 1266 CD DE 13		call	X13de
+  2754 1269 EB			xchg
+  2755 126A 2A 4E 20		lhld	X204e
+  2756 126D EB			xchg
+  2757 126E 73			mov	m,e
+  2758 126F 2B			dcx	h
+  2759 1270 72			mov	m,d
+  2760 1271 2A 4E 20	X1271:	lhld	X204e
+  2761 1274 22 56 20		shld	X2056
+  2762 1277 CD 99 12		call	X1299
+  2763 127A 70			mov	m,b
+  2764 127B 23			inx	h
+  2765 127C 71			mov	m,c
+  2766 127D FB			ei
+  2767 127E C9			ret
+			
+  2769 127F 3C		X127f:	inr	a
+  2770 1280 47			mov	b,a
+  2771 1281 21 04 20		lxi	h,X2004
+  2772 1284 7E		X1284:	mov	a,m
+  2773 1285 23			inx	h
+  2774 1286 6E			mov	l,m
+  2775 1287 67			mov	h,a
+  2776 1288 05			dcr	b
+  2777 1289 C8			rz
+  2778 128A CD 99 12		call	X1299
+  2779 128D C3 84 12		jmp	X1284
+			
+  2781 1290 E5		X1290:	push	h
+  2782 1291 CD 99 12		call	X1299
+  2783 1294 56			mov	d,m
+  2784 1295 23			inx	h
+  2785 1296 5E			mov	e,m
+  2786 1297 E1			pop	h
+  2787 1298 C9			ret
+			
+  2789 1299 CD DB 13	X1299:	call	X13db
+  2790 129C 23			inx	h
+  2791 129D 7C		X129d:	mov	a,h
+  2792 129E E6 0F		ani	0fh
+  2793 12A0 F6 20		ori	20h
+  2794 12A2 67			mov	h,a
+  2795 12A3 C9			ret
+			
+  2797 12A4 CD B0 12		call	X12b0
+  2798 12A7 50			mov	d,b
+  2799 12A8 CD B0 12		call	X12b0
+  2800 12AB			db	30h
+            30 
+  2801 12AC CD B0 12		call	X12b0
+  2802 12AF			db	10h
+            10 
+  2803 12B0 CD 91 11	X12b0:	call	X1191
+  2804 12B3 21 13 21		lxi	h,X2113
+  2805 12B6 3A F9 20		lda	X20f9
+  2806 12B9 85			add	l
+  2807 12BA 6F			mov	l,a
+  2808 12BB 7E			mov	a,m
+  2809 12BC F6 80		ori	80h
+  2810 12BE 77			mov	m,a
+  2811 12BF CD 8D 13		call	X138d
+  2812 12C2 CD C3 13		call	X13c3
+  2813 12C5 E1			pop	h
+  2814 12C6 7E			mov	a,m
+  2815 12C7 CD 95 13		call	X1395
+  2816 12CA 3A 53 21		lda	X2153
+  2817 12CD 21 F8 20		lxi	h,X20f8
+  2818 12D0 B7			ora	a
+  2819 12D1 1F			rar
+  2820 12D2 BE			cmp	m
+  2821 12D3 D2 12 10		jnc	X1012
+  2822 12D6 21 F4 20		lxi	h,X20f4
+  2823 12D9 22 F6 20		shld	X20f6
+  2824 12DC C3 12 10		jmp	X1012
+			
+  2826 12DF 3A 30 21		lda	X2130
+  2827 12E2 FE 02		cpi	2
+  2828 12E4 D0			rnc
+  2829 12E5 32 76 21		sta	X2176
+  2830 12E8 21 72 21	X12e8:	lxi	h,X2172
+  2831 12EB 7E			mov	a,m
+  2832 12EC F6 02		ori	2
+  2833 12EE 77			mov	m,a
+  2834 12EF C9			ret
+			
+  2836 12F0 3E FD		mvi	a,0fdh
+  2837 12F2 CD BF 0D		call	X0dbf
+  2838 12F5 3A 76 21		lda	X2176
+  2839 12F8 F6 32		ori	32h
+  2840 12FA CD B9 0D		call	X0db9
+  2841 12FD 3A A9 21		lda	X21a9
+  2842 1300 F5			push	psw
+  2843 1301 E6 C0		ani	0c0h
+  2844 1303 F6 18		ori	18h
+  2845 1305 87			add	a
+  2846 1306 3C			inr	a
+  2847 1307 F2 10 13		jp	X1310
+  2848 130A 1F			rar
+  2849 130B 07			rlc
+  2850 130C F6 04		ori	4
+  2851 130E E6 7F		ani	7fh
+  2852 1310 CD B9 0D	X1310:	call	X0db9
+  2853 1313 06 31		mvi	b,31h
+  2854 1315 F1			pop	psw
+  2855 1316 E6 20		ani	20h
+  2856 1318 C2 1C 13		jnz	X131c
+  2857 131B 04			inr	b
+  2858 131C 78		X131c:	mov	a,b
+  2859 131D CD B9 0D		call	X0db9
+  2860 1320 3A AB 21		lda	X21ab
+  2861 1323 0F			rrc
+  2862 1324 CD 7A 0D		call	X0d7a
+  2863 1327 CD BB 0D		call	X0dbb
+  2864 132A 3A AC 21		lda	X21ac
+  2865 132D 0F			rrc
+  2866 132E CD 7A 0D		call	X0d7a
+  2867 1331 CD BB 0D		call	X0dbb
+  2868 1334 3E 31		mvi	a,31h
+  2869 1336 CD B9 0D		call	X0db9
+  2870 1339 3A AA 21		lda	X21aa
+  2871 133C E6 F0		ani	0f0h
+  2872 133E 0F			rrc
+  2873 133F 0F			rrc
+  2874 1340 0F			rrc
+  2875 1341 0F			rrc
+  2876 1342 CD 7A 0D		call	X0d7a
+  2877 1345 36 F8		mvi	m,0f8h
+  2878 1347 C3 F3 0E		jmp	X0ef3
+			
+  2880 134A 21 57 21	X134a:	lxi	h,X2157
+  2881 134D 7E			mov	a,m
+  2882 134E B7			ora	a
+  2883 134F C8			rz
+  2884 1350 CD 91 11		call	X1191
+  2885 1353 21 13 21		lxi	h,X2113
+  2886 1356 3A F9 20		lda	X20f9
+  2887 1359 85			add	l
+  2888 135A 6F			mov	l,a
+  2889 135B 7E			mov	a,m
+  2890 135C E6 7F		ani	7fh
+  2891 135E 77			mov	m,a
+  2892 135F CD 8D 13		call	X138d
+  2893 1362 3A 50 20		lda	X2050
+  2894 1365 0F			rrc
+  2895 1366 47			mov	b,a
+  2896 1367 CD DE 13		call	X13de
+  2897 136A AF			xra	a
+  2898 136B 77		X136b:	mov	m,a
+  2899 136C 23			inx	h
+  2900 136D 05			dcr	b
+  2901 136E C2 6B 13		jnz	X136b
+  2902 1371 3E F0		mvi	a,0f0h
+  2903 1373 32 0E 21		sta	X210e
+  2904 1376 CD 95 13		call	X1395
+  2905 1379 AF			xra	a
+  2906 137A 32 57 21		sta	X2157
+  2907 137D C3 36 16		jmp	X1636
+			
+  2909 1380 3A F9 20	X1380:	lda	X20f9
+  2910 1383 CD E6 13		call	X13e6
+  2911 1386 21 C2 20	X1386:	lxi	h,X20c2
+  2912 1389 87			add	a
+  2913 138A 85			add	l
+  2914 138B 6F			mov	l,a
+  2915 138C C9			ret
+			
+  2917 138D CD 80 13	X138d:	call	X1380
+  2918 1390 7E		X1390:	mov	a,m
+  2919 1391 23			inx	h
+  2920 1392 66			mov	h,m
+  2921 1393 6F			mov	l,a
+  2922 1394 C9			ret
+			
+  2924 1395 E6 70	X1395:	ani	70h
+  2925 1397 47			mov	b,a
+  2926 1398 3A F9 20		lda	X20f9
+  2927 139B 3D			dcr	a
+  2928 139C 21 04 20		lxi	h,X2004
+  2929 139F FA BD 13		jm	X13bd
+  2930 13A2 CD E6 13		call	X13e6
+  2931 13A5 57			mov	d,a
+  2932 13A6 E6 7F		ani	7fh
+  2933 13A8 CD 86 13		call	X1386
+  2934 13AB CD 90 13		call	X1390
+  2935 13AE 3A 50 20		lda	X2050
+  2936 13B1 0F			rrc
+  2937 13B2 5F			mov	e,a
+  2938 13B3 23			inx	h
+  2939 13B4 14			inr	d
+  2940 13B5 15			dcr	d
+  2941 13B6 16 00		mvi	d,0
+  2942 13B8 19			dad	d
+  2943 13B9 FC BD 13		cm	X13bd
+  2944 13BC 19			dad	d
+  2945 13BD 7E		X13bd:	mov	a,m
+  2946 13BE E6 8F		ani	8fh
+  2947 13C0 B0			ora	b
+  2948 13C1 77			mov	m,a
+  2949 13C2 C9			ret
+			
+  2951 13C3 3A 50 20	X13c3:	lda	X2050
+  2952 13C6 0F			rrc
+  2953 13C7 54			mov	d,h
+  2954 13C8 5D			mov	e,l
+  2955 13C9 CD DE 13		call	X13de
+  2956 13CC EB			xchg
+  2957 13CD CD DB 13		call	X13db
+  2958 13D0 06 03		mvi	b,3
+  2959 13D2 7E		X13d2:	mov	a,m
+  2960 13D3 12			stax	d
+  2961 13D4 13			inx	d
+  2962 13D5 23			inx	h
+  2963 13D6 05			dcr	b
+  2964 13D7 C2 D2 13		jnz	X13d2
+  2965 13DA C9			ret
+			
+  2967 13DB 3A 50 20	X13db:	lda	X2050
+  2968 13DE 85		X13de:	add	l
+  2969 13DF 6F			mov	l,a
+  2970 13E0 D0			rnc
+  2971 13E1 24			inr	h
+  2972 13E2 C9			ret
+			
+  2974 13E3 3A F9 20	X13e3:	lda	X20f9
+  2975 13E6 21 13 21	X13e6:	lxi	h,X2113
+  2976 13E9 85			add	l
+  2977 13EA 6F			mov	l,a
+  2978 13EB 7E			mov	a,m
+  2979 13EC C9			ret
+			
+  2981 13ED 0E 00		mvi	c,0
+  2982 13EF C3 F4 13		jmp	X13f4
+			
+  2984 13F2 0E FF		mvi	c,0ffh
+  2985 13F4 3A B8 21	X13f4:	lda	X21b8
+  2986 13F7 B7			ora	a
+  2987 13F8 21 26 14		lxi	h,X1426
+  2988 13FB CA 04 14		jz	X1404
+  2989 13FE FE 3F		cpi	3fh
+  2990 1400 C0			rnz
+  2991 1401 21 0A 14		lxi	h,X140a
+  2992 1404 78		X1404:	mov	a,b
+  2993 1405 41			mov	b,c
+  2994 1406 CD FF 09		call	X09ff
+  2995 1409 C9			ret
+			
+  2997 140A 01 2A 14	X140a:	lxi	b,X142a
+  2998 140D 02			stax	b
+  2999 140E 2F			cma
+  3000 140F 14			inr	d
+  3001 1410 03			inx	b
+  3002 1411 57			mov	d,a
+  3003 1412 14			inr	d
+  3004 1413 04			inr	b
+  3005 1414 47			mov	b,a
+  3006 1415 14			inr	d
+  3007 1416 05			dcr	b
+  3008 1417 4E			mov	c,m
+  3009 1418 14			inr	d
+  3010 1419 06 3F		mvi	b,3fh
+  3011 141B 14			inr	d
+  3012 141C 07			rlc
+  3013 141D 66			mov	h,m
+  3014 141E 14			inr	d
+  3015 141F			db	8
+            08 
+  3016 1420 5F			mov	e,a
+  3017 1421 14			inr	d
+  3018 1422 09			dad	b
+  3019 1423 6D			mov	l,l
+  3020 1424 14			inr	d
+  3021 1425 00			nop
+  3022 1426 14		X1426:	inr	d
+  3023 1427			db	38h
+            38 
+  3024 1428 14			inr	d
+  3025 1429 00			nop
+  3026 142A 21 BC 21	X142a:	lxi	h,X21bc
+  3027 142D 70			mov	m,b
+  3028 142E C9			ret
+			
+  3030 142F CD 76 14		call	X1476
+  3031 1432 A7			ana	a
+  3032 1433 21 20 C3		lxi	h,Xc320
+  3033 1436 F2 0B CD		jp	Xcd0b
+  3034 1439 76			hlt
+			
+  3036 143A 14			inr	d
+  3037 143B A8			xra	b
+  3038 143C 21 20 C9		lxi	h,Xc920
+  3039 143F 21 01 21		lxi	h,X2101
+  3040 1442 70			mov	m,b
+  3041 1443 CD 48 18		call	X1848
+  3042 1446 C9			ret
+			
+  3044 1447 CD 76 14		call	X1476
+  3045 144A A6			ana	m
+  3046 144B 21 80 C9		lxi	h,Xc980
+  3047 144E CD 76 14		call	X1476
+  3048 1451 A6			ana	m
+  3049 1452 21 20 C3		lxi	h,Xc320
+  3050 1455 6B			mov	l,e
+  3051 1456 03			inx	b
+  3052 1457 21 A2 21		lxi	h,X21a2
+  3053 145A 70			mov	m,b
+  3054 145B CD 81 03		call	X0381
+  3055 145E C9			ret
+			
+  3057 145F CD 76 14		call	X1476
+  3058 1462 A6			ana	m
+  3059 1463 21 40 C9		lxi	h,Xc940
+  3060 1466 CD 76 14		call	X1476
+  3061 1469 A8			xra	b
+  3062 146A 21 40 C9		lxi	h,Xc940
+  3063 146D CD 76 14		call	X1476
+  3064 1470 A8			xra	b
+  3065 1471 21 10 C3		lxi	h,Xc310
+  3066 1474 42			mov	b,d
+  3067 1475 03			inx	b
+  3068 1476 E1		X1476:	pop	h
+  3069 1477 5E			mov	e,m
+  3070 1478 23			inx	h
+  3071 1479 56			mov	d,m
+  3072 147A 23			inx	h
+  3073 147B 7E			mov	a,m
+  3074 147C 23			inx	h
+  3075 147D EB			xchg
+  3076 147E 4F			mov	c,a
+  3077 147F 2F			cma
+  3078 1480 A6			ana	m
+  3079 1481 77			mov	m,a
+  3080 1482 78			mov	a,b
+  3081 1483 A1			ana	c
+  3082 1484 B6			ora	m
+  3083 1485 77			mov	m,a
+  3084 1486 EB			xchg
+  3085 1487 E9			pchl
+			
+  3087 1488 CD 93 14	X1488:	call	X1493
+  3088 148B E6 10		ani	10h
+  3089 148D CC AA 06		cz	X06aa
+  3090 1490 C3 59 0E		jmp	X0e59
+			;;
+			;; SUBROUTINE A
+			;;
+  3094 1493 DB 42	X1493:	in	42h		;; Read flags buffer
+  3095 1495 E6 80		ani	80h		;; check if transmit buffer is empty
+  3096 1497 C8			rz			;; if zero, return
+  3097 1498 21 44 21		lxi	h,X2144		;; HL = 0x2144
+  3098 149B 7E			mov	a,m		;; Load from 2144
+  3099 149C B7			ora	a		;; Check if zero
+  3100 149D CA A2 14		jz	X14a2		;;
+  3101 14A0 3E 10		mvi	a,10h		;; If not, A = 10 (else A is zero)
+  3102 14A2 21 A5 21	X14a2:	lxi	h,X21a5		;;
+  3103 14A5 B6			ora	m		;; or bits from 0x21a5
+  3104 14A6 21 45 21		lxi	h,X2145		;;
+  3105 14A9 B6			ora	m		;; or bits from 0x2145
+  3106 14AA 23			inx	h		;;
+  3107 14AB B6			ora	m		;; ... and 0x2146
+  3108 14AC 23			inx	h		;;
+  3109 14AD B6			ora	m		;; ... and 0x2147
+  3110 14AE 36 00		mvi	m,0		;; zero 0x2147
+  3111 14B0 23			inx	h		;;
+  3112 14B1 B6			ora	m		;; ... and 0x2148
+  3113 14B2 36 00		mvi	m,0		;; zero 0x2148
+  3114 14B4 D3 82		out	82h		;; Write to keyboard buffer
+  3115 14B6 21 74 20		lxi	h,X2074		;;
+  3116 14B9 34			inr	m		;; Increment what's at 0x2074
+  3117 14BA 3A 77 20		lda	X2077		;; load what's at 0x2077
+  3118 14BD B7			ora	a		;; return if it's not zero
+  3119 14BE C0			rnz			;;
+  3120 14BF 3A 65 20		lda	X2065		;; A =  0x2065
+  3121 14C2 21 51 20		lxi	h,X2051		;;
+  3122 14C5 B6			ora	m		;; return if [0x2065] | [0x2051] != 0
+  3123 14C6 C0			rnz
+  3124 14C7 2A 2D 21		lhld	X212d
+  3125 14CA 2B			dcx	h
+  3126 14CB 7C			mov	a,h
+  3127 14CC B5			ora	l
+  3128 14CD CA D4 14		jz	X14d4
+  3129 14D0 22 2D 21		shld	X212d
+  3130 14D3 C9			ret
+			
+  3132 14D4 3A BA 21	X14d4:	lda	X21ba
+  3133 14D7 EE FF		xri	0ffh
+  3134 14D9 32 BA 21		sta	X21ba
+  3135 14DC 21 12 02		lxi	h,X0212
+  3136 14DF C2 E5 14		jnz	X14e5
+  3137 14E2 21 09 01		lxi	h,X0109
+  3138 14E5 22 2D 21	X14e5:	shld	X212d
+  3139 14E8 2A F6 20		lhld	X20f6
+  3140 14EB 46			mov	b,m
+  3141 14EC 3A 59 21		lda	X2159
+  3142 14EF A8			xra	b
+  3143 14F0 77			mov	m,a
+  3144 14F1 11 00 10		lxi	d,X1000
+  3145 14F4 19			dad	d
+  3146 14F5 3A 5A 21		lda	X215a
+  3147 14F8 AE			xra	m
+  3148 14F9 77			mov	m,a
+  3149 14FA C9			ret
+			
+  3151 14FB 74			mov	m,h
+  3152 14FC 78			mov	a,b
+  3153 14FD B7			ora	a
+  3154 14FE CA 15 15		jz	X1515
+  3155 1501 3D			dcr	a
+  3156 1502 CA 0A 15		jz	X150a
+  3157 1505 3D			dcr	a
+  3158 1506 C0			rnz
+  3159 1507 CD 15 15		call	X1515
+  3160 150A 3A F8 20	X150a:	lda	X20f8
+  3161 150D 47			mov	b,a
+  3162 150E 04			inr	b
+  3163 150F 2A 4E 21		lhld	X214e
+  3164 1512 C3 29 15		jmp	X1529
+			
+  3166 1515 3A F8 20	X1515:	lda	X20f8
+  3167 1518 47			mov	b,a
+  3168 1519 3A 57 21		lda	X2157
+  3169 151C B7			ora	a
+  3170 151D 3A 50 20		lda	X2050
+  3171 1520 CA 24 15		jz	X1524
+  3172 1523 0F			rrc
+  3173 1524 90		X1524:	sub	b
+  3174 1525 47			mov	b,a
+  3175 1526 2A F6 20		lhld	X20f6
+  3176 1529 7C		X1529:	mov	a,h
+  3177 152A C6 10		adi	10h
+  3178 152C 57			mov	d,a
+  3179 152D 5D			mov	e,l
+  3180 152E 3E FF		mvi	a,0ffh
+  3181 1530 12		X1530:	stax	d
+  3182 1531 36 00		mvi	m,0
+  3183 1533 23			inx	h
+  3184 1534 13			inx	d
+  3185 1535 05			dcr	b
+  3186 1536 C2 30 15		jnz	X1530
+  3187 1539 32 F5 20		sta	X20f5
+  3188 153C AF			xra	a
+  3189 153D 32 F4 20		sta	X20f4
+  3190 1540 C9			ret
+			
+  3192 1541 78			mov	a,b
+  3193 1542 B7			ora	a
+  3194 1543 CA 6A 15		jz	X156a
+  3195 1546 3D			dcr	a
+  3196 1547 CA 55 15		jz	X1555
+  3197 154A 3D			dcr	a
+  3198 154B C0			rnz
+  3199 154C CD 55 15		call	X1555
+  3200 154F CD 6A 15		call	X156a
+  3201 1552 C3 4A 13		jmp	X134a
+			
+  3203 1555 21 F9 20	X1555:	lxi	h,X20f9
+  3204 1558 7E			mov	a,m
+  3205 1559 F5			push	psw
+  3206 155A 47			mov	b,a
+  3207 155B AF			xra	a
+  3208 155C 77			mov	m,a
+  3209 155D 0E FF		mvi	c,0ffh
+  3210 155F CD 86 15		call	X1586
+  3211 1562 F1			pop	psw
+  3212 1563 77			mov	m,a
+  3213 1564 CD 74 10		call	X1074
+  3214 1567 C3 0A 15		jmp	X150a
+			
+  3216 156A 3A F8 20	X156a:	lda	X20f8
+  3217 156D B7			ora	a
+  3218 156E CC 4A 13		cz	X134a
+  3219 1571 CD 15 15		call	X1515
+  3220 1574 21 F9 20		lxi	h,X20f9
+  3221 1577 7E			mov	a,m
+  3222 1578 F5			push	psw
+  3223 1579 4F			mov	c,a
+  3224 157A 3E 17		mvi	a,17h
+  3225 157C 91			sub	c
+  3226 157D 47			mov	b,a
+  3227 157E CD 86 15		call	X1586
+  3228 1581 F1			pop	psw
+  3229 1582 77			mov	m,a
+  3230 1583 C3 74 10		jmp	X1074
+			
+  3232 1586 05		X1586:	dcr	b
+  3233 1587 F8			rm
+  3234 1588 0C			inr	c
+  3235 1589 71			mov	m,c
+  3236 158A C5			push	b
+  3237 158B E5			push	h
+  3238 158C CD E3 13		call	X13e3
+  3239 158F E6 7F		ani	7fh
+  3240 1591 77			mov	m,a
+  3241 1592 3E 70		mvi	a,70h
+  3242 1594 CD 95 13		call	X1395
+  3243 1597 CD 74 10		call	X1074
+  3244 159A 3A 50 20		lda	X2050
+  3245 159D 47			mov	b,a
+  3246 159E CD 29 15		call	X1529
+  3247 15A1 E1			pop	h
+  3248 15A2 C1			pop	b
+  3249 15A3 C3 86 15		jmp	X1586
+			
+  3251 15A6 0E 81		mvi	c,81h
+  3252 15A8 CD 8E 10		call	X108e
+  3253 15AB CD BF 11		call	X11bf
+  3254 15AE 3A 30 21		lda	X2130
+  3255 15B1 B7			ora	a
+  3256 15B2 CA B6 15		jz	X15b6
+  3257 15B5 3D			dcr	a
+  3258 15B6 57		X15b6:	mov	d,a
+  3259 15B7 3A 31 21		lda	X2131
+  3260 15BA B7			ora	a
+  3261 15BB C2 C0 15		jnz	X15c0
+  3262 15BE 78			mov	a,b
+  3263 15BF 3C			inr	a
+  3264 15C0 3D		X15c0:	dcr	a
+  3265 15C1 5F			mov	e,a
+  3266 15C2 78			mov	a,b
+  3267 15C3 BB			cmp	e
+  3268 15C4 D8			rc
+  3269 15C5 7A			mov	a,d
+  3270 15C6 BB			cmp	e
+  3271 15C7 D0			rnc
+  3272 15C8 21 55 21		lxi	h,X2155
+  3273 15CB 72			mov	m,d
+  3274 15CC 23			inx	h
+  3275 15CD 73			mov	m,e
+  3276 15CE 4B			mov	c,e
+  3277 15CF 42			mov	b,d
+  3278 15D0 79			mov	a,c
+  3279 15D1 90			sub	b
+  3280 15D2 3C			inr	a
+  3281 15D3 5F			mov	e,a
+  3282 15D4 21 04 20		lxi	h,X2004
+  3283 15D7 78			mov	a,b
+  3284 15D8 B7			ora	a
+  3285 15D9 CA E8 15		jz	X15e8
+  3286 15DC 50			mov	d,b
+  3287 15DD 7E		X15dd:	mov	a,m
+  3288 15DE E6 7F		ani	7fh
+  3289 15E0 77			mov	m,a
+  3290 15E1 CD 2B 16		call	X162b
+  3291 15E4 15			dcr	d
+  3292 15E5 C2 DD 15		jnz	X15dd
+  3293 15E8 7E		X15e8:	mov	a,m
+  3294 15E9 F6 80		ori	80h
+  3295 15EB 77			mov	m,a
+  3296 15EC CD 2B 16		call	X162b
+  3297 15EF 1D			dcr	e
+  3298 15F0 C2 E8 15		jnz	X15e8
+  3299 15F3 3E 17		mvi	a,17h
+  3300 15F5 91			sub	c
+  3301 15F6 CA 05 16		jz	X1605
+  3302 15F9 57			mov	d,a
+  3303 15FA 7E		X15fa:	mov	a,m
+  3304 15FB E6 7F		ani	7fh
+  3305 15FD 77			mov	m,a
+  3306 15FE CD 2B 16		call	X162b
+  3307 1601 15			dcr	d
+  3308 1602 C2 FA 15		jnz	X15fa
+  3309 1605 78		X1605:	mov	a,b
+  3310 1606 32 55 21		sta	X2155
+  3311 1609 79			mov	a,c
+  3312 160A 32 56 21		sta	X2156
+  3313 160D 21 13 21		lxi	h,X2113
+  3314 1610 0E 18		mvi	c,18h
+  3315 1612 7E		X1612:	mov	a,m
+  3316 1613 B7			ora	a
+  3317 1614 F2 23 16		jp	X1623
+  3318 1617 E5			push	h
+  3319 1618 CD 86 13		call	X1386
+  3320 161B 7E			mov	a,m
+  3321 161C 23			inx	h
+  3322 161D 66			mov	h,m
+  3323 161E 6F			mov	l,a
+  3324 161F CD C3 13		call	X13c3
+  3325 1622 E1			pop	h
+  3326 1623 23		X1623:	inx	h
+  3327 1624 0D			dcr	c
+  3328 1625 C2 12 16		jnz	X1612
+  3329 1628 C3 48 18		jmp	X1848
+			
+  3331 162B 23		X162b:	inx	h
+  3332 162C 6E			mov	l,m
+  3333 162D E6 0F		ani	0fh
+  3334 162F F6 20		ori	20h
+  3335 1631 67			mov	h,a
+  3336 1632 23			inx	h
+  3337 1633 C3 DB 13		jmp	X13db
+			
+  3339 1636 21 0D 00	X1636:	lxi	h,X000d
+  3340 1639 22 2D 21		shld	X212d
+  3341 163C AF			xra	a
+  3342 163D 32 BA 21		sta	X21ba
+  3343 1640 2A F6 20		lhld	X20f6
+  3344 1643 3A F4 20		lda	X20f4
+  3345 1646 47			mov	b,a
+  3346 1647 77			mov	m,a
+  3347 1648 7C			mov	a,h
+  3348 1649 C6 10		adi	10h
+  3349 164B 67			mov	h,a
+  3350 164C 3A F5 20		lda	X20f5
+  3351 164F 77			mov	m,a
+  3352 1650 3A 50 20		lda	X2050
+  3353 1653 3D			dcr	a
+  3354 1654 5F			mov	e,a
+  3355 1655 3A 7B 20		lda	X207b
+  3356 1658 B7			ora	a
+  3357 1659 C2 7B 16		jnz	X167b
+  3358 165C 3A F9 20		lda	X20f9
+  3359 165F 21 0E 21		lxi	h,X210e
+  3360 1662 BE			cmp	m
+  3361 1663 CA 7F 16		jz	X167f
+  3362 1666 77			mov	m,a
+  3363 1667 CD 74 10		call	X1074
+  3364 166A AF			xra	a
+  3365 166B 32 54 21		sta	X2154
+  3366 166E 21 57 21		lxi	h,X2157
+  3367 1671 7E			mov	a,m
+  3368 1672 B7			ora	a
+  3369 1673 CA 7B 16		jz	X167b
+  3370 1676 7B			mov	a,e
+  3371 1677 3D			dcr	a
+  3372 1678 B7			ora	a
+  3373 1679 1F			rar
+  3374 167A 5F			mov	e,a
+  3375 167B 7B		X167b:	mov	a,e
+  3376 167C 32 53 21		sta	X2153
+  3377 167F 21 53 21	X167f:	lxi	h,X2153
+  3378 1682 11 F8 20		lxi	d,X20f8
+  3379 1685 1A			ldax	d
+  3380 1686 BE			cmp	m
+  3381 1687 DA 8C 16		jc	X168c
+  3382 168A 7E			mov	a,m
+  3383 168B 12			stax	d
+  3384 168C 3A BB 21	X168c:	lda	X21bb
+  3385 168F C6 08		adi	8
+  3386 1691 96			sub	m
+  3387 1692 C2 A1 16		jnz	X16a1
+  3388 1695 23			inx	h
+  3389 1696 B6			ora	m
+  3390 1697 CA A1 16		jz	X16a1
+  3391 169A CD 38 09		call	X0938
+  3392 169D AF			xra	a
+  3393 169E 32 54 21		sta	X2154
+  3394 16A1 3A F8 20	X16a1:	lda	X20f8
+  3395 16A4 32 BB 21		sta	X21bb
+  3396 16A7 2A 4E 21		lhld	X214e
+  3397 16AA CD DE 13		call	X13de
+  3398 16AD 22 F6 20		shld	X20f6
+  3399 16B0 7E			mov	a,m
+  3400 16B1 32 F4 20		sta	X20f4
+  3401 16B4 47			mov	b,a
+  3402 16B5 7C			mov	a,h
+  3403 16B6 C6 10		adi	10h
+  3404 16B8 67			mov	h,a
+  3405 16B9 7E			mov	a,m
+  3406 16BA 32 F5 20		sta	X20f5
+  3407 16BD 2A F6 20		lhld	X20f6
+  3408 16C0 70			mov	m,b
+  3409 16C1 C9			ret
+			
+  3411 16C2 47		X16c2:	mov	b,a
+  3412 16C3 21 F1 16		lxi	h,X16f1
+  3413 16C6 22 40 21		shld	X2140
+  3414 16C9 AF			xra	a
+  3415 16CA 32 2F 21		sta	X212f
+  3416 16CD 32 4B 21		sta	X214b
+  3417 16D0 32 7D 20		sta	X207d
+  3418 16D3 21 30 21		lxi	h,X2130
+  3419 16D6 0E 0F		mvi	c,0fh
+  3420 16D8 AF			xra	a
+  3421 16D9 77		X16d9:	mov	m,a
+  3422 16DA 23			inx	h
+  3423 16DB 0D			dcr	c
+  3424 16DC C2 D9 16		jnz	X16d9
+  3425 16DF 21 B8 21		lxi	h,X21b8
+  3426 16E2 36 00		mvi	m,0
+  3427 16E4 78			mov	a,b
+  3428 16E5 FE 40		cpi	40h
+  3429 16E7 D2 F2 16		jnc	X16f2
+  3430 16EA FE 3C		cpi	3ch
+  3431 16EC DA F2 16		jc	X16f2
+  3432 16EF 77			mov	m,a
+  3433 16F0 C9			ret
+			
+  3435 16F1 47		X16f1:	mov	b,a
+  3436 16F2 78		X16f2:	mov	a,b
+  3437 16F3 FE 3A		cpi	3ah
+  3438 16F5 D2 17 17		jnc	X1717
+  3439 16F8 D6 30		sui	30h
+  3440 16FA FA 17 17		jm	X1717
+  3441 16FD 4F			mov	c,a
+  3442 16FE 21 2F 21		lxi	h,X212f
+  3443 1701 7E			mov	a,m
+  3444 1702 FE 1A		cpi	1ah
+  3445 1704 D2 13 17		jnc	X1713
+  3446 1707 07			rlc
+  3447 1708 47			mov	b,a
+  3448 1709 07			rlc
+  3449 170A 07			rlc
+  3450 170B 80			add	b
+  3451 170C DA 13 17		jc	X1713
+  3452 170F 81			add	c
+  3453 1710 D2 15 17		jnc	X1715
+  3454 1713 3E FF	X1713:	mvi	a,0ffh
+  3455 1715 77		X1715:	mov	m,a
+  3456 1716 C9			ret
+			
+  3458 1717 11 30 21	X1717:	lxi	d,X2130
+  3459 171A F5			push	psw
+  3460 171B 21 4B 21		lxi	h,X214b
+  3461 171E 4E			mov	c,m
+  3462 171F 06 00		mvi	b,0
+  3463 1721 EB			xchg
+  3464 1722 09			dad	b
+  3465 1723 01 2F 21		lxi	b,X212f
+  3466 1726 0A			ldax	b
+  3467 1727 77			mov	m,a
+  3468 1728 AF			xra	a
+  3469 1729 02			stax	b
+  3470 172A 1A			ldax	d
+  3471 172B FE 0F		cpi	0fh
+  3472 172D CA 32 17		jz	X1732
+  3473 1730 3C			inr	a
+  3474 1731 12			stax	d
+  3475 1732 F1		X1732:	pop	psw
+  3476 1733 47		X1733:	mov	b,a
+  3477 1734 FE 3B		cpi	3bh
+  3478 1736 C8			rz
+  3479 1737 E6 C0		ani	0c0h
+  3480 1739 78			mov	a,b
+  3481 173A CA 43 17		jz	X1743
+  3482 173D 32 7E 20		sta	X207e
+  3483 1740 C3 A2 0A		jmp	X0aa2
+			
+  3485 1743 21 7D 20	X1743:	lxi	h,X207d
+  3486 1746 86			add	m
+  3487 1747 D2 4C 17		jnc	X174c
+  3488 174A 3E FF		mvi	a,0ffh
+  3489 174C 77		X174c:	mov	m,a
+  3490 174D 21 33 17		lxi	h,X1733
+  3491 1750 22 40 21		shld	X2140
+  3492 1753 C9			ret
+			
+  3494 1754 16 00	X1754:	mvi	d,0
+  3495 1756 06 01		mvi	b,1
+  3496 1758 C3 62 17		jmp	X1762
+			;;
+			;;  Third initialization call?
+			;;
+  3500 175B CD C0 02	X175b:	call	X02c0		;; Initialize start of screen RAM and wipe attribute RAM to 0xff
+  3501 175E 06 0A		mvi	b,0ah		;; B = 0x0a
+  3502 1760 16 01		mvi	d,1		;; D = 1
+  3503 1762 C5		X1762:	push	b		;; push B, D
+  3504 1763 D5			push	d		;;
+  3505 1764 CD BE 17		call	X17be		;; Display wait message
+  3506 1767 D1			pop	d		;; pop D
+  3507 1768 F3			di			;; disable interrupts(???)
+  3508 1769 21 7B 21		lxi	h,X217b		;; HL = 0x217b
+  3509 176C 1E 33		mvi	e,33h		;; E = 0x33
+  3510 176E 0E 01		mvi	c,1		;; C = 1
+  3511 1770 AF			xra	a		;; A = 0
+  3512 1771 32 AE 21	X1771:	sta	X21ae		;; 0x21ae = A
+  3513 1774 79			mov	a,c		;; A = C
+  3514 1775 32 AD 21		sta	X21ad		;; 0x21ad = A
+  3515 1778 D5			push	d		;; push D,H
+  3516 1779 E5			push	h		;;
+  3517 177A 7A			mov	a,d		;; A=D
+  3518 177B B7			ora	a		;; or A
+  3519 177C 7E			mov	a,m		;; load A from HL
+  3520 177D 32 AF 21		sta	X21af		;; store it in 0x21af
+  3521 1780 CC AE 18		cz	X18ae		;; if A is 0 call X18ae
+  3522 1783 CD A3 18		call	X18a3		;; call X18a3
+  3523 1786 E1			pop	h		;; pop H,D
+  3524 1787 D1			pop	d
+  3525 1788 3A AF 21		lda	X21af
+  3526 178B 1D			dcr	e
+  3527 178C CA 9E 17		jz	X179e
+  3528 178F 77			mov	m,a
+  3529 1790 3A AD 21		lda	X21ad
+  3530 1793 07			rlc
+  3531 1794 AE			xra	m
+  3532 1795 4F			mov	c,a
+  3533 1796 23			inx	h
+  3534 1797 3A AE 21		lda	X21ae
+  3535 179A 3C			inr	a
+  3536 179B C3 71 17		jmp	X1771
+			
+  3538 179E BE		X179e:	cmp	m
+  3539 179F C1			pop	b
+  3540 17A0 0E 00		mvi	c,0
+  3541 17A2 CA AC 17		jz	X17ac
+  3542 17A5 05			dcr	b
+  3543 17A6 C2 62 17		jnz	X1762
+  3544 17A9 CD D0 17		call	X17d0
+  3545 17AC 79		X17ac:	mov	a,c
+  3546 17AD B7			ora	a
+  3547 17AE F5			push	psw
+  3548 17AF 0E 40		mvi	c,40h
+  3549 17B1 3E 63		mvi	a,63h
+  3550 17B3 CD 2B 19		call	X192b
+  3551 17B6 21 F2 D0		lxi	h,Xd0f2
+  3552 17B9 22 04 20		shld	X2004
+  3553 17BC F1			pop	psw
+  3554 17BD C9			ret
+			;;
+			;;  Show wait message
+			;;
+  3558 17BE 11 EC 17	X17be:	lxi	d,X17ec		;; DE = 0x17ec
+  3559 17C1 06 07		mvi	b,7		;; B = 7
+  3560 17C3 21 CC 21		lxi	h,X21cc		;; HL = 0x21cc
+  3561 17C6 CD 8B 03		call	memmov		;; Initialize 0x21cc to Wait message
+  3562 17C9 21 71 CC		lxi	h,Xcc71		;; HL = 0xcc71
+  3563 17CC 22 04 20		shld	X2004		;; retarget screen ram to display wait message
+  3564 17CF C9			ret
+			
+  3566 17D0 21 7B 21	X17d0:	lxi	h,X217b
+  3567 17D3 06 27		mvi	b,27h
+  3568 17D5 36 80	X17d5:	mvi	m,80h
+  3569 17D7 23			inx	h
+  3570 17D8 05			dcr	b
+  3571 17D9 C2 D5 17		jnz	X17d5
+  3572 17DC 11 F3 17		lxi	d,X17f3		;; DE = 0x17f3
+  3573 17DF 06 0B		mvi	b,0bh		;; B = 11
+  3574 17E1 CD 8B 03		call	memmov		;; store
+  3575 17E4 0E 01		mvi	c,1
+  3576 17E6 3E 30		mvi	a,30h
+  3577 17E8 32 78 20		sta	X2078
+  3578 17EB C9			ret
+			X17ec:
+  3580 17EC			db	'Wait'
+            57 61 69 74 
+            
+  3581 17F0			db	07fh,070h,06h
+            7F 70 06 
+			X17f3:
+  3583 17F3			db	0,8,06eh,020h
+            00 08 6E 20 
+            
+  3584 17F7			db	0d0h,050h,0,020h
+            D0 50 00 20 
+            
+  3585 17FB			db	0,0e0h,0e0h
+            00 E0 E0 
+			X17fe:
+  3587 17FE 3A 55 21		lda	X2155
+  3588 1801 01 FF 00		lxi	b,X00ff
+  3589 1804 C3 0F 18		jmp	X180f
+			
+  3591 1807 CD BF 11		call	X11bf
+  3592 180A 3A 56 21		lda	X2156
+  3593 180D 0E 01		mvi	c,1
+  3594 180F 21 F9 20	X180f:	lxi	h,X20f9
+  3595 1812 C3 25 18		jmp	X1825
+			
+  3597 1815 3A 53 21	X1815:	lda	X2153
+  3598 1818 01 01 FF		lxi	b,Xff01
+  3599 181B C3 22 18		jmp	X1822
+			
+  3601 181E AF		X181e:	xra	a
+  3602 181F 01 FF 00		lxi	b,X00ff
+  3603 1822 21 F8 20	X1822:	lxi	h,X20f8
+  3604 1825 57		X1825:	mov	d,a
+  3605 1826 3A B8 21		lda	X21b8
+  3606 1829 B7			ora	a
+  3607 182A C2 15 0A		jnz	X0a15
+  3608 182D 3A 30 21		lda	X2130
+  3609 1830 B7			ora	a
+  3610 1831 C2 35 18		jnz	X1835
+  3611 1834 3C			inr	a
+  3612 1835 5F		X1835:	mov	e,a
+  3613 1836 7E			mov	a,m
+  3614 1837 BA		X1837:	cmp	d
+  3615 1838 CA 44 18		jz	X1844
+  3616 183B B8			cmp	b
+  3617 183C CA 44 18		jz	X1844
+  3618 183F 81			add	c
+  3619 1840 1D			dcr	e
+  3620 1841 C2 37 18		jnz	X1837
+  3621 1844 77		X1844:	mov	m,a
+  3622 1845 C3 36 16		jmp	X1636
+			
+  3624 1848 21 00 00	X1848:	lxi	h,X0000
+  3625 184B 22 30 21		shld	X2130
+  3626 184E 3E FF		mvi	a,0ffh
+  3627 1850 32 0E 21		sta	X210e
+  3628 1853 3A 01 21		lda	X2101
+  3629 1856 4F			mov	c,a
+  3630 1857 21 30 21		lxi	h,X2130
+  3631 185A 7E			mov	a,m
+  3632 185B B7			ora	a
+  3633 185C CA 60 18		jz	X1860
+  3634 185F 3D			dcr	a
+  3635 1860 47		X1860:	mov	b,a
+  3636 1861 79			mov	a,c
+  3637 1862 B7			ora	a
+  3638 1863 CA 69 18		jz	X1869
+  3639 1866 3A 55 21		lda	X2155
+  3640 1869 80		X1869:	add	b
+  3641 186A 47			mov	b,a
+  3642 186B 79			mov	a,c
+  3643 186C B7			ora	a
+  3644 186D 3A 56 21		lda	X2156
+  3645 1870 C2 79 18		jnz	X1879
+  3646 1873 48			mov	c,b
+  3647 1874 CD BF 11		call	X11bf
+  3648 1877 78			mov	a,b
+  3649 1878 41			mov	b,c
+  3650 1879 B8		X1879:	cmp	b
+  3651 187A DA 7E 18		jc	X187e
+  3652 187D 78			mov	a,b
+  3653 187E 32 F9 20	X187e:	sta	X20f9
+  3654 1881 23			inx	h
+  3655 1882 7E			mov	a,m
+  3656 1883 B7			ora	a
+  3657 1884 CA 88 18		jz	X1888
+  3658 1887 3D			dcr	a
+  3659 1888 47		X1888:	mov	b,a
+  3660 1889 79			mov	a,c
+  3661 188A B7			ora	a
+  3662 188B C2 95 18		jnz	X1895
+  3663 188E 3A 50 20		lda	X2050
+  3664 1891 3D			dcr	a
+  3665 1892 C3 98 18		jmp	X1898
+			
+  3667 1895 3A 53 21	X1895:	lda	X2153
+  3668 1898 B8		X1898:	cmp	b
+  3669 1899 DA 9D 18		jc	X189d
+  3670 189C 78			mov	a,b
+  3671 189D 32 F8 20	X189d:	sta	X20f8
+  3672 18A0 C3 36 16		jmp	X1636
+			
+  3674 18A3 0E 40	X18a3:	mvi	c,40h
+  3675 18A5 CD 28 19		call	X1928
+  3676 18A8 CD C1 18		call	X18c1
+  3677 18AB C3 BC 18		jmp	X18bc
+			
+  3679 18AE 0E 40	X18ae:	mvi	c,40h
+  3680 18B0 CD 28 19		call	X1928
+  3681 18B3 CD A8 19		call	X19a8
+  3682 18B6 CD 77 19		call	X1977
+  3683 18B9 CD D6 19		call	X19d6
+  3684 18BC 3E 30	X18bc:	mvi	a,30h
+  3685 18BE D3 62		out	62h
+  3686 18C0 C9			ret
+			;;
+			;;  On h pulse, write 0x2d to NVR... this looks like it's doing a read
+			;;
+  3690 18C1 DB 42	X18c1:	in	42h
+  3691 18C3 A1			ana	c
+  3692 18C4 CA C1 18		jz	X18c1
+  3693 18C7 DB 42	X18c7:	in	42h
+  3694 18C9 A1			ana	c
+  3695 18CA C2 C7 18		jnz	X18c7
+  3696 18CD 3E 2D		mvi	a,2dh		;; Write READ command to NVR latch
+  3697 18CF D3 62		out	62h
+  3698 18D1 DB 42	X18d1:	in	42h
+  3699 18D3 A1			ana	c
+  3700 18D4 CA D1 18		jz	X18d1
+  3701 18D7 DB 42	X18d7:	in	42h
+  3702 18D9 A1			ana	c
+  3703 18DA C2 D7 18		jnz	X18d7
+  3704 18DD 3E 2F		mvi	a,2fh		;; Write 0x2fh (standby) to nvr latch
+  3705 18DF D3 62		out	62h
+  3706 18E1 21 D3 21		lxi	h,X21d3		;; HL=X21d3
+  3707 18E4 06 0E		mvi	b,0eh		;; B= 14 -- we're reading 14 bits
+  3708 18E6 DB 42	X18e6:	in	42h
+  3709 18E8 A1			ana	c
+  3710 18E9 CA E6 18		jz	X18e6
+  3711 18EC DB 42	X18ec:	in	42h
+  3712 18EE A1			ana	c
+  3713 18EF C2 EC 18		jnz	X18ec		;; wait for NVR clock L
+  3714 18F2 3E 25		mvi	a,25h		;; shft bit out of nvr
+  3715 18F4 D3 62		out	62h
+  3716 18F6 DB 42	X18f6:	in	42h
+  3717 18F8 A1			ana	c
+  3718 18F9 CA F6 18		jz	X18f6		;; wait for NVR clock H
+  3719 18FC DB 42		in	42h		;; read bit and store it in memory
+  3720 18FE 77			mov	m,a
+  3721 18FF 23			inx	h
+  3722 1900 DB 42	X1900:	in	42h
+  3723 1902 A1			ana	c
+  3724 1903 C2 00 19		jnz	X1900		;; wait for NVR clock L
+  3725 1906 05			dcr	b
+  3726 1907 C2 F6 18		jnz	X18f6		;; read next bit
+  3727 190A 3E 2F		mvi	a,2fh		;; send standby
+  3728 190C D3 62		out	62h
+  3729 190E 11 D3 21		lxi	d,X21d3		;; DE=0x21d3
+  3730 1911 06 0E		mvi	b,0eh		;; B = 14
+  3731 1913 21 00 00		lxi	h,X0000		;; HL = 0
+  3732 1916 29		X1916:	dad	h		;;
+  3733 1917 1A			ldax	d		;; load next char
+  3734 1918 E6 20		ani	20h		;; and with NVR data bit
+  3735 191A 07			rlc			;; rotate NVR bit to high bit
+  3736 191B 07			rlc
+  3737 191C 07			rlc
+  3738 191D B5			ora	l
+  3739 191E 6F			mov	l,a
+  3740 191F 13			inx	d
+  3741 1920 05			dcr	b
+  3742 1921 C2 16 19		jnz	X1916
+  3743 1924 22 AF 21		shld	X21af		;; Store the finished data in 21af and 21ae
+  3744 1927 C9			ret
+			;;
+			;;  Loads address A into NVR address register
+			;;
+  3748 1928 3A AE 21	X1928:	lda	X21ae		;; Load accumulator from 0x21ae -- (0x42)
+  3749 192B 06 FF	X192b:	mvi	b,0ffh		;; B = 0xff
+  3750 192D 04		X192d:	inr	b		;; increment B
+  3751 192E D6 0A		sui	0ah		;; subtract 0x0a from accumulator
+  3752 1930 F2 2D 19		jp	X192d		;; repeat while accumulator is positive
+  3753 1933 C6 0A		adi	0ah		;; add 0x0a to accumulator
+			
+				;;  B = A/10, A = A%10 -- this is almost certainly related to NVR!
+				;;  First, fill the buffer at 21d3 with 20 bytes of 0x23 (accept address 1)
+			
+  3758 1935 21 D3 21		lxi	h,X21d3		;; HL = 0x21d3
+  3759 1938 1E 23		mvi	e,23h		;; E = 0x23
+  3760 193A 16 14		mvi	d,14h		;; D = 0x14
+  3761 193C 73		X193c:	mov	m,e		;;
+  3762 193D 23			inx	h		;; HL++
+  3763 193E 15			dcr	d		;; D--
+  3764 193F C2 3C 19		jnz	X193c		;; repeat until D is zero
+			
+				;;  End buffer with 0x2f -- put in standby
+			
+  3768 1942 36 2F		mvi	m,2fh		;; Store 0x2f in 21e7
+			
+				;;  Set 21d3 + a to 0x22 (accept address 0)
+			
+  3772 1944 21 D3 21		lxi	h,X21d3		;; HL = 0x21d3
+  3773 1947 5F			mov	e,a		;; copy A to E
+  3774 1948 16 00		mvi	d,0		;; clear D
+  3775 194A 19			dad	d		;; add DE to HL -- calculate address of bit A
+  3776 194B 36 22		mvi	m,22h		;; Store 0x22 in M
+			
+				;;  Set 21d3 + 10 + b to 0x22 (accept address 0)
+			
+  3780 194D 21 D3 21		lxi	h,X21d3		;; HL = 0x21d3
+  3781 1950 3E 0A		mvi	a,0ah		;; A = 0x0a
+  3782 1952 80			add	b		;; A = 0x0a + B
+  3783 1953 5F			mov	e,a
+  3784 1954 19			dad	d
+  3785 1955 36 22		mvi	m,22h
+			
+				;; Wait for horiz latch
+			
+  3789 1957 DB 42	X1957:	in	42h
+  3790 1959 A1			ana	c
+  3791 195A C2 57 19		jnz	X1957
+			
+				;; Now copy from 21d3 to nvr latch, one per edge, 21 bytes
+			
+  3795 195D 21 D3 21		lxi	h,X21d3
+  3796 1960 06 15		mvi	b,15h		;;
+  3797 1962 DB 42	X1962:	in	42h
+  3798 1964 A1			ana	c		;; Flags Buffer & C
+  3799 1965 CA 62 19		jz	X1962
+  3800 1968 05			dcr	b
+  3801 1969 F8			rm			;; Return if B is negative
+  3802 196A DB 42	X196a:	in	42h
+  3803 196C A1			ana	c
+  3804 196D C2 6A 19		jnz	X196a
+  3805 1970 7E			mov	a,m
+  3806 1971 D3 62		out	62h
+  3807 1973 23			inx	h
+  3808 1974 C3 62 19		jmp	X1962
+			
+  3810 1977 2A AF 21	X1977:	lhld	X21af
+  3811 197A 29			dad	h
+  3812 197B 29			dad	h
+  3813 197C 11 D3 21		lxi	d,X21d3
+  3814 197F 06 0E		mvi	b,0eh
+  3815 1981 3E 20	X1981:	mvi	a,20h
+  3816 1983 29			dad	h
+  3817 1984 17			ral
+  3818 1985 12			stax	d
+  3819 1986 13			inx	d
+  3820 1987 05			dcr	b
+  3821 1988 C2 81 19		jnz	X1981
+  3822 198B 3E 2F		mvi	a,2fh
+  3823 198D 12			stax	d
+  3824 198E 21 D3 21		lxi	h,X21d3
+  3825 1991 06 0F		mvi	b,0fh
+  3826 1993 DB 42	X1993:	in	42h
+  3827 1995 A1			ana	c
+  3828 1996 CA 93 19		jz	X1993
+  3829 1999 DB 42	X1999:	in	42h
+  3830 199B A1			ana	c
+  3831 199C C2 99 19		jnz	X1999
+  3832 199F 7E			mov	a,m
+  3833 19A0 D3 62		out	62h
+  3834 19A2 23			inx	h
+  3835 19A3 05			dcr	b
+  3836 19A4 C2 93 19		jnz	X1993
+  3837 19A7 C9			ret
+			
+  3839 19A8 DB 42	X19a8:	in	42h
+  3840 19AA A1			ana	c
+  3841 19AB CA A8 19		jz	X19a8
+  3842 19AE DB 42	X19ae:	in	42h
+  3843 19B0 A1			ana	c
+  3844 19B1 C2 AE 19		jnz	X19ae
+  3845 19B4 3E 2B		mvi	a,2bh
+  3846 19B6 D3 62		out	62h
+  3847 19B8 CD C0 19		call	X19c0
+  3848 19BB 3E 2F		mvi	a,2fh
+  3849 19BD D3 62		out	62h
+  3850 19BF C9			ret
+			
+  3852 19C0 21 3B 01	X19c0:	lxi	h,X013b
+  3853 19C3 DB 42	X19c3:	in	42h
+  3854 19C5 A1			ana	c
+  3855 19C6 CA C3 19		jz	X19c3
+  3856 19C9 DB 42	X19c9:	in	42h
+  3857 19CB A1			ana	c
+  3858 19CC C2 C9 19		jnz	X19c9
+  3859 19CF 2B			dcx	h
+  3860 19D0 7C			mov	a,h
+  3861 19D1 B5			ora	l
+  3862 19D2 C2 C3 19		jnz	X19c3
+  3863 19D5 C9			ret
+			
+  3865 19D6 DB 42	X19d6:	in	42h
+  3866 19D8 A1			ana	c
+  3867 19D9 CA D6 19		jz	X19d6
+  3868 19DC DB 42	X19dc:	in	42h
+  3869 19DE A1			ana	c
+  3870 19DF C2 DC 19		jnz	X19dc
+  3871 19E2 3E 29		mvi	a,29h
+  3872 19E4 D3 62		out	62h
+  3873 19E6 CD C0 19		call	X19c0
+  3874 19E9 3E 2F		mvi	a,2fh
+  3875 19EB D3 62		out	62h
+  3876 19ED C9			ret
+			
+  3878 19EE FE 20	X19ee:	cpi	20h
+  3879 19F0 0E 43		mvi	c,43h
+  3880 19F2 CA FF 01		jz	X01ff
+  3881 19F5 21 B0 1B		lxi	h,X1bb0
+  3882 19F8 E5			push	h
+  3883 19F9 FE 0D		cpi	0dh
+  3884 19FB CA 4B 09		jz	X094b
+  3885 19FE FE 09		cpi	9
+  3886 1A00 CA F9 0D		jz	X0df9
+  3887 1A03 FE 3A		cpi	3ah
+  3888 1A05 D2 60 1B		jnc	X1b60
+  3889 1A08 D6 30		sui	30h
+  3890 1A0A F8			rm
+  3891 1A0B 87			add	a
+  3892 1A0C 21 A2 1A		lxi	h,X1aa2
+  3893 1A0F CD DE 13		call	X13de
+  3894 1A12 CD 90 13		call	X1390
+  3895 1A15 78			mov	a,b
+  3896 1A16 11 AC 21		lxi	d,X21ac
+  3897 1A19 E9			pchl
+			
+  3899 1A1A 32 77 21	X1a1a:	sta	X2177
+  3900 1A1D C3 12 08		jmp	X0812
+			
+  3902 1A20 3A 7B 20	X1a20:	lda	X207b
+  3903 1A23 EE FF		xri	0ffh
+  3904 1A25 32 7B 20		sta	X207b
+  3905 1A28 CA 61 1A		jz	X1a61
+  3906 1A2B 0E 80	X1a2b:	mvi	c,80h
+  3907 1A2D CD 8E 10		call	X108e
+  3908 1A30 2A 40 21		lhld	X2140
+  3909 1A33 22 11 21		shld	X2111
+  3910 1A36 21 EE 19		lxi	h,X19ee
+  3911 1A39 22 40 21		shld	X2140
+  3912 1A3C 21 00 00		lxi	h,X0000
+  3913 1A3F 22 43 21		shld	X2143
+  3914 1A42 22 72 21		shld	X2172
+  3915 1A45 2A 04 20	X1a45:	lhld	X2004
+  3916 1A48 22 C5 21		shld	X21c5
+  3917 1A4B 2A F8 20		lhld	X20f8
+  3918 1A4E 22 0D 21		shld	X210d
+  3919 1A51 CD BA 1B		call	X1bba
+  3920 1A54 22 4E 21		shld	X214e
+  3921 1A57 AF			xra	a
+  3922 1A58 32 F8 20		sta	X20f8
+  3923 1A5B CD F9 1B		call	X1bf9
+  3924 1A5E C3 36 16		jmp	X1636
+			
+  3926 1A61 2A 11 21	X1a61:	lhld	X2111
+  3927 1A64 22 40 21		shld	X2140
+  3928 1A67 CD BA 1B		call	X1bba
+  3929 1A6A 11 00 10		lxi	d,X1000
+  3930 1A6D 19			dad	d
+  3931 1A6E 3A 50 20		lda	X2050
+  3932 1A71 36 FF	X1a71:	mvi	m,0ffh
+  3933 1A73 23			inx	h
+  3934 1A74 3D			dcr	a
+  3935 1A75 C2 71 1A		jnz	X1a71
+  3936 1A78 21 0D 21		lxi	h,X210d
+  3937 1A7B 7E			mov	a,m
+  3938 1A7C 32 F8 20		sta	X20f8
+  3939 1A7F 3E FF		mvi	a,0ffh
+  3940 1A81 23			inx	h
+  3941 1A82 77			mov	m,a
+  3942 1A83 CD 36 16		call	X1636
+  3943 1A86 2A C5 21		lhld	X21c5
+  3944 1A89 22 04 20		shld	X2004
+  3945 1A8C AF			xra	a
+  3946 1A8D 32 C4 21		sta	X21c4
+  3947 1A90 32 C2 21		sta	X21c2
+  3948 1A93 DB 42		in	42h
+  3949 1A95 E6 08		ani	8
+  3950 1A97 CA A1 1A		jz	X1aa1
+  3951 1A9A 3A 76 21		lda	X2176
+  3952 1A9D B7			ora	a
+  3953 1A9E CC E8 12		cz	X12e8
+  3954 1AA1 C9		X1aa1:	ret
+			
+  3956 1AA2 CF		X1aa2:	rst	1
+  3957 1AA3 1A			ldax	d
+  3958 1AA4 09			dad	b
+  3959 1AA5 1B			dcx	d
+  3960 1AA6 D0			rnc
+  3961 1AA7 1A			ldax	d
+  3962 1AA8 F2 1A FE		jp	Xfe1a
+  3963 1AAB 1A			ldax	d
+  3964 1AAC 0A			ldax	b
+  3965 1AAD 1B			dcx	d
+  3966 1AAE 22 1B 40		shld	X401b
+  3967 1AB1 1B			dcx	d
+  3968 1AB2 41			mov	b,c
+  3969 1AB3 1B			dcx	d
+  3970 1AB4 B6			ora	m
+  3971 1AB5 1A			ldax	d
+  3972 1AB6 CD 52 1B		call	X1b52
+  3973 1AB9 AF			xra	a
+  3974 1ABA 32 0E 21		sta	X210e
+  3975 1ABD 32 0D 21		sta	X210d
+  3976 1AC0 3A A2 21		lda	X21a2
+  3977 1AC3 B7			ora	a
+  3978 1AC4 F5			push	psw
+  3979 1AC5 CC 77 0B		cz	X0b77
+  3980 1AC8 F1			pop	psw
+  3981 1AC9 C4 63 0B		cnz	X0b63
+  3982 1ACC C3 45 1A		jmp	X1a45
+			
+  3984 1ACF C7			rst	0
+  3985 1AD0 CD 52 1B		call	X1b52
+  3986 1AD3 3A F8 20		lda	X20f8
+  3987 1AD6 B7			ora	a
+  3988 1AD7 C8			rz
+  3989 1AD8 CD 23 0E		call	X0e23
+  3990 1ADB AE			xra	m
+  3991 1ADC 77			mov	m,a
+  3992 1ADD CD 23 0E		call	X0e23
+  3993 1AE0 A6			ana	m
+  3994 1AE1 06 54		mvi	b,54h
+  3995 1AE3 C2 E8 1A		jnz	X1ae8
+  3996 1AE6 06 00	X1ae6:	mvi	b,0
+  3997 1AE8 78		X1ae8:	mov	a,b
+  3998 1AE9 32 F4 20		sta	X20f4
+  3999 1AEC 3A F8 20		lda	X20f8
+  4000 1AEF C3 EA 1E		jmp	X1eea
+			;;
+			;;  Below is what appears to be a bunch of dead code-- unreferenced functions (meant for use
+			;;  by an expansion rom or patch, perhaps?).
+			;;
+  4005 1AF2 CD 52 1B		call	X1b52
+  4006 1AF5 CD EC 0D		call	X0dec
+  4007 1AF8 CD CD 1C		call	X1ccd
+  4008 1AFB C3 E6 1A		jmp	X1ae6
+			
+  4010 1AFE 21 A5 21		lxi	h,X21a5
+  4011 1B01 7E			mov	a,m
+  4012 1B02 EE 20		xri	20h
+  4013 1B04 77			mov	m,a
+  4014 1B05 AF			xra	a
+  4015 1B06 32 44 21		sta	X2144
+  4016 1B09 C9			ret
+			
+  4018 1B0A CD 4B 09		call	X094b
+  4019 1B0D 21 5A 22		lxi	h,X225a
+  4020 1B10 7E			mov	a,m
+  4021 1B11 EE 03		xri	3
+  4022 1B13 77			mov	m,a
+  4023 1B14 32 65 22		sta	X2265
+  4024 1B17 E6 01		ani	1
+  4025 1B19 32 BE 21		sta	X21be
+  4026 1B1C CA D3 1C		jz	X1cd3
+  4027 1B1F C3 35 1C		jmp	X1c35
+			
+  4029 1B22 CD 59 1B		call	X1b59
+  4030 1B25 21 A6 21		lxi	h,X21a6
+  4031 1B28 3A F8 20		lda	X20f8
+  4032 1B2B D6 02		sui	2
+  4033 1B2D FE 28		cpi	28h
+  4034 1B2F D0			rnc
+  4035 1B30 00			nop
+			
+            1B 34		org	1b34h
+			
+  4039 1B34 57			mov	d,a
+  4040 1B35 CD 2B 0E		call	X0e2b
+  4041 1B38 AE			xra	m
+  4042 1B39 77			mov	m,a
+  4043 1B3A CD DB 1D		call	X1ddb
+  4044 1B3D C3 D3 1C		jmp	X1cd3
+			
+  4046 1B40 1B			dcx	d
+  4047 1B41 EB			xchg
+  4048 1B42 CD 59 1B		call	X1b59
+  4049 1B45 32 F8 20		sta	X20f8
+  4050 1B48 7E			mov	a,m
+  4051 1B49 C6 10		adi	10h
+  4052 1B4B 77			mov	m,a
+  4053 1B4C CD DB 1D		call	X1ddb
+  4054 1B4F C3 D3 1C		jmp	X1cd3
+			
+  4056 1B52 3A BE 21	X1b52:	lda	X21be
+  4057 1B55 B7			ora	a
+  4058 1B56 C0			rnz
+  4059 1B57 E1			pop	h
+  4060 1B58 C9			ret
+			
+  4062 1B59 3A BE 21	X1b59:	lda	X21be
+  4063 1B5C B7			ora	a
+  4064 1B5D C8			rz
+  4065 1B5E E1			pop	h
+  4066 1B5F C9			ret
+			
+  4068 1B60 3A 69 20	X1b60:	lda	X2069
+  4069 1B63 E6 20		ani	20h
+  4070 1B65 C8			rz
+  4071 1B66 78			mov	a,b
+  4072 1B67 FE 53		cpi	53h
+  4073 1B69 C2 72 1B		jnz	X1b72
+  4074 1B6C CD 54 17		call	X1754
+  4075 1B6F C3 81 1B		jmp	X1b81
+			
+  4077 1B72 FE 52	X1b72:	cpi	52h
+  4078 1B74 C2 86 1B		jnz	X1b86
+  4079 1B77 CD 5B 17		call	X175b
+  4080 1B7A FB			ei
+  4081 1B7B CD A2 03		call	X03a2
+  4082 1B7E CD 2B 1A		call	X1a2b
+  4083 1B81 FB		X1b81:	ei
+  4084 1B82 CD F9 1B		call	X1bf9
+  4085 1B85 C9			ret
+			
+  4087 1B86 FE 41	X1b86:	cpi	41h
+  4088 1B88 C0			rnz
+  4089 1B89 CD 59 1B		call	X1b59
+  4090 1B8C CD 4B 09		call	X094b
+  4091 1B8F 3E 41		mvi	a,41h
+  4092 1B91 CD E6 05		call	X05e6
+  4093 1B94 3E 3D		mvi	a,3dh
+  4094 1B96 CD E6 05		call	X05e6
+  4095 1B99 3E 20		mvi	a,20h
+  4096 1B9B CD E6 05		call	X05e6
+  4097 1B9E 21 9F 1E		lxi	h,X1e9f
+  4098 1BA1 22 40 21		shld	X2140
+  4099 1BA4 E1			pop	h
+  4100 1BA5 C9			ret
+			
+  4102 1BA6 98			sbb	b
+  4103 1BA7 FE 61		cpi	61h
+  4104 1BA9 F8			rm
+  4105 1BAA FE 7B		cpi	7bh
+  4106 1BAC F0			rp
+  4107 1BAD E6 DF		ani	0dfh
+  4108 1BAF C9			ret
+			
+  4110 1BB0 CD 94 03	X1bb0:	call	X0394
+  4111 1BB3 21 EE 19		lxi	h,X19ee
+  4112 1BB6 22 40 21		shld	X2140
+  4113 1BB9 C9			ret
+			
+  4115 1BBA 2A 4E 20	X1bba:	lhld	X204e
+  4116 1BBD C3 C3 1B		jmp	X1bc3
+			
+  4118 1BC0 21 CC 21	X1bc0:	lxi	h,X21cc
+  4119 1BC3 7C		X1bc3:	mov	a,h
+  4120 1BC4 E6 0F		ani	0fh
+  4121 1BC6 F6 20		ori	20h
+  4122 1BC8 67			mov	h,a
+  4123 1BC9 C9			ret
+			
+  4125 1BCA CD BA 1B	X1bca:	call	X1bba
+  4126 1BCD CD C8 0F		call	X0fc8
+  4127 1BD0 E5			push	h
+  4128 1BD1 36 7F		mvi	m,7fh
+  4129 1BD3 23			inx	h
+  4130 1BD4 EB			xchg
+  4131 1BD5 CD C0 1B		call	X1bc0
+  4132 1BD8 7C			mov	a,h
+  4133 1BD9 E6 0F		ani	0fh
+  4134 1BDB F6 70		ori	70h
+  4135 1BDD 12			stax	d
+  4136 1BDE 13			inx	d
+  4137 1BDF 7D			mov	a,l
+  4138 1BE0 12			stax	d
+  4139 1BE1 E1			pop	h
+  4140 1BE2 3A 50 20		lda	X2050
+  4141 1BE5 5F			mov	e,a
+  4142 1BE6 06 54		mvi	b,54h
+  4143 1BE8 7B		X1be8:	mov	a,e
+  4144 1BE9 CD 27 0E		call	X0e27
+  4145 1BEC A6			ana	m
+  4146 1BED CA F4 1B		jz	X1bf4
+  4147 1BF0 7B			mov	a,e
+  4148 1BF1 CD EA 1E		call	X1eea
+  4149 1BF4 1D		X1bf4:	dcr	e
+  4150 1BF5 C2 E8 1B		jnz	X1be8
+  4151 1BF8 C9			ret
+			
+  4153 1BF9 01 AD 1C	X1bf9:	lxi	b,X1cad
+  4154 1BFC 21 53 22		lxi	h,X2253
+  4155 1BFF 3E FA		mvi	a,0fah
+  4156 1C01 CD 71 1C		call	X1c71
+  4157 1C04 0E 01		mvi	c,1
+  4158 1C06 06 10		mvi	b,10h
+  4159 1C08 CD 8A 1C		call	X1c8a
+  4160 1C0B 01 AD 1C		lxi	b,X1cad
+  4161 1C0E 3E FA		mvi	a,0fah
+  4162 1C10 CD 71 1C		call	X1c71
+  4163 1C13 0E 01		mvi	c,1
+  4164 1C15 06 50		mvi	b,50h
+  4165 1C17 CD 8A 1C		call	X1c8a
+  4166 1C1A 01 B6 1C		lxi	b,X1cb6
+  4167 1C1D 3E FD		mvi	a,0fdh
+  4168 1C1F CD 71 1C		call	X1c71
+  4169 1C22 0E 13		mvi	c,13h
+  4170 1C24 CD 88 1C		call	X1c88
+  4171 1C27 36 7F		mvi	m,7fh
+  4172 1C29 23			inx	h
+  4173 1C2A EB			xchg
+  4174 1C2B CD BA 1B		call	X1bba
+  4175 1C2E 7C			mov	a,h
+  4176 1C2F F6 70		ori	70h
+  4177 1C31 12			stax	d
+  4178 1C32 13			inx	d
+  4179 1C33 7D			mov	a,l
+  4180 1C34 12			stax	d
+  4181 1C35 CD C0 1B	X1c35:	call	X1bc0
+  4182 1C38 3A 50 20		lda	X2050
+  4183 1C3B 47			mov	b,a
+  4184 1C3C 3E 31		mvi	a,31h
+  4185 1C3E 77		X1c3e:	mov	m,a
+  4186 1C3F 23			inx	h
+  4187 1C40 4F			mov	c,a
+  4188 1C41 E6 0F		ani	0fh
+  4189 1C43 79			mov	a,c
+  4190 1C44 C2 49 1C		jnz	X1c49
+  4191 1C47 EE 80		xri	80h
+  4192 1C49 3C		X1c49:	inr	a
+  4193 1C4A 27			daa
+  4194 1C4B D2 50 1C		jnc	X1c50
+  4195 1C4E F6 80		ori	80h
+  4196 1C50 E6 8F	X1c50:	ani	8fh
+  4197 1C52 F6 30		ori	30h
+  4198 1C54 05			dcr	b
+  4199 1C55 C2 3E 1C		jnz	X1c3e
+  4200 1C58 CD 9F 1C		call	X1c9f
+  4201 1C5B CD CA 1B		call	X1bca
+  4202 1C5E 3E 01		mvi	a,1
+  4203 1C60 32 BE 21	X1c60:	sta	X21be
+  4204 1C63 21 53 22		lxi	h,X2253
+  4205 1C66 7C			mov	a,h
+  4206 1C67 65			mov	h,l
+  4207 1C68 E6 0F		ani	0fh
+  4208 1C6A F6 30		ori	30h
+  4209 1C6C 6F			mov	l,a
+  4210 1C6D 22 04 20		shld	X2004
+  4211 1C70 C9			ret
+			
+  4213 1C71 E5		X1c71:	push	h
+  4214 1C72 11 00 10		lxi	d,X1000
+  4215 1C75 19			dad	d
+  4216 1C76 D1			pop	d
+  4217 1C77 F5		X1c77:	push	psw
+  4218 1C78 0A			ldax	b
+  4219 1C79 B7			ora	a
+  4220 1C7A CA 86 1C		jz	X1c86
+  4221 1C7D 12			stax	d
+  4222 1C7E F1			pop	psw
+  4223 1C7F 77			mov	m,a
+  4224 1C80 23			inx	h
+  4225 1C81 13			inx	d
+  4226 1C82 03			inx	b
+  4227 1C83 C3 77 1C		jmp	X1c77
+			
+  4229 1C86 F1		X1c86:	pop	psw
+  4230 1C87 C9			ret
+			
+  4232 1C88 06 70	X1c88:	mvi	b,70h
+  4233 1C8A EB		X1c8a:	xchg
+  4234 1C8B 36 7F	X1c8b:	mvi	m,7fh
+  4235 1C8D 23			inx	h
+  4236 1C8E 54			mov	d,h
+  4237 1C8F 5D			mov	e,l
+  4238 1C90 13			inx	d
+  4239 1C91 13			inx	d
+  4240 1C92 7A			mov	a,d
+  4241 1C93 E6 0F		ani	0fh
+  4242 1C95 B0			ora	b
+  4243 1C96 77			mov	m,a
+  4244 1C97 23			inx	h
+  4245 1C98 73			mov	m,e
+  4246 1C99 23			inx	h
+  4247 1C9A 0D			dcr	c
+  4248 1C9B C2 8B 1C		jnz	X1c8b
+  4249 1C9E C9			ret
+			
+  4251 1C9F 36 7F	X1c9f:	mvi	m,7fh
+  4252 1CA1 54			mov	d,h
+  4253 1CA2 5D			mov	e,l
+  4254 1CA3 23			inx	h
+  4255 1CA4 7A			mov	a,d
+  4256 1CA5 E6 0F		ani	0fh
+  4257 1CA7 F6 70		ori	70h
+  4258 1CA9 77			mov	m,a
+  4259 1CAA 23			inx	h
+  4260 1CAB 73			mov	m,e
+  4261 1CAC C9			ret
+			X1cad:
+  4263 1CAD			db	'SET-UP A',0
+            53 45 54 2D 
+            55 50 20 41 
+            00 
+			X1cb6:
+  4265 1CB6			db	'TO EXIT PRESS ',022h,'SET-UP',022h,0
+            54 4F 20 45 
+            58 49 54 20 
+            50 52 45 53 
+            53 20 22 53 
+            45 54 2D 55 
+            50 22 00 
+  4266 1CCD CD BA 1B		call	X1bba
+  4267 1CD0 C3 C8 0F		jmp	X0fc8
+			
+  4269 1CD3 CD CD 1C	X1cd3:	call	X1ccd
+  4270 1CD6 CD C0 1B		call	X1bc0
+  4271 1CD9 E5			push	h
+  4272 1CDA 3E 4E		mvi	a,4eh
+  4273 1CDC CD CB 0F		call	X0fcb
+  4274 1CDF E1			pop	h
+  4275 1CE0 E5			push	h
+  4276 1CE1 23			inx	h
+  4277 1CE2 23			inx	h
+  4278 1CE3 1E 00		mvi	e,0
+  4279 1CE5 06 04		mvi	b,4
+  4280 1CE7 DB 42		in	42h
+  4281 1CE9 E6 08		ani	8
+  4282 1CEB F5			push	psw
+  4283 1CEC CA F0 1C		jz	X1cf0
+  4284 1CEF 04			inr	b
+  4285 1CF0 0E 04	X1cf0:	mvi	c,4
+  4286 1CF2 CD CC 1D	X1cf2:	call	X1dcc
+  4287 1CF5 F6 B0		ori	0b0h
+  4288 1CF7 77			mov	m,a
+  4289 1CF8 1C			inr	e
+  4290 1CF9 23			inx	h
+  4291 1CFA 0D			dcr	c
+  4292 1CFB C2 F2 1C		jnz	X1cf2
+  4293 1CFE 0E 04		mvi	c,4
+  4294 1D00 36 00	X1d00:	mvi	m,0
+  4295 1D02 1C			inr	e
+  4296 1D03 23			inx	h
+  4297 1D04 0D			dcr	c
+  4298 1D05 C2 00 1D		jnz	X1d00
+  4299 1D08 05			dcr	b
+  4300 1D09 C2 F0 1C		jnz	X1cf0
+  4301 1D0C 0E 04		mvi	c,4
+  4302 1D0E F1			pop	psw
+  4303 1D0F F5			push	psw
+  4304 1D10 C2 17 1D		jnz	X1d17
+  4305 1D13 79			mov	a,c
+  4306 1D14 C6 08		adi	8
+  4307 1D16 4F			mov	c,a
+  4308 1D17 36 00	X1d17:	mvi	m,0
+  4309 1D19 23			inx	h
+  4310 1D1A 0D			dcr	c
+  4311 1D1B C2 17 1D		jnz	X1d17
+  4312 1D1E 11 4B 1D		lxi	d,X1d4b
+  4313 1D21 3A AB 21		lda	X21ab
+  4314 1D24 CD 61 1D		call	X1d61
+  4315 1D27 11 56 1D		lxi	d,X1d56
+  4316 1D2A 3A AC 21		lda	X21ac
+  4317 1D2D CD 61 1D		call	X1d61
+  4318 1D30 CD 9F 1C		call	X1c9f
+  4319 1D33 11 08 00		lxi	d,X0008
+  4320 1D36 0E 04		mvi	c,4
+  4321 1D38 F1			pop	psw
+  4322 1D39 CA 3D 1D		jz	X1d3d
+  4323 1D3C 0C			inr	c
+  4324 1D3D 3E 31	X1d3d:	mvi	a,31h
+  4325 1D3F E1			pop	h
+  4326 1D40 77		X1d40:	mov	m,a
+  4327 1D41 3C			inr	a
+  4328 1D42 19			dad	d
+  4329 1D43 0D			dcr	c
+  4330 1D44 C2 40 1D		jnz	X1d40
+  4331 1D47 AF			xra	a
+  4332 1D48 C3 60 1C		jmp	X1c60
+			
+  4334 1D4B		X1d4b:	db	20h
+            20 
+  4335 1D4C			db	20h
+            20 
+  4336 1D4D			db	20h
+            20 
+  4337 1D4E 54			mov	d,h
+  4338 1D4F			db	20h
+            20 
+  4339 1D50 53			mov	d,e
+  4340 1D51 50			mov	d,b
+  4341 1D52 45			mov	b,l
+  4342 1D53 45			mov	b,l
+  4343 1D54 44			mov	b,h
+  4344 1D55			db	20h
+            20 
+  4345 1D56		X1d56:	db	20h
+            20 
+  4346 1D57			db	20h
+            20 
+  4347 1D58			db	20h
+            20 
+  4348 1D59 52			mov	d,d
+  4349 1D5A			db	20h
+            20 
+  4350 1D5B 53			mov	d,e
+  4351 1D5C 50			mov	d,b
+  4352 1D5D 45			mov	b,l
+  4353 1D5E 45			mov	b,l
+  4354 1D5F 44			mov	b,h
+  4355 1D60			db	20h
+            20 
+  4356 1D61 4F		X1d61:	mov	c,a
+  4357 1D62 06 0B		mvi	b,0bh
+  4358 1D64 CD 8B 03		call	memmov
+  4359 1D67 79			mov	a,c
+  4360 1D68 0F			rrc
+  4361 1D69 0F			rrc
+  4362 1D6A 4F			mov	c,a
+  4363 1D6B 0F			rrc
+  4364 1D6C 0F			rrc
+  4365 1D6D 81			add	c
+  4366 1D6E 4F			mov	c,a
+  4367 1D6F 06 00		mvi	b,0
+  4368 1D71 11 7C 1D		lxi	d,X1d7c
+  4369 1D74 EB			xchg
+  4370 1D75 09			dad	b
+  4371 1D76 EB			xchg
+  4372 1D77 06 05		mvi	b,5
+  4373 1D79 C3 8B 03		jmp	memmov
+			
+  4375 1D7C		X1d7c:	db	20h
+            20 
+  4376 1D7D			db	20h
+            20 
+  4377 1D7E			db	20h
+            20 
+  4378 1D7F 35			dcr	m
+  4379 1D80			db	30h
+            30 
+  4380 1D81			db	20h
+            20 
+  4381 1D82			db	20h
+            20 
+  4382 1D83			db	20h
+            20 
+  4383 1D84 37			stc
+  4384 1D85 35			dcr	m
+  4385 1D86			db	20h
+            20 
+  4386 1D87			db	20h
+            20 
+  4387 1D88 31 31 30		lxi	sp,X3031
+  4388 1D8B			db	20h
+            20 
+  4389 1D8C			db	20h
+            20 
+  4390 1D8D 31 33 34		lxi	sp,X3433
+  4391 1D90			db	20h
+            20 
+  4392 1D91			db	20h
+            20 
+  4393 1D92 31 35 30		lxi	sp,X3035
+  4394 1D95			db	20h
+            20 
+  4395 1D96			db	20h
+            20 
+  4396 1D97 32 30 30		sta	X3030
+  4397 1D9A			db	20h
+            20 
+  4398 1D9B			db	20h
+            20 
+  4399 1D9C 33			inx	sp
+  4400 1D9D			db	30h
+            30 
+  4401 1D9E			db	30h
+            30 
+  4402 1D9F			db	20h
+            20 
+  4403 1DA0			db	20h
+            20 
+  4404 1DA1 36 30		mvi	m,30h
+  4405 1DA3			db	30h
+            30 
+  4406 1DA4			db	20h
+            20 
+  4407 1DA5 31 32 30		lxi	sp,X3032
+  4408 1DA8			db	30h
+            30 
+  4409 1DA9			db	20h
+            20 
+  4410 1DAA 31 38 30		lxi	sp,X3038
+  4411 1DAD			db	30h
+            30 
+  4412 1DAE			db	20h
+            20 
+  4413 1DAF 32 30 30		sta	X3030
+  4414 1DB2			db	30h
+            30 
+  4415 1DB3			db	20h
+            20 
+  4416 1DB4 32 34 30		sta	X3034
+  4417 1DB7			db	30h
+            30 
+  4418 1DB8			db	20h
+            20 
+  4419 1DB9 33			inx	sp
+  4420 1DBA 36 30		mvi	m,30h
+  4421 1DBC			db	30h
+            30 
+  4422 1DBD			db	20h
+            20 
+  4423 1DBE 34			inr	m
+  4424 1DBF			db	38h
+            38 
+  4425 1DC0			db	30h
+            30 
+  4426 1DC1			db	30h
+            30 
+  4427 1DC2			db	20h
+            20 
+  4428 1DC3 39			dad	sp
+  4429 1DC4 36 30		mvi	m,30h
+  4430 1DC6			db	30h
+            30 
+  4431 1DC7 31 39 32		lxi	sp,X3239
+  4432 1DCA			db	30h
+            30 
+  4433 1DCB			db	30h
+            30 
+  4434 1DCC E5		X1dcc:	push	h
+  4435 1DCD 21 A6 21		lxi	h,X21a6
+  4436 1DD0 53			mov	d,e
+  4437 1DD1 7B			mov	a,e
+  4438 1DD2 CD 2B 0E		call	X0e2b
+  4439 1DD5 A6			ana	m
+  4440 1DD6 E1			pop	h
+  4441 1DD7 C8			rz
+  4442 1DD8 3E 01		mvi	a,1
+  4443 1DDA C9			ret
+			
+  4445 1DDB 3A AC 21	X1ddb:	lda	X21ac
+  4446 1DDE E6 F0		ani	0f0h
+  4447 1DE0 0F			rrc
+  4448 1DE1 0F			rrc
+  4449 1DE2 0F			rrc
+  4450 1DE3 0F			rrc
+  4451 1DE4 47			mov	b,a
+  4452 1DE5 3A AB 21		lda	X21ab
+  4453 1DE8 E6 F0		ani	0f0h
+  4454 1DEA B0			ora	b
+  4455 1DEB 32 58 21		sta	X2158
+  4456 1DEE E6 F0		ani	0f0h
+  4457 1DF0 FE 20		cpi	20h
+  4458 1DF2 3A A4 21		lda	X21a4
+  4459 1DF5 CA FF 1D		jz	X1dff
+  4460 1DF8 E6 3F		ani	3fh
+  4461 1DFA F6 80		ori	80h
+  4462 1DFC C3 03 1E		jmp	X1e03
+			
+  4464 1DFF E6 3F	X1dff:	ani	3fh
+  4465 1E01 F6 C0		ori	0c0h
+  4466 1E03 32 A4 21	X1e03:	sta	X21a4
+  4467 1E06 DB 42		in	42h
+  4468 1E08 E6 08		ani	8
+  4469 1E0A CA 19 1E		jz	X1e19
+  4470 1E0D 21 A7 21		lxi	h,X21a7
+  4471 1E10 7E			mov	a,m
+  4472 1E11 F6 10		ori	10h
+  4473 1E13 77			mov	m,a
+  4474 1E14 3E 6E		mvi	a,6eh
+  4475 1E16 C3 31 1E		jmp	X1e31
+			
+  4477 1E19 3A A9 21	X1e19:	lda	X21a9
+  4478 1E1C E6 C0		ani	0c0h
+  4479 1E1E 47			mov	b,a
+  4480 1E1F 3A A9 21		lda	X21a9
+  4481 1E22 E6 20		ani	20h
+  4482 1E24 0F			rrc
+  4483 1E25 F6 20		ori	20h
+  4484 1E27 B0			ora	b
+  4485 1E28 0F			rrc
+  4486 1E29 0F			rrc
+  4487 1E2A 47			mov	b,a
+  4488 1E2B 3A A4 21		lda	X21a4
+  4489 1E2E E6 C3		ani	0c3h
+  4490 1E30 B0			ora	b
+  4491 1E31 32 A4 21	X1e31:	sta	X21a4
+  4492 1E34 3A A9 21		lda	X21a9
+  4493 1E37 E6 10		ani	10h
+  4494 1E39 CA 3E 1E		jz	X1e3e
+  4495 1E3C 3E 10		mvi	a,10h
+  4496 1E3E C6 20	X1e3e:	adi	20h
+  4497 1E40 32 7C 20		sta	X207c
+  4498 1E43 3A A6 21		lda	X21a6
+  4499 1E46 E6 10		ani	10h
+  4500 1E48 CA 4D 1E		jz	X1e4d
+  4501 1E4B 3E 01		mvi	a,1
+  4502 1E4D CD 6E 1E	X1e4d:	call	X1e6e
+  4503 1E50 CD 29 03		call	X0329
+  4504 1E53 3A F8 20		lda	X20f8
+  4505 1E56 FE 15		cpi	15h
+  4506 1E58 CC 42 03		cz	X0342
+  4507 1E5B FE 1D		cpi	1dh
+  4508 1E5D CC 42 03		cz	X0342
+  4509 1E60 FE 0C		cpi	0ch
+  4510 1E62 CC F2 0B		cz	X0bf2
+  4511 1E65 FE 12		cpi	12h
+  4512 1E67 CC F2 0B		cz	X0bf2
+  4513 1E6A CD 36 16		call	X1636
+  4514 1E6D C9			ret
+			
+  4516 1E6E B7		X1e6e:	ora	a
+  4517 1E6F CA 79 1E		jz	X1e79
+  4518 1E72 32 5B 21		sta	X215b
+  4519 1E75 AF			xra	a
+  4520 1E76 C3 94 1E		jmp	X1e94
+			
+  4522 1E79 DB 42	X1e79:	in	42h
+  4523 1E7B E6 02		ani	2
+  4524 1E7D C2 90 1E		jnz	X1e90
+  4525 1E80 32 59 21		sta	X2159
+  4526 1E83 3E 01		mvi	a,1
+  4527 1E85 32 5B 21		sta	X215b
+  4528 1E88 3E 02		mvi	a,2
+  4529 1E8A 32 5A 21		sta	X215a
+  4530 1E8D C3 6B 03		jmp	X036b
+			
+  4532 1E90 AF		X1e90:	xra	a
+  4533 1E91 32 5B 21		sta	X215b
+  4534 1E94 32 5A 21	X1e94:	sta	X215a
+  4535 1E97 3E 80		mvi	a,80h
+  4536 1E99 32 59 21		sta	X2159
+  4537 1E9C C3 6B 03		jmp	X036b
+			
+  4539 1E9F CD DD 1E	X1e9f:	call	X1edd
+  4540 1EA2 21 7B 21		lxi	h,X217b
+  4541 1EA5 77			mov	m,a
+  4542 1EA6 23			inx	h
+  4543 1EA7 22 B4 21		shld	X21b4
+  4544 1EAA 47			mov	b,a
+  4545 1EAB 11 14 00		lxi	d,X0014
+  4546 1EAE CD 83 10		call	X1083
+  4547 1EB1 21 B8 1E		lxi	h,X1eb8
+  4548 1EB4 22 40 21		shld	X2140
+  4549 1EB7 C9			ret
+			
+  4551 1EB8 CD DD 1E	X1eb8:	call	X1edd
+  4552 1EBB 2A B4 21		lhld	X21b4
+  4553 1EBE 47			mov	b,a
+  4554 1EBF 3A 7B 21		lda	X217b
+  4555 1EC2 4F			mov	c,a
+  4556 1EC3 B8			cmp	b
+  4557 1EC4 CA D3 1E		jz	X1ed3
+  4558 1EC7 7D			mov	a,l
+  4559 1EC8 FE 90		cpi	90h
+  4560 1ECA CA D3 1E		jz	X1ed3
+  4561 1ECD 70			mov	m,b
+  4562 1ECE 23			inx	h
+  4563 1ECF 22 B4 21		shld	X21b4
+  4564 1ED2 C9			ret
+			
+  4566 1ED3 71		X1ed3:	mov	m,c
+  4567 1ED4 CD CD 1C		call	X1ccd
+  4568 1ED7 CD 4B 09		call	X094b
+  4569 1EDA C3 B0 1B		jmp	X1bb0
+			
+  4571 1EDD F5		X1edd:	push	psw
+  4572 1EDE FE 20		cpi	20h
+  4573 1EE0 D2 E5 1E		jnc	X1ee5
+  4574 1EE3 3E 01		mvi	a,1
+  4575 1EE5 CD E3 05	X1ee5:	call	X05e3
+  4576 1EE8 F1			pop	psw
+  4577 1EE9 C9			ret
+			
+  4579 1EEA E5		X1eea:	push	h
+  4580 1EEB 21 4E 20		lxi	h,X204e
+  4581 1EEE 4F			mov	c,a
+  4582 1EEF 3A A2 21		lda	X21a2
+  4583 1EF2 B7			ora	a
+  4584 1EF3 C2 FC 1E		jnz	X1efc
+  4585 1EF6 79			mov	a,c
+  4586 1EF7 FE 50		cpi	50h
+  4587 1EF9 F2 0F 1F		jp	X1f0f
+  4588 1EFC 7E		X1efc:	mov	a,m
+  4589 1EFD 23			inx	h
+  4590 1EFE 66			mov	h,m
+  4591 1EFF 6F			mov	l,a
+  4592 1F00 7C			mov	a,h
+  4593 1F01 E6 0F		ani	0fh
+  4594 1F03 F6 20		ori	20h
+  4595 1F05 67			mov	h,a
+  4596 1F06 79			mov	a,c
+  4597 1F07 85			add	l
+  4598 1F08 6F			mov	l,a
+  4599 1F09 D2 0D 1F		jnc	X1f0d
+  4600 1F0C 24			inr	h
+  4601 1F0D 70		X1f0d:	mov	m,b
+  4602 1F0E 78			mov	a,b
+  4603 1F0F E1		X1f0f:	pop	h
+  4604 1F10 C9			ret
+			
+  4606 1F11 D5		X1f11:	push	d
+  4607 1F12 AF			xra	a
+  4608 1F13 32 A5 21		sta	X21a5
+  4609 1F16 06 00		mvi	b,0
+  4610 1F18 78		X1f18:	mov	a,b
+  4611 1F19 32 58 21		sta	X2158
+  4612 1F1C D3 02		out	2
+  4613 1F1E 0E 01		mvi	c,1
+  4614 1F20 79		X1f20:	mov	a,c
+  4615 1F21 D3 00		out	0
+  4616 1F23 21 00 C0		lxi	h,Xc000
+  4617 1F26 C5		X1f26:	push	b
+  4618 1F27 E5			push	h
+  4619 1F28 CD 75 06		call	X0675
+  4620 1F2B E1			pop	h
+  4621 1F2C C1			pop	b
+  4622 1F2D C2 48 1F		jnz	X1f48
+  4623 1F30 23			inx	h
+  4624 1F31 7C			mov	a,h
+  4625 1F32 B5			ora	l
+  4626 1F33 C2 26 1F		jnz	X1f26
+  4627 1F36 3E 05	X1f36:	mvi	a,5
+  4628 1F38 D3 01		out	1
+  4629 1F3A 3A 58 21		lda	X2158
+  4630 1F3D D3 02		out	2
+  4631 1F3F 3E 25		mvi	a,25h
+  4632 1F41 32 A5 21		sta	X21a5
+  4633 1F44 AF			xra	a
+  4634 1F45 37			stc
+  4635 1F46 D1			pop	d
+  4636 1F47 C9			ret
+			
+  4638 1F48 E6 7F	X1f48:	ani	7fh
+  4639 1F4A B9			cmp	c
+  4640 1F4B C2 36 1F		jnz	X1f36
+  4641 1F4E 79			mov	a,c
+  4642 1F4F 07			rlc
+  4643 1F50 FE 80		cpi	80h
+  4644 1F52 4F			mov	c,a
+  4645 1F53 C2 20 1F		jnz	X1f20
+  4646 1F56 78			mov	a,b
+  4647 1F57 C6 11		adi	11h
+  4648 1F59 47			mov	b,a
+  4649 1F5A FE 10		cpi	10h
+  4650 1F5C C2 18 1F		jnz	X1f18
+  4651 1F5F AF			xra	a
+  4652 1F60 D1			pop	d
+  4653 1F61 C9			ret
+			
+  4655 1F62 D5		X1f62:	push	d
+  4656 1F63 16 07		mvi	d,7
+  4657 1F65 7A		X1f65:	mov	a,d
+  4658 1F66 CD 7B 1F		call	X1f7b
+  4659 1F69 CD A1 1F		call	X1fa1
+  4660 1F6C BA			cmp	d
+  4661 1F6D C2 36 1F		jnz	X1f36
+  4662 1F70 15			dcr	d
+  4663 1F71 C2 65 1F		jnz	X1f65
+  4664 1F74 3E 05		mvi	a,5
+  4665 1F76 D3 01		out	1
+  4666 1F78 AF			xra	a
+  4667 1F79 D1			pop	d
+  4668 1F7A C9			ret
+			
+  4670 1F7B 47		X1f7b:	mov	b,a
+  4671 1F7C E6 02		ani	2
+  4672 1F7E 0F			rrc
+  4673 1F7F 0F			rrc
+  4674 1F80 0F			rrc
+  4675 1F81 0F			rrc
+  4676 1F82 F6 10		ori	10h
+  4677 1F84 32 C9 21		sta	X21c9
+  4678 1F87 D3 62		out	62h
+  4679 1F89 0E 05		mvi	c,5
+  4680 1F8B 78			mov	a,b
+  4681 1F8C E6 01		ani	1
+  4682 1F8E CA 93 1F		jz	X1f93
+  4683 1F91 0E 25		mvi	c,25h
+  4684 1F93 78		X1f93:	mov	a,b
+  4685 1F94 E6 04		ani	4
+  4686 1F96 CA 9D 1F		jz	X1f9d
+  4687 1F99 79			mov	a,c
+  4688 1F9A F6 02		ori	2
+  4689 1F9C 4F			mov	c,a
+  4690 1F9D 79		X1f9d:	mov	a,c
+  4691 1F9E D3 01		out	1
+  4692 1FA0 C9			ret
+			
+  4694 1FA1 DB 22	X1fa1:	in	22h
+  4695 1FA3 47			mov	b,a
+  4696 1FA4 0E 01		mvi	c,1
+  4697 1FA6 78			mov	a,b
+  4698 1FA7 E6 90		ani	90h
+  4699 1FA9 CA B3 1F		jz	X1fb3
+  4700 1FAC FE 90		cpi	90h
+  4701 1FAE 3E FF		mvi	a,0ffh
+  4702 1FB0 C0			rnz
+  4703 1FB1 0E 00		mvi	c,0
+  4704 1FB3 78		X1fb3:	mov	a,b
+  4705 1FB4 E6 40		ani	40h
+  4706 1FB6 CA BD 1F		jz	X1fbd
+  4707 1FB9 79			mov	a,c
+  4708 1FBA F6 02		ori	2
+  4709 1FBC 4F			mov	c,a
+  4710 1FBD DB 01	X1fbd:	in	1
+  4711 1FBF 0F			rrc
+  4712 1FC0 0F			rrc
+  4713 1FC1 2F			cma
+  4714 1FC2 E6 20		ani	20h
+  4715 1FC4 A8			xra	b
+  4716 1FC5 E6 20		ani	20h
+  4717 1FC7 3E FF		mvi	a,0ffh
+  4718 1FC9 C0			rnz
+  4719 1FCA 78			mov	a,b
+  4720 1FCB E6 20		ani	20h
+  4721 1FCD C2 D4 1F		jnz	X1fd4
+  4722 1FD0 79			mov	a,c
+  4723 1FD1 F6 04		ori	4
+  4724 1FD3 4F			mov	c,a
+  4725 1FD4 B7		X1fd4:	ora	a
+  4726 1FD5 79			mov	a,c
+  4727 1FD6 C9			ret
+			
+			; Last but not least, pad out to 8K (8192) bytes
+			
+  4731 1FD7 00			nop
+  4732 1FD8 00			nop
+  4733 1FD9 00			nop
+  4734 1FDA 00			nop
+  4735 1FDB 00			nop
+  4736 1FDC 00			nop
+  4737 1FDD 00			nop
+  4738 1FDE 00			nop
+  4739 1FDF 00			nop
+  4740 1FE0 00			nop
+  4741 1FE1 00			nop
+  4742 1FE2 00			nop
+  4743 1FE3 00			nop
+  4744 1FE4 00			nop
+  4745 1FE5 00			nop
+  4746 1FE6 00			nop
+  4747 1FE7 00			nop
+  4748 1FE8 00			nop
+  4749 1FE9 00			nop
+  4750 1FEA 00			nop
+  4751 1FEB 00			nop
+  4752 1FEC 00			nop
+  4753 1FED 00			nop
+  4754 1FEE 00			nop
+  4755 1FEF 00			nop
+  4756 1FF0 00			nop
+  4757 1FF1 00			nop
+  4758 1FF2 00			nop
+  4759 1FF3 00			nop
+  4760 1FF4 00			nop
+  4761 1FF5 00			nop
+  4762 1FF6 00			nop
+  4763 1FF7 00			nop
+  4764 1FF8 00			nop
+  4765 1FF9 00			nop
+  4766 1FFA 00			nop
+  4767 1FFB 00			nop
+  4768 1FFC 00			nop
+  4769 1FFD 00			nop
+  4770 1FFE 00			nop
+  4771 1FFF 00			nop
+			
+			;	Miscellaneous equates
+			
+			;  These are addresses referenced in the code but
+			;  which are in the middle of a multibyte instruction
+			;  or are addresses outside the initialized space
+			
+            00 11	X0011	equ	11h
+            00 FF	X00ff	equ	0ffh
+            01 11	X0111	equ	111h
+            01 13	X0113	equ	113h
+            0E A0	X0ea0	equ	0ea0h
+            1C CD	X1ccd	equ	1ccdh
+            20 01	X2001	equ	2001h
+            20 02	X2002	equ	2002h
+            20 04	X2004	equ	2004h
+            20 4E	X204e	equ	204eh
+            20 50	X2050	equ	2050h
+            20 51	X2051	equ	2051h
+            20 52	X2052	equ	2052h
+            20 54	X2054	equ	2054h
+            20 56	X2056	equ	2056h
+            20 58	X2058	equ	2058h
+            20 5A	X205a	equ	205ah
+            20 5B	X205b	equ	205bh
+            20 5C	X205c	equ	205ch
+            20 65	X2065	equ	2065h
+            20 67	X2067	equ	2067h
+            20 68	X2068	equ	2068h
+            20 69	X2069	equ	2069h
+            20 6A	X206a	equ	206ah
+            20 6E	X206e	equ	206eh
+            20 72	X2072	equ	2072h
+            20 73	X2073	equ	2073h
+            20 74	X2074	equ	2074h
+            20 75	X2075	equ	2075h
+            20 77	X2077	equ	2077h
+            20 78	X2078	equ	2078h
+            20 79	X2079	equ	2079h
+            20 7A	X207a	equ	207ah
+            20 7B	X207b	equ	207bh
+            20 7C	X207c	equ	207ch
+            20 7D	X207d	equ	207dh
+            20 7E	X207e	equ	207eh
+            20 7F	X207f	equ	207fh
+            20 C0	X20c0	equ	20c0h
+            20 C1	X20c1	equ	20c1h
+            20 C2	X20c2	equ	20c2h
+            20 DE	X20de	equ	20deh
+            20 F2	X20f2	equ	20f2h
+            20 F4	X20f4	equ	20f4h
+            20 F5	X20f5	equ	20f5h
+            20 F6	X20f6	equ	20f6h
+            20 F8	X20f8	equ	20f8h
+            20 F9	X20f9	equ	20f9h
+            20 FA	X20fa	equ	20fah
+            20 FB	X20fb	equ	20fbh
+            20 FC	X20fc	equ	20fch
+            20 FD	X20fd	equ	20fdh
+            20 FF	X20ff	equ	20ffh
+            21 01	X2101	equ	2101h
+            21 02	X2102	equ	2102h
+            21 04	X2104	equ	2104h
+            21 0D	X210d	equ	210dh
+            21 0E	X210e	equ	210eh
+            21 11	X2111	equ	2111h
+            21 13	X2113	equ	2113h
+            21 2B	X212b	equ	212bh
+            21 2C	X212c	equ	212ch
+            21 2D	X212d	equ	212dh
+            21 2F	X212f	equ	212fh
+            21 30	X2130	equ	2130h
+            21 31	X2131	equ	2131h
+            21 40	X2140	equ	2140h
+            21 42	X2142	equ	2142h
+            21 43	X2143	equ	2143h
+            21 44	X2144	equ	2144h
+            21 45	X2145	equ	2145h
+            21 46	X2146	equ	2146h
+            21 47	X2147	equ	2147h
+            21 48	X2148	equ	2148h
+            21 49	X2149	equ	2149h
+            21 4B	X214b	equ	214bh
+            21 4E	X214e	equ	214eh
+            21 50	X2150	equ	2150h
+            21 51	X2151	equ	2151h
+            21 52	X2152	equ	2152h
+            21 53	X2153	equ	2153h
+            21 54	X2154	equ	2154h
+            21 55	X2155	equ	2155h
+            21 56	X2156	equ	2156h
+            21 57	X2157	equ	2157h
+            21 58	X2158	equ	2158h
+            21 59	X2159	equ	2159h
+            21 5A	X215a	equ	215ah
+            21 5B	X215b	equ	215bh
+            21 5C	X215c	equ	215ch
+            21 71	X2171	equ	2171h
+            21 72	X2172	equ	2172h
+            21 73	X2173	equ	2173h
+            21 74	X2174	equ	2174h
+            21 76	X2176	equ	2176h
+            21 77	X2177	equ	2177h
+            21 78	X2178	equ	2178h
+            21 79	X2179	equ	2179h
+            21 7B	X217b	equ	217bh
+            21 91	X2191	equ	2191h
+            21 A2	X21a2	equ	21a2h
+            21 A3	X21a3	equ	21a3h
+            21 A4	X21a4	equ	21a4h
+            21 A5	X21a5	equ	21a5h
+            21 A6	X21a6	equ	21a6h
+            21 A7	X21a7	equ	21a7h
+            21 A8	X21a8	equ	21a8h
+            21 A9	X21a9	equ	21a9h
+            21 AA	X21aa	equ	21aah
+            21 AB	X21ab	equ	21abh
+            21 AC	X21ac	equ	21ach
+            21 AD	X21ad	equ	21adh
+            21 AE	X21ae	equ	21aeh
+            21 AF	X21af	equ	21afh
+            21 B4	X21b4	equ	21b4h
+            21 B8	X21b8	equ	21b8h
+            21 B9	X21b9	equ	21b9h
+            21 BA	X21ba	equ	21bah
+            21 BB	X21bb	equ	21bbh
+            21 BC	X21bc	equ	21bch
+            21 BD	X21bd	equ	21bdh
+            21 BE	X21be	equ	21beh
+            21 BF	X21bf	equ	21bfh
+            21 C0	X21c0	equ	21c0h
+            21 C1	X21c1	equ	21c1h
+            21 C2	X21c2	equ	21c2h
+            21 C3	X21c3	equ	21c3h
+            21 C4	X21c4	equ	21c4h
+            21 C5	X21c5	equ	21c5h
+            21 C7	X21c7	equ	21c7h
+            21 C8	X21c8	equ	21c8h
+            21 C9	X21c9	equ	21c9h
+            21 CB	X21cb	equ	21cbh
+            21 CC	X21cc	equ	21cch
+            21 D3	X21d3	equ	21d3h
+            22 53	X2253	equ	2253h
+            22 5A	X225a	equ	225ah
+            22 65	X2265	equ	2265h
+            22 D0	X22d0	equ	22d0h
+            28 39	X2839	equ	2839h
+            30 00	X3000	equ	3000h
+            30 30	X3030	equ	3030h
+            30 31	X3031	equ	3031h
+            30 32	X3032	equ	3032h
+            30 34	X3034	equ	3034h
+            30 35	X3035	equ	3035h
+            30 38	X3038	equ	3038h
+            32 00	X3200	equ	3200h
+            32 21	X3221	equ	3221h
+            32 39	X3239	equ	3239h
+            34 33	X3433	equ	3433h
+            3A 6A	X3a6a	equ	3a6ah
+            3C 08	X3c08	equ	3c08h
+            3C 2C	X3c2c	equ	3c2ch
+            3F 2F	X3f2f	equ	3f2fh
+            40 1B	X401b	equ	401bh
+            45 53	X4553	equ	4553h
+            5A 0B	X5a0b	equ	5a0bh
+            60 81	X6081	equ	6081h
+            67 13	X6713	equ	6713h
+            6C 14	X6c14	equ	6c14h
+            7F D0	X7fd0	equ	7fd0h
+            B7 09	Xb709	equ	0b709h
+            C0 00	Xc000	equ	0c000h
+            C3 10	Xc310	equ	0c310h
+            C3 20	Xc320	equ	0c320h
+            C9 20	Xc920	equ	0c920h
+            C9 40	Xc940	equ	0c940h
+            C9 80	Xc980	equ	0c980h
+            CC 71	Xcc71	equ	0cc71h
+            CD 00	Xcd00	equ	0cd00h
+            CD 0B	Xcd0b	equ	0cd0bh
+            D0 F2	Xd0f2	equ	0d0f2h
+            FE 1A	Xfe1a	equ	0fe1ah
+            FF 01	Xff01	equ	0ff01h
+			
+				end
+
+
+*******************************************************************************
+                                 Symbols table
+*******************************************************************************
+
+Names		Types	Values
+-----		-----	------
+X0011		EQU	00011h
+X00ff		EQU	000FFh
+X0111		EQU	00111h
+X0113		EQU	00113h
+X0ea0		EQU	00EA0h
+X1ccd		EQU	01CCDh
+X2001		EQU	02001h
+X2002		EQU	02002h
+X2004		EQU	02004h
+X204e		EQU	0204Eh
+X2050		EQU	02050h
+X2051		EQU	02051h
+X2052		EQU	02052h
+X2054		EQU	02054h
+X2056		EQU	02056h
+X2058		EQU	02058h
+X205a		EQU	0205Ah
+X205b		EQU	0205Bh
+X205c		EQU	0205Ch
+X2065		EQU	02065h
+X2067		EQU	02067h
+X2068		EQU	02068h
+X2069		EQU	02069h
+X206a		EQU	0206Ah
+X206e		EQU	0206Eh
+X2072		EQU	02072h
+X2073		EQU	02073h
+X2074		EQU	02074h
+X2075		EQU	02075h
+X2077		EQU	02077h
+X2078		EQU	02078h
+X2079		EQU	02079h
+X207a		EQU	0207Ah
+X207b		EQU	0207Bh
+X207c		EQU	0207Ch
+X207d		EQU	0207Dh
+X207e		EQU	0207Eh
+X207f		EQU	0207Fh
+X20c0		EQU	020C0h
+X20c1		EQU	020C1h
+X20c2		EQU	020C2h
+X20de		EQU	020DEh
+X20f2		EQU	020F2h
+X20f4		EQU	020F4h
+X20f5		EQU	020F5h
+X20f6		EQU	020F6h
+X20f8		EQU	020F8h
+X20f9		EQU	020F9h
+X20fa		EQU	020FAh
+X20fb		EQU	020FBh
+X20fc		EQU	020FCh
+X20fd		EQU	020FDh
+X20ff		EQU	020FFh
+X2101		EQU	02101h
+X2102		EQU	02102h
+X2104		EQU	02104h
+X210d		EQU	0210Dh
+X210e		EQU	0210Eh
+X2111		EQU	02111h
+X2113		EQU	02113h
+X212b		EQU	0212Bh
+X212c		EQU	0212Ch
+X212d		EQU	0212Dh
+X212f		EQU	0212Fh
+X2130		EQU	02130h
+X2131		EQU	02131h
+X2140		EQU	02140h
+X2142		EQU	02142h
+X2143		EQU	02143h
+X2144		EQU	02144h
+X2145		EQU	02145h
+X2146		EQU	02146h
+X2147		EQU	02147h
+X2148		EQU	02148h
+X2149		EQU	02149h
+X214b		EQU	0214Bh
+X214e		EQU	0214Eh
+X2150		EQU	02150h
+X2151		EQU	02151h
+X2152		EQU	02152h
+X2153		EQU	02153h
+X2154		EQU	02154h
+X2155		EQU	02155h
+X2156		EQU	02156h
+X2157		EQU	02157h
+X2158		EQU	02158h
+X2159		EQU	02159h
+X215a		EQU	0215Ah
+X215b		EQU	0215Bh
+X215c		EQU	0215Ch
+X2171		EQU	02171h
+X2172		EQU	02172h
+X2173		EQU	02173h
+X2174		EQU	02174h
+X2176		EQU	02176h
+X2177		EQU	02177h
+X2178		EQU	02178h
+X2179		EQU	02179h
+X217b		EQU	0217Bh
+X2191		EQU	02191h
+X21a2		EQU	021A2h
+X21a3		EQU	021A3h
+X21a4		EQU	021A4h
+X21a5		EQU	021A5h
+X21a6		EQU	021A6h
+X21a7		EQU	021A7h
+X21a8		EQU	021A8h
+X21a9		EQU	021A9h
+X21aa		EQU	021AAh
+X21ab		EQU	021ABh
+X21ac		EQU	021ACh
+X21ad		EQU	021ADh
+X21ae		EQU	021AEh
+X21af		EQU	021AFh
+X21b4		EQU	021B4h
+X21b8		EQU	021B8h
+X21b9		EQU	021B9h
+X21ba		EQU	021BAh
+X21bb		EQU	021BBh
+X21bc		EQU	021BCh
+X21bd		EQU	021BDh
+X21be		EQU	021BEh
+X21bf		EQU	021BFh
+X21c0		EQU	021C0h
+X21c1		EQU	021C1h
+X21c2		EQU	021C2h
+X21c3		EQU	021C3h
+X21c4		EQU	021C4h
+X21c5		EQU	021C5h
+X21c7		EQU	021C7h
+X21c8		EQU	021C8h
+X21c9		EQU	021C9h
+X21cb		EQU	021CBh
+X21cc		EQU	021CCh
+X21d3		EQU	021D3h
+X2253		EQU	02253h
+X225a		EQU	0225Ah
+X2265		EQU	02265h
+X22d0		EQU	022D0h
+X2839		EQU	02839h
+X3000		EQU	03000h
+X3030		EQU	03030h
+X3031		EQU	03031h
+X3032		EQU	03032h
+X3034		EQU	03034h
+X3035		EQU	03035h
+X3038		EQU	03038h
+X3200		EQU	03200h
+X3221		EQU	03221h
+X3239		EQU	03239h
+X3433		EQU	03433h
+X3a6a		EQU	03A6Ah
+X3c08		EQU	03C08h
+X3c2c		EQU	03C2Ch
+X3f2f		EQU	03F2Fh
+X401b		EQU	0401Bh
+X4553		EQU	04553h
+X5a0b		EQU	05A0Bh
+X6081		EQU	06081h
+X6713		EQU	06713h
+X6c14		EQU	06C14h
+X7fd0		EQU	07FD0h
+Xb709		EQU	0B709h
+Xc000		EQU	0C000h
+Xc310		EQU	0C310h
+Xc320		EQU	0C320h
+Xc920		EQU	0C920h
+Xc940		EQU	0C940h
+Xc980		EQU	0C980h
+Xcc71		EQU	0CC71h
+Xcd00		EQU	0CD00h
+Xcd0b		EQU	0CD0Bh
+Xd0f2		EQU	0D0F2h
+Xfe1a		EQU	0FE1Ah
+Xff01		EQU	0FF01h
+X0000		Label	00000h
+X0008		Label	00008h
+X000d		Label	0000Dh
+X0014		Label	00014h
+X0030		Label	00030h
+X003b		Label	0003Bh
+X003d		Label	0003Dh
+X0049		Label	00049h
+X004f		Label	0004Fh
+X005b		Label	0005Bh
+X0074		Label	00074h
+X0076		Label	00076h
+X0080		Label	00080h
+X0090		Label	00090h
+X00a1		Label	000A1h
+X00a5		Label	000A5h
+X00a8		Label	000A8h
+X00c4		Label	000C4h
+X00cb		Label	000CBh
+X00d2		Label	000D2h
+X00d6		Label	000D6h
+X00e0		Label	000E0h
+X00f5		Label	000F5h
+X00fd		Label	000FDh
+X0109		Label	00109h
+X010d		Label	0010Dh
+X011a		Label	0011Ah
+X012d		Label	0012Dh
+X0131		Label	00131h
+X013b		Label	0013Bh
+X015b		Label	0015Bh
+X015f		Label	0015Fh
+X016c		Label	0016Ch
+X0175		Label	00175h
+X0187		Label	00187h
+X018e		Label	0018Eh
+X0194		Label	00194h
+X019e		Label	0019Eh
+X01ab		Label	001ABh
+X01b5		Label	001B5h
+X01c3		Label	001C3h
+X01e4		Label	001E4h
+X01f0		Label	001F0h
+X01ff		Label	001FFh
+X020e		Label	0020Eh
+X0211		Label	00211h
+X0212		Label	00212h
+X0222		Label	00222h
+X0226		Label	00226h
+X022c		Label	0022Ch
+X0245		Label	00245h
+X0251		Label	00251h
+X0265		Label	00265h
+X0269		Label	00269h
+X0285		Label	00285h
+X0298		Label	00298h
+X02a4		Label	002A4h
+X02c0		Label	002C0h
+X02d9		Label	002D9h
+X02eb		Label	002EBh
+X031a		Label	0031Ah
+X0329		Label	00329h
+X0342		Label	00342h
+X034b		Label	0034Bh
+X035e		Label	0035Eh
+X036b		Label	0036Bh
+X0370		Label	00370h
+X0375		Label	00375h
+X0381		Label	00381h
+memmov		Label	0038Bh
+X038b		Label	0038Bh
+X0394		Label	00394h
+X039f		Label	0039Fh
+X03a2		Label	003A2h
+X03ae		Label	003AEh
+X03cc		Label	003CCh
+X03ed		Label	003EDh
+X0409		Label	00409h
+X0427		Label	00427h
+X042c		Label	0042Ch
+X0431		Label	00431h
+X0437		Label	00437h
+X043a		Label	0043Ah
+X043e		Label	0043Eh
+X0444		Label	00444h
+X0447		Label	00447h
+X044b		Label	0044Bh
+X0476		Label	00476h
+KBTab		Label	00476h
+X04cf		Label	004CFh
+X0505		Label	00505h
+X050b		Label	0050Bh
+X0538		Label	00538h
+X053e		Label	0053Eh
+X054f		Label	0054Fh
+X0569		Label	00569h
+X056a		Label	0056Ah
+X0587		Label	00587h
+X0593		Label	00593h
+X05a9		Label	005A9h
+X05ad		Label	005ADh
+X05b8		Label	005B8h
+X05c5		Label	005C5h
+X05cc		Label	005CCh
+X05d2		Label	005D2h
+X05d3		Label	005D3h
+X05e3		Label	005E3h
+X05e6		Label	005E6h
+X05ff		Label	005FFh
+X0616		Label	00616h
+X0624		Label	00624h
+X0641		Label	00641h
+X0668		Label	00668h
+X066d		Label	0066Dh
+X0670		Label	00670h
+X0673		Label	00673h
+X0675		Label	00675h
+X0685		Label	00685h
+X0687		Label	00687h
+X069c		Label	0069Ch
+X06a7		Label	006A7h
+X06aa		Label	006AAh
+X06c2		Label	006C2h
+X06ca		Label	006CAh
+X06d6		Label	006D6h
+X06df		Label	006DFh
+X06e7		Label	006E7h
+X06e8		Label	006E8h
+X06fb		Label	006FBh
+X0709		Label	00709h
+X071b		Label	0071Bh
+X0738		Label	00738h
+X0743		Label	00743h
+X0747		Label	00747h
+X074e		Label	0074Eh
+X0751		Label	00751h
+X075b		Label	0075Bh
+X0766		Label	00766h
+X076c		Label	0076Ch
+X0776		Label	00776h
+X07c2		Label	007C2h
+X07cb		Label	007CBh
+X07d5		Label	007D5h
+X07d7		Label	007D7h
+X07e8		Label	007E8h
+X07fc		Label	007FCh
+X07ff		Label	007FFh
+X080c		Label	0080Ch
+X080d		Label	0080Dh
+X0812		Label	00812h
+X0815		Label	00815h
+X081d		Label	0081Dh
+X082b		Label	0082Bh
+X0838		Label	00838h
+X0841		Label	00841h
+X084c		Label	0084Ch
+X0853		Label	00853h
+X085f		Label	0085Fh
+X086f		Label	0086Fh
+X0875		Label	00875h
+X08a0		Label	008A0h
+X08a7		Label	008A7h
+X08b2		Label	008B2h
+X08cb		Label	008CBh
+X08d0		Label	008D0h
+X08d4		Label	008D4h
+X08e5		Label	008E5h
+X08fb		Label	008FBh
+X08fc		Label	008FCh
+X0900		Label	00900h
+X0924		Label	00924h
+X0930		Label	00930h
+X0938		Label	00938h
+X0941		Label	00941h
+X094b		Label	0094Bh
+X0955		Label	00955h
+X0970		Label	00970h
+X0973		Label	00973h
+X0989		Label	00989h
+X0997		Label	00997h
+X0998		Label	00998h
+X099e		Label	0099Eh
+X09ab		Label	009ABh
+X09bb		Label	009BBh
+X09bd		Label	009BDh
+X09d9		Label	009D9h
+X09dc		Label	009DCh
+X09f7		Label	009F7h
+X09ff		Label	009FFh
+X0a00		Label	00A00h
+X0a0d		Label	00A0Dh
+X0a14		Label	00A14h
+X0a15		Label	00A15h
+X0a18		Label	00A18h
+X0a1c		Label	00A1Ch
+X0a50		Label	00A50h
+X0a7b		Label	00A7Bh
+X0aa2		Label	00AA2h
+X0ac2		Label	00AC2h
+X0ad9		Label	00AD9h
+X0af5		Label	00AF5h
+X0b19		Label	00B19h
+X0b2e		Label	00B2Eh
+X0b42		Label	00B42h
+X0b4f		Label	00B4Fh
+X0b5d		Label	00B5Dh
+X0b63		Label	00B63h
+X0b77		Label	00B77h
+X0b89		Label	00B89h
+X0bb8		Label	00BB8h
+X0bce		Label	00BCEh
+X0bd9		Label	00BD9h
+X0bf2		Label	00BF2h
+X0bfe		Label	00BFEh
+X0c11		Label	00C11h
+X0c23		Label	00C23h
+X0c29		Label	00C29h
+X0c31		Label	00C31h
+X0c32		Label	00C32h
+X0c39		Label	00C39h
+X0c46		Label	00C46h
+X0c4a		Label	00C4Ah
+X0c57		Label	00C57h
+X0c62		Label	00C62h
+X0c77		Label	00C77h
+X0c8a		Label	00C8Ah
+X0c97		Label	00C97h
+X0ca2		Label	00CA2h
+X0cb5		Label	00CB5h
+X0cbb		Label	00CBBh
+X0ce3		Label	00CE3h
+X0cf9		Label	00CF9h
+X0d29		Label	00D29h
+X0d2f		Label	00D2Fh
+X0d32		Label	00D32h
+X0d4a		Label	00D4Ah
+X0d6f		Label	00D6Fh
+X0d7a		Label	00D7Ah
+X0d88		Label	00D88h
+X0d93		Label	00D93h
+X0d99		Label	00D99h
+X0d9c		Label	00D9Ch
+X0db9		Label	00DB9h
+X0dbb		Label	00DBBh
+X0dbf		Label	00DBFh
+X0dd8		Label	00DD8h
+X0de5		Label	00DE5h
+X0dec		Label	00DECh
+X0def		Label	00DEFh
+X0df9		Label	00DF9h
+X0dfc		Label	00DFCh
+X0e02		Label	00E02h
+X0e0b		Label	00E0Bh
+X0e15		Label	00E15h
+X0e1d		Label	00E1Dh
+X0e23		Label	00E23h
+X0e27		Label	00E27h
+X0e2b		Label	00E2Bh
+X0e38		Label	00E38h
+X0e3e		Label	00E3Eh
+X0e47		Label	00E47h
+X0e59		Label	00E59h
+X0e6d		Label	00E6Dh
+X0e79		Label	00E79h
+X0e80		Label	00E80h
+X0e89		Label	00E89h
+X0e94		Label	00E94h
+X0ea9		Label	00EA9h
+X0ec1		Label	00EC1h
+X0ecf		Label	00ECFh
+X0ed2		Label	00ED2h
+X0ee1		Label	00EE1h
+X0ef3		Label	00EF3h
+X0f01		Label	00F01h
+X0f18		Label	00F18h
+X0f2b		Label	00F2Bh
+X0f32		Label	00F32h
+X0f4e		Label	00F4Eh
+X0f5b		Label	00F5Bh
+X0f5e		Label	00F5Eh
+X0f61		Label	00F61h
+X0f75		Label	00F75h
+X0f7e		Label	00F7Eh
+X0f9e		Label	00F9Eh
+X0faa		Label	00FAAh
+X0fae		Label	00FAEh
+X0fb2		Label	00FB2h
+X0fbe		Label	00FBEh
+X0fc8		Label	00FC8h
+X0fcb		Label	00FCBh
+X0fd8		Label	00FD8h
+X0fe6		Label	00FE6h
+X0feb		Label	00FEBh
+X0fed		Label	00FEDh
+X0ffa		Label	00FFAh
+X0fff		Label	00FFFh
+X1000		Label	01000h
+X1003		Label	01003h
+X1012		Label	01012h
+X101a		Label	0101Ah
+X102d		Label	0102Dh
+X103e		Label	0103Eh
+X104e		Label	0104Eh
+X106a		Label	0106Ah
+X1074		Label	01074h
+memset		Label	01083h
+X1083		Label	01083h
+X108e		Label	0108Eh
+X10a7		Label	010A7h
+X10ad		Label	010ADh
+X10d7		Label	010D7h
+X10f9		Label	010F9h
+X10fd		Label	010FDh
+X1136		Label	01136h
+X114c		Label	0114Ch
+X1159		Label	01159h
+X117e		Label	0117Eh
+X1189		Label	01189h
+X1191		Label	01191h
+X1199		Label	01199h
+X11a0		Label	011A0h
+X11b0		Label	011B0h
+X11bf		Label	011BFh
+X11ce		Label	011CEh
+X11e8		Label	011E8h
+X120a		Label	0120Ah
+X1211		Label	01211h
+X1228		Label	01228h
+X122f		Label	0122Fh
+X1248		Label	01248h
+X1252		Label	01252h
+X1271		Label	01271h
+X127f		Label	0127Fh
+X1284		Label	01284h
+X1290		Label	01290h
+X1299		Label	01299h
+X129d		Label	0129Dh
+X12b0		Label	012B0h
+X12e8		Label	012E8h
+X1310		Label	01310h
+X131c		Label	0131Ch
+X134a		Label	0134Ah
+X136b		Label	0136Bh
+X1380		Label	01380h
+X1386		Label	01386h
+X138d		Label	0138Dh
+X1390		Label	01390h
+X1395		Label	01395h
+X13bd		Label	013BDh
+X13c3		Label	013C3h
+X13d2		Label	013D2h
+X13db		Label	013DBh
+X13de		Label	013DEh
+X13e3		Label	013E3h
+X13e6		Label	013E6h
+X13f4		Label	013F4h
+X1404		Label	01404h
+X140a		Label	0140Ah
+X1426		Label	01426h
+X142a		Label	0142Ah
+X1476		Label	01476h
+X1488		Label	01488h
+X1493		Label	01493h
+X14a2		Label	014A2h
+X14d4		Label	014D4h
+X14e5		Label	014E5h
+X150a		Label	0150Ah
+X1515		Label	01515h
+X1524		Label	01524h
+X1529		Label	01529h
+X1530		Label	01530h
+X1555		Label	01555h
+X156a		Label	0156Ah
+X1586		Label	01586h
+X15b6		Label	015B6h
+X15c0		Label	015C0h
+X15dd		Label	015DDh
+X15e8		Label	015E8h
+X15fa		Label	015FAh
+X1605		Label	01605h
+X1612		Label	01612h
+X1623		Label	01623h
+X162b		Label	0162Bh
+X1636		Label	01636h
+X167b		Label	0167Bh
+X167f		Label	0167Fh
+X168c		Label	0168Ch
+X16a1		Label	016A1h
+X16c2		Label	016C2h
+X16d9		Label	016D9h
+X16f1		Label	016F1h
+X16f2		Label	016F2h
+X1713		Label	01713h
+X1715		Label	01715h
+X1717		Label	01717h
+X1732		Label	01732h
+X1733		Label	01733h
+X1743		Label	01743h
+X174c		Label	0174Ch
+X1754		Label	01754h
+X175b		Label	0175Bh
+X1762		Label	01762h
+X1771		Label	01771h
+X179e		Label	0179Eh
+X17ac		Label	017ACh
+X17be		Label	017BEh
+X17d0		Label	017D0h
+X17d5		Label	017D5h
+X17ec		Label	017ECh
+X17f3		Label	017F3h
+X17fe		Label	017FEh
+X180f		Label	0180Fh
+X1815		Label	01815h
+X181e		Label	0181Eh
+X1822		Label	01822h
+X1825		Label	01825h
+X1835		Label	01835h
+X1837		Label	01837h
+X1844		Label	01844h
+X1848		Label	01848h
+X1860		Label	01860h
+X1869		Label	01869h
+X1879		Label	01879h
+X187e		Label	0187Eh
+X1888		Label	01888h
+X1895		Label	01895h
+X1898		Label	01898h
+X189d		Label	0189Dh
+X18a3		Label	018A3h
+X18ae		Label	018AEh
+X18bc		Label	018BCh
+X18c1		Label	018C1h
+X18c7		Label	018C7h
+X18d1		Label	018D1h
+X18d7		Label	018D7h
+X18e6		Label	018E6h
+X18ec		Label	018ECh
+X18f6		Label	018F6h
+X1900		Label	01900h
+X1916		Label	01916h
+X1928		Label	01928h
+X192b		Label	0192Bh
+X192d		Label	0192Dh
+X193c		Label	0193Ch
+X1957		Label	01957h
+X1962		Label	01962h
+X196a		Label	0196Ah
+X1977		Label	01977h
+X1981		Label	01981h
+X1993		Label	01993h
+X1999		Label	01999h
+X19a8		Label	019A8h
+X19ae		Label	019AEh
+X19c0		Label	019C0h
+X19c3		Label	019C3h
+X19c9		Label	019C9h
+X19d6		Label	019D6h
+X19dc		Label	019DCh
+X19ee		Label	019EEh
+X1a1a		Label	01A1Ah
+X1a20		Label	01A20h
+X1a2b		Label	01A2Bh
+X1a45		Label	01A45h
+X1a61		Label	01A61h
+X1a71		Label	01A71h
+X1aa1		Label	01AA1h
+X1aa2		Label	01AA2h
+X1ae6		Label	01AE6h
+X1ae8		Label	01AE8h
+X1b52		Label	01B52h
+X1b59		Label	01B59h
+X1b60		Label	01B60h
+X1b72		Label	01B72h
+X1b81		Label	01B81h
+X1b86		Label	01B86h
+X1bb0		Label	01BB0h
+X1bba		Label	01BBAh
+X1bc0		Label	01BC0h
+X1bc3		Label	01BC3h
+X1bca		Label	01BCAh
+X1be8		Label	01BE8h
+X1bf4		Label	01BF4h
+X1bf9		Label	01BF9h
+X1c35		Label	01C35h
+X1c3e		Label	01C3Eh
+X1c49		Label	01C49h
+X1c50		Label	01C50h
+X1c60		Label	01C60h
+X1c71		Label	01C71h
+X1c77		Label	01C77h
+X1c86		Label	01C86h
+X1c88		Label	01C88h
+X1c8a		Label	01C8Ah
+X1c8b		Label	01C8Bh
+X1c9f		Label	01C9Fh
+X1cad		Label	01CADh
+X1cb6		Label	01CB6h
+X1cd3		Label	01CD3h
+X1cf0		Label	01CF0h
+X1cf2		Label	01CF2h
+X1d00		Label	01D00h
+X1d17		Label	01D17h
+X1d3d		Label	01D3Dh
+X1d40		Label	01D40h
+X1d4b		Label	01D4Bh
+X1d56		Label	01D56h
+X1d61		Label	01D61h
+X1d7c		Label	01D7Ch
+X1dcc		Label	01DCCh
+X1ddb		Label	01DDBh
+X1dff		Label	01DFFh
+X1e03		Label	01E03h
+X1e19		Label	01E19h
+X1e31		Label	01E31h
+X1e3e		Label	01E3Eh
+X1e4d		Label	01E4Dh
+X1e6e		Label	01E6Eh
+X1e79		Label	01E79h
+X1e90		Label	01E90h
+X1e94		Label	01E94h
+X1e9f		Label	01E9Fh
+X1eb8		Label	01EB8h
+X1ed3		Label	01ED3h
+X1edd		Label	01EDDh
+X1ee5		Label	01EE5h
+X1eea		Label	01EEAh
+X1efc		Label	01EFCh
+X1f0d		Label	01F0Dh
+X1f0f		Label	01F0Fh
+X1f11		Label	01F11h
+X1f18		Label	01F18h
+X1f20		Label	01F20h
+X1f26		Label	01F26h
+X1f36		Label	01F36h
+X1f48		Label	01F48h
+X1f62		Label	01F62h
+X1f65		Label	01F65h
+X1f7b		Label	01F7Bh
+X1f93		Label	01F93h
+X1f9d		Label	01F9Dh
+X1fa1		Label	01FA1h
+X1fb3		Label	01FB3h
+X1fbd		Label	01FBDh
+X1fd4		Label	01FD4h
+
+Statistics
+----------
+"Name"	= 0
+"EQU"	= 175
+"SET"	= 0
+Labels	= 544
+
+
