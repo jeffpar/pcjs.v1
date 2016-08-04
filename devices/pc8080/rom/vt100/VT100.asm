@@ -2,9 +2,11 @@
 ;  DZ80 V3.4.1 8080 Disassembly of archive/VT100.bin
 ;  2016/08/03 14:55
 ;
-;   Code annotations beginning with ";;" borrowed from Adam Mayer (https://github.com/phooky)
+;   Comments beginning with ";;" borrowed from Adam Mayer (https://github.com/phooky)
 ;   See https://github.com/phooky/VT100-Hax/blob/master/ROMs/haxrom.d80
-;   More information at http://vt100romhax.tumblr.com/post/90789754818/day-four-rom-checksums
+;   Additional information at http://vt100romhax.tumblr.com/post/90789754818/day-four-rom-checksums
+;
+;   All other comments/annotations by Jeff Parsons <Jeff@pcjs.org>
 ;
 	org	0
 ;
