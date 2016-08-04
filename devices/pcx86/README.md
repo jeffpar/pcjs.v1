@@ -32,7 +32,7 @@ For example, the IBM PC *[Keyboard](/docs/pcx86/keyboard/)* component supports d
 (eg, 83-key, 84-key, 101-key), and each of those models can also be configured to have dedicated buttons for
 selected key combinations, or even entire keyboard layouts.
 
-Complete machine configurations are constructed from those devices.  A Machine Configuration is a single XML file
+Complete [machine configurations](machine/) are constructed from those devices.  A Machine Configuration is a single XML file
 that lists all the device components to be used.  A Machine XML file can choose to configure every device itself,
 or it can include pre-configured device XML files, such as those provided above or elsewhere.
 

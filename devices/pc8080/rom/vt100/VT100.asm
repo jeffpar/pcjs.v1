@@ -1,63 +1,63 @@
 ;
-;  DZ80 V3.4.1 8080 Disassembly of archive/VT100.bin
-;  2016/08/03 14:55
+;   DZ80 V3.4.1 8080 Disassembly of archive/VT100.bin
+;   2016/08/03 14:55
 ;
 ;   Comments beginning with ";;" borrowed from Adam Mayer (https://github.com/phooky)
 ;   See https://github.com/phooky/VT100-Hax/blob/master/ROMs/haxrom.d80
 ;   Additional information at http://vt100romhax.tumblr.com/post/90789754818/day-four-rom-checksums
 ;
-;   All other comments/annotations by Jeff Parsons <Jeff@pcjs.org>
+;   All other comments/annotations by Jeff Parsons (@jeffpar) <Jeff@pcjs.org>
 ;
 	org	0
-;
+
 X0000:	di
 	lxi	sp,X204e
 	jmp	X003b
-;
+
 	org	8
-;
+
 X0008:	call	X00fd
 	ei
 	ret
-;
+
 X000d:	nop
-;
+
 	org	10h
-;
+
 	call	X03cc
 	ei
 X0014:	ret
-;
+
 	nop
-;
+
 	org	18h
-;
+
 	call	X03cc
 	call	X00fd
 	ei
 	ret
-;
+
 	call	X04cf
 	ret
-;
+
 	nop
-;
+
 	org	28h
-;
+
 	call	X04cf
 	ret
-;
+
 	nop
-;
+
 	org	30h
-;
+
 X0030:	call	X03cc
 	call	X04cf
 	ei
 	ret
-;
+
 	jmp	X0030
-;
+
 X003b:	mvi	e,1
 X003d:	di
 	mvi	a,0fh
@@ -205,7 +205,7 @@ X010d:	rlc
 	ora	m		;; or in control bit
 	mov	m,a		;; store again
 	jmp	X012d		;; jump to end to interrupt
-;
+
 X011a:	lxi	h,X2068		;; load keys flag address
 	mvi	a,7
 	ana	m		;; load key counter
@@ -243,7 +243,7 @@ X013b:	mov	a,c
 	call	X0f18
 X015b:	mov	a,c
 	jmp	X080d
-;
+
 X015f:	mvi	a,1bh
 	call	X0f18
 	mov	a,c
@@ -254,7 +254,7 @@ X016c:	call	X0f18
 	mov	a,c
 	adi	40h
 	jmp	X080d
-;
+
 X0175:	lda	X2178
 	ora	a
 	jnz	X019e
@@ -268,12 +268,12 @@ X0187:	mvi	a,1bh
 	mvi	a,4fh
 X018e:	call	X0f18
 	jmp	X015b
-;
+
 X0194:	mvi	a,1bh
 	call	X0f18
 	mvi	a,5bh
 	jmp	X018e
-;
+
 X019e:	lda	X21bc
 	ora	a
 	jz	X01b5
@@ -284,14 +284,14 @@ X01ab:	mvi	a,1bh
 	call	X0f18
 	mvi	a,4fh
 	jmp	X016c
-;
+
 X01b5:	mov	a,c
 	cpi	41h
 	jm	X01ab
 	cpi	50h
 	jm	X0194
 	jmp	X0187
-;
+
 X01c3:	lxi	h,X0815
 	push	h
 	lda	X21a5
@@ -321,7 +321,7 @@ X01f0:	push	b
 	cmp	c
 	jnz	X01f0
 	jmp	X0394
-;
+
 X01ff:	lxi	h,X0812
 	push	h
 	xra	a
@@ -340,18 +340,18 @@ X0212:	jz	X0222
 	dcr	b
 	jz	X181e
 	ret
-;
+
 X0222:	dcr	a
 	rm
 	mov	m,a
 	ret
-;
+
 X0226:	inr	a
 	cpi	20h
 	rz
 	mov	m,a
 	ret
-;
+
 X022c:	lda	X21a7
 	cma
 	ani	10h
@@ -368,7 +368,7 @@ X0245:	mov	a,c
 	sta	X21c4
 	call	X0f7e
 	jmp	X0812
-;
+
 X0251:	di
 	lxi	sp,X204e
 	lxi	h,2000h
@@ -471,7 +471,7 @@ X031a:	mvi	a,0ffh		;; A = 0xff
 	mov	l,h		;; L = 0x80
 	shld	X20c0		;; Store 0x8080 at 0x20c0
 	ret
-;
+
 X0329:	mvi	a,40h
 	out	1
 	lda	X2158
@@ -483,7 +483,7 @@ X0329:	mvi	a,40h
 	sta	X21c9
 	out	62h
 	ret
-;
+
 X0342:	lda	X21a2
 	ora	a
 	jz	X034b
@@ -503,7 +503,7 @@ X035e:	shld	X2001
 	mov	a,b
 	out	0c2h
 	ret
-;
+
 X036b:	lda	X21a6
 	ani	20h
 X0370:	jnz	X0375
@@ -514,7 +514,7 @@ X0375:	ori	0ah
 	ori	0ch
 	out	0a2h
 	ret
-;
+
 X0381:	lda	X21a2
 	ora	a
 	jz	X0b63
@@ -530,19 +530,19 @@ X038b:	ldax	d		;; Load memory at DE into accumulator
 	dcr	b		;; B--
 	jnz	X038b		;; until B is zero
 	ret
-;
+
 X0394:	lda	X21a5
 	ora	a
 	mvi	a,1
 	jnz	X039f
 	mvi	a,5
 X039f:	jmp	X1f7b
-;
+
 X03a2:	call	X0381
 	call	X1ddb
 	call	X036b
 	jmp	X0342
-;
+
 X03ae:	call	X1488
 	call	X0587
 	lxi	h,X2177
@@ -607,7 +607,7 @@ X0409:	lxi	h,X20c0
 	mov	l,a
 	mvi	m,1ah
 	jmp	X0431
-;
+
 X0427:	jp	X042c
 	adi	40h
 X042c:	cpi	20h
@@ -625,12 +625,12 @@ X043a:	pop	h
 X043e:	mvi	a,0feh
 	ana	m
 	jmp	X0447
-;
+
 X0444:	mvi	a,1
 	ora	m
 X0447:	mov	m,a
 	jmp	X0437
-;
+
 X044b:	db	30h
 	dad	h
 	lxi	sp,X3221
@@ -771,7 +771,7 @@ X056a:	mvi	a,40h
 	pop	h
 	pop	psw
 	ret
-;
+
 X0587:	lda	X21a5
 	lxi	h,X207b
 	ora	m
@@ -791,25 +791,25 @@ X0593:	mov	b,a
 	jc	X08b2
 X05a9:	lhld	X2140
 	pchl
-;
+
 X05ad:	cpi	1bh
 	jnz	X05cc
 	lxi	h,X05b8
 	jmp	X0a18
-;
+
 X05b8:	cpi	32h
 	jnz	X05c5
 	mvi	a,1
 	sta	X2079
 	jmp	X0a15
-;
+
 X05c5:	mov	b,a
 	mvi	a,1bh
 	call	X05d2
 	mov	a,b
 X05cc:	call	X05d2
 	jmp	X0c62
-;
+
 X05d2:	mov	c,a
 X05d3:	push	b
 	call	X1488
@@ -820,7 +820,7 @@ X05d3:	push	b
 	mov	a,c
 	out	0e2h
 	ret
-;
+
 X05e3:	call	X0c46
 X05e6:	push	psw
 	cpi	7fh
@@ -892,7 +892,7 @@ X0641:	lhld	X20f6
 	lda	X21a8
 	ani	40h
 	jmp	X066d
-;
+
 X0668:	inr	m
 	call	X1636
 	xra	a
@@ -902,7 +902,7 @@ X0670:	pop	b
 	pop	h
 X0673:	pop	psw
 	ret
-;
+
 X0675:	lda	X21c4
 	ora	a
 	jnz	X0685
@@ -913,7 +913,7 @@ X0675:	lda	X21c4
 	jnz	X0687
 X0685:	xra	a
 	ret
-;
+
 X0687:	mov	l,m
 	mvi	h,20h
 	mov	d,m
@@ -934,7 +934,7 @@ X069c:	cpi	30h
 X06a7:	mov	a,d
 	ora	a
 	ret
-;
+
 X06aa:	lda	X2068
 	mov	e,a
 	ani	80h
@@ -948,7 +948,7 @@ X06aa:	lda	X2068
 	xra	a
 	sta	X2067
 	ret
-;
+
 X06c2:	mov	d,a
 	mvi	c,0
 	mvi	b,4
@@ -982,7 +982,7 @@ X06e8:	inx	h
 	mvi	a,0e1h
 	sta	X2072
 	ret
-;
+
 X06fb:	lxi	h,X0747
 	push	h
 	lda	X2072
@@ -1022,10 +1022,10 @@ X0738:	mov	a,m
 	dcr	b
 	jnz	X0738
 	ret
-;
+
 X0743:	pop	h
 	jmp	X0776
-;
+
 X0747:	mov	a,c
 	cpi	4
 	rp
@@ -1043,12 +1043,12 @@ X075b:	inx	h
 	jnz	X0751
 	ldax	b
 	jmp	X076c
-;
+
 X0766:	inx	b
 	dcr	d
 	jnz	X074e
 	ret
-;
+
 X076c:	mov	b,a
 	lda	X2067
 	cmp	b
@@ -1098,7 +1098,7 @@ X0776:	pop	h
 	ani	0dfh
 	mov	c,a
 	jmp	X07d7
-;
+
 X07c2:	mov	a,b
 	ani	30h
 	jz	X07d7
@@ -1109,7 +1109,7 @@ X07cb:	mov	a,m
 	inx	h
 	inx	h
 	jmp	X07cb
-;
+
 X07d5:	inx	h
 	mov	c,m
 X07d7:	mov	a,b
@@ -1157,7 +1157,7 @@ X082b:	mov	a,m
 	dcr	d
 	jnz	X082b
 	jmp	X0841
-;
+
 X0838:	lda	X2150
 	mov	m,a
 	mvi	a,0e1h
@@ -1175,14 +1175,14 @@ X084c:	mov	m,a
 	dcr	d
 	jnz	X084c
 	ret
-;
+
 X0853:	lda	X21a7
 	ani	40h
 	rz
 	mvi	a,80h
 	sta	X2147
 	ret
-;
+
 X085f:	mov	a,e
 	lhld	X3a6a
 	mov	h,h
@@ -1220,7 +1220,7 @@ X0875:	mov	a,d
 X08a0:	mov	a,d
 	sta	2000h
 	jmp	X0251
-;
+
 X08a7:	ora	d
 	mov	d,a
 	mvi	a,8
@@ -1230,7 +1230,7 @@ X08a7:	ora	d
 	ora	d
 	mov	d,a
 	ret
-;
+
 X08b2:	cpi	1bh
 	jz	X099e
 	cpi	10h
@@ -1247,9 +1247,9 @@ X08b2:	cpi	1bh
 X08cb:	call	X0a15
 	mvi	a,2
 X08d0:	jmp	X05e6
-;
+
 	ret
-;
+
 X08d4:	sui	5		;; subtract 5 from A and return if negative
 	rm
 	lxi	h,X08e5		;; load jump table at 8e5
@@ -1263,7 +1263,7 @@ X08d4:	sui	5		;; subtract 5 from A and return if negative
 	xchg
 	xra	a		;; zero A
 	pchl			;; jump to address
-;
+
 X08e5:	dw	X0900
 	dw	X0997		;; immediate return
 	dw	X0938
@@ -1279,7 +1279,7 @@ X08e5:	dw	X0900
 X08fb:	inr	a
 X08fc:	sta	X20fc
 	ret
-;
+
 X0900:	lda	X21a5
 	ora	a
 	rnz
@@ -1292,7 +1292,7 @@ X0900:	lda	X21a5
 	ora	m
 	mov	m,a
 	ret
-;
+
 	lxi	h,X2172
 	mov	a,m
 	ani	0efh
@@ -1315,25 +1315,25 @@ X0930:	dcx	d
 	ori	80h
 	stax	d
 	jmp	X0ef3
-;
+
 X0938:	lxi	h,X2078
 	mov	a,m
 	adi	8
 	rc
 	mov	m,a
 	ret
-;
+
 X0941:	lxi	h,X20f8
 	mov	a,m
 	ora	a
 	rz
 	dcr	m
 	jmp	X1636
-;
+
 X094b:	xra	a
 	sta	X20f8
 	jmp	X1636
-;
+
 	call	X094b
 X0955:	lda	X21a8
 	ani	20h
@@ -1350,7 +1350,7 @@ X0955:	lda	X21a8
 	inr	d
 	mov	m,d
 X0970:	jmp	X1636
-;
+
 X0973:	lda	X21a6
 	ani	80h
 	jz	X0998
@@ -1367,16 +1367,16 @@ X0989:	lda	X21c3
 	dcr	a
 	sta	X20f5
 X0997:	ret
-;
+
 X0998:	call	X101a
 	jmp	X1012
-;
+
 X099e:	xra	a
 	sta	X207d
 	sta	X21b8
 	lxi	h,X09ab
 	jmp	X0a18
-;
+
 X09ab:	cpi	30h
 	jnc	X09bd
 	lxi	h,X207d
@@ -1387,7 +1387,7 @@ X09ab:	cpi	30h
 	mvi	c,0ffh
 X09bb:	mov	m,c
 	ret
-;
+
 X09bd:	sta	X207e
 	lxi	h,X0a15
 	push	h
@@ -1400,7 +1400,7 @@ X09bd:	sta	X207e
 	jnz	X09d9
 	lxi	h,X0a1c
 X09d9:	jmp	X09f7
-;
+
 X09dc:	mov	b,a
 	lda	X21a7
 	ani	20h
@@ -1428,7 +1428,7 @@ X0a00:	xra	a
 	inx	h
 	inx	h
 	jmp	X0a00
-;
+
 X0a0d:	stax	d
 	mov	a,m
 	inx	h
@@ -1436,7 +1436,7 @@ X0a0d:	stax	d
 	mov	l,a
 	xra	a
 	pchl
-;
+
 X0a14:	pop	h
 X0a15:	lxi	h,X05e6		;; HL = 0x05e6
 X0a18:	shld	X2140		;; 0x2140 = 0xe605
@@ -1551,7 +1551,7 @@ X0a7b:	inx	sp
 	shld	X2140
 	pop	h
 	ret
-;
+
 	mvi	a,48h
 	sta	X207e
 	lxi	h,X0000
@@ -1588,7 +1588,7 @@ X0ac2:	mov	a,m
 	dcr	e
 	jnz	X0ac2
 	ret
-;
+
 X0ad9:	mov	b,h
 	mvi	e,18h
 	mov	b,d
@@ -1642,7 +1642,7 @@ X0af5:	mov	h,e
 	shld	X2140
 	pop	h
 	ret
-;
+
 X0b19:	mov	b,a
 	cpi	20h
 	jc	X08b2
@@ -1652,7 +1652,7 @@ X0b19:	mov	b,a
 	lxi	h,X09ab
 	shld	X2140
 	ret
-;
+
 X0b2e:	mov	a,m
 	ora	a
 	jnz	X0b42
@@ -1663,7 +1663,7 @@ X0b2e:	mov	a,m
 	lxi	h,X0b19
 	shld	X2140
 	ret
-;
+
 X0b42:	mvi	m,0
 	mov	a,b
 	sui	20h
@@ -1678,7 +1678,7 @@ X0b4f:	call	X11bf
 	sta	X20f9
 X0b5d:	call	X0a15
 	jmp	X1636
-;
+
 X0b63:	xra	a
 	sta	X21a2
 	call	X10ad
@@ -1687,7 +1687,7 @@ X0b63:	xra	a
 	call	X114c
 	mvi	c,50h
 	jmp	X0b89
-;
+
 X0b77:	mvi	a,1
 	sta	X21a2
 	call	X10ad
@@ -1706,7 +1706,7 @@ X0b89:	xra	a
 	call	X1848
 	mvi	a,1
 	jmp	X0faa
-;
+
 	lxi	h,X20f9
 	lda	X2155
 	mov	b,a
@@ -1718,7 +1718,7 @@ X0b89:	xra	a
 	lxi	h,X20f9
 	dcr	m
 	jmp	X1636
-;
+
 X0bb8:	lda	X21a6
 	ani	80h
 	jz	X0bd9
@@ -1733,18 +1733,18 @@ X0bce:	lda	X21c3
 	jnz	X0bce
 	sta	X20f4
 	ret
-;
+
 X0bd9:	call	X102d
 	jmp	X1012
-;
+
 	lxi	h,X2178
 	mvi	m,1
 	ret
-;
+
 	lxi	h,X2178
 	mvi	m,0
 	ret
-;
+
 	lxi	h,X21a7
 	mov	a,m
 	ori	20h
@@ -1760,15 +1760,15 @@ X0bfe:	mov	l,h
 	xra	a
 	sta	X20fc
 	ret
-;
+
 	mvi	h,88h
 	jmp	X0c11
-;
+
 	mvi	h,8
 X0c11:	mov	l,h
 	shld	X20fd
 	ret
-;
+
 	lxi	h,X2145
 	mov	a,b
 	ora	a
@@ -1777,7 +1777,7 @@ X0c11:	mov	l,h
 	ani	0f0h
 	mov	m,a
 	ret
-;
+
 X0c23:	sui	5
 	rp
 	mov	b,a
@@ -1789,7 +1789,7 @@ X0c29:	ral
 	ora	m
 	mov	m,a
 	ret
-;
+
 X0c31:	inx	d
 X0c32:	lda	X207e
 	mov	b,a
@@ -1805,12 +1805,12 @@ X0c39:	inx	h
 	mov	a,m
 	stax	d
 	ret
-;
+
 X0c46:	lxi	h,X20fc
 	inr	m
 X0c4a:	inr	m
 	ret
-;
+
 	mov	b,c
 	mov	c,b
 	mov	b,d
@@ -1828,23 +1828,23 @@ X0c57:	lxi	h,X2079
 	pop	h
 X0c62:	lxi	h,X05ad
 	jmp	X0a18
-;
+
 	lxi	h,X2102
 	lxi	d,X20f8
 	jmp	X0c77
-;
+
 	lxi	h,X20f8
 	lxi	d,X2102
 X0c77:	mvi	b,0bh
 	call	memmov
 	jmp	X1636
-;
+
 	lxi	h,X0c8a
 	mov	a,b
 	ora	a
 	jz	X0c97
 	jmp	X09ff
-;
+
 X0c8a:	lxi	b,X0ca2
 	inr	b
 	ana	a
@@ -1862,26 +1862,26 @@ X0c97:	sta	X20fb
 	ori	0f7h
 	mov	m,a
 	ret
-;
+
 X0ca2:	mvi	a,0fbh
 	jmp	X0cb5
-;
+
 	lda	X21c8
 	ora	a
 	jnz	X0cbb
 	mvi	a,0fdh
 	jmp	X0cb5
-;
+
 	mvi	a,0feh
 X0cb5:	lxi	h,X20fa
 	ana	m
 	mov	m,a
 	ret
-;
+
 X0cbb:	mvi	a,80h
 	sta	X20fb
 	ret
-;
+
 	lda	X2130
 	ora	a
 	rnz
@@ -1890,7 +1890,7 @@ X0cbb:	mvi	a,80h
 	ori	4
 	mov	m,a
 	ret
-;
+
 	mvi	a,0fbh
 	call	X0dbf
 	lda	X21a7
@@ -1900,7 +1900,7 @@ X0cbb:	mvi	a,80h
 	dcx	h
 	mvi	m,2fh
 	jmp	X0ef3
-;
+
 X0ce3:	mvi	m,3fh
 	inx	h
 	mvi	a,31h
@@ -1920,7 +1920,7 @@ X0cf9:	mov	a,c
 	inx	h
 	mvi	m,0e3h
 	jmp	X0ef3
-;
+
 	lda	X21b8
 	ora	a
 	rnz
@@ -1934,7 +1934,7 @@ X0cf9:	mov	a,c
 	ori	8
 	mov	m,a
 	ret
-;
+
 	mvi	a,0f7h
 	call	X0dbf
 	mvi	b,3
@@ -1948,12 +1948,12 @@ X0d29:	ori	30h
 	inx	h
 	mvi	m,0eeh
 X0d2f:	jmp	X0ef3
-;
+
 X0d32:	mov	a,m
 	ori	1
 	mov	m,a
 	ret
-;
+
 	mvi	a,0feh
 	call	X0dbf
 	lda	X20f9
@@ -1973,7 +1973,7 @@ X0d4a:	mov	c,a
 	call	X0d7a
 	mvi	m,0d2h
 	jmp	X0ef3
-;
+
 	in	42h
 	ani	4
 	rnz
@@ -1987,7 +1987,7 @@ X0d6f:	call	X1488
 	ani	4
 	jnz	X0d6f
 	ret
-;
+
 X0d7a:	mov	e,a
 	mvi	d,30h
 	mvi	c,64h
@@ -2007,7 +2007,7 @@ X0d93:	mov	a,e
 	mov	m,a
 	inx	h
 	ret
-;
+
 X0d99:	mov	a,e
 	mvi	b,30h
 X0d9c:	inr	b
@@ -2019,7 +2019,7 @@ X0d9c:	inr	b
 	mov	a,b
 	cmp	d
 	ret
-;
+
 	mvi	a,45h
 	sta	X21c7
 	call	X0381
@@ -2028,13 +2028,13 @@ X0d9c:	inr	b
 	xra	a
 	sta	X21c7
 	ret
-;
+
 X0db9:	mov	m,a
 	inx	h
 X0dbb:	mvi	m,3bh
 	inx	h
 	ret
-;
+
 X0dbf:	lxi	h,X2172
 	ana	m
 	mov	m,a
@@ -2044,30 +2044,30 @@ X0dbf:	lxi	h,X2172
 	mvi	m,5bh
 	inx	h
 	ret
-;
+
 	mov	b,d
 	mov	a,b
 	ora	a
 	jnz	X0dd8
 	call	X0de5
 	ret
-;
+
 X0dd8:	cpi	3
 	rnz
 	call	X0dec
 	ret
-;
+
 	call	X0e23
 	ora	m
 	mov	m,a
 	ret
-;
+
 X0de5:	call	X0e23
 	cma
 	ana	m
 	mov	m,a
 	ret
-;
+
 X0dec:	lxi	h,X2191
 X0def:	xra	a
 	mov	m,a
@@ -2076,7 +2076,7 @@ X0def:	xra	a
 	cpi	0a2h
 	jnz	X0def
 	ret
-;
+
 X0df9:	call	X0e23
 X0dfc:	inr	c
 	ora	a
@@ -2087,7 +2087,7 @@ X0e02:	mov	d,a
 	mov	a,d
 	jz	X0dfc
 	jmp	X0e15
-;
+
 X0e0b:	inx	h
 	mov	a,l
 	cpi	0a2h
@@ -2100,7 +2100,7 @@ X0e15:	lda	X2153
 	mov	a,c
 X0e1d:	sta	X20f8
 	jmp	X1636
-;
+
 X0e23:	lda	X20f8
 	mov	c,a
 X0e27:	mov	d,a
@@ -2119,7 +2119,7 @@ X0e38:	dcr	d
 	rm
 	rrc
 	jmp	X0e38
-;
+
 X0e3e:	lda	X21a5
 	lxi	h,X207b
 	ora	m
@@ -2137,7 +2137,7 @@ X0e47:	in	42h
 	mov	a,m
 	out	0
 	ret
-;
+
 X0e59:	di
 	call	X0e3e
 	ei
@@ -2156,7 +2156,7 @@ X0e6d:	lxi	h,X2173
 	jz	X0e79
 	lhld	X2174
 	pchl
-;
+
 X0e79:	lda	X2172
 	ora	a
 	rz
@@ -2166,7 +2166,7 @@ X0e80:	rar
 	inr	e
 	inr	e
 	jmp	X0e80
-;
+
 X0e89:	mvi	d,0
 	lxi	h,X0e94
 	dad	d
@@ -2175,7 +2175,7 @@ X0e89:	mvi	d,0
 	mov	h,m
 	mov	l,a
 	pchl
-;
+
 X0e94:	stc
 	dcr	c
 	rp
@@ -2235,7 +2235,7 @@ X0ee1:	mov	a,b
 	jnz	X0593
 	out	0
 	ret
-;
+
 X0ef3:	lxi	h,X0f01
 	shld	X2174
 	xra	a
@@ -2255,7 +2255,7 @@ X0f01:	lxi	h,X2171
 	xra	a
 	sta	X2173
 	jmp	X0ee1
-;
+
 X0f18:	push	h
 	push	d
 	mov	d,a
@@ -2296,7 +2296,7 @@ X0f5b:	sta	X2144
 X0f5e:	pop	d
 	pop	h
 	ret
-;
+
 X0f61:	mov	a,d
 	ani	7fh
 	mov	d,a
@@ -2314,7 +2314,7 @@ X0f75:	mov	c,d
 	mvi	b,2
 	call	X0f7e
 	jmp	X0f5e
-;
+
 X0f7e:	lda	X21a7
 	ani	10h
 	rz
@@ -2344,7 +2344,7 @@ X0f9e:	ora	m
 	inx	h
 	mov	m,a
 	ret
-;
+
 X0faa:	lxi	h,X207f
 	add	m
 X0fae:	cmp	m
@@ -2357,7 +2357,7 @@ X0fb2:	lda	X207b
 	pop	psw
 	pop	h
 	jmp	X0fae
-;
+
 X0fbe:	lhld	X204e
 	mov	a,h
 	ori	0f0h
@@ -2382,10 +2382,10 @@ X0fd8:	mvi	m,0
 	inr	a
 	sta	X21c3
 	ret
-;
+
 X0fe6:	mvi	b,0ffh
 	jmp	X0fed
-;
+
 X0feb:	mvi	b,1
 X0fed:	lxi	h,X2155
 	mov	d,m
@@ -2414,7 +2414,7 @@ X1003:	mov	d,m
 X1012:	mvi	a,0ffh
 	sta	X210e
 	jmp	X1636
-;
+
 X101a:	call	X1191
 	lda	X2156
 	call	X122f
@@ -2422,7 +2422,7 @@ X101a:	call	X1191
 	lda	X2155
 	dcr	a
 	jmp	X103e
-;
+
 X102d:	call	X1191
 	lda	X2155
 	dcr	a
@@ -2460,7 +2460,7 @@ X106a:	lxi	h,X2056
 	shld	X2058
 	shld	X2075
 	ret
-;
+
 X1074:	call	X13e3
 	ani	80h
 	sta	X2157
@@ -2478,7 +2478,7 @@ X1083:	mov	m,b		;; M <- B
 	ora	e		;; A = D | E
 	jnz	X1083		;; repeat if A != 0
 	ret
-;
+
 	mvi	c,0
 X108e:	lxi	h,X2051
 	di
@@ -2493,12 +2493,12 @@ X108e:	lxi	h,X2051
 	call	X1493
 	pop	b
 	jmp	X108e
-;
+
 X10a7:	mov	a,c
 	ral
 	rnc
 	jmp	X1191
-;
+
 X10ad:	lxi	h,X0670
 	shld	X2004
 	xra	a
@@ -2536,7 +2536,7 @@ X10d7:	lda	X21c7
 	mvi	a,0ffh
 	sta	X20f5
 	ret
-;
+
 X10f9:	xra	a
 	sta	X2051
 X10fd:	lda	X2065
@@ -2567,7 +2567,7 @@ X10fd:	lda	X2065
 	lxi	h,Xd0f2
 	shld	X2004
 	ret
-;
+
 X1136:	mvi	m,7fh
 	inx	h
 	mov	d,h
@@ -2584,7 +2584,7 @@ X1136:	mvi	m,7fh
 	dcr	b
 	jnz	X1136
 	ret
-;
+
 X114c:	lxi	h,X20c2
 	inr	c
 	inr	c
@@ -2624,7 +2624,7 @@ X1189:	mov	m,a
 	dcr	b
 	jp	X1189
 	ret
-;
+
 X1191:	di
 	lda	X207a
 	ora	a
@@ -2632,7 +2632,7 @@ X1191:	di
 X1199:	ei
 	call	X1488
 	jmp	X1191
-;
+
 X11a0:	lda	X2065
 	ora	a
 	jnz	X11b0
@@ -2641,7 +2641,7 @@ X11a0:	lda	X2065
 	ei
 	rz
 	jmp	X1199
-;
+
 X11b0:	lda	X205b
 	lxi	h,X205a
 	add	m
@@ -2650,7 +2650,7 @@ X11b0:	lda	X205b
 	jz	X1199
 	ei
 	ret
-;
+
 X11bf:	push	h
 	mvi	b,17h
 	lda	X21a2
@@ -2660,7 +2660,7 @@ X11bf:	push	h
 	rz
 	mvi	b,0dh
 	ret
-;
+
 X11ce:	ora	a
 	jp	X11e8
 	lxi	h,X2004
@@ -2676,7 +2676,7 @@ X11ce:	ora	a
 	mov	b,d
 	mov	c,e
 	jmp	X120a
-;
+
 X11e8:	call	X127f
 	call	X1290
 	push	h
@@ -2700,7 +2700,7 @@ X11e8:	call	X127f
 X120a:	di
 	shld	X2075
 	jmp	X1228
-;
+
 X1211:	call	X129d
 	lda	X2050
 	rrc
@@ -2719,7 +2719,7 @@ X1228:	mov	h,b
 	shld	X2179
 	ei
 	ret
-;
+
 X122f:	push	psw
 	call	X0fbe
 	pop	psw
@@ -2738,7 +2738,7 @@ X1248:	di
 	inx	h
 	mov	c,m
 	jmp	X1271
-;
+
 X1252:	call	X129d
 	lda	X2050
 	rrc
@@ -2766,7 +2766,7 @@ X1271:	lhld	X204e
 	mov	m,c
 	ei
 	ret
-;
+
 X127f:	inr	a
 	mov	b,a
 	lxi	h,X2004
@@ -2778,7 +2778,7 @@ X1284:	mov	a,m
 	rz
 	call	X1299
 	jmp	X1284
-;
+
 X1290:	push	h
 	call	X1299
 	mov	d,m
@@ -2786,7 +2786,7 @@ X1290:	push	h
 	mov	e,m
 	pop	h
 	ret
-;
+
 X1299:	call	X13db
 	inx	h
 X129d:	mov	a,h
@@ -2794,7 +2794,7 @@ X129d:	mov	a,h
 	ori	20h
 	mov	h,a
 	ret
-;
+
 	call	X12b0
 	mov	d,b
 	call	X12b0
@@ -2823,7 +2823,7 @@ X12b0:	call	X1191
 	lxi	h,X20f4
 	shld	X20f6
 	jmp	X1012
-;
+
 	lda	X2130
 	cpi	2
 	rnc
@@ -2833,7 +2833,7 @@ X12e8:	lxi	h,X2172
 	ori	2
 	mov	m,a
 	ret
-;
+
 	mvi	a,0fdh
 	call	X0dbf
 	lda	X2176
@@ -2877,7 +2877,7 @@ X131c:	mov	a,b
 	call	X0d7a
 	mvi	m,0f8h
 	jmp	X0ef3
-;
+
 X134a:	lxi	h,X2157
 	mov	a,m
 	ora	a
@@ -2906,7 +2906,7 @@ X136b:	mov	m,a
 	xra	a
 	sta	X2157
 	jmp	X1636
-;
+
 X1380:	lda	X20f9
 	call	X13e6
 X1386:	lxi	h,X20c2
@@ -2914,14 +2914,14 @@ X1386:	lxi	h,X20c2
 	add	l
 	mov	l,a
 	ret
-;
+
 X138d:	call	X1380
 X1390:	mov	a,m
 	inx	h
 	mov	h,m
 	mov	l,a
 	ret
-;
+
 X1395:	ani	70h
 	mov	b,a
 	lda	X20f9
@@ -2948,7 +2948,7 @@ X13bd:	mov	a,m
 	ora	b
 	mov	m,a
 	ret
-;
+
 X13c3:	lda	X2050
 	rrc
 	mov	d,h
@@ -2964,24 +2964,24 @@ X13d2:	mov	a,m
 	dcr	b
 	jnz	X13d2
 	ret
-;
+
 X13db:	lda	X2050
 X13de:	add	l
 	mov	l,a
 	rnc
 	inr	h
 	ret
-;
+
 X13e3:	lda	X20f9
 X13e6:	lxi	h,X2113
 	add	l
 	mov	l,a
 	mov	a,m
 	ret
-;
+
 	mvi	c,0
 	jmp	X13f4
-;
+
 	mvi	c,0ffh
 X13f4:	lda	X21b8
 	ora	a
@@ -2994,7 +2994,7 @@ X1404:	mov	a,b
 	mov	b,c
 	call	X09ff
 	ret
-;
+
 X140a:	lxi	b,X142a
 	stax	b
 	cma
@@ -3027,13 +3027,13 @@ X1426:	inr	d
 X142a:	lxi	h,X21bc
 	mov	m,b
 	ret
-;
+
 	call	X1476
 	ana	a
 	lxi	h,Xc320
 	jp	Xcd0b
 	hlt
-;
+
 	inr	d
 	xra	b
 	lxi	h,Xc920
@@ -3041,7 +3041,7 @@ X142a:	lxi	h,X21bc
 	mov	m,b
 	call	X1848
 	ret
-;
+
 	call	X1476
 	ana	m
 	lxi	h,Xc980
@@ -3054,7 +3054,7 @@ X142a:	lxi	h,X21bc
 	mov	m,b
 	call	X0381
 	ret
-;
+
 	call	X1476
 	ana	m
 	lxi	h,Xc940
@@ -3084,7 +3084,7 @@ X1476:	pop	h
 	mov	m,a
 	xchg
 	pchl
-;
+
 X1488:	call	X1493
 	ani	10h
 	cz	X06aa
@@ -3129,7 +3129,7 @@ X14a2:	lxi	h,X21a5		;;
 	jz	X14d4
 	shld	X212d
 	ret
-;
+
 X14d4:	lda	X21ba
 	xri	0ffh
 	sta	X21ba
@@ -3148,7 +3148,7 @@ X14e5:	shld	X212d
 	xra	m
 	mov	m,a
 	ret
-;
+
 	mov	m,h
 	mov	a,b
 	ora	a
@@ -3163,7 +3163,7 @@ X150a:	lda	X20f8
 	inr	b
 	lhld	X214e
 	jmp	X1529
-;
+
 X1515:	lda	X20f8
 	mov	b,a
 	lda	X2157
@@ -3189,7 +3189,7 @@ X1530:	stax	d
 	xra	a
 	sta	X20f4
 	ret
-;
+
 	mov	a,b
 	ora	a
 	jz	X156a
@@ -3200,7 +3200,7 @@ X1530:	stax	d
 	call	X1555
 	call	X156a
 	jmp	X134a
-;
+
 X1555:	lxi	h,X20f9
 	mov	a,m
 	push	psw
@@ -3213,7 +3213,7 @@ X1555:	lxi	h,X20f9
 	mov	m,a
 	call	X1074
 	jmp	X150a
-;
+
 X156a:	lda	X20f8
 	ora	a
 	cz	X134a
@@ -3229,7 +3229,7 @@ X156a:	lda	X20f8
 	pop	psw
 	mov	m,a
 	jmp	X1074
-;
+
 X1586:	dcr	b
 	rm
 	inr	c
@@ -3248,7 +3248,7 @@ X1586:	dcr	b
 	pop	h
 	pop	b
 	jmp	X1586
-;
+
 	mvi	c,81h
 	call	X108e
 	call	X11bf
@@ -3328,7 +3328,7 @@ X1623:	inx	h
 	dcr	c
 	jnz	X1612
 	jmp	X1848
-;
+
 X162b:	inx	h
 	mov	l,m
 	ani	0fh
@@ -3336,7 +3336,7 @@ X162b:	inx	h
 	mov	h,a
 	inx	h
 	jmp	X13db
-;
+
 X1636:	lxi	h,X000d
 	shld	X212d
 	xra	a
@@ -3408,7 +3408,7 @@ X16a1:	lda	X20f8
 	lhld	X20f6
 	mov	m,b
 	ret
-;
+
 X16c2:	mov	b,a
 	lxi	h,X16f1
 	shld	X2140
@@ -3432,7 +3432,7 @@ X16d9:	mov	m,a
 	jc	X16f2
 	mov	m,a
 	ret
-;
+
 X16f1:	mov	b,a
 X16f2:	mov	a,b
 	cpi	3ah
@@ -3455,7 +3455,7 @@ X16f2:	mov	a,b
 X1713:	mvi	a,0ffh
 X1715:	mov	m,a
 	ret
-;
+
 X1717:	lxi	d,X2130
 	push	psw
 	lxi	h,X214b
@@ -3482,7 +3482,7 @@ X1733:	mov	b,a
 	jz	X1743
 	sta	X207e
 	jmp	X0aa2
-;
+
 X1743:	lxi	h,X207d
 	add	m
 	jnc	X174c
@@ -3491,7 +3491,7 @@ X174c:	mov	m,a
 	lxi	h,X1733
 	shld	X2140
 	ret
-;
+
 X1754:	mvi	d,0
 	mvi	b,1
 	jmp	X1762
@@ -3535,7 +3535,7 @@ X1771:	sta	X21ae		;; 0x21ae = A
 	lda	X21ae
 	inr	a
 	jmp	X1771
-;
+
 X179e:	cmp	m
 	pop	b
 	mvi	c,0
@@ -3563,7 +3563,7 @@ X17be:	lxi	d,X17ec		;; DE = 0x17ec
 	lxi	h,Xcc71		;; HL = 0xcc71
 	shld	X2004		;; retarget screen ram to display wait message
 	ret
-;
+
 X17d0:	lxi	h,X217b
 	mvi	b,27h
 X17d5:	mvi	m,80h
@@ -3588,17 +3588,17 @@ X17fe:
 	lda	X2155
 	lxi	b,X00ff
 	jmp	X180f
-;
+
 	call	X11bf
 	lda	X2156
 	mvi	c,1
 X180f:	lxi	h,X20f9
 	jmp	X1825
-;
+
 X1815:	lda	X2153
 	lxi	b,Xff01
 	jmp	X1822
-;
+
 X181e:	xra	a
 	lxi	b,X00ff
 X1822:	lxi	h,X20f8
@@ -3621,7 +3621,7 @@ X1837:	cmp	d
 	jnz	X1837
 X1844:	mov	m,a
 	jmp	X1636
-;
+
 X1848:	lxi	h,X0000
 	shld	X2130
 	mvi	a,0ffh
@@ -3664,19 +3664,19 @@ X1888:	mov	b,a
 	lda	X2050
 	dcr	a
 	jmp	X1898
-;
+
 X1895:	lda	X2153
 X1898:	cmp	b
 	jc	X189d
 	mov	a,b
 X189d:	sta	X20f8
 	jmp	X1636
-;
+
 X18a3:	mvi	c,40h
 	call	X1928
 	call	X18c1
 	jmp	X18bc
-;
+
 X18ae:	mvi	c,40h
 	call	X1928
 	call	X19a8
@@ -3807,7 +3807,7 @@ X196a:	in	42h
 	out	62h
 	inx	h
 	jmp	X1962
-;
+
 X1977:	lhld	X21af
 	dad	h
 	dad	h
@@ -3836,7 +3836,7 @@ X1999:	in	42h
 	dcr	b
 	jnz	X1993
 	ret
-;
+
 X19a8:	in	42h
 	ana	c
 	jz	X19a8
@@ -3849,7 +3849,7 @@ X19ae:	in	42h
 	mvi	a,2fh
 	out	62h
 	ret
-;
+
 X19c0:	lxi	h,X013b
 X19c3:	in	42h
 	ana	c
@@ -3862,7 +3862,7 @@ X19c9:	in	42h
 	ora	l
 	jnz	X19c3
 	ret
-;
+
 X19d6:	in	42h
 	ana	c
 	jz	X19d6
@@ -3875,7 +3875,7 @@ X19dc:	in	42h
 	mvi	a,2fh
 	out	62h
 	ret
-;
+
 X19ee:	cpi	20h
 	mvi	c,43h
 	jz	X01ff
@@ -3896,10 +3896,10 @@ X19ee:	cpi	20h
 	mov	a,b
 	lxi	d,X21ac
 	pchl
-;
+
 X1a1a:	sta	X2177
 	jmp	X0812
-;
+
 X1a20:	lda	X207b
 	xri	0ffh
 	sta	X207b
@@ -3923,7 +3923,7 @@ X1a45:	lhld	X2004
 	sta	X20f8
 	call	X1bf9
 	jmp	X1636
-;
+
 X1a61:	lhld	X2111
 	shld	X2140
 	call	X1bba
@@ -3953,7 +3953,7 @@ X1a71:	mvi	m,0ffh
 	ora	a
 	cz	X12e8
 X1aa1:	ret
-;
+
 X1aa2:	rst	1
 	ldax	d
 	dad	b
@@ -3981,7 +3981,7 @@ X1aa2:	rst	1
 	pop	psw
 	cnz	X0b63
 	jmp	X1a45
-;
+
 	rst	0
 	call	X1b52
 	lda	X20f8
@@ -4007,7 +4007,7 @@ X1ae8:	mov	a,b
 	call	X0dec
 	call	X1ccd
 	jmp	X1ae6
-;
+
 	lxi	h,X21a5
 	mov	a,m
 	xri	20h
@@ -4015,7 +4015,7 @@ X1ae8:	mov	a,b
 	xra	a
 	sta	X2144
 	ret
-;
+
 	call	X094b
 	lxi	h,X225a
 	mov	a,m
@@ -4026,7 +4026,7 @@ X1ae8:	mov	a,b
 	sta	X21be
 	jz	X1cd3
 	jmp	X1c35
-;
+
 	call	X1b59
 	lxi	h,X21a6
 	lda	X20f8
@@ -4034,16 +4034,16 @@ X1ae8:	mov	a,b
 	cpi	28h
 	rnc
 	nop
-;
+
 	org	1b34h
-;
+
 	mov	d,a
 	call	X0e2b
 	xra	m
 	mov	m,a
 	call	X1ddb
 	jmp	X1cd3
-;
+
 	dcx	d
 	xchg
 	call	X1b59
@@ -4053,19 +4053,19 @@ X1ae8:	mov	a,b
 	mov	m,a
 	call	X1ddb
 	jmp	X1cd3
-;
+
 X1b52:	lda	X21be
 	ora	a
 	rnz
 	pop	h
 	ret
-;
+
 X1b59:	lda	X21be
 	ora	a
 	rz
 	pop	h
 	ret
-;
+
 X1b60:	lda	X2069
 	ani	20h
 	rz
@@ -4074,7 +4074,7 @@ X1b60:	lda	X2069
 	jnz	X1b72
 	call	X1754
 	jmp	X1b81
-;
+
 X1b72:	cpi	52h
 	jnz	X1b86
 	call	X175b
@@ -4084,7 +4084,7 @@ X1b72:	cpi	52h
 X1b81:	ei
 	call	X1bf9
 	ret
-;
+
 X1b86:	cpi	41h
 	rnz
 	call	X1b59
@@ -4099,7 +4099,7 @@ X1b86:	cpi	41h
 	shld	X2140
 	pop	h
 	ret
-;
+
 	sbb	b
 	cpi	61h
 	rm
@@ -4107,22 +4107,22 @@ X1b86:	cpi	41h
 	rp
 	ani	0dfh
 	ret
-;
+
 X1bb0:	call	X0394
 	lxi	h,X19ee
 	shld	X2140
 	ret
-;
+
 X1bba:	lhld	X204e
 	jmp	X1bc3
-;
+
 X1bc0:	lxi	h,X21cc
 X1bc3:	mov	a,h
 	ani	0fh
 	ori	20h
 	mov	h,a
 	ret
-;
+
 X1bca:	call	X1bba
 	call	X0fc8
 	push	h
@@ -4150,7 +4150,7 @@ X1be8:	mov	a,e
 X1bf4:	dcr	e
 	jnz	X1be8
 	ret
-;
+
 X1bf9:	lxi	b,X1cad
 	lxi	h,X2253
 	mvi	a,0fah
@@ -4210,7 +4210,7 @@ X1c60:	sta	X21be
 	mov	l,a
 	shld	X2004
 	ret
-;
+
 X1c71:	push	h
 	lxi	d,X1000
 	dad	d
@@ -4226,10 +4226,10 @@ X1c77:	push	psw
 	inx	d
 	inx	b
 	jmp	X1c77
-;
+
 X1c86:	pop	psw
 	ret
-;
+
 X1c88:	mvi	b,70h
 X1c8a:	xchg
 X1c8b:	mvi	m,7fh
@@ -4248,7 +4248,7 @@ X1c8b:	mvi	m,7fh
 	dcr	c
 	jnz	X1c8b
 	ret
-;
+
 X1c9f:	mvi	m,7fh
 	mov	d,h
 	mov	e,l
@@ -4266,7 +4266,7 @@ X1cb6:
 	db	'TO EXIT PRESS ',022h,'SET-UP',022h,0
 	call	X1bba
 	jmp	X0fc8
-;
+
 X1cd3:	call	X1ccd
 	call	X1bc0
 	push	h
@@ -4331,7 +4331,7 @@ X1d40:	mov	m,a
 	jnz	X1d40
 	xra	a
 	jmp	X1c60
-;
+
 X1d4b:	db	20h
 	db	20h
 	db	20h
@@ -4372,7 +4372,7 @@ X1d61:	mov	c,a
 	xchg
 	mvi	b,5
 	jmp	memmov
-;
+
 X1d7c:	db	20h
 	db	20h
 	db	20h
@@ -4442,7 +4442,7 @@ X1dcc:	push	h
 	rz
 	mvi	a,1
 	ret
-;
+
 X1ddb:	lda	X21ac
 	ani	0f0h
 	rrc
@@ -4461,7 +4461,7 @@ X1ddb:	lda	X21ac
 	ani	3fh
 	ori	80h
 	jmp	X1e03
-;
+
 X1dff:	ani	3fh
 	ori	0c0h
 X1e03:	sta	X21a4
@@ -4474,7 +4474,7 @@ X1e03:	sta	X21a4
 	mov	m,a
 	mvi	a,6eh
 	jmp	X1e31
-;
+
 X1e19:	lda	X21a9
 	ani	0c0h
 	mov	b,a
@@ -4513,13 +4513,13 @@ X1e4d:	call	X1e6e
 	cz	X0bf2
 	call	X1636
 	ret
-;
+
 X1e6e:	ora	a
 	jz	X1e79
 	sta	X215b
 	xra	a
 	jmp	X1e94
-;
+
 X1e79:	in	42h
 	ani	2
 	jnz	X1e90
@@ -4529,14 +4529,14 @@ X1e79:	in	42h
 	mvi	a,2
 	sta	X215a
 	jmp	X036b
-;
+
 X1e90:	xra	a
 	sta	X215b
 X1e94:	sta	X215a
 	mvi	a,80h
 	sta	X2159
 	jmp	X036b
-;
+
 X1e9f:	call	X1edd
 	lxi	h,X217b
 	mov	m,a
@@ -4548,7 +4548,7 @@ X1e9f:	call	X1edd
 	lxi	h,X1eb8
 	shld	X2140
 	ret
-;
+
 X1eb8:	call	X1edd
 	lhld	X21b4
 	mov	b,a
@@ -4563,12 +4563,12 @@ X1eb8:	call	X1edd
 	inx	h
 	shld	X21b4
 	ret
-;
+
 X1ed3:	mov	m,c
 	call	X1ccd
 	call	X094b
 	jmp	X1bb0
-;
+
 X1edd:	push	psw
 	cpi	20h
 	jnc	X1ee5
@@ -4576,7 +4576,7 @@ X1edd:	push	psw
 X1ee5:	call	X05e3
 	pop	psw
 	ret
-;
+
 X1eea:	push	h
 	lxi	h,X204e
 	mov	c,a
@@ -4603,7 +4603,7 @@ X1f0d:	mov	m,b
 	mov	a,b
 X1f0f:	pop	h
 	ret
-;
+
 X1f11:	push	d
 	xra	a
 	sta	X21a5
@@ -4635,7 +4635,7 @@ X1f36:	mvi	a,5
 	stc
 	pop	d
 	ret
-;
+
 X1f48:	ani	7fh
 	cmp	c
 	jnz	X1f36
@@ -4652,7 +4652,7 @@ X1f48:	ani	7fh
 	xra	a
 	pop	d
 	ret
-;
+
 X1f62:	push	d
 	mvi	d,7
 X1f65:	mov	a,d
@@ -4667,7 +4667,7 @@ X1f65:	mov	a,d
 	xra	a
 	pop	d
 	ret
-;
+
 X1f7b:	mov	b,a
 	ani	2
 	rrc
@@ -4691,7 +4691,7 @@ X1f93:	mov	a,b
 X1f9d:	mov	a,c
 	out	1
 	ret
-;
+
 X1fa1:	in	22h
 	mov	b,a
 	mvi	c,1
@@ -4726,9 +4726,9 @@ X1fbd:	in	1
 X1fd4:	ora	a
 	mov	a,c
 	ret
-;
+
 ; Last but not least, pad out to 8K (8192) bytes
-;
+
 	nop
 	nop
 	nop
@@ -4770,13 +4770,13 @@ X1fd4:	ora	a
 	nop
 	nop
 	nop
-;
+
 ;	Miscellaneous equates
-;
+
 ;  These are addresses referenced in the code but
 ;  which are in the middle of a multibyte instruction
 ;  or are addresses outside the initialized space
-;
+
 X0011	equ	11h
 X00ff	equ	0ffh
 X0111	equ	111h
@@ -4954,4 +4954,3 @@ Xfe1a	equ	0fe1ah
 Xff01	equ	0ff01h
 
 	end
-
