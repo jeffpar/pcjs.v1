@@ -198,6 +198,7 @@ var asExtsPlainText = [
     "bas",
     "hex",
     "inc",
+    "lst",
     "mac",
     "map",
     "nasm",
