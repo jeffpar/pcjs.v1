@@ -171,10 +171,10 @@ ChipSet.SI1978 = {
  * to yield a 361.69ns clock period for the 8080 CPU, which means the CPU is running at 2.76Mhz (cycles per second).
  * Hence the CPU component in the VT100's machine.xml is defined as:
  *
- *      <cpu id="cpu8080" model="8080" cycles="2764798"/>
+ *      <cpu id="cpu8080" model="8080" cycles="2764800"/>
  *
- * Beyond that, we don't really care about that particular 8224.  I only mention it because knowing the CPU frequency
- * is helpful for simulating some of the other circuits below that we DO care about.
+ * where 2764800 = 24883200 / 9. Beyond that, we don't really care about that particular 8224.  I only mention it
+ * because knowing the CPU frequency is helpful for simulating some of the other circuits below that we DO care about.
  */
 ChipSet.VT100 = {
     MODEL:          100.0,
@@ -189,13 +189,24 @@ ChipSet.VT100 = {
         NVR_CLK:    0x40,               // NVR CLOCK if SET
         KBD_XMIT:   0x80                // KBD XMIT BUFFER empty if SET
     },
-    BRIGHTNESS_LATCH: {
+    BRIGHTNESS: {
         PORT:       0x42,               // write-only
         INIT:       0x00                // for lack of a better guess
     },
-    NVR_LATCH: {
-        PORT:       0x62,               // write-only
-        INIT:       0x00                // for lack of a better guess
+    NVR: {
+        LATCH: {
+            PORT:   0x62                // write-only
+        },
+        CMD: {
+            ACCEPT_DATA:    0x0,
+            ACCEPT_ADDR:    0x1,
+            SHIFT_OUT:      0x2,
+            WRITE:          0x4,
+            ERASE:          0x5,
+            READ:           0x6,
+            STANDBY:        0x7
+        },
+        WORDMASK:   0x3fff              // NVR words are 14-bit
     },
     DC012: {                            // generates scan counts for the Video Processor
         PORT:       0xA2,               // write-only
@@ -220,8 +231,8 @@ ChipSet.VT100 = {
      *
      * And on p. 4-62, timings are provided for the LBA0 through LBA7 when the VT100 is in 80-column mode; in particular:
      *
-     *      LBA6:   16.82353us (when LBA6 is low, for a period is 33.64706us)
-     *      LBA7:   31.77778us (when LBA7 is high, for a period is 63.55556us)
+     *      LBA6:   16.82353us (when LBA6 is low, for a period of 33.64706us)
+     *      LBA7:   31.77778us (when LBA7 is high, for a period of 63.55556us)
      *
      * If we assume that the CPU cycle count increments once every 361.69ns, it will increment roughly 88 times every
      * time LBA7 toggles.  So we can divide the CPU cycle count by 88 and set LBA to the low bit of that truncated
@@ -345,11 +356,13 @@ ChipSet.SI1978.init = [
 
 ChipSet.VT100.init = [
     [
-        ChipSet.VT100.BRIGHTNESS_LATCH.INIT,
-        ChipSet.VT100.NVR_LATCH.INIT,
+        ChipSet.VT100.BRIGHTNESS.INIT,
         ChipSet.VT100.FLAGS_BUFFER.NO_AVO | ChipSet.VT100.FLAGS_BUFFER.NO_GFX,
         ChipSet.VT100.DC012.INIT,
         ChipSet.VT100.DC011.INIT
+    ],
+    [
+        0, 0, 0, 0, new Array(100)
     ]
 ];
 
@@ -381,7 +394,8 @@ ChipSet.prototype.save = function()
         state.set(0, [this.bStatus0, this.bStatus1, this.bStatus2, this.wShiftData, this.bShiftCount, this.bSound1, this.bSound2]);
         break;
     case ChipSet.VT100.MODEL:
-        state.set(0, [this.bBrightnessLatch, this.bNVRLatch, this.bFlagsBuffer, this.bDC012, this.bDC011]);
+        state.set(0, [this.bBrightness, this.bFlagsBuffer, this.bDC012, this.bDC011]);
+        state.set(1, [this.dNVRAddr, this.wNVRData, this.bNVRLatch, this.bNVROut, this.aNVRWords]);
         break;
     }
     return state.data();
@@ -411,11 +425,16 @@ ChipSet.prototype.restore = function(data)
             this.bSound2 = a[6];
             return true;
         case ChipSet.VT100.MODEL:
-            this.bBrightnessLatch = a[0];
-            this.bNVRLatch = a[1];
+            this.bBrightness = a[0];
             this.bFlagsBuffer = a[2];
             this.bDC012 = a[3];
             this.bDC011 = a[4];
+            a = data[1];
+            this.dNVRAddr = a[0];               // 20-bit address
+            this.wNVRData = a[1];               // 14-bit word
+            this.bNVRLatch = a[2];              // 1 byte
+            this.bNVROut = a[3];                // 1 bit
+            this.aNVRWords = a[4];              // 100 14-bit words
             return true;
         }
     }
@@ -637,6 +656,88 @@ ChipSet.prototype.getVT100LBA = function(nBit)
 };
 
 /**
+ * getNVRAddr()
+ *
+ * @return {number}
+ */
+ChipSet.prototype.getNVRAddr = function()
+{
+    var i;
+    var tens = 0, ones = 0;
+    var addr = ~this.dNVRAddr;
+    for (i = 0; i < 10; i++) {
+        if (addr & 0x1) tens = 9-i;
+        addr >>= 1;
+    }
+    for (i = 0; i < 10; i++) {
+        if (addr & 0x1) ones = 9-i;
+        addr >>= 1;
+    }
+    addr = tens*10 + ones;
+    this.assert(addr >= 0 && addr < this.aNVRWords.length);
+    return addr;
+};
+
+/**
+ * doNVRCommand()
+ */
+ChipSet.prototype.doNVRCommand = function()
+{
+    var addr, data;
+    var bit = this.bNVRLatch & 0x1;
+    var bCmd = (this.bNVRLatch >> 1) & 0x7;
+
+    switch(bCmd) {
+    case ChipSet.VT100.NVR.CMD.STANDBY:
+        break;
+
+    case ChipSet.VT100.NVR.CMD.ACCEPT_ADDR:
+        this.dNVRAddr = (this.dNVRAddr << 1) | bit;
+        break;
+
+    case ChipSet.VT100.NVR.CMD.ERASE:
+        addr = this.getNVRAddr();
+        this.aNVRWords[addr] = ChipSet.VT100.NVR.WORDMASK;
+        this.printMessage("doNVRCommand(): erase data at addr " + str.toHexWord(addr));
+        break;
+
+    case ChipSet.VT100.NVR.CMD.ACCEPT_DATA:
+        this.wNVRData = (this.wNVRData << 1) | bit;
+        break;
+
+    case ChipSet.VT100.NVR.CMD.WRITE:
+        addr = this.getNVRAddr();
+        data = this.wNVRData & ChipSet.VT100.NVR.WORDMASK;
+        this.aNVRWords[addr] = data;
+        this.printMessage("doNVRCommand(): write data " + str.toHexWord(data) + " to addr " + str.toHexWord(addr));
+        break;
+
+    case ChipSet.VT100.NVR.CMD.READ:
+        addr = this.getNVRAddr();
+        data = this.aNVRWords[addr];
+        /*
+         * Since we don't explicitly initialize aNVRWords[], we pretend any uninitialized words contains WORDMASK.
+         */
+        if (data == null) data = ChipSet.VT100.NVR.WORDMASK;
+        this.wNVRData = data;
+        this.printMessage("doNVRCommand():  read data " + str.toHexWord(data) + " from addr " + str.toHexWord(addr));
+        break;
+
+    case ChipSet.VT100.NVR.CMD.SHIFT_OUT:
+        this.wNVRData <<= 1;
+        /*
+         * Since WORDMASK is 0x3fff, this will mask the shifted data with 0x4000, which is the bit we want to isolate.
+         */
+        this.bNVROut = this.wNVRData & (ChipSet.VT100.NVR.WORDMASK + 1);
+        break;
+
+    default:
+        this.printMessage("doNVRCommand(): unrecognized command " + str.toHexByte(bCmd));
+        break;
+    }
+};
+
+/**
  * inVT100FlagsBuffer(port, addrFrom)
  *
  * @this {ChipSet}
@@ -649,23 +750,35 @@ ChipSet.prototype.inVT100FlagsBuffer = function(port, addrFrom)
     /*
      * The NVR_CLK bit is driven by LBA7 (ie, bit 7 from Line Buffer Address generation); see the DC011 discussion above.
      */
-    var b = this.bFlagsBuffer = (this.bFlagsBuffer & ~ChipSet.VT100.FLAGS_BUFFER.NVR_CLK) | (this.getVT100LBA(7)? ChipSet.VT100.FLAGS_BUFFER.NVR_CLK : 0);
+    var b = this.bFlagsBuffer;
+    b &= ~ChipSet.VT100.FLAGS_BUFFER.NVR_CLK;
+    if (this.getVT100LBA(7)) {
+        b |= ChipSet.VT100.FLAGS_BUFFER.NVR_CLK;
+        if (b != this.bFlagsBuffer) {
+            this.doNVRCommand();
+        }
+    }
+    b &= ~ChipSet.VT100.FLAGS_BUFFER.NVR_DATA;
+    if (this.bNVROut) {
+        b |= ChipSet.VT100.FLAGS_BUFFER.NVR_DATA;
+    }
+    this.bFlagsBuffer = b;
     this.printMessageIO(port, null, addrFrom, "FLAGS.BUFFER", b, true);
     return b;
 };
 
 /**
- * outVT100BrightnessLatch(port, b, addrFrom)
+ * outVT100Brightness(port, b, addrFrom)
  *
  * @this {ChipSet}
  * @param {number} port (0x42)
  * @param {number} b
  * @param {number} [addrFrom] (not defined if the Debugger is trying to write the specified port)
  */
-ChipSet.prototype.outVT100BrightnessLatch = function(port, b, addrFrom)
+ChipSet.prototype.outVT100Brightness = function(port, b, addrFrom)
 {
-    this.printMessageIO(port, b, addrFrom, "BRIGHTNESS.LATCH", null, true);
-    this.bBrightnessLatch = b;
+    this.printMessageIO(port, b, addrFrom, "BRIGHTNESS", null, true);
+    this.bBrightness = b;
 };
 
 /**
@@ -733,7 +846,7 @@ ChipSet.VT100.portsInput = {
 };
 
 ChipSet.VT100.portsOutput = {
-    0x42: ChipSet.prototype.outVT100BrightnessLatch,
+    0x42: ChipSet.prototype.outVT100Brightness,
     0x62: ChipSet.prototype.outVT100NVRLatch,
     0xA2: ChipSet.prototype.outVT100DC012,
     0xC2: ChipSet.prototype.outVT100DC011

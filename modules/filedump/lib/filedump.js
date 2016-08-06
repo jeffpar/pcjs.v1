@@ -631,7 +631,7 @@ FileDump.prototype.loadMap = function(sMapFile, done)
                         done(new Error("unrecognized line (" + s + ") in MAP file: " + sMapName), null);
                         return;
                     }
-                    sMapData = JSON.stringify(aSymbols);
+                    sMapData = obj.fJSONComments? JSON.stringify(aSymbols, null, 2) : JSON.stringify(aSymbols);
                     if (sMapData) {
                         obj.json = '{' + obj.json + ',"symbols":' + sMapData + '}';
                     }

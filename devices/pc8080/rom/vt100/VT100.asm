@@ -3703,8 +3703,8 @@ X18d7:	in	42h
 	jnz	X18d7
 	mvi	a,2fh		;; Write 0x2fh (standby) to nvr latch
 	out	62h
-	lxi	h,X21d3		;; HL=X21d3
-	mvi	b,0eh		;; B= 14 -- we're reading 14 bits
+	lxi	h,X21d3		;; HL = X21d3
+	mvi	b,0eh		;; B = 14 -- we're reading 14 bits
 X18e6:	in	42h
 	ana	c
 	jz	X18e6
@@ -3726,7 +3726,7 @@ X1900:	in	42h
 	jnz	X18f6		;; read next bit
 	mvi	a,2fh		;; send standby
 	out	62h
-	lxi	d,X21d3		;; DE=0x21d3
+	lxi	d,X21d3		;; DE = 0x21d3
 	mvi	b,0eh		;; B = 14
 	lxi	h,X0000		;; HL = 0
 X1916:	dad	h		;;
