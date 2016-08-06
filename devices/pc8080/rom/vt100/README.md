@@ -64,6 +64,8 @@ and passed on to the PC8080 Debugger.  Here are the rebuild steps:
 	grep -E "[0-9]+ [0-9A-D]+.*;;" VT100.lst | sed -E "s/ *[0-9]+ ([0-9A-F]+).*;(;.*)/     \1   .   \2/" > VT100.map
 	filedump --file=VT100.bin --format=bytes --output=VT100.json --comments --overwrite
 
+You can omit `--comments` to reduce the size of the [VT100.json](VT100.json) file.
+
 Some [VT100.asm](VT100.asm) clean-up remains, because there are still chunks of data that were incorrectly disassembled as code.
 From a reassembly standpoint, it doesn't matter too much, because such instructions get reassembled into the same original binary
 patterns, but from a readability standpoint, it's a nuisance.
