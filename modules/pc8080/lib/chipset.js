@@ -205,7 +205,8 @@ ChipSet.VT100 = {
             ERASE:          0x5,
             READ:           0x6,
             STANDBY:        0x7
-        }
+        },
+        WORDMASK:   0x3fff              // NVR words are 14-bit
     },
     DC012: {                            // generates scan counts for the Video Processor
         PORT:       0xA2,               // write-only
@@ -678,11 +679,11 @@ ChipSet.prototype.getNVRAddr = function()
 };
 
 /**
- * advanceNVR()
+ * doNVRCommand()
  */
-ChipSet.prototype.advanceNVR = function()
+ChipSet.prototype.doNVRCommand = function()
 {
-    var addr;
+    var addr, data;
     var bit = this.bNVRLatch & 0x1;
     var bCmd = (this.bNVRLatch >> 1) & 0x7;
 
@@ -696,7 +697,8 @@ ChipSet.prototype.advanceNVR = function()
 
     case ChipSet.VT100.NVR.CMD.ERASE:
         addr = this.getNVRAddr();
-        this.aNVRWords[addr] = 0x3fff;
+        this.aNVRWords[addr] = ChipSet.VT100.NVR.WORDMASK;
+        this.printMessage("doNVRCommand(): erase data at addr " + str.toHexWord(addr));
         break;
 
     case ChipSet.VT100.NVR.CMD.ACCEPT_DATA:
@@ -705,17 +707,32 @@ ChipSet.prototype.advanceNVR = function()
 
     case ChipSet.VT100.NVR.CMD.WRITE:
         addr = this.getNVRAddr();
-        this.aNVRWords[addr] = this.wNVRData & 0x3fff;
+        data = this.wNVRData & ChipSet.VT100.NVR.WORDMASK;
+        this.aNVRWords[addr] = data;
+        this.printMessage("doNVRCommand(): write data " + str.toHexWord(data) + " to addr " + str.toHexWord(addr));
         break;
 
     case ChipSet.VT100.NVR.CMD.READ:
         addr = this.getNVRAddr();
-        this.wNVRData = this.aNVRWords[addr];
+        data = this.aNVRWords[addr];
+        /*
+         * Since we don't explicitly initialize aNVRWords[], we pretend any uninitialized words contains WORDMASK.
+         */
+        if (data == null) data = ChipSet.VT100.NVR.WORDMASK;
+        this.wNVRData = data;
+        this.printMessage("doNVRCommand():  read data " + str.toHexWord(data) + " from addr " + str.toHexWord(addr));
         break;
 
     case ChipSet.VT100.NVR.CMD.SHIFT_OUT:
-        this.bNVROut = this.wNVRData & 0x2000;
         this.wNVRData <<= 1;
+        /*
+         * Since WORDMASK is 0x3fff, this will mask the shifted data with 0x4000, which is the bit we want to isolate.
+         */
+        this.bNVROut = this.wNVRData & (ChipSet.VT100.NVR.WORDMASK + 1);
+        break;
+
+    default:
+        this.printMessage("doNVRCommand(): unrecognized command " + str.toHexByte(bCmd));
         break;
     }
 };
@@ -738,7 +755,7 @@ ChipSet.prototype.inVT100FlagsBuffer = function(port, addrFrom)
     if (this.getVT100LBA(7)) {
         b |= ChipSet.VT100.FLAGS_BUFFER.NVR_CLK;
         if (b != this.bFlagsBuffer) {
-            this.advanceNVR();
+            this.doNVRCommand();
         }
     }
     b &= ~ChipSet.VT100.FLAGS_BUFFER.NVR_DATA;

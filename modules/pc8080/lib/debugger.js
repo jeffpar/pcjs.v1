@@ -230,30 +230,31 @@ if (DEBUGGER) {
      */
 
     Debugger.COMMANDS = {
-        '?':     "help/print",
-        'a [#]': "assemble",            // TODO: Implement this command someday
-        'b [#]': "breakpoint",          // multiple variations (use b? to list them)
-        'c':     "clear output",
-        'd [#]': "dump memory",         // additional syntax: d [#] [l#], where l# is a number of bytes to dump
-        'e [#]': "edit memory",
-        'f':     "frequencies",
-        'g [#]': "go [to #]",
-        'h':     "halt",
-        'i [#]': "input port #",
-        'if':    "eval expression",
-        'k':     "stack trace",
-        "ln":    "list nearest symbol(s)",
-        'm':     "messages",
-        'o [#]': "output port #",
-        'p':     "step over",           // other variations: pr (step and dump registers)
-        'print': "print expression",
-        'r':     "dump/set registers",
-        'reset': "reset machine",
-        's':     "set options",
-        't [#]': "trace",               // other variations: tr (trace and dump registers)
-        'u [#]': "unassemble",
-        'v':     "print version",
-        'var':   "assign variable"
+        '?':        "help/print",
+        'a [#]':    "assemble",             // TODO: Implement this command someday
+        'b [#]':    "breakpoint",           // multiple variations (use b? to list them)
+        'c':        "clear output",
+        'd [#]':    "dump memory",          // additional syntax: d [#] [l#], where l# is a number of bytes to dump
+        'e [#]':    "edit memory",
+        'f':        "frequencies",
+        'g [#]':    "go [to #]",
+        'h':        "halt",
+        'i [#]':    "input port #",
+        'if':       "eval expression",
+        'int [#]':  "request interrupt",
+        'k':        "stack trace",
+        "ln":       "list nearest symbol(s)",
+        'm':        "messages",
+        'o [#]':    "output port #",
+        'p':        "step over",            // other variations: pr (step and dump registers)
+        'print':    "print expression",
+        'r':        "dump/set registers",
+        'reset':    "reset machine",
+        's':        "set options",
+        't [#]':    "trace",                // other variations: tr (trace and dump registers)
+        'u [#]':    "unassemble",
+        'v':        "print version",
+        'var':      "assign variable"
     };
 
     Debugger.STYLE_8080 = 8080;
@@ -3288,7 +3289,7 @@ if (DEBUGGER) {
     {
         var s = "commands:";
         for (var sCommand in Debugger.COMMANDS) {
-            s += '\n' + str.pad(sCommand, 7) + Debugger.COMMANDS[sCommand];
+            s += '\n' + str.pad(sCommand, 9) + Debugger.COMMANDS[sCommand];
         }
         if (!this.checksEnabled()) s += "\nnote: frequency/history disabled if no exec breakpoints";
         this.println(s);
@@ -3797,6 +3798,26 @@ if (DEBUGGER) {
             var bIn = this.bus.checkPortInputNotify(port, 1);
             this.println(str.toHexWord(port) + ": " + str.toHexByte(bIn));
         }
+    };
+
+    /**
+     * doInt(sLevel)
+     *
+     * @this {Debugger}
+     * @param {string} sLevel
+     * @return {boolean} true if success, false if error
+     */
+    Debugger.prototype.doInt = function(sLevel)
+    {
+        if (!this.cpu.getIF()) {
+            this.println("interrupts disabled (use rif=1 to enable)");
+            return false;
+        }
+        var nLevel = this.parseExpression(sLevel);
+        if (nLevel == null) return false;
+        this.println("requesting interrupt level " + nLevel);
+        this.cpu.requestINTR(nLevel);
+        return true;
     };
 
     /**
@@ -4682,6 +4703,12 @@ if (DEBUGGER) {
                 case 'i':
                     if (asArgs[0] == "if") {
                         if (!this.doIf(sCmd.substr(2), fQuiet)) {
+                            result = false;
+                        }
+                        break;
+                    }
+                    if (asArgs[0] == "int") {
+                        if (!this.doInt(asArgs[1])) {
                             result = false;
                         }
                         break;

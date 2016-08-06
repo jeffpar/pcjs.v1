@@ -5,7 +5,6 @@ permalink: /devices/pc8080/machine/invaders/
 machines:
   - type: pc8080
     id: invaders
-    debugger: true
 ---
 
 Space Invaders (1978)
