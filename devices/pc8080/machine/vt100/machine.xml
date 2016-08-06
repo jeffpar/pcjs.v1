@@ -3,7 +3,7 @@
 <machine id="vt100" class="pc8080" border="1" pos="center" background="#FAEBD7">
 	<name pos="center">VT100 Terminal</name>
 	<computer id="computer" busWidth="16"/>
-	<cpu id="cpu8080" model="8080" cycles="2764798"/>
+	<cpu id="cpu8080" model="8080" cycles="2764800"/>
 	<rom id="rom" addr="0x0000" size="0x2000" file="/devices/pc8080/rom/vt100/VT100.json"/>
 	<ram id="ram" addr="0x2000" size="0x0C00"/>
 	<video id="video" screenWidth="1600" screenHeight="960" smoothing="false"
