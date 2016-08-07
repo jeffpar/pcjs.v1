@@ -10,8 +10,7 @@ machines:
 Space Invaders (1978)
 ---
 
-This is a test of [PC8080](/modules/pc8080/), a new 8080-based machine emulator recently added to the
-PCjs Project.
+This is a test of [PC8080](/modules/pc8080/), a new 8080-based PCjs emulator running the original Space Invaders. 
 
 It is currently playable only in desktop browsers and uses the following hard-coded key mappings:
 

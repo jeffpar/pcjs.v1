@@ -59,16 +59,11 @@ function ChipSet(parmsChipSet)
 
     var model = parmsChipSet['model'];
 
-    /*
-     * this.model is a numeric version of the 'model' string; when comparing this.model to "base"
-     * model numbers, you should generally compare (this.model|0) to the target value, which truncates it.
-     */
     if (model && !ChipSet.MODELS[model]) {
         Component.notice("Unrecognized ChipSet model: " + model);
     }
 
-    this.config = ChipSet.MODELS[model] || ChipSet.SI1978;
-    this.model = this.config.MODEL;
+    this.config = ChipSet.MODELS[model] || {};
 
     this.bSwitches = this.parseDIPSwitches(parmsChipSet['swDIP']);
 
@@ -246,7 +241,7 @@ ChipSet.VT100 = {
 };
 
 /*
- * Supported model strings
+ * Supported models and their configurations
  */
 ChipSet.MODELS = {
     "SI1978":       ChipSet.SI1978,
@@ -345,7 +340,7 @@ ChipSet.prototype.powerDown = function(fSave, fShutdown)
     return fSave? this.save() : true;
 };
 
-ChipSet.SI1978.init = [
+ChipSet.SI1978.INIT = [
     [
         ChipSet.SI1978.STATUS0.ALWAYS_SET,
         ChipSet.SI1978.STATUS1.ALWAYS_SET,
@@ -354,7 +349,7 @@ ChipSet.SI1978.init = [
     ]
 ];
 
-ChipSet.VT100.init = [
+ChipSet.VT100.INIT = [
     [
         ChipSet.VT100.BRIGHTNESS.INIT,
         ChipSet.VT100.FLAGS_BUFFER.NO_AVO | ChipSet.VT100.FLAGS_BUFFER.NO_GFX,
@@ -373,7 +368,7 @@ ChipSet.VT100.init = [
  */
 ChipSet.prototype.reset = function()
 {
-    if (!this.restore(this.config.init)) {
+    if (this.config.INIT && !this.restore(this.config.INIT)) {
         this.notice("reset error");
     }
 };
@@ -389,7 +384,7 @@ ChipSet.prototype.reset = function()
 ChipSet.prototype.save = function()
 {
     var state = new State(this);
-    switch(this.model) {
+    switch(this.config.MODEL) {
     case ChipSet.SI1978.MODEL:
         state.set(0, [this.bStatus0, this.bStatus1, this.bStatus2, this.wShiftData, this.bShiftCount, this.bSound1, this.bSound2]);
         break;
@@ -414,7 +409,7 @@ ChipSet.prototype.restore = function(data)
 {
     var a;
     if (data && (a = data[0]) && a.length) {
-        switch(this.model) {
+        switch(this.config.MODEL) {
         case ChipSet.SI1978.MODEL:
             this.bStatus0 = a[0];
             this.bStatus1 = a[1];

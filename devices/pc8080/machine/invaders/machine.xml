@@ -18,5 +18,5 @@
 		</menu>
 	</video>
 	<chipset id="chipset" model="SI1978"/>
-	<keyboard id="keyboard"/>
+	<keyboard id="keyboard" model="SI1978"/>
 </machine>

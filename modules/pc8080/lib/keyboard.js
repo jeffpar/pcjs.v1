@@ -42,6 +42,10 @@ if (NODE) {
 /**
  * Keyboard(parmsKbd)
  *
+ * The Keyboard component has the following component-specific (parmsKbd) properties:
+ *
+ *      model:  eg, "VT100" (should be a member of Keyboard.MODELS)
+ *
  * @constructor
  * @extends Component
  * @param {Object} parmsKbd
@@ -50,26 +54,20 @@ function Keyboard(parmsKbd)
 {
     Component.call(this, "Keyboard", parmsKbd, Keyboard, Messages.KEYBOARD);
 
+    var model = parmsKbd['model'];
+
+    if (model && !Keyboard.MODELS[model]) {
+        Component.notice("Unrecognized Keyboard model: " + model);
+    }
+
+    this.config = Keyboard.MODELS[model] || {};
+
     this.reset();
 
     this.setReady();
 }
 
 Component.subclass(Keyboard);
-
-Keyboard.VT100 = {
-    STATUS: {
-        PORT:       0x82,               // write-only
-        LED4:       0x01,
-        LED3:       0x02,
-        LED2:       0x04,
-        LED1:       0x08,
-        LOCKED:     0x10,
-        ONLINE:     0x20,
-        START:      0x40,
-        CLICK:      0x80
-    }
-};
 
 /**
  * Alphanumeric and other common (printable) ASCII codes.
@@ -118,7 +116,7 @@ Keyboard.KEYCODE = {
     /* 0x11 */ CTRL:        17,
     /* 0x12 */ ALT:         18,
     /* 0x13 */ PAUSE:       19,         // PAUSE/BREAK
-    /* 0x14 */ CAPS_LOCK:   20,
+    /* 0x14 */ CAPSLOCK:    20,
     /* 0x1B */ ESC:         27,
     /* 0x20 */ SPACE:       32,
     /* 0x21 */ PGUP:        33,
@@ -153,21 +151,31 @@ Keyboard.KEYCODE = {
     /* 0x5C */ FF_BSLASH:   92,
     /* 0x5D */ RCMD:        93,         // aka MENU
     /* 0x5D */ FF_RBRACK:   93,
-    /* 0x60 */ NUM_INS:     96,         // 0
+    /* 0x60 */ NUM_0:       96,
+    /* 0x60 */ NUM_INS:     96,
     /* 0x60 */ FF_BQUOTE:   96,
-    /* 0x61 */ NUM_END:     97,         // 1
-    /* 0x62 */ NUM_DOWN:    98,         // 2
-    /* 0x63 */ NUM_PGDN:    99,         // 3
-    /* 0x64 */ NUM_LEFT:    100,        // 4
-    /* 0x65 */ NUM_CENTER:  101,        // 5
-    /* 0x66 */ NUM_RIGHT:   102,        // 6
-    /* 0x67 */ NUM_HOME:    103,        // 7
-    /* 0x68 */ NUM_UP:      104,        // 8
-    /* 0x69 */ NUM_PGUP:    105,        // 9
+    /* 0x61 */ NUM_1:       97,
+    /* 0x61 */ NUM_END:     97,
+    /* 0x62 */ NUM_2:       98,
+    /* 0x62 */ NUM_DOWN:    98,
+    /* 0x63 */ NUM_3:       99,
+    /* 0x63 */ NUM_PGDN:    99,
+    /* 0x64 */ NUM_4:       100,
+    /* 0x64 */ NUM_LEFT:    100,
+    /* 0x65 */ NUM_5:       101,
+    /* 0x65 */ NUM_CENTER:  101,
+    /* 0x66 */ NUM_6:       102,
+    /* 0x66 */ NUM_RIGHT:   102,
+    /* 0x67 */ NUM_7:       103,
+    /* 0x67 */ NUM_HOME:    103,
+    /* 0x68 */ NUM_8:       104,
+    /* 0x68 */ NUM_UP:      104,
+    /* 0x69 */ NUM_9:       105,
+    /* 0x69 */ NUM_PGUP:    105,
     /* 0x6A */ NUM_MUL:     106,
     /* 0x6B */ NUM_ADD:     107,
     /* 0x6D */ NUM_SUB:     109,
-    /* 0x6E */ NUM_DEL:     110,        // .
+    /* 0x6E */ NUM_DEL:     110,        // aka PERIOD
     /* 0x6F */ NUM_DIV:     111,
     /* 0x70 */ F1:          112,
     /* 0x71 */ F2:          113,
@@ -218,6 +226,11 @@ Keyboard.KEYCODE = {
 };
 
 /*
+ * Check the event object's 'location' property for a non-zero value for the following ONRIGHT keys.
+ */
+Keyboard.KEYCODE.NUM_CR = Keyboard.KEYCODE.CR + Keyboard.KEYCODE.ONRIGHT;
+
+/*
  * Maps "stupid" keyCodes to their "non-stupid" counterparts
  */
 Keyboard.STUPID_KEYCODES = {};
@@ -234,20 +247,6 @@ Keyboard.STUPID_KEYCODES[Keyboard.KEYCODE.RBRACK]  = Keyboard.ASCII[']'];   // 2
 Keyboard.STUPID_KEYCODES[Keyboard.KEYCODE.QUOTE]   = Keyboard.ASCII["'"];   // 222 -> 39
 Keyboard.STUPID_KEYCODES[Keyboard.KEYCODE.FF_DASH] = Keyboard.ASCII['-'];
 
-/**
- * Maps SOFTCODE (string) to KEYCODE (number).
- *
- * @enum {number}
- */
-Keyboard.SOFTCODES = {
-    '1p':       Keyboard.KEYCODE.ONE,
-    '2p':       Keyboard.KEYCODE.TWO,
-    'coin':     Keyboard.KEYCODE.THREE,
-    'left':     Keyboard.KEYCODE.LEFT,
-    'right':    Keyboard.KEYCODE.RIGHT,
-    'fire':     Keyboard.KEYCODE.SPACE
-};
-
 Keyboard.MINPRESSTIME = 100;            // 100ms
 
 /**
@@ -261,7 +260,123 @@ Keyboard.ALTCODES[Keyboard.ASCII.A] = Keyboard.KEYCODE.LEFT;
 Keyboard.ALTCODES[Keyboard.ASCII.D] = Keyboard.KEYCODE.RIGHT;
 Keyboard.ALTCODES[Keyboard.ASCII.L] = Keyboard.KEYCODE.SPACE;
 
-Keyboard.LEDSTATES = {
+/*
+ * Supported configurations
+ */
+Keyboard.SI1978 = {
+    MODEL:          1978.1,
+    SOFTCODES: {
+        '1p':       Keyboard.KEYCODE.ONE,
+        '2p':       Keyboard.KEYCODE.TWO,
+        'coin':     Keyboard.KEYCODE.THREE,
+        'left':     Keyboard.KEYCODE.LEFT,
+        'right':    Keyboard.KEYCODE.RIGHT,
+        'fire':     Keyboard.KEYCODE.SPACE
+    }
+};
+
+Keyboard.VT100 = {
+    MODEL:          100.0,
+    SOFTCODES: {},
+    STATUS: {
+        PORT:       0x82,               // write-only
+        LED4:       0x01,
+        LED3:       0x02,
+        LED2:       0x04,
+        LED1:       0x08,
+        LOCKED:     0x10,
+        ONLINE:     0x20,
+        START:      0x40,               // set to initiate a scan
+        CLICK:      0x80,
+        INIT:       0x00
+    }
+};
+
+Keyboard.VT100.KEYMAP = {};
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.DEL]     =   0x03;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII.P]         =   0x05;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII.O]         =   0x06;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII.Y]         =   0x07;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII.T]         =   0x08;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII.W]         =   0x09;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII.Q]         =   0x0A;
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.RIGHT]   =   0x10;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII[']']]      =   0x14;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII['[']]      =   0x15;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII.I]         =   0x16;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII.U]         =   0x17;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII.R]         =   0x18;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII.E]         =   0x19;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII['1']]      =   0x1A;
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.LEFT]    =   0x20;
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.DOWN]    =   0x22;
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.PAUSE]   =   0x23;   // aka BREAK
+Keyboard.VT100.KEYMAP[Keyboard.ASCII['`']]      =   0x24;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII['-']]      =   0x25;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII['9']]      =   0x26;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII['7']]      =   0x27;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII['4']]      =   0x28;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII['3']]      =   0x29;
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.ESC]     =   0x2A;
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.UP]      =   0x30;
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.F3]      =   0x31;   // aka PF3
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.F1]      =   0x32;   // aka PF1
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.BS]      =   0x33;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII['=']]      =   0x34;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII['0']]      =   0x35;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII['8']]      =   0x36;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII['6']]      =   0x37;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII['5']]      =   0x38;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII['2']]      =   0x39;
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.TAB]     =   0x3A;
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.NUM_7]   =   0x40;
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.F4]      =   0x41;   // aka PF4
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.F2]      =   0x42;   // aka PF2
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.NUM_0]   =   0x43;
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.LF]      =   0x44;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII['\\']]     =   0x45;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII.L]         =   0x46;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII.K]         =   0x47;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII.G]         =   0x48;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII.F]         =   0x49;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII.A]         =   0x4A;
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.NUM_8]   =   0x50;
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.NUM_CR]  =   0x51;
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.NUM_2]   =   0x52;
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.NUM_1]   =   0x53;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII["'"]]      =   0x55;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII[';']]      =   0x56;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII.J]         =   0x57;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII.H]         =   0x58;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII.D]         =   0x59;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII.S]         =   0x5A;
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.NUM_DEL] =   0x60;   // keypad period
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.F8]      =   0x61;   // aka keypad comma
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.NUM_5]   =   0x62;
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.NUM_4]   =   0x63;
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.CR]      =   0x64;   // TODO: Figure out why the Technical Manual lists CR at both 0x04 and 0x64
+Keyboard.VT100.KEYMAP[Keyboard.ASCII['.']]      =   0x65;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII[',']]      =   0x66;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII.N]         =   0x67;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII.B]         =   0x68;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII.X]         =   0x69;
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.F9]      =   0x6A;   // aka NO SCROLL
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.NUM_9]   =   0x70;
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.NUM_3]   =   0x71;
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.NUM_6]   =   0x72;
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.NUM_SUB] =   0x73;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII['/']]      =   0x75;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII.M]         =   0x76;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII[' ']]      =   0x77;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII.V]         =   0x78;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII.C]         =   0x79;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII.Z]         =   0x7A;
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.F10]     =   0x7B;   // aka SET-UP
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.CTRL]    =   0x7C;
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.SHIFT]   =   0x7D;   // either shift key (doesn't matter)
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.CAPSLOCK]=   0x7E;
+
+Keyboard.VT100.LEDCODES = {
     'l4':       Keyboard.VT100.STATUS.LED4,
     'l3':       Keyboard.VT100.STATUS.LED3,
     'l2':       Keyboard.VT100.STATUS.LED2,
@@ -269,6 +384,14 @@ Keyboard.LEDSTATES = {
     'locked':   Keyboard.VT100.STATUS.LOCKED,
     'online':   Keyboard.VT100.STATUS.ONLINE,
     'local':   ~Keyboard.VT100.STATUS.ONLINE
+};
+
+/*
+ * Supported models and their configurations
+ */
+Keyboard.MODELS = {
+    "SI1978":       Keyboard.SI1978,
+    "VT100":        Keyboard.VT100
 };
 
 /**
@@ -306,7 +429,7 @@ Keyboard.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
 
     if (this.bindings[id] === undefined) {
 
-        if (sHTMLType == "led" && Keyboard.LEDSTATES[sBinding]) {
+        if (sHTMLType == "led" && this.config.LEDCODES && this.config.LEDCODES[sBinding]) {
             this.bindings[id] = control;
             return true;
         }
@@ -330,7 +453,7 @@ Keyboard.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
             return true;
 
         default:
-            if (Keyboard.SOFTCODES[sBinding] !== undefined) {
+            if (this.config.SOFTCODES && this.config.SOFTCODES[sBinding] !== undefined) {
                 this.bindings[id] = control;
                 var fnDown = function(kbd, sSoftCode) {
                     return function onMouseOrTouchDownKeyboard(event) {
@@ -370,16 +493,8 @@ Keyboard.prototype.initBus = function(cmp, bus, cpu, dbg)
 {
     this.dbg = dbg;     // NOTE: The "dbg" property must be set for the message functions to work
     this.chipset = cmp.getMachineComponent("ChipSet");
-    this.model = this.chipset.model;
-    switch(this.model) {
-    case ChipSet.VT100.MODEL:
-        this.config = Keyboard.VT100;
-        break;
-    }
-    if (this.config) {
-        bus.addPortInputTable(this, this.config.portsInput);
-        bus.addPortOutputTable(this, this.config.portsOutput);
-    }
+    bus.addPortInputTable(this, this.config.portsInput);
+    bus.addPortOutputTable(this, this.config.portsOutput);
 };
 
 /**
@@ -415,9 +530,9 @@ Keyboard.prototype.powerDown = function(fSave, fShutdown)
     return fSave? this.save() : true;
 };
 
-Keyboard.VT100.init = [
+Keyboard.VT100.INIT = [
     [
-        0
+        Keyboard.VT100.STATUS.INIT
     ]
 ];
 
@@ -438,7 +553,7 @@ Keyboard.prototype.reset = function()
     this.keysPressed = {};
     this.keysToRelease = {};
 
-    if (this.config && !this.restore(this.config.init)) {
+    if (this.config.INIT && !this.restore(this.config.INIT)) {
         this.notice("reset error");
     }
 };
@@ -454,10 +569,10 @@ Keyboard.prototype.reset = function()
 Keyboard.prototype.save = function()
 {
     var state = new State(this);
-    switch(this.model) {
-    case ChipSet.SI1978.MODEL:
+    switch(this.config.MODEL) {
+    case Keyboard.SI1978.MODEL:
         break;
-    case ChipSet.VT100.MODEL:
+    case Keyboard.VT100.MODEL:
         state.set(0, [this.bLEDs]);
         break;
     }
@@ -477,10 +592,11 @@ Keyboard.prototype.restore = function(data)
 {
     var a;
     if (data && (a = data[0]) && a.length) {
-        switch(this.model) {
-        case ChipSet.SI1978.MODEL:
+        switch(this.config.MODEL) {
+        case Keyboard.SI1978.MODEL:
             return true;
-        case ChipSet.VT100.MODEL:
+
+        case Keyboard.VT100.MODEL:
             this.bLEDs = a[0];
             this.updateLEDs();
             return true;
@@ -511,11 +627,11 @@ Keyboard.prototype.setLED = function(control, f)
  */
 Keyboard.prototype.updateLEDs = function()
 {
-    for (var sBinding in Keyboard.LEDSTATES) {
+    for (var sBinding in this.config.LEDCODES) {
         var id = "led-" + sBinding;
         var control = this.bindings[id];
         if (control) {
-            var bitLED = Keyboard.LEDSTATES[sBinding];
+            var bitLED = this.config.LEDCODES[sBinding];
             var fOn = !!(this.bLEDs & bitLED);
             if (bitLED & (bitLED-1)) {
                 fOn = !(this.bLEDs & ~bitLED);
@@ -534,8 +650,8 @@ Keyboard.prototype.updateLEDs = function()
 Keyboard.prototype.getSoftCode = function(keyCode)
 {
     keyCode = Keyboard.ALTCODES[keyCode] || keyCode;
-    for (var sSoftCode in Keyboard.SOFTCODES) {
-        if (Keyboard.SOFTCODES[sSoftCode] === keyCode) {
+    for (var sSoftCode in this.config.SOFTCODES) {
+        if (this.config.SOFTCODES[sSoftCode] === keyCode) {
             return sSoftCode;
         }
     }

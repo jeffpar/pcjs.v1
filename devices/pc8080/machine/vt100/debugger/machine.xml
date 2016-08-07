@@ -24,7 +24,7 @@
 		</menu>
 	</video>
 	<chipset id="chipset" model="VT100"/>
-	<keyboard id="keyboard"/>
+	<keyboard id="keyboard" model="VT100"/>
 	<panel ref="/devices/pc8080/panel/wide.xml"/>
 	<debugger id="debugger" messages="mem" commands="s 8086"/>
 </machine>
