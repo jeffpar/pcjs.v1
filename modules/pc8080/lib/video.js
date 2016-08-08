@@ -117,6 +117,7 @@ function Video(parmsVideo, canvas, context, textarea, container)
     this.cxCellDefault = this.cxCell = parmsVideo['cellWidth'] || 1;
     this.cyCellDefault = this.cyCell = parmsVideo['cellHeight'] || 1;
     this.abFontData = null;
+    this.fDotStretcher = false;
 
     this.nBitsPerPixel = parmsVideo['bufferBits'] || 1;
     this.iBitFirstPixel = parmsVideo['bufferLeft'] || 0;
@@ -495,6 +496,7 @@ Video.prototype.createFonts = function(abFontData)
      * We retain abFontData in case we have to rebuild the fonts (eg, when we switch from 80 to 132 columns)
      */
     this.abFontData = abFontData;
+    this.fDotStretcher = (this.nFormat == Video.FORMAT.VT100);
     this.aFonts[Video.VT100.FONT.NORML] = [
         this.createFontVariation(this.cxCell, this.cyCell),
         this.createFontVariation(this.cxCell, this.cyCell, this.fUnderline)
@@ -561,6 +563,7 @@ Video.prototype.createFontVariation = function(cxCell, cyCell, fUnderline)
             var offFontData = iChar * nFontBytesPerChar + ((nFontByteOffset + y) & (nFontBytesPerChar - 1));
             var bits = (fUnderline && y == 8? 0xff : this.abFontData[offFontData]);
             for (var nRows = 0; nRows < (cyCell / this.cyCell); nRows++) {
+                var bitPrev = 0;
                 for (var x = 0, xDst = x; x < this.cxCell; x++) {
                     /*
                      * While x goes from 0 to cxCell-1, obviously we will run out of bits after x is 7;
@@ -568,12 +571,14 @@ Video.prototype.createFontVariation = function(cxCell, cyCell, fUnderline)
                      * (so that line-drawing characters seamlessly connect), we ensure that the effective
                      * shift count remains stuck at 7 once it reaches 7.
                      */
-                    var bit = bits & (0x80 >> (x > 7? 7 : x));
+                    var bitReal = bits & (0x80 >> (x > 7? 7 : x));
+                    var bit = (this.fDotStretcher && !bitReal && bitPrev)? bitPrev : bitReal;
                     for (var nCols = 0; nCols < (cxCell / this.cxCell); nCols++) {
                         if (fReverse) bit = !bit;
                         this.setPixel(imageChar, xDst, yDst, bit? 1 : 0);
                         xDst++;
                     }
+                    bitPrev = bitReal;
                 }
                 yDst++;
             }

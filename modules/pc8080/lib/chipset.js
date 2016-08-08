@@ -100,6 +100,12 @@ function ChipSet(parmsChipSet)
 
 Component.subclass(ChipSet);
 
+/*
+ * NOTE: The STATUS1 port could have been handled entirely by the Keyboard component, but it was just as easy
+ * to create a simple ChipSet interface, updateStatus1(), that the Keyboard calls whenever it wants to simulate a
+ * button press or release.  It's a six-of-one, half-a-dozen-of-another choice, since technically, Space Invaders
+ * doesn't have a keyboard.
+ */
 ChipSet.SI1978 = {
     MODEL:          1978.1,
     STATUS0: {                          // NOTE: STATUS0 not used by the SI1978 ROMs; refer to STATUS1 instead
@@ -168,8 +174,33 @@ ChipSet.SI1978 = {
  *
  *      <cpu id="cpu8080" model="8080" cycles="2764800"/>
  *
- * where 2764800 = 24883200 / 9. Beyond that, we don't really care about that particular 8224.  I only mention it
- * because knowing the CPU frequency is helpful for simulating some of the other circuits below that we DO care about.
+ * where 2764800 = 24883200 / 9.  You need to know this because we rely on the CPU frequency for simulating some
+ * of the other VT100 circuits.
+ *
+ * For reference, here is a list of all the VT100 I/O ports, from /devices/pc8080/machine/vt100/debugger/README.md,
+ * which in turn comes from p. 4-17 of the VT100 Technical Manual (July 1982):
+ *
+ *      READ OR WRITE
+ *      00H     PUSART data bus
+ *      01H     PUSART command port
+ *
+ *      WRITE ONLY (Decoded with I/O WR L)
+ *      02H     Baud rate generator
+ *      42H     Brightness D/A latch
+ *      62H     NVR latch
+ *      82H     Keyboard UART data input [used to update the Keyboard Status Byte -JP]
+ *      A2H     Video processor DC012
+ *      C2H     Video processor DC011
+ *      E2H     Graphics port
+ *
+ *      READ ONLY (Decoded with I/O RD L)
+ *      22H     Modem buffer
+ *      42H     Flags buffer
+ *      82H     Keyboard UART data output
+ *
+ * Most of these are handled by the ChipSet component, since it exists as sort of a "catch-all" component,
+ * but some are more appropriately handled by other components; eg, port 0x82 is handled by the Keyboard component,
+ * so it's defined there instead of here.
  */
 ChipSet.VT100 = {
     MODEL:          100.0,
@@ -202,13 +233,65 @@ ChipSet.VT100 = {
             STANDBY:        0x7
         },
         WORDMASK:   0x3fff              // NVR words are 14-bit
+        /*
+         * The Technical Manual, p. 4-18, also notes that "Early VT100s can disable the receiver interrupt by
+         * programming D4 in the NVR latch. However, this is never used by the VT100."
+         */
     },
+    /*
+     * DC012 is referred to as a Control Chip.
+     *
+     * As p. 4-67 (117) of the VT100 Technical Manual (July 1982) explains:
+     *
+     *      The DCO12 performs three main functions.
+     *
+     *       1. Scan count generation. This involves two counters, a multiplexer to switch between the counters,
+     *          double-height logic, scroll and line attribute latches, and various logic controlling switching between
+     *          the two counters. This is the biggest part of the chip. It includes all scrolling, double-height logic,
+     *          and feeds into the underline and hold request circuits.
+     *
+     *       2. Generation of HOLD REQUEST. This uses information from the scan counters and the scrolling logic to
+     *          decide when to generate HOLD REQUEST.
+     *
+     *       3. Video modifications: dot stretching, blanking, addition of attributes to video outputs, and multiple
+     *          intensity levels.
+     *
+     *      The input decoder accepts a 4-bit command from the microprocessor when VID WR 2 L is asserted. Table 4-6-2
+     *      lists the commands.
+     *
+     *      D3 D2 D1 D0     Function
+     *      -- -- -- --     --------
+     *      0  0  0  0      Load low order scroll latch = 00
+     *      0  0  0  1      Load low order scroll latch = 01
+     *      0  0  1  0      Load low order scroll latch = 10
+     *      0  0  1  1      Load low order scroll latch = 11
+     *
+     *      0  1  0  0      Load high order scroll latch = 00
+     *      0  1  0  1      Load high order scroll latch = 01
+     *      0  1  1  0      Load high order scroll latch = 10
+     *      0  1  1  1      Load high order scroll latch = 11 (not used)
+     *
+     *      1  0  0  0      Toggle blink flip-flop
+     *      1  0  0  1      Clear vertical frequency interrupt
+     *
+     *      1  0  1  0      Set reverse field on
+     *      1  0  1  1      Set reverse field off
+     *
+     *      1  1  0  0      Set basic attribute to underline*
+     *      1  1  0  1      Set basic attribute to reverse video*
+     *      1  1  1  0      Reserved for future specification*
+     *      1  1  1  1      Reserved for future specification*
+     *
+     *      *These functions also clear blink flip-flop.
+     */
     DC012: {                            // generates scan counts for the Video Processor
         PORT:       0xA2,               // write-only
         INIT:       0x00                // for lack of a better guess
     },
     /*
-     * As p. 4-55 (105) of the July 1982 Technical Manual explains:
+     * DC011 is referred to as a Timing Chip.
+     *
+     * As p. 4-55 (105) of the VT100 Technical Manual (July 1982) explains:
      *
      *      The DCO11 is a custom designed bipolar circuit that provides most of the timing signals required by the
      *      video processor. Internal counters divide the output of a 24.0734 MHz oscillator (located elsewhere on the

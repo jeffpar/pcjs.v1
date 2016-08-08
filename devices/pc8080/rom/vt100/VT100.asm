@@ -14,7 +14,9 @@ X0000:	di
 	jmp	X003b
 
 	org	8
-
+;
+; Interrupt vector 0x1 for keyboard
+;
 X0008:	call	X00fd
 	ei
 	ret
@@ -160,6 +162,9 @@ X00c4:	jz	X00cb
 X00cb:	mvi	a,2fh
 	sta	X21c9
 	out	62h
+;
+; Prepare to enter the "beep" loop
+;
 X00d2:	lxi	b,X0fff
 	ei
 X00d6:	mvi	a,8
@@ -172,7 +177,10 @@ X00e0:	out	82h
 	mov	a,b
 	ora	c
 	jnz	X00d6
-	out	82h
+;
+; Done "beeping" now
+;
+X00e8:	out	82h		; A = 0, so all LEDs off now
 	lda	X2068
 	ora	a
 	jm	X00f5
@@ -180,7 +188,28 @@ X00e0:	out	82h
 	ori	4
 	mov	d,a
 X00f5:	push	d
+
+;
+; The next call issues the following:
+;
+;   03A2 CD8103     CALL    0381                        ;stack=204A
+;   0B67 CDAD10     CALL    10AD                        ;stack=2048
+;   chipset.outPort(0x00A2,DC012,0x00) at 10BD
+;   chipset.outPort(0x00A2,DC012,0x04) at 10C1
+;
+; and then:
+;
+;   03A2 CD8103     CALL    0381                        ;stack=204A
+;   0B67 CDAD10     CALL    10AD                        ;stack=2048
+;   10C9 CDAA0F     CALL    0FAA                        ;stack=2046
+;   0FB6 CC8814     CALLZ   1488                        ;stack=2040
+;   1488 CD9314     CALL    1493                        ;stack=203E
+;   chipset.inPort(0x0042,FLAGS.BUFFER): 0x60 at 1493
+;
+; Note that once we're inside 0FAA, that appears to be where we stay.
+;
 	call	X03a2
+
 	pop	d
 	jmp	X0875
 ;;
@@ -934,10 +963,10 @@ X06a7:	mov	a,d
 	ora	a
 	ret
 
-X06aa:	lda	X2068
+X06aa:	lda	X2068		; A <- [Keys flag buffer]
 	mov	e,a
-	ani	80h
-	rz
+	ani	80h		; bit 7 set?
+	rz			; return if not
 	lxi	h,X0841
 	push	h
 	mov	a,e
@@ -2344,6 +2373,22 @@ X0f9e:	ora	m
 	mov	m,a
 	ret
 
+;
+; Main loop?
+;
+; Absent any interrupts, execution gravitates here:
+;
+;    0FAA:
+;	...
+;	call    1488
+;	  call	  1493		; read port 0x42 (check flags buffer)
+;	  call    06aa		; check byte at [2068]
+;	  cli
+;	  call    0e3e		; fetch byte at [21A5], OR byte at [207B]
+;	  sti
+;	  ; return byte at [2172] in A
+;	jmp	0FAE
+;
 X0faa:	lxi	h,X207f
 	add	m
 X0fae:	cmp	m
@@ -2356,6 +2401,9 @@ X0fb2:	lda	X207b
 	pop	psw
 	pop	h
 	jmp	X0fae
+;
+; End of main loop?
+;
 
 X0fbe:	lhld	X204e
 	mov	a,h
@@ -4728,46 +4776,7 @@ X1fd4:	ora	a
 
 ; Last but not least, pad out to 8K (8192) bytes
 
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
+	org	1fffh
 	nop
 
 ;	Miscellaneous equates
@@ -4797,7 +4806,7 @@ X205b	equ	205bh
 X205c	equ	205ch
 X2065	equ	2065h
 X2067	equ	2067h
-X2068	equ	2068h
+X2068	equ	2068h		; Keys flag buffer
 X2069	equ	2069h
 X206a	equ	206ah
 X206e	equ	206eh
