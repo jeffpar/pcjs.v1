@@ -15,8 +15,9 @@ The combined contents of those ROMs have been stored as an 8Kb JSON image in [VT
 As Trammell Hudson's [VT100 Page](https://trmm.net/VT100) explains:
 
 	There are four 8316E ROM chips for the 8080 CPU on the logic board. Since they are custom mask ROMs,
-	Digital was able to have a different chip-select bit pattern and avoided having separate NOT gates on the inputs.
-	Note that the schematic appears to be incorrect -- E56 is the low order, and E40 is the high order address bits.
+	Digital was able to have a different chip-select bit pattern and avoided having separate NOT gates on
+	the inputs.  Note that the schematic appears to be incorrect -- E56 is the low order, and E40 is the
+	high order address bits.
 
 He then describes the memory map as follows:
 
@@ -67,8 +68,8 @@ and passed on to the PC8080 Debugger.  Here are the rebuild steps:
 	grep -E "[0-9]+ [0-9A-D]+.*;;" VT100.lst | sed -E "s/ *[0-9]+ ([0-9A-F]+).*;(;.*)/     \1   .   \2/" > VT100.map
 	filedump --file=VT100.bin --format=bytes --output=VT100.json --comments --overwrite
 
-You can omit `--comments` to reduce the size of the [VT100.json](VT100.json) file.
+You can omit `--comments` from the filedump command to reduce the size of the [VT100.json](VT100.json) file.
 
 Some [VT100.asm](VT100.asm) clean-up remains, because there are still chunks of data that were incorrectly disassembled as code.
-From a reassembly standpoint, it doesn't matter too much, because such instructions get reassembled into the same original binary
-patterns, but from a readability standpoint, it's a nuisance.
+From a reassembly standpoint, it doesn't matter too much, because all the 8080 instructions unambiguously reassemble into their
+original binary patterns, but from a readability standpoint, it's a nuisance.

@@ -277,6 +277,19 @@ Keyboard.SI1978 = {
 Keyboard.VT100 = {
     MODEL:          100.0,
     SOFTCODES: {},
+    /*
+     * Reading port 0x82 returns a key address from the VT100 keyboard's UART data output.
+     *
+     * Every time a keyboard scan is initiated (by setting the START bit of the status byte),
+     * an internal address index is reset to zero, and an interrupt is generated for each entry
+     * in the aKeysPressed array, along with a final interrupt for KEYLAST.
+     */
+    ADDRESS: {
+        PORT:       0x82
+    },
+    /*
+     * Writing port 0x82 updates the VT100's keyboard status byte via the keyboard's UART data input.
+     */
     STATUS: {
         PORT:       0x82,               // write-only
         LED4:       0x01,
@@ -299,7 +312,8 @@ Keyboard.VT100 = {
          */
         CLICK:      0x80,
         INIT:       0x00
-    }
+    },
+    KEYLAST:        0x7F
 };
 
 Keyboard.VT100.KEYMAP = {};
@@ -501,6 +515,7 @@ Keyboard.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
  */
 Keyboard.prototype.initBus = function(cmp, bus, cpu, dbg)
 {
+    this.cpu = cpu;
     this.dbg = dbg;     // NOTE: The "dbg" property must be set for the message functions to work
     this.chipset = cmp.getMachineComponent("ChipSet");
     bus.addPortInputTable(this, this.config.portsInput);
@@ -542,7 +557,8 @@ Keyboard.prototype.powerDown = function(fSave, fShutdown)
 
 Keyboard.VT100.INIT = [
     [
-        Keyboard.VT100.STATUS.INIT
+        Keyboard.VT100.STATUS.INIT,
+        0                               // iKeyNext
     ]
 ];
 
@@ -554,14 +570,16 @@ Keyboard.VT100.INIT = [
 Keyboard.prototype.reset = function()
 {
     /*
-     * As keyDown events are encountered, a corresponding "softcode" property in keysPressed
-     * is set to the timestamp of the keyDown event.  When the corresponding keyUp event occurs,
-     * we look at the elapsed time: if it is less than MINPRESSTIME, then we move the key
-     * to keysToRelease and set a timeout handler to release the key later; otherwise, we process
-     * the keyUp event immediately.
+     * As keyDown events are encountered, a corresponding "softCode" is looked up.  If one is found,
+     * then an entry for the key is added to the aKeysPressed array.  Each entry contains:
+     *
+     *      softCode:           number or string representing the key pressed
+     *      msDown:             timestamp of the most recent "down" event
+     *      fAutoRelease:       true to auto-release the key after MINPRESSTIME (set when "up" occurs too quickly)
+     *
+     * When the key is finally released (or auto-released), its entry is removed from the array.
      */
-    this.keysPressed = {};
-    this.keysToRelease = {};
+    this.aKeysPressed = [];
 
     if (this.config.INIT && !this.restore(this.config.INIT)) {
         this.notice("reset error");
@@ -609,6 +627,7 @@ Keyboard.prototype.restore = function(data)
         case Keyboard.VT100.MODEL:
             this.bVT100Status = a[0];
             this.updateLEDs(this.bVT100Status & Keyboard.VT100.STATUS.LEDS);
+            this.iKeyNext = a[1];
             return true;
         }
     }
@@ -656,12 +675,17 @@ Keyboard.prototype.updateLEDs = function(bLEDs)
 /**
  * getSoftCode(keyCode)
  *
+ * Returns a number if the keyCode exists in the KEYMAP, or a string if the keyCode has a soft-code string.
+ *
  * @this {Keyboard}
- * @return {string|null}
+ * @return {string|number|null}
  */
 Keyboard.prototype.getSoftCode = function(keyCode)
 {
     keyCode = Keyboard.ALTCODES[keyCode] || keyCode;
+    if (this.config.KEYMAP[keyCode]) {
+        return keyCode;
+    }
     for (var sSoftCode in this.config.SOFTCODES) {
         if (this.config.SOFTCODES[sSoftCode] === keyCode) {
             return sSoftCode;
@@ -682,10 +706,10 @@ Keyboard.prototype.onKeyDown = function(event, fDown)
 {
     var fPass = true;
     var keyCode = event.keyCode;
-    var sSoftCode = this.getSoftCode(keyCode);
+    var softCode = this.getSoftCode(keyCode);
 
-    if (sSoftCode) {
-        fPass = this.onSoftKeyDown(sSoftCode, fDown);
+    if (softCode) {
+        fPass = this.onSoftKeyDown(softCode, fDown);
         event.preventDefault();
     }
 
@@ -697,36 +721,65 @@ Keyboard.prototype.onKeyDown = function(event, fDown)
 };
 
 /**
- * onSoftKeyDown(sSoftCode, fDown)
+ * indexOfSoftKey(softCode)
  *
  * @this {Keyboard}
- * @param {string} sSoftCode
+ * @param {number|string} softCode
+ * @return {number} index of softCode in aKeysPressed, or -1 if not found
+ */
+Keyboard.prototype.indexOfSoftKey = function(softCode)
+{
+    var i;
+    for (i = 0; i < this.aKeysPressed.length; i++) {
+        if (this.aKeysPressed[i].softCode == softCode) return i;
+    }
+    return -1;
+};
+
+/**
+ * onSoftKeyDown(softCode, fDown)
+ *
+ * @this {Keyboard}
+ * @param {number|string} softCode
  * @param {boolean} fDown is true for a down event, false for up
  * @return {boolean} true to pass the event along, false to consume it
  */
-Keyboard.prototype.onSoftKeyDown = function(sSoftCode, fDown)
+Keyboard.prototype.onSoftKeyDown = function(softCode, fDown)
 {
+    var i = this.indexOfSoftKey(softCode);
     if (fDown) {
-        // this.println(sSoftCode + " down");
-        this.keysPressed[sSoftCode] = Date.now();
-        delete this.keysToRelease[sSoftCode];
-    } else {
-        // this.println(sSoftCode + " up");
-        var msDown = this.keysPressed[sSoftCode];
-        if (msDown) {
-            var msElapsed = Date.now() - msDown;
-            if (msElapsed < Keyboard.MINPRESSTIME) {
-                // this.println(sSoftCode + " released after only " + msElapsed + "ms");
-                this.keysToRelease[sSoftCode] = msDown;
-                this.checkSoftKeysToRelease();
-                return true;
+        // this.println(softCode + " down");
+        if (i < 0) {
+            this.aKeysPressed.push({
+                softCode: softCode,
+                msDown: Date.now(),
+                fAutoRelease: false
+            });
+        } else {
+            this.aKeysPressed[i].msDown = Date.now();
+            this.aKeysPressed[i].fAutoRelease = false;
+        }
+    } else if (i >= 0) {
+        // this.println(softCode + " up");
+        if (!this.aKeysPressed[i].fAutoRelease) {
+            var msDown = this.aKeysPressed[i].msDown;
+            if (msDown) {
+                var msElapsed = Date.now() - msDown;
+                if (msElapsed < Keyboard.MINPRESSTIME) {
+                    // this.println(softCode + " released after only " + msElapsed + "ms");
+                    this.aKeysPressed[i].fAutoRelease = true;
+                    this.checkSoftKeysToRelease();
+                    return true;
+                }
             }
         }
-        delete this.keysPressed[sSoftCode];
+        this.aKeysPressed.splice(i, 1);
+    } else {
+        // this.println(softCode + " up with no down?");
     }
 
     if (this.chipset) {
-        switch(sSoftCode) {
+        switch(softCode) {
         case '1p':
             this.chipset.updateStatus1(ChipSet.SI1978.STATUS1.P1, fDown);
             break;
@@ -762,26 +815,55 @@ Keyboard.prototype.onSoftKeyDown = function(sSoftCode, fDown)
  */
 Keyboard.prototype.checkSoftKeysToRelease = function()
 {
+    var i = 0;
     var msDelayMin = -1;
-    var asSoftCodes = Object.keys(this.keysToRelease);
-    for (var i = 0; i < asSoftCodes.length; i++) {
-        var sSoftCode = asSoftCodes[i];
-        var msDown = this.keysToRelease[sSoftCode];
-        var msElapsed = Date.now() - msDown;
-        var msDelay = Keyboard.MINPRESSTIME - msElapsed;
-        if (msDelay > 0) {
-            if (msDelayMin < 0 || msDelayMin > msDelay) {
-                msDelayMin = msDelay;
+    while (i < this.aKeysPressed.length) {
+        if (this.aKeysPressed[i].fAutoRelease) {
+            var softCode = this.aKeysPressed[i].softCode;
+            var msDown = this.aKeysPressed[i].msDown;
+            var msElapsed = Date.now() - msDown;
+            var msDelay = Keyboard.MINPRESSTIME - msElapsed;
+            if (msDelay > 0) {
+                if (msDelayMin < 0 || msDelayMin > msDelay) {
+                    msDelayMin = msDelay;
+                }
+            } else {
+                /*
+                 * Because the key is already in the auto-release state, this next call guarantees that the
+                 * key will be removed from the array; a consequence of that removal, however, is that we must
+                 * reset our array index to zero.
+                 */
+                this.onSoftKeyDown(softCode, false);
+                i = 0;
+                continue;
             }
-        } else {
-            delete this.keysToRelease[sSoftCode];
-            this.onSoftKeyDown(sSoftCode, false);
         }
+        i++;
     }
     if (msDelayMin >= 0) {
         var kbd = this;
         setTimeout(function() { kbd.checkSoftKeysToRelease(); }, msDelayMin);
     }
+};
+
+/**
+ * inVT100UARTAddress(port, addrFrom)
+ *
+ * @this {Keyboard}
+ * @param {number} port (0x82)
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to write the specified port)
+ * @return {number} simulated port value
+ */
+Keyboard.prototype.inVT100UARTAddress = function(port, addrFrom)
+{
+    var b = 0;
+    if (this.iKeyNext >= 0 && this.iKeyNext < this.aKeysPressed.length - 1) {
+        var softCode = this.aKeysPressed[this.iKeyNext++];
+        b = Keyboard.VT100.KEYMAP[softCode];
+    }
+    if (!b) b = Keyboard.VT100.KEYLAST;
+    this.printMessageIO(port, null, addrFrom, "KBDUART.ADDRESS", b);
+    return b;
 };
 
 /**
@@ -794,20 +876,20 @@ Keyboard.prototype.checkSoftKeysToRelease = function()
  */
 Keyboard.prototype.outVT100UARTStatus = function(port, b, addrFrom)
 {
-    this.printMessageIO(port, b, addrFrom, "KBDUART.STATUS", null, true);
+    this.printMessageIO(port, b, addrFrom, "KBDUART.STATUS");
     this.bVT100Status = b;
     this.updateLEDs(b & Keyboard.VT100.STATUS.LEDS);
-    /*
     if (b & Keyboard.VT100.STATUS.START) {
-        console.log("keyboard scan initiated");
+        this.iKeyNext = 0;
+        this.cpu.requestINTR(1);
     }
-    */
 };
 
 /*
  * Port notification tables
  */
 Keyboard.VT100.portsInput = {
+    0x82: Keyboard.prototype.inVT100UARTAddress
 };
 
 Keyboard.VT100.portsOutput = {

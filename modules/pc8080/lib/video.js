@@ -1064,19 +1064,26 @@ Video.prototype.updateScreen = function(n)
     if (n >= 0) {
 
         if (this.rateInterrupt) {
-            if (!(n & 1)) {
-                /*
-                 * On even updates, call cpu.requestINTR(1), and also update our copy of the screen.
-                 */
-                this.cpu.requestINTR(1);
+            /*
+             * TODO: Incorporate these hard-coded interrupt vector numbers into configuration blocks.
+             */
+            if (this.rateInterrupt == 120) {
+                if (!(n & 1)) {
+                    /*
+                     * On even updates, call cpu.requestINTR(1), and also update our copy of the screen.
+                     */
+                    this.cpu.requestINTR(1);
+                } else {
+                    /*
+                     * On odd updates, call cpu.requestINTR(2), but do NOT update our copy of the screen, because
+                     * the machine has presumably only updated the top half of the frame buffer at this point; it will
+                     * update the bottom half of the frame buffer after acknowledging this interrupt.
+                     */
+                    this.cpu.requestINTR(2);
+                    fUpdate = false;
+                }
             } else {
-                /*
-                 * On odd updates, call cpu.requestINTR(2), but do NOT update our copy of the screen, because
-                 * the machine has presumably only updated the top half of the frame buffer at this point; it will
-                 * update the bottom half of the frame buffer after acknowledging this interrupt.
-                 */
-                this.cpu.requestINTR(2);
-                fUpdate = false;
+                this.cpu.requestINTR(4);
             }
         }
 

@@ -212,9 +212,19 @@ X00f5:	push	d
 
 	pop	d
 	jmp	X0875
-;;
-;;  Keyboard interrupt handler
-;;
+;
+;   Keyboard interrupt handler
+;
+;   The "Keys Flag Byte/Buffer" at 0x2068 contains the following bits:
+;
+;	0-1	Key counter
+;	  2	Key counter overflow bit
+;	  3	Setup
+;	  4	Control
+;	  5	Shift
+;	  6	Caps Lock
+;	  7	Last Key
+;
 X00fd:	push	psw
 	in	82h		;; Read from keyboard port
 	push	h

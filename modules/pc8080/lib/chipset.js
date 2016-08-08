@@ -206,7 +206,7 @@ ChipSet.VT100 = {
     MODEL:          100.0,
     FLAGS_BUFFER: {
         PORT:       0x42,               // read-only
-        XMIT:       0x01,               // active if SET
+        XMIT:       0x01,               // PUSART transmit buffer empty if SET
         NO_AVO:     0x02,               // AVO present if CLEAR
         NO_GFX:     0x04,               // VT125 graphics board present if CLEAR
         OPTION:     0x08,               // OPTION present if SET
@@ -841,7 +841,7 @@ ChipSet.prototype.inVT100FlagsBuffer = function(port, addrFrom)
         b |= ChipSet.VT100.FLAGS_BUFFER.NVR_DATA;
     }
     this.bFlagsBuffer = b;
-    this.printMessageIO(port, null, addrFrom, "FLAGS.BUFFER", b, true);
+    this.printMessageIO(port, null, addrFrom, "FLAGS.BUFFER", b);
     return b;
 };
 
@@ -855,7 +855,7 @@ ChipSet.prototype.inVT100FlagsBuffer = function(port, addrFrom)
  */
 ChipSet.prototype.outVT100Brightness = function(port, b, addrFrom)
 {
-    this.printMessageIO(port, b, addrFrom, "BRIGHTNESS", null, true);
+    this.printMessageIO(port, b, addrFrom, "BRIGHTNESS");
     this.bBrightness = b;
 };
 
@@ -869,7 +869,7 @@ ChipSet.prototype.outVT100Brightness = function(port, b, addrFrom)
  */
 ChipSet.prototype.outVT100NVRLatch = function(port, b, addrFrom)
 {
-    this.printMessageIO(port, b, addrFrom, "NVR.LATCH", null, true);
+    this.printMessageIO(port, b, addrFrom, "NVR.LATCH");
     this.bNVRLatch = b;
 };
 
@@ -883,7 +883,7 @@ ChipSet.prototype.outVT100NVRLatch = function(port, b, addrFrom)
  */
 ChipSet.prototype.outVT100DC012 = function(port, b, addrFrom)
 {
-    this.printMessageIO(port, b, addrFrom, "DC012", null, true);
+    this.printMessageIO(port, b, addrFrom, "DC012");
     this.bDC012 = b;
 };
 
@@ -897,7 +897,7 @@ ChipSet.prototype.outVT100DC012 = function(port, b, addrFrom)
  */
 ChipSet.prototype.outVT100DC011 = function(port, b, addrFrom)
 {
-    this.printMessageIO(port, b, addrFrom, "DC011", null, true);
+    this.printMessageIO(port, b, addrFrom, "DC011");
     this.bDC011 = b;
 };
 
