@@ -163,50 +163,50 @@ VT100 Initialization Process
 
 From "Power-Up and Self-Test", section 4.2.8, p. 4-19, of the VT100 Technical Manual (July 1982):
 
-	When power is first applied to the terminal controller board, the reset circuit in the 8224 holds the microprocessor
-	in a halt state. Within a second, after the voltages stabilize in the power supply, the RC network at the reset input
-	allows tlhe input voltage to rise to the switching threshold of a Schmitt trigger. Then the reset is released with the
-	8080 program counter set to 0. The low 64 bytes of program are reserved for the eight interrupt service routines which
-	can be addressed by the restart instruction (see previous section). The low 8 start the power-up routine by disabling
-	the interrupts, setting up the stack pointer, and then going immediately into the self-test routines.
+> When power is first applied to the terminal controller board, the reset circuit in the 8224 holds the microprocessor
+in a halt state. Within a second, after the voltages stabilize in the power supply, the RC network at the reset input
+allows tlhe input voltage to rise to the switching threshold of a Schmitt trigger. Then the reset is released with the
+8080 program counter set to 0. The low 64 bytes of program are reserved for the eight interrupt service routines which
+can be addressed by the restart instruction (see previous section). The low 8 start the power-up routine by disabling
+the interrupts, setting up the stack pointer, and then going immediately into the self-test routines.
 	
-	Assuming there are no hard logic failures present on the board, the microprocessor attempts to perform a confidence
-	check of the controller. Some failures are considered fatal and will stop the machine; other failures limit its operation
-	but win not prevent its use. Fatal failures are indicated by the LEDs on the keyboard, while nonfatal errors are indicated
-	as a single character on the screen.
+> Assuming there are no hard logic failures present on the board, the microprocessor attempts to perform a confidence
+check of the controller. Some failures are considered fatal and will stop the machine; other failures limit its operation
+but win not prevent its use. Fatal failures are indicated by the LEDs on the keyboard, while nonfatal errors are indicated
+as a single character on the screen.
 	
-	The microprocessor first sends the number of the first ROM to the LEDs on the keyboard. Then it calculates a checksum
-	of the contents of the first 2K of program. (Since firmware is treated as four 2K blocks of code, later VT100s with one
-	8K X 8 ROM chip operate the same way but any block failure requires replacement of the one chip). At the time of ROM
-	preparation, a special byte was included within each block to make the checksum equal zero if there are no errors. If
-	there is an error, the microprocessor halts and the LEDs indicate the current ROM at the time of failure. Otherwise, the
-	LEDs are incremented to show the next ROM number and the process continues.
-	
-	The next part of the test is writing and reading the RAM. Every bit in the RAM is written with a 0 and a 1 and read each
-	time. If the advanced video option is present (as indicated by the Option Present flag), its RAM is tested immediately
-	after the main RAM. In the main RAM a failure halts the machine. Failure of a bit in the advanced video option RAM is
-	indicated on the screen and the process continues. In another termnnal, the VT52, one bad bit in the screen RAM means there
-	is one location that may not contain right character. This can be annoying to the user but does not affect the rest of the
-	screen. If one bit is bad in a VT100 line address, the entire screen below the affected line can become garbled and unsuable.
-	A bad bit in the scratch area could disable communication with the host. So this confidence check ensures that any RAM
-	failure is detected immediately.
-	
-	The next test checks the nonvola1tile RAM by reading it. A checksum is calculated and compared with the value stored the
-	last time the NVR was written during a save. A bad NVR does not stop the VT100 because the SET-UP values can always be
-	reestablished from the keyboard at power-up. The NVR test is also the normal time when the terminal gets its auto SET-UP
-	readings from the NVR. Time is saved because reading the NVR is the most time-consuming part of both the self-test and the
-	auto SET-UP. If the NVR fails, the bell sounds several times to inform the operator, and then default settings stored in
-	the ROM allow the terminal to work. The operator must then manually reset any parameters that differ from the default values.
-	
-	To test the keyboard, the microprocessor commands the keyboard to scan once, lights all the LEDs, for about a half second,
-	and sounds the bell. It waits for the scan to finish and then looks for the last key address 7FH at the keyboard UART.
-	If the test fails, the terminal remains on-line, making it a receive-only (RO) terminal.
-	
-	This is the end of testing.
-	
-	Once the NVR data is in the scratch area in RAM, the microprocessor uses that data to program the hardware. All operating
-	parameters that were last saved (see NVR) are recalled and the terminal is set to match them. Finally the cursor appears
-	at column 1, line 1, and the microprocessor enters its background routine, ready for operation.
+> The microprocessor first sends the number of the first ROM to the LEDs on the keyboard. Then it calculates a checksum
+of the contents of the first 2K of program. (Since firmware is treated as four 2K blocks of code, later VT100s with one
+8K X 8 ROM chip operate the same way but any block failure requires replacement of the one chip). At the time of ROM
+preparation, a special byte was included within each block to make the checksum equal zero if there are no errors. If
+there is an error, the microprocessor halts and the LEDs indicate the current ROM at the time of failure. Otherwise, the
+LEDs are incremented to show the next ROM number and the process continues.
+
+> The next part of the test is writing and reading the RAM. Every bit in the RAM is written with a 0 and a 1 and read each
+time. If the advanced video option is present (as indicated by the Option Present flag), its RAM is tested immediately
+after the main RAM. In the main RAM a failure halts the machine. Failure of a bit in the advanced video option RAM is
+indicated on the screen and the process continues. In another termnnal, the VT52, one bad bit in the screen RAM means there
+is one location that may not contain right character. This can be annoying to the user but does not affect the rest of the
+screen. If one bit is bad in a VT100 line address, the entire screen below the affected line can become garbled and unsuable.
+A bad bit in the scratch area could disable communication with the host. So this confidence check ensures that any RAM
+failure is detected immediately.
+
+> The next test checks the nonvola1tile RAM by reading it. A checksum is calculated and compared with the value stored the
+last time the NVR was written during a save. A bad NVR does not stop the VT100 because the SET-UP values can always be
+reestablished from the keyboard at power-up. The NVR test is also the normal time when the terminal gets its auto SET-UP
+readings from the NVR. Time is saved because reading the NVR is the most time-consuming part of both the self-test and the
+auto SET-UP. If the NVR fails, the bell sounds several times to inform the operator, and then default settings stored in
+the ROM allow the terminal to work. The operator must then manually reset any parameters that differ from the default values.
+
+> To test the keyboard, the microprocessor commands the keyboard to scan once, lights all the LEDs, for about a half second,
+and sounds the bell. It waits for the scan to finish and then looks for the last key address 7FH at the keyboard UART.
+If the test fails, the terminal remains on-line, making it a receive-only (RO) terminal.
+
+> This is the end of testing.
+
+> Once the NVR data is in the scratch area in RAM, the microprocessor uses that data to program the hardware. All operating
+parameters that were last saved (see NVR) are recalled and the terminal is set to match them. Finally the cursor appears
+at column 1, line 1, and the microprocessor enters its background routine, ready for operation.
 
 Some additional observations:
 
