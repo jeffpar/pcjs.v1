@@ -161,6 +161,9 @@ pre a, code a {
     margin-left: 150px;
 
 }
+.common-main blockquote {
+    text-align: justify;
+}
 .common-image-gallery {
     margin: 0 auto;
     text-align: center;
