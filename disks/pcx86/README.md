@@ -59,7 +59,7 @@ computer diagnostics, programming tools, and more.
 ### Tests
 
 * [PC Diagnostics](diags/)
-* [VGA "Black Book" Tests](/tests/pc/vga/)
+* [VGA "Black Book" Tests](/tests/pcx86/vga/)
 
 ---
 
