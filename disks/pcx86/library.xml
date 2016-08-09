@@ -105,7 +105,7 @@
 		<manifest ref="/apps/pcx86/1987/thinktank/manifest.xml" disk="disk01"/>
 		<manifest ref="/apps/pcx86/1992/moria/manifest.xml" disk="disk01"/>
 		<manifest ref="/pubs/pc/programming/manifest.xml"/>
-		<disk path="/tests/pc/vga/VGABIN.json">VGA Tests (Black Book)</disk>
+		<disk path="/tests/pcx86/vga/VGABIN.json">VGA Tests (Black Book)</disk>
 	</control>
 	<control type="button" binding="loadDrive">Load</control>
 	<control type="button" binding="saveDrive" padright="8px">Save</control>

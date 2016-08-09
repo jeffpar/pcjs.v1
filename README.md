@@ -1,7 +1,7 @@
 PCjs Machines
 ===
 
-Welcome to PCjs, home of [PCx86](/docs/pcx86/), the original IBM PC simulation written entirely JavaScript.  It is
+Welcome to PCjs, home of [PCx86](/docs/pcx86/), the original IBM PC simulation that runs in your web browser.  It is
 one of several JavaScript Machines in the [PCjs Project](https://github.com/jeffpar/pcjs), an open-source project that
 includes:
 

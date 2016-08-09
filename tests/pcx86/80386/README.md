@@ -1,7 +1,9 @@
 ---
 layout: page
 title: 80386 Tests
-permalink: /tests/pc/80386/
+permalink: /tests/pcx86/80386/
+redirect_from:
+  - /tests/pc/80386/
 ---
 
 Overview
