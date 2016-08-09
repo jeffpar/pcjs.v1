@@ -109,7 +109,7 @@ function Video(parmsVideo, canvas, context, textarea, container)
     this.fUseRAM = parmsVideo['bufferRAM'];
 
     var sFormat = parmsVideo['bufferFormat'];
-    this.nFormat = sFormat && Video.FORMATS[sFormat.toLowerCase()] || Video.FORMAT.UNKNOWN;
+    this.nFormat = sFormat && Video.FORMATS[sFormat.toUpperCase()] || Video.FORMAT.UNKNOWN;
 
     this.nColsBuffer = parmsVideo['bufferCols'];
     this.nRowsBuffer = parmsVideo['bufferRows'];
@@ -263,7 +263,8 @@ Video.FORMAT = {
 };
 
 Video.FORMATS = {
-    "vt100":        Video.FORMAT.VT100
+    "SI1978":       Video.FORMAT.SI1978,
+    "VT100":        Video.FORMAT.VT100
 };
 
 
@@ -396,11 +397,6 @@ Video.prototype.initBus = function(cmp, bus, cpu, dbg)
     this.bus = bus;
     this.cpu = cpu;
     this.dbg = dbg;
-    this.chipset = cmp.getMachineComponent("ChipSet");
-
-    if (!this.nFormat && this.chipset && this.chipset.model == ChipSet.SI1978.MODEL) {
-        this.nFormat = Video.FORMAT.SI1978;
-    }
 
     /*
      * Allocate the frame buffer (as needed) along with all other buffers.

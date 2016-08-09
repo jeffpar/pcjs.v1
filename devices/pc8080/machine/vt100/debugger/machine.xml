@@ -27,5 +27,5 @@
 	<keyboard id="keyboard" model="VT100"/>
 	<serial id="serial0" adapter="0"/>
 	<panel ref="/devices/pc8080/panel/wide.xml"/>
-	<debugger id="debugger" messages="mem|port|keyboard" commands="s 8086"/>
+	<debugger id="debugger" messages="mem|port" commands="s 8086"/>
 </machine>
