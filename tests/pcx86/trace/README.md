@@ -1,10 +1,12 @@
 ---
 layout: page
 title: PC Trace Utility
-permalink: /tests/pc/trace/
+permalink: /tests/pcx86/trace/
+redirect_from:
+  - /tests/pc/trace/
 ---
 
-WARNING: This utility is obsolete.  It has been superseded by [test386](/tests/pc/80386/),
+WARNING: This utility is obsolete.  It has been superseded by [test386](/tests/pcx86/80386/),
 which, going forward, serves as our new model for instruction-level testing.  As a result,
 the **traceLog()** functionality mentioned below has been removed from the PCjs source code
 (but you can always dig it back up if you really want it).
@@ -43,15 +45,15 @@ every time the machine is loaded, via the DiskDump API.  This is useful when you
 generating new test results:
 
 ```xml
-<fdc id="fdcNEC" automount='{B:{name:"Trace Tests",path:"/tests/pc/trace/trace.com;trace.txt"}}'/>
+<fdc id="fdcNEC" automount='{B:{name:"Trace Tests",path:"/tests/pcx86/trace/trace.com;trace.txt"}}'/>
 ```
 
 Alternatively, if you want to run the tests in another virtual PC environment (eg, VMware Fusion),
 you can create an IMG disk image from a directory using DiskDump's command-line interface:
 
-	cd ~/Sites/pcjs/tests/pc
-	node ~/Sites/pcjs/modules/diskdump/bin/diskdump --dir=trace --format=img --output=trace.img
+	cd tests/pcx86
+	node ../../modules/diskdump/bin/diskdump --dir=trace --format=img --output=trace.img
  
 OS X users can also create an ISO image like so:
 
-	hdiutil makehybrid -o ~/Sites/pcjs/tests/pc/trace.iso ~/Sites/pcjs/tests/pc/trace -iso -joliet
+	hdiutil makehybrid -o tests/pcx86/trace.iso tests/pcx86/trace -iso -joliet
