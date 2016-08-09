@@ -17,7 +17,12 @@ indent_style = tab
 indent_size = 8
 trim_trailing_whitespace = true
 
-[*.{C,H,c,h,xml,xsl}]
+[*.{C,CPP,H,c,cpp,h}]
+indent_style = space
+indent_size = 4
+trim_trailing_whitespace = true
+
+[*.{xml,xsl}]
 indent_style = tab
 indent_size = 4
 trim_trailing_whitespace = true

@@ -154,6 +154,7 @@
     "./modules/pc8080/lib/ram.js",
     "./modules/pc8080/lib/keyboard.js",
     "./modules/pc8080/lib/video.js",
+    "./modules/pc8080/lib/serialport.js",
     "./modules/pc8080/lib/debugger.js",
     "./modules/pc8080/lib/state.js",
     "./modules/pc8080/lib/computer.js",

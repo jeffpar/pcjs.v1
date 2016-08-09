@@ -9,7 +9,8 @@
 	<rom id="romF" addr="0x1000" size="0x0800" file="/devices/pc8080/rom/invaders/INVADERS-F.json"/>
 	<rom id="romE" addr="0x1800" size="0x0800" file="/devices/pc8080/rom/invaders/INVADERS-E.json"/>
 	<ram id="ram"  addr="0x2000" size="0x0400"/>
-	<video id="video" screenWidth="896" screenHeight="1024" bufferRotate="-90" smoothing="false" bufferAddr="0x2400" bufferCols="256" bufferRows="224" bufferBits="1" bufferLeft="0" interruptRate="120" padding="8px">
+	<video id="video" screenWidth="896" screenHeight="1024" bufferRotate="-90" smoothing="false" bufferFormat="si1978"
+		   bufferAddr="0x2400" bufferCols="256" bufferRows="224" bufferBits="1" bufferLeft="0" interruptRate="120" padding="8px">
 		<menu>
 			<title>224x256 Screen (Rotated)</title>
 			<control type="container" pos="right">
@@ -18,5 +19,5 @@
 		</menu>
 	</video>
 	<chipset id="chipset" model="SI1978"/>
-	<keyboard id="keyboard"/>
+	<keyboard id="keyboard" model="SI1978"/>
 </machine>
