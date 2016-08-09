@@ -167,6 +167,9 @@ pre a, code a {
     padding-bottom: 1em;
     padding-right: 1em; */
 }
+.common-main blockquote {
+    text-align: justify;
+}
 .common-image-gallery {
     margin: 0 auto;
     text-align: center;
