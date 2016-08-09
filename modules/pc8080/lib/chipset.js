@@ -386,6 +386,7 @@ ChipSet.prototype.initBus = function(cmp, bus, cpu, dbg)
     this.cpu = cpu;
     this.dbg = dbg;
     this.cmp = cmp;
+    this.kbd = cmp.getMachineComponent("Keyboard");
     bus.addPortInputTable(this, this.config.portsInput);
     bus.addPortOutputTable(this, this.config.portsOutput);
 };
@@ -852,6 +853,10 @@ ChipSet.prototype.inVT100FlagsBuffer = function(port, addrFrom)
     if (this.bNVROut) {
         b |= ChipSet.VT100.FLAGS_BUFFER.NVR_DATA;
     }
+    b &= ~ChipSet.VT100.FLAGS_BUFFER.KBD_XMIT;
+    if (this.kbd && !this.kbd.checkBusy()) {
+        b |= ChipSet.VT100.FLAGS_BUFFER.KBD_XMIT;
+    }
     this.bFlagsBuffer = b;
     this.printMessageIO(port, null, addrFrom, "FLAGS.BUFFER", b);
     return b;
@@ -887,6 +892,10 @@ ChipSet.prototype.outVT100NVRLatch = function(port, b, addrFrom)
 
 /**
  * outVT100DC012(port, b, addrFrom)
+ *
+ * TODO: Consider whether we should disable any interrupts (eg, vertical retrace) until the
+ * this port is initialized at runtime.  We initialize it ourselves at start-up, but our initial
+ * value is just a guess.
  *
  * @this {ChipSet}
  * @param {number} port (0xA2)

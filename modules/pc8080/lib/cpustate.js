@@ -939,6 +939,7 @@ CPUState.prototype.checkINTR = function()
 {
     if ((this.intFlags & CPUDef.INTFLAG.INTR) && this.getIF()) {
         var bRST = CPUDef.OPCODE.RST0 | ((this.intFlags & CPUDef.INTFLAG.INTL) << 3);
+        this.intFlags &= ~CPUDef.INTFLAG.HALT;
         this.clearINTR();
         this.clearIF();
         this.aOps[bRST].call(this);
@@ -1096,16 +1097,30 @@ CPUState.prototype.stepCPU = function(nMinCycles)
 
     do {
         if (this.intFlags) {
-            if (this.checkINTR()) {
-                if (!nMinCycles) {
-                    this.assert(DEBUGGER);  // nMinCycles of zero should be generated ONLY by the Debugger
-                    if (DEBUGGER) {
-                        this.println("interrupt dispatched");
-                        break;
-                    }
-                }
+            /*
+             * We no longer call checkINTR() if the Debugger is single-stepping; you'll have to let the
+             * CPU run with a "g" (or a "p" on a call instruction) if you want interrupts to be processed.
+             */
+            if (nMinCycles) {
+                /*
+                 * NOTE: If checkINTR() returns true, it also clears INTFLAG.HALT, so we don't have to worry
+                 * about the INTFLAG.HALT code below triggering.
+                 */
+                this.checkINTR();
+                /*
+                 * If the Debugger is running, consider some new notification mechanism(s) regarding interrupt
+                 * dispatches; the following code no longer applies, due to changes above.
+                 *
+                 *      if (!nMinCycles && this.checkINTR()) {
+                 *          this.assert(DEBUGGER);  // nMinCycles of zero should be generated ONLY by the Debugger
+                 *          if (DEBUGGER) {
+                 *              this.println("interrupt dispatched");
+                 *              break;
+                 *          }
+                 *      }
+                 */
             }
-            else if (this.intFlags & CPUDef.INTFLAG.HALT) {
+            if (this.intFlags & CPUDef.INTFLAG.HALT) {
                 /*
                  * As discussed in opHLT(), the CPU is never REALLY halted by a HLT instruction; instead,
                  * opHLT() sets CPUDef.INTFLAG.HALT, signalling to us that we're free to end the current burst

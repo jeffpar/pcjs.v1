@@ -4818,7 +4818,7 @@ X2065	equ	2065h
 X2067	equ	2067h
 X2068	equ	2068h		; Keys flag buffer
 X2069	equ	2069h
-X206a	equ	206ah
+X206a	equ	206ah		; Start of the "three place New Key Address Buffer"
 X206e	equ	206eh
 X2072	equ	2072h
 X2073	equ	2073h
