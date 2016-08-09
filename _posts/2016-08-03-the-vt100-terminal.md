@@ -7,11 +7,11 @@ machines:
   - type: pc8080
     id: vt100
     debugger: true
-    config: /devices/pc8080/machine/vt100/machine.xml
+    config: /devices/pc8080/machine/vt100/debugger/machine.xml
 ---
 
 Summer has been filled with distractions, but I've finally begun making headway on a
-[DEC VT100 Terminal](/devices/pc8080/machine/vt100/) simulation.
+[DEC VT100 Terminal](/devices/pc8080/machine/vt100/debugger/) simulation.
 
 Unlike other VT100 emulators, this isn't simply an emulation of VT100 protocols.  It's a simulation of the VT100's
 8080 CPU, running the original [VT100 Firmware](/devices/pc8080/rom/vt100/) inside the [PC8080](/modules/pc8080/)
@@ -22,12 +22,13 @@ displays most of the VT100 font variations, built on-the-fly from the original V
 respond to the firmware's commands.  When you start the simulation, it briefly displays a "WAIT" message as it processes the
 VT100's Non-Volatile RAM (NVR), and then it spins, awaiting further stimulus.
 
-The initial goal for the simulation is to provide a virtual serial terminal that can communicate with other PCjs machines
-and provide a realistic serial terminal experience, all from the comfort of your web browser.
+The initial goal for the simulation is to provide a virtual terminal that can communicate with other PCjs machines
+and provide a realistic serial communication experience, all from the comfort of your web browser.
 
 In the interim, there's still a lot of debugging to do, because while DEC's Technical Manuals were excellent, they were
 not comprehensive; there are no commented source-code listings, for example, like those that IBM used to provide in their
-early Technical Reference manuals.
+early Technical Reference manuals.  Check out the [VT100 Debugger Configuration](/devices/pc8080/machine/vt100/debugger/)
+for additional information about VT100 internals and links to other technical resources.
 
 {% include machine.html id="vt100" %}
 
