@@ -42,6 +42,10 @@ if (NODE) {
 /**
  * Keyboard(parmsKbd)
  *
+ * The Keyboard component has the following component-specific (parmsKbd) properties:
+ *
+ *      model:  eg, "VT100" (should be a member of Keyboard.MODELS)
+ *
  * @constructor
  * @extends Component
  * @param {Object} parmsKbd
@@ -50,26 +54,20 @@ function Keyboard(parmsKbd)
 {
     Component.call(this, "Keyboard", parmsKbd, Keyboard, Messages.KEYBOARD);
 
+    var model = parmsKbd['model'];
+
+    if (model && !Keyboard.MODELS[model]) {
+        Component.notice("Unrecognized Keyboard model: " + model);
+    }
+
+    this.config = Keyboard.MODELS[model] || {};
+
     this.reset();
 
     this.setReady();
 }
 
 Component.subclass(Keyboard);
-
-Keyboard.VT100 = {
-    STATUS: {
-        PORT:       0x82,               // write-only
-        LED4:       0x01,
-        LED3:       0x02,
-        LED2:       0x04,
-        LED1:       0x08,
-        LOCKED:     0x10,
-        ONLINE:     0x20,
-        START:      0x40,
-        CLICK:      0x80
-    }
-};
 
 /**
  * Alphanumeric and other common (printable) ASCII codes.
@@ -104,8 +102,7 @@ Keyboard.ASCII = {
  * keyCodes for most common ASCII keys can simply use the appropriate ASCII code above.
  *
  * Most of these represent non-ASCII keys (eg, the LEFT arrow key), yet for some reason, browsers defined
- * them using ASCII codes (eg, the LEFT arrow key uses the ASCII code for '%' or 37).  This conflict is
- * discussed further in the definition of CLICKCODE below.
+ * them using ASCII codes (eg, the LEFT arrow key uses the ASCII code for '%' or 37).
  *
  * @enum {number}
  */
@@ -118,7 +115,7 @@ Keyboard.KEYCODE = {
     /* 0x11 */ CTRL:        17,
     /* 0x12 */ ALT:         18,
     /* 0x13 */ PAUSE:       19,         // PAUSE/BREAK
-    /* 0x14 */ CAPS_LOCK:   20,
+    /* 0x14 */ CAPSLOCK:    20,
     /* 0x1B */ ESC:         27,
     /* 0x20 */ SPACE:       32,
     /* 0x21 */ PGUP:        33,
@@ -153,21 +150,31 @@ Keyboard.KEYCODE = {
     /* 0x5C */ FF_BSLASH:   92,
     /* 0x5D */ RCMD:        93,         // aka MENU
     /* 0x5D */ FF_RBRACK:   93,
-    /* 0x60 */ NUM_INS:     96,         // 0
+    /* 0x60 */ NUM_0:       96,
+    /* 0x60 */ NUM_INS:     96,
     /* 0x60 */ FF_BQUOTE:   96,
-    /* 0x61 */ NUM_END:     97,         // 1
-    /* 0x62 */ NUM_DOWN:    98,         // 2
-    /* 0x63 */ NUM_PGDN:    99,         // 3
-    /* 0x64 */ NUM_LEFT:    100,        // 4
-    /* 0x65 */ NUM_CENTER:  101,        // 5
-    /* 0x66 */ NUM_RIGHT:   102,        // 6
-    /* 0x67 */ NUM_HOME:    103,        // 7
-    /* 0x68 */ NUM_UP:      104,        // 8
-    /* 0x69 */ NUM_PGUP:    105,        // 9
+    /* 0x61 */ NUM_1:       97,
+    /* 0x61 */ NUM_END:     97,
+    /* 0x62 */ NUM_2:       98,
+    /* 0x62 */ NUM_DOWN:    98,
+    /* 0x63 */ NUM_3:       99,
+    /* 0x63 */ NUM_PGDN:    99,
+    /* 0x64 */ NUM_4:       100,
+    /* 0x64 */ NUM_LEFT:    100,
+    /* 0x65 */ NUM_5:       101,
+    /* 0x65 */ NUM_CENTER:  101,
+    /* 0x66 */ NUM_6:       102,
+    /* 0x66 */ NUM_RIGHT:   102,
+    /* 0x67 */ NUM_7:       103,
+    /* 0x67 */ NUM_HOME:    103,
+    /* 0x68 */ NUM_8:       104,
+    /* 0x68 */ NUM_UP:      104,
+    /* 0x69 */ NUM_9:       105,
+    /* 0x69 */ NUM_PGUP:    105,
     /* 0x6A */ NUM_MUL:     106,
     /* 0x6B */ NUM_ADD:     107,
     /* 0x6D */ NUM_SUB:     109,
-    /* 0x6E */ NUM_DEL:     110,        // .
+    /* 0x6E */ NUM_DEL:     110,        // aka PERIOD
     /* 0x6F */ NUM_DIV:     111,
     /* 0x70 */ F1:          112,
     /* 0x71 */ F2:          113,
@@ -218,6 +225,11 @@ Keyboard.KEYCODE = {
 };
 
 /*
+ * Check the event object's 'location' property for a non-zero value for the following ONRIGHT keys.
+ */
+Keyboard.KEYCODE.NUM_CR = Keyboard.KEYCODE.CR + Keyboard.KEYCODE.ONRIGHT;
+
+/*
  * Maps "stupid" keyCodes to their "non-stupid" counterparts
  */
 Keyboard.STUPID_KEYCODES = {};
@@ -234,20 +246,6 @@ Keyboard.STUPID_KEYCODES[Keyboard.KEYCODE.RBRACK]  = Keyboard.ASCII[']'];   // 2
 Keyboard.STUPID_KEYCODES[Keyboard.KEYCODE.QUOTE]   = Keyboard.ASCII["'"];   // 222 -> 39
 Keyboard.STUPID_KEYCODES[Keyboard.KEYCODE.FF_DASH] = Keyboard.ASCII['-'];
 
-/**
- * Maps SOFTCODE (string) to KEYCODE (number).
- *
- * @enum {number}
- */
-Keyboard.SOFTCODES = {
-    '1p':       Keyboard.KEYCODE.ONE,
-    '2p':       Keyboard.KEYCODE.TWO,
-    'coin':     Keyboard.KEYCODE.THREE,
-    'left':     Keyboard.KEYCODE.LEFT,
-    'right':    Keyboard.KEYCODE.RIGHT,
-    'fire':     Keyboard.KEYCODE.SPACE
-};
-
 Keyboard.MINPRESSTIME = 100;            // 100ms
 
 /**
@@ -261,7 +259,148 @@ Keyboard.ALTCODES[Keyboard.ASCII.A] = Keyboard.KEYCODE.LEFT;
 Keyboard.ALTCODES[Keyboard.ASCII.D] = Keyboard.KEYCODE.RIGHT;
 Keyboard.ALTCODES[Keyboard.ASCII.L] = Keyboard.KEYCODE.SPACE;
 
-Keyboard.LEDSTATES = {
+/*
+ * Supported configurations
+ */
+Keyboard.SI1978 = {
+    MODEL:          1978.1,
+    SOFTCODES: {
+        '1p':       Keyboard.KEYCODE.ONE,
+        '2p':       Keyboard.KEYCODE.TWO,
+        'coin':     Keyboard.KEYCODE.THREE,
+        'left':     Keyboard.KEYCODE.LEFT,
+        'right':    Keyboard.KEYCODE.RIGHT,
+        'fire':     Keyboard.KEYCODE.SPACE
+    }
+};
+
+Keyboard.VT100 = {
+    MODEL:          100.0,
+    SOFTCODES: {},
+    /*
+     * Reading port 0x82 returns a key address from the VT100 keyboard's UART data output.
+     *
+     * Every time a keyboard scan is initiated (by setting the START bit of the status byte),
+     * an internal address index is reset to zero, and an interrupt is generated for each entry
+     * in the aKeysPressed array, along with a final interrupt for KEYLAST.
+     */
+    ADDRESS: {
+        PORT:       0x82
+    },
+    /*
+     * Writing port 0x82 updates the VT100's keyboard status byte via the keyboard's UART data input.
+     */
+    STATUS: {
+        PORT:       0x82,               // write-only
+        LED4:       0x01,
+        LED3:       0x02,
+        LED2:       0x04,
+        LED1:       0x08,
+        LOCKED:     0x10,
+        ONLINE:     0x20,
+        LEDS:       0x3F,               // all LEDs
+        START:      0x40,               // set to initiate a scan
+        /*
+         * From p. 4-38 of the VT100 Technical Manual (July 1982):
+         *
+         *      A bit (CLICK) in the keyboard status word controls the bell....  When a single status word contains
+         *      the bell bit, flip-flop E3 toggles and turns on E1, generating a click. If the bell bit is set for
+         *      many words in succession, the UART latch holds the data output constant..., allowing the circuit to
+         *      produce an 800 hertz tone. Bell is generated by setting the bell bit for 0.25 seconds.  Each cycle of
+         *      the tone is at a reduced amplitude compared with the single keyclick....  The overall effect of the
+         *      tone burst on the ear is that of a beep.
+         */
+        CLICK:      0x80,
+        INIT:       0x00
+    },
+    KEYLAST:        0x7F
+};
+
+Keyboard.VT100.KEYMAP = {};
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.DEL]     =   0x03;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII.P]         =   0x05;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII.O]         =   0x06;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII.Y]         =   0x07;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII.T]         =   0x08;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII.W]         =   0x09;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII.Q]         =   0x0A;
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.RIGHT]   =   0x10;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII[']']]      =   0x14;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII['[']]      =   0x15;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII.I]         =   0x16;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII.U]         =   0x17;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII.R]         =   0x18;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII.E]         =   0x19;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII['1']]      =   0x1A;
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.LEFT]    =   0x20;
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.DOWN]    =   0x22;
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.PAUSE]   =   0x23;   // aka BREAK
+Keyboard.VT100.KEYMAP[Keyboard.ASCII['`']]      =   0x24;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII['-']]      =   0x25;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII['9']]      =   0x26;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII['7']]      =   0x27;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII['4']]      =   0x28;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII['3']]      =   0x29;
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.ESC]     =   0x2A;
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.UP]      =   0x30;
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.F3]      =   0x31;   // aka PF3
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.F1]      =   0x32;   // aka PF1
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.BS]      =   0x33;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII['=']]      =   0x34;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII['0']]      =   0x35;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII['8']]      =   0x36;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII['6']]      =   0x37;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII['5']]      =   0x38;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII['2']]      =   0x39;
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.TAB]     =   0x3A;
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.NUM_7]   =   0x40;
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.F4]      =   0x41;   // aka PF4
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.F2]      =   0x42;   // aka PF2
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.NUM_0]   =   0x43;
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.LF]      =   0x44;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII['\\']]     =   0x45;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII.L]         =   0x46;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII.K]         =   0x47;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII.G]         =   0x48;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII.F]         =   0x49;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII.A]         =   0x4A;
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.NUM_8]   =   0x50;
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.NUM_CR]  =   0x51;
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.NUM_2]   =   0x52;
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.NUM_1]   =   0x53;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII["'"]]      =   0x55;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII[';']]      =   0x56;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII.J]         =   0x57;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII.H]         =   0x58;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII.D]         =   0x59;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII.S]         =   0x5A;
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.NUM_DEL] =   0x60;   // keypad period
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.F8]      =   0x61;   // aka keypad comma
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.NUM_5]   =   0x62;
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.NUM_4]   =   0x63;
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.CR]      =   0x64;   // TODO: Figure out why the Technical Manual lists CR at both 0x04 and 0x64
+Keyboard.VT100.KEYMAP[Keyboard.ASCII['.']]      =   0x65;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII[',']]      =   0x66;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII.N]         =   0x67;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII.B]         =   0x68;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII.X]         =   0x69;
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.F9]      =   0x6A;   // aka NO SCROLL
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.NUM_9]   =   0x70;
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.NUM_3]   =   0x71;
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.NUM_6]   =   0x72;
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.NUM_SUB] =   0x73;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII['/']]      =   0x75;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII.M]         =   0x76;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII[' ']]      =   0x77;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII.V]         =   0x78;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII.C]         =   0x79;
+Keyboard.VT100.KEYMAP[Keyboard.ASCII.Z]         =   0x7A;
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.F10]     =   0x7B;   // aka SET-UP
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.CTRL]    =   0x7C;
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.SHIFT]   =   0x7D;   // either shift key (doesn't matter)
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.CAPSLOCK]=   0x7E;
+
+Keyboard.VT100.LEDCODES = {
     'l4':       Keyboard.VT100.STATUS.LED4,
     'l3':       Keyboard.VT100.STATUS.LED3,
     'l2':       Keyboard.VT100.STATUS.LED2,
@@ -269,6 +408,14 @@ Keyboard.LEDSTATES = {
     'locked':   Keyboard.VT100.STATUS.LOCKED,
     'online':   Keyboard.VT100.STATUS.ONLINE,
     'local':   ~Keyboard.VT100.STATUS.ONLINE
+};
+
+/*
+ * Supported models and their configurations
+ */
+Keyboard.MODELS = {
+    "SI1978":       Keyboard.SI1978,
+    "VT100":        Keyboard.VT100
 };
 
 /**
@@ -306,7 +453,7 @@ Keyboard.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
 
     if (this.bindings[id] === undefined) {
 
-        if (sHTMLType == "led" && Keyboard.LEDSTATES[sBinding]) {
+        if (sHTMLType == "led" && this.config.LEDCODES && this.config.LEDCODES[sBinding]) {
             this.bindings[id] = control;
             return true;
         }
@@ -330,7 +477,7 @@ Keyboard.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
             return true;
 
         default:
-            if (Keyboard.SOFTCODES[sBinding] !== undefined) {
+            if (this.config.SOFTCODES && this.config.SOFTCODES[sBinding] !== undefined) {
                 this.bindings[id] = control;
                 var fnDown = function(kbd, sSoftCode) {
                     return function onMouseOrTouchDownKeyboard(event) {
@@ -368,18 +515,11 @@ Keyboard.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
  */
 Keyboard.prototype.initBus = function(cmp, bus, cpu, dbg)
 {
+    this.cpu = cpu;
     this.dbg = dbg;     // NOTE: The "dbg" property must be set for the message functions to work
     this.chipset = cmp.getMachineComponent("ChipSet");
-    this.model = this.chipset.model;
-    switch(this.model) {
-    case ChipSet.VT100.MODEL:
-        this.config = Keyboard.VT100;
-        break;
-    }
-    if (this.config) {
-        bus.addPortInputTable(this, this.config.portsInput);
-        bus.addPortOutputTable(this, this.config.portsOutput);
-    }
+    bus.addPortInputTable(this, this.config.portsInput);
+    bus.addPortOutputTable(this, this.config.portsOutput);
 };
 
 /**
@@ -415,9 +555,10 @@ Keyboard.prototype.powerDown = function(fSave, fShutdown)
     return fSave? this.save() : true;
 };
 
-Keyboard.VT100.init = [
+Keyboard.VT100.INIT = [
     [
-        0
+        Keyboard.VT100.STATUS.INIT,
+        0                               // iKeyNext
     ]
 ];
 
@@ -429,16 +570,18 @@ Keyboard.VT100.init = [
 Keyboard.prototype.reset = function()
 {
     /*
-     * As keyDown events are encountered, a corresponding "softcode" property in keysPressed
-     * is set to the timestamp of the keyDown event.  When the corresponding keyUp event occurs,
-     * we look at the elapsed time: if it is less than MINPRESSTIME, then we move the key
-     * to keysToRelease and set a timeout handler to release the key later; otherwise, we process
-     * the keyUp event immediately.
+     * As keyDown events are encountered, a corresponding "softCode" is looked up.  If one is found,
+     * then an entry for the key is added to the aKeysPressed array.  Each entry contains:
+     *
+     *      softCode:           number or string representing the key pressed
+     *      msDown:             timestamp of the most recent "down" event
+     *      fAutoRelease:       true to auto-release the key after MINPRESSTIME (set when "up" occurs too quickly)
+     *
+     * When the key is finally released (or auto-released), its entry is removed from the array.
      */
-    this.keysPressed = {};
-    this.keysToRelease = {};
+    this.aKeysPressed = [];
 
-    if (this.config && !this.restore(this.config.init)) {
+    if (this.config.INIT && !this.restore(this.config.INIT)) {
         this.notice("reset error");
     }
 };
@@ -454,11 +597,11 @@ Keyboard.prototype.reset = function()
 Keyboard.prototype.save = function()
 {
     var state = new State(this);
-    switch(this.model) {
-    case ChipSet.SI1978.MODEL:
+    switch(this.config.MODEL) {
+    case Keyboard.SI1978.MODEL:
         break;
-    case ChipSet.VT100.MODEL:
-        state.set(0, [this.bLEDs]);
+    case Keyboard.VT100.MODEL:
+        state.set(0, [this.bVT100Status]);
         break;
     }
     return state.data();
@@ -477,12 +620,14 @@ Keyboard.prototype.restore = function(data)
 {
     var a;
     if (data && (a = data[0]) && a.length) {
-        switch(this.model) {
-        case ChipSet.SI1978.MODEL:
+        switch(this.config.MODEL) {
+        case Keyboard.SI1978.MODEL:
             return true;
-        case ChipSet.VT100.MODEL:
-            this.bLEDs = a[0];
-            this.updateLEDs();
+
+        case Keyboard.VT100.MODEL:
+            this.bVT100Status = a[0];
+            this.updateLEDs(this.bVT100Status & Keyboard.VT100.STATUS.LEDS);
+            this.iKeyNext = a[1];
             return true;
         }
     }
@@ -505,20 +650,22 @@ Keyboard.prototype.setLED = function(control, f)
 };
 
 /**
- * updateLEDs()
+ * updateLEDs(bLEDs)
  *
  * @this {Keyboard}
+ * @param {number} bLEDs
  */
-Keyboard.prototype.updateLEDs = function()
+Keyboard.prototype.updateLEDs = function(bLEDs)
 {
-    for (var sBinding in Keyboard.LEDSTATES) {
+    this.bLEDs = bLEDs;
+    for (var sBinding in this.config.LEDCODES) {
         var id = "led-" + sBinding;
         var control = this.bindings[id];
         if (control) {
-            var bitLED = Keyboard.LEDSTATES[sBinding];
-            var fOn = !!(this.bLEDs & bitLED);
+            var bitLED = this.config.LEDCODES[sBinding];
+            var fOn = !!(bLEDs & bitLED);
             if (bitLED & (bitLED-1)) {
-                fOn = !(this.bLEDs & ~bitLED);
+                fOn = !(bLEDs & ~bitLED);
             }
             this.setLED(control, fOn);
         }
@@ -528,14 +675,19 @@ Keyboard.prototype.updateLEDs = function()
 /**
  * getSoftCode(keyCode)
  *
+ * Returns a number if the keyCode exists in the KEYMAP, or a string if the keyCode has a soft-code string.
+ *
  * @this {Keyboard}
- * @return {string|null}
+ * @return {string|number|null}
  */
 Keyboard.prototype.getSoftCode = function(keyCode)
 {
     keyCode = Keyboard.ALTCODES[keyCode] || keyCode;
-    for (var sSoftCode in Keyboard.SOFTCODES) {
-        if (Keyboard.SOFTCODES[sSoftCode] === keyCode) {
+    if (this.config.KEYMAP[keyCode]) {
+        return keyCode;
+    }
+    for (var sSoftCode in this.config.SOFTCODES) {
+        if (this.config.SOFTCODES[sSoftCode] === keyCode) {
             return sSoftCode;
         }
     }
@@ -554,10 +706,10 @@ Keyboard.prototype.onKeyDown = function(event, fDown)
 {
     var fPass = true;
     var keyCode = event.keyCode;
-    var sSoftCode = this.getSoftCode(keyCode);
+    var softCode = this.getSoftCode(keyCode);
 
-    if (sSoftCode) {
-        fPass = this.onSoftKeyDown(sSoftCode, fDown);
+    if (softCode) {
+        fPass = this.onSoftKeyDown(softCode, fDown);
         event.preventDefault();
     }
 
@@ -569,36 +721,65 @@ Keyboard.prototype.onKeyDown = function(event, fDown)
 };
 
 /**
- * onSoftKeyDown(sSoftCode, fDown)
+ * indexOfSoftKey(softCode)
  *
  * @this {Keyboard}
- * @param {string} sSoftCode
+ * @param {number|string} softCode
+ * @return {number} index of softCode in aKeysPressed, or -1 if not found
+ */
+Keyboard.prototype.indexOfSoftKey = function(softCode)
+{
+    var i;
+    for (i = 0; i < this.aKeysPressed.length; i++) {
+        if (this.aKeysPressed[i].softCode == softCode) return i;
+    }
+    return -1;
+};
+
+/**
+ * onSoftKeyDown(softCode, fDown)
+ *
+ * @this {Keyboard}
+ * @param {number|string} softCode
  * @param {boolean} fDown is true for a down event, false for up
  * @return {boolean} true to pass the event along, false to consume it
  */
-Keyboard.prototype.onSoftKeyDown = function(sSoftCode, fDown)
+Keyboard.prototype.onSoftKeyDown = function(softCode, fDown)
 {
+    var i = this.indexOfSoftKey(softCode);
     if (fDown) {
-        // this.println(sSoftCode + " down");
-        this.keysPressed[sSoftCode] = Date.now();
-        delete this.keysToRelease[sSoftCode];
-    } else {
-        // this.println(sSoftCode + " up");
-        var msDown = this.keysPressed[sSoftCode];
-        if (msDown) {
-            var msElapsed = Date.now() - msDown;
-            if (msElapsed < Keyboard.MINPRESSTIME) {
-                // this.println(sSoftCode + " released after only " + msElapsed + "ms");
-                this.keysToRelease[sSoftCode] = msDown;
-                this.checkSoftKeysToRelease();
-                return true;
+        // this.println(softCode + " down");
+        if (i < 0) {
+            this.aKeysPressed.push({
+                softCode: softCode,
+                msDown: Date.now(),
+                fAutoRelease: false
+            });
+        } else {
+            this.aKeysPressed[i].msDown = Date.now();
+            this.aKeysPressed[i].fAutoRelease = false;
+        }
+    } else if (i >= 0) {
+        // this.println(softCode + " up");
+        if (!this.aKeysPressed[i].fAutoRelease) {
+            var msDown = this.aKeysPressed[i].msDown;
+            if (msDown) {
+                var msElapsed = Date.now() - msDown;
+                if (msElapsed < Keyboard.MINPRESSTIME) {
+                    // this.println(softCode + " released after only " + msElapsed + "ms");
+                    this.aKeysPressed[i].fAutoRelease = true;
+                    this.checkSoftKeysToRelease();
+                    return true;
+                }
             }
         }
-        delete this.keysPressed[sSoftCode];
+        this.aKeysPressed.splice(i, 1);
+    } else {
+        // this.println(softCode + " up with no down?");
     }
 
     if (this.chipset) {
-        switch(sSoftCode) {
+        switch(softCode) {
         case '1p':
             this.chipset.updateStatus1(ChipSet.SI1978.STATUS1.P1, fDown);
             break;
@@ -634,26 +815,55 @@ Keyboard.prototype.onSoftKeyDown = function(sSoftCode, fDown)
  */
 Keyboard.prototype.checkSoftKeysToRelease = function()
 {
+    var i = 0;
     var msDelayMin = -1;
-    var asSoftCodes = Object.keys(this.keysToRelease);
-    for (var i = 0; i < asSoftCodes.length; i++) {
-        var sSoftCode = asSoftCodes[i];
-        var msDown = this.keysToRelease[sSoftCode];
-        var msElapsed = Date.now() - msDown;
-        var msDelay = Keyboard.MINPRESSTIME - msElapsed;
-        if (msDelay > 0) {
-            if (msDelayMin < 0 || msDelayMin > msDelay) {
-                msDelayMin = msDelay;
+    while (i < this.aKeysPressed.length) {
+        if (this.aKeysPressed[i].fAutoRelease) {
+            var softCode = this.aKeysPressed[i].softCode;
+            var msDown = this.aKeysPressed[i].msDown;
+            var msElapsed = Date.now() - msDown;
+            var msDelay = Keyboard.MINPRESSTIME - msElapsed;
+            if (msDelay > 0) {
+                if (msDelayMin < 0 || msDelayMin > msDelay) {
+                    msDelayMin = msDelay;
+                }
+            } else {
+                /*
+                 * Because the key is already in the auto-release state, this next call guarantees that the
+                 * key will be removed from the array; a consequence of that removal, however, is that we must
+                 * reset our array index to zero.
+                 */
+                this.onSoftKeyDown(softCode, false);
+                i = 0;
+                continue;
             }
-        } else {
-            delete this.keysToRelease[sSoftCode];
-            this.onSoftKeyDown(sSoftCode, false);
         }
+        i++;
     }
     if (msDelayMin >= 0) {
         var kbd = this;
         setTimeout(function() { kbd.checkSoftKeysToRelease(); }, msDelayMin);
     }
+};
+
+/**
+ * inVT100UARTAddress(port, addrFrom)
+ *
+ * @this {Keyboard}
+ * @param {number} port (0x82)
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to write the specified port)
+ * @return {number} simulated port value
+ */
+Keyboard.prototype.inVT100UARTAddress = function(port, addrFrom)
+{
+    var b = 0;
+    if (this.iKeyNext >= 0 && this.iKeyNext < this.aKeysPressed.length - 1) {
+        var softCode = this.aKeysPressed[this.iKeyNext++];
+        b = Keyboard.VT100.KEYMAP[softCode];
+    }
+    if (!b) b = Keyboard.VT100.KEYLAST;
+    this.printMessageIO(port, null, addrFrom, "KBDUART.ADDRESS", b);
+    return b;
 };
 
 /**
@@ -666,15 +876,20 @@ Keyboard.prototype.checkSoftKeysToRelease = function()
  */
 Keyboard.prototype.outVT100UARTStatus = function(port, b, addrFrom)
 {
-    this.printMessageIO(port, b, addrFrom, "KBDUART.STATUS", null, true);
-    this.bLEDs = b;
-    this.updateLEDs();
+    this.printMessageIO(port, b, addrFrom, "KBDUART.STATUS");
+    this.bVT100Status = b;
+    this.updateLEDs(b & Keyboard.VT100.STATUS.LEDS);
+    if (b & Keyboard.VT100.STATUS.START) {
+        this.iKeyNext = 0;
+        this.cpu.requestINTR(1);
+    }
 };
 
 /*
  * Port notification tables
  */
 Keyboard.VT100.portsInput = {
+    0x82: Keyboard.prototype.inVT100UARTAddress
 };
 
 Keyboard.VT100.portsOutput = {

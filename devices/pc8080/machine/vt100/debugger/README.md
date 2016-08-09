@@ -34,11 +34,42 @@ See [DEC VT100 ROMs](/devices/pc8080/rom/vt100/) for more information about the 
 (aka [phooky](https://github.com/phooky) aka Adam Mayer) further explains VT100 memory usage:
 
 	Start   End     Size    Description
-	0x0000  0x1fff  8K      Basic ROM
-	0x2000  0x2012  18B     Blank lines for refresh (6 x 3B)
-	0x2012  0x204f  61B     Stack area (grows down from 0x204e)
-	0x204f  0x22d0  641B    Scratch Pad/Setup Area(?)
-	0x22d0  0x2c00  2352B   Screen RAM
+	0x0000  0x1fff    8K    Basic ROM
+	0x2000  0x2012    18    Blank lines for refresh (6 x 3B)
+	0x2012  0x204f    61    Stack area (grows down from 0x204e)
+	0x204f  0x22d0   641    Scratch Pad/Setup Area(?)
+	0x22d0  0x2c00  2352    Screen RAM
+	
+	Note: 0x22bb through 0x22d0 appear to be unused
+
+In his [Platform Notes](https://github.com/phooky/VT100-Hax/blob/master/Platform%20Notes.md), he further describes
+portions of the "Scratch Pad" area:
+
+	Start   End     Size    Description
+	0x2052  0x2054     2    0x2004 during init?
+	0x2068  0x2069     1    Keys flag buffer
+	0x206a  0x206e     3    New keys pressed buffer
+	0x20f6  0x20f8     2    0x22d0 during init?
+	0x2014  0x2015     1    0xff during init? [Typo or reference to a byte in the Stack area? -JP]
+
+and the "Setup" area:
+
+	Start   End     Size    Description
+	0x217b            22    Answerback message (20chars+2delim)
+	0x2191            17    Tabs (bit encoding) (first bit always set)
+	0x21a2             1    80/132 col mode (00 = 80 col, 01 = 132 col)
+	0x21a3             1    intensity (00 = brightest, 0x1f = dimmest)
+	0x21a4             1    Mode byte for PUSART
+	0x21a5             1    Online/local
+	0x21a6             1    Switches 1
+	0x21a7             1    Switches 2
+	0x21a8             1    Switches 3
+	0x21a9             1    Switches 4
+	0x21aa             1    Switches 5
+	0x21ab             1    TX baud rate
+	0x21ac             1    RX baud rate
+	0x21ad             1    parity 
+	0x21ae             1    nvr checksum
 
 VT100 I/O Ports
 ---------------
@@ -78,11 +109,11 @@ information about the Flags buffer (port 0x42):
 
 	Bit Active? Description
 	7   H       KBD Transmit Buffer Empty
-	6   H       LBA 7(?) (It's a pin on the backplane connector...) - used to clock NVR - line buffer address
+	6   H       NVR CLOCK, driven by LBA7 (line buffer address)
 	5   H       NVR DATA
 	4   L       EVEN FIELD (comes out of the video timing generator)
 	3   H       OPTION PRESENT (terminal output option???)
-	2   L       GRAPHICS FLAG (is VT52 graphics card present) [I think he meant VT125 -JP]
+	2   L       GRAPHICS FLAG (is VT125 graphics card present)
 	1   L       ADVANCED VIDEO (is AVO present)
 	0   H       XMIT FLAG
 
@@ -126,6 +157,65 @@ According to the Technical Manual, a physical VT100 screen measures 12 inches di
 measure 2.0mm x 3.35mm (in 132-column mode, they measure 1.3mm x 3.35mm), which suggests that the text area of the screen is
 roughly 160mm x 80mm, implying a screen aspect ratio of 2.0.  However, after visually comparing the Technical Manual's SET-UP
 screenshots to our test screens, 1.67 appears to be closer to reality than 2.0.  I'll revisit this issue at a later date.  
+
+VT100 Initialization Process
+----------------------------
+
+From "Power-Up and Self-Test", section 4.2.8, p. 4-19, of the VT100 Technical Manual (July 1982):
+
+> When power is first applied to the terminal controller board, the reset circuit in the 8224 holds the microprocessor
+in a halt state. Within a second, after the voltages stabilize in the power supply, the RC network at the reset input
+allows tlhe input voltage to rise to the switching threshold of a Schmitt trigger. Then the reset is released with the
+8080 program counter set to 0. The low 64 bytes of program are reserved for the eight interrupt service routines which
+can be addressed by the restart instruction (see previous section). The low 8 start the power-up routine by disabling
+the interrupts, setting up the stack pointer, and then going immediately into the self-test routines.
+	
+> Assuming there are no hard logic failures present on the board, the microprocessor attempts to perform a confidence
+check of the controller. Some failures are considered fatal and will stop the machine; other failures limit its operation
+but win not prevent its use. Fatal failures are indicated by the LEDs on the keyboard, while nonfatal errors are indicated
+as a single character on the screen.
+	
+> The microprocessor first sends the number of the first ROM to the LEDs on the keyboard. Then it calculates a checksum
+of the contents of the first 2K of program. (Since firmware is treated as four 2K blocks of code, later VT100s with one
+8K X 8 ROM chip operate the same way but any block failure requires replacement of the one chip). At the time of ROM
+preparation, a special byte was included within each block to make the checksum equal zero if there are no errors. If
+there is an error, the microprocessor halts and the LEDs indicate the current ROM at the time of failure. Otherwise, the
+LEDs are incremented to show the next ROM number and the process continues.
+
+> The next part of the test is writing and reading the RAM. Every bit in the RAM is written with a 0 and a 1 and read each
+time. If the advanced video option is present (as indicated by the Option Present flag), its RAM is tested immediately
+after the main RAM. In the main RAM a failure halts the machine. Failure of a bit in the advanced video option RAM is
+indicated on the screen and the process continues. In another termnnal, the VT52, one bad bit in the screen RAM means there
+is one location that may not contain right character. This can be annoying to the user but does not affect the rest of the
+screen. If one bit is bad in a VT100 line address, the entire screen below the affected line can become garbled and unsuable.
+A bad bit in the scratch area could disable communication with the host. So this confidence check ensures that any RAM
+failure is detected immediately.
+
+> The next test checks the nonvola1tile RAM by reading it. A checksum is calculated and compared with the value stored the
+last time the NVR was written during a save. A bad NVR does not stop the VT100 because the SET-UP values can always be
+reestablished from the keyboard at power-up. The NVR test is also the normal time when the terminal gets its auto SET-UP
+readings from the NVR. Time is saved because reading the NVR is the most time-consuming part of both the self-test and the
+auto SET-UP. If the NVR fails, the bell sounds several times to inform the operator, and then default settings stored in
+the ROM allow the terminal to work. The operator must then manually reset any parameters that differ from the default values.
+
+> To test the keyboard, the microprocessor commands the keyboard to scan once, lights all the LEDs, for about a half second,
+and sounds the bell. It waits for the scan to finish and then looks for the last key address 7FH at the keyboard UART.
+If the test fails, the terminal remains on-line, making it a receive-only (RO) terminal.
+
+> This is the end of testing.
+
+> Once the NVR data is in the scratch area in RAM, the microprocessor uses that data to program the hardware. All operating
+parameters that were last saved (see NVR) are recalled and the terminal is set to match them. Finally the cursor appears
+at column 1, line 1, and the microprocessor enters its background routine, ready for operation.
+
+Some additional observations:
+
+- During the NVR test, a "WAIT" message is displayed in the top-left corner of the screen.
+- Following the NVR test, code at 0x00D2 loops for 0xFFF (4095) times with the CLICK bit (0x80) set in the keyboard STATUS
+port (0x82), generating a "bell" (beep), presumably because the NVR test failed.  And one would expect the NVR checksum test
+to fail, since we initialize all NVR words with the freshly-erased value of 0x3fff.  Also, at some point before arriving at the
+preceding loop, the "WAIT" message has been cleared.
+
 
 Additional VT100 Resources
 --------------------------

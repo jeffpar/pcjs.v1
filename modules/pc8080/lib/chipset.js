@@ -59,16 +59,11 @@ function ChipSet(parmsChipSet)
 
     var model = parmsChipSet['model'];
 
-    /*
-     * this.model is a numeric version of the 'model' string; when comparing this.model to "base"
-     * model numbers, you should generally compare (this.model|0) to the target value, which truncates it.
-     */
     if (model && !ChipSet.MODELS[model]) {
         Component.notice("Unrecognized ChipSet model: " + model);
     }
 
-    this.config = ChipSet.MODELS[model] || ChipSet.SI1978;
-    this.model = this.config.MODEL;
+    this.config = ChipSet.MODELS[model] || {};
 
     this.bSwitches = this.parseDIPSwitches(parmsChipSet['swDIP']);
 
@@ -105,6 +100,12 @@ function ChipSet(parmsChipSet)
 
 Component.subclass(ChipSet);
 
+/*
+ * NOTE: The STATUS1 port could have been handled entirely by the Keyboard component, but it was just as easy
+ * to create a simple ChipSet interface, updateStatus1(), that the Keyboard calls whenever it wants to simulate a
+ * button press or release.  It's a six-of-one, half-a-dozen-of-another choice, since technically, Space Invaders
+ * doesn't have a keyboard.
+ */
 ChipSet.SI1978 = {
     MODEL:          1978.1,
     STATUS0: {                          // NOTE: STATUS0 not used by the SI1978 ROMs; refer to STATUS1 instead
@@ -173,14 +174,39 @@ ChipSet.SI1978 = {
  *
  *      <cpu id="cpu8080" model="8080" cycles="2764800"/>
  *
- * where 2764800 = 24883200 / 9. Beyond that, we don't really care about that particular 8224.  I only mention it
- * because knowing the CPU frequency is helpful for simulating some of the other circuits below that we DO care about.
+ * where 2764800 = 24883200 / 9.  You need to know this because we rely on the CPU frequency for simulating some
+ * of the other VT100 circuits.
+ *
+ * For reference, here is a list of all the VT100 I/O ports, from /devices/pc8080/machine/vt100/debugger/README.md,
+ * which in turn comes from p. 4-17 of the VT100 Technical Manual (July 1982):
+ *
+ *      READ OR WRITE
+ *      00H     PUSART data bus
+ *      01H     PUSART command port
+ *
+ *      WRITE ONLY (Decoded with I/O WR L)
+ *      02H     Baud rate generator
+ *      42H     Brightness D/A latch
+ *      62H     NVR latch
+ *      82H     Keyboard UART data input [used to update the Keyboard Status Byte -JP]
+ *      A2H     Video processor DC012
+ *      C2H     Video processor DC011
+ *      E2H     Graphics port
+ *
+ *      READ ONLY (Decoded with I/O RD L)
+ *      22H     Modem buffer
+ *      42H     Flags buffer
+ *      82H     Keyboard UART data output
+ *
+ * Most of these are handled by the ChipSet component, since it exists as sort of a "catch-all" component,
+ * but some are more appropriately handled by other components; eg, port 0x82 is handled by the Keyboard component,
+ * so it's defined there instead of here.
  */
 ChipSet.VT100 = {
     MODEL:          100.0,
     FLAGS_BUFFER: {
         PORT:       0x42,               // read-only
-        XMIT:       0x01,               // active if SET
+        XMIT:       0x01,               // PUSART transmit buffer empty if SET
         NO_AVO:     0x02,               // AVO present if CLEAR
         NO_GFX:     0x04,               // VT125 graphics board present if CLEAR
         OPTION:     0x08,               // OPTION present if SET
@@ -207,13 +233,65 @@ ChipSet.VT100 = {
             STANDBY:        0x7
         },
         WORDMASK:   0x3fff              // NVR words are 14-bit
+        /*
+         * The Technical Manual, p. 4-18, also notes that "Early VT100s can disable the receiver interrupt by
+         * programming D4 in the NVR latch. However, this is never used by the VT100."
+         */
     },
+    /*
+     * DC012 is referred to as a Control Chip.
+     *
+     * As p. 4-67 (117) of the VT100 Technical Manual (July 1982) explains:
+     *
+     *      The DCO12 performs three main functions.
+     *
+     *       1. Scan count generation. This involves two counters, a multiplexer to switch between the counters,
+     *          double-height logic, scroll and line attribute latches, and various logic controlling switching between
+     *          the two counters. This is the biggest part of the chip. It includes all scrolling, double-height logic,
+     *          and feeds into the underline and hold request circuits.
+     *
+     *       2. Generation of HOLD REQUEST. This uses information from the scan counters and the scrolling logic to
+     *          decide when to generate HOLD REQUEST.
+     *
+     *       3. Video modifications: dot stretching, blanking, addition of attributes to video outputs, and multiple
+     *          intensity levels.
+     *
+     *      The input decoder accepts a 4-bit command from the microprocessor when VID WR 2 L is asserted. Table 4-6-2
+     *      lists the commands.
+     *
+     *      D3 D2 D1 D0     Function
+     *      -- -- -- --     --------
+     *      0  0  0  0      Load low order scroll latch = 00
+     *      0  0  0  1      Load low order scroll latch = 01
+     *      0  0  1  0      Load low order scroll latch = 10
+     *      0  0  1  1      Load low order scroll latch = 11
+     *
+     *      0  1  0  0      Load high order scroll latch = 00
+     *      0  1  0  1      Load high order scroll latch = 01
+     *      0  1  1  0      Load high order scroll latch = 10
+     *      0  1  1  1      Load high order scroll latch = 11 (not used)
+     *
+     *      1  0  0  0      Toggle blink flip-flop
+     *      1  0  0  1      Clear vertical frequency interrupt
+     *
+     *      1  0  1  0      Set reverse field on
+     *      1  0  1  1      Set reverse field off
+     *
+     *      1  1  0  0      Set basic attribute to underline*
+     *      1  1  0  1      Set basic attribute to reverse video*
+     *      1  1  1  0      Reserved for future specification*
+     *      1  1  1  1      Reserved for future specification*
+     *
+     *      *These functions also clear blink flip-flop.
+     */
     DC012: {                            // generates scan counts for the Video Processor
         PORT:       0xA2,               // write-only
         INIT:       0x00                // for lack of a better guess
     },
     /*
-     * As p. 4-55 (105) of the July 1982 Technical Manual explains:
+     * DC011 is referred to as a Timing Chip.
+     *
+     * As p. 4-55 (105) of the VT100 Technical Manual (July 1982) explains:
      *
      *      The DCO11 is a custom designed bipolar circuit that provides most of the timing signals required by the
      *      video processor. Internal counters divide the output of a 24.0734 MHz oscillator (located elsewhere on the
@@ -246,7 +324,7 @@ ChipSet.VT100 = {
 };
 
 /*
- * Supported model strings
+ * Supported models and their configurations
  */
 ChipSet.MODELS = {
     "SI1978":       ChipSet.SI1978,
@@ -345,7 +423,7 @@ ChipSet.prototype.powerDown = function(fSave, fShutdown)
     return fSave? this.save() : true;
 };
 
-ChipSet.SI1978.init = [
+ChipSet.SI1978.INIT = [
     [
         ChipSet.SI1978.STATUS0.ALWAYS_SET,
         ChipSet.SI1978.STATUS1.ALWAYS_SET,
@@ -354,7 +432,7 @@ ChipSet.SI1978.init = [
     ]
 ];
 
-ChipSet.VT100.init = [
+ChipSet.VT100.INIT = [
     [
         ChipSet.VT100.BRIGHTNESS.INIT,
         ChipSet.VT100.FLAGS_BUFFER.NO_AVO | ChipSet.VT100.FLAGS_BUFFER.NO_GFX,
@@ -362,7 +440,19 @@ ChipSet.VT100.init = [
         ChipSet.VT100.DC011.INIT
     ],
     [
-        0, 0, 0, 0, new Array(100)
+        0, 0, 0, 0,
+        [
+            0x2e80, 0x2e80, 0x2e80, 0x2e80, 0x2e80, 0x2e80, 0x2e80, 0x2e80, 0x2e80, 0x2e80,
+            0x2e80, 0x2e80, 0x2e80, 0x2e80, 0x2e80, 0x2e80, 0x2e80, 0x2e80, 0x2e80, 0x2e80,
+            0x2e80, 0x2e80, 0x2e80, 0x2e80, 0x2e80, 0x2e80, 0x2e80, 0x2e80, 0x2e80, 0x2e80,
+            0x2e80, 0x2e80, 0x2e80, 0x2e80, 0x2e80, 0x2e80, 0x2e80, 0x2e80, 0x2e80, 0x2e00,
+            0x2e08, 0x2e8e, 0x2e00, 0x2e50, 0x2e30, 0x2e40, 0x2e20, 0x2e00, 0x2ee0, 0x2ee0,
+            0x2e51, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
+            0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
+            0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
+            0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
+            0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000
+        ]
     ]
 ];
 
@@ -373,7 +463,7 @@ ChipSet.VT100.init = [
  */
 ChipSet.prototype.reset = function()
 {
-    if (!this.restore(this.config.init)) {
+    if (this.config.INIT && !this.restore(this.config.INIT)) {
         this.notice("reset error");
     }
 };
@@ -389,7 +479,7 @@ ChipSet.prototype.reset = function()
 ChipSet.prototype.save = function()
 {
     var state = new State(this);
-    switch(this.model) {
+    switch(this.config.MODEL) {
     case ChipSet.SI1978.MODEL:
         state.set(0, [this.bStatus0, this.bStatus1, this.bStatus2, this.wShiftData, this.bShiftCount, this.bSound1, this.bSound2]);
         break;
@@ -414,7 +504,7 @@ ChipSet.prototype.restore = function(data)
 {
     var a;
     if (data && (a = data[0]) && a.length) {
-        switch(this.model) {
+        switch(this.config.MODEL) {
         case ChipSet.SI1978.MODEL:
             this.bStatus0 = a[0];
             this.bStatus1 = a[1];
@@ -426,9 +516,9 @@ ChipSet.prototype.restore = function(data)
             return true;
         case ChipSet.VT100.MODEL:
             this.bBrightness = a[0];
-            this.bFlagsBuffer = a[2];
-            this.bDC012 = a[3];
-            this.bDC011 = a[4];
+            this.bFlagsBuffer = a[1];
+            this.bDC012 = a[2];
+            this.bDC011 = a[3];
             a = data[1];
             this.dNVRAddr = a[0];               // 20-bit address
             this.wNVRData = a[1];               // 14-bit word
@@ -716,7 +806,7 @@ ChipSet.prototype.doNVRCommand = function()
         addr = this.getNVRAddr();
         data = this.aNVRWords[addr];
         /*
-         * Since we don't explicitly initialize aNVRWords[], we pretend any uninitialized words contains WORDMASK.
+         * If we don't explicitly initialize aNVRWords[], pretend any uninitialized words contains WORDMASK.
          */
         if (data == null) data = ChipSet.VT100.NVR.WORDMASK;
         this.wNVRData = data;
@@ -763,7 +853,7 @@ ChipSet.prototype.inVT100FlagsBuffer = function(port, addrFrom)
         b |= ChipSet.VT100.FLAGS_BUFFER.NVR_DATA;
     }
     this.bFlagsBuffer = b;
-    this.printMessageIO(port, null, addrFrom, "FLAGS.BUFFER", b, true);
+    this.printMessageIO(port, null, addrFrom, "FLAGS.BUFFER", b);
     return b;
 };
 
@@ -777,7 +867,7 @@ ChipSet.prototype.inVT100FlagsBuffer = function(port, addrFrom)
  */
 ChipSet.prototype.outVT100Brightness = function(port, b, addrFrom)
 {
-    this.printMessageIO(port, b, addrFrom, "BRIGHTNESS", null, true);
+    this.printMessageIO(port, b, addrFrom, "BRIGHTNESS");
     this.bBrightness = b;
 };
 
@@ -791,7 +881,7 @@ ChipSet.prototype.outVT100Brightness = function(port, b, addrFrom)
  */
 ChipSet.prototype.outVT100NVRLatch = function(port, b, addrFrom)
 {
-    this.printMessageIO(port, b, addrFrom, "NVR.LATCH", null, true);
+    this.printMessageIO(port, b, addrFrom, "NVR.LATCH");
     this.bNVRLatch = b;
 };
 
@@ -805,7 +895,7 @@ ChipSet.prototype.outVT100NVRLatch = function(port, b, addrFrom)
  */
 ChipSet.prototype.outVT100DC012 = function(port, b, addrFrom)
 {
-    this.printMessageIO(port, b, addrFrom, "DC012", null, true);
+    this.printMessageIO(port, b, addrFrom, "DC012");
     this.bDC012 = b;
 };
 
@@ -819,7 +909,7 @@ ChipSet.prototype.outVT100DC012 = function(port, b, addrFrom)
  */
 ChipSet.prototype.outVT100DC011 = function(port, b, addrFrom)
 {
-    this.printMessageIO(port, b, addrFrom, "DC011", null, true);
+    this.printMessageIO(port, b, addrFrom, "DC011");
     this.bDC011 = b;
 };
 

@@ -109,7 +109,7 @@ function Video(parmsVideo, canvas, context, textarea, container)
     this.fUseRAM = parmsVideo['bufferRAM'];
 
     var sFormat = parmsVideo['bufferFormat'];
-    this.nFormat = sFormat && Video.FORMATS[sFormat.toLowerCase()] || Video.FORMAT.UNKNOWN;
+    this.nFormat = sFormat && Video.FORMATS[sFormat.toUpperCase()] || Video.FORMAT.UNKNOWN;
 
     this.nColsBuffer = parmsVideo['bufferCols'];
     this.nRowsBuffer = parmsVideo['bufferRows'];
@@ -117,6 +117,7 @@ function Video(parmsVideo, canvas, context, textarea, container)
     this.cxCellDefault = this.cxCell = parmsVideo['cellWidth'] || 1;
     this.cyCellDefault = this.cyCell = parmsVideo['cellHeight'] || 1;
     this.abFontData = null;
+    this.fDotStretcher = false;
 
     this.nBitsPerPixel = parmsVideo['bufferBits'] || 1;
     this.iBitFirstPixel = parmsVideo['bufferLeft'] || 0;
@@ -262,7 +263,8 @@ Video.FORMAT = {
 };
 
 Video.FORMATS = {
-    "vt100":        Video.FORMAT.VT100
+    "SI1978":       Video.FORMAT.SI1978,
+    "VT100":        Video.FORMAT.VT100
 };
 
 
@@ -395,11 +397,6 @@ Video.prototype.initBus = function(cmp, bus, cpu, dbg)
     this.bus = bus;
     this.cpu = cpu;
     this.dbg = dbg;
-    this.chipset = cmp.getMachineComponent("ChipSet");
-
-    if (!this.nFormat && this.chipset && this.chipset.model == ChipSet.SI1978.MODEL) {
-        this.nFormat = Video.FORMAT.SI1978;
-    }
 
     /*
      * Allocate the frame buffer (as needed) along with all other buffers.
@@ -495,6 +492,7 @@ Video.prototype.createFonts = function(abFontData)
      * We retain abFontData in case we have to rebuild the fonts (eg, when we switch from 80 to 132 columns)
      */
     this.abFontData = abFontData;
+    this.fDotStretcher = (this.nFormat == Video.FORMAT.VT100);
     this.aFonts[Video.VT100.FONT.NORML] = [
         this.createFontVariation(this.cxCell, this.cyCell),
         this.createFontVariation(this.cxCell, this.cyCell, this.fUnderline)
@@ -561,6 +559,7 @@ Video.prototype.createFontVariation = function(cxCell, cyCell, fUnderline)
             var offFontData = iChar * nFontBytesPerChar + ((nFontByteOffset + y) & (nFontBytesPerChar - 1));
             var bits = (fUnderline && y == 8? 0xff : this.abFontData[offFontData]);
             for (var nRows = 0; nRows < (cyCell / this.cyCell); nRows++) {
+                var bitPrev = 0;
                 for (var x = 0, xDst = x; x < this.cxCell; x++) {
                     /*
                      * While x goes from 0 to cxCell-1, obviously we will run out of bits after x is 7;
@@ -568,12 +567,14 @@ Video.prototype.createFontVariation = function(cxCell, cyCell, fUnderline)
                      * (so that line-drawing characters seamlessly connect), we ensure that the effective
                      * shift count remains stuck at 7 once it reaches 7.
                      */
-                    var bit = bits & (0x80 >> (x > 7? 7 : x));
+                    var bitReal = bits & (0x80 >> (x > 7? 7 : x));
+                    var bit = (this.fDotStretcher && !bitReal && bitPrev)? bitPrev : bitReal;
                     for (var nCols = 0; nCols < (cxCell / this.cxCell); nCols++) {
                         if (fReverse) bit = !bit;
                         this.setPixel(imageChar, xDst, yDst, bit? 1 : 0);
                         xDst++;
                     }
+                    bitPrev = bitReal;
                 }
                 yDst++;
             }
@@ -1059,19 +1060,26 @@ Video.prototype.updateScreen = function(n)
     if (n >= 0) {
 
         if (this.rateInterrupt) {
-            if (!(n & 1)) {
-                /*
-                 * On even updates, call cpu.requestINTR(1), and also update our copy of the screen.
-                 */
-                this.cpu.requestINTR(1);
+            /*
+             * TODO: Incorporate these hard-coded interrupt vector numbers into configuration blocks.
+             */
+            if (this.rateInterrupt == 120) {
+                if (!(n & 1)) {
+                    /*
+                     * On even updates, call cpu.requestINTR(1), and also update our copy of the screen.
+                     */
+                    this.cpu.requestINTR(1);
+                } else {
+                    /*
+                     * On odd updates, call cpu.requestINTR(2), but do NOT update our copy of the screen, because
+                     * the machine has presumably only updated the top half of the frame buffer at this point; it will
+                     * update the bottom half of the frame buffer after acknowledging this interrupt.
+                     */
+                    this.cpu.requestINTR(2);
+                    fUpdate = false;
+                }
             } else {
-                /*
-                 * On odd updates, call cpu.requestINTR(2), but do NOT update our copy of the screen, because
-                 * the machine has presumably only updated the top half of the frame buffer at this point; it will
-                 * update the bottom half of the frame buffer after acknowledging this interrupt.
-                 */
-                this.cpu.requestINTR(2);
-                fUpdate = false;
+                this.cpu.requestINTR(4);
             }
         }
 
