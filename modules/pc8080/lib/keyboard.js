@@ -264,6 +264,8 @@ Keyboard.ALTCODES[Keyboard.ASCII.L] = Keyboard.KEYCODE.SPACE;
  */
 Keyboard.SI1978 = {
     MODEL:          1978.1,
+    KEYMAP: {},
+    LEDCODES: {},
     SOFTCODES: {
         '1p':       Keyboard.KEYCODE.ONE,
         '2p':       Keyboard.KEYCODE.TWO,
@@ -276,6 +278,8 @@ Keyboard.SI1978 = {
 
 Keyboard.VT100 = {
     MODEL:          100.0,
+    KEYMAP: {},
+    LEDCODES: {},
     SOFTCODES: {},
     /*
      * Reading port 0x82 returns a key address from the VT100 keyboard's UART data output.
@@ -316,7 +320,6 @@ Keyboard.VT100 = {
     KEYLAST:        0x7F
 };
 
-Keyboard.VT100.KEYMAP = {};
 Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.DEL]     =   0x03;
 Keyboard.VT100.KEYMAP[Keyboard.ASCII.P]         =   0x05;
 Keyboard.VT100.KEYMAP[Keyboard.ASCII.O]         =   0x06;
@@ -453,7 +456,7 @@ Keyboard.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
 
     if (this.bindings[id] === undefined) {
 
-        if (sHTMLType == "led" && this.config.LEDCODES && this.config.LEDCODES[sBinding]) {
+        if (sHTMLType == "led" && this.config.LEDCODES[sBinding]) {
             this.bindings[id] = control;
             return true;
         }
