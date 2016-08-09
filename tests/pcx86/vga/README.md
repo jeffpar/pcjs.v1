@@ -1,7 +1,9 @@
 ---
 layout: page
 title: VGA "Black Book" Tests
-permalink: /tests/pc/vga/
+permalink: /tests/pcx86/vga/
+redirect_from:
+  - /tests/pc/vga/
 machines:
   - type: pcx86
     id: deskpro386
@@ -11,7 +13,7 @@ machines:
       A:
         path: /disks/pcx86/dos/compaq/3.31/COMPAQ-DOS331-DISK2.json
       B:
-        path: /tests/pc/vga/VGABIN.json
+        path: /tests/pcx86/vga/VGABIN.json
 ---
 
 VGA "Black Book" Tests
@@ -100,7 +102,7 @@ Also, I've updated the PCjs [Library](/disks/pcx86/library.xml) disk collection 
 built from the sources in this directory:
 
 ```xml
-<disk path="/tests/pc/vga/VGABIN.json">VGA Tests (Black Book)</disk>
+<disk path="/tests/pcx86/vga/VGABIN.json">VGA Tests (Black Book)</disk>
 ```
 
 The "VGA Tests (Black Book)" disk image (VGABIN) was built with this command:
@@ -113,7 +115,7 @@ the files in that directory (including any subdirectories) every time that disk 
 burden on the server, it's best to do this only when running PCjs from a local PCjs web server.
 
 ```xml
-<disk path="/tests/pc/vga/">VGA Tests (Black Book)</disk>
+<disk path="/tests/pcx86/vga/">VGA Tests (Black Book)</disk>
 ```
 
 One advantage of using [DiskDump](/modules/diskdump/) is that it automatically converts linefeeds in known text files

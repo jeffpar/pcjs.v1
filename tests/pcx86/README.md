@@ -1,11 +1,13 @@
 ---
 layout: page
 title: PC Test Resources
-permalink: /tests/pc/
+permalink: /tests/pcx86/
+redirect_from:
+  - /tests/pc/
 ---
 
-PC Test Resources
----
+PCx86 Test Resources
+--------------------
 
 * [80386 Tests](80386/)
 * [Trace Utility](trace/)
