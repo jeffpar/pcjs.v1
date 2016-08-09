@@ -457,9 +457,9 @@ module.exports = function(grunt) {
             "manifests": {
                 files: [
                     {
-                        cwd: "disks/pc/",
+                        cwd: "disks/pcx86/",
                         src: ["library.xml", "samples.xml", "private/library.xml"],
-                        dest: "disks/pc/compiled/",
+                        dest: "disks/pcx86/compiled/",
                         expand: true
                     }
                 ],
