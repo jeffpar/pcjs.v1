@@ -516,9 +516,9 @@ ChipSet.prototype.restore = function(data)
             return true;
         case ChipSet.VT100.MODEL:
             this.bBrightness = a[0];
-            this.bFlagsBuffer = a[2];
-            this.bDC012 = a[3];
-            this.bDC011 = a[4];
+            this.bFlagsBuffer = a[1];
+            this.bDC012 = a[2];
+            this.bDC011 = a[3];
             a = data[1];
             this.dNVRAddr = a[0];               // 20-bit address
             this.wNVRData = a[1];               // 14-bit word
