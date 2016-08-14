@@ -22,7 +22,6 @@ maps modern keys to VT100 key addresses, and most of the mappings are 1-1.  Func
 - F2: PF2
 - F3: PF3
 - F4: PF4
-- F5: KEYPAD COMMA
 - F6: BREAK
 - F7: LINE FEED
 - F8: NO SCROLL
@@ -222,12 +221,10 @@ at column 1, line 1, and the microprocessor enters its background routine, ready
 
 Some additional observations:
 
-- During the NVR test, a "WAIT" message is displayed in the top-left corner of the screen.
-- Following the NVR test, code at 0x00D2 loops for 0xFFF (4095) times with the CLICK bit (0x80) set in the keyboard STATUS
-port (0x82), generating a "bell" (beep), presumably because the NVR test failed.  And one would expect the NVR checksum test
-to fail, since we initialize all NVR words with the freshly-erased value of 0x3fff.  Also, at some point before arriving at the
-preceding loop, the "WAIT" message has been cleared.
-
+- During the NVR test, a "WAIT" message is displayed in the top-left corner of the screen; it's cleared after the test.
+- Following the NVR test, if an error was detected, code at 0x00D2 loops for 0xFFF (4095) times with the CLICK bit (0x80)
+set in the keyboard STATUS port (0x82), generating a "bell" (beep).  The NVR checksum test used to fail when we initialized all
+NVR words with the freshly-erased value of 0x3fff; now we initialize them with canned values (see ChipSet.VT100.INIT).
 
 Additional VT100 Resources
 --------------------------
