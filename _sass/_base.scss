@@ -111,6 +111,10 @@ blockquote {
     color: $grey-color;
     border-left: 4px solid $grey-color-light;
     padding-left: $spacing-unit / 2;
+    padding-right: $spacing-unit / 2;
+    padding-bottom: $spacing-unit / 2;
+    margin-bottom: 0;
+    text-align: justify;
     /* font-size: 18px; */
     /* letter-spacing: -1px; */
     /* font-style: italic; */
