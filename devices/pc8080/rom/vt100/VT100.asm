@@ -13,6 +13,21 @@
 ;
 stack_top	equ	204eh
 scratch_start	equ	204eh
+
+;
+;   The "Keys Flag Byte/Buffer" at 0x2068 contains the following bits:
+;
+;	0-1	Key counter
+;	  2	Key counter overflow bit
+;	  3	Setup
+;	  4	Control
+;	  5	Shift
+;	  6	Caps Lock
+;	  7	Last Key
+;
+key_flags	equ	2068h	; "Keys Flag Buffer"
+key_buffer	equ	206ah	; start of the "three place New Key Address Buffer"
+
 cursor_countdn	equ	212dh
 cursor_visible	equ	21bah
 
@@ -21,7 +36,7 @@ cursor_visible	equ	21bah
 ;
 	org	0
 	di
-	lxi	sp,stack_top		; SP = 0x204e
+	lxi	sp,stack_top	; SP = 0x204e
 	jmp	reset
 ;
 ; Interrupt vector 0x1 for Keyboard
@@ -196,7 +211,7 @@ X00e0:	out	82h
 ; Done "beeping" now
 ;
 X00e8:	out	82h		; A = 0, so all LEDs off now
-	lda	X2068
+	lda	key_flags
 	ora	a
 	jm	X00f5
 	mov	a,d
@@ -207,18 +222,18 @@ X00f5:	push	d
 ;
 ; The next call issues the following:
 ;
-;   03A2 CD8103     CALL    0381                        ;stack=204A
-;   0B67 CDAD10     CALL    10AD                        ;stack=2048
+;   03A2 CD8103     CALL    0381	;stack=204A
+;   0B67 CDAD10     CALL    10AD        ;stack=2048
 ;   chipset.outPort(0x00A2,DC012,0x00) at 10BD
 ;   chipset.outPort(0x00A2,DC012,0x04) at 10C1
 ;
 ; and then:
 ;
-;   03A2 CD8103     CALL    0381                        ;stack=204A
-;   0B67 CDAD10     CALL    10AD                        ;stack=2048
-;   10C9 CDAA0F     CALL    0FAA                        ;stack=2046
-;   0FB6 CC8814     CALLZ   1488                        ;stack=2040
-;   1488 CD9314     CALL    1493                        ;stack=203E
+;   03A2 CD8103     CALL    0381        ;stack=204A
+;   0B67 CDAD10     CALL    10AD        ;stack=2048
+;   10C9 CDAA0F     CALL    0FAA        ;stack=2046
+;   0FB6 CC8814     CALLZ   1488        ;stack=2040
+;   1488 CD9314     CALL    1493        ;stack=203E
 ;   chipset.inPort(0x0042,FLAGS.BUFFER): 0x60 at 1493
 ;
 ; Note that once we're inside 0FAA, that appears to be where we stay.
@@ -229,16 +244,6 @@ X00f5:	push	d
 	jmp	X0875
 ;
 ;   Keyboard interrupt handler
-;
-;   The "Keys Flag Byte/Buffer" at 0x2068 contains the following bits:
-;
-;	0-1	Key counter
-;	  2	Key counter overflow bit
-;	  3	Setup
-;	  4	Control
-;	  5	Shift
-;	  6	Caps Lock
-;	  7	Last Key
 ;
 X00fd:	push	psw
 	in	82h		;; Read from keyboard port
@@ -254,18 +259,18 @@ X00fd:	push	psw
 X010d:	rlc
 	dcr	h
 	jnz	X010d
-	lxi	h,X2068		;; load keys flag addresss
+	lxi	h,key_flags	;; load keys flag addresss
 	ora	m		;; or in control bit
 	mov	m,a		;; store again
 	jmp	X012d		;; jump to end to interrupt
 
-X011a:	lxi	h,X2068		;; load keys flag address
+X011a:	lxi	h,key_flags	;; load keys flag address
 	mvi	a,7
 	ana	m		;; load key counter
 	cpi	4		;; if overflow.. (>3 keys)
 	jp	X012d		;; discard keypress and end interrupt
 	inr	m		;; otherwise increment key counter
-	lxi	h,X206a		;; load key address buffer?
+	lxi	h,key_buffer	;; load key address buffer
 	call	X13de		;; add key counter to address buffer
 	mov	m,b		;; save key to address buffer
 X012d:	pop	b
@@ -352,7 +357,7 @@ X01c3:	lxi	h,X0815
 	rnz
 	call	X0853
 	lxi	b,X020e
-	lxi	h,X2068
+	lxi	h,key_flags
 	mov	a,m
 	ani	10h
 	jnz	X0900
@@ -480,7 +485,7 @@ X02c0:	call	X0a15		;; 0x2140 = 0xe605
 	lxi	h,2000h		;; HL = 0x2000
 	lxi	d,X02d9		;; DE = 0x02d9
 	mvi	b,12h		;; B = 18
-	call	memmov		;; copy 18 bytes from 0x02d9 to 0x2000
+	call	memmove		;; copy 18 bytes from 0x02d9 to 0x2000
 	lxi	h,X3000		;; HL = 0x3000
 	lxi	d,X1000		;; DE = 0x1000
 	mvi	b,0ffh		;; B = 0xFF
@@ -573,15 +578,15 @@ X0381:	lda	X21a2
 	jz	X0b63
 	jmp	X0b77
 ;;
-;;  Performs a memmove(HL,DE,B)
+;; memmove(0x038b): Move B bytes at DE to HL
 ;;
-memmov:
-X038b:	ldax	d		;; Load memory at DE into accumulator
+memmove:
+	ldax	d		;; Load memory at DE into accumulator
 	mov	m,a		;; Store it at HL
 	inx	h		;; HL++
 	inx	d		;; DE++
 	dcr	b		;; B--
-	jnz	X038b		;; until B is zero
+	jnz	memmove		;; until B is zero
 	ret
 
 X0394:	lda	X21a5
@@ -988,7 +993,7 @@ X06a7:	mov	a,d
 	ora	a
 	ret
 
-X06aa:	lda	X2068		; A <- [Keys flag buffer]
+X06aa:	lda	key_flags	; A <- [Keys flag buffer]
 	mov	e,a
 	ani	80h		; bit 7 set?
 	rz			; return if not
@@ -1012,7 +1017,7 @@ X06ca:	mov	a,m
 	push	h
 	push	b
 	mvi	b,3
-	lxi	h,X206a
+	lxi	h,key_buffer
 X06d6:	cmp	m
 	jz	X06df
 	inx	h
@@ -1082,7 +1087,7 @@ X0743:	pop	h
 X0747:	mov	a,c
 	cpi	4
 	rp
-	lxi	b,X206a
+	lxi	b,key_buffer
 X074e:	lxi	h,X206e
 X0751:	mov	a,m
 	ora	a
@@ -1216,7 +1221,7 @@ X0838:	lda	X2150
 	mvi	a,0e1h
 	sta	X2072
 X0841:	xra	a
-	lxi	h,X2068
+	lxi	h,key_flags
 	mov	d,m
 	mov	m,a
 	inx	h
@@ -1889,7 +1894,7 @@ X0c62:	lxi	h,X05ad
 	lxi	h,X20f8
 	lxi	d,X2102
 X0c77:	mvi	b,0bh
-	call	memmov
+	call	memmove
 	jmp	X1636
 
 	lxi	h,X0c8a
@@ -3634,7 +3639,7 @@ X17ac:	mov	a,c
 X17be:	lxi	d,X17ec		;; DE = 0x17ec
 	mvi	b,7		;; B = 7
 	lxi	h,X21cc		;; HL = 0x21cc
-	call	memmov		;; Initialize 0x21cc to Wait message
+	call	memmove		;; Initialize 0x21cc to Wait message
 	lxi	h,Xcc71		;; HL = 0xcc71
 	shld	X2004		;; retarget screen ram to display wait message
 	ret
@@ -3647,7 +3652,7 @@ X17d5:	mvi	m,80h
 	jnz	X17d5
 	lxi	d,X17f3		;; DE = 0x17f3
 	mvi	b,0bh		;; B = 11
-	call	memmov		;; store
+	call	memmove		;; store
 	mvi	c,1
 	mvi	a,30h
 	sta	X2078
@@ -4431,7 +4436,7 @@ X1d56:	db	20h
 	db	20h
 X1d61:	mov	c,a
 	mvi	b,0bh
-	call	memmov
+	call	memmove
 	mov	a,c
 	rrc
 	rrc
@@ -4446,7 +4451,7 @@ X1d61:	mov	c,a
 	dad	b
 	xchg
 	mvi	b,5
-	jmp	memmov
+	jmp	memmove
 
 X1d7c:	db	20h
 	db	20h
@@ -4833,9 +4838,7 @@ X205b	equ	205bh
 X205c	equ	205ch
 X2065	equ	2065h
 X2067	equ	2067h
-X2068	equ	2068h		; Keys flag buffer
 X2069	equ	2069h
-X206a	equ	206ah		; Start of the "three place New Key Address Buffer"
 X206e	equ	206eh
 X2072	equ	2072h
 X2073	equ	2073h
