@@ -19,8 +19,20 @@ CPU emulator, along with other key components that the CPU interacts with to dri
 
 It's not operational yet, but as you can see below, pieces are starting to fall into place, including a test screen that
 displays most of the VT100 font variations, built on-the-fly from the original VT100 Character Generator ROM, and LEDs that
-respond to the firmware's commands.  When you start the simulation, it briefly displays a "WAIT" message as it processes the
-VT100's Non-Volatile RAM (NVR), and then it spins, awaiting further stimulus.
+respond to the firmware's commands.  When you click "Run" to start the simulation, it briefly displays a "WAIT" message
+as it processes the VT100's Non-Volatile RAM (NVR), and then it spins, awaiting further stimulus.
+
+The VT100 KEYMAP table in [keyboard.js](/modules/pc8080/lib/keyboard.js) maps modern keys to VT100 key addresses,
+and most of the mappings are 1-1.  Function keys are mapped as follows:
+
+- F1: PF1
+- F2: PF2
+- F3: PF3
+- F4: PF4
+- F6: BREAK
+- F7: LINE FEED
+- F8: NO SCROLL
+- F9: SET-UP
 
 The initial goal for the simulation is to provide a virtual terminal that can communicate with other PCjs machines
 and provide a realistic serial communication experience, all from the comfort of your web browser.
