@@ -6,7 +6,7 @@ one of several JavaScript Machines in the [PCjs Project](https://github.com/jeff
 includes:
 
 * [PCx86](/docs/pcx86/), an x86-based IBM PC and PC-compatible emulator
-* [PC8080](/modules/pc8080/), a 8080-based machine emulator (e.g., [Space Invaders](/devices/pc8080/machine/invaders/))
+* [PC8080](/modules/pc8080/), a 8080-based machine emulator (e.g., [Space Invaders](/devices/pc8080/machine/invaders/), [VT100](pc8080/machine/vt100/))
 * [C1Pjs](/docs/c1pjs/), a 6502-based emulation of the Ohio Scientific [Challenger 1P](/devices/c1p/)
 
 All PCjs computer simulations are written entirely in [JavaScript](/modules/).  No Flash, Java or other plugins are
