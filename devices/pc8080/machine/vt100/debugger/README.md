@@ -1,6 +1,6 @@
 ---
 layout: page
-title: DEC VT100 Terminal
+title: DEC VT100 Terminal with Debugger
 permalink: /devices/pc8080/machine/vt100/debugger/
 machines:
   - type: pc8080
@@ -13,10 +13,22 @@ DEC VT100 Terminal with Debugger
 
 The [PC8080](/modules/pc8080/) machine below is configured to simulate a [VT100 Terminal](/devices/pc8080/machine/vt100/)
 with a Control Panel and Debugger.  It is running the original [VT100 Firmware](/devices/pc8080/rom/vt100/) inside the
-[PC8080](/modules/pc8080/) CPU emulator.
+[PC8080](/modules/pc8080/) CPU emulator.  You'll also find assorted [Hardware Notes](#vt100-memory-usage) below.
 
-Click the "Run" button to start the simulation.  You'll also find assorted
-[Hardware Notes](#vt100-memory-usage) below.
+Click the "Run" button to start the simulation.  The VT100 KEYMAP table in [keyboard.js](/modules/pc8080/lib/keyboard.js)
+maps modern keys to VT100 key addresses, and most of the mappings are 1-1.  Function keys are mapped as follows:
+
+- F1: PF1
+- F2: PF2
+- F3: PF3
+- F4: PF4
+- F5: KEYPAD COMMA
+- F6: BREAK
+- F7: LINE FEED
+- F8: NO SCROLL
+- F9: SET-UP
+
+The simulation is not fully operational yet, but it is now possible to access the SET-UP screen.
 
 {% include machine.html id="vt100" %}
 

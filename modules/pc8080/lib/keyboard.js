@@ -109,7 +109,7 @@ Keyboard.ASCII = {
 Keyboard.KEYCODE = {
     /* 0x08 */ BS:          8,
     /* 0x09 */ TAB:         9,
-    /* 0x0A */ LF:          10,
+    /* 0x0A */ LF:          10,         // TODO: Determine if any key actually generates this (I suspect there is none)
     /* 0x0D */ CR:          13,
     /* 0x10 */ SHIFT:       16,
     /* 0x11 */ CTRL:        17,
@@ -249,7 +249,7 @@ Keyboard.STUPID_KEYCODES[Keyboard.KEYCODE.FF_DASH] = Keyboard.ASCII['-'];
 Keyboard.MINPRESSTIME = 100;            // 100ms
 
 /**
- * Alternate keyCode mappings (to support the popular WASD directional mappings)
+ * Alternate keyCode mappings (to support popular "WASD"-style directional-key mappings)
  *
  * TODO: ES6 computed property name support may now be in all mainstream browsers, allowing us to use
  * a simple object literal for this and all other object initializations.
@@ -289,7 +289,8 @@ Keyboard.VT100 = {
      * in the aKeysActive array, along with a final interrupt for KEYLAST.
      */
     ADDRESS: {
-        PORT:       0x82
+        PORT:       0x82,
+        INIT:       0x7F
     },
     /*
      * Writing port 0x82 updates the VT100's keyboard status byte via the keyboard's UART data input.
@@ -376,7 +377,7 @@ Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.NUM_7]   =   0x40;
 Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.F4]      =   0x41;   // aka PF4
 Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.F2]      =   0x42;   // aka PF2
 Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.NUM_0]   =   0x43;
-Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.LF]      =   0x44;
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.F7]      =   0x44;   // aka LINE FEED
 Keyboard.VT100.KEYMAP[Keyboard.ASCII['\\']]     =   0x45;
 Keyboard.VT100.KEYMAP[Keyboard.ASCII['|']]      =   0xC5;
 Keyboard.VT100.KEYMAP[Keyboard.ASCII.L]         =   0x46;
@@ -397,7 +398,7 @@ Keyboard.VT100.KEYMAP[Keyboard.ASCII.H]         =   0x58;
 Keyboard.VT100.KEYMAP[Keyboard.ASCII.D]         =   0x59;
 Keyboard.VT100.KEYMAP[Keyboard.ASCII.S]         =   0x5A;
 Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.NUM_DEL] =   0x60;   // keypad period
-Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.F7]      =   0x61;   // aka KEYPAD COMMA
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.F5]      =   0x61;   // aka KEYPAD COMMA
 Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.NUM_5]   =   0x62;
 Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.NUM_4]   =   0x63;
 Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.CR]      =   0x64;   // TODO: Figure out why the Technical Manual lists CR at both 0x04 and 0x64
@@ -412,7 +413,7 @@ Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.F8]      =   0x6A;   // aka NO SCROLL
 Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.NUM_9]   =   0x70;
 Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.NUM_3]   =   0x71;
 Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.NUM_6]   =   0x72;
-Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.NUM_SUB] =   0x73;
+Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.NUM_SUB] =   0x73;   // aka KEYPAD MINUS
 Keyboard.VT100.KEYMAP[Keyboard.ASCII['/']]      =   0x75;
 Keyboard.VT100.KEYMAP[Keyboard.ASCII['?']]      =   0xF5;
 Keyboard.VT100.KEYMAP[Keyboard.ASCII.M]         =   0x76;
@@ -582,7 +583,8 @@ Keyboard.prototype.powerDown = function(fSave, fShutdown)
 
 Keyboard.VT100.INIT = [
     [
-        Keyboard.VT100.STATUS.INIT,
+        Keyboard.VT100.STATUS.INIT,     // bVT100Status
+        Keyboard.VT100.ADDRESS.INIT,    // bVT100Address
         -1                              // iKeyNext
     ]
 ];
@@ -596,7 +598,7 @@ Keyboard.prototype.reset = function()
 {
     /*
      * As keyDown events are encountered, a corresponding "softCode" is looked up.  If one is found,
-     * then an entry for the key is added to the aKeysActive array.  Each "key" entry contains:
+     * then an entry for the key is added to the aKeysActive array.  Each "key" entry in aKeysActive contains:
      *
      *      softCode:           number or string representing the key pressed
      *      msDown:             timestamp of the most recent "down" event
@@ -626,7 +628,7 @@ Keyboard.prototype.save = function()
     case Keyboard.SI1978.MODEL:
         break;
     case Keyboard.VT100.MODEL:
-        state.set(0, [this.bVT100Status]);
+        state.set(0, [this.bVT100Status, this.bVT100Address, -1]);
         break;
     }
     return state.data();
@@ -652,7 +654,8 @@ Keyboard.prototype.restore = function(data)
         case Keyboard.VT100.MODEL:
             this.bVT100Status = a[0];
             this.updateLEDs(this.bVT100Status & Keyboard.VT100.STATUS.LEDS);
-            this.iKeyNext = a[1];
+            this.bVT100Address = a[1];
+            this.iKeyNext = a[2];
             return true;
         }
     }
@@ -739,7 +742,7 @@ Keyboard.prototype.onKeyDown = function(event, fDown)
     }
 
     if (!COMPILED && this.messageEnabled(Messages.KEYS)) {
-        this.printMessage("onKey" + (fDown? "Down" : "Up") + "(" + keyCode + "): " + (fPass? "true" : "false"), true);
+        this.printMessage("onKey" + (fDown? "Down" : "Up") + "(" + keyCode + "): softCode=" + softCode + ", pass=" + (fPass? "true" : "false"), true);
     }
 
     return fPass;
@@ -888,6 +891,11 @@ Keyboard.prototype.checkBusy = function()
 /**
  * inVT100UARTAddress(port, addrFrom)
  *
+ * We take our cue from iKeyNext.  If it's -1 (default), we simply return the last value latched
+ * in bVT100Address.  Otherwise, if iKeyNext is a valid index into aKeysActive, we look up the key
+ * in the VT100.KEYMAP, latch it, and increment iKeyNext, else we latch Keyboard.VT100.KEYLAST
+ * and set iKeyNext to -1 again.
+ *
  * @this {Keyboard}
  * @param {number} port (0x82)
  * @param {number} [addrFrom] (not defined if the Debugger is trying to write the specified port)
@@ -895,19 +903,24 @@ Keyboard.prototype.checkBusy = function()
  */
 Keyboard.prototype.inVT100UARTAddress = function(port, addrFrom)
 {
-    var b = 0;
-    if (this.iKeyNext >= 0 && this.iKeyNext < this.aKeysActive.length) {
-        var key = this.aKeysActive[this.iKeyNext++];
-        b = Keyboard.VT100.KEYMAP[key.softCode];
-        if (b & 0x80) {
-            /*
-             * TODO: This code is supposed to be accompanied by a SHIFT key; make sure that it is.
-             */
-            b &= 0x7F;
+    var b = this.bVT100Address;
+    if (this.iKeyNext >= 0) {
+        if (this.iKeyNext < this.aKeysActive.length) {
+            var key = this.aKeysActive[this.iKeyNext++];
+            b = Keyboard.VT100.KEYMAP[key.softCode];
+            if (b & 0x80) {
+                /*
+                 * TODO: This code is supposed to be accompanied by a SHIFT key; make sure that it is.
+                 */
+                b &= 0x7F;
+            }
+        } else {
+            this.iKeyNext = -1;
+            b = Keyboard.VT100.KEYLAST;
         }
-        this.println("keymap: " + str.toHexByte(b));
+        this.bVT100Address = b;
+        this.cpu.requestINTR(1);
     }
-    if (!b) b = Keyboard.VT100.KEYLAST;
     this.printMessageIO(port, null, addrFrom, "KBDUART.ADDRESS", b);
     return b;
 };

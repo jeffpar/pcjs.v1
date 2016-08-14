@@ -7,59 +7,74 @@
 ;
 ;   All other comments/annotations by Jeff Parsons (@jeffpar) <Jeff@pcjs.org>
 ;
+
+;
+;   Data area definitions
+;
+stack_top	equ	204eh
+scratch_start	equ	204eh
+cursor_countdn	equ	212dh
+cursor_visible	equ	21bah
+
+;
+; Reset vector
+;
 	org	0
-
-X0000:	di
-	lxi	sp,X204e
-	jmp	X003b
-
+	di
+	lxi	sp,stack_top		; SP = 0x204e
+	jmp	reset
+;
+; Interrupt vector 0x1 for Keyboard
+;
 	org	8
-;
-; Interrupt vector 0x1 for keyboard
-;
-X0008:	call	X00fd
+	call	X00fd
 	ei
 	ret
-
-X000d:	nop
-
+;
+; Interrupt vector 0x2 for PUSART
+;
 	org	10h
-
 	call	X03cc
 	ei
-X0014:	ret
-
-	nop
-
+	ret
+;
+; Interrupt vector 0x3 for Keyboard and PUSART
+;
 	org	18h
-
 	call	X03cc
 	call	X00fd
 	ei
 	ret
-
+;
+; Interrupt vector 0x4 for Video (vertical retrace)
+;
+	org	20h
 	call	X04cf
 	ret
-
-	nop
-
+;
+; Interrupt vector 0x5 for Keyboard and Video
+;
 	org	28h
-
 	call	X04cf
 	ret
-
-	nop
-
+;
+; Interrupt vector 0x6 for PUSART and Video
+;
 	org	30h
-
 X0030:	call	X03cc
 	call	X04cf
 	ei
 	ret
-
+;
+; Interrupt vector 0x7 for Keyboard and PUSART and Video
+;
+	org	38h
 	jmp	X0030
 
-X003b:	mvi	e,1
+;
+; Beginning of power-up (reset) code at 0x003b
+;
+reset:	mvi	e,1
 X003d:	di
 	mvi	a,0fh
 	out	62h		;; 0x0f to NVR latch
@@ -233,7 +248,7 @@ X00fd:	push	psw
 	sui	7ch		;; subtract 0x7c from a
 	jm	X011a		;; jump to 011a if a is a normal key
 	mov	h,a		;; otherwise h <- a
-X0109:	inr	h		;; h++
+	inr	h		;; h++
 	mvi	a,10h		;; a <- 0x10
 	rrc
 X010d:	rlc
@@ -370,7 +385,7 @@ X01ff:	lxi	h,X0812
 X020e:	sui	41h
 	mov	b,a
 X0211:	mov	a,m
-X0212:	jz	X0222
+	jz	X0222
 	dcr	b
 	jz	X0226
 	dcr	b
@@ -408,7 +423,7 @@ X0245:	mov	a,c
 	jmp	X0812
 
 X0251:	di
-	lxi	sp,X204e
+	lxi	sp,stack_top		; SP = 0x204e
 	lxi	h,2000h
 	push	h
 	mov	a,m
@@ -447,10 +462,10 @@ X0298:	call	X0bf2
 ;;
 ;;  Zero all scratch and screen RAM above stack
 ;;
-X02a4:	lxi	h,X204e		;; HL <- 0x204e (top of stack)
-	lxi	d,X0fb2		;; DE <- 0x0fb2
-	mvi	b,0		;; B  <- 0
-	call	X1083		;; memset(0x204e,0,0xfb2)
+X02a4:	lxi	h,scratch_start	;; HL = 0x204e (just above stack)
+	lxi	d,0fb2h		;; DE = 0x0fb2 (every byte from 0x204e up to 0x3000)
+	mvi	b,0		;; B = 0
+	call	memset		;; memset(0x1083): set 0x0fb2 bytes to 0 starting at 0x204e
 	cma			;; invert A
 	sta	X2104		;; store A in 0x2104
 	lxi	h,X2004		;; HL <- 0x2004
@@ -469,7 +484,7 @@ X02c0:	call	X0a15		;; 0x2140 = 0xe605
 	lxi	h,X3000		;; HL = 0x3000
 	lxi	d,X1000		;; DE = 0x1000
 	mvi	b,0ffh		;; B = 0xFF
-	jmp	X1083		;; Set all of attribute RAM to 0xFF and return
+	jmp	memset		;; invoke memset(0x1083) to set all of attribute RAM to 0xFF and return
 ;;
 ;;  0x02d9 through 0x02eb are the initial values for the screen RAM;
 ;;  it's copied into low RAM at 0x2000 during init.
@@ -484,8 +499,8 @@ X02d9:
 ;;
 ;;  Initialize several scratch values. We don't know what all of these are for yet.
 ;;
-X02eb:	lxi	h,X0212		;; HL = 0x0212
-	shld	X212d		;; Store 0x1202 at 0x212d
+X02eb:	lxi	h,212h		;; HL = 0x0212 (530.)
+	shld	cursor_countdn	;; Store 0x0212 at cursor_countdn [0x212d]
 	mvi	a,35h		;; A = 0x35
 	sta	X212c		;; 0x212c = 0x35
 	mvi	a,1		;; A = 1
@@ -504,7 +519,7 @@ X02eb:	lxi	h,X0212		;; HL = 0x0212
 	sta	X2079		;; else store 1 in 0x2079
 X031a:	mvi	a,0ffh		;; A = 0xff
 	sta	X210e		;; 0x210e = 0xff
-	sta	X21ba		;; 0x21ba = 0xff
+	sta	cursor_visible	;; set cursor_visible [0x21ba] to 0xff (initially visible)
 	mvi	h,80h		;; H = 0x80
 	mov	l,h		;; L = 0x80
 	shld	X20c0		;; Store 0x8080 at 0x20c0
@@ -1592,7 +1607,7 @@ X0a7b:	inx	sp
 
 	mvi	a,48h
 	sta	X207e
-	lxi	h,X0000
+	lxi	h,0
 	shld	X2130
 	pop	h
 X0aa2:	lxi	h,X0a15
@@ -2405,7 +2420,7 @@ X0fae:	cmp	m
 	rz
 	push	h
 	push	psw
-X0fb2:	lda	X207b
+	lda	X207b
 	ora	a
 	cz	X1488
 	pop	psw
@@ -2415,11 +2430,11 @@ X0fb2:	lda	X207b
 ; End of main loop?
 ;
 
-X0fbe:	lhld	X204e
+X0fbe:	lhld	scratch_start	; HL = [0x204e]
 	mov	a,h
 	ori	0f0h
 	mov	h,a
-	shld	X204e
+	shld	scratch_start	; update [0x204e]
 X0fc8:	lda	X2050
 X0fcb:	mov	b,a
 	mov	a,h
@@ -2525,15 +2540,14 @@ X1074:	call	X13e3
 	shld	X214e
 	ret
 ;;
-;; memset: Set memory from HL to HL+DE-1 to value B
+;; memset(0x1083): Set DE bytes at address HL to B
 ;;
-memset:
-X1083:	mov	m,b		;; M <- B
+memset:	mov	m,b		;; M <- B
 	inx	h		;; HL++
 	dcx	d		;; DE--
 	mov	a,d		;;
 	ora	e		;; A = D | E
-	jnz	X1083		;; repeat if A != 0
+	jnz	memset		;; repeat if A != 0
 	ret
 
 	mvi	c,0
@@ -2672,7 +2686,7 @@ X1159:	mov	m,e
 X117e:	mov	a,h
 	ori	0f0h
 	mov	h,a
-	shld	X204e
+	shld	scratch_start	; update [0x204e]
 	lxi	h,X2113
 	xra	a
 X1189:	mov	m,a
@@ -2727,7 +2741,7 @@ X11ce:	ora	a
 	mov	l,m
 	ori	0f0h
 	mov	h,a
-	shld	X204e
+	shld	scratch_start	; update [0x204e]
 	call	X1290
 	pop	h
 	mov	b,d
@@ -2747,7 +2761,7 @@ X11e8:	call	X127f
 	ori	0f0h
 	mov	h,a
 	mov	l,e
-	shld	X204e
+	shld	scratch_start	; update [0x204e]
 	pop	h
 	mov	a,h
 	ori	9fh
@@ -2810,12 +2824,12 @@ X1252:	call	X129d
 	mov	c,m
 	call	X13de
 	xchg
-	lhld	X204e
+	lhld	scratch_start	; load [0x204e]
 	xchg
 	mov	m,e
 	dcx	h
 	mov	m,d
-X1271:	lhld	X204e
+X1271:	lhld	scratch_start	; load [0x204e]
 	shld	X2056
 	call	X1299
 	mov	m,b
@@ -3175,25 +3189,29 @@ X14a2:	lxi	h,X21a5		;;
 	lda	X2077		;; load what's at 0x2077
 	ora	a		;; return if it's not zero
 	rnz			;;
-	lda	X2065		;; A =  0x2065
+	lda	X2065		;; A = [0x2065]
 	lxi	h,X2051		;;
 	ora	m		;; return if [0x2065] | [0x2051] != 0
 	rnz
-	lhld	X212d
+
+	lhld	cursor_countdn	; HL = cursor countdown from [0x212d]
 	dcx	h
 	mov	a,h
 	ora	l
 	jz	X14d4
-	shld	X212d
+	shld	cursor_countdn	; update cursor countdown with decremented value
 	ret
-
-X14d4:	lda	X21ba
-	xri	0ffh
-	sta	X21ba
-	lxi	h,X0212
-	jnz	X14e5
-	lxi	h,X0109
-X14e5:	shld	X212d
+;
+; Cursor countdown reached zero, time to invert the cursor;
+; note that the cursor is on (visible) twice as long as it's off
+;
+X14d4:	lda	cursor_visible	; A = 0xff (visible) or 0x00 (invisible)
+	xri	0ffh		; invert
+	sta	cursor_visible	;
+	lxi	h,212h		; new initial count; start with 0x0212
+	jnz	X14e5		; and stick with that if cursor still visible
+	lxi	h,109h		; otherwise, use half that value (0x0109) if invisible
+X14e5:	shld	cursor_countdn	; store new cursor countdown
 	lhld	X20f6
 	mov	b,m
 	lda	X2159
@@ -3394,10 +3412,10 @@ X162b:	inx	h
 	inx	h
 	jmp	X13db
 
-X1636:	lxi	h,X000d
-	shld	X212d
+X1636:	lxi	h,13
+	shld	cursor_countdn		; reset cursor countdown to 13 (0x000d)
 	xra	a
-	sta	X21ba
+	sta	cursor_visible		; reset cursor visibility
 	lhld	X20f6
 	lda	X20f4
 	mov	b,a
@@ -3679,7 +3697,7 @@ X1837:	cmp	d
 X1844:	mov	m,a
 	jmp	X1636
 
-X1848:	lxi	h,X0000
+X1848:	lxi	h,0
 	shld	X2130
 	mvi	a,0ffh
 	sta	X210e
@@ -3786,7 +3804,7 @@ X1900:	in	42h
 	out	62h
 	lxi	d,X21d3		;; DE = 0x21d3
 	mvi	b,0eh		;; B = 14
-	lxi	h,X0000		;; HL = 0
+	lxi	h,0		;; HL = 0
 X1916:	dad	h		;;
 	ldax	d		;; load next char
 	ani	20h		;; and with NVR data bit
@@ -3967,7 +3985,7 @@ X1a2b:	mvi	c,80h
 	shld	X2111
 	lxi	h,X19ee
 	shld	X2140
-	lxi	h,X0000
+	lxi	h,0
 	shld	X2143
 	shld	X2172
 X1a45:	lhld	X2004
@@ -4170,7 +4188,7 @@ X1bb0:	call	X0394
 	shld	X2140
 	ret
 
-X1bba:	lhld	X204e
+X1bba:	lhld	scratch_start	; load [0x204e]
 	jmp	X1bc3
 
 X1bc0:	lxi	h,X21cc
@@ -4374,7 +4392,7 @@ X1d17:	mvi	m,0
 	lda	X21ac
 	call	X1d61
 	call	X1c9f
-	lxi	d,X0008
+	lxi	d,8
 	mvi	c,4
 	pop	psw
 	jz	X1d3d
@@ -4600,8 +4618,8 @@ X1e9f:	call	X1edd
 	inx	h
 	shld	X21b4
 	mov	b,a
-	lxi	d,X0014
-	call	X1083
+	lxi	d,20		; DE = 20(0x0014)
+	call	memset		; call memset(0x1083)
 	lxi	h,X1eb8
 	shld	X2140
 	ret
@@ -4635,7 +4653,7 @@ X1ee5:	call	X05e3
 	ret
 
 X1eea:	push	h
-	lxi	h,X204e
+	lxi	h,scratch_start	; HL -> 0x204e
 	mov	c,a
 	lda	X21a2
 	ora	a
@@ -4804,7 +4822,6 @@ X1ccd	equ	1ccdh
 X2001	equ	2001h
 X2002	equ	2002h
 X2004	equ	2004h
-X204e	equ	204eh
 X2050	equ	2050h
 X2051	equ	2051h
 X2052	equ	2052h
@@ -4857,7 +4874,6 @@ X2111	equ	2111h
 X2113	equ	2113h
 X212b	equ	212bh
 X212c	equ	212ch
-X212d	equ	212dh
 X212f	equ	212fh
 X2130	equ	2130h
 X2131	equ	2131h
@@ -4912,7 +4928,6 @@ X21af	equ	21afh
 X21b4	equ	21b4h
 X21b8	equ	21b8h
 X21b9	equ	21b9h
-X21ba	equ	21bah
 X21bb	equ	21bbh
 X21bc	equ	21bch
 X21bd	equ	21bdh
