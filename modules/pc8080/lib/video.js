@@ -320,7 +320,10 @@ Video.prototype.initBuffers = function()
      * for each font and draw characters by drawing from the font canvas to the target canvas.
      */
     if (this.cxCell > 1) {
-        this.initCellCache(this.nColsBuffer * this.nRowsBuffer);
+        /*
+         * We add an extra column per row to store the visible line length at the start of every row.
+         */
+        this.initCellCache((this.nColsBuffer + 1) * this.nRowsBuffer);
     } else {
         this.imageBuffer = this.contextScreen.createImageData(cxBuffer, cyBuffer);
         this.nPixelsPerCell = (16 / this.nBitsPerPixel)|0;
@@ -959,11 +962,12 @@ Video.prototype.updateChar = function(idFont, col, row, data, context)
 };
 
 /**
- * updateVT100()
+ * updateVT100(fForced)
  *
  * @this {Video}
+ * @param {boolean} [fForced]
  */
-Video.prototype.updateVT100 = function()
+Video.prototype.updateVT100 = function(fForced)
 {
     var addrNext = this.addrBuffer, fontNext = -1;
 
@@ -979,6 +983,8 @@ Video.prototype.updateVT100 = function()
         var nCols = 0;
         var addr = addrNext;
         var font = fontNext;
+        var nColsVisible = this.nColsBuffer;
+        if (font != Video.VT100.FONT.NORML) nColsVisible >>= 1;
         while (true) {
             var data = this.bus.getByteDirect(addr++);
             if ((data & Video.VT100.LINETERM) == Video.VT100.LINETERM) {
@@ -988,7 +994,7 @@ Video.prototype.updateVT100 = function()
                 addrNext += (b & Video.VT100.LINEATTR.ADDRBIAS)? Video.VT100.ADDRBIAS_LO : Video.VT100.ADDRBIAS_HI;
                 break;
             }
-            if (nCols < this.abLineBuffer.length) {
+            if (nCols < nColsVisible) {
                 this.abLineBuffer[nCols++] = data;
             } else {
                 break;                          // ideally, we would wait for a LINETERM byte, but it's not safe to loop without limit
@@ -1011,13 +1017,21 @@ Video.prototype.updateVT100 = function()
         }
 
         /*
-         * Display the line buffer; ordinarily, the font number would always be valid after processing the "fill lines",
-         * but if the buffer isn't initialized yet, the usual LINETERM might be missing, so the font number might not be set.
+         * Display the line buffer; ordinarily, the font number would be valid after processing the "fill lines",
+         * but if the buffer isn't initialized yet, those lines might be missing, so the font number might not be set.
          */
         if (font >= 0) {
+            /*
+             * Cell cache logic is complicated by the fact that a line may be single-width one frame and double-width
+             * the next.  So we store the visible line length at the start of each row in the cache, which must match if
+             * the cache is considered valid for the current line.
+             */
+            var fLineCacheValid = this.fCellCacheValid && (this.aCellCache[iCell] == nColsVisible);
+            this.aCellCache[iCell++] = nColsVisible;
             for (var iCol = 0; iCol < nCols; iCol++) {
                 data = this.abLineBuffer[iCol];
-                if (!this.fCellCacheValid || data !== this.aCellCache[iCell]) {
+                if (!fLineCacheValid || data !== this.aCellCache[iCell]) {
+                    this.aCellCache[iCell] = data;
                     this.updateChar(font, iCol, nRows, data, this.contextBuffer);
                     cUpdated++;
                 }
@@ -1025,6 +1039,18 @@ Video.prototype.updateVT100 = function()
             }
         }
         nRows++;
+    }
+
+    this.assert(font < 0 || iCell === this.nCellCache);
+
+    if (MAXDEBUG && !fForced) {
+        var nSeconds = Date.now() / 1000;
+        if ((nSeconds|0) != (this.nUpdateSeconds|0)) {
+            this.nUpdateNumber = 0;
+        }
+        this.nUpdateNumber++;
+        this.nUpdateSeconds = nSeconds;
+        this.printMessage("updateVT100(): update #" + this.nUpdateNumber + " at " +this.nUpdateSeconds + " corner=" + str.toHexByte(this.aCellCache[1]) + " cycles=" + this.nCyclesPrev + " delta=" + this.nCyclesDelta);
     }
 
     this.fCellCacheValid = true;
@@ -1056,9 +1082,10 @@ Video.prototype.updateScreen = function(n)
 {
     var fClean;
     var fUpdate = true;
+    var fForced = true;
 
     if (n >= 0) {
-
+        fForced = false;
         if (this.rateInterrupt) {
             /*
              * TODO: Incorporate these hard-coded interrupt vector numbers into configuration blocks.
@@ -1093,11 +1120,11 @@ Video.prototype.updateScreen = function(n)
         }
     }
 
-    if (DEBUG) {
+    if (DEBUG && !fForced) {
         var nCycles = this.cpu.getCycles();
-        var nCyclesDelta = nCycles - this.nCyclesPrev;
+        this.nCyclesDelta = nCycles - this.nCyclesPrev;
         this.nCyclesPrev = nCycles;
-        this.printMessage("updateScreen(" + n + "): clean=" + fClean + ", update=" + fUpdate + ", cycles=" + nCycles + ", delta=" + nCyclesDelta);
+        if (MAXDEBUG) this.printMessage("updateScreen(" + n + "): clean=" + fClean + ", update=" + fUpdate + ", cycles=" + this.nCyclesPrev + ", delta=" + this.nCyclesDelta);
     }
 
     if (!fUpdate) {
@@ -1105,32 +1132,34 @@ Video.prototype.updateScreen = function(n)
     }
 
     if (this.cxCell > 1) {
-        this.updateScreenText();
+        this.updateScreenText(fForced);
     } else {
-        this.updateScreenGraphics();
+        this.updateScreenGraphics(fForced);
     }
 };
 
 /**
- * updateScreenText()
+ * updateScreenText(fForced)
  *
  * @this {Video}
+ * @param {boolean} [fForced]
  */
-Video.prototype.updateScreenText = function()
+Video.prototype.updateScreenText = function(fForced)
 {
     switch(this.nFormat) {
     case Video.FORMAT.VT100:
-        this.updateVT100();
+        this.updateVT100(fForced);
         break;
     }
 };
 
 /**
- * updateScreenGraphics()
+ * updateScreenGraphics(fForced)
  *
  * @this {Video}
+ * @param {boolean} [fForced]
  */
-Video.prototype.updateScreenGraphics = function()
+Video.prototype.updateScreenGraphics = function(fForced)
 {
     var addr = this.addrBuffer;
     var addrLimit = addr + this.sizeBuffer;
