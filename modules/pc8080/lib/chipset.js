@@ -169,13 +169,29 @@ ChipSet.SI1978 = {
 
 /*
  * One of the many chips in the VT100 is an 8224, which operates at 24.8832MHz.  That frequency is divided by 9
- * to yield a 361.69ns clock period for the 8080 CPU, which means the CPU is running at 2.76Mhz (cycles per second).
- * Hence the CPU component in the VT100's machine.xml is defined as:
+ * to yield a 361.69ns clock period for the 8080 CPU, which means (in theory) that the CPU is running at 2.76Mhz.
+ *
+ * Hence the CPU component in the VT100's machine.xml SHOULD be defined as:
  *
  *      <cpu id="cpu8080" model="8080" cycles="2764800"/>
  *
- * where 2764800 = 24883200 / 9.  You need to know this because we rely on the CPU frequency for simulating some
- * of the other VT100 circuits.
+ * where 2764800 = 24883200 / 9.  Unfortunately, the VT100 ROM decrements a countdown value in memory to determine
+ * cursor blink rate, and if we use 2764800 cycles per second, the cursor blinks MUCH too fast.  It's surprising that
+ * the VT100 doesn't rely on vertical retrace interrupts for blink rate.  Perhaps the designers were concerned about
+ * consistency across 60Hz and 50Hz display modes, although that seems like a minor concern, considering that the
+ * alternative means the ROM is now tied to a specific CPU operating frequency.  However, short of rewriting portions
+ * of the ROM, we have to deal with it.
+ *
+ * And we deal with it by lowering cycles per second to 1000000 (1Mhz).  I'm guessing that in a real VT100, the 8080
+ * gets bogged down by other factors (eg, the Video Processor's DMA requests), but we don't simulate the hardware to
+ * that level of detail, so the easiest solution is to lower the effective clock speed.
+ *
+ * NOTE: If you've noticed that the VT100 cursor blinks unevenly, you're right, and it's by design: the ROM uses a
+ * countdown value for the cursor's "on" state that is twice as large as that for the cursor's "off" state, so it's
+ * "on" twice as long as it's "off".
+ *
+ * WARNING: The choice of clock speed has an effect on other simulated VT100 circuits; see the DC011 Timing Chip
+ * discussion below, along with the getVT100LBA() function.
  *
  * For reference, here is a list of all the VT100 I/O ports, from /devices/pc8080/machine/vt100/debugger/README.md,
  * which in turn comes from p. 4-17 of the VT100 Technical Manual (July 1982):
@@ -386,6 +402,7 @@ ChipSet.prototype.initBus = function(cmp, bus, cpu, dbg)
     this.cpu = cpu;
     this.dbg = dbg;
     this.cmp = cmp;
+    this.kbd = cmp.getMachineComponent("Keyboard");
     bus.addPortInputTable(this, this.config.portsInput);
     bus.addPortOutputTable(this, this.config.portsOutput);
 };
@@ -728,7 +745,7 @@ ChipSet.prototype.outSIWatchdog = function(port, b, addrFrom)
 };
 
 /**
- * getVT100LBA(nBit)
+ * getVT100LBA(iBit)
  *
  * Returns the state of the requested (simulated) LBA bit.
  *
@@ -737,12 +754,12 @@ ChipSet.prototype.outSIWatchdog = function(port, b, addrFrom)
  * period than if we divided the cycle count by 88, but a shorter LBA7 period is probably helpful in terms of
  * overall performance.
  *
- * @param {number} nBit
+ * @param {number} iBit
  * @return {number}
  */
-ChipSet.prototype.getVT100LBA = function(nBit)
+ChipSet.prototype.getVT100LBA = function(iBit)
 {
-    return (this.cpu.getCycles() & (1 << (nBit - 1))) << 1;
+    return (this.cpu.getCycles() & (1 << (iBit - 1))) << 1;
 };
 
 /**
@@ -852,6 +869,10 @@ ChipSet.prototype.inVT100FlagsBuffer = function(port, addrFrom)
     if (this.bNVROut) {
         b |= ChipSet.VT100.FLAGS_BUFFER.NVR_DATA;
     }
+    b &= ~ChipSet.VT100.FLAGS_BUFFER.KBD_XMIT;
+    if (this.kbd && !this.kbd.checkBusy()) {
+        b |= ChipSet.VT100.FLAGS_BUFFER.KBD_XMIT;
+    }
     this.bFlagsBuffer = b;
     this.printMessageIO(port, null, addrFrom, "FLAGS.BUFFER", b);
     return b;
@@ -887,6 +908,10 @@ ChipSet.prototype.outVT100NVRLatch = function(port, b, addrFrom)
 
 /**
  * outVT100DC012(port, b, addrFrom)
+ *
+ * TODO: Consider whether we should disable any interrupts (eg, vertical retrace) until the
+ * this port is initialized at runtime.  We initialize it ourselves at start-up, but our initial
+ * value is just a guess.
  *
  * @this {ChipSet}
  * @param {number} port (0xA2)
