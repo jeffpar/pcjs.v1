@@ -732,7 +732,7 @@ Video.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
  */
 Video.prototype.updateDimensions = function(nCols, nRows)
 {
-    this.println("updateDimensions(" + nCols + "," + nRows + ")");
+    this.printMessage("updateDimensions(" + nCols + "," + nRows + ")");
     this.nColsBuffer = nCols;
     /*
      * Even when the number of effective rows is 14 (or 15 counting the scroll line buffer), we want
@@ -758,7 +758,7 @@ Video.prototype.updateDimensions = function(nCols, nRows)
  */
 Video.prototype.updateRate = function(nRate)
 {
-    this.println("updateRate(" + nRate + ")");
+    this.printMessage("updateRate(" + nRate + ")");
     this.rateMonitor = nRate;
 };
 
@@ -846,7 +846,7 @@ Video.prototype.notifyFullScreen = function(fFullScreen)
             this.canvasScreen.style.width = this.canvasScreen.style.height = "";
         }
     }
-    this.printMessage("notifyFullScreen(" + fFullScreen + ")", true);
+    this.printMessage("notifyFullScreen(" + fFullScreen + ")");
 };
 
 /**
