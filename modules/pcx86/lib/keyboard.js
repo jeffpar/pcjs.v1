@@ -1254,8 +1254,8 @@ Keyboard.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
             else if (sValue) {
                 /*
                  * Instead of just having a dedicated "test" control, we now treat any unrecognized control with
-                 * a data value as a test control.  The only caveat is that such controls must have binding IDs that
-                 * do not conflict with predefined controls (which, of course, is the only way you can get here).
+                 * a "value" attribute as a test control.  The only caveat is that such controls must have binding IDs
+                 * that do not conflict with predefined controls (which, of course, is the only way you can get here).
                  */
                 this.bindings[id] = control;
                 control.onclick = function onClickTest(event) {
