@@ -28,6 +28,7 @@ scratch_start	equ	204eh
 key_flags	equ	2068h	; "Keys Flag Buffer"
 key_buffer	equ	206ah	; start of the "three place New Key Address Buffer"
 
+cursor_address	equ	20f6h
 cursor_countdn	equ	212dh
 cursor_visible	equ	21bah
 
@@ -454,7 +455,7 @@ X0269:	call	X03a2
 	ani	7fh
 X0285:	sta	X21bd
 	adi	30h
-	lhld	X20f6
+	lhld	cursor_address
 	mov	m,a
 	cpi	34h
 	jz	X0298
@@ -476,7 +477,7 @@ X02a4:	lxi	h,scratch_start	;; HL = 0x204e (just above stack)
 	lxi	h,X2004		;; HL <- 0x2004
 	shld	X2052		;; *(0x2052) = 0x2004
 	lxi	h,X22d0		;; HL <- 0x22d0
-	shld	X20f6		;; *(20f6) = 0x22d0
+	shld	cursor_address	;; *(20f6) = 0x22d0
 	ret
 ;;
 ;;  Initialize start of screen RAM and wipe attribute RAM to 0xff
@@ -486,8 +487,8 @@ X02c0:	call	X0a15		;; 0x2140 = 0xe605
 	lxi	d,X02d9		;; DE = 0x02d9
 	mvi	b,12h		;; B = 18
 	call	memmove		;; copy 18 bytes from 0x02d9 to 0x2000
-	lxi	h,X3000		;; HL = 0x3000
-	lxi	d,X1000		;; DE = 0x1000
+	lxi	h,3000h		;; HL = 0x3000
+	lxi	d,1000h		;; DE = 0x1000
 	mvi	b,0ffh		;; B = 0xFF
 	jmp	memset		;; invoke memset(0x1083) to set all of attribute RAM to 0xFF and return
 ;;
@@ -931,7 +932,7 @@ X0624:	lda	X20fb
 	push	b
 	call	X0955
 	pop	b
-X0641:	lhld	X20f6
+X0641:	lhld	cursor_address
 	mov	m,c
 	mov	a,h
 	adi	10h
@@ -1010,7 +1011,7 @@ X06aa:	lda	key_flags	; A <- [Keys flag buffer]
 X06c2:	mov	d,a
 	mvi	c,0
 	mvi	b,4
-	lxi	h,X206e
+	lxi	h,key_buffer+4
 X06ca:	mov	a,m
 	ora	a
 	jz	X06e8
@@ -1072,7 +1073,7 @@ X071b:	cmp	m
 	cpi	1
 	rnz
 	mvi	b,4
-	lxi	h,X206e
+	lxi	h,key_buffer+4
 X0738:	mov	a,m
 	ora	a
 	jnz	X0743
@@ -1088,7 +1089,7 @@ X0747:	mov	a,c
 	cpi	4
 	rp
 	lxi	b,key_buffer
-X074e:	lxi	h,X206e
+X074e:	lxi	h,key_buffer+4
 X0751:	mov	a,m
 	ora	a
 	jz	X075b
@@ -1099,7 +1100,7 @@ X075b:	inx	h
 	mov	a,l
 	cpi	72h
 	jnz	X0751
-	ldax	b
+	ldax	b		; A = key (loaded from BC, typically 0x206a)
 	jmp	X076c
 
 X0766:	inx	b
@@ -1200,14 +1201,14 @@ X080d:	ori	80h
 X0812:	call	X0853
 X0815:	lda	X2150
 	mvi	d,4
-	lxi	h,X206e
+	lxi	h,key_buffer+4
 X081d:	cmp	m
 	jz	X0841
 	inx	h
 	dcr	d
 	jnz	X081d
 	mvi	d,4
-	lxi	h,X206e
+	lxi	h,key_buffer+4
 X082b:	mov	a,m
 	ora	a
 	jz	X0838
@@ -2477,7 +2478,7 @@ X0ffa:	call	X13e6
 	mov	a,e
 	sub	d
 X0fff:	mov	c,a
-X1000:	lda	X212b
+	lda	X212b
 X1003:	mov	d,m
 	mov	m,a
 	mov	a,b
@@ -2897,7 +2898,7 @@ X12b0:	call	X1191
 	cmp	m
 	jnc	X1012
 	lxi	h,X20f4
-	shld	X20f6
+	shld	cursor_address
 	jmp	X1012
 
 	lda	X2130
@@ -3217,12 +3218,15 @@ X14d4:	lda	cursor_visible	; A = 0xff (visible) or 0x00 (invisible)
 	jnz	X14e5		; and stick with that if cursor still visible
 	lxi	h,109h		; otherwise, use half that value (0x0109) if invisible
 X14e5:	shld	cursor_countdn	; store new cursor countdown
-	lhld	X20f6
-	mov	b,m
-	lda	X2159
-	xra	b
-	mov	m,a
-	lxi	d,X1000
+	lhld	cursor_address
+	mov	b,m		; B = current cursor
+	lda	X2159		; A = cursor inversion mask (typically 0x80)
+	xra	b		; B = new (inverted) cursor
+	mov	m,a		; store new cursor
+;
+; Guessing this is AVO-only code, because it's monkeying with cursor_address + 0x1000, which doesn't exist without AVO
+;
+	lxi	d,1000h
 	dad	d
 	lda	X215a
 	xra	m
@@ -3253,7 +3257,7 @@ X1515:	lda	X20f8
 	rrc
 X1524:	sub	b
 	mov	b,a
-	lhld	X20f6
+	lhld	cursor_address
 X1529:	mov	a,h
 	adi	10h
 	mov	d,a
@@ -3421,7 +3425,7 @@ X1636:	lxi	h,13
 	shld	cursor_countdn		; reset cursor countdown to 13 (0x000d)
 	xra	a
 	sta	cursor_visible		; reset cursor visibility
-	lhld	X20f6
+	lhld	cursor_address
 	lda	X20f4
 	mov	b,a
 	mov	m,a
@@ -3476,7 +3480,7 @@ X16a1:	lda	X20f8
 	sta	X21bb
 	lhld	X214e
 	call	X13de
-	shld	X20f6
+	shld	cursor_address
 	mov	a,m
 	sta	X20f4
 	mov	b,a
@@ -3485,7 +3489,7 @@ X16a1:	lda	X20f8
 	mov	h,a
 	mov	a,m
 	sta	X20f5
-	lhld	X20f6
+	lhld	cursor_address
 	mov	m,b
 	ret
 
@@ -4007,7 +4011,7 @@ X1a45:	lhld	X2004
 X1a61:	lhld	X2111
 	shld	X2140
 	call	X1bba
-	lxi	d,X1000
+	lxi	d,1000h
 	dad	d
 	lda	X2050
 X1a71:	mvi	m,0ffh
@@ -4292,7 +4296,7 @@ X1c60:	sta	X21be
 	ret
 
 X1c71:	push	h
-	lxi	d,X1000
+	lxi	d,1000h
 	dad	d
 	pop	d
 X1c77:	push	psw
@@ -4839,7 +4843,6 @@ X205c	equ	205ch
 X2065	equ	2065h
 X2067	equ	2067h
 X2069	equ	2069h
-X206e	equ	206eh
 X2072	equ	2072h
 X2073	equ	2073h
 X2074	equ	2074h
@@ -4860,7 +4863,6 @@ X20de	equ	20deh
 X20f2	equ	20f2h
 X20f4	equ	20f4h
 X20f5	equ	20f5h
-X20f6	equ	20f6h
 X20f8	equ	20f8h
 X20f9	equ	20f9h
 X20fa	equ	20fah
@@ -4953,7 +4955,6 @@ X225a	equ	225ah
 X2265	equ	2265h
 X22d0	equ	22d0h
 X2839	equ	2839h
-X3000	equ	3000h
 X3030	equ	3030h
 X3031	equ	3031h
 X3032	equ	3032h

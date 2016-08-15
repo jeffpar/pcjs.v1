@@ -27,7 +27,8 @@ maps modern keys to VT100 key addresses, and most of the mappings are 1-1.  Func
 - F8: NO SCROLL
 - F9: SET-UP
 
-The simulation is not fully operational yet, but it is now possible to access the SET-UP screen.
+The simulation is not fully operational yet, but it is now possible to access the SET-UP screen, press 4 to switch to LOCAL
+mode, and verify that most VT100 keys work properly.
 
 {% include machine.html id="vt100" %}
 
