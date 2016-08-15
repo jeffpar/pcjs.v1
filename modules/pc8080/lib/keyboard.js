@@ -249,15 +249,15 @@ Keyboard.STUPID_KEYCODES[Keyboard.KEYCODE.FF_DASH] = Keyboard.ASCII['-'];
 Keyboard.MINPRESSTIME = 100;            // 100ms
 
 /**
- * Alternate keyCode mappings (to support popular "WASD"-style directional-key mappings)
+ * Alternate keyCode mappings to support popular "WASD"-style directional-key mappings.
  *
  * TODO: ES6 computed property name support may now be in all mainstream browsers, allowing us to use
  * a simple object literal for this and all other object initializations.
  */
-Keyboard.ALTCODES = {};
-Keyboard.ALTCODES[Keyboard.ASCII.A] = Keyboard.KEYCODE.LEFT;
-Keyboard.ALTCODES[Keyboard.ASCII.D] = Keyboard.KEYCODE.RIGHT;
-Keyboard.ALTCODES[Keyboard.ASCII.L] = Keyboard.KEYCODE.SPACE;
+Keyboard.WASDCODES = {};
+Keyboard.WASDCODES[Keyboard.ASCII.A] = Keyboard.KEYCODE.LEFT;
+Keyboard.WASDCODES[Keyboard.ASCII.D] = Keyboard.KEYCODE.RIGHT;
+Keyboard.WASDCODES[Keyboard.ASCII.L] = Keyboard.KEYCODE.SPACE;
 
 /*
  * Supported configurations
@@ -265,6 +265,7 @@ Keyboard.ALTCODES[Keyboard.ASCII.L] = Keyboard.KEYCODE.SPACE;
 Keyboard.SI1978 = {
     MODEL:          1978.1,
     KEYMAP: {},
+    ALTCODES: Keyboard.WASDCODES,
     LEDCODES: {},
     SOFTCODES: {
         '1p':       Keyboard.KEYCODE.ONE,
@@ -279,6 +280,7 @@ Keyboard.SI1978 = {
 Keyboard.VT100 = {
     MODEL:          100.0,
     KEYMAP: {},
+    ALTCODES: {},
     LEDCODES: {},
     SOFTCODES: {},
     /*
@@ -302,7 +304,7 @@ Keyboard.VT100 = {
         LED2:       0x04,
         LED1:       0x08,
         LOCKED:     0x10,
-        ONLINE:     0x20,
+        LOCAL:      0x20,
         LEDS:       0x3F,               // all LEDs
         START:      0x40,               // set to initiate a scan
         /*
@@ -411,8 +413,8 @@ Keyboard.VT100.LEDCODES = {
     'l2':       Keyboard.VT100.STATUS.LED2,
     'l1':       Keyboard.VT100.STATUS.LED1,
     'locked':   Keyboard.VT100.STATUS.LOCKED,
-    'online':   Keyboard.VT100.STATUS.ONLINE,
-    'local':   ~Keyboard.VT100.STATUS.ONLINE
+    'local':    Keyboard.VT100.STATUS.LOCAL,
+    'online':  ~Keyboard.VT100.STATUS.LOCAL
 };
 
 /*
@@ -689,7 +691,7 @@ Keyboard.prototype.updateLEDs = function(bLEDs)
  */
 Keyboard.prototype.getSoftCode = function(keyCode)
 {
-    keyCode = Keyboard.ALTCODES[keyCode] || keyCode;
+    keyCode = this.config.ALTCODES[keyCode] || keyCode;
     if (this.config.KEYMAP[keyCode]) {
         return keyCode;
     }
@@ -786,30 +788,29 @@ Keyboard.prototype.onSoftKeyDown = function(softCode, fDown)
     }
 
     if (this.chipset) {
+        var bit = 0;
         switch(softCode) {
         case '1p':
-            this.chipset.updateStatus1(ChipSet.SI1978.STATUS1.P1, fDown);
+            bit = ChipSet.SI1978.STATUS1.P1;
             break;
-
         case '2p':
-            this.chipset.updateStatus1(ChipSet.SI1978.STATUS1.P2, fDown);
+            bit = ChipSet.SI1978.STATUS1.P2;
             break;
-
         case 'coin':
-            this.chipset.updateStatus1(ChipSet.SI1978.STATUS1.CREDIT, fDown);
+            bit = ChipSet.SI1978.STATUS1.CREDIT;
             break;
-
         case 'left':
-            this.chipset.updateStatus1(ChipSet.SI1978.STATUS1.P1_LEFT, fDown);
+            bit = ChipSet.SI1978.STATUS1.P1_LEFT;
             break;
-
         case 'right':
-            this.chipset.updateStatus1(ChipSet.SI1978.STATUS1.P1_RIGHT, fDown);
+            bit = ChipSet.SI1978.STATUS1.P1_RIGHT;
             break;
-
         case 'fire':
-            this.chipset.updateStatus1(ChipSet.SI1978.STATUS1.P1_FIRE, fDown);
+            bit = ChipSet.SI1978.STATUS1.P1_FIRE;
             break;
+        }
+        if (bit) {
+            this.chipset.updateStatus1(bit, fDown);
         }
     }
     return true;
@@ -885,7 +886,18 @@ Keyboard.prototype.inVT100UARTAddress = function(port, addrFrom)
     var b = this.bVT100Address;
     if (this.iKeyNext >= 0) {
         if (this.iKeyNext < this.aKeysActive.length) {
-            var key = this.aKeysActive[this.iKeyNext++];
+            var key = this.aKeysActive[this.iKeyNext];
+            if (!MAXDEBUG) {
+                this.iKeyNext++;
+            } else {
+                /*
+                 * In MAXDEBUG builds, this code removes the key as soon as it's been reported, because
+                 * when debugging, it's easy for the window to lose focus and never receive the keyUp event,
+                 * thereby leaving us with a stuck key.  However, this causes more problems than it solves,
+                 * and seems to illustrate that key presses need to be persist for more than a single poll.
+                 */
+                this.aKeysActive.splice(this.iKeyNext, 1);
+            }
             b = Keyboard.VT100.KEYMAP[key.softCode];
             if (b & 0x80) {
                 /*
