@@ -272,7 +272,7 @@ SerialPort.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
             if (keyCode === 0x08 || event.ctrlKey && keyCode >= 0x41 && keyCode <= 0x5A) {
                 if (event.preventDefault) event.preventDefault();
                 if (keyCode > 0x40) keyCode -= 0x40;
-                serial.sendByte(keyCode);
+                serial.sendByteIn(keyCode);
             }
             return true;
         };
@@ -312,8 +312,17 @@ SerialPort.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
              * that do not conflict with predefined controls (which, of course, is the only way you can get here).
              */
             this.bindings[sBinding] = control;
+            /*
+             * Convert any "backslashed" sequences into the appropriate control characters.
+             */
+            sValue = sValue.replace(/\\n/g, "\n").replace(/\\r/g, "\r");
             control.onclick = function onClickTest(event) {
-                serial.sendByte(sValue.charCodeAt(0));
+                serial.sDataIn = sValue;
+                serial.sendDataIn();
+                /*
+                 * Give focus back to the machine (since clicking the button takes focus away).
+                 */
+                 if (serial.cmp) serial.cmp.updateFocus();
                 return true;
             };
             return true;
@@ -334,6 +343,7 @@ SerialPort.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
  */
 SerialPort.prototype.initBus = function(cmp, bus, cpu, dbg)
 {
+    this.cmp = cmp;
     this.bus = bus;
     this.cpu = cpu;
     this.dbg = dbg;
@@ -459,13 +469,13 @@ SerialPort.prototype.saveRegisters = function()
 };
 
 /**
- * sendByte(b)
+ * sendByteIn(b)
  *
  * @this {SerialPort}
  * @param {number} b
  * @return {boolean}
  */
-SerialPort.prototype.sendByte = function(b)
+SerialPort.prototype.sendByteIn = function(b)
 {
     if (!(this.bStatus & SerialPort.UART8251.STATUS.RECV_FULL)) {
         this.bDataIn = b;
@@ -474,6 +484,20 @@ SerialPort.prototype.sendByte = function(b)
         return true;
     }
     return false;
+};
+
+/**
+ * sendDataIn()
+ *
+ * @this {SerialPort}
+ */
+SerialPort.prototype.sendDataIn = function()
+{
+    if (this.sDataIn) {
+        if (this.sendByteIn(this.sDataIn.charCodeAt(0))) {
+            this.sDataIn = this.sDataIn.substr(1);
+        }
+    }
 };
 
 /**
@@ -537,6 +561,7 @@ SerialPort.prototype.inData = function(port, addrFrom)
     var b = this.bDataIn;
     this.printMessageIO(port, null, addrFrom, "DATA", b);
     this.bStatus &= ~SerialPort.UART8251.STATUS.RECV_FULL;
+    this.sendDataIn();          // if there is still queued incoming data, send another byte
     return b;
 };
 

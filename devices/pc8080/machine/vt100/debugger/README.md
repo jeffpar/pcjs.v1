@@ -12,10 +12,17 @@ DEC VT100 Terminal with Debugger
 --------------------------------
 
 The [PC8080](/modules/pc8080/) machine below is configured to simulate a [VT100 Terminal](/devices/pc8080/machine/vt100/)
-with a Control Panel and Debugger.  It is running the original [VT100 Firmware](/devices/pc8080/rom/vt100/) inside the
-[PC8080](/modules/pc8080/) CPU emulator.  You'll also find assorted [Hardware Notes](#vt100-memory-usage) below.
+with a Control Panel and Debugger.  When you press the "Run" button, it will start running the original
+[VT100 Firmware](/devices/pc8080/rom/vt100/) inside the [PC8080](/modules/pc8080/) CPU emulator.
 
-Click the "Run" button to start the simulation.  The VT100 KEYMAP table in [keyboard.js](/modules/pc8080/lib/keyboard.js)
+Information about [VT100 Keys](#vt100-keys) along with assorted [Hardware Notes](#vt100-memory-usage) are provided below.
+
+{% include machine.html id="vt100" %}
+
+VT100 Keys
+----------
+
+The VT100 KEYMAP table in [keyboard.js](/modules/pc8080/lib/keyboard.js)
 maps modern keys to VT100 key addresses, and most of the mappings are 1-1.  Function keys are mapped as follows:
 
 - F1: PF1
@@ -27,8 +34,8 @@ maps modern keys to VT100 key addresses, and most of the mappings are 1-1.  Func
 - F8: NO SCROLL
 - F9: SET-UP
 
-The simulation is not fully operational yet, but it is now possible to access the SET-UP screen, press **4** to switch to
-LOCAL mode, and verify local operation of most VT100 keys.  You can also test the following keys while in SET-UP Mode.
+From the SET-UP screen, you can press **4** to switch to LOCAL mode and verify local operation of most VT100
+keys.  The following keys have special meaning inside SET-UP Mode.
 
 ### SET-UP Mode Keys
 
@@ -43,8 +50,6 @@ LOCAL mode, and verify local operation of most VT100 keys.  You can also test th
 - 9: 80/132 COLUMNS
 - SHIFT-S: Save SET-UP Features
 - SHIFT-R: Restore SET-UP Features
-
-{% include machine.html id="vt100" %}
 
 VT100 Memory Usage
 ------------------
@@ -241,8 +246,7 @@ Some additional observations:
 set in the keyboard STATUS port (0x82), generating a "bell" (beep).  The NVR checksum test used to fail when we initialized all
 NVR words with the freshly-erased value of 0x3fff; now we initialize them with canned values (see ChipSet.VT100.INIT).
 
-SET-UP Mode
------------
+### SET-UP Mode
 
 From "PART 2: SET-UP MODE", p. 2-6, of the VT100 Technical Manual (July 1982):
 
