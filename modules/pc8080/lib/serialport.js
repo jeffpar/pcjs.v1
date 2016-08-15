@@ -136,6 +136,90 @@ function SerialPort(parmsSerial) {
 
 Component.subclass(SerialPort);
 
+SerialPort.UART8251 = {
+    /*
+     * Format of MODE byte written to CONTROL port 0x1
+     */
+    MODE: {
+        BAUD_FACTOR:    0x03,       // 00=SYNC, 01=1x, 10=16x, 11=64x
+        DATA_BITS:      0x0C,       // 00=5, 01=6, 10=7, 11=8
+        PARITY_ENABLE:  0x10,
+        EVEN_PARITY:    0x20,
+        STOP_BITS:      0xC0,       // 00=invalid, 01=1, 10=1.5, 11=2
+        INIT:           0x8E        // 16x baudrate, 8 data bits, no parity, 1.5 stop bits
+    },
+    /*
+     * Format of COMMAND byte written to CONTROL port 0x1
+     */
+    COMMAND: {
+        XMIT_ENABLE:    0x01,
+        DTR:            0x02,       // Data Terminal Ready
+        RECV_ENABLE:    0x04,
+        SEND_BREAK:     0x08,
+        ERROR_RESET:    0x10,
+        RTS:            0x20,       // Request To Send
+        INTERNAL_RESET: 0x40,
+        HUNT_MODE:      0x80,
+        INIT:           0x27        // XMIT_ENABLE | DTR | RECV_ENABLE | RTS
+    },
+    /*
+     * Format of STATUS byte read from CONTROL port 0x1
+     */
+    STATUS: {
+        XMIT_READY:     0x01,
+        RECV_FULL:      0x02,
+        XMIT_EMPTY:     0x04,
+        PARITY_ERROR:   0x08,
+        OVERRUN_ERROR:  0x10,
+        FRAMING_ERROR:  0x20,
+        BREAK_DETECT:   0x40,
+        DSR:            0x80,       // Data Set Ready
+        INIT:           0x85        // XMIT_READY | XMIT_EMPTY | DSR
+    },
+    /*
+     * Format of BAUDRATE byte written to port 0x2
+     *
+     * Each nibble is an index (0x0-0xF) into a set internal CPU clock divisors that yield the following baud rates:
+     *
+     *      Index   Divisor     Baud Rate
+     *      -----   -------     ---------
+     *      0x0      3456       50
+     *      0x1      2304       75
+     *      0x2      1571       110
+     *      0x3      1285       134.5
+     *      0x4      1152       150
+     *      0x5      864        200
+     *      0x6      576        300
+     *      0x7      288        600
+     *      0x8      144        1200
+     *      0x9      96         1800
+     *      0xA      86         2000
+     *      0xB      72         2400
+     *      0xC      48         3600
+     *      0xD      36         4800
+     *      0xE      18         9600    (default)
+     *      0xF      9          19200
+     *
+     * TODO: I'm not really sure at this point which nibble is for the XMIT rate and which is for the RECV
+     * rate; I just made a random guess.
+     */
+    BAUDRATE: {
+        XMIT_RATE:      0x0F,
+        RECV_RATE:      0xF0,
+        INIT:           0xEE        // default to 9600 (0xE) for both XMIT and RECV
+    }
+};
+
+SerialPort.UART8251.INIT = [
+    false,
+    0,
+    0,
+    SerialPort.UART8251.STATUS.INIT,
+    SerialPort.UART8251.MODE.INIT,
+    SerialPort.UART8251.COMMAND.INIT,
+    SerialPort.UART8251.BAUDRATE.INIT
+];
+
 /*
  * Internal name used for the I/O buffer control, if any, that we bind to the SerialPort.
  *
@@ -188,7 +272,7 @@ SerialPort.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
             if (keyCode === 0x08 || event.ctrlKey && keyCode >= 0x41 && keyCode <= 0x5A) {
                 if (event.preventDefault) event.preventDefault();
                 if (keyCode > 0x40) keyCode -= 0x40;
-                // serial.sendRBR([keyCode]);
+                serial.sendByteIn(keyCode);
             }
             return true;
         };
@@ -218,10 +302,31 @@ SerialPort.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
          * so that the soft keyboard will activate, but it shouldn't hurt to remove the attribute for all browsers.
          */
         control.removeAttribute("readonly");
-
         return true;
 
     default:
+        if (sValue) {
+            /*
+             * Instead of just having a dedicated "test" control, we now treat any unrecognized control with
+             * a "value" attribute as a test control.  The only caveat is that such controls must have binding IDs
+             * that do not conflict with predefined controls (which, of course, is the only way you can get here).
+             */
+            this.bindings[sBinding] = control;
+            /*
+             * Convert any "backslashed" sequences into the appropriate control characters.
+             */
+            sValue = sValue.replace(/\\n/g, "\n").replace(/\\r/g, "\r");
+            control.onclick = function onClickTest(event) {
+                serial.sDataIn = sValue;
+                serial.sendDataIn();
+                /*
+                 * Give focus back to the machine (since clicking the button takes focus away).
+                 */
+                 if (serial.cmp) serial.cmp.updateFocus();
+                return true;
+            };
+            return true;
+        }
         break;
     }
     return false;
@@ -238,10 +343,11 @@ SerialPort.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
  */
 SerialPort.prototype.initBus = function(cmp, bus, cpu, dbg)
 {
+    this.cmp = cmp;
     this.bus = bus;
     this.cpu = cpu;
     this.dbg = dbg;
-    this.chipset = cmp.getMachineComponent("ChipSet");
+    this.chipset = /** @type {ChipSet} */ (cmp.getMachineComponent("ChipSet"));
     bus.addPortInputTable(this, SerialPort.aPortInput, this.portBase);
     bus.addPortOutputTable(this, SerialPort.aPortOutput, this.portBase);
     this.setReady();
@@ -330,11 +436,15 @@ SerialPort.prototype.initState = function(data)
 {
     var i = 0;
     if (data === undefined) {
-        data = [0, 0, 0];
+        data = SerialPort.UART8251.INIT;
     }
-    this.bData = data[i++];
-    this.bCommand = data[i++];
-    this.bBaudRate = data[i++];
+    this.fReady     = data[i++];
+    this.bDataIn    = data[i++];
+    this.bDataOut   = data[i++];
+    this.bStatus    = data[i++];
+    this.bMode      = data[i++];
+    this.bCommand   = data[i++];
+    this.bBaudRate  = data[i];
     return true;
 };
 
@@ -348,82 +458,46 @@ SerialPort.prototype.saveRegisters = function()
 {
     var i = 0;
     var data = [];
-    data[i++] = this.bData;
+    data[i++] = this.fReady;
+    data[i++] = this.bDataIn;
+    data[i++] = this.bDataOut;
+    data[i++] = this.bStatus;
+    data[i++] = this.bMode;
     data[i++] = this.bCommand;
-    data[i++] = this.bBaudRate;
+    data[i]   = this.bBaudRate;
     return data;
 };
 
 /**
- * inData(port, addrFrom)
+ * sendByteIn(b)
  *
  * @this {SerialPort}
- * @param {number} port (0x0)
- * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
- * @return {number} simulated port value
+ * @param {number} b
+ * @return {boolean}
  */
-SerialPort.prototype.inData = function(port, addrFrom)
+SerialPort.prototype.sendByteIn = function(b)
 {
-    var b = this.bData;
-    this.printMessageIO(port, null, addrFrom, "DATA", b);
-    return b;
+    if (!(this.bStatus & SerialPort.UART8251.STATUS.RECV_FULL)) {
+        this.bDataIn = b;
+        this.bStatus |= SerialPort.UART8251.STATUS.RECV_FULL;
+        this.cpu.requestINTR(this.nIRQ);
+        return true;
+    }
+    return false;
 };
 
 /**
- * inCommand(port, addrFrom)
+ * sendDataIn()
  *
  * @this {SerialPort}
- * @param {number} port (0x1)
- * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
- * @return {number} simulated port value
  */
-SerialPort.prototype.inCommand = function(port, addrFrom)
+SerialPort.prototype.sendDataIn = function()
 {
-    var b = this.bCommand;
-    this.printMessageIO(port, null, addrFrom, "COMMAND", b);
-    return b;
-};
-
-/**
- * outData(port, bOut, addrFrom)
- *
- * @this {SerialPort}
- * @param {number} port (0x0)
- * @param {number} bOut
- * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
- */
-SerialPort.prototype.outData = function(port, bOut, addrFrom)
-{
-    this.printMessageIO(port, bOut, addrFrom, "DATA");
-    this.bData = bOut;
-};
-
-/**
- * outCommand(port, bOut, addrFrom)
- *
- * @this {SerialPort}
- * @param {number} port (0x1)
- * @param {number} bOut
- * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
- */
-SerialPort.prototype.outCommand = function(port, bOut, addrFrom)
-{
-    this.printMessageIO(port, bOut, addrFrom, "COMMAND");
-    this.bCommand = bOut;
-};
-
-/**
- * outBaudRate(port, bOut, addrFrom)
- *
- * @this {SerialPort}
- * @param {number} port (0x2)
- * @param {number} bOut
- * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
- */
-SerialPort.prototype.outBaudRate = function(port, bOut, addrFrom)
-{
-    this.printMessageIO(port, bOut, addrFrom, "BAUDRATE");
-    this.bBaudRate = bOut;
+    if (this.sDataIn) {
+        if (this.sendByteIn(this.sDataIn.charCodeAt(0))) {
+            this.sDataIn = this.sDataIn.substr(1);
+        }
+    }
 };
 
 /**
@@ -474,12 +548,99 @@ SerialPort.prototype.echoByte = function(b)
     return false;
 };
 
+/**
+ * inData(port, addrFrom)
+ *
+ * @this {SerialPort}
+ * @param {number} port (0x0)
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
+ * @return {number} simulated port value
+ */
+SerialPort.prototype.inData = function(port, addrFrom)
+{
+    var b = this.bDataIn;
+    this.printMessageIO(port, null, addrFrom, "DATA", b);
+    this.bStatus &= ~SerialPort.UART8251.STATUS.RECV_FULL;
+    this.sendDataIn();          // if there is still queued incoming data, send another byte
+    return b;
+};
+
+/**
+ * inControl(port, addrFrom)
+ *
+ * @this {SerialPort}
+ * @param {number} port (0x1)
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
+ * @return {number} simulated port value
+ */
+SerialPort.prototype.inControl = function(port, addrFrom)
+{
+    var b = this.bStatus;
+    this.printMessageIO(port, null, addrFrom, "STATUS", b);
+    return b;
+};
+
+/**
+ * outData(port, bOut, addrFrom)
+ *
+ * @this {SerialPort}
+ * @param {number} port (0x0)
+ * @param {number} bOut
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
+ */
+SerialPort.prototype.outData = function(port, bOut, addrFrom)
+{
+    this.printMessageIO(port, bOut, addrFrom, "DATA");
+    this.bDataOut = bOut;
+};
+
+/**
+ * outControl(port, bOut, addrFrom)
+ *
+ * Writes to the CONTROL port (0x1) are either MODE or COMMAND bytes.  If the device has just
+ * been powered or reset, it is in a "not ready" state and is waiting for a MODE byte.  Once it
+ * has received that initial byte, the device is marked "ready", and all further bytes are
+ * interpreted as COMMAND bytes (until/unless a COMMAND byte with the INTERNAL_RESET bit is set).
+ *
+ * @this {SerialPort}
+ * @param {number} port (0x1)
+ * @param {number} bOut
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
+ */
+SerialPort.prototype.outControl = function(port, bOut, addrFrom)
+{
+    this.printMessageIO(port, bOut, addrFrom, "CONTROL");
+    if (!this.fReady) {
+        this.bMode = bOut;
+        this.fReady = true;
+    } else {
+        this.bCommand = bOut;
+        if (this.bCommand & SerialPort.UART8251.COMMAND.INTERNAL_RESET) {
+            this.fReady = false;
+        }
+    }
+};
+
+/**
+ * outBaudRate(port, bOut, addrFrom)
+ *
+ * @this {SerialPort}
+ * @param {number} port (0x2)
+ * @param {number} bOut
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
+ */
+SerialPort.prototype.outBaudRate = function(port, bOut, addrFrom)
+{
+    this.printMessageIO(port, bOut, addrFrom, "BAUDRATE");
+    this.bBaudRate = bOut;
+};
+
 /*
  * Port input notification table
  */
 SerialPort.aPortInput = {
     0x0: SerialPort.prototype.inData,
-    0x1: SerialPort.prototype.inCommand
+    0x1: SerialPort.prototype.inControl
 
 };
 
@@ -488,7 +649,7 @@ SerialPort.aPortInput = {
  */
 SerialPort.aPortOutput = {
     0x0: SerialPort.prototype.outData,
-    0x1: SerialPort.prototype.outCommand,
+    0x1: SerialPort.prototype.outControl,
     0x2: SerialPort.prototype.outBaudRate
 };
 

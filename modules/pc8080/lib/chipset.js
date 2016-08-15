@@ -235,24 +235,52 @@ ChipSet.VT100 = {
         PORT:       0x42,               // write-only
         INIT:       0x00                // for lack of a better guess
     },
-    NVR: {
-        LATCH: {
-            PORT:   0x62                // write-only
-        },
-        CMD: {
-            ACCEPT_DATA:    0x0,
-            ACCEPT_ADDR:    0x1,
-            SHIFT_OUT:      0x2,
-            WRITE:          0x4,
-            ERASE:          0x5,
-            READ:           0x6,
-            STANDBY:        0x7
-        },
-        WORDMASK:   0x3fff              // NVR words are 14-bit
-        /*
-         * The Technical Manual, p. 4-18, also notes that "Early VT100s can disable the receiver interrupt by
-         * programming D4 in the NVR latch. However, this is never used by the VT100."
-         */
+    /*
+     * DC011 is referred to as a Timing Chip.
+     *
+     * As p. 4-55 (105) of the VT100 Technical Manual (July 1982) explains:
+     *
+     *      The DCO11 is a custom designed bipolar circuit that provides most of the timing signals required by the
+     *      video processor. Internal counters divide the output of a 24.0734 MHz oscillator (located elsewhere on the
+     *      terminal controller module) into the lower frequencies that define dot, character, scan, and frame timing.
+     *      The counters are programmable through various input pins to control the number of characters per line,
+     *      the frequency at which the screen is refreshed, and whether the display is interlaced or noninterlaced.
+     *      These parameters can be controlled through SET-UP mode or by the host.
+     *
+     *          Table 4-6-1: Video Mode Selection (Write Address 0xC2)
+     *
+     *          D5  D4      Configuration
+     *          --  --      -------------
+     *          0   0       80-column mode, interlaced
+     *          0   1       132-column mode, interlaced
+     *          1   0       60Hz, non-interlaced
+     *          1   1       50Hz, non-interlaced
+     *
+     * On p. 4-56, the DC011 Block Diagram shows 8 outputs labeled LBA0 through LBA7.  From p. 4-61:
+     *
+     *      Several of the LBAs are used as general purpose clocks in the VT100. LBA 3 and LBA 4 are used to generate
+     *      timing for the keyboard. These signals satisfy the keyboard's requirement of two square-waves, one twice the
+     *      frequency of the other, even though every 16th transition is delayed (the second stage of the horizontal
+     *      counter divides by 17, not 16). LBA 7 is used by the nonvolatile RAM.
+     *
+     * And on p. 4-62, timings are provided for the LBA0 through LBA7 when the VT100 is in 80-column mode; in particular:
+     *
+     *      LBA6:   16.82353us (when LBA6 is low, for a period of 33.64706us)
+     *      LBA7:   31.77778us (when LBA7 is high, for a period of 63.55556us)
+     *
+     * If we assume that the CPU cycle count increments once every 361.69ns, it will increment roughly 88 times every
+     * time LBA7 toggles.  So we can divide the CPU cycle count by 88 and set LBA to the low bit of that truncated
+     * result.  An even faster (but less accurate) solution would be to mask bit 6 of the CPU cycle count, which will
+     * doesn't change until the count has been incremented 64 times.  See getVT100LBA() for the chosen implementation.
+     */
+    DC011: {                            // generates Line Buffer Addresses (LBAs) for the Video Processor
+        PORT:       0xC2,               // write-only
+        COLS80:     0x00,
+        COLS132:    0x10,
+        RATE60:     0x20,
+        RATE50:     0x30,
+        INITCOLS:   0x00,               // ie, COLS80
+        INITRATE:   0x20                // ie, RATE60
     },
     /*
      * DC012 is referred to as a Control Chip.
@@ -302,40 +330,33 @@ ChipSet.VT100 = {
      */
     DC012: {                            // generates scan counts for the Video Processor
         PORT:       0xA2,               // write-only
-        INIT:       0x00                // for lack of a better guess
+        SCROLL_LO:  0x00,
+        INITSCROLL: 0x00,
+        INITBLINK:  0x00,
+        INITREVERSE:0x00,
+        INITATTR:   0x00
     },
     /*
-     * DC011 is referred to as a Timing Chip.
-     *
-     * As p. 4-55 (105) of the VT100 Technical Manual (July 1982) explains:
-     *
-     *      The DCO11 is a custom designed bipolar circuit that provides most of the timing signals required by the
-     *      video processor. Internal counters divide the output of a 24.0734 MHz oscillator (located elsewhere on the
-     *      terminal controller module) into the lower frequencies that define dot, character, scan, and frame timing.
-     *      The counters are programmable through various input pins to control the number of characters per line,
-     *      the frequency at which the screen is refreshed, and whether the display is interlaced or noninterlaced.
-     *      These parameters can be controlled through SET-UP mode or by the host.
-     *
-     * On p. 4-56, the DC011 Block Diagram shows 8 outputs labeled LBA0 through LBA7.  From p. 4-61:
-     *
-     *      Several of the LBAs are used as general purpose clocks in the VT100. LBA 3 and LBA 4 are used to generate
-     *      timing for the keyboard. These signals satisfy the keyboard's requirement of two square-waves, one twice the
-     *      frequency of the other, even though every 16th transition is delayed (the second stage of the horizontal
-     *      counter divides by 17, not 16). LBA 7 is used by the nonvolatile RAM.
-     *
-     * And on p. 4-62, timings are provided for the LBA0 through LBA7 when the VT100 is in 80-column mode; in particular:
-     *
-     *      LBA6:   16.82353us (when LBA6 is low, for a period of 33.64706us)
-     *      LBA7:   31.77778us (when LBA7 is high, for a period of 63.55556us)
-     *
-     * If we assume that the CPU cycle count increments once every 361.69ns, it will increment roughly 88 times every
-     * time LBA7 toggles.  So we can divide the CPU cycle count by 88 and set LBA to the low bit of that truncated
-     * result.  An even faster (but less accurate) solution would be to mask bit 6 of the CPU cycle count, which will
-     * doesn't change until the count has been incremented 64 times.  See getVT100LBA() for the chosen implementation.
+     * ER1400 Non-Volatile RAM (NVR) Chip Definitions
      */
-    DC011: {                            // generates Line Buffer Addresses (LBAs) for the Video Processor
-        PORT:       0xC2,               // write-only
-        INIT:       0x00                // for lack of a better guess
+    NVR: {
+        LATCH: {
+            PORT:   0x62                // write-only
+        },
+        CMD: {
+            ACCEPT_DATA:    0x0,
+            ACCEPT_ADDR:    0x1,
+            SHIFT_OUT:      0x2,
+            WRITE:          0x4,
+            ERASE:          0x5,
+            READ:           0x6,
+            STANDBY:        0x7
+        },
+        WORDMASK:   0x3fff              // NVR words are 14-bit
+        /*
+         * The Technical Manual, p. 4-18, also notes that "Early VT100s can disable the receiver interrupt by
+         * programming D4 in the NVR latch. However, this is never used by the VT100."
+         */
     }
 };
 
@@ -402,7 +423,8 @@ ChipSet.prototype.initBus = function(cmp, bus, cpu, dbg)
     this.cpu = cpu;
     this.dbg = dbg;
     this.cmp = cmp;
-    this.kbd = cmp.getMachineComponent("Keyboard");
+    this.kbd = /** @type {Keyboard} */ (cmp.getMachineComponent("Keyboard"));
+    this.video = /** @type {Video} */ (cmp.getMachineComponent("Video"));
     bus.addPortInputTable(this, this.config.portsInput);
     bus.addPortOutputTable(this, this.config.portsOutput);
 };
@@ -452,9 +474,17 @@ ChipSet.SI1978.INIT = [
 ChipSet.VT100.INIT = [
     [
         ChipSet.VT100.BRIGHTNESS.INIT,
-        ChipSet.VT100.FLAGS_BUFFER.NO_AVO | ChipSet.VT100.FLAGS_BUFFER.NO_GFX,
-        ChipSet.VT100.DC012.INIT,
-        ChipSet.VT100.DC011.INIT
+        ChipSet.VT100.FLAGS_BUFFER.NO_AVO | ChipSet.VT100.FLAGS_BUFFER.NO_GFX
+    ],
+    [
+        ChipSet.VT100.DC011.INITCOLS,
+        ChipSet.VT100.DC011.INITRATE
+    ],
+    [
+        ChipSet.VT100.DC012.INITSCROLL,
+        ChipSet.VT100.DC012.INITBLINK,
+        ChipSet.VT100.DC012.INITREVERSE,
+        ChipSet.VT100.DC012.INITATTR
     ],
     [
         0, 0, 0, 0,
@@ -501,8 +531,10 @@ ChipSet.prototype.save = function()
         state.set(0, [this.bStatus0, this.bStatus1, this.bStatus2, this.wShiftData, this.bShiftCount, this.bSound1, this.bSound2]);
         break;
     case ChipSet.VT100.MODEL:
-        state.set(0, [this.bBrightness, this.bFlagsBuffer, this.bDC012, this.bDC011]);
-        state.set(1, [this.dNVRAddr, this.wNVRData, this.bNVRLatch, this.bNVROut, this.aNVRWords]);
+        state.set(0, [this.bBrightness, this.bFlagsBuffer]);
+        state.set(1, [this.bDC011Cols, this.bDC011Rate]);
+        state.set(2, [this.bDC012Scroll, this.bDC012Blink, this.bDC012Reverse, this.bDC012Attr]);
+        state.set(3, [this.dNVRAddr, this.wNVRData, this.bNVRLatch, this.bNVROut, this.aNVRWords]);
         break;
     }
     return state.data();
@@ -534,9 +566,15 @@ ChipSet.prototype.restore = function(data)
         case ChipSet.VT100.MODEL:
             this.bBrightness = a[0];
             this.bFlagsBuffer = a[1];
-            this.bDC012 = a[2];
-            this.bDC011 = a[3];
             a = data[1];
+            this.bDC011Cols = a[0];
+            this.bDC011Rate = a[1];
+            a = data[2];
+            this.bDC012Scroll = a[0];
+            this.bDC012Blink = a[1];
+            this.bDC012Reverse = a[2];
+            this.bDC012Attr = a[3];
+            a = data[3];
             this.dNVRAddr = a[0];               // 20-bit address
             this.wNVRData = a[1];               // 14-bit word
             this.bNVRLatch = a[2];              // 1 byte
@@ -909,9 +947,8 @@ ChipSet.prototype.outVT100NVRLatch = function(port, b, addrFrom)
 /**
  * outVT100DC012(port, b, addrFrom)
  *
- * TODO: Consider whether we should disable any interrupts (eg, vertical retrace) until the
- * this port is initialized at runtime.  We initialize it ourselves at start-up, but our initial
- * value is just a guess.
+ * TODO: Consider whether we should disable any interrupts (eg, vertical retrace) until
+ * this port is initialized at runtime.
  *
  * @this {ChipSet}
  * @param {number} port (0xA2)
@@ -921,7 +958,34 @@ ChipSet.prototype.outVT100NVRLatch = function(port, b, addrFrom)
 ChipSet.prototype.outVT100DC012 = function(port, b, addrFrom)
 {
     this.printMessageIO(port, b, addrFrom, "DC012");
-    this.bDC012 = b;
+
+    var bOpt = b & 0x3;
+    var bCmd = (b >> 2) & 0x3;
+    switch(bCmd) {
+    case 0x0:
+        this.bDC012Scroll = (this.bDC012Scroll & ~0x3) | bOpt;
+        break;
+    case 0x1:
+        this.bDC012Scroll = (this.bDC012Scroll & ~0xC) | (bOpt << 2);
+        break;
+    case 0x2:
+        switch(bOpt) {
+        case 0x0:
+            this.bDC012Blink = ~this.bDC012Blink;
+            break;
+        case 0x1:
+            // TODO: Clear vertical frequency interrupt
+            break;
+        case 0x2:
+        case 0x3:
+            this.bDC012Reverse = 0x3 - bOpt;
+            break;
+        }
+        break;
+    case 0x3:
+        this.bDC012Attr = bOpt;
+        break;
+    }
 };
 
 /**
@@ -935,7 +999,25 @@ ChipSet.prototype.outVT100DC012 = function(port, b, addrFrom)
 ChipSet.prototype.outVT100DC011 = function(port, b, addrFrom)
 {
     this.printMessageIO(port, b, addrFrom, "DC011");
-    this.bDC011 = b;
+    if (b & ChipSet.VT100.DC011.RATE60) {
+        b &= ChipSet.VT100.DC011.RATE50;
+        if (this.bDC011Rate != b) {
+            this.bDC011Rate = b;
+            if (this.video) {
+                this.video.updateRate(this.bDC011Rate == ChipSet.VT100.DC011.RATE50? 50 : 60);
+            }
+        }
+    } else {
+        b &= ChipSet.VT100.DC011.COLS132;
+        if (this.bDC011Cols != b) {
+            this.bDC011Cols = b;
+            if (this.video) {
+                var nCols = (this.bDC011Cols == ChipSet.VT100.DC011.COLS132? 132 : 80);
+                var nRows = (nCols > 80 && (this.bFlagsBuffer & ChipSet.VT100.FLAGS_BUFFER.NO_AVO)? 14 : 24);
+                this.video.updateDimensions(nCols, nRows);
+            }
+        }
+    }
 };
 
 /*

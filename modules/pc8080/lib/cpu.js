@@ -176,13 +176,13 @@ CPU.prototype.initBus = function(cmp, bus, cpu, dbg)
     /*
      * We need to know the refresh rate (and corresponding interrupt rate, if any) of the Video component.
      */
-    var video = cmp.getMachineComponent("Video");
+    var video = /** @type {Video} */ (cmp.getMachineComponent("Video"));
     this.refreshRate = video && video.getRefreshRate() || CPU.VIDEO_UPDATES_PER_SECOND;
 
     /*
      * Attach the ChipSet component to the CPU so that it can be notified whenever the CPU stops and starts.
      */
-    this.chipset = cmp.getMachineComponent("ChipSet");
+    this.chipset = /** @type {ChipSet} */ (cmp.getMachineComponent("ChipSet"));
 
     /*
      * We've already saved the parmsCPU 'autoStart' setting, but there may be a machine (or URL) override.

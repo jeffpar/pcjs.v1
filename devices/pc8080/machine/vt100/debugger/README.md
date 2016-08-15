@@ -12,10 +12,17 @@ DEC VT100 Terminal with Debugger
 --------------------------------
 
 The [PC8080](/modules/pc8080/) machine below is configured to simulate a [VT100 Terminal](/devices/pc8080/machine/vt100/)
-with a Control Panel and Debugger.  It is running the original [VT100 Firmware](/devices/pc8080/rom/vt100/) inside the
-[PC8080](/modules/pc8080/) CPU emulator.  You'll also find assorted [Hardware Notes](#vt100-memory-usage) below.
+with a Control Panel and Debugger.  When you press the "Run" button, it will start running the original
+[VT100 Firmware](/devices/pc8080/rom/vt100/) inside the [PC8080](/modules/pc8080/) CPU emulator.
 
-Click the "Run" button to start the simulation.  The VT100 KEYMAP table in [keyboard.js](/modules/pc8080/lib/keyboard.js)
+Information about [VT100 Keys](#vt100-keys) along with assorted [Hardware Notes](#vt100-memory-usage) are provided below.
+
+{% include machine.html id="vt100" %}
+
+VT100 Keys
+----------
+
+The VT100 KEYMAP table in [keyboard.js](/modules/pc8080/lib/keyboard.js)
 maps modern keys to VT100 key addresses, and most of the mappings are 1-1.  Function keys are mapped as follows:
 
 - F1: PF1
@@ -27,10 +34,22 @@ maps modern keys to VT100 key addresses, and most of the mappings are 1-1.  Func
 - F8: NO SCROLL
 - F9: SET-UP
 
-The simulation is not fully operational yet, but it is now possible to access the SET-UP screen, press 4 to switch to LOCAL
-mode, and verify that most VT100 keys work properly.
+From the SET-UP screen, you can press **4** to switch to LOCAL mode and verify local operation of most VT100
+keys.  The following keys have special meaning inside SET-UP Mode.
 
-{% include machine.html id="vt100" %}
+### SET-UP Mode Keys
+
+- 0: RESET
+- 2: SET/CLEAR TAB
+- 3: CLEAR ALL TABS
+- 4: ONLINE/LOCAL
+- 5: SET-UP A/B
+- 6: TOGGLE FEATURE
+- 7: TRANSMIT SPEED
+- 8: RECEIVE SPEED
+- 9: 80/132 COLUMNS
+- SHIFT-S: Save SET-UP Features
+- SHIFT-R: Restore SET-UP Features
 
 VT100 Memory Usage
 ------------------
@@ -226,6 +245,37 @@ Some additional observations:
 - Following the NVR test, if an error was detected, code at 0x00D2 loops for 0xFFF (4095) times with the CLICK bit (0x80)
 set in the keyboard STATUS port (0x82), generating a "bell" (beep).  The NVR checksum test used to fail when we initialized all
 NVR words with the freshly-erased value of 0x3fff; now we initialize them with canned values (see ChipSet.VT100.INIT).
+
+### SET-UP Mode
+
+From "PART 2: SET-UP MODE", p. 2-6, of the VT100 Technical Manual (July 1982):
+
+> Unlike most terminals, the VT100 does not use switches or jumpers to individually turn the built-in terminal features on
+or off. Instead, the VT100 uses a nonvolatile memory (NVR) that always remembers what features have been selected, as if a
+swiitch had been set.
+
+> Selection and storage of built-in terminal features is performed in a special mode of operation called SET-UP mode.
+When you enter SET-UP mode, the status of features stored in temporary memory shows on the screen. You can then change the
+features and store any new feature selections either temporarily, by leaving SET-UP mode; or on a fixed basis, by performing
+a Save operation. In either case, terminal operation reflects the new feature selection. If a recall operation is performed,
+or the terminal is reset, or terminal power is turned off, all temporary feature settings are replaced by features that have
+been stored on a fixed basis.
+
+> ### SET-UP Features
+
+> SET-UP mode provides two brief summaries of the current feature status. The first presentation - SET-UP A - displays
+the location of tab stops set and a visual ruler that numbers each character position on the line. The second presentation -
+SET-UP B - summarizes the status of the other terminal features.
+
+> **SET-UP A** - To enter SET-UP A, press the **SET-UP** key. The display has a presentation similar to Figure 2-3. The bottom
+line of the display consists of a "ruler" that numbers each character position available on a line. Each tab stop is shown by
+a "T" above the ruler. If the tab stop(s) set are those desired, you may exit **SET-UP** mode by pressing the SET-UP key again
+or you may now change the tabs to meet your requirements.
+
+> **SET-UP B** - SET-UP B mode may only be entered from SET-UP A mode. To enter SET-UP B, from SET-UP A press the **5** key on
+the main keyboard. The display looks like Figure 2-4. Figure 2-5 summarizes the SET-UP B presentation. This summary allows you
+to quickly determine what features are enabled. For additional information on a feature refer to in Part 3, SET-UP Feature
+Definitions.
 
 Additional VT100 Resources
 --------------------------

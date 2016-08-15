@@ -72,9 +72,9 @@ Component.subclass(Keyboard);
 /**
  * Alphanumeric and other common (printable) ASCII codes.
  *
- * TODO: Determine what we can do to get ALL constants like these inlined (enum doesn't seem to
- * get the job done); the problem seems to be limited to property references that use quotes, which
- * is why I've 'unquoted' as many of them as possible.
+ * TODO: Determine what we can do to get ALL constants like these inlined by the Closure Compiler
+ * (enum doesn't seem to get the job done); the problem seems to be limited to property references
+ * that use quotes, which is why I've 'unquoted' as many of them as possible.
  *
  * @enum {number}
  */
@@ -101,8 +101,8 @@ Keyboard.ASCII = {
  *
  * keyCodes for most common ASCII keys can simply use the appropriate ASCII code above.
  *
- * Most of these represent non-ASCII keys (eg, the LEFT arrow key), yet for some reason, browsers defined
- * them using ASCII codes (eg, the LEFT arrow key uses the ASCII code for '%' or 37).
+ * Most of these represent non-ASCII characters (eg, the LEFT arrow key), yet for some reason, browsers
+ * defined them using ASCII codes (eg, the LEFT arrow key uses 37, which is the ASCII code for '%').
  *
  * @enum {number}
  */
@@ -282,13 +282,15 @@ Keyboard.VT100 = {
     KEYMAP: {},
     ALTCODES: {},
     LEDCODES: {},
-    SOFTCODES: {},
+    SOFTCODES: {
+        'setup':    Keyboard.KEYCODE.F9
+    },
     /*
      * Reading port 0x82 returns a key address from the VT100 keyboard's UART data output.
      *
      * Every time a keyboard scan is initiated (by setting the START bit of the status byte),
-     * an internal address index is reset to zero, and an interrupt is generated for each entry
-     * in the aKeysActive array, along with a final interrupt for KEYLAST.
+     * our internal address index (iKeyNext) is set to zero, and an interrupt is generated for
+     * each entry in the aKeysActive array, along with a final interrupt for KEYLAST.
      */
     ADDRESS: {
         PORT:       0x82,
@@ -320,9 +322,12 @@ Keyboard.VT100 = {
         CLICK:      0x80,
         INIT:       0x00
     },
-    KEYLAST:        0x7F
+    KEYLAST:        0x7F            // special end-of-scan key address (all valid key addresses are < KEYLAST)
 };
 
+/*
+ * Table to map host key codes to VT100 key addresses (ie, unique 7-bit values representing key positions on the VT100)
+ */
 Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.DEL]     =   0x03;
 Keyboard.VT100.KEYMAP[Keyboard.ASCII.P]         =   0x05;
 Keyboard.VT100.KEYMAP[Keyboard.ASCII.O]         =   0x06;
@@ -486,16 +491,25 @@ Keyboard.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
         default:
             if (this.config.SOFTCODES && this.config.SOFTCODES[sBinding] !== undefined) {
                 this.bindings[id] = control;
-                var fnDown = function(kbd, sSoftCode) {
-                    return function onMouseOrTouchDownKeyboard(event) {
-                        kbd.onSoftKeyDown(sSoftCode, true);
+                var fnDown = function(kbd, softCode) {
+                    return function onKeyboardBindingDown(event) {
+                        kbd.onSoftKeyDown(softCode, true);
+                        /*
+                         * I'm assuming we only need to give focus back on the "up" event...
+                         *
+                         *      if (kbd.cmp) kbd.cmp.updateFocus();
+                         */
                     };
-                }(this, sBinding);
-                var fnUp = function (kbd, sSoftCode) {
-                    return function onMouseOrTouchUpKeyboard(event) {
-                        kbd.onSoftKeyDown(sSoftCode, false);
+                }(this, this.config.SOFTCODES[sBinding]);
+                var fnUp = function (kbd, softCode) {
+                    return function onKeyboardBindingUp(event) {
+                        kbd.onSoftKeyDown(softCode, false);
+                        /*
+                         * Give focus back to the machine (since clicking the button takes focus away).
+                         */
+                        if (kbd.cmp) kbd.cmp.updateFocus();
                     };
-                }(this, sBinding);
+                }(this, this.config.SOFTCODES[sBinding]);
                 if ('ontouchstart' in window) {
                     control.ontouchstart = fnDown;
                     control.ontouchend = fnUp;
@@ -522,9 +536,10 @@ Keyboard.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
  */
 Keyboard.prototype.initBus = function(cmp, bus, cpu, dbg)
 {
+    this.cmp = cmp;
     this.cpu = cpu;
     this.dbg = dbg;     // NOTE: The "dbg" property must be set for the message functions to work
-    this.chipset = cmp.getMachineComponent("ChipSet");
+    this.chipset = /** @type {ChipSet} */ (cmp.getMachineComponent("ChipSet"));
     bus.addPortInputTable(this, this.config.portsInput);
     bus.addPortOutputTable(this, this.config.portsOutput);
 };
@@ -873,8 +888,8 @@ Keyboard.prototype.checkBusy = function()
  *
  * We take our cue from iKeyNext.  If it's -1 (default), we simply return the last value latched
  * in bVT100Address.  Otherwise, if iKeyNext is a valid index into aKeysActive, we look up the key
- * in the VT100.KEYMAP, latch it, and increment iKeyNext, else we latch Keyboard.VT100.KEYLAST
- * and set iKeyNext to -1 again.
+ * in the VT100.KEYMAP, latch it, and increment iKeyNext.  Failing that, we latch Keyboard.VT100.KEYLAST
+ * and reset iKeyNext to -1.
  *
  * @this {Keyboard}
  * @param {number} port (0x82)
@@ -893,8 +908,8 @@ Keyboard.prototype.inVT100UARTAddress = function(port, addrFrom)
                 /*
                  * In MAXDEBUG builds, this code removes the key as soon as it's been reported, because
                  * when debugging, it's easy for the window to lose focus and never receive the keyUp event,
-                 * thereby leaving us with a stuck key.  However, this causes more problems than it solves,
-                 * and seems to illustrate that key presses need to be persist for more than a single poll.
+                 * thereby leaving us with a stuck key.  However, this may cause more problems than it solves,
+                 * because the VT100's ROM seems to require that key presses persist for more than a single poll.
                  */
                 this.aKeysActive.splice(this.iKeyNext, 1);
             }

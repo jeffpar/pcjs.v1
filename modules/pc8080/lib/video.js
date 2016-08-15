@@ -152,7 +152,7 @@ function Video(parmsVideo, canvas, context, textarea, container)
 
     /*
      * Now that we've finished using nRowsBuffer to help define the screen size, we add one more
-     * row for text modes, to simplify smooth-scrolling down the road.
+     * row for text modes, to account for the VT100's scroll line buffer (used for smooth scrolling).
      */
     if (this.cyCell > 1) this.nRowsBuffer++;
 
@@ -292,6 +292,9 @@ Video.VT100 = {
 
 /**
  * initBuffers()
+ *
+ * @this {Video}
+ * @return {boolean}
  */
 Video.prototype.initBuffers = function()
 {
@@ -308,10 +311,11 @@ Video.prototype.initBuffers = function()
         cyBuffer = this.cxBuffer;
     }
 
-    this.sizeBuffer = ((this.cxBuffer * this.nBitsPerPixel) >> 3) * this.cyBuffer;
+    this.sizeBuffer = 0;
     if (!this.fUseRAM) {
+        this.sizeBuffer = ((this.cxBuffer * this.nBitsPerPixel) >> 3) * this.cyBuffer;
         if (!this.bus.addMemory(this.addrBuffer, this.sizeBuffer, Memory.TYPE.VIDEO)) {
-            return;
+            return false;
         }
     }
 
@@ -319,15 +323,15 @@ Video.prototype.initBuffers = function()
      * imageBuffer is only used for graphics modes.  For text modes, we create a canvas
      * for each font and draw characters by drawing from the font canvas to the target canvas.
      */
-    if (this.cxCell > 1) {
+    if (this.sizeBuffer) {
+        this.imageBuffer = this.contextScreen.createImageData(cxBuffer, cyBuffer);
+        this.nPixelsPerCell = (16 / this.nBitsPerPixel)|0;
+        this.initCellCache(this.sizeBuffer >> 1);
+    } else {
         /*
          * We add an extra column per row to store the visible line length at the start of every row.
          */
         this.initCellCache((this.nColsBuffer + 1) * this.nRowsBuffer);
-    } else {
-        this.imageBuffer = this.contextScreen.createImageData(cxBuffer, cyBuffer);
-        this.nPixelsPerCell = (16 / this.nBitsPerPixel)|0;
-        this.initCellCache(this.sizeBuffer >> 1);
     }
 
     this.canvasBuffer = document.createElement("canvas");
@@ -383,6 +387,7 @@ Video.prototype.initBuffers = function()
 
         this.abLineBuffer = new Array(this.nColsBuffer);
     }
+    return true;
 };
 
 /**
@@ -410,7 +415,7 @@ Video.prototype.initBus = function(cmp, bus, cpu, dbg)
      * If we have an associated keyboard, then ensure that the keyboard will be notified
      * whenever the canvas gets focus and receives input.
      */
-    this.kbd = cmp.getMachineComponent("Keyboard");
+    this.kbd = /** @type {Keyboard} */ (cmp.getMachineComponent("Keyboard"));
     if (this.kbd) {
         for (var s in this.ledBindings) {
             this.kbd.setBinding("led", s, this.ledBindings[s]);
@@ -461,7 +466,8 @@ Video.prototype.doneLoad = function(sURL, sFontData, nErrorCode)
          * Minimal font data validation, just to make sure we're not getting garbage from the server.
          */
         if (abFontData.length == 2048) {
-            this.createFonts(abFontData);
+            this.abFontData = abFontData;
+            this.createFonts();
         }
         else {
             this.notice("Unrecognized font data length (" + abFontData.length + ")");
@@ -484,30 +490,33 @@ Video.prototype.doneLoad = function(sURL, sFontData, nErrorCode)
 };
 
 /**
- * createFonts(abFontData)
+ * createFonts()
  *
  * @this {Video}
- * @param {Array.<number>} abFontData
+ * @return {boolean}
  */
-Video.prototype.createFonts = function(abFontData)
+Video.prototype.createFonts = function()
 {
     /*
      * We retain abFontData in case we have to rebuild the fonts (eg, when we switch from 80 to 132 columns)
      */
-    this.abFontData = abFontData;
-    this.fDotStretcher = (this.nFormat == Video.FORMAT.VT100);
-    this.aFonts[Video.VT100.FONT.NORML] = [
-        this.createFontVariation(this.cxCell, this.cyCell),
-        this.createFontVariation(this.cxCell, this.cyCell, this.fUnderline)
-    ];
-    this.aFonts[Video.VT100.FONT.DWIDE] = [
-        this.createFontVariation(this.cxCell*2, this.cyCell),
-        this.createFontVariation(this.cxCell*2, this.cyCell, this.fUnderline)
-    ];
-    this.aFonts[Video.VT100.FONT.DHIGH] = this.aFonts[Video.VT100.FONT.DHIGH_BOT] = [
-        this.createFontVariation(this.cxCell*2, this.cyCell*2),
-        this.createFontVariation(this.cxCell*2, this.cyCell*2, this.fUnderline)
-    ];
+    if (this.abFontData) {
+        this.fDotStretcher = (this.nFormat == Video.FORMAT.VT100);
+        this.aFonts[Video.VT100.FONT.NORML] = [
+            this.createFontVariation(this.cxCell, this.cyCell),
+            this.createFontVariation(this.cxCell, this.cyCell, this.fUnderline)
+        ];
+        this.aFonts[Video.VT100.FONT.DWIDE] = [
+            this.createFontVariation(this.cxCell*2, this.cyCell),
+            this.createFontVariation(this.cxCell*2, this.cyCell, this.fUnderline)
+        ];
+        this.aFonts[Video.VT100.FONT.DHIGH] = this.aFonts[Video.VT100.FONT.DHIGH_BOT] = [
+            this.createFontVariation(this.cxCell*2, this.cyCell*2),
+            this.createFontVariation(this.cxCell*2, this.cyCell*2, this.fUnderline)
+        ];
+        return true;
+    }
+    return false;
 };
 
 /**
@@ -713,6 +722,47 @@ Video.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
 };
 
 /**
+ * updateDimensions(nCols, nRows)
+ *
+ * Called from the ChipSet component whenever the screen dimensions have been dynamically altered.
+ *
+ * @this {Video}
+ * @param {number} nCols (should be either 80 or 132; 80 is the default)
+ * @param {number} nRows (should be either 24 or 14; 24 is the default)
+ */
+Video.prototype.updateDimensions = function(nCols, nRows)
+{
+    this.printMessage("updateDimensions(" + nCols + "," + nRows + ")");
+    this.nColsBuffer = nCols;
+    /*
+     * Even when the number of effective rows is 14 (or 15 counting the scroll line buffer), we want
+     * to leave the number of rows at 24 (or 25 counting the scroll line buffer), because the VT100 doesn't
+     * actually change character height (only character width).
+     *
+     *      this.nRowsBuffer = nRows+1; // +1 for scroll line buffer
+     */
+    this.cxCell = this.cxCellDefault;
+    if (nCols > 80) this.cxCell--;      // VT100 font cells are 9x10 instead of 10x10 in 132-column mode
+    if (this.initBuffers()) {
+        this.createFonts();
+    }
+};
+
+/**
+ * updateRate(nRate)
+ *
+ * Called from the ChipSet component whenever the monitor refresh rate has been dynamically altered.
+ *
+ * @this {Video}
+ * @param {number} nRate (should be either 50 or 60; 60 is the default)
+ */
+Video.prototype.updateRate = function(nRate)
+{
+    this.printMessage("updateRate(" + nRate + ")");
+    this.rateMonitor = nRate;
+};
+
+/**
  * doFullScreen()
  *
  * @this {Video}
@@ -796,7 +846,7 @@ Video.prototype.notifyFullScreen = function(fFullScreen)
             this.canvasScreen.style.width = this.canvasScreen.style.height = "";
         }
     }
-    this.printMessage("notifyFullScreen(" + fFullScreen + ")", true);
+    this.printMessage("notifyFullScreen(" + fFullScreen + ")");
 };
 
 /**
@@ -1057,8 +1107,8 @@ Video.prototype.updateVT100 = function(fForced)
 
     if (cUpdated && this.contextBuffer) {
         /*
-         * NOTE: We must subtract cyCell from cyBuffer to avoid displaying the extra row that we normally buffer
-         * in support of smooth-scrolling.
+         * NOTE: We must subtract cyCell from cyBuffer to avoid displaying the extra "scroll line" that we normally
+         * buffer to support smooth-scrolling.
          */
         this.contextScreen.drawImage(this.canvasBuffer, 0, 0, this.cxBuffer, this.cyBuffer - this.cyCell, this.xScreenOffset, this.yScreenOffset, this.cxScreenOffset, this.cyScreenOffset);
     }
@@ -1111,9 +1161,10 @@ Video.prototype.updateScreen = function(n)
         }
 
         /*
-         * Since this is not a forced update, if our cell cache is valid AND the buffer is clean, then do nothing.
+         * Since this is not a forced update, if our cell cache is valid AND we allocated our own buffer AND the buffer
+         * is clean, then there's nothing to do.
          */
-        if (fUpdate && this.fCellCacheValid) {
+        if (fUpdate && this.fCellCacheValid && this.sizeBuffer) {
             if ((fClean = this.bus.cleanMemory(this.addrBuffer, this.sizeBuffer))) {
                 fUpdate = false;
             }
