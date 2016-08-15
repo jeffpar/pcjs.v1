@@ -410,7 +410,7 @@ Video.prototype.initBus = function(cmp, bus, cpu, dbg)
      * If we have an associated keyboard, then ensure that the keyboard will be notified
      * whenever the canvas gets focus and receives input.
      */
-    this.kbd = cmp.getMachineComponent("Keyboard");
+    this.kbd = /** @type {Keyboard} */ (cmp.getMachineComponent("Keyboard"));
     if (this.kbd) {
         for (var s in this.ledBindings) {
             this.kbd.setBinding("led", s, this.ledBindings[s]);
@@ -710,6 +710,34 @@ Video.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
         break;
     }
     return false;
+};
+
+/**
+ * updateDimensions(nCols, nRows)
+ *
+ * Called from the ChipSet component whenever the screen dimensions have been dynamically altered.
+ *
+ * @this {Video}
+ * @param {number} nCols (should be either 80 or 132; 80 is the default)
+ * @param {number} nRows (should be either 24 or 14; 24 is the default)
+ */
+Video.prototype.updateDimensions = function(nCols, nRows)
+{
+    this.println("updateDimensions(" + nCols + "," + nRows + ")");
+};
+
+/**
+ * updateRate(nRate)
+ *
+ * Called from the ChipSet component whenever the monitor refresh rate has been dynamically altered.
+ *
+ * @this {Video}
+ * @param {number} nRate (should be either 50 or 60; 60 is the default)
+ */
+Video.prototype.updateRate = function(nRate)
+{
+    this.println("updateRate(" + nRate + ")");
+    this.rateMonitor = nRate;
 };
 
 /**

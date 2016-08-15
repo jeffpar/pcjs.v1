@@ -241,7 +241,7 @@ SerialPort.prototype.initBus = function(cmp, bus, cpu, dbg)
     this.bus = bus;
     this.cpu = cpu;
     this.dbg = dbg;
-    this.chipset = cmp.getMachineComponent("ChipSet");
+    this.chipset = /** @type {ChipSet} */ (cmp.getMachineComponent("ChipSet"));
     bus.addPortInputTable(this, SerialPort.aPortInput, this.portBase);
     bus.addPortOutputTable(this, SerialPort.aPortOutput, this.portBase);
     this.setReady();

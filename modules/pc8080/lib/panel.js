@@ -95,7 +95,7 @@ Panel.prototype.initBus = function(cmp, bus, cpu, dbg)
     this.bus = bus;
     this.cpu = cpu;
     this.dbg = dbg;
-    this.kbd = cmp.getMachineComponent("Keyboard");
+    this.kbd = /** @type {Keyboard} */ (cmp.getMachineComponent("Keyboard"));
 };
 
 /**
