@@ -157,6 +157,7 @@ function Video(parmsVideo, canvas, context, textarea, container)
     if (this.cyCell > 1) {
         this.nRowsBuffer++;
         this.bScrollOffset = 0;
+        this.fSkipSingleCellUpdate = false;
     }
 
     /*
@@ -778,7 +779,26 @@ Video.prototype.updateScrollOffset = function(bScroll)
     this.printMessage("updateScrollOffset(" + bScroll + ")");
     if (this.bScrollOffset !== bScroll) {
         this.bScrollOffset = bScroll;
-        this.updateScreen(-1);
+        /*
+         * WARNING: If we immediately redraw the screen on the first wrap of the scroll offset back to zero,
+         * we end up "slamming" the screen's contents back down again, because it seems that the frame buffer
+         * contents haven't actually been scrolled yet.  So we redraw now ONLY if bScroll is non-zero, lest
+         * we ruin the smooth-scroll effect.
+         *
+         * And this change, while necessary, is not sufficient, because another intervening updateScreen()
+         * call could still occur before the frame buffer contents are actually scrolled; and ordinarily, if the
+         * buffer hasn't changed, updateScreen() would do nothing, but alas, if the cursor happens to get toggled
+         * in the interim, updateScreen() will want to update exactly ONE cell.
+         *
+         * So we deal with that by setting the fSkipSingleCellUpdate flag.  Now of course, there's no guarantee
+         * that the next update of only ONE cell will always be a cursor update, but even if it isn't, skipping
+         * that update doesn't seem like a huge cause for concern.
+         */
+        if (bScroll) {
+            this.updateScreen(-1);
+        } else {
+            this.fSkipSingleCellUpdate = true;
+        }
     }
 };
 
@@ -1043,9 +1063,10 @@ Video.prototype.updateVT100 = function(fForced)
 
     var nRows = 0;
     var nFill = (this.rateMonitor == 60? 2 : 5);
+    var iCell = 0, cUpdated = 0, iCellUpdated = -1;
+
     this.assert(this.abLineBuffer.length == this.nColsBuffer);
 
-    var iCell = 0, cUpdated = 0;
     while (nRows < this.nRowsBuffer) {
         /*
          * Populate the line buffer
@@ -1101,7 +1122,7 @@ Video.prototype.updateVT100 = function(fForced)
             for (var iCol = 0; iCol < nCols; iCol++) {
                 data = this.abLineBuffer[iCol];
                 if (!fLineCacheValid || data !== this.aCellCache[iCell]) {
-                    this.aCellCache[iCell] = data;
+                    this.aCellCache[iCellUpdated = iCell] = data;
                     this.updateChar(font, iCol, nRows, data, this.contextBuffer);
                     cUpdated++;
                 }
@@ -1124,6 +1145,18 @@ Video.prototype.updateVT100 = function(fForced)
         this.nUpdateSeconds = nSeconds;
         this.printMessage("updateVT100(): update #" + this.nUpdateNumber + " at " +this.nUpdateSeconds + " corner=" + str.toHexByte(this.aCellCache[1]) + " cycles=" + this.nCyclesPrev + " delta=" + this.nCyclesDelta);
     }
+
+    if (!fForced && this.fSkipSingleCellUpdate && cUpdated == 1) {
+        /*
+         * We're going to blow off this update, since it comes on the heels of a smooth-scroll that *may*
+         * not be completely finished yet, and at the same time, we're going to zap the only updated cell
+         * cache entry, to guarantee that it's redrawn on the next update.
+         */
+        this.assert(iCellUpdated >= 0);
+        this.aCellCache[iCellUpdated] = -1;
+        cUpdated = 0;
+    }
+    this.fSkipSingleCellUpdate = false;
 
     if ((cUpdated || fForced) && this.contextBuffer) {
         /*
