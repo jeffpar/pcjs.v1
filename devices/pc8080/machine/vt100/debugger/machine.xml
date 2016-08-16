@@ -27,7 +27,7 @@
 	<keyboard id="keyboard" model="VT100">
 		<control type="button" binding="setup" padleft="8px">SET-UP</control>
 	</keyboard>
-	<serial id="serial0" adapter="0" binding="print">
+	<serial id="serialPort" adapter="0" binding="print">
 		<control type="button" binding="test" value="HELLO WORLD!\r\n" padleft="8px">TEST RECEIVER</control>
 	</serial>
 	<panel ref="/devices/pc8080/panel/wide.xml"/>

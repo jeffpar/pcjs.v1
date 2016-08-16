@@ -85,7 +85,7 @@ function SerialPort(parmsSerial) {
     this.consoleOutput = null;
 
     /**
-     * controlIOBuffer is a DOM element, if any, bound to the port (currently used for output only; see echoByte()).
+     * controlIOBuffer is a DOM element bound to the port (currently used for output only; see transmitByte()).
      *
      * @type {Object}
      */
@@ -93,7 +93,7 @@ function SerialPort(parmsSerial) {
 
     /*
      * If controlIOBuffer is being used AND 'tabSize' is set, then we make an attempt to monitor the characters
-     * being echoed via echoByte(), maintain a logical column position, and convert any tabs into the appropriate
+     * being echoed via transmitByte(), maintain a logical column position, and convert any tabs into the appropriate
      * number of spaces.
      *
      * charBOL, if nonzero, is a character to automatically output at the beginning of every line.  This probably
@@ -123,6 +123,18 @@ function SerialPort(parmsSerial) {
             serial.receiveData();
         }
     }(this);
+
+    /*
+     * No connection until initBus() invokes initConnection().
+     */
+    this.connection = this.sendByte = null;
+
+    /*
+     * Export all functions required by initConnection(); currently, this is the bare minimum, with no flow control.
+     */
+    this['exports'] = {
+        'receiveByte': this.receiveByte
+    };
 }
 
 /*
@@ -130,7 +142,7 @@ function SerialPort(parmsSerial) {
  * property {number} iAdapter
  * property {number} portBase
  * property {number} nIRQ
- * property {Object} controlIOBuffer is a DOM element, if any, bound to the port (for rudimentary output; see echoByte())
+ * property {Object} controlIOBuffer is a DOM element bound to the port (for rudimentary output; see transmitByte())
  *
  * NOTE: This class declaration started as a way of informing the code inspector of the controlIOBuffer property,
  * which remained undefined until a setBinding() call set it later, but I've since decided that explicitly
@@ -359,7 +371,45 @@ SerialPort.prototype.initBus = function(cmp, bus, cpu, dbg)
     this.chipset = /** @type {ChipSet} */ (cmp.getMachineComponent("ChipSet"));
     bus.addPortInputTable(this, SerialPort.aPortInput, this.portBase);
     bus.addPortOutputTable(this, SerialPort.aPortOutput, this.portBase);
+    this.initConnection();
     this.setReady();
+};
+
+/**
+ * initConnection()
+ *
+ * If a machine 'connection' parameter exists of the form "<sourcePort>=<targetMachine>.<targetPort>",
+ * and "<sourcePort>" matches our idComponent, then look for a component with id "<targetMachine>.<targetPort>".
+ *
+ * If the target component is found, then verify that it has exported functions with the following names:
+ *
+ *      receiveByte(b): called by us when we have a byte to transmit; aliased internally to sendByte(b)
+ *
+ * For now, we're not going to worry about communication in the other direction, because when the target component
+ * performs its own initConnection(), it will find our receiveByte(b) function, at which point communication in both
+ * directions should be established.
+ *
+ * @this {SerialPort}
+ */
+SerialPort.prototype.initConnection = function()
+{
+    var sConnection = this.cmp.getMachineParm("connection");
+    if (sConnection) {
+        var asParts = sConnection.split('=');
+        if (asParts.length == 2) {
+            var sSourceID = str.trim(asParts[0]);
+            var sTargetID = str.trim(asParts[1]);
+            if (sSourceID == this.idComponent) {
+                this.connection = Component.getComponentByID(sTargetID);
+                if (this.connection) {
+                    var exports = this.connection['exports'];
+                    if (exports) {
+                        this.sendByte = exports['receiveByte'];
+                    }
+                }
+            }
+        }
+    }
 };
 
 /**
@@ -545,14 +595,22 @@ SerialPort.prototype.receiveData = function()
 };
 
 /**
- * echoByte(b)
+ * transmitByte(b)
  *
  * @this {SerialPort}
  * @param {number} b
- * @return {boolean} true if echoed, false if not
+ * @return {boolean} true if transmitted, false if not
  */
-SerialPort.prototype.echoByte = function(b)
+SerialPort.prototype.transmitByte = function(b)
 {
+    var fTransmitted = false;
+
+    if (this.sendByte) {
+        if (this.sendByte.call(this.connection, b)) {
+            fTransmitted = true;
+        }
+    }
+
     if (this.controlIOBuffer) {
         if (b == 0x0D) {
             this.iLogicalCol = 0;
@@ -577,9 +635,9 @@ SerialPort.prototype.echoByte = function(b)
             this.controlIOBuffer.scrollTop = this.controlIOBuffer.scrollHeight;
             this.iLogicalCol += nChars;
         }
-        return true;
+        fTransmitted = true;
     }
-    if (this.consoleOutput != null) {
+    else if (this.consoleOutput != null) {
         if (b == 0x0A || this.consoleOutput.length >= 1024) {
             this.println(this.consoleOutput);
             this.consoleOutput = "";
@@ -587,9 +645,10 @@ SerialPort.prototype.echoByte = function(b)
         if (b != 0x0A) {
             this.consoleOutput += String.fromCharCode(b);
         }
-        return true;
+        fTransmitted = true;
     }
-    return false;
+
+    return fTransmitted;
 };
 
 /**
@@ -649,7 +708,7 @@ SerialPort.prototype.outData = function(port, bOut, addrFrom)
     this.printMessageIO(port, bOut, addrFrom, "DATA");
     this.bDataOut = bOut;
     this.bStatus &= ~(SerialPort.UART8251.STATUS.XMIT_READY | SerialPort.UART8251.STATUS.XMIT_EMPTY);
-    if (this.echoByte(bOut)) {
+    if (this.transmitByte(bOut)) {
         this.bStatus |= (SerialPort.UART8251.STATUS.XMIT_READY | SerialPort.UART8251.STATUS.XMIT_EMPTY);
     }
 };

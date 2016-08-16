@@ -3,8 +3,8 @@ layout: page
 title: DEC VT100 Terminal with Debugger
 permalink: /devices/pc8080/machine/vt100/debugger/
 machines:
-  - type: pc8080
-    id: vt100
+  - id: vt100
+    type: pc8080
     debugger: true
 ---
 
