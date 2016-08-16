@@ -154,7 +154,10 @@ function Video(parmsVideo, canvas, context, textarea, container)
      * Now that we've finished using nRowsBuffer to help define the screen size, we add one more
      * row for text modes, to account for the VT100's scroll line buffer (used for smooth scrolling).
      */
-    if (this.cyCell > 1) this.nRowsBuffer++;
+    if (this.cyCell > 1) {
+        this.nRowsBuffer++;
+        this.bScrollOffset = 0;
+    }
 
     /*
      * Support for disabling (or, less commonly, enabling) image smoothing, which all browsers
@@ -763,6 +766,23 @@ Video.prototype.updateRate = function(nRate)
 };
 
 /**
+ * updateScrollOffset(bScroll)
+ *
+ * Called from the ChipSet component whenever the screen scroll offset has been dynamically altered.
+ *
+ * @this {Video}
+ * @param {number} bScroll
+ */
+Video.prototype.updateScrollOffset = function(bScroll)
+{
+    this.printMessage("updateScrollOffset(" + bScroll + ")");
+    if (this.bScrollOffset !== bScroll) {
+        this.bScrollOffset = bScroll;
+        this.updateScreen(-1);
+    }
+};
+
+/**
  * doFullScreen()
  *
  * @this {Video}
@@ -1091,6 +1111,8 @@ Video.prototype.updateVT100 = function(fForced)
         nRows++;
     }
 
+    this.fCellCacheValid = true;
+
     this.assert(font < 0 || iCell === this.nCellCache);
 
     if (MAXDEBUG && !fForced) {
@@ -1103,14 +1125,23 @@ Video.prototype.updateVT100 = function(fForced)
         this.printMessage("updateVT100(): update #" + this.nUpdateNumber + " at " +this.nUpdateSeconds + " corner=" + str.toHexByte(this.aCellCache[1]) + " cycles=" + this.nCyclesPrev + " delta=" + this.nCyclesDelta);
     }
 
-    this.fCellCacheValid = true;
-
-    if (cUpdated && this.contextBuffer) {
+    if ((cUpdated || fForced) && this.contextBuffer) {
         /*
-         * NOTE: We must subtract cyCell from cyBuffer to avoid displaying the extra "scroll line" that we normally
-         * buffer to support smooth-scrolling.
+         * We must subtract cyCell from cyBuffer to avoid displaying the extra "scroll line" that we normally
+         * buffer, in support of smooth scrolling.  Speaking of which, we must also add bScrollOffset to ySrc
+         * (well, ySrc is always relative to zero, so no add is actually required).
          */
-        this.contextScreen.drawImage(this.canvasBuffer, 0, 0, this.cxBuffer, this.cyBuffer - this.cyCell, this.xScreenOffset, this.yScreenOffset, this.cxScreenOffset, this.cyScreenOffset);
+        this.contextScreen.drawImage(
+            this.canvasBuffer,
+            0,                                  // xSrc
+            this.bScrollOffset,                 // ySrc
+            this.cxBuffer,                      // cxSrc
+            this.cyBuffer - this.cyCell,        // cySrc
+            this.xScreenOffset,                 // xDst
+            this.yScreenOffset,                 // yDst
+            this.cxScreenOffset,                // cxDst
+            this.cyScreenOffset                 // cyDst
+        );
     }
 };
 

@@ -870,17 +870,17 @@ Keyboard.prototype.checkSoftKeysToRelease = function()
 };
 
 /**
- * checkBusy()
+ * isTransmitterReady()
  *
- * Called whenever a ChipSet circuit needs the keyboard's UART status.
- * Currently, we have no busy conditions (our virtual keyboard is infinitely fast).
+ * Called whenever a ChipSet circuit needs the Keyboard UART's transmitter status.
+ * Currently, we have no busy conditions (our virtual keyboard transmitter is infinitely fast).
  *
  * @this {Keyboard}
- * @return {boolean}
+ * @return {boolean} (true if ready, false if not)
  */
-Keyboard.prototype.checkBusy = function()
+Keyboard.prototype.isTransmitterReady = function()
 {
-    return false;
+    return true;
 };
 
 /**

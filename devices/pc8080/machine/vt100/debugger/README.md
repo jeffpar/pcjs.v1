@@ -51,6 +51,36 @@ keys.  The following keys have special meaning inside SET-UP Mode.
 - SHIFT-S: Save SET-UP Features
 - SHIFT-R: Restore SET-UP Features
 
+### SET-UP B Options
+
+#### Block 1
+
+- 1---: Smooth scroll
+- -1--: Auto-Repeat
+- --1-: Light Screen Background
+- ---1: Block Cursor
+
+#### Block 2
+
+- 1---: Margin Bell
+- -1--: Key-click
+- --1-: ANSI
+- ---1: Auto-XON/XOFF
+
+#### Block 3
+
+- 1---: UK Pound Symbol
+- -1--: Wrap-Around
+- --1-: New Line
+- ---1: Interlace
+
+#### Block 4
+
+- 1---: Even Parity
+- -1--: Parity Enable
+- --1-: 8 Data Bits
+- ---1: 50Hz Power
+
 VT100 Memory Usage
 ------------------
 
