@@ -220,16 +220,16 @@ ChipSet.SI1978 = {
  */
 ChipSet.VT100 = {
     MODEL:          100.0,
-    FLAGS_BUFFER: {
+    FLAGS: {
         PORT:       0x42,               // read-only
-        XMIT:       0x01,               // PUSART transmit buffer empty if SET
+        UART_XMIT:  0x01,               // PUSART transmit buffer empty if SET
         NO_AVO:     0x02,               // AVO present if CLEAR
         NO_GFX:     0x04,               // VT125 graphics board present if CLEAR
         OPTION:     0x08,               // OPTION present if SET
         NO_EVEN:    0x10,               // EVEN FIELD active if CLEAR
         NVR_DATA:   0x20,               // NVR DATA if SET
         NVR_CLK:    0x40,               // NVR CLOCK if SET
-        KBD_XMIT:   0x80                // KBD XMIT BUFFER empty if SET
+        KBD_XMIT:   0x80                // KBD transmit buffer empty if SET
     },
     BRIGHTNESS: {
         PORT:       0x42,               // write-only
@@ -424,6 +424,7 @@ ChipSet.prototype.initBus = function(cmp, bus, cpu, dbg)
     this.dbg = dbg;
     this.cmp = cmp;
     this.kbd = /** @type {Keyboard} */ (cmp.getMachineComponent("Keyboard"));
+    this.serial = /** @type {SerialPort} */ (cmp.getMachineComponent("SerialPort"));
     this.video = /** @type {Video} */ (cmp.getMachineComponent("Video"));
     bus.addPortInputTable(this, this.config.portsInput);
     bus.addPortOutputTable(this, this.config.portsOutput);
@@ -474,7 +475,7 @@ ChipSet.SI1978.INIT = [
 ChipSet.VT100.INIT = [
     [
         ChipSet.VT100.BRIGHTNESS.INIT,
-        ChipSet.VT100.FLAGS_BUFFER.NO_AVO | ChipSet.VT100.FLAGS_BUFFER.NO_GFX
+        ChipSet.VT100.FLAGS.NO_AVO | ChipSet.VT100.FLAGS.NO_GFX
     ],
     [
         ChipSet.VT100.DC011.INITCOLS,
@@ -531,7 +532,7 @@ ChipSet.prototype.save = function()
         state.set(0, [this.bStatus0, this.bStatus1, this.bStatus2, this.wShiftData, this.bShiftCount, this.bSound1, this.bSound2]);
         break;
     case ChipSet.VT100.MODEL:
-        state.set(0, [this.bBrightness, this.bFlagsBuffer]);
+        state.set(0, [this.bBrightness, this.bFlags]);
         state.set(1, [this.bDC011Cols, this.bDC011Rate]);
         state.set(2, [this.bDC012Scroll, this.bDC012Blink, this.bDC012Reverse, this.bDC012Attr]);
         state.set(3, [this.dNVRAddr, this.wNVRData, this.bNVRLatch, this.bNVROut, this.aNVRWords]);
@@ -555,31 +556,31 @@ ChipSet.prototype.restore = function(data)
     if (data && (a = data[0]) && a.length) {
         switch(this.config.MODEL) {
         case ChipSet.SI1978.MODEL:
-            this.bStatus0 = a[0];
-            this.bStatus1 = a[1];
-            this.bStatus2 = a[2];
-            this.wShiftData = a[3];
-            this.bShiftCount = a[4];
-            this.bSound1 = a[5];
-            this.bSound2 = a[6];
+            this.bStatus0      = a[0];
+            this.bStatus1      = a[1];
+            this.bStatus2      = a[2];
+            this.wShiftData    = a[3];
+            this.bShiftCount   = a[4];
+            this.bSound1       = a[5];
+            this.bSound2       = a[6];
             return true;
         case ChipSet.VT100.MODEL:
-            this.bBrightness = a[0];
-            this.bFlagsBuffer = a[1];
+            this.bBrightness   = a[0];
+            this.bFlags        = a[1];
             a = data[1];
-            this.bDC011Cols = a[0];
-            this.bDC011Rate = a[1];
+            this.bDC011Cols    = a[0];
+            this.bDC011Rate    = a[1];
             a = data[2];
-            this.bDC012Scroll = a[0];
-            this.bDC012Blink = a[1];
+            this.bDC012Scroll  = a[0];
+            this.bDC012Blink   = a[1];
             this.bDC012Reverse = a[2];
-            this.bDC012Attr = a[3];
+            this.bDC012Attr    = a[3];
             a = data[3];
-            this.dNVRAddr = a[0];               // 20-bit address
-            this.wNVRData = a[1];               // 14-bit word
-            this.bNVRLatch = a[2];              // 1 byte
-            this.bNVROut = a[3];                // 1 bit
-            this.aNVRWords = a[4];              // 100 14-bit words
+            this.dNVRAddr      = a[0];          // 20-bit address
+            this.wNVRData      = a[1];          // 14-bit word
+            this.bNVRLatch     = a[2];          // 1 byte
+            this.bNVROut       = a[3];          // 1 bit
+            this.aNVRWords     = a[4];          // 100 14-bit words
             return true;
         }
     }
@@ -883,36 +884,40 @@ ChipSet.prototype.doNVRCommand = function()
 };
 
 /**
- * inVT100FlagsBuffer(port, addrFrom)
+ * inVT100Flags(port, addrFrom)
  *
  * @this {ChipSet}
  * @param {number} port (0x42)
  * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
  * @return {number} simulated port value
  */
-ChipSet.prototype.inVT100FlagsBuffer = function(port, addrFrom)
+ChipSet.prototype.inVT100Flags = function(port, addrFrom)
 {
     /*
      * The NVR_CLK bit is driven by LBA7 (ie, bit 7 from Line Buffer Address generation); see the DC011 discussion above.
      */
-    var b = this.bFlagsBuffer;
-    b &= ~ChipSet.VT100.FLAGS_BUFFER.NVR_CLK;
+    var b = this.bFlags;
+    b &= ~ChipSet.VT100.FLAGS.NVR_CLK;
     if (this.getVT100LBA(7)) {
-        b |= ChipSet.VT100.FLAGS_BUFFER.NVR_CLK;
-        if (b != this.bFlagsBuffer) {
+        b |= ChipSet.VT100.FLAGS.NVR_CLK;
+        if (b != this.bFlags) {
             this.doNVRCommand();
         }
     }
-    b &= ~ChipSet.VT100.FLAGS_BUFFER.NVR_DATA;
+    b &= ~ChipSet.VT100.FLAGS.NVR_DATA;
     if (this.bNVROut) {
-        b |= ChipSet.VT100.FLAGS_BUFFER.NVR_DATA;
+        b |= ChipSet.VT100.FLAGS.NVR_DATA;
     }
-    b &= ~ChipSet.VT100.FLAGS_BUFFER.KBD_XMIT;
-    if (this.kbd && !this.kbd.checkBusy()) {
-        b |= ChipSet.VT100.FLAGS_BUFFER.KBD_XMIT;
+    b &= ~ChipSet.VT100.FLAGS.KBD_XMIT;
+    if (this.kbd && this.kbd.isTransmitterReady()) {
+        b |= ChipSet.VT100.FLAGS.KBD_XMIT;
     }
-    this.bFlagsBuffer = b;
-    this.printMessageIO(port, null, addrFrom, "FLAGS.BUFFER", b);
+    b &= ~ChipSet.VT100.FLAGS.UART_XMIT;
+    if (this.serial && this.serial.isTransmitterReady()) {
+        b |= ChipSet.VT100.FLAGS.UART_XMIT;
+    }
+    this.bFlags = b;
+    this.printMessageIO(port, null, addrFrom, "FLAGS", b);
     return b;
 };
 
@@ -967,6 +972,7 @@ ChipSet.prototype.outVT100DC012 = function(port, b, addrFrom)
         break;
     case 0x1:
         this.bDC012Scroll = (this.bDC012Scroll & ~0xC) | (bOpt << 2);
+        if (this.video) this.video.updateScrollOffset(this.bDC012Scroll);
         break;
     case 0x2:
         switch(bOpt) {
@@ -1013,7 +1019,7 @@ ChipSet.prototype.outVT100DC011 = function(port, b, addrFrom)
             this.bDC011Cols = b;
             if (this.video) {
                 var nCols = (this.bDC011Cols == ChipSet.VT100.DC011.COLS132? 132 : 80);
-                var nRows = (nCols > 80 && (this.bFlagsBuffer & ChipSet.VT100.FLAGS_BUFFER.NO_AVO)? 14 : 24);
+                var nRows = (nCols > 80 && (this.bFlags & ChipSet.VT100.FLAGS.NO_AVO)? 14 : 24);
                 this.video.updateDimensions(nCols, nRows);
             }
         }
@@ -1039,7 +1045,7 @@ ChipSet.SI1978.portsOutput = {
 };
 
 ChipSet.VT100.portsInput = {
-    0x42: ChipSet.prototype.inVT100FlagsBuffer
+    0x42: ChipSet.prototype.inVT100Flags
 };
 
 ChipSet.VT100.portsOutput = {

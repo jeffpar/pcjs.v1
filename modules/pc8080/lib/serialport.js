@@ -36,7 +36,6 @@ if (NODE) {
     var web         = require("../../shared/lib/weblib");
     var Component   = require("../../shared/lib/component");
     var Messages    = require("./messages");
-    var ChipSet     = require("./chipset");
     var State       = require("./state");
 }
 
@@ -86,7 +85,7 @@ function SerialPort(parmsSerial) {
     this.consoleOutput = null;
 
     /**
-     * controlIOBuffer is a DOM element, if any, bound to the port (currently used for output only; see echoByte()).
+     * controlIOBuffer is a DOM element bound to the port (currently used for output only; see transmitByte()).
      *
      * @type {Object}
      */
@@ -94,7 +93,7 @@ function SerialPort(parmsSerial) {
 
     /*
      * If controlIOBuffer is being used AND 'tabSize' is set, then we make an attempt to monitor the characters
-     * being echoed via echoByte(), maintain a logical column position, and convert any tabs into the appropriate
+     * being echoed via transmitByte(), maintain a logical column position, and convert any tabs into the appropriate
      * number of spaces.
      *
      * charBOL, if nonzero, is a character to automatically output at the beginning of every line.  This probably
@@ -115,6 +114,27 @@ function SerialPort(parmsSerial) {
          */
         Component.bindExternalControl(this, sBinding, SerialPort.sIOBuffer);
     }
+
+    /*
+     * Define a setTimeout() function that receiveData() can use when there's more data to receive.
+     */
+    this.fnCheckDataReceived = function(serial) {
+        return function() {
+            serial.receiveData();
+        }
+    }(this);
+
+    /*
+     * No connection until initBus() invokes initConnection().
+     */
+    this.connection = this.sendByte = null;
+
+    /*
+     * Export all functions required by initConnection(); currently, this is the bare minimum, with no flow control.
+     */
+    this['exports'] = {
+        'receiveByte': this.receiveByte
+    };
 }
 
 /*
@@ -122,7 +142,7 @@ function SerialPort(parmsSerial) {
  * property {number} iAdapter
  * property {number} portBase
  * property {number} nIRQ
- * property {Object} controlIOBuffer is a DOM element, if any, bound to the port (for rudimentary output; see echoByte())
+ * property {Object} controlIOBuffer is a DOM element bound to the port (for rudimentary output; see transmitByte())
  *
  * NOTE: This class declaration started as a way of informing the code inspector of the controlIOBuffer property,
  * which remained undefined until a setBinding() call set it later, but I've since decided that explicitly
@@ -146,7 +166,7 @@ SerialPort.UART8251 = {
         PARITY_ENABLE:  0x10,
         EVEN_PARITY:    0x20,
         STOP_BITS:      0xC0,       // 00=invalid, 01=1, 10=1.5, 11=2
-        INIT:           0x8E        // 16x baudrate, 8 data bits, no parity, 1.5 stop bits
+        INIT:           0x8E        // 16x baud rate, 8 data bits, no parity, 1.5 stop bits
     },
     /*
      * Format of COMMAND byte written to CONTROL port 0x1
@@ -177,9 +197,10 @@ SerialPort.UART8251 = {
         INIT:           0x85        // XMIT_READY | XMIT_EMPTY | DSR
     },
     /*
-     * Format of BAUDRATE byte written to port 0x2
+     * Format of BAUDRATES byte written to port 0x2
      *
-     * Each nibble is an index (0x0-0xF) into a set internal CPU clock divisors that yield the following baud rates:
+     * Each nibble is an index (0x0-0xF) into a set of internal CPU clock divisors that yield the
+     * following baud rates:
      *
      *      Index   Divisor     Baud Rate
      *      -----   -------     ---------
@@ -199,15 +220,15 @@ SerialPort.UART8251 = {
      *      0xD      36         4800
      *      0xE      18         9600    (default)
      *      0xF      9          19200
-     *
-     * TODO: I'm not really sure at this point which nibble is for the XMIT rate and which is for the RECV
-     * rate; I just made a random guess.
      */
-    BAUDRATE: {
-        XMIT_RATE:      0x0F,
-        RECV_RATE:      0xF0,
+    BAUDRATES: {
+        RECV_RATE:      0x0F,
+        XMIT_RATE:      0xF0,
         INIT:           0xEE        // default to 9600 (0xE) for both XMIT and RECV
-    }
+    },
+    BAUDTABLE: [
+        50, 75, 110, 134.5, 150, 200, 300, 600, 1200, 1800, 2000, 2400, 3600, 4800, 9600, 19200
+    ]
 };
 
 SerialPort.UART8251.INIT = [
@@ -217,7 +238,7 @@ SerialPort.UART8251.INIT = [
     SerialPort.UART8251.STATUS.INIT,
     SerialPort.UART8251.MODE.INIT,
     SerialPort.UART8251.COMMAND.INIT,
-    SerialPort.UART8251.BAUDRATE.INIT
+    SerialPort.UART8251.BAUDRATES.INIT
 ];
 
 /*
@@ -272,7 +293,7 @@ SerialPort.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
             if (keyCode === 0x08 || event.ctrlKey && keyCode >= 0x41 && keyCode <= 0x5A) {
                 if (event.preventDefault) event.preventDefault();
                 if (keyCode > 0x40) keyCode -= 0x40;
-                serial.sendByteIn(keyCode);
+                serial.receiveByte(keyCode);
             }
             return true;
         };
@@ -284,7 +305,7 @@ SerialPort.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
              */
             event = event || window.event;
             var keyCode = event.which || event.keyCode;
-            // serial.sendRBR([keyCode]);
+            serial.receiveByte(keyCode);
             /*
              * Since we're going to remove the "readonly" attribute from the <textarea> control
              * (so that the soft keyboard activates on iOS), instead of calling preventDefault() for
@@ -317,8 +338,8 @@ SerialPort.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
              */
             sValue = sValue.replace(/\\n/g, "\n").replace(/\\r/g, "\r");
             control.onclick = function onClickTest(event) {
-                serial.sDataIn = sValue;
-                serial.sendDataIn();
+                serial.sDataReceived = sValue;
+                serial.receiveData();
                 /*
                  * Give focus back to the machine (since clicking the button takes focus away).
                  */
@@ -350,7 +371,45 @@ SerialPort.prototype.initBus = function(cmp, bus, cpu, dbg)
     this.chipset = /** @type {ChipSet} */ (cmp.getMachineComponent("ChipSet"));
     bus.addPortInputTable(this, SerialPort.aPortInput, this.portBase);
     bus.addPortOutputTable(this, SerialPort.aPortOutput, this.portBase);
+    this.initConnection();
     this.setReady();
+};
+
+/**
+ * initConnection()
+ *
+ * If a machine 'connection' parameter exists of the form "<sourcePort>=<targetMachine>.<targetPort>",
+ * and "<sourcePort>" matches our idComponent, then look for a component with id "<targetMachine>.<targetPort>".
+ *
+ * If the target component is found, then verify that it has exported functions with the following names:
+ *
+ *      receiveByte(b): called by us when we have a byte to transmit; aliased internally to sendByte(b)
+ *
+ * For now, we're not going to worry about communication in the other direction, because when the target component
+ * performs its own initConnection(), it will find our receiveByte(b) function, at which point communication in both
+ * directions should be established.
+ *
+ * @this {SerialPort}
+ */
+SerialPort.prototype.initConnection = function()
+{
+    var sConnection = this.cmp.getMachineParm("connection");
+    if (sConnection) {
+        var asParts = sConnection.split('=');
+        if (asParts.length == 2) {
+            var sSourceID = str.trim(asParts[0]);
+            var sTargetID = str.trim(asParts[1]);
+            if (sSourceID == this.idComponent) {
+                this.connection = Component.getComponentByID(sTargetID);
+                if (this.connection) {
+                    var exports = this.connection['exports'];
+                    if (exports) {
+                        this.sendByte = exports['receiveByte'];
+                    }
+                }
+            }
+        }
+    }
 };
 
 /**
@@ -444,7 +503,7 @@ SerialPort.prototype.initState = function(data)
     this.bStatus    = data[i++];
     this.bMode      = data[i++];
     this.bCommand   = data[i++];
-    this.bBaudRate  = data[i];
+    this.bBaudRates = data[i];
     return true;
 };
 
@@ -464,18 +523,37 @@ SerialPort.prototype.saveRegisters = function()
     data[i++] = this.bStatus;
     data[i++] = this.bMode;
     data[i++] = this.bCommand;
-    data[i]   = this.bBaudRate;
+    data[i]   = this.bBaudRates;
     return data;
 };
 
 /**
- * sendByteIn(b)
+ * getBaudTimeout(maskRate)
+ *
+ * @this {SerialPort}
+ * @param {number} maskRate (either SerialPort.UART8251.BAUDRATES.RECV_RATE or SerialPort.UART8251.BAUDRATES.XMIT_RATE)
+ * @return {number} (number of milliseconds per byte)
+ */
+SerialPort.prototype.getBaudTimeout = function(maskRate)
+{
+    var indexRate = (this.bBaudRates & maskRate);
+    if (!(maskRate & 0xf)) indexRate >>= 4;
+    var nBaud = SerialPort.UART8251.BAUDTABLE[indexRate];
+    var nBits = ((this.bMode & SerialPort.UART8251.MODE.DATA_BITS) >> 2) + 6;   // includes an extra +1 for start bit
+    if (this.bMode & SerialPort.UART8251.MODE.PARITY_ENABLE) nBits++;
+    nBits += ((((this.bMode & SerialPort.UART8251.MODE.STOP_BITS) >> 6) + 1) >> 1);
+    var nBytesPerSecond = Math.round(nBaud / nBits);
+    return 1000 / nBytesPerSecond;
+};
+
+/**
+ * receiveByte(b)
  *
  * @this {SerialPort}
  * @param {number} b
  * @return {boolean}
  */
-SerialPort.prototype.sendByteIn = function(b)
+SerialPort.prototype.receiveByte = function(b)
 {
     if (!(this.bStatus & SerialPort.UART8251.STATUS.RECV_FULL)) {
         this.bDataIn = b;
@@ -487,28 +565,52 @@ SerialPort.prototype.sendByteIn = function(b)
 };
 
 /**
- * sendDataIn()
+ * receiveData()
  *
  * @this {SerialPort}
  */
-SerialPort.prototype.sendDataIn = function()
+SerialPort.prototype.receiveData = function()
 {
-    if (this.sDataIn) {
-        if (this.sendByteIn(this.sDataIn.charCodeAt(0))) {
-            this.sDataIn = this.sDataIn.substr(1);
+    if (this.sDataReceived) {
+        if (this.receiveByte(this.sDataReceived.charCodeAt(0))) {
+            this.sDataReceived = this.sDataReceived.substr(1);
+        }
+        /*
+         * TODO: If data has become undeliverable for some reason (eg, the Debugger has paused execution),
+         * we should stop setting timeouts, and add one or more notification mechanisms to kickstart it again.
+         */
+        if (this.sDataReceived) {
+            /*
+             * TODO: setTimeout() is a less-than-ideal solution, because it's too slow; timeouts won't fire until
+             * the end of a CPU burst.  So instead of calculating a number of milliseconds, we should calculate a
+             * number of CPU cycles, and create a CPU notification mechanism that calls us back after that many cycles
+             * have elapsed (and which will automatically shorten the current CPU burst as needed).
+             *
+             * This will also solve the other issue noted above, because if the CPU has been halted, it won't be
+             * generating any notifications either.
+             */
+            setTimeout(this.fnCheckDataReceived, this.getBaudTimeout(SerialPort.UART8251.BAUDRATES.RECV_RATE));
         }
     }
 };
 
 /**
- * echoByte(b)
+ * transmitByte(b)
  *
  * @this {SerialPort}
  * @param {number} b
- * @return {boolean} true if echoed, false if not
+ * @return {boolean} true if transmitted, false if not
  */
-SerialPort.prototype.echoByte = function(b)
+SerialPort.prototype.transmitByte = function(b)
 {
+    var fTransmitted = false;
+
+    if (this.sendByte) {
+        if (this.sendByte.call(this.connection, b)) {
+            fTransmitted = true;
+        }
+    }
+
     if (this.controlIOBuffer) {
         if (b == 0x0D) {
             this.iLogicalCol = 0;
@@ -533,9 +635,9 @@ SerialPort.prototype.echoByte = function(b)
             this.controlIOBuffer.scrollTop = this.controlIOBuffer.scrollHeight;
             this.iLogicalCol += nChars;
         }
-        return true;
+        fTransmitted = true;
     }
-    if (this.consoleOutput != null) {
+    else if (this.consoleOutput != null) {
         if (b == 0x0A || this.consoleOutput.length >= 1024) {
             this.println(this.consoleOutput);
             this.consoleOutput = "";
@@ -543,9 +645,23 @@ SerialPort.prototype.echoByte = function(b)
         if (b != 0x0A) {
             this.consoleOutput += String.fromCharCode(b);
         }
-        return true;
+        fTransmitted = true;
     }
-    return false;
+
+    return fTransmitted;
+};
+
+/**
+ * isTransmitterReady()
+ *
+ * Called whenever a ChipSet circuit needs the SerialPort UART's transmitter status.
+ *
+ * @this {SerialPort}
+ * @return {boolean} (true if ready, false if not)
+ */
+SerialPort.prototype.isTransmitterReady = function()
+{
+    return !!(this.bStatus & SerialPort.UART8251.STATUS.XMIT_READY);
 };
 
 /**
@@ -561,7 +677,6 @@ SerialPort.prototype.inData = function(port, addrFrom)
     var b = this.bDataIn;
     this.printMessageIO(port, null, addrFrom, "DATA", b);
     this.bStatus &= ~SerialPort.UART8251.STATUS.RECV_FULL;
-    this.sendDataIn();          // if there is still queued incoming data, send another byte
     return b;
 };
 
@@ -592,6 +707,10 @@ SerialPort.prototype.outData = function(port, bOut, addrFrom)
 {
     this.printMessageIO(port, bOut, addrFrom, "DATA");
     this.bDataOut = bOut;
+    this.bStatus &= ~(SerialPort.UART8251.STATUS.XMIT_READY | SerialPort.UART8251.STATUS.XMIT_EMPTY);
+    if (this.transmitByte(bOut)) {
+        this.bStatus |= (SerialPort.UART8251.STATUS.XMIT_READY | SerialPort.UART8251.STATUS.XMIT_EMPTY);
+    }
 };
 
 /**
@@ -622,17 +741,17 @@ SerialPort.prototype.outControl = function(port, bOut, addrFrom)
 };
 
 /**
- * outBaudRate(port, bOut, addrFrom)
+ * outBaudRates(port, bOut, addrFrom)
  *
  * @this {SerialPort}
  * @param {number} port (0x2)
  * @param {number} bOut
  * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
  */
-SerialPort.prototype.outBaudRate = function(port, bOut, addrFrom)
+SerialPort.prototype.outBaudRates = function(port, bOut, addrFrom)
 {
-    this.printMessageIO(port, bOut, addrFrom, "BAUDRATE");
-    this.bBaudRate = bOut;
+    this.printMessageIO(port, bOut, addrFrom, "BAUDRATES");
+    this.bBaudRates = bOut;
 };
 
 /*
@@ -650,7 +769,7 @@ SerialPort.aPortInput = {
 SerialPort.aPortOutput = {
     0x0: SerialPort.prototype.outData,
     0x1: SerialPort.prototype.outControl,
-    0x2: SerialPort.prototype.outBaudRate
+    0x2: SerialPort.prototype.outBaudRates
 };
 
 /**
