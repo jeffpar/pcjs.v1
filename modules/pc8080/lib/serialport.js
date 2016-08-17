@@ -118,13 +118,14 @@ function SerialPort(parmsSerial) {
     /*
      * No connection until initBus() invokes initConnection().
      */
-    this.connection = this.sendByte = null;
+    this.sDataReceived = "";
+    this.connection = this.sendData = null;
 
     /*
      * Export all functions required by initConnection(); currently, this is the bare minimum, with no flow control.
      */
     this['exports'] = {
-        'receiveByte': this.receiveByte
+        'receiveData': this.receiveData
     };
 }
 
@@ -329,8 +330,7 @@ SerialPort.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
              */
             sValue = sValue.replace(/\\n/g, "\n").replace(/\\r/g, "\r");
             control.onclick = function onClickTest(event) {
-                serial.sDataReceived = sValue;
-                serial.receiveData();
+                serial.receiveData(sValue);
                 /*
                  * Give focus back to the machine (since clicking the button takes focus away).
                  */
@@ -362,11 +362,9 @@ SerialPort.prototype.initBus = function(cmp, bus, cpu, dbg)
 
     var serial = this;
     this.timerReceiveNext = this.cpu.addTimer(function() {
-        serial.printMessage("timerReceiveNext()");
         serial.receiveData();
     });
     this.timerTransmitNext = this.cpu.addTimer(function() {
-        serial.printMessage("timerTransmitNext()");
         serial.transmitData();
     });
 
@@ -388,7 +386,7 @@ SerialPort.prototype.initBus = function(cmp, bus, cpu, dbg)
  *
  * If the target component is found, then verify that it has exported functions with the following names:
  *
- *      receiveByte(b): called by us when we have a byte to transmit; aliased internally to sendByte(b)
+ *      receiveData(data): called when we have data to transmit; aliased internally to sendData(data)
  *
  * For now, we're not going to worry about communication in the other direction, because when the target component
  * performs its own initConnection(), it will find our receiveByte(b) function, at which point communication in both
@@ -409,7 +407,7 @@ SerialPort.prototype.initConnection = function()
                 if (this.connection) {
                     var exports = this.connection['exports'];
                     if (exports) {
-                        this.sendByte = exports['receiveByte'];
+                        this.sendData = exports['receiveData'];
                     }
                 }
             }
@@ -560,11 +558,10 @@ SerialPort.prototype.getBaudTimeout = function(maskRate)
  */
 SerialPort.prototype.receiveByte = function(b)
 {
-    this.printMessage("receiveByte(" + str.toHexByte(b) + "): " + str.toHexByte(this.bStatus));
+    this.printMessage("receiveByte(" + str.toHexByte(b) + "), status=" + str.toHexByte(this.bStatus));
     if (!(this.bStatus & SerialPort.UART8251.STATUS.RECV_FULL)) {
         this.bDataIn = b;
         this.bStatus |= SerialPort.UART8251.STATUS.RECV_FULL;
-        this.printMessage("receiveByte(" + str.toHexByte(b) + "): " + str.toHexByte(this.bStatus) + " (requesting interrupt)");
         this.cpu.requestINTR(this.nIRQ);
         return true;
     }
@@ -572,17 +569,26 @@ SerialPort.prototype.receiveByte = function(b)
 };
 
 /**
- * receiveData()
+ * receiveData(data)
  *
  * Helper for clocking received data at the expected RECV_RATE.
  *
- * Currently, this is only use for test data that we "cram" down the terminal's throat, ensuring that we don't
- * cram it too rapidly.
+ * When we're cramming test data down the terminal's throat, that data will typically be in the form
+ * of a string.  When we're called by another component, data will typically be a number (ie, byte).  If no
+ * data is specified at all, then all we do is "clock" any remaining data into the receiver.
  *
  * @this {SerialPort}
+ * @param {number|string|undefined} [data]
  */
-SerialPort.prototype.receiveData = function()
+SerialPort.prototype.receiveData = function(data)
 {
+    if (data != null) {
+        if (typeof data != "number") {
+            this.sDataReceived = data;
+        } else {
+            this.sDataReceived += String.fromCharCode(data);
+        }
+    }
     if (this.sDataReceived) {
         if (this.receiveByte(this.sDataReceived.charCodeAt(0))) {
             this.sDataReceived = this.sDataReceived.substr(1);
@@ -604,8 +610,10 @@ SerialPort.prototype.transmitByte = function(b)
 {
     var fTransmitted = false;
 
-    if (this.sendByte) {
-        if (this.sendByte.call(this.connection, b)) {
+    this.printMessage("transmitByte(" + str.toHexByte(b) + ")");
+
+    if (this.sendData) {
+        if (this.sendData.call(this.connection, b)) {
             fTransmitted = true;
         }
     }
