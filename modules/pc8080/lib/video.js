@@ -1115,7 +1115,7 @@ Video.prototype.updateVT100 = function(fForced)
             /*
              * Cell cache logic is complicated by the fact that a line may be single-width one frame and double-width
              * the next.  So we store the visible line length at the start of each row in the cache, which must match if
-             * the cache is considered valid for the current line.
+             * the cache can be considered valid for the current line.
              */
             var fLineCacheValid = this.fCellCacheValid && (this.aCellCache[iCell] == nColsVisible);
             this.aCellCache[iCell++] = nColsVisible;
@@ -1153,6 +1153,9 @@ Video.prototype.updateVT100 = function(fForced)
          * cache entry, to guarantee that it's redrawn on the next update.
          */
         this.assert(iCellUpdated >= 0);
+        if (DEBUG && (this.aCellCache[iCellUpdated] & 0x7f) == 0x48) {
+            console.log("spurious character?");
+        }
         this.aCellCache[iCellUpdated] = -1;
         cUpdated = 0;
     }
