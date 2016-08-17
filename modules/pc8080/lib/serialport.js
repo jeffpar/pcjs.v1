@@ -116,15 +116,6 @@ function SerialPort(parmsSerial) {
     }
 
     /*
-     * Define a setTimeout() function that receiveData() can use when there's more data to receive.
-     */
-    this.fnCheckDataReceived = function(serial) {
-        return function() {
-            serial.receiveData();
-        }
-    }(this);
-
-    /*
      * No connection until initBus() invokes initConnection().
      */
     this.connection = this.sendByte = null;
@@ -368,10 +359,24 @@ SerialPort.prototype.initBus = function(cmp, bus, cpu, dbg)
     this.bus = bus;
     this.cpu = cpu;
     this.dbg = dbg;
+
+    var serial = this;
+    this.timerReceiveNext = this.cpu.addTimer(function() {
+        serial.printMessage("timerReceiveNext()");
+        serial.receiveData();
+    });
+    this.timerTransmitNext = this.cpu.addTimer(function() {
+        serial.printMessage("timerTransmitNext()");
+        serial.transmitData();
+    });
+
     this.chipset = /** @type {ChipSet} */ (cmp.getMachineComponent("ChipSet"));
+
     bus.addPortInputTable(this, SerialPort.aPortInput, this.portBase);
     bus.addPortOutputTable(this, SerialPort.aPortOutput, this.portBase);
+
     this.initConnection();
+
     this.setReady();
 };
 
@@ -555,9 +560,11 @@ SerialPort.prototype.getBaudTimeout = function(maskRate)
  */
 SerialPort.prototype.receiveByte = function(b)
 {
+    this.printMessage("receiveByte(" + str.toHexByte(b) + "): " + str.toHexByte(this.bStatus));
     if (!(this.bStatus & SerialPort.UART8251.STATUS.RECV_FULL)) {
         this.bDataIn = b;
         this.bStatus |= SerialPort.UART8251.STATUS.RECV_FULL;
+        this.printMessage("receiveByte(" + str.toHexByte(b) + "): " + str.toHexByte(this.bStatus) + " (requesting interrupt)");
         this.cpu.requestINTR(this.nIRQ);
         return true;
     }
@@ -567,6 +574,11 @@ SerialPort.prototype.receiveByte = function(b)
 /**
  * receiveData()
  *
+ * Helper for clocking received data at the expected RECV_RATE.
+ *
+ * Currently, this is only use for test data that we "cram" down the terminal's throat, ensuring that we don't
+ * cram it too rapidly.
+ *
  * @this {SerialPort}
  */
 SerialPort.prototype.receiveData = function()
@@ -575,21 +587,8 @@ SerialPort.prototype.receiveData = function()
         if (this.receiveByte(this.sDataReceived.charCodeAt(0))) {
             this.sDataReceived = this.sDataReceived.substr(1);
         }
-        /*
-         * TODO: If data has become undeliverable for some reason (eg, the Debugger has paused execution),
-         * we should stop setting timeouts, and add one or more notification mechanisms to kickstart it again.
-         */
-        if (this.sDataReceived) {
-            /*
-             * TODO: setTimeout() is a less-than-ideal solution, because it's too slow; timeouts won't fire until
-             * the end of a CPU burst.  So instead of calculating a number of milliseconds, we should calculate a
-             * number of CPU cycles, and create a CPU notification mechanism that calls us back after that many cycles
-             * have elapsed (and which will automatically shorten the current CPU burst as needed).
-             *
-             * This will also solve the other issue noted above, because if the CPU has been halted, it won't be
-             * generating any notifications either.
-             */
-            setTimeout(this.fnCheckDataReceived, this.getBaudTimeout(SerialPort.UART8251.BAUDRATES.RECV_RATE));
+        if (this.sDataReceived && this.cpu) {
+            this.cpu.setTimer(this.timerReceiveNext, this.getBaudTimeout(SerialPort.UART8251.BAUDRATES.RECV_RATE));
         }
     }
 };
@@ -612,10 +611,7 @@ SerialPort.prototype.transmitByte = function(b)
     }
 
     if (this.controlIOBuffer) {
-        if (b == 0x0D) {
-            this.iLogicalCol = 0;
-        }
-        else if (b == 0x08) {
+        if (b == 0x08) {
             this.controlIOBuffer.value = this.controlIOBuffer.value.slice(0, -1);
             /*
              * TODO: Back up the correct number of columns if the character erased was a tab.
@@ -623,12 +619,16 @@ SerialPort.prototype.transmitByte = function(b)
             if (this.iLogicalCol > 0) this.iLogicalCol--;
         }
         else {
-            var s = String.fromCharCode(b);
-            var nChars = (b >= 0x20? 1 : 0);
+            var s = str.toASCIICode(b);
+            var nChars = s.length;
             if (b == 0x09) {
                 var tabSize = this.tabSize || 8;
                 nChars = tabSize - (this.iLogicalCol % tabSize);
                 if (this.tabSize) s = str.pad("", nChars);
+            }
+            else if (b == 0x0D) {
+                this.iLogicalCol = nChars = 0;
+                s = "\n";
             }
             if (this.charBOL && !this.iLogicalCol && nChars) s = String.fromCharCode(this.charBOL) + s;
             this.controlIOBuffer.value += s;
@@ -649,6 +649,21 @@ SerialPort.prototype.transmitByte = function(b)
     }
 
     return fTransmitted;
+};
+
+/**
+ * transmitData()
+ *
+ * Helper for clocking transmitted data at the expected XMIT_RATE.
+ *
+ * When timerTransmitNext fires, we have honored the programmed XMIT_RATE period, so we can
+ * set XMIT_READY (and XMIT_EMPTY), which signals the firmware that another byte can be transmitted.
+ *
+ * @this {SerialPort}
+ */
+SerialPort.prototype.transmitData = function()
+{
+    this.bStatus |= (SerialPort.UART8251.STATUS.XMIT_READY | SerialPort.UART8251.STATUS.XMIT_EMPTY);
 };
 
 /**
@@ -708,8 +723,20 @@ SerialPort.prototype.outData = function(port, bOut, addrFrom)
     this.printMessageIO(port, bOut, addrFrom, "DATA");
     this.bDataOut = bOut;
     this.bStatus &= ~(SerialPort.UART8251.STATUS.XMIT_READY | SerialPort.UART8251.STATUS.XMIT_EMPTY);
-    if (this.transmitByte(bOut)) {
-        this.bStatus |= (SerialPort.UART8251.STATUS.XMIT_READY | SerialPort.UART8251.STATUS.XMIT_EMPTY);
+    /*
+     * If we're transmitting to a virtual device that has no measurable delay, this code may clear XMIT_READY
+     * too quickly.
+     *
+     *      if (this.transmitByte(bOut)) {
+     *          this.bStatus |= (SerialPort.UART8251.STATUS.XMIT_READY | SerialPort.UART8251.STATUS.XMIT_EMPTY);
+     *      }
+     *
+     * A better solution is to arm a timer based on the XMIT_RATE baud rate, and clear the above bits when that
+     * timer fires.  Consequently, we no longer care what transmitByte() reports.
+     */
+    this.transmitByte(bOut);
+    if (this.cpu) {
+        this.cpu.setTimer(this.timerTransmitNext, this.getBaudTimeout(SerialPort.UART8251.BAUDRATES.XMIT_RATE));
     }
 };
 

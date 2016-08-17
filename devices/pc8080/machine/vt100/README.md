@@ -14,7 +14,8 @@ This is a PCjs work-in-progress emulation of another 8080-based machine: the VT1
 
 Unlike other VT100 emulators, it is not simply an emulation of VT100 protocols.  It is a simulation of the original VT100
 machine, running the [VT100 Firmware](/devices/pc8080/rom/vt100/) inside the [PC8080](/modules/pc8080/) CPU emulator.
-A [Debugger Configuration](/devices/pc8080/machine/vt100/debugger/) is also available.
+
+A [Debugger Configuration](debugger/) is also available, along with a [Dual VT100 Terminals](dual/) demo. 
 
 Admittedly, terminals aren't that useful in isolation, since they're designed to be connected to other (host) machines.
 But once this PCjs VT100 Terminal simulation is fully operational, you can expect to see it used in conjunction with a variety

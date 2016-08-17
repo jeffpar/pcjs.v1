@@ -381,7 +381,7 @@ str.replaceArray = function(a, s)
  * @param {string} s is a string
  * @param {number} cch is desired length
  * @param {boolean} [fPadLeft] (default is padding on the right)
- * @returns {string} the original string (s) with spaces padding it to the specified length
+ * @return {string} the original string (s) with spaces padding it to the specified length
  */
 str.pad = function(s, cch, fPadLeft)
 {
@@ -393,7 +393,7 @@ str.pad = function(s, cch, fPadLeft)
  * trim(s)
  *
  * @param {string} s
- * @returns {string}
+ * @return {string}
  */
 str.trim = function(s)
 {
@@ -401,6 +401,58 @@ str.trim = function(s)
         return s.trim();
     }
     return s.replace(/^\s+|\s+$/g, "");
+};
+
+str.aASCIICodes = {
+    0x00:   "NUL",
+    0x01:   "SOH",      // Start of Heading
+    0x02:   "STX",      // Start of Text
+    0x03:   "ETX",      // End of Text
+    0x04:   "EOT",      // End of Transmission
+    0x05:   "ENQ",      // Enquiry
+    0x06:   "ACK",      // Acknowledge
+    0x07:   "BEL",      // Bell
+    0x08:   "BS",       // Backspace
+    0x09:   "TAB",      // Horizontal Tab
+    0x0A:   "LF",       // Line Feed (New Line)
+    0x0B:   "VT",       // Vertical Tab
+    0x0C:   "FF",       // Form Feed (New Page)
+    0x0D:   "CR",       // Carriage Return
+    0x0E:   "SO",       // Shift Out
+    0x0F:   "SI",       // Shift In
+    0x10:   "DLE",      // Data Link Escape
+    0x11:   "DC1",      // Device Control 1
+    0x12:   "DC2",      // Device Control 2
+    0x13:   "DC3",      // Device Control 3
+    0x14:   "DC4",      // Device Control 4
+    0x15:   "NAK",      // Negative Acknowledge
+    0x16:   "SYN",      // Synchronous Idle
+    0x17:   "ETB",      // End of Transmission Block
+    0x18:   "CAN",      // Cancel
+    0x19:   "EM",       // End of Medium
+    0x1A:   "SUB",      // Substitute
+    0x1B:   "ESC",      // Escape
+    0x1C:   "FS",       // File Separator
+    0x1D:   "GS",       // Group Separator
+    0x1E:   "RS",       // Record Separator
+    0x1F:   "US"        // Unit Separator
+};
+
+/**
+ * toASCIICode(b)
+ *
+ * @param {number} b
+ * @return {string}
+ */
+str.toASCIICode = function(b)
+{
+    var s = str.aASCIICodes[b];
+    if (s) {
+        s = '<' + s + '>';
+    } else {
+        s = String.fromCharCode(b);
+    }
+    return s;
 };
 
 if (NODE) module.exports = str;

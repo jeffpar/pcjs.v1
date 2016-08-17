@@ -938,47 +938,50 @@ CPUState.prototype.pushWord = function(w)
 CPUState.prototype.checkINTR = function()
 {
     if ((this.intFlags & CPUDef.INTFLAG.INTR) && this.getIF()) {
-        var bRST = CPUDef.OPCODE.RST0 | ((this.intFlags & CPUDef.INTFLAG.INTL) << 3);
-        this.intFlags &= ~CPUDef.INTFLAG.HALT;
-        this.clearINTR();
+        for (var nLevel = 0; nLevel < 8; nLevel++) {
+            if (this.intFlags & (1 << nLevel)) break;
+        }
+        this.clearINTR(nLevel);
         this.clearIF();
-        this.aOps[bRST].call(this);
+        this.intFlags &= ~CPUDef.INTFLAG.HALT;
+        this.aOps[CPUDef.OPCODE.RST0 | (nLevel << 3)].call(this);
         return true;
     }
     return false;
 };
 
 /**
- * clearINTR()
+ * clearINTR(nLevel)
+ *
+ * Clear the corresponding interrupt level.
+ *
+ * nLevel can either be a valid interrupt level (0-7), or -1 to clear all pending interrupts
+ * (eg, in the event of a system-wide reset).
  *
  * @this {CPUState}
+ * @param {number} nLevel (0-7, or -1 for all)
  */
-CPUState.prototype.clearINTR = function()
+CPUState.prototype.clearINTR = function(nLevel)
 {
-    this.intFlags &= ~(CPUDef.INTFLAG.INTL | CPUDef.INTFLAG.INTR);
+    var bitsClear = nLevel < 0? 0xff : (1 << nLevel);
+    this.intFlags &= ~bitsClear;
 };
 
 /**
  * requestINTR(nLevel)
  *
- * This is called by any component that wants to request a h/w interrupt.
+ * Request the corresponding interrupt level.
  *
- * NOTE: We allow INTR to be set regardless of the current state of interrupt flag (IF), on the theory
- * that if/when the CPU briefly turns interrupts off, it shouldn't lose the last h/w interrupt requested.
- * So instead of ignoring INTR here, checkINTR() ignores INTR as long as the interrupt flag (IF) is clear.
- *
- * The downside is that, as long as the CPU has interrupts disabled, an active INTR state will slow stepCPU()
- * down slightly.  We could avoid that by introducing a two-stage interrupt tracking system, where a separate
- * variable keeps track of the last interrupt requested whenever the interrupt flag (IF) is clear, and when
- * setIF() finally occurs, that interrupt is propagated to intFlags.  But for now, we're going to assume that
- * scenario is rare.
+ * Each interrupt level (0-7) has its own intFlags bit (0-7).  If one or more of those bits are set,
+ * and the Interrupt Flag (IF) is also set, indicating that interrupts are enabled, then checkINTR()
+ * chooses one of those bits, clears it, clears IF, and executes the corresponding RST opcode.
  *
  * @this {CPUState}
  * @param {number} nLevel (0-7)
  */
 CPUState.prototype.requestINTR = function(nLevel)
 {
-    this.intFlags = (this.intFlags & ~CPUDef.INTFLAG.INTL) | nLevel | CPUDef.INTFLAG.INTR;
+    this.intFlags |= (1 << nLevel);
 };
 
 /**
