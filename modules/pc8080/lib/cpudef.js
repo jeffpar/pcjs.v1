@@ -60,17 +60,17 @@ var CPUDef = {
      * Processor Status flag definitions (stored in regPS)
      */
     PS: {
-        CF:     0x0001,         // bit 0: Carry flag
+        CF:     0x0001,         // bit 0: Carry Flag
         BIT1:   0x0002,         // bit 1: reserved, always set
-        PF:     0x0004,         // bit 2: Parity flag
+        PF:     0x0004,         // bit 2: Parity Flag
         BIT3:   0x0008,         // bit 3: reserved, always clear
-        AF:     0x0010,         // bit 4: Auxiliary Carry flag
+        AF:     0x0010,         // bit 4: Auxiliary Carry Flag
         BIT5:   0x0020,         // bit 5: reserved, always clear
-        ZF:     0x0040,         // bit 6: Zero flag
-        SF:     0x0080,         // bit 7: Sign flag
+        ZF:     0x0040,         // bit 6: Zero Flag
+        SF:     0x0080,         // bit 7: Sign Flag
         ALL:    0x00D5,         // all "arithmetic" flags (CF, PF, AF, ZF, SF)
         MASK:   0x00FF,         //
-        IF:     0x0200          // bit 9: Interrupt flag (set if interrupts enabled; for internal use only)
+        IF:     0x0200          // bit 9: Interrupt Flag (set if interrupts enabled; Intel calls this the INTE bit)
     },
     PARITY:  [                  // 256-byte array with a 1 wherever the number of set bits of the array index is EVEN
         1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,
@@ -94,10 +94,9 @@ var CPUDef = {
      * Interrupt-related flags (stored in intFlags)
      */
     INTFLAG: {
-        NONE:       0x00,
-        INTL:       0x07,       // last interrupt level requested
-        INTR:       0x08,       // set if interrupt has been requested
-        HALT:       0x10        // halt requested; see opHLT()
+        NONE:       0x0000,
+        INTR:       0x00ff,     // mask for 8 bits, representing interrupt levels 0-7
+        HALT:       0x0100      // halt requested; see opHLT()
     },
     /*
      * Opcode definitions

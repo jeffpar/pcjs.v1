@@ -13,4 +13,4 @@ The following 8080-based machines are currently available:
 * [Space Invaders (1978)](invaders/) (with [Debugger](invaders/debugger/))
 * [DEC VT100 Terminal](vt100/) (with [Debugger](vt100/debugger/))
 
-And check out the [Dual VT100 Terminals](vt100/dual/) for a demo of two PCjs machines communicating over a *virtual* serial connection. 
+Check out the [Dual VT100 Terminals](vt100/dual/) for a demo of two PCjs machines communicating over a *virtual* serial connection. 

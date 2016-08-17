@@ -122,6 +122,11 @@ function CPU(parmsCPU, nCyclesDefault)
     this.aCounts.nCyclesChecksumInterval = parmsCPU["csInterval"];
     this.aCounts.nCyclesChecksumStop = parmsCPU["csStop"];
 
+    /*
+     * Array of countdown timers managed by addTimer() and setTimer().
+     */
+    this.aTimers = [];
+
     this.onRunTimeout = this.runCPU.bind(this); // function onRunTimeout() { cpu.runCPU(); };
 
     this.setReady();
@@ -536,6 +541,9 @@ CPU.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
  * in anticipation of the timer requiring an update sooner than the normal nCyclesPerYield
  * period in runCPU() would normally provide.
  *
+ * NOTE: In this context, "timer" refers to a timer chip (eg, an Intel 8253) being emulated by
+ * by the ChipSet component, not the timers managed by the CPU (eg, addTimer(), setTimer(), etc).
+ *
  * @this {CPU}
  * @param {number} nCycles is the target number of cycles to drop the current burst to
  * @return {boolean}
@@ -754,14 +762,14 @@ CPU.prototype.getSpeedTarget = function()
  *
  * NOTE: This used to return the target speed, in mhz, but no callers appear to care at this point.
  *
+ * @desc Whenever the speed is changed, the running cycle count and corresponding start time must be reset,
+ * so that the next effective speed calculation obtains sensible results.  In fact, when runCPU() initially calls
+ * setSpeed() with no parameters, that's all this function does (it doesn't change the current speed setting).
+ *
  * @this {CPU}
  * @param {number} [nMultiplier] is the new proposed multiplier (reverts to 1 if the target was too high)
  * @param {boolean} [fUpdateFocus] is true to update Computer focus
  * @return {boolean} true if successful, false if not
- *
- * @desc Whenever the speed is changed, the running cycle count and corresponding start time must be reset,
- * so that the next effective speed calculation obtains sensible results.  In fact, when runCPU() initially calls
- * setSpeed() with no parameters, that's all this function does (it doesn't change the current speed setting).
  */
 CPU.prototype.setSpeed = function(nMultiplier, fUpdateFocus)
 {
@@ -940,6 +948,104 @@ CPU.prototype.calcRemainingTime = function()
 };
 
 /**
+ * addTimer(callBack)
+ *
+ * Components that want to have timers that periodically fire after some number of milliseconds call
+ * addTimer() to create the timer, and then setTimer() every time they want to arm it.  There is currently
+ * no removeTimer() because these are generally used for the entire lifetime of a component.
+ *
+ * Internally, each timer entry is a preallocated Array with two entries: a cycle countdown in element [0]
+ * and a callback function in element [1].  A timer is initially dormant; dormant timers have a countdown
+ * value of -1 (although any negative number will suffice) and active timers have a non-negative value.
+ *
+ * Why not use JavaScript's setTimeout() instead?  Good question.  For a good answer, see setTimer() below.
+ *
+ * @this {CPU}
+ * @param {function()} callBack
+ * @return {number} timer index
+ */
+CPU.prototype.addTimer = function(callBack)
+{
+    var iTimer = this.aTimers.length;
+    this.aTimers.push([-1, callBack]);
+    return iTimer;
+};
+
+/**
+ * setTimer(iTimer, ms)
+ *
+ * Using the timer index from a previous addTimer() call, this sets that timer to fire after the
+ * specified number of milliseconds.
+ *
+ * This is preferred over JavaScript's setTimeout(), because all our timers are effectively paused when
+ * the CPU is paused (eg, when the Debugger halts execution).  Moreover, setTimeout() handlers only run after
+ * runCPU() yields, which is far too granular for some components (eg, when the SerialPort tries to simulate
+ * receiver interrupts at 9600 baud).
+ *
+ * Ideally, the only function that would use setTimeout() is runCPU(), while the rest of the components would
+ * use setTimer(); however, due to legacy code (ie, code that predates these functions) and/or laziness,
+ * that's currently not the case.  TODO: Fix.
+ *
+ * @this {CPU}
+ * @param {number} iTimer
+ * @param {number} ms (converted into a cycle countdown internally)
+ * @return {number} (number of cycles used to arm timer, or -1 if error)
+ */
+CPU.prototype.setTimer = function(iTimer, ms)
+{
+    var nCycles = -1;
+    if (iTimer >= 0 && iTimer < this.aTimers.length) {
+        nCycles = (this.aCounts.nCyclesPerSecond * this.aCounts.nCyclesMultiplier) / 1000 * ms;
+        this.aTimers[iTimer][0] = nCycles;
+    }
+    return nCycles;
+};
+
+/**
+ * getTimerBurst(nCycles)
+ *
+ * Used by runCPU() to either accept or shorten the current burst if any timers need to fire soon.
+ *
+ * @this {CPU}
+ * @param {number} nCycles (number of cycles about to execute)
+ * @return {number} (either nCycles or less if a timer needs to fire)
+ */
+CPU.prototype.getTimerBurst = function(nCycles)
+{
+    for (var i = 0; i < this.aTimers.length; i++) {
+        var timer = this.aTimers[i];
+        if (timer[0] < 0) continue;
+        if (nCycles > timer[0]) {
+            nCycles = timer[0];
+        }
+    }
+    return nCycles;
+};
+
+/**
+ * updateTimers(nCycles)
+ *
+ * Used by runCPU() to reduce all active timer countdown values by the number of cycles just executed;
+ * this is the function that actually "fires" any timer(s) whose countdown has reached (or dropped below)
+ * zero, invoking their callback function.
+ *
+ * @this {CPU}
+ * @param {number} nCycles (number of cycles actually executed)
+ */
+CPU.prototype.updateTimers = function(nCycles)
+{
+    for (var i = 0; i < this.aTimers.length; i++) {
+        var timer = this.aTimers[i];
+        if (timer[0] < 0) continue;
+        timer[0] -= nCycles;
+        if (timer[0] <= 0) {
+            timer[0] = -1;      // zero is technically an "active" value, so ensure the timer is dormant now
+            timer[1]();         // safe to invoke the callback function now
+        }
+    }
+};
+
+/**
  * runCPU(fUpdateFocus)
  *
  * @this {CPU}
@@ -962,22 +1068,37 @@ CPU.prototype.runCPU = function(fUpdateFocus)
     this.calcStartTime();
     try {
         do {
-            var nCyclesPerBurst = (this.flags.fChecksum? 1 : this.aCounts.nCyclesPerBurst);
-
             /*
              * nCyclesPerBurst is how many cycles we WANT to run on each iteration of stepCPU(), but it may run
              * significantly less (or slightly more, since we can't execute partial instructions).
              */
+            var nCyclesPerBurst = (this.flags.fChecksum? 1 : this.aCounts.nCyclesPerBurst);
+
+            /*
+             * Adjust nCyclesPerBurst if there are any CPU timers that need to fire within the current burst.
+             */
+            nCyclesPerBurst = this.getTimerBurst(nCyclesPerBurst);
+
+            /*
+             * Execute the burst.
+             */
             this.stepCPU(nCyclesPerBurst);
 
             /*
-             * nBurstCycles, less any remaining nStepCycles, is how many cycles stepCPU() ACTUALLY ran (nCycles).
-             * We add that to nCyclesThisRun, as well as nRunCycles, which is the cycle count since the CPU first
-             * started running.
+             * nCycles is how many cycles stepCPU() actually ran (nBurstCycles less any remaining nStepCycles).
              */
             var nCycles = this.nBurstCycles - this.nStepCycles;
-            this.nRunCycles += nCycles;
+
+            /*
+             * Update any/all timers, firing those whose cycle countdowns have reached (or dropped below) zero.
+             */
+            this.updateTimers(nCycles);
+
+            /*
+             * Add nCycles to nCyclesThisRun, as well as nRunCycles (the cycle count since the CPU first started).
+             */
             this.aCounts.nCyclesThisRun += nCycles;
+            this.nRunCycles += nCycles;
             this.addCycles(0, true);
             this.updateChecksum(nCycles);
 
