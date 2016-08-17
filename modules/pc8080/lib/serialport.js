@@ -116,15 +116,6 @@ function SerialPort(parmsSerial) {
     }
 
     /*
-     * Define a setTimeout() function that receiveData() can use when there's more data to receive.
-     */
-    this.fnCheckDataReceived = function(serial) {
-        return function() {
-            serial.receiveData();
-        }
-    }(this);
-
-    /*
      * No connection until initBus() invokes initConnection().
      */
     this.connection = this.sendByte = null;
@@ -368,10 +359,20 @@ SerialPort.prototype.initBus = function(cmp, bus, cpu, dbg)
     this.bus = bus;
     this.cpu = cpu;
     this.dbg = dbg;
+
+    var serial = this;
+    this.timerReceiveData = this.cpu.addTimer(function() {
+        serial.printMessage("timerReceiveData()");
+        serial.receiveData()
+    });
+
     this.chipset = /** @type {ChipSet} */ (cmp.getMachineComponent("ChipSet"));
+
     bus.addPortInputTable(this, SerialPort.aPortInput, this.portBase);
     bus.addPortOutputTable(this, SerialPort.aPortOutput, this.portBase);
+
     this.initConnection();
+
     this.setReady();
 };
 
@@ -555,9 +556,11 @@ SerialPort.prototype.getBaudTimeout = function(maskRate)
  */
 SerialPort.prototype.receiveByte = function(b)
 {
+    this.printMessage("receiveByte(" + str.toHexByte(b) + "): " + str.toHexByte(this.bStatus));
     if (!(this.bStatus & SerialPort.UART8251.STATUS.RECV_FULL)) {
         this.bDataIn = b;
         this.bStatus |= SerialPort.UART8251.STATUS.RECV_FULL;
+        this.printMessage("receiveByte(" + str.toHexByte(b) + "): " + str.toHexByte(this.bStatus) + " (requesting interrupt)");
         this.cpu.requestINTR(this.nIRQ);
         return true;
     }
@@ -575,21 +578,8 @@ SerialPort.prototype.receiveData = function()
         if (this.receiveByte(this.sDataReceived.charCodeAt(0))) {
             this.sDataReceived = this.sDataReceived.substr(1);
         }
-        /*
-         * TODO: If data has become undeliverable for some reason (eg, the Debugger has paused execution),
-         * we should stop setting timeouts, and add one or more notification mechanisms to kickstart it again.
-         */
-        if (this.sDataReceived) {
-            /*
-             * TODO: setTimeout() is a less-than-ideal solution, because it's too slow; timeouts won't fire until
-             * the end of a CPU burst.  So instead of calculating a number of milliseconds, we should calculate a
-             * number of CPU cycles, and create a CPU notification mechanism that calls us back after that many cycles
-             * have elapsed (and which will automatically shorten the current CPU burst as needed).
-             *
-             * This will also solve the other issue noted above, because if the CPU has been halted, it won't be
-             * generating any notifications either.
-             */
-            setTimeout(this.fnCheckDataReceived, this.getBaudTimeout(SerialPort.UART8251.BAUDRATES.RECV_RATE));
+        if (this.sDataReceived && this.cpu) {
+            this.cpu.setTimer(this.timerReceiveData, this.getBaudTimeout(SerialPort.UART8251.BAUDRATES.RECV_RATE));
         }
     }
 };
