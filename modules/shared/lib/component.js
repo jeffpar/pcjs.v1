@@ -85,18 +85,17 @@ function Component(type, parms, constructor, bitsMessage)
 
     if (!parms) parms = {'id': "", 'name': ""};
 
-    this.id = parms['id'];
+    this.id = parms['id'] || "";
     this.name = parms['name'];
     this.comment = parms['comment'];
     this.parms = parms;
-    if (this.id === undefined) this.id = "";
 
     var i = this.id.indexOf('.');
-    if (i > 0) {
+    if (i < 0) {
+        this.idComponent = this.id;
+    } else {
         this.idMachine = this.id.substr(0, i);
         this.idComponent = this.id.substr(i + 1);
-    } else {
-        this.idComponent = this.id;
     }
 
     /*
@@ -219,12 +218,35 @@ Component.subclass = function(subclass, superclass, methods, statics)
 };
 
 /*
- * Every component created on the current page is recorded in this array (see Component.add()).
- *
- * This enables any component to locate another component by ID (see Component.getComponentByID())
+ * Every component created on the current page is recorded in this array (see Component.add()),
+ * enabling any component to locate another component by ID (see Component.getComponentByID())
  * or by type (see Component.getComponentByType()).
+ *
+ * Every machine on the page are now recorded as well, by their machine ID.  We then record the
+ * various resources used by that machine.
  */
-Component.components = [];
+if (window) {
+    if (!window['PCjs']) {
+        window['PCjs'] = {
+            'Machines': {},
+            'Components': []
+        };
+    }
+    /*
+     * Alias the new global objects above to their original property names, to minimize code changes.
+     */
+    Component.machines = window['PCjs']['Machines'];
+    Component.components = window['PCjs']['Components'];
+}
+else {
+    /*
+     * Fallback for non-browser-based environments (ie, Node).  TODO: This will need to be
+     * tailored to Node, probably using the global object instead of the window object, if we
+     * ever want to support multi-machine configs in that environment.
+     */
+    Component.machines = {};
+    Component.components = [];
+}
 
 /**
  * Component.add(component)
@@ -240,12 +262,6 @@ Component.add = function(component)
      */
     Component.components.push(component);
 };
-
-/*
- * Every machine on the page are now recorded as well, by their machine ID.  We then record the various resources
- * used by that machine.
- */
-Component.machines = {};
 
 /**
  * Component.addMachine(idMachine)
@@ -316,7 +332,6 @@ Component.log = function(s, type)
  * Verifies conditions that must be true (for DEBUG builds only).
  *
  * The Closure Compiler should automatically remove all references to Component.assert() in non-DEBUG builds.
- *
  * TODO: Add a task to the build process that "asserts" there are no instances of "assertion failure" in RELEASE builds.
  *
  * @param {boolean} f is the expression we are asserting to be true

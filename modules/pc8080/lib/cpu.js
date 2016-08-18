@@ -35,15 +35,15 @@ if (NODE) {
     var str         = require("../../shared/lib/strlib");
     var usr         = require("../../shared/lib/usrlib");
     var Component   = require("../../shared/lib/component");
-    var Messages    = require("./messages");
+    var Messages8080= require("./messages");
 }
 
 /**
- * CPU(parmsCPU, nCyclesDefault)
+ * CPU8080(parmsCPU, nCyclesDefault)
  *
- * The CPU class supports the following (parmsCPU) properties:
+ * The CPU8080 class supports the following (parmsCPU) properties:
  *
- *      cycles: the machine's base cycles per second; the CPUState constructor will
+ *      cycles: the machine's base cycles per second; the CPUState8080 constructor will
  *      provide us with a default (based on the CPU model) to use as a fallback.
  *
  *      multiplier: base cycle multiplier; default is 1.
@@ -64,16 +64,16 @@ if (NODE) {
  * This component is primarily responsible for interfacing the CPU with the outside
  * world (eg, Panel and Debugger components), and managing overall CPU operation.
  *
- * It is extended by the CPUState component, where the simulation control logic resides.
+ * It is extended by the CPUState8080 component, where the simulation control logic resides.
  *
  * @constructor
  * @extends Component
  * @param {Object} parmsCPU
  * @param {number} nCyclesDefault
  */
-function CPU(parmsCPU, nCyclesDefault)
+function CPU8080(parmsCPU, nCyclesDefault)
 {
-    Component.call(this, "CPU", parmsCPU, CPU, Messages.CPU);
+    Component.call(this, "CPU", parmsCPU, CPU8080, Messages8080.CPU);
 
     var nCycles = parmsCPU['cycles'] || nCyclesDefault;
 
@@ -132,7 +132,7 @@ function CPU(parmsCPU, nCyclesDefault)
     this.setReady();
 }
 
-Component.subclass(CPU);
+Component.subclass(CPU8080);
 
 /*
  * Constants that control the frequency at which various updates should occur.
@@ -141,9 +141,9 @@ Component.subclass(CPU);
  * calcCycles(), which uses the nCyclesPerSecond passed to the constructor as a starting
  * point and computes the following variables:
  *
- *      this.aCounts.nCyclesPerYield         (this.aCounts.nCyclesPerSecond / CPU.YIELDS_PER_SECOND)
- *      this.aCounts.nCyclesPerVideoUpdate   (this.aCounts.nCyclesPerSecond / CPU.VIDEO_UPDATES_PER_SECOND)
- *      this.aCounts.nCyclesPerStatusUpdate  (this.aCounts.nCyclesPerSecond / CPU.STATUS_UPDATES_PER_SECOND)
+ *      this.aCounts.nCyclesPerYield         (this.aCounts.nCyclesPerSecond / CPU8080.YIELDS_PER_SECOND)
+ *      this.aCounts.nCyclesPerVideoUpdate   (this.aCounts.nCyclesPerSecond / CPU8080.VIDEO_UPDATES_PER_SECOND)
+ *      this.aCounts.nCyclesPerStatusUpdate  (this.aCounts.nCyclesPerSecond / CPU8080.STATUS_UPDATES_PER_SECOND)
  *
  * The above variables are also multiplied by any cycle multiplier in effect, via setSpeed(),
  * and then they're used to initialize another set of variables for each runCPU() iteration:
@@ -152,42 +152,42 @@ Component.subclass(CPU);
  *      this.aCounts.nCyclesNextVideoUpdate  <= this.aCounts.nCyclesPerVideoUpdate
  *      this.aCounts.nCyclesNextStatusUpdate <= this.aCounts.nCyclesPerStatusUpdate
  */
-CPU.YIELDS_PER_SECOND         = 30;
-CPU.VIDEO_UPDATES_PER_SECOND  = 60;
-CPU.STATUS_UPDATES_PER_SECOND = 2;
+CPU8080.YIELDS_PER_SECOND         = 30;
+CPU8080.VIDEO_UPDATES_PER_SECOND  = 60;
+CPU8080.STATUS_UPDATES_PER_SECOND = 2;
 
-CPU.BUTTONS = ["power", "reset"];
+CPU8080.BUTTONS = ["power", "reset"];
 
 /**
  * initBus(cmp, bus, cpu, dbg)
  *
- * @this {CPU}
- * @param {Computer} cmp
- * @param {Bus} bus
- * @param {CPU} cpu
- * @param {Debugger} dbg
+ * @this {CPU8080}
+ * @param {Computer8080} cmp
+ * @param {Bus8080} bus
+ * @param {CPU8080} cpu
+ * @param {Debugger8080} dbg
  */
-CPU.prototype.initBus = function(cmp, bus, cpu, dbg)
+CPU8080.prototype.initBus = function(cmp, bus, cpu, dbg)
 {
     this.cmp = cmp;
     this.bus = bus;
     this.dbg = dbg;
 
-    for (var i = 0; i < CPU.BUTTONS.length; i++) {
-        var control = this.bindings[CPU.BUTTONS[i]];
-        if (control) this.cmp.setBinding(null, CPU.BUTTONS[i], control);
+    for (var i = 0; i < CPU8080.BUTTONS.length; i++) {
+        var control = this.bindings[CPU8080.BUTTONS[i]];
+        if (control) this.cmp.setBinding(null, CPU8080.BUTTONS[i], control);
     }
 
     /*
      * We need to know the refresh rate (and corresponding interrupt rate, if any) of the Video component.
      */
-    var video = /** @type {Video} */ (cmp.getMachineComponent("Video"));
-    this.refreshRate = video && video.getRefreshRate() || CPU.VIDEO_UPDATES_PER_SECOND;
+    var video = /** @type {Video8080} */ (cmp.getMachineComponent("Video"));
+    this.refreshRate = video && video.getRefreshRate() || CPU8080.VIDEO_UPDATES_PER_SECOND;
 
     /*
      * Attach the ChipSet component to the CPU so that it can be notified whenever the CPU stops and starts.
      */
-    this.chipset = /** @type {ChipSet} */ (cmp.getMachineComponent("ChipSet"));
+    this.chipset = /** @type {ChipSet8080} */ (cmp.getMachineComponent("ChipSet"));
 
     /*
      * We've already saved the parmsCPU 'autoStart' setting, but there may be a machine (or URL) override.
@@ -203,9 +203,9 @@ CPU.prototype.initBus = function(cmp, bus, cpu, dbg)
 /**
  * reset()
  *
- * @this {CPU}
+ * @this {CPU8080}
  */
-CPU.prototype.reset = function()
+CPU8080.prototype.reset = function()
 {
      this.aCounts.nVideoUpdates = 0;
 };
@@ -215,10 +215,10 @@ CPU.prototype.reset = function()
  *
  * This is a placeholder for save support (overridden by the CPUState component).
  *
- * @this {CPU}
+ * @this {CPU8080}
  * @return {Object|null}
  */
-CPU.prototype.save = function()
+CPU8080.prototype.save = function()
 {
     return null;
 };
@@ -228,11 +228,11 @@ CPU.prototype.save = function()
  *
  * This is a placeholder for restore support (overridden by the CPUState component).
  *
- * @this {CPU}
+ * @this {CPU8080}
  * @param {Object} data
  * @return {boolean} true if restore successful, false if not
  */
-CPU.prototype.restore = function(data)
+CPU8080.prototype.restore = function(data)
 {
     return false;
 };
@@ -240,12 +240,12 @@ CPU.prototype.restore = function(data)
 /**
  * powerUp(data, fRepower)
  *
- * @this {CPU}
+ * @this {CPU8080}
  * @param {Object|null} data
  * @param {boolean} [fRepower]
  * @return {boolean} true if successful, false if failure
  */
-CPU.prototype.powerUp = function(data, fRepower)
+CPU8080.prototype.powerUp = function(data, fRepower)
 {
     if (!fRepower) {
         if (!data || !this.restore) {
@@ -286,12 +286,12 @@ CPU.prototype.powerUp = function(data, fRepower)
 /**
  * powerDown(fSave, fShutdown)
  *
- * @this {CPU}
+ * @this {CPU8080}
  * @param {boolean} [fSave]
  * @param {boolean} [fShutdown]
  * @return {Object|boolean} component state if fSave; otherwise, true if successful, false if failure
  */
-CPU.prototype.powerDown = function(fSave, fShutdown)
+CPU8080.prototype.powerDown = function(fSave, fShutdown)
 {
     /*
      * The Computer component (which is responsible for all powerDown and powerUp notifications)
@@ -305,10 +305,10 @@ CPU.prototype.powerDown = function(fSave, fShutdown)
 /**
  * autoStart()
  *
- * @this {CPU}
+ * @this {CPU8080}
  * @return {boolean} true if started, false if not
  */
-CPU.prototype.autoStart = function()
+CPU8080.prototype.autoStart = function()
 {
     /*
      * Start running automatically on power-up, assuming there's no Debugger and no "Run" button
@@ -327,10 +327,10 @@ CPU.prototype.autoStart = function()
 /**
  * isPowered()
  *
- * @this {CPU}
+ * @this {CPU8080}
  * @return {boolean}
  */
-CPU.prototype.isPowered = function()
+CPU8080.prototype.isPowered = function()
 {
     if (!this.flags.fPowered) {
         this.println(this.toString() + " not powered");
@@ -342,10 +342,10 @@ CPU.prototype.isPowered = function()
 /**
  * isRunning()
  *
- * @this {CPU}
+ * @this {CPU8080}
  * @return {boolean}
  */
-CPU.prototype.isRunning = function()
+CPU8080.prototype.isRunning = function()
 {
     return this.flags.fRunning;
 };
@@ -355,10 +355,10 @@ CPU.prototype.isRunning = function()
  *
  * This will be implemented by the CPUState component.
  *
- * @this {CPU}
+ * @this {CPU8080}
  * @return {number} a 32-bit summation of key elements of the current CPU state (used by the CPU checksum code)
  */
-CPU.prototype.getChecksum = function()
+CPU8080.prototype.getChecksum = function()
 {
     return 0;
 };
@@ -370,10 +370,10 @@ CPU.prototype.getChecksum = function()
  * cycle counter that will trigger the next displayChecksum(); called by resetCycles(), which is called whenever
  * the CPU is reset or restored.
  *
- * @this {CPU}
+ * @this {CPU8080}
  * @return {boolean} true if checksum generation enabled, false if not
  */
-CPU.prototype.resetChecksum = function()
+CPU8080.prototype.resetChecksum = function()
 {
     if (this.aCounts.nCyclesChecksumStart === undefined) this.aCounts.nCyclesChecksumStart = 0;
     if (this.aCounts.nCyclesChecksumInterval === undefined) this.aCounts.nCyclesChecksumInterval = -1;
@@ -399,10 +399,10 @@ CPU.prototype.resetChecksum = function()
  * the exact number cycles that were actually executed.  This should give us instruction-granular checksums
  * at precise intervals that are 100% repeatable.
  *
- * @this {CPU}
+ * @this {CPU8080}
  * @param {number} nCycles
  */
-CPU.prototype.updateChecksum = function(nCycles)
+CPU8080.prototype.updateChecksum = function(nCycles)
 {
     if (this.flags.fChecksum) {
         /*
@@ -434,9 +434,9 @@ CPU.prototype.updateChecksum = function(nCycles)
  * checksums generated at the specified cycle intervals, as specified by the "csStart" and "csInterval" parmsCPU
  * properties).
  *
- * @this {CPU}
+ * @this {CPU8080}
  */
-CPU.prototype.displayChecksum = function()
+CPU8080.prototype.displayChecksum = function()
 {
     this.println(this.getCycles() + " cycles: " + "checksum=" + str.toHex(this.aCounts.nChecksum));
 };
@@ -447,12 +447,12 @@ CPU.prototype.displayChecksum = function()
  * This is principally for displaying register values, but in reality, it can be used to display any
  * numeric (hex) value bound to the given label.
  *
- * @this {CPU}
+ * @this {CPU8080}
  * @param {string} sLabel
  * @param {number} nValue
  * @param {number} cch
  */
-CPU.prototype.displayValue = function(sLabel, nValue, cch)
+CPU8080.prototype.displayValue = function(sLabel, nValue, cch)
 {
     if (this.bindings[sLabel]) {
         if (nValue === undefined) {
@@ -478,14 +478,14 @@ CPU.prototype.displayValue = function(sLabel, nValue, cch)
 /**
  * setBinding(sHTMLType, sBinding, control, sValue)
  *
- * @this {CPU}
+ * @this {CPU8080}
  * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
  * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "run")
  * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
  * @param {string} [sValue] optional data value
  * @return {boolean} true if binding was successful, false if unrecognized binding request
  */
-CPU.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
+CPU8080.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
 {
     var cpu = this;
     var fBound = false;
@@ -544,11 +544,11 @@ CPU.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
  * NOTE: In this context, "timer" refers to a timer chip (eg, an Intel 8253) being emulated by
  * by the ChipSet component, not the timers managed by the CPU (eg, addTimer(), setTimer(), etc).
  *
- * @this {CPU}
+ * @this {CPU8080}
  * @param {number} nCycles is the target number of cycles to drop the current burst to
  * @return {boolean}
  */
-CPU.prototype.setBurstCycles = function(nCycles)
+CPU8080.prototype.setBurstCycles = function(nCycles)
 {
     if (this.flags.fRunning) {
         var nDelta = this.nStepCycles - nCycles;
@@ -571,11 +571,11 @@ CPU.prototype.setBurstCycles = function(nCycles)
 /**
  * addCycles(nCycles, fEndStep)
  *
- * @this {CPU}
+ * @this {CPU8080}
  * @param {number} nCycles
  * @param {boolean} [fEndStep]
  */
-CPU.prototype.addCycles = function(nCycles, fEndStep)
+CPU8080.prototype.addCycles = function(nCycles, fEndStep)
 {
     this.nTotalCycles += nCycles;
     if (fEndStep) {
@@ -589,9 +589,9 @@ CPU.prototype.addCycles = function(nCycles, fEndStep)
  * Calculate the number of cycles to process for each "burst" of CPU activity.  The size of a burst
  * is driven by the following values:
  *
- *      CPU.YIELDS_PER_SECOND (eg, 30)
- *      CPU.VIDEO_UPDATES_PER_SECOND (eg, 60)
- *      CPU.STATUS_UPDATES_PER_SECOND (eg, 5)
+ *      CPU8080.YIELDS_PER_SECOND (eg, 30)
+ *      CPU8080.VIDEO_UPDATES_PER_SECOND (eg, 60)
+ *      CPU8080.STATUS_UPDATES_PER_SECOND (eg, 5)
  *
  * The largest of the above values forces the size of the burst to its smallest value.  Let's say that
  * largest value is 30.  Assuming nCyclesPerSecond is 1,000,000, that results in bursts of 33,333 cycles.
@@ -604,18 +604,18 @@ CPU.prototype.addCycles = function(nCycles, fEndStep)
  * Similarly, whenever the "next video update" cycle counter goes to (or below) zero, we call updateVideo(),
  * and whenever the "next status update" cycle counter goes to (or below) zero, we call updateStatus().
  *
- * @this {CPU}
+ * @this {CPU8080}
  * @param {boolean} [fRecalc] is true if the caller wants to recalculate thresholds based on the most recent
  * speed calculation (see calcSpeed).
  */
-CPU.prototype.calcCycles = function(fRecalc)
+CPU8080.prototype.calcCycles = function(fRecalc)
 {
     /*
      * Calculate the most cycles we're allowed to execute in a single "burst"
      */
-    var nMostUpdatesPerSecond = CPU.YIELDS_PER_SECOND;
+    var nMostUpdatesPerSecond = CPU8080.YIELDS_PER_SECOND;
     if (nMostUpdatesPerSecond < this.refreshRate) nMostUpdatesPerSecond = this.refreshRate;
-    if (nMostUpdatesPerSecond < CPU.STATUS_UPDATES_PER_SECOND) nMostUpdatesPerSecond = CPU.STATUS_UPDATES_PER_SECOND;
+    if (nMostUpdatesPerSecond < CPU8080.STATUS_UPDATES_PER_SECOND) nMostUpdatesPerSecond = CPU8080.STATUS_UPDATES_PER_SECOND;
 
     /*
      * Calculate cycle "per" values for the yield, video update, and status update cycle counters
@@ -627,11 +627,11 @@ CPU.prototype.calcCycles = function(fRecalc)
         }
     }
 
-    this.aCounts.msPerYield = Math.round(1000 / CPU.YIELDS_PER_SECOND);
+    this.aCounts.msPerYield = Math.round(1000 / CPU8080.YIELDS_PER_SECOND);
     this.aCounts.nCyclesPerBurst = Math.floor(this.aCounts.nCyclesPerSecond / nMostUpdatesPerSecond * vMultiplier);
-    this.aCounts.nCyclesPerYield = Math.floor(this.aCounts.nCyclesPerSecond / CPU.YIELDS_PER_SECOND * vMultiplier);
+    this.aCounts.nCyclesPerYield = Math.floor(this.aCounts.nCyclesPerSecond / CPU8080.YIELDS_PER_SECOND * vMultiplier);
     this.aCounts.nCyclesPerVideoUpdate = Math.floor(this.aCounts.nCyclesPerSecond / this.refreshRate * vMultiplier);
-    this.aCounts.nCyclesPerStatusUpdate = Math.floor(this.aCounts.nCyclesPerSecond / CPU.STATUS_UPDATES_PER_SECOND * vMultiplier);
+    this.aCounts.nCyclesPerStatusUpdate = Math.floor(this.aCounts.nCyclesPerSecond / CPU8080.STATUS_UPDATES_PER_SECOND * vMultiplier);
 
     /*
      * And initialize "next" yield, video update, and status update cycle "threshold" counters to those "per" values
@@ -657,11 +657,11 @@ CPU.prototype.calcCycles = function(fRecalc)
  * nTotalCycles eventually get reset by calcSpeed(), to avoid overflow, so components that rely on
  * getCycles() returning steadily increasing values should also be prepared for a reset at any time.
  *
- * @this {CPU}
+ * @this {CPU8080}
  * @param {boolean} [fScaled] is true if the caller wants a cycle count relative to a multiplier of 1
  * @return {number}
  */
-CPU.prototype.getCycles = function(fScaled)
+CPU8080.prototype.getCycles = function(fScaled)
 {
     var nCycles = this.nTotalCycles + this.nRunCycles + this.nBurstCycles - this.nStepCycles;
     if (fScaled && this.aCounts.nCyclesMultiplier > 1 && this.aCounts.mhz > this.aCounts.mhzDefault) {
@@ -693,10 +693,10 @@ CPU.prototype.getCycles = function(fScaled)
  *
  * This returns the CPU's "base" speed (ie, the original cycles per second defined for the machine)
  *
- * @this {CPU}
+ * @this {CPU8080}
  * @return {number}
  */
-CPU.prototype.getCyclesPerSecond = function()
+CPU8080.prototype.getCyclesPerSecond = function()
 {
     return this.aCounts.nCyclesPerSecond;
 };
@@ -708,9 +708,9 @@ CPU.prototype.getCyclesPerSecond = function()
  * It's important that this be called BEFORE the actual restore() call, because restore() may want to call setSpeed(),
  * which in turn assumes that all the cycle counts have been initialized to sensible values.
  *
- * @this {CPU}
+ * @this {CPU8080}
  */
-CPU.prototype.resetCycles = function()
+CPU8080.prototype.resetCycles = function()
 {
     this.aCounts.mhz = 0;
     this.nTotalCycles = this.nRunCycles = this.nBurstCycles = this.nStepCycles = 0;
@@ -721,10 +721,10 @@ CPU.prototype.resetCycles = function()
 /**
  * getSpeed()
  *
- * @this {CPU}
+ * @this {CPU8080}
  * @return {number} the current speed multiplier
  */
-CPU.prototype.getSpeed = function()
+CPU8080.prototype.getSpeed = function()
 {
     return this.aCounts.nCyclesMultiplier;
 };
@@ -732,10 +732,10 @@ CPU.prototype.getSpeed = function()
 /**
  * getSpeedCurrent()
  *
- * @this {CPU}
+ * @this {CPU8080}
  * @return {string} the current speed, in mhz, as a string formatted to two decimal places
  */
-CPU.prototype.getSpeedCurrent = function()
+CPU8080.prototype.getSpeedCurrent = function()
 {
     /*
      * TODO: Has toFixed() been "fixed" in all browsers (eg, IE) to return a rounded value now?
@@ -746,10 +746,10 @@ CPU.prototype.getSpeedCurrent = function()
 /**
  * getSpeedTarget()
  *
- * @this {CPU}
+ * @this {CPU8080}
  * @return {string} the target speed, in mhz, as a string formatted to two decimal places
  */
-CPU.prototype.getSpeedTarget = function()
+CPU8080.prototype.getSpeedTarget = function()
 {
     /*
      * TODO: Has toFixed() been "fixed" in all browsers (eg, IE) to return a rounded value now?
@@ -766,12 +766,12 @@ CPU.prototype.getSpeedTarget = function()
  * so that the next effective speed calculation obtains sensible results.  In fact, when runCPU() initially calls
  * setSpeed() with no parameters, that's all this function does (it doesn't change the current speed setting).
  *
- * @this {CPU}
+ * @this {CPU8080}
  * @param {number} [nMultiplier] is the new proposed multiplier (reverts to 1 if the target was too high)
  * @param {boolean} [fUpdateFocus] is true to update Computer focus
  * @return {boolean} true if successful, false if not
  */
-CPU.prototype.setSpeed = function(nMultiplier, fUpdateFocus)
+CPU8080.prototype.setSpeed = function(nMultiplier, fUpdateFocus)
 {
     var fSuccess = false;
     if (nMultiplier !== undefined) {
@@ -805,11 +805,11 @@ CPU.prototype.setSpeed = function(nMultiplier, fUpdateFocus)
 /**
  * calcSpeed(nCycles, msElapsed)
  *
- * @this {CPU}
+ * @this {CPU8080}
  * @param {number} nCycles
  * @param {number} msElapsed
  */
-CPU.prototype.calcSpeed = function(nCycles, msElapsed)
+CPU8080.prototype.calcSpeed = function(nCycles, msElapsed)
 {
     if (msElapsed) {
         this.aCounts.mhz = Math.round(nCycles / (msElapsed * 10)) / 100;
@@ -823,9 +823,9 @@ CPU.prototype.calcSpeed = function(nCycles, msElapsed)
 /**
  * calcStartTime()
  *
- * @this {CPU}
+ * @this {CPU8080}
  */
-CPU.prototype.calcStartTime = function()
+CPU8080.prototype.calcStartTime = function()
 {
     if (this.aCounts.nCyclesRecalc >= this.aCounts.nCyclesPerSecond) {
         this.calcCycles(true);
@@ -879,10 +879,10 @@ CPU.prototype.calcStartTime = function()
 /**
  * calcRemainingTime()
  *
- * @this {CPU}
+ * @this {CPU8080}
  * @return {number}
  */
-CPU.prototype.calcRemainingTime = function()
+CPU8080.prototype.calcRemainingTime = function()
 {
     this.aCounts.msEndThisRun = usr.getTime();
 
@@ -939,7 +939,7 @@ CPU.prototype.calcRemainingTime = function()
      */
     this.aCounts.nCyclesRecalc += this.aCounts.nCyclesThisRun;
 
-    if (DEBUG && this.messageEnabled(Messages.LOG) && msRemainsThisRun) {
+    if (DEBUG && this.messageEnabled(Messages8080.LOG) && msRemainsThisRun) {
         this.log("calcRemainingTime: " + msRemainsThisRun + "ms to sleep after " + this.aCounts.msEndThisRun + "ms");
     }
 
@@ -960,11 +960,11 @@ CPU.prototype.calcRemainingTime = function()
  *
  * Why not use JavaScript's setTimeout() instead?  Good question.  For a good answer, see setTimer() below.
  *
- * @this {CPU}
+ * @this {CPU8080}
  * @param {function()} callBack
  * @return {number} timer index
  */
-CPU.prototype.addTimer = function(callBack)
+CPU8080.prototype.addTimer = function(callBack)
 {
     var iTimer = this.aTimers.length;
     this.aTimers.push([-1, callBack]);
@@ -986,12 +986,12 @@ CPU.prototype.addTimer = function(callBack)
  * use setTimer(); however, due to legacy code (ie, code that predates these functions) and/or laziness,
  * that's currently not the case.  TODO: Fix.
  *
- * @this {CPU}
+ * @this {CPU8080}
  * @param {number} iTimer
  * @param {number} ms (converted into a cycle countdown internally)
  * @return {number} (number of cycles used to arm timer, or -1 if error)
  */
-CPU.prototype.setTimer = function(iTimer, ms)
+CPU8080.prototype.setTimer = function(iTimer, ms)
 {
     var nCycles = -1;
     if (iTimer >= 0 && iTimer < this.aTimers.length) {
@@ -1006,11 +1006,11 @@ CPU.prototype.setTimer = function(iTimer, ms)
  *
  * Used by runCPU() to either accept or shorten the current burst if any timers need to fire soon.
  *
- * @this {CPU}
+ * @this {CPU8080}
  * @param {number} nCycles (number of cycles about to execute)
  * @return {number} (either nCycles or less if a timer needs to fire)
  */
-CPU.prototype.getTimerBurst = function(nCycles)
+CPU8080.prototype.getTimerBurst = function(nCycles)
 {
     for (var i = 0; i < this.aTimers.length; i++) {
         var timer = this.aTimers[i];
@@ -1029,10 +1029,10 @@ CPU.prototype.getTimerBurst = function(nCycles)
  * this is the function that actually "fires" any timer(s) whose countdown has reached (or dropped below)
  * zero, invoking their callback function.
  *
- * @this {CPU}
+ * @this {CPU8080}
  * @param {number} nCycles (number of cycles actually executed)
  */
-CPU.prototype.updateTimers = function(nCycles)
+CPU8080.prototype.updateTimers = function(nCycles)
 {
     for (var i = 0; i < this.aTimers.length; i++) {
         var timer = this.aTimers[i];
@@ -1048,10 +1048,10 @@ CPU.prototype.updateTimers = function(nCycles)
 /**
  * runCPU(fUpdateFocus)
  *
- * @this {CPU}
+ * @this {CPU8080}
  * @param {boolean} [fUpdateFocus] is true to update Computer focus
  */
-CPU.prototype.runCPU = function(fUpdateFocus)
+CPU8080.prototype.runCPU = function(fUpdateFocus)
 {
     if (!this.setBusy(true)) {
         this.updateCPU();
@@ -1140,7 +1140,7 @@ CPU.prototype.runCPU = function(fUpdateFocus)
  *
  * @param {boolean} [fUpdateFocus]
  */
-CPU.prototype.startCPU = function(fUpdateFocus)
+CPU8080.prototype.startCPU = function(fUpdateFocus)
 {
     if (!this.flags.fRunning) {
         /*
@@ -1168,11 +1168,11 @@ CPU.prototype.startCPU = function(fUpdateFocus)
  *
  * This will be implemented by the CPUState component.
  *
- * @this {CPU}
+ * @this {CPU8080}
  * @param {number} nMinCycles (0 implies a single-step, and therefore breakpoints should be ignored)
  * @return {number} of cycles executed; 0 indicates that the last instruction was not executed
  */
-CPU.prototype.stepCPU = function(nMinCycles)
+CPU8080.prototype.stepCPU = function(nMinCycles)
 {
     return 0;
 };
@@ -1185,10 +1185,10 @@ CPU.prototype.stepCPU = function(nMinCycles)
  * This similar to yieldCPU(), but it doesn't need to zero nCyclesNextYield to break out of runCPU();
  * it simply needs to clear fRunning (well, "simply" may be oversimplifying a bit....)
  *
- * @this {CPU}
+ * @this {CPU8080}
  * @param {boolean} [fComplete]
  */
-CPU.prototype.stopCPU = function(fComplete)
+CPU8080.prototype.stopCPU = function(fComplete)
 {
     this.isBusy(true);
     this.nBurstCycles -= this.nStepCycles;
@@ -1212,10 +1212,10 @@ CPU.prototype.stopCPU = function(fComplete)
  * other callers of stepCPU(), such as the Debugger, the combination of stepCPU() + updateCPU()
  * provides the old behavior.
  *
- * @this {CPU}
+ * @this {CPU8080}
  * @param {boolean} [fForce] (true to force a video update; used by the Debugger)
  */
-CPU.prototype.updateCPU = function(fForce)
+CPU8080.prototype.updateCPU = function(fForce)
 {
     if (this.cmp) {
         this.cmp.updateVideo(-1);
@@ -1229,9 +1229,9 @@ CPU.prototype.updateCPU = function(fForce)
  * Similar to stopCPU() with regard to how it resets various cycle countdown values, but the CPU
  * remains in a "running" state.
  *
- * @this {CPU}
+ * @this {CPU8080}
  */
-CPU.prototype.yieldCPU = function()
+CPU8080.prototype.yieldCPU = function()
 {
     this.aCounts.nCyclesNextYield = 0;  // this will break us out of runCPU(), once we break out of stepCPU()
     this.nBurstCycles -= this.nStepCycles;
@@ -1245,4 +1245,4 @@ CPU.prototype.yieldCPU = function()
     this.updateCPU();
 };
 
-if (NODE) module.exports = CPU;
+if (NODE) module.exports = CPU8080;

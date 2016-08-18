@@ -34,8 +34,8 @@
 if (NODE) {
     var str         = require("../../shared/lib/strlib");
     var Component   = require("../../shared/lib/component");
-    var Messages    = require("./messages");
-    var CPUDef      = require("./cpudef");
+    var CPUDef8080  = require("./cpudef");
+    var Messages8080= require("./messages");
 }
 
 /**
@@ -55,20 +55,20 @@ var littleEndian = (TYPEDARRAYS? (function() {
 })() : false);
 
 /**
- * Memory(addr, used, size, type)
+ * Memory8080(addr, used, size, type)
  *
- * The Bus component allocates Memory objects so that each has a memory buffer with a
+ * The Bus component allocates Memory8080 objects so that each has a memory buffer with a
  * block-granular starting address and an address range equal to bus.nBlockSize; however,
- * the size of any given Memory object's underlying buffer can be either zero or bus.nBlockSize;
+ * the size of any given Memory8080 object's underlying buffer can be either zero or bus.nBlockSize;
  * memory read/write functions for empty (buffer-less) blocks are mapped to readNone/writeNone.
  *
  * The Bus allocates empty blocks for the entire address space during initialization, so that
  * any reads/writes to undefined addresses will have no effect.  Later, the ROM and RAM
  * components will ask the Bus to allocate memory for specific ranges, and the Bus will allocate
- * as many new blockSize Memory objects as the ranges require.  Partial Memory blocks could
+ * as many new blockSize Memory8080 objects as the ranges require.  Partial Memory8080 blocks could
  * also be supported in theory, but in practice, they're not.
  *
- * Because Memory blocks now allow us to have a "sparse" address space, we could choose to
+ * Because Memory8080 blocks now allow us to have a "sparse" address space, we could choose to
  * take the memory hit of allocating 4K arrays per block, where each element stores only one byte,
  * instead of the more frugal but slightly slower approach of allocating arrays of 32-bit dwords
  * (LONGARRAYS) and shifting/masking bytes/words to/from dwords; in theory, byte accesses would
@@ -82,7 +82,7 @@ var littleEndian = (TYPEDARRAYS? (function() {
  * size at this point.  Also, not all JavaScript implementations support TYPEDARRAYS (IE9 is probably
  * the only real outlier: it lacks typed arrays but otherwise has all the necessary HTML5 support).
  *
- * WARNING: Since Memory blocks are low-level objects that have no UI requirements, they
+ * WARNING: Since Memory8080 blocks are low-level objects that have no UI requirements, they
  * do not inherit from the Component class, so if you want to use any Component class methods,
  * such as Component.assert(), use the corresponding Debugger methods instead (assuming a debugger
  * is available).
@@ -91,19 +91,19 @@ var littleEndian = (TYPEDARRAYS? (function() {
  * @param {number|null} [addr] of lowest used address in block
  * @param {number} [used] portion of block in bytes (0 for none); must be a multiple of 4
  * @param {number} [size] of block's buffer in bytes (0 for none); must be a multiple of 4
- * @param {number} [type] is one of the Memory.TYPE constants (default is Memory.TYPE.NONE)
+ * @param {number} [type] is one of the Memory8080.TYPE constants (default is Memory8080.TYPE.NONE)
  */
-function Memory(addr, used, size, type)
+function Memory8080(addr, used, size, type)
 {
     var i;
-    this.id = (Memory.idBlock += 2);
+    this.id = (Memory8080.idBlock += 2);
     this.adw = null;
     this.offset = 0;
     this.addr = addr;
     this.used = used;
     this.size = size || 0;
-    this.type = type || Memory.TYPE.NONE;
-    this.fReadOnly = (type == Memory.TYPE.ROM);
+    this.type = type || Memory8080.TYPE.NONE;
+    this.fReadOnly = (type == Memory8080.TYPE.ROM);
     this.copyBreakpoints();     // initialize the block's Debugger info; the caller will reinitialize
 
     /*
@@ -146,7 +146,7 @@ function Memory(addr, used, size, type)
         this.ab = new Uint8Array(this.buffer, 0, size);
         this.aw = new Uint16Array(this.buffer, 0, size >> 1);
         this.adw = new Int32Array(this.buffer, 0, size >> 2);
-        this.setAccess(littleEndian? Memory.afnArrayLE : Memory.afnArrayBE);
+        this.setAccess(littleEndian? Memory8080.afnArrayLE : Memory8080.afnArrayBE);
     } else {
         if (BYTEARRAYS) {
             this.ab = new Array(size);
@@ -160,7 +160,7 @@ function Memory(addr, used, size, type)
             this.adw = new Array(size >> 2);
             for (i = 0; i < this.adw.length; i++) this.adw[i] = 0;
         }
-        this.setAccess(Memory.afnMemory);
+        this.setAccess(Memory8080.afnMemory);
     }
 }
 
@@ -171,7 +171,7 @@ function Memory(addr, used, size, type)
  * 'little endian") storage.  ROM is equally conventional, except that the fReadOnly property is set,
  * disabling writes.  VIDEO is treated exactly like RAM, unless a controller is provided.  Both RAM and
  * VIDEO memory are always considered writable, and even ROM can be written using the Bus setByteDirect()
- * interface (which in turn uses the Memory writeByteDirect() interface), allowing the ROM component to
+ * interface (which in turn uses the Memory8080 writeByteDirect() interface), allowing the ROM component to
  * initialize its own memory.  The CTRL type is used to identify memory-mapped devices that do not need
  * any default storage and always provide their own controller.
  *
@@ -186,7 +186,7 @@ function Memory(addr, used, size, type)
  * read-only memory), but the larger purpose of these types is to help document the caller's intent and to
  * provide the Control Panel with the ability to highlight memory regions accordingly.
  */
-Memory.TYPE = {
+Memory8080.TYPE = {
     NONE:       0,
     RAM:        1,
     ROM:        2,
@@ -199,7 +199,7 @@ Memory.TYPE = {
 /*
  * Last used block ID (used for debugging only)
  */
-Memory.idBlock = 0;
+Memory8080.idBlock = 0;
 
 /**
  * adjustEndian(dw)
@@ -207,22 +207,22 @@ Memory.idBlock = 0;
  * @param {number} dw
  * @return {number}
  */
-Memory.adjustEndian = function(dw) {
+Memory8080.adjustEndian = function(dw) {
     if (TYPEDARRAYS && !littleEndian) {
         dw = (dw << 24) | ((dw << 8) & 0x00ff0000) | ((dw >> 8) & 0x0000ff00) | (dw >>> 24);
     }
     return dw;
 };
 
-Memory.prototype = {
-    constructor: Memory,
+Memory8080.prototype = {
+    constructor: Memory8080,
     parent: null,
     /**
      * init(addr)
      *
-     * Quick reinitializer when reusing a Memory block.
+     * Quick reinitializer when reusing a Memory8080 block.
      *
-     * @this {Memory}
+     * @this {Memory8080}
      * @param {number} addr
      */
     init: function(addr) {
@@ -231,13 +231,13 @@ Memory.prototype = {
     /**
      * clone(mem, type)
      *
-     * Converts the current Memory block (this) into a clone of the given Memory block (mem),
+     * Converts the current Memory8080 block (this) into a clone of the given Memory8080 block (mem),
      * and optionally overrides the current block's type with the specified type.
      *
-     * @this {Memory}
-     * @param {Memory} mem
+     * @this {Memory8080}
+     * @param {Memory8080} mem
      * @param {number} [type]
-     * @param {Debugger} [dbg]
+     * @param {Debugger8080} [dbg]
      */
     clone: function(mem, type, dbg) {
         /*
@@ -250,7 +250,7 @@ Memory.prototype = {
         this.size = mem.size;
         if (type) {
             this.type = type;
-            this.fReadOnly = (type == Memory.TYPE.ROM);
+            this.fReadOnly = (type == Memory8080.TYPE.ROM);
         }
         if (TYPEDARRAYS) {
             this.buffer = mem.buffer;
@@ -258,27 +258,27 @@ Memory.prototype = {
             this.ab = mem.ab;
             this.aw = mem.aw;
             this.adw = mem.adw;
-            this.setAccess(littleEndian? Memory.afnArrayLE : Memory.afnArrayBE);
+            this.setAccess(littleEndian? Memory8080.afnArrayLE : Memory8080.afnArrayBE);
         } else {
             if (BYTEARRAYS) {
                 this.ab = mem.ab;
             } else {
                 this.adw = mem.adw;
             }
-            this.setAccess(Memory.afnMemory);
+            this.setAccess(Memory8080.afnMemory);
         }
         this.copyBreakpoints(dbg, mem);
     },
     /**
      * save()
      *
-     * This gets the contents of a Memory block as an array of 32-bit values; used by Bus.saveMemory(),
+     * This gets the contents of a Memory8080 block as an array of 32-bit values; used by Bus8080.saveMemory(),
      * which in turn is called by CPUState.save().
      *
-     * Memory blocks with custom memory controllers do NOT save their contents; that's the responsibility
+     * Memory8080 blocks with custom memory controllers do NOT save their contents; that's the responsibility
      * of the controller component.
      *
-     * @this {Memory}
+     * @this {Memory8080}
      * @return {Array|Int32Array|null}
      */
     save: function() {
@@ -315,12 +315,12 @@ Memory.prototype = {
     /**
      * restore(adw)
      *
-     * This restores the contents of a Memory block from an array of 32-bit values;
-     * used by Bus.restoreMemory(), which is called by CPUState.restore(), after all other
-     * components have been restored and thus all Memory blocks have been allocated
+     * This restores the contents of a Memory8080 block from an array of 32-bit values;
+     * used by Bus8080.restoreMemory(), which is called by CPUState.restore(), after all other
+     * components have been restored and thus all Memory8080 blocks have been allocated
      * by their respective components.
      *
-     * @this {Memory}
+     * @this {Memory8080}
      * @param {Array|null} adw
      * @return {boolean} true if successful, false if block size mismatch
      */
@@ -360,16 +360,16 @@ Memory.prototype = {
     /**
      * setAccess(afn, fDirect)
      *
-     * If no function table is specified, a default is selected based on the Memory type.
+     * If no function table is specified, a default is selected based on the Memory8080 type.
      *
-     * @this {Memory}
+     * @this {Memory8080}
      * @param {Array.<function()>} [afn] function table
      * @param {boolean} [fDirect] (true to update direct access functions as well; default is true)
      */
     setAccess: function(afn, fDirect) {
         if (!afn) {
-            Component.assert(this.type == Memory.TYPE.NONE);
-            afn = Memory.afnNone;
+            Component.assert(this.type == Memory8080.TYPE.NONE);
+            afn = Memory8080.afnNone;
         }
         this.setReadAccess(afn, fDirect);
         this.setWriteAccess(afn, fDirect);
@@ -377,7 +377,7 @@ Memory.prototype = {
     /**
      * setReadAccess(afn, fDirect)
      *
-     * @this {Memory}
+     * @this {Memory8080}
      * @param {Array.<function()>} afn
      * @param {boolean} [fDirect]
      */
@@ -394,7 +394,7 @@ Memory.prototype = {
     /**
      * setWriteAccess(afn, fDirect)
      *
-     * @this {Memory}
+     * @this {Memory8080}
      * @param {Array.<function()>} afn
      * @param {boolean} [fDirect]
      */
@@ -411,7 +411,7 @@ Memory.prototype = {
     /**
      * resetReadAccess()
      *
-     * @this {Memory}
+     * @this {Memory8080}
      */
     resetReadAccess: function() {
         this.readByte = this.readByteDirect;
@@ -420,7 +420,7 @@ Memory.prototype = {
     /**
      * resetWriteAccess()
      *
-     * @this {Memory}
+     * @this {Memory8080}
      */
     resetWriteAccess: function() {
         this.writeByte = this.fReadOnly? this.writeNone : this.writeByteDirect;
@@ -429,31 +429,31 @@ Memory.prototype = {
     /**
      * printAddr(sMessage)
      *
-     * @this {Memory}
+     * @this {Memory8080}
      * @param {string} sMessage
      */
     printAddr: function(sMessage) {
-        if (DEBUG && this.dbg && this.dbg.messageEnabled(Messages.MEM)) {
+        if (DEBUG && this.dbg && this.dbg.messageEnabled(Messages8080.MEM)) {
             this.dbg.printMessage(sMessage + ' ' + (this.addr != null? ('%' + str.toHex(this.addr)) : '#' + this.id), true);
         }
     },
     /**
      * addBreakpoint(off, fWrite)
      *
-     * @this {Memory}
+     * @this {Memory8080}
      * @param {number} off
      * @param {boolean} fWrite
      */
     addBreakpoint: function(off, fWrite) {
         if (!fWrite) {
             if (this.cReadBreakpoints++ === 0) {
-                this.setReadAccess(Memory.afnChecked, false);
+                this.setReadAccess(Memory8080.afnChecked, false);
             }
             if (DEBUG) this.printAddr("read breakpoint added to memory block");
         }
         else {
             if (this.cWriteBreakpoints++ === 0) {
-                this.setWriteAccess(Memory.afnChecked, false);
+                this.setWriteAccess(Memory8080.afnChecked, false);
             }
             if (DEBUG) this.printAddr("write breakpoint added to memory block");
         }
@@ -461,7 +461,7 @@ Memory.prototype = {
     /**
      * removeBreakpoint(off, fWrite)
      *
-     * @this {Memory}
+     * @this {Memory8080}
      * @param {number} off
      * @param {boolean} fWrite
      */
@@ -484,19 +484,19 @@ Memory.prototype = {
     /**
      * copyBreakpoints(dbg, mem)
      *
-     * @this {Memory}
-     * @param {Debugger} [dbg]
-     * @param {Memory} [mem] (outgoing Memory block to copy breakpoints from, if any)
+     * @this {Memory8080}
+     * @param {Debugger8080} [dbg]
+     * @param {Memory8080} [mem] (outgoing Memory8080 block to copy breakpoints from, if any)
      */
     copyBreakpoints: function(dbg, mem) {
         this.dbg = dbg;
         this.cReadBreakpoints = this.cWriteBreakpoints = 0;
         if (mem) {
             if ((this.cReadBreakpoints = mem.cReadBreakpoints)) {
-                this.setReadAccess(Memory.afnChecked, false);
+                this.setReadAccess(Memory8080.afnChecked, false);
             }
             if ((this.cWriteBreakpoints = mem.cWriteBreakpoints)) {
-                this.setWriteAccess(Memory.afnChecked, false);
+                this.setWriteAccess(Memory8080.afnChecked, false);
             }
         }
     },
@@ -513,15 +513,15 @@ Memory.prototype = {
      * that a system would require nonexistent memory locations to return ALL bits set.
      *
      * Also, I'm reluctant to address that potential issue by simply returning -1, because to date, the above
-     * Memory interfaces have always returned values that are properly masked to 8, 16 or 32 bits, respectively.
+     * Memory8080 interfaces have always returned values that are properly masked to 8, 16 or 32 bits, respectively.
      *
-     * @this {Memory}
+     * @this {Memory8080}
      * @param {number} off
      * @param {number} addr
      * @return {number}
      */
     readNone: function readNone(off, addr) {
-        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(Messages.CPU | Messages.MEM) /* && !off */) {
+        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(Messages8080.CPU | Messages8080.MEM) /* && !off */) {
             this.dbg.message("attempt to read invalid block %" + str.toHex(this.addr), true);
         }
         return 0xff;
@@ -529,20 +529,20 @@ Memory.prototype = {
     /**
      * writeNone(off, v, addr)
      *
-     * @this {Memory}
+     * @this {Memory8080}
      * @param {number} off
      * @param {number} v (could be either a byte or word value, since we use the same handler for both kinds of accesses)
      * @param {number} addr
      */
     writeNone: function writeNone(off, v, addr) {
-        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(Messages.CPU | Messages.MEM) /* && !off */) {
+        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(Messages8080.CPU | Messages8080.MEM) /* && !off */) {
             this.dbg.message("attempt to write " + str.toHexWord(v) + " to invalid block %" + str.toHex(this.addr), true);
         }
     },
     /**
      * readShortDefault(off, addr)
      *
-     * @this {Memory}
+     * @this {Memory8080}
      * @param {number} off
      * @param {number} addr
      * @return {number}
@@ -553,7 +553,7 @@ Memory.prototype = {
     /**
      * writeShortDefault(off, w, addr)
      *
-     * @this {Memory}
+     * @this {Memory8080}
      * @param {number} off
      * @param {number} w
      * @param {number} addr
@@ -565,7 +565,7 @@ Memory.prototype = {
     /**
      * readByteMemory(off, addr)
      *
-     * @this {Memory}
+     * @this {Memory8080}
      * @param {number} off
      * @param {number} addr
      * @return {number}
@@ -579,7 +579,7 @@ Memory.prototype = {
     /**
      * readShortMemory(off, addr)
      *
-     * @this {Memory}
+     * @this {Memory8080}
      * @param {number} off
      * @param {number} addr
      * @return {number}
@@ -602,7 +602,7 @@ Memory.prototype = {
     /**
      * writeByteMemory(off, b, addr)
      *
-     * @this {Memory}
+     * @this {Memory8080}
      * @param {number} off
      * @param {number} b
      * @param {number} addr
@@ -620,7 +620,7 @@ Memory.prototype = {
     /**
      * writeShortMemory(off, w, addr)
      *
-     * @this {Memory}
+     * @this {Memory8080}
      * @param {number} off
      * @param {number} w
      * @param {number} addr
@@ -645,7 +645,7 @@ Memory.prototype = {
     /**
      * readByteChecked(off, addr)
      *
-     * @this {Memory}
+     * @this {Memory8080}
      * @param {number} off
      * @param {number} addr
      * @return {number}
@@ -659,7 +659,7 @@ Memory.prototype = {
     /**
      * readShortChecked(off, addr)
      *
-     * @this {Memory}
+     * @this {Memory8080}
      * @param {number} off
      * @param {number} addr
      * @return {number}
@@ -673,7 +673,7 @@ Memory.prototype = {
     /**
      * writeByteChecked(off, b, addr)
      *
-     * @this {Memory}
+     * @this {Memory8080}
      * @param {number} off
      * @param {number} addr
      * @param {number} b
@@ -687,7 +687,7 @@ Memory.prototype = {
     /**
      * writeShortChecked(off, w, addr)
      *
-     * @this {Memory}
+     * @this {Memory8080}
      * @param {number} off
      * @param {number} addr
      * @param {number} w
@@ -701,7 +701,7 @@ Memory.prototype = {
     /**
      * readByteBE(off, addr)
      *
-     * @this {Memory}
+     * @this {Memory8080}
      * @param {number} off
      * @param {number} addr
      * @return {number}
@@ -712,7 +712,7 @@ Memory.prototype = {
     /**
      * readByteLE(off, addr)
      *
-     * @this {Memory}
+     * @this {Memory8080}
      * @param {number} off
      * @param {number} addr
      * @return {number}
@@ -723,7 +723,7 @@ Memory.prototype = {
     /**
      * readShortBE(off, addr)
      *
-     * @this {Memory}
+     * @this {Memory8080}
      * @param {number} off
      * @param {number} addr
      * @return {number}
@@ -734,7 +734,7 @@ Memory.prototype = {
     /**
      * readShortLE(off, addr)
      *
-     * @this {Memory}
+     * @this {Memory8080}
      * @param {number} off
      * @param {number} addr
      * @return {number}
@@ -749,7 +749,7 @@ Memory.prototype = {
     /**
      * writeByteBE(off, b, addr)
      *
-     * @this {Memory}
+     * @this {Memory8080}
      * @param {number} off
      * @param {number} b
      * @param {number} addr
@@ -761,7 +761,7 @@ Memory.prototype = {
     /**
      * writeByteLE(off, b, addr)
      *
-     * @this {Memory}
+     * @this {Memory8080}
      * @param {number} off
      * @param {number} addr
      * @param {number} b
@@ -773,7 +773,7 @@ Memory.prototype = {
     /**
      * writeShortBE(off, w, addr)
      *
-     * @this {Memory}
+     * @this {Memory8080}
      * @param {number} off
      * @param {number} addr
      * @param {number} w
@@ -785,7 +785,7 @@ Memory.prototype = {
     /**
      * writeShortLE(off, w, addr)
      *
-     * @this {Memory}
+     * @this {Memory8080}
      * @param {number} off
      * @param {number} addr
      * @param {number} w
@@ -809,16 +809,16 @@ Memory.prototype = {
  * This is the effective definition of afnNone, but we need not fully define it, because setAccess()
  * uses these defaults when any of the 6 handlers (ie, 3 read handlers and 3 write handlers) are undefined.
  *
-Memory.afnNone          = [Memory.prototype.readNone,        Memory.prototype.readShortDefault, Memory.prototype.writeNone,        Memory.prototype.writeShortDefault];
+Memory8080.afnNone          = [Memory8080.prototype.readNone,        Memory8080.prototype.readShortDefault, Memory8080.prototype.writeNone,        Memory8080.prototype.writeShortDefault];
  */
 
-Memory.afnNone          = [];
-Memory.afnMemory        = [Memory.prototype.readByteMemory,  Memory.prototype.readShortMemory,  Memory.prototype.writeByteMemory,  Memory.prototype.writeShortMemory];
-Memory.afnChecked       = [Memory.prototype.readByteChecked, Memory.prototype.readShortChecked, Memory.prototype.writeByteChecked, Memory.prototype.writeShortChecked];
+Memory8080.afnNone          = [];
+Memory8080.afnMemory        = [Memory8080.prototype.readByteMemory,  Memory8080.prototype.readShortMemory,  Memory8080.prototype.writeByteMemory,  Memory8080.prototype.writeShortMemory];
+Memory8080.afnChecked       = [Memory8080.prototype.readByteChecked, Memory8080.prototype.readShortChecked, Memory8080.prototype.writeByteChecked, Memory8080.prototype.writeShortChecked];
 
 if (TYPEDARRAYS) {
-    Memory.afnArrayBE   = [Memory.prototype.readByteBE,      Memory.prototype.readShortBE,      Memory.prototype.writeByteBE,      Memory.prototype.writeShortBE];
-    Memory.afnArrayLE   = [Memory.prototype.readByteLE,      Memory.prototype.readShortLE,      Memory.prototype.writeByteLE,      Memory.prototype.writeShortLE];
+    Memory8080.afnArrayBE   = [Memory8080.prototype.readByteBE,      Memory8080.prototype.readShortBE,      Memory8080.prototype.writeByteBE,      Memory8080.prototype.writeShortBE];
+    Memory8080.afnArrayLE   = [Memory8080.prototype.readByteLE,      Memory8080.prototype.readShortLE,      Memory8080.prototype.writeByteLE,      Memory8080.prototype.writeShortLE];
 }
 
-if (NODE) module.exports = Memory;
+if (NODE) module.exports = Memory8080;

@@ -37,17 +37,17 @@ if (DEBUGGER) {
         var usr         = require("../../shared/lib/usrlib");
         var web         = require("../../shared/lib/weblib");
         var Component   = require("../../shared/lib/component");
-        var Messages    = require("./messages");
-        var Memory      = require("./memory");
-        var Keyboard    = require("./keyboard");
-        var State       = require("./state");
-        var CPU         = require("./cpu");
-        var CPUDef      = require("./cpudef");
+        var CPUDef8080  = require("./cpudef");
+        var CPU8080     = require("./cpu");
+        var Keyboard8080= require("./keyboard");
+        var Messages8080= require("./messages");
+        var Memory8080  = require("./memory");
+        var State8080   = require("./state");
     }
 }
 
 /**
- * Debugger Address Object
+ * Debugger8080 Address Object
  *
  *      addr            address
  *      fTemporary      true if this is a temporary breakpoint address
@@ -61,35 +61,35 @@ if (DEBUGGER) {
  *      aCmds:(Array.<string>|undefined)
  * }}
  */
-var DbgAddr;
+var DbgAddr8080;
 
 /**
- * Debugger(parmsDbg)
+ * Debugger8080(parmsDbg)
  *
  * @constructor
  * @extends Component
  * @param {Object} parmsDbg
  *
- * The Debugger component supports the following optional (parmsDbg) properties:
+ * The Debugger8080 component supports the following optional (parmsDbg) properties:
  *
  *      commands: string containing zero or more commands, separated by ';'
  *
  *      messages: string containing zero or more message categories to enable;
  *      multiple categories must be separated by '|' or ';'.  Parsed by messageInit().
  *
- * The Debugger component is an optional component that implements a variety of user
+ * The Debugger8080 component is an optional component that implements a variety of user
  * commands for controlling the CPU, dumping and editing memory, etc.
  */
-function Debugger(parmsDbg)
+function Debugger8080(parmsDbg)
 {
     if (DEBUGGER) {
 
-        Component.call(this, "Debugger", parmsDbg, Debugger);
+        Component.call(this, "Debugger", parmsDbg, Debugger8080);
 
-        this.style = Debugger.STYLE_8080;
+        this.style = Debugger8080.STYLE_8080;
 
         /*
-         * These keep track of instruction activity, but only when tracing or when Debugger checks
+         * These keep track of instruction activity, but only when tracing or when Debugger8080 checks
          * have been enabled (eg, one or more breakpoints have been set).
          *
          * They are zeroed by the reset() notification handler.  cInstructions is advanced by
@@ -181,7 +181,7 @@ function Debugger(parmsDbg)
         this.historyInit();
 
         /*
-         * Initialize Debugger message support
+         * Initialize Debugger8080 message support
          */
         this.afnDumpers = [];
         this.messageInit(parmsDbg['messages']);
@@ -189,7 +189,7 @@ function Debugger(parmsDbg)
         this.sInitCommands = parmsDbg['commands'];
 
         /*
-         * Make it easier to access Debugger commands from an external REPL (eg, the WebStorm
+         * Make it easier to access Debugger8080 commands from an external REPL (eg, the WebStorm
          * "live" console window); eg:
          *
          *      $('r')
@@ -213,10 +213,10 @@ function Debugger(parmsDbg)
 
 if (DEBUGGER) {
 
-    Component.subclass(Debugger);
+    Component.subclass(Debugger8080);
 
     /*
-     * NOTE: Every Debugger property from here to the first prototype function definition (initBus()) is a
+     * NOTE: Every Debugger8080 property from here to the first prototype function definition (initBus()) is a
      * considered a "class constant"; most of them use our "all-caps" convention (and all of them SHOULD, but
      * that wouldn't help us catch any bugs).
      *
@@ -229,7 +229,7 @@ if (DEBUGGER) {
      * caught at compile-time.
      */
 
-    Debugger.COMMANDS = {
+    Debugger8080.COMMANDS = {
         '?':        "help/print",
         'a [#]':    "assemble",             // TODO: Implement this command someday
         'b [#]':    "breakpoint",           // multiple variations (use b? to list them)
@@ -257,13 +257,13 @@ if (DEBUGGER) {
         'var':      "assign variable"
     };
 
-    Debugger.STYLE_8080 = 8080;
-    Debugger.STYLE_8086 = 8086;
+    Debugger8080.STYLE_8080 = 8080;
+    Debugger8080.STYLE_8086 = 8086;
 
     /*
      * CPU instruction ordinals
      */
-    Debugger.INS = {
+    Debugger8080.INS = {
         NONE:   0,  ACI:    1,  ADC:    2,  ADD:    3,  ADI:    4,  ANA:    5,  ANI:    6,  CALL:   7,
         CC:     8,  CM:     9,  CNC:   10,  CNZ:   11,  CP:    12,  CPE:   13,  CPO:   14,  CZ:    15,
         CMA:   16,  CMC:   17,  CMP:   18,  CPI:   19,  DAA:   20,  DAD:   21,  DCR:   22,  DCX:   23,
@@ -282,7 +282,7 @@ if (DEBUGGER) {
      * If you change the default style, using the "s" command (eg, "s 8086"), then the 8086 table
      * will be used instead.  TODO: Add a "s z80" command for Z80-style mnemonics.
      */
-    Debugger.INS_NAMES = [
+    Debugger8080.INS_NAMES = [
         "NONE",     "ACI",      "ADC",      "ADD",      "ADI",      "ANA",      "ANI",      "CALL",
         "CC",       "CM",       "CNC",      "CNZ",      "CP",       "CPE",      "CPO",      "CZ",
         "CMA",      "CMC",      "CMP",      "CPI",      "DAA",      "DAD",      "DCR",      "DCX",
@@ -295,7 +295,7 @@ if (DEBUGGER) {
         "STC",      "SUB",      "SUI",      "XCHG",     "XRA",      "XRI",      "XTHL"
     ];
 
-    Debugger.INS_NAMES_8086 = [
+    Debugger8080.INS_NAMES_8086 = [
         "NONE",     "ADC",      "ADC",      "ADD",      "ADD",      "AND",      "AND",      "CALL",
         "CALLC",    "CALLS",    "CALLNC",   "CALLNZ",   "CALLNS",   "CALLP",    "CALLNP",   "CALLZ",
         "NOT",      "CMC",      "CMP",      "CMP",      "DAA",      "ADD",      "DEC",      "DEC",
@@ -308,83 +308,83 @@ if (DEBUGGER) {
         "STC",      "SUB",      "SUB",      "XCHG",     "XOR",      "XOR",      "XCHG"
     ];
 
-    Debugger.REG_B      = 0x00;
-    Debugger.REG_C      = 0x01;
-    Debugger.REG_D      = 0x02;
-    Debugger.REG_E      = 0x03;
-    Debugger.REG_H      = 0x04;
-    Debugger.REG_L      = 0x05;
-    Debugger.REG_M      = 0x06;
-    Debugger.REG_A      = 0x07;
-    Debugger.REG_BC     = 0x08;
-    Debugger.REG_DE     = 0x09;
-    Debugger.REG_HL     = 0x0A;
-    Debugger.REG_SP     = 0x0B;
-    Debugger.REG_PC     = 0x0C;
-    Debugger.REG_PS     = 0x0D;
-    Debugger.REG_PSW    = 0x0E;         // aka AF if Z80-style mnemonics
+    Debugger8080.REG_B      = 0x00;
+    Debugger8080.REG_C      = 0x01;
+    Debugger8080.REG_D      = 0x02;
+    Debugger8080.REG_E      = 0x03;
+    Debugger8080.REG_H      = 0x04;
+    Debugger8080.REG_L      = 0x05;
+    Debugger8080.REG_M      = 0x06;
+    Debugger8080.REG_A      = 0x07;
+    Debugger8080.REG_BC     = 0x08;
+    Debugger8080.REG_DE     = 0x09;
+    Debugger8080.REG_HL     = 0x0A;
+    Debugger8080.REG_SP     = 0x0B;
+    Debugger8080.REG_PC     = 0x0C;
+    Debugger8080.REG_PS     = 0x0D;
+    Debugger8080.REG_PSW    = 0x0E;         // aka AF if Z80-style mnemonics
 
     /*
      * NOTE: "PS" is the complete processor status, which includes bits like the Interrupt flag (IF),
      * which is NOT the same as "PSW", which is the low 8 bits of "PS" combined with "A" in the high byte.
      */
-    Debugger.REGS = [
+    Debugger8080.REGS = [
         "B", "C", "D", "E", "H", "L", "M", "A", "BC", "DE", "HL", "SP", "PC", "PS", "PSW"
     ];
 
     /*
      * Operand type descriptor masks and definitions
      */
-    Debugger.TYPE_SIZE  = 0x000F;       // size field
-    Debugger.TYPE_MODE  = 0x00F0;       // mode field
-    Debugger.TYPE_IREG  = 0x0F00;       // implied register field
-    Debugger.TYPE_OTHER = 0xF000;       // "other" field
+    Debugger8080.TYPE_SIZE  = 0x000F;       // size field
+    Debugger8080.TYPE_MODE  = 0x00F0;       // mode field
+    Debugger8080.TYPE_IREG  = 0x0F00;       // implied register field
+    Debugger8080.TYPE_OTHER = 0xF000;       // "other" field
 
     /*
      * TYPE_SIZE values
      */
-    Debugger.TYPE_NONE  = 0x0000;       // (all other TYPE fields ignored)
-    Debugger.TYPE_BYTE  = 0x0001;       // byte, regardless of operand size
-    Debugger.TYPE_SBYTE = 0x0002;       // byte sign-extended to word
-    Debugger.TYPE_WORD  = 0x0003;       // word (16-bit value)
+    Debugger8080.TYPE_NONE  = 0x0000;       // (all other TYPE fields ignored)
+    Debugger8080.TYPE_BYTE  = 0x0001;       // byte, regardless of operand size
+    Debugger8080.TYPE_SBYTE = 0x0002;       // byte sign-extended to word
+    Debugger8080.TYPE_WORD  = 0x0003;       // word (16-bit value)
 
     /*
      * TYPE_MODE values
      */
-    Debugger.TYPE_REG   = 0x0010;       // register
-    Debugger.TYPE_IMM   = 0x0020;       // immediate data
-    Debugger.TYPE_ADDR  = 0x0033;       // immediate (word) address
-    Debugger.TYPE_MEM   = 0x0040;       // memory reference
-    Debugger.TYPE_INT   = 0x0080;       // interrupt level encoded in instruction (bits 3-5)
+    Debugger8080.TYPE_REG   = 0x0010;       // register
+    Debugger8080.TYPE_IMM   = 0x0020;       // immediate data
+    Debugger8080.TYPE_ADDR  = 0x0033;       // immediate (word) address
+    Debugger8080.TYPE_MEM   = 0x0040;       // memory reference
+    Debugger8080.TYPE_INT   = 0x0080;       // interrupt level encoded in instruction (bits 3-5)
 
     /*
      * TYPE_IREG values, based on the REG_* constants.
      *
      * NOte that TYPE_M isn't really a register, just an alternative form of TYPE_HL | TYPE_MEM.
      */
-    Debugger.TYPE_A     = (Debugger.REG_A  << 8 | Debugger.TYPE_REG | Debugger.TYPE_BYTE);
-    Debugger.TYPE_B     = (Debugger.REG_B  << 8 | Debugger.TYPE_REG | Debugger.TYPE_BYTE);
-    Debugger.TYPE_C     = (Debugger.REG_C  << 8 | Debugger.TYPE_REG | Debugger.TYPE_BYTE);
-    Debugger.TYPE_D     = (Debugger.REG_D  << 8 | Debugger.TYPE_REG | Debugger.TYPE_BYTE);
-    Debugger.TYPE_E     = (Debugger.REG_E  << 8 | Debugger.TYPE_REG | Debugger.TYPE_BYTE);
-    Debugger.TYPE_H     = (Debugger.REG_H  << 8 | Debugger.TYPE_REG | Debugger.TYPE_BYTE);
-    Debugger.TYPE_L     = (Debugger.REG_L  << 8 | Debugger.TYPE_REG | Debugger.TYPE_BYTE);
-    Debugger.TYPE_M     = (Debugger.REG_M  << 8 | Debugger.TYPE_REG | Debugger.TYPE_BYTE | Debugger.TYPE_MEM);
-    Debugger.TYPE_BC    = (Debugger.REG_BC << 8 | Debugger.TYPE_REG | Debugger.TYPE_WORD);
-    Debugger.TYPE_DE    = (Debugger.REG_DE << 8 | Debugger.TYPE_REG | Debugger.TYPE_WORD);
-    Debugger.TYPE_HL    = (Debugger.REG_HL << 8 | Debugger.TYPE_REG | Debugger.TYPE_WORD);
-    Debugger.TYPE_SP    = (Debugger.REG_SP << 8 | Debugger.TYPE_REG | Debugger.TYPE_WORD);
-    Debugger.TYPE_PC    = (Debugger.REG_PC << 8 | Debugger.TYPE_REG | Debugger.TYPE_WORD);
-    Debugger.TYPE_PSW   = (Debugger.REG_PSW<< 8 | Debugger.TYPE_REG | Debugger.TYPE_WORD);
+    Debugger8080.TYPE_A     = (Debugger8080.REG_A  << 8 | Debugger8080.TYPE_REG | Debugger8080.TYPE_BYTE);
+    Debugger8080.TYPE_B     = (Debugger8080.REG_B  << 8 | Debugger8080.TYPE_REG | Debugger8080.TYPE_BYTE);
+    Debugger8080.TYPE_C     = (Debugger8080.REG_C  << 8 | Debugger8080.TYPE_REG | Debugger8080.TYPE_BYTE);
+    Debugger8080.TYPE_D     = (Debugger8080.REG_D  << 8 | Debugger8080.TYPE_REG | Debugger8080.TYPE_BYTE);
+    Debugger8080.TYPE_E     = (Debugger8080.REG_E  << 8 | Debugger8080.TYPE_REG | Debugger8080.TYPE_BYTE);
+    Debugger8080.TYPE_H     = (Debugger8080.REG_H  << 8 | Debugger8080.TYPE_REG | Debugger8080.TYPE_BYTE);
+    Debugger8080.TYPE_L     = (Debugger8080.REG_L  << 8 | Debugger8080.TYPE_REG | Debugger8080.TYPE_BYTE);
+    Debugger8080.TYPE_M     = (Debugger8080.REG_M  << 8 | Debugger8080.TYPE_REG | Debugger8080.TYPE_BYTE | Debugger8080.TYPE_MEM);
+    Debugger8080.TYPE_BC    = (Debugger8080.REG_BC << 8 | Debugger8080.TYPE_REG | Debugger8080.TYPE_WORD);
+    Debugger8080.TYPE_DE    = (Debugger8080.REG_DE << 8 | Debugger8080.TYPE_REG | Debugger8080.TYPE_WORD);
+    Debugger8080.TYPE_HL    = (Debugger8080.REG_HL << 8 | Debugger8080.TYPE_REG | Debugger8080.TYPE_WORD);
+    Debugger8080.TYPE_SP    = (Debugger8080.REG_SP << 8 | Debugger8080.TYPE_REG | Debugger8080.TYPE_WORD);
+    Debugger8080.TYPE_PC    = (Debugger8080.REG_PC << 8 | Debugger8080.TYPE_REG | Debugger8080.TYPE_WORD);
+    Debugger8080.TYPE_PSW   = (Debugger8080.REG_PSW<< 8 | Debugger8080.TYPE_REG | Debugger8080.TYPE_WORD);
 
     /*
      * TYPE_OTHER bit definitions
      */
-    Debugger.TYPE_IN    = 0x1000;       // operand is input
-    Debugger.TYPE_OUT   = 0x2000;       // operand is output
-    Debugger.TYPE_BOTH  = (Debugger.TYPE_IN | Debugger.TYPE_OUT);
-    Debugger.TYPE_OPT   = 0x4000;       // optional operand (ie, normally omitted in 8080 assembly language)
-    Debugger.TYPE_UNDOC = 0x8000;       // opcode is an undocumented alternative encoding
+    Debugger8080.TYPE_IN    = 0x1000;       // operand is input
+    Debugger8080.TYPE_OUT   = 0x2000;       // operand is output
+    Debugger8080.TYPE_BOTH  = (Debugger8080.TYPE_IN | Debugger8080.TYPE_OUT);
+    Debugger8080.TYPE_OPT   = 0x4000;       // optional operand (ie, normally omitted in 8080 assembly language)
+    Debugger8080.TYPE_UNDOC = 0x8000;       // opcode is an undocumented alternative encoding
 
     /*
      * The aaOpDescs array is indexed by opcode, and each element is a sub-array (aOpDesc) that describes
@@ -405,263 +405,263 @@ if (DEBUGGER) {
      *      2) If no TYPE_OTHER bits are specified for the second (source) operand, TYPE_IN is assumed;
      *      3) If no size is specified for the second operand, the size is assumed to match the first operand.
      */
-    Debugger.aaOpDescs = [
-    /* 0x00 */  [Debugger.INS.NOP],
-    /* 0x01 */  [Debugger.INS.LXI,   Debugger.TYPE_BC,    Debugger.TYPE_IMM],
-    /* 0x02 */  [Debugger.INS.STAX,  Debugger.TYPE_BC   | Debugger.TYPE_MEM, Debugger.TYPE_A    | Debugger.TYPE_OPT],
-    /* 0x03 */  [Debugger.INS.INX,   Debugger.TYPE_BC],
-    /* 0x04 */  [Debugger.INS.INR,   Debugger.TYPE_B],
-    /* 0x05 */  [Debugger.INS.DCR,   Debugger.TYPE_B],
-    /* 0x06 */  [Debugger.INS.MVI,   Debugger.TYPE_B,     Debugger.TYPE_IMM],
-    /* 0x07 */  [Debugger.INS.RLC],
-    /* 0x08 */  [Debugger.INS.NOP,   Debugger.TYPE_UNDOC],
-    /* 0x09 */  [Debugger.INS.DAD,   Debugger.TYPE_HL   | Debugger.TYPE_OPT, Debugger.TYPE_BC],
-    /* 0x0A */  [Debugger.INS.LDAX,  Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_BC   | Debugger.TYPE_MEM],
-    /* 0x0B */  [Debugger.INS.DCX,   Debugger.TYPE_BC],
-    /* 0x0C */  [Debugger.INS.INR,   Debugger.TYPE_C],
-    /* 0x0D */  [Debugger.INS.DCR,   Debugger.TYPE_C],
-    /* 0x0E */  [Debugger.INS.MVI,   Debugger.TYPE_C,     Debugger.TYPE_IMM],
-    /* 0x0F */  [Debugger.INS.RRC],
-    /* 0x10 */  [Debugger.INS.NOP,   Debugger.TYPE_UNDOC],
-    /* 0x11 */  [Debugger.INS.LXI,   Debugger.TYPE_DE,    Debugger.TYPE_IMM],
-    /* 0x12 */  [Debugger.INS.STAX,  Debugger.TYPE_DE   | Debugger.TYPE_MEM, Debugger.TYPE_A    | Debugger.TYPE_OPT],
-    /* 0x13 */  [Debugger.INS.INX,   Debugger.TYPE_DE],
-    /* 0x14 */  [Debugger.INS.INR,   Debugger.TYPE_D],
-    /* 0x15 */  [Debugger.INS.DCR,   Debugger.TYPE_D],
-    /* 0x16 */  [Debugger.INS.MVI,   Debugger.TYPE_D,     Debugger.TYPE_IMM],
-    /* 0x17 */  [Debugger.INS.RAL],
-    /* 0x18 */  [Debugger.INS.NOP,   Debugger.TYPE_UNDOC],
-    /* 0x19 */  [Debugger.INS.DAD,   Debugger.TYPE_HL   | Debugger.TYPE_OPT, Debugger.TYPE_DE],
-    /* 0x1A */  [Debugger.INS.LDAX,  Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_DE   | Debugger.TYPE_MEM],
-    /* 0x1B */  [Debugger.INS.DCX,   Debugger.TYPE_DE],
-    /* 0x1C */  [Debugger.INS.INR,   Debugger.TYPE_E],
-    /* 0x1D */  [Debugger.INS.DCR,   Debugger.TYPE_E],
-    /* 0x1E */  [Debugger.INS.MVI,   Debugger.TYPE_E,     Debugger.TYPE_IMM],
-    /* 0x1F */  [Debugger.INS.RAR],
-    /* 0x20 */  [Debugger.INS.NOP,   Debugger.TYPE_UNDOC],
-    /* 0x21 */  [Debugger.INS.LXI,   Debugger.TYPE_HL,    Debugger.TYPE_IMM],
-    /* 0x22 */  [Debugger.INS.SHLD,  Debugger.TYPE_ADDR | Debugger.TYPE_MEM, Debugger.TYPE_HL   | Debugger.TYPE_OPT],
-    /* 0x23 */  [Debugger.INS.INX,   Debugger.TYPE_HL],
-    /* 0x24 */  [Debugger.INS.INR,   Debugger.TYPE_H],
-    /* 0x25 */  [Debugger.INS.DCR,   Debugger.TYPE_H],
-    /* 0x26 */  [Debugger.INS.MVI,   Debugger.TYPE_H,     Debugger.TYPE_IMM],
-    /* 0x27 */  [Debugger.INS.DAA],
-    /* 0x28 */  [Debugger.INS.NOP,   Debugger.TYPE_UNDOC],
-    /* 0x29 */  [Debugger.INS.DAD,   Debugger.TYPE_HL   | Debugger.TYPE_OPT, Debugger.TYPE_HL],
-    /* 0x2A */  [Debugger.INS.LHLD,  Debugger.TYPE_HL   | Debugger.TYPE_OPT, Debugger.TYPE_ADDR | Debugger.TYPE_MEM],
-    /* 0x2B */  [Debugger.INS.DCX,   Debugger.TYPE_HL],
-    /* 0x2C */  [Debugger.INS.INR,   Debugger.TYPE_L],
-    /* 0x2D */  [Debugger.INS.DCR,   Debugger.TYPE_L],
-    /* 0x2E */  [Debugger.INS.MVI,   Debugger.TYPE_L,     Debugger.TYPE_IMM],
-    /* 0x2F */  [Debugger.INS.CMA,   Debugger.TYPE_A    | Debugger.TYPE_OPT],
-    /* 0x30 */  [Debugger.INS.NOP,   Debugger.TYPE_UNDOC],
-    /* 0x31 */  [Debugger.INS.LXI,   Debugger.TYPE_SP,    Debugger.TYPE_IMM],
-    /* 0x32 */  [Debugger.INS.STA,   Debugger.TYPE_ADDR | Debugger.TYPE_MEM, Debugger.TYPE_A    | Debugger.TYPE_OPT],
-    /* 0x33 */  [Debugger.INS.INX,   Debugger.TYPE_SP],
-    /* 0x34 */  [Debugger.INS.INR,   Debugger.TYPE_M],
-    /* 0x35 */  [Debugger.INS.DCR,   Debugger.TYPE_M],
-    /* 0x36 */  [Debugger.INS.MVI,   Debugger.TYPE_M,     Debugger.TYPE_IMM],
-    /* 0x37 */  [Debugger.INS.STC],
-    /* 0x38 */  [Debugger.INS.NOP,   Debugger.TYPE_UNDOC],
-    /* 0x39 */  [Debugger.INS.DAD,   Debugger.TYPE_HL   | Debugger.TYPE_OPT, Debugger.TYPE_SP],
-    /* 0x3A */  [Debugger.INS.LDA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_ADDR | Debugger.TYPE_MEM],
-    /* 0x3B */  [Debugger.INS.DCX,   Debugger.TYPE_SP],
-    /* 0x3C */  [Debugger.INS.INR,   Debugger.TYPE_A],
-    /* 0x3D */  [Debugger.INS.DCR,   Debugger.TYPE_A],
-    /* 0x3E */  [Debugger.INS.MVI,   Debugger.TYPE_A,     Debugger.TYPE_IMM],
-    /* 0x3F */  [Debugger.INS.CMC],
-    /* 0x40 */  [Debugger.INS.MOV,   Debugger.TYPE_B,     Debugger.TYPE_B],
-    /* 0x41 */  [Debugger.INS.MOV,   Debugger.TYPE_B,     Debugger.TYPE_C],
-    /* 0x42 */  [Debugger.INS.MOV,   Debugger.TYPE_B,     Debugger.TYPE_D],
-    /* 0x43 */  [Debugger.INS.MOV,   Debugger.TYPE_B,     Debugger.TYPE_E],
-    /* 0x44 */  [Debugger.INS.MOV,   Debugger.TYPE_B,     Debugger.TYPE_H],
-    /* 0x45 */  [Debugger.INS.MOV,   Debugger.TYPE_B,     Debugger.TYPE_L],
-    /* 0x46 */  [Debugger.INS.MOV,   Debugger.TYPE_B,     Debugger.TYPE_M],
-    /* 0x47 */  [Debugger.INS.MOV,   Debugger.TYPE_B,     Debugger.TYPE_A],
-    /* 0x48 */  [Debugger.INS.MOV,   Debugger.TYPE_C,     Debugger.TYPE_B],
-    /* 0x49 */  [Debugger.INS.MOV,   Debugger.TYPE_C,     Debugger.TYPE_C],
-    /* 0x4A */  [Debugger.INS.MOV,   Debugger.TYPE_C,     Debugger.TYPE_D],
-    /* 0x4B */  [Debugger.INS.MOV,   Debugger.TYPE_C,     Debugger.TYPE_E],
-    /* 0x4C */  [Debugger.INS.MOV,   Debugger.TYPE_C,     Debugger.TYPE_H],
-    /* 0x4D */  [Debugger.INS.MOV,   Debugger.TYPE_C,     Debugger.TYPE_L],
-    /* 0x4E */  [Debugger.INS.MOV,   Debugger.TYPE_C,     Debugger.TYPE_M],
-    /* 0x4F */  [Debugger.INS.MOV,   Debugger.TYPE_C,     Debugger.TYPE_A],
-    /* 0x50 */  [Debugger.INS.MOV,   Debugger.TYPE_D,     Debugger.TYPE_B],
-    /* 0x51 */  [Debugger.INS.MOV,   Debugger.TYPE_D,     Debugger.TYPE_C],
-    /* 0x52 */  [Debugger.INS.MOV,   Debugger.TYPE_D,     Debugger.TYPE_D],
-    /* 0x53 */  [Debugger.INS.MOV,   Debugger.TYPE_D,     Debugger.TYPE_E],
-    /* 0x54 */  [Debugger.INS.MOV,   Debugger.TYPE_D,     Debugger.TYPE_H],
-    /* 0x55 */  [Debugger.INS.MOV,   Debugger.TYPE_D,     Debugger.TYPE_L],
-    /* 0x56 */  [Debugger.INS.MOV,   Debugger.TYPE_D,     Debugger.TYPE_M],
-    /* 0x57 */  [Debugger.INS.MOV,   Debugger.TYPE_D,     Debugger.TYPE_A],
-    /* 0x58 */  [Debugger.INS.MOV,   Debugger.TYPE_E,     Debugger.TYPE_B],
-    /* 0x59 */  [Debugger.INS.MOV,   Debugger.TYPE_E,     Debugger.TYPE_C],
-    /* 0x5A */  [Debugger.INS.MOV,   Debugger.TYPE_E,     Debugger.TYPE_D],
-    /* 0x5B */  [Debugger.INS.MOV,   Debugger.TYPE_E,     Debugger.TYPE_E],
-    /* 0x5C */  [Debugger.INS.MOV,   Debugger.TYPE_E,     Debugger.TYPE_H],
-    /* 0x5D */  [Debugger.INS.MOV,   Debugger.TYPE_E,     Debugger.TYPE_L],
-    /* 0x5E */  [Debugger.INS.MOV,   Debugger.TYPE_E,     Debugger.TYPE_M],
-    /* 0x5F */  [Debugger.INS.MOV,   Debugger.TYPE_E,     Debugger.TYPE_A],
-    /* 0x60 */  [Debugger.INS.MOV,   Debugger.TYPE_H,     Debugger.TYPE_B],
-    /* 0x61 */  [Debugger.INS.MOV,   Debugger.TYPE_H,     Debugger.TYPE_C],
-    /* 0x62 */  [Debugger.INS.MOV,   Debugger.TYPE_H,     Debugger.TYPE_D],
-    /* 0x63 */  [Debugger.INS.MOV,   Debugger.TYPE_H,     Debugger.TYPE_E],
-    /* 0x64 */  [Debugger.INS.MOV,   Debugger.TYPE_H,     Debugger.TYPE_H],
-    /* 0x65 */  [Debugger.INS.MOV,   Debugger.TYPE_H,     Debugger.TYPE_L],
-    /* 0x66 */  [Debugger.INS.MOV,   Debugger.TYPE_H,     Debugger.TYPE_M],
-    /* 0x67 */  [Debugger.INS.MOV,   Debugger.TYPE_H,     Debugger.TYPE_A],
-    /* 0x68 */  [Debugger.INS.MOV,   Debugger.TYPE_L,     Debugger.TYPE_B],
-    /* 0x69 */  [Debugger.INS.MOV,   Debugger.TYPE_L,     Debugger.TYPE_C],
-    /* 0x6A */  [Debugger.INS.MOV,   Debugger.TYPE_L,     Debugger.TYPE_D],
-    /* 0x6B */  [Debugger.INS.MOV,   Debugger.TYPE_L,     Debugger.TYPE_E],
-    /* 0x6C */  [Debugger.INS.MOV,   Debugger.TYPE_L,     Debugger.TYPE_H],
-    /* 0x6D */  [Debugger.INS.MOV,   Debugger.TYPE_L,     Debugger.TYPE_L],
-    /* 0x6E */  [Debugger.INS.MOV,   Debugger.TYPE_L,     Debugger.TYPE_M],
-    /* 0x6F */  [Debugger.INS.MOV,   Debugger.TYPE_L,     Debugger.TYPE_A],
-    /* 0x70 */  [Debugger.INS.MOV,   Debugger.TYPE_M,     Debugger.TYPE_B],
-    /* 0x71 */  [Debugger.INS.MOV,   Debugger.TYPE_M,     Debugger.TYPE_C],
-    /* 0x72 */  [Debugger.INS.MOV,   Debugger.TYPE_M,     Debugger.TYPE_D],
-    /* 0x73 */  [Debugger.INS.MOV,   Debugger.TYPE_M,     Debugger.TYPE_E],
-    /* 0x74 */  [Debugger.INS.MOV,   Debugger.TYPE_M,     Debugger.TYPE_H],
-    /* 0x75 */  [Debugger.INS.MOV,   Debugger.TYPE_M,     Debugger.TYPE_L],
-    /* 0x76 */  [Debugger.INS.HLT],
-    /* 0x77 */  [Debugger.INS.MOV,   Debugger.TYPE_M,     Debugger.TYPE_A],
-    /* 0x78 */  [Debugger.INS.MOV,   Debugger.TYPE_A,     Debugger.TYPE_B],
-    /* 0x79 */  [Debugger.INS.MOV,   Debugger.TYPE_A,     Debugger.TYPE_C],
-    /* 0x7A */  [Debugger.INS.MOV,   Debugger.TYPE_A,     Debugger.TYPE_D],
-    /* 0x7B */  [Debugger.INS.MOV,   Debugger.TYPE_A,     Debugger.TYPE_E],
-    /* 0x7C */  [Debugger.INS.MOV,   Debugger.TYPE_A,     Debugger.TYPE_H],
-    /* 0x7D */  [Debugger.INS.MOV,   Debugger.TYPE_A,     Debugger.TYPE_L],
-    /* 0x7E */  [Debugger.INS.MOV,   Debugger.TYPE_A,     Debugger.TYPE_M],
-    /* 0x7F */  [Debugger.INS.MOV,   Debugger.TYPE_A,     Debugger.TYPE_A],
-    /* 0x80 */  [Debugger.INS.ADD,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_B],
-    /* 0x81 */  [Debugger.INS.ADD,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_C],
-    /* 0x82 */  [Debugger.INS.ADD,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_D],
-    /* 0x83 */  [Debugger.INS.ADD,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_E],
-    /* 0x84 */  [Debugger.INS.ADD,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_H],
-    /* 0x85 */  [Debugger.INS.ADD,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_L],
-    /* 0x86 */  [Debugger.INS.ADD,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_M],
-    /* 0x87 */  [Debugger.INS.ADD,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_A],
-    /* 0x88 */  [Debugger.INS.ADC,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_B],
-    /* 0x89 */  [Debugger.INS.ADC,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_C],
-    /* 0x8A */  [Debugger.INS.ADC,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_D],
-    /* 0x8B */  [Debugger.INS.ADC,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_E],
-    /* 0x8C */  [Debugger.INS.ADC,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_H],
-    /* 0x8D */  [Debugger.INS.ADC,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_L],
-    /* 0x8E */  [Debugger.INS.ADC,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_M],
-    /* 0x8F */  [Debugger.INS.ADC,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_A],
-    /* 0x90 */  [Debugger.INS.SUB,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_B],
-    /* 0x91 */  [Debugger.INS.SUB,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_C],
-    /* 0x92 */  [Debugger.INS.SUB,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_D],
-    /* 0x93 */  [Debugger.INS.SUB,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_E],
-    /* 0x94 */  [Debugger.INS.SUB,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_H],
-    /* 0x95 */  [Debugger.INS.SUB,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_L],
-    /* 0x96 */  [Debugger.INS.SUB,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_M],
-    /* 0x97 */  [Debugger.INS.SUB,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_A],
-    /* 0x98 */  [Debugger.INS.SBB,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_B],
-    /* 0x99 */  [Debugger.INS.SBB,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_C],
-    /* 0x9A */  [Debugger.INS.SBB,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_D],
-    /* 0x9B */  [Debugger.INS.SBB,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_E],
-    /* 0x9C */  [Debugger.INS.SBB,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_H],
-    /* 0x9D */  [Debugger.INS.SBB,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_L],
-    /* 0x9E */  [Debugger.INS.SBB,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_M],
-    /* 0x9F */  [Debugger.INS.SBB,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_A],
-    /* 0xA0 */  [Debugger.INS.ANA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_B],
-    /* 0xA1 */  [Debugger.INS.ANA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_C],
-    /* 0xA2 */  [Debugger.INS.ANA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_D],
-    /* 0xA3 */  [Debugger.INS.ANA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_E],
-    /* 0xA4 */  [Debugger.INS.ANA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_H],
-    /* 0xA5 */  [Debugger.INS.ANA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_L],
-    /* 0xA6 */  [Debugger.INS.ANA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_M],
-    /* 0xA7 */  [Debugger.INS.ANA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_A],
-    /* 0xA8 */  [Debugger.INS.XRA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_B],
-    /* 0xA9 */  [Debugger.INS.XRA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_C],
-    /* 0xAA */  [Debugger.INS.XRA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_D],
-    /* 0xAB */  [Debugger.INS.XRA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_E],
-    /* 0xAC */  [Debugger.INS.XRA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_H],
-    /* 0xAD */  [Debugger.INS.XRA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_L],
-    /* 0xAE */  [Debugger.INS.XRA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_M],
-    /* 0xAF */  [Debugger.INS.XRA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_A],
-    /* 0xB0 */  [Debugger.INS.ORA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_B],
-    /* 0xB1 */  [Debugger.INS.ORA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_C],
-    /* 0xB2 */  [Debugger.INS.ORA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_D],
-    /* 0xB3 */  [Debugger.INS.ORA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_E],
-    /* 0xB4 */  [Debugger.INS.ORA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_H],
-    /* 0xB5 */  [Debugger.INS.ORA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_L],
-    /* 0xB6 */  [Debugger.INS.ORA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_M],
-    /* 0xB7 */  [Debugger.INS.ORA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_A],
-    /* 0xB8 */  [Debugger.INS.CMP,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_B],
-    /* 0xB9 */  [Debugger.INS.CMP,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_C],
-    /* 0xBA */  [Debugger.INS.CMP,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_D],
-    /* 0xBB */  [Debugger.INS.CMP,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_E],
-    /* 0xBC */  [Debugger.INS.CMP,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_H],
-    /* 0xBD */  [Debugger.INS.CMP,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_L],
-    /* 0xBE */  [Debugger.INS.CMP,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_M],
-    /* 0xBF */  [Debugger.INS.CMP,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_A],
-    /* 0xC0 */  [Debugger.INS.RNZ],
-    /* 0xC1 */  [Debugger.INS.POP,   Debugger.TYPE_BC],
-    /* 0xC2 */  [Debugger.INS.JNZ,   Debugger.TYPE_ADDR],
-    /* 0xC3 */  [Debugger.INS.JMP,   Debugger.TYPE_ADDR],
-    /* 0xC4 */  [Debugger.INS.CNZ,   Debugger.TYPE_ADDR],
-    /* 0xC5 */  [Debugger.INS.PUSH,  Debugger.TYPE_BC],
-    /* 0xC6 */  [Debugger.INS.ADI,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_IMM | Debugger.TYPE_BYTE],
-    /* 0xC7 */  [Debugger.INS.RST,   Debugger.TYPE_INT],
-    /* 0xC8 */  [Debugger.INS.RZ],
-    /* 0xC9 */  [Debugger.INS.RET],
-    /* 0xCA */  [Debugger.INS.JZ,    Debugger.TYPE_ADDR],
-    /* 0xCB */  [Debugger.INS.JMP,   Debugger.TYPE_ADDR | Debugger.TYPE_UNDOC],
-    /* 0xCC */  [Debugger.INS.CZ,    Debugger.TYPE_ADDR],
-    /* 0xCD */  [Debugger.INS.CALL,  Debugger.TYPE_ADDR],
-    /* 0xCE */  [Debugger.INS.ACI,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_IMM | Debugger.TYPE_BYTE],
-    /* 0xCF */  [Debugger.INS.RST,   Debugger.TYPE_INT],
-    /* 0xD0 */  [Debugger.INS.RNC],
-    /* 0xD1 */  [Debugger.INS.POP,   Debugger.TYPE_DE],
-    /* 0xD2 */  [Debugger.INS.JNC,   Debugger.TYPE_ADDR],
-    /* 0xD3 */  [Debugger.INS.OUT,   Debugger.TYPE_IMM  | Debugger.TYPE_BYTE,Debugger.TYPE_A   | Debugger.TYPE_OPT],
-    /* 0xD4 */  [Debugger.INS.CNC,   Debugger.TYPE_ADDR],
-    /* 0xD5 */  [Debugger.INS.PUSH,  Debugger.TYPE_DE],
-    /* 0xD6 */  [Debugger.INS.SUI,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_IMM | Debugger.TYPE_BYTE],
-    /* 0xD7 */  [Debugger.INS.RST,   Debugger.TYPE_INT],
-    /* 0xD8 */  [Debugger.INS.RC],
-    /* 0xD9 */  [Debugger.INS.RET,   Debugger.TYPE_UNDOC],
-    /* 0xDA */  [Debugger.INS.JC,    Debugger.TYPE_ADDR],
-    /* 0xDB */  [Debugger.INS.IN,    Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_IMM | Debugger.TYPE_BYTE],
-    /* 0xDC */  [Debugger.INS.CC,    Debugger.TYPE_ADDR],
-    /* 0xDD */  [Debugger.INS.CALL,  Debugger.TYPE_ADDR | Debugger.TYPE_UNDOC],
-    /* 0xDE */  [Debugger.INS.SBI,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_IMM | Debugger.TYPE_BYTE],
-    /* 0xDF */  [Debugger.INS.RST,   Debugger.TYPE_INT],
-    /* 0xE0 */  [Debugger.INS.RPO],
-    /* 0xE1 */  [Debugger.INS.POP,   Debugger.TYPE_HL],
-    /* 0xE2 */  [Debugger.INS.JPO,   Debugger.TYPE_ADDR],
-    /* 0xE3 */  [Debugger.INS.XTHL,  Debugger.TYPE_SP   | Debugger.TYPE_MEM| Debugger.TYPE_OPT,  Debugger.TYPE_HL | Debugger.TYPE_OPT],
-    /* 0xE4 */  [Debugger.INS.CPO,   Debugger.TYPE_ADDR],
-    /* 0xE5 */  [Debugger.INS.PUSH,  Debugger.TYPE_HL],
-    /* 0xE6 */  [Debugger.INS.ANI,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_IMM | Debugger.TYPE_BYTE],
-    /* 0xE7 */  [Debugger.INS.RST,   Debugger.TYPE_INT],
-    /* 0xE8 */  [Debugger.INS.RPE],
-    /* 0xE9 */  [Debugger.INS.PCHL,  Debugger.TYPE_HL],
-    /* 0xEA */  [Debugger.INS.JPE,   Debugger.TYPE_ADDR],
-    /* 0xEB */  [Debugger.INS.XCHG,  Debugger.TYPE_HL   | Debugger.TYPE_OPT, Debugger.TYPE_DE  | Debugger.TYPE_OPT],
-    /* 0xEC */  [Debugger.INS.CPE,   Debugger.TYPE_ADDR],
-    /* 0xED */  [Debugger.INS.CALL,  Debugger.TYPE_ADDR | Debugger.TYPE_UNDOC],
-    /* 0xEE */  [Debugger.INS.XRI,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_IMM | Debugger.TYPE_BYTE],
-    /* 0xEF */  [Debugger.INS.RST,   Debugger.TYPE_INT],
-    /* 0xF0 */  [Debugger.INS.RP],
-    /* 0xF1 */  [Debugger.INS.POP,   Debugger.TYPE_PSW],
-    /* 0xF2 */  [Debugger.INS.JP,    Debugger.TYPE_ADDR],
-    /* 0xF3 */  [Debugger.INS.DI],
-    /* 0xF4 */  [Debugger.INS.CP,    Debugger.TYPE_ADDR],
-    /* 0xF5 */  [Debugger.INS.PUSH,  Debugger.TYPE_PSW],
-    /* 0xF6 */  [Debugger.INS.ORI,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_IMM | Debugger.TYPE_BYTE],
-    /* 0xF7 */  [Debugger.INS.RST,   Debugger.TYPE_INT],
-    /* 0xF8 */  [Debugger.INS.RM],
-    /* 0xF9 */  [Debugger.INS.SPHL,  Debugger.TYPE_SP   | Debugger.TYPE_OPT, Debugger.TYPE_HL  | Debugger.TYPE_OPT],
-    /* 0xFA */  [Debugger.INS.JM,    Debugger.TYPE_ADDR],
-    /* 0xFB */  [Debugger.INS.EI],
-    /* 0xFC */  [Debugger.INS.CM,    Debugger.TYPE_ADDR],
-    /* 0xFD */  [Debugger.INS.CALL,  Debugger.TYPE_ADDR | Debugger.TYPE_UNDOC],
-    /* 0xFE */  [Debugger.INS.CPI,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_IMM | Debugger.TYPE_BYTE],
-    /* 0xFF */  [Debugger.INS.RST,   Debugger.TYPE_INT]
+    Debugger8080.aaOpDescs = [
+    /* 0x00 */  [Debugger8080.INS.NOP],
+    /* 0x01 */  [Debugger8080.INS.LXI,   Debugger8080.TYPE_BC,    Debugger8080.TYPE_IMM],
+    /* 0x02 */  [Debugger8080.INS.STAX,  Debugger8080.TYPE_BC   | Debugger8080.TYPE_MEM, Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT],
+    /* 0x03 */  [Debugger8080.INS.INX,   Debugger8080.TYPE_BC],
+    /* 0x04 */  [Debugger8080.INS.INR,   Debugger8080.TYPE_B],
+    /* 0x05 */  [Debugger8080.INS.DCR,   Debugger8080.TYPE_B],
+    /* 0x06 */  [Debugger8080.INS.MVI,   Debugger8080.TYPE_B,     Debugger8080.TYPE_IMM],
+    /* 0x07 */  [Debugger8080.INS.RLC],
+    /* 0x08 */  [Debugger8080.INS.NOP,   Debugger8080.TYPE_UNDOC],
+    /* 0x09 */  [Debugger8080.INS.DAD,   Debugger8080.TYPE_HL   | Debugger8080.TYPE_OPT, Debugger8080.TYPE_BC],
+    /* 0x0A */  [Debugger8080.INS.LDAX,  Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_BC   | Debugger8080.TYPE_MEM],
+    /* 0x0B */  [Debugger8080.INS.DCX,   Debugger8080.TYPE_BC],
+    /* 0x0C */  [Debugger8080.INS.INR,   Debugger8080.TYPE_C],
+    /* 0x0D */  [Debugger8080.INS.DCR,   Debugger8080.TYPE_C],
+    /* 0x0E */  [Debugger8080.INS.MVI,   Debugger8080.TYPE_C,     Debugger8080.TYPE_IMM],
+    /* 0x0F */  [Debugger8080.INS.RRC],
+    /* 0x10 */  [Debugger8080.INS.NOP,   Debugger8080.TYPE_UNDOC],
+    /* 0x11 */  [Debugger8080.INS.LXI,   Debugger8080.TYPE_DE,    Debugger8080.TYPE_IMM],
+    /* 0x12 */  [Debugger8080.INS.STAX,  Debugger8080.TYPE_DE   | Debugger8080.TYPE_MEM, Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT],
+    /* 0x13 */  [Debugger8080.INS.INX,   Debugger8080.TYPE_DE],
+    /* 0x14 */  [Debugger8080.INS.INR,   Debugger8080.TYPE_D],
+    /* 0x15 */  [Debugger8080.INS.DCR,   Debugger8080.TYPE_D],
+    /* 0x16 */  [Debugger8080.INS.MVI,   Debugger8080.TYPE_D,     Debugger8080.TYPE_IMM],
+    /* 0x17 */  [Debugger8080.INS.RAL],
+    /* 0x18 */  [Debugger8080.INS.NOP,   Debugger8080.TYPE_UNDOC],
+    /* 0x19 */  [Debugger8080.INS.DAD,   Debugger8080.TYPE_HL   | Debugger8080.TYPE_OPT, Debugger8080.TYPE_DE],
+    /* 0x1A */  [Debugger8080.INS.LDAX,  Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_DE   | Debugger8080.TYPE_MEM],
+    /* 0x1B */  [Debugger8080.INS.DCX,   Debugger8080.TYPE_DE],
+    /* 0x1C */  [Debugger8080.INS.INR,   Debugger8080.TYPE_E],
+    /* 0x1D */  [Debugger8080.INS.DCR,   Debugger8080.TYPE_E],
+    /* 0x1E */  [Debugger8080.INS.MVI,   Debugger8080.TYPE_E,     Debugger8080.TYPE_IMM],
+    /* 0x1F */  [Debugger8080.INS.RAR],
+    /* 0x20 */  [Debugger8080.INS.NOP,   Debugger8080.TYPE_UNDOC],
+    /* 0x21 */  [Debugger8080.INS.LXI,   Debugger8080.TYPE_HL,    Debugger8080.TYPE_IMM],
+    /* 0x22 */  [Debugger8080.INS.SHLD,  Debugger8080.TYPE_ADDR | Debugger8080.TYPE_MEM, Debugger8080.TYPE_HL   | Debugger8080.TYPE_OPT],
+    /* 0x23 */  [Debugger8080.INS.INX,   Debugger8080.TYPE_HL],
+    /* 0x24 */  [Debugger8080.INS.INR,   Debugger8080.TYPE_H],
+    /* 0x25 */  [Debugger8080.INS.DCR,   Debugger8080.TYPE_H],
+    /* 0x26 */  [Debugger8080.INS.MVI,   Debugger8080.TYPE_H,     Debugger8080.TYPE_IMM],
+    /* 0x27 */  [Debugger8080.INS.DAA],
+    /* 0x28 */  [Debugger8080.INS.NOP,   Debugger8080.TYPE_UNDOC],
+    /* 0x29 */  [Debugger8080.INS.DAD,   Debugger8080.TYPE_HL   | Debugger8080.TYPE_OPT, Debugger8080.TYPE_HL],
+    /* 0x2A */  [Debugger8080.INS.LHLD,  Debugger8080.TYPE_HL   | Debugger8080.TYPE_OPT, Debugger8080.TYPE_ADDR | Debugger8080.TYPE_MEM],
+    /* 0x2B */  [Debugger8080.INS.DCX,   Debugger8080.TYPE_HL],
+    /* 0x2C */  [Debugger8080.INS.INR,   Debugger8080.TYPE_L],
+    /* 0x2D */  [Debugger8080.INS.DCR,   Debugger8080.TYPE_L],
+    /* 0x2E */  [Debugger8080.INS.MVI,   Debugger8080.TYPE_L,     Debugger8080.TYPE_IMM],
+    /* 0x2F */  [Debugger8080.INS.CMA,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT],
+    /* 0x30 */  [Debugger8080.INS.NOP,   Debugger8080.TYPE_UNDOC],
+    /* 0x31 */  [Debugger8080.INS.LXI,   Debugger8080.TYPE_SP,    Debugger8080.TYPE_IMM],
+    /* 0x32 */  [Debugger8080.INS.STA,   Debugger8080.TYPE_ADDR | Debugger8080.TYPE_MEM, Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT],
+    /* 0x33 */  [Debugger8080.INS.INX,   Debugger8080.TYPE_SP],
+    /* 0x34 */  [Debugger8080.INS.INR,   Debugger8080.TYPE_M],
+    /* 0x35 */  [Debugger8080.INS.DCR,   Debugger8080.TYPE_M],
+    /* 0x36 */  [Debugger8080.INS.MVI,   Debugger8080.TYPE_M,     Debugger8080.TYPE_IMM],
+    /* 0x37 */  [Debugger8080.INS.STC],
+    /* 0x38 */  [Debugger8080.INS.NOP,   Debugger8080.TYPE_UNDOC],
+    /* 0x39 */  [Debugger8080.INS.DAD,   Debugger8080.TYPE_HL   | Debugger8080.TYPE_OPT, Debugger8080.TYPE_SP],
+    /* 0x3A */  [Debugger8080.INS.LDA,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_ADDR | Debugger8080.TYPE_MEM],
+    /* 0x3B */  [Debugger8080.INS.DCX,   Debugger8080.TYPE_SP],
+    /* 0x3C */  [Debugger8080.INS.INR,   Debugger8080.TYPE_A],
+    /* 0x3D */  [Debugger8080.INS.DCR,   Debugger8080.TYPE_A],
+    /* 0x3E */  [Debugger8080.INS.MVI,   Debugger8080.TYPE_A,     Debugger8080.TYPE_IMM],
+    /* 0x3F */  [Debugger8080.INS.CMC],
+    /* 0x40 */  [Debugger8080.INS.MOV,   Debugger8080.TYPE_B,     Debugger8080.TYPE_B],
+    /* 0x41 */  [Debugger8080.INS.MOV,   Debugger8080.TYPE_B,     Debugger8080.TYPE_C],
+    /* 0x42 */  [Debugger8080.INS.MOV,   Debugger8080.TYPE_B,     Debugger8080.TYPE_D],
+    /* 0x43 */  [Debugger8080.INS.MOV,   Debugger8080.TYPE_B,     Debugger8080.TYPE_E],
+    /* 0x44 */  [Debugger8080.INS.MOV,   Debugger8080.TYPE_B,     Debugger8080.TYPE_H],
+    /* 0x45 */  [Debugger8080.INS.MOV,   Debugger8080.TYPE_B,     Debugger8080.TYPE_L],
+    /* 0x46 */  [Debugger8080.INS.MOV,   Debugger8080.TYPE_B,     Debugger8080.TYPE_M],
+    /* 0x47 */  [Debugger8080.INS.MOV,   Debugger8080.TYPE_B,     Debugger8080.TYPE_A],
+    /* 0x48 */  [Debugger8080.INS.MOV,   Debugger8080.TYPE_C,     Debugger8080.TYPE_B],
+    /* 0x49 */  [Debugger8080.INS.MOV,   Debugger8080.TYPE_C,     Debugger8080.TYPE_C],
+    /* 0x4A */  [Debugger8080.INS.MOV,   Debugger8080.TYPE_C,     Debugger8080.TYPE_D],
+    /* 0x4B */  [Debugger8080.INS.MOV,   Debugger8080.TYPE_C,     Debugger8080.TYPE_E],
+    /* 0x4C */  [Debugger8080.INS.MOV,   Debugger8080.TYPE_C,     Debugger8080.TYPE_H],
+    /* 0x4D */  [Debugger8080.INS.MOV,   Debugger8080.TYPE_C,     Debugger8080.TYPE_L],
+    /* 0x4E */  [Debugger8080.INS.MOV,   Debugger8080.TYPE_C,     Debugger8080.TYPE_M],
+    /* 0x4F */  [Debugger8080.INS.MOV,   Debugger8080.TYPE_C,     Debugger8080.TYPE_A],
+    /* 0x50 */  [Debugger8080.INS.MOV,   Debugger8080.TYPE_D,     Debugger8080.TYPE_B],
+    /* 0x51 */  [Debugger8080.INS.MOV,   Debugger8080.TYPE_D,     Debugger8080.TYPE_C],
+    /* 0x52 */  [Debugger8080.INS.MOV,   Debugger8080.TYPE_D,     Debugger8080.TYPE_D],
+    /* 0x53 */  [Debugger8080.INS.MOV,   Debugger8080.TYPE_D,     Debugger8080.TYPE_E],
+    /* 0x54 */  [Debugger8080.INS.MOV,   Debugger8080.TYPE_D,     Debugger8080.TYPE_H],
+    /* 0x55 */  [Debugger8080.INS.MOV,   Debugger8080.TYPE_D,     Debugger8080.TYPE_L],
+    /* 0x56 */  [Debugger8080.INS.MOV,   Debugger8080.TYPE_D,     Debugger8080.TYPE_M],
+    /* 0x57 */  [Debugger8080.INS.MOV,   Debugger8080.TYPE_D,     Debugger8080.TYPE_A],
+    /* 0x58 */  [Debugger8080.INS.MOV,   Debugger8080.TYPE_E,     Debugger8080.TYPE_B],
+    /* 0x59 */  [Debugger8080.INS.MOV,   Debugger8080.TYPE_E,     Debugger8080.TYPE_C],
+    /* 0x5A */  [Debugger8080.INS.MOV,   Debugger8080.TYPE_E,     Debugger8080.TYPE_D],
+    /* 0x5B */  [Debugger8080.INS.MOV,   Debugger8080.TYPE_E,     Debugger8080.TYPE_E],
+    /* 0x5C */  [Debugger8080.INS.MOV,   Debugger8080.TYPE_E,     Debugger8080.TYPE_H],
+    /* 0x5D */  [Debugger8080.INS.MOV,   Debugger8080.TYPE_E,     Debugger8080.TYPE_L],
+    /* 0x5E */  [Debugger8080.INS.MOV,   Debugger8080.TYPE_E,     Debugger8080.TYPE_M],
+    /* 0x5F */  [Debugger8080.INS.MOV,   Debugger8080.TYPE_E,     Debugger8080.TYPE_A],
+    /* 0x60 */  [Debugger8080.INS.MOV,   Debugger8080.TYPE_H,     Debugger8080.TYPE_B],
+    /* 0x61 */  [Debugger8080.INS.MOV,   Debugger8080.TYPE_H,     Debugger8080.TYPE_C],
+    /* 0x62 */  [Debugger8080.INS.MOV,   Debugger8080.TYPE_H,     Debugger8080.TYPE_D],
+    /* 0x63 */  [Debugger8080.INS.MOV,   Debugger8080.TYPE_H,     Debugger8080.TYPE_E],
+    /* 0x64 */  [Debugger8080.INS.MOV,   Debugger8080.TYPE_H,     Debugger8080.TYPE_H],
+    /* 0x65 */  [Debugger8080.INS.MOV,   Debugger8080.TYPE_H,     Debugger8080.TYPE_L],
+    /* 0x66 */  [Debugger8080.INS.MOV,   Debugger8080.TYPE_H,     Debugger8080.TYPE_M],
+    /* 0x67 */  [Debugger8080.INS.MOV,   Debugger8080.TYPE_H,     Debugger8080.TYPE_A],
+    /* 0x68 */  [Debugger8080.INS.MOV,   Debugger8080.TYPE_L,     Debugger8080.TYPE_B],
+    /* 0x69 */  [Debugger8080.INS.MOV,   Debugger8080.TYPE_L,     Debugger8080.TYPE_C],
+    /* 0x6A */  [Debugger8080.INS.MOV,   Debugger8080.TYPE_L,     Debugger8080.TYPE_D],
+    /* 0x6B */  [Debugger8080.INS.MOV,   Debugger8080.TYPE_L,     Debugger8080.TYPE_E],
+    /* 0x6C */  [Debugger8080.INS.MOV,   Debugger8080.TYPE_L,     Debugger8080.TYPE_H],
+    /* 0x6D */  [Debugger8080.INS.MOV,   Debugger8080.TYPE_L,     Debugger8080.TYPE_L],
+    /* 0x6E */  [Debugger8080.INS.MOV,   Debugger8080.TYPE_L,     Debugger8080.TYPE_M],
+    /* 0x6F */  [Debugger8080.INS.MOV,   Debugger8080.TYPE_L,     Debugger8080.TYPE_A],
+    /* 0x70 */  [Debugger8080.INS.MOV,   Debugger8080.TYPE_M,     Debugger8080.TYPE_B],
+    /* 0x71 */  [Debugger8080.INS.MOV,   Debugger8080.TYPE_M,     Debugger8080.TYPE_C],
+    /* 0x72 */  [Debugger8080.INS.MOV,   Debugger8080.TYPE_M,     Debugger8080.TYPE_D],
+    /* 0x73 */  [Debugger8080.INS.MOV,   Debugger8080.TYPE_M,     Debugger8080.TYPE_E],
+    /* 0x74 */  [Debugger8080.INS.MOV,   Debugger8080.TYPE_M,     Debugger8080.TYPE_H],
+    /* 0x75 */  [Debugger8080.INS.MOV,   Debugger8080.TYPE_M,     Debugger8080.TYPE_L],
+    /* 0x76 */  [Debugger8080.INS.HLT],
+    /* 0x77 */  [Debugger8080.INS.MOV,   Debugger8080.TYPE_M,     Debugger8080.TYPE_A],
+    /* 0x78 */  [Debugger8080.INS.MOV,   Debugger8080.TYPE_A,     Debugger8080.TYPE_B],
+    /* 0x79 */  [Debugger8080.INS.MOV,   Debugger8080.TYPE_A,     Debugger8080.TYPE_C],
+    /* 0x7A */  [Debugger8080.INS.MOV,   Debugger8080.TYPE_A,     Debugger8080.TYPE_D],
+    /* 0x7B */  [Debugger8080.INS.MOV,   Debugger8080.TYPE_A,     Debugger8080.TYPE_E],
+    /* 0x7C */  [Debugger8080.INS.MOV,   Debugger8080.TYPE_A,     Debugger8080.TYPE_H],
+    /* 0x7D */  [Debugger8080.INS.MOV,   Debugger8080.TYPE_A,     Debugger8080.TYPE_L],
+    /* 0x7E */  [Debugger8080.INS.MOV,   Debugger8080.TYPE_A,     Debugger8080.TYPE_M],
+    /* 0x7F */  [Debugger8080.INS.MOV,   Debugger8080.TYPE_A,     Debugger8080.TYPE_A],
+    /* 0x80 */  [Debugger8080.INS.ADD,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_B],
+    /* 0x81 */  [Debugger8080.INS.ADD,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_C],
+    /* 0x82 */  [Debugger8080.INS.ADD,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_D],
+    /* 0x83 */  [Debugger8080.INS.ADD,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_E],
+    /* 0x84 */  [Debugger8080.INS.ADD,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_H],
+    /* 0x85 */  [Debugger8080.INS.ADD,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_L],
+    /* 0x86 */  [Debugger8080.INS.ADD,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_M],
+    /* 0x87 */  [Debugger8080.INS.ADD,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_A],
+    /* 0x88 */  [Debugger8080.INS.ADC,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_B],
+    /* 0x89 */  [Debugger8080.INS.ADC,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_C],
+    /* 0x8A */  [Debugger8080.INS.ADC,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_D],
+    /* 0x8B */  [Debugger8080.INS.ADC,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_E],
+    /* 0x8C */  [Debugger8080.INS.ADC,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_H],
+    /* 0x8D */  [Debugger8080.INS.ADC,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_L],
+    /* 0x8E */  [Debugger8080.INS.ADC,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_M],
+    /* 0x8F */  [Debugger8080.INS.ADC,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_A],
+    /* 0x90 */  [Debugger8080.INS.SUB,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_B],
+    /* 0x91 */  [Debugger8080.INS.SUB,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_C],
+    /* 0x92 */  [Debugger8080.INS.SUB,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_D],
+    /* 0x93 */  [Debugger8080.INS.SUB,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_E],
+    /* 0x94 */  [Debugger8080.INS.SUB,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_H],
+    /* 0x95 */  [Debugger8080.INS.SUB,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_L],
+    /* 0x96 */  [Debugger8080.INS.SUB,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_M],
+    /* 0x97 */  [Debugger8080.INS.SUB,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_A],
+    /* 0x98 */  [Debugger8080.INS.SBB,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_B],
+    /* 0x99 */  [Debugger8080.INS.SBB,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_C],
+    /* 0x9A */  [Debugger8080.INS.SBB,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_D],
+    /* 0x9B */  [Debugger8080.INS.SBB,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_E],
+    /* 0x9C */  [Debugger8080.INS.SBB,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_H],
+    /* 0x9D */  [Debugger8080.INS.SBB,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_L],
+    /* 0x9E */  [Debugger8080.INS.SBB,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_M],
+    /* 0x9F */  [Debugger8080.INS.SBB,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_A],
+    /* 0xA0 */  [Debugger8080.INS.ANA,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_B],
+    /* 0xA1 */  [Debugger8080.INS.ANA,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_C],
+    /* 0xA2 */  [Debugger8080.INS.ANA,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_D],
+    /* 0xA3 */  [Debugger8080.INS.ANA,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_E],
+    /* 0xA4 */  [Debugger8080.INS.ANA,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_H],
+    /* 0xA5 */  [Debugger8080.INS.ANA,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_L],
+    /* 0xA6 */  [Debugger8080.INS.ANA,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_M],
+    /* 0xA7 */  [Debugger8080.INS.ANA,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_A],
+    /* 0xA8 */  [Debugger8080.INS.XRA,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_B],
+    /* 0xA9 */  [Debugger8080.INS.XRA,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_C],
+    /* 0xAA */  [Debugger8080.INS.XRA,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_D],
+    /* 0xAB */  [Debugger8080.INS.XRA,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_E],
+    /* 0xAC */  [Debugger8080.INS.XRA,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_H],
+    /* 0xAD */  [Debugger8080.INS.XRA,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_L],
+    /* 0xAE */  [Debugger8080.INS.XRA,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_M],
+    /* 0xAF */  [Debugger8080.INS.XRA,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_A],
+    /* 0xB0 */  [Debugger8080.INS.ORA,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_B],
+    /* 0xB1 */  [Debugger8080.INS.ORA,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_C],
+    /* 0xB2 */  [Debugger8080.INS.ORA,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_D],
+    /* 0xB3 */  [Debugger8080.INS.ORA,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_E],
+    /* 0xB4 */  [Debugger8080.INS.ORA,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_H],
+    /* 0xB5 */  [Debugger8080.INS.ORA,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_L],
+    /* 0xB6 */  [Debugger8080.INS.ORA,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_M],
+    /* 0xB7 */  [Debugger8080.INS.ORA,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_A],
+    /* 0xB8 */  [Debugger8080.INS.CMP,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_B],
+    /* 0xB9 */  [Debugger8080.INS.CMP,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_C],
+    /* 0xBA */  [Debugger8080.INS.CMP,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_D],
+    /* 0xBB */  [Debugger8080.INS.CMP,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_E],
+    /* 0xBC */  [Debugger8080.INS.CMP,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_H],
+    /* 0xBD */  [Debugger8080.INS.CMP,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_L],
+    /* 0xBE */  [Debugger8080.INS.CMP,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_M],
+    /* 0xBF */  [Debugger8080.INS.CMP,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_A],
+    /* 0xC0 */  [Debugger8080.INS.RNZ],
+    /* 0xC1 */  [Debugger8080.INS.POP,   Debugger8080.TYPE_BC],
+    /* 0xC2 */  [Debugger8080.INS.JNZ,   Debugger8080.TYPE_ADDR],
+    /* 0xC3 */  [Debugger8080.INS.JMP,   Debugger8080.TYPE_ADDR],
+    /* 0xC4 */  [Debugger8080.INS.CNZ,   Debugger8080.TYPE_ADDR],
+    /* 0xC5 */  [Debugger8080.INS.PUSH,  Debugger8080.TYPE_BC],
+    /* 0xC6 */  [Debugger8080.INS.ADI,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_IMM | Debugger8080.TYPE_BYTE],
+    /* 0xC7 */  [Debugger8080.INS.RST,   Debugger8080.TYPE_INT],
+    /* 0xC8 */  [Debugger8080.INS.RZ],
+    /* 0xC9 */  [Debugger8080.INS.RET],
+    /* 0xCA */  [Debugger8080.INS.JZ,    Debugger8080.TYPE_ADDR],
+    /* 0xCB */  [Debugger8080.INS.JMP,   Debugger8080.TYPE_ADDR | Debugger8080.TYPE_UNDOC],
+    /* 0xCC */  [Debugger8080.INS.CZ,    Debugger8080.TYPE_ADDR],
+    /* 0xCD */  [Debugger8080.INS.CALL,  Debugger8080.TYPE_ADDR],
+    /* 0xCE */  [Debugger8080.INS.ACI,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_IMM | Debugger8080.TYPE_BYTE],
+    /* 0xCF */  [Debugger8080.INS.RST,   Debugger8080.TYPE_INT],
+    /* 0xD0 */  [Debugger8080.INS.RNC],
+    /* 0xD1 */  [Debugger8080.INS.POP,   Debugger8080.TYPE_DE],
+    /* 0xD2 */  [Debugger8080.INS.JNC,   Debugger8080.TYPE_ADDR],
+    /* 0xD3 */  [Debugger8080.INS.OUT,   Debugger8080.TYPE_IMM  | Debugger8080.TYPE_BYTE,Debugger8080.TYPE_A   | Debugger8080.TYPE_OPT],
+    /* 0xD4 */  [Debugger8080.INS.CNC,   Debugger8080.TYPE_ADDR],
+    /* 0xD5 */  [Debugger8080.INS.PUSH,  Debugger8080.TYPE_DE],
+    /* 0xD6 */  [Debugger8080.INS.SUI,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_IMM | Debugger8080.TYPE_BYTE],
+    /* 0xD7 */  [Debugger8080.INS.RST,   Debugger8080.TYPE_INT],
+    /* 0xD8 */  [Debugger8080.INS.RC],
+    /* 0xD9 */  [Debugger8080.INS.RET,   Debugger8080.TYPE_UNDOC],
+    /* 0xDA */  [Debugger8080.INS.JC,    Debugger8080.TYPE_ADDR],
+    /* 0xDB */  [Debugger8080.INS.IN,    Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_IMM | Debugger8080.TYPE_BYTE],
+    /* 0xDC */  [Debugger8080.INS.CC,    Debugger8080.TYPE_ADDR],
+    /* 0xDD */  [Debugger8080.INS.CALL,  Debugger8080.TYPE_ADDR | Debugger8080.TYPE_UNDOC],
+    /* 0xDE */  [Debugger8080.INS.SBI,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_IMM | Debugger8080.TYPE_BYTE],
+    /* 0xDF */  [Debugger8080.INS.RST,   Debugger8080.TYPE_INT],
+    /* 0xE0 */  [Debugger8080.INS.RPO],
+    /* 0xE1 */  [Debugger8080.INS.POP,   Debugger8080.TYPE_HL],
+    /* 0xE2 */  [Debugger8080.INS.JPO,   Debugger8080.TYPE_ADDR],
+    /* 0xE3 */  [Debugger8080.INS.XTHL,  Debugger8080.TYPE_SP   | Debugger8080.TYPE_MEM| Debugger8080.TYPE_OPT,  Debugger8080.TYPE_HL | Debugger8080.TYPE_OPT],
+    /* 0xE4 */  [Debugger8080.INS.CPO,   Debugger8080.TYPE_ADDR],
+    /* 0xE5 */  [Debugger8080.INS.PUSH,  Debugger8080.TYPE_HL],
+    /* 0xE6 */  [Debugger8080.INS.ANI,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_IMM | Debugger8080.TYPE_BYTE],
+    /* 0xE7 */  [Debugger8080.INS.RST,   Debugger8080.TYPE_INT],
+    /* 0xE8 */  [Debugger8080.INS.RPE],
+    /* 0xE9 */  [Debugger8080.INS.PCHL,  Debugger8080.TYPE_HL],
+    /* 0xEA */  [Debugger8080.INS.JPE,   Debugger8080.TYPE_ADDR],
+    /* 0xEB */  [Debugger8080.INS.XCHG,  Debugger8080.TYPE_HL   | Debugger8080.TYPE_OPT, Debugger8080.TYPE_DE  | Debugger8080.TYPE_OPT],
+    /* 0xEC */  [Debugger8080.INS.CPE,   Debugger8080.TYPE_ADDR],
+    /* 0xED */  [Debugger8080.INS.CALL,  Debugger8080.TYPE_ADDR | Debugger8080.TYPE_UNDOC],
+    /* 0xEE */  [Debugger8080.INS.XRI,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_IMM | Debugger8080.TYPE_BYTE],
+    /* 0xEF */  [Debugger8080.INS.RST,   Debugger8080.TYPE_INT],
+    /* 0xF0 */  [Debugger8080.INS.RP],
+    /* 0xF1 */  [Debugger8080.INS.POP,   Debugger8080.TYPE_PSW],
+    /* 0xF2 */  [Debugger8080.INS.JP,    Debugger8080.TYPE_ADDR],
+    /* 0xF3 */  [Debugger8080.INS.DI],
+    /* 0xF4 */  [Debugger8080.INS.CP,    Debugger8080.TYPE_ADDR],
+    /* 0xF5 */  [Debugger8080.INS.PUSH,  Debugger8080.TYPE_PSW],
+    /* 0xF6 */  [Debugger8080.INS.ORI,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_IMM | Debugger8080.TYPE_BYTE],
+    /* 0xF7 */  [Debugger8080.INS.RST,   Debugger8080.TYPE_INT],
+    /* 0xF8 */  [Debugger8080.INS.RM],
+    /* 0xF9 */  [Debugger8080.INS.SPHL,  Debugger8080.TYPE_SP   | Debugger8080.TYPE_OPT, Debugger8080.TYPE_HL  | Debugger8080.TYPE_OPT],
+    /* 0xFA */  [Debugger8080.INS.JM,    Debugger8080.TYPE_ADDR],
+    /* 0xFB */  [Debugger8080.INS.EI],
+    /* 0xFC */  [Debugger8080.INS.CM,    Debugger8080.TYPE_ADDR],
+    /* 0xFD */  [Debugger8080.INS.CALL,  Debugger8080.TYPE_ADDR | Debugger8080.TYPE_UNDOC],
+    /* 0xFE */  [Debugger8080.INS.CPI,   Debugger8080.TYPE_A    | Debugger8080.TYPE_OPT, Debugger8080.TYPE_IMM | Debugger8080.TYPE_BYTE],
+    /* 0xFF */  [Debugger8080.INS.RST,   Debugger8080.TYPE_INT]
     ];
 
     /*
@@ -678,22 +678,22 @@ if (DEBUGGER) {
      * aware that changing the bit values could break saved Debugger states (not a huge concern, just
      * something to be aware of).
      */
-    Debugger.MESSAGES = {
-        "cpu":      Messages.CPU,
-        "bus":      Messages.BUS,
-        "mem":      Messages.MEM,
-        "port":     Messages.PORT,
-        "chipset":  Messages.CHIPSET,
-        "keyboard": Messages.KEYBOARD,  // "kbd" is also allowed as shorthand for "keyboard"; see doMessages()
-        "key":      Messages.KEYS,      // using "key" instead of "keys", since the latter is a method on JavasScript objects
-        "video":    Messages.VIDEO,
-        "fdc":      Messages.FDC,
-        "disk":     Messages.DISK,
-        "serial":   Messages.SERIAL,
-        "speaker":  Messages.SPEAKER,
-        "computer": Messages.COMPUTER,
-        "log":      Messages.LOG,
-        "warn":     Messages.WARN,
+    Debugger8080.MESSAGES = {
+        "cpu":      Messages8080.CPU,
+        "bus":      Messages8080.BUS,
+        "mem":      Messages8080.MEM,
+        "port":     Messages8080.PORT,
+        "chipset":  Messages8080.CHIPSET,
+        "keyboard": Messages8080.KEYBOARD,  // "kbd" is also allowed as shorthand for "keyboard"; see doMessages()
+        "key":      Messages8080.KEYS,      // using "key" instead of "keys", since the latter is a method on JavasScript objects
+        "video":    Messages8080.VIDEO,
+        "fdc":      Messages8080.FDC,
+        "disk":     Messages8080.DISK,
+        "serial":   Messages8080.SERIAL,
+        "speaker":  Messages8080.SPEAKER,
+        "computer": Messages8080.COMPUTER,
+        "log":      Messages8080.LOG,
+        "warn":     Messages8080.WARN,
         /*
          * Now we turn to message actions rather than message types; for example, setting "halt"
          * on or off doesn't enable "halt" messages, but rather halts the CPU on any message above.
@@ -701,22 +701,22 @@ if (DEBUGGER) {
          * Similarly, "m buffer on" turns on message buffering, defering the display of all messages
          * until "m buffer off" is issued.
          */
-        "buffer":   Messages.BUFFER,
-        "halt":     Messages.HALT
+        "buffer":   Messages8080.BUFFER,
+        "halt":     Messages8080.HALT
     };
 
-    Debugger.HISTORY_LIMIT = DEBUG? 100000 : 1000;
+    Debugger8080.HISTORY_LIMIT = DEBUG? 100000 : 1000;
 
     /**
      * initBus(bus, cpu, dbg)
      *
-     * @this {Debugger}
-     * @param {Computer} cmp
-     * @param {Bus} bus
-     * @param {CPUState} cpu
-     * @param {Debugger} dbg
+     * @this {Debugger8080}
+     * @param {Computer8080} cmp
+     * @param {Bus8080} bus
+     * @param {CPUState8080} cpu
+     * @param {Debugger8080} dbg
      */
-    Debugger.prototype.initBus = function(cmp, bus, cpu, dbg)
+    Debugger8080.prototype.initBus = function(cmp, bus, cpu, dbg)
     {
         this.bus = bus;
         this.cpu = cpu;
@@ -728,9 +728,9 @@ if (DEBUGGER) {
         var sMessages = cmp.getMachineParm('messages');
         if (sMessages) this.messageInit(sMessages);
 
-        this.aaOpDescs = Debugger.aaOpDescs;
+        this.aaOpDescs = Debugger8080.aaOpDescs;
 
-        this.messageDump(Messages.BUS,  function onDumpBus(asArgs) { dbg.dumpBus(asArgs); });
+        this.messageDump(Messages8080.BUS,  function onDumpBus(asArgs) { dbg.dumpBus(asArgs); });
 
         this.setReady();
     };
@@ -738,14 +738,14 @@ if (DEBUGGER) {
     /**
      * setBinding(sHTMLType, sBinding, control, sValue)
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "debugInput")
      * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
-    Debugger.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
+    Debugger8080.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
     {
         var dbg = this;
         switch (sBinding) {
@@ -760,21 +760,21 @@ if (DEBUGGER) {
              */
             control.onkeydown = function onKeyDownDebugInput(event) {
                 var sCmds;
-                if (event.keyCode == Keyboard.KEYCODE.CR) {
+                if (event.keyCode == Keyboard8080.KEYCODE.CR) {
                     sCmds = control.value;
                     control.value = "";
                     dbg.doCommands(sCmds, true);
                 }
-                else if (event.keyCode == Keyboard.KEYCODE.ESC) {
+                else if (event.keyCode == Keyboard8080.KEYCODE.ESC) {
                     control.value = sCmds = "";
                 }
                 else {
-                    if (event.keyCode == Keyboard.KEYCODE.UP) {
+                    if (event.keyCode == Keyboard8080.KEYCODE.UP) {
                         if (dbg.iPrevCmd < dbg.aPrevCmds.length - 1) {
                             sCmds = dbg.aPrevCmds[++dbg.iPrevCmd];
                         }
                     }
-                    else if (event.keyCode == Keyboard.KEYCODE.DOWN) {
+                    else if (event.keyCode == Keyboard8080.KEYCODE.DOWN) {
                         if (dbg.iPrevCmd > 0) {
                             sCmds = dbg.aPrevCmds[--dbg.iPrevCmd];
                         } else {
@@ -836,9 +836,9 @@ if (DEBUGGER) {
     /**
      * updateFocus()
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      */
-    Debugger.prototype.updateFocus = function()
+    Debugger8080.prototype.updateFocus = function()
     {
         if (this.controlDebug) this.controlDebug.focus();
     };
@@ -846,17 +846,17 @@ if (DEBUGGER) {
     /**
      * getAddr(dbgAddr, fWrite, nb)
      *
-     * @this {Debugger}
-     * @param {DbgAddr|null|undefined} dbgAddr
+     * @this {Debugger8080}
+     * @param {DbgAddr8080|null|undefined} dbgAddr
      * @param {boolean} [fWrite]
      * @param {number} [nb] number of bytes to check (1 or 2); default is 1
-     * @return {number} is the corresponding linear address, or CPUDef.ADDR_INVALID
+     * @return {number} is the corresponding linear address, or CPUDef8080.ADDR_INVALID
      */
-    Debugger.prototype.getAddr = function(dbgAddr, fWrite, nb)
+    Debugger8080.prototype.getAddr = function(dbgAddr, fWrite, nb)
     {
         var addr = dbgAddr && dbgAddr.addr;
         if (addr == null) {
-            addr = CPUDef.ADDR_INVALID;
+            addr = CPUDef8080.ADDR_INVALID;
         }
         return addr;
     };
@@ -866,16 +866,16 @@ if (DEBUGGER) {
      *
      * We must route all our memory requests through the CPU now, in case paging is enabled.
      *
-     * @this {Debugger}
-     * @param {DbgAddr} dbgAddr
+     * @this {Debugger8080}
+     * @param {DbgAddr8080} dbgAddr
      * @param {number} [inc]
      * @return {number}
      */
-    Debugger.prototype.getByte = function(dbgAddr, inc)
+    Debugger8080.prototype.getByte = function(dbgAddr, inc)
     {
         var b = 0xff;
         var addr = this.getAddr(dbgAddr, false, 1);
-        if (addr !== CPUDef.ADDR_INVALID) {
+        if (addr !== CPUDef8080.ADDR_INVALID) {
             b = this.bus.getByteDirect(addr);
             if (inc) this.incAddr(dbgAddr, inc);
         }
@@ -885,12 +885,12 @@ if (DEBUGGER) {
     /**
      * getWord(dbgAddr, fAdvance)
      *
-     * @this {Debugger}
-     * @param {DbgAddr} dbgAddr
+     * @this {Debugger8080}
+     * @param {DbgAddr8080} dbgAddr
      * @param {boolean} [fAdvance]
      * @return {number}
      */
-    Debugger.prototype.getWord = function(dbgAddr, fAdvance)
+    Debugger8080.prototype.getWord = function(dbgAddr, fAdvance)
     {
         return this.getShort(dbgAddr, fAdvance? 2 : 0);
     };
@@ -898,16 +898,16 @@ if (DEBUGGER) {
     /**
      * getShort(dbgAddr, inc)
      *
-     * @this {Debugger}
-     * @param {DbgAddr} dbgAddr
+     * @this {Debugger8080}
+     * @param {DbgAddr8080} dbgAddr
      * @param {number} [inc]
      * @return {number}
      */
-    Debugger.prototype.getShort = function(dbgAddr, inc)
+    Debugger8080.prototype.getShort = function(dbgAddr, inc)
     {
         var w = 0xffff;
         var addr = this.getAddr(dbgAddr, false, 2);
-        if (addr !== CPUDef.ADDR_INVALID) {
+        if (addr !== CPUDef8080.ADDR_INVALID) {
             w = this.bus.getShortDirect(addr);
             if (inc) this.incAddr(dbgAddr, inc);
         }
@@ -917,15 +917,15 @@ if (DEBUGGER) {
     /**
      * setByte(dbgAddr, b, inc)
      *
-     * @this {Debugger}
-     * @param {DbgAddr} dbgAddr
+     * @this {Debugger8080}
+     * @param {DbgAddr8080} dbgAddr
      * @param {number} b
      * @param {number} [inc]
      */
-    Debugger.prototype.setByte = function(dbgAddr, b, inc)
+    Debugger8080.prototype.setByte = function(dbgAddr, b, inc)
     {
         var addr = this.getAddr(dbgAddr, true, 1);
-        if (addr !== CPUDef.ADDR_INVALID) {
+        if (addr !== CPUDef8080.ADDR_INVALID) {
             this.bus.setByteDirect(addr, b);
             if (inc) this.incAddr(dbgAddr, inc);
             this.cpu.updateCPU(true);           // we set fForce to true in case video memory was the target
@@ -935,15 +935,15 @@ if (DEBUGGER) {
     /**
      * setShort(dbgAddr, w, inc)
      *
-     * @this {Debugger}
-     * @param {DbgAddr} dbgAddr
+     * @this {Debugger8080}
+     * @param {DbgAddr8080} dbgAddr
      * @param {number} w
      * @param {number} [inc]
      */
-    Debugger.prototype.setShort = function(dbgAddr, w, inc)
+    Debugger8080.prototype.setShort = function(dbgAddr, w, inc)
     {
         var addr = this.getAddr(dbgAddr, true, 2);
-        if (addr !== CPUDef.ADDR_INVALID) {
+        if (addr !== CPUDef8080.ADDR_INVALID) {
             this.bus.setShortDirect(addr, w);
             if (inc) this.incAddr(dbgAddr, inc);
             this.cpu.updateCPU(true);           // we set fForce to true in case video memory was the target
@@ -953,13 +953,13 @@ if (DEBUGGER) {
     /**
      * newAddr(addr)
      *
-     * Returns a NEW DbgAddr object, initialized with specified values and/or defaults.
+     * Returns a NEW DbgAddr8080 object, initialized with specified values and/or defaults.
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {number} [addr]
-     * @return {DbgAddr}
+     * @return {DbgAddr8080}
      */
-    Debugger.prototype.newAddr = function(addr)
+    Debugger8080.prototype.newAddr = function(addr)
     {
         return {addr: addr, fTemporary: false};
     };
@@ -967,14 +967,14 @@ if (DEBUGGER) {
     /**
      * setAddr(dbgAddr, addr)
      *
-     * Updates an EXISTING DbgAddr object, initialized with specified values and/or defaults.
+     * Updates an EXISTING DbgAddr8080 object, initialized with specified values and/or defaults.
      *
-     * @this {Debugger}
-     * @param {DbgAddr} dbgAddr
+     * @this {Debugger8080}
+     * @param {DbgAddr8080} dbgAddr
      * @param {number} addr
-     * @return {DbgAddr}
+     * @return {DbgAddr8080}
      */
-    Debugger.prototype.setAddr = function(dbgAddr, addr)
+    Debugger8080.prototype.setAddr = function(dbgAddr, addr)
     {
         dbgAddr.addr = addr;
         dbgAddr.fTemporary = false;
@@ -984,13 +984,13 @@ if (DEBUGGER) {
     /**
      * packAddr(dbgAddr)
      *
-     * Packs a DbgAddr object into an Array suitable for saving in a machine state object.
+     * Packs a DbgAddr8080 object into an Array suitable for saving in a machine state object.
      *
-     * @this {Debugger}
-     * @param {DbgAddr} dbgAddr
+     * @this {Debugger8080}
+     * @param {DbgAddr8080} dbgAddr
      * @return {Array}
      */
-    Debugger.prototype.packAddr = function(dbgAddr)
+    Debugger8080.prototype.packAddr = function(dbgAddr)
     {
         return [dbgAddr.addr, dbgAddr.fTemporary];
     };
@@ -998,13 +998,13 @@ if (DEBUGGER) {
     /**
      * unpackAddr(aAddr)
      *
-     * Unpacks a DbgAddr object from an Array created by packAddr() and restored from a saved machine state.
+     * Unpacks a DbgAddr8080 object from an Array created by packAddr() and restored from a saved machine state.
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {Array} aAddr
-     * @return {DbgAddr}
+     * @return {DbgAddr8080}
      */
-    Debugger.prototype.unpackAddr = function(aAddr)
+    Debugger8080.prototype.unpackAddr = function(aAddr)
     {
         return {addr: aAddr[0], fTemporary: aAddr[1]};
     };
@@ -1013,20 +1013,20 @@ if (DEBUGGER) {
      * parseAddr(sAddr, fCode, fNoChecks, fPrint)
      *
      * Address evaluation and validation (eg, range checks) are no longer performed at this stage.  That's
-     * done later, by getAddr(), which returns CPUDef.ADDR_INVALID for invalid segments, out-of-range offsets,
+     * done later, by getAddr(), which returns CPUDef8080.ADDR_INVALID for invalid segments, out-of-range offsets,
      * etc.  The Debugger's low-level get/set memory functions verify all getAddr() results, but even if an
      * invalid address is passed through to the Bus memory interfaces, the address will simply be masked with
-     * Bus.nBusLimit; in the case of CPUDef.ADDR_INVALID, that will generally refer to the top of the physical
+     * Bus8080.nBusLimit; in the case of CPUDef8080.ADDR_INVALID, that will generally refer to the top of the physical
      * address space.
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {string|undefined} sAddr
      * @param {boolean} [fCode] (true if target is code, false if target is data)
      * @param {boolean} [fNoChecks] (true when setting breakpoints that may not be valid now, but will be later)
      * @param {boolean} [fPrint]
-     * @return {DbgAddr|null|undefined}
+     * @return {DbgAddr8080|null|undefined}
      */
-    Debugger.prototype.parseAddr = function(sAddr, fCode, fNoChecks, fPrint)
+    Debugger8080.prototype.parseAddr = function(sAddr, fCode, fNoChecks, fPrint)
     {
         var dbgAddr;
         var dbgAddrNext = (fCode? this.dbgAddrNextCode : this.dbgAddrNextData);
@@ -1046,11 +1046,11 @@ if (DEBUGGER) {
     /**
      * parseAddrOptions(dbdAddr, sOptions)
      *
-     * @this {Debugger}
-     * @param {DbgAddr} dbgAddr
+     * @this {Debugger8080}
+     * @param {DbgAddr8080} dbgAddr
      * @param {string} [sOptions]
      */
-    Debugger.prototype.parseAddrOptions = function(dbgAddr, sOptions)
+    Debugger8080.prototype.parseAddrOptions = function(dbgAddr, sOptions)
     {
         if (sOptions) {
             var a = sOptions.match(/(['"])(.*?)\1/);
@@ -1063,11 +1063,11 @@ if (DEBUGGER) {
     /**
      * incAddr(dbgAddr, inc)
      *
-     * @this {Debugger}
-     * @param {DbgAddr} dbgAddr
+     * @this {Debugger8080}
+     * @param {DbgAddr8080} dbgAddr
      * @param {number} [inc] contains value to increment dbgAddr by (default is 1)
      */
-    Debugger.prototype.incAddr = function(dbgAddr, inc)
+    Debugger8080.prototype.incAddr = function(dbgAddr, inc)
     {
         if (dbgAddr.addr != null) {
             dbgAddr.addr += (inc || 1);
@@ -1077,11 +1077,11 @@ if (DEBUGGER) {
     /**
      * toHexOffset(off)
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {number|null|undefined} [off]
      * @return {string} the hex representation of off
      */
-    Debugger.prototype.toHexOffset = function(off)
+    Debugger8080.prototype.toHexOffset = function(off)
     {
         return str.toHex(off, 4);
     };
@@ -1089,11 +1089,11 @@ if (DEBUGGER) {
     /**
      * toHexAddr(dbgAddr)
      *
-     * @this {Debugger}
-     * @param {DbgAddr} dbgAddr
+     * @this {Debugger8080}
+     * @param {DbgAddr8080} dbgAddr
      * @return {string} the hex representation of the address
      */
-    Debugger.prototype.toHexAddr = function(dbgAddr)
+    Debugger8080.prototype.toHexAddr = function(dbgAddr)
     {
         return this.toHexOffset(dbgAddr.addr);
     };
@@ -1105,12 +1105,12 @@ if (DEBUGGER) {
      * a '$'-terminated string -- mainly because I'm lazy and didn't feel like writing a separate get() function.
      * Yes, a zero-terminated string containing a '$' will be prematurely terminated, and no, I don't care.
      *
-     * @this {Debugger}
-     * @param {DbgAddr} dbgAddr
+     * @this {Debugger8080}
+     * @param {DbgAddr8080} dbgAddr
      * @param {number} [cchMax] (default is 256)
      * @return {string} (and dbgAddr advanced past the terminating zero)
      */
-    Debugger.prototype.getSZ = function(dbgAddr, cchMax)
+    Debugger8080.prototype.getSZ = function(dbgAddr, cchMax)
     {
         var s = "";
         cchMax = cchMax || 256;
@@ -1125,17 +1125,17 @@ if (DEBUGGER) {
     /**
      * dumpBlocks(aBlocks, sAddr)
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {Array} aBlocks
      * @param {string} [sAddr] (optional block address)
      */
-    Debugger.prototype.dumpBlocks = function(aBlocks, sAddr)
+    Debugger8080.prototype.dumpBlocks = function(aBlocks, sAddr)
     {
         var addr = 0, i = 0, n = aBlocks.length;
 
         if (sAddr) {
             addr = this.getAddr(this.parseAddr(sAddr));
-            if (addr === CPUDef.ADDR_INVALID) {
+            if (addr === CPUDef8080.ADDR_INVALID) {
                 this.println("invalid address: " + sAddr);
                 return;
             }
@@ -1153,11 +1153,11 @@ if (DEBUGGER) {
                 if (!cPrev++) this.println("...");
             } else {
                 typePrev = block.type;
-                var sType = Memory.TYPE.NAMES[typePrev];
+                var sType = Memory8080.TYPE.NAMES[typePrev];
                 if (block) {
                     this.println(str.toHex(block.id) + "  %" + str.toHex(i << this.bus.nBlockShift) + "  %%" + str.toHex(block.addr) + "  " + str.toHexWord(block.used) + "  " + str.toHexWord(block.size) + "  " + sType);
                 }
-                if (typePrev != Memory.TYPE.NONE) typePrev = -1;
+                if (typePrev != Memory8080.TYPE.NONE) typePrev = -1;
                 cPrev = 0;
             }
             addr += this.bus.nBlockSize;
@@ -1170,10 +1170,10 @@ if (DEBUGGER) {
      *
      * Dumps Bus allocations.
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {Array.<string>} asArgs (asArgs[0] is an optional block address)
      */
-    Debugger.prototype.dumpBus = function(asArgs)
+    Debugger8080.prototype.dumpBus = function(asArgs)
     {
         this.dumpBlocks(this.bus.aMemBlocks, asArgs[0]);
     };
@@ -1185,11 +1185,11 @@ if (DEBUGGER) {
      * supported filter is "call", which filters the history buffer for all CALL and RET instructions
      * from the specified previous point forward.
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {string} [sPrev] is a (decimal) number of instructions to rewind to (default is 10)
      * @param {string} [sLines] is a (decimal) number of instructions to print (default is, again, 10)
      */
-    Debugger.prototype.dumpHistory = function(sPrev, sLines)
+    Debugger8080.prototype.dumpHistory = function(sPrev, sLines)
     {
         var sMore = "";
         var cHistory = 0;
@@ -1299,13 +1299,13 @@ if (DEBUGGER) {
     /**
      * messageInit(sEnable)
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {string|undefined} sEnable contains zero or more message categories to enable, separated by '|'
      */
-    Debugger.prototype.messageInit = function(sEnable)
+    Debugger8080.prototype.messageInit = function(sEnable)
     {
         this.dbg = this;
-        this.bitsMessage = this.bitsWarning = Messages.WARN;
+        this.bitsMessage = this.bitsWarning = Messages8080.WARN;
         this.sMessagePrev = null;
         this.aMessageBuffer = [];
         /*
@@ -1314,9 +1314,9 @@ if (DEBUGGER) {
          */
         var aEnable = this.parseCommand(sEnable.replace("keys","key").replace("kbd","keyboard"), false, '|');
         if (aEnable.length) {
-            for (var m in Debugger.MESSAGES) {
+            for (var m in Debugger8080.MESSAGES) {
                 if (usr.indexOf(aEnable, m) >= 0) {
-                    this.bitsMessage |= Debugger.MESSAGES[m];
+                    this.bitsMessage |= Debugger8080.MESSAGES[m];
                     this.println(m + " messages enabled");
                 }
             }
@@ -1326,15 +1326,15 @@ if (DEBUGGER) {
     /**
      * messageDump(bitMessage, fnDumper)
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {number} bitMessage is one Messages category flag
      * @param {function(Array.<string>)} fnDumper is a function the Debugger can use to dump data for that category
      * @return {boolean} true if successfully registered, false if not
      */
-    Debugger.prototype.messageDump = function(bitMessage, fnDumper)
+    Debugger8080.prototype.messageDump = function(bitMessage, fnDumper)
     {
-        for (var m in Debugger.MESSAGES) {
-            if (bitMessage == Debugger.MESSAGES[m]) {
+        for (var m in Debugger8080.MESSAGES) {
+            if (bitMessage == Debugger8080.MESSAGES[m]) {
                 this.afnDumpers[m] = fnDumper;
                 return true;
             }
@@ -1345,20 +1345,20 @@ if (DEBUGGER) {
     /**
      * getRegIndex(sReg, off)
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {string} sReg
      * @param {number} [off] optional offset into sReg
      * @return {number} register index, or -1 if not found
      */
-    Debugger.prototype.getRegIndex = function(sReg, off)
+    Debugger8080.prototype.getRegIndex = function(sReg, off)
     {
         var i;
         sReg = sReg.toUpperCase();
         if (off == null) {
-            i = usr.indexOf(Debugger.REGS, sReg);
+            i = usr.indexOf(Debugger8080.REGS, sReg);
         } else {
-            i = usr.indexOf(Debugger.REGS, sReg.substr(off, 2));
-            if (i < 0) i = usr.indexOf(Debugger.REGS, sReg.substr(off, 1));
+            i = usr.indexOf(Debugger8080.REGS, sReg.substr(off, 2));
+            if (i < 0) i = usr.indexOf(Debugger8080.REGS, sReg.substr(off, 1));
         }
         return i;
     };
@@ -1366,33 +1366,33 @@ if (DEBUGGER) {
     /**
      * getRegString(iReg)
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {number} iReg
      * @return {string}
      */
-    Debugger.prototype.getRegString = function(iReg)
+    Debugger8080.prototype.getRegString = function(iReg)
     {
         var cch = 0;
         var n = this.getRegValue(iReg);
         if (n !== undefined) {
             switch(iReg) {
-            case Debugger.REG_A:
-            case Debugger.REG_B:
-            case Debugger.REG_C:
-            case Debugger.REG_D:
-            case Debugger.REG_E:
-            case Debugger.REG_H:
-            case Debugger.REG_L:
-            case Debugger.REG_M:
+            case Debugger8080.REG_A:
+            case Debugger8080.REG_B:
+            case Debugger8080.REG_C:
+            case Debugger8080.REG_D:
+            case Debugger8080.REG_E:
+            case Debugger8080.REG_H:
+            case Debugger8080.REG_L:
+            case Debugger8080.REG_M:
                 cch = 2;
                 break;
-            case Debugger.REG_BC:
-            case Debugger.REG_DE:
-            case Debugger.REG_HL:
-            case Debugger.REG_SP:
-            case Debugger.REG_PC:
-            case Debugger.REG_PS:
-            case Debugger.REG_PSW:
+            case Debugger8080.REG_BC:
+            case Debugger8080.REG_DE:
+            case Debugger8080.REG_HL:
+            case Debugger8080.REG_SP:
+            case Debugger8080.REG_PC:
+            case Debugger8080.REG_PS:
+            case Debugger8080.REG_PSW:
                 cch = 4;
                 break;
             }
@@ -1403,59 +1403,59 @@ if (DEBUGGER) {
     /**
      * getRegValue(iReg)
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {number} iReg
      * @return {number|undefined}
      */
-    Debugger.prototype.getRegValue = function(iReg)
+    Debugger8080.prototype.getRegValue = function(iReg)
     {
         var n;
         if (iReg >= 0) {
             var cpu = this.cpu;
             switch(iReg) {
-            case Debugger.REG_A:
+            case Debugger8080.REG_A:
                 n = cpu.regA;
                 break;
-            case Debugger.REG_B:
+            case Debugger8080.REG_B:
                 n = cpu.regB;
                 break;
-            case Debugger.REG_C:
+            case Debugger8080.REG_C:
                 n = cpu.regC;
                 break;
-            case Debugger.REG_BC:
+            case Debugger8080.REG_BC:
                 n = cpu.getBC();
                 break;
-            case Debugger.REG_D:
+            case Debugger8080.REG_D:
                 n = cpu.regD;
                 break;
-            case Debugger.REG_E:
+            case Debugger8080.REG_E:
                 n = cpu.regE;
                 break;
-            case Debugger.REG_DE:
+            case Debugger8080.REG_DE:
                 n = cpu.getDE();
                 break;
-            case Debugger.REG_H:
+            case Debugger8080.REG_H:
                 n = cpu.regH;
                 break;
-            case Debugger.REG_L:
+            case Debugger8080.REG_L:
                 n = cpu.regL;
                 break;
-            case Debugger.REG_HL:
+            case Debugger8080.REG_HL:
                 n = cpu.getHL();
                 break;
-            case Debugger.REG_M:
+            case Debugger8080.REG_M:
                 n = cpu.getByte(cpu.getHL());
                 break;
-            case Debugger.REG_SP:
+            case Debugger8080.REG_SP:
                 n = cpu.getSP();
                 break;
-            case Debugger.REG_PC:
+            case Debugger8080.REG_PC:
                 n = cpu.getPC();
                 break;
-            case Debugger.REG_PS:
+            case Debugger8080.REG_PS:
                 n = cpu.getPS();
                 break;
-            case Debugger.REG_PSW:
+            case Debugger8080.REG_PSW:
                 n = cpu.getPSW();
                 break;
             default:
@@ -1468,11 +1468,11 @@ if (DEBUGGER) {
     /**
      * replaceRegs(s)
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {string} s
      * @return {string}
      */
-    Debugger.prototype.replaceRegs = function(s)
+    Debugger8080.prototype.replaceRegs = function(s)
     {
         /*
          * Replace any references first; this means that register references inside the reference
@@ -1488,7 +1488,7 @@ if (DEBUGGER) {
         while ((i = s.indexOf('@', i)) >= 0) {
             var iReg = this.getRegIndex(s, i + 1);
             if (iReg >= 0) {
-                s = s.substr(0, i) + this.getRegString(iReg) + s.substr(i + 1 + Debugger.REGS[iReg].length);
+                s = s.substr(0, i) + this.getRegString(iReg) + s.substr(i + 1 + Debugger8080.REGS[iReg].length);
             }
             i++;
         }
@@ -1544,17 +1544,17 @@ if (DEBUGGER) {
     /**
      * message(sMessage, fAddress)
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {string} sMessage is any caller-defined message string
      * @param {boolean} [fAddress] is true to display the current CS:IP
      */
-    Debugger.prototype.message = function(sMessage, fAddress)
+    Debugger8080.prototype.message = function(sMessage, fAddress)
     {
         if (fAddress) {
             sMessage += " at " + this.toHexAddr(this.newAddr(this.cpu.getPC()));
         }
 
-        if (this.bitsMessage & Messages.BUFFER) {
+        if (this.bitsMessage & Messages8080.BUFFER) {
             this.aMessageBuffer.push(sMessage);
             return;
         }
@@ -1562,7 +1562,7 @@ if (DEBUGGER) {
         if (this.sMessagePrev && sMessage == this.sMessagePrev) return;
         this.sMessagePrev = sMessage;
 
-        if (this.bitsMessage & Messages.HALT) {
+        if (this.bitsMessage & Messages8080.HALT) {
             this.stopCPU();
             sMessage += " (cpu halted)";
         }
@@ -1574,7 +1574,7 @@ if (DEBUGGER) {
          * screw up the CPU's careful assumptions about cycles per burst.  So we call yieldCPU() after every
          * message, to effectively end the current burst and start fresh.
          *
-         * TODO: See CPU.calcStartTime() for a discussion of why we might want to call yieldCPU() *before*
+         * TODO: See CPU8080.calcStartTime() for a discussion of why we might want to call yieldCPU() *before*
          * we display the message.
          */
         if (this.cpu) this.cpu.yieldCPU();
@@ -1586,7 +1586,7 @@ if (DEBUGGER) {
      * Most (if not all) port handlers should provide a name for their respective ports, so if no name is provided,
      * we assume this is an unknown port, and display a message by default.
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {Component} component
      * @param {number} port
      * @param {number|null} bOut if an output operation
@@ -1595,9 +1595,9 @@ if (DEBUGGER) {
      * @param {number|null} [bIn] is the input value, if known, on an input operation
      * @param {number} [bitsMessage] is one or more Messages category flag(s)
      */
-    Debugger.prototype.messageIO = function(component, port, bOut, addrFrom, name, bIn, bitsMessage)
+    Debugger8080.prototype.messageIO = function(component, port, bOut, addrFrom, name, bIn, bitsMessage)
     {
-        bitsMessage |= Messages.PORT;
+        bitsMessage |= Messages8080.PORT;
         if (name == null || (this.bitsMessage & bitsMessage) == bitsMessage) {
             this.message(component.idComponent + '.' + (bOut != null? "outPort" : "inPort") + '(' + str.toHexWord(port) + ',' + (name? name : "unknown") + (bOut != null? ',' + str.toHexByte(bOut) : "") + ')' + (bIn != null? (": " + str.toHexByte(bIn)) : "") + (addrFrom != null? (" at " + this.toHexOffset(addrFrom)) : ""));
         }
@@ -1606,9 +1606,9 @@ if (DEBUGGER) {
     /**
      * init()
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      */
-    Debugger.prototype.init = function()
+    Debugger8080.prototype.init = function()
     {
         this.println("Type ? for help with PC8080 Debugger commands");
         this.updateStatus();
@@ -1629,10 +1629,10 @@ if (DEBUGGER) {
      * That is, if the history arrays need to be allocated and haven't already been allocated, then allocate them,
      * and if the arrays are no longer needed, then deallocate them.
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {boolean} [fQuiet]
      */
-    Debugger.prototype.historyInit = function(fQuiet)
+    Debugger8080.prototype.historyInit = function(fQuiet)
     {
         var i;
         if (!this.checksEnabled()) {
@@ -1645,7 +1645,7 @@ if (DEBUGGER) {
             return;
         }
         if (!this.aOpcodeHistory || !this.aOpcodeHistory.length) {
-            this.aOpcodeHistory = new Array(Debugger.HISTORY_LIMIT);
+            this.aOpcodeHistory = new Array(Debugger8080.HISTORY_LIMIT);
             for (i = 0; i < this.aOpcodeHistory.length; i++) {
                 /*
                  * Preallocate dummy Addr (Array) objects in every history slot, so that
@@ -1669,11 +1669,11 @@ if (DEBUGGER) {
     /**
      * runCPU(fUpdateFocus)
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {boolean} [fUpdateFocus] is true to update focus
      * @return {boolean} true if run request successful, false if not
      */
-    Debugger.prototype.runCPU = function(fUpdateFocus)
+    Debugger8080.prototype.runCPU = function(fUpdateFocus)
     {
         if (!this.isCPUAvail()) return false;
         this.cpu.runCPU(fUpdateFocus);
@@ -1683,13 +1683,13 @@ if (DEBUGGER) {
     /**
      * stepCPU(nCycles, fRegs, fUpdateCPU)
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {number} nCycles (0 for one instruction without checking breakpoints)
      * @param {boolean} [fRegs] is true to display registers after step (default is false)
      * @param {boolean} [fUpdateCPU] is false to disable calls to updateCPU() (default is true)
      * @return {boolean}
      */
-    Debugger.prototype.stepCPU = function(nCycles, fRegs, fUpdateCPU)
+    Debugger8080.prototype.stepCPU = function(nCycles, fRegs, fUpdateCPU)
     {
         if (!this.isCPUAvail()) return false;
 
@@ -1734,10 +1734,10 @@ if (DEBUGGER) {
     /**
      * stopCPU()
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {boolean} [fComplete]
      */
-    Debugger.prototype.stopCPU = function(fComplete)
+    Debugger8080.prototype.stopCPU = function(fComplete)
     {
         if (this.cpu) this.cpu.stopCPU(fComplete);
     };
@@ -1745,10 +1745,10 @@ if (DEBUGGER) {
     /**
      * updateStatus(fRegs)
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {boolean} [fRegs] (default is true)
      */
-    Debugger.prototype.updateStatus = function(fRegs)
+    Debugger8080.prototype.updateStatus = function(fRegs)
     {
         if (fRegs === undefined) fRegs = true;
 
@@ -1770,10 +1770,10 @@ if (DEBUGGER) {
      *
      * Make sure the CPU is ready (finished initializing), not busy (already running), and not in an error state.
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @return {boolean}
      */
-    Debugger.prototype.isCPUAvail = function()
+    Debugger8080.prototype.isCPUAvail = function()
     {
         if (!this.cpu)
             return false;
@@ -1789,12 +1789,12 @@ if (DEBUGGER) {
     /**
      * powerUp(data, fRepower)
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {Object|null} data
      * @param {boolean} [fRepower]
      * @return {boolean} true if successful, false if failure
      */
-    Debugger.prototype.powerUp = function(data, fRepower)
+    Debugger8080.prototype.powerUp = function(data, fRepower)
     {
         if (!fRepower) {
             /*
@@ -1816,12 +1816,12 @@ if (DEBUGGER) {
     /**
      * powerDown(fSave, fShutdown)
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {boolean} [fSave]
      * @param {boolean} [fShutdown]
      * @return {Object|boolean}
      */
-    Debugger.prototype.powerDown = function(fSave, fShutdown)
+    Debugger8080.prototype.powerDown = function(fSave, fShutdown)
     {
         if (fShutdown) this.println(fSave? "suspending" : "shutting down");
         return fSave? this.save() : true;
@@ -1832,10 +1832,10 @@ if (DEBUGGER) {
      *
      * This is a notification handler, called by the Computer, to inform us of a reset.
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {boolean} fQuiet (true only when called from our own powerUp handler)
      */
-    Debugger.prototype.reset = function(fQuiet)
+    Debugger8080.prototype.reset = function(fQuiet)
     {
         this.historyInit();
         this.cOpcodes = this.cOpcodesStart = 0;
@@ -1857,10 +1857,10 @@ if (DEBUGGER) {
      *
      * This implements (very rudimentary) save support for the Debugger component.
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @return {Object}
      */
-    Debugger.prototype.save = function()
+    Debugger8080.prototype.save = function()
     {
         var state = new State(this);
         state.set(0, this.packAddr(this.dbgAddrNextCode));
@@ -1875,11 +1875,11 @@ if (DEBUGGER) {
      *
      * This implements (very rudimentary) restore support for the Debugger component.
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {Object} data
      * @return {boolean} true if successful, false if failure
      */
-    Debugger.prototype.restore = function(data)
+    Debugger8080.prototype.restore = function(data)
     {
         var i = 0;
         if (data[2] !== undefined) {
@@ -1899,11 +1899,11 @@ if (DEBUGGER) {
      *
      * This is a notification handler, called by the Computer, to inform us the CPU has started.
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {number} ms
      * @param {number} nCycles
      */
-    Debugger.prototype.start = function(ms, nCycles)
+    Debugger8080.prototype.start = function(ms, nCycles)
     {
         if (!this.nStep) this.println("running");
         this.flags.fRunning = true;
@@ -1916,11 +1916,11 @@ if (DEBUGGER) {
      *
      * This is a notification handler, called by the Computer, to inform us the CPU has now stopped.
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {number} ms
      * @param {number} nCycles
      */
-    Debugger.prototype.stop = function(ms, nCycles)
+    Debugger8080.prototype.stop = function(ms, nCycles)
     {
         if (this.flags.fRunning) {
             this.flags.fRunning = false;
@@ -1943,7 +1943,7 @@ if (DEBUGGER) {
                     }
                     sStopped += this.nCycles + " cycles, " + msTotal + " ms, " + nCyclesPerSecond + " hz)";
                 } else {
-                    if (this.messageEnabled(Messages.HALT)) {
+                    if (this.messageEnabled(Messages8080.HALT)) {
                         /*
                          * It's possible the user is trying to 'g' past a fault that was blocked by helpCheckFault()
                          * for the Debugger's benefit; if so, it will continue to be blocked, so try displaying a helpful
@@ -1970,11 +1970,11 @@ if (DEBUGGER) {
      * "checked" Memory access functions to deal with those breakpoints in the corresponding Memory blocks.  So I've
      * simplified the test below.
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {boolean} [fRelease] is true for release criteria only; default is false (any criteria)
      * @return {boolean} true if every instruction needs to pass through checkInstruction(), false if not
      */
-    Debugger.prototype.checksEnabled = function(fRelease)
+    Debugger8080.prototype.checksEnabled = function(fRelease)
     {
         return ((DEBUG && !fRelease)? true : (this.aBreakExec.length > 1 || !!this.nBreakIns));
     };
@@ -1985,12 +1985,12 @@ if (DEBUGGER) {
      * This "check" function is called by the CPU to inform us about the next instruction to be executed,
      * giving us an opportunity to look for "exec" breakpoints and update opcode frequencies and instruction history.
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {number} addr
      * @param {number} nState is < 0 if stepping, 0 if starting, or > 0 if running
      * @return {boolean} true if breakpoint hit, false if not
      */
-    Debugger.prototype.checkInstruction = function(addr, nState)
+    Debugger8080.prototype.checkInstruction = function(addr, nState)
     {
         var cpu = this.cpu;
 
@@ -2007,7 +2007,7 @@ if (DEBUGGER) {
          * The rest of the instruction tracking logic can only be performed if historyInit() has allocated the
          * necessary data structures.  Note that there is no explicit UI for enabling/disabling history, other than
          * adding/removing breakpoints, simply because it's breakpoints that trigger the call to checkInstruction();
-         * well, OK, and a few other things now, like enabling Messages.INT messages.
+         * well, OK, and a few other things now, like enabling Messages8080.INT messages.
          */
         if (nState >= 0 && this.aaOpcodeCounts.length) {
             this.cOpcodes++;
@@ -2034,12 +2034,12 @@ if (DEBUGGER) {
      *
      * If we return true, we "trump" the machine's Debug register(s); false allows normal Debug register processing.
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {number} addr
      * @param {number} [nb] (# of bytes; default is 1)
      * @return {boolean} true if breakpoint hit, false if not
      */
-    Debugger.prototype.checkMemoryRead = function(addr, nb)
+    Debugger8080.prototype.checkMemoryRead = function(addr, nb)
     {
         if (this.checkBreakpoint(addr, nb || 1, this.aBreakRead)) {
             this.stopCPU(true);
@@ -2059,12 +2059,12 @@ if (DEBUGGER) {
      *
      * If we return true, we "trump" the machine's Debug register(s); false allows normal Debug register processing.
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {number} addr
      * @param {number} [nb] (# of bytes; default is 1)
      * @return {boolean} true if breakpoint hit, false if not
      */
-    Debugger.prototype.checkMemoryWrite = function(addr, nb)
+    Debugger8080.prototype.checkMemoryWrite = function(addr, nb)
     {
         if (this.checkBreakpoint(addr, nb || 1, this.aBreakWrite)) {
             this.stopCPU(true);
@@ -2078,13 +2078,13 @@ if (DEBUGGER) {
      *
      * This "check" function is called by the Bus component to inform us that port input occurred.
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {number} port
      * @param {number} size
      * @param {number} data
      * @return {boolean} true if breakpoint hit, false if not
      */
-    Debugger.prototype.checkPortInput = function(port, size, data)
+    Debugger8080.prototype.checkPortInput = function(port, size, data)
     {
         /*
          * We trust that the Bus component won't call us unless we told it to, so we halt unconditionally
@@ -2099,13 +2099,13 @@ if (DEBUGGER) {
      *
      * This "check" function is called by the Bus component to inform us that port output occurred.
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {number} port
      * @param {number} size
      * @param {number} data
      * @return {boolean} true if breakpoint hit, false if not
      */
-    Debugger.prototype.checkPortOutput = function(port, size, data)
+    Debugger8080.prototype.checkPortOutput = function(port, size, data)
     {
         /*
          * We trust that the Bus component won't call us unless we told it to, so we halt unconditionally
@@ -2118,9 +2118,9 @@ if (DEBUGGER) {
     /**
      * clearBreakpoints()
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      */
-    Debugger.prototype.clearBreakpoints = function()
+    Debugger8080.prototype.clearBreakpoints = function()
     {
         var i, dbgAddr;
         this.aBreakExec = ["bp"];
@@ -2167,13 +2167,13 @@ if (DEBUGGER) {
      * also consider a more WDEB386-like syntax, where "br" is used to set a variety of access-specific
      * breakpoints, using modifiers like "r1", "r2", "w1", "w2, etc.
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {Array} aBreak
-     * @param {DbgAddr} dbgAddr
+     * @param {DbgAddr8080} dbgAddr
      * @param {boolean} [fTemporary]
      * @return {boolean} true if breakpoint added, false if already exists
      */
-    Debugger.prototype.addBreakpoint = function(aBreak, dbgAddr, fTemporary)
+    Debugger8080.prototype.addBreakpoint = function(aBreak, dbgAddr, fTemporary)
     {
         var fSuccess = true;
 
@@ -2193,7 +2193,7 @@ if (DEBUGGER) {
 
         if (aBreak != this.aBreakExec) {
             var addr = this.getAddr(dbgAddr);
-            if (addr === CPUDef.ADDR_INVALID) {
+            if (addr === CPUDef8080.ADDR_INVALID) {
                 this.println("invalid address: " + this.toHexAddr(dbgAddr));
                 fSuccess = false;
             } else {
@@ -2220,15 +2220,15 @@ if (DEBUGGER) {
     /**
      * findBreakpoint(aBreak, dbgAddr, fRemove, fTemporary, fQuiet)
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {Array} aBreak
-     * @param {DbgAddr} dbgAddr
+     * @param {DbgAddr8080} dbgAddr
      * @param {boolean} [fRemove]
      * @param {boolean} [fTemporary]
      * @param {boolean} [fQuiet]
      * @return {boolean} true if found, false if not
      */
-    Debugger.prototype.findBreakpoint = function(aBreak, dbgAddr, fRemove, fTemporary, fQuiet)
+    Debugger8080.prototype.findBreakpoint = function(aBreak, dbgAddr, fRemove, fTemporary, fQuiet)
     {
         var fFound = false;
         var addr = this.getAddr(dbgAddr);
@@ -2265,11 +2265,11 @@ if (DEBUGGER) {
     /**
      * listBreakpoints(aBreak)
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {Array} aBreak
      * @return {number} of breakpoints listed, 0 if none
      */
-    Debugger.prototype.listBreakpoints = function(aBreak)
+    Debugger8080.prototype.listBreakpoints = function(aBreak)
     {
         for (var i = 1; i < aBreak.length; i++) {
             this.printBreakpoint(aBreak, i);
@@ -2280,12 +2280,12 @@ if (DEBUGGER) {
     /**
      * printBreakpoint(aBreak, i, sAction)
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {Array} aBreak
      * @param {number} i
      * @param {string} [sAction]
      */
-    Debugger.prototype.printBreakpoint = function(aBreak, i, sAction)
+    Debugger8080.prototype.printBreakpoint = function(aBreak, i, sAction)
     {
         var dbgAddr = aBreak[i];
         this.println(aBreak[0] + ' ' + this.toHexAddr(dbgAddr) + (sAction? (' ' + sAction) : (dbgAddr.sCmd? (' "' + dbgAddr.sCmd + '"') : '')));
@@ -2294,10 +2294,10 @@ if (DEBUGGER) {
     /**
      * setTempBreakpoint(dbgAddr)
      *
-     * @this {Debugger}
-     * @param {DbgAddr} dbgAddr of new temp breakpoint
+     * @this {Debugger8080}
+     * @param {DbgAddr8080} dbgAddr of new temp breakpoint
      */
-    Debugger.prototype.setTempBreakpoint = function(dbgAddr)
+    Debugger8080.prototype.setTempBreakpoint = function(dbgAddr)
     {
         this.addBreakpoint(this.aBreakExec, dbgAddr, true);
     };
@@ -2305,10 +2305,10 @@ if (DEBUGGER) {
     /**
      * clearTempBreakpoint(addr)
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {number|undefined} [addr] clear all temp breakpoints if no address specified
      */
-    Debugger.prototype.clearTempBreakpoint = function(addr)
+    Debugger8080.prototype.clearTempBreakpoint = function(addr)
     {
         if (addr !== undefined) {
             this.checkBreakpoint(addr, 1, this.aBreakExec, true);
@@ -2327,14 +2327,14 @@ if (DEBUGGER) {
     /**
      * checkBreakpoint(addr, nb, aBreak, fTemporary)
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {number} addr
      * @param {number} nb (# of bytes)
      * @param {Array} aBreak
      * @param {boolean} [fTemporary]
      * @return {boolean} true if breakpoint has been hit, false if not
      */
-    Debugger.prototype.checkBreakpoint = function(addr, nb, aBreak, fTemporary)
+    Debugger8080.prototype.checkBreakpoint = function(addr, nb, aBreak, fTemporary)
     {
         /*
          * Time to check for execution breakpoints; note that this should be done BEFORE updating frequency
@@ -2422,26 +2422,26 @@ if (DEBUGGER) {
     /**
      * getInstruction(dbgAddr, sComment, nSequence)
      *
-     * @this {Debugger}
-     * @param {DbgAddr} dbgAddr
+     * @this {Debugger8080}
+     * @param {DbgAddr8080} dbgAddr
      * @param {string} [sComment] is an associated comment
      * @param {number} [nSequence] is an associated sequence number, undefined if none
      * @return {string} (and dbgAddr is updated to the next instruction)
      */
-    Debugger.prototype.getInstruction = function(dbgAddr, sComment, nSequence)
+    Debugger8080.prototype.getInstruction = function(dbgAddr, sComment, nSequence)
     {
         var dbgAddrIns = this.newAddr(dbgAddr.addr);
 
         var bOpcode = this.getByte(dbgAddr, 1);
 
-        var asOpcodes = this.style != Debugger.STYLE_8086? Debugger.INS_NAMES : Debugger.INS_NAMES_8086;
+        var asOpcodes = this.style != Debugger8080.STYLE_8086? Debugger8080.INS_NAMES : Debugger8080.INS_NAMES_8086;
         var aOpDesc = this.aaOpDescs[bOpcode];
         var iIns = aOpDesc[0];
 
         var sOperands = "";
         var sOpcode = asOpcodes[iIns];
         var cOperands = aOpDesc.length - 1;
-        var typeSizeDefault = Debugger.TYPE_NONE, type;
+        var typeSizeDefault = Debugger8080.TYPE_NONE, type;
 
         for (var iOperand = 1; iOperand <= cOperands; iOperand++) {
 
@@ -2450,30 +2450,30 @@ if (DEBUGGER) {
 
             type = aOpDesc[iOperand];
             if (type === undefined) continue;
-            if ((type & Debugger.TYPE_OPT) && this.style == Debugger.STYLE_8080) continue;
+            if ((type & Debugger8080.TYPE_OPT) && this.style == Debugger8080.STYLE_8080) continue;
 
-            var typeMode = type & Debugger.TYPE_MODE;
+            var typeMode = type & Debugger8080.TYPE_MODE;
             if (!typeMode) continue;
 
-            var typeSize = type & Debugger.TYPE_SIZE;
+            var typeSize = type & Debugger8080.TYPE_SIZE;
             if (!typeSize) {
                 type |= typeSizeDefault;
             } else {
                 typeSizeDefault = typeSize;
             }
 
-            var typeOther = type & Debugger.TYPE_OTHER;
+            var typeOther = type & Debugger8080.TYPE_OTHER;
             if (!typeOther) {
-                type |= (iOperand == 1? Debugger.TYPE_OUT : Debugger.TYPE_IN);
+                type |= (iOperand == 1? Debugger8080.TYPE_OUT : Debugger8080.TYPE_IN);
             }
 
-            if (typeMode & Debugger.TYPE_IMM) {
+            if (typeMode & Debugger8080.TYPE_IMM) {
                 sOperand = this.getImmOperand(type, dbgAddr);
             }
-            else if (typeMode & Debugger.TYPE_REG) {
-                sOperand = this.getRegOperand((type & Debugger.TYPE_IREG) >> 8, type, dbgAddr);
+            else if (typeMode & Debugger8080.TYPE_REG) {
+                sOperand = this.getRegOperand((type & Debugger8080.TYPE_IREG) >> 8, type, dbgAddr);
             }
-            else if (typeMode & Debugger.TYPE_INT) {
+            else if (typeMode & Debugger8080.TYPE_INT) {
                 sOperand = ((bOpcode >> 3) & 0x7).toString();
             }
 
@@ -2487,7 +2487,7 @@ if (DEBUGGER) {
 
         var sBytes = "";
         var sLine = this.toHexAddr(dbgAddrIns) + ' ';
-        if (dbgAddrIns.addr !== CPUDef.ADDR_INVALID && dbgAddr.addr !== CPUDef.ADDR_INVALID) {
+        if (dbgAddrIns.addr !== CPUDef8080.ADDR_INVALID && dbgAddr.addr !== CPUDef8080.ADDR_INVALID) {
             do {
                 sBytes += str.toHex(this.getByte(dbgAddrIns, 1), 2);
                 if (dbgAddrIns.addr == null) break;
@@ -2495,7 +2495,7 @@ if (DEBUGGER) {
         }
 
         sLine += str.pad(sBytes, 10);
-        sLine += (type & Debugger.TYPE_UNDOC)? '*' : ' ';
+        sLine += (type & Debugger8080.TYPE_UNDOC)? '*' : ' ';
         sLine += str.pad(sOpcode, 7);
         if (sOperands) sLine += ' ' + sOperands;
 
@@ -2514,33 +2514,33 @@ if (DEBUGGER) {
     /**
      * getImmOperand(type, dbgAddr)
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {number} type
-     * @param {DbgAddr} dbgAddr
+     * @param {DbgAddr8080} dbgAddr
      * @return {string} operand
      */
-    Debugger.prototype.getImmOperand = function(type, dbgAddr)
+    Debugger8080.prototype.getImmOperand = function(type, dbgAddr)
     {
         var sOperand = ' ';
-        var typeSize = type & Debugger.TYPE_SIZE;
+        var typeSize = type & Debugger8080.TYPE_SIZE;
 
         switch (typeSize) {
-        case Debugger.TYPE_BYTE:
+        case Debugger8080.TYPE_BYTE:
             sOperand = str.toHex(this.getByte(dbgAddr, 1), 2);
             break;
-        case Debugger.TYPE_SBYTE:
+        case Debugger8080.TYPE_SBYTE:
             sOperand = str.toHex((this.getByte(dbgAddr, 1) << 24) >> 24, 4);
             break;
-        case Debugger.TYPE_WORD:
+        case Debugger8080.TYPE_WORD:
             sOperand = str.toHex(this.getShort(dbgAddr, 2), 4);
             break;
         default:
             return "imm(" + str.toHexWord(type) + ')';
         }
-        if (this.style == Debugger.STYLE_8086 && (type & Debugger.TYPE_MEM)) {
+        if (this.style == Debugger8080.STYLE_8086 && (type & Debugger8080.TYPE_MEM)) {
             sOperand = '[' + sOperand + ']';
-        } else if (!(type & Debugger.TYPE_REG)) {
-            sOperand = (this.style == Debugger.STYLE_8080? '$' : "0x") + sOperand;
+        } else if (!(type & Debugger8080.TYPE_REG)) {
+            sOperand = (this.style == Debugger8080.STYLE_8080? '$' : "0x") + sOperand;
         }
         return sOperand;
     };
@@ -2548,22 +2548,22 @@ if (DEBUGGER) {
     /**
      * getRegOperand(iReg, type, dbgAddr)
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {number} iReg
      * @param {number} type
-     * @param {DbgAddr} dbgAddr
+     * @param {DbgAddr8080} dbgAddr
      * @return {string} operand
      */
-    Debugger.prototype.getRegOperand = function(iReg, type, dbgAddr)
+    Debugger8080.prototype.getRegOperand = function(iReg, type, dbgAddr)
     {
         /*
          * Although this breaks with 8080 assembler conventions, I'm going to experiment with some different
          * mnemonics; specifically, "[HL]" instead of "M".  This is also more in keeping with how getImmOperand()
          * displays memory references (ie, by enclosing them in brackets).
          */
-        var sOperand = Debugger.REGS[iReg];
-        if (this.style == Debugger.STYLE_8086 && (type & Debugger.TYPE_MEM)) {
-            if (iReg == Debugger.REG_M) {
+        var sOperand = Debugger8080.REGS[iReg];
+        if (this.style == Debugger8080.STYLE_8086 && (type & Debugger8080.TYPE_MEM)) {
+            if (iReg == Debugger8080.REG_M) {
                 sOperand = "HL";
             }
             sOperand = '[' + sOperand + ']';
@@ -2576,13 +2576,13 @@ if (DEBUGGER) {
      *
      * TODO: Unimplemented.  See parseInstruction() in modules/c1pjs/lib/debugger.js for a working implementation.
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {string} sOp
      * @param {string|undefined} sOperand
-     * @param {DbgAddr} dbgAddr of memory where this instruction is being assembled
+     * @param {DbgAddr8080} dbgAddr of memory where this instruction is being assembled
      * @return {Array.<number>} of opcode bytes; if the instruction can't be parsed, the array will be empty
      */
-    Debugger.prototype.parseInstruction = function(sOp, sOperand, dbgAddr)
+    Debugger8080.prototype.parseInstruction = function(sOp, sOperand, dbgAddr)
     {
         var aOpBytes = [];
         this.println("not supported yet");
@@ -2592,11 +2592,11 @@ if (DEBUGGER) {
     /**
      * getFlagOutput(sFlag)
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {string} sFlag
      * @return {string} value of flag
      */
-    Debugger.prototype.getFlagOutput = function(sFlag)
+    Debugger8080.prototype.getFlagOutput = function(sFlag)
     {
         var b;
         switch (sFlag) {
@@ -2628,13 +2628,13 @@ if (DEBUGGER) {
     /**
      * getRegOutput(iReg)
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {number} iReg
      * @return {string}
      */
-    Debugger.prototype.getRegOutput = function(iReg)
+    Debugger8080.prototype.getRegOutput = function(iReg)
     {
-        var sReg = Debugger.REGS[iReg];
+        var sReg = Debugger8080.REGS[iReg];
         return sReg + '=' + this.getRegString(iReg) + ' ';
     };
 
@@ -2646,23 +2646,23 @@ if (DEBUGGER) {
      *      A=00 BC=0000 DE=0000 HL=0000 SP=0000 I0 S0 Z0 A0 P0 C0
      *      0000 00         NOP
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @return {string}
      */
-    Debugger.prototype.getRegDump = function()
+    Debugger8080.prototype.getRegDump = function()
     {
         var s;
-        s = this.getRegOutput(Debugger.REG_A) +
-            this.getRegOutput(Debugger.REG_BC) +
-            this.getRegOutput(Debugger.REG_DE) +
-            this.getRegOutput(Debugger.REG_HL) +
-            this.getRegOutput(Debugger.REG_SP) +
+        s = this.getRegOutput(Debugger8080.REG_A) +
+            this.getRegOutput(Debugger8080.REG_BC) +
+            this.getRegOutput(Debugger8080.REG_DE) +
+            this.getRegOutput(Debugger8080.REG_HL) +
+            this.getRegOutput(Debugger8080.REG_SP) +
             this.getFlagOutput("IF") + this.getFlagOutput("SF") + this.getFlagOutput("ZF") +
             this.getFlagOutput("AF") + this.getFlagOutput("PF") + this.getFlagOutput("CF");
         return s;
     };
 
-    Debugger.aBinOpPrecedence = {
+    Debugger8080.aBinOpPrecedence = {
         '||':   0,      // logical OR
         '&&':   1,      // logical AND
         '|':    2,      // bitwise OR
@@ -2699,13 +2699,13 @@ if (DEBUGGER) {
      *
      * 0x80000001 in decimal is -2147483647, so the product is 4611686014132420609, which is 0x3FFFFFFF00000001.
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {Array.<number>} aVals
      * @param {Array.<string>} aOps
      * @param {number} [cOps] (default is all)
      * @return {boolean} true if successful, false if error
      */
-    Debugger.prototype.evalExpression = function(aVals, aOps, cOps)
+    Debugger8080.prototype.evalExpression = function(aVals, aOps, cOps)
     {
         cOps = cOps || -1;
         while (cOps-- && aOps.length) {
@@ -2810,12 +2810,12 @@ if (DEBUGGER) {
      * multiple purposes, the other being reference replacement in message strings passing through replaceRegs(),
      * and I didn't want parentheses taking on a new meaning in message strings.
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {string|undefined} sExp
      * @param {boolean} [fPrint] is true to print all resolved values, false for quiet parsing
      * @return {number|undefined} numeric value, or undefined if sExp contains any undefined or invalid values
      */
-    Debugger.prototype.parseExpression = function(sExp, fPrint)
+    Debugger8080.prototype.parseExpression = function(sExp, fPrint)
     {
         var value;
 
@@ -2857,8 +2857,8 @@ if (DEBUGGER) {
                 aVals.push(v);
                 if (i == asValues.length) break;
                 var sOp = asValues[i++], cchOp = sOp.length;
-                this.assert(Debugger.aBinOpPrecedence[sOp] != null);
-                if (aOps.length && Debugger.aBinOpPrecedence[sOp] < Debugger.aBinOpPrecedence[aOps[aOps.length-1]]) {
+                this.assert(Debugger8080.aBinOpPrecedence[sOp] != null);
+                if (aOps.length && Debugger8080.aBinOpPrecedence[sOp] < Debugger8080.aBinOpPrecedence[aOps[aOps.length-1]]) {
                     this.evalExpression(aVals, aOps, 1);
                 }
                 aOps.push(sOp);
@@ -2885,11 +2885,11 @@ if (DEBUGGER) {
      * addresses.  Owing to this function's simplistic parsing, nested braces/brackets are not supported
      * (define intermediate variables if needed).
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {string} s
      * @return {string}
      */
-    Debugger.prototype.parseReference = function(s)
+    Debugger8080.prototype.parseReference = function(s)
     {
         var a;
         while (a = s.match(/\{(.*?)}/)) {
@@ -2912,11 +2912,11 @@ if (DEBUGGER) {
      *
      *      $ops: the number of opcodes executed since the last time it was displayed (or reset)
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {string} s
      * @return {string}
      */
-    Debugger.prototype.parseSysVars = function(s)
+    Debugger8080.prototype.parseSysVars = function(s)
     {
         var a;
         while (a = s.match(/\$([a-z]+)/i)) {
@@ -2935,13 +2935,13 @@ if (DEBUGGER) {
     /**
      * parseValue(sValue, sName, fQuiet)
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {string|undefined} sValue
      * @param {string|null} [sName] is the name of the value, if any
      * @param {boolean} [fQuiet]
      * @return {number|undefined} numeric value, or undefined if sValue is either undefined or invalid
      */
-    Debugger.prototype.parseValue = function(sValue, sName, fQuiet)
+    Debugger8080.prototype.parseValue = function(sValue, sName, fQuiet)
     {
         var value;
         if (sValue !== undefined) {
@@ -2962,12 +2962,12 @@ if (DEBUGGER) {
     /**
      * printValue(sVar, value)
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {string|null} sVar
      * @param {number|undefined} value
      * @return {boolean} true if value defined, false if not
      */
-    Debugger.prototype.printValue = function(sVar, value)
+    Debugger8080.prototype.printValue = function(sVar, value)
     {
         var sValue;
         var fDefined = false;
@@ -2983,11 +2983,11 @@ if (DEBUGGER) {
     /**
      * printVariable(sVar)
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {string} [sVar]
      * @return {boolean} true if all value(s) defined, false if not
      */
-    Debugger.prototype.printVariable = function(sVar)
+    Debugger8080.prototype.printVariable = function(sVar)
     {
         if (sVar) {
             return this.printValue(sVar, this.aVariables[sVar]);
@@ -3003,10 +3003,10 @@ if (DEBUGGER) {
     /**
      * delVariable(sVar)
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {string} sVar
      */
-    Debugger.prototype.delVariable = function(sVar)
+    Debugger8080.prototype.delVariable = function(sVar)
     {
         delete this.aVariables[sVar];
     };
@@ -3014,11 +3014,11 @@ if (DEBUGGER) {
     /**
      * getVariable(sVar)
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {string} sVar
      * @return {number|undefined}
      */
-    Debugger.prototype.getVariable = function(sVar)
+    Debugger8080.prototype.getVariable = function(sVar)
     {
         return this.aVariables[sVar];
     };
@@ -3026,11 +3026,11 @@ if (DEBUGGER) {
     /**
      * setVariable(sVar, value)
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {string} sVar
      * @param {number} value
      */
-    Debugger.prototype.setVariable = function(sVar, value)
+    Debugger8080.prototype.setVariable = function(sVar, value)
     {
         this.aVariables[sVar] = value;
     };
@@ -3038,12 +3038,12 @@ if (DEBUGGER) {
     /**
      * comparePairs(p1, p2)
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {number|string|Array|Object} p1
      * @param {number|string|Array|Object} p2
      * @return {number}
      */
-    Debugger.prototype.comparePairs = function(p1, p2)
+    Debugger8080.prototype.comparePairs = function(p1, p2)
     {
         return p1[0] > p2[0]? 1 : p1[0] < p2[0]? -1 : 0;
     };
@@ -3119,13 +3119,13 @@ if (DEBUGGER) {
      * hand-edited files, we can't assume that, and we need to ensure that findSymbol()'s binarySearch() operates
      * properly.
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {string|null} sModule
      * @param {number|null} addr (physical address where the symbols are located, if the memory is physical; eg, ROM)
      * @param {number} len (the size of the region, in bytes)
      * @param {Object} aSymbols (collection of symbols in this group; the format of this collection is described below)
      */
-    Debugger.prototype.addSymbols = function(sModule, addr, len, aSymbols)
+    Debugger8080.prototype.addSymbols = function(sModule, addr, len, aSymbols)
     {
         var dbgAddr = {};
         var aOffsets = [];
@@ -3157,9 +3157,9 @@ if (DEBUGGER) {
      * TODO: Add "numerical" and "alphabetical" dump options. This is simply dumping them in whatever
      * order they appeared in the original MAP file.
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      */
-    Debugger.prototype.dumpSymbols = function()
+    Debugger8080.prototype.dumpSymbols = function()
     {
         for (var iTable = 0; iTable < this.aSymbolTable.length; iTable++) {
             var symbolTable = this.aSymbolTable[iTable];
@@ -3183,12 +3183,12 @@ if (DEBUGGER) {
      * If fNearest is true, and no exact match was found, then the Array returned will contain TWO sets of
      * entries: [0]-[3] will refer to closest preceding symbol, and [4]-[7] will refer to the closest subsequent symbol.
      *
-     * @this {Debugger}
-     * @param {DbgAddr} dbgAddr
+     * @this {Debugger8080}
+     * @param {DbgAddr8080} dbgAddr
      * @param {boolean} [fNearest]
      * @return {Array} where [0] == symbol name, [1] == symbol value, [2] == any annotation, and [3] == any associated comment
      */
-    Debugger.prototype.findSymbol = function(dbgAddr, fNearest)
+    Debugger8080.prototype.findSymbol = function(dbgAddr, fNearest)
     {
         var aSymbol = [];
         var addrSymbol = this.getAddr(dbgAddr) >>> 0;
@@ -3218,11 +3218,11 @@ if (DEBUGGER) {
      *
      * Search aSymbolTable for sSymbol, and if found, return a dbgAddr (same as parseAddr())
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {string} sSymbol
-     * @return {DbgAddr|undefined}
+     * @return {DbgAddr8080|undefined}
      */
-    Debugger.prototype.findSymbolAddr = function(sSymbol)
+    Debugger8080.prototype.findSymbolAddr = function(sSymbol)
     {
         var dbgAddr;
         if (sSymbol.match(/^[a-z_][a-z0-9_]*$/i)) {
@@ -3261,7 +3261,7 @@ if (DEBUGGER) {
      * @param {number} iOffset
      * @param {Array} aSymbol is updated with the specified symbol, if it exists
      */
-    Debugger.prototype.returnSymbol = function(iTable, iOffset, aSymbol)
+    Debugger8080.prototype.returnSymbol = function(iTable, iOffset, aSymbol)
     {
         var symbol = {};
         var aOffsets = this.aSymbolTable[iTable].aOffsets;
@@ -3283,13 +3283,13 @@ if (DEBUGGER) {
     /**
      * doHelp()
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      */
-    Debugger.prototype.doHelp = function()
+    Debugger8080.prototype.doHelp = function()
     {
         var s = "commands:";
-        for (var sCommand in Debugger.COMMANDS) {
-            s += '\n' + str.pad(sCommand, 9) + Debugger.COMMANDS[sCommand];
+        for (var sCommand in Debugger8080.COMMANDS) {
+            s += '\n' + str.pad(sCommand, 9) + Debugger8080.COMMANDS[sCommand];
         }
         if (!this.checksEnabled()) s += "\nnote: frequency/history disabled if no exec breakpoints";
         this.println(s);
@@ -3322,10 +3322,10 @@ if (DEBUGGER) {
      * NOTE: As the previous example implies, you can even assemble new instructions into ROM address space;
      * as our setByte() function explains, the ROM write-notification handlers only refuse writes from the CPU.
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {Array.<string>} asArgs is the complete argument array, beginning with the "a" command in asArgs[0]
      */
-    Debugger.prototype.doAssemble = function(asArgs)
+    Debugger8080.prototype.doAssemble = function(asArgs)
     {
         var dbgAddr = this.parseAddr(asArgs[1], true);
         if (!dbgAddr) return;
@@ -3375,12 +3375,12 @@ if (DEBUGGER) {
      * clear them.  Because "bi" and "bo" commands are piggy-backing on Bus functions, those breakpoints
      * are currently outside the realm of what the "bl" and "bc" commands are aware of.
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {string} sCmd
      * @param {string|undefined} [sAddr]
      * @param {string} [sOptions] (the rest of the breakpoint command-line)
      */
-    Debugger.prototype.doBreak = function(sCmd, sAddr, sOptions)
+    Debugger8080.prototype.doBreak = function(sCmd, sAddr, sOptions)
     {
         if (sAddr == '?') {
             this.println("breakpoint commands:");
@@ -3472,10 +3472,10 @@ if (DEBUGGER) {
     /**
      * doClear(sCmd)
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {string} [sCmd] (eg, "cls" or "clear")
      */
-    Debugger.prototype.doClear = function(sCmd)
+    Debugger8080.prototype.doClear = function(sCmd)
     {
         /*
          * TODO: There should be a clear() component method that the Control Panel overrides to perform this function.
@@ -3490,10 +3490,10 @@ if (DEBUGGER) {
      * of lines, because we always display whole lines.  If the length is omitted/undefined, it defaults to 0x80 (128.)
      * bytes, which normally translates to 8 lines.
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {Array.<string>} asArgs (formerly sCmd, [sAddr], [sLen] and [sBytes])
      */
-    Debugger.prototype.doDump = function(asArgs)
+    Debugger8080.prototype.doDump = function(asArgs)
     {
         var m;
         var sCmd = asArgs[0];
@@ -3503,7 +3503,7 @@ if (DEBUGGER) {
 
         if (sAddr == '?') {
             var sDumpers = "";
-            for (m in Debugger.MESSAGES) {
+            for (m in Debugger8080.MESSAGES) {
                 if (this.afnDumpers[m]) {
                     if (sDumpers) sDumpers += ',';
                     sDumpers = sDumpers + m;
@@ -3548,7 +3548,7 @@ if (DEBUGGER) {
         }
 
         if (sCmd == "d") {
-            for (m in Debugger.MESSAGES) {
+            for (m in Debugger8080.MESSAGES) {
                 if (asArgs[1] == m) {
                     var fnDumper = this.afnDumpers[m];
                     if (fnDumper) {
@@ -3614,10 +3614,10 @@ if (DEBUGGER) {
     /**
      * doEdit(asArgs)
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {Array.<string>} asArgs
      */
-    Debugger.prototype.doEdit = function(asArgs)
+    Debugger8080.prototype.doEdit = function(asArgs)
     {
         var size = 1;
         var mask = 0xff;
@@ -3660,10 +3660,10 @@ if (DEBUGGER) {
     /**
      * doFreqs(sParm)
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {string|undefined} sParm
      */
-    Debugger.prototype.doFreqs = function(sParm)
+    Debugger8080.prototype.doFreqs = function(sParm)
     {
         if (sParm == '?') {
             this.println("frequency commands:");
@@ -3688,7 +3688,7 @@ if (DEBUGGER) {
                 aaSortedOpcodeCounts.sort(function(p, q) {
                     return q[1] - p[1];
                 });
-                var asOpcodes = this.style != Debugger.STYLE_8086? Debugger.INS_NAMES : Debugger.INS_NAMES_8086;
+                var asOpcodes = this.style != Debugger8080.STYLE_8086? Debugger8080.INS_NAMES : Debugger8080.INS_NAMES_8086;
                 for (i = 0; i < aaSortedOpcodeCounts.length; i++) {
                     var bOpcode = aaSortedOpcodeCounts[i][0];
                     var cFreq = aaSortedOpcodeCounts[i][1];
@@ -3707,10 +3707,10 @@ if (DEBUGGER) {
     /**
      * doHalt(fQuiet)
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {boolean} [fQuiet]
      */
-    Debugger.prototype.doHalt = function(fQuiet)
+    Debugger8080.prototype.doHalt = function(fQuiet)
     {
         var sMsg;
         if (this.flags.fRunning) {
@@ -3733,12 +3733,12 @@ if (DEBUGGER) {
      * Also, if no variable named "a" exists, "a" will evaluate to 0x0A, so the expression "a==10" becomes
      * "0x0A==0x10" (false), whereas the expression "a==10." becomes "0x0A==0x0A" (true).
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {string} sCmd
      * @param {boolean} [fQuiet]
      * @return {boolean} true if expression is non-zero, false if zero (or undefined due to a parse error)
      */
-    Debugger.prototype.doIf = function(sCmd, fQuiet)
+    Debugger8080.prototype.doIf = function(sCmd, fQuiet)
     {
         sCmd = str.trim(sCmd);
         if (!this.parseExpression(sCmd)) {
@@ -3752,11 +3752,11 @@ if (DEBUGGER) {
     /**
      * doInfo(asArgs)
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {Array.<string>} asArgs
      * @return {boolean} true only if the instruction info command ("n") is supported
      */
-    Debugger.prototype.doInfo = function(asArgs)
+    Debugger8080.prototype.doInfo = function(asArgs)
     {
         if (DEBUG) {
             this.println("msPerYield: " + this.cpu.aCounts.msPerYield);
@@ -3774,10 +3774,10 @@ if (DEBUGGER) {
      *
      * Simulate a 1-byte port input operation.
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {string|undefined} sPort
      */
-    Debugger.prototype.doInput = function(sPort)
+    Debugger8080.prototype.doInput = function(sPort)
     {
         if (!sPort || sPort == '?') {
             this.println("input commands:");
@@ -3803,11 +3803,11 @@ if (DEBUGGER) {
     /**
      * doInt(sLevel)
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {string} sLevel
      * @return {boolean} true if success, false if error
      */
-    Debugger.prototype.doInt = function(sLevel)
+    Debugger8080.prototype.doInt = function(sLevel)
     {
         if (!this.cpu.getIF()) {
             this.println("interrupts disabled (use rif=1 to enable)");
@@ -3830,11 +3830,11 @@ if (DEBUGGER) {
      * Other supported shorthand: "var" with no parameters prints the values of all variables, and "var {variable}"
      * prints the value of the specified variable.
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {string} sCmd
      * @return {boolean} true if valid "var" assignment, false if not
      */
-    Debugger.prototype.doVar = function(sCmd)
+    Debugger8080.prototype.doVar = function(sCmd)
     {
         var a = sCmd.match(/^\s*([A-Z_]?[A-Z0-9_]*)\s*(=?)\s*(.*)$/i);
         if (a) {
@@ -3863,12 +3863,12 @@ if (DEBUGGER) {
     /**
      * doList(sAddr, fPrint)
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {string} sAddr
      * @param {boolean} [fPrint]
      * @return {string|null}
      */
-    Debugger.prototype.doList = function(sAddr, fPrint)
+    Debugger8080.prototype.doList = function(sAddr, fPrint)
     {
         var sSymbol = null;
 
@@ -3904,10 +3904,10 @@ if (DEBUGGER) {
     /**
      * doMessages(asArgs)
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {Array.<string>} asArgs
      */
-    Debugger.prototype.doMessages = function(asArgs)
+    Debugger8080.prototype.doMessages = function(asArgs)
     {
         var m;
         var fCriteria = null;
@@ -3917,7 +3917,7 @@ if (DEBUGGER) {
         if (sCategory !== undefined) {
             var bitsMessage = 0;
             if (sCategory == "all") {
-                bitsMessage = (0xffffffff|0) & ~(Messages.HALT | Messages.KEYS | Messages.LOG);
+                bitsMessage = (0xffffffff|0) & ~(Messages8080.HALT | Messages8080.KEYS | Messages8080.LOG);
                 sCategory = null;
             } else if (sCategory == "on") {
                 fCriteria = true;
@@ -3932,9 +3932,9 @@ if (DEBUGGER) {
                  */
                 if (sCategory == "keys") sCategory = "key";
                 if (sCategory == "kbd") sCategory = "keyboard";
-                for (m in Debugger.MESSAGES) {
+                for (m in Debugger8080.MESSAGES) {
                     if (sCategory == m) {
-                        bitsMessage = Debugger.MESSAGES[m];
+                        bitsMessage = Debugger8080.MESSAGES[m];
                         fCriteria = !!(this.bitsMessage & bitsMessage);
                         break;
                     }
@@ -3952,7 +3952,7 @@ if (DEBUGGER) {
                 else if (asArgs[2] == "off") {
                     this.bitsMessage &= ~bitsMessage;
                     fCriteria = false;
-                    if (bitsMessage == Messages.BUFFER) {
+                    if (bitsMessage == Messages8080.BUFFER) {
                         for (var i = 0; i < this.aMessageBuffer.length; i++) {
                             this.println(this.aMessageBuffer[i]);
                         }
@@ -3967,9 +3967,9 @@ if (DEBUGGER) {
          */
         var n = 0;
         var sCategories = "";
-        for (m in Debugger.MESSAGES) {
+        for (m in Debugger8080.MESSAGES) {
             if (!sCategory || sCategory == m) {
-                var bitMessage = Debugger.MESSAGES[m];
+                var bitMessage = Debugger8080.MESSAGES[m];
                 var fEnabled = !!(this.bitsMessage & bitMessage);
                 if (fCriteria !== null && fCriteria != fEnabled) continue;
                 if (sCategories) sCategories += ',';
@@ -3989,24 +3989,24 @@ if (DEBUGGER) {
 
         this.println((fCriteria !== null? (fCriteria? "messages on:  " : "messages off: ") : "message categories:\n\t") + (sCategories || "none"));
 
-        this.historyInit();     // call this just in case Messages.INT was turned on
+        this.historyInit();     // call this just in case Messages8080.INT was turned on
     };
 
     /**
      * doOptions(asArgs)
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {Array.<string>} asArgs
      */
-    Debugger.prototype.doOptions = function(asArgs)
+    Debugger8080.prototype.doOptions = function(asArgs)
     {
         switch (asArgs[1]) {
         case "8080":
-            this.style = Debugger.STYLE_8080;
+            this.style = Debugger8080.STYLE_8080;
             break;
 
         case "8086":
-            this.style = Debugger.STYLE_8086;
+            this.style = Debugger8080.STYLE_8086;
             break;
 
         case "cs":
@@ -4066,11 +4066,11 @@ if (DEBUGGER) {
      *
      * Simulate a 1-byte port output operation.
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {string|undefined} sPort
      * @param {string|undefined} sByte (string representation of 1 byte)
      */
-    Debugger.prototype.doOutput = function(sPort, sByte)
+    Debugger8080.prototype.doOutput = function(sPort, sByte)
     {
         if (!sPort || sPort == '?') {
             this.println("output commands:");
@@ -4097,11 +4097,11 @@ if (DEBUGGER) {
     /**
      * doRegisters(asArgs, fInstruction)
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {Array.<string>} [asArgs]
      * @param {boolean} [fInstruction] (true to include the current instruction; default is true)
      */
-    Debugger.prototype.doRegisters = function(asArgs, fInstruction)
+    Debugger8080.prototype.doRegisters = function(asArgs, fInstruction)
     {
         if (asArgs && asArgs[1] == '?') {
             this.println("register commands:");
@@ -4221,13 +4221,13 @@ if (DEBUGGER) {
     /**
      * doRun(sCmd, sAddr, sOptions, fQuiet)
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {string} sCmd
      * @param {string|undefined} [sAddr]
      * @param {string} [sOptions] (the rest of the breakpoint command-line)
      * @param {boolean} [fQuiet]
      */
-    Debugger.prototype.doRun = function(sCmd, sAddr, sOptions, fQuiet)
+    Debugger8080.prototype.doRun = function(sCmd, sAddr, sOptions, fQuiet)
     {
         if (sCmd == "gt") {
             this.fIgnoreNextCheckFault = true;
@@ -4249,10 +4249,10 @@ if (DEBUGGER) {
      * NOTE: If the string to print is a quoted string, then we run it through replaceRegs(), so that
      * you can take advantage of all the special replacement options used for software interrupt logging.
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {string} sCmd
      */
-    Debugger.prototype.doPrint = function(sCmd)
+    Debugger8080.prototype.doPrint = function(sCmd)
     {
         sCmd = str.trim(sCmd);
         var a = sCmd.match(/^(['"])(.*?)\1$/);
@@ -4266,10 +4266,10 @@ if (DEBUGGER) {
     /**
      * doStep(sCmd)
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {string} [sCmd] "p" or "pr"
      */
-    Debugger.prototype.doStep = function(sCmd)
+    Debugger8080.prototype.doStep = function(sCmd)
     {
         var fCallStep = true;
         var fRegs = (sCmd == "pr"? 1 : 0);
@@ -4283,7 +4283,7 @@ if (DEBUGGER) {
             var bOpcode = this.getByte(dbgAddr);
 
             switch (bOpcode) {
-            case CPUDef.OPCODE.CALL:
+            case CPUDef8080.OPCODE.CALL:
                 if (fCallStep) {
                     this.nStep = nStep;
                     this.incAddr(dbgAddr, 3);
@@ -4318,11 +4318,11 @@ if (DEBUGGER) {
      * Given a possible return address (typically from the stack), look for a matching CALL (or INT) that
      * immediately precedes that address.
      *
-     * @this {Debugger}
-     * @param {DbgAddr} dbgAddr
+     * @this {Debugger8080}
+     * @param {DbgAddr8080} dbgAddr
      * @return {string|null} CALL instruction at or near dbgAddr, or null if none
      */
-    Debugger.prototype.getCall = function(dbgAddr)
+    Debugger8080.prototype.getCall = function(dbgAddr)
     {
         var sCall = null;
         var addr = dbgAddr.addr;
@@ -4357,11 +4357,11 @@ if (DEBUGGER) {
      *
      * Use "k" for a normal stack trace and "ks" for a stack trace with symbolic info.
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {string} [sCmd]
      * @param {string} [sAddr] (not used yet)
      */
-    Debugger.prototype.doStackTrace = function(sCmd, sAddr)
+    Debugger8080.prototype.doStackTrace = function(sCmd, sAddr)
     {
         if (sAddr == '?') {
             this.println("stack trace commands:");
@@ -4423,11 +4423,11 @@ if (DEBUGGER) {
      * However, generally a more useful command is "bn", which allows you to break after some
      * number of instructions have been executed (as opposed to some number of cycles).
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {string} [sCmd] ("t", "tc", or "tr")
      * @param {string} [sCount] # of instructions to step
      */
-    Debugger.prototype.doTrace = function(sCmd, sCount)
+    Debugger8080.prototype.doTrace = function(sCmd, sCount)
     {
         var dbg = this;
         var fRegs = (sCmd != "t");
@@ -4457,12 +4457,12 @@ if (DEBUGGER) {
     /**
      * doUnassemble(sAddr, sAddrEnd, n)
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {string} [sAddr]
      * @param {string} [sAddrEnd]
      * @param {number} [n]
      */
-    Debugger.prototype.doUnassemble = function(sAddr, sAddrEnd, n)
+    Debugger8080.prototype.doUnassemble = function(sAddr, sAddrEnd, n)
     {
         var dbgAddr = this.parseAddr(sAddr, true);
         if (!dbgAddr) return;
@@ -4524,13 +4524,13 @@ if (DEBUGGER) {
     /**
      * parseCommand(sCmd, fSave, chSep)
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {string|undefined} sCmd
      * @param {boolean} [fSave] is true to save the command, false if not
      * @param {string} [chSep] is the command separator character (default is ';')
      * @return {Array.<string>}
      */
-    Debugger.prototype.parseCommand = function(sCmd, fSave, chSep)
+    Debugger8080.prototype.parseCommand = function(sCmd, fSave, chSep)
     {
         if (fSave) {
             if (!sCmd) {
@@ -4603,11 +4603,11 @@ if (DEBUGGER) {
      *
      * Used with any command (eg, "r") that allows but doesn't require whitespace between command and first argument.
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {Array.<string>} asArgs
      * @return {Array.<string>}
      */
-    Debugger.prototype.shiftArgs = function(asArgs)
+    Debugger8080.prototype.shiftArgs = function(asArgs)
     {
         if (asArgs && asArgs.length) {
             var s0 = asArgs[0];
@@ -4627,12 +4627,12 @@ if (DEBUGGER) {
     /**
      * doCommand(sCmd, fQuiet)
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {string} sCmd
      * @param {boolean} [fQuiet]
      * @return {boolean} true if command processed, false if unrecognized
      */
-    Debugger.prototype.doCommand = function(sCmd, fQuiet)
+    Debugger8080.prototype.doCommand = function(sCmd, fQuiet)
     {
         var result = true;
 
@@ -4794,12 +4794,12 @@ if (DEBUGGER) {
     /**
      * doCommands(sCmds, fSave)
      *
-     * @this {Debugger}
+     * @this {Debugger8080}
      * @param {string} sCmds
      * @param {boolean} [fSave]
      * @return {boolean} true if all commands processed, false if not
      */
-    Debugger.prototype.doCommands = function(sCmds, fSave)
+    Debugger8080.prototype.doCommands = function(sCmds, fSave)
     {
         var a = this.parseCommand(sCmds, fSave);
         for (var s in a) {
@@ -4809,20 +4809,20 @@ if (DEBUGGER) {
     };
 
     /**
-     * Debugger.init()
+     * Debugger8080.init()
      *
      * This function operates on every HTML element of class "debugger", extracting the
      * JSON-encoded parameters for the Debugger constructor from the element's "data-value"
      * attribute, invoking the constructor to create a Debugger component, and then binding
      * any associated HTML controls to the new component.
      */
-    Debugger.init = function()
+    Debugger8080.init = function()
     {
         var aeDbg = Component.getElementsByClass(document, PC8080.APPCLASS, "debugger");
         for (var iDbg = 0; iDbg < aeDbg.length; iDbg++) {
             var eDbg = aeDbg[iDbg];
             var parmsDbg = Component.getComponentParms(eDbg);
-            var dbg = new Debugger(parmsDbg);
+            var dbg = new Debugger8080(parmsDbg);
             Component.bindComponentControls(dbg, eDbg, PC8080.APPCLASS);
         }
     };
@@ -4830,8 +4830,8 @@ if (DEBUGGER) {
     /*
      * Initialize every Debugger module on the page (as IF there's ever going to be more than one ;-))
      */
-    web.onInit(Debugger.init);
+    web.onInit(Debugger8080.init);
 
 }   // endif DEBUGGER
 
-if (NODE) module.exports = Debugger;
+if (NODE) module.exports = Debugger8080;

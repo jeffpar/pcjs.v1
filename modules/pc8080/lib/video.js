@@ -36,16 +36,16 @@ if (NODE) {
     var web         = require("../../shared/lib/weblib");
     var DumpAPI     = require("../../shared/lib/dumpapi");
     var Component   = require("../../shared/lib/component");
-    var ChipSet     = require("./chipset");
-    var Memory      = require("./memory");
-    var Messages    = require("./messages");
-    var State       = require("./state");
+    var ChipSet8080 = require("./chipset");
+    var Memory8080  = require("./memory");
+    var Messages8080= require("./messages");
+    var State8080   = require("./state");
 }
 
 /**
- * Video(parmsVideo, canvas, context, textarea, container)
+ * Video8080(parmsVideo, canvas, context, textarea, container)
  *
- * The Video component can be configured with the following (parmsVideo) properties:
+ * The Video8080 component can be configured with the following (parmsVideo) properties:
  *
  *      screenWidth: width of the screen canvas, in pixels
  *      screenHeight: height of the screen canvas, in pixels
@@ -54,7 +54,7 @@ if (NODE) {
  *      aspectRatio (eg, 1.33)
  *      bufferAddr: the starting address of the frame buffer (eg, 0x2400)
  *      bufferRAM: true to use existing RAM (default is false)
- *      bufferFormat: if defined, one of the recognized formats in Video.FORMATS (eg, "vt100")
+ *      bufferFormat: if defined, one of the recognized formats in Video8080.FORMATS (eg, "vt100")
  *      bufferCols: the width of a single frame buffer row, in pixels (eg, 256)
  *      bufferRows: the number of frame buffer rows (eg, 224)
  *      bufferBits: the number of bits per column (default is 1)
@@ -94,13 +94,13 @@ if (NODE) {
  * @param {Object} [textarea]
  * @param {Object} [container]
  */
-function Video(parmsVideo, canvas, context, textarea, container)
+function Video8080(parmsVideo, canvas, context, textarea, container)
 {
     var video = this;
     this.fGecko = web.isUserAgent("Gecko/");
     var i, sEvent, asWebPrefixes = ['', 'moz', 'ms', 'webkit'];
 
-    Component.call(this, "Video", parmsVideo, Video, Messages.VIDEO);
+    Component.call(this, "Video", parmsVideo, Video8080, Messages8080.VIDEO);
 
     this.cxScreen = parmsVideo['screenWidth'];
     this.cyScreen = parmsVideo['screenHeight'];
@@ -109,7 +109,7 @@ function Video(parmsVideo, canvas, context, textarea, container)
     this.fUseRAM = parmsVideo['bufferRAM'];
 
     var sFormat = parmsVideo['bufferFormat'];
-    this.nFormat = sFormat && Video.FORMATS[sFormat.toUpperCase()] || Video.FORMAT.UNKNOWN;
+    this.nFormat = sFormat && Video8080.FORMATS[sFormat.toUpperCase()] || Video8080.FORMAT.UNKNOWN;
 
     this.nColsBuffer = parmsVideo['bufferCols'];
     this.nRowsBuffer = parmsVideo['bufferRows'];
@@ -252,27 +252,27 @@ function Video(parmsVideo, canvas, context, textarea, container)
     if (DEBUG) this.nCyclesPrev = 0;
 }
 
-Component.subclass(Video);
+Component.subclass(Video8080);
 
-Video.COLORS = {
+Video8080.COLORS = {
     OVERLAY_TOP:    0,
     OVERLAY_BOTTOM: 1,
     OVERLAY_TOTAL:  2
 };
 
-Video.FORMAT = {
+Video8080.FORMAT = {
     UNKNOWN:        0,
     SI1978:         1,
     VT100:          2
 };
 
-Video.FORMATS = {
-    "SI1978":       Video.FORMAT.SI1978,
-    "VT100":        Video.FORMAT.VT100
+Video8080.FORMATS = {
+    "SI1978":       Video8080.FORMAT.SI1978,
+    "VT100":        Video8080.FORMAT.VT100
 };
 
 
-Video.VT100 = {
+Video8080.VT100 = {
     /*
      * The following font IDs are nothing more than all the possible LINEATTR values masked with FONTMASK;
      * also, note that double-high implies double-wide; the VT100 doesn't support a double-high single-wide font.
@@ -297,10 +297,10 @@ Video.VT100 = {
 /**
  * initBuffers()
  *
- * @this {Video}
+ * @this {Video8080}
  * @return {boolean}
  */
-Video.prototype.initBuffers = function()
+Video8080.prototype.initBuffers = function()
 {
     /*
      * Allocate off-screen buffers now
@@ -318,7 +318,7 @@ Video.prototype.initBuffers = function()
     this.sizeBuffer = 0;
     if (!this.fUseRAM) {
         this.sizeBuffer = ((this.cxBuffer * this.nBitsPerPixel) >> 3) * this.cyBuffer;
-        if (!this.bus.addMemory(this.addrBuffer, this.sizeBuffer, Memory.TYPE.VIDEO)) {
+        if (!this.bus.addMemory(this.addrBuffer, this.sizeBuffer, Memory8080.TYPE.VIDEO)) {
             return false;
         }
     }
@@ -346,7 +346,7 @@ Video.prototype.initBuffers = function()
     this.aFonts = {};
     this.initColors();
 
-    if (this.nFormat == Video.FORMAT.VT100) {
+    if (this.nFormat == Video8080.FORMAT.VT100) {
         /*
          * Beyond fonts, VT100 support requires that we maintain a number of additional properties:
          *
@@ -397,13 +397,13 @@ Video.prototype.initBuffers = function()
 /**
  * initBus(cmp, bus, cpu, dbg)
  *
- * @this {Video}
- * @param {Computer} cmp
- * @param {Bus} bus
- * @param {CPUState} cpu
- * @param {Debugger} dbg
+ * @this {Video8080}
+ * @param {Computer8080} cmp
+ * @param {Bus8080} bus
+ * @param {CPUState8080} cpu
+ * @param {Debugger8080} dbg
  */
-Video.prototype.initBus = function(cmp, bus, cpu, dbg)
+Video8080.prototype.initBus = function(cmp, bus, cpu, dbg)
 {
     this.cmp = cmp;
     this.bus = bus;
@@ -419,7 +419,7 @@ Video.prototype.initBus = function(cmp, bus, cpu, dbg)
      * If we have an associated keyboard, then ensure that the keyboard will be notified
      * whenever the canvas gets focus and receives input.
      */
-    this.kbd = /** @type {Keyboard} */ (cmp.getMachineComponent("Keyboard"));
+    this.kbd = /** @type {Keyboard8080} */ (cmp.getMachineComponent("Keyboard"));
     if (this.kbd) {
         for (var s in this.ledBindings) {
             this.kbd.setBinding("led", s, this.ledBindings[s]);
@@ -435,12 +435,12 @@ Video.prototype.initBus = function(cmp, bus, cpu, dbg)
 /**
  * doneLoad(sURL, sFontData, nErrorCode)
  *
- * @this {Video}
+ * @this {Video8080}
  * @param {string} sURL
  * @param {string} sFontData
  * @param {number} nErrorCode (response from server if anything other than 200)
  */
-Video.prototype.doneLoad = function(sURL, sFontData, nErrorCode)
+Video8080.prototype.doneLoad = function(sURL, sFontData, nErrorCode)
 {
     if (nErrorCode) {
         this.notice("Unable to load font ROM (error " + nErrorCode + ": " + sURL + ")");
@@ -496,25 +496,25 @@ Video.prototype.doneLoad = function(sURL, sFontData, nErrorCode)
 /**
  * createFonts()
  *
- * @this {Video}
+ * @this {Video8080}
  * @return {boolean}
  */
-Video.prototype.createFonts = function()
+Video8080.prototype.createFonts = function()
 {
     /*
      * We retain abFontData in case we have to rebuild the fonts (eg, when we switch from 80 to 132 columns)
      */
     if (this.abFontData) {
-        this.fDotStretcher = (this.nFormat == Video.FORMAT.VT100);
-        this.aFonts[Video.VT100.FONT.NORML] = [
+        this.fDotStretcher = (this.nFormat == Video8080.FORMAT.VT100);
+        this.aFonts[Video8080.VT100.FONT.NORML] = [
             this.createFontVariation(this.cxCell, this.cyCell),
             this.createFontVariation(this.cxCell, this.cyCell, this.fUnderline)
         ];
-        this.aFonts[Video.VT100.FONT.DWIDE] = [
+        this.aFonts[Video8080.VT100.FONT.DWIDE] = [
             this.createFontVariation(this.cxCell*2, this.cyCell),
             this.createFontVariation(this.cxCell*2, this.cyCell, this.fUnderline)
         ];
-        this.aFonts[Video.VT100.FONT.DHIGH] = this.aFonts[Video.VT100.FONT.DHIGH_BOT] = [
+        this.aFonts[Video8080.VT100.FONT.DHIGH] = this.aFonts[Video8080.VT100.FONT.DHIGH_BOT] = [
             this.createFontVariation(this.cxCell*2, this.cyCell*2),
             this.createFontVariation(this.cxCell*2, this.cyCell*2, this.fUnderline)
         ];
@@ -533,13 +533,13 @@ Video.prototype.createFonts = function()
  *      3) double-high double-wide characters (cell size is this.cxCell*2 x this.cyCell*2)
  *      4) any of the above with either reverse video or underline enabled (default is neither)
  *
- * @this {Video}
+ * @this {Video8080}
  * @param {number} cxCell is the target width of each character in the grid
  * @param {number} cyCell is the target height of each character in the grid
  * @param {boolean} [fUnderline] (null for unmodified font, false for reverse video, true for underline)
  * @return {Object}
  */
-Video.prototype.createFontVariation = function(cxCell, cyCell, fUnderline)
+Video8080.prototype.createFontVariation = function(cxCell, cyCell, fUnderline)
 {
     /*
      * On a VT100, cxCell,cyCell is initially 10,10, but may change to 9,10 for 132-column mode.
@@ -606,12 +606,12 @@ Video.prototype.createFontVariation = function(cxCell, cyCell, fUnderline)
 /**
  * powerUp(data, fRepower)
  *
- * @this {Video}
+ * @this {Video8080}
  * @param {Object|null} data
  * @param {boolean} [fRepower]
  * @return {boolean} true if successful, false if failure
  */
-Video.prototype.powerUp = function(data, fRepower)
+Video8080.prototype.powerUp = function(data, fRepower)
 {
     /*
      * Because the VT100 frame buffer can be located anywhere in RAM (above 0x2000), we must defer this
@@ -619,7 +619,7 @@ Video.prototype.powerUp = function(data, fRepower)
      *
      * TODO: Remove this display test code once the VT100 is fully operational.
      */
-    if (this.nFormat == Video.FORMAT.VT100) {
+    if (this.nFormat == Video8080.FORMAT.VT100) {
         /*
          * Build a test screen in the VT100 frame buffer; we'll mimic the "SET-UP A" screen, since it uses
          * all the font variations.  The process involves iterating over 0-based row numbers -2 (or -5 if 50Hz
@@ -629,10 +629,10 @@ Video.prototype.powerUp = function(data, fRepower)
          * default character attribute for subsequent strings.  An empty array ends the screen build process.
          */
         var aLineData = {
-             0: [Video.VT100.FONT.DHIGH, 'SET-UP A'],
-             2: [Video.VT100.FONT.DWIDE, 'TO EXIT PRESS "SET-UP"'],
-            22: [Video.VT100.FONT.NORML, '        T       T       T       T       T       T       T       T       T'],
-            23: [Video.VT100.FONT.NORML, '1234567890', '1234567890', '1234567890', '1234567890', '1234567890', '1234567890', '1234567890', '1234567890'],
+             0: [Video8080.VT100.FONT.DHIGH, 'SET-UP A'],
+             2: [Video8080.VT100.FONT.DWIDE, 'TO EXIT PRESS "SET-UP"'],
+            22: [Video8080.VT100.FONT.NORML, '        T       T       T       T       T       T       T       T       T'],
+            23: [Video8080.VT100.FONT.NORML, '1234567890', '1234567890', '1234567890', '1234567890', '1234567890', '1234567890', '1234567890', '1234567890'],
             24: []
         };
         var addr = this.addrBuffer;
@@ -644,9 +644,9 @@ Video.prototype.powerUp = function(data, fRepower)
                 var fBreak = false;
                 addrNext = addr + 2;
                 if (!lineData) {
-                    if (font == Video.VT100.FONT.DHIGH) {
+                    if (font == Video8080.VT100.FONT.DHIGH) {
                         lineData = aLineData[iRow-1];
-                        font = Video.VT100.FONT.DHIGH_BOT;
+                        font = Video8080.VT100.FONT.DHIGH_BOT;
                     }
                 }
                 else {
@@ -657,7 +657,7 @@ Video.prototype.powerUp = function(data, fRepower)
                         fBreak = true;
                     }
                 }
-                b = (font & Video.VT100.LINEATTR.FONTMASK) | ((addrNext >> 8) & Video.VT100.LINEATTR.ADDRMASK) | Video.VT100.LINEATTR.ADDRBIAS;
+                b = (font & Video8080.VT100.LINEATTR.FONTMASK) | ((addrNext >> 8) & Video8080.VT100.LINEATTR.ADDRMASK) | Video8080.VT100.LINEATTR.ADDRBIAS;
                 this.bus.setByteDirect(addr++, b);
                 this.bus.setByteDirect(addr++, addrNext & 0xff);
                 if (fBreak) break;
@@ -672,7 +672,7 @@ Video.prototype.powerUp = function(data, fRepower)
                     attr ^= 0x80;
                 }
             }
-            this.bus.setByteDirect(addr++, Video.VT100.LINETERM);
+            this.bus.setByteDirect(addr++, Video8080.VT100.LINETERM);
             addrNext = addr;
         }
         /*
@@ -686,14 +686,14 @@ Video.prototype.powerUp = function(data, fRepower)
 /**
  * setBinding(sHTMLType, sBinding, control, sValue)
  *
- * @this {Video}
+ * @this {Video8080}
  * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
  * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "refresh")
  * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
  * @param {string} [sValue] optional data value
  * @return {boolean} true if binding was successful, false if unrecognized binding request
  */
-Video.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
+Video8080.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
 {
     var video = this;
 
@@ -730,11 +730,11 @@ Video.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
  *
  * Called from the ChipSet component whenever the screen dimensions have been dynamically altered.
  *
- * @this {Video}
+ * @this {Video8080}
  * @param {number} nCols (should be either 80 or 132; 80 is the default)
  * @param {number} nRows (should be either 24 or 14; 24 is the default)
  */
-Video.prototype.updateDimensions = function(nCols, nRows)
+Video8080.prototype.updateDimensions = function(nCols, nRows)
 {
     this.printMessage("updateDimensions(" + nCols + "," + nRows + ")");
     this.nColsBuffer = nCols;
@@ -757,10 +757,10 @@ Video.prototype.updateDimensions = function(nCols, nRows)
  *
  * Called from the ChipSet component whenever the monitor refresh rate has been dynamically altered.
  *
- * @this {Video}
+ * @this {Video8080}
  * @param {number} nRate (should be either 50 or 60; 60 is the default)
  */
-Video.prototype.updateRate = function(nRate)
+Video8080.prototype.updateRate = function(nRate)
 {
     this.printMessage("updateRate(" + nRate + ")");
     this.rateMonitor = nRate;
@@ -771,10 +771,10 @@ Video.prototype.updateRate = function(nRate)
  *
  * Called from the ChipSet component whenever the screen scroll offset has been dynamically altered.
  *
- * @this {Video}
+ * @this {Video8080}
  * @param {number} bScroll
  */
-Video.prototype.updateScrollOffset = function(bScroll)
+Video8080.prototype.updateScrollOffset = function(bScroll)
 {
     this.printMessage("updateScrollOffset(" + bScroll + ")");
     if (this.bScrollOffset !== bScroll) {
@@ -805,10 +805,10 @@ Video.prototype.updateScrollOffset = function(bScroll)
 /**
  * doFullScreen()
  *
- * @this {Video}
+ * @this {Video8080}
  * @return {boolean} true if request successful, false if not (eg, failed OR not supported)
  */
-Video.prototype.doFullScreen = function()
+Video8080.prototype.doFullScreen = function()
 {
     var fSuccess = false;
     if (this.container) {
@@ -874,10 +874,10 @@ Video.prototype.doFullScreen = function()
 /**
  * notifyFullScreen(fFullScreen)
  *
- * @this {Video}
+ * @this {Video8080}
  * @param {boolean|null} fFullScreen (null if there was a full-screen error)
  */
-Video.prototype.notifyFullScreen = function(fFullScreen)
+Video8080.prototype.notifyFullScreen = function(fFullScreen)
 {
     if (!fFullScreen && this.container) {
         if (!this.fGecko) {
@@ -892,9 +892,9 @@ Video.prototype.notifyFullScreen = function(fFullScreen)
 /**
  * setFocus()
  *
- * @this {Video}
+ * @this {Video8080}
  */
-Video.prototype.setFocus = function()
+Video8080.prototype.setFocus = function()
 {
     if (this.inputScreen) this.inputScreen.focus();
 };
@@ -902,10 +902,10 @@ Video.prototype.setFocus = function()
 /**
  * getRefreshRate()
  *
- * @this {Video}
+ * @this {Video8080}
  * @return {number}
  */
-Video.prototype.getRefreshRate = function()
+Video8080.prototype.getRefreshRate = function()
 {
     return Math.max(this.rateRefresh, this.rateInterrupt);
 };
@@ -915,10 +915,10 @@ Video.prototype.getRefreshRate = function()
  *
  * Initializes the contents of our internal cell cache.
  *
- * @this {Video}
+ * @this {Video8080}
  * @param {number} nCells
  */
-Video.prototype.initCellCache = function(nCells)
+Video8080.prototype.initCellCache = function(nCells)
 {
     this.nCellCache = nCells;
     this.fCellCacheValid = false;
@@ -932,35 +932,35 @@ Video.prototype.initCellCache = function(nCells)
  *
  * This creates an array of nColors, with additional OVERLAY_TOTAL colors tacked on to the end of the array.
  *
- * @this {Video}
+ * @this {Video8080}
  */
-Video.prototype.initColors = function()
+Video8080.prototype.initColors = function()
 {
     var rgbBlack  = [0x00, 0x00, 0x00, 0xff];
     var rgbWhite  = [0xff, 0xff, 0xff, 0xff];
     this.nColors = (1 << this.nBitsPerPixel);
-    this.aRGB = new Array(this.nColors + Video.COLORS.OVERLAY_TOTAL);
+    this.aRGB = new Array(this.nColors + Video8080.COLORS.OVERLAY_TOTAL);
     this.aRGB[0] = rgbBlack;
     this.aRGB[1] = rgbWhite;
-    if (this.nFormat == Video.FORMAT.SI1978) {
+    if (this.nFormat == Video8080.FORMAT.SI1978) {
         var rgbGreen  = [0x00, 0xff, 0x00, 0xff];
         //noinspection UnnecessaryLocalVariableJS
         var rgbYellow = [0xff, 0xff, 0x00, 0xff];
-        this.aRGB[this.nColors + Video.COLORS.OVERLAY_TOP] = rgbYellow;
-        this.aRGB[this.nColors + Video.COLORS.OVERLAY_BOTTOM] = rgbGreen;
+        this.aRGB[this.nColors + Video8080.COLORS.OVERLAY_TOP] = rgbYellow;
+        this.aRGB[this.nColors + Video8080.COLORS.OVERLAY_BOTTOM] = rgbGreen;
     }
 };
 
 /**
  * setPixel(image, x, y, bPixel)
  *
- * @this {Video}
+ * @this {Video8080}
  * @param {Object} image
  * @param {number} x
  * @param {number} y
  * @param {number} bPixel (ie, an index into aRGB)
  */
-Video.prototype.setPixel = function(image, x, y, bPixel)
+Video8080.prototype.setPixel = function(image, x, y, bPixel)
 {
     var index;
     if (!this.rotateBuffer) {
@@ -968,12 +968,12 @@ Video.prototype.setPixel = function(image, x, y, bPixel)
     } else {
         index = (image.height - x - 1) * image.width + y;
     }
-    if (bPixel && this.nFormat == Video.FORMAT.SI1978) {
+    if (bPixel && this.nFormat == Video8080.FORMAT.SI1978) {
         if (x >= 208 && x < 236) {
-            bPixel = this.nColors + Video.COLORS.OVERLAY_TOP;
+            bPixel = this.nColors + Video8080.COLORS.OVERLAY_TOP;
         }
         else if (x >= 28 && x < 72) {
-            bPixel = this.nColors + Video.COLORS.OVERLAY_BOTTOM;
+            bPixel = this.nColors + Video8080.COLORS.OVERLAY_BOTTOM;
         }
     }
     var rgb = this.aRGB[bPixel];
@@ -989,14 +989,14 @@ Video.prototype.setPixel = function(image, x, y, bPixel)
  *
  * Updates a particular character cell (row,col) in the associated window.
  *
- * @this {Video}
+ * @this {Video8080}
  * @param {number} idFont
  * @param {number} col
  * @param {number} row
  * @param {number} data
  * @param {Object} [context]
  */
-Video.prototype.updateChar = function(idFont, col, row, data, context)
+Video8080.prototype.updateChar = function(idFont, col, row, data, context)
 {
     var bChar = data & 0x7f;
     var font = this.aFonts[idFont][(data & 0x80)? 1 : 0];
@@ -1037,7 +1037,7 @@ Video.prototype.updateChar = function(idFont, col, row, data, context)
      * of the character should be drawn.
      */
     if (font.cyCell > this.cyCell) {
-        if (idFont == Video.VT100.FONT.DHIGH_BOT) ySrc += this.cyCell;
+        if (idFont == Video8080.VT100.FONT.DHIGH_BOT) ySrc += this.cyCell;
         cySrc = this.cyCell;
         this.assert(font.cyCell == this.cyCell * 2);
     }
@@ -1054,10 +1054,10 @@ Video.prototype.updateChar = function(idFont, col, row, data, context)
 /**
  * updateVT100(fForced)
  *
- * @this {Video}
+ * @this {Video8080}
  * @param {boolean} [fForced]
  */
-Video.prototype.updateVT100 = function(fForced)
+Video8080.prototype.updateVT100 = function(fForced)
 {
     var addrNext = this.addrBuffer, fontNext = -1;
 
@@ -1075,14 +1075,14 @@ Video.prototype.updateVT100 = function(fForced)
         var addr = addrNext;
         var font = fontNext;
         var nColsVisible = this.nColsBuffer;
-        if (font != Video.VT100.FONT.NORML) nColsVisible >>= 1;
+        if (font != Video8080.VT100.FONT.NORML) nColsVisible >>= 1;
         while (true) {
             var data = this.bus.getByteDirect(addr++);
-            if ((data & Video.VT100.LINETERM) == Video.VT100.LINETERM) {
+            if ((data & Video8080.VT100.LINETERM) == Video8080.VT100.LINETERM) {
                 var b = this.bus.getByteDirect(addr++);
-                fontNext = b & Video.VT100.LINEATTR.FONTMASK;
-                addrNext = ((b & Video.VT100.LINEATTR.ADDRMASK) << 8) | this.bus.getByteDirect(addr);
-                addrNext += (b & Video.VT100.LINEATTR.ADDRBIAS)? Video.VT100.ADDRBIAS_LO : Video.VT100.ADDRBIAS_HI;
+                fontNext = b & Video8080.VT100.LINEATTR.FONTMASK;
+                addrNext = ((b & Video8080.VT100.LINEATTR.ADDRMASK) << 8) | this.bus.getByteDirect(addr);
+                addrNext += (b & Video8080.VT100.LINEATTR.ADDRBIAS)? Video8080.VT100.ADDRBIAS_LO : Video8080.VT100.ADDRBIAS_HI;
                 break;
             }
             if (nCols < nColsVisible) {
@@ -1192,10 +1192,10 @@ Video.prototype.updateVT100 = function(fForced)
  * and then update the cell cache to match.  Since initCellCache() sets every cell in the cell cache to an
  * invalid value, we're assured that the next call to updateScreen() will redraw the entire (visible) video buffer.
  *
- * @this {Video}
+ * @this {Video8080}
  * @param {number} n (where 0 <= n < getRefreshRate() for a normal update, or -1 for a forced update)
  */
-Video.prototype.updateScreen = function(n)
+Video8080.prototype.updateScreen = function(n)
 {
     var fClean;
     var fUpdate = true;
@@ -1259,13 +1259,13 @@ Video.prototype.updateScreen = function(n)
 /**
  * updateScreenText(fForced)
  *
- * @this {Video}
+ * @this {Video8080}
  * @param {boolean} [fForced]
  */
-Video.prototype.updateScreenText = function(fForced)
+Video8080.prototype.updateScreenText = function(fForced)
 {
     switch(this.nFormat) {
-    case Video.FORMAT.VT100:
+    case Video8080.FORMAT.VT100:
         this.updateVT100(fForced);
         break;
     }
@@ -1274,10 +1274,10 @@ Video.prototype.updateScreenText = function(fForced)
 /**
  * updateScreenGraphics(fForced)
  *
- * @this {Video}
+ * @this {Video8080}
  * @param {boolean} [fForced]
  */
-Video.prototype.updateScreenGraphics = function(fForced)
+Video8080.prototype.updateScreenGraphics = function(fForced)
 {
     var addr = this.addrBuffer;
     var addrLimit = addr + this.sizeBuffer;
@@ -1359,14 +1359,14 @@ Video.prototype.updateScreenGraphics = function(fForced)
 };
 
 /**
- * Video.init()
+ * Video8080.init()
  *
  * This function operates on every HTML element of class "video", extracting the
  * JSON-encoded parameters for the Video constructor from the element's "data-value"
  * attribute, invoking the constructor to create a Video component, and then binding
  * any associated HTML controls to the new component.
  */
-Video.init = function()
+Video8080.init = function()
 {
     var aeVideo = Component.getElementsByClass(document, PC8080.APPCLASS, "video");
     for (var iVideo = 0; iVideo < aeVideo.length; iVideo++) {
@@ -1486,7 +1486,7 @@ Video.init = function()
          * Now we can create the Video object, record it, and wire it up to the associated document elements.
          */
         var eContext = eCanvas.getContext("2d");
-        var video = new Video(parmsVideo, eCanvas, eContext, eTextArea /* || eInput */, eVideo);
+        var video = new Video8080(parmsVideo, eCanvas, eContext, eTextArea /* || eInput */, eVideo);
 
         /*
          * Bind any video-specific controls (eg, the Refresh button). There are no essential controls, however;
@@ -1499,6 +1499,6 @@ Video.init = function()
 /*
  * Initialize every Video module on the page.
  */
-web.onInit(Video.init);
+web.onInit(Video8080.init);
 
-if (NODE) module.exports = Video;
+if (NODE) module.exports = Video8080;

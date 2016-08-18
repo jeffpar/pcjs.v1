@@ -69,8 +69,8 @@ At the time of this writing, the recommended order is:
 * [pcx86/fdc.js](lib/fdc.js)
 * [pcx86/hdc.js](lib/hdc.js)
 * [pcx86/debugger.js](lib/debugger.js)
-* [pcx86/state.js](lib/state.js)
 * [pcx86/computer.js](lib/computer.js)
+* [shared/state.js](../shared/lib/state.js)
 * [shared/embed.js](../shared/lib/embed.js)
 * [shared/save.js](../shared/lib/save.js)
 
