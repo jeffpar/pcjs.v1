@@ -1414,6 +1414,7 @@ Computer.prototype.onReset = function()
  */
 Computer.prototype.getMachineComponent = function(sType, componentPrev)
 {
+    var componentLast = componentPrev;
     var aComponents = Component.getComponents(this.id);
     for (var iComponent = 0; iComponent < aComponents.length; iComponent++) {
         var component = aComponents[iComponent];
@@ -1423,6 +1424,7 @@ Computer.prototype.getMachineComponent = function(sType, componentPrev)
         }
         if (component.type == sType) return component;
     }
+    if (!componentLast) Component.log("Machine component type '" + sType + "' not found", "warning");
     return null;
 };
 
