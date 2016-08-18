@@ -6,10 +6,12 @@ machines:
   - id: ibm5170
     type: pcx86
     debugger: true
+    connection: com2->vt100.serialPort
   - id: vt100
     type: pc8080
     debugger: true
-    config: /devices/pc8080/machine/vt100/machine.xml
+    connection: serialPort->ibm5170.com2
+    config: /devices/pc8080/machine/vt100/debugger/machine.xml
 ---
 
 {% include machine.html id="ibm5170" %}

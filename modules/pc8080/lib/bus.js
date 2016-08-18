@@ -35,9 +35,9 @@ if (NODE) {
     var str         = require("../../shared/lib/strlib");
     var usr         = require("../../shared/lib/usrlib");
     var Component   = require("../../shared/lib/component");
+    var State       = require("../../shared/lib/state");
     var Memory8080  = require("./memory");
     var Messages8080= require("./messages");
-    var State8080   = require("./state");
 }
 
 /**

@@ -36,12 +36,12 @@ if (NODE) {
     var web         = require("../../shared/lib/weblib");
     var DumpAPI     = require("../../shared/lib/dumpapi");
     var Component   = require("../../shared/lib/component");
+    var State       = require("../../shared/lib/state");
     var Memory      = require("./memory");
     var Messages    = require("./messages");
     var ChipSet     = require("./chipset");
     var Keyboard    = require("./keyboard");
     var Mouse       = require("./mouse");
-    var State       = require("./state");
 }
 
 /**

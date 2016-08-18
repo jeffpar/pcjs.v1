@@ -67,9 +67,9 @@ if (NODE) {
     var UserAPI     = require("../../shared/lib/userapi");
     var ReportAPI   = require("../../shared/lib/reportapi");
     var Component   = require("../../shared/lib/component");
+    var State       = require("../../shared/lib/state");
     var Messages    = require("./messages");
     var Bus         = require("./bus");
-    var State       = require("./state");
 }
 
 /**

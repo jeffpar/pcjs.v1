@@ -35,8 +35,8 @@ if (NODE) {
     var str         = require("../../shared/lib/strlib");
     var web         = require("../../shared/lib/weblib");
     var Component   = require("../../shared/lib/component");
+    var State       = require("../../shared/lib/state");
     var Messages8080= require("./messages");
-    var State8080   = require("./state");
 }
 
 /**
@@ -404,8 +404,8 @@ SerialPort8080.prototype.initBus = function(cmp, bus, cpu, dbg)
 /**
  * initConnection()
  *
- * If a machine 'connection' parameter exists of the form "<sourcePort>=<targetMachine>.<targetPort>",
- * and "<sourcePort>" matches our idComponent, then look for a component with id "<targetMachine>.<targetPort>".
+ * If a machine 'connection' parameter exists of the form "{sourcePort}->{targetMachine}.{targetPort}",
+ * and "{sourcePort}" matches our idComponent, then look for a component with id "{targetMachine}.{targetPort}".
  *
  * If the target component is found, then verify that it has exported functions with the following names:
  *
@@ -421,20 +421,22 @@ SerialPort8080.prototype.initConnection = function()
 {
     var sConnection = this.cmp.getMachineParm("connection");
     if (sConnection) {
-        var asParts = sConnection.split('=');
+        var asParts = sConnection.split('->');
         if (asParts.length == 2) {
             var sSourceID = str.trim(asParts[0]);
+            if (sSourceID != this.idComponent) return;  // this connection string is meant for another instance
             var sTargetID = str.trim(asParts[1]);
-            if (sSourceID == this.idComponent) {
-                this.connection = Component.getComponentByID(sTargetID);
-                if (this.connection) {
-                    var exports = this.connection['exports'];
-                    if (exports) {
-                        this.sendData = exports['receiveData'];
-                    }
+            this.connection = Component.getComponentByID(sTargetID);
+            if (this.connection) {
+                var exports = this.connection['exports'];
+                if (exports) {
+                    this.sendData = exports['receiveData'];
+                    this.printMessage(this.idMachine + '.' + sSourceID + " connected to " + sTargetID, true);
+                    return;
                 }
             }
         }
+        this.notice("Unable to establish connection: " + sConnection);
     }
 };
 

@@ -36,10 +36,10 @@ if (NODE) {
     var web         = require("../../shared/lib/weblib");
     var DumpAPI     = require("../../shared/lib/dumpapi");
     var Component   = require("../../shared/lib/component");
+    var State       = require("../../shared/lib/state");
     var ChipSet8080 = require("./chipset");
     var Memory8080  = require("./memory");
     var Messages8080= require("./messages");
-    var State8080   = require("./state");
 }
 
 /**

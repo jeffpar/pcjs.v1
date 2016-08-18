@@ -35,9 +35,9 @@ if (NODE) {
     var str         = require("../../shared/lib/strlib");
     var web         = require("../../shared/lib/weblib");
     var Component   = require("../../shared/lib/component");
+    var State       = require("../../shared/lib/state");
     var Messages    = require("./messages");
     var ChipSet     = require("./chipset");
-    var State       = require("./state");
 }
 
 /**
@@ -126,6 +126,19 @@ function SerialPort(parmsSerial) {
          */
         Component.bindExternalControl(this, sBinding, SerialPort.sIOBuffer);
     }
+
+    /*
+     * No connection until initBus() invokes initConnection().
+     */
+    this.sDataReceived = "";
+    this.connection = this.sendData = null;
+
+    /*
+     * Export all functions required by initConnection(); currently, this is the bare minimum, with no flow control.
+     */
+    this['exports'] = {
+        'receiveData': this.receiveData
+    };
 }
 
 /*
@@ -386,7 +399,7 @@ SerialPort.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
             if (keyCode === 0x08 || event.ctrlKey && keyCode >= 0x41 && keyCode <= 0x5A) {
                 if (event.preventDefault) event.preventDefault();
                 if (keyCode > 0x40) keyCode -= 0x40;
-                serial.sendRBR([keyCode]);
+                serial.receiveData(keyCode);
             }
             return true;
         };
@@ -398,7 +411,7 @@ SerialPort.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
              */
             event = event || window.event;
             var keyCode = event.which || event.keyCode;
-            serial.sendRBR([keyCode]);
+            serial.receiveData(keyCode);
             /*
              * Since we're going to remove the "readonly" attribute from the <textarea> control
              * (so that the soft keyboard activates on iOS), instead of calling preventDefault() for
@@ -436,13 +449,58 @@ SerialPort.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
  */
 SerialPort.prototype.initBus = function(cmp, bus, cpu, dbg)
 {
+    this.cmp = cmp;
     this.bus = bus;
     this.cpu = cpu;
     this.dbg = dbg;
+
     this.chipset = cmp.getMachineComponent("ChipSet");
+
     bus.addPortInputTable(this, SerialPort.aPortInput, this.portBase);
     bus.addPortOutputTable(this, SerialPort.aPortOutput, this.portBase);
+
+    this.initConnection();
+
     this.setReady();
+};
+
+/**
+ * initConnection()
+ *
+ * If a machine 'connection' parameter exists of the form "{sourcePort}->{targetMachine}.{targetPort}",
+ * and "{sourcePort}" matches our idComponent, then look for a component with id "{targetMachine}.{targetPort}".
+ *
+ * If the target component is found, then verify that it has exported functions with the following names:
+ *
+ *      receiveData(data): called when we have data to transmit; aliased internally to sendData(data)
+ *
+ * For now, we're not going to worry about communication in the other direction, because when the target component
+ * performs its own initConnection(), it will find our receiveByte(b) function, at which point communication in both
+ * directions should be established.
+ *
+ * @this {SerialPort}
+ */
+SerialPort.prototype.initConnection = function()
+{
+    var sConnection = this.cmp.getMachineParm("connection");
+    if (sConnection) {
+        var asParts = sConnection.split('->');
+        if (asParts.length == 2) {
+            var sSourceID = str.trim(asParts[0]);
+            if (sSourceID != this.idComponent) return;  // this connection string is meant for another instance
+            var sTargetID = str.trim(asParts[1]);
+            this.connection = Component.getComponentByID(sTargetID);
+            if (this.connection) {
+                var exports = this.connection['exports'];
+                if (exports) {
+                    this.sendData = exports['receiveData'];
+                    this.printMessage(this.idMachine + '.' + sSourceID + " connected to " + sTargetID, true);
+                    return;
+                }
+            }
+        }
+        this.notice("Unable to establish connection: " + sConnection);
+    }
 };
 
 /**
@@ -583,14 +641,28 @@ SerialPort.prototype.saveRegisters = function()
 };
 
 /**
- * sendRBR(ab)
+ * receiveData(data)
+ *
+ * This replaces the old sendRBR() function, which expected an Array of bytes.  We still support that,
+ * but in order to support connections with other SerialPort components (ie, the PC8080 SerialPort), we
+ * have added support for numbers and strings as well.
  *
  * @this {SerialPort}
- * @param {Array} ab is an array of bytes to propagate to the bRBR (Receiver Buffer Register)
+ * @param {number|string|Array} data
  */
-SerialPort.prototype.sendRBR = function(ab)
+SerialPort.prototype.receiveData = function(data)
 {
-    this.abReceive = this.abReceive.concat(ab);
+    if (typeof data == "number") {
+        this.abReceive.push(data);
+    }
+    else if (typeof data == "string") {
+        for (var i = 0; i < data.length; i++) {
+            this.abReceive.push(data.charCodeAt(i));
+        }
+    }
+    else {
+        this.abReceive = this.abReceive.concat(data);
+    }
     this.advanceRBR();
 };
 

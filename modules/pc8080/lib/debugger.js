@@ -37,12 +37,12 @@ if (DEBUGGER) {
         var usr         = require("../../shared/lib/usrlib");
         var web         = require("../../shared/lib/weblib");
         var Component   = require("../../shared/lib/component");
+        var State       = require("../../shared/lib/state");
         var CPUDef8080  = require("./cpudef");
         var CPU8080     = require("./cpu");
         var Keyboard8080= require("./keyboard");
         var Messages8080= require("./messages");
         var Memory8080  = require("./memory");
-        var State8080   = require("./state");
     }
 }
 

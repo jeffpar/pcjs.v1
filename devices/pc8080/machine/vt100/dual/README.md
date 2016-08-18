@@ -6,11 +6,11 @@ machines:
   - id: vt100a
     type: pc8080
     config: /devices/pc8080/machine/vt100/machine.xml
-    connection: serialPort=vt100b.serialPort
+    connection: serialPort->vt100b.serialPort
   - id: vt100b
     type: pc8080
     config: /devices/pc8080/machine/vt100/machine.xml
-    connection: serialPort=vt100a.serialPort
+    connection: serialPort->vt100a.serialPort
 ---
 
 Dual VT100 Terminals

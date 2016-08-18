@@ -37,11 +37,11 @@ if (DEBUGGER) {
         var usr         = require("../../shared/lib/usrlib");
         var web         = require("../../shared/lib/weblib");
         var Component   = require("../../shared/lib/component");
+        var State       = require("../../shared/lib/state");
         var Interrupts  = require("./interrupts");
         var Messages    = require("./messages");
         var Memory      = require("./memory");
         var Keyboard    = require("./keyboard");
-        var State       = require("./state");
         var CPU         = require("./cpu");
         var X86         = require("./x86");
         var X86Seg      = require("./x86seg");

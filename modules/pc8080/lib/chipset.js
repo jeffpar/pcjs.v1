@@ -36,9 +36,9 @@ if (NODE) {
     var usr         = require("../../shared/lib/usrlib");
     var web         = require("../../shared/lib/weblib");
     var Component   = require("../../shared/lib/component");
+    var State       = require("../../shared/lib/state");
     var CPUDef8080  = require("./cpudef");
     var Messages8080= require("./messages");
-    var State8080   = require("./state");
 }
 
 /**
