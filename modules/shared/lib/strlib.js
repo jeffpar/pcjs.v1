@@ -403,34 +403,37 @@ str.trim = function(s)
     return s.replace(/^\s+|\s+$/g, "");
 };
 
+/*
+ * Any codes commented out in the following table are deemed "printable"
+ */
 str.aASCIICodes = {
     0x00:   "NUL",
-    0x01:   "SOH",      // Start of Heading
-    0x02:   "STX",      // Start of Text
-    0x03:   "ETX",      // End of Text
-    0x04:   "EOT",      // End of Transmission
-    0x05:   "ENQ",      // Enquiry
-    0x06:   "ACK",      // Acknowledge
-    0x07:   "BEL",      // Bell
-    0x08:   "BS",       // Backspace
-    0x09:   "TAB",      // Horizontal Tab
-    0x0A:   "LF",       // Line Feed (New Line)
-    0x0B:   "VT",       // Vertical Tab
-    0x0C:   "FF",       // Form Feed (New Page)
-    0x0D:   "CR",       // Carriage Return
-    0x0E:   "SO",       // Shift Out
-    0x0F:   "SI",       // Shift In
-    0x10:   "DLE",      // Data Link Escape
-    0x11:   "DC1",      // Device Control 1
-    0x12:   "DC2",      // Device Control 2
-    0x13:   "DC3",      // Device Control 3
-    0x14:   "DC4",      // Device Control 4
-    0x15:   "NAK",      // Negative Acknowledge
-    0x16:   "SYN",      // Synchronous Idle
-    0x17:   "ETB",      // End of Transmission Block
-    0x18:   "CAN",      // Cancel
-    0x19:   "EM",       // End of Medium
-    0x1A:   "SUB",      // Substitute
+    0x01:   "SOH",      // (CTRL_A) Start of Heading
+    0x02:   "STX",      // (CTRL_B) Start of Text
+    0x03:   "ETX",      // (CTRL_C) End of Text
+    0x04:   "EOT",      // (CTRL_D) End of Transmission
+    0x05:   "ENQ",      // (CTRL_E) Enquiry
+    0x06:   "ACK",      // (CTRL_F) Acknowledge
+    0x07:   "BEL",      // (CTRL_G) Bell
+    0x08:   "BS",       // (CTRL_H) Backspace
+    0x09:   "TAB",      // (CTRL_I) Horizontal Tab
+ // 0x0A:   "LF",       // (CTRL_J) Line Feed (New Line)
+    0x0B:   "VT",       // (CTRL_K) Vertical Tab
+    0x0C:   "FF",       // (CTRL_L) Form Feed (New Page)
+    0x0D:   "CR",       // (CTRL_M) Carriage Return
+    0x0E:   "SO",       // (CTRL_N) Shift Out
+    0x0F:   "SI",       // (CTRL_O) Shift In
+    0x10:   "DLE",      // (CTRL_P) Data Link Escape
+    0x11:   "XON",      // (CTRL_Q) Device Control 1 (aka DC1)
+    0x12:   "DC2",      // (CTRL_R) Device Control 2
+    0x13:   "XOFF",     // (CTRL_S) Device Control 3 (aka DC3)
+    0x14:   "DC4",      // (CTRL_T) Device Control 4
+    0x15:   "NAK",      // (CTRL_U) Negative Acknowledge
+    0x16:   "SYN",      // (CTRL_V) Synchronous Idle
+    0x17:   "ETB",      // (CTRL_W) End of Transmission Block
+    0x18:   "CAN",      // (CTRL_X) Cancel
+    0x19:   "EM",       // (CTRL_Y) End of Medium
+    0x1A:   "SUB",      // (CTRL_Z) Substitute
     0x1B:   "ESC",      // Escape
     0x1C:   "FS",       // File Separator
     0x1D:   "GS",       // Group Separator

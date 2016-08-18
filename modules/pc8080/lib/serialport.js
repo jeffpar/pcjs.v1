@@ -116,7 +116,7 @@ function SerialPort8080(parmsSerial) {
     }
 
     /*
-     * No connection until initBus() invokes initConnection().
+     * No connection until initConnection() is called.
      */
     this.sDataReceived = "";
     this.connection = this.sendData = null;
@@ -396,8 +396,6 @@ SerialPort8080.prototype.initBus = function(cmp, bus, cpu, dbg)
     bus.addPortInputTable(this, SerialPort8080.aPortInput, this.portBase);
     bus.addPortOutputTable(this, SerialPort8080.aPortOutput, this.portBase);
 
-    this.initConnection();
-
     this.setReady();
 };
 
@@ -424,14 +422,14 @@ SerialPort8080.prototype.initConnection = function()
         var asParts = sConnection.split('->');
         if (asParts.length == 2) {
             var sSourceID = str.trim(asParts[0]);
-            if (sSourceID != this.idComponent) return;  // this connection string is meant for another instance
+            if (sSourceID != this.idComponent) return;  // this connection string is intended for another instance
             var sTargetID = str.trim(asParts[1]);
             this.connection = Component.getComponentByID(sTargetID);
             if (this.connection) {
                 var exports = this.connection['exports'];
                 if (exports) {
                     this.sendData = exports['receiveData'];
-                    this.printMessage(this.idMachine + '.' + sSourceID + " connected to " + sTargetID, true);
+                    this.status(this.idMachine + '.' + sSourceID + " connected to " + sTargetID);
                     return;
                 }
             }
@@ -451,6 +449,16 @@ SerialPort8080.prototype.initConnection = function()
 SerialPort8080.prototype.powerUp = function(data, fRepower)
 {
     if (!fRepower) {
+
+        /*
+         * We needed to wait until now to make our first inter-machine connection attempt;
+         * doing this in initBus() was still too early, because initBus() is called in the context
+         * of onInit() processing for all machines of the same type (eg, PCx86), and if we're
+         * trying to connect to the port of a machine of a DIFFERENT type (eg, PC8080), it may not
+         * have been initialized yet.
+         */
+        this.initConnection();
+
         if (!data || !this.restore) {
             this.reset();
         } else {

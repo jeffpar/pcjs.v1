@@ -1561,6 +1561,11 @@ Computer8080.show = function()
                 computer.printMessage("onShow(" + computer.fInitialized + "," + computer.flags.fPowered + ")");
             }
 
+            /*
+             * Note that the FIRST 'onpageshow' event, and therefore the first show() callback, occurs
+             * AFTER the the initial 'onload' event, and at that point in time, fInitialized will not be set yet.
+             * So, practically speaking, the first show() callback isn't all that useful.
+             */
             if (computer.fInitialized && !computer.flags.fPowered) {
                 /**
                  * Repower the computer, notifying every component to continue running as-is.

@@ -101,7 +101,6 @@ if (NODE) {
     global.BYTEARRAYS  = BYTEARRAYS;
     global.TYPEDARRAYS = TYPEDARRAYS;
     global.PC8080      = PC8080;
-    /*
-     * TODO: When we're "required" by Node, should we return anything via module.exports?
-     */
+
+    module.exports = PC8080;
 }

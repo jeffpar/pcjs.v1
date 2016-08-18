@@ -38,6 +38,7 @@ if (DEBUGGER) {
         var web         = require("../../shared/lib/weblib");
         var Component   = require("../../shared/lib/component");
         var State       = require("../../shared/lib/state");
+        var PC8080      = require("./defines");
         var CPUDef8080  = require("./cpudef");
         var CPU8080     = require("./cpu");
         var Keyboard8080= require("./keyboard");
@@ -192,19 +193,19 @@ function Debugger8080(parmsDbg)
          * Make it easier to access Debugger8080 commands from an external REPL (eg, the WebStorm
          * "live" console window); eg:
          *
-         *      $('r')
-         *      $('dw 0:0')
-         *      $('h')
+         *      pc8080('r')
+         *      pc8080('dw 0:0')
+         *      pc8080('h')
          *      ...
          */
         var dbg = this;
         if (window) {
-            if (window['$'] === undefined) {
-                window['$'] = function(s) { return dbg.doCommands(s); };
+            if (window[PC8080.APPCLASS] === undefined) {
+                window[PC8080.APPCLASS] = function(s) { return dbg.doCommands(s); };
             }
         } else {
-            if (global['$'] === undefined) {
-                global['$'] = function(s) { return dbg.doCommands(s); };
+            if (global[PC8080.APPCLASS] === undefined) {
+                global[PC8080.APPCLASS] = function(s) { return dbg.doCommands(s); };
             }
         }
 
@@ -4760,7 +4761,7 @@ if (DEBUGGER) {
                         }
                         break;
                     }
-                    this.println((APPNAME || "PC8080") + " version " + (XMLVERSION || APPVERSION) + " (" + this.cpu.model + (COMPILED? ",RELEASE" : (DEBUG? ",DEBUG" : ",NODEBUG")) + (TYPEDARRAYS? ",TYPEDARRAYS" : (BYTEARRAYS? ",BYTEARRAYS" : ",LONGARRAYS")) + ')');
+                    this.println((PC8080.APPNAME || "PC8080") + " version " + (XMLVERSION || PC8080.APPVERSION) + " (" + this.cpu.model + (PC8080.COMPILED? ",RELEASE" : (PC8080.DEBUG? ",DEBUG" : ",NODEBUG")) + (PC8080.TYPEDARRAYS? ",TYPEDARRAYS" : (PC8080.BYTEARRAYS? ",BYTEARRAYS" : ",LONGARRAYS")) + ')');
                     this.println(web.getUserAgent());
                     break;
                 case '?':

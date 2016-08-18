@@ -735,25 +735,34 @@ web.onClickRepeat = function(e, msDelay, msRepeat, fn)
 };
 
 web.aPageEventHandlers = {
-    'init': [],         // list of window 'onload' handlers
-    'show': [],         // list of window 'onpageshow' handlers
-    'exit': []          // list of window 'onunload' handlers (although we prefer to use 'onbeforeunload' if possible)
+    'init': [],                 // list of window 'onload' handlers
+    'show': [],                 // list of window 'onpageshow' handlers
+    'exit': []                  // list of window 'onunload' handlers (although we prefer to use 'onbeforeunload' if possible)
 };
 
-web.fPageReady = false; // set once the browser's first page initialization has occurred
-web.fPageEventsEnabled = true;
+web.fPageLoaded = false;        // set once the page's first 'onload' event has occurred
+web.fPageShowed = false;        // set once the page's first 'onpageshow' event has occurred
+web.fPageEventsEnabled = true;  // default is true, set to false (or true) by enablePageEvents()
 
 /**
  * onPageEvent(sName, fn)
  *
+ * For 'onload', 'onunload', and 'onpageshow' events, most callers should NOT use this function, but
+ * instead use web.onInit(), web.onShow(), and web.onExit(), respectively.
+ *
+ * The only components that should still use onPageEvent() are THIS component (see the bottom of this file)
+ * and components that need to capture other events (eg, the 'onresize' event in the Video component).
+ *
+ * This function creates a chain of callbacks, allowing multiple JavaScript modules to define handlers
+ * for the same event, which wouldn't be possible if everyone modified window['onload'], window['onunload'],
+ * etc, themselves.  However, that's less of a concern now, because assuming everyone else is now using
+ * onInit(), onExit(), etc, then there really IS only one component setting the window callback: this one.
+ *
+ * NOTE: It's risky to refer to obscure event handlers with "dot" names, because the Closure Compiler may
+ * erroneously replace them (eg, window.onpageshow is a good example).
+ *
  * @param {string} sFunc
  * @param {function()} fn
- *
- * Use this instead of setting window['onload'], window['onunload'], etc.
- * Allows multiple JavaScript modules to define a handler for the same event.
- *
- * Moreover, it's risky to refer to obscure event handlers with "dot" names, because
- * the Closure Compiler may erroneously replace them (eg, window.onpageshow is a good example).
  */
 web.onPageEvent = function(sFunc, fn)
 {
@@ -777,9 +786,9 @@ web.onPageEvent = function(sFunc, fn)
 /**
  * onInit(fn)
  *
- * @param {function()} fn
- *
  * Use this instead of setting window.onload.  Allows multiple JavaScript modules to define their own 'onload' event handler.
+ *
+ * @param {function()} fn
  */
 web.onInit = function(fn)
 {
@@ -837,7 +846,8 @@ web.enablePageEvents = function(fEnable)
 {
     if (!web.fPageEventsEnabled && fEnable) {
         web.fPageEventsEnabled = true;
-        if (web.fPageReady) web.sendPageEvent('init');
+        if (web.fPageLoaded) web.sendPageEvent('init');
+        if (web.fPageShowed) web.sendPageEvent('show');
         return;
     }
     web.fPageEventsEnabled = fEnable;
@@ -857,8 +867,18 @@ web.sendPageEvent = function(sEvent)
     }
 };
 
-web.onPageEvent('onload', function onPageLoad() { web.fPageReady = true; web.doPageEvent(web.aPageEventHandlers['init']); });
-web.onPageEvent('onpageshow', function onPageShow() { web.doPageEvent(web.aPageEventHandlers['show']); });
-web.onPageEvent(web.isUserAgent("Opera") || web.isUserAgent("iOS")? 'onunload' : 'onbeforeunload', function onPageUnload() { web.doPageEvent(web.aPageEventHandlers['exit']); });
+web.onPageEvent('onload', function onPageLoad() {
+    web.fPageLoaded = true;
+    web.doPageEvent(web.aPageEventHandlers['init']);
+});
+
+web.onPageEvent('onpageshow', function onPageShow() {
+    web.fPageShowed = true;
+    web.doPageEvent(web.aPageEventHandlers['show']);
+});
+
+web.onPageEvent(web.isUserAgent("Opera") || web.isUserAgent("iOS")? 'onunload' : 'onbeforeunload', function onPageUnload() {
+    web.doPageEvent(web.aPageEventHandlers['exit']);
+});
 
 if (NODE) module.exports = web;
