@@ -13,5 +13,6 @@
 	<keyboard ref="/devices/pcx86/keyboard/us84-buttons-arrows.xml"/>
 	<chipset id="chipset" model="5170" floppies="[1440,1200]"/>
 	<serial id="com1" adapter="1"/>
+	<serial id="com2" adapter="2"/>
 	<mouse serial="com1"/>
 </machine>
