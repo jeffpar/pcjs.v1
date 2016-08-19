@@ -36,14 +36,14 @@ if (NODE) {
     var web         = require("../../shared/lib/weblib");
     var DumpAPI     = require("../../shared/lib/dumpapi");
     var Component   = require("../../shared/lib/component");
-    var Memory      = require("./memory");
-    var CPUDef      = require("./cpudef");
+    var CPUDef8080  = require("./cpudef");
+    var Memory8080  = require("./memory");
 }
 
 /**
- * ROM(parmsROM)
+ * ROM8080(parmsROM)
  *
- * The ROM component expects the following (parmsROM) properties:
+ * The ROM8080 component expects the following (parmsROM) properties:
  *
  *      addr: physical address of ROM
  *      size: amount of ROM, in bytes
@@ -68,9 +68,9 @@ if (NODE) {
  * @extends Component
  * @param {Object} parmsROM
  */
-function ROM(parmsROM)
+function ROM8080(parmsROM)
 {
-    Component.call(this, "ROM", parmsROM, ROM);
+    Component.call(this, "ROM", parmsROM, ROM8080);
 
     this.abROM = null;
     this.addrROM = parmsROM['addr'];
@@ -112,9 +112,9 @@ function ROM(parmsROM)
     }
 }
 
-Component.subclass(ROM);
+Component.subclass(ROM8080);
 
-ROM.CPM = {
+ROM8080.CPM = {
     BIOS: {
         VECTOR:         0x0000
     },
@@ -136,7 +136,7 @@ ROM.CPM = {
     }
 };
 
-ROM.CPM.VECTORS = [ROM.CPM.BIOS.VECTOR, ROM.CPM.BDOS.VECTOR];
+ROM8080.CPM.VECTORS = [ROM8080.CPM.BIOS.VECTOR, ROM8080.CPM.BDOS.VECTOR];
 
 /*
  * NOTE: There's currently no need for this component to have a reset() function, since
@@ -154,13 +154,13 @@ ROM.CPM.VECTORS = [ROM.CPM.BIOS.VECTOR, ROM.CPM.BDOS.VECTOR];
 /**
  * initBus(cmp, bus, cpu, dbg)
  *
- * @this {ROM}
- * @param {Computer} cmp
- * @param {Bus} bus
- * @param {CPUState} cpu
- * @param {Debugger} dbg
+ * @this {ROM8080}
+ * @param {Computer8080} cmp
+ * @param {Bus8080} bus
+ * @param {CPUState8080} cpu
+ * @param {Debugger8080} dbg
  */
-ROM.prototype.initBus = function(cmp, bus, cpu, dbg)
+ROM8080.prototype.initBus = function(cmp, bus, cpu, dbg)
 {
     this.bus = bus;
     this.cpu = cpu;
@@ -171,12 +171,12 @@ ROM.prototype.initBus = function(cmp, bus, cpu, dbg)
 /**
  * powerUp(data, fRepower)
  *
- * @this {ROM}
+ * @this {ROM8080}
  * @param {Object|null} data
  * @param {boolean} [fRepower]
  * @return {boolean} true if successful, false if failure
  */
-ROM.prototype.powerUp = function(data, fRepower)
+ROM8080.prototype.powerUp = function(data, fRepower)
 {
     if (this.aSymbols) {
         if (this.dbg) {
@@ -199,12 +199,12 @@ ROM.prototype.powerUp = function(data, fRepower)
  * useful down the road, like user-defined symbols (ie, symbols that the Debugger may have
  * created, above and beyond those symbols we automatically loaded, if any, along with the ROM).
  *
- * @this {ROM}
+ * @this {ROM8080}
  * @param {boolean} [fSave]
  * @param {boolean} [fShutdown]
  * @return {Object|boolean} component state if fSave; otherwise, true if successful, false if failure
  */
-ROM.prototype.powerDown = function(fSave, fShutdown)
+ROM8080.prototype.powerDown = function(fSave, fShutdown)
 {
     return true;
 };
@@ -212,12 +212,12 @@ ROM.prototype.powerDown = function(fSave, fShutdown)
 /**
  * doneLoad(sURL, sROMData, nErrorCode)
  *
- * @this {ROM}
+ * @this {ROM8080}
  * @param {string} sURL
  * @param {string} sROMData
  * @param {number} nErrorCode (response from server if anything other than 200)
  */
-ROM.prototype.doneLoad = function(sURL, sROMData, nErrorCode)
+ROM8080.prototype.doneLoad = function(sURL, sROMData, nErrorCode)
 {
     if (nErrorCode) {
         this.notice("Unable to load system ROM (error " + nErrorCode + ": " + sURL + ")");
@@ -291,9 +291,9 @@ ROM.prototype.doneLoad = function(sURL, sROMData, nErrorCode)
  * until after initBus() has received the Bus component AND doneLoad() has received the abROM data.  When both
  * those criteria are satisfied, the component becomes "ready".
  *
- * @this {ROM}
+ * @this {ROM8080}
  */
-ROM.prototype.copyROM = function()
+ROM8080.prototype.copyROM = function()
 {
     if (!this.isReady()) {
         if (!this.sFilePath) {
@@ -346,13 +346,13 @@ ROM.prototype.copyROM = function()
 /**
  * addROM(addr)
  *
- * @this {ROM}
+ * @this {ROM8080}
  * @param {number} addr
  * @return {boolean}
  */
-ROM.prototype.addROM = function(addr)
+ROM8080.prototype.addROM = function(addr)
 {
-    if (this.bus.addMemory(addr, this.sizeROM, this.fWritable?  Memory.TYPE.RAM : Memory.TYPE.ROM)) {
+    if (this.bus.addMemory(addr, this.sizeROM, this.fWritable?  Memory8080.TYPE.RAM : Memory8080.TYPE.ROM)) {
         if (DEBUG) this.log("addROM(): copying ROM to " + str.toHexLong(addr) + " (" + str.toHexLong(this.abROM.length) + " bytes)");
         var i;
         for (i = 0; i < this.abROM.length; i++) {
@@ -365,8 +365,8 @@ ROM.prototype.addROM = function(addr)
              * (namely, 0x0000, which is the CP/M reset vector, and 0x0005, which is the CP/M system call vector) and
              * then telling the CPU to call us whenever a HLT occurs, so we can check PC for one of these addresses.
              */
-            for (i = 0; i < ROM.CPM.VECTORS.length; i++) {
-                this.bus.setByteDirect(ROM.CPM.VECTORS[i], CPUDef.OPCODE.HLT);
+            for (i = 0; i < ROM8080.CPM.VECTORS.length; i++) {
+                this.bus.setByteDirect(ROM8080.CPM.VECTORS[i], CPUDef8080.OPCODE.HLT);
             }
 
             this.cpu.addHaltCheck(function(rom) {
@@ -388,24 +388,24 @@ ROM.prototype.addROM = function(addr)
 /**
  * checkCPMVector(addr)
  *
- * @this {ROM}
+ * @this {ROM8080}
  * @param {number} addr (of the HLT opcode)
  * @return {boolean} true if special processing performed, false if not
  */
-ROM.prototype.checkCPMVector = function(addr)
+ROM8080.prototype.checkCPMVector = function(addr)
 {
-    var i = ROM.CPM.VECTORS.indexOf(addr);
+    var i = ROM8080.CPM.VECTORS.indexOf(addr);
     if (i >= 0) {
         var fCPM = false;
         var cpu = this.cpu;
         var dbg = this.dbg;
-        if (addr == ROM.CPM.BDOS.VECTOR) {
+        if (addr == ROM8080.CPM.BDOS.VECTOR) {
             fCPM = true;
             switch(cpu.regC) {
-            case ROM.CPM.BDOS.FUNC.CON_WRITE:
+            case ROM8080.CPM.BDOS.FUNC.CON_WRITE:
                 this.writeCPMString(this.getCPMChar(cpu.regE));
                 break;
-            case ROM.CPM.BDOS.FUNC.STR_WRITE:
+            case ROM8080.CPM.BDOS.FUNC.STR_WRITE:
                 this.writeCPMString(this.getCPMString(cpu.getDE(), '$'));
                 break;
             default:
@@ -414,7 +414,7 @@ ROM.prototype.checkCPMVector = function(addr)
             }
         }
         if (fCPM) {
-            CPUDef.opRET.call(cpu);         // for recognized calls, automatically return
+            CPUDef8080.opRET.call(cpu);     // for recognized calls, automatically return
         }
         else if (dbg) {
             this.println("\nCP/M vector " + str.toHexWord(addr));
@@ -430,11 +430,11 @@ ROM.prototype.checkCPMVector = function(addr)
 /**
  * getCPMChar(ch)
  *
- * @this {ROM}
+ * @this {ROM8080}
  * @param {number} ch
  * @return {string}
  */
-ROM.prototype.getCPMChar = function(ch)
+ROM8080.prototype.getCPMChar = function(ch)
 {
     return String.fromCharCode(ch);
 };
@@ -442,12 +442,12 @@ ROM.prototype.getCPMChar = function(ch)
 /**
  * getCPMString(addr, chEnd)
  *
- * @this {ROM}
+ * @this {ROM8080}
  * @param {number} addr (of a string)
  * @param {string|number} [chEnd] (terminating character, default is 0)
  * @return {string}
  */
-ROM.prototype.getCPMString = function(addr, chEnd)
+ROM8080.prototype.getCPMString = function(addr, chEnd)
 {
     var s = "";
     var cchMax = 255;
@@ -463,10 +463,10 @@ ROM.prototype.getCPMString = function(addr, chEnd)
 /**
  * writeCPMString(s)
  *
- * @this {ROM}
+ * @this {ROM8080}
  * @param {string} s
  */
-ROM.prototype.writeCPMString = function(s)
+ROM8080.prototype.writeCPMString = function(s)
 {
     s = s.replace(/\r/g, '');
     if (this.controlPrint) {
@@ -485,37 +485,37 @@ ROM.prototype.writeCPMString = function(s)
  * Now that the Bus component provides low-level getMemoryBlocks() and setMemoryBlocks() methods
  * to manually get and set the blocks of any memory range, it is now possible to create true aliases.
  *
- * @this {ROM}
+ * @this {ROM8080}
  * @param {number} addr
  */
-ROM.prototype.cloneROM = function(addr)
+ROM8080.prototype.cloneROM = function(addr)
 {
     var aBlocks = this.bus.getMemoryBlocks(this.addrROM, this.sizeROM);
     this.bus.setMemoryBlocks(addr, this.sizeROM, aBlocks);
 };
 
 /**
- * ROM.init()
+ * ROM8080.init()
  *
  * This function operates on every HTML element of class "rom", extracting the
- * JSON-encoded parameters for the ROM constructor from the element's "data-value"
- * attribute, invoking the constructor to create a ROM component, and then binding
+ * JSON-encoded parameters for the ROM8080 constructor from the element's "data-value"
+ * attribute, invoking the constructor to create a ROM8080 component, and then binding
  * any associated HTML controls to the new component.
  */
-ROM.init = function()
+ROM8080.init = function()
 {
     var aeROM = Component.getElementsByClass(document, PC8080.APPCLASS, "rom");
     for (var iROM = 0; iROM < aeROM.length; iROM++) {
         var eROM = aeROM[iROM];
         var parmsROM = Component.getComponentParms(eROM);
-        var rom = new ROM(parmsROM);
+        var rom = new ROM8080(parmsROM);
         Component.bindComponentControls(rom, eROM, PC8080.APPCLASS);
     }
 };
 
 /*
- * Initialize all the ROM modules on the page.
+ * Initialize all the ROM8080 modules on the page.
  */
-web.onInit(ROM.init);
+web.onInit(ROM8080.init);
 
-if (NODE) module.exports = ROM;
+if (NODE) module.exports = ROM8080;

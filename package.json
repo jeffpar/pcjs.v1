@@ -1,6 +1,6 @@
 {
   "name": "pcjs",
-  "version": "1.23.3",
+  "version": "1.24.0",
   "description": "Node-enabled version of PCjs",
   "engine": "node ^0.12.7",
   "main": "server.js",
@@ -126,8 +126,8 @@
     "./modules/pcx86/lib/fdc.js",
     "./modules/pcx86/lib/hdc.js",
     "./modules/pcx86/lib/debugger.js",
-    "./modules/pcx86/lib/state.js",
     "./modules/pcx86/lib/computer.js",
+    "./modules/shared/lib/state.js",
     "./modules/shared/lib/embed.js",
     "./modules/shared/lib/save.js"
   ],
@@ -156,9 +156,8 @@
     "./modules/pc8080/lib/video.js",
     "./modules/pc8080/lib/serialport.js",
     "./modules/pc8080/lib/debugger.js",
-    "./modules/pc8080/lib/state.js",
     "./modules/pc8080/lib/computer.js",
-    "./modules/shared/lib/embed.js",
-    "./modules/shared/lib/save.js"
+    "./modules/shared/lib/state.js",
+    "./modules/shared/lib/embed.js"
   ]
 }

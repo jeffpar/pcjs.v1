@@ -31,7 +31,7 @@
 
 "use strict";
 
-var Messages = {
+var Messages8080 = {
     CPU:        0x00000001,
     BUS:        0x00000040,
     MEM:        0x00000080,
@@ -51,4 +51,4 @@ var Messages = {
     HALT:       0x80000000|0
 };
 
-if (NODE) module.exports = Messages;
+if (NODE) module.exports = Messages8080;

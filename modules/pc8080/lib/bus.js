@@ -35,23 +35,23 @@ if (NODE) {
     var str         = require("../../shared/lib/strlib");
     var usr         = require("../../shared/lib/usrlib");
     var Component   = require("../../shared/lib/component");
-    var Memory      = require("./memory");
-    var Messages    = require("./messages");
-    var State       = require("./state");
+    var State       = require("../../shared/lib/state");
+    var Memory8080  = require("./memory");
+    var Messages8080= require("./messages");
 }
 
 /**
- * Bus(cpu, dbg)
+ * Bus8080(cpu, dbg)
  *
- * The Bus component manages physical memory and I/O address spaces.
+ * The Bus8080 component manages physical memory and I/O address spaces.
  *
- * The Bus component has no UI elements, so it does not require an init() handler,
+ * The Bus8080 component has no UI elements, so it does not require an init() handler,
  * but it still inherits from the Component class and must be allocated like any
  * other device component.  It's currently allocated by the Computer's init() handler,
  * which then calls the initBus() method of all the other components.
  *
  * For memory beyond the simple needs of the ROM and RAM components (ie, memory-mapped
- * devices), the address space must still be allocated through the Bus component via
+ * devices), the address space must still be allocated through the Bus8080 component via
  * addMemory().  If the component needs something more than simple read/write storage,
  * it must provide a custom controller.
  *
@@ -63,12 +63,12 @@ if (NODE) {
  * @constructor
  * @extends Component
  * @param {Object} parmsBus
- * @param {CPUState} cpu
- * @param {Debugger} dbg
+ * @param {CPUState8080} cpu
+ * @param {Debugger8080} dbg
  */
-function Bus(parmsBus, cpu, dbg)
+function Bus8080(parmsBus, cpu, dbg)
 {
-    Component.call(this, "Bus", parmsBus, Bus);
+    Component.call(this, "Bus", parmsBus, Bus8080);
 
     this.cpu = cpu;
     this.dbg = dbg;
@@ -76,7 +76,7 @@ function Bus(parmsBus, cpu, dbg)
     this.nBusWidth = parmsBus['busWidth'] || 16;
 
     /*
-     * Compute all Bus memory block parameters, based on the width of the bus.
+     * Compute all Bus8080 memory block parameters, based on the width of the bus.
      *
      * Regarding blockTotal, we want to avoid using block overflow expressions like:
      *
@@ -121,7 +121,7 @@ function Bus(parmsBus, cpu, dbg)
     this.nBlockLimit = this.nBlockSize - 1;
     this.nBlockTotal = (this.addrTotal / this.nBlockSize) | 0;
     this.nBlockMask = this.nBlockTotal - 1;
-    this.assert(this.nBlockMask <= Bus.BlockInfo.num.mask);
+    this.assert(this.nBlockMask <= Bus8080.BlockInfo.num.mask);
 
     /*
      * Lists of I/O notification functions: aPortInputNotify and aPortOutputNotify are arrays, indexed by
@@ -164,9 +164,9 @@ function Bus(parmsBus, cpu, dbg)
     this.setReady();
 }
 
-Component.subclass(Bus);
+Component.subclass(Bus8080);
 
-Bus.ERROR = {
+Bus8080.ERROR = {
     ADD_MEM_INUSE:      1,
     ADD_MEM_BADRANGE:   2,
     SET_MEM_BADRANGE:   4,
@@ -188,10 +188,10 @@ var BlockInfo;
  *  type:   BitField
  * }}
  */
-Bus.BlockInfo = usr.defineBitFields({num:20, count:8, btmod:1, type:3});
+Bus8080.BlockInfo = usr.defineBitFields({num:20, count:8, btmod:1, type:3});
 
 /**
- * BusInfo object definition (returned by scanMemory())
+ * Bus8080Info object definition (returned by scanMemory())
  *
  *  cbTotal:    total bytes allocated
  *  cBlocks:    total Memory blocks allocated
@@ -203,18 +203,18 @@ Bus.BlockInfo = usr.defineBitFields({num:20, count:8, btmod:1, type:3});
  *  aBlocks:    Array.<BlockInfo>
  * }}
  */
-var BusInfo;
+var Bus8080Info;
 
 /**
  * initMemory()
  *
  * Allocate enough (empty) Memory blocks to span the entire physical address space.
  *
- * @this {Bus}
+ * @this {Bus8080}
  */
-Bus.prototype.initMemory = function()
+Bus8080.prototype.initMemory = function()
 {
-    var block = new Memory();
+    var block = new Memory8080();
     block.copyBreakpoints(this.dbg);
     this.aMemBlocks = new Array(this.nBlockTotal);
     for (var iBlock = 0; iBlock < this.nBlockTotal; iBlock++) {
@@ -225,9 +225,9 @@ Bus.prototype.initMemory = function()
 /**
  * reset()
  *
- * @this {Bus}
+ * @this {Bus8080}
  */
-Bus.prototype.reset = function()
+Bus8080.prototype.reset = function()
 {
 };
 
@@ -243,12 +243,12 @@ Bus.prototype.reset = function()
  * TODO: Perhaps Computer should be smarter: if there's no powerUp() handler, then fallback to the reset() handler.
  * In that case, however, we'd either need to remove the powerUp() stub in Component, or detect the existence of the stub.
  *
- * @this {Bus}
+ * @this {Bus8080}
  * @param {Object|null} data (always null because we supply no powerDown() handler)
  * @param {boolean} [fRepower]
  * @return {boolean} true if successful, false if failure
  */
-Bus.prototype.powerUp = function(data, fRepower)
+Bus8080.prototype.powerUp = function(data, fRepower)
 {
     if (!fRepower) this.reset();
     return true;
@@ -267,7 +267,7 @@ Bus.prototype.powerUp = function(data, fRepower)
  * because machines with large block sizes can make it impossible to load certain ROMs at
  * their required addresses.  Every allocation still allocates a whole number of blocks.
  *
- * Even so, Bus memory management does NOT provide a general-purpose heap.  Most memory
+ * Even so, Bus8080 memory management does NOT provide a general-purpose heap.  Most memory
  * allocations occur during machine initialization and never change.  In particular, there
  * is NO support for removing partial-block allocations.
  *
@@ -277,13 +277,13 @@ Bus.prototype.powerUp = function(data, fRepower)
  * space.  However, any holes that might have existed between the original allocation and an
  * extension are subsumed by the extension.
  *
- * @this {Bus}
+ * @this {Bus8080}
  * @param {number} addr is the starting physical address of the request
  * @param {number} size of the request, in bytes
- * @param {number} type is one of the Memory.TYPE constants
+ * @param {number} type is one of the Memory8080.TYPE constants
  * @return {boolean} true if successful, false if not
  */
-Bus.prototype.addMemory = function(addr, size, type)
+Bus8080.prototype.addMemory = function(addr, size, type)
 {
     var addrNext = addr;
     var sizeLeft = size;
@@ -319,10 +319,10 @@ Bus.prototype.addMemory = function(addr, size, type)
                     continue;
                 }
             }
-            return this.reportError(Bus.ERROR.ADD_MEM_INUSE, addrNext, sizeLeft);
+            return this.reportError(Bus8080.ERROR.ADD_MEM_INUSE, addrNext, sizeLeft);
         }
 
-        var blockNew = new Memory(addrNext, sizeBlock, this.nBlockSize, type);
+        var blockNew = new Memory8080(addrNext, sizeBlock, this.nBlockSize, type);
         blockNew.copyBreakpoints(this.dbg, block);
         this.aMemBlocks[iBlock++] = blockNew;
 
@@ -331,22 +331,22 @@ Bus.prototype.addMemory = function(addr, size, type)
     }
 
     if (sizeLeft <= 0) {
-        this.status(Math.floor(size / 1024) + "Kb " + Memory.TYPE.NAMES[type] + " at " + str.toHexWord(addr));
+        this.status(Math.floor(size / 1024) + "Kb " + Memory8080.TYPE.NAMES[type] + " at " + str.toHexWord(addr));
         return true;
     }
 
-    return this.reportError(Bus.ERROR.ADD_MEM_BADRANGE, addr, size);
+    return this.reportError(Bus8080.ERROR.ADD_MEM_BADRANGE, addr, size);
 };
 
 /**
  * cleanMemory(addr, size)
  *
- * @this {Bus}
+ * @this {Bus8080}
  * @param {number} addr
  * @param {number} size
  * @return {boolean} true if all blocks were clean, false if dirty; all blocks are cleaned in the process
  */
-Bus.prototype.cleanMemory = function(addr, size)
+Bus8080.prototype.cleanMemory = function(addr, size)
 {
     var fClean = true;
     var iBlock = addr >>> this.nBlockShift;
@@ -364,15 +364,15 @@ Bus.prototype.cleanMemory = function(addr, size)
 /**
  * scanMemory(info, addr, size)
  *
- * Returns a BusInfo object for the specified address range.
+ * Returns a Bus8080Info object for the specified address range.
  *
- * @this {Bus}
- * @param {Object} [info] previous BusInfo, if any
+ * @this {Bus8080}
+ * @param {Object} [info] previous Bus8080Info, if any
  * @param {number} [addr] starting address of range (0 if none provided)
  * @param {number} [size] size of range, in bytes (up to end of address space if none provided)
  * @return {Object} updated info (or new info if no previous info provided)
  */
-Bus.prototype.scanMemory = function(info, addr, size)
+Bus8080.prototype.scanMemory = function(info, addr, size)
 {
     if (addr == null) addr = 0;
     if (size == null) size = (this.addrTotal - addr) | 0;
@@ -387,7 +387,7 @@ Bus.prototype.scanMemory = function(info, addr, size)
         var block = this.aMemBlocks[iBlock];
         info.cbTotal += block.size;
         if (block.size) {
-            info.aBlocks.push(usr.initBitFields(Bus.BlockInfo, iBlock, 0, 0, block.type));
+            info.aBlocks.push(usr.initBitFields(Bus8080.BlockInfo, iBlock, 0, 0, block.type));
             info.cBlocks++
         }
         iBlock++;
@@ -398,10 +398,10 @@ Bus.prototype.scanMemory = function(info, addr, size)
 /**
  * getWidth()
  *
- * @this {Bus}
+ * @this {Bus8080}
  * @return {number}
  */
-Bus.prototype.getWidth = function()
+Bus8080.prototype.getWidth = function()
 {
     return this.nBusWidth;
 };
@@ -413,18 +413,18 @@ Bus.prototype.getWidth = function()
  *
  * TODO: Update the removeMemory() interface to reflect the relaxed requirements of the addMemory() interface.
  *
- * @this {Bus}
+ * @this {Bus8080}
  * @param {number} addr
  * @param {number} size
  * @return {boolean} true if successful, false if not
  */
-Bus.prototype.removeMemory = function(addr, size)
+Bus8080.prototype.removeMemory = function(addr, size)
 {
     if (!(addr & this.nBlockLimit) && size && !(size & this.nBlockLimit)) {
         var iBlock = addr >>> this.nBlockShift;
         while (size > 0) {
             var blockOld = this.aMemBlocks[iBlock];
-            var blockNew = new Memory(addr);
+            var blockNew = new Memory8080(addr);
             blockNew.copyBreakpoints(this.dbg, blockOld);
             this.aMemBlocks[iBlock++] = blockNew;
             addr = iBlock * this.nBlockSize;
@@ -432,18 +432,18 @@ Bus.prototype.removeMemory = function(addr, size)
         }
         return true;
     }
-    return this.reportError(Bus.ERROR.REM_MEM_BADRANGE, addr, size);
+    return this.reportError(Bus8080.ERROR.REM_MEM_BADRANGE, addr, size);
 };
 
 /**
  * getMemoryBlocks(addr, size)
  *
- * @this {Bus}
+ * @this {Bus8080}
  * @param {number} addr is the starting physical address
  * @param {number} size of the request, in bytes
  * @return {Array} of Memory blocks
  */
-Bus.prototype.getMemoryBlocks = function(addr, size)
+Bus8080.prototype.getMemoryBlocks = function(addr, size)
 {
     var aBlocks = [];
     var iBlock = addr >>> this.nBlockShift;
@@ -463,13 +463,13 @@ Bus.prototype.getMemoryBlocks = function(addr, size)
  * Otherwise, new blocks are allocated with the specified type; the underlying memory from the
  * provided blocks is still used, but the new blocks may have different access to that memory.
  *
- * @this {Bus}
+ * @this {Bus8080}
  * @param {number} addr is the starting physical address
  * @param {number} size of the request, in bytes
  * @param {Array} aBlocks as returned by getMemoryBlocks()
- * @param {number} [type] is one of the Memory.TYPE constants
+ * @param {number} [type] is one of the Memory8080.TYPE constants
  */
-Bus.prototype.setMemoryBlocks = function(addr, size, aBlocks, type)
+Bus8080.prototype.setMemoryBlocks = function(addr, size, aBlocks, type)
 {
     var i = 0;
     var iBlock = addr >>> this.nBlockShift;
@@ -478,7 +478,7 @@ Bus.prototype.setMemoryBlocks = function(addr, size, aBlocks, type)
         this.assert(block);
         if (!block) break;
         if (type !== undefined) {
-            var blockNew = new Memory(addr);
+            var blockNew = new Memory8080(addr);
             blockNew.clone(block, type, this.dbg);
             block = blockNew;
         }
@@ -490,11 +490,11 @@ Bus.prototype.setMemoryBlocks = function(addr, size, aBlocks, type)
 /**
  * getByte(addr)
  *
- * @this {Bus}
+ * @this {Bus8080}
  * @param {number} addr is a physical address
  * @return {number} byte (8-bit) value at that address
  */
-Bus.prototype.getByte = function(addr)
+Bus8080.prototype.getByte = function(addr)
 {
     return this.aMemBlocks[(addr & this.nBusMask) >>> this.nBlockShift].readByte(addr & this.nBlockLimit, addr);
 };
@@ -504,11 +504,11 @@ Bus.prototype.getByte = function(addr)
  *
  * This is useful for the Debugger and other components that want to bypass getByte() breakpoint detection.
  *
- * @this {Bus}
+ * @this {Bus8080}
  * @param {number} addr is a physical address
  * @return {number} byte (8-bit) value at that address
  */
-Bus.prototype.getByteDirect = function(addr)
+Bus8080.prototype.getByteDirect = function(addr)
 {
     return this.aMemBlocks[(addr & this.nBusMask) >>> this.nBlockShift].readByteDirect(addr & this.nBlockLimit, addr);
 };
@@ -516,11 +516,11 @@ Bus.prototype.getByteDirect = function(addr)
 /**
  * getShort(addr)
  *
- * @this {Bus}
+ * @this {Bus8080}
  * @param {number} addr is a physical address
  * @return {number} word (16-bit) value at that address
  */
-Bus.prototype.getShort = function(addr)
+Bus8080.prototype.getShort = function(addr)
 {
     var off = addr & this.nBlockLimit;
     var iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
@@ -535,11 +535,11 @@ Bus.prototype.getShort = function(addr)
  *
  * This is useful for the Debugger and other components that want to bypass getShort() breakpoint detection.
  *
- * @this {Bus}
+ * @this {Bus8080}
  * @param {number} addr is a physical address
  * @return {number} word (16-bit) value at that address
  */
-Bus.prototype.getShortDirect = function(addr)
+Bus8080.prototype.getShortDirect = function(addr)
 {
     var off = addr & this.nBlockLimit;
     var iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
@@ -552,11 +552,11 @@ Bus.prototype.getShortDirect = function(addr)
 /**
  * setByte(addr, b)
  *
- * @this {Bus}
+ * @this {Bus8080}
  * @param {number} addr is a physical address
  * @param {number} b is the byte (8-bit) value to write (we truncate it to 8 bits to be safe)
  */
-Bus.prototype.setByte = function(addr, b)
+Bus8080.prototype.setByte = function(addr, b)
 {
     this.aMemBlocks[(addr & this.nBusMask) >>> this.nBlockShift].writeByte(addr & this.nBlockLimit, b & 0xff, addr);
 };
@@ -567,11 +567,11 @@ Bus.prototype.setByte = function(addr, b)
  * This is useful for the Debugger and other components that want to bypass breakpoint detection AND read-only
  * memory protection (for example, this is an interface the ROM component could use to initialize ROM contents).
  *
- * @this {Bus}
+ * @this {Bus8080}
  * @param {number} addr is a physical address
  * @param {number} b is the byte (8-bit) value to write (we truncate it to 8 bits to be safe)
  */
-Bus.prototype.setByteDirect = function(addr, b)
+Bus8080.prototype.setByteDirect = function(addr, b)
 {
     this.aMemBlocks[(addr & this.nBusMask) >>> this.nBlockShift].writeByteDirect(addr & this.nBlockLimit, b & 0xff, addr);
 };
@@ -579,11 +579,11 @@ Bus.prototype.setByteDirect = function(addr, b)
 /**
  * setShort(addr, w)
  *
- * @this {Bus}
+ * @this {Bus8080}
  * @param {number} addr is a physical address
  * @param {number} w is the word (16-bit) value to write (we truncate it to 16 bits to be safe)
  */
-Bus.prototype.setShort = function(addr, w)
+Bus8080.prototype.setShort = function(addr, w)
 {
     var off = addr & this.nBlockLimit;
     var iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
@@ -601,11 +601,11 @@ Bus.prototype.setShort = function(addr, w)
  * This is useful for the Debugger and other components that want to bypass breakpoint detection AND read-only
  * memory protection (for example, this is an interface the ROM component could use to initialize ROM contents).
  *
- * @this {Bus}
+ * @this {Bus8080}
  * @param {number} addr is a physical address
  * @param {number} w is the word (16-bit) value to write (we truncate it to 16 bits to be safe)
  */
-Bus.prototype.setShortDirect = function(addr, w)
+Bus8080.prototype.setShortDirect = function(addr, w)
 {
     var off = addr & this.nBlockLimit;
     var iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
@@ -620,11 +620,11 @@ Bus.prototype.setShortDirect = function(addr, w)
 /**
  * addMemBreak(addr, fWrite)
  *
- * @this {Bus}
+ * @this {Bus8080}
  * @param {number} addr
  * @param {boolean} fWrite is true for a memory write breakpoint, false for a memory read breakpoint
  */
-Bus.prototype.addMemBreak = function(addr, fWrite)
+Bus8080.prototype.addMemBreak = function(addr, fWrite)
 {
     if (DEBUGGER) {
         var iBlock = addr >>> this.nBlockShift;
@@ -635,11 +635,11 @@ Bus.prototype.addMemBreak = function(addr, fWrite)
 /**
  * removeMemBreak(addr, fWrite)
  *
- * @this {Bus}
+ * @this {Bus8080}
  * @param {number} addr
  * @param {boolean} fWrite is true for a memory write breakpoint, false for a memory read breakpoint
  */
-Bus.prototype.removeMemBreak = function(addr, fWrite)
+Bus8080.prototype.removeMemBreak = function(addr, fWrite)
 {
     if (DEBUGGER) {
         var iBlock = addr >>> this.nBlockShift;
@@ -672,11 +672,11 @@ Bus.prototype.removeMemBreak = function(addr, fWrite)
  * that it's compressed, since we'll only store them in compressed form if they actually shrank, and we'll use State
  * helper methods compress() and decompress() to create and expand the compressed data arrays.
  *
- * @this {Bus}
+ * @this {Bus8080}
  * @param {boolean} [fAll] (true to save all non-ROM memory blocks, regardless of their dirty flags)
  * @return {Array} a
  */
-Bus.prototype.saveMemory = function(fAll)
+Bus8080.prototype.saveMemory = function(fAll)
 {
     var i = 0;
     var a = [];
@@ -688,7 +688,7 @@ Bus.prototype.saveMemory = function(fAll)
          * the memory blocks (eg, video memory), and while cleanMemory() will clear a dirty block's fDirty flag,
          * it also sets the dirty block's fDirtyEver flag, which is left set for the lifetime of the machine.
          */
-        if (fAll && block.type != Memory.TYPE.ROM || block.fDirty || block.fDirtyEver) {
+        if (fAll && block.type != Memory8080.TYPE.ROM || block.fDirty || block.fDirtyEver) {
             a[i++] = iBlock;
             a[i++] = State.compress(block.save());
         }
@@ -710,11 +710,11 @@ Bus.prototype.saveMemory = function(fAll)
  *
  * See saveMemory() for more information on how the memory block contents are saved.
  *
- * @this {Bus}
+ * @this {Bus8080}
  * @param {Array} a
  * @return {boolean} true if successful, false if not
  */
-Bus.prototype.restoreMemory = function(a)
+Bus8080.prototype.restoreMemory = function(a)
 {
     var i;
     for (i = 0; i < a.length - 1; i += 2) {
@@ -740,11 +740,11 @@ Bus.prototype.restoreMemory = function(a)
 /**
  * addPortInputBreak(port)
  *
- * @this {Bus}
+ * @this {Bus8080}
  * @param {number} [port]
  * @return {boolean} true if break on port input enabled, false if disabled
  */
-Bus.prototype.addPortInputBreak = function(port)
+Bus8080.prototype.addPortInputBreak = function(port)
 {
     if (port === undefined) {
         this.fPortInputBreakAll = !this.fPortInputBreakAll;
@@ -762,12 +762,12 @@ Bus.prototype.addPortInputBreak = function(port)
  *
  * Add a port input-notification handler to the list of such handlers.
  *
- * @this {Bus}
+ * @this {Bus8080}
  * @param {number} start port address
  * @param {number} end port address
  * @param {function(number,number)} fn is called with the port and IP values at the time of the input
  */
-Bus.prototype.addPortInputNotify = function(start, end, fn)
+Bus8080.prototype.addPortInputNotify = function(start, end, fn)
 {
     if (fn !== undefined) {
         for (var port = start; port <= end; port++) {
@@ -786,12 +786,12 @@ Bus.prototype.addPortInputNotify = function(start, end, fn)
  *
  * Add port input-notification handlers from the specified table (a batch version of addPortInputNotify)
  *
- * @this {Bus}
+ * @this {Bus8080}
  * @param {Component} component
  * @param {Object} table
  * @param {number} [offset] is an optional port offset
  */
-Bus.prototype.addPortInputTable = function(component, table, offset)
+Bus8080.prototype.addPortInputTable = function(component, table, offset)
 {
     if (offset === undefined) offset = 0;
     if (table) {
@@ -806,11 +806,11 @@ Bus.prototype.addPortInputTable = function(component, table, offset)
  *
  * By default, all input ports are 1 byte wide; ports that are wider must call this function.
  *
- * @this {Bus}
+ * @this {Bus8080}
  * @param {number} port
  * @param {number} size (1, 2 or 4)
  */
-Bus.prototype.addPortInputWidth = function(port, size)
+Bus8080.prototype.addPortInputWidth = function(port, size)
 {
     this.aPortInputWidth[port] = size;
 };
@@ -818,7 +818,7 @@ Bus.prototype.addPortInputWidth = function(port, size)
 /**
  * checkPortInputNotify(port, size, addrIP)
  *
- * @this {Bus}
+ * @this {Bus8080}
  * @param {number} port
  * @param {number} size (1, 2 or 4)
  * @param {number} [addrIP] is the IP value at the time of the input
@@ -827,7 +827,7 @@ Bus.prototype.addPortInputWidth = function(port, size)
  * NOTE: It seems that parts of the ROM BIOS (like the RS-232 probes around F000:E5D7 in the 5150 BIOS)
  * assume that ports for non-existent hardware return 0xff rather than 0x00, hence my new default (0xff) below.
  */
-Bus.prototype.checkPortInputNotify = function(port, size, addrIP)
+Bus8080.prototype.checkPortInputNotify = function(port, size, addrIP)
 {
     var data = 0, shift = 0;
 
@@ -882,11 +882,11 @@ Bus.prototype.checkPortInputNotify = function(port, size, addrIP)
  *
  * Remove port input-notification handler(s) (to be ENABLED later if needed)
  *
- * @this {Bus}
+ * @this {Bus8080}
  * @param {number} start address
  * @param {number} end address
  *
-Bus.prototype.removePortInputNotify = function(start, end)
+Bus8080.prototype.removePortInputNotify = function(start, end)
 {
     for (var port = start; port < end; port++) {
         if (this.aPortInputNotify[port]) {
@@ -899,11 +899,11 @@ Bus.prototype.removePortInputNotify = function(start, end)
 /**
  * addPortOutputBreak(port)
  *
- * @this {Bus}
+ * @this {Bus8080}
  * @param {number} [port]
  * @return {boolean} true if break on port output enabled, false if disabled
  */
-Bus.prototype.addPortOutputBreak = function(port)
+Bus8080.prototype.addPortOutputBreak = function(port)
 {
     if (port === undefined) {
         this.fPortOutputBreakAll = !this.fPortOutputBreakAll;
@@ -921,12 +921,12 @@ Bus.prototype.addPortOutputBreak = function(port)
  *
  * Add a port output-notification handler to the list of such handlers.
  *
- * @this {Bus}
+ * @this {Bus8080}
  * @param {number} start port address
  * @param {number} end port address
  * @param {function(number,number)} fn is called with the port and IP values at the time of the output
  */
-Bus.prototype.addPortOutputNotify = function(start, end, fn)
+Bus8080.prototype.addPortOutputNotify = function(start, end, fn)
 {
     if (fn !== undefined) {
         for (var port = start; port <= end; port++) {
@@ -945,12 +945,12 @@ Bus.prototype.addPortOutputNotify = function(start, end, fn)
  *
  * Add port output-notification handlers from the specified table (a batch version of addPortOutputNotify)
  *
- * @this {Bus}
+ * @this {Bus8080}
  * @param {Component} component
  * @param {Object} table
  * @param {number} [offset] is an optional port offset
  */
-Bus.prototype.addPortOutputTable = function(component, table, offset)
+Bus8080.prototype.addPortOutputTable = function(component, table, offset)
 {
     if (offset === undefined) offset = 0;
     if (table) {
@@ -965,11 +965,11 @@ Bus.prototype.addPortOutputTable = function(component, table, offset)
  *
  * By default, all output ports are 1 byte wide; ports that are wider must call this function.
  *
- * @this {Bus}
+ * @this {Bus8080}
  * @param {number} port
  * @param {number} size (1, 2 or 4)
  */
-Bus.prototype.addPortOutputWidth = function(port, size)
+Bus8080.prototype.addPortOutputWidth = function(port, size)
 {
     this.aPortOutputWidth[port] = size;
 };
@@ -977,13 +977,13 @@ Bus.prototype.addPortOutputWidth = function(port, size)
 /**
  * checkPortOutputNotify(port, size, data, addrIP)
  *
- * @this {Bus}
+ * @this {Bus8080}
  * @param {number} port
  * @param {number} size
  * @param {number} data
  * @param {number} [addrIP] is the IP value at the time of the output
  */
-Bus.prototype.checkPortOutputNotify = function(port, size, data, addrIP)
+Bus8080.prototype.checkPortOutputNotify = function(port, size, data, addrIP)
 {
     var shift = 0;
 
@@ -1030,11 +1030,11 @@ Bus.prototype.checkPortOutputNotify = function(port, size, data, addrIP)
  *
  * Remove port output-notification handler(s) (to be ENABLED later if needed)
  *
- * @this {Bus}
+ * @this {Bus8080}
  * @param {number} start address
  * @param {number} end address
  *
-Bus.prototype.removePortOutputNotify = function(start, end)
+Bus8080.prototype.removePortOutputNotify = function(start, end)
 {
     for (var port = start; port < end; port++) {
         if (this.aPortOutputNotify[port]) {
@@ -1047,14 +1047,14 @@ Bus.prototype.removePortOutputNotify = function(start, end)
 /**
  * reportError(op, addr, size, fQuiet)
  *
- * @this {Bus}
+ * @this {Bus8080}
  * @param {number} op
  * @param {number} addr
  * @param {number} size
  * @param {boolean} [fQuiet] (true if any error should be quietly logged)
  * @return {boolean} false
  */
-Bus.prototype.reportError = function(op, addr, size, fQuiet)
+Bus8080.prototype.reportError = function(op, addr, size, fQuiet)
 {
     var sError = "Memory block error (" + op + ": " + str.toHex(addr) + "," + str.toHex(size) + ")";
     if (fQuiet) {
@@ -1069,4 +1069,4 @@ Bus.prototype.reportError = function(op, addr, size, fQuiet)
     return false;
 };
 
-if (NODE) module.exports = Bus;
+if (NODE) module.exports = Bus8080;

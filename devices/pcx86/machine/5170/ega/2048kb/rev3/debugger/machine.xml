@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.23.3/machine.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.24.0/machine.xsl"?>
 <machine id="ibm5170" class="pcx86" border="1" pos="center" background="#FAEBD7">
-	<name>IBM PC AT (8Mhz), 128Kb EGA, 2Mb RAM, 20Mb Hard Disk</name>
+	<name pos="center">IBM PC AT (8Mhz), 128Kb EGA, 2Mb RAM, 20Mb Hard Disk</name>
 	<computer id="at-ega-2048k" name="IBM PC AT" buswidth="24"/>
 	<cpu id="cpu286" model="80286" cycles="8000000" autostart="true"/>
 	<ram id="ramLow" addr="0x00000" test="false" size="0xa0000" comment="ROM BIOS memory test has been disabled"/>

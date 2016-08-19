@@ -38,7 +38,7 @@ if (NODE) {
     var str         = require("../../shared/lib/strlib");
     var web         = require("../../shared/lib/weblib");
     var Component   = require("../../shared/lib/component");
-    var State       = require("./state");
+    var State       = require("../../shared/lib/state");
     var X86         = require("./x86");
 }
 

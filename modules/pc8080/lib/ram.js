@@ -35,15 +35,15 @@ if (NODE) {
     var str         = require("../../shared/lib/strlib");
     var web         = require("../../shared/lib/weblib");
     var Component   = require("../../shared/lib/component");
-    var Memory      = require("./memory");
-    var ROM         = require("./rom");
-    var State       = require("./state");
+    var State       = require("../../shared/lib/state");
+    var Memory8080  = require("./memory");
+    var ROM8080     = require("./rom");
 }
 
 /**
- * RAM(parmsRAM)
+ * RAM8080(parmsRAM)
  *
- * The RAM component expects the following (parmsRAM) properties:
+ * The RAM8080 component expects the following (parmsRAM) properties:
  *
  *      addr: starting physical address of RAM (default is 0)
  *      size: amount of RAM, in bytes (default is 0, which means defer to motherboard switch settings)
@@ -55,9 +55,9 @@ if (NODE) {
  * @extends Component
  * @param {Object} parmsRAM
  */
-function RAM(parmsRAM)
+function RAM8080(parmsRAM)
 {
-    Component.call(this, "RAM", parmsRAM, RAM);
+    Component.call(this, "RAM", parmsRAM, RAM8080);
 
     this.addrRAM = parmsRAM['addr'];
     this.sizeRAM = parmsRAM['size'];
@@ -65,18 +65,18 @@ function RAM(parmsRAM)
     this.fAllocated = false;
 }
 
-Component.subclass(RAM);
+Component.subclass(RAM8080);
 
 /**
  * initBus(cmp, bus, cpu, dbg)
  *
- * @this {RAM}
- * @param {Computer} cmp
- * @param {Bus} bus
- * @param {CPUState} cpu
- * @param {Debugger} dbg
+ * @this {RAM8080}
+ * @param {Computer8080} cmp
+ * @param {Bus8080} bus
+ * @param {CPUState8080} cpu
+ * @param {Debugger8080} dbg
  */
-RAM.prototype.initBus = function(cmp, bus, cpu, dbg)
+RAM8080.prototype.initBus = function(cmp, bus, cpu, dbg)
 {
     this.bus = bus;
     this.cpu = cpu;
@@ -87,12 +87,12 @@ RAM.prototype.initBus = function(cmp, bus, cpu, dbg)
 /**
  * powerUp(data, fRepower)
  *
- * @this {RAM}
+ * @this {RAM8080}
  * @param {Object|null} data
  * @param {boolean} [fRepower]
  * @return {boolean} true if successful, false if failure
  */
-RAM.prototype.powerUp = function(data, fRepower)
+RAM8080.prototype.powerUp = function(data, fRepower)
 {
     if (!fRepower) {
         /*
@@ -109,12 +109,12 @@ RAM.prototype.powerUp = function(data, fRepower)
 /**
  * powerDown(fSave, fShutdown)
  *
- * @this {RAM}
+ * @this {RAM8080}
  * @param {boolean} [fSave]
  * @param {boolean} [fShutdown]
  * @return {Object|boolean} component state if fSave; otherwise, true if successful, false if failure
  */
-RAM.prototype.powerDown = function(fSave, fShutdown)
+RAM8080.prototype.powerDown = function(fSave, fShutdown)
 {
     /*
      * The Computer powers down the CPU first, at which point CPUState state is saved,
@@ -128,12 +128,12 @@ RAM.prototype.powerDown = function(fSave, fShutdown)
 /**
  * reset()
  *
- * @this {RAM}
+ * @this {RAM8080}
  */
-RAM.prototype.reset = function()
+RAM8080.prototype.reset = function()
 {
     if (!this.fAllocated && this.sizeRAM) {
-        if (this.bus.addMemory(this.addrRAM, this.sizeRAM, Memory.TYPE.RAM)) {
+        if (this.bus.addMemory(this.addrRAM, this.sizeRAM, Memory8080.TYPE.RAM)) {
             this.fAllocated = true;
         }
     }
@@ -145,12 +145,12 @@ RAM.prototype.reset = function()
 /**
  * save()
  *
- * This implements save support for the RAM component.
+ * This implements save support for the RAM8080 component.
  *
- * @this {RAM}
+ * @this {RAM8080}
  * @return {Object}
  */
-RAM.prototype.save = function()
+RAM8080.prototype.save = function()
 {
     return null;
 };
@@ -158,39 +158,39 @@ RAM.prototype.save = function()
 /**
  * restore(data)
  *
- * This implements restore support for the RAM component.
+ * This implements restore support for the RAM8080 component.
  *
- * @this {RAM}
+ * @this {RAM8080}
  * @param {Object} data
  * @return {boolean} true if successful, false if failure
  */
-RAM.prototype.restore = function(data)
+RAM8080.prototype.restore = function(data)
 {
     return true;
 };
 
 /**
- * RAM.init()
+ * RAM8080.init()
  *
  * This function operates on every HTML element of class "ram", extracting the
- * JSON-encoded parameters for the RAM constructor from the element's "data-value"
- * attribute, invoking the constructor to create a RAM component, and then binding
+ * JSON-encoded parameters for the RAM8080 constructor from the element's "data-value"
+ * attribute, invoking the constructor to create a RAM8080 component, and then binding
  * any associated HTML controls to the new component.
  */
-RAM.init = function()
+RAM8080.init = function()
 {
     var aeRAM = Component.getElementsByClass(document, PC8080.APPCLASS, "ram");
     for (var iRAM = 0; iRAM < aeRAM.length; iRAM++) {
         var eRAM = aeRAM[iRAM];
         var parmsRAM = Component.getComponentParms(eRAM);
-        var ram = new RAM(parmsRAM);
+        var ram = new RAM8080(parmsRAM);
         Component.bindComponentControls(ram, eRAM, PC8080.APPCLASS);
     }
 };
 
 /*
- * Initialize all the RAM modules on the page.
+ * Initialize all the RAM8080 modules on the page.
  */
-web.onInit(RAM.init);
+web.onInit(RAM8080.init);
 
-if (NODE) module.exports = RAM;
+if (NODE) module.exports = RAM8080;

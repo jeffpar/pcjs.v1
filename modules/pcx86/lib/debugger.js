@@ -37,14 +37,15 @@ if (DEBUGGER) {
         var usr         = require("../../shared/lib/usrlib");
         var web         = require("../../shared/lib/weblib");
         var Component   = require("../../shared/lib/component");
-        var Interrupts  = require("./interrupts");
-        var Messages    = require("./messages");
-        var Memory      = require("./memory");
-        var Keyboard    = require("./keyboard");
-        var State       = require("./state");
+        var State       = require("../../shared/lib/state");
+        var PCX86       = require("./defines");
         var CPU         = require("./cpu");
         var X86         = require("./x86");
         var X86Seg      = require("./x86seg");
+        var Interrupts  = require("./interrupts");
+        var Keyboard    = require("./keyboard");
+        var Messages    = require("./messages");
+        var Memory      = require("./memory");
     }
 }
 
@@ -258,19 +259,19 @@ function Debugger(parmsDbg)
          * Make it easier to access Debugger commands from an external REPL (eg, the WebStorm
          * "live" console window); eg:
          *
-         *      $('r')
-         *      $('dw 0:0')
-         *      $('h')
+         *      pcx86('r')
+         *      pcx86('dw 0:0')
+         *      pcx86('h')
          *      ...
          */
         var dbg = this;
         if (window) {
-            if (window['$'] === undefined) {
-                window['$'] = function(s) { return dbg.doCommands(s); };
+            if (window[PCX86.APPCLASS] === undefined) {
+                window[PCX86.APPCLASS] = function(s) { return dbg.doCommands(s); };
             }
         } else {
-            if (global['$'] === undefined) {
-                global['$'] = function(s) { return dbg.doCommands(s); };
+            if (global[PCX86.APPCLASS] === undefined) {
+                global[PCX86.APPCLASS] = function(s) { return dbg.doCommands(s); };
             }
         }
 
@@ -8080,7 +8081,7 @@ if (DEBUGGER) {
                     this.doClear(asArgs[0]);
                     break;
                 case 'd':
-                    if (!COMPILED && sCmd == "debug") {
+                    if (!PCX86.COMPILED && sCmd == "debug") {
                         window.DEBUG = true;
                         this.println("DEBUG checks on");
                         break;
@@ -8162,7 +8163,7 @@ if (DEBUGGER) {
                         }
                         break;
                     }
-                    this.println((APPNAME || "PCx86") + " version " + (XMLVERSION || APPVERSION) + " (" + this.cpu.model + (COMPILED? ",RELEASE" : (DEBUG? ",DEBUG" : ",NODEBUG")) + (PREFETCH? ",PREFETCH" : ",NOPREFETCH") + (TYPEDARRAYS? ",TYPEDARRAYS" : (BYTEARRAYS? ",BYTEARRAYS" : ",LONGARRAYS")) + (BACKTRACK? ",BACKTRACK" : ",NOBACKTRACK") + ')');
+                    this.println((PCX86.APPNAME || "PCx86") + " version " + (XMLVERSION || PCX86.APPVERSION) + " (" + this.cpu.model + (PCX86.COMPILED? ",RELEASE" : (PCX86.DEBUG? ",DEBUG" : ",NODEBUG")) + (PCX86.PREFETCH? ",PREFETCH" : ",NOPREFETCH") + (PCX86.TYPEDARRAYS? ",TYPEDARRAYS" : (PCX86.BYTEARRAYS? ",BYTEARRAYS" : ",LONGARRAYS")) + (PCX86.BACKTRACK? ",BACKTRACK" : ",NOBACKTRACK") + ')');
                     this.println(web.getUserAgent());
                     break;
                 case 'x':
@@ -8176,7 +8177,7 @@ if (DEBUGGER) {
                     this.doHelp();
                     break;
                 case 'n':
-                    if (!COMPILED && sCmd == "nodebug") {
+                    if (!PCX86.COMPILED && sCmd == "nodebug") {
                         window.DEBUG = false;
                         this.println("DEBUG checks off");
                         break;

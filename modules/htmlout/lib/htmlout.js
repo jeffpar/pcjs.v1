@@ -150,6 +150,7 @@ var sTemplateFile = "./modules/shared/templates/common.html";
  * HTML template file; sMachineXMLFile is a fallback file to look for when sReadMeFile doesn't exist.
  */
 var sReadMeFile = "README.md";
+var sMachineMDFile = "machine.md";
 var sMachineXMLFile = "machine.xml";
 var sManifestXMLFile = "manifest.xml";
 
@@ -1713,12 +1714,20 @@ HTMLOut.prototype.getMarkdownFile = function(sFile, sToken, sIndent, aParms, sPr
 {
     var obj = this;
 
-    sFile = path.join(this.sDir, sFile);
+    var sFilePath = path.join(this.sDir, sFile);
 
-    HTMLOut.logConsole('HTMLOut.getMarkdownFile("' + sFile + '")');
+    HTMLOut.logConsole('HTMLOut.getMarkdownFile("' + sFilePath + '")');
 
-    fs.readFile(sFile, {encoding: "utf8"}, function doneMarkdownFile(err, s) {
+    fs.readFile(sFilePath, {encoding: "utf8"}, function doneMarkdownFile(err, s) {
         if (err) {
+            /*
+             * HACK to look for a "machine.md" if our attempt to load a "README.md" failed.
+             */
+            if (sFile.indexOf(sReadMeFile) >= 0) {
+                sFile = sFile.replace(sReadMeFile, sMachineMDFile);
+                obj.getMarkdownFile(sFile, sToken, sIndent, aParms, sPrevious, sMachineFile);
+                return;
+            }
             /*
              * Instead of displaying a cryptic error message inside our beautiful HTML template, eg:
              *

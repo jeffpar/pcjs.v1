@@ -31,7 +31,7 @@
 
 "use strict";
 
-var CPUDef = {
+var CPUDef8080 = {
     /*
      * CPU model numbers (supported)
      */
@@ -114,17 +114,17 @@ var CPUDef = {
  * These are the internal PS bits (outside of PS.MASK) that getPS() and setPS() can get and set,
  * but which cannot be seen with any of the documented instructions.
  */
-CPUDef.PS.INTERNAL  =   (CPUDef.PS.IF);
+CPUDef8080.PS.INTERNAL  =   (CPUDef8080.PS.IF);
 
 /*
  * PS "arithmetic" flags are NOT stored in regPS; they are maintained across separate result registers,
  * hence the RESULT designation.
  */
-CPUDef.PS.RESULT    =   (CPUDef.PS.CF | CPUDef.PS.PF | CPUDef.PS.AF | CPUDef.PS.ZF | CPUDef.PS.SF);
+CPUDef8080.PS.RESULT    =   (CPUDef8080.PS.CF | CPUDef8080.PS.PF | CPUDef8080.PS.AF | CPUDef8080.PS.ZF | CPUDef8080.PS.SF);
 
 /*
  * These are the "always set" PS bits for the 8080.
  */
-CPUDef.PS.SET       =   (CPUDef.PS.BIT1);
+CPUDef8080.PS.SET       =   (CPUDef8080.PS.BIT1);
 
-if (NODE) module.exports = CPUDef;
+if (NODE) module.exports = CPUDef8080;

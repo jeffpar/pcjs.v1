@@ -2,7 +2,7 @@
  * @fileoverview The State class used by PCjs machines.
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @version 1.0
- * Created 2016-Apr-19
+ * Created 2012-May-14
  *
  * Copyright © 2012-2016 Jeff Parsons <Jeff@pcjs.org>
  *
@@ -34,7 +34,6 @@
 if (NODE) {
     var web       = require("./../../shared/lib/weblib");
     var Component = require("./../../shared/lib/component");
-    var Messages  = require("./messages");
 }
 
 /**
@@ -42,16 +41,20 @@ if (NODE) {
  *
  * State objects are used by components to save/restore their state.
  *
- * During a save operation, components add data to a State object via set(),
- * and then return the resulting data using data().
+ * During a save operation, components add data to a State object via set(), and then return
+ * the resulting data using data().
  *
- * During a restore operation, the Computer component passes the results of each
- * data() call back to the originating component.
+ * During a restore operation, the Computer component passes the results of each data() call
+ * back to the originating component.
  *
- * WARNING: Since State objects are low-level objects that have no UI requirements,
- * they do not inherit from the Component class, so you should only use class methods
- * of Component, such as Component.assert(), or Debugger methods if the Debugger
- * is available.
+ * WARNING: Since State objects are low-level objects that have no UI requirements, they do not
+ * inherit from the Component class, so you should only use class methods of Component, such as
+ * Component.assert() (or Debugger methods if the Debugger is available).
+ *
+ * NOTE: 1.01 is the first version to provide limited save/restore support using localStorage.
+ * From that point on, care must be taken to insure that any new version that's incompatible with
+ * previous localStorage data be released with a version number that is at least 1 greater,
+ * since we're tagging the localStorage data with the integer portion of the version string.
  *
  * @constructor
  * @param {Component} component
@@ -277,7 +280,7 @@ State.prototype = {
             if (s) {
                 this[this.id] = s;
                 this.fLoaded = true;
-                if (DEBUG) this.printString("localStorage(" + this.key + "): " + s.length + " bytes loaded");
+                if (DEBUG) Component.log("localStorage(" + this.key + "): " + s.length + " bytes loaded");
                 return true;
             }
         }
@@ -314,7 +317,7 @@ State.prototype = {
         if (web.hasLocalStorage()) {
             var s = JSON.stringify(this[this.id]);
             if (web.setLocalStorageItem(this.key, s)) {
-                if (DEBUG) this.printString("localStorage(" + this.key + "): " + s.length + " bytes stored");
+                if (DEBUG) Component.log("localStorage(" + this.key + "): " + s.length + " bytes stored");
             } else {
                 /*
                  * WARNING: Because browsers tend to disable all alerts() during an "unload" operation,
@@ -372,22 +375,9 @@ State.prototype = {
             var sKey = aKeys[i];
             if (sKey && (fAll || sKey.substr(0, this.key.length) == this.key)) {
                 web.removeLocalStorageItem(sKey);
-                if (DEBUG) this.printString("localStorage(" + sKey + ") removed");
+                if (DEBUG) Component.log("localStorage(" + sKey + ") removed");
                 aKeys.splice(i, 1);
                 i = 0;
-            }
-        }
-    },
-    /**
-     * printString(s)
-     *
-     * @this {State}
-     * @param {string} s is any caller-defined string
-     */
-    printString: function(s) {
-        if (DEBUG && DEBUGGER && this.dbg) {
-            if (this.dbg.messageEnabled(Messages.LOG)) {
-                this.dbg.message(s);
             }
         }
     }

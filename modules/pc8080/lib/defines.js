@@ -68,7 +68,7 @@ var BYTEARRAYS = false;
 
 /**
  * TYPEDARRAYS enables use of typed arrays for Memory blocks.  This used to be a compile-time-only option, but I've
- * added Memory access functions for typed arrays (see Memory.afnTypedArray), so support can be enabled dynamically now.
+ * added Memory access functions for typed arrays (see Memory8080.afnTypedArray), so support can be enabled dynamically now.
  *
  * See the Memory component for details.
  */
@@ -101,7 +101,6 @@ if (NODE) {
     global.BYTEARRAYS  = BYTEARRAYS;
     global.TYPEDARRAYS = TYPEDARRAYS;
     global.PC8080      = PC8080;
-    /*
-     * TODO: When we're "required" by Node, should we return anything via module.exports?
-     */
+
+    module.exports = PC8080;
 }
