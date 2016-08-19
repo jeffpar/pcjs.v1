@@ -143,7 +143,7 @@ function SerialPort(parmsSerial) {
     this.connection = this.sendData = null;
 
     /*
-     * Export all functions required by initConnection(); currently, this is the bare minimum, with no flow control.
+     * Export all functions required by initConnection(); currently, this is the bare minimum (no flow control yet).
      */
     this['exports'] = {
         'connect': this.initConnection,
@@ -483,8 +483,12 @@ SerialPort.prototype.initBus = function(cmp, bus, cpu, dbg)
  *      receiveData(data): called when we have data to transmit; aliased internally to sendData(data)
  *
  * For now, we're not going to worry about communication in the other direction, because when the target component
- * performs its own initConnection(), it will find our receiveByte(b) function, at which point communication in both
+ * performs its own initConnection(), it will find our receiveData() function, at which point communication in both
  * directions should be established.
+ *
+ * For added robustness, if the target machine initializes much more slowly than we do, and our connection attempt
+ * fails, that's OK, because when it finally initializes, its initConnection() will call our initConnection();
+ * if we've already initialized, no harm done.
  *
  * @this {SerialPort}
  */
@@ -533,11 +537,10 @@ SerialPort.prototype.powerUp = function(data, fRepower)
     if (!fRepower) {
 
         /*
-         * We needed to wait until now to make our first inter-machine connection attempt;
-         * doing this in initBus() was still too early, because initBus() is called in the context
-         * of onInit() processing for all machines of the same type (eg, PCx86), and if we're
-         * trying to connect to the port of a machine of a DIFFERENT type (eg, PC8080), it may not
-         * have been initialized yet.
+         * This is as late as we can currently wait to make our first inter-machine connection attempt;
+         * even so, the target machine's initialization process may still be ongoing, so any connection
+         * may be not fully resolved until the target machine performs its own initConnection(), which will
+         * in turn invoke our initConnection() again.
          */
         this.initConnection();
 
