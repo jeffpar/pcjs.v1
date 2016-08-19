@@ -37,6 +37,7 @@ if (NODE) {
     var DiskAPI     = require("../../shared/lib/diskapi");
     var Component   = require("../../shared/lib/component");
     var State       = require("../../shared/lib/state");
+    var PCX86       = require("./defines");
     var Interrupts  = require("./interrupts");
     var Messages    = require("./messages");
     var ChipSet     = require("./chipset");

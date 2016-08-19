@@ -37,6 +37,7 @@ if (NODE) {
     var DumpAPI     = require("../../shared/lib/dumpapi");
     var Component   = require("../../shared/lib/component");
     var State       = require("../../shared/lib/state");
+    var PCX86       = require("./defines");
     var Memory      = require("./memory");
     var Messages    = require("./messages");
     var ChipSet     = require("./chipset");
