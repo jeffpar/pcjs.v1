@@ -136,6 +136,7 @@ function SerialPort8080(parmsSerial) {
      * Export all functions required by initConnection(); currently, this is the bare minimum, with no flow control.
      */
     this['exports'] = {
+        'connect': this.initConnection,
         'receiveData': this.receiveData
     };
 }
@@ -428,24 +429,33 @@ SerialPort8080.prototype.initBus = function(cmp, bus, cpu, dbg)
  */
 SerialPort8080.prototype.initConnection = function()
 {
-    var sConnection = this.cmp.getMachineParm("connection");
-    if (sConnection) {
-        var asParts = sConnection.split('->');
-        if (asParts.length == 2) {
-            var sSourceID = str.trim(asParts[0]);
-            if (sSourceID != this.idComponent) return;  // this connection string is intended for another instance
-            var sTargetID = str.trim(asParts[1]);
-            this.connection = Component.getComponentByID(sTargetID);
-            if (this.connection) {
-                var exports = this.connection['exports'];
-                if (exports) {
-                    this.sendData = exports['receiveData'];
-                    this.status(this.idMachine + '.' + sSourceID + " connected to " + sTargetID);
-                    return;
+    if (!this.connection) {
+        var sConnection = this.cmp.getMachineParm("connection");
+        if (sConnection) {
+            var asParts = sConnection.split('->');
+            if (asParts.length == 2) {
+                var sSourceID = str.trim(asParts[0]);
+                if (sSourceID != this.idComponent) return;  // this connection string is intended for another instance
+                var sTargetID = str.trim(asParts[1]);
+                this.connection = Component.getComponentByID(sTargetID);
+                if (this.connection) {
+                    var exports = this.connection['exports'];
+                    if (exports) {
+                        var fnConnect = exports['connect'];
+                        if (fnConnect) fnConnect.call(this.connection);
+                        this.sendData = exports['receiveData'];
+                        if (this.sendData) {
+                            this.status(this.idMachine + '.' + sSourceID + " connected to " + sTargetID);
+                            return;
+                        }
+                    }
                 }
             }
+            /*
+             * Changed from notice() to status() because sometimes a connection fails simply because one of us is a laggard.
+             */
+            this.status("Unable to establish connection: " + sConnection);
         }
-        this.notice("Unable to establish connection: " + sConnection);
     }
 };
 

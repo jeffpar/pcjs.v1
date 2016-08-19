@@ -5,7 +5,7 @@ email: Jeff@pcjs.org
 description: >
   PCjs: Home of the original IBM PC emulator in a browser.
   Classic computer simulations in JavaScript, including the IBM PC and other x86-based machines, 6502-based
-  machines such as the Ohio Scientific Challenger 1P, and 8080-based machines such as Space Invaders. 
+  machines such as the Ohio Scientific Challenger 1P, and 8080-based machines such as Space Invaders and the DEC VT100 Terminal. 
   Includes an archive of historical PC software and publications.
 baseurl: ""                 # "/pcjs" when using http://jeffpar.github.io or "" when using http://www.pcjs.org 
 url: "http://www.pcjs.org"  # "http://jeffpar.github.io" or "http://www.pcjs.org"
@@ -32,7 +32,7 @@ gems:
 
 pcjs:
   domain: pcjs.org    # whereas site.url is used for linking purposes, site.pcjs.domain is used for display purposes
-  version: 1.23.3     # IMPORTANT: keep pcjs.version in sync with package.json:version
+  version: 1.24.0     # IMPORTANT: keep pcjs.version in sync with package.json:version
   compiled: true      # by default, the compiled pcjs.version scripts will be used (eg, pcx86.js or pcx86-dbg.js)
   c1p_scripts:        # if pcjs.compiled is false, the following scripts will be included instead, in the order listed
     - /modules/shared/lib/defines.js
@@ -94,8 +94,8 @@ pcjs:
     - /modules/pcx86/lib/fdc.js
     - /modules/pcx86/lib/hdc.js
     - /modules/pcx86/lib/debugger.js
-    - /modules/pcx86/lib/state.js
     - /modules/pcx86/lib/computer.js
+    - /modules/shared/lib/state.js
     - /modules/shared/lib/embed.js
     - /modules/shared/lib/save.js
   pc8080_scripts:
@@ -123,7 +123,7 @@ pcjs:
     - /modules/pc8080/lib/video.js
     - /modules/pc8080/lib/serialport.js
     - /modules/pc8080/lib/debugger.js
-    - /modules/pc8080/lib/state.js
     - /modules/pc8080/lib/computer.js
+    - /modules/shared/lib/state.js
     - /modules/shared/lib/embed.js
     - /modules/shared/lib/save.js
