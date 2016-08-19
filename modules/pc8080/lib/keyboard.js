@@ -35,6 +35,7 @@ if (NODE) {
     var str         = require("../../shared/lib/strlib");
     var web         = require("../../shared/lib/weblib");
     var Component   = require("../../shared/lib/component");
+    var PC8080      = require("./defines");
     var ChipSet8080 = require("./chipset");
     var Messages8080= require("./messages");
 }

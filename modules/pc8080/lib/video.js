@@ -37,6 +37,7 @@ if (NODE) {
     var DumpAPI     = require("../../shared/lib/dumpapi");
     var Component   = require("../../shared/lib/component");
     var State       = require("../../shared/lib/state");
+    var PC8080      = require("./defines");
     var ChipSet8080 = require("./chipset");
     var Memory8080  = require("./memory");
     var Messages8080= require("./messages");
@@ -1153,6 +1154,16 @@ Video8080.prototype.updateVT100 = function(fForced)
          * cache entry, to guarantee that it's redrawn on the next update.
          */
         this.assert(iCellUpdated >= 0);
+        /*
+         * TODO: If I change the RECV rate to 19200 and enable smooth scrolling, I sometimes see a spurious
+         * "H" on the bottom line after a long series of "HELLO WORLD!\r\n" tests.  Dumping video memory shows
+         * "HELLO WORLD!" on 23 lines and an "H" on the 24th line, so it's really there.  But strangely, if
+         * I then press SET-UP two times, the restored screen does NOT have the spurious "H".  So somehow the
+         * firmware knows what should and shouldn't be on-screen.
+         *
+         * Possible VT100 firmware bug?  I'm not sure.  Anyway, this DEBUG-only code is here to help trap
+         * that scenario, until I figure it out.
+         */
         if (DEBUG && (this.aCellCache[iCellUpdated] & 0x7f) == 0x48) {
             console.log("spurious character?");
         }
