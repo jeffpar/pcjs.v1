@@ -103,6 +103,17 @@ function SerialPort8080(parmsSerial) {
     this.charBOL = parmsSerial['charBOL'];
     this.iLogicalCol = 0;
 
+    /*
+     * fAutoXOFF enables some experimental auto-XOFF/XON processing.  It assumes if the VT100 firmware
+     * issues an XOFF, receiveByte() should stop accepting more data until the firmware issues an XOFF.
+     *
+     * The downside is that this doesn't really do anything to stem the flow of incoming data; it just
+     * prevents the VT100's internal buffer from overflowing.  TODO: Eliminate the need for this hack
+     * and add some *real* flow-control interfaces between connected SerialPort components.
+     */
+    this.fAutoXOFF = true;
+    this.fAutoStop = false;
+
     Component.call(this, "SerialPort", parmsSerial, SerialPort8080, Messages8080.SERIAL);
 
     var sBinding = parmsSerial['binding'];
@@ -592,7 +603,7 @@ SerialPort8080.prototype.getBaudTimeout = function(maskRate)
 SerialPort8080.prototype.receiveByte = function(b)
 {
     this.printMessage("receiveByte(" + str.toHexByte(b) + "), status=" + str.toHexByte(this.bStatus));
-    if (!(this.bStatus & SerialPort8080.UART8251.STATUS.RECV_FULL)) {
+    if (!this.fAutoStop && !(this.bStatus & SerialPort8080.UART8251.STATUS.RECV_FULL)) {
         this.bDataIn = b;
         this.bStatus |= SerialPort8080.UART8251.STATUS.RECV_FULL;
         this.cpu.requestINTR(this.nIRQ);
@@ -644,6 +655,17 @@ SerialPort8080.prototype.transmitByte = function(b)
     var fTransmitted = false;
 
     this.printMessage("transmitByte(" + str.toHexByte(b) + ")");
+
+    if (this.fAutoXOFF) {
+        if (b == 0x13) {        // XOFF
+            this.fAutoStop = true;
+            return false;
+        }
+        if (b == 0x11) {        // XON
+            this.fAutoStop = false;
+            return false;
+        }
+    }
 
     if (this.sendData) {
         if (this.sendData.call(this.connection, b)) {
