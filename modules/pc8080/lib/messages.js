@@ -36,6 +36,7 @@ var Messages8080 = {
     BUS:        0x00000040,
     MEM:        0x00000080,
     PORT:       0x00000100,
+    NVR:        0x00004000,
     CHIPSET:    0x00008000,
     KEYBOARD:   0x00010000,
     KEYS:       0x00020000,
@@ -49,6 +50,48 @@ var Messages8080 = {
     WARN:       0x20000000,
     BUFFER:     0x40000000,
     HALT:       0x80000000|0
+};
+
+/*
+ * Message categories supported by the messageEnabled() function and other assorted message
+ * functions. Each category has a corresponding bit value that can be combined (ie, OR'ed) as
+ * needed.  The Debugger's message command ("m") is used to turn message categories on and off,
+ * like so:
+ *
+ *      m port on
+ *      m port off
+ *      ...
+ *
+ * NOTE: The order of these categories can be rearranged, alphabetized, etc, as desired; just be
+ * aware that changing the bit values could break saved Debugger states (not a huge concern, just
+ * something to be aware of).
+ */
+Messages8080.CATEGORIES = {
+    "cpu":      Messages8080.CPU,
+    "bus":      Messages8080.BUS,
+    "mem":      Messages8080.MEM,
+    "port":     Messages8080.PORT,
+    "nvr":      Messages8080.NVR,
+    "chipset":  Messages8080.CHIPSET,
+    "keyboard": Messages8080.KEYBOARD,  // "kbd" is also allowed as shorthand for "keyboard"; see doMessages()
+    "key":      Messages8080.KEYS,      // using "key" instead of "keys", since the latter is a method on JavasScript objects
+    "video":    Messages8080.VIDEO,
+    "fdc":      Messages8080.FDC,
+    "disk":     Messages8080.DISK,
+    "serial":   Messages8080.SERIAL,
+    "speaker":  Messages8080.SPEAKER,
+    "computer": Messages8080.COMPUTER,
+    "log":      Messages8080.LOG,
+    "warn":     Messages8080.WARN,
+    /*
+     * Now we turn to message actions rather than message types; for example, setting "halt"
+     * on or off doesn't enable "halt" messages, but rather halts the CPU on any message above.
+     *
+     * Similarly, "m buffer on" turns on message buffering, deferring the display of all messages
+     * until "m buffer off" is issued.
+     */
+    "buffer":   Messages8080.BUFFER,
+    "halt":     Messages8080.HALT
 };
 
 if (NODE) module.exports = Messages8080;

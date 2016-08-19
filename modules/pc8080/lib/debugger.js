@@ -665,47 +665,6 @@ if (DEBUGGER) {
     /* 0xFF */  [Debugger8080.INS.RST,   Debugger8080.TYPE_INT]
     ];
 
-    /*
-     * Message categories supported by the messageEnabled() function and other assorted message
-     * functions. Each category has a corresponding bit value that can be combined (ie, OR'ed) as
-     * needed.  The Debugger's message command ("m") is used to turn message categories on and off,
-     * like so:
-     *
-     *      m port on
-     *      m port off
-     *      ...
-     *
-     * NOTE: The order of these categories can be rearranged, alphabetized, etc, as desired; just be
-     * aware that changing the bit values could break saved Debugger states (not a huge concern, just
-     * something to be aware of).
-     */
-    Debugger8080.MESSAGES = {
-        "cpu":      Messages8080.CPU,
-        "bus":      Messages8080.BUS,
-        "mem":      Messages8080.MEM,
-        "port":     Messages8080.PORT,
-        "chipset":  Messages8080.CHIPSET,
-        "keyboard": Messages8080.KEYBOARD,  // "kbd" is also allowed as shorthand for "keyboard"; see doMessages()
-        "key":      Messages8080.KEYS,      // using "key" instead of "keys", since the latter is a method on JavasScript objects
-        "video":    Messages8080.VIDEO,
-        "fdc":      Messages8080.FDC,
-        "disk":     Messages8080.DISK,
-        "serial":   Messages8080.SERIAL,
-        "speaker":  Messages8080.SPEAKER,
-        "computer": Messages8080.COMPUTER,
-        "log":      Messages8080.LOG,
-        "warn":     Messages8080.WARN,
-        /*
-         * Now we turn to message actions rather than message types; for example, setting "halt"
-         * on or off doesn't enable "halt" messages, but rather halts the CPU on any message above.
-         *
-         * Similarly, "m buffer on" turns on message buffering, defering the display of all messages
-         * until "m buffer off" is issued.
-         */
-        "buffer":   Messages8080.BUFFER,
-        "halt":     Messages8080.HALT
-    };
-
     Debugger8080.HISTORY_LIMIT = DEBUG? 100000 : 1000;
 
     /**
@@ -1315,9 +1274,9 @@ if (DEBUGGER) {
          */
         var aEnable = this.parseCommand(sEnable.replace("keys","key").replace("kbd","keyboard"), false, '|');
         if (aEnable.length) {
-            for (var m in Debugger8080.MESSAGES) {
+            for (var m in Messages8080.CATEGORIES) {
                 if (usr.indexOf(aEnable, m) >= 0) {
-                    this.bitsMessage |= Debugger8080.MESSAGES[m];
+                    this.bitsMessage |= Messages8080.CATEGORIES[m];
                     this.println(m + " messages enabled");
                 }
             }
@@ -1334,8 +1293,8 @@ if (DEBUGGER) {
      */
     Debugger8080.prototype.messageDump = function(bitMessage, fnDumper)
     {
-        for (var m in Debugger8080.MESSAGES) {
-            if (bitMessage == Debugger8080.MESSAGES[m]) {
+        for (var m in Messages8080.CATEGORIES) {
+            if (bitMessage == Messages8080.CATEGORIES[m]) {
                 this.afnDumpers[m] = fnDumper;
                 return true;
             }
@@ -3504,7 +3463,7 @@ if (DEBUGGER) {
 
         if (sAddr == '?') {
             var sDumpers = "";
-            for (m in Debugger8080.MESSAGES) {
+            for (m in Messages8080.CATEGORIES) {
                 if (this.afnDumpers[m]) {
                     if (sDumpers) sDumpers += ',';
                     sDumpers = sDumpers + m;
@@ -3549,7 +3508,7 @@ if (DEBUGGER) {
         }
 
         if (sCmd == "d") {
-            for (m in Debugger8080.MESSAGES) {
+            for (m in Messages8080.CATEGORIES) {
                 if (asArgs[1] == m) {
                     var fnDumper = this.afnDumpers[m];
                     if (fnDumper) {
@@ -3933,9 +3892,9 @@ if (DEBUGGER) {
                  */
                 if (sCategory == "keys") sCategory = "key";
                 if (sCategory == "kbd") sCategory = "keyboard";
-                for (m in Debugger8080.MESSAGES) {
+                for (m in Messages8080.CATEGORIES) {
                     if (sCategory == m) {
-                        bitsMessage = Debugger8080.MESSAGES[m];
+                        bitsMessage = Messages8080.CATEGORIES[m];
                         fCriteria = !!(this.bitsMessage & bitsMessage);
                         break;
                     }
@@ -3968,9 +3927,9 @@ if (DEBUGGER) {
          */
         var n = 0;
         var sCategories = "";
-        for (m in Debugger8080.MESSAGES) {
+        for (m in Messages8080.CATEGORIES) {
             if (!sCategory || sCategory == m) {
-                var bitMessage = Debugger8080.MESSAGES[m];
+                var bitMessage = Messages8080.CATEGORIES[m];
                 var fEnabled = !!(this.bitsMessage & bitMessage);
                 if (fCriteria !== null && fCriteria != fEnabled) continue;
                 if (sCategories) sCategories += ',';

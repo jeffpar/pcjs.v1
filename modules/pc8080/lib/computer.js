@@ -39,9 +39,6 @@ if (NODE) {
     var ReportAPI   = require("../../shared/lib/reportapi");
     var Component   = require("../../shared/lib/component");
     var State       = require("../../shared/lib/state");
-    /*
-     * TODO: I'm confused why WebStorm complains if the following require() is missing in THIS file but not other files.
-     */
     var PC8080      = require("./defines");
     var Bus8080     = require("./bus");
     var Messages8080= require("./messages");

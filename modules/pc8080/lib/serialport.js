@@ -36,6 +36,7 @@ if (NODE) {
     var web         = require("../../shared/lib/weblib");
     var Component   = require("../../shared/lib/component");
     var State       = require("../../shared/lib/state");
+    var PC8080      = require("./defines");
     var Messages8080= require("./messages");
 }
 

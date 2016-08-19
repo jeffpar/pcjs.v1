@@ -37,6 +37,7 @@ if (NODE) {
     var web         = require("../../shared/lib/weblib");
     var Component   = require("../../shared/lib/component");
     var State       = require("../../shared/lib/state");
+    var PC8080      = require("./defines");
     var CPUDef8080  = require("./cpudef");
     var Messages8080= require("./messages");
 }
@@ -428,6 +429,15 @@ ChipSet8080.prototype.initBus = function(cmp, bus, cpu, dbg)
     this.video = /** @type {Video8080} */ (cmp.getMachineComponent("Video"));
     bus.addPortInputTable(this, this.config.portsInput);
     bus.addPortOutputTable(this, this.config.portsOutput);
+
+    if (DEBUGGER) {
+        if (dbg) {
+            var chipset = this;
+            dbg.messageDump(Messages8080.NVR, function onDumpNVR() {
+                chipset.dumpNVR();
+            });
+        }
+    }
 };
 
 /**
@@ -490,12 +500,33 @@ ChipSet8080.VT100.INIT = [
     [
         0, 0, 0, 0,
         [
-            0x2e80, 0x2e80, 0x2e80, 0x2e80, 0x2e80, 0x2e80, 0x2e80, 0x2e80, 0x2e80, 0x2e80,
-            0x2e80, 0x2e80, 0x2e80, 0x2e80, 0x2e80, 0x2e80, 0x2e80, 0x2e80, 0x2e80, 0x2e80,
-            0x2e80, 0x2e80, 0x2e80, 0x2e80, 0x2e80, 0x2e80, 0x2e80, 0x2e80, 0x2e80, 0x2e80,
-            0x2e80, 0x2e80, 0x2e80, 0x2e80, 0x2e80, 0x2e80, 0x2e80, 0x2e80, 0x2e80, 0x2e00,
-            0x2e08, 0x2e8e, 0x2e00, 0x2e50, 0x2e30, 0x2e40, 0x2e20, 0x2e00, 0x2ee0, 0x2ee0,
-            0x2e51, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
+            /*
+             * The following table contains the data we use to initialize all (100) words of NVR (Non-Volatile RAM).
+             * According the DEC Technical Manual:
+             *
+             *      If the NVR fails, the bell sounds several times to inform the operator, and then default settings
+             *      stored in the ROM allow the terminal to work.
+             *
+             * However, this behavior may be limited to only certain kinds of "failures", because if I deliberately
+             * stuff an invalid value in the table, there is indeed an attempt to beep (though sound isn't working yet),
+             * an error code (2) is displayed in the top-left corner of the screen, but the NVR still appears to contain
+             * all the same (invalid) data we started with.  Perhaps all they meant to say is that the RAM copy of NVR
+             * settings is reset, not the NVR itself.
+             *
+             * Using a VT100 configuration with the Debugger attached, use the NVR dumper command ("d nvr") to see how
+             * other SET-UP changes affect the NVR (after you've saved your changes using SHIFT-S, of course).
+             *
+             * NVR Notes
+             * ---------
+             * After enabling smooth scrolling, the word in row 5, col 4 changes from 2E50 to 2ED0, and the final word
+             * changes from 2E51 to 2E71 (I'm guessing that the final word is an NVR checksum).
+             */
+            0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80,
+            0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80,
+            0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80,
+            0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E00,
+            0x2E08, 0x2E8E, 0x2E00, 0x2ED0, 0x2E30, 0x2E40, 0x2E20, 0x2E00, 0x2EE0, 0x2EE0,
+            0x2E71, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
             0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
             0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
             0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
@@ -503,6 +534,25 @@ ChipSet8080.VT100.INIT = [
         ]
     ]
 ];
+
+/**
+ * dumpNVR()
+ *
+ * @this {ChipSet8080}
+ */
+ChipSet8080.prototype.dumpNVR = function()
+{
+    if (DEBUGGER) {
+        var sDump = "";
+        for (var iWord = 0; iWord < this.aNVRWords.length; iWord++) {
+            if (sDump) {
+                sDump += (iWord && (iWord % 10)? ", " : ",\n");
+            }
+            sDump += str.toHexWord(this.aNVRWords[iWord]);
+        }
+        this.dbg.println(sDump);
+    }
+};
 
 /**
  * reset()
