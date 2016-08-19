@@ -666,6 +666,7 @@ SerialPort.prototype.saveRegisters = function()
  *
  * @this {SerialPort}
  * @param {number|string|Array} data
+ * @return {boolean} true if received, false if not
  */
 SerialPort.prototype.receiveData = function(data)
 {
@@ -681,6 +682,7 @@ SerialPort.prototype.receiveData = function(data)
         this.abReceive = this.abReceive.concat(data);
     }
     this.advanceRBR();
+    return true;                // for now, return true regardless, since we're buffering everything anyway
 };
 
 /**

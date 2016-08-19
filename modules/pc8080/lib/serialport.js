@@ -623,6 +623,7 @@ SerialPort8080.prototype.receiveByte = function(b)
  *
  * @this {SerialPort8080}
  * @param {number|string|undefined} [data]
+ * @return {boolean} true if received, false if not
  */
 SerialPort8080.prototype.receiveData = function(data)
 {
@@ -641,6 +642,7 @@ SerialPort8080.prototype.receiveData = function(data)
             this.cpu.setTimer(this.timerReceiveNext, this.getBaudTimeout(SerialPort8080.UART8251.BAUDRATES.RECV_RATE));
         }
     }
+    return true;                // for now, return true regardless, since we're buffering everything anyway
 };
 
 /**
