@@ -226,17 +226,9 @@ Component.subclass = function(subclass, superclass, methods, statics)
  * various resources used by that machine.
  */
 if (window) {
-    if (!window['PCjs']) {
-        window['PCjs'] = {
-            'Machines': {},
-            'Components': []
-        };
-    }
-    /*
-     * Alias the new global objects above to their original property names, to minimize code changes.
-     */
-    Component.machines = window['PCjs']['Machines'];
-    Component.components = window['PCjs']['Components'];
+    if (!window['PCjs']) window['PCjs'] = {};
+    Component.machines = window['PCjs']['Machines'] || (window['PCjs']['Machines'] = {});
+    Component.components = window['PCjs']['Components'] || (window['PCjs']['Components'] = []);
 }
 else {
     /*
