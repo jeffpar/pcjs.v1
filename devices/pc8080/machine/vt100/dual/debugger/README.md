@@ -9,14 +9,14 @@ machines:
     autoStart: true
     messages: mem|port
     config: /devices/pc8080/machine/vt100/debugger/machine.xml
-    connection: serialPort=vt100b.serialPort
+    connection: serialPort->vt100b.serialPort
   - id: vt100b
     type: pc8080
     debugger: true
     autoStart: true
     messages: mem|port
     config: /devices/pc8080/machine/vt100/debugger/machine.xml
-    connection: serialPort=vt100a.serialPort
+    connection: serialPort->vt100a.serialPort
 ---
 
 Dual VT100 Terminals with Debuggers

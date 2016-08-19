@@ -36,26 +36,26 @@ if (NODE) {
     var usr         = require("../../shared/lib/usrlib");
     var web         = require("../../shared/lib/weblib");
     var Component   = require("../../shared/lib/component");
-    var Bus         = require("./bus");
-    var Memory      = require("./memory");
-    var CPUDef      = require("./cpudef");
+    var Bus8080     = require("./bus");
+    var CPUDef8080  = require("./cpudef");
+    var Memory8080  = require("./memory");
 }
 
 /**
- * Panel(parmsPanel)
+ * Panel8080(parmsPanel)
  *
- * The Panel component has no required (parmsPanel) properties.
+ * The Panel8080 component has no required (parmsPanel) properties.
  *
  * @constructor
  * @extends Component
  * @param {Object} parmsPanel
  */
-function Panel(parmsPanel)
+function Panel8080(parmsPanel)
 {
-    Component.call(this, "Panel", parmsPanel, Panel);
+    Component.call(this, "Panel", parmsPanel, Panel8080);
 }
 
-Component.subclass(Panel);
+Component.subclass(Panel8080);
 
 /**
  * setBinding(sHTMLType, sBinding, control, sValue)
@@ -64,14 +64,14 @@ Component.subclass(Panel);
  * Computer, CPU, Keyboard and Debugger components first.  The order shouldn't matter, since any component
  * that doesn't recognize the specified binding should simply ignore it.
  *
- * @this {Panel}
+ * @this {Panel8080}
  * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
  * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "reset")
  * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
  * @param {string} [sValue] optional data value
  * @return {boolean} true if binding was successful, false if unrecognized binding request
  */
-Panel.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
+Panel8080.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
 {
     if (this.cmp && this.cmp.setBinding(sHTMLType, sBinding, control, sValue)) return true;
     if (this.cpu && this.cpu.setBinding(sHTMLType, sBinding, control, sValue)) return true;
@@ -83,44 +83,44 @@ Panel.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
 /**
  * initBus(cmp, bus, cpu, dbg)
  *
- * @this {Panel}
- * @param {Computer} cmp
- * @param {Bus} bus
- * @param {CPUState} cpu
- * @param {Debugger} dbg
+ * @this {Panel8080}
+ * @param {Computer8080} cmp
+ * @param {Bus8080} bus
+ * @param {CPUState8080} cpu
+ * @param {Debugger8080} dbg
  */
-Panel.prototype.initBus = function(cmp, bus, cpu, dbg)
+Panel8080.prototype.initBus = function(cmp, bus, cpu, dbg)
 {
     this.cmp = cmp;
     this.bus = bus;
     this.cpu = cpu;
     this.dbg = dbg;
-    this.kbd = /** @type {Keyboard} */ (cmp.getMachineComponent("Keyboard"));
+    this.kbd = /** @type {Keyboard8080} */ (cmp.getMachineComponent("Keyboard"));
 };
 
 /**
  * powerUp(data, fRepower)
  *
- * @this {Panel}
+ * @this {Panel8080}
  * @param {Object|null} data
  * @param {boolean} [fRepower]
  * @return {boolean} true if successful, false if failure
  */
-Panel.prototype.powerUp = function(data, fRepower)
+Panel8080.prototype.powerUp = function(data, fRepower)
 {
-    if (!fRepower) Panel.init();
+    if (!fRepower) Panel8080.init();
     return true;
 };
 
 /**
  * powerDown(fSave, fShutdown)
  *
- * @this {Panel}
+ * @this {Panel8080}
  * @param {boolean} [fSave]
  * @param {boolean} [fShutdown]
  * @return {Object|boolean} component state if fSave; otherwise, true if successful, false if failure
  */
-Panel.prototype.powerDown = function(fSave, fShutdown)
+Panel8080.prototype.powerDown = function(fSave, fShutdown)
 {
     return true;
 };
@@ -135,19 +135,19 @@ Panel.prototype.powerDown = function(fSave, fShutdown)
  *
  * The Computer's updateStatus() handler is currently responsible for calling both our handler and the CPU's handler.
  *
- * @this {Panel}
+ * @this {Panel8080}
  * @param {boolean} [fForce] (true will display registers even if the CPU is running and "live" registers are not enabled)
  */
-Panel.prototype.updateStatus = function(fForce)
+Panel8080.prototype.updateStatus = function(fForce)
 {
 };
 
 /**
- * Panel.init()
+ * Panel8080.init()
  *
  * This function operates on every HTML element of class "panel", extracting the
- * JSON-encoded parameters for the Panel constructor from the element's "data-value"
- * attribute, invoking the constructor to create a Panel component, and then binding
+ * JSON-encoded parameters for the Panel8080 constructor from the element's "data-value"
+ * attribute, invoking the constructor to create a Panel8080 component, and then binding
  * any associated HTML controls to the new component.
  *
  * NOTE: Unlike most other component init() functions, this one is designed to be
@@ -159,7 +159,7 @@ Panel.prototype.updateStatus = function(fForce)
  * that might care (eg, CPU, Keyboard, and Debugger) that we have some controls they
  * might want to use.
  */
-Panel.init = function()
+Panel8080.init = function()
 {
     var fReady = false;
     var aePanels = Component.getElementsByClass(document, PC8080.APPCLASS, "panel");
@@ -169,7 +169,7 @@ Panel.init = function()
         var panel = Component.getComponentByID(parmsPanel['id']);
         if (!panel) {
             fReady = true;
-            panel = new Panel(parmsPanel);
+            panel = new Panel8080(parmsPanel);
         }
         Component.bindComponentControls(panel, ePanel, PC8080.APPCLASS);
         if (fReady) panel.setReady();
@@ -179,6 +179,6 @@ Panel.init = function()
 /*
  * Initialize every Panel module on the page.
  */
-web.onInit(Panel.init);
+web.onInit(Panel8080.init);
 
-if (NODE) module.exports = Panel;
+if (NODE) module.exports = Panel8080;

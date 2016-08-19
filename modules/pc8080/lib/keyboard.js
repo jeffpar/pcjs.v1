@@ -35,39 +35,39 @@ if (NODE) {
     var str         = require("../../shared/lib/strlib");
     var web         = require("../../shared/lib/weblib");
     var Component   = require("../../shared/lib/component");
-    var Messages    = require("./messages");
-    var ChipSet     = require("./chipset");
+    var ChipSet8080 = require("./chipset");
+    var Messages8080= require("./messages");
 }
 
 /**
- * Keyboard(parmsKbd)
+ * Keyboard8080(parmsKbd)
  *
- * The Keyboard component has the following component-specific (parmsKbd) properties:
+ * The Keyboard8080 component has the following component-specific (parmsKbd) properties:
  *
- *      model:  eg, "VT100" (should be a member of Keyboard.MODELS)
+ *      model:  eg, "VT100" (should be a member of Keyboard8080.MODELS)
  *
  * @constructor
  * @extends Component
  * @param {Object} parmsKbd
  */
-function Keyboard(parmsKbd)
+function Keyboard8080(parmsKbd)
 {
-    Component.call(this, "Keyboard", parmsKbd, Keyboard, Messages.KEYBOARD);
+    Component.call(this, "Keyboard", parmsKbd, Keyboard8080, Messages8080.KEYBOARD);
 
     var model = parmsKbd['model'];
 
-    if (model && !Keyboard.MODELS[model]) {
-        Component.notice("Unrecognized Keyboard model: " + model);
+    if (model && !Keyboard8080.MODELS[model]) {
+        Component.notice("Unrecognized Keyboard8080 model: " + model);
     }
 
-    this.config = Keyboard.MODELS[model] || {};
+    this.config = Keyboard8080.MODELS[model] || {};
 
     this.reset();
 
     this.setReady();
 }
 
-Component.subclass(Keyboard);
+Component.subclass(Keyboard8080);
 
 /**
  * Alphanumeric and other common (printable) ASCII codes.
@@ -78,7 +78,7 @@ Component.subclass(Keyboard);
  *
  * @enum {number}
  */
-Keyboard.ASCII = {
+Keyboard8080.ASCII = {
  CTRL_A:  1, CTRL_C:  3, CTRL_Z: 26,
     ' ': 32,    '!': 33,    '"': 34,    '#': 35,    '$': 36,    '%': 37,    '&': 38,    "'": 39,
     '(': 40,    ')': 41,    '*': 42,    '+': 43,    ',': 44,    '-': 45,    '.': 46,    '/': 47,
@@ -106,7 +106,7 @@ Keyboard.ASCII = {
  *
  * @enum {number}
  */
-Keyboard.KEYCODE = {
+Keyboard8080.KEYCODE = {
     /* 0x08 */ BS:          8,
     /* 0x09 */ TAB:         9,
     /* 0x0A */ LF:          10,         // TODO: Determine if any key actually generates this (I suspect there is none)
@@ -227,26 +227,26 @@ Keyboard.KEYCODE = {
 /*
  * Check the event object's 'location' property for a non-zero value for the following ONRIGHT keys.
  */
-Keyboard.KEYCODE.NUM_CR = Keyboard.KEYCODE.CR + Keyboard.KEYCODE.ONRIGHT;
+Keyboard8080.KEYCODE.NUM_CR = Keyboard8080.KEYCODE.CR + Keyboard8080.KEYCODE.ONRIGHT;
 
 /*
  * Maps "stupid" keyCodes to their "non-stupid" counterparts
  */
-Keyboard.STUPID_KEYCODES = {};
-Keyboard.STUPID_KEYCODES[Keyboard.KEYCODE.SEMI]    = Keyboard.ASCII[';'];   // 186 -> 59
-Keyboard.STUPID_KEYCODES[Keyboard.KEYCODE.EQUALS]  = Keyboard.ASCII['='];   // 187 -> 61
-Keyboard.STUPID_KEYCODES[Keyboard.KEYCODE.COMMA]   = Keyboard.ASCII[','];   // 188 -> 44
-Keyboard.STUPID_KEYCODES[Keyboard.KEYCODE.DASH]    = Keyboard.ASCII['-'];   // 189 -> 45
-Keyboard.STUPID_KEYCODES[Keyboard.KEYCODE.PERIOD]  = Keyboard.ASCII['.'];   // 190 -> 46
-Keyboard.STUPID_KEYCODES[Keyboard.KEYCODE.SLASH]   = Keyboard.ASCII['/'];   // 191 -> 47
-Keyboard.STUPID_KEYCODES[Keyboard.KEYCODE.BQUOTE]  = Keyboard.ASCII['`'];   // 192 -> 96
-Keyboard.STUPID_KEYCODES[Keyboard.KEYCODE.LBRACK]  = Keyboard.ASCII['['];   // 219 -> 91
-Keyboard.STUPID_KEYCODES[Keyboard.KEYCODE.BSLASH]  = Keyboard.ASCII['\\'];  // 220 -> 92
-Keyboard.STUPID_KEYCODES[Keyboard.KEYCODE.RBRACK]  = Keyboard.ASCII[']'];   // 221 -> 93
-Keyboard.STUPID_KEYCODES[Keyboard.KEYCODE.QUOTE]   = Keyboard.ASCII["'"];   // 222 -> 39
-Keyboard.STUPID_KEYCODES[Keyboard.KEYCODE.FF_DASH] = Keyboard.ASCII['-'];
+Keyboard8080.STUPID_KEYCODES = {};
+Keyboard8080.STUPID_KEYCODES[Keyboard8080.KEYCODE.SEMI]    = Keyboard8080.ASCII[';'];   // 186 -> 59
+Keyboard8080.STUPID_KEYCODES[Keyboard8080.KEYCODE.EQUALS]  = Keyboard8080.ASCII['='];   // 187 -> 61
+Keyboard8080.STUPID_KEYCODES[Keyboard8080.KEYCODE.COMMA]   = Keyboard8080.ASCII[','];   // 188 -> 44
+Keyboard8080.STUPID_KEYCODES[Keyboard8080.KEYCODE.DASH]    = Keyboard8080.ASCII['-'];   // 189 -> 45
+Keyboard8080.STUPID_KEYCODES[Keyboard8080.KEYCODE.PERIOD]  = Keyboard8080.ASCII['.'];   // 190 -> 46
+Keyboard8080.STUPID_KEYCODES[Keyboard8080.KEYCODE.SLASH]   = Keyboard8080.ASCII['/'];   // 191 -> 47
+Keyboard8080.STUPID_KEYCODES[Keyboard8080.KEYCODE.BQUOTE]  = Keyboard8080.ASCII['`'];   // 192 -> 96
+Keyboard8080.STUPID_KEYCODES[Keyboard8080.KEYCODE.LBRACK]  = Keyboard8080.ASCII['['];   // 219 -> 91
+Keyboard8080.STUPID_KEYCODES[Keyboard8080.KEYCODE.BSLASH]  = Keyboard8080.ASCII['\\'];  // 220 -> 92
+Keyboard8080.STUPID_KEYCODES[Keyboard8080.KEYCODE.RBRACK]  = Keyboard8080.ASCII[']'];   // 221 -> 93
+Keyboard8080.STUPID_KEYCODES[Keyboard8080.KEYCODE.QUOTE]   = Keyboard8080.ASCII["'"];   // 222 -> 39
+Keyboard8080.STUPID_KEYCODES[Keyboard8080.KEYCODE.FF_DASH] = Keyboard8080.ASCII['-'];
 
-Keyboard.MINPRESSTIME = 100;            // 100ms
+Keyboard8080.MINPRESSTIME = 100;            // 100ms
 
 /**
  * Alternate keyCode mappings to support popular "WASD"-style directional-key mappings.
@@ -254,36 +254,36 @@ Keyboard.MINPRESSTIME = 100;            // 100ms
  * TODO: ES6 computed property name support may now be in all mainstream browsers, allowing us to use
  * a simple object literal for this and all other object initializations.
  */
-Keyboard.WASDCODES = {};
-Keyboard.WASDCODES[Keyboard.ASCII.A] = Keyboard.KEYCODE.LEFT;
-Keyboard.WASDCODES[Keyboard.ASCII.D] = Keyboard.KEYCODE.RIGHT;
-Keyboard.WASDCODES[Keyboard.ASCII.L] = Keyboard.KEYCODE.SPACE;
+Keyboard8080.WASDCODES = {};
+Keyboard8080.WASDCODES[Keyboard8080.ASCII.A] = Keyboard8080.KEYCODE.LEFT;
+Keyboard8080.WASDCODES[Keyboard8080.ASCII.D] = Keyboard8080.KEYCODE.RIGHT;
+Keyboard8080.WASDCODES[Keyboard8080.ASCII.L] = Keyboard8080.KEYCODE.SPACE;
 
 /*
  * Supported configurations
  */
-Keyboard.SI1978 = {
+Keyboard8080.SI1978 = {
     MODEL:          1978.1,
     KEYMAP: {},
-    ALTCODES: Keyboard.WASDCODES,
+    ALTCODES: Keyboard8080.WASDCODES,
     LEDCODES: {},
     SOFTCODES: {
-        '1p':       Keyboard.KEYCODE.ONE,
-        '2p':       Keyboard.KEYCODE.TWO,
-        'coin':     Keyboard.KEYCODE.THREE,
-        'left':     Keyboard.KEYCODE.LEFT,
-        'right':    Keyboard.KEYCODE.RIGHT,
-        'fire':     Keyboard.KEYCODE.SPACE
+        '1p':       Keyboard8080.KEYCODE.ONE,
+        '2p':       Keyboard8080.KEYCODE.TWO,
+        'coin':     Keyboard8080.KEYCODE.THREE,
+        'left':     Keyboard8080.KEYCODE.LEFT,
+        'right':    Keyboard8080.KEYCODE.RIGHT,
+        'fire':     Keyboard8080.KEYCODE.SPACE
     }
 };
 
-Keyboard.VT100 = {
+Keyboard8080.VT100 = {
     MODEL:          100.0,
     KEYMAP: {},
     ALTCODES: {},
     LEDCODES: {},
     SOFTCODES: {
-        'setup':    Keyboard.KEYCODE.F9
+        'setup':    Keyboard8080.KEYCODE.F9
     },
     /*
      * Reading port 0x82 returns a key address from the VT100 keyboard's UART data output.
@@ -328,119 +328,119 @@ Keyboard.VT100 = {
 /*
  * Table to map host key codes to VT100 key addresses (ie, unique 7-bit values representing key positions on the VT100)
  */
-Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.DEL]     =   0x03;
-Keyboard.VT100.KEYMAP[Keyboard.ASCII.P]         =   0x05;
-Keyboard.VT100.KEYMAP[Keyboard.ASCII.O]         =   0x06;
-Keyboard.VT100.KEYMAP[Keyboard.ASCII.Y]         =   0x07;
-Keyboard.VT100.KEYMAP[Keyboard.ASCII.T]         =   0x08;
-Keyboard.VT100.KEYMAP[Keyboard.ASCII.W]         =   0x09;
-Keyboard.VT100.KEYMAP[Keyboard.ASCII.Q]         =   0x0A;
-Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.RIGHT]   =   0x10;
-Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.RBRACK]  =   0x14;
-Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.LBRACK]  =   0x15;
-Keyboard.VT100.KEYMAP[Keyboard.ASCII.I]         =   0x16;
-Keyboard.VT100.KEYMAP[Keyboard.ASCII.U]         =   0x17;
-Keyboard.VT100.KEYMAP[Keyboard.ASCII.R]         =   0x18;
-Keyboard.VT100.KEYMAP[Keyboard.ASCII.E]         =   0x19;
-Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.ONE]     =   0x1A;
-Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.LEFT]    =   0x20;
-Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.DOWN]    =   0x22;
-Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.F6]      =   0x23;   // aka BREAK
-Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.PAUSE]   =   0x23;   // aka BREAK
-Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.BQUOTE]  =   0x24;
-Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.DASH]    =   0x25;
-Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.NINE]    =   0x26;
-Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.SEVEN]   =   0x27;
-Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.FOUR]    =   0x28;
-Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.THREE]   =   0x29;
-Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.ESC]     =   0x2A;
-Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.UP]      =   0x30;
-Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.F3]      =   0x31;   // aka PF3
-Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.F1]      =   0x32;   // aka PF1
-Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.BS]      =   0x33;
-Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.EQUALS]  =   0x34;
-Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.ZERO]    =   0x35;
-Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.EIGHT]   =   0x36;
-Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.SIX]     =   0x37;
-Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.FIVE]    =   0x38;
-Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.TWO]     =   0x39;
-Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.TAB]     =   0x3A;
-Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.NUM_7]   =   0x40;
-Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.F4]      =   0x41;   // aka PF4
-Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.F2]      =   0x42;   // aka PF2
-Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.NUM_0]   =   0x43;
-Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.F7]      =   0x44;   // aka LINE FEED
-Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.BSLASH]  =   0x45;
-Keyboard.VT100.KEYMAP[Keyboard.ASCII.L]         =   0x46;
-Keyboard.VT100.KEYMAP[Keyboard.ASCII.K]         =   0x47;
-Keyboard.VT100.KEYMAP[Keyboard.ASCII.G]         =   0x48;
-Keyboard.VT100.KEYMAP[Keyboard.ASCII.F]         =   0x49;
-Keyboard.VT100.KEYMAP[Keyboard.ASCII.A]         =   0x4A;
-Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.NUM_8]   =   0x50;
-Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.NUM_CR]  =   0x51;
-Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.NUM_2]   =   0x52;
-Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.NUM_1]   =   0x53;
-Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.QUOTE]   =   0x55;
-Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.SEMI]    =   0x56;
-Keyboard.VT100.KEYMAP[Keyboard.ASCII.J]         =   0x57;
-Keyboard.VT100.KEYMAP[Keyboard.ASCII.H]         =   0x58;
-Keyboard.VT100.KEYMAP[Keyboard.ASCII.D]         =   0x59;
-Keyboard.VT100.KEYMAP[Keyboard.ASCII.S]         =   0x5A;
-Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.NUM_DEL] =   0x60;   // keypad period
-Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.F5]      =   0x61;   // aka KEYPAD COMMA
-Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.NUM_5]   =   0x62;
-Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.NUM_4]   =   0x63;
-Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.CR]      =   0x64;   // TODO: Figure out why the Technical Manual lists CR at both 0x04 and 0x64
-Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.PERIOD]  =   0x65;
-Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.COMMA]   =   0x66;
-Keyboard.VT100.KEYMAP[Keyboard.ASCII.N]         =   0x67;
-Keyboard.VT100.KEYMAP[Keyboard.ASCII.B]         =   0x68;
-Keyboard.VT100.KEYMAP[Keyboard.ASCII.X]         =   0x69;
-Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.F8]      =   0x6A;   // aka NO SCROLL
-Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.NUM_9]   =   0x70;
-Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.NUM_3]   =   0x71;
-Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.NUM_6]   =   0x72;
-Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.NUM_SUB] =   0x73;   // aka KEYPAD MINUS
-Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.SLASH]   =   0x75;
-Keyboard.VT100.KEYMAP[Keyboard.ASCII.M]         =   0x76;
-Keyboard.VT100.KEYMAP[Keyboard.ASCII[' ']]      =   0x77;
-Keyboard.VT100.KEYMAP[Keyboard.ASCII.V]         =   0x78;
-Keyboard.VT100.KEYMAP[Keyboard.ASCII.C]         =   0x79;
-Keyboard.VT100.KEYMAP[Keyboard.ASCII.Z]         =   0x7A;
-Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.F9]      =   0x7B;   // aka SET-UP
-Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.CTRL]    =   0x7C;
-Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.SHIFT]   =   0x7D;   // either shift key (doesn't matter)
-Keyboard.VT100.KEYMAP[Keyboard.KEYCODE.CAPSLOCK]=   0x7E;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.DEL]     =   0x03;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.ASCII.P]         =   0x05;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.ASCII.O]         =   0x06;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.ASCII.Y]         =   0x07;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.ASCII.T]         =   0x08;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.ASCII.W]         =   0x09;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.ASCII.Q]         =   0x0A;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.RIGHT]   =   0x10;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.RBRACK]  =   0x14;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.LBRACK]  =   0x15;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.ASCII.I]         =   0x16;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.ASCII.U]         =   0x17;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.ASCII.R]         =   0x18;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.ASCII.E]         =   0x19;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.ONE]     =   0x1A;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.LEFT]    =   0x20;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.DOWN]    =   0x22;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.F6]      =   0x23;   // aka BREAK
+Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.PAUSE]   =   0x23;   // aka BREAK
+Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.BQUOTE]  =   0x24;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.DASH]    =   0x25;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.NINE]    =   0x26;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.SEVEN]   =   0x27;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.FOUR]    =   0x28;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.THREE]   =   0x29;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.ESC]     =   0x2A;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.UP]      =   0x30;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.F3]      =   0x31;   // aka PF3
+Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.F1]      =   0x32;   // aka PF1
+Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.BS]      =   0x33;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.EQUALS]  =   0x34;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.ZERO]    =   0x35;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.EIGHT]   =   0x36;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.SIX]     =   0x37;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.FIVE]    =   0x38;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.TWO]     =   0x39;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.TAB]     =   0x3A;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.NUM_7]   =   0x40;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.F4]      =   0x41;   // aka PF4
+Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.F2]      =   0x42;   // aka PF2
+Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.NUM_0]   =   0x43;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.F7]      =   0x44;   // aka LINE FEED
+Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.BSLASH]  =   0x45;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.ASCII.L]         =   0x46;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.ASCII.K]         =   0x47;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.ASCII.G]         =   0x48;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.ASCII.F]         =   0x49;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.ASCII.A]         =   0x4A;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.NUM_8]   =   0x50;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.NUM_CR]  =   0x51;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.NUM_2]   =   0x52;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.NUM_1]   =   0x53;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.QUOTE]   =   0x55;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.SEMI]    =   0x56;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.ASCII.J]         =   0x57;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.ASCII.H]         =   0x58;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.ASCII.D]         =   0x59;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.ASCII.S]         =   0x5A;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.NUM_DEL] =   0x60;   // keypad period
+Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.F5]      =   0x61;   // aka KEYPAD COMMA
+Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.NUM_5]   =   0x62;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.NUM_4]   =   0x63;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.CR]      =   0x64;   // TODO: Figure out why the Technical Manual lists CR at both 0x04 and 0x64
+Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.PERIOD]  =   0x65;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.COMMA]   =   0x66;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.ASCII.N]         =   0x67;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.ASCII.B]         =   0x68;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.ASCII.X]         =   0x69;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.F8]      =   0x6A;   // aka NO SCROLL
+Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.NUM_9]   =   0x70;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.NUM_3]   =   0x71;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.NUM_6]   =   0x72;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.NUM_SUB] =   0x73;   // aka KEYPAD MINUS
+Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.SLASH]   =   0x75;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.ASCII.M]         =   0x76;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.ASCII[' ']]      =   0x77;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.ASCII.V]         =   0x78;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.ASCII.C]         =   0x79;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.ASCII.Z]         =   0x7A;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.F9]      =   0x7B;   // aka SET-UP
+Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.CTRL]    =   0x7C;
+Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.SHIFT]   =   0x7D;   // either shift key (doesn't matter)
+Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.CAPSLOCK]=   0x7E;
 
-Keyboard.VT100.LEDCODES = {
-    'l4':       Keyboard.VT100.STATUS.LED4,
-    'l3':       Keyboard.VT100.STATUS.LED3,
-    'l2':       Keyboard.VT100.STATUS.LED2,
-    'l1':       Keyboard.VT100.STATUS.LED1,
-    'locked':   Keyboard.VT100.STATUS.LOCKED,
-    'local':    Keyboard.VT100.STATUS.LOCAL,
-    'online':  ~Keyboard.VT100.STATUS.LOCAL
+Keyboard8080.VT100.LEDCODES = {
+    'l4':       Keyboard8080.VT100.STATUS.LED4,
+    'l3':       Keyboard8080.VT100.STATUS.LED3,
+    'l2':       Keyboard8080.VT100.STATUS.LED2,
+    'l1':       Keyboard8080.VT100.STATUS.LED1,
+    'locked':   Keyboard8080.VT100.STATUS.LOCKED,
+    'local':    Keyboard8080.VT100.STATUS.LOCAL,
+    'online':  ~Keyboard8080.VT100.STATUS.LOCAL
 };
 
 /*
  * Supported models and their configurations
  */
-Keyboard.MODELS = {
-    "SI1978":       Keyboard.SI1978,
-    "VT100":        Keyboard.VT100
+Keyboard8080.MODELS = {
+    "SI1978":       Keyboard8080.SI1978,
+    "VT100":        Keyboard8080.VT100
 };
 
 /**
  * setBinding(sHTMLType, sBinding, control, sValue)
  *
- * @this {Keyboard}
+ * @this {Keyboard8080}
  * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
  * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "esc")
  * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
  * @param {string} [sValue] optional data value
  * @return {boolean} true if binding was successful, false if unrecognized binding request
  */
-Keyboard.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
+Keyboard8080.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
 {
     /*
      * There's a special binding that the Video component uses ("kbd") to effectively bind its
@@ -528,18 +528,18 @@ Keyboard.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
 /**
  * initBus(cmp, bus, cpu, dbg)
  *
- * @this {Keyboard}
- * @param {Computer} cmp
- * @param {Bus} bus
- * @param {CPUState} cpu
- * @param {Debugger} dbg
+ * @this {Keyboard8080}
+ * @param {Computer8080} cmp
+ * @param {Bus8080} bus
+ * @param {CPUState8080} cpu
+ * @param {Debugger8080} dbg
  */
-Keyboard.prototype.initBus = function(cmp, bus, cpu, dbg)
+Keyboard8080.prototype.initBus = function(cmp, bus, cpu, dbg)
 {
     this.cmp = cmp;
     this.cpu = cpu;
     this.dbg = dbg;     // NOTE: The "dbg" property must be set for the message functions to work
-    this.chipset = /** @type {ChipSet} */ (cmp.getMachineComponent("ChipSet"));
+    this.chipset = /** @type {ChipSet8080} */ (cmp.getMachineComponent("ChipSet"));
     bus.addPortInputTable(this, this.config.portsInput);
     bus.addPortOutputTable(this, this.config.portsOutput);
 };
@@ -547,12 +547,12 @@ Keyboard.prototype.initBus = function(cmp, bus, cpu, dbg)
 /**
  * powerUp(data, fRepower)
  *
- * @this {Keyboard}
+ * @this {Keyboard8080}
  * @param {Object|null} data
  * @param {boolean} [fRepower]
  * @return {boolean} true if successful, false if failure
  */
-Keyboard.prototype.powerUp = function(data, fRepower)
+Keyboard8080.prototype.powerUp = function(data, fRepower)
 {
     if (!fRepower) {
         if (!data) {
@@ -567,20 +567,20 @@ Keyboard.prototype.powerUp = function(data, fRepower)
 /**
  * powerDown(fSave, fShutdown)
  *
- * @this {Keyboard}
+ * @this {Keyboard8080}
  * @param {boolean} [fSave]
  * @param {boolean} [fShutdown]
  * @return {Object|boolean} component state if fSave; otherwise, true if successful, false if failure
  */
-Keyboard.prototype.powerDown = function(fSave, fShutdown)
+Keyboard8080.prototype.powerDown = function(fSave, fShutdown)
 {
     return fSave? this.save() : true;
 };
 
-Keyboard.VT100.INIT = [
+Keyboard8080.VT100.INIT = [
     [
-        Keyboard.VT100.STATUS.INIT,     // bVT100Status
-        Keyboard.VT100.ADDRESS.INIT,    // bVT100Address
+        Keyboard8080.VT100.STATUS.INIT,     // bVT100Status
+        Keyboard8080.VT100.ADDRESS.INIT,    // bVT100Address
         -1                              // iKeyNext
     ]
 ];
@@ -588,9 +588,9 @@ Keyboard.VT100.INIT = [
 /**
  * reset()
  *
- * @this {Keyboard}
+ * @this {Keyboard8080}
  */
-Keyboard.prototype.reset = function()
+Keyboard8080.prototype.reset = function()
 {
     /*
      * As keyDown events are encountered, a corresponding "softCode" is looked up.  If one is found,
@@ -614,16 +614,16 @@ Keyboard.prototype.reset = function()
  *
  * This implements save support for the Keyboard component.
  *
- * @this {Keyboard}
+ * @this {Keyboard8080}
  * @return {Object}
  */
-Keyboard.prototype.save = function()
+Keyboard8080.prototype.save = function()
 {
     var state = new State(this);
     switch(this.config.MODEL) {
-    case Keyboard.SI1978.MODEL:
+    case Keyboard8080.SI1978.MODEL:
         break;
-    case Keyboard.VT100.MODEL:
+    case Keyboard8080.VT100.MODEL:
         state.set(0, [this.bVT100Status, this.bVT100Address, -1]);
         break;
     }
@@ -635,21 +635,21 @@ Keyboard.prototype.save = function()
  *
  * This implements restore support for the Keyboard component.
  *
- * @this {Keyboard}
+ * @this {Keyboard8080}
  * @param {Object} data
  * @return {boolean} true if successful, false if failure
  */
-Keyboard.prototype.restore = function(data)
+Keyboard8080.prototype.restore = function(data)
 {
     var a;
     if (data && (a = data[0]) && a.length) {
         switch(this.config.MODEL) {
-        case Keyboard.SI1978.MODEL:
+        case Keyboard8080.SI1978.MODEL:
             return true;
 
-        case Keyboard.VT100.MODEL:
+        case Keyboard8080.VT100.MODEL:
             this.bVT100Status = a[0];
-            this.updateLEDs(this.bVT100Status & Keyboard.VT100.STATUS.LEDS);
+            this.updateLEDs(this.bVT100Status & Keyboard8080.VT100.STATUS.LEDS);
             this.bVT100Address = a[1];
             this.iKeyNext = a[2];
             return true;
@@ -661,11 +661,11 @@ Keyboard.prototype.restore = function(data)
 /**
  * setLED(control, f)
  *
- * @this {Keyboard}
+ * @this {Keyboard8080}
  * @param {Object} control is an HTML control DOM object
  * @param {boolean} f is true if the LED represented by control should be "on", false if "off"
  */
-Keyboard.prototype.setLED = function(control, f)
+Keyboard8080.prototype.setLED = function(control, f)
 {
     /*
      * TODO: Add support for user-definable LED colors
@@ -676,10 +676,10 @@ Keyboard.prototype.setLED = function(control, f)
 /**
  * updateLEDs(bLEDs)
  *
- * @this {Keyboard}
+ * @this {Keyboard8080}
  * @param {number} bLEDs
  */
-Keyboard.prototype.updateLEDs = function(bLEDs)
+Keyboard8080.prototype.updateLEDs = function(bLEDs)
 {
     this.bLEDs = bLEDs;
     for (var sBinding in this.config.LEDCODES) {
@@ -701,10 +701,10 @@ Keyboard.prototype.updateLEDs = function(bLEDs)
  *
  * Returns a number if the keyCode exists in the KEYMAP, or a string if the keyCode has a soft-code string.
  *
- * @this {Keyboard}
+ * @this {Keyboard8080}
  * @return {string|number|null}
  */
-Keyboard.prototype.getSoftCode = function(keyCode)
+Keyboard8080.prototype.getSoftCode = function(keyCode)
 {
     keyCode = this.config.ALTCODES[keyCode] || keyCode;
     if (this.config.KEYMAP[keyCode]) {
@@ -721,12 +721,12 @@ Keyboard.prototype.getSoftCode = function(keyCode)
 /**
  * onKeyDown(event, fDown)
  *
- * @this {Keyboard}
+ * @this {Keyboard8080}
  * @param {Object} event
  * @param {boolean} fDown is true for a keyDown event, false for up
  * @return {boolean} true to pass the event along, false to consume it
  */
-Keyboard.prototype.onKeyDown = function(event, fDown)
+Keyboard8080.prototype.onKeyDown = function(event, fDown)
 {
     var fPass = true;
     var keyCode = event.keyCode;
@@ -737,7 +737,7 @@ Keyboard.prototype.onKeyDown = function(event, fDown)
         event.preventDefault();
     }
 
-    if (!COMPILED && this.messageEnabled(Messages.KEYS)) {
+    if (!COMPILED && this.messageEnabled(Messages8080.KEYS)) {
         this.printMessage("onKey" + (fDown? "Down" : "Up") + "(" + keyCode + "): softCode=" + softCode + ", pass=" + (fPass? "true" : "false"), true);
     }
 
@@ -747,11 +747,11 @@ Keyboard.prototype.onKeyDown = function(event, fDown)
 /**
  * indexOfSoftKey(softCode)
  *
- * @this {Keyboard}
+ * @this {Keyboard8080}
  * @param {number|string} softCode
  * @return {number} index of softCode in aKeysActive, or -1 if not found
  */
-Keyboard.prototype.indexOfSoftKey = function(softCode)
+Keyboard8080.prototype.indexOfSoftKey = function(softCode)
 {
     var i;
     for (i = 0; i < this.aKeysActive.length; i++) {
@@ -763,12 +763,12 @@ Keyboard.prototype.indexOfSoftKey = function(softCode)
 /**
  * onSoftKeyDown(softCode, fDown)
  *
- * @this {Keyboard}
+ * @this {Keyboard8080}
  * @param {number|string} softCode
  * @param {boolean} fDown is true for a down event, false for up
  * @return {boolean} true to pass the event along, false to consume it
  */
-Keyboard.prototype.onSoftKeyDown = function(softCode, fDown)
+Keyboard8080.prototype.onSoftKeyDown = function(softCode, fDown)
 {
     var i = this.indexOfSoftKey(softCode);
     if (fDown) {
@@ -789,7 +789,7 @@ Keyboard.prototype.onSoftKeyDown = function(softCode, fDown)
             var msDown = this.aKeysActive[i].msDown;
             if (msDown) {
                 var msElapsed = Date.now() - msDown;
-                if (msElapsed < Keyboard.MINPRESSTIME) {
+                if (msElapsed < Keyboard8080.MINPRESSTIME) {
                     // this.println(softCode + " released after only " + msElapsed + "ms");
                     this.aKeysActive[i].fAutoRelease = true;
                     this.checkSoftKeysToRelease();
@@ -806,22 +806,22 @@ Keyboard.prototype.onSoftKeyDown = function(softCode, fDown)
         var bit = 0;
         switch(softCode) {
         case '1p':
-            bit = ChipSet.SI1978.STATUS1.P1;
+            bit = ChipSet8080.SI1978.STATUS1.P1;
             break;
         case '2p':
-            bit = ChipSet.SI1978.STATUS1.P2;
+            bit = ChipSet8080.SI1978.STATUS1.P2;
             break;
         case 'coin':
-            bit = ChipSet.SI1978.STATUS1.CREDIT;
+            bit = ChipSet8080.SI1978.STATUS1.CREDIT;
             break;
         case 'left':
-            bit = ChipSet.SI1978.STATUS1.P1_LEFT;
+            bit = ChipSet8080.SI1978.STATUS1.P1_LEFT;
             break;
         case 'right':
-            bit = ChipSet.SI1978.STATUS1.P1_RIGHT;
+            bit = ChipSet8080.SI1978.STATUS1.P1_RIGHT;
             break;
         case 'fire':
-            bit = ChipSet.SI1978.STATUS1.P1_FIRE;
+            bit = ChipSet8080.SI1978.STATUS1.P1_FIRE;
             break;
         }
         if (bit) {
@@ -834,9 +834,9 @@ Keyboard.prototype.onSoftKeyDown = function(softCode, fDown)
 /**
  * checkSoftKeysToRelease()
  *
- * @this {Keyboard}
+ * @this {Keyboard8080}
  */
-Keyboard.prototype.checkSoftKeysToRelease = function()
+Keyboard8080.prototype.checkSoftKeysToRelease = function()
 {
     var i = 0;
     var msDelayMin = -1;
@@ -845,7 +845,7 @@ Keyboard.prototype.checkSoftKeysToRelease = function()
             var softCode = this.aKeysActive[i].softCode;
             var msDown = this.aKeysActive[i].msDown;
             var msElapsed = Date.now() - msDown;
-            var msDelay = Keyboard.MINPRESSTIME - msElapsed;
+            var msDelay = Keyboard8080.MINPRESSTIME - msElapsed;
             if (msDelay > 0) {
                 if (msDelayMin < 0 || msDelayMin > msDelay) {
                     msDelayMin = msDelay;
@@ -875,10 +875,10 @@ Keyboard.prototype.checkSoftKeysToRelease = function()
  * Called whenever a ChipSet circuit needs the Keyboard UART's transmitter status.
  * Currently, we have no busy conditions (our virtual keyboard transmitter is infinitely fast).
  *
- * @this {Keyboard}
+ * @this {Keyboard8080}
  * @return {boolean} (true if ready, false if not)
  */
-Keyboard.prototype.isTransmitterReady = function()
+Keyboard8080.prototype.isTransmitterReady = function()
 {
     return true;
 };
@@ -888,15 +888,15 @@ Keyboard.prototype.isTransmitterReady = function()
  *
  * We take our cue from iKeyNext.  If it's -1 (default), we simply return the last value latched
  * in bVT100Address.  Otherwise, if iKeyNext is a valid index into aKeysActive, we look up the key
- * in the VT100.KEYMAP, latch it, and increment iKeyNext.  Failing that, we latch Keyboard.VT100.KEYLAST
+ * in the VT100.KEYMAP, latch it, and increment iKeyNext.  Failing that, we latch Keyboard8080.VT100.KEYLAST
  * and reset iKeyNext to -1.
  *
- * @this {Keyboard}
+ * @this {Keyboard8080}
  * @param {number} port (0x82)
  * @param {number} [addrFrom] (not defined if the Debugger is trying to write the specified port)
  * @return {number} simulated port value
  */
-Keyboard.prototype.inVT100UARTAddress = function(port, addrFrom)
+Keyboard8080.prototype.inVT100UARTAddress = function(port, addrFrom)
 {
     var b = this.bVT100Address;
     if (this.iKeyNext >= 0) {
@@ -913,7 +913,7 @@ Keyboard.prototype.inVT100UARTAddress = function(port, addrFrom)
                  */
                 this.aKeysActive.splice(this.iKeyNext, 1);
             }
-            b = Keyboard.VT100.KEYMAP[key.softCode];
+            b = Keyboard8080.VT100.KEYMAP[key.softCode];
             if (b & 0x80) {
                 /*
                  * TODO: This code is supposed to be accompanied by a SHIFT key; make sure that it is.
@@ -922,7 +922,7 @@ Keyboard.prototype.inVT100UARTAddress = function(port, addrFrom)
             }
         } else {
             this.iKeyNext = -1;
-            b = Keyboard.VT100.KEYLAST;
+            b = Keyboard8080.VT100.KEYLAST;
         }
         this.bVT100Address = b;
         this.cpu.requestINTR(1);
@@ -934,17 +934,17 @@ Keyboard.prototype.inVT100UARTAddress = function(port, addrFrom)
 /**
  * outVT100UARTStatus(port, b, addrFrom)
  *
- * @this {Keyboard}
+ * @this {Keyboard8080}
  * @param {number} port (0x82)
  * @param {number} b
  * @param {number} [addrFrom] (not defined if the Debugger is trying to write the specified port)
  */
-Keyboard.prototype.outVT100UARTStatus = function(port, b, addrFrom)
+Keyboard8080.prototype.outVT100UARTStatus = function(port, b, addrFrom)
 {
     this.printMessageIO(port, b, addrFrom, "KBDUART.STATUS");
     this.bVT100Status = b;
-    this.updateLEDs(b & Keyboard.VT100.STATUS.LEDS);
-    if (b & Keyboard.VT100.STATUS.START) {
+    this.updateLEDs(b & Keyboard8080.VT100.STATUS.LEDS);
+    if (b & Keyboard8080.VT100.STATUS.START) {
         this.iKeyNext = 0;
         this.cpu.requestINTR(1);
     }
@@ -953,29 +953,29 @@ Keyboard.prototype.outVT100UARTStatus = function(port, b, addrFrom)
 /*
  * Port notification tables
  */
-Keyboard.VT100.portsInput = {
-    0x82: Keyboard.prototype.inVT100UARTAddress
+Keyboard8080.VT100.portsInput = {
+    0x82: Keyboard8080.prototype.inVT100UARTAddress
 };
 
-Keyboard.VT100.portsOutput = {
-    0x82: Keyboard.prototype.outVT100UARTStatus
+Keyboard8080.VT100.portsOutput = {
+    0x82: Keyboard8080.prototype.outVT100UARTStatus
 };
 
 /**
- * Keyboard.init()
+ * Keyboard8080.init()
  *
  * This function operates on every HTML element of class "keyboard", extracting the
  * JSON-encoded parameters for the Keyboard constructor from the element's "data-value"
  * attribute, invoking the constructor to create a Keyboard component, and then binding
  * any associated HTML controls to the new component.
  */
-Keyboard.init = function()
+Keyboard8080.init = function()
 {
     var aeKbd = Component.getElementsByClass(document, PC8080.APPCLASS, "keyboard");
     for (var iKbd = 0; iKbd < aeKbd.length; iKbd++) {
         var eKbd = aeKbd[iKbd];
         var parmsKbd = Component.getComponentParms(eKbd);
-        var kbd = new Keyboard(parmsKbd);
+        var kbd = new Keyboard8080(parmsKbd);
         Component.bindComponentControls(kbd, eKbd, PC8080.APPCLASS);
     }
 };
@@ -983,6 +983,6 @@ Keyboard.init = function()
 /*
  * Initialize every Keyboard module on the page.
  */
-web.onInit(Keyboard.init);
+web.onInit(Keyboard8080.init);
 
-if (NODE) module.exports = Keyboard;
+if (NODE) module.exports = Keyboard8080;

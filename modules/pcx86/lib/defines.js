@@ -188,7 +188,6 @@ if (NODE) {
     global.DESKPRO386  = DESKPRO386;
     global.PAGEBLOCKS  = PAGEBLOCKS;
     global.PCX86       = PCX86;
-    /*
-     * TODO: When we're "required" by Node, should we return anything via module.exports?
-     */
+
+    module.exports = PCX86;
 }

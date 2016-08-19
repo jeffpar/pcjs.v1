@@ -35,9 +35,9 @@ if (NODE) {
     var str         = require("../../shared/lib/strlib");
     var web         = require("../../shared/lib/weblib");
     var Component   = require("../../shared/lib/component");
+    var State       = require("../../shared/lib/state");
     var Messages    = require("./messages");
     var SerialPort  = require("./serialport");
-    var State       = require("./state");
 }
 
 /**
@@ -623,7 +623,7 @@ Mouse.prototype.sendPacket = function(sDiag, xDiag, yDiag)
     if (this.messageEnabled(Messages.SERIAL)) {
         this.printMessage((sDiag? (sDiag + ": ") : "") + (yDiag !== undefined? ("mouse (" + xDiag + "," + yDiag + "): ") : "") + "serial packet [" + str.toHexByte(b1) + "," + str.toHexByte(b2) + "," + str.toHexByte(b3) + "]", 0, true);
     }
-    this.componentAdapter.sendRBR([b1, b2, b3]);
+    this.componentAdapter.receiveData([b1, b2, b3]);
     this.xDelta = this.yDelta = 0;
 };
 
@@ -681,7 +681,7 @@ Mouse.prototype.notifyMCR = function(bMCR)
                  * bytes on a reset.  This doesn't seem to adversely affect serial mouse emulation for Windows 1.01, so
                  * I'm calling this good enough for now.
                  */
-                this.componentAdapter.sendRBR([Mouse.ID_SERIAL, Mouse.ID_SERIAL]);
+                this.componentAdapter.receiveData([Mouse.ID_SERIAL, Mouse.ID_SERIAL]);
                 this.printMessage("serial mouse ID sent");
             }
             this.captureAll();

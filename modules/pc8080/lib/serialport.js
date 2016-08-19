@@ -35,14 +35,14 @@ if (NODE) {
     var str         = require("../../shared/lib/strlib");
     var web         = require("../../shared/lib/weblib");
     var Component   = require("../../shared/lib/component");
-    var Messages    = require("./messages");
-    var State       = require("./state");
+    var State       = require("../../shared/lib/state");
+    var Messages8080= require("./messages");
 }
 
 /**
- * SerialPort(parmsSerial)
+ * SerialPort8080(parmsSerial)
  *
- * The SerialPort component has the following component-specific (parmsSerial) properties:
+ * The SerialPort8080 component has the following component-specific (parmsSerial) properties:
  *
  *      adapter: 0 if not defined
  *
@@ -62,7 +62,7 @@ if (NODE) {
  * @extends Component
  * @param {Object} parmsSerial
  */
-function SerialPort(parmsSerial) {
+function SerialPort8080(parmsSerial) {
 
     this.iAdapter = +parmsSerial['adapter'];
 
@@ -103,7 +103,18 @@ function SerialPort(parmsSerial) {
     this.charBOL = parmsSerial['charBOL'];
     this.iLogicalCol = 0;
 
-    Component.call(this, "SerialPort", parmsSerial, SerialPort, Messages.SERIAL);
+    /*
+     * fAutoXOFF enables some experimental auto-XOFF/XON processing.  It assumes if the VT100 firmware
+     * issues an XOFF, receiveByte() should stop accepting more data until the firmware issues an XOFF.
+     *
+     * The downside is that this doesn't really do anything to stem the flow of incoming data; it just
+     * prevents the VT100's internal buffer from overflowing.  TODO: Eliminate the need for this hack
+     * and add some *real* flow-control interfaces between connected SerialPort components.
+     */
+    this.fAutoXOFF = true;
+    this.fAutoStop = false;
+
+    Component.call(this, "SerialPort", parmsSerial, SerialPort8080, Messages8080.SERIAL);
 
     var sBinding = parmsSerial['binding'];
     if (sBinding == "console") {
@@ -112,11 +123,11 @@ function SerialPort(parmsSerial) {
         /*
          * NOTE: If sBinding is not the name of a valid Control Panel DOM element, this call does nothing.
          */
-        Component.bindExternalControl(this, sBinding, SerialPort.sIOBuffer);
+        Component.bindExternalControl(this, sBinding, SerialPort8080.sIOBuffer);
     }
 
     /*
-     * No connection until initBus() invokes initConnection().
+     * No connection until initConnection() is called.
      */
     this.sDataReceived = "";
     this.connection = this.sendData = null;
@@ -130,7 +141,7 @@ function SerialPort(parmsSerial) {
 }
 
 /*
- * class SerialPort
+ * class SerialPort8080
  * property {number} iAdapter
  * property {number} portBase
  * property {number} nIRQ
@@ -146,9 +157,9 @@ function SerialPort(parmsSerial) {
  * for third-party apps.
  */
 
-Component.subclass(SerialPort);
+Component.subclass(SerialPort8080);
 
-SerialPort.UART8251 = {
+SerialPort8080.UART8251 = {
     /*
      * Format of MODE byte written to CONTROL port 0x1
      */
@@ -212,6 +223,8 @@ SerialPort.UART8251 = {
      *      0xD      36         4800
      *      0xE      18         9600    (default)
      *      0xF      9          19200
+     *
+     * NOTE: This is a VT100-specific port and baud rate table.
      */
     BAUDRATES: {
         RECV_RATE:      0x0F,
@@ -223,20 +236,20 @@ SerialPort.UART8251 = {
     ]
 };
 
-SerialPort.UART8251.INIT = [
+SerialPort8080.UART8251.INIT = [
     false,
     0,
     0,
-    SerialPort.UART8251.STATUS.INIT,
-    SerialPort.UART8251.MODE.INIT,
-    SerialPort.UART8251.COMMAND.INIT,
-    SerialPort.UART8251.BAUDRATES.INIT
+    SerialPort8080.UART8251.STATUS.INIT,
+    SerialPort8080.UART8251.MODE.INIT,
+    SerialPort8080.UART8251.COMMAND.INIT,
+    SerialPort8080.UART8251.BAUDRATES.INIT
 ];
 
 /*
- * Internal name used for the I/O buffer control, if any, that we bind to the SerialPort.
+ * Internal name used for the I/O buffer control, if any, that we bind to a SerialPort8080.
  *
- * Alternatively, if SerialPort wants to use another component's control (eg, the Panel's
+ * Alternatively, if SerialPort8080 wants to use another component's control (eg, the Panel's
  * "print" control), it can specify the name of that control with the 'binding' property.
  *
  * For that binding to succeed, we also need to know the target component; for now, that's
@@ -244,24 +257,24 @@ SerialPort.UART8251.INIT = [
  * upon initializing before we do, but it would be a simple matter to include a component type
  * or ID as part of the 'binding' property as well, if we need more flexibility later.
  */
-SerialPort.sIOBuffer = "buffer";
+SerialPort8080.sIOBuffer = "buffer";
 
 /**
  * setBinding(sHTMLType, sBinding, control, sValue)
  *
- * @this {SerialPort}
+ * @this {SerialPort8080}
  * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
  * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "buffer")
  * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
  * @param {string} [sValue] optional data value
  * @return {boolean} true if binding was successful, false if unrecognized binding request
  */
-SerialPort.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
+SerialPort8080.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
 {
     var serial = this;
 
     switch (sBinding) {
-    case SerialPort.sIOBuffer:
+    case SerialPort8080.sIOBuffer:
         this.bindings[sBinding] = this.controlIOBuffer = control;
 
         /*
@@ -325,10 +338,31 @@ SerialPort.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
              * that do not conflict with predefined controls (which, of course, is the only way you can get here).
              */
             this.bindings[sBinding] = control;
+
             /*
-             * Convert any "backslashed" sequences into the appropriate control characters.
+             * Backslash sequences like \n, \r and \\ have already been converted to LF, CR and backslash
+             * characters, by virtue of the eval() function that all our component parameter strings pass through;
+             * eval() treats strings like "source code", so any backslash sequence that JavaScript supports is
+             * automatically converted.
+             *
+             * The complete list of supported backslash sequences:
+             *
+             *      \0  \'  \"  \\  \n  \r  \v  \t  \b  \f  \uXXXX \xXX
+             *
+             * We also want to support some additional sequences, like backslash-e for ESC.  Only one problem: for
+             * any unrecognized backslash sequence, eval() simply removes the backslash.  So we have to double-backslash
+             * it, which eval() will replace with a single backslash.
+             *
+             * So, additional supported backslash sequences include:
+             *
+             *      \\e (ESC)
+             *
+             * Note that I've judiciously avoided using terms "escape notation" or "escape sequence" to talk about
+             * these sequences, because ESC is one of the additional characters I want to support, and using the word
+             * "escape" in both contexts is WAY confusing.
              */
-            sValue = sValue.replace(/\\n/g, "\n").replace(/\\r/g, "\r");
+            sValue = sValue.replace(/\\e/g, String.fromCharCode(0x1b));
+
             control.onclick = function onClickTest(event) {
                 serial.receiveData(sValue);
                 /*
@@ -347,13 +381,13 @@ SerialPort.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
 /**
  * initBus(cmp, bus, cpu, dbg)
  *
- * @this {SerialPort}
- * @param {Computer} cmp
- * @param {Bus} bus
- * @param {CPUState} cpu
- * @param {Debugger} dbg
+ * @this {SerialPort8080}
+ * @param {Computer8080} cmp
+ * @param {Bus8080} bus
+ * @param {CPUState8080} cpu
+ * @param {Debugger8080} dbg
  */
-SerialPort.prototype.initBus = function(cmp, bus, cpu, dbg)
+SerialPort8080.prototype.initBus = function(cmp, bus, cpu, dbg)
 {
     this.cmp = cmp;
     this.bus = bus;
@@ -368,12 +402,10 @@ SerialPort.prototype.initBus = function(cmp, bus, cpu, dbg)
         serial.transmitData();
     });
 
-    this.chipset = /** @type {ChipSet} */ (cmp.getMachineComponent("ChipSet"));
+    this.chipset = /** @type {ChipSet8080} */ (cmp.getMachineComponent("ChipSet"));
 
-    bus.addPortInputTable(this, SerialPort.aPortInput, this.portBase);
-    bus.addPortOutputTable(this, SerialPort.aPortOutput, this.portBase);
-
-    this.initConnection();
+    bus.addPortInputTable(this, SerialPort8080.aPortInput, this.portBase);
+    bus.addPortOutputTable(this, SerialPort8080.aPortOutput, this.portBase);
 
     this.setReady();
 };
@@ -381,8 +413,8 @@ SerialPort.prototype.initBus = function(cmp, bus, cpu, dbg)
 /**
  * initConnection()
  *
- * If a machine 'connection' parameter exists of the form "<sourcePort>=<targetMachine>.<targetPort>",
- * and "<sourcePort>" matches our idComponent, then look for a component with id "<targetMachine>.<targetPort>".
+ * If a machine 'connection' parameter exists of the form "{sourcePort}->{targetMachine}.{targetPort}",
+ * and "{sourcePort}" matches our idComponent, then look for a component with id "{targetMachine}.{targetPort}".
  *
  * If the target component is found, then verify that it has exported functions with the following names:
  *
@@ -392,40 +424,52 @@ SerialPort.prototype.initBus = function(cmp, bus, cpu, dbg)
  * performs its own initConnection(), it will find our receiveByte(b) function, at which point communication in both
  * directions should be established.
  *
- * @this {SerialPort}
+ * @this {SerialPort8080}
  */
-SerialPort.prototype.initConnection = function()
+SerialPort8080.prototype.initConnection = function()
 {
     var sConnection = this.cmp.getMachineParm("connection");
     if (sConnection) {
-        var asParts = sConnection.split('=');
+        var asParts = sConnection.split('->');
         if (asParts.length == 2) {
             var sSourceID = str.trim(asParts[0]);
+            if (sSourceID != this.idComponent) return;  // this connection string is intended for another instance
             var sTargetID = str.trim(asParts[1]);
-            if (sSourceID == this.idComponent) {
-                this.connection = Component.getComponentByID(sTargetID);
-                if (this.connection) {
-                    var exports = this.connection['exports'];
-                    if (exports) {
-                        this.sendData = exports['receiveData'];
-                    }
+            this.connection = Component.getComponentByID(sTargetID);
+            if (this.connection) {
+                var exports = this.connection['exports'];
+                if (exports) {
+                    this.sendData = exports['receiveData'];
+                    this.status(this.idMachine + '.' + sSourceID + " connected to " + sTargetID);
+                    return;
                 }
             }
         }
+        this.notice("Unable to establish connection: " + sConnection);
     }
 };
 
 /**
  * powerUp(data, fRepower)
  *
- * @this {SerialPort}
+ * @this {SerialPort8080}
  * @param {Object|null} data
  * @param {boolean} [fRepower]
  * @return {boolean} true if successful, false if failure
  */
-SerialPort.prototype.powerUp = function(data, fRepower)
+SerialPort8080.prototype.powerUp = function(data, fRepower)
 {
     if (!fRepower) {
+
+        /*
+         * We needed to wait until now to make our first inter-machine connection attempt;
+         * doing this in initBus() was still too early, because initBus() is called in the context
+         * of onInit() processing for all machines of the same type (eg, PCx86), and if we're
+         * trying to connect to the port of a machine of a DIFFERENT type (eg, PC8080), it may not
+         * have been initialized yet.
+         */
+        this.initConnection();
+
         if (!data || !this.restore) {
             this.reset();
         } else {
@@ -438,12 +482,12 @@ SerialPort.prototype.powerUp = function(data, fRepower)
 /**
  * powerDown(fSave, fShutdown)
  *
- * @this {SerialPort}
+ * @this {SerialPort8080}
  * @param {boolean} [fSave]
  * @param {boolean} [fShutdown]
  * @return {Object|boolean} component state if fSave; otherwise, true if successful, false if failure
  */
-SerialPort.prototype.powerDown = function(fSave, fShutdown)
+SerialPort8080.prototype.powerDown = function(fSave, fShutdown)
 {
     return fSave? this.save() : true;
 };
@@ -451,9 +495,9 @@ SerialPort.prototype.powerDown = function(fSave, fShutdown)
 /**
  * reset()
  *
- * @this {SerialPort}
+ * @this {SerialPort8080}
  */
-SerialPort.prototype.reset = function()
+SerialPort8080.prototype.reset = function()
 {
     this.initState();
 };
@@ -461,12 +505,12 @@ SerialPort.prototype.reset = function()
 /**
  * save()
  *
- * This implements save support for the SerialPort component.
+ * This implements save support for the SerialPort8080 component.
  *
- * @this {SerialPort}
+ * @this {SerialPort8080}
  * @return {Object}
  */
-SerialPort.prototype.save = function()
+SerialPort8080.prototype.save = function()
 {
     var state = new State(this);
     state.set(0, this.saveRegisters());
@@ -476,13 +520,13 @@ SerialPort.prototype.save = function()
 /**
  * restore(data)
  *
- * This implements restore support for the SerialPort component.
+ * This implements restore support for the SerialPort8080 component.
  *
- * @this {SerialPort}
+ * @this {SerialPort8080}
  * @param {Object} data
  * @return {boolean} true if successful, false if failure
  */
-SerialPort.prototype.restore = function(data)
+SerialPort8080.prototype.restore = function(data)
 {
     return this.initState(data[0]);
 };
@@ -490,15 +534,15 @@ SerialPort.prototype.restore = function(data)
 /**
  * initState(data)
  *
- * @this {SerialPort}
+ * @this {SerialPort8080}
  * @param {Array} [data]
  * @return {boolean} true if successful, false if failure
  */
-SerialPort.prototype.initState = function(data)
+SerialPort8080.prototype.initState = function(data)
 {
     var i = 0;
     if (data === undefined) {
-        data = SerialPort.UART8251.INIT;
+        data = SerialPort8080.UART8251.INIT;
     }
     this.fReady     = data[i++];
     this.bDataIn    = data[i++];
@@ -513,10 +557,10 @@ SerialPort.prototype.initState = function(data)
 /**
  * saveRegisters()
  *
- * @this {SerialPort}
+ * @this {SerialPort8080}
  * @return {Array}
  */
-SerialPort.prototype.saveRegisters = function()
+SerialPort8080.prototype.saveRegisters = function()
 {
     var i = 0;
     var data = [];
@@ -533,18 +577,18 @@ SerialPort.prototype.saveRegisters = function()
 /**
  * getBaudTimeout(maskRate)
  *
- * @this {SerialPort}
- * @param {number} maskRate (either SerialPort.UART8251.BAUDRATES.RECV_RATE or SerialPort.UART8251.BAUDRATES.XMIT_RATE)
+ * @this {SerialPort8080}
+ * @param {number} maskRate (either SerialPort8080.UART8251.BAUDRATES.RECV_RATE or SerialPort8080.UART8251.BAUDRATES.XMIT_RATE)
  * @return {number} (number of milliseconds per byte)
  */
-SerialPort.prototype.getBaudTimeout = function(maskRate)
+SerialPort8080.prototype.getBaudTimeout = function(maskRate)
 {
     var indexRate = (this.bBaudRates & maskRate);
     if (!(maskRate & 0xf)) indexRate >>= 4;
-    var nBaud = SerialPort.UART8251.BAUDTABLE[indexRate];
-    var nBits = ((this.bMode & SerialPort.UART8251.MODE.DATA_BITS) >> 2) + 6;   // includes an extra +1 for start bit
-    if (this.bMode & SerialPort.UART8251.MODE.PARITY_ENABLE) nBits++;
-    nBits += ((((this.bMode & SerialPort.UART8251.MODE.STOP_BITS) >> 6) + 1) >> 1);
+    var nBaud = SerialPort8080.UART8251.BAUDTABLE[indexRate];
+    var nBits = ((this.bMode & SerialPort8080.UART8251.MODE.DATA_BITS) >> 2) + 6;   // includes an extra +1 for start bit
+    if (this.bMode & SerialPort8080.UART8251.MODE.PARITY_ENABLE) nBits++;
+    nBits += ((((this.bMode & SerialPort8080.UART8251.MODE.STOP_BITS) >> 6) + 1) >> 1);
     var nBytesPerSecond = Math.round(nBaud / nBits);
     return 1000 / nBytesPerSecond;
 };
@@ -552,16 +596,16 @@ SerialPort.prototype.getBaudTimeout = function(maskRate)
 /**
  * receiveByte(b)
  *
- * @this {SerialPort}
+ * @this {SerialPort8080}
  * @param {number} b
  * @return {boolean}
  */
-SerialPort.prototype.receiveByte = function(b)
+SerialPort8080.prototype.receiveByte = function(b)
 {
     this.printMessage("receiveByte(" + str.toHexByte(b) + "), status=" + str.toHexByte(this.bStatus));
-    if (!(this.bStatus & SerialPort.UART8251.STATUS.RECV_FULL)) {
+    if (!this.fAutoStop && !(this.bStatus & SerialPort8080.UART8251.STATUS.RECV_FULL)) {
         this.bDataIn = b;
-        this.bStatus |= SerialPort.UART8251.STATUS.RECV_FULL;
+        this.bStatus |= SerialPort8080.UART8251.STATUS.RECV_FULL;
         this.cpu.requestINTR(this.nIRQ);
         return true;
     }
@@ -577,10 +621,11 @@ SerialPort.prototype.receiveByte = function(b)
  * of a string.  When we're called by another component, data will typically be a number (ie, byte).  If no
  * data is specified at all, then all we do is "clock" any remaining data into the receiver.
  *
- * @this {SerialPort}
+ * @this {SerialPort8080}
  * @param {number|string|undefined} [data]
+ * @return {boolean} true if received, false if not
  */
-SerialPort.prototype.receiveData = function(data)
+SerialPort8080.prototype.receiveData = function(data)
 {
     if (data != null) {
         if (typeof data != "number") {
@@ -594,23 +639,35 @@ SerialPort.prototype.receiveData = function(data)
             this.sDataReceived = this.sDataReceived.substr(1);
         }
         if (this.sDataReceived && this.cpu) {
-            this.cpu.setTimer(this.timerReceiveNext, this.getBaudTimeout(SerialPort.UART8251.BAUDRATES.RECV_RATE));
+            this.cpu.setTimer(this.timerReceiveNext, this.getBaudTimeout(SerialPort8080.UART8251.BAUDRATES.RECV_RATE));
         }
     }
+    return true;                // for now, return true regardless, since we're buffering everything anyway
 };
 
 /**
  * transmitByte(b)
  *
- * @this {SerialPort}
+ * @this {SerialPort8080}
  * @param {number} b
  * @return {boolean} true if transmitted, false if not
  */
-SerialPort.prototype.transmitByte = function(b)
+SerialPort8080.prototype.transmitByte = function(b)
 {
     var fTransmitted = false;
 
     this.printMessage("transmitByte(" + str.toHexByte(b) + ")");
+
+    if (this.fAutoXOFF) {
+        if (b == 0x13) {        // XOFF
+            this.fAutoStop = true;
+            return false;
+        }
+        if (b == 0x11) {        // XON
+            this.fAutoStop = false;
+            return false;
+        }
+    }
 
     if (this.sendData) {
         if (this.sendData.call(this.connection, b)) {
@@ -667,51 +724,51 @@ SerialPort.prototype.transmitByte = function(b)
  * When timerTransmitNext fires, we have honored the programmed XMIT_RATE period, so we can
  * set XMIT_READY (and XMIT_EMPTY), which signals the firmware that another byte can be transmitted.
  *
- * @this {SerialPort}
+ * @this {SerialPort8080}
  */
-SerialPort.prototype.transmitData = function()
+SerialPort8080.prototype.transmitData = function()
 {
-    this.bStatus |= (SerialPort.UART8251.STATUS.XMIT_READY | SerialPort.UART8251.STATUS.XMIT_EMPTY);
+    this.bStatus |= (SerialPort8080.UART8251.STATUS.XMIT_READY | SerialPort8080.UART8251.STATUS.XMIT_EMPTY);
 };
 
 /**
  * isTransmitterReady()
  *
- * Called whenever a ChipSet circuit needs the SerialPort UART's transmitter status.
+ * Called whenever a ChipSet circuit needs the SerialPort8080 UART's transmitter status.
  *
- * @this {SerialPort}
+ * @this {SerialPort8080}
  * @return {boolean} (true if ready, false if not)
  */
-SerialPort.prototype.isTransmitterReady = function()
+SerialPort8080.prototype.isTransmitterReady = function()
 {
-    return !!(this.bStatus & SerialPort.UART8251.STATUS.XMIT_READY);
+    return !!(this.bStatus & SerialPort8080.UART8251.STATUS.XMIT_READY);
 };
 
 /**
  * inData(port, addrFrom)
  *
- * @this {SerialPort}
+ * @this {SerialPort8080}
  * @param {number} port (0x0)
  * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  * @return {number} simulated port value
  */
-SerialPort.prototype.inData = function(port, addrFrom)
+SerialPort8080.prototype.inData = function(port, addrFrom)
 {
     var b = this.bDataIn;
     this.printMessageIO(port, null, addrFrom, "DATA", b);
-    this.bStatus &= ~SerialPort.UART8251.STATUS.RECV_FULL;
+    this.bStatus &= ~SerialPort8080.UART8251.STATUS.RECV_FULL;
     return b;
 };
 
 /**
  * inControl(port, addrFrom)
  *
- * @this {SerialPort}
+ * @this {SerialPort8080}
  * @param {number} port (0x1)
  * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  * @return {number} simulated port value
  */
-SerialPort.prototype.inControl = function(port, addrFrom)
+SerialPort8080.prototype.inControl = function(port, addrFrom)
 {
     var b = this.bStatus;
     this.printMessageIO(port, null, addrFrom, "STATUS", b);
@@ -721,22 +778,22 @@ SerialPort.prototype.inControl = function(port, addrFrom)
 /**
  * outData(port, bOut, addrFrom)
  *
- * @this {SerialPort}
+ * @this {SerialPort8080}
  * @param {number} port (0x0)
  * @param {number} bOut
  * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
  */
-SerialPort.prototype.outData = function(port, bOut, addrFrom)
+SerialPort8080.prototype.outData = function(port, bOut, addrFrom)
 {
     this.printMessageIO(port, bOut, addrFrom, "DATA");
     this.bDataOut = bOut;
-    this.bStatus &= ~(SerialPort.UART8251.STATUS.XMIT_READY | SerialPort.UART8251.STATUS.XMIT_EMPTY);
+    this.bStatus &= ~(SerialPort8080.UART8251.STATUS.XMIT_READY | SerialPort8080.UART8251.STATUS.XMIT_EMPTY);
     /*
      * If we're transmitting to a virtual device that has no measurable delay, this code may clear XMIT_READY
      * too quickly.
      *
      *      if (this.transmitByte(bOut)) {
-     *          this.bStatus |= (SerialPort.UART8251.STATUS.XMIT_READY | SerialPort.UART8251.STATUS.XMIT_EMPTY);
+     *          this.bStatus |= (SerialPort8080.UART8251.STATUS.XMIT_READY | SerialPort8080.UART8251.STATUS.XMIT_EMPTY);
      *      }
      *
      * A better solution is to arm a timer based on the XMIT_RATE baud rate, and clear the above bits when that
@@ -744,7 +801,7 @@ SerialPort.prototype.outData = function(port, bOut, addrFrom)
      */
     this.transmitByte(bOut);
     if (this.cpu) {
-        this.cpu.setTimer(this.timerTransmitNext, this.getBaudTimeout(SerialPort.UART8251.BAUDRATES.XMIT_RATE));
+        this.cpu.setTimer(this.timerTransmitNext, this.getBaudTimeout(SerialPort8080.UART8251.BAUDRATES.XMIT_RATE));
     }
 };
 
@@ -756,12 +813,12 @@ SerialPort.prototype.outData = function(port, bOut, addrFrom)
  * has received that initial byte, the device is marked "ready", and all further bytes are
  * interpreted as COMMAND bytes (until/unless a COMMAND byte with the INTERNAL_RESET bit is set).
  *
- * @this {SerialPort}
+ * @this {SerialPort8080}
  * @param {number} port (0x1)
  * @param {number} bOut
  * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
  */
-SerialPort.prototype.outControl = function(port, bOut, addrFrom)
+SerialPort8080.prototype.outControl = function(port, bOut, addrFrom)
 {
     this.printMessageIO(port, bOut, addrFrom, "CONTROL");
     if (!this.fReady) {
@@ -769,7 +826,7 @@ SerialPort.prototype.outControl = function(port, bOut, addrFrom)
         this.fReady = true;
     } else {
         this.bCommand = bOut;
-        if (this.bCommand & SerialPort.UART8251.COMMAND.INTERNAL_RESET) {
+        if (this.bCommand & SerialPort8080.UART8251.COMMAND.INTERNAL_RESET) {
             this.fReady = false;
         }
     }
@@ -778,12 +835,12 @@ SerialPort.prototype.outControl = function(port, bOut, addrFrom)
 /**
  * outBaudRates(port, bOut, addrFrom)
  *
- * @this {SerialPort}
+ * @this {SerialPort8080}
  * @param {number} port (0x2)
  * @param {number} bOut
  * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
  */
-SerialPort.prototype.outBaudRates = function(port, bOut, addrFrom)
+SerialPort8080.prototype.outBaudRates = function(port, bOut, addrFrom)
 {
     this.printMessageIO(port, bOut, addrFrom, "BAUDRATES");
     this.bBaudRates = bOut;
@@ -792,43 +849,43 @@ SerialPort.prototype.outBaudRates = function(port, bOut, addrFrom)
 /*
  * Port input notification table
  */
-SerialPort.aPortInput = {
-    0x0: SerialPort.prototype.inData,
-    0x1: SerialPort.prototype.inControl
+SerialPort8080.aPortInput = {
+    0x0: SerialPort8080.prototype.inData,
+    0x1: SerialPort8080.prototype.inControl
 
 };
 
 /*
  * Port output notification table
  */
-SerialPort.aPortOutput = {
-    0x0: SerialPort.prototype.outData,
-    0x1: SerialPort.prototype.outControl,
-    0x2: SerialPort.prototype.outBaudRates
+SerialPort8080.aPortOutput = {
+    0x0: SerialPort8080.prototype.outData,
+    0x1: SerialPort8080.prototype.outControl,
+    0x2: SerialPort8080.prototype.outBaudRates
 };
 
 /**
- * SerialPort.init()
+ * SerialPort8080.init()
  *
  * This function operates on every HTML element of class "serial", extracting the
- * JSON-encoded parameters for the SerialPort constructor from the element's "data-value"
- * attribute, invoking the constructor to create a SerialPort component, and then binding
+ * JSON-encoded parameters for the SerialPort8080 constructor from the element's "data-value"
+ * attribute, invoking the constructor to create a SerialPort8080 component, and then binding
  * any associated HTML controls to the new component.
  */
-SerialPort.init = function()
+SerialPort8080.init = function()
 {
     var aeSerial = Component.getElementsByClass(document, PC8080.APPCLASS, "serial");
     for (var iSerial = 0; iSerial < aeSerial.length; iSerial++) {
         var eSerial = aeSerial[iSerial];
         var parmsSerial = Component.getComponentParms(eSerial);
-        var serial = new SerialPort(parmsSerial);
+        var serial = new SerialPort8080(parmsSerial);
         Component.bindComponentControls(serial, eSerial, PC8080.APPCLASS);
     }
 };
 
 /*
- * Initialize every SerialPort module on the page.
+ * Initialize every SerialPort8080 module on the page.
  */
-web.onInit(SerialPort.init);
+web.onInit(SerialPort8080.init);
 
-if (NODE) module.exports = SerialPort;
+if (NODE) module.exports = SerialPort8080;

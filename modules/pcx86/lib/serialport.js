@@ -35,9 +35,9 @@ if (NODE) {
     var str         = require("../../shared/lib/strlib");
     var web         = require("../../shared/lib/weblib");
     var Component   = require("../../shared/lib/component");
+    var State       = require("../../shared/lib/state");
     var Messages    = require("./messages");
     var ChipSet     = require("./chipset");
-    var State       = require("./state");
 }
 
 /**
@@ -97,7 +97,16 @@ function SerialPort(parmsSerial) {
     this.consoleOutput = null;
 
     /**
-     * controlIOBuffer is a DOM element, if any, bound to the port (currently used for output only; see echoByte()).
+     * controlIOBuffer is a DOM element bound to the port (currently used for output only; see transmitByte()).
+     *
+     * Example: CTTY COM2
+     *
+     * The CTTY DOS command redirects all CON I/O to the specified serial port (eg, COM2), which it assumes is
+     * connected to a serial terminal, and therefore anything it *transmits* via COM2 will be displayed by the
+     * terminal.  It further assumes that anything typed on such a terminal is NOT displayed, so as DOS *receives*
+     * serial input, DOS *transmits* the appropriate characters back to the terminal via COM2.
+     *
+     * As a result, controlIOBuffer only needs to be updated by the transmitByte() function.
      *
      * @type {Object}
      */
@@ -105,7 +114,7 @@ function SerialPort(parmsSerial) {
 
     /*
      * If controlIOBuffer is being used AND 'tabSize' is set, then we make an attempt to monitor the characters
-     * being echoed via echoByte(), maintain a logical column position, and convert any tabs into the appropriate
+     * being echoed via transmitByte(), maintain a logical column position, and convert any tabs into the appropriate
      * number of spaces.
      *
      * charBOL, if nonzero, is a character to automatically output at the beginning of every line.  This probably
@@ -126,6 +135,19 @@ function SerialPort(parmsSerial) {
          */
         Component.bindExternalControl(this, sBinding, SerialPort.sIOBuffer);
     }
+
+    /*
+     * No connection until initConnection() is called.
+     */
+    this.sDataReceived = "";
+    this.connection = this.sendData = null;
+
+    /*
+     * Export all functions required by initConnection(); currently, this is the bare minimum, with no flow control.
+     */
+    this['exports'] = {
+        'receiveData': this.receiveData
+    };
 }
 
 /*
@@ -133,7 +155,7 @@ function SerialPort(parmsSerial) {
  * property {number} iAdapter
  * property {number} portBase
  * property {number} nIRQ
- * property {Object} controlIOBuffer is a DOM element, if any, bound to the port (for rudimentary output; see echoByte())
+ * property {Object} controlIOBuffer is a DOM element bound to the port (for rudimentary output; see transmitByte())
  *
  * NOTE: This class declaration started as a way of informing the code inspector of the controlIOBuffer property,
  * which remained undefined until a setBinding() call set it later, but I've since decided that explicitly
@@ -386,7 +408,7 @@ SerialPort.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
             if (keyCode === 0x08 || event.ctrlKey && keyCode >= 0x41 && keyCode <= 0x5A) {
                 if (event.preventDefault) event.preventDefault();
                 if (keyCode > 0x40) keyCode -= 0x40;
-                serial.sendRBR([keyCode]);
+                serial.receiveData(keyCode);
             }
             return true;
         };
@@ -398,7 +420,7 @@ SerialPort.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
              */
             event = event || window.event;
             var keyCode = event.which || event.keyCode;
-            serial.sendRBR([keyCode]);
+            serial.receiveData(keyCode);
             /*
              * Since we're going to remove the "readonly" attribute from the <textarea> control
              * (so that the soft keyboard activates on iOS), instead of calling preventDefault() for
@@ -436,13 +458,56 @@ SerialPort.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
  */
 SerialPort.prototype.initBus = function(cmp, bus, cpu, dbg)
 {
+    this.cmp = cmp;
     this.bus = bus;
     this.cpu = cpu;
     this.dbg = dbg;
+
     this.chipset = cmp.getMachineComponent("ChipSet");
+
     bus.addPortInputTable(this, SerialPort.aPortInput, this.portBase);
     bus.addPortOutputTable(this, SerialPort.aPortOutput, this.portBase);
+
     this.setReady();
+};
+
+/**
+ * initConnection()
+ *
+ * If a machine 'connection' parameter exists of the form "{sourcePort}->{targetMachine}.{targetPort}",
+ * and "{sourcePort}" matches our idComponent, then look for a component with id "{targetMachine}.{targetPort}".
+ *
+ * If the target component is found, then verify that it has exported functions with the following names:
+ *
+ *      receiveData(data): called when we have data to transmit; aliased internally to sendData(data)
+ *
+ * For now, we're not going to worry about communication in the other direction, because when the target component
+ * performs its own initConnection(), it will find our receiveByte(b) function, at which point communication in both
+ * directions should be established.
+ *
+ * @this {SerialPort}
+ */
+SerialPort.prototype.initConnection = function()
+{
+    var sConnection = this.cmp.getMachineParm("connection");
+    if (sConnection) {
+        var asParts = sConnection.split('->');
+        if (asParts.length == 2) {
+            var sSourceID = str.trim(asParts[0]);
+            if (sSourceID != this.idComponent) return;  // this connection string is intended for another instance
+            var sTargetID = str.trim(asParts[1]);
+            this.connection = Component.getComponentByID(sTargetID);
+            if (this.connection) {
+                var exports = this.connection['exports'];
+                if (exports) {
+                    this.sendData = exports['receiveData'];
+                    this.status(this.idMachine + '.' + sSourceID + " connected to " + sTargetID);
+                    return;
+                }
+            }
+        }
+        this.notice("Unable to establish connection: " + sConnection);
+    }
 };
 
 /**
@@ -456,6 +521,16 @@ SerialPort.prototype.initBus = function(cmp, bus, cpu, dbg)
 SerialPort.prototype.powerUp = function(data, fRepower)
 {
     if (!fRepower) {
+
+        /*
+         * We needed to wait until now to make our first inter-machine connection attempt;
+         * doing this in initBus() was still too early, because initBus() is called in the context
+         * of onInit() processing for all machines of the same type (eg, PCx86), and if we're
+         * trying to connect to the port of a machine of a DIFFERENT type (eg, PC8080), it may not
+         * have been initialized yet.
+         */
+        this.initConnection();
+
         if (!data || !this.restore) {
             this.reset();
         } else {
@@ -583,15 +658,31 @@ SerialPort.prototype.saveRegisters = function()
 };
 
 /**
- * sendRBR(ab)
+ * receiveData(data)
+ *
+ * This replaces the old sendRBR() function, which expected an Array of bytes.  We still support that,
+ * but in order to support connections with other SerialPort components (ie, the PC8080 SerialPort), we
+ * have added support for numbers and strings as well.
  *
  * @this {SerialPort}
- * @param {Array} ab is an array of bytes to propagate to the bRBR (Receiver Buffer Register)
+ * @param {number|string|Array} data
+ * @return {boolean} true if received, false if not
  */
-SerialPort.prototype.sendRBR = function(ab)
+SerialPort.prototype.receiveData = function(data)
 {
-    this.abReceive = this.abReceive.concat(ab);
+    if (typeof data == "number") {
+        this.abReceive.push(data);
+    }
+    else if (typeof data == "string") {
+        for (var i = 0; i < data.length; i++) {
+            this.abReceive.push(data.charCodeAt(i));
+        }
+    }
+    else {
+        this.abReceive = this.abReceive.concat(data);
+    }
     this.advanceRBR();
+    return true;                // for now, return true regardless, since we're buffering everything anyway
 };
 
 /**
@@ -731,7 +822,7 @@ SerialPort.prototype.outTHR = function(port, bOut, addrFrom)
     } else {
         this.bTHR = bOut;
         this.bLSR &= ~(SerialPort.LSR.THRE | SerialPort.LSR.TSRE);
-        if (this.echoByte(bOut)) {
+        if (this.transmitByte(bOut)) {
             this.bLSR |= (SerialPort.LSR.THRE | SerialPort.LSR.TSRE);
             /*
              * QUESTION: Does this mean we should also flush/zero bTHR?
@@ -816,14 +907,24 @@ SerialPort.prototype.updateIRR = function()
 };
 
 /**
- * echoByte(b)
+ * transmitByte(b)
  *
  * @this {SerialPort}
  * @param {number} b
- * @return {boolean} true if echoed, false if not
+ * @return {boolean} true if transmitted, false if not
  */
-SerialPort.prototype.echoByte = function(b)
+SerialPort.prototype.transmitByte = function(b)
 {
+    var fTransmitted = false;
+
+    this.printMessage("transmitByte(" + str.toHexByte(b) + ")");
+
+    if (this.sendData) {
+        if (this.sendData.call(this.connection, b)) {
+            fTransmitted = true;
+        }
+    }
+
     if (this.controlIOBuffer) {
         if (b == 0x0D) {
             this.iLogicalCol = 0;
@@ -836,8 +937,9 @@ SerialPort.prototype.echoByte = function(b)
             if (this.iLogicalCol > 0) this.iLogicalCol--;
         }
         else {
-            var s = String.fromCharCode(b);
-            var nChars = (b >= 0x20? 1 : 0);
+            var s = str.toASCIICode(b); // formerly: String.fromCharCode(b);
+            var nChars = s.length;      // formerly: (b >= 0x20? 1 : 0);
+            if (b < 0x20 && nChars == 1) nChars = 0;
             if (b == 0x09) {
                 var tabSize = this.tabSize || 8;
                 nChars = tabSize - (this.iLogicalCol % tabSize);
@@ -848,9 +950,9 @@ SerialPort.prototype.echoByte = function(b)
             this.controlIOBuffer.scrollTop = this.controlIOBuffer.scrollHeight;
             this.iLogicalCol += nChars;
         }
-        return true;
+        fTransmitted = true;
     }
-    if (this.consoleOutput != null) {
+    else if (this.consoleOutput != null) {
         if (b == 0x0A || this.consoleOutput.length >= 1024) {
             this.println(this.consoleOutput);
             this.consoleOutput = "";
@@ -858,9 +960,10 @@ SerialPort.prototype.echoByte = function(b)
         if (b != 0x0A) {
             this.consoleOutput += String.fromCharCode(b);
         }
-        return true;
+        fTransmitted = true;
     }
-    return false;
+
+    return fTransmitted;
 };
 
 /*

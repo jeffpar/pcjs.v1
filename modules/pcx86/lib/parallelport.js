@@ -32,11 +32,12 @@
 "use strict";
 
 if (NODE) {
+    var str         = require("../../shared/lib/strlib");
     var web         = require("../../shared/lib/weblib");
     var Component   = require("../../shared/lib/component");
+    var State       = require("../../shared/lib/state");
     var Messages    = require("./messages");
     var ChipSet     = require("./chipset");
-    var State       = require("./state");
 }
 
 /**
@@ -93,7 +94,7 @@ function ParallelPort(parmsParallel) {
     this.consoleOutput = null;
 
     /**
-     * controlIOBuffer is a DOM element, if any, bound to the port (currently used for output only; see echoByte()).
+     * controlIOBuffer is a DOM element bound to the port (currently used for output only; see transmitByte()).
      *
      * @type {Object}
      */
@@ -117,7 +118,7 @@ function ParallelPort(parmsParallel) {
  * property {number} iAdapter
  * property {number} portBase
  * property {number} nIRQ
- * property {Object} controlIOBuffer is a DOM element, if any, bound to the port (for rudimentary output; see echoByte())
+ * property {Object} controlIOBuffer is a DOM element bound to the port (for rudimentary output; see transmitByte())
  *
  * NOTE: This class declaration started as a way of informing the code inspector of the controlIOBuffer property,
  * which remained undefined until a setBinding() call set it later, but I've since decided that explicitly
@@ -406,7 +407,7 @@ ParallelPort.prototype.outData = function(port, bOut, addrFrom)
     this.printMessageIO(port, bOut, addrFrom, "DATA");
     this.bData = bOut;
     this.bStatus |= ParallelPort.STATUS.NOTREADY;
-    if (this.echoByte(bOut)) {
+    if (this.transmitByte(bOut)) {
         this.bStatus &= ~ParallelPort.STATUS.NOTREADY;
     }
     this.updateIRR();
@@ -444,14 +445,18 @@ ParallelPort.prototype.updateIRR = function()
 };
 
 /**
- * echoByte(b)
+ * transmitByte(b)
  *
  * @this {ParallelPort}
  * @param {number} b
- * @return {boolean} true if echoed, false if not
+ * @return {boolean} true if transmitted, false if not
  */
-ParallelPort.prototype.echoByte = function(b)
+ParallelPort.prototype.transmitByte = function(b)
 {
+    var fTransmitted = false;
+
+    this.printMessage("transmitByte(" + str.toHexByte(b) + ")");
+
     if (this.controlIOBuffer) {
         if (b == 0x08) {
             this.controlIOBuffer.value = this.controlIOBuffer.value.slice(0, -1);
@@ -460,7 +465,7 @@ ParallelPort.prototype.echoByte = function(b)
             this.controlIOBuffer.value += String.fromCharCode(b);
             this.controlIOBuffer.scrollTop = this.controlIOBuffer.scrollHeight;
         }
-        return true;
+        fTransmitted = true;
     }
     if (this.consoleOutput != null) {
         if (b == 0x0A || this.consoleOutput.length >= 1024) {
@@ -470,9 +475,10 @@ ParallelPort.prototype.echoByte = function(b)
         if (b != 0x0A) {
             this.consoleOutput += String.fromCharCode(b);
         }
-        return true;
+        fTransmitted = true;
     }
-    return false;
+
+    return fTransmitted;
 };
 
 /*

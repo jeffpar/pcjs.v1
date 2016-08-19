@@ -38,17 +38,17 @@ if (NODE) {
     var UserAPI     = require("../../shared/lib/userapi");
     var ReportAPI   = require("../../shared/lib/reportapi");
     var Component   = require("../../shared/lib/component");
+    var State       = require("../../shared/lib/state");
     /*
      * TODO: I'm confused why WebStorm complains if the following require() is missing in THIS file but not other files.
      */
     var PC8080      = require("./defines");
-    var Messages    = require("./messages");
-    var Bus         = require("./bus");
-    var State       = require("./state");
+    var Bus8080     = require("./bus");
+    var Messages8080= require("./messages");
 }
 
 /**
- * Computer(parmsComputer, parmsMachine, fSuspended)
+ * Computer8080(parmsComputer, parmsMachine, fSuspended)
  *
  * @constructor
  * @extends Component
@@ -56,7 +56,7 @@ if (NODE) {
  * @param {Object} [parmsMachine]
  * @param {boolean} [fSuspended]
  *
- * The Computer component has no required (parmsComputer) properties, but it does
+ * The Computer8080 component has no required (parmsComputer) properties, but it does
  * support the following:
  *
  *      autoPower: true to automatically power the computer (default), false to wait;
@@ -67,7 +67,7 @@ if (NODE) {
  *      while 24 is required for 80286 protected-mode addressing.  This value is passed
  *      directly through to the Bus component; see that component for more details.
  *
- *      resume: one of the Computer.RESUME constants, which are as follows:
+ *      resume: one of the Computer8080.RESUME constants, which are as follows:
  *          '0' if resume disabled (default)
  *          '1' if enabled without prompting
  *          '2' if enabled with prompting
@@ -81,13 +81,13 @@ if (NODE) {
  *      autoMount: if set, this should override any 'autoMount' property in the FDC's
  *      parmsFDC object.
  *
- *      autoPower: if set, this should override any 'autoPower' property in the Computer's
+ *      autoPower: if set, this should override any 'autoPower' property in the Computer8080's
  *      parmsComputer object.
  *
  *      messages: if set, this should override any 'messages' property in the Debugger's
  *      parmsDbg object.
  *
- *      state: if set, this should override any 'state' property in the Computer's
+ *      state: if set, this should override any 'state' property in the Computer8080's
  *      parmsComputer object.
  *
  *      url: the location of the machine XML file
@@ -109,9 +109,9 @@ if (NODE) {
  * function (if it has one--it's optional).  We call the CPU's powerUp() function last,
  * so that the CPU is assured that all other components are ready and "powered".
  */
-function Computer(parmsComputer, parmsMachine, fSuspended) {
+function Computer8080(parmsComputer, parmsMachine, fSuspended) {
 
-    Component.call(this, "Computer", parmsComputer, Computer, Messages.COMPUTER);
+    Component.call(this, "Computer", parmsComputer, Computer8080, Messages8080.COMPUTER);
 
     this.flags.fPowered = false;
 
@@ -130,7 +130,7 @@ function Computer(parmsComputer, parmsMachine, fSuspended) {
      */
     this.nBusWidth = parmsComputer['busWidth'] || parmsComputer['buswidth'];
 
-    this.resume = Computer.RESUME_NONE;
+    this.resume = Computer8080.RESUME_NONE;
     this.sStateData = null;
     this.fStateData = false;            // remembers if sStateData was loaded
     this.fServerState = false;
@@ -151,12 +151,12 @@ function Computer(parmsComputer, parmsMachine, fSuspended) {
      * where we know getComponentByType() will only return an CPUState object or null), wrap the expression
      * in parentheses.  I never knew this until I stumbled across it in "Closure: The Definitive Guide".
      */
-    this.cpu = /** @type {CPUState} */ (Component.getComponentByType("CPU", this.id));
+    this.cpu = /** @type {CPUState8080} */ (Component.getComponentByType("CPU", this.id));
     if (!this.cpu) {
         Component.error("Unable to find CPU component");
         return;
     }
-    this.dbg = /** @type {Debugger} */ (Component.getComponentByType("Debugger", this.id));
+    this.dbg = /** @type {Debugger8080} */ (Component.getComponentByType("Debugger", this.id));
 
     /*
      * Enumerate all Video components for future updateVideo() calls.
@@ -169,14 +169,14 @@ function Computer(parmsComputer, parmsMachine, fSuspended) {
     /*
      * Initialize the Bus component
      */
-    this.bus = new Bus({'id': this.idMachine + '.bus', 'busWidth': this.nBusWidth}, this.cpu, this.dbg);
+    this.bus = new Bus8080({'id': this.idMachine + '.bus', 'busWidth': this.nBusWidth}, this.cpu, this.dbg);
 
     /*
      * Iterate through all the components and connect them to the Control Panel, if any
      */
     var iComponent, component;
     var aComponents = Component.getComponents(this.id);
-    this.panel = /** @type {Panel} */ (Component.getComponentByType("Panel", this.id));
+    this.panel = /** @type {Panel8080} */ (Component.getComponentByType("Panel", this.id));
 
     if (this.panel && this.panel.controlPrint) {
         for (iComponent = 0; iComponent < aComponents.length; iComponent++) {
@@ -240,7 +240,7 @@ function Computer(parmsComputer, parmsMachine, fSuspended) {
         sStatePath = this.sStatePath = sState;
         if (!fAllowResume) {
             this.fServerState = true;
-            this.resume = Computer.RESUME_NONE;
+            this.resume = Computer8080.RESUME_NONE;
         }
         if (this.resume) {
             this.stateComputer = new State(this, PC8080.APPVERSION);
@@ -278,33 +278,33 @@ function Computer(parmsComputer, parmsMachine, fSuspended) {
     if (!fSuspended && this.fAutoPower) this.wait(this.powerOn);
 }
 
-Component.subclass(Computer);
+Component.subclass(Computer8080);
 
-Computer.STATE_FAILSAFE  = "failsafe";
-Computer.STATE_VALIDATE  = "validate";
-Computer.STATE_TIMESTAMP = "timestamp";
-Computer.STATE_VERSION   = "version";
-Computer.STATE_HOSTURL   = "url";
-Computer.STATE_BROWSER   = "browser";
-Computer.STATE_USERID    = "user";
+Computer8080.STATE_FAILSAFE  = "failsafe";
+Computer8080.STATE_VALIDATE  = "validate";
+Computer8080.STATE_TIMESTAMP = "timestamp";
+Computer8080.STATE_VERSION   = "version";
+Computer8080.STATE_HOSTURL   = "url";
+Computer8080.STATE_BROWSER   = "browser";
+Computer8080.STATE_USERID    = "user";
 
 /*
  * The following constants define all the resume options.  Negative values (eg, RESUME_REPOWER) are for
  * internal use only, and RESUME_DELETE is not documented (it provides a way of deleting ALL saved states
  * whenever a resume is declined).  As a result, the only "end-user" values are 0, 1 and 2.
  */
-Computer.RESUME_REPOWER  = -1;  // resume without changing any state (for internal use only)
-Computer.RESUME_NONE     =  0;  // default (no resume)
-Computer.RESUME_AUTO     =  1;  // automatically save/restore state
-Computer.RESUME_PROMPT   =  2;  // automatically save but conditionally restore (WARNING: if restore is declined, any state is discarded)
-Computer.RESUME_DELETE   =  3;  // same as RESUME_PROMPT but discards ALL machines states whenever ANY machine restore is declined (undocumented)
+Computer8080.RESUME_REPOWER  = -1;  // resume without changing any state (for internal use only)
+Computer8080.RESUME_NONE     =  0;  // default (no resume)
+Computer8080.RESUME_AUTO     =  1;  // automatically save/restore state
+Computer8080.RESUME_PROMPT   =  2;  // automatically save but conditionally restore (WARNING: if restore is declined, any state is discarded)
+Computer8080.RESUME_DELETE   =  3;  // same as RESUME_PROMPT but discards ALL machines states whenever ANY machine restore is declined (undocumented)
 
 /**
  * getMachineID()
  *
  * @return {string}
  */
-Computer.prototype.getMachineID = function()
+Computer8080.prototype.getMachineID = function()
 {
     return this.sMachineID;
 };
@@ -316,7 +316,7 @@ Computer.prototype.getMachineID = function()
  *
  * @param {Object} [parmsMachine]
  */
-Computer.prototype.setMachineParms = function(parmsMachine)
+Computer8080.prototype.setMachineParms = function(parmsMachine)
 {
     if (!parmsMachine) {
         var sParms;
@@ -345,7 +345,7 @@ Computer.prototype.setMachineParms = function(parmsMachine)
  * @param {Object} [parmsComponent]
  * @return {string|undefined}
  */
-Computer.prototype.getMachineParm = function(sParm, parmsComponent)
+Computer8080.prototype.getMachineParm = function(sParm, parmsComponent)
 {
     /*
      * When checking parmsURL, the check is allowed be a bit looser, because URL parameters are
@@ -373,7 +373,7 @@ Computer.prototype.getMachineParm = function(sParm, parmsComponent)
  *
  * @return {string|null}
  */
-Computer.prototype.saveMachineParms = function()
+Computer8080.prototype.saveMachineParms = function()
 {
     return this.parmsMachine? JSON.stringify(this.parmsMachine) : null;
 };
@@ -383,7 +383,7 @@ Computer.prototype.saveMachineParms = function()
  *
  * @return {string}
  */
-Computer.prototype.getUserID = function()
+Computer8080.prototype.getUserID = function()
 {
     return this.sUserID || "";
 };
@@ -391,12 +391,12 @@ Computer.prototype.getUserID = function()
 /**
  * doneLoad(sURL, sStateData, nErrorCode)
  *
- * @this {Computer}
+ * @this {Computer8080}
  * @param {string} sURL
  * @param {string} sStateData
  * @param {number} nErrorCode
  */
-Computer.prototype.doneLoad = function(sURL, sStateData, nErrorCode)
+Computer8080.prototype.doneLoad = function(sURL, sStateData, nErrorCode)
 {
     if (!nErrorCode) {
         this.sStateData = sStateData;
@@ -426,11 +426,11 @@ Computer.prototype.doneLoad = function(sURL, sStateData, nErrorCode)
  *
  *      param {function(this:Computer, (number|Array|undefined)): undefined} fn
  *
- * @this {Computer}
+ * @this {Computer8080}
  * @param {function(...)} fn
  * @param {number|Array} [parms] optional parameters
  */
-Computer.prototype.wait = function(fn, parms)
+Computer8080.prototype.wait = function(fn, parms)
 {
     var computer = this;
     var aComponents = Component.getComponents(this.id);
@@ -443,7 +443,7 @@ Computer.prototype.wait = function(fn, parms)
             return;
         }
     }
-    if (DEBUG && this.messageEnabled()) this.printMessage("Computer.wait(ready)");
+    if (DEBUG && this.messageEnabled()) this.printMessage("Computer8080.wait(ready)");
     fn.call(this, parms);
 };
 
@@ -452,17 +452,17 @@ Computer.prototype.wait = function(fn, parms)
  *
  * NOTE: We clear() stateValidate only when there's no stateComputer.
  *
- * @this {Computer}
+ * @this {Computer8080}
  * @param {State|null} [stateComputer]
  * @return {boolean} true if state passes validation, false if not
  */
-Computer.prototype.validateState = function(stateComputer)
+Computer8080.prototype.validateState = function(stateComputer)
 {
     var fValid = true;
-    var stateValidate = new State(this, PC8080.APPVERSION, Computer.STATE_VALIDATE);
+    var stateValidate = new State(this, PC8080.APPVERSION, Computer8080.STATE_VALIDATE);
     if (stateValidate.load() && stateValidate.parse()) {
-        var sTimestampValidate = stateValidate.get(Computer.STATE_TIMESTAMP);
-        var sTimestampComputer = stateComputer ? stateComputer.get(Computer.STATE_TIMESTAMP) : "unknown";
+        var sTimestampValidate = stateValidate.get(Computer8080.STATE_TIMESTAMP);
+        var sTimestampComputer = stateComputer? stateComputer.get(Computer8080.STATE_TIMESTAMP) : "unknown";
         if (sTimestampValidate != sTimestampComputer) {
             this.notice("Machine state may be out-of-date\n(" + sTimestampValidate + " vs. " + sTimestampComputer + ")\nCheck your browser's local storage limits");
             fValid = false;
@@ -481,17 +481,17 @@ Computer.prototype.validateState = function(stateComputer)
  *
  * Power every component "up", applying any previously available state information.
  *
- * @this {Computer}
+ * @this {Computer8080}
  * @param {number} [resume] is a valid RESUME value; default is this.resume
  */
-Computer.prototype.powerOn = function(resume)
+Computer8080.prototype.powerOn = function(resume)
 {
     if (resume === undefined) {
-        resume = this.resume || (this.sStateData? Computer.RESUME_AUTO : Computer.RESUME_NONE);
+        resume = this.resume || (this.sStateData? Computer8080.RESUME_AUTO : Computer8080.RESUME_NONE);
     }
 
     if (DEBUG && this.messageEnabled()) {
-        this.printMessage("Computer.powerOn(" + (resume == Computer.RESUME_REPOWER ? "repower" : (resume ? "resume" : "")) + ")");
+        this.printMessage("Computer8080.powerOn(" + (resume == Computer8080.RESUME_REPOWER ? "repower" : (resume ? "resume" : "")) + ")");
     }
 
     if (this.nPowerChange) {
@@ -504,10 +504,10 @@ Computer.prototype.powerOn = function(resume)
     this.fRestoreError = false;
     var stateComputer = this.stateComputer || new State(this, PC8080.APPVERSION);
 
-    if (resume == Computer.RESUME_REPOWER) {
+    if (resume == Computer8080.RESUME_REPOWER) {
         fRepower = true;
     }
-    else if (resume > Computer.RESUME_NONE) {
+    else if (resume > Computer8080.RESUME_NONE) {
         if (stateComputer.load(this.sStateData)) {
             /*
              * Since we're resuming something (either a predefined state or a state from localStorage), let's
@@ -515,7 +515,7 @@ Computer.prototype.powerOn = function(resume)
              * Which means, of course, that if a previous "failsafe" checkpoint already exists, something bad
              * may have happened the last time around.
              */
-            this.stateFailSafe = new State(this, PC8080.APPVERSION, Computer.STATE_FAILSAFE);
+            this.stateFailSafe = new State(this, PC8080.APPVERSION, Computer8080.STATE_FAILSAFE);
             if (this.stateFailSafe.load()) {
                 this.powerReport(stateComputer);
                 /*
@@ -523,7 +523,7 @@ Computer.prototype.powerOn = function(resume)
                  * all the way to RESUME_PROMPT, so that the user will be prompted, and if the user declines to
                  * restore, the state will be removed.
                  */
-                resume = Computer.RESUME_PROMPT;
+                resume = Computer8080.RESUME_PROMPT;
                 /*
                  * To ensure that the set() below succeeds, we need to call unload(), otherwise it may fail
                  * with a "read only" error (eg, "TypeError: Cannot assign to read only property 'timestamp'").
@@ -531,11 +531,11 @@ Computer.prototype.powerOn = function(resume)
                 this.stateFailSafe.unload();
             }
 
-            this.stateFailSafe.set(Computer.STATE_TIMESTAMP, usr.getTimestamp());
+            this.stateFailSafe.set(Computer8080.STATE_TIMESTAMP, usr.getTimestamp());
             this.stateFailSafe.store();
 
             var fValidate = this.resume && !this.fServerState;
-            if (resume == Computer.RESUME_AUTO || web.confirmUser("Click OK to restore the previous " + PC8080.APPNAME + " machine state, or CANCEL to reset the machine.")) {
+            if (resume == Computer8080.RESUME_AUTO || web.confirmUser("Click OK to restore the previous " + PC8080.APPNAME + " machine state, or CANCEL to reset the machine.")) {
                 fRestore = stateComputer.parse();
                 if (fRestore) {
                     var sCode = stateComputer.get(UserAPI.RES.CODE);
@@ -578,7 +578,7 @@ Computer.prototype.powerOn = function(resume)
                 /*
                  * RESUME_PROMPT indicates we should delete the state if they clicked Cancel to confirm() above.
                  */
-                if (resume == Computer.RESUME_PROMPT) stateComputer.clear();
+                if (resume == Computer8080.RESUME_PROMPT) stateComputer.clear();
             }
         } else {
             /*
@@ -610,7 +610,7 @@ Computer.prototype.powerOn = function(resume)
      */
     var aParms = [stateComputer, resume, fRestore];
 
-    if (resume != Computer.RESUME_REPOWER) {
+    if (resume != Computer8080.RESUME_REPOWER) {
         this.wait(this.donePowerOn, aParms);
         return;
     }
@@ -620,14 +620,14 @@ Computer.prototype.powerOn = function(resume)
 /**
  * powerRestore(component, stateComputer, fRepower, fRestore)
  *
- * @this {Computer}
+ * @this {Computer8080}
  * @param {Component} component
  * @param {State} stateComputer
  * @param {boolean} fRepower
  * @param {boolean} fRestore
  * @return {boolean} true if restore should continue, false if not
  */
-Computer.prototype.powerRestore = function(component, stateComputer, fRepower, fRestore)
+Computer8080.prototype.powerRestore = function(component, stateComputer, fRepower, fRestore)
 {
     if (!component.flags.fPowered) {
 
@@ -685,7 +685,7 @@ Computer.prototype.powerRestore = function(component, stateComputer, fRepower, f
                  */
                 if (this.sStatePath && !this.fStateData) {
                     stateComputer.clear();
-                    this.resume = Computer.RESUME_NONE;
+                    this.resume = Computer8080.RESUME_NONE;
                     web.reloadPage();
                 } else {
                     /*
@@ -725,17 +725,17 @@ Computer.prototype.powerRestore = function(component, stateComputer, fRepower, f
  *
  * This is nothing more than a continuation of powerOn(), giving us the option of calling wait() one more time.
  *
- * @this {Computer}
+ * @this {Computer8080}
  * @param {Array} aParms containing [stateComputer, resume, fRestore]
  */
-Computer.prototype.donePowerOn = function(aParms)
+Computer8080.prototype.donePowerOn = function(aParms)
 {
     var stateComputer = aParms[0];
     var fRepower = (aParms[1] < 0);
     var fRestore = aParms[2];
 
     if (DEBUG && this.flags.fPowered && this.messageEnabled()) {
-        this.printMessage("Computer.donePowerOn(): redundant");
+        this.printMessage("Computer8080.donePowerOn(): redundant");
     }
 
     this.fInitialized = true;
@@ -775,10 +775,10 @@ Computer.prototype.donePowerOn = function(aParms)
 /**
  * checkPower()
  *
- * @this {Computer}
+ * @this {Computer8080}
  * @return {boolean} true if the computer is fully powered, false otherwise
  */
-Computer.prototype.checkPower = function()
+Computer8080.prototype.checkPower = function()
 {
     if (this.flags.fPowered) return true;
 
@@ -803,10 +803,10 @@ Computer.prototype.checkPower = function()
 /**
  * powerReport(stateComputer)
  *
- * @this {Computer}
+ * @this {Computer8080}
  * @param {State} stateComputer
  */
-Computer.prototype.powerReport = function(stateComputer)
+Computer8080.prototype.powerReport = function(stateComputer)
 {
     if (web.confirmUser("There may be a problem with your " + PC8080.APPNAME + " machine.\n\nTo help us diagnose it, click OK to send this " + PC8080.APPNAME + " machine state to http://" + SITEHOST + ".")) {
         web.sendReport(PC8080.APPNAME, PC8080.APPVERSION, this.url, this.getUserID(), ReportAPI.TYPE.BUG, stateComputer.toString());
@@ -839,18 +839,18 @@ Computer.prototype.powerReport = function(stateComputer)
  * As it stands, the worst that happens is any manually mounted disk images might have to be manually remounted,
  * which doesn't seem like a huge problem.
  *
- * @this {Computer}
+ * @this {Computer8080}
  * @param {boolean} [fSave] is true to request a saved state
  * @param {boolean} [fShutdown] is true if the machine is being shut down
  * @return {string|null} string representing the saved state (or null if error)
  */
-Computer.prototype.powerOff = function(fSave, fShutdown)
+Computer8080.prototype.powerOff = function(fSave, fShutdown)
 {
     var data;
     var sState = "none";
 
     if (DEBUG && this.messageEnabled()) {
-        this.printMessage("Computer.powerOff(" + (fSave ? "save" : "nosave") + (fShutdown ? ",shutdown" : "") + ")");
+        this.printMessage("Computer8080.powerOff(" + (fSave ? "save" : "nosave") + (fShutdown ? ",shutdown" : "") + ")");
     }
 
     if (this.nPowerChange) {
@@ -859,14 +859,14 @@ Computer.prototype.powerOff = function(fSave, fShutdown)
     this.nPowerChange--;
 
     var stateComputer = new State(this, PC8080.APPVERSION);
-    var stateValidate = new State(this, PC8080.APPVERSION, Computer.STATE_VALIDATE);
+    var stateValidate = new State(this, PC8080.APPVERSION, Computer8080.STATE_VALIDATE);
 
     var sTimestamp = usr.getTimestamp();
-    stateValidate.set(Computer.STATE_TIMESTAMP, sTimestamp);
-    stateComputer.set(Computer.STATE_TIMESTAMP, sTimestamp);
-    stateComputer.set(Computer.STATE_VERSION, APPVERSION);
-    stateComputer.set(Computer.STATE_HOSTURL, web.getHostURL());
-    stateComputer.set(Computer.STATE_BROWSER, web.getUserAgent());
+    stateValidate.set(Computer8080.STATE_TIMESTAMP, sTimestamp);
+    stateComputer.set(Computer8080.STATE_TIMESTAMP, sTimestamp);
+    stateComputer.set(Computer8080.STATE_VERSION, APPVERSION);
+    stateComputer.set(Computer8080.STATE_HOSTURL, web.getHostURL());
+    stateComputer.set(Computer8080.STATE_BROWSER, web.getUserAgent());
 
     /*
      * Always power the CPU "down" first, just to help insure it doesn't ask other components to do anything
@@ -932,7 +932,7 @@ Computer.prototype.powerOff = function(fSave, fShutdown)
                  */
                 if (this.resume) {
                     fClear = true;
-                    fClearAll = (this.resume == Computer.RESUME_DELETE);
+                    fClearAll = (this.resume == Computer8080.RESUME_DELETE);
                 }
             }
             if (fClear) {
@@ -963,9 +963,9 @@ Computer.prototype.powerOff = function(fSave, fShutdown)
  * allocated the Bus object ourselves, after all the other components were allocated, it ends
  * up near the end of Component's list of components.  Hence the special case for this.bus below.
  *
- * @this {Computer}
+ * @this {Computer8080}
  */
-Computer.prototype.reset = function()
+Computer8080.prototype.reset = function()
 {
     if (this.bus && this.bus.reset) {
         /*
@@ -993,11 +993,11 @@ Computer.prototype.reset = function()
  * Note that we're called by runCPU(), which is why we exclude the CPU component,
  * as well as ourselves.
  *
- * @this {Computer}
+ * @this {Computer8080}
  * @param {number} ms
  * @param {number} nCycles
  */
-Computer.prototype.start = function(ms, nCycles)
+Computer8080.prototype.start = function(ms, nCycles)
 {
     var aComponents = Component.getComponents(this.id);
     for (var iComponent = 0; iComponent < aComponents.length; iComponent++) {
@@ -1017,11 +1017,11 @@ Computer.prototype.start = function(ms, nCycles)
  * Note that we're called by runCPU(), which is why we exclude the CPU component,
  * as well as ourselves.
  *
- * @this {Computer}
+ * @this {Computer8080}
  * @param {number} ms
  * @param {number} nCycles
  */
-Computer.prototype.stop = function(ms, nCycles)
+Computer8080.prototype.stop = function(ms, nCycles)
 {
     var aComponents = Component.getComponents(this.id);
     for (var iComponent = 0; iComponent < aComponents.length; iComponent++) {
@@ -1036,14 +1036,14 @@ Computer.prototype.stop = function(ms, nCycles)
 /**
  * setBinding(sHTMLType, sBinding, control, sValue)
  *
- * @this {Computer}
+ * @this {Computer8080}
  * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
  * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "reset")
  * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
  * @param {string} [sValue] optional data value
  * @return {boolean} true if binding was successful, false if unrecognized binding request
  */
-Computer.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
+Computer8080.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
 {
     var computer = this;
 
@@ -1130,9 +1130,9 @@ Computer.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
 /**
  * resetUserID()
  */
-Computer.prototype.resetUserID = function()
+Computer8080.prototype.resetUserID = function()
 {
-    web.setLocalStorageItem(Computer.STATE_USERID, "");
+    web.setLocalStorageItem(Computer8080.STATE_USERID, "");
     this.sUserID = null;
 };
 
@@ -1142,11 +1142,11 @@ Computer.prototype.resetUserID = function()
  * @param {boolean} [fPrompt]
  * @returns {string|null|undefined}
  */
-Computer.prototype.queryUserID = function(fPrompt)
+Computer8080.prototype.queryUserID = function(fPrompt)
 {
     var sUserID = this.sUserID;
     if (!sUserID) {
-        sUserID = web.getLocalStorageItem(Computer.STATE_USERID);
+        sUserID = web.getLocalStorageItem(Computer8080.STATE_USERID);
         if (sUserID !== undefined) {
             if (!sUserID && fPrompt) {
                 /*
@@ -1170,11 +1170,11 @@ Computer.prototype.queryUserID = function(fPrompt)
 /**
  * verifyUserID(sUserID)
  *
- * @this {Computer}
+ * @this {Computer8080}
  * @param {string} sUserID
  * @return {string} validated user ID, or null if error
  */
-Computer.prototype.verifyUserID = function(sUserID)
+Computer8080.prototype.verifyUserID = function(sUserID)
 {
     this.sUserID = null;
     var fMessages = DEBUG && this.messageEnabled();
@@ -1187,8 +1187,8 @@ Computer.prototype.verifyUserID = function(sUserID)
         try {
             response = eval("(" + sResponse + ")");
             if (response.code && response.code == UserAPI.CODE.OK) {
-                web.setLocalStorageItem(Computer.STATE_USERID, response.data);
-                if (fMessages) this.printMessage(Computer.STATE_USERID + " updated: " + response.data);
+                web.setLocalStorageItem(Computer8080.STATE_USERID, response.data);
+                if (fMessages) this.printMessage(Computer8080.STATE_USERID + " updated: " + response.data);
                 this.sUserID = response.data;
             } else {
                 if (fMessages) this.printMessage(response.code + ": " + response.data);
@@ -1205,20 +1205,20 @@ Computer.prototype.verifyUserID = function(sUserID)
 /**
  * getServerStatePath()
  *
- * @this {Computer}
+ * @this {Computer8080}
  * @return {string|null} sStatePath (null if no localStorage or no USERID stored in localStorage)
  */
-Computer.prototype.getServerStatePath = function()
+Computer8080.prototype.getServerStatePath = function()
 {
     var sStatePath = null;
     if (this.sUserID) {
         if (DEBUG && this.messageEnabled()) {
-            this.printMessage(Computer.STATE_USERID + " for load: " + this.sUserID);
+            this.printMessage(Computer8080.STATE_USERID + " for load: " + this.sUserID);
         }
         sStatePath = web.getHost() + UserAPI.ENDPOINT + '?' + UserAPI.QUERY.REQ + '=' + UserAPI.REQ.LOAD + '&' + UserAPI.QUERY.USER + '=' + this.sUserID + '&' + UserAPI.QUERY.STATE + '=' + State.key(this, PC8080.APPVERSION);
     } else {
         if (DEBUG && this.messageEnabled()) {
-            this.printMessage(Computer.STATE_USERID + " unavailable");
+            this.printMessage(Computer8080.STATE_USERID + " unavailable");
         }
     }
     return sStatePath;
@@ -1230,7 +1230,7 @@ Computer.prototype.getServerStatePath = function()
  * @param {string} sUserID
  * @param {string|null} sState
  */
-Computer.prototype.saveServerState = function(sUserID, sState)
+Computer8080.prototype.saveServerState = function(sUserID, sState)
 {
     /*
      * We must pass fSync == true, because (as I understand it) browsers will blow off any async
@@ -1265,16 +1265,16 @@ Computer.prototype.saveServerState = function(sUserID, sState)
 /**
  * storeServerState(sUserID, sState, fSync)
  *
- * @this {Computer}
+ * @this {Computer8080}
  * @param {string} sUserID
  * @param {string} sState
  * @param {boolean} [fSync] is true if we're powering down and should perform a synchronous request (default is async)
  * @return {*} server response if fSync is true and a response was received; otherwise null
  */
-Computer.prototype.storeServerState = function(sUserID, sState, fSync)
+Computer8080.prototype.storeServerState = function(sUserID, sState, fSync)
 {
     if (DEBUG && this.messageEnabled()) {
-        this.printMessage(Computer.STATE_USERID + " for store: " + sUserID);
+        this.printMessage(Computer8080.STATE_USERID + " for store: " + sUserID);
     }
     /*
      * TODO: Determine whether or not any browsers cancel our request if we're called during a browser "shutdown" event,
@@ -1310,9 +1310,9 @@ Computer.prototype.storeServerState = function(sUserID, sState, fSync)
  *
  * This handles UI requests to toggle the computer's power (eg, see the "power" button binding).
  *
- * @this {Computer}
+ * @this {Computer8080}
  */
-Computer.prototype.onPower = function()
+Computer8080.prototype.onPower = function()
 {
     if (!this.nPowerChange) {
         if (!this.flags.fPowered) {
@@ -1328,9 +1328,9 @@ Computer.prototype.onPower = function()
  *
  * This handles UI requests to reset the computer's state (eg, see the "reset" button binding).
  *
- * @this {Computer}
+ * @this {Computer8080}
  */
-Computer.prototype.onReset = function()
+Computer8080.prototype.onReset = function()
 {
     /*
      * I'm going to start with the presumption that it makes little sense for an "unpowered" computer to be "reset";
@@ -1349,10 +1349,10 @@ Computer.prototype.onReset = function()
      */
     if (this.resume && !this.sResumePath) {
         /*
-         * I used to bypass the prompt if this.resume == Computer.RESUME_AUTO, setting fSave to true automatically,
+         * I used to bypass the prompt if this.resume == Computer8080.RESUME_AUTO, setting fSave to true automatically,
          * but that gives the user no means of resetting a resumable machine that contains errors in its resume state.
          */
-        var fSave = (/* this.resume == Computer.RESUME_AUTO || */ web.confirmUser("Click OK to save changes to this " + PC8080.APPNAME + " machine.\n\nWARNING: If you CANCEL, all disk changes will be discarded."));
+        var fSave = (/* this.resume == Computer8080.RESUME_AUTO || */ web.confirmUser("Click OK to save changes to this " + PC8080.APPNAME + " machine.\n\nWARNING: If you CANCEL, all disk changes will be discarded."));
         this.powerOff(fSave, true);
         /*
          * Forcing the page to reload is an expedient option, but ugly. It's preferable to call powerOn()
@@ -1371,7 +1371,7 @@ Computer.prototype.onReset = function()
             return;
         }
         if (!fSave) this.fReload = true;
-        this.powerOn(Computer.RESUME_NONE);
+        this.powerOn(Computer8080.RESUME_NONE);
         this.fReload = false;
     } else {
         this.reset();
@@ -1382,13 +1382,14 @@ Computer.prototype.onReset = function()
 /**
  * getMachineComponent(sType, componentPrev)
  *
- * @this {Computer}
+ * @this {Computer8080}
  * @param {string} sType
  * @param {Component|null} [componentPrev] of previously returned component, if any
  * @return {Component|null}
  */
-Computer.prototype.getMachineComponent = function(sType, componentPrev)
+Computer8080.prototype.getMachineComponent = function(sType, componentPrev)
 {
+    var componentLast = componentPrev;
     var aComponents = Component.getComponents(this.id);
     for (var iComponent = 0; iComponent < aComponents.length; iComponent++) {
         var component = aComponents[iComponent];
@@ -1398,6 +1399,7 @@ Computer.prototype.getMachineComponent = function(sType, componentPrev)
         }
         if (component.type == sType) return component;
     }
+    if (!componentLast) Component.log("Machine component type '" + sType + "' not found", "warning");
     return null;
 };
 
@@ -1407,10 +1409,10 @@ Computer.prototype.getMachineComponent = function(sType, componentPrev)
  * NOTE: When soft keyboard buttons call us to return focus to the machine (and away from the button),
  * the scroll feature has annoying effect on iOS, so we no longer do it by default (fScroll must be true).
  *
- * @this {Computer}
+ * @this {Computer8080}
  * @param {boolean} [fScroll]
  */
-Computer.prototype.updateFocus = function(fScroll)
+Computer8080.prototype.updateFocus = function(fScroll)
 {
     if (this.aVideo.length) {
         /*
@@ -1450,10 +1452,10 @@ Computer.prototype.updateFocus = function(fScroll)
  * knows the names, number, sizes, etc, of all the active registers.  The Panel component is the logical candidate,
  * but Panel is an optional component; generally, only machines that include Debugger also include Panel.
  *
- * @this {Computer}
+ * @this {Computer8080}
  * @param {boolean} [fForce] (true will display registers even if the CPU is running and "live" registers are not enabled)
   */
-Computer.prototype.updateStatus = function(fForce)
+Computer8080.prototype.updateStatus = function(fForce)
 {
     /*
      * fForce is generally set to true whenever the CPU is transitioning to/from a running state, in which case
@@ -1473,10 +1475,10 @@ Computer.prototype.updateStatus = function(fForce)
  *
  * Any high-frequency updates should be performed here (avoid updating DOM elements).
  *
- * @this {Computer}
+ * @this {Computer8080}
  * @param {number} n (where 0 <= n < VIDEO_UPDATES_PER_SECOND for a normal update, or -1 for a forced update)
  */
-Computer.prototype.updateVideo = function(n)
+Computer8080.prototype.updateVideo = function(n)
 {
     for (var i = 0; i < this.aVideo.length; i++) {
         this.aVideo[i].updateScreen(n);
@@ -1484,14 +1486,14 @@ Computer.prototype.updateVideo = function(n)
 };
 
 /**
- * Computer.init()
+ * Computer8080.init()
  *
  * For every machine represented by an HTML element of class "pcjs-machine", this function
  * locates the HTML element of class "computer", extracting the JSON-encoded parameters for the
  * Computer constructor from the element's "data-value" attribute, invoking the constructor to
  * create a Computer component, and then binding any associated HTML controls to the new component.
  */
-Computer.init = function()
+Computer8080.init = function()
 {
     /*
      * In non-COMPILED builds, embedMachine() may have set XMLVERSION.
@@ -1516,7 +1518,7 @@ Computer.init = function()
              * We set fSuspended in the Computer constructor because we want to "power up" the
              * computer ourselves, after any/all bindings are in place.
              */
-            var computer = new Computer(parmsComputer, parmsMachine, true);
+            var computer = new Computer8080(parmsComputer, parmsMachine, true);
 
             if (DEBUG && computer.messageEnabled()) {
                 computer.printMessage("onInit(" + computer.flags.fPowered + ")");
@@ -1538,7 +1540,7 @@ Computer.init = function()
 };
 
 /**
- * Computer.show()
+ * Computer8080.show()
  *
  * When exit() is using an "onbeforeunload" handler, this "onpageshow" handler allows us to repower everything,
  * without either resetting or restoring.  We call powerOn() with a special resume value (RESUME_REPOWER) if the
@@ -1546,31 +1548,36 @@ Computer.init = function()
  * should be very quick, essentially just marking all components as powered again (so that, for example, the Video
  * component will start drawing again) and firing the CPU up again.
  */
-Computer.show = function()
+Computer8080.show = function()
 {
     var aeComputers = Component.getElementsByClass(document, PC8080.APPCLASS, "computer");
     for (var iComputer = 0; iComputer < aeComputers.length; iComputer++) {
         var eComputer = aeComputers[iComputer];
         var parmsComputer = Component.getComponentParms(eComputer);
-        var computer = /** @type {Computer} */ (Component.getComponentByType("Computer", parmsComputer['id']));
+        var computer = /** @type {Computer8080} */ (Component.getComponentByType("Computer", parmsComputer['id']));
         if (computer) {
 
             if (DEBUG && computer.messageEnabled()) {
                 computer.printMessage("onShow(" + computer.fInitialized + "," + computer.flags.fPowered + ")");
             }
 
+            /*
+             * Note that the FIRST 'onpageshow' event, and therefore the first show() callback, occurs
+             * AFTER the the initial 'onload' event, and at that point in time, fInitialized will not be set yet.
+             * So, practically speaking, the first show() callback isn't all that useful.
+             */
             if (computer.fInitialized && !computer.flags.fPowered) {
                 /**
                  * Repower the computer, notifying every component to continue running as-is.
                  */
-                computer.powerOn(Computer.RESUME_REPOWER);
+                computer.powerOn(Computer8080.RESUME_REPOWER);
             }
         }
     }
 };
 
 /**
- * Computer.exit()
+ * Computer8080.exit()
  *
  * The Computer is currently the only component that uses an "exit" handler, which web.onExit() defines as
  * either an "unload" or "onbeforeunload" handler.  This gives us the opportunity to save the machine state,
@@ -1586,7 +1593,7 @@ Computer.show = function()
  * presence of an "onunload" handler generally causes a browser to throw the page away once the handler returns.
  *
  * However, in order to safely use "onbeforeunload", we must add yet another handler ("onpageshow") to repower
- * everything, without either resetting or restoring.  Hence, the Computer.show() function, which calls powerOn()
+ * everything, without either resetting or restoring.  Hence, the Computer8080.show() function, which calls powerOn()
  * with a special resume value (RESUME_REPOWER) if the computer is already marked as "ready", meaning the browser
  * didn't change anything.  This "repower" process should be very quick, essentially just marking all components as
  * powered again (so that, for example, the Video component will start drawing again) and firing the CPU up again.
@@ -1595,13 +1602,13 @@ Computer.show = function()
  * "unload" instead.  But even when the page must be rebuilt from scratch, the combination of browser cache and
  * localStorage means the simulation should be restored and become operational almost immediately.
  */
-Computer.exit = function()
+Computer8080.exit = function()
 {
     var aeComputers = Component.getElementsByClass(document, PC8080.APPCLASS, "computer");
     for (var iComputer = 0; iComputer < aeComputers.length; iComputer++) {
         var eComputer = aeComputers[iComputer];
         var parmsComputer = Component.getComponentParms(eComputer);
-        var computer = /** @type {Computer} */ (Component.getComponentByType("Computer", parmsComputer['id']));
+        var computer = /** @type {Computer8080} */ (Component.getComponentByType("Computer", parmsComputer['id']));
         if (computer) {
 
             if (DEBUG && computer.messageEnabled()) {
@@ -1623,8 +1630,8 @@ Computer.exit = function()
 /*
  * Initialize every Computer on the page.
  */
-web.onInit(Computer.init);
-web.onShow(Computer.show);
-web.onExit(Computer.exit);
+web.onInit(Computer8080.init);
+web.onShow(Computer8080.show);
+web.onExit(Computer8080.exit);
 
-if (NODE) module.exports = Computer;
+if (NODE) module.exports = Computer8080;
