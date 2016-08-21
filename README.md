@@ -142,9 +142,9 @@ To install Jekyll for use with PCjs:
 
  1. Install Ruby (on OS X, it should already be installed)
  2. Install Bundler (on OS X, run `sudo gem install bundler`)
- 3. Create a `Gemfile` containing `gem 'github-pages'` (this is already checked in)
- 4. Run `bundle install` (GitHub Pages alternatively suggests: `bundle exec jekyll build --safe`)
- 5. Checkout the `gh-pages` branch, since only that branch contains all the Jekyll-related files
+ 3. Checkout the `gh-pages` branch, since only that branch contains all the Jekyll-related files
+ 4. Create a `Gemfile` containing `gem 'github-pages'` (this is already checked in)
+ 5. Run `bundle install` (GitHub Pages alternatively suggests: `bundle exec jekyll build --safe`)
  6. Run `bundle exec jekyll serve` to start the web server
 
 Now open a web browser and go to `http://localhost:4000/`.  You're done!
