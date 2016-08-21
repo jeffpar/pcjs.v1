@@ -15,7 +15,8 @@ The [PC8080](/modules/pc8080/) machine below is configured to simulate a [VT100 
 with a Control Panel and Debugger.  When you press the "Run" button, it will start running the original
 [VT100 Firmware](/devices/pc8080/rom/vt100/) inside the [PC8080](/modules/pc8080/) CPU emulator.
 
-Information about [VT100 Keys](#vt100-keys) along with assorted [Hardware Notes](#vt100-memory-usage) are provided below.
+Information about [VT100 Keys](#vt100-keys) and assorted [Hardware Notes](#vt100-memory-usage) are provided below,
+followed by some [VT100 Technical Manual](/pubs/dec/vt100/) excerpts regarding the [VT100 Initialization Process](#vt100-initialization-process).
 
 {% include machine.html id="vt100" %}
 
@@ -34,52 +35,57 @@ maps modern keys to VT100 key addresses, and most of the mappings are 1-1.  Func
 - F8: NO SCROLL
 - F9: SET-UP
 
-From the SET-UP screen, you can press **4** to switch to LOCAL mode and verify local operation of most VT100
-keys.  The following keys have special meaning inside SET-UP Mode.
+Factory defaults are shown below in parentheses.  Our VT100 configurations use slightly different defaults:
+
+- ONLINE instead of LOCAL
+- ANSI ON
 
 ### SET-UP Mode Keys
 
 - 0: RESET
 - 2: SET/CLEAR TAB
 - 3: CLEAR ALL TABS
-- 4: ONLINE/LOCAL
+- 4: ONLINE/LOCAL (LOCAL)
 - 5: SET-UP A/B
 - 6: TOGGLE FEATURE
-- 7: TRANSMIT SPEED
-- 8: RECEIVE SPEED
-- 9: 80/132 COLUMNS
+- 7: TRANSMIT SPEED (9600)
+- 8: RECEIVE SPEED (9600)
+- 9: 80/132 COLUMNS (80)
 - SHIFT-S: Save SET-UP Features
 - SHIFT-R: Restore SET-UP Features
+
+To access the SET-UP B screen, press **5**.  To change SET-UP B options, move the cursor over the corresponding binary digit
+and press **6** to toggle.
 
 ### SET-UP B Options
 
 #### Block 1
 
-- 1---: Smooth scroll
-- -1--: Auto-Repeat
-- --1-: Light Screen Background
-- ---1: Block Cursor
+- 1---: Smooth scroll (ON)
+- -1--: Auto-Repeat (ON)
+- --1-: Light Screen Background (OFF)
+- ---1: Block Cursor (ON)
 
 #### Block 2
 
-- 1---: Margin Bell
-- -1--: Key-click
-- --1-: ANSI
-- ---1: Auto-XON/XOFF
+- 1---: Margin Bell (OFF)
+- -1--: Key-click (ON)
+- --1-: ANSI (OFF)
+- ---1: Auto-XON/XOFF (ON)
 
 #### Block 3
 
-- 1---: UK Pound Symbol
-- -1--: Wrap-Around
-- --1-: New Line
-- ---1: Interlace
+- 1---: UK Pound Symbol (OFF)
+- -1--: Wrap-Around (OFF)
+- --1-: New Line (OFF)
+- ---1: Interlace (OFF)
 
 #### Block 4
 
-- 1---: Even Parity
-- -1--: Parity Enable
-- --1-: 8 Data Bits
-- ---1: 50Hz Power
+- 1---: Even Parity (OFF)
+- -1--: Parity Enable (OFF)
+- --1-: 8 Data Bits (ON)
+- ---1: 50Hz Power (OFF)
 
 VT100 Memory Usage
 ------------------

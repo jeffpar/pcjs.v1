@@ -501,32 +501,47 @@ ChipSet8080.VT100.INIT = [
         0, 0, 0, 0,
         [
             /*
-             * The following table contains the data we use to initialize all (100) words of NVR (Non-Volatile RAM).
-             * According the DEC Technical Manual:
+             * The following array contains the data we use to initialize all (100) words of NVR (Non-Volatile RAM).
+             *
+             * I used to initialize every word to 0x3ff, as if the NVR had been freshly erased, but that causes the
+             * firmware to (attempt to) beep and then display an error code (2).  As the DEC Technical Manual says:
              *
              *      If the NVR fails, the bell sounds several times to inform the operator, and then default settings
              *      stored in the ROM allow the terminal to work.
              *
-             * However, this behavior may be limited to only certain kinds of "failures", because if I deliberately
-             * stuff an invalid value in the table, there is indeed an attempt to beep (though sound isn't working yet),
-             * an error code (2) is displayed in the top-left corner of the screen, but the NVR still appears to contain
-             * all the same (invalid) data we started with.  Perhaps all they meant to say is that the RAM copy of NVR
-             * settings is reset, not the NVR itself.
+             * but I think what they meant to say is that default settings are stored in the RAM copy of NVR.  So then
+             * I went into SET-UP, pressed SHIFT-S to save those settings back to NVR, and then used the PC8080 debugger
+             * "d nvr" command to dump the NVR contents.  The results are below.
              *
-             * Using a VT100 configuration with the Debugger attached, use the NVR dumper command ("d nvr") to see how
-             * other SET-UP changes affect the NVR (after you've saved your changes using SHIFT-S, of course).
+             * The first dump actually contains only two modifications to the factory defaults: enabling ONLINE instead
+             * of LOCAL operation, and turning ANSI support ON.  The second dump is unmodified (the TRUE factory defaults).
              *
-             * NVR Notes
-             * ---------
-             * After enabling smooth scrolling, the word in row 5, col 4 changes from 2E50 to 2ED0, and the final word
-             * changes from 2E51 to 2E71 (I'm guessing that the final word is an NVR checksum).
+             * By making selective changes, you can discern where the bits for certain features are stored.  For example,
+             * smooth-scrolling is apparently controlled by bit 7 of the word at offset 0x2B (and is ON by default in
+             * the factory settings).  And it's likely that the word at offset 0x32 (ie, the last word that's not zero)
+             * is the NVR checksum.
              */
             0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80,
             0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80,
             0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80,
             0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E00,
-            0x2E08, 0x2E8E, 0x2E00, 0x2ED0, 0x2E30, 0x2E40, 0x2E20, 0x2E00, 0x2EE0, 0x2EE0,
-            0x2E71, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
+            0x2E08, 0x2E8E, 0x2E00, 0x2ED0, 0x2E70, 0x2E00, 0x2E20, 0x2E00, 0x2EE0, 0x2EE0,
+            0x2E7D, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
+            0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
+            0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
+            0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
+            0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000
+        ],
+        [
+            /*
+             * The TRUE factory defaults (not currently used for anything; they're just here for reference, wasting space....)
+             */
+            0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80,
+            0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80,
+            0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80,
+            0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E00,
+            0x2E08, 0x2E8E, 0x2E20, 0x2ED0, 0x2E50, 0x2E00, 0x2E20, 0x2E00, 0x2EE0, 0x2EE0,
+            0x2E69, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
             0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
             0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
             0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,

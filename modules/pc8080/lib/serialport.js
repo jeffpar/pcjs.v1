@@ -381,6 +381,58 @@ SerialPort8080.prototype.setBinding = function(sHTMLType, sBinding, control, sVa
 };
 
 /**
+ * echoByte(b)
+ *
+ * @this {SerialPort8080}
+ * @param {number} b
+ * @return {boolean} true if echo, false if not
+ */
+SerialPort8080.prototype.echoByte = function(b)
+{
+    var fEchoed = false;
+
+    if (this.controlIOBuffer) {
+        if (b == 0x08) {
+            this.controlIOBuffer.value = this.controlIOBuffer.value.slice(0, -1);
+            /*
+             * TODO: Back up the correct number of columns if the character erased was a tab.
+             */
+            if (this.iLogicalCol > 0) this.iLogicalCol--;
+        }
+        else {
+            var s = str.toASCIICode(b);
+            var nChars = s.length;
+            if (b == 0x09) {
+                var tabSize = this.tabSize || 8;
+                nChars = tabSize - (this.iLogicalCol % tabSize);
+                if (this.tabSize) s = str.pad("", nChars);
+            }
+            else if (b == 0x0D) {
+                this.iLogicalCol = nChars = 0;
+                s = "\n";
+            }
+            if (this.charBOL && !this.iLogicalCol && nChars) s = String.fromCharCode(this.charBOL) + s;
+            this.controlIOBuffer.value += s;
+            this.controlIOBuffer.scrollTop = this.controlIOBuffer.scrollHeight;
+            this.iLogicalCol += nChars;
+        }
+        fEchoed = true;
+    }
+    else if (this.consoleOutput != null) {
+        if (b == 0x0A || this.consoleOutput.length >= 1024) {
+            this.println(this.consoleOutput);
+            this.consoleOutput = "";
+        }
+        if (b != 0x0A) {
+            this.consoleOutput += String.fromCharCode(b);
+        }
+        fEchoed = true;
+    }
+
+    return fEchoed;
+};
+
+/**
  * initBus(cmp, bus, cpu, dbg)
  *
  * @this {SerialPort8080}
@@ -616,6 +668,7 @@ SerialPort8080.prototype.getBaudTimeout = function(maskRate)
  */
 SerialPort8080.prototype.receiveByte = function(b)
 {
+    if (MAXDEBUG) this.echoByte(b);
     this.printMessage("receiveByte(" + str.toHexByte(b) + "), status=" + str.toHexByte(this.bStatus));
     if (!this.fAutoStop && !(this.bStatus & SerialPort8080.UART8251.STATUS.RECV_FULL)) {
         this.bDataIn = b;
@@ -689,41 +742,7 @@ SerialPort8080.prototype.transmitByte = function(b)
         }
     }
 
-    if (this.controlIOBuffer) {
-        if (b == 0x08) {
-            this.controlIOBuffer.value = this.controlIOBuffer.value.slice(0, -1);
-            /*
-             * TODO: Back up the correct number of columns if the character erased was a tab.
-             */
-            if (this.iLogicalCol > 0) this.iLogicalCol--;
-        }
-        else {
-            var s = str.toASCIICode(b);
-            var nChars = s.length;
-            if (b == 0x09) {
-                var tabSize = this.tabSize || 8;
-                nChars = tabSize - (this.iLogicalCol % tabSize);
-                if (this.tabSize) s = str.pad("", nChars);
-            }
-            else if (b == 0x0D) {
-                this.iLogicalCol = nChars = 0;
-                s = "\n";
-            }
-            if (this.charBOL && !this.iLogicalCol && nChars) s = String.fromCharCode(this.charBOL) + s;
-            this.controlIOBuffer.value += s;
-            this.controlIOBuffer.scrollTop = this.controlIOBuffer.scrollHeight;
-            this.iLogicalCol += nChars;
-        }
-        fTransmitted = true;
-    }
-    else if (this.consoleOutput != null) {
-        if (b == 0x0A || this.consoleOutput.length >= 1024) {
-            this.println(this.consoleOutput);
-            this.consoleOutput = "";
-        }
-        if (b != 0x0A) {
-            this.consoleOutput += String.fromCharCode(b);
-        }
+    if (this.echoByte(b)) {
         fTransmitted = true;
     }
 
