@@ -159,14 +159,14 @@ you can override the Jekyll configuration defaults in `_config.yml`.  Using deve
 `_developer.yml` is analogous to running the Node web server with certain development options; see
 [Debugging PCjs](#debugging-pcjs).
 
+GitHub Pages says you can run `jekyll serve` instead of `bundle exec jekyll serve`, but with the addition of
+more gems to `Gemfile` (eg, `jekyll-sitemap`), running `jekyll serve` may trigger dependency errors on some systems.
+`bundle exec jekyll serve` should always work.
+
 Don't see any YML files in the root of your project?  You probably forgot to switch to the
 *[gh-pages](https://github.com/jeffpar/pcjs/tree/gh-pages)* branch:
 
 	git checkout gh-pages
-
-GitHub Pages says you can run `jekyll serve` instead of `bundle exec jekyll serve`, but with the addition of
-more gems to `Gemfile` (eg, `jekyll-sitemap`), running `jekyll serve` may trigger dependency errors on some systems.
-`bundle exec jekyll serve` should always work.
 
 Last but not least, run `bundle update` periodically to keep Jekyll up-to-date.
 
@@ -317,7 +317,7 @@ you can start the server with some additional options; eg:
 
 	node server.js --logging --console --debug
 	
-The `--logging` option will create a [node.log](/logs/node.log) that records all the HTTP requests, `--debug`
+The `--logging` option will create a [node.log](/logs/) that records all the HTTP requests, `--debug`
 will generate additional debug-only messages (which will also be logged if `--logging` is enabled), and `--console`
 will replicate any messages to your console as well.
 
