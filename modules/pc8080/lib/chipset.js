@@ -172,24 +172,9 @@ ChipSet8080.SI1978 = {
  * One of the many chips in the VT100 is an 8224, which operates at 24.8832MHz.  That frequency is divided by 9
  * to yield a 361.69ns clock period for the 8080 CPU, which means (in theory) that the CPU is running at 2.76Mhz.
  *
- * Hence the CPU component in the VT100's machine.xml SHOULD be defined as:
+ * Hence the CPU component in the VT100's machine.xml should be defined as:
  *
  *      <cpu id="cpu8080" model="8080" cycles="2764800"/>
- *
- * where 2764800 = 24883200 / 9.  Unfortunately, the VT100 ROM decrements a countdown value in memory to determine
- * cursor blink rate, and if we use 2764800 cycles per second, the cursor blinks MUCH too fast.  It's surprising that
- * the VT100 doesn't rely on vertical retrace interrupts for blink rate.  Perhaps the designers were concerned about
- * consistency across 60Hz and 50Hz display modes, although that seems like a minor concern, considering that the
- * alternative means the ROM is now tied to a specific CPU operating frequency.  However, short of rewriting portions
- * of the ROM, we have to deal with it.
- *
- * And we deal with it by lowering cycles per second to 1000000 (1Mhz).  I'm guessing that in a real VT100, the 8080
- * gets bogged down by other factors (eg, the Video Processor's DMA requests), but we don't simulate the hardware to
- * that level of detail, so the easiest solution is to lower the effective clock speed.
- *
- * NOTE: If you've noticed that the VT100 cursor blinks unevenly, you're right, and it's by design: the ROM uses a
- * countdown value for the cursor's "on" state that is twice as large as that for the cursor's "off" state, so it's
- * "on" twice as long as it's "off".
  *
  * WARNING: The choice of clock speed has an effect on other simulated VT100 circuits; see the DC011 Timing Chip
  * discussion below, along with the getVT100LBA() function.
@@ -259,12 +244,12 @@ ChipSet8080.VT100 = {
      *
      * On p. 4-56, the DC011 Block Diagram shows 8 outputs labeled LBA0 through LBA7.  From p. 4-61:
      *
-     *      Several of the LBAs are used as general purpose clocks in the VT100. LBA 3 and LBA 4 are used to generate
+     *      Several of the LBAs are used as general purpose clocks in the VT100. LBA3 and LBA4 are used to generate
      *      timing for the keyboard. These signals satisfy the keyboard's requirement of two square-waves, one twice the
      *      frequency of the other, even though every 16th transition is delayed (the second stage of the horizontal
-     *      counter divides by 17, not 16). LBA 7 is used by the nonvolatile RAM.
+     *      counter divides by 17, not 16). LBA7 is used by the nonvolatile RAM.
      *
-     * And on p. 4-62, timings are provided for the LBA0 through LBA7 when the VT100 is in 80-column mode; in particular:
+     * And on p. 4-62, timings are provided for the LBA0 through LBA7; in particular:
      *
      *      LBA6:   16.82353us (when LBA6 is low, for a period of 33.64706us)
      *      LBA7:   31.77778us (when LBA7 is high, for a period of 63.55556us)
@@ -958,10 +943,11 @@ ChipSet8080.prototype.doNVRCommand = function()
  */
 ChipSet8080.prototype.inVT100Flags = function(port, addrFrom)
 {
+    var b = this.bFlags;
+
     /*
      * The NVR_CLK bit is driven by LBA7 (ie, bit 7 from Line Buffer Address generation); see the DC011 discussion above.
      */
-    var b = this.bFlags;
     b &= ~ChipSet8080.VT100.FLAGS.NVR_CLK;
     if (this.getVT100LBA(7)) {
         b |= ChipSet8080.VT100.FLAGS.NVR_CLK;
@@ -969,18 +955,22 @@ ChipSet8080.prototype.inVT100Flags = function(port, addrFrom)
             this.doNVRCommand();
         }
     }
+
     b &= ~ChipSet8080.VT100.FLAGS.NVR_DATA;
     if (this.bNVROut) {
         b |= ChipSet8080.VT100.FLAGS.NVR_DATA;
     }
+
     b &= ~ChipSet8080.VT100.FLAGS.KBD_XMIT;
-    if (this.kbd && this.kbd.isTransmitterReady()) {
+    if (this.kbd && this.kbd.isVT100TransmitterReady()) {
         b |= ChipSet8080.VT100.FLAGS.KBD_XMIT;
     }
+
     b &= ~ChipSet8080.VT100.FLAGS.UART_XMIT;
     if (this.serial && this.serial.isTransmitterReady()) {
         b |= ChipSet8080.VT100.FLAGS.UART_XMIT;
     }
+
     this.bFlags = b;
     this.printMessageIO(port, null, addrFrom, "FLAGS", b);
     return b;
@@ -1045,7 +1035,7 @@ ChipSet8080.prototype.outVT100DC012 = function(port, b, addrFrom)
             this.bDC012Blink = ~this.bDC012Blink;
             break;
         case 0x1:
-            // TODO: Clear vertical frequency interrupt
+            // TODO: Clear vertical frequency interrupt?
             break;
         case 0x2:
         case 0x3:

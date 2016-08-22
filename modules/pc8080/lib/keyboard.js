@@ -580,9 +580,11 @@ Keyboard8080.prototype.powerDown = function(fSave, fShutdown)
 
 Keyboard8080.VT100.INIT = [
     [
-        Keyboard8080.VT100.STATUS.INIT,     // bVT100Status
-        Keyboard8080.VT100.ADDRESS.INIT,    // bVT100Address
-        -1                              // iKeyNext
+        Keyboard8080.VT100.STATUS.INIT,         // bVT100Status
+        Keyboard8080.VT100.ADDRESS.INIT,        // bVT100Address
+        false,                                  // fVT100UARTBusy
+        0,                                      // nVT100UARTCycleSnap
+        -1                                      // iKeyNext
     ]
 ];
 
@@ -625,7 +627,7 @@ Keyboard8080.prototype.save = function()
     case Keyboard8080.SI1978.MODEL:
         break;
     case Keyboard8080.VT100.MODEL:
-        state.set(0, [this.bVT100Status, this.bVT100Address, -1]);
+        state.set(0, [this.bVT100Status, this.bVT100Address, this.fVT100UARTBusy, this.nVT100UARTCycleSnap, -1]);
         break;
     }
     return state.data();
@@ -652,7 +654,9 @@ Keyboard8080.prototype.restore = function(data)
             this.bVT100Status = a[0];
             this.updateLEDs(this.bVT100Status & Keyboard8080.VT100.STATUS.LEDS);
             this.bVT100Address = a[1];
-            this.iKeyNext = a[2];
+            this.fVT100UARTBusy = a[2];
+            this.nVT100UARTCycleSnap = a[3];
+            this.iKeyNext = a[4];
             return true;
         }
     }
@@ -871,17 +875,48 @@ Keyboard8080.prototype.checkSoftKeysToRelease = function()
 };
 
 /**
- * isTransmitterReady()
+ * isVT100TransmitterReady()
  *
- * Called whenever a ChipSet circuit needs the Keyboard UART's transmitter status.
- * Currently, we have no busy conditions (our virtual keyboard transmitter is infinitely fast).
+ * Called whenever the VT100 ChipSet circuit needs the Keyboard UART's transmitter status.
+ *
+ * From p. 4-32 of the VT100 Technical Manual (July 1982):
+ *
+ *      The operating clock for the keyboard interface comes from an address line in the video processor (LBA4).
+ *      This signal has an average period of 7.945 microseconds. Each data byte is transmitted with one start bit
+ *      and one stop bit, and each bit lasts 16 clock periods. The total time for each data byte is 160 times 7.945
+ *      or 1.27 milliseconds. Each time the Transmit Buffer Empty flag on the terminal's UART gets set (when the
+ *      current byte is being transmitted), the microprocessor loads another byte into the transmit buffer. In this
+ *      way, the stream of status bytes to the keyboard is continuous.
+ *
+ * We used to always return true (after all, what's wrong with an infinitely fast UART?), but unfortunately,
+ * the VT100 firmware relies on the UART's slow transmission speed to drive cursor blink rate.  We have several
+ * options:
+ *
+ *      1) Snapshot the CPU cycle count each time a byte is transmitted (see outVT100UARTStatus()) and then every
+ *      time this is polled, see if the cycle count has exceeded the snapshot value by the necessary threshold
+ *      amount; if we assume 361.69ns per CPU cycle, there are 22 CPU cycles for every 1 LBA4 cycle, and since
+ *      transmission time is supposed to last for 160 LBA4 cycles, that means 22*160 CPU cycles, or 3520 cycles.
+ *
+ *      2) Set a CPU timer using the new setTimer() interface, which can be passed the number of milliseconds to
+ *      wait before firing (in this case, 7945ms).
+ *
+ *      3) Call the ChipSet's getVT100LBA(4) function for the state of the simulated LBA4, and count 160 LBA4
+ *      transitions; however, that would be the worst solution, because there's no guarantee that the firmware's
+ *      UART polling will occur regularly and/or frequently enough for us to catch every LBA4 transition.
+ *
+ * I'm going with solution #1 because it's less overhead.
  *
  * @this {Keyboard8080}
  * @return {boolean} (true if ready, false if not)
  */
-Keyboard8080.prototype.isTransmitterReady = function()
+Keyboard8080.prototype.isVT100TransmitterReady = function()
 {
-    return true;
+    if (this.fVT100UARTBusy) {
+        if (this.cpu.getCycles() >= this.nVT100UARTCycleSnap + 3520) {
+            this.fVT100UARTBusy = false;
+        }
+    }
+    return !this.fVT100UARTBusy;
 };
 
 /**
@@ -944,6 +979,8 @@ Keyboard8080.prototype.outVT100UARTStatus = function(port, b, addrFrom)
 {
     this.printMessageIO(port, b, addrFrom, "KBDUART.STATUS");
     this.bVT100Status = b;
+    this.fVT100UARTBusy = true;
+    this.nVT100UARTCycleSnap = this.cpu.getCycles();
     this.updateLEDs(b & Keyboard8080.VT100.STATUS.LEDS);
     if (b & Keyboard8080.VT100.STATUS.START) {
         this.iKeyNext = 0;

@@ -823,7 +823,7 @@ SerialPort8080.prototype.outData = function(port, bOut, addrFrom)
     this.bStatus &= ~(SerialPort8080.UART8251.STATUS.XMIT_READY | SerialPort8080.UART8251.STATUS.XMIT_EMPTY);
     /*
      * If we're transmitting to a virtual device that has no measurable delay, this code may clear XMIT_READY
-     * too quickly.
+     * too quickly:
      *
      *      if (this.transmitByte(bOut)) {
      *          this.bStatus |= (SerialPort8080.UART8251.STATUS.XMIT_READY | SerialPort8080.UART8251.STATUS.XMIT_EMPTY);
