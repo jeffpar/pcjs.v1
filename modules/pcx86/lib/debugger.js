@@ -1719,21 +1719,21 @@ if (DEBUGGER) {
 
             case Interrupts.WINDBG.KRNLVARS:            // 0x005A
                 /*
-				 *  BX = version number of this data (0x3A0)
-				 *  DX:CX points to:
-				 *      WORD    hGlobalHeap     ****
-				 *      WORD    pGlobalHeap     ****
-				 *      WORD    hExeHead        ****
-				 *      WORD    hExeSweep
-				 *      WORD    topPDB
-				 *      WORD    headPDB
-				 *      WORD    topsizePDB
-				 *      WORD    headTDB         ****
-				 *      WORD    curTDB          ****
-				 *      WORD    loadTDB
-				 *      WORD    LockTDB
-				 *      WORD    SelTableLen     ****
-				 *      DWORD   SelTableStart   ****
+                 *  BX = version number of this data (0x3A0)
+                 *  DX:CX points to:
+                 *      WORD    hGlobalHeap     ****
+                 *      WORD    pGlobalHeap     ****
+                 *      WORD    hExeHead        ****
+                 *      WORD    hExeSweep
+                 *      WORD    topPDB
+                 *      WORD    headPDB
+                 *      WORD    topsizePDB
+                 *      WORD    headTDB         ****
+                 *      WORD    curTDB          ****
+                 *      WORD    loadTDB
+                 *      WORD    LockTDB
+                 *      WORD    SelTableLen     ****
+                 *      DWORD   SelTableStart   ****
                  */
                 break;
 
@@ -1955,7 +1955,7 @@ if (DEBUGGER) {
                     /*
                      *  AL == segment type:
                      *      0x80    device driver code seg
-				     *      0x81    device driver data seg
+                     *      0x81    device driver data seg
                      *  ES:DI -> D386_Device_Params structure (see addSectionInfo() for details)
                      */
                     this.addSectionInfo(this.newAddr(DI, ES), !(AL & 0x1), !!this.fWinDbgRM);
