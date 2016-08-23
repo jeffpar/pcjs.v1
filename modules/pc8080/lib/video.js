@@ -618,9 +618,10 @@ Video8080.prototype.powerUp = function(data, fRepower)
      * Because the VT100 frame buffer can be located anywhere in RAM (above 0x2000), we must defer this
      * test code until the powerUp() notification handler is called, when all RAM has (hopefully) been allocated.
      *
-     * TODO: Remove this display test code once the VT100 is fully operational.
+     * NOTE: The following test screen was useful for early testing, but a *real* VT100 doesn't display a test screen,
+     * so this code is no longer enabled by default.  Remove MAXDEBUG if you want to see it again.
      */
-    if (this.nFormat == Video8080.FORMAT.VT100) {
+    if (MAXDEBUG && this.nFormat == Video8080.FORMAT.VT100) {
         /*
          * Build a test screen in the VT100 frame buffer; we'll mimic the "SET-UP A" screen, since it uses
          * all the font variations.  The process involves iterating over 0-based row numbers -2 (or -5 if 50Hz

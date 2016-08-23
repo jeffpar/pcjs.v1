@@ -506,10 +506,15 @@ CPU8080.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
         this.bindings[sBinding] = control;
         control.onclick = function onClickRun() {
             if (!cpu.cmp || !cpu.cmp.checkPower()) return;
+            /*
+             * We no longer pass true to these runCPU()/stopCPU() calls, on the theory that if the "run"
+             * control is visible, then the computer is probably sufficiently visible as well; the problem
+             * with setting fUpdateFocus to true is that it can jerk the web page around in annoying ways.
+             */
             if (!cpu.flags.fRunning)
-                cpu.runCPU(true);
+                cpu.runCPU();
             else
-                cpu.stopCPU(true);
+                cpu.stopCPU();
         };
         fBound = true;
         break;
