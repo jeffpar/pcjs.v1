@@ -18,6 +18,9 @@ with a Control Panel and Debugger.  When you press the "Run" button, it will sta
 Information about [VT100 Keys](#vt100-keys) and assorted [Hardware Notes](#vt100-memory-usage) are provided below,
 followed by some [VT100 Technical Manual](/pubs/dec/vt100/) excerpts regarding the [VT100 Initialization Process](#vt100-initialization-process).
 
+[Non-Debugger Configuration](../) is available, along with demos of [Dual VT100 Terminals](../dual/) and an
+[IBM PC AT connected to a VT100](/devices/pcx86/machine/5170/ega/2048kb/rev3/vt100/).
+
 {% include machine.html id="vt100" %}
 
 VT100 Keys
