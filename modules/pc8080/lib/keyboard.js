@@ -893,12 +893,12 @@ Keyboard8080.prototype.checkSoftKeysToRelease = function()
  * options:
  *
  *      1) Snapshot the CPU cycle count each time a byte is transmitted (see outVT100UARTStatus()) and then every
- *      time this is polled, see if the cycle count has exceeded the snapshot value by the necessary threshold
- *      amount; if we assume 361.69ns per CPU cycle, there are 22 CPU cycles for every 1 LBA4 cycle, and since
- *      transmission time is supposed to last for 160 LBA4 cycles, that means 22*160 CPU cycles, or 3520 cycles.
+ *      time this is polled, see if the cycle count has exceeded the snapshot value by the necessary threshold;
+ *      if we assume 361.69ns per CPU cycle, there are 22 CPU cycles for every 1 LBA4 cycle, and since transmission
+ *      time is supposed to last for 160 LBA4 cycles, the threshold is 22*160 CPU cycles, or 3520 cycles.
  *
  *      2) Set a CPU timer using the new setTimer() interface, which can be passed the number of milliseconds to
- *      wait before firing (in this case, 7945ms).
+ *      wait before firing (in this case, roughly 1.27ms).
  *
  *      3) Call the ChipSet's getVT100LBA(4) function for the state of the simulated LBA4, and count 160 LBA4
  *      transitions; however, that would be the worst solution, because there's no guarantee that the firmware's
@@ -912,7 +912,12 @@ Keyboard8080.prototype.checkSoftKeysToRelease = function()
 Keyboard8080.prototype.isVT100TransmitterReady = function()
 {
     if (this.fVT100UARTBusy) {
-        if (this.cpu.getCycles() >= this.nVT100UARTCycleSnap + 3520) {
+        /*
+         * NOTE: getCyclesMS(1.2731488) should work out to 3520 cycles for a CPU clocked at 361.69ns per cycle,
+         * which is roughly 2.76Mhz.  We could just hard-code 3520 instead of calling getCyclesMS(), but this helps
+         * maintain a reasonable blink rate for the cursor even when the user cranks up the CPU speed.
+         */
+        if (this.cpu.getCycles() >= this.nVT100UARTCycleSnap + this.cpu.getCyclesMS(1.2731488)) {
             this.fVT100UARTBusy = false;
         }
     }
