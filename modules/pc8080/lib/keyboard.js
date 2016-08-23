@@ -494,6 +494,11 @@ Keyboard8080.prototype.setBinding = function(sHTMLType, sBinding, control, sValu
                 this.bindings[id] = control;
                 var fnDown = function(kbd, softCode) {
                     return function onKeyboardBindingDown(event) {
+                        /*
+                         * iOS Usability Improvement: Calling preventDefault() prevents rapid clicks from
+                         * also being (mis)interpreted as a desire to "zoom" in on the machine.
+                         */
+                        event.preventDefault();
                         kbd.onSoftKeyDown(softCode, true);
                         /*
                          * I'm assuming we only need to give focus back on the "up" event...
@@ -507,8 +512,12 @@ Keyboard8080.prototype.setBinding = function(sHTMLType, sBinding, control, sValu
                         kbd.onSoftKeyDown(softCode, false);
                         /*
                          * Give focus back to the machine (since clicking the button takes focus away).
+                         *
+                         *      if (kbd.cmp) kbd.cmp.updateFocus();
+                         *
+                         * iOS Usability Improvement: NOT calling updateFocus() keeps the soft keyboard down
+                         * (assuming it was already down).
                          */
-                        if (kbd.cmp) kbd.cmp.updateFocus();
                     };
                 }(this, this.config.SOFTCODES[sBinding]);
                 if ('ontouchstart' in window) {

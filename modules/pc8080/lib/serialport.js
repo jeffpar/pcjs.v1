@@ -369,8 +369,12 @@ SerialPort8080.prototype.setBinding = function(sHTMLType, sBinding, control, sVa
                 serial.receiveData(sValue);
                 /*
                  * Give focus back to the machine (since clicking the button takes focus away).
+                 *
+                 *      if (serial.cmp) serial.cmp.updateFocus();
+                 *
+                 * iOS Usability Improvement: NOT calling updateFocus() keeps the soft keyboard down
+                 * (assuming it was already down).
                  */
-                 if (serial.cmp) serial.cmp.updateFocus();
                 return true;
             };
             return true;
