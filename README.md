@@ -76,7 +76,7 @@ The project includes:
 - A simple Node-based web server ([server.js](server.js))
 - Custom Node modules used by the web server ([HTMLOut](modules/htmlout/), [MarkOut](modules/markout/), [DiskDump](modules/diskdump/), [FileDump](modules/filedump/))
 - A variety of IBM PC and C1P configuration and resource files (see [/apps](apps/), [/devices](devices/) and [/disks](disks/))
-- The [PCx86](modules/pcx86/), [PC8080](modules/pc8080/), and [C1Pjs](modules/c1pjs/) client applications, both "compiled" and uncompiled
+- The [PCx86](modules/pcx86/), [PC8080](modules/pc8080/), and [C1Pjs](modules/c1pjs/) client applications, along with "compiled" [versions](/versions/)
 - A smattering of [PCx86](docs/pcx86/) and [C1Pjs](docs/c1pjs/) documentation, along with [blog posts](https://github.com/jeffpar/pcjs/tree/gh-pages/_posts), related [publications](pubs/) and more
 
 The bundled web server is not strictly required.  Any web server (Node, Apache, Nginx, etc) that can serve the necessary

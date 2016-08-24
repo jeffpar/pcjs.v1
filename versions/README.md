@@ -1,13 +1,13 @@
 ---
 layout: page
-title: Emulator Releases
+title: Compiled Emulator Releases
 permalink: /versions/
 ---
 
-Emulator Releases
----
+Compiled Emulator Releases
+--------------------------
 
-Current and past releases of the following emulators are maintained here:
+Compiled versions of PCjs emulators (current and past releases) are stored here:
 
 - [C1Pjs](c1pjs/)
 - [PCx86](pcx86/)
