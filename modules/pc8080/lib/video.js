@@ -1204,7 +1204,6 @@ Video8080.prototype.updateVT100 = function(fForced)
  */
 Video8080.prototype.updateScreen = function(fForced)
 {
-    var fClean;
     var fUpdate = true;
 
     if (!fForced) {
@@ -1237,7 +1236,7 @@ Video8080.prototype.updateScreen = function(fForced)
          * is clean, then there's nothing to do.
          */
         if (fUpdate && this.fCellCacheValid && this.sizeBuffer) {
-            if ((fClean = this.bus.cleanMemory(this.addrBuffer, this.sizeBuffer))) {
+            if (this.bus.cleanMemory(this.addrBuffer, this.sizeBuffer)) {
                 fUpdate = false;
             }
         }
