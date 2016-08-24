@@ -218,7 +218,7 @@ function Computer(parmsComputer, parmsMachine, fSuspended) {
         }
     }
 
-    this.println(PCX86.APPNAME + " v" + PCX86.APPVERSION + "\n" + COPYRIGHT + "\n" + LICENSE);
+    this.println(PCX86.APPNAME + " v" + (XMLVERSION || PCX86.APPVERSION) + "\n" + COPYRIGHT + "\n" + LICENSE);
 
     if (DEBUG && this.messageEnabled()) this.printMessage("PREFETCH: " + PREFETCH + ", TYPEDARRAYS: " + TYPEDARRAYS);
 

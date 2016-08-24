@@ -673,7 +673,7 @@ if (DEBUGGER) {
      * @this {Debugger8080}
      * @param {Computer8080} cmp
      * @param {Bus8080} bus
-     * @param {CPUState8080} cpu
+     * @param {CPU8080State} cpu
      * @param {Debugger8080} dbg
      */
     Debugger8080.prototype.initBus = function(cmp, bus, cpu, dbg)

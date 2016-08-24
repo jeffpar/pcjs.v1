@@ -63,7 +63,7 @@ if (NODE) {
  * @constructor
  * @extends Component
  * @param {Object} parmsBus
- * @param {CPUState8080} cpu
+ * @param {CPU8080State} cpu
  * @param {Debugger8080} dbg
  */
 function Bus8080(parmsBus, cpu, dbg)

@@ -44,9 +44,9 @@ if (NODE) {
 }
 
 /**
- * CPUState8080(parmsCPU)
+ * CPU8080State(parmsCPU)
  *
- * The CPUState8080 class uses the following (parmsCPU) properties:
+ * The CPU8080State class uses the following (parmsCPU) properties:
  *
  *      model: a number (eg, 8080) that should match one of the CPUDef8080.MODEL_* values
  *
@@ -54,14 +54,14 @@ if (NODE) {
  * constructor, along with a default speed (cycles per second) based on the specified (or default)
  * CPU model number.
  *
- * The CPUState8080 class was initially written to simulate a 8080 microprocessor, although over time
+ * The CPU8080State class was initially written to simulate a 8080 microprocessor, although over time
  * it may evolved to support other microprocessors (eg, the Zilog Z80).
  *
  * @constructor
  * @extends CPU8080
  * @param {Object} parmsCPU
  */
-function CPUState8080(parmsCPU)
+function CPU8080State(parmsCPU)
 {
     this.model = +parmsCPU['model'] || CPUDef8080.MODEL_8080;
 
@@ -105,17 +105,17 @@ function CPUState8080(parmsCPU)
     this.resetRegs();
 }
 
-Component.subclass(CPUState8080, CPU8080);
+Component.subclass(CPU8080State, CPU8080);
 
 /**
  * addHaltCheck(fn)
  *
  * Records a function that will be called during HLT opcode processing.
  *
- * @this {CPUState8080}
+ * @this {CPU8080State}
  * @param {function(number)} fn
  */
-CPUState8080.prototype.addHaltCheck = function(fn)
+CPU8080State.prototype.addHaltCheck = function(fn)
 {
     this.afnHalt.push(fn);
 };
@@ -129,9 +129,9 @@ CPUState8080.prototype.addHaltCheck = function(fn)
  * a Closure Compiler optimization is defeated when generating the function array at run-time instead of at
  * compile-time.
  *
- * @this {CPUState8080}
+ * @this {CPU8080State}
  */
-CPUState8080.prototype.initProcessor = function()
+CPU8080State.prototype.initProcessor = function()
 {
     this.aOps = CPUDef8080.aOps8080;
 };
@@ -139,9 +139,9 @@ CPUState8080.prototype.initProcessor = function()
 /**
  * reset()
  *
- * @this {CPUState8080}
+ * @this {CPU8080State}
  */
-CPUState8080.prototype.reset = function()
+CPU8080State.prototype.reset = function()
 {
     if (this.flags.fRunning) this.stopCPU();
     this.resetRegs();
@@ -153,9 +153,9 @@ CPUState8080.prototype.reset = function()
 /**
  * resetRegs()
  *
- * @this {CPUState8080}
+ * @this {CPU8080State}
  */
-CPUState8080.prototype.resetRegs = function()
+CPU8080State.prototype.resetRegs = function()
 {
     this.regA = 0;
     this.regB = 0;
@@ -183,10 +183,10 @@ CPUState8080.prototype.resetRegs = function()
 /**
  * setReset(addr)
  *
- * @this {CPUState8080}
+ * @this {CPU8080State}
  * @param {number} addr
  */
-CPUState8080.prototype.setReset = function(addr)
+CPU8080State.prototype.setReset = function(addr)
 {
     this.addrReset = addr;
     this.setPC(addr);
@@ -195,10 +195,10 @@ CPUState8080.prototype.setReset = function(addr)
 /**
  * getChecksum()
  *
- * @this {CPUState8080}
+ * @this {CPU8080State}
  * @return {number} a 32-bit summation of key elements of the current CPU state (used by the CPU checksum code)
  */
-CPUState8080.prototype.getChecksum = function()
+CPU8080State.prototype.getChecksum = function()
 {
     var sum = (this.regA + this.regB + this.regC + this.regD + this.regE + this.regH + this.regL)|0;
     sum = (sum + this.getSP() + this.getPC() + this.getPS())|0;
@@ -208,12 +208,12 @@ CPUState8080.prototype.getChecksum = function()
 /**
  * save()
  *
- * This implements save support for the CPUState8080 component.
+ * This implements save support for the CPU8080State component.
  *
- * @this {CPUState8080}
+ * @this {CPU8080State}
  * @return {Object|null}
  */
-CPUState8080.prototype.save = function()
+CPU8080State.prototype.save = function()
 {
     var state = new State(this);
     state.set(0, [this.regA, this.regB, this.regC, this.regD, this.regE, this.regH, this.regL, this.getSP(), this.getPC(), this.getPS()]);
@@ -225,13 +225,13 @@ CPUState8080.prototype.save = function()
 /**
  * restore(data)
  *
- * This implements restore support for the CPUState8080 component.
+ * This implements restore support for the CPU8080State component.
  *
- * @this {CPUState8080}
+ * @this {CPU8080State}
  * @param {Object} data
  * @return {boolean} true if restore successful, false if not
  */
-CPUState8080.prototype.restore = function(data)
+CPU8080State.prototype.restore = function(data)
 {
     var a = data[0];
     this.regA = a[0];
@@ -254,14 +254,14 @@ CPUState8080.prototype.restore = function(data)
 /**
  * setBinding(sHTMLType, sBinding, control, sValue)
  *
- * @this {CPUState8080}
+ * @this {CPU8080State}
  * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
  * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "AX")
  * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
  * @param {string} [sValue] optional data value
  * @return {boolean} true if binding was successful, false if unrecognized binding request
  */
-CPUState8080.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
+CPU8080State.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
 {
     var fBound = false;
     switch (sBinding) {
@@ -298,10 +298,10 @@ CPUState8080.prototype.setBinding = function(sHTMLType, sBinding, control, sValu
 /**
  * getBC()
  *
- * @this {CPUState8080}
+ * @this {CPU8080State}
  * @return {number}
  */
-CPUState8080.prototype.getBC = function()
+CPU8080State.prototype.getBC = function()
 {
     return (this.regB << 8) | this.regC;
 };
@@ -309,10 +309,10 @@ CPUState8080.prototype.getBC = function()
 /**
  * setBC(w)
  *
- * @this {CPUState8080}
+ * @this {CPU8080State}
  * @param {number} w
  */
-CPUState8080.prototype.setBC = function(w)
+CPU8080State.prototype.setBC = function(w)
 {
     this.regB = (w >> 8) & 0xff;
     this.regC = w & 0xff;
@@ -321,10 +321,10 @@ CPUState8080.prototype.setBC = function(w)
 /**
  * getDE()
  *
- * @this {CPUState8080}
+ * @this {CPU8080State}
  * @return {number}
  */
-CPUState8080.prototype.getDE = function()
+CPU8080State.prototype.getDE = function()
 {
     return (this.regD << 8) | this.regE;
 };
@@ -332,10 +332,10 @@ CPUState8080.prototype.getDE = function()
 /**
  * setDE(w)
  *
- * @this {CPUState8080}
+ * @this {CPU8080State}
  * @param {number} w
  */
-CPUState8080.prototype.setDE = function(w)
+CPU8080State.prototype.setDE = function(w)
 {
     this.regD = (w >> 8) & 0xff;
     this.regE = w & 0xff;
@@ -344,10 +344,10 @@ CPUState8080.prototype.setDE = function(w)
 /**
  * getHL()
  *
- * @this {CPUState8080}
+ * @this {CPU8080State}
  * @return {number}
  */
-CPUState8080.prototype.getHL = function()
+CPU8080State.prototype.getHL = function()
 {
     return (this.regH << 8) | this.regL;
 };
@@ -355,10 +355,10 @@ CPUState8080.prototype.getHL = function()
 /**
  * setHL(w)
  *
- * @this {CPUState8080}
+ * @this {CPU8080State}
  * @param {number} w
  */
-CPUState8080.prototype.setHL = function(w)
+CPU8080State.prototype.setHL = function(w)
 {
     this.regH = (w >> 8) & 0xff;
     this.regL = w & 0xff;
@@ -367,10 +367,10 @@ CPUState8080.prototype.setHL = function(w)
 /**
  * getSP()
  *
- * @this {CPUState8080}
+ * @this {CPU8080State}
  * @return {number}
  */
-CPUState8080.prototype.getSP = function()
+CPU8080State.prototype.getSP = function()
 {
     return this.regSP;
 };
@@ -378,10 +378,10 @@ CPUState8080.prototype.getSP = function()
 /**
  * setSP(off)
  *
- * @this {CPUState8080}
+ * @this {CPU8080State}
  * @param {number} off
  */
-CPUState8080.prototype.setSP = function(off)
+CPU8080State.prototype.setSP = function(off)
 {
     this.regSP = off & 0xffff;
 };
@@ -389,10 +389,10 @@ CPUState8080.prototype.setSP = function(off)
 /**
  * getPC()
  *
- * @this {CPUState8080}
+ * @this {CPU8080State}
  * @return {number}
  */
-CPUState8080.prototype.getPC = function()
+CPU8080State.prototype.getPC = function()
 {
     return this.regPC;
 };
@@ -400,11 +400,11 @@ CPUState8080.prototype.getPC = function()
 /**
  * offPC()
  *
- * @this {CPUState8080}
+ * @this {CPU8080State}
  * @param {number} off
  * @return {number}
  */
-CPUState8080.prototype.offPC = function(off)
+CPU8080State.prototype.offPC = function(off)
 {
     return (this.regPC + off) & 0xffff;
 };
@@ -412,10 +412,10 @@ CPUState8080.prototype.offPC = function(off)
 /**
  * setPC(off)
  *
- * @this {CPUState8080}
+ * @this {CPU8080State}
  * @param {number} off
  */
-CPUState8080.prototype.setPC = function(off)
+CPU8080State.prototype.setPC = function(off)
 {
     this.regPC = off & 0xffff;
 };
@@ -423,9 +423,9 @@ CPUState8080.prototype.setPC = function(off)
 /**
  * clearCF()
  *
- * @this {CPUState8080}
+ * @this {CPU8080State}
  */
-CPUState8080.prototype.clearCF = function()
+CPU8080State.prototype.clearCF = function()
 {
     this.resultZeroCarry &= 0xff;
 };
@@ -433,10 +433,10 @@ CPUState8080.prototype.clearCF = function()
 /**
  * getCF()
  *
- * @this {CPUState8080}
+ * @this {CPU8080State}
  * @return {number} 0 or 1 (CPUDef8080.PS.CF)
  */
-CPUState8080.prototype.getCF = function()
+CPU8080State.prototype.getCF = function()
 {
     return (this.resultZeroCarry & 0x100)? CPUDef8080.PS.CF : 0;
 };
@@ -444,9 +444,9 @@ CPUState8080.prototype.getCF = function()
 /**
  * setCF()
  *
- * @this {CPUState8080}
+ * @this {CPU8080State}
  */
-CPUState8080.prototype.setCF = function()
+CPU8080State.prototype.setCF = function()
 {
     this.resultZeroCarry |= 0x100;
 };
@@ -454,10 +454,10 @@ CPUState8080.prototype.setCF = function()
 /**
  * updateCF(CF)
  *
- * @this {CPUState8080}
+ * @this {CPU8080State}
  * @param {number} CF (0x000 or 0x100)
  */
-CPUState8080.prototype.updateCF = function(CF)
+CPU8080State.prototype.updateCF = function(CF)
 {
     this.resultZeroCarry = (this.resultZeroCarry & 0xff) | CF;
 };
@@ -465,9 +465,9 @@ CPUState8080.prototype.updateCF = function(CF)
 /**
  * clearPF()
  *
- * @this {CPUState8080}
+ * @this {CPU8080State}
  */
-CPUState8080.prototype.clearPF = function()
+CPU8080State.prototype.clearPF = function()
 {
     if (this.getPF()) this.resultParitySign ^= 0x1;
 };
@@ -475,10 +475,10 @@ CPUState8080.prototype.clearPF = function()
 /**
  * getPF()
  *
- * @this {CPUState8080}
+ * @this {CPU8080State}
  * @return {number} 0 or CPUDef8080.PS.PF
  */
-CPUState8080.prototype.getPF = function()
+CPU8080State.prototype.getPF = function()
 {
     return (CPUDef8080.PARITY[this.resultParitySign & 0xff])? CPUDef8080.PS.PF : 0;
 };
@@ -486,9 +486,9 @@ CPUState8080.prototype.getPF = function()
 /**
  * setPF()
  *
- * @this {CPUState8080}
+ * @this {CPU8080State}
  */
-CPUState8080.prototype.setPF = function()
+CPU8080State.prototype.setPF = function()
 {
     if (!this.getPF()) this.resultParitySign ^= 0x1;
 };
@@ -496,9 +496,9 @@ CPUState8080.prototype.setPF = function()
 /**
  * clearAF()
  *
- * @this {CPUState8080}
+ * @this {CPU8080State}
  */
-CPUState8080.prototype.clearAF = function()
+CPU8080State.prototype.clearAF = function()
 {
     this.resultAuxOverflow = (this.resultParitySign & 0x10) | (this.resultAuxOverflow & ~0x10);
 };
@@ -506,10 +506,10 @@ CPUState8080.prototype.clearAF = function()
 /**
  * getAF()
  *
- * @this {CPUState8080}
+ * @this {CPU8080State}
  * @return {number} 0 or CPUDef8080.PS.AF
  */
-CPUState8080.prototype.getAF = function()
+CPU8080State.prototype.getAF = function()
 {
     return ((this.resultParitySign ^ this.resultAuxOverflow) & 0x10)? CPUDef8080.PS.AF : 0;
 };
@@ -517,9 +517,9 @@ CPUState8080.prototype.getAF = function()
 /**
  * setAF()
  *
- * @this {CPUState8080}
+ * @this {CPU8080State}
  */
-CPUState8080.prototype.setAF = function()
+CPU8080State.prototype.setAF = function()
 {
     this.resultAuxOverflow = (~this.resultParitySign & 0x10) | (this.resultAuxOverflow & ~0x10);
 };
@@ -527,9 +527,9 @@ CPUState8080.prototype.setAF = function()
 /**
  * clearZF()
  *
- * @this {CPUState8080}
+ * @this {CPU8080State}
  */
-CPUState8080.prototype.clearZF = function()
+CPU8080State.prototype.clearZF = function()
 {
     this.resultZeroCarry |= 0xff;
 };
@@ -537,10 +537,10 @@ CPUState8080.prototype.clearZF = function()
 /**
  * getZF()
  *
- * @this {CPUState8080}
+ * @this {CPU8080State}
  * @return {number} 0 or CPUDef8080.PS.ZF
  */
-CPUState8080.prototype.getZF = function()
+CPU8080State.prototype.getZF = function()
 {
     return (this.resultZeroCarry & 0xff)? 0 : CPUDef8080.PS.ZF;
 };
@@ -548,9 +548,9 @@ CPUState8080.prototype.getZF = function()
 /**
  * setZF()
  *
- * @this {CPUState8080}
+ * @this {CPU8080State}
  */
-CPUState8080.prototype.setZF = function()
+CPU8080State.prototype.setZF = function()
 {
     this.resultZeroCarry &= ~0xff;
 };
@@ -558,9 +558,9 @@ CPUState8080.prototype.setZF = function()
 /**
  * clearSF()
  *
- * @this {CPUState8080}
+ * @this {CPU8080State}
  */
-CPUState8080.prototype.clearSF = function()
+CPU8080State.prototype.clearSF = function()
 {
     if (this.getSF()) this.resultParitySign ^= 0xc0;
 };
@@ -568,10 +568,10 @@ CPUState8080.prototype.clearSF = function()
 /**
  * getSF()
  *
- * @this {CPUState8080}
+ * @this {CPU8080State}
  * @return {number} 0 or CPUDef8080.PS.SF
  */
-CPUState8080.prototype.getSF = function()
+CPU8080State.prototype.getSF = function()
 {
     return (this.resultParitySign & 0x80)? CPUDef8080.PS.SF : 0;
 };
@@ -579,9 +579,9 @@ CPUState8080.prototype.getSF = function()
 /**
  * setSF()
  *
- * @this {CPUState8080}
+ * @this {CPU8080State}
  */
-CPUState8080.prototype.setSF = function()
+CPU8080State.prototype.setSF = function()
 {
     if (!this.getSF()) this.resultParitySign ^= 0xc0;
 };
@@ -589,9 +589,9 @@ CPUState8080.prototype.setSF = function()
 /**
  * clearIF()
  *
- * @this {CPUState8080}
+ * @this {CPU8080State}
  */
-CPUState8080.prototype.clearIF = function()
+CPU8080State.prototype.clearIF = function()
 {
     this.regPS &= ~CPUDef8080.PS.IF;
 };
@@ -599,10 +599,10 @@ CPUState8080.prototype.clearIF = function()
 /**
  * getIF()
  *
- * @this {CPUState8080}
+ * @this {CPU8080State}
  * @return {number} 0 or CPUDef8080.PS.IF
  */
-CPUState8080.prototype.getIF = function()
+CPU8080State.prototype.getIF = function()
 {
     return (this.regPS & CPUDef8080.PS.IF);
 };
@@ -610,9 +610,9 @@ CPUState8080.prototype.getIF = function()
 /**
  * setIF()
  *
- * @this {CPUState8080}
+ * @this {CPU8080State}
  */
-CPUState8080.prototype.setIF = function()
+CPU8080State.prototype.setIF = function()
 {
     this.regPS |= CPUDef8080.PS.IF;
 };
@@ -620,10 +620,10 @@ CPUState8080.prototype.setIF = function()
 /**
  * getPS()
  *
- * @this {CPUState8080}
+ * @this {CPU8080State}
  * @return {number}
  */
-CPUState8080.prototype.getPS = function()
+CPU8080State.prototype.getPS = function()
 {
     return (this.regPS & ~CPUDef8080.PS.RESULT) | (this.getSF() | this.getZF() | this.getAF() | this.getPF() | this.getCF());
 };
@@ -631,10 +631,10 @@ CPUState8080.prototype.getPS = function()
 /**
  * setPS(regPS)
  *
- * @this {CPUState8080}
+ * @this {CPU8080State}
  * @param {number} regPS
  */
-CPUState8080.prototype.setPS = function(regPS)
+CPU8080State.prototype.setPS = function(regPS)
 {
     this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = 0;
     if (regPS & CPUDef8080.PS.CF) this.resultZeroCarry |= 0x100;
@@ -649,10 +649,10 @@ CPUState8080.prototype.setPS = function(regPS)
 /**
  * getPSW()
  *
- * @this {CPUState8080}
+ * @this {CPU8080State}
  * @return {number}
  */
-CPUState8080.prototype.getPSW = function()
+CPU8080State.prototype.getPSW = function()
 {
     return (this.getPS() & CPUDef8080.PS.MASK) | (this.regA << 8);
 };
@@ -660,10 +660,10 @@ CPUState8080.prototype.getPSW = function()
 /**
  * setPSW(w)
  *
- * @this {CPUState8080}
+ * @this {CPU8080State}
  * @param {number} w
  */
-CPUState8080.prototype.setPSW = function(w)
+CPU8080State.prototype.setPSW = function(w)
 {
     this.setPS((w & CPUDef8080.PS.MASK) | (this.regPS & ~CPUDef8080.PS.MASK));
     this.regA = w >> 8;
@@ -672,11 +672,11 @@ CPUState8080.prototype.setPSW = function(w)
 /**
  * addByte(src)
  *
- * @this {CPUState8080}
+ * @this {CPU8080State}
  * @param {number} src
  * @return {number} regA + src
  */
-CPUState8080.prototype.addByte = function(src)
+CPU8080State.prototype.addByte = function(src)
 {
     this.resultAuxOverflow = this.regA ^ src;
     return this.resultParitySign = (this.resultZeroCarry = this.regA + src) & 0xff;
@@ -685,11 +685,11 @@ CPUState8080.prototype.addByte = function(src)
 /**
  * addByteCarry(src)
  *
- * @this {CPUState8080}
+ * @this {CPU8080State}
  * @param {number} src
  * @return {number} regA + src + carry
  */
-CPUState8080.prototype.addByteCarry = function(src)
+CPU8080State.prototype.addByteCarry = function(src)
 {
     this.resultAuxOverflow = this.regA ^ src;
     return this.resultParitySign = (this.resultZeroCarry = this.regA + src + ((this.resultZeroCarry & 0x100)? 1 : 0)) & 0xff;
@@ -701,11 +701,11 @@ CPUState8080.prototype.addByteCarry = function(src)
  * Ordinarily, one would expect the Auxiliary Carry flag (AF) to be clear after this operation,
  * but apparently the 8080 will set AF if bit 3 in either operand is set.
  *
- * @this {CPUState8080}
+ * @this {CPU8080State}
  * @param {number} src
  * @return {number} regA & src
  */
-CPUState8080.prototype.andByte = function(src)
+CPU8080State.prototype.andByte = function(src)
 {
     this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = this.regA & src;
     if ((this.regA | src) & 0x8) this.resultAuxOverflow ^= 0x10;        // set AF by inverting bit 4 in resultAuxOverflow
@@ -718,11 +718,11 @@ CPUState8080.prototype.andByte = function(src)
  * We perform this operation using 8-bit two's complement arithmetic, by negating and then adding
  * the implied src of 1.  This appears to mimic how the 8080 manages the Auxiliary Carry flag (AF).
  *
- * @this {CPUState8080}
+ * @this {CPU8080State}
  * @param {number} b
  * @return {number}
  */
-CPUState8080.prototype.decByte = function(b)
+CPU8080State.prototype.decByte = function(b)
 {
     this.resultAuxOverflow = b ^ 0xff;
     b = this.resultParitySign = (b + 0xff) & 0xff;
@@ -733,11 +733,11 @@ CPUState8080.prototype.decByte = function(b)
 /**
  * incByte(b)
  *
- * @this {CPUState8080}
+ * @this {CPU8080State}
  * @param {number} b
  * @return {number}
  */
-CPUState8080.prototype.incByte = function(b)
+CPU8080State.prototype.incByte = function(b)
 {
     this.resultAuxOverflow = b;
     b = this.resultParitySign = (b + 1) & 0xff;
@@ -748,11 +748,11 @@ CPUState8080.prototype.incByte = function(b)
 /**
  * orByte(src)
  *
- * @this {CPUState8080}
+ * @this {CPU8080State}
  * @param {number} src
  * @return {number} regA | src
  */
-CPUState8080.prototype.orByte = function(src)
+CPU8080State.prototype.orByte = function(src)
 {
     return this.resultParitySign = this.resultZeroCarry = this.resultAuxOverflow = this.regA | src;
 };
@@ -787,11 +787,11 @@ CPUState8080.prototype.orByte = function(src)
  *      ---------
  *    1 0101 0110   (0x56)
  *
- * @this {CPUState8080}
+ * @this {CPU8080State}
  * @param {number} src
  * @return {number} regA - src
  */
-CPUState8080.prototype.subByte = function(src)
+CPU8080State.prototype.subByte = function(src)
 {
     src ^= 0xff;
     this.resultAuxOverflow = this.regA ^ src;
@@ -808,11 +808,11 @@ CPUState8080.prototype.subByte = function(src)
  * This mimics the behavior of subByte() when the Carry flag (CF) is clear, and hopefully also mimics how the
  * 8080 manages the Auxiliary Carry flag (AF) when the Carry flag (CF) is set.
  *
- * @this {CPUState8080}
+ * @this {CPU8080State}
  * @param {number} src
  * @return {number} regA - src - carry
  */
-CPUState8080.prototype.subByteBorrow = function(src)
+CPU8080State.prototype.subByteBorrow = function(src)
 {
     src ^= 0xff;
     this.resultAuxOverflow = this.regA ^ src;
@@ -822,11 +822,11 @@ CPUState8080.prototype.subByteBorrow = function(src)
 /**
  * xorByte(src)
  *
- * @this {CPUState8080}
+ * @this {CPU8080State}
  * @param {number} src
  * @return {number} regA ^ src
  */
-CPUState8080.prototype.xorByte = function(src)
+CPU8080State.prototype.xorByte = function(src)
 {
     return this.resultParitySign = this.resultZeroCarry = this.resultAuxOverflow = this.regA ^ src;
 };
@@ -834,11 +834,11 @@ CPUState8080.prototype.xorByte = function(src)
 /**
  * getByte(addr)
  *
- * @this {CPUState8080}
+ * @this {CPU8080State}
  * @param {number} addr is a linear address
  * @return {number} byte (8-bit) value at that address
  */
-CPUState8080.prototype.getByte = function(addr)
+CPU8080State.prototype.getByte = function(addr)
 {
     return this.bus.getByte(addr);
 };
@@ -846,11 +846,11 @@ CPUState8080.prototype.getByte = function(addr)
 /**
  * getWord(addr)
  *
- * @this {CPUState8080}
+ * @this {CPU8080State}
  * @param {number} addr is a linear address
  * @return {number} word (16-bit) value at that address
  */
-CPUState8080.prototype.getWord = function(addr)
+CPU8080State.prototype.getWord = function(addr)
 {
     return this.bus.getShort(addr);
 };
@@ -858,11 +858,11 @@ CPUState8080.prototype.getWord = function(addr)
 /**
  * setByte(addr, b)
  *
- * @this {CPUState8080}
+ * @this {CPU8080State}
  * @param {number} addr is a linear address
  * @param {number} b is the byte (8-bit) value to write (which we truncate to 8 bits; required by opSTOSb)
  */
-CPUState8080.prototype.setByte = function(addr, b)
+CPU8080State.prototype.setByte = function(addr, b)
 {
     this.bus.setByte(addr, b);
 };
@@ -870,11 +870,11 @@ CPUState8080.prototype.setByte = function(addr, b)
 /**
  * setWord(addr, w)
  *
- * @this {CPUState8080}
+ * @this {CPU8080State}
  * @param {number} addr is a linear address
  * @param {number} w is the word (16-bit) value to write (which we truncate to 16 bits to be safe)
  */
-CPUState8080.prototype.setWord = function(addr, w)
+CPU8080State.prototype.setWord = function(addr, w)
 {
     this.bus.setShort(addr, w);
 };
@@ -882,10 +882,10 @@ CPUState8080.prototype.setWord = function(addr, w)
 /**
  * getPCByte()
  *
- * @this {CPUState8080}
+ * @this {CPU8080State}
  * @return {number} byte at the current PC; PC advanced by 1
  */
-CPUState8080.prototype.getPCByte = function()
+CPU8080State.prototype.getPCByte = function()
 {
     var b = this.getByte(this.regPC);
     this.setPC(this.regPC + 1);
@@ -895,10 +895,10 @@ CPUState8080.prototype.getPCByte = function()
 /**
  * getPCWord()
  *
- * @this {CPUState8080}
+ * @this {CPU8080State}
  * @return {number} word at the current PC; PC advanced by 2
  */
-CPUState8080.prototype.getPCWord = function()
+CPU8080State.prototype.getPCWord = function()
 {
     var w = this.getWord(this.regPC);
     this.setPC(this.regPC + 2);
@@ -908,10 +908,10 @@ CPUState8080.prototype.getPCWord = function()
 /**
  * popWord()
  *
- * @this {CPUState8080}
+ * @this {CPU8080State}
  * @return {number} word popped from the current SP; SP increased by 2
  */
-CPUState8080.prototype.popWord = function()
+CPU8080State.prototype.popWord = function()
 {
     var w = this.getWord(this.regSP);
     this.setSP(this.regSP + 2);
@@ -921,10 +921,10 @@ CPUState8080.prototype.popWord = function()
 /**
  * pushWord(w)
  *
- * @this {CPUState8080}
+ * @this {CPU8080State}
  * @param {number} w is the word (16-bit) value to push at current SP; SP decreased by 2
  */
-CPUState8080.prototype.pushWord = function(w)
+CPU8080State.prototype.pushWord = function(w)
 {
     this.setSP(this.regSP - 2);
     this.setWord(this.regSP, w);
@@ -933,10 +933,10 @@ CPUState8080.prototype.pushWord = function(w)
 /**
  * checkINTR()
  *
- * @this {CPUState8080}
+ * @this {CPU8080State}
  * @return {boolean} true if execution may proceed, false if not
  */
-CPUState8080.prototype.checkINTR = function()
+CPU8080State.prototype.checkINTR = function()
 {
     /*
      * If the Debugger is single-stepping, this.nStepCycles will always be zero, which we take
@@ -976,10 +976,10 @@ CPUState8080.prototype.checkINTR = function()
  * nLevel can either be a valid interrupt level (0-7), or -1 to clear all pending interrupts
  * (eg, in the event of a system-wide reset).
  *
- * @this {CPUState8080}
+ * @this {CPU8080State}
  * @param {number} nLevel (0-7, or -1 for all)
  */
-CPUState8080.prototype.clearINTR = function(nLevel)
+CPU8080State.prototype.clearINTR = function(nLevel)
 {
     var bitsClear = nLevel < 0? 0xff : (1 << nLevel);
     this.intFlags &= ~bitsClear;
@@ -989,9 +989,9 @@ CPUState8080.prototype.clearINTR = function(nLevel)
 /**
  * requestHALT()
  *
- * @this {CPUState8080}
+ * @this {CPU8080State}
  */
-CPUState8080.prototype.requestHALT = function()
+CPU8080State.prototype.requestHALT = function()
 {
     this.intFlags |= CPUDef8080.INTFLAG.HALT;
     this.nBurstCycles -= this.nStepCycles;
@@ -1008,10 +1008,10 @@ CPUState8080.prototype.requestHALT = function()
  * by setting nStepCycles to zero.  But before we do, we subtract nStepCycles from nBurstCycles,
  * so that the calculation of how many cycles were actually executed on this burst is correct.
  *
- * @this {CPUState8080}
+ * @this {CPU8080State}
  * @param {number} nLevel (0-7)
  */
-CPUState8080.prototype.requestINTR = function(nLevel)
+CPU8080State.prototype.requestINTR = function(nLevel)
 {
     this.intFlags |= (1 << nLevel);
     if (this.getIF()) {
@@ -1027,12 +1027,12 @@ CPUState8080.prototype.requestINTR = function(nLevel)
  * CPU type before passing the call to displayValue(); in the "old days", updateStatus() called
  * displayValue() directly (although then it was called displayReg()).
  *
- * @this {CPUState8080}
+ * @this {CPU8080State}
  * @param {string} sReg
  * @param {number} nValue
  * @param {number} [cch] (default is 2 hex digits)
  */
-CPUState8080.prototype.updateReg = function(sReg, nValue, cch)
+CPU8080State.prototype.updateReg = function(sReg, nValue, cch)
 {
     this.displayValue(sReg, nValue, cch || 2);
 };
@@ -1046,10 +1046,10 @@ CPUState8080.prototype.updateReg = function(sReg, nValue, cch)
  * Any high-frequency updates should be performed in updateVideo(), which should avoid DOM updates, since updateVideo()
  * can be called up to 60 times per second (see VIDEO_UPDATES_PER_SECOND).
  *
- * @this {CPUState8080}
+ * @this {CPU8080State}
  * @param {boolean} [fForce] (true will display registers even if the CPU is running and "live" registers are not enabled)
  */
-CPUState8080.prototype.updateStatus = function(fForce)
+CPU8080State.prototype.updateStatus = function(fForce)
 {
     if (this.cLiveRegs) {
         if (fForce || !this.flags.fRunning || this.flags.fDisplayLiveRegs) {
@@ -1091,13 +1091,13 @@ CPUState8080.prototype.updateStatus = function(fForce)
  * As a result, the Debugger's complete independence means you can run other 8086/8088 debuggers
  * (eg, DEBUG) inside the simulation without interference; you can even "debug" them with the Debugger.
  *
- * @this {CPUState8080}
+ * @this {CPU8080State}
  * @param {number} nMinCycles (0 implies a single-step, and therefore breakpoints should be ignored)
  * @return {number} of cycles executed; 0 indicates a pre-execution condition (ie, an execution breakpoint
  * was hit), -1 indicates a post-execution condition (eg, a read or write breakpoint was hit), and a positive
  * number indicates successful completion of that many cycles (which should always be >= nMinCycles).
  */
-CPUState8080.prototype.stepCPU = function(nMinCycles)
+CPU8080State.prototype.stepCPU = function(nMinCycles)
 {
     /*
      * The Debugger uses fComplete to determine if the instruction completed (true) or was interrupted
@@ -1155,21 +1155,21 @@ CPUState8080.prototype.stepCPU = function(nMinCycles)
 };
 
 /**
- * CPUState8080.init()
+ * CPU8080State.init()
  *
  * This function operates on every HTML element of class "cpu", extracting the
- * JSON-encoded parameters for the CPUState8080 constructor from the element's "data-value"
+ * JSON-encoded parameters for the CPU8080State constructor from the element's "data-value"
  * attribute, invoking the constructor (which in turn invokes the CPU constructor)
- * to create a CPUState8080 component, and then binding any associated HTML controls to the
+ * to create a CPU8080State component, and then binding any associated HTML controls to the
  * new component.
  */
-CPUState8080.init = function()
+CPU8080State.init = function()
 {
     var aeCPUs = Component.getElementsByClass(document, PC8080.APPCLASS, "cpu");
     for (var iCPU = 0; iCPU < aeCPUs.length; iCPU++) {
         var eCPU = aeCPUs[iCPU];
         var parmsCPU = Component.getComponentParms(eCPU);
-        var cpu = new CPUState8080(parmsCPU);
+        var cpu = new CPU8080State(parmsCPU);
         Component.bindComponentControls(cpu, eCPU, PC8080.APPCLASS);
     }
 };
@@ -1177,6 +1177,6 @@ CPUState8080.init = function()
 /*
  * Initialize every CPU module on the page
  */
-web.onInit(CPUState8080.init);
+web.onInit(CPU8080State.init);
 
-if (NODE) module.exports = CPUState8080;
+if (NODE) module.exports = CPU8080State;
