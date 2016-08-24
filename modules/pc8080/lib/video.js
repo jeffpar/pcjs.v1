@@ -249,8 +249,6 @@ function Video8080(parmsVideo, canvas, context, textarea, container)
     }
 
     this.ledBindings = {};
-
-    if (DEBUG) this.nCyclesPrev = 0;
 }
 
 Component.subclass(Video8080);
@@ -1145,16 +1143,6 @@ Video8080.prototype.updateVT100 = function(fForced)
 
     this.assert(font < 0 || iCell === this.nCellCache);
 
-    if (MAXDEBUG && !fForced) {
-        var nSeconds = Date.now() / 1000;
-        if ((nSeconds|0) != (this.nUpdateSeconds|0)) {
-            this.nUpdateNumber = 0;
-        }
-        this.nUpdateNumber++;
-        this.nUpdateSeconds = nSeconds;
-        this.printMessage("updateVT100(): update #" + this.nUpdateNumber + " at " +this.nUpdateSeconds + " corner=" + str.toHexByte(this.aCellCache[1]) + " cycles=" + this.nCyclesPrev + " delta=" + this.nCyclesDelta);
-    }
-
     if (!fForced && this.fSkipSingleCellUpdate && cUpdated == 1) {
         /*
          * We're going to blow off this update, since it comes on the heels of a smooth-scroll that *may*
@@ -1255,13 +1243,6 @@ Video8080.prototype.updateScreen = function(fForced)
         }
         this.cpu.setTimer(this.timerUpdateNext, this.getRefreshTime());
         this.nUpdates++;
-    }
-
-    if (DEBUG && !fForced) {
-        var nCycles = this.cpu.getCycles();
-        this.nCyclesDelta = nCycles - this.nCyclesPrev;
-        this.nCyclesPrev = nCycles;
-        if (MAXDEBUG) this.printMessage("updateScreen(false): clean=" + fClean + ", update=" + fUpdate + ", cycles=" + this.nCyclesPrev + ", delta=" + this.nCyclesDelta);
     }
 
     if (!fUpdate) {
