@@ -1471,17 +1471,17 @@ Computer8080.prototype.updateStatus = function(fForce)
 };
 
 /**
- * updateVideo(n)
+ * updateVideo(fForced)
  *
  * Any high-frequency updates should be performed here (avoid updating DOM elements).
  *
  * @this {Computer8080}
- * @param {number} n (where 0 <= n < VIDEO_UPDATES_PER_SECOND for a normal update, or -1 for a forced update)
+ * @param {boolean} [fForced]
  */
-Computer8080.prototype.updateVideo = function(n)
+Computer8080.prototype.updateVideo = function(fForced)
 {
     for (var i = 0; i < this.aVideo.length; i++) {
-        this.aVideo[i].updateScreen(n);
+        this.aVideo[i].updateScreen(fForced);
     }
 };
 

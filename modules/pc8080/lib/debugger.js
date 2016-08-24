@@ -3720,10 +3720,7 @@ if (DEBUGGER) {
     {
         if (DEBUG) {
             this.println("msPerYield: " + this.cpu.counts.msPerYield);
-            this.println("nCyclesPerBurst: " + this.cpu.counts.nCyclesPerBurst);
             this.println("nCyclesPerYield: " + this.cpu.counts.nCyclesPerYield);
-            this.println("nCyclesPerVideoUpdate: " + this.cpu.counts.nCyclesPerVideoUpdate);
-            this.println("nCyclesPerStatusUpdate: " + this.cpu.counts.nCyclesPerStatusUpdate);
             return true;
         }
         return false;

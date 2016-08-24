@@ -922,11 +922,11 @@ Keyboard8080.prototype.isVT100TransmitterReady = function()
 {
     if (this.fVT100UARTBusy) {
         /*
-         * NOTE: getCyclesMS(1.2731488) should work out to 3520 cycles for a CPU clocked at 361.69ns per cycle,
-         * which is roughly 2.76Mhz.  We could just hard-code 3520 instead of calling getCyclesMS(), but this helps
+         * NOTE: getMSCycles(1.2731488) should work out to 3520 cycles for a CPU clocked at 361.69ns per cycle,
+         * which is roughly 2.76Mhz.  We could just hard-code 3520 instead of calling getMSCycles(), but this helps
          * maintain a reasonable blink rate for the cursor even when the user cranks up the CPU speed.
          */
-        if (this.cpu.getCycles() >= this.nVT100UARTCycleSnap + this.cpu.getCyclesMS(1.2731488)) {
+        if (this.cpu.getCycles() >= this.nVT100UARTCycleSnap + this.cpu.getMSCycles(1.2731488)) {
             this.fVT100UARTBusy = false;
         }
     }
