@@ -1287,11 +1287,6 @@ CPUDef8080.opMOVML = function()
  */
 CPUDef8080.opHLT = function()
 {
-    /*
-     * The CPU is never REALLY halted by a HLT instruction; instead, by setting X86.INTFLAG.HALT,
-     * we are signalling to stepCPU() that it's free to end the current burst AND that it should not
-     * execute any more instructions until checkINTR() indicates a hardware interrupt is requested.
-     */
     var addr = this.getPC() - 1;
 
     /*
@@ -1304,8 +1299,14 @@ CPUDef8080.opHLT = function()
         }
     }
 
-    this.intFlags |= CPUDef8080.INTFLAG.HALT;
     this.nStepCycles -= 7;
+
+    /*
+     * The CPU is never REALLY halted by a HLT instruction; instead, we call requestHALT(), which
+     * signals to stepCPU() that it should end the current burst AND that it should not execute any
+     * more instructions until checkINTR() indicates a hardware interrupt has been requested.
+     */
+    this.requestHALT();
 
     /*
      * If a Debugger is present and the HALT message category is enabled, then we REALLY halt the CPU,
@@ -2823,8 +2824,9 @@ CPUDef8080.opJM = function()
  */
 CPUDef8080.opEI = function()
 {
-    this.setIF();var w = this.getHL();
+    this.setIF();
     this.nStepCycles -= 4;
+    this.checkINTR();
 };
 
 /**

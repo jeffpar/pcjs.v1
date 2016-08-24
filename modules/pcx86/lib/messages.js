@@ -82,4 +82,57 @@ var Messages = {
     HALT:       0x80000000|0
 };
 
+/*
+ * Message categories supported by the messageEnabled() function and other assorted message
+ * functions. Each category has a corresponding bit value that can be combined (ie, OR'ed) as
+ * needed.  The Debugger's message command ("m") is used to turn message categories on and off,
+ * like so:
+ *
+ *      m port on
+ *      m port off
+ *      ...
+ *
+ * NOTE: The order of these categories can be rearranged, alphabetized, etc, as desired; just be
+ * aware that changing the bit values could break saved Debugger states (not a huge concern, just
+ * something to be aware of).
+ */
+Messages.CATEGORIES = {
+    "cpu":      Messages.CPU,
+    "seg":      Messages.SEG,
+    "desc":     Messages.DESC,
+    "tss":      Messages.TSS,
+    "int":      Messages.INT,
+    "fault":    Messages.FAULT,
+    "bus":      Messages.BUS,
+    "mem":      Messages.MEM,
+    "port":     Messages.PORT,
+    "dma":      Messages.DMA,
+    "pic":      Messages.PIC,
+    "timer":    Messages.TIMER,
+    "cmos":     Messages.CMOS,
+    "rtc":      Messages.RTC,
+    "8042":     Messages.C8042,
+    "chipset":  Messages.CHIPSET,       // ie, anything else in ChipSet besides DMA, PIC, TIMER, CMOS, RTC and 8042
+    "keyboard": Messages.KEYBOARD,      // "kbd" is also allowed as shorthand for "keyboard"; see doMessages()
+    "key":      Messages.KEYS,          // using "key" instead of "keys", since the latter is a method on JavasScript objects
+    "video":    Messages.VIDEO,
+    "fdc":      Messages.FDC,
+    "hdc":      Messages.HDC,
+    "disk":     Messages.DISK,
+    "parallel": Messages.PARALLEL,
+    "serial":   Messages.SERIAL,
+    "mouse":    Messages.MOUSE,
+    "speaker":  Messages.SPEAKER,
+    "computer": Messages.COMPUTER,
+    "dos":      Messages.DOS,
+    "data":     Messages.DATA,
+    "log":      Messages.LOG,
+    "warn":     Messages.WARN,
+    /*
+     * Now we turn to message actions rather than message types; for example, setting "halt"
+     * on or off doesn't enable "halt" messages, but rather halts the CPU on any message above.
+     */
+    "halt":     Messages.HALT
+};
+
 if (NODE) module.exports = Messages;

@@ -36,6 +36,7 @@ if (NODE) {
     var usr         = require("../../shared/lib/usrlib");
     var web         = require("../../shared/lib/weblib");
     var Component   = require("../../shared/lib/component");
+    var PCX86       = require("./defines");
     var Bus         = require("./bus");
     var Memory      = require("./memory");
     var X86         = require("./x86");

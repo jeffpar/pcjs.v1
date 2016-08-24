@@ -1404,7 +1404,8 @@ Computer8080.prototype.getMachineComponent = function(sType, componentPrev)
  * updateFocus(fScroll)
  *
  * NOTE: When soft keyboard buttons call us to return focus to the machine (and away from the button),
- * the scroll feature has annoying effect on iOS, so we no longer do it by default (fScroll must be true).
+ * the browser's default behavior is to scroll the element into view, which can be annoying, especially on iOS,
+ * where the display is more constrained, so we no longer do it by default (fScroll must be true).
  *
  * @this {Computer8080}
  * @param {boolean} [fScroll]
@@ -1418,15 +1419,17 @@ Computer8080.prototype.updateFocus = function(fScroll)
          * is to ensure that keyboard input is fielded properly.
          */
         var x = 0, y = 0;
-        if (fScroll && window) {
+        if (!fScroll && window) {
             x = window.scrollX;
             y = window.scrollY;
         }
+
         /*
          * TODO: We need a mechanism to determine the "active" display, instead of hard-coding this to aVideo[0].
          */
         this.aVideo[0].setFocus();
-        if (fScroll && window) {
+
+        if (!fScroll && window) {
             window.scrollTo(x, y);
         }
     }
@@ -1468,17 +1471,17 @@ Computer8080.prototype.updateStatus = function(fForce)
 };
 
 /**
- * updateVideo(n)
+ * updateVideo(fForced)
  *
  * Any high-frequency updates should be performed here (avoid updating DOM elements).
  *
  * @this {Computer8080}
- * @param {number} n (where 0 <= n < VIDEO_UPDATES_PER_SECOND for a normal update, or -1 for a forced update)
+ * @param {boolean} [fForced]
  */
-Computer8080.prototype.updateVideo = function(n)
+Computer8080.prototype.updateVideo = function(fForced)
 {
     for (var i = 0; i < this.aVideo.length; i++) {
-        this.aVideo[i].updateScreen(n);
+        this.aVideo[i].updateScreen(fForced);
     }
 };
 
