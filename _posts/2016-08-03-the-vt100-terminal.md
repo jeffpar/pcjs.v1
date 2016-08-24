@@ -17,11 +17,9 @@ Unlike other VT100 emulators, this isn't simply an emulation of VT100 protocols.
 CPU emulator, along with other essential components that the CPU interacts with to control the display, keyboard, and
 serial port.
 
-Most of the VT100's (non-AVO) functionality should be operational now.  The VT100 screen is initialized with a test
-image that displays most of the VT100 font variations, built on-the-fly from the original VT100 Character Generator ROM.
-Once the VT100 "powers on", it should clear the screen and briefly display a "WAIT" message as it processes its Non-Volatile
-RAM (NVR).  When you see a blinking cursor, it's ready to use.  Press the SET-UP key to configure the terminal, just as you
-would an original VT100 terminal.
+Most of the VT100's (non-AVO) functionality should be operational now.  Once the VT100 "powers on," it should clear
+the screen and briefly display a "WAIT" message as it processes its Non-Volatile RAM (NVR).  When you see a blinking cursor,
+it's ready to use.  Press the SET-UP key to configure the terminal, just as you would an original VT100 terminal.
 
 For even more fun, check out the [Dual VT100 Terminals](/devices/pc8080/machine/vt100/dual/) demo.
 
