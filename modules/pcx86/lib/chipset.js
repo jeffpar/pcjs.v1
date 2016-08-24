@@ -37,6 +37,7 @@ if (NODE) {
     var web         = require("../../shared/lib/weblib");
     var Component   = require("../../shared/lib/component");
     var State       = require("../../shared/lib/state");
+    var PCX86       = require("./defines");
     var Interrupts  = require("./interrupts");
     var Messages    = require("./messages");
     var X86         = require("./x86");

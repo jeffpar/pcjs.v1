@@ -677,59 +677,6 @@ if (DEBUGGER) {
     Debugger.TYPE_80387 = Debugger.TYPE_80386;
     Debugger.TYPE_CPU_SHIFT = 14;
 
-    /*
-     * Message categories supported by the messageEnabled() function and other assorted message
-     * functions. Each category has a corresponding bit value that can be combined (ie, OR'ed) as
-     * needed.  The Debugger's message command ("m") is used to turn message categories on and off,
-     * like so:
-     *
-     *      m port on
-     *      m port off
-     *      ...
-     *
-     * NOTE: The order of these categories can be rearranged, alphabetized, etc, as desired; just be
-     * aware that changing the bit values could break saved Debugger states (not a huge concern, just
-     * something to be aware of).
-     */
-    Debugger.MESSAGES = {
-        "cpu":      Messages.CPU,
-        "seg":      Messages.SEG,
-        "desc":     Messages.DESC,
-        "tss":      Messages.TSS,
-        "int":      Messages.INT,
-        "fault":    Messages.FAULT,
-        "bus":      Messages.BUS,
-        "mem":      Messages.MEM,
-        "port":     Messages.PORT,
-        "dma":      Messages.DMA,
-        "pic":      Messages.PIC,
-        "timer":    Messages.TIMER,
-        "cmos":     Messages.CMOS,
-        "rtc":      Messages.RTC,
-        "8042":     Messages.C8042,
-        "chipset":  Messages.CHIPSET,   // ie, anything else in ChipSet besides DMA, PIC, TIMER, CMOS, RTC and 8042
-        "keyboard": Messages.KEYBOARD,  // "kbd" is also allowed as shorthand for "keyboard"; see doMessages()
-        "key":      Messages.KEYS,      // using "key" instead of "keys", since the latter is a method on JavasScript objects
-        "video":    Messages.VIDEO,
-        "fdc":      Messages.FDC,
-        "hdc":      Messages.HDC,
-        "disk":     Messages.DISK,
-        "parallel": Messages.PARALLEL,
-        "serial":   Messages.SERIAL,
-        "mouse":    Messages.MOUSE,
-        "speaker":  Messages.SPEAKER,
-        "computer": Messages.COMPUTER,
-        "dos":      Messages.DOS,
-        "data":     Messages.DATA,
-        "log":      Messages.LOG,
-        "warn":     Messages.WARN,
-        /*
-         * Now we turn to message actions rather than message types; for example, setting "halt"
-         * on or off doesn't enable "halt" messages, but rather halts the CPU on any message above.
-         */
-        "halt":     Messages.HALT
-    };
-
     Debugger.HISTORY_LIMIT = DEBUG? 100000 : 1000;
 
     /*
@@ -1772,21 +1719,21 @@ if (DEBUGGER) {
 
             case Interrupts.WINDBG.KRNLVARS:            // 0x005A
                 /*
-				 *  BX = version number of this data (0x3A0)
-				 *  DX:CX points to:
-				 *      WORD    hGlobalHeap     ****
-				 *      WORD    pGlobalHeap     ****
-				 *      WORD    hExeHead        ****
-				 *      WORD    hExeSweep
-				 *      WORD    topPDB
-				 *      WORD    headPDB
-				 *      WORD    topsizePDB
-				 *      WORD    headTDB         ****
-				 *      WORD    curTDB          ****
-				 *      WORD    loadTDB
-				 *      WORD    LockTDB
-				 *      WORD    SelTableLen     ****
-				 *      DWORD   SelTableStart   ****
+                 *  BX = version number of this data (0x3A0)
+                 *  DX:CX points to:
+                 *      WORD    hGlobalHeap     ****
+                 *      WORD    pGlobalHeap     ****
+                 *      WORD    hExeHead        ****
+                 *      WORD    hExeSweep
+                 *      WORD    topPDB
+                 *      WORD    headPDB
+                 *      WORD    topsizePDB
+                 *      WORD    headTDB         ****
+                 *      WORD    curTDB          ****
+                 *      WORD    loadTDB
+                 *      WORD    LockTDB
+                 *      WORD    SelTableLen     ****
+                 *      DWORD   SelTableStart   ****
                  */
                 break;
 
@@ -2008,7 +1955,7 @@ if (DEBUGGER) {
                     /*
                      *  AL == segment type:
                      *      0x80    device driver code seg
-				     *      0x81    device driver data seg
+                     *      0x81    device driver data seg
                      *  ES:DI -> D386_Device_Params structure (see addSectionInfo() for details)
                      */
                     this.addSectionInfo(this.newAddr(DI, ES), !(AL & 0x1), !!this.fWinDbgRM);
@@ -3410,9 +3357,9 @@ if (DEBUGGER) {
          */
         var aEnable = this.parseCommand(sEnable.replace("keys","key").replace("kbd","keyboard"), false, '|');
         if (aEnable.length) {
-            for (var m in Debugger.MESSAGES) {
+            for (var m in Messages.CATEGORIES) {
                 if (usr.indexOf(aEnable, m) >= 0) {
-                    this.bitsMessage |= Debugger.MESSAGES[m];
+                    this.bitsMessage |= Messages.CATEGORIES[m];
                     this.println(m + " messages enabled");
                 }
             }
@@ -3430,8 +3377,8 @@ if (DEBUGGER) {
      */
     Debugger.prototype.messageDump = function(bitMessage, fnDumper)
     {
-        for (var m in Debugger.MESSAGES) {
-            if (bitMessage == Debugger.MESSAGES[m]) {
+        for (var m in Messages.CATEGORIES) {
+            if (bitMessage == Messages.CATEGORIES[m]) {
                 this.afnDumpers[m] = fnDumper;
                 return true;
             }
@@ -6404,7 +6351,7 @@ if (DEBUGGER) {
 
         if (sAddr == '?') {
             var sDumpers = "";
-            for (m in Debugger.MESSAGES) {
+            for (m in Messages.CATEGORIES) {
                 if (this.afnDumpers[m]) {
                     if (sDumpers) sDumpers += ',';
                     sDumpers = sDumpers + m;
@@ -6487,7 +6434,7 @@ if (DEBUGGER) {
                 this.doLoad(asArgs);
                 return;
             }
-            for (m in Debugger.MESSAGES) {
+            for (m in Messages.CATEGORIES) {
                 if (asArgs[1] == m) {
                     var fnDumper = this.afnDumpers[m];
                     if (fnDumper) {
@@ -7007,9 +6954,9 @@ if (DEBUGGER) {
                  */
                 if (sCategory == "keys") sCategory = "key";
                 if (sCategory == "kbd") sCategory = "keyboard";
-                for (m in Debugger.MESSAGES) {
+                for (m in Messages.CATEGORIES) {
                     if (sCategory == m) {
-                        bitsMessage = Debugger.MESSAGES[m];
+                        bitsMessage = Messages.CATEGORIES[m];
                         fCriteria = !!(this.bitsMessage & bitsMessage);
                         break;
                     }
@@ -7036,9 +6983,9 @@ if (DEBUGGER) {
          */
         var n = 0;
         var sCategories = "";
-        for (m in Debugger.MESSAGES) {
+        for (m in Messages.CATEGORIES) {
             if (!sCategory || sCategory == m) {
-                var bitMessage = Debugger.MESSAGES[m];
+                var bitMessage = Messages.CATEGORIES[m];
                 var fEnabled = !!(this.bitsMessage & bitMessage);
                 if (fCriteria !== null && fCriteria != fEnabled) continue;
                 if (sCategories) sCategories += ',';

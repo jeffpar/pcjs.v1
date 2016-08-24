@@ -249,8 +249,6 @@ function Video8080(parmsVideo, canvas, context, textarea, container)
     }
 
     this.ledBindings = {};
-
-    if (DEBUG) this.nCyclesPrev = 0;
 }
 
 Component.subclass(Video8080);
@@ -429,6 +427,13 @@ Video8080.prototype.initBus = function(cmp, bus, cpu, dbg)
             this.kbd.setBinding(this.textareaScreen? "textarea" : "canvas", "kbd", this.inputScreen);
         }
     }
+
+    var video = this;
+    this.timerUpdateNext = this.cpu.addTimer(function() {
+        video.updateScreen();
+    });
+    this.cpu.setTimer(this.timerUpdateNext, this.getRefreshTime());
+    this.nUpdates = 0;
 
     if (!this.sFontROM) this.setReady();
 };
@@ -618,9 +623,10 @@ Video8080.prototype.powerUp = function(data, fRepower)
      * Because the VT100 frame buffer can be located anywhere in RAM (above 0x2000), we must defer this
      * test code until the powerUp() notification handler is called, when all RAM has (hopefully) been allocated.
      *
-     * TODO: Remove this display test code once the VT100 is fully operational.
+     * NOTE: The following test screen was useful for early testing, but a *real* VT100 doesn't display a test screen,
+     * so this code is no longer enabled by default.  Remove MAXDEBUG if you want to see it again.
      */
-    if (this.nFormat == Video8080.FORMAT.VT100) {
+    if (MAXDEBUG && this.nFormat == Video8080.FORMAT.VT100) {
         /*
          * Build a test screen in the VT100 frame buffer; we'll mimic the "SET-UP A" screen, since it uses
          * all the font variations.  The process involves iterating over 0-based row numbers -2 (or -5 if 50Hz
@@ -796,7 +802,7 @@ Video8080.prototype.updateScrollOffset = function(bScroll)
          * that update doesn't seem like a huge cause for concern.
          */
         if (bScroll) {
-            this.updateScreen(-1);
+            this.updateScreen(true);
         } else {
             this.fSkipSingleCellUpdate = true;
         }
@@ -901,14 +907,14 @@ Video8080.prototype.setFocus = function()
 };
 
 /**
- * getRefreshRate()
+ * getRefreshTime()
  *
  * @this {Video8080}
  * @return {number}
  */
-Video8080.prototype.getRefreshRate = function()
+Video8080.prototype.getRefreshTime = function()
 {
-    return Math.max(this.rateRefresh, this.rateInterrupt);
+    return 1000 / Math.max(this.rateRefresh, this.rateInterrupt);
 };
 
 /**
@@ -1137,16 +1143,6 @@ Video8080.prototype.updateVT100 = function(fForced)
 
     this.assert(font < 0 || iCell === this.nCellCache);
 
-    if (MAXDEBUG && !fForced) {
-        var nSeconds = Date.now() / 1000;
-        if ((nSeconds|0) != (this.nUpdateSeconds|0)) {
-            this.nUpdateNumber = 0;
-        }
-        this.nUpdateNumber++;
-        this.nUpdateSeconds = nSeconds;
-        this.printMessage("updateVT100(): update #" + this.nUpdateNumber + " at " +this.nUpdateSeconds + " corner=" + str.toHexByte(this.aCellCache[1]) + " cycles=" + this.nCyclesPrev + " delta=" + this.nCyclesDelta);
-    }
-
     if (!fForced && this.fSkipSingleCellUpdate && cUpdated == 1) {
         /*
          * We're going to blow off this update, since it comes on the heels of a smooth-scroll that *may*
@@ -1193,7 +1189,7 @@ Video8080.prototype.updateVT100 = function(fForced)
 };
 
 /**
- * updateScreen(n)
+ * updateScreen(fForced)
  *
  * Propagates the video buffer to the cell cache and updates the screen with any changes.  Forced updates
  * are generally internal updates triggered by an I/O operation or other state change, while non-forced updates
@@ -1204,22 +1200,20 @@ Video8080.prototype.updateVT100 = function(fForced)
  * invalid value, we're assured that the next call to updateScreen() will redraw the entire (visible) video buffer.
  *
  * @this {Video8080}
- * @param {number} n (where 0 <= n < getRefreshRate() for a normal update, or -1 for a forced update)
+ * @param {boolean} [fForced]
  */
-Video8080.prototype.updateScreen = function(n)
+Video8080.prototype.updateScreen = function(fForced)
 {
     var fClean;
     var fUpdate = true;
-    var fForced = true;
 
-    if (n >= 0) {
-        fForced = false;
+    if (!fForced) {
         if (this.rateInterrupt) {
             /*
              * TODO: Incorporate these hard-coded interrupt vector numbers into configuration blocks.
              */
             if (this.rateInterrupt == 120) {
-                if (!(n & 1)) {
+                if (!(this.nUpdates & 1)) {
                     /*
                      * On even updates, call cpu.requestINTR(1), and also update our copy of the screen.
                      */
@@ -1247,13 +1241,8 @@ Video8080.prototype.updateScreen = function(n)
                 fUpdate = false;
             }
         }
-    }
-
-    if (DEBUG && !fForced) {
-        var nCycles = this.cpu.getCycles();
-        this.nCyclesDelta = nCycles - this.nCyclesPrev;
-        this.nCyclesPrev = nCycles;
-        if (MAXDEBUG) this.printMessage("updateScreen(" + n + "): clean=" + fClean + ", update=" + fUpdate + ", cycles=" + this.nCyclesPrev + ", delta=" + this.nCyclesDelta);
+        this.cpu.setTimer(this.timerUpdateNext, this.getRefreshTime());
+        this.nUpdates++;
     }
 
     if (!fUpdate) {

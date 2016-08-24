@@ -36,6 +36,7 @@ if (NODE) {
     var web         = require("../../shared/lib/weblib");
     var DumpAPI     = require("../../shared/lib/dumpapi");
     var Component   = require("../../shared/lib/component");
+    var PCX86       = require("./defines");
     var Memory      = require("./memory");
 }
 

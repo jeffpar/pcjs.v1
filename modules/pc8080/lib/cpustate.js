@@ -934,21 +934,38 @@ CPUState8080.prototype.pushWord = function(w)
  * checkINTR()
  *
  * @this {CPUState8080}
- * @return {boolean} true if h/w interrupt has just been acknowledged, false if not
+ * @return {boolean} true if execution may proceed, false if not
  */
 CPUState8080.prototype.checkINTR = function()
 {
-    if ((this.intFlags & CPUDef8080.INTFLAG.INTR) && this.getIF()) {
-        for (var nLevel = 0; nLevel < 8; nLevel++) {
-            if (this.intFlags & (1 << nLevel)) break;
+    /*
+     * If the Debugger is single-stepping, this.nStepCycles will always be zero, which we take
+     * advantage of here to avoid processing interrupts.  The Debugger will have to issue a "g"
+     * command (or "p" command on a call instruction) if you want interrupts to be processed.
+     */
+    if (this.nStepCycles) {
+        if ((this.intFlags & CPUDef8080.INTFLAG.INTR) && this.getIF()) {
+            for (var nLevel = 0; nLevel < 8; nLevel++) {
+                if (this.intFlags & (1 << nLevel)) break;
+            }
+            this.clearINTR(nLevel);
+            this.clearIF();
+            this.intFlags &= ~CPUDef8080.INTFLAG.HALT;
+            this.aOps[CPUDef8080.OPCODE.RST0 | (nLevel << 3)].call(this);
         }
-        this.clearINTR(nLevel);
-        this.clearIF();
-        this.intFlags &= ~CPUDef8080.INTFLAG.HALT;
-        this.aOps[CPUDef8080.OPCODE.RST0 | (nLevel << 3)].call(this);
-        return true;
     }
-    return false;
+    if (this.intFlags & CPUDef8080.INTFLAG.HALT) {
+        /*
+         * As discussed in opHLT(), the CPU is never REALLY halted by a HLT instruction; instead, opHLT()
+         * calls requestHALT(), which sets INTFLAG.HALT and signals to stepCPU() that it's free to end the
+         * current burst AND that it should not execute any more instructions until checkINTR() indicates
+         * that a hardware interrupt has been requested.
+         */
+        this.nBurstCycles -= this.nStepCycles;
+        this.nStepCycles = 0;
+        return false;
+    }
+    return true;
 };
 
 /**
@@ -968,14 +985,28 @@ CPUState8080.prototype.clearINTR = function(nLevel)
     this.intFlags &= ~bitsClear;
 };
 
+
+/**
+ * requestHALT()
+ *
+ * @this {CPUState8080}
+ */
+CPUState8080.prototype.requestHALT = function()
+{
+    this.intFlags |= CPUDef8080.INTFLAG.HALT;
+    this.nBurstCycles -= this.nStepCycles;
+    this.nStepCycles = 0;
+};
+
 /**
  * requestINTR(nLevel)
  *
  * Request the corresponding interrupt level.
  *
- * Each interrupt level (0-7) has its own intFlags bit (0-7).  If one or more of those bits are set,
- * and the Interrupt Flag (IF) is also set, indicating that interrupts are enabled, then checkINTR()
- * chooses one of those bits, clears it, clears IF, and executes the corresponding RST opcode.
+ * Each interrupt level (0-7) has its own intFlags bit (0-7).  If the Interrupt Flag (IF) is also
+ * set, then we know that checkINTR() will want to issue the interrupt, so we end the current burst
+ * by setting nStepCycles to zero.  But before we do, we subtract nStepCycles from nBurstCycles,
+ * so that the calculation of how many cycles were actually executed on this burst is correct.
  *
  * @this {CPUState8080}
  * @param {number} nLevel (0-7)
@@ -983,6 +1014,10 @@ CPUState8080.prototype.clearINTR = function(nLevel)
 CPUState8080.prototype.requestINTR = function(nLevel)
 {
     this.intFlags |= (1 << nLevel);
+    if (this.getIF()) {
+        this.nBurstCycles -= this.nStepCycles;
+        this.nStepCycles = 0;
+    }
 };
 
 /**
@@ -1099,63 +1134,22 @@ CPUState8080.prototype.stepCPU = function(nMinCycles)
      */
     this.nBurstCycles = this.nStepCycles = nMinCycles;
 
-    do {
-        if (this.intFlags) {
-            /*
-             * We no longer call checkINTR() if the Debugger is single-stepping; you'll have to let the
-             * CPU run with a "g" (or a "p" on a call instruction) if you want interrupts to be processed.
-             */
-            if (nMinCycles) {
-                /*
-                 * NOTE: If checkINTR() returns true, it also clears INTFLAG.HALT, so we don't have to worry
-                 * about the INTFLAG.HALT code below triggering.
-                 */
-                this.checkINTR();
-                /*
-                 * If the Debugger is running, consider some new notification mechanism(s) regarding interrupt
-                 * dispatches; the following code no longer applies, due to changes above.
-                 *
-                 *      if (!nMinCycles && this.checkINTR()) {
-                 *          this.assert(DEBUGGER);  // nMinCycles of zero should be generated ONLY by the Debugger
-                 *          if (DEBUGGER) {
-                 *              this.println("interrupt dispatched");
-                 *              break;
-                 *          }
-                 *      }
-                 */
+    /*
+     * NOTE: If checkINTR() returns false, INTFLAG.HALT must be set, so no instructions should be executed.
+     */
+    if (this.checkINTR()) {
+        do {
+            if (DEBUGGER && fDebugCheck) {
+                if (this.dbg.checkInstruction(this.regPC, nDebugState)) {
+                    this.stopCPU();
+                    break;
+                }
+                nDebugState = 1;
             }
-            if (this.intFlags & CPUDef8080.INTFLAG.HALT) {
-                /*
-                 * As discussed in opHLT(), the CPU is never REALLY halted by a HLT instruction; instead,
-                 * opHLT() sets CPUDef8080.INTFLAG.HALT, signalling to us that we're free to end the current burst
-                 * AND that we should not execute any more instructions until checkINTR() indicates a hardware
-                 * interrupt has been requested.
-                 *
-                 * One downside to this approach is that it *might* appear to the careful observer that we
-                 * executed a full complement of instructions during bursts where CPUDef8080.INTFLAG.HALT was set,
-                 * when in fact we did not.  However, the steady advance of the overall cycle count, and thus
-                 * the steady series calls to stepCPU(), is needed to ensure that timer updates, video updates,
-                 * etc, all continue to occur at the expected rates.
-                 *
-                 * If necessary, we can add another bookkeeping cycle counter (eg, one that keeps tracks of the
-                 * number of cycles during which we did not actually execute any instructions).
-                 */
-                this.nStepCycles = 0;
-                break;
-            }
-        }
+            this.aOps[this.getPCByte()].call(this);
 
-        if (DEBUGGER && fDebugCheck) {
-            if (this.dbg.checkInstruction(this.regPC, nDebugState)) {
-                this.stopCPU();
-                break;
-            }
-            nDebugState = 1;
-        }
-
-        this.aOps[this.getPCByte()].call(this);
-
-    } while (this.nStepCycles > 0);
+        } while (this.nStepCycles > 0);
+    }
 
     return (this.flags.fComplete? this.nBurstCycles - this.nStepCycles : (this.flags.fComplete === undefined? 0 : -1));
 };

@@ -68,6 +68,7 @@ if (NODE) {
     var ReportAPI   = require("../../shared/lib/reportapi");
     var Component   = require("../../shared/lib/component");
     var State       = require("../../shared/lib/state");
+    var PCX86       = require("./defines");
     var Messages    = require("./messages");
     var Bus         = require("./bus");
 }

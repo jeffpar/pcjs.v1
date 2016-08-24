@@ -48,7 +48,7 @@ The ROM contains 128 rows of character data, 16 bytes per character.  More on th
 ### Disassembling the 8080 Firmware
 
 Following in the footsteps of [vt100romhax](http://vt100romhax.tumblr.com/post/90697428973/the-vt100-memory-map-and-8080-disassembly),
-I disassembled the ROM, using `dz80` from [D52](http://www.brouhaha.com/~eric/software/d52/) ([manual](http://www.bipom.com/documents/dis51/d52manual.html)):
+I disassembled the ROM, using `dz80` from [D52](http://www.brouhaha.com/~eric/software/d52/) (here's the [manual](http://www.bipom.com/documents/dis51/d52manual.html)):
 
 	dz80 -80 VT100.bin
 
@@ -61,7 +61,7 @@ Finally, I verified that reassembling [VT100.asm](VT100.asm) with [asm8080](http
 original VT100.bin; after adding the correct number of `nop` instructions to the end to the source file, the binaries matched.
 
 The other advantage of reassembling the code is that the resulting [VT100.lst](VT100.lst) makes it easy to export comments
-and other symoblic information to [VT100.map](VT100.map), which can then be included in the [VT100.json](VT100.json) ROM dump
+and other symbolic information to [VT100.map](VT100.map), which can then be included in the [VT100.json](VT100.json) ROM dump
 and passed on to the PC8080 Debugger.  Here are the rebuild steps:
 
 	asm8080 -lVT100.lst VT100.asm
