@@ -57,6 +57,7 @@ var usr     = require("../../shared/lib/usrlib");
  * @property {Array.<string>} pcCSSFiles
  * @property {Array.<string>} pcX86Files
  * @property {Array.<string>} pc8080Files
+ * @property {Array.<string>} pdp11Files
  */
 var pkg = require("../../../package.json");
 
@@ -170,7 +171,8 @@ var aMachineFiles = {
     'C1P':      pkg.c1pCSSFiles.concat(pkg.c1pJSFiles),     // will be deprecated when PC6502 becomes available
     'PC':       pkg.pcCSSFiles.concat(pkg.pcX86Files),      // deprecated (same as PCx86)
     'PCx86':    pkg.pcCSSFiles.concat(pkg.pcX86Files),
-    'PC8080':   pkg.pcCSSFiles.concat(pkg.pc8080Files)
+    'PC8080':   pkg.pcCSSFiles.concat(pkg.pc8080Files),
+    'PDP11':    pkg.pcCSSFiles.concat(pkg.pdp11Files)
 };
 var aMachineFileTypes = {
     'head': [".css"],           // put BOTH ".css" and ".js" here if convertMDMachineLinks() embeds its own scripts
@@ -1437,7 +1439,7 @@ HTMLOut.prototype.getMachineXML = function(sToken, sIndent, aParms, sXMLFile, sS
                  * The common denominator in both sets is either "/pc" or "/c1p", which in turn indicates the type of machine
                  * (eg, "PC", "C1P", etc).
                  */
-                aMatch = sStyleSheet.match(/\/(pc|c1p)([^/]*)/);
+                aMatch = sStyleSheet.match(/\/(pc|c1p|pdp)([^/]*)/);
                 if (aMatch) {
                     var sMachineType = aMatch[1].toUpperCase() + (aMatch[2] != "js"? aMatch[2] : "");
                     /*

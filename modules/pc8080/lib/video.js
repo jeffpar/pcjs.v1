@@ -399,7 +399,7 @@ Video8080.prototype.initBuffers = function()
  * @this {Video8080}
  * @param {Computer8080} cmp
  * @param {Bus8080} bus
- * @param {CPU8080State} cpu
+ * @param {CPUState8080} cpu
  * @param {Debugger8080} dbg
  */
 Video8080.prototype.initBus = function(cmp, bus, cpu, dbg)

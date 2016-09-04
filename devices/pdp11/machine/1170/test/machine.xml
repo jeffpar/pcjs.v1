@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pdp11/1.24.2/machine.xsl"?>
+<machine id="test1170" class="pdp11" border="1" pos="center" background="#FAEBD7">
+	<name pos="center">PDP-11/70 Test Machine</name>
+	<computer id="computer" busWidth="18"/>
+	<cpu id="cpu" model="1170" cycles="2000000"/>
+	<ram id="ram" addr="0x0000" size="0x40000"/>
+	<panel ref="/devices/pdp11/panel/1170/wide.xml"/>
+	<debugger id="debugger"/>
+</machine>

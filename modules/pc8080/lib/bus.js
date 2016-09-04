@@ -63,7 +63,7 @@ if (NODE) {
  * @constructor
  * @extends Component
  * @param {Object} parmsBus
- * @param {CPU8080State} cpu
+ * @param {CPUState8080} cpu
  * @param {Debugger8080} dbg
  */
 function Bus8080(parmsBus, cpu, dbg)
@@ -191,7 +191,7 @@ var BlockInfo;
 Bus8080.BlockInfo = usr.defineBitFields({num:20, count:8, btmod:1, type:3});
 
 /**
- * Bus8080Info object definition (returned by scanMemory())
+ * BusInfo8080 object definition (returned by scanMemory())
  *
  *  cbTotal:    total bytes allocated
  *  cBlocks:    total Memory blocks allocated
@@ -203,7 +203,7 @@ Bus8080.BlockInfo = usr.defineBitFields({num:20, count:8, btmod:1, type:3});
  *  aBlocks:    Array.<BlockInfo>
  * }}
  */
-var Bus8080Info;
+var BusInfo8080;
 
 /**
  * initMemory()
@@ -364,10 +364,10 @@ Bus8080.prototype.cleanMemory = function(addr, size)
 /**
  * scanMemory(info, addr, size)
  *
- * Returns a Bus8080Info object for the specified address range.
+ * Returns a BusInfo8080 object for the specified address range.
  *
  * @this {Bus8080}
- * @param {Object} [info] previous Bus8080Info, if any
+ * @param {Object} [info] previous BusInfo8080, if any
  * @param {number} [addr] starting address of range (0 if none provided)
  * @param {number} [size] size of range, in bytes (up to end of address space if none provided)
  * @return {Object} updated info (or new info if no previous info provided)

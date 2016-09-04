@@ -43,7 +43,7 @@ if (NODE) {
  *
  * The CPU8080 class supports the following (parmsCPU) properties:
  *
- *      cycles: the machine's base cycles per second; the CPU8080State constructor
+ *      cycles: the machine's base cycles per second; the CPUState8080 constructor
  *      will provide us with a default (based on the CPU model) to use as a fallback.
  *
  *      multiplier: base cycle multiplier; default is 1.
@@ -64,7 +64,7 @@ if (NODE) {
  * This component is primarily responsible for interfacing the CPU with the outside
  * world (eg, Panel and Debugger components), and managing overall CPU operation.
  *
- * It is extended by the CPU8080State component, where the simulation control logic resides.
+ * It is extended by the CPUState8080 component, where the simulation control logic resides.
  *
  * @constructor
  * @extends Component
@@ -199,7 +199,7 @@ CPU8080.prototype.reset = function()
 /**
  * save()
  *
- * This is a placeholder for save support (overridden by the CPUState component).
+ * This is a placeholder for save support (overridden by the CPUState8080 component).
  *
  * @this {CPU8080}
  * @return {Object|null}
@@ -212,7 +212,7 @@ CPU8080.prototype.save = function()
 /**
  * restore(data)
  *
- * This is a placeholder for restore support (overridden by the CPUState component).
+ * This is a placeholder for restore support (overridden by the CPUState8080 component).
  *
  * @this {CPU8080}
  * @param {Object} data
@@ -339,7 +339,7 @@ CPU8080.prototype.isRunning = function()
 /**
  * getChecksum()
  *
- * This will be implemented by the CPUState component.
+ * This will be implemented by the CPUState8080 component.
  *
  * @this {CPU8080}
  * @return {number} a 32-bit summation of key elements of the current CPU state (used by the CPU checksum code)
@@ -1145,7 +1145,7 @@ CPU8080.prototype.startCPU = function(fUpdateFocus)
 /**
  * stepCPU(nMinCycles)
  *
- * This will be implemented by the CPUState component.
+ * This will be implemented by the CPUState8080 component.
  *
  * @this {CPU8080}
  * @param {number} nMinCycles (0 implies a single-step, and therefore breakpoints should be ignored)

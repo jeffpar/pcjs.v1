@@ -74,7 +74,7 @@ Component.subclass(RAM8080);
  * @this {RAM8080}
  * @param {Computer8080} cmp
  * @param {Bus8080} bus
- * @param {CPU8080State} cpu
+ * @param {CPUState8080} cpu
  * @param {Debugger8080} dbg
  */
 RAM8080.prototype.initBus = function(cmp, bus, cpu, dbg)

@@ -361,7 +361,7 @@ if (DEBUGGER) {
     /*
      * TYPE_IREG values, based on the REG_* constants.
      *
-     * NOte that TYPE_M isn't really a register, just an alternative form of TYPE_HL | TYPE_MEM.
+     * Note that TYPE_M isn't really a register, just an alternative form of TYPE_HL | TYPE_MEM.
      */
     Debugger8080.TYPE_A     = (Debugger8080.REG_A  << 8 | Debugger8080.TYPE_REG | Debugger8080.TYPE_BYTE);
     Debugger8080.TYPE_B     = (Debugger8080.REG_B  << 8 | Debugger8080.TYPE_REG | Debugger8080.TYPE_BYTE);
@@ -673,7 +673,7 @@ if (DEBUGGER) {
      * @this {Debugger8080}
      * @param {Computer8080} cmp
      * @param {Bus8080} bus
-     * @param {CPU8080State} cpu
+     * @param {CPUState8080} cpu
      * @param {Debugger8080} dbg
      */
     Debugger8080.prototype.initBus = function(cmp, bus, cpu, dbg)

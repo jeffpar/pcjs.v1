@@ -148,7 +148,7 @@ function Computer8080(parmsComputer, parmsMachine, fSuspended) {
      * where we know getComponentByType() will only return an CPUState object or null), wrap the expression
      * in parentheses.  I never knew this until I stumbled across it in "Closure: The Definitive Guide".
      */
-    this.cpu = /** @type {CPU8080State} */ (Component.getComponentByType("CPU", this.id));
+    this.cpu = /** @type {CPUState8080} */ (Component.getComponentByType("CPU", this.id));
     if (!this.cpu) {
         Component.error("Unable to find CPU component");
         return;

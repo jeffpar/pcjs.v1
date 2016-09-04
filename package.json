@@ -131,7 +131,7 @@
     "./modules/shared/lib/embed.js",
     "./modules/shared/lib/save.js"
   ],
-    "pc8080Files": [
+  "pc8080Files": [
     "./modules/shared/lib/defines.js",
     "./modules/shared/lib/dumpapi.js",
     "./modules/shared/lib/reportapi.js",
@@ -157,6 +157,32 @@
     "./modules/pc8080/lib/serialport.js",
     "./modules/pc8080/lib/debugger.js",
     "./modules/pc8080/lib/computer.js",
+    "./modules/shared/lib/state.js",
+    "./modules/shared/lib/embed.js"
+  ],
+  "pdp11Files": [
+    "./modules/shared/lib/defines.js",
+    "./modules/shared/lib/dumpapi.js",
+    "./modules/shared/lib/reportapi.js",
+    "./modules/shared/lib/userapi.js",
+    "./modules/shared/lib/strlib.js",
+    "./modules/shared/lib/usrlib.js",
+    "./modules/shared/lib/weblib.js",
+    "./modules/shared/lib/component.js",
+    "./modules/pdp11/lib/defines.js",
+    "./modules/pdp11/lib/cpudef.js",
+    "./modules/pdp11/lib/messages.js",
+    "./modules/pdp11/lib/panel.js",
+    "./modules/pdp11/lib/bus.js",
+    "./modules/pdp11/lib/memory.js",
+    "./modules/pdp11/lib/cpu.js",
+    "./modules/pdp11/lib/cpustate.js",
+    "./modules/pdp11/lib/cpuops.js",
+    "./modules/pdp11/lib/rom.js",
+    "./modules/pdp11/lib/ram.js",
+    "./modules/pdp11/lib/keyboard.js",
+    "./modules/pdp11/lib/debugger.js",
+    "./modules/pdp11/lib/computer.js",
     "./modules/shared/lib/state.js",
     "./modules/shared/lib/embed.js"
   ]
