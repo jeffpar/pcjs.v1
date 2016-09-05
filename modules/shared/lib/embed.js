@@ -166,6 +166,8 @@ function parseXML(sXML, sXMLFile, idMachine, sAppClass, sParms, fResolve, displa
              * I'm trying to switch to a shared components.xsl (at least for all PC-class machines),
              * but in the interim, that means hacking the XSL file on the fly to reflect the actual class.
              */
+            var sAppName = sAppClass.toUpperCase().replace("X86", "x86").replace("JS", "js");
+            sXML = sXML.replace(/(<xsl:variable name="APPNAME">).*?(<\/xsl:variable>)/, "$1" + sAppName + "$2");
             sXML = sXML.replace(/(<xsl:variable name="APPCLASS">).*?(<\/xsl:variable>)/, "$1" + sAppClass + "$2");
 
             /*
