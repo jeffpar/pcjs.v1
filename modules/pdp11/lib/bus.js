@@ -740,6 +740,40 @@ BusPDP11.prototype.restoreMemory = function(a)
 };
 
 /**
+ * reset_iopage()
+ *
+ * TODO: Implement
+ *
+ * @this {BusPDP11}
+ */
+BusPDP11.prototype.reset_iopage = function()
+{
+    // display.misc = (display.misc & ~0x77) | 0x14; // kernel 16 bit
+    // tty.rcsr = 0;
+    // tty.xcsr = 0x80; /*0200*/
+    // kw11.csr = 0;
+    // rk11.rkcs = 0x80; /*0200*/
+    // rl11.csr = 0x80;
+    // rp11_init();
+};
+
+/**
+ * access_iopage(physicalAddress, data, byteFlag)
+ *
+ * TODO: Implement
+ *
+ * @this {BusPDP11}
+ * @param {number} physicalAddress
+ * @param {number} data
+ * @param {number} byteFlag
+ * @return {number}
+ */
+BusPDP11.prototype.access_iopage = function(physicalAddress, data, byteFlag)
+{
+    return -1;
+};
+
+/**
  * reportError(op, addr, size, fQuiet)
  *
  * @this {BusPDP11}

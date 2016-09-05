@@ -961,8 +961,7 @@ CPUState8080.prototype.checkINTR = function()
          * current burst AND that it should not execute any more instructions until checkINTR() indicates
          * that a hardware interrupt has been requested.
          */
-        this.nBurstCycles -= this.nStepCycles;
-        this.nStepCycles = 0;
+        this.endBurst();
         return false;
     }
     return true;
@@ -994,8 +993,7 @@ CPUState8080.prototype.clearINTR = function(nLevel)
 CPUState8080.prototype.requestHALT = function()
 {
     this.intFlags |= CPUDef8080.INTFLAG.HALT;
-    this.nBurstCycles -= this.nStepCycles;
-    this.nStepCycles = 0;
+    this.endBurst();
 };
 
 /**
@@ -1015,8 +1013,7 @@ CPUState8080.prototype.requestINTR = function(nLevel)
 {
     this.intFlags |= (1 << nLevel);
     if (this.getIF()) {
-        this.nBurstCycles -= this.nStepCycles;
-        this.nStepCycles = 0;
+        this.endBurst();
     }
 };
 
@@ -1087,9 +1084,6 @@ CPUState8080.prototype.updateStatus = function(fForce)
  * in and out of h/w interrupt service routines (ISRs), etc, but from the Debugger's perspective,
  * they're all one continuous stream of instructions that can be stepped or run at will.  Moreover,
  * stepping vs. running should never change the behavior of the simulation.
- *
- * As a result, the Debugger's complete independence means you can run other 8086/8088 debuggers
- * (eg, DEBUG) inside the simulation without interference; you can even "debug" them with the Debugger.
  *
  * @this {CPUState8080}
  * @param {number} nMinCycles (0 implies a single-step, and therefore breakpoints should be ignored)

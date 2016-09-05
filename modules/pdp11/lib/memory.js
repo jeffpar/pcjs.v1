@@ -36,7 +36,7 @@
 if (NODE) {
     var str           = require("../../shared/lib/strlib");
     var Component     = require("../../shared/lib/component");
-    var CPUDefPDP11   = require("./cpudef");
+    var PDP11         = require("./defines");
     var MessagesPDP11 = require("./messages");
 }
 

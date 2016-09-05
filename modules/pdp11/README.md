@@ -17,7 +17,6 @@ PDP11 is currently comprised of the following non-shared components, as listed i
 [package.json](../../package.json) (see the *pdp11Files* property):
 
 * [defines.js](/modules/pdp11/lib/defines.js)
-* [cpudef.js](/modules/pdp11/lib/cpudef.js)
 * [messages.js](/modules/pdp11/lib/messages.js)
 * [panel.js](/modules/pdp11/lib/panel.js)
 * [bus.js](/modules/pdp11/lib/bus.js)

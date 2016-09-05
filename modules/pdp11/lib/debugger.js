@@ -41,7 +41,6 @@ if (DEBUGGER) {
         var Component     = require("../../shared/lib/component");
         var State         = require("../../shared/lib/state");
         var PDP11         = require("./defines");
-        var CPUDefPDP11   = require("./cpudef");
         var CPUPDP11      = require("./cpu");
         var KeyboardPDP11 = require("./keyboard");
         var MessagesPDP11 = require("./messages");
@@ -485,13 +484,13 @@ if (DEBUGGER) {
      * @param {DbgAddrPDP11|null|undefined} dbgAddr
      * @param {boolean} [fWrite]
      * @param {number} [nb] number of bytes to check (1 or 2); default is 1
-     * @return {number} is the corresponding linear address, or CPUDefPDP11.ADDR_INVALID
+     * @return {number} is the corresponding linear address, or PDP11.ADDR_INVALID
      */
     DebuggerPDP11.prototype.getAddr = function(dbgAddr, fWrite, nb)
     {
         var addr = dbgAddr && dbgAddr.addr;
         if (addr == null) {
-            addr = CPUDefPDP11.ADDR_INVALID;
+            addr = PDP11.ADDR_INVALID;
         }
         return addr;
     };
@@ -510,7 +509,7 @@ if (DEBUGGER) {
     {
         var b = 0xff;
         var addr = this.getAddr(dbgAddr, false, 1);
-        if (addr !== CPUDefPDP11.ADDR_INVALID) {
+        if (addr !== PDP11.ADDR_INVALID) {
             b = this.bus.getByteDirect(addr);
             if (inc) this.incAddr(dbgAddr, inc);
         }
@@ -542,7 +541,7 @@ if (DEBUGGER) {
     {
         var w = 0xffff;
         var addr = this.getAddr(dbgAddr, false, 2);
-        if (addr !== CPUDefPDP11.ADDR_INVALID) {
+        if (addr !== PDP11.ADDR_INVALID) {
             w = this.bus.getShortDirect(addr);
             if (inc) this.incAddr(dbgAddr, inc);
         }
@@ -560,7 +559,7 @@ if (DEBUGGER) {
     DebuggerPDP11.prototype.setByte = function(dbgAddr, b, inc)
     {
         var addr = this.getAddr(dbgAddr, true, 1);
-        if (addr !== CPUDefPDP11.ADDR_INVALID) {
+        if (addr !== PDP11.ADDR_INVALID) {
             this.bus.setByteDirect(addr, b);
             if (inc) this.incAddr(dbgAddr, inc);
             this.cpu.updateCPU(true);           // we set fForce to true in case video memory was the target
@@ -578,7 +577,7 @@ if (DEBUGGER) {
     DebuggerPDP11.prototype.setShort = function(dbgAddr, w, inc)
     {
         var addr = this.getAddr(dbgAddr, true, 2);
-        if (addr !== CPUDefPDP11.ADDR_INVALID) {
+        if (addr !== PDP11.ADDR_INVALID) {
             this.bus.setShortDirect(addr, w);
             if (inc) this.incAddr(dbgAddr, inc);
             this.cpu.updateCPU(true);           // we set fForce to true in case video memory was the target
@@ -648,10 +647,10 @@ if (DEBUGGER) {
      * parseAddr(sAddr, fCode, fNoChecks, fPrint)
      *
      * Address evaluation and validation (eg, range checks) are no longer performed at this stage.  That's
-     * done later, by getAddr(), which returns CPUDefPDP11.ADDR_INVALID for invalid segments, out-of-range offsets,
+     * done later, by getAddr(), which returns PDP11.ADDR_INVALID for invalid segments, out-of-range offsets,
      * etc.  The Debugger's low-level get/set memory functions verify all getAddr() results, but even if an
      * invalid address is passed through to the Bus memory interfaces, the address will simply be masked with
-     * BusPDP11.nBusLimit; in the case of CPUDefPDP11.ADDR_INVALID, that will generally refer to the top of the physical
+     * BusPDP11.nBusLimit; in the case of PDP11.ADDR_INVALID, that will generally refer to the top of the physical
      * address space.
      *
      * @this {DebuggerPDP11}
@@ -770,7 +769,7 @@ if (DEBUGGER) {
 
         if (sAddr) {
             addr = this.getAddr(this.parseAddr(sAddr));
-            if (addr === CPUDefPDP11.ADDR_INVALID) {
+            if (addr === PDP11.ADDR_INVALID) {
                 this.println("invalid address: " + sAddr);
                 return;
             }
@@ -1709,7 +1708,7 @@ if (DEBUGGER) {
 
         if (aBreak != this.aBreakExec) {
             var addr = this.getAddr(dbgAddr);
-            if (addr === CPUDefPDP11.ADDR_INVALID) {
+            if (addr === PDP11.ADDR_INVALID) {
                 this.println("invalid address: " + this.toHexAddr(dbgAddr));
                 fSuccess = false;
             } else {
@@ -2002,7 +2001,7 @@ if (DEBUGGER) {
 
         var sBytes = "";
         var sLine = this.toHexAddr(dbgAddrIns) + ' ';
-        if (dbgAddrIns.addr !== CPUDefPDP11.ADDR_INVALID && dbgAddr.addr !== CPUDefPDP11.ADDR_INVALID) {
+        if (dbgAddrIns.addr !== PDP11.ADDR_INVALID && dbgAddr.addr !== PDP11.ADDR_INVALID) {
             do {
                 sBytes += str.toHex(this.getByte(dbgAddrIns, 1), 2);
                 if (dbgAddrIns.addr == null) break;
@@ -2103,9 +2102,6 @@ if (DEBUGGER) {
     {
         var b;
         switch (sFlag) {
-        case "IF":
-            b = this.cpu.getIF();
-            break;
         case "SF":
             b = this.cpu.getSF();
             break;
@@ -3237,26 +3233,6 @@ if (DEBUGGER) {
     };
 
     /**
-     * doInt(sLevel)
-     *
-     * @this {DebuggerPDP11}
-     * @param {string} sLevel
-     * @return {boolean} true if success, false if error
-     */
-    DebuggerPDP11.prototype.doInt = function(sLevel)
-    {
-        if (!this.cpu.getIF()) {
-            this.println("interrupts disabled (use rif=1 to enable)");
-            return false;
-        }
-        var nLevel = this.parseExpression(sLevel);
-        if (nLevel == null) return false;
-        this.println("requesting interrupt level " + nLevel);
-        this.cpu.requestINTR(nLevel);
-        return true;
-    };
-
-    /**
      * doVar(sCmd)
      *
      * The command must be of the form "{variable} = [{expression}]", where expression may contain constants,
@@ -3528,48 +3504,9 @@ if (DEBUGGER) {
                 fValid = true;
                 var sRegMatch = sReg.toUpperCase();
                 switch (sRegMatch) {
-                case "A":
-                    cpu.regA = w & 0xff;
-                    break;
-                case "B":
-                    cpu.regB = w & 0xff;
-                    break;
-                case "BC":
-                    cpu.regB = ((w >> 8) & 0xff);
-                    /* falls through */
-                case "C":
-                    cpu.regC = w & 0xff;
-                    break;
-                case "D":
-                    cpu.regD = w & 0xff;
-                    break;
-                case "DE":
-                    cpu.regD = ((w >> 8) & 0xff);
-                    /* falls through */
-                case "E":
-                    cpu.regE = w & 0xff;
-                    break;
-                case "H":
-                    cpu.regH = w & 0xff;
-                    break;
-                case "HL":
-                    cpu.regH = ((w >> 8) & 0xff);
-                    /* falls through */
-                case "L":
-                    cpu.regL = w & 0xff;
-                    break;
-                case "SP":
-                    cpu.setSP(w);
-                    break;
                 case "PC":
                     cpu.setPC(w);
                     this.dbgAddrNextCode = this.newAddr(cpu.getPC());
-                    break;
-                case "PS":
-                    cpu.setPS(w);
-                    break;
-                case "PSW":
-                    cpu.setPSW(w);
                     break;
                 case "CF":
                     if (w) cpu.setCF(); else cpu.clearCF();
@@ -3579,9 +3516,6 @@ if (DEBUGGER) {
                     break;
                 case "SF":
                     if (w) cpu.setSF(); else cpu.clearSF();
-                    break;
-                case "IF":
-                    if (w) cpu.setIF(); else cpu.clearIF();
                     break;
                 default:
                     this.println("unknown register: " + sReg);
@@ -3668,8 +3602,9 @@ if (DEBUGGER) {
             var dbgAddr = this.newAddr(this.cpu.getPC());
             var bOpcode = this.getByte(dbgAddr);
 
+            /*
             switch (bOpcode) {
-            case CPUDefPDP11.OPCODE.CALL:
+            case PDP11.OPCODE.CALL:
                 if (fCallStep) {
                     this.nStep = nStep;
                     this.incAddr(dbgAddr, 3);
@@ -3678,6 +3613,7 @@ if (DEBUGGER) {
             default:
                 break;
             }
+            */
 
             if (this.nStep) {
                 this.setTempBreakpoint(dbgAddr);
@@ -4091,13 +4027,6 @@ if (DEBUGGER) {
                         if (!this.doIf(sCmd.substr(2), fQuiet)) {
                             result = false;
                         }
-                        break;
-                    }
-                    if (asArgs[0] == "int") {
-                        if (!this.doInt(asArgs[1])) {
-                            result = false;
-                        }
-                        break;
                     }
                     break;
                 case 'k':

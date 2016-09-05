@@ -93,8 +93,82 @@ var PDP11 = {
     PRIVATE:     PRIVATE,       // shared
     TYPEDARRAYS: TYPEDARRAYS,
     SITEHOST:    SITEHOST,      // shared
-    XMLVERSION:  XMLVERSION     // shared
+    XMLVERSION:  XMLVERSION,    // shared
+
+    /*
+     * CPU model numbers (supported)
+     */
+    MODEL_1145: 1145,
+    MODEL_1170: 1170,
+
+    /*
+     * This constant is used to mark points in the code where the physical address being returned
+     * is invalid and should not be used.
+     *
+     * In a 32-bit CPU, -1 (ie, 0xffffffff) could actually be a valid address, so consider changing
+     * ADDR_INVALID to NaN or null (which is also why all ADDR_INVALID tests should use strict equality
+     * operators).
+     *
+     * The main reason I'm NOT using NaN or null now is my concern that, by mixing non-numbers
+     * (specifically, values outside the range of signed 32-bit integers), performance may suffer.
+     *
+     * WARNING: Like many of the properties defined here, ADDR_INVALID is a common constant, which the
+     * Closure Compiler will happily inline (with or without @const annotations; in fact, I've yet to
+     * see a @const annotation EVER improve automatic inlining).  However, if you don't make ABSOLUTELY
+     * certain that this file is included BEFORE the first reference to any of these properties, that
+     * automatic inlining will no longer occur.
+     */
+    ADDR_INVALID: -1,
+
+    /*
+     * Processor Status flag definitions (stored in regPS)
+     */
+    PS: {
+        CF:     0x0001,         // bit  0: Carry Flag
+        OF:     0x0002,         // bit  1: Overflow Flag
+        ZF:     0x0004,         // bit  2: Zero Flag
+        SF:     0x0008,         // bit  3: Sign Flag
+        TF:     0x0010,         // bit  4: Trap Flag
+        PRI:    0x00E0,         // bits 5-7: Priority
+        UNUSED: 0x0700,         // bits 8-10: unused
+        REGSET: 0x0800,         // bit  11: Register Set
+        PMODE:  0x3000,         // bits 12-13: Previous Mode
+        CMODE:  0xC000          // bits 14-15: Current Mode
+    },
+    /*
+     * Interrupt-related flags (stored in intFlags)
+     */
+    INTFLAG: {
+        NONE:   0x0000,
+        INTR:   0x00ff,         // mask for 8 bits, representing interrupt levels 0-7
+        HALT:   0x0100          // halt requested; see opHLT()
+    },
+    /*
+     * Opcode definitions
+     */
+    OPCODE: {
+        // to be continued....
+    },
+
+    IOBASE_VIRT:    0x00E000,   /*000160000*/
+    IOBASE_18BIT:   0x03E000,   /*000760000*/
+    IOBASE_UNIBUS:  0x3C0000,   /*017000000*/
+    IOBASE_22BIT:   0x3FE000,   /*017760000*/
+    MAX_MEMORY:     0x3C0000 - 16384,           // Maximum memory address (need less memory for BSD 2.9 boot)
+    MAX_ADDRESS:    0x400000,   /*020000000*/   // Register addresses are above 22 bit addressing
+
+    BYTE_MODE:      1,
+    READ_MODE:      2,
+    WRITE_MODE:     4,
+    MODIFY_WORD:    2 | 4,      // READ_MODE | WRITE_MODE
+    MODIFY_BYTE:    1 | 2 | 4   // READ_MODE | WRITE_MODE | BYTE_MODE
 };
+
+/*
+ * PS "arithmetic" flags are NOT stored in the PS register; they are maintained across separate result registers,
+ * hence the RESULT designation.
+ */
+PDP11.PS.RESULT     = (PDP11.PS.CF | PDP11.PS.ZF | PDP11.PS.SF);
 
 if (NODE) {
     global.APPCLASS    = APPCLASS;

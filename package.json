@@ -170,7 +170,6 @@
     "./modules/shared/lib/weblib.js",
     "./modules/shared/lib/component.js",
     "./modules/pdp11/lib/defines.js",
-    "./modules/pdp11/lib/cpudef.js",
     "./modules/pdp11/lib/messages.js",
     "./modules/pdp11/lib/panel.js",
     "./modules/pdp11/lib/bus.js",

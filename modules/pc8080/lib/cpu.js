@@ -1036,6 +1036,17 @@ CPU8080.prototype.updateTimers = function(nCycles)
 };
 
 /**
+ * endBurst()
+ *
+ * @this {CPU8080}
+ */
+CPU8080.prototype.endBurst = function()
+{
+    this.nBurstCycles -= this.nStepCycles;
+    this.nStepCycles = 0;
+};
+
+/**
  * runCPU(fUpdateFocus)
  *
  * @this {CPU8080}
@@ -1170,8 +1181,7 @@ CPU8080.prototype.stepCPU = function(nMinCycles)
 CPU8080.prototype.stopCPU = function(fComplete)
 {
     this.isBusy(true);
-    this.nBurstCycles -= this.nStepCycles;
-    this.nStepCycles = 0;
+    this.endBurst();
     this.addCycles(this.nRunCycles);
     this.nRunCycles = 0;
     if (this.flags.fRunning) {
@@ -1212,9 +1222,8 @@ CPU8080.prototype.updateCPU = function(fForce)
  */
 CPU8080.prototype.yieldCPU = function()
 {
+    this.endBurst();                    // this will break us out of stepCPU()
     this.nCyclesNextYield = 0;          // this will break us out of runCPU(), once we break out of stepCPU()
-    this.nBurstCycles -= this.nStepCycles;
-    this.nStepCycles = 0;               // this will break us out of stepCPU()
     // if (DEBUG) this.nSnapCycles = this.nBurstCycles;
     /*
      * The Debugger calls yieldCPU() after every message() to ensure browser responsiveness, but it looks

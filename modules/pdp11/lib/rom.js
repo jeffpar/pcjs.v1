@@ -39,7 +39,6 @@ if (NODE) {
     var DumpAPI      = require("../../shared/lib/dumpapi");
     var Component    = require("../../shared/lib/component");
     var PDP11        = require("./defines");
-    var CPUDefPDP11  = require("./cpudef");
     var MemoryPDP11  = require("./memory");
 }
 

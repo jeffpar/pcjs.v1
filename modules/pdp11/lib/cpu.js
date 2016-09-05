@@ -1038,6 +1038,17 @@ CPUPDP11.prototype.updateTimers = function(nCycles)
 };
 
 /**
+ * endBurst()
+ *
+ * @this {CPUPDP11}
+ */
+CPUPDP11.prototype.endBurst = function()
+{
+    this.nBurstCycles -= this.nStepCycles;
+    this.nStepCycles = 0;
+};
+
+/**
  * runCPU(fUpdateFocus)
  *
  * @this {CPUPDP11}
@@ -1172,8 +1183,7 @@ CPUPDP11.prototype.stepCPU = function(nMinCycles)
 CPUPDP11.prototype.stopCPU = function(fComplete)
 {
     this.isBusy(true);
-    this.nBurstCycles -= this.nStepCycles;
-    this.nStepCycles = 0;
+    this.endBurst();
     this.addCycles(this.nRunCycles);
     this.nRunCycles = 0;
     if (this.flags.fRunning) {
@@ -1213,9 +1223,8 @@ CPUPDP11.prototype.updateCPU = function(fForce)
  */
 CPUPDP11.prototype.yieldCPU = function()
 {
+    this.endBurst();                    // this will break us out of stepCPU()
     this.nCyclesNextYield = 0;          // this will break us out of runCPU(), once we break out of stepCPU()
-    this.nBurstCycles -= this.nStepCycles;
-    this.nStepCycles = 0;               // this will break us out of stepCPU()
     // if (DEBUG) this.nSnapCycles = this.nBurstCycles;
     /*
      * The Debugger calls yieldCPU() after every message() to ensure browser responsiveness, but it looks

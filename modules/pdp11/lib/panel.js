@@ -40,7 +40,6 @@ if (NODE) {
     var Component    = require("../../shared/lib/component");
     var PDP11        = require("./defines");
     var BusPDP11     = require("./bus");
-    var CPUDefPDP11  = require("./cpudef");
     var MemoryPDP11  = require("./memory");
 }
 
