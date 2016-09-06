@@ -1,5 +1,5 @@
 /**
- * @fileoverview The Component class used by C1Pjs and PCx86.
+ * @fileoverview The Component class used by all PCjs components.
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @version 1.0
  * Created 2012-May-14
@@ -30,8 +30,8 @@
  */
 
 /*
- * All the C1Pjs and PCjs components now use JSDoc types, primarily so that Google's Closure Compiler
- * will compile everything with ZERO warnings.  For more information about the JSDoc types supported by
+ * All the PCjs components now use JSDoc types, primarily so that Google's Closure Compiler will
+ * compile everything with ZERO warnings.  For more information about the JSDoc types supported by
  * the Closure Compiler:
  *
  *      https://developers.google.com/closure/compiler/docs/js-for-compiler#types
