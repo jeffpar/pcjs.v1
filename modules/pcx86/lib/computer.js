@@ -1425,7 +1425,9 @@ Computer.prototype.getMachineComponent = function(sType, componentPrev)
         }
         if (component.type == sType) return component;
     }
-    if (!componentLast) Component.log("Machine component type '" + sType + "' not found", "warning");
+    if (!componentLast && sType != "FPU") {
+        Component.log("Machine component type '" + sType + "' not found", "warning");
+    }
     return null;
 };
 

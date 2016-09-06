@@ -918,6 +918,14 @@ CPU.prototype.calcRemainingTime = function()
 
     if (msRemainsThisRun < 0 || this.aCounts.mhz < this.aCounts.mhzTarget) {
         /*
+         * Try "throwing out" the effects of large anomalies, by moving the overall run start time up;
+         * ordinarily, this should only happen when the someone is using an external Debugger or some other
+         * tool or feature that is interfering with our overall execution.
+         */
+        if (msRemainsThisRun < -1000) {
+            this.aCounts.msStartRun -= msRemainsThisRun;
+        }
+        /*
          * If the last burst took MORE time than we allotted (ie, it's taking more than 1 second to simulate
          * nCyclesPerSecond), all we can do is yield for as little time as possible (ie, 0ms) and hope that the
          * simulation is at least usable.
