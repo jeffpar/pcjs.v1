@@ -7,7 +7,6 @@
 	<control type="container" class="pcjs-registers" width="100%" padleft="8px">
 		<control type="register" label="PC" binding="PC" width="40px" padright="8px" padbottom="8px">0000</control>
 		<control type="container" pos="left">
-			<control type="flag" label="I" binding="IF" width="8px" padright="4px" padbottom="8px">0</control>
 			<control type="flag" label="S" binding="SF" width="8px" padright="4px" padbottom="8px">0</control>
 			<control type="flag" label="Z" binding="ZF" width="8px" padright="4px" padbottom="8px">0</control>
 			<control type="flag" label="C" binding="CF" width="8px" padright="4px" padbottom="8px">0</control>
