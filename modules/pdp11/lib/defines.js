@@ -39,13 +39,14 @@
 var APPCLASS = "pdp11";         // this @define is the default application class (eg, "pcx86", "c1pjs")
 
 /**
+ * APPNAME is used more for display purposes than anything else now.  APPCLASS is what matters in terms
+ * of folder and file names, CSS styles, etc.
+ *
  * @define {string}
  */
-var APPNAME = "PDP11";          // this @define is the default application name (eg, "PCx86", "C1Pjs")
+var APPNAME = "PDP11js";        // this @define is the default application name (eg, "PCx86", "C1Pjs")
 
 /**
- * @define {boolean}
- *
  * WARNING: DEBUGGER needs to accurately reflect whether or not the Debugger component is (or will be) loaded.
  * In the compiled case, we rely on the Closure Compiler to override DEBUGGER as appropriate.  When it's *false*,
  * nearly all of debugger.js will be conditionally removed by the compiler, reducing it to little more than a
@@ -55,16 +56,18 @@ var APPNAME = "PDP11";          // this @define is the default application name 
  * However, when we're in "development mode" and running uncompiled code in debugger-less configurations,
  * I would like to skip loading debugger.js altogether.  When doing that, we must ALSO arrange for an additional file
  * (nodebugger.js) to be loaded immediately after this file, which *explicitly* overrides DEBUGGER with *false*.
+ *
+ * @define {boolean}
  */
 var DEBUGGER = true;            // this @define is overridden by the Closure Compiler to remove Debugger-related support
 
 /**
- * @define {boolean}
- *
  * BYTEARRAYS is a Closure Compiler compile-time option that allocates an Array of numbers for every Memory block,
  * where each a number represents ONE byte; very wasteful, but potentially slightly faster.
  *
  * See the Memory component for details.
+ *
+ * @define {boolean}
  */
 var BYTEARRAYS = false;
 
@@ -121,9 +124,9 @@ var PDP11 = {
     ADDR_INVALID: -1,
 
     /*
-     * Processor Status flag definitions (stored in regPS)
+     * Processor Status flag definitions (stored in regPSW)
      */
-    PS: {
+    PSW: {
         CF:     0x0001,         // bit  0: Carry Flag
         OF:     0x0002,         // bit  1: Overflow Flag
         ZF:     0x0004,         // bit  2: Zero Flag
@@ -165,10 +168,10 @@ var PDP11 = {
 };
 
 /*
- * PS "arithmetic" flags are NOT stored in the PS register; they are maintained across separate result registers,
+ * PSW "arithmetic" flags are NOT stored in the PSW register; they are maintained across separate result registers,
  * hence the RESULT designation.
  */
-PDP11.PS.RESULT     = (PDP11.PS.CF | PDP11.PS.ZF | PDP11.PS.SF);
+PDP11.PSW.RESULT     = (PDP11.PSW.CF | PDP11.PSW.ZF | PDP11.PSW.SF);
 
 if (NODE) {
     global.APPCLASS    = APPCLASS;

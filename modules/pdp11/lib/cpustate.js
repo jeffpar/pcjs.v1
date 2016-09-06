@@ -74,27 +74,14 @@ function CPUStatePDP11(parmsCPU)
     CPUPDP11.call(this, parmsCPU, nCyclesDefault);
 
     /*
-     * Initialize processor operation to match the requested model
-     */
-    this.initProcessor();
-
-    /*
-     * A variety of stepCPU() state variables that don't strictly need to be initialized before the first
-     * stepCPU() call, but it's good form to do so.
-     */
-    this.resetCycles();
-    this.flags.fComplete = this.flags.fDebugCheck = false;
-
-    /*
      * If there are no live registers to display, then updateStatus() can skip a bit....
      */
     this.cLiveRegs = 0;
 
     /*
-     * This initRegs() call is important to create all the registers, so that if/when we call restore(),
-     * it will have something to fill in.
+     * Initialize processor operation to match the requested model
      */
-    this.initRegs();
+    this.initProcessor();
 }
 
 Component.subclass(CPUStatePDP11, CPUPDP11);
@@ -113,6 +100,13 @@ Component.subclass(CPUStatePDP11, CPUPDP11);
 CPUStatePDP11.prototype.initProcessor = function()
 {
     this.aOps = PDP11.aOpsPDP1170;
+    this.initRegs();
+    /*
+     * A variety of stepCPU() state variables that don't strictly need to be initialized before the first
+     * stepCPU() call, but it's good form to do so.
+     */
+    this.resetCycles();
+    this.flags.fComplete = this.flags.fDebugCheck = false;
 };
 
 /**
@@ -269,7 +263,6 @@ CPUStatePDP11.prototype.setBinding = function(sHTMLType, sBinding, control, sVal
     switch (sBinding) {
     case "PC":
     case "PSW":
-    case "IF":
     case "SF":
     case "ZF":
     case "CF":
@@ -298,11 +291,11 @@ CPUStatePDP11.prototype.clearCF = function()
  * getCF()
  *
  * @this {CPUStatePDP11}
- * @return {number} 0 or 1 (PDP11.PS.CF)
+ * @return {number} 0 or 1 (PDP11.PSW.CF)
  */
 CPUStatePDP11.prototype.getCF = function()
 {
-    return (this.resultZeroCarry & 0x100)? PDP11.PS.CF : 0;
+    return (this.resultZeroCarry & 0x100)? PDP11.PSW.CF : 0;
 };
 
 /**
@@ -340,11 +333,11 @@ CPUStatePDP11.prototype.clearZF = function()
  * getZF()
  *
  * @this {CPUStatePDP11}
- * @return {number} 0 or PDP11.PS.ZF
+ * @return {number} 0 or PDP11.PSW.ZF
  */
 CPUStatePDP11.prototype.getZF = function()
 {
-    return (this.resultZeroCarry & 0xff)? 0 : PDP11.PS.ZF;
+    return (this.resultZeroCarry & 0xff)? 0 : PDP11.PSW.ZF;
 };
 
 /**
@@ -371,11 +364,11 @@ CPUStatePDP11.prototype.clearSF = function()
  * getSF()
  *
  * @this {CPUStatePDP11}
- * @return {number} 0 or PDP11.PS.SF
+ * @return {number} 0 or PDP11.PSW.SF
  */
 CPUStatePDP11.prototype.getSF = function()
 {
-    // return (this.resultParitySign & 0x80)? PDP11.PS.SF : 0;
+    // return (this.resultParitySign & 0x80)? PDP11.PSW.SF : 0;
     return 0;
 };
 
@@ -419,7 +412,7 @@ CPUStatePDP11.prototype.setPC = function(addr)
  */
 CPUStatePDP11.prototype.getPSW = function()
 {
-    return (this.PSW & ~PDP11.PS.RESULT) | (this.getSF() | this.getZF() | this.getCF());
+    return (this.PSW & ~PDP11.PSW.RESULT) | (this.getSF() | this.getZF() | this.getCF());
 };
 
 /**
@@ -513,11 +506,11 @@ CPUStatePDP11.prototype.updateStatus = function(fForce)
 {
     if (this.cLiveRegs) {
         if (fForce || !this.flags.fRunning || this.flags.fDisplayLiveRegs) {
-            var regPS = this.getPSW();
-            this.updateReg("PSW", regPS, 4);
-            this.updateReg("SF", (regPS & PDP11.PS.SF)? 1 : 0, 1);
-            this.updateReg("ZF", (regPS & PDP11.PS.ZF)? 1 : 0, 1);
-            this.updateReg("CF", (regPS & PDP11.PS.CF)? 1 : 0, 1);
+            var regPSW = this.getPSW();
+            this.updateReg("PSW", regPSW, 4);
+            this.updateReg("SF", (regPSW & PDP11.PSW.SF)? 1 : 0, 1);
+            this.updateReg("ZF", (regPSW & PDP11.PSW.ZF)? 1 : 0, 1);
+            this.updateReg("CF", (regPSW & PDP11.PSW.CF)? 1 : 0, 1);
         }
     }
     var controlSpeed = this.bindings["speed"];
@@ -535,10 +528,11 @@ CPUStatePDP11.prototype.updateStatus = function(fForce)
  * If the current state is WAIT (runState === 2) then skip any delay and
  * go into RUN state.
  *
- * @param delay
- * @param priority
- * @param vector
- * @param callback
+ * @this {CPUStatePDP11}
+ * @param {number} delay
+ * @param {number} priority
+ * @param {number} vector
+ * @param {function()} callback
  */
 CPUStatePDP11.prototype.interrupt = function(delay, priority, vector, callback)
 {
@@ -603,14 +597,14 @@ CPUStatePDP11.prototype.writePSW = function(newPSW)
         for (i = 0; i < 6; i++) {
             j = this.registerVal[i];
             this.registerVal[i] = this.registerAlt[i];
-            this.registerAlt[i] = j; // swap to alternate register set
+            this.registerAlt[i] = j;    // swap to alternate register set
         }
     }
-    if ((this.mmuMode = (newPSW >> 14) & 3) !== (j = (this.PSW >> 14) & 3)) {
+    if ((this.mmuMode = (newPSW >> 14) & 3) !== ((this.PSW >> 14) & 3)) {
         this.stackPointer[j] = this.registerVal[6];
         this.registerVal[6] = this.stackPointer[this.mmuMode]; // swap to new mode SP
     }
-    this.priorityReview = 2; // trigger check of priority levels
+    this.priorityReview = 2;            // trigger check of priority levels
     this.PSW = newPSW;
 };
 

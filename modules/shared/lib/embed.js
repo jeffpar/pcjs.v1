@@ -35,8 +35,8 @@
 
 if (NODE) {
     var Component = require("./component");
-    var str = require("./strlib");
-    var web = require("./weblib");
+    var str       = require("./strlib");
+    var web       = require("./weblib");
 }
 
 /*
@@ -55,7 +55,7 @@ var fAsync = true;
 var cAsyncMachines = 0;
 
 /**
- * loadXML(sFile, idMachine, sAppClass, sParms, fResolve, display, done)
+ * loadXML(sFile, idMachine, sAppName, sAppClass, sParms, fResolve, display, done)
  *
  * This is the preferred way to load all XML and XSL files. It uses getResource()
  * to load them as strings, which parseXML() can massage before parsing/transforming them.
@@ -80,13 +80,14 @@ var cAsyncMachines = 0;
  *
  * @param {string} sXMLFile
  * @param {string|null|undefined} idMachine
+ * @param {string|null|undefined} sAppName
  * @param {string|null|undefined} sAppClass
  * @param {string|null|undefined} sParms
  * @param {boolean} fResolve is true to resolve any "ref" attributes
  * @param {function(string)} display
  * @param {function(string,Object)} done (string contains the unparsed XML string data, and Object contains a parsed XML object)
  */
-function loadXML(sXMLFile, idMachine, sAppClass, sParms, fResolve, display, done)
+function loadXML(sXMLFile, idMachine, sAppName, sAppClass, sParms, fResolve, display, done)
 {
     var doneLoadXML = function(sURLName, sXML, nErrorCode) {
         if (nErrorCode) {
@@ -94,14 +95,14 @@ function loadXML(sXMLFile, idMachine, sAppClass, sParms, fResolve, display, done
             done(sXML, null);
             return;
         }
-        parseXML(sXML, sXMLFile, idMachine, sAppClass, sParms, fResolve, display, done);
+        parseXML(sXML, sXMLFile, idMachine, sAppName, sAppClass, sParms, fResolve, display, done);
     };
     display("Loading " + sXMLFile + "...");
     web.getResource(sXMLFile, null, fAsync, doneLoadXML);
 }
 
 /**
- * parseXML(sXML, sXMLFile, idMachine, sAppClass, sParms, fResolve, display, done)
+ * parseXML(sXML, sXMLFile, idMachine, sAppName, sAppClass, sParms, fResolve, display, done)
  *
  * Generates an XML document from an XML string. This function also provides a work-around for XSLT's
  * lack of support for the document() function (at least on some browsers), by replacing every reference
@@ -110,13 +111,14 @@ function loadXML(sXMLFile, idMachine, sAppClass, sParms, fResolve, display, done
  * @param {string} sXML
  * @param {string|null} sXMLFile
  * @param {string|null|undefined} idMachine
+ * @param {string|null|undefined} sAppName
  * @param {string|null|undefined} sAppClass
  * @param {string|null|undefined} sParms
  * @param {boolean} fResolve is true to resolve any "ref" attributes; default is false
  * @param {function(string)} display
  * @param {function(string,Object)} done (string contains the unparsed XML string data, and Object contains a parsed XML object)
  */
-function parseXML(sXML, sXMLFile, idMachine, sAppClass, sParms, fResolve, display, done)
+function parseXML(sXML, sXMLFile, idMachine, sAppName, sAppClass, sParms, fResolve, display, done)
 {
     var buildXML = function(sXML, sError) {
         if (sError) {
@@ -166,7 +168,6 @@ function parseXML(sXML, sXMLFile, idMachine, sAppClass, sParms, fResolve, displa
              * I'm trying to switch to a shared components.xsl (at least for all PC-class machines),
              * but in the interim, that means hacking the XSL file on the fly to reflect the actual class.
              */
-            var sAppName = sAppClass.toUpperCase().replace("X86", "x86").replace("JS", "js");
             sXML = sXML.replace(/(<xsl:variable name="APPNAME">).*?(<\/xsl:variable>)/, "$1" + sAppName + "$2");
             sXML = sXML.replace(/(<xsl:variable name="APPCLASS">).*?(<\/xsl:variable>)/, "$1" + sAppClass + "$2");
 
@@ -329,11 +330,12 @@ function resolveXML(sXML, display, done)
 }
 
 /**
- * embedMachine(sName, sVersion, idMachine, sXMLFile, sXSLFile, sParms)
+ * embedMachine(sAppName, sAppClass, sVersion, idMachine, sXMLFile, sXSLFile, sParms)
  *
  * This allows to you embed a machine on a web page, by transforming the machine XML into HTML.
  *
- * @param {string} sName is the app name (eg, "PCjs")
+ * @param {string} sAppName is the app name (eg, "PCx86")
+ * @param {string} sAppClass is the app class (eg, "pcx86"); also known as the machine class
  * @param {string} sVersion is the app version (eg, "1.15.7")
  * @param {string} idMachine
  * @param {string} sXMLFile
@@ -341,7 +343,7 @@ function resolveXML(sXML, display, done)
  * @param {string} [sParms]
  * @return {boolean} true if successful, false if error
  */
-function embedMachine(sName, sVersion, idMachine, sXMLFile, sXSLFile, sParms)
+function embedMachine(sAppName, sAppClass, sVersion, idMachine, sXMLFile, sXSLFile, sParms)
 {
     var eMachine, eWarning, fSuccess = true;
 
@@ -402,7 +404,6 @@ function embedMachine(sName, sVersion, idMachine, sXMLFile, sXSLFile, sParms)
                 head.appendChild(style);
             }
 
-            var sAppClass = sName.toLowerCase();        // eg, "pcx86" or "c1pjs"
             if (!sXSLFile) {
                 /*
                  * Now that PCjs is an open-source project, we can make the following test more flexible,
@@ -518,13 +519,13 @@ function embedMachine(sName, sVersion, idMachine, sXMLFile, sXSLFile, sParms)
                         displayError("unable to transform XML: unsupported browser");
                     }
                 };
-                loadXML(sXSLFile, null, sAppClass, null, false, displayMessage, transformXML);
+                loadXML(sXSLFile, null, sAppName, sAppClass, null, false, displayMessage, transformXML);
             };
 
             if (sXMLFile.charAt(0) != '<') {
-                loadXML(sXMLFile, idMachine, sAppClass, sParms, true, displayMessage, processXML);
+                loadXML(sXMLFile, idMachine, sAppName, sAppClass, sParms, true, displayMessage, processXML);
             } else {
-                parseXML(sXMLFile, null, idMachine, sAppClass, sParms, false, displayMessage, processXML);
+                parseXML(sXMLFile, null, idMachine, sAppName, sAppClass, sParms, false, displayMessage, processXML);
             }
         } else {
             displayError("missing machine element: " + idMachine);
@@ -546,7 +547,7 @@ function embedMachine(sName, sVersion, idMachine, sXMLFile, sXSLFile, sParms)
 function embedC1P(idMachine, sXMLFile, sXSLFile)
 {
     if (fAsync) web.enablePageEvents(false);
-    return embedMachine("C1Pjs", APPVERSION, idMachine, sXMLFile, sXSLFile);
+    return embedMachine("C1Pjs", "c1pjs", APPVERSION, idMachine, sXMLFile, sXSLFile);
 }
 
 /**
@@ -561,7 +562,7 @@ function embedC1P(idMachine, sXMLFile, sXSLFile)
 function embedPCx86(idMachine, sXMLFile, sXSLFile, sParms)
 {
     if (fAsync) web.enablePageEvents(false);
-    return embedMachine("PCx86", APPVERSION, idMachine, sXMLFile, sXSLFile, sParms);
+    return embedMachine("PCx86", "pcx86", APPVERSION, idMachine, sXMLFile, sXSLFile, sParms);
 }
 
 /**
@@ -576,7 +577,7 @@ function embedPCx86(idMachine, sXMLFile, sXSLFile, sParms)
 function embedPC8080(idMachine, sXMLFile, sXSLFile, sParms)
 {
     if (fAsync) web.enablePageEvents(false);
-    return embedMachine("PC8080", APPVERSION, idMachine, sXMLFile, sXSLFile, sParms);
+    return embedMachine("PC8080", "pc8080", APPVERSION, idMachine, sXMLFile, sXSLFile, sParms);
 }
 
 /**
@@ -591,12 +592,11 @@ function embedPC8080(idMachine, sXMLFile, sXSLFile, sParms)
 function embedPDP11(idMachine, sXMLFile, sXSLFile, sParms)
 {
     if (fAsync) web.enablePageEvents(false);
-    return embedMachine("PDP11", APPVERSION, idMachine, sXMLFile, sXSLFile, sParms);
+    return embedMachine("PDP11js", "pdp11", APPVERSION, idMachine, sXMLFile, sXSLFile, sParms);
 }
 
 /**
- * Prevent the Closure Compiler from renaming functions we want to export,
- * by adding them as (named) properties of a global object.
+ * Prevent the Closure Compiler from renaming functions we want to export, by adding them as global properties.
  */
 if (APPNAME == "C1Pjs") {
     window['embedC1P']    = embedC1P;
@@ -608,7 +608,7 @@ if (APPNAME == "PCx86") {
 if (APPNAME == "PC8080") {
     window['embedPC8080'] = embedPC8080;
 }
-if (APPNAME == "PDP11") {
+if (APPNAME == "PDP11js") {
     window['embedPDP11']  = embedPDP11;
 }
 
