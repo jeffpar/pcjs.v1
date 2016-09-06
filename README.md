@@ -68,9 +68,8 @@ Developer Notes
 ---
 
 The [PCjs repository](https://github.com/jeffpar/pcjs) on GitHub contains everything needed to run PCjs
-computer simulations.  The [PCx86](/docs/pcx86/) and [C1Pjs](/docs/c1pjs/) emulators run in any modern web browser,
-with or without a web server, and examples are provided for both [local](/docs/pcx86/examples/) and
-[remote](http://www.pcjs.org/) operation.
+computer simulations.  All the PCjs emulators run in any modern web browser, with or without a web server,
+and examples are provided for both [local](/docs/pcx86/examples/) and [remote](http://www.pcjs.org/) operation.
 
 The project includes:
 
@@ -335,8 +334,8 @@ A complete list of command-line options can be found in [server.js](server.js).
 
 ### Client Components
 
-A special command parameter ("gort") can be appended to the URL to request uncompiled client source files, making PCx86
-and C1Pjs much easier to debug, albeit much slower:
+A special command parameter ("gort") can be appended to the URL to request uncompiled client source files, making the
+PCjs emulators much easier to debug, albeit much slower:
 
 	http://localhost:8088/?gort=debug
 
