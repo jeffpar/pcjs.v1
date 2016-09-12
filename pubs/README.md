@@ -24,6 +24,7 @@ Ohio Scientific's 6502-based [Challenger 1P Publications](/pubs/c1p/):
 
 [Digital Equipment Corporation (DEC) Publications](/pubs/dec/):
 
+* [PDP-11](/pubs/dec/pdp11/)
 * [VT100](/pubs/dec/vt100/)
 
 [<img src="http://archive.pcjs.org/pubs/pc/datasheets/thumbs/8088-CPU.jpg" width="200" height="260" alt= "8088 CPU"/>](pc/datasheets/)
