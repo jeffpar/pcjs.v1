@@ -7,8 +7,7 @@ permalink: /pubs/dec/pdp11/papers/
 Assorted PDP-11 Papers
 ---
 
-* [A New Architecture for Mini-Computers: The DEC PDP-11](archive/1970--A_New_Architecture_For_Mini-Computers--The_DEC_PDP-11.pdf)
-* [PMS (Processor-Memory-Switch) and ISP (Instruction Set Processor) Descriptive Systems for Computer Structure](archive/1970--PMS_and_ISP_Descriptive_Systems.pdf)
-* [What Have We Learned From The PDP-11? (1975)](1975_what_have_we_learned/) ([PDF](archive/1975--Computer_Structures_What_Have_We_Learned.pdf))
-* [What Have We Learned From The PDP-11? (1977)](1977_what_have_we_learned/) ([PDF](archive/1975--What_Have_We_Learned_From_the_PDP-11.pdf))
-
+* A New Architecture for Mini-Computers: The DEC PDP-11 [[PDF](http://research.microsoft.com/en-us/um/people/gbell/CGB%20Files/New%20Architecture%20PDP11%20SJCC%201970%20c.pdf)]
+* PMS (Processor-Memory-Switch) and ISP (Instruction Set Processor) Descriptive Systems for Computer Structure [[PDF](http://research.microsoft.com/en-us/um/people/gbell/CGB%20Files/PMS%20and%20ISP%20Descriptive%20Systems%201970%20c.pdf)]
+* [What Have We Learned From The PDP-11? (1975)](1975_what_have_we_learned/) [[PDF](http://research.microsoft.com/en-us/um/people/gbell/Digital/Bell_Strecker_What_we%20_learned_fm_PDP-11c%207511.pdf)]
+* [What Have We Learned From The PDP-11? (1977)](1977_what_have_we_learned/) [[PDF](http://research.microsoft.com/en-us/um/people/gbell/CGB%20Files/What%20Have%20We%20Learned%20From%20the%20PDP-11%201977%20c.pdf)]
