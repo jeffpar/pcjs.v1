@@ -223,10 +223,6 @@ if (DEBUGGER) {
      * Technically, all of them should ALSO be preceded by a "@const" annotation, but that's a lot of work and it
      * really clutters the code.  I wish the Closure Compiler had a way to annotate every definition with a given
      * section with a single annotation....
-     *
-     * Bugs can slip through the cracks without those annotations; for example, I unthinkingly redefined TYPE_SI
-     * at one point, and if all the definitions had been preceded by an "@const", that mistake would have been
-     * caught at compile-time.
      */
 
     DebuggerPDP11.COMMANDS = {
@@ -1404,7 +1400,7 @@ if (DEBUGGER) {
          * it here, so that if the CPU is reset while running, we can prevent stop()
          * from unnecessarily dumping the CPU state.
          */
-        this.flags.fRunning = false;
+        this.flags.running = false;
         this.clearTempBreakpoint();
         if (!fQuiet) this.updateStatus();
     };
@@ -1463,7 +1459,7 @@ if (DEBUGGER) {
     DebuggerPDP11.prototype.start = function(ms, nCycles)
     {
         if (!this.nStep) this.println("running");
-        this.flags.fRunning = true;
+        this.flags.running = true;
         this.msStart = ms;
         this.nCyclesStart = nCycles;
     };
@@ -1479,8 +1475,8 @@ if (DEBUGGER) {
      */
     DebuggerPDP11.prototype.stop = function(ms, nCycles)
     {
-        if (this.flags.fRunning) {
-            this.flags.fRunning = false;
+        if (this.flags.running) {
+            this.flags.running = false;
             this.nCycles = nCycles - this.nCyclesStart;
             if (!this.nStep) {
                 var sStopped = "stopped";
@@ -2015,7 +2011,7 @@ if (DEBUGGER) {
 
         if (sComment) {
             sLine = str.pad(sLine, 40) + ';' + sComment;
-            if (!this.cpu.flags.fChecksum) {
+            if (!this.cpu.flags.checksum) {
                 sLine += (nSequence != null? '=' + nSequence.toString() : "");
             } else {
                 var nCycles = this.cpu.getCycles();
@@ -3179,7 +3175,7 @@ if (DEBUGGER) {
     DebuggerPDP11.prototype.doHalt = function(fQuiet)
     {
         var sMsg;
-        if (this.flags.fRunning) {
+        if (this.flags.running) {
             sMsg = "halting";
             this.stopCPU();
         } else {
@@ -3433,7 +3429,7 @@ if (DEBUGGER) {
             if (nCycles !== undefined) {
                 this.cpu.resetChecksum();
             }
-            this.println("checksums " + (this.cpu.flags.fChecksum? "enabled" : "disabled"));
+            this.println("checksums " + (this.cpu.flags.checksum? "enabled" : "disabled"));
             return;
 
         case "sp":

@@ -85,7 +85,7 @@ function CPUState8080(parmsCPU)
      * stepCPU() call, but it's good form to do so.
      */
     this.resetCycles();
-    this.flags.fComplete = this.flags.fDebugCheck = false;
+    this.flags.complete = this.flags.debugCheck = false;
 
     /*
      * If there are no live registers to display, then updateStatus() can skip a bit....
@@ -143,7 +143,7 @@ CPUState8080.prototype.initProcessor = function()
  */
 CPUState8080.prototype.reset = function()
 {
-    if (this.flags.fRunning) this.stopCPU();
+    if (this.flags.running) this.stopCPU();
     this.resetRegs();
     this.resetCycles();
     this.clearError();      // clear any fatal error/exception that setError() may have flagged
@@ -1049,7 +1049,7 @@ CPUState8080.prototype.updateReg = function(sReg, nValue, cch)
 CPUState8080.prototype.updateStatus = function(fForce)
 {
     if (this.cLiveRegs) {
-        if (fForce || !this.flags.fRunning || this.flags.fDisplayLiveRegs) {
+        if (fForce || !this.flags.running || this.flags.displayLiveRegs) {
             this.updateReg("A", this.regA);
             this.updateReg("B", this.regB);
             this.updateReg("C", this.regC);
@@ -1103,12 +1103,12 @@ CPUState8080.prototype.stepCPU = function(nMinCycles)
      * Debugger is single-stepping (even when performing multiple single-steps), fRunning is never set,
      * so stopCPU() would have no effect as far as the Debugger is concerned.
      */
-    this.flags.fComplete = true;
+    this.flags.complete = true;
 
     /*
      * fDebugCheck is true if we need to "check" every instruction with the Debugger.
      */
-    var fDebugCheck = this.flags.fDebugCheck = (DEBUGGER && this.dbg && this.dbg.checksEnabled());
+    var fDebugCheck = this.flags.debugCheck = (DEBUGGER && this.dbg && this.dbg.checksEnabled());
 
     /*
      * nDebugState is checked only when fDebugCheck is true, and its sole purpose is to tell the first call
@@ -1118,8 +1118,8 @@ CPUState8080.prototype.stepCPU = function(nMinCycles)
      * Once we snap fStarting, we clear it, because technically, we've moved beyond "starting" and have
      * officially "started" now.
      */
-    var nDebugState = (!nMinCycles)? -1 : (this.flags.fStarting? 0 : 1);
-    this.flags.fStarting = false;
+    var nDebugState = (!nMinCycles)? -1 : (this.flags.starting? 0 : 1);
+    this.flags.starting = false;
 
     /*
      * We move the minimum cycle count to nStepCycles (the number of cycles left to step), so that other
@@ -1145,7 +1145,7 @@ CPUState8080.prototype.stepCPU = function(nMinCycles)
         } while (this.nStepCycles > 0);
     }
 
-    return (this.flags.fComplete? this.nBurstCycles - this.nStepCycles : (this.flags.fComplete === undefined? 0 : -1));
+    return (this.flags.complete? this.nBurstCycles - this.nStepCycles : (this.flags.complete === undefined? 0 : -1));
 };
 
 /**

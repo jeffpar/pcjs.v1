@@ -586,8 +586,8 @@ if (DEBUGGER) {
      */
     C1PDebugger.prototype.setPower = function(fOn, cmp)
     {
-        if (fOn && !this.flags.fPowered) {
-            this.flags.fPowered = true;
+        if (fOn && !this.flags.powered) {
+            this.flags.powered = true;
             this.cpu = cmp.getComponentByType("cpu");
         }
     };

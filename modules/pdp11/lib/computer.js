@@ -112,7 +112,7 @@ function ComputerPDP11(parmsComputer, parmsMachine, fSuspended) {
 
     Component.call(this, "Computer", parmsComputer, ComputerPDP11, MessagesPDP11.COMPUTER);
 
-    this.flags.fPowered = false;
+    this.flags.powered = false;
 
     this.setMachineParms(parmsMachine);
 
@@ -622,9 +622,9 @@ ComputerPDP11.prototype.powerOn = function(resume)
  */
 ComputerPDP11.prototype.powerRestore = function(component, stateComputer, fRepower, fRestore)
 {
-    if (!component.flags.fPowered) {
+    if (!component.flags.powered) {
 
-        component.flags.fPowered = true;
+        component.flags.powered = true;
 
         if (component.powerUp) {
 
@@ -727,12 +727,12 @@ ComputerPDP11.prototype.donePowerOn = function(aParms)
     var fRepower = (aParms[1] < 0);
     var fRestore = aParms[2];
 
-    if (DEBUG && this.flags.fPowered && this.messageEnabled()) {
+    if (DEBUG && this.flags.powered && this.messageEnabled()) {
         this.printMessage("ComputerPDP11.donePowerOn(): redundant");
     }
 
     this.fInitialized = true;
-    this.flags.fPowered = true;
+    this.flags.powered = true;
     var controlPower = this.bindings["power"];
     if (controlPower) controlPower.textContent = "Shutdown";
 
@@ -773,22 +773,22 @@ ComputerPDP11.prototype.donePowerOn = function(aParms)
  */
 ComputerPDP11.prototype.checkPower = function()
 {
-    if (this.flags.fPowered) return true;
+    if (this.flags.powered) return true;
 
     var component = null, iComponent;
     var aComponents = Component.getComponents(this.id);
     for (iComponent = 0; iComponent < aComponents.length; iComponent++) {
         component = aComponents[iComponent];
-        if (component !== this && !component.flags.fReady) break;
+        if (component !== this && !component.flags.ready) break;
     }
     if (iComponent == aComponents.length) {
         for (iComponent = 0; iComponent < aComponents.length; iComponent++) {
             component = aComponents[iComponent];
-            if (component !== this && !component.flags.fPowered) break;
+            if (component !== this && !component.flags.powered) break;
         }
     }
     if (iComponent == aComponents.length) component = this;
-    var s = "The " + component.type + " component (" + component.id + ") is not " + (!component.flags.fReady? "ready yet" + (component.fnReady? " (waiting for notification)" : "") : "powered yet") + ".";
+    var s = "The " + component.type + " component (" + component.id + ") is not " + (!component.flags.ready? "ready yet" + (component.fnReady? " (waiting for notification)" : "") : "powered yet") + ".";
     web.alertUser(s);
     return false;
 };
@@ -870,7 +870,7 @@ ComputerPDP11.prototype.powerOff = function(fSave, fShutdown)
         data = this.cpu.powerDown(fSave, fShutdown);
         if (typeof data === "object") stateComputer.set(this.cpu.id, data);
         if (fShutdown) {
-            this.cpu.flags.fPowered = false;
+            this.cpu.flags.powered = false;
             if (data === false) sState = null;
         }
     }
@@ -878,13 +878,13 @@ ComputerPDP11.prototype.powerOff = function(fSave, fShutdown)
     var aComponents = Component.getComponents(this.id);
     for (var iComponent = 0; iComponent < aComponents.length; iComponent++) {
         var component = aComponents[iComponent];
-        if (component.flags.fPowered) {
+        if (component.flags.powered) {
             if (component.powerDown) {
                 data = component.powerDown(fSave, fShutdown);
                 if (typeof data === "object") stateComputer.set(component.id, data);
             }
             if (fShutdown) {
-                component.flags.fPowered = false;
+                component.flags.powered = false;
                 if (data === false) sState = null;
             }
         }
@@ -937,7 +937,7 @@ ComputerPDP11.prototype.powerOff = function(fSave, fShutdown)
     }
 
     if (fShutdown) {
-        this.flags.fPowered = false;
+        this.flags.powered = false;
         var controlPower = this.bindings["power"];
         if (controlPower) controlPower.textContent = "Power";
     }
@@ -1308,7 +1308,7 @@ ComputerPDP11.prototype.storeServerState = function(sUserID, sState, fSync)
 ComputerPDP11.prototype.onPower = function()
 {
     if (!this.nPowerChange) {
-        if (!this.flags.fPowered) {
+        if (!this.flags.powered) {
             this.wait(this.powerOn);
         } else {
             this.powerOff(false, true);
@@ -1329,7 +1329,7 @@ ComputerPDP11.prototype.onReset = function()
      * I'm going to start with the presumption that it makes little sense for an "unpowered" computer to be "reset";
      * ditto if the power state is currently being changed.
      */
-    if (!this.flags.fPowered || this.nPowerChange) return;
+    if (!this.flags.powered || this.nPowerChange) return;
 
     /*
      * If this is a "resumable" machine (and it's not using a predefined state), then we overload the reset
@@ -1481,7 +1481,7 @@ ComputerPDP11.init = function()
             var computer = new ComputerPDP11(parmsComputer, parmsMachine, true);
 
             if (DEBUG && computer.messageEnabled()) {
-                computer.printMessage("onInit(" + computer.flags.fPowered + ")");
+                computer.printMessage("onInit(" + computer.flags.powered + ")");
             }
 
             /*
@@ -1518,7 +1518,7 @@ ComputerPDP11.show = function()
         if (computer) {
 
             if (DEBUG && computer.messageEnabled()) {
-                computer.printMessage("onShow(" + computer.fInitialized + "," + computer.flags.fPowered + ")");
+                computer.printMessage("onShow(" + computer.fInitialized + "," + computer.flags.powered + ")");
             }
 
             /*
@@ -1526,7 +1526,7 @@ ComputerPDP11.show = function()
              * AFTER the the initial 'onload' event, and at that point in time, fInitialized will not be set yet.
              * So, practically speaking, the first show() callback isn't all that useful.
              */
-            if (computer.fInitialized && !computer.flags.fPowered) {
+            if (computer.fInitialized && !computer.flags.powered) {
                 /**
                  * Repower the computer, notifying every component to continue running as-is.
                  */
@@ -1572,10 +1572,10 @@ ComputerPDP11.exit = function()
         if (computer) {
 
             if (DEBUG && computer.messageEnabled()) {
-                computer.printMessage("onExit(" + computer.flags.fPowered + ")");
+                computer.printMessage("onExit(" + computer.flags.powered + ")");
             }
 
-            if (computer.flags.fPowered) {
+            if (computer.flags.powered) {
                 /**
                  * Power off the computer, giving every component an opportunity to save its state,
                  * but only if 'resume' has been set AND there is no valid resume path (because if a valid resume

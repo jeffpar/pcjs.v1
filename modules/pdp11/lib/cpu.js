@@ -98,14 +98,14 @@ function CPUPDP11(parmsCPU, nCyclesDefault)
     /*
      * We add a number of flags to the set initialized by Component
      */
-    this.flags.fRunning = false;
-    this.flags.fStarting = false;
-    this.flags.fAutoStart = parmsCPU['autoStart'];
+    this.flags.running = false;
+    this.flags.starting = false;
+    this.flags.autoStart = parmsCPU['autoStart'];
 
     /*
      * TODO: Add some UI for fDisplayLiveRegs (either an XML property, or a UI checkbox, or both)
      */
-    this.flags.fDisplayLiveRegs = false;
+    this.flags.displayLiveRegs = false;
 
     /*
      * Get checksum parameters, if any. runCPU() behavior is not affected until fChecksum
@@ -116,7 +116,7 @@ function CPUPDP11(parmsCPU, nCyclesDefault)
      * command ("x"); for example, "x cs int 5000" will set nCyclesChecksumInterval to 5000
      * and call resetChecksum().
      */
-    this.flags.fChecksum = false;
+    this.flags.checksum = false;
     this.nChecksum = this.nCyclesChecksumNext = 0;
     this.nCyclesChecksumStart = parmsCPU["csStart"];
     this.nCyclesChecksumInterval = parmsCPU["csInterval"];
@@ -183,7 +183,7 @@ CPUPDP11.prototype.initBus = function(cmp, bus, cpu, dbg)
      */
     var sAutoStart = cmp.getMachineParm('autoStart');
     if (sAutoStart != null) {
-        this.flags.fAutoStart = (sAutoStart == "true"? true : (sAutoStart  == "false"? false : !!sAutoStart));
+        this.flags.autoStart = (sAutoStart == "true"? true : (sAutoStart  == "false"? false : !!sAutoStart));
     }
 
     this.setReady();
@@ -265,7 +265,7 @@ CPUPDP11.prototype.powerUp = function(data, fRepower)
      * The Computer component (which is responsible for all powerDown and powerUp notifications)
      * is now responsible for managing a component's fPowered flag, not us.
      *
-     *      this.flags.fPowered = true;
+     *      this.flags.powered = true;
      */
     this.updateCPU();
     return true;
@@ -285,7 +285,7 @@ CPUPDP11.prototype.powerDown = function(fSave, fShutdown)
      * The Computer component (which is responsible for all powerDown and powerUp notifications)
      * is now responsible for managing a component's fPowered flag, not us.
      *
-     *      this.flags.fPowered = false;
+     *      this.flags.powered = false;
      */
     return fSave? this.save() : true;
 };
@@ -301,7 +301,7 @@ CPUPDP11.prototype.autoStart = function()
     /*
      * Start running automatically on power-up, assuming there's no Debugger and no "Run" button
      */
-    if (this.flags.fAutoStart || (!DEBUGGER || !this.dbg) && this.bindings["run"] === undefined) {
+    if (this.flags.autoStart || (!DEBUGGER || !this.dbg) && this.bindings["run"] === undefined) {
         /*
          * Now we ALSO set fUpdateFocus when calling runCPU(), on the assumption that in the "auto-starting" context,
          * a machine without focus is like a day without sunshine.
@@ -320,7 +320,7 @@ CPUPDP11.prototype.autoStart = function()
  */
 CPUPDP11.prototype.isPowered = function()
 {
-    if (!this.flags.fPowered) {
+    if (!this.flags.powered) {
         this.println(this.toString() + " not powered");
         return false;
     }
@@ -335,7 +335,7 @@ CPUPDP11.prototype.isPowered = function()
  */
 CPUPDP11.prototype.isRunning = function()
 {
-    return this.flags.fRunning;
+    return this.flags.running;
 };
 
 /**
@@ -366,8 +366,8 @@ CPUPDP11.prototype.resetChecksum = function()
     if (this.nCyclesChecksumStart === undefined) this.nCyclesChecksumStart = 0;
     if (this.nCyclesChecksumInterval === undefined) this.nCyclesChecksumInterval = -1;
     if (this.nCyclesChecksumStop === undefined) this.nCyclesChecksumStop = -1;
-    this.flags.fChecksum = (this.nCyclesChecksumStart >= 0 && this.nCyclesChecksumInterval > 0);
-    if (this.flags.fChecksum) {
+    this.flags.checksum = (this.nCyclesChecksumStart >= 0 && this.nCyclesChecksumInterval > 0);
+    if (this.flags.checksum) {
         this.nChecksum = 0;
         this.nCyclesChecksumNext = this.nCyclesChecksumStart - this.nTotalCycles;
         /*
@@ -392,7 +392,7 @@ CPUPDP11.prototype.resetChecksum = function()
  */
 CPUPDP11.prototype.updateChecksum = function(nCycles)
 {
-    if (this.flags.fChecksum) {
+    if (this.flags.checksum) {
         /*
          * Get a 32-bit summation of the current CPU state and add it to our running 32-bit checksum
          */
@@ -448,7 +448,7 @@ CPUPDP11.prototype.displayValue = function(sLabel, nValue, cch)
             this.stopCPU();
         }
         var sVal;
-        if (!this.flags.fRunning || this.flags.fDisplayLiveRegs) {
+        if (!this.flags.running || this.flags.displayLiveRegs) {
             sVal = str.toHex(nValue, cch);
         } else {
             sVal = "--------".substr(0, cch);
@@ -499,7 +499,7 @@ CPUPDP11.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
              * control is visible, then the computer is probably sufficiently visible as well; the problem
              * with setting fUpdateFocus to true is that it can jerk the web page around in annoying ways.
              */
-            if (!cpu.flags.fRunning)
+            if (!cpu.flags.running)
                 cpu.runCPU();
             else
                 cpu.stopCPU();
@@ -543,7 +543,7 @@ CPUPDP11.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
  */
 CPUPDP11.prototype.setBurstCycles = function(nCycles)
 {
-    if (this.flags.fRunning) {
+    if (this.flags.running) {
         var nDelta = this.nStepCycles - nCycles;
         /*
          * NOTE: If nDelta is negative, we will actually be increasing nStepCycles and nBurstCycles.
@@ -712,7 +712,7 @@ CPUPDP11.prototype.getSpeedCurrent = function()
     /*
      * TODO: Has toFixed() been "fixed" in all browsers (eg, IE) to return a rounded value now?
      */
-    return ((this.flags.fRunning && this.mhz)? (this.mhz.toFixed(2) + "Mhz") : "Stopped");
+    return ((this.flags.running && this.mhz)? (this.mhz.toFixed(2) + "Mhz") : "Stopped");
 };
 
 /**
@@ -1077,7 +1077,7 @@ CPUPDP11.prototype.runCPU = function(fUpdateFocus)
              * be as HIGH as nCyclesPerYield, but it may be significantly less.  getBurstCycles() will adjust
              * nCyclesPerBurst downward if any CPU timers need to fire during the next burst.
              */
-            var nCyclesPerBurst = this.getBurstCycles(this.flags.fChecksum? 1 : this.nCyclesPerYield);
+            var nCyclesPerBurst = this.getBurstCycles(this.flags.checksum? 1 : this.nCyclesPerYield);
 
             /*
              * Execute the burst.
@@ -1111,7 +1111,7 @@ CPUPDP11.prototype.runCPU = function(fUpdateFocus)
                 }
                 break;
             }
-        } while (this.flags.fRunning);
+        } while (this.flags.running);
     }
     catch (e) {
         this.stopCPU();
@@ -1134,7 +1134,7 @@ CPUPDP11.prototype.runCPU = function(fUpdateFocus)
  */
 CPUPDP11.prototype.startCPU = function(fUpdateFocus)
 {
-    if (!this.flags.fRunning) {
+    if (!this.flags.running) {
         /*
          *  setSpeed() without a speed parameter leaves the selected speed in place, but also resets the
          *  cycle counter and timestamp for the current series of runCPU() calls, calculates the maximum number
@@ -1143,8 +1143,8 @@ CPUPDP11.prototype.startCPU = function(fUpdateFocus)
          */
         this.setSpeed();
         if (this.cmp) this.cmp.start(this.msStartRun, this.getCycles());
-        this.flags.fRunning = true;
-        this.flags.fStarting = true;
+        this.flags.running = true;
+        this.flags.starting = true;
         if (this.chipset) this.chipset.start();
         var controlRun = this.bindings["run"];
         if (controlRun) controlRun.textContent = "Halt";
@@ -1186,13 +1186,13 @@ CPUPDP11.prototype.stopCPU = function(fComplete)
     this.endBurst();
     this.addCycles(this.nRunCycles);
     this.nRunCycles = 0;
-    if (this.flags.fRunning) {
-        this.flags.fRunning = false;
+    if (this.flags.running) {
+        this.flags.running = false;
         if (this.chipset) this.chipset.stop();
         var controlRun = this.bindings["run"];
         if (controlRun) controlRun.textContent = "Run";
     }
-    this.flags.fComplete = fComplete;
+    this.flags.complete = fComplete;
 };
 
 /**

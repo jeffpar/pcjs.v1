@@ -250,7 +250,7 @@ function Debugger(parmsDbg)
         /*
          * Initialize Debugger message support
          */
-        this.afnDumpers = [];
+        this.afnDumpers = {};
         this.messageInit(parmsDbg['messages']);
 
         this.sInitCommands = parmsDbg['commands'];
@@ -269,7 +269,7 @@ function Debugger(parmsDbg)
             if (window[PCX86.APPCLASS] === undefined) {
                 window[PCX86.APPCLASS] = function(s) { return dbg.doCommands(s); };
             }
-        } else {
+        } else if (global) {
             if (global[PCX86.APPCLASS] === undefined) {
                 global[PCX86.APPCLASS] = function(s) { return dbg.doCommands(s); };
             }
@@ -3324,7 +3324,7 @@ if (DEBUGGER) {
      * @this {Debugger}
      * @param {string} sModule
      * @param {number} nSegment
-     * @return {Array}
+     * @return {Object}
      */
     Debugger.prototype.findModuleInfo = function(sModule, nSegment)
     {
@@ -4074,7 +4074,7 @@ if (DEBUGGER) {
          * it here, so that if the CPU is reset while running, we can prevent stop()
          * from unnecessarily dumping the CPU state.
          */
-        this.flags.fRunning = false;
+        this.flags.running = false;
         this.clearTempBreakpoint();
         if (!fQuiet) this.updateStatus();
     };
@@ -4133,7 +4133,7 @@ if (DEBUGGER) {
     Debugger.prototype.start = function(ms, nCycles)
     {
         if (!this.nStep) this.println("running");
-        this.flags.fRunning = true;
+        this.flags.running = true;
         this.msStart = ms;
         this.nCyclesStart = nCycles;
     };
@@ -4149,8 +4149,8 @@ if (DEBUGGER) {
      */
     Debugger.prototype.stop = function(ms, nCycles)
     {
-        if (this.flags.fRunning) {
-            this.flags.fRunning = false;
+        if (this.flags.running) {
+            this.flags.running = false;
             this.nCycles = nCycles - this.nCyclesStart;
             if (!this.nStep) {
                 var sStopped = "stopped";
@@ -4822,7 +4822,7 @@ if (DEBUGGER) {
             if (dbgAddr.fData32 && sOpcode.slice(-1) == 'W') sOpcode = sOpcode.slice(0, -1) + 'D';
         }
 
-        var typeCPU = null;
+        var typeCPU = -1;
         var fComplete = true;
 
         for (var iOperand = 1; iOperand <= cOperands; iOperand++) {
@@ -4832,7 +4832,7 @@ if (DEBUGGER) {
             var type = aOpDesc[iOperand];
             if (type === undefined) continue;
 
-            if (typeCPU == null) typeCPU = type >> Debugger.TYPE_CPU_SHIFT;
+            if (typeCPU < 0) typeCPU = type >> Debugger.TYPE_CPU_SHIFT;
 
             if (iIns == Debugger.INS.LOADALL) {
                 if (typeCPU == Debugger.CPU_80286) {
@@ -4953,7 +4953,7 @@ if (DEBUGGER) {
 
         if (sComment && fComplete) {
             sLine = str.pad(sLine, dbgAddrIns.fAddr32? 74 : 56) + ';' + sComment;
-            if (!this.cpu.flags.fChecksum) {
+            if (!this.cpu.flags.checksum) {
                 sLine += (nSequence != null? '=' + nSequence.toString() : "");
             } else {
                 var nCycles = this.cpu.getCycles();
@@ -6611,7 +6611,7 @@ if (DEBUGGER) {
     Debugger.prototype.doHalt = function(fQuiet)
     {
         var sMsg;
-        if (this.flags.fRunning) {
+        if (this.flags.running) {
             sMsg = "halting";
             this.stopCPU();
         } else {
@@ -7085,7 +7085,7 @@ if (DEBUGGER) {
             if (nCycles !== undefined) {
                 this.cpu.resetChecksum();
             }
-            this.println("checksums " + (this.cpu.flags.fChecksum? "enabled" : "disabled"));
+            this.println("checksums " + (this.cpu.flags.checksum? "enabled" : "disabled"));
             break;
         case "sp":
             if (asArgs[2] !== undefined) {
@@ -8156,7 +8156,7 @@ if (DEBUGGER) {
     {
         var a = this.parseCommand(sCmds, fSave);
         for (var s in a) {
-            if (!this.doCommand(a[s])) return false;
+            if (!this.doCommand(a[+s])) return false;
         }
         return true;
     };

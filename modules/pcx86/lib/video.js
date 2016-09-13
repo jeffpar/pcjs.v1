@@ -5419,7 +5419,7 @@ Video.prototype.updateScreen = function(fForce)
     /*
      * The Computer component maintains the fPowered setting on our behalf, so we use it.
      */
-    if (!this.flags.fPowered) return;
+    if (!this.flags.powered) return;
 
     /*
      * If the card's video signal is disabled (eg, during a mode change), then skip the update,

@@ -346,8 +346,8 @@ C1PVideo.prototype.setPower = function(fOn, cmp)
      * it ourselves, too.  This also means that updateScreen() need check only fPower and not isReady(),
      * since we guarantee that the former implies the latter.
      */
-    if (fOn && !this.flags.fPowered && this.isReady()) {
-        this.flags.fPowered = true;
+    if (fOn && !this.flags.powered && this.isReady()) {
+        this.flags.powered = true;
         if (DEBUGGER) this.dbg = cmp.getComponentByType("debugger");
         /*
          * If we have an associated keyboard, then ensure that the keyboard will be notified whenever
@@ -366,8 +366,8 @@ C1PVideo.prototype.setPower = function(fOn, cmp)
         }
     }
     else
-    if (!fOn && this.flags.fPowered) {
-        this.flags.fPowered = false;
+    if (!fOn && this.flags.powered) {
+        this.flags.powered = false;
         /*
          * This is where we would add some method of blanking the display, without the disturbing the video
          * buffer contents, and blocking all further updates to the display.
@@ -481,7 +481,7 @@ C1PVideo.prototype.initScreen = function()
 C1PVideo.prototype.updateScreen = function()
 {
     var offset = 0;
-    if (this.flags.fPowered) {
+    if (this.flags.powered) {
         while (offset < this.cbScreen) {
             var b = this.abMem[this.offVideo + offset];
             if (this.abScreen[offset] != b) {

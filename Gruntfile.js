@@ -34,11 +34,10 @@
 /*
  * Overview
  * ---
- * Based on the specified version in package.json, we build a matching version
- * folder in /versions for each of the machine simulations; each of those folders
- * in turn receives compiled versions of the corresponding machine simulation scripts
- * (c1p*.js and pc*.js), along with copies of both the shared and machine-specific
- * CSS and XSL stylesheets that the scripts rely on.
+ * Based on the specified version in package.json, we build a matching version folder in /versions
+ * for each of the machine simulations; each of those folders in turn receives compiled versions of
+ * the corresponding machine simulation scripts (c1p*.js and pc*.js), along with copies of both the
+ * shared and machine-specific CSS and XSL stylesheets that the scripts rely on.
  *
  * Usage
  * ---

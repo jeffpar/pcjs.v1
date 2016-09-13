@@ -1836,7 +1836,7 @@ if (DEBUGGER) {
          * it here, so that if the CPU is reset while running, we can prevent stop()
          * from unnecessarily dumping the CPU state.
          */
-        this.flags.fRunning = false;
+        this.flags.running = false;
         this.clearTempBreakpoint();
         if (!fQuiet) this.updateStatus();
     };
@@ -1895,7 +1895,7 @@ if (DEBUGGER) {
     Debugger.prototype.start = function(ms, nCycles)
     {
         if (!this.nStep) this.println("running");
-        this.flags.fRunning = true;
+        this.flags.running = true;
         this.msStart = ms;
         this.nCyclesStart = nCycles;
     };
@@ -1911,8 +1911,8 @@ if (DEBUGGER) {
      */
     Debugger.prototype.stop = function(ms, nCycles)
     {
-        if (this.flags.fRunning) {
-            this.flags.fRunning = false;
+        if (this.flags.running) {
+            this.flags.running = false;
             this.nCycles = nCycles - this.nCyclesStart;
             if (!this.nStep) {
                 var sStopped = "stopped";
@@ -2490,7 +2490,7 @@ if (DEBUGGER) {
 
         if (sComment) {
             sLine = str.pad(sLine, 40) + ';' + sComment;
-            if (!this.cpu.flags.fChecksum) {
+            if (!this.cpu.flags.checksum) {
                 sLine += (nSequence != null? '=' + nSequence.toString() : "");
             } else {
                 var nCycles = this.cpu.getCycles();
@@ -3702,7 +3702,7 @@ if (DEBUGGER) {
     Debugger.prototype.doHalt = function(fQuiet)
     {
         var sMsg;
-        if (this.flags.fRunning) {
+        if (this.flags.running) {
             sMsg = "halting";
             this.stopCPU();
         } else {
@@ -3992,7 +3992,7 @@ if (DEBUGGER) {
             if (nCycles !== undefined) {
                 this.cpu.resetChecksum();
             }
-            this.println("checksums " + (this.cpu.flags.fChecksum? "enabled" : "disabled"));
+            this.println("checksums " + (this.cpu.flags.checksum? "enabled" : "disabled"));
             return;
 
         case "sp":
