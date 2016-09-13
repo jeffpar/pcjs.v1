@@ -173,8 +173,8 @@ Last but not least, run `bundle update` periodically to keep Jekyll up-to-date.
 ### Building PCjs
 
 Unlike a typical project, where you have to *build* or *configure* or *make* something, PCjs is "ready to run".
-That's because both the compiled and uncompiled versions of PCjs are checked into the project, making deployment
-to a web server easy.
+That's because both the compiled and uncompiled versions of PCjs emulation modules are checked into the project,
+making deployment to a web server easy.
 
 However, in order to build and test PCjs modifications, you'll want to use [Grunt](http://gruntjs.com/) and the
 Grunt tasks defined by [Gruntfile.js](Gruntfile.js).
@@ -186,9 +186,9 @@ OS X users may also need to preface this command with `sudo`:
 	npm install grunt-cli -g
 
 Now you can run `grunt` anywhere within the PCjs project to build an updated version.  If no command-line arguments
-are specified, `grunt` runs the "default" task defined by [Gruntfile.js](Gruntfile.js); that task runs Google's
-[Closure Compiler](https://developers.google.com/closure/compiler/) if any of the target files (eg, pcx86.js or
-pcx86-dbg.js in the [/versions](versions/) directory) are out-of date.
+are specified, `grunt` runs the "default" task defined by the project's [Gruntfile](Gruntfile.js); that task runs
+Google's [Closure Compiler](https://developers.google.com/closure/compiler/) if any of the target files (eg, pcx86.js
+or pcx86-dbg.js in the [/versions](versions/) directory) are out-of date.
 
 To ensure consistent compilation results, a copy of the Closure Compiler has been checked into the
 [/bin](bin/) folder.  This version of Closure Compiler, in turn, requires Java v7 or later.  Use the following
@@ -218,6 +218,20 @@ client or server components use Java.
 
 Newer versions of the Closure Compiler should work as well, and at some point, a newer version will be checked into the
 project.
+
+### Building with the JavaScript-based Closure Compiler (and Gulp)
+
+I've started dabbling with [Gulp](http://gulpjs.com/), but the current [gulpfile](gulpfile.js) has a long way to
+go before it can replace the [Gruntfile](Gruntfile.js).  At the moment, all Gulp builds is a single emulation module with
+hard-coded settings, using Google's new [JavaScript-based Closure Compiler](https://github.com/google/closure-compiler-js).
+
+Here's what I installed to get Gulp working:
+
+	sudo npm install -g gulp
+	npm install --save-dev gulp gulp-concat gulp-rename gulp-replace gulp-header gulp-foreach gulp-wrapper run-sequence
+	npm install --save-dev google-closure-compiler-js
+
+Running `gulp` should build a new `pcx86.js` in the [/versions](versions/) directory.
 
 Using PCjs
 ---
