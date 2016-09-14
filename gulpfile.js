@@ -55,6 +55,7 @@ var wrapper = require("gulp-wrapper");
 var sequence = require("run-sequence");
 var compiler = require('google-closure-compiler-js').gulp();
 
+var fs = require("fs");
 var path = require("path");
 var pkg = require("./package.json");
 
@@ -63,6 +64,27 @@ pkg.version = pkg.version.slice(0, -1) + 'x';                           // TODO:
 var pcX86TmpDir  = "./tmp/pcx86/"  + pkg.version;
 var pcX86ReleaseDir = "./versions/pcx86/" + pkg.version;
 var pcX86ReleaseFile  = "pcx86.js";
+
+var sExterns = "";
+var sSiteHost = "www.pcjs.org";
+
+for (var i = 0; i < pkg.closureCompilerExterns.length; i++) {
+    var sContents = "";
+    try {
+        sContents = fs.readFileSync(pkg.closureCompilerExterns[i], "utf8");
+    } catch(err) {
+        console.log(err.message);
+    }
+    if (sContents) {
+        if (sExterns) sExterns += '\n';
+        sExterns += sContents;
+    }
+}
+
+if (pkg.homepage) {
+    var match = pkg.homepage.match(/^http:\/\/([^\/]*)(.*)/);
+    if (match) sSiteHost = match[1];
+}
 
 gulp.task('mktmp', function() {
     return gulp.src(pkg.pcX86Files)
@@ -81,21 +103,19 @@ gulp.task('mktmp', function() {
 
 gulp.task('compile', function() {
     return gulp.src(path.join(pcX86TmpDir, pcX86ReleaseFile) /*, {base: './'} */)
-        /*
-         * The following DEFINE overrides are handled with a series of "--define" command-line arguments when using
-         * the Java version, but I didn't see anything analogous to that in the JavaScript version, so I'm taking a
-         * sledgehammer approach.  Note that SITEHOST should probably be extracted from the "homepage" property (or some
-         * other custom property) in package.json, rather than hard-coded below.
+    /*
+         * TODO: When the JavaScript version of the compiler supports something analogous to the
+         * Java version's "--define" command-line argument, use that instead of these search/replace hacks.
          */
-        .pipe(replace(/(var\s+APPVERSION\s*=\s*)"([^"]*)"(.*)/, '$1"' + pkg.version + '"$3'))
-        .pipe(replace(/(var\s+SITEHOST\s*=\s*)"([^"]*)"(.*)/, '$1"www.pcjs.org"$3'))
+        .pipe(replace(/(var\s+APPVERSION\s*=\s*)["']([^"']*)["'](.*)/, '$1"' + pkg.version + '"$3'))
+        .pipe(replace(/(var\s+SITEHOST\s*=\s*)["']([^"']*)["'](.*)/, '$1"' + sSiteHost + '"$3'))
         .pipe(replace(/(var\s+COMPILED\s*=\s*)(false)(.*)/, '$1true$3'))
         .pipe(replace(/(var\s+DEBUG\s*=\s*)(true)(.*)/, '$1false$3'))
         .pipe(replace(/(var\s+DEBUGGER\s*=\s*)(true)(.*)/, '$1false$3'))
         .pipe(compiler({
             assumeFunctionWrapper: true,
             compilationLevel: 'ADVANCED',
-            externs: [{src: 'var global; var resources;'}],             // TODO: Can this refer to "externs.js" instead?
+            externs: [{src: sExterns}],
             warningLevel: 'VERBOSE',
             /*
              * outputWrapper support isn't available yet, so we take care of it below, using the gulp-wrapper plug-in.
