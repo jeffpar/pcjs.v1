@@ -71,7 +71,7 @@ gulp.task('mktmp', function() {
                 .pipe(header('/* ' + file.path + ' */\n\n'))
                 .pipe(replace(/(^|\n)[ \t]*(['"])use strict\2;?\s*/g, "$1"))
                 .pipe(replace(/[ \t]*if\s*\(NODE\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, ""))
-                .pipe(replace(/[ \t]*if\s*\(typeof\s+(module|APP_PCJS)\s*!==\s*(['"])undefined\2\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, ""))
+                .pipe(replace(/[ \t]*if\s*\(typeof\s+module\s*!==\s*(['"])undefined\2\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, ""))
                 .pipe(replace(/[ \t]*[A-Za-z_][A-Za-z0-9_.]*\.assert\([^\n]*\);[^\n]*/g, ""))
             }))        
         .pipe(concat(pcX86ReleaseFile))
