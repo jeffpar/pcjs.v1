@@ -232,10 +232,10 @@ Here's what I installed to get Gulp working:
 	npm install --save-dev google-closure-compiler-js
 
 Running `gulp` should build a new `pcx86.js` in the [versions](/versions/) directory.  However,
-please consider Gulp support (and anything built with Gulp) as **experimental** until further notice.
-The [JavaScript-based Closure Compiler](https://github.com/google/closure-compiler-js) may not be stable either;
-for example, they removed *output_wrapper* support almost immediately after documenting it on their
-[blog](https://developers.googleblog.com/2016/08/closure-compiler-in-javascript.html).
+you should consider Gulp support (and anything built with Gulp) as **experimental** until further notice.
+The [JavaScript-based Closure Compiler](https://github.com/google/closure-compiler-js) is in a state of
+flux as well; for example, *output_wrapper* support is documented in their
+[blog](https://developers.googleblog.com/2016/08/closure-compiler-in-javascript.html) but hasn't been implemented yet.
 
 Using PCjs
 ---
