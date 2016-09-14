@@ -71,7 +71,7 @@ gulp.task('mktmp', function() {
                 .pipe(header('/* ' + file.path + ' */\n\n'))
                 .pipe(replace(/(^|\n)[ \t]*(['"])use strict\2;?\s*/g, "$1"))
                 .pipe(replace(/[ \t]*if\s*\(NODE\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, ""))
-                .pipe(replace(/[ \t]*if\s*\(typeof\s+module\s*!==\s*(['"])undefined\2\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, ""))
+                .pipe(replace(/[ \t]*if\s*\(typeof\s+module\s*!==\s*(['"])undefined\1\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, ""))
                 .pipe(replace(/[ \t]*[A-Za-z_][A-Za-z0-9_.]*\.assert\([^\n]*\);[^\n]*/g, ""))
             }))        
         .pipe(concat(pcX86ReleaseFile))
@@ -98,10 +98,9 @@ gulp.task('compile', function() {
             externs: [{src: 'var global; var resources;'}],             // TODO: Can this refer to "externs.js" instead?
             warningLevel: 'VERBOSE',
             /*
-             * outputWrapper support was recently removed (without any obvious explanation), so we take care
-             * of it below, using the gulp-wrapper plug-in.
+             * outputWrapper support isn't available yet, so we take care of it below, using the gulp-wrapper plug-in.
              * 
-             *      outputWrapper: '(function(){\n%output%\n}).call(this)',
+             *      outputWrapper: '(function(){%output%})()',
              */
             jsOutputFile: pcX86ReleaseFile,                             // TODO: This must vary according to debugger/non-debugger releases
             createSourceMap: false

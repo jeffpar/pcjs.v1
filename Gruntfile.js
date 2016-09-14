@@ -199,7 +199,7 @@ module.exports = function(grunt) {
                     banner: '"use strict";\n\n',
                     process: function(src, filepath) {
                         return "// " + filepath + "\n\n" +
-                            src.replace(/(^|\n)[ \t]*(['"])use strict\2;?\s*/g, '$1').replace(/[ \t]*if\s*\(NODE\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '').replace(/[ \t]*if\s*\(typeof\s+module\s*!==\s*(['"])undefined\2\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '').replace(/[ \t]*[A-Za-z_][A-Za-z0-9_\.]*\.assert\([^\n]*\);[^\n]*/g, '');
+                            src.replace(/(^|\n)[ \t]*(['"])use strict\2;?\s*/g, '$1').replace(/[ \t]*if\s*\(NODE\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '').replace(/[ \t]*if\s*\(typeof\s+module\s*!==\s*(['"])undefined\1\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '').replace(/[ \t]*[A-Za-z_][A-Za-z0-9_\.]*\.assert\([^\n]*\);[^\n]*/g, '');
                     }
                 }
             },
@@ -210,7 +210,7 @@ module.exports = function(grunt) {
                     banner: '"use strict";\n\n',
                     process: function(src, filepath) {
                         return "// " + filepath + "\n\n" +
-                            src.replace(/(^|\n)[ \t]*(['"])use strict\2;?\s*/g, '$1').replace(/[ \t]*if\s*\(NODE\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '').replace(/[ \t]*if\s*\(typeof\s+module\s*!==\s*(['"])undefined\2\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '').replace(/[ \t]*[A-Za-z_][A-Za-z0-9_\.]*\.assert\([^\n]*\);[^\n]*/g, '');
+                            src.replace(/(^|\n)[ \t]*(['"])use strict\2;?\s*/g, '$1').replace(/[ \t]*if\s*\(NODE\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '').replace(/[ \t]*if\s*\(typeof\s+module\s*!==\s*(['"])undefined\1\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '').replace(/[ \t]*[A-Za-z_][A-Za-z0-9_\.]*\.assert\([^\n]*\);[^\n]*/g, '');
                     }
                 }
             },
@@ -221,7 +221,7 @@ module.exports = function(grunt) {
                     banner: '"use strict";\n\n',
                     process: function(src, filepath) {
                         return "// " + filepath + "\n\n" +
-                            src.replace(/(^|\n)[ \t]*(['"])use strict\2;?\s*/g, '$1').replace(/[ \t]*if\s*\(NODE\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '').replace(/[ \t]*if\s*\(typeof\s+module\s*!==\s*(['"])undefined\2\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '').replace(/[ \t]*[A-Za-z_][A-Za-z0-9_\.]*\.assert\([^\n]*\);[^\n]*/g, '');
+                            src.replace(/(^|\n)[ \t]*(['"])use strict\2;?\s*/g, '$1').replace(/[ \t]*if\s*\(NODE\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '').replace(/[ \t]*if\s*\(typeof\s+module\s*!==\s*(['"])undefined\1\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '').replace(/[ \t]*[A-Za-z_][A-Za-z0-9_\.]*\.assert\([^\n]*\);[^\n]*/g, '');
                     }
                 }
             },
@@ -232,7 +232,7 @@ module.exports = function(grunt) {
                     banner: '"use strict";\n\n',
                     process: function(src, filepath) {
                         return "// " + filepath + "\n\n" +
-                            src.replace(/(^|\n)[ \t]*(['"])use strict\2;?\s*/g, '$1').replace(/[ \t]*if\s*\(NODE\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '').replace(/[ \t]*if\s*\(typeof\s+module\s*!==\s*(['"])undefined\2\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '').replace(/[ \t]*[A-Za-z_][A-Za-z0-9_\.]*\.assert\([^\n]*\);[^\n]*/g, '');
+                            src.replace(/(^|\n)[ \t]*(['"])use strict\2;?\s*/g, '$1').replace(/[ \t]*if\s*\(NODE\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '').replace(/[ \t]*if\s*\(typeof\s+module\s*!==\s*(['"])undefined\1\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '').replace(/[ \t]*[A-Za-z_][A-Za-z0-9_\.]*\.assert\([^\n]*\);[^\n]*/g, '');
                     }
                 }
             }
