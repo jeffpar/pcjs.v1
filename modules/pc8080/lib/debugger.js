@@ -61,7 +61,7 @@ if (DEBUGGER) {
  *      fTemporary:(boolean|undefined),
  *      sCmd:(string|undefined),
  *      aCmds:(Array.<string>|undefined)
- * }}
+ * }} DbgAddr8080
  */
 var DbgAddr8080;
 

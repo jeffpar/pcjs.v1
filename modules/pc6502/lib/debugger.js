@@ -60,7 +60,7 @@ if (DEBUGGER) {
  *      fTemporary:(boolean|undefined),
  *      sCmd:(string|undefined),
  *      aCmds:(Array.<string>|undefined)
- * }}
+ * }} DbgAddr6502
  */
 var DbgAddr6502;
 
@@ -4780,7 +4780,7 @@ if (DEBUGGER) {
         for (var iDbg = 0; iDbg < aeDbg.length; iDbg++) {
             var eDbg = aeDbg[iDbg];
             var parmsDbg = Component.getComponentParms(eDbg);
-            var dbg = new Debugger(parmsDbg);
+            var dbg = new Debugger6502(parmsDbg);
             Component.bindComponentControls(dbg, eDbg, APPCLASS);
         }
     };

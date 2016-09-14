@@ -62,7 +62,7 @@ if (DEBUGGER) {
  *      fTemporary:(boolean|undefined),
  *      sCmd:(string|undefined),
  *      aCmds:(Array.<string>|undefined)
- * }}
+ * }} DbgAddrPDP11
  */
 var DbgAddrPDP11;
 

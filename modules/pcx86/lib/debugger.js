@@ -81,7 +81,7 @@ if (DEBUGGER) {
  *      fTempBreak:(boolean|undefined),
  *      sCmd:(string|undefined),
  *      aCmds:(Array.<string>|undefined)
- * }}
+ * }} DbgAddrX86
  */
 var DbgAddrX86;
 
@@ -7771,7 +7771,7 @@ if (DEBUGGER) {
         for (var iDbg = 0; iDbg < aeDbg.length; iDbg++) {
             var eDbg = aeDbg[iDbg];
             var parmsDbg = Component.getComponentParms(eDbg);
-            var dbg = new Debugger(parmsDbg);
+            var dbg = new DebuggerX86(parmsDbg);
             Component.bindComponentControls(dbg, eDbg, PCX86.APPCLASS);
         }
     };
