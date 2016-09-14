@@ -31,22 +31,6 @@
 
 "use strict";
 
-/*
- * Components that previously used Debugger interrupt definitions by including:
- *
- *     var Debugger = require("./debugger");
- *
- * and using:
- *
- *      Debugger.INT.FOO
- *
- * must now instead include:
- *
- *      var Interrupts = require("./interrupts");
- *
- * and then replace all occurrences of "Debugger.INT.FOO" with "Interrupts.FOO".
- */
-
 var Interrupts = {
     VIDEO:      0x10,
     DISK:       0x13,
@@ -184,7 +168,7 @@ if (DEBUGGER) {
         0x4A8:  ["SAVE_PTR",4]          // POINTER TO EGA PARAMETER CONTROL BLOCK
     },
     /*
-     * See Debugger.prototype.replaceRegs() for the rules governing how register contents are replaced in the strings below.
+     * See DebuggerX86.prototype.replaceRegs() for the rules governing how register contents are replaced in the strings below.
      *
      * Replacements occur in the following order:
      *
@@ -1546,7 +1530,7 @@ if (DEBUGGER) {
  *      INT 2E Execute command (*) (2.0+)
  *      Entry: DS:SI-&gt;command string-1 followed by a carriage return
  *      Exit:  All registers except CS and IP are destroyed
- *      Note:  This function is not re-enterant and should not be issued from a
+ *      Note:  This function is not re-entrant and should not be issued from a
  *             batch file.
  *
  *      INT 2F Multiplex (3.0+)
@@ -1922,7 +1906,7 @@ if (DEBUGGER) {
  *
  *      Stacks descriptor (8 bytes)
  *      00 Flag (0=free,1=in use)
- *      02 Savearea for SS:SP
+ *      02 Save area for SS:SP
  *      06 Offset of end of stack
  *
  *      Device driver header (12h bytes)

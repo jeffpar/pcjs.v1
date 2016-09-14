@@ -41,7 +41,7 @@ var str = {};
  * So use this function to validate the entire string.
  *
  * @param {string} s is the string representation of some number
- * @param {number} [base] is the radix of the number represented above (only 2, 10 and 16 are supported)
+ * @param {number} [base] is the radix of the number represented above; 10 is the default (only 2, 8, 10 and 16 are supported)
  * @return {boolean} true if valid, false if invalid (or the specified base isn't supported)
  */
 str.isValidInt = function(s, base)

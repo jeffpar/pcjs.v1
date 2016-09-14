@@ -76,7 +76,8 @@ try {
  * Create is the constructor returned by require().  The only bit of fudging we do is
  * overriding the constructor for component "cpu" with the constructor for "x86cpu",
  * because when a "cpu" definition is encountered, it's the "x86cpu" subclass that we
- * actually want to create, not the "cpu" superclass.
+ * actually want to create, not the "cpu" superclass.  See aSubClasses for the complete
+ * list of subclassed components we manage like that.
  * 
  * TODO: Update the list of ignored (ie, ignorable) components.
  */
@@ -84,7 +85,11 @@ var Component;
 var dbg;
 var aComponents = [];
 var asComponentsIgnore = ["embed","save"];
-
+var aSubClasses = {
+    "pcx86/lib/x86cpu": "pcx86/lib/cpu",
+    "pcx86/lib/debugger": "shared/lib/debugger"
+};
+    
 /**
  * loadComponents(asFiles)
  * 
@@ -106,9 +111,17 @@ function loadComponents(asFiles)
              * we'll want to access later (eg, "component" in getComponentByType()).
              */
             var fn = require(lib + "../../../" + sFile);
-            if (sName == "x86cpu") {
+            var sSuperClass = null;
+            for (var s in aSubClasses) {
+                if (sFile.indexOf(s) >= 0) {
+                    sSuperClass = aSubClasses[s];
+                    break;
+                }
+            }
+            if (sSuperClass) {
                 for (var j = 0; j < aComponents.length; j++) {
-                    if (aComponents[j].name == "cpu") {
+                    if (aComponents[j].path.indexOf(sSuperClass) >= 0) {
+                        if (fDebug) console.log("updating superclass " + aComponents[j].path + " with subclass " + sFile);
                         aComponents[j].Create = fn;
                         sName = null;
                         break;
@@ -121,7 +134,7 @@ function loadComponents(asFiles)
                 };      // jshint ignore:line
             }
             if (sName) {
-                aComponents.push({name: sName, Create: fn, objects: []});
+                aComponents.push({name: sName, path: sFile, Create: fn, objects: []});
             }
             if (sName == "defines") {
                 /*

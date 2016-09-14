@@ -182,7 +182,7 @@ function Computer(parmsComputer, parmsMachine, fSuspended) {
         Component.error("Unable to find CPU component");
         return;
     }
-    this.dbg = /** @type {Debugger} */ (Component.getComponentByType("Debugger", this.id));
+    this.dbg = /** @type {DebuggerX86} */ (Component.getComponentByType("Debugger", this.id));
 
     /*
      * Enumerate all Video components for future updateVideo() calls.

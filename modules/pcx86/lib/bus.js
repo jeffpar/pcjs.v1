@@ -68,7 +68,7 @@ if (NODE) {
  * @extends Component
  * @param {Object} parmsBus
  * @param {X86CPU} cpu
- * @param {Debugger} dbg
+ * @param {DebuggerX86} dbg
  */
 function Bus(parmsBus, cpu, dbg)
 {

@@ -35,13 +35,9 @@
  * @define {string}
  */
 var APPVERSION = "1.x.x";       // this @define is overridden by the Closure Compiler with the version in package.json
-
 var XMLVERSION = null;          // this is set in non-COMPILED builds by embedMachine() if a version number was found in the machine XML
-
 var COPYRIGHT = "Copyright © 2012-2016 Jeff Parsons <Jeff@pcjs.org>";
-
 var LICENSE = "License: GPL version 3 or later <http://gnu.org/licenses/gpl.html>";
-
 var CSSCLASS = "pcjs";
 
 /**

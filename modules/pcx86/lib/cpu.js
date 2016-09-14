@@ -159,7 +159,7 @@ CPU.BUTTONS = ["power", "reset"];
  * @param {Computer} cmp
  * @param {Bus} bus
  * @param {CPU} cpu
- * @param {Debugger} dbg
+ * @param {DebuggerX86} dbg
  */
 CPU.prototype.initBus = function(cmp, bus, cpu, dbg)
 {

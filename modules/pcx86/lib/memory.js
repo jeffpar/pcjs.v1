@@ -288,7 +288,7 @@ Memory.prototype = {
      * @this {Memory}
      * @param {Memory} mem
      * @param {number} [type]
-     * @param {Debugger} [dbg]
+     * @param {DebuggerX86} [dbg]
      */
     clone: function(mem, type, dbg) {
         /*
@@ -620,7 +620,7 @@ Memory.prototype = {
      * copyBreakpoints(dbg, mem)
      *
      * @this {Memory}
-     * @param {Debugger} [dbg]
+     * @param {DebuggerX86} [dbg]
      * @param {Memory} [mem] (outgoing Memory block to copy breakpoints from, if any)
      */
     copyBreakpoints: function(dbg, mem) {
