@@ -45,7 +45,6 @@ if (DEBUGGER) {
         var X86         = require("./x86");
         var X86Seg      = require("./x86seg");
         var Interrupts  = require("./interrupts");
-        var Keyboard    = require("./keyboard");
         var Messages    = require("./messages");
         var Memory      = require("./memory");
     }

@@ -314,18 +314,6 @@ Keyboard.SCANCODE = {
 };
 
 /**
- * The set of values that a browser may store in the 'location' property of a keyboard event object
- * which we also support.
- *
- * @enum {number}
- */
-Keyboard.LOCATION = {
-    LEFT:           1,
-    RIGHT:          2,
-    NUMPAD:         3
-};
-
-/**
  * These internal "shift key" states are used to indicate BOTH the physical shift-key states (in bitsState)
  * and the simulated shift-key states (in bitsStateSim).  The LOCK keys are problematic in both cases: the
  * browsers give us no way to query the LOCK key states, so we can only infer them, and because they are "soft"
@@ -2116,7 +2104,7 @@ Keyboard.prototype.onKeyDown = function(event, fDown)
     if (Keyboard.SIMCODES[keyCode + Keys.KEYCODE.ONDOWN]) {
 
         simCode += Keys.KEYCODE.ONDOWN;
-        if (event.location == Keyboard.LOCATION.RIGHT) {
+        if (event.location == Keys.LOCATION.RIGHT) {
             simCode += Keys.KEYCODE.ONRIGHT;
         }
 

@@ -31,15 +31,6 @@
 
 "use strict";
 
-/**
- * Alphanumeric and other common (printable) ASCII codes.
- *
- * TODO: Determine what we can do to get ALL constants like these inlined (enum doesn't seem to
- * get the job done); the problem seems to be limited to property references that use quotes, which
- * is why I've 'unquoted' as many of them as possible.
- *
- * @enum {number}
- */
 var Keys = {
     /*
      * Alphanumeric and other common (printable) ASCII codes.
@@ -77,7 +68,7 @@ var Keys = {
     KEYCODE: {
         /* 0x08 */ BS:          8,
         /* 0x09 */ TAB:         9,
-        /* 0x0A */ LF:          10,
+        /* 0x0A */ LF:          10,         // TODO: Determine if any key actually generates this (I suspect there is none)
         /* 0x0D */ CR:          13,
         /* 0x10 */ SHIFT:       16,
         /* 0x11 */ CTRL:        17,
@@ -101,6 +92,16 @@ var Keys = {
         /* 0x2E */ DEL:         46,
         /* 0x2E */ FF_PERIOD:   46,
         /* 0x2F */ FF_SLASH:    47,
+        /* 0x30 */ ZERO:        48,
+        /* 0x31 */ ONE:         49,
+        /* 0x32 */ TWO:         50,
+        /* 0x33 */ THREE:       51,
+        /* 0x34 */ FOUR:        52,
+        /* 0x35 */ FIVE:        53,
+        /* 0x36 */ SIX:         54,
+        /* 0x37 */ SEVEN:       55,
+        /* 0x38 */ EIGHT:       56,
+        /* 0x39 */ NINE:        57,
         /* 0x3B */ FF_SEMI:     59,
         /* 0x3D */ FF_EQUALS:   61,
         /* 0x5B */ CMD:         91,         // aka WIN
@@ -108,21 +109,31 @@ var Keys = {
         /* 0x5C */ FF_BSLASH:   92,
         /* 0x5D */ RCMD:        93,         // aka MENU
         /* 0x5D */ FF_RBRACK:   93,
-        /* 0x60 */ NUM_INS:     96,         // 0
+        /* 0x60 */ NUM_0:       96,
+        /* 0x60 */ NUM_INS:     96,
         /* 0x60 */ FF_BQUOTE:   96,
-        /* 0x61 */ NUM_END:     97,         // 1
-        /* 0x62 */ NUM_DOWN:    98,         // 2
-        /* 0x63 */ NUM_PGDN:    99,         // 3
-        /* 0x64 */ NUM_LEFT:    100,        // 4
-        /* 0x65 */ NUM_CENTER:  101,        // 5
-        /* 0x66 */ NUM_RIGHT:   102,        // 6
-        /* 0x67 */ NUM_HOME:    103,        // 7
-        /* 0x68 */ NUM_UP:      104,        // 8
-        /* 0x69 */ NUM_PGUP:    105,        // 9
+        /* 0x61 */ NUM_1:       97,
+        /* 0x61 */ NUM_END:     97,
+        /* 0x62 */ NUM_2:       98,
+        /* 0x62 */ NUM_DOWN:    98,
+        /* 0x63 */ NUM_3:       99,
+        /* 0x63 */ NUM_PGDN:    99,
+        /* 0x64 */ NUM_4:       100,
+        /* 0x64 */ NUM_LEFT:    100,
+        /* 0x65 */ NUM_5:       101,
+        /* 0x65 */ NUM_CENTER:  101,
+        /* 0x66 */ NUM_6:       102,
+        /* 0x66 */ NUM_RIGHT:   102,
+        /* 0x67 */ NUM_7:       103,
+        /* 0x67 */ NUM_HOME:    103,
+        /* 0x68 */ NUM_8:       104,
+        /* 0x68 */ NUM_UP:      104,
+        /* 0x69 */ NUM_9:       105,
+        /* 0x69 */ NUM_PGUP:    105,
         /* 0x6A */ NUM_MUL:     106,
         /* 0x6B */ NUM_ADD:     107,
         /* 0x6D */ NUM_SUB:     109,
-        /* 0x6E */ NUM_DEL:     110,        // .
+        /* 0x6E */ NUM_DEL:     110,        // aka PERIOD
         /* 0x6F */ NUM_DIV:     111,
         /* 0x70 */ F1:          112,
         /* 0x71 */ F2:          113,
@@ -170,8 +181,22 @@ var Keys = {
         // The actual values are for internal use only and merely need to be unique and used consistently.
         //
         FAKE:                   4000
+    },
+    /*
+     * The set of values that a browser may store in the 'location' property of a keyboard event object
+     * which we also support.
+     */
+    LOCATION: {
+        LEFT:                   1,
+        RIGHT:                  2,
+        NUMPAD:                 3
     }
 };
+
+/*
+ * Check the event object's 'location' property for a non-zero value for the following ONRIGHT keys.
+ */
+Keys.KEYCODE.NUM_CR = Keys.KEYCODE.CR + Keys.KEYCODE.ONRIGHT;
 
 /*
  * Maps "stupid" keyCodes to their "non-stupid" counterparts

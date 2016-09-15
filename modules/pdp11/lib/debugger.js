@@ -40,10 +40,10 @@ if (DEBUGGER) {
         var web           = require("../../shared/lib/weblib");
         var Component     = require("../../shared/lib/component");
         var Debugger      = require("../../shared/lib/debugger");
+        var Keys          = require("../../shared/lib/keys");
         var State         = require("../../shared/lib/state");
         var PDP11         = require("./defines");
         var CPUPDP11      = require("./cpu");
-        var KeyboardPDP11 = require("./keyboard");
         var MessagesPDP11 = require("./messages");
         var MemoryPDP11   = require("./memory");
     }
@@ -353,19 +353,19 @@ if (DEBUGGER) {
              */
             control.onkeydown = function onKeyDownDebugInput(event) {
                 var sCmd;
-                if (event.keyCode == KeyboardPDP11.KEYCODE.CR) {
+                if (event.keyCode == Keys.KEYCODE.CR) {
                     sCmd = control.value;
                     control.value = "";
                     dbg.doCommands(sCmd, true);
                 }
-                else if (event.keyCode == KeyboardPDP11.KEYCODE.ESC) {
+                else if (event.keyCode == Keys.KEYCODE.ESC) {
                     control.value = sCmd = "";
                 }
                 else {
-                    if (event.keyCode == KeyboardPDP11.KEYCODE.UP) {
+                    if (event.keyCode == Keys.KEYCODE.UP) {
                         sCmd = dbg.getPrevCommand();
                     }
-                    else if (event.keyCode == KeyboardPDP11.KEYCODE.DOWN) {
+                    else if (event.keyCode == Keys.KEYCODE.DOWN) {
                         sCmd = dbg.getNextCommand();
                     }
                     if (sCmd != null) {
