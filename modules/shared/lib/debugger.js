@@ -39,6 +39,25 @@ if (DEBUGGER) {
 }
 
 /**
+ * Debugger Address Object
+ *
+ * This is the basic structure; other debuggers may extend it.
+ *
+ *      addr            address
+ *      fTemporary      true if this is a temporary breakpoint address
+ *      sCmd            set for breakpoint addresses if there's an associated command string
+ *      aCmds           preprocessed commands (from sCmd)
+ *
+ * @typedef {{
+ *      addr:(number|undefined),
+ *      fTemporary:(boolean|undefined),
+ *      sCmd:(string|undefined),
+ *      aCmds:(Array.<string>|undefined)
+ * }} DbgAddr
+ */
+var DbgAddr;
+
+/**
  * Debugger(parmsDbg)
  *
  * @constructor
@@ -85,11 +104,11 @@ function Debugger(parmsDbg)
          * digits, or underscores) and the property value is the variable's numeric value.  See doVar()
          * and setVariable() for details.
          *
-         * Note that parseValue(), through its reliance on str.parseInt(), assumes a default base of 16
-         * if no base is explicitly indicated (eg, a trailing decimal period), and if you define variable
-         * names containing exclusively hex alpha characters (a-f), those variables will take precedence
-         * over the corresponding hex values.  In other words, if you define variables "a" and "b", you
-         * will no longer be able to simply type "a" or "b" to specify the decimal values 10 or 11.
+         * Note that parseValue() parses variables before numbers, so any variable that looks like a
+         * unprefixed hex value (eg, "a5" as opposed to "0xa5") will trump the numeric value.  Unprefixed
+         * hex values are a convenience of parseValue(), which always calls str.parseInt() with a default
+         * base of 16; however, that default be overridden with a variety of explicit prefixes or suffixes
+         * (eg, a trailing period to indicate a decimal number).
          */
         this.aVariables = {};
 
@@ -221,21 +240,6 @@ if (DEBUGGER) {
     };
 
     /**
-     * getPrevCommand()
-     *
-     * @this {Debugger}
-     * @return {string|null}
-     */
-    Debugger.prototype.getPrevCommand = function()
-    {
-        var sCmd = null;
-        if (this.iPrevCmd < this.aPrevCmds.length - 1) {
-            sCmd = this.aPrevCmds[++this.iPrevCmd];
-        }
-        return sCmd;
-    };
-
-    /**
      * getNextCommand()
      *
      * @this {Debugger}
@@ -251,6 +255,50 @@ if (DEBUGGER) {
             this.iPrevCmd = -1;
         }
         return sCmd;
+    };
+
+    /**
+     * getPrevCommand()
+     *
+     * @this {Debugger}
+     * @return {string|null}
+     */
+    Debugger.prototype.getPrevCommand = function()
+    {
+        var sCmd = null;
+        if (this.iPrevCmd < this.aPrevCmds.length - 1) {
+            sCmd = this.aPrevCmds[++this.iPrevCmd];
+        }
+        return sCmd;
+    };
+
+    /**
+     * getRegIndex(sReg, off)
+     *
+     * NOTE: This must be implemented by the individual debuggers.
+     *
+     * @this {Debugger}
+     * @param {string} sReg
+     * @param {number} [off] optional offset into sReg
+     * @return {number} register index, or -1 if not found
+     */
+    Debugger.prototype.getRegIndex = function(sReg, off)
+    {
+        return -1;
+    };
+
+    /**
+     * getRegValue(iReg)
+     *
+     * NOTE: This must be implemented by the individual debuggers.
+     *
+     * @this {Debugger}
+     * @param {number} iReg
+     * @return {number|undefined}
+     */
+    Debugger.prototype.getRegValue = function(iReg)
+    {
+        return undefined;
     };
 
     /**
@@ -426,6 +474,23 @@ if (DEBUGGER) {
     };
 
     /**
+     * parseAddrReference(s, sAddr)
+     *
+     * Returns the given string with the given address references replaced with the contents of the address.
+     *
+     * NOTE: This must be implemented by the individual debuggers.
+     *
+     * @this {Debugger}
+     * @param {string} s
+     * @param {string} sAddr
+     * @return {string}
+     */
+    Debugger.prototype.parseAddrReference = function(s, sAddr)
+    {
+        return s.replace('[' + sAddr + ']', "unimplemented");
+    };
+
+    /**
      * parseReference(s)
      *
      * Returns the given string with any "{expression}" sequences replaced with the value of the expression,
@@ -447,8 +512,7 @@ if (DEBUGGER) {
         }
         while (a = s.match(/\[(.*?)]/)) {
             if (a[1].indexOf('[') >= 0) break;          // unsupported nested bracket(s)
-            var dbgAddr = this.parseAddr(a[1]);
-            s = s.replace('[' + a[1] + ']', dbgAddr? str.toHex(this.getWord(dbgAddr), dbgAddr.fData32? 8 : 4) : "undefined");
+            s = this.parseAddrReference(s, a[1]);
         }
         return this.parseSysVars(s);
     };
@@ -492,15 +556,15 @@ if (DEBUGGER) {
     Debugger.prototype.parseValue = function(sValue, sName, fQuiet)
     {
         var value;
-        if (sValue !== undefined) {
+        if (sValue != null) {
             var iReg = this.getRegIndex(sValue);
             if (iReg >= 0) {
                 value = this.getRegValue(iReg);
             } else {
                 value = this.getVariable(sValue);
-                if (value === undefined) value = str.parseInt(sValue, 16);
+                if (value == null) value = str.parseInt(sValue, 16);
             }
-            if (value === undefined && !fQuiet) this.println("invalid " + (sName? sName : "value") + ": " + sValue);
+            if (value == null && !fQuiet) this.println("invalid " + (sName? sName : "value") + ": " + sValue);
         } else {
             if (!fQuiet) this.println("missing " + (sName || "value"));
         }
