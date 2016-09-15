@@ -2631,7 +2631,7 @@ Card.prototype.dumpVideoCard = function()
  * TODO: Make these options more general-purpose (it currently assumes a conventional VGA planar layout).
  *
  * @this {Card}
- * @param {Array.<string>} asArgs
+ * @param {Array.<string>} asArgs (all numeric arguments default to base 16 unless otherwise specified)
  */
 Card.prototype.dumpVideoBuffer = function(asArgs)
 {
@@ -2648,12 +2648,12 @@ Card.prototype.dumpVideoBuffer = function(asArgs)
 
             var s = asArgs[i];
             if (!i) {
-                idw = str.parseInt(s);
+                idw = str.parseInt(s, 16);
                 continue;
             }
 
             var ch = s.charAt(0);
-            j = str.parseInt(s.substr(1));
+            j = str.parseInt(s.substr(1), 16);
 
             switch(ch) {
             case 'l':

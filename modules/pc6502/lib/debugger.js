@@ -37,6 +37,7 @@ if (DEBUGGER) {
         var usr         = require("../../shared/lib/usrlib");
         var web         = require("../../shared/lib/weblib");
         var Component   = require("../../shared/lib/component");
+        var Debugger    = require("../../shared/lib/debugger");
         var PC6502      = require("./defines");
         var Messages    = require("./messages");
         var Memory      = require("./memory");
@@ -68,7 +69,7 @@ var DbgAddr6502;
  * Debugger6502(parmsDbg)
  *
  * @constructor
- * @extends Component
+ * @extends Debugger
  * @param {Object} parmsDbg
  *
  * The Debugger6502 component supports the following optional (parmsDbg) properties:
@@ -90,17 +91,6 @@ function Debugger6502(parmsDbg)
         this.style = Debugger6502.STYLE_8080;
 
         /*
-         * These keep track of instruction activity, but only when tracing or when Debugger checks
-         * have been enabled (eg, one or more breakpoints have been set).
-         *
-         * They are zeroed by the reset() notification handler.  cInstructions is advanced by
-         * stepCPU() and checkInstruction() calls.  nCycles is updated by every stepCPU() or stop()
-         * call and simply represents the number of cycles performed by the last run of instructions.
-         */
-        this.nCycles = 0;
-        this.cOpcodes = this.cOpcodesStart = 0;
-
-        /*
          * Most commands that require an address call parseAddr(), which defaults to dbgAddrNextCode
          * or dbgAddrNextData when no address has been given.  doDump() and doUnassemble(), in turn,
          * update dbgAddrNextData and dbgAddrNextCode, respectively, when they're done.
@@ -110,18 +100,6 @@ function Debugger6502(parmsDbg)
          */
         this.dbgAddrNextCode = this.newAddr();
         this.dbgAddrNextData = this.newAddr();
-
-        /*
-         * This maintains command history.  New commands are inserted at index 0 of the array.
-         * When Enter is pressed on an empty input buffer, we default to the command at aPrevCmds[0].
-         */
-        this.iPrevCmd = -1;
-        this.aPrevCmds = [];
-
-        /*
-         * fAssemble is true when "assemble mode" is active, false when not.
-         */
-        this.fAssemble = false;
         this.dbgAddrAssemble = this.newAddr();
 
         /*
@@ -137,21 +115,6 @@ function Debugger6502(parmsDbg)
          * See addSymbols() for more details, since that's how callers add sets of symbols to the table.
          */
         this.aSymbolTable = [];
-
-        /*
-         * aVariables is an object with properties that grows as setVariable() assigns more variables;
-         * each property corresponds to one variable, where the property name is the variable name (ie,
-         * a string beginning with a letter or underscore, followed by zero or more additional letters,
-         * digits, or underscores) and the property value is the variable's numeric value.  See doVar()
-         * and setVariable() for details.
-         *
-         * Note that parseValue(), through its reliance on str.parseInt(), assumes a default base of 16
-         * if no base is explicitly indicated (eg, a trailing decimal period), and if you define variable
-         * names containing exclusively hex alpha characters (a-f), those variables will take precedence
-         * over the corresponding hex values.  In other words, if you define variables "a" and "b", you
-         * will no longer be able to simply type "a" or "b" to specify the decimal values 10 or 11.
-         */
-        this.aVariables = {};
 
         /*
          * clearBreakpoints() initializes the breakpoints lists: aBreakExec is a list of addresses
@@ -214,7 +177,7 @@ function Debugger6502(parmsDbg)
 
 if (DEBUGGER) {
 
-    Component.subclass(Debugger6502);
+    Component.subclass(Debugger6502, Debugger);
 
     /*
      * NOTE: Every Debugger property from here to the first prototype function definition (initBus()) is a
@@ -2650,379 +2613,6 @@ if (DEBUGGER) {
             this.getFlagOutput("IF") + this.getFlagOutput("SF") + this.getFlagOutput("ZF") +
             this.getFlagOutput("AF") + this.getFlagOutput("PF") + this.getFlagOutput("CF");
         return s;
-    };
-
-    Debugger6502.aBinOpPrecedence = {
-        '||':   0,      // logical OR
-        '&&':   1,      // logical AND
-        '|':    2,      // bitwise OR
-        '^':    3,      // bitwise XOR
-        '&':    4,      // bitwise AND
-        '!=':   5,      // inequality
-        '==':   5,      // equality
-        '>=':   6,      // greater than or equal to
-        '>':    6,      // greater than
-        '<=':   6,      // less than or equal to
-        '<':    6,      // less than
-        '>>>':  7,      // unsigned bitwise right shift
-        '>>':   7,      // bitwise right shift
-        '<<':   7,      // bitwise left shift
-        '-':    8,      // subtraction
-        '+':    8,      // addition
-        '%':    9,      // remainder
-        '/':    9,      // division
-        '*':    9       // multiplication
-    };
-
-    /**
-     * evalExpression(aVals, aOps, cOps)
-     *
-     * In Node, if you set a variable to 0x80000001; ie:
-     *
-     *      foo=0x80000001|0
-     *
-     * and then calculate foo*foo using "(foo*foo).toString(2)", the result is:
-     *
-     *      '11111111111111111111111111111100000000000000000000000000000000'
-     *
-     * which is slightly incorrect because it has overflowed JavaScript's floating-point precision.
-     *
-     * 0x80000001 in decimal is -2147483647, so the product is 4611686014132420609, which is 0x3FFFFFFF00000001.
-     *
-     * @this {Debugger6502}
-     * @param {Array.<number>} aVals
-     * @param {Array.<string>} aOps
-     * @param {number} [cOps] (default is all)
-     * @return {boolean} true if successful, false if error
-     */
-    Debugger6502.prototype.evalExpression = function(aVals, aOps, cOps)
-    {
-        cOps = cOps || -1;
-        while (cOps-- && aOps.length) {
-            var chOp = aOps.pop();
-            if (aVals.length < 2) return false;
-            var valNew;
-            var val2 = aVals.pop();
-            var val1 = aVals.pop();
-            switch(chOp) {
-            case '*':
-                valNew = val1 * val2;
-                break;
-            case '/':
-                if (!val2) return false;
-                valNew = val1 / val2;
-                break;
-            case '%':
-                if (!val2) return false;
-                valNew = val1 % val2;
-                break;
-            case '+':
-                valNew = val1 + val2;
-                break;
-            case '-':
-                valNew = val1 - val2;
-                break;
-            case '<<':
-                valNew = val1 << val2;
-                break;
-            case '>>':
-                valNew = val1 >> val2;
-                break;
-            case '>>>':
-                valNew = val1 >>> val2;
-                break;
-            case '<':
-                valNew = (val1 < val2? 1 : 0);
-                break;
-            case '<=':
-                valNew = (val1 <= val2? 1 : 0);
-                break;
-            case '>':
-                valNew = (val1 > val2? 1 : 0);
-                break;
-            case '>=':
-                valNew = (val1 >= val2? 1 : 0);
-                break;
-            case '==':
-                valNew = (val1 == val2? 1 : 0);
-                break;
-            case '!=':
-                valNew = (val1 != val2? 1 : 0);
-                break;
-            case '&':
-                valNew = val1 & val2;
-                break;
-            case '^':
-                valNew = val1 ^ val2;
-                break;
-            case '|':
-                valNew = val1 | val2;
-                break;
-            case '&&':
-                valNew = (val1 && val2? 1 : 0);
-                break;
-            case '||':
-                valNew = (val1 || val2? 1 : 0);
-                break;
-            default:
-                return false;
-            }
-            aVals.push(valNew|0);
-        }
-        return true;
-    };
-
-    /**
-     * parseExpression(sExp, fPrint)
-     *
-     * A quick-and-dirty expression parser.  It takes an expression like:
-     *
-     *      EDX+EDX*4+12345678
-     *
-     * and builds a value stack in aVals and a "binop" (binary operator) stack in aOps:
-     *
-     *      aVals       aOps
-     *      -----       ----
-     *      EDX         +
-     *      EDX         *
-     *      4           +
-     *      ...
-     *
-     * We pop 1 "binop" from aOps and 2 values from aVals whenever a "binop" of lower priority than its
-     * predecessor is encountered, evaluate, and push the result back onto aVals.
-     *
-     * Unary operators like '~' and ternary operators like '?:' are not supported; neither are parentheses.
-     *
-     * However, parseReference() now makes it possible to write parenthetical-style sub-expressions by using
-     * {...} (braces), as well as address references by using [...] (brackets).
-     *
-     * Why am I using braces instead of parentheses for sub-expressions?  Because parseReference() serves
-     * multiple purposes, the other being reference replacement in message strings passing through replaceRegs(),
-     * and I didn't want parentheses taking on a new meaning in message strings.
-     *
-     * @this {Debugger6502}
-     * @param {string|undefined} sExp
-     * @param {boolean} [fPrint] is true to print all resolved values, false for quiet parsing
-     * @return {number|undefined} numeric value, or undefined if sExp contains any undefined or invalid values
-     */
-    Debugger6502.prototype.parseExpression = function(sExp, fPrint)
-    {
-        var value;
-
-        if (sExp) {
-            /*
-             * First process (and eliminate) any references, aka sub-expressions.
-             */
-            sExp = this.parseReference(sExp);
-
-            var i = 0;
-            var fError = false;
-            var sExpOrig = sExp;
-            var aVals = [], aOps = [];
-            /*
-             * All browsers (including, I believe, IE9 and up) support the following idiosyncrasy of a regexp split():
-             * when the regexp uses a capturing pattern, the resulting array will include entries for all the pattern
-             * matches along with the non-matches.  This effectively means that, in the set of expressions that we
-             * support, all even entries in asValues will contain "values" and all odd entries will contain "operators".
-             *
-             * And although I tried to list the supported operators in "precedential" order, bitwise operators must
-             * be out-of-order so that we don't mistakenly match either '>' or '<' when they're part of '>>' or '<<'.
-             */
-            var regExp = /(\|\||&&|\||^|&|!=|==|>=|>>>|>>|>|<=|<<|<|-|\+|%|\/|\*)/;
-            var asValues = sExp.split(regExp);
-            while (i < asValues.length) {
-                var sValue = asValues[i++];
-                var cchValue = sValue.length;
-                var s = str.trim(sValue);
-                if (!s) {
-                    fError = true;
-                    break;
-                }
-                var v = this.parseValue(s, null, fPrint === false);
-                if (v === undefined) {
-                    fError = true;
-                    fPrint = false;
-                    break;
-                }
-                aVals.push(v);
-                if (i == asValues.length) break;
-                var sOp = asValues[i++], cchOp = sOp.length;
-                this.assert(Debugger6502.aBinOpPrecedence[sOp] != null);
-                if (aOps.length && Debugger6502.aBinOpPrecedence[sOp] < Debugger6502.aBinOpPrecedence[aOps[aOps.length-1]]) {
-                    this.evalExpression(aVals, aOps, 1);
-                }
-                aOps.push(sOp);
-                sExp = sExp.substr(cchValue + cchOp);
-            }
-            if (!this.evalExpression(aVals, aOps) || aVals.length != 1) {
-                fError = true;
-            }
-            if (!fError) {
-                value = aVals.pop();
-                if (fPrint) this.printValue(null, value);
-            } else {
-                if (fPrint) this.println("error parsing '" + sExpOrig + "' at character " + (sExpOrig.length - sExp.length));
-            }
-        }
-        return value;
-    };
-
-    /**
-     * parseReference(s)
-     *
-     * Returns the given string with any "{expression}" sequences replaced with the value of the expression,
-     * and any "[address]" references replaced with the contents of the address.  Expressions are parsed BEFORE
-     * addresses.  Owing to this function's simplistic parsing, nested braces/brackets are not supported
-     * (define intermediate variables if needed).
-     *
-     * @this {Debugger6502}
-     * @param {string} s
-     * @return {string}
-     */
-    Debugger6502.prototype.parseReference = function(s)
-    {
-        var a;
-        while (a = s.match(/\{(.*?)}/)) {
-            if (a[1].indexOf('{') >= 0) break;          // unsupported nested brace(s)
-            var value = this.parseExpression(a[1]);
-            s = s.replace('{' + a[1] + '}', value != null? str.toHex(value) : "undefined");
-        }
-        while (a = s.match(/\[(.*?)]/)) {
-            if (a[1].indexOf('[') >= 0) break;          // unsupported nested bracket(s)
-            var dbgAddr = this.parseAddr(a[1]);
-            s = s.replace('[' + a[1] + ']', dbgAddr? str.toHex(this.getWord(dbgAddr), 4) : "undefined");
-        }
-        return this.parseSysVars(s);
-    };
-
-    /**
-     * parseSysVars(s)
-     *
-     * Returns the given string with any recognized "$var" replaced with its value; eg:
-     *
-     *      $ops: the number of opcodes executed since the last time it was displayed (or reset)
-     *
-     * @this {Debugger6502}
-     * @param {string} s
-     * @return {string}
-     */
-    Debugger6502.prototype.parseSysVars = function(s)
-    {
-        var a;
-        while (a = s.match(/\$([a-z]+)/i)) {
-            var v = null;
-            switch(a[1].toLowerCase()) {
-            case "ops":
-                v = this.cOpcodes - this.cOpcodesStart;
-                break;
-            }
-            if (v == null) break;
-            s = s.replace(a[0], v.toString());
-        }
-        return s;
-    };
-
-    /**
-     * parseValue(sValue, sName, fQuiet)
-     *
-     * @this {Debugger6502}
-     * @param {string|undefined} sValue
-     * @param {string|null} [sName] is the name of the value, if any
-     * @param {boolean} [fQuiet]
-     * @return {number|undefined} numeric value, or undefined if sValue is either undefined or invalid
-     */
-    Debugger6502.prototype.parseValue = function(sValue, sName, fQuiet)
-    {
-        var value;
-        if (sValue !== undefined) {
-            var iReg = this.getRegIndex(sValue);
-            if (iReg >= 0) {
-                value = this.getRegValue(iReg);
-            } else {
-                value = this.getVariable(sValue);
-                if (value === undefined) value = str.parseInt(sValue);
-            }
-            if (value === undefined && !fQuiet) this.println("invalid " + (sName? sName : "value") + ": " + sValue);
-        } else {
-            if (!fQuiet) this.println("missing " + (sName || "value"));
-        }
-        return value;
-    };
-
-    /**
-     * printValue(sVar, value)
-     *
-     * @this {Debugger6502}
-     * @param {string|null} sVar
-     * @param {number|undefined} value
-     * @return {boolean} true if value defined, false if not
-     */
-    Debugger6502.prototype.printValue = function(sVar, value)
-    {
-        var sValue;
-        var fDefined = false;
-        if (value !== undefined) {
-            fDefined = true;
-            sValue = str.toHexLong(value) + " " + value + ". (" + str.toBinBytes(value) + ")";
-        }
-        sVar = (sVar != null? (sVar + ": ") : "");
-        this.println(sVar + sValue);
-        return fDefined;
-    };
-
-    /**
-     * printVariable(sVar)
-     *
-     * @this {Debugger6502}
-     * @param {string} [sVar]
-     * @return {boolean} true if all value(s) defined, false if not
-     */
-    Debugger6502.prototype.printVariable = function(sVar)
-    {
-        if (sVar) {
-            return this.printValue(sVar, this.aVariables[sVar]);
-        }
-        var cVariables = 0;
-        for (sVar in this.aVariables) {
-            this.printValue(sVar, this.aVariables[sVar]);
-            cVariables++;
-        }
-        return cVariables > 0;
-    };
-
-    /**
-     * delVariable(sVar)
-     *
-     * @this {Debugger6502}
-     * @param {string} sVar
-     */
-    Debugger6502.prototype.delVariable = function(sVar)
-    {
-        delete this.aVariables[sVar];
-    };
-
-    /**
-     * getVariable(sVar)
-     *
-     * @this {Debugger6502}
-     * @param {string} sVar
-     * @return {number|undefined}
-     */
-    Debugger6502.prototype.getVariable = function(sVar)
-    {
-        return this.aVariables[sVar];
-    };
-
-    /**
-     * setVariable(sVar, value)
-     *
-     * @this {Debugger6502}
-     * @param {string} sVar
-     * @param {number} value
-     */
-    Debugger6502.prototype.setVariable = function(sVar, value)
-    {
-        this.aVariables[sVar] = value;
     };
 
     /**

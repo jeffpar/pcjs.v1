@@ -100,11 +100,6 @@ function Debugger8080(parmsDbg)
          */
         this.dbgAddrNextCode = this.newAddr();
         this.dbgAddrNextData = this.newAddr();
-
-        /*
-         * fAssemble is true when "assemble mode" is active, false when not.
-         */
-        this.fAssemble = false;
         this.dbgAddrAssemble = this.newAddr();
 
         /*

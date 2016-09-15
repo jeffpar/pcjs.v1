@@ -41,7 +41,7 @@ var str = {};
  * So use this function to validate the entire string.
  *
  * @param {string} s is the string representation of some number
- * @param {number} [base] is the radix of the number represented above; 10 is the default (only 2, 8, 10 and 16 are supported)
+ * @param {number} [base] is the radix of the above number; 10 is the default (only 2, 8, 10 and 16 are supported)
  * @return {boolean} true if valid, false if invalid (or the specified base isn't supported)
  */
 str.isValidInt = function(s, base)
@@ -63,14 +63,14 @@ str.isValidInt = function(s, base)
  * for binary, because 1) it's not commonly used, and 2) it conflicts with valid hex sequences.
  *
  * @param {string} s is the string representation of some number
- * @param {number} [base] is the default radix to use (default is 16); can be overridden by prefixes/suffixes
+ * @param {number} [base] is the default radix to use (default is 10); can be overridden by prefixes/suffixes
  * @return {number|undefined} corresponding value, or undefined if invalid
  */
 str.parseInt = function(s, base)
 {
     var value;
     if (s) {
-        if (!base) base = 16;
+        if (!base) base = 10;
         if (s.charAt(0) == '$') {
             base = 16;
             s = s.substr(1);

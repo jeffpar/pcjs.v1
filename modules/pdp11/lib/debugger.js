@@ -99,11 +99,6 @@ function DebuggerPDP11(parmsDbg)
          */
         this.dbgAddrNextCode = this.newAddr();
         this.dbgAddrNextData = this.newAddr();
-
-        /*
-         * fAssemble is true when "assemble mode" is active, false when not.
-         */
-        this.fAssemble = false;
         this.dbgAddrAssemble = this.newAddr();
 
         /*
@@ -3432,83 +3427,6 @@ if (DEBUGGER) {
             cb -= dbgAddr.addr - addr;
             cLines++;
         }
-    };
-
-    /**
-     * parseCommand(sCmd, fSave, chSep)
-     *
-     * @this {DebuggerPDP11}
-     * @param {string|undefined} sCmd
-     * @param {boolean} [fSave] is true to save the command, false if not
-     * @param {string} [chSep] is the command separator character (default is ';')
-     * @return {Array.<string>}
-     */
-    DebuggerPDP11.prototype.parseCommand = function(sCmd, fSave, chSep)
-    {
-        if (fSave) {
-            if (!sCmd) {
-                if (this.fAssemble) {
-                    sCmd = "end";
-                } else {
-                    sCmd = this.aPrevCmds[this.iPrevCmd+1];
-                }
-            } else {
-                if (this.iPrevCmd < 0 && this.aPrevCmds.length) {
-                    this.iPrevCmd = 0;
-                }
-                if (this.iPrevCmd < 0 || sCmd != this.aPrevCmds[this.iPrevCmd]) {
-                    this.aPrevCmds.splice(0, 0, sCmd);
-                    this.iPrevCmd = 0;
-                }
-                this.iPrevCmd--;
-            }
-        }
-        var a = [];
-        if (sCmd) {
-            /*
-             * With the introduction of breakpoint commands (ie, quoted command sequences
-             * associated with a breakpoint), we can no longer perform simplistic splitting.
-             *
-             *      a = sCmd.split(chSep || ';');
-             *      for (var i = 0; i < a.length; i++) a[i] = str.trim(a[i]);
-             *
-             * We may now split on semi-colons ONLY if they are outside a quoted sequence.
-             *
-             * Also, to allow quoted strings *inside* breakpoint commands, we first replace all
-             * DOUBLE double-quotes with single quotes.
-             */
-            sCmd = sCmd.toLowerCase().replace(/""/g, "'");
-
-            var iPrev = 0;
-            var chQuote = null;
-            chSep = chSep || ';';
-            /*
-             * NOTE: Processing charAt() up to and INCLUDING length is not a typo; we're taking
-             * advantage of the fact that charAt() with an invalid index returns an empty string,
-             * allowing us to use the same substring() call to capture the final portion of sCmd.
-             *
-             * In a sense, it allows us to pretend that the string ends with a zero terminator.
-             */
-            for (var i = 0; i <= sCmd.length; i++) {
-                var ch = sCmd.charAt(i);
-                if (ch == '"' || ch == "'") {
-                    if (!chQuote) {
-                        chQuote = ch;
-                    } else if (ch == chQuote) {
-                        chQuote = null;
-                    }
-                }
-                else if (ch == chSep && !chQuote || !ch) {
-                    /*
-                     * Recall that substring() accepts starting (inclusive) and ending (exclusive)
-                     * indexes, whereas substr() accepts a starting index and a length.  We need the former.
-                     */
-                    a.push(str.trim(sCmd.substring(iPrev, i)));
-                    iPrev = i + 1;
-                }
-            }
-        }
-        return a;
     };
 
     /**

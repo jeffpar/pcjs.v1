@@ -73,18 +73,21 @@ try {
  *  ]
  *  
  * Every component name comes from the component filename, minus the ".js" extension;
- * Create is the constructor returned by require().  The only bit of fudging we do is
- * overriding the constructor for component "cpu" with the constructor for "x86cpu",
- * because when a "cpu" definition is encountered, it's the "x86cpu" subclass that we
- * actually want to create, not the "cpu" superclass.  See aSubClasses for the complete
- * list of subclassed components we manage like that.
+ * Create is the constructor returned by require().
  * 
  * TODO: Update the list of ignored (ie, ignorable) components.
  */
 var Component;
 var dbg;
 var aComponents = [];
-var asComponentsIgnore = ["embed","save"];
+var asComponentsIgnore = ["embed", "save"];
+
+/*
+ * A few of the components are subclasses of other classes (eg, "x86cpu" is a subclass
+ * of "cpu").  In those situations, we "hoist" the subclass constructor into the 
+ * corresponding superclass, because it is the name of the superclass that we rely on during
+ * machine initialization.
+ */
 var aSubClasses = {
     "pcx86/lib/x86cpu": "pcx86/lib/cpu",
     "pcx86/lib/debugger": "shared/lib/debugger"
