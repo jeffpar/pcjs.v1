@@ -47,7 +47,7 @@ if (DEBUGGER) {
  *
  * The Debugger component is a shared component containing a subset of functionality used by
  * the other CPU-specific Debuggers (eg, DebuggerX86).  Over time, the goal is to factor out as
- * much common debugging support from those components into this one.
+ * much common debugging support as possible from those components into this one.
  */
 function Debugger(parmsDbg)
 {
@@ -218,6 +218,39 @@ if (DEBUGGER) {
             aVals.push(valNew|0);
         }
         return true;
+    };
+
+    /**
+     * getPrevCommand()
+     *
+     * @this {Debugger}
+     * @return {string|null}
+     */
+    Debugger.prototype.getPrevCommand = function()
+    {
+        var sCmd = null;
+        if (this.iPrevCmd < this.aPrevCmds.length - 1) {
+            sCmd = this.aPrevCmds[++this.iPrevCmd];
+        }
+        return sCmd;
+    };
+
+    /**
+     * getNextCommand()
+     *
+     * @this {Debugger}
+     * @return {string}
+     */
+    Debugger.prototype.getNextCommand = function()
+    {
+        var sCmd;
+        if (this.iPrevCmd > 0) {
+            sCmd = this.aPrevCmds[--this.iPrevCmd];
+        } else {
+            sCmd = "";
+            this.iPrevCmd = -1;
+        }
+        return sCmd;
     };
 
     /**

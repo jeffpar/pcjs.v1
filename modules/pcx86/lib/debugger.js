@@ -38,6 +38,7 @@ if (DEBUGGER) {
         var web         = require("../../shared/lib/weblib");
         var Component   = require("../../shared/lib/component");
         var Debugger    = require("../../shared/lib/debugger");
+        var Keys        = require("../../shared/lib/keys");
         var State       = require("../../shared/lib/state");
         var PCX86       = require("./defines");
         var CPU         = require("./cpu");
@@ -247,7 +248,7 @@ if (DEBUGGER) {
     Component.subclass(DebuggerX86, Debugger);
 
     /*
-     * NOTE: Every Debugger property from here to the first prototype function definition (initBus()) is a
+     * NOTE: Every Debugger property from here to the first prototype function definition (initBus()) is
      * considered a "class constant"; most of them use our "all-caps" convention (and all of them SHOULD, but
      * that wouldn't help us catch any bugs).
      *
@@ -2018,36 +2019,29 @@ if (DEBUGGER) {
              *      control.focus();
              */
             control.onkeydown = function onKeyDownDebugInput(event) {
-                var sCmds;
-                if (event.keyCode == Keyboard.KEYCODE.CR) {
-                    sCmds = control.value;
+                var sCmd;
+                if (event.keyCode == Keys.KEYCODE.CR) {
+                    sCmd = control.value;
                     control.value = "";
-                    dbg.doCommands(sCmds, true);
+                    dbg.doCommands(sCmd, true);
                 }
-                else if (event.keyCode == Keyboard.KEYCODE.ESC) {
-                    control.value = sCmds = "";
+                else if (event.keyCode == Keys.KEYCODE.ESC) {
+                    control.value = sCmd = "";
                 }
                 else {
-                    if (event.keyCode == Keyboard.KEYCODE.UP) {
-                        if (dbg.iPrevCmd < dbg.aPrevCmds.length - 1) {
-                            sCmds = dbg.aPrevCmds[++dbg.iPrevCmd];
-                        }
+                    if (event.keyCode == Keys.KEYCODE.UP) {
+                        sCmd = dbg.getPrevCommand();
                     }
-                    else if (event.keyCode == Keyboard.KEYCODE.DOWN) {
-                        if (dbg.iPrevCmd > 0) {
-                            sCmds = dbg.aPrevCmds[--dbg.iPrevCmd];
-                        } else {
-                            sCmds = "";
-                            dbg.iPrevCmd = -1;
-                        }
+                    else if (event.keyCode == Keys.KEYCODE.DOWN) {
+                        sCmd = dbg.getNextCommand();
                     }
-                    if (sCmds != null) {
-                        var cch = sCmds.length;
-                        control.value = sCmds;
+                    if (sCmd != null) {
+                        var cch = sCmd.length;
+                        control.value = sCmd;
                         control.setSelectionRange(cch, cch);
                     }
                 }
-                if (sCmds != null && event.preventDefault) event.preventDefault();
+                if (sCmd != null && event.preventDefault) event.preventDefault();
             };
             return true;
 
