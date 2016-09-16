@@ -51,7 +51,6 @@ var concat = require("gulp-concat");
 var foreach = require("gulp-foreach");
 var header = require("gulp-header");
 var replace = require("gulp-replace");
-var wrapper = require("gulp-wrapper");
 var sequence = require("run-sequence");
 var compiler = require('google-closure-compiler-js').gulp();
 
@@ -103,31 +102,21 @@ gulp.task('mktmp', function() {
 
 gulp.task('compile', function() {
     return gulp.src(path.join(pcX86TmpDir, pcX86ReleaseFile) /*, {base: './'} */)
-    /*
-         * TODO: When the JavaScript version of the compiler supports something analogous to the
-         * Java version's "--define" command-line argument, use that instead of these search/replace hacks.
-         */
-        .pipe(replace(/(var\s+APPVERSION\s*=\s*)["']([^"']*)["'](.*)/, '$1"' + pkg.version + '"$3'))
-        .pipe(replace(/(var\s+SITEHOST\s*=\s*)["']([^"']*)["'](.*)/, '$1"' + sSiteHost + '"$3'))
-        .pipe(replace(/(var\s+COMPILED\s*=\s*)(false)(.*)/, '$1true$3'))
-        .pipe(replace(/(var\s+DEBUG\s*=\s*)(true)(.*)/, '$1false$3'))
-        .pipe(replace(/(var\s+DEBUGGER\s*=\s*)(true)(.*)/, '$1false$3'))
         .pipe(compiler({
             assumeFunctionWrapper: true,
             compilationLevel: 'ADVANCED',
+            defines: {
+                "APPVERSION": pkg.version,
+                "SITEHOST": sSiteHost,
+                "COMPILED": true,
+                "DEBUG": false,
+                "DEBUGGER": false
+            },
             externs: [{src: sExterns}],
             warningLevel: 'VERBOSE',
-            /*
-             * outputWrapper support isn't available yet, so we take care of it below, using the gulp-wrapper plug-in.
-             * 
-             *      outputWrapper: '(function(){%output%})()',
-             */
+            outputWrapper: '(function(){%output%})()',
             jsOutputFile: pcX86ReleaseFile,                             // TODO: This must vary according to debugger/non-debugger releases
             createSourceMap: false
-        }))
-        .pipe(wrapper({
-            header: '(function(){',
-            footer: '})();'
         }))
         .pipe(gulp.dest(pcX86ReleaseDir));
 });

@@ -47,7 +47,7 @@
   "devDependencies": {
     "async": "^0.6.2",
     "editorconfig": "^0.11.4",
-    "google-closure-compiler-js": "^20160828.0.1",
+    "google-closure-compiler-js": "^20160916.0.0",
     "grunt": "^0.4.3",
     "grunt-closure-tools": "^0.9.4",
     "grunt-contrib-concat": "^0.3.0",
