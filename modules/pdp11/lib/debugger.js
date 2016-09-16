@@ -251,12 +251,12 @@ if (DEBUGGER) {
         "SXT",          "TST",          "TSTB",         "WAIT"
     ];
 
-    DebuggerPDP11.REG_PC     = 0x0C;
-    DebuggerPDP11.REG_PSW    = 0x0E;
-
-    DebuggerPDP11.REGS = [
-        "PC", "PSW"
-    ];
+    /*
+     * Register numbers 0-7 are reserved for cpu.regsCur, 8-15 are reserved for cpu.regsAlt, and 16-19 for cpu.regsStack.
+     */
+    DebuggerPDP11.REG_SP        = 6;            // aka R6
+    DebuggerPDP11.REG_PC        = 7;            // aka R7
+    DebuggerPDP11.REG_PSW       = 20;
 
     DebuggerPDP11.MODE_REG      = 0x0;          // REGISTER                 (register is operand)
     DebuggerPDP11.MODE_REGD     = 0x1;          // REGISTER DEFERRED        (register is address of operand)
@@ -1036,75 +1036,6 @@ if (DEBUGGER) {
     };
 
     /**
-     * getRegIndex(sReg, off)
-     *
-     * @this {DebuggerPDP11}
-     * @param {string} sReg
-     * @param {number} [off] optional offset into sReg
-     * @return {number} register index, or -1 if not found
-     */
-    DebuggerPDP11.prototype.getRegIndex = function(sReg, off)
-    {
-        var i;
-        sReg = sReg.toUpperCase();
-        if (off == null) {
-            i = usr.indexOf(DebuggerPDP11.REGS, sReg);
-        } else {
-            i = usr.indexOf(DebuggerPDP11.REGS, sReg.substr(off, 2));
-            if (i < 0) i = usr.indexOf(DebuggerPDP11.REGS, sReg.substr(off, 1));
-        }
-        return i;
-    };
-
-    /**
-     * getRegString(iReg)
-     *
-     * @this {DebuggerPDP11}
-     * @param {number} iReg
-     * @return {string}
-     */
-    DebuggerPDP11.prototype.getRegString = function(iReg)
-    {
-        var cch = 0;
-        var n = this.getRegValue(iReg);
-        if (n !== undefined) {
-            switch(iReg) {
-            case DebuggerPDP11.REG_PC:
-            case DebuggerPDP11.REG_PSW:
-                cch = 4;
-                break;
-            }
-        }
-        return cch? str.toHex(n, cch) : "??";
-    };
-
-    /**
-     * getRegValue(iReg)
-     *
-     * @this {DebuggerPDP11}
-     * @param {number} iReg
-     * @return {number|undefined}
-     */
-    DebuggerPDP11.prototype.getRegValue = function(iReg)
-    {
-        var n;
-        if (iReg >= 0) {
-            var cpu = this.cpu;
-            switch(iReg) {
-            case DebuggerPDP11.REG_PC:
-                n = cpu.getPC();
-                break;
-            case DebuggerPDP11.REG_PSW:
-                n = cpu.getPSW();
-                break;
-            default:
-                break;
-            }
-        }
-        return n;
-    };
-
-    /**
      * replaceRegs(s)
      *
      * @this {DebuggerPDP11}
@@ -1113,70 +1044,6 @@ if (DEBUGGER) {
      */
     DebuggerPDP11.prototype.replaceRegs = function(s)
     {
-        /*
-         * Replace any references first; this means that register references inside the reference
-         * do NOT need to be prefixed with '@'.
-         */
-        s = this.parseReference(s);
-
-        /*
-         * Replace every @XX (or @XXX), where XX (or XXX) is a register, with the register's value.
-         */
-        var i = 0;
-        var b, sChar, sAddr, dbgAddr, sReplace;
-        while ((i = s.indexOf('@', i)) >= 0) {
-            var iReg = this.getRegIndex(s, i + 1);
-            if (iReg >= 0) {
-                s = s.substr(0, i) + this.getRegString(iReg) + s.substr(i + 1 + DebuggerPDP11.REGS[iReg].length);
-            }
-            i++;
-        }
-        /*
-         * Replace every #XX, where XX is a hex byte value, with the corresponding ASCII character (if printable).
-         */
-        i = 0;
-        while ((i = s.indexOf('#', i)) >= 0) {
-            sChar = s.substr(i+1, 2);
-            b = str.parseInt(sChar, 16);
-            if (b != null && b >= 32 && b < 128) {
-                sReplace = sChar + " '" + String.fromCharCode(b) + "'";
-                s = s.replace('#' + sChar, sReplace);
-                i += sReplace.length;
-                continue;
-            }
-            i++;
-        }
-        /*
-         * Replace every $XXXX:XXXX, where XXXX:XXXX is a segmented address, with the zero-terminated string at that address.
-         */
-        i = 0;
-        while ((i = s.indexOf('$', i)) >= 0) {
-            sAddr = s.substr(i+1, 9);
-            dbgAddr = this.parseAddr(sAddr);
-            if (dbgAddr) {
-                sReplace = sAddr + ' "' + this.getSZ(dbgAddr) + '"';
-                s = s.replace('$' + sAddr, sReplace);
-                i += sReplace.length;
-                continue;
-            }
-            i++;
-        }
-        /*
-         * Replace every ^XXXX:XXXX, where XXXX:XXXX is a segmented address, with the FCB filename stored at that address.
-         */
-        i = 0;
-        while ((i = s.indexOf('^', i)) >= 0) {
-            sAddr = s.substr(i+1, 9);
-            dbgAddr = this.parseAddr(sAddr);
-            if (dbgAddr) {
-                this.incAddr(dbgAddr);
-                sReplace = sAddr + ' "' + this.getSZ(dbgAddr, 11) + '"';
-                s = s.replace('^' + sAddr, sReplace);
-                i += sReplace.length;
-                continue;
-            }
-            i++;
-        }
         return s;
     };
 
@@ -2016,6 +1883,7 @@ if (DEBUGGER) {
             opDesc = opMask[bits];
             if (opDesc) break;
         }
+
         if (!opDesc) opDesc = [DebuggerPDP11.OPS.NONE];
 
         var sOperands = "";
@@ -2039,7 +1907,7 @@ if (DEBUGGER) {
         }
 
         var sBytes = "";
-        var sLine = this.toHexAddr(dbgAddrOp) + ' ';
+        var sLine = this.toHexAddr(dbgAddrOp) + ": ";
         if (dbgAddrOp.addr !== PDP11.ADDR_INVALID && dbgAddr.addr !== PDP11.ADDR_INVALID) {
             do {
                 sBytes += str.toHex(this.getByte(dbgAddrOp, 1), 2);
@@ -2075,6 +1943,10 @@ if (DEBUGGER) {
     DebuggerPDP11.prototype.getOperand = function(opCode, type, dbgAddr)
     {
         var sOperand = "";
+        /*
+         * Take care of TYPE_BRANCH opcodes first; then all we'll have to worry about
+         * next are TYPE_SRC or TYPE_DST opcodes.
+         */
         if (type & DebuggerPDP11.TYPE_BRANCH) {
             var disp = ((opCode & 0xff) << 24) >> 24;
             var addr = (dbgAddr.addr + disp) & 0xffff;
@@ -2082,11 +1954,11 @@ if (DEBUGGER) {
         }
         else {
             /*
-             * Isolate all SRC or DST bits from opcode in the mode variable.
+             * Isolate all TYPE_SRC or TYPE_DST bits from opcode in the mode variable.
              */
             var mode = opCode & type;
             /*
-             * Convert SRC bits into DST bits, since they use the same format.
+             * Convert TYPE_SRC bits into TYPE_DST bits, since they use the same format.
              */
             if (type & DebuggerPDP11.TYPE_SRC) {
                 mode >>= 6;
@@ -2155,20 +2027,6 @@ if (DEBUGGER) {
     };
 
     /**
-     * getRegOperand(iReg, type, dbgAddr)
-     *
-     * @this {DebuggerPDP11}
-     * @param {number} iReg
-     * @param {number} type
-     * @param {DbgAddrPDP11} dbgAddr
-     * @return {string} operand
-     */
-    DebuggerPDP11.prototype.getRegOperand = function(iReg, type, dbgAddr)
-    {
-        return DebuggerPDP11.REGS[iReg];
-    };
-
-    /**
      * parseInstruction(sOp, sOperand, addr)
      *
      * TODO: Unimplemented.  See parseInstruction() in modules/c1pjs/lib/debugger.js for a working implementation.
@@ -2197,13 +2055,13 @@ if (DEBUGGER) {
     {
         var b;
         switch (sFlag) {
-        case "SF":
+        case 'N':
             b = this.cpu.getSF();
             break;
-        case "ZF":
+        case 'Z':
             b = this.cpu.getZF();
             break;
-        case "CF":
+        case 'C':
             b = this.cpu.getCF();
             break;
         default:
@@ -2222,19 +2080,48 @@ if (DEBUGGER) {
      */
     DebuggerPDP11.prototype.getRegOutput = function(iReg)
     {
-        var sReg = DebuggerPDP11.REGS[iReg];
-        return sReg + '=' + this.getRegString(iReg) + ' ';
+        var sReg = "";
+        var cpu = this.cpu;
+
+        if (iReg < 8) {
+            sReg = (iReg < 6? ("R" + iReg) :  (iReg == 6? "SP" : "PC"));
+            sReg += '=' + str.toHex(cpu.regsCur[iReg], 4);
+        }
+        else if (iReg < 13) {
+            sReg = "A" + (iReg - 8) + '=' + str.toHex(cpu.regsAlt[iReg - 8], 4);
+        }
+        else if (iReg >= 16 && iReg < 20) {
+            sReg = "S" + (iReg - 16) + '=' + str.toHex(cpu.regsStack[iReg - 16], 4);
+        }
+        else if (iReg == DebuggerPDP11.REG_PSW) {
+            sReg = "PS=" + str.toHex(cpu.getPSW(), 4);
+        }
+        if (sReg) sReg += ' ';
+        return sReg;
     };
 
     /**
      * getRegDump()
+     *
+     * Sample register dump:
+     *
+     *      R0=xxxx R1=xxxx R2=xxxx R3=xxxx R4=xxxx R5=xxxx
+     *      SP=xxxx PC=xxxx PS=xxxx T0 N0 Z0 V0 C0
      *
      * @this {DebuggerPDP11}
      * @return {string}
      */
     DebuggerPDP11.prototype.getRegDump = function()
     {
-        return "no regs";
+        var i;
+        var sDump = "";
+        for (i = 0; i < DebuggerPDP11.REG_SP; i++) {
+            sDump += this.getRegOutput(i);
+        }
+        sDump += '\n';
+        sDump += this.getRegOutput(DebuggerPDP11.REG_SP) + this.getRegOutput(DebuggerPDP11.REG_PC);
+        sDump += this.getFlagOutput('T') + this.getFlagOutput('N') + this.getFlagOutput('Z') + this.getFlagOutput('V') + this.getFlagOutput('C');
+        return sDump;
     };
 
     /**
