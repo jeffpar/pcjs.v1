@@ -62,13 +62,12 @@ var Keys = {
      * keyCodes for most common ASCII keys can simply use the appropriate ASCII code above.
      *
      * Most of these represent non-ASCII keys (eg, the LEFT arrow key), yet for some reason, browsers defined
-     * them using ASCII codes (eg, the LEFT arrow key uses the ASCII code for '%' or 37).  This conflict is
-     * discussed further in the definition of CLICKCODE below.
+     * them using ASCII codes (eg, the LEFT arrow key uses the ASCII code for '%' or 37).
      */
     KEYCODE: {
         /* 0x08 */ BS:          8,
         /* 0x09 */ TAB:         9,
-        /* 0x0A */ LF:          10,         // TODO: Determine if any key actually generates this (I suspect there is none)
+        /* 0x0A */ LF:          10,         // TODO: Determine if any key actually generates this
         /* 0x0D */ CR:          13,
         /* 0x10 */ SHIFT:       16,
         /* 0x11 */ CTRL:        17,

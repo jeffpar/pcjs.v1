@@ -71,7 +71,8 @@ str.isValidInt = function(s, base)
  *
  * To summarize our non-standard alternatives: a 'y' suffix indicates binary, a '#' prefix indicates
  * octal, a '$' prefix indicates hex, and a "0b" prefix indicates binary IF at least one comma is present.
- * Commas are useful for grouping binary digits, but if you don't want to use them, then use a 'y' suffix.
+ * Commas are useful for grouping binary digits, but if you don't want to use them, then you must use a
+ * 'y' suffix for binary numbers.
  *
  * @param {string} s is the string representation of some number
  * @param {number} [base] is the radix to use (default is 10); can be overridden by prefixes/suffixes

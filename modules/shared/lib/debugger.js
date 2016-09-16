@@ -108,7 +108,9 @@ function Debugger(parmsDbg)
          * unprefixed hex value (eg, "a5" as opposed to "0xa5") will trump the numeric value.  Unprefixed
          * hex values are a convenience of parseValue(), which always calls str.parseInt() with a default
          * base of 16; however, that default be overridden with a variety of explicit prefixes or suffixes
-         * (eg, a leading zero to indicate octal, or a trailing period to indicate decimal).
+         * (eg, a leading "0o" to indicate octal, a trailing period to indicate decimal, etc.)
+         *
+         * See str.parseInt() for more details about supported numbers.
          */
         this.aVariables = {};
 
