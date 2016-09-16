@@ -6151,7 +6151,7 @@ if (DEBUGGER) {
                 this.println("warning: " + str.toHex(vNew) + " exceeds " + size + "-byte value");
             }
             var vOld = fnGet.call(this, dbgAddr);
-            this.println("changing " + this.toHexAddr(dbgAddr) + " from 0x" + str.toHex(vOld, cch) + " to 0x" + str.toHex(vNew, cch));
+            this.println("changing " + this.toHexAddr(dbgAddr) + " from " + str.toHex(vOld, cch, true) + " to " + str.toHex(vNew, cch, true));
             fnSet.call(this, dbgAddr, vNew, size);
         }
     };

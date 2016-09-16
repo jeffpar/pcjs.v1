@@ -1283,7 +1283,7 @@ DiskDump.prototype.dumpBuffer = function(sKey, buf, len, cbItem, offData)
         }
         else {
             sLine += str.toHexByte(v);
-            if (!sASCII) sASCII = "0x" + str.toHex(offData + off) + " ";
+            if (!sASCII) sASCII = str.toHex(offData + off, 0, true) + " ";
             sASCII += (v >= 0x20 && v < 0x7F && v != 0x3C && v != 0x3E? String.fromCharCode(v) : ".");
         }
     }
@@ -1377,7 +1377,7 @@ DiskDump.prototype.trimSector = function(buf, len)
         dwPattern = buf.readInt32LE(off);
         while ((off -= cbPattern) >= 0) {
             var dw = buf.readInt32LE(off);
-            // if (fDebug) DiskDump.logConsole("0x" + str.toHex(off) + ": comparing 0x" + str.toHex(dw) + " to pattern 0x" + str.toHex(dwPattern));
+            // if (fDebug) DiskDump.logConsole(str.toHex(off, 0, true) + ": comparing " + str.toHex(dw, 0, true) + " to pattern " + str.toHex(dwPattern, 0, true));
             if (dw != dwPattern) break;
             cbTrim += cbPattern;
         }
@@ -2081,7 +2081,7 @@ DiskDump.prototype.buildClusters = function(aFiles, offDisk, cbCluster, iParentC
                         if (!err) {
                             if (fDebug && cb != buf.length) DiskDump.logConsole(file.FILE_NAME + ": initial size (" + cb + ") does not match actual size (" + buf.length + ")");
                             buf.copy(obj.bufDisk.buf || obj.bufDisk, off);
-                            if (fDebug) DiskDump.logConsole("0x" + str.toHex(off) + ": 0x" + str.toHex(buf.length) + " bytes written for " + file.FILE_PATH);
+                            if (fDebug) DiskDump.logConsole(str.toHex(off, 0, true) + ": " + str.toHex(buf.length, 0, true) + " bytes written for " + file.FILE_PATH);
                             if (obj.sManifestFile) file.FILE_MD5 = crypto.createHash('md5').update(buf).digest('hex');
                         }
                         if (!--obj.cWritesPending) done(err);
@@ -2101,7 +2101,7 @@ DiskDump.prototype.buildClusters = function(aFiles, offDisk, cbCluster, iParentC
         }
         if (bufData) {
             bufData.copy(this.bufDisk, offDisk);
-            if (fDebug) DiskDump.logConsole("0x" + str.toHex(offDisk) + ": 0x" + str.toHex(bufData.length) + " bytes IMMEDIATELY written for " + aFiles[iFile].FILE_PATH);
+            if (fDebug) DiskDump.logConsole(str.toHex(offDisk, 0, true) + ": " + str.toHex(bufData.length, 0, true) + " bytes IMMEDIATELY written for " + aFiles[iFile].FILE_PATH);
         }
         offDisk += cbData;
         cClusters += ((cbData / cbCluster) | 0);
@@ -2117,11 +2117,11 @@ DiskDump.prototype.buildClusters = function(aFiles, offDisk, cbCluster, iParentC
         for (iFile = 0; iFile < aFiles.length; iFile++) {
             var cb = aFiles[iFile].FILE_SIZE;
             if (cb < 0) {
-                if (fDebug) DiskDump.logConsole("0x" + str.toHex(offDisk) + ": buildClusters()");
+                if (fDebug) DiskDump.logConsole(str.toHex(offDisk, 0, true) + ": buildClusters()");
                 var cSubClusters = this.buildClusters(aFiles[iFile].FILE_DATA, offDisk, cbCluster, aFiles[iFile].FILE_CLUS, iLevel + 1, done);
                 cClusters += cSubClusters;
                 offDisk += cSubClusters * cbCluster;
-                if (fDebug) DiskDump.logConsole("0x" + str.toHex(offDisk) + ": buildClusters() returned, writing " + cSubClusters + " clusters");
+                if (fDebug) DiskDump.logConsole(str.toHex(offDisk, 0, true) + ": buildClusters() returned, writing " + cSubClusters + " clusters");
             }
         }
     }
@@ -2288,7 +2288,7 @@ DiskDump.prototype.buildImageFromFiles = function(aFiles, done)
     var nTargetSectors = (this.kbTarget? this.kbTarget * 2 : 0);
     var cbTotal = this.calcFileSizes(aFiles);
 
-    if (fDebug) DiskDump.logConsole("total calculated size for " + aFiles.length + " files/folders: " + cbTotal + " bytes (0x" + str.toHex(cbTotal) + ")");
+    if (fDebug) DiskDump.logConsole("total calculated size for " + aFiles.length + " files/folders: " + cbTotal + " bytes (" + str.toHex(cbTotal, 0, true) + ")");
 
     if (cbTotal >= cbMax) {
         err = new Error("file(s) too large (" + cbTotal + " bytes total, " + cbMax + " bytes maximum)");
@@ -2914,7 +2914,7 @@ DiskDump.prototype.convertOSIDiskToJSON = function()
                     json += this.dumpLine(-2, "]");
                 }
                 else {
-                    DiskDump.logError(new Error("unrecognized OSI disk track at 0x" + str.toHex(offTrack)));
+                    DiskDump.logError(new Error("unrecognized OSI disk track at " + str.toHex(offTrack, 0, true)));
                     break;
                 }
             }

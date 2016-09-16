@@ -38,56 +38,100 @@ var str = {};
  *
  * The built-in parseInt() function has the annoying feature of returning a partial value (ie,
  * up to the point where it encounters an invalid character); eg, parseInt("foo", 16) returns 0xf.
- * So use this function to validate the entire string.
+ *
+ * So it's best to use our own str.parseInt() function, which will in turn use this function to
+ * validate the entire string.
  *
  * @param {string} s is the string representation of some number
- * @param {number} [base] is the radix of the above number; 10 is the default (only 2, 8, 10 and 16 are supported)
+ * @param {number} [base] is the radix to use (default is 10); only 2, 8, 10 and 16 are supported
  * @return {boolean} true if valid, false if invalid (or the specified base isn't supported)
  */
 str.isValidInt = function(s, base)
 {
     if (!base || base == 10) return s.match(/^[0-9]+$/) !== null;
     if (base == 16) return s.match(/^[0-9a-f]+$/i) !== null;
-    if (base == 2) return s.match(/^[01]+$/i) !== null;
+    if (base == 8) return s.match(/^[0-7]+$/) !== null;
+    if (base == 2) return s.match(/^[01]+$/) !== null;
     return false;
 };
 
 /**
  * parseInt(s, base)
  *
- * This is a wrapper around the built-in parseInt() function, which recognizes certain prefixes (eg,
- * '$' or "0x" for hex) and suffixes (eg, 'h' for hex, or '.' for decimal), and then calls isValidInt()
- * to ensure we don't convert strings that contain partial values (see isValidInt() for details).
+ * This is a wrapper around the built-in parseInt() function.  Our wrapper recognizes certain prefixes
+ * ('$' or "0x" for hex, '#' or "0o" for octal) and suffixes ('.' for decimal, 'h' for hex, 'y' for
+ * binary), and then calls isValidInt() to ensure we don't convert strings that contain partial values;
+ * see isValidInt() for details.
  *
- * We don't support multiple prefix/suffix combinations, nor do we support the "0b" prefix (or "b" suffix)
- * for binary, because 1) it's not commonly used, and 2) it conflicts with valid hex sequences.
+ * The use of multiple prefix/suffix combinations is undefined (although for the record, we process
+ * prefixes first).  We do NOT support the "0b" prefix to indicate binary UNLESS one or more commas are
+ * also present (because "0b" is also a valid hex sequence), and we do NOT support a single leading zero
+ * to indicate octal (because such a number could also be decimal or hex).  Any number of commas are
+ * allowed; we remove them all before calling the built-in parseInt().
+ *
+ * To summarize our non-standard alternatives: a 'y' suffix indicates binary, a '#' prefix indicates
+ * octal, a '$' prefix indicates hex, and a "0b" prefix indicates binary IF at least one comma is present.
+ * Commas are useful for grouping binary digits, but if you don't want to use them, then use a 'y' suffix.
  *
  * @param {string} s is the string representation of some number
- * @param {number} [base] is the default radix to use (default is 10); can be overridden by prefixes/suffixes
+ * @param {number} [base] is the radix to use (default is 10); can be overridden by prefixes/suffixes
  * @return {number|undefined} corresponding value, or undefined if invalid
  */
 str.parseInt = function(s, base)
 {
     var value;
+
     if (s) {
         if (!base) base = 10;
-        if (s.charAt(0) == '$') {
+        var chPrefix = s.charAt(0);
+        var fCommas = (s.indexOf(',') > 0);
+        if (fCommas) s = s.replace(/,/g, '');
+        if (chPrefix == '#') {
+            base = 8;
+            chPrefix = null;
+        }
+        else if (chPrefix == '$') {
             base = 16;
+            chPrefix = null;
+        }
+        if (chPrefix == null) {
             s = s.substr(1);
-        } else if (s.substr(0, 2) == "0x") {
-            base = 16;
-            s = s.substr(2);
-        } else {
-            var chSuffix = s.charAt(s.length-1).toLowerCase();
-            if (chSuffix == 'h') {
-                base = 16;
-                chSuffix = null;
+        }
+        else {
+            if (chPrefix == '0') {
+                chPrefix = s.charAt(1);
+                if (chPrefix == 'b' && fCommas) {
+                    base = 2;
+                    chPrefix = null;
+                }
+                if (chPrefix == 'o') {
+                    base = 8;
+                    chPrefix = null;
+                }
+                else if (chPrefix == 'x') {
+                    base = 16;
+                    chPrefix = null;
+                }
             }
-            else if (chSuffix == '.') {
-                base = 10;
-                chSuffix = null;
+            if (chPrefix == null) {
+                s = s.substr(2);
             }
-            if (chSuffix == null) s = s.substr(0, s.length-1);
+            else {
+                var chSuffix = s.charAt(s.length-1).toLowerCase();
+                if (chSuffix == 'y') {
+                    base = 2;
+                    chSuffix = null;
+                }
+                else if (chSuffix == '.') {
+                    base = 10;
+                    chSuffix = null;
+                }
+                else if (chSuffix == 'h') {
+                    base = 16;
+                    chSuffix = null;
+                }
+                if (chSuffix == null) s = s.substr(0, s.length-1);
+            }
         }
         var v;
         if (str.isValidInt(s, base) && !isNaN(v = parseInt(s, base))) {
@@ -109,7 +153,7 @@ str.parseInt = function(s, base)
 str.toBin = function(n, cch)
 {
     var s = "";
-    if (cch === undefined) {
+    if (!cch) {
         cch = 32;
     } else {
         if (cch > 32) cch = 32;
@@ -134,30 +178,74 @@ str.toBin = function(n, cch)
 };
 
 /**
- * toBinBytes(n, cb)
+ * toBinBytes(n, cb, fPrefix)
  *
  * Converts an integer to binary, with the specified number of bytes (up to the default of 4).
  *
  * @param {number|null|undefined} n is a 32-bit value
  * @param {number} [cb] is the desired number of binary bytes (4 is both the default and the maximum)
+ * @param {boolean} [fPrefix]
  * @return {string} the binary representation of n
  */
-str.toBinBytes = function(n, cb)
+str.toBinBytes = function(n, cb, fPrefix)
 {
     var s = "";
     if (!cb || cb > 4) cb = 4;
     for (var i = 0; i < cb; i++) {
         if (s) s = ',' + s;
-        s = str.toBin(n & 0xff, 8) + 'b' + s;
+        s = str.toBin(n & 0xff, 8) + s;
         n >>= 8;
     }
-    return s;
+    return (fPrefix? "0b" : "") + s;
 };
 
 /**
- * toHex(n, cch)
+ * toOctal(n, cch, fPrefix)
  *
- * Converts an integer to hex, with the specified number of digits (up to the default of 8).
+ * Converts an integer to octal, with the specified number of digits (default of 6; max of 11)
+ *
+ * You might be tempted to use the built-in n.toString(8) instead, but it doesn't zero-pad and it
+ * doesn't properly convert negative values.  Moreover, if n is undefined, n.toString() will throw
+ * an exception, whereas this function will return '?' characters.
+ *
+ * @param {number|null|undefined} n is a 32-bit value
+ * @param {number} [cch] is the desired number of octal digits (0 or undefined for default of either 6 or 11)
+ * @param {boolean} [fPrefix]
+ * @return {string} the octal representation of n
+ */
+str.toOctal = function(n, cch, fPrefix)
+{
+    var s = "";
+
+    if (cch) {
+        if (cch > 11) cch = 11;
+    } else {
+        cch = (n & ~0xffff)? 11 : 6;
+    }
+    /*
+     * An initial "falsey" check for null takes care of both null and undefined;
+     * we can't rely entirely on isNaN(), because isNaN(null) returns false, oddly enough.
+     *
+     * Alternatively, we could mask and shift n regardless of whether it's null/undefined/NaN,
+     * since JavaScript coerces such operands to zero, but I think there's "value" in seeing those
+     * values displayed differently.
+     */
+    if (n == null || isNaN(n)) {
+        while (cch-- > 0) s = '?' + s;
+    } else {
+        while (cch-- > 0) {
+            var d = (n & 7) + 0x30;
+            s = String.fromCharCode(d) + s;
+            n >>= 3;
+        }
+    }
+    return (fPrefix? "0o" : "") + s;
+};
+
+/**
+ * toHex(n, cch, fPrefix)
+ *
+ * Converts an integer to hex, with the specified number of digits (default of 4 or 8, max of 8).
  *
  * You might be tempted to use the built-in n.toString(16) instead, but it doesn't zero-pad and it
  * doesn't properly convert negative values; for example, if n is -2147483647, then n.toString(16)
@@ -172,16 +260,18 @@ str.toBinBytes = function(n, cb)
  *      s = s.substr(0, cch).toUpperCase();
  *
  * @param {number|null|undefined} n is a 32-bit value
- * @param {number} [cch] is the desired number of hex digits (8 is both the default and the maximum)
+ * @param {number} [cch] is the desired number of hex digits (0 or undefined for default of either 4 or 8)
+ * @param {boolean} [fPrefix]
  * @return {string} the hex representation of n
  */
-str.toHex = function(n, cch)
+str.toHex = function(n, cch, fPrefix)
 {
     var s = "";
-    if (cch === undefined) {
-        cch = 8;
-    } else {
+
+    if (cch) {
         if (cch > 8) cch = 8;
+    } else {
+        cch = (n & ~0xffff)? 8 : 4;
     }
     /*
      * An initial "falsey" check for null takes care of both null and undefined;
@@ -201,46 +291,46 @@ str.toHex = function(n, cch)
             n >>= 4;
         }
     }
-    return s;
+    return (fPrefix? "0x" : "") + s;
 };
 
 /**
  * toHexByte(b)
  *
- * Alias for "0x" + str.toHex(b, 2)
+ * Alias for str.toHex(b, 2, true)
  *
  * @param {number|null|undefined} b is a byte value
  * @return {string} the hex representation of b
  */
 str.toHexByte = function(b)
 {
-    return "0x" + str.toHex(b, 2);
+    return str.toHex(b, 2, true);
 };
 
 /**
  * toHexWord(w)
  *
- * Alias for "0x" + str.toHex(w, 4)
+ * Alias for str.toHex(w, 4, true)
  *
  * @param {number|null|undefined} w is a word (16-bit) value
  * @return {string} the hex representation of w
  */
 str.toHexWord = function(w)
 {
-    return "0x" + str.toHex(w, 4);
+    return str.toHex(w, 4, true);
 };
 
 /**
  * toHexLong(l)
  *
- * Alias for "0x" + toHex(l)
+ * Alias for str.toHex(l, 8, true)
  *
  * @param {number|null|undefined} l is a dword (32-bit) value
  * @return {string} the hex representation of w
  */
 str.toHexLong = function(l)
 {
-    return "0x" + str.toHex(l);
+    return str.toHex(l, 8, true);
 };
 
 /**

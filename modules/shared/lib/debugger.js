@@ -98,7 +98,7 @@ function Debugger(parmsDbg)
         this.aPrevCmds = [];
 
         /*
-         * aVariables is an object with properties that grows as setVariable() assigns more variables;
+         * aVariables is an object with properties that grow as setVariable() assigns more variables;
          * each property corresponds to one variable, where the property name is the variable name (ie,
          * a string beginning with a letter or underscore, followed by zero or more additional letters,
          * digits, or underscores) and the property value is the variable's numeric value.  See doVar()
@@ -108,7 +108,7 @@ function Debugger(parmsDbg)
          * unprefixed hex value (eg, "a5" as opposed to "0xa5") will trump the numeric value.  Unprefixed
          * hex values are a convenience of parseValue(), which always calls str.parseInt() with a default
          * base of 16; however, that default be overridden with a variety of explicit prefixes or suffixes
-         * (eg, a trailing period to indicate a decimal number).
+         * (eg, a leading zero to indicate octal, or a trailing period to indicate decimal).
          */
         this.aVariables = {};
 
@@ -139,6 +139,162 @@ if (DEBUGGER) {
         '%':    9,      // remainder
         '/':    9,      // division
         '*':    9       // multiplication
+    };
+
+    /**
+     * getRegIndex(sReg, off)
+     *
+     * NOTE: This must be implemented by the individual debuggers.
+     *
+     * @this {Debugger}
+     * @param {string} sReg
+     * @param {number} [off] optional offset into sReg
+     * @return {number} register index, or -1 if not found
+     */
+    Debugger.prototype.getRegIndex = function(sReg, off)
+    {
+        return -1;
+    };
+
+    /**
+     * getRegValue(iReg)
+     *
+     * NOTE: This must be implemented by the individual debuggers.
+     *
+     * @this {Debugger}
+     * @param {number} iReg
+     * @return {number|undefined}
+     */
+    Debugger.prototype.getRegValue = function(iReg)
+    {
+        return undefined;
+    };
+
+    /**
+     * parseAddrReference(s, sAddr)
+     *
+     * Returns the given string with the given address reference replaced with the contents of that address.
+     *
+     * NOTE: This must be implemented by the individual debuggers.
+     *
+     * @this {Debugger}
+     * @param {string} s
+     * @param {string} sAddr
+     * @return {string}
+     */
+    Debugger.prototype.parseAddrReference = function(s, sAddr)
+    {
+        return s.replace('[' + sAddr + ']', "unimplemented");
+    };
+
+    /**
+     * getNextCommand()
+     *
+     * @this {Debugger}
+     * @return {string}
+     */
+    Debugger.prototype.getNextCommand = function()
+    {
+        var sCmd;
+        if (this.iPrevCmd > 0) {
+            sCmd = this.aPrevCmds[--this.iPrevCmd];
+        } else {
+            sCmd = "";
+            this.iPrevCmd = -1;
+        }
+        return sCmd;
+    };
+
+    /**
+     * getPrevCommand()
+     *
+     * @this {Debugger}
+     * @return {string|null}
+     */
+    Debugger.prototype.getPrevCommand = function()
+    {
+        var sCmd = null;
+        if (this.iPrevCmd < this.aPrevCmds.length - 1) {
+            sCmd = this.aPrevCmds[++this.iPrevCmd];
+        }
+        return sCmd;
+    };
+
+    /**
+     * parseCommand(sCmd, fSave, chSep)
+     *
+     * @this {Debugger}
+     * @param {string|undefined} sCmd
+     * @param {boolean} [fSave] is true to save the command, false if not
+     * @param {string} [chSep] is the command separator character (default is ';')
+     * @return {Array.<string>}
+     */
+    Debugger.prototype.parseCommand = function(sCmd, fSave, chSep)
+    {
+        if (fSave) {
+            if (!sCmd) {
+                if (this.fAssemble) {
+                    sCmd = "end";
+                } else {
+                    sCmd = this.aPrevCmds[this.iPrevCmd+1];
+                }
+            } else {
+                if (this.iPrevCmd < 0 && this.aPrevCmds.length) {
+                    this.iPrevCmd = 0;
+                }
+                if (this.iPrevCmd < 0 || sCmd != this.aPrevCmds[this.iPrevCmd]) {
+                    this.aPrevCmds.splice(0, 0, sCmd);
+                    this.iPrevCmd = 0;
+                }
+                this.iPrevCmd--;
+            }
+        }
+        var a = [];
+        if (sCmd) {
+            /*
+             * With the introduction of breakpoint commands (ie, quoted command sequences
+             * associated with a breakpoint), we can no longer perform simplistic splitting.
+             *
+             *      a = sCmd.split(chSep || ';');
+             *      for (var i = 0; i < a.length; i++) a[i] = str.trim(a[i]);
+             *
+             * We may now split on semi-colons ONLY if they are outside a quoted sequence.
+             *
+             * Also, to allow quoted strings *inside* breakpoint commands, we first replace all
+             * DOUBLE double-quotes with single quotes.
+             */
+            sCmd = sCmd.toLowerCase().replace(/""/g, "'");
+
+            var iPrev = 0;
+            var chQuote = null;
+            chSep = chSep || ';';
+            /*
+             * NOTE: Processing charAt() up to and INCLUDING length is not a typo; we're taking
+             * advantage of the fact that charAt() with an invalid index returns an empty string,
+             * allowing us to use the same substring() call to capture the final portion of sCmd.
+             *
+             * In a sense, it allows us to pretend that the string ends with a zero terminator.
+             */
+            for (var i = 0; i <= sCmd.length; i++) {
+                var ch = sCmd.charAt(i);
+                if (ch == '"' || ch == "'") {
+                    if (!chQuote) {
+                        chQuote = ch;
+                    } else if (ch == chQuote) {
+                        chQuote = null;
+                    }
+                }
+                else if (ch == chSep && !chQuote || !ch) {
+                    /*
+                     * Recall that substring() accepts starting (inclusive) and ending (exclusive)
+                     * indexes, whereas substr() accepts a starting index and a length.  We need the former.
+                     */
+                    a.push(str.trim(sCmd.substring(iPrev, i)));
+                    iPrev = i + 1;
+                }
+            }
+        }
+        return a;
     };
 
     /**
@@ -240,145 +396,6 @@ if (DEBUGGER) {
     };
 
     /**
-     * getNextCommand()
-     *
-     * @this {Debugger}
-     * @return {string}
-     */
-    Debugger.prototype.getNextCommand = function()
-    {
-        var sCmd;
-        if (this.iPrevCmd > 0) {
-            sCmd = this.aPrevCmds[--this.iPrevCmd];
-        } else {
-            sCmd = "";
-            this.iPrevCmd = -1;
-        }
-        return sCmd;
-    };
-
-    /**
-     * getPrevCommand()
-     *
-     * @this {Debugger}
-     * @return {string|null}
-     */
-    Debugger.prototype.getPrevCommand = function()
-    {
-        var sCmd = null;
-        if (this.iPrevCmd < this.aPrevCmds.length - 1) {
-            sCmd = this.aPrevCmds[++this.iPrevCmd];
-        }
-        return sCmd;
-    };
-
-    /**
-     * getRegIndex(sReg, off)
-     *
-     * NOTE: This must be implemented by the individual debuggers.
-     *
-     * @this {Debugger}
-     * @param {string} sReg
-     * @param {number} [off] optional offset into sReg
-     * @return {number} register index, or -1 if not found
-     */
-    Debugger.prototype.getRegIndex = function(sReg, off)
-    {
-        return -1;
-    };
-
-    /**
-     * getRegValue(iReg)
-     *
-     * NOTE: This must be implemented by the individual debuggers.
-     *
-     * @this {Debugger}
-     * @param {number} iReg
-     * @return {number|undefined}
-     */
-    Debugger.prototype.getRegValue = function(iReg)
-    {
-        return undefined;
-    };
-
-    /**
-     * parseCommand(sCmd, fSave, chSep)
-     *
-     * @this {Debugger}
-     * @param {string|undefined} sCmd
-     * @param {boolean} [fSave] is true to save the command, false if not
-     * @param {string} [chSep] is the command separator character (default is ';')
-     * @return {Array.<string>}
-     */
-    Debugger.prototype.parseCommand = function(sCmd, fSave, chSep)
-    {
-        if (fSave) {
-            if (!sCmd) {
-                if (this.fAssemble) {
-                    sCmd = "end";
-                } else {
-                    sCmd = this.aPrevCmds[this.iPrevCmd+1];
-                }
-            } else {
-                if (this.iPrevCmd < 0 && this.aPrevCmds.length) {
-                    this.iPrevCmd = 0;
-                }
-                if (this.iPrevCmd < 0 || sCmd != this.aPrevCmds[this.iPrevCmd]) {
-                    this.aPrevCmds.splice(0, 0, sCmd);
-                    this.iPrevCmd = 0;
-                }
-                this.iPrevCmd--;
-            }
-        }
-        var a = [];
-        if (sCmd) {
-            /*
-             * With the introduction of breakpoint commands (ie, quoted command sequences
-             * associated with a breakpoint), we can no longer perform simplistic splitting.
-             *
-             *      a = sCmd.split(chSep || ';');
-             *      for (var i = 0; i < a.length; i++) a[i] = str.trim(a[i]);
-             *
-             * We may now split on semi-colons ONLY if they are outside a quoted sequence.
-             *
-             * Also, to allow quoted strings *inside* breakpoint commands, we first replace all
-             * DOUBLE double-quotes with single quotes.
-             */
-            sCmd = sCmd.toLowerCase().replace(/""/g, "'");
-
-            var iPrev = 0;
-            var chQuote = null;
-            chSep = chSep || ';';
-            /*
-             * NOTE: Processing charAt() up to and INCLUDING length is not a typo; we're taking
-             * advantage of the fact that charAt() with an invalid index returns an empty string,
-             * allowing us to use the same substring() call to capture the final portion of sCmd.
-             *
-             * In a sense, it allows us to pretend that the string ends with a zero terminator.
-             */
-            for (var i = 0; i <= sCmd.length; i++) {
-                var ch = sCmd.charAt(i);
-                if (ch == '"' || ch == "'") {
-                    if (!chQuote) {
-                        chQuote = ch;
-                    } else if (ch == chQuote) {
-                        chQuote = null;
-                    }
-                }
-                else if (ch == chSep && !chQuote || !ch) {
-                    /*
-                     * Recall that substring() accepts starting (inclusive) and ending (exclusive)
-                     * indexes, whereas substr() accepts a starting index and a length.  We need the former.
-                     */
-                    a.push(str.trim(sCmd.substring(iPrev, i)));
-                    iPrev = i + 1;
-                }
-            }
-        }
-        return a;
-    };
-
-    /**
      * parseExpression(sExp, fPrint)
      *
      * A quick-and-dirty expression parser.  It takes an expression like:
@@ -471,23 +488,6 @@ if (DEBUGGER) {
             }
         }
         return value;
-    };
-
-    /**
-     * parseAddrReference(s, sAddr)
-     *
-     * Returns the given string with the given address references replaced with the contents of the address.
-     *
-     * NOTE: This must be implemented by the individual debuggers.
-     *
-     * @this {Debugger}
-     * @param {string} s
-     * @param {string} sAddr
-     * @return {string}
-     */
-    Debugger.prototype.parseAddrReference = function(s, sAddr)
-    {
-        return s.replace('[' + sAddr + ']', "unimplemented");
     };
 
     /**
@@ -585,7 +585,7 @@ if (DEBUGGER) {
         var fDefined = false;
         if (value !== undefined) {
             fDefined = true;
-            sValue = str.toHexLong(value) + " " + value + ". (" + str.toBinBytes(value) + ")";
+            sValue = str.toHex(value, 0, true) + " " + value + ". " + str.toOctal(value, 0, true) + " " + str.toBinBytes(value, 0, true);
         }
         sVar = (sVar != null? (sVar + ": ") : "");
         this.println(sVar + sValue);
