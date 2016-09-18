@@ -295,7 +295,7 @@ if (DEBUGGER) {
      * Note that, by convention, opcodes that require two operands list the SRC operand first and DST operand
      * second (ie, the OPPOSITE of the Intel convention).
      *
-     * Also note that, for some of the newer PDP-11 opcodes (eg, MUL, DIV, ASH, ASCH), the location of the
+     * Also note that, for some of the newer PDP-11 opcodes (eg, MUL, DIV, ASH, ASHC), the location of the
      * opcode's SRC and DST bits are reversed.  This is why, for example, you'll see the MUL instruction defined
      * below as having TYPE_DST for the first operand and TYPE_SRCREG for the second operand.  This does NOT mean
      * that the opcode's destination operand is being listed first, but rather that the bits describing the source
