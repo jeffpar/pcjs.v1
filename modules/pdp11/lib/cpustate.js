@@ -131,13 +131,13 @@ CPUStatePDP11.prototype.initRegs = function()
     this.flagV = 0x8000;        // PSW V bit
     this.flagZ = 0xffff;        // ~ PSW Z bit
     this.PSW = 0xf;             // PSW other bits
-    this.regsCur = [            // Current R0 - R7
+    this.regsGen = [            // General R0 - R7
         0, 0, 0, 0, 0, 0, 0, 0
     ];
     this.regsAlt = [            // Alternate R0 - R5
         0, 0, 0, 0, 0, 0
     ];
-    this.regsStack = [          // Alternate R6 (kernel, super, illegal, user)
+    this.regsAltStack = [       // Alternate R6 (kernel, super, illegal, user)
         0, 0, 0, 0
     ];
     this.memory = [];           // Main memory (words)
@@ -258,8 +258,9 @@ CPUStatePDP11.prototype.setBinding = function(sHTMLType, sBinding, control, sVal
     switch (sBinding) {
     case "PC":
     case "PSW":
-    case "SF":
+    case "NF":
     case "ZF":
+    case "VF":
     case "CF":
         this.bindings[sBinding] = control;
         this.cLiveRegs++;
@@ -279,18 +280,18 @@ CPUStatePDP11.prototype.setBinding = function(sHTMLType, sBinding, control, sVal
  */
 CPUStatePDP11.prototype.clearCF = function()
 {
-    this.resultZeroCarry &= 0xff;
+    // this.resultZeroCarry &= 0xff;
 };
 
 /**
  * getCF()
  *
  * @this {CPUStatePDP11}
- * @return {number} 0 or 1 (PDP11.PSW.CF)
+ * @return {number} 0 or PDP11.PSW.CF
  */
 CPUStatePDP11.prototype.getCF = function()
 {
-    return (this.resultZeroCarry & 0x100)? PDP11.PSW.CF : 0;
+    return (this.flagC & 0x10000)? PDP11.PSW.CF: 0;
 };
 
 /**
@@ -300,18 +301,38 @@ CPUStatePDP11.prototype.getCF = function()
  */
 CPUStatePDP11.prototype.setCF = function()
 {
-    this.resultZeroCarry |= 0x100;
+    // this.resultZeroCarry |= 0x100;
 };
 
 /**
- * updateCF(CF)
+ * clearVF()
  *
  * @this {CPUStatePDP11}
- * @param {number} CF (0x000 or 0x100)
  */
-CPUStatePDP11.prototype.updateCF = function(CF)
+CPUStatePDP11.prototype.clearVF = function()
 {
-    this.resultZeroCarry = (this.resultZeroCarry & 0xff) | CF;
+    // this.resultZeroCarry |= 0xff;
+};
+
+/**
+ * getVF()
+ *
+ * @this {CPUStatePDP11}
+ * @return {number} 0 or PDP11.PSW.VF
+ */
+CPUStatePDP11.prototype.getVF = function()
+{
+    return (this.flagV & 0x8000)? PDP11.PSW.VF: 0;
+};
+
+/**
+ * setVF()
+ *
+ * @this {CPUStatePDP11}
+ */
+CPUStatePDP11.prototype.setVF = function()
+{
+    // this.resultZeroCarry &= ~0xff;
 };
 
 /**
@@ -321,7 +342,7 @@ CPUStatePDP11.prototype.updateCF = function(CF)
  */
 CPUStatePDP11.prototype.clearZF = function()
 {
-    this.resultZeroCarry |= 0xff;
+    // this.resultZeroCarry |= 0xff;
 };
 
 /**
@@ -332,7 +353,7 @@ CPUStatePDP11.prototype.clearZF = function()
  */
 CPUStatePDP11.prototype.getZF = function()
 {
-    return (this.resultZeroCarry & 0xff)? 0 : PDP11.PSW.ZF;
+    return (this.flagZ & 0xffff)? 0 : PDP11.PSW.ZF;
 };
 
 /**
@@ -342,39 +363,38 @@ CPUStatePDP11.prototype.getZF = function()
  */
 CPUStatePDP11.prototype.setZF = function()
 {
-    this.resultZeroCarry &= ~0xff;
+    // this.resultZeroCarry &= ~0xff;
 };
 
 /**
- * clearSF()
+ * clearNF()
  *
  * @this {CPUStatePDP11}
  */
-CPUStatePDP11.prototype.clearSF = function()
+CPUStatePDP11.prototype.clearNF = function()
 {
-    // if (this.getSF()) this.resultParitySign ^= 0xc0;
+    // if (this.getNF()) this.resultParitySign ^= 0xc0;
 };
 
 /**
- * getSF()
+ * getNF()
  *
  * @this {CPUStatePDP11}
- * @return {number} 0 or PDP11.PSW.SF
+ * @return {number} 0 or PDP11.PSW.NF
  */
-CPUStatePDP11.prototype.getSF = function()
+CPUStatePDP11.prototype.getNF = function()
 {
-    // return (this.resultParitySign & 0x80)? PDP11.PSW.SF : 0;
-    return 0;
+    return (this.flagN >> (15 - PDP11.PSW.NF_SHIFT)) & PDP11.PSW.NF;
 };
 
 /**
- * setSF()
+ * setNF()
  *
  * @this {CPUStatePDP11}
  */
-CPUStatePDP11.prototype.setSF = function()
+CPUStatePDP11.prototype.setNF = function()
 {
-    // if (!this.getSF()) this.resultParitySign ^= 0xc0;
+    // if (!this.getNF()) this.resultParitySign ^= 0xc0;
 };
 
 /**
@@ -385,7 +405,7 @@ CPUStatePDP11.prototype.setSF = function()
  */
 CPUStatePDP11.prototype.getPC = function()
 {
-    return this.regsCur[7];
+    return this.regsGen[7];
 };
 
 /**
@@ -396,7 +416,7 @@ CPUStatePDP11.prototype.getPC = function()
  */
 CPUStatePDP11.prototype.setPC = function(addr)
 {
-    this.regsCur[7] = addr;
+    this.regsGen[7] = addr;
 };
 
 /**
@@ -407,7 +427,7 @@ CPUStatePDP11.prototype.setPC = function(addr)
  */
 CPUStatePDP11.prototype.getPSW = function()
 {
-    return (this.PSW & ~PDP11.PSW.RESULT) | (this.getSF() | this.getZF() | this.getCF());
+    return (this.PSW & ~PDP11.PSW.FLAGS) | (this.getNF() | this.getZF() | this.getVF() | this.getCF());
 };
 
 /**
@@ -418,7 +438,7 @@ CPUStatePDP11.prototype.getPSW = function()
  */
 CPUStatePDP11.prototype.getSP = function()
 {
-    return this.regsCur[6];
+    return this.regsGen[6];
 };
 
 /**
@@ -481,11 +501,11 @@ CPUStatePDP11.prototype.requestHALT = function()
  * @this {CPUStatePDP11}
  * @param {string} sReg
  * @param {number} nValue
- * @param {number} [cch] (default is 2 hex digits)
+ * @param {number} [cch] (default is 4 hex digits)
  */
 CPUStatePDP11.prototype.updateReg = function(sReg, nValue, cch)
 {
-    this.displayValue(sReg, nValue, cch || 2);
+    this.displayValue(sReg, nValue, cch || 4);
 };
 
 /**
@@ -503,8 +523,9 @@ CPUStatePDP11.prototype.updateStatus = function(fForce)
         if (fForce || !this.flags.running || this.flags.displayLiveRegs) {
             var regPSW = this.getPSW();
             this.updateReg("PSW", regPSW, 4);
-            this.updateReg("SF", (regPSW & PDP11.PSW.SF)? 1 : 0, 1);
+            this.updateReg("NF", (regPSW & PDP11.PSW.NF)? 1 : 0, 1);
             this.updateReg("ZF", (regPSW & PDP11.PSW.ZF)? 1 : 0, 1);
+            this.updateReg("VF", (regPSW & PDP11.PSW.VF)? 1 : 0, 1);
             this.updateReg("CF", (regPSW & PDP11.PSW.CF)? 1 : 0, 1);
         }
     }
@@ -568,38 +589,46 @@ CPUStatePDP11.prototype.interrupt = function(delay, priority, vector, callback)
 /**
  * writePSW(newPSW)
  *
- * writePSW() is used to update the CPU Processor Status Word. The PSW should generally
- * be written through this routine so that changes can be tracked properly, for example
- * the correct register set, the current memory management mode, etc. An exception is
- * SPL which writes the priority directly. Note that that N, Z, V, and C flags are
- * actually stored separately to the PSW property for performance reasons.
+ * This updates the CPU Processor Status Word. The PSW should generally be written through
+ * this routine so that changes can be tracked properly, for example the correct register set,
+ * the current memory management mode, etc. An exception is SPL which writes the priority directly.
+ * Note that that N, Z, V, and C flags are actually stored separately for performance reasons.
  *
  * PSW    15 14 13 12 11 10  9  8  7  6  5  4  3  2  1  0
- *          CM |  PM |RS|        |PRIORITY| T| N| Z| V| C
- * mode 0 kernel 1 super 3 user
+ *        CMODE PMODE RS -------- PRIORITY  T  N  Z  V  C
  *
  * @this {CPUStatePDP11}
  * @param {number} newPSW
  */
 CPUStatePDP11.prototype.writePSW = function(newPSW)
 {
-    var i, j;
     this.flagN = newPSW << 12;
     this.flagZ = (~newPSW) & 4;
     this.flagV = newPSW << 14;
     this.flagC = newPSW << 16;
-    if ((newPSW ^ this.PSW) & 0x800) {
-        for (i = 0; i < 6; i++) {
-            j = this.regsCur[i];
-            this.regsCur[i] = this.regsAlt[i];
-            this.regsAlt[i] = j;    // swap to alternate register set
+    if ((newPSW ^ this.PSW) & PDP11.PSW.REGSET) {
+        /*
+         * Swap register sets
+         */
+        for (var i = this.regsAlt.length; --i >= 0;) {
+            var tmp = this.regsGen[i];
+            this.regsGen[i] = this.regsAlt[i];
+            this.regsAlt[i] = tmp;
         }
     }
-    if ((this.mmuMode = (newPSW >> 14) & 3) !== ((this.PSW >> 14) & 3)) {
-        this.regsStack[j] = this.regsCur[6];
-        this.regsCur[6] = this.regsStack[this.mmuMode]; // swap to new mode SP
+    this.mmuMode = (newPSW >> PDP11.PSW.CMODE_SHIFT) & PDP11.MODE.MASK;
+    var oldMode = (this.PSW >> PDP11.PSW.CMODE_SHIFT) & PDP11.MODE.MASK;
+    if (this.mmuMode != oldMode) {
+        /*
+         * Swap stack pointers
+         */
+        this.regsAltStack[oldMode] = this.regsGen[6];
+        this.regsGen[6] = this.regsAltStack[this.mmuMode];
     }
-    this.priorityReview = 2;            // trigger check of priority levels
+    /*
+     * Trigger check of priority levels
+     */
+    this.priorityReview = 2;
     this.PSW = newPSW;
 };
 
@@ -611,9 +640,8 @@ CPUStatePDP11.prototype.writePSW = function(newPSW)
  */
 CPUStatePDP11.prototype.readPSW = function()
 {
-    this.PSW = (this.PSW & 0xf8f0) | ((this.flagN >> 12) & 8) | ((this.flagV >> 14) & 2) | ((this.flagC >> 16) & 1);
-    if (!(this.flagZ & 0xffff)) this.PSW |= 4;
-    return this.PSW;
+    var mask = PDP11.PSW.CMODE | PDP11.PSW.PMODE | PDP11.PSW.REGSET | PDP11.PSW.PRI | PDP11.PSW.TF;
+    return this.PSW = (this.PSW & mask) | this.getNF() | this.getZF() | this.getVF() | this.getCF();
 };
 
 /**
@@ -663,10 +691,10 @@ CPUStatePDP11.prototype.trap = function(vector, reason)
             this.writePSW((newPSW & 0xcfff) | ((this.trapPSW >> 2) & 0x3000)); // set new this.PSW with previous mode
             if (doubleTrap) {
                 this.CPU_Error |= 4;
-                this.regsCur[6] = 4;
+                this.regsGen[6] = 4;
             }
-            if (this.pushWord(this.trapPSW) >= 0 && this.pushWord(this.regsCur[7]) >= 0) {
-                this.regsCur[7] = newPC;
+            if (this.pushWord(this.trapPSW) >= 0 && this.pushWord(this.regsGen[7]) >= 0) {
+                this.regsGen[7] = newPC;
             }
         }
     }
@@ -860,7 +888,7 @@ CPUStatePDP11.prototype.mapVirtualToPhysical = function(virtualAddress, accessMa
 CPUStatePDP11.prototype.readWordByAddr = function(physicalAddress)
 {
     if (physicalAddress >= PDP11.MAX_ADDRESS) {
-        return this.regsCur[physicalAddress - PDP11.MAX_ADDRESS];
+        return this.regsGen[physicalAddress - PDP11.MAX_ADDRESS];
 	} else {
         if (physicalAddress >= PDP11.IOBASE_UNIBUS) {
             return this.bus.access_iopage(physicalAddress, -1, 0);
@@ -885,7 +913,7 @@ CPUStatePDP11.prototype.writeWordByAddr = function(physicalAddress, data)
 {
     data &= 0xffff;
     if (physicalAddress >= PDP11.MAX_ADDRESS) {
-        return (this.regsCur[physicalAddress - PDP11.MAX_ADDRESS] = data);
+        return (this.regsGen[physicalAddress - PDP11.MAX_ADDRESS] = data);
 	} else {
         if (physicalAddress >= PDP11.IOBASE_UNIBUS) {
             return this.bus.access_iopage(physicalAddress, data, 0);
@@ -909,7 +937,7 @@ CPUStatePDP11.prototype.readByteByAddr = function(physicalAddress)
 {
     var result;
     if (physicalAddress >= PDP11.MAX_ADDRESS) {
-        return (this.regsCur[physicalAddress - PDP11.MAX_ADDRESS] & 0xff);
+        return (this.regsGen[physicalAddress - PDP11.MAX_ADDRESS] & 0xff);
 	} else {
         if (physicalAddress >= PDP11.IOBASE_UNIBUS) {
             return this.bus.access_iopage(physicalAddress, -1, 1);
@@ -938,7 +966,7 @@ CPUStatePDP11.prototype.writeByteByAddr = function(physicalAddress, data)
 {
     data &= 0xff;
     if (physicalAddress >= PDP11.MAX_ADDRESS) {
-        return (this.regsCur[physicalAddress - PDP11.MAX_ADDRESS] = (this.regsCur[physicalAddress - PDP11.MAX_ADDRESS] & 0xff00) | data);
+        return (this.regsGen[physicalAddress - PDP11.MAX_ADDRESS] = (this.regsGen[physicalAddress - PDP11.MAX_ADDRESS] & 0xff00) | data);
 	} else {
         if (physicalAddress >= PDP11.IOBASE_UNIBUS) {
             return this.bus.access_iopage(physicalAddress, data, 1);
@@ -974,9 +1002,9 @@ CPUStatePDP11.prototype.readWordByVirtual = function(virtualAddress)
  */
 CPUStatePDP11.prototype.popWord = function()
 {
-    var result = this.readWordByVirtual(this.regsCur[6] | 0x10000);
+    var result = this.readWordByVirtual(this.regsGen[6] | 0x10000);
     if (result >= 0) {
-        this.regsCur[6] = (this.regsCur[6] + 2) & 0xffff;
+        this.regsGen[6] = (this.regsGen[6] + 2) & 0xffff;
     }
     return result;
 };
@@ -991,14 +1019,14 @@ CPUStatePDP11.prototype.popWord = function()
 CPUStatePDP11.prototype.pushWord = function(data)
 {
     var physicalAddress, virtualAddress;
-    this.regsCur[6] = virtualAddress = (this.regsCur[6] - 2) & 0xffff; // BSD needs SP updated before any fault :-(
+    this.regsGen[6] = virtualAddress = (this.regsGen[6] - 2) & 0xffff; // BSD needs SP updated before any fault :-(
     if (!(this.MMR0 & 0xe000)) {
         this.MMR1 = (this.MMR1 << 8) | 0xf6;
     }
     if ((!this.mmuMode) && virtualAddress <= this.stackLimit && virtualAddress > 4) {
         if (virtualAddress <= this.stackLimit - 32) {
             this.CPU_Error |= 4; // Red stack
-            this.regsCur[6] = 4;
+            this.regsGen[6] = 4;
             return this.trap(4, 32);
         }
         this.CPU_Error |= 8; // Yellow
@@ -1048,19 +1076,19 @@ CPUStatePDP11.prototype.getVirtualByMode = function(addressMode, accessMode)
         return this.trap(4, 34); // trap for invalid virtual address
     case 1: // Mode 1: (R)
         if (reg === 6 && (!this.mmuMode) && (accessMode & PDP11.WRITE_MODE) &&
-            (this.regsCur[6] <= this.stackLimit || this.regsCur[6] >= 0xfffe)) {
-            if (this.regsCur[6] <= this.stackLimit - 32 || this.regsCur[6] >= 0xfffe) {
+            (this.regsGen[6] <= this.stackLimit || this.regsGen[6] >= 0xfffe)) {
+            if (this.regsGen[6] <= this.stackLimit - 32 || this.regsGen[6] >= 0xfffe) {
                 this.CPU_Error |= 4; // Red stack
-                this.regsCur[6] = 4;
+                this.regsGen[6] = 4;
                 return this.trap(4, 36);
             }
             this.CPU_Error |= 8; // Yellow
             this.trapMask |= 4;
         }
-        return (reg === 7 ? this.regsCur[reg] : (this.regsCur[reg] | 0x10000));
+        return (reg === 7 ? this.regsGen[reg] : (this.regsGen[reg] | 0x10000));
     case 2: // Mode 2: (R)+
         stepSize = 2;
-        virtualAddress = this.regsCur[reg];
+        virtualAddress = this.regsGen[reg];
         if (reg !== 7) {
             virtualAddress |= 0x10000;
             if (reg < 6 && (accessMode & PDP11.BYTE_MODE)) {
@@ -1070,7 +1098,7 @@ CPUStatePDP11.prototype.getVirtualByMode = function(addressMode, accessMode)
         break;
     case 3: // Mode 3: @(R)+
         stepSize = 2;
-        virtualAddress = this.regsCur[reg];
+        virtualAddress = this.regsGen[reg];
         if (reg !== 7) virtualAddress |= 0x10000;
         if ((virtualAddress = this.readWordByVirtual(virtualAddress)) < 0) {
             return virtualAddress;
@@ -1081,14 +1109,14 @@ CPUStatePDP11.prototype.getVirtualByMode = function(addressMode, accessMode)
     case 4: // Mode 4: -(R)
         stepSize = -2;
         if (reg < 6 && (accessMode & PDP11.BYTE_MODE)) stepSize = -1;
-        virtualAddress = (this.regsCur[reg] + stepSize) & 0xffff;
+        virtualAddress = (this.regsGen[reg] + stepSize) & 0xffff;
         if (reg !== 7) {
             virtualAddress |= 0x10000;
         }
         break;
     case 5: // Mode 5: @-(R)
         stepSize = -2;
-        virtualAddress = (this.regsCur[reg] - 2) & 0xffff;
+        virtualAddress = (this.regsGen[reg] - 2) & 0xffff;
         if (reg !== 7) virtualAddress |= 0x10000;
         if ((virtualAddress = this.readWordByVirtual(virtualAddress)) < 0) {
             return virtualAddress;
@@ -1096,28 +1124,28 @@ CPUStatePDP11.prototype.getVirtualByMode = function(addressMode, accessMode)
         virtualAddress |= 0x10000;
         break;
     case 6: // Mode 6: d(R)
-        if ((virtualAddress = this.readWordByVirtual(this.regsCur[7])) < 0) {
+        if ((virtualAddress = this.readWordByVirtual(this.regsGen[7])) < 0) {
             return virtualAddress;
         }
-        this.regsCur[7] = (this.regsCur[7] + 2) & 0xffff;
+        this.regsGen[7] = (this.regsGen[7] + 2) & 0xffff;
         if (reg < 7) {
             //LOG_ADDRESS(virtualAddress);
-            virtualAddress = (virtualAddress + this.regsCur[reg]) & 0xffff;
+            virtualAddress = (virtualAddress + this.regsGen[reg]) & 0xffff;
         } else {
-            virtualAddress = (virtualAddress + this.regsCur[reg]) & 0xffff;
+            virtualAddress = (virtualAddress + this.regsGen[reg]) & 0xffff;
             //LOG_ADDRESS(virtualAddress);
         }
         return virtualAddress | 0x10000;
     case 7: // Mode 7: @d(R)
-        if ((virtualAddress = this.readWordByVirtual(this.regsCur[7])) < 0) {
+        if ((virtualAddress = this.readWordByVirtual(this.regsGen[7])) < 0) {
             return virtualAddress;
         }
-        this.regsCur[7] = (this.regsCur[7] + 2) & 0xffff;
+        this.regsGen[7] = (this.regsGen[7] + 2) & 0xffff;
         if (reg < 7) {
             //LOG_ADDRESS(virtualAddress);
-            virtualAddress = (virtualAddress + this.regsCur[reg]) & 0xffff;
+            virtualAddress = (virtualAddress + this.regsGen[reg]) & 0xffff;
         } else {
-            virtualAddress = (virtualAddress + this.regsCur[reg]) & 0xffff;
+            virtualAddress = (virtualAddress + this.regsGen[reg]) & 0xffff;
             //LOG_ADDRESS(virtualAddress);
         }
         if ((virtualAddress = this.readWordByVirtual(virtualAddress | 0x10000)) < 0) {
@@ -1125,15 +1153,15 @@ CPUStatePDP11.prototype.getVirtualByMode = function(addressMode, accessMode)
         }
         return virtualAddress | 0x10000; // @x
     }
-    this.regsCur[reg] = (this.regsCur[reg] + stepSize) & 0xffff;
+    this.regsGen[reg] = (this.regsGen[reg] + stepSize) & 0xffff;
     if (!(this.MMR0 & 0xe000)) {
         this.MMR1 = (this.MMR1 << 8) | ((stepSize << 3) & 0xf8) | reg;
     }
     if (reg === 6 && (!this.mmuMode) && (accessMode & PDP11.WRITE_MODE) && stepSize <= 0 &&
-        (this.regsCur[6] <= this.stackLimit || this.regsCur[6] >= 0xfffe)) {
-        if (this.regsCur[6] <= this.stackLimit - 32) {
+        (this.regsGen[6] <= this.stackLimit || this.regsGen[6] >= 0xfffe)) {
+        if (this.regsGen[6] <= this.stackLimit - 32) {
             this.CPU_Error |= 4; // Red stack
-            this.regsCur[6] = 4;
+            this.regsGen[6] = 4;
             return this.trap(4, 38);
         }
         this.CPU_Error |= 8; // Yellow
@@ -1174,7 +1202,7 @@ CPUStatePDP11.prototype.readWordByMode = function(addressMode)
 {
     var result;
     if (!(addressMode & 0x38)) {
-        result = this.regsCur[addressMode & 7];
+        result = this.regsGen[addressMode & 7];
         //LOG_SOURCE(result);
     } else {
         if ((result = this.getAddrByMode(addressMode, PDP11.READ_MODE)) >= 0) {
@@ -1197,7 +1225,7 @@ CPUStatePDP11.prototype.readByteByMode = function(addressMode)
 {
     var result;
     if (!(addressMode & 0x38)) {
-        result = this.regsCur[addressMode & 7] & 0xff;
+        result = this.regsGen[addressMode & 7] & 0xff;
         //LOG_SOURCE(result);
     } else {
         if ((result = this.getAddrByMode(addressMode, PDP11.READ_MODE | PDP11.BYTE_MODE)) >= 0) {
@@ -1340,25 +1368,25 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                     }
                 }
             }
-            //if (this.regsCur[7] === this.debugPC) {
+            //if (this.regsGen[7] === this.debugPC) {
             //LOG_PRINT();
             //
             //}
             // Initialize this.memory before getting an instruction
             if (!(this.MMR0 & 0xe000)) {
                 this.MMR1 = 0;
-                this.MMR2 = this.regsCur[7];
+                this.MMR2 = this.regsGen[7];
             }
             // If needed T-bit trap at the end of this instruction
             this.trapMask = this.PSW & 0x10;
-            if ((instruction = this.readWordByVirtual(this.regsCur[7])) >= 0) {
-                this.regsCur[7] = (this.regsCur[7] + 2) & 0xffff;
+            if ((instruction = this.readWordByVirtual(this.regsGen[7])) >= 0) {
+                this.regsGen[7] = (this.regsGen[7] + 2) & 0xffff;
                 switch (instruction & 0xF000) /*0170000*/ { // Double operand instructions xxSSDD
                 case 0x1000: /*0010000*/ // MOV  01SSDD
                     //LOG_INSTRUCTION(instruction, 2, "MOV");
                     if ((src = this.readWordByMode(instruction >> 6)) >= 0) {
                         if (!(instruction & 0x38)) {
-                            this.regsCur[instruction & 7] = src;
+                            this.regsGen[instruction & 7] = src;
                             this.flagN = this.flagZ = src;
                             this.flagV = 0;
                         } else {
@@ -1394,7 +1422,7 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                     //LOG_INSTRUCTION(instruction, 2, "BIC");
                     if ((src = this.readWordByMode(instruction >> 6)) >= 0) {
                         if (!(instruction & 0x38)) {
-                            result = this.regsCur[instruction & 7] &= ~src;
+                            result = this.regsGen[instruction & 7] &= ~src;
                             this.flagN = this.flagZ = result;
                             this.flagV = 0;
                         } else {
@@ -1412,7 +1440,7 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                     //LOG_INSTRUCTION(instruction, 2, "BIS");
                     if ((src = this.readWordByMode(instruction >> 6)) >= 0) {
                         if (!(instruction & 0x38)) {
-                            result = this.regsCur[instruction & 7] |= src;
+                            result = this.regsGen[instruction & 7] |= src;
                             this.flagN = this.flagZ = result;
                             this.flagV = 0;
                         } else {
@@ -1431,8 +1459,8 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                     if ((src = this.readWordByMode(instruction >> 6)) >= 0) {
                         if (!(instruction & 0x38)) {
                             reg = instruction & 7;
-                            dst = this.regsCur[reg];
-                            this.regsCur[reg] = (result = src + dst) & 0xffff;
+                            dst = this.regsGen[reg];
+                            this.regsGen[reg] = (result = src + dst) & 0xffff;
                             this.flagN = this.flagZ = this.flagC = result;
                             this.flagV = (src ^ result) & (dst ^ result);
                         } else {
@@ -1451,7 +1479,7 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                     if ((src = this.readByteByMode(instruction >> 6)) >= 0) {
                         if (!(instruction & 0x38)) {
                             if (src & 0x80) /*0200*/ src |= 0xff00; // movb sign extends register to word size
-                            this.regsCur[instruction & 7] = src;
+                            this.regsGen[instruction & 7] = src;
                             this.flagN = this.flagZ = src;
                             this.flagV = 0;
                         } else {
@@ -1512,8 +1540,8 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                     if ((src = this.readWordByMode(instruction >> 6)) >= 0) {
                         if (!(instruction & 0x38)) {
                             reg = instruction & 7;
-                            dst = this.regsCur[reg];
-                            this.regsCur[reg] = (result = dst - src) & 0xffff;
+                            dst = this.regsGen[reg];
+                            this.regsGen[reg] = (result = dst - src) & 0xffff;
                             this.flagN = this.flagZ = this.flagC = result;
                             this.flagV = (src ^ dst) & (dst ^ result);
                         } else {
@@ -1533,9 +1561,9 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                         //LOG_INSTRUCTION(instruction, 3, "JSR");
                         if ((virtualAddress = this.getVirtualByMode(instruction, 0)) >= 0) {
                             reg = (instruction >> 6) & 7;
-                            if (this.pushWord(this.regsCur[reg]) >= 0) {
-                                this.regsCur[reg] = this.regsCur[7];
-                                this.regsCur[7] = virtualAddress & 0xffff;
+                            if (this.pushWord(this.regsGen[reg]) >= 0) {
+                                this.regsGen[reg] = this.regsGen[7];
+                                this.regsGen[7] = virtualAddress & 0xffff;
                             }
                         }
                         break;
@@ -1544,11 +1572,11 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                         if ((src = this.readWordByMode(instruction)) >= 0) {
                             reg = (instruction >> 6) & 7;
                             if (src & 0x8000) src |= ~0xffff;
-                            dst = this.regsCur[reg];
+                            dst = this.regsGen[reg];
                             if (dst & 0x8000) dst |= ~0xffff;
                             result = ~~(src * dst);
-                            this.regsCur[reg] = (result >> 16) & 0xffff;
-                            this.regsCur[reg | 1] = result & 0xffff;
+                            this.regsGen[reg] = (result >> 16) & 0xffff;
+                            this.regsGen[reg | 1] = result & 0xffff;
                             this.flagN = result >> 16;
                             this.flagZ = this.flagN | result;
                             this.flagC = this.flagV = 0;
@@ -1565,21 +1593,21 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                 this.flagC = 0x10000; // divide by zero
                             } else {
                                 reg = (instruction >> 6) & 7;
-                                dst = (this.regsCur[reg] << 16) | this.regsCur[reg | 1];
+                                dst = (this.regsGen[reg] << 16) | this.regsGen[reg | 1];
                                 this.flagC = this.flagV = 0;
                                 if (src & 0x8000) src |= ~0xffff;
                                 result = ~~(dst / src);
                                 if (result >= -32768 && result <= 32767) {
-                                    this.regsCur[reg] = result & 0xffff;
-                                    this.regsCur[reg | 1] = (dst - (result * src)) & 0xffff;
+                                    this.regsGen[reg] = result & 0xffff;
+                                    this.regsGen[reg | 1] = (dst - (result * src)) & 0xffff;
                                     this.flagZ = (result >> 16) | result;
                                     this.flagN = result >> 16;
                                 } else {
                                     this.flagV = 0x8000; // overflow - following are indeterminate
                                     this.flagZ = (result >> 15) | result; // dodgy
                                     this.flagN = dst >> 16; // just as dodgy
-                                    if (src === -1 && this.regsCur[reg] ===
-                                        0xfffe) this.regsCur[reg] = this.regsCur[reg | 1] = 1; // etc
+                                    if (src === -1 && this.regsGen[reg] ===
+                                        0xfffe) this.regsGen[reg] = this.regsGen[reg | 1] = 1; // etc
                                 }
                             }
                         }
@@ -1588,7 +1616,7 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                         //LOG_INSTRUCTION(instruction, 3, "ASH");
                         if ((src = this.readWordByMode(instruction)) >= 0) {
                             reg = (instruction >> 6) & 7;
-                            result = this.regsCur[reg];
+                            result = this.regsGen[reg];
                             if (result & 0x8000) result |= 0xffff0000;
                             this.flagC = this.flagV = 0;
                             src &= 0x3F; /*077*/
@@ -1610,7 +1638,7 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                     }
                                 }
                             }
-                            this.regsCur[reg] = result & 0xffff;
+                            this.regsGen[reg] = result & 0xffff;
                             this.flagN = this.flagZ = result;
                         }
                         break;
@@ -1618,7 +1646,7 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                         //LOG_INSTRUCTION(instruction, 3, "ASHC");
                         if ((src = this.readWordByMode(instruction)) >= 0) {
                             reg = (instruction >> 6) & 7;
-                            dst = (this.regsCur[reg] << 16) | this.regsCur[reg | 1];
+                            dst = (this.regsGen[reg] << 16) | this.regsGen[reg | 1];
                             this.flagC = this.flagV = 0;
                             src &= 0x3F; /*077*/
                             if (src & 0x20) /*040*/ {
@@ -1643,8 +1671,8 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                     result = dst;
                                 }
                             }
-                            this.regsCur[reg] = (result >> 16) & 0xffff;
-                            this.regsCur[reg | 1] = result & 0xffff;
+                            this.regsGen[reg] = (result >> 16) & 0xffff;
+                            this.regsGen[reg | 1] = result & 0xffff;
                             this.flagN = result >> 16;
                             this.flagZ = result >> 16 | result;
                         }
@@ -1652,12 +1680,12 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                     case 0x7800: /*0074000*/ // XOR 074RSS
                         //LOG_INSTRUCTION(instruction, 3, "XOR");
                         if (!(instruction & 0x38)) {
-                            dst = this.regsCur[instruction & 7] ^= this.regsCur[(instruction >> 6) & 7];
+                            dst = this.regsGen[instruction & 7] ^= this.regsGen[(instruction >> 6) & 7];
                             this.flagN = this.flagZ = dst;
                             this.flagV = 0;
                         } else {
                             if ((dst = this.readWordByAddr(dstAddr = this.getAddrByMode(instruction, PDP11.MODIFY_WORD))) >= 0) {
-                                dst ^= this.regsCur[(instruction >> 6) & 7];
+                                dst ^= this.regsGen[(instruction >> 6) & 7];
                                 if (this.writeWordByAddr(dstAddr, dst) >= 0) {
                                     this.flagN = this.flagZ = dst;
                                     this.flagV = 0;
@@ -1668,78 +1696,78 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                     case 0x7E00: /*0077000*/ // SOB 077Rnn
                         //LOG_INSTRUCTION(instruction, 5, "SOB");
                         reg = (instruction >> 6) & 7;
-                        if ((this.regsCur[reg] = ((this.regsCur[reg] - 1) & 0xffff))) {
-                            this.regsCur[7] = (this.regsCur[7] - ((instruction & 0x3F) /*077*/ << 1)) & 0xffff;
+                        if ((this.regsGen[reg] = ((this.regsGen[reg] - 1) & 0xffff))) {
+                            this.regsGen[7] = (this.regsGen[7] - ((instruction & 0x3F) /*077*/ << 1)) & 0xffff;
                         }
                         break;
                     default:
                         switch (instruction & 0xFF00) /*0177400*/ { // Program control instructions & traps
                         case 0x100: /*0000400*/ // BR
                             //LOG_INSTRUCTION(instruction, 4, "BR");
-                            this.regsCur[7] = this.branch(this.regsCur[7], instruction);
+                            this.regsGen[7] = this.branch(this.regsGen[7], instruction);
                             break;
                         case 0x200: /*0001000*/ // BNE
                             //LOG_INSTRUCTION(instruction, 4, "BNE");
-                            if (this.flagZ & 0xffff) this.regsCur[7] = this.branch(this.regsCur[7], instruction);
+                            if (this.flagZ & 0xffff) this.regsGen[7] = this.branch(this.regsGen[7], instruction);
                             break;
                         case 0x300: /*0001400*/ // BEQ
                             //LOG_INSTRUCTION(instruction, 4, "BEQ");
-                            if (!(this.flagZ & 0xffff)) this.regsCur[7] = this.branch(this.regsCur[7], instruction);
+                            if (!(this.flagZ & 0xffff)) this.regsGen[7] = this.branch(this.regsGen[7], instruction);
                             break;
                         case 0x400: /*0002000*/ // BGE
                             //LOG_INSTRUCTION(instruction, 4, "BGE");
                             if ((this.flagN & 0x8000) ===
-                                (this.flagV & 0x8000)) this.regsCur[7] = this.branch(this.regsCur[7], instruction);
+                                (this.flagV & 0x8000)) this.regsGen[7] = this.branch(this.regsGen[7], instruction);
                             break;
                         case 0x500: /*0002400*/ // BLT
                             //LOG_INSTRUCTION(instruction, 4, "BLT");
                             if ((this.flagN & 0x8000) !==
-                                (this.flagV & 0x8000)) this.regsCur[7] = this.branch(this.regsCur[7], instruction);
+                                (this.flagV & 0x8000)) this.regsGen[7] = this.branch(this.regsGen[7], instruction);
                             break;
                         case 0x600: /*0003000*/ // BGT
                             //LOG_INSTRUCTION(instruction, 4, "BGT");
                             if ((this.flagZ & 0xffff) && ((this.flagN & 0x8000) ===
-                                (this.flagV & 0x8000))) this.regsCur[7] = this.branch(this.regsCur[7], instruction);
+                                (this.flagV & 0x8000))) this.regsGen[7] = this.branch(this.regsGen[7], instruction);
                             break;
                         case 0x700: /*0003400*/ // BLE
                             //LOG_INSTRUCTION(instruction, 4, "BLE");
                             if (!(this.flagZ & 0xffff) || ((this.flagN & 0x8000) !==
-                                (this.flagV & 0x8000))) this.regsCur[7] = this.branch(this.regsCur[7], instruction);
+                                (this.flagV & 0x8000))) this.regsGen[7] = this.branch(this.regsGen[7], instruction);
                             break;
                         case 0x8000: /*0100000*/ // BPL
                             //LOG_INSTRUCTION(instruction, 4, "BPL");
-                            if (!(this.flagN & 0x8000)) this.regsCur[7] = this.branch(this.regsCur[7], instruction);
+                            if (!(this.flagN & 0x8000)) this.regsGen[7] = this.branch(this.regsGen[7], instruction);
                             break;
                         case 0x8200: /*0101000*/ // BHI
                             //LOG_INSTRUCTION(instruction, 4, "BHI");
                             if (!(this.flagC & 0x10000) &&
-                                (this.flagZ & 0xffff)) this.regsCur[7] = this.branch(this.regsCur[7], instruction);
+                                (this.flagZ & 0xffff)) this.regsGen[7] = this.branch(this.regsGen[7], instruction);
                             break;
                         case 0x8100: /*0100400*/ // BMI
                             //LOG_INSTRUCTION(instruction, 4, "BMI");
-                            if ((this.flagN & 0x8000)) this.regsCur[7] = this.branch(this.regsCur[7], instruction);
+                            if ((this.flagN & 0x8000)) this.regsGen[7] = this.branch(this.regsGen[7], instruction);
                             break;
                         case 0x8300: /*0101400*/ // BLOS
                             //LOG_INSTRUCTION(instruction, 4, "BLOS");
                             if ((this.flagC & 0x10000) ||
-                                !(this.flagZ & 0xffff)) this.regsCur[7] = this.branch(this.regsCur[7], instruction);
+                                !(this.flagZ & 0xffff)) this.regsGen[7] = this.branch(this.regsGen[7], instruction);
                             break;
                         case 0x8400: /*0102000*/ // BVC
                             //LOG_INSTRUCTION(instruction, 4, "BVC");
-                            if (!(this.flagV & 0x8000)) this.regsCur[7] = this.branch(this.regsCur[7], instruction);
+                            if (!(this.flagV & 0x8000)) this.regsGen[7] = this.branch(this.regsGen[7], instruction);
                             break;
                         case 0x8500: /*0102400*/ // BVS
                             //LOG_INSTRUCTION(instruction, 4, "BVS");
-                            if ((this.flagV & 0x8000)) this.regsCur[7] = this.branch(this.regsCur[7], instruction);
+                            if ((this.flagV & 0x8000)) this.regsGen[7] = this.branch(this.regsGen[7], instruction);
                             break;
                         case 0x8600: /*0103000*/ // BCC
                             //LOG_INSTRUCTION(instruction, 4, "BCC");
                             if (!(this.flagC &
-                                0x10000)) this.regsCur[7] = this.branch(this.regsCur[7], instruction);
+                                0x10000)) this.regsGen[7] = this.branch(this.regsGen[7], instruction);
                             break;
                         case 0x8700: /*0103400*/ // BCS
                             //LOG_INSTRUCTION(instruction, 4, "BCS");
-                            if (this.flagC & 0x10000) this.regsCur[7] = this.branch(this.regsCur[7], instruction);
+                            if (this.flagC & 0x10000) this.regsGen[7] = this.branch(this.regsGen[7], instruction);
                             break;
                         case 0x8800: /*0104000*/ // EMT 104000 -> 104377
                             //LOG_INSTRUCTION(instruction, 7, "EMT");
@@ -1754,15 +1782,15 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                             case 0x40: /*0000100*/ // JMP 0001DD
                                 //LOG_INSTRUCTION(instruction, 1, "JMP");
                                 if ((virtualAddress = this.getVirtualByMode(instruction, 0)) >= 0) {
-                                    this.regsCur[7] = virtualAddress & 0xffff;
+                                    this.regsGen[7] = virtualAddress & 0xffff;
                                 }
                                 break;
                             case 0xC0: /*0000300*/ // SWAB 0003DD
                                 //LOG_INSTRUCTION(instruction, 1, "SWAB");
                                 if (!(instruction & 0x38)) {
                                     reg = instruction & 7;
-                                    dst = this.regsCur[reg];
-                                    this.regsCur[reg] = ((dst << 8) | (dst >> 8)) & 0xffff;
+                                    dst = this.regsGen[reg];
+                                    this.regsGen[reg] = ((dst << 8) | (dst >> 8)) & 0xffff;
                                     this.flagN = this.flagZ = dst & 0xff00;
                                     this.flagV = this.flagC = 0;
                                 } else {
@@ -1779,7 +1807,7 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                             case 0xA00: /*0005000*/ // CLR 0050DD
                                 //LOG_INSTRUCTION(instruction, 1, "CLR");
                                 if (!(instruction & 0x38)) {
-                                    this.regsCur[instruction & 7] = 0;
+                                    this.regsGen[instruction & 7] = 0;
                                     this.flagN = this.flagC = this.flagV = this.flagZ = 0;
                                 } else {
                                     if ((dstAddr = this.getAddrByMode(instruction, PDP11.WRITE_MODE)) >= 0) { // write word
@@ -1805,9 +1833,9 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                 //LOG_INSTRUCTION(instruction, 1, "INC");
                                 if (!(instruction & 0x38)) {
                                     reg = instruction & 7;
-                                    dst = this.regsCur[reg];
+                                    dst = this.regsGen[reg];
                                     result = dst + 1;
-                                    this.regsCur[reg] = result & 0xffff;
+                                    this.regsGen[reg] = result & 0xffff;
                                     this.flagN = this.flagZ = result;
                                     this.flagV = result & (result ^ dst);
                                 } else {
@@ -1825,9 +1853,9 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                 //LOG_INSTRUCTION(instruction, 1, "DEC");
                                 if (!(instruction & 0x38)) {
                                     reg = instruction & 7;
-                                    dst = this.regsCur[reg];
+                                    dst = this.regsGen[reg];
                                     result = dst - 1;
-                                    this.regsCur[reg] = result & 0xffff;
+                                    this.regsGen[reg] = result & 0xffff;
                                     this.flagN = this.flagZ = result;
                                     this.flagV = (result ^ dst) & dst;
                                 } else {
@@ -1885,9 +1913,9 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                 //LOG_INSTRUCTION(instruction, 1, "ROR");
                                 if (!(instruction & 0x38)) {
                                     reg = instruction & 7;
-                                    dst = this.regsCur[reg];
+                                    dst = this.regsGen[reg];
                                     result = ((this.flagC & 0x10000) | dst) >> 1;
-                                    this.regsCur[reg] = result & 0xffff;
+                                    this.regsGen[reg] = result & 0xffff;
                                     this.flagC = (dst << 16);
                                     this.flagN = this.flagZ = result;
                                     this.flagV = result ^ (this.flagC >> 1);
@@ -1907,9 +1935,9 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                 //LOG_INSTRUCTION(instruction, 1, "ROL");
                                 if (!(instruction & 0x38)) {
                                     reg = instruction & 7;
-                                    dst = this.regsCur[reg];
+                                    dst = this.regsGen[reg];
                                     result = (dst << 1) | ((this.flagC >> 16) & 1);
-                                    this.regsCur[reg] = result & 0xffff;
+                                    this.regsGen[reg] = result & 0xffff;
                                     this.flagC = this.flagN = this.flagZ = result;
                                     this.flagV = result ^ dst;
                                 } else {
@@ -1927,9 +1955,9 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                 //LOG_INSTRUCTION(instruction, 1, "ASR");
                                 if (!(instruction & 0x38)) {
                                     reg = instruction & 7;
-                                    dst = this.regsCur[reg];
+                                    dst = this.regsGen[reg];
                                     result = (dst & 0x8000) | (dst >> 1);
-                                    this.regsCur[reg] = result & 0xffff;
+                                    this.regsGen[reg] = result & 0xffff;
                                     this.flagC = dst << 16;
                                     this.flagN = this.flagZ = result;
                                     this.flagV = this.flagN ^ (this.flagC >> 1);
@@ -1949,9 +1977,9 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                 //LOG_INSTRUCTION(instruction, 1, "ASL");
                                 if (!(instruction & 0x38)) {
                                     reg = instruction & 7;
-                                    dst = this.regsCur[reg];
+                                    dst = this.regsGen[reg];
                                     result = dst << 1;
-                                    this.regsCur[reg] = result & 0xffff;
+                                    this.regsGen[reg] = result & 0xffff;
                                     this.flagC = this.flagN = this.flagZ = result;
                                     this.flagV = result ^ dst;
                                 } else {
@@ -1967,11 +1995,11 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                 break;
                             case 0xD00: /*0006400*/ // MARK 0064nn
                                 //LOG_INSTRUCTION(instruction, 8, "MARK");
-                                virtualAddress = (this.regsCur[7] + ((instruction & 0x3F) /*077*/ << 1)) & 0xffff;
+                                virtualAddress = (this.regsGen[7] + ((instruction & 0x3F) /*077*/ << 1)) & 0xffff;
                                 if ((src = this.readWordByVirtual(virtualAddress | 0x10000)) >= 0) {
-                                    this.regsCur[7] = this.regsCur[5];
-                                    this.regsCur[5] = src;
-                                    this.regsCur[6] = (virtualAddress + 2) & 0xffff;
+                                    this.regsGen[7] = this.regsGen[5];
+                                    this.regsGen[5] = src;
+                                    this.regsGen[6] = (virtualAddress + 2) & 0xffff;
                                 }
                                 break;
                             case 0xD40: /*0006500*/ // MFPI 0065SS
@@ -1979,9 +2007,9 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                 if (!(instruction & 0x38)) {
                                     reg = instruction & 7;
                                     if (6 !== reg || ((this.PSW >> 2) & 0x3000) === (this.PSW & 0x3000)) {
-                                        src = this.regsCur[reg];
+                                        src = this.regsGen[reg];
                                     } else {
-                                        src = this.regsStack[(this.PSW >> 12) & 3];
+                                        src = this.regsAltStack[(this.PSW >> 12) & 3];
                                     }
                                     if (this.pushWord(src) >= 0) {
                                         this.flagN = this.flagZ = src;
@@ -2008,9 +2036,9 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                     if (!(instruction & 0x38)) {
                                         reg = instruction & 7;
                                         if (6 !== reg || ((this.PSW >> 2) & 0x3000) === (this.PSW & 0x3000)) {
-                                            this.regsCur[reg] = dst;
+                                            this.regsGen[reg] = dst;
                                         } else {
-                                            this.regsStack[(this.PSW >> 12) & 3] = dst;
+                                            this.regsAltStack[(this.PSW >> 12) & 3] = dst;
                                         }
                                         this.flagN = this.flagZ = dst;
                                         this.flagV = 0;
@@ -2042,7 +2070,7 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                             case 0x8A00: /*0105000*/ // CLRB 1050DD
                                 //LOG_INSTRUCTION(instruction, 1, "CLRB");
                                 if (!(instruction & 0x38)) {
-                                    this.regsCur[instruction & 7] &= 0xff00;
+                                    this.regsGen[instruction & 7] &= 0xff00;
                                     this.flagN = this.flagC = this.flagV = this.flagZ = 0;
                                 } else {
                                     if ((dstAddr = this.getAddrByMode(instruction, PDP11.WRITE_MODE | PDP11.BYTE_MODE)) >= 0) { // write byte
@@ -2183,9 +2211,9 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                 if (!(instruction & 0x38)) {
                                     reg = instruction & 7;
                                     if (6 !== reg || ((this.PSW >> 2) & 0x3000) === (this.PSW & 0x3000)) {
-                                        src = this.regsCur[reg];
+                                        src = this.regsGen[reg];
                                     } else {
-                                        src = this.regsStack[(this.PSW >> 12) & 3];
+                                        src = this.regsAltStack[(this.PSW >> 12) & 3];
                                     }
                                     if (this.pushWord(src) >= 0) {
                                         this.flagN = this.flagZ = src;
@@ -2211,9 +2239,9 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                     if (!(instruction & 0x38)) {
                                         reg = instruction & 7;
                                         if (6 !== reg || ((this.PSW >> 2) & 0x3000) === (this.PSW & 0x3000)) {
-                                            this.regsCur[reg] = dst;
+                                            this.regsGen[reg] = dst;
                                         } else {
-                                            this.regsStack[(this.PSW >> 12) & 3] = dst;
+                                            this.regsAltStack[(this.PSW >> 12) & 3] = dst;
                                         }
                                         this.flagN = this.flagZ = dst;
                                         this.flagV = 0;
@@ -2244,7 +2272,7 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                 //        }
                                 //    } else {
                                 //        if (src & 0200) src |= 0xff00;
-                                //        this.regsCur[instruction & 7] = src;
+                                //        this.regsGen[instruction & 7] = src;
                                 //        this.flagN = this.flagZ = src << 8;
                                 //        this.flagV = 0;
                                 //    } // Temporary PDP 11/34A
@@ -2255,8 +2283,8 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                     //LOG_INSTRUCTION(instruction, 6, "RTS");
                                     if ((src = this.popWord()) >= 0) {
                                         reg = instruction & 7;
-                                        this.regsCur[7] = this.regsCur[reg];
-                                        this.regsCur[reg] = src;
+                                        this.regsGen[7] = this.regsGen[reg];
+                                        this.regsGen[reg] = src;
                                     }
                                     break;
                                 case 0x98: /*0000230*/ // SPL 00023N
@@ -2293,7 +2321,7 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                             this.runState = 3; // halt
                                             this.endBurst();
                                             //LOG_PRINT();
-                                            console.log("HALT at " + this.regsCur[7].toString(8));
+                                            console.log("HALT at " + this.regsGen[7].toString(8));
                                         }
                                         break;
                                     case 0x1: /*0000001*/ // WAIT 000001
@@ -2323,23 +2351,23 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                         if (!(this.PSW & 0xc000)) {
                                             this.resetRegs();
                                             this.bus.reset_iopage();
-                                            // display.data = this.regsCur[0];  // TODO: Review
+                                            // display.data = this.regsGen[0];  // TODO: Review
                                         }
                                         break;
                                     case 0x2: /*0000002*/ // RTI 000002
                                     case 0x6: /*0000006*/ // RTT 000006
                                         //LOG_INSTRUCTION(instruction, 0, "RTT");
-                                        dstAddr = this.regsCur[6];
+                                        dstAddr = this.regsGen[6];
                                         if ((virtualAddress = this.readWordByVirtual(dstAddr | 0x10000)) >= 0) {
                                             dstAddr = (dstAddr + 2) & 0xffff;
                                             if ((savePSW = this.readWordByVirtual(dstAddr | 0x10000)) >= 0) {
-                                                this.regsCur[6] = (dstAddr + 2) & 0xffff;
+                                                this.regsGen[6] = (dstAddr + 2) & 0xffff;
                                                 savePSW &= 0xf8ff;
                                                 if (this.PSW & 0xc000) { // user / super restrictions
                                                     // keep SPL and allow lower only for modes and register set
                                                     savePSW = (savePSW & 0xf81f) | (this.PSW & 0xf8e0);
                                                 }
-                                                this.regsCur[7] = virtualAddress;
+                                                this.regsGen[7] = virtualAddress;
                                                 this.writePSW(savePSW);
                                                 this.trapMask &= ~0x10; // turn off Trace trap
                                                 if (instruction === 2) this.trapMask |= this.PSW & 0x10; // RTI enables immediate trace
@@ -2348,7 +2376,7 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                         break;
                                         //case 0000007: // MFPT 000007
                                         //    //LOG_INSTRUCTION(instruction, 0, "MFPT");
-                                        //    this.regsCur[0] = 1;
+                                        //    this.regsGen[0] = 1;
                                         //    break; // Exists on pdp 11/44 & KB11-EM
                                     default: // We don't know this instruction
                                         //LOG_INSTRUCTION(instruction, 11, "-unknown-");

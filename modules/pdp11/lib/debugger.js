@@ -229,7 +229,8 @@ if (DEBUGGER) {
         ROLB:   72,     ROR:    73,     RORB:   74,     RTI:    75,     RTS:    76,     SBC:    77,     SBCB:   78,     SCC:    79,
         SEC:    80,     SECN:   81,     SECV:   82,     SECVN:  83,     SECVZ:  84,     SECZ:   85,     SECZN:  86,     SEN:    87,
         SEV:    88,     SEVN:   89,     SEVZ:   90,     SEVZN:  91,     SEZ:    92,     SEZN:   93,     SUB:    94,     SWAB:   95,
-        SXT:    96,     TST:    97,     TSTB:   98,     WAIT:   99
+        SXT:    96,     TST:    97,     TSTB:   98,     WAIT:   99,     MUL:    100,    DIV:    101,    ASH:    102,    ASHC:   103,
+        XOR:    104,    SOB:    105,    EMT:    106,    TRAP:   107,    SPL:    108,    IOT:    109,    RTT:    110,    MFPT:   111
     };
 
     /*
@@ -248,11 +249,12 @@ if (DEBUGGER) {
         "ROLB",         "ROR",          "RORB",         "RTI",          "RTS",          "SBC",          "SBCB",         "SCC",
         "SEC",          "SECN",         "SECV",         "SECVN",        "SECVZ",        "SECZ",         "SECZN",        "SEN",
         "SEV",          "SEVN",         "SEVZ",         "SEVZN",        "SEZ",          "SEZN",         "SUB",          "SWAB",
-        "SXT",          "TST",          "TSTB",         "WAIT"
+        "SXT",          "TST",          "TSTB",         "WAIT",         "MUL",          "DIV",          "ASH",          "ASHC",
+        "XOR",          "SOB",          "EMT",          "TRAP",         "SPL",          "IOT",          "RTT",          "MFPT"
     ];
 
     /*
-     * Register numbers 0-7 are reserved for cpu.regsCur, 8-15 are reserved for cpu.regsAlt, and 16-19 for cpu.regsStack.
+     * Register numbers 0-7 are reserved for cpu.regsGen, 8-15 are reserved for cpu.regsAlt, and 16-19 for cpu.regsStack.
      */
     DebuggerPDP11.REG_SP        = 6;            // aka R6
     DebuggerPDP11.REG_PC        = 7;            // aka R7
@@ -268,7 +270,7 @@ if (DEBUGGER) {
     DebuggerPDP11.MODE_INDEXD   = 0x7;          // INDEX DEFERRED           (register + next word is address of address of operand)
 
     /*
-     * Operand descriptor masks
+     * Operand descriptor masks; anything that's not covered by TYPE_SRC or TYPE_DST must be a TYPE_OTHER value.
      */
     DebuggerPDP11.TYPE_DSTREG   = 0x0007;
     DebuggerPDP11.TYPE_DSTMOD   = 0x0038;
@@ -277,36 +279,51 @@ if (DEBUGGER) {
     DebuggerPDP11.TYPE_SRCMOD   = 0x0E00;
     DebuggerPDP11.TYPE_SRC      = (DebuggerPDP11.TYPE_SRCMOD | DebuggerPDP11.TYPE_SRCREG);
     DebuggerPDP11.TYPE_BRANCH   = 0x1000;
+    DebuggerPDP11.TYPE_DSTOFF   = 0x2000;
+    DebuggerPDP11.TYPE_DSTNUM3  = 0x3000;       // DST 3-bit number (ie, just the DSTREG field)
+    DebuggerPDP11.TYPE_DSTNUM6  = 0x6000;       // DST 6-bit number (ie, both the DSTREG and DSTMOD fields)
+    DebuggerPDP11.TYPE_OTHER    = 0xF000;
 
     /*
-     * The opMasks table contains opcode masks, and each mask refers to table of possible values,
-     * and each value refers to an array that contains:
+     * The opMasks table contains opcode masks, and each mask refers to table of possible values, and each
+     * value refers to an array that contains:
      *
      *      [0]: {number} of the opcode name (see OP.*)
      *      [1]: {number} containing the first operand descriptor bit(s), if any
      *      [2]: {number} containing the second operand descriptor bit(s), if any
      *
-     * These sub-elements are all optional. If [0] is not present, the opcode is undefined; if [1] is not
-     * present (or contains zero), the opcode has no (or only implied) operands; if [2] is not present, the
-     * opcode has only a single operand.  And so on.
+     * Note that, by convention, opcodes that require two operands list the SRC operand first and DST operand
+     * second (ie, the OPPOSITE of the Intel convention).
+     *
+     * Also note that, for some of the newer PDP-11 opcodes (eg, MUL, DIV, ASH, ASCH), the location of the
+     * opcode's SRC and DST bits are reversed.  This is why, for example, you'll see the MUL instruction defined
+     * below as having TYPE_DST for the first operand and TYPE_SRCREG for the second operand.  This does NOT mean
+     * that the opcode's destination operand is being listed first, but rather that the bits describing the source
+     * operand are in the opcode's TYPE_DST field.
      */
     DebuggerPDP11.opMasks = {
         0xF000: {
-            0x1000: [DebuggerPDP11.OPS.MOV,     DebuggerPDP11.TYPE_SRC,         DebuggerPDP11.TYPE_DST],
-            0x2000: [DebuggerPDP11.OPS.CMP,     DebuggerPDP11.TYPE_SRC,         DebuggerPDP11.TYPE_DST],
-            0x3000: [DebuggerPDP11.OPS.BIT,     DebuggerPDP11.TYPE_SRC,         DebuggerPDP11.TYPE_DST],
-            0x4000: [DebuggerPDP11.OPS.BIC,     DebuggerPDP11.TYPE_SRC,         DebuggerPDP11.TYPE_DST],
-            0x5000: [DebuggerPDP11.OPS.BIS,     DebuggerPDP11.TYPE_SRC,         DebuggerPDP11.TYPE_DST],
-            0x6000: [DebuggerPDP11.OPS.ADD,     DebuggerPDP11.TYPE_SRC,         DebuggerPDP11.TYPE_DST],
-            0x9000: [DebuggerPDP11.OPS.MOVB,    DebuggerPDP11.TYPE_SRC,         DebuggerPDP11.TYPE_DST],
-            0xA000: [DebuggerPDP11.OPS.CMPB,    DebuggerPDP11.TYPE_SRC,         DebuggerPDP11.TYPE_DST],
-            0xB000: [DebuggerPDP11.OPS.BITB,    DebuggerPDP11.TYPE_SRC,         DebuggerPDP11.TYPE_DST],
-            0xC000: [DebuggerPDP11.OPS.BICB,    DebuggerPDP11.TYPE_SRC,         DebuggerPDP11.TYPE_DST],
-            0xD000: [DebuggerPDP11.OPS.BISB,    DebuggerPDP11.TYPE_SRC,         DebuggerPDP11.TYPE_DST],
-            0xE000: [DebuggerPDP11.OPS.SUB,     DebuggerPDP11.TYPE_SRC,         DebuggerPDP11.TYPE_DST]
+            0x1000: [DebuggerPDP11.OPS.MOV,     DebuggerPDP11.TYPE_SRC,         DebuggerPDP11.TYPE_DST],        // 01SSDD
+            0x2000: [DebuggerPDP11.OPS.CMP,     DebuggerPDP11.TYPE_SRC,         DebuggerPDP11.TYPE_DST],        // 02SSDD
+            0x3000: [DebuggerPDP11.OPS.BIT,     DebuggerPDP11.TYPE_SRC,         DebuggerPDP11.TYPE_DST],        // 03SSDD
+            0x4000: [DebuggerPDP11.OPS.BIC,     DebuggerPDP11.TYPE_SRC,         DebuggerPDP11.TYPE_DST],        // 04SSDD
+            0x5000: [DebuggerPDP11.OPS.BIS,     DebuggerPDP11.TYPE_SRC,         DebuggerPDP11.TYPE_DST],        // 05SSDD
+            0x6000: [DebuggerPDP11.OPS.ADD,     DebuggerPDP11.TYPE_SRC,         DebuggerPDP11.TYPE_DST],        // 06SSDD
+            0x9000: [DebuggerPDP11.OPS.MOVB,    DebuggerPDP11.TYPE_SRC,         DebuggerPDP11.TYPE_DST],        // 11SSDD
+            0xA000: [DebuggerPDP11.OPS.CMPB,    DebuggerPDP11.TYPE_SRC,         DebuggerPDP11.TYPE_DST],        // 12SSDD
+            0xB000: [DebuggerPDP11.OPS.BITB,    DebuggerPDP11.TYPE_SRC,         DebuggerPDP11.TYPE_DST],        // 13SSDD
+            0xC000: [DebuggerPDP11.OPS.BICB,    DebuggerPDP11.TYPE_SRC,         DebuggerPDP11.TYPE_DST],        // 14SSDD
+            0xD000: [DebuggerPDP11.OPS.BISB,    DebuggerPDP11.TYPE_SRC,         DebuggerPDP11.TYPE_DST],        // 15SSDD
+            0xE000: [DebuggerPDP11.OPS.SUB,     DebuggerPDP11.TYPE_SRC,         DebuggerPDP11.TYPE_DST]         // 16SSDD
         },
         0xFE00: {
-            0x0800: [DebuggerPDP11.OPS.JSR,     DebuggerPDP11.TYPE_SRCREG,      DebuggerPDP11.TYPE_DST]
+            0x0800: [DebuggerPDP11.OPS.JSR,     DebuggerPDP11.TYPE_SRCREG,      DebuggerPDP11.TYPE_DST],        // 004RDD
+            0x7000: [DebuggerPDP11.OPS.MUL,     DebuggerPDP11.TYPE_DST,         DebuggerPDP11.TYPE_SRCREG],     // 070RSS
+            0x7200: [DebuggerPDP11.OPS.DIV,     DebuggerPDP11.TYPE_DST,         DebuggerPDP11.TYPE_SRCREG],     // 071RSS
+            0x7400: [DebuggerPDP11.OPS.ASH,     DebuggerPDP11.TYPE_DST,         DebuggerPDP11.TYPE_SRCREG],     // 072RSS
+            0x7600: [DebuggerPDP11.OPS.ASHC,    DebuggerPDP11.TYPE_DST,         DebuggerPDP11.TYPE_SRCREG],     // 073RSS
+            0x7800: [DebuggerPDP11.OPS.XOR,     DebuggerPDP11.TYPE_SRCREG,      DebuggerPDP11.TYPE_DST],        // 074RSS
+            0x7E00: [DebuggerPDP11.OPS.SOB,     DebuggerPDP11.TYPE_SRCREG,      DebuggerPDP11.TYPE_DSTOFF]      // 077Rnn
         },
         0xFF00: {
             0x0100: [DebuggerPDP11.OPS.BR,      DebuggerPDP11.TYPE_BRANCH],
@@ -323,53 +340,59 @@ if (DEBUGGER) {
             0x8400: [DebuggerPDP11.OPS.BVC,     DebuggerPDP11.TYPE_BRANCH],
             0x8500: [DebuggerPDP11.OPS.BVS,     DebuggerPDP11.TYPE_BRANCH],
             0x8600: [DebuggerPDP11.OPS.BCC,     DebuggerPDP11.TYPE_BRANCH],
-            0x8700: [DebuggerPDP11.OPS.BCS,     DebuggerPDP11.TYPE_BRANCH]
+            0x8700: [DebuggerPDP11.OPS.BCS,     DebuggerPDP11.TYPE_BRANCH],
+            0x8800: [DebuggerPDP11.OPS.EMT],                                    // 104000..104377
+            0x8900: [DebuggerPDP11.OPS.TRAP]                                    // 104400..104777
         },
         0xFFC0: {
-            0x0010: [DebuggerPDP11.OPS.JMP,     DebuggerPDP11.TYPE_DST],
-            0x00C0: [DebuggerPDP11.OPS.SWAB,    DebuggerPDP11.TYPE_DST],
-            0x0480: [DebuggerPDP11.OPS.INC,     DebuggerPDP11.TYPE_DST],
-            0x0A00: [DebuggerPDP11.OPS.CLR,     DebuggerPDP11.TYPE_DST],
-            0x0A40: [DebuggerPDP11.OPS.COM,     DebuggerPDP11.TYPE_DST],
-            0x0AC0: [DebuggerPDP11.OPS.DEC,     DebuggerPDP11.TYPE_DST],
-            0x0B00: [DebuggerPDP11.OPS.NEG,     DebuggerPDP11.TYPE_DST],
-            0x0B40: [DebuggerPDP11.OPS.ADC,     DebuggerPDP11.TYPE_DST],
-            0x0B80: [DebuggerPDP11.OPS.SBC,     DebuggerPDP11.TYPE_DST],
-            0x0BC0: [DebuggerPDP11.OPS.TST,     DebuggerPDP11.TYPE_DST],
-            0x0C00: [DebuggerPDP11.OPS.ROR,     DebuggerPDP11.TYPE_DST],
-            0x0C40: [DebuggerPDP11.OPS.ROL,     DebuggerPDP11.TYPE_DST],
-            0x0C80: [DebuggerPDP11.OPS.ASR,     DebuggerPDP11.TYPE_DST],
-            0x0CC0: [DebuggerPDP11.OPS.ASL,     DebuggerPDP11.TYPE_DST],
-            0x0D00: [DebuggerPDP11.OPS.MARK,    DebuggerPDP11.TYPE_DST],
-            0x0D40: [DebuggerPDP11.OPS.MFPI,    DebuggerPDP11.TYPE_DST],
-            0x0D80: [DebuggerPDP11.OPS.MTPI,    DebuggerPDP11.TYPE_DST],
-            0x0DC0: [DebuggerPDP11.OPS.SXT,     DebuggerPDP11.TYPE_DST],
-            0x8480: [DebuggerPDP11.OPS.INCB,    DebuggerPDP11.TYPE_DST],
-            0x8A00: [DebuggerPDP11.OPS.CLRB,    DebuggerPDP11.TYPE_DST],
-            0x8A40: [DebuggerPDP11.OPS.COMB,    DebuggerPDP11.TYPE_DST],
-            0x8AC0: [DebuggerPDP11.OPS.DECB,    DebuggerPDP11.TYPE_DST],
-            0x8B00: [DebuggerPDP11.OPS.NEGB,    DebuggerPDP11.TYPE_DST],
-            0x8B40: [DebuggerPDP11.OPS.ADCB,    DebuggerPDP11.TYPE_DST],
-            0x8B80: [DebuggerPDP11.OPS.SBCB,    DebuggerPDP11.TYPE_DST],
-            0x8BC0: [DebuggerPDP11.OPS.TSTB,    DebuggerPDP11.TYPE_DST],
-            0x8C00: [DebuggerPDP11.OPS.RORB,    DebuggerPDP11.TYPE_DST],
-            0x8C40: [DebuggerPDP11.OPS.ROLB,    DebuggerPDP11.TYPE_DST],
-            0x8C80: [DebuggerPDP11.OPS.ASRB,    DebuggerPDP11.TYPE_DST],
-            0x8CC0: [DebuggerPDP11.OPS.ASLB,    DebuggerPDP11.TYPE_DST],
-            0x8D00: [DebuggerPDP11.OPS.MTPS,    DebuggerPDP11.TYPE_DST],        // only on LSI-11
-            0x8D40: [DebuggerPDP11.OPS.MFPD,    DebuggerPDP11.TYPE_DST],        // same as MFPI if no separate instruction/data spaces
-            0x8D80: [DebuggerPDP11.OPS.MTPD,    DebuggerPDP11.TYPE_DST],        // same as MTPI if no separate instruction/data spaces
-            0x8DC0: [DebuggerPDP11.OPS.MFPS,    DebuggerPDP11.TYPE_DST]         // only on LSI-11
+            0x0040: [DebuggerPDP11.OPS.JMP,     DebuggerPDP11.TYPE_DST],        // 0001DD
+            0x00C0: [DebuggerPDP11.OPS.SWAB,    DebuggerPDP11.TYPE_DST],        // 0003DD
+            0x0A00: [DebuggerPDP11.OPS.CLR,     DebuggerPDP11.TYPE_DST],        // 0050DD
+            0x0A40: [DebuggerPDP11.OPS.COM,     DebuggerPDP11.TYPE_DST],        // 0051DD
+            0x0A80: [DebuggerPDP11.OPS.INC,     DebuggerPDP11.TYPE_DST],        // 0052DD
+            0x0AC0: [DebuggerPDP11.OPS.DEC,     DebuggerPDP11.TYPE_DST],        // 0053DD
+            0x0B00: [DebuggerPDP11.OPS.NEG,     DebuggerPDP11.TYPE_DST],        // 0054DD
+            0x0B40: [DebuggerPDP11.OPS.ADC,     DebuggerPDP11.TYPE_DST],        // 0055DD
+            0x0B80: [DebuggerPDP11.OPS.SBC,     DebuggerPDP11.TYPE_DST],        // 0056DD
+            0x0BC0: [DebuggerPDP11.OPS.TST,     DebuggerPDP11.TYPE_DST],        // 0057DD
+            0x0C00: [DebuggerPDP11.OPS.ROR,     DebuggerPDP11.TYPE_DST],        // 0060DD
+            0x0C40: [DebuggerPDP11.OPS.ROL,     DebuggerPDP11.TYPE_DST],        // 0061DD
+            0x0C80: [DebuggerPDP11.OPS.ASR,     DebuggerPDP11.TYPE_DST],        // 0062DD
+            0x0CC0: [DebuggerPDP11.OPS.ASL,     DebuggerPDP11.TYPE_DST],        // 0063DD
+            0x0D00: [DebuggerPDP11.OPS.MARK,    DebuggerPDP11.TYPE_DSTNUM6],    // 0064nn
+            0x0D40: [DebuggerPDP11.OPS.MFPI,    DebuggerPDP11.TYPE_DST],        // 0065SS
+            0x0D80: [DebuggerPDP11.OPS.MTPI,    DebuggerPDP11.TYPE_DST],        // 0066DD
+            0x0DC0: [DebuggerPDP11.OPS.SXT,     DebuggerPDP11.TYPE_DST],        // 0067DD
+            0x8A00: [DebuggerPDP11.OPS.CLRB,    DebuggerPDP11.TYPE_DST],        // 1050DD
+            0x8A40: [DebuggerPDP11.OPS.COMB,    DebuggerPDP11.TYPE_DST],        // 1051DD
+            0x8A80: [DebuggerPDP11.OPS.INCB,    DebuggerPDP11.TYPE_DST],        // 1052DD
+            0x8AC0: [DebuggerPDP11.OPS.DECB,    DebuggerPDP11.TYPE_DST],        // 1053DD
+            0x8B00: [DebuggerPDP11.OPS.NEGB,    DebuggerPDP11.TYPE_DST],        // 1054DD
+            0x8B40: [DebuggerPDP11.OPS.ADCB,    DebuggerPDP11.TYPE_DST],        // 1055DD
+            0x8B80: [DebuggerPDP11.OPS.SBCB,    DebuggerPDP11.TYPE_DST],        // 1056DD
+            0x8BC0: [DebuggerPDP11.OPS.TSTB,    DebuggerPDP11.TYPE_DST],        // 1057DD
+            0x8C00: [DebuggerPDP11.OPS.RORB,    DebuggerPDP11.TYPE_DST],        // 1060DD
+            0x8C40: [DebuggerPDP11.OPS.ROLB,    DebuggerPDP11.TYPE_DST],        // 1061DD
+            0x8C80: [DebuggerPDP11.OPS.ASRB,    DebuggerPDP11.TYPE_DST],        // 1062DD
+            0x8CC0: [DebuggerPDP11.OPS.ASLB,    DebuggerPDP11.TYPE_DST],        // 1063DD
+            0x8D00: [DebuggerPDP11.OPS.MTPS,    DebuggerPDP11.TYPE_DST],        // 1064SS (only on LSI-11)
+            0x8D40: [DebuggerPDP11.OPS.MFPD,    DebuggerPDP11.TYPE_DST],        // 1065DD (same as MFPI if no separate instruction/data spaces)
+            0x8D80: [DebuggerPDP11.OPS.MTPD,    DebuggerPDP11.TYPE_DST],        // 1066DD (same as MTPI if no separate instruction/data spaces)
+            0x8DC0: [DebuggerPDP11.OPS.MFPS,    DebuggerPDP11.TYPE_DST]         // 1067SS (only on LSI-11)
         },
         0xFFF8: {
-            0x0080: [DebuggerPDP11.OPS.RTS,     DebuggerPDP11.TYPE_SRCREG]
+            0x0080: [DebuggerPDP11.OPS.RTS,     DebuggerPDP11.TYPE_DSTREG],     // 00020R
+            0x0098: [DebuggerPDP11.OPS.SPL,     DebuggerPDP11.TYPE_DSTNUM3]     // 00023N
         },
         0xFFFF: {
-            0x0000: [DebuggerPDP11.OPS.HALT],
-            0x0001: [DebuggerPDP11.OPS.WAIT],
-            0x0002: [DebuggerPDP11.OPS.RTI],
-            0x0004: [DebuggerPDP11.OPS.BPT],
-            0x0005: [DebuggerPDP11.OPS.RESET],
+            0x0000: [DebuggerPDP11.OPS.HALT],                                   // 000000
+            0x0001: [DebuggerPDP11.OPS.WAIT],                                   // 000001
+            0x0002: [DebuggerPDP11.OPS.RTI],                                    // 000002
+            0x0003: [DebuggerPDP11.OPS.BPT],                                    // 000003
+            0x0004: [DebuggerPDP11.OPS.IOT],                                    // 000004
+            0x0005: [DebuggerPDP11.OPS.RESET],                                  // 000005
+            0x0006: [DebuggerPDP11.OPS.RTT],                                    // 000006
+            0x0007: [DebuggerPDP11.OPS.MFPT],                                   // 000007
             0x00A0: [DebuggerPDP11.OPS.NOP],
             0x00A1: [DebuggerPDP11.OPS.CLC],
             0x00A2: [DebuggerPDP11.OPS.CLV],
@@ -385,7 +408,7 @@ if (DEBUGGER) {
             0x00AC: [DebuggerPDP11.OPS.CLZN],
             0x00AD: [DebuggerPDP11.OPS.CLCZN],
             0x00AE: [DebuggerPDP11.OPS.CLVZN],
-            0x00AF: [DebuggerPDP11.OPS.CCC],        // aka CLCVZN
+            0x00AF: [DebuggerPDP11.OPS.CCC],                                    // aka CLCVZN
             0x00B0: [DebuggerPDP11.OPS.NOP],
             0x00B1: [DebuggerPDP11.OPS.SEC],
             0x00B2: [DebuggerPDP11.OPS.SEV],
@@ -401,7 +424,7 @@ if (DEBUGGER) {
             0x00BC: [DebuggerPDP11.OPS.SEZN],
             0x00BD: [DebuggerPDP11.OPS.SECZN],
             0x00BE: [DebuggerPDP11.OPS.SEVZN],
-            0x00BF: [DebuggerPDP11.OPS.SCC]         // aka SECVZN
+            0x00BF: [DebuggerPDP11.OPS.SCC]                                     // aka SECVZN
         }
     };
 
@@ -1942,15 +1965,29 @@ if (DEBUGGER) {
      */
     DebuggerPDP11.prototype.getOperand = function(opCode, type, dbgAddr)
     {
-        var sOperand = "";
+        var sOperand = "", disp, addr;
         /*
-         * Take care of TYPE_BRANCH opcodes first; then all we'll have to worry about
+         * Take care of TYPE_OTHER opcodes first; then all we'll have to worry about
          * next are TYPE_SRC or TYPE_DST opcodes.
          */
-        if (type & DebuggerPDP11.TYPE_BRANCH) {
-            var disp = ((opCode & 0xff) << 24) >> 24;
-            var addr = (dbgAddr.addr + disp) & 0xffff;
+        var typeOther = type & DebuggerPDP11.TYPE_OTHER;
+        if (typeOther == DebuggerPDP11.TYPE_BRANCH) {
+            disp = ((opCode & 0xff) << 24) >> 24;
+            addr = (dbgAddr.addr + disp) & 0xffff;
             sOperand = str.toHexWord(addr);
+        }
+        else if (typeOther == DebuggerPDP11.TYPE_DSTOFF) {
+            disp = (opCode & 0x3f) << 1;
+            addr = (dbgAddr.addr - disp) & 0xffff;
+            sOperand = str.toHexWord(addr);
+        }
+        else if (typeOther == DebuggerPDP11.TYPE_DSTNUM3) {
+            disp = (opCode & 0x7);
+            sOperand = str.toHexByte(disp);
+        }
+        else if (typeOther == DebuggerPDP11.TYPE_DSTNUM6) {
+            disp = (opCode & 0x3f);
+            sOperand = str.toHexByte(disp);
         }
         else {
             /*
@@ -2056,10 +2093,13 @@ if (DEBUGGER) {
         var b;
         switch (sFlag) {
         case 'N':
-            b = this.cpu.getSF();
+            b = this.cpu.getNF();
             break;
         case 'Z':
             b = this.cpu.getZF();
+            break;
+        case 'V':
+            b = this.cpu.getVF();
             break;
         case 'C':
             b = this.cpu.getCF();
@@ -2085,13 +2125,13 @@ if (DEBUGGER) {
 
         if (iReg < 8) {
             sReg = (iReg < 6? ("R" + iReg) :  (iReg == 6? "SP" : "PC"));
-            sReg += '=' + str.toHex(cpu.regsCur[iReg], 4);
+            sReg += '=' + str.toHex(cpu.regsGen[iReg], 4);
         }
         else if (iReg < 13) {
             sReg = "A" + (iReg - 8) + '=' + str.toHex(cpu.regsAlt[iReg - 8], 4);
         }
         else if (iReg >= 16 && iReg < 20) {
-            sReg = "S" + (iReg - 16) + '=' + str.toHex(cpu.regsStack[iReg - 16], 4);
+            sReg = "S" + (iReg - 16) + '=' + str.toHex(cpu.regsAltStack[iReg - 16], 4);
         }
         else if (iReg == DebuggerPDP11.REG_PSW) {
             sReg = "PS=" + str.toHex(cpu.getPSW(), 4);
@@ -3070,14 +3110,17 @@ if (DEBUGGER) {
                     cpu.setPC(w);
                     this.dbgAddrNextCode = this.newAddr(cpu.getPC());
                     break;
-                case "CF":
-                    if (w) cpu.setCF(); else cpu.clearCF();
+                case "NF":
+                    if (w) cpu.setNF(); else cpu.clearNF();
                     break;
                 case "ZF":
                     if (w) cpu.setZF(); else cpu.clearZF();
                     break;
-                case "SF":
-                    if (w) cpu.setSF(); else cpu.clearSF();
+                case "VF":
+                    if (w) cpu.setVF(); else cpu.clearVF();
+                    break;
+                case "CF":
+                    if (w) cpu.setCF(); else cpu.clearCF();
                     break;
                 default:
                     this.println("unknown register: " + sReg);
@@ -3215,7 +3258,7 @@ if (DEBUGGER) {
             if (n > 2) {
                 dbgAddr.addr = addr;
                 var s = this.getInstruction(dbgAddr);
-                if (s.indexOf("CALL") >= 0) {
+                if (s.indexOf("JSR") >= 0) {
                     /*
                      * Verify that the length of this CALL (or INT), when added to the address of the CALL (or INT),
                      * matches the original return address.  We do this by getting the string index of the opcode bytes,

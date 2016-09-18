@@ -122,21 +122,38 @@ var PDP11 = {
      * automatic inlining will no longer occur.
      */
     ADDR_INVALID: -1,
-
+    /*
+     * Processor Modes
+     */
+    MODE: {
+        KERNEL: 0x0,
+        SUPER:  0x1,
+        UNUSED: 0x2,
+        USER:   0x3,
+        MASK:   0x3
+    },
     /*
      * Processor Status flag definitions (stored in regPSW)
      */
     PSW: {
         CF:     0x0001,         // bit  0: Carry Flag
-        OF:     0x0002,         // bit  1: Overflow Flag
+        CF_SHIFT:    0,
+        VF:     0x0002,         // bit  1: Overflow Flag (aka OF on Intel processors)
+        VF_SHIFT:    1,
         ZF:     0x0004,         // bit  2: Zero Flag
-        SF:     0x0008,         // bit  3: Sign Flag
+        ZF_SHIFT:    2,
+        NF:     0x0008,         // bit  3: Negative Flag (aka SF -- Sign Flag -- on Intel processors)
+        NF_SHIFT:    3,
         TF:     0x0010,         // bit  4: Trap Flag
+        TF_SHIFT:    4,
         PRI:    0x00E0,         // bits 5-7: Priority
+        PRI_SHIFT:   5,
         UNUSED: 0x0700,         // bits 8-10: unused
         REGSET: 0x0800,         // bit  11: Register Set
-        PMODE:  0x3000,         // bits 12-13: Previous Mode
-        CMODE:  0xC000          // bits 14-15: Current Mode
+        PMODE:  0x3000,         // bits 12-13: Previous Mode (see PDP11.MODE)
+        PMODE_SHIFT:12,
+        CMODE:  0xC000,         // bits 14-15: Current Mode (see PDP11.MODE)
+        CMODE_SHIFT:14
     },
     /*
      * Interrupt-related flags (stored in intFlags)
@@ -150,7 +167,7 @@ var PDP11 = {
      * Opcode definitions
      */
     OPCODE: {
-        // to be continued....
+        // TODO
     },
 
     IOBASE_VIRT:    0x00E000,   /*000160000*/
@@ -168,18 +185,18 @@ var PDP11 = {
 };
 
 /*
- * PSW "arithmetic" flags are NOT stored in the PSW register; they are maintained across separate result registers,
- * hence the RESULT designation.
+ * PSW arithmetic flags are NOT stored directly into the PSW register; they are maintained across separate
+ * flag registers.
  */
-PDP11.PSW.RESULT     = (PDP11.PSW.CF | PDP11.PSW.ZF | PDP11.PSW.SF);
+PDP11.PSW.FLAGS         = (PDP11.PSW.NF | PDP11.PSW.ZF | PDP11.PSW.VF | PDP11.PSW.CF);
 
 if (NODE) {
-    global.APPCLASS    = APPCLASS;
-    global.APPNAME     = APPNAME;
-    global.DEBUGGER    = DEBUGGER;
-    global.BYTEARRAYS  = BYTEARRAYS;
-    global.TYPEDARRAYS = TYPEDARRAYS;
-    global.PDP11       = PDP11;
+    global.APPCLASS     = APPCLASS;
+    global.APPNAME      = APPNAME;
+    global.DEBUGGER     = DEBUGGER;
+    global.BYTEARRAYS   = BYTEARRAYS;
+    global.TYPEDARRAYS  = TYPEDARRAYS;
+    global.PDP11        = PDP11;
 
     module.exports = PDP11;
 }
