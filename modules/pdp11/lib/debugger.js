@@ -69,10 +69,6 @@ var DbgAddrPDP11;
 /**
  * DebuggerPDP11(parmsDbg)
  *
- * @constructor
- * @extends Debugger
- * @param {Object} parmsDbg
- *
  * The DebuggerPDP11 component supports the following optional (parmsDbg) properties:
  *
  *      commands: string containing zero or more commands, separated by ';'
@@ -82,6 +78,10 @@ var DbgAddrPDP11;
  *
  * The DebuggerPDP11 component is an optional component that implements a variety of user
  * commands for controlling the CPU, dumping and editing memory, etc.
+ *
+ * @constructor
+ * @extends Debugger
+ * @param {Object} parmsDbg
  */
 function DebuggerPDP11(parmsDbg)
 {
@@ -1921,15 +1921,15 @@ if (DEBUGGER) {
         }
 
         var sOpcodes = "";
-        var sLine = this.toStrAddr(dbgAddrOp) + ": ";
+        var sLine = this.toStrAddr(dbgAddrOp) + ":";
         if (dbgAddrOp.addr !== PDP11.ADDR_INVALID && dbgAddr.addr !== PDP11.ADDR_INVALID) {
             do {
-                sOpcodes += this.toStrBase(this.getWord(dbgAddrOp, true));
+                sOpcodes += ' ' + this.toStrBase(this.getWord(dbgAddrOp, true));
                 if (dbgAddrOp.addr == null) break;
             } while (dbgAddrOp.addr != dbgAddr.addr);
         }
 
-        sLine += str.pad(sOpcodes, 10);
+        sLine += str.pad(sOpcodes, 15);
         sLine += str.pad(sOpName, 7);
         if (sOperands) sLine += ' ' + sOperands;
 

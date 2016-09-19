@@ -1168,6 +1168,12 @@
 
 	<xsl:template match="debugger[not(@ref)]">
 		<xsl:param name="machine" select="''"/>
+		<xsl:variable name="base">
+			<xsl:choose>
+				<xsl:when test="@base"><xsl:value-of select="@base"/></xsl:when>
+				<xsl:otherwise>16</xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
 		<xsl:variable name="commands">
 			<xsl:choose>
 				<xsl:when test="@commands"><xsl:value-of select="@commands"/></xsl:when>
@@ -1183,7 +1189,7 @@
 		<xsl:call-template name="component">
 			<xsl:with-param name="machine" select="$machine"/>
 			<xsl:with-param name="class">debugger</xsl:with-param>
-			<xsl:with-param name="parms">,commands:'<xsl:value-of select="$commands"/>',messages:'<xsl:value-of select="$messages"/>'</xsl:with-param>
+			<xsl:with-param name="parms">,base:<xsl:value-of select="$base"/>,commands:'<xsl:value-of select="$commands"/>',messages:'<xsl:value-of select="$messages"/>'</xsl:with-param>
 		</xsl:call-template>
 	</xsl:template>
 

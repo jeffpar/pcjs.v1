@@ -60,13 +60,17 @@ var DbgAddr;
 /**
  * Debugger(parmsDbg)
  *
- * @constructor
- * @extends Component
- * @param {Object} parmsDbg
+ * The Debugger component supports the following optional (parmsDbg) properties:
+ *
+ *      base: the base to use for most numeric input/output (default is 16)
  *
  * The Debugger component is a shared component containing a subset of functionality used by
  * the other CPU-specific Debuggers (eg, DebuggerX86).  Over time, the goal is to factor out as
  * much common debugging support as possible from those components into this one.
+ *
+ * @constructor
+ * @extends Component
+ * @param {Object} parmsDbg
  */
 function Debugger(parmsDbg)
 {
@@ -77,7 +81,7 @@ function Debugger(parmsDbg)
         /*
          * Default base used to display all values; modified with the "s base" command.
          */
-        this.nBase = 16;
+        this.nBase = parmsDbg['base'] || 16;
 
         /*
          * These keep track of instruction activity, but only when tracing or when Debugger checks

@@ -8,5 +8,5 @@
 	<rom id="rom" addr="0xC000" size="0x0570" file="/devices/pdp11/rom/custom/bootcode.json"/>
 	<ram id="ram" addr="0x10000" size="0x34000"/>
 	<panel ref="/devices/pdp11/panel/1170/wide.xml"/>
-	<debugger id="debugger"/>
+	<debugger id="debugger" base="8"/>
 </machine>
