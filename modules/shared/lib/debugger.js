@@ -75,6 +75,11 @@ function Debugger(parmsDbg)
         Component.call(this, "Debugger", parmsDbg, Debugger);
 
         /*
+         * Default base used to display all values; modified with the "s base" command.
+         */
+        this.nBase = 16;
+
+        /*
          * These keep track of instruction activity, but only when tracing or when Debugger checks
          * have been enabled (eg, one or more breakpoints have been set).
          *
@@ -564,7 +569,7 @@ if (DEBUGGER) {
                 value = this.getRegValue(iReg);
             } else {
                 value = this.getVariable(sValue);
-                if (value == null) value = str.parseInt(sValue, 16);
+                if (value == null) value = str.parseInt(sValue, this.nBase);
             }
             if (value == null && !fQuiet) this.println("invalid " + (sName? sName : "value") + ": " + sValue);
         } else {
@@ -587,7 +592,7 @@ if (DEBUGGER) {
         var fDefined = false;
         if (value !== undefined) {
             fDefined = true;
-            sValue = str.toHex(value, 0, true) + " " + value + ". " + str.toOctal(value, 0, true) + " " + str.toBinBytes(value, 0, true);
+            sValue = str.toHex(value, 0, true) + " " + value + ". " + str.toOct(value, 0, true) + " " + str.toBinBytes(value, 0, true);
         }
         sVar = (sVar != null? (sVar + ": ") : "");
         this.println(sVar + sValue);
@@ -647,6 +652,29 @@ if (DEBUGGER) {
     Debugger.prototype.setVariable = function(sVar, value)
     {
         this.aVariables[sVar] = value;
+    };
+
+    /**
+     * toStrBase(n, cch)
+     *
+     * Use this instead of str.toHex() or str.toOct() to convert words to the default base.
+     *
+     * @this {Debugger}
+     * @param {number|null|undefined} n
+     * @param {number} [cch] is the desired number of hex digits (0 or undefined for default)
+     * @return {string}
+     */
+    Debugger.prototype.toStrBase = function(n, cch)
+    {
+        switch(this.nBase) {
+        case 8:
+            return str.toOct(n, cch);
+        case 10:
+            return n.toString();        // TODO: Do we want to support any formatting based on cch?
+        case 16:
+        default:
+            return str.toHex(n, cch);
+        }
     };
 
 }   // endif DEBUGGER

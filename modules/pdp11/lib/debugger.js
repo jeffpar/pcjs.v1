@@ -260,28 +260,19 @@ if (DEBUGGER) {
     DebuggerPDP11.REG_PC        = 7;            // aka R7
     DebuggerPDP11.REG_PSW       = 20;
 
-    DebuggerPDP11.MODE_REG      = 0x0;          // REGISTER                 (register is operand)
-    DebuggerPDP11.MODE_REGD     = 0x1;          // REGISTER DEFERRED        (register is address of operand)
-    DebuggerPDP11.MODE_POSTINC  = 0x2;          // POST-INCREMENT           (register is address of operand, register incremented)
-    DebuggerPDP11.MODE_POSTINCD = 0x3;          // POST-INCREMENT DEFERRED  (register is address of address of operand, register incremented)
-    DebuggerPDP11.MODE_PREDEC   = 0x4;          // PRE-DECREMENT            (register decremented, register is address of operand)
-    DebuggerPDP11.MODE_PREDECD  = 0x5;          // PRE-DECREMENT DEFERRED   (register decremented, register is address of address of operand)
-    DebuggerPDP11.MODE_INDEX    = 0x6;          // INDEX                    (register + next word is address of operand)
-    DebuggerPDP11.MODE_INDEXD   = 0x7;          // INDEX DEFERRED           (register + next word is address of address of operand)
-
     /*
      * Operand descriptor masks; anything that's not covered by TYPE_SRC or TYPE_DST must be a TYPE_OTHER value.
      */
     DebuggerPDP11.TYPE_DSTREG   = 0x0007;
-    DebuggerPDP11.TYPE_DSTMOD   = 0x0038;
-    DebuggerPDP11.TYPE_DST      = (DebuggerPDP11.TYPE_DSTMOD | DebuggerPDP11.TYPE_DSTREG);
+    DebuggerPDP11.TYPE_DSTMODE  = 0x0038;
+    DebuggerPDP11.TYPE_DST      = (DebuggerPDP11.TYPE_DSTMODE | DebuggerPDP11.TYPE_DSTREG);
     DebuggerPDP11.TYPE_SRCREG   = 0x01C0;
-    DebuggerPDP11.TYPE_SRCMOD   = 0x0E00;
-    DebuggerPDP11.TYPE_SRC      = (DebuggerPDP11.TYPE_SRCMOD | DebuggerPDP11.TYPE_SRCREG);
+    DebuggerPDP11.TYPE_SRCMODE  = 0x0E00;
+    DebuggerPDP11.TYPE_SRC      = (DebuggerPDP11.TYPE_SRCMODE | DebuggerPDP11.TYPE_SRCREG);
     DebuggerPDP11.TYPE_BRANCH   = 0x1000;
     DebuggerPDP11.TYPE_DSTOFF   = 0x2000;
     DebuggerPDP11.TYPE_DSTNUM3  = 0x3000;       // DST 3-bit number (ie, just the DSTREG field)
-    DebuggerPDP11.TYPE_DSTNUM6  = 0x6000;       // DST 6-bit number (ie, both the DSTREG and DSTMOD fields)
+    DebuggerPDP11.TYPE_DSTNUM6  = 0x6000;       // DST 6-bit number (ie, both the DSTREG and DSTMODE fields)
     DebuggerPDP11.TYPE_OTHER    = 0xF000;
 
     /*
@@ -791,27 +782,27 @@ if (DEBUGGER) {
     };
 
     /**
-     * toHexOffset(off)
+     * toStrOffset(off)
      *
      * @this {DebuggerPDP11}
      * @param {number|null|undefined} [off]
      * @return {string} the hex representation of off
      */
-    DebuggerPDP11.prototype.toHexOffset = function(off)
+    DebuggerPDP11.prototype.toStrOffset = function(off)
     {
-        return str.toHex(off, 4);
+        return this.toStrBase(off);
     };
 
     /**
-     * toHexAddr(dbgAddr)
+     * toStrAddr(dbgAddr)
      *
      * @this {DebuggerPDP11}
      * @param {DbgAddrPDP11} dbgAddr
      * @return {string} the hex representation of the address
      */
-    DebuggerPDP11.prototype.toHexAddr = function(dbgAddr)
+    DebuggerPDP11.prototype.toStrAddr = function(dbgAddr)
     {
-        return this.toHexOffset(dbgAddr.addr);
+        return this.toStrOffset(dbgAddr.addr);
     };
 
     /**
@@ -871,7 +862,7 @@ if (DEBUGGER) {
                 typePrev = block.type;
                 var sType = MemoryPDP11.TYPE.NAMES[typePrev];
                 if (block) {
-                    this.println(str.toHex(block.id) + "  %" + str.toHex(i << this.bus.nBlockShift) + "  %%" + str.toHex(block.addr) + "  " + str.toHexWord(block.used) + "  " + str.toHexWord(block.size) + "  " + sType);
+                    this.println(str.toHex(block.id, 8) + "  %" + str.toHex(i << this.bus.nBlockShift, 8) + "  %%" + str.toHex(block.addr, 8) + "  " + str.toHexWord(block.used) + "  " + str.toHexWord(block.size) + "  " + sType);
                 }
                 if (typePrev != MemoryPDP11.TYPE.NONE) typePrev = -1;
                 cPrev = 0;
@@ -1080,7 +1071,7 @@ if (DEBUGGER) {
     DebuggerPDP11.prototype.message = function(sMessage, fAddress)
     {
         if (fAddress) {
-            sMessage += " at " + this.toHexAddr(this.newAddr(this.cpu.getPC()));
+            sMessage += " at " + this.toStrAddr(this.newAddr(this.cpu.getPC()));
         }
 
         if (this.bitsMessage & MessagesPDP11.BUFFER) {
@@ -1657,7 +1648,7 @@ if (DEBUGGER) {
         if (aBreak != this.aBreakExec) {
             var addr = this.getAddr(dbgAddr);
             if (addr === PDP11.ADDR_INVALID) {
-                this.println("invalid address: " + this.toHexAddr(dbgAddr));
+                this.println("invalid address: " + this.toStrAddr(dbgAddr));
                 fSuccess = false;
             } else {
                 this.bus.addMemBreak(addr, aBreak == this.aBreakWrite);
@@ -1751,7 +1742,7 @@ if (DEBUGGER) {
     DebuggerPDP11.prototype.printBreakpoint = function(aBreak, i, sAction)
     {
         var dbgAddr = aBreak[i];
-        this.println(aBreak[0] + ' ' + this.toHexAddr(dbgAddr) + (sAction? (' ' + sAction) : (dbgAddr.sCmd? (' "' + dbgAddr.sCmd + '"') : '')));
+        this.println(aBreak[0] + ' ' + this.toStrAddr(dbgAddr) + (sAction? (' ' + sAction) : (dbgAddr.sCmd? (' "' + dbgAddr.sCmd + '"') : '')));
     };
 
     /**
@@ -1929,16 +1920,16 @@ if (DEBUGGER) {
             sOperands += (sOperand || "???");
         }
 
-        var sBytes = "";
-        var sLine = this.toHexAddr(dbgAddrOp) + ": ";
+        var sOpcodes = "";
+        var sLine = this.toStrAddr(dbgAddrOp) + ": ";
         if (dbgAddrOp.addr !== PDP11.ADDR_INVALID && dbgAddr.addr !== PDP11.ADDR_INVALID) {
             do {
-                sBytes += str.toHex(this.getByte(dbgAddrOp, 1), 2);
+                sOpcodes += this.toStrBase(this.getWord(dbgAddrOp, true));
                 if (dbgAddrOp.addr == null) break;
             } while (dbgAddrOp.addr != dbgAddr.addr);
         }
 
-        sLine += str.pad(sBytes, 10);
+        sLine += str.pad(sOpcodes, 10);
         sLine += str.pad(sOpName, 7);
         if (sOperands) sLine += ' ' + sOperands;
 
@@ -2008,14 +1999,14 @@ if (DEBUGGER) {
                  * Note that opcodes that specify only REG bits in the type mask (ie, no MOD bits)
                  * will automatically default to MODE_REG below.
                  */
-                switch(mode & DebuggerPDP11.TYPE_DSTMOD) {
-                case DebuggerPDP11.MODE_REG:            // 0x0: REGISTER
+                switch(mode & DebuggerPDP11.TYPE_DSTMODE) {
+                case PDP11.OPMODE.REG:                  // 0x0: REGISTER
                     sOperand = "R" + reg;
                     break;
-                case DebuggerPDP11.MODE_REGD:           // 0x1: REGISTER DEFERRED
+                case PDP11.OPMODE.REGD:                 // 0x1: REGISTER DEFERRED
                     sOperand = "@R" + reg;
                     break;
-                case DebuggerPDP11.MODE_POSTINC:        // 0x2: POST-INCREMENT
+                case PDP11.OPMODE.POSTINC:              // 0x2: POST-INCREMENT
                     if (reg < 7) {
                         sOperand = "(R" + reg + ")+";
                     } else {
@@ -2026,7 +2017,7 @@ if (DEBUGGER) {
                         sOperand = "#" + str.toHexWord(wIndex);
                     }
                     break;
-                case DebuggerPDP11.MODE_POSTINCD:       // 0x3: POST-INCREMENT DEFERRED
+                case PDP11.OPMODE.POSTINCD:             // 0x3: POST-INCREMENT DEFERRED
                     if (reg < 7) {
                         sOperand = "@(R" + reg + ")+";
                     } else {
@@ -2037,20 +2028,20 @@ if (DEBUGGER) {
                         sOperand = "@#" + str.toHexWord(wIndex);
                     }
                     break;
-                case DebuggerPDP11.MODE_PREDEC:         // 0x4: PRE-DECREMENT
+                case PDP11.OPMODE.PREDEC:               // 0x4: PRE-DECREMENT
                     sOperand = "-(R" + reg + ")";
                     break;
-                case DebuggerPDP11.MODE_PREDECD:        // 0x5: PRE-DECREMENT DEFERRED
+                case PDP11.OPMODE.PREDECD:              // 0x5: PRE-DECREMENT DEFERRED
                     sOperand = "@-R(" + reg + ")";
                     break;
-                case DebuggerPDP11.MODE_INDEX:          // 0x6: INDEX
+                case PDP11.OPMODE.INDEX:                // 0x6: INDEX
                     wIndex = this.getWord(dbgAddr, true);
                     /*
                      * When using R7 (aka PC), INDEX is known as RELATIVE
                      */
                     sOperand = str.toHexWord(wIndex) + (reg < 7? "(R" + reg + ")" : "(PC)");
                     break;
-                case DebuggerPDP11.MODE_INDEXD:         // 0x7: INDEX DEFERRED
+                case PDP11.OPMODE.INDEXD:               // 0x7: INDEX DEFERRED
                     wIndex = this.getWord(dbgAddr, true);
                     /*
                      * When using R7 (aka PC), INDEX DEFERRED is known as RELATIVE DEFERRED
@@ -2125,16 +2116,16 @@ if (DEBUGGER) {
 
         if (iReg < 8) {
             sReg = (iReg < 6? ("R" + iReg) :  (iReg == 6? "SP" : "PC"));
-            sReg += '=' + str.toHex(cpu.regsGen[iReg], 4);
+            sReg += '=' + this.toStrBase(cpu.regsGen[iReg]);
         }
         else if (iReg < 13) {
-            sReg = "A" + (iReg - 8) + '=' + str.toHex(cpu.regsAlt[iReg - 8], 4);
+            sReg = "A" + (iReg - 8) + '=' + this.toStrBase(cpu.regsAlt[iReg - 8]);
         }
         else if (iReg >= 16 && iReg < 20) {
-            sReg = "S" + (iReg - 16) + '=' + str.toHex(cpu.regsAltStack[iReg - 16], 4);
+            sReg = "S" + (iReg - 16) + '=' + this.toStrBase(cpu.regsAltStack[iReg - 16]);
         }
         else if (iReg == DebuggerPDP11.REG_PSW) {
-            sReg = "PS=" + str.toHex(cpu.getPSW(), 4);
+            sReg = "PS=" + this.toStrBase(cpu.getPSW());
         }
         if (sReg) sReg += ' ';
         return sReg;
@@ -2299,7 +2290,7 @@ if (DEBUGGER) {
                 if (offSymbol === undefined) continue;
                 var sSymbolOrig = symbolTable.aSymbols[sSymbol]['l'];
                 if (sSymbolOrig) sSymbol = sSymbolOrig;
-                this.println(this.toHexOffset(offSymbol) + ' ' + sSymbol);
+                this.println(this.toStrOffset(offSymbol) + ' ' + sSymbol);
             }
         }
     };
@@ -2461,7 +2452,7 @@ if (DEBUGGER) {
 
         this.dbgAddrAssemble = dbgAddr;
         if (asArgs[2] === undefined) {
-            this.println("begin assemble at " + this.toHexAddr(dbgAddr));
+            this.println("begin assemble at " + this.toStrAddr(dbgAddr));
             this.fAssemble = true;
             this.cpu.updateCPU();
             return;
@@ -2561,7 +2552,7 @@ if (DEBUGGER) {
                 return;
             if (this.findBreakpoint(this.aBreakWrite, dbgAddr, true))
                 return;
-            this.println("breakpoint missing: " + this.toHexAddr(dbgAddr));
+            this.println("breakpoint missing: " + this.toStrAddr(dbgAddr));
             return;
         }
 
@@ -2706,7 +2697,7 @@ if (DEBUGGER) {
         while (cLines-- && cb > 0) {
             var data = 0, iByte = 0, i;
             var sData = "", sChars = "";
-            sAddr = this.toHexAddr(dbgAddr);
+            sAddr = this.toStrAddr(dbgAddr);
             for (i = 16; i > 0 && cb > 0; i--) {
                 var b = this.getByte(dbgAddr, 1);
                 data |= (b << (iByte++ << 3));
@@ -2767,7 +2758,7 @@ if (DEBUGGER) {
                 this.println("warning: " + str.toHex(vNew) + " exceeds " + size + "-byte value");
             }
             var vOld = fnGet.call(this, dbgAddr);
-            this.println("changing " + this.toHexAddr(dbgAddr) + " from " + str.toHex(vOld, cch, true) + " to " + str.toHex(vNew, cch, true));
+            this.println("changing " + this.toStrAddr(dbgAddr) + " from " + str.toHex(vOld, cch, true) + " to " + str.toHex(vNew, cch, true));
             fnSet.call(this, dbgAddr, vNew, size);
         }
     };
@@ -2896,7 +2887,7 @@ if (DEBUGGER) {
                     sDelta = "";
                     nDelta = dbgAddr.addr - aSymbol[1];
                     if (nDelta) sDelta = " + " + str.toHexWord(nDelta);
-                    s = aSymbol[0] + " (" + this.toHexOffset(aSymbol[1]) + ')' + sDelta;
+                    s = aSymbol[0] + " (" + this.toStrOffset(aSymbol[1]) + ')' + sDelta;
                     if (fPrint) this.println(s);
                     sSymbol = s;
                 }
@@ -2904,7 +2895,7 @@ if (DEBUGGER) {
                     sDelta = "";
                     nDelta = aSymbol[5] - dbgAddr.addr;
                     if (nDelta) sDelta = " - " + str.toHexWord(nDelta);
-                    s = aSymbol[4] + " (" + this.toHexOffset(aSymbol[5]) + ')' + sDelta;
+                    s = aSymbol[4] + " (" + this.toStrOffset(aSymbol[5]) + ')' + sDelta;
                     if (fPrint) this.println(s);
                     if (!sSymbol) sSymbol = s;
                 }
@@ -3015,6 +3006,18 @@ if (DEBUGGER) {
     DebuggerPDP11.prototype.doOptions = function(asArgs)
     {
         switch (asArgs[1]) {
+        case "base":
+            if (asArgs[2]) {
+                var nBase = +asArgs[2];
+                if (nBase == 8 || nBase == 10 || nBase == 16) {
+                    this.nBase = nBase;
+                } else {
+                    this.println("invalid base: " + nBase);
+                    break;
+                }
+            }
+            this.println("default base: " + this.nBase);
+            break;
         case "cs":
             var nCycles;
             if (asArgs[3] !== undefined) nCycles = +asArgs[3];          // warning: decimal instead of hex conversion
@@ -3049,6 +3052,7 @@ if (DEBUGGER) {
 
         case "?":
             this.println("debugger options:");
+            this.println("\tbase #\t\tset default base to #");
             this.println("\tcs int #\tset checksum cycle interval to #");
             this.println("\tcs start #\tset checksum cycle start count to #");
             this.println("\tcs stop #\tset checksum cycle stop count to #");
@@ -3139,7 +3143,7 @@ if (DEBUGGER) {
 
         if (fInstruction) {
             this.dbgAddrNextCode = this.newAddr(cpu.getPC());
-            this.doUnassemble(this.toHexAddr(this.dbgAddrNextCode));
+            this.doUnassemble(this.toStrAddr(this.dbgAddrNextCode));
         }
     };
 
@@ -3300,7 +3304,7 @@ if (DEBUGGER) {
         var nFrames = 10, cFrames = 0;
         var dbgAddrCall = this.newAddr();
         var dbgAddrStack = this.newAddr(this.cpu.getSP());
-        this.println("stack trace for " + this.toHexAddr(dbgAddrStack));
+        this.println("stack trace for " + this.toStrAddr(dbgAddrStack));
 
         while (cFrames < nFrames) {
             var sCall = null, sCallPrev = null, cTests = 256;
@@ -3326,7 +3330,7 @@ if (DEBUGGER) {
                 var a = sCall.match(/[0-9A-F]+$/);
                 if (a) sSymbol = this.doList(a[0]);
             }
-            sCall = str.pad(sCall, 50) + "  ;" + (sSymbol || "stack=" + this.toHexAddr(dbgAddrStack)); // + " return=" + this.toHexAddr(dbgAddrCall));
+            sCall = str.pad(sCall, 50) + "  ;" + (sSymbol || "stack=" + this.toStrAddr(dbgAddrStack)); // + " return=" + this.toStrAddr(dbgAddrCall));
             this.println(sCall);
             sCallPrev = sCall;
             cFrames++;
@@ -3489,7 +3493,7 @@ if (DEBUGGER) {
         try {
             if (!sCmd.length || sCmd == "end") {
                 if (this.fAssemble) {
-                    this.println("ended assemble at " + this.toHexAddr(this.dbgAddrAssemble));
+                    this.println("ended assemble at " + this.toStrAddr(this.dbgAddrAssemble));
                     this.dbgAddrNextCode = this.dbgAddrAssemble;
                     this.fAssemble = false;
                 }
@@ -3514,7 +3518,7 @@ if (DEBUGGER) {
             if (this.isReady() /* && !this.isBusy(true) */ && sCmd.length > 0) {
 
                 if (this.fAssemble) {
-                    sCmd = "a " + this.toHexAddr(this.dbgAddrAssemble) + ' ' + sCmd;
+                    sCmd = "a " + this.toStrAddr(this.dbgAddrAssemble) + ' ' + sCmd;
                 }
 
                 var asArgs = this.shiftArgs(sCmd.replace(/ +/g, ' ').split(' '));

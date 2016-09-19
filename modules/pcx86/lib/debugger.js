@@ -2777,7 +2777,7 @@ if (DEBUGGER) {
                     sType += " -> " + Memory.TYPE.NAMES[block.type];
                 }
                 if (block) {
-                    this.println(str.toHex(block.id) + "  %" + str.toHex(i << this.cpu.nBlockShift) + "  %%" + str.toHex(block.addr) + "  " + str.toHexWord(block.used) + "  " + str.toHexWord(block.size) + "  " + sType);
+                    this.println(str.toHex(block.id, 8) + "  %" + str.toHex(i << this.cpu.nBlockShift, 8) + "  %%" + str.toHex(block.addr, 8) + "  " + str.toHexWord(block.used) + "  " + str.toHexWord(block.size) + "  " + sType);
                 }
                 if (typePrev != Memory.TYPE.NONE && typePrev != Memory.TYPE.UNPAGED) typePrev = -1;
                 cPrev = 0;

@@ -201,7 +201,7 @@ str.toBinBytes = function(n, cb, fPrefix)
 };
 
 /**
- * toOctal(n, cch, fPrefix)
+ * toOct(n, cch, fPrefix)
  *
  * Converts an integer to octal, with the specified number of digits (default of 6; max of 11)
  *
@@ -214,7 +214,7 @@ str.toBinBytes = function(n, cb, fPrefix)
  * @param {boolean} [fPrefix]
  * @return {string} the octal representation of n
  */
-str.toOctal = function(n, cch, fPrefix)
+str.toOct = function(n, cch, fPrefix)
 {
     var s = "";
 

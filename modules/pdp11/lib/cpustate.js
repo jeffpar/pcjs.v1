@@ -50,6 +50,7 @@ if (NODE) {
  * The CPUStatePDP11 class uses the following (parmsCPU) properties:
  *
  *      model: a number (eg, 1170) that should match one of the PDP11.MODEL_* values
+ *      resetAddr: reset address (default is 0)
  *
  * This extends the CPU class and passes any remaining parmsCPU properties to the CPU class
  * constructor, along with a default speed (cycles per second) based on the specified (or default)
@@ -62,6 +63,7 @@ if (NODE) {
 function CPUStatePDP11(parmsCPU)
 {
     this.model = +parmsCPU['model'] || PDP11.MODEL_1170;
+    this.resetAddr = parmsCPU['resetAddr'] || 0;
 
     var nCyclesDefault = 0;
     switch(this.model) {
@@ -125,11 +127,45 @@ CPUStatePDP11.prototype.reset = function()
  */
 CPUStatePDP11.prototype.initRegs = function()
 {
-    // BEGIN pdp11.js:40:82
+    /*
+     * Instead of having separate flagC, flagZ and flagN variables, I would prefer to have only one: flagsCZN.
+     * The C and N flags don't conflict; they are always bits 16 and 15 of the last 16-bit arithmetic result (or
+     * bits 8 and 7 of the last 8-bit arithmetic result).  The Z flag is a "bit" more complicated, because it's a
+     * representation of bits 15-0 (or 7-0), which overlap the N flag bit.  That overlap is fine after any given
+     * arithmetic operation, because of the four possible N and Z combinations:
+     *
+     *      N   Z
+     *      -   -
+     *      0   0       Positive non-zero number
+     *      0   1       Zero
+     *      1   0       Negative non-zero number
+     *      1   1       INVALID
+     *
+     * the fourth combination is an impossibility (the world of floating point numbers, with their NaNs, positive
+     * and negative zeros, infinities, etc, is another story, which doesn't concern us here).
+     *
+     * The problem is that some intervening NON-arithmetic instruction (eg, SEN or SEZ) could be executed that sets
+     * either N or Z independently, resulting in BOTH flags being set.
+     *
+     * One way to support that combination would be to define Z as the result of all non-sign bits.  However,
+     * that means that, after any arithmetic operation, we would have to propagate the sign bit of the result to
+     * one or more other bits in flagsCZN; eg:
+     *
+     *      flagsCZN = result | ((result & 0x8000) >> 1)
+     * or:
+     *      flagsCZN = result | ((result & 0xffff)? 1 : 0)
+     *
+     * It's worth noting that all that extra work is actually required for only ONE 16-bit value: -32768 or 0x8000
+     * (and ONE 8-bit value: -128 or 0x80), because all other negative numbers already have 1 or more lower bits set.
+     *
+     * A simpler approach would be to leave flagN independent, and only combine flagC and flagZ (into flagCZ).
+     * Alternatively, we could combine flagC and flagN and leave flagZ independent; the choice is arbitrary. -JP
+     */
     this.flagC = 0x10000;       // PSW C bit
-    this.flagN = 0x8000;        // PSW N bit
     this.flagV = 0x8000;        // PSW V bit
     this.flagZ = 0xffff;        // ~ PSW Z bit
+    this.flagN = 0x8000;        // PSW N bit
+
     this.PSW = 0xf;             // PSW other bits
     this.regsGen = [            // General R0 - R7
         0, 0, 0, 0, 0, 0, 0, 0
@@ -137,7 +173,7 @@ CPUStatePDP11.prototype.initRegs = function()
     this.regsAlt = [            // Alternate R0 - R5
         0, 0, 0, 0, 0, 0
     ];
-    this.regsAltStack = [       // Alternate R6 (kernel, super, illegal, user)
+    this.regsAltStack = [       // Alternate R6 stack pointers (kernel, super, illegal, user)
         0, 0, 0, 0
     ];
     this.memory = [];           // Main memory (words)
@@ -177,7 +213,6 @@ CPUStatePDP11.prototype.initRegs = function()
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     ];
     this.debugPC = -1;
-    // END pdp11.js:40:82
 };
 
 /**
@@ -187,6 +222,7 @@ CPUStatePDP11.prototype.initRegs = function()
  */
 CPUStatePDP11.prototype.resetRegs = function()
 {
+    this.setPC(this.resetAddr);
     this.stackLimit = 0xff;
     this.CPU_Error = 0;
     this.interruptQueue = [];
@@ -660,14 +696,15 @@ CPUStatePDP11.prototype.panic = function(reason)
 /**
  * trap(vector, reason)
  *
- * trap() handles all the trap/abort functions. It reads the trap vector from kernel
+ * trap() handles all the trap/abort functions.  It reads the trap vector from kernel
  * D space, changes mode to reflect the new PSW and PC, and then pushes the old PSW and
- * PC onto the new mode stack. trap() returns a -1 which is passed up through function
+ * PC onto the new mode stack.  trap() returns a -1 which is passed up through function
  * calls to indicate that a trap/abort has occurred (suspend instruction processing).
  *
  * @this {CPUStatePDP11}
  * @param {number} vector
  * @param {number} reason
+ * @return {number}
  */
 CPUStatePDP11.prototype.trap = function(vector, reason)
 {
@@ -1320,7 +1357,6 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                 nDebugState = 1;
             }
 
-            // BEGIN pdp11.js:886:1936
             var instruction,
                 src,
                 dst,
@@ -2401,7 +2437,6 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                 }
                 this.trapMask = 0;
             }
-            // END pdp11.js:886:1936
         } while (this.nStepCycles > 0);
     }
 

@@ -123,7 +123,7 @@ var PDP11 = {
      */
     ADDR_INVALID: -1,
     /*
-     * Processor Modes
+     * Processor modes
      */
     MODE: {
         KERNEL: 0x0,
@@ -162,6 +162,19 @@ var PDP11 = {
         NONE:   0x0000,
         INTR:   0x00ff,         // mask for 8 bits, representing interrupt levels 0-7
         HALT:   0x0100          // halt requested; see opHLT()
+    },
+    /*
+     * Opcode modes
+     */
+    OPMODE: {
+        REG:       0x0,         // REGISTER                 (register is operand)
+        REGD:      0x1,         // REGISTER DEFERRED        (register is address of operand)
+        POSTINC:   0x2,         // POST-INCREMENT           (register is address of operand, register incremented)
+        POSTINCD:  0x3,         // POST-INCREMENT DEFERRED  (register is address of address of operand, register incremented)
+        PREDEC:    0x4,         // PRE-DECREMENT            (register decremented, register is address of operand)
+        PREDECD:   0x5,         // PRE-DECREMENT DEFERRED   (register decremented, register is address of address of operand)
+        INDEX:     0x6,         // INDEX                    (register + next word is address of operand)
+        INDEXD:    0x7          // INDEX DEFERRED           (register + next word is address of address of operand)
     },
     /*
      * Opcode definitions

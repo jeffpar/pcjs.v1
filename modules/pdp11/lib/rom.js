@@ -204,28 +204,39 @@ ROMPDP11.prototype.doneLoad = function(sURL, sROMData, nErrorCode)
 
     Component.addMachineResource(this.idMachine, sURL, sROMData);
 
+    var i;
     if (sROMData.charAt(0) == "[" || sROMData.charAt(0) == "{") {
         try {
             /*
-             * The most likely source of any exception will be here: parsing the JSON-encoded ROM data.
+             * The most likely source of any exception will be here: parsing the JSON-encoded ROM.
              */
+            var a, ib;
             var rom = eval("(" + sROMData + ")");
-            var ab = rom['bytes'];
-            var adw = rom['data'];
 
-            if (ab) {
-                this.abROM = ab;
+            if (a = rom['bytes']) {
+                this.abROM = a;
             }
-            else if (adw) {
+            else if (a = rom['words']) {
                 /*
-                 * Convert all the DWORDs into BYTEs, so that subsequent code only has to deal with abROM.
+                 * Convert all WORDs into BYTEs, so that subsequent code only has to deal with abROM.
                  */
-                this.abROM = new Array(adw.length * 4);
-                for (var idw = 0, ib = 0; idw < adw.length; idw++) {
-                    this.abROM[ib++] = adw[idw] & 0xff;
-                    this.abROM[ib++] = (adw[idw] >> 8) & 0xff;
-                    this.abROM[ib++] = (adw[idw] >> 16) & 0xff;
-                    this.abROM[ib++] = (adw[idw] >> 24) & 0xff;
+                this.abROM = new Array(a.length * 2);
+                for (i = 0, ib = 0; i < a.length; i++) {
+                    this.abROM[ib++] = a[i] & 0xff;
+                    this.abROM[ib++] = (a[i] >> 8) & 0xff;
+                    this.assert(!(a[i] & ~0xffff));
+                }
+            }
+            else if (a = rom['data']) {
+                /*
+                 * Convert all DWORDs into BYTEs, so that subsequent code only has to deal with abROM.
+                 */
+                this.abROM = new Array(a.length * 4);
+                for (i = 0, ib = 0; i < a.length; i++) {
+                    this.abROM[ib++] = a[i] & 0xff;
+                    this.abROM[ib++] = (a[i] >> 8) & 0xff;
+                    this.abROM[ib++] = (a[i] >> 16) & 0xff;
+                    this.abROM[ib++] = (a[i] >> 24) & 0xff;
                 }
             }
             else {
@@ -255,7 +266,7 @@ ROMPDP11.prototype.doneLoad = function(sURL, sROMData, nErrorCode)
         var sHexData = sROMData.replace(/\n/gm, " ").replace(/ +$/, "");
         var asHexData = sHexData.split(" ");
         this.abROM = new Array(asHexData.length);
-        for (var i = 0; i < asHexData.length; i++) {
+        for (i = 0; i < asHexData.length; i++) {
             this.abROM[i] = str.parseInt(asHexData[i], 16);
         }
     }

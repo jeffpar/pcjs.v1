@@ -1951,7 +1951,7 @@ X86CPU.prototype.restore = function(data)
  * getSeg(sName)
  *
  * @param {string} sName
- * @return {Array}
+ * @return {X86Seg|Array}
  */
 X86CPU.prototype.getSeg = function(sName)
 {
@@ -2374,8 +2374,11 @@ X86CPU.prototype.setSP = function(off)
  * specifies any flags not contained in the new type parameter, then those flags must be immediately
  * calculated and written to the appropriate bit(s) in regPS.
  *
- * The fSubtract parameter is used to indicate a "subtracted" result (eg, CMP, DEC, SUB, SBB); the
- * default assumes an "added" result (eg, ADD, ADC, INC).
+ * The default assumes an "addition" (eg, ADD, ADC, INC), where value = dst + src. The fSubtract
+ * parameter is used to indicate a "subtraction" (eg, CMP, DEC, SUB, SBB), where value = dst - src;
+ * We can transform a subtraction into an addition, since it's also true that dst = value + src,
+ * by swapping swap dst and value -- which is exactly what we do below.  This allows all downstream
+ * flag calculations (eg, getCF(), getOF()) to remain the same.
  *
  * @this {X86CPU}
  * @param {number} dst
@@ -2469,12 +2472,11 @@ X86CPU.prototype.getCarry = function()
 /**
  * getCF()
  *
- * Notes regarding carry following an I386 addition:
+ * The following table summarizes bit 31 of the dst (D) and src (S) operands, bit 31 of the
+ * addition (A), along with the expected carry bit (C):
  *
- * The following table summarizes bit 31 of dst, src, and result, along with the expected carry:
- *
- *      dst src res carry
- *      --- --- --- -----
+ *      D   S   A   C
+ *      -   -   -   -
  *      0   0   0   0       no
  *      0   0   1   0       no (there must have been a carry out of bit 30, but it was "absorbed")
  *      0   1   0   1       yes (there must have been a carry out of bit 30, but it was NOT "absorbed")
@@ -2487,6 +2489,10 @@ X86CPU.prototype.getCarry = function()
  * So, we use the following calculation:
  *
  *      (resultDst ^ ((resultDst ^ resultSrc) & (resultSrc ^ resultArith))) & resultType
+ *
+ * NOTE: The above table assumes that the resultDst (D) and resultSrc (S) operands were ADDED to
+ * produce resultArith (A); if they were SUBTRACTED instead (D - S), then D and A must be swapped
+ * after the subtraction, so that the above truth table still applies; see setArithResult().
  *
  * @this {X86CPU}
  * @return {number} 0 or X86.PS.CF
@@ -2522,8 +2528,8 @@ X86CPU.prototype.getCF = function()
  *      lowest nibble of v.  This number is like a miniature 16-bit parity-table indexed by the low four bits in v.
  *      The result has the parity of v in bit 1, which is masked and returned.
  *
- * The x86 parity flag (PF) is based exclusively on the low 8 bits of resultParitySign, and PF must be SET if that byte
- * has EVEN parity; the above calculation yields ODD parity, so we use the conditional operator to invert the result.
+ * The x86 parity flag (PF) is based exclusively on the low 8 bits of resultParitySign, so our calculation is bit
+ * simpler.  Note that PF must be SET if that byte has EVEN parity, and CLEAR if it has ODD parity.
  *
  * @this {X86CPU}
  * @return {number} 0 or X86.PS.PF
@@ -2625,8 +2631,8 @@ X86CPU.prototype.getSF = function()
  *
  *      ((resultDst ^ resultArith) & (resultSrc ^ resultArith)) & resultType
  *
- * which you can verify from the following table of sign bits (where x1 is resultDst ^ resultArith,
- * and x2 is resultSrc ^ resultArith):
+ * which you can verify from the following table of sign bits, where x1 is resultDst ^ resultArith,
+ * and x2 is resultSrc ^ resultArith:
  *
  *      D   S   A   x1  x2  OF
  *      -   -   -   --  --  --
@@ -2638,6 +2644,10 @@ X86CPU.prototype.getSF = function()
  *      1   0   1   0   1   0
  *      1   1   0   1   1   1 (adding two negative values yielded a positive value)
  *      1   1   1   0   0   0
+ *
+ * NOTE: The above table assumes that the resultDst (D) and resultSrc (S) operands were ADDED to
+ * produce resultArith (A); if they were SUBTRACTED instead (D - S), then D and A must be swapped
+ * after the subtraction, so that the above truth table still applies; see setArithResult().
  *
  * @this {X86CPU}
  * @return {number} 0 or X86.PS.OF

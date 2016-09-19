@@ -333,7 +333,7 @@ BusPDP11.prototype.addMemory = function(addr, size, type)
     }
 
     if (sizeLeft <= 0) {
-        this.status(Math.floor(size / 1024) + "Kb " + MemoryPDP11.TYPE.NAMES[type] + " at " + str.toHexWord(addr));
+        this.status(Math.floor(size / 1024) + "Kb " + MemoryPDP11.TYPE.NAMES[type] + " at " + str.toHexLong(addr));
         return true;
     }
 
