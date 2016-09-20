@@ -86,7 +86,7 @@ function Debugger8080(parmsDbg)
 {
     if (DEBUGGER) {
 
-        Component.call(this, "Debugger", parmsDbg, Debugger8080);
+        Debugger.call(this, parmsDbg);
 
         this.style = Debugger8080.STYLE_8080;
 
