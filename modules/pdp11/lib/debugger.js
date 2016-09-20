@@ -2187,7 +2187,7 @@ if (DEBUGGER) {
             sDump += this.getRegOutput(i);
         }
         sDump += '\n';
-        sDump += this.getRegOutput(DebuggerPDP11.REG_SP) + this.getRegOutput(DebuggerPDP11.REG_PC);
+        sDump += this.getRegOutput(DebuggerPDP11.REG_SP) + this.getRegOutput(DebuggerPDP11.REG_PC) + this.getRegOutput(DebuggerPDP11.REG_PSW);
         sDump += this.getFlagOutput('T') + this.getFlagOutput('N') + this.getFlagOutput('Z') + this.getFlagOutput('V') + this.getFlagOutput('C');
         return sDump;
     };
