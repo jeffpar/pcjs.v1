@@ -59,7 +59,7 @@ if (NODE) {
  * is the ROM you expected.
  *
  * Finally, while making ROM "writable" may seem a contradiction in terms, I want to be able to load selected
- * CP/M binary files into memory purely for testing purposes, and the RAM component has no "file" option, so the
+ * binary files into memory purely for testing purposes, and the RAM component has no "file" option, so the
  * simplest solution was to add the option to load binary files into memory as "writable" ROMs.
  *
  * Moreover, if a "writable" ROM is installed at addr 0x100, that triggers our "Fake CP/M" support, providing

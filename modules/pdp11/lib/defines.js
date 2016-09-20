@@ -150,9 +150,9 @@ var PDP11 = {
         PRI_SHIFT:   5,
         UNUSED: 0x0700,         // bits 8-10: unused
         REGSET: 0x0800,         // bit  11: Register Set
-        PMODE:  0x3000,         // bits 12-13: Previous Mode (see PDP11.MODE)
+        PMODE:  0x3000,         // bits 12-13: Prev Mode (see PDP11.MODE)
         PMODE_SHIFT:12,
-        CMODE:  0xC000,         // bits 14-15: Current Mode (see PDP11.MODE)
+        CMODE:  0xC000,         // bits 14-15: Curr Mode (see PDP11.MODE)
         CMODE_SHIFT:14
     },
     /*

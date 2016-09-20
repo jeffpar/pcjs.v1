@@ -128,47 +128,16 @@ CPUStatePDP11.prototype.reset = function()
 CPUStatePDP11.prototype.initRegs = function()
 {
     /*
-     * Instead of having separate flagC, flagZ and flagN variables, I would prefer to have only one: flagsCZN.
-     * The C and N flags don't conflict; they are always bits 16 and 15 of the last 16-bit arithmetic result (or
-     * bits 8 and 7 of the last 8-bit arithmetic result).  The Z flag is a "bit" more complicated, because it's a
-     * representation of bits 15-0 (or 7-0), which overlap the N flag bit.  That overlap is fine after any given
-     * arithmetic operation, because of the four possible N and Z combinations:
-     *
-     *      N   Z
-     *      -   -
-     *      0   0       Positive non-zero number
-     *      0   1       Zero
-     *      1   0       Negative non-zero number
-     *      1   1       INVALID
-     *
-     * the fourth combination is an impossibility (the world of floating point numbers, with their NaNs, positive
-     * and negative zeros, infinities, etc, is another story, which doesn't concern us here).
-     *
-     * The problem is that some intervening NON-arithmetic instruction (eg, SEN or SEZ) could be executed that sets
-     * either N or Z independently, resulting in BOTH flags being set.
-     *
-     * One way to support that combination would be to define Z as the result of all non-sign bits.  However,
-     * that means that, after any arithmetic operation, we would have to propagate the sign bit of the result to
-     * one or more other bits in flagsCZN; eg:
-     *
-     *      flagsCZN = result | ((result & 0x8000) >> 1)
-     * or:
-     *      flagsCZN = result | ((result & 0xffff)? 1 : 0)
-     *
-     * It's worth noting that all that extra work is actually required for only ONE 16-bit value: -32768 or 0x8000
-     * (and ONE 8-bit value: -128 or 0x80), because all other negative numbers already have 1 or more lower bits set.
-     *
-     * A simpler approach would be to leave flagN independent, and only combine flagC and flagZ (into flagCZ).
-     * Alternatively, we could combine flagC and flagN and leave flagZ independent; the choice is arbitrary. -JP
+     * TODO: Verify the initial state of all PDP-11 flags (are they documented?)
      */
     this.flagC = 0x10000;       // PSW C bit
     this.flagV = 0x8000;        // PSW V bit
-    this.flagZ = 0xffff;        // ~ PSW Z bit
+    this.flagZ = 0xffff;        // ~ PSW Z bit (TODO: Why is Z clear instead of set like all other flags?)
     this.flagN = 0x8000;        // PSW N bit
 
     this.PSW = 0xf;             // PSW other bits
     this.regsGen = [            // General R0 - R7
-        0, 0, 0, 0, 0, 0, 0, 0
+        0, 0, 0, 0, 0, 0, 0, this.resetAddr
     ];
     this.regsAlt = [            // Alternate R0 - R5
         0, 0, 0, 0, 0, 0
@@ -212,7 +181,6 @@ CPUStatePDP11.prototype.initRegs = function()
     this.controlReg = [         // various control registers we don't really care about
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     ];
-    this.debugPC = -1;
 };
 
 /**
@@ -222,7 +190,6 @@ CPUStatePDP11.prototype.initRegs = function()
  */
 CPUStatePDP11.prototype.resetRegs = function()
 {
-    this.setPC(this.resetAddr);
     this.stackLimit = 0xff;
     this.CPU_Error = 0;
     this.interruptQueue = [];
@@ -292,12 +259,19 @@ CPUStatePDP11.prototype.setBinding = function(sHTMLType, sBinding, control, sVal
 {
     var fBound = false;
     switch (sBinding) {
-    case "PC":
-    case "PSW":
+    case "R0":
+    case "R1":
+    case "R2":
+    case "R3":
+    case "R4":
+    case "R5":
+    case "R6":
+    case "R7":
     case "NF":
     case "ZF":
     case "VF":
     case "CF":
+    case "PSW":
         this.bindings[sBinding] = control;
         this.cLiveRegs++;
         fBound = true;
@@ -310,13 +284,41 @@ CPUStatePDP11.prototype.setBinding = function(sHTMLType, sBinding, control, sVal
 };
 
 /**
+ * updateStatus(fForce)
+ *
+ * This provides periodic Control Panel updates (a few times per second; see YIELDS_PER_STATUS).
+ * this is where we take care of any DOM updates (eg, register values) while the CPU is running.
+ *
+ * @this {CPUStatePDP11}
+ * @param {boolean} [fForce] (true will display registers even if the CPU is running and "live" registers are not enabled)
+ */
+CPUStatePDP11.prototype.updateStatus = function(fForce)
+{
+    if (this.cLiveRegs) {
+        if (fForce || !this.flags.running || this.flags.displayLiveRegs) {
+            for (var i = 0; i < this.regsGen.length; i++) {
+                this.displayValue('R'+i, this.regsGen[i]);
+            }
+            var regPSW = this.getPSW();
+            this.displayValue("PSW", regPSW);
+            this.displayValue("NF", (regPSW & PDP11.PSW.NF)? 1 : 0, 1);
+            this.displayValue("ZF", (regPSW & PDP11.PSW.ZF)? 1 : 0, 1);
+            this.displayValue("VF", (regPSW & PDP11.PSW.VF)? 1 : 0, 1);
+            this.displayValue("CF", (regPSW & PDP11.PSW.CF)? 1 : 0, 1);
+        }
+    }
+    var controlSpeed = this.bindings["speed"];
+    if (controlSpeed) controlSpeed.textContent = this.getSpeedCurrent();
+};
+
+/**
  * clearCF()
  *
  * @this {CPUStatePDP11}
  */
 CPUStatePDP11.prototype.clearCF = function()
 {
-    // this.resultZeroCarry &= 0xff;
+    this.flagC = 0;
 };
 
 /**
@@ -337,7 +339,7 @@ CPUStatePDP11.prototype.getCF = function()
  */
 CPUStatePDP11.prototype.setCF = function()
 {
-    // this.resultZeroCarry |= 0x100;
+    this.flagC = 0x10000;
 };
 
 /**
@@ -347,7 +349,7 @@ CPUStatePDP11.prototype.setCF = function()
  */
 CPUStatePDP11.prototype.clearVF = function()
 {
-    // this.resultZeroCarry |= 0xff;
+    this.flagV = 0;
 };
 
 /**
@@ -368,7 +370,7 @@ CPUStatePDP11.prototype.getVF = function()
  */
 CPUStatePDP11.prototype.setVF = function()
 {
-    // this.resultZeroCarry &= ~0xff;
+    this.flagV = 0x8000;
 };
 
 /**
@@ -378,7 +380,7 @@ CPUStatePDP11.prototype.setVF = function()
  */
 CPUStatePDP11.prototype.clearZF = function()
 {
-    // this.resultZeroCarry |= 0xff;
+    this.flagZ = 1;
 };
 
 /**
@@ -399,7 +401,7 @@ CPUStatePDP11.prototype.getZF = function()
  */
 CPUStatePDP11.prototype.setZF = function()
 {
-    // this.resultZeroCarry &= ~0xff;
+    this.flagZ = 0;
 };
 
 /**
@@ -409,7 +411,7 @@ CPUStatePDP11.prototype.setZF = function()
  */
 CPUStatePDP11.prototype.clearNF = function()
 {
-    // if (this.getNF()) this.resultParitySign ^= 0xc0;
+    this.flagN = 0;
 };
 
 /**
@@ -420,7 +422,7 @@ CPUStatePDP11.prototype.clearNF = function()
  */
 CPUStatePDP11.prototype.getNF = function()
 {
-    return (this.flagN >> (15 - PDP11.PSW.NF_SHIFT)) & PDP11.PSW.NF;
+    return (this.flagN & 0x8000)? PDP11.PSW.NF : 0;
 };
 
 /**
@@ -430,7 +432,7 @@ CPUStatePDP11.prototype.getNF = function()
  */
 CPUStatePDP11.prototype.setNF = function()
 {
-    // if (!this.getNF()) this.resultParitySign ^= 0xc0;
+    this.flagN = 0x8000;
 };
 
 /**
@@ -525,48 +527,6 @@ CPUStatePDP11.prototype.requestHALT = function()
 {
     this.intFlags |= PDP11.INTFLAG.HALT;
     this.endBurst();
-};
-
-/**
- * updateReg(sReg, nValue, cch)
- *
- * This function helps updateStatus() by massaging the register names and values according to
- * CPU type before passing the call to displayValue(); in the "old days", updateStatus() called
- * displayValue() directly (although then it was called displayReg()).
- *
- * @this {CPUStatePDP11}
- * @param {string} sReg
- * @param {number} nValue
- * @param {number} [cch] (default is 4 hex digits)
- */
-CPUStatePDP11.prototype.updateReg = function(sReg, nValue, cch)
-{
-    this.displayValue(sReg, nValue, cch || 4);
-};
-
-/**
- * updateStatus(fForce)
- *
- * This provides periodic Control Panel updates (eg, a few times per second; see YIELDS_PER_STATUS).
- * this is where we take care of any DOM updates (eg, register values) while the CPU is running.
- *
- * @this {CPUStatePDP11}
- * @param {boolean} [fForce] (true will display registers even if the CPU is running and "live" registers are not enabled)
- */
-CPUStatePDP11.prototype.updateStatus = function(fForce)
-{
-    if (this.cLiveRegs) {
-        if (fForce || !this.flags.running || this.flags.displayLiveRegs) {
-            var regPSW = this.getPSW();
-            this.updateReg("PSW", regPSW, 4);
-            this.updateReg("NF", (regPSW & PDP11.PSW.NF)? 1 : 0, 1);
-            this.updateReg("ZF", (regPSW & PDP11.PSW.ZF)? 1 : 0, 1);
-            this.updateReg("VF", (regPSW & PDP11.PSW.VF)? 1 : 0, 1);
-            this.updateReg("CF", (regPSW & PDP11.PSW.CF)? 1 : 0, 1);
-        }
-    }
-    var controlSpeed = this.bindings["speed"];
-    if (controlSpeed) controlSpeed.textContent = this.getSpeedCurrent();
 };
 
 /**
@@ -931,7 +891,7 @@ CPUStatePDP11.prototype.readWordByAddr = function(physicalAddress)
             return this.bus.access_iopage(physicalAddress, -1, 0);
 		} else {
 			if (physicalAddress >= 0) {
-				return this.memory[physicalAddress >> 1];
+                return this.bus.getShort(physicalAddress);
 			}
 		}
 	}
@@ -952,13 +912,14 @@ CPUStatePDP11.prototype.writeWordByAddr = function(physicalAddress, data)
     if (physicalAddress >= PDP11.MAX_ADDRESS) {
         return (this.regsGen[physicalAddress - PDP11.MAX_ADDRESS] = data);
 	} else {
-        if (physicalAddress >= PDP11.IOBASE_UNIBUS) {
-            return this.bus.access_iopage(physicalAddress, data, 0);
-		} else {
+        // if (physicalAddress >= PDP11.IOBASE_UNIBUS) {
+        //     return this.bus.access_iopage(physicalAddress, data, 0);
+		// } else {
 			if (physicalAddress >= 0) {
-				return (this.memory[physicalAddress >> 1] = data);
+                this.bus.setShort(physicalAddress, data);
+                return data;
 			}
-		}
+		// }
 	}
 	return physicalAddress;
 };
@@ -980,11 +941,7 @@ CPUStatePDP11.prototype.readByteByAddr = function(physicalAddress)
             return this.bus.access_iopage(physicalAddress, -1, 1);
 		} else {
 			if (physicalAddress >= 0) {
-				result = this.memory[physicalAddress >> 1];
-				if (physicalAddress & 1) {
-					result = result >> 8;
-				}
-				return (result & 0xff);
+				return this.bus.getByte(physicalAddress);
 			}
 		}
 	}
@@ -1009,11 +966,8 @@ CPUStatePDP11.prototype.writeByteByAddr = function(physicalAddress, data)
             return this.bus.access_iopage(physicalAddress, data, 1);
 		} else {
 			if (physicalAddress >= 0) {
-				if (physicalAddress & 1) {
-					return (this.memory[physicalAddress >> 1] = (data << 8) | (this.memory[physicalAddress >> 1] & 0xff));
-				} else {
-					return (this.memory[physicalAddress >> 1] = (this.memory[physicalAddress >> 1] & 0xff00) | data);
-				}
+			    this.bus.setByte(physicalAddress, data);
+                return data;
 			}
 		}
 	}
@@ -1404,11 +1358,6 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                     }
                 }
             }
-            //if (this.regsGen[7] === this.debugPC) {
-            //LOG_PRINT();
-            //
-            //}
-            // Initialize this.memory before getting an instruction
             if (!(this.MMR0 & 0xe000)) {
                 this.MMR1 = 0;
                 this.MMR2 = this.regsGen[7];
@@ -2332,19 +2281,17 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                     break;
                                 case 0xA0: /*0000240*/ // CLR CC 00024M Part 1 without N
                                 case 0xA8: /*0000250*/ // CLR CC 00025M Part 2 with N
-                                    //LOG_INSTRUCTION(instruction, 10, "CLR CC");
-                                    if (instruction & 1) this.flagC = 0; // CLC
-                                    if (instruction & 2) this.flagV = 0; // CLV
-                                    if (instruction & 4) this.flagZ = 1; // CLZ
-                                    if (instruction & 8) this.flagN = 0; // CLN
+                                    if (instruction & 1) this.clearCF();        // CLC
+                                    if (instruction & 2) this.clearVF();        // CLV
+                                    if (instruction & 4) this.clearZF();        // CLZ
+                                    if (instruction & 8) this.clearNF();        // CLN
                                     break;
                                 case 0xB0: /*0000260*/ // SET CC 00026M Part 1 without N
                                 case 0xB8: /*0000270*/ // SET CC 00026M Part 2 with N
-                                    //LOG_INSTRUCTION(instruction, 10, "SET CC");
-                                    if (instruction & 1) this.flagC = 0x10000; // SEC
-                                    if (instruction & 2) this.flagV = 0x8000; // SEV
-                                    if (instruction & 4) this.flagZ = 0; // SEZ
-                                    if (instruction & 8) this.flagN = 0x8000; // SEN
+                                    if (instruction & 1) this.setCF();          // SEC
+                                    if (instruction & 2) this.setVF();          // SEV
+                                    if (instruction & 4) this.setZF();          // SEZ
+                                    if (instruction & 8) this.setNF();          // SEN
                                     break;
                                 default: // Misc instructions (decode ALL remaining bits) xxxxxx
                                     switch (instruction) {

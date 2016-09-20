@@ -57,7 +57,7 @@ var littleEndian = (TYPEDARRAYS? (function() {
 })() : false);
 
 /**
- * MemoryPDP11(addr, used, size, type)
+ * MemoryPDP11(addr, used, size, type, controller)
  *
  * The Bus component allocates MemoryPDP11 objects so that each has a memory buffer with a
  * block-granular starting address and an address range equal to bus.nBlockSize; however,
@@ -94,8 +94,9 @@ var littleEndian = (TYPEDARRAYS? (function() {
  * @param {number} [used] portion of block in bytes (0 for none); must be a multiple of 4
  * @param {number} [size] of block's buffer in bytes (0 for none); must be a multiple of 4
  * @param {number} [type] is one of the MemoryPDP11.TYPE constants (default is MemoryPDP11.TYPE.NONE)
+ * @param {Object} [controller] is an optional memory controller component
  */
-function MemoryPDP11(addr, used, size, type)
+function MemoryPDP11(addr, used, size, type, controller)
 {
     var i;
     this.id = (MemoryPDP11.idBlock += 2);
@@ -106,6 +107,7 @@ function MemoryPDP11(addr, used, size, type)
     this.size = size || 0;
     this.type = type || MemoryPDP11.TYPE.NONE;
     this.fReadOnly = (type == MemoryPDP11.TYPE.ROM);
+    this.controller = null;
     this.copyBreakpoints();     // initialize the block's Debugger info; the caller will reinitialize
 
     /*
@@ -126,6 +128,19 @@ function MemoryPDP11(addr, used, size, type)
      */
     if (!size) {
         this.setAccess();
+        return;
+    }
+
+    /*
+     * When a controller is specified, the controller must provide a buffer,
+     * via getMemoryBuffer(), and memory access functions, via getMemoryAccess().
+     */
+    if (controller) {
+        this.controller = controller;
+        var a = controller.getMemoryBuffer(addr);
+        this.adw = a[0];
+        this.offset = a[1];
+        this.setAccess(controller.getMemoryAccess());
         return;
     }
 
@@ -285,7 +300,10 @@ MemoryPDP11.prototype = {
      */
     save: function() {
         var adw, i;
-        if (BYTEARRAYS) {
+        if (this.controller) {
+            adw = null;
+        }
+        else if (BYTEARRAYS) {
             adw = new Array(this.size >> 2);
             var off = 0;
             for (i = 0; i < adw.length; i++) {
@@ -327,6 +345,9 @@ MemoryPDP11.prototype = {
      * @return {boolean} true if successful, false if block size mismatch
      */
     restore: function(adw) {
+        if (this.controller) {
+            return (adw == null);
+        }
         /*
          * At this point, it's a consistency error for adw to be null; it's happened once already,
          * when there was a restore bug in the Video component that added the frame buffer at the video
@@ -809,18 +830,45 @@ MemoryPDP11.prototype = {
 
 /*
  * This is the effective definition of afnNone, but we need not fully define it, because setAccess()
- * uses these defaults when any of the 6 handlers (ie, 3 read handlers and 3 write handlers) are undefined.
+ * uses these defaults when any of the 4 handlers (ie, 2 read handlers and 2 write handlers) are undefined.
  *
-MemoryPDP11.afnNone         = [MemoryPDP11.prototype.readNone,        MemoryPDP11.prototype.readShortDefault, MemoryPDP11.prototype.writeNone,        MemoryPDP11.prototype.writeShortDefault];
+MemoryPDP11.afnNone     = [
+    MemoryPDP11.prototype.readNone,
+    MemoryPDP11.prototype.readShortDefault,
+    MemoryPDP11.prototype.writeNone,
+    MemoryPDP11.prototype.writeShortDefault
+];
  */
+MemoryPDP11.afnNone     = [];
 
-MemoryPDP11.afnNone         = [];
-MemoryPDP11.afnMemory       = [MemoryPDP11.prototype.readByteMemory,  MemoryPDP11.prototype.readShortMemory,  MemoryPDP11.prototype.writeByteMemory,  MemoryPDP11.prototype.writeShortMemory];
-MemoryPDP11.afnChecked      = [MemoryPDP11.prototype.readByteChecked, MemoryPDP11.prototype.readShortChecked, MemoryPDP11.prototype.writeByteChecked, MemoryPDP11.prototype.writeShortChecked];
+MemoryPDP11.afnMemory   = [
+    MemoryPDP11.prototype.readByteMemory,
+    MemoryPDP11.prototype.readShortMemory,
+    MemoryPDP11.prototype.writeByteMemory,
+    MemoryPDP11.prototype.writeShortMemory
+];
+
+MemoryPDP11.afnChecked  = [
+    MemoryPDP11.prototype.readByteChecked,
+    MemoryPDP11.prototype.readShortChecked,
+    MemoryPDP11.prototype.writeByteChecked,
+    MemoryPDP11.prototype.writeShortChecked
+];
 
 if (TYPEDARRAYS) {
-    MemoryPDP11.afnArrayBE  = [MemoryPDP11.prototype.readByteBE,      MemoryPDP11.prototype.readShortBE,      MemoryPDP11.prototype.writeByteBE,      MemoryPDP11.prototype.writeShortBE];
-    MemoryPDP11.afnArrayLE  = [MemoryPDP11.prototype.readByteLE,      MemoryPDP11.prototype.readShortLE,      MemoryPDP11.prototype.writeByteLE,      MemoryPDP11.prototype.writeShortLE];
+    MemoryPDP11.afnArrayBE  = [
+        MemoryPDP11.prototype.readByteBE,
+        MemoryPDP11.prototype.readShortBE,
+        MemoryPDP11.prototype.writeByteBE,
+        MemoryPDP11.prototype.writeShortBE
+    ];
+
+    MemoryPDP11.afnArrayLE  = [
+        MemoryPDP11.prototype.readByteLE,
+        MemoryPDP11.prototype.readShortLE,
+        MemoryPDP11.prototype.writeByteLE,
+        MemoryPDP11.prototype.writeShortLE
+    ];
 }
 
 if (NODE) module.exports = MemoryPDP11;

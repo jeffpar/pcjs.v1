@@ -433,12 +433,12 @@ CPUPDP11.prototype.displayChecksum = function()
  * displayValue(sLabel, nValue, cch)
  *
  * This is principally for displaying register values, but in reality, it can be used to display any
- * numeric (hex) value bound to the given label.
+ * numeric value bound to the given label.
  *
  * @this {CPUPDP11}
  * @param {string} sLabel
  * @param {number} nValue
- * @param {number} cch
+ * @param {number} [cch]
  */
 CPUPDP11.prototype.displayValue = function(sLabel, nValue, cch)
 {
@@ -448,10 +448,11 @@ CPUPDP11.prototype.displayValue = function(sLabel, nValue, cch)
             this.stopCPU();
         }
         var sVal;
+        var nBase = this.dbg && this.dbg.nBase || 8;
         if (!this.flags.running || this.flags.displayLiveRegs) {
-            sVal = str.toHex(nValue, cch);
+            sVal = nBase == 8? str.toOct(nValue, cch) : str.toHex(nValue, cch);
         } else {
-            sVal = "--------".substr(0, cch);
+            sVal = "--------".substr(0, cch || 4);
         }
         /*
          * TODO: Determine if this test actually avoids any redrawing when a register hasn't changed, and/or if

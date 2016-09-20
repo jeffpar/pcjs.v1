@@ -106,7 +106,9 @@ function BusPDP11(parmsBus, cpu, dbg)
      *      Bus Width                       Block Shift     Block Size
      *      ---------                       -----------     ----------
      *      16 bits (64Kb address space):   10              1Kb (64 maximum blocks)
+     *      18 bits (256Kb address space):  11              2Kb (128 maximum blocks)
      *      20 bits (1Mb address space):    12              4Kb (256 maximum blocks)
+     *      22 bits (4Mb address space):    13              8Kb (512 maximum blocks)
      *      24 bits (16Mb address space):   14              16Kb (1K maximum blocks)
      *      32 bits (4Gb address space);    15              32Kb (128K maximum blocks)
      *
@@ -117,7 +119,9 @@ function BusPDP11(parmsBus, cpu, dbg)
      */
     this.addrTotal = Math.pow(2, this.nBusWidth);
     this.nBusLimit = this.nBusMask = (this.addrTotal - 1) | 0;
-    this.nBlockShift = (this.nBusWidth <= 16)? 10 : ((this.nBusWidth <= 20)? 12 : (this.nBusWidth <= 24? 14 : 15));
+    this.nBlockShift = (this.nBusWidth >> 1) + 2;
+    if (this.nBlockShift < 10) this.nBlockShift = 10;
+    if (this.nBlockShift > 15) this.nBlockShift = 15;
     this.nBlockSize = 1 << this.nBlockShift;
     this.nBlockLen = this.nBlockSize >> 2;
     this.nBlockLimit = this.nBlockSize - 1;
@@ -168,9 +172,17 @@ function BusPDP11(parmsBus, cpu, dbg)
 
 Component.subclass(BusPDP11);
 
+BusPDP11.IOBASE_VIRT    =   0xE000;     /*000160000*/
+BusPDP11.IOBASE_18BIT   =  0x3E000;     /*000760000*/
+BusPDP11.IOBASE_UNIBUS  = 0x3C0000;     /*017000000*/
+BusPDP11.IOBASE_22BIT   = 0x3FE000;     /*017760000*/
+BusPDP11.MAX_MEMORY     = BusPDP11.IOBASE_UNIBUS - 16384;       // Maximum memory address (need less memory for BSD 2.9 boot)
+BusPDP11.MAX_ADDRESS    = 0x400000;     /*020000000*/           // Register addresses are above 22 bit addressing
+
 BusPDP11.ERROR = {
     ADD_MEM_INUSE:      1,
     ADD_MEM_BADRANGE:   2,
+    SET_MEM_NOCTRL:     3,
     SET_MEM_BADRANGE:   4,
     REM_MEM_BADRANGE:   5
 };
@@ -222,6 +234,89 @@ BusPDP11.prototype.initMemory = function()
     for (var iBlock = 0; iBlock < this.nBlockTotal; iBlock++) {
         this.aMemBlocks[iBlock] = block;
     }
+    this.afnCtrl = new Array(4);
+    this.afnCtrl[0] = this.readCtrlByte;
+    this.afnCtrl[1] = this.readCtrlWord;
+    this.afnCtrl[2] = this.writeCtrlByte;
+    this.afnCtrl[3] = this.writeCtrlWord;
+    this.addMemory(BusPDP11.IOBASE_22BIT, 8192, MemoryPDP11.TYPE.CTRL, this);
+};
+
+/**
+ * getMemoryBuffer(addr)
+ *
+ * Our Bus component also acts as custom memory controller, so it must also provide this function.
+ *
+ * @this {BusPDP11}
+ * @param {number} addr
+ * @return {Array} containing the buffer (and the offset within that buffer that corresponds to the requested block)
+ */
+BusPDP11.prototype.getMemoryBuffer = function(addr)
+{
+    return [null, 0];
+};
+
+/**
+ * getMemoryAccess()
+ *
+ * Our Bus component also acts as custom memory controller, so it must also provide this function.
+ *
+ * @this {BusPDP11}
+ * @return {Array.<function()>}
+ */
+BusPDP11.prototype.getMemoryAccess = function()
+{
+    return this.afnCtrl;
+};
+
+/**
+ * readCtrlByte(off, addr)
+ *
+ * @this {BusPDP11}
+ * @param {number} off
+ * @param {number} [addr]
+ * @return {number}
+ */
+BusPDP11.prototype.readCtrlByte = function(off, addr)
+{
+    return 0;
+};
+
+/**
+ * readCtrlWord(off, addr)
+ *
+ * @this {BusPDP11}
+ * @param {number} off
+ * @param {number} [addr]
+ * @return {number}
+ */
+BusPDP11.prototype.readCtrlWord = function(off, addr)
+{
+    return 0;
+};
+
+/**
+ * writeCtrlByte(off, b, addr)
+ *
+ * @this {BusPDP11}
+ * @param {number} off
+ * @param {number} b (which should already be pre-masked to 8 bits)
+ * @param {number} [addr]
+ */
+BusPDP11.prototype.writeCtrlByte = function(off, b, addr)
+{
+};
+
+/**
+ * writeCtrlWord(off, w, addr)
+ *
+ * @this {BusPDP11}
+ * @param {number} off
+ * @param {number} w (which should already be pre-masked to 16 bits)
+ * @param {number} [addr]
+ */
+BusPDP11.prototype.writeCtrlWord = function(off, w, addr)
+{
 };
 
 /**
@@ -257,7 +352,7 @@ BusPDP11.prototype.powerUp = function(data, fRepower)
 };
 
 /**
- * addMemory(addr, size, type)
+ * addMemory(addr, size, type, controller)
  *
  * Adds new Memory blocks to the specified address range.  Any Memory blocks previously
  * added to that range must first be removed via removeMemory(); otherwise, you'll get
@@ -283,9 +378,10 @@ BusPDP11.prototype.powerUp = function(data, fRepower)
  * @param {number} addr is the starting physical address of the request
  * @param {number} size of the request, in bytes
  * @param {number} type is one of the MemoryPDP11.TYPE constants
+ * @param {Object} [controller] is an optional memory controller component
  * @return {boolean} true if successful, false if not
  */
-BusPDP11.prototype.addMemory = function(addr, size, type)
+BusPDP11.prototype.addMemory = function(addr, size, type, controller)
 {
     var addrNext = addr;
     var sizeLeft = size;
@@ -299,7 +395,7 @@ BusPDP11.prototype.addMemory = function(addr, size, type)
         if (sizeBlock > sizeLeft) sizeBlock = sizeLeft;
 
         if (block && block.size) {
-            if (block.type == type) {
+            if (block.type == type && block.controller == controller) {
                 /*
                  * Where there is already a similar block with a non-zero size, we allow the allocation only if:
                  *
@@ -324,7 +420,7 @@ BusPDP11.prototype.addMemory = function(addr, size, type)
             return this.reportError(BusPDP11.ERROR.ADD_MEM_INUSE, addrNext, sizeLeft);
         }
 
-        var blockNew = new MemoryPDP11(addrNext, sizeBlock, this.nBlockSize, type);
+        var blockNew = new MemoryPDP11(addrNext, sizeBlock, this.nBlockSize, type, controller);
         blockNew.copyBreakpoints(this.dbg, block);
         this.aMemBlocks[iBlock++] = blockNew;
 
@@ -454,6 +550,38 @@ BusPDP11.prototype.getMemoryBlocks = function(addr, size)
         size -= this.nBlockSize;
     }
     return aBlocks;
+};
+
+/**
+ * setMemoryAccess(addr, size, afn, fQuiet)
+ *
+ * Updates the access functions in every block of the specified address range.  Since the only components
+ * that should be dynamically modifying the memory access functions are those that use addMemory() with a custom
+ * memory controller, we require that the block(s) being updated do in fact have a controller.
+ *
+ * @this {BusPDP11}
+ * @param {number} addr
+ * @param {number} size
+ * @param {Array.<function()>} [afn]
+ * @param {boolean} [fQuiet] (true if any error should be quietly logged)
+ * @return {boolean} true if successful, false if not
+ */
+BusPDP11.prototype.setMemoryAccess = function(addr, size, afn, fQuiet)
+{
+    if (!(addr & this.nBlockLimit) && size && !(size & this.nBlockLimit)) {
+        var iBlock = addr >>> this.nBlockShift;
+        while (size > 0) {
+            var block = this.aMemBlocks[iBlock];
+            if (!block.controller) {
+                return this.reportError(BusPDP11.ERROR.SET_MEM_NOCTRL, addr, size, fQuiet);
+            }
+            block.setAccess(afn, true);
+            size -= this.nBlockSize;
+            iBlock++;
+        }
+        return true;
+    }
+    return this.reportError(BusPDP11.ERROR.SET_MEM_BADRANGE, addr, size);
 };
 
 /**
