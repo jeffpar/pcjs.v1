@@ -221,7 +221,7 @@ if (DEBUGGER) {
         BCC:    8,      BCS:    9,      BEQ:    10,     BGE:    11,     BGT:    12,     BHI:    13,     BIC:    14,     BICB:   15,
         BIS:    16,     BISB:   17,     BIT:    18,     BITB:   19,     BLE:    20,     BLOS:   21,     BLT:    22,     BMI:    23,
         BNE:    24,     BPL:    25,     BPT:    26,     BR:     27,     BVC:    28,     BVS:    29,     CCC:    30,     CLC:    31,
-        CLCN:   32,     CLCV:   32,     CLCVN:  33,     CLCVZ:  34,     CLCZ:   35,     CLCZN:  36,     CLN:    37,     CLR:    38,
+        CLCN:   32,     CLCV:   33,     CLCVN:  34,     CLCVZ:  35,     CLCZ:   36,     CLCZN:  37,     CLN:    38,     CLR:    39,
         CLRB:   40,     CLV:    41,     CLVN:   42,     CLVZ:   43,     CLVZN:  44,     CLZ:    45,     CLZN:   46,     CMP:    47,
         CMPB:   48,     COM:    49,     COMB:   50,     DEC:    51,     DECB:   52,     INC:    53,     INCB:   54,     HALT:   55,
         JMP:    56,     JSR:    57,     MARK:   58,     MFPD:   59,     MFPI:   60,     MFPS:   61,     MOV:    62,     MOVB:   63,
@@ -265,6 +265,7 @@ if (DEBUGGER) {
      */
     DebuggerPDP11.TYPE_DSTREG   = 0x0007;
     DebuggerPDP11.TYPE_DSTMODE  = 0x0038;
+    DebuggerPDP11.TYPE_DSTMODE_SHIFT = 3;
     DebuggerPDP11.TYPE_DST      = (DebuggerPDP11.TYPE_DSTMODE | DebuggerPDP11.TYPE_DSTREG);
     DebuggerPDP11.TYPE_SRCREG   = 0x01C0;
     DebuggerPDP11.TYPE_SRCMODE  = 0x0E00;
@@ -1916,6 +1917,15 @@ if (DEBUGGER) {
                 break;
             }
 
+            /*
+             * If getOperand() returns an Array rather than a string, then the first element is the original
+             * operand, and the second element is a comment containing an alternate representation of the operand.
+             */
+            if (typeof sOperand != "string") {
+                if (!sComment) sComment = sOperand[1];
+                sOperand = sOperand[0];
+            }
+
             if (sOperands.length > 0) sOperands += ',';
             sOperands += (sOperand || "???");
         }
@@ -1929,12 +1939,12 @@ if (DEBUGGER) {
             } while (dbgAddrOp.addr != dbgAddr.addr);
         }
 
-        sLine += str.pad(sOpcodes, 15);
-        sLine += str.pad(sOpName, 7);
+        sLine += str.pad(sOpcodes, 24);
+        sLine += str.pad(sOpName, 5);
         if (sOperands) sLine += ' ' + sOperands;
 
         if (sComment) {
-            sLine = str.pad(sLine, 40) + ';' + sComment;
+            sLine = str.pad(sLine, 60) + ';' + sComment;
             if (!this.cpu.flags.checksum) {
                 sLine += (nSequence != null? '=' + nSequence.toString() : "");
             } else {
@@ -1948,11 +1958,14 @@ if (DEBUGGER) {
     /**
      * getOperand(opCode, type, dbgAddr)
      *
+     * If getOperand() returns an Array rather than a string, then the first element is the original
+     * operand, and the second element is a comment containing an alternate representation of the operand.
+     *
      * @this {DebuggerPDP11}
      * @param {number} opCode
      * @param {number} type
      * @param {DbgAddrPDP11} dbgAddr
-     * @return {string} operand
+     * @return {string|Array.<string>}
      */
     DebuggerPDP11.prototype.getOperand = function(opCode, type, dbgAddr)
     {
@@ -1963,22 +1976,22 @@ if (DEBUGGER) {
          */
         var typeOther = type & DebuggerPDP11.TYPE_OTHER;
         if (typeOther == DebuggerPDP11.TYPE_BRANCH) {
-            disp = ((opCode & 0xff) << 24) >> 24;
+            disp = ((opCode & 0xff) << 24) >> 23;
             addr = (dbgAddr.addr + disp) & 0xffff;
-            sOperand = str.toHexWord(addr);
+            sOperand = this.toStrBase(addr);
         }
         else if (typeOther == DebuggerPDP11.TYPE_DSTOFF) {
             disp = (opCode & 0x3f) << 1;
             addr = (dbgAddr.addr - disp) & 0xffff;
-            sOperand = str.toHexWord(addr);
+            sOperand = this.toStrBase(addr);
         }
         else if (typeOther == DebuggerPDP11.TYPE_DSTNUM3) {
             disp = (opCode & 0x7);
-            sOperand = str.toHexByte(disp);
+            sOperand = this.toStrBase(disp, 2);
         }
         else if (typeOther == DebuggerPDP11.TYPE_DSTNUM6) {
             disp = (opCode & 0x3f);
-            sOperand = str.toHexByte(disp);
+            sOperand = this.toStrBase(disp);
         }
         else {
             /*
@@ -1999,56 +2012,68 @@ if (DEBUGGER) {
                  * Note that opcodes that specify only REG bits in the type mask (ie, no MOD bits)
                  * will automatically default to MODE_REG below.
                  */
-                switch(mode & DebuggerPDP11.TYPE_DSTMODE) {
+                switch((mode & DebuggerPDP11.TYPE_DSTMODE) >> DebuggerPDP11.TYPE_DSTMODE_SHIFT) {
                 case PDP11.OPMODE.REG:                  // 0x0: REGISTER
-                    sOperand = "R" + reg;
+                    sOperand = this.getRegName(reg);
                     break;
                 case PDP11.OPMODE.REGD:                 // 0x1: REGISTER DEFERRED
-                    sOperand = "@R" + reg;
+                    sOperand = '@' + this.getRegName(reg);
                     break;
                 case PDP11.OPMODE.POSTINC:              // 0x2: POST-INCREMENT
                     if (reg < 7) {
-                        sOperand = "(R" + reg + ")+";
+                        sOperand = '(' + this.getRegName(reg) + ")+";
                     } else {
                         /*
                          * When using R7 (aka PC), POST-INCREMENT is known as IMMEDIATE
                          */
                         wIndex = this.getWord(dbgAddr, true);
-                        sOperand = "#" + str.toHexWord(wIndex);
+                        sOperand = "#" + this.toStrBase(wIndex);
                     }
                     break;
                 case PDP11.OPMODE.POSTINCD:             // 0x3: POST-INCREMENT DEFERRED
                     if (reg < 7) {
-                        sOperand = "@(R" + reg + ")+";
+                        sOperand = "@(" + this.getRegName(reg) + ")+";
                     } else {
                         /*
                          * When using R7 (aka PC), POST-INCREMENT DEFERRED is known as ABSOLUTE
                          */
                         wIndex = this.getWord(dbgAddr, true);
-                        sOperand = "@#" + str.toHexWord(wIndex);
+                        sOperand = "@#" + this.toStrBase(wIndex);
                     }
                     break;
                 case PDP11.OPMODE.PREDEC:               // 0x4: PRE-DECREMENT
-                    sOperand = "-(R" + reg + ")";
+                    sOperand = "-(" + this.getRegName(reg) + ")";
                     break;
                 case PDP11.OPMODE.PREDECD:              // 0x5: PRE-DECREMENT DEFERRED
-                    sOperand = "@-R(" + reg + ")";
+                    sOperand = "@-(" + this.getRegName(reg) + ")";
                     break;
                 case PDP11.OPMODE.INDEX:                // 0x6: INDEX
                     wIndex = this.getWord(dbgAddr, true);
-                    /*
-                     * When using R7 (aka PC), INDEX is known as RELATIVE
-                     */
-                    sOperand = str.toHexWord(wIndex) + (reg < 7? "(R" + reg + ")" : "(PC)");
+                    sOperand = this.toStrBase(wIndex) + '(' + this.getRegName(reg) + ')';
+                    if (reg == 7) {
+                        /*
+                         * When using R7 (aka PC), INDEX is known as RELATIVE
+                         */
+                        sOperand = [sOperand, this.toStrBase((wIndex + dbgAddr.addr) & 0xffff)];
+                    }
                     break;
                 case PDP11.OPMODE.INDEXD:               // 0x7: INDEX DEFERRED
                     wIndex = this.getWord(dbgAddr, true);
-                    /*
-                     * When using R7 (aka PC), INDEX DEFERRED is known as RELATIVE DEFERRED
-                     */
-                    sOperand = '@' + str.toHexWord(wIndex) + (reg < 7? "(R" + reg + ")" : "(PC)");
+                    sOperand = '@' + this.toStrBase(wIndex) + '(' + this.getRegName(reg) + ')';
+                    if (reg == 7) {
+                        /*
+                         * When using R7 (aka PC), INDEX DEFERRED is known as RELATIVE DEFERRED
+                         */
+                        sOperand = [sOperand, this.toStrBase((wIndex + dbgAddr.addr) & 0xffff)];
+                    }
+                    break;
+                default:
+                    this.assert(false);
                     break;
                 }
+            }
+            else {
+                this.assert(false);
             }
         }
         return sOperand;
@@ -2103,6 +2128,18 @@ if (DEBUGGER) {
     };
 
     /**
+     * getRegName(iReg)
+     *
+     * @this {DebuggerPDP11}
+     * @param {number} iReg
+     * @return {string}
+     */
+    DebuggerPDP11.prototype.getRegName = function(iReg)
+    {
+        return (iReg < 6? ("R" + iReg) :  (iReg == 6? "SP" : "PC"));
+    };
+
+    /**
      * getRegOutput(iReg)
      *
      * @this {DebuggerPDP11}
@@ -2115,7 +2152,7 @@ if (DEBUGGER) {
         var cpu = this.cpu;
 
         if (iReg < 8) {
-            sReg = (iReg < 6? ("R" + iReg) :  (iReg == 6? "SP" : "PC"));
+            sReg = this.getRegName(iReg);
             sReg += '=' + this.toStrBase(cpu.regsGen[iReg]);
         }
         else if (iReg < 13) {
