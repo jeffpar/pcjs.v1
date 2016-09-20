@@ -132,15 +132,15 @@ function MemoryPDP11(addr, used, size, type, controller)
     }
 
     /*
-     * When a controller is specified, the controller must provide a buffer,
-     * via getMemoryBuffer(), and memory access functions, via getMemoryAccess().
+     * When a controller is specified, the controller must provide a buffer, via getControllerBuffer(),
+     * and memory access functions, via getControllerAccess().
      */
     if (controller) {
         this.controller = controller;
-        var a = controller.getMemoryBuffer(addr);
+        var a = controller.getControllerBuffer(addr);
         this.adw = a[0];
         this.offset = a[1];
-        this.setAccess(controller.getMemoryAccess());
+        this.setAccess(controller.getControllerAccess());
         return;
     }
 
@@ -189,8 +189,8 @@ function MemoryPDP11(addr, used, size, type, controller)
  * disabling writes.  VIDEO is treated exactly like RAM, unless a controller is provided.  Both RAM and
  * VIDEO memory are always considered writable, and even ROM can be written using the Bus setByteDirect()
  * interface (which in turn uses the MemoryPDP11 writeByteDirect() interface), allowing the ROM component to
- * initialize its own memory.  The CTRL type is used to identify memory-mapped devices that do not need
- * any default storage and always provide their own controller.
+ * initialize its own memory.  The CONTROLLER type is used to identify memory-mapped devices that do not
+ * need any default storage and always provide their own controller.
  *
  * Unallocated regions of the address space contain a special memory block of type NONE that contains
  * no storage.  Mapping every addressible location to a memory block allows all accesses to be routed in
@@ -198,8 +198,8 @@ function MemoryPDP11(addr, used, size, type, controller)
  *
  * These types are not mutually exclusive.  For example, VIDEO memory could be allocated as RAM, with or
  * without a custom controller (the original Monochrome and CGA video cards used read/write storage that
- * was indistinguishable from RAM), and CTRL memory could be allocated as an empty block of any type, with
- * a custom controller.  A few types are required for certain features (eg, ROM is required if you want
+ * was indistinguishable from RAM), and CONTROLLER memory could be allocated as an empty block of any type,
+ * with a custom controller.  A few types are required for certain features (eg, ROM is required if you want
  * read-only memory), but the larger purpose of these types is to help document the caller's intent and to
  * provide the Control Panel with the ability to highlight memory regions accordingly.
  */
@@ -208,7 +208,7 @@ MemoryPDP11.TYPE = {
     RAM:        1,
     ROM:        2,
     VIDEO:      3,
-    CTRL:       4,
+    CONTROLLER: 4,
     COLORS:     ["black", "blue", "green", "cyan"],
     NAMES:      ["NONE",  "RAM",  "ROM",   "VID",  "H/W"]
 };

@@ -57,11 +57,6 @@ if (NODE) {
  * addMemory().  If the component needs something more than simple read/write storage,
  * it must provide a custom controller.
  *
- * All port (I/O) operations are defined by external handlers; they register with us,
- * and we manage those registrations and provide support for I/O breakpoints, but the
- * only default I/O behavior we provide is ignoring writes to any unregistered output
- * ports and returning 0xff from any unregistered input ports.
- *
  * @constructor
  * @extends Component
  * @param {Object} parmsBus
@@ -130,37 +125,26 @@ function BusPDP11(parmsBus, cpu, dbg)
     this.assert(this.nBlockMask <= BusPDP11.BlockInfo.num.mask);
 
     /*
-     * Lists of I/O notification functions: aPortInputNotify and aPortOutputNotify are arrays, indexed by
-     * port, of sub-arrays which contain:
+     * Lists of I/O notification functions: aIONotify are arrays, indexed by address, where each entry
+     * contains an array:
      *
-     *      [0]: registered function to call for every I/O access
+     *      [0]: registered function to call for read
+     *      [1]: registered function to call for write
      *
-     * The registered function is called with the port address, and if the access was triggered by the CPU,
-     * the instruction pointer (IP) at the point of access.
+     * The registered function is called with the address, and if the access was triggered by the CPU,
+     * the program counter (PC) at the point of access.
      *
-     * WARNING: Unlike the (old) read and write memory notification functions, these support only one
-     * pair of input/output functions per port.  A more sophisticated architecture could support a list
-     * of chained functions across multiple components, but I doubt that will be necessary here.
+     * UPDATE: The Debugger now piggy-backs on these arrays to indicate addresses for which it wants
+     * notification.  In those cases, the registered component/function elements may or may not be set,
+     * but the following additional element will be set:
      *
-     * UPDATE: The Debugger now piggy-backs on these arrays to indicate ports for which it wants notification
-     * of I/O.  In those cases, the registered component/function elements may or may not be set, but the
-     * following additional element will be set:
+     *      [2]: true to break on I/O, false to ignore I/O
      *
-     *      [1]: true to break on I/O, false to ignore I/O
-     *
-     * The false case is important if fPortInputBreakAll and/or fPortOutputBreakAll is set, because it allows the
-     * Debugger to selectively ignore specific ports.
+     * The false case is important if fIOBreakAll is set, because it allows the Debugger to selectively
+     * ignore specific addresses.
      */
-    this.aPortInputNotify = [];
-    this.aPortOutputNotify = [];
-    this.fPortInputBreakAll = this.fPortOutputBreakAll = false;
-
-    /*
-     * By default, all I/O ports are 1 byte wide; ports that are wider must add themselves to one or both of
-     * these lists, using addPortInputWidth() and/or addPortOutputWidth().
-     */
-    this.aPortInputWidth = [];
-    this.aPortOutputWidth = [];
+    this.aIONotify = [];
+    this.fIOBreakAll = false;
 
     /*
      * Allocate empty Memory blocks to span the entire physical address space.
@@ -172,19 +156,20 @@ function BusPDP11(parmsBus, cpu, dbg)
 
 Component.subclass(BusPDP11);
 
-BusPDP11.IOBASE_VIRT    =   0xE000;     /*000160000*/
-BusPDP11.IOBASE_18BIT   =  0x3E000;     /*000760000*/
-BusPDP11.IOBASE_UNIBUS  = 0x3C0000;     /*017000000*/
-BusPDP11.IOBASE_22BIT   = 0x3FE000;     /*017760000*/
-BusPDP11.MAX_MEMORY     = BusPDP11.IOBASE_UNIBUS - 16384;       // Maximum memory address (need less memory for BSD 2.9 boot)
-BusPDP11.MAX_ADDRESS    = 0x400000;     /*020000000*/           // Register addresses are above 22 bit addressing
+BusPDP11.IOPAGE_VIRT    =   0xE000; /*000160000*/
+BusPDP11.IOPAGE_18BIT   =  0x3E000; /*000760000*/               // eg, PDP-11/45
+BusPDP11.IOPAGE_UNIBUS  = 0x3C0000; /*017000000*/
+BusPDP11.IOPAGE_22BIT   = 0x3FE000; /*017760000*/               // eg, PDP-11/70
+BusPDP11.IOPAGE_LENGTH  =   0x2000;                             // ie, 8Kb
+BusPDP11.MAX_MEMORY     = BusPDP11.IOPAGE_UNIBUS - 16384;       // Maximum memory address (need less memory for BSD 2.9 boot)
+BusPDP11.MAX_ADDRESS    = 0x400000; /*020000000*/               // Register addresses are above 22 bit addressing
 
 BusPDP11.ERROR = {
-    ADD_MEM_INUSE:      1,
-    ADD_MEM_BADRANGE:   2,
-    SET_MEM_NOCTRL:     3,
-    SET_MEM_BADRANGE:   4,
-    REM_MEM_BADRANGE:   5
+    RANGE_INUSE:        1,
+    RANGE_INVALID:      2,
+    NO_CONTROLLER:      3,
+    SETACC_INVALID:     4,
+    REMOVE_INVALID:     5
 };
 
 /**
@@ -219,6 +204,62 @@ BusPDP11.BlockInfo = usr.defineBitFields({num:20, count:8, btmod:1, type:3});
  */
 var BusInfoPDP11;
 
+BusPDP11.controller = {
+
+    /**
+     * readIOPageByte(off, addr)
+     *
+     * @this {MemoryPDP11}
+     * @param {number} off
+     * @param {number} [addr]
+     * @return {number}
+     */
+    readIOPageByte: function(off, addr)
+    {
+        return 0;
+    },
+
+    /**
+     * readIOPageWord(off, addr)
+     *
+     * @this {MemoryPDP11}
+     * @param {number} off
+     * @param {number} [addr]
+     * @return {number}
+     */
+    readIOPageWord: function(off, addr)
+    {
+        var afn = this.controller.aIONotify[off];
+        return afn? afn[0](addr) : 0;
+    },
+
+    /**
+     * writeIOPageByte(off, b, addr)
+     *
+     * @this {MemoryPDP11}
+     * @param {number} off
+     * @param {number} b (which should already be pre-masked to 8 bits)
+     * @param {number} [addr]
+     */
+    writeIOPageByte: function(off, b, addr)
+    {
+    },
+
+    /**
+     * writeIOPageWord(off, w, addr)
+     *
+     * @this {MemoryPDP11}
+     * @param {number} off
+     * @param {number} w (which should already be pre-masked to 16 bits)
+     * @param {number} [addr]
+     */
+    writeIOPageWord: function(off, w, addr)
+    {
+        var afn = this.controller.aIONotify[off];
+        return afn? afn[1](w, addr) : 0;
+    }
+};
+
 /**
  * initMemory()
  *
@@ -234,16 +275,17 @@ BusPDP11.prototype.initMemory = function()
     for (var iBlock = 0; iBlock < this.nBlockTotal; iBlock++) {
         this.aMemBlocks[iBlock] = block;
     }
-    this.afnCtrl = new Array(4);
-    this.afnCtrl[0] = this.readCtrlByte;
-    this.afnCtrl[1] = this.readCtrlWord;
-    this.afnCtrl[2] = this.writeCtrlByte;
-    this.afnCtrl[3] = this.writeCtrlWord;
-    this.addMemory(BusPDP11.IOBASE_22BIT, 8192, MemoryPDP11.TYPE.CTRL, this);
+    this.afnIOPage = new Array(4);
+    this.afnIOPage[0] = BusPDP11.controller.readIOPageByte;
+    this.afnIOPage[1] = BusPDP11.controller.readIOPageWord;
+    this.afnIOPage[2] = BusPDP11.controller.writeIOPageByte;
+    this.afnIOPage[3] = BusPDP11.controller.writeIOPageWord;
+    this.addrIOPage = this.addrTotal - BusPDP11.IOPAGE_LENGTH;
+    this.addMemory(this.addrIOPage, BusPDP11.IOPAGE_LENGTH, MemoryPDP11.TYPE.CONTROLLER, this);
 };
 
 /**
- * getMemoryBuffer(addr)
+ * getControllerBuffer(addr)
  *
  * Our Bus component also acts as custom memory controller, so it must also provide this function.
  *
@@ -251,72 +293,22 @@ BusPDP11.prototype.initMemory = function()
  * @param {number} addr
  * @return {Array} containing the buffer (and the offset within that buffer that corresponds to the requested block)
  */
-BusPDP11.prototype.getMemoryBuffer = function(addr)
+BusPDP11.prototype.getControllerBuffer = function(addr)
 {
     return [null, 0];
 };
 
 /**
- * getMemoryAccess()
+ * getControllerAccess()
  *
  * Our Bus component also acts as custom memory controller, so it must also provide this function.
  *
  * @this {BusPDP11}
  * @return {Array.<function()>}
  */
-BusPDP11.prototype.getMemoryAccess = function()
+BusPDP11.prototype.getControllerAccess = function()
 {
-    return this.afnCtrl;
-};
-
-/**
- * readCtrlByte(off, addr)
- *
- * @this {BusPDP11}
- * @param {number} off
- * @param {number} [addr]
- * @return {number}
- */
-BusPDP11.prototype.readCtrlByte = function(off, addr)
-{
-    return 0;
-};
-
-/**
- * readCtrlWord(off, addr)
- *
- * @this {BusPDP11}
- * @param {number} off
- * @param {number} [addr]
- * @return {number}
- */
-BusPDP11.prototype.readCtrlWord = function(off, addr)
-{
-    return 0;
-};
-
-/**
- * writeCtrlByte(off, b, addr)
- *
- * @this {BusPDP11}
- * @param {number} off
- * @param {number} b (which should already be pre-masked to 8 bits)
- * @param {number} [addr]
- */
-BusPDP11.prototype.writeCtrlByte = function(off, b, addr)
-{
-};
-
-/**
- * writeCtrlWord(off, w, addr)
- *
- * @this {BusPDP11}
- * @param {number} off
- * @param {number} w (which should already be pre-masked to 16 bits)
- * @param {number} [addr]
- */
-BusPDP11.prototype.writeCtrlWord = function(off, w, addr)
-{
+    return this.afnIOPage;
 };
 
 /**
@@ -417,7 +409,7 @@ BusPDP11.prototype.addMemory = function(addr, size, type, controller)
                     continue;
                 }
             }
-            return this.reportError(BusPDP11.ERROR.ADD_MEM_INUSE, addrNext, sizeLeft);
+            return this.reportError(BusPDP11.ERROR.RANGE_INUSE, addrNext, sizeLeft);
         }
 
         var blockNew = new MemoryPDP11(addrNext, sizeBlock, this.nBlockSize, type, controller);
@@ -433,7 +425,7 @@ BusPDP11.prototype.addMemory = function(addr, size, type, controller)
         return true;
     }
 
-    return this.reportError(BusPDP11.ERROR.ADD_MEM_BADRANGE, addr, size);
+    return this.reportError(BusPDP11.ERROR.RANGE_INVALID, addr, size);
 };
 
 /**
@@ -530,7 +522,7 @@ BusPDP11.prototype.removeMemory = function(addr, size)
         }
         return true;
     }
-    return this.reportError(BusPDP11.ERROR.REM_MEM_BADRANGE, addr, size);
+    return this.reportError(BusPDP11.ERROR.REMOVE_INVALID, addr, size);
 };
 
 /**
@@ -573,7 +565,7 @@ BusPDP11.prototype.setMemoryAccess = function(addr, size, afn, fQuiet)
         while (size > 0) {
             var block = this.aMemBlocks[iBlock];
             if (!block.controller) {
-                return this.reportError(BusPDP11.ERROR.SET_MEM_NOCTRL, addr, size, fQuiet);
+                return this.reportError(BusPDP11.ERROR.NO_CONTROLLER, addr, size, fQuiet);
             }
             block.setAccess(afn, true);
             size -= this.nBlockSize;
@@ -581,7 +573,7 @@ BusPDP11.prototype.setMemoryAccess = function(addr, size, afn, fQuiet)
         }
         return true;
     }
-    return this.reportError(BusPDP11.ERROR.SET_MEM_BADRANGE, addr, size);
+    return this.reportError(BusPDP11.ERROR.SETACC_INVALID, addr, size);
 };
 
 /**
@@ -868,6 +860,54 @@ BusPDP11.prototype.restoreMemory = function(a)
 };
 
 /**
+ * addIOHandlers(start, end, fnRead, fnWrite)
+ *
+ * Add I/O notification handlers to the list of such handlers.  The start and end addresses are typically
+ * relative to the starting IOPAGE address, but they can also be absolute.
+ *
+ * @this {BusPDP11}
+ * @param {number} start address
+ * @param {number} end address
+ * @param {function(number)|null|undefined} fnRead is called with the read address whenever a read occurs
+ * @param {function(number,number)|null|undefined} fnWrite is called with the data and write address whenever a write occurs
+ */
+BusPDP11.prototype.addIOHandlers = function(start, end, fnRead, fnWrite)
+{
+    for (var addr = start; addr <= end; addr += 2) {
+        var off = addr & (BusPDP11.IOPAGE_LENGTH - 1);
+        if (off < 0 || off >= BusPDP11.IOPAGE_LENGTH) {
+            Component.warning("I/O address out of bounds: " + str.toHexLong(this.addrIOPage + off));
+            break;
+        }
+        if (this.aIONotify[off] !== undefined) {
+            Component.warning("I/O address already registered: " + str.toHexLong(this.addrIOPage + off));
+            continue;
+        }
+        this.aIONotify[off] = [fnRead, fnWrite, false];
+        if (MAXDEBUG) this.log("addIOHandlers(" + str.toHexLong(this.addrIOPage + off) + ")");
+    }
+};
+
+/**
+ * addIOTable(component, table)
+ *
+ * Add I/O notification handlers from the specified table (a batch version of addIOHandlers)
+ *
+ * @this {BusPDP11}
+ * @param {Component} component
+ * @param {Object} table
+ */
+BusPDP11.prototype.addIOTable = function(component, table)
+{
+    for (var port in table) {
+        var afn = table[port];
+        var fnRead = afn[0]? afn[0].bind(component) : null;
+        var fnWrite = afn[1]? afn[1].bind(component) : null;
+        this.addIOHandlers(+port, +port, fnRead, fnWrite);
+    }
+};
+
+/**
  * reset_iopage()
  *
  * TODO: Implement
@@ -902,18 +942,18 @@ BusPDP11.prototype.access_iopage = function(physicalAddress, data, byteFlag)
 };
 
 /**
- * reportError(op, addr, size, fQuiet)
+ * reportError(errNum, addr, size, fQuiet)
  *
  * @this {BusPDP11}
- * @param {number} op
+ * @param {number} errNum
  * @param {number} addr
  * @param {number} size
  * @param {boolean} [fQuiet] (true if any error should be quietly logged)
  * @return {boolean} false
  */
-BusPDP11.prototype.reportError = function(op, addr, size, fQuiet)
+BusPDP11.prototype.reportError = function(errNum, addr, size, fQuiet)
 {
-    var sError = "Memory block error (" + op + ": " + str.toHex(addr) + "," + str.toHex(size) + ")";
+    var sError = "Memory block error (" + errNum + ": " + str.toHex(addr) + "," + str.toHex(size) + ")";
     if (fQuiet) {
         if (this.dbg) {
             this.dbg.message(sError);

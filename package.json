@@ -188,6 +188,7 @@
     "./modules/pdp11/lib/messages.js",
     "./modules/pdp11/lib/panel.js",
     "./modules/pdp11/lib/bus.js",
+    "./modules/pdp11/lib/device.js",
     "./modules/pdp11/lib/memory.js",
     "./modules/pdp11/lib/cpu.js",
     "./modules/pdp11/lib/cpustate.js",
