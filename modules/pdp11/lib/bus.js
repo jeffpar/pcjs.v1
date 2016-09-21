@@ -183,7 +183,7 @@ BusPDP11.controller = {
     {
         var afn = this.controller.aIONotify[off];
         if (afn && afn[1]) {
-            afn[1](addr, b);
+            afn[1](b, addr);
         }
     },
 
@@ -223,10 +223,10 @@ BusPDP11.controller = {
         var afn = this.controller.aIONotify[off];
         if (afn) {
             if (afn[3]) {
-                afn[3](addr, w);
+                afn[3](w, addr);
             } else if (afn[1]) {
-                afn[1](addr, w & 0xff);
-                afn[1](addr + 1, w >> 8);
+                afn[1](w & 0xff, addr);
+                afn[1](w >> 8, addr + 1);
             }
         }
     }
