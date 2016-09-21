@@ -116,7 +116,7 @@ CPUStatePDP11.prototype.reset = function()
     if (this.flags.running) this.stopCPU();
     this.resetRegs();
     this.resetCycles();
-    this.clearError();      // clear any fatal error/exception that setError() may have flagged
+    this.clearError();          // clear any fatal error/exception that setError() may have flagged
     this.parent.reset.call(this);
 };
 
@@ -544,7 +544,7 @@ CPUStatePDP11.prototype.requestHALT = function()
  * @param {number} delay
  * @param {number} priority
  * @param {number} vector
- * @param {function()} callback
+ * @param {function()} [callback]
  */
 CPUStatePDP11.prototype.interrupt = function(delay, priority, vector, callback)
 {
@@ -887,13 +887,13 @@ CPUStatePDP11.prototype.readWordByAddr = function(physicalAddress)
     if (physicalAddress >= PDP11.MAX_ADDRESS) {
         return this.regsGen[physicalAddress - PDP11.MAX_ADDRESS];
 	} else {
-        if (physicalAddress >= PDP11.IOBASE_UNIBUS) {
-            return this.bus.access_iopage(physicalAddress, -1, 0);
-		} else {
+        // if (physicalAddress >= PDP11.IOBASE_UNIBUS) {
+        //    return this.bus.access_iopage(physicalAddress, -1, 0);
+		// } else {
 			if (physicalAddress >= 0) {
                 return this.bus.getShort(physicalAddress);
 			}
-		}
+		// }
 	}
     return physicalAddress;
 };
@@ -937,13 +937,13 @@ CPUStatePDP11.prototype.readByteByAddr = function(physicalAddress)
     if (physicalAddress >= PDP11.MAX_ADDRESS) {
         return (this.regsGen[physicalAddress - PDP11.MAX_ADDRESS] & 0xff);
 	} else {
-        if (physicalAddress >= PDP11.IOBASE_UNIBUS) {
-            return this.bus.access_iopage(physicalAddress, -1, 1);
-		} else {
+        // if (physicalAddress >= PDP11.IOBASE_UNIBUS) {
+        //     return this.bus.access_iopage(physicalAddress, -1, 1);
+		// } else {
 			if (physicalAddress >= 0) {
 				return this.bus.getByte(physicalAddress);
 			}
-		}
+		// }
 	}
     return physicalAddress;
 };
@@ -962,14 +962,14 @@ CPUStatePDP11.prototype.writeByteByAddr = function(physicalAddress, data)
     if (physicalAddress >= PDP11.MAX_ADDRESS) {
         return (this.regsGen[physicalAddress - PDP11.MAX_ADDRESS] = (this.regsGen[physicalAddress - PDP11.MAX_ADDRESS] & 0xff00) | data);
 	} else {
-        if (physicalAddress >= PDP11.IOBASE_UNIBUS) {
-            return this.bus.access_iopage(physicalAddress, data, 1);
-		} else {
+        // if (physicalAddress >= PDP11.IOBASE_UNIBUS) {
+        //     return this.bus.access_iopage(physicalAddress, data, 1);
+		// } else {
 			if (physicalAddress >= 0) {
 			    this.bus.setByte(physicalAddress, data);
                 return data;
 			}
-		}
+		// }
 	}
     return physicalAddress;
 };
@@ -2333,7 +2333,7 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                         //LOG_INSTRUCTION(instruction, 0, "RESET");
                                         if (!(this.PSW & 0xc000)) {
                                             this.resetRegs();
-                                            this.bus.reset_iopage();
+                                            this.bus.reset();
                                             // display.data = this.regsGen[0];  // TODO: Review
                                         }
                                         break;

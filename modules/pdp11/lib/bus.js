@@ -108,9 +108,9 @@ function BusPDP11(parmsBus, cpu, dbg)
      * entry contains an array:
      *
      *      [0]: readByte(addr)
-     *      [1]: writeByte()
-     *      [2]: readShort()
-     *      [3]: writeShort()
+     *      [1]: writeByte(b, addr)
+     *      [2]: readShort(addr)
+     *      [3]: writeShort(w, addr)
      *
      * Each of these 4-element arrays are similar to the memory access arrays assigned to entire Memory
      * blocks, but these handlers generally target a specific address (or handful of addresses), while
@@ -129,6 +129,9 @@ function BusPDP11(parmsBus, cpu, dbg)
     this.aIONotify = [];
     this.fIOBreakAll = false;
 
+    this.fnReset = null;
+    this.fnAccess = this.access;
+
     /*
      * Allocate empty Memory blocks to span the entire physical address space.
      */
@@ -144,6 +147,7 @@ BusPDP11.IOPAGE_18BIT   =  0x3E000; /*000760000*/               // eg, PDP-11/45
 BusPDP11.IOPAGE_UNIBUS  = 0x3C0000; /*017000000*/
 BusPDP11.IOPAGE_22BIT   = 0x3FE000; /*017760000*/               // eg, PDP-11/70
 BusPDP11.IOPAGE_LENGTH  =   0x2000;                             // ie, 8Kb
+BusPDP11.IOPAGE_MASK    = BusPDP11.IOPAGE_LENGTH - 1;
 BusPDP11.MAX_MEMORY     = BusPDP11.IOPAGE_UNIBUS - 16384;       // Maximum memory address (need less memory for BSD 2.9 boot)
 BusPDP11.MAX_ADDRESS    = 0x400000; /*020000000*/               // Register addresses are above 22 bit addressing
 
@@ -155,6 +159,21 @@ BusPDP11.ERROR = {
     REMOVE_INVALID:     5
 };
 
+/*
+ * These are our custom controller functions for all IOPAGE accesses.
+ *
+ * Note that we try to have reasonable fall-backs for byte reads when only short read handlers exist,
+ * and short reads if only byte handlers exist.  Ditto for writes.  These fall-backs may not always be
+ * appropriate; for example, when a byte write falls back to a short write, the address must be read
+ * first, and depending on the underlying I/O device, that may or may not have side-effects.  It's really
+ * up to the device to know whether that matters, and provide all the necessary handlers if it does.
+ *
+ * TODO: Another small potential improvement would be for addIOHandlers() to predefine fall-backs for all
+ * missing handlers, so there's never a need to check each entry (eg, afn[0], afn[1], etc) before calling
+ * it.  However, since there's no avoiding checking afn itself (unless we FULLY populate the aIONotify
+ * array), and since these I/O accesses should be pretty infrequent relative to all other memory accesses,
+ * the benefit seems pretty minimal.
+ */
 BusPDP11.controller = {
 
     /**
@@ -168,7 +187,23 @@ BusPDP11.controller = {
     readIOPageByte: function(off, addr)
     {
         var afn = this.controller.aIONotify[off];
-        return afn && afn[0]? afn[0](addr) : 0;
+        if (afn) {
+            if (afn[0]) {
+                return afn[0](addr);
+            } else if (afn[2]) {
+                if (!(addr & 0x1)) {
+                    return afn[2](addr) & 0xff;
+                } else {
+                    return afn[2](addr & ~0x1) >> 8;
+                }
+            }
+        } else if (addr & 0x1) {
+            afn = this.controller.aIONotify[off & ~0x1];
+            if (afn[2]) {
+                return afn[2](addr & ~0x1) >> 8;
+            }
+        }
+        return this.controller.fnAccess(addr, -1, 1);
     },
 
     /**
@@ -181,10 +216,31 @@ BusPDP11.controller = {
      */
     writeIOPageByte: function(off, b, addr)
     {
+        var w;
         var afn = this.controller.aIONotify[off];
-        if (afn && afn[1]) {
-            afn[1](b, addr);
+        if (afn) {
+            if (afn[1]) {
+                afn[1](b, addr);
+                return;
+            } else if (afn[3]) {
+                w = afn[2]? afn[2](addr) : 0;
+                if (!(addr & 0x1)) {
+                    afn[3]((w & ~0xff) | b, addr)
+                } else {
+                    afn[3]((w & 0xff) | (b << 8), addr & ~0x1);
+                }
+                return;
+            }
+        } else if (addr & 0x1) {
+            afn = this.controller.aIONotify[off & ~0x1];
+            if (afn[3]) {
+                addr &= ~0x1;
+                w = afn[2]? afn[2](addr) : 0;
+                afn[3]((w & 0xff) | (b << 8), addr);
+                return;
+            }
         }
+        this.controller.fnAccess(addr, b, 1);
     },
 
     /**
@@ -206,7 +262,7 @@ BusPDP11.controller = {
                 return afn[0](addr) | (afn[0](addr + 1) << 8);
             }
         }
-        return 0;
+        return this.controller.fnAccess(addr, -1, 0);
     },
 
     /**
@@ -224,11 +280,14 @@ BusPDP11.controller = {
         if (afn) {
             if (afn[3]) {
                 afn[3](w, addr);
+                return;
             } else if (afn[1]) {
                 afn[1](w & 0xff, addr);
                 afn[1](w >> 8, addr + 1);
+                return;
             }
         }
+        this.controller.fnAccess(addr, w, 0);
     }
 };
 
@@ -290,6 +349,20 @@ BusPDP11.prototype.getControllerAccess = function()
  */
 BusPDP11.prototype.reset = function()
 {
+    if (this.fnReset) this.fnReset();
+};
+
+/**
+ * access()
+ *
+ * @this {BusPDP11}
+ * @param {number} addr
+ * @param {number} data
+ * @param {number} byteFlag
+ */
+BusPDP11.prototype.access = function(addr, data, byteFlag)
+{
+    return 0;
 };
 
 /**
@@ -872,7 +945,7 @@ BusPDP11.prototype.restoreMemory = function(a)
  *
  * Add I/O notification handlers to the master list (aIONotify).  The start and end addresses are typically
  * relative to the starting IOPAGE address, but they can also be absolute; we simply mask all addresses with
- * (IOPAGE_LENGTH - 1).
+ * IOPAGE_MASK.
  *
  * @this {BusPDP11}
  * @param {number} start address
@@ -885,11 +958,7 @@ BusPDP11.prototype.restoreMemory = function(a)
 BusPDP11.prototype.addIOHandlers = function(start, end, fnReadByte, fnWriteByte, fnReadShort, fnWriteShort)
 {
     for (var addr = start; addr <= end; addr += 2) {
-        var off = addr & (BusPDP11.IOPAGE_LENGTH - 1);
-        if (off < 0 || off >= BusPDP11.IOPAGE_LENGTH) {
-            Component.warning("I/O address out of bounds: " + str.toHexLong(this.addrIOPage + off));
-            break;
-        }
+        var off = addr & BusPDP11.IOPAGE_MASK;
         if (this.aIONotify[off] !== undefined) {
             Component.warning("I/O address already registered: " + str.toHexLong(this.addrIOPage + off));
             continue;
@@ -921,37 +990,18 @@ BusPDP11.prototype.addIOTable = function(component, table)
 };
 
 /**
- * reset_iopage()
+ * addIODefaultHandlers(fnReset, fnAccess)
  *
- * TODO: Implement
- *
- * @this {BusPDP11}
- */
-BusPDP11.prototype.reset_iopage = function()
-{
-    // display.misc = (display.misc & ~0x77) | 0x14; // kernel 16 bit
-    // tty.rcsr = 0;
-    // tty.xcsr = 0x80; /*0200*/
-    // kw11.csr = 0;
-    // rk11.rkcs = 0x80; /*0200*/
-    // rl11.csr = 0x80;
-    // rp11_init();
-};
-
-/**
- * access_iopage(physicalAddress, data, byteFlag)
- *
- * TODO: Implement
+ * Add default I/O notification handlers.
  *
  * @this {BusPDP11}
- * @param {number} physicalAddress
- * @param {number} data
- * @param {number} byteFlag
- * @return {number}
+ * @param {function()} fnReset
+ * @param {function(number,number,number)} fnAccess
  */
-BusPDP11.prototype.access_iopage = function(physicalAddress, data, byteFlag)
+BusPDP11.prototype.addIODefaultHandlers = function(fnReset, fnAccess)
 {
-    return -1;
+    this.fnReset = fnReset;
+    this.fnAccess = fnAccess;
 };
 
 /**
