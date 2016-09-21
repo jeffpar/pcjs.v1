@@ -417,7 +417,19 @@ Memory.prototype = {
     /**
      * setAccess(afn, fDirect)
      *
-     * If no function table is specified, a default is selected based on the Memory type.
+     * The afn parameter should be a 6-entry function table containing two byte handlers, two
+     * short handlers, and two long handlers.  See the static afnMemory table for an example.
+     *
+     * If no function table is specified, a default is selected based on the Memory type;
+     * similarly, any undefined entries in the table are filled with default handlers that fall
+     * back to the byte handlers, and if one or both byte handlers are undefined, they default
+     * to handlers that simply ignore the access.
+     *
+     * fDirect indicates that both the default AND the direct handlers should be updated.  Direct
+     * handlers normally match the default handlers, except when "checked" handlers are installed;
+     * this allows "checked" handlers to know where to dispatch the call after performing checks.
+     * Examples of checks are read/write breakpoints, but it's really up to the Debugger to decide
+     * what the check consists of.
      *
      * @this {Memory}
      * @param {Array.<function()>} [afn] function table
@@ -448,13 +460,13 @@ Memory.prototype = {
     setReadAccess: function(afn, fDirect) {
         if (!fDirect || !this.cReadBreakpoints) {
             this.readByte = afn[0] || this.readNone;
-            this.readShort = afn[1] || this.readShortDefault;
-            this.readLong = afn[2] || this.readLongDefault;
+            this.readShort = afn[2] || this.readShortDefault;
+            this.readLong = afn[4] || this.readLongDefault;
         }
         if (fDirect || fDirect === undefined) {
             this.readByteDirect = afn[0] || this.readNone;
-            this.readShortDirect = afn[1] || this.readShortDefault;
-            this.readLongDirect = afn[2] || this.readLongDefault;
+            this.readShortDirect = afn[2] || this.readShortDefault;
+            this.readLongDirect = afn[4] || this.readLongDefault;
         }
     },
     /**
@@ -466,13 +478,13 @@ Memory.prototype = {
      */
     setWriteAccess: function(afn, fDirect) {
         if (!fDirect || !this.cWriteBreakpoints) {
-            this.writeByte = !this.fReadOnly && afn[3] || this.writeNone;
-            this.writeShort = !this.fReadOnly && afn[4] || this.writeShortDefault;
+            this.writeByte = !this.fReadOnly && afn[1] || this.writeNone;
+            this.writeShort = !this.fReadOnly && afn[3] || this.writeShortDefault;
             this.writeLong = !this.fReadOnly && afn[5] || this.writeLongDefault;
         }
         if (fDirect || fDirect === undefined) {
-            this.writeByteDirect = afn[3] || this.writeNone;
-            this.writeShortDirect = afn[4] || this.writeShortDefault;
+            this.writeByteDirect = afn[1] || this.writeNone;
+            this.writeShortDirect = afn[3] || this.writeShortDefault;
             this.writeLongDirect = afn[5] || this.writeLongDefault;
         }
     },
@@ -1507,25 +1519,85 @@ Memory.prototype = {
 };
 
 /*
- * This is the effective definition of afnNone, but we need not fully define it, because setAccess()
- * uses these defaults when any of the 6 handlers (ie, 3 read handlers and 3 write handlers) are undefined.
+ * This is the effective definition of afnNone, but we need not fully define it, because setAccess() uses these
+ * defaults when any of the 6 handlers (ie, 2 byte handlers, 2 short handlers, and 2 long handlers) are undefined.
  *
-Memory.afnNone          = [Memory.prototype.readNone,        Memory.prototype.readShortDefault, Memory.prototype.readLongDefault, Memory.prototype.writeNone,        Memory.prototype.writeShortDefault, Memory.prototype.writeLongDefault];
+Memory.afnNone = [
+    Memory.prototype.readNone,
+    Memory.prototype.writeNone,
+    Memory.prototype.readShortDefault,
+    Memory.prototype.writeShortDefault,
+    Memory.prototype.readLongDefault,
+    Memory.prototype.writeLongDefault
+];
  */
+Memory.afnNone = [];
 
-Memory.afnNone          = [];
-Memory.afnMemory        = [Memory.prototype.readByteMemory,  Memory.prototype.readShortMemory,  Memory.prototype.readLongMemory,  Memory.prototype.writeByteMemory,  Memory.prototype.writeShortMemory,  Memory.prototype.writeLongMemory];
-Memory.afnChecked       = [Memory.prototype.readByteChecked, Memory.prototype.readShortChecked, Memory.prototype.readLongChecked, Memory.prototype.writeByteChecked, Memory.prototype.writeShortChecked, Memory.prototype.writeLongChecked];
+Memory.afnMemory = [
+    Memory.prototype.readByteMemory,
+    Memory.prototype.writeByteMemory,
+    Memory.prototype.readShortMemory,
+    Memory.prototype.writeShortMemory,
+    Memory.prototype.readLongMemory,
+    Memory.prototype.writeLongMemory
+];
+
+Memory.afnChecked = [
+    Memory.prototype.readByteChecked,
+    Memory.prototype.writeByteChecked,
+    Memory.prototype.readShortChecked,
+    Memory.prototype.writeShortChecked,
+    Memory.prototype.readLongChecked,
+    Memory.prototype.writeLongChecked
+];
 
 if (PAGEBLOCKS) {
-    Memory.afnPaged     = [Memory.prototype.readBytePaged,   Memory.prototype.readShortPaged,   Memory.prototype.readLongPaged,   Memory.prototype.writeBytePaged,   Memory.prototype.writeShortPaged,   Memory.prototype.writeLongPaged];
-    Memory.afnUnpaged   = [Memory.prototype.readByteUnpaged, Memory.prototype.readShortUnpaged, Memory.prototype.readLongUnpaged, Memory.prototype.writeByteUnpaged, Memory.prototype.writeShortUnpaged, Memory.prototype.writeLongUnpaged];
+    Memory.afnPaged = [
+        Memory.prototype.readBytePaged,
+        Memory.prototype.writeBytePaged,
+        Memory.prototype.readShortPaged,
+        Memory.prototype.writeShortPaged,
+        Memory.prototype.readLongPaged,
+        Memory.prototype.writeLongPaged
+    ];
+
+    Memory.afnUnpaged = [
+        Memory.prototype.readByteUnpaged,
+        Memory.prototype.writeByteUnpaged,
+        Memory.prototype.readShortUnpaged,
+        Memory.prototype.writeShortUnpaged,
+        Memory.prototype.readLongUnpaged,
+        Memory.prototype.writeLongUnpaged
+    ];
 }
 
 if (TYPEDARRAYS) {
-    Memory.afnArrayBE   = [Memory.prototype.readByteBE,      Memory.prototype.readShortBE,      Memory.prototype.readLongBE,      Memory.prototype.writeByteBE,      Memory.prototype.writeShortBE,      Memory.prototype.writeLongBE];
-    Memory.afnArrayLE   = [Memory.prototype.readByteLE,      Memory.prototype.readShortLE,      Memory.prototype.readLongLE,      Memory.prototype.writeByteLE,      Memory.prototype.writeShortLE,      Memory.prototype.writeLongLE];
-    Memory.afnPagedLE   = [Memory.prototype.readBytePLE,     Memory.prototype.readShortPLE,     Memory.prototype.readLongPLE,     Memory.prototype.writeBytePLE,     Memory.prototype.writeShortPLE,     Memory.prototype.writeLongPLE];
+    Memory.afnArrayBE = [
+        Memory.prototype.readByteBE,
+        Memory.prototype.writeByteBE,
+        Memory.prototype.readShortBE,
+        Memory.prototype.writeShortBE,
+        Memory.prototype.readLongBE,
+        Memory.prototype.writeLongBE
+    ];
+
+    Memory.afnArrayLE = [
+        Memory.prototype.readByteLE,
+        Memory.prototype.writeByteLE,
+        Memory.prototype.readShortLE,
+        Memory.prototype.writeShortLE,
+        Memory.prototype.readLongLE,
+        Memory.prototype.writeLongLE
+    ];
+
+    Memory.afnPagedLE = [
+        Memory.prototype.readBytePLE,
+        Memory.prototype.writeBytePLE,
+        Memory.prototype.readShortPLE,
+        Memory.prototype.writeShortPLE,
+        Memory.prototype.readLongPLE,
+        Memory.prototype.writeLongPLE
+    ];
 }
 
 if (NODE) module.exports = Memory;

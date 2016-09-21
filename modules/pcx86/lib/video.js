@@ -2797,7 +2797,7 @@ Card.prototype.setMemoryAccess = function(nAccess)
         }
         if (!this.afnAccess) this.afnAccess = new Array(6);
         this.afnAccess[0] = fnReadByte;
-        this.afnAccess[3] = fnWriteByte;
+        this.afnAccess[1] = fnWriteByte;
         this.nAccess = nAccess;
     }
 };

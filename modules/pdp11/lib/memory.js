@@ -383,7 +383,19 @@ MemoryPDP11.prototype = {
     /**
      * setAccess(afn, fDirect)
      *
-     * If no function table is specified, a default is selected based on the MemoryPDP11 type.
+     * The afn parameter should be a 4-entry function table containing two byte handlers and
+     * two short handlers.  See the static afnMemory table for an example.
+     *
+     * If no function table is specified, a default is selected based on the MemoryPDP11 type;
+     * similarly, any undefined entries in the table are filled with default handlers that fall
+     * back to the byte handlers, and if one or both byte handlers are undefined, they default
+     * to handlers that simply ignore the access.
+     *
+     * fDirect indicates that both the default AND the direct handlers should be updated.  Direct
+     * handlers normally match the default handlers, except when "checked" handlers are installed;
+     * this allows "checked" handlers to know where to dispatch the call after performing checks.
+     * Examples of checks are read/write breakpoints, but it's really up to the Debugger to decide
+     * what the check consists of.
      *
      * @this {MemoryPDP11}
      * @param {Array.<function()>} [afn] function table
@@ -407,11 +419,11 @@ MemoryPDP11.prototype = {
     setReadAccess: function(afn, fDirect) {
         if (!fDirect || !this.cReadBreakpoints) {
             this.readByte = afn[0] || this.readNone;
-            this.readShort = afn[1] || this.readShortDefault;
+            this.readShort = afn[2] || this.readShortDefault;
         }
         if (fDirect || fDirect === undefined) {
             this.readByteDirect = afn[0] || this.readNone;
-            this.readShortDirect = afn[1] || this.readShortDefault;
+            this.readShortDirect = afn[2] || this.readShortDefault;
         }
     },
     /**
@@ -423,11 +435,11 @@ MemoryPDP11.prototype = {
      */
     setWriteAccess: function(afn, fDirect) {
         if (!fDirect || !this.cWriteBreakpoints) {
-            this.writeByte = !this.fReadOnly && afn[2] || this.writeNone;
+            this.writeByte = !this.fReadOnly && afn[1] || this.writeNone;
             this.writeShort = !this.fReadOnly && afn[3] || this.writeShortDefault;
         }
         if (fDirect || fDirect === undefined) {
-            this.writeByteDirect = afn[2] || this.writeNone;
+            this.writeByteDirect = afn[1] || this.writeNone;
             this.writeShortDirect = afn[3] || this.writeShortDefault;
         }
     },
@@ -830,43 +842,43 @@ MemoryPDP11.prototype = {
 
 /*
  * This is the effective definition of afnNone, but we need not fully define it, because setAccess()
- * uses these defaults when any of the 4 handlers (ie, 2 read handlers and 2 write handlers) are undefined.
+ * uses these defaults when any of the 4 handlers (ie, 2 byte handlers and 2 short handlers) are undefined.
  *
-MemoryPDP11.afnNone     = [
+MemoryPDP11.afnNone = [
     MemoryPDP11.prototype.readNone,
-    MemoryPDP11.prototype.readShortDefault,
     MemoryPDP11.prototype.writeNone,
+    MemoryPDP11.prototype.readShortDefault,
     MemoryPDP11.prototype.writeShortDefault
 ];
  */
-MemoryPDP11.afnNone     = [];
+MemoryPDP11.afnNone = [];
 
-MemoryPDP11.afnMemory   = [
+MemoryPDP11.afnMemory = [
     MemoryPDP11.prototype.readByteMemory,
-    MemoryPDP11.prototype.readShortMemory,
     MemoryPDP11.prototype.writeByteMemory,
+    MemoryPDP11.prototype.readShortMemory,
     MemoryPDP11.prototype.writeShortMemory
 ];
 
-MemoryPDP11.afnChecked  = [
+MemoryPDP11.afnChecked = [
     MemoryPDP11.prototype.readByteChecked,
-    MemoryPDP11.prototype.readShortChecked,
     MemoryPDP11.prototype.writeByteChecked,
+    MemoryPDP11.prototype.readShortChecked,
     MemoryPDP11.prototype.writeShortChecked
 ];
 
 if (TYPEDARRAYS) {
-    MemoryPDP11.afnArrayBE  = [
+    MemoryPDP11.afnArrayBE = [
         MemoryPDP11.prototype.readByteBE,
-        MemoryPDP11.prototype.readShortBE,
         MemoryPDP11.prototype.writeByteBE,
+        MemoryPDP11.prototype.readShortBE,
         MemoryPDP11.prototype.writeShortBE
     ];
 
-    MemoryPDP11.afnArrayLE  = [
+    MemoryPDP11.afnArrayLE = [
         MemoryPDP11.prototype.readByteLE,
-        MemoryPDP11.prototype.readShortLE,
         MemoryPDP11.prototype.writeByteLE,
+        MemoryPDP11.prototype.readShortLE,
         MemoryPDP11.prototype.writeShortLE
     ];
 }

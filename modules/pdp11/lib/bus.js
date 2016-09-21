@@ -73,30 +73,9 @@ function BusPDP11(parmsBus, cpu, dbg)
     this.nBusWidth = parmsBus['busWidth'] || 16;
 
     /*
-     * Compute all BusPDP11 memory block parameters, based on the width of the bus.
-     *
-     * Regarding blockTotal, we want to avoid using block overflow expressions like:
-     *
-     *      iBlock < this.nBlockTotal? iBlock : 0
-     *
-     * As long as we know that blockTotal is a power of two (eg, 256 or 0x100, in the case of
-     * nBusWidth == 20 and blockSize == 4096), we can define blockMask as (blockTotal - 1) and
-     * rewrite the previous expression as:
-     *
-     *      iBlock & this.nBlockMask
-     *
-     *      Bus Property        Old hard-coded values (when nBusWidth was always 20)
-     *      ------------        ----------------------------------------------------
-     *      this.nBusLimit      0xfffff
-     *      this.nBusMask       [same as busLimit]
-     *      this.nBlockSize     4096
-     *      this.nBlockLen      (this.nBlockSize >> 2)
-     *      this.nBlockShift    12
-     *      this.nBlockLimit    0xfff
-     *      this.nBlockTotal    ((this.nBusLimit + this.nBlockSize) / this.nBlockSize) | 0
-     *      this.nBlockMask     (this.nBlockTotal - 1) [ie, 0xff]
-     *
-     * Note that we choose a nBlockShift value (and thus a physical memory block size) based on "buswidth":
+     * Compute all BusPDP11 memory block parameters, based on the width of the bus.  The entire
+     * address space is divided into blocks, using a block size that is (hopefully) appropriate to
+     * the bus width.  The following table summarizes our simplistic calculations.
      *
      *      Bus Width                       Block Shift     Block Size
      *      ---------                       -----------     ----------
@@ -125,20 +104,24 @@ function BusPDP11(parmsBus, cpu, dbg)
     this.assert(this.nBlockMask <= BusPDP11.BlockInfo.num.mask);
 
     /*
-     * Lists of I/O notification functions: aIONotify are arrays, indexed by address, where each entry
-     * contains an array:
+     * aIONotify is an array (ie, a hash) of I/O notification handlers, indexed by address, where each
+     * entry contains an array:
      *
-     *      [0]: registered function to call for read
-     *      [1]: registered function to call for write
+     *      [0]: readByte(addr)
+     *      [1]: writeByte()
+     *      [2]: readShort()
+     *      [3]: writeShort()
      *
-     * The registered function is called with the address, and if the access was triggered by the CPU,
-     * the program counter (PC) at the point of access.
+     * Each of these 4-element arrays are similar to the memory access arrays assigned to entire Memory
+     * blocks, but these handlers generally target a specific address (or handful of addresses), while
+     * Memory access handlers must service the entire block; see the setAccess() function in the Memory
+     * component for details.
      *
-     * UPDATE: The Debugger now piggy-backs on these arrays to indicate addresses for which it wants
+     * UPDATE: The Debugger wants to piggy-back on these arrays to indicate addresses for which it wants
      * notification.  In those cases, the registered component/function elements may or may not be set,
      * but the following additional element will be set:
      *
-     *      [2]: true to break on I/O, false to ignore I/O
+     *      [4]: true to break on I/O, false to ignore I/O
      *
      * The false case is important if fIOBreakAll is set, because it allows the Debugger to selectively
      * ignore specific addresses.
@@ -172,38 +155,6 @@ BusPDP11.ERROR = {
     REMOVE_INVALID:     5
 };
 
-/**
- * @typedef {number}
- */
-var BlockInfo;
-
-/**
- * This defines the BlockInfo bit fields used by scanMemory() when it creates the aBlocks array.
- *
- * @typedef {{
- *  num:    BitField,
- *  count:  BitField,
- *  btmod:  BitField,
- *  type:   BitField
- * }}
- */
-BusPDP11.BlockInfo = usr.defineBitFields({num:20, count:8, btmod:1, type:3});
-
-/**
- * BusInfoPDP11 object definition (returned by scanMemory())
- *
- *  cbTotal:    total bytes allocated
- *  cBlocks:    total Memory blocks allocated
- *  aBlocks:    array of allocated Memory block numbers
- *
- * @typedef {{
- *  cbTotal:    number,
- *  cBlocks:    number,
- *  aBlocks:    Array.<BlockInfo>
- * }}
- */
-var BusInfoPDP11;
-
 BusPDP11.controller = {
 
     /**
@@ -211,26 +162,13 @@ BusPDP11.controller = {
      *
      * @this {MemoryPDP11}
      * @param {number} off
-     * @param {number} [addr]
+     * @param {number} addr
      * @return {number}
      */
     readIOPageByte: function(off, addr)
     {
-        return 0;
-    },
-
-    /**
-     * readIOPageWord(off, addr)
-     *
-     * @this {MemoryPDP11}
-     * @param {number} off
-     * @param {number} [addr]
-     * @return {number}
-     */
-    readIOPageWord: function(off, addr)
-    {
         var afn = this.controller.aIONotify[off];
-        return afn? afn[0](addr) : 0;
+        return afn && afn[0]? afn[0](addr) : 0;
     },
 
     /**
@@ -239,24 +177,58 @@ BusPDP11.controller = {
      * @this {MemoryPDP11}
      * @param {number} off
      * @param {number} b (which should already be pre-masked to 8 bits)
-     * @param {number} [addr]
+     * @param {number} addr
      */
     writeIOPageByte: function(off, b, addr)
     {
+        var afn = this.controller.aIONotify[off];
+        if (afn && afn[1]) {
+            afn[1](addr, b);
+        }
     },
 
     /**
-     * writeIOPageWord(off, w, addr)
+     * readIOPageShort(off, addr)
+     *
+     * @this {MemoryPDP11}
+     * @param {number} off
+     * @param {number} addr
+     * @return {number}
+     */
+    readIOPageShort: function(off, addr)
+    {
+        Component.assert(!(addr & 1));                  // unaligned addresses should be getting trapped at a higher level
+        var afn = this.controller.aIONotify[off];
+        if (afn) {
+            if (afn[2]) {
+                return afn[2](addr);
+            } else if (afn[0]) {
+                return afn[0](addr) | (afn[0](addr + 1) << 8);
+            }
+        }
+        return 0;
+    },
+
+    /**
+     * writeIOPageShort(off, w, addr)
      *
      * @this {MemoryPDP11}
      * @param {number} off
      * @param {number} w (which should already be pre-masked to 16 bits)
-     * @param {number} [addr]
+     * @param {number} addr
      */
-    writeIOPageWord: function(off, w, addr)
+    writeIOPageShort: function(off, w, addr)
     {
+        Component.assert(!(addr & 1));                  // unaligned addresses should be getting trapped at a higher level
         var afn = this.controller.aIONotify[off];
-        return afn? afn[1](w, addr) : 0;
+        if (afn) {
+            if (afn[3]) {
+                afn[3](addr, w);
+            } else if (afn[1]) {
+                afn[1](addr, w & 0xff);
+                afn[1](addr + 1, w >> 8);
+            }
+        }
     }
 };
 
@@ -277,9 +249,9 @@ BusPDP11.prototype.initMemory = function()
     }
     this.afnIOPage = new Array(4);
     this.afnIOPage[0] = BusPDP11.controller.readIOPageByte;
-    this.afnIOPage[1] = BusPDP11.controller.readIOPageWord;
+    this.afnIOPage[1] = BusPDP11.controller.readIOPageShort;
     this.afnIOPage[2] = BusPDP11.controller.writeIOPageByte;
-    this.afnIOPage[3] = BusPDP11.controller.writeIOPageWord;
+    this.afnIOPage[3] = BusPDP11.controller.writeIOPageShort;
     this.addrIOPage = this.addrTotal - BusPDP11.IOPAGE_LENGTH;
     this.addMemory(this.addrIOPage, BusPDP11.IOPAGE_LENGTH, MemoryPDP11.TYPE.CONTROLLER, this);
 };
@@ -451,16 +423,52 @@ BusPDP11.prototype.cleanMemory = function(addr, size)
     return fClean;
 };
 
+/*
+ * Data types used by scanMemory()
+ */
+
+/**
+ * @typedef {number} BlockInfo
+ */
+var BlockInfo;
+
+/**
+ * This defines the BlockInfo bit fields used by scanMemory() when it creates the aBlocks array.
+ *
+ * @typedef {{
+ *  num:    BitField,
+ *  count:  BitField,
+ *  btmod:  BitField,
+ *  type:   BitField
+ * }}
+ */
+BusPDP11.BlockInfo = usr.defineBitFields({num:20, count:8, btmod:1, type:3});
+
+/**
+ * BusInfoPDP11 object definition (returned by scanMemory())
+ *
+ *  cbTotal:    total bytes allocated
+ *  cBlocks:    total Memory blocks allocated
+ *  aBlocks:    array of allocated Memory block numbers
+ *
+ * @typedef {{
+ *  cbTotal:    number,
+ *  cBlocks:    number,
+ *  aBlocks:    Array.<BlockInfo>
+ * }} BusInfoPDP11
+ */
+var BusInfoPDP11;
+
 /**
  * scanMemory(info, addr, size)
  *
  * Returns a BusInfoPDP11 object for the specified address range.
  *
  * @this {BusPDP11}
- * @param {Object} [info] previous BusInfoPDP11, if any
+ * @param {BusInfoPDP11} [info] previous BusInfoPDP11, if any
  * @param {number} [addr] starting address of range (0 if none provided)
  * @param {number} [size] size of range, in bytes (up to end of address space if none provided)
- * @return {Object} updated info (or new info if no previous info provided)
+ * @return {BusInfoPDP11} updated info (or new info if no previous info provided)
  */
 BusPDP11.prototype.scanMemory = function(info, addr, size)
 {
@@ -640,7 +648,7 @@ BusPDP11.prototype.getByteDirect = function(addr)
  *
  * @this {BusPDP11}
  * @param {number} addr is a physical address
- * @return {number} word (16-bit) value at that address
+ * @return {number} short (16-bit) value at that address
  */
 BusPDP11.prototype.getShort = function(addr)
 {
@@ -659,7 +667,7 @@ BusPDP11.prototype.getShort = function(addr)
  *
  * @this {BusPDP11}
  * @param {number} addr is a physical address
- * @return {number} word (16-bit) value at that address
+ * @return {number} short (16-bit) value at that address
  */
 BusPDP11.prototype.getShortDirect = function(addr)
 {
@@ -703,7 +711,7 @@ BusPDP11.prototype.setByteDirect = function(addr, b)
  *
  * @this {BusPDP11}
  * @param {number} addr is a physical address
- * @param {number} w is the word (16-bit) value to write (we truncate it to 16 bits to be safe)
+ * @param {number} w is the short (16-bit) value to write (we truncate it to 16 bits to be safe)
  */
 BusPDP11.prototype.setShort = function(addr, w)
 {
@@ -725,7 +733,7 @@ BusPDP11.prototype.setShort = function(addr, w)
  *
  * @this {BusPDP11}
  * @param {number} addr is a physical address
- * @param {number} w is the word (16-bit) value to write (we truncate it to 16 bits to be safe)
+ * @param {number} w is the short (16-bit) value to write (we truncate it to 16 bits to be safe)
  */
 BusPDP11.prototype.setShortDirect = function(addr, w)
 {
@@ -860,18 +868,21 @@ BusPDP11.prototype.restoreMemory = function(a)
 };
 
 /**
- * addIOHandlers(start, end, fnRead, fnWrite)
+ * addIOHandlers(start, end, fnReadByte, fnWriteByte, fnReadShort, fnWriteShort)
  *
- * Add I/O notification handlers to the list of such handlers.  The start and end addresses are typically
- * relative to the starting IOPAGE address, but they can also be absolute.
+ * Add I/O notification handlers to the master list (aIONotify).  The start and end addresses are typically
+ * relative to the starting IOPAGE address, but they can also be absolute; we simply mask all addresses with
+ * (IOPAGE_LENGTH - 1).
  *
  * @this {BusPDP11}
  * @param {number} start address
  * @param {number} end address
- * @param {function(number)|null|undefined} fnRead is called with the read address whenever a read occurs
- * @param {function(number,number)|null|undefined} fnWrite is called with the data and write address whenever a write occurs
+ * @param {function(number)|null|undefined} fnReadByte
+ * @param {function(number,number)|null|undefined} fnWriteByte
+ * @param {function(number)|null|undefined} fnReadShort
+ * @param {function(number,number)|null|undefined} fnWriteShort
  */
-BusPDP11.prototype.addIOHandlers = function(start, end, fnRead, fnWrite)
+BusPDP11.prototype.addIOHandlers = function(start, end, fnReadByte, fnWriteByte, fnReadShort, fnWriteShort)
 {
     for (var addr = start; addr <= end; addr += 2) {
         var off = addr & (BusPDP11.IOPAGE_LENGTH - 1);
@@ -883,7 +894,7 @@ BusPDP11.prototype.addIOHandlers = function(start, end, fnRead, fnWrite)
             Component.warning("I/O address already registered: " + str.toHexLong(this.addrIOPage + off));
             continue;
         }
-        this.aIONotify[off] = [fnRead, fnWrite, false];
+        this.aIONotify[off] = [fnReadByte, fnWriteByte, fnReadShort, fnWriteShort, false];
         if (MAXDEBUG) this.log("addIOHandlers(" + str.toHexLong(this.addrIOPage + off) + ")");
     }
 };
@@ -901,9 +912,11 @@ BusPDP11.prototype.addIOTable = function(component, table)
 {
     for (var port in table) {
         var afn = table[port];
-        var fnRead = afn[0]? afn[0].bind(component) : null;
-        var fnWrite = afn[1]? afn[1].bind(component) : null;
-        this.addIOHandlers(+port, +port, fnRead, fnWrite);
+        var fnReadByte = afn[0]? afn[0].bind(component) : null;
+        var fnWriteByte = afn[1]? afn[1].bind(component) : null;
+        var fnReadShort = afn[2]? afn[2].bind(component) : null;
+        var fnWriteShort = afn[3]? afn[3].bind(component) : null;
+        this.addIOHandlers(+port, +port, fnReadByte, fnWriteByte, fnReadShort, fnWriteShort);
     }
 };
 

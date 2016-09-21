@@ -76,35 +76,16 @@ function Bus8080(parmsBus, cpu, dbg)
     this.nBusWidth = parmsBus['busWidth'] || 16;
 
     /*
-     * Compute all Bus8080 memory block parameters, based on the width of the bus.
-     *
-     * Regarding blockTotal, we want to avoid using block overflow expressions like:
-     *
-     *      iBlock < this.nBlockTotal? iBlock : 0
-     *
-     * As long as we know that blockTotal is a power of two (eg, 256 or 0x100, in the case of
-     * nBusWidth == 20 and blockSize == 4096), we can define blockMask as (blockTotal - 1) and
-     * rewrite the previous expression as:
-     *
-     *      iBlock & this.nBlockMask
-     *
-     *      Bus Property        Old hard-coded values (when nBusWidth was always 20)
-     *      ------------        ----------------------------------------------------
-     *      this.nBusLimit      0xfffff
-     *      this.nBusMask       [same as busLimit]
-     *      this.nBlockSize     4096
-     *      this.nBlockLen      (this.nBlockSize >> 2)
-     *      this.nBlockShift    12
-     *      this.nBlockLimit    0xfff
-     *      this.nBlockTotal    ((this.nBusLimit + this.nBlockSize) / this.nBlockSize) | 0
-     *      this.nBlockMask     (this.nBlockTotal - 1) [ie, 0xff]
-     *
-     * Note that we choose a nBlockShift value (and thus a physical memory block size) based on "buswidth":
+     * Compute all Bus8080 memory block parameters, based on the width of the bus.  The entire
+     * address space is divided into blocks, using a block size that is (hopefully) appropriate to
+     * the bus width.  The following table summarizes our simplistic calculations.
      *
      *      Bus Width                       Block Shift     Block Size
      *      ---------                       -----------     ----------
      *      16 bits (64Kb address space):   10              1Kb (64 maximum blocks)
+     *      18 bits (256Kb address space):  11              2Kb (128 maximum blocks)
      *      20 bits (1Mb address space):    12              4Kb (256 maximum blocks)
+     *      22 bits (4Mb address space):    13              8Kb (512 maximum blocks)
      *      24 bits (16Mb address space):   14              16Kb (1K maximum blocks)
      *      32 bits (4Gb address space);    15              32Kb (128K maximum blocks)
      *
@@ -115,7 +96,9 @@ function Bus8080(parmsBus, cpu, dbg)
      */
     this.addrTotal = Math.pow(2, this.nBusWidth);
     this.nBusLimit = this.nBusMask = (this.addrTotal - 1) | 0;
-    this.nBlockShift = (this.nBusWidth <= 16)? 10 : ((this.nBusWidth <= 20)? 12 : (this.nBusWidth <= 24? 14 : 15));
+    this.nBlockShift = (this.nBusWidth >> 1) + 2;
+    if (this.nBlockShift < 10) this.nBlockShift = 10;
+    if (this.nBlockShift > 15) this.nBlockShift = 15;
     this.nBlockSize = 1 << this.nBlockShift;
     this.nBlockLen = this.nBlockSize >> 2;
     this.nBlockLimit = this.nBlockSize - 1;
@@ -172,38 +155,6 @@ Bus8080.ERROR = {
     SET_MEM_BADRANGE:   4,
     REM_MEM_BADRANGE:   5
 };
-
-/**
- * @typedef {number}
- */
-var BlockInfo;
-
-/**
- * This defines the BlockInfo bit fields used by scanMemory() when it creates the aBlocks array.
- *
- * @typedef {{
- *  num:    BitField,
- *  count:  BitField,
- *  btmod:  BitField,
- *  type:   BitField
- * }}
- */
-Bus8080.BlockInfo = usr.defineBitFields({num:20, count:8, btmod:1, type:3});
-
-/**
- * BusInfo8080 object definition (returned by scanMemory())
- *
- *  cbTotal:    total bytes allocated
- *  cBlocks:    total Memory blocks allocated
- *  aBlocks:    array of allocated Memory block numbers
- *
- * @typedef {{
- *  cbTotal:    number,
- *  cBlocks:    number,
- *  aBlocks:    Array.<BlockInfo>
- * }}
- */
-var BusInfo8080;
 
 /**
  * initMemory()
@@ -360,6 +311,42 @@ Bus8080.prototype.cleanMemory = function(addr, size)
     }
     return fClean;
 };
+
+/*
+ * Data types used by scanMemory()
+ */
+
+/**
+ * @typedef {number}
+ */
+var BlockInfo;
+
+/**
+ * This defines the BlockInfo bit fields used by scanMemory() when it creates the aBlocks array.
+ *
+ * @typedef {{
+ *  num:    BitField,
+ *  count:  BitField,
+ *  btmod:  BitField,
+ *  type:   BitField
+ * }}
+ */
+Bus8080.BlockInfo = usr.defineBitFields({num:20, count:8, btmod:1, type:3});
+
+/**
+ * BusInfo8080 object definition (returned by scanMemory())
+ *
+ *  cbTotal:    total bytes allocated
+ *  cBlocks:    total Memory blocks allocated
+ *  aBlocks:    array of allocated Memory block numbers
+ *
+ * @typedef {{
+ *  cbTotal:    number,
+ *  cBlocks:    number,
+ *  aBlocks:    Array.<BlockInfo>
+ * }}
+ */
+var BusInfo8080;
 
 /**
  * scanMemory(info, addr, size)

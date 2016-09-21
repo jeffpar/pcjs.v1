@@ -89,7 +89,7 @@ DevicePDP11.prototype.initBus = function(cmp, bus, cpu, dbg)
  * readPSW(addr)
  *
  * @this {DevicePDP11}
- * @param {number} [addr]
+ * @param {number} addr
  * @return {number}
  */
 DevicePDP11.prototype.readPSW = function(addr)
@@ -102,7 +102,7 @@ DevicePDP11.prototype.readPSW = function(addr)
  *
  * @this {DevicePDP11}
  * @param {number} data
- * @param {number} [addr]
+ * @param {number} addr
  */
 DevicePDP11.prototype.writePSW = function(data, addr)
 {
@@ -110,7 +110,7 @@ DevicePDP11.prototype.writePSW = function(data, addr)
 };
 
 DevicePDP11.UNIBUS_TABLE = {};
-DevicePDP11.UNIBUS_TABLE[DevicePDP11.ADDR_PSW] = [DevicePDP11.prototype.readPSW, DevicePDP11.prototype.writePSW];
+DevicePDP11.UNIBUS_TABLE[DevicePDP11.ADDR_PSW] = [null, null, DevicePDP11.prototype.readPSW, DevicePDP11.prototype.writePSW];
 
 /**
  * DevicePDP11.init()

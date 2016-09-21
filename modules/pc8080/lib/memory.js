@@ -384,11 +384,11 @@ Memory8080.prototype = {
     setReadAccess: function(afn, fDirect) {
         if (!fDirect || !this.cReadBreakpoints) {
             this.readByte = afn[0] || this.readNone;
-            this.readShort = afn[1] || this.readShortDefault;
+            this.readShort = afn[2] || this.readShortDefault;
         }
         if (fDirect || fDirect === undefined) {
             this.readByteDirect = afn[0] || this.readNone;
-            this.readShortDirect = afn[1] || this.readShortDefault;
+            this.readShortDirect = afn[2] || this.readShortDefault;
         }
     },
     /**
@@ -400,11 +400,11 @@ Memory8080.prototype = {
      */
     setWriteAccess: function(afn, fDirect) {
         if (!fDirect || !this.cWriteBreakpoints) {
-            this.writeByte = !this.fReadOnly && afn[2] || this.writeNone;
+            this.writeByte = !this.fReadOnly && afn[1] || this.writeNone;
             this.writeShort = !this.fReadOnly && afn[3] || this.writeShortDefault;
         }
         if (fDirect || fDirect === undefined) {
-            this.writeByteDirect = afn[2] || this.writeNone;
+            this.writeByteDirect = afn[1] || this.writeNone;
             this.writeShortDirect = afn[3] || this.writeShortDefault;
         }
     },
@@ -807,18 +807,45 @@ Memory8080.prototype = {
 
 /*
  * This is the effective definition of afnNone, but we need not fully define it, because setAccess()
- * uses these defaults when any of the 6 handlers (ie, 3 read handlers and 3 write handlers) are undefined.
+ * uses these defaults when any of the 4 handlers (ie, 2 byte handlers and 2 short handlers) are undefined.
  *
-Memory8080.afnNone          = [Memory8080.prototype.readNone,        Memory8080.prototype.readShortDefault, Memory8080.prototype.writeNone,        Memory8080.prototype.writeShortDefault];
+Memory8080.afnNone = [
+    Memory8080.prototype.readNone,
+    Memory8080.prototype.writeNone,
+    Memory8080.prototype.readShortDefault,
+    Memory8080.prototype.writeShortDefault
+];
  */
+Memory8080.afnNone = [];
 
-Memory8080.afnNone          = [];
-Memory8080.afnMemory        = [Memory8080.prototype.readByteMemory,  Memory8080.prototype.readShortMemory,  Memory8080.prototype.writeByteMemory,  Memory8080.prototype.writeShortMemory];
-Memory8080.afnChecked       = [Memory8080.prototype.readByteChecked, Memory8080.prototype.readShortChecked, Memory8080.prototype.writeByteChecked, Memory8080.prototype.writeShortChecked];
+Memory8080.afnMemory = [
+    Memory8080.prototype.readByteMemory,
+    Memory8080.prototype.writeByteMemory,
+    Memory8080.prototype.readShortMemory,
+    Memory8080.prototype.writeShortMemory
+];
+
+Memory8080.afnChecked = [
+    Memory8080.prototype.readByteChecked,
+    Memory8080.prototype.writeByteChecked,
+    Memory8080.prototype.readShortChecked,
+    Memory8080.prototype.writeShortChecked
+];
 
 if (TYPEDARRAYS) {
-    Memory8080.afnArrayBE   = [Memory8080.prototype.readByteBE,      Memory8080.prototype.readShortBE,      Memory8080.prototype.writeByteBE,      Memory8080.prototype.writeShortBE];
-    Memory8080.afnArrayLE   = [Memory8080.prototype.readByteLE,      Memory8080.prototype.readShortLE,      Memory8080.prototype.writeByteLE,      Memory8080.prototype.writeShortLE];
+    Memory8080.afnArrayBE = [
+        Memory8080.prototype.readByteBE,
+        Memory8080.prototype.writeByteBE,
+        Memory8080.prototype.readShortBE,
+        Memory8080.prototype.writeShortBE
+    ];
+
+    Memory8080.afnArrayLE = [
+        Memory8080.prototype.readByteLE,
+        Memory8080.prototype.writeByteLE,
+        Memory8080.prototype.readShortLE,
+        Memory8080.prototype.writeShortLE
+    ];
 }
 
 if (NODE) module.exports = Memory8080;
