@@ -271,7 +271,7 @@ CPUStatePDP11.prototype.setBinding = function(sHTMLType, sBinding, control, sVal
     case "ZF":
     case "VF":
     case "CF":
-    case "PSW":
+    case "PS":
         this.bindings[sBinding] = control;
         this.cLiveRegs++;
         fBound = true;
@@ -300,7 +300,7 @@ CPUStatePDP11.prototype.updateStatus = function(fForce)
                 this.displayValue('R'+i, this.regsGen[i]);
             }
             var regPSW = this.getPSW();
-            this.displayValue("PSW", regPSW);
+            this.displayValue("PS", regPSW);
             this.displayValue("NF", (regPSW & PDP11.PSW.NF)? 1 : 0, 1);
             this.displayValue("ZF", (regPSW & PDP11.PSW.ZF)? 1 : 0, 1);
             this.displayValue("VF", (regPSW & PDP11.PSW.VF)? 1 : 0, 1);
@@ -583,7 +583,19 @@ CPUStatePDP11.prototype.interrupt = function(delay, priority, vector, callback)
 };
 
 /**
- * writePSW(newPSW)
+ * readPSW()
+ *
+ * @this {CPUStatePDP11}
+ * @return {number}
+ */
+CPUStatePDP11.prototype.readPSW = function()
+{
+    var mask = PDP11.PSW.CMODE | PDP11.PSW.PMODE | PDP11.PSW.REGSET | PDP11.PSW.PRI | PDP11.PSW.TF;
+    return this.PSW = (this.PSW & mask) | this.getNF() | this.getZF() | this.getVF() | this.getCF();
+};
+
+/**
+ * setPSW(newPSW)
  *
  * This updates the CPU Processor Status Word. The PSW should generally be written through
  * this routine so that changes can be tracked properly, for example the correct register set,
@@ -596,7 +608,7 @@ CPUStatePDP11.prototype.interrupt = function(delay, priority, vector, callback)
  * @this {CPUStatePDP11}
  * @param {number} newPSW
  */
-CPUStatePDP11.prototype.writePSW = function(newPSW)
+CPUStatePDP11.prototype.setPSW = function(newPSW)
 {
     this.flagN = newPSW << 12;
     this.flagZ = (~newPSW) & 4;
@@ -629,15 +641,17 @@ CPUStatePDP11.prototype.writePSW = function(newPSW)
 };
 
 /**
- * readPSW()
+ * writePSW(newPSW)
+ *
+ * This is a stricter version of setPSW(), used for writes to ADDR_PSW, which preserves bits that
+ * should not be overwritten.
  *
  * @this {CPUStatePDP11}
- * @return {number}
+ * @param {number} newPSW
  */
-CPUStatePDP11.prototype.readPSW = function()
+CPUStatePDP11.prototype.writePSW = function(newPSW)
 {
-    var mask = PDP11.PSW.CMODE | PDP11.PSW.PMODE | PDP11.PSW.REGSET | PDP11.PSW.PRI | PDP11.PSW.TF;
-    return this.PSW = (this.PSW & mask) | this.getNF() | this.getZF() | this.getVF() | this.getCF();
+    this.setPSW((newPSW & 0xf8ef) | (this.PSW & 0x0710));
 };
 
 /**
@@ -685,7 +699,7 @@ CPUStatePDP11.prototype.trap = function(vector, reason)
     this.mmuMode = 0;   // read from kernel D space
     if ((newPC = this.readWordByVirtual(vector | 0x10000)) >= 0) {
         if ((newPSW = this.readWordByVirtual(((vector + 2) & 0xffff) | 0x10000)) >= 0) {
-            this.writePSW((newPSW & 0xcfff) | ((this.trapPSW >> 2) & 0x3000)); // set new this.PSW with previous mode
+            this.setPSW((newPSW & 0xcfff) | ((this.trapPSW >> 2) & 0x3000)); // set new this.PSW with previous mode
             if (doubleTrap) {
                 this.CPU_Error |= 4;
                 this.regsGen[6] = 4;
@@ -740,10 +754,10 @@ CPUStatePDP11.prototype.mapUnibus = function(unibusAddress)
  *
  * When doing mapping, mmuMode is used to decide what address space is to be
  * used. 0 = kernel, 1 = supervisor, 2 = illegal, 3 = user. Normally, mmuMode is
- * set by the writePSW() function but there are exceptions for instructions which
+ * set by the setPSW() function but there are exceptions for instructions which
  * move data between address spaces (MFPD, MFPI, MTPD, and MTPI) and trap(). These will
- * modify mmuMode outside of writePSW() and then restore it again if all worked. If
- * however something happens to cause a trap then no restore is done as writePSW()
+ * modify mmuMode outside of setPSW() and then restore it again if all worked. If
+ * however something happens to cause a trap then no restore is done as setPSW()
  * will have been invoked as part of the trap, which will resynchronize mmuMode
  *
  * mmuMask[mmuMode] is used to control whether I/D space is active or not for
@@ -2188,7 +2202,7 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                 //case 0106400: // MTPS 1064SS
                                 //    //LOG_INSTRUCTION(instruction, 1, "MTPS");
                                 //    if ((src = this.readByteByMode(instruction)) >= 0) {
-                                //        this.writePSW((this.PSW & 0xff00) | (src & 0xef));
+                                //        this.setPSW((this.PSW & 0xff00) | (src & 0xef));
                                 //    } // Temporary PDP 11/34A
                                 //    break;
                             case 0x8D40: /*0106500*/ // MFPD 1065DD
@@ -2351,7 +2365,7 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                                     savePSW = (savePSW & 0xf81f) | (this.PSW & 0xf8e0);
                                                 }
                                                 this.regsGen[7] = virtualAddress;
-                                                this.writePSW(savePSW);
+                                                this.setPSW(savePSW);
                                                 this.trapMask &= ~0x10; // turn off Trace trap
                                                 if (instruction === 2) this.trapMask |= this.PSW & 0x10; // RTI enables immediate trace
                                             }

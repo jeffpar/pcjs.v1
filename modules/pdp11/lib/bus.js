@@ -308,8 +308,8 @@ BusPDP11.prototype.initMemory = function()
     }
     this.afnIOPage = new Array(4);
     this.afnIOPage[0] = BusPDP11.controller.readIOPageByte;
-    this.afnIOPage[1] = BusPDP11.controller.readIOPageShort;
-    this.afnIOPage[2] = BusPDP11.controller.writeIOPageByte;
+    this.afnIOPage[1] = BusPDP11.controller.writeIOPageByte;
+    this.afnIOPage[2] = BusPDP11.controller.readIOPageShort;
     this.afnIOPage[3] = BusPDP11.controller.writeIOPageShort;
     this.addrIOPage = this.addrTotal - BusPDP11.IOPAGE_LENGTH;
     this.addMemory(this.addrIOPage, BusPDP11.IOPAGE_LENGTH, MemoryPDP11.TYPE.CONTROLLER, this);

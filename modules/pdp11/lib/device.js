@@ -205,7 +205,7 @@ DevicePDP11.prototype.initBus = function(cmp, bus, cpu, dbg)
  * readPSW(addr)
  *
  * @this {DevicePDP11}
- * @param {number} addr
+ * @param {number} addr (ie, ADDR_PSW)
  * @return {number}
  */
 DevicePDP11.prototype.readPSW = function(addr)
@@ -218,14 +218,19 @@ DevicePDP11.prototype.readPSW = function(addr)
  *
  * @this {DevicePDP11}
  * @param {number} data
- * @param {number} addr
+ * @param {number} addr (ie, ADDR_PSW)
  */
 DevicePDP11.prototype.writePSW = function(data, addr)
 {
     /*
-     * TODO: Review the next line, which mimics access(), and determine if writePSW() can do this itself.
+     * TODO: Determine whether we need to replicate the code in access_iopage() that returns a bogus
+     * error when writing to ADDR_PSW, as a way of preventing instructions like CLR from updating the flags
+     * and potentially modifying some of the PSW bits that were just set (eg, the Z flag).
+     *
+     * If so, then we'll need to centralize the flag update logic, so that it can be skipped whenever a
+     * special one-time opcode flag is set.  Because there are a number of arithmetic instructions besides
+     * CLR that could be used to modify ADDR_PSW.
      */
-    data = (data & 0xf8ef) | (this.cpu.readPSW() & 0x0710);
     this.cpu.writePSW(data);
 };
 
@@ -707,6 +712,40 @@ DevicePDP11.prototype.getCache = function(callback, meta, block, address, count)
 };
 
 /**
+ * insertData(original, physicalAddress, data, byteFlag)
+ *
+ * @this {DevicePDP11}
+ * @param {number} original
+ * @param {number} physicalAddress
+ * @param {number} data
+ * @param {number} byteFlag
+ * @return {number}
+ */
+DevicePDP11.prototype.insertData = function(original, physicalAddress, data, byteFlag)
+{
+    if (physicalAddress & 1) {
+        if (!byteFlag) {
+            //log.push("TRAP 4 201 " + physicalAddress.toString(8) + " " + data.toString(8));
+            return this.cpu.trap(4, 122);
+        }
+        if (data >= 0) {
+            data = ((data << 8) & 0xff00) | (original & 0xff);
+        } else {
+            data = original;
+        }
+    } else {
+        if (data >= 0) {
+            if (byteFlag) {
+                data = (original & 0xff00) | (data & 0xff);
+            }
+        } else {
+            data = original;
+        }
+    }
+    return data;
+};
+
+/**
  * readData(meta, block, address, count)
  *
  * @this {DevicePDP11}
@@ -810,8 +849,11 @@ DevicePDP11.prototype.access = function(physicalAddress, data, byteFlag)
     switch (physicalAddress & ~0x3F) /*077*/ {
         case 0x3FFFC0: /*017777700*/ // 017777700 - 017777777
             switch (physicalAddress & ~1) {
-                case 0x3FFFFE: /*017777776*/ // PSW
-                    Component.assert(false);        // verify that this is being handled by our new registered functions now
+                /*
+                 * Superseded by UNIBUS_TABLE (much more of this code will be commented out
+                 * as it is replaced by read/write handlers in the UNIBUS_TABLE; stay tuned).
+                 *
+                case 0x3FFFFE: // 017777776 // PSW
                     result = cpu.readPSW();
                     if (data >= 0) {
                         if (physicalAddress & 1) {
@@ -819,11 +861,11 @@ DevicePDP11.prototype.access = function(physicalAddress, data, byteFlag)
                         } else {
                             if (byteFlag) data = (result & 0xff00) | (data & 0xff);
                         }
-                        data = (data & 0xf8ef) | (result & 0x0710);
                         cpu.writePSW(data);
                         return -1; // KLUDGE - no trap but abort any CC updates
                     }
                     break;
+                */
                 case 0x3FFFFC: /*017777774*/ // stack limit
                     if (data < 0) {
                         result = cpu.stackLimit & 0xff00;
@@ -1389,40 +1431,6 @@ DevicePDP11.prototype.access = function(physicalAddress, data, byteFlag)
         cpu.panic(76);
     }
     return result;
-};
-
-/**
- * insertData(original, physicalAddress, data, byteFlag)
- *
- * @this {DevicePDP11}
- * @param {number} original
- * @param {number} physicalAddress
- * @param {number} data
- * @param {number} byteFlag
- * @return {number}
- */
-DevicePDP11.prototype.insertData = function(original, physicalAddress, data, byteFlag)
-{
-    if (physicalAddress & 1) {
-        if (!byteFlag) {
-            //log.push("TRAP 4 201 " + physicalAddress.toString(8) + " " + data.toString(8));
-            return this.cpu.trap(4, 122);
-        }
-        if (data >= 0) {
-            data = ((data << 8) & 0xff00) | (original & 0xff);
-        } else {
-            data = original;
-        }
-    } else {
-        if (data >= 0) {
-            if (byteFlag) {
-                data = (original & 0xff00) | (data & 0xff);
-            }
-        } else {
-            data = original;
-        }
-    }
-    return data;
 };
 
 DevicePDP11.UNIBUS_TABLE = {};
