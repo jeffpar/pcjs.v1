@@ -636,10 +636,10 @@ DevicePDP11.prototype.mapUnibus = function(unibusAddress)
     if (idx < 31) {
         if (this.cpu.MMR3 & 0x20) {
             unibusAddress = (this.cpu.unibusMap[idx] + (unibusAddress & 0x1ffe)) & 0x3ffffe;
-            if (unibusAddress >= PDP11.IOBASE_UNIBUS && unibusAddress < PDP11.IOBASE_22BIT) this.cpu.panic(898);
+            if (unibusAddress >= BusPDP11.IOPAGE_UNIBUS && unibusAddress < BusPDP11.IOPAGE_22BIT) this.cpu.panic(898);
         }
     } else {
-        unibusAddress |= PDP11.IOBASE_22BIT;
+        unibusAddress |= BusPDP11.IOPAGE_22BIT;
     }
     return unibusAddress;
 };
@@ -916,7 +916,7 @@ DevicePDP11.prototype.access = function(physicalAddress, data, byteFlag)
                     break;
                 case 0x3FFFF0: /*017777760*/ // Lower size
                     if (cpu.cpuType !== 70) return cpu.trap(4, 228);
-                    result = (PDP11.MAX_MEMORY >> 6) - 1;
+                    result = (BusPDP11.MAX_MEMORY >> 6) - 1;
                     break;
                 case 0x3FFFF8: /*017777770*/ // Microprogram break
                     if (data >= 0 && !(physicalAddress & 1)) data &= 0xff; // Required for KB11-CM without MFPT instruction

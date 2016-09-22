@@ -183,13 +183,6 @@ var PDP11 = {
         // TODO
     },
 
-    IOBASE_VIRT:    0x00E000,   /*000160000*/
-    IOBASE_18BIT:   0x03E000,   /*000760000*/
-    IOBASE_UNIBUS:  0x3C0000,   /*017000000*/
-    IOBASE_22BIT:   0x3FE000,   /*017760000*/
-    MAX_MEMORY:     0x3C0000 - 16384,           // Maximum memory address (need less memory for BSD 2.9 boot)
-    MAX_ADDRESS:    0x400000,   /*020000000*/   // Register addresses are above 22 bit addressing
-
     BYTE_MODE:      1,
     READ_MODE:      2,
     WRITE_MODE:     4,

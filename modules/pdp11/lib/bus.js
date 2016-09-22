@@ -118,8 +118,7 @@ function BusPDP11(parmsBus, cpu, dbg)
      * component for details.
      *
      * UPDATE: The Debugger wants to piggy-back on these arrays to indicate addresses for which it wants
-     * notification.  In those cases, the registered component/function elements may or may not be set,
-     * but the following additional element will be set:
+     * notification.  In those cases, the following additional element will be set:
      *
      *      [4]: true to break on I/O, false to ignore I/O
      *
@@ -154,9 +153,7 @@ BusPDP11.MAX_ADDRESS    = 0x400000; /*020000000*/               // Register addr
 BusPDP11.ERROR = {
     RANGE_INUSE:        1,
     RANGE_INVALID:      2,
-    NO_CONTROLLER:      3,
-    SETACC_INVALID:     4,
-    REMOVE_INVALID:     5
+    NO_CONTROLLER:      3
 };
 
 /*
@@ -603,7 +600,7 @@ BusPDP11.prototype.removeMemory = function(addr, size)
         }
         return true;
     }
-    return this.reportError(BusPDP11.ERROR.REMOVE_INVALID, addr, size);
+    return this.reportError(BusPDP11.ERROR.RANGE_INVALID, addr, size);
 };
 
 /**
@@ -654,7 +651,7 @@ BusPDP11.prototype.setMemoryAccess = function(addr, size, afn, fQuiet)
         }
         return true;
     }
-    return this.reportError(BusPDP11.ERROR.SETACC_INVALID, addr, size);
+    return this.reportError(BusPDP11.ERROR.RANGE_INVALID, addr, size);
 };
 
 /**

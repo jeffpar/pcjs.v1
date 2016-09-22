@@ -39,6 +39,7 @@ if (NODE) {
     var Component     = require("../../shared/lib/component");
     var State         = require("../../shared/lib/state");
     var PDP11         = require("./defines");
+    var BusPDP11      = require("./bus");
     var CPUPDP11      = require("./cpu");
     var MessagesPDP11 = require("./messages");
     var MemoryPDP11   = require("./memory");
@@ -709,10 +710,10 @@ CPUStatePDP11.prototype.mapUnibus = function(unibusAddress)
     if (idx < 31) {
         if (this.MMR3 & 0x20) {
             unibusAddress = (this.unibusMap[idx] + (unibusAddress & 0x1ffe)) & 0x3ffffe;
-            if (unibusAddress >= PDP11.IOBASE_UNIBUS && unibusAddress < PDP11.IOBASE_22BIT) this.panic(898);
+            if (unibusAddress >= BusPDP11.IOPAGE_UNIBUS && unibusAddress < BusPDP11.IOPAGE_22BIT) this.panic(898);
         }
     } else {
-        unibusAddress |= PDP11.IOBASE_22BIT;
+        unibusAddress |= BusPDP11.IOPAGE_22BIT;
     }
     return unibusAddress;
 };
@@ -772,8 +773,8 @@ CPUStatePDP11.prototype.mapVirtualToPhysical = function(virtualAddress, accessMa
     if (!(accessMask & this.mmuEnable)) {
         physicalAddress = virtualAddress & 0xffff;      // virtual address without MMU is 16 bit (no I&D)
         this.mmuLastVirtual = physicalAddress;
-        if (physicalAddress >= PDP11.IOBASE_VIRT) {
-            physicalAddress |= PDP11.IOBASE_22BIT;
+        if (physicalAddress >= BusPDP11.IOPAGE_VIRT) {
+            physicalAddress |= BusPDP11.IOPAGE_22BIT;
         } else { // no max_memory check in 16 bit mode
             if ((physicalAddress & 1) && !(accessMask & PDP11.BYTE_MODE)) {
                 this.CPU_Error |= 0x40;
@@ -787,15 +788,15 @@ CPUStatePDP11.prototype.mapVirtualToPhysical = function(virtualAddress, accessMa
         pdr = this.mmuMap[this.mmuMode][page];
         physicalAddress = ((this.mmuMap[this.mmuMode][page + 16] << 6) + (virtualAddress & 0x1fff)) & 0x3fffff;
         if (this.MMR3 & 0x10) { // if 22 bit MM mode
-            if (physicalAddress >= PDP11.IOBASE_UNIBUS && physicalAddress < PDP11.IOBASE_22BIT) {
+            if (physicalAddress >= BusPDP11.IOPAGE_UNIBUS && physicalAddress < BusPDP11.IOPAGE_22BIT) {
                 physicalAddress = this.mapUnibus(physicalAddress & 0x3ffff); // 18bit unibus space
             }
         } else {
             physicalAddress &= 0x3ffff; // truncate if only 18 bit mapping
-            if (physicalAddress >= PDP11.IOBASE_18BIT) physicalAddress |= PDP11.IOBASE_22BIT;
+            if (physicalAddress >= BusPDP11.IOPAGE_18BIT) physicalAddress |= BusPDP11.IOPAGE_22BIT;
         }
-        if (physicalAddress < PDP11.IOBASE_UNIBUS) {
-            if (physicalAddress >= PDP11.MAX_MEMORY) {
+        if (physicalAddress < BusPDP11.IOPAGE_UNIBUS) {
+            if (physicalAddress >= BusPDP11.MAX_MEMORY) {
                 this.CPU_Error |= 0x20;
                 return this.trap(4, 24); // KB11-EM does this after ABORT handling - KB11-CM before
             }
@@ -880,10 +881,10 @@ CPUStatePDP11.prototype.mapVirtualToPhysical = function(virtualAddress, accessMa
  */
 CPUStatePDP11.prototype.readWordByAddr = function(physicalAddress)
 {
-    if (physicalAddress >= PDP11.MAX_ADDRESS) {
-        return this.regsGen[physicalAddress - PDP11.MAX_ADDRESS];
+    if (physicalAddress >= BusPDP11.MAX_ADDRESS) {
+        return this.regsGen[physicalAddress - BusPDP11.MAX_ADDRESS];
 	} else {
-        // if (physicalAddress >= PDP11.IOBASE_UNIBUS) {
+        // if (physicalAddress >= BusPDP11.IOPAGE_UNIBUS) {
         //    return this.bus.access_iopage(physicalAddress, -1, 0);
 		// } else {
 			if (physicalAddress >= 0) {
@@ -905,10 +906,10 @@ CPUStatePDP11.prototype.readWordByAddr = function(physicalAddress)
 CPUStatePDP11.prototype.writeWordByAddr = function(physicalAddress, data)
 {
     data &= 0xffff;
-    if (physicalAddress >= PDP11.MAX_ADDRESS) {
-        return (this.regsGen[physicalAddress - PDP11.MAX_ADDRESS] = data);
+    if (physicalAddress >= BusPDP11.MAX_ADDRESS) {
+        return (this.regsGen[physicalAddress - BusPDP11.MAX_ADDRESS] = data);
 	} else {
-        // if (physicalAddress >= PDP11.IOBASE_UNIBUS) {
+        // if (physicalAddress >= BusPDP11.IOPAGE_UNIBUS) {
         //     return this.bus.access_iopage(physicalAddress, data, 0);
 		// } else {
 			if (physicalAddress >= 0) {
@@ -930,10 +931,10 @@ CPUStatePDP11.prototype.writeWordByAddr = function(physicalAddress, data)
 CPUStatePDP11.prototype.readByteByAddr = function(physicalAddress)
 {
     var result;
-    if (physicalAddress >= PDP11.MAX_ADDRESS) {
-        return (this.regsGen[physicalAddress - PDP11.MAX_ADDRESS] & 0xff);
+    if (physicalAddress >= BusPDP11.MAX_ADDRESS) {
+        return (this.regsGen[physicalAddress - BusPDP11.MAX_ADDRESS] & 0xff);
 	} else {
-        // if (physicalAddress >= PDP11.IOBASE_UNIBUS) {
+        // if (physicalAddress >= BusPDP11.IOPAGE_UNIBUS) {
         //     return this.bus.access_iopage(physicalAddress, -1, 1);
 		// } else {
 			if (physicalAddress >= 0) {
@@ -955,10 +956,10 @@ CPUStatePDP11.prototype.readByteByAddr = function(physicalAddress)
 CPUStatePDP11.prototype.writeByteByAddr = function(physicalAddress, data)
 {
     data &= 0xff;
-    if (physicalAddress >= PDP11.MAX_ADDRESS) {
-        return (this.regsGen[physicalAddress - PDP11.MAX_ADDRESS] = (this.regsGen[physicalAddress - PDP11.MAX_ADDRESS] & 0xff00) | data);
+    if (physicalAddress >= BusPDP11.MAX_ADDRESS) {
+        return (this.regsGen[physicalAddress - BusPDP11.MAX_ADDRESS] = (this.regsGen[physicalAddress - BusPDP11.MAX_ADDRESS] & 0xff00) | data);
 	} else {
-        // if (physicalAddress >= PDP11.IOBASE_UNIBUS) {
+        // if (physicalAddress >= BusPDP11.IOPAGE_UNIBUS) {
         //     return this.bus.access_iopage(physicalAddress, data, 1);
 		// } else {
 			if (physicalAddress >= 0) {
@@ -1169,7 +1170,7 @@ CPUStatePDP11.prototype.getAddrByMode = function(addressMode, accessMode)
 {
     var result;
     if (!(addressMode & 0x38)) {
-        return PDP11.MAX_ADDRESS + (addressMode & 7); // Registers have special addresses above maximum address
+        return BusPDP11.MAX_ADDRESS + (addressMode & 7); // Registers have special addresses above maximum address
     } else {
         if ((result = this.getVirtualByMode(addressMode, accessMode)) >= 0) {
             result = this.mapVirtualToPhysical(result, accessMode);
