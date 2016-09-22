@@ -104,7 +104,7 @@ function BusPDP11(parmsBus, cpu, dbg)
     this.assert(this.nBlockMask <= BusPDP11.BlockInfo.num.mask);
 
     /*
-     * aIONotify is an array (ie, a hash) of I/O notification handlers, indexed by address, where each
+     * aIOHandlers is an array (ie, a hash) of I/O notification handlers, indexed by address, where each
      * entry contains an array:
      *
      *      [0]: readByte(addr)
@@ -126,7 +126,7 @@ function BusPDP11(parmsBus, cpu, dbg)
      * The false case is important if fIOBreakAll is set, because it allows the Debugger to selectively
      * ignore specific addresses.
      */
-    this.aIONotify = [];
+    this.aIOHandlers = [];
     this.fIOBreakAll = false;
 
     this.fnReset = null;
@@ -170,7 +170,7 @@ BusPDP11.ERROR = {
  *
  * TODO: Another small potential improvement would be for addIOHandlers() to predefine fall-backs for all
  * missing handlers, so there's never a need to check each entry (eg, afn[0], afn[1], etc) before calling
- * it.  However, since there's no avoiding checking afn itself (unless we FULLY populate the aIONotify
+ * it.  However, since there's no avoiding checking afn itself (unless we FULLY populate the aIOHandlers
  * array), and since these I/O accesses should be pretty infrequent relative to all other memory accesses,
  * the benefit seems pretty minimal.
  */
@@ -186,7 +186,7 @@ BusPDP11.controller = {
      */
     readIOPageByte: function(off, addr)
     {
-        var afn = this.controller.aIONotify[off];
+        var afn = this.controller.aIOHandlers[off];
         if (afn) {
             if (afn[0]) {
                 return afn[0](addr);
@@ -198,7 +198,7 @@ BusPDP11.controller = {
                 }
             }
         } else if (addr & 0x1) {
-            afn = this.controller.aIONotify[off & ~0x1];
+            afn = this.controller.aIOHandlers[off & ~0x1];
             if (afn[2]) {
                 return afn[2](addr & ~0x1) >> 8;
             }
@@ -217,7 +217,7 @@ BusPDP11.controller = {
     writeIOPageByte: function(off, b, addr)
     {
         var w;
-        var afn = this.controller.aIONotify[off];
+        var afn = this.controller.aIOHandlers[off];
         if (afn) {
             if (afn[1]) {
                 afn[1](b, addr);
@@ -232,7 +232,7 @@ BusPDP11.controller = {
                 return;
             }
         } else if (addr & 0x1) {
-            afn = this.controller.aIONotify[off & ~0x1];
+            afn = this.controller.aIOHandlers[off & ~0x1];
             if (afn[3]) {
                 addr &= ~0x1;
                 w = afn[2]? afn[2](addr) : 0;
@@ -254,7 +254,7 @@ BusPDP11.controller = {
     readIOPageShort: function(off, addr)
     {
         Component.assert(!(addr & 1));                  // unaligned addresses should be getting trapped at a higher level
-        var afn = this.controller.aIONotify[off];
+        var afn = this.controller.aIOHandlers[off];
         if (afn) {
             if (afn[2]) {
                 return afn[2](addr);
@@ -276,7 +276,7 @@ BusPDP11.controller = {
     writeIOPageShort: function(off, w, addr)
     {
         Component.assert(!(addr & 1));                  // unaligned addresses should be getting trapped at a higher level
-        var afn = this.controller.aIONotify[off];
+        var afn = this.controller.aIOHandlers[off];
         if (afn) {
             if (afn[3]) {
                 afn[3](w, addr);
@@ -943,7 +943,7 @@ BusPDP11.prototype.restoreMemory = function(a)
 /**
  * addIOHandlers(start, end, fnReadByte, fnWriteByte, fnReadShort, fnWriteShort)
  *
- * Add I/O notification handlers to the master list (aIONotify).  The start and end addresses are typically
+ * Add I/O notification handlers to the master list (aIOHandlers).  The start and end addresses are typically
  * relative to the starting IOPAGE address, but they can also be absolute; we simply mask all addresses with
  * IOPAGE_MASK.
  *
@@ -959,11 +959,11 @@ BusPDP11.prototype.addIOHandlers = function(start, end, fnReadByte, fnWriteByte,
 {
     for (var addr = start; addr <= end; addr += 2) {
         var off = addr & BusPDP11.IOPAGE_MASK;
-        if (this.aIONotify[off] !== undefined) {
+        if (this.aIOHandlers[off] !== undefined) {
             Component.warning("I/O address already registered: " + str.toHexLong(this.addrIOPage + off));
             continue;
         }
-        this.aIONotify[off] = [fnReadByte, fnWriteByte, fnReadShort, fnWriteShort, false];
+        this.aIOHandlers[off] = [fnReadByte, fnWriteByte, fnReadShort, fnWriteShort, false];
         if (MAXDEBUG) this.log("addIOHandlers(" + str.toHexLong(this.addrIOPage + off) + ")");
     }
 };

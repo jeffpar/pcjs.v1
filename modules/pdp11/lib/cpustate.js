@@ -458,17 +458,6 @@ CPUStatePDP11.prototype.setPC = function(addr)
 };
 
 /**
- * getPSW()
- *
- * @this {CPUStatePDP11}
- * @return {number}
- */
-CPUStatePDP11.prototype.getPSW = function()
-{
-    return (this.PSW & ~PDP11.PSW.FLAGS) | (this.getNF() | this.getZF() | this.getVF() | this.getCF());
-};
-
-/**
  * getSP()
  *
  * @this {CPUStatePDP11}
@@ -583,13 +572,20 @@ CPUStatePDP11.prototype.interrupt = function(delay, priority, vector, callback)
 };
 
 /**
- * readPSW()
+ * getPSW()
  *
  * @this {CPUStatePDP11}
  * @return {number}
  */
-CPUStatePDP11.prototype.readPSW = function()
+CPUStatePDP11.prototype.getPSW = function()
 {
+    /*
+     * I'm not sure why this function can't simply be written as:
+     *
+     *      return (this.PSW & ~PDP11.PSW.FLAGS) | (this.getNF() | this.getZF() | this.getVF() | this.getCF());
+     *
+     * but for now, I'm keeping the same masking logic as pdp11.js.
+     */
     var mask = PDP11.PSW.CMODE | PDP11.PSW.PMODE | PDP11.PSW.REGSET | PDP11.PSW.PRI | PDP11.PSW.TF;
     return this.PSW = (this.PSW & mask) | this.getNF() | this.getZF() | this.getVF() | this.getCF();
 };
@@ -641,20 +637,6 @@ CPUStatePDP11.prototype.setPSW = function(newPSW)
 };
 
 /**
- * writePSW(newPSW)
- *
- * This is a stricter version of setPSW(), used for writes to ADDR_PSW, which preserves bits that
- * should not be overwritten.
- *
- * @this {CPUStatePDP11}
- * @param {number} newPSW
- */
-CPUStatePDP11.prototype.writePSW = function(newPSW)
-{
-    this.setPSW((newPSW & 0xf8ef) | (this.PSW & 0x0710));
-};
-
-/**
  * panic(reason)
  *
  * TODO: Something.
@@ -684,7 +666,7 @@ CPUStatePDP11.prototype.trap = function(vector, reason)
 {
     var newPC, newPSW, doubleTrap = 0;
     if (this.trapPSW < 0) {
-        this.trapPSW = this.readPSW();
+        this.trapPSW = this.getPSW();
     } else {
         if (!this.mmuMode) {
             vector = 4;
@@ -2261,7 +2243,7 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                 break;
                                 //case 0106700: // MTFS 1064SS
                                 //    //LOG_INSTRUCTION(instruction, 1, "MFPS");
-                                //    src = this.readPSW() & 0xff;
+                                //    src = this.getPSW() & 0xff;
                                 //    if (instruction & 0x38) {
                                 //        if ((dstAddr = this.getAddrByMode(instruction, PDP11.WRITE_MODE | PDP11.BYTE_MODE)) >= 0) { // write byte
                                 //            if (this.writeByteByAddr(dstAddr, src) >= 0) {

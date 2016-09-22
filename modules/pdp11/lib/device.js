@@ -210,7 +210,7 @@ DevicePDP11.prototype.initBus = function(cmp, bus, cpu, dbg)
  */
 DevicePDP11.prototype.readPSW = function(addr)
 {
-    return this.cpu.readPSW();
+    return this.cpu.getPSW();
 };
 
 /**
@@ -231,7 +231,8 @@ DevicePDP11.prototype.writePSW = function(data, addr)
      * special one-time opcode flag is set.  Because there are a number of arithmetic instructions besides
      * CLR that could be used to modify ADDR_PSW.
      */
-    this.cpu.writePSW(data);
+    var maskDisallowed = PDP11.PSW.UNUSED | PDP11.PSW.TF;
+    this.cpu.setPSW((data & ~maskDisallowed) | (this.cpu.getPSW() & maskDisallowed));
 };
 
 /**
@@ -854,14 +855,15 @@ DevicePDP11.prototype.access = function(physicalAddress, data, byteFlag)
                  * as it is replaced by read/write handlers in the UNIBUS_TABLE; stay tuned).
                  *
                 case 0x3FFFFE: // 017777776 // PSW
-                    result = cpu.readPSW();
+                    result = cpu.getPSW();
                     if (data >= 0) {
                         if (physicalAddress & 1) {
                             data = (data << 8) | (result & 0xff);
                         } else {
                             if (byteFlag) data = (result & 0xff00) | (data & 0xff);
                         }
-                        cpu.writePSW(data);
+                        data = (data & 0xf8ef) | (result & 0x0710);
+                        cpu.setPSW(data);
                         return -1; // KLUDGE - no trap but abort any CC updates
                     }
                     break;
