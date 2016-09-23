@@ -163,12 +163,15 @@ var PDP11 = {
         INTR:       0x00ff,     // mask for 8 bits, representing interrupt levels 0-7
         HALT:       0x0100      // halt requested; see opHLT()
     },
+    /*
+     * Internal operation state flags
+     */
     OPFLAG: {
         TRAP_TF:    0x10,       // aka PDP11.PSW.TF
         TRAP_MMU:   0x20,
         TRAP_SP:    0x40,
         TRAP_MASK:  0x70,
-        SKIP_FLAGS: 0x80
+        SKIP_FLAGS: 0x80        // when set, all updateXXXFlags() functions must leave flags unchanged
     },
     /*
      * Opcode reg (opcode bits 2-0)
@@ -198,6 +201,9 @@ var PDP11 = {
         MASK:       0x0FC0,
         SHIFT:      6
     },
+    /*
+     * PDP-11 trap vectors
+     */
     TRAP: {
         UNDEFINED:  0x00,       // 000  (reserved)
         BUS_ERROR:  0x04,       // 004  illegal instructions, bus errors, stack limit, illegal internal address, microbreak
@@ -210,6 +216,9 @@ var PDP11 = {
         PIRQ:       0xA0,       // 240  PIRQ, program interrupt request
         MMU_FAULT:  0xA8        // 250  MMU aborts and traps
     },
+    /*
+     * Internal memory access flags
+     */
     ACCESS: {
         WORD:       0x0,
         BYTE:       0x1,

@@ -34,9 +34,7 @@
 "use strict";
 
 if (NODE) {
-    var str           = require("../../shared/lib/strlib");
     var PDP11         = require("./defines");
-    var MessagesPDP11 = require("./messages");
 }
 
 /**
@@ -70,6 +68,21 @@ PDP11.fnBIC = function(src, dst)
 };
 
 /**
+ * fnBICB(dst, src)
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} src
+ * @param {number} dst
+ * @return {number} (~src & dst)
+ */
+PDP11.fnBICB = function(src, dst)
+{
+    var result = ~src & dst;
+    this.updateNZFlags(result << 8);
+    return result;
+};
+
+/**
  * fnBIS(dst, src)
  *
  * @this {CPUStatePDP11}
@@ -81,6 +94,21 @@ PDP11.fnBIS = function(src, dst)
 {
     var result = src | dst;
     this.updateNZFlags(result);
+    return result;
+};
+
+/**
+ * fnBISB(dst, src)
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} src
+ * @param {number} dst
+ * @return {number} (src | dst)
+ */
+PDP11.fnBISB = function(src, dst)
+{
+    var result = src | dst;
+    this.updateNZFlags(result << 8);
     return result;
 };
 
@@ -97,28 +125,6 @@ PDP11.fnSUB = function(src, dst)
     var result = dst - src;
     this.updateSubFlags(result, src, dst);
     return result & 0xffff;
-};
-
-/**
- * op1170(opCode)
- *
- * @this {CPUStatePDP11}
- * @param {number} opCode
- */
-PDP11.op1170 = function(opCode)
-{
-    PDP11.aOpsF000_1170[opCode >> 12].call(this, opCode);
-};
-
-/**
- * op0XXX_1170(opCode)
- *
- * @this {CPUStatePDP11}
- * @param {number} opCode
- */
-PDP11.op0XXX_1170 = function(opCode)
-{
-    // PDP11.aOpsF000_1170[opCode >> 12].call(this, opCode);
 };
 
 /**
@@ -146,6 +152,18 @@ PDP11.opBIC = function(opCode)
 };
 
 /**
+ * opBICB(opCode)
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} opCode
+ */
+PDP11.opBICB = function(opCode)
+{
+    this.updateByteByMode(opCode, this.readByteByMode(opCode >> PDP11.SRCMODE.SHIFT), PDP11.fnBICB);
+    this.nStepCycles -= 1;
+};
+
+/**
  * opBIS(opCode)
  *
  * @this {CPUStatePDP11}
@@ -154,6 +172,18 @@ PDP11.opBIC = function(opCode)
 PDP11.opBIS = function(opCode)
 {
     this.updateWordByMode(opCode, this.readWordByMode(opCode >> PDP11.SRCMODE.SHIFT), PDP11.fnBIS);
+    this.nStepCycles -= 1;
+};
+
+/**
+ * opBISB(opCode)
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} opCode
+ */
+PDP11.opBISB = function(opCode)
+{
+    this.updateByteByMode(opCode, this.readByteByMode(opCode >> PDP11.SRCMODE.SHIFT), PDP11.fnBISB);
     this.nStepCycles -= 1;
 };
 
@@ -170,6 +200,18 @@ PDP11.opBIT = function(opCode)
 };
 
 /**
+ * opBITB(opCode)
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} opCode
+ */
+PDP11.opBITB = function(opCode)
+{
+    this.updateNZFlags((this.readByteByMode(opCode >> PDP11.SRCMODE.SHIFT) & this.readByteByMode(opCode)) << 8);
+    this.nStepCycles -= 1;
+};
+
+/**
  * opCMP(opCode)
  *
  * @this {CPUStatePDP11}
@@ -179,6 +221,25 @@ PDP11.opCMP = function(opCode)
 {
     var src = this.readWordByMode(opCode >> PDP11.SRCMODE.SHIFT);
     var dst = this.readWordByMode(opCode);
+    var result = src - dst;
+    /*
+     * NOTE: CMP calculates (src - dst) rather than (dst - src), so when we call updateSubFlags(),
+     * we must reverse the order of the src and dst parameters.
+     */
+    this.updateSubFlags(result, dst, src);
+    this.nStepCycles -= 1;
+};
+
+/**
+ * opCMPB(opCode)
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} opCode
+ */
+PDP11.opCMPB = function(opCode)
+{
+    var src = this.readByteByMode(opCode >> PDP11.SRCMODE.SHIFT) << 8;
+    var dst = this.readByteByMode(opCode) << 8;
     var result = src - dst;
     /*
      * NOTE: CMP calculates (src - dst) rather than (dst - src), so when we call updateSubFlags(),
@@ -212,7 +273,7 @@ PDP11.opMOVB = function(opCode)
     /*
      * When dst is a register, data must be sign-extended; otherwise, sign-extension is unnecessary (but harmless).
      */
-    this.updateNZFlags(this.writeByteByMode(opCode, (data & 0x80)? data | 0xff00 : data));
+    this.updateNZFlags(this.writeByteByMode(opCode, (data & 0x80)? data | 0xff00 : data) << 8);
     this.nStepCycles -= 1;
 };
 
@@ -239,6 +300,28 @@ PDP11.opSUB = function(opCode)
     this.nStepCycles -= 1;
 };
 
+/**
+ * op1170(opCode)
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} opCode
+ */
+PDP11.op1170 = function(opCode)
+{
+    PDP11.aOpsF000_1170[opCode >> 12].call(this, opCode);
+};
+
+/**
+ * op0XXX_1170(opCode)
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} opCode
+ */
+PDP11.op0XXX_1170 = function(opCode)
+{
+    // PDP11.aOpsF000_1170[opCode >> 12].call(this, opCode);
+};
+
 PDP11.aOpsF000_1170 = [
     PDP11.op0XXX_1170,
     PDP11.opMOV,                // MOV  01SSDD
@@ -250,10 +333,10 @@ PDP11.aOpsF000_1170 = [
     PDP11.opNOP,                // 0x7XXX
     PDP11.opNOP,                // 0x8XXX
     PDP11.opMOVB,               // MOVB 11SSDD
-    PDP11.opNOP,                // 0xAXXX
-    PDP11.opNOP,                // 0xBXXX
-    PDP11.opNOP,                // 0xCXXX
-    PDP11.opNOP,                // 0xDXXX
+    PDP11.opCMPB,               // CMPB 12SSDD
+    PDP11.opBITB,               // BITB 13SSDD
+    PDP11.opBICB,               // BICB 14SSDD
+    PDP11.opBISB,               // BISB 15SSDD
     PDP11.opSUB,                // SUB  16SSDD
     PDP11.opNOP                 // 0xFXXX
 ];

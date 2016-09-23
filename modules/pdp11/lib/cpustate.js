@@ -639,7 +639,7 @@ CPUStatePDP11.prototype.setPSW = function(newPSW)
  */
 CPUStatePDP11.prototype.updateNZFlags = function(result)
 {
-    if (!this.opFlags & PDP11.OPFLAG.SKIP_FLAGS) {
+    if (!(this.opFlags & PDP11.OPFLAG.SKIP_FLAGS)) {
         this.flagN = this.flagZ = result;
         this.flagV = 0;
     }
@@ -655,7 +655,7 @@ CPUStatePDP11.prototype.updateNZFlags = function(result)
  */
 CPUStatePDP11.prototype.updateAddFlags = function(result, src, dst)
 {
-    if (!this.opFlags & PDP11.OPFLAG.SKIP_FLAGS) {
+    if (!(this.opFlags & PDP11.OPFLAG.SKIP_FLAGS)) {
         this.flagN = this.flagZ = this.flagC = result;
         this.flagV = (src ^ result) & (dst ^ result);
     }
@@ -674,7 +674,7 @@ CPUStatePDP11.prototype.updateAddFlags = function(result, src, dst)
  */
 CPUStatePDP11.prototype.updateSubFlags = function(result, src, dst)
 {
-    if (!this.opFlags & PDP11.OPFLAG.SKIP_FLAGS) {
+    if (!(this.opFlags & PDP11.OPFLAG.SKIP_FLAGS)) {
         this.flagN = this.flagZ = this.flagC = result;
         this.flagV = (src ^ dst) & (dst ^ result);
     }
@@ -1293,6 +1293,33 @@ CPUStatePDP11.prototype.updateWordByMode = function(addressMode, src, fnOp)
 };
 
 /**
+ * updateByteByMode(addressMode, src, fnOp)
+ *
+ * Used whenever the dst operand (as described by addressMode) DOES need to be read before writing.
+ *
+ * TODO: writeByteByAddr() currently plays it safe and always masks the incoming data.  Let's see if we can
+ * change that to an assert(), and make sure we never give writeByteByAddr() unmasked data.
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} addressMode
+ * @param {number} src
+ * @param {function(number,number)} fnOp
+ * @return {number}
+ */
+CPUStatePDP11.prototype.updateByteByMode = function(addressMode, src, fnOp)
+{
+    var data;
+    if (!(addressMode & PDP11.OPMODE.MASK)) {
+        var reg = addressMode & PDP11.OPREG.MASK;
+        this.regsGen[reg] = (data = fnOp.call(this, src, this.regsGen[reg]));
+    } else {
+        var addr = this.getAddrByMode(addressMode, PDP11.ACCESS.UPDATE_BYTE);
+        this.writeByteByAddr(addr, (data = fnOp.call(this, src, this.readByteByAddr(addr))));
+    }
+    return data;
+};
+
+/**
  * writeWordByMode(addressMode, data)
  *
  * Used whenever the dst operand (as described by addressMode) does NOT need to be read before writing.
@@ -1622,49 +1649,49 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                 //         }
                 //     }
                 //     break;
-                case 0xA000: /*0120000*/ // CMPB 12SSDD
-                    //LOG_INSTRUCTION(instruction, 2, "CMPB");
-                    if ((src = this.readByteByMode(instruction >> 6)) >= 0) {
-                        if ((dst = this.readByteByMode(instruction)) >= 0) {
-                            result = src - dst;
-                            this.flagN = this.flagZ = this.flagC = result << 8;
-                            this.flagV = ((src ^ dst) & (src ^ result)) << 8;
-                        }
-                    }
-                    break;
-                case 0xB000: /*0130000*/ // BITB 13SSDD
-                    //LOG_INSTRUCTION(instruction, 2, "BITB");
-                    if ((src = this.readByteByMode(instruction >> 6)) >= 0) {
-                        if ((dst = this.readByteByMode(instruction)) >= 0) {
-                            this.flagN = this.flagZ = (src & dst) << 8;
-                            this.flagV = 0;
-                        }
-                    }
-                    break;
-                case 0xC000: /*0140000*/ // BICB 14SSDD
-                    //LOG_INSTRUCTION(instruction, 2, "BICB");
-                    if ((src = this.readByteByMode(instruction >> 6)) >= 0) {
-                        if ((dst = this.readByteByAddr(dstAddr = this.getAddrByMode(instruction, PDP11.ACCESS.UPDATE_BYTE))) >= 0) {
-                            result = dst & ~src;
-                            if (this.writeByteByAddr(dstAddr, result) >= 0) {
-                                this.flagN = this.flagZ = result << 8;
-                                this.flagV = 0;
-                            }
-                        }
-                    }
-                    break;
-                case 0xD000: /*0150000*/ // BISB 15SSDD
-                    //LOG_INSTRUCTION(instruction, 2, "BISB");
-                    if ((src = this.readByteByMode(instruction >> 6)) >= 0) {
-                        if ((dst = this.readByteByAddr(dstAddr = this.getAddrByMode(instruction, PDP11.ACCESS.UPDATE_BYTE))) >= 0) {
-                            result = dst | src;
-                            if (this.writeByteByAddr(dstAddr, result) >= 0) {
-                                this.flagN = this.flagZ = result << 8;
-                                this.flagV = 0;
-                            }
-                        }
-                    }
-                    break;
+                // case 0xA000: /*0120000*/ // CMPB 12SSDD
+                //     //LOG_INSTRUCTION(instruction, 2, "CMPB");
+                //     if ((src = this.readByteByMode(instruction >> 6)) >= 0) {
+                //         if ((dst = this.readByteByMode(instruction)) >= 0) {
+                //             result = src - dst;
+                //             this.flagN = this.flagZ = this.flagC = result << 8;
+                //             this.flagV = ((src ^ dst) & (src ^ result)) << 8;
+                //         }
+                //     }
+                //     break;
+                // case 0xB000: /*0130000*/ // BITB 13SSDD
+                //     //LOG_INSTRUCTION(instruction, 2, "BITB");
+                //     if ((src = this.readByteByMode(instruction >> 6)) >= 0) {
+                //         if ((dst = this.readByteByMode(instruction)) >= 0) {
+                //             this.flagN = this.flagZ = (src & dst) << 8;
+                //             this.flagV = 0;
+                //         }
+                //     }
+                //     break;
+                // case 0xC000: /*0140000*/ // BICB 14SSDD
+                //     //LOG_INSTRUCTION(instruction, 2, "BICB");
+                //     if ((src = this.readByteByMode(instruction >> 6)) >= 0) {
+                //         if ((dst = this.readByteByAddr(dstAddr = this.getAddrByMode(instruction, PDP11.ACCESS.UPDATE_BYTE))) >= 0) {
+                //             result = dst & ~src;
+                //             if (this.writeByteByAddr(dstAddr, result) >= 0) {
+                //                 this.flagN = this.flagZ = result << 8;
+                //                 this.flagV = 0;
+                //             }
+                //         }
+                //     }
+                //     break;
+                // case 0xD000: /*0150000*/ // BISB 15SSDD
+                //     //LOG_INSTRUCTION(instruction, 2, "BISB");
+                //     if ((src = this.readByteByMode(instruction >> 6)) >= 0) {
+                //         if ((dst = this.readByteByAddr(dstAddr = this.getAddrByMode(instruction, PDP11.ACCESS.UPDATE_BYTE))) >= 0) {
+                //             result = dst | src;
+                //             if (this.writeByteByAddr(dstAddr, result) >= 0) {
+                //                 this.flagN = this.flagZ = result << 8;
+                //                 this.flagV = 0;
+                //             }
+                //         }
+                //     }
+                //     break;
                 // case 0xE000: /*0160000*/ // SUB 16SSDD
                 //     //LOG_INSTRUCTION(instruction, 2, "SUB");
                 //     if ((src = this.readWordByMode(instruction >> 6)) >= 0) {
