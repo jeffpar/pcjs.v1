@@ -1007,9 +1007,9 @@ DevicePDP11.prototype.access = function(physicalAddress, data, byteFlag)
                                 idx = 2; // 18 bit
                                 if (cpu.MMR3 & 0x10) idx = 1; // 22 bit
                                 if (result & 0x1) {
-                                    cpu.mmuEnable = PDP11.READ_MODE | PDP11.WRITE_MODE;
+                                    cpu.mmuEnable = PDP11.ACCESS.READ | PDP11.ACCESS.WRITE;
                                 } else {
-                                    cpu.mmuEnable = PDP11.WRITE_MODE;
+                                    cpu.mmuEnable = PDP11.ACCESS.WRITE;
                                 }
                             } else {
                                 cpu.mmuEnable = 0;

@@ -40,15 +40,63 @@ if (NODE) {
 }
 
 /**
+ * fnADD(dst, src)
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} src
+ * @param {number} dst
+ * @return {number} (src + dst)
+ */
+PDP11.fnADD = function(src, dst)
+{
+    var result = src + dst;
+    this.updateAddFlags(result, src, dst);
+    return result & 0xffff;
+};
+
+/**
  * fnBIC(dst, src)
  *
+ * @this {CPUStatePDP11}
  * @param {number} src
  * @param {number} dst
  * @return {number} (~src & dst)
  */
 PDP11.fnBIC = function(src, dst)
 {
-    return ~src & dst;
+    var result = ~src & dst;
+    this.updateNZFlags(result);
+    return result;
+};
+
+/**
+ * fnBIS(dst, src)
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} src
+ * @param {number} dst
+ * @return {number} (src | dst)
+ */
+PDP11.fnBIS = function(src, dst)
+{
+    var result = src | dst;
+    this.updateNZFlags(result);
+    return result;
+};
+
+/**
+ * fnSUB(dst, src)
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} src
+ * @param {number} dst
+ * @return {number} (dst - src)
+ */
+PDP11.fnSUB = function(src, dst)
+{
+    var result = dst - src;
+    this.updateSubFlags(result, src, dst);
+    return result & 0xffff;
 };
 
 /**
@@ -74,29 +122,38 @@ PDP11.op0XXX_1170 = function(opCode)
 };
 
 /**
- * opMOV(opCode)
+ * opADD(opCode)
  *
  * @this {CPUStatePDP11}
  * @param {number} opCode
  */
-PDP11.opMOV = function(opCode)
+PDP11.opADD = function(opCode)
 {
-    this.updateNZFlags(this.writeWordByMode(opCode, this.readWordByMode(opCode >> PDP11.SRCMODE.SHIFT)));
+    this.updateWordByMode(opCode, this.readWordByMode(opCode >> PDP11.SRCMODE.SHIFT), PDP11.fnADD);
     this.nStepCycles -= 1;
 };
 
 /**
- * opCMP(opCode)
+ * opBIC(opCode)
  *
  * @this {CPUStatePDP11}
  * @param {number} opCode
  */
-PDP11.opCMP = function(opCode)
+PDP11.opBIC = function(opCode)
 {
-    var src = this.readWordByMode(opCode >> PDP11.SRCMODE.SHIFT);
-    var dst = this.readWordByMode(opCode);
-    var result = src - dst;
-    this.updateAllFlags(result, src, dst);
+    this.updateWordByMode(opCode, this.readWordByMode(opCode >> PDP11.SRCMODE.SHIFT), PDP11.fnBIC);
+    this.nStepCycles -= 1;
+};
+
+/**
+ * opBIS(opCode)
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} opCode
+ */
+PDP11.opBIS = function(opCode)
+{
+    this.updateWordByMode(opCode, this.readWordByMode(opCode >> PDP11.SRCMODE.SHIFT), PDP11.fnBIS);
     this.nStepCycles -= 1;
 };
 
@@ -113,14 +170,49 @@ PDP11.opBIT = function(opCode)
 };
 
 /**
- * opBIC(opCode)
+ * opCMP(opCode)
  *
  * @this {CPUStatePDP11}
  * @param {number} opCode
  */
-PDP11.opBIC = function(opCode)
+PDP11.opCMP = function(opCode)
 {
-    this.updateNZFlags(this.updateWordByMode(opCode, this.readWordByMode(opCode >> PDP11.SRCMODE.SHIFT), PDP11.fnBIC));
+    var src = this.readWordByMode(opCode >> PDP11.SRCMODE.SHIFT);
+    var dst = this.readWordByMode(opCode);
+    var result = src - dst;
+    /*
+     * NOTE: CMP calculates (src - dst) rather than (dst - src), so when we call updateSubFlags(),
+     * we must reverse the order of the src and dst parameters.
+     */
+    this.updateSubFlags(result, dst, src);
+    this.nStepCycles -= 1;
+};
+
+/**
+ * opMOV(opCode)
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} opCode
+ */
+PDP11.opMOV = function(opCode)
+{
+    this.updateNZFlags(this.writeWordByMode(opCode, this.readWordByMode(opCode >> PDP11.SRCMODE.SHIFT)));
+    this.nStepCycles -= 1;
+};
+
+/**
+ * opMOVB(opCode)
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} opCode
+ */
+PDP11.opMOVB = function(opCode)
+{
+    var data = this.readByteByMode(opCode >> PDP11.SRCMODE.SHIFT);
+    /*
+     * When dst is a register, data must be sign-extended; otherwise, sign-extension is unnecessary (but harmless).
+     */
+    this.updateNZFlags(this.writeByteByMode(opCode, (data & 0x80)? data | 0xff00 : data));
     this.nStepCycles -= 1;
 };
 
@@ -135,21 +227,33 @@ PDP11.opNOP = function(opCode)
     this.nStepCycles -= 1;
 };
 
+/**
+ * opSUB(opCode)
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} opCode
+ */
+PDP11.opSUB = function(opCode)
+{
+    this.updateWordByMode(opCode, this.readWordByMode(opCode >> PDP11.SRCMODE.SHIFT), PDP11.fnSUB);
+    this.nStepCycles -= 1;
+};
+
 PDP11.aOpsF000_1170 = [
     PDP11.op0XXX_1170,
     PDP11.opMOV,                // MOV  01SSDD
     PDP11.opCMP,                // CMP  02SSDD
     PDP11.opBIT,                // BIT  03SSDD
     PDP11.opBIC,                // BIC  04SSDD
-    PDP11.opNOP,                // 0x5XXX
-    PDP11.opNOP,                // 0x6XXX
+    PDP11.opBIS,                // BIS  05SSDD
+    PDP11.opADD,                // ADD  06SSDD
     PDP11.opNOP,                // 0x7XXX
     PDP11.opNOP,                // 0x8XXX
-    PDP11.opNOP,                // 0x9XXX
+    PDP11.opMOVB,               // MOVB 11SSDD
     PDP11.opNOP,                // 0xAXXX
     PDP11.opNOP,                // 0xBXXX
     PDP11.opNOP,                // 0xCXXX
     PDP11.opNOP,                // 0xDXXX
-    PDP11.opNOP,                // 0xEXXX
+    PDP11.opSUB,                // SUB  16SSDD
     PDP11.opNOP                 // 0xFXXX
 ];

@@ -210,12 +210,21 @@ var PDP11 = {
         PIRQ:       0xA0,       // 240  PIRQ, program interrupt request
         MMU_FAULT:  0xA8        // 250  MMU aborts and traps
     },
-    BYTE_MODE:      1,
-    READ_MODE:      2,
-    WRITE_MODE:     4,
-    MODIFY_WORD:    2 | 4,      // READ_MODE | WRITE_MODE
-    MODIFY_BYTE:    1 | 2 | 4   // READ_MODE | WRITE_MODE | BYTE_MODE
+    ACCESS: {
+        WORD:       0x0,
+        BYTE:       0x1,
+        READ:       0x2,
+        WRITE:      0x4,
+        UPDATE:     0x6
+    }
 };
+
+PDP11.ACCESS.READ        = PDP11.ACCESS.WORD | PDP11.ACCESS.READ;       // formerly READ_MODE (2)
+PDP11.ACCESS.READ_BYTE   = PDP11.ACCESS.BYTE | PDP11.ACCESS.READ;       // formerly READ_MODE (2) | BYTE_MODE (1)
+PDP11.ACCESS.WRITE       = PDP11.ACCESS.WORD | PDP11.ACCESS.WRITE;      // formerly WRITE_MODE (4)
+PDP11.ACCESS.WRITE_BYTE  = PDP11.ACCESS.BYTE | PDP11.ACCESS.WRITE;      // formerly WRITE_MODE (4) | BYTE_MODE (1)
+PDP11.ACCESS.UPDATE      = PDP11.ACCESS.WORD | PDP11.ACCESS.UPDATE;     // formerly MODIFY_WORD (2 | 4)
+PDP11.ACCESS.UPDATE_BYTE = PDP11.ACCESS.BYTE | PDP11.ACCESS.UPDATE;     // formerly MODIFY_BYTE (1 | 2 | 4)
 
 /*
  * PSW arithmetic flags are NOT stored directly into the PSW register; they are maintained across separate
