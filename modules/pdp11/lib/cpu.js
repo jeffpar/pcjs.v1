@@ -1083,7 +1083,13 @@ CPUPDP11.prototype.runCPU = function(fUpdateFocus)
             /*
              * Execute the burst.
              */
-            this.stepCPU(nCyclesPerBurst);
+            try {
+                this.stepCPU(nCyclesPerBurst);
+            }
+            catch(exception) {
+                if (typeof exception != "number") throw exception;
+                if (DEBUG) this.println("CPU exception " + str.toHexWord(exception));
+            }
 
             /*
              * nCycles is how many cycles stepCPU() actually ran (nBurstCycles less any remaining nStepCycles).

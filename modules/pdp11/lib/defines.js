@@ -84,19 +84,19 @@ var TYPEDARRAYS = (typeof ArrayBuffer !== 'undefined');
  * which all machine components should start using; eg: "if (PDP11.DEBUG) ..." instead of "if (DEBUG) ...".
  */
 var PDP11 = {
-    APPCLASS:    APPCLASS,
-    APPNAME:     APPNAME,
-    APPVERSION:  APPVERSION,    // shared
-    BYTEARRAYS:  BYTEARRAYS,
-    COMPILED:    COMPILED,      // shared
-    CSSCLASS:    CSSCLASS,      // shared
-    DEBUG:       DEBUG,         // shared
-    DEBUGGER:    DEBUGGER,
-    MAXDEBUG:    MAXDEBUG,      // shared
-    PRIVATE:     PRIVATE,       // shared
-    TYPEDARRAYS: TYPEDARRAYS,
-    SITEHOST:    SITEHOST,      // shared
-    XMLVERSION:  XMLVERSION,    // shared
+    APPCLASS:   APPCLASS,
+    APPNAME:    APPNAME,
+    APPVERSION: APPVERSION,     // shared
+    BYTEARRAYS: BYTEARRAYS,
+    COMPILED:   COMPILED,       // shared
+    CSSCLASS:   CSSCLASS,       // shared
+    DEBUG:      DEBUG,          // shared
+    DEBUGGER:   DEBUGGER,
+    MAXDEBUG:   MAXDEBUG,       // shared
+    PRIVATE:    PRIVATE,        // shared
+    TYPEDARRAYS:TYPEDARRAYS,
+    SITEHOST:   SITEHOST,       // shared
+    XMLVERSION: XMLVERSION,     // shared
 
     /*
      * CPU model numbers (supported)
@@ -121,68 +121,95 @@ var PDP11 = {
      * certain that this file is included BEFORE the first reference to any of these properties, that
      * automatic inlining will no longer occur.
      */
-    ADDR_INVALID: -1,
+    ADDR_INVALID:   -1,
     /*
      * Processor modes
      */
     MODE: {
-        KERNEL: 0x0,
-        SUPER:  0x1,
-        UNUSED: 0x2,
-        USER:   0x3,
-        MASK:   0x3
+        KERNEL:     0x0,
+        SUPER:      0x1,
+        UNUSED:     0x2,
+        USER:       0x3,
+        MASK:       0x3
     },
     /*
      * Processor Status flag definitions (stored in regPSW)
      */
     PSW: {
-        CF:     0x0001,         // bit  0: Carry Flag
-        CF_SHIFT:    0,
-        VF:     0x0002,         // bit  1: Overflow Flag (aka OF on Intel processors)
-        VF_SHIFT:    1,
-        ZF:     0x0004,         // bit  2: Zero Flag
-        ZF_SHIFT:    2,
-        NF:     0x0008,         // bit  3: Negative Flag (aka SF -- Sign Flag -- on Intel processors)
-        NF_SHIFT:    3,
-        TF:     0x0010,         // bit  4: Trap Flag
-        TF_SHIFT:    4,
-        PRI:    0x00E0,         // bits 5-7: Priority
-        PRI_SHIFT:   5,
-        UNUSED: 0x0700,         // bits 8-10: unused
-        REGSET: 0x0800,         // bit  11: Register Set
-        PMODE:  0x3000,         // bits 12-13: Prev Mode (see PDP11.MODE)
-        PMODE_SHIFT:12,
-        CMODE:  0xC000,         // bits 14-15: Curr Mode (see PDP11.MODE)
-        CMODE_SHIFT:14
+        CF:         0x0001,     // bit  0: Carry Flag
+        CF_SHIFT:        0,
+        VF:         0x0002,     // bit  1: Overflow Flag (aka OF on Intel processors)
+        VF_SHIFT:        1,
+        ZF:         0x0004,     // bit  2: Zero Flag
+        ZF_SHIFT:        2,
+        NF:         0x0008,     // bit  3: Negative Flag (aka SF -- Sign Flag -- on Intel processors)
+        NF_SHIFT:        3,
+        TF:         0x0010,     // bit  4: Trap Flag
+        TF_SHIFT:        4,
+        PRI:        0x00E0,     // bits 5-7: Priority
+        PRI_SHIFT:       5,
+        UNUSED:     0x0700,     // bits 8-10: unused
+        REGSET:     0x0800,     // bit  11: Register Set
+        PMODE:      0x3000,     // bits 12-13: Prev Mode (see PDP11.MODE)
+        PMODE_SHIFT:    12,
+        CMODE:      0xC000,     // bits 14-15: Curr Mode (see PDP11.MODE)
+        CMODE_SHIFT:    14
     },
     /*
      * Interrupt-related flags (stored in intFlags)
      */
     INTFLAG: {
-        NONE:   0x0000,
-        INTR:   0x00ff,         // mask for 8 bits, representing interrupt levels 0-7
-        HALT:   0x0100          // halt requested; see opHLT()
+        NONE:       0x0000,
+        INTR:       0x00ff,     // mask for 8 bits, representing interrupt levels 0-7
+        HALT:       0x0100      // halt requested; see opHLT()
+    },
+    OPFLAG: {
+        TRAP_TF:    0x10,       // aka PDP11.PSW.TF
+        TRAP_MMU:   0x20,
+        TRAP_SP:    0x40,
+        TRAP_MASK:  0x70,
+        SKIP_FLAGS: 0x80
     },
     /*
-     * Opcode modes
+     * Opcode reg (opcode bits 2-0)
+     */
+    OPREG: {
+        MASK:       0x07
+    },
+    /*
+     * Opcode modes (opcode bits 5-3)
      */
     OPMODE: {
-        REG:       0x0,         // REGISTER                 (register is operand)
-        REGD:      0x1,         // REGISTER DEFERRED        (register is address of operand)
-        POSTINC:   0x2,         // POST-INCREMENT           (register is address of operand, register incremented)
-        POSTINCD:  0x3,         // POST-INCREMENT DEFERRED  (register is address of address of operand, register incremented)
-        PREDEC:    0x4,         // PRE-DECREMENT            (register decremented, register is address of operand)
-        PREDECD:   0x5,         // PRE-DECREMENT DEFERRED   (register decremented, register is address of address of operand)
-        INDEX:     0x6,         // INDEX                    (register + next word is address of operand)
-        INDEXD:    0x7          // INDEX DEFERRED           (register + next word is address of address of operand)
+        REG:        0x00,       // REGISTER                 (register is operand)
+        REGD:       0x08,       // REGISTER DEFERRED        (register is address of operand)
+        POSTINC:    0x10,       // POST-INCREMENT           (register is address of operand, register incremented)
+        POSTINCD:   0x18,       // POST-INCREMENT DEFERRED  (register is address of address of operand, register incremented)
+        PREDEC:     0x20,       // PRE-DECREMENT            (register decremented, register is address of operand)
+        PREDECD:    0x28,       // PRE-DECREMENT DEFERRED   (register decremented, register is address of address of operand)
+        INDEX:      0x30,       // INDEX                    (register + next word is address of operand)
+        INDEXD:     0x38,       // INDEX DEFERRED           (register + next word is address of address of operand)
+        MASK:       0x38
     },
-    /*
-     * Opcode definitions
-     */
-    OPCODE: {
-        // TODO
+    DSTMODE: {
+        MASK:       0x003F,
+        SHIFT:      0
     },
-
+    SRCMODE: {
+        MASK:       0x0FC0,
+        SHIFT:      6
+    },
+    TRAP: {
+        UNDEFINED:  0x00,       // 000  (reserved)
+        BUS_ERROR:  0x04,       // 004  illegal instructions, bus errors, stack limit, illegal internal address, microbreak
+        RESERVED:   0x08,       // 010  reserved instructions
+        BREAKPOINT: 0x0C,       // 014  BPT, breakpoint trap (trace)
+        IOT:        0x10,       // 020  IOT, input/output trap
+        POWER_FAIL: 0x14,       // 024  power fail
+        EMULATOR:   0x18,       // 030  EMT, emulator trap
+        TRAP:       0x1C,       // 034  TRAP instruction
+        PIRQ:       0xA0,       // 240  PIRQ, program interrupt request
+        MMU_FAULT:  0xA8        // 250  MMU aborts and traps
+    },
     BYTE_MODE:      1,
     READ_MODE:      2,
     WRITE_MODE:     4,

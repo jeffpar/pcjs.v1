@@ -40,85 +40,116 @@ if (NODE) {
 }
 
 /**
- * op=0x00 (NOP)
+ * fnBIC(dst, src)
  *
- * @this {CPUStatePDP11}
+ * @param {number} src
+ * @param {number} dst
+ * @return {number} (~src & dst)
  */
-PDP11.opNOP = function()
+PDP11.fnBIC = function(src, dst)
 {
-    this.nStepCycles -= 4;
+    return ~src & dst;
 };
 
-/*
- * This 256-entry array of opcode functions is at the heart of the CPU engine: stepCPU(n).
+/**
+ * op1170(opCode)
  *
- * It might be worth trying a switch() statement instead, to see how the performance compares,
- * but I suspect that would vary quite a bit across JavaScript engines; for now, I'm putting my
- * money on array lookup.
+ * @this {CPUStatePDP11}
+ * @param {number} opCode
  */
-PDP11.aOpsPDP1170 = [
-    /* 0x00-0x03 */ PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,
-    /* 0x04-0x07 */ PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,
-    /* 0x08-0x0B */ PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,
-    /* 0x0C-0x0F */ PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,
-    /* 0x10-0x13 */ PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,
-    /* 0x14-0x17 */ PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,
-    /* 0x18-0x1B */ PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,
-    /* 0x1C-0x1F */ PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,
-    /* 0x20-0x23 */ PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,
-    /* 0x24-0x27 */ PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,
-    /* 0x28-0x2B */ PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,
-    /* 0x2C-0x2F */ PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,
-    /* 0x30-0x33 */ PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,
-    /* 0x34-0x37 */ PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,
-    /* 0x38-0x3B */ PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,
-    /* 0x3C-0x3F */ PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,
-    /* 0x40-0x43 */ PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,
-    /* 0x44-0x47 */ PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,
-    /* 0x48-0x4B */ PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,
-    /* 0x4C-0x4F */ PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,
-    /* 0x50-0x53 */ PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,
-    /* 0x54-0x57 */ PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,
-    /* 0x58-0x5B */ PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,
-    /* 0x5C-0x5F */ PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,
-    /* 0x60-0x63 */ PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,
-    /* 0x64-0x67 */ PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,
-    /* 0x68-0x6B */ PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,
-    /* 0x6C-0x6F */ PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,
-    /* 0x70-0x73 */ PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,
-    /* 0x74-0x77 */ PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,
-    /* 0x78-0x7B */ PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,
-    /* 0x7C-0x7F */ PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,
-    /* 0x80-0x83 */ PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,
-    /* 0x84-0x87 */ PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,
-    /* 0x88-0x8B */ PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,
-    /* 0x8C-0x8F */ PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,
-    /* 0x90-0x93 */ PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,
-    /* 0x94-0x97 */ PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,
-    /* 0x98-0x9B */ PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,
-    /* 0x9C-0x9F */ PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,
-    /* 0xA0-0xA3 */ PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,
-    /* 0xA4-0xA7 */ PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,
-    /* 0xA8-0xAB */ PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,
-    /* 0xAC-0xAF */ PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,
-    /* 0xB0-0xB3 */ PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,
-    /* 0xB4-0xB7 */ PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,
-    /* 0xB8-0xBB */ PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,
-    /* 0xBC-0xBF */ PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,
-    /* 0xC0-0xC3 */ PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,
-    /* 0xC4-0xC7 */ PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,
-    /* 0xC8-0xCB */ PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,
-    /* 0xCC-0xCF */ PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,
-    /* 0xD0-0xD3 */ PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,
-    /* 0xD4-0xD7 */ PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,
-    /* 0xD8-0xDB */ PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,
-    /* 0xDC-0xDF */ PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,
-    /* 0xE0-0xE3 */ PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,
-    /* 0xE4-0xE7 */ PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,
-    /* 0xE8-0xEB */ PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,
-    /* 0xEC-0xEF */ PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,
-    /* 0xF0-0xF3 */ PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,
-    /* 0xF4-0xF7 */ PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,
-    /* 0xF8-0xFB */ PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,
-    /* 0xFC-0xFF */ PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP,  PDP11.opNOP
+PDP11.op1170 = function(opCode)
+{
+    PDP11.aOpsF000_1170[opCode >> 12].call(this, opCode);
+};
+
+/**
+ * op0XXX_1170(opCode)
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} opCode
+ */
+PDP11.op0XXX_1170 = function(opCode)
+{
+    // PDP11.aOpsF000_1170[opCode >> 12].call(this, opCode);
+};
+
+/**
+ * opMOV(opCode)
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} opCode
+ */
+PDP11.opMOV = function(opCode)
+{
+    this.updateNZFlags(this.writeWordByMode(opCode, this.readWordByMode(opCode >> PDP11.SRCMODE.SHIFT)));
+    this.nStepCycles -= 1;
+};
+
+/**
+ * opCMP(opCode)
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} opCode
+ */
+PDP11.opCMP = function(opCode)
+{
+    var src = this.readWordByMode(opCode >> PDP11.SRCMODE.SHIFT);
+    var dst = this.readWordByMode(opCode);
+    var result = src - dst;
+    this.updateAllFlags(result, src, dst);
+    this.nStepCycles -= 1;
+};
+
+/**
+ * opBIT(opCode)
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} opCode
+ */
+PDP11.opBIT = function(opCode)
+{
+    this.updateNZFlags(this.readWordByMode(opCode >> PDP11.SRCMODE.SHIFT) & this.readWordByMode(opCode));
+    this.nStepCycles -= 1;
+};
+
+/**
+ * opBIC(opCode)
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} opCode
+ */
+PDP11.opBIC = function(opCode)
+{
+    this.updateNZFlags(this.updateWordByMode(opCode, this.readWordByMode(opCode >> PDP11.SRCMODE.SHIFT), PDP11.fnBIC));
+    this.nStepCycles -= 1;
+};
+
+/**
+ * opNOP(opCode)
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} opCode
+ */
+PDP11.opNOP = function(opCode)
+{
+    this.nStepCycles -= 1;
+};
+
+PDP11.aOpsF000_1170 = [
+    PDP11.op0XXX_1170,
+    PDP11.opMOV,                // MOV  01SSDD
+    PDP11.opCMP,                // CMP  02SSDD
+    PDP11.opBIT,                // BIT  03SSDD
+    PDP11.opBIC,                // BIC  04SSDD
+    PDP11.opNOP,                // 0x5XXX
+    PDP11.opNOP,                // 0x6XXX
+    PDP11.opNOP,                // 0x7XXX
+    PDP11.opNOP,                // 0x8XXX
+    PDP11.opNOP,                // 0x9XXX
+    PDP11.opNOP,                // 0xAXXX
+    PDP11.opNOP,                // 0xBXXX
+    PDP11.opNOP,                // 0xCXXX
+    PDP11.opNOP,                // 0xDXXX
+    PDP11.opNOP,                // 0xEXXX
+    PDP11.opNOP                 // 0xFXXX
 ];

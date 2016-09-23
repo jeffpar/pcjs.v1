@@ -222,17 +222,9 @@ DevicePDP11.prototype.readPSW = function(addr)
  */
 DevicePDP11.prototype.writePSW = function(data, addr)
 {
-    /*
-     * TODO: Determine whether we need to replicate the code in access_iopage() that returns a bogus
-     * error when writing to ADDR_PSW, as a way of preventing instructions like CLR from updating the flags
-     * and potentially modifying some of the PSW bits that were just set (eg, the Z flag).
-     *
-     * If so, then we'll need to centralize the flag update logic, so that it can be skipped whenever a
-     * special one-time opcode flag is set.  Because there are a number of arithmetic instructions besides
-     * CLR that could be used to modify ADDR_PSW.
-     */
     var maskDisallowed = PDP11.PSW.UNUSED | PDP11.PSW.TF;
     this.cpu.setPSW((data & ~maskDisallowed) | (this.cpu.getPSW() & maskDisallowed));
+    this.cpu.opFlags |= PDP11.OPFLAG.SKIP_FLAGS;
 };
 
 /**
@@ -624,27 +616,6 @@ DevicePDP11.prototype.kw11_interrupt = function()
 };
 
 /**
- * mapUnibus(unibusAddress)
- *
- * @this {DevicePDP11}
- * @param {number} unibusAddress
- * @return {number}
- */
-DevicePDP11.prototype.mapUnibus = function(unibusAddress)
-{
-    var idx = (unibusAddress >> 13) & 0x1f;
-    if (idx < 31) {
-        if (this.cpu.MMR3 & 0x20) {
-            unibusAddress = (this.cpu.unibusMap[idx] + (unibusAddress & 0x1ffe)) & 0x3ffffe;
-            if (unibusAddress >= BusPDP11.IOPAGE_UNIBUS && unibusAddress < BusPDP11.IOPAGE_22BIT) this.cpu.panic(898);
-        }
-    } else {
-        unibusAddress |= BusPDP11.IOPAGE_22BIT;
-    }
-    return unibusAddress;
-};
-
-/**
  * getData(xhr, callback, meta, block, address, count)
  *
  * @this {DevicePDP11}
@@ -764,7 +735,7 @@ DevicePDP11.prototype.readData = function(meta, block, address, count)
             return;
         }
         for (word = 0; word < meta.blocksize && count > 0; word++) {
-            if (this.cpu.writeWordByAddr((meta.mapped? this.mapUnibus(address) : address), meta.cache[block][word]) < 0) {
+            if (this.cpu.writeWordByAddr((meta.mapped? this.cpu.mapUnibus(address) : address), meta.cache[block][word]) < 0) {
                 meta.postProcess(2, meta, block, address, count); // NXM
                 return;
             }
@@ -798,7 +769,7 @@ DevicePDP11.prototype.writeData = function(meta, block, address, count)
             }
         }
         for (word = 0; word < meta.blocksize && count > 0; word++) {
-            data = this.cpu.readWordByAddr((meta.mapped? this.mapUnibus(address) : address));
+            data = this.cpu.readWordByAddr((meta.mapped? this.cpu.mapUnibus(address) : address));
             if (data < 0) {
                 meta.postProcess(2, meta, block, address, count); // NXM
                 return;
