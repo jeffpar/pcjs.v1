@@ -244,6 +244,8 @@ var PDP11 = {
      * an ES6-aware browser.  Everyone else should be using code compiled by Google's Closure Compiler, which
      * automatically produces code that's backward-compatible with ES5.1 (for example, octal constants are converted
      * to decimal values).
+     *
+     * For more details: https://github.com/google/closure-compiler/wiki/ECMAScript6
      */
     UNIBUS: {       //  22-bit     18-bit   16-bit    22-bit    Description
         PSW:        0o17777776, // 777776   177776  0x3FFFFE    PSW
