@@ -137,23 +137,25 @@ var PDP11 = {
      */
     PSW: {
         CF:         0x0001,     // bit  0: Carry Flag
-        CF_SHIFT:        0,
         VF:         0x0002,     // bit  1: Overflow Flag (aka OF on Intel processors)
-        VF_SHIFT:        1,
         ZF:         0x0004,     // bit  2: Zero Flag
-        ZF_SHIFT:        2,
         NF:         0x0008,     // bit  3: Negative Flag (aka SF -- Sign Flag -- on Intel processors)
-        NF_SHIFT:        3,
         TF:         0x0010,     // bit  4: Trap Flag
-        TF_SHIFT:        4,
         PRI:        0x00E0,     // bits 5-7: Priority
-        PRI_SHIFT:       5,
         UNUSED:     0x0700,     // bits 8-10: unused
         REGSET:     0x0800,     // bit  11: Register Set
         PMODE:      0x3000,     // bits 12-13: Prev Mode (see PDP11.MODE)
-        PMODE_SHIFT:    12,
         CMODE:      0xC000,     // bits 14-15: Curr Mode (see PDP11.MODE)
-        CMODE_SHIFT:    14
+        SHIFT: {
+            CF:     0,
+            VF:     1,
+            ZF:     2,
+            NF:     3,
+            TF:     4,
+            PRI:    5,
+            PMODE:  12,
+            CMODE:  14
+        }
     },
     /*
      * Interrupt-related flags (stored in intFlags)
@@ -236,9 +238,15 @@ var PDP11 = {
     },
     /*
      * Assorted special (UNIBUS) addresses
+     *
+     * ES6 ALERT: By using octal constants, this is the first place I'm dipping my toe into ECMAScript 6 waters.
+     * If you're loading this raw source code into your browser, then by now (2016) you're almost certainly using
+     * an ES6-aware browser.  Everyone else should be using code compiled by Google's Closure Compiler, which
+     * automatically produces code that's backward-compatible with ES5.1 (for example, octal constants are converted
+     * to decimal values).
      */
-    UNIBUS: {
-        PSW:        0o177776
+    UNIBUS: {       //  22-bit     18-bit   16-bit    22-bit    Description
+        PSW:        0o17777776, // 777776   177776  0x3FFFFE    PSW
     }
 };
 

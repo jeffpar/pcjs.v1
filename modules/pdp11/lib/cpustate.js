@@ -615,8 +615,8 @@ CPUStatePDP11.prototype.setPSW = function(newPSW)
             this.regsAlt[i] = tmp;
         }
     }
-    this.mmuMode = (newPSW >> PDP11.PSW.CMODE_SHIFT) & PDP11.MODE.MASK;
-    var oldMode = (this.PSW >> PDP11.PSW.CMODE_SHIFT) & PDP11.MODE.MASK;
+    this.mmuMode = (newPSW >> PDP11.PSW.SHIFT.CMODE) & PDP11.MODE.MASK;
+    var oldMode = (this.PSW >> PDP11.PSW.SHIFT.CMODE) & PDP11.MODE.MASK;
     if (this.mmuMode != oldMode) {
         /*
          * Swap stack pointers

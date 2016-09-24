@@ -140,7 +140,6 @@ function DevicePDP11(parmsDevice)
 Component.subclass(DevicePDP11);
 
 DevicePDP11.UNIBUS_NAME = "unibus";
-DevicePDP11.ADDR_PSW    = 0x3FFFFE; /*017777776*/       // PSW
 
 DevicePDP11.M9312 = [
     0x101F, /*0010037*/ 0x1C0, /*0000700*/ 0x105F, /*0010137*/ 0x1C2, /*0000702*/ 0x111F, /*0010437*/ 0x1C4, /*0000704*/ 0xA1F, /*0005037*/ 0x1C6, /*0000706*/
@@ -205,7 +204,7 @@ DevicePDP11.prototype.initBus = function(cmp, bus, cpu, dbg)
  * readPSW(addr)
  *
  * @this {DevicePDP11}
- * @param {number} addr (ie, ADDR_PSW)
+ * @param {number} addr (ie, PDP11.UNIBUS.PSW)
  * @return {number}
  */
 DevicePDP11.prototype.readPSW = function(addr)
@@ -218,7 +217,7 @@ DevicePDP11.prototype.readPSW = function(addr)
  *
  * @this {DevicePDP11}
  * @param {number} data
- * @param {number} addr (ie, ADDR_PSW)
+ * @param {number} addr (ie, PDP11.UNIBUS.PSW)
  */
 DevicePDP11.prototype.writePSW = function(data, addr)
 {
@@ -1407,7 +1406,7 @@ DevicePDP11.prototype.access = function(physicalAddress, data, byteFlag)
 };
 
 DevicePDP11.UNIBUS_TABLE = {};
-DevicePDP11.UNIBUS_TABLE[DevicePDP11.ADDR_PSW] = [null, null, DevicePDP11.prototype.readPSW, DevicePDP11.prototype.writePSW];
+DevicePDP11.UNIBUS_TABLE[PDP11.UNIBUS.PSW] = [null, null, DevicePDP11.prototype.readPSW, DevicePDP11.prototype.writePSW];
 
 /**
  * DevicePDP11.init()
