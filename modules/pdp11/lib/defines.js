@@ -233,6 +233,12 @@ var PDP11 = {
         NORMAL:     0x0,        // write byte or word normally
         ZERO:       0x1,        // zero byte or word
         SIGNEXT:    0x2         // sign-extend a byte to a word
+    },
+    /*
+     * Assorted special (UNIBUS) addresses
+     */
+    UNIBUS: {
+        PSW:        0o177776
     }
 };
 

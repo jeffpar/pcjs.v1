@@ -146,7 +146,7 @@ function DebuggerPDP11(parmsDbg)
         /*
          * Initialize DebuggerPDP11 message support
          */
-        this.afnDumpers = [];
+        this.afnDumpers = {};
         this.messageInit(parmsDbg['messages']);
 
         this.sInitCommands = parmsDbg['commands'];
@@ -3682,7 +3682,7 @@ if (DEBUGGER) {
     {
         var a = this.parseCommand(sCmds, fSave);
         for (var s in a) {
-            if (!this.doCommand(a[s])) return false;
+            if (!this.doCommand(a[+s])) return false;
         }
         return true;
     };

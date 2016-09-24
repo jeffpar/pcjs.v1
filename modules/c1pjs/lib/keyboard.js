@@ -204,7 +204,7 @@ function C1PKeyboard(parmsKbd)
     this.msReleaseRepeat    = 100;      // number of milliseconds before a held key is "forced" up (assuming auto-repeat)
     this.msInjectDelay      = 300;      // number of milliseconds between injected keystrokes
 
-    this.aButtonCodeMap = [];
+    this.aButtonCodeMap = {};
     this.aButtonCodeMap['break']  = this.CHARCODE_BREAK;
     this.aButtonCodeMap['esc']    = this.CHARCODE_ESC;
     this.aButtonCodeMap['ctrl-c'] = this.CHARCODE_CTRLC;
