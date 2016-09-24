@@ -1088,7 +1088,7 @@ CPUPDP11.prototype.runCPU = function(fUpdateFocus)
             }
             catch(exception) {
                 if (typeof exception != "number") throw exception;
-                if (DEBUG) this.println("CPU exception " + str.toHexWord(exception));
+                if (DEBUG) this.println("CPU exception: " + str.toHexWord(exception));
             }
 
             /*

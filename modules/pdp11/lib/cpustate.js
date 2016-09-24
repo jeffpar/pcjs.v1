@@ -632,6 +632,20 @@ CPUStatePDP11.prototype.setPSW = function(newPSW)
 };
 
 /**
+ * updateNZCFlags(result)
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} result
+ */
+CPUStatePDP11.prototype.updateNZCFlags = function(result)
+{
+    if (!(this.opFlags & PDP11.OPFLAG.SKIP_FLAGS)) {
+        this.flagN = this.flagZ = this.flagC = result;
+        this.flagV = 0;
+    }
+};
+
+/**
  * updateNZFlags(result)
  *
  * @this {CPUStatePDP11}
@@ -1218,13 +1232,12 @@ CPUStatePDP11.prototype.getAddrByMode = function(addressMode, accessFlags)
 {
     var result;
     if (!(addressMode & 0x38)) {
-        return BusPDP11.MAX_ADDRESS + (addressMode & 7); // Registers have special addresses above maximum address
+        result = BusPDP11.MAX_ADDRESS + (addressMode & 7); // Registers have special addresses above maximum address
     } else {
-        if ((result = this.getVirtualByMode(addressMode, accessFlags)) >= 0) {
-            result = this.mapVirtualToPhysical(result, accessFlags);
-        }
-        return result;
+        var addr = this.getVirtualByMode(addressMode, accessFlags);
+        result = this.mapVirtualToPhysical(addr, accessFlags);
     }
+    return result;
 };
 
 /**
@@ -1270,9 +1283,6 @@ CPUStatePDP11.prototype.readByteByMode = function(addressMode)
  *
  * Used whenever the dst operand (as described by addressMode) DOES need to be read before writing.
  *
- * TODO: writeWordByAddr() currently plays it safe and always masks the incoming data.  Let's see if we can
- * change that to an assert(), and make sure we never give writeWordByAddr() unmasked data.
- *
  * @this {CPUStatePDP11}
  * @param {number} addressMode
  * @param {number} src
@@ -1284,7 +1294,7 @@ CPUStatePDP11.prototype.updateWordByMode = function(addressMode, src, fnOp)
     var data;
     if (!(addressMode & PDP11.OPMODE.MASK)) {
         var reg = addressMode & PDP11.OPREG.MASK;
-        this.regsGen[reg] = (data = fnOp.call(this, src, this.regsGen[reg]));
+        this.regsGen[reg] = (data = fnOp.call(this, src, this.regsGen[reg]) & 0xffff);
     } else {
         var addr = this.getAddrByMode(addressMode, PDP11.ACCESS.UPDATE);
         this.writeWordByAddr(addr, (data = fnOp.call(this, src, this.readWordByAddr(addr))));
@@ -1297,9 +1307,6 @@ CPUStatePDP11.prototype.updateWordByMode = function(addressMode, src, fnOp)
  *
  * Used whenever the dst operand (as described by addressMode) DOES need to be read before writing.
  *
- * TODO: writeByteByAddr() currently plays it safe and always masks the incoming data.  Let's see if we can
- * change that to an assert(), and make sure we never give writeByteByAddr() unmasked data.
- *
  * @this {CPUStatePDP11}
  * @param {number} addressMode
  * @param {number} src
@@ -1311,7 +1318,7 @@ CPUStatePDP11.prototype.updateByteByMode = function(addressMode, src, fnOp)
     var data;
     if (!(addressMode & PDP11.OPMODE.MASK)) {
         var reg = addressMode & PDP11.OPREG.MASK;
-        this.regsGen[reg] = (data = fnOp.call(this, src, this.regsGen[reg]));
+        this.regsGen[reg] = (this.regsGen[reg] & 0xff00) | ((data = fnOp.call(this, src, this.regsGen[reg]) & 0xff));
     } else {
         var addr = this.getAddrByMode(addressMode, PDP11.ACCESS.UPDATE_BYTE);
         this.writeByteByAddr(addr, (data = fnOp.call(this, src, this.readByteByAddr(addr))));
@@ -1324,9 +1331,6 @@ CPUStatePDP11.prototype.updateByteByMode = function(addressMode, src, fnOp)
  *
  * Used whenever the dst operand (as described by addressMode) does NOT need to be read before writing.
  *
- * TODO: writeWordByAddr() currently plays it safe and always masks the incoming data.  Let's see if we can
- * change that to an assert(), and make sure we never give writeWordByAddr() unmasked data.
- *
  * @this {CPUStatePDP11}
  * @param {number} addressMode
  * @param {number} data
@@ -1335,7 +1339,7 @@ CPUStatePDP11.prototype.updateByteByMode = function(addressMode, src, fnOp)
 CPUStatePDP11.prototype.writeWordByMode = function(addressMode, data)
 {
     if (!(addressMode & PDP11.OPMODE.MASK)) {
-        this.regsGen[addressMode & PDP11.OPREG.MASK] = data;
+        this.regsGen[addressMode & PDP11.OPREG.MASK] = data & 0xffff;
     } else {
         this.writeWordByAddr(this.getAddrByMode(addressMode, PDP11.ACCESS.WRITE), data);
     }
@@ -1343,24 +1347,29 @@ CPUStatePDP11.prototype.writeWordByMode = function(addressMode, data)
 };
 
 /**
- * writeByteByMode(addressMode, data)
+ * writeByteByMode(addressMode, data, writeFlags)
  *
  * Used whenever the dst operand (as described by addressMode) does NOT need to be read before writing.
- *
- * TODO: writeWordByAddr() currently plays it safe and always masks the incoming data.  Let's see if we can
- * change that to an assert(), and make sure we never give writeWordByAddr() unmasked data.
  *
  * @this {CPUStatePDP11}
  * @param {number} addressMode
  * @param {number} data
+ * @param {number} [writeFlags]
  * @return {number}
  */
-CPUStatePDP11.prototype.writeByteByMode = function(addressMode, data)
+CPUStatePDP11.prototype.writeByteByMode = function(addressMode, data, writeFlags)
 {
     if (!(addressMode & PDP11.OPMODE.MASK)) {
-        this.regsGen[addressMode & PDP11.OPREG.MASK] = data;
+        var reg = addressMode & PDP11.OPREG.MASK;
+        if (!writeFlags) {
+            this.regsGen[reg] = (this.regsGen[reg] & ~0xff) | (data & 0xff);
+        } else if (writeFlags & PDP11.WRITE.ZERO) {
+            this.regsGen[reg] &= ~0xff;
+        } else {
+            this.assert(writeFlags & PDP11.WRITE.SIGNEXT);
+            this.regsGen[reg] = ((data << 24) >> 24) & 0xffff;
+        }
     } else {
-        data &= 0xff;           // we mask just in case the caller sign-extended the data
         this.writeByteByAddr(this.getAddrByMode(addressMode, PDP11.ACCESS.WRITE_BYTE), data);
     }
     return data;
@@ -1532,189 +1541,190 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
 
             /*
              * TODO: Determine (later) if this.regOp is a useful (internal) register to maintain;
-             * perhaps it would alleviate lots of opCode parameter-passing.
+             * perhaps it would alleviate lots of opCode parameter-passing.  In the meantime, we use
+             * it to detect if our new decode() function has processed (ie, "consumed") the opcode,
+             * by setting it to -1.  If it has, then we can skip the older opcode decode logic below.
              */
             this.regOp = opCode = this.readWordByVirtual(this.regsGen[7]);
-            this.regsGen[7] = (this.regsGen[7] + 2) & 0xffff;
+            if (opCode >= 0) this.regsGen[7] = (this.regsGen[7] + 2) & 0xffff;
 
             this.decode(opCode);
 
-            if (opCode >= 0) {
-                // this.regsGen[7] = (this.regsGen[7] + 2) & 0xffff;
+            if (this.regOp < 0) {
                 switch (opCode & 0xF000) /*0170000*/ { // Double operand instructions xxSSDD
-                // case 0x1000: /*0010000*/ // MOV  01SSDD
-                //     //LOG_INSTRUCTION(opCode, 2, "MOV");
-                //     if ((src = this.readWordByMode(opCode >> 6)) >= 0) {
-                //         if (!(opCode & 0x38)) {
-                //             this.regsGen[opCode & 7] = src;
-                //             this.flagN = this.flagZ = src;
-                //             this.flagV = 0;
-                //         } else {
-                //             if ((dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.WRITE)) >= 0) {
-                //                 if (this.writeWordByAddr(dstAddr, src) >= 0) {
-                //                     this.flagN = this.flagZ = src;
-                //                     this.flagV = 0;
-                //                 }
-                //             }
-                //         }
-                //     }
-                //     break;
-                // case 0x2000: /*0020000*/ // CMP 02SSDD
-                //     //LOG_INSTRUCTION(opCode, 2, "CMP");
-                //     if ((src = this.readWordByMode(opCode >> 6)) >= 0) {
-                //         if ((dst = this.readWordByMode(opCode)) >= 0) {
-                //             result = src - dst;
-                //             this.flagN = this.flagZ = this.flagC = result;
-                //             this.flagV = (src ^ dst) & (src ^ result);
-                //         }
-                //     }
-                //     break;
-                // case 0x3000: /*0030000*/ // BIT 03SSDD
-                //     //LOG_INSTRUCTION(opCode, 2, "BIT");
-                //     if ((src = this.readWordByMode(opCode >> 6)) >= 0) {
-                //         if ((dst = this.readWordByMode(opCode)) >= 0) {
-                //             this.flagN = this.flagZ = src & dst;
-                //             this.flagV = 0;
-                //         }
-                //     }
-                //     break;
-                // case 0x4000: /*0040000*/ // BIC 04SSDD
-                //     //LOG_INSTRUCTION(opCode, 2, "BIC");
-                //     if ((src = this.readWordByMode(opCode >> 6)) >= 0) {
-                //         if (!(opCode & 0x38)) {
-                //             result = this.regsGen[opCode & 7] &= ~src;
-                //             this.flagN = this.flagZ = result;
-                //             this.flagV = 0;
-                //         } else {
-                //             if ((dst = this.readWordByAddr(dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.UPDATE))) >= 0) {
-                //                 result = dst & ~src;
-                //                 if (this.writeWordByAddr(dstAddr, result) >= 0) {
-                //                     this.flagN = this.flagZ = result;
-                //                     this.flagV = 0;
-                //                 }
-                //             }
-                //         }
-                //     }
-                //     break;
-                // case 0x5000: /*0050000*/ // BIS 05SSDD
-                //     //LOG_INSTRUCTION(opCode, 2, "BIS");
-                //     if ((src = this.readWordByMode(opCode >> 6)) >= 0) {
-                //         if (!(opCode & 0x38)) {
-                //             result = this.regsGen[opCode & 7] |= src;
-                //             this.flagN = this.flagZ = result;
-                //             this.flagV = 0;
-                //         } else {
-                //             if ((dst = this.readWordByAddr(dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.UPDATE))) >= 0) {
-                //                 result = dst | src;
-                //                 if (this.writeWordByAddr(dstAddr, result) >= 0) {
-                //                     this.flagN = this.flagZ = result;
-                //                     this.flagV = 0;
-                //                 }
-                //             }
-                //         }
-                //     }
-                //     break;
-                // case 0x6000: /*0060000*/ // ADD 06SSDD
-                //     //LOG_INSTRUCTION(opCode, 2, "ADD");
-                //     if ((src = this.readWordByMode(opCode >> 6)) >= 0) {
-                //         if (!(opCode & 0x38)) {
-                //             reg = opCode & 7;
-                //             dst = this.regsGen[reg];
-                //             this.regsGen[reg] = (result = src + dst) & 0xffff;
-                //             this.flagN = this.flagZ = this.flagC = result;
-                //             this.flagV = (src ^ result) & (dst ^ result);
-                //         } else {
-                //             if ((dst = this.readWordByAddr(dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.UPDATE))) >= 0) {
-                //                 result = src + dst;
-                //                 if (this.writeWordByAddr(dstAddr, result) >= 0) {
-                //                     this.flagN = this.flagZ = this.flagC = result;
-                //                     this.flagV = (src ^ result) & (dst ^ result);
-                //                 }
-                //             }
-                //         }
-                //     }
-                //     break;
-                // case 0x9000: /*0110000*/ // MOVB 11SSDD
-                //     //LOG_INSTRUCTION(opCode, 2, "MOVB");
-                //     if ((src = this.readByteByMode(opCode >> 6)) >= 0) {
-                //         if (!(opCode & 0x38)) {
-                //             if (src & 0x80) /*0200*/ src |= 0xff00; // movb sign extends register to word size
-                //             this.regsGen[opCode & 7] = src;
-                //             this.flagN = this.flagZ = src;
-                //             this.flagV = 0;
-                //         } else {
-                //             if ((dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.WRITE_BYTE)) >= 0) { // write byte
-                //                 if (this.writeByteByAddr(dstAddr, src) >= 0) {
-                //                     this.flagN = this.flagZ = src << 8;
-                //                     this.flagV = 0;
-                //                 }
-                //             }
-                //         }
-                //     }
-                //     break;
-                // case 0xA000: /*0120000*/ // CMPB 12SSDD
-                //     //LOG_INSTRUCTION(opCode, 2, "CMPB");
-                //     if ((src = this.readByteByMode(opCode >> 6)) >= 0) {
-                //         if ((dst = this.readByteByMode(opCode)) >= 0) {
-                //             result = src - dst;
-                //             this.flagN = this.flagZ = this.flagC = result << 8;
-                //             this.flagV = ((src ^ dst) & (src ^ result)) << 8;
-                //         }
-                //     }
-                //     break;
-                // case 0xB000: /*0130000*/ // BITB 13SSDD
-                //     //LOG_INSTRUCTION(opCode, 2, "BITB");
-                //     if ((src = this.readByteByMode(opCode >> 6)) >= 0) {
-                //         if ((dst = this.readByteByMode(opCode)) >= 0) {
-                //             this.flagN = this.flagZ = (src & dst) << 8;
-                //             this.flagV = 0;
-                //         }
-                //     }
-                //     break;
-                // case 0xC000: /*0140000*/ // BICB 14SSDD
-                //     //LOG_INSTRUCTION(opCode, 2, "BICB");
-                //     if ((src = this.readByteByMode(opCode >> 6)) >= 0) {
-                //         if ((dst = this.readByteByAddr(dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.UPDATE_BYTE))) >= 0) {
-                //             result = dst & ~src;
-                //             if (this.writeByteByAddr(dstAddr, result) >= 0) {
-                //                 this.flagN = this.flagZ = result << 8;
-                //                 this.flagV = 0;
-                //             }
-                //         }
-                //     }
-                //     break;
-                // case 0xD000: /*0150000*/ // BISB 15SSDD
-                //     //LOG_INSTRUCTION(opCode, 2, "BISB");
-                //     if ((src = this.readByteByMode(opCode >> 6)) >= 0) {
-                //         if ((dst = this.readByteByAddr(dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.UPDATE_BYTE))) >= 0) {
-                //             result = dst | src;
-                //             if (this.writeByteByAddr(dstAddr, result) >= 0) {
-                //                 this.flagN = this.flagZ = result << 8;
-                //                 this.flagV = 0;
-                //             }
-                //         }
-                //     }
-                //     break;
-                // case 0xE000: /*0160000*/ // SUB 16SSDD
-                //     //LOG_INSTRUCTION(opCode, 2, "SUB");
-                //     if ((src = this.readWordByMode(opCode >> 6)) >= 0) {
-                //         if (!(opCode & 0x38)) {
-                //             reg = opCode & 7;
-                //             dst = this.regsGen[reg];
-                //             this.regsGen[reg] = (result = dst - src) & 0xffff;
-                //             this.flagN = this.flagZ = this.flagC = result;
-                //             this.flagV = (src ^ dst) & (dst ^ result);
-                //         } else {
-                //             if ((dst = this.readWordByAddr(dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.UPDATE))) >= 0) {
-                //                 result = dst - src;
-                //                 if (this.writeWordByAddr(dstAddr, result) >= 0) {
-                //                     this.flagN = this.flagZ = this.flagC = result;
-                //                     this.flagV = (src ^ dst) & (dst ^ result);
-                //                 }
-                //             }
-                //         }
-                //     }
-                //     break;
+                case 0x1000: /*0010000*/ // MOV  01SSDD
+                    //LOG_INSTRUCTION(opCode, 2, "MOV");
+                    if ((src = this.readWordByMode(opCode >> 6)) >= 0) {
+                        if (!(opCode & 0x38)) {
+                            this.regsGen[opCode & 7] = src;
+                            this.flagN = this.flagZ = src;
+                            this.flagV = 0;
+                        } else {
+                            if ((dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.WRITE)) >= 0) {
+                                if (this.writeWordByAddr(dstAddr, src) >= 0) {
+                                    this.flagN = this.flagZ = src;
+                                    this.flagV = 0;
+                                }
+                            }
+                        }
+                    }
+                    break;
+                case 0x2000: /*0020000*/ // CMP 02SSDD
+                    //LOG_INSTRUCTION(opCode, 2, "CMP");
+                    if ((src = this.readWordByMode(opCode >> 6)) >= 0) {
+                        if ((dst = this.readWordByMode(opCode)) >= 0) {
+                            result = src - dst;
+                            this.flagN = this.flagZ = this.flagC = result;
+                            this.flagV = (src ^ dst) & (src ^ result);
+                        }
+                    }
+                    break;
+                case 0x3000: /*0030000*/ // BIT 03SSDD
+                    //LOG_INSTRUCTION(opCode, 2, "BIT");
+                    if ((src = this.readWordByMode(opCode >> 6)) >= 0) {
+                        if ((dst = this.readWordByMode(opCode)) >= 0) {
+                            this.flagN = this.flagZ = src & dst;
+                            this.flagV = 0;
+                        }
+                    }
+                    break;
+                case 0x4000: /*0040000*/ // BIC 04SSDD
+                    //LOG_INSTRUCTION(opCode, 2, "BIC");
+                    if ((src = this.readWordByMode(opCode >> 6)) >= 0) {
+                        if (!(opCode & 0x38)) {
+                            result = this.regsGen[opCode & 7] &= ~src;
+                            this.flagN = this.flagZ = result;
+                            this.flagV = 0;
+                        } else {
+                            if ((dst = this.readWordByAddr(dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.UPDATE))) >= 0) {
+                                result = dst & ~src;
+                                if (this.writeWordByAddr(dstAddr, result) >= 0) {
+                                    this.flagN = this.flagZ = result;
+                                    this.flagV = 0;
+                                }
+                            }
+                        }
+                    }
+                    break;
+                case 0x5000: /*0050000*/ // BIS 05SSDD
+                    //LOG_INSTRUCTION(opCode, 2, "BIS");
+                    if ((src = this.readWordByMode(opCode >> 6)) >= 0) {
+                        if (!(opCode & 0x38)) {
+                            result = this.regsGen[opCode & 7] |= src;
+                            this.flagN = this.flagZ = result;
+                            this.flagV = 0;
+                        } else {
+                            if ((dst = this.readWordByAddr(dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.UPDATE))) >= 0) {
+                                result = dst | src;
+                                if (this.writeWordByAddr(dstAddr, result) >= 0) {
+                                    this.flagN = this.flagZ = result;
+                                    this.flagV = 0;
+                                }
+                            }
+                        }
+                    }
+                    break;
+                case 0x6000: /*0060000*/ // ADD 06SSDD
+                    //LOG_INSTRUCTION(opCode, 2, "ADD");
+                    if ((src = this.readWordByMode(opCode >> 6)) >= 0) {
+                        if (!(opCode & 0x38)) {
+                            reg = opCode & 7;
+                            dst = this.regsGen[reg];
+                            this.regsGen[reg] = (result = src + dst) & 0xffff;
+                            this.flagN = this.flagZ = this.flagC = result;
+                            this.flagV = (src ^ result) & (dst ^ result);
+                        } else {
+                            if ((dst = this.readWordByAddr(dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.UPDATE))) >= 0) {
+                                result = src + dst;
+                                if (this.writeWordByAddr(dstAddr, result) >= 0) {
+                                    this.flagN = this.flagZ = this.flagC = result;
+                                    this.flagV = (src ^ result) & (dst ^ result);
+                                }
+                            }
+                        }
+                    }
+                    break;
+                case 0x9000: /*0110000*/ // MOVB 11SSDD
+                    //LOG_INSTRUCTION(opCode, 2, "MOVB");
+                    if ((src = this.readByteByMode(opCode >> 6)) >= 0) {
+                        if (!(opCode & 0x38)) {
+                            if (src & 0x80) /*0200*/ src |= 0xff00; // movb sign extends register to word size
+                            this.regsGen[opCode & 7] = src;
+                            this.flagN = this.flagZ = src;
+                            this.flagV = 0;
+                        } else {
+                            if ((dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.WRITE_BYTE)) >= 0) { // write byte
+                                if (this.writeByteByAddr(dstAddr, src) >= 0) {
+                                    this.flagN = this.flagZ = src << 8;
+                                    this.flagV = 0;
+                                }
+                            }
+                        }
+                    }
+                    break;
+                case 0xA000: /*0120000*/ // CMPB 12SSDD
+                    //LOG_INSTRUCTION(opCode, 2, "CMPB");
+                    if ((src = this.readByteByMode(opCode >> 6)) >= 0) {
+                        if ((dst = this.readByteByMode(opCode)) >= 0) {
+                            result = src - dst;
+                            this.flagN = this.flagZ = this.flagC = result << 8;
+                            this.flagV = ((src ^ dst) & (src ^ result)) << 8;
+                        }
+                    }
+                    break;
+                case 0xB000: /*0130000*/ // BITB 13SSDD
+                    //LOG_INSTRUCTION(opCode, 2, "BITB");
+                    if ((src = this.readByteByMode(opCode >> 6)) >= 0) {
+                        if ((dst = this.readByteByMode(opCode)) >= 0) {
+                            this.flagN = this.flagZ = (src & dst) << 8;
+                            this.flagV = 0;
+                        }
+                    }
+                    break;
+                case 0xC000: /*0140000*/ // BICB 14SSDD
+                    //LOG_INSTRUCTION(opCode, 2, "BICB");
+                    if ((src = this.readByteByMode(opCode >> 6)) >= 0) {
+                        if ((dst = this.readByteByAddr(dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.UPDATE_BYTE))) >= 0) {
+                            result = dst & ~src;
+                            if (this.writeByteByAddr(dstAddr, result) >= 0) {
+                                this.flagN = this.flagZ = result << 8;
+                                this.flagV = 0;
+                            }
+                        }
+                    }
+                    break;
+                case 0xD000: /*0150000*/ // BISB 15SSDD
+                    //LOG_INSTRUCTION(opCode, 2, "BISB");
+                    if ((src = this.readByteByMode(opCode >> 6)) >= 0) {
+                        if ((dst = this.readByteByAddr(dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.UPDATE_BYTE))) >= 0) {
+                            result = dst | src;
+                            if (this.writeByteByAddr(dstAddr, result) >= 0) {
+                                this.flagN = this.flagZ = result << 8;
+                                this.flagV = 0;
+                            }
+                        }
+                    }
+                    break;
+                case 0xE000: /*0160000*/ // SUB 16SSDD
+                    //LOG_INSTRUCTION(opCode, 2, "SUB");
+                    if ((src = this.readWordByMode(opCode >> 6)) >= 0) {
+                        if (!(opCode & 0x38)) {
+                            reg = opCode & 7;
+                            dst = this.regsGen[reg];
+                            this.regsGen[reg] = (result = dst - src) & 0xffff;
+                            this.flagN = this.flagZ = this.flagC = result;
+                            this.flagV = (src ^ dst) & (dst ^ result);
+                        } else {
+                            if ((dst = this.readWordByAddr(dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.UPDATE))) >= 0) {
+                                result = dst - src;
+                                if (this.writeWordByAddr(dstAddr, result) >= 0) {
+                                    this.flagN = this.flagZ = this.flagC = result;
+                                    this.flagV = (src ^ dst) & (dst ^ result);
+                                }
+                            }
+                        }
+                    }
+                    break;
                 default:
                     switch (opCode & 0xFE00) /*0177000*/ { // Misc instructions xxRDD
                     case 0x800: /*04000*/ // JSR 004RDD

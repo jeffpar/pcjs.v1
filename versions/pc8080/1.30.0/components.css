@@ -32,10 +32,10 @@
     line-height: 19px;
     vertical-align: middle;
     float: left;
-    font-family: "Lucida Console", monospace;
+    font-family: Monaco, "Lucida Console", monospace;
 }
 .pcjs-controls textarea {
-    font-family: Monaco, monospace;
+    font-family: Monaco, "Lucida Console", monospace;
     font-size: x-small;
 }
 .pcjs-fieldset {
@@ -44,14 +44,14 @@
     padding: 0;
 }
 .pcjs-flag {
-    font-family: "Lucida Console", monospace;
+    font-family: Monaco, "Lucida Console", monospace;
     font-size: small;
     text-align: center;
     line-height: 19px;
     vertical-align: middle;
 }
 .pcjs-register {
-    font-family: "Lucida Console", monospace;
+    font-family: Monaco, "Lucida Console", monospace;
     font-size: small;
     text-align: center;
     line-height: 19px;

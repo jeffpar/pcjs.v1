@@ -1200,6 +1200,9 @@ if (DEBUGGER) {
              */
             if (this.checksEnabled()) this.checkInstruction(this.cpu.getPC(), 0);
         }
+        /*
+         * For our typically tiny bursts (usually single instructions), mimic what runCPU() does.
+         */
         try {
             var nCyclesStep = this.cpu.stepCPU(nCycles);
             if (nCyclesStep > 0) {
@@ -1214,6 +1217,8 @@ if (DEBUGGER) {
                 var e = exception;
                 this.nCycles = 0;
                 this.cpu.setError(e.stack || e.message);
+            } else {
+                if (DEBUG) this.println("CPU exception: " + str.toHexWord(exception));
             }
         }
 

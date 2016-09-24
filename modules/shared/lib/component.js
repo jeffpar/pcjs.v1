@@ -769,8 +769,8 @@ Component.prototype = {
      * TODO: Add a task to the build process that "asserts" there are no instances of "assertion failure" in RELEASE builds.
      *
      * @this {Component}
-     * @param {boolean} f is the expression we are asserting to be true
-     * @param {string} [s] is description of the assertion on failure
+     * @param {boolean|number} f is the expression asserted to be true
+     * @param {string} [s] is a description of the assertion to be displayed or logged on failure
      */
     assert: function(f, s) {
         if (DEBUG) {
