@@ -1449,7 +1449,7 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                 nDebugState = 1;
             }
 
-            var instruction,
+            var opCode,
                 src,
                 dst,
                 dstAddr,
@@ -1530,24 +1530,27 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
              */
             this.opFlags = this.PSW & PDP11.PSW.TF;
 
-            this.regOp = this.readWordByVirtual(this.regsGen[7]);
+            /*
+             * TODO: Determine (later) if this.regOp is a useful (internal) register to maintain;
+             * perhaps it would alleviate lots of opCode parameter-passing.
+             */
+            this.regOp = opCode = this.readWordByVirtual(this.regsGen[7]);
             this.regsGen[7] = (this.regsGen[7] + 2) & 0xffff;
-            this.decode(this.regOp);
 
-            if (this.regOp >= 0) {
-                instruction = this.regOp;
-                this.regsGen[7] = (this.regsGen[7] + 2) & 0xffff;
+            this.decode(opCode);
 
-                switch (instruction & 0xF000) /*0170000*/ { // Double operand instructions xxSSDD
+            if (opCode >= 0) {
+                // this.regsGen[7] = (this.regsGen[7] + 2) & 0xffff;
+                switch (opCode & 0xF000) /*0170000*/ { // Double operand instructions xxSSDD
                 // case 0x1000: /*0010000*/ // MOV  01SSDD
-                //     //LOG_INSTRUCTION(instruction, 2, "MOV");
-                //     if ((src = this.readWordByMode(instruction >> 6)) >= 0) {
-                //         if (!(instruction & 0x38)) {
-                //             this.regsGen[instruction & 7] = src;
+                //     //LOG_INSTRUCTION(opCode, 2, "MOV");
+                //     if ((src = this.readWordByMode(opCode >> 6)) >= 0) {
+                //         if (!(opCode & 0x38)) {
+                //             this.regsGen[opCode & 7] = src;
                 //             this.flagN = this.flagZ = src;
                 //             this.flagV = 0;
                 //         } else {
-                //             if ((dstAddr = this.getAddrByMode(instruction, PDP11.ACCESS.WRITE)) >= 0) {
+                //             if ((dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.WRITE)) >= 0) {
                 //                 if (this.writeWordByAddr(dstAddr, src) >= 0) {
                 //                     this.flagN = this.flagZ = src;
                 //                     this.flagV = 0;
@@ -1557,9 +1560,9 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                 //     }
                 //     break;
                 // case 0x2000: /*0020000*/ // CMP 02SSDD
-                //     //LOG_INSTRUCTION(instruction, 2, "CMP");
-                //     if ((src = this.readWordByMode(instruction >> 6)) >= 0) {
-                //         if ((dst = this.readWordByMode(instruction)) >= 0) {
+                //     //LOG_INSTRUCTION(opCode, 2, "CMP");
+                //     if ((src = this.readWordByMode(opCode >> 6)) >= 0) {
+                //         if ((dst = this.readWordByMode(opCode)) >= 0) {
                 //             result = src - dst;
                 //             this.flagN = this.flagZ = this.flagC = result;
                 //             this.flagV = (src ^ dst) & (src ^ result);
@@ -1567,23 +1570,23 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                 //     }
                 //     break;
                 // case 0x3000: /*0030000*/ // BIT 03SSDD
-                //     //LOG_INSTRUCTION(instruction, 2, "BIT");
-                //     if ((src = this.readWordByMode(instruction >> 6)) >= 0) {
-                //         if ((dst = this.readWordByMode(instruction)) >= 0) {
+                //     //LOG_INSTRUCTION(opCode, 2, "BIT");
+                //     if ((src = this.readWordByMode(opCode >> 6)) >= 0) {
+                //         if ((dst = this.readWordByMode(opCode)) >= 0) {
                 //             this.flagN = this.flagZ = src & dst;
                 //             this.flagV = 0;
                 //         }
                 //     }
                 //     break;
                 // case 0x4000: /*0040000*/ // BIC 04SSDD
-                //     //LOG_INSTRUCTION(instruction, 2, "BIC");
-                //     if ((src = this.readWordByMode(instruction >> 6)) >= 0) {
-                //         if (!(instruction & 0x38)) {
-                //             result = this.regsGen[instruction & 7] &= ~src;
+                //     //LOG_INSTRUCTION(opCode, 2, "BIC");
+                //     if ((src = this.readWordByMode(opCode >> 6)) >= 0) {
+                //         if (!(opCode & 0x38)) {
+                //             result = this.regsGen[opCode & 7] &= ~src;
                 //             this.flagN = this.flagZ = result;
                 //             this.flagV = 0;
                 //         } else {
-                //             if ((dst = this.readWordByAddr(dstAddr = this.getAddrByMode(instruction, PDP11.ACCESS.UPDATE))) >= 0) {
+                //             if ((dst = this.readWordByAddr(dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.UPDATE))) >= 0) {
                 //                 result = dst & ~src;
                 //                 if (this.writeWordByAddr(dstAddr, result) >= 0) {
                 //                     this.flagN = this.flagZ = result;
@@ -1594,14 +1597,14 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                 //     }
                 //     break;
                 // case 0x5000: /*0050000*/ // BIS 05SSDD
-                //     //LOG_INSTRUCTION(instruction, 2, "BIS");
-                //     if ((src = this.readWordByMode(instruction >> 6)) >= 0) {
-                //         if (!(instruction & 0x38)) {
-                //             result = this.regsGen[instruction & 7] |= src;
+                //     //LOG_INSTRUCTION(opCode, 2, "BIS");
+                //     if ((src = this.readWordByMode(opCode >> 6)) >= 0) {
+                //         if (!(opCode & 0x38)) {
+                //             result = this.regsGen[opCode & 7] |= src;
                 //             this.flagN = this.flagZ = result;
                 //             this.flagV = 0;
                 //         } else {
-                //             if ((dst = this.readWordByAddr(dstAddr = this.getAddrByMode(instruction, PDP11.ACCESS.UPDATE))) >= 0) {
+                //             if ((dst = this.readWordByAddr(dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.UPDATE))) >= 0) {
                 //                 result = dst | src;
                 //                 if (this.writeWordByAddr(dstAddr, result) >= 0) {
                 //                     this.flagN = this.flagZ = result;
@@ -1612,16 +1615,16 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                 //     }
                 //     break;
                 // case 0x6000: /*0060000*/ // ADD 06SSDD
-                //     //LOG_INSTRUCTION(instruction, 2, "ADD");
-                //     if ((src = this.readWordByMode(instruction >> 6)) >= 0) {
-                //         if (!(instruction & 0x38)) {
-                //             reg = instruction & 7;
+                //     //LOG_INSTRUCTION(opCode, 2, "ADD");
+                //     if ((src = this.readWordByMode(opCode >> 6)) >= 0) {
+                //         if (!(opCode & 0x38)) {
+                //             reg = opCode & 7;
                 //             dst = this.regsGen[reg];
                 //             this.regsGen[reg] = (result = src + dst) & 0xffff;
                 //             this.flagN = this.flagZ = this.flagC = result;
                 //             this.flagV = (src ^ result) & (dst ^ result);
                 //         } else {
-                //             if ((dst = this.readWordByAddr(dstAddr = this.getAddrByMode(instruction, PDP11.ACCESS.UPDATE))) >= 0) {
+                //             if ((dst = this.readWordByAddr(dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.UPDATE))) >= 0) {
                 //                 result = src + dst;
                 //                 if (this.writeWordByAddr(dstAddr, result) >= 0) {
                 //                     this.flagN = this.flagZ = this.flagC = result;
@@ -1632,15 +1635,15 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                 //     }
                 //     break;
                 // case 0x9000: /*0110000*/ // MOVB 11SSDD
-                //     //LOG_INSTRUCTION(instruction, 2, "MOVB");
-                //     if ((src = this.readByteByMode(instruction >> 6)) >= 0) {
-                //         if (!(instruction & 0x38)) {
+                //     //LOG_INSTRUCTION(opCode, 2, "MOVB");
+                //     if ((src = this.readByteByMode(opCode >> 6)) >= 0) {
+                //         if (!(opCode & 0x38)) {
                 //             if (src & 0x80) /*0200*/ src |= 0xff00; // movb sign extends register to word size
-                //             this.regsGen[instruction & 7] = src;
+                //             this.regsGen[opCode & 7] = src;
                 //             this.flagN = this.flagZ = src;
                 //             this.flagV = 0;
                 //         } else {
-                //             if ((dstAddr = this.getAddrByMode(instruction, PDP11.ACCESS.WRITE_BYTE)) >= 0) { // write byte
+                //             if ((dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.WRITE_BYTE)) >= 0) { // write byte
                 //                 if (this.writeByteByAddr(dstAddr, src) >= 0) {
                 //                     this.flagN = this.flagZ = src << 8;
                 //                     this.flagV = 0;
@@ -1650,9 +1653,9 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                 //     }
                 //     break;
                 // case 0xA000: /*0120000*/ // CMPB 12SSDD
-                //     //LOG_INSTRUCTION(instruction, 2, "CMPB");
-                //     if ((src = this.readByteByMode(instruction >> 6)) >= 0) {
-                //         if ((dst = this.readByteByMode(instruction)) >= 0) {
+                //     //LOG_INSTRUCTION(opCode, 2, "CMPB");
+                //     if ((src = this.readByteByMode(opCode >> 6)) >= 0) {
+                //         if ((dst = this.readByteByMode(opCode)) >= 0) {
                 //             result = src - dst;
                 //             this.flagN = this.flagZ = this.flagC = result << 8;
                 //             this.flagV = ((src ^ dst) & (src ^ result)) << 8;
@@ -1660,18 +1663,18 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                 //     }
                 //     break;
                 // case 0xB000: /*0130000*/ // BITB 13SSDD
-                //     //LOG_INSTRUCTION(instruction, 2, "BITB");
-                //     if ((src = this.readByteByMode(instruction >> 6)) >= 0) {
-                //         if ((dst = this.readByteByMode(instruction)) >= 0) {
+                //     //LOG_INSTRUCTION(opCode, 2, "BITB");
+                //     if ((src = this.readByteByMode(opCode >> 6)) >= 0) {
+                //         if ((dst = this.readByteByMode(opCode)) >= 0) {
                 //             this.flagN = this.flagZ = (src & dst) << 8;
                 //             this.flagV = 0;
                 //         }
                 //     }
                 //     break;
                 // case 0xC000: /*0140000*/ // BICB 14SSDD
-                //     //LOG_INSTRUCTION(instruction, 2, "BICB");
-                //     if ((src = this.readByteByMode(instruction >> 6)) >= 0) {
-                //         if ((dst = this.readByteByAddr(dstAddr = this.getAddrByMode(instruction, PDP11.ACCESS.UPDATE_BYTE))) >= 0) {
+                //     //LOG_INSTRUCTION(opCode, 2, "BICB");
+                //     if ((src = this.readByteByMode(opCode >> 6)) >= 0) {
+                //         if ((dst = this.readByteByAddr(dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.UPDATE_BYTE))) >= 0) {
                 //             result = dst & ~src;
                 //             if (this.writeByteByAddr(dstAddr, result) >= 0) {
                 //                 this.flagN = this.flagZ = result << 8;
@@ -1681,9 +1684,9 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                 //     }
                 //     break;
                 // case 0xD000: /*0150000*/ // BISB 15SSDD
-                //     //LOG_INSTRUCTION(instruction, 2, "BISB");
-                //     if ((src = this.readByteByMode(instruction >> 6)) >= 0) {
-                //         if ((dst = this.readByteByAddr(dstAddr = this.getAddrByMode(instruction, PDP11.ACCESS.UPDATE_BYTE))) >= 0) {
+                //     //LOG_INSTRUCTION(opCode, 2, "BISB");
+                //     if ((src = this.readByteByMode(opCode >> 6)) >= 0) {
+                //         if ((dst = this.readByteByAddr(dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.UPDATE_BYTE))) >= 0) {
                 //             result = dst | src;
                 //             if (this.writeByteByAddr(dstAddr, result) >= 0) {
                 //                 this.flagN = this.flagZ = result << 8;
@@ -1693,16 +1696,16 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                 //     }
                 //     break;
                 // case 0xE000: /*0160000*/ // SUB 16SSDD
-                //     //LOG_INSTRUCTION(instruction, 2, "SUB");
-                //     if ((src = this.readWordByMode(instruction >> 6)) >= 0) {
-                //         if (!(instruction & 0x38)) {
-                //             reg = instruction & 7;
+                //     //LOG_INSTRUCTION(opCode, 2, "SUB");
+                //     if ((src = this.readWordByMode(opCode >> 6)) >= 0) {
+                //         if (!(opCode & 0x38)) {
+                //             reg = opCode & 7;
                 //             dst = this.regsGen[reg];
                 //             this.regsGen[reg] = (result = dst - src) & 0xffff;
                 //             this.flagN = this.flagZ = this.flagC = result;
                 //             this.flagV = (src ^ dst) & (dst ^ result);
                 //         } else {
-                //             if ((dst = this.readWordByAddr(dstAddr = this.getAddrByMode(instruction, PDP11.ACCESS.UPDATE))) >= 0) {
+                //             if ((dst = this.readWordByAddr(dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.UPDATE))) >= 0) {
                 //                 result = dst - src;
                 //                 if (this.writeWordByAddr(dstAddr, result) >= 0) {
                 //                     this.flagN = this.flagZ = this.flagC = result;
@@ -1713,11 +1716,11 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                 //     }
                 //     break;
                 default:
-                    switch (instruction & 0xFE00) /*0177000*/ { // Misc instructions xxRDD
+                    switch (opCode & 0xFE00) /*0177000*/ { // Misc instructions xxRDD
                     case 0x800: /*04000*/ // JSR 004RDD
-                        //LOG_INSTRUCTION(instruction, 3, "JSR");
-                        if ((virtualAddress = this.getVirtualByMode(instruction, 0)) >= 0) {
-                            reg = (instruction >> 6) & 7;
+                        //LOG_INSTRUCTION(opCode, 3, "JSR");
+                        if ((virtualAddress = this.getVirtualByMode(opCode, 0)) >= 0) {
+                            reg = (opCode >> 6) & 7;
                             if (this.pushWord(this.regsGen[reg]) >= 0) {
                                 this.regsGen[reg] = this.regsGen[7];
                                 this.regsGen[7] = virtualAddress & 0xffff;
@@ -1725,9 +1728,9 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                         }
                         break;
                     case 0x7000: /*0070000*/ // MUL 070RSS
-                        //LOG_INSTRUCTION(instruction, 3, "MUL");
-                        if ((src = this.readWordByMode(instruction)) >= 0) {
-                            reg = (instruction >> 6) & 7;
+                        //LOG_INSTRUCTION(opCode, 3, "MUL");
+                        if ((src = this.readWordByMode(opCode)) >= 0) {
+                            reg = (opCode >> 6) & 7;
                             if (src & 0x8000) src |= ~0xffff;
                             dst = this.regsGen[reg];
                             if (dst & 0x8000) dst |= ~0xffff;
@@ -1741,15 +1744,15 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                         }
                         break;
                     case 0x7200: /*0071000*/ // DIV 071RSS
-                        //LOG_INSTRUCTION(instruction, 3, "DIV");
-                        if ((src = this.readWordByMode(instruction)) >= 0) {
+                        //LOG_INSTRUCTION(opCode, 3, "DIV");
+                        if ((src = this.readWordByMode(opCode)) >= 0) {
                             if (!src) {
                                 this.flagN = 0; // NZVC
                                 this.flagZ = 0;
                                 this.flagV = 0x8000;
                                 this.flagC = 0x10000; // divide by zero
                             } else {
-                                reg = (instruction >> 6) & 7;
+                                reg = (opCode >> 6) & 7;
                                 dst = (this.regsGen[reg] << 16) | this.regsGen[reg | 1];
                                 this.flagC = this.flagV = 0;
                                 if (src & 0x8000) src |= ~0xffff;
@@ -1770,9 +1773,9 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                         }
                         break;
                     case 0x7400: /*072000*/ // ASH 072RSS
-                        //LOG_INSTRUCTION(instruction, 3, "ASH");
-                        if ((src = this.readWordByMode(instruction)) >= 0) {
-                            reg = (instruction >> 6) & 7;
+                        //LOG_INSTRUCTION(opCode, 3, "ASH");
+                        if ((src = this.readWordByMode(opCode)) >= 0) {
+                            reg = (opCode >> 6) & 7;
                             result = this.regsGen[reg];
                             if (result & 0x8000) result |= 0xffff0000;
                             this.flagC = this.flagV = 0;
@@ -1800,9 +1803,9 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                         }
                         break;
                     case 0x7600: /*073000*/ // ASHC 073RSS
-                        //LOG_INSTRUCTION(instruction, 3, "ASHC");
-                        if ((src = this.readWordByMode(instruction)) >= 0) {
-                            reg = (instruction >> 6) & 7;
+                        //LOG_INSTRUCTION(opCode, 3, "ASHC");
+                        if ((src = this.readWordByMode(opCode)) >= 0) {
+                            reg = (opCode >> 6) & 7;
                             dst = (this.regsGen[reg] << 16) | this.regsGen[reg | 1];
                             this.flagC = this.flagV = 0;
                             src &= 0x3F; /*077*/
@@ -1835,14 +1838,14 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                         }
                         break;
                     case 0x7800: /*0074000*/ // XOR 074RSS
-                        //LOG_INSTRUCTION(instruction, 3, "XOR");
-                        if (!(instruction & 0x38)) {
-                            dst = this.regsGen[instruction & 7] ^= this.regsGen[(instruction >> 6) & 7];
+                        //LOG_INSTRUCTION(opCode, 3, "XOR");
+                        if (!(opCode & 0x38)) {
+                            dst = this.regsGen[opCode & 7] ^= this.regsGen[(opCode >> 6) & 7];
                             this.flagN = this.flagZ = dst;
                             this.flagV = 0;
                         } else {
-                            if ((dst = this.readWordByAddr(dstAddr = this.getAddrByMode(instruction, PDP11.ACCESS.UPDATE))) >= 0) {
-                                dst ^= this.regsGen[(instruction >> 6) & 7];
+                            if ((dst = this.readWordByAddr(dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.UPDATE))) >= 0) {
+                                dst ^= this.regsGen[(opCode >> 6) & 7];
                                 if (this.writeWordByAddr(dstAddr, dst) >= 0) {
                                     this.flagN = this.flagZ = dst;
                                     this.flagV = 0;
@@ -1851,107 +1854,107 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                         }
                         break;
                     case 0x7E00: /*0077000*/ // SOB 077Rnn
-                        //LOG_INSTRUCTION(instruction, 5, "SOB");
-                        reg = (instruction >> 6) & 7;
+                        //LOG_INSTRUCTION(opCode, 5, "SOB");
+                        reg = (opCode >> 6) & 7;
                         if ((this.regsGen[reg] = ((this.regsGen[reg] - 1) & 0xffff))) {
-                            this.regsGen[7] = (this.regsGen[7] - ((instruction & 0x3F) /*077*/ << 1)) & 0xffff;
+                            this.regsGen[7] = (this.regsGen[7] - ((opCode & 0x3F) /*077*/ << 1)) & 0xffff;
                         }
                         break;
                     default:
-                        switch (instruction & 0xFF00) /*0177400*/ { // Program control instructions & traps
+                        switch (opCode & 0xFF00) /*0177400*/ { // Program control instructions & traps
                         case 0x100: /*0000400*/ // BR
-                            //LOG_INSTRUCTION(instruction, 4, "BR");
-                            this.regsGen[7] = this.branch(this.regsGen[7], instruction);
+                            //LOG_INSTRUCTION(opCode, 4, "BR");
+                            this.regsGen[7] = this.branch(this.regsGen[7], opCode);
                             break;
                         case 0x200: /*0001000*/ // BNE
-                            //LOG_INSTRUCTION(instruction, 4, "BNE");
-                            if (this.flagZ & 0xffff) this.regsGen[7] = this.branch(this.regsGen[7], instruction);
+                            //LOG_INSTRUCTION(opCode, 4, "BNE");
+                            if (this.flagZ & 0xffff) this.regsGen[7] = this.branch(this.regsGen[7], opCode);
                             break;
                         case 0x300: /*0001400*/ // BEQ
-                            //LOG_INSTRUCTION(instruction, 4, "BEQ");
-                            if (!(this.flagZ & 0xffff)) this.regsGen[7] = this.branch(this.regsGen[7], instruction);
+                            //LOG_INSTRUCTION(opCode, 4, "BEQ");
+                            if (!(this.flagZ & 0xffff)) this.regsGen[7] = this.branch(this.regsGen[7], opCode);
                             break;
                         case 0x400: /*0002000*/ // BGE
-                            //LOG_INSTRUCTION(instruction, 4, "BGE");
+                            //LOG_INSTRUCTION(opCode, 4, "BGE");
                             if ((this.flagN & 0x8000) ===
-                                (this.flagV & 0x8000)) this.regsGen[7] = this.branch(this.regsGen[7], instruction);
+                                (this.flagV & 0x8000)) this.regsGen[7] = this.branch(this.regsGen[7], opCode);
                             break;
                         case 0x500: /*0002400*/ // BLT
-                            //LOG_INSTRUCTION(instruction, 4, "BLT");
+                            //LOG_INSTRUCTION(opCode, 4, "BLT");
                             if ((this.flagN & 0x8000) !==
-                                (this.flagV & 0x8000)) this.regsGen[7] = this.branch(this.regsGen[7], instruction);
+                                (this.flagV & 0x8000)) this.regsGen[7] = this.branch(this.regsGen[7], opCode);
                             break;
                         case 0x600: /*0003000*/ // BGT
-                            //LOG_INSTRUCTION(instruction, 4, "BGT");
+                            //LOG_INSTRUCTION(opCode, 4, "BGT");
                             if ((this.flagZ & 0xffff) && ((this.flagN & 0x8000) ===
-                                (this.flagV & 0x8000))) this.regsGen[7] = this.branch(this.regsGen[7], instruction);
+                                (this.flagV & 0x8000))) this.regsGen[7] = this.branch(this.regsGen[7], opCode);
                             break;
                         case 0x700: /*0003400*/ // BLE
-                            //LOG_INSTRUCTION(instruction, 4, "BLE");
+                            //LOG_INSTRUCTION(opCode, 4, "BLE");
                             if (!(this.flagZ & 0xffff) || ((this.flagN & 0x8000) !==
-                                (this.flagV & 0x8000))) this.regsGen[7] = this.branch(this.regsGen[7], instruction);
+                                (this.flagV & 0x8000))) this.regsGen[7] = this.branch(this.regsGen[7], opCode);
                             break;
                         case 0x8000: /*0100000*/ // BPL
-                            //LOG_INSTRUCTION(instruction, 4, "BPL");
-                            if (!(this.flagN & 0x8000)) this.regsGen[7] = this.branch(this.regsGen[7], instruction);
+                            //LOG_INSTRUCTION(opCode, 4, "BPL");
+                            if (!(this.flagN & 0x8000)) this.regsGen[7] = this.branch(this.regsGen[7], opCode);
                             break;
                         case 0x8200: /*0101000*/ // BHI
-                            //LOG_INSTRUCTION(instruction, 4, "BHI");
+                            //LOG_INSTRUCTION(opCode, 4, "BHI");
                             if (!(this.flagC & 0x10000) &&
-                                (this.flagZ & 0xffff)) this.regsGen[7] = this.branch(this.regsGen[7], instruction);
+                                (this.flagZ & 0xffff)) this.regsGen[7] = this.branch(this.regsGen[7], opCode);
                             break;
                         case 0x8100: /*0100400*/ // BMI
-                            //LOG_INSTRUCTION(instruction, 4, "BMI");
-                            if ((this.flagN & 0x8000)) this.regsGen[7] = this.branch(this.regsGen[7], instruction);
+                            //LOG_INSTRUCTION(opCode, 4, "BMI");
+                            if ((this.flagN & 0x8000)) this.regsGen[7] = this.branch(this.regsGen[7], opCode);
                             break;
                         case 0x8300: /*0101400*/ // BLOS
-                            //LOG_INSTRUCTION(instruction, 4, "BLOS");
+                            //LOG_INSTRUCTION(opCode, 4, "BLOS");
                             if ((this.flagC & 0x10000) ||
-                                !(this.flagZ & 0xffff)) this.regsGen[7] = this.branch(this.regsGen[7], instruction);
+                                !(this.flagZ & 0xffff)) this.regsGen[7] = this.branch(this.regsGen[7], opCode);
                             break;
                         case 0x8400: /*0102000*/ // BVC
-                            //LOG_INSTRUCTION(instruction, 4, "BVC");
-                            if (!(this.flagV & 0x8000)) this.regsGen[7] = this.branch(this.regsGen[7], instruction);
+                            //LOG_INSTRUCTION(opCode, 4, "BVC");
+                            if (!(this.flagV & 0x8000)) this.regsGen[7] = this.branch(this.regsGen[7], opCode);
                             break;
                         case 0x8500: /*0102400*/ // BVS
-                            //LOG_INSTRUCTION(instruction, 4, "BVS");
-                            if ((this.flagV & 0x8000)) this.regsGen[7] = this.branch(this.regsGen[7], instruction);
+                            //LOG_INSTRUCTION(opCode, 4, "BVS");
+                            if ((this.flagV & 0x8000)) this.regsGen[7] = this.branch(this.regsGen[7], opCode);
                             break;
                         case 0x8600: /*0103000*/ // BCC
-                            //LOG_INSTRUCTION(instruction, 4, "BCC");
+                            //LOG_INSTRUCTION(opCode, 4, "BCC");
                             if (!(this.flagC &
-                                0x10000)) this.regsGen[7] = this.branch(this.regsGen[7], instruction);
+                                0x10000)) this.regsGen[7] = this.branch(this.regsGen[7], opCode);
                             break;
                         case 0x8700: /*0103400*/ // BCS
-                            //LOG_INSTRUCTION(instruction, 4, "BCS");
-                            if (this.flagC & 0x10000) this.regsGen[7] = this.branch(this.regsGen[7], instruction);
+                            //LOG_INSTRUCTION(opCode, 4, "BCS");
+                            if (this.flagC & 0x10000) this.regsGen[7] = this.branch(this.regsGen[7], opCode);
                             break;
                         case 0x8800: /*0104000*/ // EMT 104000 -> 104377
-                            //LOG_INSTRUCTION(instruction, 7, "EMT");
+                            //LOG_INSTRUCTION(opCode, 7, "EMT");
                             this.trap(PDP11.TRAP.EMULATOR, /*030*/ 2);
                             break;
                         case 0x8900: /*0104400*/ // TRAP 104400 -> 104777
-                            //LOG_INSTRUCTION(instruction, 7, "TRAP");
+                            //LOG_INSTRUCTION(opCode, 7, "TRAP");
                             this.trap(PDP11.TRAP.TRAP, /*034*/ 4);
                             break;
                         default:
-                            switch (instruction & 0xFFC0) /*0177700*/ { // Single operand instructions xxxxDD
+                            switch (opCode & 0xFFC0) /*0177700*/ { // Single operand instructions xxxxDD
                             case 0x40: /*0000100*/ // JMP 0001DD
-                                //LOG_INSTRUCTION(instruction, 1, "JMP");
-                                if ((virtualAddress = this.getVirtualByMode(instruction, 0)) >= 0) {
+                                //LOG_INSTRUCTION(opCode, 1, "JMP");
+                                if ((virtualAddress = this.getVirtualByMode(opCode, 0)) >= 0) {
                                     this.regsGen[7] = virtualAddress & 0xffff;
                                 }
                                 break;
                             case 0xC0: /*0000300*/ // SWAB 0003DD
-                                //LOG_INSTRUCTION(instruction, 1, "SWAB");
-                                if (!(instruction & 0x38)) {
-                                    reg = instruction & 7;
+                                //LOG_INSTRUCTION(opCode, 1, "SWAB");
+                                if (!(opCode & 0x38)) {
+                                    reg = opCode & 7;
                                     dst = this.regsGen[reg];
                                     this.regsGen[reg] = ((dst << 8) | (dst >> 8)) & 0xffff;
                                     this.flagN = this.flagZ = dst & 0xff00;
                                     this.flagV = this.flagC = 0;
                                 } else {
-                                    if ((dst = this.readWordByAddr(dstAddr = this.getAddrByMode(instruction, PDP11.ACCESS.UPDATE))) >=
+                                    if ((dst = this.readWordByAddr(dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.UPDATE))) >=
                                         0) {
                                         result = (dst << 8) | (dst >> 8);
                                         if (this.writeWordByAddr(dstAddr, result) >= 0) {
@@ -1962,12 +1965,12 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                 }
                                 break;
                             case 0xA00: /*0005000*/ // CLR 0050DD
-                                //LOG_INSTRUCTION(instruction, 1, "CLR");
-                                if (!(instruction & 0x38)) {
-                                    this.regsGen[instruction & 7] = 0;
+                                //LOG_INSTRUCTION(opCode, 1, "CLR");
+                                if (!(opCode & 0x38)) {
+                                    this.regsGen[opCode & 7] = 0;
                                     this.flagN = this.flagC = this.flagV = this.flagZ = 0;
                                 } else {
-                                    if ((dstAddr = this.getAddrByMode(instruction, PDP11.ACCESS.WRITE)) >= 0) { // write word
+                                    if ((dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.WRITE)) >= 0) { // write word
                                         if (this.writeWordByAddr(dstAddr, 0) >= 0) {
                                             this.flagN = this.flagC = this.flagV = this.flagZ = 0;
                                         }
@@ -1975,8 +1978,8 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                 }
                                 break;
                             case 0xA40: /*0005100*/ // COM 0051DD
-                                //LOG_INSTRUCTION(instruction, 1, "COM");
-                                if ((dst = this.readWordByAddr(dstAddr = this.getAddrByMode(instruction, PDP11.ACCESS.UPDATE))) >=
+                                //LOG_INSTRUCTION(opCode, 1, "COM");
+                                if ((dst = this.readWordByAddr(dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.UPDATE))) >=
                                     0) {
                                     result = ~dst;
                                     if (this.writeWordByAddr(dstAddr, result) >= 0) {
@@ -1987,16 +1990,16 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                 }
                                 break;
                             case 0xA80: /*0005200*/ // INC 0052DD
-                                //LOG_INSTRUCTION(instruction, 1, "INC");
-                                if (!(instruction & 0x38)) {
-                                    reg = instruction & 7;
+                                //LOG_INSTRUCTION(opCode, 1, "INC");
+                                if (!(opCode & 0x38)) {
+                                    reg = opCode & 7;
                                     dst = this.regsGen[reg];
                                     result = dst + 1;
                                     this.regsGen[reg] = result & 0xffff;
                                     this.flagN = this.flagZ = result;
                                     this.flagV = result & (result ^ dst);
                                 } else {
-                                    if ((dst = this.readWordByAddr(dstAddr = this.getAddrByMode(instruction, PDP11.ACCESS.UPDATE))) >=
+                                    if ((dst = this.readWordByAddr(dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.UPDATE))) >=
                                         0) {
                                         result = dst + 1;
                                         if (this.writeWordByAddr(dstAddr, result) >= 0) {
@@ -2007,16 +2010,16 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                 }
                                 break;
                             case 0xAC0: /*0005300*/ // DEC 0053DD
-                                //LOG_INSTRUCTION(instruction, 1, "DEC");
-                                if (!(instruction & 0x38)) {
-                                    reg = instruction & 7;
+                                //LOG_INSTRUCTION(opCode, 1, "DEC");
+                                if (!(opCode & 0x38)) {
+                                    reg = opCode & 7;
                                     dst = this.regsGen[reg];
                                     result = dst - 1;
                                     this.regsGen[reg] = result & 0xffff;
                                     this.flagN = this.flagZ = result;
                                     this.flagV = (result ^ dst) & dst;
                                 } else {
-                                    if ((dst = this.readWordByAddr(dstAddr = this.getAddrByMode(instruction, PDP11.ACCESS.UPDATE))) >=
+                                    if ((dst = this.readWordByAddr(dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.UPDATE))) >=
                                         0) {
                                         result = dst - 1;
                                         if (this.writeWordByAddr(dstAddr, result) >= 0) {
@@ -2027,8 +2030,8 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                 }
                                 break;
                             case 0xB00: /*0005400*/ // NEG 0054DD
-                                //LOG_INSTRUCTION(instruction, 1, "NEG");
-                                if ((dst = this.readWordByAddr(dstAddr = this.getAddrByMode(instruction, PDP11.ACCESS.UPDATE))) >=
+                                //LOG_INSTRUCTION(opCode, 1, "NEG");
+                                if ((dst = this.readWordByAddr(dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.UPDATE))) >=
                                     0) {
                                     result = -dst;
                                     if (this.writeWordByAddr(dstAddr, result) >= 0) {
@@ -2038,8 +2041,8 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                 }
                                 break;
                             case 0xB40: /*0005500*/ // ADC 0055DD
-                                //LOG_INSTRUCTION(instruction, 1, "ADC");
-                                if ((dst = this.readWordByAddr(dstAddr = this.getAddrByMode(instruction, PDP11.ACCESS.UPDATE))) >=
+                                //LOG_INSTRUCTION(opCode, 1, "ADC");
+                                if ((dst = this.readWordByAddr(dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.UPDATE))) >=
                                     0) {
                                     result = dst + ((this.flagC >> 16) & 1);
                                     if (this.writeWordByAddr(dstAddr, result) >= 0) {
@@ -2049,8 +2052,8 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                 }
                                 break;
                             case 0xB80: /*0005600*/ // SBC 0056DD
-                                //LOG_INSTRUCTION(instruction, 1, "SBC");
-                                if ((dst = this.readWordByAddr(dstAddr = this.getAddrByMode(instruction, PDP11.ACCESS.UPDATE))) >=
+                                //LOG_INSTRUCTION(opCode, 1, "SBC");
+                                if ((dst = this.readWordByAddr(dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.UPDATE))) >=
                                     0) {
                                     result = dst - ((this.flagC >> 16) & 1);
                                     if (this.writeWordByAddr(dstAddr, result) >= 0) {
@@ -2060,16 +2063,16 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                 }
                                 break;
                             case 0xBC0: /*0005700*/ // TST 0057DD
-                                //LOG_INSTRUCTION(instruction, 1, "TST");
-                                if ((dst = this.readWordByMode(instruction)) >= 0) {
+                                //LOG_INSTRUCTION(opCode, 1, "TST");
+                                if ((dst = this.readWordByMode(opCode)) >= 0) {
                                     this.flagN = this.flagZ = dst;
                                     this.flagC = this.flagV = 0;
                                 }
                                 break;
                             case 0xC00: /*0006000*/ // ROR 0060DD
-                                //LOG_INSTRUCTION(instruction, 1, "ROR");
-                                if (!(instruction & 0x38)) {
-                                    reg = instruction & 7;
+                                //LOG_INSTRUCTION(opCode, 1, "ROR");
+                                if (!(opCode & 0x38)) {
+                                    reg = opCode & 7;
                                     dst = this.regsGen[reg];
                                     result = ((this.flagC & 0x10000) | dst) >> 1;
                                     this.regsGen[reg] = result & 0xffff;
@@ -2077,7 +2080,7 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                     this.flagN = this.flagZ = result;
                                     this.flagV = result ^ (this.flagC >> 1);
                                 } else {
-                                    if ((dst = this.readWordByAddr(dstAddr = this.getAddrByMode(instruction, PDP11.ACCESS.UPDATE))) >=
+                                    if ((dst = this.readWordByAddr(dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.UPDATE))) >=
                                         0) {
                                         result = ((this.flagC & 0x10000) | dst) >> 1;
                                         if (this.writeWordByAddr(dstAddr, result) >= 0) {
@@ -2089,16 +2092,16 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                 }
                                 break;
                             case 0xC40: /*0006100*/ // ROL 0061DD
-                                //LOG_INSTRUCTION(instruction, 1, "ROL");
-                                if (!(instruction & 0x38)) {
-                                    reg = instruction & 7;
+                                //LOG_INSTRUCTION(opCode, 1, "ROL");
+                                if (!(opCode & 0x38)) {
+                                    reg = opCode & 7;
                                     dst = this.regsGen[reg];
                                     result = (dst << 1) | ((this.flagC >> 16) & 1);
                                     this.regsGen[reg] = result & 0xffff;
                                     this.flagC = this.flagN = this.flagZ = result;
                                     this.flagV = result ^ dst;
                                 } else {
-                                    if ((dst = this.readWordByAddr(dstAddr = this.getAddrByMode(instruction, PDP11.ACCESS.UPDATE))) >=
+                                    if ((dst = this.readWordByAddr(dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.UPDATE))) >=
                                         0) {
                                         result = (dst << 1) | ((this.flagC >> 16) & 1);
                                         if (this.writeWordByAddr(dstAddr, result) >= 0) {
@@ -2109,9 +2112,9 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                 }
                                 break;
                             case 0xC80: /*0006200*/ // ASR 0062DD
-                                //LOG_INSTRUCTION(instruction, 1, "ASR");
-                                if (!(instruction & 0x38)) {
-                                    reg = instruction & 7;
+                                //LOG_INSTRUCTION(opCode, 1, "ASR");
+                                if (!(opCode & 0x38)) {
+                                    reg = opCode & 7;
                                     dst = this.regsGen[reg];
                                     result = (dst & 0x8000) | (dst >> 1);
                                     this.regsGen[reg] = result & 0xffff;
@@ -2119,7 +2122,7 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                     this.flagN = this.flagZ = result;
                                     this.flagV = this.flagN ^ (this.flagC >> 1);
                                 } else {
-                                    if ((dst = this.readWordByAddr(dstAddr = this.getAddrByMode(instruction, PDP11.ACCESS.UPDATE))) >=
+                                    if ((dst = this.readWordByAddr(dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.UPDATE))) >=
                                         0) {
                                         result = (dst & 0x8000) | (dst >> 1);
                                         if (this.writeWordByAddr(dstAddr, result) >= 0) {
@@ -2131,16 +2134,16 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                 }
                                 break;
                             case 0xCC0: /*0006300*/ // ASL 0063DD
-                                //LOG_INSTRUCTION(instruction, 1, "ASL");
-                                if (!(instruction & 0x38)) {
-                                    reg = instruction & 7;
+                                //LOG_INSTRUCTION(opCode, 1, "ASL");
+                                if (!(opCode & 0x38)) {
+                                    reg = opCode & 7;
                                     dst = this.regsGen[reg];
                                     result = dst << 1;
                                     this.regsGen[reg] = result & 0xffff;
                                     this.flagC = this.flagN = this.flagZ = result;
                                     this.flagV = result ^ dst;
                                 } else {
-                                    if ((dst = this.readWordByAddr(dstAddr = this.getAddrByMode(instruction, PDP11.ACCESS.UPDATE))) >=
+                                    if ((dst = this.readWordByAddr(dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.UPDATE))) >=
                                         0) {
                                         result = dst << 1;
                                         if (this.writeWordByAddr(dstAddr, result) >= 0) {
@@ -2151,8 +2154,8 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                 }
                                 break;
                             case 0xD00: /*0006400*/ // MARK 0064nn
-                                //LOG_INSTRUCTION(instruction, 8, "MARK");
-                                virtualAddress = (this.regsGen[7] + ((instruction & 0x3F) /*077*/ << 1)) & 0xffff;
+                                //LOG_INSTRUCTION(opCode, 8, "MARK");
+                                virtualAddress = (this.regsGen[7] + ((opCode & 0x3F) /*077*/ << 1)) & 0xffff;
                                 if ((src = this.readWordByVirtual(virtualAddress | 0x10000)) >= 0) {
                                     this.regsGen[7] = this.regsGen[5];
                                     this.regsGen[5] = src;
@@ -2160,9 +2163,9 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                 }
                                 break;
                             case 0xD40: /*0006500*/ // MFPI 0065SS
-                                //LOG_INSTRUCTION(instruction, 1, "MFPI");
-                                if (!(instruction & 0x38)) {
-                                    reg = instruction & 7;
+                                //LOG_INSTRUCTION(opCode, 1, "MFPI");
+                                if (!(opCode & 0x38)) {
+                                    reg = opCode & 7;
                                     if (6 !== reg || ((this.PSW >> 2) & 0x3000) === (this.PSW & 0x3000)) {
                                         src = this.regsGen[reg];
                                     } else {
@@ -2173,7 +2176,7 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                         this.flagV = 0;
                                     }
                                 } else {
-                                    if ((virtualAddress = this.getVirtualByMode(instruction, 0)) >= 0) {
+                                    if ((virtualAddress = this.getVirtualByMode(opCode, 0)) >= 0) {
                                         if ((this.PSW & 0xf000) !== 0xf000) virtualAddress &= 0xffff;
                                         this.mmuMode = (this.PSW >> 12) & 3;
                                         if ((src = this.readWordByVirtual(virtualAddress)) >= 0) {
@@ -2187,11 +2190,11 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                 }
                                 break;
                             case 0xD80: /*0006600*/ // MTPI 0066DD
-                                //LOG_INSTRUCTION(instruction, 1, "MTPI");
+                                //LOG_INSTRUCTION(opCode, 1, "MTPI");
                                 if ((dst = this.popWord()) >= 0) {
                                     if (!(this.MMR0 & 0xe000)) this.MMR1 = 0x16; /*026*/
-                                    if (!(instruction & 0x38)) {
-                                        reg = instruction & 7;
+                                    if (!(opCode & 0x38)) {
+                                        reg = opCode & 7;
                                         if (6 !== reg || ((this.PSW >> 2) & 0x3000) === (this.PSW & 0x3000)) {
                                             this.regsGen[reg] = dst;
                                         } else {
@@ -2200,7 +2203,7 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                         this.flagN = this.flagZ = dst;
                                         this.flagV = 0;
                                     } else {
-                                        if ((virtualAddress = this.getVirtualByMode(instruction, 0)) >= 0) {
+                                        if ((virtualAddress = this.getVirtualByMode(opCode, 0)) >= 0) {
                                             virtualAddress &= 0xffff;
                                             this.mmuMode = (this.PSW >> 12) & 3;
                                             if ((dstAddr = this.mapVirtualToPhysical(virtualAddress, PDP11.ACCESS.WRITE)) >= 0) {
@@ -2215,8 +2218,8 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                 }
                                 break;
                             case 0xDC0: /*0006700*/ // SXT 0067DD
-                                //LOG_INSTRUCTION(instruction, 1, "SXT");
-                                if ((dstAddr = this.getAddrByMode(instruction, PDP11.ACCESS.WRITE)) >= 0) { // write word
+                                //LOG_INSTRUCTION(opCode, 1, "SXT");
+                                if ((dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.WRITE)) >= 0) { // write word
                                     result = -((this.flagN >> 15) & 1);
                                     if (this.writeWordByAddr(dstAddr, result) >= 0) {
                                         this.flagZ = result;
@@ -2225,12 +2228,12 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                 }
                                 break;
                             case 0x8A00: /*0105000*/ // CLRB 1050DD
-                                //LOG_INSTRUCTION(instruction, 1, "CLRB");
-                                if (!(instruction & 0x38)) {
-                                    this.regsGen[instruction & 7] &= 0xff00;
+                                //LOG_INSTRUCTION(opCode, 1, "CLRB");
+                                if (!(opCode & 0x38)) {
+                                    this.regsGen[opCode & 7] &= 0xff00;
                                     this.flagN = this.flagC = this.flagV = this.flagZ = 0;
                                 } else {
-                                    if ((dstAddr = this.getAddrByMode(instruction, PDP11.ACCESS.WRITE_BYTE)) >= 0) { // write byte
+                                    if ((dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.WRITE_BYTE)) >= 0) { // write byte
                                         if (this.writeByteByAddr(dstAddr, 0) >= 0) {
                                             this.flagN = this.flagC = this.flagV = this.flagZ = 0;
                                         }
@@ -2238,8 +2241,8 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                 }
                                 break;
                             case 0x8A40: /*0105100*/ // COMB 1051DD
-                                //LOG_INSTRUCTION(instruction, 1, "COMB");
-                                if ((dst = this.readByteByAddr(dstAddr = this.getAddrByMode(instruction, PDP11.ACCESS.UPDATE_BYTE))) >=
+                                //LOG_INSTRUCTION(opCode, 1, "COMB");
+                                if ((dst = this.readByteByAddr(dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.UPDATE_BYTE))) >=
                                     0) {
                                     result = ~dst;
                                     if (this.writeByteByAddr(dstAddr, result) >= 0) {
@@ -2250,8 +2253,8 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                 }
                                 break;
                             case 0x8A80: /*0105200*/ // INCB 1052DD
-                                //LOG_INSTRUCTION(instruction, 1, "INCB");
-                                if ((dst = this.readByteByAddr(dstAddr = this.getAddrByMode(instruction, PDP11.ACCESS.UPDATE_BYTE))) >=
+                                //LOG_INSTRUCTION(opCode, 1, "INCB");
+                                if ((dst = this.readByteByAddr(dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.UPDATE_BYTE))) >=
                                     0) {
                                     result = dst + 1;
                                     if (this.writeByteByAddr(dstAddr, result) >= 0) {
@@ -2261,8 +2264,8 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                 }
                                 break;
                             case 0x8AC0: /*0105300*/ // DECB 1053DD
-                                //LOG_INSTRUCTION(instruction, 1, "DECB");
-                                if ((dst = this.readByteByAddr(dstAddr = this.getAddrByMode(instruction, PDP11.ACCESS.UPDATE_BYTE))) >=
+                                //LOG_INSTRUCTION(opCode, 1, "DECB");
+                                if ((dst = this.readByteByAddr(dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.UPDATE_BYTE))) >=
                                     0) {
                                     result = dst - 1;
                                     if (this.writeByteByAddr(dstAddr, result) >= 0) {
@@ -2272,8 +2275,8 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                 }
                                 break;
                             case 0x8B00: /*0105400*/ // NEGB 1054DD
-                                //LOG_INSTRUCTION(instruction, 1, "NEGB");
-                                if ((dst = this.readByteByAddr(dstAddr = this.getAddrByMode(instruction, PDP11.ACCESS.UPDATE_BYTE))) >=
+                                //LOG_INSTRUCTION(opCode, 1, "NEGB");
+                                if ((dst = this.readByteByAddr(dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.UPDATE_BYTE))) >=
                                     0) {
                                     result = -dst;
                                     if (this.writeByteByAddr(dstAddr, result) >= 0) {
@@ -2283,8 +2286,8 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                 }
                                 break;
                             case 0x8B40: /*0105500*/ // ADCB 01055DD
-                                //LOG_INSTRUCTION(instruction, 1, "ADCB");
-                                if ((dst = this.readByteByAddr(dstAddr = this.getAddrByMode(instruction, PDP11.ACCESS.UPDATE_BYTE))) >=
+                                //LOG_INSTRUCTION(opCode, 1, "ADCB");
+                                if ((dst = this.readByteByAddr(dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.UPDATE_BYTE))) >=
                                     0) {
                                     result = dst + ((this.flagC >> 16) & 1);
                                     if (this.writeByteByAddr(dstAddr, result) >= 0) {
@@ -2294,8 +2297,8 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                 }
                                 break;
                             case 0x8B80: /*0105600*/ // SBCB 01056DD
-                                //LOG_INSTRUCTION(instruction, 1, "SBCB");
-                                if ((dst = this.readByteByAddr(dstAddr = this.getAddrByMode(instruction, PDP11.ACCESS.UPDATE_BYTE))) >=
+                                //LOG_INSTRUCTION(opCode, 1, "SBCB");
+                                if ((dst = this.readByteByAddr(dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.UPDATE_BYTE))) >=
                                     0) {
                                     result = dst - ((this.flagC >> 16) & 1);
                                     if (this.writeByteByAddr(dstAddr, result) >= 0) {
@@ -2305,15 +2308,15 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                 }
                                 break;
                             case 0x8BC0: /*0105700*/ // TSTB 1057DD
-                                //LOG_INSTRUCTION(instruction, 1, "TSTB");
-                                if ((dst = this.readByteByMode(instruction)) >= 0) {
+                                //LOG_INSTRUCTION(opCode, 1, "TSTB");
+                                if ((dst = this.readByteByMode(opCode)) >= 0) {
                                     this.flagN = this.flagZ = dst << 8;
                                     this.flagC = this.flagV = 0;
                                 }
                                 break;
                             case 0x8C00: /*0106000*/ // RORB 1060DD
-                                //LOG_INSTRUCTION(instruction, 1, "RORB");
-                                if ((dst = this.readByteByAddr(dstAddr = this.getAddrByMode(instruction, PDP11.ACCESS.UPDATE_BYTE))) >=
+                                //LOG_INSTRUCTION(opCode, 1, "RORB");
+                                if ((dst = this.readByteByAddr(dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.UPDATE_BYTE))) >=
                                     0) {
                                     result = (((this.flagC & 0x10000) >> 8) | dst) >> 1;
                                     if (this.writeByteByAddr(dstAddr, result) >= 0) {
@@ -2324,8 +2327,8 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                 }
                                 break;
                             case 0x8C40: /*0106100*/ // ROLB 1061DD
-                                //LOG_INSTRUCTION(instruction, 1, "ROLB");
-                                if ((dst = this.readByteByAddr(dstAddr = this.getAddrByMode(instruction, PDP11.ACCESS.UPDATE_BYTE))) >=
+                                //LOG_INSTRUCTION(opCode, 1, "ROLB");
+                                if ((dst = this.readByteByAddr(dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.UPDATE_BYTE))) >=
                                     0) {
                                     result = (dst << 1) | ((this.flagC >> 16) & 1);
                                     if (this.writeByteByAddr(dstAddr, result) >= 0) {
@@ -2335,8 +2338,8 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                 }
                                 break;
                             case 0x8C80: /*0106200*/ // ASRB 1062DD
-                                //LOG_INSTRUCTION(instruction, 1, "ASRB");
-                                if ((dst = this.readByteByAddr(dstAddr = this.getAddrByMode(instruction, PDP11.ACCESS.UPDATE_BYTE))) >=
+                                //LOG_INSTRUCTION(opCode, 1, "ASRB");
+                                if ((dst = this.readByteByAddr(dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.UPDATE_BYTE))) >=
                                     0) {
                                     result = (dst & 0x80) | (dst >> 1);
                                     if (this.writeByteByAddr(dstAddr, result) >= 0) {
@@ -2347,8 +2350,8 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                 }
                                 break;
                             case 0x8CC0: /*0106300*/ // ASLB 1063DD
-                                //LOG_INSTRUCTION(instruction, 1, "ASLB");
-                                if ((dst = this.readByteByAddr(dstAddr = this.getAddrByMode(instruction, PDP11.ACCESS.UPDATE_BYTE))) >=
+                                //LOG_INSTRUCTION(opCode, 1, "ASLB");
+                                if ((dst = this.readByteByAddr(dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.UPDATE_BYTE))) >=
                                     0) {
                                     result = dst << 1;
                                     if (this.writeByteByAddr(dstAddr, result) >= 0) {
@@ -2358,15 +2361,15 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                 }
                                 break;
                                 //case 0106400: // MTPS 1064SS
-                                //    //LOG_INSTRUCTION(instruction, 1, "MTPS");
+                                //    //LOG_INSTRUCTION(opCode, 1, "MTPS");
                                 //    if ((src = this.readByteByMode(instruction)) >= 0) {
                                 //        this.setPSW((this.PSW & 0xff00) | (src & 0xef));
                                 //    } // Temporary PDP 11/34A
                                 //    break;
                             case 0x8D40: /*0106500*/ // MFPD 1065DD
-                                //LOG_INSTRUCTION(instruction, 1, "MFPD");
-                                if (!(instruction & 0x38)) {
-                                    reg = instruction & 7;
+                                //LOG_INSTRUCTION(opCode, 1, "MFPD");
+                                if (!(opCode & 0x38)) {
+                                    reg = opCode & 7;
                                     if (6 !== reg || ((this.PSW >> 2) & 0x3000) === (this.PSW & 0x3000)) {
                                         src = this.regsGen[reg];
                                     } else {
@@ -2377,7 +2380,7 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                         this.flagV = 0;
                                     }
                                 } else {
-                                    if ((virtualAddress = this.getVirtualByMode(instruction, 0)) >= 0) {
+                                    if ((virtualAddress = this.getVirtualByMode(opCode, 0)) >= 0) {
                                         this.mmuMode = (this.PSW >> 12) & 3;
                                         if ((src = this.readWordByVirtual(virtualAddress | 0x10000)) >= 0) {
                                             this.mmuMode = (this.PSW >> 14) & 3;
@@ -2390,11 +2393,11 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                 }
                                 break;
                             case 0x8D80: /*0106600*/ // MTPD 1066DD
-                                //LOG_INSTRUCTION(instruction, 1, "MTPD");
+                                //LOG_INSTRUCTION(opCode, 1, "MTPD");
                                 if ((dst = this.popWord()) >= 0) {
                                     if (!(this.MMR0 & 0xe000)) this.MMR1 = 0x16; /*026*/
-                                    if (!(instruction & 0x38)) {
-                                        reg = instruction & 7;
+                                    if (!(opCode & 0x38)) {
+                                        reg = opCode & 7;
                                         if (6 !== reg || ((this.PSW >> 2) & 0x3000) === (this.PSW & 0x3000)) {
                                             this.regsGen[reg] = dst;
                                         } else {
@@ -2403,7 +2406,7 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                         this.flagN = this.flagZ = dst;
                                         this.flagV = 0;
                                     } else {
-                                        if ((virtualAddress = this.getVirtualByMode(instruction, 0)) >= 0) {
+                                        if ((virtualAddress = this.getVirtualByMode(opCode, 0)) >= 0) {
                                             this.mmuMode = (this.PSW >> 12) & 3;
                                             if ((dstAddr = this.mapVirtualToPhysical(virtualAddress |
                                                     0x10000, PDP11.ACCESS.WRITE)) >= 0) {
@@ -2418,7 +2421,7 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                 }
                                 break;
                                 //case 0106700: // MTFS 1064SS
-                                //    //LOG_INSTRUCTION(instruction, 1, "MFPS");
+                                //    //LOG_INSTRUCTION(opCode, 1, "MFPS");
                                 //    src = this.getPSW() & 0xff;
                                 //    if (instruction & 0x38) {
                                 //        if ((dstAddr = this.getAddrByMode(instruction, PDP11.ACCESS.WRITE_BYTE)) >= 0) { // write byte
@@ -2435,40 +2438,40 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                 //    } // Temporary PDP 11/34A
                                 //    break;
                             default:
-                                switch (instruction & 0xFFF8) /*0177770*/ { // Single register instructions xxxxxR (and CC)
+                                switch (opCode & 0xFFF8) /*0177770*/ { // Single register instructions xxxxxR (and CC)
                                 case 0x80: /*0000200*/ // RTS 00020R
-                                    //LOG_INSTRUCTION(instruction, 6, "RTS");
+                                    //LOG_INSTRUCTION(opCode, 6, "RTS");
                                     if ((src = this.popWord()) >= 0) {
-                                        reg = instruction & 7;
+                                        reg = opCode & 7;
                                         this.regsGen[7] = this.regsGen[reg];
                                         this.regsGen[reg] = src;
                                     }
                                     break;
                                 case 0x98: /*0000230*/ // SPL 00023N
-                                    //LOG_INSTRUCTION(instruction, 9, "SPL");
+                                    //LOG_INSTRUCTION(opCode, 9, "SPL");
                                     if (!(this.PSW & 0xc000)) {
-                                        this.PSW = (this.PSW & 0xf81f) | ((instruction & 7) << 5);
+                                        this.PSW = (this.PSW & 0xf81f) | ((opCode & 7) << 5);
                                         this.priorityReview = 1;
                                     }
                                     break;
                                 case 0xA0: /*0000240*/ // CLR CC 00024M Part 1 without N
                                 case 0xA8: /*0000250*/ // CLR CC 00025M Part 2 with N
-                                    if (instruction & 1) this.clearCF();        // CLC
-                                    if (instruction & 2) this.clearVF();        // CLV
-                                    if (instruction & 4) this.clearZF();        // CLZ
-                                    if (instruction & 8) this.clearNF();        // CLN
+                                    if (opCode & 1) this.clearCF();        // CLC
+                                    if (opCode & 2) this.clearVF();        // CLV
+                                    if (opCode & 4) this.clearZF();        // CLZ
+                                    if (opCode & 8) this.clearNF();        // CLN
                                     break;
                                 case 0xB0: /*0000260*/ // SET CC 00026M Part 1 without N
                                 case 0xB8: /*0000270*/ // SET CC 00026M Part 2 with N
-                                    if (instruction & 1) this.setCF();          // SEC
-                                    if (instruction & 2) this.setVF();          // SEV
-                                    if (instruction & 4) this.setZF();          // SEZ
-                                    if (instruction & 8) this.setNF();          // SEN
+                                    if (opCode & 1) this.setCF();          // SEC
+                                    if (opCode & 2) this.setVF();          // SEV
+                                    if (opCode & 4) this.setZF();          // SEZ
+                                    if (opCode & 8) this.setNF();          // SEN
                                     break;
                                 default: // Misc instructions (decode ALL remaining bits) xxxxxx
-                                    switch (instruction) {
+                                    switch (opCode) {
                                     case 0x0: /*0000000*/ // HALT 000000
-                                        //LOG_INSTRUCTION(instruction, 0, "HALT");
+                                        //LOG_INSTRUCTION(opCode, 0, "HALT");
                                         if (0xc000 & this.PSW) {
                                             this.CPU_Error |= 0x80; /*0200*/
                                             this.trap(PDP11.TRAP.BUS_ERROR, 46);
@@ -2480,7 +2483,7 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                         }
                                         break;
                                     case 0x1: /*0000001*/ // WAIT 000001
-                                        //LOG_INSTRUCTION(instruction, 0, "WAIT");
+                                        //LOG_INSTRUCTION(opCode, 0, "WAIT");
                                         j = 0;
                                         if ((i = this.interruptQueue.length) > 0) {
                                             while (i-- > 0) {
@@ -2494,15 +2497,15 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                         }
                                         break;
                                     case 0x3: /*0000003*/ // BPT  000003
-                                        //LOG_INSTRUCTION(instruction, 0, "BPT");
+                                        //LOG_INSTRUCTION(opCode, 0, "BPT");
                                         this.trap(PDP11.TRAP.BREAKPOINT, /*014*/ 6);
                                         break;
                                     case 0x4: /*0000004*/ // IOT  000004
-                                        //LOG_INSTRUCTION(instruction, 0, "IOT");
+                                        //LOG_INSTRUCTION(opCode, 0, "IOT");
                                         this.trap(PDP11.TRAP.IOT, /*020*/ 8);
                                         break;
                                     case 0x5: /*0000005*/ // RESET 000005
-                                        //LOG_INSTRUCTION(instruction, 0, "RESET");
+                                        //LOG_INSTRUCTION(opCode, 0, "RESET");
                                         if (!(this.PSW & 0xc000)) {
                                             this.resetRegs();
                                             this.bus.reset();
@@ -2511,7 +2514,7 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                         break;
                                     case 0x2: /*0000002*/ // RTI 000002
                                     case 0x6: /*0000006*/ // RTT 000006
-                                        //LOG_INSTRUCTION(instruction, 0, "RTT");
+                                        //LOG_INSTRUCTION(opCode, 0, "RTT");
                                         dstAddr = this.regsGen[6];
                                         if ((virtualAddress = this.readWordByVirtual(dstAddr | 0x10000)) >= 0) {
                                             dstAddr = (dstAddr + 2) & 0xffff;
@@ -2525,18 +2528,18 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                                 this.regsGen[7] = virtualAddress;
                                                 this.setPSW(savePSW);
                                                 this.opFlags &= ~PDP11.OPFLAG.TRAP_TF;
-                                                if (instruction === 2) {            // RTI enables immediate trace
+                                                if (opCode === 2) {            // RTI enables immediate trace
                                                     this.opFlags |= (this.PSW & PDP11.PSW.TF);
                                                 }
                                             }
                                         }
                                         break;
                                         //case 0000007: // MFPT 000007
-                                        //    //LOG_INSTRUCTION(instruction, 0, "MFPT");
+                                        //    //LOG_INSTRUCTION(opCode, 0, "MFPT");
                                         //    this.regsGen[0] = 1;
                                         //    break; // Exists on pdp 11/44 & KB11-EM
                                     default: // We don't know this instruction
-                                        //LOG_INSTRUCTION(instruction, 11, "-unknown-");
+                                        //LOG_INSTRUCTION(opCode, 11, "-unknown-");
                                         this.trap(PDP11.TRAP.RESERVED, /*010*/ 48); // reserved instruction
                                         break;
                                     }
