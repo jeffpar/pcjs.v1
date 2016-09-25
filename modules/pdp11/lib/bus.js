@@ -171,19 +171,20 @@ BusPDP11.ERROR = {
  * array), and since these I/O accesses should be pretty infrequent relative to all other memory accesses,
  * the benefit seems pretty minimal.
  */
-BusPDP11.controller = {
+BusPDP11.IOController = {
 
     /**
-     * readIOPageByte(off, addr)
+     * readByte(off, addr)
      *
      * @this {MemoryPDP11}
      * @param {number} off
      * @param {number} addr
      * @return {number}
      */
-    readIOPageByte: function(off, addr)
+    readByte: function(off, addr)
     {
-        var afn = this.controller.aIOHandlers[off];
+        var bus = this.controller;
+        var afn = bus.aIOHandlers[off];
         if (afn) {
             if (afn[0]) {
                 return afn[0](addr);
@@ -195,26 +196,27 @@ BusPDP11.controller = {
                 }
             }
         } else if (addr & 0x1) {
-            afn = this.controller.aIOHandlers[off & ~0x1];
+            afn = bus.aIOHandlers[off & ~0x1];
             if (afn[2]) {
                 return afn[2](addr & ~0x1) >> 8;
             }
         }
-        return this.controller.fnAccess(addr, -1, 1);
+        return bus.fnAccess(addr, -1, 1);
     },
 
     /**
-     * writeIOPageByte(off, b, addr)
+     * writeByte(off, b, addr)
      *
      * @this {MemoryPDP11}
      * @param {number} off
      * @param {number} b (which should already be pre-masked to 8 bits)
      * @param {number} addr
      */
-    writeIOPageByte: function(off, b, addr)
+    writeByte: function(off, b, addr)
     {
         var w;
-        var afn = this.controller.aIOHandlers[off];
+        var bus = this.controller;
+        var afn = bus.aIOHandlers[off];
         if (afn) {
             if (afn[1]) {
                 afn[1](b, addr);
@@ -229,7 +231,7 @@ BusPDP11.controller = {
                 return;
             }
         } else if (addr & 0x1) {
-            afn = this.controller.aIOHandlers[off & ~0x1];
+            afn = bus.aIOHandlers[off & ~0x1];
             if (afn[3]) {
                 addr &= ~0x1;
                 w = afn[2]? afn[2](addr) : 0;
@@ -237,21 +239,22 @@ BusPDP11.controller = {
                 return;
             }
         }
-        this.controller.fnAccess(addr, b, 1);
+        bus.fnAccess(addr, b, 1);
     },
 
     /**
-     * readIOPageShort(off, addr)
+     * readShort(off, addr)
      *
      * @this {MemoryPDP11}
      * @param {number} off
      * @param {number} addr
      * @return {number}
      */
-    readIOPageShort: function(off, addr)
+    readShort: function(off, addr)
     {
+        var bus = this.controller;
         Component.assert(!(addr & 1));                  // unaligned addresses should be getting trapped at a higher level
-        var afn = this.controller.aIOHandlers[off];
+        var afn = bus.aIOHandlers[off];
         if (afn) {
             if (afn[2]) {
                 return afn[2](addr);
@@ -259,21 +262,22 @@ BusPDP11.controller = {
                 return afn[0](addr) | (afn[0](addr + 1) << 8);
             }
         }
-        return this.controller.fnAccess(addr, -1, 0);
+        return bus.fnAccess(addr, -1, 0);
     },
 
     /**
-     * writeIOPageShort(off, w, addr)
+     * writeShort(off, w, addr)
      *
      * @this {MemoryPDP11}
      * @param {number} off
      * @param {number} w (which should already be pre-masked to 16 bits)
      * @param {number} addr
      */
-    writeIOPageShort: function(off, w, addr)
+    writeShort: function(off, w, addr)
     {
+        var bus = this.controller;
         Component.assert(!(addr & 1));                  // unaligned addresses should be getting trapped at a higher level
-        var afn = this.controller.aIOHandlers[off];
+        var afn = bus.aIOHandlers[off];
         if (afn) {
             if (afn[3]) {
                 afn[3](w, addr);
@@ -284,7 +288,7 @@ BusPDP11.controller = {
                 return;
             }
         }
-        this.controller.fnAccess(addr, w, 0);
+        bus.fnAccess(addr, w, 0);
     }
 };
 
@@ -304,12 +308,17 @@ BusPDP11.prototype.initMemory = function()
         this.aMemBlocks[iBlock] = block;
     }
     this.afnIOPage = new Array(4);
-    this.afnIOPage[0] = BusPDP11.controller.readIOPageByte;
-    this.afnIOPage[1] = BusPDP11.controller.writeIOPageByte;
-    this.afnIOPage[2] = BusPDP11.controller.readIOPageShort;
-    this.afnIOPage[3] = BusPDP11.controller.writeIOPageShort;
-    this.addrIOPage = this.addrTotal - BusPDP11.IOPAGE_LENGTH;
-    this.addMemory(this.addrIOPage, BusPDP11.IOPAGE_LENGTH, MemoryPDP11.TYPE.CONTROLLER, this);
+    this.afnIOPage[0] = BusPDP11.IOController.readByte;
+    this.afnIOPage[1] = BusPDP11.IOController.writeByte;
+    this.afnIOPage[2] = BusPDP11.IOController.readShort;
+    this.afnIOPage[3] = BusPDP11.IOController.writeShort;
+    /*
+     * Map IOPAGE at the top of the address space (as determined by nBusWidth), as well as at IOPAGE_VIRT
+     * (which is the only place that 16-bit code can reach the IOPAGE when memory management is not enabled).
+     */
+    var addr = this.addrTotal - BusPDP11.IOPAGE_LENGTH;
+    this.addMemory(addr, BusPDP11.IOPAGE_LENGTH, MemoryPDP11.TYPE.CONTROLLER, this);
+    this.addMemory(BusPDP11.IOPAGE_VIRT, BusPDP11.IOPAGE_LENGTH, MemoryPDP11.TYPE.CONTROLLER, this);
 };
 
 /**
@@ -342,6 +351,9 @@ BusPDP11.prototype.getControllerAccess = function()
 /**
  * reset()
  *
+ * The Device component initializes fnReset by calling addIODefaultHandlers() from its initBus() function;
+ * it will be that function's responsibility to reset all the necessary devices.
+ *
  * @this {BusPDP11}
  */
 BusPDP11.prototype.reset = function()
@@ -352,10 +364,15 @@ BusPDP11.prototype.reset = function()
 /**
  * access()
  *
+ * This is our default I/O handler, called whenever there's an IOPAGE access without a corresponding entry
+ * in aIOHandlers; in the interim, our Device component will override this default handler with its own function
+ * by calling addIODefaultHandlers(), until the Device component has been completely rewritten to install I/O
+ * handlers for all supported I/O addresses.
+ *
  * @this {BusPDP11}
- * @param {number} addr
- * @param {number} data
- * @param {number} byteFlag
+ * @param {number} addr (ie, an IOPAGE address)
+ * @param {number} data (-1 if read, otherwise write)
+ * @param {number} byteFlag (true if byte I/O, otherwise word)
  */
 BusPDP11.prototype.access = function(addr, data, byteFlag)
 {
@@ -957,11 +974,11 @@ BusPDP11.prototype.addIOHandlers = function(start, end, fnReadByte, fnWriteByte,
     for (var addr = start; addr <= end; addr += 2) {
         var off = addr & BusPDP11.IOPAGE_MASK;
         if (this.aIOHandlers[off] !== undefined) {
-            Component.warning("I/O address already registered: " + str.toHexLong(this.addrIOPage + off));
+            Component.warning("I/O address already registered: " + str.toHexLong(addr));
             continue;
         }
         this.aIOHandlers[off] = [fnReadByte, fnWriteByte, fnReadShort, fnWriteShort, false];
-        if (MAXDEBUG) this.log("addIOHandlers(" + str.toHexLong(this.addrIOPage + off) + ")");
+        if (MAXDEBUG) this.log("addIOHandlers(" + str.toHexLong(addr) + ")");
     }
 };
 

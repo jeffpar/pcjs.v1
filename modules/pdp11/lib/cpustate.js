@@ -177,6 +177,8 @@ CPUStatePDP11.prototype.initRegs = function()
     this.runState = 0;          // 0=run, 1=step, 2=wait, 3=run
     this.loopRate = 9999;       // instructions we can execute in 12ms
     this.priorityReview = 2;    // flag to mark if we need to check priority change
+
+    this.initMemoryAccess();
 };
 
 /**
@@ -193,6 +195,39 @@ CPUStatePDP11.prototype.resetRegs = function()
     this.MMR0 = this.MMR1 = this.MMR2 = this.MMR3 = this.mmuFrozen = this.mmuEnable = 0;
     this.mmuMask[0] = this.mmuMask[1] = this.mmuMask[3] = 0x7;
     this.mmuLastMode = 0;
+
+    this.initMemoryAccess();
+};
+
+/**
+ * initMemoryAccess()
+ *
+ * Define getAddr(), readWord(), etc, handlers appropriate for the current MMU mode.
+ *
+ * The initial goal is to eliminate unnecessary calls to mapVirtualToPhysical(); for example,
+ * readWordByVirtual() always does this:
+ *
+ *      return this.readWordByPhysical(this.mapVirtualToPhysical(virtualAddress, PDP11.ACCESS.READ));
+ *
+ * and getAddrVirtual() -- formerly getAddrByMode() -- always does this:
+ *
+ *      return this.mapVirtualToPhysical(this.getVirtualByMode(addressMode, accessFlags), accessFlags);
+ *
+ * So now we define readWord() and getAddr() functions that are more appropriate for the current MMU mode.
+ *
+ * @this {CPUStatePDP11}
+ */
+CPUStatePDP11.prototype.initMemoryAccess = function()
+{
+    if (this.mmuEnable) {
+        this.addrDSpace = PDP11.ACCESS.DSPACE;
+        this.getAddr = this.getAddrVirtual;
+        this.readWord = this.readWordByVirtual;
+    } else {
+        this.addrDSpace = 0;
+        this.getAddr = this.getAddrPhysical;
+        this.readWord = this.readWordByPhysical;
+    }
 };
 
 /**
@@ -736,8 +771,8 @@ CPUStatePDP11.prototype.trap = function(vector, reason)
         this.MMR2 = vector;
     }
     this.mmuMode = 0;   // read from kernel D space
-    if ((newPC = this.readWordByVirtual(vector | 0x10000)) >= 0) {
-        if ((newPSW = this.readWordByVirtual(((vector + 2) & 0xffff) | 0x10000)) >= 0) {
+    if ((newPC = this.readWordByVirtual(vector | PDP11.ACCESS.DSPACE)) >= 0) {
+        if ((newPSW = this.readWordByVirtual(((vector + 2) & 0xffff) | PDP11.ACCESS.DSPACE)) >= 0) {
             this.setPSW((newPSW & 0xcfff) | ((this.trapPSW >> 2) & 0x3000)); // set new this.PSW with previous mode
             if (doubleTrap) {
                 this.regCPUErr |= PDP11.CPUERR.RED;
@@ -929,13 +964,13 @@ CPUStatePDP11.prototype.mapVirtualToPhysical = function(virtualAddress, accessFl
 };
 
 /**
- * readWordByAddr(physicalAddress)
+ * readWordByPhysical(physicalAddress) [formerly readWordByAddr]
  *
  * @this {CPUStatePDP11}
  * @param {number} physicalAddress
  * @return {number}
  */
-CPUStatePDP11.prototype.readWordByAddr = function(physicalAddress)
+CPUStatePDP11.prototype.readWordByPhysical = function(physicalAddress)
 {
     if (physicalAddress >= BusPDP11.MAX_ADDRESS) {
         return this.regsGen[physicalAddress - BusPDP11.MAX_ADDRESS];
@@ -952,14 +987,25 @@ CPUStatePDP11.prototype.readWordByAddr = function(physicalAddress)
 };
 
 /**
- * writeWordByAddr(physicalAddress, data)
+ * readWordByVirtual(virtualAddress)
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} virtualAddress (input address is 17 bit (I&D))
+ */
+CPUStatePDP11.prototype.readWordByVirtual = function(virtualAddress)
+{
+    return this.readWordByPhysical(this.mapVirtualToPhysical(virtualAddress, PDP11.ACCESS.READ));
+};
+
+/**
+ * writeWordByPhysical(physicalAddress, data) [formerly writeWordByAddr]
  *
  * @this {CPUStatePDP11}
  * @param {number} physicalAddress
  * @param {number} data
  * @return {number}
  */
-CPUStatePDP11.prototype.writeWordByAddr = function(physicalAddress, data)
+CPUStatePDP11.prototype.writeWordByPhysical = function(physicalAddress, data)
 {
     data &= 0xffff;
     if (physicalAddress >= BusPDP11.MAX_ADDRESS) {
@@ -978,13 +1024,13 @@ CPUStatePDP11.prototype.writeWordByAddr = function(physicalAddress, data)
 };
 
 /**
- * readByteByAddr(physicalAddress)
+ * readByteByPhysical(physicalAddress) [formerly readByteByAddr]
  *
  * @this {CPUStatePDP11}
  * @param {number} physicalAddress
  * @return {number}
  */
-CPUStatePDP11.prototype.readByteByAddr = function(physicalAddress)
+CPUStatePDP11.prototype.readByteByPhysical = function(physicalAddress)
 {
     var result;
     if (physicalAddress >= BusPDP11.MAX_ADDRESS) {
@@ -1002,14 +1048,14 @@ CPUStatePDP11.prototype.readByteByAddr = function(physicalAddress)
 };
 
 /**
- * writeByteByAddr(physicalAddress, data)
+ * writeByteByPhysical(physicalAddress, data) [formerly writeByteByAddr]
  *
  * @this {CPUStatePDP11}
  * @param {number} physicalAddress
  * @param {number} data
  * @return {number}
  */
-CPUStatePDP11.prototype.writeByteByAddr = function(physicalAddress, data)
+CPUStatePDP11.prototype.writeByteByPhysical = function(physicalAddress, data)
 {
     data &= 0xff;
     if (physicalAddress >= BusPDP11.MAX_ADDRESS) {
@@ -1028,17 +1074,6 @@ CPUStatePDP11.prototype.writeByteByAddr = function(physicalAddress, data)
 };
 
 /**
- * readWordByVirtual(virtualAddress)
- *
- * @this {CPUStatePDP11}
- * @param {number} virtualAddress (input address is 17 bit (I&D))
- */
-CPUStatePDP11.prototype.readWordByVirtual = function(virtualAddress)
-{
-    return this.readWordByAddr(this.mapVirtualToPhysical(virtualAddress, PDP11.ACCESS.READ));
-};
-
-/**
  * popWord()
  *
  * @this {CPUStatePDP11}
@@ -1046,7 +1081,7 @@ CPUStatePDP11.prototype.readWordByVirtual = function(virtualAddress)
  */
 CPUStatePDP11.prototype.popWord = function()
 {
-    var result = this.readWordByVirtual(this.regsGen[6] | 0x10000);
+    var result = this.readWordByVirtual(this.regsGen[6] | PDP11.ACCESS.DSPACE);
     if (result >= 0) {
         this.regsGen[6] = (this.regsGen[6] + 2) & 0xffff;
     }
@@ -1077,8 +1112,8 @@ CPUStatePDP11.prototype.pushWord = function(data)
             this.opFlags |= 4;
         }
     }
-    if ((physicalAddress = this.mapVirtualToPhysical(virtualAddress | 0x10000, PDP11.ACCESS.WRITE)) >= 0) {
-        return this.writeWordByAddr(physicalAddress, data);
+    if ((physicalAddress = this.mapVirtualToPhysical(virtualAddress | PDP11.ACCESS.DSPACE, PDP11.ACCESS.WRITE)) >= 0) {
+        return this.writeWordByPhysical(physicalAddress, data);
     }
     return physicalAddress;
 };
@@ -1134,13 +1169,13 @@ CPUStatePDP11.prototype.getVirtualByMode = function(addressMode, accessFlags)
                 this.opFlags |= PDP11.OPFLAG.TRAP_SP;
             }
         }
-        return (reg === 7 ? this.regsGen[reg] : (this.regsGen[reg] | 0x10000));
+        return (reg === 7 ? this.regsGen[reg] : (this.regsGen[reg] | this.addrDSpace));
 
     case 2:                     // Mode 2: (R)+
         stepSize = 2;
         virtualAddress = this.regsGen[reg];
         if (reg !== 7) {
-            virtualAddress |= 0x10000;
+            virtualAddress |= this.addrDSpace;
             if (reg < 6 && (accessFlags & PDP11.ACCESS.BYTE)) {
                 stepSize = 1;
             }
@@ -1149,29 +1184,29 @@ CPUStatePDP11.prototype.getVirtualByMode = function(addressMode, accessFlags)
     case 3: // Mode 3: @(R)+
         stepSize = 2;
         virtualAddress = this.regsGen[reg];
-        if (reg !== 7) virtualAddress |= 0x10000;
+        if (reg !== 7) virtualAddress |= this.addrDSpace;
         if ((virtualAddress = this.readWordByVirtual(virtualAddress)) < 0) {
             return virtualAddress;
         }
         // if (reg === 7) LOG_ADDRESS(virtualAddress); // @#n not operational
-        virtualAddress |= 0x10000;
+        virtualAddress |= this.addrDSpace;
         break;
     case 4: // Mode 4: -(R)
         stepSize = -2;
         if (reg < 6 && (accessFlags & PDP11.ACCESS.BYTE)) stepSize = -1;
         virtualAddress = (this.regsGen[reg] + stepSize) & 0xffff;
         if (reg !== 7) {
-            virtualAddress |= 0x10000;
+            virtualAddress |= this.addrDSpace;
         }
         break;
     case 5: // Mode 5: @-(R)
         stepSize = -2;
         virtualAddress = (this.regsGen[reg] - 2) & 0xffff;
-        if (reg !== 7) virtualAddress |= 0x10000;
+        if (reg !== 7) virtualAddress |= this.addrDSpace;
         if ((virtualAddress = this.readWordByVirtual(virtualAddress)) < 0) {
             return virtualAddress;
         }
-        virtualAddress |= 0x10000;
+        virtualAddress |= this.addrDSpace;
         break;
     case 6: // Mode 6: d(R)
         if ((virtualAddress = this.readWordByVirtual(this.regsGen[7])) < 0) {
@@ -1185,7 +1220,7 @@ CPUStatePDP11.prototype.getVirtualByMode = function(addressMode, accessFlags)
             virtualAddress = (virtualAddress + this.regsGen[reg]) & 0xffff;
             //LOG_ADDRESS(virtualAddress);
         }
-        return virtualAddress | 0x10000;
+        return virtualAddress | this.addrDSpace;
     case 7: // Mode 7: @d(R)
         if ((virtualAddress = this.readWordByVirtual(this.regsGen[7])) < 0) {
             return virtualAddress;
@@ -1198,13 +1233,13 @@ CPUStatePDP11.prototype.getVirtualByMode = function(addressMode, accessFlags)
             virtualAddress = (virtualAddress + this.regsGen[reg]) & 0xffff;
             //LOG_ADDRESS(virtualAddress);
         }
-        if ((virtualAddress = this.readWordByVirtual(virtualAddress | 0x10000)) < 0) {
+        if ((virtualAddress = this.readWordByVirtual(virtualAddress | PDP11.ACCESS.DSPACE)) < 0) {
             return virtualAddress;
         }
-        return virtualAddress | 0x10000; // @x
+        return virtualAddress | this.addrDSpace;
     }
     this.regsGen[reg] = (this.regsGen[reg] + stepSize) & 0xffff;
-    if (!(this.MMR0 & 0xe000)) {
+    if (this.addrDSpace && !(this.MMR0 & 0xe000)) {
         this.MMR1 = (this.MMR1 << 8) | ((stepSize << 3) & 0xf8) | reg;
     }
     if (reg === 6 && (!this.mmuMode) && (accessFlags & PDP11.ACCESS.WRITE) && stepSize <= 0 &&
@@ -1222,23 +1257,39 @@ CPUStatePDP11.prototype.getVirtualByMode = function(addressMode, accessFlags)
 };
 
 /**
- * getAddrByMode(addressMode, accessFlags)
+ * getAddrPhysical(addressMode, accessFlags)
  *
  * @this {CPUStatePDP11}
  * @param {number} addressMode
  * @param {number} accessFlags
  * @return {number}
  */
-CPUStatePDP11.prototype.getAddrByMode = function(addressMode, accessFlags)
+CPUStatePDP11.prototype.getAddrPhysical = function(addressMode, accessFlags)
 {
-    var result;
-    if (!(addressMode & 0x38)) {
-        result = BusPDP11.MAX_ADDRESS + (addressMode & 7); // Registers have special addresses above maximum address
-    } else {
-        var addr = this.getVirtualByMode(addressMode, accessFlags);
-        result = this.mapVirtualToPhysical(addr, accessFlags);
-    }
-    return result;
+    this.assert(addressMode & 0x38);
+    // if (!(addressMode & 0x38)) {
+    //     return BusPDP11.MAX_ADDRESS + (addressMode & 7); // Registers have special addresses above maximum address
+    // } else {
+           return this.getVirtualByMode(addressMode, accessFlags);
+    // }
+};
+
+/**
+ * getAddrVirtual(addressMode, accessFlags)
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} addressMode
+ * @param {number} accessFlags
+ * @return {number}
+ */
+CPUStatePDP11.prototype.getAddrVirtual = function(addressMode, accessFlags)
+{
+    this.assert(addressMode & 0x38);
+    // if (!(addressMode & 0x38)) {
+    //     return BusPDP11.MAX_ADDRESS + (addressMode & 7); // Registers have special addresses above maximum address
+    // } else {
+           return this.mapVirtualToPhysical(this.getVirtualByMode(addressMode, accessFlags), accessFlags);
+    // }
 };
 
 /**
@@ -1254,8 +1305,12 @@ CPUStatePDP11.prototype.readWordByMode = function(addressMode)
     if (!(addressMode & PDP11.OPMODE.MASK)) {
         result = this.regsGen[addressMode & PDP11.OPREG.MASK];
     } else {
-        var addr = this.getAddrByMode(addressMode, PDP11.ACCESS.READ);
-        result = this.readWordByAddr(addr);
+        /*
+         * NOTE: This used to call readWordByPhysical(), after calling getAddrVirtual(), but the latter is
+         * just a wrapper around mapVirtualToPhysical() on the result from getVirtualByMode(), so now we call
+         * getVirtualByMode() directly, knowing that the current readWord() will call the correct function.
+         */
+        result = this.readWord(this.getVirtualByMode(addressMode, PDP11.ACCESS.READ));
     }
     return result;
 };
@@ -1273,8 +1328,7 @@ CPUStatePDP11.prototype.readByteByMode = function(addressMode)
     if (!(addressMode & 0x38)) {
         result = this.regsGen[addressMode & 7] & 0xff;
     } else {
-        var addr = this.getAddrByMode(addressMode, PDP11.ACCESS.READ_BYTE);
-        result = this.readByteByAddr(addr);
+        result = this.readByteByPhysical(this.getAddr(addressMode, PDP11.ACCESS.READ_BYTE));
     }
     return result;
 };
@@ -1297,8 +1351,8 @@ CPUStatePDP11.prototype.updateWordByMode = function(addressMode, src, fnOp)
         var reg = addressMode & PDP11.OPREG.MASK;
         this.regsGen[reg] = (data = fnOp.call(this, src, this.regsGen[reg]) & 0xffff);
     } else {
-        var addr = this.getAddrByMode(addressMode, PDP11.ACCESS.UPDATE);
-        this.writeWordByAddr(addr, (data = fnOp.call(this, src, this.readWordByAddr(addr))));
+        var addr = this.getAddr(addressMode, PDP11.ACCESS.UPDATE);
+        this.writeWordByPhysical(addr, (data = fnOp.call(this, src, this.readWordByPhysical(addr))));
     }
     return data;
 };
@@ -1321,8 +1375,8 @@ CPUStatePDP11.prototype.updateByteByMode = function(addressMode, src, fnOp)
         var reg = addressMode & PDP11.OPREG.MASK;
         this.regsGen[reg] = (this.regsGen[reg] & 0xff00) | ((data = fnOp.call(this, src, this.regsGen[reg]) & 0xff));
     } else {
-        var addr = this.getAddrByMode(addressMode, PDP11.ACCESS.UPDATE_BYTE);
-        this.writeByteByAddr(addr, (data = fnOp.call(this, src, this.readByteByAddr(addr))));
+        var addr = this.getAddr(addressMode, PDP11.ACCESS.UPDATE_BYTE);
+        this.writeByteByPhysical(addr, (data = fnOp.call(this, src, this.readByteByPhysical(addr))));
     }
     return data;
 };
@@ -1342,7 +1396,7 @@ CPUStatePDP11.prototype.writeWordByMode = function(addressMode, data)
     if (!(addressMode & PDP11.OPMODE.MASK)) {
         this.regsGen[addressMode & PDP11.OPREG.MASK] = data & 0xffff;
     } else {
-        this.writeWordByAddr(this.getAddrByMode(addressMode, PDP11.ACCESS.WRITE), data);
+        this.writeWordByPhysical(this.getAddr(addressMode, PDP11.ACCESS.WRITE), data);
     }
     return data;
 };
@@ -1371,7 +1425,7 @@ CPUStatePDP11.prototype.writeByteByMode = function(addressMode, data, writeFlags
             this.regsGen[reg] = ((data << 24) >> 24) & 0xffff;
         }
     } else {
-        this.writeByteByAddr(this.getAddrByMode(addressMode, PDP11.ACCESS.WRITE_BYTE), data);
+        this.writeByteByPhysical(this.getAddr(addressMode, PDP11.ACCESS.WRITE_BYTE), data);
     }
     return data;
 };
@@ -1555,176 +1609,176 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                 switch (opCode & 0xF000) /*0170000*/ { // Double operand instructions xxSSDD
                 case 0x1000: /*0010000*/ // MOV  01SSDD
                     //LOG_INSTRUCTION(opCode, 2, "MOV");
-                    if ((src = this.readWordByMode(opCode >> 6)) >= 0) {
-                        if (!(opCode & 0x38)) {
-                            this.regsGen[opCode & 7] = src;
-                            this.flagN = this.flagZ = src;
-                            this.flagV = 0;
-                        } else {
-                            if ((dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.WRITE)) >= 0) {
-                                if (this.writeWordByAddr(dstAddr, src) >= 0) {
-                                    this.flagN = this.flagZ = src;
-                                    this.flagV = 0;
-                                }
-                            }
-                        }
-                    }
+                    // if ((src = this.readWordByMode(opCode >> 6)) >= 0) {
+                    //     if (!(opCode & 0x38)) {
+                    //         this.regsGen[opCode & 7] = src;
+                    //         this.flagN = this.flagZ = src;
+                    //         this.flagV = 0;
+                    //     } else {
+                    //         if ((dstAddr = this.getAddr(opCode, PDP11.ACCESS.WRITE)) >= 0) {
+                    //             if (this.writeWordByPhysical(dstAddr, src) >= 0) {
+                    //                 this.flagN = this.flagZ = src;
+                    //                 this.flagV = 0;
+                    //             }
+                    //         }
+                    //     }
+                    // }
                     break;
                 case 0x2000: /*0020000*/ // CMP 02SSDD
                     //LOG_INSTRUCTION(opCode, 2, "CMP");
-                    if ((src = this.readWordByMode(opCode >> 6)) >= 0) {
-                        if ((dst = this.readWordByMode(opCode)) >= 0) {
-                            result = src - dst;
-                            this.flagN = this.flagZ = this.flagC = result;
-                            this.flagV = (src ^ dst) & (src ^ result);
-                        }
-                    }
+                    // if ((src = this.readWordByMode(opCode >> 6)) >= 0) {
+                    //     if ((dst = this.readWordByMode(opCode)) >= 0) {
+                    //         result = src - dst;
+                    //         this.flagN = this.flagZ = this.flagC = result;
+                    //         this.flagV = (src ^ dst) & (src ^ result);
+                    //     }
+                    // }
                     break;
                 case 0x3000: /*0030000*/ // BIT 03SSDD
                     //LOG_INSTRUCTION(opCode, 2, "BIT");
-                    if ((src = this.readWordByMode(opCode >> 6)) >= 0) {
-                        if ((dst = this.readWordByMode(opCode)) >= 0) {
-                            this.flagN = this.flagZ = src & dst;
-                            this.flagV = 0;
-                        }
-                    }
+                    // if ((src = this.readWordByMode(opCode >> 6)) >= 0) {
+                    //     if ((dst = this.readWordByMode(opCode)) >= 0) {
+                    //         this.flagN = this.flagZ = src & dst;
+                    //         this.flagV = 0;
+                    //     }
+                    // }
                     break;
                 case 0x4000: /*0040000*/ // BIC 04SSDD
                     //LOG_INSTRUCTION(opCode, 2, "BIC");
-                    if ((src = this.readWordByMode(opCode >> 6)) >= 0) {
-                        if (!(opCode & 0x38)) {
-                            result = this.regsGen[opCode & 7] &= ~src;
-                            this.flagN = this.flagZ = result;
-                            this.flagV = 0;
-                        } else {
-                            if ((dst = this.readWordByAddr(dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.UPDATE))) >= 0) {
-                                result = dst & ~src;
-                                if (this.writeWordByAddr(dstAddr, result) >= 0) {
-                                    this.flagN = this.flagZ = result;
-                                    this.flagV = 0;
-                                }
-                            }
-                        }
-                    }
+                    // if ((src = this.readWordByMode(opCode >> 6)) >= 0) {
+                    //     if (!(opCode & 0x38)) {
+                    //         result = this.regsGen[opCode & 7] &= ~src;
+                    //         this.flagN = this.flagZ = result;
+                    //         this.flagV = 0;
+                    //     } else {
+                    //         if ((dst = this.readWordByPhysical(dstAddr = this.getAddr(opCode, PDP11.ACCESS.UPDATE))) >= 0) {
+                    //             result = dst & ~src;
+                    //             if (this.writeWordByPhysical(dstAddr, result) >= 0) {
+                    //                 this.flagN = this.flagZ = result;
+                    //                 this.flagV = 0;
+                    //             }
+                    //         }
+                    //     }
+                    // }
                     break;
                 case 0x5000: /*0050000*/ // BIS 05SSDD
                     //LOG_INSTRUCTION(opCode, 2, "BIS");
-                    if ((src = this.readWordByMode(opCode >> 6)) >= 0) {
-                        if (!(opCode & 0x38)) {
-                            result = this.regsGen[opCode & 7] |= src;
-                            this.flagN = this.flagZ = result;
-                            this.flagV = 0;
-                        } else {
-                            if ((dst = this.readWordByAddr(dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.UPDATE))) >= 0) {
-                                result = dst | src;
-                                if (this.writeWordByAddr(dstAddr, result) >= 0) {
-                                    this.flagN = this.flagZ = result;
-                                    this.flagV = 0;
-                                }
-                            }
-                        }
-                    }
+                    // if ((src = this.readWordByMode(opCode >> 6)) >= 0) {
+                    //     if (!(opCode & 0x38)) {
+                    //         result = this.regsGen[opCode & 7] |= src;
+                    //         this.flagN = this.flagZ = result;
+                    //         this.flagV = 0;
+                    //     } else {
+                    //         if ((dst = this.readWordByPhysical(dstAddr = this.getAddr(opCode, PDP11.ACCESS.UPDATE))) >= 0) {
+                    //             result = dst | src;
+                    //             if (this.writeWordByPhysical(dstAddr, result) >= 0) {
+                    //                 this.flagN = this.flagZ = result;
+                    //                 this.flagV = 0;
+                    //             }
+                    //         }
+                    //     }
+                    // }
                     break;
                 case 0x6000: /*0060000*/ // ADD 06SSDD
                     //LOG_INSTRUCTION(opCode, 2, "ADD");
-                    if ((src = this.readWordByMode(opCode >> 6)) >= 0) {
-                        if (!(opCode & 0x38)) {
-                            reg = opCode & 7;
-                            dst = this.regsGen[reg];
-                            this.regsGen[reg] = (result = src + dst) & 0xffff;
-                            this.flagN = this.flagZ = this.flagC = result;
-                            this.flagV = (src ^ result) & (dst ^ result);
-                        } else {
-                            if ((dst = this.readWordByAddr(dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.UPDATE))) >= 0) {
-                                result = src + dst;
-                                if (this.writeWordByAddr(dstAddr, result) >= 0) {
-                                    this.flagN = this.flagZ = this.flagC = result;
-                                    this.flagV = (src ^ result) & (dst ^ result);
-                                }
-                            }
-                        }
-                    }
+                    // if ((src = this.readWordByMode(opCode >> 6)) >= 0) {
+                    //     if (!(opCode & 0x38)) {
+                    //         reg = opCode & 7;
+                    //         dst = this.regsGen[reg];
+                    //         this.regsGen[reg] = (result = src + dst) & 0xffff;
+                    //         this.flagN = this.flagZ = this.flagC = result;
+                    //         this.flagV = (src ^ result) & (dst ^ result);
+                    //     } else {
+                    //         if ((dst = this.readWordByPhysical(dstAddr = this.getAddr(opCode, PDP11.ACCESS.UPDATE))) >= 0) {
+                    //             result = src + dst;
+                    //             if (this.writeWordByPhysical(dstAddr, result) >= 0) {
+                    //                 this.flagN = this.flagZ = this.flagC = result;
+                    //                 this.flagV = (src ^ result) & (dst ^ result);
+                    //             }
+                    //         }
+                    //     }
+                    // }
                     break;
                 case 0x9000: /*0110000*/ // MOVB 11SSDD
                     //LOG_INSTRUCTION(opCode, 2, "MOVB");
-                    if ((src = this.readByteByMode(opCode >> 6)) >= 0) {
-                        if (!(opCode & 0x38)) {
-                            if (src & 0x80) /*0200*/ src |= 0xff00; // movb sign extends register to word size
-                            this.regsGen[opCode & 7] = src;
-                            this.flagN = this.flagZ = src;
-                            this.flagV = 0;
-                        } else {
-                            if ((dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.WRITE_BYTE)) >= 0) { // write byte
-                                if (this.writeByteByAddr(dstAddr, src) >= 0) {
-                                    this.flagN = this.flagZ = src << 8;
-                                    this.flagV = 0;
-                                }
-                            }
-                        }
-                    }
+                    // if ((src = this.readByteByMode(opCode >> 6)) >= 0) {
+                    //     if (!(opCode & 0x38)) {
+                    //         if (src & 0x80) /*0200*/ src |= 0xff00; // movb sign extends register to word size
+                    //         this.regsGen[opCode & 7] = src;
+                    //         this.flagN = this.flagZ = src;
+                    //         this.flagV = 0;
+                    //     } else {
+                    //         if ((dstAddr = this.getAddr(opCode, PDP11.ACCESS.WRITE_BYTE)) >= 0) { // write byte
+                    //             if (this.writeByteByPhysical(dstAddr, src) >= 0) {
+                    //                 this.flagN = this.flagZ = src << 8;
+                    //                 this.flagV = 0;
+                    //             }
+                    //         }
+                    //     }
+                    // }
                     break;
                 case 0xA000: /*0120000*/ // CMPB 12SSDD
                     //LOG_INSTRUCTION(opCode, 2, "CMPB");
-                    if ((src = this.readByteByMode(opCode >> 6)) >= 0) {
-                        if ((dst = this.readByteByMode(opCode)) >= 0) {
-                            result = src - dst;
-                            this.flagN = this.flagZ = this.flagC = result << 8;
-                            this.flagV = ((src ^ dst) & (src ^ result)) << 8;
-                        }
-                    }
+                    // if ((src = this.readByteByMode(opCode >> 6)) >= 0) {
+                    //     if ((dst = this.readByteByMode(opCode)) >= 0) {
+                    //         result = src - dst;
+                    //         this.flagN = this.flagZ = this.flagC = result << 8;
+                    //         this.flagV = ((src ^ dst) & (src ^ result)) << 8;
+                    //     }
+                    // }
                     break;
                 case 0xB000: /*0130000*/ // BITB 13SSDD
                     //LOG_INSTRUCTION(opCode, 2, "BITB");
-                    if ((src = this.readByteByMode(opCode >> 6)) >= 0) {
-                        if ((dst = this.readByteByMode(opCode)) >= 0) {
-                            this.flagN = this.flagZ = (src & dst) << 8;
-                            this.flagV = 0;
-                        }
-                    }
+                    // if ((src = this.readByteByMode(opCode >> 6)) >= 0) {
+                    //     if ((dst = this.readByteByMode(opCode)) >= 0) {
+                    //         this.flagN = this.flagZ = (src & dst) << 8;
+                    //         this.flagV = 0;
+                    //     }
+                    // }
                     break;
                 case 0xC000: /*0140000*/ // BICB 14SSDD
                     //LOG_INSTRUCTION(opCode, 2, "BICB");
-                    if ((src = this.readByteByMode(opCode >> 6)) >= 0) {
-                        if ((dst = this.readByteByAddr(dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.UPDATE_BYTE))) >= 0) {
-                            result = dst & ~src;
-                            if (this.writeByteByAddr(dstAddr, result) >= 0) {
-                                this.flagN = this.flagZ = result << 8;
-                                this.flagV = 0;
-                            }
-                        }
-                    }
+                    // if ((src = this.readByteByMode(opCode >> 6)) >= 0) {
+                    //     if ((dst = this.readByteByPhysical(dstAddr = this.getAddr(opCode, PDP11.ACCESS.UPDATE_BYTE))) >= 0) {
+                    //         result = dst & ~src;
+                    //         if (this.writeByteByPhysical(dstAddr, result) >= 0) {
+                    //             this.flagN = this.flagZ = result << 8;
+                    //             this.flagV = 0;
+                    //         }
+                    //     }
+                    // }
                     break;
                 case 0xD000: /*0150000*/ // BISB 15SSDD
                     //LOG_INSTRUCTION(opCode, 2, "BISB");
-                    if ((src = this.readByteByMode(opCode >> 6)) >= 0) {
-                        if ((dst = this.readByteByAddr(dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.UPDATE_BYTE))) >= 0) {
-                            result = dst | src;
-                            if (this.writeByteByAddr(dstAddr, result) >= 0) {
-                                this.flagN = this.flagZ = result << 8;
-                                this.flagV = 0;
-                            }
-                        }
-                    }
+                    // if ((src = this.readByteByMode(opCode >> 6)) >= 0) {
+                    //     if ((dst = this.readByteByPhysical(dstAddr = this.getAddr(opCode, PDP11.ACCESS.UPDATE_BYTE))) >= 0) {
+                    //         result = dst | src;
+                    //         if (this.writeByteByPhysical(dstAddr, result) >= 0) {
+                    //             this.flagN = this.flagZ = result << 8;
+                    //             this.flagV = 0;
+                    //         }
+                    //     }
+                    // }
                     break;
                 case 0xE000: /*0160000*/ // SUB 16SSDD
                     //LOG_INSTRUCTION(opCode, 2, "SUB");
-                    if ((src = this.readWordByMode(opCode >> 6)) >= 0) {
-                        if (!(opCode & 0x38)) {
-                            reg = opCode & 7;
-                            dst = this.regsGen[reg];
-                            this.regsGen[reg] = (result = dst - src) & 0xffff;
-                            this.flagN = this.flagZ = this.flagC = result;
-                            this.flagV = (src ^ dst) & (dst ^ result);
-                        } else {
-                            if ((dst = this.readWordByAddr(dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.UPDATE))) >= 0) {
-                                result = dst - src;
-                                if (this.writeWordByAddr(dstAddr, result) >= 0) {
-                                    this.flagN = this.flagZ = this.flagC = result;
-                                    this.flagV = (src ^ dst) & (dst ^ result);
-                                }
-                            }
-                        }
-                    }
+                    // if ((src = this.readWordByMode(opCode >> 6)) >= 0) {
+                    //     if (!(opCode & 0x38)) {
+                    //         reg = opCode & 7;
+                    //         dst = this.regsGen[reg];
+                    //         this.regsGen[reg] = (result = dst - src) & 0xffff;
+                    //         this.flagN = this.flagZ = this.flagC = result;
+                    //         this.flagV = (src ^ dst) & (dst ^ result);
+                    //     } else {
+                    //         if ((dst = this.readWordByPhysical(dstAddr = this.getAddr(opCode, PDP11.ACCESS.UPDATE))) >= 0) {
+                    //             result = dst - src;
+                    //             if (this.writeWordByPhysical(dstAddr, result) >= 0) {
+                    //                 this.flagN = this.flagZ = this.flagC = result;
+                    //                 this.flagV = (src ^ dst) & (dst ^ result);
+                    //             }
+                    //         }
+                    //     }
+                    // }
                     break;
                 default:
                     switch (opCode & 0xFE00) /*0177000*/ { // Misc instructions xxRDD
@@ -1855,9 +1909,9 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                             this.flagN = this.flagZ = dst;
                             this.flagV = 0;
                         } else {
-                            if ((dst = this.readWordByAddr(dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.UPDATE))) >= 0) {
+                            if ((dst = this.readWordByPhysical(dstAddr = this.getAddr(opCode, PDP11.ACCESS.UPDATE))) >= 0) {
                                 dst ^= this.regsGen[(opCode >> 6) & 7];
-                                if (this.writeWordByAddr(dstAddr, dst) >= 0) {
+                                if (this.writeWordByPhysical(dstAddr, dst) >= 0) {
                                     this.flagN = this.flagZ = dst;
                                     this.flagV = 0;
                                 }
@@ -1965,10 +2019,10 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                     this.flagN = this.flagZ = dst & 0xff00;
                                     this.flagV = this.flagC = 0;
                                 } else {
-                                    if ((dst = this.readWordByAddr(dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.UPDATE))) >=
+                                    if ((dst = this.readWordByPhysical(dstAddr = this.getAddr(opCode, PDP11.ACCESS.UPDATE))) >=
                                         0) {
                                         result = (dst << 8) | (dst >> 8);
-                                        if (this.writeWordByAddr(dstAddr, result) >= 0) {
+                                        if (this.writeWordByPhysical(dstAddr, result) >= 0) {
                                             this.flagN = this.flagZ = dst & 0xff00;
                                             this.flagV = this.flagC = 0;
                                         }
@@ -1977,23 +2031,26 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                 break;
                             case 0xA00: /*0005000*/ // CLR 0050DD
                                 //LOG_INSTRUCTION(opCode, 1, "CLR");
-                                if (!(opCode & 0x38)) {
-                                    this.regsGen[opCode & 7] = 0;
-                                    this.flagN = this.flagC = this.flagV = this.flagZ = 0;
-                                } else {
-                                    if ((dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.WRITE)) >= 0) { // write word
-                                        if (this.writeWordByAddr(dstAddr, 0) >= 0) {
-                                            this.flagN = this.flagC = this.flagV = this.flagZ = 0;
-                                        }
-                                    }
-                                }
+                                // if (!(opCode & 0x38)) {
+                                //     this.regsGen[opCode & 7] = 0;
+                                //     this.flagN = this.flagC = this.flagV = this.flagZ = 0;
+                                // } else {
+                                //     if ((dstAddr = this.getAddr(opCode, PDP11.ACCESS.WRITE)) >= 0) { // write word
+                                //         if (this.writeWordByPhysical(dstAddr, 0) >= 0) {
+                                //             this.flagN = this.flagC = this.flagV = this.flagZ = 0;
+                                //         }
+                                //     }
+                                // }
                                 break;
                             case 0xA40: /*0005100*/ // COM 0051DD
                                 //LOG_INSTRUCTION(opCode, 1, "COM");
-                                if ((dst = this.readWordByAddr(dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.UPDATE))) >=
+                                /*
+                                 * TODO: Here's an example where getAddr() could be called in the register-only case.
+                                 */
+                                if ((dst = this.readWordByPhysical(dstAddr = this.getAddr(opCode, PDP11.ACCESS.UPDATE))) >=
                                     0) {
                                     result = ~dst;
-                                    if (this.writeWordByAddr(dstAddr, result) >= 0) {
+                                    if (this.writeWordByPhysical(dstAddr, result) >= 0) {
                                         this.flagN = this.flagZ = result;
                                         this.flagC = 0x10000;
                                         this.flagV = 0;
@@ -2010,10 +2067,10 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                     this.flagN = this.flagZ = result;
                                     this.flagV = result & (result ^ dst);
                                 } else {
-                                    if ((dst = this.readWordByAddr(dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.UPDATE))) >=
+                                    if ((dst = this.readWordByPhysical(dstAddr = this.getAddr(opCode, PDP11.ACCESS.UPDATE))) >=
                                         0) {
                                         result = dst + 1;
-                                        if (this.writeWordByAddr(dstAddr, result) >= 0) {
+                                        if (this.writeWordByPhysical(dstAddr, result) >= 0) {
                                             this.flagN = this.flagZ = result;
                                             this.flagV = result & (result ^ dst);
                                         }
@@ -2030,10 +2087,10 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                     this.flagN = this.flagZ = result;
                                     this.flagV = (result ^ dst) & dst;
                                 } else {
-                                    if ((dst = this.readWordByAddr(dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.UPDATE))) >=
+                                    if ((dst = this.readWordByPhysical(dstAddr = this.getAddr(opCode, PDP11.ACCESS.UPDATE))) >=
                                         0) {
                                         result = dst - 1;
-                                        if (this.writeWordByAddr(dstAddr, result) >= 0) {
+                                        if (this.writeWordByPhysical(dstAddr, result) >= 0) {
                                             this.flagN = this.flagZ = result;
                                             this.flagV = (result ^ dst) & dst;
                                         }
@@ -2042,10 +2099,13 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                 break;
                             case 0xB00: /*0005400*/ // NEG 0054DD
                                 //LOG_INSTRUCTION(opCode, 1, "NEG");
-                                if ((dst = this.readWordByAddr(dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.UPDATE))) >=
+                                /*
+                                 * TODO: Here's an example where getAddr() could be called in the register-only case.
+                                 */
+                                if ((dst = this.readWordByPhysical(dstAddr = this.getAddr(opCode, PDP11.ACCESS.UPDATE))) >=
                                     0) {
                                     result = -dst;
-                                    if (this.writeWordByAddr(dstAddr, result) >= 0) {
+                                    if (this.writeWordByPhysical(dstAddr, result) >= 0) {
                                         this.flagC = this.flagN = this.flagZ = result;
                                         this.flagV = result & dst;
                                     }
@@ -2053,10 +2113,13 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                 break;
                             case 0xB40: /*0005500*/ // ADC 0055DD
                                 //LOG_INSTRUCTION(opCode, 1, "ADC");
-                                if ((dst = this.readWordByAddr(dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.UPDATE))) >=
+                                /*
+                                 * TODO: Here's an example where getAddr() could be called in the register-only case.
+                                 */
+                                if ((dst = this.readWordByPhysical(dstAddr = this.getAddr(opCode, PDP11.ACCESS.UPDATE))) >=
                                     0) {
                                     result = dst + ((this.flagC >> 16) & 1);
-                                    if (this.writeWordByAddr(dstAddr, result) >= 0) {
+                                    if (this.writeWordByPhysical(dstAddr, result) >= 0) {
                                         this.flagC = this.flagN = this.flagZ = result;
                                         this.flagV = result & (result ^ dst);
                                     }
@@ -2064,10 +2127,13 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                 break;
                             case 0xB80: /*0005600*/ // SBC 0056DD
                                 //LOG_INSTRUCTION(opCode, 1, "SBC");
-                                if ((dst = this.readWordByAddr(dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.UPDATE))) >=
+                                /*
+                                 * TODO: Here's an example where getAddr() could be called in the register-only case.
+                                 */
+                                if ((dst = this.readWordByPhysical(dstAddr = this.getAddr(opCode, PDP11.ACCESS.UPDATE))) >=
                                     0) {
                                     result = dst - ((this.flagC >> 16) & 1);
-                                    if (this.writeWordByAddr(dstAddr, result) >= 0) {
+                                    if (this.writeWordByPhysical(dstAddr, result) >= 0) {
                                         this.flagC = this.flagN = this.flagZ = result;
                                         this.flagV = (result ^ dst) & dst;
                                     }
@@ -2091,10 +2157,10 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                     this.flagN = this.flagZ = result;
                                     this.flagV = result ^ (this.flagC >> 1);
                                 } else {
-                                    if ((dst = this.readWordByAddr(dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.UPDATE))) >=
+                                    if ((dst = this.readWordByPhysical(dstAddr = this.getAddr(opCode, PDP11.ACCESS.UPDATE))) >=
                                         0) {
                                         result = ((this.flagC & 0x10000) | dst) >> 1;
-                                        if (this.writeWordByAddr(dstAddr, result) >= 0) {
+                                        if (this.writeWordByPhysical(dstAddr, result) >= 0) {
                                             this.flagC = (dst << 16);
                                             this.flagN = this.flagZ = result;
                                             this.flagV = result ^ (this.flagC >> 1);
@@ -2112,10 +2178,10 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                     this.flagC = this.flagN = this.flagZ = result;
                                     this.flagV = result ^ dst;
                                 } else {
-                                    if ((dst = this.readWordByAddr(dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.UPDATE))) >=
+                                    if ((dst = this.readWordByPhysical(dstAddr = this.getAddr(opCode, PDP11.ACCESS.UPDATE))) >=
                                         0) {
                                         result = (dst << 1) | ((this.flagC >> 16) & 1);
-                                        if (this.writeWordByAddr(dstAddr, result) >= 0) {
+                                        if (this.writeWordByPhysical(dstAddr, result) >= 0) {
                                             this.flagC = this.flagN = this.flagZ = result;
                                             this.flagV = result ^ dst;
                                         }
@@ -2133,10 +2199,10 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                     this.flagN = this.flagZ = result;
                                     this.flagV = this.flagN ^ (this.flagC >> 1);
                                 } else {
-                                    if ((dst = this.readWordByAddr(dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.UPDATE))) >=
+                                    if ((dst = this.readWordByPhysical(dstAddr = this.getAddr(opCode, PDP11.ACCESS.UPDATE))) >=
                                         0) {
                                         result = (dst & 0x8000) | (dst >> 1);
-                                        if (this.writeWordByAddr(dstAddr, result) >= 0) {
+                                        if (this.writeWordByPhysical(dstAddr, result) >= 0) {
                                             this.flagC = dst << 16;
                                             this.flagN = this.flagZ = result;
                                             this.flagV = this.flagN ^ (this.flagC >> 1);
@@ -2154,10 +2220,10 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                     this.flagC = this.flagN = this.flagZ = result;
                                     this.flagV = result ^ dst;
                                 } else {
-                                    if ((dst = this.readWordByAddr(dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.UPDATE))) >=
+                                    if ((dst = this.readWordByPhysical(dstAddr = this.getAddr(opCode, PDP11.ACCESS.UPDATE))) >=
                                         0) {
                                         result = dst << 1;
-                                        if (this.writeWordByAddr(dstAddr, result) >= 0) {
+                                        if (this.writeWordByPhysical(dstAddr, result) >= 0) {
                                             this.flagC = this.flagN = this.flagZ = result;
                                             this.flagV = result ^ dst;
                                         }
@@ -2167,7 +2233,7 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                             case 0xD00: /*0006400*/ // MARK 0064nn
                                 //LOG_INSTRUCTION(opCode, 8, "MARK");
                                 virtualAddress = (this.regsGen[7] + ((opCode & 0x3F) /*077*/ << 1)) & 0xffff;
-                                if ((src = this.readWordByVirtual(virtualAddress | 0x10000)) >= 0) {
+                                if ((src = this.readWordByVirtual(virtualAddress | PDP11.ACCESS.DSPACE)) >= 0) {
                                     this.regsGen[7] = this.regsGen[5];
                                     this.regsGen[5] = src;
                                     this.regsGen[6] = (virtualAddress + 2) & 0xffff;
@@ -2219,7 +2285,7 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                             this.mmuMode = (this.PSW >> 12) & 3;
                                             if ((dstAddr = this.mapVirtualToPhysical(virtualAddress, PDP11.ACCESS.WRITE)) >= 0) {
                                                 this.mmuMode = (this.PSW >> 14) & 3;
-                                                if (this.writeWordByAddr(dstAddr, dst) >= 0) {
+                                                if (this.writeWordByPhysical(dstAddr, dst) >= 0) {
                                                     this.flagN = this.flagZ = dst;
                                                     this.flagV = 0;
                                                 }
@@ -2230,9 +2296,12 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                 break;
                             case 0xDC0: /*0006700*/ // SXT 0067DD
                                 //LOG_INSTRUCTION(opCode, 1, "SXT");
-                                if ((dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.WRITE)) >= 0) { // write word
+                                /*
+                                 * TODO: Here's an example where getAddr() could be called in the register-only case.
+                                 */
+                                if ((dstAddr = this.getAddr(opCode, PDP11.ACCESS.WRITE)) >= 0) { // write word
                                     result = -((this.flagN >> 15) & 1);
-                                    if (this.writeWordByAddr(dstAddr, result) >= 0) {
+                                    if (this.writeWordByPhysical(dstAddr, result) >= 0) {
                                         this.flagZ = result;
                                         this.flagV = 0;
                                     }
@@ -2240,23 +2309,26 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                 break;
                             case 0x8A00: /*0105000*/ // CLRB 1050DD
                                 //LOG_INSTRUCTION(opCode, 1, "CLRB");
-                                if (!(opCode & 0x38)) {
-                                    this.regsGen[opCode & 7] &= 0xff00;
-                                    this.flagN = this.flagC = this.flagV = this.flagZ = 0;
-                                } else {
-                                    if ((dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.WRITE_BYTE)) >= 0) { // write byte
-                                        if (this.writeByteByAddr(dstAddr, 0) >= 0) {
-                                            this.flagN = this.flagC = this.flagV = this.flagZ = 0;
-                                        }
-                                    }
-                                }
+                                // if (!(opCode & 0x38)) {
+                                //     this.regsGen[opCode & 7] &= 0xff00;
+                                //     this.flagN = this.flagC = this.flagV = this.flagZ = 0;
+                                // } else {
+                                //     if ((dstAddr = this.getAddr(opCode, PDP11.ACCESS.WRITE_BYTE)) >= 0) { // write byte
+                                //         if (this.writeByteByPhysical(dstAddr, 0) >= 0) {
+                                //             this.flagN = this.flagC = this.flagV = this.flagZ = 0;
+                                //         }
+                                //     }
+                                // }
                                 break;
                             case 0x8A40: /*0105100*/ // COMB 1051DD
                                 //LOG_INSTRUCTION(opCode, 1, "COMB");
-                                if ((dst = this.readByteByAddr(dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.UPDATE_BYTE))) >=
+                                /*
+                                 * TODO: Here's an example where getAddr() could be called in the register-only case.
+                                 */
+                                if ((dst = this.readByteByPhysical(dstAddr = this.getAddr(opCode, PDP11.ACCESS.UPDATE_BYTE))) >=
                                     0) {
                                     result = ~dst;
-                                    if (this.writeByteByAddr(dstAddr, result) >= 0) {
+                                    if (this.writeByteByPhysical(dstAddr, result) >= 0) {
                                         this.flagN = this.flagZ = result << 8;
                                         this.flagC = 0x10000;
                                         this.flagV = 0;
@@ -2265,10 +2337,13 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                 break;
                             case 0x8A80: /*0105200*/ // INCB 1052DD
                                 //LOG_INSTRUCTION(opCode, 1, "INCB");
-                                if ((dst = this.readByteByAddr(dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.UPDATE_BYTE))) >=
+                                /*
+                                 * TODO: Here's an example where getAddr() could be called in the register-only case.
+                                 */
+                                if ((dst = this.readByteByPhysical(dstAddr = this.getAddr(opCode, PDP11.ACCESS.UPDATE_BYTE))) >=
                                     0) {
                                     result = dst + 1;
-                                    if (this.writeByteByAddr(dstAddr, result) >= 0) {
+                                    if (this.writeByteByPhysical(dstAddr, result) >= 0) {
                                         this.flagN = this.flagZ = result << 8;
                                         this.flagV = (result & (result ^ dst)) << 8;
                                     }
@@ -2276,10 +2351,13 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                 break;
                             case 0x8AC0: /*0105300*/ // DECB 1053DD
                                 //LOG_INSTRUCTION(opCode, 1, "DECB");
-                                if ((dst = this.readByteByAddr(dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.UPDATE_BYTE))) >=
+                                /*
+                                 * TODO: Here's an example where getAddr() could be called in the register-only case.
+                                 */
+                                if ((dst = this.readByteByPhysical(dstAddr = this.getAddr(opCode, PDP11.ACCESS.UPDATE_BYTE))) >=
                                     0) {
                                     result = dst - 1;
-                                    if (this.writeByteByAddr(dstAddr, result) >= 0) {
+                                    if (this.writeByteByPhysical(dstAddr, result) >= 0) {
                                         this.flagN = this.flagZ = result << 8;
                                         this.flagV = ((result ^ dst) & dst) << 8;
                                     }
@@ -2287,10 +2365,13 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                 break;
                             case 0x8B00: /*0105400*/ // NEGB 1054DD
                                 //LOG_INSTRUCTION(opCode, 1, "NEGB");
-                                if ((dst = this.readByteByAddr(dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.UPDATE_BYTE))) >=
+                                /*
+                                 * TODO: Here's an example where getAddr() could be called in the register-only case.
+                                 */
+                                if ((dst = this.readByteByPhysical(dstAddr = this.getAddr(opCode, PDP11.ACCESS.UPDATE_BYTE))) >=
                                     0) {
                                     result = -dst;
-                                    if (this.writeByteByAddr(dstAddr, result) >= 0) {
+                                    if (this.writeByteByPhysical(dstAddr, result) >= 0) {
                                         this.flagC = this.flagN = this.flagZ = result << 8;
                                         this.flagV = (result & dst) << 8;
                                     }
@@ -2298,10 +2379,13 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                 break;
                             case 0x8B40: /*0105500*/ // ADCB 01055DD
                                 //LOG_INSTRUCTION(opCode, 1, "ADCB");
-                                if ((dst = this.readByteByAddr(dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.UPDATE_BYTE))) >=
+                                /*
+                                 * TODO: Here's an example where getAddr() could be called in the register-only case.
+                                 */
+                                if ((dst = this.readByteByPhysical(dstAddr = this.getAddr(opCode, PDP11.ACCESS.UPDATE_BYTE))) >=
                                     0) {
                                     result = dst + ((this.flagC >> 16) & 1);
-                                    if (this.writeByteByAddr(dstAddr, result) >= 0) {
+                                    if (this.writeByteByPhysical(dstAddr, result) >= 0) {
                                         this.flagN = this.flagZ = this.flagC = result << 8;
                                         this.flagV = (result & (result ^ dst)) << 8;
                                     }
@@ -2309,10 +2393,13 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                 break;
                             case 0x8B80: /*0105600*/ // SBCB 01056DD
                                 //LOG_INSTRUCTION(opCode, 1, "SBCB");
-                                if ((dst = this.readByteByAddr(dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.UPDATE_BYTE))) >=
+                                /*
+                                 * TODO: Here's an example where getAddr() could be called in the register-only case.
+                                 */
+                                if ((dst = this.readByteByPhysical(dstAddr = this.getAddr(opCode, PDP11.ACCESS.UPDATE_BYTE))) >=
                                     0) {
                                     result = dst - ((this.flagC >> 16) & 1);
-                                    if (this.writeByteByAddr(dstAddr, result) >= 0) {
+                                    if (this.writeByteByPhysical(dstAddr, result) >= 0) {
                                         this.flagN = this.flagZ = this.flagC = result << 8;
                                         this.flagV = ((result ^ dst) & dst) << 8;
                                     }
@@ -2327,10 +2414,13 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                 break;
                             case 0x8C00: /*0106000*/ // RORB 1060DD
                                 //LOG_INSTRUCTION(opCode, 1, "RORB");
-                                if ((dst = this.readByteByAddr(dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.UPDATE_BYTE))) >=
+                                /*
+                                 * TODO: Here's an example where getAddr() could be called in the register-only case.
+                                 */
+                                if ((dst = this.readByteByPhysical(dstAddr = this.getAddr(opCode, PDP11.ACCESS.UPDATE_BYTE))) >=
                                     0) {
                                     result = (((this.flagC & 0x10000) >> 8) | dst) >> 1;
-                                    if (this.writeByteByAddr(dstAddr, result) >= 0) {
+                                    if (this.writeByteByPhysical(dstAddr, result) >= 0) {
                                         this.flagC = (dst << 16);
                                         this.flagN = this.flagZ = (result << 8);
                                         this.flagV = this.flagN ^ (this.flagC >> 1);
@@ -2339,10 +2429,13 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                 break;
                             case 0x8C40: /*0106100*/ // ROLB 1061DD
                                 //LOG_INSTRUCTION(opCode, 1, "ROLB");
-                                if ((dst = this.readByteByAddr(dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.UPDATE_BYTE))) >=
+                                /*
+                                 * TODO: Here's an example where getAddr() could be called in the register-only case.
+                                 */
+                                if ((dst = this.readByteByPhysical(dstAddr = this.getAddr(opCode, PDP11.ACCESS.UPDATE_BYTE))) >=
                                     0) {
                                     result = (dst << 1) | ((this.flagC >> 16) & 1);
-                                    if (this.writeByteByAddr(dstAddr, result) >= 0) {
+                                    if (this.writeByteByPhysical(dstAddr, result) >= 0) {
                                         this.flagC = this.flagN = this.flagZ = result << 8;
                                         this.flagV = (result ^ dst) << 8;
                                     }
@@ -2350,10 +2443,13 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                 break;
                             case 0x8C80: /*0106200*/ // ASRB 1062DD
                                 //LOG_INSTRUCTION(opCode, 1, "ASRB");
-                                if ((dst = this.readByteByAddr(dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.UPDATE_BYTE))) >=
+                                /*
+                                 * TODO: Here's an example where getAddr() could be called in the register-only case.
+                                 */
+                                if ((dst = this.readByteByPhysical(dstAddr = this.getAddr(opCode, PDP11.ACCESS.UPDATE_BYTE))) >=
                                     0) {
                                     result = (dst & 0x80) | (dst >> 1);
-                                    if (this.writeByteByAddr(dstAddr, result) >= 0) {
+                                    if (this.writeByteByPhysical(dstAddr, result) >= 0) {
                                         this.flagC = dst << 16;
                                         this.flagN = this.flagZ = result << 8;
                                         this.flagV = this.flagN ^ (this.flagC >> 1);
@@ -2362,10 +2458,13 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                 break;
                             case 0x8CC0: /*0106300*/ // ASLB 1063DD
                                 //LOG_INSTRUCTION(opCode, 1, "ASLB");
-                                if ((dst = this.readByteByAddr(dstAddr = this.getAddrByMode(opCode, PDP11.ACCESS.UPDATE_BYTE))) >=
+                                /*
+                                 * TODO: Here's an example where getAddr() could be called in the register-only case.
+                                 */
+                                if ((dst = this.readByteByPhysical(dstAddr = this.getAddr(opCode, PDP11.ACCESS.UPDATE_BYTE))) >=
                                     0) {
                                     result = dst << 1;
-                                    if (this.writeByteByAddr(dstAddr, result) >= 0) {
+                                    if (this.writeByteByPhysical(dstAddr, result) >= 0) {
                                         this.flagC = this.flagN = this.flagZ = result << 8;
                                         this.flagV = (result ^ dst) << 8;
                                     }
@@ -2393,7 +2492,7 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                 } else {
                                     if ((virtualAddress = this.getVirtualByMode(opCode, 0)) >= 0) {
                                         this.mmuMode = (this.PSW >> 12) & 3;
-                                        if ((src = this.readWordByVirtual(virtualAddress | 0x10000)) >= 0) {
+                                        if ((src = this.readWordByVirtual(virtualAddress | PDP11.ACCESS.DSPACE)) >= 0) {
                                             this.mmuMode = (this.PSW >> 14) & 3;
                                             if (this.pushWord(src) >= 0) {
                                                 this.flagN = this.flagZ = src;
@@ -2419,10 +2518,9 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                     } else {
                                         if ((virtualAddress = this.getVirtualByMode(opCode, 0)) >= 0) {
                                             this.mmuMode = (this.PSW >> 12) & 3;
-                                            if ((dstAddr = this.mapVirtualToPhysical(virtualAddress |
-                                                    0x10000, PDP11.ACCESS.WRITE)) >= 0) {
+                                            if ((dstAddr = this.mapVirtualToPhysical(virtualAddress | PDP11.ACCESS.DSPACE, PDP11.ACCESS.WRITE)) >= 0) {
                                                 this.mmuMode = (this.PSW >> 14) & 3;
-                                                if (this.writeWordByAddr(dstAddr, dst) >= 0) {
+                                                if (this.writeWordByPhysical(dstAddr, dst) >= 0) {
                                                     this.flagN = this.flagZ = dst;
                                                     this.flagV = 0;
                                                 }
@@ -2435,8 +2533,8 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                 //    //LOG_INSTRUCTION(opCode, 1, "MFPS");
                                 //    src = this.getPSW() & 0xff;
                                 //    if (instruction & 0x38) {
-                                //        if ((dstAddr = this.getAddrByMode(instruction, PDP11.ACCESS.WRITE_BYTE)) >= 0) { // write byte
-                                //            if (this.writeByteByAddr(dstAddr, src) >= 0) {
+                                //        if ((dstAddr = this.getAddr(instruction, PDP11.ACCESS.WRITE_BYTE)) >= 0) { // write byte
+                                //            if (this.writeByteByPhysical(dstAddr, src) >= 0) {
                                 //                this.flagN = this.flagZ = src << 8;
                                 //                this.flagV = 0;
                                 //            }
@@ -2467,17 +2565,17 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                     break;
                                 case 0xA0: /*0000240*/ // CLR CC 00024M Part 1 without N
                                 case 0xA8: /*0000250*/ // CLR CC 00025M Part 2 with N
-                                    if (opCode & 1) this.clearCF();        // CLC
-                                    if (opCode & 2) this.clearVF();        // CLV
-                                    if (opCode & 4) this.clearZF();        // CLZ
-                                    if (opCode & 8) this.clearNF();        // CLN
+                                    // if (opCode & 1) this.clearCF();        // CLC
+                                    // if (opCode & 2) this.clearVF();        // CLV
+                                    // if (opCode & 4) this.clearZF();        // CLZ
+                                    // if (opCode & 8) this.clearNF();        // CLN
                                     break;
                                 case 0xB0: /*0000260*/ // SET CC 00026M Part 1 without N
                                 case 0xB8: /*0000270*/ // SET CC 00026M Part 2 with N
-                                    if (opCode & 1) this.setCF();          // SEC
-                                    if (opCode & 2) this.setVF();          // SEV
-                                    if (opCode & 4) this.setZF();          // SEZ
-                                    if (opCode & 8) this.setNF();          // SEN
+                                    // if (opCode & 1) this.setCF();          // SEC
+                                    // if (opCode & 2) this.setVF();          // SEV
+                                    // if (opCode & 4) this.setZF();          // SEZ
+                                    // if (opCode & 8) this.setNF();          // SEN
                                     break;
                                 default: // Misc instructions (decode ALL remaining bits) xxxxxx
                                     switch (opCode) {
@@ -2517,19 +2615,19 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                                         break;
                                     case 0x5: /*0000005*/ // RESET 000005
                                         //LOG_INSTRUCTION(opCode, 0, "RESET");
-                                        if (!(this.PSW & 0xc000)) {
-                                            this.resetRegs();
-                                            this.bus.reset();
-                                            // display.data = this.regsGen[0];  // TODO: Review
-                                        }
+                                        // if (!(this.PSW & 0xc000)) {
+                                        //     this.resetRegs();
+                                        //     this.bus.reset();
+                                        //     // display.data = this.regsGen[0];  // TODO: Review
+                                        // }
                                         break;
                                     case 0x2: /*0000002*/ // RTI 000002
                                     case 0x6: /*0000006*/ // RTT 000006
                                         //LOG_INSTRUCTION(opCode, 0, "RTT");
                                         dstAddr = this.regsGen[6];
-                                        if ((virtualAddress = this.readWordByVirtual(dstAddr | 0x10000)) >= 0) {
+                                        if ((virtualAddress = this.readWordByVirtual(dstAddr | PDP11.ACCESS.DSPACE)) >= 0) {
                                             dstAddr = (dstAddr + 2) & 0xffff;
-                                            if ((savePSW = this.readWordByVirtual(dstAddr | 0x10000)) >= 0) {
+                                            if ((savePSW = this.readWordByVirtual(dstAddr | PDP11.ACCESS.DSPACE)) >= 0) {
                                                 this.regsGen[6] = (dstAddr + 2) & 0xffff;
                                                 savePSW &= 0xf8ff;
                                                 if (this.PSW & 0xc000) {            // user / super restrictions

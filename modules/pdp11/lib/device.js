@@ -734,7 +734,7 @@ DevicePDP11.prototype.readData = function(meta, block, address, count)
             return;
         }
         for (word = 0; word < meta.blocksize && count > 0; word++) {
-            if (this.cpu.writeWordByAddr((meta.mapped? this.cpu.mapUnibus(address) : address), meta.cache[block][word]) < 0) {
+            if (this.cpu.writeWordByPhysical((meta.mapped? this.cpu.mapUnibus(address) : address), meta.cache[block][word]) < 0) {
                 meta.postProcess(2, meta, block, address, count); // NXM
                 return;
             }
@@ -768,7 +768,7 @@ DevicePDP11.prototype.writeData = function(meta, block, address, count)
             }
         }
         for (word = 0; word < meta.blocksize && count > 0; word++) {
-            data = this.cpu.readWordByAddr((meta.mapped? this.cpu.mapUnibus(address) : address));
+            data = this.cpu.readWordByPhysical((meta.mapped? this.cpu.mapUnibus(address) : address));
             if (data < 0) {
                 meta.postProcess(2, meta, block, address, count); // NXM
                 return;

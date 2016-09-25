@@ -226,7 +226,8 @@ var PDP11 = {
         BYTE:       0x1,
         READ:       0x2,
         WRITE:      0x4,
-        UPDATE:     0x6
+        UPDATE:     0x6,
+        DSPACE:     0x10000     // set bit 17 in any 16-bit virtual address that refers to D space (as opposed to I space)
     },
     /*
      * Internal flags passed to writeByteByMode(), etc.
@@ -276,13 +277,17 @@ var PDP11 = {
     /*
      * Assorted special (UNIBUS) addresses
      *
-     * Within the PDP-11's 18-bit address space, of the 0x40000 possible addresses, the top 8Kb (0x2000)
-     * is called the IOPAGE and is reserved for CPU and I/O registers.  The IOPAGE spans 0x3E000-0x3FFFF.
+     * Within the PDP-11/45's 18-bit address space, of the 0x40000 possible addresses (256Kb), the top 0x2000
+     * (8Kb) is called the IOPAGE and is reserved for CPU and I/O registers.  The IOPAGE spans 0x3E000-0x3FFFF.
      *
-     * To map UNIBUS addresses to 22-bit physical addresses, a UNIBUS relocation map is used.  It consists
-     * of 31 double-word registers that each hold a 22-bit base address.  When UNIBUS relocation is enabled,
-     * the top 5 bits of an address select one of the 31 mapping registers, and the bottom 13 bits are then
-     * added to the contents of the selected mapping register.
+     * Within the PDP-11/70's 22-bit address space, of the 0x400000 possible addresses (4Mb), the top 0x20000
+     * (256Kb) is mapped to the UNIBUS (not physical memory), and as before, the top 0x2000 (8Kb) of that is
+     * mapped to the IOPAGE.
+     *
+     * To map 18-bit UNIBUS addresses to 22-bit physical addresses, the 11/70 uses a UNIBUS relocation map.
+     * It consists of 31 double-word registers that each hold a 22-bit base address.  When UNIBUS relocation
+     * is enabled, the top 5 bits of an address select one of the 31 mapping registers, and the bottom 13 bits
+     * are then added to the contents of the selected mapping register.
      *
      * ES6 ALERT: By using octal constants, this is the first place I'm dipping my toe into ECMAScript 6 waters.
      * If you're loading this raw source code into your browser, then by now (2016) you're almost certainly using
@@ -293,11 +298,15 @@ var PDP11 = {
      * For more details: https://github.com/google/closure-compiler/wiki/ECMAScript6
      */
     UNIBUS: {       //16-bit       18-bit     22-bit         Hex    Description
-        PSW:        0o177776,   // 777776   17777776    0x3FFFFE    PSW
-        SL:         0o177774,   //                                  Stack Limit
+        PSW:        0o177776,   // 777776   17777776    0x3FFFFE    Processor Status Word
+        SL:         0o177774,   //                                  Stack Limit Register
         PIR:        0o177772,   //                                  Program Interrupt Request
-        MB:         0o177770,   //                                  Microprogram break
-        CPUERR:     0o177766,   //                                  CPU error
+        MB:         0o177770,   //                                  Microprogram break                          (11/70 only?)
+        CPUERR:     0o177766,   //                                  CPU error                                   (11/70 only?)
+        SYSID:      0o177764,   //                                  System ID Register                          (11/70 only?)
+        SIZE_HI:    0o177762,   //                                  Upper Size Register (always zero)           (11/70 only?)
+        SIZE_LO:    0o177760,   //                                  Lower Size Register (last 32-word block)    (11/70 only?)
+        DISPLAY:    0o177570,   //                                  Console Switch and Display
         MMR0:       0o177572,   // 777572   17777572
         MMR1:       0o177574,   // 777574   17777574
         MMR2:       0o177576,   // 777576   17777576
