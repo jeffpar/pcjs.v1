@@ -234,8 +234,7 @@ var PDP11 = {
      */
     WRITE: {
         NORMAL:     0x0,        // write byte or word normally
-        ZERO:       0x1,        // zero byte or word
-        SIGNEXT:    0x2         // sign-extend a byte to a word
+        SIGNEXT:    0x1         // sign-extend a byte to a word
     },
     CPUERR: {
         RED:        0x0004,     // red zone stack limit
@@ -307,6 +306,10 @@ var PDP11 = {
         SIZE_HI:    0o177762,   //                                  Upper Size Register (always zero)           (11/70 only?)
         SIZE_LO:    0o177760,   //                                  Lower Size Register (last 32-word block)    (11/70 only?)
         DISPLAY:    0o177570,   //                                  Console Switch and Display
+        XBUF:       0o177566,   //                                  Console Terminal: Transmitter Data Buffer Register
+        XCSR:       0o177564,   //                                  Console Terminal: Transmitter Status Register
+        RBUF:       0o177562,   //                                  Console Terminal: Receiver Data Buffer Register
+        RCSR:       0o177560,   //                                  Console Terminal: Receiver Status Register
         MMR0:       0o177572,   // 777572   17777572
         MMR1:       0o177574,   // 777574   17777574
         MMR2:       0o177576,   // 777576   17777576
@@ -407,6 +410,17 @@ var PDP11 = {
         KDSAR5:     0o172372,   //                                  Kernel D Space Address Register 5
         KDSAR6:     0o172374,   //                                  Kernel D Space Address Register 6
         KDSAR7:     0o172376,   //                                  Kernel D Space Address Register 7
+    },
+    DL11: {
+        DELAY:      8,
+        PRI:        4,
+        VEC:        0o64,
+        XCSR: {
+            READY:      0x80,       // Transmitter Ready (read-only)
+            INT_ENABLE: 0x40,       // Transmitter Interrupt Enable (read-write)
+            MAINT:      0x04,       // Maintenance (read-write)
+            BREAK:      0x01        // BREAK (read-write)
+        }
     }
 };
 

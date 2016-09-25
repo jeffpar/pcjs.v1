@@ -204,7 +204,7 @@ DevicePDP11.prototype.initBus = function(cmp, bus, cpu, dbg)
  * readPSW(addr)
  *
  * @this {DevicePDP11}
- * @param {number} addr (eg, PDP11.UNIBUS.PSW)
+ * @param {number} addr (eg, 177776)
  * @return {number}
  */
 DevicePDP11.prototype.readPSW = function(addr)
@@ -217,13 +217,50 @@ DevicePDP11.prototype.readPSW = function(addr)
  *
  * @this {DevicePDP11}
  * @param {number} data
- * @param {number} addr (ie, PDP11.UNIBUS.PSW)
+ * @param {number} addr (eg, 177776)
  */
 DevicePDP11.prototype.writePSW = function(data, addr)
 {
     var maskDisallowed = PDP11.PSW.UNUSED | PDP11.PSW.TF;
     this.cpu.setPSW((data & ~maskDisallowed) | (this.cpu.getPSW() & maskDisallowed));
     this.cpu.opFlags |= PDP11.OPFLAG.SKIP_FLAGS;
+};
+
+/**
+ * readXCSR(addr)
+ *
+ * @this {DevicePDP11}
+ * @param {number} addr (eg, 177564)
+ * @return {number}
+ */
+DevicePDP11.prototype.readXCSR = function(addr)
+{
+    return this.tty.xcsr;
+};
+
+/**
+ * writeXCSR(data, addr)
+ *
+ * @this {DevicePDP11}
+ * @param {number} data
+ * @param {number} addr (eg, 177564)
+ */
+DevicePDP11.prototype.writeXCSR = function(data, addr)
+{
+    /*
+     * If the device is READY and INT_ENABLE is transitioning to *set*, generate an interrupt.
+     */
+    var device = this;
+    if ((this.tty.xcsr & (PDP11.DL11.XCSR.READY | PDP11.DL11.XCSR.INT_ENABLE)) == PDP11.DL11.XCSR.READY && (data & PDP11.DL11.XCSR.INT_ENABLE)) {
+        this.cpu.interrupt(PDP11.DL11.DELAY, PDP11.DL11.PRI, PDP11.DL11.VEC, function() {
+            device.tty.xcsr |= PDP11.DL11.XCSR.READY;
+            return !!(device.tty.xcsr & PDP11.DL11.XCSR.INT_ENABLE);
+        });
+    }
+    /*
+     * In any event, update all bits from data *except* for READY.
+     */
+    this.tty.xcsr = (this.tty.xcsr & PDP11.DL11.XCSR.READY) | (data & ~PDP11.DL11.XCSR.READY);
 };
 
 /**
@@ -295,7 +332,7 @@ DevicePDP11.prototype.rk11_go = function()
             break;
     }
     rk11.rkds = (drive << 13) | (rk11.rkds & 0x1ff0) | ((rk11.rkda % 9) & 0xf);
-    this.cpu.interrupt(20, 5 << 5, 0x90, /*0220*/ function() {
+    this.cpu.interrupt(20, 5, 0x90, /*0220*/ function() {
         rk11.rkcs = (rk11.rkcs & 0xfffe) | 0x80; // turn off go & set done
         return !!(rk11.rkcs & 0x40);
     });
@@ -327,7 +364,7 @@ DevicePDP11.prototype.rk11_end = function(err, meta, block, address, count)
             rk11.rkcs |= 0xc000; // err
             break;
     }
-    this.cpu.interrupt(20, 5 << 5, 0x90, /*0220*/ function() {
+    this.cpu.interrupt(20, 5, 0x90, /*0220*/ function() {
         rk11.rkcs = (rk11.rkcs & 0xfffe) | 0x80; // turn off go & set done
         return !!(rk11.rkcs & 0x40);
     });
@@ -408,7 +445,7 @@ DevicePDP11.prototype.rl11_go = function()
         case 7: // Read data without header check
             break;
     }
-    this.cpu.interrupt(20, 5 << 5, 0x70, /*0160*/ function() {
+    this.cpu.interrupt(20, 5, 0x70, /*0160*/ function() {
         rl11.csr |= 0x81; // turn off go & set ready
         return !!(rl11.csr & 0x40);
     });
@@ -442,7 +479,7 @@ DevicePDP11.prototype.rl11_end = function(err, meta, block, address, count)
             rl11.csr |= 0xa000; // NXM
             break;
     }
-    this.cpu.interrupt(20, 5 << 5, 0x70, /*0160*/ function() {
+    this.cpu.interrupt(20, 5, 0x70, /*0160*/ function() {
         rl11.csr |= 0x81; // turn off go & set ready
         return !!(rl11.csr & 0x40);
     });
@@ -551,7 +588,7 @@ DevicePDP11.prototype.rp11_go = function(drive)
         default:
             break;
     }
-    this.cpu.interrupt(3, 5 << 5, 0xAC, /*0254*/ function() {
+    this.cpu.interrupt(3, 5, 0xAC, /*0254*/ function() {
         rp11.rpcs1 = (rp11.rpcs1 & 0xfffe) | 0x80; // Turn go off and ready on
         rp11.rpds[drive] |= 0x80; // ATA
         return !!(rp11.rpcs1 & 0x40);
@@ -594,7 +631,7 @@ DevicePDP11.prototype.rp11_end = function(err, meta, block, address, count)
             rp11.rpcs1 |= 0xc000; // set SC & TRE
             break;
     }
-    this.cpu.interrupt(20, 5 << 5, 0xAC, /*0254*/ function() {
+    this.cpu.interrupt(20, 5, 0xAC, /*0254*/ function() {
         rp11.rpds[meta.drive] |= 0x80;
         rp11.rpcs1 = (rp11.rpcs1 & 0xfffe) | 0x80; // Turn go off and ready on
         return !!(rp11.rpcs1 & 0x40);
@@ -610,7 +647,7 @@ DevicePDP11.prototype.kw11_interrupt = function()
 {
     this.kw11.csr |= 0x80;
     if (this.kw11.csr & 0x40) {
-        this.cpu.interrupt(0, 6 << 5, 0x40 /*0100*/);
+        this.cpu.interrupt(0, 6, 0x40 /*0100*/);
     }
 };
 
@@ -734,7 +771,7 @@ DevicePDP11.prototype.readData = function(meta, block, address, count)
             return;
         }
         for (word = 0; word < meta.blocksize && count > 0; word++) {
-            if (this.cpu.writeWordByPhysical((meta.mapped? this.cpu.mapUnibus(address) : address), meta.cache[block][word]) < 0) {
+            if (this.cpu.writeWordToPhysical((meta.mapped? this.cpu.mapUnibus(address) : address), meta.cache[block][word]) < 0) {
                 meta.postProcess(2, meta, block, address, count); // NXM
                 return;
             }
@@ -768,7 +805,7 @@ DevicePDP11.prototype.writeData = function(meta, block, address, count)
             }
         }
         for (word = 0; word < meta.blocksize && count > 0; word++) {
-            data = this.cpu.readWordByPhysical((meta.mapped? this.cpu.mapUnibus(address) : address));
+            data = this.cpu.readWordFromPhysical((meta.mapped? this.cpu.mapUnibus(address) : address));
             if (data < 0) {
                 meta.postProcess(2, meta, block, address, count); // NXM
                 return;
@@ -1057,7 +1094,7 @@ DevicePDP11.prototype.access = function(physicalAddress, data, byteFlag)
                         tty.del = 0;
                         }
                         tty.xcsr &= ~0x80; /*0200*/
-                        cpu.interrupt(100, 4 << 5, 0x34, /*064*/ function() {
+                        cpu.interrupt(100, 4, 0x34, /*064*/ function() {
                             tty.xcsr |= 0x80; /*0200*/
                             return !!(tty.xcsr & 0x40); /*0100*/
                         });
@@ -1065,20 +1102,20 @@ DevicePDP11.prototype.access = function(physicalAddress, data, byteFlag)
                     result = 0;
                     break;
                 case 0x3FFF74: /*017777564*/ // console xcsr
-                    if (data < 0) {
-                        result = tty.xcsr;
-                    } else {
-                        result = this.insertData(tty.xcsr, physicalAddress, data, byteFlag);
-                        if (result >= 0) {
-                            if ((tty.xcsr & 0xC0) /*0300*/ == 0x80  /*0200*/&& (result & 0x40) /*0100*/) {
-                                cpu.interrupt(8, 4 << 5, 0x34, /*064*/ function() {
-                                    tty.xcsr |= 0x80; /*0200*/
-                                    return !!(tty.xcsr & 0x40); /*0100*/
-                                });
-                            }
-                            tty.xcsr = (tty.xcsr & 0x80) /*0200*/ | (result & ~0x80) /*0200*/;
-                        }
-                    }
+                    // if (data < 0) {
+                    //     result = tty.xcsr;
+                    // } else {
+                    //     result = this.insertData(tty.xcsr, physicalAddress, data, byteFlag);
+                    //     if (result >= 0) {
+                    //         if ((tty.xcsr & 0xC0) /*0300*/ == 0x80  /*0200*/&& (result & 0x40) /*0100*/) {
+                    //             cpu.interrupt(8, 4, 0x34, /*064*/ function() {
+                    //                 tty.xcsr |= 0x80; /*0200*/
+                    //                 return !!(tty.xcsr & 0x40); /*0100*/
+                    //             });
+                    //         }
+                    //         tty.xcsr = (tty.xcsr & 0x80) /*0200*/ | (result & ~0x80) /*0200*/;
+                    //     }
+                    // }
                     break;
                 case 0x3FFF72: /*017777562*/ // console rbuf
                     result = 0;
@@ -1089,7 +1126,7 @@ DevicePDP11.prototype.access = function(physicalAddress, data, byteFlag)
                             if (tty.rbuf.length > 0) {
                                 setTimeout(function() {
                                     tty.rcsr |= 0x80; /*0200*/
-                                    if (tty.rcsr & 0x40) /*0100*/ cpu.interrupt(40, 4 << 5, 0x30) /*060*/;
+                                    if (tty.rcsr & 0x40) /*0100*/ cpu.interrupt(40, 4, 0x30) /*060*/;
                                 }, 50);
                             }
                         }
@@ -1182,7 +1219,7 @@ DevicePDP11.prototype.access = function(physicalAddress, data, byteFlag)
                             this.rp11_go(idx);
                         } else {
                             if ((result & 0xc0) == 0xc0) {
-                                cpu.interrupt(0, 5 << 5, 0xAC) /*0254*/;
+                                cpu.interrupt(0, 5, 0xAC) /*0254*/;
                             }
                         }
                     }
@@ -1409,7 +1446,12 @@ DevicePDP11.prototype.access = function(physicalAddress, data, byteFlag)
  * ES6 ALERT: As you can see below, I've finally started using computed property names.
  */
 DevicePDP11.UNIBUS_TABLE = {
-    [PDP11.UNIBUS.PSW]: [null, null, DevicePDP11.prototype.readPSW, DevicePDP11.prototype.writePSW]
+    [PDP11.UNIBUS.PSW]: [
+        null, null, DevicePDP11.prototype.readPSW, DevicePDP11.prototype.writePSW
+    ],
+    [PDP11.UNIBUS.XCSR]: [
+        null, null, DevicePDP11.prototype.readXCSR, DevicePDP11.prototype.writeXCSR
+    ]
 };
 
 /**

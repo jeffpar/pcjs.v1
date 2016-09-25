@@ -591,7 +591,7 @@ PDP11.opCLR = function(opCode)
  */
 PDP11.opCLRB = function(opCode)
 {
-    this.updateNZCFlags(this.writeByteByMode(opCode, 0, PDP11.WRITE.ZERO));
+    this.updateNZCFlags(this.writeByteByMode(opCode, 0));
     this.nStepCycles -= 1;
 };
 
