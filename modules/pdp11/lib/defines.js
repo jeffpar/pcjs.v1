@@ -236,19 +236,168 @@ var PDP11 = {
         ZERO:       0x1,        // zero byte or word
         SIGNEXT:    0x2         // sign-extend a byte to a word
     },
+    CPUERR: {
+        RED:        0x0004,     // red zone stack limit
+        YELLOW:     0x0008,     // yellow zone stack limit
+        TIMEOUT:    0x0010,     // UNIBUS timeout error
+        NOMEMORY:   0x0020,     // non-existent memory error
+        ODDADDR:    0x0040,     // odd word address error (as in non-even, not strange)
+        BADHALT:    0x0080      // HALT attempted in USER or SUPER modes
+    },
+    MMR0: {
+        ENABLED:    0x0001,     // address relocation enabled
+        PAGE_NUM:   0x000E,     // page number of last fault
+        PAGE_D:     0x0010,     // last fault occurred in D space
+        PAGE_MODE:  0x0060,     // processor mode as of last fault
+        COMPLETED:  0x0080,     // last instruction completed
+        DSTMODE:    0x0100,     // only destination mode references will be relocated (for diagnostic use)
+        MMU_TRAPS:  0x0200,     // enable MMU traps
+        UNUSED:     0x0C00,
+        TRAP_MMU:   0x1000,     // trap: MMU
+        ABORT_RO:   0x2000,     // abort: read-only
+        ABORT_PL:   0x4000,     // abort: page length
+        ABORT_NR:   0x8000      // abort: non-resident
+    },
+    MMR1: {                     // general purpose auto-inc/auto-dec register
+        REG1_NUM:   0x0007,
+        REG1_DELTA: 0x00F8,
+        REG2_NUM:   0x0700,
+        REG2_DELTA: 0xF800
+    },
+    MMR2: {                     // virtual program counter register
+    },
+    MMR3: {                     // mapping register
+        USER_D:     0x0001,
+        SUPER_D:    0x0002,
+        KERNEL_D:   0x0004,
+        MMU_22BIT:  0x0010,
+        UNIBUS_MAP: 0x0020      // UNIBUS map relocation enabled
+    },
     /*
      * Assorted special (UNIBUS) addresses
+     *
+     * Within the PDP-11's 18-bit address space, of the 0x40000 possible addresses, the top 8Kb (0x2000)
+     * is called the IOPAGE and is reserved for CPU and I/O registers.  The IOPAGE spans 0x3E000-0x3FFFF.
+     *
+     * To map UNIBUS addresses to 22-bit physical addresses, a UNIBUS relocation map is used.  It consists
+     * of 31 double-word registers that each hold a 22-bit base address.  When UNIBUS relocation is enabled,
+     * the top 5 bits of an address select one of the 31 mapping registers, and the bottom 13 bits are then
+     * added to the contents of the selected mapping register.
      *
      * ES6 ALERT: By using octal constants, this is the first place I'm dipping my toe into ECMAScript 6 waters.
      * If you're loading this raw source code into your browser, then by now (2016) you're almost certainly using
      * an ES6-aware browser.  Everyone else should be using code compiled by Google's Closure Compiler, which
-     * automatically produces code that's backward-compatible with ES5.1 (for example, octal constants are converted
-     * to decimal values).
+     * automatically produces code that's backward-compatible with ES5.1 (for example, octal constants are
+     * converted to decimal values).
      *
      * For more details: https://github.com/google/closure-compiler/wiki/ECMAScript6
      */
-    UNIBUS: {       //  22-bit     18-bit   16-bit    22-bit    Description
-        PSW:        0o17777776, // 777776   177776  0x3FFFFE    PSW
+    UNIBUS: {       //16-bit       18-bit     22-bit         Hex    Description
+        PSW:        0o177776,   // 777776   17777776    0x3FFFFE    PSW
+        SL:         0o177774,   //                                  Stack Limit
+        PIR:        0o177772,   //                                  Program Interrupt Request
+        MB:         0o177770,   //                                  Microprogram break
+        CPUERR:     0o177766,   //                                  CPU error
+        MMR0:       0o177572,   // 777572   17777572
+        MMR1:       0o177574,   // 777574   17777574
+        MMR2:       0o177576,   // 777576   17777576
+        MMR3:       0o172516,   // 772516   17772516
+        UISDR0:     0o177600,   //                                  User I Space Descriptor Register 0
+        UISDR1:     0o177602,   //                                  User I Space Descriptor Register 1
+        UISDR2:     0o177604,   //                                  User I Space Descriptor Register 2
+        UISDR3:     0o177606,   //                                  User I Space Descriptor Register 3
+        UISDR4:     0o177610,   //                                  User I Space Descriptor Register 4
+        UISDR5:     0o177612,   //                                  User I Space Descriptor Register 5
+        UISDR6:     0o177614,   //                                  User I Space Descriptor Register 6
+        UISDR7:     0o177616,   //                                  User I Space Descriptor Register 7
+        UDSDR0:     0o177620,   //                                  User D Space Descriptor Register 0
+        UDSDR1:     0o177622,   //                                  User D Space Descriptor Register 1
+        UDSDR2:     0o177624,   //                                  User D Space Descriptor Register 2
+        UDSDR3:     0o177626,   //                                  User D Space Descriptor Register 3
+        UDSDR4:     0o177630,   //                                  User D Space Descriptor Register 4
+        UDSDR5:     0o177632,   //                                  User D Space Descriptor Register 5
+        UDSDR6:     0o177634,   //                                  User D Space Descriptor Register 6
+        UDSDR7:     0o177636,   //                                  User D Space Descriptor Register 7
+        UISAR0:     0o177640,   //                                  User I Space Address Register 0
+        UISAR1:     0o177642,   //                                  User I Space Address Register 1
+        UISAR2:     0o177644,   //                                  User I Space Address Register 2
+        UISAR3:     0o177646,   //                                  User I Space Address Register 3
+        UISAR4:     0o177650,   //                                  User I Space Address Register 4
+        UISAR5:     0o177652,   //                                  User I Space Address Register 5
+        UISAR6:     0o177654,   //                                  User I Space Address Register 6
+        UISAR7:     0o177656,   //                                  User I Space Address Register 7
+        UDSAR0:     0o177660,   //                                  User D Space Address Register 0
+        UDSAR1:     0o177662,   //                                  User D Space Address Register 1
+        UDSAR2:     0o177664,   //                                  User D Space Address Register 2
+        UDSAR3:     0o177666,   //                                  User D Space Address Register 3
+        UDSAR4:     0o177670,   //                                  User D Space Address Register 4
+        UDSAR5:     0o177672,   //                                  User D Space Address Register 5
+        UDSAR6:     0o177674,   //                                  User D Space Address Register 6
+        UDSAR7:     0o177676,   //                                  User D Space Address Register 7
+        SISDR0:     0o172200,   //                                  Supervisor I Space Descriptor Register 0
+        SISDR1:     0o172202,   //                                  Supervisor I Space Descriptor Register 1
+        SISDR2:     0o172204,   //                                  Supervisor I Space Descriptor Register 2
+        SISDR3:     0o172206,   //                                  Supervisor I Space Descriptor Register 3
+        SISDR4:     0o172210,   //                                  Supervisor I Space Descriptor Register 4
+        SISDR5:     0o172212,   //                                  Supervisor I Space Descriptor Register 5
+        SISDR6:     0o172214,   //                                  Supervisor I Space Descriptor Register 6
+        SISDR7:     0o172216,   //                                  Supervisor I Space Descriptor Register 7
+        SDSDR0:     0o172220,   //                                  Supervisor D Space Descriptor Register 0
+        SDSDR1:     0o172222,   //                                  Supervisor D Space Descriptor Register 1
+        SDSDR2:     0o172224,   //                                  Supervisor D Space Descriptor Register 2
+        SDSDR3:     0o172226,   //                                  Supervisor D Space Descriptor Register 3
+        SDSDR4:     0o172230,   //                                  Supervisor D Space Descriptor Register 4
+        SDSDR5:     0o172232,   //                                  Supervisor D Space Descriptor Register 5
+        SDSDR6:     0o172234,   //                                  Supervisor D Space Descriptor Register 6
+        SDSDR7:     0o172236,   //                                  Supervisor D Space Descriptor Register 7
+        SISAR0:     0o172240,   //                                  Supervisor I Space Address Register 0
+        SISAR1:     0o172242,   //                                  Supervisor I Space Address Register 1
+        SISAR2:     0o172244,   //                                  Supervisor I Space Address Register 2
+        SISAR3:     0o172246,   //                                  Supervisor I Space Address Register 3
+        SISAR4:     0o172250,   //                                  Supervisor I Space Address Register 4
+        SISAR5:     0o172252,   //                                  Supervisor I Space Address Register 5
+        SISAR6:     0o172254,   //                                  Supervisor I Space Address Register 6
+        SISAR7:     0o172256,   //                                  Supervisor I Space Address Register 7
+        SDSAR0:     0o172260,   //                                  Supervisor D Space Address Register 0
+        SDSAR1:     0o172262,   //                                  Supervisor D Space Address Register 1
+        SDSAR2:     0o172264,   //                                  Supervisor D Space Address Register 2
+        SDSAR3:     0o172266,   //                                  Supervisor D Space Address Register 3
+        SDSAR4:     0o172270,   //                                  Supervisor D Space Address Register 4
+        SDSAR5:     0o172272,   //                                  Supervisor D Space Address Register 5
+        SDSAR6:     0o172274,   //                                  Supervisor D Space Address Register 6
+        SDSAR7:     0o172276,   //                                  Supervisor D Space Address Register 7
+        KISDR0:     0o172300,   //                                  Kernel I Space Descriptor Register 0
+        KISDR1:     0o172302,   //                                  Kernel I Space Descriptor Register 1
+        KISDR2:     0o172304,   //                                  Kernel I Space Descriptor Register 2
+        KISDR3:     0o172306,   //                                  Kernel I Space Descriptor Register 3
+        KISDR4:     0o172310,   //                                  Kernel I Space Descriptor Register 4
+        KISDR5:     0o172312,   //                                  Kernel I Space Descriptor Register 5
+        KISDR6:     0o172314,   //                                  Kernel I Space Descriptor Register 6
+        KISDR7:     0o172316,   //                                  Kernel I Space Descriptor Register 7
+        KDSDR0:     0o172320,   //                                  Kernel D Space Descriptor Register 0
+        KDSDR1:     0o172322,   //                                  Kernel D Space Descriptor Register 1
+        KDSDR2:     0o172324,   //                                  Kernel D Space Descriptor Register 2
+        KDSDR3:     0o172326,   //                                  Kernel D Space Descriptor Register 3
+        KDSDR4:     0o172330,   //                                  Kernel D Space Descriptor Register 4
+        KDSDR5:     0o172332,   //                                  Kernel D Space Descriptor Register 5
+        KDSDR6:     0o172334,   //                                  Kernel D Space Descriptor Register 6
+        KDSDR7:     0o172336,   //                                  Kernel D Space Descriptor Register 7
+        KISAR0:     0o172340,   //                                  Kernel I Space Address Register 0
+        KISAR1:     0o172342,   //                                  Kernel I Space Address Register 1
+        KISAR2:     0o172344,   //                                  Kernel I Space Address Register 2
+        KISAR3:     0o172346,   //                                  Kernel I Space Address Register 3
+        KISAR4:     0o172350,   //                                  Kernel I Space Address Register 4
+        KISAR5:     0o172352,   //                                  Kernel I Space Address Register 5
+        KISAR6:     0o172354,   //                                  Kernel I Space Address Register 6
+        KISAR7:     0o172356,   //                                  Kernel I Space Address Register 7
+        KDSAR0:     0o172360,   //                                  Kernel D Space Address Register 0
+        KDSAR1:     0o172362,   //                                  Kernel D Space Address Register 1
+        KDSAR2:     0o172364,   //                                  Kernel D Space Address Register 2
+        KDSAR3:     0o172366,   //                                  Kernel D Space Address Register 3
+        KDSAR4:     0o172370,   //                                  Kernel D Space Address Register 4
+        KDSAR5:     0o172372,   //                                  Kernel D Space Address Register 5
+        KDSAR6:     0o172374,   //                                  Kernel D Space Address Register 6
+        KDSAR7:     0o172376,   //                                  Kernel D Space Address Register 7
     }
 };
 

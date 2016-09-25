@@ -204,7 +204,7 @@ DevicePDP11.prototype.initBus = function(cmp, bus, cpu, dbg)
  * readPSW(addr)
  *
  * @this {DevicePDP11}
- * @param {number} addr (ie, PDP11.UNIBUS.PSW)
+ * @param {number} addr (eg, PDP11.UNIBUS.PSW)
  * @return {number}
  */
 DevicePDP11.prototype.readPSW = function(addr)
@@ -697,7 +697,7 @@ DevicePDP11.prototype.insertData = function(original, physicalAddress, data, byt
     if (physicalAddress & 1) {
         if (!byteFlag) {
             //log.push("TRAP 4 201 " + physicalAddress.toString(8) + " " + data.toString(8));
-            return this.cpu.trap(4, 122);
+            return this.cpu.trap(PDP11.TRAP.BUS_ERROR, 122);
         }
         if (data >= 0) {
             data = ((data << 8) & 0xff00) | (original & 0xff);
@@ -821,7 +821,7 @@ DevicePDP11.prototype.access = function(physicalAddress, data, byteFlag)
         case 0x3FFFC0: /*017777700*/ // 017777700 - 017777777
             switch (physicalAddress & ~1) {
                 /*
-                 * Superseded by UNIBUS_TABLE (much more of this code will be commented out
+                 * Superseded by UNIBUS_TABLE (more of this code will be commented out
                  * as it is replaced by read/write handlers in the UNIBUS_TABLE; stay tuned).
                  *
                 case 0x3FFFFE: // 017777776 // PSW
@@ -840,19 +840,19 @@ DevicePDP11.prototype.access = function(physicalAddress, data, byteFlag)
                 */
                 case 0x3FFFFC: /*017777774*/ // stack limit
                     if (data < 0) {
-                        result = cpu.stackLimit & 0xff00;
+                        result = cpu.regSL & 0xff00;
                     } else {
                         if (physicalAddress & 1) {
                             data = data << 8;
                         }
-                        cpu.stackLimit = data | 0xff;
+                        cpu.regSL = data | 0xff;
                         result = 0;
                     }
-                    //log.push("stacklimit access "+cpu.stackLimit.toString(8));
+                    //log.push("stack limit access "+cpu.regSL.toString(8));
                     break;
                 case 0x3FFFFA: /*017777772*/ // PIR
                     if (data < 0) {
-                        result = cpu.pir;
+                        result = cpu.regPIR;
                     } else {
                         if (physicalAddress & 1) {
                             data = data << 8;
@@ -864,28 +864,28 @@ DevicePDP11.prototype.access = function(physicalAddress, data, byteFlag)
                                 result += 0x22;
                             } while (idx >>= 1);
                         }
-                        cpu.pir = result;
+                        cpu.regPIR = result;
                         cpu.priorityReview = 2;
                     }
                     break;
                 case 0x3FFFF6: /*017777766*/ // CPU error
-                    if (cpu.cpuType !== 70) return cpu.trap(4, 222);
+                    if (cpu.cpuType !== 70) return cpu.trap(PDP11.TRAP.BUS_ERROR, 222);
                     if (data < 0) {
-                        result = cpu.CPU_Error;
+                        result = cpu.regCPUErr;
                     } else {
-                        result = cpu.CPU_Error = 0; // Always writes as zero?
+                        result = cpu.regCPUErr = 0;     // TODO: Always writes as zero?
                     }
                     break;
                 case 0x3FFFF4: /*017777764*/ // System I/D
-                    if (cpu.cpuType !== 70) return cpu.trap(4, 224);
+                    if (cpu.cpuType !== 70) return cpu.trap(PDP11.TRAP.BUS_ERROR, 224);
                     result = 1;
                     break;
                 case 0x3FFFF2: /*017777762*/ // Upper size
-                    if (cpu.cpuType !== 70) return cpu.trap(4, 226);
+                    if (cpu.cpuType !== 70) return cpu.trap(PDP11.TRAP.BUS_ERROR, 226);
                     result = 0;
                     break;
                 case 0x3FFFF0: /*017777760*/ // Lower size
-                    if (cpu.cpuType !== 70) return cpu.trap(4, 228);
+                    if (cpu.cpuType !== 70) return cpu.trap(PDP11.TRAP.BUS_ERROR, 228);
                     result = (BusPDP11.MAX_MEMORY >> 6) - 1;
                     break;
                 case 0x3FFFF8: /*017777770*/ // Microprogram break
@@ -899,7 +899,7 @@ DevicePDP11.prototype.access = function(physicalAddress, data, byteFlag)
                 case 0x3FFFE4: /*017777744*/ // Memory system error
                 case 0x3FFFE2: /*017777742*/ // High error address
                 case 0x3FFFE0: /*017777740*/ // Low error address
-                    if (cpu.cpuType !== 70) return cpu.trap(4, 232);
+                    if (cpu.cpuType !== 70) return cpu.trap(PDP11.TRAP.BUS_ERROR, 232);
                     idx = (physicalAddress - 0x3FFFE0) /*017777740*/ >> 1;
                     if (data < 0) {
                         result = cpu.controlReg[idx];
@@ -968,8 +968,8 @@ DevicePDP11.prototype.access = function(physicalAddress, data, byteFlag)
                     }
                     return result;
                 default:
-                    cpu.CPU_Error |= 0x10;
-                    return cpu.trap(4, 124);
+                    cpu.regCPUErr |= PDP11.CPUERR.TIMEOUT;
+                    return cpu.trap(PDP11.TRAP.BUS_ERROR, 124);
             }
             break;
         case 0x3FFF80: /*017777600*/ // 017777600 - 017777677 MMU user mode Map
@@ -1121,8 +1121,8 @@ DevicePDP11.prototype.access = function(physicalAddress, data, byteFlag)
                     }
                     break;
                 default:
-                    cpu.CPU_Error |= 0x10;
-                    return cpu.trap(4, 126);
+                    cpu.regCPUErr |= PDP11.CPUERR.TIMEOUT;
+                    return cpu.trap(PDP11.TRAP.BUS_ERROR, 126);
             }
             break;
         case 0x3FFF00: /*017777400*/ // 017777400 - 017777477
@@ -1164,8 +1164,8 @@ DevicePDP11.prototype.access = function(physicalAddress, data, byteFlag)
                     if (result >= 0) rk11.rkdb = result;
                     break;
                 default:
-                    cpu.CPU_Error |= 0x10;
-                    return cpu.trap(4, 128);
+                    cpu.regCPUErr |= PDP11.CPUERR.TIMEOUT;
+                    return cpu.trap(PDP11.TRAP.BUS_ERROR, 128);
             }
             break;
         case 0x3FFDC0: /*017776700*/ // 017777600 - 017777677 rp11 controller
@@ -1269,8 +1269,8 @@ DevicePDP11.prototype.access = function(physicalAddress, data, byteFlag)
                     if (result >= 0) rp11.rpcs3 = result;
                     break;
                 default:
-                    cpu.CPU_Error |= 0x10;
-                    return cpu.trap(4, 132);
+                    cpu.regCPUErr |= PDP11.CPUERR.TIMEOUT;
+                    return cpu.trap(PDP11.TRAP.BUS_ERROR, 132);
             }
             break;
         case 0x3FF900: /*017774400*/ // 017774400 - 017774477
@@ -1308,8 +1308,8 @@ DevicePDP11.prototype.access = function(physicalAddress, data, byteFlag)
                     }
                     break;
                 default:
-                    cpu.CPU_Error |= 0x10;
-                    return cpu.trap(4, 134);
+                    cpu.regCPUErr |= PDP11.CPUERR.TIMEOUT;
+                    return cpu.trap(PDP11.TRAP.BUS_ERROR, 134);
             }
             break;
         case 0x3FF540: /*017772500*/ // 017772500 - 017772577
@@ -1334,8 +1334,8 @@ DevicePDP11.prototype.access = function(physicalAddress, data, byteFlag)
                     }
                     break;
                 default:
-                    cpu.CPU_Error |= 0x10;
-                    return cpu.trap(4, 136);
+                    cpu.regCPUErr |= PDP11.CPUERR.TIMEOUT;
+                    return cpu.trap(PDP11.TRAP.BUS_ERROR, 136);
             }
             break;
         case 0x3FF4C0: /*017772300*/ // 017772300 - 017772377 MMU kernel mode Map
@@ -1356,7 +1356,7 @@ DevicePDP11.prototype.access = function(physicalAddress, data, byteFlag)
             break;
         case 0x3FF0C0: /*017770300*/ // 017770300 - 017770377 Unibus Map
         case 0x3FF080: /*017770200*/ // 017770200 - 017770277 Unibus Map
-            if (cpu.cpuType !== 70) return cpu.trap(4, 234);
+            if (cpu.cpuType !== 70) return cpu.trap(PDP11.TRAP.BUS_ERROR, 234);
             idx = (physicalAddress >> 2) & 0x1f;
             result = cpu.unibusMap[idx];
             if (physicalAddress & 0x2) /*02*/ result = result >> 16;
@@ -1384,13 +1384,13 @@ DevicePDP11.prototype.access = function(physicalAddress, data, byteFlag)
                 idx = (physicalAddress >> 1) & 0xff;
                 result = DevicePDP11.M9312[idx];
             } else {
-                cpu.CPU_Error |= 0x10;
-                return cpu.trap(4, 138);
+                cpu.regCPUErr |= PDP11.CPUERR.TIMEOUT;
+                return cpu.trap(PDP11.TRAP.BUS_ERROR, 138);
             }
             break;
         default:
-            cpu.CPU_Error |= 0x10;
-            return cpu.trap(4, 142);
+            cpu.regCPUErr |= PDP11.CPUERR.TIMEOUT;
+            return cpu.trap(PDP11.TRAP.BUS_ERROR, 142);
     }
     if (byteFlag && result >= 0) { // make any required byte adjustment
         if ((physicalAddress & 1)) {
@@ -1405,8 +1405,12 @@ DevicePDP11.prototype.access = function(physicalAddress, data, byteFlag)
     return result;
 };
 
-DevicePDP11.UNIBUS_TABLE = {};
-DevicePDP11.UNIBUS_TABLE[PDP11.UNIBUS.PSW] = [null, null, DevicePDP11.prototype.readPSW, DevicePDP11.prototype.writePSW];
+/*
+ * ES6 ALERT: As you can see below, I've finally started using computed property names.
+ */
+DevicePDP11.UNIBUS_TABLE = {
+    [PDP11.UNIBUS.PSW]: [null, null, DevicePDP11.prototype.readPSW, DevicePDP11.prototype.writePSW]
+};
 
 /**
  * DevicePDP11.init()
