@@ -282,6 +282,8 @@ module.exports = function(grunt) {
                     externs: pkg.closureCompilerExterns,
                     define: ["'SITEHOST=\"www.pcjs.org\"'", "'COMPILED=true'", "'DEBUG=false'"],
                     warning_level: "verbose",
+                    language_in: "ES6",                 // this is now the default, just documenting our requirements
+                    language_out: "ES5",                // this is also the default
                     // jscomp_off: ["checkTypes", "fileoverviewTags"],
                     // summary_detail_level: 3,
                     // formatting: "PRETTY_PRINT --debug",

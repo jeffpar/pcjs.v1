@@ -114,8 +114,10 @@ gulp.task('compile', function() {
             },
             externs: [{src: sExterns}],
             warningLevel: 'VERBOSE',
+            languageIn: "ES6",                          // this is now the default, just documenting our requirements
+            languageOut: "ES5",                         // this is also the default
             outputWrapper: '(function(){%output%})()',
-            jsOutputFile: pcX86ReleaseFile,                             // TODO: This must vary according to debugger/non-debugger releases
+            jsOutputFile: pcX86ReleaseFile,             // TODO: This must vary according to debugger/non-debugger releases
             createSourceMap: false
         }))
         .pipe(gulp.dest(pcX86ReleaseDir));
