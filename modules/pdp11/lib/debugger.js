@@ -1872,7 +1872,7 @@ if (DEBUGGER) {
      * @this {DebuggerPDP11}
      * @param {DbgAddrPDP11} dbgAddr
      * @param {string} [sComment] is an associated comment
-     * @param {number} [nSequence] is an associated sequence number, undefined if none
+     * @param {number|null} [nSequence] is an associated sequence number, undefined if none
      * @return {string} (and dbgAddr is updated to the next instruction)
      */
     DebuggerPDP11.prototype.getInstruction = function(dbgAddr, sComment, nSequence)
@@ -1911,7 +1911,11 @@ if (DEBUGGER) {
              * operand, and the second element is a comment containing an alternate representation of the operand.
              */
             if (typeof sOperand != "string") {
-                if (!sComment) sComment = sOperand[1];
+                /*
+                 * TODO: Stop overriding the comment and sequence values once cycle counts become legitimate.
+                 */
+                /* if (!sComment) */ sComment = sOperand[1];
+                nSequence = null;
                 sOperand = sOperand[0];
             }
 
