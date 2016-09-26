@@ -302,55 +302,6 @@ var PDP11 = {
      * For more details: https://github.com/google/closure-compiler/wiki/ECMAScript6
      */
     UNIBUS: {       //16-bit       18-bit     22-bit         Hex    Description
-        PSW:        0o177776,   // 777776   17777776    0x3FFFFE    Processor Status Word
-        SL:         0o177774,   //                                  Stack Limit Register
-        PIR:        0o177772,   //                                  Program Interrupt Request
-        MB:         0o177770,   //                                  Microprogram break                          (11/70 only?)
-        CPUERR:     0o177766,   //                                  CPU error                                   (11/70 only?)
-        SYSID:      0o177764,   //                                  System ID Register                          (11/70 only?)
-        SIZE_HI:    0o177762,   //                                  Upper Size Register (always zero)           (11/70 only?)
-        SIZE_LO:    0o177760,   //                                  Lower Size Register (last 32-word block)    (11/70 only?)
-        DISPLAY:    0o177570,   //                                  Console Switch and Display
-        XBUF:       0o177566,   //                                  Console Terminal: Transmitter Data Buffer Register
-        XCSR:       0o177564,   //                                  Console Terminal: Transmitter Status Register
-        RBUF:       0o177562,   //                                  Console Terminal: Receiver Data Buffer Register
-        RCSR:       0o177560,   //                                  Console Terminal: Receiver Status Register
-        MMR0:       0o177572,   // 777572   17777572
-        MMR1:       0o177574,   // 777574   17777574
-        MMR2:       0o177576,   // 777576   17777576
-        MMR3:       0o172516,   // 772516   17772516
-        UISDR0:     0o177600,   //                                  User I Space Descriptor Register 0
-        UISDR1:     0o177602,   //                                  User I Space Descriptor Register 1
-        UISDR2:     0o177604,   //                                  User I Space Descriptor Register 2
-        UISDR3:     0o177606,   //                                  User I Space Descriptor Register 3
-        UISDR4:     0o177610,   //                                  User I Space Descriptor Register 4
-        UISDR5:     0o177612,   //                                  User I Space Descriptor Register 5
-        UISDR6:     0o177614,   //                                  User I Space Descriptor Register 6
-        UISDR7:     0o177616,   //                                  User I Space Descriptor Register 7
-        UDSDR0:     0o177620,   //                                  User D Space Descriptor Register 0
-        UDSDR1:     0o177622,   //                                  User D Space Descriptor Register 1
-        UDSDR2:     0o177624,   //                                  User D Space Descriptor Register 2
-        UDSDR3:     0o177626,   //                                  User D Space Descriptor Register 3
-        UDSDR4:     0o177630,   //                                  User D Space Descriptor Register 4
-        UDSDR5:     0o177632,   //                                  User D Space Descriptor Register 5
-        UDSDR6:     0o177634,   //                                  User D Space Descriptor Register 6
-        UDSDR7:     0o177636,   //                                  User D Space Descriptor Register 7
-        UISAR0:     0o177640,   //                                  User I Space Address Register 0
-        UISAR1:     0o177642,   //                                  User I Space Address Register 1
-        UISAR2:     0o177644,   //                                  User I Space Address Register 2
-        UISAR3:     0o177646,   //                                  User I Space Address Register 3
-        UISAR4:     0o177650,   //                                  User I Space Address Register 4
-        UISAR5:     0o177652,   //                                  User I Space Address Register 5
-        UISAR6:     0o177654,   //                                  User I Space Address Register 6
-        UISAR7:     0o177656,   //                                  User I Space Address Register 7
-        UDSAR0:     0o177660,   //                                  User D Space Address Register 0
-        UDSAR1:     0o177662,   //                                  User D Space Address Register 1
-        UDSAR2:     0o177664,   //                                  User D Space Address Register 2
-        UDSAR3:     0o177666,   //                                  User D Space Address Register 3
-        UDSAR4:     0o177670,   //                                  User D Space Address Register 4
-        UDSAR5:     0o177672,   //                                  User D Space Address Register 5
-        UDSAR6:     0o177674,   //                                  User D Space Address Register 6
-        UDSAR7:     0o177676,   //                                  User D Space Address Register 7
         SISDR0:     0o172200,   //                                  Supervisor I Space Descriptor Register 0
         SISDR1:     0o172202,   //                                  Supervisor I Space Descriptor Register 1
         SISDR2:     0o172204,   //                                  Supervisor I Space Descriptor Register 2
@@ -415,8 +366,63 @@ var PDP11 = {
         KDSAR5:     0o172372,   //                                  Kernel D Space Address Register 5
         KDSAR6:     0o172374,   //                                  Kernel D Space Address Register 6
         KDSAR7:     0o172376,   //                                  Kernel D Space Address Register 7
+
+        MMR3:       0o172516,   // 772516   17772516
+
+        XBUF:       0o177566,   //                                  Console Terminal: Transmitter Data Buffer Register
+        XCSR:       0o177564,   //                                  Console Terminal: Transmitter Status Register
+        RBUF:       0o177562,   //                                  Console Terminal: Receiver Data Buffer Register
+        RCSR:       0o177560,   //                                  Console Terminal: Receiver Status Register
+        LKS:        0o177546,   //                                  KW11-L Clock Status
+        DISPLAY:    0o177570,   //                                  Console Switch and Display
+
+        MMR0:       0o177572,   // 777572   17777572
+        MMR1:       0o177574,   // 777574   17777574
+        MMR2:       0o177576,   // 777576   17777576
+
+        UISDR0:     0o177600,   //                                  User I Space Descriptor Register 0
+        UISDR1:     0o177602,   //                                  User I Space Descriptor Register 1
+        UISDR2:     0o177604,   //                                  User I Space Descriptor Register 2
+        UISDR3:     0o177606,   //                                  User I Space Descriptor Register 3
+        UISDR4:     0o177610,   //                                  User I Space Descriptor Register 4
+        UISDR5:     0o177612,   //                                  User I Space Descriptor Register 5
+        UISDR6:     0o177614,   //                                  User I Space Descriptor Register 6
+        UISDR7:     0o177616,   //                                  User I Space Descriptor Register 7
+        UDSDR0:     0o177620,   //                                  User D Space Descriptor Register 0
+        UDSDR1:     0o177622,   //                                  User D Space Descriptor Register 1
+        UDSDR2:     0o177624,   //                                  User D Space Descriptor Register 2
+        UDSDR3:     0o177626,   //                                  User D Space Descriptor Register 3
+        UDSDR4:     0o177630,   //                                  User D Space Descriptor Register 4
+        UDSDR5:     0o177632,   //                                  User D Space Descriptor Register 5
+        UDSDR6:     0o177634,   //                                  User D Space Descriptor Register 6
+        UDSDR7:     0o177636,   //                                  User D Space Descriptor Register 7
+        UISAR0:     0o177640,   //                                  User I Space Address Register 0
+        UISAR1:     0o177642,   //                                  User I Space Address Register 1
+        UISAR2:     0o177644,   //                                  User I Space Address Register 2
+        UISAR3:     0o177646,   //                                  User I Space Address Register 3
+        UISAR4:     0o177650,   //                                  User I Space Address Register 4
+        UISAR5:     0o177652,   //                                  User I Space Address Register 5
+        UISAR6:     0o177654,   //                                  User I Space Address Register 6
+        UISAR7:     0o177656,   //                                  User I Space Address Register 7
+        UDSAR0:     0o177660,   //                                  User D Space Address Register 0
+        UDSAR1:     0o177662,   //                                  User D Space Address Register 1
+        UDSAR2:     0o177664,   //                                  User D Space Address Register 2
+        UDSAR3:     0o177666,   //                                  User D Space Address Register 3
+        UDSAR4:     0o177670,   //                                  User D Space Address Register 4
+        UDSAR5:     0o177672,   //                                  User D Space Address Register 5
+        UDSAR6:     0o177674,   //                                  User D Space Address Register 6
+        UDSAR7:     0o177676,   //                                  User D Space Address Register 7
+
+        SIZE_LO:    0o177760,   //                                  Lower Size Register (last 32-word block)    (11/70 only?)
+        SIZE_HI:    0o177762,   //                                  Upper Size Register (always zero)           (11/70 only?)
+        SYSID:      0o177764,   //                                  System ID Register                          (11/70 only?)
+        CPUERR:     0o177766,   //                                  CPU error                                   (11/70 only?)
+        MB:         0o177770,   //                                  Microprogram break                          (11/70 only?)
+        PIR:        0o177772,   //                                  Program Interrupt Request
+        SL:         0o177774,   //                                  Stack Limit Register
+        PSW:        0o177776    // 777776   17777776    0x3FFFFE    Processor Status Word
     },
-    DL11: {
+    DL11: {                         // SERIAL LINE INTERFACE
         DELAY:      8,
         PRI:        4,
         VEC:        0o64,
@@ -425,6 +431,15 @@ var PDP11 = {
             INT_ENABLE: 0x40,       // Transmitter Interrupt Enable (read-write)
             MAINT:      0x04,       // Maintenance (read-write)
             BREAK:      0x01        // BREAK (read-write)
+        }
+    },
+    KW11: {                         // KW11-L LINE TIME CLOCK
+        DELAY:      0,
+        PRI:        6,
+        VEC:        0o100,
+        LKS: {
+            INT_ENABLE: 0x40,
+            MONITOR:    0x80
         }
     }
 };
