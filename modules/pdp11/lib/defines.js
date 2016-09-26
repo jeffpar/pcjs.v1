@@ -203,6 +203,10 @@ var PDP11 = {
         MASK:       0x0FC0,
         SHIFT:      6
     },
+    REG: {
+        SP:         6,
+        PC:         7,
+    },
     /*
      * PDP-11 trap vectors
      */
@@ -222,12 +226,13 @@ var PDP11 = {
      * Internal memory access flags
      */
     ACCESS: {
-        WORD:       0x0,
-        BYTE:       0x1,
-        READ:       0x2,
-        WRITE:      0x4,
-        UPDATE:     0x6,
-        DSPACE:     0x10000     // set bit 17 in any 16-bit virtual address that refers to D space (as opposed to I space)
+        WORD:       0x00,
+        BYTE:       0x01,
+        READ:       0x02,
+        WRITE:      0x04,
+        UPDATE:     0x06,
+        VIRT:       0x08,       // getVirtualByMode() leaves bit 17 clear if this is set (otherwise the caller would have to clear it again)
+        DSPACE:     0x10000,    // getVirtualByMode() sets bit 17 in any 16-bit virtual address that refers to D space (as opposed to I space)
     },
     /*
      * Internal flags passed to writeByteByMode(), etc.

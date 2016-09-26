@@ -854,10 +854,11 @@ PDP11.opIOT = function(opCode)
  */
 PDP11.opJSR = function(opCode)
 {
-    /*
-     * TODO: Implement
-     */
-    this.regOp = -1;
+    var addr = this.getVirtualByMode(opCode, PDP11.ACCESS.VIRT);
+    var reg = (opCode >> PDP11.SRCMODE.SHIFT) & PDP11.OPREG.MASK;
+    this.pushWord(this.regsGen[reg]);
+    this.regsGen[reg] = this.regsGen[PDP11.REG.PC];
+    this.regsGen[PDP11.REG.PC] = addr;
     this.nStepCycles -= 1;
 };
 

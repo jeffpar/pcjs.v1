@@ -48,8 +48,8 @@ if (NODE) {
  *      name: the name of the device to be supported (eg, "unibus" for generic UNIBUS support)
  *
  * TODO: This is currently a "catch-all" device; ideally, each of the assorted devices emulated here
- * (eg, KW11, RK11, RL11, etc) would be a separate component.  But because we're in the middle of porting
- * all this code from a common module (iopage.js), that's the way it is.
+ * (eg, DL11, KW11, RK11, RL11, etc) would be a separate component.  But because we're in the middle of
+ * porting all this code from a common module (iopage.js), that's the way it is.
  *
  * @constructor
  * @extends Component
@@ -63,7 +63,7 @@ function DevicePDP11(parmsDevice)
     this.tty = {
         rbuf: [],
         rcsr: 0,
-        xcsr: 0x80, /*0200*/
+        xcsr: PDP11.DL11.XCSR.READY,
         delCode: 127,
         del: 0
     };
@@ -248,17 +248,17 @@ DevicePDP11.prototype.readXCSR = function(addr)
 DevicePDP11.prototype.writeXCSR = function(data, addr)
 {
     /*
-     * If the device is READY and INT_ENABLE is transitioning to *set*, generate an interrupt.
+     * If the device is READY, and INT_ENABLE is transitioning to *set*, then generate an interrupt.
      */
-    var device = this;
     if ((this.tty.xcsr & (PDP11.DL11.XCSR.READY | PDP11.DL11.XCSR.INT_ENABLE)) == PDP11.DL11.XCSR.READY && (data & PDP11.DL11.XCSR.INT_ENABLE)) {
+        var device = this;
         this.cpu.interrupt(PDP11.DL11.DELAY, PDP11.DL11.PRI, PDP11.DL11.VEC, function() {
             device.tty.xcsr |= PDP11.DL11.XCSR.READY;
             return !!(device.tty.xcsr & PDP11.DL11.XCSR.INT_ENABLE);
         });
     }
     /*
-     * In any event, update all bits from data *except* for READY.
+     * In any event, propagate all bits from data *except* for READY.
      */
     this.tty.xcsr = (this.tty.xcsr & PDP11.DL11.XCSR.READY) | (data & ~PDP11.DL11.XCSR.READY);
 };
