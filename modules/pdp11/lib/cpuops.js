@@ -267,10 +267,7 @@ PDP11.opASRB = function(opCode)
  */
 PDP11.opBCC = function(opCode)
 {
-    /*
-     * TODO: Implement
-     */
-    this.regOp = -1;
+    if (!this.getCF()) this.regsGen[7] = this.branch(opCode);
     this.nStepCycles -= 1;
 };
 
@@ -282,10 +279,7 @@ PDP11.opBCC = function(opCode)
  */
 PDP11.opBCS = function(opCode)
 {
-    /*
-     * TODO: Implement
-     */
-    this.regOp = -1;
+    if (this.getCF()) this.regsGen[7] = this.branch(opCode);
     this.nStepCycles -= 1;
 };
 
@@ -369,10 +363,7 @@ PDP11.opBITB = function(opCode)
  */
 PDP11.opBEQ = function(opCode)
 {
-    /*
-     * TODO: Implement
-     */
-    this.regOp = -1;
+    if (this.getZF()) this.regsGen[7] = this.branch(opCode);
     this.nStepCycles -= 1;
 };
 
@@ -384,10 +375,7 @@ PDP11.opBEQ = function(opCode)
  */
 PDP11.opBGE = function(opCode)
 {
-    /*
-     * TODO: Implement
-     */
-    this.regOp = -1;
+    if (!this.getNF() == !this.getVF()) this.regsGen[7] = this.branch(opCode);
     this.nStepCycles -= 1;
 };
 
@@ -399,10 +387,7 @@ PDP11.opBGE = function(opCode)
  */
 PDP11.opBGT = function(opCode)
 {
-    /*
-     * TODO: Implement
-     */
-    this.regOp = -1;
+    if (!this.getZF() && (!this.getNF() == !this.getVF())) this.regsGen[7] = this.branch(opCode);
     this.nStepCycles -= 1;
 };
 
@@ -414,10 +399,7 @@ PDP11.opBGT = function(opCode)
  */
 PDP11.opBHI = function(opCode)
 {
-    /*
-     * TODO: Implement
-     */
-    this.regOp = -1;
+    if (!this.getCF() && !this.getZF()) this.regsGen[7] = this.branch(opCode);
     this.nStepCycles -= 1;
 };
 
@@ -429,10 +411,7 @@ PDP11.opBHI = function(opCode)
  */
 PDP11.opBLE = function(opCode)
 {
-    /*
-     * TODO: Implement
-     */
-    this.regOp = -1;
+    if (this.getZF() || (!this.getNF() != !this.getVF())) this.regsGen[7] = this.branch(opCode);
     this.nStepCycles -= 1;
 };
 
@@ -444,10 +423,7 @@ PDP11.opBLE = function(opCode)
  */
 PDP11.opBLOS = function(opCode)
 {
-    /*
-     * TODO: Implement
-     */
-    this.regOp = -1;
+    if (this.getCF() || this.getZF()) this.regsGen[7] = this.branch(opCode);
     this.nStepCycles -= 1;
 };
 
@@ -459,10 +435,7 @@ PDP11.opBLOS = function(opCode)
  */
 PDP11.opBLT = function(opCode)
 {
-    /*
-     * TODO: Implement
-     */
-    this.regOp = -1;
+    if (!this.getNF() != !this.getVF()) this.regsGen[7] = this.branch(opCode);
     this.nStepCycles -= 1;
 };
 
@@ -474,10 +447,7 @@ PDP11.opBLT = function(opCode)
  */
 PDP11.opBMI = function(opCode)
 {
-    /*
-     * TODO: Implement
-     */
-    this.regOp = -1;
+    if (this.getNF()) this.regsGen[7] = this.branch(opCode);
     this.nStepCycles -= 1;
 };
 
@@ -489,10 +459,7 @@ PDP11.opBMI = function(opCode)
  */
 PDP11.opBNE = function(opCode)
 {
-    /*
-     * TODO: Implement
-     */
-    this.regOp = -1;
+    if (!this.getZF()) this.regsGen[7] = this.branch(opCode);
     this.nStepCycles -= 1;
 };
 
@@ -504,10 +471,7 @@ PDP11.opBNE = function(opCode)
  */
 PDP11.opBPL = function(opCode)
 {
-    /*
-     * TODO: Implement
-     */
-    this.regOp = -1;
+    if (!this.getNF()) this.regsGen[7] = this.branch(opCode);
     this.nStepCycles -= 1;
 };
 
@@ -534,10 +498,7 @@ PDP11.opBPT = function(opCode)
  */
 PDP11.opBR = function(opCode)
 {
-    /*
-     * TODO: Implement
-     */
-    this.regOp = -1;
+    this.regsGen[7] = this.branch(opCode);
     this.nStepCycles -= 1;
 };
 
@@ -549,10 +510,7 @@ PDP11.opBR = function(opCode)
  */
 PDP11.opBVC = function(opCode)
 {
-    /*
-     * TODO: Implement
-     */
-    this.regOp = -1;
+    if (!this.getVF()) this.regsGen[7] = this.branch(opCode);
     this.nStepCycles -= 1;
 };
 
@@ -564,10 +522,7 @@ PDP11.opBVC = function(opCode)
  */
 PDP11.opBVS = function(opCode)
 {
-    /*
-     * TODO: Implement
-     */
-    this.regOp = -1;
+    if (this.getVF()) this.regsGen[7] = this.branch(opCode);
     this.nStepCycles -= 1;
 };
 
@@ -1155,6 +1110,22 @@ PDP11.opRTI = function(opCode)
 };
 
 /**
+ * opRTS(opCode)
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} opCode
+ */
+PDP11.opRTS = function(opCode)
+{
+    this.assert(!(opCode & 0x08));
+    var src = this.popWord();
+    var reg = opCode & PDP11.OPREG.MASK;
+    this.regsGen[PDP11.REG.PC] = this.regsGen[reg];
+    this.regsGen[reg] = src;
+    this.nStepCycles -= 1;
+};
+
+/**
  * opRTT(opCode)
  *
  * @this {CPUStatePDP11}
@@ -1274,6 +1245,22 @@ PDP11.opSOB = function(opCode)
      * TODO: Implement
      */
     this.regOp = -1;
+    this.nStepCycles -= 1;
+};
+
+/**
+ * opSPL(opCode)
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} opCode
+ */
+PDP11.opSPL = function(opCode)
+{
+    this.assert(opCode & 0x08);
+    if (!(this.PSW & PDP11.PSW.CMODE)) {
+        this.PSW = (this.PSW & ~(PDP11.PSW.UNUSED | PDP11.PSW.PRI)) | ((opCode & 0x7) << PDP11.PSW.SHIFT.PRI);
+        this.priorityReview = 1;
+    }
     this.nStepCycles -= 1;
 };
 
@@ -1468,6 +1455,17 @@ PDP11.op00Xn_1170 = function(opCode)
 };
 
 /**
+ * op008X_1170(opCode)
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} opCode
+ */
+PDP11.op008X_1170 = function(opCode)
+{
+    PDP11.aOps00AX_1170[opCode & 0xf].call(this, opCode);
+};
+
+/**
  * op00AX_1170(opCode)
  *
  * @this {CPUStatePDP11}
@@ -1568,20 +1566,20 @@ PDP11.op8DXn_1170 = function(opCode)
 
 PDP11.aOpsXnnn_1170 = [
     PDP11.op0Xnn_1170,          // 0x0nnn
-    PDP11.opMOV,                // 0x1nnn   MOV  01SSDD
-    PDP11.opCMP,                // 0x2nnn   CMP  02SSDD
-    PDP11.opBIT,                // 0x3nnn   BIT  03SSDD
-    PDP11.opBIC,                // 0x4nnn   BIC  04SSDD
-    PDP11.opBIS,                // 0x5nnn   BIS  05SSDD
-    PDP11.opADD,                // 0x6nnn   ADD  06SSDD
+    PDP11.opMOV,                // 0x1nnn   01SSDD
+    PDP11.opCMP,                // 0x2nnn   02SSDD
+    PDP11.opBIT,                // 0x3nnn   03SSDD
+    PDP11.opBIC,                // 0x4nnn   04SSDD
+    PDP11.opBIS,                // 0x5nnn   05SSDD
+    PDP11.opADD,                // 0x6nnn   06SSDD
     PDP11.op7Xnn_1170,          // 0x7nnn
     PDP11.op8Xnn_1170,          // 0x8nnn
-    PDP11.opMOVB,               // 0x9nnn   MOVB 11SSDD
-    PDP11.opCMPB,               // 0xAnnn   CMPB 12SSDD
-    PDP11.opBITB,               // 0xBnnn   BITB 13SSDD
-    PDP11.opBICB,               // 0xCnnn   BICB 14SSDD
-    PDP11.opBISB,               // 0xDnnn   BISB 15SSDD
-    PDP11.opSUB,                // 0xEnnn   SUB  16SSDD
+    PDP11.opMOVB,               // 0x9nnn   11SSDD
+    PDP11.opCMPB,               // 0xAnnn   12SSDD
+    PDP11.opBITB,               // 0xBnnn   13SSDD
+    PDP11.opBICB,               // 0xCnnn   14SSDD
+    PDP11.opBISB,               // 0xDnnn   15SSDD
+    PDP11.opSUB,                // 0xEnnn   16SSDD
     PDP11.opUndefined           // 0xFnnn
 ];
 
@@ -1613,10 +1611,10 @@ PDP11.aOps00Xn_1170 = [
     PDP11.opUndefined,          // 0x005n
     PDP11.opUndefined,          // 0x006n
     PDP11.opUndefined,          // 0x007n
-    PDP11.opUndefined,          // 0x008n
-    PDP11.opUndefined,          // 0x009n
-    PDP11.op00AX_1170,          // 0x00An
-    PDP11.op00BX_1170,          // 0x00Bn
+    PDP11.opRTS,                // 0x008n   00020R  (technically, bit 3 should also be CLR for the RTS opCode)
+    PDP11.opSPL,                // 0x009n   00023N  (technically, bit 3 should also be SET for the SPL opCode)
+    PDP11.op00AX_1170,          // 0x00An   000240-000257
+    PDP11.op00BX_1170,          // 0x00Bn   000260-000277
     PDP11.opUndefined,          // 0x00Cn
     PDP11.opUndefined,          // 0x00Dn
     PDP11.opUndefined,          // 0x00En
@@ -1624,7 +1622,7 @@ PDP11.aOps00Xn_1170 = [
 ];
 
 PDP11.aOps00AX_1170 = [
-    PDP11.opNOP,                // 0x00A0
+    PDP11.opNOP,                // 0x00A0   000240
     PDP11.opCLC,                // 0x00A1
     PDP11.opCLV,                // 0x00A2
     PDP11.opCLx,                // 0x00A3
@@ -1639,11 +1637,11 @@ PDP11.aOps00AX_1170 = [
     PDP11.opCLx,                // 0x00AC
     PDP11.opCLx,                // 0x00AD
     PDP11.opCLx,                // 0x00AE
-    PDP11.opCLx                 // 0x00AF
+    PDP11.opCLx                 // 0x00AF   000257
 ];
 
 PDP11.aOps00BX_1170 = [
-    PDP11.opNOP,                // 0x00B0
+    PDP11.opNOP,                // 0x00B0   000260
     PDP11.opSEC,                // 0x00B1
     PDP11.opSEV,                // 0x00B2
     PDP11.opSEx,                // 0x00B3
@@ -1658,7 +1656,7 @@ PDP11.aOps00BX_1170 = [
     PDP11.opSEx,                // 0x00BC
     PDP11.opSEx,                // 0x00BD
     PDP11.opSEx,                // 0x00BE
-    PDP11.opSEx                 // 0x00BF
+    PDP11.opSEx                 // 0x00BF   000277
 ];
 
 PDP11.aOps000X_1170 = [

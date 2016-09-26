@@ -2728,11 +2728,16 @@ if (DEBUGGER) {
             var data = 0, iByte = 0, i;
             var sData = "", sChars = "";
             sAddr = this.toStrAddr(dbgAddr);
-            for (i = 16; i > 0 && cb > 0; i--) {
+            /*
+             * It's just coincidence that we want to dump 8 bytes per line when using base 8 and 16 bytes
+             * per line when using base 16, because octal requires more digits.
+             */
+            var nBytes = (size == 4? 16 : this.nBase);
+            for (i = nBytes; i > 0 && cb > 0; i--) {
                 var b = this.getByte(dbgAddr, 1);
                 data |= (b << (iByte++ << 3));
                 if (iByte == size) {
-                    sData += str.toHex(data, size * 2);
+                    sData += (this.nBase == 8? str.toOct(data, size * 3) : str.toHex(data, size * 2));
                     sData += (size == 1? (i == 9? '-' : ' ') : "  ");
                     data = iByte = 0;
                 }

@@ -125,7 +125,7 @@ CPUStatePDP11.prototype.initRegs = function()
     /*
      * TODO: Verify the initial state of all PDP-11 flags and registers (are they well-documented?)
      */
-    this.flagC  = 0x10000;      // PSW C bit
+    this.flagC = 0x10000;       // PSW C bit
     this.flagV  = 0x8000;       // PSW V bit
     this.flagZ  = 0xffff;       // ~ PSW Z bit      (TODO: Why do we clear instead of set Z, like other flags?)
     this.flagN  = 0x8000;       // PSW N bit
@@ -1469,21 +1469,15 @@ CPUStatePDP11.prototype.writeByteByMode = function(addressMode, data, writeFlags
 };
 
 /**
- * branch(PC, instruction)
+ * branch(opCode)
  *
  * @this {CPUStatePDP11}
- * @param {number} PC
- * @param {number} instruction
- * @return {number}
+ * @param {number} opCode
+ * @return {number} (PC +/- the word delta specified in the opCode)
  */
-CPUStatePDP11.prototype.branch = function(PC, instruction)
+CPUStatePDP11.prototype.branch = function(opCode)
 {
-    if (instruction & 0x80) { /*0200*/
-        instruction |= 0xff00;
-    } else {
-        instruction &= 0xff;
-    }
-    return ((instruction << 1) + PC) & 0xffff;
+    return (this.regsGen[PDP11.REG.PC] + ((opCode << 24) >> 23)) & 0xffff;
 };
 
 /**
@@ -1972,70 +1966,70 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                 //     switch (opCode & 0xFF00) /*0177400*/ { // Program control instructions & traps
                 //     case 0x100: /*0000400*/ // BR
                 //         //LOG_INSTRUCTION(opCode, 4, "BR");
-                //         this.regsGen[7] = this.branch(this.regsGen[7], opCode);
+                //         this.regsGen[7] = this.branch(opCode);
                 //         break;
                 //     case 0x200: /*0001000*/ // BNE
                 //         //LOG_INSTRUCTION(opCode, 4, "BNE");
-                //         if (this.flagZ & 0xffff) this.regsGen[7] = this.branch(this.regsGen[7], opCode);
+                //         if (this.flagZ & 0xffff) this.regsGen[7] = this.branch(opCode);
                 //         break;
                 //     case 0x300: /*0001400*/ // BEQ
                 //         //LOG_INSTRUCTION(opCode, 4, "BEQ");
-                //         if (!(this.flagZ & 0xffff)) this.regsGen[7] = this.branch(this.regsGen[7], opCode);
+                //         if (!(this.flagZ & 0xffff)) this.regsGen[7] = this.branch(opCode);
                 //         break;
                 //     case 0x400: /*0002000*/ // BGE
                 //         //LOG_INSTRUCTION(opCode, 4, "BGE");
                 //         if ((this.flagN & 0x8000) ===
-                //             (this.flagV & 0x8000)) this.regsGen[7] = this.branch(this.regsGen[7], opCode);
+                //             (this.flagV & 0x8000)) this.regsGen[7] = this.branch(opCode);
                 //         break;
                 //     case 0x500: /*0002400*/ // BLT
                 //         //LOG_INSTRUCTION(opCode, 4, "BLT");
                 //         if ((this.flagN & 0x8000) !==
-                //             (this.flagV & 0x8000)) this.regsGen[7] = this.branch(this.regsGen[7], opCode);
+                //             (this.flagV & 0x8000)) this.regsGen[7] = this.branch(opCode);
                 //         break;
                 //     case 0x600: /*0003000*/ // BGT
                 //         //LOG_INSTRUCTION(opCode, 4, "BGT");
                 //         if ((this.flagZ & 0xffff) && ((this.flagN & 0x8000) ===
-                //             (this.flagV & 0x8000))) this.regsGen[7] = this.branch(this.regsGen[7], opCode);
+                //             (this.flagV & 0x8000))) this.regsGen[7] = this.branch(opCode);
                 //         break;
                 //     case 0x700: /*0003400*/ // BLE
                 //         //LOG_INSTRUCTION(opCode, 4, "BLE");
                 //         if (!(this.flagZ & 0xffff) || ((this.flagN & 0x8000) !==
-                //             (this.flagV & 0x8000))) this.regsGen[7] = this.branch(this.regsGen[7], opCode);
+                //             (this.flagV & 0x8000))) this.regsGen[7] = this.branch(opCode);
                 //         break;
                 //     case 0x8000: /*0100000*/ // BPL
                 //         //LOG_INSTRUCTION(opCode, 4, "BPL");
-                //         if (!(this.flagN & 0x8000)) this.regsGen[7] = this.branch(this.regsGen[7], opCode);
+                //         if (!(this.flagN & 0x8000)) this.regsGen[7] = this.branch(opCode);
                 //         break;
                 //     case 0x8200: /*0101000*/ // BHI
                 //         //LOG_INSTRUCTION(opCode, 4, "BHI");
                 //         if (!(this.flagC & 0x10000) &&
-                //             (this.flagZ & 0xffff)) this.regsGen[7] = this.branch(this.regsGen[7], opCode);
+                //             (this.flagZ & 0xffff)) this.regsGen[7] = this.branch(opCode);
                 //         break;
                 //     case 0x8100: /*0100400*/ // BMI
                 //         //LOG_INSTRUCTION(opCode, 4, "BMI");
-                //         if ((this.flagN & 0x8000)) this.regsGen[7] = this.branch(this.regsGen[7], opCode);
+                //         if ((this.flagN & 0x8000)) this.regsGen[7] = this.branch(opCode);
                 //         break;
                 //     case 0x8300: /*0101400*/ // BLOS
                 //         //LOG_INSTRUCTION(opCode, 4, "BLOS");
                 //         if ((this.flagC & 0x10000) ||
-                //             !(this.flagZ & 0xffff)) this.regsGen[7] = this.branch(this.regsGen[7], opCode);
+                //             !(this.flagZ & 0xffff)) this.regsGen[7] = this.branch(opCode);
                 //         break;
                 //     case 0x8400: /*0102000*/ // BVC
                 //         //LOG_INSTRUCTION(opCode, 4, "BVC");
-                //         if (!(this.flagV & 0x8000)) this.regsGen[7] = this.branch(this.regsGen[7], opCode);
+                //         if (!(this.flagV & 0x8000)) this.regsGen[7] = this.branch(opCode);
                 //         break;
                 //     case 0x8500: /*0102400*/ // BVS
                 //         //LOG_INSTRUCTION(opCode, 4, "BVS");
-                //         if ((this.flagV & 0x8000)) this.regsGen[7] = this.branch(this.regsGen[7], opCode);
+                //         if ((this.flagV & 0x8000)) this.regsGen[7] = this.branch(opCode);
                 //         break;
                 //     case 0x8600: /*0103000*/ // BCC
                 //         //LOG_INSTRUCTION(opCode, 4, "BCC");
                 //         if (!(this.flagC &
-                //             0x10000)) this.regsGen[7] = this.branch(this.regsGen[7], opCode);
+                //             0x10000)) this.regsGen[7] = this.branch(opCode);
                 //         break;
                 //     case 0x8700: /*0103400*/ // BCS
                 //         //LOG_INSTRUCTION(opCode, 4, "BCS");
-                //         if (this.flagC & 0x10000) this.regsGen[7] = this.branch(this.regsGen[7], opCode);
+                //         if (this.flagC & 0x10000) this.regsGen[7] = this.branch(opCode);
                 //         break;
                 //     case 0x8800: /*0104000*/ // EMT 104000 -> 104377
                 //         //LOG_INSTRUCTION(opCode, 7, "EMT");
