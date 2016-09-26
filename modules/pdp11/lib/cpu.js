@@ -1087,8 +1087,12 @@ CPUPDP11.prototype.runCPU = function(fUpdateFocus)
                 this.stepCPU(nCyclesPerBurst);
             }
             catch(exception) {
+                /*
+                 * We assume that any numeric exception was explicitly thrown by the CPU to interrupt the
+                 * current instruction (and by extension, the current burst, but not the current run).  All
+                 * other exceptions are re-thrown to the catch below, which will attempt a stack dump.
+                 */
                 if (typeof exception != "number") throw exception;
-                if (DEBUG) this.println("CPU exception: " + str.toHexWord(exception));
             }
 
             /*

@@ -1200,12 +1200,14 @@ if (DEBUGGER) {
             }
         }
         catch(exception) {
+            /*
+             * We assume that any numeric exception was explicitly thrown by the CPU to interrupt the
+             * current instruction.  For all other exceptions, we attempt a stack dump.
+             */
             if (typeof exception != "number") {
                 var e = exception;
                 this.nCycles = 0;
                 this.cpu.setError(e.stack || e.message);
-            } else {
-                if (DEBUG) this.println("CPU exception: " + str.toHexWord(exception));
             }
         }
 
@@ -1980,11 +1982,11 @@ if (DEBUGGER) {
         }
         else if (opTypeOther == DebuggerPDP11.OP_DSTNUM3) {
             disp = (opCode & 0x7);
-            sOperand = this.toStrBase(disp, 2);
+            sOperand = this.toStrBase(disp, 1);
         }
         else if (opTypeOther == DebuggerPDP11.OP_DSTNUM6) {
             disp = (opCode & 0x3f);
-            sOperand = this.toStrBase(disp);
+            sOperand = this.toStrBase(disp, 1);
         }
         else {
             /*

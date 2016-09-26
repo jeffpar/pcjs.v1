@@ -659,25 +659,25 @@ if (DEBUGGER) {
     };
 
     /**
-     * toStrBase(n, cch)
+     * toStrBase(n, nBytes)
      *
-     * Use this instead of str.toHex() or str.toOct() to convert words to the default base.
+     * Use this instead of str.toHex() or str.toOct() to convert bytes/words to the Debugger's default base.
      *
      * @this {Debugger}
      * @param {number|null|undefined} n
-     * @param {number} [cch] is the desired number of hex digits (0 or undefined for default)
+     * @param {number} [nBytes] is the number of bytes to display, which we translate into a number of characters
      * @return {string}
      */
-    Debugger.prototype.toStrBase = function(n, cch)
+    Debugger.prototype.toStrBase = function(n, nBytes)
     {
         switch(this.nBase) {
         case 8:
-            return str.toOct(n, cch);
+            return str.toOct(n, nBytes * 3);
         case 10:
-            return n.toString();        // TODO: Do we want to support any formatting based on cch?
+            return n.toString();
         case 16:
         default:
-            return str.toHex(n, cch);
+            return str.toHex(n, nBytes * 2);
         }
     };
 

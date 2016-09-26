@@ -234,6 +234,38 @@ DevicePDP11.prototype.writeLKS = function(data, addr)
 };
 
 /**
+ * readMMR0(addr)
+ *
+ * @this {DevicePDP11}
+ * @param {number} addr (eg, PDP11.UNIBUS.MMR0 or 177572)
+ * @return {number}
+ */
+DevicePDP11.prototype.readMMR0 = function(addr)
+{
+    return this.cpu.getMMR0();
+};
+
+/**
+ * writeMMR0(data, addr)
+ *
+ * @this {DevicePDP11}
+ * @param {number} data
+ * @param {number} addr (eg, PDP11.UNIBUS.MMR0 or 177572)
+ */
+DevicePDP11.prototype.writeMMR0 = function(data, addr)
+{
+    /*
+     * Set idx to 1 (22-bit), 2 (18-bit), or 4 (16-bit)
+     */
+    var idx = 4;
+    data = this.cpu.setMMR0(data);
+    if (data & PDP11.MMR0.ENABLED | PDP11.MMR0.DSTMODE) {
+        idx = (this.cpu.MMR3 & PDP11.MMR3.MMU_22BIT)? 1 : 2;
+    }
+    this.display.misc = (this.display.misc & ~7) | idx;
+};
+
+/**
  * readXCSR(addr)
  *
  * @this {DevicePDP11}
@@ -890,24 +922,23 @@ DevicePDP11.prototype.access = function(physicalAddress, data, byteFlag)
     switch (physicalAddress & ~0x3F) /*077*/ {
         case 0x3FFFC0: /*017777700*/ // 017777700 - 017777777
             switch (physicalAddress & ~1) {
-                /*
-                 * Superseded by UNIBUS_TABLE (more of this code will be commented out
-                 * as it is replaced by read/write handlers in the UNIBUS_TABLE; stay tuned).
-                 *
-                case 0x3FFFFE: // 017777776 // PSW
-                    result = cpu.getPSW();
-                    if (data >= 0) {
-                        if (physicalAddress & 1) {
-                            data = (data << 8) | (result & 0xff);
-                        } else {
-                            if (byteFlag) data = (result & 0xff00) | (data & 0xff);
-                        }
-                        data = (data & 0xf8ef) | (result & 0x0710);
-                        cpu.setPSW(data);
-                        return -1; // KLUDGE - no trap but abort any CC updates
-                    }
-                    break;
-                */
+                //
+                // Superseded by UNIBUS_TABLE (more of this code will be commented out
+                // as it is replaced by read/write handlers in UNIBUS_TABLE; stay tuned).
+                //
+                // case 0x3FFFFE: // 017777776 // PSW
+                //     result = cpu.getPSW();
+                //     if (data >= 0) {
+                //         if (physicalAddress & 1) {
+                //             data = (data << 8) | (result & 0xff);
+                //         } else {
+                //             if (byteFlag) data = (result & 0xff00) | (data & 0xff);
+                //         }
+                //         data = (data & 0xf8ef) | (result & 0x0710);
+                //         cpu.setPSW(data);
+                //         return -1; // KLUDGE - no trap but abort any CC updates
+                //     }
+                //     break;
                 case 0x3FFFFC: /*017777774*/ // stack limit
                     if (data < 0) {
                         result = cpu.regSL & 0xff00;
@@ -941,9 +972,9 @@ DevicePDP11.prototype.access = function(physicalAddress, data, byteFlag)
                 case 0x3FFFF6: /*017777766*/ // CPU error
                     if (cpu.cpuType !== 70) return cpu.trap(PDP11.TRAP.BUS_ERROR, 222);
                     if (data < 0) {
-                        result = cpu.regCPUErr;
+                        result = cpu.regErr;
                     } else {
-                        result = cpu.regCPUErr = 0;     // TODO: Always writes as zero?
+                        result = cpu.regErr = 0;     // TODO: Always writes as zero?
                     }
                     break;
                 case 0x3FFFF4: /*017777764*/ // System I/D
@@ -1038,7 +1069,7 @@ DevicePDP11.prototype.access = function(physicalAddress, data, byteFlag)
                     }
                     return result;
                 default:
-                    cpu.regCPUErr |= PDP11.CPUERR.TIMEOUT;
+                    cpu.regErr |= PDP11.CPUERR.TIMEOUT;
                     return cpu.trap(PDP11.TRAP.BUS_ERROR, 124);
             }
             break;
@@ -1062,32 +1093,32 @@ DevicePDP11.prototype.access = function(physicalAddress, data, byteFlag)
                     result = cpu.MMR1;
                     if (result & 0xff00) result = ((result << 8) | (result >> 8)) & 0xffff;
                     break;
-                case 0x3FFF7A: /*017777572*/ // MMR0
-                    cpu.MMR0 = (cpu.MMR0 & 0xf381) | (cpu.mmuLastMode << 5) | (cpu.mmuLastPage << 1);
-                    if (data < 0) {
-                        result = cpu.MMR0;
-                    } else {
-                        result = this.insertData(cpu.MMR0, physicalAddress, data, byteFlag);
-                        if (result >= 0) {
-                            cpu.MMR0 = result &= 0xf381;
-                            cpu.mmuLastMode = (result >> 5) & 3;
-                            cpu.mmuLastPage = (result >> 1) & 0xf;
-                            if (result & 0x101) {
-                                idx = 2; // 18 bit
-                                if (cpu.MMR3 & 0x10) idx = 1; // 22 bit
-                                if (result & 0x1) {
-                                    cpu.mmuEnable = PDP11.ACCESS.READ | PDP11.ACCESS.WRITE;
-                                } else {
-                                    cpu.mmuEnable = PDP11.ACCESS.WRITE;
-                                }
-                            } else {
-                                cpu.mmuEnable = 0;
-                                idx = 4; // 16 bit
-                            }
-                            this.display.misc = (this.display.misc & ~7) | idx;
-                        }
-                    }
-                    break;
+                // case 0x3FFF7A: /*017777572*/ // MMR0
+                //     cpu.MMR0 = (cpu.MMR0 & 0xf381) | (cpu.mmuLastMode << 5) | (cpu.mmuLastPage << 1);
+                //     if (data < 0) {
+                //         result = cpu.MMR0;
+                //     } else {
+                //         result = this.insertData(cpu.MMR0, physicalAddress, data, byteFlag);
+                //         if (result >= 0) {
+                //             cpu.MMR0 = result &= 0xf381;
+                //             cpu.mmuLastMode = (result >> 5) & 3;
+                //             cpu.mmuLastPage = (result >> 1) & 0xf;
+                //             if (result & 0x101) {
+                //                 idx = 2; // 18 bit
+                //                 if (cpu.MMR3 & 0x10) idx = 1; // 22 bit
+                //                 if (result & 0x1) {
+                //                     cpu.mmuEnable = PDP11.ACCESS.READ | PDP11.ACCESS.WRITE;
+                //                 } else {
+                //                     cpu.mmuEnable = PDP11.ACCESS.WRITE;
+                //                 }
+                //             } else {
+                //                 cpu.mmuEnable = 0;
+                //                 idx = 4; // 16 bit
+                //             }
+                //             this.display.misc = (this.display.misc & ~7) | idx;
+                //         }
+                //     }
+                //     break;
                 case 0x3FFF78: /*017777570*/ // console display/switch;
                     if (data < 0) {
                         result = this.display.switches & 0xffff;
@@ -1191,7 +1222,7 @@ DevicePDP11.prototype.access = function(physicalAddress, data, byteFlag)
                 //     }
                 //     break;
                 default:
-                    cpu.regCPUErr |= PDP11.CPUERR.TIMEOUT;
+                    cpu.regErr |= PDP11.CPUERR.TIMEOUT;
                     return cpu.trap(PDP11.TRAP.BUS_ERROR, 126);
             }
             break;
@@ -1234,7 +1265,7 @@ DevicePDP11.prototype.access = function(physicalAddress, data, byteFlag)
                     if (result >= 0) rk11.rkdb = result;
                     break;
                 default:
-                    cpu.regCPUErr |= PDP11.CPUERR.TIMEOUT;
+                    cpu.regErr |= PDP11.CPUERR.TIMEOUT;
                     return cpu.trap(PDP11.TRAP.BUS_ERROR, 128);
             }
             break;
@@ -1339,7 +1370,7 @@ DevicePDP11.prototype.access = function(physicalAddress, data, byteFlag)
                     if (result >= 0) rp11.rpcs3 = result;
                     break;
                 default:
-                    cpu.regCPUErr |= PDP11.CPUERR.TIMEOUT;
+                    cpu.regErr |= PDP11.CPUERR.TIMEOUT;
                     return cpu.trap(PDP11.TRAP.BUS_ERROR, 132);
             }
             break;
@@ -1378,7 +1409,7 @@ DevicePDP11.prototype.access = function(physicalAddress, data, byteFlag)
                     }
                     break;
                 default:
-                    cpu.regCPUErr |= PDP11.CPUERR.TIMEOUT;
+                    cpu.regErr |= PDP11.CPUERR.TIMEOUT;
                     return cpu.trap(PDP11.TRAP.BUS_ERROR, 134);
             }
             break;
@@ -1404,7 +1435,7 @@ DevicePDP11.prototype.access = function(physicalAddress, data, byteFlag)
                     }
                     break;
                 default:
-                    cpu.regCPUErr |= PDP11.CPUERR.TIMEOUT;
+                    cpu.regErr |= PDP11.CPUERR.TIMEOUT;
                     return cpu.trap(PDP11.TRAP.BUS_ERROR, 136);
             }
             break;
@@ -1454,12 +1485,12 @@ DevicePDP11.prototype.access = function(physicalAddress, data, byteFlag)
                 idx = (physicalAddress >> 1) & 0xff;
                 result = DevicePDP11.M9312[idx];
             } else {
-                cpu.regCPUErr |= PDP11.CPUERR.TIMEOUT;
+                cpu.regErr |= PDP11.CPUERR.TIMEOUT;
                 return cpu.trap(PDP11.TRAP.BUS_ERROR, 138);
             }
             break;
         default:
-            cpu.regCPUErr |= PDP11.CPUERR.TIMEOUT;
+            cpu.regErr |= PDP11.CPUERR.TIMEOUT;
             return cpu.trap(PDP11.TRAP.BUS_ERROR, 142);
     }
     if (byteFlag && result >= 0) { // make any required byte adjustment
@@ -1480,6 +1511,7 @@ DevicePDP11.prototype.access = function(physicalAddress, data, byteFlag)
  */
 DevicePDP11.UNIBUS_TABLE = {
     [PDP11.UNIBUS.LKS]:     [null, null, DevicePDP11.prototype.readLKS,     DevicePDP11.prototype.writeLKS],
+    [PDP11.UNIBUS.MMR0]:    [null, null, DevicePDP11.prototype.readMMR0,    DevicePDP11.prototype.writeMMR0],
     [PDP11.UNIBUS.XCSR]:    [null, null, DevicePDP11.prototype.readXCSR,    DevicePDP11.prototype.writeXCSR],
     [PDP11.UNIBUS.PSW]:     [null, null, DevicePDP11.prototype.readPSW,     DevicePDP11.prototype.writePSW]
 };
