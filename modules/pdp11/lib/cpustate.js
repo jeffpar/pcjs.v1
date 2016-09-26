@@ -1003,7 +1003,7 @@ CPUStatePDP11.prototype.readWordFromPhysical = function(physicalAddress)
  */
 CPUStatePDP11.prototype.readWordFromVirtual = function(virtualAddress)
 {
-    return this.readWordFromPhysical(this.mapVirtualToPhysical(virtualAddress, PDP11.ACCESS.READ));
+    return this.readWordFromPhysical(this.mapVirtualToPhysical(virtualAddress, PDP11.ACCESS.READ_WORD));
 };
 
 /**
@@ -1124,7 +1124,7 @@ CPUStatePDP11.prototype.pushWord = function(data)
         }
     }
 
-    var physicalAddress = this.mapVirtualToPhysical(virtualAddress | PDP11.ACCESS.DSPACE, PDP11.ACCESS.WRITE);
+    var physicalAddress = this.mapVirtualToPhysical(virtualAddress | PDP11.ACCESS.DSPACE, PDP11.ACCESS.WRITE_WORD);
     this.writeWordToPhysical(physicalAddress, data);
 };
 
@@ -1349,7 +1349,7 @@ CPUStatePDP11.prototype.readWordByMode = function(addressMode)
          * just a wrapper around mapVirtualToPhysical() on the result from getVirtualByMode(), so now we call
          * getVirtualByMode() directly, knowing that the current readWord() will call the correct function.
          */
-        result = this.readWord(this.getVirtualByMode(addressMode, PDP11.ACCESS.READ));
+        result = this.readWord(this.getVirtualByMode(addressMode, PDP11.ACCESS.READ_WORD));
     }
     return result;
 };
@@ -1390,7 +1390,7 @@ CPUStatePDP11.prototype.updateWordByMode = function(addressMode, src, fnOp)
         var reg = addressMode & PDP11.OPREG.MASK;
         this.regsGen[reg] = (data = fnOp.call(this, src, this.regsGen[reg]) & 0xffff);
     } else {
-        var addr = this.getAddr(addressMode, PDP11.ACCESS.UPDATE);
+        var addr = this.getAddr(addressMode, PDP11.ACCESS.UPDATE_WORD);
         this.writeWordToPhysical(addr, (data = fnOp.call(this, src, this.readWordFromPhysical(addr))));
     }
     return data;
@@ -1435,7 +1435,7 @@ CPUStatePDP11.prototype.writeWordByMode = function(addressMode, data)
     if (!(addressMode & PDP11.OPMODE.MASK)) {
         this.regsGen[addressMode & PDP11.OPREG.MASK] = data & 0xffff;
     } else {
-        this.writeWordToPhysical(this.getAddr(addressMode, PDP11.ACCESS.WRITE), data);
+        this.writeWordToPhysical(this.getAddr(addressMode, PDP11.ACCESS.WRITE_WORD), data);
     }
     return data;
 };
@@ -1688,7 +1688,7 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                 //         this.flagN = this.flagZ = result;
                 //         this.flagV = 0;
                 //     } else {
-                //         if ((dst = this.readWordFromPhysical(dstAddr = this.getAddr(opCode, PDP11.ACCESS.UPDATE))) >= 0) {
+                //         if ((dst = this.readWordFromPhysical(dstAddr = this.getAddr(opCode, PDP11.ACCESS.UPDATE_WORD))) >= 0) {
                 //             result = dst & ~src;
                 //             if (this.writeWordToPhysical(dstAddr, result) >= 0) {
                 //                 this.flagN = this.flagZ = result;
@@ -1706,7 +1706,7 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                 //         this.flagN = this.flagZ = result;
                 //         this.flagV = 0;
                 //     } else {
-                //         if ((dst = this.readWordFromPhysical(dstAddr = this.getAddr(opCode, PDP11.ACCESS.UPDATE))) >= 0) {
+                //         if ((dst = this.readWordFromPhysical(dstAddr = this.getAddr(opCode, PDP11.ACCESS.UPDATE_WORD))) >= 0) {
                 //             result = dst | src;
                 //             if (this.writeWordToPhysical(dstAddr, result) >= 0) {
                 //                 this.flagN = this.flagZ = result;
@@ -1726,7 +1726,7 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                 //         this.flagN = this.flagZ = this.flagC = result;
                 //         this.flagV = (src ^ result) & (dst ^ result);
                 //     } else {
-                //         if ((dst = this.readWordFromPhysical(dstAddr = this.getAddr(opCode, PDP11.ACCESS.UPDATE))) >= 0) {
+                //         if ((dst = this.readWordFromPhysical(dstAddr = this.getAddr(opCode, PDP11.ACCESS.UPDATE_WORD))) >= 0) {
                 //             result = src + dst;
                 //             if (this.writeWordToPhysical(dstAddr, result) >= 0) {
                 //                 this.flagN = this.flagZ = this.flagC = result;
@@ -1807,7 +1807,7 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                 //         this.flagN = this.flagZ = this.flagC = result;
                 //         this.flagV = (src ^ dst) & (dst ^ result);
                 //     } else {
-                //         if ((dst = this.readWordFromPhysical(dstAddr = this.getAddr(opCode, PDP11.ACCESS.UPDATE))) >= 0) {
+                //         if ((dst = this.readWordFromPhysical(dstAddr = this.getAddr(opCode, PDP11.ACCESS.UPDATE_WORD))) >= 0) {
                 //             result = dst - src;
                 //             if (this.writeWordToPhysical(dstAddr, result) >= 0) {
                 //                 this.flagN = this.flagZ = this.flagC = result;
@@ -1946,7 +1946,7 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                 //         this.flagN = this.flagZ = dst;
                 //         this.flagV = 0;
                 //     } else {
-                //         if ((dst = this.readWordFromPhysical(dstAddr = this.getAddr(opCode, PDP11.ACCESS.UPDATE))) >= 0) {
+                //         if ((dst = this.readWordFromPhysical(dstAddr = this.getAddr(opCode, PDP11.ACCESS.UPDATE_WORD))) >= 0) {
                 //             dst ^= this.regsGen[(opCode >> 6) & 7];
                 //             if (this.writeWordToPhysical(dstAddr, dst) >= 0) {
                 //                 this.flagN = this.flagZ = dst;
@@ -2056,7 +2056,7 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                 //                 this.flagN = this.flagZ = dst & 0xff00;
                 //                 this.flagV = this.flagC = 0;
                 //             } else {
-                //                 if ((dst = this.readWordFromPhysical(dstAddr = this.getAddr(opCode, PDP11.ACCESS.UPDATE))) >=
+                //                 if ((dst = this.readWordFromPhysical(dstAddr = this.getAddr(opCode, PDP11.ACCESS.UPDATE_WORD))) >=
                 //                     0) {
                 //                     result = (dst << 8) | (dst >> 8);
                 //                     if (this.writeWordToPhysical(dstAddr, result) >= 0) {
