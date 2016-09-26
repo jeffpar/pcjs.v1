@@ -979,7 +979,7 @@ CPUStatePDP11.prototype.readWordFromPhysical = function(physicalAddress)
         //    return this.bus.access_iopage(physicalAddress, -1, 0);
 		// } else {
 			if (physicalAddress >= 0) {
-                return this.bus.getShort(physicalAddress);
+                return this.bus.getWord(physicalAddress);
 			}
 		// }
 	}
@@ -1015,7 +1015,7 @@ CPUStatePDP11.prototype.writeWordToPhysical = function(physicalAddress, data)
         //     return this.bus.access_iopage(physicalAddress, data, 0);
 		// } else {
 			if (physicalAddress >= 0) {
-                this.bus.setShort(physicalAddress, data);
+                this.bus.setWord(physicalAddress, data);
                 return data;
 			}
 		// }

@@ -590,32 +590,19 @@ if (DEBUGGER) {
     };
 
     /**
-     * getWord(dbgAddr, fAdvance)
-     *
-     * @this {DebuggerPDP11}
-     * @param {DbgAddrPDP11} dbgAddr
-     * @param {boolean} [fAdvance]
-     * @return {number}
-     */
-    DebuggerPDP11.prototype.getWord = function(dbgAddr, fAdvance)
-    {
-        return this.getShort(dbgAddr, fAdvance? 2 : 0);
-    };
-
-    /**
-     * getShort(dbgAddr, inc)
+     * getWord(dbgAddr, inc)
      *
      * @this {DebuggerPDP11}
      * @param {DbgAddrPDP11} dbgAddr
      * @param {number} [inc]
      * @return {number}
      */
-    DebuggerPDP11.prototype.getShort = function(dbgAddr, inc)
+    DebuggerPDP11.prototype.getWord = function(dbgAddr, inc)
     {
         var w = 0xffff;
         var addr = this.getAddr(dbgAddr, false, 2);
         if (addr !== PDP11.ADDR_INVALID) {
-            w = this.bus.getShortDirect(addr);
+            w = this.bus.getWordDirect(addr);
             if (inc) this.incAddr(dbgAddr, inc);
         }
         return w;
@@ -640,18 +627,18 @@ if (DEBUGGER) {
     };
 
     /**
-     * setShort(dbgAddr, w, inc)
+     * setWord(dbgAddr, w, inc)
      *
      * @this {DebuggerPDP11}
      * @param {DbgAddrPDP11} dbgAddr
      * @param {number} w
      * @param {number} [inc]
      */
-    DebuggerPDP11.prototype.setShort = function(dbgAddr, w, inc)
+    DebuggerPDP11.prototype.setWord = function(dbgAddr, w, inc)
     {
         var addr = this.getAddr(dbgAddr, true, 2);
         if (addr !== PDP11.ADDR_INVALID) {
-            this.bus.setShortDirect(addr, w);
+            this.bus.setWordDirect(addr, w);
             if (inc) this.incAddr(dbgAddr, inc);
             this.cpu.updateCPU(true);           // we set fForce to true in case video memory was the target
         }
@@ -1513,7 +1500,7 @@ if (DEBUGGER) {
          */
         if (nState >= 0 && this.aaOpcodeCounts.length) {
             this.cOpcodes++;
-            var opCode = this.bus.getShortDirect(addr);
+            var opCode = this.bus.getWordDirect(addr);
             if (opCode != null) {
                 var dbgAddr = this.aOpcodeHistory[this.iOpcodeHistory];
                 this.setAddr(dbgAddr, cpu.getPC());
@@ -1892,7 +1879,7 @@ if (DEBUGGER) {
     {
         var opNames = DebuggerPDP11.OPNAMES;
         var dbgAddrOp = this.newAddr(dbgAddr.addr);
-        var opCode = this.getWord(dbgAddr, true);
+        var opCode = this.getWord(dbgAddr, 2);
 
         var opDesc;
         for (var mask in this.opTable) {
@@ -1936,7 +1923,7 @@ if (DEBUGGER) {
         var sLine = this.toStrAddr(dbgAddrOp) + ":";
         if (dbgAddrOp.addr !== PDP11.ADDR_INVALID && dbgAddr.addr !== PDP11.ADDR_INVALID) {
             do {
-                sOpcodes += ' ' + this.toStrBase(this.getWord(dbgAddrOp, true));
+                sOpcodes += ' ' + this.toStrBase(this.getWord(dbgAddrOp, 2));
                 if (dbgAddrOp.addr == null) break;
             } while (dbgAddrOp.addr != dbgAddr.addr);
         }
@@ -2028,7 +2015,7 @@ if (DEBUGGER) {
                         /*
                          * When using R7 (aka PC), POST-INCREMENT is known as IMMEDIATE
                          */
-                        wIndex = this.getWord(dbgAddr, true);
+                        wIndex = this.getWord(dbgAddr, 2);
                         sOperand = "#" + this.toStrBase(wIndex);
                     }
                     break;
@@ -2039,7 +2026,7 @@ if (DEBUGGER) {
                         /*
                          * When using R7 (aka PC), POST-INCREMENT DEFERRED is known as ABSOLUTE
                          */
-                        wIndex = this.getWord(dbgAddr, true);
+                        wIndex = this.getWord(dbgAddr, 2);
                         sOperand = "@#" + this.toStrBase(wIndex);
                     }
                     break;
@@ -2050,7 +2037,7 @@ if (DEBUGGER) {
                     sOperand = "@-(" + this.getRegName(reg) + ")";
                     break;
                 case PDP11.OPMODE.INDEX:                // 0x6: INDEX
-                    wIndex = this.getWord(dbgAddr, true);
+                    wIndex = this.getWord(dbgAddr, 2);
                     sOperand = this.toStrBase(wIndex) + '(' + this.getRegName(reg) + ')';
                     if (reg == 7) {
                         /*
@@ -2060,7 +2047,7 @@ if (DEBUGGER) {
                     }
                     break;
                 case PDP11.OPMODE.INDEXD:               // 0x7: INDEX DEFERRED
-                    wIndex = this.getWord(dbgAddr, true);
+                    wIndex = this.getWord(dbgAddr, 2);
                     sOperand = '@' + this.toStrBase(wIndex) + '(' + this.getRegName(reg) + ')';
                     if (reg == 7) {
                         /*
@@ -2771,8 +2758,8 @@ if (DEBUGGER) {
         if (asArgs[0] == "ew") {
             size = 2;
             mask = 0xffff;
-            fnGet = this.getShort;
-            fnSet = this.setShort;
+            fnGet = this.getWord;
+            fnSet = this.setWord;
         }
         var cch = size << 1;
 
@@ -3348,7 +3335,7 @@ if (DEBUGGER) {
         while (cFrames < nFrames) {
             var sCall = null, sCallPrev = null, cTests = 256;
             while ((dbgAddrStack.addr >>> 0) < 0x10000) {
-                dbgAddrCall.addr = this.getWord(dbgAddrStack, true);
+                dbgAddrCall.addr = this.getWord(dbgAddrStack, 2);
                 /*
                  * Because we're using the auto-increment feature of getWord(), and because that will automatically
                  * wrap the offset around the end of the segment, we must also check the addr property to detect the wrap.

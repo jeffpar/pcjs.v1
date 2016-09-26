@@ -109,8 +109,8 @@ function BusPDP11(parmsBus, cpu, dbg)
      *
      *      [0]: readByte(addr)
      *      [1]: writeByte(b, addr)
-     *      [2]: readShort(addr)
-     *      [3]: writeShort(w, addr)
+     *      [2]: readWord(addr)
+     *      [3]: writeWord(w, addr)
      *
      * Each of these 4-element arrays are similar to the memory access arrays assigned to entire Memory
      * blocks, but these handlers generally target a specific address (or handful of addresses), while
@@ -159,9 +159,9 @@ BusPDP11.ERROR = {
 /*
  * These are our custom controller functions for all IOPAGE accesses.
  *
- * Note that we try to have reasonable fall-backs for byte reads when only short read handlers exist,
- * and short reads if only byte handlers exist.  Ditto for writes.  These fall-backs may not always be
- * appropriate; for example, when a byte write falls back to a short write, the address must be read
+ * Note that we try to have reasonable fall-backs for byte reads when only word read handlers exist,
+ * and word reads if only byte handlers exist.  Ditto for writes.  These fall-backs may not always be
+ * appropriate; for example, when a byte write falls back to a word write, the address must be read
  * first, and depending on the underlying I/O device, that may or may not have side-effects.  It's really
  * up to the device to know whether that matters, and provide all the necessary handlers if it does.
  *
@@ -201,6 +201,7 @@ BusPDP11.IOController = {
                 return afn[2](addr & ~0x1) >> 8;
             }
         }
+        bus.println("warning: unconverted read access to byte @" + str.toOct(addr));
         return bus.fnAccess(addr, -1, 1);
     },
 
@@ -239,18 +240,19 @@ BusPDP11.IOController = {
                 return;
             }
         }
+        bus.println("warning: unconverted write access to byte @" + str.toOct(addr));
         bus.fnAccess(addr, b, 1);
     },
 
     /**
-     * readShort(off, addr)
+     * readWord(off, addr)
      *
      * @this {MemoryPDP11}
      * @param {number} off
      * @param {number} addr
      * @return {number}
      */
-    readShort: function(off, addr)
+    readWord: function(off, addr)
     {
         var bus = this.controller;
         Component.assert(!(addr & 1));                  // unaligned addresses should be getting trapped at a higher level
@@ -262,18 +264,19 @@ BusPDP11.IOController = {
                 return afn[0](addr) | (afn[0](addr + 1) << 8);
             }
         }
+        bus.println("warning: unconverted read access to word @" + str.toOct(addr));
         return bus.fnAccess(addr, -1, 0);
     },
 
     /**
-     * writeShort(off, w, addr)
+     * writeWord(off, w, addr)
      *
      * @this {MemoryPDP11}
      * @param {number} off
      * @param {number} w (which should already be pre-masked to 16 bits)
      * @param {number} addr
      */
-    writeShort: function(off, w, addr)
+    writeWord: function(off, w, addr)
     {
         var bus = this.controller;
         Component.assert(!(addr & 1));                  // unaligned addresses should be getting trapped at a higher level
@@ -288,6 +291,7 @@ BusPDP11.IOController = {
                 return;
             }
         }
+        bus.println("warning: unconverted write access to word @" + str.toOct(addr));
         bus.fnAccess(addr, w, 0);
     }
 };
@@ -310,8 +314,8 @@ BusPDP11.prototype.initMemory = function()
     this.afnIOPage = new Array(4);
     this.afnIOPage[0] = BusPDP11.IOController.readByte;
     this.afnIOPage[1] = BusPDP11.IOController.writeByte;
-    this.afnIOPage[2] = BusPDP11.IOController.readShort;
-    this.afnIOPage[3] = BusPDP11.IOController.writeShort;
+    this.afnIOPage[2] = BusPDP11.IOController.readWord;
+    this.afnIOPage[3] = BusPDP11.IOController.writeWord;
     /*
      * Map IOPAGE at the top of the address space (as determined by nBusWidth), as well as at IOPAGE_VIRT
      * (which is the only place that 16-bit code can reach the IOPAGE when memory management is not enabled).
@@ -731,37 +735,37 @@ BusPDP11.prototype.getByteDirect = function(addr)
 };
 
 /**
- * getShort(addr)
+ * getWord(addr)
  *
  * @this {BusPDP11}
  * @param {number} addr is a physical address
- * @return {number} short (16-bit) value at that address
+ * @return {number} word (16-bit) value at that address
  */
-BusPDP11.prototype.getShort = function(addr)
+BusPDP11.prototype.getWord = function(addr)
 {
     var off = addr & this.nBlockLimit;
     var iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
     if (off != this.nBlockLimit) {
-        return this.aMemBlocks[iBlock].readShort(off, addr);
+        return this.aMemBlocks[iBlock].readWord(off, addr);
     }
     return this.aMemBlocks[iBlock++].readByte(off, addr) | (this.aMemBlocks[iBlock & this.nBlockMask].readByte(0, addr + 1) << 8);
 };
 
 /**
- * getShortDirect(addr)
+ * getWordDirect(addr)
  *
- * This is useful for the Debugger and other components that want to bypass getShort() breakpoint detection.
+ * This is useful for the Debugger and other components that want to bypass getWord() breakpoint detection.
  *
  * @this {BusPDP11}
  * @param {number} addr is a physical address
- * @return {number} short (16-bit) value at that address
+ * @return {number} word (16-bit) value at that address
  */
-BusPDP11.prototype.getShortDirect = function(addr)
+BusPDP11.prototype.getWordDirect = function(addr)
 {
     var off = addr & this.nBlockLimit;
     var iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
     if (off != this.nBlockLimit) {
-        return this.aMemBlocks[iBlock].readShortDirect(off, addr);
+        return this.aMemBlocks[iBlock].readWordDirect(off, addr);
     }
     return this.aMemBlocks[iBlock++].readByteDirect(off, addr) | (this.aMemBlocks[iBlock & this.nBlockMask].readByteDirect(0, addr + 1) << 8);
 };
@@ -794,18 +798,18 @@ BusPDP11.prototype.setByteDirect = function(addr, b)
 };
 
 /**
- * setShort(addr, w)
+ * setWord(addr, w)
  *
  * @this {BusPDP11}
  * @param {number} addr is a physical address
- * @param {number} w is the short (16-bit) value to write (we truncate it to 16 bits to be safe)
+ * @param {number} w is the word (16-bit) value to write (we truncate it to 16 bits to be safe)
  */
-BusPDP11.prototype.setShort = function(addr, w)
+BusPDP11.prototype.setWord = function(addr, w)
 {
     var off = addr & this.nBlockLimit;
     var iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
     if (off != this.nBlockLimit) {
-        this.aMemBlocks[iBlock].writeShort(off, w & 0xffff, addr);
+        this.aMemBlocks[iBlock].writeWord(off, w & 0xffff, addr);
         return;
     }
     this.aMemBlocks[iBlock++].writeByte(off, w & 0xff, addr);
@@ -813,21 +817,21 @@ BusPDP11.prototype.setShort = function(addr, w)
 };
 
 /**
- * setShortDirect(addr, w)
+ * setWordDirect(addr, w)
  *
  * This is useful for the Debugger and other components that want to bypass breakpoint detection AND read-only
  * memory protection (for example, this is an interface the ROM component could use to initialize ROM contents).
  *
  * @this {BusPDP11}
  * @param {number} addr is a physical address
- * @param {number} w is the short (16-bit) value to write (we truncate it to 16 bits to be safe)
+ * @param {number} w is the word (16-bit) value to write (we truncate it to 16 bits to be safe)
  */
-BusPDP11.prototype.setShortDirect = function(addr, w)
+BusPDP11.prototype.setWordDirect = function(addr, w)
 {
     var off = addr & this.nBlockLimit;
     var iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
     if (off != this.nBlockLimit) {
-        this.aMemBlocks[iBlock].writeShortDirect(off, w & 0xffff, addr);
+        this.aMemBlocks[iBlock].writeWordDirect(off, w & 0xffff, addr);
         return;
     }
     this.aMemBlocks[iBlock++].writeByteDirect(off, w & 0xff, addr);
@@ -955,7 +959,7 @@ BusPDP11.prototype.restoreMemory = function(a)
 };
 
 /**
- * addIOHandlers(start, end, fnReadByte, fnWriteByte, fnReadShort, fnWriteShort)
+ * addIOHandlers(start, end, fnReadByte, fnWriteByte, fnReadWord, fnWriteWord)
  *
  * Add I/O notification handlers to the master list (aIOHandlers).  The start and end addresses are typically
  * relative to the starting IOPAGE address, but they can also be absolute; we simply mask all addresses with
@@ -966,10 +970,10 @@ BusPDP11.prototype.restoreMemory = function(a)
  * @param {number} end address
  * @param {function(number)|null|undefined} fnReadByte
  * @param {function(number,number)|null|undefined} fnWriteByte
- * @param {function(number)|null|undefined} fnReadShort
- * @param {function(number,number)|null|undefined} fnWriteShort
+ * @param {function(number)|null|undefined} fnReadWord
+ * @param {function(number,number)|null|undefined} fnWriteWord
  */
-BusPDP11.prototype.addIOHandlers = function(start, end, fnReadByte, fnWriteByte, fnReadShort, fnWriteShort)
+BusPDP11.prototype.addIOHandlers = function(start, end, fnReadByte, fnWriteByte, fnReadWord, fnWriteWord)
 {
     for (var addr = start; addr <= end; addr += 2) {
         var off = addr & BusPDP11.IOPAGE_MASK;
@@ -977,7 +981,7 @@ BusPDP11.prototype.addIOHandlers = function(start, end, fnReadByte, fnWriteByte,
             Component.warning("I/O address already registered: " + str.toHexLong(addr));
             continue;
         }
-        this.aIOHandlers[off] = [fnReadByte, fnWriteByte, fnReadShort, fnWriteShort, false];
+        this.aIOHandlers[off] = [fnReadByte, fnWriteByte, fnReadWord, fnWriteWord, false];
         if (MAXDEBUG) this.log("addIOHandlers(" + str.toHexLong(addr) + ")");
     }
 };
@@ -997,9 +1001,9 @@ BusPDP11.prototype.addIOTable = function(component, table)
         var afn = table[port];
         var fnReadByte = afn[0]? afn[0].bind(component) : null;
         var fnWriteByte = afn[1]? afn[1].bind(component) : null;
-        var fnReadShort = afn[2]? afn[2].bind(component) : null;
-        var fnWriteShort = afn[3]? afn[3].bind(component) : null;
-        this.addIOHandlers(+port, +port, fnReadByte, fnWriteByte, fnReadShort, fnWriteShort);
+        var fnReadWord = afn[2]? afn[2].bind(component) : null;
+        var fnWriteWord = afn[3]? afn[3].bind(component) : null;
+        this.addIOHandlers(+port, +port, fnReadByte, fnWriteByte, fnReadWord, fnWriteWord);
     }
 };
 

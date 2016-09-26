@@ -384,7 +384,7 @@ MemoryPDP11.prototype = {
      * setAccess(afn, fDirect)
      *
      * The afn parameter should be a 4-entry function table containing two byte handlers and
-     * two short handlers.  See the static afnMemory table for an example.
+     * two word handlers.  See the static afnMemory table for an example.
      *
      * If no function table is specified, a default is selected based on the MemoryPDP11 type;
      * similarly, any undefined entries in the table are filled with default handlers that fall
@@ -419,11 +419,11 @@ MemoryPDP11.prototype = {
     setReadAccess: function(afn, fDirect) {
         if (!fDirect || !this.cReadBreakpoints) {
             this.readByte = afn[0] || this.readNone;
-            this.readShort = afn[2] || this.readShortDefault;
+            this.readWord = afn[2] || this.readWordDefault;
         }
         if (fDirect || fDirect === undefined) {
             this.readByteDirect = afn[0] || this.readNone;
-            this.readShortDirect = afn[2] || this.readShortDefault;
+            this.readWordDirect = afn[2] || this.readWordDefault;
         }
     },
     /**
@@ -436,11 +436,11 @@ MemoryPDP11.prototype = {
     setWriteAccess: function(afn, fDirect) {
         if (!fDirect || !this.cWriteBreakpoints) {
             this.writeByte = !this.fReadOnly && afn[1] || this.writeNone;
-            this.writeShort = !this.fReadOnly && afn[3] || this.writeShortDefault;
+            this.writeWord = !this.fReadOnly && afn[3] || this.writeWordDefault;
         }
         if (fDirect || fDirect === undefined) {
             this.writeByteDirect = afn[1] || this.writeNone;
-            this.writeShortDirect = afn[3] || this.writeShortDefault;
+            this.writeWordDirect = afn[3] || this.writeWordDefault;
         }
     },
     /**
@@ -450,7 +450,7 @@ MemoryPDP11.prototype = {
      */
     resetReadAccess: function() {
         this.readByte = this.readByteDirect;
-        this.readShort = this.readShortDirect;
+        this.readWord = this.readWordDirect;
     },
     /**
      * resetWriteAccess()
@@ -459,7 +459,7 @@ MemoryPDP11.prototype = {
      */
     resetWriteAccess: function() {
         this.writeByte = this.fReadOnly? this.writeNone : this.writeByteDirect;
-        this.writeShort = this.fReadOnly? this.writeShortDefault : this.writeShortDirect;
+        this.writeWord = this.fReadOnly? this.writeWordDefault : this.writeWordDirect;
     },
     /**
      * printAddr(sMessage)
@@ -543,7 +543,7 @@ MemoryPDP11.prototype = {
      * if it reads back 0x0000, it will initially think that LOTS of RAM exists, only to be disappointed later
      * when it performs a more exhaustive memory test, generating unwanted error messages in the process.
      *
-     * TODO: Determine if we should have separate readByteNone(), readShortNone() and readLongNone() functions
+     * TODO: Determine if we should have separate readByteNone(), readWordNone() and readLongNone() functions
      * to return 0xff, 0xffff and 0xffffffff|0, respectively.  This seems sufficient for now, as it seems unlikely
      * that a system would require nonexistent memory locations to return ALL bits set.
      *
@@ -575,25 +575,25 @@ MemoryPDP11.prototype = {
         }
     },
     /**
-     * readShortDefault(off, addr)
+     * readWordDefault(off, addr)
      *
      * @this {MemoryPDP11}
      * @param {number} off
      * @param {number} addr
      * @return {number}
      */
-    readShortDefault: function readShortDefault(off, addr) {
+    readWordDefault: function readWordDefault(off, addr) {
         return this.readByte(off++, addr++) | (this.readByte(off, addr) << 8);
     },
     /**
-     * writeShortDefault(off, w, addr)
+     * writeWordDefault(off, w, addr)
      *
      * @this {MemoryPDP11}
      * @param {number} off
      * @param {number} w
      * @param {number} addr
      */
-    writeShortDefault: function writeShortDefault(off, w, addr) {
+    writeWordDefault: function writeWordDefault(off, w, addr) {
         this.writeByte(off++, w & 0xff, addr++);
         this.writeByte(off, w >> 8, addr);
     },
@@ -612,14 +612,14 @@ MemoryPDP11.prototype = {
         return ((this.adw[off >> 2] >>> ((off & 0x3) << 3)) & 0xff);
     },
     /**
-     * readShortMemory(off, addr)
+     * readWordMemory(off, addr)
      *
      * @this {MemoryPDP11}
      * @param {number} off
      * @param {number} addr
      * @return {number}
      */
-    readShortMemory: function readShortMemory(off, addr) {
+    readWordMemory: function readWordMemory(off, addr) {
         if (BYTEARRAYS) {
             return this.ab[off] | (this.ab[off + 1] << 8);
         }
@@ -653,14 +653,14 @@ MemoryPDP11.prototype = {
         this.fDirty = true;
     },
     /**
-     * writeShortMemory(off, w, addr)
+     * writeWordMemory(off, w, addr)
      *
      * @this {MemoryPDP11}
      * @param {number} off
      * @param {number} w
      * @param {number} addr
      */
-    writeShortMemory: function writeShortMemory(off, w, addr) {
+    writeWordMemory: function writeWordMemory(off, w, addr) {
         if (BYTEARRAYS) {
             this.ab[off] = (w & 0xff);
             this.ab[off + 1] = (w >> 8);
@@ -692,18 +692,18 @@ MemoryPDP11.prototype = {
         return this.readByteDirect(off, addr);
     },
     /**
-     * readShortChecked(off, addr)
+     * readWordChecked(off, addr)
      *
      * @this {MemoryPDP11}
      * @param {number} off
      * @param {number} addr
      * @return {number}
      */
-    readShortChecked: function readShortChecked(off, addr) {
+    readWordChecked: function readWordChecked(off, addr) {
         if (DEBUGGER && this.dbg && this.addr != null) {
             this.dbg.checkMemoryRead(this.addr + off, 2);
         }
-        return this.readShortDirect(off, addr);
+        return this.readWordDirect(off, addr);
     },
     /**
      * writeByteChecked(off, b, addr)
@@ -720,18 +720,18 @@ MemoryPDP11.prototype = {
         if (this.fReadOnly) this.writeNone(off, b, addr); else this.writeByteDirect(off, b, addr);
     },
     /**
-     * writeShortChecked(off, w, addr)
+     * writeWordChecked(off, w, addr)
      *
      * @this {MemoryPDP11}
      * @param {number} off
      * @param {number} addr
      * @param {number} w
      */
-    writeShortChecked: function writeShortChecked(off, w, addr) {
+    writeWordChecked: function writeWordChecked(off, w, addr) {
         if (DEBUGGER && this.dbg && this.addr != null) {
             this.dbg.checkMemoryWrite(this.addr + off, 2)
         }
-        if (this.fReadOnly) this.writeNone(off, w, addr); else this.writeShortDirect(off, w, addr);
+        if (this.fReadOnly) this.writeNone(off, w, addr); else this.writeWordDirect(off, w, addr);
     },
     /**
      * readByteBE(off, addr)
@@ -756,28 +756,28 @@ MemoryPDP11.prototype = {
         return this.ab[off];
     },
     /**
-     * readShortBE(off, addr)
+     * readWordBE(off, addr)
      *
      * @this {MemoryPDP11}
      * @param {number} off
      * @param {number} addr
      * @return {number}
      */
-    readShortBE: function readShortBE(off, addr) {
+    readWordBE: function readWordBE(off, addr) {
         return this.dv.getUint16(off, true);
     },
     /**
-     * readShortLE(off, addr)
+     * readWordLE(off, addr)
      *
      * @this {MemoryPDP11}
      * @param {number} off
      * @param {number} addr
      * @return {number}
      */
-    readShortLE: function readShortLE(off, addr) {
+    readWordLE: function readWordLE(off, addr) {
         /*
          * TODO: It remains to be seen if there's any advantage to checking the offset for an aligned read
-         * vs. always reading the bytes separately; it seems a safe bet for longs, but it's less clear for shorts.
+         * vs. always reading the bytes separately.
          */
         return (off & 0x1)? (this.ab[off] | (this.ab[off+1] << 8)) : this.aw[off >> 1];
     },
@@ -806,29 +806,29 @@ MemoryPDP11.prototype = {
         this.fDirty = true;
     },
     /**
-     * writeShortBE(off, w, addr)
+     * writeWordBE(off, w, addr)
      *
      * @this {MemoryPDP11}
      * @param {number} off
      * @param {number} addr
      * @param {number} w
      */
-    writeShortBE: function writeShortBE(off, w, addr) {
+    writeWordBE: function writeWordBE(off, w, addr) {
         this.dv.setUint16(off, w, true);
         this.fDirty = true;
     },
     /**
-     * writeShortLE(off, w, addr)
+     * writeWordLE(off, w, addr)
      *
      * @this {MemoryPDP11}
      * @param {number} off
      * @param {number} addr
      * @param {number} w
      */
-    writeShortLE: function writeShortLE(off, w, addr) {
+    writeWordLE: function writeWordLE(off, w, addr) {
         /*
          * TODO: It remains to be seen if there's any advantage to checking the offset for an aligned write
-         * vs. always writing the bytes separately; it seems a safe bet for longs, but it's less clear for shorts.
+         * vs. always writing the bytes separately.
          */
         if (off & 0x1) {
             this.ab[off] = w;
@@ -842,13 +842,13 @@ MemoryPDP11.prototype = {
 
 /*
  * This is the effective definition of afnNone, but we need not fully define it, because setAccess()
- * uses these defaults when any of the 4 handlers (ie, 2 byte handlers and 2 short handlers) are undefined.
+ * uses these defaults when any of the 4 handlers (ie, 2 byte handlers and 2 word handlers) are undefined.
  *
 MemoryPDP11.afnNone = [
     MemoryPDP11.prototype.readNone,
     MemoryPDP11.prototype.writeNone,
-    MemoryPDP11.prototype.readShortDefault,
-    MemoryPDP11.prototype.writeShortDefault
+    MemoryPDP11.prototype.readWordDefault,
+    MemoryPDP11.prototype.writeWordDefault
 ];
  */
 MemoryPDP11.afnNone = [];
@@ -856,30 +856,30 @@ MemoryPDP11.afnNone = [];
 MemoryPDP11.afnMemory = [
     MemoryPDP11.prototype.readByteMemory,
     MemoryPDP11.prototype.writeByteMemory,
-    MemoryPDP11.prototype.readShortMemory,
-    MemoryPDP11.prototype.writeShortMemory
+    MemoryPDP11.prototype.readWordMemory,
+    MemoryPDP11.prototype.writeWordMemory
 ];
 
 MemoryPDP11.afnChecked = [
     MemoryPDP11.prototype.readByteChecked,
     MemoryPDP11.prototype.writeByteChecked,
-    MemoryPDP11.prototype.readShortChecked,
-    MemoryPDP11.prototype.writeShortChecked
+    MemoryPDP11.prototype.readWordChecked,
+    MemoryPDP11.prototype.writeWordChecked
 ];
 
 if (TYPEDARRAYS) {
     MemoryPDP11.afnArrayBE = [
         MemoryPDP11.prototype.readByteBE,
         MemoryPDP11.prototype.writeByteBE,
-        MemoryPDP11.prototype.readShortBE,
-        MemoryPDP11.prototype.writeShortBE
+        MemoryPDP11.prototype.readWordBE,
+        MemoryPDP11.prototype.writeWordBE
     ];
 
     MemoryPDP11.afnArrayLE = [
         MemoryPDP11.prototype.readByteLE,
         MemoryPDP11.prototype.writeByteLE,
-        MemoryPDP11.prototype.readShortLE,
-        MemoryPDP11.prototype.writeShortLE
+        MemoryPDP11.prototype.readWordLE,
+        MemoryPDP11.prototype.writeWordLE
     ];
 }
 
