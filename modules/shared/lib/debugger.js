@@ -659,26 +659,35 @@ if (DEBUGGER) {
     };
 
     /**
-     * toStrBase(n, nBytes)
+     * toBase(n, nBytes, fStripLeadingZeros)
      *
      * Use this instead of str.toHex() or str.toOct() to convert bytes/words to the Debugger's default base.
      *
      * @this {Debugger}
      * @param {number|null|undefined} n
      * @param {number} [nBytes] is the number of bytes to display, which we translate into a number of characters
+     * @param {boolean} [fStripLeadingZeros]
      * @return {string}
      */
-    Debugger.prototype.toStrBase = function(n, nBytes)
+    Debugger.prototype.toBase = function(n, nBytes, fStripLeadingZeros)
     {
+        var s;
         switch(this.nBase) {
         case 8:
-            return str.toOct(n, nBytes * 3);
+            s = str.toOct(n, nBytes * 3);
+            break;
         case 10:
-            return n.toString();
+            s = n.toString();
+            break;
         case 16:
         default:
-            return str.toHex(n, nBytes * 2);
+            s = str.toHex(n, nBytes * 2);
+            break;
         }
+        if (fStripLeadingZeros && s.charAt(0) == '0') {
+            s = s.replace(/^0+([0-9A-F]+)$/i, "$1");
+        }
+        return s;
     };
 
 }   // endif DEBUGGER

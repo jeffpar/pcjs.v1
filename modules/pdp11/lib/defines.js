@@ -179,10 +179,10 @@ var PDP11 = {
     OPMODE: {
         REG:        0x00,       // REGISTER                 (register is operand)
         REGD:       0x08,       // REGISTER DEFERRED        (register is address of operand)
-        POSTINC:    0x10,       // POST-INCREMENT           (register is address of operand, register incremented)
-        POSTINCD:   0x18,       // POST-INCREMENT DEFERRED  (register is address of address of operand, register incremented)
-        PREDEC:     0x20,       // PRE-DECREMENT            (register decremented, register is address of operand)
-        PREDECD:    0x28,       // PRE-DECREMENT DEFERRED   (register decremented, register is address of address of operand)
+        POSTINC:    0x10,       // AUTO-INCREMENT           (register is address of operand, register incremented)
+        POSTINCD:   0x18,       // AUTO-INCREMENT DEFERRED  (register is address of address of operand, register incremented)
+        PREDEC:     0x20,       // AUTO-DECREMENT           (register decremented, register is address of operand)
+        PREDECD:    0x28,       // AUTO-DECREMENT DEFERRED  (register decremented, register is address of address of operand)
         INDEX:      0x30,       // INDEX                    (register + next word is address of operand)
         INDEXD:     0x38,       // INDEX DEFERRED           (register + next word is address of address of operand)
         MASK:       0x38

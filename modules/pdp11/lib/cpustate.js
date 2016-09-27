@@ -879,7 +879,7 @@ CPUStatePDP11.prototype.trap = function(vector, reason)
     this.opFlags &= ~PDP11.OPFLAG.TRAP_MASK;    // lose interest in traps after an abort
     this.trapPSW = -1;                          // reset flag that we have a trap within a trap
 
-    if (DEBUG && this.dbg) this.dbg.println("trap to vector " + this.dbg.toStrBase(vector) + (reason? " (reason " + reason + ")" : ""));
+    if (DEBUG && this.dbg) this.dbg.println("trap to vector " + this.dbg.toBase(vector) + (reason? " (reason " + reason + ")" : ""));
 
     throw vector;
 };
