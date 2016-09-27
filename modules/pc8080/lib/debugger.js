@@ -3669,81 +3669,74 @@ if (DEBUGGER) {
                 return;
             }
 
-            var fValid = false;
             var w = this.parseExpression(sValue);
+            if (w === undefined) return;
 
-            if (w !== undefined) {
-                fValid = true;
-                var sRegMatch = sReg.toUpperCase();
-                switch (sRegMatch) {
-                case "A":
-                    cpu.regA = w & 0xff;
-                    break;
-                case "B":
-                    cpu.regB = w & 0xff;
-                    break;
-                case "BC":
-                    cpu.regB = ((w >> 8) & 0xff);
-                    /* falls through */
-                case "C":
-                    cpu.regC = w & 0xff;
-                    break;
-                case "D":
-                    cpu.regD = w & 0xff;
-                    break;
-                case "DE":
-                    cpu.regD = ((w >> 8) & 0xff);
-                    /* falls through */
-                case "E":
-                    cpu.regE = w & 0xff;
-                    break;
-                case "H":
-                    cpu.regH = w & 0xff;
-                    break;
-                case "HL":
-                    cpu.regH = ((w >> 8) & 0xff);
-                    /* falls through */
-                case "L":
-                    cpu.regL = w & 0xff;
-                    break;
-                case "SP":
-                    cpu.setSP(w);
-                    break;
-                case "PC":
-                    cpu.setPC(w);
-                    this.dbgAddrNextCode = this.newAddr(cpu.getPC());
-                    break;
-                case "PS":
-                    cpu.setPS(w);
-                    break;
-                case "PSW":
-                    cpu.setPSW(w);
-                    break;
-                case "CF":
-                    if (w) cpu.setCF(); else cpu.clearCF();
-                    break;
-                case "PF":
-                    if (w) cpu.setPF(); else cpu.clearPF();
-                    break;
-                case "AF":
-                    if (w) cpu.setAF(); else cpu.clearAF();
-                    break;
-                case "ZF":
-                    if (w) cpu.setZF(); else cpu.clearZF();
-                    break;
-                case "SF":
-                    if (w) cpu.setSF(); else cpu.clearSF();
-                    break;
-                case "IF":
-                    if (w) cpu.setIF(); else cpu.clearIF();
-                    break;
-                default:
-                    this.println("unknown register: " + sReg);
-                    return;
-                }
-            }
-            if (!fValid) {
-                this.println("invalid value: " + sValue);
+            var sRegMatch = sReg.toUpperCase();
+            switch (sRegMatch) {
+            case "A":
+                cpu.regA = w & 0xff;
+                break;
+            case "B":
+                cpu.regB = w & 0xff;
+                break;
+            case "BC":
+                cpu.regB = ((w >> 8) & 0xff);
+                /* falls through */
+            case "C":
+                cpu.regC = w & 0xff;
+                break;
+            case "D":
+                cpu.regD = w & 0xff;
+                break;
+            case "DE":
+                cpu.regD = ((w >> 8) & 0xff);
+                /* falls through */
+            case "E":
+                cpu.regE = w & 0xff;
+                break;
+            case "H":
+                cpu.regH = w & 0xff;
+                break;
+            case "HL":
+                cpu.regH = ((w >> 8) & 0xff);
+                /* falls through */
+            case "L":
+                cpu.regL = w & 0xff;
+                break;
+            case "SP":
+                cpu.setSP(w);
+                break;
+            case "PC":
+                cpu.setPC(w);
+                this.dbgAddrNextCode = this.newAddr(cpu.getPC());
+                break;
+            case "PS":
+                cpu.setPS(w);
+                break;
+            case "PSW":
+                cpu.setPSW(w);
+                break;
+            case "CF":
+                if (w) cpu.setCF(); else cpu.clearCF();
+                break;
+            case "PF":
+                if (w) cpu.setPF(); else cpu.clearPF();
+                break;
+            case "AF":
+                if (w) cpu.setAF(); else cpu.clearAF();
+                break;
+            case "ZF":
+                if (w) cpu.setZF(); else cpu.clearZF();
+                break;
+            case "SF":
+                if (w) cpu.setSF(); else cpu.clearSF();
+                break;
+            case "IF":
+                if (w) cpu.setIF(); else cpu.clearIF();
+                break;
+            default:
+                this.println("unknown register: " + sReg);
                 return;
             }
             cpu.updateCPU();

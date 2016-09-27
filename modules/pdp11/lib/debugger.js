@@ -3177,7 +3177,6 @@ if (DEBUGGER) {
                 this.println("unknown register: " + sReg);
                 return;
             }
-
             cpu.updateCPU();
             this.println("updated registers:");
         }

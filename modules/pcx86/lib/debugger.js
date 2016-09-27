@@ -6784,214 +6784,214 @@ if (DEBUGGER) {
                     this.println("missing value for " + asArgs[1]);
                     return;
                 }
-                var fValid = false;
+
                 var w = this.parseExpression(sValue);
-                if (w !== undefined) {
-                    fValid = true;
-                    var sRegMatch = sReg.toUpperCase();
-                    if (sRegMatch.charAt(0) == 'E' && this.cchReg <= 4) {
-                        sRegMatch = null;
-                    }
-                    switch (sRegMatch) {
-                    case "AL":
-                        this.cpu.regEAX = (this.cpu.regEAX & ~0xff) | (w & 0xff);
-                        break;
-                    case "AH":
-                        this.cpu.regEAX = (this.cpu.regEAX & ~0xff00) | ((w << 8) & 0xff);
-                        break;
-                    case "AX":
-                        this.cpu.regEAX = (this.cpu.regEAX & ~0xffff) | (w & 0xffff);
-                        break;
-                    case "BL":
-                        this.cpu.regEBX = (this.cpu.regEBX & ~0xff) | (w & 0xff);
-                        break;
-                    case "BH":
-                        this.cpu.regEBX = (this.cpu.regEBX & ~0xff00) | ((w << 8) & 0xff);
-                        break;
-                    case "BX":
-                        this.cpu.regEBX = (this.cpu.regEBX & ~0xffff) | (w & 0xffff);
-                        break;
-                    case "CL":
-                        this.cpu.regECX = (this.cpu.regECX & ~0xff) | (w & 0xff);
-                        break;
-                    case "CH":
-                        this.cpu.regECX = (this.cpu.regECX & ~0xff00) | ((w << 8) & 0xff);
-                        break;
-                    case "CX":
-                        this.cpu.regECX = (this.cpu.regECX & ~0xffff) | (w & 0xffff);
-                        break;
-                    case "DL":
-                        this.cpu.regEDX = (this.cpu.regEDX & ~0xff) | (w & 0xff);
-                        break;
-                    case "DH":
-                        this.cpu.regEDX = (this.cpu.regEDX & ~0xff00) | ((w << 8) & 0xff);
-                        break;
-                    case "DX":
-                        this.cpu.regEDX = (this.cpu.regEDX & ~0xffff) | (w & 0xffff);
-                        break;
-                    case "SP":
-                        this.cpu.setSP((this.cpu.getSP() & ~0xffff) | (w & 0xffff));
-                        break;
-                    case "BP":
-                        this.cpu.regEBP = (this.cpu.regEBP & ~0xffff) | (w & 0xffff);
-                        break;
-                    case "SI":
-                        this.cpu.regESI = (this.cpu.regESI & ~0xffff) | (w & 0xffff);
-                        break;
-                    case "DI":
-                        this.cpu.regEDI = (this.cpu.regEDI & ~0xffff) | (w & 0xffff);
-                        break;
-                    /*
-                     * DANGER: For any of the segment loads below, by going through the normal CPU
-                     * segment load procedure, you run the risk of generating a fault in the machine
-                     * if you're not careful.  So, um, be careful.
-                     */
-                    case "DS":
-                        this.cpu.setDS(w);
-                        break;
-                    case "ES":
-                        this.cpu.setES(w);
-                        break;
-                    case "SS":
-                        this.cpu.setSS(w);
-                        break;
-                    case "CS":
-                     // fInstruction = true;
-                        this.cpu.setCS(w);
-                        this.dbgAddrNextCode = this.newAddr(this.cpu.getIP(), this.cpu.getCS());
-                        break;
-                    case "IP":
-                    case "EIP":
-                     // fInstruction = true;
-                        this.cpu.setIP(w);
-                        this.dbgAddrNextCode = this.newAddr(this.cpu.getIP(), this.cpu.getCS());
-                        break;
-                    /*
-                     * I used to alias "PC" (Program Counter) to "IP" (Instruction Pointer), because in PC-DOS 1.00
-                     * through 2.10, DEBUG.COM did the same thing.  Then I discovered that, starting with PC-DOS 3.00,
-                     * DEBUG.COM changed "PC" to refer to the 16-bit flags register (Program or Processor Control?)
-                     * I've elected to go for PC-DOS 3.00+ compatibility, since that will be more widely known.
-                     *
-                     * PCx86 prefers "PS" (Processor Status) for accessing the FLAGS register in its 16-bit (or 32-bit)
-                     * entirety.  Individual flag bits can also be accessed as 1-bit registers, using the names shown
-                     * below ("C", "P", "A", "Z", etc.)
-                     */
-                    case "PC":
-                    case "PS":
-                        this.cpu.setPS(w);
-                        break;
-                    case 'C':
-                        if (w) this.cpu.setCF(); else this.cpu.clearCF();
-                        break;
-                    case 'P':
-                        if (w) this.cpu.setPF(); else this.cpu.clearPF();
-                        break;
-                    case 'A':
-                        if (w) this.cpu.setAF(); else this.cpu.clearAF();
-                        break;
-                    case 'Z':
-                        if (w) this.cpu.setZF(); else this.cpu.clearZF();
-                        break;
-                    case 'S':
-                        if (w) this.cpu.setSF(); else this.cpu.clearSF();
-                        break;
-                    case 'I':
-                        if (w) this.cpu.setIF(); else this.cpu.clearIF();
-                        break;
-                    case 'D':
-                        if (w) this.cpu.setDF(); else this.cpu.clearDF();
-                        break;
-                    case 'V':
-                        if (w) this.cpu.setOF(); else this.cpu.clearOF();
-                        break;
-                    default:
-                        var fUnknown = true;
-                        if (this.cpu.model >= X86.MODEL_80286) {
-                            fUnknown = false;
-                            switch(sRegMatch){
-                            case "MS":
-                                this.cpu.setMSW(w);
-                                break;
-                            case "TR":
+                if (w === undefined) return;
+
+                var fValid = true;
+                var sRegMatch = sReg.toUpperCase();
+                if (sRegMatch.charAt(0) == 'E' && this.cchReg <= 4) {
+                    sRegMatch = null;
+                }
+                switch (sRegMatch) {
+                case "AL":
+                    this.cpu.regEAX = (this.cpu.regEAX & ~0xff) | (w & 0xff);
+                    break;
+                case "AH":
+                    this.cpu.regEAX = (this.cpu.regEAX & ~0xff00) | ((w << 8) & 0xff);
+                    break;
+                case "AX":
+                    this.cpu.regEAX = (this.cpu.regEAX & ~0xffff) | (w & 0xffff);
+                    break;
+                case "BL":
+                    this.cpu.regEBX = (this.cpu.regEBX & ~0xff) | (w & 0xff);
+                    break;
+                case "BH":
+                    this.cpu.regEBX = (this.cpu.regEBX & ~0xff00) | ((w << 8) & 0xff);
+                    break;
+                case "BX":
+                    this.cpu.regEBX = (this.cpu.regEBX & ~0xffff) | (w & 0xffff);
+                    break;
+                case "CL":
+                    this.cpu.regECX = (this.cpu.regECX & ~0xff) | (w & 0xff);
+                    break;
+                case "CH":
+                    this.cpu.regECX = (this.cpu.regECX & ~0xff00) | ((w << 8) & 0xff);
+                    break;
+                case "CX":
+                    this.cpu.regECX = (this.cpu.regECX & ~0xffff) | (w & 0xffff);
+                    break;
+                case "DL":
+                    this.cpu.regEDX = (this.cpu.regEDX & ~0xff) | (w & 0xff);
+                    break;
+                case "DH":
+                    this.cpu.regEDX = (this.cpu.regEDX & ~0xff00) | ((w << 8) & 0xff);
+                    break;
+                case "DX":
+                    this.cpu.regEDX = (this.cpu.regEDX & ~0xffff) | (w & 0xffff);
+                    break;
+                case "SP":
+                    this.cpu.setSP((this.cpu.getSP() & ~0xffff) | (w & 0xffff));
+                    break;
+                case "BP":
+                    this.cpu.regEBP = (this.cpu.regEBP & ~0xffff) | (w & 0xffff);
+                    break;
+                case "SI":
+                    this.cpu.regESI = (this.cpu.regESI & ~0xffff) | (w & 0xffff);
+                    break;
+                case "DI":
+                    this.cpu.regEDI = (this.cpu.regEDI & ~0xffff) | (w & 0xffff);
+                    break;
+                /*
+                 * DANGER: For any of the segment loads below, by going through the normal CPU
+                 * segment load procedure, you run the risk of generating a fault in the machine
+                 * if you're not careful.  So, um, be careful.
+                 */
+                case "DS":
+                    this.cpu.setDS(w);
+                    break;
+                case "ES":
+                    this.cpu.setES(w);
+                    break;
+                case "SS":
+                    this.cpu.setSS(w);
+                    break;
+                case "CS":
+                 // fInstruction = true;
+                    this.cpu.setCS(w);
+                    this.dbgAddrNextCode = this.newAddr(this.cpu.getIP(), this.cpu.getCS());
+                    break;
+                case "IP":
+                case "EIP":
+                 // fInstruction = true;
+                    this.cpu.setIP(w);
+                    this.dbgAddrNextCode = this.newAddr(this.cpu.getIP(), this.cpu.getCS());
+                    break;
+                /*
+                 * I used to alias "PC" (Program Counter) to "IP" (Instruction Pointer), because in PC-DOS 1.00
+                 * through 2.10, DEBUG.COM did the same thing.  Then I discovered that, starting with PC-DOS 3.00,
+                 * DEBUG.COM changed "PC" to refer to the 16-bit flags register (Program or Processor Control?)
+                 * I've elected to go for PC-DOS 3.00+ compatibility, since that will be more widely known.
+                 *
+                 * PCx86 prefers "PS" (Processor Status) for accessing the FLAGS register in its 16-bit (or 32-bit)
+                 * entirety.  Individual flag bits can also be accessed as 1-bit registers, using the names shown
+                 * below ("C", "P", "A", "Z", etc.)
+                 */
+                case "PC":
+                case "PS":
+                    this.cpu.setPS(w);
+                    break;
+                case 'C':
+                    if (w) this.cpu.setCF(); else this.cpu.clearCF();
+                    break;
+                case 'P':
+                    if (w) this.cpu.setPF(); else this.cpu.clearPF();
+                    break;
+                case 'A':
+                    if (w) this.cpu.setAF(); else this.cpu.clearAF();
+                    break;
+                case 'Z':
+                    if (w) this.cpu.setZF(); else this.cpu.clearZF();
+                    break;
+                case 'S':
+                    if (w) this.cpu.setSF(); else this.cpu.clearSF();
+                    break;
+                case 'I':
+                    if (w) this.cpu.setIF(); else this.cpu.clearIF();
+                    break;
+                case 'D':
+                    if (w) this.cpu.setDF(); else this.cpu.clearDF();
+                    break;
+                case 'V':
+                    if (w) this.cpu.setOF(); else this.cpu.clearOF();
+                    break;
+                default:
+                    var fUnknown = true;
+                    if (this.cpu.model >= X86.MODEL_80286) {
+                        fUnknown = false;
+                        switch(sRegMatch){
+                        case "MS":
+                            this.cpu.setMSW(w);
+                            break;
+                        case "TR":
+                            /*
+                             * DANGER: Like any of the segment loads above, by going through the normal CPU
+                             * segment load procedure, you run the risk of generating a fault in the machine
+                             * if you're not careful.  So, um, be careful.
+                             */
+                            if (this.cpu.segTSS.load(w) === X86.ADDR_INVALID) {
+                                fValid = false;
+                            }
+                            break;
+                        /*
+                         * TODO: Add support for GDTR (addr and limit), IDTR (addr and limit), and perhaps
+                         * even the ability to edit descriptor information associated with each segment register.
+                         */
+                        default:
+                            fUnknown = true;
+                            if (I386 && this.cpu.model >= X86.MODEL_80386) {
+                                fUnknown = false;
+                                switch(sRegMatch){
+                                case "EAX":
+                                    this.cpu.regEAX = w;
+                                    break;
+                                case "EBX":
+                                    this.cpu.regEBX = w;
+                                    break;
+                                case "ECX":
+                                    this.cpu.regECX = w;
+                                    break;
+                                case "EDX":
+                                    this.cpu.regEDX = w;
+                                    break;
+                                case "ESP":
+                                    this.cpu.setSP(w);
+                                    break;
+                                case "EBP":
+                                    this.cpu.regEBP = w;
+                                    break;
+                                case "ESI":
+                                    this.cpu.regESI = w;
+                                    break;
+                                case "EDI":
+                                    this.cpu.regEDI = w;
+                                    break;
                                 /*
-                                 * DANGER: Like any of the segment loads above, by going through the normal CPU
+                                 * DANGER: For any of the segment loads below, by going through the normal CPU
                                  * segment load procedure, you run the risk of generating a fault in the machine
                                  * if you're not careful.  So, um, be careful.
                                  */
-                                if (this.cpu.segTSS.load(w) === X86.ADDR_INVALID) {
-                                    fValid = false;
+                                case "FS":
+                                    this.cpu.setFS(w);
+                                    break;
+                                case "GS":
+                                    this.cpu.setGS(w);
+                                    break;
+                                case "CR0":
+                                    this.cpu.regCR0 = w;
+                                    X86.helpLoadCR0.call(this.cpu, w);
+                                    break;
+                                case "CR2":
+                                    this.cpu.regCR2 = w;
+                                    break;
+                                case "CR3":
+                                    this.cpu.regCR3 = w;
+                                    X86.helpLoadCR3.call(this.cpu, w);
+                                    break;
+                                /*
+                                 * TODO: Add support for DR0-DR7 and TR6-TR7.
+                                 */
+                                default:
+                                    fUnknown = true;
+                                    break;
                                 }
-                                break;
-                            /*
-                             * TODO: Add support for GDTR (addr and limit), IDTR (addr and limit), and perhaps
-                             * even the ability to edit descriptor information associated with each segment register.
-                             */
-                            default:
-                                fUnknown = true;
-                                if (I386 && this.cpu.model >= X86.MODEL_80386) {
-                                    fUnknown = false;
-                                    switch(sRegMatch){
-                                    case "EAX":
-                                        this.cpu.regEAX = w;
-                                        break;
-                                    case "EBX":
-                                        this.cpu.regEBX = w;
-                                        break;
-                                    case "ECX":
-                                        this.cpu.regECX = w;
-                                        break;
-                                    case "EDX":
-                                        this.cpu.regEDX = w;
-                                        break;
-                                    case "ESP":
-                                        this.cpu.setSP(w);
-                                        break;
-                                    case "EBP":
-                                        this.cpu.regEBP = w;
-                                        break;
-                                    case "ESI":
-                                        this.cpu.regESI = w;
-                                        break;
-                                    case "EDI":
-                                        this.cpu.regEDI = w;
-                                        break;
-                                    /*
-                                     * DANGER: For any of the segment loads below, by going through the normal CPU
-                                     * segment load procedure, you run the risk of generating a fault in the machine
-                                     * if you're not careful.  So, um, be careful.
-                                     */
-                                    case "FS":
-                                        this.cpu.setFS(w);
-                                        break;
-                                    case "GS":
-                                        this.cpu.setGS(w);
-                                        break;
-                                    case "CR0":
-                                        this.cpu.regCR0 = w;
-                                        X86.helpLoadCR0.call(this.cpu, w);
-                                        break;
-                                    case "CR2":
-                                        this.cpu.regCR2 = w;
-                                        break;
-                                    case "CR3":
-                                        this.cpu.regCR3 = w;
-                                        X86.helpLoadCR3.call(this.cpu, w);
-                                        break;
-                                    /*
-                                     * TODO: Add support for DR0-DR7 and TR6-TR7.
-                                     */
-                                    default:
-                                        fUnknown = true;
-                                        break;
-                                    }
-                                }
-                                break;
                             }
+                            break;
                         }
-                        if (fUnknown) {
-                            this.println("unknown register: " + sReg);
-                            return;
-                        }
+                    }
+                    if (fUnknown) {
+                        this.println("unknown register: " + sReg);
+                        return;
                     }
                 }
                 if (!fValid) {
