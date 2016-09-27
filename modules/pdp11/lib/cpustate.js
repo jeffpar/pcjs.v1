@@ -512,7 +512,7 @@ CPUStatePDP11.prototype.getPC = function()
  */
 CPUStatePDP11.prototype.setPC = function(addr)
 {
-    this.regsGen[7] = addr;
+    this.regsGen[7] = addr & 0xffff;
 };
 
 /**
@@ -524,6 +524,17 @@ CPUStatePDP11.prototype.setPC = function(addr)
 CPUStatePDP11.prototype.getSP = function()
 {
     return this.regsGen[6];
+};
+
+/**
+ * setSP()
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} addr
+ */
+CPUStatePDP11.prototype.setSP = function(addr)
+{
+    this.regsGen[6] = addr & 0xffff;
 };
 
 /**
@@ -702,6 +713,8 @@ CPUStatePDP11.prototype.setPSW = function(newPSW)
 /**
  * updateNZCFlags(result)
  *
+ * NOTE: The V flag is simply zeroed, it is not "updated" based on the result.
+ *
  * @this {CPUStatePDP11}
  * @param {number} result
  */
@@ -715,6 +728,8 @@ CPUStatePDP11.prototype.updateNZCFlags = function(result)
 
 /**
  * updateNZFlags(result)
+ *
+ * NOTE: The V flag is simply zeroed, it is not "updated" based on the result.
  *
  * @this {CPUStatePDP11}
  * @param {number} result
@@ -740,6 +755,44 @@ CPUStatePDP11.prototype.updateAddFlags = function(result, src, dst)
     if (!(this.opFlags & PDP11.OPFLAG.SKIP_FLAGS)) {
         this.flagN = this.flagZ = this.flagC = result;
         this.flagV = (src ^ result) & (dst ^ result);
+    }
+};
+
+/**
+ * updateIncFlags(result, src, dst)
+ *
+ * NOTE: We could have used updateAddFlags() if not for the fact that the C flag must be preserved.
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} result (dst + src)
+ * @param {number} src (ie, 1)
+ * @param {number} dst
+ */
+CPUStatePDP11.prototype.updateIncFlags = function(result, src, dst)
+{
+    if (!(this.opFlags & PDP11.OPFLAG.SKIP_FLAGS)) {
+        this.flagN = this.flagZ = result;
+        // Because src is always 1 (with a zero sign bit), it can be optimized out of this calculation
+        this.flagV = (/* src ^ */ result) & (dst ^ result);
+    }
+};
+
+/**
+ * updateDecFlags(result, src, dst)
+ *
+ * NOTE: We could have used updateSubFlags() if not for the fact that the C flag must be preserved.
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} result (dst - src)
+ * @param {number} src (ie, 1)
+ * @param {number} dst
+ */
+CPUStatePDP11.prototype.updateDecFlags = function(result, src, dst)
+{
+    if (!(this.opFlags & PDP11.OPFLAG.SKIP_FLAGS)) {
+        this.flagN = this.flagZ = result;
+        // Because src is always 1 (with a zero sign bit), it can be optimized out of this calculation
+        this.flagV = (/* src ^ */ dst) & (dst ^ result);
     }
 };
 

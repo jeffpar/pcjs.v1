@@ -38,22 +38,22 @@ if (NODE) {
 }
 
 /**
- * fnADD(dst, src)
+ * fnADD(src, dst)
  *
  * @this {CPUStatePDP11}
  * @param {number} src
  * @param {number} dst
- * @return {number} (src + dst)
+ * @return {number} (dst + src)
  */
 PDP11.fnADD = function(src, dst)
 {
-    var result = src + dst;
+    var result = dst + src;
     this.updateAddFlags(result, src, dst);
     return result & 0xffff;
 };
 
 /**
- * fnBIC(dst, src)
+ * fnBIC(src, dst)
  *
  * @this {CPUStatePDP11}
  * @param {number} src
@@ -62,13 +62,13 @@ PDP11.fnADD = function(src, dst)
  */
 PDP11.fnBIC = function(src, dst)
 {
-    var result = ~src & dst;
+    var result = dst & ~src;
     this.updateNZFlags(result);
     return result;
 };
 
 /**
- * fnBICB(dst, src)
+ * fnBICB(src, dst)
  *
  * @this {CPUStatePDP11}
  * @param {number} src
@@ -77,43 +77,73 @@ PDP11.fnBIC = function(src, dst)
  */
 PDP11.fnBICB = function(src, dst)
 {
-    var result = ~src & dst;
+    var result = dst & ~src;
     this.updateNZFlags(result << 8);
     return result;
 };
 
 /**
- * fnBIS(dst, src)
+ * fnBIS(src, dst)
  *
  * @this {CPUStatePDP11}
  * @param {number} src
  * @param {number} dst
- * @return {number} (src | dst)
+ * @return {number} (dst | src)
  */
 PDP11.fnBIS = function(src, dst)
 {
-    var result = src | dst;
+    var result = dst | src;
     this.updateNZFlags(result);
     return result;
 };
 
 /**
- * fnBISB(dst, src)
+ * fnBISB(src, dst)
  *
  * @this {CPUStatePDP11}
  * @param {number} src
  * @param {number} dst
- * @return {number} (src | dst)
+ * @return {number} (dst | src)
  */
 PDP11.fnBISB = function(src, dst)
 {
-    var result = src | dst;
+    var result = dst | src;
     this.updateNZFlags(result << 8);
     return result;
 };
 
 /**
- * fnSUB(dst, src)
+ * fnDEC(src, dst)
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} src (ie, 1)
+ * @param {number} dst
+ * @return {number} (dst - src)
+ */
+PDP11.fnDEC = function(src, dst)
+{
+    var result = dst - src;
+    this.updateDecFlags(result, src, dst);
+    return result & 0xffff;
+};
+
+/**
+ * fnINC(src, dst)
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} src (ie, 1)
+ * @param {number} dst
+ * @return {number} (dst + src)
+ */
+PDP11.fnINC = function(src, dst)
+{
+    var result = dst + src;
+    this.updateIncFlags(result, src, dst);
+    return result & 0xffff;
+};
+
+/**
+ * fnSUB(src, dst)
  *
  * @this {CPUStatePDP11}
  * @param {number} src
@@ -689,10 +719,7 @@ PDP11.opCOMB = function(opCode)
  */
 PDP11.opDEC = function(opCode)
 {
-    /*
-     * TODO: Implement
-     */
-    this.regOp = -1;
+    this.updateWordByMode(opCode, 1, PDP11.fnDEC);
     this.nStepCycles -= 1;
 };
 
@@ -764,10 +791,7 @@ PDP11.opHALT = function(opCode)
  */
 PDP11.opINC = function(opCode)
 {
-    /*
-     * TODO: Implement
-     */
-    this.regOp = -1;
+    this.updateWordByMode(opCode, 1, PDP11.fnINC);
     this.nStepCycles -= 1;
 };
 

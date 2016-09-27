@@ -3140,38 +3140,44 @@ if (DEBUGGER) {
                 return;
             }
 
-            var fValid = false;
             var w = this.parseExpression(sValue);
+            if (w === undefined) return;
 
-            if (w !== undefined) {
-                fValid = true;
-                var sRegMatch = sReg.toUpperCase();
-                switch (sRegMatch) {
-                case "PC":
-                    cpu.setPC(w);
-                    this.dbgAddrNextCode = this.newAddr(cpu.getPC());
-                    break;
-                case "NF":
-                    if (w) cpu.setNF(); else cpu.clearNF();
-                    break;
-                case "ZF":
-                    if (w) cpu.setZF(); else cpu.clearZF();
-                    break;
-                case "VF":
-                    if (w) cpu.setVF(); else cpu.clearVF();
-                    break;
-                case "CF":
-                    if (w) cpu.setCF(); else cpu.clearCF();
-                    break;
-                default:
-                    this.println("unknown register: " + sReg);
-                    return;
+            var sRegMatch = sReg.toUpperCase();
+            switch (sRegMatch) {
+            case "SP":
+            case "R6":
+                cpu.setSP(w);
+                break;
+            case "PC":
+            case "R7":
+                cpu.setPC(w);
+                this.dbgAddrNextCode = this.newAddr(cpu.getPC());
+                break;
+            case "N":
+                if (w) cpu.setNF(); else cpu.clearNF();
+                break;
+            case "Z":
+                if (w) cpu.setZF(); else cpu.clearZF();
+                break;
+            case "V":
+                if (w) cpu.setVF(); else cpu.clearVF();
+                break;
+            case "C":
+                if (w) cpu.setCF(); else cpu.clearCF();
+                break;
+            default:
+                if (sRegMatch.charAt(0) == 'R') {
+                    var iReg = +sRegMatch.charAt(1);
+                    if (iReg >= 0 && iReg < 6) {
+                        cpu.regsGen[iReg] = w & 0xffff;
+                        break;
+                    }
                 }
-            }
-            if (!fValid) {
-                this.println("invalid value: " + sValue);
+                this.println("unknown register: " + sReg);
                 return;
             }
+
             cpu.updateCPU();
             this.println("updated registers:");
         }
