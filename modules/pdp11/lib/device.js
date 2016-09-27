@@ -76,8 +76,8 @@ function DevicePDP11(parmsDevice)
     };
 
     this.kw11 = {
-        init: 0,
-        csr: 0
+        csr:    0,
+        timer:  -1      // initBus() will initialize this timer ID
     };
 
     this.rk11 = {
@@ -190,6 +190,12 @@ DevicePDP11.prototype.initBus = function(cmp, bus, cpu, dbg)
     this.bus = bus;
     this.cpu = cpu;
     this.dbg = dbg;
+
+    var device = this;
+    this.kw11.timer = this.cpu.addTimer(function() {
+        device.kw11_interrupt();
+    });
+
     switch(this.sDeviceName) {
     case DevicePDP11.UNIBUS_NAME:
     default:
@@ -225,10 +231,7 @@ DevicePDP11.prototype.writeLKS = function(data, addr)
 {
     this.kw11.lks = data;
     if (data & PDP11.KW11.LKS.INT_ENABLE) {
-        if (!this.kw11.init) {
-            setInterval(this.kw11_interrupt.bind(this), 25);
-            this.kw11.init = 1;
-        }
+        this.cpu.setTimer(this.kw11.timer, 1000/60);
     }
     this.kw11.lks = data & ~PDP11.KW11.LKS.MONITOR;
 };
@@ -713,6 +716,7 @@ DevicePDP11.prototype.kw11_interrupt = function()
     this.kw11.lks |= PDP11.KW11.LKS.MONITOR;
     if (this.kw11.lks & PDP11.KW11.LKS.INT_ENABLE) {
         this.cpu.interrupt(PDP11.KW11.DELAY, PDP11.KW11.PRI, PDP11.KW11.VEC);
+        this.cpu.setTimer(this.kw11.timer, 1000/60);
     }
 };
 

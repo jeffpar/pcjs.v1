@@ -910,7 +910,7 @@ Video8080.prototype.setFocus = function()
  * getRefreshTime()
  *
  * @this {Video8080}
- * @return {number}
+ * @return {number} (number of milliseconds per refresh)
  */
 Video8080.prototype.getRefreshTime = function()
 {

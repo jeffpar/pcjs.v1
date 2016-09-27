@@ -953,7 +953,7 @@ CPUPDP11.prototype.addTimer = function(callBack)
 };
 
 /**
- * setTimer(iTimer, ms)
+ * setTimer(iTimer, ms, fReset)
  *
  * Using the timer index from a previous addTimer() call, this sets that timer to fire after the
  * specified number of milliseconds.
@@ -965,19 +965,22 @@ CPUPDP11.prototype.addTimer = function(callBack)
  *
  * Ideally, the only function that would use setTimeout() is runCPU(), while the rest of the components
  * use setTimer(); however, due to legacy code (ie, code that predates these functions) and/or laziness,
- * that's currently not the case.  TODO: Fix.
+ * that may not be the case.
  *
  * @this {CPUPDP11}
  * @param {number} iTimer
  * @param {number} ms (converted into a cycle countdown internally)
+ * @param {boolean} [fReset] (true if the timer should be reset even if already armed)
  * @return {number} (number of cycles used to arm timer, or -1 if error)
  */
-CPUPDP11.prototype.setTimer = function(iTimer, ms)
+CPUPDP11.prototype.setTimer = function(iTimer, ms, fReset)
 {
     var nCycles = -1;
     if (iTimer >= 0 && iTimer < this.aTimers.length) {
-        nCycles = this.getMSCycles(ms);
-        this.aTimers[iTimer][0] = nCycles;
+        if (fReset || this.aTimers[iTimer][0] < 0) {
+            nCycles = this.getMSCycles(ms);
+            this.aTimers[iTimer][0] = nCycles;
+        }
     }
     return nCycles;
 };
