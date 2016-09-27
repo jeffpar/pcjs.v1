@@ -53,6 +53,81 @@ PDP11.fnADD = function(src, dst)
 };
 
 /**
+ * fnADDB(src, dst)
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} src
+ * @param {number} dst
+ * @return {number} (dst + src)
+ */
+PDP11.fnADDB = function(src, dst)
+{
+    var result = dst + src;
+    this.updateAddFlags(result << 8, src << 8, dst << 8);
+    return result & 0xff;
+};
+
+/**
+ * fnASL(src, dst)
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} src (ignored)
+ * @param {number} dst
+ * @return {number} (dst << 1)
+ */
+PDP11.fnASL = function(src, dst)
+{
+    var result = dst << 1;
+    this.updateLogFlags(result);
+    return result & 0xffff;
+};
+
+/**
+ * fnASLB(src, dst)
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} src (ignored)
+ * @param {number} dst
+ * @return {number} (dst << 1)
+ */
+PDP11.fnASLB = function(src, dst)
+{
+    var result = dst << 1;
+    this.updateLogFlags(result << 8);
+    return result & 0xff;
+};
+
+/**
+ * fnASR(src, dst)
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} src (ignored)
+ * @param {number} dst
+ * @return {number} (dst >> 1)
+ */
+PDP11.fnASR = function(src, dst)
+{
+    var result = (dst & 0x8000) | (dst >> 1) | (dst << 16);
+    this.updateLogFlags(result);
+    return result & 0xffff;
+};
+
+/**
+ * fnASRB(src, dst)
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} src (ignored)
+ * @param {number} dst
+ * @return {number} (dst >> 1)
+ */
+PDP11.fnASRB = function(src, dst)
+{
+    var result = (dst & 0x800) | (dst >> 1) | (dst << 8);
+    this.updateLogFlags(result << 8);
+    return result & 0xff;
+};
+
+/**
  * fnBIC(src, dst)
  *
  * @this {CPUStatePDP11}
@@ -113,6 +188,36 @@ PDP11.fnBISB = function(src, dst)
 };
 
 /**
+ * fnCOM(src, dst)
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} src (ignored)
+ * @param {number} dst
+ * @return {number} (~dst)
+ */
+PDP11.fnCOM = function(src, dst)
+{
+    var result = ~dst | 0x10000;
+    this.updateNZCFlags(result);
+    return result & 0xffff;
+};
+
+/**
+ * fnCOMB(src, dst)
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} src (ignored)
+ * @param {number} dst
+ * @return {number} (~dst)
+ */
+PDP11.fnCOMB = function(src, dst)
+{
+    var result = ~dst | 0x100;
+    this.updateNZCFlags(result << 8);
+    return result & 0xff;
+};
+
+/**
  * fnDEC(src, dst)
  *
  * @this {CPUStatePDP11}
@@ -123,8 +228,23 @@ PDP11.fnBISB = function(src, dst)
 PDP11.fnDEC = function(src, dst)
 {
     var result = dst - src;
-    this.updateDecFlags(result, src, dst);
+    this.updateDecFlags(result, dst);
     return result & 0xffff;
+};
+
+/**
+ * fnDECB(src, dst)
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} src (ie, 1)
+ * @param {number} dst
+ * @return {number} (dst - src)
+ */
+PDP11.fnDECB = function(src, dst)
+{
+    var result = dst - src;
+    this.updateDecFlags(result << 8, dst << 8);
+    return result & 0xff;
 };
 
 /**
@@ -138,8 +258,119 @@ PDP11.fnDEC = function(src, dst)
 PDP11.fnINC = function(src, dst)
 {
     var result = dst + src;
-    this.updateIncFlags(result, src, dst);
+    this.updateIncFlags(result, dst);
     return result & 0xffff;
+};
+
+/**
+ * fnINCB(src, dst)
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} src (ie, 1)
+ * @param {number} dst
+ * @return {number} (dst + src)
+ */
+PDP11.fnINCB = function(src, dst)
+{
+    var result = dst + src;
+    this.updateIncFlags(result << 8, dst << 8);
+    return result & 0xff;
+};
+
+/**
+ * fnNEG(src, dst)
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} src (ignored)
+ * @param {number} dst
+ * @return {number} (-dst)
+ */
+PDP11.fnNEG = function(src, dst)
+{
+    var result = -dst;
+    /*
+     * If the sign bit of both dst and result are set, the original value must have been 0x8000, triggering overflow.
+     */
+    this.updateNZCFlags(result, result & dst & 0x8000);
+    return result & 0xffff;
+};
+
+/**
+ * fnNEGB(src, dst)
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} src (ignored)
+ * @param {number} dst
+ * @return {number} (-dst)
+ */
+PDP11.fnNEGB = function(src, dst)
+{
+    var result = -dst;
+    /*
+     * If the sign bit of both dst and result are set, the original value must have been 0x80, which triggers overflow.
+     */
+    this.updateNZCFlags(result << 8, (result & dst & 0x80) << 8);
+    return result & 0xff;
+};
+
+/**
+ * fnROL(src, dst)
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} src (ignored)
+ * @param {number} dst
+ * @return {number} (dst >> 1)
+ */
+PDP11.fnROL = function(src, dst)
+{
+    var result = (dst << 1) | ((this.flagC >> 16) & 1);
+    this.updateLogFlags(result);
+    return result & 0xffff;
+};
+
+/**
+ * fnROLB(src, dst)
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} src (ignored)
+ * @param {number} dst
+ * @return {number} (dst >> 1)
+ */
+PDP11.fnROLB = function(src, dst)
+{
+    var result = (dst << 1) | ((this.flagC >> 16) & 1);
+    this.updateLogFlags(result << 8);
+    return result & 0xff;
+};
+
+/**
+ * fnROR(src, dst)
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} src (ignored)
+ * @param {number} dst
+ * @return {number} (dst >> 1)
+ */
+PDP11.fnROR = function(src, dst)
+{
+    var result = (((this.flagC & 0x10000) | dst) >> 1) | (dst << 16);
+    this.updateLogFlags(result);
+    return result & 0xffff;
+};
+
+/**
+ * fnRORB(src, dst)
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} src (ignored)
+ * @param {number} dst
+ * @return {number} (dst >> 1)
+ */
+PDP11.fnRORB = function(src, dst)
+{
+    var result = ((((this.flagC & 0x10000) >> 8) | dst) >> 1) | (dst << 8);
+    this.updateLogFlags(result << 8);
+    return result & 0xff;
 };
 
 /**
@@ -158,6 +389,36 @@ PDP11.fnSUB = function(src, dst)
 };
 
 /**
+ * fnSUBB(src, dst)
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} src
+ * @param {number} dst
+ * @return {number} (dst - src)
+ */
+PDP11.fnSUBB = function(src, dst)
+{
+    var result = dst - src;
+    this.updateSubFlags(result << 8, src << 8, dst << 8);
+    return result & 0xff;
+};
+
+/**
+ * fnXOR(src, dst)
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} src
+ * @param {number} dst
+ * @return {number} (dst ^ src)
+ */
+PDP11.fnXOR = function(src, dst)
+{
+    var result = dst ^ src;
+    this.updateNZFlags(result);
+    return result & 0xffff;
+};
+
+/**
  * opADC(opCode)
  *
  * @this {CPUStatePDP11}
@@ -165,10 +426,7 @@ PDP11.fnSUB = function(src, dst)
  */
 PDP11.opADC = function(opCode)
 {
-    /*
-     * TODO: Implement
-     */
-    this.regOp = -1;
+    this.updateWordByMode(opCode, this.getCF()? 1 : 0, PDP11.fnADD);
     this.nStepCycles -= 1;
 };
 
@@ -180,10 +438,7 @@ PDP11.opADC = function(opCode)
  */
 PDP11.opADCB = function(opCode)
 {
-    /*
-     * TODO: Implement
-     */
-    this.regOp = -1;
+    this.updateByteByMode(opCode, this.getCF()? 1 : 0, PDP11.fnADDB);
     this.nStepCycles -= 1;
 };
 
@@ -207,10 +462,30 @@ PDP11.opADD = function(opCode)
  */
 PDP11.opASH = function(opCode)
 {
-    /*
-     * TODO: Implement
-     */
-    this.regOp = -1;
+    var src = this.readWordByMode(opCode);
+    var reg = (opCode >> 6) & 7;
+    var result = this.regsGen[reg];
+    if (result & 0x8000) result |= 0xffff0000;
+    this.flagC = this.flagV = 0;
+    src &= 0x3F;
+    if (src & 0x20) {   // shift right
+        src = 64 - src;
+        if (src > 16) src = 16;
+        this.flagC = result << (17 - src);
+        result = result >> src;
+    } else if (src) {
+        if (src > 16) {
+            this.flagV = result;
+            result = 0;
+        } else {
+            result = result << src;
+            this.flagC = result;
+            var dst = (result >> 15) & 0xffff;  // check successive sign bits
+            if (dst && dst !== 0xffff) this.flagV = 0x8000;
+        }
+    }
+    this.regsGen[reg] = result & 0xffff;
+    this.flagN = this.flagZ = result;
     this.nStepCycles -= 1;
 };
 
@@ -222,10 +497,37 @@ PDP11.opASH = function(opCode)
  */
 PDP11.opASHC = function(opCode)
 {
-    /*
-     * TODO: Implement
-     */
-    this.regOp = -1;
+    var src = this.readWordByMode(opCode);
+    var reg = (opCode >> 6) & 7;
+    var dst = (this.regsGen[reg] << 16) | this.regsGen[reg | 1];
+    this.flagC = this.flagV = 0;
+    src &= 0x3F;
+    if (src & 0x20) {
+        src = 64 - src;
+        if (src > 32) src = 32;
+        var result = dst >> (src - 1);
+        this.flagC = result << 16;
+        result >>= 1;
+        if (dst & 0x80000000) result |= 0xffffffff << (32 - src);
+    } else {
+        if (src) {      // shift left
+            result = dst << (src - 1);
+            this.flagC = result >> 15;
+            result <<= 1;
+            if (src > 32) src = 32;
+            dst = dst >> (32 - src);
+            if (dst) {
+                dst |= (0xffffffff << src) & 0xffffffff;
+                if (dst !== 0xffffffff) this.flagV = 0x8000;
+            }
+        } else {
+            result = dst;
+        }
+    }
+    this.regsGen[reg] = (result >> 16) & 0xffff;
+    this.regsGen[reg | 1] = result & 0xffff;
+    this.flagN = result >> 16;
+    this.flagZ = result >> 16 | result;
     this.nStepCycles -= 1;
 };
 
@@ -237,10 +539,7 @@ PDP11.opASHC = function(opCode)
  */
 PDP11.opASL = function(opCode)
 {
-    /*
-     * TODO: Implement
-     */
-    this.regOp = -1;
+    this.updateWordByMode(opCode, 0, PDP11.fnASL);
     this.nStepCycles -= 1;
 };
 
@@ -252,10 +551,7 @@ PDP11.opASL = function(opCode)
  */
 PDP11.opASLB = function(opCode)
 {
-    /*
-     * TODO: Implement
-     */
-    this.regOp = -1;
+    this.updateByteByMode(opCode, 0, PDP11.fnASLB);
     this.nStepCycles -= 1;
 };
 
@@ -267,10 +563,7 @@ PDP11.opASLB = function(opCode)
  */
 PDP11.opASR = function(opCode)
 {
-    /*
-     * TODO: Implement
-     */
-    this.regOp = -1;
+    this.updateWordByMode(opCode, 0, PDP11.fnASR);
     this.nStepCycles -= 1;
 };
 
@@ -282,10 +575,7 @@ PDP11.opASR = function(opCode)
  */
 PDP11.opASRB = function(opCode)
 {
-    /*
-     * TODO: Implement
-     */
-    this.regOp = -1;
+    this.updateByteByMode(opCode, 0, PDP11.fnASRB);
     this.nStepCycles -= 1;
 };
 
@@ -689,10 +979,7 @@ PDP11.opCMPB = function(opCode)
  */
 PDP11.opCOM = function(opCode)
 {
-    /*
-     * TODO: Implement
-     */
-    this.regOp = -1;
+    this.updateWordByMode(opCode, 0, PDP11.fnCOM);
     this.nStepCycles -= 1;
 };
 
@@ -704,10 +991,7 @@ PDP11.opCOM = function(opCode)
  */
 PDP11.opCOMB = function(opCode)
 {
-    /*
-     * TODO: Implement
-     */
-    this.regOp = -1;
+    this.updateByteByMode(opCode, 0, PDP11.fnCOMB);
     this.nStepCycles -= 1;
 };
 
@@ -731,10 +1015,7 @@ PDP11.opDEC = function(opCode)
  */
 PDP11.opDECB = function(opCode)
 {
-    /*
-     * TODO: Implement
-     */
-    this.regOp = -1;
+    this.updateByteByMode(opCode, 1, PDP11.fnDECB);
     this.nStepCycles -= 1;
 };
 
@@ -746,10 +1027,32 @@ PDP11.opDECB = function(opCode)
  */
 PDP11.opDIV = function(opCode)
 {
-    /*
-     * TODO: Implement
-     */
-    this.regOp = -1;
+    var src = this.readWordByMode(opCode);
+    if (!src) {
+        this.flagN = 0;         // NZVC
+        this.flagZ = 0;
+        this.flagV = 0x8000;
+        this.flagC = 0x10000;   // divide by zero
+    } else {
+        var reg = (opCode >> 6) & 7;
+        var dst = (this.regsGen[reg] << 16) | this.regsGen[reg | 1];
+        this.flagC = this.flagV = 0;
+        if (src & 0x8000) src |= ~0xffff;
+        var result = ~~(dst / src);
+        if (result >= -32768 && result <= 32767) {
+            this.regsGen[reg] = result & 0xffff;
+            this.regsGen[reg | 1] = (dst - (result * src)) & 0xffff;
+            this.flagZ = (result >> 16) | result;
+            this.flagN = result >> 16;
+        } else {
+            this.flagV = 0x8000;                                // overflow - following are indeterminate
+            this.flagZ = (result >> 15) | result;               // dodgy
+            this.flagN = dst >> 16;                             // just as dodgy
+            if (src === -1 && this.regsGen[reg] === 0xfffe) {
+                this.regsGen[reg] = this.regsGen[reg | 1] = 1;  // etc
+            }
+        }
+    }
     this.nStepCycles -= 1;
 };
 
@@ -761,10 +1064,7 @@ PDP11.opDIV = function(opCode)
  */
 PDP11.opEMT = function(opCode)
 {
-    /*
-     * TODO: Implement
-     */
-    this.regOp = -1;
+    this.trap(PDP11.TRAP.EMULATOR, 2);
     this.nStepCycles -= 1;
 };
 
@@ -776,10 +1076,13 @@ PDP11.opEMT = function(opCode)
  */
 PDP11.opHALT = function(opCode)
 {
-    /*
-     * TODO: Implement
-     */
-    this.regOp = -1;
+    if (this.regPSW & PDP11.PSW.CMODE) {
+        this.regErr |= PDP11.CPUERR.BADHALT;
+        this.trap(PDP11.TRAP.BUS_ERROR, 46);
+    } else {
+        this.runState = 3;
+        this.endBurst();
+    }
     this.nStepCycles -= 1;
 };
 
@@ -803,10 +1106,7 @@ PDP11.opINC = function(opCode)
  */
 PDP11.opINCB = function(opCode)
 {
-    /*
-     * TODO: Implement
-     */
-    this.regOp = -1;
+    this.updateByteByMode(opCode, 1, PDP11.fnINCB);
     this.nStepCycles -= 1;
 };
 
@@ -994,10 +1294,18 @@ PDP11.opMTPS = function(opCode)
  */
 PDP11.opMUL = function(opCode)
 {
-    /*
-     * TODO: Implement
-     */
-    this.regOp = -1;
+    var src = this.readWordByMode(opCode);
+    var reg = (opCode >> 6) & 7;
+    if (src & 0x8000) src |= ~0xffff;
+    var dst = this.regsGen[reg];
+    if (dst & 0x8000) dst |= ~0xffff;
+    var result = ~~(src * dst);
+    this.regsGen[reg] = (result >> 16) & 0xffff;
+    this.regsGen[reg | 1] = result & 0xffff;
+    this.flagN = result >> 16;
+    this.flagZ = this.flagN | result;
+    this.flagV = 0;
+    this.flagC = (result < -32768 || result > 32767)? 0x10000 : 0;
     this.nStepCycles -= 1;
 };
 
@@ -1009,10 +1317,7 @@ PDP11.opMUL = function(opCode)
  */
 PDP11.opNEG = function(opCode)
 {
-    /*
-     * TODO: Implement
-     */
-    this.regOp = -1;
+    this.updateWordByMode(opCode, 0, PDP11.fnNEG);
     this.nStepCycles -= 1;
 };
 
@@ -1024,10 +1329,7 @@ PDP11.opNEG = function(opCode)
  */
 PDP11.opNEGB = function(opCode)
 {
-    /*
-     * TODO: Implement
-     */
-    this.regOp = -1;
+    this.updateByteByMode(opCode, 0, PDP11.fnNEGB);
     this.nStepCycles -= 1;
 };
 
@@ -1050,7 +1352,7 @@ PDP11.opNOP = function(opCode)
  */
 PDP11.opRESET = function(opCode)
 {
-    if (!(this.PSW & PDP11.PSW.CMODE)) {
+    if (!(this.regPSW & PDP11.PSW.CMODE)) {
         this.resetRegs();
         this.bus.reset();
         // display.data = this.regsGen[0];  // TODO: Review
@@ -1066,10 +1368,7 @@ PDP11.opRESET = function(opCode)
  */
 PDP11.opROL = function(opCode)
 {
-    /*
-     * TODO: Implement
-     */
-    this.regOp = -1;
+    this.updateWordByMode(opCode, 0, PDP11.fnROL);
     this.nStepCycles -= 1;
 };
 
@@ -1081,10 +1380,7 @@ PDP11.opROL = function(opCode)
  */
 PDP11.opROLB = function(opCode)
 {
-    /*
-     * TODO: Implement
-     */
-    this.regOp = -1;
+    this.updateByteByMode(opCode, 0, PDP11.fnROLB);
     this.nStepCycles -= 1;
 };
 
@@ -1096,10 +1392,7 @@ PDP11.opROLB = function(opCode)
  */
 PDP11.opROR = function(opCode)
 {
-    /*
-     * TODO: Implement
-     */
-    this.regOp = -1;
+    this.updateWordByMode(opCode, 0, PDP11.fnROR);
     this.nStepCycles -= 1;
 };
 
@@ -1111,10 +1404,7 @@ PDP11.opROR = function(opCode)
  */
 PDP11.opRORB = function(opCode)
 {
-    /*
-     * TODO: Implement
-     */
-    this.regOp = -1;
+    this.updateByteByMode(opCode, 0, PDP11.fnRORB);
     this.nStepCycles -= 1;
 };
 
@@ -1126,10 +1416,11 @@ PDP11.opRORB = function(opCode)
  */
 PDP11.opRTI = function(opCode)
 {
+    this.trapReturn();
     /*
-     * TODO: Implement
+     * Unlike RTT, RTI enables immediate trace
      */
-    this.regOp = -1;
+    this.opFlags |= (this.regPSW & PDP11.PSW.TF);
     this.nStepCycles -= 1;
 };
 
@@ -1157,10 +1448,7 @@ PDP11.opRTS = function(opCode)
  */
 PDP11.opRTT = function(opCode)
 {
-    /*
-     * TODO: Implement
-     */
-    this.regOp = -1;
+    this.trapReturn();
     this.nStepCycles -= 1;
 };
 
@@ -1172,10 +1460,7 @@ PDP11.opRTT = function(opCode)
  */
 PDP11.opSBC = function(opCode)
 {
-    /*
-     * TODO: Implement
-     */
-    this.regOp = -1;
+    this.updateWordByMode(opCode, this.getCF()? 1 : 0, PDP11.fnSUB);
     this.nStepCycles -= 1;
 };
 
@@ -1187,10 +1472,7 @@ PDP11.opSBC = function(opCode)
  */
 PDP11.opSBCB = function(opCode)
 {
-    /*
-     * TODO: Implement
-     */
-    this.regOp = -1;
+    this.updateByteByMode(opCode, this.getCF()? 1 : 0, PDP11.fnSUBB);
     this.nStepCycles -= 1;
 };
 
@@ -1281,8 +1563,8 @@ PDP11.opSOB = function(opCode)
 PDP11.opSPL = function(opCode)
 {
     this.assert(opCode & 0x08);
-    if (!(this.PSW & PDP11.PSW.CMODE)) {
-        this.PSW = (this.PSW & ~(PDP11.PSW.UNUSED | PDP11.PSW.PRI)) | ((opCode & 0x7) << PDP11.PSW.SHIFT.PRI);
+    if (!(this.regPSW & PDP11.PSW.CMODE)) {
+        this.regPSW = (this.regPSW & ~(PDP11.PSW.UNUSED | PDP11.PSW.PRI)) | ((opCode & 0x7) << PDP11.PSW.SHIFT.PRI);
         this.priorityReview = 1;
     }
     this.nStepCycles -= 1;
@@ -1308,10 +1590,7 @@ PDP11.opSUB = function(opCode)
  */
 PDP11.opSXT = function(opCode)
 {
-    /*
-     * TODO: Implement
-     */
-    this.regOp = -1;
+    this.updateNZFlags(this.writeWordByMode(opCode, this.getNF? 0xffff : 0));
     this.nStepCycles -= 1;
 };
 
@@ -1323,10 +1602,7 @@ PDP11.opSXT = function(opCode)
  */
 PDP11.opTRAP = function(opCode)
 {
-    /*
-     * TODO: Implement
-     */
-    this.regOp = -1;
+    this.trap(PDP11.TRAP.TRAP, 4);
     this.nStepCycles -= 1;
 };
 
@@ -1338,10 +1614,9 @@ PDP11.opTRAP = function(opCode)
  */
 PDP11.opTST = function(opCode)
 {
-    /*
-     * TODO: Implement
-     */
-    this.regOp = -1;
+    var result = this.readWordByMode(opCode);
+    this.assert(!(result & ~0xffff));   // assert that C flag will be clear
+    this.updateNZCFlags(result);
     this.nStepCycles -= 1;
 };
 
@@ -1353,10 +1628,9 @@ PDP11.opTST = function(opCode)
  */
 PDP11.opTSTB = function(opCode)
 {
-    /*
-     * TODO: Implement
-     */
-    this.regOp = -1;
+    var result = this.readByteByMode(opCode);
+    this.assert(!(result & ~0xff));     // assert that C flag will be clear
+    this.updateNZCFlags(result << 8);
     this.nStepCycles -= 1;
 };
 
@@ -1383,10 +1657,7 @@ PDP11.opWAIT = function(opCode)
  */
 PDP11.opXOR = function(opCode)
 {
-    /*
-     * TODO: Implement
-     */
-    this.regOp = -1;
+    this.updateWordByMode(opCode, this.readWordByMode((opCode & PDP11.SRCMODE.REG) >> PDP11.SRCMODE.SHIFT), PDP11.fnXOR);
     this.nStepCycles -= 1;
 };
 

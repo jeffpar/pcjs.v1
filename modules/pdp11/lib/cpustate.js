@@ -635,7 +635,7 @@ CPUStatePDP11.prototype.checkInterruptQueue = function()
                 this.interruptQueue.splice(i, 1);
             }
         }
-        if (savePSW > (this.PSW & 0xe0)) {
+        if (savePSW > (this.regPSW & 0xe0)) {
             if (!interruptEvent) {
                 this.trap(PDP11.TRAP.PIRQ, 42);
             } else {
@@ -656,12 +656,12 @@ CPUStatePDP11.prototype.getPSW = function()
     /*
      * I'm not sure why this function can't simply be written as:
      *
-     *      return (this.PSW & ~PDP11.PSW.FLAGS) | (this.getNF() | this.getZF() | this.getVF() | this.getCF());
+     *      return (this.regPSW & ~PDP11.PSW.FLAGS) | (this.getNF() | this.getZF() | this.getVF() | this.getCF());
      *
      * but for now, I'm keeping the same masking logic as pdp11.js.
      */
     var mask = PDP11.PSW.CMODE | PDP11.PSW.PMODE | PDP11.PSW.REGSET | PDP11.PSW.PRI | PDP11.PSW.TF;
-    return this.PSW = (this.PSW & mask) | this.getNF() | this.getZF() | this.getVF() | this.getCF();
+    return this.regPSW = (this.regPSW & mask) | this.getNF() | this.getZF() | this.getVF() | this.getCF();
 };
 
 /**
@@ -684,7 +684,7 @@ CPUStatePDP11.prototype.setPSW = function(newPSW)
     this.flagZ = (~newPSW) & 4;
     this.flagV = newPSW << 14;
     this.flagC = newPSW << 16;
-    if ((newPSW ^ this.PSW) & PDP11.PSW.REGSET) {
+    if ((newPSW ^ this.regPSW) & PDP11.PSW.REGSET) {
         /*
          * Swap register sets
          */
@@ -695,7 +695,7 @@ CPUStatePDP11.prototype.setPSW = function(newPSW)
         }
     }
     this.mmuMode = (newPSW >> PDP11.PSW.SHIFT.CMODE) & PDP11.MODE.MASK;
-    var oldMode = (this.PSW >> PDP11.PSW.SHIFT.CMODE) & PDP11.MODE.MASK;
+    var oldMode = (this.regPSW >> PDP11.PSW.SHIFT.CMODE) & PDP11.MODE.MASK;
     if (this.mmuMode != oldMode) {
         /*
          * Swap stack pointers
@@ -707,22 +707,24 @@ CPUStatePDP11.prototype.setPSW = function(newPSW)
      * Trigger check of priority levels
      */
     this.priorityReview = 2;
-    this.PSW = newPSW;
+    this.regPSW = newPSW;
 };
 
 /**
- * updateNZCFlags(result)
+ * updateNZCFlags(result, overflow)
  *
- * NOTE: The V flag is simply zeroed, it is not "updated" based on the result.
+ * NOTE: The V flag is simply zeroed, it is not "updated" based on the result;
+ * however, a specific overflow value may be provided (used by NEG, for example).
  *
  * @this {CPUStatePDP11}
  * @param {number} result
+ * @param {number} [overflow]
  */
-CPUStatePDP11.prototype.updateNZCFlags = function(result)
+CPUStatePDP11.prototype.updateNZCFlags = function(result, overflow)
 {
     if (!(this.opFlags & PDP11.OPFLAG.SKIP_FLAGS)) {
         this.flagN = this.flagZ = this.flagC = result;
-        this.flagV = 0;
+        this.flagV = overflow || 0;
     }
 };
 
@@ -759,16 +761,33 @@ CPUStatePDP11.prototype.updateAddFlags = function(result, src, dst)
 };
 
 /**
- * updateIncFlags(result, src, dst)
+ * updateDecFlags(result, dst)
+ *
+ * NOTE: We could have used updateSubFlags() if not for the fact that the C flag must be preserved.
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} result (dst - src, where src is an implied 1)
+ * @param {number} dst
+ */
+CPUStatePDP11.prototype.updateDecFlags = function(result, dst)
+{
+    if (!(this.opFlags & PDP11.OPFLAG.SKIP_FLAGS)) {
+        this.flagN = this.flagZ = result;
+        // Because src is always 1 (with a zero sign bit), it can be optimized out of this calculation
+        this.flagV = (/* src ^ */ dst) & (dst ^ result);
+    }
+};
+
+/**
+ * updateIncFlags(result, dst)
  *
  * NOTE: We could have used updateAddFlags() if not for the fact that the C flag must be preserved.
  *
  * @this {CPUStatePDP11}
- * @param {number} result (dst + src)
- * @param {number} src (ie, 1)
+ * @param {number} result (dst + src, where src is an implied 1)
  * @param {number} dst
  */
-CPUStatePDP11.prototype.updateIncFlags = function(result, src, dst)
+CPUStatePDP11.prototype.updateIncFlags = function(result, dst)
 {
     if (!(this.opFlags & PDP11.OPFLAG.SKIP_FLAGS)) {
         this.flagN = this.flagZ = result;
@@ -778,21 +797,16 @@ CPUStatePDP11.prototype.updateIncFlags = function(result, src, dst)
 };
 
 /**
- * updateDecFlags(result, src, dst)
- *
- * NOTE: We could have used updateSubFlags() if not for the fact that the C flag must be preserved.
+ * updateLogFlags(result)
  *
  * @this {CPUStatePDP11}
- * @param {number} result (dst - src)
- * @param {number} src (ie, 1)
- * @param {number} dst
+ * @param {number} result
  */
-CPUStatePDP11.prototype.updateDecFlags = function(result, src, dst)
+CPUStatePDP11.prototype.updateLogFlags = function(result)
 {
     if (!(this.opFlags & PDP11.OPFLAG.SKIP_FLAGS)) {
-        this.flagN = this.flagZ = result;
-        // Because src is always 1 (with a zero sign bit), it can be optimized out of this calculation
-        this.flagV = (/* src ^ */ dst) & (dst ^ result);
+        this.flagN = this.flagZ = this.flagC = result;
+        this.flagV = this.flagN ^ (this.flagC >> 1);
     }
 };
 
@@ -837,7 +851,7 @@ CPUStatePDP11.prototype.panic = function(reason)
  *
  * @this {CPUStatePDP11}
  * @param {number} vector
- * @param {number} [reason]
+ * @param {number} [reason] (for diagnostic purposes only)
  */
 CPUStatePDP11.prototype.trap = function(vector, reason)
 {
@@ -882,6 +896,33 @@ CPUStatePDP11.prototype.trap = function(vector, reason)
     if (DEBUG && this.dbg) this.dbg.println("trap to vector " + this.dbg.toBase(vector) + (reason? " (reason " + reason + ")" : ""));
 
     throw vector;
+};
+
+/**
+ * trapReturn()
+ *
+ * @this {CPUStatePDP11}
+ */
+CPUStatePDP11.prototype.trapReturn = function()
+{
+    /*
+     * This code used to defer updating regsGen[6] (SP) until after BOTH words had been popped, which seems
+     * safer, but if we're going to do pushes in trap(), then I see no reason to avoid doing pops in trapReturn().
+     */
+    var addr = this.popWord();
+    var newPSW = this.popWord() & ~PDP11.PSW.UNUSED;
+    if (this.regPSW & PDP11.PSW.CMODE) {
+        /*
+         * Keep SPL and allow lower only for modes and register set.
+         *
+         * TODO: Review, because it seems a bit odd to only CLEAR the PRI bits in the new PSW, and then to OR in
+         * CMODE, PMODE, and REGSET bits from the current PSW.
+         */
+        newPSW = (newPSW & ~PDP11.PSW.PRI) | (this.regPSW & (PDP11.PSW.PRI | PDP11.PSW.REGSET | PDP11.PSW.PMODE | PDP11.PSW.CMODE));
+    }
+    this.setPC(addr);
+    this.setPSW(newPSW);
+    this.opFlags &= ~PDP11.OPFLAG.TRAP_TF;
 };
 
 /**
@@ -1100,24 +1141,10 @@ CPUStatePDP11.prototype.readWordFromVirtual = function(virtualAddress)
  * @this {CPUStatePDP11}
  * @param {number} physicalAddress
  * @param {number} data
- * @return {number}
  */
 CPUStatePDP11.prototype.writeWordToPhysical = function(physicalAddress, data)
 {
-    data &= 0xffff;
-    if (physicalAddress >= BusPDP11.MAX_ADDRESS) {
-        return (this.regsGen[physicalAddress - BusPDP11.MAX_ADDRESS] = data);
-	} else {
-        // if (physicalAddress >= BusPDP11.IOPAGE_UNIBUS) {
-        //     return this.bus.access_iopage(physicalAddress, data, 0);
-		// } else {
-			if (physicalAddress >= 0) {
-                this.bus.setWord(physicalAddress, data);
-                return data;
-			}
-		// }
-	}
-	return physicalAddress;
+    this.bus.setWord(physicalAddress, data & 0xffff);
 };
 
 /**
@@ -1129,19 +1156,7 @@ CPUStatePDP11.prototype.writeWordToPhysical = function(physicalAddress, data)
  */
 CPUStatePDP11.prototype.readByteFromPhysical = function(physicalAddress)
 {
-    var result;
-    if (physicalAddress >= BusPDP11.MAX_ADDRESS) {
-        return (this.regsGen[physicalAddress - BusPDP11.MAX_ADDRESS] & 0xff);
-	} else {
-        // if (physicalAddress >= BusPDP11.IOPAGE_UNIBUS) {
-        //     return this.bus.access_iopage(physicalAddress, -1, 1);
-		// } else {
-			if (physicalAddress >= 0) {
-				return this.bus.getByte(physicalAddress);
-			}
-		// }
-	}
-    return physicalAddress;
+    return this.bus.getByte(physicalAddress);
 };
 
 /**
@@ -1150,24 +1165,10 @@ CPUStatePDP11.prototype.readByteFromPhysical = function(physicalAddress)
  * @this {CPUStatePDP11}
  * @param {number} physicalAddress
  * @param {number} data
- * @return {number}
  */
 CPUStatePDP11.prototype.writeByteToPhysical = function(physicalAddress, data)
 {
-    data &= 0xff;
-    if (physicalAddress >= BusPDP11.MAX_ADDRESS) {
-        return (this.regsGen[physicalAddress - BusPDP11.MAX_ADDRESS] = (this.regsGen[physicalAddress - BusPDP11.MAX_ADDRESS] & 0xff00) | data);
-	} else {
-        // if (physicalAddress >= BusPDP11.IOPAGE_UNIBUS) {
-        //     return this.bus.access_iopage(physicalAddress, data, 1);
-		// } else {
-			if (physicalAddress >= 0) {
-			    this.bus.setByte(physicalAddress, data);
-                return data;
-			}
-		// }
-	}
-    return physicalAddress;
+    this.bus.setByte(physicalAddress, data & 0xff);
 };
 
 /**
@@ -1179,9 +1180,7 @@ CPUStatePDP11.prototype.writeByteToPhysical = function(physicalAddress, data)
 CPUStatePDP11.prototype.popWord = function()
 {
     var result = this.readWordFromVirtual(this.regsGen[6] | PDP11.ACCESS.DSPACE);
-    if (result >= 0) {
-        this.regsGen[6] = (this.regsGen[6] + 2) & 0xffff;
-    }
+    this.regsGen[6] = (this.regsGen[6] + 2) & 0xffff;
     return result;
 };
 
@@ -1394,11 +1393,7 @@ CPUStatePDP11.prototype.getVirtualByMode = function(addressMode, accessFlags)
 CPUStatePDP11.prototype.getAddrPhysical = function(addressMode, accessFlags)
 {
     this.assert(addressMode & 0x38);
-    // if (!(addressMode & 0x38)) {
-    //     return BusPDP11.MAX_ADDRESS + (addressMode & 7); // Registers have special addresses above maximum address
-    // } else {
-           return this.getVirtualByMode(addressMode, accessFlags);
-    // }
+    return this.getVirtualByMode(addressMode, accessFlags);
 };
 
 /**
@@ -1412,11 +1407,7 @@ CPUStatePDP11.prototype.getAddrPhysical = function(addressMode, accessFlags)
 CPUStatePDP11.prototype.getAddrVirtual = function(addressMode, accessFlags)
 {
     this.assert(addressMode & 0x38);
-    // if (!(addressMode & 0x38)) {
-    //     return BusPDP11.MAX_ADDRESS + (addressMode & 7); // Registers have special addresses above maximum address
-    // } else {
-           return this.mapVirtualToPhysical(this.getVirtualByMode(addressMode, accessFlags), accessFlags);
-    // }
+    return this.mapVirtualToPhysical(this.getVirtualByMode(addressMode, accessFlags), accessFlags);
 };
 
 /**
@@ -1469,19 +1460,16 @@ CPUStatePDP11.prototype.readByteByMode = function(addressMode)
  * @param {number} addressMode
  * @param {number} src
  * @param {function(number,number)} fnOp
- * @return {number}
  */
 CPUStatePDP11.prototype.updateWordByMode = function(addressMode, src, fnOp)
 {
-    var data;
     if (!(addressMode & PDP11.OPMODE.MASK)) {
         var reg = addressMode & PDP11.OPREG.MASK;
-        this.regsGen[reg] = (data = fnOp.call(this, src, this.regsGen[reg]) & 0xffff);
+        this.regsGen[reg] = fnOp.call(this, src, this.regsGen[reg]);
     } else {
         var addr = this.getAddr(addressMode, PDP11.ACCESS.UPDATE_WORD);
-        this.writeWordToPhysical(addr, (data = fnOp.call(this, src, this.readWordFromPhysical(addr))));
+        this.writeWordToPhysical(addr, fnOp.call(this, src, this.readWordFromPhysical(addr)));
     }
-    return data;
 };
 
 /**
@@ -1493,19 +1481,16 @@ CPUStatePDP11.prototype.updateWordByMode = function(addressMode, src, fnOp)
  * @param {number} addressMode
  * @param {number} src
  * @param {function(number,number)} fnOp
- * @return {number}
  */
 CPUStatePDP11.prototype.updateByteByMode = function(addressMode, src, fnOp)
 {
-    var data;
     if (!(addressMode & PDP11.OPMODE.MASK)) {
         var reg = addressMode & PDP11.OPREG.MASK;
-        this.regsGen[reg] = (this.regsGen[reg] & 0xff00) | ((data = fnOp.call(this, src, this.regsGen[reg]) & 0xff));
+        this.regsGen[reg] = (this.regsGen[reg] & 0xff00) | fnOp.call(this, src, this.regsGen[reg]);
     } else {
         var addr = this.getAddr(addressMode, PDP11.ACCESS.UPDATE_BYTE);
-        this.writeByteToPhysical(addr, (data = fnOp.call(this, src, this.readByteFromPhysical(addr))));
+        this.writeByteToPhysical(addr, fnOp.call(this, src, this.readByteFromPhysical(addr)));
     }
-    return data;
 };
 
 /**
@@ -1664,7 +1649,7 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
          * Snapshot the TF bit in opFlags, while simultaneously clearing all other opFlags;
          * we'll check the TRAP_TF bit in opFlags when we come back around for another opcode.
          */
-        this.opFlags = this.PSW & PDP11.PSW.TF;
+        this.opFlags = this.regPSW & PDP11.PSW.TF;
 
         /*
          * TODO: Determine (later) if this.regOp is a useful (internal) register to maintain;
@@ -1677,1070 +1662,12 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
 
         this.decode(opCode);
 
-        if (this.regOp < 0) {
+        if (DEBUG && this.regOp < 0) {
             this.regsGen[7] = (this.regsGen[7] - 2) & 0xffff;
             this.println("unimplemented");
             break;
         }
 
-        // var opCode,
-        //     src,
-        //     dst,
-        //     dstAddr,
-        //     result,
-        //     virtualAddress, savePSW, reg, i, j;
-
-        switch (opCode & 0xF000) /*0170000*/ { // Double operand instructions xxSSDD
-        case 0x1000: /*0010000*/ // MOV  01SSDD
-            //LOG_INSTRUCTION(opCode, 2, "MOV");
-            // if ((src = this.readWordByMode(opCode >> 6)) >= 0) {
-            //     if (!(opCode & 0x38)) {
-            //         this.regsGen[opCode & 7] = src;
-            //         this.flagN = this.flagZ = src;
-            //         this.flagV = 0;
-            //     } else {
-            //         if ((dstAddr = this.getAddr(opCode, PDP11.ACCESS.WRITE)) >= 0) {
-            //             if (this.writeWordToPhysical(dstAddr, src) >= 0) {
-            //                 this.flagN = this.flagZ = src;
-            //                 this.flagV = 0;
-            //             }
-            //         }
-            //     }
-            // }
-            break;
-        case 0x2000: /*0020000*/ // CMP 02SSDD
-            //LOG_INSTRUCTION(opCode, 2, "CMP");
-            // if ((src = this.readWordByMode(opCode >> 6)) >= 0) {
-            //     if ((dst = this.readWordByMode(opCode)) >= 0) {
-            //         result = src - dst;
-            //         this.flagN = this.flagZ = this.flagC = result;
-            //         this.flagV = (src ^ dst) & (src ^ result);
-            //     }
-            // }
-            break;
-        case 0x3000: /*0030000*/ // BIT 03SSDD
-            //LOG_INSTRUCTION(opCode, 2, "BIT");
-            // if ((src = this.readWordByMode(opCode >> 6)) >= 0) {
-            //     if ((dst = this.readWordByMode(opCode)) >= 0) {
-            //         this.flagN = this.flagZ = src & dst;
-            //         this.flagV = 0;
-            //     }
-            // }
-            break;
-        case 0x4000: /*0040000*/ // BIC 04SSDD
-            //LOG_INSTRUCTION(opCode, 2, "BIC");
-            // if ((src = this.readWordByMode(opCode >> 6)) >= 0) {
-            //     if (!(opCode & 0x38)) {
-            //         result = this.regsGen[opCode & 7] &= ~src;
-            //         this.flagN = this.flagZ = result;
-            //         this.flagV = 0;
-            //     } else {
-            //         if ((dst = this.readWordFromPhysical(dstAddr = this.getAddr(opCode, PDP11.ACCESS.UPDATE_WORD))) >= 0) {
-            //             result = dst & ~src;
-            //             if (this.writeWordToPhysical(dstAddr, result) >= 0) {
-            //                 this.flagN = this.flagZ = result;
-            //                 this.flagV = 0;
-            //             }
-            //         }
-            //     }
-            // }
-            break;
-        case 0x5000: /*0050000*/ // BIS 05SSDD
-            //LOG_INSTRUCTION(opCode, 2, "BIS");
-            // if ((src = this.readWordByMode(opCode >> 6)) >= 0) {
-            //     if (!(opCode & 0x38)) {
-            //         result = this.regsGen[opCode & 7] |= src;
-            //         this.flagN = this.flagZ = result;
-            //         this.flagV = 0;
-            //     } else {
-            //         if ((dst = this.readWordFromPhysical(dstAddr = this.getAddr(opCode, PDP11.ACCESS.UPDATE_WORD))) >= 0) {
-            //             result = dst | src;
-            //             if (this.writeWordToPhysical(dstAddr, result) >= 0) {
-            //                 this.flagN = this.flagZ = result;
-            //                 this.flagV = 0;
-            //             }
-            //         }
-            //     }
-            // }
-            break;
-        case 0x6000: /*0060000*/ // ADD 06SSDD
-            //LOG_INSTRUCTION(opCode, 2, "ADD");
-            // if ((src = this.readWordByMode(opCode >> 6)) >= 0) {
-            //     if (!(opCode & 0x38)) {
-            //         reg = opCode & 7;
-            //         dst = this.regsGen[reg];
-            //         this.regsGen[reg] = (result = src + dst) & 0xffff;
-            //         this.flagN = this.flagZ = this.flagC = result;
-            //         this.flagV = (src ^ result) & (dst ^ result);
-            //     } else {
-            //         if ((dst = this.readWordFromPhysical(dstAddr = this.getAddr(opCode, PDP11.ACCESS.UPDATE_WORD))) >= 0) {
-            //             result = src + dst;
-            //             if (this.writeWordToPhysical(dstAddr, result) >= 0) {
-            //                 this.flagN = this.flagZ = this.flagC = result;
-            //                 this.flagV = (src ^ result) & (dst ^ result);
-            //             }
-            //         }
-            //     }
-            // }
-            break;
-        case 0x9000: /*0110000*/ // MOVB 11SSDD
-            //LOG_INSTRUCTION(opCode, 2, "MOVB");
-            // if ((src = this.readByteByMode(opCode >> 6)) >= 0) {
-            //     if (!(opCode & 0x38)) {
-            //         if (src & 0x80) /*0200*/ src |= 0xff00; // movb sign extends register to word size
-            //         this.regsGen[opCode & 7] = src;
-            //         this.flagN = this.flagZ = src;
-            //         this.flagV = 0;
-            //     } else {
-            //         if ((dstAddr = this.getAddr(opCode, PDP11.ACCESS.WRITE_BYTE)) >= 0) { // write byte
-            //             if (this.writeByteToPhysical(dstAddr, src) >= 0) {
-            //                 this.flagN = this.flagZ = src << 8;
-            //                 this.flagV = 0;
-            //             }
-            //         }
-            //     }
-            // }
-            break;
-        case 0xA000: /*0120000*/ // CMPB 12SSDD
-            //LOG_INSTRUCTION(opCode, 2, "CMPB");
-            // if ((src = this.readByteByMode(opCode >> 6)) >= 0) {
-            //     if ((dst = this.readByteByMode(opCode)) >= 0) {
-            //         result = src - dst;
-            //         this.flagN = this.flagZ = this.flagC = result << 8;
-            //         this.flagV = ((src ^ dst) & (src ^ result)) << 8;
-            //     }
-            // }
-            break;
-        case 0xB000: /*0130000*/ // BITB 13SSDD
-            //LOG_INSTRUCTION(opCode, 2, "BITB");
-            // if ((src = this.readByteByMode(opCode >> 6)) >= 0) {
-            //     if ((dst = this.readByteByMode(opCode)) >= 0) {
-            //         this.flagN = this.flagZ = (src & dst) << 8;
-            //         this.flagV = 0;
-            //     }
-            // }
-            break;
-        case 0xC000: /*0140000*/ // BICB 14SSDD
-            //LOG_INSTRUCTION(opCode, 2, "BICB");
-            // if ((src = this.readByteByMode(opCode >> 6)) >= 0) {
-            //     if ((dst = this.readByteFromPhysical(dstAddr = this.getAddr(opCode, PDP11.ACCESS.UPDATE_BYTE))) >= 0) {
-            //         result = dst & ~src;
-            //         if (this.writeByteToPhysical(dstAddr, result) >= 0) {
-            //             this.flagN = this.flagZ = result << 8;
-            //             this.flagV = 0;
-            //         }
-            //     }
-            // }
-            break;
-        case 0xD000: /*0150000*/ // BISB 15SSDD
-            //LOG_INSTRUCTION(opCode, 2, "BISB");
-            // if ((src = this.readByteByMode(opCode >> 6)) >= 0) {
-            //     if ((dst = this.readByteFromPhysical(dstAddr = this.getAddr(opCode, PDP11.ACCESS.UPDATE_BYTE))) >= 0) {
-            //         result = dst | src;
-            //         if (this.writeByteToPhysical(dstAddr, result) >= 0) {
-            //             this.flagN = this.flagZ = result << 8;
-            //             this.flagV = 0;
-            //         }
-            //     }
-            // }
-            break;
-        case 0xE000: /*0160000*/ // SUB 16SSDD
-            //LOG_INSTRUCTION(opCode, 2, "SUB");
-            // if ((src = this.readWordByMode(opCode >> 6)) >= 0) {
-            //     if (!(opCode & 0x38)) {
-            //         reg = opCode & 7;
-            //         dst = this.regsGen[reg];
-            //         this.regsGen[reg] = (result = dst - src) & 0xffff;
-            //         this.flagN = this.flagZ = this.flagC = result;
-            //         this.flagV = (src ^ dst) & (dst ^ result);
-            //     } else {
-            //         if ((dst = this.readWordFromPhysical(dstAddr = this.getAddr(opCode, PDP11.ACCESS.UPDATE_WORD))) >= 0) {
-            //             result = dst - src;
-            //             if (this.writeWordToPhysical(dstAddr, result) >= 0) {
-            //                 this.flagN = this.flagZ = this.flagC = result;
-            //                 this.flagV = (src ^ dst) & (dst ^ result);
-            //             }
-            //         }
-            //     }
-            // }
-            break;
-        default:
-            // switch (opCode & 0xFE00) /*0177000*/ { // Misc instructions xxRDD
-            // case 0x800: /*04000*/ // JSR 004RDD
-            //     //LOG_INSTRUCTION(opCode, 3, "JSR");
-            //     if ((virtualAddress = this.getVirtualByMode(opCode, 0)) >= 0) {
-            //         reg = (opCode >> 6) & 7;
-            //         if (this.pushWord(this.regsGen[reg]) >= 0) {
-            //             this.regsGen[reg] = this.regsGen[7];
-            //             this.regsGen[7] = virtualAddress & 0xffff;
-            //         }
-            //     }
-            //     break;
-            // case 0x7000: /*0070000*/ // MUL 070RSS
-            //     //LOG_INSTRUCTION(opCode, 3, "MUL");
-            //     if ((src = this.readWordByMode(opCode)) >= 0) {
-            //         reg = (opCode >> 6) & 7;
-            //         if (src & 0x8000) src |= ~0xffff;
-            //         dst = this.regsGen[reg];
-            //         if (dst & 0x8000) dst |= ~0xffff;
-            //         result = ~~(src * dst);
-            //         this.regsGen[reg] = (result >> 16) & 0xffff;
-            //         this.regsGen[reg | 1] = result & 0xffff;
-            //         this.flagN = result >> 16;
-            //         this.flagZ = this.flagN | result;
-            //         this.flagC = this.flagV = 0;
-            //         if (result < -32768 || result > 32767) this.flagC = 0x10000;
-            //     }
-            //     break;
-            // case 0x7200: /*0071000*/ // DIV 071RSS
-            //     //LOG_INSTRUCTION(opCode, 3, "DIV");
-            //     if ((src = this.readWordByMode(opCode)) >= 0) {
-            //         if (!src) {
-            //             this.flagN = 0; // NZVC
-            //             this.flagZ = 0;
-            //             this.flagV = 0x8000;
-            //             this.flagC = 0x10000; // divide by zero
-            //         } else {
-            //             reg = (opCode >> 6) & 7;
-            //             dst = (this.regsGen[reg] << 16) | this.regsGen[reg | 1];
-            //             this.flagC = this.flagV = 0;
-            //             if (src & 0x8000) src |= ~0xffff;
-            //             result = ~~(dst / src);
-            //             if (result >= -32768 && result <= 32767) {
-            //                 this.regsGen[reg] = result & 0xffff;
-            //                 this.regsGen[reg | 1] = (dst - (result * src)) & 0xffff;
-            //                 this.flagZ = (result >> 16) | result;
-            //                 this.flagN = result >> 16;
-            //             } else {
-            //                 this.flagV = 0x8000; // overflow - following are indeterminate
-            //                 this.flagZ = (result >> 15) | result; // dodgy
-            //                 this.flagN = dst >> 16; // just as dodgy
-            //                 if (src === -1 && this.regsGen[reg] ===
-            //                     0xfffe) this.regsGen[reg] = this.regsGen[reg | 1] = 1; // etc
-            //             }
-            //         }
-            //     }
-            //     break;
-            // case 0x7400: /*072000*/ // ASH 072RSS
-            //     //LOG_INSTRUCTION(opCode, 3, "ASH");
-            //     if ((src = this.readWordByMode(opCode)) >= 0) {
-            //         reg = (opCode >> 6) & 7;
-            //         result = this.regsGen[reg];
-            //         if (result & 0x8000) result |= 0xffff0000;
-            //         this.flagC = this.flagV = 0;
-            //         src &= 0x3F; /*077*/
-            //         if (src & 0x20) /*040*/ { // shift right
-            //             src = 64 - src;
-            //             if (src > 16) src = 16;
-            //             this.flagC = result << (17 - src);
-            //             result = result >> src;
-            //         } else {
-            //             if (src) {
-            //                 if (src > 16) {
-            //                     this.flagV = result;
-            //                     result = 0;
-            //                 } else {
-            //                     result = result << src;
-            //                     this.flagC = result;
-            //                     dst = (result >> 15) & 0xffff; // check successive sign bits
-            //                     if (dst && dst !== 0xffff) this.flagV = 0x8000;
-            //                 }
-            //             }
-            //         }
-            //         this.regsGen[reg] = result & 0xffff;
-            //         this.flagN = this.flagZ = result;
-            //     }
-            //     break;
-            // case 0x7600: /*073000*/ // ASHC 073RSS
-            //     //LOG_INSTRUCTION(opCode, 3, "ASHC");
-            //     if ((src = this.readWordByMode(opCode)) >= 0) {
-            //         reg = (opCode >> 6) & 7;
-            //         dst = (this.regsGen[reg] << 16) | this.regsGen[reg | 1];
-            //         this.flagC = this.flagV = 0;
-            //         src &= 0x3F; /*077*/
-            //         if (src & 0x20) /*040*/ {
-            //             src = 64 - src;
-            //             if (src > 32) src = 32;
-            //             result = dst >> (src - 1);
-            //             this.flagC = result << 16;
-            //             result >>= 1;
-            //             if (dst & 0x80000000) result |= 0xffffffff << (32 - src);
-            //         } else {
-            //             if (src) { // shift left
-            //                 result = dst << (src - 1);
-            //                 this.flagC = result >> 15;
-            //                 result <<= 1;
-            //                 if (src > 32) src = 32;
-            //                 dst = dst >> (32 - src);
-            //                 if (dst) {
-            //                     dst |= (0xffffffff << src) & 0xffffffff;
-            //                     if (dst !== 0xffffffff) this.flagV = 0x8000;
-            //                 }
-            //             } else {
-            //                 result = dst;
-            //             }
-            //         }
-            //         this.regsGen[reg] = (result >> 16) & 0xffff;
-            //         this.regsGen[reg | 1] = result & 0xffff;
-            //         this.flagN = result >> 16;
-            //         this.flagZ = result >> 16 | result;
-            //     }
-            //     break;
-            // case 0x7800: /*0074000*/ // XOR 074RSS
-            //     //LOG_INSTRUCTION(opCode, 3, "XOR");
-            //     if (!(opCode & 0x38)) {
-            //         dst = this.regsGen[opCode & 7] ^= this.regsGen[(opCode >> 6) & 7];
-            //         this.flagN = this.flagZ = dst;
-            //         this.flagV = 0;
-            //     } else {
-            //         if ((dst = this.readWordFromPhysical(dstAddr = this.getAddr(opCode, PDP11.ACCESS.UPDATE_WORD))) >= 0) {
-            //             dst ^= this.regsGen[(opCode >> 6) & 7];
-            //             if (this.writeWordToPhysical(dstAddr, dst) >= 0) {
-            //                 this.flagN = this.flagZ = dst;
-            //                 this.flagV = 0;
-            //             }
-            //         }
-            //     }
-            //     break;
-            // case 0x7E00: /*0077000*/ // SOB 077Rnn
-            //     //LOG_INSTRUCTION(opCode, 5, "SOB");
-            //     reg = (opCode >> 6) & 7;
-            //     if ((this.regsGen[reg] = ((this.regsGen[reg] - 1) & 0xffff))) {
-            //         this.regsGen[7] = (this.regsGen[7] - ((opCode & 0x3F) /*077*/ << 1)) & 0xffff;
-            //     }
-            //     break;
-            // default:
-            //     switch (opCode & 0xFF00) /*0177400*/ { // Program control instructions & traps
-            //     case 0x100: /*0000400*/ // BR
-            //         //LOG_INSTRUCTION(opCode, 4, "BR");
-            //         this.regsGen[7] = this.branch(opCode);
-            //         break;
-            //     case 0x200: /*0001000*/ // BNE
-            //         //LOG_INSTRUCTION(opCode, 4, "BNE");
-            //         if (this.flagZ & 0xffff) this.regsGen[7] = this.branch(opCode);
-            //         break;
-            //     case 0x300: /*0001400*/ // BEQ
-            //         //LOG_INSTRUCTION(opCode, 4, "BEQ");
-            //         if (!(this.flagZ & 0xffff)) this.regsGen[7] = this.branch(opCode);
-            //         break;
-            //     case 0x400: /*0002000*/ // BGE
-            //         //LOG_INSTRUCTION(opCode, 4, "BGE");
-            //         if ((this.flagN & 0x8000) ===
-            //             (this.flagV & 0x8000)) this.regsGen[7] = this.branch(opCode);
-            //         break;
-            //     case 0x500: /*0002400*/ // BLT
-            //         //LOG_INSTRUCTION(opCode, 4, "BLT");
-            //         if ((this.flagN & 0x8000) !==
-            //             (this.flagV & 0x8000)) this.regsGen[7] = this.branch(opCode);
-            //         break;
-            //     case 0x600: /*0003000*/ // BGT
-            //         //LOG_INSTRUCTION(opCode, 4, "BGT");
-            //         if ((this.flagZ & 0xffff) && ((this.flagN & 0x8000) ===
-            //             (this.flagV & 0x8000))) this.regsGen[7] = this.branch(opCode);
-            //         break;
-            //     case 0x700: /*0003400*/ // BLE
-            //         //LOG_INSTRUCTION(opCode, 4, "BLE");
-            //         if (!(this.flagZ & 0xffff) || ((this.flagN & 0x8000) !==
-            //             (this.flagV & 0x8000))) this.regsGen[7] = this.branch(opCode);
-            //         break;
-            //     case 0x8000: /*0100000*/ // BPL
-            //         //LOG_INSTRUCTION(opCode, 4, "BPL");
-            //         if (!(this.flagN & 0x8000)) this.regsGen[7] = this.branch(opCode);
-            //         break;
-            //     case 0x8200: /*0101000*/ // BHI
-            //         //LOG_INSTRUCTION(opCode, 4, "BHI");
-            //         if (!(this.flagC & 0x10000) &&
-            //             (this.flagZ & 0xffff)) this.regsGen[7] = this.branch(opCode);
-            //         break;
-            //     case 0x8100: /*0100400*/ // BMI
-            //         //LOG_INSTRUCTION(opCode, 4, "BMI");
-            //         if ((this.flagN & 0x8000)) this.regsGen[7] = this.branch(opCode);
-            //         break;
-            //     case 0x8300: /*0101400*/ // BLOS
-            //         //LOG_INSTRUCTION(opCode, 4, "BLOS");
-            //         if ((this.flagC & 0x10000) ||
-            //             !(this.flagZ & 0xffff)) this.regsGen[7] = this.branch(opCode);
-            //         break;
-            //     case 0x8400: /*0102000*/ // BVC
-            //         //LOG_INSTRUCTION(opCode, 4, "BVC");
-            //         if (!(this.flagV & 0x8000)) this.regsGen[7] = this.branch(opCode);
-            //         break;
-            //     case 0x8500: /*0102400*/ // BVS
-            //         //LOG_INSTRUCTION(opCode, 4, "BVS");
-            //         if ((this.flagV & 0x8000)) this.regsGen[7] = this.branch(opCode);
-            //         break;
-            //     case 0x8600: /*0103000*/ // BCC
-            //         //LOG_INSTRUCTION(opCode, 4, "BCC");
-            //         if (!(this.flagC &
-            //             0x10000)) this.regsGen[7] = this.branch(opCode);
-            //         break;
-            //     case 0x8700: /*0103400*/ // BCS
-            //         //LOG_INSTRUCTION(opCode, 4, "BCS");
-            //         if (this.flagC & 0x10000) this.regsGen[7] = this.branch(opCode);
-            //         break;
-            //     case 0x8800: /*0104000*/ // EMT 104000 -> 104377
-            //         //LOG_INSTRUCTION(opCode, 7, "EMT");
-            //         this.trap(PDP11.TRAP.EMULATOR, /*030*/ 2);
-            //         break;
-            //     case 0x8900: /*0104400*/ // TRAP 104400 -> 104777
-            //         //LOG_INSTRUCTION(opCode, 7, "TRAP");
-            //         this.trap(PDP11.TRAP.TRAP, /*034*/ 4);
-            //         break;
-            //     default:
-            //         switch (opCode & 0xFFC0) /*0177700*/ { // Single operand instructions xxxxDD
-            //         case 0x40: /*0000100*/ // JMP 0001DD
-            //             //LOG_INSTRUCTION(opCode, 1, "JMP");
-            //             if ((virtualAddress = this.getVirtualByMode(opCode, 0)) >= 0) {
-            //                 this.regsGen[7] = virtualAddress & 0xffff;
-            //             }
-            //             break;
-            //         case 0xC0: /*0000300*/ // SWAB 0003DD
-            //             //LOG_INSTRUCTION(opCode, 1, "SWAB");
-            //             if (!(opCode & 0x38)) {
-            //                 reg = opCode & 7;
-            //                 dst = this.regsGen[reg];
-            //                 this.regsGen[reg] = ((dst << 8) | (dst >> 8)) & 0xffff;
-            //                 this.flagN = this.flagZ = dst & 0xff00;
-            //                 this.flagV = this.flagC = 0;
-            //             } else {
-            //                 if ((dst = this.readWordFromPhysical(dstAddr = this.getAddr(opCode, PDP11.ACCESS.UPDATE_WORD))) >=
-            //                     0) {
-            //                     result = (dst << 8) | (dst >> 8);
-            //                     if (this.writeWordToPhysical(dstAddr, result) >= 0) {
-            //                         this.flagN = this.flagZ = dst & 0xff00;
-            //                         this.flagV = this.flagC = 0;
-            //                     }
-            //                 }
-            //             }
-            //             break;
-            //         case 0xA00: /*0005000*/ // CLR 0050DD
-            //             //LOG_INSTRUCTION(opCode, 1, "CLR");
-            //             // if (!(opCode & 0x38)) {
-            //             //     this.regsGen[opCode & 7] = 0;
-            //             //     this.flagN = this.flagC = this.flagV = this.flagZ = 0;
-            //             // } else {
-            //             //     if ((dstAddr = this.getAddr(opCode, PDP11.ACCESS.WRITE)) >= 0) { // write word
-            //             //         if (this.writeWordToPhysical(dstAddr, 0) >= 0) {
-            //             //             this.flagN = this.flagC = this.flagV = this.flagZ = 0;
-            //             //         }
-            //             //     }
-            //             // }
-            //             break;
-            //         case 0xA40: /*0005100*/ // COM 0051DD
-            //             //LOG_INSTRUCTION(opCode, 1, "COM");
-            //             /*
-            //              * TODO: Here's an example where getAddr() could be called in the register-only case.
-            //              */
-            //             if ((dst = this.readWordFromPhysical(dstAddr = this.getAddr(opCode, PDP11.ACCESS.UPDATE))) >=
-            //                 0) {
-            //                 result = ~dst;
-            //                 if (this.writeWordToPhysical(dstAddr, result) >= 0) {
-            //                     this.flagN = this.flagZ = result;
-            //                     this.flagC = 0x10000;
-            //                     this.flagV = 0;
-            //                 }
-            //             }
-            //             break;
-            //         case 0xA80: /*0005200*/ // INC 0052DD
-            //             //LOG_INSTRUCTION(opCode, 1, "INC");
-            //             if (!(opCode & 0x38)) {
-            //                 reg = opCode & 7;
-            //                 dst = this.regsGen[reg];
-            //                 result = dst + 1;
-            //                 this.regsGen[reg] = result & 0xffff;
-            //                 this.flagN = this.flagZ = result;
-            //                 this.flagV = result & (result ^ dst);
-            //             } else {
-            //                 if ((dst = this.readWordFromPhysical(dstAddr = this.getAddr(opCode, PDP11.ACCESS.UPDATE))) >=
-            //                     0) {
-            //                     result = dst + 1;
-            //                     if (this.writeWordToPhysical(dstAddr, result) >= 0) {
-            //                         this.flagN = this.flagZ = result;
-            //                         this.flagV = result & (result ^ dst);
-            //                     }
-            //                 }
-            //             }
-            //             break;
-            //         case 0xAC0: /*0005300*/ // DEC 0053DD
-            //             //LOG_INSTRUCTION(opCode, 1, "DEC");
-            //             if (!(opCode & 0x38)) {
-            //                 reg = opCode & 7;
-            //                 dst = this.regsGen[reg];
-            //                 result = dst - 1;
-            //                 this.regsGen[reg] = result & 0xffff;
-            //                 this.flagN = this.flagZ = result;
-            //                 this.flagV = (result ^ dst) & dst;
-            //             } else {
-            //                 if ((dst = this.readWordFromPhysical(dstAddr = this.getAddr(opCode, PDP11.ACCESS.UPDATE))) >=
-            //                     0) {
-            //                     result = dst - 1;
-            //                     if (this.writeWordToPhysical(dstAddr, result) >= 0) {
-            //                         this.flagN = this.flagZ = result;
-            //                         this.flagV = (result ^ dst) & dst;
-            //                     }
-            //                 }
-            //             }
-            //             break;
-            //         case 0xB00: /*0005400*/ // NEG 0054DD
-            //             //LOG_INSTRUCTION(opCode, 1, "NEG");
-            //             /*
-            //              * TODO: Here's an example where getAddr() could be called in the register-only case.
-            //              */
-            //             if ((dst = this.readWordFromPhysical(dstAddr = this.getAddr(opCode, PDP11.ACCESS.UPDATE))) >=
-            //                 0) {
-            //                 result = -dst;
-            //                 if (this.writeWordToPhysical(dstAddr, result) >= 0) {
-            //                     this.flagC = this.flagN = this.flagZ = result;
-            //                     this.flagV = result & dst;
-            //                 }
-            //             }
-            //             break;
-            //         case 0xB40: /*0005500*/ // ADC 0055DD
-            //             //LOG_INSTRUCTION(opCode, 1, "ADC");
-            //             /*
-            //              * TODO: Here's an example where getAddr() could be called in the register-only case.
-            //              */
-            //             if ((dst = this.readWordFromPhysical(dstAddr = this.getAddr(opCode, PDP11.ACCESS.UPDATE))) >=
-            //                 0) {
-            //                 result = dst + ((this.flagC >> 16) & 1);
-            //                 if (this.writeWordToPhysical(dstAddr, result) >= 0) {
-            //                     this.flagC = this.flagN = this.flagZ = result;
-            //                     this.flagV = result & (result ^ dst);
-            //                 }
-            //             }
-            //             break;
-            //         case 0xB80: /*0005600*/ // SBC 0056DD
-            //             //LOG_INSTRUCTION(opCode, 1, "SBC");
-            //             /*
-            //              * TODO: Here's an example where getAddr() could be called in the register-only case.
-            //              */
-            //             if ((dst = this.readWordFromPhysical(dstAddr = this.getAddr(opCode, PDP11.ACCESS.UPDATE))) >=
-            //                 0) {
-            //                 result = dst - ((this.flagC >> 16) & 1);
-            //                 if (this.writeWordToPhysical(dstAddr, result) >= 0) {
-            //                     this.flagC = this.flagN = this.flagZ = result;
-            //                     this.flagV = (result ^ dst) & dst;
-            //                 }
-            //             }
-            //             break;
-            //         case 0xBC0: /*0005700*/ // TST 0057DD
-            //             //LOG_INSTRUCTION(opCode, 1, "TST");
-            //             if ((dst = this.readWordByMode(opCode)) >= 0) {
-            //                 this.flagN = this.flagZ = dst;
-            //                 this.flagC = this.flagV = 0;
-            //             }
-            //             break;
-            //         case 0xC00: /*0006000*/ // ROR 0060DD
-            //             //LOG_INSTRUCTION(opCode, 1, "ROR");
-            //             if (!(opCode & 0x38)) {
-            //                 reg = opCode & 7;
-            //                 dst = this.regsGen[reg];
-            //                 result = ((this.flagC & 0x10000) | dst) >> 1;
-            //                 this.regsGen[reg] = result & 0xffff;
-            //                 this.flagC = (dst << 16);
-            //                 this.flagN = this.flagZ = result;
-            //                 this.flagV = result ^ (this.flagC >> 1);
-            //             } else {
-            //                 if ((dst = this.readWordFromPhysical(dstAddr = this.getAddr(opCode, PDP11.ACCESS.UPDATE))) >=
-            //                     0) {
-            //                     result = ((this.flagC & 0x10000) | dst) >> 1;
-            //                     if (this.writeWordToPhysical(dstAddr, result) >= 0) {
-            //                         this.flagC = (dst << 16);
-            //                         this.flagN = this.flagZ = result;
-            //                         this.flagV = result ^ (this.flagC >> 1);
-            //                     }
-            //                 }
-            //             }
-            //             break;
-            //         case 0xC40: /*0006100*/ // ROL 0061DD
-            //             //LOG_INSTRUCTION(opCode, 1, "ROL");
-            //             if (!(opCode & 0x38)) {
-            //                 reg = opCode & 7;
-            //                 dst = this.regsGen[reg];
-            //                 result = (dst << 1) | ((this.flagC >> 16) & 1);
-            //                 this.regsGen[reg] = result & 0xffff;
-            //                 this.flagC = this.flagN = this.flagZ = result;
-            //                 this.flagV = result ^ dst;
-            //             } else {
-            //                 if ((dst = this.readWordFromPhysical(dstAddr = this.getAddr(opCode, PDP11.ACCESS.UPDATE))) >=
-            //                     0) {
-            //                     result = (dst << 1) | ((this.flagC >> 16) & 1);
-            //                     if (this.writeWordToPhysical(dstAddr, result) >= 0) {
-            //                         this.flagC = this.flagN = this.flagZ = result;
-            //                         this.flagV = result ^ dst;
-            //                     }
-            //                 }
-            //             }
-            //             break;
-            //         case 0xC80: /*0006200*/ // ASR 0062DD
-            //             //LOG_INSTRUCTION(opCode, 1, "ASR");
-            //             if (!(opCode & 0x38)) {
-            //                 reg = opCode & 7;
-            //                 dst = this.regsGen[reg];
-            //                 result = (dst & 0x8000) | (dst >> 1);
-            //                 this.regsGen[reg] = result & 0xffff;
-            //                 this.flagC = dst << 16;
-            //                 this.flagN = this.flagZ = result;
-            //                 this.flagV = this.flagN ^ (this.flagC >> 1);
-            //             } else {
-            //                 if ((dst = this.readWordFromPhysical(dstAddr = this.getAddr(opCode, PDP11.ACCESS.UPDATE))) >=
-            //                     0) {
-            //                     result = (dst & 0x8000) | (dst >> 1);
-            //                     if (this.writeWordToPhysical(dstAddr, result) >= 0) {
-            //                         this.flagC = dst << 16;
-            //                         this.flagN = this.flagZ = result;
-            //                         this.flagV = this.flagN ^ (this.flagC >> 1);
-            //                     }
-            //                 }
-            //             }
-            //             break;
-            //         case 0xCC0: /*0006300*/ // ASL 0063DD
-            //             //LOG_INSTRUCTION(opCode, 1, "ASL");
-            //             if (!(opCode & 0x38)) {
-            //                 reg = opCode & 7;
-            //                 dst = this.regsGen[reg];
-            //                 result = dst << 1;
-            //                 this.regsGen[reg] = result & 0xffff;
-            //                 this.flagC = this.flagN = this.flagZ = result;
-            //                 this.flagV = result ^ dst;
-            //             } else {
-            //                 if ((dst = this.readWordFromPhysical(dstAddr = this.getAddr(opCode, PDP11.ACCESS.UPDATE))) >=
-            //                     0) {
-            //                     result = dst << 1;
-            //                     if (this.writeWordToPhysical(dstAddr, result) >= 0) {
-            //                         this.flagC = this.flagN = this.flagZ = result;
-            //                         this.flagV = result ^ dst;
-            //                     }
-            //                 }
-            //             }
-            //             break;
-            //         case 0xD00: /*0006400*/ // MARK 0064nn
-            //             //LOG_INSTRUCTION(opCode, 8, "MARK");
-            //             virtualAddress = (this.regsGen[7] + ((opCode & 0x3F) /*077*/ << 1)) & 0xffff;
-            //             if ((src = this.readWordFromVirtual(virtualAddress | PDP11.ACCESS.DSPACE)) >= 0) {
-            //                 this.regsGen[7] = this.regsGen[5];
-            //                 this.regsGen[5] = src;
-            //                 this.regsGen[6] = (virtualAddress + 2) & 0xffff;
-            //             }
-            //             break;
-            //         case 0xD40: /*0006500*/ // MFPI 0065SS
-            //             //LOG_INSTRUCTION(opCode, 1, "MFPI");
-            //             if (!(opCode & 0x38)) {
-            //                 reg = opCode & 7;
-            //                 if (6 !== reg || ((this.PSW >> 2) & 0x3000) === (this.PSW & 0x3000)) {
-            //                     src = this.regsGen[reg];
-            //                 } else {
-            //                     src = this.regsAltStack[(this.PSW >> 12) & 3];
-            //                 }
-            //                 if (this.pushWord(src) >= 0) {
-            //                     this.flagN = this.flagZ = src;
-            //                     this.flagV = 0;
-            //                 }
-            //             } else {
-            //                 if ((virtualAddress = this.getVirtualByMode(opCode, 0)) >= 0) {
-            //                     if ((this.PSW & 0xf000) !== 0xf000) virtualAddress &= 0xffff;
-            //                     this.mmuMode = (this.PSW >> 12) & 3;
-            //                     if ((src = this.readWordFromVirtual(virtualAddress)) >= 0) {
-            //                         this.mmuMode = (this.PSW >> 14) & 3;
-            //                         if (this.pushWord(src) >= 0) {
-            //                             this.flagN = this.flagZ = src;
-            //                             this.flagV = 0;
-            //                         }
-            //                     }
-            //                 }
-            //             }
-            //             break;
-            //         case 0xD80: /*0006600*/ // MTPI 0066DD
-            //             //LOG_INSTRUCTION(opCode, 1, "MTPI");
-            //             if ((dst = this.popWord()) >= 0) {
-            //                 if (!(this.MMR0 & 0xe000)) this.MMR1 = 0x16; /*026*/
-            //                 if (!(opCode & 0x38)) {
-            //                     reg = opCode & 7;
-            //                     if (6 !== reg || ((this.PSW >> 2) & 0x3000) === (this.PSW & 0x3000)) {
-            //                         this.regsGen[reg] = dst;
-            //                     } else {
-            //                         this.regsAltStack[(this.PSW >> 12) & 3] = dst;
-            //                     }
-            //                     this.flagN = this.flagZ = dst;
-            //                     this.flagV = 0;
-            //                 } else {
-            //                     if ((virtualAddress = this.getVirtualByMode(opCode, 0)) >= 0) {
-            //                         virtualAddress &= 0xffff;
-            //                         this.mmuMode = (this.PSW >> 12) & 3;
-            //                         if ((dstAddr = this.mapVirtualToPhysical(virtualAddress, PDP11.ACCESS.WRITE)) >= 0) {
-            //                             this.mmuMode = (this.PSW >> 14) & 3;
-            //                             if (this.writeWordToPhysical(dstAddr, dst) >= 0) {
-            //                                 this.flagN = this.flagZ = dst;
-            //                                 this.flagV = 0;
-            //                             }
-            //                         }
-            //                     }
-            //                 }
-            //             }
-            //             break;
-            //         case 0xDC0: /*0006700*/ // SXT 0067DD
-            //             //LOG_INSTRUCTION(opCode, 1, "SXT");
-            //             /*
-            //              * TODO: Here's an example where getAddr() could be called in the register-only case.
-            //              */
-            //             if ((dstAddr = this.getAddr(opCode, PDP11.ACCESS.WRITE)) >= 0) { // write word
-            //                 result = -((this.flagN >> 15) & 1);
-            //                 if (this.writeWordToPhysical(dstAddr, result) >= 0) {
-            //                     this.flagZ = result;
-            //                     this.flagV = 0;
-            //                 }
-            //             }
-            //             break;
-            //         case 0x8A00: /*0105000*/ // CLRB 1050DD
-            //             //LOG_INSTRUCTION(opCode, 1, "CLRB");
-            //             // if (!(opCode & 0x38)) {
-            //             //     this.regsGen[opCode & 7] &= 0xff00;
-            //             //     this.flagN = this.flagC = this.flagV = this.flagZ = 0;
-            //             // } else {
-            //             //     if ((dstAddr = this.getAddr(opCode, PDP11.ACCESS.WRITE_BYTE)) >= 0) { // write byte
-            //             //         if (this.writeByteToPhysical(dstAddr, 0) >= 0) {
-            //             //             this.flagN = this.flagC = this.flagV = this.flagZ = 0;
-            //             //         }
-            //             //     }
-            //             // }
-            //             break;
-            //         case 0x8A40: /*0105100*/ // COMB 1051DD
-            //             //LOG_INSTRUCTION(opCode, 1, "COMB");
-            //             /*
-            //              * TODO: Here's an example where getAddr() could be called in the register-only case.
-            //              */
-            //             if ((dst = this.readByteFromPhysical(dstAddr = this.getAddr(opCode, PDP11.ACCESS.UPDATE_BYTE))) >=
-            //                 0) {
-            //                 result = ~dst;
-            //                 if (this.writeByteToPhysical(dstAddr, result) >= 0) {
-            //                     this.flagN = this.flagZ = result << 8;
-            //                     this.flagC = 0x10000;
-            //                     this.flagV = 0;
-            //                 }
-            //             }
-            //             break;
-            //         case 0x8A80: /*0105200*/ // INCB 1052DD
-            //             //LOG_INSTRUCTION(opCode, 1, "INCB");
-            //             /*
-            //              * TODO: Here's an example where getAddr() could be called in the register-only case.
-            //              */
-            //             if ((dst = this.readByteFromPhysical(dstAddr = this.getAddr(opCode, PDP11.ACCESS.UPDATE_BYTE))) >=
-            //                 0) {
-            //                 result = dst + 1;
-            //                 if (this.writeByteToPhysical(dstAddr, result) >= 0) {
-            //                     this.flagN = this.flagZ = result << 8;
-            //                     this.flagV = (result & (result ^ dst)) << 8;
-            //                 }
-            //             }
-            //             break;
-            //         case 0x8AC0: /*0105300*/ // DECB 1053DD
-            //             //LOG_INSTRUCTION(opCode, 1, "DECB");
-            //             /*
-            //              * TODO: Here's an example where getAddr() could be called in the register-only case.
-            //              */
-            //             if ((dst = this.readByteFromPhysical(dstAddr = this.getAddr(opCode, PDP11.ACCESS.UPDATE_BYTE))) >=
-            //                 0) {
-            //                 result = dst - 1;
-            //                 if (this.writeByteToPhysical(dstAddr, result) >= 0) {
-            //                     this.flagN = this.flagZ = result << 8;
-            //                     this.flagV = ((result ^ dst) & dst) << 8;
-            //                 }
-            //             }
-            //             break;
-            //         case 0x8B00: /*0105400*/ // NEGB 1054DD
-            //             //LOG_INSTRUCTION(opCode, 1, "NEGB");
-            //             /*
-            //              * TODO: Here's an example where getAddr() could be called in the register-only case.
-            //              */
-            //             if ((dst = this.readByteFromPhysical(dstAddr = this.getAddr(opCode, PDP11.ACCESS.UPDATE_BYTE))) >=
-            //                 0) {
-            //                 result = -dst;
-            //                 if (this.writeByteToPhysical(dstAddr, result) >= 0) {
-            //                     this.flagC = this.flagN = this.flagZ = result << 8;
-            //                     this.flagV = (result & dst) << 8;
-            //                 }
-            //             }
-            //             break;
-            //         case 0x8B40: /*0105500*/ // ADCB 01055DD
-            //             //LOG_INSTRUCTION(opCode, 1, "ADCB");
-            //             /*
-            //              * TODO: Here's an example where getAddr() could be called in the register-only case.
-            //              */
-            //             if ((dst = this.readByteFromPhysical(dstAddr = this.getAddr(opCode, PDP11.ACCESS.UPDATE_BYTE))) >=
-            //                 0) {
-            //                 result = dst + ((this.flagC >> 16) & 1);
-            //                 if (this.writeByteToPhysical(dstAddr, result) >= 0) {
-            //                     this.flagN = this.flagZ = this.flagC = result << 8;
-            //                     this.flagV = (result & (result ^ dst)) << 8;
-            //                 }
-            //             }
-            //             break;
-            //         case 0x8B80: /*0105600*/ // SBCB 01056DD
-            //             //LOG_INSTRUCTION(opCode, 1, "SBCB");
-            //             /*
-            //              * TODO: Here's an example where getAddr() could be called in the register-only case.
-            //              */
-            //             if ((dst = this.readByteFromPhysical(dstAddr = this.getAddr(opCode, PDP11.ACCESS.UPDATE_BYTE))) >=
-            //                 0) {
-            //                 result = dst - ((this.flagC >> 16) & 1);
-            //                 if (this.writeByteToPhysical(dstAddr, result) >= 0) {
-            //                     this.flagN = this.flagZ = this.flagC = result << 8;
-            //                     this.flagV = ((result ^ dst) & dst) << 8;
-            //                 }
-            //             }
-            //             break;
-            //         case 0x8BC0: /*0105700*/ // TSTB 1057DD
-            //             //LOG_INSTRUCTION(opCode, 1, "TSTB");
-            //             if ((dst = this.readByteByMode(opCode)) >= 0) {
-            //                 this.flagN = this.flagZ = dst << 8;
-            //                 this.flagC = this.flagV = 0;
-            //             }
-            //             break;
-            //         case 0x8C00: /*0106000*/ // RORB 1060DD
-            //             //LOG_INSTRUCTION(opCode, 1, "RORB");
-            //             /*
-            //              * TODO: Here's an example where getAddr() could be called in the register-only case.
-            //              */
-            //             if ((dst = this.readByteFromPhysical(dstAddr = this.getAddr(opCode, PDP11.ACCESS.UPDATE_BYTE))) >=
-            //                 0) {
-            //                 result = (((this.flagC & 0x10000) >> 8) | dst) >> 1;
-            //                 if (this.writeByteToPhysical(dstAddr, result) >= 0) {
-            //                     this.flagC = (dst << 16);
-            //                     this.flagN = this.flagZ = (result << 8);
-            //                     this.flagV = this.flagN ^ (this.flagC >> 1);
-            //                 }
-            //             }
-            //             break;
-            //         case 0x8C40: /*0106100*/ // ROLB 1061DD
-            //             //LOG_INSTRUCTION(opCode, 1, "ROLB");
-            //             /*
-            //              * TODO: Here's an example where getAddr() could be called in the register-only case.
-            //              */
-            //             if ((dst = this.readByteFromPhysical(dstAddr = this.getAddr(opCode, PDP11.ACCESS.UPDATE_BYTE))) >=
-            //                 0) {
-            //                 result = (dst << 1) | ((this.flagC >> 16) & 1);
-            //                 if (this.writeByteToPhysical(dstAddr, result) >= 0) {
-            //                     this.flagC = this.flagN = this.flagZ = result << 8;
-            //                     this.flagV = (result ^ dst) << 8;
-            //                 }
-            //             }
-            //             break;
-            //         case 0x8C80: /*0106200*/ // ASRB 1062DD
-            //             //LOG_INSTRUCTION(opCode, 1, "ASRB");
-            //             /*
-            //              * TODO: Here's an example where getAddr() could be called in the register-only case.
-            //              */
-            //             if ((dst = this.readByteFromPhysical(dstAddr = this.getAddr(opCode, PDP11.ACCESS.UPDATE_BYTE))) >=
-            //                 0) {
-            //                 result = (dst & 0x80) | (dst >> 1);
-            //                 if (this.writeByteToPhysical(dstAddr, result) >= 0) {
-            //                     this.flagC = dst << 16;
-            //                     this.flagN = this.flagZ = result << 8;
-            //                     this.flagV = this.flagN ^ (this.flagC >> 1);
-            //                 }
-            //             }
-            //             break;
-            //         case 0x8CC0: /*0106300*/ // ASLB 1063DD
-            //             //LOG_INSTRUCTION(opCode, 1, "ASLB");
-            //             /*
-            //              * TODO: Here's an example where getAddr() could be called in the register-only case.
-            //              */
-            //             if ((dst = this.readByteFromPhysical(dstAddr = this.getAddr(opCode, PDP11.ACCESS.UPDATE_BYTE))) >=
-            //                 0) {
-            //                 result = dst << 1;
-            //                 if (this.writeByteToPhysical(dstAddr, result) >= 0) {
-            //                     this.flagC = this.flagN = this.flagZ = result << 8;
-            //                     this.flagV = (result ^ dst) << 8;
-            //                 }
-            //             }
-            //             break;
-            //             //case 0106400: // MTPS 1064SS
-            //             //    //LOG_INSTRUCTION(opCode, 1, "MTPS");
-            //             //    if ((src = this.readByteByMode(instruction)) >= 0) {
-            //             //        this.setPSW((this.PSW & 0xff00) | (src & 0xef));
-            //             //    } // Temporary PDP 11/34A
-            //             //    break;
-            //         case 0x8D40: /*0106500*/ // MFPD 1065DD
-            //             //LOG_INSTRUCTION(opCode, 1, "MFPD");
-            //             if (!(opCode & 0x38)) {
-            //                 reg = opCode & 7;
-            //                 if (6 !== reg || ((this.PSW >> 2) & 0x3000) === (this.PSW & 0x3000)) {
-            //                     src = this.regsGen[reg];
-            //                 } else {
-            //                     src = this.regsAltStack[(this.PSW >> 12) & 3];
-            //                 }
-            //                 if (this.pushWord(src) >= 0) {
-            //                     this.flagN = this.flagZ = src;
-            //                     this.flagV = 0;
-            //                 }
-            //             } else {
-            //                 if ((virtualAddress = this.getVirtualByMode(opCode, 0)) >= 0) {
-            //                     this.mmuMode = (this.PSW >> 12) & 3;
-            //                     if ((src = this.readWordFromVirtual(virtualAddress | PDP11.ACCESS.DSPACE)) >= 0) {
-            //                         this.mmuMode = (this.PSW >> 14) & 3;
-            //                         if (this.pushWord(src) >= 0) {
-            //                             this.flagN = this.flagZ = src;
-            //                             this.flagV = 0;
-            //                         }
-            //                     }
-            //                 }
-            //             }
-            //             break;
-            //         case 0x8D80: /*0106600*/ // MTPD 1066DD
-            //             //LOG_INSTRUCTION(opCode, 1, "MTPD");
-            //             if ((dst = this.popWord()) >= 0) {
-            //                 if (!(this.MMR0 & 0xe000)) this.MMR1 = 0x16; /*026*/
-            //                 if (!(opCode & 0x38)) {
-            //                     reg = opCode & 7;
-            //                     if (6 !== reg || ((this.PSW >> 2) & 0x3000) === (this.PSW & 0x3000)) {
-            //                         this.regsGen[reg] = dst;
-            //                     } else {
-            //                         this.regsAltStack[(this.PSW >> 12) & 3] = dst;
-            //                     }
-            //                     this.flagN = this.flagZ = dst;
-            //                     this.flagV = 0;
-            //                 } else {
-            //                     if ((virtualAddress = this.getVirtualByMode(opCode, 0)) >= 0) {
-            //                         this.mmuMode = (this.PSW >> 12) & 3;
-            //                         if ((dstAddr = this.mapVirtualToPhysical(virtualAddress | PDP11.ACCESS.DSPACE, PDP11.ACCESS.WRITE)) >= 0) {
-            //                             this.mmuMode = (this.PSW >> 14) & 3;
-            //                             if (this.writeWordToPhysical(dstAddr, dst) >= 0) {
-            //                                 this.flagN = this.flagZ = dst;
-            //                                 this.flagV = 0;
-            //                             }
-            //                         }
-            //                     }
-            //                 }
-            //             }
-            //             break;
-            //             //case 0106700: // MTFS 1064SS
-            //             //    //LOG_INSTRUCTION(opCode, 1, "MFPS");
-            //             //    src = this.getPSW() & 0xff;
-            //             //    if (instruction & 0x38) {
-            //             //        if ((dstAddr = this.getAddr(instruction, PDP11.ACCESS.WRITE_BYTE)) >= 0) { // write byte
-            //             //            if (this.writeByteToPhysical(dstAddr, src) >= 0) {
-            //             //                this.flagN = this.flagZ = src << 8;
-            //             //                this.flagV = 0;
-            //             //            }
-            //             //        }
-            //             //    } else {
-            //             //        if (src & 0200) src |= 0xff00;
-            //             //        this.regsGen[instruction & 7] = src;
-            //             //        this.flagN = this.flagZ = src << 8;
-            //             //        this.flagV = 0;
-            //             //    } // Temporary PDP 11/34A
-            //             //    break;
-            //         default:
-            //             switch (opCode & 0xFFF8) /*0177770*/ { // Single register instructions xxxxxR (and CC)
-            //             case 0x80: /*0000200*/ // RTS 00020R
-            //                 //LOG_INSTRUCTION(opCode, 6, "RTS");
-            //                 if ((src = this.popWord()) >= 0) {
-            //                     reg = opCode & 7;
-            //                     this.regsGen[7] = this.regsGen[reg];
-            //                     this.regsGen[reg] = src;
-            //                 }
-            //                 break;
-            //             case 0x98: /*0000230*/ // SPL 00023N
-            //                 //LOG_INSTRUCTION(opCode, 9, "SPL");
-            //                 if (!(this.PSW & 0xc000)) {
-            //                     this.PSW = (this.PSW & 0xf81f) | ((opCode & 7) << 5);
-            //                     this.priorityReview = 1;
-            //                 }
-            //                 break;
-            //             case 0xA0: /*0000240*/ // CLR CC 00024M Part 1 without N
-            //             case 0xA8: /*0000250*/ // CLR CC 00025M Part 2 with N
-            //                 // if (opCode & 1) this.clearCF();        // CLC
-            //                 // if (opCode & 2) this.clearVF();        // CLV
-            //                 // if (opCode & 4) this.clearZF();        // CLZ
-            //                 // if (opCode & 8) this.clearNF();        // CLN
-            //                 break;
-            //             case 0xB0: /*0000260*/ // SET CC 00026M Part 1 without N
-            //             case 0xB8: /*0000270*/ // SET CC 00026M Part 2 with N
-            //                 // if (opCode & 1) this.setCF();          // SEC
-            //                 // if (opCode & 2) this.setVF();          // SEV
-            //                 // if (opCode & 4) this.setZF();          // SEZ
-            //                 // if (opCode & 8) this.setNF();          // SEN
-            //                 break;
-            //             default: // Misc instructions (decode ALL remaining bits) xxxxxx
-            //                 switch (opCode) {
-            //                 case 0x0: /*0000000*/ // HALT 000000
-            //                     //LOG_INSTRUCTION(opCode, 0, "HALT");
-            //                     if (0xc000 & this.PSW) {
-            //                         this.regErr |= PDP11.CPUERR.BADHALT;
-            //                         this.trap(PDP11.TRAP.BUS_ERROR, 46);
-            //                     } else {
-            //                         this.runState = 3; // halt
-            //                         this.endBurst();
-            //                         //LOG_PRINT();
-            //                         console.log("HALT at " + this.regsGen[7].toString(8));
-            //                     }
-            //                     break;
-            //                 case 0x1: /*0000001*/ // WAIT 000001
-            //                     //LOG_INSTRUCTION(opCode, 0, "WAIT");
-            //                     j = 0;
-            //                     if ((i = this.interruptQueue.length) > 0) {
-            //                         while (i-- > 0) {
-            //                             j += this.interruptQueue[i].delay;
-            //                             this.interruptQueue[i].delay = 0;
-            //                         }
-            //                     }
-            //                     if (j === 0 && this.runState === 0) {
-            //                         this.runState = 2; // wait
-            //                         this.endBurst();
-            //                     }
-            //                     break;
-            //                 case 0x3: /*0000003*/ // BPT  000003
-            //                     //LOG_INSTRUCTION(opCode, 0, "BPT");
-            //                     this.trap(PDP11.TRAP.BREAKPOINT, /*014*/ 6);
-            //                     break;
-            //                 case 0x4: /*0000004*/ // IOT  000004
-            //                     //LOG_INSTRUCTION(opCode, 0, "IOT");
-            //                     this.trap(PDP11.TRAP.IOT, /*020*/ 8);
-            //                     break;
-            //                 case 0x5: /*0000005*/ // RESET 000005
-            //                     //LOG_INSTRUCTION(opCode, 0, "RESET");
-            //                     // if (!(this.PSW & 0xc000)) {
-            //                     //     this.resetRegs();
-            //                     //     this.bus.reset();
-            //                     //     // display.data = this.regsGen[0];  // TODO: Review
-            //                     // }
-            //                     break;
-            //                 case 0x2: /*0000002*/ // RTI 000002
-            //                 case 0x6: /*0000006*/ // RTT 000006
-            //                     //LOG_INSTRUCTION(opCode, 0, "RTT");
-            //                     dstAddr = this.regsGen[6];
-            //                     if ((virtualAddress = this.readWordFromVirtual(dstAddr | PDP11.ACCESS.DSPACE)) >= 0) {
-            //                         dstAddr = (dstAddr + 2) & 0xffff;
-            //                         if ((savePSW = this.readWordFromVirtual(dstAddr | PDP11.ACCESS.DSPACE)) >= 0) {
-            //                             this.regsGen[6] = (dstAddr + 2) & 0xffff;
-            //                             savePSW &= 0xf8ff;
-            //                             if (this.PSW & 0xc000) {            // user / super restrictions
-            //                                 // keep SPL and allow lower only for modes and register set
-            //                                 savePSW = (savePSW & 0xf81f) | (this.PSW & 0xf8e0);
-            //                             }
-            //                             this.regsGen[7] = virtualAddress;
-            //                             this.setPSW(savePSW);
-            //                             this.opFlags &= ~PDP11.OPFLAG.TRAP_TF;
-            //                             if (opCode === 2) {            // RTI enables immediate trace
-            //                                 this.opFlags |= (this.PSW & PDP11.PSW.TF);
-            //                             }
-            //                         }
-            //                     }
-            //                     break;
-            //                     //case 0000007: // MFPT 000007
-            //                     //    //LOG_INSTRUCTION(opCode, 0, "MFPT");
-            //                     //    this.regsGen[0] = 1;
-            //                     //    break; // Exists on pdp 11/44 & KB11-EM
-            //                 default: // We don't know this instruction
-            //                     //LOG_INSTRUCTION(opCode, 11, "-unknown-");
-            //                     this.trap(PDP11.TRAP.RESERVED, /*010*/ 48); // reserved instruction
-            //                     break;
-            //                 }
-            //             }
-            //         }
-            //     }
-            // }
-        }
     } while (this.nStepCycles > 0);
 
     return (this.flags.complete? this.nBurstCycles - this.nStepCycles : (this.flags.complete === undefined? 0 : -1));

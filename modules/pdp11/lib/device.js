@@ -1017,7 +1017,7 @@ DevicePDP11.prototype.access = function(physicalAddress, data, byteFlag)
                     break;
                 case 0x3FFFCE: /*017777716*/ // User and Super SP
                     if (physicalAddress & 1) {
-                        if ((cpu.PSW >> 14) & 3 == 3) { // User Mode
+                        if ((cpu.regPSW >> 14) & 3 == 3) { // User Mode
                             if (data >= 0) cpu.regsGen[6] = data;
                             result = cpu.regsGen[6];
                         } else {
@@ -1025,7 +1025,7 @@ DevicePDP11.prototype.access = function(physicalAddress, data, byteFlag)
                             result = cpu.regsAltStack[3];
                         }
                     } else {
-                        if ((cpu.PSW >> 14) & 3 == 1) { // Super Mode
+                        if ((cpu.regPSW >> 14) & 3 == 1) { // Super Mode
                             if (data >= 0) cpu.regsGen[6] = data;
                             result = cpu.regsGen[6];
                         } else {
@@ -1038,7 +1038,7 @@ DevicePDP11.prototype.access = function(physicalAddress, data, byteFlag)
                 case 0x3FFFCA: /*017777712*/
                 case 0x3FFFC8: /*017777710*/ // Register set 1
                     idx = physicalAddress & 7;
-                    if (cpu.PSW & 0x800) {
+                    if (cpu.regPSW & 0x800) {
                         if (data >= 0) cpu.regsGen[idx] = data;
                         result = cpu.regsGen[idx];
                     } else {
@@ -1051,7 +1051,7 @@ DevicePDP11.prototype.access = function(physicalAddress, data, byteFlag)
                         if (data >= 0) cpu.regsGen[7] = data;
                         result = cpu.regsGen[7];
                     } else {
-                        if ((cpu.PSW >> 14) & 3 == 0) { // Kernel Mode
+                        if ((cpu.regPSW >> 14) & 3 == 0) { // Kernel Mode
                             if (data >= 0) cpu.regsGen[6] = data;
                             result = cpu.regsGen[6];
                         } else {
@@ -1064,7 +1064,7 @@ DevicePDP11.prototype.access = function(physicalAddress, data, byteFlag)
                 case 0x3FFFC2: /*017777702*/
                 case 0x3FFFC0: /*017777700*/ // Register set 0
                     idx = physicalAddress & 7;
-                    if (cpu.PSW & 0x800) {
+                    if (cpu.regPSW & 0x800) {
                         if (data >= 0) cpu.regsAlt[idx] = data;
                         result = cpu.regsAlt[idx];
                     } else {

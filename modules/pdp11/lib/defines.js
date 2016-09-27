@@ -188,10 +188,14 @@ var PDP11 = {
         MASK:       0x38
     },
     DSTMODE: {
+        REG:        0x0007,
+        MODE:       0x0038,
         MASK:       0x003F,
         SHIFT:      0
     },
     SRCMODE: {
+        REG:        0x01C0,
+        MODE:       0x0E00,
         MASK:       0x0FC0,
         SHIFT:      6
     },
