@@ -1159,22 +1159,9 @@ PDP11.opMARK = function(opCode)
  */
 PDP11.opMFPD = function(opCode)
 {
-    var src;
-    if (!(opCode & PDP11.OPMODE.MASK)) {
-        var reg = opCode & 7;
-        if (reg != 6 || ((this.regPSW >> 2) & PDP11.PSW.PMODE) === (this.regPSW & PDP11.PSW.PMODE)) {
-            src = this.regsGen[reg];
-        } else {
-            src = this.regsAltStack[(this.regPSW >> 12) & 3];
-        }
-    } else {
-        var addr = this.getVirtualByMode(opCode, PDP11.ACCESS.WORD);
-        this.mmuMode = (this.regPSW >> 12) & 3;
-        src = this.readWordFromVirtual(addr | 0x10000);
-        this.mmuMode = (this.regPSW >> 14) & 3;
-    }
-    this.pushWord(src);
-    this.updateNZFlags(src);
+    var data = this.readWordFromPrevSpace(opCode, PDP11.ACCESS.DSPACE);
+    this.pushWord(data);
+    this.updateNZFlags(data);
     this.nStepCycles -= 1;
 };
 
@@ -1186,40 +1173,9 @@ PDP11.opMFPD = function(opCode)
  */
 PDP11.opMFPI = function(opCode)
 {
-    /*
-     * TODO: Implement
-     */
-    this.regOp = -1;
-    this.nStepCycles -= 1;
-};
-
-/**
- * opMFPS(opCode)
- *
- * @this {CPUStatePDP11}
- * @param {number} opCode
- */
-PDP11.opMFPS = function(opCode)
-{
-    /*
-     * TODO: Implement
-     */
-    this.regOp = -1;
-    this.nStepCycles -= 1;
-};
-
-/**
- * opMFPT(opCode)
- *
- * @this {CPUStatePDP11}
- * @param {number} opCode
- */
-PDP11.opMFPT = function(opCode)
-{
-    /*
-     * TODO: Implement
-     */
-    this.regOp = -1;
+    var data = this.readWordFromPrevSpace(opCode, PDP11.ACCESS.ISPACE);
+    this.pushWord(data);
+    this.updateNZFlags(data);
     this.nStepCycles -= 1;
 };
 
@@ -1256,10 +1212,9 @@ PDP11.opMOVB = function(opCode)
  */
 PDP11.opMTPD = function(opCode)
 {
-    /*
-     * TODO: Implement
-     */
-    this.regOp = -1;
+    var data = this.popWord();
+    this.writeWordToPrevSpace(opCode, PDP11.ACCESS.DSPACE, data);
+    this.updateNZFlags(data);
     this.nStepCycles -= 1;
 };
 
@@ -1271,25 +1226,9 @@ PDP11.opMTPD = function(opCode)
  */
 PDP11.opMTPI = function(opCode)
 {
-    /*
-     * TODO: Implement
-     */
-    this.regOp = -1;
-    this.nStepCycles -= 1;
-};
-
-/**
- * opMTPS(opCode)
- *
- * @this {CPUStatePDP11}
- * @param {number} opCode
- */
-PDP11.opMTPS = function(opCode)
-{
-    /*
-     * TODO: Implement
-     */
-    this.regOp = -1;
+    var data = this.popWord();
+    this.writeWordToPrevSpace(opCode, PDP11.ACCESS.ISPACE, data);
+    this.updateNZFlags(data);
     this.nStepCycles -= 1;
 };
 
@@ -1649,10 +1588,7 @@ PDP11.opTSTB = function(opCode)
  */
 PDP11.opWAIT = function(opCode)
 {
-    /*
-     * TODO: Implement
-     */
-    this.regOp = -1;
+    this.checkInterruptDelay();
     this.nStepCycles -= 1;
 };
 
@@ -1969,7 +1905,7 @@ PDP11.aOps000X_1170 = [
     PDP11.opIOT,                // 0x0004
     PDP11.opRESET,              // 0x0005
     PDP11.opRTT,                // 0x0006
-    PDP11.opMFPT,               // 0x0007
+    PDP11.opUndefined,          // 0x0007
     PDP11.opUndefined,          // 0x0008
     PDP11.opUndefined,          // 0x0009
     PDP11.opUndefined,          // 0x000A
@@ -2068,8 +2004,8 @@ PDP11.aOps8CXn_1170 = [
 ];
 
 PDP11.aOps8DXn_1170 = [
-    PDP11.opMTPS,               // 0x8D0n
+    PDP11.opUndefined,          // 0x8D0n
     PDP11.opMFPD,               // 0x8D4n
     PDP11.opMTPD,               // 0x8D8n
-    PDP11.opMFPS                // 0x8DCn
+    PDP11.opUndefined           // 0x8DCn
 ];

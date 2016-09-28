@@ -602,6 +602,24 @@ CPUStatePDP11.prototype.interrupt = function(delay, priority, vector, callback)
 };
 
 /**
+ * checkInterruptDelay()
+ *
+ * @this {CPUStatePDP11}
+ */
+CPUStatePDP11.prototype.checkInterruptDelay = function()
+{
+    var delay = 0;
+    for (var i = this.interruptQueue.length; --i >= 0;) {
+        delay += this.interruptQueue[i].delay;
+        this.interruptQueue[i].delay = 0;
+    }
+    if (!delay && this.runState === 0) {
+        this.runState = 2;          // wait
+        this.endBurst();
+    }
+};
+
+/**
  * checkInterruptQueue()
  *
  * @this {CPUStatePDP11}
@@ -1408,6 +1426,68 @@ CPUStatePDP11.prototype.getAddrVirtual = function(addressMode, accessFlags)
 {
     this.assert(addressMode & 0x38);
     return this.mapVirtualToPhysical(this.getVirtualByMode(addressMode, accessFlags), accessFlags);
+};
+
+/**
+ * readWordFromPrevSpace(opCode, accessFlags)
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} opCode
+ * @param {number} accessFlags (really just PDP11.ACCESS.DSPACE or PDP11.ACCESS.ISPACE)
+ * @return {number}
+ */
+CPUStatePDP11.prototype.readWordFromPrevSpace = function(opCode, accessFlags)
+{
+    var src;
+    if (!(opCode & PDP11.OPMODE.MASK)) {
+        var reg = opCode & 7;
+        if (reg != 6 || ((this.regPSW >> 2) & PDP11.PSW.PMODE) === (this.regPSW & PDP11.PSW.PMODE)) {
+            src = this.regsGen[reg];
+        } else {
+            src = this.regsAltStack[(this.regPSW >> 12) & 3];
+        }
+    } else {
+        var addr = this.getVirtualByMode(opCode, PDP11.ACCESS.WORD);
+        if (!(accessFlags & PDP11.ACCESS.DSPACE)) {
+            if ((this.regPSW & 0xf000) !== 0xf000) addr &= 0xffff;
+        }
+        this.mmuMode = (this.regPSW >> 12) & 3;
+        src = this.readWordFromVirtual(addr | (accessFlags & PDP11.ACCESS.DSPACE));
+        this.mmuMode = (this.regPSW >> 14) & 3;
+    }
+    return src;
+};
+
+/**
+ * writeWordToPrevSpace(opCode, accessFlags, data)
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} opCode
+ * @param {number} accessFlags (really just PDP11.ACCESS.DSPACE or PDP11.ACCESS.ISPACE)
+ * @param {number} data
+ * @return {number}
+ */
+CPUStatePDP11.prototype.writeWordToPrevSpace = function(opCode, accessFlags, data)
+{
+    if (!(this.MMR0 & 0xe000)) {
+        this.MMR1 = 0x16;
+    }
+    if (!(opCode & 0x38)) {
+        var reg = opCode & 7;
+        if (reg != 6 || ((this.regPSW >> 2) & PDP11.PSW.PMODE) === (this.regPSW & PDP11.PSW.PMODE)) {
+            this.regsGen[reg] = data;
+        } else {
+            this.regsAltStack[(this.regPSW >> 12) & 3] = data;
+        }
+    } else {
+        var addr = this.getVirtualByMode(opCode, PDP11.ACCESS.WORD);
+        if (!(accessFlags & PDP11.ACCESS.DSPACE)) addr &= 0xffff;
+        this.mmuMode = (this.regPSW >> 12) & 3;
+        addr = this.mapVirtualToPhysical(addr | (accessFlags & PDP11.ACCESS.DSPACE), PDP11.ACCESS.WRITE);
+        this.mmuMode = (this.regPSW >> 14) & 3;
+        this.writeWordToPhysical(addr, data);
+    }
+    return data;
 };
 
 /**

@@ -5,7 +5,7 @@
 	<computer id="computer" busWidth="22"/>
 	<cpu id="cpu" model="1170" cycles="2000000" resetAddr="0xC000"/>
 	<ram id="ram" addr="0x0000" size="0xC000"/>
-	<rom id="rom" addr="0xC000" size="0x0570" file="/devices/pdp11/rom/custom/bootcode.json"/>
+	<rom id="rom" addr="0xC000" size="0x0570" file="/devices/pdp11/rom/custom/boot.json"/>
 	<ram id="ram" addr="0x10000" size="0x34000"/>
 	<device id="unibus" name="unibus"/>
 	<panel ref="/devices/pdp11/panel/1170/wide.xml"/>

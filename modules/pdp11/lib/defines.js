@@ -228,7 +228,8 @@ var PDP11 = {
         WRITE:      0x04,
         UPDATE:     0x06,
         VIRT:       0x08,       // getVirtualByMode() leaves bit 17 clear if this is set (otherwise the caller would have to clear it again)
-        DSPACE:     0x10000,    // getVirtualByMode() sets bit 17 in any 16-bit virtual address that refers to D space (as opposed to I space)
+        ISPACE:     0x00000,
+        DSPACE:     0x10000     // getVirtualByMode() sets bit 17 in any 16-bit virtual address that refers to D space (as opposed to I space)
     },
     /*
      * Internal flags passed to writeByteByMode(), etc.

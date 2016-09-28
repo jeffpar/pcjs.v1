@@ -383,7 +383,7 @@ if (DEBUGGER) {
             0x0004: [DebuggerPDP11.OPS.IOT],                                    // 000004
             0x0005: [DebuggerPDP11.OPS.RESET],                                  // 000005
             0x0006: [DebuggerPDP11.OPS.RTT],                                    // 000006
-            0x0007: [DebuggerPDP11.OPS.MFPT],                                   // 000007
+            0x0007: [DebuggerPDP11.OPS.MFPT],                                   // 000007 (only on PDP-11/44 & KB11-EM?)
             0x00A0: [DebuggerPDP11.OPS.NOP],
             0x00A1: [DebuggerPDP11.OPS.CLC],
             0x00A2: [DebuggerPDP11.OPS.CLV],
