@@ -184,10 +184,10 @@ CPUStatePDP11.prototype.resetRegs = function()
     this.regSL = 0xff;          // 177774
     this.regErr = 0;            // 177766
     this.regPIR = 0;            // 177772
-    this.MMR0 = 0;              // 177572
-    this.MMR1 = 0;              // 177574
-    this.MMR2 = 0;              // 177576
-    this.MMR3 = 0;              // 172516
+    this.regMMR0 = 0;           // 177572
+    this.regMMR1 = 0;           // 177574
+    this.regMMR2 = 0;           // 177576
+    this.regMMR3 = 0;           // 172516
     this.mmuEnable = 0;         // MMU enabled for PDP11.ACCESS.READ or PDP11.ACCESS.WRITE
     this.mmuLastMode = 0;
     this.mmuMask = [            // mask to control I&D access for each mode
@@ -230,7 +230,7 @@ CPUStatePDP11.prototype.initMemoryAccess = function()
  */
 CPUStatePDP11.prototype.getMMR0 = function()
 {
-    return (this.MMR0 & 0xf381) | (this.mmuLastMode << 5) | (this.mmuLastPage << 1);
+    return (this.regMMR0 & 0xf381) | (this.mmuLastMode << 5) | (this.mmuLastPage << 1);
 };
 
 /**
@@ -242,7 +242,7 @@ CPUStatePDP11.prototype.getMMR0 = function()
  */
 CPUStatePDP11.prototype.setMMR0 = function(newMMR0)
 {
-    this.MMR0 = newMMR0 &= 0xf381;
+    this.regMMR0 = newMMR0 &= 0xf381;
     this.mmuLastMode = (newMMR0 >> 5) & 3;
     this.mmuLastPage = (newMMR0 >> 1) & 0xf;
     if (newMMR0 & 0x101) {
@@ -255,7 +255,7 @@ CPUStatePDP11.prototype.setMMR0 = function(newMMR0)
         this.mmuEnable = 0;
     }
     this.initMemoryAccess();
-    return this.MMR0;
+    return this.regMMR0;
 };
 
 /**
@@ -655,9 +655,9 @@ CPUStatePDP11.prototype.checkInterruptQueue = function()
         }
         if (savePSW > (this.regPSW & 0xe0)) {
             if (!interruptEvent) {
-                this.trap(PDP11.TRAP.PIRQ, 42);
+                this.trap(PDP11.TRAP.PIRQ, PDP11.REASON.INTERRUPT);
             } else {
-                this.trap(interruptEvent.vector, 44);
+                this.trap(interruptEvent.vector, PDP11.REASON.INTERRUPT);
             }
         }
     }
@@ -882,9 +882,9 @@ CPUStatePDP11.prototype.trap = function(vector, reason)
         doubleTrap = true;
     }
 
-    if (!(this.MMR0 & 0xe000)) {
-        this.MMR1 = 0xf6f6;
-        this.MMR2 = vector;
+    if (!(this.regMMR0 & 0xe000)) {
+        this.regMMR1 = 0xf6f6;
+        this.regMMR2 = vector;
     }
 
     /*
@@ -897,7 +897,7 @@ CPUStatePDP11.prototype.trap = function(vector, reason)
     /*
      * Set new PSW with previous mode
      */
-    this.setPSW((newPSW & 0xcfff) | ((this.trapPSW >> 2) & 0x3000));
+    this.setPSW((newPSW & ~PDP11.PSW.PMODE) | ((this.trapPSW >> 2) & PDP11.PSW.PMODE));
 
     if (doubleTrap) {
         this.regErr |= PDP11.CPUERR.RED;
@@ -911,7 +911,11 @@ CPUStatePDP11.prototype.trap = function(vector, reason)
     this.opFlags &= ~PDP11.OPFLAG.TRAP_MASK;    // lose interest in traps after an abort
     this.trapPSW = -1;                          // reset flag that we have a trap within a trap
 
-    if (DEBUG && this.dbg) this.dbg.println("trap to vector " + this.dbg.toBase(vector) + (reason? " (reason " + reason + ")" : ""));
+    if (DEBUG && this.dbg) {
+        if (reason != PDP11.REASON.INTERRUPT) {
+            this.dbg.println("trap to vector " + this.dbg.toBase(vector, 0, true) + (reason? " (reason " + reason + ")" : ""));
+        }
+    }
 
     throw vector;
 };
@@ -954,7 +958,7 @@ CPUStatePDP11.prototype.mapUnibus = function(unibusAddress)
 {
     var idx = (unibusAddress >> 13) & 0x1f;
     if (idx < 31) {
-        if (this.MMR3 & PDP11.MMR3.UNIBUS_MAP) {
+        if (this.regMMR3 & PDP11.MMR3.UNIBUS_MAP) {
             unibusAddress = (this.unibusMap[idx] + (unibusAddress & 0x1ffe)) & 0x3ffffe;
             if (unibusAddress >= BusPDP11.IOPAGE_UNIBUS && unibusAddress < BusPDP11.IOPAGE_22BIT) this.panic(898);
         }
@@ -1026,7 +1030,7 @@ CPUStatePDP11.prototype.mapVirtualToPhysical = function(virtualAddress, accessFl
         } else { // no max_memory check in 16 bit mode
             if ((physicalAddress & 1) && !(accessFlags & PDP11.ACCESS.BYTE)) {
                 this.regErr |= PDP11.CPUERR.ODDADDR;
-                this.trap(PDP11.TRAP.BUS_ERROR, 22);
+                this.trap(PDP11.TRAP.BUS_ERROR, PDP11.REASON.ODDMEMADDR);
             }
         }
     } else {
@@ -1034,7 +1038,7 @@ CPUStatePDP11.prototype.mapVirtualToPhysical = function(virtualAddress, accessFl
         page = (virtualAddress >> 13) & this.mmuMask[this.mmuMode];
         pdr = this.mmuMap[this.mmuMode][page];
         physicalAddress = ((this.mmuMap[this.mmuMode][page + 16] << 6) + (virtualAddress & 0x1fff)) & 0x3fffff;
-        if (this.MMR3 & 0x10) {                         // if 22 bit MM mode
+        if (this.regMMR3 & 0x10) {                         // if 22 bit MM mode
             if (physicalAddress >= BusPDP11.IOPAGE_UNIBUS && physicalAddress < BusPDP11.IOPAGE_22BIT) {
                 physicalAddress = this.mapUnibus(physicalAddress & 0x3ffff); // 18bit unibus space
             }
@@ -1045,11 +1049,11 @@ CPUStatePDP11.prototype.mapVirtualToPhysical = function(virtualAddress, accessFl
         if (physicalAddress < BusPDP11.IOPAGE_UNIBUS) {
             if (physicalAddress >= BusPDP11.MAX_MEMORY) {
                 this.regErr |= PDP11.CPUERR.NOMEMORY;
-                this.trap(PDP11.TRAP.BUS_ERROR, 24);    // KB11-EM does this after ABORT handling - KB11-CM before
+                this.trap(PDP11.TRAP.BUS_ERROR, PDP11.REASON.NOMEMORY); // KB11-EM does this after ABORT handling - KB11-CM before
             }
             if ((physicalAddress & 1) && !(accessFlags & PDP11.ACCESS.BYTE)) {
                 this.regErr |= PDP11.CPUERR.ODDADDR;
-                this.trap(PDP11.TRAP.BUS_ERROR, 26);
+                this.trap(PDP11.TRAP.BUS_ERROR, PDP11.REASON.ODDMMUADDR);
             }
         }
         switch (pdr & 0x7) {
@@ -1100,16 +1104,16 @@ CPUStatePDP11.prototype.mapVirtualToPhysical = function(virtualAddress, accessFl
         if (errorMask) {
             if (errorMask & 0xe000) {
                 if (this.trapPSW >= 0) errorMask |= 0x80; // Instruction complete
-                if (!(this.MMR0 & 0xe000)) {
-                    this.MMR0 |= errorMask | (this.mmuLastMode << 5) | (this.mmuLastPage << 1);
+                if (!(this.regMMR0 & 0xe000)) {
+                    this.regMMR0 |= errorMask | (this.mmuLastMode << 5) | (this.mmuLastPage << 1);
                 }
-                this.trap(PDP11.TRAP.MMU_FAULT, 28);
+                this.trap(PDP11.TRAP.MMU_FAULT, PDP11.REASON.MAPERROR);
             }
-            if (!(this.MMR0 & 0xf000)) {
+            if (!(this.regMMR0 & 0xf000)) {
                 //if (physicalAddress < 017772200 || physicalAddress > 017777677) {
                 if (physicalAddress < 0x3ff480 || physicalAddress > 0x3fffbf) {
-                    this.MMR0 |= 0x1000; // MMU trap flag
-                    if (this.MMR0 & 0x0200) {
+                    this.regMMR0 |= 0x1000; // MMU trap flag
+                    if (this.regMMR0 & 0x0200) {
                         this.opFlags |= PDP11.OPFLAG.TRAP_MMU;
                     }
                 }
@@ -1214,15 +1218,15 @@ CPUStatePDP11.prototype.pushWord = function(data)
 
     this.regsGen[6] = virtualAddress;           // BSD needs SP updated before any fault :-(
 
-    if (!(this.MMR0 & 0xe000)) {
-        this.MMR1 = (this.MMR1 << 8) | 0xf6;
+    if (!(this.regMMR0 & 0xe000)) {
+        this.regMMR1 = (this.regMMR1 << 8) | 0xf6;
     }
 
     if ((!this.mmuMode) && virtualAddress <= this.regSL && virtualAddress > 4) {
         if (virtualAddress <= this.regSL - 32) {
             this.regErr |= PDP11.CPUERR.RED;
             this.regsGen[6] = 4;
-            this.trap(PDP11.TRAP.BUS_ERROR, 32);
+            this.trap(PDP11.TRAP.BUS_ERROR, PDP11.REASON.PUSHERROR);
         } else {
             this.regErr |= PDP11.CPUERR.YELLOW;
             this.opFlags |= 4;
@@ -1274,7 +1278,7 @@ CPUStatePDP11.prototype.getVirtualByMode = function(addressMode, accessFlags)
      * Mode 0: Registers don't have a virtual address so trap
      */
     case 0:
-        this.trap(PDP11.TRAP.BUS_ERROR, 34);
+        this.trap(PDP11.TRAP.BUS_ERROR, PDP11.REASON.NOREGADDR);
         break;
 
     /*
@@ -1286,7 +1290,7 @@ CPUStatePDP11.prototype.getVirtualByMode = function(addressMode, accessFlags)
             if (this.regsGen[6] <= this.regSL - 32 || this.regsGen[6] >= 0xfffe) {
                 this.regErr |= PDP11.CPUERR.RED;
                 this.regsGen[6] = 4;
-                this.trap(PDP11.TRAP.BUS_ERROR, 36);
+                this.trap(PDP11.TRAP.BUS_ERROR, PDP11.REASON.STACKMODE1);
             } else {
                 this.regErr |= PDP11.CPUERR.YELLOW;
                 this.opFlags |= PDP11.OPFLAG.TRAP_SP;
@@ -1383,15 +1387,15 @@ CPUStatePDP11.prototype.getVirtualByMode = function(addressMode, accessFlags)
 
     this.regsGen[reg] = (this.regsGen[reg] + stepSize) & 0xffff;
 
-    if (addrDSpace && !(this.MMR0 & 0xe000)) {
-        this.MMR1 = (this.MMR1 << 8) | ((stepSize << 3) & 0xf8) | reg;
+    if (addrDSpace && !(this.regMMR0 & 0xe000)) {
+        this.regMMR1 = (this.regMMR1 << 8) | ((stepSize << 3) & 0xf8) | reg;
     }
 
-    if (reg === 6 && (!this.mmuMode) && (accessFlags & PDP11.ACCESS.WRITE) && stepSize <= 0 && (this.regsGen[6] <= this.regSL || this.regsGen[6] >= 0xfffe)) {
+    if (reg == 6 && (!this.mmuMode) && (accessFlags & PDP11.ACCESS.WRITE) && stepSize <= 0 && (this.regsGen[6] <= this.regSL || this.regsGen[6] >= 0xfffe)) {
         if (this.regsGen[6] <= this.regSL - 32) {
             this.regErr |= PDP11.CPUERR.RED;
             this.regsGen[6] = 4;
-            this.trap(PDP11.TRAP.BUS_ERROR, 38);
+            this.trap(PDP11.TRAP.BUS_ERROR, PDP11.REASON.STACKERROR);
         } else {
             this.regErr |= PDP11.CPUERR.YELLOW;
             this.opFlags |= PDP11.OPFLAG.TRAP_SP;
@@ -1469,8 +1473,8 @@ CPUStatePDP11.prototype.readWordFromPrevSpace = function(opCode, accessFlags)
  */
 CPUStatePDP11.prototype.writeWordToPrevSpace = function(opCode, accessFlags, data)
 {
-    if (!(this.MMR0 & 0xe000)) {
-        this.MMR1 = 0x16;
+    if (!(this.regMMR0 & 0xe000)) {
+        this.regMMR1 = 0x16;
     }
     if (!(opCode & 0x38)) {
         var reg = opCode & 7;
@@ -1702,13 +1706,13 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
          */
         if (this.opFlags & PDP11.OPFLAG.TRAP_MASK) {
             if (this.opFlags & PDP11.OPFLAG.TRAP_MMU) {
-                this.trap(PDP11.TRAP.MMU_FAULT, 52);                // MMU trap has priority
+                this.trap(PDP11.TRAP.MMU_FAULT, PDP11.REASON.TRAPMMU);          // MMU trap has priority
             } else {
                 if (this.opFlags & PDP11.OPFLAG.TRAP_SP) {
-                    this.trap(PDP11.TRAP.BUS_ERROR, 54);            // then SP trap
+                    this.trap(PDP11.TRAP.BUS_ERROR, PDP11.REASON.TRAPSP);       // then SP trap
                 } else {
                     if (this.opFlags & PDP11.OPFLAG.TRAP_TF) {
-                        this.trap(PDP11.TRAP.BREAKPOINT, 56);       // and finally a TF trap
+                        this.trap(PDP11.TRAP.BREAKPOINT, PDP11.REASON.TRAPTF);  // and finally a TF trap
                     }
                 }
             }
@@ -1719,9 +1723,9 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
             this.checkInterruptQueue();
         }
 
-        if (!(this.MMR0 & 0xe000)) {
-            this.MMR1 = 0;
-            this.MMR2 = this.regsGen[7];
+        if (!(this.regMMR0 & 0xe000)) {
+            this.regMMR1 = 0;
+            this.regMMR2 = this.regsGen[7];
         }
 
         /*

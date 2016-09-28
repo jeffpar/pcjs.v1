@@ -219,10 +219,18 @@ BusPDP11.IOController = {
         var bus = this.controller;
         var afn = bus.aIOHandlers[off];
         if (afn) {
+            /*
+             * If a writeByte() handler exists, call it; we're done
+             */
             if (afn[1]) {
                 afn[1](b, addr);
                 return;
-            } else if (afn[3]) {
+            }
+            /*
+             * If a writeWord() handler exists, call the readWord() handler first to get the original data,
+             * then call writeWord() with the new data pre-inserted into the original data.
+             */
+            if (afn[3]) {
                 w = afn[2]? afn[2](addr) : 0;
                 if (!(addr & 0x1)) {
                     afn[3]((w & ~0xff) | b, addr)
@@ -232,6 +240,11 @@ BusPDP11.IOController = {
                 return;
             }
         } else if (addr & 0x1) {
+            /*
+             * If no handler existed, and this address was odd, then perhaps a handler exists for the even address;
+             * if so, call the readWord() handler first to get the original data, then call writeWord() with the new
+             * data pre-inserted into (the high byte of) the original data.
+             */
             afn = bus.aIOHandlers[off & ~0x1];
             if (afn[3]) {
                 addr &= ~0x1;

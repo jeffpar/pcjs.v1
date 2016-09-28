@@ -37,6 +37,22 @@ if (NODE) {
     var PDP11         = require("./defines");
 }
 
+/*
+ * Decoding starts at the bottom of this file, in op1170().  The basic decoding approach is to
+ * dispatch on the top 4 bits of the opcode, and if further decoding is required, then dispatch on
+ * the next 4 bits, and so on (although some of the intermediate levels dispatch only on 2 bits).
+ *
+ * Eventually, every opcode should end up either in an opXXX() function or opUndefined().  For
+ * opcodes that perform a simple read and/or write operation, the entire functionality is handled
+ * by the opXXX() function.  For opcodes that perform a more extensive read/modify/write operation
+ * (also known as an update operation), those opXXX() functions usually rely on a corresponding
+ * fnXXX() helper function.
+ *
+ * For example, opADD() passes the helper function fnADD() to the appropriate update method.  This
+ * allows the update method to perform the entire read/modify/write operation, because the modification
+ * is handled by the helper function.
+ */
+
 /**
  * fnADD(src, dst)
  *
@@ -803,7 +819,7 @@ PDP11.opBPL = function(opCode)
  */
 PDP11.opBPT = function(opCode)
 {
-    this.trap(PDP11.TRAP.BREAKPOINT, 6);
+    this.trap(PDP11.TRAP.BREAKPOINT, PDP11.REASON.BPT);
     this.nStepCycles -= 1;
 };
 
@@ -1061,7 +1077,7 @@ PDP11.opDIV = function(opCode)
  */
 PDP11.opEMT = function(opCode)
 {
-    this.trap(PDP11.TRAP.EMULATOR, 2);
+    this.trap(PDP11.TRAP.EMULATOR, PDP11.REASON.EMT);
     this.nStepCycles -= 1;
 };
 
@@ -1075,7 +1091,7 @@ PDP11.opHALT = function(opCode)
 {
     if (this.regPSW & PDP11.PSW.CMODE) {
         this.regErr |= PDP11.CPUERR.BADHALT;
-        this.trap(PDP11.TRAP.BUS_ERROR, 46);
+        this.trap(PDP11.TRAP.BUS_ERROR, PDP11.REASON.HALT);
     } else {
         this.runState = 3;
         this.endBurst();
@@ -1115,7 +1131,7 @@ PDP11.opINCB = function(opCode)
  */
 PDP11.opIOT = function(opCode)
 {
-    this.trap(PDP11.TRAP.IOT, 8);
+    this.trap(PDP11.TRAP.IOT, PDP11.REASON.IOT);
     this.nStepCycles -= 1;
 };
 
@@ -1548,7 +1564,7 @@ PDP11.opSXT = function(opCode)
  */
 PDP11.opTRAP = function(opCode)
 {
-    this.trap(PDP11.TRAP.TRAP, 4);
+    this.trap(PDP11.TRAP.TRAP, PDP11.REASON.TRAP);
     this.nStepCycles -= 1;
 };
 
@@ -1612,18 +1628,7 @@ PDP11.opXOR = function(opCode)
  */
 PDP11.opUndefined = function(opCode)
 {
-    this.trap(PDP11.TRAP.RESERVED, 48);
-};
-
-/**
- * op1170(opCode)
- *
- * @this {CPUStatePDP11}
- * @param {number} opCode
- */
-PDP11.op1170 = function(opCode)
-{
-    PDP11.aOpsXnnn_1170[opCode >> 12].call(this, opCode);
+    this.trap(PDP11.TRAP.RESERVED, PDP11.REASON.RESERVED);
 };
 
 /**
@@ -1800,6 +1805,17 @@ PDP11.op8CXn_1170 = function(opCode)
 PDP11.op8DXn_1170 = function(opCode)
 {
     PDP11.aOps8DXn_1170[(opCode >> 6) & 0x3].call(this, opCode);
+};
+
+/**
+ * op1170(opCode)
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} opCode
+ */
+PDP11.op1170 = function(opCode)
+{
+    PDP11.aOpsXnnn_1170[opCode >> 12].call(this, opCode);
 };
 
 PDP11.aOpsXnnn_1170 = [

@@ -218,6 +218,26 @@ var PDP11 = {
         PIRQ:       0xA0,       // 240  PIRQ, program interrupt request
         MMU_FAULT:  0xA8        // 250  MMU aborts and traps
     },
+    REASON: {
+        BPT:        1,
+        EMT:        2,
+        HALT:       3,
+        IOT:        4,
+        TRAP:       5,
+        RESERVED:   6,
+        ODDMEMADDR: 22,
+        NOMEMORY:   24,
+        ODDMMUADDR: 26,
+        MAPERROR:   28,
+        PUSHERROR:  32,
+        NOREGADDR:  34,
+        STACKMODE1: 36,
+        STACKERROR: 38,
+        INTERRUPT:  44,
+        TRAPMMU:    52,
+        TRAPSP:     54,
+        TRAPTF:     56
+    },
     /*
      * Internal memory access flags
      */
@@ -366,11 +386,12 @@ var PDP11 = {
 
         MMR3:       0o172516,   // 772516   17772516
 
-        XBUF:       0o177566,   //                                  Console Terminal: Transmitter Data Buffer Register
-        XCSR:       0o177564,   //                                  Console Terminal: Transmitter Status Register
-        RBUF:       0o177562,   //                                  Console Terminal: Receiver Data Buffer Register
-        RCSR:       0o177560,   //                                  Console Terminal: Receiver Status Register
         LKS:        0o177546,   //                                  KW11-L Clock Status
+
+        RCSR:       0o177560,   //                                  Console Terminal: Receiver Status Register
+        RBUF:       0o177562,   //                                  Console Terminal: Receiver Data Buffer Register
+        XCSR:       0o177564,   //                                  Console Terminal: Transmitter Status Register
+        XBUF:       0o177566,   //                                  Console Terminal: Transmitter Data Buffer Register
         DISPLAY:    0o177570,   //                                  Console Switch and Display
 
         MMR0:       0o177572,   // 777572   17777572

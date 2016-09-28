@@ -263,9 +263,33 @@ DevicePDP11.prototype.writeMMR0 = function(data, addr)
     var idx = 4;
     data = this.cpu.setMMR0(data);
     if (data & PDP11.MMR0.ENABLED | PDP11.MMR0.DSTMODE) {
-        idx = (this.cpu.MMR3 & PDP11.MMR3.MMU_22BIT)? 1 : 2;
+        idx = (this.cpu.regMMR3 & PDP11.MMR3.MMU_22BIT)? 1 : 2;
     }
     this.display.misc = (this.display.misc & ~7) | idx;
+};
+
+/**
+ * readRCSR(addr)
+ *
+ * @this {DevicePDP11}
+ * @param {number} addr (eg, PDP11.UNIBUS.RCSR or 177560)
+ * @return {number}
+ */
+DevicePDP11.prototype.readRCSR = function(addr)
+{
+    return this.tty.rcsr;
+};
+
+/**
+ * writeRCSR(data, addr)
+ *
+ * @this {DevicePDP11}
+ * @param {number} data
+ * @param {number} addr (eg, PDP11.UNIBUS.RCSR or 177560)
+ */
+DevicePDP11.prototype.writeRCSR = function(data, addr)
+{
+    this.tty.rcsr = (this.tty.rcsr & 0x80) | (data & ~0x80);
 };
 
 /**
@@ -1090,26 +1114,26 @@ DevicePDP11.prototype.access = function(physicalAddress, data, byteFlag)
             var kw11 = this.kw11;
             switch (physicalAddress & ~1) {
                 case 0x3FFF7E: /*017777576*/ // MMR2
-                    result = this.insertData(cpu.MMR2, physicalAddress, data, byteFlag);
-                    if (result >= 0) cpu.MMR2 = result;
+                    result = this.insertData(cpu.regMMR2, physicalAddress, data, byteFlag);
+                    if (result >= 0) cpu.regMMR2 = result;
                     break;
                 case 0x3FFF7C: /*017777574*/ // MMR1
-                    result = cpu.MMR1;
+                    result = cpu.regMMR1;
                     if (result & 0xff00) result = ((result << 8) | (result >> 8)) & 0xffff;
                     break;
                 // case 0x3FFF7A: /*017777572*/ // MMR0
-                //     cpu.MMR0 = (cpu.MMR0 & 0xf381) | (cpu.mmuLastMode << 5) | (cpu.mmuLastPage << 1);
+                //     cpu.regMMR0 = (cpu.regMMR0 & 0xf381) | (cpu.mmuLastMode << 5) | (cpu.mmuLastPage << 1);
                 //     if (data < 0) {
-                //         result = cpu.MMR0;
+                //         result = cpu.regMMR0;
                 //     } else {
-                //         result = this.insertData(cpu.MMR0, physicalAddress, data, byteFlag);
+                //         result = this.insertData(cpu.regMMR0, physicalAddress, data, byteFlag);
                 //         if (result >= 0) {
-                //             cpu.MMR0 = result &= 0xf381;
+                //             cpu.regMMR0 = result &= 0xf381;
                 //             cpu.mmuLastMode = (result >> 5) & 3;
                 //             cpu.mmuLastPage = (result >> 1) & 0xf;
                 //             if (result & 0x101) {
                 //                 idx = 2; // 18 bit
-                //                 if (cpu.MMR3 & 0x10) idx = 1; // 22 bit
+                //                 if (cpu.regMMR3 & 0x10) idx = 1; // 22 bit
                 //                 if (result & 0x1) {
                 //                     cpu.mmuEnable = PDP11.ACCESS.READ | PDP11.ACCESS.WRITE;
                 //                 } else {
@@ -1421,18 +1445,18 @@ DevicePDP11.prototype.access = function(physicalAddress, data, byteFlag)
             switch (physicalAddress & ~1) {
                 case 0x3FF54E: /*017772516*/ // MMR3 - UB 22 x K S U
                     if (data < 0) {
-                        result = cpu.MMR3;
+                        result = cpu.regMMR3;
                     } else {
-                        result = this.insertData(cpu.MMR3, physicalAddress, data, byteFlag);
+                        result = this.insertData(cpu.regMMR3, physicalAddress, data, byteFlag);
                         if (result >= 0) {
                             if (cpu.cpuType !== 70) result &= ~0x30; // don't allow 11/45 to do 22 bit or use unibus map
-                            cpu.MMR3 = result;
+                            cpu.regMMR3 = result;
                             cpu.mmuMask[0] = (result & 4 ? 0xf : 0x7);
                             cpu.mmuMask[1] = (result & 2 ? 0xf : 0x7);
                             cpu.mmuMask[3] = (result & 1 ? 0xf : 0x7);
                             if (cpu.mmuEnable) {
                                 idx = 2; // 18 bit
-                                if (cpu.MMR3 & 0x10) idx = 1; // 22 bit
+                                if (cpu.regMMR3 & 0x10) idx = 1; // 22 bit
                                 this.display.misc = (this.display.misc & ~7) | idx;
                             }
                         }
@@ -1514,10 +1538,11 @@ DevicePDP11.prototype.access = function(physicalAddress, data, byteFlag)
  * ES6 ALERT: As you can see below, I've finally started using computed property names.
  */
 DevicePDP11.UNIBUS_TABLE = {
-    [PDP11.UNIBUS.LKS]:     [null, null, DevicePDP11.prototype.readLKS,     DevicePDP11.prototype.writeLKS],
-    [PDP11.UNIBUS.MMR0]:    [null, null, DevicePDP11.prototype.readMMR0,    DevicePDP11.prototype.writeMMR0],
-    [PDP11.UNIBUS.XCSR]:    [null, null, DevicePDP11.prototype.readXCSR,    DevicePDP11.prototype.writeXCSR],
-    [PDP11.UNIBUS.PSW]:     [null, null, DevicePDP11.prototype.readPSW,     DevicePDP11.prototype.writePSW]
+    [PDP11.UNIBUS.LKS]:     /* 177546 */    [null, null, DevicePDP11.prototype.readLKS,     DevicePDP11.prototype.writeLKS],
+    [PDP11.UNIBUS.RCSR]:    /* 177560 */    [null, null, DevicePDP11.prototype.readRCSR,    DevicePDP11.prototype.writeRCSR],
+    [PDP11.UNIBUS.XCSR]:    /* 177564 */    [null, null, DevicePDP11.prototype.readXCSR,    DevicePDP11.prototype.writeXCSR],
+    [PDP11.UNIBUS.MMR0]:    /* 177572 */    [null, null, DevicePDP11.prototype.readMMR0,    DevicePDP11.prototype.writeMMR0],
+    [PDP11.UNIBUS.PSW]:     /* 177776 */    [null, null, DevicePDP11.prototype.readPSW,     DevicePDP11.prototype.writePSW]
 };
 
 /**
