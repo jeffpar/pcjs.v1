@@ -1546,11 +1546,10 @@ CPUStatePDP11.prototype.writeByteByMode = function(addressMode, data, writeFlags
  *
  * @this {CPUStatePDP11}
  * @param {number} opCode
- * @return {number} (PC +/- the word delta specified in the opCode)
  */
 CPUStatePDP11.prototype.branch = function(opCode)
 {
-    return (this.regsGen[PDP11.REG.PC] + ((opCode << 24) >> 23)) & 0xffff;
+    this.setPC(this.regsGen[PDP11.REG.PC] + ((opCode << 24) >> 23));
 };
 
 /**

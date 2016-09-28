@@ -587,7 +587,7 @@ PDP11.opASRB = function(opCode)
  */
 PDP11.opBCC = function(opCode)
 {
-    if (!this.getCF()) this.regsGen[7] = this.branch(opCode);
+    if (!this.getCF()) this.branch(opCode);
     this.nStepCycles -= 1;
 };
 
@@ -599,7 +599,7 @@ PDP11.opBCC = function(opCode)
  */
 PDP11.opBCS = function(opCode)
 {
-    if (this.getCF()) this.regsGen[7] = this.branch(opCode);
+    if (this.getCF()) this.branch(opCode);
     this.nStepCycles -= 1;
 };
 
@@ -683,7 +683,7 @@ PDP11.opBITB = function(opCode)
  */
 PDP11.opBEQ = function(opCode)
 {
-    if (this.getZF()) this.regsGen[7] = this.branch(opCode);
+    if (this.getZF()) this.branch(opCode);
     this.nStepCycles -= 1;
 };
 
@@ -695,7 +695,7 @@ PDP11.opBEQ = function(opCode)
  */
 PDP11.opBGE = function(opCode)
 {
-    if (!this.getNF() == !this.getVF()) this.regsGen[7] = this.branch(opCode);
+    if (!this.getNF() == !this.getVF()) this.branch(opCode);
     this.nStepCycles -= 1;
 };
 
@@ -707,7 +707,7 @@ PDP11.opBGE = function(opCode)
  */
 PDP11.opBGT = function(opCode)
 {
-    if (!this.getZF() && (!this.getNF() == !this.getVF())) this.regsGen[7] = this.branch(opCode);
+    if (!this.getZF() && (!this.getNF() == !this.getVF())) this.branch(opCode);
     this.nStepCycles -= 1;
 };
 
@@ -719,7 +719,7 @@ PDP11.opBGT = function(opCode)
  */
 PDP11.opBHI = function(opCode)
 {
-    if (!this.getCF() && !this.getZF()) this.regsGen[7] = this.branch(opCode);
+    if (!this.getCF() && !this.getZF()) this.branch(opCode);
     this.nStepCycles -= 1;
 };
 
@@ -731,7 +731,7 @@ PDP11.opBHI = function(opCode)
  */
 PDP11.opBLE = function(opCode)
 {
-    if (this.getZF() || (!this.getNF() != !this.getVF())) this.regsGen[7] = this.branch(opCode);
+    if (this.getZF() || (!this.getNF() != !this.getVF())) this.branch(opCode);
     this.nStepCycles -= 1;
 };
 
@@ -743,7 +743,7 @@ PDP11.opBLE = function(opCode)
  */
 PDP11.opBLOS = function(opCode)
 {
-    if (this.getCF() || this.getZF()) this.regsGen[7] = this.branch(opCode);
+    if (this.getCF() || this.getZF()) this.branch(opCode);
     this.nStepCycles -= 1;
 };
 
@@ -755,7 +755,7 @@ PDP11.opBLOS = function(opCode)
  */
 PDP11.opBLT = function(opCode)
 {
-    if (!this.getNF() != !this.getVF()) this.regsGen[7] = this.branch(opCode);
+    if (!this.getNF() != !this.getVF()) this.branch(opCode);
     this.nStepCycles -= 1;
 };
 
@@ -767,7 +767,7 @@ PDP11.opBLT = function(opCode)
  */
 PDP11.opBMI = function(opCode)
 {
-    if (this.getNF()) this.regsGen[7] = this.branch(opCode);
+    if (this.getNF()) this.branch(opCode);
     this.nStepCycles -= 1;
 };
 
@@ -779,7 +779,7 @@ PDP11.opBMI = function(opCode)
  */
 PDP11.opBNE = function(opCode)
 {
-    if (!this.getZF()) this.regsGen[7] = this.branch(opCode);
+    if (!this.getZF()) this.branch(opCode);
     this.nStepCycles -= 1;
 };
 
@@ -791,7 +791,7 @@ PDP11.opBNE = function(opCode)
  */
 PDP11.opBPL = function(opCode)
 {
-    if (!this.getNF()) this.regsGen[7] = this.branch(opCode);
+    if (!this.getNF()) this.branch(opCode);
     this.nStepCycles -= 1;
 };
 
@@ -803,10 +803,7 @@ PDP11.opBPL = function(opCode)
  */
 PDP11.opBPT = function(opCode)
 {
-    /*
-     * TODO: Implement
-     */
-    this.regOp = -1;
+    this.trap(PDP11.TRAP.BREAKPOINT, 6);
     this.nStepCycles -= 1;
 };
 
@@ -818,7 +815,7 @@ PDP11.opBPT = function(opCode)
  */
 PDP11.opBR = function(opCode)
 {
-    this.regsGen[7] = this.branch(opCode);
+    this.branch(opCode);
     this.nStepCycles -= 1;
 };
 
@@ -830,7 +827,7 @@ PDP11.opBR = function(opCode)
  */
 PDP11.opBVC = function(opCode)
 {
-    if (!this.getVF()) this.regsGen[7] = this.branch(opCode);
+    if (!this.getVF()) this.branch(opCode);
     this.nStepCycles -= 1;
 };
 
@@ -842,7 +839,7 @@ PDP11.opBVC = function(opCode)
  */
 PDP11.opBVS = function(opCode)
 {
-    if (this.getVF()) this.regsGen[7] = this.branch(opCode);
+    if (this.getVF()) this.branch(opCode);
     this.nStepCycles -= 1;
 };
 
@@ -1118,10 +1115,7 @@ PDP11.opINCB = function(opCode)
  */
 PDP11.opIOT = function(opCode)
 {
-    /*
-     * TODO: Implement
-     */
-    this.regOp = -1;
+    this.trap(PDP11.TRAP.IOT, 8);
     this.nStepCycles -= 1;
 };
 
@@ -1149,10 +1143,11 @@ PDP11.opJSR = function(opCode)
  */
 PDP11.opMARK = function(opCode)
 {
-    /*
-     * TODO: Implement
-     */
-    this.regOp = -1;
+    var addr = (this.regsGen[7] + ((opCode & 0x3F) << 1)) & 0xffff;
+    var src = this.readWordFromVirtual(addr | 0x10000);
+    this.setPC(this.regsGen[5]);
+    this.setSP(addr + 2);
+    this.regsGen[5] = src;
     this.nStepCycles -= 1;
 };
 
@@ -1164,10 +1159,22 @@ PDP11.opMARK = function(opCode)
  */
 PDP11.opMFPD = function(opCode)
 {
-    /*
-     * TODO: Implement
-     */
-    this.regOp = -1;
+    var src;
+    if (!(opCode & PDP11.OPMODE.MASK)) {
+        var reg = opCode & 7;
+        if (reg != 6 || ((this.regPSW >> 2) & PDP11.PSW.PMODE) === (this.regPSW & PDP11.PSW.PMODE)) {
+            src = this.regsGen[reg];
+        } else {
+            src = this.regsAltStack[(this.regPSW >> 12) & 3];
+        }
+    } else {
+        var addr = this.getVirtualByMode(opCode, PDP11.ACCESS.WORD);
+        this.mmuMode = (this.regPSW >> 12) & 3;
+        src = this.readWordFromVirtual(addr | 0x10000);
+        this.mmuMode = (this.regPSW >> 14) & 3;
+    }
+    this.pushWord(src);
+    this.updateNZFlags(src);
     this.nStepCycles -= 1;
 };
 
@@ -1543,14 +1550,14 @@ PDP11.opSEx = function(opCode)
  * opSOB(opCode)
  *
  * @this {CPUStatePDP11}
- * @param {number} opCode
+ * @param {number} opCode (077Rnn)
  */
 PDP11.opSOB = function(opCode)
 {
-    /*
-     * TODO: Implement
-     */
-    this.regOp = -1;
+    var reg = (opCode & PDP11.SRCMODE.REG) >> PDP11.SRCMODE.SHIFT;
+    if ((this.regsGen[reg] = ((this.regsGen[reg] - 1) & 0xffff))) {
+        this.setPC(this.regsGen[7] - ((opCode & 0x3F) << 1));
+    }
     this.nStepCycles -= 1;
 };
 
