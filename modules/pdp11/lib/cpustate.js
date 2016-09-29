@@ -194,8 +194,8 @@ CPUStatePDP11.prototype.resetRegs = function()
     /**
      * @type {Array.<InterruptEvent>}
      */
-    this.interruptQueue = [];   // List of interrupts pending
-    this.priorityReview = 2;    // flag to mark if we need to check priority change
+    this.interruptQueue = [];
+    this.opFlags |= PDP11.OPFLAG.INTQ;
     this.initMemoryAccess();
 };
 
@@ -511,8 +511,19 @@ CPUStatePDP11.prototype.getPC = function()
 CPUStatePDP11.prototype.getPCWord = function()
 {
     var data = this.readWordFromVirtual(this.regsGen[7]);
-    this.regsGen[7] = (this.regsGen[7] + 2) & 0xffff;
+    this.advancePC(2);
     return data;
+};
+
+/**
+ * advancePC(off)
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} off
+ */
+CPUStatePDP11.prototype.advancePC = function(off)
+{
+    this.regsGen[7] = (this.regsGen[7] + off) & 0xffff;
 };
 
 /**
@@ -601,7 +612,7 @@ CPUStatePDP11.prototype.interrupt = function(delay, priority, vector, callback)
             "callback": callback
         });
     }
-    this.priorityReview = 2;
+    this.opFlags |= PDP11.OPFLAG.INTQ;
 };
 
 /**
@@ -611,16 +622,14 @@ CPUStatePDP11.prototype.interrupt = function(delay, priority, vector, callback)
  */
 CPUStatePDP11.prototype.checkInterruptQueue = function()
 {
-    if (this.priorityReview == 1) {
-        this.priorityReview = 2;    // SPL delay
-    } else {
-        this.priorityReview = 0;
+    if (this.opFlags & PDP11.OPFLAG.INTQ) {
+        this.opFlags &= ~PDP11.OPFLAG.INTQ;
         var interruptEvent = null;
         var savePSW = this.regPIR & 0xe0;
         for (var i = this.interruptQueue.length; --i >= 0;) {
             if (this.interruptQueue[i].delay > 0) {
                 this.interruptQueue[i].delay--;
-                this.priorityReview = 2;
+                this.opFlags |= PDP11.OPFLAG.INTQ;
                 break;          // Decrement only one delay 'difference' per cycle
             }
             //if (typeof this.interruptQueue[i].callback !== "undefined") {
@@ -639,13 +648,23 @@ CPUStatePDP11.prototype.checkInterruptQueue = function()
             }
         }
         if (savePSW > (this.regPSW & 0xe0)) {
-            this.opFlags &= ~PDP11.OPFLAG.WAIT;
+            if (this.opFlags & PDP11.OPFLAG.WAIT) {
+                this.advancePC(2);
+                this.opFlags &= ~PDP11.OPFLAG.WAIT;
+            }
             if (!interruptEvent) {
                 this.trap(PDP11.TRAP.PIRQ, PDP11.REASON.INTERRUPT);
             } else {
                 this.trap(interruptEvent.vector, PDP11.REASON.INTERRUPT);
             }
         }
+    }
+    else if (this.opFlags & PDP11.OPFLAG.INTQ_SPL) {
+        /*
+         * We know that INTQ (bit 1) is clear, so since INTQ_SPL (bit 0) is set, incrementing opFlags
+         * will transform INTQ_SPL into INTQ, without affecting any other (higher) bits.
+         */
+        this.opFlags++;
     }
 };
 
@@ -708,9 +727,9 @@ CPUStatePDP11.prototype.setPSW = function(newPSW)
         this.regsGen[6] = this.regsAltStack[this.mmuMode];
     }
     /*
-     * Trigger check of priority levels
+     * Trigger a call to checkInterruptQueue()
      */
-    this.priorityReview = 2;
+    this.opFlags |= PDP11.OPFLAG.INTQ;
     this.regPSW = newPSW;
 };
 
@@ -911,7 +930,7 @@ CPUStatePDP11.prototype.trap = function(vector, reason)
 
     this.pushWord(this.trapPSW);
     this.pushWord(this.regsGen[7]);
-    this.regsGen[7] = newPC;
+    this.setPC(newPC);
 
     this.opFlags &= ~PDP11.OPFLAG.TRAP_MASK;    // lose interest in traps after an abort
     this.trapPSW = -1;                          // reset flag that we have a trap within a trap
@@ -1704,30 +1723,14 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                 this.opFlags &= ~PDP11.OPFLAG.TRAP_MASK;
             }
             /*
-             * If we're in WAIT state, see if any interrupts are ready to kick us out of that state.
+             * If we're in the INTQ or WAIT state, see if any interrupts can kick us out of that state.
+             *
+             * By also requiring nMinCycles to be non-zero before checking the interrupt queue, we avoid
+             * interrupting the natural flow of instructions whenever the Debugger is stepping through code.
              */
-            if (this.opFlags & PDP11.OPFLAG.WAIT) {
-                /*
-                 * If checkInterruptQueue() found an interrupt, it will have dispatched it AND cleared
-                 * the WAIT flag; it won't return, so we're done.
-                 */
+            if ((this.opFlags & (PDP11.OPFLAG.INTQ_SPL | PDP11.OPFLAG.INTQ | PDP11.OPFLAG.WAIT)) /*&& nMinCycles*/) {
                 this.checkInterruptQueue();
-                /*
-                 * Since checkInterruptQueue() returned, we need to rewind the PC to the WAIT instruction;
-                 * we're going to play it safe and turn off the WAIT flag, because assuming the WAIT instruction
-                 * is still there, it will automatically re-enable it.  TODO: Assert that the WAIT is still there.
-                 */
-                this.opFlags &= ~PDP11.OPFLAG.WAIT;
-                this.regsGen[7] = (this.regsGen[7] - 2) & 0xffff;
             }
-        }
-
-        /*
-         * By requiring nMinCycles to be non-zero before checking the interrupt queue, we avoid
-         * interrupting the natural flow of instructions when the Debugger is stepping through code.
-         */
-        if (nMinCycles && this.priorityReview) {
-            this.checkInterruptQueue();
         }
 
         if (!(this.regMMR0 & PDP11.MMR0.ABORT)) {
@@ -1736,10 +1739,10 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
         }
 
         /*
-         * Snapshot the TF bit in opFlags, while simultaneously clearing all other opFlags (except WAIT);
+         * Snapshot the TF bit in opFlags, while clearing all other opFlags (except those in PRESERVE);
          * we'll check the TRAP_TF bit in opFlags when we come back around for another opcode.
          */
-        this.opFlags = (this.opFlags & PDP11.OPFLAG.WAIT) | (this.regPSW & PDP11.PSW.TF);
+        this.opFlags = (this.opFlags & PDP11.OPFLAG.PRESERVE) | (this.regPSW & PDP11.PSW.TF);
 
         this.decode(this.getPCWord());
 

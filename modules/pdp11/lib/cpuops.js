@@ -1527,7 +1527,7 @@ PDP11.opSPL = function(opCode)
     this.assert(opCode & 0x08);
     if (!(this.regPSW & PDP11.PSW.CMODE)) {
         this.regPSW = (this.regPSW & ~(PDP11.PSW.UNUSED | PDP11.PSW.PRI)) | ((opCode & 0x7) << PDP11.PSW.SHIFT.PRI);
-        this.priorityReview = 1;
+        this.opFlags |= PDP11.OPFLAG.INTQ_SPL;
     }
     this.nStepCycles -= 1;
 };
@@ -1618,13 +1618,21 @@ PDP11.opWAIT = function(opCode)
      * However, the PCjs approach requires the CPU to continue running.  One simple solution to this dilemma:
      *
      *      1) opWAIT() sets a new opFlags bit (OPFLAG.WAIT)
-     *      2) When stepCPU() sees OPFLAG.WAIT, it checks for interrupts; if none, it rewinds the PC back to the WAIT
+     *      2) Rewind PC back to WAIT
+     *      3) Whenever stepCPU() detects OPFLAG.WAIT, call checkInterruptQueue()
+     *      4) If checkInterruptQueue() detects an interrupt, advance PC past WAIT before dispatching it
+     *
+     * Technically, the PC is already exactly where it's supposed to be, so why are we wasting time with steps
+     * 2 and 4?  It's largely for the Debugger's sake, so that as long as execution is "blocked" by a WAIT, that's
+     * what you'll see in the Debugger.  I could make those steps conditioned on the presence of the Debugger,
+     * but I feel it's better to keep all code paths the same.
      *
      * NOTE: It's almost always a bad idea to add more checks to the inner stepCPU() loop, because every additional
      * check can have a measurable (negative) impact on performance.  Which is why it's important to use opFlags bits
      * whenever possible, since we can test for multiple (up to 32) exceptional conditions with a single check.
      */
     this.opFlags |= PDP11.OPFLAG.WAIT;
+    this.advancePC(-2);
     this.nStepCycles -= 1;
 };
 

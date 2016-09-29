@@ -1269,8 +1269,10 @@ if (DEBUGGER) {
          * For our typically tiny bursts (usually single instructions), mimic what runCPU() does.
          */
         try {
+            nCycles = this.cpu.getBurstCycles(nCycles);
             var nCyclesStep = this.cpu.stepCPU(nCycles);
             if (nCyclesStep > 0) {
+                this.cpu.updateTimers(nCycles);
                 this.nCycles += nCyclesStep;
                 this.cpu.addCycles(nCyclesStep, true);
                 this.cpu.updateChecksum(nCyclesStep);
@@ -3460,7 +3462,8 @@ if (DEBUGGER) {
      *
      * The "tc" command interprets the count as a number of cycles rather than instructions,
      * allowing you to quickly execute large chunks of instructions with a single command; it
-     * doesn't display anything until the the chunk has finished.
+     * doesn't display anything until the the chunk has finished.  "tc 1" is also a useful
+     * command in that it doesn't inhibit interrupts like "t" or "tr" does.
      *
      * However, generally a more useful command is "bn", which allows you to break after some
      * number of instructions have been executed (as opposed to some number of cycles).

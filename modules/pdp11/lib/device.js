@@ -994,7 +994,7 @@ DevicePDP11.prototype.access = function(physicalAddress, data, byteFlag)
                             } while (idx >>= 1);
                         }
                         cpu.regPIR = result;
-                        cpu.priorityReview = 2;
+                        cpu.opFlags |= PDP11.OPFLAG.INTQ;
                     }
                     break;
                 case 0x3FFFF6: /*017777766*/ // CPU error

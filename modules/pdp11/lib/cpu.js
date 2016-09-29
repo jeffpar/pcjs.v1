@@ -1092,7 +1092,9 @@ CPUPDP11.prototype.runCPU = function()
             }
 
             /*
-             * nCycles is how many cycles stepCPU() actually ran (nBurstCycles less any remaining nStepCycles).
+             * nCycles is how many cycles stepCPU() actually ran (nBurstCycles less any remaining nStepCycles);
+             * that calculation matches the return value from stepCPU(), but since it may have thrown an exception,
+             * we can't rely on it.
              */
             var nCycles = this.nBurstCycles - this.nStepCycles;
 
