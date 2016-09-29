@@ -165,7 +165,6 @@ CPUStatePDP11.prototype.initRegs = function()
     this.controlReg = [         // various control registers we don't really care about
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     ];
-    this.regOp = -1;            // current opcode
     this.opFlags = 0;
     this.cpuType = 70;
     this.trapPSW = -1;
@@ -505,6 +504,19 @@ CPUStatePDP11.prototype.getPC = function()
 };
 
 /**
+ * getPCWord()
+ *
+ * @this {CPUStatePDP11}
+ * @return {number}
+ */
+CPUStatePDP11.prototype.getPCWord = function()
+{
+    var data = this.readWordFromVirtual(this.regsGen[7]);
+    this.regsGen[7] = (this.regsGen[7] + 2) & 0xffff;
+    return data;
+};
+
+/**
  * setPC()
  *
  * @this {CPUStatePDP11}
@@ -729,27 +741,9 @@ CPUStatePDP11.prototype.setPSW = function(newPSW)
 };
 
 /**
- * updateNZCFlags(result, overflow)
- *
- * NOTE: The V flag is simply zeroed, it is not "updated" based on the result;
- * however, a specific overflow value may be provided (used by NEG, for example).
- *
- * @this {CPUStatePDP11}
- * @param {number} result
- * @param {number} [overflow]
- */
-CPUStatePDP11.prototype.updateNZCFlags = function(result, overflow)
-{
-    if (!(this.opFlags & PDP11.OPFLAG.SKIP_FLAGS)) {
-        this.flagN = this.flagZ = this.flagC = result;
-        this.flagV = overflow || 0;
-    }
-};
-
-/**
  * updateNZFlags(result)
  *
- * NOTE: The V flag is simply zeroed, it is not "updated" based on the result.
+ * NOTE: The V flag is simply zeroed, and the C flag is unchanged.
  *
  * @this {CPUStatePDP11}
  * @param {number} result
@@ -759,6 +753,23 @@ CPUStatePDP11.prototype.updateNZFlags = function(result)
     if (!(this.opFlags & PDP11.OPFLAG.SKIP_FLAGS)) {
         this.flagN = this.flagZ = result;
         this.flagV = 0;
+    }
+};
+
+/**
+ * updateAllFlags(result, overflow)
+ *
+ * NOTE: The V flag is simply zeroed, unless a specific value is provided (eg, by NEG).
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} result
+ * @param {number} [overflow]
+ */
+CPUStatePDP11.prototype.updateAllFlags = function(result, overflow)
+{
+    if (!(this.opFlags & PDP11.OPFLAG.SKIP_FLAGS)) {
+        this.flagN = this.flagZ = this.flagC = result;
+        this.flagV = overflow || 0;
     }
 };
 
@@ -815,12 +826,26 @@ CPUStatePDP11.prototype.updateIncFlags = function(result, dst)
 };
 
 /**
- * updateLogFlags(result)
+ * updateMulFlags(result)
  *
  * @this {CPUStatePDP11}
  * @param {number} result
  */
-CPUStatePDP11.prototype.updateLogFlags = function(result)
+CPUStatePDP11.prototype.updateMulFlags = function(result)
+{
+    this.flagN = result >> 16;
+    this.flagZ = this.flagN | result;
+    this.flagV = 0;
+    this.flagC = (result < -32768 || result > 32767)? 0x10000 : 0;
+};
+
+/**
+ * updateShiftFlags(result)
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} result
+ */
+CPUStatePDP11.prototype.updateShiftFlags = function(result)
 {
     if (!(this.opFlags & PDP11.OPFLAG.SKIP_FLAGS)) {
         this.flagN = this.flagZ = this.flagC = result;
@@ -913,7 +938,7 @@ CPUStatePDP11.prototype.trap = function(vector, reason)
 
     if (DEBUG && this.dbg) {
         if (this.messageEnabled(MessagesPDP11.TRAP)) {
-            this.printMessage("trap to vector " + this.dbg.toBase(vector, 0, true) + (reason? " (reason " + reason + ")" : ""), MessagesPDP11.TRAP, true);
+            this.printMessage("trap to vector " + this.dbg.toStrBase(vector, 0, true) + (reason? " (reason " + reason + ")" : ""), MessagesPDP11.TRAP, true);
         }
     }
 
@@ -1319,9 +1344,7 @@ CPUStatePDP11.prototype.getVirtualByMode = function(addressMode, accessFlags)
         stepSize = 2;
         virtualAddress = this.regsGen[reg];
         if (reg !== 7) virtualAddress |= addrDSpace;
-        if ((virtualAddress = this.readWordFromVirtual(virtualAddress)) < 0) {
-            return virtualAddress;
-        }
+        virtualAddress = this.readWordFromVirtual(virtualAddress);
         // if (reg === 7) LOG_ADDRESS(virtualAddress); // @#n not operational
         virtualAddress |= addrDSpace;
         break;
@@ -1345,44 +1368,25 @@ CPUStatePDP11.prototype.getVirtualByMode = function(addressMode, accessFlags)
         stepSize = -2;
         virtualAddress = (this.regsGen[reg] - 2) & 0xffff;
         if (reg !== 7) virtualAddress |= addrDSpace;
-        if ((virtualAddress = this.readWordFromVirtual(virtualAddress)) < 0) {
-            return virtualAddress;
-        }
-        virtualAddress |= addrDSpace;
+        virtualAddress = this.readWordFromVirtual(virtualAddress) | addrDSpace;
         break;
 
     /*
      * Mode 6: d(R)
      */
     case 6:
-        if ((virtualAddress = this.readWordFromVirtual(this.regsGen[7])) < 0) {
-            return virtualAddress;
-        }
-        this.regsGen[7] = (this.regsGen[7] + 2) & 0xffff;
-        if (reg < 7) {
-            virtualAddress = (virtualAddress + this.regsGen[reg]) & 0xffff;
-        } else {
-            virtualAddress = (virtualAddress + this.regsGen[reg]) & 0xffff;
-        }
-        return virtualAddress | addrDSpace;
+        virtualAddress = this.getPCWord();
+        virtualAddress = ((virtualAddress + this.regsGen[reg]) & 0xffff) | addrDSpace;
+        return virtualAddress;
 
     /*
      * Mode 7: @d(R)
      */
     case 7:
-        if ((virtualAddress = this.readWordFromVirtual(this.regsGen[7])) < 0) {
-            return virtualAddress;
-        }
-        this.regsGen[7] = (this.regsGen[7] + 2) & 0xffff;
-        if (reg < 7) {
-            virtualAddress = (virtualAddress + this.regsGen[reg]) & 0xffff;
-        } else {
-            virtualAddress = (virtualAddress + this.regsGen[reg]) & 0xffff;
-        }
-        if ((virtualAddress = this.readWordFromVirtual(virtualAddress | PDP11.ACCESS.DSPACE)) < 0) {
-            return virtualAddress;
-        }
-        return virtualAddress | addrDSpace;
+        virtualAddress = this.getPCWord();
+        virtualAddress = (virtualAddress + this.regsGen[reg]) & 0xffff;
+        virtualAddress = this.readWordFromVirtual(virtualAddress | PDP11.ACCESS.DSPACE) | addrDSpace;
+        return virtualAddress;
     }
 
     this.regsGen[reg] = (this.regsGen[reg] + stepSize) & 0xffff;
@@ -1727,7 +1731,7 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
             this.checkInterruptQueue();
         }
 
-        if (!(this.regMMR0 & 0xe000)) {
+        if (!(this.regMMR0 & PDP11.MMR0.ABORT)) {
             this.regMMR1 = 0;
             this.regMMR2 = this.regsGen[7];
         }
@@ -1738,22 +1742,7 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
          */
         this.opFlags = this.regPSW & PDP11.PSW.TF;
 
-        /*
-         * TODO: Determine (later) if this.regOp is a useful (internal) register to maintain;
-         * perhaps it would alleviate lots of opCode parameter-passing.  In the meantime, we use
-         * it to detect if our new decode() function has processed (ie, "consumed") the opcode,
-         * by setting it to -1.  If it has, then we can skip the older opcode decode logic below.
-         */
-        var opCode = this.regOp = this.readWordFromVirtual(this.regsGen[7]);
-        if (opCode >= 0) this.regsGen[7] = (this.regsGen[7] + 2) & 0xffff;
-
-        this.decode(opCode);
-
-        if (DEBUG && this.regOp < 0) {
-            this.regsGen[7] = (this.regsGen[7] - 2) & 0xffff;
-            this.println("unimplemented");
-            break;
-        }
+        this.decode(this.getPCWord());
 
     } while (this.nStepCycles > 0);
 

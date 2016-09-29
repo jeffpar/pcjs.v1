@@ -281,7 +281,8 @@ var PDP11 = {
         TRAP_MMU:   0x1000,     // trap: MMU
         ABORT_RO:   0x2000,     // abort: read-only
         ABORT_PL:   0x4000,     // abort: page length
-        ABORT_NR:   0x8000      // abort: non-resident
+        ABORT_NR:   0x8000,     // abort: non-resident
+        ABORT:      0xE000
     },
     MMR1: {                     // general purpose auto-inc/auto-dec register
         REG1_NUM:   0x0007,

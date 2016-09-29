@@ -659,7 +659,7 @@ if (DEBUGGER) {
     };
 
     /**
-     * toBase(n, nBytes, fStripLeadingZeros)
+     * toStrBase(n, nBytes, fStripLeadingZeros)
      *
      * Use this instead of str.toHex() or str.toOct() to convert bytes/words to the Debugger's default base.
      *
@@ -669,7 +669,7 @@ if (DEBUGGER) {
      * @param {boolean} [fStripLeadingZeros]
      * @return {string}
      */
-    Debugger.prototype.toBase = function(n, nBytes, fStripLeadingZeros)
+    Debugger.prototype.toStrBase = function(n, nBytes, fStripLeadingZeros)
     {
         var s;
         switch(this.nBase) {

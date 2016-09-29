@@ -39,18 +39,19 @@ if (NODE) {
 
 /*
  * Decoding starts at the bottom of this file, in op1170().  The basic decoding approach is to
- * dispatch on the top 4 bits of the opcode, and if further decoding is required, then dispatch on
- * the next 4 bits, and so on (although some of the intermediate levels dispatch only on 2 bits).
+ * dispatch on the top 4 bits of the opcode, and if further decoding is required, the dispatched
+ * function will dispatch on the next 4 bits, and so on (although some of the intermediate levels
+ * dispatch only on 2 bits, which could also handled with a switch statement).
  *
  * Eventually, every opcode should end up either in an opXXX() function or opUndefined().  For
- * opcodes that perform a simple read and/or write operation, the entire functionality is handled
- * by the opXXX() function.  For opcodes that perform a more extensive read/modify/write operation
+ * opcodes that perform a simple read and/or write operation, the entire operation is handled by
+ * the opXXX() function.  For opcodes that perform a more extensive read/modify/write operation
  * (also known as an update operation), those opXXX() functions usually rely on a corresponding
  * fnXXX() helper function.
  *
  * For example, opADD() passes the helper function fnADD() to the appropriate update method.  This
  * allows the update method to perform the entire read/modify/write operation, because the modification
- * is handled by the helper function.
+ * is performed internally via the helper function.
  */
 
 /**
@@ -94,7 +95,7 @@ PDP11.fnADDB = function(src, dst)
 PDP11.fnASL = function(src, dst)
 {
     var result = dst << 1;
-    this.updateLogFlags(result);
+    this.updateShiftFlags(result);
     return result & 0xffff;
 };
 
@@ -109,7 +110,7 @@ PDP11.fnASL = function(src, dst)
 PDP11.fnASLB = function(src, dst)
 {
     var result = dst << 1;
-    this.updateLogFlags(result << 8);
+    this.updateShiftFlags(result << 8);
     return result & 0xff;
 };
 
@@ -124,7 +125,7 @@ PDP11.fnASLB = function(src, dst)
 PDP11.fnASR = function(src, dst)
 {
     var result = (dst & 0x8000) | (dst >> 1) | (dst << 16);
-    this.updateLogFlags(result);
+    this.updateShiftFlags(result);
     return result & 0xffff;
 };
 
@@ -139,7 +140,7 @@ PDP11.fnASR = function(src, dst)
 PDP11.fnASRB = function(src, dst)
 {
     var result = (dst & 0x800) | (dst >> 1) | (dst << 8);
-    this.updateLogFlags(result << 8);
+    this.updateShiftFlags(result << 8);
     return result & 0xff;
 };
 
@@ -214,7 +215,7 @@ PDP11.fnBISB = function(src, dst)
 PDP11.fnCOM = function(src, dst)
 {
     var result = ~dst | 0x10000;
-    this.updateNZCFlags(result);
+    this.updateAllFlags(result);
     return result & 0xffff;
 };
 
@@ -229,7 +230,7 @@ PDP11.fnCOM = function(src, dst)
 PDP11.fnCOMB = function(src, dst)
 {
     var result = ~dst | 0x100;
-    this.updateNZCFlags(result << 8);
+    this.updateAllFlags(result << 8);
     return result & 0xff;
 };
 
@@ -307,7 +308,7 @@ PDP11.fnNEG = function(src, dst)
     /*
      * If the sign bit of both dst and result are set, the original value must have been 0x8000, triggering overflow.
      */
-    this.updateNZCFlags(result, result & dst & 0x8000);
+    this.updateAllFlags(result, result & dst & 0x8000);
     return result & 0xffff;
 };
 
@@ -325,7 +326,7 @@ PDP11.fnNEGB = function(src, dst)
     /*
      * If the sign bit of both dst and result are set, the original value must have been 0x80, which triggers overflow.
      */
-    this.updateNZCFlags(result << 8, (result & dst & 0x80) << 8);
+    this.updateAllFlags(result << 8, (result & dst & 0x80) << 8);
     return result & 0xff;
 };
 
@@ -340,7 +341,7 @@ PDP11.fnNEGB = function(src, dst)
 PDP11.fnROL = function(src, dst)
 {
     var result = (dst << 1) | ((this.flagC >> 16) & 1);
-    this.updateLogFlags(result);
+    this.updateShiftFlags(result);
     return result & 0xffff;
 };
 
@@ -355,7 +356,7 @@ PDP11.fnROL = function(src, dst)
 PDP11.fnROLB = function(src, dst)
 {
     var result = (dst << 1) | ((this.flagC >> 16) & 1);
-    this.updateLogFlags(result << 8);
+    this.updateShiftFlags(result << 8);
     return result & 0xff;
 };
 
@@ -370,7 +371,7 @@ PDP11.fnROLB = function(src, dst)
 PDP11.fnROR = function(src, dst)
 {
     var result = (((this.flagC & 0x10000) | dst) >> 1) | (dst << 16);
-    this.updateLogFlags(result);
+    this.updateShiftFlags(result);
     return result & 0xffff;
 };
 
@@ -385,7 +386,7 @@ PDP11.fnROR = function(src, dst)
 PDP11.fnRORB = function(src, dst)
 {
     var result = ((((this.flagC & 0x10000) >> 8) | dst) >> 1) | (dst << 8);
-    this.updateLogFlags(result << 8);
+    this.updateShiftFlags(result << 8);
     return result & 0xff;
 };
 
@@ -867,7 +868,7 @@ PDP11.opBVS = function(opCode)
  */
 PDP11.opCLR = function(opCode)
 {
-    this.updateNZCFlags(this.writeWordByMode(opCode, 0));
+    this.updateAllFlags(this.writeWordByMode(opCode, 0));
     this.nStepCycles -= 1;
 };
 
@@ -879,7 +880,7 @@ PDP11.opCLR = function(opCode)
  */
 PDP11.opCLRB = function(opCode)
 {
-    this.updateNZCFlags(this.writeByteByMode(opCode, 0));
+    this.updateAllFlags(this.writeByteByMode(opCode, 0));
     this.nStepCycles -= 1;
 };
 
@@ -1040,6 +1041,9 @@ PDP11.opDECB = function(opCode)
  */
 PDP11.opDIV = function(opCode)
 {
+    /*
+     * TODO: Review and determine if flag updates can be encapsulated in an updateDivFlags() function.
+     */
     var src = this.readWordByMode(opCode);
     if (!src) {
         this.flagN = 0;         // NZVC
@@ -1159,7 +1163,7 @@ PDP11.opJSR = function(opCode)
  */
 PDP11.opMARK = function(opCode)
 {
-    var addr = (this.regsGen[7] + ((opCode & 0x3F) << 1)) & 0xffff;
+    var addr = (this.regsGen[PDP11.REG.PC] + ((opCode & 0x3F) << 1)) & 0xffff;
     var src = this.readWordFromVirtual(addr | 0x10000);
     this.setPC(this.regsGen[5]);
     this.setSP(addr + 2);
@@ -1264,10 +1268,7 @@ PDP11.opMUL = function(opCode)
     var result = ~~(src * dst);
     this.regsGen[reg] = (result >> 16) & 0xffff;
     this.regsGen[reg | 1] = result & 0xffff;
-    this.flagN = result >> 16;
-    this.flagZ = this.flagN | result;
-    this.flagV = 0;
-    this.flagC = (result < -32768 || result > 32767)? 0x10000 : 0;
+    this.updateMulFlags(result);
     this.nStepCycles -= 1;
 };
 
@@ -1511,7 +1512,7 @@ PDP11.opSOB = function(opCode)
 {
     var reg = (opCode & PDP11.SRCMODE.REG) >> PDP11.SRCMODE.SHIFT;
     if ((this.regsGen[reg] = ((this.regsGen[reg] - 1) & 0xffff))) {
-        this.setPC(this.regsGen[7] - ((opCode & 0x3F) << 1));
+        this.setPC(this.regsGen[PDP11.REG.PC] - ((opCode & 0x3F) << 1));
     }
     this.nStepCycles -= 1;
 };
@@ -1578,7 +1579,7 @@ PDP11.opTST = function(opCode)
 {
     var result = this.readWordByMode(opCode);
     this.assert(!(result & ~0xffff));   // assert that C flag will be clear
-    this.updateNZCFlags(result);
+    this.updateAllFlags(result);
     this.nStepCycles -= 1;
 };
 
@@ -1592,7 +1593,7 @@ PDP11.opTSTB = function(opCode)
 {
     var result = this.readByteByMode(opCode);
     this.assert(!(result & ~0xff));     // assert that C flag will be clear
-    this.updateNZCFlags(result << 8);
+    this.updateAllFlags(result << 8);
     this.nStepCycles -= 1;
 };
 
@@ -1643,45 +1644,45 @@ PDP11.op0Xnn_1170 = function(opCode)
 };
 
 /**
- * op0Ann_1170(opCode)
+ * op0AXn_1170(opCode)
  *
  * @this {CPUStatePDP11}
  * @param {number} opCode
  */
-PDP11.op0Ann_1170 = function(opCode)
+PDP11.op0AXn_1170 = function(opCode)
 {
     PDP11.aOps0AXn_1170[(opCode >> 6) & 0x3].call(this, opCode);
 };
 
 /**
- * op0Bnn_1170(opCode)
+ * op0BXn_1170(opCode)
  *
  * @this {CPUStatePDP11}
  * @param {number} opCode
  */
-PDP11.op0Bnn_1170 = function(opCode)
+PDP11.op0BXn_1170 = function(opCode)
 {
     PDP11.aOps0BXn_1170[(opCode >> 6) & 0x3].call(this, opCode);
 };
 
 /**
- * op0Cnn_1170(opCode)
+ * op0CXn_1170(opCode)
  *
  * @this {CPUStatePDP11}
  * @param {number} opCode
  */
-PDP11.op0Cnn_1170 = function(opCode)
+PDP11.op0CXn_1170 = function(opCode)
 {
     PDP11.aOps0CXn_1170[(opCode >> 6) & 0x3].call(this, opCode);
 };
 
 /**
- * op0Dnn_1170(opCode)
+ * op0DXn_1170(opCode)
  *
  * @this {CPUStatePDP11}
  * @param {number} opCode
  */
-PDP11.op0Dnn_1170 = function(opCode)
+PDP11.op0DXn_1170 = function(opCode)
 {
     PDP11.aOps0DXn_1170[(opCode >> 6) & 0x3].call(this, opCode);
 };
@@ -1848,12 +1849,40 @@ PDP11.aOps0Xnn_1170 = [
     PDP11.opBLE,                // 0x07nn
     PDP11.opJSR,                // 0x08nn
     PDP11.opJSR,                // 0x09nn
-    PDP11.op0Ann_1170,          // 0x0Ann
-    PDP11.op0Bnn_1170,          // 0x0Bnn
-    PDP11.op0Cnn_1170,          // 0x0Cnn
-    PDP11.op0Dnn_1170,          // 0x0Dnn
+    PDP11.op0AXn_1170,          // 0x0Ann
+    PDP11.op0BXn_1170,          // 0x0Bnn
+    PDP11.op0CXn_1170,          // 0x0Cnn
+    PDP11.op0DXn_1170,          // 0x0Dnn
     PDP11.opUndefined,          // 0x0Enn
     PDP11.opUndefined           // 0x0Fnn
+];
+
+PDP11.aOps0AXn_1170 = [
+    PDP11.opCLR,                // 0x0A0n
+    PDP11.opCOM,                // 0x0A4n
+    PDP11.opINC,                // 0x0A8n
+    PDP11.opDEC                 // 0x0ACn
+];
+
+PDP11.aOps0BXn_1170 = [
+    PDP11.opNEG,                // 0x0B0n
+    PDP11.opADC,                // 0x0B4n
+    PDP11.opSBC,                // 0x0B8n
+    PDP11.opTST                 // 0x0BCn
+];
+
+PDP11.aOps0CXn_1170 = [
+    PDP11.opROR,                // 0x0C0n
+    PDP11.opROL,                // 0x0C4n
+    PDP11.opASR,                // 0x0C8n
+    PDP11.opASL                 // 0x0CCn
+];
+
+PDP11.aOps0DXn_1170 = [
+    PDP11.opMARK,               // 0x0D0n
+    PDP11.opMFPI,               // 0x0D4n
+    PDP11.opMTPI,               // 0x0D8n
+    PDP11.opSXT                 // 0x0DCn
 ];
 
 PDP11.aOps00Xn_1170 = [
@@ -1914,13 +1943,13 @@ PDP11.aOps00BX_1170 = [
 ];
 
 PDP11.aOps000X_1170 = [
-    PDP11.opHALT,               // 0x0000
-    PDP11.opWAIT,               // 0x0001
-    PDP11.opRTI,                // 0x0002
-    PDP11.opBPT,                // 0x0003
-    PDP11.opIOT,                // 0x0004
-    PDP11.opRESET,              // 0x0005
-    PDP11.opRTT,                // 0x0006
+    PDP11.opHALT,               // 0x0000   000000
+    PDP11.opWAIT,               // 0x0001   000001
+    PDP11.opRTI,                // 0x0002   000002
+    PDP11.opBPT,                // 0x0003   000003
+    PDP11.opIOT,                // 0x0004   000004
+    PDP11.opRESET,              // 0x0005   000005
+    PDP11.opRTT,                // 0x0006   000006
     PDP11.opUndefined,          // 0x0007
     PDP11.opUndefined,          // 0x0008
     PDP11.opUndefined,          // 0x0009
@@ -1968,34 +1997,6 @@ PDP11.aOps8Xnn_1170 = [
     PDP11.op8DXn_1170,          // 0x8Dnn
     PDP11.opUndefined,          // 0x8Enn
     PDP11.opUndefined           // 0x8Fnn
-];
-
-PDP11.aOps0AXn_1170 = [
-    PDP11.opCLR,                // 0x0A0n
-    PDP11.opCOM,                // 0x0A4n
-    PDP11.opINC,                // 0x0A8n
-    PDP11.opDEC                 // 0x0ACn
-];
-
-PDP11.aOps0BXn_1170 = [
-    PDP11.opNEG,                // 0x0B0n
-    PDP11.opADC,                // 0x0B4n
-    PDP11.opSBC,                // 0x0B8n
-    PDP11.opTST                 // 0x0BCn
-];
-
-PDP11.aOps0CXn_1170 = [
-    PDP11.opROR,                // 0x0C0n
-    PDP11.opROL,                // 0x0C4n
-    PDP11.opASR,                // 0x0C8n
-    PDP11.opASL                 // 0x0CCn
-];
-
-PDP11.aOps0DXn_1170 = [
-    PDP11.opMARK,               // 0x0D0n
-    PDP11.opMFPI,               // 0x0D4n
-    PDP11.opMTPI,               // 0x0D8n
-    PDP11.opSXT                 // 0x0DCn
 ];
 
 PDP11.aOps8AXn_1170 = [

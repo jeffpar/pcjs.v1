@@ -777,7 +777,7 @@ if (DEBUGGER) {
      */
     DebuggerPDP11.prototype.toStrOffset = function(off)
     {
-        return this.toBase(off);
+        return this.toStrBase(off);
     };
 
     /**
@@ -1037,7 +1037,80 @@ if (DEBUGGER) {
     };
 
     /**
+     * getRegIndex(sReg, off)
+     *
+     * @this {DebuggerPDP11}
+     * @param {string} sReg
+     * @param {number} [off] optional offset into sReg
+     * @return {number} register index, or -1 if not found
+     */
+    DebuggerPDP11.prototype.getRegIndex = function(sReg, off)
+    {
+        var iReg = -1;
+        sReg = sReg.toUpperCase();
+        switch(sReg) {
+        case "SP":
+            iReg = 6;
+            break;
+        case "PC":
+            iReg = 7;
+            break;
+        default:
+            if (sReg.charAt(0) == "R") {
+                iReg = +sReg.charAt(1);
+                if (iReg < 0 || iReg > 7) iReg = -1;
+            }
+            break;
+        }
+        return iReg;
+    };
+
+    /**
+     * getRegName(iReg)
+     *
+     * @this {DebuggerPDP11}
+     * @param {number} iReg
+     * @return {string}
+     */
+    DebuggerPDP11.prototype.getRegName = function(iReg)
+    {
+        return (iReg < 6? ("R" + iReg) :  (iReg == 6? "SP" : "PC"));
+    };
+
+    /**
+     * getRegValue(iReg)
+     *
+     * Register numbers 0-7 are reserved for cpu.regsGen, 8-15 are reserved for cpu.regsAlt,
+     * 16-19 for cpu.regsAltStack, and 20 for regPSW.
+     *
+     * @this {DebuggerPDP11}
+     * @param {number} iReg
+     * @return {number|undefined}
+     */
+    DebuggerPDP11.prototype.getRegValue = function(iReg)
+    {
+        var value;
+        if (iReg >= 0) {
+            if (iReg < 8) {
+                value = this.cpu.regsGen[iReg];
+            }
+            else if (iReg < 16) {
+                value = this.cpu.regsAlt[iReg-8];
+            }
+            else if (iReg < 20) {
+                value = this.cpu.regsAltStack[iReg-16];
+            }
+            else if (iReg == DebuggerPDP11.REG_PSW) {
+                value = this.cpu.getPSW();
+            }
+        }
+        return value;
+    };
+
+    /**
      * replaceRegs(s)
+     *
+     * TODO: Implement or eliminate.
      *
      * @this {DebuggerPDP11}
      * @param {string} s
@@ -1929,7 +2002,7 @@ if (DEBUGGER) {
         var sLine = this.toStrAddr(dbgAddrOp) + ":";
         if (dbgAddrOp.addr !== PDP11.ADDR_INVALID && dbgAddr.addr !== PDP11.ADDR_INVALID) {
             do {
-                sOpcodes += ' ' + this.toBase(this.getWord(dbgAddrOp, 2));
+                sOpcodes += ' ' + this.toStrBase(this.getWord(dbgAddrOp, 2));
                 if (dbgAddrOp.addr == null) break;
             } while (dbgAddrOp.addr != dbgAddr.addr);
         }
@@ -1973,20 +2046,20 @@ if (DEBUGGER) {
         if (opTypeOther == DebuggerPDP11.OP_BRANCH) {
             disp = ((opCode & 0xff) << 24) >> 23;
             addr = (dbgAddr.addr + disp) & 0xffff;
-            sOperand = this.toBase(addr);
+            sOperand = this.toStrBase(addr);
         }
         else if (opTypeOther == DebuggerPDP11.OP_DSTOFF) {
             disp = (opCode & 0x3f) << 1;
             addr = (dbgAddr.addr - disp) & 0xffff;
-            sOperand = this.toBase(addr);
+            sOperand = this.toStrBase(addr);
         }
         else if (opTypeOther == DebuggerPDP11.OP_DSTNUM3) {
             disp = (opCode & 0x7);
-            sOperand = this.toBase(disp, 1);
+            sOperand = this.toStrBase(disp, 1);
         }
         else if (opTypeOther == DebuggerPDP11.OP_DSTNUM6) {
             disp = (opCode & 0x3f);
-            sOperand = this.toBase(disp, 1);
+            sOperand = this.toStrBase(disp, 1);
         }
         else {
             /*
@@ -2022,7 +2095,7 @@ if (DEBUGGER) {
                          * When using R7 (aka PC), POST-INCREMENT is known as IMMEDIATE
                          */
                         wIndex = this.getWord(dbgAddr, 2);
-                        sOperand = '#' + this.toBase(wIndex, 0, true);
+                        sOperand = '#' + this.toStrBase(wIndex, 0, true);
                     }
                     break;
                 case PDP11.OPMODE.POSTINCD:             // 0x3: POST-INCREMENT DEFERRED
@@ -2033,7 +2106,7 @@ if (DEBUGGER) {
                          * When using R7 (aka PC), POST-INCREMENT DEFERRED is known as ABSOLUTE
                          */
                         wIndex = this.getWord(dbgAddr, 2);
-                        sOperand = "@#" + this.toBase(wIndex, 0, true);
+                        sOperand = "@#" + this.toStrBase(wIndex, 0, true);
                     }
                     break;
                 case PDP11.OPMODE.PREDEC:               // 0x4: PRE-DECREMENT
@@ -2044,22 +2117,22 @@ if (DEBUGGER) {
                     break;
                 case PDP11.OPMODE.INDEX:                // 0x6: INDEX
                     wIndex = this.getWord(dbgAddr, 2);
-                    sOperand = this.toBase(wIndex, 0, true) + '(' + this.getRegName(reg) + ')';
+                    sOperand = this.toStrBase(wIndex, 0, true) + '(' + this.getRegName(reg) + ')';
                     if (reg == 7) {
                         /*
                          * When using R7 (aka PC), INDEX is known as RELATIVE
                          */
-                        sOperand = [sOperand, this.toBase((wIndex + dbgAddr.addr) & 0xffff)];
+                        sOperand = [sOperand, this.toStrBase((wIndex + dbgAddr.addr) & 0xffff)];
                     }
                     break;
                 case PDP11.OPMODE.INDEXD:               // 0x7: INDEX DEFERRED
                     wIndex = this.getWord(dbgAddr, 2);
-                    sOperand = '@' + this.toBase(wIndex) + '(' + this.getRegName(reg) + ')';
+                    sOperand = '@' + this.toStrBase(wIndex) + '(' + this.getRegName(reg) + ')';
                     if (reg == 7) {
                         /*
                          * When using R7 (aka PC), INDEX DEFERRED is known as RELATIVE DEFERRED
                          */
-                        sOperand = [sOperand, this.toBase((wIndex + dbgAddr.addr) & 0xffff)];
+                        sOperand = [sOperand, this.toStrBase((wIndex + dbgAddr.addr) & 0xffff)];
                     }
                     break;
                 default:
@@ -2123,18 +2196,6 @@ if (DEBUGGER) {
     };
 
     /**
-     * getRegName(iReg)
-     *
-     * @this {DebuggerPDP11}
-     * @param {number} iReg
-     * @return {string}
-     */
-    DebuggerPDP11.prototype.getRegName = function(iReg)
-    {
-        return (iReg < 6? ("R" + iReg) :  (iReg == 6? "SP" : "PC"));
-    };
-
-    /**
      * getRegOutput(iReg)
      *
      * @this {DebuggerPDP11}
@@ -2148,16 +2209,16 @@ if (DEBUGGER) {
 
         if (iReg < 8) {
             sReg = this.getRegName(iReg);
-            sReg += '=' + this.toBase(cpu.regsGen[iReg]);
+            sReg += '=' + this.toStrBase(cpu.regsGen[iReg]);
         }
         else if (iReg < 13) {
-            sReg = "A" + (iReg - 8) + '=' + this.toBase(cpu.regsAlt[iReg - 8]);
+            sReg = "A" + (iReg - 8) + '=' + this.toStrBase(cpu.regsAlt[iReg - 8]);
         }
         else if (iReg >= 16 && iReg < 20) {
-            sReg = "S" + (iReg - 16) + '=' + this.toBase(cpu.regsAltStack[iReg - 16]);
+            sReg = "S" + (iReg - 16) + '=' + this.toStrBase(cpu.regsAltStack[iReg - 16]);
         }
         else if (iReg == DebuggerPDP11.REG_PSW) {
-            sReg = "PS=" + this.toBase(cpu.getPSW());
+            sReg = "PS=" + this.toStrBase(cpu.getPSW());
         }
         if (sReg) sReg += ' ';
         return sReg;
@@ -2762,29 +2823,32 @@ if (DEBUGGER) {
      */
     DebuggerPDP11.prototype.doEdit = function(asArgs)
     {
-        var size = 1;
-        var mask = 0xff;
-        var fnGet = this.getByte;
-        var fnSet = this.setByte;
-        if (asArgs[0] == "ew") {
+        var size, mask;
+        var fnGet, fnSet;
+        var sCmd = asArgs[0];
+        var sAddr = asArgs[1];
+        if (sCmd == "eb") {
+            size = 1;
+            mask = 0xff;
+            fnGet = this.getByte;
+            fnSet = this.setByte;
+        }
+        else if (sCmd == "e" || sCmd == "ew") {
             size = 2;
             mask = 0xffff;
             fnGet = this.getWord;
             fnSet = this.setWord;
+        } else {
+            sAddr = null;
         }
-        var cch = size << 1;
-
-        var sAddr = asArgs[1];
         if (sAddr == null) {
             this.println("edit memory commands:");
             this.println("\teb [a] [...]  edit bytes at address a");
             this.println("\tew [a] [...]  edit words at address a");
             return;
         }
-
         var dbgAddr = this.parseAddr(sAddr);
         if (!dbgAddr) return;
-
         for (var i = 2; i < asArgs.length; i++) {
             var vNew = this.parseExpression(asArgs[i]);
             if (vNew === undefined) {
@@ -2795,7 +2859,7 @@ if (DEBUGGER) {
                 this.println("warning: " + str.toHex(vNew) + " exceeds " + size + "-byte value");
             }
             var vOld = fnGet.call(this, dbgAddr);
-            this.println("changing " + this.toStrAddr(dbgAddr) + " from " + str.toHex(vOld, cch, true) + " to " + str.toHex(vNew, cch, true));
+            this.println("changing " + this.toStrAddr(dbgAddr) + " from " + this.toStrBase(vOld, size) + " to " + this.toStrBase(vNew, size));
             fnSet.call(this, dbgAddr, vNew, size);
         }
     };
