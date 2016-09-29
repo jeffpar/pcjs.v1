@@ -168,7 +168,6 @@ CPUStatePDP11.prototype.initRegs = function()
     this.opFlags = 0;
     this.cpuType = 70;
     this.trapPSW = -1;
-    this.runState = 0;          // 0=run, 1=step, 2=wait, 3=run
     this.loopRate = 9999;       // instructions we can execute in 12ms
     this.resetRegs();
 };
@@ -568,9 +567,6 @@ CPUStatePDP11.prototype.requestHALT = function()
  * is active and both the second and third are waiting for one more instruction
  * execution to become active.
  *
- * If the current state is WAIT (runState === 2) then skip any delay and
- * go into RUN state.
- *
  * @this {CPUStatePDP11}
  * @param {number} delay
  * @param {number} priority
@@ -590,11 +586,6 @@ CPUStatePDP11.prototype.interrupt = function(delay, priority, vector, callback)
         }
     }
     if (delay >= 0) {
-        if (this.runState === 2) {                      // if currently wait
-            delay = 0;
-            this.runState = 0;
-            setTimeout(this.onRunTimeout, 0);           // TODO: Review
-        }
         i = this.interruptQueue.length;                 // queue in delay 'difference' order
         while (i-- > 0) {
             if (this.interruptQueue[i].delay > delay) {
@@ -611,24 +602,6 @@ CPUStatePDP11.prototype.interrupt = function(delay, priority, vector, callback)
         });
     }
     this.priorityReview = 2;
-};
-
-/**
- * checkInterruptDelay()
- *
- * @this {CPUStatePDP11}
- */
-CPUStatePDP11.prototype.checkInterruptDelay = function()
-{
-    var delay = 0;
-    for (var i = this.interruptQueue.length; --i >= 0;) {
-        delay += this.interruptQueue[i].delay;
-        this.interruptQueue[i].delay = 0;
-    }
-    if (!delay && this.runState === 0) {
-        this.runState = 2;          // wait
-        this.endBurst();
-    }
 };
 
 /**
@@ -666,6 +639,7 @@ CPUStatePDP11.prototype.checkInterruptQueue = function()
             }
         }
         if (savePSW > (this.regPSW & 0xe0)) {
+            this.opFlags &= ~PDP11.OPFLAG.WAIT;
             if (!interruptEvent) {
                 this.trap(PDP11.TRAP.PIRQ, PDP11.REASON.INTERRUPT);
             } else {
@@ -750,7 +724,7 @@ CPUStatePDP11.prototype.setPSW = function(newPSW)
  */
 CPUStatePDP11.prototype.updateNZFlags = function(result)
 {
-    if (!(this.opFlags & PDP11.OPFLAG.SKIP_FLAGS)) {
+    if (!(this.opFlags & PDP11.OPFLAG.NO_FLAGS)) {
         this.flagN = this.flagZ = result;
         this.flagV = 0;
     }
@@ -767,7 +741,7 @@ CPUStatePDP11.prototype.updateNZFlags = function(result)
  */
 CPUStatePDP11.prototype.updateAllFlags = function(result, overflow)
 {
-    if (!(this.opFlags & PDP11.OPFLAG.SKIP_FLAGS)) {
+    if (!(this.opFlags & PDP11.OPFLAG.NO_FLAGS)) {
         this.flagN = this.flagZ = this.flagC = result;
         this.flagV = overflow || 0;
     }
@@ -783,7 +757,7 @@ CPUStatePDP11.prototype.updateAllFlags = function(result, overflow)
  */
 CPUStatePDP11.prototype.updateAddFlags = function(result, src, dst)
 {
-    if (!(this.opFlags & PDP11.OPFLAG.SKIP_FLAGS)) {
+    if (!(this.opFlags & PDP11.OPFLAG.NO_FLAGS)) {
         this.flagN = this.flagZ = this.flagC = result;
         this.flagV = (src ^ result) & (dst ^ result);
     }
@@ -800,7 +774,7 @@ CPUStatePDP11.prototype.updateAddFlags = function(result, src, dst)
  */
 CPUStatePDP11.prototype.updateDecFlags = function(result, dst)
 {
-    if (!(this.opFlags & PDP11.OPFLAG.SKIP_FLAGS)) {
+    if (!(this.opFlags & PDP11.OPFLAG.NO_FLAGS)) {
         this.flagN = this.flagZ = result;
         // Because src is always 1 (with a zero sign bit), it can be optimized out of this calculation
         this.flagV = (/* src ^ */ dst) & (dst ^ result);
@@ -818,7 +792,7 @@ CPUStatePDP11.prototype.updateDecFlags = function(result, dst)
  */
 CPUStatePDP11.prototype.updateIncFlags = function(result, dst)
 {
-    if (!(this.opFlags & PDP11.OPFLAG.SKIP_FLAGS)) {
+    if (!(this.opFlags & PDP11.OPFLAG.NO_FLAGS)) {
         this.flagN = this.flagZ = result;
         // Because src is always 1 (with a zero sign bit), it can be optimized out of this calculation
         this.flagV = (/* src ^ */ result) & (dst ^ result);
@@ -833,10 +807,16 @@ CPUStatePDP11.prototype.updateIncFlags = function(result, dst)
  */
 CPUStatePDP11.prototype.updateMulFlags = function(result)
 {
-    this.flagN = result >> 16;
-    this.flagZ = this.flagN | result;
-    this.flagV = 0;
-    this.flagC = (result < -32768 || result > 32767)? 0x10000 : 0;
+    /*
+     * NOTE: Technically, the MUL instruction doesn't need to worry about NO_FLAGS, because that instruction
+     * doesn't write to the bus, and therefore can't modify the PSW directly.  But it doesn't hurt to be consistent.
+     */
+    if (!(this.opFlags & PDP11.OPFLAG.NO_FLAGS)) {
+        this.flagN = result >> 16;
+        this.flagZ = this.flagN | result;
+        this.flagV = 0;
+        this.flagC = (result < -32768 || result > 32767)? 0x10000 : 0;
+    }
 };
 
 /**
@@ -847,7 +827,7 @@ CPUStatePDP11.prototype.updateMulFlags = function(result)
  */
 CPUStatePDP11.prototype.updateShiftFlags = function(result)
 {
-    if (!(this.opFlags & PDP11.OPFLAG.SKIP_FLAGS)) {
+    if (!(this.opFlags & PDP11.OPFLAG.NO_FLAGS)) {
         this.flagN = this.flagZ = this.flagC = result;
         this.flagV = this.flagN ^ (this.flagC >> 1);
     }
@@ -866,7 +846,7 @@ CPUStatePDP11.prototype.updateShiftFlags = function(result)
  */
 CPUStatePDP11.prototype.updateSubFlags = function(result, src, dst)
 {
-    if (!(this.opFlags & PDP11.OPFLAG.SKIP_FLAGS)) {
+    if (!(this.opFlags & PDP11.OPFLAG.NO_FLAGS)) {
         this.flagN = this.flagZ = this.flagC = result;
         this.flagV = (src ^ dst) & (dst ^ result);
     }
@@ -1701,26 +1681,45 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
             nDebugState = 1;
         }
 
-        /*
-         * Check for any pending traps.
-         *
-         * I've moved this TRAP_MASK check BEFORE we decode the next instruction instead
-         * of immediately AFTER, because the last instruction may have thrown an exception,
-         * kicking us out before we reach the bottom of this loop.
-         */
-        if (this.opFlags & PDP11.OPFLAG.TRAP_MASK) {
-            if (this.opFlags & PDP11.OPFLAG.TRAP_MMU) {
-                this.trap(PDP11.TRAP.MMU_FAULT, PDP11.REASON.TRAPMMU);          // MMU trap has priority
-            } else {
-                if (this.opFlags & PDP11.OPFLAG.TRAP_SP) {
-                    this.trap(PDP11.TRAP.BUS_ERROR, PDP11.REASON.TRAPSP);       // then SP trap
+        if (this.opFlags) {
+            /*
+             * Check for any pending traps.
+             *
+             * I've moved this TRAP_MASK check BEFORE we decode the next instruction instead
+             * of immediately AFTER, because the last instruction may have thrown an exception,
+             * kicking us out before we reach the bottom of this loop.
+             */
+            if (this.opFlags & PDP11.OPFLAG.TRAP_MASK) {
+                if (this.opFlags & PDP11.OPFLAG.TRAP_MMU) {
+                    this.trap(PDP11.TRAP.MMU_FAULT, PDP11.REASON.TRAPMMU);          // MMU trap has priority
                 } else {
-                    if (this.opFlags & PDP11.OPFLAG.TRAP_TF) {
-                        this.trap(PDP11.TRAP.BREAKPOINT, PDP11.REASON.TRAPTF);  // and finally a TF trap
+                    if (this.opFlags & PDP11.OPFLAG.TRAP_SP) {
+                        this.trap(PDP11.TRAP.BUS_ERROR, PDP11.REASON.TRAPSP);       // then SP trap
+                    } else {
+                        if (this.opFlags & PDP11.OPFLAG.TRAP_TF) {
+                            this.trap(PDP11.TRAP.BREAKPOINT, PDP11.REASON.TRAPTF);  // and finally a TF trap
+                        }
                     }
                 }
+                this.opFlags &= ~PDP11.OPFLAG.TRAP_MASK;
             }
-            this.opFlags &= ~PDP11.OPFLAG.TRAP_MASK;
+            /*
+             * If we're in WAIT state, see if any interrupts are ready to kick us out of that state.
+             */
+            if (this.opFlags & PDP11.OPFLAG.WAIT) {
+                /*
+                 * If checkInterruptQueue() found an interrupt, it will have dispatched it AND cleared
+                 * the WAIT flag; it won't return, so we're done.
+                 */
+                this.checkInterruptQueue();
+                /*
+                 * Since checkInterruptQueue() returned, we need to rewind the PC to the WAIT instruction;
+                 * we're going to play it safe and turn off the WAIT flag, because assuming the WAIT instruction
+                 * is still there, it will automatically re-enable it.  TODO: Assert that the WAIT is still there.
+                 */
+                this.opFlags &= ~PDP11.OPFLAG.WAIT;
+                this.regsGen[7] = (this.regsGen[7] - 2) & 0xffff;
+            }
         }
 
         /*
@@ -1737,10 +1736,10 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
         }
 
         /*
-         * Snapshot the TF bit in opFlags, while simultaneously clearing all other opFlags;
+         * Snapshot the TF bit in opFlags, while simultaneously clearing all other opFlags (except WAIT);
          * we'll check the TRAP_TF bit in opFlags when we come back around for another opcode.
          */
-        this.opFlags = this.regPSW & PDP11.PSW.TF;
+        this.opFlags = (this.opFlags & PDP11.OPFLAG.WAIT) | (this.regPSW & PDP11.PSW.TF);
 
         this.decode(this.getPCWord());
 

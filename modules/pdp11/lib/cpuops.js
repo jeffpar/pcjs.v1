@@ -1097,7 +1097,6 @@ PDP11.opHALT = function(opCode)
         this.regErr |= PDP11.CPUERR.BADHALT;
         this.trap(PDP11.TRAP.BUS_ERROR, PDP11.REASON.HALT);
     } else {
-        this.runState = 3;
         this.endBurst();
     }
     this.nStepCycles -= 1;
@@ -1605,7 +1604,27 @@ PDP11.opTSTB = function(opCode)
  */
 PDP11.opWAIT = function(opCode)
 {
-    this.checkInterruptDelay();
+    /*
+     * The original PDP-11 emulation code would actually stop emulating instructions now, relying on assorted
+     * setTimeout() callbacks, setInterval() callbacks, device XHR (XMLHttpRequest) callbacks, etc, to eventually
+     * call interrupt(), which would then transition the CPU's runState from 2 to 0 and kickstart emulate() again.
+     *
+     * That approach isn't compatible with PCjs emulators, which prefer to rely on the simulated CPU clock to
+     * drive all simulated device updates.  This means components should call the CPU's setTimer() function, which
+     * invokes the provided callback when the number of CPU cycles that correspond to the requested number of
+     * milliseconds have elapsed.  This also gives us the ability to scale device response times as needed if the
+     * user decides to crank up CPU speed, and to freeze them along with the CPU whenever the user halts the machine.
+     *
+     * However, the PCjs approach requires the CPU to continue running.  One simple solution to this dilemma:
+     *
+     *      1) opWAIT() sets a new opFlags bit (OPFLAG.WAIT)
+     *      2) When stepCPU() sees OPFLAG.WAIT, it checks for interrupts; if none, it rewinds the PC back to the WAIT
+     *
+     * NOTE: It's almost always a bad idea to add more checks to the inner stepCPU() loop, because every additional
+     * check can have a measurable (negative) impact on performance.  Which is why it's important to use opFlags bits
+     * whenever possible, since we can test for multiple (up to 32) exceptional conditions with a single check.
+     */
+    this.opFlags |= PDP11.OPFLAG.WAIT;
     this.nStepCycles -= 1;
 };
 

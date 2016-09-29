@@ -161,11 +161,12 @@ var PDP11 = {
      * Internal operation state flags
      */
     OPFLAG: {
+        WAIT:       0x01,       // WAIT operation in progress
         TRAP_TF:    0x10,       // aka PDP11.PSW.TF
         TRAP_MMU:   0x20,
         TRAP_SP:    0x40,
         TRAP_MASK:  0x70,
-        SKIP_FLAGS: 0x80        // when set, all updateXXXFlags() functions must leave flags unchanged
+        NO_FLAGS:   0x80        // set whenever the PSW is written directly, requiring all updateXXXFlags() functions to leave flags unchanged
     },
     /*
      * Opcode reg (opcode bits 2-0)

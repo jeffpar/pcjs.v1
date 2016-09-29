@@ -1161,8 +1161,8 @@ CPUPDP11.prototype.startCPU = function(fUpdateFocus)
     var controlRun = this.bindings["run"];
     if (controlRun) controlRun.textContent = "Halt";
     if (this.cmp) {
-        this.cmp.start(this.msStartRun, this.getCycles());
         if (fUpdateFocus) this.cmp.updateFocus(true);
+        this.cmp.start(this.msStartRun, this.getCycles());
     }
     this.updateCPU(true);
     setTimeout(this.onRunTimeout, 0);
