@@ -90,6 +90,11 @@ function DebuggerPDP11(parmsDbg)
         Debugger.call(this, parmsDbg);
 
         /*
+         * Since this Debugger doesn't use replaceRegs(), we can use parentheses instead of braces.
+         */
+        this.fParens = true;
+
+        /*
          * Most commands that require an address call parseAddr(), which defaults to dbgAddrNextCode
          * or dbgAddrNextData when no address has been given.  doDump() and doUnassemble(), in turn,
          * update dbgAddrNextData and dbgAddrNextCode, respectively, when they're done.

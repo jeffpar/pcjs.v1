@@ -82,6 +82,7 @@ function Debugger(parmsDbg)
          * Default base used to display all values; modified with the "s base" command.
          */
         this.nBase = parmsDbg['base'] || 16;
+        this.fParens = false;
 
         /*
          * These keep track of instruction activity, but only when tracing or when Debugger checks
@@ -434,6 +435,9 @@ if (DEBUGGER) {
      * multiple purposes, the other being reference replacement in message strings passing through replaceRegs(),
      * and I didn't want parentheses taking on a new meaning in message strings.
      *
+     * However, a Debugger can override this choice by setting fParens to true, if there's no conflict in its
+     * replaceRegs() implementation.
+     *
      * @this {Debugger}
      * @param {string|undefined} sExp
      * @param {boolean} [fPrint] is true to print all resolved values, false for quiet parsing
@@ -516,10 +520,13 @@ if (DEBUGGER) {
     Debugger.prototype.parseReference = function(s)
     {
         var a;
-        while (a = s.match(/\{(.*?)}/)) {
-            if (a[1].indexOf('{') >= 0) break;          // unsupported nested brace(s)
+        var chOpen = this.fParens? '(' : '{';
+        var chClose = this.fParens? ')' : '}';
+        var reSubExp = new RegExp(this.fParens? "\\((.*?)\\)" : "\\{(.*?)\\}");
+        while (a = s.match(reSubExp)) {
+            if (a[1].indexOf(chOpen) >= 0) break;       // unsupported nested brace(s)
             var value = this.parseExpression(a[1]);
-            s = s.replace('{' + a[1] + '}', value != null? str.toHex(value) : "undefined");
+            s = s.replace(chOpen + a[1] + chClose, value != null? this.toStrBase(value) : "undefined");
         }
         while (a = s.match(/\[(.*?)]/)) {
             if (a[1].indexOf('[') >= 0) break;          // unsupported nested bracket(s)
