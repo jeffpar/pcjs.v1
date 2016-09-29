@@ -35,6 +35,7 @@
 
 var MessagesPDP11 = {
     CPU:        0x00000001,
+    TRAP:       0x00000010,
     BUS:        0x00000040,
     MEM:        0x00000080,
     KEYBOARD:   0x00010000,
@@ -65,6 +66,7 @@ var MessagesPDP11 = {
  */
 MessagesPDP11.CATEGORIES = {
     "cpu":      MessagesPDP11.CPU,
+    "trap":     MessagesPDP11.TRAP,
     "bus":      MessagesPDP11.BUS,
     "mem":      MessagesPDP11.MEM,
     "keyboard": MessagesPDP11.KEYBOARD, // "kbd" is also allowed as shorthand for "keyboard"; see doMessages()

@@ -303,10 +303,10 @@ CPUPDP11.prototype.autoStart = function()
      */
     if (this.flags.autoStart || (!DEBUGGER || !this.dbg) && this.bindings["run"] === undefined) {
         /*
-         * Now we ALSO set fUpdateFocus when calling runCPU(), on the assumption that in the "auto-starting" context,
-         * a machine without focus is like a day without sunshine.
+         * Now we ALSO set fUpdateFocus when calling startCPU(), on the assumption that in the "auto-starting"
+         * context, a machine without focus is like a day without sunshine.
          */
-        this.runCPU(true);
+        this.startCPU(true);
         return true;
     }
     return false;
@@ -496,12 +496,12 @@ CPUPDP11.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
         control.onclick = function onClickRun() {
             if (!cpu.cmp || !cpu.cmp.checkPower()) return;
             /*
-             * We no longer pass true to these runCPU()/stopCPU() calls, on the theory that if the "run"
+             * We no longer pass true to these startCPU()/stopCPU() calls, on the theory that if the "run"
              * control is visible, then the computer is probably sufficiently visible as well; the problem
              * with setting fUpdateFocus to true is that it can jerk the web page around in annoying ways.
              */
             if (!cpu.flags.running)
-                cpu.runCPU();
+                cpu.startCPU();
             else
                 cpu.stopCPU();
         };
@@ -1053,20 +1053,13 @@ CPUPDP11.prototype.endBurst = function()
 };
 
 /**
- * runCPU(fUpdateFocus)
+ * runCPU()
  *
  * @this {CPUPDP11}
- * @param {boolean} [fUpdateFocus] is true to update Computer focus
  */
-CPUPDP11.prototype.runCPU = function(fUpdateFocus)
+CPUPDP11.prototype.runCPU = function()
 {
-    if (!this.setBusy(true)) {
-        this.updateCPU();
-        if (this.cmp) this.cmp.stop(usr.getTime(), this.getCycles());
-        return;
-    }
-
-    this.startCPU(fUpdateFocus);
+    if (!this.flags.running) return;
 
     /*
      *  calcStartTime() initializes the cycle counter and timestamp for this runCPU() invocation, and optionally
@@ -1131,42 +1124,49 @@ CPUPDP11.prototype.runCPU = function(fUpdateFocus)
         this.stopCPU();
         this.updateCPU();
         if (this.cmp) this.cmp.stop(usr.getTime(), this.getCycles());
-        this.setBusy(false);
         this.setError(e.stack || e.message);
         return;
     }
 
-    setTimeout(this.onRunTimeout, this.calcRemainingTime());
+    if (this.flags.running) setTimeout(this.onRunTimeout, this.calcRemainingTime());
 };
 
 /**
  * startCPU(fUpdateFocus)
  *
- * WARNING: Other components must use runCPU() to get the CPU running; this is a runCPU() helper function only.
+ * For use by any component that wants to start the CPU.
  *
  * @param {boolean} [fUpdateFocus]
+ * @return {boolean}
  */
 CPUPDP11.prototype.startCPU = function(fUpdateFocus)
 {
-    if (!this.flags.running) {
-        /*
-         *  setSpeed() without a speed parameter leaves the selected speed in place, but also resets the
-         *  cycle counter and timestamp for the current series of runCPU() calls, calculates the maximum number
-         *  of cycles for each burst based on the last known effective CPU speed, and resets the nCyclesRecalc
-         *  threshold counter.
-         */
-        this.setSpeed();
-        if (this.cmp) this.cmp.start(this.msStartRun, this.getCycles());
-        this.flags.running = true;
-        this.flags.starting = true;
-        if (this.chipset) this.chipset.start();
-        var controlRun = this.bindings["run"];
-        if (controlRun) controlRun.textContent = "Halt";
-        if (this.cmp) {
-            this.cmp.updateStatus(true);
-            if (fUpdateFocus) this.cmp.updateFocus(true);
-        }
+    if (this.isError()) {
+        return false;
     }
+    if (this.flags.running) {
+        this.println(this.toString() + " busy");
+        return false;
+    }
+    /*
+     * setSpeed() without a speed parameter leaves the selected speed in place, but also resets the
+     * cycle counter and timestamp for the current series of runCPU() calls, calculates the maximum number
+     * of cycles for each burst based on the last known effective CPU speed, and resets the nCyclesRecalc
+     * threshold counter.
+     */
+    this.setSpeed();
+    this.flags.running = true;
+    this.flags.starting = true;
+    if (this.chipset) this.chipset.start();
+    var controlRun = this.bindings["run"];
+    if (controlRun) controlRun.textContent = "Halt";
+    if (this.cmp) {
+        this.cmp.start(this.msStartRun, this.getCycles());
+        if (fUpdateFocus) this.cmp.updateFocus(true);
+    }
+    this.updateCPU(true);
+    setTimeout(this.onRunTimeout, 0);
+    return true;
 };
 
 /**
@@ -1196,15 +1196,18 @@ CPUPDP11.prototype.stepCPU = function(nMinCycles)
  */
 CPUPDP11.prototype.stopCPU = function(fComplete)
 {
-    this.isBusy(true);
-    this.endBurst();
-    this.addCycles(this.nRunCycles);
-    this.nRunCycles = 0;
     if (this.flags.running) {
+        this.endBurst();
+        this.addCycles(this.nRunCycles);
+        this.nRunCycles = 0;
         this.flags.running = false;
         if (this.chipset) this.chipset.stop();
         var controlRun = this.bindings["run"];
         if (controlRun) controlRun.textContent = "Run";
+        if (this.cmp) {
+            this.cmp.stop(usr.getTime(), this.getCycles());
+        }
+        this.updateCPU();
     }
     this.flags.complete = fComplete;
 };

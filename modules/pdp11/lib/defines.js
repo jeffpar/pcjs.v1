@@ -218,6 +218,9 @@ var PDP11 = {
         PIRQ:       0xA0,       // 240  PIRQ, program interrupt request
         MMU_FAULT:  0xA8        // 250  MMU aborts and traps
     },
+    /*
+     * PDP-11 trap reasons (for diagnostic purposes only)
+     */
     REASON: {
         BPT:        1,
         EMT:        2,
@@ -225,18 +228,18 @@ var PDP11 = {
         IOT:        4,
         TRAP:       5,
         RESERVED:   6,
-        ODDMEMADDR: 22,
-        NOMEMORY:   24,
-        ODDMMUADDR: 26,
-        MAPERROR:   28,
-        PUSHERROR:  32,
-        NOREGADDR:  34,
-        STACKMODE1: 36,
-        STACKERROR: 38,
-        INTERRUPT:  44,
-        TRAPMMU:    52,
-        TRAPSP:     54,
-        TRAPTF:     56
+        ODDMEMADDR: 10,
+        NOMEMORY:   12,
+        ODDMMUADDR: 14,
+        MAPERROR:   16,
+        PUSHERROR:  18,
+        NOREGADDR:  20,
+        STACKMODE1: 22,
+        STACKERROR: 24,
+        INTERRUPT:  26,
+        TRAPMMU:    28,
+        TRAPSP:     30,
+        TRAPTF:     32
     },
     /*
      * Internal memory access flags

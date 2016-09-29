@@ -199,7 +199,7 @@ DevicePDP11.prototype.initBus = function(cmp, bus, cpu, dbg)
     switch(this.sDeviceName) {
     case DevicePDP11.UNIBUS_NAME:
     default:
-        bus.addIOTable(this, DevicePDP11.UNIBUS_TABLE);
+        bus.addIOTable(this, DevicePDP11.UNIBUS_IOTABLE);
         bus.addIODefaultHandlers(this.reset.bind(this), this.access.bind(this));
         break;
     }
@@ -951,8 +951,8 @@ DevicePDP11.prototype.access = function(physicalAddress, data, byteFlag)
         case 0x3FFFC0: /*017777700*/ // 017777700 - 017777777
             switch (physicalAddress & ~1) {
                 //
-                // Superseded by UNIBUS_TABLE (more of this code will be commented out
-                // as it is replaced by read/write handlers in UNIBUS_TABLE; stay tuned).
+                // Superseded by UNIBUS_IOTABLE (more of this code will be commented out
+                // as it is replaced by read/write handlers in UNIBUS_IOTABLE; stay tuned).
                 //
                 // case 0x3FFFFE: // 017777776 // PSW
                 //     result = cpu.getPSW();
@@ -1537,12 +1537,12 @@ DevicePDP11.prototype.access = function(physicalAddress, data, byteFlag)
 /*
  * ES6 ALERT: As you can see below, I've finally started using computed property names.
  */
-DevicePDP11.UNIBUS_TABLE = {
-    [PDP11.UNIBUS.LKS]:     /* 177546 */    [null, null, DevicePDP11.prototype.readLKS,     DevicePDP11.prototype.writeLKS],
-    [PDP11.UNIBUS.RCSR]:    /* 177560 */    [null, null, DevicePDP11.prototype.readRCSR,    DevicePDP11.prototype.writeRCSR],
-    [PDP11.UNIBUS.XCSR]:    /* 177564 */    [null, null, DevicePDP11.prototype.readXCSR,    DevicePDP11.prototype.writeXCSR],
-    [PDP11.UNIBUS.MMR0]:    /* 177572 */    [null, null, DevicePDP11.prototype.readMMR0,    DevicePDP11.prototype.writeMMR0],
-    [PDP11.UNIBUS.PSW]:     /* 177776 */    [null, null, DevicePDP11.prototype.readPSW,     DevicePDP11.prototype.writePSW]
+DevicePDP11.UNIBUS_IOTABLE = {
+    [PDP11.UNIBUS.LKS]:     /* 177546 */    [null, null, DevicePDP11.prototype.readLKS,     DevicePDP11.prototype.writeLKS,     "LKS"],
+    [PDP11.UNIBUS.RCSR]:    /* 177560 */    [null, null, DevicePDP11.prototype.readRCSR,    DevicePDP11.prototype.writeRCSR,    "RCSR"],
+    [PDP11.UNIBUS.XCSR]:    /* 177564 */    [null, null, DevicePDP11.prototype.readXCSR,    DevicePDP11.prototype.writeXCSR,    "XCSR"],
+    [PDP11.UNIBUS.MMR0]:    /* 177572 */    [null, null, DevicePDP11.prototype.readMMR0,    DevicePDP11.prototype.writeMMR0,    "MMR0"],
+    [PDP11.UNIBUS.PSW]:     /* 177776 */    [null, null, DevicePDP11.prototype.readPSW,     DevicePDP11.prototype.writePSW,     "PSW"]
 };
 
 /**

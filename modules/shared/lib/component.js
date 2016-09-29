@@ -949,7 +949,7 @@ Component.prototype = {
     /**
      * setBusy(fBusy)
      *
-     * Update the current busy state; if an fCancel request is pending, it will be honored now.
+     * Update the current busy state; if a busyCancel request is pending, it will be honored now.
      *
      * @this {Component}
      * @param {boolean} fBusy
@@ -957,9 +957,7 @@ Component.prototype = {
      */
     setBusy: function(fBusy) {
         if (this.flags.busyCancel) {
-            if (this.flags.busy) {
-                this.flags.busy = false;
-            }
+            this.flags.busy = false;
             this.flags.busyCancel = false;
             return false;
         }

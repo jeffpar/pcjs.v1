@@ -912,8 +912,8 @@ CPUStatePDP11.prototype.trap = function(vector, reason)
     this.trapPSW = -1;                          // reset flag that we have a trap within a trap
 
     if (DEBUG && this.dbg) {
-        if (reason != PDP11.REASON.INTERRUPT) {
-            this.dbg.println("trap to vector " + this.dbg.toBase(vector, 0, true) + (reason? " (reason " + reason + ")" : ""));
+        if (this.messageEnabled(MessagesPDP11.TRAP)) {
+            this.printMessage("trap to vector " + this.dbg.toBase(vector, 0, true) + (reason? " (reason " + reason + ")" : ""), MessagesPDP11.TRAP, true);
         }
     }
 
@@ -1719,7 +1719,11 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
             this.opFlags &= ~PDP11.OPFLAG.TRAP_MASK;
         }
 
-        if (this.priorityReview) {
+        /*
+         * By requiring nMinCycles to be non-zero before checking the interrupt queue, we avoid
+         * interrupting the natural flow of instructions when the Debugger is stepping through code.
+         */
+        if (nMinCycles && this.priorityReview) {
             this.checkInterruptQueue();
         }
 

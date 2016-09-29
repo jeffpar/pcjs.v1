@@ -65,7 +65,7 @@ if (NODE) {
  */
 function BusPDP11(parmsBus, cpu, dbg)
 {
-    Component.call(this, "Bus", parmsBus, BusPDP11);
+    Component.call(this, "Bus", parmsBus, BusPDP11, MessagesPDP11.BUS);
 
     this.cpu = cpu;
     this.dbg = dbg;
@@ -124,6 +124,10 @@ function BusPDP11(parmsBus, cpu, dbg)
      *
      * The false case is important if fIOBreakAll is set, because it allows the Debugger to selectively
      * ignore specific addresses.
+     *
+     * Finally, for debugging purposes, if an I/O address has a symbolic name, it will be saved here:
+     *
+     *     [5]: symbolic name of I/O address
      */
     this.aIOHandlers = [];
     this.fIOBreakAll = false;
@@ -186,6 +190,7 @@ BusPDP11.IOController = {
         var bus = this.controller;
         var afn = bus.aIOHandlers[off];
         if (afn) {
+            if (bus.messageEnabled()) bus.printMessage(afn[5] + ".readByte(" + str.toOct(addr) + ")", 0, true);
             if (afn[0]) {
                 return afn[0](addr);
             } else if (afn[2]) {
@@ -197,8 +202,11 @@ BusPDP11.IOController = {
             }
         } else if (addr & 0x1) {
             afn = bus.aIOHandlers[off & ~0x1];
-            if (afn[2]) {
-                return afn[2](addr & ~0x1) >> 8;
+            if (afn) {
+                if (bus.messageEnabled()) bus.printMessage(afn[5] + ".readByte(" + str.toOct(addr) + ")", 0, true);
+                if (afn[2]) {
+                    return afn[2](addr & ~0x1) >> 8;
+                }
             }
         }
         bus.println("warning: unconverted read access to byte @" + str.toOct(addr));
@@ -219,6 +227,7 @@ BusPDP11.IOController = {
         var bus = this.controller;
         var afn = bus.aIOHandlers[off];
         if (afn) {
+            if (bus.messageEnabled()) bus.printMessage(afn[5] + ".writeByte(" + str.toOct(addr) + "," + str.toOct(b) + ")", 0, true);
             /*
              * If a writeByte() handler exists, call it; we're done
              */
@@ -246,11 +255,14 @@ BusPDP11.IOController = {
              * data pre-inserted into (the high byte of) the original data.
              */
             afn = bus.aIOHandlers[off & ~0x1];
-            if (afn[3]) {
-                addr &= ~0x1;
-                w = afn[2]? afn[2](addr) : 0;
-                afn[3]((w & 0xff) | (b << 8), addr);
-                return;
+            if (afn) {
+                if (bus.messageEnabled()) bus.printMessage(afn[5] + ".writeByte(" + str.toOct(addr) + "," + str.toOct(b) + ")", 0, true);
+                if (afn[3]) {
+                    addr &= ~0x1;
+                    w = afn[2]? afn[2](addr) : 0;
+                    afn[3]((w & 0xff) | (b << 8), addr);
+                    return;
+                }
             }
         }
         bus.println("warning: unconverted write access to byte @" + str.toOct(addr));
@@ -271,6 +283,7 @@ BusPDP11.IOController = {
         Component.assert(!(addr & 1));                  // unaligned addresses should be getting trapped at a higher level
         var afn = bus.aIOHandlers[off];
         if (afn) {
+            if (bus.messageEnabled()) bus.printMessage(afn[5] + ".readWord(" + str.toOct(addr) + ")", 0, true);
             if (afn[2]) {
                 return afn[2](addr);
             } else if (afn[0]) {
@@ -295,6 +308,7 @@ BusPDP11.IOController = {
         Component.assert(!(addr & 1));                  // unaligned addresses should be getting trapped at a higher level
         var afn = bus.aIOHandlers[off];
         if (afn) {
+            if (bus.messageEnabled()) bus.printMessage(afn[5] + ".writeWord(" + str.toOct(addr) + "," + str.toOct(w) + ")", 0, true);
             if (afn[3]) {
                 afn[3](w, addr);
                 return;
@@ -972,7 +986,7 @@ BusPDP11.prototype.restoreMemory = function(a)
 };
 
 /**
- * addIOHandlers(start, end, fnReadByte, fnWriteByte, fnReadWord, fnWriteWord)
+ * addIOHandlers(start, end, fnReadByte, fnWriteByte, fnReadWord, fnWriteWord, sName)
  *
  * Add I/O notification handlers to the master list (aIOHandlers).  The start and end addresses are typically
  * relative to the starting IOPAGE address, but they can also be absolute; we simply mask all addresses with
@@ -985,8 +999,9 @@ BusPDP11.prototype.restoreMemory = function(a)
  * @param {function(number,number)|null|undefined} fnWriteByte
  * @param {function(number)|null|undefined} fnReadWord
  * @param {function(number,number)|null|undefined} fnWriteWord
+ * @param {string} [sName]
  */
-BusPDP11.prototype.addIOHandlers = function(start, end, fnReadByte, fnWriteByte, fnReadWord, fnWriteWord)
+BusPDP11.prototype.addIOHandlers = function(start, end, fnReadByte, fnWriteByte, fnReadWord, fnWriteWord, sName)
 {
     for (var addr = start; addr <= end; addr += 2) {
         var off = addr & BusPDP11.IOPAGE_MASK;
@@ -994,7 +1009,7 @@ BusPDP11.prototype.addIOHandlers = function(start, end, fnReadByte, fnWriteByte,
             Component.warning("I/O address already registered: " + str.toHexLong(addr));
             continue;
         }
-        this.aIOHandlers[off] = [fnReadByte, fnWriteByte, fnReadWord, fnWriteWord, false];
+        this.aIOHandlers[off] = [fnReadByte, fnWriteByte, fnReadWord, fnWriteWord, false, sName || "unknown"];
         if (MAXDEBUG) this.log("addIOHandlers(" + str.toHexLong(addr) + ")");
     }
 };
@@ -1002,7 +1017,7 @@ BusPDP11.prototype.addIOHandlers = function(start, end, fnReadByte, fnWriteByte,
 /**
  * addIOTable(component, table)
  *
- * Add I/O notification handlers from the specified table (a batch version of addIOHandlers)
+ * Add I/O notification handlers from the specified table (a batch version of addIOHandlers).
  *
  * @this {BusPDP11}
  * @param {Component} component
@@ -1016,7 +1031,7 @@ BusPDP11.prototype.addIOTable = function(component, table)
         var fnWriteByte = afn[1]? afn[1].bind(component) : null;
         var fnReadWord = afn[2]? afn[2].bind(component) : null;
         var fnWriteWord = afn[3]? afn[3].bind(component) : null;
-        this.addIOHandlers(+port, +port, fnReadByte, fnWriteByte, fnReadWord, fnWriteWord);
+        this.addIOHandlers(+port, +port, fnReadByte, fnWriteByte, fnReadWord, fnWriteWord, afn[4]);
     }
 };
 

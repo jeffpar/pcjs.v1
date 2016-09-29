@@ -1053,7 +1053,7 @@ if (DEBUGGER) {
      *
      * @this {DebuggerPDP11}
      * @param {string} sMessage is any caller-defined message string
-     * @param {boolean} [fAddress] is true to display the current CS:IP
+     * @param {boolean} [fAddress] is true to display the current PC
      */
     DebuggerPDP11.prototype.message = function(sMessage, fAddress)
     {
@@ -1151,16 +1151,16 @@ if (DEBUGGER) {
     };
 
     /**
-     * runCPU(fUpdateFocus)
+     * startCPU(fUpdateFocus)
      *
      * @this {DebuggerPDP11}
      * @param {boolean} [fUpdateFocus] is true to update focus
      * @return {boolean} true if run request successful, false if not
      */
-    DebuggerPDP11.prototype.runCPU = function(fUpdateFocus)
+    DebuggerPDP11.prototype.startCPU = function(fUpdateFocus)
     {
-        if (!this.isCPUAvail()) return false;
-        this.cpu.runCPU(fUpdateFocus);
+        if (!this.checkCPU()) return false;
+        this.cpu.startCPU(fUpdateFocus);
         return true;
     };
 
@@ -1175,7 +1175,7 @@ if (DEBUGGER) {
      */
     DebuggerPDP11.prototype.stepCPU = function(nCycles, fRegs, fUpdateCPU)
     {
-        if (!this.isCPUAvail()) return false;
+        if (!this.checkCPU()) return false;
 
         this.nCycles = 0;
 
@@ -1212,7 +1212,7 @@ if (DEBUGGER) {
         }
 
         /*
-         * Because we called cpu.stepCPU() and not cpu.runCPU(), we must nudge the cpu's update code,
+         * Because we called cpu.stepCPU() and not cpu.startCPU(), we must nudge the cpu's update code,
          * and then update our own state.  Normally, the only time fUpdateCPU will be false is when doTrace()
          * is calling us in a loop, in which case it will perform its own updateCPU() when it's done.
          */
@@ -1257,14 +1257,14 @@ if (DEBUGGER) {
     };
 
     /**
-     * isCPUAvail()
+     * checkCPU()
      *
-     * Make sure the CPU is ready (finished initializing), not busy (already running), and not in an error state.
+     * Make sure the CPU is ready (finished initializing), powered, not already running, and not in an error state.
      *
      * @this {DebuggerPDP11}
      * @return {boolean}
      */
-    DebuggerPDP11.prototype.isCPUAvail = function()
+    DebuggerPDP11.prototype.checkCPU = function()
     {
         if (!this.cpu)
             return false;
@@ -1272,7 +1272,7 @@ if (DEBUGGER) {
             return false;
         if (!this.cpu.isPowered())
             return false;
-        if (this.cpu.isBusy())
+        if (this.cpu.isRunning())
             return false;
         return !this.cpu.isError();
     };
@@ -3209,7 +3209,7 @@ if (DEBUGGER) {
             this.parseAddrOptions(dbgAddr, sOptions);
             this.setTempBreakpoint(dbgAddr);
         }
-        if (!this.runCPU(true)) {
+        if (!this.startCPU(true)) {
             if (!fQuiet) this.println("cpu busy or unavailable, run command ignored");
         }
     };
@@ -3268,7 +3268,7 @@ if (DEBUGGER) {
 
             if (this.nStep) {
                 this.setTempBreakpoint(dbgAddr);
-                if (!this.runCPU()) {
+                if (!this.startCPU()) {
                     if (this.cmp) this.cmp.updateFocus();
                     this.nStep = 0;
                 }

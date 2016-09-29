@@ -9,5 +9,5 @@
 	<ram id="ram" addr="0x10000" size="0x34000"/>
 	<device id="unibus" name="unibus"/>
 	<panel ref="/devices/pdp11/panel/1170/wide.xml"/>
-	<debugger id="debugger" base="8"/>
+	<debugger id="debugger" base="8" messages="bus|trap" commands="bp 140270"/>
 </machine>
