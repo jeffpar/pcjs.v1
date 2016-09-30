@@ -165,7 +165,19 @@ CPUStatePDP11.prototype.initRegs = function()
     this.controlReg = [         // various control registers we don't really care about
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     ];
+
+    /*
+     * opFlags contains various triggers that stepCPU() needs to be aware of
+     */
     this.opFlags = 0;
+
+    /*
+     * srcMode and dstMode are set by getVirtualByMode(), indicating to the opcode handlers the mode(s) used
+     * as part of the current opcode.  Ditto for srcReg and dstReg.
+     */
+    this.srcMode = this.dstMode = 0;
+    this.srcReg = this.dstReg = 0;
+
     this.cpuType = 70;
     this.trapPSW = -1;
     this.loopRate = 9999;       // instructions we can execute in 12ms
@@ -1214,6 +1226,7 @@ CPUStatePDP11.prototype.readByteFromPhysical = function(physicalAddress)
  */
 CPUStatePDP11.prototype.writeByteToPhysical = function(physicalAddress, data)
 {
+    if (physicalAddress & 1) this.nStepCycles--;
     this.bus.setByte(physicalAddress, data & 0xff);
 };
 
@@ -1293,17 +1306,29 @@ CPUStatePDP11.prototype.pushWord = function(data)
  */
 CPUStatePDP11.prototype.getVirtualByMode = function(addressMode, accessFlags)
 {
-    var virtualAddress, stepSize, reg = addressMode & 7;
+    var virtualAddress, stepSize;
     var addrDSpace = (accessFlags & PDP11.ACCESS.VIRT)? 0 : this.addrDSpace;
 
-    switch ((addressMode >> 3) & 7) {
+    var reg = addressMode & 7;
+    var mode = (addressMode >> 3) & 7;
 
+    if (accessFlags & PDP11.ACCESS.WRITE) {
+        this.dstMode = mode; this.dstReg = reg;
+    } else {
+        this.srcMode = mode; this.srcReg = reg;
+    }
+
+    /*
+     * Modes that need to auto-increment or auto-decrement will break,
+     * n order to perform the update; others will return an address immediately.
+     */
+    switch (mode) {
     /*
      * Mode 0: Registers don't have a virtual address so trap
      */
     case 0:
         this.trap(PDP11.TRAP.BUS_ERROR, PDP11.REASON.NOREGADDR);
-        break;
+        return 0;
 
     /*
      * Mode 1: (R)
@@ -1320,7 +1345,8 @@ CPUStatePDP11.prototype.getVirtualByMode = function(addressMode, accessFlags)
                 this.opFlags |= PDP11.OPFLAG.TRAP_SP;
             }
         }
-        return (reg === 7 ? this.regsGen[reg] : (this.regsGen[reg] | addrDSpace));
+        this.nStepCycles -= 2 + 1;
+        return (reg === 7? this.regsGen[reg] : (this.regsGen[reg] | addrDSpace));
 
     /*
      * Mode 2: (R)+
@@ -1334,6 +1360,7 @@ CPUStatePDP11.prototype.getVirtualByMode = function(addressMode, accessFlags)
                 stepSize = 1;
             }
         }
+        this.nStepCycles -= 2 + 1;
         break;
 
     /*
@@ -1346,6 +1373,7 @@ CPUStatePDP11.prototype.getVirtualByMode = function(addressMode, accessFlags)
         virtualAddress = this.readWordFromVirtual(virtualAddress);
         // if (reg === 7) LOG_ADDRESS(virtualAddress); // @#n not operational
         virtualAddress |= addrDSpace;
+        this.nStepCycles -= 5 + 2;
         break;
 
     /*
@@ -1355,9 +1383,8 @@ CPUStatePDP11.prototype.getVirtualByMode = function(addressMode, accessFlags)
         stepSize = -2;
         if (reg < 6 && (accessFlags & PDP11.ACCESS.BYTE)) stepSize = -1;
         virtualAddress = (this.regsGen[reg] + stepSize) & 0xffff;
-        if (reg !== 7) {
-            virtualAddress |= addrDSpace;
-        }
+        if (reg !== 7) virtualAddress |= addrDSpace;
+        this.nStepCycles -= 3 + 1;
         break;
 
     /*
@@ -1368,6 +1395,7 @@ CPUStatePDP11.prototype.getVirtualByMode = function(addressMode, accessFlags)
         virtualAddress = (this.regsGen[reg] - 2) & 0xffff;
         if (reg !== 7) virtualAddress |= addrDSpace;
         virtualAddress = this.readWordFromVirtual(virtualAddress) | addrDSpace;
+        this.nStepCycles -= 6 + 2;
         break;
 
     /*
@@ -1376,6 +1404,7 @@ CPUStatePDP11.prototype.getVirtualByMode = function(addressMode, accessFlags)
     case 6:
         virtualAddress = this.getPCWord();
         virtualAddress = ((virtualAddress + this.regsGen[reg]) & 0xffff) | addrDSpace;
+        this.nStepCycles -= 4 + 2;
         return virtualAddress;
 
     /*
@@ -1385,6 +1414,7 @@ CPUStatePDP11.prototype.getVirtualByMode = function(addressMode, accessFlags)
         virtualAddress = this.getPCWord();
         virtualAddress = (virtualAddress + this.regsGen[reg]) & 0xffff;
         virtualAddress = this.readWordFromVirtual(virtualAddress | PDP11.ACCESS.DSPACE) | addrDSpace;
+        this.nStepCycles -= 7 + 3;
         return virtualAddress;
     }
 
@@ -1454,7 +1484,7 @@ CPUStatePDP11.prototype.readWordFromPrevSpace = function(opCode, accessFlags)
             src = this.regsAltStack[(this.regPSW >> 12) & 3];
         }
     } else {
-        var addr = this.getVirtualByMode(opCode, PDP11.ACCESS.WORD);
+        var addr = this.getVirtualByMode(opCode, PDP11.ACCESS.READ_WORD);
         if (!(accessFlags & PDP11.ACCESS.DSPACE)) {
             if ((this.regPSW & 0xf000) !== 0xf000) addr &= 0xffff;
         }
@@ -1472,7 +1502,6 @@ CPUStatePDP11.prototype.readWordFromPrevSpace = function(opCode, accessFlags)
  * @param {number} opCode
  * @param {number} accessFlags (really just PDP11.ACCESS.DSPACE or PDP11.ACCESS.ISPACE)
  * @param {number} data
- * @return {number}
  */
 CPUStatePDP11.prototype.writeWordToPrevSpace = function(opCode, accessFlags, data)
 {
@@ -1487,14 +1516,13 @@ CPUStatePDP11.prototype.writeWordToPrevSpace = function(opCode, accessFlags, dat
             this.regsAltStack[(this.regPSW >> 12) & 3] = data;
         }
     } else {
-        var addr = this.getVirtualByMode(opCode, PDP11.ACCESS.WORD);
+        var addr = this.getVirtualByMode(opCode, PDP11.ACCESS.WRITE_WORD);
         if (!(accessFlags & PDP11.ACCESS.DSPACE)) addr &= 0xffff;
         this.mmuMode = (this.regPSW >> 12) & 3;
         addr = this.mapVirtualToPhysical(addr | (accessFlags & PDP11.ACCESS.DSPACE), PDP11.ACCESS.WRITE);
         this.mmuMode = (this.regPSW >> 14) & 3;
         this.writeWordToPhysical(addr, data);
     }
-    return data;
 };
 
 /**

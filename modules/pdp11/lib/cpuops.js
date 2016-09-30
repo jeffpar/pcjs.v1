@@ -468,7 +468,7 @@ PDP11.opADCB = function(opCode)
 PDP11.opADD = function(opCode)
 {
     this.updateWordByMode(opCode, this.readWordByMode(opCode >> PDP11.SRCMODE.SHIFT), PDP11.fnADD);
-    this.nStepCycles -= 1;
+    this.nStepCycles -= (this.dstMode? (8 + 1) + (this.srcReg && this.dstReg >= 6? 1 : 0) : (this.srcMode? (3 + 2) : (2 + 1) + (this.dstReg == 7? 2 : 0)));
 };
 
 /**
