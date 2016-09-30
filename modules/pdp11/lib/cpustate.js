@@ -511,7 +511,7 @@ CPUStatePDP11.prototype.setNF = function()
  */
 CPUStatePDP11.prototype.getPC = function()
 {
-    return this.regsGen[7];
+    return this.regsGen[PDP11.REG.PC];
 };
 
 /**
@@ -522,7 +522,7 @@ CPUStatePDP11.prototype.getPC = function()
  */
 CPUStatePDP11.prototype.getPCWord = function()
 {
-    var data = this.readWordFromVirtual(this.regsGen[7]);
+    var data = this.readWordFromVirtual(this.regsGen[PDP11.REG.PC]);
     this.advancePC(2);
     return data;
 };
@@ -535,7 +535,7 @@ CPUStatePDP11.prototype.getPCWord = function()
  */
 CPUStatePDP11.prototype.advancePC = function(off)
 {
-    this.regsGen[7] = (this.regsGen[7] + off) & 0xffff;
+    this.regsGen[PDP11.REG.PC] = (this.regsGen[PDP11.REG.PC] + off) & 0xffff;
 };
 
 /**
@@ -546,7 +546,7 @@ CPUStatePDP11.prototype.advancePC = function(off)
  */
 CPUStatePDP11.prototype.setPC = function(addr)
 {
-    this.regsGen[7] = addr & 0xffff;
+    this.regsGen[PDP11.REG.PC] = addr & 0xffff;
 };
 
 /**
@@ -557,7 +557,7 @@ CPUStatePDP11.prototype.setPC = function(addr)
  */
 CPUStatePDP11.prototype.getSP = function()
 {
-    return this.regsGen[6];
+    return this.regsGen[PDP11.REG.SP];
 };
 
 /**
@@ -568,7 +568,7 @@ CPUStatePDP11.prototype.getSP = function()
  */
 CPUStatePDP11.prototype.setSP = function(addr)
 {
-    this.regsGen[6] = addr & 0xffff;
+    this.regsGen[PDP11.REG.SP] = addr & 0xffff;
 };
 
 /**
@@ -746,18 +746,34 @@ CPUStatePDP11.prototype.setPSW = function(newPSW)
 };
 
 /**
- * updateNZFlags(result)
+ * updateNZVFlags(result)
  *
- * NOTE: The V flag is simply zeroed, and the C flag is unchanged.
+ * NOTE: Only N and Z are updated based on the result; V is zeroed, C is unchanged.
  *
  * @this {CPUStatePDP11}
  * @param {number} result
  */
-CPUStatePDP11.prototype.updateNZFlags = function(result)
+CPUStatePDP11.prototype.updateNZVFlags = function(result)
 {
     if (!(this.opFlags & PDP11.OPFLAG.NO_FLAGS)) {
         this.flagN = this.flagZ = result;
         this.flagV = 0;
+    }
+};
+
+/**
+ * updateNZVCFlags(result)
+ *
+ * NOTE: Only N and Z are updated based on the result; both V and C are simply zeroed.
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} result
+ */
+CPUStatePDP11.prototype.updateNZVCFlags = function(result)
+{
+    if (!(this.opFlags & PDP11.OPFLAG.NO_FLAGS)) {
+        this.flagN = this.flagZ = result;
+        this.flagV = this.flagC = 0;
     }
 };
 
