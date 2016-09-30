@@ -70,7 +70,7 @@ function CPUStatePDP11(parmsCPU)
     switch(this.model) {
     case PDP11.MODEL_1170:
     default:
-        nCyclesDefault = 1000000;
+        nCyclesDefault = 6666667;
         break;
     }
 

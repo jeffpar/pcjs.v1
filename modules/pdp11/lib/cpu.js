@@ -62,7 +62,7 @@ if (NODE) {
  * 750ns.  My initial take on DEC's timings is that they are including the write time as part
  * of the total EF (execute/fetch) time.  So, for instructions that write to memory, it looks
  * like we'll normally need to add 5 cycles (750/150) to the instruction's base time, but
- * we'll need to keep an eye for exceptions.
+ * we'll need to keep an eye out for exceptions.
  */
 
 /**
