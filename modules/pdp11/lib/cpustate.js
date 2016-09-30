@@ -1325,8 +1325,8 @@ CPUStatePDP11.prototype.getVirtualByMode = function(addressMode, accessFlags)
     var virtualAddress, stepSize;
     var addrDSpace = (accessFlags & PDP11.ACCESS.VIRT)? 0 : this.addrDSpace;
 
-    var reg = addressMode & 7;
     var mode = (addressMode >> 3) & 7;
+    var reg = addressMode & PDP11.OPREG.MASK;
 
     if (accessFlags & PDP11.ACCESS.WRITE) {
         this.dstMode = mode; this.dstReg = reg;
@@ -1340,9 +1340,11 @@ CPUStatePDP11.prototype.getVirtualByMode = function(addressMode, accessFlags)
      */
     switch (mode) {
     /*
-     * Mode 0: Registers don't have a virtual address so trap
+     * Mode 0: Registers don't have a virtual address, so trap.
+     * TODO: Review whether we should ever actually hit this code path (hence the assert).
      */
     case 0:
+        this.assert(false);
         this.trap(PDP11.TRAP.BUS_ERROR, PDP11.REASON.NOREGADDR);
         return 0;
 
@@ -1463,7 +1465,7 @@ CPUStatePDP11.prototype.getVirtualByMode = function(addressMode, accessFlags)
  */
 CPUStatePDP11.prototype.getAddrPhysical = function(addressMode, accessFlags)
 {
-    this.assert(addressMode & 0x38);
+    this.assert(addressMode & PDP11.OPMODE.MASK);
     return this.getVirtualByMode(addressMode, accessFlags);
 };
 
@@ -1477,7 +1479,7 @@ CPUStatePDP11.prototype.getAddrPhysical = function(addressMode, accessFlags)
  */
 CPUStatePDP11.prototype.getAddrVirtual = function(addressMode, accessFlags)
 {
-    this.assert(addressMode & 0x38);
+    this.assert(addressMode & PDP11.OPMODE.MASK);
     return this.mapVirtualToPhysical(this.getVirtualByMode(addressMode, accessFlags), accessFlags);
 };
 
@@ -1493,7 +1495,8 @@ CPUStatePDP11.prototype.readWordFromPrevSpace = function(opCode, accessFlags)
 {
     var src;
     if (!(opCode & PDP11.OPMODE.MASK)) {
-        var reg = opCode & 7;
+        this.srcMode = 0;
+        var reg = opCode & PDP11.OPREG.MASK;
         if (reg != 6 || ((this.regPSW >> 2) & PDP11.PSW.PMODE) === (this.regPSW & PDP11.PSW.PMODE)) {
             src = this.regsGen[reg];
         } else {
@@ -1524,8 +1527,9 @@ CPUStatePDP11.prototype.writeWordToPrevSpace = function(opCode, accessFlags, dat
     if (!(this.regMMR0 & 0xe000)) {
         this.regMMR1 = 0x16;
     }
-    if (!(opCode & 0x38)) {
-        var reg = opCode & 7;
+    if (!(opCode & PDP11.OPMODE.MASK)) {
+        this.dstMode = 0;
+        var reg = opCode & PDP11.OPREG.MASK;
         if (reg != 6 || ((this.regPSW >> 2) & PDP11.PSW.PMODE) === (this.regPSW & PDP11.PSW.PMODE)) {
             this.regsGen[reg] = data;
         } else {
@@ -1552,6 +1556,7 @@ CPUStatePDP11.prototype.readWordByMode = function(addressMode)
 {
     var result;
     if (!(addressMode & PDP11.OPMODE.MASK)) {
+        this.srcMode = 0;
         result = this.regsGen[addressMode & PDP11.OPREG.MASK];
     } else {
         /*
@@ -1574,8 +1579,9 @@ CPUStatePDP11.prototype.readWordByMode = function(addressMode)
 CPUStatePDP11.prototype.readByteByMode = function(addressMode)
 {
     var result;
-    if (!(addressMode & 0x38)) {
-        result = this.regsGen[addressMode & 7] & 0xff;
+    if (!(addressMode & PDP11.OPMODE.MASK)) {
+        this.srcMode = 0;
+        result = this.regsGen[addressMode & PDP11.OPREG.MASK] & 0xff;
     } else {
         result = this.readByteFromPhysical(this.getAddr(addressMode, PDP11.ACCESS.READ_BYTE));
     }
@@ -1595,6 +1601,7 @@ CPUStatePDP11.prototype.readByteByMode = function(addressMode)
 CPUStatePDP11.prototype.updateWordByMode = function(addressMode, src, fnOp)
 {
     if (!(addressMode & PDP11.OPMODE.MASK)) {
+        this.dstMode = 0;
         var reg = addressMode & PDP11.OPREG.MASK;
         this.regsGen[reg] = fnOp.call(this, src, this.regsGen[reg]);
     } else {
@@ -1616,6 +1623,7 @@ CPUStatePDP11.prototype.updateWordByMode = function(addressMode, src, fnOp)
 CPUStatePDP11.prototype.updateByteByMode = function(addressMode, src, fnOp)
 {
     if (!(addressMode & PDP11.OPMODE.MASK)) {
+        this.dstMode = 0;
         var reg = addressMode & PDP11.OPREG.MASK;
         this.regsGen[reg] = (this.regsGen[reg] & 0xff00) | fnOp.call(this, src, this.regsGen[reg]);
     } else {
@@ -1637,6 +1645,7 @@ CPUStatePDP11.prototype.updateByteByMode = function(addressMode, src, fnOp)
 CPUStatePDP11.prototype.writeWordByMode = function(addressMode, data)
 {
     if (!(addressMode & PDP11.OPMODE.MASK)) {
+        this.dstMode = 0;
         this.regsGen[addressMode & PDP11.OPREG.MASK] = data & 0xffff;
     } else {
         this.writeWordToPhysical(this.getAddr(addressMode, PDP11.ACCESS.WRITE_WORD), data);
@@ -1658,6 +1667,7 @@ CPUStatePDP11.prototype.writeWordByMode = function(addressMode, data)
 CPUStatePDP11.prototype.writeByteByMode = function(addressMode, data, writeFlags)
 {
     if (!(addressMode & PDP11.OPMODE.MASK)) {
+        this.dstMode = 0;
         var reg = addressMode & PDP11.OPREG.MASK;
         if (!data) {
             this.regsGen[reg] &= ~0xff; // TODO: Profile to determine if this is a win
