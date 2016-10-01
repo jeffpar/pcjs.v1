@@ -1057,4 +1057,48 @@ Component.prototype = {
     }
 };
 
+/*
+ * The following polyfills provide ES5.1 functionality that's missing in older browsers (eg, IE8),
+ * allowing PCjs apps to run without slamming into exceptions; however, due to the lack of HTML5 canvas
+ * support in those browsers, all you're likely to see are "soft" errors (eg, "Missing <canvas> support").
+ *
+ * Perhaps we can implement a text-only faux video display for a fun retro-browser experience someday.
+ *
+ * TODO: Come up with a better place to put these polyfills.  We will likely have more if we decide to
+ * make the leap from ES5.1 to ES6 features.
+ */
+
+/*
+ * See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/indexOf
+ */
+if (!Array.prototype.indexOf) {
+    Array.prototype.indexOf = function(obj, start) {
+         for (var i = (start || 0), j = this.length; i < j; i++) {
+             if (this[i] === obj) { return i; }
+         }
+         return -1;
+    }
+}
+
+/*
+ * See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind
+ */
+if (!Function.prototype.bind) {
+    Function.prototype.bind = function(obj) {
+        if (typeof this != "function") {
+            // Closest thing possible to the ECMAScript 5 internal IsCallable function
+            throw new TypeError("Function.prototype.bind: non-callable object");
+        }
+        var args = Array.prototype.slice.call(arguments, 1);
+        var fToBind = this;
+        var fnNOP = /** @constructor */ (function() {});
+        var fnBound = function() {
+            return fToBind.apply(this instanceof fnNOP && obj? this : obj, args.concat(Array.prototype.slice.call(arguments)));
+        };
+        fnNOP.prototype = this.prototype;
+        fnBound.prototype = new fnNOP();
+        return fnBound;
+    };
+}
+
 if (NODE) module.exports = Component;
