@@ -1972,7 +1972,7 @@ if (DEBUGGER) {
 
         if (!opDesc) opDesc = [DebuggerPDP11.OPS.NONE];
 
-        var sOperands = "";
+        var sOperands = "", sTarget = "";
         var sOpName = opNames[opDesc[0]];
         var cOperands = opDesc.length - 1;
 
@@ -1990,14 +1990,10 @@ if (DEBUGGER) {
 
             /*
              * If getOperand() returns an Array rather than a string, then the first element is the original
-             * operand, and the second element is a comment containing an alternate representation of the operand.
+             * operand, and the second element contains an alternate representation of the operand (eg, target address).
              */
             if (typeof sOperand != "string") {
-                /*
-                 * TODO: Stop overriding the comment and sequence values once cycle counts become legitimate.
-                 */
-                /* if (!sComment) */ sComment = sOperand[1];
-                nSequence = null;
+                sTarget = sOperand[1];
                 sOperand = sOperand[0];
             }
 
@@ -2018,14 +2014,15 @@ if (DEBUGGER) {
         sLine += str.pad(sOpName, 5);
         if (sOperands) sLine += ' ' + sOperands;
 
-        if (sComment) {
-            sLine = str.pad(sLine, 60) + ';' + sComment;
+        if (sComment || sTarget) {
+            sLine = str.pad(sLine, 60) + ';' + (sComment || "");
             if (!this.cpu.flags.checksum) {
                 sLine += (nSequence != null? '=' + nSequence.toString() : "");
             } else {
                 var nCycles = this.cpu.getCycles();
                 sLine += "cycles=" + nCycles.toString() + " cs=" + str.toHex(this.cpu.nChecksum);
             }
+            if (sTarget) sLine += " @" + sTarget;
         }
         return sLine;
     };
