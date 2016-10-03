@@ -1058,14 +1058,14 @@ Component.prototype = {
 };
 
 /*
- * The following polyfills provide ES5.1 functionality that's missing in older browsers (eg, IE8),
+ * The following polyfills provide ES5 functionality that's missing in older browsers (eg, IE8),
  * allowing PCjs apps to run without slamming into exceptions; however, due to the lack of HTML5 canvas
  * support in those browsers, all you're likely to see are "soft" errors (eg, "Missing <canvas> support").
  *
  * Perhaps we can implement a text-only faux video display for a fun retro-browser experience someday.
  *
  * TODO: Come up with a better place to put these polyfills.  We will likely have more if we decide to
- * make the leap from ES5.1 to ES6 features.
+ * make the leap from ES5 to ES6 features.
  */
 
 /*

@@ -321,7 +321,7 @@ var PDP11 = {
      * ES6 ALERT: By using octal constants, this is the first place I'm dipping my toe into ECMAScript 6 waters.
      * If you're loading this raw source code into your browser, then by now (2016) you're almost certainly using
      * an ES6-aware browser.  Everyone else should be using code compiled by Google's Closure Compiler, which
-     * automatically produces code that's backward-compatible with ES5.1 (for example, octal constants are
+     * we configure to produce code that's backward-compatible with ES5 (for example, octal constants are
      * converted to decimal values).
      *
      * For more details: https://github.com/google/closure-compiler/wiki/ECMAScript6
