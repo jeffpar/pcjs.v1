@@ -701,7 +701,7 @@ PDP11.opBISB = function(opCode)
 PDP11.opBIT = function(opCode)
 {
     /*
-     * NOTE: Because readWordByMode() is being used to READ (not WRITE) the DSTMODE field of opCode,
+     * NOTE: Because readWordByMode() will be used to READ (not WRITE) the DSTMODE field of opCode,
      * the srcMode and srcReg properties need to be copied before they get overwritten.
      */
     var src = this.readWordByMode(opCode >> PDP11.SRCMODE.SHIFT);
@@ -725,7 +725,7 @@ PDP11.opBIT = function(opCode)
 PDP11.opBITB = function(opCode)
 {
     /*
-     * NOTE: Because readByteByMode() is being used to READ (not WRITE) the DSTMODE field of opCode,
+     * NOTE: Because readByteByMode() will be used to READ (not WRITE) the DSTMODE field of opCode,
      * the srcMode and srcReg properties need to be copied before they get overwritten.
      */
     var src = this.readByteByMode(opCode >> PDP11.SRCMODE.SHIFT);
@@ -994,7 +994,7 @@ PDP11.opCLx = function(opCode)
 PDP11.opCMP = function(opCode)
 {
     /*
-     * NOTE: Because readWordByMode() is being used to READ (not WRITE) the DSTMODE field of opCode,
+     * NOTE: Because readWordByMode() will be used to READ (not WRITE) the DSTMODE field of opCode,
      * the srcMode and srcReg properties need to be copied before they get overwritten.
      */
     var src = this.readWordByMode(opCode >> PDP11.SRCMODE.SHIFT);
@@ -1023,7 +1023,7 @@ PDP11.opCMP = function(opCode)
 PDP11.opCMPB = function(opCode)
 {
     /*
-     * NOTE: Because readByteByMode() is being used to READ (not WRITE) the DSTMODE field of opCode,
+     * NOTE: Because readByteByMode() will be used to READ (not WRITE) the DSTMODE field of opCode,
      * the srcMode and srcReg properties need to be copied before they get overwritten.
      */
     var src = this.readByteByMode(opCode >> PDP11.SRCMODE.SHIFT) << 8;
@@ -1237,6 +1237,10 @@ PDP11.opJSR = function(opCode)
      * srcMode rather than dstMode, because JSR does not WRITE the dst operand; it merely READs it.
      */
     var nSnapCycles = this.nStepCycles;
+    /*
+     * TODO: Determine whether or not the SRCMODE operand (regsGen[reg]) should be snapped BEFORE or AFTER we
+     * decode the DSTMODE operand.  Doing it AFTER seems a bit risky.
+     */
     var addr = this.getVirtualByMode(opCode, PDP11.ACCESS.VIRT);
     var reg = (opCode >> PDP11.SRCMODE.SHIFT) & PDP11.OPREG.MASK;
     this.pushWord(this.regsGen[reg]);
