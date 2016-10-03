@@ -2878,13 +2878,12 @@ if (DEBUGGER) {
     {
         var sMsg;
         if (this.flags.running) {
-            sMsg = "halting";
+            if (!fQuiet) this.println("halting");
             this.stopCPU();
         } else {
             if (this.isBusy(true)) return;
-            sMsg = "already halted";
+            if (!fQuiet) this.println("already halted");
         }
-        if (!fQuiet) this.println(sMsg);
     };
 
     /**

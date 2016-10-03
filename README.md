@@ -209,8 +209,8 @@ Then run:
 which should report:
 
 	Closure Compiler (http://github.com/google/closure-compiler)
-	Version: v20150609
-	Built on: 2015/06/09 16:35
+	Version: v20160911
+	Built on: 2016-09-13 16:51
 
 If you don't have Java installed, it's recommended that you install the JDK (*not* the JRE), because the JRE may not
 update your command-line tools properly.  Note that Java is used *only* by the Closure Compiler; none of the PCjs

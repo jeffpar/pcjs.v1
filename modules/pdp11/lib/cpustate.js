@@ -216,7 +216,7 @@ CPUStatePDP11.prototype.resetRegs = function()
 /**
  * initMemoryAccess()
  *
- * Define getAddr(), readWord(), etc, handlers appropriate for the current MMU mode, in order to
+ * Define getAddr() handlers appropriate for the current MMU mode, in order to
  * eliminate unnecessary calls to mapVirtualToPhysical().
  *
  * @this {CPUStatePDP11}
@@ -226,11 +226,9 @@ CPUStatePDP11.prototype.initMemoryAccess = function()
     if (this.mmuEnable) {
         this.addrDSpace = PDP11.ACCESS.DSPACE;
         this.getAddr = this.getAddrVirtual;
-        this.readWord = this.readWordFromVirtual;
     } else {
         this.addrDSpace = 0;
         this.getAddr = this.getAddrPhysical;
-        this.readWord = this.readWordFromPhysical;
     }
 };
 
@@ -1563,12 +1561,7 @@ CPUStatePDP11.prototype.readWordByMode = function(addressMode)
         this.srcMode = 0;
         result = this.regsGen[this.srcReg = addressMode & PDP11.OPREG.MASK];
     } else {
-        /*
-         * NOTE: This used to call readWordFromPhysical(), after calling getAddrVirtual(), but the latter is
-         * just a wrapper around mapVirtualToPhysical() on the result from getVirtualByMode(), so now we call
-         * getVirtualByMode() directly, knowing that the current readWord() will call the correct function.
-         */
-        result = this.readWord(this.getVirtualByMode(addressMode, PDP11.ACCESS.READ_WORD));
+        result = this.readWordFromPhysical(this.getAddr(addressMode, PDP11.ACCESS.READ_WORD));
     }
     return result;
 };
