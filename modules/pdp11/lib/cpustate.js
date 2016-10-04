@@ -216,8 +216,8 @@ CPUStatePDP11.prototype.resetRegs = function()
 /**
  * initMemoryAccess()
  *
- * Define getAddr() handlers appropriate for the current MMU mode, in order to
- * eliminate unnecessary calls to mapVirtualToPhysical().
+ * Define getAddr() handler and DSPACE setting appropriate for the current MMU mode, in order to eliminate
+ * unnecessary calls to mapVirtualToPhysical().
  *
  * @this {CPUStatePDP11}
  */
@@ -1184,18 +1184,7 @@ CPUStatePDP11.prototype.mapVirtualToPhysical = function(virtualAddress, accessFl
  */
 CPUStatePDP11.prototype.readWordFromPhysical = function(physicalAddress)
 {
-    if (physicalAddress >= BusPDP11.MAX_ADDRESS) {
-        return this.regsGen[physicalAddress - BusPDP11.MAX_ADDRESS];
-	} else {
-        // if (physicalAddress >= BusPDP11.IOPAGE_UNIBUS) {
-        //    return this.bus.access_iopage(physicalAddress, -1, 0);
-		// } else {
-			if (physicalAddress >= 0) {
-                return this.bus.getWord(physicalAddress);
-			}
-		// }
-	}
-    return physicalAddress;
+    return this.bus.getWord(physicalAddress);
 };
 
 /**
