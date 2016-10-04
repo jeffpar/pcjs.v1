@@ -210,7 +210,7 @@ BusPDP11.IOController = {
         }
         if (b >= 0) {
             if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS)) {
-                this.dbg.printMessage(afn[5] + ".readByte(" + this.dbg.toStrBase(addr) + "): " + this.dbg.toStrBase(b), true);
+                this.dbg.printMessage(afn[5] + ".readByte(" + this.dbg.toStrBase(addr) + "): " + this.dbg.toStrBase(b), true, true);
             }
             return b;
         }
@@ -275,7 +275,7 @@ BusPDP11.IOController = {
         }
         if (fWrite) {
             if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS)) {
-                this.dbg.printMessage(afn[5] + ".writeByte(" + this.dbg.toStrBase(addr) + "," + this.dbg.toStrBase(b) + ")", true);
+                this.dbg.printMessage(afn[5] + ".writeByte(" + this.dbg.toStrBase(addr) + "," + this.dbg.toStrBase(b) + ")", true, true);
             }
             return;
         }
@@ -308,7 +308,7 @@ BusPDP11.IOController = {
         }
         if (w >= 0) {
             if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS)) {
-                this.dbg.printMessage(afn[5] + ".readWord(" + this.dbg.toStrBase(addr) + "): " + this.dbg.toStrBase(w), true);
+                this.dbg.printMessage(afn[5] + ".readWord(" + this.dbg.toStrBase(addr) + "): " + this.dbg.toStrBase(w), true, true);
             }
             return w;
         }
@@ -345,7 +345,7 @@ BusPDP11.IOController = {
         }
         if (fWrite) {
             if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS)) {
-                this.dbg.printMessage(afn[5] + ".writeWord(" + this.dbg.toStrBase(addr) + "," + this.dbg.toStrBase(w) + ")", true);
+                this.dbg.printMessage(afn[5] + ".writeWord(" + this.dbg.toStrBase(addr) + "," + this.dbg.toStrBase(w) + ")", true, true);
             }
             return;
         }

@@ -456,7 +456,11 @@ var PDP11 = {
             READY:      0x80,       // Transmitter Ready (read-only)
             INT_ENABLE: 0x40,       // Transmitter Interrupt Enable (read-write)
             MAINT:      0x04,       // Maintenance (read-write)
-            BREAK:      0x01        // BREAK (read-write)
+            BREAK:      0x01,       // BREAK (read-write)
+            DELAY:      8
+        },
+        XBUF: {
+            DELAY:      100
         }
     },
     KW11: {                         // KW11-L LINE TIME CLOCK

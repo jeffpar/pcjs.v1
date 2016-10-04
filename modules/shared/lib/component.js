@@ -1027,7 +1027,7 @@ Component.prototype = {
     printMessage: function(sMessage, bitsMessage, fAddress) {
         if (DEBUGGER && this.dbg) {
             if (bitsMessage === true || this.messageEnabled(bitsMessage | 0)) {
-                this.dbg.message(sMessage, fAddress || bitsMessage === true);
+                this.dbg.message(sMessage, fAddress);
             }
         }
     },

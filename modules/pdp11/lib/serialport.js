@@ -344,7 +344,7 @@ SerialPortPDP11.prototype.writeXCSR = function(data, addr)
      */
     if ((this.tty.xcsr & (PDP11.DL11.XCSR.READY | PDP11.DL11.XCSR.INT_ENABLE)) == PDP11.DL11.XCSR.READY && (data & PDP11.DL11.XCSR.INT_ENABLE)) {
         var device = this;
-        this.cpu.interrupt(PDP11.DL11.DELAY, PDP11.DL11.PRI, PDP11.DL11.VEC, function() {
+        this.cpu.interrupt(PDP11.DL11.XCSR.DELAY, PDP11.DL11.PRI, PDP11.DL11.VEC, function() {
             device.tty.xcsr |= PDP11.DL11.XCSR.READY;
             return !!(device.tty.xcsr & PDP11.DL11.XCSR.INT_ENABLE);
         });
@@ -376,39 +376,16 @@ SerialPortPDP11.prototype.readXBUF = function(addr)
  */
 SerialPortPDP11.prototype.writeXBUF = function(data, addr)
 {
-    // data &= 0x7f;
-    // if (data) {
-    //     switch (data) {
-    //     case 0:
-    //     case 0xD: /*015*/
-    //         /*
-    //         if (document.forms.console.line.value.length > 9000) {
-    //             document.forms.console.line.value = document.forms.console.line.value.substring(document.forms.console.line.value.length - 8192);
-    //         }
-    //         */
-    //         break;
-    //     case 0x8: /*010*/
-    //         /*
-    //         if (!tty.del) {
-    //             document.forms.console.line.value = document.forms.console.line.value.substring(0, document.forms.console.line.value.length - 1);
-    //         }
-    //         */
-    //         break;
-    //     default:
-    //         /*
-    //         document.forms.console.line.value += String.fromCharCode(data);
-    //         if (data == 0x0A) {
-    //             document.forms.console.line.scrollTop = document.forms.console.line.scrollHeight;
-    //         }
-    //         */
-    //     }
-    //     tty.del = 0;
-    // }
-    // tty.xcsr &= ~0x80; /*0200*/
-    // cpu.interrupt(100, 4, 0x34, /*064*/ function() {
-    //     tty.xcsr |= 0x80; /*0200*/
-    //     return !!(tty.xcsr & 0x40); /*0100*/
-    // });
+    data &= 0x7f;
+    if (data) {
+        var serial = this;
+        this.transmitByte(data);
+        this.tty.xcsr &= ~PDP11.DL11.XCSR.READY;
+        this.cpu.interrupt(PDP11.DL11.XBUF.DELAY, PDP11.DL11.PRI, PDP11.DL11.VEC, function() {
+            serial.tty.xcsr |= PDP11.DL11.XCSR.READY;
+            return !!(serial.tty.xcsr & PDP11.DL11.XCSR.INT_ENABLE);
+        });
+    }
 };
 
 /**
@@ -513,7 +490,7 @@ SerialPortPDP11.prototype.powerDown = function(fSave, fShutdown)
 SerialPortPDP11.prototype.reset = function()
 {
     this.tty.rcsr = 0;
-    this.tty.xcsr = 0x80; /*0200*/
+    this.tty.xcsr = 0x80;
     this.initState();
 };
 

@@ -1167,7 +1167,7 @@ if (DEBUGGER) {
         if (this.nDisableMessages) return;
 
         if (fAddress) {
-            sMessage += " at " + this.toStrAddr(this.newAddr(this.cpu.getPC()));
+            sMessage += " @" + this.toStrAddr(this.newAddr(this.cpu.getPC()));
         }
 
         if (this.bitsMessage & MessagesPDP11.BUFFER) {
