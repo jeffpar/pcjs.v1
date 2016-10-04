@@ -187,30 +187,38 @@ BusPDP11.IOController = {
      */
     readByte: function(off, addr)
     {
+        var b = -1;
         var bus = this.controller;
         var afn = bus.aIOHandlers[off];
         if (afn) {
-            if (bus.messageEnabled()) bus.printMessage(afn[5] + ".readByte(" + str.toOct(addr) + ")", 0, true);
             if (afn[0]) {
-                return afn[0](addr);
+                b = afn[0](addr);
             } else if (afn[2]) {
                 if (!(addr & 0x1)) {
-                    return afn[2](addr) & 0xff;
+                    b = afn[2](addr) & 0xff;
                 } else {
-                    return afn[2](addr & ~0x1) >> 8;
+                    b = afn[2](addr & ~0x1) >> 8;
                 }
             }
         } else if (addr & 0x1) {
             afn = bus.aIOHandlers[off & ~0x1];
             if (afn) {
-                if (bus.messageEnabled()) bus.printMessage(afn[5] + ".readByte(" + str.toOct(addr) + ")", 0, true);
                 if (afn[2]) {
-                    return afn[2](addr & ~0x1) >> 8;
+                    b = afn[2](addr & ~0x1) >> 8;
                 }
             }
         }
-        bus.println("warning: unconverted read access to byte @" + str.toOct(addr));
-        return bus.fnAccess(addr, -1, 1);
+        if (b >= 0) {
+            if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS)) {
+                this.dbg.message(afn[5] + ".readByte(" + this.dbg.toStrBase(addr) + "): " + this.dbg.toStrBase(b), true);
+            }
+            return b;
+        }
+        b = bus.fnAccess(addr, -1, 1);
+        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS)) {
+            this.dbg.message("warning: unconverted read access to byte @" + this.dbg.toStrBase(addr) + ": " + this.dbg.toStrBase(b));
+        }
+        return b;
     },
 
     /**
@@ -224,29 +232,30 @@ BusPDP11.IOController = {
     writeByte: function(off, b, addr)
     {
         var w;
+        var fWrite = false;
         var bus = this.controller;
         var afn = bus.aIOHandlers[off];
         if (afn) {
-            if (bus.messageEnabled()) bus.printMessage(afn[5] + ".writeByte(" + str.toOct(addr) + "," + str.toOct(b) + ")", 0, true);
             /*
              * If a writeByte() handler exists, call it; we're done
              */
             if (afn[1]) {
                 afn[1](b, addr);
-                return;
+                fWrite = true;
             }
             /*
              * If a writeWord() handler exists, call the readWord() handler first to get the original data,
              * then call writeWord() with the new data pre-inserted into the original data.
              */
-            if (afn[3]) {
+            else if (afn[3]) {
                 w = afn[2]? afn[2](addr) : 0;
                 if (!(addr & 0x1)) {
-                    afn[3]((w & ~0xff) | b, addr)
+                    afn[3]((w & ~0xff) | b, addr);
+                    fWrite = true;
                 } else {
                     afn[3]((w & 0xff) | (b << 8), addr & ~0x1);
+                    fWrite = true;
                 }
-                return;
             }
         } else if (addr & 0x1) {
             /*
@@ -256,17 +265,24 @@ BusPDP11.IOController = {
              */
             afn = bus.aIOHandlers[off & ~0x1];
             if (afn) {
-                if (bus.messageEnabled()) bus.printMessage(afn[5] + ".writeByte(" + str.toOct(addr) + "," + str.toOct(b) + ")", 0, true);
                 if (afn[3]) {
                     addr &= ~0x1;
                     w = afn[2]? afn[2](addr) : 0;
                     afn[3]((w & 0xff) | (b << 8), addr);
-                    return;
+                    fWrite = true;
                 }
             }
         }
-        bus.println("warning: unconverted write access to byte @" + str.toOct(addr));
+        if (fWrite) {
+            if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS)) {
+                this.dbg.message(afn[5] + ".writeByte(" + this.dbg.toStrBase(addr) + "," + this.dbg.toStrBase(b) + ")", true);
+            }
+            return;
+        }
         bus.fnAccess(addr, b, 1);
+        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS)) {
+            this.dbg.message("warning: unconverted write access to byte @" + this.dbg.toStrBase(addr) + ": " + this.dbg.toStrBase(b));
+        }
     },
 
     /**
@@ -279,19 +295,28 @@ BusPDP11.IOController = {
      */
     readWord: function(off, addr)
     {
+        var w = -1;
         var bus = this.controller;
         Component.assert(!(addr & 1));                  // unaligned addresses should be getting trapped at a higher level
         var afn = bus.aIOHandlers[off];
         if (afn) {
-            if (bus.messageEnabled()) bus.printMessage(afn[5] + ".readWord(" + str.toOct(addr) + ")", 0, true);
             if (afn[2]) {
-                return afn[2](addr);
+                w = afn[2](addr);
             } else if (afn[0]) {
-                return afn[0](addr) | (afn[0](addr + 1) << 8);
+                w = afn[0](addr) | (afn[0](addr + 1) << 8);
             }
         }
-        bus.println("warning: unconverted read access to word @" + str.toOct(addr));
-        return bus.fnAccess(addr, -1, 0);
+        if (w >= 0) {
+            if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS)) {
+                this.dbg.message(afn[5] + ".readWord(" + this.dbg.toStrBase(addr) + "): " + this.dbg.toStrBase(w), true);
+            }
+            return w;
+        }
+        w = bus.fnAccess(addr, -1, 0);
+        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS)) {
+            this.dbg.message("warning: unconverted read access to word @" + this.dbg.toStrBase(addr) + ": " + this.dbg.toStrBase(w));
+        }
+        return w;
     },
 
     /**
@@ -304,22 +329,30 @@ BusPDP11.IOController = {
      */
     writeWord: function(off, w, addr)
     {
+        var fWrite = false;
         var bus = this.controller;
         Component.assert(!(addr & 1));                  // unaligned addresses should be getting trapped at a higher level
         var afn = bus.aIOHandlers[off];
         if (afn) {
-            if (bus.messageEnabled()) bus.printMessage(afn[5] + ".writeWord(" + str.toOct(addr) + "," + str.toOct(w) + ")", 0, true);
             if (afn[3]) {
                 afn[3](w, addr);
-                return;
+                fWrite = true;
             } else if (afn[1]) {
                 afn[1](w & 0xff, addr);
                 afn[1](w >> 8, addr + 1);
-                return;
+                fWrite = true;
             }
         }
-        bus.println("warning: unconverted write access to word @" + str.toOct(addr));
+        if (fWrite) {
+            if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS)) {
+                this.dbg.message(afn[5] + ".writeWord(" + this.dbg.toStrBase(addr) + "," + this.dbg.toStrBase(w) + ")", true);
+            }
+            return;
+        }
         bus.fnAccess(addr, w, 0);
+        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS)) {
+            this.dbg.message("warning: unconverted write access to word @" + this.dbg.toStrBase(addr) + ": " + this.dbg.toStrBase(w));
+        }
     }
 };
 

@@ -588,7 +588,9 @@ if (DEBUGGER) {
         var b = 0xff;
         var addr = this.getAddr(dbgAddr, false, 1);
         if (addr !== PDP11.ADDR_INVALID) {
+            this.nDisableMessages++;
             b = this.bus.getByteDirect(addr);
+            this.nDisableMessages--;
             if (inc) this.incAddr(dbgAddr, inc);
         }
         return b;
@@ -607,7 +609,9 @@ if (DEBUGGER) {
         var w = 0xffff;
         var addr = this.getAddr(dbgAddr, false, 2);
         if (addr !== PDP11.ADDR_INVALID) {
+            this.nDisableMessages++;
             w = this.bus.getWordDirect(addr);
+            this.nDisableMessages--;
             if (inc) this.incAddr(dbgAddr, inc);
         }
         return w;
@@ -625,7 +629,9 @@ if (DEBUGGER) {
     {
         var addr = this.getAddr(dbgAddr, true, 1);
         if (addr !== PDP11.ADDR_INVALID) {
+            this.nDisableMessages++;
             this.bus.setByteDirect(addr, b);
+            this.nDisableMessages--;
             if (inc) this.incAddr(dbgAddr, inc);
             this.cpu.updateCPU(true);           // we set fForce to true in case video memory was the target
         }
@@ -643,7 +649,9 @@ if (DEBUGGER) {
     {
         var addr = this.getAddr(dbgAddr, true, 2);
         if (addr !== PDP11.ADDR_INVALID) {
+            this.nDisableMessages++;
             this.bus.setWordDirect(addr, w);
+            this.nDisableMessages--;
             if (inc) this.incAddr(dbgAddr, inc);
             this.cpu.updateCPU(true);           // we set fForce to true in case video memory was the target
         }
@@ -1007,6 +1015,7 @@ if (DEBUGGER) {
         this.bitsMessage = this.bitsWarning = MessagesPDP11.WARN;
         this.sMessagePrev = null;
         this.aMessageBuffer = [];
+        this.nDisableMessages = 0;
         /*
          * Internally, we use "key" instead of "keys", since the latter is a method on JavasScript objects,
          * but externally, we allow the user to specify "keys"; "kbd" is also allowed as shorthand for "keyboard".
@@ -1135,6 +1144,8 @@ if (DEBUGGER) {
      */
     DebuggerPDP11.prototype.message = function(sMessage, fAddress)
     {
+        if (this.nDisableMessages) return;
+
         if (fAddress) {
             sMessage += " at " + this.toStrAddr(this.newAddr(this.cpu.getPC()));
         }
@@ -1582,7 +1593,9 @@ if (DEBUGGER) {
          */
         if (nState >= 0 && this.aaOpcodeCounts.length) {
             this.cOpcodes++;
+            this.nDisableMessages++;
             var opCode = this.bus.getWordDirect(addr);
+            this.nDisableMessages--;
             if (opCode != null) {
                 var dbgAddr = this.aOpcodeHistory[this.iOpcodeHistory];
                 this.setAddr(dbgAddr, cpu.getPC());

@@ -556,7 +556,7 @@ MemoryPDP11.prototype = {
      * @return {number}
      */
     readNone: function readNone(off, addr) {
-        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.CPU | MessagesPDP11.MEM) /* && !off */) {
+        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.MEM) /* && !off */) {
             this.dbg.message("attempt to read invalid block %" + str.toHex(this.addr), true);
         }
         return 0xff;
@@ -570,7 +570,7 @@ MemoryPDP11.prototype = {
      * @param {number} addr
      */
     writeNone: function writeNone(off, v, addr) {
-        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.CPU | MessagesPDP11.MEM) /* && !off */) {
+        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.MEM) /* && !off */) {
             this.dbg.message("attempt to write " + str.toHexWord(v) + " to invalid block %" + str.toHex(this.addr), true);
         }
     },
@@ -753,7 +753,11 @@ MemoryPDP11.prototype = {
      * @return {number}
      */
     readByteLE: function readByteLE(off, addr) {
-        return this.ab[off];
+        var b = this.ab[off];
+        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.MEM)) {
+            this.dbg.message("Memory.readByteLE(" + this.dbg.toStrBase(addr) + "): " + this.dbg.toStrBase(b), true);
+        }
+        return b;
     },
     /**
      * readWordBE(off, addr)
@@ -779,7 +783,11 @@ MemoryPDP11.prototype = {
          * TODO: It remains to be seen if there's any advantage to checking the offset for an aligned read
          * vs. always reading the bytes separately.
          */
-        return (off & 0x1)? (this.ab[off] | (this.ab[off+1] << 8)) : this.aw[off >> 1];
+        var w = (off & 0x1)? (this.ab[off] | (this.ab[off+1] << 8)) : this.aw[off >> 1];
+        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.MEM)) {
+            this.dbg.message("Memory.readWordLE(" + this.dbg.toStrBase(addr) + "): " + this.dbg.toStrBase(w), true);
+        }
+        return w;
     },
     /**
      * writeByteBE(off, b, addr)
@@ -804,6 +812,9 @@ MemoryPDP11.prototype = {
     writeByteLE: function writeByteLE(off, b, addr) {
         this.ab[off] = b;
         this.fDirty = true;
+        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.MEM)) {
+            this.dbg.message("Memory.writeByteLE(" + this.dbg.toStrBase(addr) + "," + this.dbg.toStrBase(b) + ")", true);
+        }
     },
     /**
      * writeWordBE(off, w, addr)
@@ -837,6 +848,9 @@ MemoryPDP11.prototype = {
             this.aw[off >> 1] = w;
         }
         this.fDirty = true;
+        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.MEM)) {
+            this.dbg.message("Memory.writeWordLE(" + this.dbg.toStrBase(addr) + "," + this.dbg.toStrBase(w) + ")", true);
+        }
     }
 };
 
