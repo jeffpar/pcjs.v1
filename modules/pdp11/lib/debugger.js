@@ -102,9 +102,9 @@ function DebuggerPDP11(parmsDbg)
          * For TEMPORARY breakpoint addresses, we set fTemporary to true, so that they can be automatically
          * cleared when they're hit.
          */
-        this.dbgAddrNextCode = this.newAddr();
-        this.dbgAddrNextData = this.newAddr();
-        this.dbgAddrAssemble = this.newAddr();
+        this.dbgAddrNextCode = this.newAddr(0);
+        this.dbgAddrNextData = this.newAddr(0);
+        this.dbgAddrAssemble = this.newAddr(0);
 
         /*
          * aSymbolTable is an array of SymbolTable objects, one per ROM or other chunk of address space,
