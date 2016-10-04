@@ -59,18 +59,18 @@ var littleEndian = (TYPEDARRAYS? (function() {
 /**
  * MemoryPDP11(addr, used, size, type, controller)
  *
- * The Bus component allocates MemoryPDP11 objects so that each has a memory buffer with a
+ * The Bus component allocates Memory objects so that each has a memory buffer with a
  * block-granular starting address and an address range equal to bus.nBlockSize; however,
- * the size of any given MemoryPDP11 object's underlying buffer can be either zero or bus.nBlockSize;
+ * the size of any given Memory object's underlying buffer can be either zero or bus.nBlockSize;
  * memory read/write functions for empty (buffer-less) blocks are mapped to readNone/writeNone.
  *
  * The Bus allocates empty blocks for the entire address space during initialization, so that
  * any reads/writes to undefined addresses will have no effect.  Later, the ROM and RAM
  * components will ask the Bus to allocate memory for specific ranges, and the Bus will allocate
- * as many new blockSize MemoryPDP11 objects as the ranges require.  Partial MemoryPDP11 blocks could
+ * as many new blockSize Memory objects as the ranges require.  Partial Memory blocks could
  * also be supported in theory, but in practice, they're not.
  *
- * Because MemoryPDP11 blocks now allow us to have a "sparse" address space, we could choose to
+ * Because Memory blocks now allow us to have a "sparse" address space, we could choose to
  * take the memory hit of allocating 4K arrays per block, where each element stores only one byte,
  * instead of the more frugal but slightly slower approach of allocating arrays of 32-bit dwords
  * (LONGARRAYS) and shifting/masking bytes/words to/from dwords; in theory, byte accesses would
@@ -84,7 +84,7 @@ var littleEndian = (TYPEDARRAYS? (function() {
  * size at this point.  Also, not all JavaScript implementations support TYPEDARRAYS (IE9 is probably
  * the only real outlier: it lacks typed arrays but otherwise has all the necessary HTML5 support).
  *
- * WARNING: Since MemoryPDP11 blocks are low-level objects that have no UI requirements, they
+ * WARNING: Since Memory blocks are low-level objects that have no UI requirements, they
  * do not inherit from the Component class, so if you want to use any Component class methods,
  * such as Component.assert(), use the corresponding Debugger methods instead (assuming a debugger
  * is available).
@@ -188,7 +188,7 @@ function MemoryPDP11(addr, used, size, type, controller)
  * 'little endian") storage.  ROM is equally conventional, except that the fReadOnly property is set,
  * disabling writes.  VIDEO is treated exactly like RAM, unless a controller is provided.  Both RAM and
  * VIDEO memory are always considered writable, and even ROM can be written using the Bus setByteDirect()
- * interface (which in turn uses the MemoryPDP11 writeByteDirect() interface), allowing the ROM component to
+ * interface (which in turn uses the Memory writeByteDirect() interface), allowing the ROM component to
  * initialize its own memory.  The CONTROLLER type is used to identify memory-mapped devices that do not
  * need any default storage and always provide their own controller.
  *
@@ -237,7 +237,7 @@ MemoryPDP11.prototype = {
     /**
      * init(addr)
      *
-     * Quick reinitializer when reusing a MemoryPDP11 block.
+     * Quick reinitializer when reusing a Memory block.
      *
      * @this {MemoryPDP11}
      * @param {number} addr
@@ -248,7 +248,7 @@ MemoryPDP11.prototype = {
     /**
      * clone(mem, type)
      *
-     * Converts the current MemoryPDP11 block (this) into a clone of the given MemoryPDP11 block (mem),
+     * Converts the current Memory block (this) into a clone of the given Memory block (mem),
      * and optionally overrides the current block's type with the specified type.
      *
      * @this {MemoryPDP11}
@@ -289,10 +289,10 @@ MemoryPDP11.prototype = {
     /**
      * save()
      *
-     * This gets the contents of a MemoryPDP11 block as an array of 32-bit values; used by BusPDP11.saveMemory(),
-     * which in turn is called by CPUStatePDP11.save().
+     * This gets the contents of a Memory block as an array of 32-bit values; used by Bus.saveMemory(),
+     * which in turn is called by CPUState.save().
      *
-     * MemoryPDP11 blocks with custom memory controllers do NOT save their contents; that's the responsibility
+     * Memory blocks with custom memory controllers do NOT save their contents; that's the responsibility
      * of the controller component.
      *
      * @this {MemoryPDP11}
@@ -335,9 +335,9 @@ MemoryPDP11.prototype = {
     /**
      * restore(adw)
      *
-     * This restores the contents of a MemoryPDP11 block from an array of 32-bit values;
-     * used by BusPDP11.restoreMemory(), which is called by CPUStatePDP11.restore(), after all other
-     * components have been restored and thus all MemoryPDP11 blocks have been allocated
+     * This restores the contents of a Memory block from an array of 32-bit values;
+     * used by Bus.restoreMemory(), which is called by CPUState.restore(), after all other
+     * components have been restored and thus all Memory blocks have been allocated
      * by their respective components.
      *
      * @this {MemoryPDP11}
@@ -386,7 +386,7 @@ MemoryPDP11.prototype = {
      * The afn parameter should be a 4-entry function table containing two byte handlers and
      * two word handlers.  See the static afnMemory table for an example.
      *
-     * If no function table is specified, a default is selected based on the MemoryPDP11 type;
+     * If no function table is specified, a default is selected based on the Memory type;
      * similarly, any undefined entries in the table are filled with default handlers that fall
      * back to the byte handlers, and if one or both byte handlers are undefined, they default
      * to handlers that simply ignore the access.
@@ -469,7 +469,7 @@ MemoryPDP11.prototype = {
      */
     printAddr: function(sMessage) {
         if (DEBUG && this.dbg && this.dbg.messageEnabled(MessagesPDP11.MEM)) {
-            this.dbg.printMessage(sMessage + ' ' + (this.addr != null? ('%' + str.toHex(this.addr)) : '#' + this.id), true);
+            this.dbg.printMessage(sMessage + ' ' + (this.addr != null? ('@' + this.dbg.toStrBase(this.addr)) : '#' + this.id), true);
         }
     },
     /**
@@ -548,7 +548,7 @@ MemoryPDP11.prototype = {
      * that a system would require nonexistent memory locations to return ALL bits set.
      *
      * Also, I'm reluctant to address that potential issue by simply returning -1, because to date, the above
-     * MemoryPDP11 interfaces have always returned values that are properly masked to 8, 16 or 32 bits, respectively.
+     * Memory interfaces have always returned values that are properly masked to 8, 16 or 32 bits, respectively.
      *
      * @this {MemoryPDP11}
      * @param {number} off
@@ -557,7 +557,8 @@ MemoryPDP11.prototype = {
      */
     readNone: function readNone(off, addr) {
         if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.MEM) /* && !off */) {
-            this.dbg.message("attempt to read invalid block %" + str.toHex(this.addr), true);
+            this.dbg.printMessage("attempt to read invalid block %" + str.toHex(this.addr), true);
+            this.dbg.stopCPU();
         }
         return 0xff;
     },
@@ -571,7 +572,8 @@ MemoryPDP11.prototype = {
      */
     writeNone: function writeNone(off, v, addr) {
         if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.MEM) /* && !off */) {
-            this.dbg.message("attempt to write " + str.toHexWord(v) + " to invalid block %" + str.toHex(this.addr), true);
+            this.dbg.printMessage("attempt to write " + str.toHexWord(v) + " to invalid block %" + str.toHex(this.addr), true);
+            this.dbg.stopCPU();
         }
     },
     /**
@@ -755,7 +757,7 @@ MemoryPDP11.prototype = {
     readByteLE: function readByteLE(off, addr) {
         var b = this.ab[off];
         if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.MEM)) {
-            this.dbg.message("Memory.readByteLE(" + this.dbg.toStrBase(addr) + "): " + this.dbg.toStrBase(b), true);
+            this.dbg.printMessage("Memory.readByte(" + this.dbg.toStrBase(addr) + "): " + this.dbg.toStrBase(b), true);
         }
         return b;
     },
@@ -785,7 +787,7 @@ MemoryPDP11.prototype = {
          */
         var w = (off & 0x1)? (this.ab[off] | (this.ab[off+1] << 8)) : this.aw[off >> 1];
         if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.MEM)) {
-            this.dbg.message("Memory.readWordLE(" + this.dbg.toStrBase(addr) + "): " + this.dbg.toStrBase(w), true);
+            this.dbg.printMessage("Memory.readWord(" + this.dbg.toStrBase(addr) + "): " + this.dbg.toStrBase(w), true);
         }
         return w;
     },
@@ -813,7 +815,7 @@ MemoryPDP11.prototype = {
         this.ab[off] = b;
         this.fDirty = true;
         if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.MEM)) {
-            this.dbg.message("Memory.writeByteLE(" + this.dbg.toStrBase(addr) + "," + this.dbg.toStrBase(b) + ")", true);
+            this.dbg.printMessage("Memory.writeByte(" + this.dbg.toStrBase(addr) + "," + this.dbg.toStrBase(b) + ")", true);
         }
     },
     /**
@@ -849,7 +851,7 @@ MemoryPDP11.prototype = {
         }
         this.fDirty = true;
         if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.MEM)) {
-            this.dbg.message("Memory.writeWordLE(" + this.dbg.toStrBase(addr) + "," + this.dbg.toStrBase(w) + ")", true);
+            this.dbg.printMessage("Memory.writeWord(" + this.dbg.toStrBase(addr) + "," + this.dbg.toStrBase(w) + ")", true);
         }
     }
 };

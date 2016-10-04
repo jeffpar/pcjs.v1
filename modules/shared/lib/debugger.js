@@ -275,7 +275,7 @@ if (DEBUGGER) {
              * Also, to allow quoted strings *inside* breakpoint commands, we first replace all
              * DOUBLE double-quotes with single quotes.
              */
-            sCmd = sCmd.toLowerCase().replace(/""/g, "'");
+            sCmd = sCmd.replace(/""/g, "'");
 
             var iPrev = 0;
             var chQuote = null;
@@ -604,6 +604,9 @@ if (DEBUGGER) {
         if (value !== undefined) {
             fDefined = true;
             sValue = str.toHex(value, 0, true) + " " + value + ". " + str.toOct(value, 0, true) + " " + str.toBinBytes(value, 0, true);
+            if (value >= 0x20 && value < 0x7F) {
+                sValue += " '" + String.fromCharCode(value) + "'";
+            }
         }
         sVar = (sVar != null? (sVar + ": ") : "");
         this.println(sVar + sValue);

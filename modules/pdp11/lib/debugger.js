@@ -214,8 +214,8 @@ if (DEBUGGER) {
         's':        "set options",
         't [#]':    "trace",                // other variations: tr (trace and dump registers)
         'u [#]':    "unassemble",
-        'v':        "print version",
-        'var':      "assign variable"
+        'var':      "assign variable",
+        'ver':      "print version"
     };
 
     /*
@@ -1136,11 +1136,31 @@ if (DEBUGGER) {
     };
 
     /**
+     * disableMessages(s)
+     *
+     * @this {DebuggerPDP11}
+     */
+    DebuggerPDP11.prototype.disableMessages = function()
+    {
+        this.nDisableMessages++;
+    };
+
+    /**
+     * enableMessages(s)
+     *
+     * @this {DebuggerPDP11}
+     */
+    DebuggerPDP11.prototype.enableMessages = function()
+    {
+        this.nDisableMessages--;
+    };
+
+    /**
      * message(sMessage, fAddress)
      *
      * @this {DebuggerPDP11}
      * @param {string} sMessage is any caller-defined message string
-     * @param {boolean} [fAddress] is true to display the current PC
+     * @param {boolean} [fAddress] is true to display the current address
      */
     DebuggerPDP11.prototype.message = function(sMessage, fAddress)
     {
@@ -3123,6 +3143,7 @@ if (DEBUGGER) {
     DebuggerPDP11.prototype.doOptions = function(asArgs)
     {
         switch (asArgs[1]) {
+
         case "base":
             if (asArgs[2]) {
                 var nBase = +asArgs[2];
@@ -3135,6 +3156,7 @@ if (DEBUGGER) {
             }
             this.println("default base: " + this.nBase);
             break;
+
         case "cs":
             var nCycles;
             if (asArgs[3] !== undefined) nCycles = +asArgs[3];          // warning: decimal instead of hex conversion
@@ -3167,6 +3189,13 @@ if (DEBUGGER) {
             this.println("target speed: " + this.cpu.getSpeedTarget() + " (" + this.cpu.getSpeed() + "x)");
             return;
 
+        default:
+            if (asArgs[1]) {
+                this.println("unknown option: " + asArgs[1]);
+                return;
+            }
+            /* falls through */
+
         case "?":
             this.println("debugger options:");
             this.println("\tbase #\t\tset default base to #");
@@ -3174,13 +3203,6 @@ if (DEBUGGER) {
             this.println("\tcs start #\tset checksum cycle start count to #");
             this.println("\tcs stop #\tset checksum cycle stop count to #");
             this.println("\tsp #\t\tset speed multiplier to #");
-            break;
-
-        default:
-            if (asArgs[1]) {
-                this.println("unknown option: " + asArgs[1]);
-                return;
-            }
             break;
         }
     };
@@ -3310,7 +3332,11 @@ if (DEBUGGER) {
         if (!a) {
             this.parseExpression(sCmd, true);
         } else {
-            this.println(this.replaceRegs(a[2]));
+            if (a[2].length > 1) {
+                this.println(this.replaceRegs(a[2]));
+            } else {
+                this.printValue(null, a[2].charCodeAt(0));
+            }
         }
     };
 
@@ -3644,7 +3670,9 @@ if (DEBUGGER) {
                     sCmd = "a " + this.toStrAddr(this.dbgAddrAssemble) + ' ' + sCmd;
                 }
 
+                var fError = false;
                 var asArgs = this.shiftArgs(sCmd.replace(/ +/g, ' ').split(' '));
+                asArgs[0] = asArgs[0].toLowerCase();
 
                 switch (asArgs[0].charAt(0)) {
                 case 'a':
@@ -3679,7 +3707,9 @@ if (DEBUGGER) {
                         if (!this.doIf(sCmd.substr(2), fQuiet)) {
                             result = false;
                         }
+                        break;
                     }
+                    fError = true;
                     break;
                 case 'k':
                     this.doStackTrace(asArgs[0], asArgs[1]);
@@ -3689,6 +3719,7 @@ if (DEBUGGER) {
                         this.doList(asArgs[1], true);
                         break;
                     }
+                    fError = true;
                     break;
                 case 'm':
                     this.doMessages(asArgs);
@@ -3723,8 +3754,12 @@ if (DEBUGGER) {
                         }
                         break;
                     }
-                    this.println((PDP11.APPNAME || "PDP11") + " version " + (XMLVERSION || PDP11.APPVERSION) + " (" + this.cpu.model + (PDP11.COMPILED? ",RELEASE" : (PDP11.DEBUG? ",DEBUG" : ",NODEBUG")) + (PDP11.TYPEDARRAYS? ",TYPEDARRAYS" : (PDP11.BYTEARRAYS? ",BYTEARRAYS" : ",LONGARRAYS")) + ')');
-                    this.println(web.getUserAgent());
+                    if (asArgs[0] == "ver") {
+                        this.println((PDP11.APPNAME || "PDP11") + " version " + (XMLVERSION || PDP11.APPVERSION) + " (" + this.cpu.model + (PDP11.COMPILED? ",RELEASE" : (PDP11.DEBUG? ",DEBUG" : ",NODEBUG")) + (PDP11.TYPEDARRAYS? ",TYPEDARRAYS" : (PDP11.BYTEARRAYS? ",BYTEARRAYS" : ",LONGARRAYS")) + ')');
+                        this.println(web.getUserAgent());
+                        break;
+                    }
+                    fError = true;
                     break;
                 case '?':
                     if (asArgs[1]) {
@@ -3742,9 +3777,12 @@ if (DEBUGGER) {
                     if (this.doInfo(asArgs)) break;
                     /* falls through */
                 default:
+                    fError = true;
+                    break;
+                }
+                if (fError) {
                     this.println("unknown command: " + sCmd);
                     result = false;
-                    break;
                 }
             }
         } catch(e) {

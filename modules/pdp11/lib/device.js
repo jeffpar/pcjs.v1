@@ -60,14 +60,6 @@ function DevicePDP11(parmsDevice)
     Component.call(this, "Device", parmsDevice, DevicePDP11);
     this.sDeviceName = parmsDevice['name'];
 
-    this.tty = {
-        rbuf: [],
-        rcsr: 0,
-        xcsr: PDP11.DL11.XCSR.READY,
-        delCode: 127,
-        del: 0
-    };
-
     this.display = {
         data: 0,
         address: 0,
@@ -266,67 +258,6 @@ DevicePDP11.prototype.writeMMR0 = function(data, addr)
         idx = (this.cpu.regMMR3 & PDP11.MMR3.MMU_22BIT)? 1 : 2;
     }
     this.display.misc = (this.display.misc & ~7) | idx;
-};
-
-/**
- * readRCSR(addr)
- *
- * @this {DevicePDP11}
- * @param {number} addr (eg, PDP11.UNIBUS.RCSR or 177560)
- * @return {number}
- */
-DevicePDP11.prototype.readRCSR = function(addr)
-{
-    return this.tty.rcsr;
-};
-
-/**
- * writeRCSR(data, addr)
- *
- * @this {DevicePDP11}
- * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.RCSR or 177560)
- */
-DevicePDP11.prototype.writeRCSR = function(data, addr)
-{
-    this.tty.rcsr = (this.tty.rcsr & 0x80) | (data & ~0x80);
-};
-
-/**
- * readXCSR(addr)
- *
- * @this {DevicePDP11}
- * @param {number} addr (eg, PDP11.UNIBUS.XCSR or 177564)
- * @return {number}
- */
-DevicePDP11.prototype.readXCSR = function(addr)
-{
-    return this.tty.xcsr;
-};
-
-/**
- * writeXCSR(data, addr)
- *
- * @this {DevicePDP11}
- * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.XCSR or 177564)
- */
-DevicePDP11.prototype.writeXCSR = function(data, addr)
-{
-    /*
-     * If the device is READY, and INT_ENABLE is transitioning to *set*, then generate an interrupt.
-     */
-    if ((this.tty.xcsr & (PDP11.DL11.XCSR.READY | PDP11.DL11.XCSR.INT_ENABLE)) == PDP11.DL11.XCSR.READY && (data & PDP11.DL11.XCSR.INT_ENABLE)) {
-        var device = this;
-        this.cpu.interrupt(PDP11.DL11.DELAY, PDP11.DL11.PRI, PDP11.DL11.VEC, function() {
-            device.tty.xcsr |= PDP11.DL11.XCSR.READY;
-            return !!(device.tty.xcsr & PDP11.DL11.XCSR.INT_ENABLE);
-        });
-    }
-    /*
-     * In any event, propagate all bits from data *except* for READY.
-     */
-    this.tty.xcsr = (this.tty.xcsr & PDP11.DL11.XCSR.READY) | (data & ~PDP11.DL11.XCSR.READY);
 };
 
 /**
@@ -924,8 +855,6 @@ DevicePDP11.prototype.writeData = function(meta, block, address, count)
 DevicePDP11.prototype.reset = function()
 {
     this.display.misc = (this.display.misc & ~0x77) | 0x14; // kernel 16 bit
-    this.tty.rcsr = 0;
-    this.tty.xcsr = 0x80; /*0200*/
     this.kw11.lks = 0;
     this.rk11.rkcs = 0x80; /*0200*/
     this.rl11.csr = 0x80;
@@ -1110,7 +1039,7 @@ DevicePDP11.prototype.access = function(physicalAddress, data, byteFlag)
             }
             break;
         case 0x3FFF40: /*017777500*/ // 017777500 - 017777577
-            var tty = this.tty;
+            // var tty = this.tty;
             var kw11 = this.kw11;
             switch (physicalAddress & ~1) {
                 case 0x3FFF7E: /*017777576*/ // MMR2
@@ -1155,44 +1084,44 @@ DevicePDP11.prototype.access = function(physicalAddress, data, byteFlag)
                         if (result >= 0) this.display.data = result;
                     }
                     break;
-                case 0x3FFF76: /*017777566*/ // console xbuf
-                    if (data >= 0) {
-                        data &= 0x7f;
-                        if (data) {
-                        switch (data) {
-                        case 0:
-                        case 0xD: /*015*/
-                            /*
-                            if (document.forms.console.line.value.length > 9000) {
-                                document.forms.console.line.value = document.forms.console.line.value.substring(document.forms.console.line.value.length - 8192);
-                            }
-                            */
-                            break;
-                        case 0x8: /*010*/
-                            /*
-                            if (!tty.del) {
-                                document.forms.console.line.value = document.forms.console.line.value.substring(0, document.forms.console.line.value.length - 1);
-                            }
-                            */
-                            break;
-                        default:
-                            /*
-                            document.forms.console.line.value += String.fromCharCode(data);
-                            if (data == 0x0A) {
-                                document.forms.console.line.scrollTop = document.forms.console.line.scrollHeight;
-                            }
-                            */
-                        }
-                        tty.del = 0;
-                        }
-                        tty.xcsr &= ~0x80; /*0200*/
-                        cpu.interrupt(100, 4, 0x34, /*064*/ function() {
-                            tty.xcsr |= 0x80; /*0200*/
-                            return !!(tty.xcsr & 0x40); /*0100*/
-                        });
-                    }
-                    result = 0;
-                    break;
+                // case 0x3FFF76: /*017777566*/ // console xbuf
+                //     if (data >= 0) {
+                //         data &= 0x7f;
+                //         if (data) {
+                //             switch (data) {
+                //             case 0:
+                //             case 0xD: /*015*/
+                //                 /*
+                //                 if (document.forms.console.line.value.length > 9000) {
+                //                     document.forms.console.line.value = document.forms.console.line.value.substring(document.forms.console.line.value.length - 8192);
+                //                 }
+                //                 */
+                //                 break;
+                //             case 0x8: /*010*/
+                //                 /*
+                //                 if (!tty.del) {
+                //                     document.forms.console.line.value = document.forms.console.line.value.substring(0, document.forms.console.line.value.length - 1);
+                //                 }
+                //                 */
+                //                 break;
+                //             default:
+                //                 /*
+                //                 document.forms.console.line.value += String.fromCharCode(data);
+                //                 if (data == 0x0A) {
+                //                     document.forms.console.line.scrollTop = document.forms.console.line.scrollHeight;
+                //                 }
+                //                 */
+                //             }
+                //             tty.del = 0;
+                //         }
+                //         tty.xcsr &= ~0x80; /*0200*/
+                //         cpu.interrupt(100, 4, 0x34, /*064*/ function() {
+                //             tty.xcsr |= 0x80; /*0200*/
+                //             return !!(tty.xcsr & 0x40); /*0100*/
+                //         });
+                //     }
+                //     result = 0;
+                //     break;
                 // case 0x3FFF74: /*017777564*/ // console xcsr
                 //     if (data < 0) {
                 //         result = tty.xcsr;
@@ -1209,29 +1138,29 @@ DevicePDP11.prototype.access = function(physicalAddress, data, byteFlag)
                 //         }
                 //     }
                 //     break;
-                case 0x3FFF72: /*017777562*/ // console rbuf
-                    result = 0;
-                    if (data < 0) {
-                        tty.rcsr &= ~0x80; /*0200*/
-                        if (tty.rbuf.length > 0) {
-                            result = tty.rbuf.shift();
-                            if (tty.rbuf.length > 0) {
-                                setTimeout(function() {
-                                    tty.rcsr |= 0x80; /*0200*/
-                                    if (tty.rcsr & 0x40) /*0100*/ cpu.interrupt(40, 4, 0x30) /*060*/;
-                                }, 50);
-                            }
-                        }
-                    }
-                    break;
-                case 0x3FFF70: /*017777560*/ // console rcsr
-                    if (data < 0) {
-                        result = tty.rcsr;
-                    } else {
-                        result = this.insertData(tty.rcsr, physicalAddress, data, byteFlag);
-                        if (result >= 0) tty.rcsr = (tty.rcsr & 0x80) /*0200*/ | (result & ~0x80) /*0200*/;
-                    }
-                    break;
+                // case 0x3FFF72: /*017777562*/ // console rbuf
+                //     result = 0;
+                //     if (data < 0) {
+                //         tty.rcsr &= ~0x80; /*0200*/
+                //         if (tty.rbuf.length > 0) {
+                //             result = tty.rbuf.shift();
+                //             if (tty.rbuf.length > 0) {
+                //                 setTimeout(function() {
+                //                     tty.rcsr |= 0x80; /*0200*/
+                //                     if (tty.rcsr & 0x40) /*0100*/ cpu.interrupt(40, 4, 0x30) /*060*/;
+                //                 }, 50);
+                //             }
+                //         }
+                //     }
+                //     break;
+                // case 0x3FFF70: /*017777560*/ // console rcsr
+                //     if (data < 0) {
+                //         result = tty.rcsr;
+                //     } else {
+                //         result = this.insertData(tty.rcsr, physicalAddress, data, byteFlag);
+                //         if (result >= 0) tty.rcsr = (tty.rcsr & 0x80) /*0200*/ | (result & ~0x80) /*0200*/;
+                //     }
+                //     break;
                 // case 0x3FFF66: /*017777546*/ // kw11.lks
                 //     if (data < 0) {
                 //         result = kw11.lks;
@@ -1539,8 +1468,6 @@ DevicePDP11.prototype.access = function(physicalAddress, data, byteFlag)
  */
 DevicePDP11.UNIBUS_IOTABLE = {
     [PDP11.UNIBUS.LKS]:     /* 177546 */    [null, null, DevicePDP11.prototype.readLKS,     DevicePDP11.prototype.writeLKS,     "LKS"],
-    [PDP11.UNIBUS.RCSR]:    /* 177560 */    [null, null, DevicePDP11.prototype.readRCSR,    DevicePDP11.prototype.writeRCSR,    "RCSR"],
-    [PDP11.UNIBUS.XCSR]:    /* 177564 */    [null, null, DevicePDP11.prototype.readXCSR,    DevicePDP11.prototype.writeXCSR,    "XCSR"],
     [PDP11.UNIBUS.MMR0]:    /* 177572 */    [null, null, DevicePDP11.prototype.readMMR0,    DevicePDP11.prototype.writeMMR0,    "MMR0"],
     [PDP11.UNIBUS.PSW]:     /* 177776 */    [null, null, DevicePDP11.prototype.readPSW,     DevicePDP11.prototype.writePSW,     "PSW"]
 };

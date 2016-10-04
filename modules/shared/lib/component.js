@@ -806,7 +806,7 @@ Component.prototype = {
         }
     },
     /**
-     * println(s, type)
+     * println(s, type, id)
      *
      * For non-diagnostic messages, which components may override to control the destination/appearance of their output.
      *
@@ -1027,7 +1027,7 @@ Component.prototype = {
     printMessage: function(sMessage, bitsMessage, fAddress) {
         if (DEBUGGER && this.dbg) {
             if (bitsMessage === true || this.messageEnabled(bitsMessage | 0)) {
-                this.dbg.message(sMessage, fAddress);
+                this.dbg.message(sMessage, fAddress || bitsMessage === true);
             }
         }
     },

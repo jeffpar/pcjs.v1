@@ -210,13 +210,13 @@ BusPDP11.IOController = {
         }
         if (b >= 0) {
             if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS)) {
-                this.dbg.message(afn[5] + ".readByte(" + this.dbg.toStrBase(addr) + "): " + this.dbg.toStrBase(b), true);
+                this.dbg.printMessage(afn[5] + ".readByte(" + this.dbg.toStrBase(addr) + "): " + this.dbg.toStrBase(b), true);
             }
             return b;
         }
-        b = bus.fnAccess(addr, -1, 1);
+        b = bus.fnAccess(addr | BusPDP11.IOPAGE_22BIT, -1, 1);
         if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS)) {
-            this.dbg.message("warning: unconverted read access to byte @" + this.dbg.toStrBase(addr) + ": " + this.dbg.toStrBase(b));
+            this.dbg.printMessage("warning: unconverted read access to byte @" + this.dbg.toStrBase(addr) + ": " + this.dbg.toStrBase(b));
         }
         return b;
     },
@@ -275,13 +275,13 @@ BusPDP11.IOController = {
         }
         if (fWrite) {
             if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS)) {
-                this.dbg.message(afn[5] + ".writeByte(" + this.dbg.toStrBase(addr) + "," + this.dbg.toStrBase(b) + ")", true);
+                this.dbg.printMessage(afn[5] + ".writeByte(" + this.dbg.toStrBase(addr) + "," + this.dbg.toStrBase(b) + ")", true);
             }
             return;
         }
-        bus.fnAccess(addr, b, 1);
+        bus.fnAccess(addr | BusPDP11.IOPAGE_22BIT, b, 1);
         if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS)) {
-            this.dbg.message("warning: unconverted write access to byte @" + this.dbg.toStrBase(addr) + ": " + this.dbg.toStrBase(b));
+            this.dbg.printMessage("warning: unconverted write access to byte @" + this.dbg.toStrBase(addr) + ": " + this.dbg.toStrBase(b));
         }
     },
 
@@ -308,13 +308,13 @@ BusPDP11.IOController = {
         }
         if (w >= 0) {
             if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS)) {
-                this.dbg.message(afn[5] + ".readWord(" + this.dbg.toStrBase(addr) + "): " + this.dbg.toStrBase(w), true);
+                this.dbg.printMessage(afn[5] + ".readWord(" + this.dbg.toStrBase(addr) + "): " + this.dbg.toStrBase(w), true);
             }
             return w;
         }
-        w = bus.fnAccess(addr, -1, 0);
+        w = bus.fnAccess(addr | BusPDP11.IOPAGE_22BIT, -1, 0);
         if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS)) {
-            this.dbg.message("warning: unconverted read access to word @" + this.dbg.toStrBase(addr) + ": " + this.dbg.toStrBase(w));
+            this.dbg.printMessage("warning: unconverted read access to word @" + this.dbg.toStrBase(addr) + ": " + this.dbg.toStrBase(w));
         }
         return w;
     },
@@ -345,13 +345,13 @@ BusPDP11.IOController = {
         }
         if (fWrite) {
             if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS)) {
-                this.dbg.message(afn[5] + ".writeWord(" + this.dbg.toStrBase(addr) + "," + this.dbg.toStrBase(w) + ")", true);
+                this.dbg.printMessage(afn[5] + ".writeWord(" + this.dbg.toStrBase(addr) + "," + this.dbg.toStrBase(w) + ")", true);
             }
             return;
         }
-        bus.fnAccess(addr, w, 0);
+        bus.fnAccess(addr | BusPDP11.IOPAGE_22BIT, w, 0);
         if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS)) {
-            this.dbg.message("warning: unconverted write access to word @" + this.dbg.toStrBase(addr) + ": " + this.dbg.toStrBase(w));
+            this.dbg.printMessage("warning: unconverted write access to word @" + this.dbg.toStrBase(addr) + ": " + this.dbg.toStrBase(w));
         }
     }
 };
@@ -426,7 +426,7 @@ BusPDP11.prototype.reset = function()
 };
 
 /**
- * access()
+ * access(addr, data, byteFlag)
  *
  * This is our default I/O handler, called whenever there's an IOPAGE access without a corresponding entry
  * in aIOHandlers; in the interim, our Device component will override this default handler with its own function
@@ -440,6 +440,9 @@ BusPDP11.prototype.reset = function()
  */
 BusPDP11.prototype.access = function(addr, data, byteFlag)
 {
+    if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS)) {
+        this.dbg.printMessage("warning: unrecognized access(" + this.dbg.toStrBase(addr) + "," + this.dbg.toStrBase(data) + "," + byteFlag + ")");
+    }
     return 0;
 };
 

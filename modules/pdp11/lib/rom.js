@@ -342,7 +342,9 @@ ROMPDP11.prototype.addROM = function(addr)
         if (DEBUG) this.log("addROM(): copying ROM to " + str.toHexLong(addr) + " (" + str.toHexLong(this.abROM.length) + " bytes)");
         var i;
         for (i = 0; i < this.abROM.length; i++) {
+            if (DEBUGGER && this.dbg) this.dbg.disableMessages();
             this.bus.setByteDirect(addr + i, this.abROM[i]);
+            if (DEBUGGER && this.dbg) this.dbg.enableMessages();
         }
         return true;
     }

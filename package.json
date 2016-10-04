@@ -196,6 +196,7 @@
     "./modules/pdp11/lib/rom.js",
     "./modules/pdp11/lib/ram.js",
     "./modules/pdp11/lib/keyboard.js",
+    "./modules/pdp11/lib/serialport.js",
     "./modules/shared/lib/debugger.js",
     "./modules/pdp11/lib/debugger.js",
     "./modules/pdp11/lib/computer.js",
