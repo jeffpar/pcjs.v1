@@ -164,7 +164,7 @@ From p. 4-17 of the Technical Manual:
 	42H     Flags buffer
 	82H     Keyboard UART data output
 
-The PC8080 ChipSet component deals with the ER1400's Non-volatile RAM (NVR) ports, the Flags buffer, and the
+The PC8080 ChipSet component deals with the ER1400's Non-Volatile RAM (NVR) ports, the Flags buffer, and the
 DC011 and DC012 circuits, while the Keyboard component deals with the Keyboard UART.
 
 You might wonder why the PC8080 Video component doesn't manage the DC011 and DC012.  In fact, the above labels are misleading.
@@ -204,7 +204,7 @@ In addition to single-wide vs. double-wide, line attributes can also specify dou
 top or bottom halves of the double-high characters should be displayed, because double-high always implies double-wide
 (ie, there is no support for double-high, single-wide characters).
 
-Conssequently, a VT100 [machine XML file](machine.xml) must set the Video component's *bufferRAM* property
+Consequently, a VT100 [machine XML file](machine.xml) must set the Video component's *bufferRAM* property
 to "true", indicating that existing RAM should be used, and a new property, *bufferFormat* must be set to "vt100",
 enabling support for the VT100's line data format; eg:
 
@@ -235,7 +235,7 @@ From "Power-Up and Self-Test", section 4.2.8, p. 4-19, of the VT100 Technical Ma
 
 > When power is first applied to the terminal controller board, the reset circuit in the 8224 holds the microprocessor
 in a halt state. Within a second, after the voltages stabilize in the power supply, the RC network at the reset input
-allows tlhe input voltage to rise to the switching threshold of a Schmitt trigger. Then the reset is released with the
+allows the input voltage to rise to the switching threshold of a Schmitt trigger. Then the reset is released with the
 8080 program counter set to 0. The low 64 bytes of program are reserved for the eight interrupt service routines which
 can be addressed by the restart instruction (see previous section). The low 8 start the power-up routine by disabling
 the interrupts, setting up the stack pointer, and then going immediately into the self-test routines.
@@ -255,13 +255,13 @@ LEDs are incremented to show the next ROM number and the process continues.
 > The next part of the test is writing and reading the RAM. Every bit in the RAM is written with a 0 and a 1 and read each
 time. If the advanced video option is present (as indicated by the Option Present flag), its RAM is tested immediately
 after the main RAM. In the main RAM a failure halts the machine. Failure of a bit in the advanced video option RAM is
-indicated on the screen and the process continues. In another termnnal, the VT52, one bad bit in the screen RAM means there
+indicated on the screen and the process continues. In another terminal, the VT52, one bad bit in the screen RAM means there
 is one location that may not contain right character. This can be annoying to the user but does not affect the rest of the
-screen. If one bit is bad in a VT100 line address, the entire screen below the affected line can become garbled and unsuable.
+screen. If one bit is bad in a VT100 line address, the entire screen below the affected line can become garbled and unusable.
 A bad bit in the scratch area could disable communication with the host. So this confidence check ensures that any RAM
 failure is detected immediately.
 
-> The next test checks the nonvola1tile RAM by reading it. A checksum is calculated and compared with the value stored the
+> The next test checks the non-volatile RAM by reading it. A checksum is calculated and compared with the value stored the
 last time the NVR was written during a save. A bad NVR does not stop the VT100 because the SET-UP values can always be
 reestablished from the keyboard at power-up. The NVR test is also the normal time when the terminal gets its auto SET-UP
 readings from the NVR. Time is saved because reading the NVR is the most time-consuming part of both the self-test and the
@@ -290,8 +290,8 @@ NVR words with the freshly-erased value of 0x3fff; now we initialize them with c
 From "PART 2: SET-UP MODE", p. 2-6, of the VT100 Technical Manual (July 1982):
 
 > Unlike most terminals, the VT100 does not use switches or jumpers to individually turn the built-in terminal features on
-or off. Instead, the VT100 uses a nonvolatile memory (NVR) that always remembers what features have been selected, as if a
-swiitch had been set.
+or off. Instead, the VT100 uses a non-volatile memory (NVR) that always remembers what features have been selected, as if a
+switch had been set.
 
 > Selection and storage of built-in terminal features is performed in a special mode of operation called SET-UP mode.
 When you enter SET-UP mode, the status of features stored in temporary memory shows on the screen. You can then change the
