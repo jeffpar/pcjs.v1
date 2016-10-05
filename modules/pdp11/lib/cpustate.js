@@ -644,7 +644,6 @@ CPUStatePDP11.prototype.checkInterruptQueue = function()
                 this.opFlags |= PDP11.OPFLAG.INTQ;
                 break;          // Decrement only one delay 'difference' per cycle
             }
-            //if (typeof this.interruptQueue[i].callback !== "undefined") {
             if (this.interruptQueue[i].callback) {
                 if (!this.interruptQueue[i].callback()) {
                     this.interruptQueue.splice(i, 1);

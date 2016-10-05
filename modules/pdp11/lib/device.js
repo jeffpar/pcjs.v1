@@ -208,7 +208,7 @@ DevicePDP11.prototype.initBus = function(cmp, bus, cpu, dbg)
 DevicePDP11.prototype.readLKS = function(addr)
 {
     var result = this.kw11.lks;
-    this.kw11.lks &= ~PDP11.KW11.LKS.MONITOR;
+    this.kw11.lks &= ~PDP11.KW11.LKS.MON;
     return result;
 };
 
@@ -222,10 +222,10 @@ DevicePDP11.prototype.readLKS = function(addr)
 DevicePDP11.prototype.writeLKS = function(data, addr)
 {
     this.kw11.lks = data;
-    if (data & PDP11.KW11.LKS.INT_ENABLE) {
+    if (data & PDP11.KW11.LKS.IE) {
         this.cpu.setTimer(this.kw11.timer, 1000/60);
     }
-    this.kw11.lks = data & ~PDP11.KW11.LKS.MONITOR;
+    this.kw11.lks = data & ~PDP11.KW11.LKS.MON;
 };
 
 /**
@@ -668,8 +668,8 @@ DevicePDP11.prototype.rp11_end = function(err, meta, block, address, count)
  */
 DevicePDP11.prototype.kw11_interrupt = function()
 {
-    this.kw11.lks |= PDP11.KW11.LKS.MONITOR;
-    if (this.kw11.lks & PDP11.KW11.LKS.INT_ENABLE) {
+    this.kw11.lks |= PDP11.KW11.LKS.MON;
+    if (this.kw11.lks & PDP11.KW11.LKS.IE) {
         this.cpu.interrupt(PDP11.KW11.DELAY, PDP11.KW11.PRI, PDP11.KW11.VEC);
         this.cpu.setTimer(this.kw11.timer, 1000/60);
     }

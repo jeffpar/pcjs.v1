@@ -69,14 +69,6 @@ function SerialPortPDP11(parmsSerial) {
 
     this.iAdapter = parmsSerial['adapter'];
 
-    this.tty = {
-        rbuf: [],
-        rcsr: 0,
-        xcsr: PDP11.DL11.XCSR.READY,
-        delCode: 127,
-        del: 0
-    };
-
     /**
      * consoleOutput becomes a string that records serial port output if the 'binding' property is set to the
      * reserved name "console".  Nothing is written to the console, however, until a linefeed (0x0A) is output
@@ -267,125 +259,22 @@ SerialPortPDP11.prototype.initBus = function(cmp, bus, cpu, dbg)
     this.cpu = cpu;
     this.dbg = dbg;
 
+    var serial = this;
+
+    this.timerReceiveData = this.cpu.addTimer(function() {
+        serial.rcsr |= PDP11.DL11.RCSR.RD;
+        if (serial.rcsr & PDP11.DL11.RCSR.RIE) {
+            serial.cpu.interrupt(PDP11.DL11.DELAY, PDP11.DL11.PRI, PDP11.DL11.RVEC);
+        }
+    });
+
+    this.doneTransmitInterrupt = function() {
+        serial.xcsr |= PDP11.DL11.XCSR.READY;
+        return !!(serial.xcsr & PDP11.DL11.XCSR.TIE);
+    };
+
     bus.addIOTable(this, SerialPortPDP11.UNIBUS_IOTABLE);
     this.setReady();
-};
-
-/**
- * readRCSR(addr)
- *
- * @this {SerialPortPDP11}
- * @param {number} addr (eg, PDP11.UNIBUS.RCSR or 177560)
- * @return {number}
- */
-SerialPortPDP11.prototype.readRCSR = function(addr)
-{
-    return this.tty.rcsr;
-};
-
-/**
- * writeRCSR(data, addr)
- *
- * @this {SerialPortPDP11}
- * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.RCSR or 177560)
- */
-SerialPortPDP11.prototype.writeRCSR = function(data, addr)
-{
-    this.tty.rcsr = (this.tty.rcsr & 0x80) | (data & ~0x80);
-};
-
-/**
- * readRBUF(addr)
- *
- * @this {SerialPortPDP11}
- * @param {number} addr (eg, PDP11.UNIBUS.RBUF or 177562)
- * @return {number}
- */
-SerialPortPDP11.prototype.readRBUF = function(addr)
-{
-    return 0;
-};
-
-/**
- * writeRBUF(data, addr)
- *
- * @this {SerialPortPDP11}
- * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.RBUF or 177562)
- */
-SerialPortPDP11.prototype.writeRBUF = function(data, addr)
-{
-};
-
-/**
- * readXCSR(addr)
- *
- * @this {SerialPortPDP11}
- * @param {number} addr (eg, PDP11.UNIBUS.XCSR or 177564)
- * @return {number}
- */
-SerialPortPDP11.prototype.readXCSR = function(addr)
-{
-    return this.tty.xcsr;
-};
-
-/**
- * writeXCSR(data, addr)
- *
- * @this {SerialPortPDP11}
- * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.XCSR or 177564)
- */
-SerialPortPDP11.prototype.writeXCSR = function(data, addr)
-{
-    /*
-     * If the device is READY, and INT_ENABLE is transitioning to *set*, then generate an interrupt.
-     */
-    if ((this.tty.xcsr & (PDP11.DL11.XCSR.READY | PDP11.DL11.XCSR.INT_ENABLE)) == PDP11.DL11.XCSR.READY && (data & PDP11.DL11.XCSR.INT_ENABLE)) {
-        var device = this;
-        this.cpu.interrupt(PDP11.DL11.XCSR.DELAY, PDP11.DL11.PRI, PDP11.DL11.VEC, function() {
-            device.tty.xcsr |= PDP11.DL11.XCSR.READY;
-            return !!(device.tty.xcsr & PDP11.DL11.XCSR.INT_ENABLE);
-        });
-    }
-    /*
-     * In any event, propagate all bits from data *except* for READY.
-     */
-    this.tty.xcsr = (this.tty.xcsr & PDP11.DL11.XCSR.READY) | (data & ~PDP11.DL11.XCSR.READY);
-};
-
-/**
- * readXBUF(addr)
- *
- * @this {SerialPortPDP11}
- * @param {number} addr (eg, PDP11.UNIBUS.XBUF or 177566)
- * @return {number}
- */
-SerialPortPDP11.prototype.readXBUF = function(addr)
-{
-    return 0;
-};
-
-/**
- * writeXBUF(data, addr)
- *
- * @this {SerialPortPDP11}
- * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.XBUF or 177566)
- */
-SerialPortPDP11.prototype.writeXBUF = function(data, addr)
-{
-    data &= 0x7f;
-    if (data) {
-        var serial = this;
-        this.transmitByte(data);
-        this.tty.xcsr &= ~PDP11.DL11.XCSR.READY;
-        this.cpu.interrupt(PDP11.DL11.XBUF.DELAY, PDP11.DL11.PRI, PDP11.DL11.VEC, function() {
-            serial.tty.xcsr |= PDP11.DL11.XCSR.READY;
-            return !!(serial.tty.xcsr & PDP11.DL11.XCSR.INT_ENABLE);
-        });
-    }
 };
 
 /**
@@ -489,8 +378,6 @@ SerialPortPDP11.prototype.powerDown = function(fSave, fShutdown)
  */
 SerialPortPDP11.prototype.reset = function()
 {
-    this.tty.rcsr = 0;
-    this.tty.xcsr = 0x80;
     this.initState();
 };
 
@@ -532,6 +419,9 @@ SerialPortPDP11.prototype.restore = function(data)
  */
 SerialPortPDP11.prototype.initState = function(data)
 {
+    this.rbuf = [];
+    this.rcsr = 0;
+    this.xcsr = PDP11.DL11.XCSR.READY;
     return true;
 };
 
@@ -632,6 +522,120 @@ SerialPortPDP11.prototype.transmitByte = function(b)
     }
 
     return fTransmitted;
+};
+
+/**
+ * readRCSR(addr)
+ *
+ * @this {SerialPortPDP11}
+ * @param {number} addr (eg, PDP11.UNIBUS.RCSR or 177560)
+ * @return {number}
+ */
+SerialPortPDP11.prototype.readRCSR = function(addr)
+{
+    return this.rcsr & PDP11.DL11.RCSR.RMASK;
+};
+
+/**
+ * writeRCSR(data, addr)
+ *
+ * @this {SerialPortPDP11}
+ * @param {number} data
+ * @param {number} addr (eg, PDP11.UNIBUS.RCSR or 177560)
+ */
+SerialPortPDP11.prototype.writeRCSR = function(data, addr)
+{
+    this.rcsr = (this.rcsr & ~PDP11.DL11.RCSR.WMASK) | (data & PDP11.DL11.RCSR.WMASK);
+};
+
+/**
+ * readRBUF(addr)
+ *
+ * @this {SerialPortPDP11}
+ * @param {number} addr (eg, PDP11.UNIBUS.RBUF or 177562)
+ * @return {number}
+ */
+SerialPortPDP11.prototype.readRBUF = function(addr)
+{
+    var result = 0;
+    this.rcsr &= ~PDP11.DL11.RCSR.RD;
+    if (this.rbuf.length > 0) {
+        result = this.rbuf.shift();
+        if (this.rbuf.length > 0) {
+            this.cpu.setTimer(this.timerReceiveData, 50);
+        }
+    }
+    return result;
+};
+
+/**
+ * writeRBUF(data, addr)
+ *
+ * @this {SerialPortPDP11}
+ * @param {number} data
+ * @param {number} addr (eg, PDP11.UNIBUS.RBUF or 177562)
+ */
+SerialPortPDP11.prototype.writeRBUF = function(data, addr)
+{
+};
+
+/**
+ * readXCSR(addr)
+ *
+ * @this {SerialPortPDP11}
+ * @param {number} addr (eg, PDP11.UNIBUS.XCSR or 177564)
+ * @return {number}
+ */
+SerialPortPDP11.prototype.readXCSR = function(addr)
+{
+    return this.xcsr;
+};
+
+/**
+ * writeXCSR(data, addr)
+ *
+ * @this {SerialPortPDP11}
+ * @param {number} data
+ * @param {number} addr (eg, PDP11.UNIBUS.XCSR or 177564)
+ */
+SerialPortPDP11.prototype.writeXCSR = function(data, addr)
+{
+    /*
+     * If the device is READY, and IE is transitioning on, then request an interrupt.
+     */
+    if ((this.xcsr & (PDP11.DL11.XCSR.READY | PDP11.DL11.XCSR.TIE)) == PDP11.DL11.XCSR.READY && (data & PDP11.DL11.XCSR.TIE)) {
+        this.cpu.interrupt(PDP11.DL11.XCSR.DELAY, PDP11.DL11.PRI, PDP11.DL11.XVEC, this.doneTransmitInterrupt);
+    }
+    this.xcsr = (this.xcsr & ~PDP11.DL11.XCSR.WMASK) | (data & PDP11.DL11.XCSR.WMASK);
+};
+
+/**
+ * readXBUF(addr)
+ *
+ * @this {SerialPortPDP11}
+ * @param {number} addr (eg, PDP11.UNIBUS.XBUF or 177566)
+ * @return {number}
+ */
+SerialPortPDP11.prototype.readXBUF = function(addr)
+{
+    return 0;
+};
+
+/**
+ * writeXBUF(data, addr)
+ *
+ * @this {SerialPortPDP11}
+ * @param {number} data
+ * @param {number} addr (eg, PDP11.UNIBUS.XBUF or 177566)
+ */
+SerialPortPDP11.prototype.writeXBUF = function(data, addr)
+{
+    data &= PDP11.DL11.XBUF.DATA;
+    if (data) {
+        this.transmitByte(data);
+        this.xcsr &= ~PDP11.DL11.XCSR.READY;
+        this.cpu.interrupt(PDP11.DL11.XBUF.DELAY, PDP11.DL11.PRI, PDP11.DL11.XVEC, this.doneTransmitInterrupt);
+    }
 };
 
 /*

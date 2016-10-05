@@ -449,28 +449,56 @@ var PDP11 = {
         SL:         0o177774,   //                                  Stack Limit Register
         PSW:        0o177776    // 777776   17777776    0x3FFFFE    Processor Status Word
     },
-    DL11: {                         // SERIAL LINE INTERFACE
-        DELAY:      8,
+    DL11: {                     // Serial Line Interface (program compatible with the KL11 for control of console teleprinters)
         PRI:        4,
-        VEC:        0o64,
-        XCSR: {
-            READY:      0x80,       // Transmitter Ready (read-only)
-            INT_ENABLE: 0x40,       // Transmitter Interrupt Enable (read-write)
-            MAINT:      0x04,       // Maintenance (read-write)
-            BREAK:      0x01,       // BREAK (read-write)
-            DELAY:      8
+        RVEC:       0o60,
+        XVEC:       0o64,
+        DELAY:      40,
+        RCSR: {                 // 177560
+            RE:     0x0001,     // Reader Enable (W/O)              TODO: Determine if we really need to exclude this write-only bit from RMASK
+            DTR:    0x0002,     // Data Terminal Ready (R/W)
+            RTS:    0x0004,     // Request To Send (R/W)
+            STD:    0x0008,     // Secondary Transmitted Data (R/W)
+            DIE:    0x0020,     // Dataset Interrupt Enable (R/W)
+            RIE:    0x0040,     // Receiver Interrupt Enable (R/W)
+            RD:     0x0080,     // Receiver Done (R/O)
+            SRD:    0x0400,     // Secondary Received Data (R/O)
+            RA:     0x0800,     // Receiver Active (R/O)
+            CD:     0x1000,     // Carrier Detect (R/O)
+            CTS:    0x2000,     // Clear To Send (R/O)
+            RI:     0x4000,     // Ring Indicator (R/O)
+            DSC:    0x8000,     // Dataset Status Change (R/O)
+            RMASK:  0xFFFF,     // read mask
+            WMASK:  0x006F      // write mask
         },
-        XBUF: {
-            DELAY:      100
+        RBUF: {                 // 177562
+            DATA:   0x00ff,     // Received Data (R/O)
+            PARITY: 0x1000,     // Received Data Parity (R/O)
+            FE:     0x2000,     // Framing Error (R/O)
+            OE:     0x4000,     // Overrun Error (R/O)
+            ERROR:  0x8000      // Error (R/O)
+        },
+        XCSR: {                 // 177564
+            BREAK:  0x0001,     // BREAK (R/W)
+            MAINT:  0x0004,     // Maintenance (R/W)
+            TIE:    0x0040,     // Transmitter Interrupt Enable (R/W)
+            READY:  0x0080,     // Transmitter Ready (R/O)
+            RMASK:  0x00C5,
+            WMASK:  0x0045,
+            DELAY:  8
+        },
+        XBUF: {                 // 177566
+            DATA:   0x00FF,     // Transmitted Data (W/O)       TODO: Determine why pdp11.js effectively defined this as 0x7F
+            DELAY:  100
         }
     },
-    KW11: {                         // KW11-L LINE TIME CLOCK
-        DELAY:      0,
+    KW11: {                     // KW11-L Line Time Clock
         PRI:        6,
         VEC:        0o100,
+        DELAY:      0,
         LKS: {
-            INT_ENABLE: 0x40,
-            MONITOR:    0x80
+            IE:     0x0040,     // Interrupt Enable
+            MON:    0x0080      // Monitor
         }
     }
 };
