@@ -461,7 +461,7 @@ PDP11.fnXOR = function(src, dst)
  */
 PDP11.opADC = function(opCode)
 {
-    this.updateWordByMode(opCode, this.getCF()? 1 : 0, PDP11.fnADD);
+    this.updateDstWord(opCode, this.getCF()? 1 : 0, PDP11.fnADD);
     this.nStepCycles -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
 };
 
@@ -473,7 +473,7 @@ PDP11.opADC = function(opCode)
  */
 PDP11.opADCB = function(opCode)
 {
-    this.updateByteByMode(opCode, this.getCF()? 1 : 0, PDP11.fnADDB);
+    this.updateDstByte(opCode, this.getCF()? 1 : 0, PDP11.fnADDB);
     this.nStepCycles -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
 };
 
@@ -485,7 +485,7 @@ PDP11.opADCB = function(opCode)
  */
 PDP11.opADD = function(opCode)
 {
-    this.updateWordByMode(opCode, this.readWordByMode(opCode >> PDP11.SRCMODE.SHIFT), PDP11.fnADD);
+    this.updateDstWord(opCode, this.readSrcWord(opCode), PDP11.fnADD);
     this.nStepCycles -= (this.dstMode? (8 + 1) + (this.srcReg && this.dstReg >= 6? 1 : 0) : (this.srcMode? (3 + 2) : (2 + 1)) + (this.dstReg == 7? 2 : 0));
 };
 
@@ -497,11 +497,7 @@ PDP11.opADD = function(opCode)
  */
 PDP11.opASH = function(opCode)
 {
-    /*
-     * NOTE: Because readWordByMode() is being used to READ (not WRITE) the DSTMODE field of opCode,
-     * this.srcMode and this.srcReg must be used instead of this.dstMode and this.dstReg.
-     */
-    var src = this.readWordByMode(opCode);
+    var src = this.readDstWord(opCode);
     var reg = (opCode >> 6) & 7;
     var result = this.regsGen[reg];
     if (result & 0x8000) result |= 0xffff0000;
@@ -525,7 +521,7 @@ PDP11.opASH = function(opCode)
     }
     this.regsGen[reg] = result & 0xffff;
     this.flagN = this.flagZ = result;
-    this.nStepCycles -= (this.srcMode? (5 + 1) : (6 + 1)) + src;
+    this.nStepCycles -= (this.dstMode? (5 + 1) : (6 + 1)) + src;
 };
 
 /**
@@ -536,11 +532,7 @@ PDP11.opASH = function(opCode)
  */
 PDP11.opASHC = function(opCode)
 {
-    /*
-     * NOTE: Because readWordByMode() is being used to READ (not WRITE) the DSTMODE field of opCode,
-     * this.srcMode and this.srcReg must be used instead of this.dstMode and this.dstReg.
-     */
-    var src = this.readWordByMode(opCode);
+    var src = this.readDstWord(opCode);
     var reg = (opCode >> 6) & 7;
     var dst = (this.regsGen[reg] << 16) | this.regsGen[reg | 1];
     this.flagC = this.flagV = 0;
@@ -571,7 +563,7 @@ PDP11.opASHC = function(opCode)
     this.regsGen[reg | 1] = result & 0xffff;
     this.flagN = result >> 16;
     this.flagZ = result >> 16 | result;
-    this.nStepCycles -= (this.srcMode? (5 + 1) : (6 + 1)) + src;
+    this.nStepCycles -= (this.dstMode? (5 + 1) : (6 + 1)) + src;
 };
 
 /**
@@ -582,7 +574,7 @@ PDP11.opASHC = function(opCode)
  */
 PDP11.opASL = function(opCode)
 {
-    this.updateWordByMode(opCode, 0, PDP11.fnASL);
+    this.updateDstWord(opCode, 0, PDP11.fnASL);
     this.nStepCycles -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
 };
 
@@ -594,7 +586,7 @@ PDP11.opASL = function(opCode)
  */
 PDP11.opASLB = function(opCode)
 {
-    this.updateByteByMode(opCode, 0, PDP11.fnASLB);
+    this.updateDstByte(opCode, 0, PDP11.fnASLB);
     this.nStepCycles -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
 };
 
@@ -606,7 +598,7 @@ PDP11.opASLB = function(opCode)
  */
 PDP11.opASR = function(opCode)
 {
-    this.updateWordByMode(opCode, 0, PDP11.fnASR);
+    this.updateDstWord(opCode, 0, PDP11.fnASR);
     this.nStepCycles -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
 };
 
@@ -618,7 +610,7 @@ PDP11.opASR = function(opCode)
  */
 PDP11.opASRB = function(opCode)
 {
-    this.updateByteByMode(opCode, 0, PDP11.fnASRB);
+    this.updateDstByte(opCode, 0, PDP11.fnASRB);
     this.nStepCycles -= (this.dstMode? (8 + 1) + (this.dstAddr & 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
 };
 
@@ -652,7 +644,7 @@ PDP11.opBCS = function(opCode)
  */
 PDP11.opBIC = function(opCode)
 {
-    this.updateWordByMode(opCode, this.readWordByMode(opCode >> PDP11.SRCMODE.SHIFT), PDP11.fnBIC);
+    this.updateDstWord(opCode, this.readSrcWord(opCode), PDP11.fnBIC);
     this.nStepCycles -= (this.dstMode? (8 + 1) + (this.srcReg && this.dstReg >= 6? 1 : 0) : (this.srcMode? (3 + 2) : (2 + 1)) + (this.dstReg == 7? 2 : 0));
 };
 
@@ -664,7 +656,7 @@ PDP11.opBIC = function(opCode)
  */
 PDP11.opBICB = function(opCode)
 {
-    this.updateByteByMode(opCode, this.readByteByMode(opCode >> PDP11.SRCMODE.SHIFT), PDP11.fnBICB);
+    this.updateDstByte(opCode, this.readSrcByte(opCode), PDP11.fnBICB);
     this.nStepCycles -= (this.dstMode? (8 + 1) + (this.srcReg && this.dstReg >= 6? 1 : 0) : (this.srcMode? (3 + 2) : (2 + 1)) + (this.dstReg == 7? 2 : 0));
 };
 
@@ -676,7 +668,7 @@ PDP11.opBICB = function(opCode)
  */
 PDP11.opBIS = function(opCode)
 {
-    this.updateWordByMode(opCode, this.readWordByMode(opCode >> PDP11.SRCMODE.SHIFT), PDP11.fnBIS);
+    this.updateDstWord(opCode, this.readSrcWord(opCode), PDP11.fnBIS);
     this.nStepCycles -= (this.dstMode? (8 + 1) + (this.srcReg && this.dstReg >= 6? 1 : 0) : (this.srcMode? (3 + 2) : (2 + 1)) + (this.dstReg == 7? 2 : 0));
 };
 
@@ -688,7 +680,7 @@ PDP11.opBIS = function(opCode)
  */
 PDP11.opBISB = function(opCode)
 {
-    this.updateByteByMode(opCode, this.readByteByMode(opCode >> PDP11.SRCMODE.SHIFT), PDP11.fnBISB);
+    this.updateDstByte(opCode, this.readSrcByte(opCode), PDP11.fnBISB);
     this.nStepCycles -= (this.dstMode? (8 + 1) + (this.srcReg && this.dstReg >= 6? 1 : 0) : (this.srcMode? (3 + 2) : (2 + 1)) + (this.dstReg == 7? 2 : 0));
 };
 
@@ -700,20 +692,8 @@ PDP11.opBISB = function(opCode)
  */
 PDP11.opBIT = function(opCode)
 {
-    /*
-     * NOTE: Because readWordByMode() will be used to READ (not WRITE) the DSTMODE field of opCode,
-     * the srcMode and srcReg properties need to be copied before they get overwritten.
-     */
-    var src = this.readWordByMode(opCode >> PDP11.SRCMODE.SHIFT);
-    var srcMode = this.srcMode;
-    var srcReg = this.srcReg;
-    /*
-     * NOTE: Because readWordByMode() is being used to READ (not WRITE) the DSTMODE field of opCode,
-     * this.srcMode and this.srcReg must be used instead of this.dstMode and this.dstReg.
-     */
-    var dst = this.readWordByMode(opCode);
-    this.updateNZVFlags(src & dst);
-    this.nStepCycles -= (this.srcMode? (3 + 1) + (srcReg && this.srcReg >= 6? 1 : 0) : (srcMode? (3 + 1) : (2 + 1)) + (this.srcReg == 7? 2 : 0));
+    this.updateNZVFlags(this.readSrcWord(opCode) & this.readDstWord(opCode));
+    this.nStepCycles -= (this.dstMode? (3 + 1) + (this.srcReg && this.dstReg >= 6? 1 : 0) : (this.srcMode? (3 + 1) : (2 + 1)) + (this.dstReg == 7? 2 : 0));
 };
 
 /**
@@ -724,20 +704,8 @@ PDP11.opBIT = function(opCode)
  */
 PDP11.opBITB = function(opCode)
 {
-    /*
-     * NOTE: Because readByteByMode() will be used to READ (not WRITE) the DSTMODE field of opCode,
-     * the srcMode and srcReg properties need to be copied before they get overwritten.
-     */
-    var src = this.readByteByMode(opCode >> PDP11.SRCMODE.SHIFT);
-    var srcMode = this.srcMode;
-    var srcReg = this.srcReg;
-    /*
-     * NOTE: Because readByteByMode() is being used to READ (not WRITE) the DSTMODE field of opCode,
-     * this.srcMode and this.srcReg must be used instead of this.dstMode and this.dstReg.
-     */
-    var dst = this.readByteByMode(opCode);
-    this.updateNZVFlags((src & dst) << 8);
-    this.nStepCycles -= (this.srcMode? (3 + 1) + (srcReg && this.srcReg >= 6? 1 : 0) : (srcMode? (3 + 1) : (2 + 1)) + (this.srcReg == 7? 2 : 0));
+    this.updateNZVFlags((this.readSrcByte(opCode) & this.readDstByte(opCode)) << 8);
+    this.nStepCycles -= (this.dstMode? (3 + 1) + (this.srcReg && this.dstReg >= 6? 1 : 0) : (this.srcMode? (3 + 1) : (2 + 1)) + (this.dstReg == 7? 2 : 0));
 };
 
 /**
@@ -903,7 +871,7 @@ PDP11.opBVS = function(opCode)
  */
 PDP11.opCLR = function(opCode)
 {
-    this.updateAllFlags(this.writeWordByMode(opCode, 0));
+    this.updateAllFlags(this.writeDstWord(opCode, 0));
     this.nStepCycles -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
 };
 
@@ -915,7 +883,7 @@ PDP11.opCLR = function(opCode)
  */
 PDP11.opCLRB = function(opCode)
 {
-    this.updateAllFlags(this.writeByteByMode(opCode, 0));
+    this.updateAllFlags(this.writeDstByte(opCode, 0));
     this.nStepCycles -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
 };
 
@@ -993,25 +961,14 @@ PDP11.opCLx = function(opCode)
  */
 PDP11.opCMP = function(opCode)
 {
-    /*
-     * NOTE: Because readWordByMode() will be used to READ (not WRITE) the DSTMODE field of opCode,
-     * the srcMode and srcReg properties need to be copied before they get overwritten.
-     */
-    var src = this.readWordByMode(opCode >> PDP11.SRCMODE.SHIFT);
-    var srcMode = this.srcMode;
-    var srcReg = this.srcReg;
-    /*
-     * NOTE: Because readWordByMode() is being used to READ (not WRITE) the DSTMODE field of opCode,
-     * this.srcMode and this.srcReg must be used instead of this.dstMode and this.dstReg.
-     */
-    var dst = this.readWordByMode(opCode);
+    var src = this.readSrcWord(opCode);
+    var dst = this.readDstWord(opCode);
     var result = src - dst;
     /*
-     * NOTE: CMP calculates (src - dst) rather than (dst - src), so when we call updateSubFlags(),
-     * we must reverse the order of the src and dst parameters.
+     * NOTE: CMP calculates (src - dst) rather than (dst - src), so src and dst updateSubFlags() parms must be reversed.
      */
     this.updateSubFlags(result, dst, src);
-    this.nStepCycles -= (this.srcMode? (3 + 1) + (srcReg && this.srcReg >= 6? 1 : 0) : (srcMode? (3 + 1) : (2 + 1)) + (this.srcReg == 7? 2 : 0));
+    this.nStepCycles -= (this.dstMode? (3 + 1) + (this.srcReg && this.dstReg >= 6? 1 : 0) : (this.srcMode? (3 + 1) : (2 + 1)) + (this.dstReg == 7? 2 : 0));
 };
 
 /**
@@ -1022,25 +979,14 @@ PDP11.opCMP = function(opCode)
  */
 PDP11.opCMPB = function(opCode)
 {
-    /*
-     * NOTE: Because readByteByMode() will be used to READ (not WRITE) the DSTMODE field of opCode,
-     * the srcMode and srcReg properties need to be copied before they get overwritten.
-     */
-    var src = this.readByteByMode(opCode >> PDP11.SRCMODE.SHIFT) << 8;
-    var srcMode = this.srcMode;
-    var srcReg = this.srcReg;
-    /*
-     * NOTE: Because readByteByMode() is being used to READ (not WRITE) the DSTMODE field of opCode,
-     * this.srcMode and this.srcReg must be used instead of this.dstMode and this.dstReg.
-     */
-    var dst = this.readByteByMode(opCode) << 8;
+    var src = this.readSrcByte(opCode) << 8;
+    var dst = this.readDstByte(opCode) << 8;
     var result = src - dst;
     /*
-     * NOTE: CMP calculates (src - dst) rather than (dst - src), so when we call updateSubFlags(),
-     * we must reverse the order of the src and dst parameters.
+     * NOTE: CMP calculates (src - dst) rather than (dst - src), so src and dst updateSubFlags() parms must be reversed.
      */
     this.updateSubFlags(result, dst, src);
-    this.nStepCycles -= (this.srcMode? (3 + 1) + (srcReg && this.srcReg >= 6? 1 : 0) : (srcMode? (3 + 1) : (2 + 1)) + (this.srcReg == 7? 2 : 0));
+    this.nStepCycles -= (this.dstMode? (3 + 1) + (this.srcReg && this.dstReg >= 6? 1 : 0) : (this.srcMode? (3 + 1) : (2 + 1)) + (this.dstReg == 7? 2 : 0));
 };
 
 /**
@@ -1051,7 +997,7 @@ PDP11.opCMPB = function(opCode)
  */
 PDP11.opCOM = function(opCode)
 {
-    this.updateWordByMode(opCode, 0, PDP11.fnCOM);
+    this.updateDstWord(opCode, 0, PDP11.fnCOM);
     this.nStepCycles -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
 };
 
@@ -1063,7 +1009,7 @@ PDP11.opCOM = function(opCode)
  */
 PDP11.opCOMB = function(opCode)
 {
-    this.updateByteByMode(opCode, 0, PDP11.fnCOMB);
+    this.updateDstByte(opCode, 0, PDP11.fnCOMB);
     this.nStepCycles -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
 };
 
@@ -1075,7 +1021,7 @@ PDP11.opCOMB = function(opCode)
  */
 PDP11.opDEC = function(opCode)
 {
-    this.updateWordByMode(opCode, 1, PDP11.fnDEC);
+    this.updateDstWord(opCode, 1, PDP11.fnDEC);
     this.nStepCycles -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
 };
 
@@ -1087,7 +1033,7 @@ PDP11.opDEC = function(opCode)
  */
 PDP11.opDECB = function(opCode)
 {
-    this.updateByteByMode(opCode, 1, PDP11.fnDECB);
+    this.updateDstByte(opCode, 1, PDP11.fnDECB);
     this.nStepCycles -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
 };
 
@@ -1102,7 +1048,7 @@ PDP11.opDIV = function(opCode)
     /*
      * TODO: Review and determine if flag updates can be encapsulated in an updateDivFlags() function.
      */
-    var src = this.readWordByMode(opCode);
+    var src = this.readDstWord(opCode);
     if (!src) {
         this.flagN = 0;         // NZVC
         this.flagZ = 0;
@@ -1169,7 +1115,7 @@ PDP11.opHALT = function(opCode)
  */
 PDP11.opINC = function(opCode)
 {
-    this.updateWordByMode(opCode, 1, PDP11.fnINC);
+    this.updateDstWord(opCode, 1, PDP11.fnINC);
     this.nStepCycles -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
 };
 
@@ -1181,7 +1127,7 @@ PDP11.opINC = function(opCode)
  */
 PDP11.opINCB = function(opCode)
 {
-    this.updateByteByMode(opCode, 1, PDP11.fnINCB);
+    this.updateDstByte(opCode, 1, PDP11.fnINCB);
     this.nStepCycles -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
 };
 
@@ -1211,12 +1157,11 @@ PDP11.opJMP = function(opCode)
 {
     /*
      * Since JMP and JSR opcodes have their own unique timings for the various dst modes, we must snapshot
-     * nStepCycles before decoding the mode, and then use that to update nStepCycles.  Moreover, we must use
-     * srcMode rather than dstMode, because JMP does not WRITE the dst operand; it merely READs it.
+     * nStepCycles before decoding the mode, and then use that to update nStepCycles.
      */
     var nSnapCycles = this.nStepCycles;
-    this.setPC(this.getVirtualByMode(opCode, PDP11.ACCESS.VIRT));
-    this.nStepCycles = nSnapCycles - PDP11.JMP_CYCLES[this.srcMode];
+    this.setPC(this.readDstAddr(opCode));
+    this.nStepCycles = nSnapCycles - PDP11.JMP_CYCLES[this.dstMode];
 };
 
 PDP11.JSR_CYCLES = [
@@ -1233,20 +1178,19 @@ PDP11.opJSR = function(opCode)
 {
     /*
      * Since JMP and JSR opcodes have their own unique timings for the various dst modes, we must snapshot
-     * nStepCycles before decoding the mode, and then use that to update nStepCycles.  Moreover, we must use
-     * srcMode rather than dstMode, because JSR does not WRITE the dst operand; it merely READs it.
+     * nStepCycles before decoding the mode, and then use that to update nStepCycles.
      */
     var nSnapCycles = this.nStepCycles;
     /*
      * TODO: Determine whether or not the SRCMODE operand (regsGen[reg]) should be snapped BEFORE or AFTER we
      * decode the DSTMODE operand.  Doing it AFTER seems a bit risky.
      */
-    var addr = this.getVirtualByMode(opCode, PDP11.ACCESS.VIRT);
+    var addr = this.readDstAddr(opCode);
     var reg = (opCode >> PDP11.SRCMODE.SHIFT) & PDP11.OPREG.MASK;
     this.pushWord(this.regsGen[reg]);
     this.regsGen[reg] = this.getPC();
     this.setPC(addr);
-    this.nStepCycles = nSnapCycles - PDP11.JSR_CYCLES[this.srcMode];
+    this.nStepCycles = nSnapCycles - PDP11.JSR_CYCLES[this.dstMode];
 };
 
 /**
@@ -1310,9 +1254,9 @@ PDP11.opMOV = function(opCode)
      * Since MOV opcodes have their own unique timings for the various dst modes, we must snapshot
      * nStepCycles after decoding the src mode, and then use that to update nStepCycles.
      */
-    var data = this.readWordByMode(opCode >> PDP11.SRCMODE.SHIFT);
+    var data = this.readSrcWord(opCode);
     var nSnapCycles = this.nStepCycles;
-    this.updateNZVFlags(this.writeWordByMode(opCode, data));
+    this.updateNZVFlags(this.writeDstWord(opCode, data));
     this.nStepCycles = nSnapCycles - PDP11.MOV_CYCLES[(this.srcMode? 8 : 0) + this.dstMode] + (this.dstReg == 7 && !this.dstMode? 2 : 0);
 };
 
@@ -1324,8 +1268,8 @@ PDP11.opMOV = function(opCode)
  */
 PDP11.opMOVB = function(opCode)
 {
-    var data = this.readByteByMode(opCode >> PDP11.SRCMODE.SHIFT);
-    this.updateNZVFlags(this.writeByteByMode(opCode, data, PDP11.WRITE.SIGNEXT) << 8);
+    var data = this.readSrcByte(opCode);
+    this.updateNZVFlags(this.writeDstByte(opCode, data, PDP11.WRITE.SIGNEXT) << 8);
     this.nStepCycles -= (this.dstMode? (8 + 1) + (this.srcReg && this.dstReg >= 6? 1 : 0) : (this.srcMode? (3 + 2) : (2 + 1)) + (this.dstReg == 7? 2 : 0));
 };
 
@@ -1379,7 +1323,7 @@ PDP11.opMTPI = function(opCode)
  */
 PDP11.opMUL = function(opCode)
 {
-    var src = this.readWordByMode(opCode);
+    var src = this.readDstWord(opCode);
     var reg = (opCode >> 6) & 7;
     if (src & 0x8000) src |= ~0xffff;
     var dst = this.regsGen[reg];
@@ -1399,7 +1343,7 @@ PDP11.opMUL = function(opCode)
  */
 PDP11.opNEG = function(opCode)
 {
-    this.updateWordByMode(opCode, 0, PDP11.fnNEG);
+    this.updateDstWord(opCode, 0, PDP11.fnNEG);
     this.nStepCycles -= (this.dstMode? (10 + 1) : (5 + 1));
 };
 
@@ -1411,7 +1355,7 @@ PDP11.opNEG = function(opCode)
  */
 PDP11.opNEGB = function(opCode)
 {
-    this.updateByteByMode(opCode, 0, PDP11.fnNEGB);
+    this.updateDstByte(opCode, 0, PDP11.fnNEGB);
     this.nStepCycles -= (this.dstMode? (10 + 1) : (5 + 1));
 };
 
@@ -1450,7 +1394,7 @@ PDP11.opRESET = function(opCode)
  */
 PDP11.opROL = function(opCode)
 {
-    this.updateWordByMode(opCode, 0, PDP11.fnROL);
+    this.updateDstWord(opCode, 0, PDP11.fnROL);
     this.nStepCycles -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
 };
 
@@ -1462,7 +1406,7 @@ PDP11.opROL = function(opCode)
  */
 PDP11.opROLB = function(opCode)
 {
-    this.updateByteByMode(opCode, 0, PDP11.fnROLB);
+    this.updateDstByte(opCode, 0, PDP11.fnROLB);
     this.nStepCycles -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
 };
 
@@ -1474,7 +1418,7 @@ PDP11.opROLB = function(opCode)
  */
 PDP11.opROR = function(opCode)
 {
-    this.updateWordByMode(opCode, 0, PDP11.fnROR);
+    this.updateDstWord(opCode, 0, PDP11.fnROR);
     this.nStepCycles -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
 };
 
@@ -1486,7 +1430,7 @@ PDP11.opROR = function(opCode)
  */
 PDP11.opRORB = function(opCode)
 {
-    this.updateByteByMode(opCode, 0, PDP11.fnRORB);
+    this.updateDstByte(opCode, 0, PDP11.fnRORB);
     this.nStepCycles -= (this.dstMode? (8 + 1) + (this.dstAddr & 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
 };
 
@@ -1545,7 +1489,7 @@ PDP11.opRTT = function(opCode)
  */
 PDP11.opSBC = function(opCode)
 {
-    this.updateWordByMode(opCode, this.getCF()? 1 : 0, PDP11.fnSUB);
+    this.updateDstWord(opCode, this.getCF()? 1 : 0, PDP11.fnSUB);
     this.nStepCycles -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
 };
 
@@ -1557,7 +1501,7 @@ PDP11.opSBC = function(opCode)
  */
 PDP11.opSBCB = function(opCode)
 {
-    this.updateByteByMode(opCode, this.getCF()? 1 : 0, PDP11.fnSUBB);
+    this.updateDstByte(opCode, this.getCF()? 1 : 0, PDP11.fnSUBB);
     this.nStepCycles -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
 };
 
@@ -1670,7 +1614,7 @@ PDP11.opSPL = function(opCode)
  */
 PDP11.opSUB = function(opCode)
 {
-    this.updateWordByMode(opCode, this.readWordByMode(opCode >> PDP11.SRCMODE.SHIFT), PDP11.fnSUB);
+    this.updateDstWord(opCode, this.readSrcWord(opCode), PDP11.fnSUB);
     this.nStepCycles -= (this.dstMode? (8 + 1) + (this.srcReg && this.dstReg >= 6? 1 : 0) : (this.srcMode? (3 + 2) : (2 + 1)) + (this.dstReg == 7? 2 : 0));
 };
 
@@ -1682,7 +1626,7 @@ PDP11.opSUB = function(opCode)
  */
 PDP11.opSWAB = function(opCode)
 {
-    this.updateWordByMode(opCode, 0, PDP11.fnSWAB);
+    this.updateDstWord(opCode, 0, PDP11.fnSWAB);
     this.nStepCycles -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
 };
 
@@ -1694,7 +1638,7 @@ PDP11.opSWAB = function(opCode)
  */
 PDP11.opSXT = function(opCode)
 {
-    this.updateNZVFlags(this.writeWordByMode(opCode, this.getNF? 0xffff : 0));
+    this.updateNZVFlags(this.writeDstWord(opCode, this.getNF? 0xffff : 0));
     this.nStepCycles -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
 };
 
@@ -1718,14 +1662,10 @@ PDP11.opTRAP = function(opCode)
  */
 PDP11.opTST = function(opCode)
 {
-    /*
-     * NOTE: Because readWordByMode() is being used to READ (not WRITE) the DSTMODE field of opCode,
-     * this.srcMode and this.srcReg must be used instead of this.dstMode and this.dstReg.
-     */
-    var result = this.readWordByMode(opCode);
+    var result = this.readDstWord(opCode);
     this.assert(!(result & ~0xffff));   // assert that C flag will be clear
     this.updateAllFlags(result);
-    this.nStepCycles -= (this.srcMode? (3 + 1) : (2 + 1) + (this.srcReg == 7? 2 : 0));
+    this.nStepCycles -= (this.dstMode? (3 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
 };
 
 /**
@@ -1736,14 +1676,10 @@ PDP11.opTST = function(opCode)
  */
 PDP11.opTSTB = function(opCode)
 {
-    /*
-     * NOTE: Because readByteByMode() is being used to READ (not WRITE) the DSTMODE field of opCode,
-     * this.srcMode and this.srcReg must be used instead of this.dstMode and this.dstReg.
-     */
-    var result = this.readByteByMode(opCode);
+    var result = this.readDstByte(opCode);
     this.assert(!(result & ~0xff));     // assert that C flag will be clear
     this.updateAllFlags(result << 8);
-    this.nStepCycles -= (this.srcMode? (3 + 1) : (2 + 1) + (this.srcReg == 7? 2 : 0));
+    this.nStepCycles -= (this.dstMode? (3 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
 };
 
 /**
@@ -1794,7 +1730,7 @@ PDP11.opWAIT = function(opCode)
  */
 PDP11.opXOR = function(opCode)
 {
-    this.updateWordByMode(opCode, this.readWordByMode((opCode & PDP11.SRCMODE.REG) >> PDP11.SRCMODE.SHIFT), PDP11.fnXOR);
+    this.updateDstWord(opCode, this.readSrcWord(opCode), PDP11.fnXOR);
     this.nStepCycles -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
 };
 

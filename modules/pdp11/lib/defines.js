@@ -189,7 +189,8 @@ var PDP11 = {
         PREDECD:    0x28,       // AUTO-DECREMENT DEFERRED  (register decremented, register is address of address of operand)
         INDEX:      0x30,       // INDEX                    (register + next word is address of operand)
         INDEXD:     0x38,       // INDEX DEFERRED           (register + next word is address of address of operand)
-        MASK:       0x38
+        MASK:       0x38,
+        SHIFT:      3
     },
     DSTMODE: {
         REG:        0x0007,

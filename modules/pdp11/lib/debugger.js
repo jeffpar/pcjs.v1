@@ -589,6 +589,9 @@ if (DEBUGGER) {
         var addr = this.getAddr(dbgAddr, false, 1);
         if (addr !== PDP11.ADDR_INVALID) {
             this.nDisableMessages++;
+            /*
+             * TODO: We also need a Bus interface to disable fnAccess() calls that could trigger a trap()
+             */
             b = this.bus.getByteDirect(addr);
             this.nDisableMessages--;
             if (inc) this.incAddr(dbgAddr, inc);
@@ -610,6 +613,9 @@ if (DEBUGGER) {
         var addr = this.getAddr(dbgAddr, false, 2);
         if (addr !== PDP11.ADDR_INVALID) {
             this.nDisableMessages++;
+            /*
+             * TODO: We also need a Bus interface to disable fnAccess() calls that could trigger a trap()
+             */
             w = this.bus.getWordDirect(addr);
             this.nDisableMessages--;
             if (inc) this.incAddr(dbgAddr, inc);
@@ -630,6 +636,9 @@ if (DEBUGGER) {
         var addr = this.getAddr(dbgAddr, true, 1);
         if (addr !== PDP11.ADDR_INVALID) {
             this.nDisableMessages++;
+            /*
+             * TODO: We also need a Bus interface to disable fnAccess() calls that could trigger a trap()
+             */
             this.bus.setByteDirect(addr, b);
             this.nDisableMessages--;
             if (inc) this.incAddr(dbgAddr, inc);
@@ -650,6 +659,9 @@ if (DEBUGGER) {
         var addr = this.getAddr(dbgAddr, true, 2);
         if (addr !== PDP11.ADDR_INVALID) {
             this.nDisableMessages++;
+            /*
+             * TODO: We also need a Bus interface to disable fnAccess() calls that could trigger a trap()
+             */
             this.bus.setWordDirect(addr, w);
             this.nDisableMessages--;
             if (inc) this.incAddr(dbgAddr, inc);
@@ -3425,7 +3437,7 @@ if (DEBUGGER) {
                     }
                 }
             }
-            addr--;
+            addr -= 2;
         }
         dbgAddr.addr = addrOrig;
         return sCall;
@@ -3463,6 +3475,7 @@ if (DEBUGGER) {
                  * wrap the offset around the end of the segment, we must also check the addr property to detect the wrap.
                  */
                 if (dbgAddrStack.addr == null || !cTests--) break;
+                if (dbgAddrCall.addr & 0x1) continue;           // an odd address on the PDP-11 is not a valid instruction boundary
                 sCall = this.getCall(dbgAddrCall);
                 if (sCall) break;
             }

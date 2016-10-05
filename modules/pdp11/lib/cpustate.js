@@ -172,13 +172,13 @@ CPUStatePDP11.prototype.initRegs = function()
     this.opFlags = 0;
 
     /*
-     * srcMode and srcReg are set by getVirtualByMode() for reads, and dstMode and dstReg are set for writes/updates.
-     * indicating to the opcode handlers the mode(s) and register(s) used as part of the current opcode, so that they
-     * can calculate the correct number of cycles.  dstAddr is set for byte operations that also need to know the
-     * effective address for their cycle calculation.
+     * srcMode and srcReg are set by SRCMODE decodes, and dstMode and dstReg are set for DSTMODE decodes,
+     * indicating to the opcode handlers the mode(s) and register(s) used as part of the current opcode, so
+     * that they can calculate the correct number of cycles.  dstAddr is set for byte operations that also
+     * need to know the effective address for their cycle calculation.
      */
-    this.srcMode = this.dstMode = this.dstAddr = 0;
-    this.srcReg = this.dstReg = 0;
+    this.srcMode = this.srcReg = 0;
+    this.dstMode = this.dstReg = this.dstAddr = 0;
 
     this.cpuType = 70;
     this.trapPSW = -1;
@@ -1281,9 +1281,9 @@ CPUStatePDP11.prototype.pushWord = function(data)
 
 
 /**
- * getVirtualByMode(addressMode, accessFlags)
+ * getVirtual(mode, reg, accessFlags)
  *
- * getVirtualByMode() maps a six bit operand to a 17 bit I/D virtual address space.
+ * getVirtual() maps a six bit operand to a 17 bit I/D virtual address space.
  *
  * Instruction operands are six bits in length - three bits for the mode and three
  * for the register. The 17th I/D bit in the resulting virtual address represents
@@ -1305,23 +1305,15 @@ CPUStatePDP11.prototype.pushWord = function(data)
  * if a page fault occurs.
  *
  * @this {CPUStatePDP11}
- * @param {number} addressMode
+ * @param {number} mode
+ * @param {number} reg
  * @param {number} accessFlags
  * @return {number}
  */
-CPUStatePDP11.prototype.getVirtualByMode = function(addressMode, accessFlags)
+CPUStatePDP11.prototype.getVirtual = function(mode, reg, accessFlags)
 {
     var virtualAddress, stepSize;
     var addrDSpace = (accessFlags & PDP11.ACCESS.VIRT)? 0 : this.addrDSpace;
-
-    var mode = (addressMode >> 3) & 7;
-    var reg = addressMode & PDP11.OPREG.MASK;
-
-    if (accessFlags & PDP11.ACCESS.WRITE) {
-        this.dstMode = mode; this.dstReg = reg;
-    } else {
-        this.srcMode = mode; this.srcReg = reg;
-    }
 
     /*
      * Modes that need to auto-increment or auto-decrement will break, in order to perform the
@@ -1331,7 +1323,7 @@ CPUStatePDP11.prototype.getVirtualByMode = function(addressMode, accessFlags)
     /*
      * Mode 0: Registers don't have a virtual address, so trap.
      *
-     * NOTE: Most instruction code paths never call getVirtualByMode() when the mode is zero;
+     * NOTE: Most instruction code paths never call getVirtual() when the mode is zero;
      * JMP and JSR instructions are exceptions, but that's OK, because those are documented to
      * "cause an 'illegal' instruction" condition", which we interpret to mean a BUS_ERROR trap.
      */
@@ -1447,31 +1439,31 @@ CPUStatePDP11.prototype.getVirtualByMode = function(addressMode, accessFlags)
 };
 
 /**
- * getAddrPhysical(addressMode, accessFlags)
+ * getAddrPhysical(mode, reg, accessFlags)
  *
  * @this {CPUStatePDP11}
- * @param {number} addressMode
+ * @param {number} mode
+ * @param {number} reg
  * @param {number} accessFlags
  * @return {number}
  */
-CPUStatePDP11.prototype.getAddrPhysical = function(addressMode, accessFlags)
+CPUStatePDP11.prototype.getAddrPhysical = function(mode, reg, accessFlags)
 {
-    this.assert(addressMode & PDP11.OPMODE.MASK);
-    return this.getVirtualByMode(addressMode, accessFlags);
+    return this.getVirtual(mode, reg, accessFlags);
 };
 
 /**
- * getAddrVirtual(addressMode, accessFlags)
+ * getAddrVirtual(mode, reg, accessFlags)
  *
  * @this {CPUStatePDP11}
- * @param {number} addressMode
+ * @param {number} mode
+ * @param {number} reg
  * @param {number} accessFlags
  * @return {number}
  */
-CPUStatePDP11.prototype.getAddrVirtual = function(addressMode, accessFlags)
+CPUStatePDP11.prototype.getAddrVirtual = function(mode, reg, accessFlags)
 {
-    this.assert(addressMode & PDP11.OPMODE.MASK);
-    return this.mapVirtualToPhysical(this.getVirtualByMode(addressMode, accessFlags), accessFlags);
+    return this.mapVirtualToPhysical(this.getVirtual(mode, reg, accessFlags), accessFlags);
 };
 
 /**
@@ -1485,16 +1477,16 @@ CPUStatePDP11.prototype.getAddrVirtual = function(addressMode, accessFlags)
 CPUStatePDP11.prototype.readWordFromPrevSpace = function(opCode, accessFlags)
 {
     var src;
-    if (!(opCode & PDP11.OPMODE.MASK)) {
-        this.srcMode = 0;
-        var reg = this.srcReg =  opCode & PDP11.OPREG.MASK;
+    var reg = this.dstReg = opCode & PDP11.OPREG.MASK;
+    var mode = this.dstMode = (opCode & PDP11.OPMODE.MASK) >> PDP11.OPMODE.SHIFT;
+    if (!mode) {
         if (reg != 6 || ((this.regPSW >> 2) & PDP11.PSW.PMODE) === (this.regPSW & PDP11.PSW.PMODE)) {
             src = this.regsGen[reg];
         } else {
             src = this.regsAltStack[(this.regPSW >> 12) & 3];
         }
     } else {
-        var addr = this.getVirtualByMode(opCode, PDP11.ACCESS.READ_WORD);
+        var addr = this.getVirtual(mode, reg, PDP11.ACCESS.READ_WORD);
         if (!(accessFlags & PDP11.ACCESS.DSPACE)) {
             if ((this.regPSW & 0xf000) !== 0xf000) addr &= 0xffff;
         }
@@ -1518,16 +1510,16 @@ CPUStatePDP11.prototype.writeWordToPrevSpace = function(opCode, accessFlags, dat
     if (!(this.regMMR0 & 0xe000)) {
         this.regMMR1 = 0x16;
     }
-    if (!(opCode & PDP11.OPMODE.MASK)) {
-        this.dstMode = 0;
-        var reg = this.dstReg = opCode & PDP11.OPREG.MASK;
+    var reg = this.dstReg = opCode & PDP11.OPREG.MASK;
+    var mode = this.dstMode = (opCode & PDP11.OPMODE.MASK) >> PDP11.OPMODE.SHIFT;
+    if (!mode) {
         if (reg != 6 || ((this.regPSW >> 2) & PDP11.PSW.PMODE) === (this.regPSW & PDP11.PSW.PMODE)) {
             this.regsGen[reg] = data;
         } else {
             this.regsAltStack[(this.regPSW >> 12) & 3] = data;
         }
     } else {
-        var addr = this.getVirtualByMode(opCode, PDP11.ACCESS.WRITE_WORD);
+        var addr = this.getVirtual(mode, reg, PDP11.ACCESS.WRITE_WORD);
         if (!(accessFlags & PDP11.ACCESS.DSPACE)) addr &= 0xffff;
         this.mmuMode = (this.regPSW >> 12) & 3;
         addr = this.mapVirtualToPhysical(addr | (accessFlags & PDP11.ACCESS.DSPACE), PDP11.ACCESS.WRITE);
@@ -1537,124 +1529,161 @@ CPUStatePDP11.prototype.writeWordToPrevSpace = function(opCode, accessFlags, dat
 };
 
 /**
- * readWordByMode(addressMode)
+ * readSrcByte(opCode)
  *
  * @this {CPUStatePDP11}
- * @param {number} addressMode
+ * @param {number} opCode
  * @return {number}
  */
-CPUStatePDP11.prototype.readWordByMode = function(addressMode)
+CPUStatePDP11.prototype.readSrcByte = function(opCode)
 {
     var result;
-    if (!(addressMode & PDP11.OPMODE.MASK)) {
-        this.srcMode = 0;
-        result = this.regsGen[this.srcReg = addressMode & PDP11.OPREG.MASK];
+    opCode >>= PDP11.SRCMODE.SHIFT;
+    var reg = this.srcReg = opCode & PDP11.OPREG.MASK;
+    var mode = this.srcMode = (opCode & PDP11.OPMODE.MASK) >> PDP11.OPMODE.SHIFT;
+    if (!mode) {
+        result = this.regsGen[reg] & 0xff;
     } else {
-        result = this.readWordFromPhysical(this.getAddr(addressMode, PDP11.ACCESS.READ_WORD));
+        result = this.readByteFromPhysical(this.getAddr(mode, reg, PDP11.ACCESS.READ_BYTE));
     }
     return result;
 };
 
 /**
- * readByteByMode(addressMode)
+ * readSrcWord(opCode)
  *
  * @this {CPUStatePDP11}
- * @param {number} addressMode
+ * @param {number} opCode
  * @return {number}
  */
-CPUStatePDP11.prototype.readByteByMode = function(addressMode)
+CPUStatePDP11.prototype.readSrcWord = function(opCode)
 {
     var result;
-    if (!(addressMode & PDP11.OPMODE.MASK)) {
-        this.srcMode = 0;
-        result = this.regsGen[this.srcReg = addressMode & PDP11.OPREG.MASK] & 0xff;
+    opCode >>= PDP11.SRCMODE.SHIFT;
+    var reg = this.srcReg = opCode & PDP11.OPREG.MASK;
+    var mode = this.srcMode = (opCode & PDP11.OPMODE.MASK) >> PDP11.OPMODE.SHIFT;
+    if (!mode) {
+        result = this.regsGen[reg];
     } else {
-        result = this.readByteFromPhysical(this.getAddr(addressMode, PDP11.ACCESS.READ_BYTE));
+        result = this.readWordFromPhysical(this.getAddr(mode, reg, PDP11.ACCESS.READ_WORD));
     }
     return result;
 };
 
 /**
- * updateWordByMode(addressMode, src, fnOp)
- *
- * Used whenever the dst operand (as described by addressMode) DOES need to be read before writing.
+ * readDstAddr(opCode)
  *
  * @this {CPUStatePDP11}
- * @param {number} addressMode
- * @param {number} src
- * @param {function(number,number)} fnOp
+ * @param {number} opCode
+ * @return {number}
  */
-CPUStatePDP11.prototype.updateWordByMode = function(addressMode, src, fnOp)
+CPUStatePDP11.prototype.readDstAddr = function(opCode)
 {
-    if (!(addressMode & PDP11.OPMODE.MASK)) {
-        this.dstMode = 0;
-        var reg = this.dstReg = addressMode & PDP11.OPREG.MASK;
-        this.regsGen[reg] = fnOp.call(this, src, this.regsGen[reg]);
-    } else {
-        var addr = this.getAddr(addressMode, PDP11.ACCESS.UPDATE_WORD);
-        this.writeWordToPhysical(addr, fnOp.call(this, src, this.readWordFromPhysical(addr)));
-    }
+    var reg = this.dstReg = opCode & PDP11.OPREG.MASK;
+    var mode = this.dstMode = (opCode & PDP11.OPMODE.MASK) >> PDP11.OPMODE.SHIFT;
+    return this.getVirtual(mode, reg, PDP11.ACCESS.VIRT);
 };
 
 /**
- * updateByteByMode(addressMode, src, fnOp)
- *
- * Used whenever the dst operand (as described by addressMode) DOES need to be read before writing.
+ * readDstByte(opCode)
  *
  * @this {CPUStatePDP11}
- * @param {number} addressMode
+ * @param {number} opCode
+ * @return {number}
+ */
+CPUStatePDP11.prototype.readDstByte = function(opCode)
+{
+    var result;
+    var reg = this.dstReg = opCode & PDP11.OPREG.MASK;
+    var mode = this.dstMode = (opCode & PDP11.OPMODE.MASK) >> PDP11.OPMODE.SHIFT;
+    if (!mode) {
+        result = this.regsGen[reg] & 0xff;
+    } else {
+        result = this.readByteFromPhysical(this.getAddr(mode, reg, PDP11.ACCESS.READ_BYTE));
+    }
+    return result;
+};
+
+/**
+ * readDstWord(opCode)
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} opCode
+ * @return {number}
+ */
+CPUStatePDP11.prototype.readDstWord = function(opCode)
+{
+    var result;
+    var reg = this.dstReg = opCode & PDP11.OPREG.MASK;
+    var mode = this.dstMode = (opCode & PDP11.OPMODE.MASK) >> PDP11.OPMODE.SHIFT;
+    if (!mode) {
+        result = this.regsGen[reg];
+    } else {
+        result = this.readWordFromPhysical(this.getAddr(mode, reg, PDP11.ACCESS.READ_WORD));
+    }
+    return result;
+};
+
+/**
+ * updateDstByte(opCode, src, fnOp)
+ *
+ * Used whenever the dst operand (as described by opCode) needs to be read before writing.
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} opCode
  * @param {number} src
  * @param {function(number,number)} fnOp
  */
-CPUStatePDP11.prototype.updateByteByMode = function(addressMode, src, fnOp)
+CPUStatePDP11.prototype.updateDstByte = function(opCode, src, fnOp)
 {
-    if (!(addressMode & PDP11.OPMODE.MASK)) {
-        this.dstMode = 0;
-        var reg = this.dstReg = addressMode & PDP11.OPREG.MASK;
+    var reg = this.dstReg = opCode & PDP11.OPREG.MASK;
+    var mode = this.dstMode = (opCode & PDP11.OPMODE.MASK) >> PDP11.OPMODE.SHIFT;
+    if (!mode) {
         this.regsGen[reg] = (this.regsGen[reg] & 0xff00) | fnOp.call(this, src, this.regsGen[reg]);
     } else {
-        var addr = this.dstAddr = this.getAddr(addressMode, PDP11.ACCESS.UPDATE_BYTE);
+        var addr = this.dstAddr = this.getAddr(mode, reg, PDP11.ACCESS.UPDATE_BYTE);
         this.writeByteToPhysical(addr, fnOp.call(this, src, this.readByteFromPhysical(addr)));
     }
 };
 
 /**
- * writeWordByMode(addressMode, data)
+ * updateDstWord(opCode, src, fnOp)
  *
- * Used whenever the dst operand (as described by addressMode) does NOT need to be read before writing.
+ * Used whenever the dst operand (as described by opCode) needs to be read before writing.
  *
  * @this {CPUStatePDP11}
- * @param {number} addressMode
- * @param {number} data
- * @return {number}
+ * @param {number} opCode
+ * @param {number} src
+ * @param {function(number,number)} fnOp
  */
-CPUStatePDP11.prototype.writeWordByMode = function(addressMode, data)
+CPUStatePDP11.prototype.updateDstWord = function(opCode, src, fnOp)
 {
-    if (!(addressMode & PDP11.OPMODE.MASK)) {
-        this.dstMode = 0;
-        this.regsGen[this.dstReg = addressMode & PDP11.OPREG.MASK] = data & 0xffff;
+    var reg = this.dstReg = opCode & PDP11.OPREG.MASK;
+    var mode = this.dstMode = (opCode & PDP11.OPMODE.MASK) >> PDP11.OPMODE.SHIFT;
+    if (!mode) {
+        this.regsGen[reg] = fnOp.call(this, src, this.regsGen[reg]);
     } else {
-        this.writeWordToPhysical(this.getAddr(addressMode, PDP11.ACCESS.WRITE_WORD), data);
+        var addr = this.getAddr(mode, reg, PDP11.ACCESS.UPDATE_WORD);
+        this.writeWordToPhysical(addr, fnOp.call(this, src, this.readWordFromPhysical(addr)));
     }
-    return data;
 };
 
 /**
- * writeByteByMode(addressMode, data, writeFlags)
+ * writeDstByte(opCode, data, writeFlags)
  *
- * Used whenever the dst operand (as described by addressMode) does NOT need to be read before writing.
+ * Used whenever the dst operand (as described by opCode) does NOT need to be read before writing.
  *
  * @this {CPUStatePDP11}
- * @param {number} addressMode
+ * @param {number} opCode
  * @param {number} data
  * @param {number} [writeFlags]
  * @return {number}
  */
-CPUStatePDP11.prototype.writeByteByMode = function(addressMode, data, writeFlags)
+CPUStatePDP11.prototype.writeDstByte = function(opCode, data, writeFlags)
 {
-    if (!(addressMode & PDP11.OPMODE.MASK)) {
-        this.dstMode = 0;
-        var reg = this.dstReg = addressMode & PDP11.OPREG.MASK;
+    var reg = this.dstReg = opCode & PDP11.OPREG.MASK;
+    var mode = this.dstMode = (opCode & PDP11.OPMODE.MASK) >> PDP11.OPMODE.SHIFT;
+    if (!mode) {
         if (!data) {
             this.regsGen[reg] &= ~0xff; // TODO: Profile to determine if this is a win
         } else if (writeFlags & PDP11.WRITE.SIGNEXT) {
@@ -1663,7 +1692,29 @@ CPUStatePDP11.prototype.writeByteByMode = function(addressMode, data, writeFlags
             this.regsGen[reg] = (this.regsGen[reg] & ~0xff) | (data & 0xff);
         }
     } else {
-        this.writeByteToPhysical(this.getAddr(addressMode, PDP11.ACCESS.WRITE_BYTE), data);
+        this.writeByteToPhysical(this.getAddr(mode, reg, PDP11.ACCESS.WRITE_BYTE), data);
+    }
+    return data;
+};
+
+/**
+ * writeDstWord(opCode, data)
+ *
+ * Used whenever the dst operand (as described by opCode) does NOT need to be read before writing.
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} opCode
+ * @param {number} data
+ * @return {number}
+ */
+CPUStatePDP11.prototype.writeDstWord = function(opCode, data)
+{
+    var reg = this.dstReg = opCode & PDP11.OPREG.MASK;
+    var mode = this.dstMode = (opCode & PDP11.OPMODE.MASK) >> PDP11.OPMODE.SHIFT;
+    if (!mode) {
+        this.regsGen[reg] = data & 0xffff;
+    } else {
+        this.writeWordToPhysical(this.getAddr(mode, reg, PDP11.ACCESS.WRITE_WORD), data);
     }
     return data;
 };
