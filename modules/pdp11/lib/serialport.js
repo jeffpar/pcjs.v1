@@ -262,9 +262,14 @@ SerialPortPDP11.prototype.initBus = function(cmp, bus, cpu, dbg)
     var serial = this;
 
     this.timerReceiveData = this.cpu.addTimer(function() {
-        serial.rcsr |= PDP11.DL11.RCSR.RD;
-        if (serial.rcsr & PDP11.DL11.RCSR.RIE) {
-            serial.cpu.interrupt(PDP11.DL11.DELAY, PDP11.DL11.PRI, PDP11.DL11.RVEC);
+        if (!(serial.rcsr & PDP11.DL11.RCSR.RD)) {
+            if (serial.abReceive.length) {
+                serial.rbuf = serial.abReceive.shift();
+                serial.rcsr |= PDP11.DL11.RCSR.RD;
+                if (serial.rcsr & PDP11.DL11.RCSR.RIE) {
+                    serial.cpu.interrupt(PDP11.DL11.DELAY, PDP11.DL11.PRI, PDP11.DL11.RVEC);
+                }
+            }
         }
     });
 
@@ -419,9 +424,10 @@ SerialPortPDP11.prototype.restore = function(data)
  */
 SerialPortPDP11.prototype.initState = function(data)
 {
-    this.rbuf = [];
+    this.rbuf = 0;
     this.rcsr = 0;
     this.xcsr = PDP11.DL11.XCSR.READY;
+    this.abReceive = [];
     return true;
 };
 
@@ -460,8 +466,12 @@ SerialPortPDP11.prototype.receiveData = function(data)
     else {
         this.abReceive = this.abReceive.concat(data);
     }
-    // this.advanceRBR();
+    this.cpu.setTimer(this.timerReceiveData, 50);
     return true;                // for now, return true regardless, since we're buffering everything anyway
+};
+
+SerialPortPDP11.prototype.advanceRBUF = function()
+{
 };
 
 /**
@@ -557,15 +567,11 @@ SerialPortPDP11.prototype.writeRCSR = function(data, addr)
  */
 SerialPortPDP11.prototype.readRBUF = function(addr)
 {
-    var result = 0;
     this.rcsr &= ~PDP11.DL11.RCSR.RD;
-    if (this.rbuf.length > 0) {
-        result = this.rbuf.shift();
-        if (this.rbuf.length > 0) {
-            this.cpu.setTimer(this.timerReceiveData, 50);
-        }
+    if (this.abReceive.length > 0) {
+        this.cpu.setTimer(this.timerReceiveData, 50);
     }
-    return result;
+    return this.rbuf;
 };
 
 /**
