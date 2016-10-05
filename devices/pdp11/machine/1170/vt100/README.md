@@ -17,6 +17,6 @@ machines:
 PDP-11/70 with VT100 Terminal
 ------------------------------------------
 
-{% include machine.html id="vt100" %}
-
 {% include machine.html id="test1170" %}
+
+{% include machine.html id="vt100" %}
