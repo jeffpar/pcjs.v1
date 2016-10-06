@@ -452,7 +452,7 @@ FileDump.prototype.dumpBuffer = function(sKey, buf, len, cbItem, offDump, nWidth
             } else {
                 sLine += str.toHexByte(v);
             }
-            if (!sASCII) sASCII = "0x" + str.toHex(off) + " ";
+            if (!sASCII) sASCII = str.toHex(off, 0, true) + " ";
             sASCII += (v >= 0x20 && v < 0x7F && v != 0x3C && v != 0x3E? String.fromCharCode(v) : ".");
         }
     }

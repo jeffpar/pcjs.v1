@@ -1,5 +1,5 @@
 /**
- * @fileoverview The Component class used by C1Pjs and PCx86.
+ * @fileoverview The Component class used by all PCjs components.
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @version 1.0
  * Created 2012-May-14
@@ -30,8 +30,8 @@
  */
 
 /*
- * All the C1Pjs and PCjs components now use JSDoc types, primarily so that Google's Closure Compiler
- * will compile everything with ZERO warnings.  For more information about the JSDoc types supported by
+ * All the PCjs components now use JSDoc types, primarily so that Google's Closure Compiler will
+ * compile everything with ZERO warnings.  For more information about the JSDoc types supported by
  * the Closure Compiler:
  *
  *      https://developers.google.com/closure/compiler/docs/js-for-compiler#types
@@ -110,11 +110,11 @@ function Component(type, parms, constructor, bitsMessage)
      * subclasses to do the same, to reduce the property clutter we have to wade through while debugging.
      */
     this.flags = {
-        fReady: false,
-        fBusy: false,
-        fBusyCancel: false,
-        fPowered: false,
-        fError: false
+        ready:      false,
+        busy:       false,
+        busyCancel: false,
+        powered:    false,
+        error:      false
     };
 
     this.fnReady = null;
@@ -769,8 +769,8 @@ Component.prototype = {
      * TODO: Add a task to the build process that "asserts" there are no instances of "assertion failure" in RELEASE builds.
      *
      * @this {Component}
-     * @param {boolean} f is the expression we are asserting to be true
-     * @param {string} [s] is description of the assertion on failure
+     * @param {boolean|number} f is the expression asserted to be true
+     * @param {string} [s] is a description of the assertion to be displayed or logged on failure
      */
     assert: function(f, s) {
         if (DEBUG) {
@@ -806,7 +806,7 @@ Component.prototype = {
         }
     },
     /**
-     * println(s, type)
+     * println(s, type, id)
      *
      * For non-diagnostic messages, which components may override to control the destination/appearance of their output.
      *
@@ -856,7 +856,7 @@ Component.prototype = {
      * @param {string} s describes a fatal error condition
      */
     setError: function(s) {
-        this.flags.fError = true;
+        this.flags.error = true;
         this.notice(s);         // TODO: Any cases where we should still prefix this string with "Fatal error: "?
     },
     /**
@@ -867,7 +867,7 @@ Component.prototype = {
      * @this {Component}
      */
     clearError: function() {
-        this.flags.fError = false;
+        this.flags.error = false;
     },
     /**
      * isError()
@@ -878,7 +878,7 @@ Component.prototype = {
      * @return {boolean} true if a fatal error condition exists, false if not
      */
     isError: function() {
-        if (this.flags.fError) {
+        if (this.flags.error) {
             this.println(this.toString() + " error");
             return true;
         }
@@ -899,14 +899,14 @@ Component.prototype = {
      */
     isReady: function(fnReady) {
         if (fnReady) {
-            if (this.flags.fReady) {
+            if (this.flags.ready) {
                 fnReady();
             } else {
                 if (MAXDEBUG) this.log("NOT ready");
                 this.fnReady = fnReady;
             }
         }
-        return this.flags.fReady;
+        return this.flags.ready;
     },
     /**
      * setReady(fReady)
@@ -917,9 +917,9 @@ Component.prototype = {
      * @param {boolean} [fReady] is assumed to indicate "ready" unless EXPLICITLY set to false
      */
     setReady: function(fReady) {
-        if (!this.flags.fError) {
-            this.flags.fReady = (fReady !== false);
-            if (this.flags.fReady) {
+        if (!this.flags.error) {
+            this.flags.ready = (fReady !== false);
+            if (this.flags.ready) {
                 if (MAXDEBUG /* || this.name */) this.log("ready");
                 var fnReady = this.fnReady;
                 this.fnReady = null;
@@ -937,38 +937,36 @@ Component.prototype = {
      * @return {boolean} true if "busy", false if not
      */
     isBusy: function(fCancel) {
-        if (this.flags.fBusy) {
+        if (this.flags.busy) {
             if (fCancel) {
-                this.flags.fBusyCancel = true;
+                this.flags.busyCancel = true;
             } else if (fCancel === undefined) {
                 this.println(this.toString() + " busy");
             }
         }
-        return this.flags.fBusy;
+        return this.flags.busy;
     },
     /**
      * setBusy(fBusy)
      *
-     * Update the current busy state; if an fCancel request is pending, it will be honored now.
+     * Update the current busy state; if a busyCancel request is pending, it will be honored now.
      *
      * @this {Component}
      * @param {boolean} fBusy
      * @return {boolean}
      */
     setBusy: function(fBusy) {
-        if (this.flags.fBusyCancel) {
-            if (this.flags.fBusy) {
-                this.flags.fBusy = false;
-            }
-            this.flags.fBusyCancel = false;
+        if (this.flags.busyCancel) {
+            this.flags.busy = false;
+            this.flags.busyCancel = false;
             return false;
         }
-        if (this.flags.fError) {
+        if (this.flags.error) {
             this.println(this.toString() + " error");
             return false;
         }
-        this.flags.fBusy = fBusy;
-        return this.flags.fBusy;
+        this.flags.busy = fBusy;
+        return this.flags.busy;
     },
     /**
      * powerUp(fSave)
@@ -979,7 +977,7 @@ Component.prototype = {
      * @return {boolean} true if successful, false if failure
      */
     powerUp: function(data, fRepower) {
-        this.flags.fPowered = true;
+        this.flags.powered = true;
         return true;
     },
     /**
@@ -991,7 +989,7 @@ Component.prototype = {
      * @return {Object|boolean} component state if fSave; otherwise, true if successful, false if failure
      */
     powerDown: function(fSave, fShutdown) {
-        if (fShutdown) this.flags.fPowered = false;
+        if (fShutdown) this.flags.powered = false;
         return true;
     },
     /**
@@ -1058,5 +1056,49 @@ Component.prototype = {
         }
     }
 };
+
+/*
+ * The following polyfills provide ES5 functionality that's missing in older browsers (eg, IE8),
+ * allowing PCjs apps to run without slamming into exceptions; however, due to the lack of HTML5 canvas
+ * support in those browsers, all you're likely to see are "soft" errors (eg, "Missing <canvas> support").
+ *
+ * Perhaps we can implement a text-only faux video display for a fun retro-browser experience someday.
+ *
+ * TODO: Come up with a better place to put these polyfills.  We will likely have more if we decide to
+ * make the leap from ES5 to ES6 features.
+ */
+
+/*
+ * See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/indexOf
+ */
+if (!Array.prototype.indexOf) {
+    Array.prototype.indexOf = function(obj, start) {
+         for (var i = (start || 0), j = this.length; i < j; i++) {
+             if (this[i] === obj) { return i; }
+         }
+         return -1;
+    }
+}
+
+/*
+ * See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind
+ */
+if (!Function.prototype.bind) {
+    Function.prototype.bind = function(obj) {
+        if (typeof this != "function") {
+            // Closest thing possible to the ECMAScript 5 internal IsCallable function
+            throw new TypeError("Function.prototype.bind: non-callable object");
+        }
+        var args = Array.prototype.slice.call(arguments, 1);
+        var fToBind = this;
+        var fnNOP = /** @constructor */ (function() {});
+        var fnBound = function() {
+            return fToBind.apply(this instanceof fnNOP && obj? this : obj, args.concat(Array.prototype.slice.call(arguments)));
+        };
+        fnNOP.prototype = this.prototype;
+        fnBound.prototype = new fnNOP();
+        return fnBound;
+    };
+}
 
 if (NODE) module.exports = Component;

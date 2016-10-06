@@ -149,7 +149,7 @@ function X86CPU(parmsCPU)
      * stepCPU() call, but it's good form to do so.
      */
     this.resetCycles();
-    this.flags.fComplete = this.flags.fDebugCheck = false;
+    this.flags.complete = this.flags.debugCheck = false;
 
     /*
      * If there are no live registers to display, then updateStatus() can skip a bit....
@@ -880,7 +880,7 @@ X86CPU.prototype.initProcessor = function()
                 this.aOps[X86.OPCODE.OS] = X86.opOS;        // 0x66
                 this.aOps[X86.OPCODE.AS] = X86.opAS;        // 0x67
                 for (bOpcode in X86.aOps0F386) {
-                    this.aOps0F[+bOpcode] = X86.aOps0F386[bOpcode];
+                    this.aOps0F[+bOpcode] = X86.aOps0F386[+bOpcode];
                 }
                 if (this.stepping >= X86.STEPPING_80386_A0 && this.stepping <= X86.STEPPING_80386_B0) {
                     this.aOps0F[0xA6] = X86.opXBTS;
@@ -898,7 +898,7 @@ X86CPU.prototype.initProcessor = function()
  */
 X86CPU.prototype.reset = function()
 {
-    if (this.flags.fRunning) this.stopCPU();
+    if (this.flags.running) this.stopCPU();
     this.resetRegs();
     this.resetCycles();
     this.clearError();      // clear any fatal error/exception that setError() may have flagged
@@ -1540,7 +1540,7 @@ X86CPU.prototype.checkIntNotify = function(nInt)
      * For most purposes, just having dbg.messageInt(), and the Debugger's ability to selectively turn categories
      * of messages on and off, is good enough.
      */
-    if (DEBUGGER && this.flags.fDebugCheck) {
+    if (DEBUGGER && this.flags.debugCheck) {
         if (this.messageEnabled(Messages.INT) && this.dbg.messageInt(nInt, this.regLIP) && MAXDEBUG) {
             this.addIntReturn(this.regLIP, function(cpu, nCycles) {
                 return function onIntReturn(nLevel) {
@@ -1951,7 +1951,7 @@ X86CPU.prototype.restore = function(data)
  * getSeg(sName)
  *
  * @param {string} sName
- * @return {Array}
+ * @return {X86Seg|Array}
  */
 X86CPU.prototype.getSeg = function(sName)
 {
@@ -2374,8 +2374,11 @@ X86CPU.prototype.setSP = function(off)
  * specifies any flags not contained in the new type parameter, then those flags must be immediately
  * calculated and written to the appropriate bit(s) in regPS.
  *
- * The fSubtract parameter is used to indicate a "subtracted" result (eg, CMP, DEC, SUB, SBB); the
- * default assumes an "added" result (eg, ADD, ADC, INC).
+ * The default assumes an "addition" (eg, ADD, ADC, INC), where value = dst + src. The fSubtract
+ * parameter is used to indicate a "subtraction" (eg, CMP, DEC, SUB, SBB), where value = dst - src;
+ * We can transform a subtraction into an addition, since it's also true that dst = value + src,
+ * by swapping swap dst and value -- which is exactly what we do below.  This allows all downstream
+ * flag calculations (eg, getCF(), getOF()) to remain the same.
  *
  * @this {X86CPU}
  * @param {number} dst
@@ -2469,12 +2472,11 @@ X86CPU.prototype.getCarry = function()
 /**
  * getCF()
  *
- * Notes regarding carry following an I386 addition:
+ * The following table summarizes bit 31 of the dst (D) and src (S) operands, bit 31 of the
+ * addition (A), along with the expected carry bit (C):
  *
- * The following table summarizes bit 31 of dst, src, and result, along with the expected carry:
- *
- *      dst src res carry
- *      --- --- --- -----
+ *      D   S   A   C
+ *      -   -   -   -
  *      0   0   0   0       no
  *      0   0   1   0       no (there must have been a carry out of bit 30, but it was "absorbed")
  *      0   1   0   1       yes (there must have been a carry out of bit 30, but it was NOT "absorbed")
@@ -2487,6 +2489,10 @@ X86CPU.prototype.getCarry = function()
  * So, we use the following calculation:
  *
  *      (resultDst ^ ((resultDst ^ resultSrc) & (resultSrc ^ resultArith))) & resultType
+ *
+ * NOTE: The above table assumes that the resultDst (D) and resultSrc (S) operands were ADDED to
+ * produce resultArith (A); if they were SUBTRACTED instead (D - S), then D and A must be swapped
+ * after the subtraction, so that the above truth table still applies; see setArithResult().
  *
  * @this {X86CPU}
  * @return {number} 0 or X86.PS.CF
@@ -2522,8 +2528,8 @@ X86CPU.prototype.getCF = function()
  *      lowest nibble of v.  This number is like a miniature 16-bit parity-table indexed by the low four bits in v.
  *      The result has the parity of v in bit 1, which is masked and returned.
  *
- * The x86 parity flag (PF) is based exclusively on the low 8 bits of resultParitySign, and PF must be SET if that byte
- * has EVEN parity; the above calculation yields ODD parity, so we use the conditional operator to invert the result.
+ * The x86 parity flag (PF) is based exclusively on the low 8 bits of resultParitySign, so our calculation is bit
+ * simpler.  Note that PF must be SET if that byte has EVEN parity, and CLEAR if it has ODD parity.
  *
  * @this {X86CPU}
  * @return {number} 0 or X86.PS.PF
@@ -2625,8 +2631,8 @@ X86CPU.prototype.getSF = function()
  *
  *      ((resultDst ^ resultArith) & (resultSrc ^ resultArith)) & resultType
  *
- * which you can verify from the following table of sign bits (where x1 is resultDst ^ resultArith,
- * and x2 is resultSrc ^ resultArith):
+ * which you can verify from the following table of sign bits, where x1 is resultDst ^ resultArith,
+ * and x2 is resultSrc ^ resultArith:
  *
  *      D   S   A   x1  x2  OF
  *      -   -   -   --  --  --
@@ -2638,6 +2644,10 @@ X86CPU.prototype.getSF = function()
  *      1   0   1   0   1   0
  *      1   1   0   1   1   1 (adding two negative values yielded a positive value)
  *      1   1   1   0   0   0
+ *
+ * NOTE: The above table assumes that the resultDst (D) and resultSrc (S) operands were ADDED to
+ * produce resultArith (A); if they were SUBTRACTED instead (D - S), then D and A must be swapped
+ * after the subtraction, so that the above truth table still applies; see setArithResult().
  *
  * @this {X86CPU}
  * @return {number} 0 or X86.PS.OF
@@ -4159,7 +4169,7 @@ X86CPU.prototype.updateReg = function(sReg, nValue)
 X86CPU.prototype.updateStatus = function(fForce)
 {
     if (this.cLiveRegs) {
-        if (fForce || !this.flags.fRunning || this.flags.fDisplayLiveRegs) {
+        if (fForce || !this.flags.running || this.flags.displayLiveRegs) {
             this.updateReg("EAX", this.regEAX);
             this.updateReg("EBX", this.regEBX);
             this.updateReg("ECX", this.regECX);
@@ -4231,12 +4241,12 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
      * Debugger is single-stepping (even when performing multiple single-steps), fRunning is never set,
      * so stopCPU() would have no effect as far as the Debugger is concerned.
      */
-    this.flags.fComplete = true;
+    this.flags.complete = true;
 
     /*
      * fDebugCheck is true if we need to "check" every instruction with the Debugger.
      */
-    var fDebugCheck = this.flags.fDebugCheck = (DEBUGGER && this.dbg && this.dbg.checksEnabled());
+    var fDebugCheck = this.flags.debugCheck = (DEBUGGER && this.dbg && this.dbg.checksEnabled());
 
     /*
      * nDebugState is checked only when fDebugCheck is true, and its sole purpose is to tell the first call
@@ -4246,8 +4256,8 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
      * Once we snap fStarting, we clear it, because technically, we've moved beyond "starting" and have
      * officially "started" now.
      */
-    var nDebugState = (!nMinCycles)? -1 : (this.flags.fStarting? 0 : 1);
-    this.flags.fStarting = false;
+    var nDebugState = (!nMinCycles)? -1 : (this.flags.starting? 0 : 1);
+    this.flags.starting = false;
 
     /*
      * We move the minimum cycle count to nStepCycles (the number of cycles left to step), so that other
@@ -4373,7 +4383,7 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
             //
             // Make sure that every instruction is assessing a cycle cost, and that the cost is a net positive.
             //
-            if (this.flags.fComplete && this.nStepCycles >= this.nSnapCycles && !(this.opFlags & X86.OPFLAG_PREFIXES)) {
+            if (this.flags.complete && this.nStepCycles >= this.nSnapCycles && !(this.opFlags & X86.OPFLAG_PREFIXES)) {
                 this.println("cycle miscount: " + (this.nSnapCycles - this.nStepCycles));
                 this.setIP(this.opLIP - this.segCS.base);
                 this.stopCPU();
@@ -4384,7 +4394,7 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
 
     } while (this.nStepCycles > 0);
 
-    return (this.flags.fComplete? this.nBurstCycles - this.nStepCycles : (this.flags.fComplete === undefined? 0 : -1));
+    return (this.flags.complete? this.nBurstCycles - this.nStepCycles : (this.flags.complete === undefined? 0 : -1));
 };
 
 /**

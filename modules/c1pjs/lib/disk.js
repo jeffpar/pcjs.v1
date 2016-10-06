@@ -222,7 +222,7 @@ function C1PDiskController(parmsDC)
 {
     Component.call(this, "C1PDiskController", parmsDC);
 
-    this.flags.fPowered = false;
+    this.flags.powered = false;
 
     /*
      * Our DiskController simulates the combination of an MC6820 PIA and an MC6850 ACIA.
@@ -743,8 +743,8 @@ C1PDiskController.prototype.setBuffer = function(abMemory, start, end, cpu)
  */
 C1PDiskController.prototype.setPower = function(fOn, cmp)
 {
-    if (fOn && !this.flags.fPowered) {
-        this.flags.fPowered = true;
+    if (fOn && !this.flags.powered) {
+        this.flags.powered = true;
         if (DEBUGGER) this.dbg = cmp.getComponentByType("debugger");
     }
 };

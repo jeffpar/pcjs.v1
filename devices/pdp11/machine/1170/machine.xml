@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pdp11/1.30.0/machine.xsl"?>
+<machine id="test1170" class="pdp11" border="1" pos="center" background="#FAEBD7">
+	<name pos="center">PDP-11/70 Test Machine</name>
+	<computer id="computer" busWidth="22"/>
+	<cpu id="cpu" model="1170" cycles="6666667" resetAddr="0xC000"/>
+	<ram id="ram" addr="0x0000" size="0xC000"/>
+	<rom id="rom" addr="0xC000" size="0x0570" file="/devices/pdp11/rom/custom/boot.json" writable="true"/>
+	<ram id="ram" addr="0x10000" size="0x34000"/>
+	<device id="unibus" name="unibus"/>
+	<serial id="dl11" adapter="0"/>
+	<panel ref="/devices/pdp11/panel/1170/wide.xml"/>
+	<debugger id="debugger" base="8" messages="" commands=""/>
+</machine>

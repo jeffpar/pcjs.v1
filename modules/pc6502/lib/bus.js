@@ -59,16 +59,11 @@ if (NODE) {
  * addMemory().  If the component needs something more than simple read/write storage,
  * it must provide a custom controller.
  *
- * All port (I/O) operations are defined by external handlers; they register with us,
- * and we manage those registrations and provide support for I/O breakpoints, but the
- * only default I/O behavior we provide is ignoring writes to any unregistered output
- * ports and returning 0xff from any unregistered input ports.
- *
  * @constructor
  * @extends Component
  * @param {Object} parmsBus
  * @param {CPUState} cpu
- * @param {Debugger} dbg
+ * @param {Debugger6502} dbg
  */
 function Bus(parmsBus, cpu, dbg)
 {
@@ -80,35 +75,16 @@ function Bus(parmsBus, cpu, dbg)
     this.nBusWidth = parmsBus['busWidth'] || 16;
 
     /*
-     * Compute all Bus memory block parameters, based on the width of the bus.
-     *
-     * Regarding blockTotal, we want to avoid using block overflow expressions like:
-     *
-     *      iBlock < this.nBlockTotal? iBlock : 0
-     *
-     * As long as we know that blockTotal is a power of two (eg, 256 or 0x100, in the case of
-     * nBusWidth == 20 and blockSize == 4096), we can define blockMask as (blockTotal - 1) and
-     * rewrite the previous expression as:
-     *
-     *      iBlock & this.nBlockMask
-     *
-     *      Bus Property        Old hard-coded values (when nBusWidth was always 20)
-     *      ------------        ----------------------------------------------------
-     *      this.nBusLimit      0xfffff
-     *      this.nBusMask       [same as busLimit]
-     *      this.nBlockSize     4096
-     *      this.nBlockLen      (this.nBlockSize >> 2)
-     *      this.nBlockShift    12
-     *      this.nBlockLimit    0xfff
-     *      this.nBlockTotal    ((this.nBusLimit + this.nBlockSize) / this.nBlockSize) | 0
-     *      this.nBlockMask     (this.nBlockTotal - 1) [ie, 0xff]
-     *
-     * Note that we choose a nBlockShift value (and thus a physical memory block size) based on "buswidth":
+     * Compute all Bus6502 memory block parameters, based on the width of the bus.  The entire
+     * address space is divided into blocks, using a block size that is (hopefully) appropriate to
+     * the bus width.  The following table summarizes our simplistic calculations.
      *
      *      Bus Width                       Block Shift     Block Size
      *      ---------                       -----------     ----------
      *      16 bits (64Kb address space):   10              1Kb (64 maximum blocks)
+     *      18 bits (256Kb address space):  11              2Kb (128 maximum blocks)
      *      20 bits (1Mb address space):    12              4Kb (256 maximum blocks)
+     *      22 bits (4Mb address space):    13              8Kb (512 maximum blocks)
      *      24 bits (16Mb address space):   14              16Kb (1K maximum blocks)
      *      32 bits (4Gb address space);    15              32Kb (128K maximum blocks)
      *
@@ -119,46 +95,15 @@ function Bus(parmsBus, cpu, dbg)
      */
     this.addrTotal = Math.pow(2, this.nBusWidth);
     this.nBusLimit = this.nBusMask = (this.addrTotal - 1) | 0;
-    this.nBlockShift = (this.nBusWidth <= 16)? 10 : ((this.nBusWidth <= 20)? 12 : (this.nBusWidth <= 24? 14 : 15));
+    this.nBlockShift = (this.nBusWidth >> 1) + 2;
+    if (this.nBlockShift < 10) this.nBlockShift = 10;
+    if (this.nBlockShift > 15) this.nBlockShift = 15;
     this.nBlockSize = 1 << this.nBlockShift;
     this.nBlockLen = this.nBlockSize >> 2;
     this.nBlockLimit = this.nBlockSize - 1;
     this.nBlockTotal = (this.addrTotal / this.nBlockSize) | 0;
     this.nBlockMask = this.nBlockTotal - 1;
     this.assert(this.nBlockMask <= Bus.BlockInfo.num.mask);
-
-    /*
-     * Lists of I/O notification functions: aPortInputNotify and aPortOutputNotify are arrays, indexed by
-     * port, of sub-arrays which contain:
-     *
-     *      [0]: registered function to call for every I/O access
-     *
-     * The registered function is called with the port address, and if the access was triggered by the CPU,
-     * the instruction pointer (IP) at the point of access.
-     *
-     * WARNING: Unlike the (old) read and write memory notification functions, these support only one
-     * pair of input/output functions per port.  A more sophisticated architecture could support a list
-     * of chained functions across multiple components, but I doubt that will be necessary here.
-     *
-     * UPDATE: The Debugger now piggy-backs on these arrays to indicate ports for which it wants notification
-     * of I/O.  In those cases, the registered component/function elements may or may not be set, but the
-     * following additional element will be set:
-     *
-     *      [1]: true to break on I/O, false to ignore I/O
-     *
-     * The false case is important if fPortInputBreakAll and/or fPortOutputBreakAll is set, because it allows the
-     * Debugger to selectively ignore specific ports.
-     */
-    this.aPortInputNotify = [];
-    this.aPortOutputNotify = [];
-    this.fPortInputBreakAll = this.fPortOutputBreakAll = false;
-
-    /*
-     * By default, all I/O ports are 1 byte wide; ports that are wider must add themselves to one or both of
-     * these lists, using addPortInputWidth() and/or addPortOutputWidth().
-     */
-    this.aPortInputWidth = [];
-    this.aPortOutputWidth = [];
 
     /*
      * Allocate empty Memory blocks to span the entire physical address space.
@@ -176,38 +121,6 @@ Bus.ERROR = {
     SET_MEM_BADRANGE:   4,
     REM_MEM_BADRANGE:   5
 };
-
-/**
- * @typedef {number}
- */
-var BlockInfo;
-
-/**
- * This defines the BlockInfo bit fields used by scanMemory() when it creates the aBlocks array.
- *
- * @typedef {{
- *  num:    BitField,
- *  count:  BitField,
- *  btmod:  BitField,
- *  type:   BitField
- * }}
- */
-Bus.BlockInfo = usr.defineBitFields({num:20, count:8, btmod:1, type:3});
-
-/**
- * BusInfo object definition (returned by scanMemory())
- *
- *  cbTotal:    total bytes allocated
- *  cBlocks:    total Memory blocks allocated
- *  aBlocks:    array of allocated Memory block numbers
- *
- * @typedef {{
- *  cbTotal:    number,
- *  cBlocks:    number,
- *  aBlocks:    Array.<BlockInfo>
- * }}
- */
-var BusInfo;
 
 /**
  * initMemory()
@@ -364,6 +277,42 @@ Bus.prototype.cleanMemory = function(addr, size)
     }
     return fClean;
 };
+
+/*
+ * Data types used by scanMemory()
+ */
+
+/**
+ * @typedef {number}
+ */
+var BlockInfo;
+
+/**
+ * This defines the BlockInfo bit fields used by scanMemory() when it creates the aBlocks array.
+ *
+ * @typedef {{
+ *  num:    BitField,
+ *  count:  BitField,
+ *  btmod:  BitField,
+ *  type:   BitField
+ * }}
+ */
+Bus.BlockInfo = usr.defineBitFields({num:20, count:8, btmod:1, type:3});
+
+/**
+ * BusInfo object definition (returned by scanMemory())
+ *
+ *  cbTotal:    total bytes allocated
+ *  cBlocks:    total Memory blocks allocated
+ *  aBlocks:    array of allocated Memory block numbers
+ *
+ * @typedef {{
+ *  cbTotal:    number,
+ *  cBlocks:    number,
+ *  aBlocks:    Array.<BlockInfo>
+ * }}
+ */
+var BusInfo;
 
 /**
  * scanMemory(info, addr, size)
@@ -740,309 +689,6 @@ Bus.prototype.restoreMemory = function(a)
     }
     return true;
 };
-
-/**
- * addPortInputBreak(port)
- *
- * @this {Bus}
- * @param {number} [port]
- * @return {boolean} true if break on port input enabled, false if disabled
- */
-Bus.prototype.addPortInputBreak = function(port)
-{
-    if (port === undefined) {
-        this.fPortInputBreakAll = !this.fPortInputBreakAll;
-        return this.fPortInputBreakAll;
-    }
-    if (this.aPortInputNotify[port] === undefined) {
-        this.aPortInputNotify[port] = [null, false];
-    }
-    this.aPortInputNotify[port][1] = !this.aPortInputNotify[port][1];
-    return this.aPortInputNotify[port][1];
-};
-
-/**
- * addPortInputNotify(start, end, fn)
- *
- * Add a port input-notification handler to the list of such handlers.
- *
- * @this {Bus}
- * @param {number} start port address
- * @param {number} end port address
- * @param {function(number,number)} fn is called with the port and IP values at the time of the input
- */
-Bus.prototype.addPortInputNotify = function(start, end, fn)
-{
-    if (fn !== undefined) {
-        for (var port = start; port <= end; port++) {
-            if (this.aPortInputNotify[port] !== undefined) {
-                Component.warning("Input port " + str.toHexWord(port) + " already registered");
-                continue;
-            }
-            this.aPortInputNotify[port] = [fn, false];
-            if (MAXDEBUG) this.log("addPortInputNotify(" + str.toHexWord(port) + ")");
-        }
-    }
-};
-
-/**
- * addPortInputTable(component, table, offset)
- *
- * Add port input-notification handlers from the specified table (a batch version of addPortInputNotify)
- *
- * @this {Bus}
- * @param {Component} component
- * @param {Object} table
- * @param {number} [offset] is an optional port offset
- */
-Bus.prototype.addPortInputTable = function(component, table, offset)
-{
-    if (offset === undefined) offset = 0;
-    for (var port in table) {
-        this.addPortInputNotify(+port + offset, +port + offset, table[port].bind(component));
-    }
-};
-
-/**
- * addPortInputWidth(port, size)
- *
- * By default, all input ports are 1 byte wide; ports that are wider must call this function.
- *
- * @this {Bus}
- * @param {number} port
- * @param {number} size (1, 2 or 4)
- */
-Bus.prototype.addPortInputWidth = function(port, size)
-{
-    this.aPortInputWidth[port] = size;
-};
-
-/**
- * checkPortInputNotify(port, size, addrIP)
- *
- * @this {Bus}
- * @param {number} port
- * @param {number} size (1, 2 or 4)
- * @param {number} [addrIP] is the IP value at the time of the input
- * @return {number} simulated port data
- *
- * NOTE: It seems that parts of the ROM BIOS (like the RS-232 probes around F000:E5D7 in the 5150 BIOS)
- * assume that ports for non-existent hardware return 0xff rather than 0x00, hence my new default (0xff) below.
- */
-Bus.prototype.checkPortInputNotify = function(port, size, addrIP)
-{
-    var data = 0, shift = 0;
-
-    while (size > 0) {
-
-        var aNotify = this.aPortInputNotify[port];
-        var sizePort = this.aPortInputWidth[port] || 1;
-        var maskPort = (sizePort == 1? 0xff : (sizePort == 2? 0xffff : -1));
-        var dataPort = maskPort;
-
-        /*
-         * TODO: We need to decide what to do about 8-bit I/O to a 16-bit port (ditto for 16-bit I/O
-         * to a 32-bit port).  We probably should pass the size through to the aNotify[0] handler,
-         * and let it decide what to do, but I don't feel like changing all the I/O handlers right now.
-         * The good news, at least, is that the 8-bit handlers would not have to do anything special.
-         * This assert will warn us if this is a pressing need.
-         */
-        this.assert(size >= sizePort);
-
-        if (aNotify !== undefined) {
-            if (aNotify[0]) {
-                dataPort = aNotify[0](port, addrIP);
-                if (dataPort === undefined) {
-                    dataPort = maskPort;
-                } else {
-                    dataPort &= maskPort;
-                }
-            }
-            if (DEBUGGER && this.dbg && this.fPortInputBreakAll != aNotify[1]) {
-                this.dbg.checkPortInput(port, size, dataPort);
-            }
-        }
-        else {
-            if (DEBUGGER && this.dbg) {
-                this.dbg.messageIO(this, port, null, addrIP);
-                if (this.fPortInputBreakAll) this.dbg.checkPortInput(port, size, dataPort);
-            }
-        }
-
-        data |= dataPort << shift;
-        shift += (sizePort << 3);
-        port += sizePort;
-        size -= sizePort;
-    }
-
-    this.assert(!size);
-    return data;
-};
-
-/**
- * removePortInputNotify(start, end)
- *
- * Remove port input-notification handler(s) (to be ENABLED later if needed)
- *
- * @this {Bus}
- * @param {number} start address
- * @param {number} end address
- *
-Bus.prototype.removePortInputNotify = function(start, end)
- {
-    for (var port = start; port < end; port++) {
-        if (this.aPortInputNotify[port]) {
-            delete this.aPortInputNotify[port];
-        }
-    }
-};
- */
-
-/**
- * addPortOutputBreak(port)
- *
- * @this {Bus}
- * @param {number} [port]
- * @return {boolean} true if break on port output enabled, false if disabled
- */
-Bus.prototype.addPortOutputBreak = function(port)
-{
-    if (port === undefined) {
-        this.fPortOutputBreakAll = !this.fPortOutputBreakAll;
-        return this.fPortOutputBreakAll;
-    }
-    if (this.aPortOutputNotify[port] === undefined) {
-        this.aPortOutputNotify[port] = [null, false];
-    }
-    this.aPortOutputNotify[port][1] = !this.aPortOutputNotify[port][1];
-    return this.aPortOutputNotify[port][1];
-};
-
-/**
- * addPortOutputNotify(start, end, fn)
- *
- * Add a port output-notification handler to the list of such handlers.
- *
- * @this {Bus}
- * @param {number} start port address
- * @param {number} end port address
- * @param {function(number,number)} fn is called with the port and IP values at the time of the output
- */
-Bus.prototype.addPortOutputNotify = function(start, end, fn)
-{
-    if (fn !== undefined) {
-        for (var port = start; port <= end; port++) {
-            if (this.aPortOutputNotify[port] !== undefined) {
-                Component.warning("Output port " + str.toHexWord(port) + " already registered");
-                continue;
-            }
-            this.aPortOutputNotify[port] = [fn, false];
-            if (MAXDEBUG) this.log("addPortOutputNotify(" + str.toHexWord(port) + ")");
-        }
-    }
-};
-
-/**
- * addPortOutputTable(component, table, offset)
- *
- * Add port output-notification handlers from the specified table (a batch version of addPortOutputNotify)
- *
- * @this {Bus}
- * @param {Component} component
- * @param {Object} table
- * @param {number} [offset] is an optional port offset
- */
-Bus.prototype.addPortOutputTable = function(component, table, offset)
-{
-    if (offset === undefined) offset = 0;
-    for (var port in table) {
-        this.addPortOutputNotify(+port + offset, +port + offset, table[port].bind(component));
-    }
-};
-
-/**
- * addPortOutputWidth(port, size)
- *
- * By default, all output ports are 1 byte wide; ports that are wider must call this function.
- *
- * @this {Bus}
- * @param {number} port
- * @param {number} size (1, 2 or 4)
- */
-Bus.prototype.addPortOutputWidth = function(port, size)
-{
-    this.aPortOutputWidth[port] = size;
-};
-
-/**
- * checkPortOutputNotify(port, size, data, addrIP)
- *
- * @this {Bus}
- * @param {number} port
- * @param {number} size
- * @param {number} data
- * @param {number} [addrIP] is the IP value at the time of the output
- */
-Bus.prototype.checkPortOutputNotify = function(port, size, data, addrIP)
-{
-    var shift = 0;
-
-    while (size > 0) {
-
-        var aNotify = this.aPortOutputNotify[port];
-        var sizePort = this.aPortOutputWidth[port] || 1;
-        var maskPort = (sizePort == 1? 0xff : (sizePort == 2? 0xffff : -1));
-        var dataPort = (data >>>= shift) & maskPort;
-
-        /*
-         * TODO: We need to decide what to do about 8-bit I/O to a 16-bit port (ditto for 16-bit I/O
-         * to a 32-bit port).  We probably should pass the size through to the aNotify[0] handler,
-         * and let it decide what to do, but I don't feel like changing all the I/O handlers right now.
-         * The good news, at least, is that the 8-bit handlers would not have to do anything special.
-         * This assert will warn us if this is a pressing need.
-         */
-        this.assert(size >= sizePort);
-
-        if (aNotify !== undefined) {
-            if (aNotify[0]) {
-                aNotify[0](port, dataPort, addrIP);
-            }
-            if (DEBUGGER && this.dbg && this.fPortOutputBreakAll != aNotify[1]) {
-                this.dbg.checkPortOutput(port, size, dataPort);
-            }
-        }
-        else {
-            if (DEBUGGER && this.dbg) {
-                this.dbg.messageIO(this, port, dataPort, addrIP);
-                if (this.fPortOutputBreakAll) this.dbg.checkPortOutput(port, size, dataPort);
-            }
-        }
-
-        shift += (sizePort << 3);
-        port += sizePort;
-        size -= sizePort;
-    }
-    this.assert(!size);
-};
-
-/**
- * removePortOutputNotify(start, end)
- *
- * Remove port output-notification handler(s) (to be ENABLED later if needed)
- *
- * @this {Bus}
- * @param {number} start address
- * @param {number} end address
- *
-Bus.prototype.removePortOutputNotify = function(start, end)
- {
-    for (var port = start; port < end; port++) {
-        if (this.aPortOutputNotify[port]) {
-            delete this.aPortOutputNotify[port];
-        }
-    }
-};
- */
 
 /**
  * reportError(op, addr, size, fQuiet)

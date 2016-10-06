@@ -16,15 +16,16 @@ Publication Archive
 * [Reference Manuals](/pubs/pc/reference/)
 * [Software User and Development Guides](/pubs/pc/software/) (eg, [DOS](/pubs/pc/software/dos/), [OS/2](/pubs/pc/software/os2/), [Windows](/pubs/pc/software/windows/))
 
+[Digital Equipment Corporation (DEC) Publications](/pubs/dec/):
+
+* [PDP-11](/pubs/dec/pdp11/)
+* [VT100](/pubs/dec/vt100/)
+
 Ohio Scientific's 6502-based [Challenger 1P Publications](/pubs/c1p/):
 
 * [Datasheets](/pubs/c1p/datasheets/)
 * [Programming Guides/Samples](/pubs/c1p/programming/)
 * [Reference Manuals](/pubs/c1p/techref/)
-
-[Digital Equipment Corporation (DEC) Publications](/pubs/dec/):
-
-* [VT100](/pubs/dec/vt100/)
 
 [<img src="http://archive.pcjs.org/pubs/pc/datasheets/thumbs/8088-CPU.jpg" width="200" height="260" alt= "8088 CPU"/>](pc/datasheets/)
 [<img src="http://archive.pcjs.org/pubs/pc/magazines/byte/BYTE-1975-11/thumbs/BYTE-1975-11 1.jpeg" width="200" height="260" alt= "Byte Magazine"/>](pc/magazines/byte/)

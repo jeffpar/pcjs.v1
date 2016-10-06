@@ -731,7 +731,7 @@ X86.helpFault = function(nFault, nError, nCycles, fHalt)
 {
     var fDispatch = false;
 
-    if (!this.flags.fComplete) {
+    if (!this.flags.complete) {
         /*
          * Prior to each new burst of instructions, stepCPU() sets fComplete to true, and the only (normal) way
          * for fComplete to become false is through stopCPU(), which isn't ordinarily called, except by the Debugger.
@@ -970,7 +970,7 @@ X86.helpCheckFault = function(nFault, nError, fHalt)
 
     if (this.messageEnabled(bitsMessage) || fHalt) {
 
-        var fRunning = this.flags.fRunning;
+        var fRunning = this.flags.running;
         var sMessage = "Fault " + str.toHexByte(nFault) + (nError != null? " (" + str.toHexWord(nError) + ")" : "") + " on opcode " + str.toHexByte(bOpcode);
         if (fHalt && fRunning) sMessage += " (blocked)";
 

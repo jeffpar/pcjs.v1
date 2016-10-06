@@ -31,22 +31,6 @@
 
 "use strict";
 
-/*
- * Components that previously used Debugger messages definitions by including:
- *
- *     var Debugger = require("./debugger");
- *
- * and using:
- *
- *      Debugger.MESSAGE.FOO
- *
- * must now instead include:
- *
- *      var Messages = require("./messages");
- *
- * and then replace all occurrences of "Debugger.MESSAGE.FOO" with "Messages.FOO".
- */
-
 var Messages = {
     CPU:        0x00000001,
     SEG:        0x00000002,

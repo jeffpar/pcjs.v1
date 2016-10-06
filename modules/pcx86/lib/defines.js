@@ -34,12 +34,12 @@
 /**
  * @define {string}
  */
-var APPCLASS = "pcx86";          // this @define is the default application class (eg, "pcx86", "c1pjs")
+var APPCLASS = "pcx86";         // this @define is the default application class (eg, "pcx86", "c1pjs")
 
 /**
  * @define {string}
  */
-var APPNAME = "PCx86";           // this @define is the default application name (eg, "PCx86", "C1Pjs")
+var APPNAME = "PCx86";          // this @define is the default application name (eg, "PCx86", "C1Pjs")
 
 /**
  * @define {boolean}

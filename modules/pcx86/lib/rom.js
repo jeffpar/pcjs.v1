@@ -162,7 +162,7 @@ ROM.BIOS.RESET_FLAG_WARMBOOT = 0x1234;  // value stored at ROM.BIOS.RESET_FLAG t
  * @param {Computer} cmp
  * @param {Bus} bus
  * @param {X86CPU} cpu
- * @param {Debugger} dbg
+ * @param {DebuggerX86} dbg
  */
 ROM.prototype.initBus = function(cmp, bus, cpu, dbg)
 {

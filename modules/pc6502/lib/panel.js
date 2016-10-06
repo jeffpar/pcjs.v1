@@ -87,7 +87,7 @@ Panel.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
  * @param {Computer} cmp
  * @param {Bus} bus
  * @param {CPUState} cpu
- * @param {Debugger} dbg
+ * @param {Debugger6502} dbg
  */
 Panel.prototype.initBus = function(cmp, bus, cpu, dbg)
 {

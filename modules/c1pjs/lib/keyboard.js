@@ -127,7 +127,7 @@ function C1PKeyboard(parmsKbd)
 {
     Component.call(this, "C1PKeyboard", parmsKbd);
 
-    this.flags.fPowered = false;
+    this.flags.powered = false;
     this.nDefaultModel = parmsKbd['model'];
 
     /*
@@ -204,7 +204,7 @@ function C1PKeyboard(parmsKbd)
     this.msReleaseRepeat    = 100;      // number of milliseconds before a held key is "forced" up (assuming auto-repeat)
     this.msInjectDelay      = 300;      // number of milliseconds between injected keystrokes
 
-    this.aButtonCodeMap = [];
+    this.aButtonCodeMap = {};
     this.aButtonCodeMap['break']  = this.CHARCODE_BREAK;
     this.aButtonCodeMap['esc']    = this.CHARCODE_ESC;
     this.aButtonCodeMap['ctrl-c'] = this.CHARCODE_CTRLC;
@@ -521,8 +521,8 @@ C1PKeyboard.prototype.setModel = function(nModel)
  */
 C1PKeyboard.prototype.setPower = function(fOn, cmp)
 {
-    if (fOn && !this.flags.fPowered) {
-        this.flags.fPowered = true;
+    if (fOn && !this.flags.powered) {
+        this.flags.powered = true;
         this.cmp = cmp;
         if (DEBUGGER) this.dbg = cmp.getComponentByType("debugger");
     }

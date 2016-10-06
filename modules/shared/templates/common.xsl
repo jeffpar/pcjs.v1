@@ -52,7 +52,7 @@
 			<p class="common-reference"></p>
 			<p class="common-copyright">
 				<span class="common-copyright"><a href="http://www.pcjs.org/">pcjs.org</a> website © 2012-2016 by <a href="http://twitter.com/jeffpar">@jeffpar</a></span><br/>
-				<span class="common-copyright">PCjs and C1Pjs released under <a href="http://gnu.org/licenses/gpl.html">GPL version 3 or later</a></span>
+				<span class="common-copyright"><a href="http://github.com/jeffpar/pcjs">PCjs Project</a> released under <a href="http://gnu.org/licenses/gpl.html">GPL version 3 or later</a></span>
 			</p>
 		</div>
 	</xsl:template>

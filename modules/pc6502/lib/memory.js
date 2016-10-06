@@ -237,7 +237,7 @@ Memory.prototype = {
      * @this {Memory}
      * @param {Memory} mem
      * @param {number} [type]
-     * @param {Debugger} [dbg]
+     * @param {Debugger6502} [dbg]
      */
     clone: function(mem, type, dbg) {
         /*
@@ -485,7 +485,7 @@ Memory.prototype = {
      * copyBreakpoints(dbg, mem)
      *
      * @this {Memory}
-     * @param {Debugger} [dbg]
+     * @param {Debugger6502} [dbg]
      * @param {Memory} [mem] (outgoing Memory block to copy breakpoints from, if any)
      */
     copyBreakpoints: function(dbg, mem) {
@@ -807,18 +807,45 @@ Memory.prototype = {
 
 /*
  * This is the effective definition of afnNone, but we need not fully define it, because setAccess()
- * uses these defaults when any of the 6 handlers (ie, 3 read handlers and 3 write handlers) are undefined.
+ * uses these defaults when any of the 4 handlers (ie, 2 byte handlers and 2 short handlers) are undefined.
  *
-Memory.afnNone          = [Memory.prototype.readNone,        Memory.prototype.readShortDefault, Memory.prototype.writeNone,        Memory.prototype.writeShortDefault];
+Memory.afnNone = [
+    Memory.prototype.readNone,
+    Memory.prototype.writeNone,
+    Memory.prototype.readShortDefault,
+    Memory.prototype.writeShortDefault
+];
  */
+Memory.afnNone = [];
 
-Memory.afnNone          = [];
-Memory.afnMemory        = [Memory.prototype.readByteMemory,  Memory.prototype.readShortMemory,  Memory.prototype.writeByteMemory,  Memory.prototype.writeShortMemory];
-Memory.afnChecked       = [Memory.prototype.readByteChecked, Memory.prototype.readShortChecked, Memory.prototype.writeByteChecked, Memory.prototype.writeShortChecked];
+Memory.afnMemory = [
+    Memory.prototype.readByteMemory,
+    Memory.prototype.writeByteMemory,
+    Memory.prototype.readShortMemory,
+    Memory.prototype.writeShortMemory
+];
+
+Memory.afnChecked = [
+    Memory.prototype.readByteChecked,
+    Memory.prototype.writeByteChecked,
+    Memory.prototype.readShortChecked,
+    Memory.prototype.writeShortChecked
+];
 
 if (TYPEDARRAYS) {
-    Memory.afnArrayBE   = [Memory.prototype.readByteBE,      Memory.prototype.readShortBE,      Memory.prototype.writeByteBE,      Memory.prototype.writeShortBE];
-    Memory.afnArrayLE   = [Memory.prototype.readByteLE,      Memory.prototype.readShortLE,      Memory.prototype.writeByteLE,      Memory.prototype.writeShortLE];
+    Memory.afnArrayBE = [
+        Memory.prototype.readByteBE,
+        Memory.prototype.writeByteBE,
+        Memory.prototype.readShortBE,
+        Memory.prototype.writeShortBE
+    ];
+
+    Memory.afnArrayLE = [
+        Memory.prototype.readByteLE,
+        Memory.prototype.writeByteLE,
+        Memory.prototype.readShortLE,
+        Memory.prototype.writeShortLE
+    ];
 }
 
 if (NODE) module.exports = Memory;

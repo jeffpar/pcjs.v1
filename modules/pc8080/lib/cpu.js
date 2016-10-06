@@ -79,32 +79,31 @@ function CPU8080(parmsCPU, nCyclesDefault)
 
     var nMultiplier = parmsCPU['multiplier'] || 1;
 
-    this.counts = {};
-    this.counts.nCyclesPerSecond = nCycles;
+    this.nCyclesPerSecond = nCycles;
 
     /*
      * nCyclesMultiplier replaces the old "speed" variable (0, 1, 2) and eliminates the need for
      * the constants (SPEED_SLOW, SPEED_FAST and SPEED_MAX).  The UI simply doubles the multiplier
      * until we've exceeded the host's speed limit and then starts the multiplier over at 1.
      */
-    this.counts.nCyclesMultiplier = nMultiplier;
-    this.counts.mhzDefault = Math.round(this.counts.nCyclesPerSecond / 10000) / 100;
+    this.nCyclesMultiplier = nMultiplier;
+    this.mhzDefault = Math.round(this.nCyclesPerSecond / 10000) / 100;
     /*
      * TODO: Take care of this with an initial setSpeed() call instead?
      */
-    this.counts.mhzTarget = this.counts.mhzDefault * this.counts.nCyclesMultiplier;
+    this.mhzTarget = this.mhzDefault * this.nCyclesMultiplier;
 
     /*
      * We add a number of flags to the set initialized by Component
      */
-    this.flags.fRunning = false;
-    this.flags.fStarting = false;
-    this.flags.fAutoStart = parmsCPU['autoStart'];
+    this.flags.running = false;
+    this.flags.starting = false;
+    this.flags.autoStart = parmsCPU['autoStart'];
 
     /*
      * TODO: Add some UI for fDisplayLiveRegs (either an XML property, or a UI checkbox, or both)
      */
-    this.flags.fDisplayLiveRegs = false;
+    this.flags.displayLiveRegs = false;
 
     /*
      * Get checksum parameters, if any. runCPU() behavior is not affected until fChecksum
@@ -115,11 +114,11 @@ function CPU8080(parmsCPU, nCyclesDefault)
      * command ("x"); for example, "x cs int 5000" will set nCyclesChecksumInterval to 5000
      * and call resetChecksum().
      */
-    this.flags.fChecksum = false;
-    this.counts.nChecksum = this.counts.nCyclesChecksumNext = 0;
-    this.counts.nCyclesChecksumStart = parmsCPU["csStart"];
-    this.counts.nCyclesChecksumInterval = parmsCPU["csInterval"];
-    this.counts.nCyclesChecksumStop = parmsCPU["csStop"];
+    this.flags.checksum = false;
+    this.nChecksum = this.nCyclesChecksumNext = 0;
+    this.nCyclesChecksumStart = parmsCPU["csStart"];
+    this.nCyclesChecksumInterval = parmsCPU["csInterval"];
+    this.nCyclesChecksumStop = parmsCPU["csStop"];
 
     /*
      * Array of countdown timers managed by addTimer() and setTimer().
@@ -140,12 +139,12 @@ Component.subclass(CPU8080);
  * calcCycles(), which uses the nCyclesPerSecond passed to the constructor as a starting
  * point and computes the following variables:
  *
- *      this.counts.nCyclesPerYield:    (this.counts.nCyclesPerSecond / CPU8080.YIELDS_PER_SECOND)
+ *      this.nCyclesPerYield:    (this.nCyclesPerSecond / CPU8080.YIELDS_PER_SECOND)
  *
  * The above variables are also multiplied by any cycle multiplier in effect, via setSpeed(),
  * and then they're used to initialize another set of variables for each runCPU() iteration:
  *
- *      this.counts.nCyclesNextYield:   this.counts.nCyclesPerYield
+ *      this.nCyclesNextYield:   this.nCyclesPerYield
  */
 CPU8080.YIELDS_PER_SECOND       = 30;           // just a gut feeling for the MINIMUM number of yields per second
 CPU8080.YIELDS_PER_STATUS       = 15;           // every 15 yields (ie, twice per second), perform CPU status updates
@@ -182,7 +181,7 @@ CPU8080.prototype.initBus = function(cmp, bus, cpu, dbg)
      */
     var sAutoStart = cmp.getMachineParm('autoStart');
     if (sAutoStart != null) {
-        this.flags.fAutoStart = (sAutoStart == "true"? true : (sAutoStart  == "false"? false : !!sAutoStart));
+        this.flags.autoStart = (sAutoStart == "true"? true : (sAutoStart  == "false"? false : !!sAutoStart));
     }
 
     this.setReady();
@@ -200,7 +199,7 @@ CPU8080.prototype.reset = function()
 /**
  * save()
  *
- * This is a placeholder for save support (overridden by the CPUState component).
+ * This is a placeholder for save support (overridden by the CPUState8080 component).
  *
  * @this {CPU8080}
  * @return {Object|null}
@@ -213,7 +212,7 @@ CPU8080.prototype.save = function()
 /**
  * restore(data)
  *
- * This is a placeholder for restore support (overridden by the CPUState component).
+ * This is a placeholder for restore support (overridden by the CPUState8080 component).
  *
  * @this {CPU8080}
  * @param {Object} data
@@ -264,7 +263,7 @@ CPU8080.prototype.powerUp = function(data, fRepower)
      * The Computer component (which is responsible for all powerDown and powerUp notifications)
      * is now responsible for managing a component's fPowered flag, not us.
      *
-     *      this.flags.fPowered = true;
+     *      this.flags.powered = true;
      */
     this.updateCPU();
     return true;
@@ -284,7 +283,7 @@ CPU8080.prototype.powerDown = function(fSave, fShutdown)
      * The Computer component (which is responsible for all powerDown and powerUp notifications)
      * is now responsible for managing a component's fPowered flag, not us.
      *
-     *      this.flags.fPowered = false;
+     *      this.flags.powered = false;
      */
     return fSave? this.save() : true;
 };
@@ -300,7 +299,7 @@ CPU8080.prototype.autoStart = function()
     /*
      * Start running automatically on power-up, assuming there's no Debugger and no "Run" button
      */
-    if (this.flags.fAutoStart || (!DEBUGGER || !this.dbg) && this.bindings["run"] === undefined) {
+    if (this.flags.autoStart || (!DEBUGGER || !this.dbg) && this.bindings["run"] === undefined) {
         /*
          * Now we ALSO set fUpdateFocus when calling runCPU(), on the assumption that in the "auto-starting" context,
          * a machine without focus is like a day without sunshine.
@@ -319,7 +318,7 @@ CPU8080.prototype.autoStart = function()
  */
 CPU8080.prototype.isPowered = function()
 {
-    if (!this.flags.fPowered) {
+    if (!this.flags.powered) {
         this.println(this.toString() + " not powered");
         return false;
     }
@@ -334,13 +333,13 @@ CPU8080.prototype.isPowered = function()
  */
 CPU8080.prototype.isRunning = function()
 {
-    return this.flags.fRunning;
+    return this.flags.running;
 };
 
 /**
  * getChecksum()
  *
- * This will be implemented by the CPUState component.
+ * This will be implemented by the CPUState8080 component.
  *
  * @this {CPU8080}
  * @return {number} a 32-bit summation of key elements of the current CPU state (used by the CPU checksum code)
@@ -362,16 +361,16 @@ CPU8080.prototype.getChecksum = function()
  */
 CPU8080.prototype.resetChecksum = function()
 {
-    if (this.counts.nCyclesChecksumStart === undefined) this.counts.nCyclesChecksumStart = 0;
-    if (this.counts.nCyclesChecksumInterval === undefined) this.counts.nCyclesChecksumInterval = -1;
-    if (this.counts.nCyclesChecksumStop === undefined) this.counts.nCyclesChecksumStop = -1;
-    this.flags.fChecksum = (this.counts.nCyclesChecksumStart >= 0 && this.counts.nCyclesChecksumInterval > 0);
-    if (this.flags.fChecksum) {
-        this.counts.nChecksum = 0;
-        this.counts.nCyclesChecksumNext = this.counts.nCyclesChecksumStart - this.nTotalCycles;
+    if (this.nCyclesChecksumStart === undefined) this.nCyclesChecksumStart = 0;
+    if (this.nCyclesChecksumInterval === undefined) this.nCyclesChecksumInterval = -1;
+    if (this.nCyclesChecksumStop === undefined) this.nCyclesChecksumStop = -1;
+    this.flags.checksum = (this.nCyclesChecksumStart >= 0 && this.nCyclesChecksumInterval > 0);
+    if (this.flags.checksum) {
+        this.nChecksum = 0;
+        this.nCyclesChecksumNext = this.nCyclesChecksumStart - this.nTotalCycles;
         /*
-         *  this.counts.nCyclesChecksumNext = this.counts.nCyclesChecksumStart + this.counts.nCyclesChecksumInterval -
-         *      (this.nTotalCycles % this.counts.nCyclesChecksumInterval);
+         *  this.nCyclesChecksumNext = this.nCyclesChecksumStart + this.nCyclesChecksumInterval -
+         *      (this.nTotalCycles % this.nCyclesChecksumInterval);
          */
         return true;
     }
@@ -391,20 +390,20 @@ CPU8080.prototype.resetChecksum = function()
  */
 CPU8080.prototype.updateChecksum = function(nCycles)
 {
-    if (this.flags.fChecksum) {
+    if (this.flags.checksum) {
         /*
          * Get a 32-bit summation of the current CPU state and add it to our running 32-bit checksum
          */
         var fDisplay = false;
-        this.counts.nChecksum = (this.counts.nChecksum + this.getChecksum())|0;
-        this.counts.nCyclesChecksumNext -= nCycles;
-        if (this.counts.nCyclesChecksumNext <= 0) {
-            this.counts.nCyclesChecksumNext += this.counts.nCyclesChecksumInterval;
+        this.nChecksum = (this.nChecksum + this.getChecksum())|0;
+        this.nCyclesChecksumNext -= nCycles;
+        if (this.nCyclesChecksumNext <= 0) {
+            this.nCyclesChecksumNext += this.nCyclesChecksumInterval;
             fDisplay = true;
         }
-        if (this.counts.nCyclesChecksumStop >= 0) {
-            if (this.counts.nCyclesChecksumStop <= this.getCycles()) {
-                this.counts.nCyclesChecksumInterval = this.counts.nCyclesChecksumStop = -1;
+        if (this.nCyclesChecksumStop >= 0) {
+            if (this.nCyclesChecksumStop <= this.getCycles()) {
+                this.nCyclesChecksumInterval = this.nCyclesChecksumStop = -1;
                 this.resetChecksum();
                 this.stopCPU();
                 fDisplay = true;
@@ -425,7 +424,7 @@ CPU8080.prototype.updateChecksum = function(nCycles)
  */
 CPU8080.prototype.displayChecksum = function()
 {
-    this.println(this.getCycles() + " cycles: " + "checksum=" + str.toHex(this.counts.nChecksum));
+    this.println(this.getCycles() + " cycles: " + "checksum=" + str.toHex(this.nChecksum));
 };
 
 /**
@@ -447,7 +446,7 @@ CPU8080.prototype.displayValue = function(sLabel, nValue, cch)
             this.stopCPU();
         }
         var sVal;
-        if (!this.flags.fRunning || this.flags.fDisplayLiveRegs) {
+        if (!this.flags.running || this.flags.displayLiveRegs) {
             sVal = str.toHex(nValue, cch);
         } else {
             sVal = "--------".substr(0, cch);
@@ -498,7 +497,7 @@ CPU8080.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
              * control is visible, then the computer is probably sufficiently visible as well; the problem
              * with setting fUpdateFocus to true is that it can jerk the web page around in annoying ways.
              */
-            if (!cpu.flags.fRunning)
+            if (!cpu.flags.running)
                 cpu.runCPU();
             else
                 cpu.stopCPU();
@@ -514,7 +513,7 @@ CPU8080.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
     case "setSpeed":
         this.bindings[sBinding] = control;
         control.onclick = function onClickSetSpeed() {
-            cpu.setSpeed(cpu.counts.nCyclesMultiplier << 1, true);
+            cpu.setSpeed(cpu.nCyclesMultiplier << 1, true);
         };
         control.textContent = this.getSpeedTarget();
         fBound = true;
@@ -542,7 +541,7 @@ CPU8080.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
  */
 CPU8080.prototype.setBurstCycles = function(nCycles)
 {
-    if (this.flags.fRunning) {
+    if (this.flags.running) {
         var nDelta = this.nStepCycles - nCycles;
         /*
          * NOTE: If nDelta is negative, we will actually be increasing nStepCycles and nBurstCycles.
@@ -597,21 +596,21 @@ CPU8080.prototype.calcCycles = function(fRecalc)
      */
     var vMultiplier = 1;
     if (fRecalc) {
-        if (this.counts.nCyclesMultiplier > 1 && this.counts.mhz) {
-            vMultiplier = (this.counts.mhz / this.counts.mhzDefault);
+        if (this.nCyclesMultiplier > 1 && this.mhz) {
+            vMultiplier = (this.mhz / this.mhzDefault);
         }
     }
 
-    this.counts.msPerYield = Math.round(1000 / CPU8080.YIELDS_PER_SECOND);
-    this.counts.nCyclesPerYield = Math.floor(this.counts.nCyclesPerSecond / CPU8080.YIELDS_PER_SECOND * vMultiplier);
+    this.msPerYield = Math.round(1000 / CPU8080.YIELDS_PER_SECOND);
+    this.nCyclesPerYield = Math.floor(this.nCyclesPerSecond / CPU8080.YIELDS_PER_SECOND * vMultiplier);
 
     /*
      * And initialize "next" yield values to the "per" values.
      */
     if (!fRecalc) {
-        this.counts.nCyclesNextYield = this.counts.nCyclesPerYield;
+        this.nCyclesNextYield = this.nCyclesPerYield;
     }
-    this.counts.nCyclesRecalc = 0;
+    this.nCyclesRecalc = 0;
 };
 
 /**
@@ -634,11 +633,11 @@ CPU8080.prototype.calcCycles = function(fRecalc)
 CPU8080.prototype.getCycles = function(fScaled)
 {
     var nCycles = this.nTotalCycles + this.nRunCycles + this.nBurstCycles - this.nStepCycles;
-    if (fScaled && this.counts.nCyclesMultiplier > 1 && this.counts.mhz > this.counts.mhzDefault) {
+    if (fScaled && this.nCyclesMultiplier > 1 && this.mhz > this.mhzDefault) {
         /*
-         * We could scale the current cycle count by the current effective speed (this.counts.mhz); eg:
+         * We could scale the current cycle count by the current effective speed (this.mhz); eg:
          *
-         *      nCycles = Math.round(nCycles / (this.counts.mhz / this.counts.mhzDefault));
+         *      nCycles = Math.round(nCycles / (this.mhz / this.mhzDefault));
          *
          * but that speed will fluctuate somewhat: large fluctuations at first, but increasingly smaller
          * fluctuations after each burst of instructions that runCPU() executes.
@@ -653,7 +652,7 @@ CPU8080.prototype.getCycles = function(fScaled)
          * interface allows any value, as does the CPU "multiplier" parmsCPU property (from the machine's
          * XML file).
          */
-        nCycles = Math.round(nCycles / this.counts.nCyclesMultiplier);
+        nCycles = Math.round(nCycles / this.nCyclesMultiplier);
     }
     return nCycles;
 };
@@ -668,7 +667,7 @@ CPU8080.prototype.getCycles = function(fScaled)
  */
 CPU8080.prototype.getCyclesPerSecond = function()
 {
-    return this.counts.nCyclesPerSecond;
+    return this.nCyclesPerSecond;
 };
 
 /**
@@ -682,8 +681,8 @@ CPU8080.prototype.getCyclesPerSecond = function()
  */
 CPU8080.prototype.resetCycles = function()
 {
-    this.counts.mhz = 0;
-    this.counts.nYieldsSinceStatusUpdate = 0;
+    this.mhz = 0;
+    this.nYieldsSinceStatusUpdate = 0;
     this.nTotalCycles = this.nRunCycles = this.nBurstCycles = this.nStepCycles = 0;
     this.resetChecksum();
     this.setSpeed(1);
@@ -697,7 +696,7 @@ CPU8080.prototype.resetCycles = function()
  */
 CPU8080.prototype.getSpeed = function()
 {
-    return this.counts.nCyclesMultiplier;
+    return this.nCyclesMultiplier;
 };
 
 /**
@@ -711,7 +710,7 @@ CPU8080.prototype.getSpeedCurrent = function()
     /*
      * TODO: Has toFixed() been "fixed" in all browsers (eg, IE) to return a rounded value now?
      */
-    return ((this.flags.fRunning && this.counts.mhz)? (this.counts.mhz.toFixed(2) + "Mhz") : "Stopped");
+    return ((this.flags.running && this.mhz)? (this.mhz.toFixed(2) + "Mhz") : "Stopped");
 };
 
 /**
@@ -725,7 +724,7 @@ CPU8080.prototype.getSpeedTarget = function()
     /*
      * TODO: Has toFixed() been "fixed" in all browsers (eg, IE) to return a rounded value now?
      */
-    return this.counts.mhzTarget.toFixed(2) + "Mhz";
+    return this.mhzTarget.toFixed(2) + "Mhz";
 };
 
 /**
@@ -749,15 +748,15 @@ CPU8080.prototype.setSpeed = function(nMultiplier, fUpdateFocus)
         /*
          * If we haven't reached 80% (0.8) of the current target speed, revert to a multiplier of one (1).
          */
-        if (this.counts.mhz / this.counts.mhzTarget < 0.8) {
+        if (this.mhz / this.mhzTarget < 0.8) {
             nMultiplier = 1;
         } else {
             fSuccess = true;
         }
-        this.counts.nCyclesMultiplier = nMultiplier;
-        var mhz = this.counts.mhzDefault * this.counts.nCyclesMultiplier;
-        if (this.counts.mhzTarget != mhz) {
-            this.counts.mhzTarget = mhz;
+        this.nCyclesMultiplier = nMultiplier;
+        var mhz = this.mhzDefault * this.nCyclesMultiplier;
+        if (this.mhzTarget != mhz) {
+            this.mhzTarget = mhz;
             var sSpeed = this.getSpeedTarget();
             var controlSpeed = this.bindings["setSpeed"];
             if (controlSpeed) controlSpeed.textContent = sSpeed;
@@ -767,8 +766,8 @@ CPU8080.prototype.setSpeed = function(nMultiplier, fUpdateFocus)
     }
     this.addCycles(this.nRunCycles);
     this.nRunCycles = 0;
-    this.counts.msStartRun = usr.getTime();
-    this.counts.msEndThisRun = 0;
+    this.msStartRun = usr.getTime();
+    this.msEndThisRun = 0;
     this.calcCycles();
     return fSuccess;
 };
@@ -783,7 +782,7 @@ CPU8080.prototype.setSpeed = function(nMultiplier, fUpdateFocus)
 CPU8080.prototype.calcSpeed = function(nCycles, msElapsed)
 {
     if (msElapsed) {
-        this.counts.mhz = Math.round(nCycles / (msElapsed * 10)) / 100;
+        this.mhz = Math.round(nCycles / (msElapsed * 10)) / 100;
         if (msElapsed >= 86400000) {
             this.nTotalCycles = 0;
             this.setSpeed();        // reset all counters once per day so that we never have to worry about overflow
@@ -798,11 +797,11 @@ CPU8080.prototype.calcSpeed = function(nCycles, msElapsed)
  */
 CPU8080.prototype.calcStartTime = function()
 {
-    if (this.counts.nCyclesRecalc >= this.counts.nCyclesPerSecond) {
+    if (this.nCyclesRecalc >= this.nCyclesPerSecond) {
         this.calcCycles(true);
     }
-    this.counts.nCyclesThisRun = 0;
-    this.counts.msStartThisRun = usr.getTime();
+    this.nCyclesThisRun = 0;
+    this.msStartThisRun = usr.getTime();
 
     /*
      * Try to detect situations where the browser may have throttled us, such as when the user switches
@@ -829,19 +828,19 @@ CPU8080.prototype.calcStartTime = function()
      * to hit its target speed, since you would expect any instruction that displays a message to be an
      * EXTREMELY slow instruction.
      */
-    if (this.counts.msEndThisRun) {
-        var msDelta = this.counts.msStartThisRun - this.counts.msEndThisRun;
-        if (msDelta > this.counts.msPerYield) {
+    if (this.msEndThisRun) {
+        var msDelta = this.msStartThisRun - this.msEndThisRun;
+        if (msDelta > this.msPerYield) {
             if (MAXDEBUG) this.println("large time delay: " + msDelta + "ms");
-            this.counts.msStartRun += msDelta;
+            this.msStartRun += msDelta;
             /*
              * Bumping msStartRun forward should NEVER cause it to exceed msStartThisRun; however, just
              * in case, I make absolutely sure it cannot happen, since doing so could result in negative
              * speed calculations.
              */
-            this.assert(this.counts.msStartRun <= this.counts.msStartThisRun);
-            if (this.counts.msStartRun > this.counts.msStartThisRun) {
-                this.counts.msStartRun = this.counts.msStartThisRun;
+            this.assert(this.msStartRun <= this.msStartThisRun);
+            if (this.msStartRun > this.msStartThisRun) {
+                this.msStartRun = this.msStartThisRun;
             }
         }
     }
@@ -855,47 +854,55 @@ CPU8080.prototype.calcStartTime = function()
  */
 CPU8080.prototype.calcRemainingTime = function()
 {
-    this.counts.msEndThisRun = usr.getTime();
+    this.msEndThisRun = usr.getTime();
 
-    var msYield = this.counts.msPerYield;
-    if (this.counts.nCyclesThisRun) {
+    var msYield = this.msPerYield;
+    if (this.nCyclesThisRun) {
         /*
          * Normally, we would assume we executed a full quota of work over msPerYield, but since the CPU
          * now has the option of calling yieldCPU(), that might not be true.  If nCyclesThisRun is correct, then
          * the ratio of nCyclesThisRun/nCyclesPerYield should represent the percentage of work we performed,
          * and so applying that percentage to msPerYield should give us a better estimate of work vs. time.
          */
-        msYield = Math.round(msYield * this.counts.nCyclesThisRun / this.counts.nCyclesPerYield);
+        msYield = Math.round(msYield * this.nCyclesThisRun / this.nCyclesPerYield);
     }
 
-    var msElapsedThisRun = this.counts.msEndThisRun - this.counts.msStartThisRun;
+    var msElapsedThisRun = this.msEndThisRun - this.msStartThisRun;
     var msRemainsThisRun = msYield - msElapsedThisRun;
 
     /*
      * We could pass only "this run" results to calcSpeed():
      *
-     *      nCycles = this.counts.nCyclesThisRun;
+     *      nCycles = this.nCyclesThisRun;
      *      msElapsed = msElapsedThisRun;
      *
      * but it seems preferable to use longer time periods and hopefully get a more accurate speed.
      *
-     * Also, if msRemainsThisRun >= 0 && this.counts.nCyclesMultiplier == 1, we could pass these results instead:
+     * Also, if msRemainsThisRun >= 0 && this.nCyclesMultiplier == 1, we could pass these results instead:
      *
-     *      nCycles = this.counts.nCyclesThisRun;
-     *      msElapsed = this.counts.msPerYield;
+     *      nCycles = this.nCyclesThisRun;
+     *      msElapsed = this.msPerYield;
      *
      * to insure that we display a smooth, constant N Mhz.  But for now, I prefer seeing any fluctuations.
      */
     var nCycles = this.nRunCycles;
-    var msElapsed = this.counts.msEndThisRun - this.counts.msStartRun;
+    var msElapsed = this.msEndThisRun - this.msStartRun;
 
-    if (MAXDEBUG && msRemainsThisRun < 0 && this.counts.nCyclesMultiplier > 1) {
+    if (MAXDEBUG && msRemainsThisRun < 0 && this.nCyclesMultiplier > 1) {
         this.println("warning: updates @" + msElapsedThisRun + "ms (prefer " + Math.round(msYield) + "ms)");
     }
 
     this.calcSpeed(nCycles, msElapsed);
 
-    if (msRemainsThisRun < 0 || this.counts.mhz < this.counts.mhzTarget) {
+    if (msRemainsThisRun < 0 || this.mhz < this.mhzTarget) {
+        /*
+         * Try "throwing out" the effects of large anomalies, by moving the overall run start time up;
+         * ordinarily, this should only happen when the someone is using an external Debugger or some other
+         * tool or feature that is interfering with our overall execution.
+         */
+        if (msRemainsThisRun < -1000) {
+            this.msStartRun -= msRemainsThisRun;
+        }
         /*
          * If the last burst took MORE time than we allotted (ie, it's taking more than 1 second to simulate
          * nCyclesPerSecond), all we can do is yield for as little time as possible (ie, 0ms) and hope that the
@@ -908,13 +915,13 @@ CPU8080.prototype.calcRemainingTime = function()
      * Last but not least, update nCyclesRecalc, so that when runCPU() starts up again and calls calcStartTime(),
      * it'll be ready to decide if calcCycles() should be called again.
      */
-    this.counts.nCyclesRecalc += this.counts.nCyclesThisRun;
+    this.nCyclesRecalc += this.nCyclesThisRun;
 
     if (DEBUG && this.messageEnabled(Messages8080.LOG) && msRemainsThisRun) {
-        this.log("calcRemainingTime: " + msRemainsThisRun + "ms to sleep after " + this.counts.msEndThisRun + "ms");
+        this.log("calcRemainingTime: " + msRemainsThisRun + "ms to sleep after " + this.msEndThisRun + "ms");
     }
 
-    this.counts.msEndThisRun += msRemainsThisRun;
+    this.msEndThisRun += msRemainsThisRun;
     return msRemainsThisRun;
 };
 
@@ -943,7 +950,7 @@ CPU8080.prototype.addTimer = function(callBack)
 };
 
 /**
- * setTimer(iTimer, ms)
+ * setTimer(iTimer, ms, fReset)
  *
  * Using the timer index from a previous addTimer() call, this sets that timer to fire after the
  * specified number of milliseconds.
@@ -960,14 +967,17 @@ CPU8080.prototype.addTimer = function(callBack)
  * @this {CPU8080}
  * @param {number} iTimer
  * @param {number} ms (converted into a cycle countdown internally)
+ * @param {boolean} [fReset] (true if the timer should be reset even if already armed)
  * @return {number} (number of cycles used to arm timer, or -1 if error)
  */
-CPU8080.prototype.setTimer = function(iTimer, ms)
+CPU8080.prototype.setTimer = function(iTimer, ms, fReset)
 {
     var nCycles = -1;
     if (iTimer >= 0 && iTimer < this.aTimers.length) {
-        nCycles = this.getMSCycles(ms);
-        this.aTimers[iTimer][0] = nCycles;
+        if (fReset || this.aTimers[iTimer][0] < 0) {
+            nCycles = this.getMSCycles(ms);
+            this.aTimers[iTimer][0] = nCycles;
+        }
     }
     return nCycles;
 };
@@ -981,7 +991,7 @@ CPU8080.prototype.setTimer = function(iTimer, ms)
  */
 CPU8080.prototype.getMSCycles = function(ms)
 {
-    return (this.counts.nCyclesPerSecond * this.counts.nCyclesMultiplier) / 1000 * ms;
+    return (this.nCyclesPerSecond * this.nCyclesMultiplier) / 1000 * ms;
 };
 
 /**
@@ -1029,6 +1039,17 @@ CPU8080.prototype.updateTimers = function(nCycles)
 };
 
 /**
+ * endBurst()
+ *
+ * @this {CPU8080}
+ */
+CPU8080.prototype.endBurst = function()
+{
+    this.nBurstCycles -= this.nStepCycles;
+    this.nStepCycles = 0;
+};
+
+/**
  * runCPU(fUpdateFocus)
  *
  * @this {CPU8080}
@@ -1057,7 +1078,7 @@ CPU8080.prototype.runCPU = function(fUpdateFocus)
              * be as HIGH as nCyclesPerYield, but it may be significantly less.  getBurstCycles() will adjust
              * nCyclesPerBurst downward if any CPU timers need to fire during the next burst.
              */
-            var nCyclesPerBurst = this.getBurstCycles(this.flags.fChecksum? 1 : this.counts.nCyclesPerYield);
+            var nCyclesPerBurst = this.getBurstCycles(this.flags.checksum? 1 : this.nCyclesPerYield);
 
             /*
              * Execute the burst.
@@ -1077,21 +1098,21 @@ CPU8080.prototype.runCPU = function(fUpdateFocus)
             /*
              * Add nCycles to nCyclesThisRun, as well as nRunCycles (the cycle count since the CPU first started).
              */
-            this.counts.nCyclesThisRun += nCycles;
+            this.nCyclesThisRun += nCycles;
             this.nRunCycles += nCycles;
             this.addCycles(0, true);
             this.updateChecksum(nCycles);
 
-            this.counts.nCyclesNextYield -= nCycles;
-            if (this.counts.nCyclesNextYield <= 0) {
-                this.counts.nCyclesNextYield += this.counts.nCyclesPerYield;
-                if (++this.counts.nYieldsSinceStatusUpdate >= CPU8080.YIELDS_PER_STATUS) {
+            this.nCyclesNextYield -= nCycles;
+            if (this.nCyclesNextYield <= 0) {
+                this.nCyclesNextYield += this.nCyclesPerYield;
+                if (++this.nYieldsSinceStatusUpdate >= CPU8080.YIELDS_PER_STATUS) {
                     if (this.cmp) this.cmp.updateStatus();
-                    this.counts.nYieldsSinceStatusUpdate = 0;
+                    this.nYieldsSinceStatusUpdate = 0;
                 }
                 break;
             }
-        } while (this.flags.fRunning);
+        } while (this.flags.running);
     }
     catch (e) {
         this.stopCPU();
@@ -1114,7 +1135,7 @@ CPU8080.prototype.runCPU = function(fUpdateFocus)
  */
 CPU8080.prototype.startCPU = function(fUpdateFocus)
 {
-    if (!this.flags.fRunning) {
+    if (!this.flags.running) {
         /*
          *  setSpeed() without a speed parameter leaves the selected speed in place, but also resets the
          *  cycle counter and timestamp for the current series of runCPU() calls, calculates the maximum number
@@ -1122,9 +1143,9 @@ CPU8080.prototype.startCPU = function(fUpdateFocus)
          *  threshold counter.
          */
         this.setSpeed();
-        if (this.cmp) this.cmp.start(this.counts.msStartRun, this.getCycles());
-        this.flags.fRunning = true;
-        this.flags.fStarting = true;
+        if (this.cmp) this.cmp.start(this.msStartRun, this.getCycles());
+        this.flags.running = true;
+        this.flags.starting = true;
         if (this.chipset) this.chipset.start();
         var controlRun = this.bindings["run"];
         if (controlRun) controlRun.textContent = "Halt";
@@ -1138,7 +1159,7 @@ CPU8080.prototype.startCPU = function(fUpdateFocus)
 /**
  * stepCPU(nMinCycles)
  *
- * This will be implemented by the CPUState component.
+ * This will be implemented by the CPUState8080 component.
  *
  * @this {CPU8080}
  * @param {number} nMinCycles (0 implies a single-step, and therefore breakpoints should be ignored)
@@ -1163,17 +1184,16 @@ CPU8080.prototype.stepCPU = function(nMinCycles)
 CPU8080.prototype.stopCPU = function(fComplete)
 {
     this.isBusy(true);
-    this.nBurstCycles -= this.nStepCycles;
-    this.nStepCycles = 0;
+    this.endBurst();
     this.addCycles(this.nRunCycles);
     this.nRunCycles = 0;
-    if (this.flags.fRunning) {
-        this.flags.fRunning = false;
+    if (this.flags.running) {
+        this.flags.running = false;
         if (this.chipset) this.chipset.stop();
         var controlRun = this.bindings["run"];
         if (controlRun) controlRun.textContent = "Run";
     }
-    this.flags.fComplete = fComplete;
+    this.flags.complete = fComplete;
 };
 
 /**
@@ -1205,9 +1225,8 @@ CPU8080.prototype.updateCPU = function(fForce)
  */
 CPU8080.prototype.yieldCPU = function()
 {
-    this.counts.nCyclesNextYield = 0;  // this will break us out of runCPU(), once we break out of stepCPU()
-    this.nBurstCycles -= this.nStepCycles;
-    this.nStepCycles = 0;               // this will break us out of stepCPU()
+    this.endBurst();                    // this will break us out of stepCPU()
+    this.nCyclesNextYield = 0;          // this will break us out of runCPU(), once we break out of stepCPU()
     // if (DEBUG) this.nSnapCycles = this.nBurstCycles;
     /*
      * The Debugger calls yieldCPU() after every message() to ensure browser responsiveness, but it looks
