@@ -782,10 +782,15 @@ MemoryPDP11.prototype = {
      */
     readWordLE: function readWordLE(off, addr) {
         /*
-         * TODO: It remains to be seen if there's any advantage to checking the offset for an aligned read
-         * vs. always reading the bytes separately.
+         * TODO: For non-WORDBUS machines, it remains to be seen if there's any advantage to checking the offset
+         * for an aligned read vs. always reading the bytes separately.
          */
-        var w = (off & 0x1)? (this.ab[off] | (this.ab[off+1] << 8)) : this.aw[off >> 1];
+        var w;
+        if (PDP11.WORDBUS || !(off & 0x1)) {
+            w = this.aw[off >> 1];
+        } else {
+            w = this.ab[off] | (this.ab[off+1] << 8);
+        }
         if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.MEM)) {
             this.dbg.printMessage("Memory.readWord(" + this.dbg.toStrBase(addr) + "): " + this.dbg.toStrBase(w), true);
         }
@@ -840,14 +845,14 @@ MemoryPDP11.prototype = {
      */
     writeWordLE: function writeWordLE(off, w, addr) {
         /*
-         * TODO: It remains to be seen if there's any advantage to checking the offset for an aligned write
-         * vs. always writing the bytes separately.
+         * TODO: For non-WORDBUS machines, it remains to be seen if there's any advantage to checking the offset
+         * for an aligned write vs. always writing the bytes separately.
          */
-        if (off & 0x1) {
+        if (PDP11.WORDBUS || !(off & 0x1)) {
+            this.aw[off >> 1] = w;
+        } else {
             this.ab[off] = w;
             this.ab[off+1] = w >> 8;
-        } else {
-            this.aw[off >> 1] = w;
         }
         this.fDirty = true;
         if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.MEM)) {

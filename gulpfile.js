@@ -34,12 +34,12 @@
  * so for normal development, you should continue using Grunt.
  * 
  * To learn Gulp, I started with a simple concatenation task ("mktmp") that combines all the files
- * required to compile a single emulation module (PCx86), and then I added a compilation task ("compile")
+ * required to compile a single emulation module (PDPjs), and then I added a compilation task ("compile")
  * that runs the new JavaScript version of Google's Closure Compiler.
  * 
  * Unfortunately, the JavaScript version of the Closure Compiler appears to be MUCH slower than the
  * Java version.  But, it did uncover a few new type-related bugs in my code, which are now fixed,
- * and the PCx86 emulation module now compiles successfully (although I haven't tested it yet).
+ * and the PDPjs emulation module now compiles successfully (although I haven't tested it yet).
  * 
  * Additional work is required to make Gulp skip tasks when the output file(s) are still newer
  * than the input file(s).  By default, every time you run Gulp, EVERYTHING is built again.  Apparently,
@@ -60,9 +60,9 @@ var pkg = require("./package.json");
 
 pkg.version = pkg.version.slice(0, -1) + 'x';                           // TODO: Remove this hack when we're done testing
 
-var pcX86TmpDir  = "./tmp/pcx86/"  + pkg.version;
-var pcX86ReleaseDir = "./versions/pcx86/" + pkg.version;
-var pcX86ReleaseFile  = "pcx86.js";
+var pdp11TmpDir  = "./tmp/pdp11/"  + pkg.version;
+var pdp11ReleaseDir = "./versions/pdpjs/" + pkg.version;
+var pdp11ReleaseFile  = "pdp11.js";
 
 var sExterns = "";
 var sSiteHost = "www.pcjs.org";
@@ -86,7 +86,7 @@ if (pkg.homepage) {
 }
 
 gulp.task('mktmp', function() {
-    return gulp.src(pkg.pcX86Files)
+    return gulp.src(pkg.pdp11Files)
         .pipe(foreach(function(stream, file){
               return stream
                 .pipe(header('/* ' + file.path + ' */\n\n'))
@@ -95,13 +95,13 @@ gulp.task('mktmp', function() {
                 .pipe(replace(/[ \t]*if\s*\(typeof\s+module\s*!==\s*(['"])undefined\1\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, ""))
                 .pipe(replace(/[ \t]*[A-Za-z_][A-Za-z0-9_.]*\.assert\([^\n]*\);[^\n]*/g, ""))
             }))        
-        .pipe(concat(pcX86ReleaseFile))
+        .pipe(concat(pdp11ReleaseFile))
         .pipe(header('"use strict";\n\n'))
-        .pipe(gulp.dest(pcX86TmpDir));
+        .pipe(gulp.dest(pdp11TmpDir));
 });
 
 gulp.task('compile', function() {
-    return gulp.src(path.join(pcX86TmpDir, pcX86ReleaseFile) /*, {base: './'} */)
+    return gulp.src(path.join(pdp11TmpDir, pdp11ReleaseFile) /*, {base: './'} */)
         .pipe(compiler({
             assumeFunctionWrapper: true,
             compilationLevel: 'ADVANCED',
@@ -117,10 +117,10 @@ gulp.task('compile', function() {
             languageIn: "ES6",                          // this is now the default, just documenting our requirements
             languageOut: "ES5",                         // this is also the default
             outputWrapper: '(function(){%output%})()',
-            jsOutputFile: pcX86ReleaseFile,             // TODO: This must vary according to debugger/non-debugger releases
+            jsOutputFile: pdp11ReleaseFile,             // TODO: This must vary according to debugger/non-debugger releases
             createSourceMap: false
         }))
-        .pipe(gulp.dest(pcX86ReleaseDir));
+        .pipe(gulp.dest(pdp11ReleaseDir));
 });
 
 gulp.task('default', function() {

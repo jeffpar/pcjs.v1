@@ -1094,12 +1094,18 @@ CPUStatePDP11.prototype.mapVirtualToPhysical = function(virtualAddress, accessFl
         this.mmuLastVirtual = physicalAddress;
         if (physicalAddress >= BusPDP11.IOPAGE_VIRT) {
             physicalAddress |= BusPDP11.IOPAGE_22BIT;
-        } else { // no max_memory check in 16 bit mode
+        }
+        /*
+         * I'm moving this alignment test to the CPU->Bus interfaces that read/write physical words;
+         * hopefully there are no order dependencies on this test.
+         *
+        else { // no max_memory check in 16 bit mode
             if ((physicalAddress & 1) && !(accessFlags & PDP11.ACCESS.BYTE)) {
                 this.regErr |= PDP11.CPUERR.ODDADDR;
                 this.trap(PDP11.TRAP.BUS_ERROR, PDP11.REASON.ODDMEMADDR);
             }
         }
+        */
     } else {
         this.mmuLastVirtual = virtualAddress;
         page = (virtualAddress >> 13) & this.mmuMask[this.mmuMode];
@@ -1118,10 +1124,15 @@ CPUStatePDP11.prototype.mapVirtualToPhysical = function(virtualAddress, accessFl
                 this.regErr |= PDP11.CPUERR.NOMEMORY;
                 this.trap(PDP11.TRAP.BUS_ERROR, PDP11.REASON.NOMEMORY); // KB11-EM does this after ABORT handling - KB11-CM before
             }
+            /*
+             * I'm moving this alignment test to the CPU->Bus interfaces that read/write physical words;
+             * hopefully there are no order dependencies on this test.
+             *
             if ((physicalAddress & 1) && !(accessFlags & PDP11.ACCESS.BYTE)) {
                 this.regErr |= PDP11.CPUERR.ODDADDR;
                 this.trap(PDP11.TRAP.BUS_ERROR, PDP11.REASON.ODDMMUADDR);
             }
+            */
         }
         switch (pdr & 0x7) {
         case 1:                         // read-only with trap
@@ -1191,6 +1202,18 @@ CPUStatePDP11.prototype.mapVirtualToPhysical = function(virtualAddress, accessFl
 };
 
 /**
+ * readByteFromPhysical(physicalAddress) [formerly readByteByAddr]
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} physicalAddress
+ * @return {number}
+ */
+CPUStatePDP11.prototype.readByteFromPhysical = function(physicalAddress)
+{
+    return this.bus.getByte(physicalAddress);
+};
+
+/**
  * readWordFromPhysical(physicalAddress) [formerly readWordByAddr]
  *
  * @this {CPUStatePDP11}
@@ -1199,6 +1222,10 @@ CPUStatePDP11.prototype.mapVirtualToPhysical = function(virtualAddress, accessFl
  */
 CPUStatePDP11.prototype.readWordFromPhysical = function(physicalAddress)
 {
+    if (physicalAddress & 0x1) {
+        this.regErr |= PDP11.CPUERR.ODDADDR;
+        this.trap(PDP11.TRAP.BUS_ERROR, PDP11.REASON.ODDMEMADDR);
+    }
     return this.bus.getWord(physicalAddress);
 };
 
@@ -1214,30 +1241,6 @@ CPUStatePDP11.prototype.readWordFromVirtual = function(virtualAddress)
 };
 
 /**
- * writeWordToPhysical(physicalAddress, data) [formerly writeWordByAddr]
- *
- * @this {CPUStatePDP11}
- * @param {number} physicalAddress
- * @param {number} data
- */
-CPUStatePDP11.prototype.writeWordToPhysical = function(physicalAddress, data)
-{
-    this.bus.setWord(physicalAddress, data & 0xffff);
-};
-
-/**
- * readByteFromPhysical(physicalAddress) [formerly readByteByAddr]
- *
- * @this {CPUStatePDP11}
- * @param {number} physicalAddress
- * @return {number}
- */
-CPUStatePDP11.prototype.readByteFromPhysical = function(physicalAddress)
-{
-    return this.bus.getByte(physicalAddress);
-};
-
-/**
  * writeByteToPhysical(physicalAddress, data) [formerly writeByteByAddr]
  *
  * @this {CPUStatePDP11}
@@ -1248,6 +1251,22 @@ CPUStatePDP11.prototype.writeByteToPhysical = function(physicalAddress, data)
 {
     if (physicalAddress & 1) this.nStepCycles--;
     this.bus.setByte(physicalAddress, data & 0xff);
+};
+
+/**
+ * writeWordToPhysical(physicalAddress, data) [formerly writeWordByAddr]
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} physicalAddress
+ * @param {number} data
+ */
+CPUStatePDP11.prototype.writeWordToPhysical = function(physicalAddress, data)
+{
+    if (physicalAddress & 0x1) {
+        this.regErr |= PDP11.CPUERR.ODDADDR;
+        this.trap(PDP11.TRAP.BUS_ERROR, PDP11.REASON.ODDMEMADDR);
+    }
+    this.bus.setWord(physicalAddress, data & 0xffff);
 };
 
 /**

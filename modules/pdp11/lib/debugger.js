@@ -590,7 +590,7 @@ if (DEBUGGER) {
         if (addr !== PDP11.ADDR_INVALID) {
             this.nDisableMessages++;
             /*
-             * TODO: We also need a Bus interface to disable fnAccess() calls that could trigger a trap()
+             * TODO: We also need a Bus interface to disable fnIOAccess() calls that could trigger a trap().
              */
             b = this.bus.getByteDirect(addr);
             this.nDisableMessages--;
@@ -614,7 +614,11 @@ if (DEBUGGER) {
         if (addr !== PDP11.ADDR_INVALID) {
             this.nDisableMessages++;
             /*
-             * TODO: We also need a Bus interface to disable fnAccess() calls that could trigger a trap()
+             * TODO: We also need a Bus interface to disable fnIOAccess() calls that could trigger a trap().
+             *
+             * NOTE: We don't care if the word address is aligned, because 1) we assume the user knows what
+             * they're doing, and 2) the Bus simply ignores the low address bit anyway.  Alignment checks are
+             * performed by the CPU, not the Bus.
              */
             w = this.bus.getWordDirect(addr);
             this.nDisableMessages--;
@@ -637,7 +641,7 @@ if (DEBUGGER) {
         if (addr !== PDP11.ADDR_INVALID) {
             this.nDisableMessages++;
             /*
-             * TODO: We also need a Bus interface to disable fnAccess() calls that could trigger a trap()
+             * TODO: We also need a Bus interface to disable fnIOAccess() calls that could trigger a trap().
              */
             this.bus.setByteDirect(addr, b);
             this.nDisableMessages--;
@@ -660,7 +664,11 @@ if (DEBUGGER) {
         if (addr !== PDP11.ADDR_INVALID) {
             this.nDisableMessages++;
             /*
-             * TODO: We also need a Bus interface to disable fnAccess() calls that could trigger a trap()
+             * TODO: We also need a Bus interface to disable fnIOAccess() calls that could trigger a trap().
+             *
+             * NOTE: We don't care if the word address is aligned, because 1) we assume the user knows what
+             * they're doing, and 2) the Bus simply ignores the low address bit anyway.  Alignment checks are
+             * performed by the CPU, not the Bus.
              */
             this.bus.setWordDirect(addr, w);
             this.nDisableMessages--;
@@ -2841,15 +2849,14 @@ if (DEBUGGER) {
             var sData = "", sChars = "";
             sAddr = this.toStrAddr(dbgAddr);
             /*
-             * It's just coincidence that we want to dump 8 bytes per line when using base 8 and 16 bytes
-             * per line when using base 16, because octal requires more digits.
+             * Dump 8 bytes per line when using base 8, and dump 16 bytes when using base 16 (or when dumping dwords)
              */
             var nBytes = (size == 4? 16 : this.nBase);
             for (i = nBytes; i > 0 && cb > 0; i--) {
                 var b = this.getByte(dbgAddr, 1);
                 data |= (b << (iByte++ << 3));
                 if (iByte == size) {
-                    sData += (this.nBase == 8? str.toOct(data, size * 3) : str.toHex(data, size * 2));
+                    sData += this.toStrBase(data, size);
                     sData += (size == 1? (i == 9? '-' : ' ') : "  ");
                     data = iByte = 0;
                 }

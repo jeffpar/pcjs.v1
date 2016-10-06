@@ -133,7 +133,7 @@ function BusPDP11(parmsBus, cpu, dbg)
     this.fIOBreakAll = false;
 
     this.fnReset = null;
-    this.fnAccess = this.access;
+    this.fnIOAccess = this.unknownIO;
 
     /*
      * Allocate empty Memory blocks to span the entire physical address space.
@@ -214,7 +214,7 @@ BusPDP11.IOController = {
             }
             return b;
         }
-        b = bus.fnAccess(addr | BusPDP11.IOPAGE_22BIT, -1, 1);
+        b = bus.fnIOAccess(addr | BusPDP11.IOPAGE_22BIT, -1, 1);
         if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS)) {
             this.dbg.printMessage("warning: unconverted read access to byte @" + this.dbg.toStrBase(addr) + ": " + this.dbg.toStrBase(b));
         }
@@ -279,7 +279,7 @@ BusPDP11.IOController = {
             }
             return;
         }
-        bus.fnAccess(addr | BusPDP11.IOPAGE_22BIT, b, 1);
+        bus.fnIOAccess(addr | BusPDP11.IOPAGE_22BIT, b, 1);
         if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS)) {
             this.dbg.printMessage("warning: unconverted write access to byte @" + this.dbg.toStrBase(addr) + ": " + this.dbg.toStrBase(b));
         }
@@ -312,7 +312,7 @@ BusPDP11.IOController = {
             }
             return w;
         }
-        w = bus.fnAccess(addr | BusPDP11.IOPAGE_22BIT, -1, 0);
+        w = bus.fnIOAccess(addr | BusPDP11.IOPAGE_22BIT, -1, 0);
         if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS)) {
             this.dbg.printMessage("warning: unconverted read access to word @" + this.dbg.toStrBase(addr) + ": " + this.dbg.toStrBase(w));
         }
@@ -349,7 +349,7 @@ BusPDP11.IOController = {
             }
             return;
         }
-        bus.fnAccess(addr | BusPDP11.IOPAGE_22BIT, w, 0);
+        bus.fnIOAccess(addr | BusPDP11.IOPAGE_22BIT, w, 0);
         if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS)) {
             this.dbg.printMessage("warning: unconverted write access to word @" + this.dbg.toStrBase(addr) + ": " + this.dbg.toStrBase(w));
         }
@@ -426,7 +426,7 @@ BusPDP11.prototype.reset = function()
 };
 
 /**
- * access(addr, data, byteFlag)
+ * unknownIO(addr, data, byteFlag)
  *
  * This is our default I/O handler, called whenever there's an IOPAGE access without a corresponding entry
  * in aIOHandlers; in the interim, our Device component will override this default handler with its own function
@@ -438,10 +438,10 @@ BusPDP11.prototype.reset = function()
  * @param {number} data (-1 if read, otherwise write)
  * @param {number} byteFlag (true if byte I/O, otherwise word)
  */
-BusPDP11.prototype.access = function(addr, data, byteFlag)
+BusPDP11.prototype.unknownIO = function(addr, data, byteFlag)
 {
     if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS)) {
-        this.dbg.printMessage("warning: unrecognized access(" + this.dbg.toStrBase(addr) + "," + this.dbg.toStrBase(data) + "," + byteFlag + ")");
+        this.dbg.printMessage("warning: unrecognized I/O access(" + this.dbg.toStrBase(addr) + "," + this.dbg.toStrBase(data) + "," + byteFlag + ")");
     }
     return 0;
 };
@@ -808,10 +808,10 @@ BusPDP11.prototype.getWord = function(addr)
 {
     var off = addr & this.nBlockLimit;
     var iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
-    if (off != this.nBlockLimit) {
-        return this.aMemBlocks[iBlock].readWord(off, addr);
+    if (!PDP11.WORDBUS && off == this.nBlockLimit) {
+        return this.aMemBlocks[iBlock++].readByte(off, addr) | (this.aMemBlocks[iBlock & this.nBlockMask].readByte(0, addr + 1) << 8);
     }
-    return this.aMemBlocks[iBlock++].readByte(off, addr) | (this.aMemBlocks[iBlock & this.nBlockMask].readByte(0, addr + 1) << 8);
+    return this.aMemBlocks[iBlock].readWord(off, addr);
 };
 
 /**
@@ -827,10 +827,10 @@ BusPDP11.prototype.getWordDirect = function(addr)
 {
     var off = addr & this.nBlockLimit;
     var iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
-    if (off != this.nBlockLimit) {
-        return this.aMemBlocks[iBlock].readWordDirect(off, addr);
+    if (!PDP11.WORDBUS && off == this.nBlockLimit) {
+        return this.aMemBlocks[iBlock++].readByteDirect(off, addr) | (this.aMemBlocks[iBlock & this.nBlockMask].readByteDirect(0, addr + 1) << 8);
     }
-    return this.aMemBlocks[iBlock++].readByteDirect(off, addr) | (this.aMemBlocks[iBlock & this.nBlockMask].readByteDirect(0, addr + 1) << 8);
+    return this.aMemBlocks[iBlock].readWordDirect(off, addr);
 };
 
 /**
@@ -871,12 +871,12 @@ BusPDP11.prototype.setWord = function(addr, w)
 {
     var off = addr & this.nBlockLimit;
     var iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
-    if (off != this.nBlockLimit) {
-        this.aMemBlocks[iBlock].writeWord(off, w & 0xffff, addr);
+    if (!PDP11.WORDBUS && off == this.nBlockLimit) {
+        this.aMemBlocks[iBlock++].writeByte(off, w & 0xff, addr);
+        this.aMemBlocks[iBlock & this.nBlockMask].writeByte(0, (w >> 8) & 0xff, addr + 1);
         return;
     }
-    this.aMemBlocks[iBlock++].writeByte(off, w & 0xff, addr);
-    this.aMemBlocks[iBlock & this.nBlockMask].writeByte(0, (w >> 8) & 0xff, addr + 1);
+    this.aMemBlocks[iBlock].writeWord(off, w & 0xffff, addr);
 };
 
 /**
@@ -893,12 +893,12 @@ BusPDP11.prototype.setWordDirect = function(addr, w)
 {
     var off = addr & this.nBlockLimit;
     var iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
-    if (off != this.nBlockLimit) {
-        this.aMemBlocks[iBlock].writeWordDirect(off, w & 0xffff, addr);
+    if (!PDP11.WORDBUS && off == this.nBlockLimit) {
+        this.aMemBlocks[iBlock++].writeByteDirect(off, w & 0xff, addr);
+        this.aMemBlocks[iBlock & this.nBlockMask].writeByteDirect(0, (w >> 8) & 0xff, addr + 1);
         return;
     }
-    this.aMemBlocks[iBlock++].writeByteDirect(off, w & 0xff, addr);
-    this.aMemBlocks[iBlock & this.nBlockMask].writeByteDirect(0, (w >> 8) & 0xff, addr + 1);
+    this.aMemBlocks[iBlock].writeWordDirect(off, w & 0xffff, addr);
 };
 
 /**
@@ -1072,18 +1072,18 @@ BusPDP11.prototype.addIOTable = function(component, table)
 };
 
 /**
- * addIODefaultHandlers(fnReset, fnAccess)
+ * addIODefaultHandlers(fnReset, fnIOAccess)
  *
  * Add default I/O notification handlers.
  *
  * @this {BusPDP11}
  * @param {function()} fnReset
- * @param {function(number,number,number)} fnAccess
+ * @param {function(number,number,number)} fnIOAccess
  */
-BusPDP11.prototype.addIODefaultHandlers = function(fnReset, fnAccess)
+BusPDP11.prototype.addIODefaultHandlers = function(fnReset, fnIOAccess)
 {
     this.fnReset = fnReset;
-    this.fnAccess = fnAccess;
+    this.fnIOAccess = fnIOAccess;
 };
 
 /**

@@ -253,7 +253,7 @@ C1PComputer.power = function(computer)
 /*
  * C1PComputer.init()
  *
- * This function operates on every HTML element of class "computer", extracting the
+ * This function operates on every HTML element of class "c1pjs-computer", extracting the
  * JSON-encoded parameters for the C1PComputer constructor from the element's "data-value"
  * attribute, invoking the constructor to create a C1PComputer component, and then binding
  * any associated HTML controls to the new component.
@@ -263,7 +263,7 @@ C1PComputer.init = function()
     /*
      * In non-COMPILED builds, embedMachine() may have set XMLVERSION.
      */
-    if (!COMPILED && C1PJS.XMLVERSION) C1PJS.APPVERSION = C1PJS.XMLVERSION;
+    if (!COMPILED && XMLVERSION) C1PJS.APPVERSION = XMLVERSION;
 
     var aeComputers = Component.getElementsByClass(document, C1PJS.APPCLASS, "computer");
 

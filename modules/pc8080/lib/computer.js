@@ -1488,7 +1488,7 @@ Computer8080.prototype.updateVideo = function(fForced)
 /**
  * Computer8080.init()
  *
- * For every machine represented by an HTML element of class "pcjs-machine", this function
+ * For every machine represented by an HTML element of class "pc8080-machine", this function
  * locates the HTML element of class "computer", extracting the JSON-encoded parameters for the
  * Computer constructor from the element's "data-value" attribute, invoking the constructor to
  * create a Computer component, and then binding any associated HTML controls to the new component.
@@ -1498,7 +1498,7 @@ Computer8080.init = function()
     /*
      * In non-COMPILED builds, embedMachine() may have set XMLVERSION.
      */
-    if (!COMPILED && PC8080.XMLVERSION) PC8080.APPVERSION = PC8080.XMLVERSION;
+    if (!COMPILED && XMLVERSION) PC8080.APPVERSION = XMLVERSION;
 
     var aeMachines = Component.getElementsByClass(document, PC8080.APPCLASS + "-machine");
 

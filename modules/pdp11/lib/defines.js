@@ -79,6 +79,21 @@ var BYTEARRAYS = false;
  */
 var TYPEDARRAYS = (typeof ArrayBuffer !== 'undefined');
 
+/**
+ * WORDBUS forces the Bus and Memory interfaces to assume even addresses when accessing words.  Since PDPjs inherited
+ * its Bus component from PCx86, it originally supported both aligned and unaligned word accesses by default, but since
+ * the PDP-11 requires aligned (even) word addresses, we can turn off support for unaligned accesses and get some
+ * performance gains.
+ *
+ * When WORDBUS is true, the Bus and Memory components simply ignore the low bit of word addresses, because it is the
+ * CPU, not the Bus, that's responsible for validating addresses and generating the appropriate traps.
+ *
+ * Don't worry that the source code looks MORE complicated rather than LESS with the additional WORDBUS checks, because
+ * the Closure Compiler eliminates those checks and throws away the (unreachable) code blocks that deal with unaligned
+ * accesses.
+ */
+var WORDBUS = true;
+
 /*
  * Combine all the shared globals and machine-specific globals into one machine-specific global object,
  * which all machine components should start using; eg: "if (PDP11.DEBUG) ..." instead of "if (DEBUG) ...".
@@ -95,6 +110,7 @@ var PDP11 = {
     MAXDEBUG:   MAXDEBUG,       // shared
     PRIVATE:    PRIVATE,        // shared
     TYPEDARRAYS:TYPEDARRAYS,
+    WORDBUS:    WORDBUS,
     SITEHOST:   SITEHOST,       // shared
     XMLVERSION: XMLVERSION,     // shared
 

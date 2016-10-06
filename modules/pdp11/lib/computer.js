@@ -1448,7 +1448,7 @@ ComputerPDP11.prototype.updateStatus = function(fForce)
 /**
  * ComputerPDP11.init()
  *
- * For every machine represented by an HTML element of class "pcjs-machine", this function
+ * For every machine represented by an HTML element of class "pdp11-machine", this function
  * locates the HTML element of class "computer", extracting the JSON-encoded parameters for the
  * Computer constructor from the element's "data-value" attribute, invoking the constructor to
  * create a Computer component, and then binding any associated HTML controls to the new component.
