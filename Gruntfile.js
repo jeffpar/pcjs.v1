@@ -125,7 +125,7 @@ module.exports = function(grunt) {
     var tmpC1Pjs  = "./tmp/c1pjs/"  + pkg.version + "/c1p.js";
     var tmpPCx86  = "./tmp/pcx86/"  + pkg.version + "/pcx86.js";
     var tmpPC8080 = "./tmp/pc8080/" + pkg.version + "/pc8080.js";
-    var tmpPDP11  = "./tmp/pdp11/"  + pkg.version + "/pdp11.js";
+    var tmpPDP11  = "./tmp/pdpjs/"  + pkg.version + "/pdp11.js";
 
     grunt.initConfig({
         pkg: pkg,               // pass the "package.json" object to initConfig() as a property, too
@@ -181,7 +181,7 @@ module.exports = function(grunt) {
             },
             "pdp11.js": {
                 src: pkg.pdp11Files,
-                dest: "./versions/pdp11/" + pkg.version + "/pdp11.js",
+                dest: "./versions/pdpjs/" + pkg.version + "/pdp11.js",
                 options: {
                     process: function(src, filepath) {
                         return (path.basename(filepath) == "debugger.js"? "" : src);
@@ -190,7 +190,7 @@ module.exports = function(grunt) {
             },
             "pdp11-dbg.js": {
                 src: pkg.pdp11Files,
-                dest: "./versions/pdp11/" + pkg.version + "/pdp11-dbg.js"
+                dest: "./versions/pdpjs/" + pkg.version + "/pdp11-dbg.js"
             },
             "tmp-c1pjs": {
                 src: pkg.c1pJSFiles,
@@ -397,30 +397,30 @@ module.exports = function(grunt) {
             },
             "pdp11.js": {
                 TEMPcompilerOpts: {
-                    // create_source_map: "./tmp/pdp11/"  + pkg.version + "/pdp11.map",
+                    // create_source_map: "./tmp/pdpjs/"  + pkg.version + "/pdp11.map",
                     define: ["\"APPVERSION='" + pkg.version + "'\"",
                              "\"SITEHOST='www.pcjs.org'\"", "COMPILED=true", "DEBUG=false", "DEBUGGER=false"],
-                    // output_wrapper: "\"(function(){%output%})();//@ sourceMappingURL=/tmp/pdp11/" + pkg.version + "/pdp11.map\""
+                    // output_wrapper: "\"(function(){%output%})();//@ sourceMappingURL=/tmp/pdpjs/" + pkg.version + "/pdp11.map\""
                     output_wrapper: "\"(function(){%output%})();\""
                 },
                 // src: pkg.pdp11Files,
                 src: tmpPDP11,
-                dest: "./versions/pdp11/" + pkg.version + "/pdp11.js"
+                dest: "./versions/pdpjs/" + pkg.version + "/pdp11.js"
             },
             "pdp11-dbg.js": {
                 /*
                  * Technically, this is the one case we don't need to override the default 'define' settings, but maybe it's best to be explicit.
                  */
                 TEMPcompilerOpts: {
-                    // create_source_map: "./tmp/pdp11/"  + pkg.version + "/pdp11-dbg.map",
+                    // create_source_map: "./tmp/pdpjs/"  + pkg.version + "/pdp11-dbg.map",
                     define: ["\"APPVERSION='" + pkg.version + "'\"",
                              "\"SITEHOST='www.pcjs.org'\"", "COMPILED=true", "DEBUG=false", "DEBUGGER=true"],
-                    // output_wrapper: "\"(function(){%output%})();//@ sourceMappingURL=/tmp/pdp11/" + pkg.version + "/pdp11-dbg.map\""
+                    // output_wrapper: "\"(function(){%output%})();//@ sourceMappingURL=/tmp/pdpjs/" + pkg.version + "/pdp11-dbg.map\""
                     output_wrapper: "\"(function(){%output%})();\""
                 },
                 // src: pkg.pdp11Files,
                 src: tmpPDP11,
-                dest: "./versions/pdp11/" + pkg.version + "/pdp11-dbg.js"
+                dest: "./versions/pdpjs/" + pkg.version + "/pdp11-dbg.js"
             }
         },
         copy: {
@@ -502,7 +502,7 @@ module.exports = function(grunt) {
                     {
                         cwd: "modules/shared/templates/",
                         src: ["common.css", "common.xsl", "components.*", "document.css", "document.xsl", "machine.xsl", "manifest.xsl", "outline.xsl"],
-                        dest: "versions/pdp11/<%= pkg.version %>/",
+                        dest: "versions/pdpjs/<%= pkg.version %>/",
                         expand: true
                     }
                 ],
@@ -511,7 +511,7 @@ module.exports = function(grunt) {
                         var s = content.replace(/(<xsl:variable name="APPCLASS">)[^<]*(<\/xsl:variable>)/g, "$1pdp11$2");
                         s = s.replace(/(<xsl:variable name="APPNAME">)[^<]*(<\/xsl:variable>)/g, "$1PDP11$2");
                         s = s.replace(/(<xsl:variable name="APPVERSION">)[^<]*(<\/xsl:variable>)/g, "$1" + pkg.version + "$2");
-                        s = s.replace(/"[^"]*\/?(common.css|common.xsl|components.css|components.xsl|document.css|document.xsl)"/g, '"/versions/pdp11/' + pkg.version + '/$1"');
+                        s = s.replace(/"[^"]*\/?(common.css|common.xsl|components.css|components.xsl|document.css|document.xsl)"/g, '"/versions/pdpjs/' + pkg.version + '/$1"');
                         s = s.replace(/[ \t]*\/\*[^\*][\s\S]*?\*\//g, "").replace(/[ \t]*<!--[^@]*?-->[ \t]*\n?/g, "");
                         return s;
                     }

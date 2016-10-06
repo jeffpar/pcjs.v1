@@ -13,11 +13,11 @@
 	<xsl:variable name="CSSCLASS">pcjs</xsl:variable>
 	<xsl:variable name="APPCLASS">pdp11</xsl:variable>
 	<xsl:variable name="APPNAME">PDP11</xsl:variable>
-	<xsl:variable name="APPVERSION">1.24.2</xsl:variable>
+	<xsl:variable name="APPVERSION">1.30.0</xsl:variable>
 	<xsl:variable name="SITEHOST">www.pcjs.org</xsl:variable>
 
 	<xsl:template name="componentStyles">
-		<link rel="stylesheet" type="text/css" href="/versions/pdp11/1.24.2/components.css"/>
+		<link rel="stylesheet" type="text/css" href="/versions/pdpjs/1.30.0/components.css"/>
 	</xsl:template>
 
 	<xsl:template name="componentScripts">
@@ -578,6 +578,12 @@
 				<xsl:otherwise>null</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
+		<xsl:variable name="resetAddr">
+			<xsl:choose>
+				<xsl:when test="@resetAddr"><xsl:value-of select="@resetAddr"/></xsl:when>
+				<xsl:otherwise>0</xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
 		<xsl:variable name="csStart">
 			<xsl:choose>
 				<xsl:when test="@csstart"><xsl:value-of select="@csstart"/></xsl:when>
@@ -602,7 +608,7 @@
 		<xsl:call-template name="component">
 			<xsl:with-param name="machine" select="$machine"/>
 			<xsl:with-param name="class" select="'cpu'"/>
-			<xsl:with-param name="parms">,model:'<xsl:value-of select="$model"/>',stepping:'<xsl:value-of select="$stepping"/>',fpu:<xsl:value-of select="$fpu"/>,cycles:<xsl:value-of select="$cycles"/>,multiplier:<xsl:value-of select="$multiplier"/>,autoStart:<xsl:value-of select="$autoStart"/>,csStart:<xsl:value-of select="$csStart"/>,csInterval:<xsl:value-of select="$csInterval"/>,csStop:<xsl:value-of select="$csStop"/></xsl:with-param>
+			<xsl:with-param name="parms">,model:'<xsl:value-of select="$model"/>',stepping:'<xsl:value-of select="$stepping"/>',fpu:<xsl:value-of select="$fpu"/>,cycles:<xsl:value-of select="$cycles"/>,multiplier:<xsl:value-of select="$multiplier"/>,autoStart:<xsl:value-of select="$autoStart"/>,resetAddr:<xsl:value-of select="$resetAddr"/>,csStart:<xsl:value-of select="$csStart"/>,csInterval:<xsl:value-of select="$csInterval"/>,csStop:<xsl:value-of select="$csStop"/></xsl:with-param>
 		</xsl:call-template>
 	</xsl:template>
 
@@ -693,6 +699,27 @@
 			<xsl:with-param name="machine" select="$machine"/>
 			<xsl:with-param name="class">chipset</xsl:with-param>
 			<xsl:with-param name="parms">,model:'<xsl:value-of select="$model"/>',scaleTimers:<xsl:value-of select="$scaletimers"/>,sw1:'<xsl:value-of select="$sw1"/>',sw2:'<xsl:value-of select="$sw2"/>',sound:<xsl:value-of select="$sound"/>,floppies:<xsl:value-of select="$floppies"/>,monitor:'<xsl:value-of select="$monitor"/>',rtcDate:'<xsl:value-of select="$rtcdate"/>'</xsl:with-param>
+		</xsl:call-template>
+	</xsl:template>
+
+	<xsl:template match="device[@ref]">
+		<xsl:param name="machine" select="''"/>
+		<xsl:variable name="componentFile"><xsl:value-of select="$rootDir"/><xsl:value-of select="@ref"/></xsl:variable>
+		<xsl:apply-templates select="document($componentFile)/device"><xsl:with-param name="machine" select="$machine"/></xsl:apply-templates>
+	</xsl:template>
+
+	<xsl:template match="device[not(@ref)]">
+		<xsl:param name="machine" select="''"/>
+		<xsl:variable name="name">
+			<xsl:choose>
+				<xsl:when test="@name"><xsl:value-of select="@name"/></xsl:when>
+				<xsl:otherwise/>
+			</xsl:choose>
+		</xsl:variable>
+		<xsl:call-template name="component">
+			<xsl:with-param name="machine" select="$machine"/>
+			<xsl:with-param name="class">device</xsl:with-param>
+			<xsl:with-param name="parms">,name:'<xsl:value-of select="$name"/>'</xsl:with-param>
 		</xsl:call-template>
 	</xsl:template>
 
@@ -1155,6 +1182,12 @@
 
 	<xsl:template match="debugger[not(@ref)]">
 		<xsl:param name="machine" select="''"/>
+		<xsl:variable name="base">
+			<xsl:choose>
+				<xsl:when test="@base"><xsl:value-of select="@base"/></xsl:when>
+				<xsl:otherwise>16</xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
 		<xsl:variable name="commands">
 			<xsl:choose>
 				<xsl:when test="@commands"><xsl:value-of select="@commands"/></xsl:when>
@@ -1170,7 +1203,7 @@
 		<xsl:call-template name="component">
 			<xsl:with-param name="machine" select="$machine"/>
 			<xsl:with-param name="class">debugger</xsl:with-param>
-			<xsl:with-param name="parms">,commands:'<xsl:value-of select="$commands"/>',messages:'<xsl:value-of select="$messages"/>'</xsl:with-param>
+			<xsl:with-param name="parms">,base:<xsl:value-of select="$base"/>,commands:'<xsl:value-of select="$commands"/>',messages:'<xsl:value-of select="$messages"/>'</xsl:with-param>
 		</xsl:call-template>
 	</xsl:template>
 

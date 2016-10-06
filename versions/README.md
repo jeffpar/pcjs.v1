@@ -12,4 +12,4 @@ Compiled versions of PCjs emulators (current and past releases) are stored here:
 - [C1Pjs](c1pjs/)
 - [PCx86](pcx86/)
 - [PC8080](pc8080/)
-- [PDP11](pdp11/)
+- [PDPjs](pdpjs/)

@@ -1,19 +1,19 @@
 ---
 layout: page
-title: PDP-11 Machine Emulation Module (PDP11js)
+title: PDP-11 Machine Emulation Module (PDPjs)
 permalink: /modules/pdp11/
 ---
 
-PDP-11 Machine Emulation Module (PDP11js)
+PDP-11 Machine Emulation Module (PDPjs)
 =========================================
 
 Overview
 ---
-PDP11js is our PDP-11 machine emulation module.  The code is being adapted from
+PDPjs is our PDP-11 machine emulation module.  The code is being adapted from
 the JavaScript [PDP 11/70 Emulator (v1.3)](http://skn.noip.me/pdp11/pdp11.html) written by
 [Paul Nankervis](mailto:paulnank@hotmail.com).
 
-PDP11js is currently comprised of the following non-shared components, as listed in
+PDPjs is currently comprised of the following non-shared components, as listed in
 [package.json](../../package.json) (see the *pdp11Files* property):
 
 * [defines.js](/modules/pdp11/lib/defines.js)

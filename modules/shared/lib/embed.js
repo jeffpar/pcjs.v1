@@ -592,7 +592,7 @@ function embedPC8080(idMachine, sXMLFile, sXSLFile, sParms)
 function embedPDP11(idMachine, sXMLFile, sXSLFile, sParms)
 {
     if (fAsync) web.enablePageEvents(false);
-    return embedMachine("PDP11js", "pdp11", APPVERSION, idMachine, sXMLFile, sXSLFile, sParms);
+    return embedMachine("PDPjs", "pdp11", APPVERSION, idMachine, sXMLFile, sXSLFile, sParms);
 }
 
 /**
@@ -608,7 +608,7 @@ if (APPNAME == "PCx86") {
 if (APPNAME == "PC8080") {
     window['embedPC8080'] = embedPC8080;
 }
-if (APPNAME == "PDP11js") {
+if (APPNAME == "PDPjs") {
     window['embedPDP11']  = embedPDP11;
 }
 

@@ -23,7 +23,7 @@
 		<link rel="apple-touch-icon" href="/versions/icons/current/apple-touch-icon.png"/>
 		<link rel="icon" type="image/png" sizes="192x192" href="/versions/icons/current/pc-icon-192.png"/>
 		<link rel="shortcut icon" type="image/x-icon" href="/versions/icons/current/favicon.ico"/>
-		<link rel="stylesheet" type="text/css" href="/versions/pdp11/1.24.2/common.css"/>
+		<link rel="stylesheet" type="text/css" href="/versions/pdpjs/1.30.0/common.css"/>
 	</xsl:template>
 
 	<xsl:template name="commonTop">

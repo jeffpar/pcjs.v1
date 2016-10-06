@@ -10,7 +10,7 @@
 	<xsl:output method="html"/>
 
 	<xsl:template name="documentStyles">
-		<link rel="stylesheet" type="text/css" href="/versions/pdp11/1.30.0/document.css"/>
+		<link rel="stylesheet" type="text/css" href="/versions/pdpjs/1.30.0/document.css"/>
 	</xsl:template>
 
 	<xsl:template match="title">

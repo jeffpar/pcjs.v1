@@ -8,8 +8,8 @@
 
 	<xsl:output doctype-system="about:legacy-compat" method="html"/>
 
-	<xsl:include href="/versions/pdp11/1.30.0/common.xsl"/>
-	<xsl:include href="/versions/pdp11/1.30.0/components.xsl"/>
+	<xsl:include href="/versions/pdpjs/1.30.0/common.xsl"/>
+	<xsl:include href="/versions/pdpjs/1.30.0/components.xsl"/>
 
 	<xsl:template match="/manifest[@type = 'document']">
 		<html lang="en">

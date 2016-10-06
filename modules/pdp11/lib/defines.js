@@ -44,7 +44,7 @@ var APPCLASS = "pdp11";         // this @define is the default application class
  *
  * @define {string}
  */
-var APPNAME = "PDP11js";        // this @define is the default application name (eg, "PCx86", "C1Pjs")
+var APPNAME = "PDPjs";          // this @define is the default application name (eg, "PCx86", "C1Pjs")
 
 /**
  * WARNING: DEBUGGER needs to accurately reflect whether or not the Debugger component is (or will be) loaded.
