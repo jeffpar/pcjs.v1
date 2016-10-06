@@ -68,7 +68,7 @@ if (NODE) {
  * @extends Component
  * @param {Object} parmsBus
  * @param {X86CPU} cpu
- * @param {Debugger} dbg
+ * @param {DebuggerX86} dbg
  */
 function Bus(parmsBus, cpu, dbg)
 {
@@ -260,38 +260,6 @@ Bus.ERROR = {
 };
 
 /**
- * @typedef {number}
- */
-var BlockInfo;
-
-/**
- * This defines the BlockInfo bit fields used by scanMemory() when it creates the aBlocks array.
- *
- * @typedef {{
- *  num:    BitField,
- *  count:  BitField,
- *  btmod:  BitField,
- *  type:   BitField
- * }}
- */
-Bus.BlockInfo = usr.defineBitFields({num:20, count:8, btmod:1, type:3});
-
-/**
- * BusInfo object definition (returned by scanMemory())
- *
- *  cbTotal:    total bytes allocated
- *  cBlocks:    total Memory blocks allocated
- *  aBlocks:    array of allocated Memory block numbers
- *
- * @typedef {{
- *  cbTotal:    number,
- *  cBlocks:    number,
- *  aBlocks:    Array.<BlockInfo>
- * }}
- */
-var BusInfo;
-
-/**
  * initMemory()
  *
  * Allocate enough (empty) Memory blocks to span the entire physical address space.
@@ -462,6 +430,42 @@ Bus.prototype.cleanMemory = function(addr, size)
     }
     return fClean;
 };
+
+/*
+ * Data types used by scanMemory()
+ */
+
+/**
+ * @typedef {number}
+ */
+var BlockInfo;
+
+/**
+ * This defines the BlockInfo bit fields used by scanMemory() when it creates the aBlocks array.
+ *
+ * @typedef {{
+ *  num:    BitField,
+ *  count:  BitField,
+ *  btmod:  BitField,
+ *  type:   BitField
+ * }}
+ */
+Bus.BlockInfo = usr.defineBitFields({num:20, count:8, btmod:1, type:3});
+
+/**
+ * BusInfo object definition (returned by scanMemory())
+ *
+ *  cbTotal:    total bytes allocated
+ *  cBlocks:    total Memory blocks allocated
+ *  aBlocks:    array of allocated Memory block numbers
+ *
+ * @typedef {{
+ *  cbTotal:    number,
+ *  cBlocks:    number,
+ *  aBlocks:    Array.<BlockInfo>
+ * }}
+ */
+var BusInfo;
 
 /**
  * scanMemory(info, addr, size)

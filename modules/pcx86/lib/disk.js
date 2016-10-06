@@ -811,7 +811,7 @@ var SectorInfo;
  * @param {Computer} cmp
  * @param {Bus} bus
  * @param {X86CPU} cpu
- * @param {Debugger} dbg
+ * @param {DebuggerX86} dbg
  */
 Disk.prototype.initBus = function(cmp, bus, cpu, dbg) {
     this.dbg = dbg;
@@ -1166,7 +1166,7 @@ Disk.prototype.doneLoad = function(sURL, sDiskData, nErrorCode)
 {
     var disk = null;
     this.fWriteProtected = false;
-    var fPrintOnly = (nErrorCode < 0 && this.cmp && !this.cmp.flags.fPowered);
+    var fPrintOnly = (nErrorCode < 0 && this.cmp && !this.cmp.flags.powered);
 
     if (this.fOnDemand) {
         if (!nErrorCode) {
@@ -1594,11 +1594,11 @@ Disk.prototype.buildFileTable = function()
  * @this {Disk}
  * @param {string} sModule
  * @param {number} nSegment
- * @return {Array}
+ * @return {Object}
  */
 Disk.prototype.getModuleInfo = function(sModule, nSegment)
 {
-    var aSymbols = [];
+    var aSymbols = {};
     if (SYMBOLS && this.aFileTable) {
         for (var iFile = 0; iFile < this.aFileTable.length; iFile++) {
             var file = this.aFileTable[iFile];

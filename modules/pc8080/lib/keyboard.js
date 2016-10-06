@@ -35,6 +35,7 @@ if (NODE) {
     var str         = require("../../shared/lib/strlib");
     var web         = require("../../shared/lib/weblib");
     var Component   = require("../../shared/lib/component");
+    var Keys        = require("../../shared/lib/keys");
     var PC8080      = require("./defines");
     var ChipSet8080 = require("./chipset");
     var Messages8080= require("./messages");
@@ -70,183 +71,6 @@ function Keyboard8080(parmsKbd)
 
 Component.subclass(Keyboard8080);
 
-/**
- * Alphanumeric and other common (printable) ASCII codes.
- *
- * TODO: Determine what we can do to get ALL constants like these inlined by the Closure Compiler
- * (enum doesn't seem to get the job done); the problem seems to be limited to property references
- * that use quotes, which is why I've 'unquoted' as many of them as possible.
- *
- * @enum {number}
- */
-Keyboard8080.ASCII = {
- CTRL_A:  1, CTRL_C:  3, CTRL_Z: 26,
-    ' ': 32,    '!': 33,    '"': 34,    '#': 35,    '$': 36,    '%': 37,    '&': 38,    "'": 39,
-    '(': 40,    ')': 41,    '*': 42,    '+': 43,    ',': 44,    '-': 45,    '.': 46,    '/': 47,
-    '0': 48,    '1': 49,    '2': 50,    '3': 51,    '4': 52,    '5': 53,    '6': 54,    '7': 55,
-    '8': 56,    '9': 57,    ':': 58,    ';': 59,    '<': 60,    '=': 61,    '>': 62,    '?': 63,
-    '@': 64,     A:  65,     B:  66,     C:  67,     D:  68,     E:  69,     F:  70,     G:  71,
-     H:  72,     I:  73,     J:  74,     K:  75,     L:  76,     M:  77,     N:  78,     O:  79,
-     P:  80,     Q:  81,     R:  82,     S:  83,     T:  84,     U:  85,     V:  86,     W:  87,
-     X:  88,     Y:  89,     Z:  90,    '[': 91,    '\\':92,    ']': 93,    '^': 94,    '_': 95,
-    '`': 96,     a:  97,     b:  98,     c:  99,     d: 100,     e: 101,     f: 102,     g: 103,
-     h:  104,    i: 105,     j: 106,     k: 107,     l: 108,     m: 109,     n: 110,     o: 111,
-     p:  112,    q: 113,     r: 114,     s: 115,     t: 116,     u: 117,     v: 118,     w: 119,
-     x:  120,    y: 121,     z: 122,    '{':123,    '|':124,    '}':125,    '~':126
-};
-
-/**
- * Browser keyCodes we must pay particular attention to.  For the most part, these are non-alphanumeric
- * or function keys, some which may require special treatment (eg, preventDefault() if returning false on
- * the initial keyDown event is insufficient).
- *
- * keyCodes for most common ASCII keys can simply use the appropriate ASCII code above.
- *
- * Most of these represent non-ASCII characters (eg, the LEFT arrow key), yet for some reason, browsers
- * defined them using ASCII codes (eg, the LEFT arrow key uses 37, which is the ASCII code for '%').
- *
- * @enum {number}
- */
-Keyboard8080.KEYCODE = {
-    /* 0x08 */ BS:          8,
-    /* 0x09 */ TAB:         9,
-    /* 0x0A */ LF:          10,         // TODO: Determine if any key actually generates this (I suspect there is none)
-    /* 0x0D */ CR:          13,
-    /* 0x10 */ SHIFT:       16,
-    /* 0x11 */ CTRL:        17,
-    /* 0x12 */ ALT:         18,
-    /* 0x13 */ PAUSE:       19,         // PAUSE/BREAK
-    /* 0x14 */ CAPSLOCK:    20,
-    /* 0x1B */ ESC:         27,
-    /* 0x20 */ SPACE:       32,
-    /* 0x21 */ PGUP:        33,
-    /* 0x22 */ PGDN:        34,
-    /* 0x23 */ END:         35,
-    /* 0x24 */ HOME:        36,
-    /* 0x25 */ LEFT:        37,
-    /* 0x26 */ UP:          38,
-    /* 0x27 */ RIGHT:       39,
-    /* 0x27 */ FF_QUOTE:    39,
-    /* 0x28 */ DOWN:        40,
-    /* 0x2C */ FF_COMMA:    44,
-    /* 0x2C */ PRTSC:       44,
-    /* 0x2D */ INS:         45,
-    /* 0x2E */ DEL:         46,
-    /* 0x2E */ FF_PERIOD:   46,
-    /* 0x2F */ FF_SLASH:    47,
-    /* 0x30 */ ZERO:        48,
-    /* 0x31 */ ONE:         49,
-    /* 0x32 */ TWO:         50,
-    /* 0x33 */ THREE:       51,
-    /* 0x34 */ FOUR:        52,
-    /* 0x35 */ FIVE:        53,
-    /* 0x36 */ SIX:         54,
-    /* 0x37 */ SEVEN:       55,
-    /* 0x38 */ EIGHT:       56,
-    /* 0x39 */ NINE:        57,
-    /* 0x3B */ FF_SEMI:     59,
-    /* 0x3D */ FF_EQUALS:   61,
-    /* 0x5B */ CMD:         91,         // aka WIN
-    /* 0x5B */ FF_LBRACK:   91,
-    /* 0x5C */ FF_BSLASH:   92,
-    /* 0x5D */ RCMD:        93,         // aka MENU
-    /* 0x5D */ FF_RBRACK:   93,
-    /* 0x60 */ NUM_0:       96,
-    /* 0x60 */ NUM_INS:     96,
-    /* 0x60 */ FF_BQUOTE:   96,
-    /* 0x61 */ NUM_1:       97,
-    /* 0x61 */ NUM_END:     97,
-    /* 0x62 */ NUM_2:       98,
-    /* 0x62 */ NUM_DOWN:    98,
-    /* 0x63 */ NUM_3:       99,
-    /* 0x63 */ NUM_PGDN:    99,
-    /* 0x64 */ NUM_4:       100,
-    /* 0x64 */ NUM_LEFT:    100,
-    /* 0x65 */ NUM_5:       101,
-    /* 0x65 */ NUM_CENTER:  101,
-    /* 0x66 */ NUM_6:       102,
-    /* 0x66 */ NUM_RIGHT:   102,
-    /* 0x67 */ NUM_7:       103,
-    /* 0x67 */ NUM_HOME:    103,
-    /* 0x68 */ NUM_8:       104,
-    /* 0x68 */ NUM_UP:      104,
-    /* 0x69 */ NUM_9:       105,
-    /* 0x69 */ NUM_PGUP:    105,
-    /* 0x6A */ NUM_MUL:     106,
-    /* 0x6B */ NUM_ADD:     107,
-    /* 0x6D */ NUM_SUB:     109,
-    /* 0x6E */ NUM_DEL:     110,        // aka PERIOD
-    /* 0x6F */ NUM_DIV:     111,
-    /* 0x70 */ F1:          112,
-    /* 0x71 */ F2:          113,
-    /* 0x72 */ F3:          114,
-    /* 0x73 */ F4:          115,
-    /* 0x74 */ F5:          116,
-    /* 0x75 */ F6:          117,
-    /* 0x76 */ F7:          118,
-    /* 0x77 */ F8:          119,
-    /* 0x78 */ F9:          120,
-    /* 0x79 */ F10:         121,
-    /* 0x7A */ F11:         122,
-    /* 0x7B */ F12:         123,
-    /* 0x90 */ NUM_LOCK:    144,
-    /* 0x91 */ SCROLL_LOCK: 145,
-    /* 0xAD */ FF_DASH:     173,
-    /* 0xBA */ SEMI:        186,        // Firefox: 59
-    /* 0xBB */ EQUALS:      187,        // Firefox: 61
-    /* 0xBC */ COMMA:       188,        // Firefox: 44
-    /* 0xBD */ DASH:        189,        // Firefox: 173
-    /* 0xBE */ PERIOD:      190,        // Firefox: 46
-    /* 0xBF */ SLASH:       191,        // Firefox: 47
-    /* 0xC0 */ BQUOTE:      192,        // Firefox: 96
-    /* 0xDB */ LBRACK:      219,        // Firefox: 91
-    /* 0xDC */ BSLASH:      220,        // Firefox: 92
-    /* 0xDD */ RBRACK:      221,        // Firefox: 93
-    /* 0xDE */ QUOTE:       222,        // Firefox: 39
-    /* 0xE0 */ FF_CMD:      224,        // Firefox only (used for both CMD and RCMD)
-    //
-    // The following biases use what I'll call Decimal Coded Binary or DCB (the opposite of BCD),
-    // where the thousands digit is used to store the sum of "binary" digits 1 and/or 2 and/or 4.
-    //
-    // Technically, that makes it DCO (Decimal Coded Octal), but then again, BCD should have really
-    // been called HCD (Hexadecimal Coded Decimal), so if "they" can take liberties, so can I.
-    //
-    // ONDOWN is a bias we add to browser keyCodes that we want to handle on "down" rather than on "press".
-    //
-    ONDOWN:                 1000,
-    //
-    // ONRIGHT is a bias we add to browser keyCodes that need to check for a "right" location (default is "left")
-    //
-    ONRIGHT:                2000,
-    //
-    // FAKE is a bias we add to signal these are fake keyCodes corresponding to internal keystroke combinations.
-    // The actual values are for internal use only and merely need to be unique and used consistently.
-    //
-    FAKE:                   4000
-};
-
-/*
- * Check the event object's 'location' property for a non-zero value for the following ONRIGHT keys.
- */
-Keyboard8080.KEYCODE.NUM_CR = Keyboard8080.KEYCODE.CR + Keyboard8080.KEYCODE.ONRIGHT;
-
-/*
- * Maps "stupid" keyCodes to their "non-stupid" counterparts
- */
-Keyboard8080.STUPID_KEYCODES = {};
-Keyboard8080.STUPID_KEYCODES[Keyboard8080.KEYCODE.SEMI]    = Keyboard8080.ASCII[';'];   // 186 -> 59
-Keyboard8080.STUPID_KEYCODES[Keyboard8080.KEYCODE.EQUALS]  = Keyboard8080.ASCII['='];   // 187 -> 61
-Keyboard8080.STUPID_KEYCODES[Keyboard8080.KEYCODE.COMMA]   = Keyboard8080.ASCII[','];   // 188 -> 44
-Keyboard8080.STUPID_KEYCODES[Keyboard8080.KEYCODE.DASH]    = Keyboard8080.ASCII['-'];   // 189 -> 45
-Keyboard8080.STUPID_KEYCODES[Keyboard8080.KEYCODE.PERIOD]  = Keyboard8080.ASCII['.'];   // 190 -> 46
-Keyboard8080.STUPID_KEYCODES[Keyboard8080.KEYCODE.SLASH]   = Keyboard8080.ASCII['/'];   // 191 -> 47
-Keyboard8080.STUPID_KEYCODES[Keyboard8080.KEYCODE.BQUOTE]  = Keyboard8080.ASCII['`'];   // 192 -> 96
-Keyboard8080.STUPID_KEYCODES[Keyboard8080.KEYCODE.LBRACK]  = Keyboard8080.ASCII['['];   // 219 -> 91
-Keyboard8080.STUPID_KEYCODES[Keyboard8080.KEYCODE.BSLASH]  = Keyboard8080.ASCII['\\'];  // 220 -> 92
-Keyboard8080.STUPID_KEYCODES[Keyboard8080.KEYCODE.RBRACK]  = Keyboard8080.ASCII[']'];   // 221 -> 93
-Keyboard8080.STUPID_KEYCODES[Keyboard8080.KEYCODE.QUOTE]   = Keyboard8080.ASCII["'"];   // 222 -> 39
-Keyboard8080.STUPID_KEYCODES[Keyboard8080.KEYCODE.FF_DASH] = Keyboard8080.ASCII['-'];
-
 Keyboard8080.MINPRESSTIME = 100;            // 100ms
 
 /**
@@ -256,9 +80,9 @@ Keyboard8080.MINPRESSTIME = 100;            // 100ms
  * a simple object literal for this and all other object initializations.
  */
 Keyboard8080.WASDCODES = {};
-Keyboard8080.WASDCODES[Keyboard8080.ASCII.A] = Keyboard8080.KEYCODE.LEFT;
-Keyboard8080.WASDCODES[Keyboard8080.ASCII.D] = Keyboard8080.KEYCODE.RIGHT;
-Keyboard8080.WASDCODES[Keyboard8080.ASCII.L] = Keyboard8080.KEYCODE.SPACE;
+Keyboard8080.WASDCODES[Keys.ASCII.A] = Keys.KEYCODE.LEFT;
+Keyboard8080.WASDCODES[Keys.ASCII.D] = Keys.KEYCODE.RIGHT;
+Keyboard8080.WASDCODES[Keys.ASCII.L] = Keys.KEYCODE.SPACE;
 
 /*
  * Supported configurations
@@ -269,12 +93,12 @@ Keyboard8080.SI1978 = {
     ALTCODES: Keyboard8080.WASDCODES,
     LEDCODES: {},
     SOFTCODES: {
-        '1p':       Keyboard8080.KEYCODE.ONE,
-        '2p':       Keyboard8080.KEYCODE.TWO,
-        'coin':     Keyboard8080.KEYCODE.THREE,
-        'left':     Keyboard8080.KEYCODE.LEFT,
-        'right':    Keyboard8080.KEYCODE.RIGHT,
-        'fire':     Keyboard8080.KEYCODE.SPACE
+        '1p':       Keys.KEYCODE.ONE,
+        '2p':       Keys.KEYCODE.TWO,
+        'coin':     Keys.KEYCODE.THREE,
+        'left':     Keys.KEYCODE.LEFT,
+        'right':    Keys.KEYCODE.RIGHT,
+        'fire':     Keys.KEYCODE.SPACE
     }
 };
 
@@ -284,7 +108,7 @@ Keyboard8080.VT100 = {
     ALTCODES: {},
     LEDCODES: {},
     SOFTCODES: {
-        'setup':    Keyboard8080.KEYCODE.F9
+        'setup':    Keys.KEYCODE.F9
     },
     /*
      * Reading port 0x82 returns a key address from the VT100 keyboard's UART data output.
@@ -329,89 +153,89 @@ Keyboard8080.VT100 = {
 /*
  * Table to map host key codes to VT100 key addresses (ie, unique 7-bit values representing key positions on the VT100)
  */
-Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.DEL]     =   0x03;
-Keyboard8080.VT100.KEYMAP[Keyboard8080.ASCII.P]         =   0x05;
-Keyboard8080.VT100.KEYMAP[Keyboard8080.ASCII.O]         =   0x06;
-Keyboard8080.VT100.KEYMAP[Keyboard8080.ASCII.Y]         =   0x07;
-Keyboard8080.VT100.KEYMAP[Keyboard8080.ASCII.T]         =   0x08;
-Keyboard8080.VT100.KEYMAP[Keyboard8080.ASCII.W]         =   0x09;
-Keyboard8080.VT100.KEYMAP[Keyboard8080.ASCII.Q]         =   0x0A;
-Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.RIGHT]   =   0x10;
-Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.RBRACK]  =   0x14;
-Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.LBRACK]  =   0x15;
-Keyboard8080.VT100.KEYMAP[Keyboard8080.ASCII.I]         =   0x16;
-Keyboard8080.VT100.KEYMAP[Keyboard8080.ASCII.U]         =   0x17;
-Keyboard8080.VT100.KEYMAP[Keyboard8080.ASCII.R]         =   0x18;
-Keyboard8080.VT100.KEYMAP[Keyboard8080.ASCII.E]         =   0x19;
-Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.ONE]     =   0x1A;
-Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.LEFT]    =   0x20;
-Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.DOWN]    =   0x22;
-Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.F6]      =   0x23;   // aka BREAK
-Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.PAUSE]   =   0x23;   // aka BREAK
-Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.BQUOTE]  =   0x24;
-Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.DASH]    =   0x25;
-Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.NINE]    =   0x26;
-Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.SEVEN]   =   0x27;
-Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.FOUR]    =   0x28;
-Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.THREE]   =   0x29;
-Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.ESC]     =   0x2A;
-Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.UP]      =   0x30;
-Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.F3]      =   0x31;   // aka PF3
-Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.F1]      =   0x32;   // aka PF1
-Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.BS]      =   0x33;
-Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.EQUALS]  =   0x34;
-Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.ZERO]    =   0x35;
-Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.EIGHT]   =   0x36;
-Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.SIX]     =   0x37;
-Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.FIVE]    =   0x38;
-Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.TWO]     =   0x39;
-Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.TAB]     =   0x3A;
-Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.NUM_7]   =   0x40;
-Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.F4]      =   0x41;   // aka PF4
-Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.F2]      =   0x42;   // aka PF2
-Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.NUM_0]   =   0x43;
-Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.F7]      =   0x44;   // aka LINE FEED
-Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.BSLASH]  =   0x45;
-Keyboard8080.VT100.KEYMAP[Keyboard8080.ASCII.L]         =   0x46;
-Keyboard8080.VT100.KEYMAP[Keyboard8080.ASCII.K]         =   0x47;
-Keyboard8080.VT100.KEYMAP[Keyboard8080.ASCII.G]         =   0x48;
-Keyboard8080.VT100.KEYMAP[Keyboard8080.ASCII.F]         =   0x49;
-Keyboard8080.VT100.KEYMAP[Keyboard8080.ASCII.A]         =   0x4A;
-Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.NUM_8]   =   0x50;
-Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.NUM_CR]  =   0x51;
-Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.NUM_2]   =   0x52;
-Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.NUM_1]   =   0x53;
-Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.QUOTE]   =   0x55;
-Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.SEMI]    =   0x56;
-Keyboard8080.VT100.KEYMAP[Keyboard8080.ASCII.J]         =   0x57;
-Keyboard8080.VT100.KEYMAP[Keyboard8080.ASCII.H]         =   0x58;
-Keyboard8080.VT100.KEYMAP[Keyboard8080.ASCII.D]         =   0x59;
-Keyboard8080.VT100.KEYMAP[Keyboard8080.ASCII.S]         =   0x5A;
-Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.NUM_DEL] =   0x60;   // keypad period
-Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.F5]      =   0x61;   // aka KEYPAD COMMA
-Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.NUM_5]   =   0x62;
-Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.NUM_4]   =   0x63;
-Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.CR]      =   0x64;   // TODO: Figure out why the Technical Manual lists CR at both 0x04 and 0x64
-Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.PERIOD]  =   0x65;
-Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.COMMA]   =   0x66;
-Keyboard8080.VT100.KEYMAP[Keyboard8080.ASCII.N]         =   0x67;
-Keyboard8080.VT100.KEYMAP[Keyboard8080.ASCII.B]         =   0x68;
-Keyboard8080.VT100.KEYMAP[Keyboard8080.ASCII.X]         =   0x69;
-Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.F8]      =   0x6A;   // aka NO SCROLL
-Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.NUM_9]   =   0x70;
-Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.NUM_3]   =   0x71;
-Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.NUM_6]   =   0x72;
-Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.NUM_SUB] =   0x73;   // aka KEYPAD MINUS
-Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.SLASH]   =   0x75;
-Keyboard8080.VT100.KEYMAP[Keyboard8080.ASCII.M]         =   0x76;
-Keyboard8080.VT100.KEYMAP[Keyboard8080.ASCII[' ']]      =   0x77;
-Keyboard8080.VT100.KEYMAP[Keyboard8080.ASCII.V]         =   0x78;
-Keyboard8080.VT100.KEYMAP[Keyboard8080.ASCII.C]         =   0x79;
-Keyboard8080.VT100.KEYMAP[Keyboard8080.ASCII.Z]         =   0x7A;
-Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.F9]      =   0x7B;   // aka SET-UP
-Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.CTRL]    =   0x7C;
-Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.SHIFT]   =   0x7D;   // either shift key (doesn't matter)
-Keyboard8080.VT100.KEYMAP[Keyboard8080.KEYCODE.CAPSLOCK]=   0x7E;
+Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.DEL]     =   0x03;
+Keyboard8080.VT100.KEYMAP[Keys.ASCII.P]         =   0x05;
+Keyboard8080.VT100.KEYMAP[Keys.ASCII.O]         =   0x06;
+Keyboard8080.VT100.KEYMAP[Keys.ASCII.Y]         =   0x07;
+Keyboard8080.VT100.KEYMAP[Keys.ASCII.T]         =   0x08;
+Keyboard8080.VT100.KEYMAP[Keys.ASCII.W]         =   0x09;
+Keyboard8080.VT100.KEYMAP[Keys.ASCII.Q]         =   0x0A;
+Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.RIGHT]   =   0x10;
+Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.RBRACK]  =   0x14;
+Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.LBRACK]  =   0x15;
+Keyboard8080.VT100.KEYMAP[Keys.ASCII.I]         =   0x16;
+Keyboard8080.VT100.KEYMAP[Keys.ASCII.U]         =   0x17;
+Keyboard8080.VT100.KEYMAP[Keys.ASCII.R]         =   0x18;
+Keyboard8080.VT100.KEYMAP[Keys.ASCII.E]         =   0x19;
+Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.ONE]     =   0x1A;
+Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.LEFT]    =   0x20;
+Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.DOWN]    =   0x22;
+Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.F6]      =   0x23;   // aka BREAK
+Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.PAUSE]   =   0x23;   // aka BREAK
+Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.BQUOTE]  =   0x24;
+Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.DASH]    =   0x25;
+Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.NINE]    =   0x26;
+Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.SEVEN]   =   0x27;
+Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.FOUR]    =   0x28;
+Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.THREE]   =   0x29;
+Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.ESC]     =   0x2A;
+Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.UP]      =   0x30;
+Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.F3]      =   0x31;   // aka PF3
+Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.F1]      =   0x32;   // aka PF1
+Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.BS]      =   0x33;
+Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.EQUALS]  =   0x34;
+Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.ZERO]    =   0x35;
+Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.EIGHT]   =   0x36;
+Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.SIX]     =   0x37;
+Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.FIVE]    =   0x38;
+Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.TWO]     =   0x39;
+Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.TAB]     =   0x3A;
+Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.NUM_7]   =   0x40;
+Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.F4]      =   0x41;   // aka PF4
+Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.F2]      =   0x42;   // aka PF2
+Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.NUM_0]   =   0x43;
+Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.F7]      =   0x44;   // aka LINE FEED
+Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.BSLASH]  =   0x45;
+Keyboard8080.VT100.KEYMAP[Keys.ASCII.L]         =   0x46;
+Keyboard8080.VT100.KEYMAP[Keys.ASCII.K]         =   0x47;
+Keyboard8080.VT100.KEYMAP[Keys.ASCII.G]         =   0x48;
+Keyboard8080.VT100.KEYMAP[Keys.ASCII.F]         =   0x49;
+Keyboard8080.VT100.KEYMAP[Keys.ASCII.A]         =   0x4A;
+Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.NUM_8]   =   0x50;
+Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.NUM_CR]  =   0x51;
+Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.NUM_2]   =   0x52;
+Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.NUM_1]   =   0x53;
+Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.QUOTE]   =   0x55;
+Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.SEMI]    =   0x56;
+Keyboard8080.VT100.KEYMAP[Keys.ASCII.J]         =   0x57;
+Keyboard8080.VT100.KEYMAP[Keys.ASCII.H]         =   0x58;
+Keyboard8080.VT100.KEYMAP[Keys.ASCII.D]         =   0x59;
+Keyboard8080.VT100.KEYMAP[Keys.ASCII.S]         =   0x5A;
+Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.NUM_DEL] =   0x60;   // keypad period
+Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.F5]      =   0x61;   // aka KEYPAD COMMA
+Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.NUM_5]   =   0x62;
+Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.NUM_4]   =   0x63;
+Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.CR]      =   0x64;   // TODO: Figure out why the Technical Manual lists CR at both 0x04 and 0x64
+Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.PERIOD]  =   0x65;
+Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.COMMA]   =   0x66;
+Keyboard8080.VT100.KEYMAP[Keys.ASCII.N]         =   0x67;
+Keyboard8080.VT100.KEYMAP[Keys.ASCII.B]         =   0x68;
+Keyboard8080.VT100.KEYMAP[Keys.ASCII.X]         =   0x69;
+Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.F8]      =   0x6A;   // aka NO SCROLL
+Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.NUM_9]   =   0x70;
+Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.NUM_3]   =   0x71;
+Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.NUM_6]   =   0x72;
+Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.NUM_SUB] =   0x73;   // aka KEYPAD MINUS
+Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.SLASH]   =   0x75;
+Keyboard8080.VT100.KEYMAP[Keys.ASCII.M]         =   0x76;
+Keyboard8080.VT100.KEYMAP[Keys.ASCII[' ']]      =   0x77;
+Keyboard8080.VT100.KEYMAP[Keys.ASCII.V]         =   0x78;
+Keyboard8080.VT100.KEYMAP[Keys.ASCII.C]         =   0x79;
+Keyboard8080.VT100.KEYMAP[Keys.ASCII.Z]         =   0x7A;
+Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.F9]      =   0x7B;   // aka SET-UP
+Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.CTRL]    =   0x7C;
+Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.SHIFT]   =   0x7D;   // either shift key (doesn't matter)
+Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.CAPS_LOCK] = 0x7E;
 
 Keyboard8080.VT100.LEDCODES = {
     'l4':       Keyboard8080.VT100.STATUS.LED4,

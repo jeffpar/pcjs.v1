@@ -6,8 +6,9 @@ one of several JavaScript Machines in the [PCjs Project](https://github.com/jeff
 includes:
 
 * [PCx86](/docs/pcx86/), an x86-based IBM PC and PC-compatible emulator
-* [PC8080](/modules/pc8080/), an 8080-based machine emulator (e.g., [Space Invaders](/devices/pc8080/machine/invaders/), [VT100 Terminal](/devices/pc8080/machine/vt100/))
-* [C1Pjs](/docs/c1pjs/), a 6502-based emulation of the Ohio Scientific [Challenger 1P](/devices/c1p/)
+* [PC8080](/modules/pc8080/), an 8080 machine emulator (e.g., [Space Invaders](/devices/pc8080/machine/invaders/), [VT100 Terminal](/devices/pc8080/machine/vt100/))
+* [C1Pjs](/docs/c1pjs/), an emulation of the 6502-based Ohio Scientific [Challenger 1P](/devices/c1p/)
+* [PDPjs](/modules/pdp11/), a PDP-11 machine emulator currently in development (e.g., [PDP-11/70](/devices/pdp11/machine/1170/))
 
 All PCjs computer simulations are written entirely in [JavaScript](/modules/).  No Flash, Java or other plugins are
 required.  Supported browsers include modern versions of Chrome, Safari, Firefox, Internet Explorer (v9.0 and up), Edge,
@@ -67,16 +68,15 @@ Developer Notes
 ---
 
 The [PCjs repository](https://github.com/jeffpar/pcjs) on GitHub contains everything needed to run PCjs
-computer simulations.  The [PCx86](/docs/pcx86/) and [C1Pjs](/docs/c1pjs/) emulators run in any modern web browser,
-with or without a web server, and examples are provided for both [local](/docs/pcx86/examples/) and
-[remote](http://www.pcjs.org/) operation.
+computer simulations.  All the PCjs emulators run in any modern web browser, with or without a web server,
+and examples are provided for both [local](/docs/pcx86/examples/) and [remote](http://www.pcjs.org/) operation.
 
 The project includes:
 
 - A simple Node-based web server ([server.js](server.js))
 - Custom Node modules used by the web server ([HTMLOut](modules/htmlout/), [MarkOut](modules/markout/), [DiskDump](modules/diskdump/), [FileDump](modules/filedump/))
 - A variety of IBM PC and C1P configuration and resource files (see [/apps](apps/), [/devices](devices/) and [/disks](disks/))
-- The [PCx86](modules/pcx86/), [PC8080](modules/pc8080/), and [C1Pjs](modules/c1pjs/) client applications, both "compiled" and uncompiled
+- The [PCx86](modules/pcx86/), [PC8080](modules/pc8080/), and [C1Pjs](modules/c1pjs/) client applications, along with "compiled" [versions](/versions/)
 - A smattering of [PCx86](docs/pcx86/) and [C1Pjs](docs/c1pjs/) documentation, along with [blog posts](https://github.com/jeffpar/pcjs/tree/gh-pages/_posts), related [publications](pubs/) and more
 
 The bundled web server is not strictly required.  Any web server (Node, Apache, Nginx, etc) that can serve the necessary
@@ -173,8 +173,8 @@ Last but not least, run `bundle update` periodically to keep Jekyll up-to-date.
 ### Building PCjs
 
 Unlike a typical project, where you have to *build* or *configure* or *make* something, PCjs is "ready to run".
-That's because both the compiled and uncompiled versions of PCjs are checked into the project, making deployment
-to a web server easy.
+That's because both the compiled and uncompiled versions of PCjs emulation modules are checked into the project,
+making deployment to a web server easy.
 
 However, in order to build and test PCjs modifications, you'll want to use [Grunt](http://gruntjs.com/) and the
 Grunt tasks defined by [Gruntfile.js](Gruntfile.js).
@@ -186,9 +186,9 @@ OS X users may also need to preface this command with `sudo`:
 	npm install grunt-cli -g
 
 Now you can run `grunt` anywhere within the PCjs project to build an updated version.  If no command-line arguments
-are specified, `grunt` runs the "default" task defined by [Gruntfile.js](Gruntfile.js); that task runs Google's
-[Closure Compiler](https://developers.google.com/closure/compiler/) if any of the target files (eg, pcx86.js or
-pcx86-dbg.js in the [/versions](versions/) directory) are out-of date.
+are specified, `grunt` runs the "default" task defined by the project's [Gruntfile](Gruntfile.js); that task runs
+Google's [Closure Compiler](https://developers.google.com/closure/compiler/) if any of the target files (eg, pcx86.js
+or pcx86-dbg.js in the [versions](/versions/) directory) are out-of date.
 
 To ensure consistent compilation results, a copy of the Closure Compiler has been checked into the
 [/bin](bin/) folder.  This version of Closure Compiler, in turn, requires Java v7 or later.  Use the following
@@ -209,8 +209,8 @@ Then run:
 which should report:
 
 	Closure Compiler (http://github.com/google/closure-compiler)
-	Version: v20150609
-	Built on: 2015/06/09 16:35
+	Version: v20160911
+	Built on: 2016-09-13 16:51
 
 If you don't have Java installed, it's recommended that you install the JDK (*not* the JRE), because the JRE may not
 update your command-line tools properly.  Note that Java is used *only* by the Closure Compiler; none of the PCjs
@@ -218,6 +218,24 @@ client or server components use Java.
 
 Newer versions of the Closure Compiler should work as well, and at some point, a newer version will be checked into the
 project.
+
+### Building with Gulp (and the JavaScript-based Closure Compiler)
+
+I've started dabbling with [Gulp](http://gulpjs.com/), but the current [gulpfile](gulpfile.js) has a long way to
+go before it can replace the [Gruntfile](Gruntfile.js).  At the moment, all Gulp builds is a single emulation module with
+hard-coded settings, using Google's new [JavaScript-based Closure Compiler](https://github.com/google/closure-compiler-js).
+
+Here's what I installed to get Gulp working:
+
+	sudo npm install -g gulp
+	npm install --save-dev gulp gulp-concat gulp-rename gulp-replace gulp-header gulp-foreach gulp-wrapper run-sequence
+	npm install --save-dev google-closure-compiler-js
+
+Running `gulp` should build a new `pcx86.js` in the [versions](/versions/) directory.  However,
+you should consider Gulp support (and anything built with Gulp) as **experimental** until further notice.
+The [JavaScript-based Closure Compiler](https://github.com/google/closure-compiler-js) is in a state of
+flux as well; for example, *output_wrapper* support is documented in their
+[blog](https://developers.googleblog.com/2016/08/closure-compiler-in-javascript.html) but hasn't been implemented yet.
 
 Using PCjs
 ---
@@ -334,8 +352,8 @@ A complete list of command-line options can be found in [server.js](server.js).
 
 ### Client Components
 
-A special command parameter ("gort") can be appended to the URL to request uncompiled client source files, making PCx86
-and C1Pjs much easier to debug, albeit much slower:
+A special command parameter ("gort") can be appended to the URL to request uncompiled client source files, making the
+PCjs emulators much easier to debug, albeit much slower:
 
 	http://localhost:8088/?gort=debug
 

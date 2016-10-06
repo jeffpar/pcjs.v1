@@ -94,9 +94,9 @@ var CPUDef8080 = {
      * Interrupt-related flags (stored in intFlags)
      */
     INTFLAG: {
-        NONE:       0x0000,
-        INTR:       0x00ff,     // mask for 8 bits, representing interrupt levels 0-7
-        HALT:       0x0100      // halt requested; see opHLT()
+        NONE:   0x0000,
+        INTR:   0x00ff,         // mask for 8 bits, representing interrupt levels 0-7
+        HALT:   0x0100          // halt requested; see opHLT()
     },
     /*
      * Opcode definitions

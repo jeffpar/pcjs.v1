@@ -109,7 +109,7 @@ function Computer(parmsComputer, parmsMachine, fSuspended) {
 
     Component.call(this, "Computer", parmsComputer, Computer, Messages.COMPUTER);
 
-    this.flags.fPowered = false;
+    this.flags.powered = false;
 
     this.setMachineParms(parmsMachine);
 
@@ -152,7 +152,7 @@ function Computer(parmsComputer, parmsMachine, fSuspended) {
         Component.error("Unable to find CPU component");
         return;
     }
-    this.dbg = /** @type {Debugger} */ (Component.getComponentByType("Debugger", this.id));
+    this.dbg = /** @type {Debugger6502} */ (Component.getComponentByType("Debugger", this.id));
 
     /*
      * Enumerate all Video components for future updateVideo() calls.
@@ -635,9 +635,9 @@ Computer.prototype.powerOn = function(resume)
  */
 Computer.prototype.powerRestore = function(component, stateComputer, fRepower, fRestore)
 {
-    if (!component.flags.fPowered) {
+    if (!component.flags.powered) {
 
-        component.flags.fPowered = true;
+        component.flags.powered = true;
 
         if (component.powerUp) {
 
@@ -740,12 +740,12 @@ Computer.prototype.donePowerOn = function(aParms)
     var fRepower = (aParms[1] < 0);
     var fRestore = aParms[2];
 
-    if (DEBUG && this.flags.fPowered && this.messageEnabled()) {
+    if (DEBUG && this.flags.powered && this.messageEnabled()) {
         this.printMessage("Computer.donePowerOn(): redundant");
     }
 
     this.fInitialized = true;
-    this.flags.fPowered = true;
+    this.flags.powered = true;
     var controlPower = this.bindings["power"];
     if (controlPower) controlPower.textContent = "Shutdown";
 
@@ -786,22 +786,22 @@ Computer.prototype.donePowerOn = function(aParms)
  */
 Computer.prototype.checkPower = function()
 {
-    if (this.flags.fPowered) return true;
+    if (this.flags.powered) return true;
 
     var component = null, iComponent;
     var aComponents = Component.getComponents(this.id);
     for (iComponent = 0; iComponent < aComponents.length; iComponent++) {
         component = aComponents[iComponent];
-        if (component !== this && !component.flags.fReady) break;
+        if (component !== this && !component.flags.ready) break;
     }
     if (iComponent == aComponents.length) {
         for (iComponent = 0; iComponent < aComponents.length; iComponent++) {
             component = aComponents[iComponent];
-            if (component !== this && !component.flags.fPowered) break;
+            if (component !== this && !component.flags.powered) break;
         }
     }
     if (iComponent == aComponents.length) component = this;
-    var s = "The " + component.type + " component (" + component.id + ") is not " + (!component.flags.fReady? "ready yet" + (component.fnReady? " (waiting for notification)" : "") : "powered yet") + ".";
+    var s = "The " + component.type + " component (" + component.id + ") is not " + (!component.flags.ready? "ready yet" + (component.fnReady? " (waiting for notification)" : "") : "powered yet") + ".";
     web.alertUser(s);
     return false;
 };
@@ -883,7 +883,7 @@ Computer.prototype.powerOff = function(fSave, fShutdown)
         data = this.cpu.powerDown(fSave, fShutdown);
         if (typeof data === "object") stateComputer.set(this.cpu.id, data);
         if (fShutdown) {
-            this.cpu.flags.fPowered = false;
+            this.cpu.flags.powered = false;
             if (data === false) sState = null;
         }
     }
@@ -891,13 +891,13 @@ Computer.prototype.powerOff = function(fSave, fShutdown)
     var aComponents = Component.getComponents(this.id);
     for (var iComponent = 0; iComponent < aComponents.length; iComponent++) {
         var component = aComponents[iComponent];
-        if (component.flags.fPowered) {
+        if (component.flags.powered) {
             if (component.powerDown) {
                 data = component.powerDown(fSave, fShutdown);
                 if (typeof data === "object") stateComputer.set(component.id, data);
             }
             if (fShutdown) {
-                component.flags.fPowered = false;
+                component.flags.powered = false;
                 if (data === false) sState = null;
             }
         }
@@ -950,7 +950,7 @@ Computer.prototype.powerOff = function(fSave, fShutdown)
     }
 
     if (fShutdown) {
-        this.flags.fPowered = false;
+        this.flags.powered = false;
         var controlPower = this.bindings["power"];
         if (controlPower) controlPower.textContent = "Power";
     }
@@ -1321,7 +1321,7 @@ Computer.prototype.storeServerState = function(sUserID, sState, fSync)
 Computer.prototype.onPower = function()
 {
     if (!this.nPowerChange) {
-        if (!this.flags.fPowered) {
+        if (!this.flags.powered) {
             this.wait(this.powerOn);
         } else {
             this.powerOff(false, true);
@@ -1342,7 +1342,7 @@ Computer.prototype.onReset = function()
      * I'm going to start with the presumption that it makes little sense for an "unpowered" computer to be "reset";
      * ditto if the power state is currently being changed.
      */
-    if (!this.flags.fPowered || this.nPowerChange) return;
+    if (!this.flags.powered || this.nPowerChange) return;
 
     /*
      * If this is a "resumable" machine (and it's not using a predefined state), then we overload the reset
@@ -1526,7 +1526,7 @@ Computer.init = function()
             var computer = new Computer(parmsComputer, parmsMachine, true);
 
             if (DEBUG && computer.messageEnabled()) {
-                computer.printMessage("onInit(" + computer.flags.fPowered + ")");
+                computer.printMessage("onInit(" + computer.flags.powered + ")");
             }
 
             /*
@@ -1563,10 +1563,10 @@ Computer.show = function()
         if (computer) {
 
             if (DEBUG && computer.messageEnabled()) {
-                computer.printMessage("onShow(" + computer.fInitialized + "," + computer.flags.fPowered + ")");
+                computer.printMessage("onShow(" + computer.fInitialized + "," + computer.flags.powered + ")");
             }
 
-            if (computer.fInitialized && !computer.flags.fPowered) {
+            if (computer.fInitialized && !computer.flags.powered) {
                 /**
                  * Repower the computer, notifying every component to continue running as-is.
                  */
@@ -1612,10 +1612,10 @@ Computer.exit = function()
         if (computer) {
 
             if (DEBUG && computer.messageEnabled()) {
-                computer.printMessage("onExit(" + computer.flags.fPowered + ")");
+                computer.printMessage("onExit(" + computer.flags.powered + ")");
             }
 
-            if (computer.flags.fPowered) {
+            if (computer.flags.powered) {
                 /**
                  * Power off the computer, giving every component an opportunity to save its state,
                  * but only if 'resume' has been set AND there is no valid resume path (because if a valid resume

@@ -85,7 +85,7 @@ function CPUState8080(parmsCPU)
      * stepCPU() call, but it's good form to do so.
      */
     this.resetCycles();
-    this.flags.fComplete = this.flags.fDebugCheck = false;
+    this.flags.complete = this.flags.debugCheck = false;
 
     /*
      * If there are no live registers to display, then updateStatus() can skip a bit....
@@ -143,7 +143,7 @@ CPUState8080.prototype.initProcessor = function()
  */
 CPUState8080.prototype.reset = function()
 {
-    if (this.flags.fRunning) this.stopCPU();
+    if (this.flags.running) this.stopCPU();
     this.resetRegs();
     this.resetCycles();
     this.clearError();      // clear any fatal error/exception that setError() may have flagged
@@ -961,8 +961,7 @@ CPUState8080.prototype.checkINTR = function()
          * current burst AND that it should not execute any more instructions until checkINTR() indicates
          * that a hardware interrupt has been requested.
          */
-        this.nBurstCycles -= this.nStepCycles;
-        this.nStepCycles = 0;
+        this.endBurst();
         return false;
     }
     return true;
@@ -994,8 +993,7 @@ CPUState8080.prototype.clearINTR = function(nLevel)
 CPUState8080.prototype.requestHALT = function()
 {
     this.intFlags |= CPUDef8080.INTFLAG.HALT;
-    this.nBurstCycles -= this.nStepCycles;
-    this.nStepCycles = 0;
+    this.endBurst();
 };
 
 /**
@@ -1015,8 +1013,7 @@ CPUState8080.prototype.requestINTR = function(nLevel)
 {
     this.intFlags |= (1 << nLevel);
     if (this.getIF()) {
-        this.nBurstCycles -= this.nStepCycles;
-        this.nStepCycles = 0;
+        this.endBurst();
     }
 };
 
@@ -1040,11 +1037,11 @@ CPUState8080.prototype.updateReg = function(sReg, nValue, cch)
 /**
  * updateStatus(fForce)
  *
- * This provides periodic Control Panel updates (eg, a few times per second; see STATUS_UPDATES_PER_SECOND).
+ * This provides periodic Control Panel updates (eg, a few times per second; see YIELDS_PER_STATUS).
  * this is where we take care of any DOM updates (eg, register values) while the CPU is running.
  *
- * Any high-frequency updates should be performed in updateVideo(), which should avoid DOM updates, since updateVideo()
- * can be called up to 60 times per second (see VIDEO_UPDATES_PER_SECOND).
+ * Any high-frequency updates should be performed in updateVideo(), which should avoid DOM updates,
+ * since updateVideo() can be called up to 60 times per second.
  *
  * @this {CPUState8080}
  * @param {boolean} [fForce] (true will display registers even if the CPU is running and "live" registers are not enabled)
@@ -1052,7 +1049,7 @@ CPUState8080.prototype.updateReg = function(sReg, nValue, cch)
 CPUState8080.prototype.updateStatus = function(fForce)
 {
     if (this.cLiveRegs) {
-        if (fForce || !this.flags.fRunning || this.flags.fDisplayLiveRegs) {
+        if (fForce || !this.flags.running || this.flags.displayLiveRegs) {
             this.updateReg("A", this.regA);
             this.updateReg("B", this.regB);
             this.updateReg("C", this.regC);
@@ -1088,9 +1085,6 @@ CPUState8080.prototype.updateStatus = function(fForce)
  * they're all one continuous stream of instructions that can be stepped or run at will.  Moreover,
  * stepping vs. running should never change the behavior of the simulation.
  *
- * As a result, the Debugger's complete independence means you can run other 8086/8088 debuggers
- * (eg, DEBUG) inside the simulation without interference; you can even "debug" them with the Debugger.
- *
  * @this {CPUState8080}
  * @param {number} nMinCycles (0 implies a single-step, and therefore breakpoints should be ignored)
  * @return {number} of cycles executed; 0 indicates a pre-execution condition (ie, an execution breakpoint
@@ -1109,12 +1103,12 @@ CPUState8080.prototype.stepCPU = function(nMinCycles)
      * Debugger is single-stepping (even when performing multiple single-steps), fRunning is never set,
      * so stopCPU() would have no effect as far as the Debugger is concerned.
      */
-    this.flags.fComplete = true;
+    this.flags.complete = true;
 
     /*
      * fDebugCheck is true if we need to "check" every instruction with the Debugger.
      */
-    var fDebugCheck = this.flags.fDebugCheck = (DEBUGGER && this.dbg && this.dbg.checksEnabled());
+    var fDebugCheck = this.flags.debugCheck = (DEBUGGER && this.dbg && this.dbg.checksEnabled());
 
     /*
      * nDebugState is checked only when fDebugCheck is true, and its sole purpose is to tell the first call
@@ -1124,8 +1118,8 @@ CPUState8080.prototype.stepCPU = function(nMinCycles)
      * Once we snap fStarting, we clear it, because technically, we've moved beyond "starting" and have
      * officially "started" now.
      */
-    var nDebugState = (!nMinCycles)? -1 : (this.flags.fStarting? 0 : 1);
-    this.flags.fStarting = false;
+    var nDebugState = (!nMinCycles)? -1 : (this.flags.starting? 0 : 1);
+    this.flags.starting = false;
 
     /*
      * We move the minimum cycle count to nStepCycles (the number of cycles left to step), so that other
@@ -1151,7 +1145,7 @@ CPUState8080.prototype.stepCPU = function(nMinCycles)
         } while (this.nStepCycles > 0);
     }
 
-    return (this.flags.fComplete? this.nBurstCycles - this.nStepCycles : (this.flags.fComplete === undefined? 0 : -1));
+    return (this.flags.complete? this.nBurstCycles - this.nStepCycles : (this.flags.complete === undefined? 0 : -1));
 };
 
 /**

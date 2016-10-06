@@ -34,7 +34,12 @@
 /**
  * @define {string}
  */
-var APPCLASS = "pc8080";       // this @define is the default application class (formerly APPCLASS) to use
+var APPCLASS = "pc6502";        // this @define is the default application class (eg, "pcx86", "c1pjs")
+
+/**
+ * @define {string}
+ */
+var APPNAME = "PC6502";         // this @define is the default application name (eg, "PCx86", "C1Pjs")
 
 /**
  * @define {boolean}
@@ -68,6 +73,26 @@ var BYTEARRAYS = false;
  * See the Memory component for details.
  */
 var TYPEDARRAYS = (typeof ArrayBuffer !== 'undefined');
+
+/*
+ * Combine all the shared globals and machine-specific globals into one machine-specific global object,
+ * which all machine components should start using; eg: "if (PCX86.DEBUG) ..." instead of "if (DEBUG) ...".
+ */
+var PC6502 = {
+    APPCLASS:    APPCLASS,
+    APPNAME:     APPNAME,
+    APPVERSION:  APPVERSION,    // shared
+    BYTEARRAYS:  BYTEARRAYS,
+    COMPILED:    COMPILED,      // shared
+    CSSCLASS:    CSSCLASS,      // shared
+    DEBUG:       DEBUG,         // shared
+    DEBUGGER:    DEBUGGER,
+    MAXDEBUG:    MAXDEBUG,      // shared
+    PRIVATE:     PRIVATE,       // shared
+    TYPEDARRAYS: TYPEDARRAYS,
+    SITEHOST:    SITEHOST,      // shared
+    XMLVERSION:  XMLVERSION     // shared
+};
 
 if (NODE) {
     global.APPCLASS = APPCLASS;

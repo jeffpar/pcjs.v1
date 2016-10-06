@@ -232,7 +232,7 @@ TextOut.prototype.massageLines = function()
             var cBytes = 0, c;
             var sBytes = match[1], sASCIILine = "";
             for (var i = 0; i < sBytes.length; i += 2) {
-                c = str.parseInt(sBytes.substr(i, 2));
+                c = str.parseInt(sBytes.substr(i, 2), 16);
                 if (c != 0x0D && c != 0x0A && (c < 0x20 || c >= 0x7F)) {
                     c = 0x2E;
                     fASCII = false;
@@ -357,7 +357,7 @@ TextOut.prototype.labelTargets = function()
         } else {
             sTarget = sTarget.substr(sShort.length);
         }
-        target = str.parseInt(sTarget);
+        target = str.parseInt(sTarget, 16);
         if (target == undefined) continue;
         if (aTargets.indexOf(target) < 0) {
             aTargets.push(target);
@@ -376,7 +376,7 @@ TextOut.prototype.labelTargets = function()
     for (i = 0; i < this.asLines.length; i++) {
         as = this.getLineParts(i);
         if (!as) continue;
-        addr = str.parseInt(as[4]);
+        addr = str.parseInt(as[4], 16);
         if (addr == undefined) continue;
         j = aTargets.indexOf(addr);
         if (j >= 0) {
@@ -398,7 +398,7 @@ TextOut.prototype.labelTargets = function()
             as = this.getLineParts(i);
             if (!as) continue;
             if (as[3].charAt(0) == chPrefix) {
-                addr = str.parseInt(as[3].substr(1));
+                addr = str.parseInt(as[3].substr(1), 16);
                 if (aTargets.indexOf(addr) >= 0) {
                     /*
                      * Instead of putting back the original target address, let's just convert the line to a "db"

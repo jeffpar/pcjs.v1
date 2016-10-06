@@ -136,12 +136,13 @@ net.propagateParms = function(sURL, req)
 /**
  * encodeURL(sURL, req, fDebug)
  *
- * Used to encodes any URLs presented on the current page, using this 3-step (um, 4-step) process:
+ * Used to encodes any URLs presented on the current page, using this, um, simple 5-step process:
  *
  *  1) Replace any backslashes with slashes, in case the URL was derived from a file system path
  *  2) Remap links that begin with "archive/" to the corresponding URL at "http://archive.pcjs.org/"
- *  3) Transform any "htmlspecialchars" into the corresponding entities, using encodeURI()
- *  4) Massage the result with net.propagateParms(), so that any special parameters are passed along
+ *  3) Use decodeURI() to eliminate escape sequences (like "%20") so that encodeURI() won't re-encode the "%"
+ *  4) Use encodeURI() to transform all "htmlspecialchars" and reserved characters into the appropriate sequences
+ *  5) Massage the result with net.propagateParms(), so that any special parameters are passed along
  *
  * @param {string} sURL
  * @param {Object} req is the web server's (ie, Express) request object, if any
@@ -158,7 +159,12 @@ net.encodeURL = function(sURL, req, fDebug)
                 sURL = "http://archive.pcjs.org" + sURL.replace("/archive/", "/");
             }
         }
-        return net.propagateParms(encodeURI(sURL), req);
+        /*
+         * If the incoming URL already contains URI-style escape sequences (eg, "%20" instead of spaces),
+         * calling decodeURI() first will eliminate them, preventing encodeURI() from converting leading
+         * "%" into "%25" and corrupting sequences like "%20" by turning them into "%2520".
+         */
+        return net.propagateParms(encodeURI(decodeURI(sURL)), req);
     }
     return sURL;
 };
