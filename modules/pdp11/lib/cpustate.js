@@ -205,9 +205,7 @@ CPUStatePDP11.prototype.resetRegs = function()
     this.mmuMask = [            // mask to control I&D access for each mode
         0x7, 0x7, 0x7, 0x7
     ];
-    /**
-     * @type {Array.<InterruptEvent>}
-     */
+    /** @type {Array.<InterruptEvent>} */
     this.interruptQueue = [];
     this.opFlags |= PDP11.OPFLAG.INTQ;
     this.initMemoryAccess();
@@ -617,12 +615,30 @@ CPUStatePDP11.prototype.interrupt = function(delay, priority, vector, callback)
             }
             delay -= this.interruptQueue[i].delay;
         }
-        this.interruptQueue.splice(i + 1, 0, {
-            "delay": delay,
-            "priority": (priority << 5) & 0xe0,
-            "vector": vector,
-            "callback": callback
-        });
+        /*
+         * NOTE regarding a Google Closure Compiler "bug": if an InterruptEvent is inserted into the
+         * interruptQueue with the named properties below, they will never be seen by the rest of the
+         * code, because the compiler renames all other property references EXCEPT these.
+         *
+         *      this.interruptQueue.splice(i + 1, 0, {
+         *          "delay": delay,
+         *          "priority": (priority << 5) & 0xe0,
+         *          "vector": vector,
+         *          "callback": callback
+         *      });
+         *
+         * Perhaps if the inlined object had been explicitly @typed, that wouldn't have happened, but
+         * I'm playing it safe now: I've taken the object out-of-line, removed the quoted property names,
+         * and explicitly typed it.  The compiler re-inlines the object with correctly renamed properties.
+         */
+        /** @type {InterruptEvent} */
+        var interruptEvent = {
+            delay: delay,
+            priority: (priority << 5) & 0xe0,
+            vector: vector,
+            callback: callback
+        };
+        this.interruptQueue.splice(i + 1, 0, interruptEvent);
     }
     this.opFlags |= PDP11.OPFLAG.INTQ;
 };

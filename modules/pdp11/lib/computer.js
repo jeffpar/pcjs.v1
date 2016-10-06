@@ -183,7 +183,7 @@ function ComputerPDP11(parmsComputer, parmsMachine, fSuspended) {
         }
     }
 
-    this.println(PDP11.APPNAME + " v" + (XMLVERSION || PDP11.APPVERSION) + "\n" + COPYRIGHT + "\n" + LICENSE);
+    this.println(PDP11.APPNAME + " v" + PDP11.APPVERSION + "\n" + COPYRIGHT + "\n" + LICENSE);
 
     this.println("Portions adapted from the PDP-11/70 Emulator v1.3 by Paul Nankervis <paulnank@hotmail.com>");
 
@@ -1458,7 +1458,7 @@ ComputerPDP11.init = function()
     /*
      * In non-COMPILED builds, embedMachine() may have set XMLVERSION.
      */
-    if (!COMPILED && PDP11.XMLVERSION) PDP11.APPVERSION = PDP11.XMLVERSION;
+    if (!COMPILED && XMLVERSION) PDP11.APPVERSION = XMLVERSION;
 
     var aeMachines = Component.getElementsByClass(document, PDP11.APPCLASS + "-machine");
 

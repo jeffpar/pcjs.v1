@@ -3,10 +3,11 @@
 title: "PCjs Machines"
 email: Jeff@pcjs.org
 description: >
-  PCjs: Home of the original IBM PC emulator in a browser.
-  Classic computer simulations in JavaScript, including the IBM PC and other x86-based machines, 6502-based
-  machines such as the Ohio Scientific Challenger 1P, and 8080-based machines such as Space Invaders and the DEC VT100 Terminal. 
-  Includes an archive of historical PC software and publications.
+  Welcome to PCjs, home of the original IBM PC in a web browser.
+  PCjs provides a variety of computer emulators written in JavaScript, including PCx86 for x86-based machines
+  (up through the 80386), C1Pjs for the 6502-based Ohio Scientific Challenger 1P, PC8080 for 8080-based machines
+  such as Space Invaders and the DEC VT100 Terminal, and PDPjs for PDP-11 machines like the 11/45 and 11/70.
+  PCjs also provides an archive of selected historical PC software, publications, and reference materials.
 baseurl: ""                 # "/pcjs" when using http://jeffpar.github.io or "" when using http://www.pcjs.org 
 url: "http://www.pcjs.org"  # "http://jeffpar.github.io" or "http://www.pcjs.org"
 twitter_username: jeffpar
@@ -18,7 +19,7 @@ encoding: UTF-8
 
 # Build settings
 
-exclude: ["index.html", "**/index.html", "**/archive", "**/c64", "logs", "node_modules", "projects", "**/private", "src", "**/src", "tmp", "**/tmp", "videos", "web", ".git", ".idea"]
+exclude: ["index.html", "**/index.html", "**/archive", "**/ecp", "**/c64", "logs", "node_modules", "projects", "**/private", "**/rt11", "src", "**/src", "tmp", "**/tmp", "videos", "web", ".git", ".idea"]
 markdown: kramdown
 kramdown:
   input: GFM
@@ -32,7 +33,7 @@ gems:
 
 pcjs:
   domain: pcjs.org    # whereas site.url is used for linking purposes, site.pcjs.domain is used for display purposes
-  version: 1.24.1     # IMPORTANT: keep pcjs.version in sync with package.json:version
+  version: 1.30.0     # IMPORTANT: keep pcjs.version in sync with package.json:version
   compiled: true      # by default, the compiled pcjs.version scripts will be used (eg, pcx86.js or pcx86-dbg.js)
   c1p_scripts:        # if pcjs.compiled is false, the following scripts will be included instead, in the order listed
     - /modules/shared/lib/defines.js
@@ -127,3 +128,31 @@ pcjs:
     - /modules/shared/lib/state.js
     - /modules/shared/lib/embed.js
     - /modules/shared/lib/save.js
+  pdp11_scripts:
+    - /modules/shared/lib/defines.js
+    - /modules/shared/lib/dumpapi.js
+    - /modules/shared/lib/reportapi.js
+    - /modules/shared/lib/userapi.js
+    - /modules/shared/lib/keys.js
+    - /modules/shared/lib/strlib.js
+    - /modules/shared/lib/usrlib.js
+    - /modules/shared/lib/weblib.js
+    - /modules/shared/lib/component.js
+    - /modules/pdp11/lib/defines.js
+    - /modules/pdp11/lib/messages.js
+    - /modules/pdp11/lib/panel.js
+    - /modules/pdp11/lib/bus.js
+    - /modules/pdp11/lib/device.js
+    - /modules/pdp11/lib/memory.js
+    - /modules/pdp11/lib/cpu.js
+    - /modules/pdp11/lib/cpustate.js
+    - /modules/pdp11/lib/cpuops.js
+    - /modules/pdp11/lib/rom.js
+    - /modules/pdp11/lib/ram.js
+    - /modules/pdp11/lib/keyboard.js
+    - /modules/pdp11/lib/serialport.js
+    - /modules/shared/lib/debugger.js
+    - /modules/pdp11/lib/debugger.js
+    - /modules/pdp11/lib/computer.js
+    - /modules/shared/lib/state.js
+    - /modules/shared/lib/embed.js
