@@ -5,7 +5,7 @@ permalink: /modules/pdp11/
 ---
 
 PDP-11 Machine Emulation Module (PDPjs)
-=========================================
+=======================================
 
 Overview
 ---
