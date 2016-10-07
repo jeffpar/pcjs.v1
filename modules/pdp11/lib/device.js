@@ -260,6 +260,327 @@ DevicePDP11.prototype.writeMMR0 = function(data, addr)
 };
 
 /**
+ * readSISDR(addr)
+ *
+ * @this {DevicePDP11}
+ * @param {number} addr (eg, PDP11.UNIBUS.SISDR0--SISDR7 or 172200--172216)
+ * @return {number}
+ */
+DevicePDP11.prototype.readSISDR = function(addr)
+{
+    var reg = (addr >> 1) & 7;
+    return this.cpu.mmuPDR[1][reg];
+};
+
+/**
+ * writeSISDR(data, addr)
+ *
+ * @this {DevicePDP11}
+ * @param {number} data
+ * @param {number} addr (eg, PDP11.UNIBUS.SISDR0--SISDR7 or 172200--172216)
+ */
+DevicePDP11.prototype.writeSISDR = function(data, addr)
+{
+    var reg = (addr >> 1) & 7;
+    this.cpu.mmuPDR[1][reg] = data & 0xff0f;
+};
+
+/**
+ * readSDSDR(addr)
+ *
+ * @this {DevicePDP11}
+ * @param {number} addr (eg, PDP11.UNIBUS.SDSDR0--SDSDR7 or 172220--172236)
+ * @return {number}
+ */
+DevicePDP11.prototype.readSDSDR = function(addr)
+{
+    var reg = ((addr >> 1) & 7) + 8;
+    return this.cpu.mmuPDR[1][reg];
+};
+
+/**
+ * writeSDSDR(data, addr)
+ *
+ * @this {DevicePDP11}
+ * @param {number} data
+ * @param {number} addr (eg, PDP11.UNIBUS.SDSDR0--SDSDR7 or 172220--172236)
+ */
+DevicePDP11.prototype.writeSDSDR = function(data, addr)
+{
+    var reg = ((addr >> 1) & 7) + 8;
+    this.cpu.mmuPDR[1][reg] = data & 0xff0f;
+};
+
+/**
+ * readSISAR(addr)
+ *
+ * @this {DevicePDP11}
+ * @param {number} addr (eg, PDP11.UNIBUS.SISAR0--SISAR7 or 172240--172256)
+ * @return {number}
+ */
+DevicePDP11.prototype.readSISAR = function(addr)
+{
+    var reg = (addr >> 1) & 7;
+    return this.cpu.mmuPAR[1][reg];
+};
+
+/**
+ * writeSISAR(data, addr)
+ *
+ * @this {DevicePDP11}
+ * @param {number} data
+ * @param {number} addr (eg, PDP11.UNIBUS.SISAR0--SISAR7 or 172240--172256)
+ */
+DevicePDP11.prototype.writeSISAR = function(data, addr)
+{
+    var reg = (addr >> 1) & 7;
+    this.cpu.mmuPAR[1][reg] = data;
+    this.cpu.mmuPDR[1][reg] &= 0xff0f;
+
+};
+
+/**
+ * readSDSAR(addr)
+ *
+ * @this {DevicePDP11}
+ * @param {number} addr (eg, PDP11.UNIBUS.SDSAR0--SDSAR7 or 172260--172276)
+ * @return {number}
+ */
+DevicePDP11.prototype.readSDSAR = function(addr)
+{
+    var reg = ((addr >> 1) & 7) + 8;
+    return this.cpu.mmuPAR[1][reg];
+};
+
+/**
+ * writeSDSAR(data, addr)
+ *
+ * @this {DevicePDP11}
+ * @param {number} data
+ * @param {number} addr (eg, PDP11.UNIBUS.SDSAR0--SDSAR7 or 172260--172276)
+ */
+DevicePDP11.prototype.writeSDSAR = function(data, addr)
+{
+    var reg = ((addr >> 1) & 7) + 8;
+    this.cpu.mmuPAR[1][reg] = data;
+    this.cpu.mmuPDR[1][reg] &= 0xff0f;
+};
+
+/**
+ * readKISDR(addr)
+ *
+ * @this {DevicePDP11}
+ * @param {number} addr (eg, PDP11.UNIBUS.KISDR0--KISDR7 or 172300--172316)
+ * @return {number}
+ */
+DevicePDP11.prototype.readKISDR = function(addr)
+{
+    var reg = (addr >> 1) & 7;
+    return this.cpu.mmuPDR[0][reg];
+};
+
+/**
+ * writeKISDR(data, addr)
+ *
+ * @this {DevicePDP11}
+ * @param {number} data
+ * @param {number} addr (eg, PDP11.UNIBUS.KISDR0--KISDR7 or 172300--172316)
+ */
+DevicePDP11.prototype.writeKISDR = function(data, addr)
+{
+    var reg = (addr >> 1) & 7;
+    this.cpu.mmuPDR[0][reg] = data & 0xff0f;
+};
+
+/**
+ * readKDSDR(addr)
+ *
+ * @this {DevicePDP11}
+ * @param {number} addr (eg, PDP11.UNIBUS.KDSDR0--KDSDR7 or 172320--172336)
+ * @return {number}
+ */
+DevicePDP11.prototype.readKDSDR = function(addr)
+{
+    var reg = ((addr >> 1) & 7) + 8;
+    return this.cpu.mmuPDR[0][reg];
+};
+
+/**
+ * writeKDSDR(data, addr)
+ *
+ * @this {DevicePDP11}
+ * @param {number} data
+ * @param {number} addr (eg, PDP11.UNIBUS.KDSDR0--KDSDR7 or 172320--172336)
+ */
+DevicePDP11.prototype.writeKDSDR = function(data, addr)
+{
+    var reg = ((addr >> 1) & 7) + 8;
+    this.cpu.mmuPDR[0][reg] = data & 0xff0f;
+};
+
+/**
+ * readKISAR(addr)
+ *
+ * @this {DevicePDP11}
+ * @param {number} addr (eg, PDP11.UNIBUS.KISAR0--KISAR7 or 172340--172356)
+ * @return {number}
+ */
+DevicePDP11.prototype.readKISAR = function(addr)
+{
+    var reg = (addr >> 1) & 7;
+    return this.cpu.mmuPAR[0][reg];
+};
+
+/**
+ * writeKISAR(data, addr)
+ *
+ * @this {DevicePDP11}
+ * @param {number} data
+ * @param {number} addr (eg, PDP11.UNIBUS.KISAR0--KISAR7 or 172340--172356)
+ */
+DevicePDP11.prototype.writeKISAR = function(data, addr)
+{
+    var reg = (addr >> 1) & 7;
+    this.cpu.mmuPAR[0][reg] = data;
+    this.cpu.mmuPDR[0][reg] &= 0xff0f;
+
+};
+
+/**
+ * readKDSAR(addr)
+ *
+ * @this {DevicePDP11}
+ * @param {number} addr (eg, PDP11.UNIBUS.KDSAR0--KDSAR7 or 172360--172376)
+ * @return {number}
+ */
+DevicePDP11.prototype.readKDSAR = function(addr)
+{
+    var reg = ((addr >> 1) & 7) + 8;
+    return this.cpu.mmuPAR[0][reg];
+};
+
+/**
+ * writeKDSAR(data, addr)
+ *
+ * @this {DevicePDP11}
+ * @param {number} data
+ * @param {number} addr (eg, PDP11.UNIBUS.KDSAR0--KDSAR7 or 172360--172376)
+ */
+DevicePDP11.prototype.writeKDSAR = function(data, addr)
+{
+    var reg = ((addr >> 1) & 7) + 8;
+    this.cpu.mmuPAR[0][reg] = data;
+    this.cpu.mmuPDR[0][reg] &= 0xff0f;
+};
+
+/**
+ * readUISDR(addr)
+ *
+ * @this {DevicePDP11}
+ * @param {number} addr (eg, PDP11.UNIBUS.UISDR0--UISDR7 or 177600--177616)
+ * @return {number}
+ */
+DevicePDP11.prototype.readUISDR = function(addr)
+{
+    var reg = (addr >> 1) & 7;
+    return this.cpu.mmuPDR[3][reg];
+};
+
+/**
+ * writeUISDR(data, addr)
+ *
+ * @this {DevicePDP11}
+ * @param {number} data
+ * @param {number} addr (eg, PDP11.UNIBUS.UISDR0--UISDR7 or 177600--177616)
+ */
+DevicePDP11.prototype.writeUISDR = function(data, addr)
+{
+    var reg = (addr >> 1) & 7;
+    this.cpu.mmuPDR[3][reg] = data & 0xff0f;
+};
+
+/**
+ * readUDSDR(addr)
+ *
+ * @this {DevicePDP11}
+ * @param {number} addr (eg, PDP11.UNIBUS.UDSDR0--UDSDR7 or 177620--177636)
+ * @return {number}
+ */
+DevicePDP11.prototype.readUDSDR = function(addr)
+{
+    var reg = ((addr >> 1) & 7) + 8;
+    return this.cpu.mmuPDR[3][reg];
+};
+
+/**
+ * writeUDSDR(data, addr)
+ *
+ * @this {DevicePDP11}
+ * @param {number} data
+ * @param {number} addr (eg, PDP11.UNIBUS.UDSDR0--UDSDR7 or 177620--177636)
+ */
+DevicePDP11.prototype.writeUDSDR = function(data, addr)
+{
+    var reg = ((addr >> 1) & 7) + 8;
+    this.cpu.mmuPDR[3][reg] = data & 0xff0f;
+};
+
+/**
+ * readUISAR(addr)
+ *
+ * @this {DevicePDP11}
+ * @param {number} addr (eg, PDP11.UNIBUS.UISAR0--UISAR7 or 177640--177656)
+ * @return {number}
+ */
+DevicePDP11.prototype.readUISAR = function(addr)
+{
+    var reg = (addr >> 1) & 7;
+    return this.cpu.mmuPAR[3][reg];
+};
+
+/**
+ * writeUISAR(data, addr)
+ *
+ * @this {DevicePDP11}
+ * @param {number} data
+ * @param {number} addr (eg, PDP11.UNIBUS.UISAR0--UISAR7 or 177640--177656)
+ */
+DevicePDP11.prototype.writeUISAR = function(data, addr)
+{
+    var reg = (addr >> 1) & 7;
+    this.cpu.mmuPAR[3][reg] = data;
+    this.cpu.mmuPDR[3][reg] &= 0xff0f;
+
+};
+
+/**
+ * readUDSAR(addr)
+ *
+ * @this {DevicePDP11}
+ * @param {number} addr (eg, PDP11.UNIBUS.UDSAR0--UDSAR7 or 177660--177676)
+ * @return {number}
+ */
+DevicePDP11.prototype.readUDSAR = function(addr)
+{
+    var reg = ((addr >> 1) & 7) + 8;
+    return this.cpu.mmuPAR[3][reg];
+};
+
+/**
+ * writeUDSAR(data, addr)
+ *
+ * @this {DevicePDP11}
+ * @param {number} data
+ * @param {number} addr (eg, PDP11.UNIBUS.UDSAR0--UDSAR7 or 177660--177676)
+ */
+DevicePDP11.prototype.writeUDSAR = function(data, addr)
+{
+    var reg = ((addr >> 1) & 7) + 8;
+    this.cpu.mmuPAR[3][reg] = data;
+    this.cpu.mmuPDR[3][reg] &= 0xff0f;
+};
+
+/**
  * readPSW(addr)
  *
  * @this {DevicePDP11}
@@ -1466,10 +1787,118 @@ DevicePDP11.prototype.access = function(physicalAddress, data, byteFlag)
  * ES6 ALERT: As you can see below, I've finally started using computed property names.
  */
 DevicePDP11.UNIBUS_IOTABLE = {
+    [PDP11.UNIBUS.SISDR0]:  /* 172200 */    [null, null, DevicePDP11.prototype.readSISDR,   DevicePDP11.prototype.writeSISDR,   "SISDR"],
+    [PDP11.UNIBUS.SDSDR0]:  /* 172220 */    [null, null, DevicePDP11.prototype.readSDSDR,   DevicePDP11.prototype.writeSDSDR,   "SDSDR"],
+    [PDP11.UNIBUS.SISAR0]:  /* 172240 */    [null, null, DevicePDP11.prototype.readSISAR,   DevicePDP11.prototype.writeSISAR,   "SISAR"],
+    [PDP11.UNIBUS.SDSAR0]:  /* 172260 */    [null, null, DevicePDP11.prototype.readSDSAR,   DevicePDP11.prototype.writeSDSAR,   "SDSAR"],
+    [PDP11.UNIBUS.KISDR0]:  /* 172300 */    [null, null, DevicePDP11.prototype.readKISDR,   DevicePDP11.prototype.writeKISDR,   "KISDR"],
+    [PDP11.UNIBUS.KDSDR0]:  /* 172320 */    [null, null, DevicePDP11.prototype.readKDSDR,   DevicePDP11.prototype.writeKDSDR,   "KDSDR"],
+    [PDP11.UNIBUS.KISAR0]:  /* 172340 */    [null, null, DevicePDP11.prototype.readKISAR,   DevicePDP11.prototype.writeKISAR,   "KISAR"],
+    [PDP11.UNIBUS.KDSAR0]:  /* 172360 */    [null, null, DevicePDP11.prototype.readKDSAR,   DevicePDP11.prototype.writeKDSAR,   "KDSAR"],
     [PDP11.UNIBUS.LKS]:     /* 177546 */    [null, null, DevicePDP11.prototype.readLKS,     DevicePDP11.prototype.writeLKS,     "LKS"],
     [PDP11.UNIBUS.MMR0]:    /* 177572 */    [null, null, DevicePDP11.prototype.readMMR0,    DevicePDP11.prototype.writeMMR0,    "MMR0"],
-    [PDP11.UNIBUS.PSW]:     /* 177776 */    [null, null, DevicePDP11.prototype.readPSW,     DevicePDP11.prototype.writePSW,     "PSW"]
+    [PDP11.UNIBUS.UISDR0]:  /* 177600 */    [null, null, DevicePDP11.prototype.readUISDR,   DevicePDP11.prototype.writeUISDR,   "UISDR"],
+    [PDP11.UNIBUS.UDSDR0]:  /* 177620 */    [null, null, DevicePDP11.prototype.readUDSDR,   DevicePDP11.prototype.writeUDSDR,   "UDSDR"],
+    [PDP11.UNIBUS.UISAR0]:  /* 177640 */    [null, null, DevicePDP11.prototype.readUISAR,   DevicePDP11.prototype.writeUISAR,   "UISAR"],
+    [PDP11.UNIBUS.UDSAR0]:  /* 177660 */    [null, null, DevicePDP11.prototype.readUDSAR,   DevicePDP11.prototype.writeUDSAR,   "UDSAR"],
+    [PDP11.UNIBUS.PSW]:     /* 177776 */    [null, null, DevicePDP11.prototype.readPSW,     DevicePDP11.prototype.writePSW,     "PSW"],
 };
+
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SISDR1] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SISDR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SISDR2] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SISDR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SISDR3] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SISDR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SISDR4] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SISDR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SISDR5] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SISDR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SISDR6] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SISDR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SISDR7] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SISDR0];
+
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SDSDR1] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SDSDR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SDSDR2] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SDSDR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SDSDR3] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SDSDR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SDSDR4] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SDSDR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SDSDR5] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SDSDR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SDSDR6] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SDSDR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SDSDR7] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SDSDR0];
+
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SISAR1] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SISAR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SISAR2] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SISAR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SISAR3] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SISAR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SISAR4] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SISAR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SISAR5] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SISAR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SISAR6] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SISAR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SISAR7] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SISAR0];
+
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SDSAR1] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SDSAR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SDSAR2] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SDSAR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SDSAR3] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SDSAR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SDSAR4] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SDSAR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SDSAR5] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SDSAR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SDSAR6] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SDSAR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SDSAR7] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SDSAR0];
+
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KISDR1] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KISDR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KISDR2] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KISDR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KISDR3] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KISDR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KISDR4] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KISDR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KISDR5] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KISDR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KISDR6] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KISDR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KISDR7] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KISDR0];
+
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KDSDR1] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KDSDR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KDSDR2] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KDSDR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KDSDR3] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KDSDR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KDSDR4] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KDSDR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KDSDR5] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KDSDR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KDSDR6] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KDSDR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KDSDR7] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KDSDR0];
+
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KISAR1] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KISAR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KISAR2] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KISAR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KISAR3] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KISAR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KISAR4] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KISAR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KISAR5] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KISAR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KISAR6] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KISAR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KISAR7] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KISAR0];
+
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KDSAR1] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KDSAR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KDSAR2] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KDSAR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KDSAR3] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KDSAR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KDSAR4] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KDSAR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KDSAR5] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KDSAR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KDSAR6] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KDSAR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KDSAR7] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KDSAR0];
+
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UISDR1] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UISDR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UISDR2] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UISDR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UISDR3] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UISDR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UISDR4] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UISDR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UISDR5] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UISDR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UISDR6] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UISDR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UISDR7] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UISDR0];
+
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UDSDR1] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UDSDR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UDSDR2] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UDSDR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UDSDR3] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UDSDR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UDSDR4] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UDSDR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UDSDR5] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UDSDR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UDSDR6] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UDSDR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UDSDR7] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UDSDR0];
+
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UISAR1] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UISAR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UISAR2] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UISAR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UISAR3] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UISAR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UISAR4] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UISAR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UISAR5] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UISAR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UISAR6] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UISAR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UISAR7] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UISAR0];
+
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UDSAR1] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UDSAR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UDSAR2] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UDSAR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UDSAR3] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UDSAR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UDSAR4] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UDSAR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UDSAR5] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UDSAR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UDSAR6] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UDSAR0];
+DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UDSAR7] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UDSAR0];
 
 /**
  * DevicePDP11.init()
