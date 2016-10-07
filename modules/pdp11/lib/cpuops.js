@@ -1101,7 +1101,7 @@ PDP11.opHALT = function(opCode)
         this.regErr |= PDP11.CPUERR.BADHALT;
         this.trap(PDP11.TRAP.BUS_ERROR, PDP11.REASON.HALT);
     } else {
-        this.endBurst();
+        this.stopCPU();
     }
     this.nStepCycles -= 7;
 };

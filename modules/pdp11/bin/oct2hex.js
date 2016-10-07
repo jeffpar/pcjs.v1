@@ -35,7 +35,7 @@ try {
     var asLines = sText.split('\n');
     for (var iLine = 0; iLine < asLines.length; iLine++) {
         var sLine = asLines[iLine];
-        var match, re = /(^|[^0-9a-z_-]*)(0[0-7]+)([^0-9a-z_,]*|$)/gi;
+        var match, re = /(^|[^0-9a-z_-])(0[0-7]+)([^0-9a-z_]|$)/gi;
         var iComment = sLine.indexOf("//");
         while (match = re.exec(sLine)) {
             if (iComment >= 0 && match.index > iComment) break;
@@ -44,14 +44,15 @@ try {
                 console.log("found negative octal value (" + match[2] + "), skipping");
                 continue;
             }
-            var sReplace = match[1] + "0x" + ("0000" + n.toString(16).toUpperCase()).substr(-4) + match[3] + " /*" + match[2] + "*/";
+            var cch = (n <= 255? 2 : (n <= 65535? 4 : 8));
+            var sReplace = match[1] + "0x" + ("00000000" + n.toString(16).toUpperCase()).substr(-cch) + match[3] + " /*" + match[2] + "*/";
             sLine = sLine.substr(0, match.index) + sReplace + sLine.substr(match.index + match[0].length);
             re.lastIndex = match.index + sReplace.length;
             asLines[iLine] = sLine;
         }
     }
     sText = "";
-    for (var iLine = 0; iLine < asLines.length; iLine++) {
+    for (iLine = 0; iLine < asLines.length; iLine++) {
         if (sText) sText += '\n';
         sText += asLines[iLine];
     }

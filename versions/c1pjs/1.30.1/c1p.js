@@ -1,4 +1,443 @@
-(function(){var e;function p(a,b,c){var d="";b?8<b&&(b=8):b=a&-65536?8:4;if(null==a||isNaN(a))for(;0<b--;)d="?"+d;else for(;0<b--;){var f=a&15,f=f+(0<=f&&9>=f?48:55),d=String.fromCharCode(f)+d;a>>=4}return(c?"0x":"")+d}function aa(a){var b=a,c=a.lastIndexOf("/");0<=c&&(b=a.substr(c+1));c=b.indexOf("&");0<c&&(b=b.substr(0,c));return b}function ba(a){var b="",c=a.lastIndexOf(".");0<=c&&(b=a.substr(c+1).toLowerCase());return b}var ca={"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"};
+(function(){/*
+ Jeff Parsons 2012-2016
+
+ This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
+
+ PCjs is free software: you can redistribute it and/or modify it under the terms of the
+ GNU General Public License as published by the Free Software Foundation, either version 3
+ of the License, or (at your option) any later version.
+
+ PCjs is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License along with PCjs.  If not,
+ see <http://www.gnu.org/licenses/gpl.html>.
+
+ You are required to include the above copyright notice in every source code file of every
+ copy or modified version of this work, and to display that copyright notice on every screen
+ that loads or runs any version of this software (see COPYRIGHT in /modules/shared/lib/defines.js).
+
+ Some PCjs files also attempt to load external resource files, such as character-image files,
+ ROM files, and disk image files. Those external resource files are not considered part of PCjs
+ for purposes of the GNU General Public License, and the author does not claim any copyright
+ as to their contents.
+ Jeff Parsons 2012-2016
+
+ This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
+
+ PCjs is free software: you can redistribute it and/or modify it under the terms of the
+ GNU General Public License as published by the Free Software Foundation, either version 3
+ of the License, or (at your option) any later version.
+
+ PCjs is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License along with PCjs.  If not,
+ see <http://www.gnu.org/licenses/gpl.html>.
+
+ You are required to include the above copyright notice in every source code file of every
+ copy or modified version of this work, and to display that copyright notice on every screen
+ that loads or runs any version of this software (see COPYRIGHT in /modules/shared/lib/defines.js).
+
+ Some PCjs files also attempt to load external resource files, such as character-image files,
+ ROM files, and disk image files. Those external resource files are not considered part of PCjs
+ for purposes of the GNU General Public License, and the author does not claim any copyright
+ as to their contents.
+ Jeff Parsons 2012-2016
+
+ This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
+
+ PCjs is free software: you can redistribute it and/or modify it under the terms of the
+ GNU General Public License as published by the Free Software Foundation, either version 3
+ of the License, or (at your option) any later version.
+
+ PCjs is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License along with PCjs.  If not,
+ see <http://www.gnu.org/licenses/gpl.html>.
+
+ You are required to include the above copyright notice in every source code file of every
+ copy or modified version of this work, and to display that copyright notice on every screen
+ that loads or runs any version of this software (see COPYRIGHT in /modules/shared/lib/defines.js).
+
+ Some PCjs files also attempt to load external resource files, such as character-image files,
+ ROM files, and disk image files. Those external resource files are not considered part of PCjs
+ for purposes of the GNU General Public License, and the author does not claim any copyright
+ as to their contents.
+ Jeff Parsons 2012-2016
+
+ This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
+
+ PCjs is free software: you can redistribute it and/or modify it under the terms of the
+ GNU General Public License as published by the Free Software Foundation, either version 3
+ of the License, or (at your option) any later version.
+
+ PCjs is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License along with PCjs.  If not,
+ see <http://www.gnu.org/licenses/gpl.html>.
+
+ You are required to include the above copyright notice in every source code file of every
+ copy or modified version of this work, and to display that copyright notice on every screen
+ that loads or runs any version of this software (see COPYRIGHT in /modules/shared/lib/defines.js).
+
+ Some PCjs files also attempt to load external resource files, such as character-image files,
+ ROM files, and disk image files. Those external resource files are not considered part of PCjs
+ for purposes of the GNU General Public License, and the author does not claim any copyright
+ as to their contents.
+ Jeff Parsons 2012-2016
+
+ This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
+
+ PCjs is free software: you can redistribute it and/or modify it under the terms of the
+ GNU General Public License as published by the Free Software Foundation, either version 3
+ of the License, or (at your option) any later version.
+
+ PCjs is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License along with PCjs.  If not,
+ see <http://www.gnu.org/licenses/gpl.html>.
+
+ You are required to include the above copyright notice in every source code file of every
+ copy or modified version of this work, and to display that copyright notice on every screen
+ that loads or runs any version of this software (see COPYRIGHT in /modules/shared/lib/defines.js).
+
+ Some PCjs files also attempt to load external resource files, such as character-image files,
+ ROM files, and disk image files. Those external resource files are not considered part of PCjs
+ for purposes of the GNU General Public License, and the author does not claim any copyright
+ as to their contents.
+ Jeff Parsons 2012-2016
+
+ This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
+
+ PCjs is free software: you can redistribute it and/or modify it under the terms of the
+ GNU General Public License as published by the Free Software Foundation, either version 3
+ of the License, or (at your option) any later version.
+
+ PCjs is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License along with PCjs.  If not,
+ see <http://www.gnu.org/licenses/gpl.html>.
+
+ You are required to include the above copyright notice in every source code file of every
+ copy or modified version of this work, and to display that copyright notice on every screen
+ that loads or runs any version of this software (see COPYRIGHT in /modules/shared/lib/defines.js).
+
+ Some PCjs files also attempt to load external resource files, such as character-image files,
+ ROM files, and disk image files. Those external resource files are not considered part of PCjs
+ for purposes of the GNU General Public License, and the author does not claim any copyright
+ as to their contents.
+ Jeff Parsons 2012-2016
+
+ This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
+
+ PCjs is free software: you can redistribute it and/or modify it under the terms of the
+ GNU General Public License as published by the Free Software Foundation, either version 3
+ of the License, or (at your option) any later version.
+
+ PCjs is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License along with PCjs.  If not,
+ see <http://www.gnu.org/licenses/gpl.html>.
+
+ You are required to include the above copyright notice in every source code file of every
+ copy or modified version of this work, and to display that copyright notice on every screen
+ that loads or runs any version of this software (see COPYRIGHT in /modules/shared/lib/defines.js).
+
+ Some PCjs files also attempt to load external resource files, such as character-image files,
+ ROM files, and disk image files. Those external resource files are not considered part of PCjs
+ for purposes of the GNU General Public License, and the author does not claim any copyright
+ as to their contents.
+ Jeff Parsons 2012-2016
+
+ This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
+
+ PCjs is free software: you can redistribute it and/or modify it under the terms of the
+ GNU General Public License as published by the Free Software Foundation, either version 3
+ of the License, or (at your option) any later version.
+
+ PCjs is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License along with PCjs.  If not,
+ see <http://www.gnu.org/licenses/gpl.html>.
+
+ You are required to include the above copyright notice in every source code file of every
+ copy or modified version of this work, and to display that copyright notice on every screen
+ that loads or runs any version of this software (see COPYRIGHT in /modules/shared/lib/defines.js).
+
+ Some PCjs files also attempt to load external resource files, such as character-image files,
+ ROM files, and disk image files. Those external resource files are not considered part of PCjs
+ for purposes of the GNU General Public License, and the author does not claim any copyright
+ as to their contents.
+ Jeff Parsons 2012-2016
+
+ This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
+
+ PCjs is free software: you can redistribute it and/or modify it under the terms of the
+ GNU General Public License as published by the Free Software Foundation, either version 3
+ of the License, or (at your option) any later version.
+
+ PCjs is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License along with PCjs.  If not,
+ see <http://www.gnu.org/licenses/gpl.html>.
+
+ You are required to include the above copyright notice in every source code file of every
+ copy or modified version of this work, and to display that copyright notice on every screen
+ that loads or runs any version of this software (see COPYRIGHT in /modules/shared/lib/defines.js).
+
+ Some PCjs files also attempt to load external resource files, such as character-image files,
+ ROM files, and disk image files. Those external resource files are not considered part of PCjs
+ for purposes of the GNU General Public License, and the author does not claim any copyright
+ as to their contents.
+ Jeff Parsons 2012-2016
+
+ This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
+
+ PCjs is free software: you can redistribute it and/or modify it under the terms of the
+ GNU General Public License as published by the Free Software Foundation, either version 3
+ of the License, or (at your option) any later version.
+
+ PCjs is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License along with PCjs.  If not,
+ see <http://www.gnu.org/licenses/gpl.html>.
+
+ You are required to include the above copyright notice in every source code file of every
+ copy or modified version of this work, and to display that copyright notice on every screen
+ that loads or runs any version of this software (see COPYRIGHT in /modules/shared/lib/defines.js).
+
+ Some PCjs files also attempt to load external resource files, such as character-image files,
+ ROM files, and disk image files. Those external resource files are not considered part of PCjs
+ for purposes of the GNU General Public License, and the author does not claim any copyright
+ as to their contents.
+ Jeff Parsons 2012-2016
+
+ This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
+
+ PCjs is free software: you can redistribute it and/or modify it under the terms of the
+ GNU General Public License as published by the Free Software Foundation, either version 3
+ of the License, or (at your option) any later version.
+
+ PCjs is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License along with PCjs.  If not,
+ see <http://www.gnu.org/licenses/gpl.html>.
+
+ You are required to include the above copyright notice in every source code file of every
+ copy or modified version of this work, and to display that copyright notice on every screen
+ that loads or runs any version of this software (see COPYRIGHT in /modules/shared/lib/defines.js).
+
+ Some PCjs files also attempt to load external resource files, such as character-image files,
+ ROM files, and disk image files. Those external resource files are not considered part of PCjs
+ for purposes of the GNU General Public License, and the author does not claim any copyright
+ as to their contents.
+ Jeff Parsons 2012-2016
+
+ This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
+
+ PCjs is free software: you can redistribute it and/or modify it under the terms of the
+ GNU General Public License as published by the Free Software Foundation, either version 3
+ of the License, or (at your option) any later version.
+
+ PCjs is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License along with PCjs.  If not,
+ see <http://www.gnu.org/licenses/gpl.html>.
+
+ You are required to include the above copyright notice in every source code file of every
+ copy or modified version of this work, and to display that copyright notice on every screen
+ that loads or runs any version of this software (see COPYRIGHT in /modules/shared/lib/defines.js).
+
+ Some PCjs files also attempt to load external resource files, such as character-image files,
+ ROM files, and disk image files. Those external resource files are not considered part of PCjs
+ for purposes of the GNU General Public License, and the author does not claim any copyright
+ as to their contents.
+ Jeff Parsons 2012-2016
+
+ This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
+
+ PCjs is free software: you can redistribute it and/or modify it under the terms of the
+ GNU General Public License as published by the Free Software Foundation, either version 3
+ of the License, or (at your option) any later version.
+
+ PCjs is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License along with PCjs.  If not,
+ see <http://www.gnu.org/licenses/gpl.html>.
+
+ You are required to include the above copyright notice in every source code file of every
+ copy or modified version of this work, and to display that copyright notice on every screen
+ that loads or runs any version of this software (see COPYRIGHT in /modules/shared/lib/defines.js).
+
+ Some PCjs files also attempt to load external resource files, such as character-image files,
+ ROM files, and disk image files. Those external resource files are not considered part of PCjs
+ for purposes of the GNU General Public License, and the author does not claim any copyright
+ as to their contents.
+ Jeff Parsons 2012-2016
+
+ This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
+
+ PCjs is free software: you can redistribute it and/or modify it under the terms of the
+ GNU General Public License as published by the Free Software Foundation, either version 3
+ of the License, or (at your option) any later version.
+
+ PCjs is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License along with PCjs.  If not,
+ see <http://www.gnu.org/licenses/gpl.html>.
+
+ You are required to include the above copyright notice in every source code file of every
+ copy or modified version of this work, and to display that copyright notice on every screen
+ that loads or runs any version of this software (see COPYRIGHT in /modules/shared/lib/defines.js).
+
+ Some PCjs files also attempt to load external resource files, such as character-image files,
+ ROM files, and disk image files. Those external resource files are not considered part of PCjs
+ for purposes of the GNU General Public License, and the author does not claim any copyright
+ as to their contents.
+ Jeff Parsons 2012-2016
+
+ This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
+
+ PCjs is free software: you can redistribute it and/or modify it under the terms of the
+ GNU General Public License as published by the Free Software Foundation, either version 3
+ of the License, or (at your option) any later version.
+
+ PCjs is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License along with PCjs.  If not,
+ see <http://www.gnu.org/licenses/gpl.html>.
+
+ You are required to include the above copyright notice in every source code file of every
+ copy or modified version of this work, and to display that copyright notice on every screen
+ that loads or runs any version of this software (see COPYRIGHT in /modules/shared/lib/defines.js).
+
+ Some PCjs files also attempt to load external resource files, such as character-image files,
+ ROM files, and disk image files. Those external resource files are not considered part of PCjs
+ for purposes of the GNU General Public License, and the author does not claim any copyright
+ as to their contents.
+ Jeff Parsons 2012-2016
+
+ This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
+
+ PCjs is free software: you can redistribute it and/or modify it under the terms of the
+ GNU General Public License as published by the Free Software Foundation, either version 3
+ of the License, or (at your option) any later version.
+
+ PCjs is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License along with PCjs.  If not,
+ see <http://www.gnu.org/licenses/gpl.html>.
+
+ You are required to include the above copyright notice in every source code file of every
+ copy or modified version of this work, and to display that copyright notice on every screen
+ that loads or runs any version of this software (see COPYRIGHT in /modules/shared/lib/defines.js).
+
+ Some PCjs files also attempt to load external resource files, such as character-image files,
+ ROM files, and disk image files. Those external resource files are not considered part of PCjs
+ for purposes of the GNU General Public License, and the author does not claim any copyright
+ as to their contents.
+ Jeff Parsons 2012-2016
+
+ This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
+
+ PCjs is free software: you can redistribute it and/or modify it under the terms of the
+ GNU General Public License as published by the Free Software Foundation, either version 3
+ of the License, or (at your option) any later version.
+
+ PCjs is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License along with PCjs.  If not,
+ see <http://www.gnu.org/licenses/gpl.html>.
+
+ You are required to include the above copyright notice in every source code file of every
+ copy or modified version of this work, and to display that copyright notice on every screen
+ that loads or runs any version of this software (see COPYRIGHT in /modules/shared/lib/defines.js).
+
+ Some PCjs files also attempt to load external resource files, such as character-image files,
+ ROM files, and disk image files. Those external resource files are not considered part of PCjs
+ for purposes of the GNU General Public License, and the author does not claim any copyright
+ as to their contents.
+ Jeff Parsons 2012-2016
+
+ This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
+
+ PCjs is free software: you can redistribute it and/or modify it under the terms of the
+ GNU General Public License as published by the Free Software Foundation, either version 3
+ of the License, or (at your option) any later version.
+
+ PCjs is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License along with PCjs.  If not,
+ see <http://www.gnu.org/licenses/gpl.html>.
+
+ You are required to include the above copyright notice in every source code file of every
+ copy or modified version of this work, and to display that copyright notice on every screen
+ that loads or runs any version of this software (see COPYRIGHT in /modules/shared/lib/defines.js).
+
+ Some PCjs files also attempt to load external resource files, such as character-image files,
+ ROM files, and disk image files. Those external resource files are not considered part of PCjs
+ for purposes of the GNU General Public License, and the author does not claim any copyright
+ as to their contents.
+ Jeff Parsons 2012-2016
+
+ This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
+
+ PCjs is free software: you can redistribute it and/or modify it under the terms of the
+ GNU General Public License as published by the Free Software Foundation, either version 3
+ of the License, or (at your option) any later version.
+
+ PCjs is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License along with PCjs.  If not,
+ see <http://www.gnu.org/licenses/gpl.html>.
+
+ You are required to include the above copyright notice in every source code file of every
+ copy or modified version of this work, and to display that copyright notice on every screen
+ that loads or runs any version of this software (see COPYRIGHT in /modules/shared/lib/defines.js).
+
+ Some PCjs files also attempt to load external resource files, such as character-image files,
+ ROM files, and disk image files. Those external resource files are not considered part of PCjs
+ for purposes of the GNU General Public License, and the author does not claim any copyright
+ as to their contents.
+*/
+var e;function p(a,b,c){var d="";b?8<b&&(b=8):b=a&-65536?8:4;if(null==a||isNaN(a))for(;0<b--;)d="?"+d;else for(;0<b--;){var f=a&15,f=f+(0<=f&&9>=f?48:55),d=String.fromCharCode(f)+d;a>>=4}return(c?"0x":"")+d}function aa(a){var b=a,c=a.lastIndexOf("/");0<=c&&(b=a.substr(c+1));c=b.indexOf("&");0<c&&(b=b.substr(0,c));return b}function ba(a){var b="",c=a.lastIndexOf(".");0<=c&&(b=a.substr(c+1).toLowerCase());return b}var ca={"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"};
 function da(a){return a.replace(/[&<>"']/g,function(a){return ca[a]})}var q=Date.now||function(){return+new Date};
 function r(a,b){var c=0,d=null;if("object"==typeof resources&&(d=resources[a]))b&&b(a,d,c);else if("function"==typeof resources)resources(a,function(c,d){b&&b(a,c,d)});else{var f=window.XMLHttpRequest?new window.XMLHttpRequest:new window.ActiveXObject("Microsoft.XMLHTTP");f.onreadystatechange=function(){4===f.readyState&&(d=f.responseText,200==f.status||!f.status&&d.length&&"file:"==(window?window.location.protocol:"file:")||(c=f.status||-1),b&&b(a,d,c))};f.open("GET",a,!0);f.send()}}
 function t(a){window&&window.alert(a)}function u(a){if(window){var b=window?window.navigator.userAgent:"";return"iOS"==a&&b.match(/(iPod|iPhone|iPad)/)&&b.match(/AppleWebKit/)||"MSIE"==a&&b.match(/(MSIE|Trident)/)||0<=b.indexOf(a)?!0:!1}return!1}var v={init:[],show:[],exit:[]},ea=!1,fa=!1,w=!0;function ga(a,b){if(window){var c=window[a];window[a]="function"!==typeof c?b:function(){c&&c();b()}}}function x(a){v.init.push(a)}
