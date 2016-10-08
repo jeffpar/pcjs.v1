@@ -589,7 +589,7 @@ if (DEBUGGER) {
         if (addr !== PDP11.ADDR_INVALID) {
             this.nDisableMessages++;
             /*
-             * TODO: We also need a Bus interface to disable fnIOAccess() calls that could trigger a trap().
+             * TODO: We also need a Bus interface to disable accesses that could trigger a trap().
              */
             b = this.bus.getByteDirect(addr);
             this.nDisableMessages--;
@@ -613,7 +613,7 @@ if (DEBUGGER) {
         if (addr !== PDP11.ADDR_INVALID) {
             this.nDisableMessages++;
             /*
-             * TODO: We also need a Bus interface to disable fnIOAccess() calls that could trigger a trap().
+             * TODO: We also need a Bus interface to disable accesses that could trigger a trap().
              *
              * NOTE: We don't care if the word address is aligned, because 1) we assume the user knows what
              * they're doing, and 2) the Bus simply ignores the low address bit anyway.  Alignment checks are
@@ -640,7 +640,7 @@ if (DEBUGGER) {
         if (addr !== PDP11.ADDR_INVALID) {
             this.nDisableMessages++;
             /*
-             * TODO: We also need a Bus interface to disable fnIOAccess() calls that could trigger a trap().
+             * TODO: We also need a Bus interface to disable accesses that could trigger a trap().
              */
             this.bus.setByteDirect(addr, b);
             this.nDisableMessages--;
@@ -663,7 +663,7 @@ if (DEBUGGER) {
         if (addr !== PDP11.ADDR_INVALID) {
             this.nDisableMessages++;
             /*
-             * TODO: We also need a Bus interface to disable fnIOAccess() calls that could trigger a trap().
+             * TODO: We also need a Bus interface to disable accesses that could trigger a trap().
              *
              * NOTE: We don't care if the word address is aligned, because 1) we assume the user knows what
              * they're doing, and 2) the Bus simply ignores the low address bit anyway.  Alignment checks are

@@ -7,7 +7,7 @@
 	<ram id="ram" addr="0x0000" size="0xC000"/>
 	<rom id="rom" addr="0xC000" size="0x0570" file="/devices/pdp11/rom/custom/boot.json" writable="true"/>
 	<ram id="ram" addr="0x10000" size="0x34000"/>
-	<device id="unibus" name="unibus"/>
+	<device id="default" name="default"/>
 	<serial id="dl11" adapter="0" binding="print"/>
 	<panel ref="/devices/pdp11/panel/1170/wide.xml"/>
 	<debugger id="debugger" base="8" messages="" commands=""/>

@@ -455,11 +455,40 @@ var PDP11 = {
         UDSAR6:     0o177674,   //                                  User D Space Address Register 6
         UDSAR7:     0o177676,   //                                  User D Space Address Register 7
 
-        SIZE_LO:    0o177760,   //                                  Lower Size Register (last 32-word block)    (11/70 only?)
-        SIZE_HI:    0o177762,   //                                  Upper Size Register (always zero)           (11/70 only?)
-        SYSID:      0o177764,   //                                  System ID Register                          (11/70 only?)
-        CPUERR:     0o177766,   //                                  CPU error                                   (11/70 only?)
-        MB:         0o177770,   //                                  Microprogram break                          (11/70 only?)
+        R0SET0:     0o177700,
+        R1SET0:     0o177701,
+        R2SET0:     0o177702,
+        R3SET0:     0o177703,
+        R4SET0:     0o177704,
+        R5SET0:     0o177705,
+        R6KERNEL:   0o177706,
+        R7KERNEL:   0o177707,
+        R0SET1:     0o177710,
+        R1SET1:     0o177711,
+        R2SET1:     0o177712,
+        R3SET1:     0o177713,
+        R4SET1:     0o177714,
+        R5SET1:     0o177715,
+        R6SUPER:    0o177716,
+        R6USER:     0o177717,
+
+        /*
+         * This next group of registers is largely ignored; all accesses are routed to regsControl[]
+         */
+        LAERR:      0o177740,   //                                  Low Address Error                           (11/70 only)
+        HAERR:      0o177742,   //                                  High Address Error                          (11/70 only)
+        MEMERR:     0o177744,   //                                  Memory System Error                         (11/70 only)
+        CACHEC:     0o177746,   //                                  Cache Control                               (11/70 only)
+        MAINT:      0o177750,   //                                  Maintenance                                 (11/70 only)
+        HITMISS:    0o177752,   //                                  Hit/Miss                                    (11/70 only)
+        UNDEF1:     0o177754,
+        UNDEF2:     0o177756,
+
+        LSIZE:      0o177760,   //                                  Lower Size Register (last 32-word block)    (11/70 only)
+        HSIZE:      0o177762,   //                                  Upper Size Register (always zero)           (11/70 only)
+        SYSID:      0o177764,   //                                  System ID Register                          (11/70 only)
+        CPUERR:     0o177766,   //                                  CPU error                                   (11/70 only)
+        MB:         0o177770,   //                                  Microprogram break
         PIR:        0o177772,   //                                  Program Interrupt Request
         SL:         0o177774,   //                                  Stack Limit Register
         PSW:        0o177776    // 777776   17777776    0x3FFFFE    Processor Status Word

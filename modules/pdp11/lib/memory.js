@@ -56,7 +56,7 @@ var littleEndian = (TYPEDARRAYS? (function() {
 })() : false);
 
 /**
- * MemoryPDP11(addr, used, size, type, controller)
+ * MemoryPDP11(cpu, addr, used, size, type, controller)
  *
  * The Bus component allocates Memory objects so that each has a memory buffer with a
  * block-granular starting address and an address range equal to bus.nBlockSize; however,
@@ -89,15 +89,17 @@ var littleEndian = (TYPEDARRAYS? (function() {
  * is available).
  *
  * @constructor
+ * @param {CPUStatePDP11} cpu
  * @param {number|null} [addr] of lowest used address in block
  * @param {number} [used] portion of block in bytes (0 for none); must be a multiple of 4
  * @param {number} [size] of block's buffer in bytes (0 for none); must be a multiple of 4
  * @param {number} [type] is one of the MemoryPDP11.TYPE constants (default is MemoryPDP11.TYPE.NONE)
  * @param {Object} [controller] is an optional memory controller component
  */
-function MemoryPDP11(addr, used, size, type, controller)
+function MemoryPDP11(cpu, addr, used, size, type, controller)
 {
     var i;
+    this.cpu = cpu;
     this.id = (MemoryPDP11.idBlock += 2);
     this.adw = null;
     this.offset = 0;
@@ -621,6 +623,9 @@ MemoryPDP11.prototype = {
      * @return {number}
      */
     readWordMemory: function readWordMemory(off, addr) {
+        if (PDP11.WORDBUS && (off & 0x1)) {
+            this.cpu.fault(addr);
+        }
         if (BYTEARRAYS) {
             return this.ab[off] | (this.ab[off + 1] << 8);
         }
@@ -662,6 +667,9 @@ MemoryPDP11.prototype = {
      * @param {number} addr
      */
     writeWordMemory: function writeWordMemory(off, w, addr) {
+        if (PDP11.WORDBUS && (off & 0x1)) {
+            this.cpu.fault(addr);
+        }
         if (BYTEARRAYS) {
             this.ab[off] = (w & 0xff);
             this.ab[off + 1] = (w >> 8);
@@ -769,6 +777,9 @@ MemoryPDP11.prototype = {
      * @return {number}
      */
     readWordBE: function readWordBE(off, addr) {
+        if (PDP11.WORDBUS && (off & 0x1)) {
+            this.cpu.fault(addr);
+        }
         return this.dv.getUint16(off, true);
     },
     /**
@@ -785,7 +796,10 @@ MemoryPDP11.prototype = {
          * for an aligned read vs. always reading the bytes separately.
          */
         var w;
-        if (PDP11.WORDBUS || !(off & 0x1)) {
+        if (PDP11.WORDBUS && (off & 0x1)) {
+            this.cpu.fault(addr);
+        }
+        if (!(off & 0x1)) {
             w = this.aw[off >> 1];
         } else {
             w = this.ab[off] | (this.ab[off+1] << 8);
@@ -831,6 +845,9 @@ MemoryPDP11.prototype = {
      * @param {number} w
      */
     writeWordBE: function writeWordBE(off, w, addr) {
+        if (PDP11.WORDBUS && (off & 0x1)) {
+            this.cpu.fault(addr);
+        }
         this.dv.setUint16(off, w, true);
         this.fDirty = true;
     },
@@ -847,7 +864,10 @@ MemoryPDP11.prototype = {
          * TODO: For non-WORDBUS machines, it remains to be seen if there's any advantage to checking the offset
          * for an aligned write vs. always writing the bytes separately.
          */
-        if (PDP11.WORDBUS || !(off & 0x1)) {
+        if (PDP11.WORDBUS && (off & 0x1)) {
+            this.cpu.fault(addr);
+        }
+        if (!(off & 0x1)) {
             this.aw[off >> 1] = w;
         } else {
             this.ab[off] = w;
