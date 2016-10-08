@@ -42,7 +42,7 @@ if (NODE) {
 }
 
 /**
- * BusPDP11(cpu, dbg)
+ * BusPDP11(parmsBus, cpu, dbg)
  *
  * The BusPDP11 component manages physical memory and I/O address spaces.
  *
@@ -69,7 +69,17 @@ function BusPDP11(parmsBus, cpu, dbg)
     this.cpu = cpu;
     this.dbg = dbg;
 
+    /*
+     * Supported values for nBusWidth are 16 (default), 18, and 22.  This represents the maximum size
+     * of the bus for the life of the machine, regardless what memory management mode the CPU has enabled.
+     */
     this.nBusWidth = parmsBus['busWidth'] || 16;
+
+    /*
+     * This controls the location of the IOPAGE (ie, at the top of 16-bit, 18-bit, or 22-bit address range).
+     * It is managed by setIOPageRange().  initMemory() establishes the default (16).
+     */
+    this.nIOPageRange = 0;                  // zero means no IOPAGE access (yet)
 
     /*
      * Compute all BusPDP11 memory block parameters, based on the width of the bus.  The entire
@@ -130,10 +140,26 @@ function BusPDP11(parmsBus, cpu, dbg)
      */
     this.aIOHandlers = [];
     this.fIOBreakAll = false;
+
+    /*
+     * Array of RESET notification handlers registered by Device components.
+     */
     this.afnReset = [];
 
     /*
-     * Allocate empty Memory blocks to span the entire physical address space.
+     * Before we can add any memory blocks that declare our component as a custom memory controller,
+     * we must initialize the array that the getControllerAccess() method supplies to the Memory component.
+     */
+    this.afnIOPage = [
+        BusPDP11.IOController.readByte,
+        BusPDP11.IOController.writeByte,
+        BusPDP11.IOController.readWord,
+        BusPDP11.IOController.writeWord
+    ];
+
+    /*
+     * We're ready to allocate empty Memory blocks to span the entire physical address space, including the
+     * initial location of the IOPAGE.
      */
     this.initMemory();
 
@@ -142,7 +168,7 @@ function BusPDP11(parmsBus, cpu, dbg)
 
 Component.subclass(BusPDP11);
 
-BusPDP11.IOPAGE_VIRT    =   0xE000; /*000160000*/
+BusPDP11.IOPAGE_16BIT   =   0xE000; /*000160000*/               // eg, PDP-11/20
 BusPDP11.IOPAGE_18BIT   =  0x3E000; /*000760000*/               // eg, PDP-11/45
 BusPDP11.IOPAGE_UNIBUS  = 0x3C0000; /*017000000*/
 BusPDP11.IOPAGE_22BIT   = 0x3FE000; /*017760000*/               // eg, PDP-11/70
@@ -365,18 +391,31 @@ BusPDP11.prototype.initMemory = function()
     for (var iBlock = 0; iBlock < this.nBlockTotal; iBlock++) {
         this.aMemBlocks[iBlock] = block;
     }
-    this.afnIOPage = new Array(4);
-    this.afnIOPage[0] = BusPDP11.IOController.readByte;
-    this.afnIOPage[1] = BusPDP11.IOController.writeByte;
-    this.afnIOPage[2] = BusPDP11.IOController.readWord;
-    this.afnIOPage[3] = BusPDP11.IOController.writeWord;
-    /*
-     * Map IOPAGE at the top of the address space (as determined by nBusWidth), as well as at IOPAGE_VIRT
-     * (which is the only place that 16-bit code can reach the IOPAGE when memory management is not enabled).
-     */
-    var addr = this.addrTotal - BusPDP11.IOPAGE_LENGTH;
-    this.addMemory(addr, BusPDP11.IOPAGE_LENGTH, MemoryPDP11.TYPE.CONTROLLER, this);
-    this.addMemory(BusPDP11.IOPAGE_VIRT, BusPDP11.IOPAGE_LENGTH, MemoryPDP11.TYPE.CONTROLLER, this);
+    this.setIOPageRange(16);
+};
+
+/**
+ * setIOPageRange(nRange)
+ *
+ * We can define the IOPAGE address range with a single number, because the size of the IOPAGE is fixed at 8Kb.
+ * The bottom of the range is (2 ^ nRange) - IOPAGE_LENGTH, and the top is (2 ^ nRange) - 1.
+ *
+ * @this {BusPDP11}
+ * @param {number} nRange (16, 18 or 22)
+ */
+BusPDP11.prototype.setIOPageRange = function(nRange)
+{
+    if (nRange != this.nIOPageRange) {
+        var addr;
+        if (this.nIOPageRange) {
+            addr = (1 << this.nIOPageRange) - BusPDP11.IOPAGE_LENGTH;
+            if (!this.removeMemory(addr, BusPDP11.IOPAGE_LENGTH)) return;
+            this.nIOPageRange = 0;
+        }
+        addr = (1 << nRange) - BusPDP11.IOPAGE_LENGTH;
+        if (!this.addMemory(addr, BusPDP11.IOPAGE_LENGTH, MemoryPDP11.TYPE.CONTROLLER, this)) return;
+        this.nIOPageRange = nRange;
+    }
 };
 
 /**
@@ -390,6 +429,9 @@ BusPDP11.prototype.initMemory = function()
  */
 BusPDP11.prototype.getControllerBuffer = function(addr)
 {
+    /*
+     * No buffer is required; all accesses go to a registered I/O handler or the bit-bucket.
+     */
     return [null, 0];
 };
 

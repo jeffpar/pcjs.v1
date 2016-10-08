@@ -623,7 +623,7 @@ MemoryPDP11.prototype = {
      * @return {number}
      */
     readWordMemory: function readWordMemory(off, addr) {
-        if (PDP11.WORDBUS && (off & 0x1)) {
+        if (PDP11.MEMFAULT && (off & 0x1)) {
             this.cpu.fault(addr);
         }
         if (BYTEARRAYS) {
@@ -667,7 +667,7 @@ MemoryPDP11.prototype = {
      * @param {number} addr
      */
     writeWordMemory: function writeWordMemory(off, w, addr) {
-        if (PDP11.WORDBUS && (off & 0x1)) {
+        if (PDP11.MEMFAULT && (off & 0x1)) {
             this.cpu.fault(addr);
         }
         if (BYTEARRAYS) {
@@ -777,7 +777,7 @@ MemoryPDP11.prototype = {
      * @return {number}
      */
     readWordBE: function readWordBE(off, addr) {
-        if (PDP11.WORDBUS && (off & 0x1)) {
+        if (PDP11.MEMFAULT && (off & 0x1)) {
             this.cpu.fault(addr);
         }
         return this.dv.getUint16(off, true);
@@ -791,15 +791,15 @@ MemoryPDP11.prototype = {
      * @return {number}
      */
     readWordLE: function readWordLE(off, addr) {
+        var w;
+        if (PDP11.MEMFAULT && (off & 0x1)) {
+            this.cpu.fault(addr);
+        }
         /*
          * TODO: For non-WORDBUS machines, it remains to be seen if there's any advantage to checking the offset
          * for an aligned read vs. always reading the bytes separately.
          */
-        var w;
-        if (PDP11.WORDBUS && (off & 0x1)) {
-            this.cpu.fault(addr);
-        }
-        if (!(off & 0x1)) {
+        if (PDP11.WORDBUS || !(off & 0x1)) {
             w = this.aw[off >> 1];
         } else {
             w = this.ab[off] | (this.ab[off+1] << 8);
@@ -845,7 +845,7 @@ MemoryPDP11.prototype = {
      * @param {number} w
      */
     writeWordBE: function writeWordBE(off, w, addr) {
-        if (PDP11.WORDBUS && (off & 0x1)) {
+        if (PDP11.MEMFAULT && (off & 0x1)) {
             this.cpu.fault(addr);
         }
         this.dv.setUint16(off, w, true);
@@ -860,14 +860,14 @@ MemoryPDP11.prototype = {
      * @param {number} w
      */
     writeWordLE: function writeWordLE(off, w, addr) {
+        if (PDP11.MEMFAULT && (off & 0x1)) {
+            this.cpu.fault(addr);
+        }
         /*
          * TODO: For non-WORDBUS machines, it remains to be seen if there's any advantage to checking the offset
          * for an aligned write vs. always writing the bytes separately.
          */
-        if (PDP11.WORDBUS && (off & 0x1)) {
-            this.cpu.fault(addr);
-        }
-        if (!(off & 0x1)) {
+        if (PDP11.WORDBUS || !(off & 0x1)) {
             this.aw[off >> 1] = w;
         } else {
             this.ab[off] = w;

@@ -198,11 +198,6 @@ CPUPDP11.prototype.initBus = function(cmp, bus, cpu, dbg)
     }
 
     /*
-     * Attach the ChipSet component to the CPU so that it can be notified whenever the CPU stops and starts.
-     */
-    this.chipset = null;    // /** @type {ChipSetPDP11} */ (cmp.getMachineComponent("ChipSet"));
-
-    /*
      * We've already saved the parmsCPU 'autoStart' setting, but there may be a machine (or URL) override.
      */
     var sAutoStart = cmp.getMachineParm('autoStart');
@@ -210,11 +205,26 @@ CPUPDP11.prototype.initBus = function(cmp, bus, cpu, dbg)
         this.flags.autoStart = (sAutoStart == "true"? true : (sAutoStart  == "false"? false : !!sAutoStart));
     }
 
+    this.initBusComplete();
+
     this.setReady();
 };
 
 /**
+ * initBusComplete()
+ *
+ * Stub for Bus finalization (overridden by the CPUStatePDP11 component).
+ *
+ * @this {CPUPDP11}
+ */
+CPUPDP11.prototype.initBusComplete = function()
+{
+};
+
+/**
  * reset()
+ *
+ * Stub for reset notification (overridden by the CPUStatePDP11 component).
  *
  * @this {CPUPDP11}
  */
@@ -225,7 +235,7 @@ CPUPDP11.prototype.reset = function()
 /**
  * save()
  *
- * This is a placeholder for save support (overridden by the CPUStatePDP11 component).
+ * Stub for save support (overridden by the CPUStatePDP11 component).
  *
  * @this {CPUPDP11}
  * @return {Object|null}
@@ -238,7 +248,7 @@ CPUPDP11.prototype.save = function()
 /**
  * restore(data)
  *
- * This is a placeholder for restore support (overridden by the CPUStatePDP11 component).
+ * Stub for restore support (overridden by the CPUStatePDP11 component).
  *
  * @this {CPUPDP11}
  * @param {Object} data
@@ -550,40 +560,6 @@ CPUPDP11.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
         break;
     }
     return fBound;
-};
-
-/**
- * setBurstCycles(nCycles)
- *
- * This function is used by the ChipSet component whenever a very low timer count is set,
- * in anticipation of the timer requiring an update sooner than the normal nCyclesPerYield
- * period in runCPU() would normally provide.
- *
- * NOTE: In this context, "timer" refers to a timer chip (eg, an Intel 8253) being emulated by
- * by the ChipSet component, not the timers managed by the CPU (eg, addTimer(), setTimer(), etc).
- *
- * @this {CPUPDP11}
- * @param {number} nCycles is the target number of cycles to drop the current burst to
- * @return {boolean}
- */
-CPUPDP11.prototype.setBurstCycles = function(nCycles)
-{
-    if (this.flags.running) {
-        var nDelta = this.nStepCycles - nCycles;
-        /*
-         * NOTE: If nDelta is negative, we will actually be increasing nStepCycles and nBurstCycles.
-         * Which is OK, but if we're also taking snapshots of the cycle counts, to make sure that instruction
-         * costs are being properly assessed, then we need to update nSnapCycles as well.
-         *
-         * TODO: If the delta is negative, we could simply ignore the request, but we must first carefully
-         * consider the impact on the ChipSet timers, if any.
-         */
-        // if (DEBUG) this.nSnapCycles -= nDelta;
-        this.nStepCycles -= nDelta;
-        this.nBurstCycles -= nDelta;
-        return true;
-    }
-    return false;
 };
 
 /**
@@ -1183,7 +1159,6 @@ CPUPDP11.prototype.startCPU = function(fUpdateFocus)
     this.setSpeed();
     this.flags.running = true;
     this.flags.starting = true;
-    if (this.chipset) this.chipset.start();
     var controlRun = this.bindings["run"];
     if (controlRun) controlRun.textContent = "Halt";
     if (this.cmp) {
@@ -1227,7 +1202,6 @@ CPUPDP11.prototype.stopCPU = function(fComplete)
         this.addCycles(this.nRunCycles);
         this.nRunCycles = 0;
         this.flags.running = false;
-        if (this.chipset) this.chipset.stop();
         var controlRun = this.bindings["run"];
         if (controlRun) controlRun.textContent = "Run";
         if (this.cmp) {

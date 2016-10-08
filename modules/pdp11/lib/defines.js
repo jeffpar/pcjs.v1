@@ -79,16 +79,24 @@ var BYTEARRAYS = false;
 var TYPEDARRAYS = (typeof ArrayBuffer !== 'undefined');
 
 /**
- * WORDBUS forces the Bus and Memory interfaces to assume even addresses when accessing words.  Since PDPjs inherited
- * its Bus component from PCx86, it originally supported both aligned and unaligned word accesses by default, but since
- * the PDP-11 requires aligned (even) word addresses, we can turn off support for unaligned accesses and get some
- * performance gains.
+ * MEMFAULT forces the Memory interfaces to signal a CPU fault when a word is accessed using an odd (unaligned) address.
  *
- * When WORDBUS is true, the Bus and Memory components simply ignore the low bit of word addresses, because it is the
- * CPU, not the Bus, that's responsible for validating addresses and generating the appropriate traps.
+ * Since PDPjs inherited its Bus component from PCx86, it included support for both aligned and unaligned word accesses
+ * by default.  However, the PDP-11 adds a wrinkle: when an odd address is used to access a memory word, a BUS_ERROR trap
+ * must be generated.  Note that odd IOPAGE word accesses are fine; this only affects the Memory component.
  *
- * Don't worry that the source code looks MORE complicated rather than LESS with the additional WORDBUS checks, because
- * the Closure Compiler eliminates those checks and throws away the (unreachable) code blocks that deal with unaligned
+ * When the MMU is enabled, these checks may also be performed at a higher level, eliminating the need for them at the
+ * physical memory level.
+ */
+var MEMFAULT = true;
+
+/**
+ * WORDBUS turns off support for unaligned memory words.  Whereas MEMFAULT necessarily slows down memory word accesses
+ * slightly, WORDBUS is able to speed them up slightly, by assuming that all word accesses (which didn't fault) must be
+ * aligned.  This affects all word accesses, even IOPAGE accesses, because it also eliminates cross-block boundary checks.
+ *
+ * Don't worry that the source code looks MORE complicated rather than LESS with the additional MEMFAULT and WORDBUS checks,
+ * because the Closure Compiler eliminates those checks and throws away the (unreachable) code blocks that deal with unaligned
  * accesses.
  */
 var WORDBUS = true;
@@ -109,6 +117,7 @@ var PDP11 = {
     MAXDEBUG:   MAXDEBUG,       // shared
     PRIVATE:    PRIVATE,        // shared
     TYPEDARRAYS:TYPEDARRAYS,
+    MEMFAULT:   MEMFAULT,
     WORDBUS:    WORDBUS,
     SITEHOST:   SITEHOST,       // shared
     XMLVERSION: XMLVERSION,     // shared

@@ -99,6 +99,17 @@ Component.subclass(CPUStatePDP11, CPUPDP11);
 var InterruptEvent;
 
 /**
+ * initBusComplete()
+ *
+ * @this {CPUStatePDP11}
+ */
+CPUStatePDP11.prototype.initBusComplete = function()
+{
+    this.assert(this.bus);
+    this.setMemoryAccess();
+};
+
+/**
  * initProcessor()
  *
  * @this {CPUStatePDP11}
@@ -216,11 +227,12 @@ CPUStatePDP11.prototype.resetRegs = function()
     /** @type {Array.<InterruptEvent>} */
     this.interruptQueue = [];
     this.opFlags |= PDP11.OPFLAG.INTQ;
-    this.initMemoryAccess();
+
+    if (this.bus) this.setMemoryAccess();
 };
 
 /**
- * initMemoryAccess()
+ * setMemoryAccess()
  *
  * Define handlers and DSPACE setting appropriate for the current MMU mode, in order to eliminate
  * unnecessary calls to mapVirtualToPhysical().
@@ -231,18 +243,20 @@ CPUStatePDP11.prototype.resetRegs = function()
  *
  * @this {CPUStatePDP11}
  */
-CPUStatePDP11.prototype.initMemoryAccess = function()
+CPUStatePDP11.prototype.setMemoryAccess = function()
 {
     if (this.mmuEnable) {
         this.addrDSpace = PDP11.ACCESS.DSPACE;
         this.getAddrByMode = this.getVirtualAddrByMode;
         this.readWordFromAddr = this.readWordFromVirtual;
         this.writeWordToAddr = this.writeWordToVirtual;
+        this.bus.setIOPageRange((this.regMMR3 & PDP11.MMR3.MMU_22BIT)? 22 : 18);
     } else {
         this.addrDSpace = 0;
         this.getAddrByMode = this.getPhysicalAddrByMode;
         this.readWordFromAddr = this.readWordFromPhysical;
         this.writeWordToAddr = this.writeWordToPhysical;
+        this.bus.setIOPageRange(16);
     }
 };
 
@@ -265,19 +279,23 @@ CPUStatePDP11.prototype.getMMR0 = function()
  */
 CPUStatePDP11.prototype.setMMR0 = function(newMMR0)
 {
-    this.regMMR0 = newMMR0 &= 0xf381;
-    this.mmuLastMode = (newMMR0 >> 5) & 3;
-    this.mmuLastPage = (newMMR0 >> 1) & 0xf;
-    if (newMMR0 & 0x101) {
-        if (newMMR0 & 0x1) {
-            this.mmuEnable = PDP11.ACCESS.READ | PDP11.ACCESS.WRITE;
-        } else {
-            this.mmuEnable = PDP11.ACCESS.WRITE;
+    newMMR0 &= 0xf381;
+    if (this.regMMR0 != newMMR0) {
+        this.regMMR0 = newMMR0;
+        this.mmuLastMode = (newMMR0 >> 5) & 3;
+        this.mmuLastPage = (newMMR0 >> 1) & 0xf;
+        var mmuEnable = 0;
+        if (newMMR0 & 0x101) {
+            mmuEnable = PDP11.ACCESS.WRITE;
+            if (newMMR0 & 0x1) {
+                mmuEnable |= PDP11.ACCESS.READ;
+            }
         }
-    } else {
-        this.mmuEnable = 0;
+        if (this.mmuEnable != mmuEnable) {
+            this.mmuEnable = mmuEnable;
+            this.setMemoryAccess();
+        }
     }
-    this.initMemoryAccess();
 };
 
 /**
@@ -309,13 +327,16 @@ CPUStatePDP11.prototype.setMMR3 = function(newMMR3)
     if (this.cpuType !== 70) {
         newMMR3 &= ~(PDP11.MMR3.MMU_22BIT | PDP11.MMR3.UNIBUS_MAP);
     }
-    this.regMMR3 = newMMR3;
-    if (this.regMMR3 & PDP11.MMR3.MMU_22BIT) {
-        this.mmuMask = 0x3fffff;
-        this.mmuMemorySize = BusPDP11.MAX_MEMORY;
-    } else {
-        this.mmuMask = 0x3ffff;
-        this.mmuMemorySize = BusPDP11.IOPAGE_18BIT;
+    if (this.regMMR3 != newMMR3) {
+        this.regMMR3 = newMMR3;
+        if (newMMR3 & PDP11.MMR3.MMU_22BIT) {
+            this.mmuMask = 0x3fffff;
+            this.mmuMemorySize = BusPDP11.MAX_MEMORY;
+        } else {
+            this.mmuMask = 0x3ffff;
+            this.mmuMemorySize = BusPDP11.IOPAGE_18BIT;
+        }
+        this.setMemoryAccess();
     }
 };
 
@@ -1515,7 +1536,7 @@ CPUStatePDP11.prototype.getAddress = function(mode, reg, accessFlags)
 /**
  * getPhysicalAddrByMode(mode, reg, accessFlags)
  *
- * This is a handler set up by initMemoryAccess().  All calls should go through getAddrByMode().
+ * This is a handler set up by setMemoryAccess().  All calls should go through getAddrByMode().
  *
  * @this {CPUStatePDP11}
  * @param {number} mode
@@ -1531,7 +1552,7 @@ CPUStatePDP11.prototype.getPhysicalAddrByMode = function(mode, reg, accessFlags)
 /**
  * getVirtualAddrByMode(mode, reg, accessFlags)
  *
- * This is a handler set up by initMemoryAccess().  All calls should go through getAddrByMode().
+ * This is a handler set up by setMemoryAccess().  All calls should go through getAddrByMode().
  *
  * @this {CPUStatePDP11}
  * @param {number} mode
@@ -1547,7 +1568,7 @@ CPUStatePDP11.prototype.getVirtualAddrByMode = function(mode, reg, accessFlags)
 /**
  * readWordFromPhysical(physicalAddress)
  *
- * This is a handler set up by initMemoryAccess().  All calls should go through readWordFromAddr().
+ * This is a handler set up by setMemoryAccess().  All calls should go through readWordFromAddr().
  *
  * @this {CPUStatePDP11}
  * @param {number} physicalAddress
@@ -1561,7 +1582,7 @@ CPUStatePDP11.prototype.readWordFromPhysical = function(physicalAddress)
 /**
  * readWordFromVirtual(virtualAddress)
  *
- * This is a handler set up by initMemoryAccess().  All calls should go through readWordFromAddr().
+ * This is a handler set up by setMemoryAccess().  All calls should go through readWordFromAddr().
  *
  * @this {CPUStatePDP11}
  * @param {number} virtualAddress (input address is 17 bit (I&D))
@@ -1575,7 +1596,7 @@ CPUStatePDP11.prototype.readWordFromVirtual = function(virtualAddress)
 /**
  * writeWordToPhysical(physicalAddress, data)
  *
- * This is a handler set up by initMemoryAccess().  All calls should go through writeWordToAddr().
+ * This is a handler set up by setMemoryAccess().  All calls should go through writeWordToAddr().
  *
  * @this {CPUStatePDP11}
  * @param {number} physicalAddress
@@ -1589,7 +1610,7 @@ CPUStatePDP11.prototype.writeWordToPhysical = function(physicalAddress, data)
 /**
  * writeWordToVirtual(virtualAddress, data)
  *
- * This is a handler set up by initMemoryAccess().  All calls should go through writeWordToAddr().
+ * This is a handler set up by setMemoryAccess().  All calls should go through writeWordToAddr().
  *
  * @this {CPUStatePDP11}
  * @param {number} virtualAddress (input address is 17 bit (I&D))
@@ -1659,7 +1680,7 @@ CPUStatePDP11.prototype.writeWordToPrevSpace = function(opCode, accessFlags, dat
          * TODO: Consider replacing the following code with writeWordToAddr(), by adding optional mmuMode
          * parameters for each of the discrete mapVirtualToPhysical() and bus.setWord() operations, because
          * as it stands, this is the only remaining call to mapVirtualToPhysical() outside of our
-         * initMemoryAccess() handlers.
+         * setMemoryAccess() handlers.
          */
         this.mmuMode = (this.regPSW >> 12) & 3;
         addr = this.mapVirtualToPhysical(addr | (accessFlags & PDP11.ACCESS.DSPACE), PDP11.ACCESS.WRITE);
