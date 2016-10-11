@@ -1692,7 +1692,7 @@ PDP11.opWAIT = function(opCode)
     /*
      * The original PDP-11 emulation code would actually stop emulating instructions now, relying on assorted
      * setTimeout() callbacks, setInterval() callbacks, device XHR (XMLHttpRequest) callbacks, etc, to eventually
-     * call interrupt(), which would then transition the CPU's runState from 2 to 0 and kickstart emulate() again.
+     * call interrupt(), which would then transition the CPU of its "wait" state and kickstart emulate() again.
      *
      * That approach isn't compatible with PCjs emulators, which prefer to rely on the simulated CPU clock to
      * drive all simulated device updates.  This means components should call the CPU's setTimer() function, which
@@ -1703,9 +1703,9 @@ PDP11.opWAIT = function(opCode)
      * However, the PCjs approach requires the CPU to continue running.  One simple solution to this dilemma:
      *
      *      1) opWAIT() sets a new opFlags bit (OPFLAG.WAIT)
-     *      2) Rewind PC back to WAIT
+     *      2) Rewind the PC back to the WAIT instruction
      *      3) Whenever stepCPU() detects OPFLAG.WAIT, call checkInterruptQueue()
-     *      4) If checkInterruptQueue() detects an interrupt, advance PC past WAIT before dispatching it
+     *      4) If checkInterruptQueue() detects an interrupt, advance PC past the WAIT and then dispatch the interrupt
      *
      * Technically, the PC is already exactly where it's supposed to be, so why are we wasting time with steps
      * 2 and 4?  It's largely for the Debugger's sake, so that as long as execution is "blocked" by a WAIT, that's
@@ -1716,6 +1716,12 @@ PDP11.opWAIT = function(opCode)
      * check can have a measurable (negative) impact on performance.  Which is why it's important to use opFlags bits
      * whenever possible, since we can test for multiple (up to 32) exceptional conditions with a single check.
      */
+    if (!(this.opFlags & PDP11.OPFLAG.WAIT)) {
+        /*
+         * Since here we're actually transitioning to WAIT, let's update the Panel's LEDs (well, OK, among other things).
+         */
+        this.cmp.updateStatus();
+    }
     this.opFlags |= PDP11.OPFLAG.WAIT;
     this.advancePC(-2);
     this.nStepCycles -= 3;
