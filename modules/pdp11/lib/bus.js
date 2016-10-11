@@ -207,34 +207,36 @@ BusPDP11.IOHANDLER = {
  * first, and depending on the underlying I/O device, that may or may not have side-effects.  It's really
  * up to the device to know whether that matters, and provide all the necessary handlers if it does.
  *
- * TODO: Unlike regular Memory blocks, IOPAGE accesses permit word accesses on ODD addresses; that works
+ * Unlike regular Memory blocks, IOPAGE accesses permit word accesses on ODD addresses; that works
  * just fine by registering WORD handlers for the appropriate ODD addresses.  What is unclear, however,
  * is what is exactly supposed to happen when the CPU reads or writes a BYTE from an ODD IOPAGE address;
- * it's likely that our built-in fallbacks are NOT correct for those cases.
+ * it seems clear that our built-in fallbacks are NOT correct in all cases.
  *
  * For example, let's imagine that only read/write WORD handlers have been registered for ODD address
- * 177701 (ie, General Register R1, Set 0).  If a readByte(177701) request is made, we would fallback to
- * reading the word at 177700 and returning the high byte, but that would fetch the contents of General
- * Register R0 instead of R1, which clearly seems wrong.
+ * 177701 (ie, general register R1, set 0).  If a readByte(177701) request is made, we would fallback to
+ * reading the word at 177700 and returning the high byte, but that would fetch the contents of general
+ * register R0 instead of R1, which is clearly wrong.
  *
  * One solution is for the caller to register both BYTE and WORD handlers for ODD addresses, making
  * the caller responsible for the defining the correct behavior in all cases.  However, that's more work
  * for the caller, and we're just punting the problem instead of solving it.
  *
  * Another solution is for addIOHandlers() to detect the ODD address case, and install custom fallback
- * handlers for read and write BYTE accesses.  In the above example, the custom read BYTE handler would
- * invoke the read WORD handler and mask the result with 0xff, and the custom write BYTE handler would
+ * handlers for read and write BYTE accesses.  In the above example, the custom read BYTE handler could
+ * invoke the read WORD handler and mask the result with 0xff, and the custom write BYTE handler could
  * first call the read WORD handler, insert the new data into the low byte of the result, and then
  * call the write WORD handler.
  *
- * addIOHandlers() currently implements the second solution.  Again, we're assuming that's the correct
- * behavior for ODD IOPAGE accesses, which may not be a valid assumption.
+ * However, that would produce inconsistent results between EVEN and ODD addresses in the register
+ * address range (0o177700 through 0o177717), so I'm assuming that the correct solution is to install
+ * alternate fallback BYTE handlers for ALL addresses in that range.  The alternate read BYTE handler will
+ * mask its result with 0xff, and the alternate write BYTE handler will store the (zero-extended) byte to
+ * the entire corresponding register.
  *
- * One of things that gives me pause about the second solution is that when the destination of a MOVB
- * instruction is a general register, the byte is sign-extended to a word.  So it seems to strange to have
- * a different MOVB behavior when the destination is ODD general register using an ODD IOPAGE address.
- * Other byte instructions, like CLRB, would function identically when modifying ODD general registers,
- * regardless how they are referenced.
+ * One of things that gives me pause about this solution is that it differs from the behavior of a MOVB
+ * instruction when the destination is a general register, because MOVB always sign-extends the source byte
+ * to a word; it does NOT zero-extend.  So it seems to strange to have a different MOVB behavior when the
+ * destination register is specified using an IOPAGE address.  But, maybe that was by design.
  *
  * TODO: Another small potential improvement would be for addIOHandlers() to predefine fall-backs for all
  * missing handlers, in both the ODD and EVEN cases, so there's never a need to check each function index
@@ -1193,23 +1195,23 @@ BusPDP11.prototype.addIOTable = function(component, table)
         var fnWriteWord = afn[3]? afn[3].bind(component) : null;
 
         /*
-         * As discussed in the IOController comments above, when handlers are being registered for ODD addresses,
-         * we assume that we need different fallback handlers when reading and/or writing bytes.
+         * As discussed in the IOController comments above, when handlers are being registered for the following
+         * addresses, we must install different fallback handlers for all BYTE accesses.
          */
-        if (addr & 0x1) {
+        if (addr >= PDP11.UNIBUS.R0SET0 && addr <= PDP11.UNIBUS.R6USER) {
             if (!fnReadByte && fnReadWord) {
-                fnReadByte = function(fnReadWord) {
+                fnReadByte = function readByteIORegister(readWord) {
                     return function(addr) {
-                        return fnReadWord(addr) & 0xff;
+                        return readWord(addr) & 0xff;
                     }.bind(component);
                 }(fnReadWord);
             }
-            if (!fnWriteByte && fnWriteWord && fnReadWord) {
-                fnWriteByte = function(fnWriteWord, fnReadWord) {
+            if (!fnWriteByte && fnWriteWord) {
+                fnWriteByte = function writeByteIORegister(writeWord) {
                     return function(data, addr) {
-                        return fnWriteWord((fnReadWord(addr) & ~0xff) | data, addr);
+                        return writeWord(data, addr);
                     }.bind(component);
-                }(fnWriteWord, fnReadWord);
+                }(fnWriteWord);
             }
         }
         this.addIOHandlers(addr, addr, fnReadByte, fnWriteByte, fnReadWord, fnWriteWord, afn[4]);
