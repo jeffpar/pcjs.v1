@@ -1843,7 +1843,7 @@ HTMLOut.prototype.getRandomString = function(sIndent)
  *
  * At a minimum, each machine object should contain the following properties:
  *
- *      'type' (eg, a machine type, such as "PCx86" or "C1P")
+ *      'type' (eg, a machine type, such as "C1P", "PCx86", "PC8080", or "PDP11")
  *      'version' (eg, "1.10", "*" to select the current version, or "uncompiled"; "*" is the default)
  *      'debugger' (eg, true or false; false is the default)
  *
@@ -1891,7 +1891,7 @@ HTMLOut.prototype.processMachines = function(aMachines, buildOptions, done)
         if (fCompiled) {
             var sScriptName = sType.toLowerCase();
             var sScriptFile = sScriptName + (fDebugger? "-dbg" : "") + ".js";
-            var sScriptFolder = sScriptName + ((sType == "C1P" || sType == "PC")? "js" : "");
+            var sScriptFolder = sScriptName == "c1p"? "c1pjs" : (sScriptName.substr(0, 3) == "pdp"? "pdpjs" : sScriptName);
             asFiles.push("/versions/" + sScriptFolder + "/" + sVersion + "/components.css");
             asFiles.push("/versions/" + sScriptFolder + "/" + sVersion + "/" + sScriptFile);
             this.addFilesToHTML(asFiles, sScriptEmbed);

@@ -409,10 +409,12 @@ function embedMachine(sAppName, sAppClass, sVersion, idMachine, sXMLFile, sXSLFi
                  * Third-party sites that don't use the PCjs server will ALWAYS want to specify a fully-qualified
                  * path to the XSL file, unless they choose to mirror our folder structure.
                  */
+                var sAppFolder = sAppClass;
                 if (DEBUG || sVersion == "1.x.x") {
-                    sXSLFile = "/modules/" + sAppClass + "/templates/components.xsl";
+                    sXSLFile = "/modules/" + sAppFolder + "/templates/components.xsl";
                 } else {
-                    sXSLFile = "/versions/" + sAppClass + "/" + sVersion + "/components.xsl";
+                    if (sAppClass.substr(0, 3) == "pdp") sAppFolder = "pdpjs";
+                    sXSLFile = "/versions/" + sAppFolder + "/" + sVersion + "/components.xsl";
                 }
             }
 
