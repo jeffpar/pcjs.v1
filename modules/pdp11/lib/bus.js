@@ -307,7 +307,7 @@ BusPDP11.IOController = {
         var afn = bus.aIOHandlers[off];
         if (afn) {
             /*
-             * If a writeByte() handler exists, call it; we're done
+             * If a writeByte() handler exists, call it; we're done.
              */
             if (afn[BusPDP11.IOHANDLER.WRITE_BYTE]) {
                 afn[BusPDP11.IOHANDLER.WRITE_BYTE](b, addr);
@@ -316,9 +316,13 @@ BusPDP11.IOController = {
             /*
              * If a writeWord() handler exists, call the readWord() handler first to get the original data,
              * then call writeWord() with the new data pre-inserted in the original data.
+             *
+             * WARNING: Whenever we call readWord() under these circumstances, we zero the address parameter,
+             * so that the handler can distinguish this case.  Thus, if we're dealing with a special register
+             * where a byte write operation modifies the entire register, the handler can simply return zero.
              */
             else if (afn[BusPDP11.IOHANDLER.WRITE_WORD]) {
-                w = afn[BusPDP11.IOHANDLER.READ_WORD]? afn[BusPDP11.IOHANDLER.READ_WORD](addr) : 0;
+                w = afn[BusPDP11.IOHANDLER.READ_WORD]? afn[BusPDP11.IOHANDLER.READ_WORD](0) : 0;
                 if (!(addr & 0x1)) {
                     afn[BusPDP11.IOHANDLER.WRITE_WORD]((w & ~0xff) | b, addr);
                     fWrite = true;
@@ -337,7 +341,7 @@ BusPDP11.IOController = {
             if (afn) {
                 if (afn[BusPDP11.IOHANDLER.WRITE_WORD]) {
                     addr &= ~0x1;
-                    w = afn[BusPDP11.IOHANDLER.READ_WORD]? afn[BusPDP11.IOHANDLER.READ_WORD](addr) : 0;
+                    w = afn[BusPDP11.IOHANDLER.READ_WORD]? afn[BusPDP11.IOHANDLER.READ_WORD](0) : 0;
                     afn[BusPDP11.IOHANDLER.WRITE_WORD]((w & 0xff) | (b << 8), addr);
                     fWrite = true;
                 }

@@ -918,6 +918,7 @@ DevicePDP11.prototype.writeMB = function(data, addr)
  */
 DevicePDP11.prototype.readPIR = function(addr)
 {
+    if (!addr) return 0;        // the caller is preparing to write the low or high byte; these are the bits to return for the other byte
     return this.cpu.getPIR();
 };
 
@@ -942,6 +943,7 @@ DevicePDP11.prototype.writePIR = function(data, addr)
  */
 DevicePDP11.prototype.readSL = function(addr)
 {
+    if (!addr) return 0;        // the caller is preparing to write the low or high byte; these are the bits to return for the other byte
     return this.cpu.getSL();
 };
 
