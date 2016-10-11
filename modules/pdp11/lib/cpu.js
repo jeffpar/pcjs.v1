@@ -127,11 +127,6 @@ function CPUPDP11(parmsCPU, nCyclesDefault)
     this.flags.autoStart = parmsCPU['autoStart'];
 
     /*
-     * TODO: Add some UI for fDisplayLiveRegs (either an XML property, or a UI checkbox, or both)
-     */
-    this.flags.displayLiveRegs = false;
-
-    /*
      * Get checksum parameters, if any. runCPU() behavior is not affected until fChecksum
      * is true, which won't happen until resetChecksum() is called with nCyclesChecksumInterval
      * ("csInterval") set to a positive value.
@@ -288,7 +283,7 @@ CPUPDP11.prototype.powerUp = function(data, fRepower)
      *
      *      this.flags.powered = true;
      */
-    this.updateCPU();
+    this.cmp.updateStatus();
     return true;
 };
 
@@ -451,54 +446,18 @@ CPUPDP11.prototype.displayChecksum = function()
 };
 
 /**
- * displayValue(sLabel, nValue, cch)
- *
- * This is principally for displaying register values, but in reality, it can be used to display any
- * numeric value bound to the given label.
+ * setBinding(sType, sBinding, control, sValue)
  *
  * @this {CPUPDP11}
- * @param {string} sLabel
- * @param {number} nValue
- * @param {number} [cch]
- */
-CPUPDP11.prototype.displayValue = function(sLabel, nValue, cch)
-{
-    if (this.bindings[sLabel]) {
-        if (nValue === undefined) {
-            this.setError("Value for " + sLabel + " is invalid");
-            this.stopCPU();
-        }
-        var sVal;
-        var nBase = this.dbg && this.dbg.nBase || 8;
-        if (!this.flags.running || this.flags.displayLiveRegs) {
-            sVal = nBase == 8? str.toOct(nValue, cch) : str.toHex(nValue, cch);
-        } else {
-            sVal = "--------".substr(0, cch || 4);
-        }
-        /*
-         * TODO: Determine if this test actually avoids any redrawing when a register hasn't changed, and/or if
-         * we should maintain our own (numeric) cache of displayed register values (to avoid creating these temporary
-         * string values that will have to garbage-collected), and/or if this is actually slower, and/or if I'm being
-         * too obsessive.
-         */
-        if (this.bindings[sLabel].textContent != sVal) this.bindings[sLabel].textContent = sVal;
-    }
-};
-
-/**
- * setBinding(sHTMLType, sBinding, control, sValue)
- *
- * @this {CPUPDP11}
- * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
+ * @param {string|null} sType is the type of the HTML control (eg, "button", "textarea", "register", "flag", "rled", etc)
  * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "run")
  * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
  * @param {string} [sValue] optional data value
  * @return {boolean} true if binding was successful, false if unrecognized binding request
  */
-CPUPDP11.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
+CPUPDP11.prototype.setBinding = function(sType, sBinding, control, sValue)
 {
     var cpu = this;
-    var fBound = false;
 
     switch (sBinding) {
     case "power":
@@ -509,8 +468,7 @@ CPUPDP11.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
          * so we record those bindings here and pass them on to the Computer component in initBus().
          */
         this.bindings[sBinding] = control;
-        fBound = true;
-        break;
+        return true;
 
     case "run":
         this.bindings[sBinding] = control;
@@ -526,13 +484,11 @@ CPUPDP11.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
             else
                 cpu.stopCPU();
         };
-        fBound = true;
-        break;
+        return true;
 
     case "speed":
         this.bindings[sBinding] = control;
-        fBound = true;
-        break;
+        return true;
 
     case "setSpeed":
         this.bindings[sBinding] = control;
@@ -540,13 +496,27 @@ CPUPDP11.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
             cpu.setSpeed(cpu.nCyclesMultiplier << 1, true);
         };
         control.textContent = this.getSpeedTarget();
-        fBound = true;
-        break;
+        return true;
 
     default:
         break;
     }
-    return fBound;
+    return false;
+};
+
+/**
+ * updateStatus(fForce)
+ *
+ * Some of the CPU bindings provide feedback and therefore need to be updated periodically.  This is called
+ * via the Computer's updateStatus() handler several times per second; see YIELDS_PER_STATUS.
+ *
+ * @this {CPUPDP11}
+ * @param {boolean} [fForce]
+ */
+CPUPDP11.prototype.updateStatus = function(fForce)
+{
+    var controlSpeed = this.bindings["speed"];
+    if (controlSpeed) controlSpeed.textContent = this.getSpeedCurrent();
 };
 
 /**
@@ -1111,7 +1081,6 @@ CPUPDP11.prototype.runCPU = function()
     }
     catch (e) {
         this.stopCPU();
-        this.updateCPU();
         if (this.cmp) this.cmp.stop(usr.getTime(), this.getCycles());
         this.setError(e.stack || e.message);
         return;
@@ -1152,7 +1121,6 @@ CPUPDP11.prototype.startCPU = function(fUpdateFocus)
         if (fUpdateFocus) this.cmp.updateFocus(true);
         this.cmp.start(this.msStartRun, this.getCycles());
     }
-    this.updateCPU(true);
     setTimeout(this.onRunTimeout, 0);
     return true;
 };
@@ -1194,27 +1162,8 @@ CPUPDP11.prototype.stopCPU = function(fComplete)
         if (this.cmp) {
             this.cmp.stop(usr.getTime(), this.getCycles());
         }
-        this.updateCPU();
     }
     this.flags.complete = fComplete;
-};
-
-/**
- * updateCPU(fForce)
- *
- * This used to be performed at the end of every stepCPU(), but runCPU() -- which relies upon
- * stepCPU() -- needed to have more control over when these updates are performed.  However, for
- * other callers of stepCPU(), such as the Debugger, the combination of stepCPU() + updateCPU()
- * provides the old behavior.
- *
- * @this {CPUPDP11}
- * @param {boolean} [fForce] (true to force a video update; used by the Debugger)
- */
-CPUPDP11.prototype.updateCPU = function(fForce)
-{
-    if (this.cmp) {
-        this.cmp.updateStatus(fForce);
-    }
 };
 
 /**
@@ -1232,10 +1181,10 @@ CPUPDP11.prototype.yieldCPU = function()
     // if (DEBUG) this.nSnapCycles = this.nBurstCycles;
     /*
      * The Debugger calls yieldCPU() after every message() to ensure browser responsiveness, but it looks
-     * odd for those messages to show CPU state changes but for the CPU's own status display to not (ditto
-     * for the Video display), so I've added this call to try to keep things looking synchronized.
+     * odd for those messages to show CPU state changes if the Control Panel, Video display, etc, does not,
+     * so I've added this call to try to keep things looking synchronized.
      */
-    this.updateCPU();
+    this.cmp.updateStatus();
 };
 
 if (NODE) module.exports = CPUPDP11;

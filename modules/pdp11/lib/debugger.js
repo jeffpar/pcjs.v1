@@ -454,16 +454,16 @@ if (DEBUGGER) {
     };
 
     /**
-     * setBinding(sHTMLType, sBinding, control, sValue)
+     * setBinding(sType, sBinding, control, sValue)
      *
      * @this {DebuggerPDP11}
-     * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
+     * @param {string|null} sType is the type of the HTML control (eg, "button", "textarea", "register", "flag", "rled", etc)
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "debugInput")
      * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
-    DebuggerPDP11.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
+    DebuggerPDP11.prototype.setBinding = function(sType, sBinding, control, sValue)
     {
         var dbg = this;
         switch (sBinding) {
@@ -626,7 +626,7 @@ if (DEBUGGER) {
         if (addr !== PDP11.ADDR_INVALID) {
             this.bus.setByteDirect(addr, b);
             if (inc) this.incAddr(dbgAddr, inc);
-            this.cpu.updateCPU(true);           // we set fForce to true in case video memory was the target
+            this.cmp.updateStatus(true);        // force a computer status update if, say, video memory was the target
         }
     };
 
@@ -644,7 +644,7 @@ if (DEBUGGER) {
         if (addr !== PDP11.ADDR_INVALID) {
             this.bus.setWordDirect(addr, w);
             if (inc) this.incAddr(dbgAddr, inc);
-            this.cpu.updateCPU(true);           // we set fForce to true in case video memory was the target
+            this.cmp.updateStatus(true);        // force a computer status update if, say, video memory was the target
         }
     };
 
@@ -1242,15 +1242,15 @@ if (DEBUGGER) {
     };
 
     /**
-     * stepCPU(nCycles, fRegs, fUpdateCPU)
+     * stepCPU(nCycles, fRegs, fUpdateStatus)
      *
      * @this {DebuggerPDP11}
      * @param {number} nCycles (0 for one instruction without checking breakpoints)
      * @param {boolean} [fRegs] is true to display registers after step (default is false)
-     * @param {boolean} [fUpdateCPU] is false to disable calls to updateCPU() (default is true)
+     * @param {boolean} [fUpdateStatus] is false to disable Computer status updates (default is true)
      * @return {boolean}
      */
-    DebuggerPDP11.prototype.stepCPU = function(nCycles, fRegs, fUpdateCPU)
+    DebuggerPDP11.prototype.stepCPU = function(nCycles, fRegs, fUpdateStatus)
     {
         if (!this.checkCPU()) return false;
 
@@ -1291,11 +1291,11 @@ if (DEBUGGER) {
         }
 
         /*
-         * Because we called cpu.stepCPU() and not cpu.startCPU(), we must nudge the cpu's update code,
-         * and then update our own state.  Normally, the only time fUpdateCPU will be false is when doTrace()
-         * is calling us in a loop, in which case it will perform its own updateCPU() when it's done.
+         * Because we called cpu.stepCPU() and not cpu.startCPU(), we must nudge the Computer's update code,
+         * and then update our own state.  Normally, the only time fUpdateStatus will be false is when doTrace()
+         * is calling us in a loop, in which case it will perform its own updateStatus() when it's done.
          */
-        if (fUpdateCPU !== false) this.cpu.updateCPU();
+        if (fUpdateStatus !== false) this.cmp.updateStatus();
 
         this.updateStatus(fRegs || false);
         return (this.nCycles > 0);
@@ -2550,7 +2550,7 @@ if (DEBUGGER) {
         if (asArgs[2] === undefined) {
             this.println("begin assemble at " + this.toStrAddr(dbgAddr));
             this.fAssemble = true;
-            this.cpu.updateCPU();
+            this.cmp.updateStatus();
             return;
         }
 
@@ -3247,7 +3247,7 @@ if (DEBUGGER) {
                 this.println("unknown register: " + sReg);
                 return;
             }
-            cpu.updateCPU();
+            this.cmp.updateStatus();
             this.println("updated registers:");
         }
 
@@ -3493,11 +3493,12 @@ if (DEBUGGER) {
             },
             function onCountStepComplete() {
                 /*
-                 * We explicitly called stepCPU() with fUpdateCPU === false, because repeatedly
-                 * calling updateCPU() can be very slow, especially when fDisplayLiveRegs is true,
-                 * so once the repeat count has been exhausted, we must perform a final updateCPU().
+                 * We explicitly called stepCPU() with fUpdateStatus === false, because repeatedly
+                 * calling updateStatus() can be very slow, especially if a Control Panel is present
+                 * with displayLiveRegs enabled, so once the repeat count has been exhausted, we must
+                 * perform a final updateStatus().
                  */
-                dbg.cpu.updateCPU();
+                dbg.cmp.updateStatus();
                 dbg.setBusy(false);
             }
         );

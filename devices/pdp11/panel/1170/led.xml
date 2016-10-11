@@ -9,43 +9,43 @@
 			<control type="container" class="pcjs-ledpad" width="33%" pos="right"><control type="rled" binding="A2" width="100%" container="center"/></control>
 		</control>
 		<control type="container" class="pcjs-tripled" width="12.5%" pos="right">
-			<control type="container" class="pcjs-tripled-label" width="100%" pos="right" style="color:transparent;">.</control>
+			<control type="container" class="pcjs-tripled-label" width="100%" pos="right" style="opacity:0">.</control>
 			<control type="container" class="pcjs-ledpad" width="33%" pos="right"><control type="rled" binding="A3" width="100%" container="center"/></control>
 			<control type="container" class="pcjs-ledpad" width="33%" pos="right"><control type="rled" binding="A4" width="100%" container="center"/></control>
 			<control type="container" class="pcjs-ledpad" width="33%" pos="right"><control type="rled" binding="A5" width="100%" container="center"/></control>
 		</control>
 		<control type="container" class="pcjs-tripled" width="12.5%" pos="right">
-			<control type="container" class="pcjs-tripled-label" width="100%" pos="right" style="color:transparent;">.</control>
+			<control type="container" class="pcjs-tripled-label" width="100%" pos="right" style="opacity:0">.</control>
 			<control type="container" class="pcjs-ledpad" width="33%" pos="right"><control type="rled" binding="A6" width="100%" container="center"/></control>
 			<control type="container" class="pcjs-ledpad" width="33%" pos="right"><control type="rled" binding="A7" width="100%" container="center"/></control>
 			<control type="container" class="pcjs-ledpad" width="33%" pos="right"><control type="rled" binding="A8" width="100%" container="center"/></control>
 		</control>
 		<control type="container" class="pcjs-tripled" width="12.5%" pos="right">
-			<control type="container" class="pcjs-tripled-label" width="100%" pos="right" style="color:transparent;">.</control>
+			<control type="container" class="pcjs-tripled-label" width="100%" pos="right" style="opacity:0">.</control>
 			<control type="container" class="pcjs-ledpad" width="33%" pos="right"><control type="rled" binding="A9" width="100%" container="center"/></control>
 			<control type="container" class="pcjs-ledpad" width="33%" pos="right"><control type="rled" binding="A10" width="100%" container="center"/></control>
 			<control type="container" class="pcjs-ledpad" width="33%" pos="right"><control type="rled" binding="A11" width="100%" container="center"/></control>
 		</control>
 		<control type="container" class="pcjs-tripled" width="12.5%" pos="right">
-			<control type="container" class="pcjs-tripled-label" width="100%" pos="right" style="color:transparent;">.</control>
+			<control type="container" class="pcjs-tripled-label" width="100%" pos="right" style="opacity:0">.</control>
 			<control type="container" class="pcjs-ledpad" width="33%" pos="right"><control type="rled" binding="A12" width="100%" container="center"/></control>
 			<control type="container" class="pcjs-ledpad" width="33%" pos="right"><control type="rled" binding="A13" width="100%" container="center"/></control>
 			<control type="container" class="pcjs-ledpad" width="33%" pos="right"><control type="rled" binding="A14" width="100%" container="center"/></control>
 		</control>
 		<control type="container" class="pcjs-tripled" width="12.5%" pos="right">
-			<control type="container" class="pcjs-tripled-label" width="100%" pos="right" style="color:transparent;">.</control>
+			<control type="container" class="pcjs-tripled-label" width="100%" pos="right" style="opacity:0">.</control>
 			<control type="container" class="pcjs-ledpad" width="33%" pos="right"><control type="rled" binding="A15" width="100%" container="center"/></control>
 			<control type="container" class="pcjs-ledpad" width="33%" pos="right"><control type="rled" binding="A16" width="100%" container="center"/></control>
 			<control type="container" class="pcjs-ledpad" width="33%" pos="right"><control type="rled" binding="A17" width="100%" container="center"/></control>
 		</control>
 		<control type="container" class="pcjs-tripled" width="12.5%" pos="right">
-			<control type="container" class="pcjs-tripled-label" width="100%" pos="right" style="color:transparent;">.</control>
+			<control type="container" class="pcjs-tripled-label" width="100%" pos="right" style="opacity:0">.</control>
 			<control type="container" class="pcjs-ledpad" width="33%" pos="right"><control type="rled" binding="A18" width="100%" container="center"/></control>
 			<control type="container" class="pcjs-ledpad" width="33%" pos="right"><control type="rled" binding="A19" width="100%" container="center"/></control>
 			<control type="container" class="pcjs-ledpad" width="33%" pos="right"><control type="rled" binding="A20" width="100%" container="center"/></control>
 		</control>
 		<control type="container" class="pcjs-tripled" width="12.5%" pos="right">
-			<control type="container" class="pcjs-tripled-label" width="100%" pos="right" style="color:transparent;">.</control>
+			<control type="container" class="pcjs-tripled-label" width="100%" pos="right" style="opacity:0">.</control>
 			<control type="container" class="pcjs-ledpad" width="33%" pos="right"><control type="rled" binding="A21" width="100%" container="center"/></control>
 		</control>
 	</control>
@@ -57,31 +57,31 @@
 			<control type="container" class="pcjs-ledpad" width="33%" pos="right"><control type="rled" binding="D2" width="100%" container="center"/></control>
 		</control>
 		<control type="container" class="pcjs-tripled" width="12.5%" pos="right">
-			<control type="container" class="pcjs-tripled-label" width="100%" pos="right" style="color:transparent;">.</control>
+			<control type="container" class="pcjs-tripled-label" width="100%" pos="right" style="opacity:0">.</control>
 			<control type="container" class="pcjs-ledpad" width="33%" pos="right"><control type="rled" binding="D3" width="100%" container="center"/></control>
 			<control type="container" class="pcjs-ledpad" width="33%" pos="right"><control type="rled" binding="D4" width="100%" container="center"/></control>
 			<control type="container" class="pcjs-ledpad" width="33%" pos="right"><control type="rled" binding="D5" width="100%" container="center"/></control>
 		</control>
 		<control type="container" class="pcjs-tripled" width="12.5%" pos="right">
-			<control type="container" class="pcjs-tripled-label" width="100%" pos="right" style="color:transparent;">.</control>
+			<control type="container" class="pcjs-tripled-label" width="100%" pos="right" style="opacity:0">.</control>
 			<control type="container" class="pcjs-ledpad" width="33%" pos="right"><control type="rled" binding="D6" width="100%" container="center"/></control>
 			<control type="container" class="pcjs-ledpad" width="33%" pos="right"><control type="rled" binding="D7" width="100%" container="center"/></control>
 			<control type="container" class="pcjs-ledpad" width="33%" pos="right"><control type="rled" binding="D8" width="100%" container="center"/></control>
 		</control>
 		<control type="container" class="pcjs-tripled" width="12.5%" pos="right">
-			<control type="container" class="pcjs-tripled-label" width="100%" pos="right" style="color:transparent;">.</control>
+			<control type="container" class="pcjs-tripled-label" width="100%" pos="right" style="opacity:0">.</control>
 			<control type="container" class="pcjs-ledpad" width="33%" pos="right"><control type="rled" binding="D9" width="100%" container="center"/></control>
 			<control type="container" class="pcjs-ledpad" width="33%" pos="right"><control type="rled" binding="D10" width="100%" container="center"/></control>
 			<control type="container" class="pcjs-ledpad" width="33%" pos="right"><control type="rled" binding="D11" width="100%" container="center"/></control>
 		</control>
 		<control type="container" class="pcjs-tripled" width="12.5%" pos="right">
-			<control type="container" class="pcjs-tripled-label" width="100%" pos="right" style="color:transparent;">.</control>
+			<control type="container" class="pcjs-tripled-label" width="100%" pos="right" style="opacity:0">.</control>
 			<control type="container" class="pcjs-ledpad" width="33%" pos="right"><control type="rled" binding="D12" width="100%" container="center"/></control>
 			<control type="container" class="pcjs-ledpad" width="33%" pos="right"><control type="rled" binding="D13" width="100%" container="center"/></control>
 			<control type="container" class="pcjs-ledpad" width="33%" pos="right"><control type="rled" binding="D14" width="100%" container="center"/></control>
 		</control>
 		<control type="container" class="pcjs-tripled" width="12.5%" pos="right">
-			<control type="container" class="pcjs-tripled-label" width="100%" pos="right" style="color:transparent;">.</control>
+			<control type="container" class="pcjs-tripled-label" width="100%" pos="right" style="opacity:0">.</control>
 			<control type="container" class="pcjs-ledpad" width="33%" pos="right"><control type="rled" binding="D15" width="100%" container="center"/></control>
 		</control>
 	</control>

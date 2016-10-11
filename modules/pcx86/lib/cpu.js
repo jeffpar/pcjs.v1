@@ -99,7 +99,7 @@ function CPU(parmsCPU, nCyclesDefault)
     this.flags.autoStart = parmsCPU['autoStart'];
 
     /*
-     * TODO: Add some UI for fDisplayLiveRegs (either an XML property, or a UI checkbox, or both)
+     * TODO: Add some UI for displayLiveRegs (either an XML property, or a UI checkbox, or both)
      */
     this.flags.displayLiveRegs = false;
 

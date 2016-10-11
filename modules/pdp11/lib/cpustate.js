@@ -76,11 +76,6 @@ function CPUStatePDP11(parmsCPU)
     CPUPDP11.call(this, parmsCPU, nCyclesDefault);
 
     /*
-     * If there are no live registers to display, then updateStatus() can skip a bit....
-     */
-    this.cLiveRegs = 0;
-
-    /*
      * Initialize processor operation to match the requested model
      */
     this.initProcessor();
@@ -372,72 +367,6 @@ CPUStatePDP11.prototype.restore = function(data)
     this.nTotalCycles = a[1];
     this.setSpeed(a[3]);
     return this.bus.restoreMemory(data[2]);
-};
-
-/**
- * setBinding(sHTMLType, sBinding, control, sValue)
- *
- * @this {CPUStatePDP11}
- * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
- * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "AX")
- * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
- * @param {string} [sValue] optional data value
- * @return {boolean} true if binding was successful, false if unrecognized binding request
- */
-CPUStatePDP11.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
-{
-    var fBound = false;
-    switch (sBinding) {
-    case "R0":
-    case "R1":
-    case "R2":
-    case "R3":
-    case "R4":
-    case "R5":
-    case "R6":
-    case "R7":
-    case "NF":
-    case "ZF":
-    case "VF":
-    case "CF":
-    case "PS":
-        this.bindings[sBinding] = control;
-        this.cLiveRegs++;
-        fBound = true;
-        break;
-    default:
-        fBound = this.parent.setBinding.call(this, sHTMLType, sBinding, control);
-        break;
-    }
-    return fBound;
-};
-
-/**
- * updateStatus(fForce)
- *
- * This provides periodic Control Panel updates (a few times per second; see YIELDS_PER_STATUS).
- * this is where we take care of any DOM updates (eg, register values) while the CPU is running.
- *
- * @this {CPUStatePDP11}
- * @param {boolean} [fForce] (true will display registers even if the CPU is running and "live" registers are not enabled)
- */
-CPUStatePDP11.prototype.updateStatus = function(fForce)
-{
-    if (this.cLiveRegs) {
-        if (fForce || !this.flags.running || this.flags.displayLiveRegs) {
-            for (var i = 0; i < this.regsGen.length; i++) {
-                this.displayValue('R'+i, this.regsGen[i]);
-            }
-            var regPSW = this.getPSW();
-            this.displayValue("PS", regPSW);
-            this.displayValue("NF", (regPSW & PDP11.PSW.NF)? 1 : 0, 1);
-            this.displayValue("ZF", (regPSW & PDP11.PSW.ZF)? 1 : 0, 1);
-            this.displayValue("VF", (regPSW & PDP11.PSW.VF)? 1 : 0, 1);
-            this.displayValue("CF", (regPSW & PDP11.PSW.CF)? 1 : 0, 1);
-        }
-    }
-    var controlSpeed = this.bindings["speed"];
-    if (controlSpeed) controlSpeed.textContent = this.getSpeedCurrent();
 };
 
 /**

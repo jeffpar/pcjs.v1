@@ -54,30 +54,70 @@ if (NODE) {
 function PanelPDP11(parmsPanel)
 {
     Component.call(this, "Panel", parmsPanel, PanelPDP11);
+    /*
+     * If there are any live registers, LEDs, etc, to display, this will provide a count.
+     */
+    this.cLiveRegs = 0;
+    /*
+     * TODO: Add some UI for displayLiveRegs (either an XML property, or a UI checkbox, or both)
+     */
+    this.flags.displayLiveRegs = true;
+
 }
 
 Component.subclass(PanelPDP11);
 
 /**
- * setBinding(sHTMLType, sBinding, control, sValue)
+ * setBinding(sType, sBinding, control, sValue)
  *
- * Most panel layouts don't have bindings of their own, so we pass along all binding requests to the
- * Computer, CPU, Keyboard and Debugger components first.  The order shouldn't matter, since any component
- * that doesn't recognize the specified binding should simply ignore it.
+ * Some panel layouts don't have bindings of their own, and even when they do, there may still be some
+ * components (eg, the CPU) that prefer to update their own bindings, so we pass along all binding requests
+ * to the Computer, CPU, Keyboard and Debugger components first.  The order shouldn't matter, since any
+ * component that doesn't recognize the specified binding should simply ignore it.
  *
  * @this {PanelPDP11}
- * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
+ * @param {string|null} sType is the type of the HTML control (eg, "button", "textarea", "register", "flag", "rled", etc)
  * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "reset")
  * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
  * @param {string} [sValue] optional data value
  * @return {boolean} true if binding was successful, false if unrecognized binding request
  */
-PanelPDP11.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
+PanelPDP11.prototype.setBinding = function(sType, sBinding, control, sValue)
 {
-    if (this.cmp && this.cmp.setBinding(sHTMLType, sBinding, control, sValue)) return true;
-    if (this.cpu && this.cpu.setBinding(sHTMLType, sBinding, control, sValue)) return true;
-    if (DEBUGGER && this.dbg && this.dbg.setBinding(sHTMLType, sBinding, control, sValue)) return true;
-    return this.parent.setBinding.call(this, sHTMLType, sBinding, control, sValue);
+    if (this.cmp && this.cmp.setBinding(sType, sBinding, control, sValue)) {
+        return true;
+    }
+    if (this.cpu && this.cpu.setBinding(sType, sBinding, control, sValue)) {
+        return true;
+    }
+    if (DEBUGGER && this.dbg && this.dbg.setBinding(sType, sBinding, control, sValue)) {
+        return true;
+    }
+    switch (sBinding) {
+    case "R0":
+    case "R1":
+    case "R2":
+    case "R3":
+    case "R4":
+    case "R5":
+    case "R6":
+    case "R7":
+    case "NF":
+    case "ZF":
+    case "VF":
+    case "CF":
+    case "PS":
+        this.bindings[sBinding] = control;
+        this.cLiveRegs++;
+        return true;
+    default:
+        if (sType == "rled") {
+            this.bindings[sBinding] = control;
+            this.cLiveRegs++;
+            return true;
+        }
+        return this.parent.setBinding.call(this, sType, sBinding, control, sValue);
+    }
 };
 
 /**
@@ -125,20 +165,97 @@ PanelPDP11.prototype.powerDown = function(fSave, fShutdown)
 };
 
 /**
+ * updateValue(sLabel, nValue, cch)
+ *
+ * This is principally for displaying register values, but in reality, it can be used to display any
+ * numeric value bound to the given label.
+ *
+ * @this {PanelPDP11}
+ * @param {string} sLabel
+ * @param {number} nValue
+ * @param {number} [cch]
+ */
+PanelPDP11.prototype.updateValue = function(sLabel, nValue, cch)
+{
+    if (this.bindings[sLabel]) {
+        if (nValue === undefined) {
+            this.setError("Value for " + sLabel + " is invalid");
+            this.cpu.stopCPU();
+        }
+        var sVal;
+        var nBase = this.dbg && this.dbg.nBase || 8;
+        if (!this.cpu.isRunning() || this.flags.displayLiveRegs) {
+            sVal = nBase == 8? str.toOct(nValue, cch) : str.toHex(nValue, cch);
+        } else {
+            sVal = "--------".substr(0, cch || 4);
+        }
+        /*
+         * TODO: Determine if this test actually avoids any redrawing when a register hasn't changed, and/or if
+         * we should maintain our own (numeric) cache of displayed register values (to avoid creating these temporary
+         * string values that will have to garbage-collected), and/or if this is actually slower, and/or if I'm being
+         * too obsessive.
+         */
+        if (this.bindings[sLabel].textContent != sVal) this.bindings[sLabel].textContent = sVal;
+    }
+};
+
+/**
+ * setLED(control, f)
+ *
+ * @this {PanelPDP11}
+ * @param {Object} control is an HTML control DOM object
+ * @param {boolean|number} f is true if the LED represented by control should be "on", false if "off"
+ */
+PanelPDP11.prototype.setLED = function(control, f)
+{
+    /*
+     * TODO: Add support for user-definable LED colors
+     */
+    control.style.backgroundColor = (f? "#ff0000" : "#000000");
+};
+
+/**
+ * updateLEDs(sPrefix, data, nLEDs)
+ *
+ * @this {PanelPDP11}
+ * @param {string} sPrefix
+ * @param {number} data
+ * @param {number} nLEDs
+ */
+PanelPDP11.prototype.updateLEDs = function(sPrefix, data, nLEDs)
+{
+    for (var i = 0; i < nLEDs; i++) {
+        var id = sPrefix + i;
+        var control = this.bindings[id];
+        if (control) {
+            this.setLED(control, data & (1 << i));
+        }
+    }
+};
+
+/**
  * updateStatus(fForce)
- *
- * Update function for Panels containing elements with high-frequency display requirements.
- *
- * For older (and slower) DOM-based display elements, those are sill being managed by the CPUState component,
- * so it has its own updateStatus() handler.
- *
- * The Computer's updateStatus() handler is currently responsible for calling both our handler and the CPU's handler.
  *
  * @this {PanelPDP11}
  * @param {boolean} [fForce] (true will display registers even if the CPU is running and "live" registers are not enabled)
  */
 PanelPDP11.prototype.updateStatus = function(fForce)
 {
+    if (this.cLiveRegs) {
+        if (fForce || !this.cpu.isRunning() || this.flags.displayLiveRegs) {
+            for (var i = 0; i < this.cpu.regsGen.length; i++) {
+                this.updateValue('R'+i, this.cpu.regsGen[i]);
+            }
+            var regPSW = this.cpu.getPSW();
+            this.updateValue("PS", regPSW);
+            this.updateValue("NF", (regPSW & PDP11.PSW.NF)? 1 : 0, 1);
+            this.updateValue("ZF", (regPSW & PDP11.PSW.ZF)? 1 : 0, 1);
+            this.updateValue("VF", (regPSW & PDP11.PSW.VF)? 1 : 0, 1);
+            this.updateValue("CF", (regPSW & PDP11.PSW.CF)? 1 : 0, 1);
+            this.updateLEDs("D", this.cpu.regsGen[0], 16);
+            this.updateLEDs("A", this.cpu.regsGen[7], 22);
+        }
+    }
 };
 
 /**

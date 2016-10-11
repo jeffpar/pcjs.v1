@@ -165,16 +165,16 @@ Component.subclass(SerialPortPDP11);
 SerialPortPDP11.sIOBuffer = "buffer";
 
 /**
- * setBinding(sHTMLType, sBinding, control, sValue)
+ * setBinding(sType, sBinding, control, sValue)
  *
  * @this {SerialPortPDP11}
- * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
+ * @param {string|null} sType is the type of the HTML control (eg, "button", "textarea", "register", "flag", "rled", etc)
  * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "buffer")
  * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
  * @param {string} [sValue] optional data value
  * @return {boolean} true if binding was successful, false if unrecognized binding request
  */
-SerialPortPDP11.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
+SerialPortPDP11.prototype.setBinding = function(sType, sBinding, control, sValue)
 {
     var serial = this;
 
