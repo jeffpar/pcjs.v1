@@ -105,6 +105,9 @@
     color: #ffffff;
     background-color: #404040;
 }
+.pcjs-tripled {
+    padding: 1px;
+}
 .pcjs-tripled-label {
     text-align: right;
     padding: 8px;
