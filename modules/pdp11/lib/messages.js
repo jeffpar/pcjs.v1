@@ -36,7 +36,8 @@ var MessagesPDP11 = {
     CPU:        0x00000001,
     TRAP:       0x00000010,
     BUS:        0x00000040,
-    MEM:        0x00000080,
+    MEMORY:     0x00000080,
+    DEVICE:     0x00000100,
     KEYBOARD:   0x00010000,
     KEYS:       0x00020000,
     DISK:       0x00200000,
@@ -67,7 +68,8 @@ MessagesPDP11.CATEGORIES = {
     "cpu":      MessagesPDP11.CPU,
     "trap":     MessagesPDP11.TRAP,
     "bus":      MessagesPDP11.BUS,
-    "mem":      MessagesPDP11.MEM,
+    "memory":   MessagesPDP11.MEMORY,
+    "device":   MessagesPDP11.DEVICE,
     "keyboard": MessagesPDP11.KEYBOARD, // "kbd" is also allowed as shorthand for "keyboard"; see doMessages()
     "key":      MessagesPDP11.KEYS,     // using "key" instead of "keys", since the latter is a method on JavasScript objects
     "disk":     MessagesPDP11.DISK,

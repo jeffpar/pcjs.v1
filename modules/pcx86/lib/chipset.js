@@ -810,7 +810,7 @@ ChipSet.DIPSW[ChipSet.MODEL_5150][0][ChipSet.SWITCH_TYPE.FPU] = {
         0:      0x00,   // 0 means an FPU is NOT installed
         1:      0x02    // 1 means an FPU is installed
     },
-    LABEL: "Coprocessor"
+    LABEL: "FPU"
 };
 ChipSet.DIPSW[ChipSet.MODEL_5150][0][ChipSet.SWITCH_TYPE.MONITOR] = {
     MASK:       0x30,
@@ -910,7 +910,7 @@ ChipSet.DIPSW[ChipSet.MODEL_ATT_6300][0][ChipSet.SWITCH_TYPE.FPU] = {
         0:      0x00,
         1:      0x10
     },
-    LABEL: "Coprocessor"
+    LABEL: "FPU"
 };
 ChipSet.DIPSW[ChipSet.MODEL_ATT_6300][1][ChipSet.SWITCH_TYPE.FLOPTYPE] = {
     MASK:       0x01,
@@ -2809,7 +2809,7 @@ ChipSet.prototype.updateDIPSwitchDescriptions = function()
             3: "Monochrome"
         };
         sText += this.getDIPMemorySize(true) + "Kb";
-        sText += ", " + (+this.getDIPCoprocessor(true)? "" : "No ") + "Coprocessor";
+        sText += ", " + (+this.getDIPCoprocessor(true)? "" : "No ") + "FPU";
         sText += ", " + asMonitorTypes[this.getDIPVideoMonitor(true)] + " Monitor";
         sText += ", " + this.getDIPFloppyDrives(true) + " Floppy Drives";
         if (this.aDIPSwitches[0][1] != null && this.aDIPSwitches[0][1] != this.aDIPSwitches[0][0] ||

@@ -120,7 +120,7 @@ Component.subclass(ROMPDP11);
  * ROM contents, so in that case, having a reset() function that restores the original ROM data
  * might be useful; then again, it might not, depending on what you're trying to debug.
  *
- * If we do add reset(), then we'll want to change copyROM() to hang onto the original
+ * If we do add reset(), then we'll want to change initROM() to hang onto the original
  * ROM data; currently, we release it after copying it into the read-only memory allocated
  * via bus.addMemory().
  */
@@ -139,7 +139,7 @@ ROMPDP11.prototype.initBus = function(cmp, bus, cpu, dbg)
     this.bus = bus;
     this.cpu = cpu;
     this.dbg = dbg;
-    this.copyROM();
+    this.initROM();
 };
 
 /**
@@ -266,11 +266,11 @@ ROMPDP11.prototype.doneLoad = function(sURL, sROMData, nErrorCode)
             this.abROM[i] = str.parseInt(asHexData[i], 16);
         }
     }
-    this.copyROM();
+    this.initROM();
 };
 
 /**
- * copyROM()
+ * initROM()
  *
  * This function is called by both initBus() and doneLoad(), but it cannot copy the the ROM data into place
  * until after initBus() has received the Bus component AND doneLoad() has received the abROM data.  When both
@@ -278,7 +278,7 @@ ROMPDP11.prototype.doneLoad = function(sURL, sROMData, nErrorCode)
  *
  * @this {ROMPDP11}
  */
-ROMPDP11.prototype.copyROM = function()
+ROMPDP11.prototype.initROM = function()
 {
     if (!this.isReady()) {
         if (!this.sFilePath) {
@@ -341,9 +341,7 @@ ROMPDP11.prototype.addROM = function(addr)
         if (DEBUG) this.log("addROM(): copying ROM to " + str.toHexLong(addr) + " (" + str.toHexLong(this.abROM.length) + " bytes)");
         var i;
         for (i = 0; i < this.abROM.length; i++) {
-            if (DEBUGGER && this.dbg) this.dbg.disableMessages();
             this.bus.setByteDirect(addr + i, this.abROM[i]);
-            if (DEBUGGER && this.dbg) this.dbg.enableMessages();
         }
         return true;
     }

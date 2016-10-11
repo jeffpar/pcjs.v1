@@ -83,6 +83,24 @@ RAMPDP11.prototype.initBus = function(cmp, bus, cpu, dbg)
     this.bus = bus;
     this.cpu = cpu;
     this.dbg = dbg;
+    this.initRAM();
+};
+
+/**
+ * initRAM()
+ *
+ * @this {RAMPDP11}
+ */
+RAMPDP11.prototype.initRAM = function()
+{
+    if (!this.fAllocated && this.sizeRAM) {
+        if (this.bus.addMemory(this.addrRAM, this.sizeRAM, MemoryPDP11.TYPE.RAM)) {
+            this.fAllocated = true;
+        }
+    }
+    if (!this.fAllocated) {
+        Component.error("No RAM allocated");
+    }
     this.setReady();
 };
 
@@ -96,15 +114,12 @@ RAMPDP11.prototype.initBus = function(cmp, bus, cpu, dbg)
  */
 RAMPDP11.prototype.powerUp = function(data, fRepower)
 {
-    if (!fRepower) {
-        /*
-         * The Computer powers up the CPU last, at which point CPUState state is restored,
-         * which includes the Bus state, and since we use the Bus to allocate all our memory,
-         * memory contents are already restored for us, so we don't need the usual restore
-         * logic.  We just need to call reset(), to allocate memory for the RAM.
-         */
-        this.reset();
-    }
+    /*
+     * The Computer powers up the CPU last, at which point CPUState state is restored,
+     * which includes the Bus state, and since we use the Bus to allocate all our memory,
+     * memory contents are already restored for us, so we don't need the usual restore
+     * logic.
+     */
     return true;
 };
 
@@ -124,7 +139,7 @@ RAMPDP11.prototype.powerDown = function(fSave, fShutdown)
      * our memory, memory contents are already saved for us, so we don't need the usual
      * save logic.
      */
-    return (fSave)? this.save() : true;
+    return true;
 };
 
 /**
@@ -134,41 +149,9 @@ RAMPDP11.prototype.powerDown = function(fSave, fShutdown)
  */
 RAMPDP11.prototype.reset = function()
 {
-    if (!this.fAllocated && this.sizeRAM) {
-        if (this.bus.addMemory(this.addrRAM, this.sizeRAM, MemoryPDP11.TYPE.RAM)) {
-            this.fAllocated = true;
-        }
-    }
-    if (!this.fAllocated) {
-        Component.error("No RAM allocated");
-    }
-};
-
-/**
- * save()
- *
- * This implements save support for the RAMPDP11 component.
- *
- * @this {RAMPDP11}
- * @return {Object}
- */
-RAMPDP11.prototype.save = function()
-{
-    return null;
-};
-
-/**
- * restore(data)
- *
- * This implements restore support for the RAMPDP11 component.
- *
- * @this {RAMPDP11}
- * @param {Object} data
- * @return {boolean} true if successful, false if failure
- */
-RAMPDP11.prototype.restore = function(data)
-{
-    return true;
+    /*
+     * If you want to zero RAM on reset, then this would be a good place to do it.
+     */
 };
 
 /**

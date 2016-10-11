@@ -461,6 +461,7 @@ BOOTRP:					; 142460
 	TSTB	(R1)			; WAIT
 	BPL	.-2
 	CLRB	(R1)
+	MOV	R3,R0
 	CLR	PC
 
 	.END	START

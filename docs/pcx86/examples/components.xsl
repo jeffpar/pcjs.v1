@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- author="Jeff Parsons (@jeffpar)" website="http://www.pcjs.org/" created="2012-05-05" modified="2016-04-15" license="http://www.gnu.org/licenses/gpl.html" -->
 <!DOCTYPE xsl:stylesheet [
+	<!ENTITY nbsp "&#160;"> <!ENTITY ne "&#8800;"> <!ENTITY le "&#8804;"> <!ENTITY ge "&#8805;">
 ]>
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
@@ -330,6 +331,7 @@
 				<xsl:when test="@pos = 'center'">margin:0 auto;</xsl:when>
 				<xsl:when test="@pos">position:<xsl:value-of select="@pos"/>;</xsl:when>
 				<xsl:when test="$left != '' or $top != ''">position:relative;</xsl:when>
+				<xsl:when test="@container">text-align:<xsl:value-of select="@container"/>;</xsl:when>
 				<xsl:otherwise><xsl:if test="$left = ''">float:left;</xsl:if></xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
@@ -411,7 +413,7 @@
 					</form>
 				</xsl:when>
 				<xsl:when test="@type = 'led' or @type = 'rled'">
-					<div class="{$APPCLASS}-binding {$CSSCLASS}-{@type}" data-value="{{{$type},{$binding}}}"><xsl:value-of select="."/></div>
+					<div class="{$APPCLASS}-binding {$CSSCLASS}-{@type}" data-value="{{{$type},{$binding}}}" style="display:inline-block;"><xsl:value-of select="."/></div>
 				</xsl:when>
 				<xsl:when test="@type = 'separator'">
 					<hr/>

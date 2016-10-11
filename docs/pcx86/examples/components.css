@@ -29,7 +29,7 @@
 }
 .pcjs-label {
     font-size: small;
-    line-height: 19px;
+    line-height: 20px;
     vertical-align: middle;
     float: left;
     font-family: Monaco, "Lucida Console", monospace;
@@ -47,14 +47,14 @@
     font-family: Monaco, "Lucida Console", monospace;
     font-size: small;
     text-align: center;
-    line-height: 19px;
+    line-height: 20px;
     vertical-align: middle;
 }
 .pcjs-register {
     font-family: Monaco, "Lucida Console", monospace;
     font-size: small;
     text-align: center;
-    line-height: 19px;
+    line-height: 20px;
     vertical-align: middle;
     border: 1px solid black;
 }
@@ -96,6 +96,18 @@
     line-height: 34px;
     background-color: #ffffff;
 }
+.pcjs-panel-group {
+    color: #ffffff;
+    background-color: #404040;
+}
+.pcjs-tripled-label {
+    text-align: right;
+    padding: 8px;
+}
+.pcjs-ledpad {
+    line-height: 32px;
+    background-color: #000000;
+}
 .pcjs-led {
     float: left;
     width: 8px;
@@ -103,19 +115,18 @@
     margin: 4px;
     border: 1px solid black;
     text-align: center;
-    line-height: 19px;
+    vertical-align: middle;
     background-color: #000000;
 }
 .pcjs-rled {
-    float: left;
     width: 8px;
     height: 8px;
     margin: 4px;
     border: 1px solid black;
     border-radius: 50%;
     text-align: center;
-    line-height: 19px;
-    background-color: #000000;
+    vertical-align: middle;
+    background-color: #ff0000;
 }
 .pcjs-screen {
     clear: both;

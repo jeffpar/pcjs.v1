@@ -56,7 +56,7 @@ var littleEndian = (TYPEDARRAYS? (function() {
 })() : false);
 
 /**
- * MemoryPDP11(cpu, addr, used, size, type, controller)
+ * MemoryPDP11(bus, addr, used, size, type, controller)
  *
  * The Bus component allocates Memory objects so that each has a memory buffer with a
  * block-granular starting address and an address range equal to bus.nBlockSize; however,
@@ -89,17 +89,17 @@ var littleEndian = (TYPEDARRAYS? (function() {
  * is available).
  *
  * @constructor
- * @param {CPUStatePDP11} cpu
+ * @param {BusPDP11} bus
  * @param {number|null} [addr] of lowest used address in block
  * @param {number} [used] portion of block in bytes (0 for none); must be a multiple of 4
  * @param {number} [size] of block's buffer in bytes (0 for none); must be a multiple of 4
  * @param {number} [type] is one of the MemoryPDP11.TYPE constants (default is MemoryPDP11.TYPE.NONE)
  * @param {Object} [controller] is an optional memory controller component
  */
-function MemoryPDP11(cpu, addr, used, size, type, controller)
+function MemoryPDP11(bus, addr, used, size, type, controller)
 {
     var i;
-    this.cpu = cpu;
+    this.bus = bus;
     this.id = (MemoryPDP11.idBlock += 2);
     this.adw = null;
     this.offset = 0;
@@ -209,10 +209,10 @@ MemoryPDP11.TYPE = {
     RAM:        1,
     ROM:        2,
     VIDEO:      3,
-    CONTROLLER: 4,
-    COLORS:     ["black", "blue", "green", "cyan"],
-    NAMES:      ["NONE",  "RAM",  "ROM",   "VID",  "H/W"]
+    CONTROLLER: 4
 };
+MemoryPDP11.TYPE_COLORS = ["black", "blue", "green", "cyan"];
+MemoryPDP11.TYPE_NAMES  = ["NONE",  "RAM",  "ROM",   "VID",  "H/W"];
 
 /*
  * Last used block ID (used for debugging only)
@@ -469,7 +469,7 @@ MemoryPDP11.prototype = {
      * @param {string} sMessage
      */
     printAddr: function(sMessage) {
-        if (DEBUG && this.dbg && this.dbg.messageEnabled(MessagesPDP11.MEM)) {
+        if (DEBUG && this.dbg && this.dbg.messageEnabled(MessagesPDP11.MEMORY)) {
             this.dbg.printMessage(sMessage + ' ' + (this.addr != null? ('@' + this.dbg.toStrBase(this.addr)) : '#' + this.id), true);
         }
     },
@@ -557,7 +557,7 @@ MemoryPDP11.prototype = {
      * @return {number}
      */
     readNone: function readNone(off, addr) {
-        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.MEM) /* && !off */) {
+        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.MEMORY) /* && !off */) {
             this.dbg.printMessage("attempt to read invalid block %" + str.toHex(this.addr), true);
             this.dbg.stopCPU();
         }
@@ -572,7 +572,7 @@ MemoryPDP11.prototype = {
      * @param {number} addr
      */
     writeNone: function writeNone(off, v, addr) {
-        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.MEM) /* && !off */) {
+        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.MEMORY) /* && !off */) {
             this.dbg.printMessage("attempt to write " + str.toHexWord(v) + " to invalid block %" + str.toHex(this.addr), true);
             this.dbg.stopCPU();
         }
@@ -624,7 +624,7 @@ MemoryPDP11.prototype = {
      */
     readWordMemory: function readWordMemory(off, addr) {
         if (PDP11.MEMFAULT && (off & 0x1)) {
-            this.cpu.fault(addr);
+            this.bus.fault(addr);
         }
         if (BYTEARRAYS) {
             return this.ab[off] | (this.ab[off + 1] << 8);
@@ -668,7 +668,7 @@ MemoryPDP11.prototype = {
      */
     writeWordMemory: function writeWordMemory(off, w, addr) {
         if (PDP11.MEMFAULT && (off & 0x1)) {
-            this.cpu.fault(addr);
+            this.bus.fault(addr);
         }
         if (BYTEARRAYS) {
             this.ab[off] = (w & 0xff);
@@ -763,7 +763,7 @@ MemoryPDP11.prototype = {
      */
     readByteLE: function readByteLE(off, addr) {
         var b = this.ab[off];
-        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.MEM)) {
+        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.MEMORY)) {
             this.dbg.printMessage("Memory.readByte(" + this.dbg.toStrBase(addr) + "): " + this.dbg.toStrBase(b), true);
         }
         return b;
@@ -778,7 +778,7 @@ MemoryPDP11.prototype = {
      */
     readWordBE: function readWordBE(off, addr) {
         if (PDP11.MEMFAULT && (off & 0x1)) {
-            this.cpu.fault(addr);
+            this.bus.fault(addr);
         }
         return this.dv.getUint16(off, true);
     },
@@ -793,7 +793,7 @@ MemoryPDP11.prototype = {
     readWordLE: function readWordLE(off, addr) {
         var w;
         if (PDP11.MEMFAULT && (off & 0x1)) {
-            this.cpu.fault(addr);
+            this.bus.fault(addr);
         }
         /*
          * TODO: For non-WORDBUS machines, it remains to be seen if there's any advantage to checking the offset
@@ -804,7 +804,7 @@ MemoryPDP11.prototype = {
         } else {
             w = this.ab[off] | (this.ab[off+1] << 8);
         }
-        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.MEM)) {
+        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.MEMORY)) {
             this.dbg.printMessage("Memory.readWord(" + this.dbg.toStrBase(addr) + "): " + this.dbg.toStrBase(w), true);
         }
         return w;
@@ -832,7 +832,7 @@ MemoryPDP11.prototype = {
     writeByteLE: function writeByteLE(off, b, addr) {
         this.ab[off] = b;
         this.fDirty = true;
-        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.MEM)) {
+        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.MEMORY)) {
             this.dbg.printMessage("Memory.writeByte(" + this.dbg.toStrBase(addr) + "," + this.dbg.toStrBase(b) + ")", true);
         }
     },
@@ -846,7 +846,7 @@ MemoryPDP11.prototype = {
      */
     writeWordBE: function writeWordBE(off, w, addr) {
         if (PDP11.MEMFAULT && (off & 0x1)) {
-            this.cpu.fault(addr);
+            this.bus.fault(addr);
         }
         this.dv.setUint16(off, w, true);
         this.fDirty = true;
@@ -861,7 +861,7 @@ MemoryPDP11.prototype = {
      */
     writeWordLE: function writeWordLE(off, w, addr) {
         if (PDP11.MEMFAULT && (off & 0x1)) {
-            this.cpu.fault(addr);
+            this.bus.fault(addr);
         }
         /*
          * TODO: For non-WORDBUS machines, it remains to be seen if there's any advantage to checking the offset
@@ -874,7 +874,7 @@ MemoryPDP11.prototype = {
             this.ab[off+1] = w >> 8;
         }
         this.fDirty = true;
-        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.MEM)) {
+        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.MEMORY)) {
             this.dbg.printMessage("Memory.writeWord(" + this.dbg.toStrBase(addr) + "," + this.dbg.toStrBase(w) + ")", true);
         }
     }

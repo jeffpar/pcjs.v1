@@ -587,12 +587,7 @@ if (DEBUGGER) {
         var b = 0xff;
         var addr = this.getAddr(dbgAddr, false, 1);
         if (addr !== PDP11.ADDR_INVALID) {
-            this.nDisableMessages++;
-            /*
-             * TODO: We also need a Bus interface to disable accesses that could trigger a trap().
-             */
             b = this.bus.getByteDirect(addr);
-            this.nDisableMessages--;
             if (inc) this.incAddr(dbgAddr, inc);
         }
         return b;
@@ -611,16 +606,7 @@ if (DEBUGGER) {
         var w = 0xffff;
         var addr = this.getAddr(dbgAddr, false, 2);
         if (addr !== PDP11.ADDR_INVALID) {
-            this.nDisableMessages++;
-            /*
-             * TODO: We also need a Bus interface to disable accesses that could trigger a trap().
-             *
-             * NOTE: We don't care if the word address is aligned, because 1) we assume the user knows what
-             * they're doing, and 2) the Bus simply ignores the low address bit anyway.  Alignment checks are
-             * performed by the CPU, not the Bus.
-             */
             w = this.bus.getWordDirect(addr);
-            this.nDisableMessages--;
             if (inc) this.incAddr(dbgAddr, inc);
         }
         return w;
@@ -638,12 +624,7 @@ if (DEBUGGER) {
     {
         var addr = this.getAddr(dbgAddr, true, 1);
         if (addr !== PDP11.ADDR_INVALID) {
-            this.nDisableMessages++;
-            /*
-             * TODO: We also need a Bus interface to disable accesses that could trigger a trap().
-             */
             this.bus.setByteDirect(addr, b);
-            this.nDisableMessages--;
             if (inc) this.incAddr(dbgAddr, inc);
             this.cpu.updateCPU(true);           // we set fForce to true in case video memory was the target
         }
@@ -661,16 +642,7 @@ if (DEBUGGER) {
     {
         var addr = this.getAddr(dbgAddr, true, 2);
         if (addr !== PDP11.ADDR_INVALID) {
-            this.nDisableMessages++;
-            /*
-             * TODO: We also need a Bus interface to disable accesses that could trigger a trap().
-             *
-             * NOTE: We don't care if the word address is aligned, because 1) we assume the user knows what
-             * they're doing, and 2) the Bus simply ignores the low address bit anyway.  Alignment checks are
-             * performed by the CPU, not the Bus.
-             */
             this.bus.setWordDirect(addr, w);
-            this.nDisableMessages--;
             if (inc) this.incAddr(dbgAddr, inc);
             this.cpu.updateCPU(true);           // we set fForce to true in case video memory was the target
         }
@@ -879,7 +851,7 @@ if (DEBUGGER) {
                 if (!cPrev++) this.println("...");
             } else {
                 typePrev = block.type;
-                var sType = MemoryPDP11.TYPE.NAMES[typePrev];
+                var sType = MemoryPDP11.TYPE_NAMES[typePrev];
                 if (block) {
                     this.println(str.toHex(block.id, 8) + "  %" + str.toHex(i << this.bus.nBlockShift, 8) + "  %%" + str.toHex(block.addr, 8) + "  " + str.toHexWord(block.used) + "  " + str.toHexWord(block.size) + "  " + sType);
                 }
@@ -1034,7 +1006,6 @@ if (DEBUGGER) {
         this.bitsMessage = this.bitsWarning = MessagesPDP11.WARN;
         this.sMessagePrev = null;
         this.aMessageBuffer = [];
-        this.nDisableMessages = 0;
         /*
          * Internally, we use "key" instead of "keys", since the latter is a method on JavasScript objects,
          * but externally, we allow the user to specify "keys"; "kbd" is also allowed as shorthand for "keyboard".
@@ -1155,26 +1126,6 @@ if (DEBUGGER) {
     };
 
     /**
-     * disableMessages(s)
-     *
-     * @this {DebuggerPDP11}
-     */
-    DebuggerPDP11.prototype.disableMessages = function()
-    {
-        this.nDisableMessages++;
-    };
-
-    /**
-     * enableMessages(s)
-     *
-     * @this {DebuggerPDP11}
-     */
-    DebuggerPDP11.prototype.enableMessages = function()
-    {
-        this.nDisableMessages--;
-    };
-
-    /**
      * message(sMessage, fAddress)
      *
      * @this {DebuggerPDP11}
@@ -1183,8 +1134,6 @@ if (DEBUGGER) {
      */
     DebuggerPDP11.prototype.message = function(sMessage, fAddress)
     {
-        if (this.nDisableMessages) return;
-
         if (fAddress) {
             sMessage += " @" + this.toStrAddr(this.newAddr(this.cpu.getPC()));
         }
@@ -1632,9 +1581,7 @@ if (DEBUGGER) {
          */
         if (nState >= 0 && this.aaOpcodeCounts.length) {
             this.cOpcodes++;
-            this.nDisableMessages++;
             var opCode = this.bus.getWordDirect(addr);
-            this.nDisableMessages--;
             if (opCode != null) {
                 var dbgAddr = this.aOpcodeHistory[this.iOpcodeHistory];
                 this.setAddr(dbgAddr, cpu.getPC());
@@ -2741,9 +2688,8 @@ if (DEBUGGER) {
     /**
      * doDump(asArgs)
      *
-     * The length parameter is interpreted as a number of bytes, in hex, which we convert to the appropriate number
-     * of lines, because we always display whole lines.  If the length is omitted/undefined, it defaults to 0x80 (128.)
-     * bytes, which normally translates to 8 lines.
+     * The length parameter is interpreted as a number of bytes (or words, or dwords) to dump, and it is
+     * interpreted using the current base.
      *
      * @this {DebuggerPDP11}
      * @param {Array.<string>} asArgs (formerly sCmd, [sAddr], [sLen] and [sBytes])
@@ -2840,27 +2786,31 @@ if (DEBUGGER) {
 
         var sDump = "";
         var size = (sCmd == "dd"? 4 : (sCmd == "dw"? 2 : 1));
-        var cb = (size * len) || 128;
-        var cLines = ((cb + 15) >> 4) || 1;
+        var nBytes = (size * len) || 128;
+        var nLines = ((nBytes + 15) >> 4) || 1;
 
-        while (cLines-- && cb > 0) {
-            var data = 0, iByte = 0, i;
+        while (nLines-- && nBytes > 0) {
+            var data = 0, shift = 0, i;
             var sData = "", sChars = "";
             sAddr = this.toStrAddr(dbgAddr);
             /*
-             * Dump 8 bytes per line when using base 8, and dump 16 bytes when using base 16 (or when dumping dwords)
+             * Dump 8 bytes per line when using base 8, and dump 16 bytes when using base 16 (or when dumping dwords).
+             *
+             * And while we used to always call getByte() and assemble them into words or dwords as appropriate, I've
+             * changed the logic below to honor "dw" by calling getWord(), since the Bus interfaces have been updated
+             * to prevent generating traps due to to Debugger access of unaligned memory and/or undefined IOPAGE addresses.
              */
-            var nBytes = (size == 4? 16 : this.nBase);
-            for (i = nBytes; i > 0 && cb > 0; i--) {
-                var b = this.getByte(dbgAddr, 1);
-                data |= (b << (iByte++ << 3));
-                if (iByte == size) {
+            for (i = (size == 4? 16 : this.nBase); i > 0 && nBytes > 0; i--) {
+                var n, v = size == 2? this.getWord(dbgAddr, n = 2) : this.getByte(dbgAddr, n = 1);
+                data |= (v << (shift << 3));
+                shift += n;
+                if (shift == size) {
                     sData += this.toStrBase(data, size);
                     sData += (size == 1? (i == 9? '-' : ' ') : "  ");
-                    data = iByte = 0;
+                    data = shift = 0;
                 }
-                sChars += (b >= 32 && b < 128? String.fromCharCode(b) : '.');
-                cb--;
+                sChars += (v >= 32 && v < 128? String.fromCharCode(v) : '.');
+                nBytes--;
             }
             if (sDump) sDump += '\n';
             sDump += sAddr + "  " + sData + ((i == 0)? (' ' + sChars) : "");
@@ -3568,14 +3518,14 @@ if (DEBUGGER) {
 
         if (n === undefined) n = 1;
 
-        var cb = 0x100;
+        var nBytes = 0x100;
         if (sAddrEnd !== undefined) {
 
             var dbgAddrEnd = this.parseAddr(sAddrEnd, true);
             if (!dbgAddrEnd || dbgAddrEnd.addr < dbgAddr.addr) return;
 
-            cb = dbgAddrEnd.addr - dbgAddr.addr;
-            if (!DEBUG && cb > 0x100) {
+            nBytes = dbgAddrEnd.addr - dbgAddr.addr;
+            if (!DEBUG && nBytes > 0x100) {
                 /*
                  * Limiting the amount of disassembled code to 256 bytes in non-DEBUG builds is partly to
                  * prevent the user from wedging the browser by dumping too many lines, but also a recognition
@@ -3587,10 +3537,10 @@ if (DEBUGGER) {
             n = -1;
         }
 
-        var cLines = 0;
+        var nLines = 0;
         var sInstruction;
 
-        while (cb > 0 && n--) {
+        while (nBytes > 0 && n--) {
 
             var nSequence = (this.isBusy(false) || this.nStep)? this.nCycles : null;
             var sComment = (nSequence != null? "cycles" : null);
@@ -3599,7 +3549,7 @@ if (DEBUGGER) {
             var addr = dbgAddr.addr;    // we snap dbgAddr.addr *after* calling findSymbol(), which re-evaluates it
 
             if (aSymbol[0] && n) {
-                if (!cLines && n || aSymbol[0].indexOf('+') < 0) {
+                if (!nLines && n || aSymbol[0].indexOf('+') < 0) {
                     var sLabel = aSymbol[0] + ':';
                     if (aSymbol[2]) sLabel += ' ' + aSymbol[2];
                     this.println(sLabel);
@@ -3615,8 +3565,8 @@ if (DEBUGGER) {
 
             this.println(sInstruction);
             this.dbgAddrNextCode = dbgAddr;
-            cb -= dbgAddr.addr - addr;
-            cLines++;
+            nBytes -= dbgAddr.addr - addr;
+            nLines++;
         }
     };
 

@@ -33,10 +33,12 @@
 "use strict";
 
 if (NODE) {
-    var web         = require("../../shared/lib/weblib");
-    var Component   = require("../../shared/lib/component");
-    var State       = require("../../shared/lib/state");
-    var BusPDP11    = require("./bus");
+    var str           = require("../../shared/lib/strlib");
+    var web           = require("../../shared/lib/weblib");
+    var Component     = require("../../shared/lib/component");
+    var State         = require("../../shared/lib/state");
+    var BusPDP11      = require("./bus");
+    var MessagesPDP11 = require("./messages");
 }
 
 /**
@@ -55,7 +57,7 @@ if (NODE) {
  */
 function DevicePDP11(parmsDevice)
 {
-    Component.call(this, "Device", parmsDevice, DevicePDP11);
+    Component.call(this, "Device", parmsDevice, DevicePDP11, MessagesPDP11.DEVICE);
 
     this.display = {
         data:       0,
@@ -982,6 +984,20 @@ DevicePDP11.prototype.writePSW = function(data, addr)
 };
 
 /**
+ * writeIgnored(data, addr)
+ *
+ * @this {DevicePDP11}
+ * @param {number} data
+ * @param {number} addr
+ */
+DevicePDP11.prototype.writeIgnored = function(data, addr)
+{
+    if (this.messageEnabled()) {
+        this.printMessage("writeIgnored(" + str.toOct(addr) + "): " + str.toOct(data), true, true);
+    }
+};
+
+/**
  * kw11_interrupt()
  *
  * @this {DevicePDP11}
@@ -1023,28 +1039,28 @@ DevicePDP11.UNIBUS_IOTABLE = {
     [PDP11.UNIBUS.MMR3]:    /* 172516 */    [null, null, DevicePDP11.prototype.readMMR3,    DevicePDP11.prototype.writeMMR3,    "MMR3"],
     [PDP11.UNIBUS.LKS]:     /* 177546 */    [null, null, DevicePDP11.prototype.readLKS,     DevicePDP11.prototype.writeLKS,     "LKS"],
     [PDP11.UNIBUS.MMR0]:    /* 177572 */    [null, null, DevicePDP11.prototype.readMMR0,    DevicePDP11.prototype.writeMMR0,    "MMR0"],
-    [PDP11.UNIBUS.MMR1]:    /* 177574 */    [null, null, DevicePDP11.prototype.readMMR1,    null,                               "MMR1"],
-    [PDP11.UNIBUS.MMR2]:    /* 177576 */    [null, null, DevicePDP11.prototype.readMMR2,    null,                               "MMR2"],
+    [PDP11.UNIBUS.MMR1]:    /* 177574 */    [null, null, DevicePDP11.prototype.readMMR1,    DevicePDP11.prototype.writeIgnored, "MMR1"],
+    [PDP11.UNIBUS.MMR2]:    /* 177576 */    [null, null, DevicePDP11.prototype.readMMR2,    DevicePDP11.prototype.writeIgnored, "MMR2"],
     [PDP11.UNIBUS.UISDR0]:  /* 177600 */    [null, null, DevicePDP11.prototype.readUISDR,   DevicePDP11.prototype.writeUISDR,   "UISDR"],
     [PDP11.UNIBUS.UDSDR0]:  /* 177620 */    [null, null, DevicePDP11.prototype.readUDSDR,   DevicePDP11.prototype.writeUDSDR,   "UDSDR"],
     [PDP11.UNIBUS.UISAR0]:  /* 177640 */    [null, null, DevicePDP11.prototype.readUISAR,   DevicePDP11.prototype.writeUISAR,   "UISAR"],
     [PDP11.UNIBUS.UDSAR0]:  /* 177660 */    [null, null, DevicePDP11.prototype.readUDSAR,   DevicePDP11.prototype.writeUDSAR,   "UDSAR"],
-    [PDP11.UNIBUS.R0SET0]:  /* 177700 */    [DevicePDP11.prototype.readRSET0,   DevicePDP11.prototype.writeRSET0,   DevicePDP11.prototype.readRSET0,    DevicePDP11.prototype.writeRSET0,   "R0SET0"],
-    [PDP11.UNIBUS.R1SET0]:  /* 177701 */    [DevicePDP11.prototype.readRSET0,   DevicePDP11.prototype.writeRSET0,   DevicePDP11.prototype.readRSET0,    DevicePDP11.prototype.writeRSET0,   "R1SET0"],
-    [PDP11.UNIBUS.R2SET0]:  /* 177702 */    [DevicePDP11.prototype.readRSET0,   DevicePDP11.prototype.writeRSET0,   DevicePDP11.prototype.readRSET0,    DevicePDP11.prototype.writeRSET0,   "R2SET0"],
-    [PDP11.UNIBUS.R3SET0]:  /* 177703 */    [DevicePDP11.prototype.readRSET0,   DevicePDP11.prototype.writeRSET0,   DevicePDP11.prototype.readRSET0,    DevicePDP11.prototype.writeRSET0,   "R3SET0"],
-    [PDP11.UNIBUS.R4SET0]:  /* 177704 */    [DevicePDP11.prototype.readRSET0,   DevicePDP11.prototype.writeRSET0,   DevicePDP11.prototype.readRSET0,    DevicePDP11.prototype.writeRSET0,   "R4SET0"],
-    [PDP11.UNIBUS.R5SET0]:  /* 177705 */    [DevicePDP11.prototype.readRSET0,   DevicePDP11.prototype.writeRSET0,   DevicePDP11.prototype.readRSET0,    DevicePDP11.prototype.writeRSET0,   "R5SET0"],
-    [PDP11.UNIBUS.R6KERNEL]:/* 177706 */    [DevicePDP11.prototype.readR6KERNEL,DevicePDP11.prototype.writeR6KERNEL,DevicePDP11.prototype.readR6KERNEL, DevicePDP11.prototype.writeR6KERNEL,"R6KERNEL"],
-    [PDP11.UNIBUS.R7KERNEL]:/* 177707 */    [DevicePDP11.prototype.readR7KERNEL,DevicePDP11.prototype.writeR7KERNEL,DevicePDP11.prototype.readR7KERNEL, DevicePDP11.prototype.writeR7KERNEL,"R7KERNEL"],
-    [PDP11.UNIBUS.R0SET1]:  /* 177710 */    [DevicePDP11.prototype.readRSET1,   DevicePDP11.prototype.writeRSET1,   DevicePDP11.prototype.readRSET1,    DevicePDP11.prototype.writeRSET1,   "R0SET1"],
-    [PDP11.UNIBUS.R1SET1]:  /* 177711 */    [DevicePDP11.prototype.readRSET1,   DevicePDP11.prototype.writeRSET1,   DevicePDP11.prototype.readRSET1,    DevicePDP11.prototype.writeRSET1,   "R1SET1"],
-    [PDP11.UNIBUS.R2SET1]:  /* 177712 */    [DevicePDP11.prototype.readRSET1,   DevicePDP11.prototype.writeRSET1,   DevicePDP11.prototype.readRSET1,    DevicePDP11.prototype.writeRSET1,   "R2SET1"],
-    [PDP11.UNIBUS.R3SET1]:  /* 177713 */    [DevicePDP11.prototype.readRSET1,   DevicePDP11.prototype.writeRSET1,   DevicePDP11.prototype.readRSET1,    DevicePDP11.prototype.writeRSET1,   "R3SET1"],
-    [PDP11.UNIBUS.R4SET1]:  /* 177714 */    [DevicePDP11.prototype.readRSET1,   DevicePDP11.prototype.writeRSET1,   DevicePDP11.prototype.readRSET1,    DevicePDP11.prototype.writeRSET1,   "R4SET1"],
-    [PDP11.UNIBUS.R5SET1]:  /* 177715 */    [DevicePDP11.prototype.readRSET1,   DevicePDP11.prototype.writeRSET1,   DevicePDP11.prototype.readRSET1,    DevicePDP11.prototype.writeRSET1,   "R5SET1"],
-    [PDP11.UNIBUS.R6SUPER]: /* 177716 */    [DevicePDP11.prototype.readR6SUPER, DevicePDP11.prototype.writeR6SUPER, DevicePDP11.prototype.readR6SUPER,  DevicePDP11.prototype.writeR6SUPER, "R6SUPER"],
-    [PDP11.UNIBUS.R6USER]:  /* 177717 */    [DevicePDP11.prototype.readR6USER,  DevicePDP11.prototype.writeR6USER,  DevicePDP11.prototype.readR6USER,   DevicePDP11.prototype.writeR6USER,  "R6USER"],
+    [PDP11.UNIBUS.R0SET0]:  /* 177700 */    [null, null, DevicePDP11.prototype.readRSET0,   DevicePDP11.prototype.writeRSET0,   "R0SET0"],
+    [PDP11.UNIBUS.R1SET0]:  /* 177701 */    [null, null, DevicePDP11.prototype.readRSET0,   DevicePDP11.prototype.writeRSET0,   "R1SET0"],
+    [PDP11.UNIBUS.R2SET0]:  /* 177702 */    [null, null, DevicePDP11.prototype.readRSET0,   DevicePDP11.prototype.writeRSET0,   "R2SET0"],
+    [PDP11.UNIBUS.R3SET0]:  /* 177703 */    [null, null, DevicePDP11.prototype.readRSET0,   DevicePDP11.prototype.writeRSET0,   "R3SET0"],
+    [PDP11.UNIBUS.R4SET0]:  /* 177704 */    [null, null, DevicePDP11.prototype.readRSET0,   DevicePDP11.prototype.writeRSET0,   "R4SET0"],
+    [PDP11.UNIBUS.R5SET0]:  /* 177705 */    [null, null, DevicePDP11.prototype.readRSET0,   DevicePDP11.prototype.writeRSET0,   "R5SET0"],
+    [PDP11.UNIBUS.R6KERNEL]:/* 177706 */    [null, null, DevicePDP11.prototype.readR6KERNEL,DevicePDP11.prototype.writeR6KERNEL,"R6KERNEL"],
+    [PDP11.UNIBUS.R7KERNEL]:/* 177707 */    [null, null, DevicePDP11.prototype.readR7KERNEL,DevicePDP11.prototype.writeR7KERNEL,"R7KERNEL"],
+    [PDP11.UNIBUS.R0SET1]:  /* 177710 */    [null, null, DevicePDP11.prototype.readRSET1,   DevicePDP11.prototype.writeRSET1,   "R0SET1"],
+    [PDP11.UNIBUS.R1SET1]:  /* 177711 */    [null, null, DevicePDP11.prototype.readRSET1,   DevicePDP11.prototype.writeRSET1,   "R1SET1"],
+    [PDP11.UNIBUS.R2SET1]:  /* 177712 */    [null, null, DevicePDP11.prototype.readRSET1,   DevicePDP11.prototype.writeRSET1,   "R2SET1"],
+    [PDP11.UNIBUS.R3SET1]:  /* 177713 */    [null, null, DevicePDP11.prototype.readRSET1,   DevicePDP11.prototype.writeRSET1,   "R3SET1"],
+    [PDP11.UNIBUS.R4SET1]:  /* 177714 */    [null, null, DevicePDP11.prototype.readRSET1,   DevicePDP11.prototype.writeRSET1,   "R4SET1"],
+    [PDP11.UNIBUS.R5SET1]:  /* 177715 */    [null, null, DevicePDP11.prototype.readRSET1,   DevicePDP11.prototype.writeRSET1,   "R5SET1"],
+    [PDP11.UNIBUS.R6SUPER]: /* 177716 */    [null, null, DevicePDP11.prototype.readR6SUPER, DevicePDP11.prototype.writeR6SUPER, "R6SUPER"],
+    [PDP11.UNIBUS.R6USER]:  /* 177717 */    [null, null, DevicePDP11.prototype.readR6USER,  DevicePDP11.prototype.writeR6USER,  "R6USER"],
     [PDP11.UNIBUS.LAERR]:   /* 177740 */    [null, null, DevicePDP11.prototype.readCTRL,    DevicePDP11.prototype.writeCTRL,    "CTRL",     PDP11.MODEL_1170],
     [PDP11.UNIBUS.LSIZE]:   /* 177760 */    [null, null, DevicePDP11.prototype.readSIZE,    DevicePDP11.prototype.writeSIZE,    "LSIZE",    PDP11.MODEL_1170],
     [PDP11.UNIBUS.HSIZE]:   /* 177762 */    [null, null, DevicePDP11.prototype.readSIZE,    DevicePDP11.prototype.writeSIZE,    "HSIZE",    PDP11.MODEL_1170],

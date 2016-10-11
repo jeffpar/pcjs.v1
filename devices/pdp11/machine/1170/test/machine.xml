@@ -9,6 +9,6 @@
 	<ram id="ram" addr="0x10000" size="0x34000"/>
 	<device id="default" name="default"/>
 	<serial id="dl11" adapter="0" binding="print"/>
-	<panel ref="/devices/pdp11/panel/1170/wide.xml"/>
+	<panel ref="/devices/pdp11/panel/1170/led.xml"/>
 	<debugger id="debugger" base="8" messages="" commands=""/>
 </machine>

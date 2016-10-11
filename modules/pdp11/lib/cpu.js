@@ -205,20 +205,7 @@ CPUPDP11.prototype.initBus = function(cmp, bus, cpu, dbg)
         this.flags.autoStart = (sAutoStart == "true"? true : (sAutoStart  == "false"? false : !!sAutoStart));
     }
 
-    this.initBusComplete();
-
     this.setReady();
-};
-
-/**
- * initBusComplete()
- *
- * Stub for Bus finalization (overridden by the CPUStatePDP11 component).
- *
- * @this {CPUPDP11}
- */
-CPUPDP11.prototype.initBusComplete = function()
-{
 };
 
 /**

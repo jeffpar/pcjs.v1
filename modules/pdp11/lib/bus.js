@@ -77,9 +77,11 @@ function BusPDP11(parmsBus, cpu, dbg)
 
     /*
      * This controls the location of the IOPAGE (ie, at the top of 16-bit, 18-bit, or 22-bit address range).
-     * It is managed by setIOPageRange().  initMemory() establishes the default (16).
+     * It is managed by setIOPageRange().  reset() establishes the default (16).
      */
     this.nIOPageRange = 0;                  // zero means no IOPAGE access (yet)
+    this.prevIOPageBlocks = [];             // this saves any memory blocks we had to replace with IOPAGE blocks
+    this.realIOPageBlocks = null;           // this saves the memory blocks allocated for IOPAGE, so we can reuse them
 
     /*
      * Compute all BusPDP11 memory block parameters, based on the width of the bus.  The entire
@@ -140,6 +142,7 @@ function BusPDP11(parmsBus, cpu, dbg)
      */
     this.aIOHandlers = [];
     this.fIOBreakAll = false;
+    this.nDisableTraps = 0;
 
     /*
      * Array of RESET notification handlers registered by Device components.
@@ -183,19 +186,62 @@ BusPDP11.ERROR = {
 };
 
 /*
- * These are our custom controller functions for all IOPAGE accesses.
+ * Every entry in the aIOHandlers table is an array with the following indexes:
+ */
+BusPDP11.IOHANDLER = {
+    READ_BYTE:          0,
+    WRITE_BYTE:         1,
+    READ_WORD:          2,
+    WRITE_WORD:         3,
+    NAME:               4
+};
+
+/*
+ * These are our custom IOController functions for all IOPAGE accesses.  They look up the IOPAGE
+ * offset in the aIOHandlers table, and if an entry exists, they use the appropriate IOHANDLER indexes
+ * (above) to locate the appropriate read/write handlers.
  *
- * Note that we try to have reasonable fall-backs for byte reads when only word read handlers exist,
- * and word reads if only byte handlers exist.  Ditto for writes.  These fall-backs may not always be
+ * Note that we try to have reasonable fallbacks for byte reads when only word read handlers exist,
+ * and word reads if only byte handlers exist.  Ditto for writes.  These fallbacks may not always be
  * appropriate; for example, when a byte write falls back to a word write, the address must be read
  * first, and depending on the underlying I/O device, that may or may not have side-effects.  It's really
  * up to the device to know whether that matters, and provide all the necessary handlers if it does.
  *
+ * TODO: Unlike regular Memory blocks, IOPAGE accesses permit word accesses on ODD addresses; that works
+ * just fine by registering WORD handlers for the appropriate ODD addresses.  What is unclear, however,
+ * is what is exactly supposed to happen when the CPU reads or writes a BYTE from an ODD IOPAGE address;
+ * it's likely that our built-in fallbacks are NOT correct for those cases.
+ *
+ * For example, let's imagine that only read/write WORD handlers have been registered for ODD address
+ * 177701 (ie, General Register R1, Set 0).  If a readByte(177701) request is made, we would fallback to
+ * reading the word at 177700 and returning the high byte, but that would fetch the contents of General
+ * Register R0 instead of R1, which clearly seems wrong.
+ *
+ * One solution is for the caller to register both BYTE and WORD handlers for ODD addresses, making
+ * the caller responsible for the defining the correct behavior in all cases.  However, that's more work
+ * for the caller, and we're just punting the problem instead of solving it.
+ *
+ * Another solution is for addIOHandlers() to detect the ODD address case, and install custom fallback
+ * handlers for read and write BYTE accesses.  In the above example, the custom read BYTE handler would
+ * invoke the read WORD handler and mask the result with 0xff, and the custom write BYTE handler would
+ * first call the read WORD handler, insert the new data into the low byte of the result, and then
+ * call the write WORD handler.
+ *
+ * addIOHandlers() currently implements the second solution.  Again, we're assuming that's the correct
+ * behavior for ODD IOPAGE accesses, which may not be a valid assumption.
+ *
+ * One of things that gives me pause about the second solution is that when the destination of a MOVB
+ * instruction is a general register, the byte is sign-extended to a word.  So it seems to strange to have
+ * a different MOVB behavior when the destination is ODD general register using an ODD IOPAGE address.
+ * Other byte instructions, like CLRB, would function identically when modifying ODD general registers,
+ * regardless how they are referenced.
+ *
  * TODO: Another small potential improvement would be for addIOHandlers() to predefine fall-backs for all
- * missing handlers, so there's never a need to check each entry (eg, afn[0], afn[1], etc) before calling
- * it.  However, since there's no avoiding checking afn itself (unless we FULLY populate the aIOHandlers
- * array), and since these I/O accesses should be pretty infrequent relative to all other memory accesses,
- * the benefit seems pretty minimal.
+ * missing handlers, in both the ODD and EVEN cases, so there's never a need to check each function index
+ * before calling it.  However, since there's no avoiding checking aIOHandlers[off] (unless we FULLY populate
+ * the aIOHandlers array), and since these I/O accesses should be pretty infrequent relative to all other
+ * memory accesses, the benefit seems pretty minimal.  Plus, all our fallback assumptions still need to be
+ * verified, so let's wait until that's done before we start optimizing this code.
  */
 BusPDP11.IOController = {
 
@@ -213,26 +259,26 @@ BusPDP11.IOController = {
         var bus = this.controller;
         var afn = bus.aIOHandlers[off];
         if (afn) {
-            if (afn[0]) {
-                b = afn[0](addr) & 0xff;        // we mask the result of readByte() in case the caller is re-using their readWord() handler
-            } else if (afn[2]) {
+            if (afn[BusPDP11.IOHANDLER.READ_BYTE]) {
+                b = afn[BusPDP11.IOHANDLER.READ_BYTE](addr);
+            } else if (afn[BusPDP11.IOHANDLER.READ_WORD]) {
                 if (!(addr & 0x1)) {
-                    b = afn[2](addr) & 0xff;
+                    b = afn[BusPDP11.IOHANDLER.READ_WORD](addr) & 0xff;
                 } else {
-                    b = afn[2](addr & ~0x1) >> 8;
+                    b = afn[BusPDP11.IOHANDLER.READ_WORD](addr & ~0x1) >> 8;
                 }
             }
         } else if (addr & 0x1) {
             afn = bus.aIOHandlers[off & ~0x1];
             if (afn) {
-                if (afn[2]) {
-                    b = afn[2](addr & ~0x1) >> 8;
+                if (afn[BusPDP11.IOHANDLER.READ_WORD]) {
+                    b = afn[BusPDP11.IOHANDLER.READ_WORD](addr & ~0x1) >> 8;
                 }
             }
         }
         if (b >= 0) {
             if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS)) {
-                this.dbg.printMessage(afn[4] + ".readByte(" + this.dbg.toStrBase(addr) + "): " + this.dbg.toStrBase(b), true, true);
+                this.dbg.printMessage(afn[BusPDP11.IOHANDLER.NAME] + ".readByte(" + this.dbg.toStrBase(addr) + "): " + this.dbg.toStrBase(b), true, true);
             }
             return b;
         }
@@ -261,21 +307,21 @@ BusPDP11.IOController = {
             /*
              * If a writeByte() handler exists, call it; we're done
              */
-            if (afn[1]) {
-                afn[1](b, addr);
+            if (afn[BusPDP11.IOHANDLER.WRITE_BYTE]) {
+                afn[BusPDP11.IOHANDLER.WRITE_BYTE](b, addr);
                 fWrite = true;
             }
             /*
              * If a writeWord() handler exists, call the readWord() handler first to get the original data,
-             * then call writeWord() with the new data pre-inserted into the original data.
+             * then call writeWord() with the new data pre-inserted in the original data.
              */
-            else if (afn[3]) {
-                w = afn[2]? afn[2](addr) : 0;
+            else if (afn[BusPDP11.IOHANDLER.WRITE_WORD]) {
+                w = afn[BusPDP11.IOHANDLER.READ_WORD]? afn[BusPDP11.IOHANDLER.READ_WORD](addr) : 0;
                 if (!(addr & 0x1)) {
-                    afn[3]((w & ~0xff) | b, addr);
+                    afn[BusPDP11.IOHANDLER.WRITE_WORD]((w & ~0xff) | b, addr);
                     fWrite = true;
                 } else {
-                    afn[3]((w & 0xff) | (b << 8), addr & ~0x1);
+                    afn[BusPDP11.IOHANDLER.WRITE_WORD]((w & 0xff) | (b << 8), addr & ~0x1);
                     fWrite = true;
                 }
             }
@@ -283,21 +329,21 @@ BusPDP11.IOController = {
             /*
              * If no handler existed, and this address was odd, then perhaps a handler exists for the even address;
              * if so, call the readWord() handler first to get the original data, then call writeWord() with the new
-             * data pre-inserted into (the high byte of) the original data.
+             * data pre-inserted in (the high byte of) the original data.
              */
             afn = bus.aIOHandlers[off & ~0x1];
             if (afn) {
-                if (afn[3]) {
+                if (afn[BusPDP11.IOHANDLER.WRITE_WORD]) {
                     addr &= ~0x1;
-                    w = afn[2]? afn[2](addr) : 0;
-                    afn[3]((w & 0xff) | (b << 8), addr);
+                    w = afn[BusPDP11.IOHANDLER.READ_WORD]? afn[BusPDP11.IOHANDLER.READ_WORD](addr) : 0;
+                    afn[BusPDP11.IOHANDLER.WRITE_WORD]((w & 0xff) | (b << 8), addr);
                     fWrite = true;
                 }
             }
         }
         if (fWrite) {
             if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS)) {
-                this.dbg.printMessage(afn[4] + ".writeByte(" + this.dbg.toStrBase(addr) + "," + this.dbg.toStrBase(b) + ")", true, true);
+                this.dbg.printMessage(afn[BusPDP11.IOHANDLER.NAME] + ".writeByte(" + this.dbg.toStrBase(addr) + "," + this.dbg.toStrBase(b) + ")", true, true);
             }
             return;
         }
@@ -321,15 +367,15 @@ BusPDP11.IOController = {
         var bus = this.controller;
         var afn = bus.aIOHandlers[off];
         if (afn) {
-            if (afn[2]) {
-                w = afn[2](addr);
-            } else if (afn[0]) {
-                w = afn[0](addr) | (afn[0](addr + 1) << 8);
+            if (afn[BusPDP11.IOHANDLER.READ_WORD]) {
+                w = afn[BusPDP11.IOHANDLER.READ_WORD](addr);
+            } else if (afn[BusPDP11.IOHANDLER.READ_BYTE]) {
+                w = afn[BusPDP11.IOHANDLER.READ_BYTE](addr) | (afn[BusPDP11.IOHANDLER.READ_BYTE](addr + 1) << 8);
             }
         }
         if (w >= 0) {
             if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS)) {
-                this.dbg.printMessage(afn[4] + ".readWord(" + this.dbg.toStrBase(addr) + "): " + this.dbg.toStrBase(w), true, true);
+                this.dbg.printMessage(afn[BusPDP11.IOHANDLER.NAME] + ".readWord(" + this.dbg.toStrBase(addr) + "): " + this.dbg.toStrBase(w), true, true);
             }
             return w;
         }
@@ -354,18 +400,18 @@ BusPDP11.IOController = {
         var bus = this.controller;
         var afn = bus.aIOHandlers[off];
         if (afn) {
-            if (afn[3]) {
-                afn[3](w, addr);
+            if (afn[BusPDP11.IOHANDLER.WRITE_WORD]) {
+                afn[BusPDP11.IOHANDLER.WRITE_WORD](w, addr);
                 fWrite = true;
-            } else if (afn[1]) {
-                afn[1](w & 0xff, addr);
-                afn[1](w >> 8, addr + 1);
+            } else if (afn[BusPDP11.IOHANDLER.WRITE_BYTE]) {
+                afn[BusPDP11.IOHANDLER.WRITE_BYTE](w & 0xff, addr);
+                afn[BusPDP11.IOHANDLER.WRITE_BYTE](w >> 8, addr + 1);
                 fWrite = true;
             }
         }
         if (fWrite) {
             if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS)) {
-                this.dbg.printMessage(afn[4] + ".writeWord(" + this.dbg.toStrBase(addr) + "," + this.dbg.toStrBase(w) + ")", true, true);
+                this.dbg.printMessage(afn[BusPDP11.IOHANDLER.NAME] + ".writeWord(" + this.dbg.toStrBase(addr) + "," + this.dbg.toStrBase(w) + ")", true, true);
             }
             return;
         }
@@ -385,13 +431,12 @@ BusPDP11.IOController = {
  */
 BusPDP11.prototype.initMemory = function()
 {
-    var block = new MemoryPDP11(this.cpu);
+    var block = new MemoryPDP11(this);
     block.copyBreakpoints(this.dbg);
     this.aMemBlocks = new Array(this.nBlockTotal);
     for (var iBlock = 0; iBlock < this.nBlockTotal; iBlock++) {
         this.aMemBlocks[iBlock] = block;
     }
-    this.setIOPageRange(16);
 };
 
 /**
@@ -400,8 +445,12 @@ BusPDP11.prototype.initMemory = function()
  * We can define the IOPAGE address range with a single number, because the size of the IOPAGE is fixed at 8Kb.
  * The bottom of the range is (2 ^ nRange) - IOPAGE_LENGTH, and the top is (2 ^ nRange) - 1.
  *
+ * Note that we defer our initial call to this function as long as possible (ie, at the end of reset()) so that
+ * other components have first shot at adding their own memory blocks (if any), because addMemory() only allows
+ * installing memory on top of empty memory blocks.
+ *
  * @this {BusPDP11}
- * @param {number} nRange (16, 18 or 22)
+ * @param {number} nRange (16, 18 or 22; 0 removes the IOPAGE altogether)
  */
 BusPDP11.prototype.setIOPageRange = function(nRange)
 {
@@ -409,12 +458,20 @@ BusPDP11.prototype.setIOPageRange = function(nRange)
         var addr;
         if (this.nIOPageRange) {
             addr = (1 << this.nIOPageRange) - BusPDP11.IOPAGE_LENGTH;
-            if (!this.removeMemory(addr, BusPDP11.IOPAGE_LENGTH)) return;
+            this.setMemoryBlocks(addr, BusPDP11.IOPAGE_LENGTH, this.prevIOPageBlocks);
             this.nIOPageRange = 0;
         }
-        addr = (1 << nRange) - BusPDP11.IOPAGE_LENGTH;
-        if (!this.addMemory(addr, BusPDP11.IOPAGE_LENGTH, MemoryPDP11.TYPE.CONTROLLER, this)) return;
-        this.nIOPageRange = nRange;
+        if (nRange) {
+            this.nIOPageRange = nRange;
+            addr = (1 << nRange) - BusPDP11.IOPAGE_LENGTH;
+            this.prevIOPageBlocks = this.getMemoryBlocks(addr, BusPDP11.IOPAGE_LENGTH);
+            if (this.realIOPageBlocks) {
+                this.setMemoryBlocks(addr, BusPDP11.IOPAGE_LENGTH, this.realIOPageBlocks);
+            } else {
+                this.addMemory(addr, BusPDP11.IOPAGE_LENGTH, MemoryPDP11.TYPE.CONTROLLER, this);
+                this.realIOPageBlocks = this.getMemoryBlocks(addr, BusPDP11.IOPAGE_LENGTH);
+            }
+        }
     }
 };
 
@@ -460,6 +517,7 @@ BusPDP11.prototype.reset = function()
     for (var i = 0; i < this.afnReset.length; i++) {
         this.afnReset[i]();
     }
+    this.setIOPageRange(16);
 };
 
 /**
@@ -474,13 +532,17 @@ BusPDP11.prototype.reset = function()
  * @param {number} addr (ie, an IOPAGE address)
  * @param {number} data (-1 if read, otherwise write)
  * @param {number} byteFlag (true if byte I/O, otherwise word)
+ * @return {number}
  */
 BusPDP11.prototype.unknownAccess = function(addr, data, byteFlag)
 {
-    if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.WARN)) {
-        this.dbg.printMessage("warning: unrecognized I/O access(" + this.dbg.toStrBase(addr) + "," + this.dbg.toStrBase(data) + "," + byteFlag + ")", true, true);
+    if (!this.nDisableTraps) {
+        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.WARN)) {
+            this.dbg.printMessage("warning: unrecognized I/O access(" + this.dbg.toStrBase(addr) + "," + this.dbg.toStrBase(data) + "," + byteFlag + ")", true, true);
+        }
+        this.cpu.trap(PDP11.TRAP.BUS_ERROR, addr);
     }
-    this.cpu.trap(PDP11.TRAP.BUS_ERROR, addr);
+    return 0;
 };
 
 /**
@@ -549,8 +611,13 @@ BusPDP11.prototype.addMemory = function(addr, size, type, controller)
         var sizeBlock = this.nBlockSize - (addrNext - addrBlock);
         if (sizeBlock > sizeLeft) sizeBlock = sizeLeft;
 
-        if (block && block.size) {
-            if (block.type == type && block.controller == controller) {
+        /*
+         * addMemory() will now happily replace an existing block when a memory controller is specified;
+         * this is a work-around to make life easier for setIOPageRange(), which otherwise would have to call
+         * removeMemory() first, which would just waste time and memory allocating more (empty) blocks.
+         */
+        if (!controller && block && block.size) {
+            if (block.type == type /* && block.controller == controller */) {
                 /*
                  * Where there is already a similar block with a non-zero size, we allow the allocation only if:
                  *
@@ -575,7 +642,7 @@ BusPDP11.prototype.addMemory = function(addr, size, type, controller)
             return this.reportError(BusPDP11.ERROR.RANGE_INUSE, addrNext, sizeLeft);
         }
 
-        var blockNew = new MemoryPDP11(this.cpu, addrNext, sizeBlock, this.nBlockSize, type, controller);
+        var blockNew = new MemoryPDP11(this, addrNext, sizeBlock, this.nBlockSize, type, controller);
         blockNew.copyBreakpoints(this.dbg, block);
         this.aMemBlocks[iBlock++] = blockNew;
 
@@ -584,7 +651,7 @@ BusPDP11.prototype.addMemory = function(addr, size, type, controller)
     }
 
     if (sizeLeft <= 0) {
-        this.status(Math.floor(size / 1024) + "Kb " + MemoryPDP11.TYPE.NAMES[type] + " at " + str.toHexLong(addr));
+        this.status(Math.floor(size / 1024) + "Kb " + MemoryPDP11.TYPE_NAMES[type] + " at " + str.toHexLong(addr));
         return true;
     }
 
@@ -713,7 +780,7 @@ BusPDP11.prototype.removeMemory = function(addr, size)
         var iBlock = addr >>> this.nBlockShift;
         while (size > 0) {
             var blockOld = this.aMemBlocks[iBlock];
-            var blockNew = new MemoryPDP11(this.cpu, addr);
+            var blockNew = new MemoryPDP11(this, addr);
             blockNew.copyBreakpoints(this.dbg, blockOld);
             this.aMemBlocks[iBlock++] = blockNew;
             addr = iBlock * this.nBlockSize;
@@ -799,7 +866,7 @@ BusPDP11.prototype.setMemoryBlocks = function(addr, size, aBlocks, type)
         this.assert(block);
         if (!block) break;
         if (type !== undefined) {
-            var blockNew = new MemoryPDP11(this.cpu, addr);
+            var blockNew = new MemoryPDP11(this, addr);
             blockNew.clone(block, type, this.dbg);
             block = blockNew;
         }
@@ -831,7 +898,10 @@ BusPDP11.prototype.getByte = function(addr)
  */
 BusPDP11.prototype.getByteDirect = function(addr)
 {
-    return this.aMemBlocks[(addr & this.nBusMask) >>> this.nBlockShift].readByteDirect(addr & this.nBlockLimit, addr);
+    this.nDisableTraps++;
+    var b = this.aMemBlocks[(addr & this.nBusMask) >>> this.nBlockShift].readByteDirect(addr & this.nBlockLimit, addr);
+    this.nDisableTraps--;
+    return b;
 };
 
 /**
@@ -862,12 +932,17 @@ BusPDP11.prototype.getWord = function(addr)
  */
 BusPDP11.prototype.getWordDirect = function(addr)
 {
+    var w;
     var off = addr & this.nBlockLimit;
     var iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
+    this.nDisableTraps++;
     if (!PDP11.WORDBUS && off == this.nBlockLimit) {
-        return this.aMemBlocks[iBlock++].readByteDirect(off, addr) | (this.aMemBlocks[iBlock & this.nBlockMask].readByteDirect(0, addr + 1) << 8);
+        w = this.aMemBlocks[iBlock++].readByteDirect(off, addr) | (this.aMemBlocks[iBlock & this.nBlockMask].readByteDirect(0, addr + 1) << 8);
+    } else {
+        w = this.aMemBlocks[iBlock].readWordDirect(off, addr);
     }
-    return this.aMemBlocks[iBlock].readWordDirect(off, addr);
+    this.nDisableTraps--;
+    return w;
 };
 
 /**
@@ -894,7 +969,9 @@ BusPDP11.prototype.setByte = function(addr, b)
  */
 BusPDP11.prototype.setByteDirect = function(addr, b)
 {
+    this.nDisableTraps++;
     this.aMemBlocks[(addr & this.nBusMask) >>> this.nBlockShift].writeByteDirect(addr & this.nBlockLimit, b & 0xff, addr);
+    this.nDisableTraps--;
 };
 
 /**
@@ -930,12 +1007,14 @@ BusPDP11.prototype.setWordDirect = function(addr, w)
 {
     var off = addr & this.nBlockLimit;
     var iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
+    this.nDisableTraps++;
     if (!PDP11.WORDBUS && off == this.nBlockLimit) {
         this.aMemBlocks[iBlock++].writeByteDirect(off, w & 0xff, addr);
         this.aMemBlocks[iBlock & this.nBlockMask].writeByteDirect(0, (w >> 8) & 0xff, addr + 1);
-        return;
+    } else {
+        this.aMemBlocks[iBlock].writeWordDirect(off, w & 0xffff, addr);
     }
-    this.aMemBlocks[iBlock].writeWordDirect(off, w & 0xffff, addr);
+    this.nDisableTraps--;
 };
 
 /**
@@ -1099,13 +1178,41 @@ BusPDP11.prototype.addIOHandlers = function(start, end, fnReadByte, fnWriteByte,
 BusPDP11.prototype.addIOTable = function(component, table)
 {
     for (var port in table) {
+        var addr = +port;
         var afn = table[port];
+
+        /*
+         * Don't install (ie, ignore) handlers for I/O addresses that are defined with a model number
+         * that is "greater than" than the current model.
+         */
         if (afn[5] && afn[5] > this.cpu.model) continue;
+
         var fnReadByte = afn[0]? afn[0].bind(component) : null;
         var fnWriteByte = afn[1]? afn[1].bind(component) : null;
         var fnReadWord = afn[2]? afn[2].bind(component) : null;
         var fnWriteWord = afn[3]? afn[3].bind(component) : null;
-        this.addIOHandlers(+port, +port, fnReadByte, fnWriteByte, fnReadWord, fnWriteWord, afn[4]);
+
+        /*
+         * As discussed in the IOController comments above, when handlers are being registered for ODD addresses,
+         * we assume that we need different fallback handlers when reading and/or writing bytes.
+         */
+        if (addr & 0x1) {
+            if (!fnReadByte && fnReadWord) {
+                fnReadByte = function(fnReadWord) {
+                    return function(addr) {
+                        return fnReadWord(addr) & 0xff;
+                    }.bind(component);
+                }(fnReadWord);
+            }
+            if (!fnWriteByte && fnWriteWord && fnReadWord) {
+                fnWriteByte = function(fnWriteWord, fnReadWord) {
+                    return function(data, addr) {
+                        return fnWriteWord((fnReadWord(addr) & ~0xff) | data, addr);
+                    }.bind(component);
+                }(fnWriteWord, fnReadWord);
+            }
+        }
+        this.addIOHandlers(addr, addr, fnReadByte, fnWriteByte, fnReadWord, fnWriteWord, afn[4]);
     }
 };
 
@@ -1118,6 +1225,24 @@ BusPDP11.prototype.addIOTable = function(component, table)
 BusPDP11.prototype.addResetHandler = function(fnReset)
 {
     this.afnReset.push(fnReset);
+};
+
+/**
+ * fault(addr)
+ *
+ * Memory interface for signaling alignment errors.
+ *
+ * @this {BusPDP11}
+ * @param {number} addr
+ */
+BusPDP11.prototype.fault = function(addr)
+{
+    if (!this.nDisableTraps) {
+        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.WARN)) {
+            this.dbg.printMessage("memory fault on address " + this.dbg.toStrBase(addr), true, true);
+        }
+        this.cpu.trap(PDP11.TRAP.BUS_ERROR, addr);
+    }
 };
 
 /**

@@ -99,17 +99,6 @@ Component.subclass(CPUStatePDP11, CPUPDP11);
 var InterruptEvent;
 
 /**
- * initBusComplete()
- *
- * @this {CPUStatePDP11}
- */
-CPUStatePDP11.prototype.initBusComplete = function()
-{
-    this.assert(this.bus);
-    this.setMemoryAccess();
-};
-
-/**
  * initProcessor()
  *
  * @this {CPUStatePDP11}
@@ -156,7 +145,7 @@ CPUStatePDP11.prototype.initRegs = function()
     this.regsAlt = [            // Alternate R0 - R5
         0, 0, 0, 0, 0, 0
     ];
-    this.regsAltStack = [       // Alternate R6 stack pointers (kernel, super, illegal, user)
+    this.regsAltStack = [       // Alternate R6 stack pointers (KERNEL, SUPER, illegal, USER)
         0, 0, 0, 0
     ];
     this.mmuMode = 0;           // current memory management mode (see PDP11.MODE.KERNEL | SUPER | UNUSED | USER)
@@ -1027,19 +1016,6 @@ CPUStatePDP11.prototype.updateSubFlags = function(result, src, dst)
         this.flagN = this.flagZ = this.flagC = result;
         this.flagV = (src ^ dst) & (dst ^ result);
     }
-};
-
-/**
- * fault(addr)
- *
- * Memory interface for signaling alignment errors.
- *
- * @this {CPUStatePDP11}
- * @param {number} addr
- */
-CPUStatePDP11.prototype.fault = function(addr)
-{
-    this.trap(PDP11.TRAP.BUS_ERROR, addr);
 };
 
 /**
