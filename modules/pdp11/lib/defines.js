@@ -506,7 +506,6 @@ var PDP11 = {
         PRI:        4,
         RVEC:       0o60,
         XVEC:       0o64,
-        DELAY:      40,
         RCSR: {                 // 177560
             RE:     0x0001,     // Reader Enable (W/O)              TODO: Determine if we really need to exclude this write-only bit from RMASK
             DTR:    0x0002,     // Data Terminal Ready (R/W)
@@ -529,7 +528,8 @@ var PDP11 = {
             PARITY: 0x1000,     // Received Data Parity (R/O)
             FE:     0x2000,     // Framing Error (R/O)
             OE:     0x4000,     // Overrun Error (R/O)
-            ERROR:  0x8000      // Error (R/O)
+            ERROR:  0x8000,     // Error (R/O)
+            DELAY:  1
         },
         XCSR: {                 // 177564
             BREAK:  0x0001,     // BREAK (R/W)
@@ -538,11 +538,11 @@ var PDP11 = {
             READY:  0x0080,     // Transmitter Ready (R/O)
             RMASK:  0x00C5,
             WMASK:  0x0045,
-            DELAY:  8
+            DELAY:  1
         },
         XBUF: {                 // 177566
             DATA:   0x00FF,     // Transmitted Data (W/O)       TODO: Determine why pdp11.js effectively defined this as 0x7F
-            DELAY:  100
+            DELAY:  1
         }
     },
     KW11: {                     // KW11-L Line Time Clock

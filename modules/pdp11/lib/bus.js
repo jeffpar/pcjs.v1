@@ -199,46 +199,34 @@ BusPDP11.IOHANDLER = {
 /*
  * These are our custom IOController functions for all IOPAGE accesses.  They look up the IOPAGE
  * offset in the aIOHandlers table, and if an entry exists, they use the appropriate IOHANDLER indexes
- * (above) to locate the appropriate read/write handlers.
+ * (above) to locate the registered read/write handlers.  If no handler is found, then unknownAccess()
+ * is called, triggering a trap -- unless traps are disabled because direct access was requested
+ * (eg, by the Debugger).
  *
- * Note that we try to have reasonable fallbacks for byte reads when only word read handlers exist,
- * and word reads if only byte handlers exist.  Ditto for writes.  These fallbacks may not always be
- * appropriate; for example, when a byte write falls back to a word write, the address must be read
- * first, and depending on the underlying I/O device, that may or may not have side-effects.  It's really
- * up to the device to know whether that matters, and provide all the necessary handlers if it does.
+ * Handlers receive the original IOPAGE address that was used, although in most cases, it's ignored,
+ * because most handlers usually handle only one address.  Only handlers used for a range of addresses
+ * must pay attention to it.
+ *
+ * Note that these functions include fallbacks for byte reads when only word read handlers exist (by
+ * masking or shifting the result) and for word reads if only byte handlers exist (by combining bytes).
+ * Fallbacks for writes exist, too, but they are slightly more complicated, because a byte write using
+ * a word write handler requires reading the word first, and then updating the appropriate byte within
+ * that word.
+ *
+ * Those fallbacks may not always be appropriate; for example, byte writes to some device registers
+ * must be zero-extended to update the entire word.  For those cases, the fallback's "preliminary" read
+ * is issued with a zero address so that the handler can distinguish a normal read from one of these
+ * preliminary reads, and return an appropriate value for the update (ie, zero).
+ *
+ * If none of these fallback behaviors are appropriate, the device has a simple recourse: register
+ * handlers for all possible addresses and sizes.
  *
  * Unlike regular Memory blocks, IOPAGE accesses permit word accesses on ODD addresses; that works
- * just fine by registering WORD handlers for the appropriate ODD addresses.  What is unclear, however,
- * is what is exactly supposed to happen when the CPU reads or writes a BYTE from an ODD IOPAGE address;
- * it seems clear that our built-in fallbacks are NOT correct in all cases.
+ * just fine by registering WORD handlers for the appropriate ODD addresses.  For BYTE accesses, it
+ * depends.  For CPU register addresses, addIOHandlers() installs special byte handlers that perform
+ * either a simple word read or write.  Other addresses must be handled on case-by-case basis.
  *
- * For example, let's imagine that only read/write WORD handlers have been registered for ODD address
- * 177701 (ie, general register R1, set 0).  If a readByte(177701) request is made, we would fallback to
- * reading the word at 177700 and returning the high byte, but that would fetch the contents of general
- * register R0 instead of R1, which is clearly wrong.
- *
- * One solution is for the caller to register both BYTE and WORD handlers for ODD addresses, making
- * the caller responsible for the defining the correct behavior in all cases.  However, that's more work
- * for the caller, and we're just punting the problem instead of solving it.
- *
- * Another solution is for addIOHandlers() to detect the ODD address case, and install custom fallback
- * handlers for read and write BYTE accesses.  In the above example, the custom read BYTE handler could
- * invoke the read WORD handler and mask the result with 0xff, and the custom write BYTE handler could
- * first call the read WORD handler, insert the new data into the low byte of the result, and then
- * call the write WORD handler.
- *
- * However, that would produce inconsistent results between EVEN and ODD addresses in the register
- * address range (0o177700 through 0o177717), so I'm assuming that the correct solution is to install
- * alternate fallback BYTE handlers for ALL addresses in that range.  The alternate read BYTE handler will
- * mask its result with 0xff, and the alternate write BYTE handler will store the (zero-extended) byte to
- * the entire corresponding register.
- *
- * One of things that gives me pause about this solution is that it differs from the behavior of a MOVB
- * instruction when the destination is a general register, because MOVB always sign-extends the source byte
- * to a word; it does NOT zero-extend.  So it seems to strange to have a different MOVB behavior when the
- * destination register is specified using an IOPAGE address.  But, maybe that was by design.
- *
- * TODO: Another small potential improvement would be for addIOHandlers() to predefine fall-backs for all
+ * TODO: Another small potential improvement would be for addIOHandlers() to install fallbacks for ALL
  * missing handlers, in both the ODD and EVEN cases, so there's never a need to check each function index
  * before calling it.  However, since there's no avoiding checking aIOHandlers[off] (unless we FULLY populate
  * the aIOHandlers array), and since these I/O accesses should be pretty infrequent relative to all other
@@ -336,6 +324,10 @@ BusPDP11.IOController = {
              * If no handler existed, and this address was odd, then perhaps a handler exists for the even address;
              * if so, call the readWord() handler first to get the original data, then call writeWord() with the new
              * data pre-inserted in (the high byte of) the original data.
+             *
+             * WARNING: Whenever we call readWord() under these circumstances, we zero the address parameter,
+             * so that the handler can distinguish this case.  Thus, if we're dealing with a special register
+             * where a byte write operation modifies the entire register, the handler can simply return zero.
              */
             afn = bus.aIOHandlers[off & ~0x1];
             if (afn) {
@@ -484,7 +476,7 @@ BusPDP11.prototype.setIOPageRange = function(nRange)
 /**
  * getControllerBuffer(addr)
  *
- * Our Bus component also acts as custom memory controller, so it must also provide this function.
+ * Our Bus component also acts as custom memory controller for the IOPAGE, so it must also provide this function.
  *
  * @this {BusPDP11}
  * @param {number} addr
@@ -493,7 +485,7 @@ BusPDP11.prototype.setIOPageRange = function(nRange)
 BusPDP11.prototype.getControllerBuffer = function(addr)
 {
     /*
-     * No buffer is required; all accesses go to a registered I/O handler or the bit-bucket.
+     * No buffer is required for the IOPAGE; all accesses go to registered I/O handlers or to unknownAccess().
      */
     return [null, 0];
 };
@@ -501,7 +493,7 @@ BusPDP11.prototype.getControllerBuffer = function(addr)
 /**
  * getControllerAccess()
  *
- * Our Bus component also acts as custom memory controller, so it must also provide this function.
+ * Our Bus component also acts as custom memory controller for the IOPAGE, so it must also provide this function.
  *
  * @this {BusPDP11}
  * @return {Array.<function()>}
@@ -509,6 +501,17 @@ BusPDP11.prototype.getControllerBuffer = function(addr)
 BusPDP11.prototype.getControllerAccess = function()
 {
     return this.afnIOPage;
+};
+
+/**
+ * getWidth()
+ *
+ * @this {BusPDP11}
+ * @return {number}
+ */
+BusPDP11.prototype.getWidth = function()
+{
+    return this.nBusWidth;
 };
 
 /**
@@ -530,9 +533,7 @@ BusPDP11.prototype.reset = function()
  * unknownAccess(addr, data, byteFlag)
  *
  * This is our default I/O handler, called whenever there's an IOPAGE access without a corresponding entry
- * in aIOHandlers; in the interim, our Device component will override this default handler with its own function
- * by calling addIODefaultHandlers(), until the Device component has been completely rewritten to install I/O
- * handlers for all supported I/O addresses.
+ * in aIOHandlers.
  *
  * @this {BusPDP11}
  * @param {number} addr (ie, an IOPAGE address)
@@ -755,17 +756,6 @@ BusPDP11.prototype.scanMemory = function(info, addr, size)
         iBlock++;
     }
     return info;
-};
-
-/**
- * getWidth()
- *
- * @this {BusPDP11}
- * @return {number}
- */
-BusPDP11.prototype.getWidth = function()
-{
-    return this.nBusWidth;
 };
 
 /**

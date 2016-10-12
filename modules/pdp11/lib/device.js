@@ -125,9 +125,11 @@ DevicePDP11.prototype.initBus = function(cmp, bus, cpu, dbg)
     this.dbg = dbg;
 
     var device = this;
-    this.kw11.timer = this.cpu.addTimer(function() {
+    this.kw11.timer = cpu.addTimer(function() {
         device.kw11_interrupt();
     });
+
+    this.kw11.trigger = cpu.addTrigger(PDP11.KW11.VEC, PDP11.KW11.PRI);
 
     bus.addIOTable(this, DevicePDP11.UNIBUS_IOTABLE);
     bus.addResetHandler(this.reset.bind(this));
@@ -1008,7 +1010,7 @@ DevicePDP11.prototype.kw11_interrupt = function()
 {
     this.kw11.lks |= PDP11.KW11.LKS.MON;
     if (this.kw11.lks & PDP11.KW11.LKS.IE) {
-        this.cpu.interrupt(PDP11.KW11.DELAY, PDP11.KW11.PRI, PDP11.KW11.VEC);
+        this.cpu.setTrigger(this.kw11.trigger);
         this.cpu.setTimer(this.kw11.timer, 1000/60);
     }
 };

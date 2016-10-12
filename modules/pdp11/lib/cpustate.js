@@ -83,15 +83,37 @@ function CPUStatePDP11(parmsCPU)
 
 Component.subclass(CPUStatePDP11, CPUPDP11);
 
+/*
+ * Overview of Device Interrupt Support
+ *
+ * Originally, the CPU maintained a queue of requested interrupts.  Entries in this queue recorded a device's
+ * priority, vector, and delay (ie, a number of instructions to process before issuing the interrupt).  This queue
+ * would constantly grow and shrink as requests were issued and dispatched, and as long as there was something
+ * in the queue, the CPU was constantly examining it.
+ *
+ * Now we are trying something simpler.  First, the CPU offers timer services to any device that wants a callback
+ * after a specified delay, which are much more efficient than requiring the CPU to dive into an interrupt queue and
+ * look for (and decrement) delay counts on every instruction.
+ *
+ * Second, when a device decides it's time to interrupt (either at the end of some operation or when its delay timer
+ * has fired), it will simply request the interrupt, and CPU priority permitting, the interrupt will be dispatched.
+ * If CPU priority is NOT permitting, then the interrupt will remain pending until the priority drops.  This means
+ * that the CPU need not check for any pending interrupts until/unless the CPU priority changes.
+ *
+ * All this will be managed with "triggers".  Every device that wants to interrupt must register via addTrigger().
+ * This will add a Trigger object to an array, and each object will contain the (self) assigned vector, the priority,
+ * the interrupt request status, and a next pointer.
+ */
+
 /**
  * @typedef {{
- *  delay: number,
- *  priority: number,
  *  vector: number,
- *  callback: (function()|null|undefined)
- * }} InterruptEvent
+ *  priority: number,
+ *  request: number,
+ *  next: (Trigger|null)
+ * }} Trigger
  */
-var InterruptEvent;
+var Trigger;
 
 /**
  * initProcessor()
@@ -101,7 +123,15 @@ var InterruptEvent;
 CPUStatePDP11.prototype.initProcessor = function()
 {
     this.decode = PDP11.op1170.bind(this);
+
+    /** @type {Array.<Trigger>} */
+    this.aTriggers = [];
+
+    /** @type {Trigger|null} */
+    this.triggerNext = null;
+
     this.initRegs();
+
     this.flags.complete = this.flags.debugCheck = false;
 };
 
@@ -169,7 +199,7 @@ CPUStatePDP11.prototype.initRegs = function()
     this.regMB = 0;
 
     /*
-     * opFlags contains various triggers that stepCPU() needs to be aware of
+     * opFlags contains various conditions that stepCPU() needs to be aware of
      */
     this.opFlags = 0;
 
@@ -208,8 +238,6 @@ CPUStatePDP11.prototype.resetRegs = function()
     this.mmuMask = 0x3ffff;
     this.mmuMemorySize = BusPDP11.IOPAGE_18BIT;
 
-    /** @type {Array.<InterruptEvent>} */
-    this.interruptQueue = [];
     this.opFlags |= PDP11.OPFLAG.INTQ;
 
     if (this.bus) this.setMemoryAccess();
@@ -562,77 +590,131 @@ CPUStatePDP11.prototype.setSP = function(addr)
 };
 
 /**
- * interrupt(delay, priority, vector, callback)
- *
- * Interrupts are stored in a queue in delay order with the delay expressed as
- * a difference. For example if the delays were 0, 1, 0 then the first entry
- * is active and both the second and third are waiting for one more instruction
- * execution to become active.
+ * addTrigger(vector, priority)
  *
  * @this {CPUStatePDP11}
- * @param {number} delay
- * @param {number} priority
  * @param {number} vector
- * @param {function()} [callback]
+ * @param {number} priority
+ * @return {Trigger}
  */
-CPUStatePDP11.prototype.interrupt = function(delay, priority, vector, callback)
+CPUStatePDP11.prototype.addTrigger = function(vector, priority)
 {
-    var i = this.interruptQueue.length;
-    while (i-- > 0) {
-        if (this.interruptQueue[i].vector === vector) {
-            if (i > 0) {
-                this.interruptQueue[i - 1].delay += this.interruptQueue[i].delay;
-            }
-            this.interruptQueue.splice(i, 1);
-            break;
-        }
-    }
-    if (delay >= 0) {
-        i = this.interruptQueue.length;                 // queue in delay 'difference' order
-        while (i-- > 0) {
-            if (this.interruptQueue[i].delay > delay) {
-                this.interruptQueue[i].delay -= delay;
-                break;
-            }
-            delay -= this.interruptQueue[i].delay;
-        }
-        /*
-         * NOTE regarding a Google Closure Compiler "bug": if an InterruptEvent is inserted into the
-         * interruptQueue with the named properties below, they will never be seen by the rest of the
-         * code, because the compiler renames all other property references EXCEPT these.
-         *
-         *      this.interruptQueue.splice(i + 1, 0, {
-         *          "delay": delay,
-         *          "priority": (priority << 5) & 0xe0,
-         *          "vector": vector,
-         *          "callback": callback
-         *      });
-         *
-         * Perhaps if the inlined object had been explicitly @typed, that wouldn't have happened, but
-         * I'm playing it safe now: I've taken the object out-of-line, removed the quoted property names,
-         * and explicitly typed it.  The compiler re-inlines the object with correctly renamed properties.
-         */
-        /** @type {InterruptEvent} */
-        var interruptEvent = {
-            delay: delay,
-            priority: (priority << 5) & 0xe0,
-            vector: vector,
-            callback: callback
-        };
-        this.interruptQueue.splice(i + 1, 0, interruptEvent);
-    }
-    this.opFlags |= PDP11.OPFLAG.INTQ;
+    var trigger = {vector: vector, priority: priority, request: -1, next: null};
+    this.aTriggers.push(trigger);
+    return trigger;
 };
 
 /**
- * checkInterruptQueue()
+ * checkTriggers()
  *
  * @this {CPUStatePDP11}
  */
-CPUStatePDP11.prototype.checkInterruptQueue = function()
+CPUStatePDP11.prototype.checkTriggers = function()
+{
+    if (this.triggerNext && this.setTrigger(this.triggerNext)) {
+        this.removeTrigger(this.triggerNext);
+    }
+};
+
+/**
+ * insertTrigger(trigger)
+ *
+ * @this {CPUStatePDP11}
+ * @param {Trigger} trigger
+ */
+CPUStatePDP11.prototype.insertTrigger = function(trigger)
+{
+    if (trigger != this.triggerNext) {
+        var triggerPrev = this.triggerNext;
+        if (!triggerPrev || triggerPrev.priority <= trigger.priority) {
+            trigger.next = triggerPrev;
+            this.triggerNext = trigger;
+        } else {
+            do {
+                var triggerNext = triggerPrev.next;
+                if (!triggerNext || triggerNext.priority <= trigger.priority) {
+                    trigger.next = triggerNext;
+                    triggerPrev.next = trigger;
+                    break;
+                }
+                triggerPrev = triggerNext;
+            } while (true);
+        }
+    }
+};
+
+/**
+ * removeTrigger(trigger)
+ *
+ * @this {CPUStatePDP11}
+ * @param {Trigger} trigger
+ */
+CPUStatePDP11.prototype.removeTrigger = function(trigger)
+{
+    var triggerPrev = this.triggerNext;
+    if (triggerPrev == trigger) {
+        this.triggerNext = trigger.next;
+    } else {
+        do {
+            var triggerNext = triggerPrev.next;
+            if (triggerNext == trigger) {
+                triggerPrev.next = triggerNext.next;
+                break;
+            }
+            triggerPrev = triggerNext;
+        } while (true);
+    }
+};
+
+/**
+ * setTrigger(trigger)
+ *
+ * @this {CPUStatePDP11}
+ * @param {Trigger|null} trigger
+ * @return {boolean} (true if interrupt dispatched, false if not)
+ */
+CPUStatePDP11.prototype.setTrigger = function(trigger)
+{
+    if (!this.dispatchInterrupt(trigger.vector, trigger.priority)) {
+        this.insertTrigger(trigger);
+        return false;
+    }
+    return true;
+};
+
+/**
+ * dispatchInterrupt(vector, priority)
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} vector
+ * @param {number} priority
+ * @return {boolean} (true if dispatched, false if not)
+ */
+CPUStatePDP11.prototype.dispatchInterrupt = function(vector, priority)
+{
+    var priorityCPU = (this.regPSW & PDP11.PSW.PRI) >> PDP11.PSW.SHIFT.PRI;
+    if (priority > priorityCPU) {
+        if (this.opFlags & PDP11.OPFLAG.WAIT) {
+            this.advancePC(2);
+            this.opFlags &= ~PDP11.OPFLAG.WAIT;
+        }
+        this.trap(vector, PDP11.REASON.INTERRUPT);
+        return true;
+    }
+    return false;
+};
+
+/**
+ * checkInterrupts()
+ *
+ * @this {CPUStatePDP11}
+ */
+CPUStatePDP11.prototype.checkInterrupts = function()
 {
     if (this.opFlags & PDP11.OPFLAG.INTQ) {
         this.opFlags &= ~PDP11.OPFLAG.INTQ;
+        this.checkTriggers();
+        /*
         var interruptEvent = null;
         var savePSW = this.regPIR & 0xe0;
         for (var i = this.interruptQueue.length; --i >= 0;) {
@@ -666,6 +748,7 @@ CPUStatePDP11.prototype.checkInterruptQueue = function()
                 this.trap(interruptEvent.vector, PDP11.REASON.INTERRUPT);
             }
         }
+        */
     }
     else if (this.opFlags & PDP11.OPFLAG.INTQ_SPL) {
         /*
@@ -735,7 +818,7 @@ CPUStatePDP11.prototype.setPSW = function(newPSW)
         this.regsGen[6] = this.regsAltStack[this.mmuMode];
     }
     /*
-     * Trigger a call to checkInterruptQueue()
+     * Trigger a call to checkInterrupts()
      */
     this.opFlags |= PDP11.OPFLAG.INTQ;
     this.regPSW = newPSW;
@@ -1017,7 +1100,7 @@ CPUStatePDP11.prototype.trap = function(vector, reason)
         }
     }
 
-    throw vector;
+    if (reason != PDP11.REASON.INTERRUPT) throw vector;
 };
 
 /**
@@ -1891,7 +1974,7 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
              * interrupting the natural flow of instructions whenever the Debugger is stepping through code.
              */
             if ((this.opFlags & (PDP11.OPFLAG.INTQ_SPL | PDP11.OPFLAG.INTQ | PDP11.OPFLAG.WAIT)) /*&& nMinCycles*/) {
-                this.checkInterruptQueue();
+                this.checkInterrupts();
             }
         }
 

@@ -260,22 +260,28 @@ SerialPortPDP11.prototype.initBus = function(cmp, bus, cpu, dbg)
 
     var serial = this;
 
-    this.timerReceiveData = this.cpu.addTimer(function() {
+    this.triggerReceiveInterrupt = this.cpu.addTrigger(PDP11.DL11.RVEC, PDP11.DL11.PRI);
+
+    this.timerReceiveInterrupt = this.cpu.addTimer(function() {
         if (!(serial.rcsr & PDP11.DL11.RCSR.RD)) {
             if (serial.abReceive.length) {
                 serial.rbuf = serial.abReceive.shift();
                 serial.rcsr |= PDP11.DL11.RCSR.RD;
                 if (serial.rcsr & PDP11.DL11.RCSR.RIE) {
-                    serial.cpu.interrupt(PDP11.DL11.DELAY, PDP11.DL11.PRI, PDP11.DL11.RVEC);
+                    serial.cpu.setTrigger(serial.triggerReceiveInterrupt);
                 }
             }
         }
     });
 
-    this.doneTransmitInterrupt = function() {
+    this.triggerTransmitInterrupt = this.cpu.addTrigger(PDP11.DL11.XVEC, PDP11.DL11.PRI);
+
+    this.timerTransmitInterrupt = this.cpu.addTimer(function() {
         serial.xcsr |= PDP11.DL11.XCSR.READY;
-        return !!(serial.xcsr & PDP11.DL11.XCSR.TIE);
-    };
+        if (serial.xcsr & PDP11.DL11.XCSR.TIE) {
+            serial.cpu.setTrigger(serial.triggerTransmitInterrupt);
+        }
+    });
 
     bus.addIOTable(this, SerialPortPDP11.UNIBUS_IOTABLE);
     this.setReady();
@@ -465,7 +471,7 @@ SerialPortPDP11.prototype.receiveData = function(data)
     else {
         this.abReceive = this.abReceive.concat(data);
     }
-    this.cpu.setTimer(this.timerReceiveData, 50);
+    this.cpu.setTimer(this.timerReceiveInterrupt, PDP11.DL11.RBUF.DELAY);
     return true;                // for now, return true regardless, since we're buffering everything anyway
 };
 
@@ -568,7 +574,7 @@ SerialPortPDP11.prototype.readRBUF = function(addr)
 {
     this.rcsr &= ~PDP11.DL11.RCSR.RD;
     if (this.abReceive.length > 0) {
-        this.cpu.setTimer(this.timerReceiveData, 50);
+        this.cpu.setTimer(this.timerReceiveInterrupt, PDP11.DL11.RBUF.DELAY);
     }
     return this.rbuf;
 };
@@ -609,7 +615,7 @@ SerialPortPDP11.prototype.writeXCSR = function(data, addr)
      * If the device is READY, and IE is transitioning on, then request an interrupt.
      */
     if ((this.xcsr & (PDP11.DL11.XCSR.READY | PDP11.DL11.XCSR.TIE)) == PDP11.DL11.XCSR.READY && (data & PDP11.DL11.XCSR.TIE)) {
-        this.cpu.interrupt(PDP11.DL11.XCSR.DELAY, PDP11.DL11.PRI, PDP11.DL11.XVEC, this.doneTransmitInterrupt);
+        this.cpu.setTimer(this.timerTransmitInterrupt, PDP11.DL11.XCSR.DELAY);
     }
     this.xcsr = (this.xcsr & ~PDP11.DL11.XCSR.WMASK) | (data & PDP11.DL11.XCSR.WMASK);
 };
@@ -639,7 +645,7 @@ SerialPortPDP11.prototype.writeXBUF = function(data, addr)
     if (data) {
         this.transmitByte(data);
         this.xcsr &= ~PDP11.DL11.XCSR.READY;
-        this.cpu.interrupt(PDP11.DL11.XBUF.DELAY, PDP11.DL11.PRI, PDP11.DL11.XVEC, this.doneTransmitInterrupt);
+        this.cpu.setTimer(this.timerTransmitInterrupt, PDP11.DL11.XBUF.DELAY);
     }
 };
 
