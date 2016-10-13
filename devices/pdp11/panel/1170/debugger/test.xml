@@ -31,5 +31,6 @@
 		<control type="button" binding="step">Step</control>
 		<control type="button" binding="reset">Reset</control>
 		<control type="button" binding="setSpeed">Fast</control>
+		<control type="description" binding="speed" padleft="8px">Stopped</control>
 	</control>
 </panel>
