@@ -12,19 +12,20 @@ IBM PC Device Configurations
 
 All our [IBM PC Machines](machine/) are built from a collection of devices, including:
 
-* [ChipSet](chipset/)
-* [Control Panel](panel/)
-* [CPU](/docs/pcx86/cpu/)
+* [ChipSets](chipset/)
+* [Control Panels](panel/)
+* [CPUs](/docs/pcx86/cpu/)
 * [Debugger](/docs/pcx86/debugger/)
 * [Floppy Drive Controller](/docs/pcx86/fdc/)
 * [Hard Drive Controller](/docs/pcx86/hdc/)
 * [Keyboard](keyboard/)
+* [Machines](machine/)
 * [Mouse](/docs/pcx86/mouse/)
 * [RAM](/docs/pcx86/ram/)
-* [ROM](rom/)
+* [ROMs](rom/)
 * [Parallel Port](/docs/pcx86/parallel/)
 * [Serial Port](/docs/pcx86/serial/)
-* [Video](video/)
+* [Video Adapters](video/)
 
 Each of those devices can be configured in multiple ways, and some support external UI controls.
 

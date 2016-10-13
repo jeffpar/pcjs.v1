@@ -9,11 +9,12 @@ Challenger 1P Device Configurations
 
 All our [Challenger 1P Machines](machine/) are built from a collection of devices, including:
 
-* [Control Panel](panel/)
+* [Control Panels](panel/)
 * CPU (6502)
 * Debugger
 * Floppy Drive Controller
 * Keyboard
+* [Machines](machine/)
 * RAM
 * [ROM](rom/)
 * Serial Port
