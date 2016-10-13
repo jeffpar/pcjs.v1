@@ -1704,8 +1704,8 @@ PDP11.opWAIT = function(opCode)
      *
      *      1) opWAIT() sets a new opFlags bit (OPFLAG.WAIT)
      *      2) Rewind the PC back to the WAIT instruction
-     *      3) Whenever stepCPU() detects OPFLAG.WAIT, call checkInterruptQueue()
-     *      4) If checkInterruptQueue() detects an interrupt, advance PC past the WAIT and then dispatch the interrupt
+     *      3) Whenever stepCPU() detects OPFLAG.WAIT, call checkInterrupts()
+     *      4) If checkInterrupts() detects an interrupt, advance PC past the WAIT and then dispatch the interrupt
      *
      * Technically, the PC is already exactly where it's supposed to be, so why are we wasting time with steps
      * 2 and 4?  It's largely for the Debugger's sake, so that as long as execution is "blocked" by a WAIT, that's

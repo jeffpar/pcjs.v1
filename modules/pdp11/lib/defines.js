@@ -186,7 +186,7 @@ var PDP11 = {
      */
     OPFLAG: {
         INTQ_SPL:   0x01,       // INTQ triggered by SPL
-        INTQ:       0x02,       // call checkInterruptQueue()
+        INTQ:       0x02,       // call checkInterrupts()
         WAIT:       0x04,       // WAIT operation in progress
         TRAP_TF:    0x10,       // aka PDP11.PSW.TF
         TRAP_MMU:   0x20,

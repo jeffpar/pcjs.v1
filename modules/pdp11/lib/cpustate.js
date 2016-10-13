@@ -87,29 +87,30 @@ Component.subclass(CPUStatePDP11, CPUPDP11);
  * Overview of Device Interrupt Support
  *
  * Originally, the CPU maintained a queue of requested interrupts.  Entries in this queue recorded a device's
- * priority, vector, and delay (ie, a number of instructions to process before issuing the interrupt).  This queue
- * would constantly grow and shrink as requests were issued and dispatched, and as long as there was something
+ * priority, vector, and delay (ie, a number of instructions to execute before dispatching the interrupt).  This
+ * queue would constantly grow and shrink as requests were issued and dispatched, and as long as there was something
  * in the queue, the CPU was constantly examining it.
  *
- * Now we are trying something simpler.  First, the CPU offers timer services to any device that wants a callback
- * after a specified delay, which are much more efficient than requiring the CPU to dive into an interrupt queue and
- * look for (and decrement) delay counts on every instruction.
+ * Now we are trying something more efficient.  First, for devices that require delays (like a serial port's receiver
+ * and transmitter buffer registers that are supposed to "clock" the data in and out at a specific baud rate), the
+ * CPU offers timer services that will "fire" a callback after a specified delay, which are much more efficient than
+ * requiring the CPU to dive into an interrupt queue and decrement delay counts on every instruction.
  *
- * Second, when a device decides it's time to interrupt (either at the end of some operation or when its delay timer
- * has fired), it will simply request the interrupt, and CPU priority permitting, the interrupt will be dispatched.
- * If CPU priority is NOT permitting, then the interrupt will remain pending until the priority drops.  This means
- * that the CPU need not check for any pending interrupts until/unless the CPU priority changes.
+ * Second, devices that generate interrupts will allocate a trigger object during initialization; we will no longer
+ * be creating and destroying interrupt event objects and inserting/deleting them in a constantly changing queue.  Each
+ * trigger contains properties that never change (eg, the vector and priority), along with a "next" pointer that's
+ * only used when the trigger is active.
  *
- * All this will be managed with "triggers".  Every device that wants to interrupt must register via addTrigger().
- * This will add a Trigger object to an array, and each object will contain the (self) assigned vector, the priority,
- * the interrupt request status, and a next pointer.
+ * When a device decides it's time to interrupt (either at the end of some I/O operation or when a timer has "fired"),
+ * it will simply "pull the trigger", which basically means that its trigger will be linked onto a list of active
+ * triggers, and in priority order, so that when the CPU is ready to acknowledge interrupts, it need only check the
+ * top of the active trigger list.
  */
 
 /**
  * @typedef {{
  *  vector: number,
  *  priority: number,
- *  request: number,
  *  next: (Trigger|null)
  * }} Trigger
  */
@@ -125,10 +126,10 @@ CPUStatePDP11.prototype.initProcessor = function()
     this.decode = PDP11.op1170.bind(this);
 
     /** @type {Array.<Trigger>} */
-    this.aTriggers = [];
+    this.aTriggers = [];                // list of all triggers, active or not (TODO: DEBUG-only?)
 
     /** @type {Trigger|null} */
-    this.triggerNext = null;
+    this.triggerNext = null;            // the head of the active triggers list, in priority order
 
     this.initRegs();
 
@@ -599,21 +600,9 @@ CPUStatePDP11.prototype.setSP = function(addr)
  */
 CPUStatePDP11.prototype.addTrigger = function(vector, priority)
 {
-    var trigger = {vector: vector, priority: priority, request: -1, next: null};
+    var trigger = {vector: vector, priority: priority, next: null};
     this.aTriggers.push(trigger);
     return trigger;
-};
-
-/**
- * checkTriggers()
- *
- * @this {CPUStatePDP11}
- */
-CPUStatePDP11.prototype.checkTriggers = function()
-{
-    if (this.triggerNext && this.setTrigger(this.triggerNext)) {
-        this.removeTrigger(this.triggerNext);
-    }
 };
 
 /**
@@ -638,7 +627,7 @@ CPUStatePDP11.prototype.insertTrigger = function(trigger)
                     break;
                 }
                 triggerPrev = triggerNext;
-            } while (true);
+            } while (triggerPrev);
         }
     }
 };
@@ -655,14 +644,14 @@ CPUStatePDP11.prototype.removeTrigger = function(trigger)
     if (triggerPrev == trigger) {
         this.triggerNext = trigger.next;
     } else {
-        do {
+        while (triggerPrev) {
             var triggerNext = triggerPrev.next;
             if (triggerNext == trigger) {
                 triggerPrev.next = triggerNext.next;
                 break;
             }
             triggerPrev = triggerNext;
-        } while (true);
+        }
     }
 };
 
@@ -670,16 +659,65 @@ CPUStatePDP11.prototype.removeTrigger = function(trigger)
  * setTrigger(trigger)
  *
  * @this {CPUStatePDP11}
- * @param {Trigger|null} trigger
+ * @param {Trigger} trigger
  * @return {boolean} (true if interrupt dispatched, false if not)
  */
 CPUStatePDP11.prototype.setTrigger = function(trigger)
 {
-    if (!this.dispatchInterrupt(trigger.vector, trigger.priority)) {
-        this.insertTrigger(trigger);
-        return false;
+    /*
+     * For now, we will not dispatch interrupts immediately, but always defer to checkInterrupts() instead.
+     *
+    if (this.dispatchInterrupt(trigger.vector, trigger.priority)) {
+        return true;
     }
-    return true;
+     */
+    this.insertTrigger(trigger);
+    this.opFlags |= PDP11.OPFLAG.INTQ;
+    return false;
+};
+
+/**
+ * checkTriggers(priority)
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} priority
+ * @return {Trigger|null}
+ */
+CPUStatePDP11.prototype.checkTriggers = function(priority)
+{
+    return (this.triggerNext && this.triggerNext.priority > priority)? this.triggerNext : null;
+};
+
+/**
+ * checkInterrupts()
+ *
+ * @this {CPUStatePDP11}
+ */
+CPUStatePDP11.prototype.checkInterrupts = function()
+{
+    if (this.opFlags & PDP11.OPFLAG.INTQ) {
+        this.opFlags &= ~PDP11.OPFLAG.INTQ;
+
+        var vector = PDP11.TRAP.PIRQ;
+        var priority = (this.regPIR & PDP11.PSW.PRI) >> PDP11.PSW.SHIFT.PRI;
+
+        var trigger = this.checkTriggers(priority);
+        if (trigger) {
+            vector = trigger.vector;
+            priority = trigger.priority;
+        }
+
+        if (this.dispatchInterrupt(vector, priority)) {
+            if (trigger) this.removeTrigger(trigger);
+        }
+    }
+    else if (this.opFlags & PDP11.OPFLAG.INTQ_SPL) {
+        /*
+         * We know that INTQ (bit 1) is clear, so since INTQ_SPL (bit 0) is set, incrementing opFlags
+         * will transform INTQ_SPL into INTQ, without affecting any other (higher) bits.
+         */
+        this.opFlags++;
+    }
 };
 
 /**
@@ -705,61 +743,6 @@ CPUStatePDP11.prototype.dispatchInterrupt = function(vector, priority)
 };
 
 /**
- * checkInterrupts()
- *
- * @this {CPUStatePDP11}
- */
-CPUStatePDP11.prototype.checkInterrupts = function()
-{
-    if (this.opFlags & PDP11.OPFLAG.INTQ) {
-        this.opFlags &= ~PDP11.OPFLAG.INTQ;
-        this.checkTriggers();
-        /*
-        var interruptEvent = null;
-        var savePSW = this.regPIR & 0xe0;
-        for (var i = this.interruptQueue.length; --i >= 0;) {
-            if (this.interruptQueue[i].delay > 0) {
-                this.interruptQueue[i].delay--;
-                this.opFlags |= PDP11.OPFLAG.INTQ;
-                break;          // Decrement only one delay 'difference' per cycle
-            }
-            if (this.interruptQueue[i].callback) {
-                if (!this.interruptQueue[i].callback()) {
-                    this.interruptQueue.splice(i, 1);
-                    continue;
-                }
-                //delete
-                this.interruptQueue[i].callback = null;
-            }
-            if (this.interruptQueue[i].priority > savePSW) {
-                savePSW = this.interruptQueue[i].priority;
-                interruptEvent = this.interruptQueue[i];
-                this.interruptQueue.splice(i, 1);
-            }
-        }
-        if (savePSW > (this.regPSW & 0xe0)) {
-            if (this.opFlags & PDP11.OPFLAG.WAIT) {
-                this.advancePC(2);
-                this.opFlags &= ~PDP11.OPFLAG.WAIT;
-            }
-            if (!interruptEvent) {
-                this.trap(PDP11.TRAP.PIRQ, PDP11.REASON.INTERRUPT);
-            } else {
-                this.trap(interruptEvent.vector, PDP11.REASON.INTERRUPT);
-            }
-        }
-        */
-    }
-    else if (this.opFlags & PDP11.OPFLAG.INTQ_SPL) {
-        /*
-         * We know that INTQ (bit 1) is clear, so since INTQ_SPL (bit 0) is set, incrementing opFlags
-         * will transform INTQ_SPL into INTQ, without affecting any other (higher) bits.
-         */
-        this.opFlags++;
-    }
-};
-
-/**
  * getPSW()
  *
  * @this {CPUStatePDP11}
@@ -768,11 +751,11 @@ CPUStatePDP11.prototype.checkInterrupts = function()
 CPUStatePDP11.prototype.getPSW = function()
 {
     /*
-     * I'm not sure why this function can't simply be written as:
+     * TODO: I'm not sure why this function can't simply be written as:
      *
      *      return (this.regPSW & ~PDP11.PSW.FLAGS) | (this.getNF() | this.getZF() | this.getVF() | this.getCF());
      *
-     * but for now, I'm keeping the same masking logic as pdp11.js.
+     * but for now, I'm keeping the same masking logic as the original pdp11.js.
      */
     var mask = PDP11.PSW.CMODE | PDP11.PSW.PMODE | PDP11.PSW.REGSET | PDP11.PSW.PRI | PDP11.PSW.TF;
     return this.regPSW = (this.regPSW & mask) | this.getNF() | this.getZF() | this.getVF() | this.getCF();
@@ -817,11 +800,23 @@ CPUStatePDP11.prototype.setPSW = function(newPSW)
         this.regsAltStack[oldMode] = this.regsGen[6];
         this.regsGen[6] = this.regsAltStack[this.mmuMode];
     }
+    this.regPSW = newPSW;
+
     /*
-     * Trigger a call to checkInterrupts()
+     * Trigger a call to checkInterrupts(), just in case.
+     *
+     * TODO: I think this is overdone; if you set a breakpoint on checkInterrupts(), you'll see that a significant
+     * percentage of calls do nothing.  For example, you'll usually see a spurious checkInterrupts() immediately after
+     * an interrupt has been dispatched, because it's dispatched via trap(), and trap() calls setPSW().
+     *
+     * I mean, sure, it's POSSIBLE that the new PSW loaded by trap() actually set a lower priority, allowing a lower
+     * priority interrupt to immediately be acknowledged.  But perhaps we should a bit more rigorous here.
+     *
+     * For example, we could avoid setting INTQ unless 1) there's actually an active interrupt trigger (ie, triggerNext
+     * is not null) or 2) an optional fCheckInterrupts flag is passed to us, because the caller has some knowledge
+     * that priority could be changing.  Just throwing out some ideas....
      */
     this.opFlags |= PDP11.OPFLAG.INTQ;
-    this.regPSW = newPSW;
 };
 
 /**
