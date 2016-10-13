@@ -1039,6 +1039,20 @@ PDP11.opDECB = function(opCode)
 /**
  * opDIV(opCode)
  *
+ * The instruction "DIV SRC,Rn" determines SRC using the DSTMODE portion of the opcode and Rn using
+ * the SRCMODE portion; Rn can only be a register (and it should be an EVEN-numbered register, lest you
+ * get unexpected results).  The dividend (DST) is then calculated as:
+ *
+ *      DST = (regs[Rn] << 16) | (regs[Rn|1])
+ *
+ * DST is divided by SRC, and the quotient is stored in regs[Rn] and the remainder in regs[Rn|1].
+ *
+ * For example:
+ *
+ *      DIV     R4,R0
+ *
+ * where R4 = 006400 and R0,R1 = 000000,015000 will result in R0,R1 = 000002,000000.
+ *
  * @this {CPUStatePDP11}
  * @param {number} opCode
  */

@@ -535,6 +535,20 @@ CPUStatePDP11.prototype.getPC = function()
 };
 
 /**
+ * getLastPC()
+ *
+ * @this {CPUStatePDP11}
+ * @return {number}
+ */
+CPUStatePDP11.prototype.getLastPC = function()
+{
+    /*
+     * As long as we're always snapping the PC before every opcode, we might as well use it....
+     */
+    return this.regMMR2;
+};
+
+/**
  * getPCWord()
  *
  * @this {CPUStatePDP11}

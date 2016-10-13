@@ -46,10 +46,10 @@ if (NODE) {
  *
  * The Device component implements the following "default" devices:
  *
- *      KW11
- *      DISPLAY Registers
- *      MMU Registers
- *      CPU Registers (eg, PSW)
+ *      KW11 (KW11-L Line Time Clock)
+ *      CNSL (Console Switch and Front Panel Display)
+ *
+ * as well providing access to all the MMU and CPU registers, PSW, etc.
  *
  * @constructor
  * @extends Component
@@ -59,14 +59,14 @@ function DevicePDP11(parmsDevice)
 {
     Component.call(this, "Device", parmsDevice, DevicePDP11, MessagesPDP11.DEVICE);
 
-    this.display = {
+    this.console = {            // CNSL registers
         data:       0,
         address:    0,
         misc:       0x14,
         switches:   0
     };
 
-    this.kw11 = {
+    this.kw11 = {               // LW11 registers
         csr:        0,
         timer:      -1          // initBus() will initialize this timer ID
     };
@@ -168,6 +168,33 @@ DevicePDP11.prototype.writeLKS = function(data, addr)
 };
 
 /**
+ * readCNSL(addr)
+ *
+ * If addr is set, then this a normal read, so we should return normal results (ie, switches);
+ * if addr is NOT set, then this is a read-before-write, so we must return the value being updated (ie, data).
+ *
+ * @this {DevicePDP11}
+ * @param {number} addr (eg, PDP11.UNIBUS.CNSL or 177570)
+ * @return {number}
+ */
+DevicePDP11.prototype.readCNSL = function(addr)
+{
+    return (addr? this.console.switches : this.console.data) & 0xffff;
+};
+
+/**
+ * writeCNSL(data, addr)
+ *
+ * @this {DevicePDP11}
+ * @param {number} data
+ * @param {number} addr (eg, PDP11.UNIBUS.CNSL or 177570)
+ */
+DevicePDP11.prototype.writeCNSL = function(data, addr)
+{
+    this.console.data = data;
+};
+
+/**
  * readMMR0(addr)
  *
  * @this {DevicePDP11}
@@ -189,7 +216,7 @@ DevicePDP11.prototype.readMMR0 = function(addr)
 DevicePDP11.prototype.writeMMR0 = function(data, addr)
 {
     this.cpu.setMMR0(data);
-    this.updateDisplayMode();
+    this.updateConsoleMode();
 };
 
 /**
@@ -250,21 +277,21 @@ DevicePDP11.prototype.readMMR3 = function(addr)
 DevicePDP11.prototype.writeMMR3 = function(data, addr)
 {
     this.cpu.setMMR3(data);
-    this.updateDisplayMode();
+    this.updateConsoleMode();
 };
 
 /**
- * updateDisplayMode()
+ * updateConsoleMode()
  *
  * @this {DevicePDP11}
  */
-DevicePDP11.prototype.updateDisplayMode = function()
+DevicePDP11.prototype.updateConsoleMode = function()
 {
     /*
      * Set bit to 1 (22-bit), 2 (18-bit), or 4 (16-bit)
      */
     var bit = this.cpu.mmuEnable? ((this.cpu.regMMR3 & PDP11.MMR3.MMU_22BIT)? 1 : 2) : 4;
-    this.display.misc = (this.display.misc & ~7) | bit;
+    this.console.misc = (this.console.misc & ~7) | bit;
 };
 
 /**
@@ -1024,7 +1051,7 @@ DevicePDP11.prototype.kw11_interrupt = function()
  */
 DevicePDP11.prototype.reset = function()
 {
-    this.display.misc = (this.display.misc & ~0x77) | 0x14; // kernel 16 bit
+    this.console.misc = (this.console.misc & ~0x77) | 0x14; // kernel 16 bit
     this.kw11.lks = 0;
 };
 
@@ -1042,6 +1069,7 @@ DevicePDP11.UNIBUS_IOTABLE = {
     [PDP11.UNIBUS.KDSAR0]:  /* 172360 */    [null, null, DevicePDP11.prototype.readKDSAR,   DevicePDP11.prototype.writeKDSAR,   "KDSAR"],
     [PDP11.UNIBUS.MMR3]:    /* 172516 */    [null, null, DevicePDP11.prototype.readMMR3,    DevicePDP11.prototype.writeMMR3,    "MMR3"],
     [PDP11.UNIBUS.LKS]:     /* 177546 */    [null, null, DevicePDP11.prototype.readLKS,     DevicePDP11.prototype.writeLKS,     "LKS"],
+    [PDP11.UNIBUS.CNSL]:    /* 177570 */    [null, null, DevicePDP11.prototype.readCNSL,    DevicePDP11.prototype.writeCNSL,    "CNSL"],
     [PDP11.UNIBUS.MMR0]:    /* 177572 */    [null, null, DevicePDP11.prototype.readMMR0,    DevicePDP11.prototype.writeMMR0,    "MMR0"],
     [PDP11.UNIBUS.MMR1]:    /* 177574 */    [null, null, DevicePDP11.prototype.readMMR1,    DevicePDP11.prototype.writeIgnored, "MMR1"],
     [PDP11.UNIBUS.MMR2]:    /* 177576 */    [null, null, DevicePDP11.prototype.readMMR2,    DevicePDP11.prototype.writeIgnored, "MMR2"],

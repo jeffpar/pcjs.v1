@@ -216,7 +216,7 @@ BusPDP11.IOHANDLER = {
  * Those fallbacks may not always be appropriate; for example, byte writes to some device registers
  * must be zero-extended to update the entire word.  For those cases, the fallback's "preliminary" read
  * is issued with a zero address so that the handler can distinguish a normal read from one of these
- * preliminary reads, and return an appropriate value for the update (ie, zero).
+ * preliminary reads (aka read-before-write), and return an appropriate value for the update (eg, zero).
  *
  * If none of these fallback behaviors are appropriate, the device has a simple recourse: register
  * handlers for all possible addresses and sizes.
@@ -543,10 +543,15 @@ BusPDP11.prototype.reset = function()
  */
 BusPDP11.prototype.unknownAccess = function(addr, data, byteFlag)
 {
+    if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.WARN)) {
+        /*
+         * TODO: For 22-bit machines, let's display addr as a 3-byte value (for a total of 9 octal digits)
+         */
+        this.dbg.printMessage("warning: unknown I/O access (" + this.dbg.toStrBase(addr, 3) + "," + this.dbg.toStrBase(data) + "," + byteFlag + ")", true, true);
+        this.cpu.setPC(this.cpu.getLastPC());
+        this.cpu.stopCPU();
+    }
     if (!this.nDisableTraps) {
-        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.WARN)) {
-            this.dbg.printMessage("warning: unrecognized I/O access(" + this.dbg.toStrBase(addr) + "," + this.dbg.toStrBase(data) + "," + byteFlag + ")", true, true);
-        }
         this.cpu.trap(PDP11.TRAP.BUS_ERROR, addr);
     }
     return 0;

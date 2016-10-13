@@ -218,7 +218,7 @@ str.toOct = function(n, cch, fPrefix)
     if (cch) {
         if (cch > 11) cch = 11;
     } else {
-        cch = (n & ~0xffff)? 11 : 6;
+        cch = (n & ~0xffff)? 11 : 6;    // TODO: For our 22-bit machines, we really don't need more than 8 digits max
     }
     /*
      * An initial "falsey" check for null takes care of both null and undefined;

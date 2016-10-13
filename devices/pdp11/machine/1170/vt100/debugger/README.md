@@ -1,11 +1,12 @@
 ---
 layout: page
-title: PDP-11/70 with VT100 Terminal
+title: PDP-11/70 with VT100 Terminal and Debugger
 permalink: /devices/pdp11/machine/1170/vt100/
 machines:
   - id: test1170
     type: pdp11
-    config: /devices/pdp11/machine/1170/vt100/machine.xml
+    debugger: true
+    config: /devices/pdp11/machine/1170/vt100/debugger/machine.xml
     connection: dl11->vt100.serialPort
   - id: vt100
     type: pc8080

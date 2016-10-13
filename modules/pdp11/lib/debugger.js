@@ -1152,7 +1152,7 @@ if (DEBUGGER) {
     DebuggerPDP11.prototype.message = function(sMessage, fAddress)
     {
         if (fAddress) {
-            sMessage += " @" + this.toStrAddr(this.newAddr(this.cpu.getPC()));
+            sMessage += " @" + this.toStrAddr(this.newAddr(this.cpu.getLastPC()));
         }
 
         if (this.bitsMessage & MessagesPDP11.BUFFER) {

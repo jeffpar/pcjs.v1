@@ -421,11 +421,12 @@ var PDP11 = {
 
         LKS:        0o177546,   //                                  KW11-L Clock Status
 
-        RCSR:       0o177560,   //                                  Console Terminal: Receiver Status Register
-        RBUF:       0o177562,   //                                  Console Terminal: Receiver Data Buffer Register
-        XCSR:       0o177564,   //                                  Console Terminal: Transmitter Status Register
-        XBUF:       0o177566,   //                                  Console Terminal: Transmitter Data Buffer Register
-        DISPLAY:    0o177570,   //                                  Console Switch and Display
+        RCSR:       0o177560,   //                                  Display Terminal: Receiver Status Register
+        RBUF:       0o177562,   //                                  Display Terminal: Receiver Data Buffer Register
+        XCSR:       0o177564,   //                                  Display Terminal: Transmitter Status Register
+        XBUF:       0o177566,   //                                  Display Terminal: Transmitter Data Buffer Register
+
+        CNSL:       0o177570,   //                                  Console Switch and Front Panel Display
 
         MMR0:       0o177572,   // 777572   17777572
         MMR1:       0o177574,   // 777574   17777574
