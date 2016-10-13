@@ -1201,7 +1201,7 @@ PDP11.opJSR = function(opCode)
 PDP11.opMARK = function(opCode)
 {
     var addr = (this.getPC() + ((opCode & 0x3F) << 1)) & 0xffff;
-    var src = this.readWordFromVirtual(addr | 0x10000);
+    var src = this.readWord(addr | this.addrDSpace);
     this.setPC(this.regsGen[5]);
     this.setSP(addr + 2);
     this.regsGen[5] = src;

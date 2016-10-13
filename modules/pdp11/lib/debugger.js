@@ -52,12 +52,14 @@ if (DEBUGGER) {
  * DebuggerPDP11 Address Object
  *
  *      addr            address
+ *      fPhysical       true if this is a physical address
  *      fTemporary      true if this is a temporary breakpoint address
  *      sCmd            set for breakpoint addresses if there's an associated command string
  *      aCmds           preprocessed commands (from sCmd)
  *
  * @typedef {{
  *      addr:(number|undefined),
+ *      fPhysical:(boolean|undefined),
  *      fTemporary:(boolean|undefined),
  *      sCmd:(string|undefined),
  *      aCmds:(Array.<string>|undefined)
@@ -587,7 +589,7 @@ if (DEBUGGER) {
         var b = 0xff;
         var addr = this.getAddr(dbgAddr, false, 1);
         if (addr !== PDP11.ADDR_INVALID) {
-            b = this.bus.getByteDirect(addr);
+            b = dbgAddr.fPhysical? this.bus.getByteDirect(addr) : this.cpu.getByteDirect(addr);
             if (inc) this.incAddr(dbgAddr, inc);
         }
         return b;
@@ -606,7 +608,7 @@ if (DEBUGGER) {
         var w = 0xffff;
         var addr = this.getAddr(dbgAddr, false, 2);
         if (addr !== PDP11.ADDR_INVALID) {
-            w = this.bus.getWordDirect(addr);
+            w = dbgAddr.fPhysical? this.bus.getWordDirect(addr) : this.cpu.getWordDirect(addr);
             if (inc) this.incAddr(dbgAddr, inc);
         }
         return w;
@@ -624,7 +626,11 @@ if (DEBUGGER) {
     {
         var addr = this.getAddr(dbgAddr, true, 1);
         if (addr !== PDP11.ADDR_INVALID) {
-            this.bus.setByteDirect(addr, b);
+            if (dbgAddr.fPhysical) {
+                this.bus.setByteDirect(addr, b);
+            } else {
+                this.cpu.setByteDirect(addr, b);
+            }
             if (inc) this.incAddr(dbgAddr, inc);
             this.cmp.updateStatus(true);        // force a computer status update if, say, video memory was the target
         }
@@ -642,24 +648,29 @@ if (DEBUGGER) {
     {
         var addr = this.getAddr(dbgAddr, true, 2);
         if (addr !== PDP11.ADDR_INVALID) {
-            this.bus.setWordDirect(addr, w);
+            if (dbgAddr.fPhysical) {
+                this.bus.setWordDirect(addr, w);
+            } else {
+                this.cpu.setWordDirect(addr, w);
+            }
             if (inc) this.incAddr(dbgAddr, inc);
             this.cmp.updateStatus(true);        // force a computer status update if, say, video memory was the target
         }
     };
 
     /**
-     * newAddr(addr)
+     * newAddr(addr, fPhysical)
      *
      * Returns a NEW DbgAddrPDP11 object, initialized with specified values and/or defaults.
      *
      * @this {DebuggerPDP11}
      * @param {number} [addr]
+     * @param {boolean} [fPhysical]
      * @return {DbgAddrPDP11}
      */
-    DebuggerPDP11.prototype.newAddr = function(addr)
+    DebuggerPDP11.prototype.newAddr = function(addr, fPhysical)
     {
-        return {addr: addr, fTemporary: false};
+        return {addr: addr, fPhysical: fPhysical, fTemporary: false};
     };
 
     /**
@@ -729,14 +740,20 @@ if (DEBUGGER) {
         var dbgAddr;
         var dbgAddrNext = (fCode? this.dbgAddrNextCode : this.dbgAddrNextData);
         var addr = dbgAddrNext.addr;
+        var fPhysical = false;
         if (sAddr !== undefined) {
             sAddr = this.parseReference(sAddr);
+            var ch = sAddr.charAt(0);
+            if (ch == '%') {
+                fPhysical = true;
+                sAddr = sAddr.substr(1);
+            }
             dbgAddr = this.findSymbolAddr(sAddr);
             if (dbgAddr) return dbgAddr;
             addr = this.parseExpression(sAddr, fPrint);
         }
         if (addr != null) {
-            dbgAddr = this.newAddr(addr);
+            dbgAddr = this.newAddr(addr, fPhysical);
         }
         return dbgAddr;
     };
@@ -1228,15 +1245,16 @@ if (DEBUGGER) {
     };
 
     /**
-     * startCPU(fUpdateFocus)
+     * startCPU(fUpdateFocus, fQuiet)
      *
      * @this {DebuggerPDP11}
      * @param {boolean} [fUpdateFocus] is true to update focus
+     * @param {boolean} [fQuiet]
      * @return {boolean} true if run request successful, false if not
      */
-    DebuggerPDP11.prototype.startCPU = function(fUpdateFocus)
+    DebuggerPDP11.prototype.startCPU = function(fUpdateFocus, fQuiet)
     {
-        if (!this.checkCPU()) return false;
+        if (!this.checkCPU(fQuiet)) return false;
         this.cpu.startCPU(fUpdateFocus);
         return true;
     };
@@ -1336,23 +1354,20 @@ if (DEBUGGER) {
     };
 
     /**
-     * checkCPU()
+     * checkCPU(fQuiet)
      *
      * Make sure the CPU is ready (finished initializing), powered, not already running, and not in an error state.
      *
      * @this {DebuggerPDP11}
+     * @param {boolean} [fQuiet]
      * @return {boolean}
      */
-    DebuggerPDP11.prototype.checkCPU = function()
+    DebuggerPDP11.prototype.checkCPU = function(fQuiet)
     {
-        if (!this.cpu)
+        if (!this.cpu || !this.cpu.isReady() || !this.cpu.isPowered() || this.cpu.isRunning()) {
+            if (!fQuiet) this.println("cpu busy or unavailable, command ignored");
             return false;
-        if (!this.cpu.isReady())
-            return false;
-        if (!this.cpu.isPowered())
-            return false;
-        if (this.cpu.isRunning())
-            return false;
+        }
         return !this.cpu.isError();
     };
 
@@ -1581,7 +1596,7 @@ if (DEBUGGER) {
          */
         if (nState >= 0 && this.aaOpcodeCounts.length) {
             this.cOpcodes++;
-            var opCode = this.bus.getWordDirect(addr);
+            var opCode = this.cpu.getWordDirect(addr);
             if (opCode != null) {
                 var dbgAddr = this.aOpcodeHistory[this.iOpcodeHistory];
                 this.setAddr(dbgAddr, cpu.getPC());
@@ -3279,9 +3294,7 @@ if (DEBUGGER) {
             this.parseAddrOptions(dbgAddr, sOptions);
             this.setTempBreakpoint(dbgAddr);
         }
-        if (!this.startCPU(true)) {
-            if (!fQuiet) this.println("cpu busy or unavailable, run command ignored");
-        }
+        this.startCPU(true, fQuiet);
     };
 
     /**
