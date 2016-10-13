@@ -262,7 +262,7 @@ SerialPortPDP11.prototype.initBus = function(cmp, bus, cpu, dbg)
 
     this.triggerReceiveInterrupt = this.cpu.addTrigger(PDP11.DL11.RVEC, PDP11.DL11.PRI);
 
-    this.timerReceiveInterrupt = this.cpu.addTimer(function() {
+    this.timerReceiveInterrupt = this.cpu.addTimer(function readyReceiver() {
         if (!(serial.rcsr & PDP11.DL11.RCSR.RD)) {
             if (serial.abReceive.length) {
                 serial.rbuf = serial.abReceive.shift();
@@ -276,7 +276,7 @@ SerialPortPDP11.prototype.initBus = function(cmp, bus, cpu, dbg)
 
     this.triggerTransmitInterrupt = this.cpu.addTrigger(PDP11.DL11.XVEC, PDP11.DL11.PRI);
 
-    this.timerTransmitInterrupt = this.cpu.addTimer(function() {
+    this.timerTransmitInterrupt = this.cpu.addTimer(function readyTransmitter() {
         serial.xcsr |= PDP11.DL11.XCSR.READY;
         if (serial.xcsr & PDP11.DL11.XCSR.TIE) {
             serial.cpu.setTrigger(serial.triggerTransmitInterrupt);

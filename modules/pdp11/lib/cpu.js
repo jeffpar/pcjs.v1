@@ -936,7 +936,13 @@ CPUPDP11.prototype.setTimer = function(iTimer, ms, fReset)
     if (iTimer >= 0 && iTimer < this.aTimers.length) {
         if (fReset || this.aTimers[iTimer][0] < 0) {
             nCycles = this.getMSCycles(ms);
-            this.aTimers[iTimer][0] = nCycles;
+            /*
+             * We must now confront the following problem: if the CPU is currently executing a burst of cycles,
+             * the number of cycles it has executed in that burst so far must NOT be charged against the cycle
+             * timeout we're about to set.  The simplest way to resolve that is to immediately call endBurst()
+             * and bias the above cycle timeout by the number of cycles that the burst executed.
+             */
+            this.aTimers[iTimer][0] = nCycles + this.endBurst();
         }
     }
     return nCycles;
@@ -999,14 +1005,18 @@ CPUPDP11.prototype.updateTimers = function(nCycles)
 };
 
 /**
- * endBurst()
+ * endBurst(fReset)
  *
  * @this {CPUPDP11}
+ * @param {boolean} [fReset]
+ * @return {number} (number of cycles executed in the most recent burst)
  */
-CPUPDP11.prototype.endBurst = function()
+CPUPDP11.prototype.endBurst = function(fReset)
 {
-    this.nBurstCycles -= this.nStepCycles;
+    var nCycles = this.nBurstCycles -= this.nStepCycles;
     this.nStepCycles = 0;
+    if (fReset) this.nBurstCycles = 0;
+    return nCycles;
 };
 
 /**
@@ -1027,17 +1037,17 @@ CPUPDP11.prototype.runCPU = function()
     try {
         do {
             /*
-             * nCyclesPerBurst is how many cycles we WANT to run on each iteration of stepCPU(), and may
-             * be as HIGH as nCyclesPerYield, but it may be significantly less.  getBurstCycles() will adjust
-             * nCyclesPerBurst downward if any CPU timers need to fire during the next burst.
+             * nCycles is how many cycles we WANT to run on each iteration of stepCPU(), and may be as
+             * HIGH as nCyclesPerYield, but it may be significantly less.  getBurstCycles() will adjust
+             * nCycles downward if any CPU timers need to fire during the next burst.
              */
-            var nCyclesPerBurst = this.getBurstCycles(this.flags.checksum? 1 : this.nCyclesPerYield);
+            var nCycles = this.getBurstCycles(this.flags.checksum? 1 : this.nCyclesPerYield);
 
             /*
              * Execute the burst.
              */
             try {
-                this.stepCPU(nCyclesPerBurst);
+                this.stepCPU(nCycles);
             }
             catch(exception) {
                 /*
@@ -1049,24 +1059,21 @@ CPUPDP11.prototype.runCPU = function()
             }
 
             /*
-             * nCycles is how many cycles stepCPU() actually ran (nBurstCycles less any remaining nStepCycles);
-             * that calculation matches the return value from stepCPU(), but since it may have thrown an exception,
-             * we can't rely on it.
+             * Terminate the burst, returning the number of cycles that stepCPU() actually ran.
              */
-            var nCycles = this.nBurstCycles - this.nStepCycles;
-
-            /*
-             * Update any/all timers, firing those whose cycle countdowns have reached (or dropped below) zero.
-             */
-            this.updateTimers(nCycles);
+            nCycles = this.endBurst(true);
 
             /*
              * Add nCycles to nCyclesThisRun, as well as nRunCycles (the cycle count since the CPU first started).
              */
             this.nCyclesThisRun += nCycles;
             this.nRunCycles += nCycles;
-            this.addCycles(0, true);
             this.updateChecksum(nCycles);
+
+            /*
+             * Update any/all timers, firing those whose cycle countdowns have reached (or dropped below) zero.
+             */
+            this.updateTimers(nCycles);
 
             this.nCyclesNextYield -= nCycles;
             if (this.nCyclesNextYield <= 0) {
