@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <panel id="panel" width="100%" padding="8px">
 	<name>Control Panel</name>
-	<control type="container" class="pcjs-textarea" width="60%" padbottom="8px" padright="8px">
-		<control type="textarea" binding="print" width="100%" height="252px" pos="relative" style="resize:vertical;"/>
+	<control type="container" class="pcjs-textarea" width="60%" padbottom="8px">
+		<control type="textarea" binding="print" width="100%" height="252px" padright="8px" pos="relative" style="resize:vertical;"/>
 		<control type="container" width="100%">
 			<control type="text" binding="debugInput" width="auto"/>
 			<control type="button" binding="debugEnter">Enter</control>
@@ -26,7 +26,7 @@
 			<control type="flag" label="C" binding="CF" width="8px" padright="4px" padbottom="8px">0</control>
 		</control>
 	</control>
-	<control type="container" padbottom="8px" padleft="8px">
+	<control type="container" padbottom="8px">
 		<control type="button" binding="run">Run</control>
 		<control type="button" binding="step">Step</control>
 		<control type="button" binding="reset">Reset</control>
