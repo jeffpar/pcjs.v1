@@ -796,7 +796,7 @@ HTMLOut.prototype.setData = function(err, sData, sFile, fTemplate)
      * We cheat slightly and insert one of those tokens right now, because otherwise
      * the template file itself would not render correctly in your web browser.
      */
-    this.sTemplate = sData.replace("/modules/shared/templates/common.css", "/versions/pcx86/<!-- pcjs:version -->/common.css");
+    this.sTemplate = sData; // .replace("/modules/shared/templates/common.css", "/versions/pcx86/<!-- pcjs:version -->/common.css");
     this.sHTML = this.sTemplate;
 
     /*
