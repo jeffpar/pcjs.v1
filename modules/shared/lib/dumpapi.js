@@ -67,7 +67,9 @@ var DumpAPI = {
         JSON_GZ:    "gz",       // gzip is currently used ONLY for compressed JSON
         DATA:       "data",     // same as "json", but built without JSON.stringify() (DiskDump only)
         HEX:        "hex",      // deprecated
+        OCTAL:      "octal",    // displays data as octal words
         BYTES:      "bytes",    // displays data as hex bytes; normally used only when comments are enabled
+        WORDS:      "words",    // displays data as hex words; normally used only when comments are enabled
         IMG:        "img",      // returns the raw disk data (ie, using a Buffer object) (DiskDump only)
         ROM:        "rom"       // returns the raw file data (ie, using a Buffer object) (FileDump only)
     }

@@ -691,10 +691,7 @@ if (DEBUGGER) {
             s = str.toHex(n, nBytes * 2);
             break;
         }
-        if (fStripLeadingZeros && s.charAt(0) == '0') {
-            s = s.replace(/^0+([0-9A-F]+)$/i, "$1");
-        }
-        return s;
+        return (fStripLeadingZeros? str.stripLeadingZeros(s) : s);
     };
 
 }   // endif DEBUGGER

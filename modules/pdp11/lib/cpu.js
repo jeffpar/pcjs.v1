@@ -962,7 +962,7 @@ CPUPDP11.prototype.setTimer = function(iTimer, ms, fReset)
  */
 CPUPDP11.prototype.getMSCycles = function(ms)
 {
-    return (this.nCyclesPerSecond * this.nCyclesMultiplier) / 1000 * ms;
+    return ((this.nCyclesPerSecond * this.nCyclesMultiplier) / 1000 * ms)|0;
 };
 
 /**

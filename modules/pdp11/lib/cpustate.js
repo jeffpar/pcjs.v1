@@ -123,7 +123,11 @@ var Trigger;
  */
 CPUStatePDP11.prototype.initProcessor = function()
 {
-    this.decode = PDP11.op1170.bind(this);
+    if (this.model == PDP11.MODEL_1120) {
+        this.decode = PDP11.op1120.bind(this);
+    } else {
+        this.decode = PDP11.op1170.bind(this);
+    }
 
     this.initRegs();
 
@@ -147,6 +151,7 @@ CPUStatePDP11.prototype.initProcessor = function()
  */
 CPUStatePDP11.prototype.reset = function()
 {
+    this.status("model " + this.model);
     if (this.flags.running) this.stopCPU();
     this.initRegs();
     this.resetCycles();
@@ -826,7 +831,7 @@ CPUStatePDP11.prototype.setPSW = function(newPSW)
      * an interrupt has been dispatched, because it's dispatched via trap(), and trap() calls setPSW().
      *
      * I mean, sure, it's POSSIBLE that the new PSW loaded by trap() actually set a lower priority, allowing a lower
-     * priority interrupt to immediately be acknowledged.  But perhaps we should a bit more rigorous here.
+     * priority interrupt to immediately be acknowledged.  But perhaps we should be a bit more rigorous here.
      *
      * For example, we could avoid setting INTQ unless 1) there's actually an active interrupt trigger (ie, triggerNext
      * is not null) or 2) an optional fCheckInterrupts flag is passed to us, because the caller has some knowledge

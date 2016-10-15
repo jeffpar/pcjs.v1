@@ -125,6 +125,7 @@ var PDP11 = {
     /*
      * CPU model numbers (supported)
      */
+    MODEL_1120: 1120,
     MODEL_1145: 1145,
     MODEL_1170: 1170,
 
@@ -167,7 +168,10 @@ var PDP11 = {
         TF:         0x0010,     // bit  4: Trap Flag
         PRI:        0x00E0,     // bits 5-7: Priority
         UNUSED:     0x0700,     // bits 8-10: unused
-        REGSET:     0x0800,     // bit  11: Register Set
+        /*
+         * PSW bits above this point are unused on 11/20-class machines
+         */
+        REGSET:     0x0800,     // bit  11: Register Set                        (
         PMODE:      0x3000,     // bits 12-13: Prev Mode (see PDP11.MODE)
         CMODE:      0xC000,     // bits 14-15: Curr Mode (see PDP11.MODE)
         SHIFT: {
@@ -498,7 +502,7 @@ var PDP11 = {
         HSIZE:      0o177762,   //                                  Upper Size Register (always zero)           (11/70 only)
         SYSID:      0o177764,   //                                  System ID Register                          (11/70 only)
         CPUERR:     0o177766,   //                                  CPU error                                   (11/70 only)
-        MB:         0o177770,   //                                  Microprogram break
+        MB:         0o177770,   //                                  Microprogram break                          (11/70 only)
         PIR:        0o177772,   //                                  Program Interrupt Request
         SL:         0o177774,   //                                  Stack Limit Register
         PSW:        0o177776    // 777776   17777776    0x3FFFFE    Processor Status Word

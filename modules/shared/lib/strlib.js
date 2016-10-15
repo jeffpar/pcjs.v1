@@ -241,6 +241,48 @@ str.toOct = function(n, cch, fPrefix)
 };
 
 /**
+ * toDec(n, cch)
+ *
+ * Converts an integer to decimal, with the specified number of digits (default of 5; max of 10)
+ *
+ * You might be tempted to use the built-in n.toString(10) instead, but it doesn't zero-pad and it
+ * doesn't properly convert negative values.  Moreover, if n is undefined, n.toString() will throw
+ * an exception, whereas this function will return '?' characters.
+ *
+ * @param {number|null|undefined} n is a 32-bit value
+ * @param {number} [cch] is the desired number of decimal digits (0 or undefined for default of either 5 or 10)
+ * @return {string} the octal representation of n
+ */
+str.toDec = function(n, cch)
+{
+    var s = "";
+
+    if (cch) {
+        if (cch > 10) cch = 10;
+    } else {
+        cch = (n & ~0xffff)? 10 : 5;
+    }
+    /*
+     * An initial "falsey" check for null takes care of both null and undefined;
+     * we can't rely entirely on isNaN(), because isNaN(null) returns false, oddly enough.
+     *
+     * Alternatively, we could mask and shift n regardless of whether it's null/undefined/NaN,
+     * since JavaScript coerces such operands to zero, but I think there's "value" in seeing those
+     * values displayed differently.
+     */
+    if (n == null || isNaN(n)) {
+        while (cch-- > 0) s = '?' + s;
+    } else {
+        while (cch-- > 0) {
+            var d = (n % 10) + 0x30;
+            s = String.fromCharCode(d) + s;
+            n /= 10;
+        }
+    }
+    return s;
+};
+
+/**
  * toHex(n, cch, fPrefix)
  *
  * Converts an integer to hex, with the specified number of digits (default of 4 or 8, max of 8).
@@ -475,6 +517,21 @@ str.pad = function(s, cch, fPadLeft)
 {
     var sPadding = "                                        ";
     return fPadLeft? (sPadding + s).slice(-cch) : (s + sPadding).slice(0, cch);
+};
+
+/**
+ * stripLeadingZeros(s, fPad)
+ *
+ * @param {string} s
+ * @param {boolean} [fPad]
+ * @return {string}
+ */
+str.stripLeadingZeros = function(s, fPad)
+{
+    var cch = s.length;
+    s = s.replace(/^0+([0-9A-F]+)$/i, "$1");
+    if (fPad) s = str.pad(s, cch, true);
+    return s;
 };
 
 /**

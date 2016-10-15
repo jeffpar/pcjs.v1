@@ -86,7 +86,7 @@ function BusPDP11(parmsBus, cpu, dbg)
     /*
      * Compute all BusPDP11 memory block parameters, based on the width of the bus.  The entire
      * address space is divided into blocks, using a block size that is (hopefully) appropriate to
-     * the bus width.  The following table summarizes our simplistic calculations.
+     * the bus width.  The following table summarizes our (original) simplistic calculations:
      *
      *      Bus Width                       Block Shift     Block Size
      *      ---------                       -----------     ----------
@@ -104,10 +104,19 @@ function BusPDP11(parmsBus, cpu, dbg)
      */
     this.addrTotal = Math.pow(2, this.nBusWidth);
     this.nBusLimit = this.nBusMask = (this.addrTotal - 1) | 0;
-    this.nBlockShift = (this.nBusWidth >> 1) + 2;
-    if (this.nBlockShift < 10) this.nBlockShift = 10;
-    if (this.nBlockShift > 15) this.nBlockShift = 15;
-    this.nBlockSize = 1 << this.nBlockShift;
+
+    /*
+     * WARNING: Instead of dynamically calculating nBlockShift based on nBusWidth, as described above, we
+     * now force nBlockSize to IOPAGE_LENGTH, because that's what our IOController functions currently require.
+     *
+     *      this.nBlockShift = (this.nBusWidth >> 1) + 2;
+     *      if (this.nBlockShift < 10) this.nBlockShift = 10;
+     *      if (this.nBlockShift > 15) this.nBlockShift = 15;
+     *      this.nBlockSize = 1 << this.nBlockShift;
+     */
+    this.nBlockSize = BusPDP11.IOPAGE_LENGTH;
+    this.nBlockShift = Math.log2(this.nBlockSize);      // ES6 ALERT (alternatively: Math.log(this.nBlockSize) / Math.LN2)
+
     this.nBlockLen = this.nBlockSize >> 2;
     this.nBlockLimit = this.nBlockSize - 1;
     this.nBlockTotal = (this.addrTotal / this.nBlockSize) | 0;
@@ -272,7 +281,7 @@ BusPDP11.IOController = {
             }
             return b;
         }
-        b = bus.unknownAccess(addr | BusPDP11.IOPAGE_22BIT, -1, 1);
+        b = bus.unknownAccess(addr, -1, true);
         if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS)) {
             this.dbg.printMessage("warning: unconverted read access to byte @" + this.dbg.toStrBase(addr) + ": " + this.dbg.toStrBase(b), true, true);
         }
@@ -345,7 +354,7 @@ BusPDP11.IOController = {
             }
             return;
         }
-        bus.unknownAccess(addr | BusPDP11.IOPAGE_22BIT, b, 1);
+        bus.unknownAccess(addr, b, true);
         if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS)) {
             this.dbg.printMessage("warning: unconverted write access to byte @" + this.dbg.toStrBase(addr) + ": " + this.dbg.toStrBase(b), true, true);
         }
@@ -377,7 +386,7 @@ BusPDP11.IOController = {
             }
             return w;
         }
-        w = bus.unknownAccess(addr | BusPDP11.IOPAGE_22BIT, -1, 0);
+        w = bus.unknownAccess(addr, -1);
         if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS)) {
             this.dbg.printMessage("warning: unconverted read access to word @" + this.dbg.toStrBase(addr) + ": " + this.dbg.toStrBase(w), true, true);
         }
@@ -413,7 +422,7 @@ BusPDP11.IOController = {
             }
             return;
         }
-        bus.unknownAccess(addr | BusPDP11.IOPAGE_22BIT, w, 0);
+        bus.unknownAccess(addr, w);
         if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS)) {
             this.dbg.printMessage("warning: unconverted write access to word @" + this.dbg.toStrBase(addr) + ": " + this.dbg.toStrBase(w), true, true);
         }
@@ -530,24 +539,23 @@ BusPDP11.prototype.reset = function()
 };
 
 /**
- * unknownAccess(addr, data, byteFlag)
+ * unknownAccess(addr, data, fByte)
  *
- * This is our default I/O handler, called whenever there's an IOPAGE access without a corresponding entry
- * in aIOHandlers.
+ * This is our default I/O handler, called when there's an IOPAGE access without a corresponding entry in aIOHandlers.
  *
  * @this {BusPDP11}
  * @param {number} addr (ie, an IOPAGE address)
  * @param {number} data (-1 if read, otherwise write)
- * @param {number} byteFlag (true if byte I/O, otherwise word)
+ * @param {boolean} [fByte] (true if byte access, otherwise word)
  * @return {number}
  */
-BusPDP11.prototype.unknownAccess = function(addr, data, byteFlag)
+BusPDP11.prototype.unknownAccess = function(addr, data, fByte)
 {
     if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.WARN)) {
         /*
          * TODO: For 22-bit machines, let's display addr as a 3-byte value (for a total of 9 octal digits)
          */
-        this.dbg.printMessage("warning: unknown I/O access (" + this.dbg.toStrBase(addr, 3) + "," + this.dbg.toStrBase(data) + "," + byteFlag + ")", true, true);
+        this.dbg.printMessage("warning: unknown I/O access (" + this.dbg.toStrBase(addr, 3) + "," + this.dbg.toStrBase(data) + "," + fByte + ")", true, true);
         this.cpu.setPC(this.cpu.getLastPC());
         this.cpu.stopCPU();
     }
@@ -663,7 +671,7 @@ BusPDP11.prototype.addMemory = function(addr, size, type, controller)
     }
 
     if (sizeLeft <= 0) {
-        this.status(Math.floor(size / 1024) + "Kb " + MemoryPDP11.TYPE_NAMES[type] + " at " + str.toHexLong(addr));
+        this.status(str.toDec(size / 1024) + "Kb " + MemoryPDP11.TYPE_NAMES[type] + " at " + str.toOct(addr));
         return true;
     }
 
