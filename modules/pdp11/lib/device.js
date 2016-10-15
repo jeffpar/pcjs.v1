@@ -39,6 +39,7 @@ if (NODE) {
     var State         = require("../../shared/lib/state");
     var BusPDP11      = require("./bus");
     var MessagesPDP11 = require("./messages");
+    var PC11          = require("./pc11");
 }
 
 /**
@@ -135,6 +136,31 @@ DevicePDP11.prototype.initBus = function(cmp, bus, cpu, dbg)
     bus.addResetHandler(this.reset.bind(this));
 
     this.setReady();
+};
+
+/**
+ * reset()
+ *
+ * @this {DevicePDP11}
+ */
+DevicePDP11.prototype.reset = function()
+{
+    this.console.misc = (this.console.misc & ~0x77) | 0x14; // kernel 16 bit
+    this.kw11.lks = 0;
+};
+
+/**
+ * kw11_interrupt()
+ *
+ * @this {DevicePDP11}
+ */
+DevicePDP11.prototype.kw11_interrupt = function()
+{
+    this.kw11.lks |= PDP11.KW11.LKS.MON;
+    if (this.kw11.lks & PDP11.KW11.LKS.IE) {
+        this.cpu.setTrigger(this.kw11.trigger);
+        this.cpu.setTimer(this.kw11.timer, 1000/60);
+    }
 };
 
 /**
@@ -1028,33 +1054,6 @@ DevicePDP11.prototype.writeIgnored = function(data, addr)
     }
 };
 
-/**
- * kw11_interrupt()
- *
- * @this {DevicePDP11}
- */
-DevicePDP11.prototype.kw11_interrupt = function()
-{
-    this.kw11.lks |= PDP11.KW11.LKS.MON;
-    if (this.kw11.lks & PDP11.KW11.LKS.IE) {
-        this.cpu.setTrigger(this.kw11.trigger);
-        this.cpu.setTimer(this.kw11.timer, 1000/60);
-    }
-};
-
-/**
- * reset()
- *
- * Formerly reset_iopage().
- *
- * @this {DevicePDP11}
- */
-DevicePDP11.prototype.reset = function()
-{
-    this.console.misc = (this.console.misc & ~0x77) | 0x14; // kernel 16 bit
-    this.kw11.lks = 0;
-};
-
 /*
  * ES6 ALERT: As you can see below, I've finally started using computed property names.
  */
@@ -1220,11 +1219,16 @@ DevicePDP11.init = function()
 {
     var aeDevice = Component.getElementsByClass(document, PDP11.APPCLASS, "device");
     for (var iDevice = 0; iDevice < aeDevice.length; iDevice++) {
+        var device;
         var eDevice = aeDevice[iDevice];
         var parmsDevice = Component.getComponentParms(eDevice);
-        switch(parmsDevice['name']) {
+        switch(parmsDevice['type']) {
         case 'default':
-            var device = new DevicePDP11(parmsDevice);
+            device = new DevicePDP11(parmsDevice);
+            Component.bindComponentControls(device, eDevice, PDP11.APPCLASS);
+            break;
+        case 'pc11':
+            device = new PC11(parmsDevice);
             Component.bindComponentControls(device, eDevice, PDP11.APPCLASS);
             break;
         }

@@ -425,6 +425,9 @@ var PDP11 = {
 
         LKS:        0o177546,   //                                  KW11-L Clock Status
 
+        PRS:        0o177550,   //                                  PC11/PR11 Reader Status Register
+        PRB:        0o177552,   //                                  PC11/PR11 Reader Buffer Register
+
         RCSR:       0o177560,   //                                  Display Terminal: Receiver Status Register
         RBUF:       0o177562,   //                                  Display Terminal: Receiver Data Buffer Register
         XCSR:       0o177564,   //                                  Display Terminal: Transmitter Status Register
@@ -506,6 +509,20 @@ var PDP11 = {
         PIR:        0o177772,   //                                  Program Interrupt Request
         SL:         0o177774,   //                                  Stack Limit Register
         PSW:        0o177776    // 777776   17777776    0x3FFFFE    Processor Status Word
+    },
+    PC11: {                     // High Speed Reader & Punch (PR11 is a Reader-only unit)
+        PRS: {
+            RE:     0x0001,     // Reader Enable (W/O)
+            RIE:    0x0040,     // Reader Interrupt Enable (allows the DONE and ERROR bits to trigger an interrupt)
+            DONE:   0x0080,     // Done (R/O)
+            BUSY:   0x0800,     // Busy (R/O)
+            ERROR:  0x8000,     // Error (R/O)
+            CLEAR:  0x08C0,     // bits cleared on INIT
+            WMASK:  0x0041      // bits writable
+        },
+        PRB: {
+            MASK:   0x00FF      // Data
+        }
     },
     DL11: {                     // Serial Line Interface (program compatible with the KL11 for control of console teleprinters)
         PRI:        4,

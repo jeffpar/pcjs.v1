@@ -1644,7 +1644,7 @@ if (DEBUGGER) {
         if (cpu.isRunning()) {
             cpu.setPC(this.cpu.getLastPC());
             this.stopCPU();
-            return true;
+            throw -1;           // TODO: Review the appropriate-ness of throwing a bogus vector number in order to immediately stop the instruction
         }
         return false;
     };

@@ -714,16 +714,16 @@
 
 	<xsl:template match="device[not(@ref)]">
 		<xsl:param name="machine" select="''"/>
-		<xsl:variable name="name">
+		<xsl:variable name="type">
 			<xsl:choose>
-				<xsl:when test="@name"><xsl:value-of select="@name"/></xsl:when>
+				<xsl:when test="@type"><xsl:value-of select="@type"/></xsl:when>
 				<xsl:otherwise/>
 			</xsl:choose>
 		</xsl:variable>
 		<xsl:call-template name="component">
 			<xsl:with-param name="machine" select="$machine"/>
 			<xsl:with-param name="class">device</xsl:with-param>
-			<xsl:with-param name="parms">,name:'<xsl:value-of select="$name"/>'</xsl:with-param>
+			<xsl:with-param name="parms">,type:'<xsl:value-of select="$type"/>'</xsl:with-param>
 		</xsl:call-template>
 	</xsl:template>
 

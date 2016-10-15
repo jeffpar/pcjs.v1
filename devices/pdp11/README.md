@@ -7,4 +7,9 @@ permalink: /devices/pdp11/
 PDP-11 Device Configurations
 ----------------------------
 
-See the list of [PDP-11 Machines](machine/) supported by [PDPjs](/modules/pdp11/), our PDP-11 emulation module.
+PDP-11 resources used by [PDPjs](/modules/pdp11/), our PDP-11 emulation module, include:
+
+* [Loaders](loader/)
+* [Machines](machine/)
+* [Panels](panel/)
+* [ROMs](rom/)
