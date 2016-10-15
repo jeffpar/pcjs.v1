@@ -115,8 +115,7 @@ FileDump.asBadExts = [
  *      in "strict" mode.  Prefixing them with "0o" is the new convention for ES6 and up, which is great, but we still
  *      have no octal format that works across the board.  We can use the new octal format in code, because we always
  *      compile browser-based code back to ES5 (converting all numeric constants to decimal), and current versions of
- *      Node support it as well (we don't care about old versions of Node).  But what we store in data files is more
- *      problematic.
+ *      Node supported the new format for quite a while.  But what we store in data files is more problematic.
  *
  *      When a second file is "merged", the first file sets all even bytes and the second file sets all odd bytes.
  *      In fact, any number of files can be merged: if there are N files, file #1 sets bytes at "offset mod N == 0",
@@ -297,7 +296,7 @@ FileDump.prototype.parseListing = function(sListing)
 {
     var ab = [];
     var matchLine;
-    var re = /^([0-9 ]{9})([0-7]{6})[ ]+([0-7]+)[ ]*([0-7']+|)[ ]+([0-7']+|)[ ]+(.*)$/gm;
+    var re = /^( [0-9 ]{8}|)([0-7]{6})[: ]+([0-7]+)[ ]*([0-7']+|)[ ]+([0-7']+|)[ ]+(.*)$/gm;
     var addrStart = null;
     while (matchLine = re.exec(sListing)) {
         /*

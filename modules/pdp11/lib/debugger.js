@@ -245,7 +245,7 @@ if (DEBUGGER) {
      * CPU opcode names, indexed by CPU opcode ordinal (above)
      */
     DebuggerPDP11.OPNAMES = [
-        "NONE",         "ADC",          "ADCB",         "ADD",          "ASL",          "ASLB",         "ASR",          "ASRB",
+        ".WORD",        "ADC",          "ADCB",         "ADD",          "ASL",          "ASLB",         "ASR",          "ASRB",
         "BCC",          "BCS",          "BEQ",          "BGE",          "BGT",          "BHI",          "BIC",          "BICB",
         "BIS",          "BISB",         "BIT",          "BITB",         "BLE",          "BLOS",         "BLT",          "BMI",
         "BNE",          "BPL",          "BPT",          "BR",           "BVC",          "BVS",          "CCC",          "CLC",
@@ -282,7 +282,7 @@ if (DEBUGGER) {
     DebuggerPDP11.OP_OTHER    = 0xF000;
 
     /*
-     * The opTable contains opcode masks, and each mask refers to table of possible values, and each
+     * The OPTABLE contains opcode masks, and each mask refers to table of possible values, and each
      * value refers to an array that contains:
      *
      *      [0]: {number} of the opcode name (see OP.*)
@@ -298,7 +298,7 @@ if (DEBUGGER) {
      * that the opcode's destination operand is being listed first, but rather that the bits describing the source
      * operand are in the opcode's OP_DST field.
      */
-    DebuggerPDP11.opTable = {
+    DebuggerPDP11.OPTABLE = {
         0xF000: {
             0x1000: [DebuggerPDP11.OPS.MOV,     DebuggerPDP11.OP_SRC,         DebuggerPDP11.OP_DST],        // 01SSDD
             0x2000: [DebuggerPDP11.OPS.CMP,     DebuggerPDP11.OP_SRC,         DebuggerPDP11.OP_DST],        // 02SSDD
@@ -425,6 +425,28 @@ if (DEBUGGER) {
         }
     };
 
+    DebuggerPDP11.OPNONE = [DebuggerPDP11.OPS.NONE];
+
+    /*
+     * Table of opcodes that are specific to the 11/45 and higher
+     */
+    DebuggerPDP11.OP1145 = [
+        DebuggerPDP11.OPS.MARK,
+        DebuggerPDP11.OPS.MFPI,
+        DebuggerPDP11.OPS.MTPI,
+        DebuggerPDP11.OPS.SXT,
+        DebuggerPDP11.OPS.SPL,
+        DebuggerPDP11.OPS.RTT,
+        DebuggerPDP11.OPS.MUL,
+        DebuggerPDP11.OPS.DIV,
+        DebuggerPDP11.OPS.ASH,
+        DebuggerPDP11.OPS.ASHC,
+        DebuggerPDP11.OPS.XOR,
+        DebuggerPDP11.OPS.SOB,
+        DebuggerPDP11.OPS.MFPD,
+        DebuggerPDP11.OPS.MTPD
+    ];
+
     DebuggerPDP11.HISTORY_LIMIT = DEBUG? 100000 : 1000;
 
     /**
@@ -448,7 +470,8 @@ if (DEBUGGER) {
         var sMessages = cmp.getMachineParm('messages');
         if (sMessages) this.messageInit(sMessages);
 
-        this.opTable = DebuggerPDP11.opTable;
+        this.opTable = DebuggerPDP11.OPTABLE;
+        this.aOpReserved = this.cpu.model < PDP11.MODEL_1145? DebuggerPDP11.OP1145 : [];
 
         this.messageDump(MessagesPDP11.BUS,  function onDumpBus(asArgs) { dbg.dumpBus(asArgs); });
 
@@ -2016,11 +2039,23 @@ if (DEBUGGER) {
             if (opDesc) break;
         }
 
-        if (!opDesc) opDesc = [DebuggerPDP11.OPS.NONE];
+        if (!opDesc) {
+            opDesc = DebuggerPDP11.OPNONE;
+        }
+
+        var opNum = opDesc[0];
+        if (this.aOpReserved.indexOf(opNum) >= 0) {
+            opDesc = DebuggerPDP11.OPNONE;
+            opNum = opDesc[0];
+        }
 
         var sOperands = "", sTarget = "";
-        var sOpName = opNames[opDesc[0]];
+        var sOpName = opNames[opNum];
         var cOperands = opDesc.length - 1;
+
+        if (!opNum && !cOperands) {
+            sOperands = this.toStrBase(opCode);
+        }
 
         for (var iOperand = 1; iOperand <= cOperands; iOperand++) {
 
@@ -3550,43 +3585,49 @@ if (DEBUGGER) {
     };
 
     /**
-     * doUnassemble(sAddr, sAddrEnd, n)
+     * doUnassemble(sAddr, sAddrEnd, nLines)
      *
      * @this {DebuggerPDP11}
      * @param {string} [sAddr]
      * @param {string} [sAddrEnd]
-     * @param {number} [n]
+     * @param {number} [nLines]
      */
-    DebuggerPDP11.prototype.doUnassemble = function(sAddr, sAddrEnd, n)
+    DebuggerPDP11.prototype.doUnassemble = function(sAddr, sAddrEnd, nLines)
     {
         var dbgAddr = this.parseAddr(sAddr, true);
         if (!dbgAddr) return;
 
-        if (n === undefined) n = 1;
+        if (nLines === undefined) nLines = 1;
 
         var nBytes = 0x100;
         if (sAddrEnd !== undefined) {
 
-            var dbgAddrEnd = this.parseAddr(sAddrEnd, true);
-            if (!dbgAddrEnd || dbgAddrEnd.addr < dbgAddr.addr) return;
-
-            nBytes = dbgAddrEnd.addr - dbgAddr.addr;
-            if (!DEBUG && nBytes > 0x100) {
-                /*
-                 * Limiting the amount of disassembled code to 256 bytes in non-DEBUG builds is partly to
-                 * prevent the user from wedging the browser by dumping too many lines, but also a recognition
-                 * that, in non-DEBUG builds, this.println() keeps print output buffer truncated to 8Kb anyway.
-                 */
-                this.println("range too large");
-                return;
+            if (sAddrEnd.charAt(0) == 'l') {
+                var n = this.parseValue(sAddrEnd.substr(1));
+                if (n != null) nLines = n;
             }
-            n = -1;
+            else {
+                var dbgAddrEnd = this.parseAddr(sAddrEnd, true);
+                if (!dbgAddrEnd || dbgAddrEnd.addr < dbgAddr.addr) return;
+
+                nBytes = dbgAddrEnd.addr - dbgAddr.addr;
+                if (!DEBUG && nBytes > 0x100) {
+                    /*
+                     * Limiting the amount of disassembled code to 256 bytes in non-DEBUG builds is partly to
+                     * prevent the user from wedging the browser by dumping too many lines, but also a recognition
+                     * that, in non-DEBUG builds, this.println() keeps print output buffer truncated to 8Kb anyway.
+                     */
+                    this.println("range too large");
+                    return;
+                }
+                nLines = -1;
+            }
         }
 
-        var nLines = 0;
+        var nPrinted = 0;
         var sInstruction;
 
-        while (nBytes > 0 && n--) {
+        while (nBytes > 0 && nLines--) {
 
             var nSequence = (this.isBusy(false) || this.nStep)? this.nCycles : null;
             var sComment = (nSequence != null? "cycles" : null);
@@ -3594,8 +3635,8 @@ if (DEBUGGER) {
 
             var addr = dbgAddr.addr;    // we snap dbgAddr.addr *after* calling findSymbol(), which re-evaluates it
 
-            if (aSymbol[0] && n) {
-                if (!nLines && n || aSymbol[0].indexOf('+') < 0) {
+            if (aSymbol[0] && nLines) {
+                if (!nPrinted && nLines || aSymbol[0].indexOf('+') < 0) {
                     var sLabel = aSymbol[0] + ':';
                     if (aSymbol[2]) sLabel += ' ' + aSymbol[2];
                     this.println(sLabel);
@@ -3612,7 +3653,7 @@ if (DEBUGGER) {
             this.println(sInstruction);
             this.dbgAddrNextCode = dbgAddr;
             nBytes -= dbgAddr.addr - addr;
-            nLines++;
+            nPrinted++;
         }
     };
 
