@@ -126,7 +126,7 @@ CPUStatePDP11.prototype.initProcessor = function()
     if (this.model == PDP11.MODEL_1120) {
         this.decode = PDP11.op1120.bind(this);
     } else {
-        this.decode = PDP11.op1170.bind(this);
+        this.decode = PDP11.op1145.bind(this);
     }
 
     this.initRegs();

@@ -107,7 +107,7 @@ function BusPDP11(parmsBus, cpu, dbg)
 
     /*
      * WARNING: Instead of dynamically calculating nBlockShift based on nBusWidth, as described above, we
-     * now force nBlockSize to IOPAGE_LENGTH, because that's what our IOController functions currently require.
+     * now force nBlockSize to IOPAGE_LENGTH, because that's what our IOController functions currently assume.
      *
      *      this.nBlockShift = (this.nBusWidth >> 1) + 2;
      *      if (this.nBlockShift < 10) this.nBlockShift = 10;
