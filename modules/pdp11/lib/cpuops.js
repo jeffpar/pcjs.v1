@@ -1763,6 +1763,9 @@ PDP11.opXOR = function(opCode)
  */
 PDP11.opUndefined = function(opCode)
 {
+    if (DEBUGGER && this.dbg) {
+        this.dbg.undefinedInstruction(opCode);
+    }
     this.trap(PDP11.TRAP.RESERVED, PDP11.REASON.RESERVED);
 };
 

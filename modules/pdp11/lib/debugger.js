@@ -1608,6 +1608,37 @@ if (DEBUGGER) {
     };
 
     /**
+     * stopInstruction()
+     *
+     * TODO: Currently, the only way to prevent this call from stopping the CPU is when you're single-stepping.
+     *
+     * @this {DebuggerPDP11}
+     * @return {boolean} true if stopping is enabled, false if not
+     */
+    DebuggerPDP11.prototype.stopInstruction = function()
+    {
+        var cpu = this.cpu;
+        if (cpu.isRunning()) {
+            cpu.setPC(this.cpu.getLastPC());
+            this.stopCPU();
+            return true;
+        }
+        return false;
+    };
+
+    /**
+     * undefinedInstruction(opCode)
+     *
+     * @this {DebuggerPDP11}
+     * @param {number} opCode
+     */
+    DebuggerPDP11.prototype.undefinedInstruction = function(opCode)
+    {
+        this.printMessage("undefined opcode " + this.toStrBase(opCode), true, true);
+        this.stopInstruction();         // allow the caller to step over it if they really want a trap generated
+    };
+
+    /**
      * checkMemoryRead(addr, nb)
      *
      * This "check" function is called by a Memory block to inform us that a memory read occurred, giving us an

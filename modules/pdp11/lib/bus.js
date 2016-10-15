@@ -556,8 +556,7 @@ BusPDP11.prototype.unknownAccess = function(addr, data, fByte)
          * TODO: For 22-bit machines, let's display addr as a 3-byte value (for a total of 9 octal digits)
          */
         this.dbg.printMessage("warning: unknown I/O access (" + this.dbg.toStrBase(addr, 3) + "," + this.dbg.toStrBase(data) + "," + fByte + ")", true, true);
-        this.cpu.setPC(this.cpu.getLastPC());
-        this.cpu.stopCPU();
+        if (this.dbg.stopInstruction()) return 0;
     }
     if (!this.nDisableTraps) {
         this.cpu.trap(PDP11.TRAP.BUS_ERROR, addr);

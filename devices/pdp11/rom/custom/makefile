@@ -1,3 +1,7 @@
+#
+# Don't have macro11?  Make yourself a copy from https://github.com/shattered/macro11
+#
+
 all: boot.json
 
 boot.lst: boot.mac
