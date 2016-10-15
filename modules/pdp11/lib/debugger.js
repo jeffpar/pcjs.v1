@@ -1631,11 +1631,12 @@ if (DEBUGGER) {
      *
      * @this {DebuggerPDP11}
      * @param {number} opCode
+     * @return {boolean} true if stopping is enabled, false if not
      */
     DebuggerPDP11.prototype.undefinedInstruction = function(opCode)
     {
         this.printMessage("undefined opcode " + this.toStrBase(opCode), true, true);
-        this.stopInstruction();         // allow the caller to step over it if they really want a trap generated
+        return this.stopInstruction();  // allow the caller to step over it if they really want a trap generated
     };
 
     /**

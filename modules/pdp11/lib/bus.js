@@ -281,7 +281,7 @@ BusPDP11.IOController = {
             }
             return b;
         }
-        b = bus.unknownAccess(addr, -1, true);
+        b = bus.unknownAccess(addr, true);
         if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS)) {
             this.dbg.printMessage("warning: unconverted read access to byte @" + this.dbg.toStrBase(addr) + ": " + this.dbg.toStrBase(b), true, true);
         }
@@ -354,7 +354,7 @@ BusPDP11.IOController = {
             }
             return;
         }
-        bus.unknownAccess(addr, b, true);
+        bus.unknownAccess(addr, true, b);
         if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS)) {
             this.dbg.printMessage("warning: unconverted write access to byte @" + this.dbg.toStrBase(addr) + ": " + this.dbg.toStrBase(b), true, true);
         }
@@ -386,7 +386,7 @@ BusPDP11.IOController = {
             }
             return w;
         }
-        w = bus.unknownAccess(addr, -1);
+        w = bus.unknownAccess(addr, false);
         if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS)) {
             this.dbg.printMessage("warning: unconverted read access to word @" + this.dbg.toStrBase(addr) + ": " + this.dbg.toStrBase(w), true, true);
         }
@@ -422,7 +422,7 @@ BusPDP11.IOController = {
             }
             return;
         }
-        bus.unknownAccess(addr, w);
+        bus.unknownAccess(addr, false, w);
         if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS)) {
             this.dbg.printMessage("warning: unconverted write access to word @" + this.dbg.toStrBase(addr) + ": " + this.dbg.toStrBase(w), true, true);
         }
@@ -539,23 +539,23 @@ BusPDP11.prototype.reset = function()
 };
 
 /**
- * unknownAccess(addr, data, fByte)
+ * unknownAccess(addr, fByte, data)
  *
  * This is our default I/O handler, called when there's an IOPAGE access without a corresponding entry in aIOHandlers.
  *
  * @this {BusPDP11}
  * @param {number} addr (ie, an IOPAGE address)
- * @param {number} data (-1 if read, otherwise write)
  * @param {boolean} [fByte] (true if byte access, otherwise word)
+ * @param {number} [data] (undefined if read, otherwise write)
  * @return {number}
  */
-BusPDP11.prototype.unknownAccess = function(addr, data, fByte)
+BusPDP11.prototype.unknownAccess = function(addr, fByte, data)
 {
     if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.WARN)) {
         /*
          * TODO: For 22-bit machines, let's display addr as a 3-byte value (for a total of 9 octal digits)
          */
-        this.dbg.printMessage("warning: unknown I/O access (" + this.dbg.toStrBase(addr, 3) + "," + this.dbg.toStrBase(data) + "," + fByte + ")", true, true);
+        this.dbg.printMessage("warning: unknown I/O access (" + this.dbg.toStrBase(addr) + "," + this.dbg.toStrBase(data, fByte?1:2) + ")", true, true);
         if (this.dbg.stopInstruction()) return 0;
     }
     if (!this.nDisableTraps) {
