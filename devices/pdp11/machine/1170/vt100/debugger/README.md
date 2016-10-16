@@ -1,7 +1,7 @@
 ---
 layout: page
 title: PDP-11/70 with VT100 Terminal and Debugger
-permalink: /devices/pdp11/machine/1170/vt100/
+permalink: /devices/pdp11/machine/1170/vt100/debugger/
 machines:
   - id: test1170
     type: pdp11
