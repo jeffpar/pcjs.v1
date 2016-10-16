@@ -90,6 +90,9 @@ PC11.prototype.initBus = function(cmp, bus, cpu, dbg)
     this.bus = bus;
     this.cpu = cpu;
     this.dbg = dbg;
+
+    bus.addIOTable(this, PC11.UNIBUS_IOTABLE);
+
     this.setReady();
 };
 
