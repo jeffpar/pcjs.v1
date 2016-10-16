@@ -1,10 +1,7 @@
 /**
  * @fileoverview String-related helper functions
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a> (@jeffpar)
- * @version 1.0
- * Created 2014-03-09
- *
- * Copyright © 2012-2016 Jeff Parsons <Jeff@pcjs.org>
+ * @copyright © Jeff Parsons 2012-2016
  *
  * This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
  *
@@ -19,9 +16,9 @@
  * You should have received a copy of the GNU General Public License along with PCjs.  If not,
  * see <http://www.gnu.org/licenses/gpl.html>.
  *
- * You are required to include the above copyright notice in every source code file of every
- * copy or modified version of this work, and to display that copyright notice on every screen
- * that loads or runs any version of this software (see COPYRIGHT in /modules/shared/lib/defines.js).
+ * You are required to include the above copyright notice in every modified copy of this work
+ * and to display that copyright notice when the software starts running; see COPYRIGHT in
+ * <http://pcjs.org/modules/shared/lib/defines.js>.
  *
  * Some PCjs files also attempt to load external resource files, such as character-image files,
  * ROM files, and disk image files. Those external resource files are not considered part of PCjs
@@ -221,7 +218,7 @@ str.toOct = function(n, cch, fPrefix)
     if (cch) {
         if (cch > 11) cch = 11;
     } else {
-        cch = (n & ~0xffff)? 11 : 6;
+        cch = (n & ~0xffff)? 11 : 6;    // TODO: For our 22-bit machines, we really don't need more than 8 digits max
     }
     /*
      * An initial "falsey" check for null takes care of both null and undefined;
@@ -241,6 +238,48 @@ str.toOct = function(n, cch, fPrefix)
         }
     }
     return (fPrefix? "0o" : "") + s;
+};
+
+/**
+ * toDec(n, cch)
+ *
+ * Converts an integer to decimal, with the specified number of digits (default of 5; max of 10)
+ *
+ * You might be tempted to use the built-in n.toString(10) instead, but it doesn't zero-pad and it
+ * doesn't properly convert negative values.  Moreover, if n is undefined, n.toString() will throw
+ * an exception, whereas this function will return '?' characters.
+ *
+ * @param {number|null|undefined} n is a 32-bit value
+ * @param {number} [cch] is the desired number of decimal digits (0 or undefined for default of either 5 or 10)
+ * @return {string} the octal representation of n
+ */
+str.toDec = function(n, cch)
+{
+    var s = "";
+
+    if (cch) {
+        if (cch > 10) cch = 10;
+    } else {
+        cch = (n & ~0xffff)? 10 : 5;
+    }
+    /*
+     * An initial "falsey" check for null takes care of both null and undefined;
+     * we can't rely entirely on isNaN(), because isNaN(null) returns false, oddly enough.
+     *
+     * Alternatively, we could mask and shift n regardless of whether it's null/undefined/NaN,
+     * since JavaScript coerces such operands to zero, but I think there's "value" in seeing those
+     * values displayed differently.
+     */
+    if (n == null || isNaN(n)) {
+        while (cch-- > 0) s = '?' + s;
+    } else {
+        while (cch-- > 0) {
+            var d = (n % 10) + 0x30;
+            s = String.fromCharCode(d) + s;
+            n /= 10;
+        }
+    }
+    return s;
 };
 
 /**
@@ -478,6 +517,21 @@ str.pad = function(s, cch, fPadLeft)
 {
     var sPadding = "                                        ";
     return fPadLeft? (sPadding + s).slice(-cch) : (s + sPadding).slice(0, cch);
+};
+
+/**
+ * stripLeadingZeros(s, fPad)
+ *
+ * @param {string} s
+ * @param {boolean} [fPad]
+ * @return {string}
+ */
+str.stripLeadingZeros = function(s, fPad)
+{
+    var cch = s.length;
+    s = s.replace(/^0+([0-9A-F]+)$/i, "$1");
+    if (fPad) s = str.pad(s, cch, true);
+    return s;
 };
 
 /**

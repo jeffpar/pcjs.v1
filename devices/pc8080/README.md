@@ -9,12 +9,13 @@ PC8080 Device Configurations
 
 All our [8080-Based Machines](machine/) are built from a collection of devices, including:
 
+* ChipSets
+* [Control Panels](panel/)
 * CPU (8080)
+* [Machines](machine/)
 * RAM
 * [ROMs](rom/)
-* ChipSets
 * Video Adapters
-* [Control Panels](panel/)
 
 Complete [machine configurations](machine/) are constructed from those devices.  A machine configuration is a single XML file
 that lists all the device components to be used.  A machine XML file can choose to configure every device itself,

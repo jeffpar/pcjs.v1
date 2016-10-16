@@ -9,5 +9,7 @@ PDP-11/70 Machine Configurations
 
 PCjs is adding support the following PDP-11/70 configurations:
 
-* [PDP-11/70 Test Machine](/devices/pdp11/machine/1170/test/)
-* [PDP-11/70 with VT100 Terminal](/devices/pdp11/machine/1170/vt100/)
+* [PDP-11/70 Test Machine](/devices/pdp11/machine/1170/test/) ([Debugger](/devices/pdp11/machine/1170/test/debugger/))
+* [PDP-11/70 with Front Panel](/devices/pdp11/machine/1170/panel) ([Debugger](/devices/pdp11/machine/1170/panel/debugger/))
+* [PDP-11/70 "Server Array"](/devices/pdp11/machine/1170/array/)
+* [PDP-11/70 with VT100 Terminal](/devices/pdp11/machine/1170/vt100/) ([Debugger](/devices/pdp11/machine/1170/vt100/debugger/))

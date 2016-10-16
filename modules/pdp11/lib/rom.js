@@ -1,14 +1,13 @@
 /**
  * @fileoverview Implements the PDP11 ROM component.
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
- * @version 1.0
- * Created 2016-Sep-03
+ * @copyright © Jeff Parsons 2012-2016
  *
  * This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
  *
- * It has been adapted from the JavaScript PDP 11/70 Emulator v1.3 written by Paul Nankervis
- * (paulnank@hotmail.com) as of August 2016 from http://skn.noip.me/pdp11/pdp11.html.  This code
- * may be used freely provided the original author name is acknowledged in any modified source code.
+ * It has been adapted from the JavaScript PDP 11/70 Emulator v1.4 written by Paul Nankervis
+ * (paulnank@hotmail.com) as of September 2016 at <http://skn.noip.me/pdp11/pdp11.html>.  This code
+ * may be used freely provided the original authors are acknowledged in any modified source code.
  *
  * PCjs is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3
@@ -21,9 +20,9 @@
  * You should have received a copy of the GNU General Public License along with PCjs.  If not,
  * see <http://www.gnu.org/licenses/gpl.html>.
  *
- * You are required to include the above copyright notice in every source code file of every
- * copy or modified version of this work, and to display that copyright notice on every screen
- * that loads or runs any version of this software (see COPYRIGHT in /modules/shared/lib/defines.js).
+ * You are required to include the above copyright notice in every modified copy of this work
+ * and to display that copyright notice when the software starts running; see COPYRIGHT in
+ * <http://pcjs.org/modules/shared/lib/defines.js>.
  *
  * Some PCjs files also attempt to load external resource files, such as character-image files,
  * ROM files, and disk image files. Those external resource files are not considered part of PCjs
@@ -121,7 +120,7 @@ Component.subclass(ROMPDP11);
  * ROM contents, so in that case, having a reset() function that restores the original ROM data
  * might be useful; then again, it might not, depending on what you're trying to debug.
  *
- * If we do add reset(), then we'll want to change copyROM() to hang onto the original
+ * If we do add reset(), then we'll want to change initROM() to hang onto the original
  * ROM data; currently, we release it after copying it into the read-only memory allocated
  * via bus.addMemory().
  */
@@ -140,7 +139,7 @@ ROMPDP11.prototype.initBus = function(cmp, bus, cpu, dbg)
     this.bus = bus;
     this.cpu = cpu;
     this.dbg = dbg;
-    this.copyROM();
+    this.initROM();
 };
 
 /**
@@ -267,11 +266,11 @@ ROMPDP11.prototype.doneLoad = function(sURL, sROMData, nErrorCode)
             this.abROM[i] = str.parseInt(asHexData[i], 16);
         }
     }
-    this.copyROM();
+    this.initROM();
 };
 
 /**
- * copyROM()
+ * initROM()
  *
  * This function is called by both initBus() and doneLoad(), but it cannot copy the the ROM data into place
  * until after initBus() has received the Bus component AND doneLoad() has received the abROM data.  When both
@@ -279,7 +278,7 @@ ROMPDP11.prototype.doneLoad = function(sURL, sROMData, nErrorCode)
  *
  * @this {ROMPDP11}
  */
-ROMPDP11.prototype.copyROM = function()
+ROMPDP11.prototype.initROM = function()
 {
     if (!this.isReady()) {
         if (!this.sFilePath) {
@@ -342,9 +341,7 @@ ROMPDP11.prototype.addROM = function(addr)
         if (DEBUG) this.log("addROM(): copying ROM to " + str.toHexLong(addr) + " (" + str.toHexLong(this.abROM.length) + " bytes)");
         var i;
         for (i = 0; i < this.abROM.length; i++) {
-            if (DEBUGGER && this.dbg) this.dbg.disableMessages();
             this.bus.setByteDirect(addr + i, this.abROM[i]);
-            if (DEBUGGER && this.dbg) this.dbg.enableMessages();
         }
         return true;
     }

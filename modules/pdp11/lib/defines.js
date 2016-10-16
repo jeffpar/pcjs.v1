@@ -1,14 +1,13 @@
 /**
  * @fileoverview PDP11-specific compile-time definitions.
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
- * @version 1.0
- * Created 2016-Sep-03
+ * @copyright © Jeff Parsons 2012-2016
  *
  * This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
  *
- * It has been adapted from the JavaScript PDP 11/70 Emulator v1.3 written by Paul Nankervis
- * (paulnank@hotmail.com) as of August 2016 from http://skn.noip.me/pdp11/pdp11.html.  This code
- * may be used freely provided the original author name is acknowledged in any modified source code.
+ * It has been adapted from the JavaScript PDP 11/70 Emulator v1.4 written by Paul Nankervis
+ * (paulnank@hotmail.com) as of September 2016 at <http://skn.noip.me/pdp11/pdp11.html>.  This code
+ * may be used freely provided the original authors are acknowledged in any modified source code.
  *
  * PCjs is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3
@@ -21,9 +20,9 @@
  * You should have received a copy of the GNU General Public License along with PCjs.  If not,
  * see <http://www.gnu.org/licenses/gpl.html>.
  *
- * You are required to include the above copyright notice in every source code file of every
- * copy or modified version of this work, and to display that copyright notice on every screen
- * that loads or runs any version of this software (see COPYRIGHT in /modules/shared/lib/defines.js).
+ * You are required to include the above copyright notice in every modified copy of this work
+ * and to display that copyright notice when the software starts running; see COPYRIGHT in
+ * <http://pcjs.org/modules/shared/lib/defines.js>.
  *
  * Some PCjs files also attempt to load external resource files, such as character-image files,
  * ROM files, and disk image files. Those external resource files are not considered part of PCjs
@@ -79,6 +78,29 @@ var BYTEARRAYS = false;
  */
 var TYPEDARRAYS = (typeof ArrayBuffer !== 'undefined');
 
+/**
+ * MEMFAULT forces the Memory interfaces to signal a CPU fault when a word is accessed using an odd (unaligned) address.
+ *
+ * Since PDPjs inherited its Bus component from PCx86, it included support for both aligned and unaligned word accesses
+ * by default.  However, the PDP-11 adds a wrinkle: when an odd address is used to access a memory word, a BUS_ERROR trap
+ * must be generated.  Note that odd IOPAGE word accesses are fine; this only affects the Memory component.
+ *
+ * When the MMU is enabled, these checks may also be performed at a higher level, eliminating the need for them at the
+ * physical memory level.
+ */
+var MEMFAULT = true;
+
+/**
+ * WORDBUS turns off support for unaligned memory words.  Whereas MEMFAULT necessarily slows down memory word accesses
+ * slightly, WORDBUS is able to speed them up slightly, by assuming that all word accesses (which didn't fault) must be
+ * aligned.  This affects all word accesses, even IOPAGE accesses, because it also eliminates cross-block boundary checks.
+ *
+ * Don't worry that the source code looks MORE complicated rather than LESS with the additional MEMFAULT and WORDBUS checks,
+ * because the Closure Compiler eliminates those checks and throws away the (unreachable) code blocks that deal with unaligned
+ * accesses.
+ */
+var WORDBUS = true;
+
 /*
  * Combine all the shared globals and machine-specific globals into one machine-specific global object,
  * which all machine components should start using; eg: "if (PDP11.DEBUG) ..." instead of "if (DEBUG) ...".
@@ -95,12 +117,15 @@ var PDP11 = {
     MAXDEBUG:   MAXDEBUG,       // shared
     PRIVATE:    PRIVATE,        // shared
     TYPEDARRAYS:TYPEDARRAYS,
+    MEMFAULT:   MEMFAULT,
+    WORDBUS:    WORDBUS,
     SITEHOST:   SITEHOST,       // shared
     XMLVERSION: XMLVERSION,     // shared
 
     /*
      * CPU model numbers (supported)
      */
+    MODEL_1120: 1120,
     MODEL_1145: 1145,
     MODEL_1170: 1170,
 
@@ -143,7 +168,10 @@ var PDP11 = {
         TF:         0x0010,     // bit  4: Trap Flag
         PRI:        0x00E0,     // bits 5-7: Priority
         UNUSED:     0x0700,     // bits 8-10: unused
-        REGSET:     0x0800,     // bit  11: Register Set
+        /*
+         * PSW bits above this point are unused on 11/20-class machines
+         */
+        REGSET:     0x0800,     // bit  11: Register Set                        (
         PMODE:      0x3000,     // bits 12-13: Prev Mode (see PDP11.MODE)
         CMODE:      0xC000,     // bits 14-15: Curr Mode (see PDP11.MODE)
         SHIFT: {
@@ -162,7 +190,7 @@ var PDP11 = {
      */
     OPFLAG: {
         INTQ_SPL:   0x01,       // INTQ triggered by SPL
-        INTQ:       0x02,       // call checkInterruptQueue()
+        INTQ:       0x02,       // call checkInterrupts()
         WAIT:       0x04,       // WAIT operation in progress
         TRAP_TF:    0x10,       // aka PDP11.PSW.TF
         TRAP_MMU:   0x20,
@@ -397,11 +425,15 @@ var PDP11 = {
 
         LKS:        0o177546,   //                                  KW11-L Clock Status
 
-        RCSR:       0o177560,   //                                  Console Terminal: Receiver Status Register
-        RBUF:       0o177562,   //                                  Console Terminal: Receiver Data Buffer Register
-        XCSR:       0o177564,   //                                  Console Terminal: Transmitter Status Register
-        XBUF:       0o177566,   //                                  Console Terminal: Transmitter Data Buffer Register
-        DISPLAY:    0o177570,   //                                  Console Switch and Display
+        PRS:        0o177550,   //                                  PC11/PR11 Reader Status Register
+        PRB:        0o177552,   //                                  PC11/PR11 Reader Buffer Register
+
+        RCSR:       0o177560,   //                                  Display Terminal: Receiver Status Register
+        RBUF:       0o177562,   //                                  Display Terminal: Receiver Data Buffer Register
+        XCSR:       0o177564,   //                                  Display Terminal: Transmitter Status Register
+        XBUF:       0o177566,   //                                  Display Terminal: Transmitter Data Buffer Register
+
+        CNSL:       0o177570,   //                                  Console Switch and Front Panel Display
 
         MMR0:       0o177572,   // 777572   17777572
         MMR1:       0o177574,   // 777574   17777574
@@ -440,20 +472,62 @@ var PDP11 = {
         UDSAR6:     0o177674,   //                                  User D Space Address Register 6
         UDSAR7:     0o177676,   //                                  User D Space Address Register 7
 
-        SIZE_LO:    0o177760,   //                                  Lower Size Register (last 32-word block)    (11/70 only?)
-        SIZE_HI:    0o177762,   //                                  Upper Size Register (always zero)           (11/70 only?)
-        SYSID:      0o177764,   //                                  System ID Register                          (11/70 only?)
-        CPUERR:     0o177766,   //                                  CPU error                                   (11/70 only?)
-        MB:         0o177770,   //                                  Microprogram break                          (11/70 only?)
+        R0SET0:     0o177700,
+        R1SET0:     0o177701,
+        R2SET0:     0o177702,
+        R3SET0:     0o177703,
+        R4SET0:     0o177704,
+        R5SET0:     0o177705,
+        R6KERNEL:   0o177706,
+        R7KERNEL:   0o177707,
+        R0SET1:     0o177710,
+        R1SET1:     0o177711,
+        R2SET1:     0o177712,
+        R3SET1:     0o177713,
+        R4SET1:     0o177714,
+        R5SET1:     0o177715,
+        R6SUPER:    0o177716,
+        R6USER:     0o177717,
+
+        /*
+         * This next group of registers is largely ignored; all accesses are routed to regsControl[]
+         */
+        LAERR:      0o177740,   //                                  Low Address Error                           (11/70 only)
+        HAERR:      0o177742,   //                                  High Address Error                          (11/70 only)
+        MEMERR:     0o177744,   //                                  Memory System Error                         (11/70 only)
+        CACHEC:     0o177746,   //                                  Cache Control                               (11/70 only)
+        MAINT:      0o177750,   //                                  Maintenance                                 (11/70 only)
+        HITMISS:    0o177752,   //                                  Hit/Miss                                    (11/70 only)
+        UNDEF1:     0o177754,
+        UNDEF2:     0o177756,
+
+        LSIZE:      0o177760,   //                                  Lower Size Register (last 32-word block)    (11/70 only)
+        HSIZE:      0o177762,   //                                  Upper Size Register (always zero)           (11/70 only)
+        SYSID:      0o177764,   //                                  System ID Register                          (11/70 only)
+        CPUERR:     0o177766,   //                                  CPU error                                   (11/70 only)
+        MB:         0o177770,   //                                  Microprogram break                          (11/70 only)
         PIR:        0o177772,   //                                  Program Interrupt Request
         SL:         0o177774,   //                                  Stack Limit Register
         PSW:        0o177776    // 777776   17777776    0x3FFFFE    Processor Status Word
+    },
+    PC11: {                     // High Speed Reader & Punch (PR11 is a Reader-only unit)
+        PRS: {
+            RE:     0x0001,     // Reader Enable (W/O)
+            RIE:    0x0040,     // Reader Interrupt Enable (allows the DONE and ERROR bits to trigger an interrupt)
+            DONE:   0x0080,     // Done (R/O)
+            BUSY:   0x0800,     // Busy (R/O)
+            ERROR:  0x8000,     // Error (R/O)
+            CLEAR:  0x08C0,     // bits cleared on INIT
+            WMASK:  0x0041      // bits writable
+        },
+        PRB: {
+            MASK:   0x00FF      // Data
+        }
     },
     DL11: {                     // Serial Line Interface (program compatible with the KL11 for control of console teleprinters)
         PRI:        4,
         RVEC:       0o60,
         XVEC:       0o64,
-        DELAY:      40,
         RCSR: {                 // 177560
             RE:     0x0001,     // Reader Enable (W/O)              TODO: Determine if we really need to exclude this write-only bit from RMASK
             DTR:    0x0002,     // Data Terminal Ready (R/W)
@@ -476,7 +550,8 @@ var PDP11 = {
             PARITY: 0x1000,     // Received Data Parity (R/O)
             FE:     0x2000,     // Framing Error (R/O)
             OE:     0x4000,     // Overrun Error (R/O)
-            ERROR:  0x8000      // Error (R/O)
+            ERROR:  0x8000,     // Error (R/O)
+            DELAY:  1
         },
         XCSR: {                 // 177564
             BREAK:  0x0001,     // BREAK (R/W)
@@ -485,11 +560,11 @@ var PDP11 = {
             READY:  0x0080,     // Transmitter Ready (R/O)
             RMASK:  0x00C5,
             WMASK:  0x0045,
-            DELAY:  8
+            DELAY:  1
         },
         XBUF: {                 // 177566
             DATA:   0x00FF,     // Transmitted Data (W/O)       TODO: Determine why pdp11.js effectively defined this as 0x7F
-            DELAY:  100
+            DELAY:  1
         }
     },
     KW11: {                     // KW11-L Line Time Clock

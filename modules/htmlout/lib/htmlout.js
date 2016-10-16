@@ -1,10 +1,7 @@
 /**
  * @fileoverview Builds default ("index.html") documents from HTML templates
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a> (@jeffpar)
- * @version 1.0
- * Created 2014-02-14
- *
- * Copyright © 2012-2016 Jeff Parsons <Jeff@pcjs.org>
+ * @copyright © Jeff Parsons 2012-2016
  *
  * This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
  *
@@ -19,9 +16,9 @@
  * You should have received a copy of the GNU General Public License along with PCjs.  If not,
  * see <http://www.gnu.org/licenses/gpl.html>.
  *
- * You are required to include the above copyright notice in every source code file of every
- * copy or modified version of this work, and to display that copyright notice on every screen
- * that loads or runs any version of this software (see COPYRIGHT in /modules/shared/lib/defines.js).
+ * You are required to include the above copyright notice in every modified copy of this work
+ * and to display that copyright notice when the software starts running; see COPYRIGHT in
+ * <http://pcjs.org/modules/shared/lib/defines.js>.
  *
  * Some PCjs files also attempt to load external resource files, such as character-image files,
  * ROM files, and disk image files. Those external resource files are not considered part of PCjs
@@ -799,7 +796,7 @@ HTMLOut.prototype.setData = function(err, sData, sFile, fTemplate)
      * We cheat slightly and insert one of those tokens right now, because otherwise
      * the template file itself would not render correctly in your web browser.
      */
-    this.sTemplate = sData.replace("/modules/shared/templates/common.css", "/versions/pcx86/<!-- pcjs:version -->/common.css");
+    this.sTemplate = sData; // .replace("/modules/shared/templates/common.css", "/versions/pcx86/<!-- pcjs:version -->/common.css");
     this.sHTML = this.sTemplate;
 
     /*
@@ -1846,7 +1843,7 @@ HTMLOut.prototype.getRandomString = function(sIndent)
  *
  * At a minimum, each machine object should contain the following properties:
  *
- *      'type' (eg, a machine type, such as "PCx86" or "C1P")
+ *      'type' (eg, a machine type, such as "C1P", "PCx86", "PC8080", or "PDP11")
  *      'version' (eg, "1.10", "*" to select the current version, or "uncompiled"; "*" is the default)
  *      'debugger' (eg, true or false; false is the default)
  *
@@ -1894,7 +1891,7 @@ HTMLOut.prototype.processMachines = function(aMachines, buildOptions, done)
         if (fCompiled) {
             var sScriptName = sType.toLowerCase();
             var sScriptFile = sScriptName + (fDebugger? "-dbg" : "") + ".js";
-            var sScriptFolder = sScriptName + ((sType == "C1P" || sType == "PC")? "js" : "");
+            var sScriptFolder = sScriptName == "c1p"? "c1pjs" : (sScriptName.substr(0, 3) == "pdp"? "pdpjs" : sScriptName);
             asFiles.push("/versions/" + sScriptFolder + "/" + sVersion + "/components.css");
             asFiles.push("/versions/" + sScriptFolder + "/" + sVersion + "/" + sScriptFile);
             this.addFilesToHTML(asFiles, sScriptEmbed);

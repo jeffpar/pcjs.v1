@@ -1,10 +1,7 @@
 /**
  * @fileoverview Converts file contents to JSON
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a> (@jeffpar)
- * @version 1.0
- * Created 2014-02-01
- *
- * Copyright © 2012-2016 Jeff Parsons <Jeff@pcjs.org>
+ * @copyright © Jeff Parsons 2012-2016
  *
  * This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
  *
@@ -19,9 +16,9 @@
  * You should have received a copy of the GNU General Public License along with PCjs.  If not,
  * see <http://www.gnu.org/licenses/gpl.html>.
  *
- * You are required to include the above copyright notice in every source code file of every
- * copy or modified version of this work, and to display that copyright notice on every screen
- * that loads or runs any version of this software (see COPYRIGHT in /modules/shared/lib/defines.js).
+ * You are required to include the above copyright notice in every modified copy of this work
+ * and to display that copyright notice when the software starts running; see COPYRIGHT in
+ * <http://pcjs.org/modules/shared/lib/defines.js>.
  *
  * Some PCjs files also attempt to load external resource files, such as character-image files,
  * ROM files, and disk image files. Those external resource files are not considered part of PCjs
@@ -83,7 +80,7 @@ function FileDump(sFormat, fComments, fDecimal, offDump, nWidthDump, sServerRoot
 FileDump.sAPIURL = "http://www.pcjs.org" + DumpAPI.ENDPOINT;
 FileDump.sCopyright = "© 2012-2016 by Jeff Parsons (@jeffpar)";
 FileDump.sNotice = FileDump.sAPIURL + " " + FileDump.sCopyright;
-FileDump.sUsage = "Usage: " + FileDump.sAPIURL + "?" + DumpAPI.QUERY.FILE + "=({path}|{URL})&" + DumpAPI.QUERY.FORMAT + "=(json|data|hex|bytes|rom)";
+FileDump.sUsage = "Usage: " + FileDump.sAPIURL + "?" + DumpAPI.QUERY.FILE + "=({path}|{URL})&" + DumpAPI.QUERY.FORMAT + "=(json|data|hex|octal|bytes|words|rom)";
 
 FileDump.asBadExts = [
     "js", "log"
@@ -100,15 +97,25 @@ FileDump.asBadExts = [
  *
  * Usage
  * ---
- *      filedump --file=({path}|{URL}) [--merge=({path}|{url})] [--format=(json|data|hex|bytes|rom)] [--comments]
- *               [--decimal] [--offset={number}] [--width={number}] [--output={path}] [--overwrite]
+ *      filedump --file=({path}|{URL}) [--merge=({path}|{url})] [--format=(json|data|hex|octal|bytes|words|rom)]
+ *                  [--comments] [--decimal] [--offset={number}] [--width={number}] [--output={path}] [--overwrite]
  *
  * Arguments
  * ---
  *      The default format is "json", which generates an array of signed 32-bit decimal values; "hex" is an older
  *      text format that consists entirely of 2-character hex values (deprecated), and "bytes" is a JSON-like format
  *      that also uses hex values (but with "0x" prefixes) and is normally used only when comments are enabled (use
- *      --decimal to force decimal byte output).
+ *      --decimal to force decimal byte output).  "words" are like "bytes" except that it outputs 16-bit values
+ *      instead of 8-bit values; "octal" is an alias for "words", the only difference being that it includes a comment
+ *      alongside each word with the octal form of the word.
+ *
+ *      If you want actual octal output, then an --octal option should be added at some point; however, that begs the
+ *      question of how to render octal numbers so that all versions of JavaScript interpret them correctly.  Prefixing
+ *      octal values with an extra zero was the old convention, but it was never formally adopted and it isn't allowed
+ *      in "strict" mode.  Prefixing them with "0o" is the new convention for ES6 and up, which is great, but we still
+ *      have no octal format that works across the board.  We can use the new octal format in code, because we always
+ *      compile browser-based code back to ES5 (converting all numeric constants to decimal), and current versions of
+ *      Node supported the new format for quite a while.  But what we store in data files is more problematic.
  *
  *      When a second file is "merged", the first file sets all even bytes and the second file sets all odd bytes.
  *      In fact, any number of files can be merged: if there are N files, file #1 sets bytes at "offset mod N == 0",
@@ -136,7 +143,7 @@ FileDump.CLI = function()
     var args = proc.getArgs();
 
     if (!args.argc) {
-        console.log("usage: filedump --file=({path}|{URL}) [--merge=({path}|{url})] [--format=(json|data|hex|bytes|rom)] [--comments] [--decimal] [--offset={number}] [--width={number}] [--output={path}] [--overwrite]");
+        console.log("usage: filedump --file=({path}|{URL}) [--merge=({path}|{url})] [--format=(json|data|hex|octal|bytes|words|rom)] [--comments] [--decimal] [--offset={number}] [--width={number}] [--output={path}] [--overwrite]");
         return;
     }
 
@@ -242,9 +249,12 @@ FileDump.prototype.loadFile = function(sFile, iStart, nSkip, done)
 {
     var obj = this;
 
+    var encoding = null;
     var sExt = str.getExtension(sFile);
-    var options = {encoding: sExt == DumpAPI.FORMAT.JSON || sExt == DumpAPI.FORMAT.HEX? "utf8" : null};
-
+    if (sExt == DumpAPI.FORMAT.JSON || sExt == DumpAPI.FORMAT.HEX || sExt == "lst") {
+        encoding = "utf8";
+    }
+    var options = {encoding: encoding};
     var sFilePath = (this.fLocal || net.isRemote(sFile))? sFile : path.join(this.sServerRoot, sFile);
 
     if (!this.sFilePath) this.sFilePath = sFilePath;
@@ -257,7 +267,7 @@ FileDump.prototype.loadFile = function(sFile, iStart, nSkip, done)
                 done(err);
                 return;
             }
-            obj.setData(buf, iStart, nSkip);
+            obj.setData(buf, iStart, nSkip, sExt);
             done(null);
         });
     } else {
@@ -267,14 +277,58 @@ FileDump.prototype.loadFile = function(sFile, iStart, nSkip, done)
                 done(err);
                 return;
             }
-            obj.setData(buf, iStart, nSkip);
+            obj.setData(buf, iStart, nSkip, sExt);
             done(null);
         });
     }
 };
 
 /**
- * setData(buf, iStart, nSkip)
+ * parseListing(sListing)
+ *
+ * Parses the data within a MACRO11 listing file and produces an array of bytes.
+ *
+ * @this {FileDump}
+ * @param {string} sListing
+ * @return {Array.<number>}
+ */
+FileDump.prototype.parseListing = function(sListing)
+{
+    var ab = [];
+    var matchLine;
+    var re = /^( [0-9 ]{8}|)([0-7]{6})[: ]+([0-7]+)[ ]*([0-7']+|)[ ]+([0-7']+|)[ ]+(.*)$/gm;
+    var addrStart = null;
+    while (matchLine = re.exec(sListing)) {
+        /*
+         * matchLine[1]: line # (optional)
+         * matchLine[2]: address
+         * matchLine[3]: 6-digit opcode or 3-digit data
+         * matchLine[4]: 6-digit operand (with optional apostrophe) or 3-digit data
+         * matchLine[5]: 6-digit operand (with optional apostrophe) or 3-digit data
+         */
+        var addrLine = parseInt(matchLine[2], 8);
+        if (addrStart == null) addrStart = addrLine;
+        for (var i = 3, s; i <= 5 && (s = matchLine[i]); i++) {
+            var data = parseInt(s.substr(0, 6), 8);
+            if (s.length == 3) {
+                addrLine++;
+                ab.push(data);
+            }
+            else {
+                addrLine += 2;
+                if (s.length == 7) {
+                    data -= addrLine;
+                }
+                ab.push(data & 0xff);
+                ab.push(data >> 8);
+            }
+        }
+    }
+    return ab;
+};
+
+/**
+ * setData(buf, iStart, nSkip, sExt)
  *
  * Records the given file data in the FileDump's buffer
  *
@@ -282,13 +336,17 @@ FileDump.prototype.loadFile = function(sFile, iStart, nSkip, done)
  * @param {Buffer|string} buf
  * @param {number} iStart
  * @param {number} nSkip
+ * @param {string} [sExt]
  */
-FileDump.prototype.setData = function(buf, iStart, nSkip)
+FileDump.prototype.setData = function(buf, iStart, nSkip, sExt)
 {
     var b, i, j, s;
     if (typeof buf == "string") {
         var ab = [];
-        if (buf.indexOf('{') >= 0) {
+        if (sExt == "lst") {
+            ab = this.parseListing(buf);
+        }
+        else if (buf.indexOf('{') >= 0) {
             /*
              * Treat the incoming string data as JSON data.
              */
@@ -324,7 +382,6 @@ FileDump.prototype.setData = function(buf, iStart, nSkip)
          * If we didn't recognize the data, then simply return, leaving this.buf undefined.
          */
         if (!ab.length) return;
-
         buf = new Buffer(ab);
     }
     if (!this.buf) {
@@ -409,6 +466,12 @@ FileDump.prototype.dumpBuffer = function(sKey, buf, len, cbItem, offDump, nWidth
 {
     var chOpen = '', chClose = '', chSep = ' ', sHexPrefix = "";
 
+    var nBase = 16;
+    if (sKey == DumpAPI.FORMAT.OCTAL) {
+        sKey = DumpAPI.FORMAT.WORDS;
+        nBase = 8;
+    }
+
     this.sKey = sKey;
 
     if (this.sFormat != DumpAPI.FORMAT.HEX) {
@@ -422,7 +485,7 @@ FileDump.prototype.dumpBuffer = function(sKey, buf, len, cbItem, offDump, nWidth
 
     var sLine = "";
     var sASCII = "";
-    var cMaxCols = nWidthDump * cbItem;
+    var cMaxCols = nWidthDump * (cbItem == 2 && nBase == 8? 1 : cbItem);
 
     for (var off = offDump; off < len; off += cbItem) {
 
@@ -434,7 +497,7 @@ FileDump.prototype.dumpBuffer = function(sKey, buf, len, cbItem, offDump, nWidth
             break;
         }
 
-        var v = (cbItem == 1? buf.readUInt8(off) : buf.readInt32LE(off));
+        var v = (cbItem == 1? buf.readUInt8(off) : (cbItem == 2? buf.readInt16LE(off) : buf.readInt32LE(off)));
 
         if (off > offDump) {
             sLine += chSep;
@@ -444,7 +507,11 @@ FileDump.prototype.dumpBuffer = function(sKey, buf, len, cbItem, offDump, nWidth
             }
         }
         if (cbItem > 1) {
-            sLine += v;
+            if (cbItem > 2) {
+                sLine += v;
+            } else {
+                sLine += str.toHexWord(v) + (nBase == 8? " /*" + str.toOct(v & 0xffff, 6) + "*/" : "");
+            }
         }
         else {
             if (this.fDecimal) {
@@ -665,6 +732,9 @@ FileDump.prototype.buildJSON = function()
         // console.log("length of buffer: " + this.buf.length);
         if (this.fJSONComments || this.sFormat == DumpAPI.FORMAT.HEX || this.sFormat == DumpAPI.FORMAT.BYTES) {
             this.json += this.dumpBuffer(null, this.buf, this.buf.length, 1);
+        }
+        else if (this.sFormat == DumpAPI.FORMAT.OCTAL || this.sFormat == DumpAPI.FORMAT.WORDS) {
+            this.json += this.dumpBuffer(this.sFormat, this.buf, this.buf.length, 2);
         } else {
             this.json += this.dumpBuffer("data", this.buf, this.buf.length, 4);
         }

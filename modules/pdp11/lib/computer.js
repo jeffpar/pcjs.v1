@@ -1,14 +1,13 @@
 /**
  * @fileoverview Implements the PDP11 Computer component.
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
- * @version 1.0
- * Created 2016-Sep-03
+ * @copyright © Jeff Parsons 2012-2016
  *
  * This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
  *
- * It has been adapted from the JavaScript PDP 11/70 Emulator v1.3 written by Paul Nankervis
- * (paulnank@hotmail.com) as of August 2016 from http://skn.noip.me/pdp11/pdp11.html.  This code
- * may be used freely provided the original author name is acknowledged in any modified source code.
+ * It has been adapted from the JavaScript PDP 11/70 Emulator v1.4 written by Paul Nankervis
+ * (paulnank@hotmail.com) as of September 2016 at <http://skn.noip.me/pdp11/pdp11.html>.  This code
+ * may be used freely provided the original authors are acknowledged in any modified source code.
  *
  * PCjs is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3
@@ -21,9 +20,9 @@
  * You should have received a copy of the GNU General Public License along with PCjs.  If not,
  * see <http://www.gnu.org/licenses/gpl.html>.
  *
- * You are required to include the above copyright notice in every source code file of every
- * copy or modified version of this work, and to display that copyright notice on every screen
- * that loads or runs any version of this software (see COPYRIGHT in /modules/shared/lib/defines.js).
+ * You are required to include the above copyright notice in every modified copy of this work
+ * and to display that copyright notice when the software starts running; see COPYRIGHT in
+ * <http://pcjs.org/modules/shared/lib/defines.js>.
  *
  * Some PCjs files also attempt to load external resource files, such as character-image files,
  * ROM files, and disk image files. Those external resource files are not considered part of PCjs
@@ -185,7 +184,7 @@ function ComputerPDP11(parmsComputer, parmsMachine, fSuspended) {
 
     this.println(PDP11.APPNAME + " v" + PDP11.APPVERSION + "\n" + COPYRIGHT + "\n" + LICENSE);
 
-    this.println("Portions adapted from the PDP-11/70 Emulator v1.3 by Paul Nankervis <paulnank@hotmail.com>");
+    this.println("Portions adapted from the PDP-11/70 Emulator v1.4 by Paul Nankervis <paulnank@hotmail.com>");
 
     if (DEBUG && this.messageEnabled()) this.printMessage("TYPEDARRAYS: " + TYPEDARRAYS);
 
@@ -1000,6 +999,7 @@ ComputerPDP11.prototype.start = function(ms, nCycles)
             component.start(ms, nCycles);
         }
     }
+    this.updateStatus(true);
 };
 
 /**
@@ -1024,19 +1024,20 @@ ComputerPDP11.prototype.stop = function(ms, nCycles)
             component.stop(ms, nCycles);
         }
     }
+    this.updateStatus(true);
 };
 
 /**
- * setBinding(sHTMLType, sBinding, control, sValue)
+ * setBinding(sType, sBinding, control, sValue)
  *
  * @this {ComputerPDP11}
- * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
+ * @param {string|null} sType is the type of the HTML control (eg, "button", "textarea", "register", "flag", "rled", etc)
  * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "reset")
  * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
  * @param {string} [sValue] optional data value
  * @return {boolean} true if binding was successful, false if unrecognized binding request
  */
-ComputerPDP11.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
+ComputerPDP11.prototype.setBinding = function(sType, sBinding, control, sValue)
 {
     var computer = this;
 
@@ -1448,7 +1449,7 @@ ComputerPDP11.prototype.updateStatus = function(fForce)
 /**
  * ComputerPDP11.init()
  *
- * For every machine represented by an HTML element of class "pcjs-machine", this function
+ * For every machine represented by an HTML element of class "pdp11-machine", this function
  * locates the HTML element of class "computer", extracting the JSON-encoded parameters for the
  * Computer constructor from the element's "data-value" attribute, invoking the constructor to
  * create a Computer component, and then binding any associated HTML controls to the new component.

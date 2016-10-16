@@ -1,14 +1,13 @@
 /**
  * @fileoverview Defines PDP11 message categories.
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
- * @version 1.0
- * Created 2016-Sep-03
+ * @copyright © Jeff Parsons 2012-2016
  *
  * This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
  *
- * It has been adapted from the JavaScript PDP 11/70 Emulator v1.3 written by Paul Nankervis
- * (paulnank@hotmail.com) as of August 2016 from http://skn.noip.me/pdp11/pdp11.html.  This code
- * may be used freely provided the original author name is acknowledged in any modified source code.
+ * It has been adapted from the JavaScript PDP 11/70 Emulator v1.4 written by Paul Nankervis
+ * (paulnank@hotmail.com) as of September 2016 at <http://skn.noip.me/pdp11/pdp11.html>.  This code
+ * may be used freely provided the original authors are acknowledged in any modified source code.
  *
  * PCjs is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3
@@ -21,9 +20,9 @@
  * You should have received a copy of the GNU General Public License along with PCjs.  If not,
  * see <http://www.gnu.org/licenses/gpl.html>.
  *
- * You are required to include the above copyright notice in every source code file of every
- * copy or modified version of this work, and to display that copyright notice on every screen
- * that loads or runs any version of this software (see COPYRIGHT in /modules/shared/lib/defines.js).
+ * You are required to include the above copyright notice in every modified copy of this work
+ * and to display that copyright notice when the software starts running; see COPYRIGHT in
+ * <http://pcjs.org/modules/shared/lib/defines.js>.
  *
  * Some PCjs files also attempt to load external resource files, such as character-image files,
  * ROM files, and disk image files. Those external resource files are not considered part of PCjs
@@ -37,7 +36,8 @@ var MessagesPDP11 = {
     CPU:        0x00000001,
     TRAP:       0x00000010,
     BUS:        0x00000040,
-    MEM:        0x00000080,
+    MEMORY:     0x00000080,
+    DEVICE:     0x00000100,
     KEYBOARD:   0x00010000,
     KEYS:       0x00020000,
     DISK:       0x00200000,
@@ -68,7 +68,8 @@ MessagesPDP11.CATEGORIES = {
     "cpu":      MessagesPDP11.CPU,
     "trap":     MessagesPDP11.TRAP,
     "bus":      MessagesPDP11.BUS,
-    "mem":      MessagesPDP11.MEM,
+    "memory":   MessagesPDP11.MEMORY,
+    "device":   MessagesPDP11.DEVICE,
     "keyboard": MessagesPDP11.KEYBOARD, // "kbd" is also allowed as shorthand for "keyboard"; see doMessages()
     "key":      MessagesPDP11.KEYS,     // using "key" instead of "keys", since the latter is a method on JavasScript objects
     "disk":     MessagesPDP11.DISK,

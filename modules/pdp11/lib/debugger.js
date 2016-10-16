@@ -1,14 +1,13 @@
 /**
  * @fileoverview Implements the PDP11 Debugger component.
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
- * @version 1.0
- * Created 2016-Sep-03
+ * @copyright © Jeff Parsons 2012-2016
  *
  * This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
  *
- * It has been adapted from the JavaScript PDP 11/70 Emulator v1.3 written by Paul Nankervis
- * (paulnank@hotmail.com) as of August 2016 from http://skn.noip.me/pdp11/pdp11.html.  This code
- * may be used freely provided the original author name is acknowledged in any modified source code.
+ * It has been adapted from the JavaScript PDP 11/70 Emulator v1.4 written by Paul Nankervis
+ * (paulnank@hotmail.com) as of September 2016 at <http://skn.noip.me/pdp11/pdp11.html>.  This code
+ * may be used freely provided the original authors are acknowledged in any modified source code.
  *
  * PCjs is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3
@@ -21,9 +20,9 @@
  * You should have received a copy of the GNU General Public License along with PCjs.  If not,
  * see <http://www.gnu.org/licenses/gpl.html>.
  *
- * You are required to include the above copyright notice in every source code file of every
- * copy or modified version of this work, and to display that copyright notice on every screen
- * that loads or runs any version of this software (see COPYRIGHT in /modules/shared/lib/defines.js).
+ * You are required to include the above copyright notice in every modified copy of this work
+ * and to display that copyright notice when the software starts running; see COPYRIGHT in
+ * <http://pcjs.org/modules/shared/lib/defines.js>.
  *
  * Some PCjs files also attempt to load external resource files, such as character-image files,
  * ROM files, and disk image files. Those external resource files are not considered part of PCjs
@@ -53,12 +52,14 @@ if (DEBUGGER) {
  * DebuggerPDP11 Address Object
  *
  *      addr            address
+ *      fPhysical       true if this is a physical address
  *      fTemporary      true if this is a temporary breakpoint address
  *      sCmd            set for breakpoint addresses if there's an associated command string
  *      aCmds           preprocessed commands (from sCmd)
  *
  * @typedef {{
  *      addr:(number|undefined),
+ *      fPhysical:(boolean|undefined),
  *      fTemporary:(boolean|undefined),
  *      sCmd:(string|undefined),
  *      aCmds:(Array.<string>|undefined)
@@ -244,7 +245,7 @@ if (DEBUGGER) {
      * CPU opcode names, indexed by CPU opcode ordinal (above)
      */
     DebuggerPDP11.OPNAMES = [
-        "NONE",         "ADC",          "ADCB",         "ADD",          "ASL",          "ASLB",         "ASR",          "ASRB",
+        ".WORD",        "ADC",          "ADCB",         "ADD",          "ASL",          "ASLB",         "ASR",          "ASRB",
         "BCC",          "BCS",          "BEQ",          "BGE",          "BGT",          "BHI",          "BIC",          "BICB",
         "BIS",          "BISB",         "BIT",          "BITB",         "BLE",          "BLOS",         "BLT",          "BMI",
         "BNE",          "BPL",          "BPT",          "BR",           "BVC",          "BVS",          "CCC",          "CLC",
@@ -281,7 +282,7 @@ if (DEBUGGER) {
     DebuggerPDP11.OP_OTHER    = 0xF000;
 
     /*
-     * The opTable contains opcode masks, and each mask refers to table of possible values, and each
+     * The OPTABLE contains opcode masks, and each mask refers to table of possible values, and each
      * value refers to an array that contains:
      *
      *      [0]: {number} of the opcode name (see OP.*)
@@ -297,7 +298,7 @@ if (DEBUGGER) {
      * that the opcode's destination operand is being listed first, but rather that the bits describing the source
      * operand are in the opcode's OP_DST field.
      */
-    DebuggerPDP11.opTable = {
+    DebuggerPDP11.OPTABLE = {
         0xF000: {
             0x1000: [DebuggerPDP11.OPS.MOV,     DebuggerPDP11.OP_SRC,         DebuggerPDP11.OP_DST],        // 01SSDD
             0x2000: [DebuggerPDP11.OPS.CMP,     DebuggerPDP11.OP_SRC,         DebuggerPDP11.OP_DST],        // 02SSDD
@@ -424,6 +425,28 @@ if (DEBUGGER) {
         }
     };
 
+    DebuggerPDP11.OPNONE = [DebuggerPDP11.OPS.NONE];
+
+    /*
+     * Table of opcodes that are specific to the 11/45 and higher
+     */
+    DebuggerPDP11.OP1145 = [
+        DebuggerPDP11.OPS.MARK,
+        DebuggerPDP11.OPS.MFPI,
+        DebuggerPDP11.OPS.MTPI,
+        DebuggerPDP11.OPS.SXT,
+        DebuggerPDP11.OPS.SPL,
+        DebuggerPDP11.OPS.RTT,
+        DebuggerPDP11.OPS.MUL,
+        DebuggerPDP11.OPS.DIV,
+        DebuggerPDP11.OPS.ASH,
+        DebuggerPDP11.OPS.ASHC,
+        DebuggerPDP11.OPS.XOR,
+        DebuggerPDP11.OPS.SOB,
+        DebuggerPDP11.OPS.MFPD,
+        DebuggerPDP11.OPS.MTPD
+    ];
+
     DebuggerPDP11.HISTORY_LIMIT = DEBUG? 100000 : 1000;
 
     /**
@@ -447,7 +470,8 @@ if (DEBUGGER) {
         var sMessages = cmp.getMachineParm('messages');
         if (sMessages) this.messageInit(sMessages);
 
-        this.opTable = DebuggerPDP11.opTable;
+        this.opTable = DebuggerPDP11.OPTABLE;
+        this.aOpReserved = this.cpu.model < PDP11.MODEL_1145? DebuggerPDP11.OP1145 : [];
 
         this.messageDump(MessagesPDP11.BUS,  function onDumpBus(asArgs) { dbg.dumpBus(asArgs); });
 
@@ -455,16 +479,16 @@ if (DEBUGGER) {
     };
 
     /**
-     * setBinding(sHTMLType, sBinding, control, sValue)
+     * setBinding(sType, sBinding, control, sValue)
      *
      * @this {DebuggerPDP11}
-     * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
+     * @param {string|null} sType is the type of the HTML control (eg, "button", "textarea", "register", "flag", "rled", etc)
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "debugInput")
      * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
-    DebuggerPDP11.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
+    DebuggerPDP11.prototype.setBinding = function(sType, sBinding, control, sValue)
     {
         var dbg = this;
         switch (sBinding) {
@@ -588,12 +612,7 @@ if (DEBUGGER) {
         var b = 0xff;
         var addr = this.getAddr(dbgAddr, false, 1);
         if (addr !== PDP11.ADDR_INVALID) {
-            this.nDisableMessages++;
-            /*
-             * TODO: We also need a Bus interface to disable fnAccess() calls that could trigger a trap()
-             */
-            b = this.bus.getByteDirect(addr);
-            this.nDisableMessages--;
+            b = dbgAddr.fPhysical? this.bus.getByteDirect(addr) : this.cpu.getByteDirect(addr);
             if (inc) this.incAddr(dbgAddr, inc);
         }
         return b;
@@ -612,12 +631,7 @@ if (DEBUGGER) {
         var w = 0xffff;
         var addr = this.getAddr(dbgAddr, false, 2);
         if (addr !== PDP11.ADDR_INVALID) {
-            this.nDisableMessages++;
-            /*
-             * TODO: We also need a Bus interface to disable fnAccess() calls that could trigger a trap()
-             */
-            w = this.bus.getWordDirect(addr);
-            this.nDisableMessages--;
+            w = dbgAddr.fPhysical? this.bus.getWordDirect(addr) : this.cpu.getWordDirect(addr);
             if (inc) this.incAddr(dbgAddr, inc);
         }
         return w;
@@ -635,14 +649,13 @@ if (DEBUGGER) {
     {
         var addr = this.getAddr(dbgAddr, true, 1);
         if (addr !== PDP11.ADDR_INVALID) {
-            this.nDisableMessages++;
-            /*
-             * TODO: We also need a Bus interface to disable fnAccess() calls that could trigger a trap()
-             */
-            this.bus.setByteDirect(addr, b);
-            this.nDisableMessages--;
+            if (dbgAddr.fPhysical) {
+                this.bus.setByteDirect(addr, b);
+            } else {
+                this.cpu.setByteDirect(addr, b);
+            }
             if (inc) this.incAddr(dbgAddr, inc);
-            this.cpu.updateCPU(true);           // we set fForce to true in case video memory was the target
+            this.cmp.updateStatus(true);        // force a computer status update if, say, video memory was the target
         }
     };
 
@@ -658,29 +671,29 @@ if (DEBUGGER) {
     {
         var addr = this.getAddr(dbgAddr, true, 2);
         if (addr !== PDP11.ADDR_INVALID) {
-            this.nDisableMessages++;
-            /*
-             * TODO: We also need a Bus interface to disable fnAccess() calls that could trigger a trap()
-             */
-            this.bus.setWordDirect(addr, w);
-            this.nDisableMessages--;
+            if (dbgAddr.fPhysical) {
+                this.bus.setWordDirect(addr, w);
+            } else {
+                this.cpu.setWordDirect(addr, w);
+            }
             if (inc) this.incAddr(dbgAddr, inc);
-            this.cpu.updateCPU(true);           // we set fForce to true in case video memory was the target
+            this.cmp.updateStatus(true);        // force a computer status update if, say, video memory was the target
         }
     };
 
     /**
-     * newAddr(addr)
+     * newAddr(addr, fPhysical)
      *
      * Returns a NEW DbgAddrPDP11 object, initialized with specified values and/or defaults.
      *
      * @this {DebuggerPDP11}
      * @param {number} [addr]
+     * @param {boolean} [fPhysical]
      * @return {DbgAddrPDP11}
      */
-    DebuggerPDP11.prototype.newAddr = function(addr)
+    DebuggerPDP11.prototype.newAddr = function(addr, fPhysical)
     {
-        return {addr: addr, fTemporary: false};
+        return {addr: addr, fPhysical: fPhysical, fTemporary: false};
     };
 
     /**
@@ -750,14 +763,20 @@ if (DEBUGGER) {
         var dbgAddr;
         var dbgAddrNext = (fCode? this.dbgAddrNextCode : this.dbgAddrNextData);
         var addr = dbgAddrNext.addr;
+        var fPhysical = false;
         if (sAddr !== undefined) {
             sAddr = this.parseReference(sAddr);
+            var ch = sAddr.charAt(0);
+            if (ch == '%') {
+                fPhysical = true;
+                sAddr = sAddr.substr(1);
+            }
             dbgAddr = this.findSymbolAddr(sAddr);
             if (dbgAddr) return dbgAddr;
             addr = this.parseExpression(sAddr, fPrint);
         }
         if (addr != null) {
-            dbgAddr = this.newAddr(addr);
+            dbgAddr = this.newAddr(addr, fPhysical);
         }
         return dbgAddr;
     };
@@ -872,7 +891,7 @@ if (DEBUGGER) {
                 if (!cPrev++) this.println("...");
             } else {
                 typePrev = block.type;
-                var sType = MemoryPDP11.TYPE.NAMES[typePrev];
+                var sType = MemoryPDP11.TYPE_NAMES[typePrev];
                 if (block) {
                     this.println(str.toHex(block.id, 8) + "  %" + str.toHex(i << this.bus.nBlockShift, 8) + "  %%" + str.toHex(block.addr, 8) + "  " + str.toHexWord(block.used) + "  " + str.toHexWord(block.size) + "  " + sType);
                 }
@@ -1027,7 +1046,6 @@ if (DEBUGGER) {
         this.bitsMessage = this.bitsWarning = MessagesPDP11.WARN;
         this.sMessagePrev = null;
         this.aMessageBuffer = [];
-        this.nDisableMessages = 0;
         /*
          * Internally, we use "key" instead of "keys", since the latter is a method on JavasScript objects,
          * but externally, we allow the user to specify "keys"; "kbd" is also allowed as shorthand for "keyboard".
@@ -1148,26 +1166,6 @@ if (DEBUGGER) {
     };
 
     /**
-     * disableMessages(s)
-     *
-     * @this {DebuggerPDP11}
-     */
-    DebuggerPDP11.prototype.disableMessages = function()
-    {
-        this.nDisableMessages++;
-    };
-
-    /**
-     * enableMessages(s)
-     *
-     * @this {DebuggerPDP11}
-     */
-    DebuggerPDP11.prototype.enableMessages = function()
-    {
-        this.nDisableMessages--;
-    };
-
-    /**
      * message(sMessage, fAddress)
      *
      * @this {DebuggerPDP11}
@@ -1176,10 +1174,8 @@ if (DEBUGGER) {
      */
     DebuggerPDP11.prototype.message = function(sMessage, fAddress)
     {
-        if (this.nDisableMessages) return;
-
         if (fAddress) {
-            sMessage += " @" + this.toStrAddr(this.newAddr(this.cpu.getPC()));
+            sMessage += " @" + this.toStrAddr(this.newAddr(this.cpu.getLastPC()));
         }
 
         if (this.bitsMessage & MessagesPDP11.BUFFER) {
@@ -1272,29 +1268,30 @@ if (DEBUGGER) {
     };
 
     /**
-     * startCPU(fUpdateFocus)
+     * startCPU(fUpdateFocus, fQuiet)
      *
      * @this {DebuggerPDP11}
      * @param {boolean} [fUpdateFocus] is true to update focus
+     * @param {boolean} [fQuiet]
      * @return {boolean} true if run request successful, false if not
      */
-    DebuggerPDP11.prototype.startCPU = function(fUpdateFocus)
+    DebuggerPDP11.prototype.startCPU = function(fUpdateFocus, fQuiet)
     {
-        if (!this.checkCPU()) return false;
+        if (!this.checkCPU(fQuiet)) return false;
         this.cpu.startCPU(fUpdateFocus);
         return true;
     };
 
     /**
-     * stepCPU(nCycles, fRegs, fUpdateCPU)
+     * stepCPU(nCycles, fRegs, fUpdateStatus)
      *
      * @this {DebuggerPDP11}
      * @param {number} nCycles (0 for one instruction without checking breakpoints)
      * @param {boolean} [fRegs] is true to display registers after step (default is false)
-     * @param {boolean} [fUpdateCPU] is false to disable calls to updateCPU() (default is true)
+     * @param {boolean} [fUpdateStatus] is false to disable Computer status updates (default is true)
      * @return {boolean}
      */
-    DebuggerPDP11.prototype.stepCPU = function(nCycles, fRegs, fUpdateCPU)
+    DebuggerPDP11.prototype.stepCPU = function(nCycles, fRegs, fUpdateStatus)
     {
         if (!this.checkCPU()) return false;
 
@@ -1335,11 +1332,11 @@ if (DEBUGGER) {
         }
 
         /*
-         * Because we called cpu.stepCPU() and not cpu.startCPU(), we must nudge the cpu's update code,
-         * and then update our own state.  Normally, the only time fUpdateCPU will be false is when doTrace()
-         * is calling us in a loop, in which case it will perform its own updateCPU() when it's done.
+         * Because we called cpu.stepCPU() and not cpu.startCPU(), we must nudge the Computer's update code,
+         * and then update our own state.  Normally, the only time fUpdateStatus will be false is when doTrace()
+         * is calling us in a loop, in which case it will perform its own updateStatus() when it's done.
          */
-        if (fUpdateCPU !== false) this.cpu.updateCPU();
+        if (fUpdateStatus !== false) this.cmp.updateStatus();
 
         this.updateStatus(fRegs || false);
         return (this.nCycles > 0);
@@ -1380,23 +1377,20 @@ if (DEBUGGER) {
     };
 
     /**
-     * checkCPU()
+     * checkCPU(fQuiet)
      *
      * Make sure the CPU is ready (finished initializing), powered, not already running, and not in an error state.
      *
      * @this {DebuggerPDP11}
+     * @param {boolean} [fQuiet]
      * @return {boolean}
      */
-    DebuggerPDP11.prototype.checkCPU = function()
+    DebuggerPDP11.prototype.checkCPU = function(fQuiet)
     {
-        if (!this.cpu)
+        if (!this.cpu || !this.cpu.isReady() || !this.cpu.isPowered() || this.cpu.isRunning()) {
+            if (!fQuiet) this.println("cpu busy or unavailable, command ignored");
             return false;
-        if (!this.cpu.isReady())
-            return false;
-        if (!this.cpu.isPowered())
-            return false;
-        if (this.cpu.isRunning())
-            return false;
+        }
         return !this.cpu.isError();
     };
 
@@ -1625,9 +1619,7 @@ if (DEBUGGER) {
          */
         if (nState >= 0 && this.aaOpcodeCounts.length) {
             this.cOpcodes++;
-            this.nDisableMessages++;
-            var opCode = this.bus.getWordDirect(addr);
-            this.nDisableMessages--;
+            var opCode = this.cpu.getWordDirect(addr);
             if (opCode != null) {
                 var dbgAddr = this.aOpcodeHistory[this.iOpcodeHistory];
                 this.setAddr(dbgAddr, cpu.getPC());
@@ -1636,6 +1628,38 @@ if (DEBUGGER) {
             }
         }
         return false;
+    };
+
+    /**
+     * stopInstruction()
+     *
+     * TODO: Currently, the only way to prevent this call from stopping the CPU is when you're single-stepping.
+     *
+     * @this {DebuggerPDP11}
+     * @return {boolean} true if stopping is enabled, false if not
+     */
+    DebuggerPDP11.prototype.stopInstruction = function()
+    {
+        var cpu = this.cpu;
+        if (cpu.isRunning()) {
+            cpu.setPC(this.cpu.getLastPC());
+            this.stopCPU();
+            throw -1;           // TODO: Review the appropriate-ness of throwing a bogus vector number in order to immediately stop the instruction
+        }
+        return false;
+    };
+
+    /**
+     * undefinedInstruction(opCode)
+     *
+     * @this {DebuggerPDP11}
+     * @param {number} opCode
+     * @return {boolean} true if stopping is enabled, false if not
+     */
+    DebuggerPDP11.prototype.undefinedInstruction = function(opCode)
+    {
+        this.printMessage("undefined opcode " + this.toStrBase(opCode), true, true);
+        return this.stopInstruction();  // allow the caller to step over it if they really want a trap generated
     };
 
     /**
@@ -2015,11 +2039,23 @@ if (DEBUGGER) {
             if (opDesc) break;
         }
 
-        if (!opDesc) opDesc = [DebuggerPDP11.OPS.NONE];
+        if (!opDesc) {
+            opDesc = DebuggerPDP11.OPNONE;
+        }
+
+        var opNum = opDesc[0];
+        if (this.aOpReserved.indexOf(opNum) >= 0) {
+            opDesc = DebuggerPDP11.OPNONE;
+            opNum = opDesc[0];
+        }
 
         var sOperands = "", sTarget = "";
-        var sOpName = opNames[opDesc[0]];
+        var sOpName = opNames[opNum];
         var cOperands = opDesc.length - 1;
+
+        if (!opNum && !cOperands) {
+            sOperands = this.toStrBase(opCode);
+        }
 
         for (var iOperand = 1; iOperand <= cOperands; iOperand++) {
 
@@ -2596,7 +2632,7 @@ if (DEBUGGER) {
         if (asArgs[2] === undefined) {
             this.println("begin assemble at " + this.toStrAddr(dbgAddr));
             this.fAssemble = true;
-            this.cpu.updateCPU();
+            this.cmp.updateStatus();
             return;
         }
 
@@ -2734,9 +2770,8 @@ if (DEBUGGER) {
     /**
      * doDump(asArgs)
      *
-     * The length parameter is interpreted as a number of bytes, in hex, which we convert to the appropriate number
-     * of lines, because we always display whole lines.  If the length is omitted/undefined, it defaults to 0x80 (128.)
-     * bytes, which normally translates to 8 lines.
+     * The length parameter is interpreted as a number of bytes (or words, or dwords) to dump, and it is
+     * interpreted using the current base.
      *
      * @this {DebuggerPDP11}
      * @param {Array.<string>} asArgs (formerly sCmd, [sAddr], [sLen] and [sBytes])
@@ -2833,28 +2868,31 @@ if (DEBUGGER) {
 
         var sDump = "";
         var size = (sCmd == "dd"? 4 : (sCmd == "dw"? 2 : 1));
-        var cb = (size * len) || 128;
-        var cLines = ((cb + 15) >> 4) || 1;
+        var nBytes = (size * len) || 128;
+        var nLines = ((nBytes + 15) >> 4) || 1;
 
-        while (cLines-- && cb > 0) {
-            var data = 0, iByte = 0, i;
+        while (nLines-- && nBytes > 0) {
+            var data = 0, shift = 0, i;
             var sData = "", sChars = "";
             sAddr = this.toStrAddr(dbgAddr);
             /*
-             * It's just coincidence that we want to dump 8 bytes per line when using base 8 and 16 bytes
-             * per line when using base 16, because octal requires more digits.
+             * Dump 8 bytes per line when using base 8, and dump 16 bytes when using base 16 (or when dumping dwords).
+             *
+             * And while we used to always call getByte() and assemble them into words or dwords as appropriate, I've
+             * changed the logic below to honor "dw" by calling getWord(), since the Bus interfaces have been updated
+             * to prevent generating traps due to to Debugger access of unaligned memory and/or undefined IOPAGE addresses.
              */
-            var nBytes = (size == 4? 16 : this.nBase);
-            for (i = nBytes; i > 0 && cb > 0; i--) {
-                var b = this.getByte(dbgAddr, 1);
-                data |= (b << (iByte++ << 3));
-                if (iByte == size) {
-                    sData += (this.nBase == 8? str.toOct(data, size * 3) : str.toHex(data, size * 2));
+            for (i = (size == 4? 16 : this.nBase); i > 0 && nBytes > 0; i--) {
+                var n, v = size == 2? this.getWord(dbgAddr, n = 2) : this.getByte(dbgAddr, n = 1);
+                data |= (v << (shift << 3));
+                shift += n;
+                if (shift == size) {
+                    sData += this.toStrBase(data, size);
                     sData += (size == 1? (i == 9? '-' : ' ') : "  ");
-                    data = iByte = 0;
+                    data = shift = 0;
                 }
-                sChars += (b >= 32 && b < 128? String.fromCharCode(b) : '.');
-                cb--;
+                sChars += (v >= 32 && v < 128? String.fromCharCode(v) : '.');
+                nBytes--;
             }
             if (sDump) sDump += '\n';
             sDump += sAddr + "  " + sData + ((i == 0)? (' ' + sChars) : "");
@@ -3291,7 +3329,7 @@ if (DEBUGGER) {
                 this.println("unknown register: " + sReg);
                 return;
             }
-            cpu.updateCPU();
+            this.cmp.updateStatus();
             this.println("updated registers:");
         }
 
@@ -3323,9 +3361,7 @@ if (DEBUGGER) {
             this.parseAddrOptions(dbgAddr, sOptions);
             this.setTempBreakpoint(dbgAddr);
         }
-        if (!this.startCPU(true)) {
-            if (!fQuiet) this.println("cpu busy or unavailable, run command ignored");
-        }
+        this.startCPU(true, fQuiet);
     };
 
     /**
@@ -3537,54 +3573,61 @@ if (DEBUGGER) {
             },
             function onCountStepComplete() {
                 /*
-                 * We explicitly called stepCPU() with fUpdateCPU === false, because repeatedly
-                 * calling updateCPU() can be very slow, especially when fDisplayLiveRegs is true,
-                 * so once the repeat count has been exhausted, we must perform a final updateCPU().
+                 * We explicitly called stepCPU() with fUpdateStatus === false, because repeatedly
+                 * calling updateStatus() can be very slow, especially if a Control Panel is present
+                 * with displayLiveRegs enabled, so once the repeat count has been exhausted, we must
+                 * perform a final updateStatus().
                  */
-                dbg.cpu.updateCPU();
+                dbg.cmp.updateStatus();
                 dbg.setBusy(false);
             }
         );
     };
 
     /**
-     * doUnassemble(sAddr, sAddrEnd, n)
+     * doUnassemble(sAddr, sAddrEnd, nLines)
      *
      * @this {DebuggerPDP11}
      * @param {string} [sAddr]
      * @param {string} [sAddrEnd]
-     * @param {number} [n]
+     * @param {number} [nLines]
      */
-    DebuggerPDP11.prototype.doUnassemble = function(sAddr, sAddrEnd, n)
+    DebuggerPDP11.prototype.doUnassemble = function(sAddr, sAddrEnd, nLines)
     {
         var dbgAddr = this.parseAddr(sAddr, true);
         if (!dbgAddr) return;
 
-        if (n === undefined) n = 1;
+        if (nLines === undefined) nLines = 1;
 
-        var cb = 0x100;
+        var nBytes = 0x100;
         if (sAddrEnd !== undefined) {
 
-            var dbgAddrEnd = this.parseAddr(sAddrEnd, true);
-            if (!dbgAddrEnd || dbgAddrEnd.addr < dbgAddr.addr) return;
-
-            cb = dbgAddrEnd.addr - dbgAddr.addr;
-            if (!DEBUG && cb > 0x100) {
-                /*
-                 * Limiting the amount of disassembled code to 256 bytes in non-DEBUG builds is partly to
-                 * prevent the user from wedging the browser by dumping too many lines, but also a recognition
-                 * that, in non-DEBUG builds, this.println() keeps print output buffer truncated to 8Kb anyway.
-                 */
-                this.println("range too large");
-                return;
+            if (sAddrEnd.charAt(0) == 'l') {
+                var n = this.parseValue(sAddrEnd.substr(1));
+                if (n != null) nLines = n;
             }
-            n = -1;
+            else {
+                var dbgAddrEnd = this.parseAddr(sAddrEnd, true);
+                if (!dbgAddrEnd || dbgAddrEnd.addr < dbgAddr.addr) return;
+
+                nBytes = dbgAddrEnd.addr - dbgAddr.addr;
+                if (!DEBUG && nBytes > 0x100) {
+                    /*
+                     * Limiting the amount of disassembled code to 256 bytes in non-DEBUG builds is partly to
+                     * prevent the user from wedging the browser by dumping too many lines, but also a recognition
+                     * that, in non-DEBUG builds, this.println() keeps print output buffer truncated to 8Kb anyway.
+                     */
+                    this.println("range too large");
+                    return;
+                }
+                nLines = -1;
+            }
         }
 
-        var cLines = 0;
+        var nPrinted = 0;
         var sInstruction;
 
-        while (cb > 0 && n--) {
+        while (nBytes > 0 && nLines--) {
 
             var nSequence = (this.isBusy(false) || this.nStep)? this.nCycles : null;
             var sComment = (nSequence != null? "cycles" : null);
@@ -3592,8 +3635,8 @@ if (DEBUGGER) {
 
             var addr = dbgAddr.addr;    // we snap dbgAddr.addr *after* calling findSymbol(), which re-evaluates it
 
-            if (aSymbol[0] && n) {
-                if (!cLines && n || aSymbol[0].indexOf('+') < 0) {
+            if (aSymbol[0] && nLines) {
+                if (!nPrinted && nLines || aSymbol[0].indexOf('+') < 0) {
                     var sLabel = aSymbol[0] + ':';
                     if (aSymbol[2]) sLabel += ' ' + aSymbol[2];
                     this.println(sLabel);
@@ -3609,8 +3652,8 @@ if (DEBUGGER) {
 
             this.println(sInstruction);
             this.dbgAddrNextCode = dbgAddr;
-            cb -= dbgAddr.addr - addr;
-            cLines++;
+            nBytes -= dbgAddr.addr - addr;
+            nPrinted++;
         }
     };
 

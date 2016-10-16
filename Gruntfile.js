@@ -198,8 +198,12 @@ module.exports = function(grunt) {
                 options: {
                     banner: '"use strict";\n\n',
                     process: function(src, filepath) {
-                        return "// " + filepath + "\n\n" +
-                            src.replace(/(^|\n)[ \t]*(['"])use strict\2;?\s*/g, '$1').replace(/[ \t]*if\s*\(NODE\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '').replace(/[ \t]*if\s*\(typeof\s+module\s*!==\s*(['"])undefined\1\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '').replace(/[ \t]*[A-Za-z_][A-Za-z0-9_\.]*\.assert\([^\n]*\);[^\n]*/g, '');
+                        return "/**\n * @copyright " + filepath.replace(/^\./, "http://pcjs.org") + " (C) Jeff Parsons 2012-2016\n */\n\n" +
+                            src.replace(/(^|\n)[ \t]*(['"])use strict\2;?\s*/g, '$1')
+                               .replace(/\/\*\*\s*\*\s*@fileoverview[\s\S]*?\*\/\s*/g, '') 
+                               .replace(/[ \t]*if\s*\(NODE\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '')
+                               .replace(/[ \t]*if\s*\(typeof\s+module\s*!==\s*(['"])undefined\1\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '')
+                               .replace(/[ \t]*[A-Za-z_][A-Za-z0-9_.]*\.assert\([^\n]*\);[^\n]*/g, '');
                     }
                 }
             },
@@ -209,8 +213,12 @@ module.exports = function(grunt) {
                 options: {
                     banner: '"use strict";\n\n',
                     process: function(src, filepath) {
-                        return "// " + filepath + "\n\n" +
-                            src.replace(/(^|\n)[ \t]*(['"])use strict\2;?\s*/g, '$1').replace(/[ \t]*if\s*\(NODE\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '').replace(/[ \t]*if\s*\(typeof\s+module\s*!==\s*(['"])undefined\1\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '').replace(/[ \t]*[A-Za-z_][A-Za-z0-9_\.]*\.assert\([^\n]*\);[^\n]*/g, '');
+                        return "/**\n * @copyright " + filepath.replace(/^\./, "http://pcjs.org") + " (C) Jeff Parsons 2012-2016\n */\n\n" +
+                            src.replace(/(^|\n)[ \t]*(['"])use strict\2;?\s*/g, '$1')
+                               .replace(/\/\*\*\s*\*\s*@fileoverview[\s\S]*?\*\/\s*/g, '') 
+                               .replace(/[ \t]*if\s*\(NODE\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '')
+                               .replace(/[ \t]*if\s*\(typeof\s+module\s*!==\s*(['"])undefined\1\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '')
+                               .replace(/[ \t]*[A-Za-z_][A-Za-z0-9_.]*\.assert\([^\n]*\);[^\n]*/g, '');
                     }
                 }
             },
@@ -220,8 +228,12 @@ module.exports = function(grunt) {
                 options: {
                     banner: '"use strict";\n\n',
                     process: function(src, filepath) {
-                        return "// " + filepath + "\n\n" +
-                            src.replace(/(^|\n)[ \t]*(['"])use strict\2;?\s*/g, '$1').replace(/[ \t]*if\s*\(NODE\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '').replace(/[ \t]*if\s*\(typeof\s+module\s*!==\s*(['"])undefined\1\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '').replace(/[ \t]*[A-Za-z_][A-Za-z0-9_\.]*\.assert\([^\n]*\);[^\n]*/g, '');
+                        return "/**\n * @copyright " + filepath.replace(/^\./, "http://pcjs.org") + " (C) Jeff Parsons 2012-2016\n */\n\n" +
+                            src.replace(/(^|\n)[ \t]*(['"])use strict\2;?\s*/g, '$1')
+                               .replace(/\/\*\*\s*\*\s*@fileoverview[\s\S]*?\*\/\s*/g, '') 
+                               .replace(/[ \t]*if\s*\(NODE\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '')
+                               .replace(/[ \t]*if\s*\(typeof\s+module\s*!==\s*(['"])undefined\1\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '')
+                               .replace(/[ \t]*[A-Za-z_][A-Za-z0-9_.]*\.assert\([^\n]*\);[^\n]*/g, '');
                     }
                 }
             },
@@ -231,8 +243,12 @@ module.exports = function(grunt) {
                 options: {
                     banner: '"use strict";\n\n',
                     process: function(src, filepath) {
-                        return "// " + filepath + "\n\n" +
-                            src.replace(/(^|\n)[ \t]*(['"])use strict\2;?\s*/g, '$1').replace(/[ \t]*if\s*\(NODE\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '').replace(/[ \t]*if\s*\(typeof\s+module\s*!==\s*(['"])undefined\1\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '').replace(/[ \t]*[A-Za-z_][A-Za-z0-9_\.]*\.assert\([^\n]*\);[^\n]*/g, '');
+                        return "/**\n * @copyright " + filepath.replace(/^\./, "http://pcjs.org") + " (C) Jeff Parsons 2012-2016\n */\n\n" +
+                            src.replace(/(^|\n)[ \t]*(['"])use strict\2;?\s*/g, '$1')
+                               .replace(/\/\*\*\s*\*\s*@fileoverview[\s\S]*?\*\/\s*/g, '') 
+                               .replace(/[ \t]*if\s*\(NODE\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '')
+                               .replace(/[ \t]*if\s*\(typeof\s+module\s*!==\s*(['"])undefined\1\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '')
+                               .replace(/[ \t]*[A-Za-z_][A-Za-z0-9_.]*\.assert\([^\n]*\);[^\n]*/g, '');
                     }
                 }
             }
@@ -322,7 +338,7 @@ module.exports = function(grunt) {
                     // create_source_map: "./tmp/c1pjs/"  + pkg.version + "/c1p.map",
                     define: ["\"APPVERSION='" + pkg.version + "'\"", "DEBUGGER=false",
                              "\"SITEHOST='www.pcjs.org'\"", "COMPILED=true", "DEBUG=false"],
-                    // output_wrapper: "\"(function(){%output%})();//@ sourceMappingURL=/tmp/c1pjs/" + pkg.version + "/c1p.map\""
+                    // output_wrapper: "\"(function(){%output%})();//# sourceMappingURL=/tmp/c1pjs/" + pkg.version + "/c1p.map\""
                     output_wrapper: "\"(function(){%output%})();\""
                 },
                 // src: pkg.c1pJSFiles,
@@ -334,7 +350,7 @@ module.exports = function(grunt) {
                     // create_source_map: "./tmp/c1pjs/"  + pkg.version + "/c1p-dbg.map",
                     define: ["\"APPVERSION='" + pkg.version + "'\"",
                              "\"SITEHOST='www.pcjs.org'\"", "COMPILED=true", "DEBUG=false"],
-                    // output_wrapper: "\"(function(){%output%})();//@ sourceMappingURL=/tmp/c1pjs/" + pkg.version + "/c1p-dbg.map\""
+                    // output_wrapper: "\"(function(){%output%})();//# sourceMappingURL=/tmp/c1pjs/" + pkg.version + "/c1p-dbg.map\""
                     output_wrapper: "\"(function(){%output%})();\""
                 },
                 // src: pkg.c1pJSFiles,
@@ -346,7 +362,7 @@ module.exports = function(grunt) {
                     // create_source_map: "./tmp/pcx86/"  + pkg.version + "/pcx86.map",
                     define: ["\"APPVERSION='" + pkg.version + "'\"", "DEBUGGER=false",
                              "\"SITEHOST='www.pcjs.org'\"", "COMPILED=true", "DEBUG=false", "BACKTRACK=false", "I386=true"],
-                    // output_wrapper: "\"(function(){%output%})();//@ sourceMappingURL=/tmp/pcx86/" + pkg.version + "/pcx86.map\""
+                    // output_wrapper: "\"(function(){%output%})();//# sourceMappingURL=/tmp/pcx86/" + pkg.version + "/pcx86.map\""
                     output_wrapper: "\"(function(){%output%})();\""
                 },
                 // src: pkg.pcX86Files,
@@ -361,7 +377,7 @@ module.exports = function(grunt) {
                     // create_source_map: "./tmp/pcx86/"  + pkg.version + "/pcx86-dbg.map",
                     define: ["\"APPVERSION='" + pkg.version + "'\"",
                              "\"SITEHOST='www.pcjs.org'\"", "COMPILED=true", "DEBUG=false", "BACKTRACK=false", "I386=true"],
-                    // output_wrapper: "\"(function(){%output%})();//@ sourceMappingURL=/tmp/pcx86/" + pkg.version + "/pcx86-dbg.map\""
+                    // output_wrapper: "\"(function(){%output%})();//# sourceMappingURL=/tmp/pcx86/" + pkg.version + "/pcx86-dbg.map\""
                     output_wrapper: "\"(function(){%output%})();\""
                 },
                 // src: pkg.pcX86Files,
@@ -373,7 +389,7 @@ module.exports = function(grunt) {
                     // create_source_map: "./tmp/pc8080/"  + pkg.version + "/pc8080.map",
                     define: ["\"APPVERSION='" + pkg.version + "'\"",
                              "\"SITEHOST='www.pcjs.org'\"", "COMPILED=true", "DEBUG=false", "DEBUGGER=false"],
-                    // output_wrapper: "\"(function(){%output%})();//@ sourceMappingURL=/tmp/pc8080/" + pkg.version + "/pc8080.map\""
+                    // output_wrapper: "\"(function(){%output%})();//# sourceMappingURL=/tmp/pc8080/" + pkg.version + "/pc8080.map\""
                     output_wrapper: "\"(function(){%output%})();\""
                 },
                 // src: pkg.pc8080Files,
@@ -388,7 +404,7 @@ module.exports = function(grunt) {
                     // create_source_map: "./tmp/pc8080/"  + pkg.version + "/pc8080-dbg.map",
                     define: ["\"APPVERSION='" + pkg.version + "'\"",
                              "\"SITEHOST='www.pcjs.org'\"", "COMPILED=true", "DEBUG=false", "DEBUGGER=true"],
-                    // output_wrapper: "\"(function(){%output%})();//@ sourceMappingURL=/tmp/pc8080/" + pkg.version + "/pc8080-dbg.map\""
+                    // output_wrapper: "\"(function(){%output%})();//# sourceMappingURL=/tmp/pc8080/" + pkg.version + "/pc8080-dbg.map\""
                     output_wrapper: "\"(function(){%output%})();\""
                 },
                 // src: pkg.pc8080Files,
@@ -397,11 +413,11 @@ module.exports = function(grunt) {
             },
             "pdp11.js": {
                 TEMPcompilerOpts: {
-                    // create_source_map: "./tmp/pdpjs/"  + pkg.version + "/pdp11.map",
+                    create_source_map: "./tmp/pdpjs/"  + pkg.version + "/pdp11.map",
                     define: ["\"APPVERSION='" + pkg.version + "'\"",
                              "\"SITEHOST='www.pcjs.org'\"", "COMPILED=true", "DEBUG=false", "DEBUGGER=false"],
-                    // output_wrapper: "\"(function(){%output%})();//@ sourceMappingURL=/tmp/pdpjs/" + pkg.version + "/pdp11.map\""
-                    output_wrapper: "\"(function(){%output%})();\""
+                    output_wrapper: "\"(function(){%output%})();//# sourceMappingURL=/tmp/pdpjs/" + pkg.version + "/pdp11.map\""
+                    // output_wrapper: "\"(function(){%output%})();\""
                 },
                 // src: pkg.pdp11Files,
                 src: tmpPDP11,
@@ -412,11 +428,11 @@ module.exports = function(grunt) {
                  * Technically, this is the one case we don't need to override the default 'define' settings, but maybe it's best to be explicit.
                  */
                 TEMPcompilerOpts: {
-                    // create_source_map: "./tmp/pdpjs/"  + pkg.version + "/pdp11-dbg.map",
+                    create_source_map: "./tmp/pdpjs/"  + pkg.version + "/pdp11-dbg.map",
                     define: ["\"APPVERSION='" + pkg.version + "'\"",
                              "\"SITEHOST='www.pcjs.org'\"", "COMPILED=true", "DEBUG=false", "DEBUGGER=true"],
-                    // output_wrapper: "\"(function(){%output%})();//@ sourceMappingURL=/tmp/pdpjs/" + pkg.version + "/pdp11-dbg.map\""
-                    output_wrapper: "\"(function(){%output%})();\""
+                    output_wrapper: "\"(function(){%output%})();//# sourceMappingURL=/tmp/pdpjs/" + pkg.version + "/pdp11-dbg.map\""
+                    // output_wrapper: "\"(function(){%output%})();\""
                 },
                 // src: pkg.pdp11Files,
                 src: tmpPDP11,
@@ -437,7 +453,7 @@ module.exports = function(grunt) {
                     process: function(content, srcPath) {
                         var s = content.replace(/(<xsl:variable name="APPVERSION">)[^<]*(<\/xsl:variable>)/g, "$1" + pkg.version + "$2");
                         s = s.replace(/"[^"]*\/?(common.css|common.xsl|components.css|components.xsl|document.css|document.xsl)"/g, '"/versions/c1pjs/' + pkg.version + '/$1"');
-                        s = s.replace(/[ \t]*\/\*[^\*][\s\S]*?\*\//g, "").replace(/[ \t]*<!--[^@]*?-->[ \t]*\n?/g, "");
+                        s = s.replace(/[ \t]*\/\*[^*][\s\S]*?\*\//g, "").replace(/[ \t]*<!--[^@]*?-->[ \t]*\n?/g, "");
                         return s;
                     }
                 }
@@ -454,7 +470,7 @@ module.exports = function(grunt) {
                 options: {
                     process: function(content, srcPath) {
                         var s = content.replace(/(<xsl:variable name="APPVERSION">)[^<]*(<\/xsl:variable>)/g, "$1" + pkg.version + "$2");
-                        s = s.replace(/[ \t]*\/\*[^\*][\s\S]*?\*\//g, "").replace(/[ \t]*<!--[^@]*?-->[ \t]*\n?/g, "");
+                        s = s.replace(/[ \t]*\/\*[^*][\s\S]*?\*\//g, "").replace(/[ \t]*<!--[^@]*?-->[ \t]*\n?/g, "");
                         return s;
                     }
                 }
@@ -472,7 +488,7 @@ module.exports = function(grunt) {
                     process: function(content, srcPath) {
                         var s = content.replace(/(<xsl:variable name="APPVERSION">)[^<]*(<\/xsl:variable>)/g, "$1" + pkg.version + "$2");
                         s = s.replace(/"[^"]*\/?(common.css|common.xsl|components.css|components.xsl|document.css|document.xsl)"/g, '"/versions/pcx86/' + pkg.version + '/$1"');
-                        s = s.replace(/[ \t]*\/\*[^\*][\s\S]*?\*\//g, "").replace(/[ \t]*<!--[^@]*?-->[ \t]*\n?/g, "");
+                        s = s.replace(/[ \t]*\/\*[^*][\s\S]*?\*\//g, "").replace(/[ \t]*<!--[^@]*?-->[ \t]*\n?/g, "");
                         return s;
                     }
                 }
@@ -492,7 +508,7 @@ module.exports = function(grunt) {
                         s = s.replace(/(<xsl:variable name="APPNAME">)[^<]*(<\/xsl:variable>)/g, "$1PC8080$2");
                         s = s.replace(/(<xsl:variable name="APPVERSION">)[^<]*(<\/xsl:variable>)/g, "$1" + pkg.version + "$2");
                         s = s.replace(/"[^"]*\/?(common.css|common.xsl|components.css|components.xsl|document.css|document.xsl)"/g, '"/versions/pc8080/' + pkg.version + '/$1"');
-                        s = s.replace(/[ \t]*\/\*[^\*][\s\S]*?\*\//g, "").replace(/[ \t]*<!--[^@]*?-->[ \t]*\n?/g, "");
+                        s = s.replace(/[ \t]*\/\*[^*][\s\S]*?\*\//g, "").replace(/[ \t]*<!--[^@]*?-->[ \t]*\n?/g, "");
                         return s;
                     }
                 }
@@ -512,7 +528,7 @@ module.exports = function(grunt) {
                         s = s.replace(/(<xsl:variable name="APPNAME">)[^<]*(<\/xsl:variable>)/g, "$1PDP11$2");
                         s = s.replace(/(<xsl:variable name="APPVERSION">)[^<]*(<\/xsl:variable>)/g, "$1" + pkg.version + "$2");
                         s = s.replace(/"[^"]*\/?(common.css|common.xsl|components.css|components.xsl|document.css|document.xsl)"/g, '"/versions/pdpjs/' + pkg.version + '/$1"');
-                        s = s.replace(/[ \t]*\/\*[^\*][\s\S]*?\*\//g, "").replace(/[ \t]*<!--[^@]*?-->[ \t]*\n?/g, "");
+                        s = s.replace(/[ \t]*\/\*[^*][\s\S]*?\*\//g, "").replace(/[ \t]*<!--[^@]*?-->[ \t]*\n?/g, "");
                         return s;
                     }
                 }
@@ -604,7 +620,12 @@ module.exports = function(grunt) {
         },
         replace: {
             "fix-source-maps": {
-                src: ["./tmp/c1pjs/" + pkg.version + "/c1p*.map", "./tmp/pcx86/" + pkg.version + "/pc*.map"],
+                src: [
+                    "./tmp/c1pjs/" + pkg.version + "/c1p*.map",
+                    "./tmp/pcx86/" + pkg.version + "/pc*.map",
+                    "./tmp/pcx8008/" + pkg.version + "/pc*.map",
+                    "./tmp/pdpjs/" + pkg.version + "/pdp*.map"
+                ],
                 overwrite: true,
                 replacements: [
                     {
