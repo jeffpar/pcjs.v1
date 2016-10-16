@@ -1,14 +1,13 @@
 /**
  * @fileoverview Controls the PDP11 CPU component.
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
- * @version 1.0
- * Created 2016-Sep-03
+ * @copyright © Jeff Parsons 2012-2016
  *
  * This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
  *
- * It has been adapted from the JavaScript PDP 11/70 Emulator v1.3 written by Paul Nankervis
- * (paulnank@hotmail.com) as of August 2016 from http://skn.noip.me/pdp11/pdp11.html.  This code
- * may be used freely provided the original author name is acknowledged in any modified source code.
+ * It has been adapted from the JavaScript PDP 11/70 Emulator v1.4 written by Paul Nankervis
+ * (paulnank@hotmail.com) as of September 2016 at <http://skn.noip.me/pdp11/pdp11.html>.  This code
+ * may be used freely provided the original authors are acknowledged in any modified source code.
  *
  * PCjs is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3
@@ -21,9 +20,9 @@
  * You should have received a copy of the GNU General Public License along with PCjs.  If not,
  * see <http://www.gnu.org/licenses/gpl.html>.
  *
- * You are required to include the above copyright notice in every source code file of every
- * copy or modified version of this work, and to display that copyright notice on every screen
- * that loads or runs any version of this software (see COPYRIGHT in /modules/shared/lib/defines.js).
+ * You are required to include the above copyright notice in every modified copy of this work
+ * and to display that copyright notice when the software starts running; see COPYRIGHT in
+ * <http://pcjs.org/modules/shared/lib/defines.js>.
  *
  * Some PCjs files also attempt to load external resource files, such as character-image files,
  * ROM files, and disk image files. Those external resource files are not considered part of PCjs
@@ -128,11 +127,6 @@ function CPUPDP11(parmsCPU, nCyclesDefault)
     this.flags.autoStart = parmsCPU['autoStart'];
 
     /*
-     * TODO: Add some UI for fDisplayLiveRegs (either an XML property, or a UI checkbox, or both)
-     */
-    this.flags.displayLiveRegs = false;
-
-    /*
      * Get checksum parameters, if any. runCPU() behavior is not affected until fChecksum
      * is true, which won't happen until resetChecksum() is called with nCyclesChecksumInterval
      * ("csInterval") set to a positive value.
@@ -199,11 +193,6 @@ CPUPDP11.prototype.initBus = function(cmp, bus, cpu, dbg)
     }
 
     /*
-     * Attach the ChipSet component to the CPU so that it can be notified whenever the CPU stops and starts.
-     */
-    this.chipset = null;    // /** @type {ChipSetPDP11} */ (cmp.getMachineComponent("ChipSet"));
-
-    /*
      * We've already saved the parmsCPU 'autoStart' setting, but there may be a machine (or URL) override.
      */
     var sAutoStart = cmp.getMachineParm('autoStart');
@@ -217,6 +206,8 @@ CPUPDP11.prototype.initBus = function(cmp, bus, cpu, dbg)
 /**
  * reset()
  *
+ * Stub for reset notification (overridden by the CPUStatePDP11 component).
+ *
  * @this {CPUPDP11}
  */
 CPUPDP11.prototype.reset = function()
@@ -226,7 +217,7 @@ CPUPDP11.prototype.reset = function()
 /**
  * save()
  *
- * This is a placeholder for save support (overridden by the CPUStatePDP11 component).
+ * Stub for save support (overridden by the CPUStatePDP11 component).
  *
  * @this {CPUPDP11}
  * @return {Object|null}
@@ -239,7 +230,7 @@ CPUPDP11.prototype.save = function()
 /**
  * restore(data)
  *
- * This is a placeholder for restore support (overridden by the CPUStatePDP11 component).
+ * Stub for restore support (overridden by the CPUStatePDP11 component).
  *
  * @this {CPUPDP11}
  * @param {Object} data
@@ -292,7 +283,7 @@ CPUPDP11.prototype.powerUp = function(data, fRepower)
      *
      *      this.flags.powered = true;
      */
-    this.updateCPU();
+    this.cmp.updateStatus();
     return true;
 };
 
@@ -455,54 +446,18 @@ CPUPDP11.prototype.displayChecksum = function()
 };
 
 /**
- * displayValue(sLabel, nValue, cch)
- *
- * This is principally for displaying register values, but in reality, it can be used to display any
- * numeric value bound to the given label.
+ * setBinding(sType, sBinding, control, sValue)
  *
  * @this {CPUPDP11}
- * @param {string} sLabel
- * @param {number} nValue
- * @param {number} [cch]
- */
-CPUPDP11.prototype.displayValue = function(sLabel, nValue, cch)
-{
-    if (this.bindings[sLabel]) {
-        if (nValue === undefined) {
-            this.setError("Value for " + sLabel + " is invalid");
-            this.stopCPU();
-        }
-        var sVal;
-        var nBase = this.dbg && this.dbg.nBase || 8;
-        if (!this.flags.running || this.flags.displayLiveRegs) {
-            sVal = nBase == 8? str.toOct(nValue, cch) : str.toHex(nValue, cch);
-        } else {
-            sVal = "--------".substr(0, cch || 4);
-        }
-        /*
-         * TODO: Determine if this test actually avoids any redrawing when a register hasn't changed, and/or if
-         * we should maintain our own (numeric) cache of displayed register values (to avoid creating these temporary
-         * string values that will have to garbage-collected), and/or if this is actually slower, and/or if I'm being
-         * too obsessive.
-         */
-        if (this.bindings[sLabel].textContent != sVal) this.bindings[sLabel].textContent = sVal;
-    }
-};
-
-/**
- * setBinding(sHTMLType, sBinding, control, sValue)
- *
- * @this {CPUPDP11}
- * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
+ * @param {string|null} sType is the type of the HTML control (eg, "button", "textarea", "register", "flag", "rled", etc)
  * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "run")
  * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
  * @param {string} [sValue] optional data value
  * @return {boolean} true if binding was successful, false if unrecognized binding request
  */
-CPUPDP11.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
+CPUPDP11.prototype.setBinding = function(sType, sBinding, control, sValue)
 {
     var cpu = this;
-    var fBound = false;
 
     switch (sBinding) {
     case "power":
@@ -513,8 +468,7 @@ CPUPDP11.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
          * so we record those bindings here and pass them on to the Computer component in initBus().
          */
         this.bindings[sBinding] = control;
-        fBound = true;
-        break;
+        return true;
 
     case "run":
         this.bindings[sBinding] = control;
@@ -530,13 +484,11 @@ CPUPDP11.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
             else
                 cpu.stopCPU();
         };
-        fBound = true;
-        break;
+        return true;
 
     case "speed":
         this.bindings[sBinding] = control;
-        fBound = true;
-        break;
+        return true;
 
     case "setSpeed":
         this.bindings[sBinding] = control;
@@ -544,47 +496,27 @@ CPUPDP11.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
             cpu.setSpeed(cpu.nCyclesMultiplier << 1, true);
         };
         control.textContent = this.getSpeedTarget();
-        fBound = true;
-        break;
+        return true;
 
     default:
         break;
     }
-    return fBound;
+    return false;
 };
 
 /**
- * setBurstCycles(nCycles)
+ * updateStatus(fForce)
  *
- * This function is used by the ChipSet component whenever a very low timer count is set,
- * in anticipation of the timer requiring an update sooner than the normal nCyclesPerYield
- * period in runCPU() would normally provide.
- *
- * NOTE: In this context, "timer" refers to a timer chip (eg, an Intel 8253) being emulated by
- * by the ChipSet component, not the timers managed by the CPU (eg, addTimer(), setTimer(), etc).
+ * Some of the CPU bindings provide feedback and therefore need to be updated periodically.  This is called
+ * via the Computer's updateStatus() handler several times per second; see YIELDS_PER_STATUS.
  *
  * @this {CPUPDP11}
- * @param {number} nCycles is the target number of cycles to drop the current burst to
- * @return {boolean}
+ * @param {boolean} [fForce]
  */
-CPUPDP11.prototype.setBurstCycles = function(nCycles)
+CPUPDP11.prototype.updateStatus = function(fForce)
 {
-    if (this.flags.running) {
-        var nDelta = this.nStepCycles - nCycles;
-        /*
-         * NOTE: If nDelta is negative, we will actually be increasing nStepCycles and nBurstCycles.
-         * Which is OK, but if we're also taking snapshots of the cycle counts, to make sure that instruction
-         * costs are being properly assessed, then we need to update nSnapCycles as well.
-         *
-         * TODO: If the delta is negative, we could simply ignore the request, but we must first carefully
-         * consider the impact on the ChipSet timers, if any.
-         */
-        // if (DEBUG) this.nSnapCycles -= nDelta;
-        this.nStepCycles -= nDelta;
-        this.nBurstCycles -= nDelta;
-        return true;
-    }
-    return false;
+    var controlSpeed = this.bindings["speed"];
+    if (controlSpeed) controlSpeed.textContent = this.getSpeedCurrent();
 };
 
 /**
@@ -966,6 +898,11 @@ CPUPDP11.prototype.calcRemainingTime = function()
  *
  * Why not use JavaScript's setTimeout() instead?  Good question.  For a good answer, see setTimer() below.
  *
+ * TODO: Consider making the addTimer() and setTimer() interfaces more like the addTrigger() and setTrigger()
+ * interfaces (which return the underlying object instead of an array index) and maintaining a separate list
+ * of active timers, in order of highest to lowest cycle countdown values, as this could speed up getBurstCycles()
+ * and updateTimers() functions ever so slightly.
+ *
  * @this {CPUPDP11}
  * @param {function()} callBack
  * @return {number} timer index
@@ -1004,7 +941,13 @@ CPUPDP11.prototype.setTimer = function(iTimer, ms, fReset)
     if (iTimer >= 0 && iTimer < this.aTimers.length) {
         if (fReset || this.aTimers[iTimer][0] < 0) {
             nCycles = this.getMSCycles(ms);
-            this.aTimers[iTimer][0] = nCycles;
+            /*
+             * We must now confront the following problem: if the CPU is currently executing a burst of cycles,
+             * the number of cycles it has executed in that burst so far must NOT be charged against the cycle
+             * timeout we're about to set.  The simplest way to resolve that is to immediately call endBurst()
+             * and bias the above cycle timeout by the number of cycles that the burst executed.
+             */
+            this.aTimers[iTimer][0] = nCycles + this.endBurst();
         }
     }
     return nCycles;
@@ -1019,7 +962,7 @@ CPUPDP11.prototype.setTimer = function(iTimer, ms, fReset)
  */
 CPUPDP11.prototype.getMSCycles = function(ms)
 {
-    return (this.nCyclesPerSecond * this.nCyclesMultiplier) / 1000 * ms;
+    return ((this.nCyclesPerSecond * this.nCyclesMultiplier) / 1000 * ms)|0;
 };
 
 /**
@@ -1067,14 +1010,18 @@ CPUPDP11.prototype.updateTimers = function(nCycles)
 };
 
 /**
- * endBurst()
+ * endBurst(fReset)
  *
  * @this {CPUPDP11}
+ * @param {boolean} [fReset]
+ * @return {number} (number of cycles executed in the most recent burst)
  */
-CPUPDP11.prototype.endBurst = function()
+CPUPDP11.prototype.endBurst = function(fReset)
 {
-    this.nBurstCycles -= this.nStepCycles;
+    var nCycles = this.nBurstCycles -= this.nStepCycles;
     this.nStepCycles = 0;
+    if (fReset) this.nBurstCycles = 0;
+    return nCycles;
 };
 
 /**
@@ -1095,17 +1042,17 @@ CPUPDP11.prototype.runCPU = function()
     try {
         do {
             /*
-             * nCyclesPerBurst is how many cycles we WANT to run on each iteration of stepCPU(), and may
-             * be as HIGH as nCyclesPerYield, but it may be significantly less.  getBurstCycles() will adjust
-             * nCyclesPerBurst downward if any CPU timers need to fire during the next burst.
+             * nCycles is how many cycles we WANT to run on each iteration of stepCPU(), and may be as
+             * HIGH as nCyclesPerYield, but it may be significantly less.  getBurstCycles() will adjust
+             * nCycles downward if any CPU timers need to fire during the next burst.
              */
-            var nCyclesPerBurst = this.getBurstCycles(this.flags.checksum? 1 : this.nCyclesPerYield);
+            var nCycles = this.getBurstCycles(this.flags.checksum? 1 : this.nCyclesPerYield);
 
             /*
              * Execute the burst.
              */
             try {
-                this.stepCPU(nCyclesPerBurst);
+                this.stepCPU(nCycles);
             }
             catch(exception) {
                 /*
@@ -1117,24 +1064,21 @@ CPUPDP11.prototype.runCPU = function()
             }
 
             /*
-             * nCycles is how many cycles stepCPU() actually ran (nBurstCycles less any remaining nStepCycles);
-             * that calculation matches the return value from stepCPU(), but since it may have thrown an exception,
-             * we can't rely on it.
+             * Terminate the burst, returning the number of cycles that stepCPU() actually ran.
              */
-            var nCycles = this.nBurstCycles - this.nStepCycles;
-
-            /*
-             * Update any/all timers, firing those whose cycle countdowns have reached (or dropped below) zero.
-             */
-            this.updateTimers(nCycles);
+            nCycles = this.endBurst(true);
 
             /*
              * Add nCycles to nCyclesThisRun, as well as nRunCycles (the cycle count since the CPU first started).
              */
             this.nCyclesThisRun += nCycles;
             this.nRunCycles += nCycles;
-            this.addCycles(0, true);
             this.updateChecksum(nCycles);
+
+            /*
+             * Update any/all timers, firing those whose cycle countdowns have reached (or dropped below) zero.
+             */
+            this.updateTimers(nCycles);
 
             this.nCyclesNextYield -= nCycles;
             if (this.nCyclesNextYield <= 0) {
@@ -1149,7 +1093,6 @@ CPUPDP11.prototype.runCPU = function()
     }
     catch (e) {
         this.stopCPU();
-        this.updateCPU();
         if (this.cmp) this.cmp.stop(usr.getTime(), this.getCycles());
         this.setError(e.stack || e.message);
         return;
@@ -1184,14 +1127,12 @@ CPUPDP11.prototype.startCPU = function(fUpdateFocus)
     this.setSpeed();
     this.flags.running = true;
     this.flags.starting = true;
-    if (this.chipset) this.chipset.start();
     var controlRun = this.bindings["run"];
     if (controlRun) controlRun.textContent = "Halt";
     if (this.cmp) {
         if (fUpdateFocus) this.cmp.updateFocus(true);
         this.cmp.start(this.msStartRun, this.getCycles());
     }
-    this.updateCPU(true);
     setTimeout(this.onRunTimeout, 0);
     return true;
 };
@@ -1228,33 +1169,13 @@ CPUPDP11.prototype.stopCPU = function(fComplete)
         this.addCycles(this.nRunCycles);
         this.nRunCycles = 0;
         this.flags.running = false;
-        if (this.chipset) this.chipset.stop();
         var controlRun = this.bindings["run"];
         if (controlRun) controlRun.textContent = "Run";
         if (this.cmp) {
             this.cmp.stop(usr.getTime(), this.getCycles());
         }
-        this.updateCPU();
     }
     this.flags.complete = fComplete;
-};
-
-/**
- * updateCPU(fForce)
- *
- * This used to be performed at the end of every stepCPU(), but runCPU() -- which relies upon
- * stepCPU() -- needed to have more control over when these updates are performed.  However, for
- * other callers of stepCPU(), such as the Debugger, the combination of stepCPU() + updateCPU()
- * provides the old behavior.
- *
- * @this {CPUPDP11}
- * @param {boolean} [fForce] (true to force a video update; used by the Debugger)
- */
-CPUPDP11.prototype.updateCPU = function(fForce)
-{
-    if (this.cmp) {
-        this.cmp.updateStatus(fForce);
-    }
 };
 
 /**
@@ -1272,10 +1193,10 @@ CPUPDP11.prototype.yieldCPU = function()
     // if (DEBUG) this.nSnapCycles = this.nBurstCycles;
     /*
      * The Debugger calls yieldCPU() after every message() to ensure browser responsiveness, but it looks
-     * odd for those messages to show CPU state changes but for the CPU's own status display to not (ditto
-     * for the Video display), so I've added this call to try to keep things looking synchronized.
+     * odd for those messages to show CPU state changes if the Control Panel, Video display, etc, does not,
+     * so I've added this call to try to keep things looking synchronized.
      */
-    this.updateCPU();
+    this.cmp.updateStatus();
 };
 
 if (NODE) module.exports = CPUPDP11;

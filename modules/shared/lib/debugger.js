@@ -1,10 +1,7 @@
 /**
  * @fileoverview Common PCjs Debugger support.
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
- * @version 1.0
- * Created 2012-Jun-21
- *
- * Copyright © 2012-2016 Jeff Parsons <Jeff@pcjs.org>
+ * @copyright © Jeff Parsons 2012-2016
  *
  * This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
  *
@@ -19,9 +16,9 @@
  * You should have received a copy of the GNU General Public License along with PCjs.  If not,
  * see <http://www.gnu.org/licenses/gpl.html>.
  *
- * You are required to include the above copyright notice in every source code file of every
- * copy or modified version of this work, and to display that copyright notice on every screen
- * that loads or runs any version of this software (see COPYRIGHT in /modules/shared/lib/defines.js).
+ * You are required to include the above copyright notice in every modified copy of this work
+ * and to display that copyright notice when the software starts running; see COPYRIGHT in
+ * <http://pcjs.org/modules/shared/lib/defines.js>.
  *
  * Some PCjs files also attempt to load external resource files, such as character-image files,
  * ROM files, and disk image files. Those external resource files are not considered part of PCjs
@@ -694,10 +691,7 @@ if (DEBUGGER) {
             s = str.toHex(n, nBytes * 2);
             break;
         }
-        if (fStripLeadingZeros && s.charAt(0) == '0') {
-            s = s.replace(/^0+([0-9A-F]+)$/i, "$1");
-        }
-        return s;
+        return (fStripLeadingZeros? str.stripLeadingZeros(s) : s);
     };
 
 }   // endif DEBUGGER

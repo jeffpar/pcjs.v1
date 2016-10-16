@@ -1,10 +1,7 @@
 /**
  * @fileoverview Controls the PC8080 CPU component.
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
- * @version 1.0
- * Created 2016-Apr-18
- *
- * Copyright © 2012-2016 Jeff Parsons <Jeff@pcjs.org>
+ * @copyright © Jeff Parsons 2012-2016
  *
  * This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
  *
@@ -19,9 +16,9 @@
  * You should have received a copy of the GNU General Public License along with PCjs.  If not,
  * see <http://www.gnu.org/licenses/gpl.html>.
  *
- * You are required to include the above copyright notice in every source code file of every
- * copy or modified version of this work, and to display that copyright notice on every screen
- * that loads or runs any version of this software (see COPYRIGHT in /modules/shared/lib/defines.js).
+ * You are required to include the above copyright notice in every modified copy of this work
+ * and to display that copyright notice when the software starts running; see COPYRIGHT in
+ * <http://pcjs.org/modules/shared/lib/defines.js>.
  *
  * Some PCjs files also attempt to load external resource files, such as character-image files,
  * ROM files, and disk image files. Those external resource files are not considered part of PCjs
@@ -976,7 +973,13 @@ CPU8080.prototype.setTimer = function(iTimer, ms, fReset)
     if (iTimer >= 0 && iTimer < this.aTimers.length) {
         if (fReset || this.aTimers[iTimer][0] < 0) {
             nCycles = this.getMSCycles(ms);
-            this.aTimers[iTimer][0] = nCycles;
+            /*
+             * We must now confront the following problem: if the CPU is currently executing a burst of cycles,
+             * the number of cycles it has executed in that burst so far must NOT be charged against the cycle
+             * timeout we're about to set.  The simplest way to resolve that is to immediately call endBurst()
+             * and bias the above cycle timeout by the number of cycles that the burst executed.
+             */
+            this.aTimers[iTimer][0] = nCycles + this.endBurst();
         }
     }
     return nCycles;
@@ -1039,14 +1042,18 @@ CPU8080.prototype.updateTimers = function(nCycles)
 };
 
 /**
- * endBurst()
+ * endBurst(fReset)
  *
  * @this {CPU8080}
+ * @param {boolean} [fReset]
+ * @return {number} (number of cycles executed in the most recent burst)
  */
-CPU8080.prototype.endBurst = function()
+CPU8080.prototype.endBurst = function(fReset)
 {
-    this.nBurstCycles -= this.nStepCycles;
+    var nCycles = this.nBurstCycles -= this.nStepCycles;
     this.nStepCycles = 0;
+    if (fReset) this.nBurstCycles = 0;
+    return nCycles;
 };
 
 /**
@@ -1074,34 +1081,33 @@ CPU8080.prototype.runCPU = function(fUpdateFocus)
     try {
         do {
             /*
-             * nCyclesPerBurst is how many cycles we WANT to run on each iteration of stepCPU(), and may
-             * be as HIGH as nCyclesPerYield, but it may be significantly less.  getBurstCycles() will adjust
-             * nCyclesPerBurst downward if any CPU timers need to fire during the next burst.
+             * nCycles is how many cycles we WANT to run on each iteration of stepCPU(), and may be as
+             * HIGH as nCyclesPerYield, but it may be significantly less.  getBurstCycles() will adjust
+             * nCycles downward if any CPU timers need to fire during the next burst.
              */
-            var nCyclesPerBurst = this.getBurstCycles(this.flags.checksum? 1 : this.nCyclesPerYield);
+            var nCycles = this.getBurstCycles(this.flags.checksum? 1 : this.nCyclesPerYield);
 
             /*
              * Execute the burst.
              */
-            this.stepCPU(nCyclesPerBurst);
+            this.stepCPU(nCycles);
 
             /*
-             * nCycles is how many cycles stepCPU() actually ran (nBurstCycles less any remaining nStepCycles).
+             * Terminate the burst, returning the number of cycles that stepCPU() actually ran.
              */
-            var nCycles = this.nBurstCycles - this.nStepCycles;
-
-            /*
-             * Update any/all timers, firing those whose cycle countdowns have reached (or dropped below) zero.
-             */
-            this.updateTimers(nCycles);
+            nCycles = this.endBurst(true);
 
             /*
              * Add nCycles to nCyclesThisRun, as well as nRunCycles (the cycle count since the CPU first started).
              */
             this.nCyclesThisRun += nCycles;
             this.nRunCycles += nCycles;
-            this.addCycles(0, true);
             this.updateChecksum(nCycles);
+
+            /*
+             * Update any/all timers, firing those whose cycle countdowns have reached (or dropped below) zero.
+             */
+            this.updateTimers(nCycles);
 
             this.nCyclesNextYield -= nCycles;
             if (this.nCyclesNextYield <= 0) {

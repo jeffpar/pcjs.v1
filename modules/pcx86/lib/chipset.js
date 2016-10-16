@@ -1,10 +1,7 @@
 /**
  * @fileoverview Implements the PCx86 ChipSet component.
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
- * @version 1.0
- * Created 2012-Sep-14
- *
- * Copyright © 2012-2016 Jeff Parsons <Jeff@pcjs.org>
+ * @copyright © Jeff Parsons 2012-2016
  *
  * This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
  *
@@ -19,9 +16,9 @@
  * You should have received a copy of the GNU General Public License along with PCjs.  If not,
  * see <http://www.gnu.org/licenses/gpl.html>.
  *
- * You are required to include the above copyright notice in every source code file of every
- * copy or modified version of this work, and to display that copyright notice on every screen
- * that loads or runs any version of this software (see COPYRIGHT in /modules/shared/lib/defines.js).
+ * You are required to include the above copyright notice in every modified copy of this work
+ * and to display that copyright notice when the software starts running; see COPYRIGHT in
+ * <http://pcjs.org/modules/shared/lib/defines.js>.
  *
  * Some PCjs files also attempt to load external resource files, such as character-image files,
  * ROM files, and disk image files. Those external resource files are not considered part of PCjs
@@ -813,7 +810,7 @@ ChipSet.DIPSW[ChipSet.MODEL_5150][0][ChipSet.SWITCH_TYPE.FPU] = {
         0:      0x00,   // 0 means an FPU is NOT installed
         1:      0x02    // 1 means an FPU is installed
     },
-    LABEL: "Coprocessor"
+    LABEL: "FPU"
 };
 ChipSet.DIPSW[ChipSet.MODEL_5150][0][ChipSet.SWITCH_TYPE.MONITOR] = {
     MASK:       0x30,
@@ -913,7 +910,7 @@ ChipSet.DIPSW[ChipSet.MODEL_ATT_6300][0][ChipSet.SWITCH_TYPE.FPU] = {
         0:      0x00,
         1:      0x10
     },
-    LABEL: "Coprocessor"
+    LABEL: "FPU"
 };
 ChipSet.DIPSW[ChipSet.MODEL_ATT_6300][1][ChipSet.SWITCH_TYPE.FLOPTYPE] = {
     MASK:       0x01,
@@ -2812,7 +2809,7 @@ ChipSet.prototype.updateDIPSwitchDescriptions = function()
             3: "Monochrome"
         };
         sText += this.getDIPMemorySize(true) + "Kb";
-        sText += ", " + (+this.getDIPCoprocessor(true)? "" : "No ") + "Coprocessor";
+        sText += ", " + (+this.getDIPCoprocessor(true)? "" : "No ") + "FPU";
         sText += ", " + asMonitorTypes[this.getDIPVideoMonitor(true)] + " Monitor";
         sText += ", " + this.getDIPFloppyDrives(true) + " Floppy Drives";
         if (this.aDIPSwitches[0][1] != null && this.aDIPSwitches[0][1] != this.aDIPSwitches[0][0] ||

@@ -1,14 +1,13 @@
 /**
  * @fileoverview Implements the PDP11 SerialPort component.
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
- * @version 1.0
- * Created 2016-Oct-04
+ * @copyright © Jeff Parsons 2012-2016
  *
  * This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
  *
- * It has been adapted from the JavaScript PDP 11/70 Emulator v1.3 written by Paul Nankervis
- * (paulnank@hotmail.com) as of August 2016 from http://skn.noip.me/pdp11/pdp11.html.  This code
- * may be used freely provided the original author name is acknowledged in any modified source code.
+ * It has been adapted from the JavaScript PDP 11/70 Emulator v1.4 written by Paul Nankervis
+ * (paulnank@hotmail.com) as of September 2016 at <http://skn.noip.me/pdp11/pdp11.html>.  This code
+ * may be used freely provided the original authors are acknowledged in any modified source code.
  *
  * PCjs is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3
@@ -21,9 +20,9 @@
  * You should have received a copy of the GNU General Public License along with PCjs.  If not,
  * see <http://www.gnu.org/licenses/gpl.html>.
  *
- * You are required to include the above copyright notice in every source code file of every
- * copy or modified version of this work, and to display that copyright notice on every screen
- * that loads or runs any version of this software (see COPYRIGHT in /modules/shared/lib/defines.js).
+ * You are required to include the above copyright notice in every modified copy of this work
+ * and to display that copyright notice when the software starts running; see COPYRIGHT in
+ * <http://pcjs.org/modules/shared/lib/defines.js>.
  *
  * Some PCjs files also attempt to load external resource files, such as character-image files,
  * ROM files, and disk image files. Those external resource files are not considered part of PCjs
@@ -166,16 +165,16 @@ Component.subclass(SerialPortPDP11);
 SerialPortPDP11.sIOBuffer = "buffer";
 
 /**
- * setBinding(sHTMLType, sBinding, control, sValue)
+ * setBinding(sType, sBinding, control, sValue)
  *
  * @this {SerialPortPDP11}
- * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
+ * @param {string|null} sType is the type of the HTML control (eg, "button", "textarea", "register", "flag", "rled", etc)
  * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "buffer")
  * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
  * @param {string} [sValue] optional data value
  * @return {boolean} true if binding was successful, false if unrecognized binding request
  */
-SerialPortPDP11.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
+SerialPortPDP11.prototype.setBinding = function(sType, sBinding, control, sValue)
 {
     var serial = this;
 
@@ -261,22 +260,28 @@ SerialPortPDP11.prototype.initBus = function(cmp, bus, cpu, dbg)
 
     var serial = this;
 
-    this.timerReceiveData = this.cpu.addTimer(function() {
+    this.triggerReceiveInterrupt = this.cpu.addTrigger(PDP11.DL11.RVEC, PDP11.DL11.PRI);
+
+    this.timerReceiveInterrupt = this.cpu.addTimer(function readyReceiver() {
         if (!(serial.rcsr & PDP11.DL11.RCSR.RD)) {
             if (serial.abReceive.length) {
                 serial.rbuf = serial.abReceive.shift();
                 serial.rcsr |= PDP11.DL11.RCSR.RD;
                 if (serial.rcsr & PDP11.DL11.RCSR.RIE) {
-                    serial.cpu.interrupt(PDP11.DL11.DELAY, PDP11.DL11.PRI, PDP11.DL11.RVEC);
+                    serial.cpu.setTrigger(serial.triggerReceiveInterrupt);
                 }
             }
         }
     });
 
-    this.doneTransmitInterrupt = function() {
+    this.triggerTransmitInterrupt = this.cpu.addTrigger(PDP11.DL11.XVEC, PDP11.DL11.PRI);
+
+    this.timerTransmitInterrupt = this.cpu.addTimer(function readyTransmitter() {
         serial.xcsr |= PDP11.DL11.XCSR.READY;
-        return !!(serial.xcsr & PDP11.DL11.XCSR.TIE);
-    };
+        if (serial.xcsr & PDP11.DL11.XCSR.TIE) {
+            serial.cpu.setTrigger(serial.triggerTransmitInterrupt);
+        }
+    });
 
     bus.addIOTable(this, SerialPortPDP11.UNIBUS_IOTABLE);
     this.setReady();
@@ -466,7 +471,7 @@ SerialPortPDP11.prototype.receiveData = function(data)
     else {
         this.abReceive = this.abReceive.concat(data);
     }
-    this.cpu.setTimer(this.timerReceiveData, 50);
+    this.cpu.setTimer(this.timerReceiveInterrupt, PDP11.DL11.RBUF.DELAY);
     return true;                // for now, return true regardless, since we're buffering everything anyway
 };
 
@@ -569,7 +574,7 @@ SerialPortPDP11.prototype.readRBUF = function(addr)
 {
     this.rcsr &= ~PDP11.DL11.RCSR.RD;
     if (this.abReceive.length > 0) {
-        this.cpu.setTimer(this.timerReceiveData, 50);
+        this.cpu.setTimer(this.timerReceiveInterrupt, PDP11.DL11.RBUF.DELAY);
     }
     return this.rbuf;
 };
@@ -610,7 +615,7 @@ SerialPortPDP11.prototype.writeXCSR = function(data, addr)
      * If the device is READY, and IE is transitioning on, then request an interrupt.
      */
     if ((this.xcsr & (PDP11.DL11.XCSR.READY | PDP11.DL11.XCSR.TIE)) == PDP11.DL11.XCSR.READY && (data & PDP11.DL11.XCSR.TIE)) {
-        this.cpu.interrupt(PDP11.DL11.XCSR.DELAY, PDP11.DL11.PRI, PDP11.DL11.XVEC, this.doneTransmitInterrupt);
+        this.cpu.setTimer(this.timerTransmitInterrupt, PDP11.DL11.XCSR.DELAY);
     }
     this.xcsr = (this.xcsr & ~PDP11.DL11.XCSR.WMASK) | (data & PDP11.DL11.XCSR.WMASK);
 };
@@ -640,7 +645,7 @@ SerialPortPDP11.prototype.writeXBUF = function(data, addr)
     if (data) {
         this.transmitByte(data);
         this.xcsr &= ~PDP11.DL11.XCSR.READY;
-        this.cpu.interrupt(PDP11.DL11.XBUF.DELAY, PDP11.DL11.PRI, PDP11.DL11.XVEC, this.doneTransmitInterrupt);
+        this.cpu.setTimer(this.timerTransmitInterrupt, PDP11.DL11.XBUF.DELAY);
     }
 };
 

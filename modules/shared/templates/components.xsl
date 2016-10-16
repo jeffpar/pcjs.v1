@@ -2,6 +2,7 @@
 <!-- author="Jeff Parsons (@jeffpar)" website="http://www.pcjs.org/" created="2012-05-05" modified="2016-04-15" license="http://www.gnu.org/licenses/gpl.html" -->
 <!DOCTYPE xsl:stylesheet [
 	<!-- XSLT understands these entities only: lt, gt, apos, quot, and amp.  Other required entities may be defined below (see http://www.pcjs.org/modules/shared/templates/entities.dtd). -->
+	<!ENTITY nbsp "&#160;"> <!ENTITY ne "&#8800;"> <!ENTITY le "&#8804;"> <!ENTITY ge "&#8805;">
 ]>
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
@@ -331,6 +332,7 @@
 				<xsl:when test="@pos = 'center'">margin:0 auto;</xsl:when>
 				<xsl:when test="@pos">position:<xsl:value-of select="@pos"/>;</xsl:when>
 				<xsl:when test="$left != '' or $top != ''">position:relative;</xsl:when>
+				<xsl:when test="@container">text-align:<xsl:value-of select="@container"/>;</xsl:when>
 				<xsl:otherwise><xsl:if test="$left = ''">float:left;</xsl:if></xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
@@ -412,7 +414,7 @@
 					</form>
 				</xsl:when>
 				<xsl:when test="@type = 'led' or @type = 'rled'">
-					<div class="{$APPCLASS}-binding {$CSSCLASS}-{@type}" data-value="{{{$type},{$binding}}}"><xsl:value-of select="."/></div>
+					<div class="{$APPCLASS}-binding {$CSSCLASS}-{@type}" data-value="{{{$type},{$binding}}}" style="display:inline-block;"><xsl:value-of select="."/></div>
 				</xsl:when>
 				<xsl:when test="@type = 'separator'">
 					<hr/>
@@ -712,16 +714,16 @@
 
 	<xsl:template match="device[not(@ref)]">
 		<xsl:param name="machine" select="''"/>
-		<xsl:variable name="name">
+		<xsl:variable name="type">
 			<xsl:choose>
-				<xsl:when test="@name"><xsl:value-of select="@name"/></xsl:when>
+				<xsl:when test="@type"><xsl:value-of select="@type"/></xsl:when>
 				<xsl:otherwise/>
 			</xsl:choose>
 		</xsl:variable>
 		<xsl:call-template name="component">
 			<xsl:with-param name="machine" select="$machine"/>
 			<xsl:with-param name="class">device</xsl:with-param>
-			<xsl:with-param name="parms">,name:'<xsl:value-of select="$name"/>'</xsl:with-param>
+			<xsl:with-param name="parms">,type:'<xsl:value-of select="$type"/>'</xsl:with-param>
 		</xsl:call-template>
 	</xsl:template>
 
