@@ -7,4 +7,4 @@ permalink: /devices/pdp11/rom/
 PDP-11 ROMs
 -----------
 
-* [Test ROM](custom/) ([original version](http://skn.noip.me/pdp11/boot.mac) created by [Paul Nankervis](paulnank@hotmail.com))
+* [Test ROM](test/) (based on [BOOT.MAC](http://skn.noip.me/pdp11/boot.mac) written by [Paul Nankervis](mailto:paulnank@hotmail.com))

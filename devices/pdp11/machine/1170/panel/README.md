@@ -8,3 +8,5 @@ machines:
 ---
 
 {% include machine.html id="test1170" %}
+
+This machine is also available with our built-in [Debugger](debugger/).

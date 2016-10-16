@@ -10,7 +10,7 @@ PDP-11 Machine Emulation Module (PDPjs)
 Overview
 ---
 PDPjs is our PDP-11 machine emulation module.  The code is being adapted from
-the JavaScript [PDP 11/70 Emulator (v1.3)](http://skn.noip.me/pdp11/pdp11.html) written by
+the JavaScript [PDP 11/70 Emulator (v1.4)](http://skn.noip.me/pdp11/pdp11.html) written by
 [Paul Nankervis](mailto:paulnank@hotmail.com).
 
 See the list of available [PDP-11 Machines](/devices/pdp11/machine/), which includes a
