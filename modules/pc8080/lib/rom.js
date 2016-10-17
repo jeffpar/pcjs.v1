@@ -65,7 +65,6 @@ function ROM8080(parmsROM)
     this.addrROM = parmsROM['addr'];
     this.sizeROM = parmsROM['size'];
 
-
     /*
      * The new 'alias' property can now be EITHER a single physical address (like 'addr') OR an array of
      * physical addresses; eg:
