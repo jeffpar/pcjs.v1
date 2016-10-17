@@ -2,10 +2,10 @@
 # Don't have macro11?  Make yourself a copy from https://github.com/shattered/macro11
 #
 
-all: BOOTTEST.json
+all: TEST.json
 
-BOOTTEST.lst: BOOTTEST.mac
-	macro11 BOOTTEST.mac -l BOOTTEST.lst
+TEST.lst: TEST.mac
+	macro11 TEST.mac -l TEST.lst
 
-BOOTTEST.json: BOOTTEST.lst
-	node ../../../../modules/filedump/bin/filedump --file=BOOTTEST.lst --format=octal --output=BOOTTEST.json --overwrite
+TEST.json: TEST.lst
+	node ../../../../modules/filedump/bin/filedump --file=TEST.lst --format=octal --output=TEST.json --overwrite
