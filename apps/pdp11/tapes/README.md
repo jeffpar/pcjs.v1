@@ -7,15 +7,15 @@ permalink: /apps/pdp11/tapes/
 PDP-11 Software Tapes
 ---------------------
 
-The initial PDP-11 software we are working on supporting includes:
+Supported PDP-11 software includes:
 
 - [Absolute Loader](DEC-11-L2PC-PO.json)
 - [BASIC (Single User)](DEC-11-AJPB-PB.json)
 
-To make it easy for PDPjs machines to load these applications, we provide the following High-Speed
+To make it easy for PDPjs machines to load these tapes, we provide the following High-Speed
 Paper Tape Reader (PC11) configuration files:
 
-- [samples.xml](samples.xml)
+- [tapedemo.xml](tapedemo.xml)
 
 These configuration files create UI controls that allow you to choose from a set of tapes that are automatically sent
 to the machine's PC11 device.
