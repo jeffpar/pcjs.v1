@@ -582,9 +582,9 @@
 				<xsl:otherwise>null</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
-		<xsl:variable name="resetAddr">
+		<xsl:variable name="addrReset">
 			<xsl:choose>
-				<xsl:when test="@resetAddr"><xsl:value-of select="@resetAddr"/></xsl:when>
+				<xsl:when test="@addrReset"><xsl:value-of select="@addrReset"/></xsl:when>
 				<xsl:otherwise>0</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
@@ -612,7 +612,7 @@
 		<xsl:call-template name="component">
 			<xsl:with-param name="machine" select="$machine"/>
 			<xsl:with-param name="class" select="'cpu'"/>
-			<xsl:with-param name="parms">,model:'<xsl:value-of select="$model"/>',stepping:'<xsl:value-of select="$stepping"/>',fpu:<xsl:value-of select="$fpu"/>,cycles:<xsl:value-of select="$cycles"/>,multiplier:<xsl:value-of select="$multiplier"/>,autoStart:<xsl:value-of select="$autoStart"/>,resetAddr:<xsl:value-of select="$resetAddr"/>,csStart:<xsl:value-of select="$csStart"/>,csInterval:<xsl:value-of select="$csInterval"/>,csStop:<xsl:value-of select="$csStop"/></xsl:with-param>
+			<xsl:with-param name="parms">,model:'<xsl:value-of select="$model"/>',stepping:'<xsl:value-of select="$stepping"/>',fpu:<xsl:value-of select="$fpu"/>,cycles:<xsl:value-of select="$cycles"/>,multiplier:<xsl:value-of select="$multiplier"/>,autoStart:<xsl:value-of select="$autoStart"/>,addrReset:<xsl:value-of select="$addrReset"/>,csStart:<xsl:value-of select="$csStart"/>,csInterval:<xsl:value-of select="$csInterval"/>,csStop:<xsl:value-of select="$csStop"/></xsl:with-param>
 		</xsl:call-template>
 	</xsl:template>
 
@@ -933,16 +933,10 @@
 				<xsl:otherwise/>
 			</xsl:choose>
 		</xsl:variable>
-		<xsl:variable name="writable">
-			<xsl:choose>
-				<xsl:when test="@writable"><xsl:value-of select="@writable"/></xsl:when>
-				<xsl:otherwise>false</xsl:otherwise>
-			</xsl:choose>
-		</xsl:variable>
 		<xsl:call-template name="component">
 			<xsl:with-param name="machine" select="$machine"/>
 			<xsl:with-param name="class">rom</xsl:with-param>
-			<xsl:with-param name="parms">,addr:<xsl:value-of select="$addr"/>,size:<xsl:value-of select="$size"/>,alias:<xsl:value-of select="$alias"/>,file:'<xsl:value-of select="$file"/>',notify:'<xsl:value-of select="$notify"/>',writable:<xsl:value-of select="$writable"/></xsl:with-param>
+			<xsl:with-param name="parms">,addr:<xsl:value-of select="$addr"/>,size:<xsl:value-of select="$size"/>,alias:<xsl:value-of select="$alias"/>,file:'<xsl:value-of select="$file"/>',notify:'<xsl:value-of select="$notify"/>'</xsl:with-param>
 		</xsl:call-template>
 	</xsl:template>
 
@@ -966,6 +960,24 @@
 				<xsl:otherwise>0</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
+		<xsl:variable name="file">
+			<xsl:choose>
+				<xsl:when test="@file"><xsl:value-of select="@file"/></xsl:when>
+				<xsl:otherwise/>
+			</xsl:choose>
+		</xsl:variable>
+		<xsl:variable name="load">
+			<xsl:choose>
+				<xsl:when test="@load"><xsl:value-of select="@load"/></xsl:when>
+				<xsl:otherwise>null</xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
+		<xsl:variable name="exec">
+			<xsl:choose>
+				<xsl:when test="@exec"><xsl:value-of select="@exec"/></xsl:when>
+				<xsl:otherwise>null</xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
 		<xsl:variable name="test">
 			<xsl:choose>
 				<xsl:when test="@test"><xsl:value-of select="@test"/></xsl:when>
@@ -975,7 +987,7 @@
 		<xsl:call-template name="component">
 			<xsl:with-param name="machine" select="$machine"/>
 			<xsl:with-param name="class">ram</xsl:with-param>
-			<xsl:with-param name="parms">,addr:<xsl:value-of select="$addr"/>,size:<xsl:value-of select="$size"/>,test:<xsl:value-of select="$test"/></xsl:with-param>
+			<xsl:with-param name="parms">,addr:<xsl:value-of select="$addr"/>,size:<xsl:value-of select="$size"/>,file:'<xsl:value-of select="$file"/>',load:<xsl:value-of select="$load"/>,exec:<xsl:value-of select="$exec"/>,test:<xsl:value-of select="$test"/></xsl:with-param>
 		</xsl:call-template>
 	</xsl:template>
 

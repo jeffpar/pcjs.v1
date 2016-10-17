@@ -35,11 +35,11 @@
 if (NODE) {
     var str          = require("../../shared/lib/strlib");
     var web          = require("../../shared/lib/weblib");
+    var DumpAPI      = require("../../shared/lib/dumpapi");
     var Component    = require("../../shared/lib/component");
     var State        = require("../../shared/lib/state");
     var PDP11        = require("./defines");
     var MemoryPDP11  = require("./memory");
-    var ROMPDP11     = require("./rom");
 }
 
 /**
@@ -49,6 +49,9 @@ if (NODE) {
  *
  *      addr: starting physical address of RAM (default is 0)
  *      size: amount of RAM, in bytes (default is 0, which means defer to motherboard switch settings)
+ *      file: name of optional data file to load into RAM (default is "")
+ *      load: optional file load address (overrides any load address specified in the data file; default is null)
+ *      exec: optional file exec address (overrides any exec address specified in the data file; default is null)
  *
  * NOTE: We make a note of the specified size, but no memory is initially allocated for the RAM until the
  * Computer component calls powerUp().
@@ -61,10 +64,37 @@ function RAMPDP11(parmsRAM)
 {
     Component.call(this, "RAM", parmsRAM, RAMPDP11);
 
+    this.abInit = null;
+    this.aSymbols = null;
+
     this.addrRAM = parmsRAM['addr'];
     this.sizeRAM = parmsRAM['size'];
+    this.nFileLoad = parmsRAM['load'];
+    this.nFileExec = parmsRAM['exec'];
+
     this.fInstalled = (!!this.sizeRAM); // 0 is the default value for 'size' when none is specified
     this.fAllocated = false;
+
+    this.sFilePath = parmsRAM['file'];
+    this.sFileName = str.getBaseName(this.sFilePath);
+
+    if (this.sFilePath) {
+        var sFileURL = this.sFilePath;
+        if (DEBUG) this.log('load("' + sFileURL + '")');
+        /*
+         * If the selected data file has a ".json" extension, then we assume it's pre-converted
+         * JSON-encoded data, so we load it as-is; ditto for ROM files with a ".hex" extension.
+         * Otherwise, we ask our server-side converter to return the file in a JSON-compatible format.
+         */
+        var sFileExt = str.getExtension(this.sFileName);
+        if (sFileExt != DumpAPI.FORMAT.JSON && sFileExt != DumpAPI.FORMAT.HEX) {
+            sFileURL = web.getHost() + DumpAPI.ENDPOINT + '?' + DumpAPI.QUERY.FILE + '=' + this.sFilePath + '&' + DumpAPI.QUERY.FORMAT + '=' + DumpAPI.FORMAT.BYTES + '&' + DumpAPI.QUERY.DECIMAL + '=true';
+        }
+        var ram = this;
+        web.getResource(sFileURL, null, true, function(sURL, sResponse, nErrorCode) {
+            ram.doneLoad(sURL, sResponse, nErrorCode);
+        });
+    }
 }
 
 Component.subclass(RAMPDP11);
@@ -84,24 +114,6 @@ RAMPDP11.prototype.initBus = function(cmp, bus, cpu, dbg)
     this.cpu = cpu;
     this.dbg = dbg;
     this.initRAM();
-};
-
-/**
- * initRAM()
- *
- * @this {RAMPDP11}
- */
-RAMPDP11.prototype.initRAM = function()
-{
-    if (!this.fAllocated && this.sizeRAM) {
-        if (this.bus.addMemory(this.addrRAM, this.sizeRAM, MemoryPDP11.TYPE.RAM)) {
-            this.fAllocated = true;
-        }
-    }
-    if (!this.fAllocated) {
-        Component.error("No RAM allocated");
-    }
-    this.setReady();
 };
 
 /**
@@ -140,6 +152,80 @@ RAMPDP11.prototype.powerDown = function(fSave, fShutdown)
      * save logic.
      */
     return true;
+};
+
+/**
+ * doneLoad(sURL, sData, nErrorCode)
+ *
+ * @this {RAMPDP11}
+ * @param {string} sURL
+ * @param {string} sData
+ * @param {number} nErrorCode (response from server if anything other than 200)
+ */
+RAMPDP11.prototype.doneLoad = function(sURL, sData, nErrorCode)
+{
+    if (nErrorCode) {
+        this.notice("Unable to load RAM resource (error " + nErrorCode + ": " + sURL + ")");
+        return;
+    }
+
+    Component.addMachineResource(this.idMachine, sURL, sData);
+
+    var resource = web.parseMemoryResource(sURL, sData);
+    if (resource) {
+        this.abInit = resource.aBytes;
+        this.aSymbols = resource.aSymbols;
+        if (this.nFileLoad == null && resource.nLoad != null) this.nFileLoad = resource.nLoad;
+        if (this.nFileExec == null && resource.nExec != null) this.nFileExec = resource.nExec;
+    } else {
+        this.sFilePath = null;
+    }
+    this.initRAM();
+};
+
+/**
+ * initRAM()
+ *
+ * This function is called by both initBus() and doneLoad(), but it cannot copy the initial data into place
+ * until after initBus() has received the Bus component AND doneLoad() has received the data.  When both those
+ * criteria are satisfied, the component becomes "ready".
+ *
+ * @this {RAMPDP11}
+ */
+RAMPDP11.prototype.initRAM = function()
+{
+    if (!this.fAllocated && this.sizeRAM) {
+        if (this.bus.addMemory(this.addrRAM, this.sizeRAM, MemoryPDP11.TYPE.RAM)) {
+            this.fAllocated = true;
+        }
+    }
+    if (!this.isReady()) {
+        if (!this.fAllocated) {
+            Component.error("No RAM allocated");
+        }
+        else if (this.sFilePath) {
+            /*
+             * Too early...
+             */
+            if (!this.abInit || !this.bus) return;
+
+            var addr = this.addrRAM;
+            if (this.nFileLoad !== null) addr = this.nFileLoad;
+            for (var i = 0; i < this.abInit.length; i++) {
+                this.bus.setByteDirect(addr + i, this.abInit[i]);
+            }
+
+            if (this.nFileExec !== null) {
+                this.cpu.setReset(this.nFileExec);
+            }
+
+            /*
+             * TODO: Consider an option to retain this data and give the user a way of restoring the initial contents.
+             */
+            delete this.abInit;
+        }
+        this.setReady();
+    }
 };
 
 /**

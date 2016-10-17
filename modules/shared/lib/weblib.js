@@ -284,6 +284,90 @@ web.getResource = function(sURL, dataPost, fAsync, done)
 };
 
 /**
+ * parseMemoryResource(sURL, sData)
+ *
+ * @param {string} sData
+ * @return {Object|null} (resource)
+ */
+web.parseMemoryResource = function(sURL, sData)
+{
+    var i;
+    var resource = {
+        aBytes: null,
+        aSymbols: null,
+        nLoad: null,
+        nExec: null
+    };
+    if (sData.charAt(0) == "[" || sData.charAt(0) == "{") {
+        try {
+            var a, ib;
+            var data = eval("(" + sData + ")");
+
+            resource.nLoad = data['load'];
+            resource.nExec = data['exec'];
+
+            if (a = data['bytes']) {
+                resource.aBytes = a;
+            }
+            else if (a = data['words']) {
+                /*
+                 * Convert all words into bytes
+                 */
+                resource.aBytes = new Array(a.length * 2);
+                for (i = 0, ib = 0; i < a.length; i++) {
+                    resource.aBytes[ib++] = a[i] & 0xff;
+                    resource.aBytes[ib++] = (a[i] >> 8) & 0xff;
+                    Component.assert(!(a[i] & ~0xffff));
+                }
+            }
+            else if (a = data['data']) {
+                /*
+                 * Convert all dwords (longs) into bytes
+                 */
+                resource.aBytes = new Array(a.length * 4);
+                for (i = 0, ib = 0; i < a.length; i++) {
+                    resource.aBytes[ib++] = a[i] & 0xff;
+                    resource.aBytes[ib++] = (a[i] >> 8) & 0xff;
+                    resource.aBytes[ib++] = (a[i] >> 16) & 0xff;
+                    resource.aBytes[ib++] = (a[i] >> 24) & 0xff;
+                }
+            }
+            else {
+                resource.aBytes = data;
+            }
+
+            resource.aSymbols = data['symbols'];
+
+            if (!resource.aBytes.length) {
+                Component.error("Empty resource: " + sURL);
+                resource = null;
+            }
+            else if (resource.aBytes.length == 1) {
+                Component.error(resource.aBytes[0]);
+                resource = null;
+            }
+        } catch (e) {
+            Component.error("Resource data error: " + e.message);
+            resource = null;
+        }
+    }
+    else {
+        /*
+         * Parse the data manually; we'll assume it's in "simplified" hex form
+         * (a series of hex byte-values separated by whitespace).
+         */
+        var sHexData = sData.replace(/\n/gm, " ").replace(/ +$/, "");
+        var asHexData = sHexData.split(" ");
+        resource.aBytes = new Array(asHexData.length);
+        for (i = 0; i < asHexData.length; i++) {
+            resource.aBytes[i] = parseInt(asHexData[i], 16);
+            Component.assert(!isNaN(resource.aBytes[i]));
+        }
+    }
+    return resource;
+};
+
+/**
  * sendReport(sApp, sVer, sURL, sUser, sType, sReport, sHostName)
  *
  * Send a report (eg, bug report) to the server.

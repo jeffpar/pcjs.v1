@@ -1,7 +1,7 @@
 ---
 layout: page
-title: PDP-11/20 Test Machine 
-permalink: /devices/pdp11/machine/1120/test/
+title: PDP-11/20 with 16Kb and Bootstrap Loader
+permalink: /devices/pdp11/machine/1120/bootstrap/
 machines:
   - id: test1120
     type: pdp11

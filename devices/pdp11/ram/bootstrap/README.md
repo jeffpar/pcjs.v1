@@ -1,11 +1,11 @@
 ---
 layout: page
-title: PDP-11 Loaders
-permalink: /devices/pdp11/loader/
+title: PDP-11 Bootstrap Loader
+permalink: /devices/pdp11/ram/bootstrap/
 ---
 
-PDP-11 Loaders
---------------
+PDP-11 Bootstrap Loader
+-----------------------
 
 The blog post "[PDP-11 Paper Tape BASIC](http://avitech.com.au/?page_id=709)" describes the *Bootstrap Loader*,
 a small program used to load the *Absolute Loader*, which in turn loads the *PDP-11 BASIC Paper Tape*. 

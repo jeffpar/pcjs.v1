@@ -50,7 +50,7 @@ if (NODE) {
  * The CPUStatePDP11 class uses the following (parmsCPU) properties:
  *
  *      model: a number (eg, 1170) that should match one of the PDP11.MODEL_* values
- *      resetAddr: reset address (default is 0)
+ *      addrReset: reset address (default is 0)
  *
  * This extends the CPU class and passes any remaining parmsCPU properties to the CPU class
  * constructor, along with a default speed (cycles per second) based on the specified (or default)
@@ -63,7 +63,7 @@ if (NODE) {
 function CPUStatePDP11(parmsCPU)
 {
     this.model = +parmsCPU['model'] || PDP11.MODEL_1170;
-    this.resetAddr = parmsCPU['resetAddr'] || 0;
+    this.addrReset = parmsCPU['addrReset'] || 0;
 
     var nCyclesDefault = 0;
     switch(this.model) {
@@ -175,7 +175,7 @@ CPUStatePDP11.prototype.initRegs = function()
     this.flagN  = 0x8000;       // PSW N bit
     this.regPSW = 0x000f;       // PSW other bits   (TODO: What's the point of setting the flag bits here, too?)
     this.regsGen = [            // General R0 - R7
-        0, 0, 0, 0, 0, 0, 0, this.resetAddr
+        0, 0, 0, 0, 0, 0, 0, this.addrReset
     ];
     this.regsAlt = [            // Alternate R0 - R5
         0, 0, 0, 0, 0, 0
@@ -357,6 +357,18 @@ CPUStatePDP11.prototype.setMMR3 = function(newMMR3)
         }
         this.setMemoryAccess();
     }
+};
+
+/**
+ * setReset(addr)
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} addr
+ */
+CPUStatePDP11.prototype.setReset = function(addr)
+{
+    this.addrReset = addr;
+    this.setPC(addr);
 };
 
 /**
