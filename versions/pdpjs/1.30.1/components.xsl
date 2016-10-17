@@ -181,10 +181,10 @@
 			<xsl:choose>
 				<xsl:when test="@padding">padding:<xsl:value-of select="@padding"/>;</xsl:when>
 				<xsl:otherwise>
-					<xsl:if test="@padtop">padding-top:<xsl:value-of select="@padtop"/>;</xsl:if>
-					<xsl:if test="@padright">padding-right:<xsl:value-of select="@padright"/>;</xsl:if>
-					<xsl:if test="@padbottom">padding-bottom:<xsl:value-of select="@padbottom"/>;</xsl:if>
-					<xsl:if test="@padleft">padding-left:<xsl:value-of select="@padleft"/>;</xsl:if>
+					<xsl:if test="@padTop">padding-top:<xsl:value-of select="@padTop"/>;</xsl:if>
+					<xsl:if test="@padRight">padding-right:<xsl:value-of select="@padRight"/>;</xsl:if>
+					<xsl:if test="@padBottom">padding-bottom:<xsl:value-of select="@padBottom"/>;</xsl:if>
+					<xsl:if test="@padLeft">padding-left:<xsl:value-of select="@padLeft"/>;</xsl:if>
 				</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
@@ -317,10 +317,10 @@
 			<xsl:choose>
 				<xsl:when test="@padding">padding:<xsl:value-of select="@padding"/>;</xsl:when>
 				<xsl:otherwise>
-					<xsl:if test="@padtop">padding-top:<xsl:value-of select="@padtop"/>;</xsl:if>
-					<xsl:if test="@padright">padding-right:<xsl:value-of select="@padright"/>;</xsl:if>
-					<xsl:if test="@padbottom">padding-bottom:<xsl:value-of select="@padbottom"/>;</xsl:if>
-					<xsl:if test="@padleft">padding-left:<xsl:value-of select="@padleft"/>;</xsl:if>
+					<xsl:if test="@padTop">padding-top:<xsl:value-of select="@padTop"/>;</xsl:if>
+					<xsl:if test="@padRight">padding-right:<xsl:value-of select="@padRight"/>;</xsl:if>
+					<xsl:if test="@padBottom">padding-bottom:<xsl:value-of select="@padBottom"/>;</xsl:if>
+					<xsl:if test="@padLeft">padding-left:<xsl:value-of select="@padLeft"/>;</xsl:if>
 				</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
@@ -389,7 +389,7 @@
 				</xsl:when>
 				<xsl:when test="@type = 'list'">
 					<select class="{$APPCLASS}-binding" style="{$border}{$width}{$height}{$fontsize}{$style}" data-value="{{{$type},{$binding}}}">
-						<xsl:apply-templates select="disk|app|manifest" mode="component"/>
+						<xsl:apply-templates select="disk|tape|app|manifest" mode="component"/>
 					</select>
 				</xsl:when>
 				<xsl:when test="@type = 'text'">
@@ -451,7 +451,38 @@
 				</xsl:if>
 			</xsl:if>
 		</xsl:variable>
-		<option value="{@path}" data-value="{{{$desc}}}"><xsl:if test="name"><xsl:value-of select="name"/></xsl:if><xsl:if test="not(name)"><xsl:value-of select="."/></xsl:if></option>
+		<xsl:variable name="name">
+			<xsl:choose>
+				<xsl:when test="@name"><xsl:value-of select="@name"/></xsl:when>
+				<xsl:when test="name"><xsl:value-of select="name"/></xsl:when>
+				<xsl:otherwise><xsl:value-of select="."/></xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
+		<option value="{@path}" data-value="{{{$desc}}}"><xsl:value-of select="$name"/></option>
+	</xsl:template>
+
+	<xsl:template match="tape[@ref]" mode="component">
+		<xsl:variable name="componentFile"><xsl:value-of select="$rootDir"/><xsl:value-of select="@ref"/></xsl:variable>
+		<xsl:apply-templates select="document($componentFile)/tape" mode="component"/>
+	</xsl:template>
+
+	<xsl:template match="tape[not(@ref)]" mode="component">
+		<xsl:variable name="desc">
+			<xsl:if test="@desc">
+				<xsl:text>desc:'</xsl:text><xsl:value-of select="@desc"/><xsl:text>'</xsl:text>
+				<xsl:if test="@href">
+					<xsl:text>,href:'</xsl:text><xsl:value-of select="@href"/><xsl:text>'</xsl:text>
+				</xsl:if>
+			</xsl:if>
+		</xsl:variable>
+		<xsl:variable name="name">
+			<xsl:choose>
+				<xsl:when test="@name"><xsl:value-of select="@name"/></xsl:when>
+				<xsl:when test="name"><xsl:value-of select="name"/></xsl:when>
+				<xsl:otherwise><xsl:value-of select="."/></xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
+		<option value="{@path}" data-value="{{{$desc}}}"><xsl:value-of select="$name"/></option>
 	</xsl:template>
 
 	<xsl:template match="app[@ref]" mode="component">

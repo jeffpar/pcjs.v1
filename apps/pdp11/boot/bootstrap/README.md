@@ -1,13 +1,13 @@
 ---
 layout: page
 title: PDP-11 Bootstrap Loader
-permalink: /devices/pdp11/ram/bootstrap/
+permalink: /apps/pdp11/boot/bootstrap/
 ---
 
 PDP-11 Bootstrap Loader
 -----------------------
 
-The blog post "[PDP-11 Paper Tape BASIC](http://avitech.com.au/?page_id=709)" describes the *Bootstrap Loader*,
+The blog post "[PDP-11 Paper Tape BASIC](http://www.avitech.com.au/ptb/ptb.html)" describes the *Bootstrap Loader*,
 a small program used to load the *Absolute Loader*, which in turn loads the *PDP-11 BASIC Paper Tape*. 
  
 Here's what the *Bootstrap Loader* looks like:
@@ -45,13 +45,12 @@ You can immediately disassemble the code using `u 037744 040000`:
 	037774: 000765                 BR    037750
 	037776: 177550                 .WORD 177550
 
-I also pasted the disassembled code into a listing file, [bootstrap.lst](bootstrap.lst), and ran [FileDump](/modules/filedump)
-to produce a [bootstrap.json](bootstrap.json) that can be pre-loaded into any machine:
+I also pasted the disassembled code into a listing file, [BOOTSTRAP-16KB.LST](BOOTSTRAP-16KB.lst), and ran [FileDump](/modules/filedump)
+to produce a [BOOTSTRAP-16KB.JSON](BOOTSTRAP-16KB.json) that can be pre-loaded into any machine:
 
-	filedump --file=bootstrap.lst --format=octal --output=bootstrap.json
+	filedump --file=BOOTSTRAP-16KB.lst --format=octal --output=BOOTSTRAP-16KB.json
 
 To run the *Bootstrap Loader*, set the PC to 037744 and start the machine: 
 
 	r pc=037744
 	g
-

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <panel id="panel" width="100%" padding="8px">
 	<name>Control Panel</name>
-	<control type="container" class="pcjs-panel-group" width="100%" padbottom="8px">
+	<control type="container" class="pcjs-panel-group" width="100%" padBottom="8px">
 		<control type="container" class="pcjs-tripled" width="12%" pos="right">
 			<control type="container" class="pcjs-tripled-label" width="100%" pos="right">ADDRESS</control>
 			<control type="container" class="pcjs-ledpad" width="33%" pos="right"><control type="rled" binding="A0" width="100%" container="center"/></control>
@@ -49,7 +49,7 @@
 			<control type="container" class="pcjs-ledpad" width="33%" pos="right"><control type="rled" binding="A21" width="100%" container="center"/></control>
 		</control>
 	</control>
-	<control type="container" class="pcjs-panel-group" width="100%" padbottom="8px">
+	<control type="container" class="pcjs-panel-group" width="100%" padBottom="8px">
 		<control type="container" class="pcjs-tripled" width="12%" pos="right">
 			<control type="container" class="pcjs-tripled-label" width="100%" pos="right">DATA</control>
 			<control type="container" class="pcjs-ledpad" width="33%" pos="right"><control type="rled" binding="D0" width="100%" container="center"/></control>
@@ -85,36 +85,36 @@
 			<control type="container" class="pcjs-ledpad" width="33%" pos="right"><control type="rled" binding="D15" width="100%" container="center"/></control>
 		</control>
 	</control>
-	<control type="container" class="pcjs-textarea" width="60%" padtop="8px" padbottom="8px">
-		<control type="textarea" binding="print" width="100%" height="252px" padright="8px" pos="relative" style="resize:vertical;"/>
+	<control type="container" class="pcjs-textarea" width="60%" padTop="8px" padBottom="8px">
+		<control type="textarea" binding="print" width="100%" height="252px" padRight="8px" pos="relative" style="resize:vertical;"/>
 		<control type="container" width="100%">
 			<control type="text" binding="debugInput" width="auto"/>
 			<control type="button" binding="debugEnter">Enter</control>
 			<control type="button" binding="clear">Clear</control>
 		</control>
 	</control>
-	<control type="container" class="pcjs-registers" width="35%" padtop="8px" padleft="8px">
-		<control type="register" label="R0" binding="R0" pos="left" width="60px" padright="8px" padbottom="8px">0000</control>
-		<control type="register" label="R1" binding="R1" pos="left" width="60px" padright="8px" padbottom="8px">0000</control>
-		<control type="register" label="R2" binding="R2" pos="left" width="60px" padright="8px" padbottom="8px">0000</control>
-		<control type="register" label="R3" binding="R3" pos="left" width="60px" padright="8px" padbottom="8px">0000</control>
-		<control type="register" label="R4" binding="R4" pos="left" width="60px" padright="8px" padbottom="8px">0000</control>
-		<control type="register" label="R5" binding="R5" pos="left" width="60px" padright="8px" padbottom="8px">0000</control>
-		<control type="register" label="SP" binding="R6" pos="left" width="60px" padright="8px" padbottom="8px">0000</control>
-		<control type="register" label="PC" binding="R7" pos="left" width="60px" padright="8px" padbottom="8px">0000</control>
-		<control type="register" label="PS" binding="PS" pos="left" width="60px" padright="8px" padbottom="8px">0000</control>
+	<control type="container" class="pcjs-registers" width="35%" padTop="8px" padLeft="8px">
+		<control type="register" label="R0" binding="R0" pos="left" width="60px" padRight="8px" padBottom="8px">0000</control>
+		<control type="register" label="R1" binding="R1" pos="left" width="60px" padRight="8px" padBottom="8px">0000</control>
+		<control type="register" label="R2" binding="R2" pos="left" width="60px" padRight="8px" padBottom="8px">0000</control>
+		<control type="register" label="R3" binding="R3" pos="left" width="60px" padRight="8px" padBottom="8px">0000</control>
+		<control type="register" label="R4" binding="R4" pos="left" width="60px" padRight="8px" padBottom="8px">0000</control>
+		<control type="register" label="R5" binding="R5" pos="left" width="60px" padRight="8px" padBottom="8px">0000</control>
+		<control type="register" label="SP" binding="R6" pos="left" width="60px" padRight="8px" padBottom="8px">0000</control>
+		<control type="register" label="PC" binding="R7" pos="left" width="60px" padRight="8px" padBottom="8px">0000</control>
+		<control type="register" label="PS" binding="PS" pos="left" width="60px" padRight="8px" padBottom="8px">0000</control>
 		<control type="container" pos="left">
-			<control type="flag" label="N" binding="NF" width="8px" padright="4px" padbottom="8px">0</control>
-			<control type="flag" label="Z" binding="ZF" width="8px" padright="4px" padbottom="8px">0</control>
-			<control type="flag" label="V" binding="VF" width="8px" padright="4px" padbottom="8px">0</control>
-			<control type="flag" label="C" binding="CF" width="8px" padright="4px" padbottom="8px">0</control>
+			<control type="flag" label="N" binding="NF" width="8px" padRight="4px" padBottom="8px">0</control>
+			<control type="flag" label="Z" binding="ZF" width="8px" padRight="4px" padBottom="8px">0</control>
+			<control type="flag" label="V" binding="VF" width="8px" padRight="4px" padBottom="8px">0</control>
+			<control type="flag" label="C" binding="CF" width="8px" padRight="4px" padBottom="8px">0</control>
 		</control>
 	</control>
-	<control type="container" padtop="8px" padbottom="8px">
+	<control type="container" padTop="8px" padBottom="8px">
 		<control type="button" binding="run">Run</control>
 		<control type="button" binding="step">Step</control>
 		<control type="button" binding="reset">Reset</control>
 		<control type="button" binding="setSpeed">Fast</control>
-		<control type="description" binding="speed" padleft="8px">Stopped</control>
+		<control type="description" binding="speed" padLeft="8px">Stopped</control>
 	</control>
 </panel>

@@ -13,7 +13,7 @@
 	<debugger id="debugger"/>
 	<panel ref="/devices/pcx86/panel/default.xml"/>
 	<fdc ref="/disks/pcx86/compiled/samples.xml" width="280px"/>
-	<chipset id="chipset" model="5160" sw1="01110001" pos="left" padleft="8px" padbottom="8px">
+	<chipset id="chipset" model="5160" sw1="01110001" pos="left" padLeft="8px" padBottom="8px">
 		<control type="switches" label="SW1" binding="sw1" left="0px"/>
 		<control type="description" binding="swdesc" left="0px"/>
 	</chipset>

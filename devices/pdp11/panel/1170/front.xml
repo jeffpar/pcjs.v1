@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <panel id="panel" width="100%" padding="8px">
 	<name>Control Panel</name>
-	<control type="container" class="pcjs-panel-group" width="100%" padbottom="8px">
+	<control type="container" class="pcjs-panel-group" width="100%" padBottom="8px">
 		<control type="container" class="pcjs-tripled" width="12%" pos="right">
 			<control type="container" class="pcjs-tripled-label" width="100%" pos="right">ADDRESS</control>
 			<control type="container" class="pcjs-ledpad" width="33%" pos="right"><control type="rled" binding="A0" width="100%" container="center"/></control>
@@ -49,7 +49,7 @@
 			<control type="container" class="pcjs-ledpad" width="33%" pos="right"><control type="rled" binding="A21" width="100%" container="center"/></control>
 		</control>
 	</control>
-	<control type="container" class="pcjs-panel-group" width="100%" padbottom="8px">
+	<control type="container" class="pcjs-panel-group" width="100%" padBottom="8px">
 		<control type="container" class="pcjs-tripled" width="12%" pos="right">
 			<control type="container" class="pcjs-tripled-label" width="100%" pos="right">DATA</control>
 			<control type="container" class="pcjs-ledpad" width="33%" pos="right"><control type="rled" binding="D0" width="100%" container="center"/></control>
@@ -85,13 +85,13 @@
 			<control type="container" class="pcjs-ledpad" width="33%" pos="right"><control type="rled" binding="D15" width="100%" container="center"/></control>
 		</control>
 	</control>
-	<control type="container" class="pcjs-textarea" width="60%" padtop="8px" padbottom="8px">
-		<control type="textarea" binding="print" width="100%" height="252px" padright="8px" pos="relative" style="resize:vertical;"/>
+	<control type="container" class="pcjs-textarea" width="60%" padTop="8px" padBottom="8px">
+		<control type="textarea" binding="print" width="100%" height="252px" padRight="8px" pos="relative" style="resize:vertical;"/>
 	</control>
-	<control type="container" padtop="8px" padbottom="8px">
+	<control type="container" padTop="8px" padBottom="8px">
 		<control type="button" binding="run">Run</control>
 		<control type="button" binding="reset">Reset</control>
 		<control type="button" binding="setSpeed">Fast</control>
-		<control type="description" binding="speed" padleft="8px">Stopped</control>
+		<control type="description" binding="speed" padLeft="8px">Stopped</control>
 	</control>
 </panel>

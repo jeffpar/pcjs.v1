@@ -123,10 +123,10 @@
 			<xsl:choose>
 				<xsl:when test="@padding">padding:<xsl:value-of select="@padding"/>;</xsl:when>
 				<xsl:otherwise>
-					<xsl:if test="@padtop">padding-top:<xsl:value-of select="@padtop"/>;</xsl:if>
-					<xsl:if test="@padright">padding-right:<xsl:value-of select="@padright"/>;</xsl:if>
-					<xsl:if test="@padbottom">padding-bottom:<xsl:value-of select="@padbottom"/>;</xsl:if>
-					<xsl:if test="@padleft">padding-left:<xsl:value-of select="@padleft"/>;</xsl:if>
+					<xsl:if test="@padTop">padding-top:<xsl:value-of select="@padTop"/>;</xsl:if>
+					<xsl:if test="@padRight">padding-right:<xsl:value-of select="@padRight"/>;</xsl:if>
+					<xsl:if test="@padBottom">padding-bottom:<xsl:value-of select="@padBottom"/>;</xsl:if>
+					<xsl:if test="@padLeft">padding-left:<xsl:value-of select="@padLeft"/>;</xsl:if>
 				</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>

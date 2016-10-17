@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<fdc id="fdcNEC" width="320px" pos="left" padtop="8px" automount='{A:{name:"PC-DOS 2.00 (Disk 1)",path:"/disks/pcx86/dos/ibm/2.00/PCDOS200-DISK1.json"}, B:{name:"PC-DOS 2.00 (Disk 2)",path:"/disks/pcx86/dos/ibm/2.00/PCDOS200-DISK2.json"}}'>
+<fdc id="fdcNEC" width="320px" pos="left" padTop="8px" automount='{A:{name:"PC-DOS 2.00 (Disk 1)",path:"/disks/pcx86/dos/ibm/2.00/PCDOS200-DISK1.json"}, B:{name:"PC-DOS 2.00 (Disk 2)",path:"/disks/pcx86/dos/ibm/2.00/PCDOS200-DISK2.json"}}'>
 	<control type="list" binding="listDrives"/>
 	<control type="list" binding="listDisks">
 		<manifest ref="/disks/pcx86/dos/ibm/2.00/manifest.xml" disk="*"/>
@@ -16,5 +16,5 @@
 		<disk path="/disks/pcx86/windows/1.03/06-WRITE/">Windows 1.03 (WRITE)</disk>
 	</control>
 	<control type="button" binding="loadDrive">Load</control>
-	<control type="description" binding="descDisk" padleft="8px"/>
+	<control type="description" binding="descDisk" padLeft="8px"/>
 </fdc>

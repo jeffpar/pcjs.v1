@@ -4,7 +4,7 @@
 	<name pos="center">PDP-11/20: 16Kb, Bootstrap Loader</name>
 	<computer id="computer" busWidth="16"/>
 	<cpu id="cpu" model="1120" cycles="6666667"/>
-	<ram id="ram" addr="0x0000" size="0x4000" file="/devices/pdp11/ram/bootstrap/bootstrap.json"/>
+	<ram id="ram" addr="0x0000" size="0x4000" file="/apps/pdp11/boot/bootstrap/BOOTSTRAP-16KB.json"/>
 	<device id="default" type="default"/>
 	<device id="pc11" type="pc11"/>
 	<serial id="dl11" adapter="0" binding="print"/>

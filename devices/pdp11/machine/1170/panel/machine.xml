@@ -4,7 +4,7 @@
 	<name pos="center">PDP-11/70 with Front Panel</name>
 	<computer id="computer" busWidth="22"/>
 	<cpu id="cpu" model="1170" cycles="6666667" autoStart="true"/>
-	<ram id="ram" addr="0x0000" size="0xE000" file="/devices/pdp11/ram/bootdemo/bootdemo.json" load="0xC000" exec="0xC000"/>
+	<ram id="ram" addr="0x0000" size="0xE000" file="/apps/pdp11/boot/test/BOOTTEST.json" load="0xC000" exec="0xC000"/>
 	<ram id="ram" addr="0x10000" size="0x34000"/>
 	<device id="default" type="default"/>
 	<serial id="dl11" adapter="0" binding="print"/>

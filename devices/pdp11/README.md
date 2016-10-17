@@ -11,7 +11,6 @@ PDP-11 Device Configurations
 
 * [Machines](machine/)
 * [Panels](panel/)
-* [RAM Images](ram/)
 * [ROM Images](rom/)
 
 Our collection of sample machines includes a

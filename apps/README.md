@@ -10,6 +10,7 @@ Browse these PCjs Application Archives:
 
 - [IBM PC](pcx86/)
 - [Challenger 1P](c1p/)
+- [PDP-11](pdp11/)
 
 ---
 

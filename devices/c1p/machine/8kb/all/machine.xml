@@ -20,7 +20,7 @@
 	<video id="video" screenWidth="1024" screenHeight="800" cols="32" rows="32" smoothing="false" charSet="/devices/c1p/video/chargen4x.png" padding="8px">
 		<name>Video Display</name>
 	</video>
-	<keyboard id="keyboard" padleft="8px">
+	<keyboard id="keyboard" padLeft="8px">
 		<control type="button" binding="ctrl-c">CTRL-C</control>
 		<control type="button" binding="ctrl-o">CTRL-O</control>
 		<control type="button" binding="break">BREAK</control>

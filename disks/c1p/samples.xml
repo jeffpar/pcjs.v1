@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<disk id="disk" pos="left" padleft="8px">
+<disk id="disk" pos="left" padLeft="8px">
 	<control type="list" binding="listDisk">
 		<item ref="/disks/c1p/OS65D33.json">OS65D33</item>
 	</control>

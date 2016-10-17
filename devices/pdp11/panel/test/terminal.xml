@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <panel id="panel" width="100%" padding="8px">
 	<name>Control Panel</name>
-	<control type="container" class="pcjs-textarea" width="60%" padbottom="8px">
-		<control type="textarea" binding="print" width="100%" height="252px" padright="8px" pos="relative" style="resize:vertical;"/>
+	<control type="container" class="pcjs-textarea" width="60%" padBottom="8px">
+		<control type="textarea" binding="print" width="100%" height="252px" padRight="8px" pos="relative" style="resize:vertical;"/>
 	</control>
-	<control type="container" padbottom="8px">
+	<control type="container" padBottom="8px">
 		<control type="button" binding="run">Run</control>
 		<control type="button" binding="reset">Reset</control>
 		<control type="button" binding="setSpeed">Fast</control>
-		<control type="description" binding="speed" padleft="8px">Stopped</control>
+		<control type="description" binding="speed" padLeft="8px">Stopped</control>
 	</control>
 </panel>
