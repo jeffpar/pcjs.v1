@@ -425,8 +425,10 @@ var PDP11 = {
 
         LKS:        0o177546,   //                                  KW11-L Clock Status
 
-        PRS:        0o177550,   //                                  PC11/PR11 Reader Status Register
-        PRB:        0o177552,   //                                  PC11/PR11 Reader Buffer Register
+        PRS:        0o177550,   //                                  PC11 (and PR11) Reader Status Register
+        PRB:        0o177552,   //                                  PC11 (and PR11) Reader Buffer Register
+        PPS:        0o177554,   //                                  PC11 Punch Status Register
+        PPB:        0o177556,   //                                  PC11 Punch Buffer Register
 
         RCSR:       0o177560,   //                                  Display Terminal: Receiver Status Register
         RBUF:       0o177562,   //                                  Display Terminal: Receiver Data Buffer Register
@@ -511,6 +513,9 @@ var PDP11 = {
         PSW:        0o177776    // 777776   17777776    0x3FFFFE    Processor Status Word
     },
     PC11: {                     // High Speed Reader & Punch (PR11 is a Reader-only unit)
+        PRI:        4,          // NOTE: reader has precedence over punch
+        RVEC:       0o70,       // reader vector
+        PVEC:       0o74,       // punch vector
         PRS: {
             RE:     0x0001,     // Reader Enable (W/O)
             RIE:    0x0040,     // Reader Interrupt Enable (allows the DONE and ERROR bits to trigger an interrupt)
@@ -518,6 +523,7 @@ var PDP11 = {
             BUSY:   0x0800,     // Busy (R/O)
             ERROR:  0x8000,     // Error (R/O)
             CLEAR:  0x08C0,     // bits cleared on INIT
+            RMASK:  0xFFFE,     // bits readable (TODO: All I know for sure is that bit 0 is NOT readable; see PC11.readPRS())
             WMASK:  0x0041      // bits writable
         },
         PRB: {

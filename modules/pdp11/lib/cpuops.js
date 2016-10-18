@@ -52,7 +52,7 @@ if (NODE) {
  *
  * For example, opADD() passes the helper function fnADD() to the appropriate update method.  This
  * allows the update method to perform the entire read/modify/write operation, because the modify
- * step is performed internally via the fnXXX() helper function.
+ * step is performed internally, via the fnXXX() helper function.
  */
 
 /**
@@ -1117,7 +1117,24 @@ PDP11.opHALT = function(opCode)
         this.regErr |= PDP11.CPUERR.BADHALT;
         this.trap(PDP11.TRAP.BUS_ERROR, PDP11.REASON.HALT);
     } else {
-        this.stopCPU();
+        if (!this.dbg) {
+            /*
+             * This will leave the PC exactly where it's supposed to be: at the address of the HALT + 2.
+             */
+            this.stopCPU();
+        } else {
+            /*
+             * When the Debugger is present, this call will rewind PC by 2 so that the HALT instruction is
+             * displayed, making it clear why the processor stopped; the user could also use the "dh" command
+             * to dump the Debugger's instruction history buffer to see why it stopped, assuming the history
+             * buffer is enabled, but that's more work.
+             *
+             * Because rewinding is not normal CPU behavior, attempting to Run again (or use the Debugger's
+             * "g" command) will cause an immediate HALT again; the work-around is simple: either set the PC to
+             * a new address (eg, "r pc=pc+2") or single-step the HALT instruction ("t").
+             */
+            this.dbg.stopInstruction();
+        }
     }
     this.nStepCycles -= 7;
 };

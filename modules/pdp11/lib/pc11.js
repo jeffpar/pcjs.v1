@@ -206,6 +206,8 @@ PC11.prototype.initBus = function(cmp, bus, cpu, dbg)
     this.cpu = cpu;
     this.dbg = dbg;
 
+    var pc11 = this;
+
     this.configMount = this.cmp.getMachineParm('autoMount') || this.configMount;
 
     if (this.configMount) {
@@ -222,6 +224,12 @@ PC11.prototype.initBus = function(cmp, bus, cpu, dbg)
             }
         }
     }
+
+    this.triggerReaderInterrupt = this.cpu.addTrigger(PDP11.PC11.RVEC, PDP11.PC11.PRI);
+
+    this.timerReaderAdvance = this.cpu.addTimer(function readyReader() {
+        pc11.advanceReader();
+    });
 
     bus.addIOTable(this, PC11.UNIBUS_IOTABLE);
 
@@ -624,7 +632,48 @@ PC11.prototype.restore = function(data)
 };
 
 /**
+ * advanceReader()
+ *
+ * If the reader is enabled (RE is set) and there is no exceptional condition (ie, ERROR is set),
+ * and if the buffer register is empty (DONE is clear), then if we have more data in our internal buffer,
+ * store it in the buffer register, and optionally trigger an interrupt if device interrupts are enabled.
+ *
+ * @this {PC11}
+ */
+PC11.prototype.advanceReader = function()
+{
+    if ((this.prs & (PDP11.PC11.PRS.RE | PDP11.PC11.PRS.ERROR)) == PDP11.PC11.PRS.RE) {
+        if (!(this.prs & PDP11.PC11.PRS.DONE)) {
+            if (this.iTapeData < this.aTapeData.length) {
+                this.prb = this.aTapeData[this.iTapeData++];
+                this.prs |= PDP11.PC11.PRS.DONE;
+                this.prs &= ~PDP11.PC11.PRS.BUSY;
+                if (this.prs & PDP11.PC11.PRS.RIE) {
+                    this.cpu.setTrigger(this.triggerReaderInterrupt);
+                }
+                /*
+                 * The PC11, by virtue of its "high speed", is supposed to deliver characters at 300 CPS,
+                 * so for now, that's what we're going to deliver (ie, 1000ms / 300).
+                 *
+                 * TODO: Review this code.  If we don't set the fReset parameter to true, the timer will eventually
+                 * fire while the "Absolute Loader" tape is still reading bytes from, say, the "BASIC (Single User)"
+                 * tape, causing an EXTRA advance to occur and causing a byte to be skipped.  Passing true ensures
+                 * that the timer cannot fire for AT LEAST 3ms after each advance.  But again, I need to understand
+                 * the reader's actual behavior.
+                 */
+                this.cpu.setTimer(this.timerReaderAdvance, 1000/300, true);
+            }
+        }
+    }
+};
+
+/**
  * readPRS(addr)
+ *
+ * NOTE: We use the PRS RMASK to honor the "write-only" behavior of bit 0, the reader enable bit (RE), because
+ * DEC's tiny Bootstrap Loader (/apps/pdp11/boot/bootstrap/BOOTSTRAP-16KB.lst) repeatedly enables the reader using
+ * the INC instruction, which causes the PRS to be read, incremented, and written, so if bit 0 isn't always read
+ * as zero, the INC instruction would clear RE instead of setting it.
  *
  * @this {PC11}
  * @param {number} addr (eg, PDP11.UNIBUS.PRS or 177550)
@@ -632,7 +681,7 @@ PC11.prototype.restore = function(data)
  */
 PC11.prototype.readPRS = function(addr)
 {
-    return this.prs;
+    return this.prs & PDP11.PC11.PRS.RMASK;     // RMASK honors the "write-only" nature of the RE bit by returning zero on reads
 };
 
 /**
@@ -648,14 +697,16 @@ PC11.prototype.writePRS = function(data, addr)
         if (this.prs & PDP11.PC11.PRS.ERROR) {
             data &= ~PDP11.PC11.PRS.RE;
             // if (this.prs & PDP11.PC11.PRS.RIE) {
-                // TODO: Generate an interrupt
+                // TODO: Generate an interrupt (error condition)
             // }
         } else {
             this.prs &= ~PDP11.PC11.PRS.DONE;
             this.prs |= PDP11.PC11.PRS.BUSY;
+            this.prb = 0;
         }
     }
     this.prs = (this.prs & ~PDP11.PC11.PRS.WMASK) | (data & PDP11.PC11.PRS.WMASK);
+    this.advanceReader();
 };
 
 /**
@@ -667,6 +718,12 @@ PC11.prototype.writePRS = function(data, addr)
  */
 PC11.prototype.readPRB = function(addr)
 {
+    /*
+     * I'm guessing that the DONE and BUSY bits always remain more-or-less inverses of each other.  They definitely
+     * start out that way when writePRS() sets the reader enable (RE) bit, and so that's how we treat them elsewhere, too.
+     */
+    this.prs &= ~PDP11.PC11.PRS.DONE;
+    this.prs |= PDP11.PC11.PRS.BUSY;
     return this.prb;
 };
 

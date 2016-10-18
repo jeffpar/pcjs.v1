@@ -475,10 +475,6 @@ SerialPortPDP11.prototype.receiveData = function(data)
     return true;                // for now, return true regardless, since we're buffering everything anyway
 };
 
-SerialPortPDP11.prototype.advanceRBUF = function()
-{
-};
-
 /**
  * transmitByte(b)
  *

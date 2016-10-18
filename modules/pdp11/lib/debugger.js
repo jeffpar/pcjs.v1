@@ -997,10 +997,16 @@ if (DEBUGGER) {
 
                 var sComment = "history";
                 var nSequence = nPrev--;
+
+                /*
+                 * TODO: Need to some UI to control whether cycle counts are displayed as part of the history.
+                 * It's currently disabled in checkInstruction(), so it's disable here, too.
+                 *
                 if (DEBUG && dbgAddr.cycleCount != null) {
                     sComment = "cycles";
                     nSequence = dbgAddr.cycleCount;
                 }
+                 */
 
                 var sInstruction = this.getInstruction(dbgAddrNew, sComment, nSequence);
 
@@ -1623,7 +1629,7 @@ if (DEBUGGER) {
             if (opCode != null) {
                 var dbgAddr = this.aOpcodeHistory[this.iOpcodeHistory];
                 this.setAddr(dbgAddr, cpu.getPC());
-                if (DEBUG) dbgAddr.cycleCount = cpu.getCycles();
+                // if (DEBUG) dbgAddr.cycleCount = cpu.getCycles();
                 if (++this.iOpcodeHistory == this.aOpcodeHistory.length) this.iOpcodeHistory = 0;
             }
         }
