@@ -7,4 +7,7 @@ permalink: /apps/pdp11/
 PDP-11 Software
 ---------------
 
-This is where we maintain selected PDP-11 software distributed on [Tape](tapes/).
+We have archived the following selected PDP-11 software:
+
+- [Boot Code](boot/)
+- [DEC PDP-11 Tapes](tapes/)

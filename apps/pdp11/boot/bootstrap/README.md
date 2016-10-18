@@ -1,11 +1,11 @@
 ---
 layout: page
-title: PDP-11 Bootstrap Loader
+title: DEC PDP-11 Bootstrap Loader
 permalink: /apps/pdp11/boot/bootstrap/
 ---
 
-PDP-11 Bootstrap Loader
------------------------
+DEC PDP-11 Bootstrap Loader
+---------------------------
 
 The blog post "[PDP-11 Paper Tape BASIC](http://www.avitech.com.au/ptb/ptb.html)" describes the *Bootstrap Loader*,
 a small program used to load the *Absolute Loader*, which in turn loads the *PDP-11 BASIC Paper Tape*. 
@@ -28,12 +28,13 @@ Here's what the *Bootstrap Loader* looks like:
 	 037774     000765
 	 037776     177550
 
-Using a [PDPjs](/modules/pdpjs/) machine such as the [PDP-11/20 Test Machine with Debugger](/devices/pdp11/machine/1120/test/debugger/),
-the *Bootstrap Loader* is easily entered with a single Debugger "edit" command:
+Using a [PDPjs](/modules/pdpjs/) machine with the built-in Debugger, such as the
+[PDP-11/20 Test Machine with Debugger](/devices/pdp11/machine/1120/test/debugger/), the *Bootstrap Loader*
+is easily entered with a single Debugger EDIT ("e") command:
 
 	e 037744 016701 000026 012702 000352 005211 105711 100376 116162 000002 037400 005267 177756 000765 177550
 
-You can immediately disassemble the code using `u 037744 040000`:
+You can immediately disassemble the code using the Debugger's UNASSEMBLE ("u") command `u 037744 040000`:
 
 	037744: 016701 000026          MOV   26(PC),R1              ; @037776
 	037750: 012702 000352          MOV   #352,R2
@@ -45,12 +46,38 @@ You can immediately disassemble the code using `u 037744 040000`:
 	037774: 000765                 BR    037750
 	037776: 177550                 .WORD 177550
 
-I also pasted the disassembled code into a listing file, [BOOTSTRAP-16KB.LST](BOOTSTRAP-16KB.lst), and ran [FileDump](/modules/filedump)
-to produce a [BOOTSTRAP-16KB.JSON](BOOTSTRAP-16KB.json) that can be pre-loaded into any machine:
-
-	filedump --file=BOOTSTRAP-16KB.lst --format=octal --output=BOOTSTRAP-16KB.json
-
-To run the *Bootstrap Loader*, set the PC to 037744 and start the machine: 
+To run the above code, set the PC to 037744 and start the machine: 
 
 	r pc=037744
 	g
+
+Preloading DEC's Bootstrap Loader
+---------------------------------
+
+I pasted the disassembled code (above) into a listing file, [BOOTSTRAP-16KB.lst](BOOTSTRAP-16KB.lst),
+and then ran [FileDump](/modules/filedump) to produce a [BOOTSTRAP-16KB.json](BOOTSTRAP-16KB.json) that can
+be automatically pre-loaded into any machine:
+
+	filedump --file=BOOTSTRAP-16KB.lst --format=octal --output=BOOTSTRAP-16KB.json
+
+For example, this [PDP-11/20 16Kb Machine](/devices/pdp11/machine/1120/bootstrap/debugger/machine.xml) preloads
+the *Bootstrap Loader* using the `<ram>` component's optional *file* attribute:
+
+	<ram id="ram" addr="0x0000" size="0x4000" file="/apps/pdp11/boot/bootstrap/BOOTSTRAP-16KB.json"/>
+
+I also edited [BOOTSTRAP-16KB.json](BOOTSTRAP-16KB.json) to include the following properties:
+
+	"load": 0x3FE4,
+	"exec": 0x3FE4,
+
+so that the `<ram>` component knows exactly where to load and execute the file.  However, the `<ram>` component can also
+specify those value(s) itself, if needed:
+
+	<ram id="ram" addr="0x0000" size="0x4000" file="/apps/pdp11/boot/bootstrap/BOOTSTRAP-16KB.json" load="0x3FE4" exec="0x3FE4"/>
+
+Finally, if you prefer octal *and* you're sure everyone will be using an ES6-capable browser, you can do this:
+
+	<ram id="ram" addr="0o00000" size="0o40000" file="/apps/pdp11/boot/bootstrap/BOOTSTRAP-16KB.json" load="0o37744" exec="0o37744"/>
+
+All PCjs configuration files use hex and/or decimal exclusively, since those number formats have always been supported,
+but as time goes by, the new octal and binary formats will be almost as universal.

@@ -1,21 +1,21 @@
 ---
 layout: page
-title: PDP-11 Software Tapes
+title: DEC PDP-11 Tapes
 permalink: /apps/pdp11/tapes/
 ---
 
-PDP-11 Software Tapes
----------------------
+DEC PDP-11 Tapes
+----------------
 
-Supported PDP-11 software includes:
+We have archived the following DEC PDP-11 Tapes:
 
 - [Absolute Loader](DEC-11-L2PC-PO.json)
 - [BASIC (Single User)](DEC-11-AJPB-PB.json)
 
-To make it easy for PDPjs machines to load these tapes, we provide the following High-Speed
-Paper Tape Reader (PC11) configuration files:
+To make it easy for PDPjs machines to load these tapes, we created the following High-Speed
+Paper Tape Reader (PC11) configurations:
 
-- [tapedemo.xml](tapedemo.xml)
+- [demo.xml](demo.xml)
 
 These configuration files create UI controls that allow you to choose from a set of tapes that are automatically sent
 to the machine's PC11 device.
@@ -23,5 +23,4 @@ to the machine's PC11 device.
 Third-Party Resources
 ---------------------
 
-- "[Analysis of the PDP-11 bootstrap loader code](http://decuser.blogspot.com/2015/12/analysis-of-pdp-11-bootloader-code.html)"
-- "[PDP-11 Paper Tape BASIC](http://www.avitech.com.au/ptb/ptb.html)" and follow-up article "[PDP-11 BASIC, booting the hard way](http://decuser.blogspot.com/2015/12/pdp-11-basic-booting-hard-way.html)"
+- [PDP-11 Paper Tape BASIC](http://www.avitech.com.au/ptb/ptb.html)

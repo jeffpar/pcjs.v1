@@ -77,6 +77,9 @@ function PC11(parms)
 
 Component.subclass(PC11);
 
+/*
+ * There's nothing super special about these values, except that NONE should be falsey and the others should not.
+ */
 PC11.LOADSTATE = {
     NONE:   "",
     LOCAL:  "?",
@@ -222,9 +225,9 @@ PC11.prototype.initBus = function(cmp, bus, cpu, dbg)
 
     bus.addIOTable(this, PC11.UNIBUS_IOTABLE);
 
-    this.addTape("None", "", true);
-    if (this.fLocalTapes) this.addTape("Local Tape", "?");
-    this.addTape("Remote Tape", "??");
+    this.addTape("None", PC11.LOADSTATE.NONE, true);
+    if (this.fLocalTapes) this.addTape("Local Tape", PC11.LOADSTATE.LOCAL);
+    this.addTape("Remote Tape", PC11.LOADSTATE.REMOTE);
 
     if (!this.autoMount()) this.setReady();
 };
@@ -312,15 +315,15 @@ PC11.prototype.loadSelectedTape = function(sTapeName, sTapePath, file)
         return;
     }
 
-    if (sTapePath == "?") {
+    if (sTapePath == PC11.LOADSTATE.LOCAL) {
         this.notice('Use "Choose File" and "Mount" to select and load a local tape.');
         return;
     }
 
 
     /*
-     * If the special path of "??" is selected, then we want to prompt the user for a URL.  Oh, and
-     * make sure we pass an empty string as the 2nd parameter to prompt(), so that IE won't display
+     * If the special PC11.LOADSTATE.REMOTE path is selected, then we want to prompt the user for a URL.
+     * Oh, and make sure we pass an empty string as the 2nd parameter to prompt(), so that IE won't display
      * "undefined" -- because after all, undefined and "undefined" are EXACTLY the same thing, right?
      *
      * TODO: This is literally all I've done to support remote tape images. There's probably more
