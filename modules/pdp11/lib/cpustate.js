@@ -560,22 +560,29 @@ CPUStatePDP11.prototype.getPC = function()
 CPUStatePDP11.prototype.getLastPC = function()
 {
     /*
-     * As long as we're always snapping the PC before every opcode, we might as well use it....
+     * As long as we're always snapping the PC before every opcode, we might as well use it.
      */
     return this.regMMR2;
 };
 
 /**
- * getPCWord()
+ * getOpcode()
+ *
+ * TODO: Determine whether we can speed this up by *always* snapping PC into a shadow MMR2 register
+ * and eliminating the ABORT test.
  *
  * @this {CPUStatePDP11}
  * @return {number}
  */
-CPUStatePDP11.prototype.getPCWord = function()
+CPUStatePDP11.prototype.getOpcode = function()
 {
-    var data = this.readWord(this.regsGen[PDP11.REG.PC]);
-    this.advancePC(2);
-    return data;
+    var pc = this.regsGen[PDP11.REG.PC];
+    if (!(this.regMMR0 & PDP11.MMR0.ABORT)) {
+        this.regMMR1 = 0;
+        this.regMMR2 = pc;
+    }
+    this.regsGen[PDP11.REG.PC] = (pc + 2) & 0xffff;
+    return this.readWord(pc);
 };
 
 /**
@@ -583,10 +590,13 @@ CPUStatePDP11.prototype.getPCWord = function()
  *
  * @this {CPUStatePDP11}
  * @param {number} off
+ * @return {number} (original PC)
  */
 CPUStatePDP11.prototype.advancePC = function(off)
 {
-    this.regsGen[PDP11.REG.PC] = (this.regsGen[PDP11.REG.PC] + off) & 0xffff;
+    var pc = this.regsGen[PDP11.REG.PC];
+    this.regsGen[PDP11.REG.PC] = (pc + off) & 0xffff;
+    return pc;
 };
 
 /**
@@ -1513,7 +1523,7 @@ CPUStatePDP11.prototype.getAddrByMode = function(mode, reg, accessFlags)
      * Mode 6: d(R)
      */
     case 6:
-        virtualAddress = this.getPCWord();
+        virtualAddress = this.readWord(this.advancePC(2));
         virtualAddress = ((virtualAddress + this.regsGen[reg]) & 0xffff) | addrDSpace;
         this.nStepCycles -= (4 + 2);
         return virtualAddress;
@@ -1522,7 +1532,7 @@ CPUStatePDP11.prototype.getAddrByMode = function(mode, reg, accessFlags)
      * Mode 7: @d(R)
      */
     case 7:
-        virtualAddress = this.getPCWord();
+        virtualAddress = this.readWord(this.advancePC(2));
         virtualAddress = (virtualAddress + this.regsGen[reg]) & 0xffff;
         virtualAddress = this.readWord(virtualAddress | this.addrDSpace) | addrDSpace;
         this.nStepCycles -= (7 + 3);
@@ -2089,18 +2099,13 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
             }
         }
 
-        if (!(this.regMMR0 & PDP11.MMR0.ABORT)) {
-            this.regMMR1 = 0;
-            this.regMMR2 = this.regsGen[7];
-        }
-
         /*
          * Snapshot the TF bit in opFlags, while clearing all other opFlags (except those in PRESERVE);
          * we'll check the TRAP_TF bit in opFlags when we come back around for another opcode.
          */
         this.opFlags = (this.opFlags & PDP11.OPFLAG.PRESERVE) | (this.regPSW & PDP11.PSW.TF);
 
-        this.decode(this.getPCWord());
+        this.decode(this.getOpcode());
 
     } while (this.nStepCycles > 0);
 
