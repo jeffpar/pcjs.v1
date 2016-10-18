@@ -6,6 +6,7 @@
 			<tape id="tape01" name="Absolute Loader" path="/apps/pdp11/tapes/DEC-11-L2PC-PO.json"/>
 			<tape id="tape02" name="BASIC (Single User)" path="/apps/pdp11/tapes/DEC-11-AJPB-PB.json"/>
 		</control>
+		<control type="button" binding="attachTape">Attach</control>
 		<control type="button" binding="loadTape">Load</control>
 		<control type="description" binding="descTape" padRight="8px"/>
 		<control type="file" binding="mountTape"/>

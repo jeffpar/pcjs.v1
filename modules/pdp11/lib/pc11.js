@@ -56,15 +56,12 @@ function PC11(parms)
     this.configMount = parms['autoMount'] || null;
     this.cAutoMount = 0;
 
-    /*
-     * TODO: Technically, the PC11 should have a timer that "clocks" data from the aTapeData buffer into the
-     * PRB register at the appropriate rate (300 CPS for the high-speed version, 10 CPS for the low-speed version).
-     */
     this.prs = 0;               // PRS register
     this.prb = 0;               // PRB register
     this.iTapeData = 0;         // buffer index
     this.aTapeData = [];        // buffer for the PRB register
-    this.sLoadState = PC11.LOADSTATE.NONE;
+    this.sTapeSource = PC11.SOURCE.NONE;
+    this.nTapeTarget = PC11.TARGET.NONE;
     this.sTapeName = this.sTapePath = "";
 
     /*
@@ -80,10 +77,16 @@ Component.subclass(PC11);
 /*
  * There's nothing super special about these values, except that NONE should be falsey and the others should not.
  */
-PC11.LOADSTATE = {
+PC11.SOURCE = {
     NONE:   "",
     LOCAL:  "?",
     REMOTE: "??"
+};
+
+PC11.TARGET = {
+    NONE:   0,
+    READER: 1,
+    MEMORY: 2
 };
 
 /**
@@ -99,12 +102,12 @@ PC11.LOADSTATE = {
 PC11.prototype.setBinding = function(sType, sBinding, control, sValue)
 {
     var pc11 = this;
+    var nTapeTarget = PC11.TARGET.NONE;
 
     switch (sBinding) {
 
     case "listTapes":
         this.bindings[sBinding] = control;
-
         control.onchange = function onChangeListTapes(event) {
             var controlDesc = pc11.bindings["descTape"];
             var controlOption = control.options[control.selectedIndex];
@@ -131,15 +134,24 @@ PC11.prototype.setBinding = function(sType, sBinding, control, sValue)
         this.bindings[sBinding] = control;
         return true;
 
+    /*
+     * "loadTape" operation must do pretty much everything that the "attachTape" does, but whereas the attach
+     * operation records the bytes in aTapeData, the load operation stuffs them directly into the machine's memory;
+     * the former sets nTapeTarget to TARGET.READER, while the latter sets it to TARGET.MEMORY.
+     */
     case "loadTape":
-        this.bindings[sBinding] = control;
+        nTapeTarget = PC11.TARGET.MEMORY;
+        /* falls through */
 
+    case "attachTape":
+        if (!nTapeTarget) nTapeTarget = PC11.TARGET.READER;
+        this.bindings[sBinding] = control;
         control.onclick = function onClickLoadTape(event) {
             var controlTapes = pc11.bindings["listTapes"];
             if (controlTapes) {
                 var sTapeName = controlTapes.options[controlTapes.selectedIndex].text;
                 var sTapePath = controlTapes.value;
-                pc11.loadSelectedTape(sTapeName, sTapePath);
+                pc11.loadSelectedTape(sTapeName, sTapePath, nTapeTarget);
             }
         };
         return true;
@@ -175,7 +187,10 @@ PC11.prototype.setBinding = function(sType, sBinding, control, sValue)
             if (file) {
                 var sTapePath = file.name;
                 var sTapeName = str.getBaseName(sTapePath, true);
-                pc11.loadSelectedTape(sTapeName, sTapePath, file);
+                /*
+                 * TODO: Provide a way to mount tapes into MEMORY as well as READER.
+                 */
+                pc11.loadSelectedTape(sTapeName, sTapePath, PC11.TARGET.READER, file);
             }
             /*
              * Prevent reloading of web page after form submission
@@ -233,9 +248,9 @@ PC11.prototype.initBus = function(cmp, bus, cpu, dbg)
 
     bus.addIOTable(this, PC11.UNIBUS_IOTABLE);
 
-    this.addTape("None", PC11.LOADSTATE.NONE, true);
-    if (this.fLocalTapes) this.addTape("Local Tape", PC11.LOADSTATE.LOCAL);
-    this.addTape("Remote Tape", PC11.LOADSTATE.REMOTE);
+    this.addTape("None", PC11.SOURCE.NONE, true);
+    if (this.fLocalTapes) this.addTape("Local Tape", PC11.SOURCE.LOCAL);
+    this.addTape("Remote Tape", PC11.SOURCE.REMOTE);
 
     if (!this.autoMount()) this.setReady();
 };
@@ -298,7 +313,10 @@ PC11.prototype.autoMount = function(fRemount)
         var sTapePath = this.configMount['path'];
         var sTapeName = this.configMount['name'] || this.findTape(sTapePath);
         if (sTapePath && sTapeName) {
-            if (!this.loadTape(sTapeName, sTapePath, true) && fRemount) {
+            /*
+             * TODO: Provide a way to autoMount tapes into MEMORY as well as READER.
+             */
+            if (!this.loadTape(sTapeName, sTapePath, PC11.TARGET.READER, true) && fRemount) {
                 this.setReady(false);
             }
         } else {
@@ -309,28 +327,28 @@ PC11.prototype.autoMount = function(fRemount)
 };
 
 /**
- * loadSelectedTape(sTapeName, sTapePath, file)
+ * loadSelectedTape(sTapeName, sTapePath, nTapeTarget, file)
  *
  * @this {PC11}
  * @param {string} sTapeName
  * @param {string} sTapePath
+ * @param {number} nTapeTarget
  * @param {File} [file] is set if there's an associated File object
  */
-PC11.prototype.loadSelectedTape = function(sTapeName, sTapePath, file)
+PC11.prototype.loadSelectedTape = function(sTapeName, sTapePath, nTapeTarget, file)
 {
     if (!sTapePath) {
         this.unloadTape(false);
         return;
     }
 
-    if (sTapePath == PC11.LOADSTATE.LOCAL) {
+    if (sTapePath == PC11.SOURCE.LOCAL) {
         this.notice('Use "Choose File" and "Mount" to select and load a local tape.');
         return;
     }
 
-
     /*
-     * If the special PC11.LOADSTATE.REMOTE path is selected, then we want to prompt the user for a URL.
+     * If the special PC11.SOURCE.REMOTE path is selected, then we want to prompt the user for a URL.
      * Oh, and make sure we pass an empty string as the 2nd parameter to prompt(), so that IE won't display
      * "undefined" -- because after all, undefined and "undefined" are EXACTLY the same thing, right?
      *
@@ -338,36 +356,37 @@ PC11.prototype.loadSelectedTape = function(sTapeName, sTapePath, file)
      * I should do, like dynamically updating "listTapes" to include new entries, and adding new entries
      * to the save/restore data.
      */
-    if (sTapePath == PC11.LOADSTATE.REMOTE) {
+    if (sTapePath == PC11.SOURCE.REMOTE) {
         sTapePath = window.prompt("Enter the URL of a remote tape image.", "") || "";
         if (!sTapePath) return;
         sTapeName = str.getBaseName(sTapePath);
         if (DEBUG) this.println("Attempting to load " + sTapePath + " as \"" + sTapeName + "\"");
-        this.sLoadState = PC11.LOADSTATE.REMOTE;
+        this.sTapeSource = PC11.SOURCE.REMOTE;
     }
     else {
-        this.sLoadState = sTapePath;
+        this.sTapeSource = sTapePath;
     }
 
-    this.loadTape(sTapeName, sTapePath, false, file);
+    this.loadTape(sTapeName, sTapePath, nTapeTarget, false, file);
 };
 
 /**
- * loadTape(sTapeName, sTapePath, fAutoMount, file)
+ * loadTape(sTapeName, sTapePath, nTapeTarget, fAutoMount, file)
  *
  * NOTE: If sTapePath is already loaded, nothing needs to be done.
  *
  * @this {PC11}
  * @param {string} sTapeName
  * @param {string} sTapePath
+ * @param {number} nTapeTarget
  * @param {boolean} [fAutoMount]
  * @param {File} [file] is set if there's an associated File object
  * @return {number} 1 if tape loaded, 0 if queued up (or busy), -1 if already loaded
  */
-PC11.prototype.loadTape = function(sTapeName, sTapePath, fAutoMount, file)
+PC11.prototype.loadTape = function(sTapeName, sTapePath, nTapeTarget, fAutoMount, file)
 {
     var nResult = -1;
-    if (this.sTapePath.toLowerCase() != sTapePath.toLowerCase()) {
+    if (this.sTapePath.toLowerCase() != sTapePath.toLowerCase() || this.nTapeTarget != nTapeTarget) {
 
         nResult++;
         this.unloadTape(true);
@@ -381,27 +400,28 @@ PC11.prototype.loadTape = function(sTapeName, sTapePath, fAutoMount, file)
                 this.cAutoMount++;
                 if (this.messageEnabled()) this.printMessage("auto-loading tape: " + sTapeName);
             }
-            if (this.load(sTapeName, sTapePath, file)) {
+            if (this.load(sTapeName, sTapePath, nTapeTarget, file)) {
                 nResult++;
             } else {
                 this.flags.busy = true;
             }
         }
     }
-    if (DEBUG && nResult) this.println("tape loaded");
+    if (DEBUG && nResult) this.println(this.nTapeTarget == PC11.TARGET.READER? "tape attached" : "tape loaded");
     return nResult;
 };
 
 /**
- * load(sTapeName, sTapePath, file)
+ * load(sTapeName, sTapePath, nTapeTarget, file)
  *
  * @this {PC11}
  * @param {string} sTapeName
  * @param {string} sTapePath
+ * @param {number} nTapeTarget
  * @param {File} [file] is set if there's an associated File object
  * @return {boolean} true if load completed (successfully or not), false if queued
  */
-PC11.prototype.load = function(sTapeName, sTapePath, file)
+PC11.prototype.load = function(sTapeName, sTapePath, nTapeTarget, file)
 {
     var pc11 = this;
     var sTapeURL = sTapePath;
@@ -414,7 +434,7 @@ PC11.prototype.load = function(sTapeName, sTapePath, file)
     if (file) {
         var reader = new FileReader();
         reader.onload = function() {
-            pc11.doneRead(sTapeName, sTapePath, reader.result);
+            pc11.doneRead(sTapeName, sTapePath, nTapeTarget, reader.result);
         };
         reader.readAsArrayBuffer(file);
         return true;
@@ -440,21 +460,22 @@ PC11.prototype.load = function(sTapeName, sTapePath, file)
     }
 
     return !!web.getResource(sTapeURL, null, true, function(sURL, sResponse, nErrorCode) {
-        pc11.doneLoad(sTapeName, sTapePath, sResponse, sURL, nErrorCode);
+        pc11.doneLoad(sTapeName, sTapePath, nTapeTarget, sResponse, sURL, nErrorCode);
     });
 };
 
 /**
- * doneLoad(sTapeName, sTapePath, sTapeData, sURL, nErrorCode)
+ * doneLoad(sTapeName, sTapePath, sTapeData, nTapeTarget, sURL, nErrorCode)
  *
  * @this {PC11}
  * @param {string} sTapeName
  * @param {string} sTapePath
  * @param {string} sTapeData
+ * @param {number} nTapeTarget
  * @param {string} sURL
  * @param {number} nErrorCode (response from server if anything other than 200)
  */
-PC11.prototype.doneLoad = function(sTapeName, sTapePath, sTapeData, sURL, nErrorCode)
+PC11.prototype.doneLoad = function(sTapeName, sTapePath, nTapeTarget, sTapeData, sURL, nErrorCode)
 {
     var fPrintOnly = (nErrorCode < 0 && this.cmp && !this.cmp.flags.powered);
 
@@ -475,11 +496,7 @@ PC11.prototype.doneLoad = function(sTapeName, sTapePath, sTapeData, sURL, nError
         Component.addMachineResource(this.idMachine, sURL, sTapeData);
         var resource = web.parseMemoryResource(sURL, sTapeData);
         if (resource) {
-            this.sTapeName = sTapeName;
-            this.sTapePath = sTapePath;
-            this.iTapeData = 0;
-            this.aTapeData = resource.aBytes;
-            if (DEBUG) this.println("tape loaded: " + sTapeName);
+            this.parseTape(sTapeName, sTapePath, nTapeTarget, resource.aBytes);
         }
     }
     this.flags.busy = false;
@@ -491,22 +508,20 @@ PC11.prototype.doneLoad = function(sTapeName, sTapePath, sTapeData, sURL, nError
 };
 
 /**
- * doneRead(sTapeName, sTapePath, buffer)
+ * doneRead(sTapeName, sTapePath, nTapeTarget, buffer)
  *
  * @this {PC11}
  * @param {string} sTapeName
  * @param {string} sTapePath
+ * @param {number} nTapeTarget
  * @param {?} buffer (we KNOW this is an ArrayBuffer, but we can't seem to convince the Closure Compiler)
  */
-PC11.prototype.doneRead = function(sTapeName, sTapePath, buffer)
+PC11.prototype.doneRead = function(sTapeName, sTapePath, nTapeTarget, buffer)
 {
     if (buffer) {
-        this.sTapeName = sTapeName;
-        this.sTapePath = sTapePath;
-        this.iTapeData = 0;
-        this.aTapeData = new Uint8Array(buffer, 0, buffer.byteLength);
-        this.sLoadState = PC11.LOADSTATE.LOCAL;
-        if (DEBUG) this.println("tape length: " + this.aTapeData.length);
+        var aBytes = new Uint8Array(buffer, 0, buffer.byteLength);
+        this.parseTape(sTapeName, sTapePath, nTapeTarget, aBytes);
+        this.sTapeSource = PC11.SOURCE.LOCAL;
     }
     this.displayTape();
 };
@@ -568,7 +583,7 @@ PC11.prototype.displayTape = function()
 {
     var controlTapes = this.bindings["listTapes"];
     if (controlTapes && controlTapes.options) {
-        var sTargetPath = this.sLoadState || this.sTapePath;
+        var sTargetPath = this.sTapeSource || this.sTapePath;
         for (var i = 0; i < controlTapes.options.length; i++) {
             if (controlTapes.options[i].value == sTargetPath) {
                 if (controlTapes.selectedIndex != i) {
@@ -579,6 +594,29 @@ PC11.prototype.displayTape = function()
         }
         if (i == controlTapes.options.length) controlTapes.selectedIndex = 0;
     }
+};
+
+/**
+ * parseTape(sTapeName, sTapePath, nTapeTarget, aBytes)
+ *
+ * @this {PC11}
+ * @param {string} sTapeName
+ * @param {string} sTapePath
+ * @param {number} nTapeTarget
+ * @param {Array|Uint8Array} aBytes
+ */
+PC11.prototype.parseTape = function(sTapeName, sTapePath, nTapeTarget, aBytes)
+{
+    this.sTapeName = sTapeName;
+    this.sTapePath = sTapePath;
+    this.nTapeTarget = nTapeTarget;
+    if (nTapeTarget == PC11.TARGET.MEMORY) {
+        if (DEBUG) this.println("tape loaded: " + sTapeName);
+        return;
+    }
+    this.iTapeData = 0;
+    this.aTapeData = aBytes;
+    if (DEBUG) this.println("tape attached: " + sTapeName);
 };
 
 /**
@@ -593,12 +631,13 @@ PC11.prototype.unloadTape = function(fLoading)
         this.sTapeName = "";
         this.sTapePath = "";
         /*
-         * Try to avoid any unnecessary hysteresis regarding the display if this unload is merely a prelude to another load.
+         * Avoid any unnecessary hysteresis regarding the display if this unload is merely a prelude to another load.
          */
         if (!fLoading) {
-            this.sLoadState = PC11.LOADSTATE.NONE;
+            this.sTapeSource = PC11.SOURCE.NONE;
             this.displayTape();
-            if (DEBUG) this.println("tape unloaded");
+            if (DEBUG && this.nTapeTarget) this.println(this.nTapeTarget == PC11.TARGET.READER? "tape detached" : "tape unloaded");
+            this.nTapeTarget = PC11.TARGET.NONE;
         }
     }
 };
@@ -653,7 +692,8 @@ PC11.prototype.advanceReader = function()
                 }
                 /*
                  * The PC11, by virtue of its "high speed", is supposed to deliver characters at 300 CPS,
-                 * so for now, that's what we're going to deliver (ie, 1000ms / 300).
+                 * so for now, that's what we're going to deliver (ie, 1000ms / 300).  The original "low speed"
+                 * version of the reader ran at 10 CPS.
                  *
                  * TODO: Review this code.  If we don't set the fReset parameter to true, the timer will eventually
                  * fire while the "Absolute Loader" tape is still reading bytes from, say, the "BASIC (Single User)"
