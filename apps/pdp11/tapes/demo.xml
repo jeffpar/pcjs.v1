@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<device id="pc11" type="pc11" autoMount='{name:"BASIC",path:"/devices/pdp11/tape/BASIC.json"}' pos="left" padLeft="8px" padBottom="8px">
+<device id="pc11" type="pc11" autoMount='{path:"/apps/pdp11/tapes/DEC-11-L2PC-PO.json"}' pos="left" padLeft="8px" padBottom="8px">
 	<control type="container" width="300px">
 		<control type="list" binding="listTapes">
 			<tape id="tape00" name="Bootstrap Loader (16Kb)" path="/apps/pdp11/boot/bootstrap/BOOTSTRAP-16KB.json"/>

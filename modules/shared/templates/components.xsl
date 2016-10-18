@@ -740,21 +740,32 @@
 	<xsl:template match="device[@ref]">
 		<xsl:param name="machine" select="''"/>
 		<xsl:variable name="componentFile"><xsl:value-of select="$rootDir"/><xsl:value-of select="@ref"/></xsl:variable>
-		<xsl:apply-templates select="document($componentFile)/device"><xsl:with-param name="machine" select="$machine"/></xsl:apply-templates>
+		<xsl:apply-templates select="document($componentFile)/device">
+			<xsl:with-param name="machine" select="$machine"/>
+			<xsl:with-param name="mount" select="@automount"/>
+		</xsl:apply-templates>
 	</xsl:template>
 
 	<xsl:template match="device[not(@ref)]">
 		<xsl:param name="machine" select="''"/>
+		<xsl:param name="mount" select="''"/>
 		<xsl:variable name="type">
 			<xsl:choose>
 				<xsl:when test="@type"><xsl:value-of select="@type"/></xsl:when>
 				<xsl:otherwise/>
 			</xsl:choose>
 		</xsl:variable>
+		<xsl:variable name="autoMount">
+			<xsl:choose>
+				<xsl:when test="$mount != ''"><xsl:value-of select="$mount"/></xsl:when>
+				<xsl:when test="@automount"><xsl:value-of select="@automount"/></xsl:when>
+				<xsl:otherwise><xsl:value-of select="@autoMount"/></xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
 		<xsl:call-template name="component">
 			<xsl:with-param name="machine" select="$machine"/>
 			<xsl:with-param name="class">device</xsl:with-param>
-			<xsl:with-param name="parms">,type:'<xsl:value-of select="$type"/>'</xsl:with-param>
+			<xsl:with-param name="parms">,type:'<xsl:value-of select="$type"/>',autoMount:'<xsl:value-of select="$autoMount"/>'</xsl:with-param>
 		</xsl:call-template>
 	</xsl:template>
 
@@ -880,10 +891,11 @@
 	<xsl:template match="fdc[not(@ref)]">
 		<xsl:param name="machine" select="''"/>
 		<xsl:param name="mount" select="''"/>
-		<xsl:variable name="automount">
+		<xsl:variable name="autoMount">
 			<xsl:choose>
 				<xsl:when test="$mount != ''"><xsl:value-of select="$mount"/></xsl:when>
-				<xsl:otherwise><xsl:value-of select="@automount"/></xsl:otherwise>
+				<xsl:when test="@automount"><xsl:value-of select="@automount"/></xsl:when>
+				<xsl:otherwise><xsl:value-of select="@autoMount"/></xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
 		<xsl:variable name="sortBy">
@@ -895,7 +907,7 @@
 		<xsl:call-template name="component">
 			<xsl:with-param name="machine" select="$machine"/>
 			<xsl:with-param name="class">fdc</xsl:with-param>
-			<xsl:with-param name="parms">,autoMount:'<xsl:value-of select="$automount"/>',sortBy:'<xsl:value-of select="$sortBy"/>'</xsl:with-param>
+			<xsl:with-param name="parms">,autoMount:'<xsl:value-of select="$autoMount"/>',sortBy:'<xsl:value-of select="$sortBy"/>'</xsl:with-param>
 		</xsl:call-template>
 	</xsl:template>
 

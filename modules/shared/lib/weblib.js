@@ -298,10 +298,45 @@ web.parseMemoryResource = function(sURL, sData)
         nLoad: null,
         nExec: null
     };
+
     if (sData.charAt(0) == "[" || sData.charAt(0) == "{") {
         try {
-            var a, ib;
-            var data = eval("(" + sData + ")");
+            var a, ib, data;
+
+            if (sData.substr(0, 1) == "<") {    // if the "data" begins with a "<"...
+                /*
+                 * Early server configs reported an error (via the nErrorCode parameter) if a tape URL was invalid,
+                 * but more recent server configs now display a somewhat friendlier HTML error page.  The downside,
+                 * however, is that the original error has been buried, and we've received "data" that isn't actually
+                 * tape data.  So if the data we've received appears to be "HTML-like", we treat it as an error message.
+                 */
+                throw new Error(sData);
+            }
+
+            /*
+             * TODO: IE9 is rather unfriendly and restrictive with regard to how much data it's willing to
+             * eval().  In particular, the 10Mb disk image we use for the Windows 1.01 demo config fails in
+             * IE9 with an "Out of memory" exception.  One work-around would be to chop the data into chunks
+             * (perhaps one track per chunk, using regular expressions) and then manually re-assemble it.
+             *
+             * However, it turns out that using JSON.parse(sDiskData) instead of eval("(" + sDiskData + ")")
+             * is a much easier fix. The only drawback is that we must first quote any unquoted property names
+             * and remove any comments, because while eval() was cool with them, JSON.parse() is more particular;
+             * the following RegExp replacements take care of those requirements.
+             *
+             * The use of hex values is something else that eval() was OK with, but JSON.parse() is not, and
+             * while I've stopped using hex values in DumpAPI responses (at least when "format=json" is specified),
+             * I can't guarantee they won't show up in "legacy" images, and there's no simple RegExp replacement
+             * for transforming hex values into decimal values, so I cop out and fall back to eval() if I detect
+             * any hex prefixes ("0x") in the sequence.  Ditto for error messages, which appear like so:
+             *
+             *      ["unrecognized disk path: test.img"]
+             */
+            if (sData.indexOf("0x") < 0 && sData.substr(0, 2) != "[\"") {
+                data = JSON.parse(sData.replace(/([a-z]+):/gm, "\"$1\":").replace(/\/\/[^\n]*/gm, ""));
+            } else {
+                data = eval("(" + sData + ")");
+            }
 
             resource.nLoad = data['load'];
             resource.nExec = data['exec'];
@@ -347,22 +382,26 @@ web.parseMemoryResource = function(sURL, sData)
                 resource = null;
             }
         } catch (e) {
-            Component.error("Resource data error: " + e.message);
+            Component.error("Resource data error (" + sURL + "): " + e.message);
             resource = null;
         }
     }
     else {
         /*
-         * Parse the data manually; we'll assume it's in "simplified" hex form
-         * (a series of hex byte-values separated by whitespace).
+         * Parse the data manually; we assume it's a series of hex byte-values separated by whitespace.
          */
+        var ab = [];
         var sHexData = sData.replace(/\n/gm, " ").replace(/ +$/, "");
         var asHexData = sHexData.split(" ");
-        resource.aBytes = new Array(asHexData.length);
         for (i = 0; i < asHexData.length; i++) {
-            resource.aBytes[i] = parseInt(asHexData[i], 16);
-            Component.assert(!isNaN(resource.aBytes[i]));
+            var n = parseInt(asHexData[i], 16);
+            if (isNaN(n)) {
+                Component.error("Resource data error (" + sURL + "): invalid hex byte (" + asHexData[i] + ")");
+                break;
+            }
+            ab.push(n & 0xff);
         }
+        if (i == asHexData.length) resource.aBytes = ab;
     }
     return resource;
 };
