@@ -54,18 +54,18 @@ function PC11(parms)
      * getMachineParm() service may have an override for us.
      */
     this.configMount = parms['autoMount'] || null;
+    this.cAutoMount = 0;
 
     /*
-     * TODO: Technically, the PC11 should have a timer that "clocks" data from the abReader buffer into the
+     * TODO: Technically, the PC11 should have a timer that "clocks" data from the aTapeData buffer into the
      * PRB register at the appropriate rate (300 CPS for the high-speed version, 10 CPS for the low-speed version).
      */
     this.prs = 0;               // PRS register
     this.prb = 0;               // PRB register
-    this.iReader = 0;           // buffer index
-    this.abReader = [];         // buffer for the PRB register
-
-    this.flags.local = false;
-    this.sTapeName = this.sTapePath = this.sTapeFile = "";
+    this.iTapeData = 0;         // buffer index
+    this.aTapeData = [];        // buffer for the PRB register
+    this.sLoadState = PC11.LOADSTATE.NONE;
+    this.sTapeName = this.sTapePath = "";
 
     /*
      * Support for local tape images is currently limited to desktop browsers with FileReader support;
@@ -76,6 +76,12 @@ function PC11(parms)
 }
 
 Component.subclass(PC11);
+
+PC11.LOADSTATE = {
+    NONE:   "",
+    LOCAL:  "?",
+    REMOTE: "??"
+};
 
 /**
  * setBinding(sType, sBinding, control, sValue)
@@ -265,8 +271,6 @@ PC11.prototype.reset = function()
 {
     this.prs &= ~PDP11.PC11.PRS.CLEAR;
     this.prb = 0;
-    this.iReader = 0;
-    this.abReader = [];
 };
 
 /**
@@ -304,7 +308,7 @@ PC11.prototype.autoMount = function(fRemount)
 PC11.prototype.loadSelectedTape = function(sTapeName, sTapePath, file)
 {
     if (!sTapePath) {
-        this.unloadTape();
+        this.unloadTape(false);
         return;
     }
 
@@ -312,6 +316,7 @@ PC11.prototype.loadSelectedTape = function(sTapeName, sTapePath, file)
         this.notice('Use "Choose File" and "Mount" to select and load a local tape.');
         return;
     }
+
 
     /*
      * If the special path of "??" is selected, then we want to prompt the user for a URL.  Oh, and
@@ -322,11 +327,15 @@ PC11.prototype.loadSelectedTape = function(sTapeName, sTapePath, file)
      * I should do, like dynamically updating "listTapes" to include new entries, and adding new entries
      * to the save/restore data.
      */
-    if (sTapePath == "??") {
+    if (sTapePath == PC11.LOADSTATE.REMOTE) {
         sTapePath = window.prompt("Enter the URL of a remote tape image.", "") || "";
         if (!sTapePath) return;
         sTapeName = str.getBaseName(sTapePath);
         if (DEBUG) this.println("Attempting to load " + sTapePath + " as \"" + sTapeName + "\"");
+        this.sLoadState = PC11.LOADSTATE.REMOTE;
+    }
+    else {
+        this.sLoadState = sTapePath;
     }
 
     this.loadTape(sTapeName, sTapePath, false, file);
@@ -346,34 +355,30 @@ PC11.prototype.loadSelectedTape = function(sTapeName, sTapePath, file)
  */
 PC11.prototype.loadTape = function(sTapeName, sTapePath, fAutoMount, file)
 {
-    if (sTapePath) {
-        if (this.sTapePath.toLowerCase() != sTapePath.toLowerCase()) {
+    var nResult = -1;
+    if (this.sTapePath.toLowerCase() != sTapePath.toLowerCase()) {
 
-            this.unloadTape(fAutoMount, true);
+        nResult++;
+        this.unloadTape(true);
 
-            if (this.flags.busy) {
-                this.notice("PC11 busy");
-                return 0;
-            }
-
+        if (this.flags.busy) {
+            this.notice("PC11 busy");
+        }
+        else {
             // if (DEBUG) this.println("tape queued: " + sTapeName);
-
-            this.flags.busy = true;
             if (fAutoMount) {
-                this.fAutoMount = true;
                 this.cAutoMount++;
                 if (this.messageEnabled()) this.printMessage("auto-loading tape: " + sTapeName);
             }
-
-            this.flags.local = !!file;
-            if (!this.load(sTapeName, sTapePath, file)) {
-                return 0;
+            if (this.load(sTapeName, sTapePath, file)) {
+                nResult++;
+            } else {
+                this.flags.busy = true;
             }
-            return 1;
         }
-        if (DEBUG) this.println("tape loaded");
     }
-    return -1;
+    if (DEBUG && nResult) this.println("tape loaded");
+    return nResult;
 };
 
 /**
@@ -387,6 +392,7 @@ PC11.prototype.loadTape = function(sTapeName, sTapePath, fAutoMount, file)
  */
 PC11.prototype.load = function(sTapeName, sTapePath, file)
 {
+    var pc11 = this;
     var sTapeURL = sTapePath;
 
     if (DEBUG) {
@@ -394,14 +400,10 @@ PC11.prototype.load = function(sTapeName, sTapePath, file)
         this.printMessage(sMessage);
     }
 
-    var sTapeFile = str.getBaseName(sTapePath);
-
-    var pc11 = this;
-
     if (file) {
         var reader = new FileReader();
         reader.onload = function() {
-            pc11.build(reader.result);
+            pc11.doneRead(sTapeName, sTapePath, reader.result);
         };
         reader.readAsArrayBuffer(file);
         return true;
@@ -427,39 +429,22 @@ PC11.prototype.load = function(sTapeName, sTapePath, file)
     }
 
     return !!web.getResource(sTapeURL, null, true, function(sURL, sResponse, nErrorCode) {
-        pc11.doneLoad(sURL, sTapeName, sTapePath, sResponse, nErrorCode);
+        pc11.doneLoad(sTapeName, sTapePath, sResponse, sURL, nErrorCode);
     });
 };
 
 /**
- * build(buffer)
- *
- * Builds a disk image from an ArrayBuffer (eg, from a FileReader object), rather than from JSON-encoded data.
+ * doneLoad(sTapeName, sTapePath, sTapeData, sURL, nErrorCode)
  *
  * @this {PC11}
- * @param {?} buffer (we KNOW this is an ArrayBuffer, but we can't seem to convince the Closure Compiler)
- */
-PC11.prototype.build = function(buffer)
-{
-    if (buffer) {
-        this.aTapeData = new Uint8Array(buffer, 0, buffer.byteLength);
-    }
-};
-
-/**
- * doneLoad(sURL, sTapeName, sTapePath, sTapeData, nErrorCode)
- *
- * @this {PC11}
- * @param {string} sURL
  * @param {string} sTapeName
  * @param {string} sTapePath
  * @param {string} sTapeData
+ * @param {string} sURL
  * @param {number} nErrorCode (response from server if anything other than 200)
  */
-PC11.prototype.doneLoad = function(sURL, sTapeName, sTapePath, sTapeData, nErrorCode)
+PC11.prototype.doneLoad = function(sTapeName, sTapePath, sTapeData, sURL, nErrorCode)
 {
-    this.flags.busy = false;
-
     var fPrintOnly = (nErrorCode < 0 && this.cmp && !this.cmp.flags.powered);
 
     if (nErrorCode) {
@@ -476,23 +461,42 @@ PC11.prototype.doneLoad = function(sURL, sTapeName, sTapePath, sTapeData, nError
         if (DEBUG && this.messageEnabled()) {
             this.printMessage('doneLoad("' + sTapePath + '")');
         }
-
         Component.addMachineResource(this.idMachine, sURL, sTapeData);
-
         var resource = web.parseMemoryResource(sURL, sTapeData);
         if (resource) {
             this.sTapeName = sTapeName;
             this.sTapePath = sTapePath;
+            this.iTapeData = 0;
             this.aTapeData = resource.aBytes;
             if (DEBUG) this.println("tape loaded: " + sTapeName);
         }
     }
-
-    if (this.fAutoMount) {
-        this.fAutoMount = false;
-        if (!--this.cAutoMount) this.setReady();
+    this.flags.busy = false;
+    if (this.cAutoMount) {
+        this.cAutoMount--;
+        if (!this.cAutoMount) this.setReady();
     }
+    this.displayTape();
+};
 
+/**
+ * doneRead(sTapeName, sTapePath, buffer)
+ *
+ * @this {PC11}
+ * @param {string} sTapeName
+ * @param {string} sTapePath
+ * @param {?} buffer (we KNOW this is an ArrayBuffer, but we can't seem to convince the Closure Compiler)
+ */
+PC11.prototype.doneRead = function(sTapeName, sTapePath, buffer)
+{
+    if (buffer) {
+        this.sTapeName = sTapeName;
+        this.sTapePath = sTapePath;
+        this.iTapeData = 0;
+        this.aTapeData = new Uint8Array(buffer, 0, buffer.byteLength);
+        this.sLoadState = PC11.LOADSTATE.LOCAL;
+        if (DEBUG) this.println("tape length: " + this.aTapeData.length);
+    }
     this.displayTape();
 };
 
@@ -552,9 +556,8 @@ PC11.prototype.findTape = function(sPath)
 PC11.prototype.displayTape = function()
 {
     var controlTapes = this.bindings["listTapes"];
-
     if (controlTapes && controlTapes.options) {
-        var sTargetPath = (this.flags.local? "?" : this.sTapePath);
+        var sTargetPath = this.sLoadState || this.sTapePath;
         for (var i = 0; i < controlTapes.options.length; i++) {
             if (controlTapes.options[i].value == sTargetPath) {
                 if (controlTapes.selectedIndex != i) {
@@ -568,17 +571,25 @@ PC11.prototype.displayTape = function()
 };
 
 /**
- * unloadTape(fAutoUnload, fQuiet)
+ * unloadTape(fLoading)
  *
  * @this {PC11}
- * @param {boolean} [fAutoUnload] is true if this unload is being forced as part of an automount and/or restored mount
- * @param {boolean} [fQuiet]
+ * @param {boolean} [fLoading]
  */
-PC11.prototype.unloadTape = function(fAutoUnload, fQuiet)
+PC11.prototype.unloadTape = function(fLoading)
 {
-    this.sTapeName = "";
-    this.sTapePath = "";
-    this.flags.local = false;
+    if (this.sTapePath || fLoading === false) {
+        this.sTapeName = "";
+        this.sTapePath = "";
+        /*
+         * Try to avoid any unnecessary hysteresis regarding the display if this unload is merely a prelude to another load.
+         */
+        if (!fLoading) {
+            this.sLoadState = PC11.LOADSTATE.NONE;
+            this.displayTape();
+            if (DEBUG) this.println("tape unloaded");
+        }
+    }
 };
 
 /**
