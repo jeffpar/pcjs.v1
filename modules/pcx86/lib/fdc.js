@@ -1278,7 +1278,7 @@ FDC.prototype.autoMount = function(fRemount)
     if (this.configMount) {
         for (var sDrive in this.configMount) {
             var configDrive = this.configMount[sDrive];
-            var sDiskettePath = configDrive['path'];
+            var sDiskettePath = configDrive['path'] || "";
             var sDisketteName = configDrive['name'] || this.findDiskette(sDiskettePath);
             if (sDiskettePath && sDisketteName) {
                 /*

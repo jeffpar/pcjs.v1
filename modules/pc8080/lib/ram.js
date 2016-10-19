@@ -66,8 +66,8 @@ function RAM8080(parmsRAM)
 
     this.addrRAM = parmsRAM['addr'];
     this.sizeRAM = parmsRAM['size'];
-    this.nFileLoad = parmsRAM['load'];
-    this.nFileExec = parmsRAM['exec'];
+    this.addrLoad = parmsRAM['load'];
+    this.addrExec = parmsRAM['exec'];
 
     this.fInstalled = (!!this.sizeRAM); // 0 is the default value for 'size' when none is specified
     this.fAllocated = false;
@@ -197,8 +197,8 @@ RAM8080.prototype.doneLoad = function(sURL, sData, nErrorCode)
     if (resource) {
         this.abInit = resource.aBytes;
         this.aSymbols = resource.aSymbols;
-        if (this.nFileLoad == null && resource.nLoad != null) this.nFileLoad = resource.nLoad;
-        if (this.nFileExec == null && resource.nExec != null) this.nFileExec = resource.nExec;
+        if (this.addrLoad == null) this.addrLoad = resource.addrLoad;
+        if (this.addrExec == null) this.addrExec = resource.addrExec;
     } else {
         this.sFilePath = null;
     }
@@ -232,19 +232,19 @@ RAM8080.prototype.initRAM = function()
             if (!this.abInit || !this.bus) return;
 
             var addr = this.addrRAM;
-            if (this.nFileLoad !== null) addr = this.nFileLoad;
+            if (this.addrLoad !== null) addr = this.addrLoad;
             for (var i = 0; i < this.abInit.length; i++) {
                 this.bus.setByteDirect(addr + i, this.abInit[i]);
             }
 
-            if (this.nFileExec !== null) {
+            if (this.addrExec !== null) {
                 /*
                  * Here's where we enable our "Fake CP/M" support, triggered by the user loading a "writable" ROM image
                  * at offset 0x100.  Fake CP/M support works by installing HLT opcodes at well-known CP/M addresses
                  * (namely, 0x0000, which is the CP/M reset vector, and 0x0005, which is the CP/M system call vector) and
                  * then telling the CPU to call us whenever a HLT occurs, so we can check PC for one of these addresses.
                  */
-                if (this.nFileExec == RAM8080.CPM.INIT) {
+                if (this.addrExec == RAM8080.CPM.INIT) {
                     for (i = 0; i < RAM8080.CPM.VECTORS.length; i++) {
                         this.bus.setByteDirect(RAM8080.CPM.VECTORS[i], CPUDef8080.OPCODE.HLT);
                     }
@@ -255,7 +255,7 @@ RAM8080.prototype.initRAM = function()
                         };
                     }(this));
                 }
-                this.cpu.setReset(this.nFileExec);
+                this.cpu.setReset(this.addrExec);
             }
 
             /*

@@ -220,6 +220,7 @@ PC11.prototype.initBus = function(cmp, bus, cpu, dbg)
     this.bus = bus;
     this.cpu = cpu;
     this.dbg = dbg;
+    this.ram = cmp.getMachineComponent("RAM");
 
     var pc11 = this;
 
@@ -310,7 +311,7 @@ PC11.prototype.autoMount = function(fRemount)
 {
     if (!fRemount) this.cAutoMount = 0;
     if (this.configMount) {
-        var sTapePath = this.configMount['path'];
+        var sTapePath = this.configMount['path'] || "";
         var sTapeName = this.configMount['name'] || this.findTape(sTapePath);
         if (sTapePath && sTapeName) {
             /*
@@ -320,7 +321,11 @@ PC11.prototype.autoMount = function(fRemount)
                 this.setReady(false);
             }
         } else {
-            this.notice("Incorrect auto-mount settings for PC11 (" + JSON.stringify(this.configMount) + ")");
+            /*
+             * This likely happened because there was no autoMount setting (or it was overridden with an empty value),
+             * so just make sure the current selection is set to "None".
+             */
+            this.displayTape();
         }
     }
     return !!this.cAutoMount;
@@ -360,7 +365,7 @@ PC11.prototype.loadSelectedTape = function(sTapeName, sTapePath, nTapeTarget, fi
         sTapePath = window.prompt("Enter the URL of a remote tape image.", "") || "";
         if (!sTapePath) return;
         sTapeName = str.getBaseName(sTapePath);
-        if (DEBUG) this.println("Attempting to load " + sTapePath + " as \"" + sTapeName + "\"");
+        this.status("Attempting to load " + sTapePath + " as \"" + sTapeName + "\"");
         this.sTapeSource = PC11.SOURCE.REMOTE;
     }
     else {
@@ -395,7 +400,7 @@ PC11.prototype.loadTape = function(sTapeName, sTapePath, nTapeTarget, fAutoMount
             this.notice("PC11 busy");
         }
         else {
-            // if (DEBUG) this.println("tape queued: " + sTapeName);
+            // this.status("tape queued: " + sTapeName);
             if (fAutoMount) {
                 this.cAutoMount++;
                 if (this.messageEnabled()) this.printMessage("auto-loading tape: " + sTapeName);
@@ -407,7 +412,7 @@ PC11.prototype.loadTape = function(sTapeName, sTapePath, nTapeTarget, fAutoMount
             }
         }
     }
-    if (DEBUG && nResult) this.println(this.nTapeTarget == PC11.TARGET.READER? "tape attached" : "tape loaded");
+    if (nResult) this.status(this.nTapeTarget == PC11.TARGET.READER? "tape attached" : "tape loaded");
     return nResult;
 };
 
@@ -496,7 +501,7 @@ PC11.prototype.doneLoad = function(sTapeName, sTapePath, nTapeTarget, sTapeData,
         Component.addMachineResource(this.idMachine, sURL, sTapeData);
         var resource = web.parseMemoryResource(sURL, sTapeData);
         if (resource) {
-            this.parseTape(sTapeName, sTapePath, nTapeTarget, resource.aBytes);
+            this.parseTape(sTapeName, sTapePath, nTapeTarget, resource.aBytes, resource.addrLoad, resource.addrExec);
         }
     }
     this.flags.busy = false;
@@ -597,107 +602,50 @@ PC11.prototype.displayTape = function()
 };
 
 /**
- * parseTape(sTapeName, sTapePath, nTapeTarget, aBytes)
+ * parseTape(sTapeName, sTapePath, nTapeTarget, aBytes, addrLoad, addrExec)
  *
  * @this {PC11}
  * @param {string} sTapeName
  * @param {string} sTapePath
  * @param {number} nTapeTarget
  * @param {Array|Uint8Array} aBytes
+ * @param {number|null} [addrLoad]
+ * @param {number|null} [addrExec]
  */
-PC11.prototype.parseTape = function(sTapeName, sTapePath, nTapeTarget, aBytes)
+PC11.prototype.parseTape = function(sTapeName, sTapePath, nTapeTarget, aBytes, addrLoad, addrExec)
 {
     this.sTapeName = sTapeName;
     this.sTapePath = sTapePath;
     this.nTapeTarget = nTapeTarget;
+
     if (nTapeTarget == PC11.TARGET.MEMORY) {
         /*
-         * Data on tapes is organized into blocks; each block begins with a 6-byte header:
+         * Use the RAM component's loadImage() service to do our dirty work.  If the load succeeds, then
+         * depending on whether there was also exec address, either the CPU will be stopped or the PC wil be
+         * reset.
          *
-         *      2-byte signature (0x01,0x00)
-         *      2-byte length (N + 6)
-         *      2-byte load address
+         * NOTE: Some tapes are not in the Absolute Loader format, so if the JSON-encoded tape resource file
+         * we downloaded didn't ALSO include a load address, the load will fail.
          *
-         * followed by N data bytes.  If N is zero, then the 2-byte load address is the exec address,
-         * unless the address is odd (usually 1), in which case stop.
-         *
-         * After the data bytes, there is a single checksum byte.  The sum of all the bytes (including
-         * the checksum byte) should be zero.
-         *
-         * ANOMALIES: Tape files don't always begin with a signature word, so I allow any number of
-         * leading zeros before the first signature.  Tape files don't always end cleanly either, so as
-         * soon as I see an invalid signature, I break out of the loop without signalling an error, as
-         * long as at least ONE block was successfully processed.
+         * For example, the "Absolute Loader" tape is NOT itself in the Absolute Loader format.  You just have
+         * to know that in order to load that tape, you must first load the appropriate "Bootstrap Loader" (which
+         * DOES include its own hard-coded load address), attach the "Absolute Loader" tape, and then run the
+         * "Bootstrap Loader".
          */
-        var off = 0;
-        var fError = false, cBlocks = 0;
-        while (off < aBytes.length - 1) {
-            var w = (aBytes[off] & 0xff) | ((aBytes[off+1] & 0xff) << 8);
-            if (!w) {           // ignore pairs of leading zeros
-                off += 2;
-                continue;
-            }
-            if (!(w & 0xff)) {  // as well as single bytes of zero
-                off++;
-                continue;
-            }
-            var offBlock = off;
-            if (w != 0x0001) {
-                if (DEBUG) this.println("invalid signature (" + str.toHexWord(w) + ") at offset " + str.toHexWord(offBlock));
-                if (!cBlocks) fError = true;
-                break;
-            }
-            if (off + 6 >= aBytes.length) {
-                if (DEBUG) this.println("invalid block at offset " + str.toHexWord(offBlock));
-                fError = true;
-                break;
-            }
-            off += 2;
-            var checksum = w;
-            var len = (aBytes[off++] & 0xff) | ((aBytes[off++] & 0xff) << 8);
-            var addr = (aBytes[off++] & 0xff) | ((aBytes[off++] & 0xff) << 8);
-            checksum += (len & 0xff) + (len >> 8) + (addr & 0xff) + (addr >> 8);
-            var offData = off, cbData = len -= 6;
-            while (len > 0 && off < aBytes.length - 1) {
-                checksum += aBytes[off++] & 0xff;
-                len--;
-            }
-            if (len != 0 || off >= aBytes.length) {
-                if (DEBUG) this.println("insufficient data for block at offset " + str.toHexWord(offBlock));
-                fError = true;
-                break;
-            }
-            checksum += aBytes[off++] & 0xff;
-            if (checksum & 0xff) {
-                if (DEBUG) this.println("invalid checksum (" + str.toHexByte(checksum) + ") for block at offset " + str.toHexWord(offBlock));
-                fError = true;
-                break;
-            }
-            if (!cbData) {
-                if (!(addr & 0x1)) {
-                    this.cpu.setPC(addr);
-                }
-            } else {
-                while (cbData--) {
-                    this.cpu.setByteDirect(addr++, aBytes[offData++] & 0xff);
-                }
-            }
-            cBlocks++;
-        }
-        if (fError) {
+        if (!this.ram || !this.ram.loadImage(aBytes, addrLoad, addrExec)) {
             this.sTapeName = "";
             this.sTapePath = "";
             this.sTapeSource = PC11.SOURCE.NONE;
             this.nTapeTarget = PC11.TARGET.NONE;
-            if (DEBUG) this.println("error loading tape: " + sTapeName);
+            this.status("error loading tape: " + sTapeName);
             return;
         }
-        if (DEBUG) this.println("tape loaded: " + sTapeName);
+        this.status("tape loaded: " + sTapeName);
         return;
     }
     this.iTapeData = 0;
     this.aTapeData = aBytes;
-    if (DEBUG) this.println("tape attached: " + sTapeName);
+    this.status("tape attached: " + sTapeName);
 };
 
 /**
@@ -715,7 +663,7 @@ PC11.prototype.unloadTape = function(fLoading)
          * Avoid any unnecessary hysteresis regarding the display if this unload is merely a prelude to another load.
          */
         if (!fLoading) {
-            if (DEBUG && this.nTapeTarget) this.println(this.nTapeTarget == PC11.TARGET.READER? "tape detached" : "tape unloaded");
+            if (this.nTapeTarget) this.status(this.nTapeTarget == PC11.TARGET.READER? "tape detached" : "tape unloaded");
             this.sTapeSource = PC11.SOURCE.NONE;
             this.nTapeTarget = PC11.TARGET.NONE;
             this.displayTape();

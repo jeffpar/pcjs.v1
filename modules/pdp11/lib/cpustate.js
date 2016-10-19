@@ -369,6 +369,13 @@ CPUStatePDP11.prototype.setReset = function(addr)
 {
     this.addrReset = addr;
     this.setPC(addr);
+    if (this.dbg) {
+        /*
+         * TODO: Review the decision to always stop the CPU if the Debugger is loaded.
+         */
+        this.stopCPU();
+        this.dbg.updateStatus();
+    }
 };
 
 /**

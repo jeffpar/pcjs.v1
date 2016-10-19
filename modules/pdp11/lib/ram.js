@@ -69,8 +69,8 @@ function RAMPDP11(parmsRAM)
 
     this.addrRAM = parmsRAM['addr'];
     this.sizeRAM = parmsRAM['size'];
-    this.nFileLoad = parmsRAM['load'];
-    this.nFileExec = parmsRAM['exec'];
+    this.addrLoad = parmsRAM['load'];
+    this.addrExec = parmsRAM['exec'];
 
     this.fInstalled = (!!this.sizeRAM); // 0 is the default value for 'size' when none is specified
     this.fAllocated = false;
@@ -175,8 +175,8 @@ RAMPDP11.prototype.doneLoad = function(sURL, sData, nErrorCode)
     if (resource) {
         this.abInit = resource.aBytes;
         this.aSymbols = resource.aSymbols;
-        if (this.nFileLoad == null && resource.nLoad != null) this.nFileLoad = resource.nLoad;
-        if (this.nFileExec == null && resource.nExec != null) this.nFileExec = resource.nExec;
+        if (this.addrLoad == null) this.addrLoad = resource.addrLoad;
+        if (this.addrExec == null) this.addrExec = resource.addrExec;
     } else {
         this.sFilePath = null;
     }
@@ -194,6 +194,8 @@ RAMPDP11.prototype.doneLoad = function(sURL, sData, nErrorCode)
  */
 RAMPDP11.prototype.initRAM = function()
 {
+    if (!this.bus) return;
+
     if (!this.fAllocated && this.sizeRAM) {
         if (this.bus.addMemory(this.addrRAM, this.sizeRAM, MemoryPDP11.TYPE.RAM)) {
             this.fAllocated = true;
@@ -209,15 +211,7 @@ RAMPDP11.prototype.initRAM = function()
              */
             if (!this.abInit || !this.bus) return;
 
-            var addr = this.addrRAM;
-            if (this.nFileLoad !== null) addr = this.nFileLoad;
-            for (var i = 0; i < this.abInit.length; i++) {
-                this.bus.setByteDirect(addr + i, this.abInit[i]);
-            }
-
-            if (this.nFileExec !== null) {
-                this.cpu.setReset(this.nFileExec);
-            }
+            this.loadImage(this.abInit, this.addrLoad, this.addrExec, this.addrRAM);
 
             /*
              * TODO: Consider an option to retain this data and give the user a way of restoring the initial contents.
@@ -238,6 +232,108 @@ RAMPDP11.prototype.reset = function()
     /*
      * If you want to zero RAM on reset, then this would be a good place to do it.
      */
+};
+
+/**
+ * loadImage(aBytes, addrLoad, addrExec, addrInit)
+ *
+ * @this {RAMPDP11}
+ * @param {Array|Uint8Array} aBytes
+ * @param {number|null} [addrLoad]
+ * @param {number|null} [addrExec]
+ * @param {number|null} [addrInit]
+ * @return {boolean} (true if loaded, false if not)
+ */
+RAMPDP11.prototype.loadImage = function(aBytes, addrLoad, addrExec, addrInit)
+{
+    var fLoaded = false;
+    /*
+     * Data on tapes is organized into blocks; each block begins with a 6-byte header:
+     *
+     *      2-byte signature (0x0001)
+     *      2-byte block length (N + 6, because it includes the 6-byte header)
+     *      2-byte load address
+     *
+     * followed by N data bytes.  If N is zero, then the 2-byte load address is the exec address,
+     * unless the address is odd (usually 1).  DEC's "Absolute Loader" jumps to the exec address
+     * in former case, halts in the latter.
+     *
+     * All values are stored "little endian" (low byte first, followed by high byte), just like
+     * the PDP-11 does.
+     *
+     * After the data bytes, there is a single checksum byte.  The 8-bit sum of all the bytes in
+     * the block (including the header bytes and checksum byte) should be zero.
+     *
+     * ANOMALIES: Tape files don't always begin with a signature word, so I allow any number of
+     * leading zeros before the first signature.  Tape files don't always end cleanly either, so as
+     * soon as I see an invalid signature, I break out of the loop without signalling an error, as
+     * long as at least ONE block was successfully processed.
+     */
+    if (addrLoad == null) {
+        var off = 0, fError = false;
+        while (off < aBytes.length - 1) {
+            var w = (aBytes[off] & 0xff) | ((aBytes[off+1] & 0xff) << 8);
+            if (!w) {           // ignore pairs of leading zeros
+                off += 2;
+                continue;
+            }
+            if (!(w & 0xff)) {  // as well as single bytes of zero
+                off++;
+                continue;
+            }
+            var offBlock = off;
+            if (w != 0x0001) {
+                if (MAXDEBUG) this.println("invalid signature (" + str.toHexWord(w) + ") at offset " + str.toHexWord(offBlock));
+                break;
+            }
+            if (off + 6 >= aBytes.length) {
+                if (MAXDEBUG) this.println("invalid block at offset " + str.toHexWord(offBlock));
+                break;
+            }
+            off += 2;
+            var checksum = w;
+            var len = (aBytes[off++] & 0xff) | ((aBytes[off++] & 0xff) << 8);
+            var addr = (aBytes[off++] & 0xff) | ((aBytes[off++] & 0xff) << 8);
+            checksum += (len & 0xff) + (len >> 8) + (addr & 0xff) + (addr >> 8);
+            var offData = off, cbData = len -= 6;
+            while (len > 0 && off < aBytes.length) {
+                checksum += aBytes[off++] & 0xff;
+                len--;
+            }
+            if (len != 0 || off >= aBytes.length) {
+                if (MAXDEBUG) this.println("insufficient data for block at offset " + str.toHexWord(offBlock));
+                break;
+            }
+            checksum += aBytes[off++] & 0xff;
+            if (checksum & 0xff) {
+                if (MAXDEBUG) this.println("invalid checksum (" + str.toHexByte(checksum) + ") for block at offset " + str.toHexWord(offBlock));
+                break;
+            }
+            if (!cbData) {
+                if (addr & 0x1) {
+                    this.cpu.stopCPU();
+                } else {
+                    this.cpu.setReset(addr);
+                }
+            } else {
+                while (cbData--) {
+                    this.cpu.setByteDirect(addr++, aBytes[offData++] & 0xff);
+                }
+            }
+            fLoaded = true;
+        }
+    }
+    if (!fLoaded) {
+        if (addrLoad == null) addrLoad = addrInit;
+        if (addrLoad != null) {
+            for (var i = 0; i < aBytes.length; i++) {
+                this.cpu.setByteDirect(addrLoad + i, aBytes[i]);
+            }
+            if (addrExec != null) this.cpu.setReset(addrExec);
+            fLoaded = true;
+        }
+    }
+    return fLoaded;
 };
 
 /**

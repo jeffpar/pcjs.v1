@@ -295,8 +295,8 @@ web.parseMemoryResource = function(sURL, sData)
     var resource = {
         aBytes: null,
         aSymbols: null,
-        nLoad: null,
-        nExec: null
+        addrLoad: null,
+        addrExec: null
     };
 
     if (sData.charAt(0) == "[" || sData.charAt(0) == "{") {
@@ -338,8 +338,8 @@ web.parseMemoryResource = function(sURL, sData)
                 data = eval("(" + sData + ")");
             }
 
-            resource.nLoad = data['load'];
-            resource.nExec = data['exec'];
+            resource.addrLoad = data['load'];
+            resource.addrExec = data['exec'];
 
             if (a = data['bytes']) {
                 resource.aBytes = a;

@@ -93,6 +93,7 @@ function DebuggerPDP11(parmsDbg)
         /*
          * Since this Debugger doesn't use replaceRegs(), we can use parentheses instead of braces.
          */
+        this.fInit = false;
         this.fParens = true;
 
         /*
@@ -1217,6 +1218,7 @@ if (DEBUGGER) {
      */
     DebuggerPDP11.prototype.init = function()
     {
+        this.fInit = true;
         this.println("Type ? for help with PDP11 Debugger commands");
         this.updateStatus();
         if (this.sInitCommands) {
@@ -1367,6 +1369,8 @@ if (DEBUGGER) {
      */
     DebuggerPDP11.prototype.updateStatus = function(fRegs)
     {
+        if (!this.fInit) return;
+
         if (fRegs === undefined) fRegs = true;
 
         this.dbgAddrNextCode = this.newAddr(this.cpu.getPC());
