@@ -15,7 +15,7 @@ We have archived the following DEC PDP-11 Tapes:
 To make it easy for PDPjs machines to load these tapes, we created the following High-Speed
 Paper Tape Reader (PC11) configurations:
 
-- [demo.xml](demo.xml)
+- [demo.xml](/devices/pdp11/pc11/demo.xml)
 
 These configuration files create UI controls that allow you to choose from a set of tapes that are automatically sent
 to the machine's PC11 device.

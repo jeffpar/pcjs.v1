@@ -92,6 +92,6 @@
 		<control type="button" binding="run">Run</control>
 		<control type="button" binding="reset">Reset</control>
 		<control type="button" binding="setSpeed">Fast</control>
-		<control type="description" binding="speed" padLeft="8px">Stopped</control>
+		<control type="description" binding="speed" pos="default">Stopped</control>
 	</control>
 </panel>
