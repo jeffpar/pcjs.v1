@@ -50,8 +50,8 @@ function PC11(parms)
     Component.call(this, "PC11", parms, PC11);
 
     /*
-     * We record any 'autoMount' object now, but we no longer parse it until initBus(), because the Computer's
-     * getMachineParm() service may have an override for us.
+     * We record any 'autoMount' object now, but we no longer parse it until initBus(), because the
+     * Computer's getMachineParm() service may have an override for us.
      */
     this.configMount = parms['autoMount'] || null;
     this.cAutoMount = 0;
@@ -611,6 +611,87 @@ PC11.prototype.parseTape = function(sTapeName, sTapePath, nTapeTarget, aBytes)
     this.sTapePath = sTapePath;
     this.nTapeTarget = nTapeTarget;
     if (nTapeTarget == PC11.TARGET.MEMORY) {
+        /*
+         * Data on tapes is organized into blocks; each block begins with a 6-byte header:
+         *
+         *      2-byte signature (0x01,0x00)
+         *      2-byte length (N + 6)
+         *      2-byte load address
+         *
+         * followed by N data bytes.  If N is zero, then the 2-byte load address is the exec address,
+         * unless the address is odd (usually 1), in which case stop.
+         *
+         * After the data bytes, there is a single checksum byte.  The sum of all the bytes (including
+         * the checksum byte) should be zero.
+         *
+         * ANOMALIES: Tape files don't always begin with a signature word, so I allow any number of
+         * leading zeros before the first signature.  Tape files don't always end cleanly either, so as
+         * soon as I see an invalid signature, I break out of the loop without signalling an error, as
+         * long as at least ONE block was successfully processed.
+         */
+        var off = 0;
+        var fError = false, cBlocks = 0;
+        while (off < aBytes.length - 1) {
+            var w = (aBytes[off] & 0xff) | ((aBytes[off+1] & 0xff) << 8);
+            if (!w) {           // ignore pairs of leading zeros
+                off += 2;
+                continue;
+            }
+            if (!(w & 0xff)) {  // as well as single bytes of zero
+                off++;
+                continue;
+            }
+            var offBlock = off;
+            if (w != 0x0001) {
+                if (DEBUG) this.println("invalid signature (" + str.toHexWord(w) + ") at offset " + str.toHexWord(offBlock));
+                if (!cBlocks) fError = true;
+                break;
+            }
+            if (off + 6 >= aBytes.length) {
+                if (DEBUG) this.println("invalid block at offset " + str.toHexWord(offBlock));
+                fError = true;
+                break;
+            }
+            off += 2;
+            var checksum = w;
+            var len = (aBytes[off++] & 0xff) | ((aBytes[off++] & 0xff) << 8);
+            var addr = (aBytes[off++] & 0xff) | ((aBytes[off++] & 0xff) << 8);
+            checksum += (len & 0xff) + (len >> 8) + (addr & 0xff) + (addr >> 8);
+            var offData = off, cbData = len -= 6;
+            while (len > 0 && off < aBytes.length - 1) {
+                checksum += aBytes[off++] & 0xff;
+                len--;
+            }
+            if (len != 0 || off >= aBytes.length) {
+                if (DEBUG) this.println("insufficient data for block at offset " + str.toHexWord(offBlock));
+                fError = true;
+                break;
+            }
+            checksum += aBytes[off++] & 0xff;
+            if (checksum & 0xff) {
+                if (DEBUG) this.println("invalid checksum (" + str.toHexByte(checksum) + ") for block at offset " + str.toHexWord(offBlock));
+                fError = true;
+                break;
+            }
+            if (!cbData) {
+                if (!(addr & 0x1)) {
+                    this.cpu.setPC(addr);
+                }
+            } else {
+                while (cbData--) {
+                    this.cpu.setByteDirect(addr++, aBytes[offData++] & 0xff);
+                }
+            }
+            cBlocks++;
+        }
+        if (fError) {
+            this.sTapeName = "";
+            this.sTapePath = "";
+            this.sTapeSource = PC11.SOURCE.NONE;
+            this.nTapeTarget = PC11.TARGET.NONE;
+            if (DEBUG) this.println("error loading tape: " + sTapeName);
+            return;
+        }
         if (DEBUG) this.println("tape loaded: " + sTapeName);
         return;
     }
@@ -634,10 +715,10 @@ PC11.prototype.unloadTape = function(fLoading)
          * Avoid any unnecessary hysteresis regarding the display if this unload is merely a prelude to another load.
          */
         if (!fLoading) {
-            this.sTapeSource = PC11.SOURCE.NONE;
-            this.displayTape();
             if (DEBUG && this.nTapeTarget) this.println(this.nTapeTarget == PC11.TARGET.READER? "tape detached" : "tape unloaded");
+            this.sTapeSource = PC11.SOURCE.NONE;
             this.nTapeTarget = PC11.TARGET.NONE;
+            this.displayTape();
         }
     }
 };
@@ -684,22 +765,22 @@ PC11.prototype.advanceReader = function()
     if ((this.prs & (PDP11.PC11.PRS.RE | PDP11.PC11.PRS.ERROR)) == PDP11.PC11.PRS.RE) {
         if (!(this.prs & PDP11.PC11.PRS.DONE)) {
             if (this.iTapeData < this.aTapeData.length) {
-                this.prb = this.aTapeData[this.iTapeData++];
+                this.prb = this.aTapeData[this.iTapeData++] & 0xff;
                 this.prs |= PDP11.PC11.PRS.DONE;
                 this.prs &= ~PDP11.PC11.PRS.BUSY;
                 if (this.prs & PDP11.PC11.PRS.RIE) {
                     this.cpu.setTrigger(this.triggerReaderInterrupt);
                 }
                 /*
-                 * The PC11, by virtue of its "high speed", is supposed to deliver characters at 300 CPS,
-                 * so for now, that's what we're going to deliver (ie, 1000ms / 300).  The original "low speed"
+                 * The PC11, by virtue of its "high speed", is supposed to deliver characters at 300 CPS, so
+                 * that's the rate we'll choose as well (ie, 1000ms / 300).  As an aside, the original "low speed"
                  * version of the reader ran at 10 CPS.
                  *
                  * TODO: Review this code.  If we don't set the fReset parameter to true, the timer will eventually
                  * fire while the "Absolute Loader" tape is still reading bytes from, say, the "BASIC (Single User)"
-                 * tape, causing an EXTRA advance to occur and causing a byte to be skipped.  Passing true ensures
-                 * that the timer cannot fire for AT LEAST 3ms after each advance.  But again, I need to understand
-                 * the reader's actual behavior.
+                 * tape, causing an EXTRA advance to occur and a byte to be skipped.  Passing true ensures that the
+                 * timer cannot fire for AT LEAST 3ms after each advance.  But we need to understand the reader's
+                 * actual behavior.
                  */
                 this.cpu.setTimer(this.timerReaderAdvance, 1000/300, true);
             }
