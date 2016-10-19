@@ -714,23 +714,12 @@ PC11.prototype.advanceReader = function()
         if (!(this.prs & PDP11.PC11.PRS.DONE)) {
             if (this.iTapeData < this.aTapeData.length) {
                 this.prb = this.aTapeData[this.iTapeData++] & 0xff;
+                if (MAXDEBUG) this.println("tape read " + str.toHexByte(this.prb) + " at pos " + str.toHexWord(this.iTapeData));
                 this.prs |= PDP11.PC11.PRS.DONE;
                 this.prs &= ~PDP11.PC11.PRS.BUSY;
                 if (this.prs & PDP11.PC11.PRS.RIE) {
                     this.cpu.setTrigger(this.triggerReaderInterrupt);
                 }
-                /*
-                 * The PC11, by virtue of its "high speed", is supposed to deliver characters at 300 CPS, so
-                 * that's the rate we'll choose as well (ie, 1000ms / 300).  As an aside, the original "low speed"
-                 * version of the reader ran at 10 CPS.
-                 *
-                 * TODO: Review this code.  If we don't set the fReset parameter to true, the timer will eventually
-                 * fire while the "Absolute Loader" tape is still reading bytes from, say, the "BASIC (Single User)"
-                 * tape, causing an EXTRA advance to occur and a byte to be skipped.  Passing true ensures that the
-                 * timer cannot fire for AT LEAST 3ms after each advance.  But we need to understand the reader's
-                 * actual behavior.
-                 */
-                this.cpu.setTimer(this.timerReaderAdvance, 1000/300, true);
             }
         }
     }
@@ -763,19 +752,31 @@ PC11.prototype.readPRS = function(addr)
 PC11.prototype.writePRS = function(data, addr)
 {
     if (data & PDP11.PC11.PRS.RE) {
+        /*
+         * From the 1976 Peripherals Handbook, p. 4-378:
+         *
+         *      Set [RE] to allow the Reader to fetch one character. The setting of this bit clears Done,
+         *      sets Busy, and clears the Reader Buffer (PRB). Operation of this bit is disabled if Error = 1;
+         *      attempting to set it when Error = 1 will cause an immediate interrupt if Interrupt Enable = 1.
+         */
         if (this.prs & PDP11.PC11.PRS.ERROR) {
             data &= ~PDP11.PC11.PRS.RE;
-            // if (this.prs & PDP11.PC11.PRS.RIE) {
-                // TODO: Generate an interrupt (error condition)
-            // }
+            if (this.prs & PDP11.PC11.PRS.RIE) {
+                this.cpu.setTrigger(this.triggerReaderInterrupt);
+            }
         } else {
             this.prs &= ~PDP11.PC11.PRS.DONE;
             this.prs |= PDP11.PC11.PRS.BUSY;
             this.prb = 0;
+            /*
+             * The PC11, by virtue of its "high speed", is supposed to deliver characters at 300 CPS, so
+             * that's the rate we'll choose as well (ie, 1000ms / 300).  As an aside, the original "low speed"
+             * version of the reader ran at 10 CPS.
+             */
+            this.cpu.setTimer(this.timerReaderAdvance, 1000/300);
         }
     }
     this.prs = (this.prs & ~PDP11.PC11.PRS.WMASK) | (data & PDP11.PC11.PRS.WMASK);
-    this.advanceReader();
 };
 
 /**
