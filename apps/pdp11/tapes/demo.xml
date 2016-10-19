@@ -10,5 +10,6 @@
 		<control type="button" binding="loadTape">Load</control>
 		<control type="description" binding="descTape" padRight="8px"/>
 		<control type="file" binding="mountTape"/>
+		<control type="progress" binding="readProgress" width="250px">Tape Reader Progress</control>
 	</control>
 </device>

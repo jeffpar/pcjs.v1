@@ -330,6 +330,7 @@
 				<xsl:when test="@pos = 'left'">float:left;</xsl:when>
 				<xsl:when test="@pos = 'right'">float:right;</xsl:when>
 				<xsl:when test="@pos = 'center'">margin:0 auto;</xsl:when>
+				<xsl:when test="@pos = 'default'">clear:both;</xsl:when>
 				<xsl:when test="@pos">position:<xsl:value-of select="@pos"/>;</xsl:when>
 				<xsl:when test="$left != '' or $top != ''">position:relative;</xsl:when>
 				<xsl:when test="@container">text-align:<xsl:value-of select="@container"/>;</xsl:when>
@@ -415,6 +416,12 @@
 				</xsl:when>
 				<xsl:when test="@type = 'led' or @type = 'rled'">
 					<div class="{$APPCLASS}-binding {$CSSCLASS}-{@type}" data-value="{{{$type},{$binding}}}" style="display:inline-block;"><xsl:value-of select="."/></div>
+				</xsl:when>
+				<xsl:when test="@type = 'progress'">
+					<div class="{$APPCLASS}-binding {$CSSCLASS}-{@type}" style="-webkit-user-select:none;{$border}{$width}{$height}{$fontsize}{$style}" data-value="{{{$type},{$binding},{$value}}}">
+						<div class="{$CSSCLASS}-{@type}-text" style="{$width}"><xsl:apply-templates/></div>
+						<div class="{$CSSCLASS}-{@type}-bar"></div>
+					</div>
 				</xsl:when>
 				<xsl:when test="@type = 'separator'">
 					<hr/>

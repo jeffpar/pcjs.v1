@@ -89,6 +89,14 @@ PC11.TARGET = {
     MEMORY: 2
 };
 
+PC11.BINDING = {
+    READ_PROGRESS:  "readProgress"
+};
+
+PC11.CSSCLASS = {
+    PROGRESS_BAR:   PDP11.CSSCLASS + "-progress-bar"
+};
+
 /**
  * setBinding(sType, sBinding, control, sValue)
  *
@@ -197,6 +205,10 @@ PC11.prototype.setBinding = function(sType, sBinding, control, sValue)
              */
             return false;
         };
+        return true;
+
+    case PC11.BINDING.READ_PROGRESS:
+        this.bindings[sBinding] = control;
         return true;
 
     default:
@@ -602,6 +614,28 @@ PC11.prototype.displayTape = function()
 };
 
 /**
+ * displayProgress(nPercent)
+ *
+ * @this {PC11}
+ * @param {number} nPercent
+ */
+PC11.prototype.displayProgress = function(nPercent)
+{
+    nPercent |= 0;
+    if (nPercent !== this.lastPercent) {
+        var control = this.bindings[PC11.BINDING.READ_PROGRESS];
+        if (control) {
+            var aeControls = Component.getElementsByClass(control, PC11.CSSCLASS.PROGRESS_BAR);
+            var controlBar = aeControls && aeControls[0];
+            if (controlBar && controlBar.style) {
+                controlBar.style.width = nPercent + "%";
+            }
+        }
+        this.lastPercent = nPercent;
+    }
+};
+
+/**
  * parseTape(sTapeName, sTapePath, nTapeTarget, aBytes, addrLoad, addrExec)
  *
  * @this {PC11}
@@ -646,6 +680,7 @@ PC11.prototype.parseTape = function(sTapeName, sTapePath, nTapeTarget, aBytes, a
     this.iTapeData = 0;
     this.aTapeData = aBytes;
     this.status("tape attached: " + sTapeName);
+    this.displayProgress(0);
 };
 
 /**
@@ -714,6 +749,7 @@ PC11.prototype.advanceReader = function()
         if (!(this.prs & PDP11.PC11.PRS.DONE)) {
             if (this.iTapeData < this.aTapeData.length) {
                 this.prb = this.aTapeData[this.iTapeData++] & 0xff;
+                this.displayProgress(this.iTapeData / this.aTapeData.length * 100);
                 if (MAXDEBUG) this.println("tape read " + str.toHexByte(this.prb) + " at pos " + str.toHexWord(this.iTapeData));
                 this.prs |= PDP11.PC11.PRS.DONE;
                 this.prs &= ~PDP11.PC11.PRS.BUSY;
