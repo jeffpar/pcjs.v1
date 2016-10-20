@@ -7,6 +7,8 @@ permalink: /apps/pdp11/tapes/basic/
 DEC PDP-11 BASIC
 ----------------
 
+Try our [DEC BASIC Demo](/devices/pdp11/machine/1120/basic/).
+
 PCjs has archived the following DEC resources:
 
 - [BASIC (Single User)](DEC-11-AJPB-PB.json)
@@ -15,3 +17,4 @@ PCjs has archived the following DEC resources:
 Third-party resources include:
 
 - "[PDP-11 Paper Tape BASIC](http://www.avitech.com.au/ptb/ptb.html)", written March 24, 2013
+

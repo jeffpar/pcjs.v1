@@ -10,7 +10,7 @@ DEC PDP-11 Absolute Loader
 The Absolute Loader is a special tape image that must be loaded in order to load *other* tapes
 which use the Absolute Loader format.
 
-To see the Absolute Loader in action, try the [Bootstrap Loader Demo](/devices/pdp11/machine/1120/bootstrap/debugger/).
+To see the Absolute Loader in action, start with the [Bootstrap Loader Demo](/devices/pdp11/machine/1120/bootstrap/debugger/).
 
 PCjs has archived the following DEC resources:
 
