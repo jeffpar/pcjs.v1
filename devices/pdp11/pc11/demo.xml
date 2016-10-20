@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<device id="pc11" type="pc11" autoMount='{path:"/apps/pdp11/tapes/DEC-11-L2PC-PO.json"}' pos="left" padLeft="8px" padBottom="8px">
+<device id="pc11" type="pc11" autoMount='{path:"/apps/pdp11/tapes/DEC-11-L2PC-PO.json"}' pos="left" width="35%" padLeft="8px" padBottom="8px">
 	<name>Paper Tape Controls</name>
-	<control type="container" width="300px">
+	<control type="container">
 		<control type="list" binding="listTapes">
 			<tape id="tape00" name="Bootstrap Loader (16Kb)" path="/apps/pdp11/boot/bootstrap/BOOTSTRAP-16KB.json"/>
 			<tape id="tape01" name="Absolute Loader" path="/apps/pdp11/tapes/DEC-11-L2PC-PO.json"/>
@@ -11,6 +11,6 @@
 		<control type="button" binding="loadTape">Load</control>
 		<control type="description" binding="descTape" padRight="8px"/>
 		<control type="file" binding="mountTape"/>
-		<control type="progress" binding="readProgress" width="250px">Tape Progress</control>
+		<control type="progress" binding="readProgress" pos="default" width="250px" padTop="8px">Tape Progress</control>
 	</control>
 </device>

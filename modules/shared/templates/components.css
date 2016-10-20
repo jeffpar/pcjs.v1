@@ -199,7 +199,8 @@
     .pcjs-registers {
         width: 100% !important;
     }
-    .pcjs-device {
+    .pdp11-device {
         width: 100% !important;
+        max-width: none !important;
     }
 }
