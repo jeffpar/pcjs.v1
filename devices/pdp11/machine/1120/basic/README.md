@@ -1,6 +1,6 @@
 ---
 layout: page
-title: PDP-11/20 with 16Kb, DEC BASIC
+title: PDP-11/20 DEC BASIC Demo
 permalink: /devices/pdp11/machine/1120/basic/
 machines:
   - id: test1120
@@ -8,8 +8,8 @@ machines:
     autoMount: ''
 ---
 
-DEC PDP-11 BASIC Demo
----------------------
+DEC BASIC Demo
+--------------
 
 This machine pre-loads the **[DEC PDP-11 BASIC](/apps/pdp11/tapes/basic/)** tape image into 16Kb of RAM:
 
@@ -20,4 +20,4 @@ However, if this is too convenient for you, you can manually load it into memory
 
 {% include machine.html id="test1120" %}
 
-See also: [DEC PDP-11 BASIC Demo (with Debugger)](/devices/pdp11/machine/1120/basic/debugger/)
+This machine is also available with our built-in [Debugger](debugger/).

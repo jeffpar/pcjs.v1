@@ -1,6 +1,6 @@
 ---
 layout: page
-title: PDP-11/20 with 16Kb, Bootstrap Loader, and Debugger
+title: PDP-11/20 Bootstrap Loader with Debugger
 permalink: /devices/pdp11/machine/1120/bootstrap/debugger/
 machines:
   - id: test1120
@@ -11,7 +11,7 @@ machines:
 Bootstrap Loader Demo (with Debugger)
 -------------------------------------
 
-This machine pre-loads the **[Bootstrap Loader](/apps/pdp11/boot/bootstrap/)** code into RAM:
+This machine pre-loads the **[Bootstrap Loader](/apps/pdp11/boot/bootstrap/)** code into 16Kb of RAM:
 
 	<ram id="ram" addr="0x0000" size="0x4000" file="/apps/pdp11/boot/bootstrap/BOOTSTRAP-16KB.json"/>
 

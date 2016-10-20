@@ -1,6 +1,6 @@
 ---
 layout: page
-title: PDP-11/20 with 16Kb and Bootstrap Loader
+title: PDP-11/20 Bootstrap Loader Demo
 permalink: /devices/pdp11/machine/1120/bootstrap/
 machines:
   - id: test1120
@@ -10,7 +10,7 @@ machines:
 Bootstrap Loader Demo
 ---------------------
 
-This machine pre-loads the **[Bootstrap Loader](/apps/pdp11/boot/bootstrap/)** code into RAM:
+This machine pre-loads the **[Bootstrap Loader](/apps/pdp11/boot/bootstrap/)** code into 16Kb of RAM:
 
 	<ram id="ram" addr="0x0000" size="0x4000" file="/apps/pdp11/boot/bootstrap/BOOTSTRAP-16KB.json"/>
 
@@ -26,3 +26,5 @@ You can then select another tape image in the Absolute Loader format, such as **
 click "Attach" and then "Run".
 
 {% include machine.html id="test1120" %}
+
+This machine is also available with our built-in [Debugger](debugger/).

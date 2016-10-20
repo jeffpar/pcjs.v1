@@ -14,7 +14,7 @@ PDP-11 Boot Test
 [TEST.mac](TEST.mac) was cross-assembled with [MACRO11](https://github.com/shattered/macro11) to produce [TEST.lst](TEST.lst),
 which was then processed by [FileDump](/modules/filedump/) to produce [TEST.json](TEST.json).
 
-To see this Boot Test in action, try the [PDP-11/70 Test Machine with Debugger](/devices/pdp11/machine/1170/test/debugger/).
+To see the Boot Test in action, try the [PDP-11/70 Boot Test with Debugger](/devices/pdp11/machine/1170/test/debugger/).
 
 The source code is shown below.
 
