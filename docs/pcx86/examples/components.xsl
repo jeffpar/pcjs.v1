@@ -23,7 +23,14 @@
 
 	<xsl:template name="componentScripts">
 		<xsl:param name="component"/>
-		<script type="text/javascript" src="{$component}.js"> </script>
+		<xsl:choose>
+			<xsl:when test="$APPNAME = 'PDPjs'">
+				<script type="text/javascript" src="/versions/pdpjs/{$APPVERSION}/{$component}.js"> </script>
+			</xsl:when>
+			<xsl:otherwise>
+				<script type="text/javascript" src="{$component}.js"> </script>
+			</xsl:otherwise>
+		</xsl:choose>
 	</xsl:template>
 
 	<xsl:template name="componentIncludes">
@@ -760,6 +767,18 @@
 				<xsl:otherwise/>
 			</xsl:choose>
 		</xsl:variable>
+		<xsl:variable name="baudReceive">
+			<xsl:choose>
+				<xsl:when test="@baudReceive"><xsl:value-of select="@baudReceive"/></xsl:when>
+				<xsl:otherwise>0</xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
+		<xsl:variable name="baudTransmit">
+			<xsl:choose>
+				<xsl:when test="@baudTransmit"><xsl:value-of select="@baudTransmit"/></xsl:when>
+				<xsl:otherwise>0</xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
 		<xsl:variable name="autoMount">
 			<xsl:choose>
 				<xsl:when test="$mount != ''"><xsl:value-of select="$mount"/></xsl:when>
@@ -770,7 +789,7 @@
 		<xsl:call-template name="component">
 			<xsl:with-param name="machine" select="$machine"/>
 			<xsl:with-param name="class">device</xsl:with-param>
-			<xsl:with-param name="parms">,type:'<xsl:value-of select="$type"/>',autoMount:'<xsl:value-of select="$autoMount"/>'</xsl:with-param>
+			<xsl:with-param name="parms">,type:'<xsl:value-of select="$type"/>',baudReceive:<xsl:value-of select="$baudReceive"/>,baudTransmit:<xsl:value-of select="$baudTransmit"/>,autoMount:'<xsl:value-of select="$autoMount"/>'</xsl:with-param>
 		</xsl:call-template>
 	</xsl:template>
 
@@ -836,6 +855,18 @@
 				<xsl:otherwise>0</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
+		<xsl:variable name="baudReceive">
+			<xsl:choose>
+				<xsl:when test="@baudReceive"><xsl:value-of select="@baudReceive"/></xsl:when>
+				<xsl:otherwise>0</xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
+		<xsl:variable name="baudTransmit">
+			<xsl:choose>
+				<xsl:when test="@baudTransmit"><xsl:value-of select="@baudTransmit"/></xsl:when>
+				<xsl:otherwise>0</xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
 		<xsl:variable name="binding">
 			<xsl:choose>
 				<xsl:when test="@binding"><xsl:value-of select="@binding"/></xsl:when>
@@ -859,7 +890,7 @@
 		<xsl:call-template name="component">
 			<xsl:with-param name="machine" select="$machine"/>
 			<xsl:with-param name="class">serial</xsl:with-param>
-			<xsl:with-param name="parms">,adapter:<xsl:value-of select="$adapter"/>,binding:'<xsl:value-of select="$binding"/>',tabSize:<xsl:value-of select="$tabSize"/>,charBOL:<xsl:value-of select="$charBOL"/></xsl:with-param>
+			<xsl:with-param name="parms">,adapter:<xsl:value-of select="$adapter"/>,baudReceive:<xsl:value-of select="$baudReceive"/>,baudTransmit:<xsl:value-of select="$baudTransmit"/>,binding:'<xsl:value-of select="$binding"/>',tabSize:<xsl:value-of select="$tabSize"/>,charBOL:<xsl:value-of select="$charBOL"/></xsl:with-param>
 		</xsl:call-template>
 	</xsl:template>
 

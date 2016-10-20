@@ -7,10 +7,10 @@ permalink: /apps/pdp11/boot/bootstrap/
 DEC PDP-11 Bootstrap Loader
 ---------------------------
 
-The blog post "[PDP-11 Paper Tape BASIC](http://www.avitech.com.au/ptb/ptb.html)" describes the *Bootstrap Loader*,
-a small program used to load the *Absolute Loader*, which in turn loads the *PDP-11 BASIC Paper Tape*. 
+The **Bootstrap Loader** is a small program that loads the **[Absolute Loader](/apps/pdp11/tapes/absloader/)**,
+which is then used to load other PDP-11 tapes, such as **[BASIC (Single User)](/apps/pdp11/tabes/basic/)**. 
  
-Here's what the *Bootstrap Loader* looks like:
+Here's what the **Bootstrap Loader** looks like:
 
 	Location  Instruction
 	 037744     016701
@@ -28,8 +28,8 @@ Here's what the *Bootstrap Loader* looks like:
 	 037774     000765
 	 037776     177550
 
-Using a [PDPjs](/modules/pdpjs/) machine with the built-in Debugger, such as the
-[PDP-11/20 Test Machine with Debugger](/devices/pdp11/machine/1120/test/debugger/), the *Bootstrap Loader*
+Using any [PDPjs](/modules/pdpjs/) machine with the built-in Debugger, such as this
+[PDP-11/20 Test Machine with Debugger](/devices/pdp11/machine/1120/test/debugger/), the **Bootstrap Loader**
 is easily entered with a single Debugger EDIT ("e") command:
 
 	e 037744 016701 000026 012702 000352 005211 105711 100376 116162 000002 037400 005267 177756 000765 177550
@@ -51,8 +51,8 @@ To run the above code, set the PC to 037744 and start the machine:
 	r pc=037744
 	g
 
-Preloading DEC's Bootstrap Loader
----------------------------------
+Pre-loading DEC's Bootstrap Loader
+----------------------------------
 
 I pasted the disassembled code (above) into a listing file, [BOOTSTRAP-16KB.lst](BOOTSTRAP-16KB.lst),
 and then ran [FileDump](/modules/filedump) to produce a [BOOTSTRAP-16KB.json](BOOTSTRAP-16KB.json) that can
@@ -60,8 +60,8 @@ be automatically pre-loaded into any machine:
 
 	filedump --file=BOOTSTRAP-16KB.lst --format=octal --output=BOOTSTRAP-16KB.json
 
-For example, this [PDP-11/20 16Kb Machine](/devices/pdp11/machine/1120/bootstrap/debugger/machine.xml) preloads
-the *Bootstrap Loader* using the `<ram>` component's optional *file* attribute:
+For example, this [PDP-11/20 16Kb Machine](/devices/pdp11/machine/1120/bootstrap/debugger/) pre-loads
+the **Bootstrap Loader** using the `<ram>` component's optional *file* attribute:
 
 	<ram id="ram" addr="0x0000" size="0x4000" file="/apps/pdp11/boot/bootstrap/BOOTSTRAP-16KB.json"/>
 

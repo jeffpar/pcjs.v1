@@ -1,5 +1,5 @@
 /**
- * @fileoverview Implements the PC11 High-Speed Paper Tape Reader/Punch
+ * @fileoverview Implements the PDP-11 High-Speed Paper Tape Reader/Punch (eg, PC11)
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © Jeff Parsons 2012-2016
  *
@@ -41,6 +41,24 @@ if (NODE) {
 /**
  * PC11(parms)
  *
+ * The PC11 component has the following component-specific (parms) properties:
+ *
+ *      autoMount: a JSON-encoded object containing 'name' and 'path' properties, describing a
+ *      tape resource to automatically attach at startup (only the "attach" operation is supported
+ *      for autoMount; if you want to "load" a tape image directly into RAM at startup, you must
+ *      ask the RAM component to do that).
+ *
+ *      baudReceive: the default number of bits/second that the device should receive data at;
+ *      0 means use the device default (PDP11.PC11.PRS.BAUD)
+ *
+ *      baudTransmit: the default number of bits/second that the device should transmit data at;
+ *      0 means use the device default (PDP11.PC11.PPS.BAUD); currently ignored, since punch
+ *      support isn't implemented yet.
+ *
+ * NOTE: Since the XSL file defines the 'baud' properties as numbers, not strings, there's no need to
+ * use parseInt(), and as an added benefit, we don't need to worry about whether a hex or decimal format
+ * was used.
+ *
  * @constructor
  * @extends Component
  * @param {Object} parms
@@ -55,6 +73,7 @@ function PC11(parms)
      */
     this.configMount = parms['autoMount'] || null;
     this.cAutoMount = 0;
+    this.nBaudReceive = parms['baudReceive'] || PDP11.PC11.PRS.BAUD;
 
     this.prs = 0;               // PRS register
     this.prb = 0;               // PRB register
@@ -63,6 +82,7 @@ function PC11(parms)
     this.sTapeSource = PC11.SOURCE.NONE;
     this.nTapeTarget = PC11.TARGET.NONE;
     this.sTapeName = this.sTapePath = "";
+    this.nLastPercent = -1;     // ensure the first displayProgress() displays something
 
     /*
      * Support for local tape images is currently limited to desktop browsers with FileReader support;
@@ -622,7 +642,7 @@ PC11.prototype.displayTape = function()
 PC11.prototype.displayProgress = function(nPercent)
 {
     nPercent |= 0;
-    if (nPercent !== this.lastPercent) {
+    if (nPercent !== this.nLastPercent) {
         var control = this.bindings[PC11.BINDING.READ_PROGRESS];
         if (control) {
             var aeControls = Component.getElementsByClass(control, PC11.CSSCLASS.PROGRESS_BAR);
@@ -631,7 +651,7 @@ PC11.prototype.displayProgress = function(nPercent)
                 controlBar.style.width = nPercent + "%";
             }
         }
-        this.lastPercent = nPercent;
+        this.nLastPercent = nPercent;
     }
 };
 
@@ -735,6 +755,25 @@ PC11.prototype.restore = function(data)
 };
 
 /**
+ * getBaudTimeout(nBaud)
+ *
+ * Based on the selected baud rate (nBaud), convert that rate into a millisecond delay.
+ *
+ * @this {PC11}
+ * @param {number} nBaud
+ * @return {number} (number of milliseconds per byte)
+ */
+PC11.prototype.getBaudTimeout = function(nBaud)
+{
+    /*
+     * TODO: Do a better job computing this, based on actual numbers of start, stop and parity bits,
+     * instead of hard-coding the total number of bits per byte to 10.
+     */
+    var nBytesPerSecond = Math.round(nBaud / 10);
+    return 1000 / nBytesPerSecond;
+};
+
+/**
  * advanceReader()
  *
  * If the reader is enabled (RE is set) and there is no exceptional condition (ie, ERROR is set),
@@ -748,9 +787,14 @@ PC11.prototype.advanceReader = function()
     if ((this.prs & (PDP11.PC11.PRS.RE | PDP11.PC11.PRS.ERROR)) == PDP11.PC11.PRS.RE) {
         if (!(this.prs & PDP11.PC11.PRS.DONE)) {
             if (this.iTapeData < this.aTapeData.length) {
+                /*
+                 * Here, as elsewhere (eg, the DL11 component), even if I trusted all incoming data
+                 * to be byte values (which I don't), there's also the risk that it could be signed data
+                 * (eg, -128 to 127, instead of 0 to 255).  Both risks are good reasons to always mask
+                 * the data assigned to PRB with 0xff.
+                 */
                 this.prb = this.aTapeData[this.iTapeData++] & 0xff;
                 this.displayProgress(this.iTapeData / this.aTapeData.length * 100);
-                if (MAXDEBUG) this.println("tape read " + str.toHexByte(this.prb) + " at pos " + str.toHexWord(this.iTapeData));
                 this.prs |= PDP11.PC11.PRS.DONE;
                 this.prs &= ~PDP11.PC11.PRS.BUSY;
                 if (this.prs & PDP11.PC11.PRS.RIE) {
@@ -809,7 +853,7 @@ PC11.prototype.writePRS = function(data, addr)
              * that's the rate we'll choose as well (ie, 1000ms / 300).  As an aside, the original "low speed"
              * version of the reader ran at 10 CPS.
              */
-            this.cpu.setTimer(this.timerReaderAdvance, 1000/300);
+            this.cpu.setTimer(this.timerReaderAdvance, this.getBaudTimeout(this.nBaudReceive));
         }
     }
     this.prs = (this.prs & ~PDP11.PC11.PRS.WMASK) | (data & PDP11.PC11.PRS.WMASK);

@@ -88,7 +88,6 @@ KeyboardPDP11.prototype.initBus = function(cmp, bus, cpu, dbg)
     this.cmp = cmp;
     this.cpu = cpu;
     this.dbg = dbg;         // NOTE: The "dbg" property must be set for the message functions to work
-    this.chipset = null;    // /** @type {ChipSetPDP11} */ (cmp.getMachineComponent("ChipSet"));
 };
 
 /**

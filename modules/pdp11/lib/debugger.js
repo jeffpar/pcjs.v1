@@ -1610,7 +1610,19 @@ if (DEBUGGER) {
      */
     DebuggerPDP11.prototype.checkInstruction = function(addr, nState)
     {
+        var opCode = -1
         var cpu = this.cpu;
+
+        /*
+         * Purely as a convenience, we're going to skip over a HALT opcode if the machine is just starting,
+         * and pretend that the NEXT instruction is the first to be executed.
+         */
+        if (nState == 0) {
+            opCode = this.cpu.getWordDirect(addr);
+            if (opCode == PDP11.OPCODE.HALT) {
+                this.cpu.advancePC(2);
+            }
+        }
 
         if (nState > 0) {
             if (this.nBreakIns && !--this.nBreakIns) {
@@ -1629,7 +1641,7 @@ if (DEBUGGER) {
          */
         if (nState >= 0 && this.aaOpcodeCounts.length) {
             this.cOpcodes++;
-            var opCode = this.cpu.getWordDirect(addr);
+            if (opCode < 0) opCode = this.cpu.getWordDirect(addr);
             if (opCode != null) {
                 var dbgAddr = this.aOpcodeHistory[this.iOpcodeHistory];
                 this.setAddr(dbgAddr, cpu.getPC());

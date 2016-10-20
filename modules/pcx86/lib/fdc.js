@@ -103,6 +103,7 @@ if (NODE) {
  * component-specific property:
  *
  *      autoMount: one or more JSON-encoded objects, each containing 'name' and 'path' properties
+ *
  *      sortBy: "name" to sort disks by name, "path" to sort by path, or "none" to leave as-is (default is "name")
  *
  * Regarding early diskette drives: the IBM PC Model 5150 originally shipped with single-sided drives,
