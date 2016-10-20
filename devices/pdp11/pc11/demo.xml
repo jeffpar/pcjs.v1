@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <device id="pc11" type="pc11" autoMount='{path:"/apps/pdp11/tapes/DEC-11-L2PC-PO.json"}' pos="left" padLeft="8px" padBottom="8px">
 	<name>Paper Tape Controls</name>
-	<control type="container" width="300px" name="Paper Tape Controls">
+	<control type="container" width="300px">
 		<control type="list" binding="listTapes">
 			<tape id="tape00" name="Bootstrap Loader (16Kb)" path="/apps/pdp11/boot/bootstrap/BOOTSTRAP-16KB.json"/>
 			<tape id="tape01" name="Absolute Loader" path="/apps/pdp11/tapes/DEC-11-L2PC-PO.json"/>
