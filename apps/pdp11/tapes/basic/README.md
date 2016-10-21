@@ -7,11 +7,11 @@ permalink: /apps/pdp11/tapes/basic/
 DEC PDP-11 BASIC
 ----------------
 
-Try our [DEC BASIC Demo](/devices/pdp11/machine/1120/basic/).
+Try the [DEC BASIC Demo](/devices/pdp11/machine/1120/basic/debugger/).
 
 PCjs has archived the following DEC resources:
 
-- [BASIC (Single User)](DEC-11-AJPB-PB.json)
+- [BASIC (Single User) Tape Image](DEC-11-AJPB-PB.json)
 - [PDP-11 BASIC PROGRAMMING MANUAL (December 1970)](http://archive.pcjs.org/pubs/dec/pdp11/basic/DEC-11-AJPB-D_PDP-11_BASIC_Programming_Manual_Dec70.pdf) 
 
 Third-party resources include:
