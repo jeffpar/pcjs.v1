@@ -258,8 +258,8 @@ RAMPDP11.prototype.loadImage = function(aBytes, addrLoad, addrExec, addrInit)
      * unless the address is odd (usually 1).  DEC's "Absolute Loader" jumps to the exec address
      * in former case, halts in the latter.
      *
-     * All values are stored "little endian" (low byte first, followed by high byte), just like
-     * the PDP-11 does.
+     * All values are stored "little endian" (low byte followed by high byte), just like the
+     * PDP-11's memory architecture.
      *
      * After the data bytes, there is a single checksum byte.  The 8-bit sum of all the bytes in
      * the block (including the header bytes and checksum byte) should be zero.
@@ -267,7 +267,9 @@ RAMPDP11.prototype.loadImage = function(aBytes, addrLoad, addrExec, addrInit)
      * ANOMALIES: Tape files don't always begin with a signature word, so I allow any number of
      * leading zeros before the first signature.  Tape files don't always end cleanly either, so as
      * soon as I see an invalid signature, I break out of the loop without signalling an error, as
-     * long as at least ONE block was successfully processed.
+     * long as at least ONE block was successfully processed.  In fact, it's possible that as
+     * soon as a block with ZERO data bytes is encountered, processing is supposed to stop, but
+     * I haven't examined enough tapes (or the Absolute Loader code) to know for sure.
      */
     if (addrLoad == null) {
         var off = 0, fError = false;

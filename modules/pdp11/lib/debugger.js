@@ -140,7 +140,7 @@ function DebuggerPDP11(parmsDbg)
          * The new "bn" command allows you to specify a number of instructions to execute and then stop;
          * "bn 0" disables any outstanding count.
          */
-        this.nBreakIns = 0;
+        this.nBreakInstructions = 0;
 
         /*
          * Execution history is allocated by historyInit() whenever checksEnabled() conditions change.
@@ -280,6 +280,7 @@ if (DEBUGGER) {
     DebuggerPDP11.OP_DSTOFF   = 0x2000;
     DebuggerPDP11.OP_DSTNUM3  = 0x3000;       // DST 3-bit number (ie, just the DSTREG field)
     DebuggerPDP11.OP_DSTNUM6  = 0x6000;       // DST 6-bit number (ie, both the DSTREG and DSTMODE fields)
+    DebuggerPDP11.OP_DSTNUM8  = 0x8000;       // DST 8-bit number
     DebuggerPDP11.OP_OTHER    = 0xF000;
 
     /*
@@ -339,8 +340,8 @@ if (DEBUGGER) {
             0x8500: [DebuggerPDP11.OPS.BVS,     DebuggerPDP11.OP_BRANCH],
             0x8600: [DebuggerPDP11.OPS.BCC,     DebuggerPDP11.OP_BRANCH],
             0x8700: [DebuggerPDP11.OPS.BCS,     DebuggerPDP11.OP_BRANCH],
-            0x8800: [DebuggerPDP11.OPS.EMT],                                    // 104000..104377
-            0x8900: [DebuggerPDP11.OPS.TRAP]                                    // 104400..104777
+            0x8800: [DebuggerPDP11.OPS.EMT,     DebuggerPDP11.OP_DSTNUM8],      // 104000..104377
+            0x8900: [DebuggerPDP11.OPS.TRAP,    DebuggerPDP11.OP_DSTNUM8]       // 104400..104777
         },
         0xFFC0: {
             0x0040: [DebuggerPDP11.OPS.JMP,     DebuggerPDP11.OP_DST],          // 0001DD
@@ -932,8 +933,8 @@ if (DEBUGGER) {
     {
         var sMore = "";
         var cHistory = 0;
-        var iHistory = this.iOpcodeHistory;
-        var aHistory = this.aOpcodeHistory;
+        var iHistory = this.iInstructionHistory;
+        var aHistory = this.aInstructionHistory;
 
         if (aHistory.length) {
             var nPrev = +sPrev || this.nextHistory;
@@ -985,7 +986,7 @@ if (DEBUGGER) {
              *
              * If you re-enable this protection, be sure to re-enable the decrement below, too.
              */
-            while (nLines > 0 && iHistory != this.iOpcodeHistory) {
+            while (nLines > 0 && iHistory != this.iInstructionHistory) {
 
                 var dbgAddr = aHistory[iHistory++];
                 if (dbgAddr.addr == null) break;
@@ -1245,32 +1246,25 @@ if (DEBUGGER) {
     {
         var i;
         if (!this.checksEnabled()) {
-            if (this.aOpcodeHistory && this.aOpcodeHistory.length && !fQuiet) {
+            if (this.aInstructionHistory && this.aInstructionHistory.length && !fQuiet) {
                 this.println("instruction history buffer freed");
             }
-            this.iOpcodeHistory = 0;
-            this.aOpcodeHistory = [];
-            this.aaOpcodeCounts = [];
+            this.iInstructionHistory = 0;
+            this.aInstructionHistory = [];
             return;
         }
-        if (!this.aOpcodeHistory || !this.aOpcodeHistory.length) {
-            this.aOpcodeHistory = new Array(DebuggerPDP11.HISTORY_LIMIT);
-            for (i = 0; i < this.aOpcodeHistory.length; i++) {
+        if (!this.aInstructionHistory || !this.aInstructionHistory.length) {
+            this.aInstructionHistory = new Array(DebuggerPDP11.HISTORY_LIMIT);
+            for (i = 0; i < this.aInstructionHistory.length; i++) {
                 /*
                  * Preallocate dummy Addr (Array) objects in every history slot, so that
                  * checkInstruction() doesn't need to call newAddr() on every slot update.
                  */
-                this.aOpcodeHistory[i] = this.newAddr();
+                this.aInstructionHistory[i] = this.newAddr();
             }
-            this.iOpcodeHistory = 0;
+            this.iInstructionHistory = 0;
             if (!fQuiet) {
                 this.println("instruction history buffer allocated");
-            }
-        }
-        if (!this.aaOpcodeCounts || !this.aaOpcodeCounts.length) {
-            this.aaOpcodeCounts = new Array(256);
-            for (i = 0; i < this.aaOpcodeCounts.length; i++) {
-                this.aaOpcodeCounts[i] = [i, 0];
             }
         }
     };
@@ -1324,7 +1318,7 @@ if (DEBUGGER) {
                 this.nCycles += nCyclesStep;
                 this.cpu.addCycles(nCyclesStep, true);
                 this.cpu.updateChecksum(nCyclesStep);
-                this.cOpcodes++;
+                this.cInstructions++;
             }
         }
         catch(exception) {
@@ -1456,7 +1450,7 @@ if (DEBUGGER) {
     DebuggerPDP11.prototype.reset = function(fQuiet)
     {
         this.historyInit();
-        this.cOpcodes = this.cOpcodesStart = 0;
+        this.cInstructions = this.cInstructionsStart = 0;
         this.sMessagePrev = null;
         this.nCycles = 0;
         this.dbgAddrNextCode = this.newAddr(this.cpu.getPC());
@@ -1550,14 +1544,14 @@ if (DEBUGGER) {
                     var nCyclesPerSecond = (msTotal > 0? Math.round(this.nCycles * 1000 / msTotal) : 0);
                     sStopped += " (";
                     if (this.checksEnabled()) {
-                        sStopped += this.cOpcodes + " opcodes, ";
+                        sStopped += this.cInstructions + " instructions, ";
                         /*
                          * $ops displays progress by calculating cOpcodes - cOpcodesStart, so before
                          * zeroing cOpcodes, we should subtract cOpcodes from cOpcodesStart (since we're
                          * effectively subtracting cOpcodes from cOpcodes as well).
                          */
-                        this.cOpcodesStart -= this.cOpcodes;
-                        this.cOpcodes = 0;
+                        this.cInstructionsStart -= this.cInstructions;
+                        this.cInstructions = 0;
                     }
                     sStopped += this.nCycles + " cycles, " + msTotal + " ms, " + nCyclesPerSecond + " hz)";
                 } else {
@@ -1594,7 +1588,7 @@ if (DEBUGGER) {
      */
     DebuggerPDP11.prototype.checksEnabled = function(fRelease)
     {
-        return ((DEBUG && !fRelease)? true : (this.aBreakExec.length > 1 || !!this.nBreakIns));
+        return ((DEBUG && !fRelease)? true : (this.aBreakExec.length > 1 || !!this.nBreakInstructions));
     };
 
     /**
@@ -1610,7 +1604,7 @@ if (DEBUGGER) {
      */
     DebuggerPDP11.prototype.checkInstruction = function(addr, nState)
     {
-        var opCode = -1
+        var opCode = -1;
         var cpu = this.cpu;
 
         /*
@@ -1620,13 +1614,13 @@ if (DEBUGGER) {
         if (nState == 0) {
             opCode = this.cpu.getWordDirect(addr);
             if (opCode == PDP11.OPCODE.HALT) {
-                this.cpu.advancePC(2);
+                addr = this.cpu.advancePC(2);
             }
         }
 
         if (nState > 0) {
-            if (this.nBreakIns && !--this.nBreakIns) {
-                return true;
+            if (this.nBreakInstructions) {
+                if (!--this.nBreakInstructions) return true;
             }
             if (this.checkBreakpoint(addr, 1, this.aBreakExec)) {
                 return true;
@@ -1639,14 +1633,16 @@ if (DEBUGGER) {
          * adding/removing breakpoints, simply because it's breakpoints that trigger the call to checkInstruction();
          * well, OK, and a few other things now, like enabling MessagesPDP11.INT messages.
          */
-        if (nState >= 0 && this.aaOpcodeCounts.length) {
-            this.cOpcodes++;
-            if (opCode < 0) opCode = this.cpu.getWordDirect(addr);
-            if (opCode != null) {
-                var dbgAddr = this.aOpcodeHistory[this.iOpcodeHistory];
-                this.setAddr(dbgAddr, cpu.getPC());
+        if (nState >= 0 && this.aInstructionHistory.length) {
+            this.cInstructions++;
+            if (opCode < 0) {
+                opCode = this.cpu.getWordDirect(addr);
+            }
+            if ((opCode & 0xffff) != PDP11.OPCODE.INVALID) {
+                var dbgAddr = this.aInstructionHistory[this.iInstructionHistory];
+                this.setAddr(dbgAddr, addr);
                 // if (DEBUG) dbgAddr.cycleCount = cpu.getCycles();
-                if (++this.iOpcodeHistory == this.aOpcodeHistory.length) this.iOpcodeHistory = 0;
+                if (++this.iInstructionHistory == this.aInstructionHistory.length) this.iInstructionHistory = 0;
             }
         }
         return false;
@@ -2161,11 +2157,15 @@ if (DEBUGGER) {
             sOperand = this.toStrBase(addr);
         }
         else if (opTypeOther == DebuggerPDP11.OP_DSTNUM3) {
-            disp = (opCode & 0x7);
+            disp = (opCode & 0x07);
             sOperand = this.toStrBase(disp, 1);
         }
         else if (opTypeOther == DebuggerPDP11.OP_DSTNUM6) {
             disp = (opCode & 0x3f);
+            sOperand = this.toStrBase(disp, 1);
+        }
+        else if (opTypeOther == DebuggerPDP11.OP_DSTNUM8) {
+            disp = (opCode & 0xff);
             sOperand = this.toStrBase(disp, 1);
         }
         else {
@@ -2724,8 +2724,8 @@ if (DEBUGGER) {
         }
 
         if (sParm == 'n') {
-            this.nBreakIns = this.parseValue(sAddr);
-            this.println("break after " + this.nBreakIns + " instruction(s)");
+            this.nBreakInstructions = this.parseValue(sAddr);
+            this.println("break after " + this.nBreakInstructions + " instruction(s)");
             return;
         }
 
@@ -2914,7 +2914,7 @@ if (DEBUGGER) {
                     data = shift = 0;
                 }
                 sChars += (v >= 32 && v < 128? String.fromCharCode(v) : '.');
-                nBytes--;
+                nBytes -= n;
             }
             if (sDump) sDump += '\n';
             sDump += sAddr + "  " + sData + ((i == 0)? (' ' + sChars) : "");
@@ -3680,16 +3680,16 @@ if (DEBUGGER) {
     };
 
     /**
-     * shiftArgs(asArgs)
-     *
-     * Used with any command (eg, "r") that allows but doesn't require whitespace between command and first argument.
+     * splitArgs(sCmd)
      *
      * @this {DebuggerPDP11}
-     * @param {Array.<string>} asArgs
+     * @param {string} sCmd
      * @return {Array.<string>}
      */
-    DebuggerPDP11.prototype.shiftArgs = function(asArgs)
+    DebuggerPDP11.prototype.splitArgs = function(sCmd)
     {
+        var asArgs = sCmd.replace(/ +/g, ' ').split(' ');
+        asArgs[0] = asArgs[0].toLowerCase();
         if (asArgs && asArgs.length) {
             var s0 = asArgs[0];
             var ch0 = s0.charAt(0);
@@ -3749,8 +3749,7 @@ if (DEBUGGER) {
                 }
 
                 var fError = false;
-                var asArgs = this.shiftArgs(sCmd.replace(/ +/g, ' ').split(' '));
-                asArgs[0] = asArgs[0].toLowerCase();
+                var asArgs = this.splitArgs(sCmd);
 
                 switch (asArgs[0].charAt(0)) {
                 case 'a':

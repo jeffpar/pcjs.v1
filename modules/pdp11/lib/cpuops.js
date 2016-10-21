@@ -827,7 +827,7 @@ PDP11.opBPL = function(opCode)
  */
 PDP11.opBPT = function(opCode)
 {
-    this.trap(PDP11.TRAP.BREAKPOINT, PDP11.REASON.BPT);
+    this.trap(PDP11.TRAP.BPT, PDP11.REASON.BPT);
     this.nStepCycles -= (4 + 1);
 };
 
@@ -1101,7 +1101,7 @@ PDP11.opDIV = function(opCode)
  */
 PDP11.opEMT = function(opCode)
 {
-    this.trap(PDP11.TRAP.EMULATOR, PDP11.REASON.EMT);
+    this.trap(PDP11.TRAP.EMT, PDP11.REASON.EMT);
     this.nStepCycles -= (22 + 3);
 };
 
@@ -1496,8 +1496,15 @@ PDP11.opRTS = function(opCode)
     }
     var src = this.popWord();
     var reg = opCode & PDP11.OPREG.MASK;
-    this.setPC(this.regsGen[reg]);
-    this.regsGen[reg] = src;
+    /*
+     * When the popular "RTS PC" form is used, we might as well eliminate the useless setting of PC to itself.
+     */
+    if (reg == PDP11.REG.PC) {
+        this.setPC(src);
+    } else {
+        this.setPC(this.regsGen[reg]);
+        this.regsGen[reg] = src;
+    }
     this.nStepCycles -= (7 + 2);
 };
 

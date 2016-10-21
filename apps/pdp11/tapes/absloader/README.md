@@ -16,4 +16,4 @@ PCjs has archived the following DEC resources:
 
 - [Absolute Loader](DEC-11-L2PC-PO.json)
 - [LISTING OF PDP-11 ABSOLUTE LOADER (June 1975)](http://archive.pcjs.org/pubs/dec/pdp11/other/DEC-11-UABLA-A-LA_PDP-11AbsoluteLoaderListing_Jun75.pdf)
-- "APPENDIX D: THE BOOTSTRAP AND ABSOLUTE LOADERS" from the [PDP-11 BASIC PROGRAMMING MANUAL (December 1970)](http://archive.pcjs.org/pubs/dec/pdp11/other/BASIC_Programming_Manual_Dec70.pdf) 
+- "APPENDIX D: THE BOOTSTRAP AND ABSOLUTE LOADERS" from the [PDP-11 BASIC PROGRAMMING MANUAL (December 1970)](http://archive.pcjs.org/pubs/dec/pdp11/basic/DEC-11-AJPB-D_PDP-11_BASIC_Programming_Manual_Dec70.pdf) 

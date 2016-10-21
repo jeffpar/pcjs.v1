@@ -189,7 +189,8 @@ var PDP11 = {
      * Assorted common opcodes
      */
     OPCODE: {
-        HALT:       0x0000
+        HALT:       0x0000,
+        INVALID:    0xFFFF      // far from the only invalid opcode, just a KNOWN invalid opcode
     },
     /*
      * Internal operation state flags
@@ -249,13 +250,13 @@ var PDP11 = {
         UNDEFINED:  0x00,       // 000  (reserved)
         BUS_ERROR:  0x04,       // 004  illegal instructions, bus errors, stack limit, illegal internal address, microbreak
         RESERVED:   0x08,       // 010  reserved instructions
-        BREAKPOINT: 0x0C,       // 014  BPT, breakpoint trap (trace)
-        IOT:        0x10,       // 020  IOT, input/output trap
-        POWER_FAIL: 0x14,       // 024  power fail
-        EMULATOR:   0x18,       // 030  EMT, emulator trap
+        BPT:        0x0C,       // 014  BPT: breakpoint trap (trace)
+        IOT:        0x10,       // 020  IOT: input/output trap
+        PF:         0x14,       // 024  power fail
+        EMT:        0x18,       // 030  EMT: emulator trap
         TRAP:       0x1C,       // 034  TRAP instruction
-        PIRQ:       0xA0,       // 240  PIRQ, program interrupt request
-        MMU_FAULT:  0xA8        // 250  MMU aborts and traps
+        PIRQ:       0xA0,       // 240  PIRQ: program interrupt request
+        MMU:        0xA8        // 250  MMU: aborts and traps
     },
     /*
      * PDP-11 trap reasons (for diagnostic purposes only)

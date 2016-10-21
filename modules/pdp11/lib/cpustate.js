@@ -548,31 +548,6 @@ CPUStatePDP11.prototype.setNF = function()
 };
 
 /**
- * getPC()
- *
- * @this {CPUStatePDP11}
- * @return {number}
- */
-CPUStatePDP11.prototype.getPC = function()
-{
-    return this.regsGen[PDP11.REG.PC];
-};
-
-/**
- * getLastPC()
- *
- * @this {CPUStatePDP11}
- * @return {number}
- */
-CPUStatePDP11.prototype.getLastPC = function()
-{
-    /*
-     * As long as we're always snapping the PC before every opcode, we might as well use it.
-     */
-    return this.regMMR2;
-};
-
-/**
  * getOpcode()
  *
  * TODO: Determine whether we can speed this up by *always* snapping PC into a shadow MMR2 register
@@ -595,6 +570,8 @@ CPUStatePDP11.prototype.getOpcode = function()
 /**
  * advancePC(off)
  *
+ * NOTE: This function is nothing more than a convenience, and we fully expect it to be inlined at runtime.
+ *
  * @this {CPUStatePDP11}
  * @param {number} off
  * @return {number} (original PC)
@@ -607,7 +584,38 @@ CPUStatePDP11.prototype.advancePC = function(off)
 };
 
 /**
+ * getPC()
+ *
+ * NOTE: This function is nothing more than a convenience, and we fully expect it to be inlined at runtime.
+ *
+ * @this {CPUStatePDP11}
+ * @return {number}
+ */
+CPUStatePDP11.prototype.getPC = function()
+{
+    return this.regsGen[PDP11.REG.PC];
+};
+
+/**
+ * getLastPC()
+ *
+ * @this {CPUStatePDP11}
+ * @return {number}
+ */
+CPUStatePDP11.prototype.getLastPC = function()
+{
+    /*
+     * As long as we're always snapping the PC into regMMR2 before every opcode, we might as well use it.
+     */
+    return this.regMMR2;
+};
+
+/**
  * setPC()
+ *
+ * NOTE: Unlike other PCjs emulators, such as PCx86, where all PC updates MUST go through the setPC()
+ * function, this function is nothing more than a convenience, because in the PDP-11, the PC can be loaded
+ * like any other general register.  We fully expect this function to be inlined at runtime.
  *
  * @this {CPUStatePDP11}
  * @param {number} addr
@@ -620,6 +628,8 @@ CPUStatePDP11.prototype.setPC = function(addr)
 /**
  * getSP()
  *
+ * NOTE: This function is nothing more than a convenience, and we fully expect it to be inlined at runtime.
+ *
  * @this {CPUStatePDP11}
  * @return {number}
  */
@@ -630,6 +640,10 @@ CPUStatePDP11.prototype.getSP = function()
 
 /**
  * setSP()
+ *
+ * NOTE: Unlike other PCjs emulators, such as PCx86, where all SP updates MUST go through the setSP()
+ * function, this function is nothing more than a convenience, because in the PDP-11, the PC can be loaded
+ * like any other general register.  We fully expect this function to be inlined at runtime.
  *
  * @this {CPUStatePDP11}
  * @param {number} addr
@@ -1326,7 +1340,7 @@ CPUStatePDP11.prototype.mapVirtualToPhysical = function(virtualAddress, accessFl
             if (!(this.regMMR0 & 0xe000)) {
                 this.regMMR0 |= errorMask | (this.mmuLastMode << 5) | (this.mmuLastPage << 1);
             }
-            this.trap(PDP11.TRAP.MMU_FAULT, PDP11.REASON.MAPERROR);
+            this.trap(PDP11.TRAP.MMU, PDP11.REASON.MAPERROR);
         }
         if (!(this.regMMR0 & 0xf000)) {
             //if (physicalAddress < 017772200 || physicalAddress > 017777677) {
@@ -2083,13 +2097,13 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
              */
             if (this.opFlags & PDP11.OPFLAG.TRAP_MASK) {
                 if (this.opFlags & PDP11.OPFLAG.TRAP_MMU) {
-                    this.trap(PDP11.TRAP.MMU_FAULT, PDP11.REASON.TRAPMMU);          // MMU trap has priority
+                    this.trap(PDP11.TRAP.MMU, PDP11.REASON.TRAPMMU);            // MMU trap has priority
                 } else {
                     if (this.opFlags & PDP11.OPFLAG.TRAP_SP) {
-                        this.trap(PDP11.TRAP.BUS_ERROR, PDP11.REASON.TRAPSP);       // then SP trap
+                        this.trap(PDP11.TRAP.BUS_ERROR, PDP11.REASON.TRAPSP);   // then SP trap
                     } else {
                         if (this.opFlags & PDP11.OPFLAG.TRAP_TF) {
-                            this.trap(PDP11.TRAP.BREAKPOINT, PDP11.REASON.TRAPTF);  // and finally a TF trap
+                            this.trap(PDP11.TRAP.BPT, PDP11.REASON.TRAPTF);     // and finally a TF trap
                         }
                     }
                 }
