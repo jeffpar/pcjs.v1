@@ -23,9 +23,9 @@ Third-party resources include:
 Debugging Notes
 ---------------
 
-One of the first things I noticed when debugging PDP-11 BASIC was its reliance on TRAP instructions.
-For example, `TRAP 000` used to output the character in R2 to the terminal.  Let's take a closer look at how its
-TRAP handler works.
+One of the first things I noticed when debugging PDP-11 BASIC was its heavy reliance on TRAP instructions.
+For example, `TRAP 000` is used to output the character in R2 to the terminal.  Let's take a closer look at how
+its TRAP handler works.
 
 First, if you check the table of PDP-11 trap vectors, you'll see that the vector for TRAP instructions is 000034.
 So let's dump the contents of the two-word vector at 000034:
