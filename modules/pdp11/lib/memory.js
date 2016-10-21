@@ -98,7 +98,7 @@ var littleEndian = (TYPEDARRAYS? (function() {
  */
 function MemoryPDP11(bus, addr, used, size, type, controller)
 {
-    var i;
+    var a, i;
     this.bus = bus;
     this.id = (MemoryPDP11.idBlock += 2);
     this.adw = null;
@@ -127,7 +127,7 @@ function MemoryPDP11(bus, addr, used, size, type, controller)
     /*
      * For empty memory blocks, all we need to do is ensure all access functions are mapped to "none" handlers.
      */
-    if (!size) {
+    if (!this.size) {
         this.setAccess();
         return;
     }
@@ -138,7 +138,7 @@ function MemoryPDP11(bus, addr, used, size, type, controller)
      */
     if (controller) {
         this.controller = controller;
-        var a = controller.getControllerBuffer(addr);
+        a = controller.getControllerBuffer(addr);
         this.adw = a[0];
         this.offset = a[1];
         this.setAccess(controller.getControllerAccess());
@@ -154,20 +154,24 @@ function MemoryPDP11(bus, addr, used, size, type, controller)
      * mode; pseudo-random might be best, to help make any bugs reproducible.
      */
     if (TYPEDARRAYS) {
-        this.buffer = new ArrayBuffer(size);
-        this.dv = new DataView(this.buffer, 0, size);
+        this.buffer = new ArrayBuffer(this.size);
+        this.dv = new DataView(this.buffer, 0, this.size);
         /*
          * If littleEndian is true, we can use ab[], aw[] and adw[] directly; well, we can use them
          * whenever the offset is a multiple of 1, 2 or 4, respectively.  Otherwise, we must fallback to
          * dv.getUint8()/dv.setUint8(), dv.getUint16()/dv.setUint16() and dv.getInt32()/dv.setInt32().
          */
-        this.ab = new Uint8Array(this.buffer, 0, size);
-        this.aw = new Uint16Array(this.buffer, 0, size >> 1);
-        this.adw = new Int32Array(this.buffer, 0, size >> 2);
+        this.ab = new Uint8Array(this.buffer, 0, this.size);
+        this.aw = new Uint16Array(this.buffer, 0, this.size >> 1);
+        this.adw = new Int32Array(this.buffer, 0, this.size >> 2);
         this.setAccess(littleEndian? MemoryPDP11.afnArrayLE : MemoryPDP11.afnArrayBE);
     } else {
+        /*
+         * NOTE: An ArrayBuffer is defined as being zero-initialized, but the elements of a new
+         * Array are not, so this code path takes care of zero-initialization ourselves.
+         */
         if (BYTEARRAYS) {
-            this.ab = new Array(size);
+            a = this.ab = new Array(this.size);
         } else {
             /*
              * NOTE: This is the default mode of operation (!TYPEDARRAYS && !BYTEARRAYS), because it
@@ -175,9 +179,9 @@ function MemoryPDP11(bus, addr, used, size, type, controller)
              * come at twice the overhead of TYPEDARRAYS, it's increasingly likely that the JavaScript
              * runtime will notice that all we ever store are 32-bit values, and optimize accordingly.
              */
-            this.adw = new Array(size >> 2);
-            for (i = 0; i < this.adw.length; i++) this.adw[i] = 0;
+            a = this.adw = new Array(this.size >> 2);
         }
+        for (i = 0; i < a.length; i++) a[i] = 0;
         this.setAccess(MemoryPDP11.afnMemory);
     }
 }
@@ -247,7 +251,7 @@ MemoryPDP11.prototype = {
         this.addr = addr;
     },
     /**
-     * clone(mem, type)
+     * clone(mem, type, dbg)
      *
      * Converts the current Memory block (this) into a clone of the given Memory block (mem),
      * and optionally overrides the current block's type with the specified type.
@@ -380,6 +384,31 @@ MemoryPDP11.prototype = {
             return true;
         }
         return false;
+    },
+    /**
+     * zero(off, len)
+     *
+     * Zeros the block.  Supporting off and len parameters is probably overkill, and makes more
+     * work in the non-TYPEDARRAY, non-BYTEARRAY case, because there all we have is an array of DWORDs,
+     * but that's not the typical case.
+     *
+     * @this {MemoryPDP11}
+     * @param {number} [off] (optional starting byte offset within block)
+     * @param {number} [len] (optional maximum number of bytes; default is the entire block)
+     */
+    zero: function(off, len) {
+        var i;
+        off = off || 0;
+        /*
+         * NOTE: If len happens to be larger than the block, that's OK, because we also bounds-check the index.
+         */
+        if (len === undefined) len = this.size;
+        Component.assert(off >= 0 && off < this.size);
+        if (TYPEDARRAYS || BYTEARRAYS) {
+            for (i = off; len-- && i < this.ab.length; i++) this.ab[i] = 0;
+        } else {
+            for (i = off; len-- && i < this.size; i++) this.writeByteDirect(off, 0, this.addr + off);
+        }
     },
     /**
      * setAccess(afn, fDirect)

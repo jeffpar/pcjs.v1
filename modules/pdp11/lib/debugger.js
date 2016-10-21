@@ -572,11 +572,11 @@ if (DEBUGGER) {
     };
 
     /**
-     * updateFocus()
+     * setFocus()
      *
      * @this {DebuggerPDP11}
      */
-    DebuggerPDP11.prototype.updateFocus = function()
+    DebuggerPDP11.prototype.setFocus = function()
     {
         if (this.controlDebug) this.controlDebug.focus();
     };
@@ -1216,12 +1216,14 @@ if (DEBUGGER) {
      * init()
      *
      * @this {DebuggerPDP11}
+     * @param {boolean} [fAutoStart]
      */
-    DebuggerPDP11.prototype.init = function()
+    DebuggerPDP11.prototype.init = function(fAutoStart)
     {
         this.fInit = true;
         this.println("Type ? for help with PDP11 Debugger commands");
         this.updateStatus();
+        if (!fAutoStart) this.setFocus();
         if (this.sInitCommands) {
             var sCmds = this.sInitCommands;
             this.sInitCommands = null;
@@ -1567,7 +1569,7 @@ if (DEBUGGER) {
                 this.println(sStopped);
             }
             this.updateStatus(true);
-            this.updateFocus();
+            this.setFocus();
             this.clearTempBreakpoint(this.cpu.getPC());
         }
     };
@@ -2903,9 +2905,12 @@ if (DEBUGGER) {
              * And while we used to always call getByte() and assemble them into words or dwords as appropriate, I've
              * changed the logic below to honor "dw" by calling getWord(), since the Bus interfaces have been updated
              * to prevent generating traps due to to Debugger access of unaligned memory and/or undefined IOPAGE addresses.
+             *
+             * Besides, it's nice for "db" and "dw" to generate the same Bus activity that typical byte and word reads do.
              */
             for (i = (size == 4? 16 : this.nBase); i > 0 && nBytes > 0; i--) {
-                var n, v = size == 2? this.getWord(dbgAddr, n = 2) : this.getByte(dbgAddr, n = 1);
+                var n = 1;
+                var v = size == 1? this.getByte(dbgAddr, n) : this.getWord(dbgAddr, (n = 2));
                 data |= (v << (shift << 3));
                 shift += n;
                 if (shift == size) {
@@ -3445,7 +3450,7 @@ if (DEBUGGER) {
             if (this.nStep) {
                 this.setTempBreakpoint(dbgAddr);
                 if (!this.startCPU()) {
-                    if (this.cmp) this.cmp.updateFocus();
+                    if (this.cmp) this.cmp.setFocus();
                     this.nStep = 0;
                 }
                 /*

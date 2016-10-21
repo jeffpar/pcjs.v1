@@ -324,6 +324,9 @@ PC11.prototype.powerDown = function(fSave, fShutdown)
 /**
  * reset()
  *
+ * TODO: Consider making our reset() handler ALSO restore the original attached tape, in much the same
+ * way the RAM component now restores the original predefined memory or tape image after resetting the RAM.
+ *
  * @this {PC11}
  */
 PC11.prototype.reset = function()
@@ -691,7 +694,7 @@ PC11.prototype.parseTape = function(sTapeName, sTapePath, nTapeTarget, aBytes, a
             this.sTapePath = "";
             this.sTapeSource = PC11.SOURCE.NONE;
             this.nTapeTarget = PC11.TARGET.NONE;
-            this.status("error loading tape: " + sTapeName);
+            this.notice("No load address available for tape: " + sTapeName);
             return;
         }
         this.status("tape loaded: " + sTapeName);

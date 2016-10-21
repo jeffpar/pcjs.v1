@@ -360,16 +360,17 @@ CPUStatePDP11.prototype.setMMR3 = function(newMMR3)
 };
 
 /**
- * setReset(addr)
+ * setReset(addr, fReset)
  *
  * @this {CPUStatePDP11}
  * @param {number} addr
+ * @param {boolean} [fReset] (true if called in the context of a complete reset, obviating the need to notify the Debugger)
  */
-CPUStatePDP11.prototype.setReset = function(addr)
+CPUStatePDP11.prototype.setReset = function(addr, fReset)
 {
     this.addrReset = addr;
     this.setPC(addr);
-    if (this.dbg) {
+    if (!fReset && this.dbg) {
         /*
          * TODO: Review the decision to always stop the CPU if the Debugger is loaded.
          */

@@ -126,6 +126,16 @@ RAMPDP11.prototype.initBus = function(cmp, bus, cpu, dbg)
  */
 RAMPDP11.prototype.powerUp = function(data, fRepower)
 {
+    if (this.aSymbols) {
+        if (this.dbg) {
+            this.dbg.addSymbols(this.id, this.addrRAM, this.sizeRAM, this.aSymbols);
+        }
+        /*
+         * Our only role in the handling of symbols is to hand them off to the Debugger at our
+         * first opportunity. Now that we've done that, our copy of the symbols, if any, are toast.
+         */
+        delete this.aSymbols;
+    }
     /*
      * The Computer powers up the CPU last, at which point CPUState state is restored,
      * which includes the Bus state, and since we use the Bus to allocate all our memory,
@@ -210,13 +220,12 @@ RAMPDP11.prototype.initRAM = function()
              * Too early...
              */
             if (!this.abInit || !this.bus) return;
-
             this.loadImage(this.abInit, this.addrLoad, this.addrExec, this.addrRAM);
-
             /*
-             * TODO: Consider an option to retain this data and give the user a way of restoring the initial contents.
+             * NOTE: We now retain this data, so that reset() can return the RAM to its predefined state.
+             *
+             *      delete this.abInit;
              */
-            delete this.abInit;
         }
         this.setReady();
     }
@@ -229,22 +238,26 @@ RAMPDP11.prototype.initRAM = function()
  */
 RAMPDP11.prototype.reset = function()
 {
-    /*
-     * If you want to zero RAM on reset, then this would be a good place to do it.
-     */
+    if (this.fAllocated) {
+        this.bus.zeroMemory(this.addrRAM, this.sizeRAM);
+        if (this.abInit) {
+            this.loadImage(this.abInit, this.addrLoad, this.addrExec, this.addrRAM, true);
+        }
+    }
 };
 
 /**
- * loadImage(aBytes, addrLoad, addrExec, addrInit)
+ * loadImage(aBytes, addrLoad, addrExec, addrInit, fReset)
  *
  * @this {RAMPDP11}
  * @param {Array|Uint8Array} aBytes
  * @param {number|null} [addrLoad]
  * @param {number|null} [addrExec]
  * @param {number|null} [addrInit]
+ * @param {boolean} [fReset]
  * @return {boolean} (true if loaded, false if not)
  */
-RAMPDP11.prototype.loadImage = function(aBytes, addrLoad, addrExec, addrInit)
+RAMPDP11.prototype.loadImage = function(aBytes, addrLoad, addrExec, addrInit, fReset)
 {
     var fLoaded = false;
     /*
@@ -315,7 +328,7 @@ RAMPDP11.prototype.loadImage = function(aBytes, addrLoad, addrExec, addrInit)
                 if (addr & 0x1) {
                     this.cpu.stopCPU();
                 } else {
-                    this.cpu.setReset(addr);
+                    this.cpu.setReset(addr, fReset);
                 }
             } else {
                 while (cbData--) {
@@ -331,7 +344,7 @@ RAMPDP11.prototype.loadImage = function(aBytes, addrLoad, addrExec, addrInit)
             for (var i = 0; i < aBytes.length; i++) {
                 this.cpu.setByteDirect(addrLoad + i, aBytes[i]);
             }
-            if (addrExec != null) this.cpu.setReset(addrExec);
+            if (addrExec != null) this.cpu.setReset(addrExec, fReset);
             fLoaded = true;
         }
     }

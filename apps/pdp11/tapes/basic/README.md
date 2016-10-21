@@ -23,6 +23,8 @@ Third-party resources include:
 Debugging Notes
 ---------------
 
+### TRAP Handling
+
 One of the first things I noticed when debugging PDP-11 BASIC was its heavy reliance on TRAP instructions.
 For example, `TRAP 000` is used to output the character in R2 to the terminal.  Let's take a closer look at how
 its TRAP handler works.
@@ -64,3 +66,19 @@ an *even* value) into a jump table index.
 
 The final instruction, `MOV @(SP)+,PC`, moves the address at the jump table index into PC, while also removing the TRAP
 instruction from the stack, leaving only the *previous PC* on the stack.
+
+### Comparing to SIMH
+
+How to set (and display) a breakpoint in PDPjs:
+
+	>> bp 016220
+	bp 016220 set
+	>> bl
+	bp 016220
+
+How to set (and display) the same breakpoint in SIMH:
+
+	sim> break -e 016220
+	sim> show break
+	16220:	E
+

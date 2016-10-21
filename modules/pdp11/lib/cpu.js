@@ -260,10 +260,10 @@ CPUPDP11.prototype.powerUp = function(data, fRepower)
             this.resetChecksum();
         }
         /*
-         * Give the Debugger a chance to do/print something once we've powered up
+         * Give the Debugger a chance to do/print something once we've powered up.
          */
         if (DEBUGGER && this.dbg) {
-            this.dbg.init();
+            this.dbg.init(this.flags.autoStart);
         } else {
             /*
              * The Computer (this.cmp) knows if there's a Control Panel (this.cmp.panel), and the Control Panel
@@ -722,7 +722,7 @@ CPUPDP11.prototype.setSpeed = function(nMultiplier, fUpdateFocus)
             if (controlSpeed) controlSpeed.textContent = sSpeed;
             this.println("target speed: " + sSpeed);
         }
-        if (fUpdateFocus && this.cmp) this.cmp.updateFocus();
+        if (fUpdateFocus && this.cmp) this.cmp.setFocus();
     }
     this.addCycles(this.nRunCycles);
     this.nRunCycles = 0;
@@ -1130,7 +1130,7 @@ CPUPDP11.prototype.startCPU = function(fUpdateFocus)
     var controlRun = this.bindings["run"];
     if (controlRun) controlRun.textContent = "Halt";
     if (this.cmp) {
-        if (fUpdateFocus) this.cmp.updateFocus(true);
+        if (fUpdateFocus) this.cmp.setFocus(true);
         this.cmp.start(this.msStartRun, this.getCycles());
     }
     setTimeout(this.onRunTimeout, 0);
