@@ -530,7 +530,7 @@ CPUPDP11.prototype.addCycles = function(nCycles, fEndStep)
 {
     this.nTotalCycles += nCycles;
     if (fEndStep) {
-        this.nBurstCycles = this.nStepCycles = 0;
+        this.nBurstCycles = this.nStepCycles = this.nSnapCycles = 0;
     }
 };
 
@@ -643,7 +643,7 @@ CPUPDP11.prototype.resetCycles = function()
 {
     this.mhz = 0;
     this.nYieldsSinceStatusUpdate = 0;
-    this.nTotalCycles = this.nRunCycles = this.nBurstCycles = this.nStepCycles = 0;
+    this.nTotalCycles = this.nRunCycles = this.nBurstCycles = this.nStepCycles = this.nSnapCycles = 0;
     this.resetChecksum();
     this.setSpeed(1);
 };
@@ -1019,7 +1019,13 @@ CPUPDP11.prototype.updateTimers = function(nCycles)
 CPUPDP11.prototype.endBurst = function(fReset)
 {
     var nCycles = this.nBurstCycles -= this.nStepCycles;
-    this.nStepCycles = 0;
+    /*
+     * In addition to zeroing nStepCycles, it's important that we also zero nSnapCycles, because if a CPU
+     * burst is being ended after nStepCycles has been "snapped" (because a certain opcode has an unusual timing
+     * calculation that must be based on a "snapped" cycle count rather the opcode's starting cycle count), we
+     * could inadvertently undo the endBurst() if the original "snapped" value was used to update nStepCycles.
+     */
+    this.nStepCycles = this.nSnapCycles = 0;
     if (fReset) this.nBurstCycles = 0;
     return nCycles;
 };
@@ -1190,7 +1196,6 @@ CPUPDP11.prototype.yieldCPU = function()
 {
     this.endBurst();                    // this will break us out of stepCPU()
     this.nCyclesNextYield = 0;          // this will break us out of runCPU(), once we break out of stepCPU()
-    // if (DEBUG) this.nSnapCycles = this.nBurstCycles;
     /*
      * The Debugger calls yieldCPU() after every message() to ensure browser responsiveness, but it looks
      * odd for those messages to show CPU state changes if the Control Panel, Video display, etc, does not,

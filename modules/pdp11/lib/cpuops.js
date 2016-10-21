@@ -1191,9 +1191,9 @@ PDP11.opJMP = function(opCode)
      * Since JMP and JSR opcodes have their own unique timings for the various dst modes, we must snapshot
      * nStepCycles before decoding the mode, and then use that to update nStepCycles.
      */
-    var nSnapCycles = this.nStepCycles;
+    this.nSnapCycles = this.nStepCycles;
     this.setPC(this.readDstAddr(opCode));
-    this.nStepCycles = nSnapCycles - PDP11.JMP_CYCLES[this.dstMode];
+    this.nStepCycles = this.nSnapCycles - PDP11.JMP_CYCLES[this.dstMode];
 };
 
 PDP11.JSR_CYCLES = [
@@ -1212,7 +1212,7 @@ PDP11.opJSR = function(opCode)
      * Since JMP and JSR opcodes have their own unique timings for the various dst modes, we must snapshot
      * nStepCycles before decoding the mode, and then use that to update nStepCycles.
      */
-    var nSnapCycles = this.nStepCycles;
+    this.nSnapCycles = this.nStepCycles;
     /*
      * TODO: Determine whether or not the SRCMODE operand (regsGen[reg]) should be snapped BEFORE or AFTER we
      * decode the DSTMODE operand.  Doing it AFTER seems a bit risky.
@@ -1222,7 +1222,7 @@ PDP11.opJSR = function(opCode)
     this.pushWord(this.regsGen[reg]);
     this.regsGen[reg] = this.getPC();
     this.setPC(addr);
-    this.nStepCycles = nSnapCycles - PDP11.JSR_CYCLES[this.dstMode];
+    this.nStepCycles = this.nSnapCycles - PDP11.JSR_CYCLES[this.dstMode];
 };
 
 /**
@@ -1287,9 +1287,9 @@ PDP11.opMOV = function(opCode)
      * nStepCycles after decoding the src mode, and then use that to update nStepCycles.
      */
     var data = this.readSrcWord(opCode);
-    var nSnapCycles = this.nStepCycles;
+    this.nSnapCycles = this.nStepCycles;
     this.updateNZVFlags(this.writeDstWord(opCode, data));
-    this.nStepCycles = nSnapCycles - PDP11.MOV_CYCLES[(this.srcMode? 8 : 0) + this.dstMode] + (this.dstReg == 7 && !this.dstMode? 2 : 0);
+    this.nStepCycles = this.nSnapCycles - PDP11.MOV_CYCLES[(this.srcMode? 8 : 0) + this.dstMode] + (this.dstReg == 7 && !this.dstMode? 2 : 0);
 };
 
 /**
@@ -1322,10 +1322,10 @@ PDP11.opMTPD = function(opCode)
      * nStepCycles before decoding the mode, and then use that to update nStepCycles.
      */
     var data = this.popWord();
-    var nSnapCycles = this.nStepCycles;
+    this.nSnapCycles = this.nStepCycles;
     this.writeWordToPrevSpace(opCode, PDP11.ACCESS.DSPACE, data);
     this.updateNZVFlags(data);
-    this.nStepCycles = nSnapCycles - PDP11.MTP_CYCLES[this.dstMode];
+    this.nStepCycles = this.nSnapCycles - PDP11.MTP_CYCLES[this.dstMode];
 };
 
 /**
@@ -1341,10 +1341,10 @@ PDP11.opMTPI = function(opCode)
      * nStepCycles before decoding the mode, and then use that to update nStepCycles.
      */
     var data = this.popWord();
-    var nSnapCycles = this.nStepCycles;
+    this.nSnapCycles = this.nStepCycles;
     this.writeWordToPrevSpace(opCode, PDP11.ACCESS.ISPACE, data);
     this.updateNZVFlags(data);
-    this.nStepCycles = nSnapCycles - PDP11.MTP_CYCLES[this.dstMode];
+    this.nStepCycles = this.nSnapCycles - PDP11.MTP_CYCLES[this.dstMode];
 };
 
 /**
@@ -1497,7 +1497,7 @@ PDP11.opRTS = function(opCode)
     var src = this.popWord();
     var reg = opCode & PDP11.OPREG.MASK;
     /*
-     * When the popular "RTS PC" form is used, we might as well eliminate the useless setting of PC to itself.
+     * When the popular "RTS PC" form is used, we might as well eliminate the useless setting of PC to
      */
     if (reg == PDP11.REG.PC) {
         this.setPC(src);

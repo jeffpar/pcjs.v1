@@ -2091,7 +2091,8 @@ if (DEBUGGER) {
 
             /*
              * If getOperand() returns an Array rather than a string, then the first element is the original
-             * operand, and the second element contains an alternate representation of the operand (eg, target address).
+             * operand, and the second element contains an alternate representation of the operand (eg, target address,
+             * memory contents, etc).
              */
             if (typeof sOperand != "string") {
                 sTarget = sOperand[1];
@@ -2133,6 +2134,10 @@ if (DEBUGGER) {
      *
      * If getOperand() returns an Array rather than a string, then the first element is the original
      * operand, and the second element is a comment containing an alternate representation of the operand.
+     *
+     * TODO: For PC-relative addresses, we now return the effective address directly, rather than as the
+     * second element of an Array;  however, I still envision using Array return values to include current
+     * memory operands, so support for such values is being left in place.
      *
      * @this {DebuggerPDP11}
      * @param {number} opCode
@@ -2229,9 +2234,20 @@ if (DEBUGGER) {
                     sOperand = this.toStrBase(wIndex, 0, true) + '(' + this.getRegName(reg) + ')';
                     if (reg == 7) {
                         /*
-                         * When using R7 (aka PC), INDEX is known as RELATIVE
+                         * When using R7 (aka PC), INDEX is known as RELATIVE.  However, instead of displaying
+                         * such an instruction like this:
+                         *
+                         *  016156: 010167 001300          MOV   R1,1300(PC)            ; @017462
+                         *
+                         * with the effective address display to the far right, let's display it like this instead:
+                         *
+                         *  016156: 010167 001300          MOV   R1,017462
+                         *
+                         * because you can still clearly see PC-relative offset (eg, 001300) as part of the disassembly.
+                         *
+                         *      sOperand = [sOperand, this.toStrBase((wIndex + dbgAddr.addr) & 0xffff)];
                          */
-                        sOperand = [sOperand, this.toStrBase((wIndex + dbgAddr.addr) & 0xffff)];
+                        sOperand = this.toStrBase((wIndex + dbgAddr.addr) & 0xffff);
                     }
                     break;
                 case PDP11.OPMODE.INDEXD:               // 0x7: INDEX DEFERRED
@@ -2239,9 +2255,12 @@ if (DEBUGGER) {
                     sOperand = '@' + this.toStrBase(wIndex) + '(' + this.getRegName(reg) + ')';
                     if (reg == 7) {
                         /*
-                         * When using R7 (aka PC), INDEX DEFERRED is known as RELATIVE DEFERRED
+                         * When using R7 (aka PC), INDEX DEFERRED is known as RELATIVE DEFERRED.  And for the same
+                         * reasons articulated above, we now display the effective address inline.
+                         *
+                         *      sOperand = [sOperand, this.toStrBase((wIndex + dbgAddr.addr) & 0xffff)];
                          */
-                        sOperand = [sOperand, this.toStrBase((wIndex + dbgAddr.addr) & 0xffff)];
+                        sOperand = '@' + this.toStrBase((wIndex + dbgAddr.addr) & 0xffff);
                     }
                     break;
                 default:
