@@ -44,8 +44,8 @@ The first new device component is
 only means PDPjs has of communicating with the outside world.  So you can try
 [PDPjs connected to a VT100 Terminal](http://www.pcjs.org/devices/pdp11/machine/1170/vt100/), by clicking the "Run"
 button on the test machine.  The test machine is running
-[custom boot code](https://github.com/jeffpar/pcjs/blob/master/devices/pdp11/rom/custom/boot.mac) written by Paul,
-but due to the lack of other device support, nothing can be booted yet.
+[custom boot code](https://github.com/jeffpar/pcjs/blob/master/apps/pdp11/boot/test/BOOTTEST.mac), adapted from boot code
+written by Paul, but due to the lack of other device support, nothing can be booted yet.
 
 Obviously PDPjs is very much a work-in-progress.  Before I proceed much farther, I really want to put the CPU through
 some rigorous testing, so I'll be on the lookout for some comprehensive PDP-11 instruction tests.  Or I'll write my own,

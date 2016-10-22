@@ -76,6 +76,7 @@
   ],
   "c1pJSFiles": [
     "./modules/shared/lib/defines.js",
+    "./modules/shared/lib/nodebug.js",
     "./modules/shared/lib/dumpapi.js",
     "./modules/shared/lib/reportapi.js",
     "./modules/shared/lib/strlib.js",
@@ -100,6 +101,7 @@
   ],
   "pcX86Files": [
     "./modules/shared/lib/defines.js",
+    "./modules/shared/lib/nodebug.js",
     "./modules/shared/lib/diskapi.js",
     "./modules/shared/lib/dumpapi.js",
     "./modules/shared/lib/reportapi.js",
@@ -145,6 +147,7 @@
   ],
   "pc8080Files": [
     "./modules/shared/lib/defines.js",
+    "./modules/shared/lib/nodebug.js",
     "./modules/shared/lib/dumpapi.js",
     "./modules/shared/lib/reportapi.js",
     "./modules/shared/lib/userapi.js",
@@ -176,6 +179,7 @@
   ],
   "pdp11Files": [
     "./modules/shared/lib/defines.js",
+    "./modules/shared/lib/nodebug.js",
     "./modules/shared/lib/dumpapi.js",
     "./modules/shared/lib/reportapi.js",
     "./modules/shared/lib/userapi.js",

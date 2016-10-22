@@ -63,6 +63,7 @@ pcjs:
     - /modules/shared/lib/dumpapi.js
     - /modules/shared/lib/reportapi.js
     - /modules/shared/lib/userapi.js
+    - /modules/shared/lib/keys.js
     - /modules/shared/lib/strlib.js
     - /modules/shared/lib/usrlib.js
     - /modules/shared/lib/weblib.js
@@ -94,6 +95,7 @@ pcjs:
     - /modules/pcx86/lib/disk.js
     - /modules/pcx86/lib/fdc.js
     - /modules/pcx86/lib/hdc.js
+    - /modules/shared/lib/debugger.js
     - /modules/pcx86/lib/debugger.js
     - /modules/pcx86/lib/computer.js
     - /modules/shared/lib/state.js
@@ -104,6 +106,7 @@ pcjs:
     - /modules/shared/lib/dumpapi.js
     - /modules/shared/lib/reportapi.js
     - /modules/shared/lib/userapi.js
+    - /modules/shared/lib/keys.js
     - /modules/shared/lib/strlib.js
     - /modules/shared/lib/usrlib.js
     - /modules/shared/lib/weblib.js
@@ -123,11 +126,11 @@ pcjs:
     - /modules/pc8080/lib/keyboard.js
     - /modules/pc8080/lib/video.js
     - /modules/pc8080/lib/serialport.js
+    - /modules/shared/lib/debugger.js
     - /modules/pc8080/lib/debugger.js
     - /modules/pc8080/lib/computer.js
     - /modules/shared/lib/state.js
     - /modules/shared/lib/embed.js
-    - /modules/shared/lib/save.js
   pdp11_scripts:
     - /modules/shared/lib/defines.js
     - /modules/shared/lib/dumpapi.js
