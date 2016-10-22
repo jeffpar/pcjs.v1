@@ -11,13 +11,13 @@ PDPjs implements the PC11 component in [pc11.js](/modules/pdp11/lib/pc11.js).
 
 A selection of [Paper Tape Images](/apps/pdp11/tapes/) have been archived for use by PDPjs machines:
 
-- [Bootstrap Loader Demo](/devices/pdp11/machine/1120/bootstrap/) (with [Debugger](/devices/pdp11/machine/1120/bootstrap/debugger/))
+- [Bootstrap Loader Demo](/devices/pdp11/machine/1120/bootstrap/)
 - [PDP-11/20 BASIC Demo](/devices/pdp11/machine/1120/basic/) (with [Debugger](/devices/pdp11/machine/1120/basic/debugger/))
 
 The tape images are typically listed in a common configuration file that all machines can use, such as [demo.xml](demo.xml): 
 
 	<?xml version="1.0" encoding="UTF-8"?>
-	<device id="pc11" type="pc11" baudReceive="9600" autoMount='{path:"/apps/pdp11/tapes/DEC-11-L2PC-PO.json"}' pos="left" width="35%" padLeft="8px" padBottom="8px">
+	<device id="pc11" type="pc11" baudReceive="9600" autoMount='{path:"/apps/pdp11/tapes/absloader/DEC-11-L2PC-PO.json"}' pos="left" width="35%" padLeft="8px" padBottom="8px">
 		<name>Paper Tape Controls</name>
 		<control type="container">
 			<control type="list" binding="listTapes">
