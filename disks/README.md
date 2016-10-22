@@ -1,8 +1,6 @@
 ---
 layout: page
 title: Disk Libraries
-menu_title: Disks
-menu_order: 4
 permalink: /disks/
 ---
 

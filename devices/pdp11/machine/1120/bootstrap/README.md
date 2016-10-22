@@ -16,7 +16,7 @@ This machine pre-loads the **[Bootstrap Loader](/apps/pdp11/boot/bootstrap/)** c
 
 and then pre-attaches the **[Absolute Loader](/apps/pdp11/tapes/absloader/)** tape image to the PC11 Paper Tape Reader:
 
-	<device id="pc11" type="pc11" baudReceive="9600" autoMount='{path:"/apps/pdp11/tapes/DEC-11-L2PC-PO.json"}' ...>...</device>
+	<device id="pc11" type="pc11" baudReceive="9600" autoMount='{path:"/apps/pdp11/tapes/absloader/DEC-11-L2PC-PO.json"}' ...>...</device>
 
 Click "Run" to load the **[Absolute Loader](/apps/pdp11/tapes/absloader/)**.
 When the **[Bootstrap Loader](/apps/pdp11/boot/bootstrap/)** is finished, it will HALT,

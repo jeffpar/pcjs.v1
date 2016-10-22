@@ -10,7 +10,7 @@ includes:
 * [C1Pjs](/docs/c1pjs/), an emulation of the 6502-based [Ohio Scientific Challenger 1P](/devices/c1p/)
 * [PDPjs](/modules/pdp11/), a PDP-11 machine emulator currently in development (e.g., [PDP-11/20 and PDP-11/70](/devices/pdp11/machine/))
 
-All PCjs computer simulations are written entirely in [JavaScript](/modules/).  No Flash, Java or other plugins are
+All PCjs machine simulations are written entirely in [JavaScript](/modules/).  No Flash, Java or other plugins are
 required.  Supported browsers include modern versions of Chrome, Safari, Firefox, Internet Explorer (v9.0 and up), Edge,
 and assorted mobile browsers.
 
