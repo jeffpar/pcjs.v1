@@ -2073,21 +2073,25 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
      * so stopCPU() would have no effect as far as the Debugger is concerned.
      */
     this.flags.complete = true;
+    this.flags.debugCheck = (DEBUGGER && this.dbg && this.dbg.checksEnabled());
 
     /*
-     * fDebugCheck is true if we need to "check" every instruction with the Debugger.
+     * nDebugCheck is 1 if we want to "check" every instruction with the Debugger, and -1 if we only
+     * want to check the first instruction.
      */
-    var fDebugCheck = this.flags.debugCheck = (DEBUGGER && this.dbg && this.dbg.checksEnabled());
+    var nDebugCheck = this.flags.debugCheck? 1 : -1;
 
     /*
-     * nDebugState is checked only when fDebugCheck is true, and its sole purpose is to tell the first call
+     * nDebugState is checked only when nDebugCheck is set, and its sole purpose is to tell the first call
      * to checkInstruction() that it can skip breakpoint checks, and that will be true ONLY when fStarting is
      * true OR nMinCycles is zero (the latter means the Debugger is single-stepping).
-     *
+     */
+    var nDebugState = (!nMinCycles)? -1 : (this.flags.starting? 0 : 1);
+
+    /*
      * Once we snap fStarting, we clear it, because technically, we've moved beyond "starting" and have
      * officially "started" now.
      */
-    var nDebugState = (!nMinCycles)? -1 : (this.flags.starting? 0 : 1);
     this.flags.starting = false;
 
     /*
@@ -2098,12 +2102,13 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
     this.nBurstCycles = this.nStepCycles = nMinCycles;
 
     do {
-        if (DEBUGGER && fDebugCheck) {
+        if (DEBUGGER && nDebugCheck) {
             if (this.dbg.checkInstruction(this.getPC(), nDebugState)) {
                 this.stopCPU();
                 break;
             }
             nDebugState = 1;
+            nDebugCheck++;
         }
 
         if (this.opFlags) {
