@@ -27,7 +27,7 @@
 			<control type="flag" label="C" binding="CF" width="8px" padRight="4px" padBottom="8px">0</control>
 		</control>
 	</control>
-	<control type="container" width="35%" padLeft="8px" padBottom="8px">
+	<control type="container" class="pcjs-registers" width="35%" padLeft="8px" padBottom="8px">
 		<control type="button" binding="run">Run</control>
 		<control type="button" binding="step">Step</control>
 		<control type="button" binding="reset">Reset</control>

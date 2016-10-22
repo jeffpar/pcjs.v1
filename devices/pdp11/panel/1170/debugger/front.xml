@@ -93,7 +93,7 @@
 			<control type="button" binding="clear">Clear</control>
 		</control>
 	</control>
-	<control type="container" class="pcjs-registers" width="35%" padTop="8px" padLeft="8px">
+	<control type="container" class="pcjs-registers" width="35%" padding="8px">
 		<name>Registers</name>
 		<control type="register" label="R0" binding="R0" pos="left" width="60px" padRight="8px" padBottom="8px">0000</control>
 		<control type="register" label="R1" binding="R1" pos="left" width="60px" padRight="8px" padBottom="8px">0000</control>
@@ -111,7 +111,7 @@
 			<control type="flag" label="C" binding="CF" width="8px" padRight="4px" padBottom="8px">0</control>
 		</control>
 	</control>
-	<control type="container" padTop="8px" padBottom="8px">
+	<control type="container" class="pcjs-registers" width="35%" padding="8px">
 		<control type="button" binding="run">Run</control>
 		<control type="button" binding="step">Step</control>
 		<control type="button" binding="reset">Reset</control>

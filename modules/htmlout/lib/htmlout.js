@@ -1929,13 +1929,13 @@ HTMLOut.prototype.processMachines = function(aMachines, buildOptions, done)
                     }
                 }
                 /*
-                 * Step 2: If there's a "debugger.js" source file in the list of uncompiled files, we need to remove
-                 * it, which we do by using the Array splice() method, removing the 1 matching element from the array.
+                 * Step 2: If there are "debugger.js" source files in the list of uncompiled files, we need to remove
+                 * them, which we do by using the Array splice() method, removing the matching element(s) from the array.
                  */
                 for (i = 0; i < asFiles.length; i++) {
                     if (asFiles[i].indexOf("/debugger.js") >= 0) {
                         asFiles.splice(i, 1);
-                        break;
+                        i--;
                     }
                 }
             }

@@ -88,7 +88,7 @@
 	<control type="container" class="pcjs-textarea" width="60%" padTop="8px" padBottom="8px">
 		<control type="textarea" binding="print" width="100%" height="252px" padRight="8px" pos="relative" style="resize:vertical;"/>
 	</control>
-	<control type="container" padTop="8px" padBottom="8px">
+	<control type="container" class="pcjs-registers" width="35%" padding="8px">
 		<control type="button" binding="run">Run</control>
 		<control type="button" binding="reset">Reset</control>
 		<control type="button" binding="setSpeed">Fast</control>
