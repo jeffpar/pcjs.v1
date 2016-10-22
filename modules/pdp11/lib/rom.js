@@ -50,17 +50,12 @@ if (NODE) {
  *      size: amount of ROM, in bytes
  *      alias: physical alias address (null if none)
  *      file: name of ROM data file
- *      writable: true to make ROM writable (default is false)
  *
  * NOTE: The ROM data will not be copied into place until the Bus is ready (see initBus()) AND the
  * ROM data file has finished loading (see doneLoad()).
  *
  * Also, while the size parameter may seem redundant, I consider it useful to confirm that the ROM you received
  * is the ROM you expected.
- *
- * Finally, while making ROM "writable" may seem a contradiction in terms, I want to be able to load selected
- * binary files into memory purely for testing purposes, and the RAM component has no "file" option, so the
- * simplest solution was to add the option to load binary files into memory as "writable" ROMs.
  *
  * @constructor
  * @extends Component
@@ -70,10 +65,11 @@ function ROMPDP11(parmsROM)
 {
     Component.call(this, "ROM", parmsROM, ROMPDP11);
 
-    this.abROM = null;
+    this.abInit = null;
+    this.aSymbols = null;
+
     this.addrROM = parmsROM['addr'];
     this.sizeROM = parmsROM['size'];
-    this.fWritable = parmsROM['writable'];
 
     /*
      * The new 'alias' property can now be EITHER a single physical address (like 'addr') OR an array of
@@ -184,87 +180,28 @@ ROMPDP11.prototype.powerDown = function(fSave, fShutdown)
 };
 
 /**
- * doneLoad(sURL, sROMData, nErrorCode)
+ * doneLoad(sURL, sData, nErrorCode)
  *
  * @this {ROMPDP11}
  * @param {string} sURL
- * @param {string} sROMData
+ * @param {string} sData
  * @param {number} nErrorCode (response from server if anything other than 200)
  */
-ROMPDP11.prototype.doneLoad = function(sURL, sROMData, nErrorCode)
+ROMPDP11.prototype.doneLoad = function(sURL, sData, nErrorCode)
 {
     if (nErrorCode) {
-        this.notice("Unable to load system ROM (error " + nErrorCode + ": " + sURL + ")");
+        this.notice("Unable to load ROM resource (error " + nErrorCode + ": " + sURL + ")");
         return;
     }
 
-    Component.addMachineResource(this.idMachine, sURL, sROMData);
+    Component.addMachineResource(this.idMachine, sURL, sData);
 
-    var i;
-    if (sROMData.charAt(0) == "[" || sROMData.charAt(0) == "{") {
-        try {
-            /*
-             * The most likely source of any exception will be here: parsing the JSON-encoded ROM.
-             */
-            var a, ib;
-            var rom = eval("(" + sROMData + ")");
-
-            if (a = rom['bytes']) {
-                this.abROM = a;
-            }
-            else if (a = rom['words']) {
-                /*
-                 * Convert all WORDs into BYTEs, so that subsequent code only has to deal with abROM.
-                 */
-                this.abROM = new Array(a.length * 2);
-                for (i = 0, ib = 0; i < a.length; i++) {
-                    this.abROM[ib++] = a[i] & 0xff;
-                    this.abROM[ib++] = (a[i] >> 8) & 0xff;
-                    this.assert(!(a[i] & ~0xffff));
-                }
-            }
-            else if (a = rom['data']) {
-                /*
-                 * Convert all DWORDs into BYTEs, so that subsequent code only has to deal with abROM.
-                 */
-                this.abROM = new Array(a.length * 4);
-                for (i = 0, ib = 0; i < a.length; i++) {
-                    this.abROM[ib++] = a[i] & 0xff;
-                    this.abROM[ib++] = (a[i] >> 8) & 0xff;
-                    this.abROM[ib++] = (a[i] >> 16) & 0xff;
-                    this.abROM[ib++] = (a[i] >> 24) & 0xff;
-                }
-            }
-            else {
-                this.abROM = rom;
-            }
-
-            this.aSymbols = rom['symbols'];
-
-            if (!this.abROM.length) {
-                Component.error("Empty ROM: " + sURL);
-                return;
-            }
-            else if (this.abROM.length == 1) {
-                Component.error(this.abROM[0]);
-                return;
-            }
-        } catch (e) {
-            this.notice("ROM data error: " + e.message);
-            return;
-        }
-    }
-    else {
-        /*
-         * Parse the ROM data manually; we assume it's in "simplified" hex form (a series of hex byte-values
-         * separated by whitespace).
-         */
-        var sHexData = sROMData.replace(/\n/gm, " ").replace(/ +$/, "");
-        var asHexData = sHexData.split(" ");
-        this.abROM = new Array(asHexData.length);
-        for (i = 0; i < asHexData.length; i++) {
-            this.abROM[i] = str.parseInt(asHexData[i], 16);
-        }
+    var resource = web.parseMemoryResource(sURL, sData);
+    if (resource) {
+        this.abInit = resource.aBytes;
+        this.aSymbols = resource.aSymbols;
+    } else {
+        this.sFilePath = null;
     }
     this.initROM();
 };
@@ -272,33 +209,35 @@ ROMPDP11.prototype.doneLoad = function(sURL, sROMData, nErrorCode)
 /**
  * initROM()
  *
- * This function is called by both initBus() and doneLoad(), but it cannot copy the the ROM data into place
- * until after initBus() has received the Bus component AND doneLoad() has received the abROM data.  When both
- * those criteria are satisfied, the component becomes "ready".
+ * This function is called by both initBus() and doneLoad(), but it cannot copy the initial data into place
+ * until after initBus() has received the Bus component AND doneLoad() has received the data.  When both those
+ * criteria are satisfied, the component becomes "ready".
  *
  * @this {ROMPDP11}
  */
 ROMPDP11.prototype.initROM = function()
 {
     if (!this.isReady()) {
-        if (!this.sFilePath) {
-            this.setReady();
-        }
-        else if (this.abROM && this.bus) {
+        if (this.sFilePath) {
+            /*
+             * Too early...
+             */
+            if (!this.abInit || !this.bus) return;
+
             /*
              * If no explicit size was specified, then use whatever the actual size is.
              */
             if (!this.sizeROM) {
-                this.sizeROM = this.abROM.length;
+                this.sizeROM = this.abInit.length;
             }
-            if (this.abROM.length != this.sizeROM) {
+            if (this.abInit.length != this.sizeROM) {
                 /*
                  * Note that setError() sets the component's fError flag, which in turn prevents setReady() from
                  * marking the component ready.  TODO: Revisit this decision.  On the one hand, it sounds like a
                  * good idea to stop the machine in its tracks whenever a setError() occurs, but there may also be
                  * times when we'd like to forge ahead anyway.
                  */
-                this.setError("ROM size (" + str.toHexLong(this.abROM.length) + ") does not match specified size (" + str.toHexLong(this.sizeROM) + ")");
+                this.setError("ROM size (" + str.toHexLong(this.abInit.length) + ") does not match specified size (" + str.toHexLong(this.sizeROM) + ")");
             }
             else if (this.addROM(this.addrROM)) {
 
@@ -312,7 +251,7 @@ ROMPDP11.prototype.initROM = function()
                     this.cloneROM(aliases[i]);
                 }
                 /*
-                 * We used to hang onto the original ROM data so that we could restore any bytes the CPU overwrote,
+                 * We used to hang onto the initial ROM data so that we could restore any bytes the CPU overwrote,
                  * using memory write-notification handlers, but with the introduction of read-only memory blocks, that's
                  * no longer necessary.
                  *
@@ -321,10 +260,10 @@ ROMPDP11.prototype.initROM = function()
                  * whether they're ROM or RAM.  However, the only way to modify a machine's ROM is with the Debugger,
                  * and Debugger users should know better.
                  */
-                delete this.abROM;
+                delete this.abInit;
             }
-            this.setReady();
         }
+        this.setReady();
     }
 };
 
@@ -337,11 +276,11 @@ ROMPDP11.prototype.initROM = function()
  */
 ROMPDP11.prototype.addROM = function(addr)
 {
-    if (this.bus.addMemory(addr, this.sizeROM, this.fWritable?  MemoryPDP11.TYPE.RAM : MemoryPDP11.TYPE.ROM)) {
-        if (DEBUG) this.log("addROM(): copying ROM to " + str.toHexLong(addr) + " (" + str.toHexLong(this.abROM.length) + " bytes)");
+    if (this.bus.addMemory(addr, this.sizeROM, MemoryPDP11.TYPE.ROM)) {
+        if (DEBUG) this.log("addROM(): copying ROM to " + str.toHexLong(addr) + " (" + str.toHexLong(this.abInit.length) + " bytes)");
         var i;
-        for (i = 0; i < this.abROM.length; i++) {
-            this.bus.setByteDirect(addr + i, this.abROM[i]);
+        for (i = 0; i < this.abInit.length; i++) {
+            this.bus.setByteDirect(addr + i, this.abInit[i]);
         }
         return true;
     }

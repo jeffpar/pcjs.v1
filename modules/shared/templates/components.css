@@ -55,6 +55,30 @@
     line-height: 20px;
     vertical-align: middle;
 }
+.pcjs-progress {
+    height: 20px;
+    width: 300px;
+    margin-top: 8px;
+    border: 1px solid black;
+    position: relative;
+}
+.pcjs-progress-bar {
+    height: 20px;
+    width: 0%; /* this will be updated pragmatically */
+    background-color: gold;
+    position: absolute;
+    top: 0px;
+}
+.pcjs-progress-text {
+    height: 20px;
+    width: 300px;
+    font-size: small;
+    line-height: 20px;
+    text-align: center;
+    position: absolute;
+    top: 0px;
+    z-index: 1;
+}
 .pcjs-register {
     font-family: Monaco, "Lucida Console", monospace;
     font-size: small;
@@ -174,5 +198,9 @@
     }
     .pcjs-registers {
         width: 100% !important;
+    }
+    .pdp11-device {
+        width: 100% !important;
+        max-width: none !important;
     }
 }

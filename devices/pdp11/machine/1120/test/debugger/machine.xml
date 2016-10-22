@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href="/versions/pdpjs/1.30.1/machine.xsl"?>
 <machine id="test1120" class="pdp11" border="1" pos="center" background="#FAEBD7">
-	<name pos="center">PDP-11/20 Test Machine with Debugger</name>
+	<name pos="center">PDP-11/20 Boot Test with 56Kb and Debugger</name>
 	<computer id="computer" busWidth="16"/>
-	<cpu id="cpu" model="1120" cycles="6666667" resetAddr="0xC000"/>
-	<ram id="ram" addr="0x0000" size="0xC000"/>
-	<rom id="rom" addr="0xC000" file="/devices/pdp11/rom/test/boot.json" writable="true"/>
+	<cpu id="cpu" model="1120" cycles="6666667"/>
+	<ram id="ram" addr="0x0000" size="0xE000" file="/apps/pdp11/boot/test/BOOTTEST.json"/>
 	<device id="default" type="default"/>
 	<device id="pc11" type="pc11"/>
 	<serial id="dl11" adapter="0" binding="print"/>

@@ -1,6 +1,6 @@
 ---
 layout: page
-title: PDP-11/70 Test Machine with Debugger
+title: PDP-11/70 Boot Test with Debugger
 permalink: /devices/pdp11/machine/1170/test/debugger/
 machines:
   - id: test1170

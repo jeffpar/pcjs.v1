@@ -9,7 +9,7 @@
 	<rom id="romBIOS"  addr="0xfe000" size="0x2000" file="/devices/pcx86/rom/5150/1981-04-24/PCBIOS-REV1.json"/>
 	<video ref="/devices/pcx86/video/ibm/cga/ibm-cga.xml"/>
 	<fdc ref="/disks/pcx86/games/infocom/disks.xml"/>
-	<keyboard id="keyboard" pos="left" padleft="8px">
+	<keyboard id="keyboard" pos="left" padLeft="8px">
 		<control type="button" binding="esc">ESC</control>
 		<control type="button" binding="ctrl-c">CTRL-C</control>
 		<control type="button" binding="ctrl-alt-del">CTRL-ALT-DEL</control>

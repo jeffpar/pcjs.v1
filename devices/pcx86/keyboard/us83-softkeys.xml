@@ -1,4 +1,4 @@
-<keyboard id="keyboard" model="us83" pos="center" width="900px" height="210px" padleft="8px">
+<keyboard id="keyboard" model="us83" pos="center" width="900px" height="210px" padLeft="8px">
 	<control type="container">
 		<control type="key" binding="f1" width="34px" top="0px" left="0px">F1</control>
 		<control type="key" binding="f2" width="34px" top="0px" left="42px">F2</control>

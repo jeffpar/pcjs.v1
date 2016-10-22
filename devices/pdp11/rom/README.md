@@ -1,10 +1,10 @@
 ---
 layout: page
-title: PDP-11 ROMs
+title: PDP-11 ROM Images
 permalink: /devices/pdp11/rom/
 ---
 
-PDP-11 ROMs
------------
+PDP-11 ROM Images
+-----------------
 
-* [Test ROM](test/) (based on [BOOT.MAC](http://skn.noip.me/pdp11/boot.mac) written by [Paul Nankervis](mailto:paulnank@hotmail.com))
+Any ROM images added to the project will be stored here.

@@ -1,5 +1,5 @@
 /**
- * @fileoverview Implements the PDP11 SerialPort component.
+ * @fileoverview Implements the PDP-11 SerialPort component (eg, DL11)
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © Jeff Parsons 2012-2016
  *
@@ -46,19 +46,28 @@ if (NODE) {
  *
  * The SerialPort component has the following component-specific (parmsSerial) properties:
  *
- *      adapter: adapter number; 0 if not defined
+ *      adapter: adapter number; 0 if not defined (the PCx86 SerialPort component uses this
+ *      value to set the device's internal COM number, which in turn determines other properties,
+ *      such as I/O ports and IRQ; for the PDP-11, this currently has no defined use)
+ *
+ *      baudReceive: the default number of bits/second that the device should receive data at;
+ *      0 means use the device default (PDP11.DL11.RCSR.BAUD)
+ *
+ *      baudTransmit: the default number of bits/second that the device should transmit data at;
+ *      0 means use the device default (PDP11.DL11.XCSR.BAUD)
  *
  *      binding: name of a control (based on its "binding" attribute) to bind to this port's I/O
  *
  *      tabSize: set to a non-zero number to convert tabs to spaces (applies only to output to
  *      the above binding); default is 0 (no conversion)
  *
- * In the future, we may support 'port' and 'irq' properties that allow the machine to define a
- * non-standard serial port configuration, instead of only our pre-defined 'adapter' configurations.
+ *      upperCase: if true, all received input is upper-cased; it is normally the responsibility
+ *      of the sending device to ensure this, but sometimes it's more convenient to enforce
+ *      on the receiving end.
  *
- * NOTE: Since the XSL file defines 'adapter' as a number, not a string, there's no need to use
- * parseInt(), and as an added benefit, we don't need to worry about whether a hex or decimal format
- * was used.
+ * NOTE: Since the XSL file defines the 'adapter' and 'baud' properties as numbers, not strings,
+ * there's no need to use parseInt(), and as an added benefit, we don't need to worry about whether
+ * a hex or decimal format was used.
  *
  * @constructor
  * @extends Component
@@ -67,6 +76,9 @@ if (NODE) {
 function SerialPortPDP11(parmsSerial) {
 
     this.iAdapter = parmsSerial['adapter'];
+    this.nBaudReceive = parmsSerial['baudReceive'] || PDP11.DL11.RCSR.BAUD;
+    this.nBaudTransmit = parmsSerial['baudTransmit'] || PDP11.DL11.XCSR.BAUD;
+    this.fUpperCase = parmsSerial['upperCase'];
 
     /**
      * consoleOutput becomes a string that records serial port output if the 'binding' property is set to the
@@ -265,7 +277,23 @@ SerialPortPDP11.prototype.initBus = function(cmp, bus, cpu, dbg)
     this.timerReceiveInterrupt = this.cpu.addTimer(function readyReceiver() {
         if (!(serial.rcsr & PDP11.DL11.RCSR.RD)) {
             if (serial.abReceive.length) {
-                serial.rbuf = serial.abReceive.shift();
+                /*
+                 * Here, as elsewhere (eg, the PC11 component), even if I trusted all incoming data
+                 * to be byte values (which I don't), there's also the risk that it could be signed data
+                 * (eg, -128 to 127, instead of 0 to 255).  Both risks are good reasons to always mask
+                 * the data assigned to RBUF with 0xff.
+                 */
+                serial.rbuf = serial.abReceive.shift() & 0xff;
+                if (serial.fUpperCase) {
+                    /*
+                     * Automatically transform lower-case ASCII codes to upper-case; fUpperCase should
+                     * only be set when a terminal or some sort of pseudo-display is being used and we don't
+                     * trust it to have its CAPS-LOCK setting correct.
+                     */
+                    if (serial.rbuf >= 0x61 && serial.rbuf < 0x7A) {
+                        serial.rbuf -= 0x20;
+                    }
+                }
                 serial.rcsr |= PDP11.DL11.RCSR.RD;
                 if (serial.rcsr & PDP11.DL11.RCSR.RIE) {
                     serial.cpu.setTrigger(serial.triggerReceiveInterrupt);
@@ -448,6 +476,25 @@ SerialPortPDP11.prototype.saveRegisters = function()
 };
 
 /**
+ * getBaudTimeout(nBaud)
+ *
+ * Based on the selected baud rate (nBaud), convert that rate into a millisecond delay.
+ *
+ * @this {SerialPortPDP11}
+ * @param {number} nBaud
+ * @return {number} (number of milliseconds per byte)
+ */
+SerialPortPDP11.prototype.getBaudTimeout = function(nBaud)
+{
+    /*
+     * TODO: Do a better job computing this, based on actual numbers of start, stop and parity bits,
+     * instead of hard-coding the total number of bits per byte to 10.
+     */
+    var nBytesPerSecond = Math.round(nBaud / 10);
+    return 1000 / nBytesPerSecond;
+};
+
+/**
  * receiveData(data)
  *
  * This replaces the old sendRBR() function, which expected an Array of bytes.  We still support that,
@@ -471,12 +518,8 @@ SerialPortPDP11.prototype.receiveData = function(data)
     else {
         this.abReceive = this.abReceive.concat(data);
     }
-    this.cpu.setTimer(this.timerReceiveInterrupt, PDP11.DL11.RBUF.DELAY);
+    this.cpu.setTimer(this.timerReceiveInterrupt, this.getBaudTimeout(this.nBaudReceive));
     return true;                // for now, return true regardless, since we're buffering everything anyway
-};
-
-SerialPortPDP11.prototype.advanceRBUF = function()
-{
 };
 
 /**
@@ -574,7 +617,7 @@ SerialPortPDP11.prototype.readRBUF = function(addr)
 {
     this.rcsr &= ~PDP11.DL11.RCSR.RD;
     if (this.abReceive.length > 0) {
-        this.cpu.setTimer(this.timerReceiveInterrupt, PDP11.DL11.RBUF.DELAY);
+        this.cpu.setTimer(this.timerReceiveInterrupt, this.getBaudTimeout(this.nBaudReceive));
     }
     return this.rbuf;
 };
@@ -615,7 +658,7 @@ SerialPortPDP11.prototype.writeXCSR = function(data, addr)
      * If the device is READY, and IE is transitioning on, then request an interrupt.
      */
     if ((this.xcsr & (PDP11.DL11.XCSR.READY | PDP11.DL11.XCSR.TIE)) == PDP11.DL11.XCSR.READY && (data & PDP11.DL11.XCSR.TIE)) {
-        this.cpu.setTimer(this.timerTransmitInterrupt, PDP11.DL11.XCSR.DELAY);
+        this.cpu.setTimer(this.timerTransmitInterrupt, this.getBaudTimeout(this.nBaudTransmit));
     }
     this.xcsr = (this.xcsr & ~PDP11.DL11.XCSR.WMASK) | (data & PDP11.DL11.XCSR.WMASK);
 };
@@ -645,7 +688,7 @@ SerialPortPDP11.prototype.writeXBUF = function(data, addr)
     if (data) {
         this.transmitByte(data);
         this.xcsr &= ~PDP11.DL11.XCSR.READY;
-        this.cpu.setTimer(this.timerTransmitInterrupt, PDP11.DL11.XBUF.DELAY);
+        this.cpu.setTimer(this.timerTransmitInterrupt, this.getBaudTimeout(this.nBaudTransmit));
     }
 };
 

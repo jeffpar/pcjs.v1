@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<serial id="serialPort" pos="left" padleft="8px">
+<serial id="serialPort" pos="left" padLeft="8px">
 	<control type="list" binding="listSerial">
 		<item ref="/apps/c1p/BASIC/OSI/MATH.BAS">BASIC MATH</item>
 		<item ref="/apps/c1p/BASIC/OSI/CHECKING.BAS">CHECKING</item>

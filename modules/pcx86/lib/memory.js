@@ -667,7 +667,7 @@ Memory.prototype = {
      */
     readNone: function readNone(off, addr) {
         if (DEBUGGER && this.dbg && this.dbg.messageEnabled(Messages.CPU | Messages.MEM) /* && !off */) {
-            this.dbg.message("attempt to read invalid block %" + str.toHex(this.addr), true);
+            this.dbg.message("attempt to read invalid block %" + str.toHex(addr), true);
         }
         return 0xff;
     },
@@ -681,7 +681,7 @@ Memory.prototype = {
      */
     writeNone: function writeNone(off, v, addr) {
         if (DEBUGGER && this.dbg && this.dbg.messageEnabled(Messages.CPU | Messages.MEM) /* && !off */) {
-            this.dbg.message("attempt to write " + str.toHexWord(v) + " to invalid block %" + str.toHex(this.addr), true);
+            this.dbg.message("attempt to write " + str.toHexWord(v) + " to invalid block %" + str.toHex(addr), true);
         }
     },
     /**

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<serial id="serialPort" pos="left" padleft="8px">
+<serial id="serialPort" pos="left" padLeft="8px">
 	<control type="list" binding="listSerial">
 		<item ref="/apps/c1p/6502/jeffpar/assembler/ASSEMBLER-4K.json">6502 4K Assembler (JP)</item>
 		<item ref="/apps/c1p/6502/jeffpar/assembler/ASSEMBLER-8K.json">6502 8K Assembler (JP)</item>

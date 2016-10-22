@@ -1398,7 +1398,7 @@ ComputerPDP11.prototype.getMachineComponent = function(sType, componentPrev)
 };
 
 /**
- * updateFocus(fScroll)
+ * setFocus(fScroll)
  *
  * NOTE: When soft keyboard buttons call us to return focus to the machine (and away from the button),
  * the browser's default behavior is to scroll the element into view, which can be annoying, especially on iOS,
@@ -1407,8 +1407,9 @@ ComputerPDP11.prototype.getMachineComponent = function(sType, componentPrev)
  * @this {ComputerPDP11}
  * @param {boolean} [fScroll]
  */
-ComputerPDP11.prototype.updateFocus = function(fScroll)
+ComputerPDP11.prototype.setFocus = function(fScroll)
 {
+    if (this.controlPrint) this.controlPrint.focus();
 };
 
 /**

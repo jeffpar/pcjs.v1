@@ -21,12 +21,12 @@
 	<video id="video" screenWidth="1024" screenHeight="800" cols="32" rows="32" smoothing="false" charSet="../../../../video/chargen4x.png" width="512px" padding="8px">
 		<name>Video Display</name>
 	</video>
-	<keyboard id="keyboard" padleft="8px">
+	<keyboard id="keyboard" padLeft="8px">
 		<control type="button" binding="ctrl-c">CTRL-C</control>
 		<control type="button" binding="ctrl-o">CTRL-O</control>
 		<control type="button" binding="break">BREAK</control>
 	</keyboard>
-	<serial id="serialPort" pos="left" padleft="8px">
+	<serial id="serialPort" pos="left" padLeft="8px">
 		<control type="list" binding="listSerial">
 			<item ref="../../../../../../apps/c1p/BASIC/OSI/POKER.BAS">POKER</item>
 			<item ref="../../../../../../apps/c1p/BASIC/OSI/SAMPLE1.BAS">BASIC MATH</item>

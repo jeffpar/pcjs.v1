@@ -1,6 +1,6 @@
 ---
 layout: page
-title: PDP-11/70 Test Machine
+title: PDP-11/70 Boot Test
 permalink: /devices/pdp11/machine/1170/test/
 machines:
   - id: test1170

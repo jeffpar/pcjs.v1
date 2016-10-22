@@ -50,7 +50,7 @@ if (NODE) {
  * The CPUStatePDP11 class uses the following (parmsCPU) properties:
  *
  *      model: a number (eg, 1170) that should match one of the PDP11.MODEL_* values
- *      resetAddr: reset address (default is 0)
+ *      addrReset: reset address (default is 0)
  *
  * This extends the CPU class and passes any remaining parmsCPU properties to the CPU class
  * constructor, along with a default speed (cycles per second) based on the specified (or default)
@@ -63,7 +63,7 @@ if (NODE) {
 function CPUStatePDP11(parmsCPU)
 {
     this.model = +parmsCPU['model'] || PDP11.MODEL_1170;
-    this.resetAddr = parmsCPU['resetAddr'] || 0;
+    this.addrReset = parmsCPU['addrReset'] || 0;
 
     var nCyclesDefault = 0;
     switch(this.model) {
@@ -175,7 +175,7 @@ CPUStatePDP11.prototype.initRegs = function()
     this.flagN  = 0x8000;       // PSW N bit
     this.regPSW = 0x000f;       // PSW other bits   (TODO: What's the point of setting the flag bits here, too?)
     this.regsGen = [            // General R0 - R7
-        0, 0, 0, 0, 0, 0, 0, this.resetAddr
+        0, 0, 0, 0, 0, 0, 0, this.addrReset
     ];
     this.regsAlt = [            // Alternate R0 - R5
         0, 0, 0, 0, 0, 0
@@ -360,6 +360,26 @@ CPUStatePDP11.prototype.setMMR3 = function(newMMR3)
 };
 
 /**
+ * setReset(addr, fReset)
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} addr
+ * @param {boolean} [fReset] (true if called in the context of a complete reset, obviating the need to notify the Debugger)
+ */
+CPUStatePDP11.prototype.setReset = function(addr, fReset)
+{
+    this.addrReset = addr;
+    this.setPC(addr);
+    if (!fReset && this.dbg) {
+        /*
+         * TODO: Review the decision to always stop the CPU if the Debugger is loaded.
+         */
+        this.stopCPU();
+        this.dbg.updateStatus();
+    }
+};
+
+/**
  * getChecksum()
  *
  * @this {CPUStatePDP11}
@@ -529,7 +549,45 @@ CPUStatePDP11.prototype.setNF = function()
 };
 
 /**
+ * getOpcode()
+ *
+ * TODO: Determine whether we can speed this up by *always* snapping PC into a shadow MMR2 register
+ * and eliminating the ABORT test.
+ *
+ * @this {CPUStatePDP11}
+ * @return {number}
+ */
+CPUStatePDP11.prototype.getOpcode = function()
+{
+    var pc = this.regsGen[PDP11.REG.PC];
+    if (!(this.regMMR0 & PDP11.MMR0.ABORT)) {
+        this.regMMR1 = 0;
+        this.regMMR2 = pc;
+    }
+    this.regsGen[PDP11.REG.PC] = (pc + 2) & 0xffff;
+    return this.readWord(pc);
+};
+
+/**
+ * advancePC(off)
+ *
+ * NOTE: This function is nothing more than a convenience, and we fully expect it to be inlined at runtime.
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} off
+ * @return {number} (original PC)
+ */
+CPUStatePDP11.prototype.advancePC = function(off)
+{
+    var pc = this.regsGen[PDP11.REG.PC];
+    this.regsGen[PDP11.REG.PC] = (pc + off) & 0xffff;
+    return pc;
+};
+
+/**
  * getPC()
+ *
+ * NOTE: This function is nothing more than a convenience, and we fully expect it to be inlined at runtime.
  *
  * @this {CPUStatePDP11}
  * @return {number}
@@ -548,37 +606,17 @@ CPUStatePDP11.prototype.getPC = function()
 CPUStatePDP11.prototype.getLastPC = function()
 {
     /*
-     * As long as we're always snapping the PC before every opcode, we might as well use it....
+     * As long as we're always snapping the PC into regMMR2 before every opcode, we might as well use it.
      */
     return this.regMMR2;
 };
 
 /**
- * getPCWord()
- *
- * @this {CPUStatePDP11}
- * @return {number}
- */
-CPUStatePDP11.prototype.getPCWord = function()
-{
-    var data = this.readWord(this.regsGen[PDP11.REG.PC]);
-    this.advancePC(2);
-    return data;
-};
-
-/**
- * advancePC(off)
- *
- * @this {CPUStatePDP11}
- * @param {number} off
- */
-CPUStatePDP11.prototype.advancePC = function(off)
-{
-    this.regsGen[PDP11.REG.PC] = (this.regsGen[PDP11.REG.PC] + off) & 0xffff;
-};
-
-/**
  * setPC()
+ *
+ * NOTE: Unlike other PCjs emulators, such as PCx86, where all PC updates MUST go through the setPC()
+ * function, this function is nothing more than a convenience, because in the PDP-11, the PC can be loaded
+ * like any other general register.  We fully expect this function to be inlined at runtime.
  *
  * @this {CPUStatePDP11}
  * @param {number} addr
@@ -591,6 +629,8 @@ CPUStatePDP11.prototype.setPC = function(addr)
 /**
  * getSP()
  *
+ * NOTE: This function is nothing more than a convenience, and we fully expect it to be inlined at runtime.
+ *
  * @this {CPUStatePDP11}
  * @return {number}
  */
@@ -601,6 +641,10 @@ CPUStatePDP11.prototype.getSP = function()
 
 /**
  * setSP()
+ *
+ * NOTE: Unlike other PCjs emulators, such as PCx86, where all SP updates MUST go through the setSP()
+ * function, this function is nothing more than a convenience, because in the PDP-11, the PC can be loaded
+ * like any other general register.  We fully expect this function to be inlined at runtime.
  *
  * @this {CPUStatePDP11}
  * @param {number} addr
@@ -1118,6 +1162,13 @@ CPUStatePDP11.prototype.trap = function(vector, reason)
     this.opFlags &= ~PDP11.OPFLAG.TRAP_MASK;    // lose interest in traps after an abort
     this.trapPSW = -1;                          // reset flag that we have a trap within a trap
 
+    /*
+     * These next properties are purely for bookkeeping purposes; see getTrapStatus()
+     */
+    this.opFlags |= PDP11.OPFLAG.TRAP;
+    this.trapVector = vector;
+    this.trapReason = reason;
+
     if (reason != PDP11.REASON.INTERRUPT) throw vector;
 };
 
@@ -1146,6 +1197,17 @@ CPUStatePDP11.prototype.trapReturn = function()
     this.setPC(addr);
     this.setPSW(newPSW);
     this.opFlags &= ~PDP11.OPFLAG.TRAP_TF;
+};
+
+/**
+ * getTrapStatus()
+ *
+ * @this {CPUStatePDP11}
+ * @return {number}
+ */
+CPUStatePDP11.prototype.getTrapStatus = function()
+{
+    return (this.opFlags & PDP11.OPFLAG.TRAP)? (this.trapVector | this.trapReason << 8) : 0;
 };
 
 /**
@@ -1297,7 +1359,7 @@ CPUStatePDP11.prototype.mapVirtualToPhysical = function(virtualAddress, accessFl
             if (!(this.regMMR0 & 0xe000)) {
                 this.regMMR0 |= errorMask | (this.mmuLastMode << 5) | (this.mmuLastPage << 1);
             }
-            this.trap(PDP11.TRAP.MMU_FAULT, PDP11.REASON.MAPERROR);
+            this.trap(PDP11.TRAP.MMU, PDP11.REASON.MAPERROR);
         }
         if (!(this.regMMR0 & 0xf000)) {
             //if (physicalAddress < 017772200 || physicalAddress > 017777677) {
@@ -1501,7 +1563,7 @@ CPUStatePDP11.prototype.getAddrByMode = function(mode, reg, accessFlags)
      * Mode 6: d(R)
      */
     case 6:
-        virtualAddress = this.getPCWord();
+        virtualAddress = this.readWord(this.advancePC(2));
         virtualAddress = ((virtualAddress + this.regsGen[reg]) & 0xffff) | addrDSpace;
         this.nStepCycles -= (4 + 2);
         return virtualAddress;
@@ -1510,7 +1572,7 @@ CPUStatePDP11.prototype.getAddrByMode = function(mode, reg, accessFlags)
      * Mode 7: @d(R)
      */
     case 7:
-        virtualAddress = this.getPCWord();
+        virtualAddress = this.readWord(this.advancePC(2));
         virtualAddress = (virtualAddress + this.regsGen[reg]) & 0xffff;
         virtualAddress = this.readWord(virtualAddress | this.addrDSpace) | addrDSpace;
         this.nStepCycles -= (7 + 3);
@@ -2054,13 +2116,13 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
              */
             if (this.opFlags & PDP11.OPFLAG.TRAP_MASK) {
                 if (this.opFlags & PDP11.OPFLAG.TRAP_MMU) {
-                    this.trap(PDP11.TRAP.MMU_FAULT, PDP11.REASON.TRAPMMU);          // MMU trap has priority
+                    this.trap(PDP11.TRAP.MMU, PDP11.REASON.TRAPMMU);            // MMU trap has priority
                 } else {
                     if (this.opFlags & PDP11.OPFLAG.TRAP_SP) {
-                        this.trap(PDP11.TRAP.BUS_ERROR, PDP11.REASON.TRAPSP);       // then SP trap
+                        this.trap(PDP11.TRAP.BUS_ERROR, PDP11.REASON.TRAPSP);   // then SP trap
                     } else {
                         if (this.opFlags & PDP11.OPFLAG.TRAP_TF) {
-                            this.trap(PDP11.TRAP.BREAKPOINT, PDP11.REASON.TRAPTF);  // and finally a TF trap
+                            this.trap(PDP11.TRAP.BPT, PDP11.REASON.TRAPTF);     // and finally a TF trap
                         }
                     }
                 }
@@ -2077,18 +2139,13 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
             }
         }
 
-        if (!(this.regMMR0 & PDP11.MMR0.ABORT)) {
-            this.regMMR1 = 0;
-            this.regMMR2 = this.regsGen[7];
-        }
-
         /*
          * Snapshot the TF bit in opFlags, while clearing all other opFlags (except those in PRESERVE);
          * we'll check the TRAP_TF bit in opFlags when we come back around for another opcode.
          */
         this.opFlags = (this.opFlags & PDP11.OPFLAG.PRESERVE) | (this.regPSW & PDP11.PSW.TF);
 
-        this.decode(this.getPCWord());
+        this.decode(this.getOpcode());
 
     } while (this.nStepCycles > 0);
 

@@ -35,11 +35,11 @@
 if (NODE) {
     var str          = require("../../shared/lib/strlib");
     var web          = require("../../shared/lib/weblib");
+    var DumpAPI      = require("../../shared/lib/dumpapi");
     var Component    = require("../../shared/lib/component");
     var State        = require("../../shared/lib/state");
     var PDP11        = require("./defines");
     var MemoryPDP11  = require("./memory");
-    var ROMPDP11     = require("./rom");
 }
 
 /**
@@ -49,6 +49,9 @@ if (NODE) {
  *
  *      addr: starting physical address of RAM (default is 0)
  *      size: amount of RAM, in bytes (default is 0, which means defer to motherboard switch settings)
+ *      file: name of optional data file to load into RAM (default is "")
+ *      load: optional file load address (overrides any load address specified in the data file; default is null)
+ *      exec: optional file exec address (overrides any exec address specified in the data file; default is null)
  *
  * NOTE: We make a note of the specified size, but no memory is initially allocated for the RAM until the
  * Computer component calls powerUp().
@@ -61,10 +64,37 @@ function RAMPDP11(parmsRAM)
 {
     Component.call(this, "RAM", parmsRAM, RAMPDP11);
 
+    this.abInit = null;
+    this.aSymbols = null;
+
     this.addrRAM = parmsRAM['addr'];
     this.sizeRAM = parmsRAM['size'];
+    this.addrLoad = parmsRAM['load'];
+    this.addrExec = parmsRAM['exec'];
+
     this.fInstalled = (!!this.sizeRAM); // 0 is the default value for 'size' when none is specified
     this.fAllocated = false;
+
+    this.sFilePath = parmsRAM['file'];
+    this.sFileName = str.getBaseName(this.sFilePath);
+
+    if (this.sFilePath) {
+        var sFileURL = this.sFilePath;
+        if (DEBUG) this.log('load("' + sFileURL + '")');
+        /*
+         * If the selected data file has a ".json" extension, then we assume it's pre-converted
+         * JSON-encoded data, so we load it as-is; ditto for ROM files with a ".hex" extension.
+         * Otherwise, we ask our server-side converter to return the file in a JSON-compatible format.
+         */
+        var sFileExt = str.getExtension(this.sFileName);
+        if (sFileExt != DumpAPI.FORMAT.JSON && sFileExt != DumpAPI.FORMAT.HEX) {
+            sFileURL = web.getHost() + DumpAPI.ENDPOINT + '?' + DumpAPI.QUERY.FILE + '=' + this.sFilePath + '&' + DumpAPI.QUERY.FORMAT + '=' + DumpAPI.FORMAT.BYTES + '&' + DumpAPI.QUERY.DECIMAL + '=true';
+        }
+        var ram = this;
+        web.getResource(sFileURL, null, true, function(sURL, sResponse, nErrorCode) {
+            ram.doneLoad(sURL, sResponse, nErrorCode);
+        });
+    }
 }
 
 Component.subclass(RAMPDP11);
@@ -87,24 +117,6 @@ RAMPDP11.prototype.initBus = function(cmp, bus, cpu, dbg)
 };
 
 /**
- * initRAM()
- *
- * @this {RAMPDP11}
- */
-RAMPDP11.prototype.initRAM = function()
-{
-    if (!this.fAllocated && this.sizeRAM) {
-        if (this.bus.addMemory(this.addrRAM, this.sizeRAM, MemoryPDP11.TYPE.RAM)) {
-            this.fAllocated = true;
-        }
-    }
-    if (!this.fAllocated) {
-        Component.error("No RAM allocated");
-    }
-    this.setReady();
-};
-
-/**
  * powerUp(data, fRepower)
  *
  * @this {RAMPDP11}
@@ -114,6 +126,16 @@ RAMPDP11.prototype.initRAM = function()
  */
 RAMPDP11.prototype.powerUp = function(data, fRepower)
 {
+    if (this.aSymbols) {
+        if (this.dbg) {
+            this.dbg.addSymbols(this.id, this.addrRAM, this.sizeRAM, this.aSymbols);
+        }
+        /*
+         * Our only role in the handling of symbols is to hand them off to the Debugger at our
+         * first opportunity. Now that we've done that, our copy of the symbols, if any, are toast.
+         */
+        delete this.aSymbols;
+    }
     /*
      * The Computer powers up the CPU last, at which point CPUState state is restored,
      * which includes the Bus state, and since we use the Bus to allocate all our memory,
@@ -143,15 +165,190 @@ RAMPDP11.prototype.powerDown = function(fSave, fShutdown)
 };
 
 /**
+ * doneLoad(sURL, sData, nErrorCode)
+ *
+ * @this {RAMPDP11}
+ * @param {string} sURL
+ * @param {string} sData
+ * @param {number} nErrorCode (response from server if anything other than 200)
+ */
+RAMPDP11.prototype.doneLoad = function(sURL, sData, nErrorCode)
+{
+    if (nErrorCode) {
+        this.notice("Unable to load RAM resource (error " + nErrorCode + ": " + sURL + ")");
+        return;
+    }
+
+    Component.addMachineResource(this.idMachine, sURL, sData);
+
+    var resource = web.parseMemoryResource(sURL, sData);
+    if (resource) {
+        this.abInit = resource.aBytes;
+        this.aSymbols = resource.aSymbols;
+        if (this.addrLoad == null) this.addrLoad = resource.addrLoad;
+        if (this.addrExec == null) this.addrExec = resource.addrExec;
+    } else {
+        this.sFilePath = null;
+    }
+    this.initRAM();
+};
+
+/**
+ * initRAM()
+ *
+ * This function is called by both initBus() and doneLoad(), but it cannot copy the initial data into place
+ * until after initBus() has received the Bus component AND doneLoad() has received the data.  When both those
+ * criteria are satisfied, the component becomes "ready".
+ *
+ * @this {RAMPDP11}
+ */
+RAMPDP11.prototype.initRAM = function()
+{
+    if (!this.bus) return;
+
+    if (!this.fAllocated && this.sizeRAM) {
+        if (this.bus.addMemory(this.addrRAM, this.sizeRAM, MemoryPDP11.TYPE.RAM)) {
+            this.fAllocated = true;
+        }
+    }
+    if (!this.isReady()) {
+        if (!this.fAllocated) {
+            Component.error("No RAM allocated");
+        }
+        else if (this.sFilePath) {
+            /*
+             * Too early...
+             */
+            if (!this.abInit || !this.bus) return;
+            this.loadImage(this.abInit, this.addrLoad, this.addrExec, this.addrRAM);
+            /*
+             * NOTE: We now retain this data, so that reset() can return the RAM to its predefined state.
+             *
+             *      delete this.abInit;
+             */
+        }
+        this.setReady();
+    }
+};
+
+/**
  * reset()
  *
  * @this {RAMPDP11}
  */
 RAMPDP11.prototype.reset = function()
 {
+    if (this.fAllocated) {
+        this.bus.zeroMemory(this.addrRAM, this.sizeRAM);
+        if (this.abInit) {
+            this.loadImage(this.abInit, this.addrLoad, this.addrExec, this.addrRAM, true);
+        }
+    }
+};
+
+/**
+ * loadImage(aBytes, addrLoad, addrExec, addrInit, fReset)
+ *
+ * @this {RAMPDP11}
+ * @param {Array|Uint8Array} aBytes
+ * @param {number|null} [addrLoad]
+ * @param {number|null} [addrExec]
+ * @param {number|null} [addrInit]
+ * @param {boolean} [fReset]
+ * @return {boolean} (true if loaded, false if not)
+ */
+RAMPDP11.prototype.loadImage = function(aBytes, addrLoad, addrExec, addrInit, fReset)
+{
+    var fLoaded = false;
     /*
-     * If you want to zero RAM on reset, then this would be a good place to do it.
+     * Data on tapes is organized into blocks; each block begins with a 6-byte header:
+     *
+     *      2-byte signature (0x0001)
+     *      2-byte block length (N + 6, because it includes the 6-byte header)
+     *      2-byte load address
+     *
+     * followed by N data bytes.  If N is zero, then the 2-byte load address is the exec address,
+     * unless the address is odd (usually 1).  DEC's "Absolute Loader" jumps to the exec address
+     * in former case, halts in the latter.
+     *
+     * All values are stored "little endian" (low byte followed by high byte), just like the
+     * PDP-11's memory architecture.
+     *
+     * After the data bytes, there is a single checksum byte.  The 8-bit sum of all the bytes in
+     * the block (including the header bytes and checksum byte) should be zero.
+     *
+     * ANOMALIES: Tape files don't always begin with a signature word, so I allow any number of
+     * leading zeros before the first signature.  Tape files don't always end cleanly either, so as
+     * soon as I see an invalid signature, I break out of the loop without signalling an error, as
+     * long as at least ONE block was successfully processed.  In fact, it's possible that as
+     * soon as a block with ZERO data bytes is encountered, processing is supposed to stop, but
+     * I haven't examined enough tapes (or the Absolute Loader code) to know for sure.
      */
+    if (addrLoad == null) {
+        var off = 0, fError = false;
+        while (off < aBytes.length - 1) {
+            var w = (aBytes[off] & 0xff) | ((aBytes[off+1] & 0xff) << 8);
+            if (!w) {           // ignore pairs of leading zeros
+                off += 2;
+                continue;
+            }
+            if (!(w & 0xff)) {  // as well as single bytes of zero
+                off++;
+                continue;
+            }
+            var offBlock = off;
+            if (w != 0x0001) {
+                if (MAXDEBUG) this.println("invalid signature (" + str.toHexWord(w) + ") at offset " + str.toHexWord(offBlock));
+                break;
+            }
+            if (off + 6 >= aBytes.length) {
+                if (MAXDEBUG) this.println("invalid block at offset " + str.toHexWord(offBlock));
+                break;
+            }
+            off += 2;
+            var checksum = w;
+            var len = (aBytes[off++] & 0xff) | ((aBytes[off++] & 0xff) << 8);
+            var addr = (aBytes[off++] & 0xff) | ((aBytes[off++] & 0xff) << 8);
+            checksum += (len & 0xff) + (len >> 8) + (addr & 0xff) + (addr >> 8);
+            var offData = off, cbData = len -= 6;
+            while (len > 0 && off < aBytes.length) {
+                checksum += aBytes[off++] & 0xff;
+                len--;
+            }
+            if (len != 0 || off >= aBytes.length) {
+                if (MAXDEBUG) this.println("insufficient data for block at offset " + str.toHexWord(offBlock));
+                break;
+            }
+            checksum += aBytes[off++] & 0xff;
+            if (checksum & 0xff) {
+                if (MAXDEBUG) this.println("invalid checksum (" + str.toHexByte(checksum) + ") for block at offset " + str.toHexWord(offBlock));
+                break;
+            }
+            if (!cbData) {
+                if (addr & 0x1) {
+                    this.cpu.stopCPU();
+                } else {
+                    this.cpu.setReset(addr, fReset);
+                }
+            } else {
+                while (cbData--) {
+                    this.cpu.setByteDirect(addr++, aBytes[offData++] & 0xff);
+                }
+            }
+            fLoaded = true;
+        }
+    }
+    if (!fLoaded) {
+        if (addrLoad == null) addrLoad = addrInit;
+        if (addrLoad != null) {
+            for (var i = 0; i < aBytes.length; i++) {
+                this.cpu.setByteDirect(addrLoad + i, aBytes[i]);
+            }
+            if (addrExec != null) this.cpu.setReset(addrExec, fReset);
+            fLoaded = true;
+        }
+    }
+    return fLoaded;
 };
 
 /**

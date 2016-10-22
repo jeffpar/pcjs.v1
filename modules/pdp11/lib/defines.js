@@ -186,12 +186,20 @@ var PDP11 = {
         }
     },
     /*
+     * Assorted common opcodes
+     */
+    OPCODE: {
+        HALT:       0x0000,
+        INVALID:    0xFFFF      // far from the only invalid opcode, just a KNOWN invalid opcode
+    },
+    /*
      * Internal operation state flags
      */
     OPFLAG: {
         INTQ_SPL:   0x01,       // INTQ triggered by SPL
         INTQ:       0x02,       // call checkInterrupts()
         WAIT:       0x04,       // WAIT operation in progress
+        TRAP:       0x08,       // set if last operation was a trap (see trapLast for the vector, and trapReason for the reason)
         TRAP_TF:    0x10,       // aka PDP11.PSW.TF
         TRAP_MMU:   0x20,
         TRAP_SP:    0x40,
@@ -241,15 +249,15 @@ var PDP11 = {
      */
     TRAP: {
         UNDEFINED:  0x00,       // 000  (reserved)
-        BUS_ERROR:  0x04,       // 004  illegal instructions, bus errors, stack limit, illegal internal address, microbreak
+        BUS_ERROR:  0x04,       // 004  illegal instruction, unaligned address, invalid memory, stack limit, microbreak
         RESERVED:   0x08,       // 010  reserved instructions
-        BREAKPOINT: 0x0C,       // 014  BPT, breakpoint trap (trace)
-        IOT:        0x10,       // 020  IOT, input/output trap
-        POWER_FAIL: 0x14,       // 024  power fail
-        EMULATOR:   0x18,       // 030  EMT, emulator trap
+        BPT:        0x0C,       // 014  BPT: breakpoint trap (trace)
+        IOT:        0x10,       // 020  IOT: input/output trap
+        PF:         0x14,       // 024  power fail
+        EMT:        0x18,       // 030  EMT: emulator trap
         TRAP:       0x1C,       // 034  TRAP instruction
-        PIRQ:       0xA0,       // 240  PIRQ, program interrupt request
-        MMU_FAULT:  0xA8        // 250  MMU aborts and traps
+        PIRQ:       0xA0,       // 240  PIRQ: program interrupt request
+        MMU:        0xA8        // 250  MMU: aborts and traps
     },
     /*
      * PDP-11 trap reasons (for diagnostic purposes only)
@@ -425,8 +433,10 @@ var PDP11 = {
 
         LKS:        0o177546,   //                                  KW11-L Clock Status
 
-        PRS:        0o177550,   //                                  PC11/PR11 Reader Status Register
-        PRB:        0o177552,   //                                  PC11/PR11 Reader Buffer Register
+        PRS:        0o177550,   //                                  PC11 (and PR11) Reader Status Register
+        PRB:        0o177552,   //                                  PC11 (and PR11) Reader Buffer Register
+        PPS:        0o177554,   //                                  PC11 Punch Status Register
+        PPB:        0o177556,   //                                  PC11 Punch Buffer Register
 
         RCSR:       0o177560,   //                                  Display Terminal: Receiver Status Register
         RBUF:       0o177562,   //                                  Display Terminal: Receiver Data Buffer Register
@@ -511,6 +521,9 @@ var PDP11 = {
         PSW:        0o177776    // 777776   17777776    0x3FFFFE    Processor Status Word
     },
     PC11: {                     // High Speed Reader & Punch (PR11 is a Reader-only unit)
+        PRI:        4,          // NOTE: reader has precedence over punch
+        RVEC:       0o70,       // reader vector
+        PVEC:       0o74,       // punch vector
         PRS: {
             RE:     0x0001,     // Reader Enable (W/O)
             RIE:    0x0040,     // Reader Interrupt Enable (allows the DONE and ERROR bits to trigger an interrupt)
@@ -518,18 +531,26 @@ var PDP11 = {
             BUSY:   0x0800,     // Busy (R/O)
             ERROR:  0x8000,     // Error (R/O)
             CLEAR:  0x08C0,     // bits cleared on INIT
-            WMASK:  0x0041      // bits writable
+            RMASK:  0xFFFE,     // bits readable (TODO: All I know for sure is that bit 0 is NOT readable; see readPRS())
+            WMASK:  0x0041,     // bits writable
+            BAUD:   3600
         },
         PRB: {
             MASK:   0x00FF      // Data
-        }
+        },
+        PPS: {
+            /*
+             * TODO: Flesh this out if/when we add Paper Tape Punch support
+             */
+            BAUD:   600
+        },
     },
     DL11: {                     // Serial Line Interface (program compatible with the KL11 for control of console teleprinters)
         PRI:        4,
         RVEC:       0o60,
         XVEC:       0o64,
         RCSR: {                 // 177560
-            RE:     0x0001,     // Reader Enable (W/O)              TODO: Determine if we really need to exclude this write-only bit from RMASK
+            RE:     0x0001,     // Reader Enable (W/O)
             DTR:    0x0002,     // Data Terminal Ready (R/W)
             RTS:    0x0004,     // Request To Send (R/W)
             STD:    0x0008,     // Secondary Transmitted Data (R/W)
@@ -542,16 +563,16 @@ var PDP11 = {
             CTS:    0x2000,     // Clear To Send (R/O)
             RI:     0x4000,     // Ring Indicator (R/O)
             DSC:    0x8000,     // Dataset Status Change (R/O)
-            RMASK:  0xFFFF,     // read mask
-            WMASK:  0x006F      // write mask
+            RMASK:  0xFFFE,     // bits readable (TODO: All I know for sure is that bit 0 is NOT readable; see readRCSR())
+            WMASK:  0x006F,     // bits writable
+            BAUD:   9600
         },
         RBUF: {                 // 177562
             DATA:   0x00ff,     // Received Data (R/O)
             PARITY: 0x1000,     // Received Data Parity (R/O)
             FE:     0x2000,     // Framing Error (R/O)
             OE:     0x4000,     // Overrun Error (R/O)
-            ERROR:  0x8000,     // Error (R/O)
-            DELAY:  1
+            ERROR:  0x8000      // Error (R/O)
         },
         XCSR: {                 // 177564
             BREAK:  0x0001,     // BREAK (R/W)
@@ -560,11 +581,10 @@ var PDP11 = {
             READY:  0x0080,     // Transmitter Ready (R/O)
             RMASK:  0x00C5,
             WMASK:  0x0045,
-            DELAY:  1
+            BAUD:   9600
         },
         XBUF: {                 // 177566
-            DATA:   0x00FF,     // Transmitted Data (W/O)       TODO: Determine why pdp11.js effectively defined this as 0x7F
-            DELAY:  1
+            DATA:   0x00FF      // Transmitted Data (W/O)       TODO: Determine why pdp11.js effectively defined this as 0x7F
         }
     },
     KW11: {                     // KW11-L Line Time Clock
