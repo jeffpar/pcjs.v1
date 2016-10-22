@@ -7,4 +7,4 @@ permalink: /devices/pdp11/panel/test/
 PDP-11 Test Panels
 ------------------
 
-* [Terminal Test Panel](terminal.xml) ([Debugger](debugger/terminal.xml))
+* [Terminal Test Panel](terminal.xml) (with [Debugger](debugger/terminal.xml))
