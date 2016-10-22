@@ -25,6 +25,13 @@ leaving the **[Absolute Loader](/apps/pdp11/tapes/absloader/)** ready to run imm
 You can then select another tape image in the Absolute Loader format, such as **[BASIC (Single User)](/apps/pdp11/tapes/basic/)**,
 click "Attach" and then "Run".
 
+If you need to start over, select "Bootstrap Loader (16Kb)" from the list of tapes and click "Load" instead of
+"Attach", re-installing the **[Bootstrap Loader](/apps/pdp11/boot/bootstrap/)** directly into RAM.
+
+Alternatively, just press the "Reset" button.  The RAM component was recently updated to restore pre-loaded images whenever
+the entire machine is reset.  You'll still need to manually re-attach the **[Absolute Loader](/apps/pdp11/tapes/absloader/)**
+tape image, however.
+
 {% include machine.html id="test1120" %}
 
 This machine is also available with our built-in [Debugger](debugger/).

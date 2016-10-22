@@ -19,4 +19,8 @@ This machine pre-loads the **[DEC PDP-11 BASIC](/apps/pdp11/tapes/basic/)** tape
 You can also manually load it into memory using the **[Bootstrap Loader](/apps/pdp11/boot/bootstrap/)**.
 See the [Bootstrap Loader Demo (with Debugger)](/devices/pdp11/machine/1120/bootstrap/debugger/) for details.
 
+There are also some [Debugging Notes](/apps/pdp11/tapes/basic/#debugging-notes) on the
+[DEC PDP-11 BASIC](/apps/pdp11/tapes/basic/) page, if you're inclined to do some debugging with the built-in
+PDPjs Debugger.
+
 {% include machine.html id="test1120" %}
