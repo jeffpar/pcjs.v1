@@ -1162,6 +1162,13 @@ CPUStatePDP11.prototype.trap = function(vector, reason)
     this.opFlags &= ~PDP11.OPFLAG.TRAP_MASK;    // lose interest in traps after an abort
     this.trapPSW = -1;                          // reset flag that we have a trap within a trap
 
+    /*
+     * These next properties are purely for bookkeeping purposes; see getTrapStatus()
+     */
+    this.opFlags |= PDP11.OPFLAG.TRAP;
+    this.trapVector = vector;
+    this.trapReason = reason;
+
     if (reason != PDP11.REASON.INTERRUPT) throw vector;
 };
 
@@ -1190,6 +1197,17 @@ CPUStatePDP11.prototype.trapReturn = function()
     this.setPC(addr);
     this.setPSW(newPSW);
     this.opFlags &= ~PDP11.OPFLAG.TRAP_TF;
+};
+
+/**
+ * getTrapStatus()
+ *
+ * @this {CPUStatePDP11}
+ * @return {number}
+ */
+CPUStatePDP11.prototype.getTrapStatus = function()
+{
+    return (this.opFlags & PDP11.OPFLAG.TRAP)? (this.trapVector | this.trapReason << 8) : 0;
 };
 
 /**

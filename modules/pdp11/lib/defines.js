@@ -199,6 +199,7 @@ var PDP11 = {
         INTQ_SPL:   0x01,       // INTQ triggered by SPL
         INTQ:       0x02,       // call checkInterrupts()
         WAIT:       0x04,       // WAIT operation in progress
+        TRAP:       0x08,       // set if last operation was a trap (see trapLast for the vector, and trapReason for the reason)
         TRAP_TF:    0x10,       // aka PDP11.PSW.TF
         TRAP_MMU:   0x20,
         TRAP_SP:    0x40,

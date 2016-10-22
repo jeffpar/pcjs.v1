@@ -29,13 +29,12 @@ One of the first things I noticed when debugging PDP-11 BASIC was its heavy reli
 For example, `TRAP 000` is used to output the character in R2 to the terminal.  Let's take a closer look at how
 its TRAP handler works.
 
-First, if you check the table of PDP-11 trap vectors, you'll see that the vector for TRAP instructions is 000034.
-So let's dump the contents of the two-word vector at 000034:
+Since the trap vector for TRAP instructions is fixed at address 000034, we need to dump the contents of that vector:
 
 	>> dw 034 l2
 	000034  000100  000000  
 
-The BASIC TRAP handler is at 000100, and here's that code:
+This tells us that the BASIC TRAP handler is at 000100:
 
 	>> u 000100
 	000100: 011666 000002          MOV   @SP,2(SP)
@@ -67,7 +66,7 @@ an *even* value) into a jump table index.
 The final instruction, `MOV @(SP)+,PC`, moves the address at the jump table index into PC, while also removing the TRAP
 instruction from the stack, leaving only the *previous PC* on the stack.
 
-### Comparing to SIMH
+### The PDPjs Debugger vs. SIMH
 
 How to set (and display) a breakpoint in PDPjs:
 
@@ -81,4 +80,3 @@ How to set (and display) the same breakpoint in SIMH:
 	sim> break -e 016220
 	sim> show break
 	16220:	E
-

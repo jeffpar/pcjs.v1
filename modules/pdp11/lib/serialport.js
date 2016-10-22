@@ -61,6 +61,10 @@ if (NODE) {
  *      tabSize: set to a non-zero number to convert tabs to spaces (applies only to output to
  *      the above binding); default is 0 (no conversion)
  *
+ *      upperCase: if true, all received input is upper-cased; it is normally the responsibility
+ *      of the sending device to ensure this, but sometimes it's more convenient to enforce
+ *      on the receiving end.
+ *
  * NOTE: Since the XSL file defines the 'adapter' and 'baud' properties as numbers, not strings,
  * there's no need to use parseInt(), and as an added benefit, we don't need to worry about whether
  * a hex or decimal format was used.
@@ -74,6 +78,7 @@ function SerialPortPDP11(parmsSerial) {
     this.iAdapter = parmsSerial['adapter'];
     this.nBaudReceive = parmsSerial['baudReceive'] || PDP11.DL11.RCSR.BAUD;
     this.nBaudTransmit = parmsSerial['baudTransmit'] || PDP11.DL11.XCSR.BAUD;
+    this.fUpperCase = parmsSerial['upperCase'];
 
     /**
      * consoleOutput becomes a string that records serial port output if the 'binding' property is set to the
@@ -279,6 +284,16 @@ SerialPortPDP11.prototype.initBus = function(cmp, bus, cpu, dbg)
                  * the data assigned to RBUF with 0xff.
                  */
                 serial.rbuf = serial.abReceive.shift() & 0xff;
+                if (serial.fUpperCase) {
+                    /*
+                     * Automatically transform lower-case ASCII codes to upper-case; fUpperCase should
+                     * only be set when a terminal or some sort of pseudo-display is being used and we don't
+                     * trust it to have its CAPS-LOCK setting correct.
+                     */
+                    if (serial.rbuf >= 0x61 && serial.rbuf < 0x7A) {
+                        serial.rbuf -= 0x20;
+                    }
+                }
                 serial.rcsr |= PDP11.DL11.RCSR.RD;
                 if (serial.rcsr & PDP11.DL11.RCSR.RIE) {
                     serial.cpu.setTrigger(serial.triggerReceiveInterrupt);

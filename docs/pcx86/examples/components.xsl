@@ -887,10 +887,17 @@
 				<xsl:otherwise>0</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
+		<xsl:variable name="upperCase">
+			<xsl:choose>
+				<xsl:when test="@uppercase"><xsl:value-of select="@uppercase"/></xsl:when>
+				<xsl:when test="@upperCase"><xsl:value-of select="@upperCase"/></xsl:when>
+				<xsl:otherwise>false</xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
 		<xsl:call-template name="component">
 			<xsl:with-param name="machine" select="$machine"/>
 			<xsl:with-param name="class">serial</xsl:with-param>
-			<xsl:with-param name="parms">,adapter:<xsl:value-of select="$adapter"/>,baudReceive:<xsl:value-of select="$baudReceive"/>,baudTransmit:<xsl:value-of select="$baudTransmit"/>,binding:'<xsl:value-of select="$binding"/>',tabSize:<xsl:value-of select="$tabSize"/>,charBOL:<xsl:value-of select="$charBOL"/></xsl:with-param>
+			<xsl:with-param name="parms">,adapter:<xsl:value-of select="$adapter"/>,baudReceive:<xsl:value-of select="$baudReceive"/>,baudTransmit:<xsl:value-of select="$baudTransmit"/>,binding:'<xsl:value-of select="$binding"/>',tabSize:<xsl:value-of select="$tabSize"/>,charBOL:<xsl:value-of select="$charBOL"/>,upperCase:<xsl:value-of select="$upperCase"/></xsl:with-param>
 		</xsl:call-template>
 	</xsl:template>
 

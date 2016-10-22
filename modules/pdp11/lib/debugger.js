@@ -1369,6 +1369,13 @@ if (DEBUGGER) {
 
         if (fRegs === undefined) fRegs = true;
 
+        var trapStatus = this.cpu.getTrapStatus();
+        if (trapStatus) {
+            var trapReason = trapStatus >> 8;
+            var sReason = trapReason? (" (" + this.toStrBase(trapReason) + ")") : "";
+            this.println("trapped to " + this.toStrBase(trapStatus & 0xff, 1) + sReason);
+        }
+
         this.dbgAddrNextCode = this.newAddr(this.cpu.getPC());
         /*
          * this.nStep used to be a simple boolean, but now it's 0 (or undefined)
