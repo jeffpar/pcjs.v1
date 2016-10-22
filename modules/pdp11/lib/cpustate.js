@@ -333,6 +333,17 @@ CPUStatePDP11.prototype.getMMR1 = function()
 };
 
 /**
+ * getMMR3()
+ *
+ * @this {CPUStatePDP11}
+ * @return {number}
+ */
+CPUStatePDP11.prototype.getMMR3 = function()
+{
+    return this.regMMR3;
+};
+
+/**
  * setMMR3()
  *
  * @this {CPUStatePDP11}
@@ -1133,7 +1144,7 @@ CPUStatePDP11.prototype.trap = function(vector, reason)
         doubleTrap = true;
     }
 
-    if (!(this.regMMR0 & 0xe000)) {
+    if (!(this.regMMR0 & PDP11.MMR0.ABORT)) {
         this.regMMR1 = 0xf6f6;
         this.regMMR2 = vector;
     }
@@ -2103,7 +2114,7 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
 
     do {
         if (DEBUGGER && nDebugCheck) {
-            if (this.dbg.checkInstruction(this.getPC(), nDebugState)) {
+            if (this.dbg && this.dbg.checkInstruction(this.getPC(), nDebugState)) {
                 this.stopCPU();
                 break;
             }
