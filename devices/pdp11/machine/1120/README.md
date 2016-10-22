@@ -11,4 +11,4 @@ PDPjs is currently being tested with the following PDP-11/20 machine configurati
 
 * [PDP-11/20 Boot Test](/devices/pdp11/machine/1120/test/) (with [Debugger](/devices/pdp11/machine/1120/test/debugger/))
 * [PDP-11/20 Bootstrap Loader Demo](/devices/pdp11/machine/1120/bootstrap/) (with [Debugger](/devices/pdp11/machine/1120/bootstrap/debugger/))
-* [PDP-11/20 DEC BASIC Demo](/devices/pdp11/machine/1120/basic/) (with [Debugger](/devices/pdp11/machine/1120/basic/debugger/))
+* [PDP-11/20 DEC PDP-11 BASIC Demo](/devices/pdp11/machine/1120/basic/) (with [Debugger](/devices/pdp11/machine/1120/basic/debugger/))

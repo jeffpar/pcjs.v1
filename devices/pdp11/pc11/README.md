@@ -31,5 +31,5 @@ configuration file such as [demo.xml](demo.xml):
 		
 The above configuration is used by PDPjs machines such as:
 
-- [PDP-11/20 with 16Kb and Bootstrap Loader](/devices/pdp11/machine/1120/bootstrap/) ([Debugger](/devices/pdp11/machine/1120/bootstrap/debugger/))
-- [PDP-11/20 with 16Kb and DEC BASIC](/devices/pdp11/machine/1120/basic/) ([Debugger](/devices/pdp11/machine/1120/basic/debugger/))
+- [Bootstrap Loader Demo](/devices/pdp11/machine/1120/bootstrap/) ([Debugger](/devices/pdp11/machine/1120/bootstrap/debugger/))
+- [DEC PDP-11 BASIC Demo](/devices/pdp11/machine/1120/basic/) ([Debugger](/devices/pdp11/machine/1120/basic/debugger/))
