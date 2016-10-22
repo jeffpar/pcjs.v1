@@ -7,8 +7,8 @@ permalink: /apps/pdp11/boot/bootstrap/
 DEC PDP-11 Bootstrap Loader
 ---------------------------
 
-The **Bootstrap Loader** is a small program that loads the **[Absolute Loader](/apps/pdp11/tapes/absloader/)**,
-which is then used to load other PDP-11 tapes, such as **[BASIC (Single User)](/apps/pdp11/tabes/basic/)**. 
+The **Bootstrap Loader** is a small program that loads the [Absolute Loader](/apps/pdp11/tapes/absloader/),
+which is then used to load other PDP-11 tapes, such as [BASIC (Single User)](/apps/pdp11/tabes/basic/). 
  
 Here's what the **Bootstrap Loader** looks like:
 

@@ -9,12 +9,24 @@ PC11 High-Speed Paper Tape Reader/Punch
 
 PDPjs implements the PC11 component in [pc11.js](/modules/pdp11/lib/pc11.js). 
 
-A selection of [Paper Tape Images](/apps/pdp11/tapes/) have been archived for use by PDPjs machines:
+PDPjs machines that contain a PC11 Tape Reader include:
 
 - [Bootstrap Loader Demo](/devices/pdp11/machine/1120/bootstrap/)
 - [PDP-11/20 BASIC Demo](/devices/pdp11/machine/1120/basic/) (with [Debugger](/devices/pdp11/machine/1120/basic/debugger/))
 
-The tape images are typically listed in a common configuration file that all machines can use, such as [demo.xml](demo.xml): 
+We have archived a selection of [Paper Tape Images](/apps/pdp11/tapes/) for use by those machines.
+
+To make it easy for PDPjs machines to load those tapes, we created the following High-Speed Paper Tape Reader (PC11)
+Device XML file:
+
+- [Demo](/devices/pdp11/pc11/demo.xml)
+
+which is typically referenced by a Machine XML file as:
+
+	<device ref="/devices/pdp11/pc11/demo.xml"/>
+		
+Device XML files typically configure the device, list all the resource the device will use, and define UI elements
+used to control the device, such as choosing which tape should be "attached" to the PC11 device.  For example:
 
 	<?xml version="1.0" encoding="UTF-8"?>
 	<device id="pc11" type="pc11" baudReceive="9600" autoMount='{path:"/apps/pdp11/tapes/absloader/DEC-11-L2PC-PO.json"}' pos="left" width="35%" padLeft="8px" padBottom="8px">

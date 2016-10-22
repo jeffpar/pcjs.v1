@@ -249,6 +249,9 @@ RAMPDP11.prototype.reset = function()
 /**
  * loadImage(aBytes, addrLoad, addrExec, addrInit, fReset)
  *
+ * If the array contains an image in the "Absolute Format," load it as specified by
+ * the format; otherwise, load it as-is using the address(es) supplied.
+ *
  * @this {RAMPDP11}
  * @param {Array|Uint8Array} aBytes
  * @param {number|null} [addrLoad]
@@ -261,14 +264,15 @@ RAMPDP11.prototype.loadImage = function(aBytes, addrLoad, addrExec, addrInit, fR
 {
     var fLoaded = false;
     /*
-     * Data on tapes is organized into blocks; each block begins with a 6-byte header:
+	 * Data on tapes in the "Absolute Format" is organized into blocks; each block begins with
+	 * a 6-byte header:
      *
      *      2-byte signature (0x0001)
      *      2-byte block length (N + 6, because it includes the 6-byte header)
      *      2-byte load address
      *
      * followed by N data bytes.  If N is zero, then the 2-byte load address is the exec address,
-     * unless the address is odd (usually 1).  DEC's "Absolute Loader" jumps to the exec address
+     * unless the address is odd (usually 1).  DEC's Absolute Loader jumps to the exec address
      * in former case, halts in the latter.
      *
      * All values are stored "little endian" (low byte followed by high byte), just like the

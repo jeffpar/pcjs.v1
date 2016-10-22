@@ -13,12 +13,12 @@ machines:
 DEC PDP-11 BASIC
 ----------------
 
-The first PCjs machine to run DEC PDP-11 BASIC was this [PDP-11/20](/devices/pdp11/machine/1120/basic/debugger/),
+The first PDPjs machine to run DEC PDP-11 BASIC was this [PDP-11/20](/devices/pdp11/machine/1120/basic/debugger/),
 shown below.
 
 {% include machine.html id="test1120" %}
 
-PCjs has archived these DEC PDP-11 BASIC resources:
+PCjs has archived the following DEC PDP-11 BASIC resources:
 
 - [BASIC (Single User) Tape Image](DEC-11-AJPB-PB.json)
 - [LISTING OF BASIC/PTS (March 1974)](http://archive.pcjs.org/pubs/dec/pdp11/basic/AB-2045B-SC_BASIC_PTS_Listing_Mar77.pdf)

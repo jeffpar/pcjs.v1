@@ -7,10 +7,10 @@ machines:
     type: pdp11
 ---
 
-Boot Test
----------
+PDP-11/20 Boot Test
+-------------------
 
-This machine pre-loads the **[PDP-11 Boot Test](/apps/pdp11/boot/test/)** code into RAM:
+This machine pre-loads the [PDP-11 Boot Test](/apps/pdp11/boot/test/) code into RAM:
 
 	<ram id="ram" addr="0x0000" size="0xE000" file="/apps/pdp11/boot/test/BOOTTEST.json" load="0xC000" exec="0xC000"/>
 
