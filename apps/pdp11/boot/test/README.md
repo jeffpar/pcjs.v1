@@ -9,14 +9,16 @@ redirect_from:
 PDP-11 Boot Test
 ----------------
 
-[BOOTTEST.mac](BOOTTEST.mac) is based on [boot.mac](http://skn.noip.me/pdp11/boot.mac) written by [Paul Nankervis](mailto:paulnank@hotmail.com).
+[BOOTTEST.mac](BOOTTEST.mac) is based on [boot.mac](http://skn.noip.me/pdp11/boot.mac) written by
+[Paul Nankervis](mailto:paulnank@hotmail.com).  It is used with all our initial PDP-11 boot tests.
 
-[BOOTTEST.mac](BOOTTEST.mac) was cross-assembled with [MACRO11](https://github.com/shattered/macro11) to produce [BOOTTEST.lst](BOOTTEST.lst),
-which was then processed by [FileDump](/modules/filedump/) to produce [BOOTTEST.json](BOOTTEST.json).
+[BOOTTEST.mac](BOOTTEST.mac) was cross-assembled with [MACRO11](https://github.com/shattered/macro11) to produce
+[BOOTTEST.lst](BOOTTEST.lst), which was then processed by [FileDump](/modules/filedump/) to produce
+[BOOTTEST.json](BOOTTEST.json).
 
-To see the Boot Test in action, try the [PDP-11/70 Boot Test with Debugger](/devices/pdp11/machine/1170/test/debugger/).
+To see the Boot Test in action, try the [PDP-11/70 Boot Test (with Debugger)](/devices/pdp11/machine/1170/test/debugger/).
 
-The source code is shown below.
+The **BOOTTEST.mac** source code is shown below.
 
 	; BOOT LOADER CODE
 	;
@@ -205,7 +207,7 @@ The source code is shown below.
 	        .ASCIZ  'HELP'
 	        .BYTE   0
 	UNKMSG: .ASCIZ  'UNKNOWN COMMAND'<12><15>
-	BANNER: .ASCIZ  'PAUL NANKERVIS - PAULNANK@HOTMAIL.COM'<12><15><12><15>
+	BANNER:	.ASCIZ	'PDP-11 BOOT TEST FOR PDPjs'<12><15>'ADAPTED FROM CODE BY PAUL NANKERVIS <PAULNANK@HOTMAIL.COM>'<12><15><12><15>
 	PROMPT: .ASCIZ  'BOOT> '
 	BADBOO: .ASCIZ  'UNKNOWN BOOT DEVICE'<12><15>
 	PERMSG: .ASCIZ  '      CLOCK TICKS'<12><15>

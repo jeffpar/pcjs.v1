@@ -11,8 +11,10 @@ Disk Libraries
 
 Browse these PCjs Disk Libraries:
 
-- [IBM PC](pcx86/)
-- [Challenger 1P](c1p/)
+* [IBM PC](pcx86/)
+* [Challenger 1P](c1p/)
+
+Additional selected software is available in the PCjs [Software Archives](/apps/).
 
 ---
 

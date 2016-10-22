@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- author="Jeff Parsons (@jeffpar)" website="http://www.pcjs.org/" created="2012-05-05" modified="2014-02-23" license="http://www.gnu.org/licenses/gpl.html" -->
 <!DOCTYPE xsl:stylesheet [
-	<!-- XSLT understands these entities only: lt, gt, apos, quot, and amp.  Other required entities may be defined below (see entities.dtd). -->
 	<!ENTITY nbsp "&#160;"> <!ENTITY ne "&#8800;"> <!ENTITY le "&#8804;"> <!ENTITY ge "&#8805;">
 	<!ENTITY times "&#215;"> <!ENTITY sdot "&#8901;"> <!ENTITY divide "&#247;">
 	<!ENTITY copy "&#169;"> <!ENTITY Sigma "&#931;"> <!ENTITY sigma "&#963;"> <!ENTITY sum "&#8721;"> <!ENTITY lbrace "&#123;">
@@ -24,8 +23,7 @@
 		<link rel="apple-touch-icon" href="/versions/icons/current/apple-touch-icon.png"/>
 		<link rel="icon" type="image/png" sizes="192x192" href="/versions/icons/current/pc-icon-192.png"/>
 		<link rel="shortcut icon" type="image/x-icon" href="/versions/icons/current/favicon.ico"/>
-		<link rel="stylesheet" type="text/css" href="/modules/shared/templates/common.css"/>
-		<!-- script type="text/javascript" src="/versions/jquery/1.7.2/jquery.min.js" -->
+		<link rel="stylesheet" type="text/css" href="/versions/c1pjs/1.30.2/common.css"/>
 	</xsl:template>
 
 	<xsl:template name="commonTop">
