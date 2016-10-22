@@ -2,7 +2,7 @@
 layout: blog
 title: Blog
 menu_title: Blog
-menu_order: 2
+menu_order: 1
 permalink: /blog/
 ---
 

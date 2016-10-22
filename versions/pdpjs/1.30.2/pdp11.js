@@ -1,4 +1,5 @@
 (function(){/*
+ http://pcjs.org/modules/shared/lib/nodebug.js (C) Jeff Parsons 2012-2016
  http://pcjs.org/modules/shared/lib/dumpapi.js (C) Jeff Parsons 2012-2016
  http://pcjs.org/modules/shared/lib/reportapi.js (C) Jeff Parsons 2012-2016
  http://pcjs.org/modules/shared/lib/userapi.js (C) Jeff Parsons 2012-2016

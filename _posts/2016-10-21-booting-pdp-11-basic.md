@@ -15,7 +15,7 @@ machines:
 models, and since it had no MMU, it was limited to a maximum of 56Kb of RAM (or as DEC would say, 28K words), since
 the top 8Kb (or 4K words) of its 16-bit address space was reserved for UNIBUS devices.
 
-The first PDPjs test of a PDP-11/20 configuration was attempting to run [PDP-11 BASIC](/apps/pdp11/tapes/basic/), by loading
+The first PDPjs test of a PDP-11/20 machine was running [PDP-11 BASIC](/apps/pdp11/tapes/basic/), by loading
 it directly into memory from the original paper tape image.  This required changes to the [RAM](/modules/pdp11/lib/ram.js)
 component, including a new *loadImage()* interface that understands DEC's paper tape format.
 
