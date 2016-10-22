@@ -7,11 +7,12 @@ permalink: /apps/pdp11/tapes/basic/
 DEC PDP-11 BASIC
 ----------------
 
-Try the [DEC BASIC Demo](/devices/pdp11/machine/1120/basic/debugger/).
+To see DEC PDP-11 BASIC in action, try the [PDP-11/20 BASIC Demo](/devices/pdp11/machine/1120/basic/debugger/).
 
-PCjs has archived the following DEC resources:
+PCjs has archived the following DEC PDP-11 BASIC resources:
 
 - [BASIC (Single User) Tape Image](DEC-11-AJPB-PB.json)
+- [LISTING OF BASIC/PTS (March 1974)](http://archive.pcjs.org/pubs/dec/pdp11/basic/AB-2045B-SC_BASIC_PTS_Listing_Mar77.pdf)
 - [PDP-11 BASIC PROGRAMMING MANUAL (December 1970)](http://archive.pcjs.org/pubs/dec/pdp11/basic/DEC-11-AJPB-D_PDP-11_BASIC_Programming_Manual_Dec70.pdf) 
 
 Third-party resources include:

@@ -290,7 +290,7 @@ DevicePDP11.prototype.writeMMR2 = function(data, addr)
  */
 DevicePDP11.prototype.readMMR3 = function(addr)
 {
-    return this.cpu.regMMR3;
+    return this.cpu.getMMR3();
 };
 
 /**

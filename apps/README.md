@@ -7,11 +7,16 @@ permalink: /apps/
 Software Archives
 -----------------
 
-Browse these PCjs Software Archives:
+PCjs has archived selected software for the following machines:
 
-- [IBM PC](pcx86/)
-- [Challenger 1P](c1p/)
-- [PDP-11](pdp11/)
+* [IBM PC](pcx86/)
+* [Challenger 1P](c1p/)
+* [PDP-11](pdp11/)
+
+PCjs also includes a small collection of disk images in the [Disk Libraries](/disks/):
+
+* [IBM PC](/disks/pcx86/)
+* [Challenger 1P](/disks/c1p/)
 
 ---
 
