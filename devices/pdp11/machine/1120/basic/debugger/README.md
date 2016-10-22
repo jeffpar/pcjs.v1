@@ -1,6 +1,6 @@
 ---
 layout: page
-title: PDP-11/20 DEC PDP-11 BASIC Demo with Debugger
+title: PDP-11/20 BASIC Demo with Debugger
 permalink: /devices/pdp11/machine/1120/basic/debugger/
 machines:
   - id: test1120
@@ -9,8 +9,8 @@ machines:
     autoMount: ''
 ---
 
-DEC PDP-11 BASIC Demo (with Debugger)
--------------------------------------
+PDP-11/20 BASIC Demo (with Debugger)
+------------------------------------
 
 This machine pre-loads the **[DEC PDP-11 BASIC](/apps/pdp11/tapes/basic/)** tape image into 16Kb of RAM:
 

@@ -7,7 +7,7 @@ permalink: /apps/pdp11/tapes/basic/
 DEC PDP-11 BASIC
 ----------------
 
-Try the [DEC PDP-11 BASIC Demo](/devices/pdp11/machine/1120/basic/debugger/).
+Try the [PDP-11/20 BASIC Demo](/devices/pdp11/machine/1120/basic/debugger/).
 
 PCjs has archived the following DEC resources:
 
