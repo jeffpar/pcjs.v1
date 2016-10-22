@@ -556,7 +556,7 @@ BusPDP11.prototype.unknownAccess = function(addr, fByte, data)
          * TODO: For 22-bit machines, let's display addr as a 3-byte value (for a total of 9 octal digits)
          */
         this.dbg.printMessage("warning: unknown I/O access (" + this.dbg.toStrBase(addr) + "," + this.dbg.toStrBase(data, fByte?1:2) + ")", true, true);
-        if (this.dbg.stopInstruction()) return 0;
+        this.dbg.stopInstruction();
     }
     if (!this.nDisableFaults) {
         this.cpu.trap(PDP11.TRAP.BUS_ERROR, addr);
@@ -1255,18 +1255,20 @@ BusPDP11.prototype.addResetHandler = function(fnReset)
 };
 
 /**
- * fault(addr)
+ * fault(addr, access)
  *
- * Memory interface for signaling alignment errors.
+ * Memory interface for signaling alignment errors, invalid memory
  *
  * @this {BusPDP11}
  * @param {number} addr
+ * @param {number} [access] (for diagnostic purposes only)
  */
-BusPDP11.prototype.fault = function(addr)
+BusPDP11.prototype.fault = function(addr, access)
 {
     if (!this.nDisableFaults) {
-        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.WARN)) {
-            this.dbg.printMessage("memory fault on address " + this.dbg.toStrBase(addr), true, true);
+        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS)) {
+            this.dbg.printMessage("memory fault (" + access + ") on address " + this.dbg.toStrBase(addr), true, true);
+            this.dbg.stopInstruction();
         }
         this.cpu.trap(PDP11.TRAP.BUS_ERROR, addr);
     }

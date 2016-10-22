@@ -248,7 +248,7 @@ var PDP11 = {
      */
     TRAP: {
         UNDEFINED:  0x00,       // 000  (reserved)
-        BUS_ERROR:  0x04,       // 004  illegal instructions, bus errors, stack limit, illegal internal address, microbreak
+        BUS_ERROR:  0x04,       // 004  illegal instruction, unaligned address, invalid memory, stack limit, microbreak
         RESERVED:   0x08,       // 010  reserved instructions
         BPT:        0x0C,       // 014  BPT: breakpoint trap (trace)
         IOT:        0x10,       // 020  IOT: input/output trap

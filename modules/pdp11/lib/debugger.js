@@ -1664,7 +1664,12 @@ if (DEBUGGER) {
         if (cpu.isRunning()) {
             cpu.setPC(this.cpu.getLastPC());
             this.stopCPU();
-            throw -1;           // TODO: Review the appropriate-ness of throwing a bogus vector number in order to immediately stop the instruction
+            /*
+             * TODO: Review the appropriate-ness of throwing a bogus vector number in order to immediately stop
+             * the instruction.  It's handy, but it also means that we no longer actually return true, so callers
+             * of either stopInstruction() or undefinedInstruction() may have unreachable code paths.
+             */
+            throw -1;
         }
         return false;
     };
@@ -2091,8 +2096,8 @@ if (DEBUGGER) {
 
             /*
              * If getOperand() returns an Array rather than a string, then the first element is the original
-             * operand, and the second element contains an alternate representation of the operand (eg, target address,
-             * memory contents, etc).
+             * operand, and the second element contains an alternate representation of the operand (eg, target
+             * address, memory contents, etc).
              */
             if (typeof sOperand != "string") {
                 sTarget = sOperand[1];
@@ -2278,7 +2283,7 @@ if (DEBUGGER) {
     /**
      * parseInstruction(sOp, sOperand, addr)
      *
-     * TODO: Unimplemented.  See parseInstruction() in modules/c1pjs/lib/debugger.js for a working implementation.
+     * TODO: Unimplemented.  See parseInstruction() in modules/c1pjs/lib/debugger.js for a sample implementation.
      *
      * @this {DebuggerPDP11}
      * @param {string} sOp
