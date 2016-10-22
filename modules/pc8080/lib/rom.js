@@ -34,7 +34,6 @@ if (NODE) {
     var DumpAPI     = require("../../shared/lib/dumpapi");
     var Component   = require("../../shared/lib/component");
     var PC8080      = require("./defines");
-    var CPUDef8080  = require("./cpudef");
     var Memory8080  = require("./memory");
 }
 
@@ -47,20 +46,12 @@ if (NODE) {
  *      size: amount of ROM, in bytes
  *      alias: physical alias address (null if none)
  *      file: name of ROM data file
- *      writable: true to make ROM writable (default is false)
  *
  * NOTE: The ROM data will not be copied into place until the Bus is ready (see initBus()) AND the
  * ROM data file has finished loading (see doneLoad()).
  *
  * Also, while the size parameter may seem redundant, I consider it useful to confirm that the ROM you received
  * is the ROM you expected.
- *
- * Finally, while making ROM "writable" may seem a contradiction in terms, I want to be able to load selected
- * binary files into memory purely for testing purposes, and the RAM component has no "file" option, so the
- * simplest solution was to add the option to load binary files into memory as "writable" ROMs.
- *
- * Moreover, if a "writable" ROM is installed at addr 0x100, that triggers our "Fake CP/M" support, providing
- * a quick-and-dirty means of loading simple CP/M test binaries.  See addROM() for details.
  *
  * @constructor
  * @extends Component
@@ -73,7 +64,6 @@ function ROM8080(parmsROM)
     this.abROM = null;
     this.addrROM = parmsROM['addr'];
     this.sizeROM = parmsROM['size'];
-    this.fWritable = parmsROM['writable'];
 
     /*
      * The new 'alias' property can now be EITHER a single physical address (like 'addr') OR an array of
@@ -111,30 +101,6 @@ function ROM8080(parmsROM)
 }
 
 Component.subclass(ROM8080);
-
-ROM8080.CPM = {
-    BIOS: {
-        VECTOR:         0x0000
-    },
-    BDOS: {
-        VECTOR:         0x0005,
-        FUNC: {                         // function number (specified in regC)
-            RESET:      0x00,
-            CON_READ:   0x01,           // output: A = L = ASCII character
-            CON_WRITE:  0x02,           // input: E = ASCII character
-            AUX_READ:   0x03,           // output: A = L = ASCII character
-            AUX_WRITE:  0x04,           // input: E = ASCII character
-            PRN_WRITE:  0x05,           // input: E = ASCII character
-            MEM_SIZE:   0x06,           // output: base address of CCP (Console Command Processor), but which register? (perhaps moot if this was CP/M 1.3 only...)
-            CON_IO:     0x06,           // input: E = ASCII character (or 0xFF to return ASCII character in A)
-            GET_IOBYTE: 0x07,
-            SET_IOBYTE: 0x08,
-            STR_WRITE:  0x09            // input: DE = address of string
-        }
-    }
-};
-
-ROM8080.CPM.VECTORS = [ROM8080.CPM.BIOS.VECTOR, ROM8080.CPM.BDOS.VECTOR];
 
 /*
  * NOTE: There's currently no need for this component to have a reset() function, since
@@ -350,30 +316,11 @@ ROM8080.prototype.copyROM = function()
  */
 ROM8080.prototype.addROM = function(addr)
 {
-    if (this.bus.addMemory(addr, this.sizeROM, this.fWritable?  Memory8080.TYPE.RAM : Memory8080.TYPE.ROM)) {
+    if (this.bus.addMemory(addr, this.sizeROM, Memory8080.TYPE.ROM)) {
         if (DEBUG) this.log("addROM(): copying ROM to " + str.toHexLong(addr) + " (" + str.toHexLong(this.abROM.length) + " bytes)");
         var i;
         for (i = 0; i < this.abROM.length; i++) {
             this.bus.setByteDirect(addr + i, this.abROM[i]);
-        }
-        if (this.fWritable && addr == 0x100) {
-            /*
-             * Here's where we enable our "Fake CP/M" support, triggered by the user loading a "writable" ROM image
-             * at offset 0x100.  Fake CP/M support works by installing HLT opcodes at well-known CP/M addresses
-             * (namely, 0x0000, which is the CP/M reset vector, and 0x0005, which is the CP/M system call vector) and
-             * then telling the CPU to call us whenever a HLT occurs, so we can check PC for one of these addresses.
-             */
-            for (i = 0; i < ROM8080.CPM.VECTORS.length; i++) {
-                this.bus.setByteDirect(ROM8080.CPM.VECTORS[i], CPUDef8080.OPCODE.HLT);
-            }
-
-            this.cpu.addHaltCheck(function(rom) {
-                return function(addr) {
-                    return rom.checkCPMVector(addr)
-                };
-            }(this));
-
-            this.cpu.setReset(addr);
         }
         return true;
     }
@@ -381,96 +328,6 @@ ROM8080.prototype.addROM = function(addr)
      * We don't need to report an error here, because addMemory() already takes care of that.
      */
     return false;
-};
-
-/**
- * checkCPMVector(addr)
- *
- * @this {ROM8080}
- * @param {number} addr (of the HLT opcode)
- * @return {boolean} true if special processing performed, false if not
- */
-ROM8080.prototype.checkCPMVector = function(addr)
-{
-    var i = ROM8080.CPM.VECTORS.indexOf(addr);
-    if (i >= 0) {
-        var fCPM = false;
-        var cpu = this.cpu;
-        var dbg = this.dbg;
-        if (addr == ROM8080.CPM.BDOS.VECTOR) {
-            fCPM = true;
-            switch(cpu.regC) {
-            case ROM8080.CPM.BDOS.FUNC.CON_WRITE:
-                this.writeCPMString(this.getCPMChar(cpu.regE));
-                break;
-            case ROM8080.CPM.BDOS.FUNC.STR_WRITE:
-                this.writeCPMString(this.getCPMString(cpu.getDE(), '$'));
-                break;
-            default:
-                fCPM = false;
-                break;
-            }
-        }
-        if (fCPM) {
-            CPUDef8080.opRET.call(cpu);     // for recognized calls, automatically return
-        }
-        else if (dbg) {
-            this.println("\nCP/M vector " + str.toHexWord(addr));
-            cpu.setPC(addr);                // this is purely for the Debugger's benefit, to show the HLT
-            dbg.stopCPU();
-        }
-        return true;
-    }
-    return false;
-};
-
-
-/**
- * getCPMChar(ch)
- *
- * @this {ROM8080}
- * @param {number} ch
- * @return {string}
- */
-ROM8080.prototype.getCPMChar = function(ch)
-{
-    return String.fromCharCode(ch);
-};
-
-/**
- * getCPMString(addr, chEnd)
- *
- * @this {ROM8080}
- * @param {number} addr (of a string)
- * @param {string|number} [chEnd] (terminating character, default is 0)
- * @return {string}
- */
-ROM8080.prototype.getCPMString = function(addr, chEnd)
-{
-    var s = "";
-    var cchMax = 255;
-    var bEnd = chEnd && chEnd.length && chEnd.charCodeAt(0) || chEnd || 0;
-    while (cchMax--) {
-        var b = this.cpu.getByte(addr++);
-        if (b == bEnd) break;
-        s += String.fromCharCode(b);
-    }
-    return s;
-};
-
-/**
- * writeCPMString(s)
- *
- * @this {ROM8080}
- * @param {string} s
- */
-ROM8080.prototype.writeCPMString = function(s)
-{
-    s = s.replace(/\r/g, '');
-    if (this.controlPrint) {
-        this.controlPrint.value += s;
-        this.controlPrint.scrollTop = this.controlPrint.scrollHeight;
-    }
 };
 
 /**

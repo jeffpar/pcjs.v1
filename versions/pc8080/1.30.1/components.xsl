@@ -23,7 +23,14 @@
 
 	<xsl:template name="componentScripts">
 		<xsl:param name="component"/>
-		<script type="text/javascript" src="/versions/{$APPCLASS}/{$APPVERSION}/{$component}.js"> </script>
+		<xsl:choose>
+			<xsl:when test="$APPNAME = 'PDPjs'">
+				<script type="text/javascript" src="/versions/pdpjs/{$APPVERSION}/{$component}.js"> </script>
+			</xsl:when>
+			<xsl:otherwise>
+				<script type="text/javascript" src="/versions/{$APPCLASS}/{$APPVERSION}/{$component}.js"> </script>
+			</xsl:otherwise>
+		</xsl:choose>
 	</xsl:template>
 
 	<xsl:template name="componentIncludes">
@@ -181,10 +188,10 @@
 			<xsl:choose>
 				<xsl:when test="@padding">padding:<xsl:value-of select="@padding"/>;</xsl:when>
 				<xsl:otherwise>
-					<xsl:if test="@padtop">padding-top:<xsl:value-of select="@padtop"/>;</xsl:if>
-					<xsl:if test="@padright">padding-right:<xsl:value-of select="@padright"/>;</xsl:if>
-					<xsl:if test="@padbottom">padding-bottom:<xsl:value-of select="@padbottom"/>;</xsl:if>
-					<xsl:if test="@padleft">padding-left:<xsl:value-of select="@padleft"/>;</xsl:if>
+					<xsl:if test="@padTop">padding-top:<xsl:value-of select="@padTop"/>;</xsl:if>
+					<xsl:if test="@padRight">padding-right:<xsl:value-of select="@padRight"/>;</xsl:if>
+					<xsl:if test="@padBottom">padding-bottom:<xsl:value-of select="@padBottom"/>;</xsl:if>
+					<xsl:if test="@padLeft">padding-left:<xsl:value-of select="@padLeft"/>;</xsl:if>
 				</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
@@ -317,10 +324,10 @@
 			<xsl:choose>
 				<xsl:when test="@padding">padding:<xsl:value-of select="@padding"/>;</xsl:when>
 				<xsl:otherwise>
-					<xsl:if test="@padtop">padding-top:<xsl:value-of select="@padtop"/>;</xsl:if>
-					<xsl:if test="@padright">padding-right:<xsl:value-of select="@padright"/>;</xsl:if>
-					<xsl:if test="@padbottom">padding-bottom:<xsl:value-of select="@padbottom"/>;</xsl:if>
-					<xsl:if test="@padleft">padding-left:<xsl:value-of select="@padleft"/>;</xsl:if>
+					<xsl:if test="@padTop">padding-top:<xsl:value-of select="@padTop"/>;</xsl:if>
+					<xsl:if test="@padRight">padding-right:<xsl:value-of select="@padRight"/>;</xsl:if>
+					<xsl:if test="@padBottom">padding-bottom:<xsl:value-of select="@padBottom"/>;</xsl:if>
+					<xsl:if test="@padLeft">padding-left:<xsl:value-of select="@padLeft"/>;</xsl:if>
 				</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
@@ -329,6 +336,7 @@
 				<xsl:when test="@pos = 'left'">float:left;</xsl:when>
 				<xsl:when test="@pos = 'right'">float:right;</xsl:when>
 				<xsl:when test="@pos = 'center'">margin:0 auto;</xsl:when>
+				<xsl:when test="@pos = 'default'">clear:both;</xsl:when>
 				<xsl:when test="@pos">position:<xsl:value-of select="@pos"/>;</xsl:when>
 				<xsl:when test="$left != '' or $top != ''">position:relative;</xsl:when>
 				<xsl:when test="@container">text-align:<xsl:value-of select="@container"/>;</xsl:when>
@@ -389,7 +397,7 @@
 				</xsl:when>
 				<xsl:when test="@type = 'list'">
 					<select class="{$APPCLASS}-binding" style="{$border}{$width}{$height}{$fontsize}{$style}" data-value="{{{$type},{$binding}}}">
-						<xsl:apply-templates select="disk|app|manifest" mode="component"/>
+						<xsl:apply-templates select="disk|tape|app|manifest" mode="component"/>
 					</select>
 				</xsl:when>
 				<xsl:when test="@type = 'text'">
@@ -414,6 +422,12 @@
 				</xsl:when>
 				<xsl:when test="@type = 'led' or @type = 'rled'">
 					<div class="{$APPCLASS}-binding {$CSSCLASS}-{@type}" data-value="{{{$type},{$binding}}}" style="display:inline-block;"><xsl:value-of select="."/></div>
+				</xsl:when>
+				<xsl:when test="@type = 'progress'">
+					<div class="{$APPCLASS}-binding {$CSSCLASS}-{@type}" style="-webkit-user-select:none;{$border}{$width}{$height}{$fontsize}{$style}" data-value="{{{$type},{$binding},{$value}}}">
+						<div class="{$CSSCLASS}-{@type}-text" style="{$width}"><xsl:apply-templates/></div>
+						<div class="{$CSSCLASS}-{@type}-bar"></div>
+					</div>
 				</xsl:when>
 				<xsl:when test="@type = 'separator'">
 					<hr/>
@@ -451,7 +465,38 @@
 				</xsl:if>
 			</xsl:if>
 		</xsl:variable>
-		<option value="{@path}" data-value="{{{$desc}}}"><xsl:if test="name"><xsl:value-of select="name"/></xsl:if><xsl:if test="not(name)"><xsl:value-of select="."/></xsl:if></option>
+		<xsl:variable name="name">
+			<xsl:choose>
+				<xsl:when test="@name"><xsl:value-of select="@name"/></xsl:when>
+				<xsl:when test="name"><xsl:value-of select="name"/></xsl:when>
+				<xsl:otherwise><xsl:value-of select="."/></xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
+		<option value="{@path}" data-value="{{{$desc}}}"><xsl:value-of select="$name"/></option>
+	</xsl:template>
+
+	<xsl:template match="tape[@ref]" mode="component">
+		<xsl:variable name="componentFile"><xsl:value-of select="$rootDir"/><xsl:value-of select="@ref"/></xsl:variable>
+		<xsl:apply-templates select="document($componentFile)/tape" mode="component"/>
+	</xsl:template>
+
+	<xsl:template match="tape[not(@ref)]" mode="component">
+		<xsl:variable name="desc">
+			<xsl:if test="@desc">
+				<xsl:text>desc:'</xsl:text><xsl:value-of select="@desc"/><xsl:text>'</xsl:text>
+				<xsl:if test="@href">
+					<xsl:text>,href:'</xsl:text><xsl:value-of select="@href"/><xsl:text>'</xsl:text>
+				</xsl:if>
+			</xsl:if>
+		</xsl:variable>
+		<xsl:variable name="name">
+			<xsl:choose>
+				<xsl:when test="@name"><xsl:value-of select="@name"/></xsl:when>
+				<xsl:when test="name"><xsl:value-of select="name"/></xsl:when>
+				<xsl:otherwise><xsl:value-of select="."/></xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
+		<option value="{@path}" data-value="{{{$desc}}}"><xsl:value-of select="$name"/></option>
 	</xsl:template>
 
 	<xsl:template match="app[@ref]" mode="component">
@@ -580,9 +625,9 @@
 				<xsl:otherwise>null</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
-		<xsl:variable name="resetAddr">
+		<xsl:variable name="addrReset">
 			<xsl:choose>
-				<xsl:when test="@resetAddr"><xsl:value-of select="@resetAddr"/></xsl:when>
+				<xsl:when test="@addrReset"><xsl:value-of select="@addrReset"/></xsl:when>
 				<xsl:otherwise>0</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
@@ -610,7 +655,7 @@
 		<xsl:call-template name="component">
 			<xsl:with-param name="machine" select="$machine"/>
 			<xsl:with-param name="class" select="'cpu'"/>
-			<xsl:with-param name="parms">,model:'<xsl:value-of select="$model"/>',stepping:'<xsl:value-of select="$stepping"/>',fpu:<xsl:value-of select="$fpu"/>,cycles:<xsl:value-of select="$cycles"/>,multiplier:<xsl:value-of select="$multiplier"/>,autoStart:<xsl:value-of select="$autoStart"/>,resetAddr:<xsl:value-of select="$resetAddr"/>,csStart:<xsl:value-of select="$csStart"/>,csInterval:<xsl:value-of select="$csInterval"/>,csStop:<xsl:value-of select="$csStop"/></xsl:with-param>
+			<xsl:with-param name="parms">,model:'<xsl:value-of select="$model"/>',stepping:'<xsl:value-of select="$stepping"/>',fpu:<xsl:value-of select="$fpu"/>,cycles:<xsl:value-of select="$cycles"/>,multiplier:<xsl:value-of select="$multiplier"/>,autoStart:<xsl:value-of select="$autoStart"/>,addrReset:<xsl:value-of select="$addrReset"/>,csStart:<xsl:value-of select="$csStart"/>,csInterval:<xsl:value-of select="$csInterval"/>,csStop:<xsl:value-of select="$csStop"/></xsl:with-param>
 		</xsl:call-template>
 	</xsl:template>
 
@@ -707,21 +752,44 @@
 	<xsl:template match="device[@ref]">
 		<xsl:param name="machine" select="''"/>
 		<xsl:variable name="componentFile"><xsl:value-of select="$rootDir"/><xsl:value-of select="@ref"/></xsl:variable>
-		<xsl:apply-templates select="document($componentFile)/device"><xsl:with-param name="machine" select="$machine"/></xsl:apply-templates>
+		<xsl:apply-templates select="document($componentFile)/device">
+			<xsl:with-param name="machine" select="$machine"/>
+			<xsl:with-param name="mount" select="@automount"/>
+		</xsl:apply-templates>
 	</xsl:template>
 
 	<xsl:template match="device[not(@ref)]">
 		<xsl:param name="machine" select="''"/>
+		<xsl:param name="mount" select="''"/>
 		<xsl:variable name="type">
 			<xsl:choose>
 				<xsl:when test="@type"><xsl:value-of select="@type"/></xsl:when>
 				<xsl:otherwise/>
 			</xsl:choose>
 		</xsl:variable>
+		<xsl:variable name="baudReceive">
+			<xsl:choose>
+				<xsl:when test="@baudReceive"><xsl:value-of select="@baudReceive"/></xsl:when>
+				<xsl:otherwise>0</xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
+		<xsl:variable name="baudTransmit">
+			<xsl:choose>
+				<xsl:when test="@baudTransmit"><xsl:value-of select="@baudTransmit"/></xsl:when>
+				<xsl:otherwise>0</xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
+		<xsl:variable name="autoMount">
+			<xsl:choose>
+				<xsl:when test="$mount != ''"><xsl:value-of select="$mount"/></xsl:when>
+				<xsl:when test="@automount"><xsl:value-of select="@automount"/></xsl:when>
+				<xsl:otherwise><xsl:value-of select="@autoMount"/></xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
 		<xsl:call-template name="component">
 			<xsl:with-param name="machine" select="$machine"/>
 			<xsl:with-param name="class">device</xsl:with-param>
-			<xsl:with-param name="parms">,type:'<xsl:value-of select="$type"/>'</xsl:with-param>
+			<xsl:with-param name="parms">,type:'<xsl:value-of select="$type"/>',baudReceive:<xsl:value-of select="$baudReceive"/>,baudTransmit:<xsl:value-of select="$baudTransmit"/>,autoMount:'<xsl:value-of select="$autoMount"/>'</xsl:with-param>
 		</xsl:call-template>
 	</xsl:template>
 
@@ -787,6 +855,18 @@
 				<xsl:otherwise>0</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
+		<xsl:variable name="baudReceive">
+			<xsl:choose>
+				<xsl:when test="@baudReceive"><xsl:value-of select="@baudReceive"/></xsl:when>
+				<xsl:otherwise>0</xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
+		<xsl:variable name="baudTransmit">
+			<xsl:choose>
+				<xsl:when test="@baudTransmit"><xsl:value-of select="@baudTransmit"/></xsl:when>
+				<xsl:otherwise>0</xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
 		<xsl:variable name="binding">
 			<xsl:choose>
 				<xsl:when test="@binding"><xsl:value-of select="@binding"/></xsl:when>
@@ -807,10 +887,17 @@
 				<xsl:otherwise>0</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
+		<xsl:variable name="upperCase">
+			<xsl:choose>
+				<xsl:when test="@uppercase"><xsl:value-of select="@uppercase"/></xsl:when>
+				<xsl:when test="@upperCase"><xsl:value-of select="@upperCase"/></xsl:when>
+				<xsl:otherwise>false</xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
 		<xsl:call-template name="component">
 			<xsl:with-param name="machine" select="$machine"/>
 			<xsl:with-param name="class">serial</xsl:with-param>
-			<xsl:with-param name="parms">,adapter:<xsl:value-of select="$adapter"/>,binding:'<xsl:value-of select="$binding"/>',tabSize:<xsl:value-of select="$tabSize"/>,charBOL:<xsl:value-of select="$charBOL"/></xsl:with-param>
+			<xsl:with-param name="parms">,adapter:<xsl:value-of select="$adapter"/>,baudReceive:<xsl:value-of select="$baudReceive"/>,baudTransmit:<xsl:value-of select="$baudTransmit"/>,binding:'<xsl:value-of select="$binding"/>',tabSize:<xsl:value-of select="$tabSize"/>,charBOL:<xsl:value-of select="$charBOL"/>,upperCase:<xsl:value-of select="$upperCase"/></xsl:with-param>
 		</xsl:call-template>
 	</xsl:template>
 
@@ -847,10 +934,11 @@
 	<xsl:template match="fdc[not(@ref)]">
 		<xsl:param name="machine" select="''"/>
 		<xsl:param name="mount" select="''"/>
-		<xsl:variable name="automount">
+		<xsl:variable name="autoMount">
 			<xsl:choose>
 				<xsl:when test="$mount != ''"><xsl:value-of select="$mount"/></xsl:when>
-				<xsl:otherwise><xsl:value-of select="@automount"/></xsl:otherwise>
+				<xsl:when test="@automount"><xsl:value-of select="@automount"/></xsl:when>
+				<xsl:otherwise><xsl:value-of select="@autoMount"/></xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
 		<xsl:variable name="sortBy">
@@ -862,7 +950,7 @@
 		<xsl:call-template name="component">
 			<xsl:with-param name="machine" select="$machine"/>
 			<xsl:with-param name="class">fdc</xsl:with-param>
-			<xsl:with-param name="parms">,autoMount:'<xsl:value-of select="$automount"/>',sortBy:'<xsl:value-of select="$sortBy"/>'</xsl:with-param>
+			<xsl:with-param name="parms">,autoMount:'<xsl:value-of select="$autoMount"/>',sortBy:'<xsl:value-of select="$sortBy"/>'</xsl:with-param>
 		</xsl:call-template>
 	</xsl:template>
 
@@ -931,16 +1019,10 @@
 				<xsl:otherwise/>
 			</xsl:choose>
 		</xsl:variable>
-		<xsl:variable name="writable">
-			<xsl:choose>
-				<xsl:when test="@writable"><xsl:value-of select="@writable"/></xsl:when>
-				<xsl:otherwise>false</xsl:otherwise>
-			</xsl:choose>
-		</xsl:variable>
 		<xsl:call-template name="component">
 			<xsl:with-param name="machine" select="$machine"/>
 			<xsl:with-param name="class">rom</xsl:with-param>
-			<xsl:with-param name="parms">,addr:<xsl:value-of select="$addr"/>,size:<xsl:value-of select="$size"/>,alias:<xsl:value-of select="$alias"/>,file:'<xsl:value-of select="$file"/>',notify:'<xsl:value-of select="$notify"/>',writable:<xsl:value-of select="$writable"/></xsl:with-param>
+			<xsl:with-param name="parms">,addr:<xsl:value-of select="$addr"/>,size:<xsl:value-of select="$size"/>,alias:<xsl:value-of select="$alias"/>,file:'<xsl:value-of select="$file"/>',notify:'<xsl:value-of select="$notify"/>'</xsl:with-param>
 		</xsl:call-template>
 	</xsl:template>
 
@@ -964,6 +1046,24 @@
 				<xsl:otherwise>0</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
+		<xsl:variable name="file">
+			<xsl:choose>
+				<xsl:when test="@file"><xsl:value-of select="@file"/></xsl:when>
+				<xsl:otherwise/>
+			</xsl:choose>
+		</xsl:variable>
+		<xsl:variable name="load">
+			<xsl:choose>
+				<xsl:when test="@load"><xsl:value-of select="@load"/></xsl:when>
+				<xsl:otherwise>null</xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
+		<xsl:variable name="exec">
+			<xsl:choose>
+				<xsl:when test="@exec"><xsl:value-of select="@exec"/></xsl:when>
+				<xsl:otherwise>null</xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
 		<xsl:variable name="test">
 			<xsl:choose>
 				<xsl:when test="@test"><xsl:value-of select="@test"/></xsl:when>
@@ -973,7 +1073,7 @@
 		<xsl:call-template name="component">
 			<xsl:with-param name="machine" select="$machine"/>
 			<xsl:with-param name="class">ram</xsl:with-param>
-			<xsl:with-param name="parms">,addr:<xsl:value-of select="$addr"/>,size:<xsl:value-of select="$size"/>,test:<xsl:value-of select="$test"/></xsl:with-param>
+			<xsl:with-param name="parms">,addr:<xsl:value-of select="$addr"/>,size:<xsl:value-of select="$size"/>,file:'<xsl:value-of select="$file"/>',load:<xsl:value-of select="$load"/>,exec:<xsl:value-of select="$exec"/>,test:<xsl:value-of select="$test"/></xsl:with-param>
 		</xsl:call-template>
 	</xsl:template>
 

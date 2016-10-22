@@ -7,7 +7,8 @@ permalink: /disks/
 ---
 
 Disk Libraries
----
+--------------
+
 Browse these PCjs Disk Libraries:
 
 - [IBM PC](pcx86/)

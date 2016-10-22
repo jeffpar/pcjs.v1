@@ -151,7 +151,7 @@ function BusPDP11(parmsBus, cpu, dbg)
      */
     this.aIOHandlers = [];
     this.fIOBreakAll = false;
-    this.nDisableTraps = 0;
+    this.nDisableFaults = 0;
 
     /*
      * Array of RESET notification handlers registered by Device components.
@@ -556,9 +556,9 @@ BusPDP11.prototype.unknownAccess = function(addr, fByte, data)
          * TODO: For 22-bit machines, let's display addr as a 3-byte value (for a total of 9 octal digits)
          */
         this.dbg.printMessage("warning: unknown I/O access (" + this.dbg.toStrBase(addr) + "," + this.dbg.toStrBase(data, fByte?1:2) + ")", true, true);
-        if (this.dbg.stopInstruction()) return 0;
+        this.dbg.stopInstruction();
     }
-    if (!this.nDisableTraps) {
+    if (!this.nDisableFaults) {
         this.cpu.trap(PDP11.TRAP.BUS_ERROR, addr);
     }
     return 0;
@@ -698,6 +698,25 @@ BusPDP11.prototype.cleanMemory = function(addr, size)
         iBlock++;
     }
     return fClean;
+};
+
+/**
+ * zeroMemory(addr, size)
+ *
+ * @this {BusPDP11}
+ * @param {number} addr
+ * @param {number} size
+ */
+BusPDP11.prototype.zeroMemory = function(addr, size)
+{
+    var off = addr & this.nBlockLimit;
+    var iBlock = addr >>> this.nBlockShift;
+    while (size > 0 && iBlock < this.aMemBlocks.length) {
+        this.aMemBlocks[iBlock].zero(off, size);
+        size -= this.nBlockSize;
+        iBlock++;
+        off = 0;
+    }
 };
 
 /*
@@ -906,9 +925,9 @@ BusPDP11.prototype.getByte = function(addr)
  */
 BusPDP11.prototype.getByteDirect = function(addr)
 {
-    this.nDisableTraps++;
+    this.nDisableFaults++;
     var b = this.aMemBlocks[(addr & this.nBusMask) >>> this.nBlockShift].readByteDirect(addr & this.nBlockLimit, addr);
-    this.nDisableTraps--;
+    this.nDisableFaults--;
     return b;
 };
 
@@ -943,13 +962,13 @@ BusPDP11.prototype.getWordDirect = function(addr)
     var w;
     var off = addr & this.nBlockLimit;
     var iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
-    this.nDisableTraps++;
+    this.nDisableFaults++;
     if (!PDP11.WORDBUS && off == this.nBlockLimit) {
         w = this.aMemBlocks[iBlock++].readByteDirect(off, addr) | (this.aMemBlocks[iBlock & this.nBlockMask].readByteDirect(0, addr + 1) << 8);
     } else {
         w = this.aMemBlocks[iBlock].readWordDirect(off, addr);
     }
-    this.nDisableTraps--;
+    this.nDisableFaults--;
     return w;
 };
 
@@ -977,9 +996,9 @@ BusPDP11.prototype.setByte = function(addr, b)
  */
 BusPDP11.prototype.setByteDirect = function(addr, b)
 {
-    this.nDisableTraps++;
+    this.nDisableFaults++;
     this.aMemBlocks[(addr & this.nBusMask) >>> this.nBlockShift].writeByteDirect(addr & this.nBlockLimit, b & 0xff, addr);
-    this.nDisableTraps--;
+    this.nDisableFaults--;
 };
 
 /**
@@ -1015,14 +1034,14 @@ BusPDP11.prototype.setWordDirect = function(addr, w)
 {
     var off = addr & this.nBlockLimit;
     var iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
-    this.nDisableTraps++;
+    this.nDisableFaults++;
     if (!PDP11.WORDBUS && off == this.nBlockLimit) {
         this.aMemBlocks[iBlock++].writeByteDirect(off, w & 0xff, addr);
         this.aMemBlocks[iBlock & this.nBlockMask].writeByteDirect(0, (w >> 8) & 0xff, addr + 1);
     } else {
         this.aMemBlocks[iBlock].writeWordDirect(off, w & 0xffff, addr);
     }
-    this.nDisableTraps--;
+    this.nDisableFaults--;
 };
 
 /**
@@ -1236,18 +1255,20 @@ BusPDP11.prototype.addResetHandler = function(fnReset)
 };
 
 /**
- * fault(addr)
+ * fault(addr, access)
  *
- * Memory interface for signaling alignment errors.
+ * Memory interface for signaling alignment errors, invalid memory
  *
  * @this {BusPDP11}
  * @param {number} addr
+ * @param {number} [access] (for diagnostic purposes only)
  */
-BusPDP11.prototype.fault = function(addr)
+BusPDP11.prototype.fault = function(addr, access)
 {
-    if (!this.nDisableTraps) {
-        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.WARN)) {
-            this.dbg.printMessage("memory fault on address " + this.dbg.toStrBase(addr), true, true);
+    if (!this.nDisableFaults) {
+        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS)) {
+            this.dbg.printMessage("memory fault (" + access + ") on address " + this.dbg.toStrBase(addr), true, true);
+            this.dbg.stopInstruction();
         }
         this.cpu.trap(PDP11.TRAP.BUS_ERROR, addr);
     }

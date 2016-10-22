@@ -52,7 +52,7 @@ if (NODE) {
  *
  * For example, opADD() passes the helper function fnADD() to the appropriate update method.  This
  * allows the update method to perform the entire read/modify/write operation, because the modify
- * step is performed internally via the fnXXX() helper function.
+ * step is performed internally, via the fnXXX() helper function.
  */
 
 /**
@@ -827,7 +827,7 @@ PDP11.opBPL = function(opCode)
  */
 PDP11.opBPT = function(opCode)
 {
-    this.trap(PDP11.TRAP.BREAKPOINT, PDP11.REASON.BPT);
+    this.trap(PDP11.TRAP.BPT, PDP11.REASON.BPT);
     this.nStepCycles -= (4 + 1);
 };
 
@@ -1101,7 +1101,7 @@ PDP11.opDIV = function(opCode)
  */
 PDP11.opEMT = function(opCode)
 {
-    this.trap(PDP11.TRAP.EMULATOR, PDP11.REASON.EMT);
+    this.trap(PDP11.TRAP.EMT, PDP11.REASON.EMT);
     this.nStepCycles -= (22 + 3);
 };
 
@@ -1117,7 +1117,24 @@ PDP11.opHALT = function(opCode)
         this.regErr |= PDP11.CPUERR.BADHALT;
         this.trap(PDP11.TRAP.BUS_ERROR, PDP11.REASON.HALT);
     } else {
-        this.stopCPU();
+        if (!this.dbg) {
+            /*
+             * This will leave the PC exactly where it's supposed to be: at the address of the HALT + 2.
+             */
+            this.stopCPU();
+        } else {
+            /*
+             * When the Debugger is present, this call will rewind PC by 2 so that the HALT instruction is
+             * displayed, making it clear why the processor stopped; the user could also use the "dh" command
+             * to dump the Debugger's instruction history buffer to see why it stopped, assuming the history
+             * buffer is enabled, but that's more work.
+             *
+             * Because rewinding is not normal CPU behavior, attempting to Run again (or use the Debugger's
+             * "g" command) will cause an immediate HALT again; the work-around is simple: either set the PC to
+             * a new address (eg, "r pc=pc+2") or single-step the HALT instruction ("t").
+             */
+            this.dbg.stopInstruction();
+        }
     }
     this.nStepCycles -= 7;
 };
@@ -1174,9 +1191,9 @@ PDP11.opJMP = function(opCode)
      * Since JMP and JSR opcodes have their own unique timings for the various dst modes, we must snapshot
      * nStepCycles before decoding the mode, and then use that to update nStepCycles.
      */
-    var nSnapCycles = this.nStepCycles;
+    this.nSnapCycles = this.nStepCycles;
     this.setPC(this.readDstAddr(opCode));
-    this.nStepCycles = nSnapCycles - PDP11.JMP_CYCLES[this.dstMode];
+    this.nStepCycles = this.nSnapCycles - PDP11.JMP_CYCLES[this.dstMode];
 };
 
 PDP11.JSR_CYCLES = [
@@ -1195,7 +1212,7 @@ PDP11.opJSR = function(opCode)
      * Since JMP and JSR opcodes have their own unique timings for the various dst modes, we must snapshot
      * nStepCycles before decoding the mode, and then use that to update nStepCycles.
      */
-    var nSnapCycles = this.nStepCycles;
+    this.nSnapCycles = this.nStepCycles;
     /*
      * TODO: Determine whether or not the SRCMODE operand (regsGen[reg]) should be snapped BEFORE or AFTER we
      * decode the DSTMODE operand.  Doing it AFTER seems a bit risky.
@@ -1205,7 +1222,7 @@ PDP11.opJSR = function(opCode)
     this.pushWord(this.regsGen[reg]);
     this.regsGen[reg] = this.getPC();
     this.setPC(addr);
-    this.nStepCycles = nSnapCycles - PDP11.JSR_CYCLES[this.dstMode];
+    this.nStepCycles = this.nSnapCycles - PDP11.JSR_CYCLES[this.dstMode];
 };
 
 /**
@@ -1270,9 +1287,9 @@ PDP11.opMOV = function(opCode)
      * nStepCycles after decoding the src mode, and then use that to update nStepCycles.
      */
     var data = this.readSrcWord(opCode);
-    var nSnapCycles = this.nStepCycles;
+    this.nSnapCycles = this.nStepCycles;
     this.updateNZVFlags(this.writeDstWord(opCode, data));
-    this.nStepCycles = nSnapCycles - PDP11.MOV_CYCLES[(this.srcMode? 8 : 0) + this.dstMode] + (this.dstReg == 7 && !this.dstMode? 2 : 0);
+    this.nStepCycles = this.nSnapCycles - PDP11.MOV_CYCLES[(this.srcMode? 8 : 0) + this.dstMode] + (this.dstReg == 7 && !this.dstMode? 2 : 0);
 };
 
 /**
@@ -1305,10 +1322,10 @@ PDP11.opMTPD = function(opCode)
      * nStepCycles before decoding the mode, and then use that to update nStepCycles.
      */
     var data = this.popWord();
-    var nSnapCycles = this.nStepCycles;
+    this.nSnapCycles = this.nStepCycles;
     this.writeWordToPrevSpace(opCode, PDP11.ACCESS.DSPACE, data);
     this.updateNZVFlags(data);
-    this.nStepCycles = nSnapCycles - PDP11.MTP_CYCLES[this.dstMode];
+    this.nStepCycles = this.nSnapCycles - PDP11.MTP_CYCLES[this.dstMode];
 };
 
 /**
@@ -1324,10 +1341,10 @@ PDP11.opMTPI = function(opCode)
      * nStepCycles before decoding the mode, and then use that to update nStepCycles.
      */
     var data = this.popWord();
-    var nSnapCycles = this.nStepCycles;
+    this.nSnapCycles = this.nStepCycles;
     this.writeWordToPrevSpace(opCode, PDP11.ACCESS.ISPACE, data);
     this.updateNZVFlags(data);
-    this.nStepCycles = nSnapCycles - PDP11.MTP_CYCLES[this.dstMode];
+    this.nStepCycles = this.nSnapCycles - PDP11.MTP_CYCLES[this.dstMode];
 };
 
 /**
@@ -1479,8 +1496,15 @@ PDP11.opRTS = function(opCode)
     }
     var src = this.popWord();
     var reg = opCode & PDP11.OPREG.MASK;
-    this.setPC(this.regsGen[reg]);
-    this.regsGen[reg] = src;
+    /*
+     * When the popular "RTS PC" form is used, we might as well eliminate the useless setting of PC to
+     */
+    if (reg == PDP11.REG.PC) {
+        this.setPC(src);
+    } else {
+        this.setPC(this.regsGen[reg]);
+        this.regsGen[reg] = src;
+    }
     this.nStepCycles -= (7 + 2);
 };
 

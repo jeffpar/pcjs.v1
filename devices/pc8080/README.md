@@ -13,8 +13,8 @@ All our [8080-Based Machines](machine/) are built from a collection of devices, 
 * [Control Panels](panel/)
 * CPU (8080)
 * [Machines](machine/)
-* RAM
-* [ROMs](rom/)
+* [RAM Images](ram/)
+* [ROM Images](rom/)
 * Video Adapters
 
 Complete [machine configurations](machine/) are constructed from those devices.  A machine configuration is a single XML file

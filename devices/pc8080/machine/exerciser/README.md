@@ -18,7 +18,7 @@ PCjs Project.
 
 The test machine below loads a copy of the
 [8080 Exerciser](https://web.archive.org/web/20151006085348/http://www.idb.me.uk/sunhillow/8080.html)
-(specifically, [8080EX1](/devices/pc8080/rom/exerciser/8080EX1.MAC)) and intercepts the exerciser's CP/M console
+(specifically, [8080EX1](/devices/pc8080/ram/exerciser/8080EX1.MAC)) and intercepts the exerciser's CP/M console
 calls so that you can see its progress in the Control Panel window.  This is a "headless" test machine
 (no keyboard or display), so that's all you get.
 

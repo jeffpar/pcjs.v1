@@ -12,7 +12,7 @@ Challenger 1P Applications
 - [BASIC](BASIC/)
 - [6502 Machine-Language](6502/)
 
-To make it easy for our machines to load our applications, we provide the following **Serial** configuration files:
+To make it easy for our C1Pjs machines to load these applications, we provide the following **Serial** configuration files:
 
 - [all.xml](all.xml)
 - [samples.xml](samples.xml)

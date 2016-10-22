@@ -55,6 +55,7 @@ var DumpAPI = require("../../shared/lib/dumpapi");
  */
 function FileDump(sFormat, fComments, fDecimal, offDump, nWidthDump, sServerRoot)
 {
+    this.addrLoad = null;
     this.fDebug = false;
     this.sFormat = (sFormat || DumpAPI.FORMAT.JSON);
     this.fJSONNative = (this.sFormat == DumpAPI.FORMAT.JSON && !fComments);
@@ -297,7 +298,6 @@ FileDump.prototype.parseListing = function(sListing)
     var ab = [];
     var matchLine;
     var re = /^( [0-9 ]{8}|)([0-7]{6})[: ]+([0-7]+)[ ]*([0-7']+|)[ ]+([0-7']+|)[ ]+(.*)$/gm;
-    var addrStart = null;
     while (matchLine = re.exec(sListing)) {
         /*
          * matchLine[1]: line # (optional)
@@ -307,7 +307,7 @@ FileDump.prototype.parseListing = function(sListing)
          * matchLine[5]: 6-digit operand (with optional apostrophe) or 3-digit data
          */
         var addrLine = parseInt(matchLine[2], 8);
-        if (addrStart == null) addrStart = addrLine;
+        if (this.addrLoad == null) this.addrLoad = addrLine;
         for (var i = 3, s; i <= 5 && (s = matchLine[i]); i++) {
             var data = parseInt(s.substr(0, 6), 8);
             if (s.length == 3) {
@@ -481,7 +481,17 @@ FileDump.prototype.dumpBuffer = function(sKey, buf, len, cbItem, offDump, nWidth
     offDump = offDump || this.offDump;
     nWidthDump = nWidthDump || this.nWidthDump;
 
-    var sDump = this.dumpLine(2, (sKey? '"' + sKey + '":' : "") + this.sJSONWhitespace + chOpen);
+    var sDump = "";
+    if (this.addrLoad) {
+        /*
+         * TODO: We need command-line overrides (eg, --load and --exec) to allow the user to specify the
+         * correct load (and exec) addresses.  For now, we're simply inferring that the first address parsed
+         * in parseListing() is both the load and exec address.
+         */
+        var sAddr = str.toHexWord(this.addrLoad) + (nBase == 8? " /*" + str.toOct(this.addrLoad, 6) + "*/" : "");
+        sDump += this.dumpLine(2, '"load":' + sAddr + ',"exec":' + sAddr + ',');
+    }
+    sDump += this.dumpLine(2, (sKey? '"' + sKey + '":' : "") + this.sJSONWhitespace + chOpen);
 
     var sLine = "";
     var sASCII = "";

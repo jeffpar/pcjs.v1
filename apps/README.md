@@ -1,15 +1,17 @@
 ---
 layout: page
-title: Application Archives
+title: Software Archives
 permalink: /apps/
 ---
 
-Application Archives
----
-Browse these PCjs Application Archives:
+Software Archives
+-----------------
+
+Browse these PCjs Software Archives:
 
 - [IBM PC](pcx86/)
 - [Challenger 1P](c1p/)
+- [PDP-11](pdp11/)
 
 ---
 

@@ -12,22 +12,22 @@
 		<menu>
 			<title>VT100 Screen</title>
 			<control type="container" pos="right">
-				<control type="rled" label="ON LINE" binding="online" padleft="8px"/>
-				<control type="rled" label="LOCAL" binding="local" padleft="8px"/>
-				<control type="rled" label="LOCKED" binding="locked" padleft="8px"/>
-				<control type="rled" label="L1" binding="l1" padleft="8px"/>
-				<control type="rled" label="L2" binding="l2" padleft="8px"/>
-				<control type="rled" label="L3" binding="l3" padleft="8px"/>
-				<control type="rled" label="L4" binding="l4" padleft="8px"/>
-				<control type="button" binding="fullScreen" padleft="8px;line-height:1em">Full Screen</control>
+				<control type="rled" label="ON LINE" binding="online" padLeft="8px"/>
+				<control type="rled" label="LOCAL" binding="local" padLeft="8px"/>
+				<control type="rled" label="LOCKED" binding="locked" padLeft="8px"/>
+				<control type="rled" label="L1" binding="l1" padLeft="8px"/>
+				<control type="rled" label="L2" binding="l2" padLeft="8px"/>
+				<control type="rled" label="L3" binding="l3" padLeft="8px"/>
+				<control type="rled" label="L4" binding="l4" padLeft="8px"/>
+				<control type="button" binding="fullScreen" padLeft="8px;line-height:1em">Full Screen</control>
 			</control>
 		</menu>
 	</video>
 	<chipset id="chipset" model="VT100"/>
 	<keyboard id="keyboard" model="VT100">
-		<control type="button" binding="setup" padleft="8px" padbottom="8px">SET-UP</control>
+		<control type="button" binding="setup" padLeft="8px" padBottom="8px">SET-UP</control>
 	</keyboard>
 	<serial id="serialPort" adapter="0">
-		<control type="button" binding="test" value="HELLO WORLD!\n\\e[D\\e[D\\e[D\\e[D\\e[D\\e[D\\e[D\\e[D\\e[D\\e[D\\e[D" padleft="8px" padbottom="8px">TEST RECEIVER</control>
+		<control type="button" binding="test" value="HELLO WORLD!\n\\e[D\\e[D\\e[D\\e[D\\e[D\\e[D\\e[D\\e[D\\e[D\\e[D\\e[D" padLeft="8px" padBottom="8px">TEST RECEIVER</control>
 	</serial>
 </machine>

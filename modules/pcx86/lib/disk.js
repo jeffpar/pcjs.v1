@@ -1094,7 +1094,6 @@ Disk.prototype.load = function(sDiskName, sDiskPath, file, fnNotify, controller)
 };
 
 /**
- *
  * build(buffer, fModified)
  *
  * Builds a disk image from an ArrayBuffer (eg, from a FileReader object), rather than from JSON-encoded data.
@@ -1217,24 +1216,6 @@ Disk.prototype.doneLoad = function(sURL, sDiskData, nErrorCode)
             }
             /*
              * The most likely source of any exception will be here, where we're parsing the disk data.
-             *
-             * TODO: IE9 is rather unfriendly and restrictive with regard to how much data it's willing to
-             * eval().  In particular, the 10Mb disk image we use for the Windows 1.01 demo config fails in
-             * IE9 with an "Out of memory" exception.  One work-around would be to chop the data into chunks
-             * (perhaps one track per chunk, using regular expressions) and then manually re-assemble it.
-             *
-             * However, it turns out that using JSON.parse(sDiskData) instead of eval("(" + sDiskData + ")")
-             * is a much easier fix. The only drawback is that we must first quote any unquoted property names
-             * and remove any comments, because while eval() was cool with them, JSON.parse() is more particular;
-             * the following RegExp replacements take care of those requirements.
-             *
-             * The use of hex values is something else that eval() was OK with, but JSON.parse() is not, and
-             * while I've stopped using hex values in DumpAPI responses (at least when "format=json" is specified),
-             * I can't guarantee they won't show up in "legacy" images, and there's no simple RegExp replacement
-             * for transforming hex values into decimal values, so I cop out and fall back to eval() if I detect
-             * any hex prefixes ("0x") in the sequence.  Ditto for error messages, which appear like so:
-             *
-             *      ["unrecognized disk path: test.img"]
              */
             var aDiskData;
             if (sDiskData.substr(0, 1) == "<") {        // if the "data" begins with a "<"...
@@ -1249,6 +1230,25 @@ Disk.prototype.doneLoad = function(sURL, sDiskData, nErrorCode)
                  */
                 aDiskData = ["Missing disk image: " + this.sDiskName];
             } else {
+                /*
+                 * TODO: IE9 is rather unfriendly and restrictive with regard to how much data it's willing to
+                 * eval().  In particular, the 10Mb disk image we use for the Windows 1.01 demo config fails in
+                 * IE9 with an "Out of memory" exception.  One work-around would be to chop the data into chunks
+                 * (perhaps one track per chunk, using regular expressions) and then manually re-assemble it.
+                 *
+                 * However, it turns out that using JSON.parse(sDiskData) instead of eval("(" + sDiskData + ")")
+                 * is a much easier fix. The only drawback is that we must first quote any unquoted property names
+                 * and remove any comments, because while eval() was cool with them, JSON.parse() is more particular;
+                 * the following RegExp replacements take care of those requirements.
+                 *
+                 * The use of hex values is something else that eval() was OK with, but JSON.parse() is not, and
+                 * while I've stopped using hex values in DumpAPI responses (at least when "format=json" is specified),
+                 * I can't guarantee they won't show up in "legacy" images, and there's no simple RegExp replacement
+                 * for transforming hex values into decimal values, so I cop out and fall back to eval() if I detect
+                 * any hex prefixes ("0x") in the sequence.  Ditto for error messages, which appear like so:
+                 *
+                 *      ["unrecognized disk path: test.img"]
+                 */
                 if (sDiskData.indexOf("0x") < 0 && sDiskData.substr(0, 2) != "[\"") {
                     aDiskData = JSON.parse(sDiskData.replace(/([a-z]+):/gm, "\"$1\":").replace(/\/\/[^\n]*/gm, ""));
                 } else {

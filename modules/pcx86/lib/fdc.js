@@ -103,6 +103,7 @@ if (NODE) {
  * component-specific property:
  *
  *      autoMount: one or more JSON-encoded objects, each containing 'name' and 'path' properties
+ *
  *      sortBy: "name" to sort disks by name, "path" to sort by path, or "none" to leave as-is (default is "name")
  *
  * Regarding early diskette drives: the IBM PC Model 5150 originally shipped with single-sided drives,
@@ -659,10 +660,7 @@ FDC.prototype.initBus = function(cmp, bus, cpu, dbg)
     bus.addPortOutputTable(this, FDC.aPortOutput);
 
     this.addDiskette("None", "", true);
-
-    if (this.fLocalDisks) {
-        this.addDiskette("Local Disk", "?");
-    }
+    if (this.fLocalDisks) this.addDiskette("Local Disk", "?");
     this.addDiskette("Remote Disk", "??");
 
     if (!this.autoMount()) this.setReady();
@@ -1281,7 +1279,7 @@ FDC.prototype.autoMount = function(fRemount)
     if (this.configMount) {
         for (var sDrive in this.configMount) {
             var configDrive = this.configMount[sDrive];
-            var sDiskettePath = configDrive['path'];
+            var sDiskettePath = configDrive['path'] || "";
             var sDisketteName = configDrive['name'] || this.findDiskette(sDiskettePath);
             if (sDiskettePath && sDisketteName) {
                 /*
@@ -1535,6 +1533,7 @@ FDC.prototype.doneLoadDiskette = function onFDCLoadNotify(drive, disk, sDiskette
 /**
  * addDiskette(sName, sPath, fTop)
  *
+ * @this {FDC}
  * @param {string} sName
  * @param {string} sPath
  * @param {boolean} [fTop] (default is bottom)
@@ -1563,6 +1562,7 @@ FDC.prototype.addDiskette = function(sName, sPath, fTop)
  * This is used to deal with mount requests (eg, autoMount) that supply a path without a name;
  * if we can find the path in the "listDisks" control, then we return the associated disk name.
  *
+ * @this {FDC}
  * @param {string} sPath
  * @return {string|null}
  */
