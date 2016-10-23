@@ -19,8 +19,8 @@ The first PDPjs test of a PDP-11/20 machine was running [PDP-11 BASIC](/apps/pdp
 it directly into memory from the original paper tape image.  This required changes to the [RAM](/modules/pdp11/lib/ram.js)
 component, including a new *loadImage()* interface that understands DEC's paper tape format.
 
-To provide a more "authentic" experience, there is also a new [PC11 Paper Tape](/modules/pdp11/lib/pc11.js) component,
-and machines can now be configured to include a virtual paper tape reader, with an [assortment of paper tapes](/devices/pdp11/pc11/)
+To provide a more "authentic" experience, there is also a new [PC11 Paper Tape](/devices/pdp11/pc11/) component,
+and machines can now be configured to include a virtual paper tape reader, with an [assortment of paper tapes](/apps/pdp11/tapes/)
 ready to be attached.
 
 In the real world, before you could load *any* paper tape, you had to first enter a
