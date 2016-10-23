@@ -1617,16 +1617,19 @@ if (DEBUGGER) {
         var cpu = this.cpu;
 
         /*
-         * Purely as a convenience, we're going to skip over a HALT opcode if the machine is just starting,
-         * and pretend that the NEXT instruction is the first to be executed.
+         * Since opHalt() will rewind the PC on a HALT, purely for our debugging benefit, we must compensate
+         * for that here by skipping over the HALT if/when the machine starts up again.
          */
-        if (nState == 0) {
+        if (!nState) {
             opCode = this.cpu.getWordDirect(addr);
             if (opCode == PDP11.OPCODE.HALT) {
                 addr = this.cpu.advancePC(2);
             }
         }
 
+        /*
+         * If the CPU stopped on a breakpoint, we're not interested in stopping again if the machine is starting.
+         */
         if (nState > 0) {
             if (this.nBreakInstructions) {
                 if (!--this.nBreakInstructions) return true;

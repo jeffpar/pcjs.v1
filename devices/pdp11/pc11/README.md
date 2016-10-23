@@ -19,11 +19,11 @@ We have archived a selection of [Paper Tape Images](/apps/pdp11/tapes/) for use 
 To make it easy for PDPjs machines to load those tapes, we created the following High-Speed Paper Tape Reader (PC11)
 Device XML file:
 
-- [Demo](/devices/pdp11/pc11/demo.xml)
+- [PC11 Default](/devices/pdp11/pc11/default.xml)
 
 which is typically referenced by a Machine XML file as:
 
-	<device ref="/devices/pdp11/pc11/demo.xml"/>
+	<device ref="/devices/pdp11/pc11/default.xml"/>
 		
 Device XML files typically configure the device, list all the resource the device will use, and define UI elements
 used to control the device, such as choosing which tape should be "attached" to the PC11 device.  For example:

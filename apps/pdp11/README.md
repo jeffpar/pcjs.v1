@@ -9,5 +9,6 @@ PDP-11 Software
 
 We have archived the following selected PDP-11 software:
 
-- [Boot Code](boot/)
+- [Boot Images](boot/)
+- [Diagnostic Images](diags/)
 - [DEC PDP-11 Tapes](tapes/)

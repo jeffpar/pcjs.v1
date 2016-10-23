@@ -18,7 +18,18 @@ shown below.
 
 {% include machine.html id="test1120" %}
 
-PCjs has archived the following DEC PDP-11 BASIC resources:
+According to the [PDP-11/20 Handbook (1971)](http://archive.pcjs.org/pubs/dec/pdp11/1120/PDP1120_Handbook_1971.pdf), p. 160,
+notable features of PDP-11 BASIC included:
+
+- Use of BASIC statements in immediate mode (no line number)
+- Ability to use any BASIC command (RUN, LIST, etc.) in deferred mode (with a line number)
+- Recursive subroutine calls
+- Multiple statements on a single line
+- Array names of a letter followed by a number
+- User programs can be halted (with CTRL/P) without clearing variables; PRINT can then be used to examine values
+- Ability to call assembly language functions
+
+PCjs has also archived the following DEC PDP-11 BASIC resources:
 
 - [BASIC (Single User) Tape Image](DEC-11-AJPB-PB.json)
 - [LISTING OF BASIC/PTS (March 1974)](http://archive.pcjs.org/pubs/dec/pdp11/basic/AB-2045B-SC_BASIC_PTS_Listing_Mar77.pdf)

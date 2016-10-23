@@ -482,7 +482,7 @@ FileDump.prototype.dumpBuffer = function(sKey, buf, len, cbItem, offDump, nWidth
     nWidthDump = nWidthDump || this.nWidthDump;
 
     var sDump = "";
-    if (this.addrLoad) {
+    if (this.addrLoad != null) {
         /*
          * TODO: We need command-line overrides (eg, --load and --exec) to allow the user to specify the
          * correct load (and exec) addresses.  For now, we're simply inferring that the first address parsed
