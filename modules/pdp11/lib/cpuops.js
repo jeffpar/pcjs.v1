@@ -1130,8 +1130,8 @@ PDP11.opHALT = function(opCode)
              * buffer is enabled, but that's more work.
              *
              * Because rewinding is not normal CPU behavior, attempting to Run again (or use the Debugger's
-             * "g" command) will cause an immediate HALT again; the work-around is simple: either set the PC to
-             * a new address (eg, "r pc=pc+2") or single-step the HALT instruction ("t").
+             * "g" command) would cause an immediate HALT again -- except that checkInstruction() checks for that
+             * precise condition, so if the CPU starts on a HALT, checkInstruction() will skip over it.
              */
             this.dbg.stopInstruction();
         }

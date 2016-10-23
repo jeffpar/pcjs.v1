@@ -141,7 +141,7 @@ CPUStatePDP11.prototype.initProcessor = function()
         this.aTriggers = [];            // list of all triggers, active or not (just for debugging)
     }
 
-    this.flags.complete = this.flags.debugCheck = false;
+    this.flags.complete = false;
 };
 
 /**
@@ -2084,24 +2084,23 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
      * so stopCPU() would have no effect as far as the Debugger is concerned.
      */
     this.flags.complete = true;
-    this.flags.debugCheck = (DEBUGGER && this.dbg && this.dbg.checksEnabled());
 
     /*
-     * nDebugCheck is 1 if we want to "check" every instruction with the Debugger, and -1 if we only
-     * want to check the first instruction.
+     * nDebugCheck is 1 if we want the Debugger's checkInstruction() to check every instruction,
+     * -1 if we want it to check just the first instruction, and 0 if there's no need for any checks.
      */
-    var nDebugCheck = this.flags.debugCheck? 1 : -1;
+    var nDebugCheck = (DEBUGGER && this.dbg && this.dbg.checksEnabled())? 1 : (this.flags.starting? -1 : 0);
 
     /*
-     * nDebugState is checked only when nDebugCheck is set, and its sole purpose is to tell the first call
-     * to checkInstruction() that it can skip breakpoint checks, and that will be true ONLY when fStarting is
-     * true OR nMinCycles is zero (the latter means the Debugger is single-stepping).
+     * nDebugState is needed only when nDebugCheck is non-zero; it is -1 if this is a single-step, 0 if
+     * this is the start of a new run, and 1 if this is a continuation of a previous run.  It is used by
+     * checkInstruction() to determine if it should skip breakpoint checks and/or HALT instructions (ie,
+     * if nDebugState is <= zero).
      */
     var nDebugState = (!nMinCycles)? -1 : (this.flags.starting? 0 : 1);
 
     /*
-     * Once we snap fStarting, we clear it, because technically, we've moved beyond "starting" and have
-     * officially "started" now.
+     * We've moved beyond "starting" now and have officially "started".
      */
     this.flags.starting = false;
 
