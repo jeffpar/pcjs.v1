@@ -7,17 +7,13 @@ permalink: /devices/pdp11/pc11/
 PC11 High-Speed Paper Tape Reader/Punch
 ---------------------------------------
 
-PDPjs implements the PC11 component in [pc11.js](/modules/pdp11/lib/pc11.js). 
+Machines containing the [PC11 Component](/modules/pdp11/lib/pc11.js) include:
 
-PDPjs machines that contain a PC11 Tape Reader include:
-
-- [Bootstrap Loader Demo](/devices/pdp11/machine/1120/bootstrap/)
+- [PDP-11/20 Bootstrap Loader Demo](/devices/pdp11/machine/1120/bootstrap/) (with [Debugger](/devices/pdp11/machine/1120/bootstrap/debugger/))
 - [PDP-11/20 BASIC Demo](/devices/pdp11/machine/1120/basic/) (with [Debugger](/devices/pdp11/machine/1120/basic/debugger/))
 
-We have archived a selection of [Paper Tape Images](/apps/pdp11/tapes/) for use by those machines.
-
-To make it easy for PDPjs machines to load those tapes, we created the following High-Speed Paper Tape Reader (PC11)
-Device XML file:
+PCjs has archived a selection of [Paper Tape Images](/apps/pdp11/tapes/) for use by those machines, most of which are
+listed in the following PC11 Device XML file:
 
 - [Default](/devices/pdp11/pc11/default.xml)
 
@@ -25,7 +21,7 @@ which is typically referenced by a Machine XML file as:
 
 	<device ref="/devices/pdp11/pc11/default.xml"/>
 		
-Device XML files typically configure the device, list all the resource the device will use, and define UI elements
+Device XML files not only configure a device, but also list all the resource the device will use, and define UI elements
 used to control the device, such as choosing which tape should be "attached" to the PC11 device.  For example:
 
 	<?xml version="1.0" encoding="UTF-8"?>
