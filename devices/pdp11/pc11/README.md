@@ -19,7 +19,7 @@ We have archived a selection of [Paper Tape Images](/apps/pdp11/tapes/) for use 
 To make it easy for PDPjs machines to load those tapes, we created the following High-Speed Paper Tape Reader (PC11)
 Device XML file:
 
-- [PC11 Default](/devices/pdp11/pc11/default.xml)
+- [Default](/devices/pdp11/pc11/default.xml)
 
 which is typically referenced by a Machine XML file as:
 

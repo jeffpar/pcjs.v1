@@ -572,13 +572,31 @@ if (DEBUGGER) {
     };
 
     /**
-     * setFocus()
+     * setFocus(fScroll)
      *
      * @this {DebuggerPDP11}
+     * @param {boolean} [fScroll] (true if you really want the control scrolled into view)
      */
-    DebuggerPDP11.prototype.setFocus = function()
+    DebuggerPDP11.prototype.setFocus = function(fScroll)
     {
-        if (this.controlDebug) this.controlDebug.focus();
+        if (this.controlDebug) {
+            /*
+             * This seems to be recommended work-around to prevent the browser from scrolling the focused element
+             * into view.  The CPU is not a visual component, so when the CPU wants to set focus, the primary intent
+             * is to ensure that keyboard input is fielded properly.
+             */
+            var x = 0, y = 0;
+            if (!fScroll && window) {
+                x = window.scrollX;
+                y = window.scrollY;
+            }
+
+            this.controlDebug.focus();
+
+            if (!fScroll && window) {
+                window.scrollTo(x, y);
+            }
+        }
     };
 
     /**

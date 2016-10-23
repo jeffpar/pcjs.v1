@@ -1405,11 +1405,28 @@ ComputerPDP11.prototype.getMachineComponent = function(sType, componentPrev)
  * where the display is more constrained, so we no longer do it by default (fScroll must be true).
  *
  * @this {ComputerPDP11}
- * @param {boolean} [fScroll]
+ * @param {boolean} [fScroll] (true if you really want the control scrolled into view)
  */
 ComputerPDP11.prototype.setFocus = function(fScroll)
 {
-    if (this.controlPrint) this.controlPrint.focus();
+    if (this.controlPrint) {
+        /*
+         * This seems to be recommended work-around to prevent the browser from scrolling the focused element
+         * into view.  The CPU is not a visual component, so when the CPU wants to set focus, the primary intent
+         * is to ensure that keyboard input is fielded properly.
+         */
+        var x = 0, y = 0;
+        if (!fScroll && window) {
+            x = window.scrollX;
+            y = window.scrollY;
+        }
+
+        this.controlPrint.focus();
+
+        if (!fScroll && window) {
+            window.scrollTo(x, y);
+        }
+    }
 };
 
 /**

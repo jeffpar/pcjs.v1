@@ -7,8 +7,10 @@ permalink: /apps/pdp11/tapes/absloader/
 DEC PDP-11 Absolute Loader
 --------------------------
 
+[![DEC-11-L2PC-PO](DEC-11-L2PC-PO.jpg)](DEC-11-L2PC-PO.json)
+
 The Absolute Loader is a special tape image that must be loaded in order to load *other* tapes
-that use what we'll call the "Absolute Format."  To see the Absolute Loader in action, start with the
+that use what we'll call the "Absolute Format."  To see the Absolute Loader in action, try the
 [PDP-11/20 Bootstrap Loader Demo](/devices/pdp11/machine/1120/bootstrap/debugger/).
 
 The *loadImage()* interface of the [PDPjs RAM Component](/modules/pdp11/lib/ram.js) explains what
@@ -39,8 +41,8 @@ we know about the "Absolute Format":
 	I haven't examined enough tapes (or the Absolute Loader code) to know for sure.
 
 [Other sites](http://www.retrocmp.com/stories/dec-pc05-papertape/242-dec-pc05-working-with-paper-tapes)
-have referred to this tape format as the "Standard Absolute" format, but I've not found confirmation of
-that terminology in any DEC publication.  In fact, I think that term may have been a misreading of instructions
+have referred to this tape format as the "Standard Absolute" format, but I've not found that terminology
+used in any DEC publication.  In fact, I think that term may have arisen from a misreading of instructions
 found in DEC manuals like the ["MEM EXER 16K" Diagnostics Manual](http://archive.pcjs.org/pubs/dec/pdp11/other/AC-9045F-MC_CZQMCF0-0-124K-Mem-Exer-16k_Feb78.pdf):
 
 	Load the program using any standard absolute loader.
