@@ -298,10 +298,11 @@ CPU8080.prototype.autoStart = function()
      */
     if (this.flags.autoStart || (!DEBUGGER || !this.dbg) && this.bindings["run"] === undefined) {
         /*
-         * Now we ALSO set fUpdateFocus when calling runCPU(), on the assumption that in the "auto-starting" context,
-         * a machine without focus is like a day without sunshine.
+         * We used to also set fUpdateFocus when calling runCPU(), on the assumption that in the "auto-starting"
+         * context, a machine without focus is like a day without sunshine, but in reality, focus should only be
+         * forced when the user takes some other machine-related action.
          */
-        this.runCPU(true);
+        this.runCPU();
         return true;
     }
     return false;
