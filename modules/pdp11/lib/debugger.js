@@ -1596,6 +1596,7 @@ if (DEBUGGER) {
             this.updateStatus(true);
             this.setFocus();
             this.clearTempBreakpoint(this.cpu.getPC());
+            this.sMessagePrev = null;
         }
     };
 
@@ -1679,18 +1680,20 @@ if (DEBUGGER) {
     };
 
     /**
-     * stopInstruction()
+     * stopInstruction(sMessage)
      *
      * TODO: Currently, the only way to prevent this call from stopping the CPU is when you're single-stepping.
      *
      * @this {DebuggerPDP11}
+     * @param {string} [sMessage]
      * @return {boolean} true if stopping is enabled, false if not
      */
-    DebuggerPDP11.prototype.stopInstruction = function()
+    DebuggerPDP11.prototype.stopInstruction = function(sMessage)
     {
         var cpu = this.cpu;
         if (cpu.isRunning()) {
             cpu.setPC(this.cpu.getLastPC());
+            if (sMessage) this.println(sMessage);
             this.stopCPU();
             /*
              * TODO: Review the appropriate-ness of throwing a bogus vector number in order to immediately stop
