@@ -1168,9 +1168,11 @@ CPUPDP11.prototype.stepCPU = function(nMinCycles)
  *
  * @this {CPUPDP11}
  * @param {boolean} [fComplete]
+ * @return {boolean} true if the CPU was stopped, false if it was already stopped
  */
 CPUPDP11.prototype.stopCPU = function(fComplete)
 {
+    var fStopped = false;
     if (this.flags.running) {
         this.endBurst();
         this.addCycles(this.nRunCycles);
@@ -1181,8 +1183,10 @@ CPUPDP11.prototype.stopCPU = function(fComplete)
         if (this.cmp) {
             this.cmp.stop(usr.getTime(), this.getCycles());
         }
+        fStopped = true;
     }
     this.flags.complete = fComplete;
+    return fStopped;
 };
 
 /**

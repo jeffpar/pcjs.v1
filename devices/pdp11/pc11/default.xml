@@ -30,6 +30,7 @@
 			<tape id="tape24" name="DUMPTT SA=XX7440 RA=XX7440" path="/apps/pdp11/tapes/dumptt/DEC-11-Y1PA-PO.json"/>
 			<tape id="tape25" name="DUMPTT SA=XXXXXX RA=XXXXXX" path="/apps/pdp11/tapes/dumptt/DEC-11-Y1PA-PB.json"/>
 			<tape id="tape26" name="DUMPAB SA=XXXXXX RA=XXXXXX" path="/apps/pdp11/tapes/dumpab/DEC-11-Y2PA-PB.json"/>
+			<tape id="tray02.tape04" name="11/70 CPU EXERCISER" path="/apps/pdp11/tapes/misc/MAINDEC-11-DEQKC-B1-PB.json"/>
 		</control>
 		<control type="button" binding="attachTape">Attach</control>
 		<control type="button" binding="loadTape">Load</control>
