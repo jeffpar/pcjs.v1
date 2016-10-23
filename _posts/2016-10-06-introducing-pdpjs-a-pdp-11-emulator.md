@@ -7,7 +7,7 @@ machines:
   - id: test1170
     type: pdp11
     debugger: true
-    config: /devices/pdp11/machine/1170/machine.xml
+    config: /devices/pdp11/machine/1170/vt100/debugger/machine.xml
     connection: dl11->vt100.serialPort
   - id: vt100
     type: pc8080
