@@ -1435,7 +1435,7 @@ Computer.prototype.getMachineComponent = function(sType, componentPrev)
  * the scroll feature has annoying effect on iOS, so we no longer do it by default (fScroll must be true).
  *
  * @this {Computer}
- * @param {boolean} [fScroll]
+ * @param {boolean} [fScroll] (true if you really want the control scrolled into view)
  */
 Computer.prototype.updateFocus = function(fScroll)
 {
@@ -1446,7 +1446,7 @@ Computer.prototype.updateFocus = function(fScroll)
          * is to ensure that keyboard input is fielded properly.
          */
         var x = 0, y = 0;
-        if (fScroll && window) {
+        if (!fScroll && window) {
             x = window.scrollX;
             y = window.scrollY;
         }
@@ -1454,7 +1454,7 @@ Computer.prototype.updateFocus = function(fScroll)
          * TODO: We need a mechanism to determine the "active" display, instead of hard-coding this to aVideo[0].
          */
         this.aVideo[0].setFocus();
-        if (fScroll && window) {
+        if (!fScroll && window) {
             window.scrollTo(x, y);
         }
     }

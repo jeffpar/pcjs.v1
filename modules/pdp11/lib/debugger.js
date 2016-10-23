@@ -572,13 +572,31 @@ if (DEBUGGER) {
     };
 
     /**
-     * setFocus()
+     * setFocus(fScroll)
      *
      * @this {DebuggerPDP11}
+     * @param {boolean} [fScroll] (true if you really want the control scrolled into view)
      */
-    DebuggerPDP11.prototype.setFocus = function()
+    DebuggerPDP11.prototype.setFocus = function(fScroll)
     {
-        if (this.controlDebug) this.controlDebug.focus();
+        if (this.controlDebug) {
+            /*
+             * This seems to be recommended work-around to prevent the browser from scrolling the focused element
+             * into view.  The CPU is not a visual component, so when the CPU wants to set focus, the primary intent
+             * is to ensure that keyboard input is fielded properly.
+             */
+            var x = 0, y = 0;
+            if (!fScroll && window) {
+                x = window.scrollX;
+                y = window.scrollY;
+            }
+
+            this.controlDebug.focus();
+
+            if (!fScroll && window) {
+                window.scrollTo(x, y);
+            }
+        }
     };
 
     /**
@@ -1617,16 +1635,19 @@ if (DEBUGGER) {
         var cpu = this.cpu;
 
         /*
-         * Purely as a convenience, we're going to skip over a HALT opcode if the machine is just starting,
-         * and pretend that the NEXT instruction is the first to be executed.
+         * Since opHalt() will rewind the PC on a HALT, purely for our debugging benefit, we must compensate
+         * for that here by skipping over the HALT if/when the machine starts up again.
          */
-        if (nState == 0) {
+        if (!nState) {
             opCode = this.cpu.getWordDirect(addr);
             if (opCode == PDP11.OPCODE.HALT) {
                 addr = this.cpu.advancePC(2);
             }
         }
 
+        /*
+         * If the CPU stopped on a breakpoint, we're not interested in stopping again if the machine is starting.
+         */
         if (nState > 0) {
             if (this.nBreakInstructions) {
                 if (!--this.nBreakInstructions) return true;
