@@ -319,10 +319,11 @@ CPUPDP11.prototype.autoStart = function()
      */
     if (this.flags.autoStart || (!DEBUGGER || !this.dbg) && this.bindings["run"] === undefined) {
         /*
-         * Now we ALSO set fUpdateFocus when calling startCPU(), on the assumption that in the "auto-starting"
-         * context, a machine without focus is like a day without sunshine.
+         * We used to also set fUpdateFocus when calling startCPU(), on the assumption that in the "auto-starting"
+         * context, a machine without focus is like a day without sunshine, but in reality, focus should only be
+         * forced when the user takes some other machine-related action.
          */
-        this.startCPU(true);
+        this.startCPU();
         return true;
     }
     return false;

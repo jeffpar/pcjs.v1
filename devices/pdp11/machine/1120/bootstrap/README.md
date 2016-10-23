@@ -10,7 +10,7 @@ machines:
 PDP-11/20 Bootstrap Loader Demo
 -------------------------------
 
-This machine pre-loads the [Bootstrap Loader](/apps/pdp11/boot/bootstrap/) code into 16Kb of RAM:
+The machine below pre-loads the [Bootstrap Loader](/apps/pdp11/boot/bootstrap/) code into 16Kb of RAM:
 
 	<ram id="ram" addr="0x0000" size="0x4000" file="/apps/pdp11/boot/bootstrap/BOOTSTRAP-16KB.json"/>
 
