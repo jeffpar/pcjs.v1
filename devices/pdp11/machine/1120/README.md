@@ -12,3 +12,6 @@ PDPjs is currently being tested with the following PDP-11/20 machine configurati
 * [PDP-11/20 Boot Test](/devices/pdp11/machine/1120/test/) (with [Debugger](/devices/pdp11/machine/1120/test/debugger/))
 * [PDP-11/20 Bootstrap Loader Demo](/devices/pdp11/machine/1120/bootstrap/) (with [Debugger](/devices/pdp11/machine/1120/bootstrap/debugger/))
 * [PDP-11/20 BASIC Demo](/devices/pdp11/machine/1120/basic/) (with [Debugger](/devices/pdp11/machine/1120/basic/debugger/))
+
+The "Demo" machines come with 16Kb of RAM and a [PC11 Paper Tape Reader](/devices/pdp11/pc11/).  The "Boot Test" machine
+has 56Kb of RAM.

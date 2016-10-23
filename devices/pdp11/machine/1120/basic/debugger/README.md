@@ -12,7 +12,7 @@ machines:
 PDP-11/20 BASIC Demo (with Debugger)
 ------------------------------------
 
-This machine pre-loads the [DEC PDP-11 BASIC](/apps/pdp11/tapes/basic/) tape image into 16Kb of RAM:
+The machine below pre-loads the [DEC PDP-11 BASIC](/apps/pdp11/tapes/basic/) tape image into 16Kb of RAM:
 
 	<ram id="ram" addr="0x0000" size="0x4000" file="/apps/pdp11/tapes/basic/DEC-11-AJPB-PB.json"/>
 
