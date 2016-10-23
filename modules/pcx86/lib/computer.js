@@ -1432,7 +1432,8 @@ Computer.prototype.getMachineComponent = function(sType, componentPrev)
  * updateFocus(fScroll)
  *
  * NOTE: When soft keyboard buttons call us to return focus to the machine (and away from the button),
- * the scroll feature has annoying effect on iOS, so we no longer do it by default (fScroll must be true).
+ * the browser's default behavior is to scroll the element into view, which can be annoying, especially on iOS,
+ * where the display is more constrained, so we no longer do it by default (fScroll must be true).
  *
  * @this {Computer}
  * @param {boolean} [fScroll] (true if you really want the control scrolled into view)
@@ -1450,10 +1451,12 @@ Computer.prototype.updateFocus = function(fScroll)
             x = window.scrollX;
             y = window.scrollY;
         }
+
         /*
          * TODO: We need a mechanism to determine the "active" display, instead of hard-coding this to aVideo[0].
          */
         this.aVideo[0].setFocus();
+
         if (!fScroll && window) {
             window.scrollTo(x, y);
         }
