@@ -7,6 +7,7 @@
 	<ram id="ram" addr="0x0000" size="0xE000" file="/apps/pdp11/boot/test/BOOTTEST.json"/>
 	<ram id="ram" addr="0x10000" size="0x34000"/>
 	<device id="default" type="default"/>
-	<serial id="dl11" adapter="0" binding="print"/>
+	<serial id="dl11" adapter="0" binding="print" upperCase="true"/>
 	<panel ref="/devices/pdp11/panel/1170/front.xml"/>
+	<device ref="/devices/pdp11/pc11/default.xml"/>
 </machine>

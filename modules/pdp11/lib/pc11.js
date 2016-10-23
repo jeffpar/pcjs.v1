@@ -82,6 +82,13 @@ function PC11(parms)
     this.sTapeSource = PC11.SOURCE.NONE;
     this.nTapeTarget = PC11.TARGET.NONE;
     this.sTapeName = this.sTapePath = "";
+
+    /*
+     * These next few variables simply keep track of the previous parameters to parseTape(),
+     * so that we can easily reparse the previous tape as needed.
+     */
+    this.aBytes = this.addrLoad = this.addrExec = null;
+
     this.nLastPercent = -1;     // ensure the first displayProgress() displays something
 
     /*
@@ -447,7 +454,15 @@ PC11.prototype.loadTape = function(sTapeName, sTapePath, nTapeTarget, fAutoMount
             }
         }
     }
-    if (nResult) this.status(this.nTapeTarget == PC11.TARGET.READER? "tape attached" : "tape loaded");
+    if (nResult) {
+        /*
+         * Now that we're calling parseTape() again (so that the current tape can either be restarted on
+         * the reader or reloaded into RAM), we can also rely on it to display an appropriate status message, too.
+         *
+         *      this.status(this.nTapeTarget == PC11.TARGET.READER? "tape attached" : "tape loaded");
+         */
+        this.parseTape(this.sTapeName, this.sTapePath, this.nTapeTarget, this.aBytes, this.addrLoad, this.addrExec);
+    }
     return nResult;
 };
 
@@ -674,6 +689,9 @@ PC11.prototype.parseTape = function(sTapeName, sTapePath, nTapeTarget, aBytes, a
     this.sTapeName = sTapeName;
     this.sTapePath = sTapePath;
     this.nTapeTarget = nTapeTarget;
+    this.aBytes = aBytes;
+    this.addrLoad = addrLoad;
+    this.addrExec = addrExec;
 
     if (nTapeTarget == PC11.TARGET.MEMORY) {
         /*

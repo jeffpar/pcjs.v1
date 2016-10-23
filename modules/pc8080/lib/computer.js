@@ -1405,7 +1405,7 @@ Computer8080.prototype.getMachineComponent = function(sType, componentPrev)
  * where the display is more constrained, so we no longer do it by default (fScroll must be true).
  *
  * @this {Computer8080}
- * @param {boolean} [fScroll]
+ * @param {boolean} [fScroll] (true if you really want the control scrolled into view)
  */
 Computer8080.prototype.updateFocus = function(fScroll)
 {

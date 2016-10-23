@@ -246,7 +246,7 @@ CPUStatePDP11.prototype.resetRegs = function()
     this.mmuMask = 0x3ffff;
     this.mmuMemorySize = BusPDP11.IOPAGE_18BIT;
 
-    this.opFlags |= PDP11.OPFLAG.INTQ;
+    this.resetTriggers();
 
     if (this.bus) this.setMemoryAccess();
 };
@@ -383,10 +383,15 @@ CPUStatePDP11.prototype.setReset = function(addr, fReset)
     this.setPC(addr);
     if (!fReset && this.dbg) {
         /*
-         * TODO: Review the decision to always stop the CPU if the Debugger is loaded.
+         * TODO: Review the decision to always stop the CPU if the Debugger is loaded.  Note that
+         * when stopCPU() stops a running CPU, the Debugger gets notified, so again, no need to notify it here.
+         *
+         * TODO: There are more serious problems to deal with if another component is slamming a new PC down
+         * the CPU's throat (presumably while also dropping some new code into RAM) while the CPU was still running;
+         * we should probably force a complete reset if the CPU is running, but for now, it's up to the user
+         * to hit the reset button themselves.
          */
-        this.stopCPU();
-        this.dbg.updateStatus();
+        if (!this.stopCPU()) this.dbg.updateStatus();
     }
 };
 
@@ -765,12 +770,25 @@ CPUStatePDP11.prototype.checkTriggers = function(priority)
 };
 
 /**
- * checkInterrupts()
+ * resetTriggers(priority)
  *
  * @this {CPUStatePDP11}
  */
+CPUStatePDP11.prototype.resetTriggers = function()
+{
+    this.triggerNext = null;
+};
+
+/**
+ * checkInterrupts()
+ *
+ * @this {CPUStatePDP11}
+ * @return {boolean} true if an interrupt was dispatched, false if not
+ */
 CPUStatePDP11.prototype.checkInterrupts = function()
 {
+    var fInterrupt = false;
+
     if (this.opFlags & PDP11.OPFLAG.INTQ) {
         this.opFlags &= ~PDP11.OPFLAG.INTQ;
 
@@ -785,6 +803,7 @@ CPUStatePDP11.prototype.checkInterrupts = function()
 
         if (this.dispatchInterrupt(vector, priority)) {
             if (trigger) this.removeTrigger(trigger);
+            fInterrupt = true;
         }
     }
     else if (this.opFlags & PDP11.OPFLAG.INTQ_SPL) {
@@ -794,6 +813,7 @@ CPUStatePDP11.prototype.checkInterrupts = function()
          */
         this.opFlags++;
     }
+    return fInterrupt;
 };
 
 /**
@@ -879,7 +899,7 @@ CPUStatePDP11.prototype.setPSW = function(newPSW)
     this.regPSW = newPSW;
 
     /*
-     * Trigger a call to checkInterrupts(), just in case.
+     * Trigger (no pun intended) a call to checkInterrupts(), just in case.
      *
      * TODO: I think this is overdone; if you set a breakpoint on checkInterrupts(), you'll see that a significant
      * percentage of calls do nothing.  For example, you'll usually see a spurious checkInterrupts() immediately after
@@ -2050,7 +2070,11 @@ CPUStatePDP11.prototype.writeDstWord = function(opCode, data)
 CPUStatePDP11.prototype.branch = function(opCode, condition)
 {
     if (condition) {
-        this.setPC(this.getPC() + ((opCode << 24) >> 23));
+        var off = ((opCode << 24) >> 23);
+        if (DEBUG && DEBUGGER && this.dbg && off == -2) {
+            this.dbg.stopInstruction("branch to self");
+        }
+        this.setPC(this.getPC() + off);
         this.nStepCycles -= 2;
     }
     this.nStepCycles -= (2 + 1);
@@ -2117,7 +2141,7 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                 this.stopCPU();
                 break;
             }
-            nDebugState = 1;
+            if (!nDebugState) nDebugState++;
             nDebugCheck++;
         }
 
@@ -2150,7 +2174,14 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
              * interrupting the natural flow of instructions whenever the Debugger is stepping through code.
              */
             if ((this.opFlags & (PDP11.OPFLAG.INTQ_SPL | PDP11.OPFLAG.INTQ | PDP11.OPFLAG.WAIT)) /*&& nMinCycles*/) {
-                this.checkInterrupts();
+                if (this.checkInterrupts()) {
+                    /*
+                     * Since an interrupt was just dispatched, altering the normal flow of time and changing
+                     * the future as we knew it, let's break out immediately if we're single-stepping, so that
+                     * the Debugger gets to see the first instruction of the interrupt handler.
+                     */
+                    if (nDebugState < 0) break;
+                }
             }
         }
 
