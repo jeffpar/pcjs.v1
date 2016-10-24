@@ -2499,11 +2499,12 @@ DiskDump.prototype.convertToJSON = function()
          * image whose logical format doesn't agree with its physical structure.
          */
         var fXDFOutput = false;
-        var disketteFormat = DiskAPI.DISKETTE_FORMATS[cbDiskData];
-        if (disketteFormat) {
-            nCylinders = disketteFormat[0];
-            nHeads = disketteFormat[1];
-            nSectorsPerTrack = disketteFormat[2];
+        var diskFormat = DiskAPI.DISK_FORMATS[cbDiskData];
+        if (diskFormat) {
+            nCylinders = diskFormat[0];
+            nHeads = diskFormat[1];
+            nSectorsPerTrack = diskFormat[2];
+            cbSector = diskFormat[3] || cbSector;
         }
         else {
             /*

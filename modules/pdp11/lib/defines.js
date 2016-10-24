@@ -520,31 +520,6 @@ var PDP11 = {
         SL:         0o177774,   //                                  Stack Limit Register
         PSW:        0o177776    // 777776   17777776    0x3FFFFE    Processor Status Word
     },
-    PC11: {                     // High Speed Reader & Punch (PR11 is a Reader-only unit)
-        PRI:        4,          // NOTE: reader has precedence over punch
-        RVEC:       0o70,       // reader vector
-        PVEC:       0o74,       // punch vector
-        PRS: {
-            RE:     0x0001,     // Reader Enable (W/O)
-            RIE:    0x0040,     // Reader Interrupt Enable (allows the DONE and ERROR bits to trigger an interrupt)
-            DONE:   0x0080,     // Done (R/O)
-            BUSY:   0x0800,     // Busy (R/O)
-            ERROR:  0x8000,     // Error (R/O)
-            CLEAR:  0x08C0,     // bits cleared on INIT
-            RMASK:  0xFFFE,     // bits readable (TODO: All I know for sure is that bit 0 is NOT readable; see readPRS())
-            WMASK:  0x0041,     // bits writable
-            BAUD:   3600
-        },
-        PRB: {
-            MASK:   0x00FF      // Data
-        },
-        PPS: {
-            /*
-             * TODO: Flesh this out if/when we add Paper Tape Punch support
-             */
-            BAUD:   600
-        },
-    },
     DL11: {                     // Serial Line Interface (program compatible with the KL11 for control of console teleprinters)
         PRI:        4,
         RVEC:       0o60,
@@ -595,6 +570,35 @@ var PDP11 = {
             IE:     0x0040,     // Interrupt Enable
             MON:    0x0080      // Monitor
         }
+    },
+    PC11: {                     // High Speed Reader & Punch (PR11 is a Reader-only unit)
+        PRI:        4,          // NOTE: reader has precedence over punch
+        RVEC:       0o70,       // reader vector
+        PVEC:       0o74,       // punch vector
+        PRS: {
+            RE:     0x0001,     // Reader Enable (W/O)
+            RIE:    0x0040,     // Reader Interrupt Enable (allows the DONE and ERROR bits to trigger an interrupt)
+            DONE:   0x0080,     // Done (R/O)
+            BUSY:   0x0800,     // Busy (R/O)
+            ERROR:  0x8000,     // Error (R/O)
+            CLEAR:  0x08C0,     // bits cleared on INIT
+            RMASK:  0xFFFE,     // bits readable (TODO: All I know for sure is that bit 0 is NOT readable; see readPRS())
+            WMASK:  0x0041,     // bits writable
+            BAUD:   3600
+        },
+        PRB: {
+            MASK:   0x00FF      // Data
+        },
+        PPS: {
+            /*
+             * TODO: Flesh this out if/when we add Paper Tape Punch support
+             */
+            BAUD:   600
+        },
+    },
+    RL11: {                     // RL11 Disk Controller
+        PRI:        5,          // TODO: Review controller defaults and their configurability
+        VEC:        0o160
     }
 };
 

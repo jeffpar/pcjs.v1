@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<device id="rl11" type="rl11" autoMount='{RL0:{path:"/disks/dec/rl02k/RL02K-DEMO3.json"}}' pos="left" width="35%" padLeft="8px" padBottom="8px">
+	<name>Disk Drive Controls</name>
+	<control type="container">
+		<control type="list" binding="listDrives"/>
+		<control type="list" binding="listDisks">
+			<tape id="disk00" name="DEMO3 (10Mb)" path="/disks/dec/rl02k/RL02K-DEMO3.json"/>
+		</control>
+		<control type="button" binding="loadDrive">Load</control>
+		<control type="description" binding="descDisk" padRight="8px"/>
+		<control type="file" binding="mountDisk"/>
+	</control>
+</device>

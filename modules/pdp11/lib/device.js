@@ -40,6 +40,7 @@ if (NODE) {
     var BusPDP11      = require("./bus");
     var MessagesPDP11 = require("./messages");
     var PC11          = require("./pc11");
+    var RL11          = require("./rl11");
 }
 
 /**
@@ -1229,6 +1230,10 @@ DevicePDP11.init = function()
             break;
         case 'pc11':
             device = new PC11(parmsDevice);
+            Component.bindComponentControls(device, eDevice, PDP11.APPCLASS);
+            break;
+        case 'rl11':
+            device = new RL11(parmsDevice);
             Component.bindComponentControls(device, eDevice, PDP11.APPCLASS);
             break;
         }
