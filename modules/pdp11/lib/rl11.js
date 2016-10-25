@@ -273,6 +273,13 @@ RL11.prototype.initBus = function(cmp, bus, cpu, dbg)
         }
     }
 
+    /*
+     * If we didn't need auto-mount support, we could defer controller initialization until we received a powerUp() notification,
+     * at which point reset() would call initController(), or restore() would restore the controller; in that case, all we'd need
+     * to do here is call setReady().
+     */
+    this.initController();
+
     this.triggerReaderInterrupt = this.cpu.addTrigger(PDP11.RL11.VEC, PDP11.RL11.PRI);
 
     bus.addIOTable(this, RL11.UNIBUS_IOTABLE);
@@ -294,6 +301,23 @@ RL11.prototype.initBus = function(cmp, bus, cpu, dbg)
 RL11.prototype.getDriveName = function(iDrive)
 {
     return "RL" + iDrive;
+};
+
+/**
+ * getDriveNumber(sDrive)
+ *
+ * @this {RL11}
+ * @param {string} sDrive
+ * @return {number} (0-3, or -1 if error)
+ */
+RL11.prototype.getDriveNumber = function(sDrive)
+{
+    var iDrive = -1;
+    if (sDrive) {
+        iDrive = sDrive.charCodeAt(sDrive.length - 1) - 0x30;
+        if (iDrive < 0 || iDrive > 9) iDrive = -1;
+    }
+    return iDrive;
 };
 
 /**
@@ -332,11 +356,6 @@ RL11.prototype.powerUp = function(data, fRepower)
             for (var iDrive = 0; iDrive < this.nDrives; iDrive++) {
                 var controlOption = document.createElement("option");
                 controlOption.value = iDrive;
-                /*
-                 * TODO: This conversion of drive number to drive letter, starting with A:, is very simplistic
-                 * and will NOT match the drive mappings that DOS ultimately uses.  We'll need to spiff this up at
-                 * some point.
-                 */
                 controlOption.text = this.getDriveName(iDrive);
                 controlDrives.appendChild(controlOption);
             }
@@ -431,8 +450,7 @@ RL11.prototype.initController = function(data)
  */
 RL11.prototype.saveController = function()
 {
-    var data = [];
-    return data;
+    return [];
 };
 
 /**
@@ -502,11 +520,7 @@ RL11.prototype.autoMount = function(fRemount)
             var sDiskPath = configDrive['path'] || "";
             var sDiskName = configDrive['name'] || this.findDisk(sDiskPath);
             if (sDiskPath && sDiskName) {
-                /*
-                 * WARNING: This conversion of drive letter to drive number, starting with A:, is very simplistic
-                 * and is not guaranteed to match the drive mapping that DOS ultimately uses.
-                 */
-                var iDrive = sDrive.charCodeAt(0) - 0x41;
+                var iDrive = this.getDriveNumber(sDrive);
                 if (iDrive >= 0 && iDrive < this.aDrives.length) {
                     if (!this.loadDrive(iDrive, sDiskName, sDiskPath, true) && fRemount) {
                         this.setReady(false);
@@ -668,7 +682,7 @@ RL11.prototype.doneLoadDrive = function onLoadDrive(drive, disk, sDiskName, sDis
          * For a local disk (ie, one loaded via mountDrive()), the disk.restore() performed by addDiskHistory()
          * may have altered the disk geometry, so refresh the disk info.
          */
-        aDiskInfo = disk.info();
+        // aDiskInfo = disk.info();
 
         /*
          * Clearly, a successful mount implies a disk change, and I suppose that, technically, an *unsuccessful*
@@ -684,9 +698,6 @@ RL11.prototype.doneLoadDrive = function onLoadDrive(drive, disk, sDiskName, sDis
         /*
          * With the addition of notify(), users are now "alerted" whenever a disk has finished loading;
          * notify() is selective about its output, using print() if a print window is open, alert() otherwise.
-         *
-         * WARNING: This conversion of drive number to drive letter, starting with A:, is very simplistic
-         * and will not match the drive mappings that DOS ultimately uses (ie, for drives beyond B:).
          */
         this.notice("Mounted disk \"" + sDiskName + "\" in drive " + this.getDriveName(drive.iDrive), drive.fAutoMount || fAutoMount);
 
@@ -832,10 +843,6 @@ RL11.prototype.unloadDrive = function(iDrive, fLoading)
 
         // this.regInput |= FDC.REG_INPUT.DISK_CHANGE;
 
-        /*
-         * WARNING: This conversion of drive number to drive letter, starting with A:, is very simplistic
-         * and is not guaranteed to match the drive mapping that DOS ultimately uses.
-         */
         if (!fLoading) {
             this.notice("Drive " + this.getDriveName(iDrive) + " unloaded", fLoading);
             this.sDiskSource = RL11.SOURCE.NONE;

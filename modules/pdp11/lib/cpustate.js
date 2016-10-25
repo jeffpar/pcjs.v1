@@ -203,7 +203,7 @@ CPUStatePDP11.prototype.initRegs = function()
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     ];
-    this.regsControl = [        // various control registers we don't really care about
+    this.regsControl = [        // various control registers (177740-177756) we don't really care about
         0, 0, 0, 0, 0, 0, 0, 0
     ];
     this.regMB = 0;
@@ -1194,7 +1194,7 @@ CPUStatePDP11.prototype.trap = function(vector, reason)
     this.trapPSW = -1;                          // reset flag that we have a trap within a trap
 
     /*
-     * These next properties are purely for bookkeeping purposes; see getTrapStatus()
+     * These next properties are purely an aid for the Debugger; see getTrapStatus()
      */
     this.opFlags |= PDP11.OPFLAG.TRAP;
     this.trapVector = vector;
