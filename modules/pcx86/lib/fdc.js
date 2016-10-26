@@ -470,7 +470,14 @@ FDC.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
                 }
             });
             for (i = 0; i < aOptions.length; i++)  {
-                control.options[i] = aOptions[i];
+                try {
+                    /*
+                     * TODO: Determine why this line blows up in IE8; are the properties of an options object not settable in IE8?
+                     */
+                    control.options[i] = aOptions[i];
+                } catch(e) {
+                    break;
+                }
             }
         }
 
