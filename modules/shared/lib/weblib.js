@@ -286,6 +286,7 @@ web.getResource = function(sURL, dataPost, fAsync, done)
 /**
  * parseMemoryResource(sURL, sData)
  *
+ * @param {string} sURL
  * @param {string} sData
  * @return {Object|null} (resource)
  */
