@@ -1481,6 +1481,8 @@ Disk.prototype.buildFileTable = function()
             else if (cbDisk == 320 * 1024 && this.getClusterEntry(dir, 0, 0) == DiskAPI.FAT.MEDIA_320KB) {
                 dir.lbaTotal = 640;
                 dir.nEntries = 112;
+                this.assert(this.nHeads == 2);
+                dir.nClusterSecs++;         // 320Kb disks use 2 sectors/cluster
                 fValid = true;
             }
             else {
