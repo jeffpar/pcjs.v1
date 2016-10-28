@@ -414,10 +414,11 @@ DiskDump.PCJS_OEM   = "PCJS.ORG";
  * The BPBs that buildImage() currently supports; these BPBs should be in order of smallest to largest capacity,
  * to help ensure we don't select a disk format larger than necessary.
  *
- * TODO: For now, the code that chooses a default BPB is starting with #1 instead of #0, because Windows 95 (at least
+ * TODO: For now, the code that chooses a default BPB is starting with #3 instead of #0, because Windows 95 (at least
  * when running under VMware) fails to read the contents of such disks correctly.  Whether that's my fault or Windows 95's
  * fault is still TBD (although it's probably mine -- perhaps 160Kb diskettes aren't supposed to have BPBs?)  The simple
- * work-around is to avoid creating 160Kb diskette images.
+ * work-around is to avoid creating 160Kb diskette images (and, to play it safe, I skip 180Kb and 320Kb as well, since
+ * 360Kb was the most commonly used format after DOS 2.0 introduced it).
  */
 DiskDump.aDefaultBPBs = [
   [                             // define BPB for 160Kb diskette
@@ -433,7 +434,39 @@ DiskDump.aDefaultBPBs = [
     0xFE,                       // 0x15: media type (eg, 0xFF: 320Kb, 0xFE: 160Kb, 0xFD: 360Kb, 0xFC: 180Kb)
     0x01, 0x00,                 // 0x16: sectors per FAT (1)
     0x08, 0x00,                 // 0x18: sectors per track (8)
-    0x01, 0x00,                 // 0x1A: number of heads (2)
+    0x01, 0x00,                 // 0x1A: number of heads (1)
+    0x00, 0x00, 0x00, 0x00      // 0x1C: number of hidden sectors (always 0 for non-partitioned media)
+  ],
+  [                             // define BPB for 180Kb diskette
+    0xEB, 0xFE, 0x90,           // 0x00: JMP instruction, following by 8-byte OEM signature
+    0x50, 0x43, 0x4A, 0x53, 0x2E, 0x4F, 0x52, 0x47,     // PCJS_OEM
+ // 0x49, 0x42, 0x4D, 0x20, 0x20, 0x31, 0x2E, 0x30,     // "IBM  1.0" (this is a fake OEM signature)
+    0x00, 0x02,                 // 0x0B: bytes per sector (0x200 or 512)
+    0x01,                       // 0x0D: sectors per cluster (1)
+    0x01, 0x00,                 // 0x0E: reserved sectors; ie, # sectors preceding the first FAT--usually just the boot sector (1)
+    0x02,                       // 0x10: FAT copies (2)
+    0x40, 0x00,                 // 0x11: root directory entries (0x40 or 64)  0x40 * 0x20 = 0x800 (1 sector is 0x200 bytes, total of 4 sectors)
+    0x68, 0x01,                 // 0x13: number of sectors (0x168 or 360)
+    0xFC,                       // 0x15: media type (eg, 0xFF: 320Kb, 0xFE: 160Kb, 0xFD: 360Kb, 0xFC: 180Kb)
+    0x02, 0x00,                 // 0x16: sectors per FAT (2)
+    0x09, 0x00,                 // 0x18: sectors per track (9)
+    0x01, 0x00,                 // 0x1A: number of heads (1)
+    0x00, 0x00, 0x00, 0x00      // 0x1C: number of hidden sectors (always 0 for non-partitioned media)
+  ],
+  [                             // define BPB for 320Kb diskette
+    0xEB, 0xFE, 0x90,           // 0x00: JMP instruction, following by 8-byte OEM signature
+    0x50, 0x43, 0x4A, 0x53, 0x2E, 0x4F, 0x52, 0x47,     // PCJS_OEM
+ // 0x49, 0x42, 0x4D, 0x20, 0x20, 0x32, 0x2E, 0x30,     // "IBM  2.0" (this is a real OEM signature)
+    0x00, 0x02,                 // 0x0B: bytes per sector (0x200 or 512)
+    0x02,                       // 0x0D: sectors per cluster (2)
+    0x01, 0x00,                 // 0x0E: reserved sectors; ie, # sectors preceding the first FAT--usually just the boot sector (1)
+    0x02,                       // 0x10: FAT copies (2)
+    0x70, 0x00,                 // 0x11: root directory entries (0x70 or 112)  0x70 * 0x20 = 0xE00 (1 sector is 0x200 bytes, total of 7 sectors)
+    0x80, 0x02,                 // 0x13: number of sectors (0x280 or 640)
+    0xFF,                       // 0x15: media type (eg, 0xFF: 320Kb, 0xFE: 160Kb, 0xFD: 360Kb, 0xFC: 180Kb)
+    0x01, 0x00,                 // 0x16: sectors per FAT (1)
+    0x08, 0x00,                 // 0x18: sectors per track (8)
+    0x02, 0x00,                 // 0x1A: number of heads (2)
     0x00, 0x00, 0x00, 0x00      // 0x1C: number of hidden sectors (always 0 for non-partitioned media)
   ],
   [                             // define BPB for 360Kb diskette
@@ -1032,7 +1065,7 @@ DiskDump.logWarning = function(s)
 {
     var sWarning = "";
     if (s) {
-        sWarning = "diskdump warning: " + s;
+        sWarning = "DiskDump warning: " + s;
         DiskDump.logConsole(sWarning);
     }
     return sWarning;
@@ -1911,8 +1944,7 @@ DiskDump.prototype.buildFATEntry = function(abFAT, iFAT, v)
     else {
         if (abFAT[iByte] === undefined) abFAT[iByte] = 0;
         abFAT[iByte] = (abFAT[iByte] & 0x0F) | ((v & 0xF) << 4);
-        iByte++;
-        abFAT[iByte] = (v >> 4);
+        abFAT[iByte + 1] = (v >> 4);
     }
 };
 
@@ -2300,7 +2332,7 @@ DiskDump.prototype.buildImageFromFiles = function(aFiles, done)
      * Find or build a BPB with enough capacity, and at the same time, calculate all
      * the other values we'll need, including total number of data sectors (cDataSectors).
      */
-    for (var iBPB = 1; iBPB < DiskDump.aDefaultBPBs.length; iBPB++) {
+    for (var iBPB = 3; iBPB < DiskDump.aDefaultBPBs.length; iBPB++) {
         /*
          * If this BPB is for a hard drive but a disk size was not specified, skip it.
          */
@@ -2369,6 +2401,9 @@ DiskDump.prototype.buildImageFromFiles = function(aFiles, done)
 
     /*
      * Build the FAT, noting the starting cluster number that each file will use along the way.
+     *
+     * Also, notice that the first byte of the FAT is the "media type" byte that's replicated in the
+     * BPB at offset 0x15.  For old BPB-less diskettes, this is where you must look for the media type.
      */
     var abFAT = [];
     this.buildFATEntry(abFAT, 0, abBoot[0x15] | 0xF00);
@@ -2457,6 +2492,7 @@ DiskDump.prototype.convertToJSON = function()
         var aTracks = [];                   // track array (used only for disk images with track tables)
         var iTrack, cbTrack, offTrack, bufTrack, bufSector;
         var cbSector = 512;                 // default sector size
+        var bMediaType = 0;
         var offBootSector = 0;
         var cbDiskData = this.bufDisk.length;
 
@@ -2484,6 +2520,7 @@ DiskDump.prototype.convertToJSON = function()
         }
 
         var bByte0 = this.bufDisk.readUInt8(offBootSector + DiskAPI.BOOT.JMP_OPCODE);
+        var bByte1 = this.bufDisk.readUInt8(offBootSector + DiskAPI.BOOT.JMP_OPCODE + 1);
         var cbSectorBPB = this.bufDisk.readUInt16LE(offBootSector + DiskAPI.BPB.SECTOR_BYTES);
 
         /*
@@ -2505,58 +2542,130 @@ DiskDump.prototype.convertToJSON = function()
             nHeads = diskFormat[1];
             nSectorsPerTrack = diskFormat[2];
             cbSector = diskFormat[3] || cbSector;
+            bMediaType = diskFormat[4] || bMediaType;
         }
-        else {
-            /*
-             * See if the first sector of the image contains a valid DOS BPB.  That begs the question: what IS a valid
-             * DOS BPB?  For starters, the first word (at offset 0x0B) is invariably 0x0200, indicating a 512-byte sector
-             * size.  I also check the first byte for an Intel JMP opcode (0xEB is JMP with a 1-byte displacement, and
-             * 0xE9 is JMP with a 2-byte displacement).  What else?
-             */
-            if ((bByte0 == X86.OPCODE.JMP || bByte0 == X86.OPCODE.JMPS) && cbSectorBPB == cbSector) {
 
-                var nHeadsBPB = this.bufDisk.readUInt16LE(offBootSector + DiskAPI.BPB.TOTAL_HEADS);
+        /*
+         * I used to do these BPB tests only if diskFormat was undefined, but now I always do them, because I
+         * want to make sure they're in agreement (and if not, then figure out why not).
+         *
+         * See if the first sector of the image contains a valid DOS BPB.  That begs the question: what IS a valid
+         * DOS BPB?  For starters, the first word (at offset 0x0B) is invariably 0x0200, indicating a 512-byte sector
+         * size.  I also check the first byte for an Intel JMP opcode (0xEB is JMP with a 1-byte displacement, and
+         * 0xE9 is JMP with a 2-byte displacement).  What else?
+         */
+        var fBPBExists = false;
+        if ((bByte0 == X86.OPCODE.JMP || bByte0 == X86.OPCODE.JMPS) && cbSectorBPB == cbSector) {
+
+            var nHeadsBPB = this.bufDisk.readUInt16LE(offBootSector + DiskAPI.BPB.TOTAL_HEADS);
+            var nSectorsPerTrackBPB = this.bufDisk.readUInt16LE(offBootSector + DiskAPI.BPB.TRACK_SECS);
+
+            if (nHeadsBPB && nSectorsPerTrackBPB) {
+
+                fBPBExists = true;
+                var bMediaTypeBPB = this.bufDisk.readUInt8(offBootSector + DiskAPI.BPB.MEDIA_TYPE);
                 var nSectorsTotalBPB = this.bufDisk.readUInt16LE(offBootSector + DiskAPI.BPB.TOTAL_SECS);
-                var nSectorsPerTrackBPB = this.bufDisk.readUInt16LE(offBootSector + DiskAPI.BPB.TRACK_SECS);
 
-                if (nSectorsPerTrackBPB && nHeadsBPB) {
+                var nSectorsPerCylinderBPB = nSectorsPerTrackBPB * nHeadsBPB;
+                var nCylindersBPB = Math.floor(nSectorsTotalBPB / nSectorsPerCylinderBPB);
 
-                    var nSectorsPerCylinderBPB = nSectorsPerTrackBPB * nHeadsBPB;
-                    nHeads = nHeadsBPB;
-                    nCylinders = Math.floor(nSectorsTotalBPB / nSectorsPerCylinderBPB);
-                    nSectorsPerTrack = nSectorsPerTrackBPB;
-
-                    /*
-                     * OK, great, the disk appears to contain a valid BPB.  But so do XDF disk images, which are
-                     * diskette images with tracks containing:
-                     *
-                     *      1 8Kb sector (equivalent of 16 512-byte sectors)
-                     *      1 2Kb sector (equivalent of 4 512-byte sectors)
-                     *      1 1Kb sector (equivalent of 2 512-byte sectors)
-                     *      1 512-byte sector (equivalent of, um, 1 512-byte sector)
-                     *
-                     * for a total of the equivalent of 23 512-byte sectors, or 11776 (0x2E00) bytes per track.
-                     * For an 80-track diskette with 2 sides, that works out to a total of 3680 512-byte sectors,
-                     * or 1884160 bytes, or 1.84Mb, which is the exact size of the (only) XDF diskette images we
-                     * currently (try to) support.
-                     *
-                     * Moreover, the first two tracks (ie, the first cylinder) contain only 19 sectors each,
-                     * rather than 23, but XDF disk images still pads those tracks with 4 unused sectors.
-                     *
-                     * So, data for the first track contains 1 boot sector ending at 512 (0x200), 11 FAT sectors
-                     * ending at 6144 (0x1800), and 7 "micro-disk" sectors ending at 9728 (0x2600).  Then there's
-                     * 4 (useless?) sectors that end at 11776 (0x2E00).
-                     *
-                     * Data for the second track contains 7 root directory sectors ending at 15360 (0x3C00), followed
-                     * by disk data.
-                     *
-                     * For more details, check out this helpful article: http://www.os2museum.com/wp/the-xdf-diskette-format/
-                     */
-                    if (nSectorsTotalBPB == 3680 && this.fXDFSupport) {
-                        DiskDump.logWarning("XDF diskette detected, experimental XDF output enabled");
-                        fXDFOutput = true;
+                if (diskFormat) {
+                    if (nCylinders != nCylindersBPB) {
+                        DiskDump.logWarning("BPB cylinders (" + nCylindersBPB + ") do not match actual cylinders: " + nCylinders);
+                    }
+                    if (nHeads != nHeadsBPB) {
+                        DiskDump.logWarning("BPB heads (" + nHeadsBPB + ") do not match actual heads: " + nHeads);
+                    }
+                    if (nSectorsPerTrack != nSectorsPerTrackBPB) {
+                        DiskDump.logWarning("BPB sectors/track (" + nSectorsPerTrackBPB + ") do not match actual sectors/track: " + nSectorsPerTrack);
+                    }
+                    if (bMediaType && bMediaType != bMediaTypeBPB) {
+                        DiskDump.logWarning("BPB media type (" + bMediaTypeBPB + ") do not match actual media type: " + bMediaType);
                     }
                 }
+                else {
+                    nCylinders = nCylindersBPB;
+                    nHeads = nHeadsBPB;
+                    nSectorsPerTrack = nSectorsPerTrackBPB;
+                    bMediaType = bMediaTypeBPB;
+                }
+
+                /*
+                 * OK, great, the disk appears to contain a valid BPB.  But so do XDF disk images, which are
+                 * diskette images with tracks containing:
+                 *
+                 *      1 8Kb sector (equivalent of 16 512-byte sectors)
+                 *      1 2Kb sector (equivalent of 4 512-byte sectors)
+                 *      1 1Kb sector (equivalent of 2 512-byte sectors)
+                 *      1 512-byte sector (equivalent of, um, 1 512-byte sector)
+                 *
+                 * for a total of the equivalent of 23 512-byte sectors, or 11776 (0x2E00) bytes per track.
+                 * For an 80-track diskette with 2 sides, that works out to a total of 3680 512-byte sectors,
+                 * or 1884160 bytes, or 1.84Mb, which is the exact size of the (only) XDF diskette images we
+                 * currently (try to) support.
+                 *
+                 * Moreover, the first two tracks (ie, the first cylinder) contain only 19 sectors each,
+                 * rather than 23, but XDF disk images still pads those tracks with 4 unused sectors.
+                 *
+                 * So, data for the first track contains 1 boot sector ending at 512 (0x200), 11 FAT sectors
+                 * ending at 6144 (0x1800), and 7 "micro-disk" sectors ending at 9728 (0x2600).  Then there's
+                 * 4 (useless?) sectors that end at 11776 (0x2E00).
+                 *
+                 * Data for the second track contains 7 root directory sectors ending at 15360 (0x3C00), followed
+                 * by disk data.
+                 *
+                 * For more details, check out this helpful article: http://www.os2museum.com/wp/the-xdf-diskette-format/
+                 */
+                if (nSectorsTotalBPB == 3680 && this.fXDFSupport) {
+                    DiskDump.logWarning("XDF diskette detected, experimental XDF output enabled");
+                    fXDFOutput = true;
+                }
+            }
+        }
+
+        /*
+         * Let's see if we can find a corresponding BPB in our table of default BPBs.
+         */
+        var i, iBPB = -1;
+        if (bMediaType) {
+            for (i = 0; i < DiskDump.aDefaultBPBs.length; i++) {
+                if (DiskDump.aDefaultBPBs[i][DiskAPI.BPB.MEDIA_TYPE] == bMediaType) {
+                    iBPB = i;
+                    break;
+                }
+            }
+        }
+        if (iBPB >= 0) {
+            if (fBPBExists) {
+                for (i = DiskAPI.BPB.SECTOR_BYTES; i < DiskAPI.BPB.LARGE_SECS; i++) {
+                    var bDefault = DiskDump.aDefaultBPBs[iBPB][i];
+                    var bActual = this.bufDisk.readUInt8(offBootSector + i);
+                    if (bDefault != bActual) {
+                        DiskDump.logWarning("BPB byte " + str.toHexByte(i) + " default (" + str.toHexByte(bDefault) + ") does not match actual byte: " + str.toHexByte(bActual));
+                    }
+                }
+            }
+            else if (bByte0 == X86.OPCODE.JMPS && bByte1 >= 0x22) {
+                /*
+                 * I'm going to stick my neck out here and slam a BPB into this disk image, since it doesn't appear
+                 * to have one, which should make it more "mountable" on modern operating systems.
+                 */
+                for (i = DiskAPI.BPB.SECTOR_BYTES; i < DiskAPI.BPB.LARGE_SECS+4; i++) {
+                    this.bufDisk.writeUInt8(DiskDump.aDefaultBPBs[iBPB][i] || 0, offBootSector + i);
+                }
+            }
+            else if (bByte0 == 0xF6 && bByte1 == 0xF6) {
+                /*
+                 * WARNING: I've added this "0xF6" hack expressly to fix boot sectors that may have been zapped by an
+                 * inadvertent reformat, or...?
+                 */
+                DiskDump.logWarning("repairing damaged boot sector with BPB for media type " + str.toHexByte(bMediaType));
+                for (i = 0; i < DiskAPI.BPB.LARGE_SECS+4; i++) {
+                    this.bufDisk.writeUInt8(DiskDump.aDefaultBPBs[iBPB][i] || 0, offBootSector + i);
+                }
+            }
+            else {
+                DiskDump.logWarning("unrecognized boot sector: " + str.toHexByte(bByte0) + "," + str.toHexByte(bByte1));
             }
         }
 
@@ -2711,6 +2820,14 @@ DiskDump.prototype.convertToJSON = function()
                         }
 
                         bufSector = bufTrack.slice(offSector, offSector + cbSectorThisTrack);
+
+                        if (bMediaType && !iCylinder && !iHead && iSector == 2) {
+                            var bFATType = bufSector.readUInt8(0);
+                            if (bMediaType != bFATType) {
+                                DiskDump.logWarning("wrong media type (" + str.toHexByte(bFATType) + ") in FAT, expected " + str.toHexByte(bMediaType));
+                            }
+                            bMediaType = 0;
+                        }
 
                         if (this.fJSONNative) {
                             sector['sector'] = nSector;
