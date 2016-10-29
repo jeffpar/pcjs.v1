@@ -152,6 +152,7 @@ function BusPDP11(parmsBus, cpu, dbg)
     this.aIOHandlers = [];
     this.fIOBreakAll = false;
     this.nDisableFaults = 0;
+    this.fFault = false;
 
     /*
      * Array of RESET notification handlers registered by Device components.
@@ -552,13 +553,11 @@ BusPDP11.prototype.reset = function()
 BusPDP11.prototype.unknownAccess = function(addr, fByte, data)
 {
     if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.WARN)) {
-        /*
-         * TODO: For 22-bit machines, let's display addr as a 3-byte value (for a total of 9 octal digits)
-         */
         this.dbg.printMessage("warning: unknown I/O access (" + this.dbg.toStrBase(addr) + "," + this.dbg.toStrBase(data, fByte?1:2) + ")", true, true);
         this.dbg.stopInstruction();
     }
     if (!this.nDisableFaults) {
+        this.cpu.regErr |= PDP11.CPUERR.TIMEOUT;
         this.cpu.trap(PDP11.TRAP.BUS_ERROR, addr);
     }
     return 0;
@@ -925,6 +924,7 @@ BusPDP11.prototype.getByte = function(addr)
  */
 BusPDP11.prototype.getByteDirect = function(addr)
 {
+    this.fFault = false;
     this.nDisableFaults++;
     var b = this.aMemBlocks[(addr & this.nBusMask) >>> this.nBlockShift].readByteDirect(addr & this.nBlockLimit, addr);
     this.nDisableFaults--;
@@ -962,6 +962,7 @@ BusPDP11.prototype.getWordDirect = function(addr)
     var w;
     var off = addr & this.nBlockLimit;
     var iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
+    this.fFault = false;
     this.nDisableFaults++;
     if (!PDP11.WORDBUS && off == this.nBlockLimit) {
         w = this.aMemBlocks[iBlock++].readByteDirect(off, addr) | (this.aMemBlocks[iBlock & this.nBlockMask].readByteDirect(0, addr + 1) << 8);
@@ -996,6 +997,7 @@ BusPDP11.prototype.setByte = function(addr, b)
  */
 BusPDP11.prototype.setByteDirect = function(addr, b)
 {
+    this.fFault = false;
     this.nDisableFaults++;
     this.aMemBlocks[(addr & this.nBusMask) >>> this.nBlockShift].writeByteDirect(addr & this.nBlockLimit, b & 0xff, addr);
     this.nDisableFaults--;
@@ -1034,6 +1036,7 @@ BusPDP11.prototype.setWordDirect = function(addr, w)
 {
     var off = addr & this.nBlockLimit;
     var iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
+    this.fFault = false;
     this.nDisableFaults++;
     if (!PDP11.WORDBUS && off == this.nBlockLimit) {
         this.aMemBlocks[iBlock++].writeByteDirect(off, w & 0xff, addr);
@@ -1272,6 +1275,22 @@ BusPDP11.prototype.fault = function(addr, access)
         }
         this.cpu.trap(PDP11.TRAP.BUS_ERROR, addr);
     }
+    this.fFault = true;
+};
+
+/**
+ * checkFault()
+ *
+ * This also serves as a clearFault() function.
+ *
+ * @this {BusPDP11}
+ * @return {boolean}
+ */
+BusPDP11.prototype.checkFault= function()
+{
+    var f = this.fFault;
+    this.fFault = false;
+    return f;
 };
 
 /**

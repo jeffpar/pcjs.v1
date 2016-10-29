@@ -93,7 +93,7 @@ function DiskPDP11(controller, drive, mode)
     this.drive = drive;
 
     /*
-     * We pull out a number of drive properties that we may or may not need as defaults
+     * We pull out a number of drive properties that we may or may not need as defaults.
      */
     this.sDiskName = drive.name;
     this.fRemovable = drive.fRemovable;
@@ -1230,4 +1230,4 @@ DiskPDP11.prototype.dumpSector = function(sector, pba, sDesc)
     return sDump;
 };
 
-if (NODE) module.exports = Disk;
+if (NODE) module.exports = DiskPDP11;

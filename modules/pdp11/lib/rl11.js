@@ -274,13 +274,13 @@ RL11.prototype.initBus = function(cmp, bus, cpu, dbg)
     }
 
     /*
-     * If we didn't need auto-mount support, we could defer controller initialization until we received a powerUp() notification,
-     * at which point reset() would call initController(), or restore() would restore the controller; in that case, all we'd need
-     * to do here is call setReady().
+     * If we didn't need auto-mount support, we could defer controller initialization until we received
+     * a powerUp() notification, at which point reset() would call initController(), or restore() would restore
+     * the controller; in that case, all we'd need to do here is call setReady().
      */
     this.initController();
 
-    this.triggerReaderInterrupt = this.cpu.addTrigger(PDP11.RL11.VEC, PDP11.RL11.PRI);
+    this.triggerInterrupt = this.cpu.addTrigger(PDP11.RL11.VEC, PDP11.RL11.PRI);
 
     bus.addIOTable(this, RL11.UNIBUS_IOTABLE);
 
@@ -417,29 +417,7 @@ RL11.prototype.save = function()
  */
 RL11.prototype.restore = function(data)
 {
-    return true;    // this.initController(data[0]);
-};
-
-/**
- * initController(data)
- *
- * @this {RL11}
- * @param {Array} [data]
- * @return {boolean} true if successful, false if failure
- */
-RL11.prototype.initController = function(data)
-{
-    var fSuccess = true;
-    for (var iDrive = 0; iDrive < this.aDrives.length; iDrive++) {
-        var drive = this.aDrives[iDrive];
-        if (drive === undefined) {
-            drive = this.aDrives[iDrive] = {};
-        }
-        if (!this.initDrive(drive, iDrive)) {
-            fSuccess = false;
-        }
-    }
-    return true;
+    return this.initController(data[0]);
 };
 
 /**
@@ -451,57 +429,6 @@ RL11.prototype.initController = function(data)
 RL11.prototype.saveController = function()
 {
     return [];
-};
-
-/**
- * initDrive(drive, iDrive, data)
- *
- * TODO: Consider a separate Drive class that any drive controller can use, since there's a lot of commonality
- * between the drive objects created by disk controllers.  This will clean up overall drive management and allow
- * us to factor out some common Drive methods.
- *
- * @this {RL11}
- * @param {Object} drive
- * @param {number} iDrive
- * @param {Array|undefined} [data]
- * @return {boolean} true if successful, false if failure
- */
-RL11.prototype.initDrive = function(drive, iDrive, data)
-{
-    var i = 0;
-    var fSuccess = true;
-
-    drive.iDrive = iDrive;
-    drive.fBusy = drive.fLocal = false;
-
-    drive.name = this.idComponent;
-    drive.nCylinders = 512;
-    drive.nHeads = 2;
-    drive.nSectors = 40;
-    drive.cbSector = 256;
-    drive.fRemovable = true;
-
-    /*
-     * The next group of properties are set by various controller command sequences.
-     */
-    drive.bHead = 0;
-    drive.bCylinderSeek = 0;
-    drive.bCylinder = 0;
-    drive.bSector = 1;
-    drive.bSectorEnd = drive.nSectors;      // aka EOT
-    drive.nBytes = drive.cbSector;
-
-    /*
-     * The next group of properties are managed by worker functions (eg, doRead()) to maintain state across DMA requests.
-     */
-    drive.ibSector = 0;
-    drive.sector = null;
-
-    if (!drive.disk) {
-        drive.sDiskPath = "";               // ensure this is initialized to a default that displayDisk() can deal with
-    }
-
-    return fSuccess;
 };
 
 /**
@@ -866,10 +793,446 @@ RL11.prototype.unloadAllDrives = function(fDiscard)
     }
 };
 
+/**
+ * initController(data)
+ *
+ * @this {RL11}
+ * @param {Array} [data]
+ * @return {boolean} true if successful, false if failure
+ */
+RL11.prototype.initController = function(data)
+{
+    var i = 0;
+    if (!data) data = [];
+    this.csr = data[i++] || 0;
+    this.bar = data[i++] || 0;
+    this.dar = data[i++] || 0;
+    this.darInternal = data[i++] || 0;
+    this.mpr = data[i++] || 0;
+    this.ber = data[i] || 0;
+
+    var fSuccess = true;
+    for (var iDrive = 0; iDrive < this.aDrives.length; iDrive++) {
+        var drive = this.aDrives[iDrive];
+        if (drive === undefined) {
+            drive = this.aDrives[iDrive] = {};
+        }
+        if (!this.initDrive(drive, iDrive)) {
+            fSuccess = false;
+        }
+    }
+    return fSuccess;
+};
+
+/**
+ * initDrive(drive, iDrive, data)
+ *
+ * TODO: Consider a separate Drive class that any drive controller can use, since there's a lot of commonality
+ * between the drive objects created by disk controllers.  This will clean up overall drive management and allow
+ * us to factor out some common Drive methods.
+ *
+ * @this {RL11}
+ * @param {Object} drive
+ * @param {number} iDrive
+ * @param {Array|undefined} [data]
+ * @return {boolean} true if successful, false if failure
+ */
+RL11.prototype.initDrive = function(drive, iDrive, data)
+{
+    var i = 0;
+    var fSuccess = true;
+
+    drive.iDrive = iDrive;
+    drive.fBusy = drive.fLocal = false;
+
+    drive.name = this.idComponent;
+    drive.nCylinders = 512;
+    drive.nHeads = 2;
+    drive.nSectors = 40;
+    drive.cbSector = 256;
+    drive.fRemovable = true;
+
+    /*
+     * The next group of properties are set by various controller command sequences.
+     */
+    drive.bHead = 0;
+    drive.bCylinderSeek = 0;
+    drive.bCylinder = 0;
+    drive.bSector = 1;
+    drive.bSectorEnd = drive.nSectors;      // aka EOT
+    drive.nBytes = drive.cbSector;
+
+    /*
+     * The next group of properties are managed by worker functions (eg, doRead()) to maintain state across DMA requests.
+     */
+    drive.ibSector = 0;
+    drive.sector = null;
+
+    if (!drive.disk) {
+        drive.sDiskPath = "";               // ensure this is initialized to a default that displayDisk() can deal with
+    }
+
+    /*
+     * Default drive status bits returned via the controller's Get Status command via the RLMP register
+     */
+    drive.status = PDP11.RL11.RLMP.GS_ST.LOCKON | PDP11.RL11.RLMP.GS_BH | PDP11.RL11.RLMP.GS_HO | (drive.nCylinders == 512? PDP11.RL11.RLMP.GS_DT : 0);
+
+    return fSuccess;
+};
+
+/**
+ * processCommand()
+ *
+ * @this {RL11}
+ */
+RL11.prototype.processCommand = function()
+{
+    var fnReadWrite;
+    var fInterrupt = true;
+    var iDrive = (this.csr & PDP11.RL11.RLCS.DS) >> PDP11.RL11.RLCS.SHIFT.DS;
+    var drive = this.aDrives[iDrive];
+    var iCylinder, iHead, iSector, nWords, addr;
+
+    /*
+     * The typical pattern of DRDY and CRDY:
+     *
+     *  1) Normally both set
+     *  2) CRDY is cleared to process a command
+     *  3) DRDY is cleared to command is in process
+     */
+    this.csr &= ~PDP11.RL11.RLCS.DRDY;
+
+    switch(this.csr & PDP11.RL11.RLCS.FUNC) {
+
+    case PDP11.RL11.FUNC.NOP:
+    case PDP11.RL11.FUNC.WCHK:
+    case PDP11.RL11.FUNC.RDNC:
+        break;
+
+    case PDP11.RL11.FUNC.STATUS:
+        if (this.dar & PDP11.RL11.RLDA.GS_RST) {
+            this.csr &= 0x3F;                                   // TODO: Review
+        }
+        this.mpr = drive.status | (this.darInternal & PDP11.RL11.RLDA.RW_HS);    // bit 6: Head Select, bit 7: Drive Type (1=RL02)
+        break;
+
+    case PDP11.RL11.FUNC.SEEK:
+        if ((this.dar & PDP11.RL11.RLDA.GS_CMD) == PDP11.RL11.RLDA.SEEK_CMD) {
+            var darCA = (this.dar & PDP11.RL11.RLDA.RW_CA);
+            var darHS = (this.dar & PDP11.RL11.RLDA.SEEK_HS) << 2;
+            if (this.dar & PDP11.RL11.RLDA.SEEK_DIR) {
+                this.darInternal += darCA;
+            } else {
+                this.darInternal -= darCA;
+            }
+            this.dar = this.darInternal = (this.darInternal & PDP11.RL11.RLDA.RW_CA) | darHS;
+        }
+        break;
+
+    case PDP11.RL11.FUNC.RHDR:
+        this.mpr = this.darInternal;
+        break;
+
+    case PDP11.RL11.FUNC.RDATA:
+        fnReadWrite = this.readData;
+        /* falls through */
+
+    case PDP11.RL11.FUNC.WDATA:
+        if (!fnReadWrite) fnReadWrite = this.writeData;
+        iCylinder = this.dar >> PDP11.RL11.RLDA.SHIFT.RW_CA;
+        iHead = (this.dar & PDP11.RL11.RLDA.RW_HS)? 0 : 1;
+        iSector = this.dar & PDP11.RL11.RLDA.RW_SA;
+        if (iCylinder >= drive.nCylinders || iSector >= drive.nSectors) {
+            this.csr |= PDP11.RL11.ERRC.HNF | PDP11.RL11.RLCS.ERR;
+            break;
+        }
+        addr = (((this.ber & PDP11.RL11.RLBE.MASK)) << 16) | this.bar;   // 22 bit mode
+        nWords = (0x10000 - this.mpr) & 0xffff;
+        fInterrupt = fnReadWrite.call(this, drive, iCylinder, iHead, iSector, nWords, addr, this.endReadWrite.bind(this));
+        break;
+
+    default:
+        break;
+    }
+
+    if (fInterrupt) {
+        this.csr |= PDP11.RL11.RLCS.DRDY | PDP11.RL11.RLCS.CRDY;
+        if (this.csr & PDP11.RL11.RLCS.IE) {
+            this.cpu.setTrigger(this.triggerInterrupt);
+        }
+    }
+};
+
+/**
+ * endReadWrite(err, iCylinder, iHead, iSector, nWords, addr)
+ *
+ * @this {RL11}
+ * @param {number} err
+ * @param {number} iCylinder
+ * @param {number} iHead
+ * @param {number} iSector
+ * @param {number} nWords
+ * @param {number} addr
+ * @return {boolean}
+ */
+RL11.prototype.endReadWrite = function(err, iCylinder, iHead, iSector, nWords, addr)
+{
+    this.bar = addr & 0xffff;
+    this.csr = (this.csr & ~PDP11.RL11.RLCS.BAE) | ((addr >> 12) & PDP11.RL11.RLCS.BAE);
+    this.ber = (addr >> 16) & PDP11.RL11.RLBE.MASK;         // 22 bit mode
+    this.dar = (iCylinder << PDP11.RL11.RLDA.SHIFT.RW_CA) | (iHead? PDP11.RL11.RLDA.RW_HS : 0) | (iSector & PDP11.RL11.RLDA.RW_SA);
+    this.darInternal = this.dar;
+    this.mpr = (0x10000 - nWords) & 0xffff;
+    if (err) {
+        this.csr |= err | PDP11.RL11.RLCS.ERR;
+    }
+    return true;
+};
+
+/**
+ * readData(drive, iCylinder, iHead, iSector, nWords, addr, done)
+ *
+ * @this {RL11}
+ * @param {Object} drive
+ * @param {number} iCylinder
+ * @param {number} iHead
+ * @param {number} iSector
+ * @param {number} nWords
+ * @param {number} addr
+ * @param {function(...)} done
+ * @return {boolean} true if complete, false if queued
+ */
+RL11.prototype.readData = function(drive, iCylinder, iHead, iSector, nWords, addr, done)
+{
+    var err = 0;
+    var disk = drive.disk;
+    var sector = null, ibSector;
+
+    while (nWords--) {
+        if (!sector) {
+            sector = drive.disk.seek(iCylinder, iHead, iSector, true);
+            if (!sector) {
+                err = PDP11.RL11.ERRC.HNF;
+                break;
+            }
+            ibSector = 0;
+        }
+        var b0, b1;
+        if ((b0 = drive.disk.read(sector, ibSector++)) < 0 || (b1 = drive.disk.read(sector, ibSector++)) < 0) {
+            err = PDP11.RL11.ERRC.HNF;
+            break;
+        }
+        var data = this.bus.setWordDirect(this.cpu.mapUnibus(addr), b0 | (b1 << 8));
+        if (this.bus.checkFault()) {
+            err = PDP11.RL11.ERRC.NXM;
+            break;
+        }
+        addr += 2;
+        if (ibSector >= disk.cbSector) {
+            sector = null;
+            if (++iSector >= disk.nSectors) {
+                iSector = 0;
+                if (++iHead >= disk.nHeads) {
+                    iHead = 0;
+                    if (++iCylinder >= disk.nCylinders) {
+                        err = PDP11.RL11.ERRC.HNF;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    return done(err, iCylinder, iHead, iSector, nWords, addr);
+};
+
+/**
+ * writeData(drive, iCylinder, iHead, iSector, nWords, addr, done)
+ *
+ * @this {RL11}
+ * @param {Object} drive
+ * @param {number} iCylinder
+ * @param {number} iHead
+ * @param {number} iSector
+ * @param {number} nWords
+ * @param {number} addr
+ * @param {function(...)} done
+ * @return {boolean} true if complete, false if queued
+ */
+RL11.prototype.writeData = function(drive, iCylinder, iHead, iSector, nWords, addr, done)
+{
+    var err = 0;
+    var disk = drive.disk;
+    var sector = null, ibSector;
+
+    while (nWords--) {
+        var data = this.bus.getWordDirect(this.cpu.mapUnibus(addr));
+        if (this.bus.checkFault()) {
+            err = PDP11.RL11.ERRC.NXM;
+            break;
+        }
+        addr += 2;
+        if (!sector) {
+            sector = drive.disk.seek(iCylinder, iHead, iSector, true);
+            if (!sector) {
+                err = PDP11.RL11.ERRC.HNF;
+                break;
+            }
+            ibSector = 0;
+        }
+        if (!drive.disk.write(sector, ibSector++, data & 0xff) || !drive.disk.write(sector, ibSector++, data >> 8)) {
+            err = PDP11.RL11.ERRC.HNF;
+            break;
+        }
+        if (ibSector >= disk.cbSector) {
+            sector = null;
+            if (++iSector >= disk.nSectors) {
+                iSector = 0;
+                if (++iHead >= disk.nHeads) {
+                    iHead = 0;
+                    if (++iCylinder >= disk.nCylinders) {
+                        err = PDP11.RL11.ERRC.HNF;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    return done(err, iCylinder, iHead, iSector, nWords, addr);
+};
+
+/**
+ * readRLCS(addr)
+ *
+ * @this {RL11}
+ * @param {number} addr (eg, PDP11.UNIBUS.RLCS or 174400)
+ * @return {number}
+ */
+RL11.prototype.readRLCS = function(addr)
+{
+    return this.csr & PDP11.RL11.RLCS.RMASK;
+};
+
+/**
+ * writeRLCS(data, addr)
+ *
+ * @this {RL11}
+ * @param {number} data
+ * @param {number} addr (eg, PDP11.UNIBUS.RLCS or 174400)
+ */
+RL11.prototype.writeRLCS = function(data, addr)
+{
+    this.csr = (this.csr & ~PDP11.RL11.RLCS.WMASK) | (data & PDP11.RL11.RLCS.WMASK);
+
+    this.bae = (this.bae & ~0x3) | ((data & PDP11.RL11.RLCS.BAE) >> 4);
+
+    if (!(this.csr & PDP11.RL11.RLCS.CRDY)) this.processCommand();
+};
+
+/**
+ * readRLBA(addr)
+ *
+ * @this {RL11}
+ * @param {number} addr (eg, PDP11.UNIBUS.RLBA or 174402)
+ * @return {number}
+ */
+RL11.prototype.readRLBA = function(addr)
+{
+    return this.bar;
+};
+
+/**
+ * writeRLBA(data, addr)
+ *
+ * @this {RL11}
+ * @param {number} data
+ * @param {number} addr (eg, PDP11.UNIBUS.RLBA or 174402)
+ */
+RL11.prototype.writeRLBA = function(data, addr)
+{
+    this.bar = data & PDP11.RL11.RLBA.WMASK;
+};
+
+/**
+ * readRLDA(addr)
+ *
+ * @this {RL11}
+ * @param {number} addr (eg, PDP11.UNIBUS.RLDA or 174404)
+ * @return {number}
+ */
+RL11.prototype.readRLDA = function(addr)
+{
+    return this.dar;
+};
+
+/**
+ * writeRLDA(data, addr)
+ *
+ * @this {RL11}
+ * @param {number} data
+ * @param {number} addr (eg, PDP11.UNIBUS.RLDA or 174404)
+ */
+RL11.prototype.writeRLDA = function(data, addr)
+{
+    this.dar = data;
+};
+
+/**
+ * readRLMP(addr)
+ *
+ * @this {RL11}
+ * @param {number} addr (eg, PDP11.UNIBUS.RLMP or 174406)
+ * @return {number}
+ */
+RL11.prototype.readRLMP = function(addr)
+{
+    return this.mpr;
+};
+
+/**
+ * writeRLMP(data, addr)
+ *
+ * @this {RL11}
+ * @param {number} data
+ * @param {number} addr (eg, PDP11.UNIBUS.RLMP or 174406)
+ */
+RL11.prototype.writeRLMP = function(data, addr)
+{
+    this.mpr = data;
+};
+
+/**
+ * readRLBE(addr)
+ *
+ * @this {RL11}
+ * @param {number} addr (eg, PDP11.UNIBUS.RLBE or 174410)
+ * @return {number}
+ */
+RL11.prototype.readRLBE = function(addr)
+{
+    return this.ber;
+};
+
+/**
+ * writeRLBE(data, addr)
+ *
+ * @this {RL11}
+ * @param {number} data
+ * @param {number} addr (eg, PDP11.UNIBUS.RLBE or 174410)
+ */
+RL11.prototype.writeRLBE = function(data, addr)
+{
+    this.ber = data & PDP11.RL11.RLBE.MASK;
+};
+
 /*
  * ES6 ALERT: As you can see below, I've finally started using computed property names.
  */
 RL11.UNIBUS_IOTABLE = {
+    [PDP11.UNIBUS.RLCS]:     /* 174400 */    [null, null, RL11.prototype.readRLCS,  RL11.prototype.writeRLCS,   "RLCS"],
+    [PDP11.UNIBUS.RLBA]:     /* 174402 */    [null, null, RL11.prototype.readRLBA,  RL11.prototype.writeRLBA,   "RLBA"],
+    [PDP11.UNIBUS.RLDA]:     /* 174404 */    [null, null, RL11.prototype.readRLDA,  RL11.prototype.writeRLDA,   "RLDA"],
+    [PDP11.UNIBUS.RLMP]:     /* 174406 */    [null, null, RL11.prototype.readRLMP,  RL11.prototype.writeRLMP,   "RLMP"],
+    [PDP11.UNIBUS.RLBE]:     /* 174410 */    [null, null, RL11.prototype.readRLBE,  RL11.prototype.writeRLBE,   "RLBE"]
 };
 
 if (NODE) module.exports = RL11;

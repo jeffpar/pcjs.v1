@@ -431,10 +431,11 @@ var PDP11 = {
 
         MMR3:       0o172516,   // 772516   17772516
 
-        RLCS:       0o174400,   //                                  RL11 Control Status
-        RLBA:       0o174402,   //                                  RL11 Bus Address
-        RLDA:       0o177404,   //                                  RL11 Disk Address
-        RLMP:       0o177406,   //                                  RL11 Multi-Purpose
+        RLCS:       0o174400,   //                                  RL11 Control Status Register
+        RLBA:       0o174402,   //                                  RL11 Bus Address Register
+        RLDA:       0o177404,   //                                  RL11 Disk Address Register
+        RLMP:       0o177406,   //                                  RL11 Multi-Purpose Register
+        RLBE:       0o177410,   //                                  RL11 Bus (Address) Extension Register (RLV12 controller only)
 
         LKS:        0o177546,   //                                  KW11-L Clock Status
 
@@ -618,6 +619,10 @@ var PDP11 = {
             SET:    0x0080,     // bits set on INIT (bit 7 is set)
             RMASK:  0xFFFF,     // no write-only bits
             WMASK:  0x03FE,     // bits writable
+            SHIFT: {
+                FUNC:   1,
+                DS:     8
+            }
         },
         RLBA: {                 // Bus Address Register (174402)
             WMASK:  0xFFFE      // bit 0 is effectively not writable (always zero)
@@ -634,20 +639,33 @@ var PDP11 = {
             RW_HS:      0x0040, // Head Select
             RW_CA:      0xFF80, // Cylinder Address (RL01 has 256 cylinders, RL02 has 512)
             GS_CMD:     0x0003, // Get Status: bit 0 must be set, bit 1 set, and bits 2 and 4-7 clear (bits 8-15 unused)
-            GS_RST:     0x0008  // Reset (when set, clears error register before sending status word to controller)
+            GS_RST:     0x0008, // Reset (when set, clears error register before sending status word to controller)
+            SHIFT: {
+                RW_HS:  6,
+                RW_CA:  7
+            }
         },
         /*
          * This register has 3 formats: one for Read Header, another for Read/Write, and a third for Get Status
          */
-        RLMP: {
-            GS_ST:      0x0007, // Major State Code
+        RLMP: {                 // Multi-Purpose Register (177406)
+            GS_ST: {            // Major State Code (of the drive)
+                LOADC:  0x0,    // Load Cartridge
+                SPINUP: 0x1,    // Spin-Up
+                BRUSHC: 0x2,    // Brush Cycle
+                LOADH:  0x3,    // Load Heads
+                SEEK:   0x4,    // Seek
+                LOCKON: 0x5,    // Lock On
+                UNLOADH:0x6,    // Unload Heads
+                SPINDN: 0x7     // Spin-Down
+            },
             GS_BH:      0x0008, // Brushes Home
             GS_HO:      0x0010, // Heads Out
             GS_CO:      0x0020, // Cover Open (or dust cover is not in place)
             GS_HS:      0x0040, // Head Selected (0 for upper head, 1 for lower head)
             GS_DT:      0x0080, // Drive Type (0 for RL01, 1 for RL02)
             GS_DSE:     0x0100, // Drive Select Error
-            GS_VC:      0x0200, // Volume Check
+            GS_VC:      0x0200, // Volume Check (Set during transition from a head load state to a head-on-track state; cleared by execution of a Get Status command with Bit 3 asserted)
             GS_WGE:     0x0400, // Write Gate Error
             GS_SPE:     0x0800, // Spin Error
             GS_SKTO:    0x1000, // Seek Time-Out
@@ -655,17 +673,10 @@ var PDP11 = {
             GS_CHE:     0x4000, // Current Head Error
             GS_WDE:     0x8000  // Write Data Error
         },
-        FUNC: {                 // NOTE: These function codes are pre-shifted to write directly into RLCS.FUNC
-            NOP:    0b0000,     // No-Op
-            WCHK:   0b0010,     // Write Check
-            STATUS: 0b0100,     // Get Status
-            SEEK:   0b0110,     // Seek
-            RHDR:   0b1000,     // Read Header
-            WDATA:  0b1010,     // Write Data
-            RDATA:  0b1100,     // Read Data
-            RDNC:   0b1110      // Read Data without Header Check
+        RLBE: {                 // Bus (Address) Extension Register (174410)
+            MASK:   0x003F      // bits 5-0 correspond to bus address bits 21-16
         },
-        ERRC: {                 // NOTE: These error codes are pre-shifted to read directly from RLCS.ERRC
+        ERRC: {                 // NOTE: These error codes are pre-shifted to read/write directly from/to RLCS.ERRC
             OPI:    0x0400,     // Operation Incomplete
             DCRC:   0x0800,     // Read Data CRC
             WCE:    0x0800,     // Write Check Error
@@ -674,6 +685,16 @@ var PDP11 = {
             HNF:    0x1400,     // Header Not Found
             NXM:    0x2000,     // Non-Existent Memory
             MPE:    0x2400      // Memory Parity Error (RLV12 only)
+        },
+        FUNC: {                 // NOTE: These function codes are pre-shifted to read/write directly from/to RLCS.FUNC
+            NOP:    0b0000,     // No-Op
+            WCHK:   0b0010,     // Write Check
+            STATUS: 0b0100,     // Get Status
+            SEEK:   0b0110,     // Seek
+            RHDR:   0b1000,     // Read Header
+            WDATA:  0b1010,     // Write Data
+            RDATA:  0b1100,     // Read Data
+            RDNC:   0b1110      // Read Data without Header Check
         }
     }
 };
