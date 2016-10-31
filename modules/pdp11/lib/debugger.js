@@ -1239,7 +1239,7 @@ if (DEBUGGER) {
     DebuggerPDP11.prototype.init = function(fAutoStart)
     {
         this.fInit = true;
-        this.println("Type ? for help with PDP11 Debugger commands");
+        this.println("Type ? for help with PDPjs Debugger commands");
         this.updateStatus();
         if (!fAutoStart) this.setFocus();
         if (this.sInitCommands) {

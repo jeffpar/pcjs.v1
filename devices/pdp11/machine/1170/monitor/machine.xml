@@ -9,5 +9,6 @@
 	<device id="default" type="default"/>
 	<serial id="dl11" adapter="0" binding="print"/>
 	<panel ref="/devices/pdp11/panel/test/terminal.xml"/>
+	<device ref="/devices/pdp11/pc11/default.xml"/>
 	<device ref="/devices/pdp11/rl11/default.xml"/>
 </machine>
