@@ -1,26 +1,26 @@
 ---
 layout: page
-title: PDP-11 Boot Test
-permalink: /apps/pdp11/boot/test/
+title: PDP-11 Boot Monitor
+permalink: /apps/pdp11/boot/monitor/
 redirect_from:
   - /devices/pdp11/rom/test/
 ---
 
-PDP-11 Boot Test
-----------------
+PDP-11 Boot Monitor
+-------------------
 
-[BOOTTEST.mac](BOOTTEST.mac) is based on [boot.mac](http://skn.noip.me/pdp11/boot.mac) written by
-[Paul Nankervis](mailto:paulnank@hotmail.com).  It is used with all our initial PDP-11 boot tests.
+[PDPJSMON.mac](PDPJSMON.mac) is a custom boot monitor/loader based on [boot.mac](http://skn.noip.me/pdp11/boot.mac) written by
+[Paul Nankervis](mailto:paulnank@hotmail.com).  It is used with all our PDP-11 test machines.
 
-[BOOTTEST.mac](BOOTTEST.mac) was cross-assembled with [MACRO11](https://github.com/shattered/macro11) to produce
-[BOOTTEST.lst](BOOTTEST.lst), which was then processed by [FileDump](/modules/filedump/) to produce
-[BOOTTEST.json](BOOTTEST.json).
+[PDPJSMON.mac](PDPJSMON.mac) was cross-assembled with [MACRO11](https://github.com/shattered/macro11) to produce
+[PDPJSMON.lst](PDPJSMON.lst), which was then processed by [FileDump](/modules/filedump/) to produce
+[PDPJSMON.json](PDPJSMON.json).
 
-To see the Boot Test in action, try the [PDP-11/70 Boot Test (with Debugger)](/devices/pdp11/machine/1170/test/debugger/).
+To see the Boot Monitor in action, try the [PDP-11/70 Boot Monitor (with Debugger)](/devices/pdp11/machine/1170/monitor/debugger/).
 
-The **BOOTTEST.mac** source code is shown below.
+The **PDPJSMON.mac** source code is shown below.
 
-	; BOOT LOADER CODE
+	; BOOT MONITOR
 	;
 	; REBASE HIGHER LINK/BOT:140000
 	; WANT PERFORMANCE COUNTER - CLOCK TICKS TO DO SOMETHING?
@@ -207,7 +207,8 @@ The **BOOTTEST.mac** source code is shown below.
 	        .ASCIZ  'HELP'
 	        .BYTE   0
 	UNKMSG: .ASCIZ  'UNKNOWN COMMAND'<12><15>
-	BANNER:	.ASCIZ	'PDP-11 BOOT TEST FOR PDPjs'<12><15>'ADAPTED FROM CODE BY PAUL NANKERVIS <PAULNANK@HOTMAIL.COM>'<12><15><12><15>
+	BANNER: .ASCIZ  'PDP-11 MONITOR V1.0'<12><15><12><15>
+	;        'ADAPTED FROM CODE BY PAUL NANKERVIS <PAULNANK@HOTMAIL.COM>'<12><15><12><15>
 	PROMPT: .ASCIZ  'BOOT> '
 	BADBOO: .ASCIZ  'UNKNOWN BOOT DEVICE'<12><15>
 	PERMSG: .ASCIZ  '      CLOCK TICKS'<12><15>

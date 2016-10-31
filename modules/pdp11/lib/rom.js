@@ -191,17 +191,17 @@ ROMPDP11.prototype.doneLoad = function(sURL, sData, nErrorCode)
 {
     if (nErrorCode) {
         this.notice("Unable to load ROM resource (error " + nErrorCode + ": " + sURL + ")");
-        return;
-    }
-
-    Component.addMachineResource(this.idMachine, sURL, sData);
-
-    var resource = web.parseMemoryResource(sURL, sData);
-    if (resource) {
-        this.abInit = resource.aBytes;
-        this.aSymbols = resource.aSymbols;
-    } else {
         this.sFilePath = null;
+    }
+    else {
+        Component.addMachineResource(this.idMachine, sURL, sData);
+        var resource = web.parseMemoryResource(sURL, sData);
+        if (resource) {
+            this.abInit = resource.aBytes;
+            this.aSymbols = resource.aSymbols;
+        } else {
+            this.sFilePath = null;
+        }
     }
     this.initROM();
 };

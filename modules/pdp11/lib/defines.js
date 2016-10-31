@@ -364,6 +364,7 @@ var PDP11 = {
      * For more details: https://github.com/google/closure-compiler/wiki/ECMAScript6
      */
     UNIBUS: {       //16-bit       18-bit     22-bit         Hex    Description
+        UNIMAP:     0o170200,   //                                  UNIBUS Mapping Registers (0-31) 64 words (ends at 0o170372)
         SISDR0:     0o172200,   //                                  Supervisor I Space Descriptor Register 0
         SISDR1:     0o172202,   //                                  Supervisor I Space Descriptor Register 1
         SISDR2:     0o172204,   //                                  Supervisor I Space Descriptor Register 2

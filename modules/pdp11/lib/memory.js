@@ -575,7 +575,9 @@ MemoryPDP11.prototype = {
      *
      * TODO: Determine if we should have separate readByteNone(), readWordNone() and readLongNone() functions
      * to return 0xff, 0xffff and 0xffffffff|0, respectively.  This seems sufficient for now, as it seems unlikely
-     * that a system would require nonexistent memory locations to return ALL bits set.
+     * that a system would require nonexistent memory locations to return ALL bits set.  However, another factor
+     * is whether or not ODDADDR faults take precedence over NOMEMORY faults; if they do, then we need separate
+     * interfaces.
      *
      * Also, I'm reluctant to address that potential issue by simply returning -1, because to date, the above
      * Memory interfaces have always returned values that are properly masked to 8, 16 or 32 bits, respectively.
@@ -590,7 +592,7 @@ MemoryPDP11.prototype = {
             this.dbg.printMessage("attempt to read invalid address " + this.dbg.toStrBase(addr), true);
             this.dbg.stopInstruction();
         }
-        this.bus.fault(addr, PDP11.ACCESS.READ);
+        this.bus.fault(addr, PDP11.CPUERR.NOMEMORY, PDP11.ACCESS.READ);
         return 0xff;
     },
     /**
@@ -606,7 +608,7 @@ MemoryPDP11.prototype = {
             this.dbg.printMessage("attempt to write " + this.dbg.toStrBase(v) + " to invalid addresses " + this.dbg.toStrBase(addr), true);
             this.dbg.stopInstruction();
         }
-        this.bus.fault(addr, PDP11.ACCESS.WRITE);
+        this.bus.fault(addr, PDP11.CPUERR.NOMEMORY, PDP11.ACCESS.WRITE);
     },
     /**
      * readWordDefault(off, addr)
@@ -655,7 +657,7 @@ MemoryPDP11.prototype = {
      */
     readWordMemory: function readWordMemory(off, addr) {
         if (PDP11.MEMFAULT && (off & 0x1)) {
-            this.bus.fault(addr, PDP11.ACCESS.READ_WORD);
+            this.bus.fault(addr, PDP11.CPUERR.ODDADDR, PDP11.ACCESS.READ_WORD);
         }
         if (BYTEARRAYS) {
             return this.ab[off] | (this.ab[off + 1] << 8);
@@ -699,7 +701,7 @@ MemoryPDP11.prototype = {
      */
     writeWordMemory: function writeWordMemory(off, w, addr) {
         if (PDP11.MEMFAULT && (off & 0x1)) {
-            this.bus.fault(addr, PDP11.ACCESS.WRITE_WORD);
+            this.bus.fault(addr, PDP11.CPUERR.ODDADDR, PDP11.ACCESS.WRITE_WORD);
         }
         if (BYTEARRAYS) {
             this.ab[off] = (w & 0xff);
@@ -809,7 +811,7 @@ MemoryPDP11.prototype = {
      */
     readWordBE: function readWordBE(off, addr) {
         if (PDP11.MEMFAULT && (off & 0x1)) {
-            this.bus.fault(addr, PDP11.ACCESS.READ_WORD);
+            this.bus.fault(addr, PDP11.CPUERR.ODDADDR, PDP11.ACCESS.READ_WORD);
         }
         return this.dv.getUint16(off, true);
     },
@@ -824,7 +826,7 @@ MemoryPDP11.prototype = {
     readWordLE: function readWordLE(off, addr) {
         var w;
         if (PDP11.MEMFAULT && (off & 0x1)) {
-            this.bus.fault(addr, PDP11.ACCESS.READ_WORD);
+            this.bus.fault(addr, PDP11.CPUERR.ODDADDR, PDP11.ACCESS.READ_WORD);
         }
         /*
          * TODO: For non-WORDBUS machines, it remains to be seen if there's any advantage to checking the offset
@@ -877,7 +879,7 @@ MemoryPDP11.prototype = {
      */
     writeWordBE: function writeWordBE(off, w, addr) {
         if (PDP11.MEMFAULT && (off & 0x1)) {
-            this.bus.fault(addr, PDP11.ACCESS.WRITE_WORD);
+            this.bus.fault(addr, PDP11.CPUERR.ODDADDR, PDP11.ACCESS.WRITE_WORD);
         }
         this.dv.setUint16(off, w, true);
         this.fDirty = true;
@@ -892,7 +894,7 @@ MemoryPDP11.prototype = {
      */
     writeWordLE: function writeWordLE(off, w, addr) {
         if (PDP11.MEMFAULT && (off & 0x1)) {
-            this.bus.fault(addr, PDP11.ACCESS.WRITE_WORD);
+            this.bus.fault(addr, PDP11.CPUERR.ODDADDR, PDP11.ACCESS.WRITE_WORD);
         }
         /*
          * TODO: For non-WORDBUS machines, it remains to be seen if there's any advantage to checking the offset

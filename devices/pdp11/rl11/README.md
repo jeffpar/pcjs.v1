@@ -9,7 +9,7 @@ RL11 Disk Controller
 
 Machines containing the [RL11 Component](/modules/pdp11/lib/pc11.js) include:
 
-- [PDP-11/70 Boot Test](/devices/pdp11/machine/1170/test/) (with [Debugger](/devices/pdp11/machine/1170/test/debugger/))
+- [PDP-11/70 Boot Monitor](/devices/pdp11/machine/1170/monitor/) (with [Debugger](/devices/pdp11/machine/1170/monitor/debugger/))
 - [PDP-11/70 with Front Panel](/devices/pdp11/machine/1170/panel/) (with [Debugger](/devices/pdp11/machine/1170/panel/debugger/))
 
 PCjs has archived a selection of [RL02K Disk Images](/disks/dec/rl02k/) for use by those machines, most of which are

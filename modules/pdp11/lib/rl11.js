@@ -856,7 +856,6 @@ RL11.prototype.initDrive = function(drive, iDrive, data)
      * The next group of properties are set by various controller command sequences.
      */
     drive.bHead = 0;
-    drive.bCylinderSeek = 0;
     drive.bCylinder = 0;
     drive.bSector = 1;
     drive.bSectorEnd = drive.nSectors;      // aka EOT
@@ -1010,7 +1009,7 @@ RL11.prototype.readData = function(drive, iCylinder, iHead, iSector, nWords, add
 
     while (nWords--) {
         if (!sector) {
-            sector = drive.disk.seek(iCylinder, iHead, iSector, true);
+            sector = drive.disk.seek(iCylinder, iHead, iSector + 1);
             if (!sector) {
                 err = PDP11.RL11.ERRC.HNF;
                 break;
@@ -1022,7 +1021,7 @@ RL11.prototype.readData = function(drive, iCylinder, iHead, iSector, nWords, add
             err = PDP11.RL11.ERRC.HNF;
             break;
         }
-        var data = this.bus.setWordDirect(this.cpu.mapUnibus(addr), b0 | (b1 << 8));
+        var data = this.bus.setWord(addr, b0 | (b1 << 8));
         if (this.bus.checkFault()) {
             err = PDP11.RL11.ERRC.NXM;
             break;
@@ -1065,14 +1064,14 @@ RL11.prototype.writeData = function(drive, iCylinder, iHead, iSector, nWords, ad
     var sector = null, ibSector;
 
     while (nWords--) {
-        var data = this.bus.getWordDirect(this.cpu.mapUnibus(addr));
+        var data = this.bus.getWord(addr);
         if (this.bus.checkFault()) {
             err = PDP11.RL11.ERRC.NXM;
             break;
         }
         addr += 2;
         if (!sector) {
-            sector = drive.disk.seek(iCylinder, iHead, iSector, true);
+            sector = drive.disk.seek(iCylinder, iHead, iSector + 1, true);
             if (!sector) {
                 err = PDP11.RL11.ERRC.HNF;
                 break;

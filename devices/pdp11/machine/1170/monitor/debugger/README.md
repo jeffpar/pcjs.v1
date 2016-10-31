@@ -1,7 +1,7 @@
 ---
 layout: page
-title: PDP-11/70 Boot Test with Debugger
-permalink: /devices/pdp11/machine/1170/test/debugger/
+title: PDP-11/70 Boot Monitor with Debugger
+permalink: /devices/pdp11/machine/1170/monitor/debugger/
 machines:
   - id: test1170
     type: pdp11

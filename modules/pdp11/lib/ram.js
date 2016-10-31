@@ -176,19 +176,19 @@ RAMPDP11.prototype.doneLoad = function(sURL, sData, nErrorCode)
 {
     if (nErrorCode) {
         this.notice("Unable to load RAM resource (error " + nErrorCode + ": " + sURL + ")");
-        return;
-    }
-
-    Component.addMachineResource(this.idMachine, sURL, sData);
-
-    var resource = web.parseMemoryResource(sURL, sData);
-    if (resource) {
-        this.abInit = resource.aBytes;
-        this.aSymbols = resource.aSymbols;
-        if (this.addrLoad == null) this.addrLoad = resource.addrLoad;
-        if (this.addrExec == null) this.addrExec = resource.addrExec;
-    } else {
         this.sFilePath = null;
+    }
+    else {
+        Component.addMachineResource(this.idMachine, sURL, sData);
+        var resource = web.parseMemoryResource(sURL, sData);
+        if (resource) {
+            this.abInit = resource.aBytes;
+            this.aSymbols = resource.aSymbols;
+            if (this.addrLoad == null) this.addrLoad = resource.addrLoad;
+            if (this.addrExec == null) this.addrExec = resource.addrExec;
+        } else {
+            this.sFilePath = null;
+        }
     }
     this.initRAM();
 };

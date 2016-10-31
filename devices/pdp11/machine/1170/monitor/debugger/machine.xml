@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href="/versions/pdpjs/1.30.2/machine.xsl"?>
 <machine id="test1170" class="pdp11" border="1" pos="center" background="#FAEBD7">
-	<name pos="center">PDP-11/70 Boot Test</name>
+	<name pos="center">PDP-11/70 Boot Monitor with Debugger</name>
 	<computer id="computer" busWidth="22"/>
-	<cpu id="cpu" model="1170" cycles="6666667" autoStart="true"/>
-	<ram id="ram" addr="0x0000" size="0xE000" file="/apps/pdp11/boot/test/BOOTTEST.json"/>
+	<cpu id="cpu" model="1170" cycles="6666667"/>
+	<ram id="ram" addr="0x0000" size="0xE000" file="/apps/pdp11/boot/monitor/PDPJSMON.json"/>
 	<ram id="ram" addr="0x10000" size="0x34000"/>
 	<device id="default" type="default"/>
 	<serial id="dl11" adapter="0" binding="print"/>
-	<panel ref="/devices/pdp11/panel/test/terminal.xml"/>
+	<panel ref="/devices/pdp11/panel/test/debugger/terminal.xml"/>
+	<debugger id="debugger" base="8" messages="" commands=""/>
 	<device ref="/devices/pdp11/rl11/default.xml"/>
 </machine>

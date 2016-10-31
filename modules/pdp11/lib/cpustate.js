@@ -200,7 +200,6 @@ CPUStatePDP11.prototype.initRegs = function()
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]    // user 3
     ];
     this.unibusMap = [          // 32 unibus map registers
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     ];
     this.regsControl = [        // various control registers (177740-177756) we don't really care about
@@ -242,10 +241,7 @@ CPUStatePDP11.prototype.resetRegs = function()
     this.regMMR3 = 0;           // 172516
     this.mmuEnable = 0;         // MMU enabled for PDP11.ACCESS.READ or PDP11.ACCESS.WRITE
     this.mmuLastMode = 0;
-
     this.mmuMask = 0x3ffff;
-    this.mmuMemorySize = BusPDP11.IOPAGE_18BIT;
-
     this.resetTriggers();
 
     if (this.bus) this.setMemoryAccess();
@@ -359,13 +355,7 @@ CPUStatePDP11.prototype.setMMR3 = function(newMMR3)
     }
     if (this.regMMR3 != newMMR3) {
         this.regMMR3 = newMMR3;
-        if (newMMR3 & PDP11.MMR3.MMU_22BIT) {
-            this.mmuMask = 0x3fffff;
-            this.mmuMemorySize = BusPDP11.MAX_MEMORY;
-        } else {
-            this.mmuMask = 0x3ffff;
-            this.mmuMemorySize = BusPDP11.IOPAGE_18BIT;
-        }
+        this.mmuMask = (newMMR3 & PDP11.MMR3.MMU_22BIT)? 0x3fffff : 0x3ffff;
         this.setMemoryAccess();
     }
 };
@@ -1242,24 +1232,45 @@ CPUStatePDP11.prototype.getTrapStatus = function()
 };
 
 /**
- * mapUnibus(unibusAddress)
+ * mapUnibus(addr)
+ *
+ * If bits 18-21 of addr are all set (which is implied by addr >= BusPDP11.IOPAGE_UNIBUS aka 0x3C0000),
+ * then we have a 22-bit address pointing to the top 256Kb range, so if the UNIBUS relocation map is enabled,
+ * we must pass the lower 18 bits of that address through the map.
+ *
+ * Since mapUnibus() only looks at the low 18 bits of addr, there's no need to mask addr first.  Note that
+ * if bits 13-17 are all set, then the 18-bit address points to the top 8Kb of its 256Kb range, and mapUnibus()
+ * will return addr unchanged, since it should already be pointing to the top 8Kb of the 4Mb 22-bit range.
+ *
+ * From the PDP-11/70 Handbook:
+ *
+ *      On the 11/44 and 11/70, there are a total of 31 mapping registers for address relocation.  Each register is
+ *      composed of a double 16-bit PDP-11 word (in consecutive locations) that holds the 22-bit base address.  These
+ *      registers have UNIBUS addresses in the range 770200 to 770372.
+ *
+ *      If the UNIBUS map relocation is not enabled, an incoming 18-bit UNIBUS address has 4 leading zeroes added for
+ *      referencing a 22-bit physical address. The lower 18 bits are the same. No relocation is performed.
+ *
+ *      If UNIBUS map relocation is enabled, the five high order bits of the UNIBUS address are used to select one of the
+ *      31 mapping registers.  The low-order 13 bits of the incoming address are used as an offset from the base address
+ *      contained in the 22-bit mapping register.  To form the physical address, the 13 low-order bits of the UNIBUS
+ *      address are added to 22 bits of the selected mapping register to produce the 22-bit physical address.  The lowest
+ *      order bit of all mapping registers is always a zero, since relocation is always on word boundaries.
  *
  * @this {CPUStatePDP11}
- * @param {number} unibusAddress
+ * @param {number} addr
  * @return {number}
  */
-CPUStatePDP11.prototype.mapUnibus = function(unibusAddress)
+CPUStatePDP11.prototype.mapUnibus = function(addr)
 {
-    var idx = (unibusAddress >> 13) & 0x1f;
+    var idx = (addr >> 13) & 0x1f;
     if (idx < 31) {
         if (this.regMMR3 & PDP11.MMR3.UNIBUS_MAP) {
-            unibusAddress = (this.unibusMap[idx] + (unibusAddress & 0x1ffe)) & 0x3ffffe;
-            if (unibusAddress >= BusPDP11.IOPAGE_UNIBUS && unibusAddress < BusPDP11.IOPAGE_22BIT) this.panic(898);
+            addr = (this.unibusMap[idx] + (addr & 0x1ffe)) & 0x3ffffe;
+            if (addr >= BusPDP11.IOPAGE_UNIBUS && addr < BusPDP11.IOPAGE_22BIT) this.panic(898);
         }
-    } else {
-        unibusAddress |= BusPDP11.IOPAGE_22BIT;
     }
-    return unibusAddress;
+    return addr;
 };
 
 /**
@@ -1287,8 +1298,8 @@ CPUStatePDP11.prototype.mapUnibus = function(unibusAddress)
  * A PDP 11/70 is different to other PDP 11's in that the highest 18 bit space (017000000 & above)
  * maps directly to UNIBUS space - including low memory. This doesn't appear to be particularly
  * useful as it restricts maximum system memory - although it does appear to allow software
- * testing of the unibus map. This feature also appears to confuse some OSes which test consecutive
- * memory locations to find maximum memory - and on a full memory system find themselves accessing
+ * testing of the unibus map.  This feature also appears to confuse some OSes which test consecutive
+ * memory locations to find maximum memory -- and on a full memory system find themselves accessing
  * low memory again at high addresses.
  *
  * 15 | 14 | 13 | 12 | 11 | 10 | 9 | 8 | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 MMR0
@@ -1318,26 +1329,6 @@ CPUStatePDP11.prototype.mapVirtualToPhysical = function(virtualAddress, accessFl
     pdr = this.mmuPDR[this.mmuMode][page];
     physicalAddress = ((this.mmuPAR[this.mmuMode][page] << 6) + (virtualAddress & 0x1fff)) & this.mmuMask;
 
-    if (physicalAddress < this.mmuMemorySize) {
-        if ((physicalAddress & 1) && !(accessFlags & PDP11.ACCESS.BYTE)) {
-            this.regErr |= PDP11.CPUERR.ODDADDR;
-            this.trap(PDP11.TRAP.BUS_ERROR, PDP11.REASON.ODDMEMADDR);
-        }
-    } else {
-        if (!(this.regMMR3 & 0x10)) {
-            if (physicalAddress >= BusPDP11.IOPAGE_18BIT) physicalAddress |= BusPDP11.IOPAGE_22BIT;
-        }
-        if (physicalAddress < BusPDP11.IOPAGE_22BIT) {
-            if (physicalAddress >= BusPDP11.IOPAGE_UNIBUS) {
-                physicalAddress = this.mapUnibus(physicalAddress & 0x3ffff);    // 18bit unibus space
-            }
-            if (physicalAddress >= this.mmuMemorySize && physicalAddress < BusPDP11.IOPAGE_22BIT) {
-                this.regErr |= PDP11.CPUERR.NOMEMORY;
-                this.trap(PDP11.TRAP.BUS_ERROR, PDP11.REASON.NOMEMORY);         // KB11-EM does this after ABORT handling - KB11-CM before
-            }
-        }
-    }
-
     switch (pdr & 0x7) {
     case 1:                         // read-only with trap
         errorMask = 0x1000;         // MMU trap
@@ -1365,18 +1356,19 @@ CPUStatePDP11.prototype.mapVirtualToPhysical = function(virtualAddress, accessFl
     }
 
     if ((pdr & 0x7f08) !== 0x7f00) { // skip checking most common case (hopefully)
-        if (pdr & 0x8) { // expand downwards
+        if (pdr & 0x8) {            // expand downwards
             if (pdr & 0x7f00) {
                 if ((virtualAddress & 0x1fc0) < ((pdr >> 2) & 0x1fc0)) {
                     errorMask |= 0x4000; // page length error abort
                 }
             }
-        } else { // expand upwards
+        } else {                    // expand upwards
             if ((virtualAddress & 0x1fc0) > ((pdr >> 2) & 0x1fc0)) {
                 errorMask |= 0x4000; // page length error abort
             }
         }
     }
+
     // aborts and traps: log FIRST trap and MOST RECENT abort
 
     this.mmuPDR[this.mmuMode][page] = pdr;
@@ -1384,13 +1376,15 @@ CPUStatePDP11.prototype.mapVirtualToPhysical = function(virtualAddress, accessFl
         this.mmuLastMode = this.mmuMode;
         this.mmuLastPage = page;
     }
+
+    var fTrap = false;
     if (errorMask) {
         if (errorMask & 0xe000) {
             if (this.trapPSW >= 0) errorMask |= 0x80; // Instruction complete
             if (!(this.regMMR0 & 0xe000)) {
                 this.regMMR0 |= errorMask | (this.mmuLastMode << 5) | (this.mmuLastPage << 1);
             }
-            this.trap(PDP11.TRAP.MMU, PDP11.REASON.MAPERROR);
+            fTrap = true;
         }
         if (!(this.regMMR0 & 0xf000)) {
             //if (physicalAddress < 017772200 || physicalAddress > 017777677) {
@@ -1400,6 +1394,9 @@ CPUStatePDP11.prototype.mapVirtualToPhysical = function(virtualAddress, accessFl
                     this.opFlags |= PDP11.OPFLAG.TRAP_MMU;
                 }
             }
+        }
+        if (fTrap) {                                    // don't trap until the end, because it throws an exception
+            this.trap(PDP11.TRAP.MMU, PDP11.REASON.MAPERROR);
         }
     }
     return physicalAddress;

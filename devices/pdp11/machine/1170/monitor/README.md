@@ -1,7 +1,7 @@
 ---
 layout: page
-title: PDP-11/70 Boot Test
-permalink: /devices/pdp11/machine/1170/test/
+title: PDP-11/70 Boot Monitor
+permalink: /devices/pdp11/machine/1170/monitor/
 machines:
   - id: test1170
     type: pdp11
