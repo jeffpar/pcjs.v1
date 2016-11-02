@@ -132,11 +132,19 @@
 .pcjs-tripled {
     padding: 1px;
 }
-.pcjs-tripled-label {
+.pcjs-ledlbl0 {
     text-align: right;
-    padding: 8px;
+    font-size: 50%;
+    background-color: #8d4076;
+}
+.pcjs-ledlbl1 {
+    text-align: right;
+    font-size: 50%;
+    background-color: #d83662;
 }
 .pcjs-ledpad {
+    text-align: center;
+    font-size: x-small;
     line-height: 32px;
     background-color: #000000;
 }
@@ -159,6 +167,25 @@
     text-align: center;
     vertical-align: middle;
     background-color: #ff0000;
+    max-width: 50%;
+    max-height: 50%;
+}
+.pcjs-swlbl {
+    text-align: center;
+    font-size: 40%;
+    line-height: 32px;
+    background-color: #000000;
+}
+.pcjs-swpad {
+    height: 32px;
+    background-color: #000000;
+}
+.pcjs-switch {
+    height: 10px;    
+    width: 28px;
+    margin-top: 0%;
+    max-width: 90%;
+    background-color: #00ff00;
 }
 .pcjs-screen {
     clear: both;

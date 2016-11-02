@@ -186,6 +186,7 @@ CPUPDP11.prototype.initBus = function(cmp, bus, cpu, dbg)
     this.cmp = cmp;
     this.bus = bus;
     this.dbg = dbg;
+    this.panel = cmp.panel;
 
     for (var i = 0; i < CPUPDP11.BUTTONS.length; i++) {
         var control = this.bindings[CPUPDP11.BUTTONS[i]];

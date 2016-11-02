@@ -450,7 +450,7 @@ var PDP11 = {
         XCSR:       0o177564,   //                                  Display Terminal: Transmitter Status Register
         XBUF:       0o177566,   //                                  Display Terminal: Transmitter Data Buffer Register
 
-        CNSL:       0o177570,   //                                  Console Switch and Front Panel Display
+        CNSW:       0o177570,   //                                  Console (Front Panel) Switch Register
 
         MMR0:       0o177572,   // 777572   17777572
         MMR1:       0o177574,   // 777574   17777574
