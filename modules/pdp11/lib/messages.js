@@ -35,6 +35,7 @@
 var MessagesPDP11 = {
     CPU:        0x00000001,
     TRAP:       0x00000010,
+    FAULT:      0x00000020,
     BUS:        0x00000040,
     MEMORY:     0x00000080,
     DEVICE:     0x00000100,
@@ -67,6 +68,7 @@ var MessagesPDP11 = {
 MessagesPDP11.CATEGORIES = {
     "cpu":      MessagesPDP11.CPU,
     "trap":     MessagesPDP11.TRAP,
+    "fault":    MessagesPDP11.FAULT,
     "bus":      MessagesPDP11.BUS,
     "memory":   MessagesPDP11.MEMORY,
     "device":   MessagesPDP11.DEVICE,

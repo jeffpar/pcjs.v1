@@ -310,7 +310,6 @@ CPUStatePDP11.prototype.setMMR0 = function(newMMR0)
             this.mmuEnable = mmuEnable;
             this.setMemoryAccess();
         }
-        if (this.panel) this.panel.updateStatus();
     }
 };
 
@@ -358,7 +357,6 @@ CPUStatePDP11.prototype.setMMR3 = function(newMMR3)
         this.regMMR3 = newMMR3;
         this.mmuMask = (newMMR3 & PDP11.MMR3.MMU_22BIT)? 0x3fffff : 0x3ffff;
         this.setMemoryAccess();
-        if (this.panel) this.panel.updateStatus();
     }
 };
 

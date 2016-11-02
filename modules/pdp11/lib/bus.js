@@ -117,14 +117,16 @@ function BusPDP11(parmsBus, cpu, dbg)
      * Memory access handlers must service the entire block; see the setAccess() function in the Memory
      * component for details.
      *
-     * Finally, for debugging purposes, if an I/O address has a symbolic name, it will be saved here:
+     * Finally, for debugging purposes, if an I/O address has a symbolic name and message category,
+     * they will be saved here:
      *
      *      [4]: symbolic name of I/O address
+     *      [5]: message category
      *
      * UPDATE: The Debugger wants to piggy-back on these arrays to indicate addresses for which it wants
      * notification.  In those cases, the following additional element will be set:
      *
-     *      [5]: true to break on I/O, false to ignore I/O
+     *      [6]: true to break on I/O, false to ignore I/O
      *
      * The false case is important if fIOBreakAll is set, because it allows the Debugger to selectively
      * ignore specific addresses.
@@ -183,7 +185,9 @@ BusPDP11.IOHANDLER = {
     WRITE_BYTE:         1,
     READ_WORD:          2,
     WRITE_WORD:         3,
-    NAME:               4
+    NAME:               4,
+    MSG_CATEGORY:       5,
+    DBG_BREAK:          6
 };
 
 /*
@@ -257,14 +261,14 @@ BusPDP11.IOController = {
             }
         }
         if (b >= 0) {
-            if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS)) {
+            if (DEBUGGER && this.dbg && this.dbg.messageEnabled(afn[BusPDP11.IOHANDLER.MSG_CATEGORY])) {
                 this.dbg.printMessage(afn[BusPDP11.IOHANDLER.NAME] + ".readByte(" + this.dbg.toStrBase(addr) + "): " + this.dbg.toStrBase(b), true, true);
             }
             return b;
         }
         bus.fault(addr, PDP11.CPUERR.TIMEOUT, PDP11.ACCESS.READ_BYTE);
         b = 0xff;
-        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS)) {
+        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(afn[BusPDP11.IOHANDLER.MSG_CATEGORY])) {
             this.dbg.printMessage("warning: unconverted read access to byte @" + this.dbg.toStrBase(addr) + ": " + this.dbg.toStrBase(b), true, true);
         }
         return b;
@@ -331,13 +335,13 @@ BusPDP11.IOController = {
             }
         }
         if (fWrite) {
-            if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS)) {
+            if (DEBUGGER && this.dbg && this.dbg.messageEnabled(afn[BusPDP11.IOHANDLER.MSG_CATEGORY])) {
                 this.dbg.printMessage(afn[BusPDP11.IOHANDLER.NAME] + ".writeByte(" + this.dbg.toStrBase(addr) + "," + this.dbg.toStrBase(b) + ")", true, true);
             }
             return;
         }
         bus.fault(addr, PDP11.CPUERR.TIMEOUT, PDP11.ACCESS.WRITE_BYTE);
-        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS)) {
+        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(afn[BusPDP11.IOHANDLER.MSG_CATEGORY])) {
             this.dbg.printMessage("warning: unconverted write access to byte @" + this.dbg.toStrBase(addr) + ": " + this.dbg.toStrBase(b), true, true);
         }
     },
@@ -363,14 +367,14 @@ BusPDP11.IOController = {
             }
         }
         if (w >= 0) {
-            if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS)) {
+            if (DEBUGGER && this.dbg && this.dbg.messageEnabled(afn[BusPDP11.IOHANDLER.MSG_CATEGORY])) {
                 this.dbg.printMessage(afn[BusPDP11.IOHANDLER.NAME] + ".readWord(" + this.dbg.toStrBase(addr) + "): " + this.dbg.toStrBase(w), true, true);
             }
             return w;
         }
         bus.fault(addr, PDP11.CPUERR.TIMEOUT, PDP11.ACCESS.READ_WORD);
         w = 0xffff;
-        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS)) {
+        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(afn[BusPDP11.IOHANDLER.MSG_CATEGORY])) {
             this.dbg.printMessage("warning: unconverted read access to word @" + this.dbg.toStrBase(addr) + ": " + this.dbg.toStrBase(w), true, true);
         }
         return w;
@@ -400,13 +404,13 @@ BusPDP11.IOController = {
             }
         }
         if (fWrite) {
-            if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS)) {
+            if (DEBUGGER && this.dbg && this.dbg.messageEnabled(afn[BusPDP11.IOHANDLER.MSG_CATEGORY])) {
                 this.dbg.printMessage(afn[BusPDP11.IOHANDLER.NAME] + ".writeWord(" + this.dbg.toStrBase(addr) + "," + this.dbg.toStrBase(w) + ")", true, true);
             }
             return;
         }
         bus.fault(addr, PDP11.CPUERR.TIMEOUT, PDP11.ACCESS.WRITE_WORD);
-        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS)) {
+        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(afn[BusPDP11.IOHANDLER.MSG_CATEGORY])) {
             this.dbg.printMessage("warning: unconverted write access to word @" + this.dbg.toStrBase(addr) + ": " + this.dbg.toStrBase(w), true, true);
         }
     }
@@ -1172,8 +1176,9 @@ BusPDP11.prototype.restoreMemory = function(a)
  * @param {function(number)|null|undefined} fnReadWord
  * @param {function(number,number)|null|undefined} fnWriteWord
  * @param {string} [sName]
+ * @param {number} [msgCategory]
  */
-BusPDP11.prototype.addIOHandlers = function(start, end, fnReadByte, fnWriteByte, fnReadWord, fnWriteWord, sName)
+BusPDP11.prototype.addIOHandlers = function(start, end, fnReadByte, fnWriteByte, fnReadWord, fnWriteWord, sName, msgCategory)
 {
     for (var addr = start; addr <= end; addr += 2) {
         var off = addr & BusPDP11.IOPAGE_MASK;
@@ -1181,21 +1186,22 @@ BusPDP11.prototype.addIOHandlers = function(start, end, fnReadByte, fnWriteByte,
             Component.warning("I/O address already registered: " + str.toHexLong(addr));
             continue;
         }
-        this.aIOHandlers[off] = [fnReadByte, fnWriteByte, fnReadWord, fnWriteWord, sName || "unknown", false];
+        this.aIOHandlers[off] = [fnReadByte, fnWriteByte, fnReadWord, fnWriteWord, sName || "unknown", msgCategory, false];
         if (MAXDEBUG) this.log("addIOHandlers(" + str.toHexLong(addr) + ")");
     }
 };
 
 /**
- * addIOTable(component, table)
+ * addIOTable(component, table, msgCategory)
  *
  * Add I/O notification handlers from the specified table (a batch version of addIOHandlers).
  *
  * @this {BusPDP11}
  * @param {Component} component
  * @param {Object} table
+ * @param {number} [msgCategory] (default is BUS)
  */
-BusPDP11.prototype.addIOTable = function(component, table)
+BusPDP11.prototype.addIOTable = function(component, table, msgCategory)
 {
     for (var port in table) {
         var addr = +port;
@@ -1237,7 +1243,7 @@ BusPDP11.prototype.addIOTable = function(component, table)
         var sReg = afn[4];
         for (var iReg = 0; iReg < nRegs; iReg++, addr += 2) {
             if (sReg && nRegs > 1) sReg = afn[4] + iReg;
-            this.addIOHandlers(addr, addr, fnReadByte, fnWriteByte, fnReadWord, fnWriteWord, sReg);
+            this.addIOHandlers(addr, addr, fnReadByte, fnWriteByte, fnReadWord, fnWriteWord, sReg, msgCategory || MessagesPDP11.BUS);
         }
     }
 };
@@ -1267,9 +1273,8 @@ BusPDP11.prototype.fault = function(addr, err, access)
 {
     this.fFault = true;
     if (!this.nDisableFaults) {
-        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS)) {
+        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.FAULT)) {
             this.dbg.printMessage("memory fault (" + access + ") on address " + this.dbg.toStrBase(addr), true, true);
-            this.dbg.stopInstruction();
         }
         if (err) this.cpu.regErr |= err;
         this.cpu.trap(PDP11.TRAP.BUS_ERROR, addr);

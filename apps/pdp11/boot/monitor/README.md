@@ -26,6 +26,7 @@ The **PDPJSMON.mac** source code is shown below.
 	; WANT PERFORMANCE COUNTER - CLOCK TICKS TO DO SOMETHING?
 	
 	PSW             =       177776
+	CNSW            =       177570
 	DL11XCSR        =       177564
 	DL11VEC         =       64
 	
@@ -50,7 +51,8 @@ The **PDPJSMON.mac** source code is shown below.
 	        MOV     SP,R0
 	        JSR     PC,INPUT
 	        CLR     R0
-	1$:     WAIT
+	1$:     MOV     R0,@#CNSW               ; UPDATE THE FRONT PANEL DATA DISPLAY WITH R0
+	        WAIT
 	        INC     R0
 	        TST     LGHTON
 	        BEQ     1$

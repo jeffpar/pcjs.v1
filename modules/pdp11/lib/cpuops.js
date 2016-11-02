@@ -1760,7 +1760,7 @@ PDP11.opWAIT = function(opCode)
         /*
          * Since here we're actually transitioning to WAIT, let's update the Panel's LEDs (well, OK, among other things).
          */
-        this.cmp.updateStatus();
+        if (this.cmp) this.cmp.updateStatus();
     }
     this.opFlags |= PDP11.OPFLAG.WAIT;
     this.advancePC(-2);

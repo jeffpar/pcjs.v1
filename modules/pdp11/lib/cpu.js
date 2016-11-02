@@ -186,7 +186,6 @@ CPUPDP11.prototype.initBus = function(cmp, bus, cpu, dbg)
     this.cmp = cmp;
     this.bus = bus;
     this.dbg = dbg;
-    this.panel = cmp.panel;
 
     for (var i = 0; i < CPUPDP11.BUTTONS.length; i++) {
         var control = this.bindings[CPUPDP11.BUTTONS[i]];
@@ -283,6 +282,9 @@ CPUPDP11.prototype.powerUp = function(data, fRepower)
      * is now responsible for managing a component's fPowered flag, not us.
      *
      *      this.flags.powered = true;
+     *
+     * And we don't have to worry whether this.cmp is set, because powerUp() handlers are never called
+     * before initBus() handlers.
      */
     this.cmp.updateStatus();
     return true;
@@ -1077,7 +1079,7 @@ CPUPDP11.prototype.runCPU = function()
             nCycles = this.endBurst(true);
 
             /*
-             * Add nCycles to nCyclesThisRun, as well as nRunCycles (the cycle count since the CPU first started).
+             * Add nCycles to nCyclesThisRun, as well as nRunCycles (the cycle count since the CPU started).
              */
             this.nCyclesThisRun += nCycles;
             this.nRunCycles += nCycles;
@@ -1207,7 +1209,7 @@ CPUPDP11.prototype.yieldCPU = function()
      * odd for those messages to show CPU state changes if the Control Panel, Video display, etc, does not,
      * so I've added this call to try to keep things looking synchronized.
      */
-    this.cmp.updateStatus();
+    if (this.cmp) this.cmp.updateStatus();
 };
 
 if (NODE) module.exports = CPUPDP11;

@@ -43,8 +43,8 @@ if (DEBUGGER) {
         var State         = require("../../shared/lib/state");
         var PDP11         = require("./defines");
         var CPUPDP11      = require("./cpu");
-        var MessagesPDP11 = require("./messages");
         var MemoryPDP11   = require("./memory");
+        var MessagesPDP11 = require("./messages");
     }
 }
 
@@ -1212,7 +1212,7 @@ if (DEBUGGER) {
         if (this.sMessagePrev && sMessage == this.sMessagePrev) return;
         this.sMessagePrev = sMessage;
 
-        if (this.bitsMessage & MessagesPDP11.HALT) {
+        if ((this.bitsMessage & MessagesPDP11.HALT) && this.cpu && this.cpu.isRunning()) {
             this.stopCPU();
             sMessage += " (cpu halted)";
         }
@@ -1334,7 +1334,7 @@ if (DEBUGGER) {
             nCycles = this.cpu.getBurstCycles(nCycles);
             var nCyclesStep = this.cpu.stepCPU(nCycles);
             if (nCyclesStep > 0) {
-                this.cpu.updateTimers(nCycles);
+                this.cpu.updateTimers(nCyclesStep);
                 this.nCycles += nCyclesStep;
                 this.cpu.addCycles(nCyclesStep, true);
                 this.cpu.updateChecksum(nCyclesStep);
@@ -1358,7 +1358,13 @@ if (DEBUGGER) {
          * and then update our own state.  Normally, the only time fUpdateStatus will be false is when doTrace()
          * is calling us in a loop, in which case it will perform its own updateStatus() when it's done.
          */
-        if (fUpdateStatus !== false) this.cmp.updateStatus();
+        if (fUpdateStatus !== false) {
+            /*
+             * Make an effort to keep any Front Panel in sync with us.
+             */
+            if (this.cmp.panel && this.cmp.panel.stop) this.cmp.panel.stop();
+            this.cmp.updateStatus();
+        }
 
         this.updateStatus(fRegs || false);
         return (this.nCycles > 0);
@@ -3660,6 +3666,7 @@ if (DEBUGGER) {
                  * with displayLiveRegs enabled, so once the repeat count has been exhausted, we must
                  * perform a final updateStatus().
                  */
+                if (dbg.cmp.panel && dbg.cmp.panel.stop) dbg.cmp.panel.stop();
                 dbg.cmp.updateStatus();
                 dbg.setBusy(false);
             }

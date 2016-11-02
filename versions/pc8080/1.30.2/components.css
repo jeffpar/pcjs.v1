@@ -124,8 +124,13 @@
     color: #ffffff;
     background-color: #404040;
 }
-.pcjs-tripled {
+.pcjs-triplet {
     padding: 1px;
+}
+.pcjs-ledlbl {
+    text-align: center;
+    font-size: 40%;
+    background-color: #000000;
 }
 .pcjs-ledlbl0 {
     text-align: right;
@@ -142,6 +147,8 @@
     font-size: x-small;
     line-height: 32px;
     background-color: #000000;
+    border-bottom-left-radius: 20%;
+    border-bottom-right-radius: 20%;
 }
 .pcjs-led {
     float: left;
@@ -168,8 +175,10 @@
 .pcjs-swlbl {
     text-align: center;
     font-size: 40%;
-    line-height: 32px;
+    line-height: 16px;
     background-color: #000000;
+    border-top-left-radius: 20%;
+    border-top-right-radius: 20%;
 }
 .pcjs-swpad {
     height: 32px;

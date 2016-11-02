@@ -55,16 +55,16 @@ function RL11(parms)
     Component.call(this, "RL11", parms, RL11, MessagesPDP11.DISK);
 
     /*
-     * We record any 'autoMount' object now, but we no longer parse it until initBus(), because the
-     * Computer's getMachineParm() service may have an override for us.
+     * We record any 'autoMount' object now, but we no longer parse it until initBus(),
+     * because the Computer's getMachineParm() service may have an override for us.
      */
     this.configMount = parms['autoMount'] || null;
     this.cAutoMount = 0;
 
     /*
-     * TODO: Make this configurable
+     * The RL11 has two Drive Select bits, representing up to four drives.
      */
-    this.nDrives = 1;
+    this.nDrives = 4;
     this.aDrives = new Array(this.nDrives);
 
     this.fLocalDisks = (!web.isMobile() && window && 'FileReader' in window);
@@ -282,7 +282,7 @@ RL11.prototype.initBus = function(cmp, bus, cpu, dbg)
 
     this.triggerInterrupt = this.cpu.addTrigger(PDP11.RL11.VEC, PDP11.RL11.PRI);
 
-    bus.addIOTable(this, RL11.UNIBUS_IOTABLE);
+    bus.addIOTable(this, RL11.UNIBUS_IOTABLE, MessagesPDP11.DISK);
 
     this.addDisk("None", RL11.SOURCE.NONE, true);
     if (this.fLocalDisks) this.addDisk("Local Disk", RL11.SOURCE.LOCAL);

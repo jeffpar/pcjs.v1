@@ -71,7 +71,7 @@ function PanelPDP11(parmsPanel)
      *
      * regAddr is an internal register containing the contents of the Front Panel's ADDRESS display,
      * and regData corresponds to the DATA display.  They are updated by setAddr() and setData(),
-     * which in turn take care of calling updateLEDArray().
+     * which in turn take care of calling setLEDArray().
      */
     this.regCNSW = 0;
     this.regAddr = this.regData = 0;
@@ -82,28 +82,28 @@ function PanelPDP11(parmsPanel)
      *
      *      0 if off, 1 if on
      *
-     * initBus() will call updateLEDs() to ensure that every LED is set to its initial value.
+     * initBus() will call displayLEDs() to ensure that every LED is set to its initial value.
      */
     this.leds = {};
 
     /*
      * Every switch has an array associated with it:
      *
-     *      [0]: initial/current value of switch (0 if down, 1 if up)
+     *      [0]: initial/current value of switch (0 if "down", 1 if "up")
      *      [1]: true if the switch is momentary, false if not
-     *      [2]: true if the switch is currently being pressed, false if not
+     *      [2]: true if the switch is currently pressed, false if released
      *      [3]: optional handler to call whenever the switch is pressed or released
      *      [4]: optional switch index (used with CNSW switches 'S0' through 'S21')
      *
-     * initBus() will call updateSwitches() to ensure that every switch is the position represented below.
+     * initBus() will call displaySwitches() to ensure that every switch is the position represented below.
      *
      * NOTE: Not all switches have the same "process" criteria.  For example, 'TEST' will perform a lamp test
-     * when it is momentarily pressed "up", whereas 'LOAD [ADRS]' will load the address register from the switch
+     * when it is momentarily pressed "up", whereas 'LOAD [ADRS]' will load the ADDRESS register from the SWITCH
      * register when it is momentarily pressed "down".
      *
-     * This means that processLampTest(value) must act when value == 1, whereas processLoadAddr(value) must
-     * act when value == 0.  You can infer all this from the table below, because the initial value of any
-     * momentary switch is its "passive" value, so the opposite is its "active" value.
+     * This means that processLampTest(value) must act when value == 1 ("up"), whereas processLoadAddr(value)
+     * must act when value == 0 ("down").  You can infer all this from the table below, because the initial value
+     * of any momentary switch is its "inactive" value, so the opposite is its "active" value.
      */
     this.switches = {
         'START':    [1, true,  false, this.processStart],
@@ -127,15 +127,21 @@ Component.subclass(PanelPDP11);
  *
  *      this.getSwitch(PanelPDP11.SWITCH.ENABLE)
  *
- * However, I haven't filled out this table, primarily because the only switches we need to query
- * are the non-momentary ones (eg, ENABLE and STEP), and EXAM and DEP (because they have special
- * "step" behavior when pressed more than once in a row).
+ * I haven't filled out this table, primarily it only needs to list switches we actually query
+ * (eg, non-momentary ones like 'ENABLE' and 'STEP', and 'EXAM' and 'DEP' since they have special
+ * "step" behavior when pressed more than once in a row).  Ditto for the LED table.
  */
 PanelPDP11.SWITCH = {
     DEP:    'DEP',
     ENABLE: 'ENABLE',
     EXAM:   'EXAM',
     STEP:   'STEP'
+};
+
+PanelPDP11.LED = {
+    B16:    'B16',
+    B18:    'B18',
+    B22:    'B22'
 };
 
 /**
@@ -275,8 +281,8 @@ PanelPDP11.prototype.initBus = function(cmp, bus, cpu, dbg)
     bus.addIOTable(this, PanelPDP11.UNIBUS_IOTABLE);
     bus.addResetHandler(this.reset.bind(this));
 
-    this.updateLEDs();
-    this.updateSwitches();
+    this.displayLEDs();
+    this.displaySwitches();
 };
 
 /**
@@ -301,7 +307,11 @@ PanelPDP11.prototype.powerUp = function(data, fRepower)
          * currently unnecessary, since we've added reset() to the addResetHandler() list.
          *
          *      this.reset();
+         *
+         * In the meantime, simulate a call to our stop() handler, to update the panel's ADDRESS register
+         * with the new PC.
          */
+        this.stop();
     }
     return true;
 };
@@ -320,7 +330,66 @@ PanelPDP11.prototype.powerDown = function(fSave, fShutdown)
 };
 
 /**
- * updateValue(sLabel, nValue, cch)
+ * displayLED(sBinding, value)
+ *
+ * @this {PanelPDP11}
+ * @param {string} sBinding
+ * @param {boolean|number} value (true or non-zero if the LED should be on, false or zero if off)
+ */
+PanelPDP11.prototype.displayLED = function(sBinding, value)
+{
+    var control = this.bindings[sBinding];
+    if (control) {
+        /*
+         * TODO: Add support for user-definable LED colors?
+         */
+        control.style.backgroundColor = (value? "#ff0000" : "#000000");
+    }
+};
+
+/**
+ * displayLEDs(override)
+ *
+ * @this {PanelPDP11}
+ * @param {boolean|number|null} [override] (true turn on all LEDs, false to turn off all LEDs, null or undefined for normal LED activity)
+ */
+PanelPDP11.prototype.displayLEDs = function(override)
+{
+    for (var sBinding in this.leds) {
+        this.displayLED(sBinding, override != null? override : this.leds[sBinding]);
+    }
+};
+
+/**
+ * displaySwitch(sBinding, value)
+ *
+ * @this {PanelPDP11}
+ * @param {string} sBinding
+ * @param {boolean|number} value (true if the switch should be "up" (on), false if "down" (off))
+ */
+PanelPDP11.prototype.displaySwitch = function(sBinding, value)
+{
+    var control = this.bindings[sBinding];
+    if (control) {
+        control.style.marginTop = (value? "0px" : "20px");
+        control.style.backgroundColor = (value? "#00ff00" : "#228B22");
+    }
+};
+
+/**
+ * displaySwitches()
+ *
+ * @this {PanelPDP11}
+ */
+PanelPDP11.prototype.displaySwitches = function()
+{
+    for (var sBinding in this.switches) {
+        this.displaySwitch(sBinding, this.switches[sBinding][0]);
+    }
+};
+
+/**
+ * displayValue(sLabel, nValue, cch)
  *
  * This is principally for displaying register values, but in reality, it can be used to display any
  * numeric value bound to the given label.
@@ -330,7 +399,7 @@ PanelPDP11.prototype.powerDown = function(fSave, fShutdown)
  * @param {number} nValue
  * @param {number} [cch]
  */
-PanelPDP11.prototype.updateValue = function(sLabel, nValue, cch)
+PanelPDP11.prototype.displayValue = function(sLabel, nValue, cch)
 {
     if (this.bindings[sLabel]) {
         if (nValue === undefined) {
@@ -355,69 +424,6 @@ PanelPDP11.prototype.updateValue = function(sLabel, nValue, cch)
 };
 
 /**
- * setLED(sBinding, value)
- *
- * @this {PanelPDP11}
- * @param {string} sBinding
- * @param {boolean|number} value (true if the LED should be on, false if off)
- */
-PanelPDP11.prototype.setLED = function(sBinding, value)
-{
-    var control = this.bindings[sBinding];
-    if (control) {
-        /*
-         * TODO: Add support for user-definable LED colors?
-         */
-        control.style.backgroundColor = (value? "#ff0000" : "#000000");
-    }
-};
-
-/**
- * updateLEDs(override)
- *
- * @this {PanelPDP11}
- * @param {boolean|number|null} [override] (true turn on all LEDs, false to turn off all LEDs, null or undefined for normal LED activity)
- */
-PanelPDP11.prototype.updateLEDs = function(override)
-{
-    for (var sBinding in this.leds) {
-        this.setLED(sBinding, override != null? override : this.leds[sBinding]);
-    }
-};
-
-/**
- * updateLEDArray(sPrefix, data, nLEDs)
- *
- * @this {PanelPDP11}
- * @param {string} sPrefix
- * @param {number} data
- * @param {number} nLEDs
- */
-PanelPDP11.prototype.updateLEDArray = function(sPrefix, data, nLEDs)
-{
-    for (var i = 0; i < nLEDs; i++) {
-        var sBinding = sPrefix + i;
-        this.setLED(sBinding, data & (1 << i));
-    }
-};
-
-/**
- * setSwitch(sBinding, value)
- *
- * @this {PanelPDP11}
- * @param {string} sBinding
- * @param {boolean|number} value (true if the switch should be "up" (on), false if "down" (off))
- */
-PanelPDP11.prototype.setSwitch = function(sBinding, value)
-{
-    var control = this.bindings[sBinding];
-    if (control) {
-        control.style.marginTop = (value? "0px" : "20px");
-        control.style.backgroundColor = (value? "#00ff00" : "#228B22");
-    }
-};
-
-/**
  * pressSwitch(sBinding)
  *
  * @this {PanelPDP11}
@@ -426,9 +432,22 @@ PanelPDP11.prototype.setSwitch = function(sBinding, value)
 PanelPDP11.prototype.pressSwitch = function(sBinding)
 {
     var sw = this.switches[sBinding];
-    this.setSwitch(sBinding, sw[0] = 1 - sw[0]);
+
+    /*
+     * Set the new switch value in sw[0] and then immediately display it
+     */
+    this.displaySwitch(sBinding, (sw[0] = 1 - sw[0]));
+
+    /*
+     * Mark the switch as "pressed"
+     */
     sw[2] = true;
+
+    /*
+     * Call the appropriate process handler with the current switch value (sw[0])
+     */
     if (sw[3]) sw[3].call(this, sw[0], sw[4]);
+
     this.fDeposit = (sBinding == PanelPDP11.SWITCH.DEP);
     this.fExamine = (sBinding == PanelPDP11.SWITCH.EXAM);
 };
@@ -448,13 +467,23 @@ PanelPDP11.prototype.releaseSwitch = function(sBinding)
      * we receive EITHER of those events AND the switch is marked momentary (sw[1]) AND the switch is pressed (sw[2]),
      * then we must flip the switch back to its original value.
      *
-     * Otherwise, the only thing we have to do is mark the switch as no longer "pressed" (ie, set sw[2] to false).
+     * Otherwise, the only thing we have to do is mark the switch as "released" (ie, set sw[2] to false).
      */
     var sw = this.switches[sBinding];
     if (sw[1] && sw[2]) {
-        this.setSwitch(sBinding, sw[0] = 1 - sw[0]);
+        /*
+         * Set the new switch value in sw[0] and then immediately display it
+         */
+        this.displaySwitch(sBinding, (sw[0] = 1 - sw[0]));
+
+        /*
+         * Call the appropriate process handler with the current switch value (sw[0])
+         */
         if (sw[3]) sw[3].call(this, sw[0], sw[4]);
     }
+    /*
+     * Mark the switch as "released"
+     */
     sw[2] = false;
 };
 
@@ -499,6 +528,10 @@ PanelPDP11.prototype.processStart = function(value, index)
  */
 PanelPDP11.prototype.processStep = function(value, index)
 {
+    /*
+     * There's really nothing for us to do here, because the normal press and release handlers
+     * already record the state of this switch, so it can be queried as needed, using getSwitch().
+     */
 };
 
 /**
@@ -532,20 +565,60 @@ PanelPDP11.prototype.processEnable = function(value, index)
 PanelPDP11.prototype.processContinue = function(value, index)
 {
     if (!value && !this.cpu.isRunning()) {
+        /*
+         * TODO: Technically, we're also supposed to check the 'STEP' switch to determine if we should
+         * step one instruction or just one cycle, but we don't currently have the ability to do the latter.
+         */
         if (!this.getSwitch(PanelPDP11.SWITCH.ENABLE)) {
             /*
-             * TODO: Technically, we're also supposed to check the 'STEP' switch to determine if we should
-             * step one instruction or just one cycle, but we don't currently have the ability to do the latter.
+             * Using the Debugger's stepCPU() function is more convenient, and has the pleasant side-effect
+             * of updating the debugger's display; however, not all machines with a Front Panel will necessarily
+             * also have the Debugger loaded.
              */
             var dbg = this.dbg;
             if (dbg && !dbg.isBusy(true)) {
                 dbg.setBusy(true);
                 dbg.stepCPU(0);
                 dbg.setBusy(false);
-            } else {
-                this.cpu.stepCPU(1);
-                this.updateStatus();
             }
+            else {
+                /*
+                 * For this tiny single-instruction burst, mimic what runCPU() does.
+                 */
+                try {
+                    var nCyclesStep = this.cpu.stepCPU(1);
+                    if (nCyclesStep > 0) {
+                        this.cpu.updateTimers(nCyclesStep);
+                        this.cpu.addCycles(nCyclesStep, true);
+                        this.cpu.updateChecksum(nCyclesStep);
+                    }
+                }
+                catch(exception) {
+                    /*
+                     * We assume that any numeric exception was explicitly thrown by the CPU to interrupt the
+                     * current instruction.  For all other exceptions, we attempt a stack dump.
+                     */
+                    if (typeof exception != "number") {
+                        var e = exception;
+                        this.cpu.setError(e.stack || e.message);
+                    }
+                }
+            }
+
+            /*
+             * Simulate a call to our stop() handler, to update the panel's ADDRESS register with the new PC.
+             */
+            this.stop();
+
+            /*
+             * Going through the normal channels (ie, the Computer's updateStatus() interface) ensures that ALL
+             * updateStatus() handlers will be called, including ours.
+             *
+             * NOTE: If we used the Debugger's stepCPU() function, then that includes a call to updateStatus();
+             * unfortunately, it will have happened BEFORE we called stop() to update the ADDRESS register, so we
+             * still need to call it again.
+             */
+            if (this.cmp) this.cmp.updateStatus();
         }
         else {
             this.cpu.startCPU();
@@ -610,7 +683,7 @@ PanelPDP11.prototype.processLoadAddr = function(value, index)
  */
 PanelPDP11.prototype.processLampTest = function(value, index)
 {
-    this.updateLEDs(value || null);
+    this.displayLEDs(value || null);
 };
 
 /**
@@ -639,7 +712,7 @@ PanelPDP11.prototype.processSwitchReg = function(value, index)
 PanelPDP11.prototype.setAddr = function(value)
 {
     this.regAddr = value & this.bus.nBusMask;
-    this.updateLEDArray("A", this.regAddr, 22);
+    this.setLEDArray("A", this.regAddr, 22);
     return this.regAddr;
 };
 
@@ -653,12 +726,63 @@ PanelPDP11.prototype.setAddr = function(value)
 PanelPDP11.prototype.setData = function(value)
 {
     this.regData = value & 0xffff;
-    this.updateLEDArray("D", this.regData, 16);
+    this.setLEDArray("D", this.regData, 16);
     return this.regData;
 };
 
 /**
+ * setLED(sBinding, value)
+ *
+ * @this {PanelPDP11}
+ * @param {string} sBinding
+ * @param {number} value
+ * @return {number}
+ */
+PanelPDP11.prototype.setLED = function(sBinding, value)
+{
+    this.leds[sBinding] = value;
+    if (!this.fLampTest) this.displayLED(sBinding, value);
+    return value;
+};
+
+/**
+ * setLEDArray(sPrefix, data, nLEDs)
+ *
+ * @this {PanelPDP11}
+ * @param {string} sPrefix
+ * @param {number} data
+ * @param {number} nLEDs
+ */
+PanelPDP11.prototype.setLEDArray = function(sPrefix, data, nLEDs)
+{
+    for (var i = 0; i < nLEDs; i++) {
+        var sBinding = sPrefix + i;
+        this.setLED(sBinding, data & (1 << i));
+    }
+};
+
+/**
+ * stop(ms, nCycles)
+ *
+ * This is a notification handler, called by the Computer, to inform us the CPU has now stopped.
+ *
+ * @this {PanelPDP11}
+ * @param {number} [ms]
+ * @param {number} [nCycles]
+ */
+PanelPDP11.prototype.stop = function(ms, nCycles)
+{
+    this.setAddr(this.cpu.regsGen[7]);
+    /*
+     * TODO: Consider an option to call setData() with the current opcode as well; presumably that wouldn't be
+     * normal Front Panel behavior, but it could be useful for debugging.
+     */
+};
+
+/**
  * updateStatus(fForce)
+ *
+ * Called by the Computer component at appropriate intervals to update any register displays, LEDs, etc.
  *
  * @this {PanelPDP11}
  * @param {boolean} [fForce] (true will display registers even if the CPU is running and "live" registers are not enabled)
@@ -668,36 +792,24 @@ PanelPDP11.prototype.updateStatus = function(fForce)
     if (this.cLiveRegs) {
         if (fForce || !this.cpu.isRunning() || this.fDisplayLiveRegs) {
             for (var i = 0; i < this.cpu.regsGen.length; i++) {
-                this.updateValue('R'+i, this.cpu.regsGen[i]);
+                this.displayValue('R'+i, this.cpu.regsGen[i]);
             }
             var regPSW = this.cpu.getPSW();
-            this.updateValue("PS", regPSW);
-            this.updateValue("NF", (regPSW & PDP11.PSW.NF)? 1 : 0, 1);
-            this.updateValue("ZF", (regPSW & PDP11.PSW.ZF)? 1 : 0, 1);
-            this.updateValue("VF", (regPSW & PDP11.PSW.VF)? 1 : 0, 1);
-            this.updateValue("CF", (regPSW & PDP11.PSW.CF)? 1 : 0, 1);
-            if (!this.fLampTest) {
-                this.setData(this.cpu.regsGen[0]);
-                this.setAddr(this.cpu.regsGen[7]);
-                /*
-                 * Set bit to 1 (22-bit), 2 (18-bit), or 4 (16-bit)
-                 */
-                var bit = this.cpu.mmuEnable? ((this.cpu.regMMR3 & PDP11.MMR3.MMU_22BIT)? 1 : 2) : 4;
-                // this.misc = (this.misc & ~7) | bit;
-            }
+            this.displayValue("PS", regPSW);
+            this.displayValue("NF", (regPSW & PDP11.PSW.NF)? 1 : 0, 1);
+            this.displayValue("ZF", (regPSW & PDP11.PSW.ZF)? 1 : 0, 1);
+            this.displayValue("VF", (regPSW & PDP11.PSW.VF)? 1 : 0, 1);
+            this.displayValue("CF", (regPSW & PDP11.PSW.CF)? 1 : 0, 1);
+            this.setLEDArray("D", this.regData, 16);
+            this.setLEDArray("A", this.regAddr, 22);
+            /*
+             * Set bit to 1 (22-bit), 2 (18-bit), or 4 (16-bit)
+             */
+            var bit = this.cpu.mmuEnable? ((this.cpu.regMMR3 & PDP11.MMR3.MMU_22BIT)? 1 : 2) : 4;
+            this.setLED(PanelPDP11.LED.B22, bit & 1);
+            this.setLED(PanelPDP11.LED.B18, bit & 2);
+            this.setLED(PanelPDP11.LED.B16, bit & 4);
         }
-    }
-};
-
-/**
- * updateSwitches()
- *
- * @this {PanelPDP11}
- */
-PanelPDP11.prototype.updateSwitches = function()
-{
-    for (var sBinding in this.switches) {
-        this.setSwitch(sBinding, this.switches[sBinding][0]);
     }
 };
 
