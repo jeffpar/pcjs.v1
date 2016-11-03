@@ -93,8 +93,8 @@ function BusPDP11(parmsBus, cpu, dbg)
      * For PDPjs machines, the ideal block size is 8Kb (IOPAGE_LENGTH), the size of the IOPAGE on all PDP-11 machines;
      * as a result, our IOController functions assume that all incoming offsets are within a single 8Kb block.
      */
-    this.addrTotal = Math.pow(2, this.nBusWidth);
-    this.nBusLimit = this.nBusMask = (this.addrTotal - 1) | 0;
+    this.addrTotal = 1 << this.nBusWidth;
+    this.nBusLimit = this.nBusMask = (this.addrTotal - 1);
     this.nBlockSize = BusPDP11.IOPAGE_LENGTH;
     this.nBlockShift = Math.log2(this.nBlockSize);      // ES6 ALERT (alternatively: Math.log(this.nBlockSize) / Math.LN2)
     this.nBlockLen = this.nBlockSize >> 2;
@@ -457,7 +457,9 @@ BusPDP11.prototype.setIOPageRange = function(nRange)
         }
         if (nRange) {
             this.nIOPageRange = nRange;
-            addr = (1 << nRange) - BusPDP11.IOPAGE_LENGTH;
+            addr = (1 << nRange);
+            this.nBusLimit = this.nBusMask = (addr - 1);
+            addr -= BusPDP11.IOPAGE_LENGTH;
             this.prevIOPageBlocks = this.getMemoryBlocks(addr, BusPDP11.IOPAGE_LENGTH);
             if (this.realIOPageBlocks) {
                 this.setMemoryBlocks(addr, BusPDP11.IOPAGE_LENGTH, this.realIOPageBlocks);

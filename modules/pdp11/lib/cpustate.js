@@ -1312,15 +1312,16 @@ CPUStatePDP11.prototype.mapUnibus = function(addr)
  */
 CPUStatePDP11.prototype.mapVirtualToPhysical = function(virtualAddress, accessFlags)
 {
-    var page, pdr, physicalAddress, errorMask = 0;
+    var page, pdr, physicalAddress;
+
+    this.assert(!(virtualAddress & ~0x1ffff) && accessFlags);
 
     /*
-     * Verify that 1) the incoming virtual address is within the 17-bit I/D range, 2) that
-     * accessFlags is properly set, and 3) that the MMU is enabled (because non-MMU code paths
-     * should no longer be going through this function; the Bus component is responsible for
-     * mapping physical addresses appropriately).
+     * This can happen when the DSTMODE (MAINT) bit of MMR0 is set but *not* the ENABLED bit.
      */
-    this.assert(!(virtualAddress & ~0x1ffff) && accessFlags && (accessFlags & this.mmuEnable));
+    if (!(accessFlags & this.mmuEnable)) {
+        return virtualAddress;
+    }
 
     this.mmuLastVirtual = virtualAddress;
 
@@ -1329,6 +1330,7 @@ CPUStatePDP11.prototype.mapVirtualToPhysical = function(virtualAddress, accessFl
     pdr = this.mmuPDR[this.mmuMode][page];
     physicalAddress = ((this.mmuPAR[this.mmuMode][page] << 6) + (virtualAddress & 0x1fff)) & this.mmuMask;
 
+    var errorMask = 0;
     switch (pdr & 0x7) {
     case 1:                         // read-only with trap
         errorMask = 0x1000;         // MMU trap

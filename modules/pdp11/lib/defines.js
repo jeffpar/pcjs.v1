@@ -316,7 +316,7 @@ var PDP11 = {
         PAGE_D:     0x0010,     // last fault occurred in D space
         PAGE_MODE:  0x0060,     // processor mode as of last fault
         COMPLETED:  0x0080,     // last instruction completed
-        DSTMODE:    0x0100,     // only destination mode references will be relocated (for diagnostic use)
+        DSTMODE:    0x0100,     // only destination mode references will be relocated (aka MAINT bit)
         MMU_TRAPS:  0x0200,     // enable MMU traps
         UNUSED:     0x0C00,
         TRAP_MMU:   0x1000,     // trap: MMU
