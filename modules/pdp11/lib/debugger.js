@@ -266,6 +266,7 @@ if (DEBUGGER) {
      * Register numbers 0-7 are reserved for cpu.regsGen, 8-15 are reserved for cpu.regsAlt, and 16-19 for cpu.regsStack.
      */
     DebuggerPDP11.REG_PSW       = 20;
+    DebuggerPDP11.REG_SW        = 21;
 
     /*
      * Operand type masks; anything that's not covered by OP_SRC or OP_DST must be a OP_OTHER value.
@@ -465,6 +466,7 @@ if (DEBUGGER) {
         this.bus = bus;
         this.cpu = cpu;
         this.cmp = cmp;
+        this.panel = cmp.panel;
 
         /*
          * Re-initialize Debugger message support if necessary
@@ -1125,6 +1127,9 @@ if (DEBUGGER) {
         case "PC":
             iReg = 7;
             break;
+        case "SW":
+            iReg = 21;
+            break;
         default:
             if (sReg.charAt(0) == "R") {
                 iReg = +sReg.charAt(1);
@@ -1139,7 +1144,7 @@ if (DEBUGGER) {
      * getRegName(iReg)
      *
      * @this {DebuggerPDP11}
-     * @param {number} iReg
+     * @param {number} iReg (0-7; not used for other registers)
      * @return {string}
      */
     DebuggerPDP11.prototype.getRegName = function(iReg)
@@ -1151,7 +1156,7 @@ if (DEBUGGER) {
      * getRegValue(iReg)
      *
      * Register numbers 0-7 are reserved for cpu.regsGen, 8-15 are reserved for cpu.regsAlt,
-     * 16-19 for cpu.regsAltStack, and 20 for regPSW.
+     * 16-19 for cpu.regsAltStack, 20 for regPSW, and 21 for regSW.
      *
      * @this {DebuggerPDP11}
      * @param {number} iReg
@@ -1172,6 +1177,9 @@ if (DEBUGGER) {
             }
             else if (iReg == DebuggerPDP11.REG_PSW) {
                 value = this.cpu.getPSW();
+            }
+            else if (iReg == DebuggerPDP11.REG_SW && this.panel && this.panel.hasSwitches()) {
+                value = this.panel.getSW();
             }
         }
         return value;
@@ -1362,7 +1370,7 @@ if (DEBUGGER) {
             /*
              * Make an effort to keep any Front Panel in sync with us.
              */
-            if (this.cmp.panel && this.cmp.panel.stop) this.cmp.panel.stop();
+            if (this.panel && this.panel.stop) this.panel.stop();
             this.cmp.updateStatus();
         }
 
@@ -2390,6 +2398,9 @@ if (DEBUGGER) {
         else if (iReg == DebuggerPDP11.REG_PSW) {
             sReg = "PS=" + this.toStrBase(cpu.getPSW());
         }
+        else if (iReg == DebuggerPDP11.REG_SW && this.panel && this.panel.hasSwitches()) {
+            sReg = "SW=" + this.toStrBase(this.panel.getSW(), 3);
+        }
         if (sReg) sReg += ' ';
         return sReg;
     };
@@ -2413,7 +2424,8 @@ if (DEBUGGER) {
             sDump += this.getRegOutput(i);
         }
         sDump += '\n';
-        sDump += this.getRegOutput(PDP11.REG.SP) + this.getRegOutput(PDP11.REG.PC) + this.getRegOutput(DebuggerPDP11.REG_PSW);
+        sDump += this.getRegOutput(PDP11.REG.SP) + this.getRegOutput(PDP11.REG.PC);
+        sDump += this.getRegOutput(DebuggerPDP11.REG_PSW) + this.getRegOutput(DebuggerPDP11.REG_SW);
         sDump += this.getFlagOutput('T') + this.getFlagOutput('N') + this.getFlagOutput('Z') + this.getFlagOutput('V') + this.getFlagOutput('C');
         return sDump;
     };
@@ -3406,6 +3418,12 @@ if (DEBUGGER) {
             case "C":
                 if (w) cpu.setCF(); else cpu.clearCF();
                 break;
+            case "SW":
+                if (this.panel && this.panel.hasSwitches()) {
+                    this.panel.setSW(w);
+                    break;
+                }
+                /* falls through */
             default:
                 if (sRegMatch.charAt(0) == 'R') {
                     var iReg = +sRegMatch.charAt(1);
@@ -3666,7 +3684,7 @@ if (DEBUGGER) {
                  * with displayLiveRegs enabled, so once the repeat count has been exhausted, we must
                  * perform a final updateStatus().
                  */
-                if (dbg.cmp.panel && dbg.cmp.panel.stop) dbg.cmp.panel.stop();
+                if (dbg.panel && dbg.panel.stop) dbg.panel.stop();
                 dbg.cmp.updateStatus();
                 dbg.setBusy(false);
             }

@@ -681,7 +681,7 @@ if (DEBUGGER) {
         var s;
         switch(this.nBase) {
         case 8:
-            s = str.toOct(n, nBytes * 3);
+            s = str.toOct(n, Math.round((8/3) * nBytes));
             break;
         case 10:
             s = n.toString();
