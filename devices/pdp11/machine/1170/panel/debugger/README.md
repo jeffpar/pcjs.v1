@@ -40,15 +40,16 @@ Chapter 4:
 	Load Address 300
 	Exam                Display = 070707 ... Relocation works
 
-With the PDPjs Debugger, the above "toggle-in" is more easily entered like so:
+With the PDPjs Debugger, the above "toggle-in" is easily entered with these commands:
 
 	e 200 012737 000400 177572 012737 070707 000200 000000
 	e 300 000300
 	e 17772300 077406
 	e 17772340 000001
 	r pc 200
+	g
 
-The "g" command should produce these results:
+which should produce these results:
 
 	>> e 200 012737 000400 177572 012737 070707 000200 000000
 	changing 000200 from 00000 to 12737
