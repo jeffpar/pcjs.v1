@@ -2867,8 +2867,8 @@ if (DEBUGGER) {
     /**
      * doDump(asArgs)
      *
-     * The length parameter is interpreted as a number of bytes (or words, or dwords) to dump, and it is
-     * interpreted using the current base.
+     * The length parameter is interpreted as a number of bytes (or words, or dwords) to dump,
+     * and it is interpreted using the current base.
      *
      * @this {DebuggerPDP11}
      * @param {Array.<string>} asArgs (formerly sCmd, [sAddr], [sLen] and [sBytes])
@@ -2941,7 +2941,7 @@ if (DEBUGGER) {
                     return;
                 }
             }
-            if (!sAddr) sCmd = this.sCmdDumpPrev || "db";
+            if (!sAddr) sCmd = this.sCmdDumpPrev || "dw";
         } else {
             this.sCmdDumpPrev = sCmd;
         }
@@ -2963,17 +2963,20 @@ if (DEBUGGER) {
             if (len > 0x10000) len = 0x10000;   // prevent bad user (or variable) input from producing excessive output
         }
 
-        var sDump = "";
-        var size = (sCmd == "dd"? 4 : (sCmd == "dw"? 2 : 1));
+        /*
+         * I've changed the code below to effectively make "dw" the default if only "d" is specified,
+         * since this is primarily a word-oriented machine.
+         */
+        var size = (sCmd == "dd"? 4 : (sCmd == "db"? 1 : 2));
         var nBytes = (size * len) || 128;
         var nLines = ((nBytes + 15) >> 4) || 1;
 
+        var sDump = "";
         while (nLines-- && nBytes > 0) {
-            var data = 0, shift = 0, i;
             var sData = "", sChars = "";
             sAddr = this.toStrAddr(dbgAddr);
             /*
-             * Dump 8 bytes per line when using base 8, and dump 16 bytes when using base 16 (or when dumping dwords).
+             * Dump 8 bytes per line when using base 8, and dump 16 bytes when using base 16.
              *
              * And while we used to always call getByte() and assemble them into words or dwords as appropriate, I've
              * changed the logic below to honor "dw" by calling getWord(), since the Bus interfaces have been updated
@@ -2981,8 +2984,10 @@ if (DEBUGGER) {
              *
              * Besides, it's nice for "db" and "dw" to generate the same Bus activity that typical byte and word reads do.
              */
-            for (i = (size == 4? 16 : this.nBase); i > 0 && nBytes > 0; i--) {
-                var n = 1;
+            var i, n;
+            var data = 0, shift = 0;
+            for (i = this.nBase; i > 0 && nBytes > 0; i -= n, nBytes -= n) {
+                n = 1;
                 var v = size == 1? this.getByte(dbgAddr, n) : this.getWord(dbgAddr, (n = 2));
                 data |= (v << (shift << 3));
                 shift += n;
@@ -2992,7 +2997,6 @@ if (DEBUGGER) {
                     data = shift = 0;
                 }
                 sChars += (v >= 32 && v < 128? String.fromCharCode(v) : '.');
-                nBytes -= n;
             }
             if (sDump) sDump += '\n';
             sDump += sAddr + "  " + sData + ((i == 0)? (' ' + sChars) : "");
@@ -3045,8 +3049,7 @@ if (DEBUGGER) {
             if (vNew & ~mask) {
                 this.println("warning: " + str.toHex(vNew) + " exceeds " + size + "-byte value");
             }
-            var vOld = fnGet.call(this, dbgAddr);
-            this.println("changing " + this.toStrAddr(dbgAddr) + " from " + this.toStrBase(vOld, size) + " to " + this.toStrBase(vNew, size));
+            this.println("changing " + this.toStrAddr(dbgAddr) + (this.messageEnabled(MessagesPDP11.BUS)? "" : (" from " + this.toStrBase(fnGet.call(this, dbgAddr), size))) + " to " + this.toStrBase(vNew, size));
             fnSet.call(this, dbgAddr, vNew, size);
         }
     };

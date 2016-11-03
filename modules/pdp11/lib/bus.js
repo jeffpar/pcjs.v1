@@ -262,14 +262,14 @@ BusPDP11.IOController = {
         }
         if (b >= 0) {
             if (DEBUGGER && this.dbg && this.dbg.messageEnabled(afn[BusPDP11.IOHANDLER.MSG_CATEGORY])) {
-                this.dbg.printMessage(afn[BusPDP11.IOHANDLER.NAME] + ".readByte(" + this.dbg.toStrBase(addr) + "): " + this.dbg.toStrBase(b), true, true);
+                this.dbg.printMessage(afn[BusPDP11.IOHANDLER.NAME] + ".readByte(" + this.dbg.toStrBase(addr) + "): " + this.dbg.toStrBase(b), true, !bus.nDisableFaults);
             }
             return b;
         }
         bus.fault(addr, PDP11.CPUERR.TIMEOUT, PDP11.ACCESS.READ_BYTE);
         b = 0xff;
         if (DEBUGGER && this.dbg && this.dbg.messageEnabled(afn[BusPDP11.IOHANDLER.MSG_CATEGORY])) {
-            this.dbg.printMessage("warning: unconverted read access to byte @" + this.dbg.toStrBase(addr) + ": " + this.dbg.toStrBase(b), true, true);
+            this.dbg.printMessage("warning: unconverted read access to byte @" + this.dbg.toStrBase(addr) + ": " + this.dbg.toStrBase(b), true, !bus.nDisableFaults);
         }
         return b;
     },
@@ -336,13 +336,13 @@ BusPDP11.IOController = {
         }
         if (fWrite) {
             if (DEBUGGER && this.dbg && this.dbg.messageEnabled(afn[BusPDP11.IOHANDLER.MSG_CATEGORY])) {
-                this.dbg.printMessage(afn[BusPDP11.IOHANDLER.NAME] + ".writeByte(" + this.dbg.toStrBase(addr) + "," + this.dbg.toStrBase(b) + ")", true, true);
+                this.dbg.printMessage(afn[BusPDP11.IOHANDLER.NAME] + ".writeByte(" + this.dbg.toStrBase(addr) + "," + this.dbg.toStrBase(b) + ")", true, !bus.nDisableFaults);
             }
             return;
         }
         bus.fault(addr, PDP11.CPUERR.TIMEOUT, PDP11.ACCESS.WRITE_BYTE);
         if (DEBUGGER && this.dbg && this.dbg.messageEnabled(afn[BusPDP11.IOHANDLER.MSG_CATEGORY])) {
-            this.dbg.printMessage("warning: unconverted write access to byte @" + this.dbg.toStrBase(addr) + ": " + this.dbg.toStrBase(b), true, true);
+            this.dbg.printMessage("warning: unconverted write access to byte @" + this.dbg.toStrBase(addr) + ": " + this.dbg.toStrBase(b), true, !bus.nDisableFaults);
         }
     },
 
@@ -368,14 +368,14 @@ BusPDP11.IOController = {
         }
         if (w >= 0) {
             if (DEBUGGER && this.dbg && this.dbg.messageEnabled(afn[BusPDP11.IOHANDLER.MSG_CATEGORY])) {
-                this.dbg.printMessage(afn[BusPDP11.IOHANDLER.NAME] + ".readWord(" + this.dbg.toStrBase(addr) + "): " + this.dbg.toStrBase(w), true, true);
+                this.dbg.printMessage(afn[BusPDP11.IOHANDLER.NAME] + ".readWord(" + this.dbg.toStrBase(addr) + "): " + this.dbg.toStrBase(w), true, !bus.nDisableFaults);
             }
             return w;
         }
         bus.fault(addr, PDP11.CPUERR.TIMEOUT, PDP11.ACCESS.READ_WORD);
         w = 0xffff;
         if (DEBUGGER && this.dbg && this.dbg.messageEnabled(afn[BusPDP11.IOHANDLER.MSG_CATEGORY])) {
-            this.dbg.printMessage("warning: unconverted read access to word @" + this.dbg.toStrBase(addr) + ": " + this.dbg.toStrBase(w), true, true);
+            this.dbg.printMessage("warning: unconverted read access to word @" + this.dbg.toStrBase(addr) + ": " + this.dbg.toStrBase(w), true, !bus.nDisableFaults);
         }
         return w;
     },
@@ -405,13 +405,13 @@ BusPDP11.IOController = {
         }
         if (fWrite) {
             if (DEBUGGER && this.dbg && this.dbg.messageEnabled(afn[BusPDP11.IOHANDLER.MSG_CATEGORY])) {
-                this.dbg.printMessage(afn[BusPDP11.IOHANDLER.NAME] + ".writeWord(" + this.dbg.toStrBase(addr) + "," + this.dbg.toStrBase(w) + ")", true, true);
+                this.dbg.printMessage(afn[BusPDP11.IOHANDLER.NAME] + ".writeWord(" + this.dbg.toStrBase(addr) + "," + this.dbg.toStrBase(w) + ")", true, !bus.nDisableFaults);
             }
             return;
         }
         bus.fault(addr, PDP11.CPUERR.TIMEOUT, PDP11.ACCESS.WRITE_WORD);
         if (DEBUGGER && this.dbg && this.dbg.messageEnabled(afn[BusPDP11.IOHANDLER.MSG_CATEGORY])) {
-            this.dbg.printMessage("warning: unconverted write access to word @" + this.dbg.toStrBase(addr) + ": " + this.dbg.toStrBase(w), true, true);
+            this.dbg.printMessage("warning: unconverted write access to word @" + this.dbg.toStrBase(addr) + ": " + this.dbg.toStrBase(w), true, !bus.nDisableFaults);
         }
     }
 };
@@ -896,6 +896,14 @@ BusPDP11.prototype.getByte = function(addr)
  */
 BusPDP11.prototype.getByteDirect = function(addr)
 {
+    /*
+     * If bits 18-21 of addr are all set (which is implied by addr >= BusPDP11.IOPAGE_UNIBUS aka 0x3C0000),
+     * then we have a 22-bit address pointing to the top 256Kb range, so we must pass the address through the
+     * UNIBUS relocation map.
+     */
+    if (addr >= BusPDP11.IOPAGE_UNIBUS) {
+        addr = this.cpu.mapUnibus(addr);
+    }
     this.fFault = false;
     this.nDisableFaults++;
     var b = this.aMemBlocks[(addr & this.nBusMask) >>> this.nBlockShift].readByteDirect(addr & this.nBlockLimit, addr);
@@ -939,6 +947,14 @@ BusPDP11.prototype.getWord = function(addr)
  */
 BusPDP11.prototype.getWordDirect = function(addr)
 {
+    /*
+     * If bits 18-21 of addr are all set (which is implied by addr >= BusPDP11.IOPAGE_UNIBUS aka 0x3C0000),
+     * then we have a 22-bit address pointing to the top 256Kb range, so we must pass the address through the
+     * UNIBUS relocation map.
+     */
+    if (addr >= BusPDP11.IOPAGE_UNIBUS) {
+        addr = this.cpu.mapUnibus(addr);
+    }
     var w;
     var off = addr & this.nBlockLimit;
     var iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
@@ -985,6 +1001,14 @@ BusPDP11.prototype.setByte = function(addr, b)
  */
 BusPDP11.prototype.setByteDirect = function(addr, b)
 {
+    /*
+     * If bits 18-21 of addr are all set (which is implied by addr >= BusPDP11.IOPAGE_UNIBUS aka 0x3C0000),
+     * then we have a 22-bit address pointing to the top 256Kb range, so we must pass the address through the
+     * UNIBUS relocation map.
+     */
+    if (addr >= BusPDP11.IOPAGE_UNIBUS) {
+        addr = this.cpu.mapUnibus(addr);
+    }
     this.fFault = false;
     this.nDisableFaults++;
     this.aMemBlocks[(addr & this.nBusMask) >>> this.nBlockShift].writeByteDirect(addr & this.nBlockLimit, b & 0xff, addr);
@@ -1030,6 +1054,14 @@ BusPDP11.prototype.setWord = function(addr, w)
  */
 BusPDP11.prototype.setWordDirect = function(addr, w)
 {
+    /*
+     * If bits 18-21 of addr are all set (which is implied by addr >= BusPDP11.IOPAGE_UNIBUS aka 0x3C0000),
+     * then we have a 22-bit address pointing to the top 256Kb range, so we must pass the address through the
+     * UNIBUS relocation map.
+     */
+    if (addr >= BusPDP11.IOPAGE_UNIBUS) {
+        addr = this.cpu.mapUnibus(addr);
+    }
     var off = addr & this.nBlockLimit;
     var iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
     this.fFault = false;

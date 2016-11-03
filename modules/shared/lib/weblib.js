@@ -202,9 +202,9 @@ web.getResource = function(sURL, dataPost, fAsync, done)
 
     if (DEBUG) {
         /*
-         * The larger resources that we put on archive.pcjs.org should also be available locally...
+         * The larger resources we put on archive.pcjs.org should also be available locally...
          */
-        sURL = sURL.replace("http://archive.pcjs.org", "");
+        sURL = sURL.replace(/^http:\/\/archive.pcjs.org(\/.*)\/([^\/]*)$/, "$1/archive/$2");
     }
 
     if (NODE) {

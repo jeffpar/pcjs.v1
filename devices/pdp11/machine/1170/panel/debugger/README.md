@@ -13,8 +13,8 @@ machines:
 Toggle-Ins
 ----------
 
-As DEC explains in its [PDP-11/70 Maintenance Service Guide](http://archive.pcjs.org/pubs/dec/pdp11/1170/PDP1170_Maintenance_Service_Guide_Apr88.pdf),
-Chapter 4: "There are several useful toggle-ins that are probably not very well known."  Excerpts are listed below.
+As DEC notes in the [PDP-11/70 Maintenance Service Guide](http://archive.pcjs.org/pubs/dec/pdp11/1170/PDP1170_Maintenance_Service_Guide_Apr88.pdf),
+Chapter 4: "There are several useful toggle-ins that are probably not very well known."  Excerpts are provided below.
 
 ### Memory Management
 
@@ -38,31 +38,32 @@ Chapter 4: "There are several useful toggle-ins that are probably not very well 
 	Load Address 300
 	Exam                Display = 070707 ... Relocation works
 
-With the PDPjs Debugger, the above "toggle-in" is easily entered with these commands:
+With the PDPjs Debugger, the above "toggle-in" is easily entered with the following commands (the semicolons are optional;
+they just make it easier to paste an entire set of commands into the Debugger at once):
 
-	e 200 012737 000400 177572 012737 070707 000200 000000
-	e 300 000300
-	e 17772300 077406
-	e 17772340 000001
-	r pc 200
+	e 200 012737 000400 177572 012737 070707 000200 000000;
+	e 300 000300;
+	e 17772300 077406;
+	e 17772340 000001;
+	r pc 200;
 	g
 
 which should produce these results:
 
 	>> e 200 012737 000400 177572 012737 070707 000200 000000
-	changing 000200 from 00000 to 12737
-	changing 000202 from 00000 to 00400
-	changing 000204 from 00000 to 77572
-	changing 000206 from 00000 to 12737
-	changing 000210 from 00000 to 70707
-	changing 000212 from 00000 to 00200
-	changing 000214 from 00000 to 00000
+	changing 000200 from 000000 to 012737
+	changing 000202 from 000000 to 000400
+	changing 000204 from 000000 to 177572
+	changing 000206 from 000000 to 012737
+	changing 000210 from 000000 to 070707
+	changing 000212 from 000000 to 000200
+	changing 000214 from 000000 to 000000
 	>> e 300 000300
-	changing 000300 from 00000 to 00300
+	changing 000300 from 000000 to 000300
 	>> e 17772300 077406
-	changing 00017772300 from 00000 to 77406
+	changing 00017772300 from 000000 to 077406
 	>> e 17772340 000001
-	changing 00017772340 from 00000 to 00001
+	changing 00017772340 from 000000 to 000001
 	>> r pc 200
 	updated registers:
 	R0=000000 R1=000000 R2=000000 R3=000000 R4=000000 R5=000000 
@@ -74,8 +75,12 @@ which should produce these results:
 	R0=000000 R1=000000 R2=000000 R3=000000 R4=000000 R5=000000 
 	SP=000000 PC=000214 PS=000001 SW=00000000 T0 N0 Z0 V0 C1 
 	000214: 000000                 HALT 
-	>> dw 300 l1
-	000300  70707  
+	>> d 300 l1
+	000300  070707  
+
+NOTE: By long-standing convention, all PCjs Debuggers use the "e" command to edit memory and the "d" command to dump
+memory.  Don't confuse those letters with the "EXAM" and "DEP" switches on the PDP-11 Front Panel, because they perform
+*opposite* operations.
 
 ### Unibus Map Checkout
 
@@ -85,7 +90,7 @@ which should produce these results:
 	Deposit             125252      Known Data
 	
 	Load Address        17000500
-	Deposit             125252      Data Path Ok
+	Examine             125252      Data Path Ok
 	
 	Load Address        17000700
 	Deposit             070707      Known Data
@@ -101,3 +106,190 @@ which should produce these results:
 	
 	Load address        17000500    Relocates to 700
 	Examine             070707      ... Relocated ok
+
+The above "toggle-in" can be performed with the PDPjs Debugger as follows:
+
+	e 500 125252;
+	d 17000500 l1;
+	e 17000700 070707;
+	e 17770202 000000;
+	e 17770200 000200;
+	e 17772516 40;
+	d 17000500 l1
+
+which should produce these results:
+
+	>> e 500 125252
+	changing 000500 from 000000 to 125252
+	>> d 17000500 l1
+	00017000500  125252  
+	>> e 17000700 070707
+	changing 00017000700 from 000000 to 070707
+	>> e 17770202 000000
+	changing 00017770202 from 000000 to 000000
+	>> e 17770200 000200
+	changing 00017770200 from 000000 to 000200
+	>> e 17772516 40
+	changing 00017772516 from 000000 to 000040
+	>> d 17000500 l1
+	00017000500  070707  
+
+If you also want to see all the hardware register activity, use the Debugger's "m bus on" command to turn bus messages on:
+
+	>> m bus on
+	messages on:  bus
+	>> e 500 125252
+	changing 000500 to 125252
+	>> d 17000500 l1
+	00017000500  125252  
+	>> e 17000700 070707
+	changing 00017000700 to 070707
+	>> e 17770202 000000
+	changing 00017770202 to 000000
+	UNIMAP1.writeWord(00017770202,000000)
+	>> e 17770200 000200
+	changing 00017770200 to 000200
+	UNIMAP0.writeWord(00017770200,000200)
+	>> e 17772516 40
+	changing 00017772516 to 000040
+	MMR3.writeWord(00017772516,000040)
+	>> d 17000500 l1
+	00017000500  070707  
+
+### Memory Clear Program
+
+	Use this toggle-in to clear all of memory from location 0 to system size.
+	
+	LOCATION        CONTENTS    INSTRUCTIONS & NOTES
+	
+	17772300        077406      KIPDR 0
+	17772316        077406      KIPDR 7 = I/O page for program
+	17772340        000000      KIPAR 0         ; Load 200 if using trap catchers
+	17772356        177600      KIPAR 7 = I/O page for program
+	17777700        000000      R0 = Start Virtual Address
+	17777701        172340      R1 = KIPAR 0 Address
+	17777702        177572      R2 = MMR0 Address
+	17777703        177760      R3 = System size register Address
+	17777704        172516      R4 = MMR3 Address
+	17777705        Pattern     R5 = Desired pattern or "0"
+	17777706        177676      R6 = Stack pointer
+	17777776        000000      PSW = 0
+	17772240        012714      MOV #20,(R4)    ; Enable 22-bit Mapping
+	17772242        000020      
+	17772244        005212      INC (R2)        ; Enable Memory Management      
+	17772246        010520  1$: MOV R5,(R0)+    ; Data to memory      
+	17772250        020027      CMP R0,#17776   ; Top of Page 0?
+	17772252        017776
+	17772254        003774      BLE 1$
+	17772256        062711      ADD #200,(R1)   ; Step Page
+	17772260        000200
+	17772262        021311      CMP (R3),(R1)   ; Top of Memory?
+	17772264        003402      BLE 2$
+	17772266        005000      CLR R0          ; Start at Virtual Address 0
+	17772270        000776      BR  1$
+	17772272        005312  2$: DEC (R2)        ; Disable Relocation
+	17772274        000000      HLT
+	
+	Load address    172240
+	Start
+
+The above "toggle-in" can be entered with the PDPjs Debugger as follows:
+
+	e 17772300 077406;
+	e 17772316 077406;
+	e 17772340 000000;
+	e 17772356 177600;
+	e 17777700 000000;
+	e 17777701 172340;
+	e 17777702 177572;
+	e 17777703 177760;
+	e 17777704 172516;
+	e 17777705 123123;
+	e 17777706 177676;
+	e 17777776 000000;
+	e 17772240 012714 000020 005212 010520 020027 017776 003774 062711;
+	e 17772260 000200 021311 003402 005000 000776 005312 000000;
+	r pc 172240
+
+which should produce the following results when bus messages are turned on ("m bus on"):
+
+	>> m bus on
+	messages on:  bus
+	>> e 17772300 077406
+	changing 00017772300 to 077406
+	KISDR0.writeWord(00017772300,077406)
+	>> e 17772316 077406
+	changing 00017772316 to 077406
+	KISDR7.writeWord(00017772316,077406)
+	>> e 17772340 000000
+	changing 00017772340 to 000000
+	KISAR0.writeWord(00017772340,000000)
+	>> e 17772356 177600
+	changing 00017772356 to 177600
+	KISAR7.writeWord(00017772356,177600)
+	>> e 17777700 000000
+	changing 00017777700 to 000000
+	R0SET0.writeWord(00017777700,000000)
+	>> e 17777701 172340
+	changing 00017777701 to 172340
+	R1SET0.writeWord(00017777701,172340)
+	>> e 17777702 177572
+	changing 00017777702 to 177572
+	R2SET0.writeWord(00017777702,177572)
+	>> e 17777703 177760
+	changing 00017777703 to 177760
+	R3SET0.writeWord(00017777703,177760)
+	>> e 17777704 172516
+	changing 00017777704 to 172516
+	R4SET0.writeWord(00017777704,172516)
+	>> e 17777705 123123
+	changing 00017777705 to 123123
+	R5SET0.writeWord(00017777705,123123)
+	>> e 17777706 177676
+	changing 00017777706 to 177676
+	R6KERNEL.writeWord(00017777706,177676)
+	>> e 17777776 000000
+	changing 00017777776 to 000000
+	PSW.writeWord(00017777776,000000)
+	>> e 17772240 012714 000020 005212 010520 020027 017776 003774 062711
+	changing 00017772240 to 012714
+	SISAR0.writeWord(00017772240,012714)
+	changing 00017772242 to 000020
+	SISAR1.writeWord(00017772242,000020)
+	changing 00017772244 to 005212
+	SISAR2.writeWord(00017772244,005212)
+	changing 00017772246 to 010520
+	SISAR3.writeWord(00017772246,010520)
+	changing 00017772250 to 020027
+	SISAR4.writeWord(00017772250,020027)
+	changing 00017772252 to 017776
+	SISAR5.writeWord(00017772252,017776)
+	changing 00017772254 to 003774
+	SISAR6.writeWord(00017772254,003774)
+	changing 00017772256 to 062711
+	SISAR7.writeWord(00017772256,062711)
+	>> e 17772260 000200 021311 003402 005000 000776 005312 000000
+	changing 00017772260 to 000200
+	SDSAR0.writeWord(00017772260,000200)
+	changing 00017772262 to 021311
+	SDSAR1.writeWord(00017772262,021311)
+	changing 00017772264 to 003402
+	SDSAR2.writeWord(00017772264,003402)
+	changing 00017772266 to 005000
+	SDSAR3.writeWord(00017772266,005000)
+	changing 00017772270 to 000776
+	SDSAR4.writeWord(00017772270,000776)
+	changing 00017772272 to 005312
+	SDSAR5.writeWord(00017772272,005312)
+	changing 00017772274 to 000000
+	SDSAR6.writeWord(00017772274,000000)
+	>> r pc 172240
+	updated registers:
+	R0=000000 R1=172340 R2=177572 R3=177760 R4=172516 R5=123123 
+	SP=177676 PC=172240 PS=000000 SW=00000000 T0 N0 Z0 V0 C0 
+	SISAR0.readWord(172240): 012714
+	SISAR1.readWord(172242): 000020
+	SISAR0.readWord(172240): 012714
+	SISAR1.readWord(172242): 000020
+	172240: 012714 000020          MOV   #20,@R4
+
