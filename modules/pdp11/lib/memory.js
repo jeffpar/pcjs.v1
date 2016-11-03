@@ -174,10 +174,9 @@ function MemoryPDP11(bus, addr, used, size, type, controller)
             a = this.ab = new Array(this.size);
         } else {
             /*
-             * NOTE: This is the default mode of operation (!TYPEDARRAYS && !BYTEARRAYS), because it
-             * seems to provide the best performance; and although in theory, that performance might
-             * come at twice the overhead of TYPEDARRAYS, it's increasingly likely that the JavaScript
-             * runtime will notice that all we ever store are 32-bit values, and optimize accordingly.
+             * NOTE: This used to be the default mode of operation (!TYPEDARRAYS && !BYTEARRAYS), because
+             * it seemed to provide the best performance; however, that was then, and this is now.  TYPEDARRAYS
+             * is more efficient.
              */
             a = this.adw = new Array(this.size >> 2);
         }
@@ -389,8 +388,8 @@ MemoryPDP11.prototype = {
      * zero(off, len)
      *
      * Zeros the block.  Supporting off and len parameters is probably overkill, and makes more
-     * work in the non-TYPEDARRAY, non-BYTEARRAY case, because there all we have is an array of DWORDs,
-     * but that's not the typical case.
+     * work in the non-TYPEDARRAY, non-BYTEARRAY case, but that's not the typical case.  The other
+     * exception is controller-based blocks, which may not have any array backing at all.
      *
      * @this {MemoryPDP11}
      * @param {number} [off] (optional starting byte offset within block)
@@ -404,7 +403,7 @@ MemoryPDP11.prototype = {
          */
         if (len === undefined) len = this.size;
         Component.assert(off >= 0 && off < this.size);
-        if (TYPEDARRAYS || BYTEARRAYS) {
+        if ((TYPEDARRAYS || BYTEARRAYS) && this.ab) {
             for (i = off; len-- && i < this.ab.length; i++) this.ab[i] = 0;
         } else {
             for (i = off; len-- && i < this.size; i++) this.writeByteDirect(off, 0, this.addr + off);

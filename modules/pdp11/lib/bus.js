@@ -80,8 +80,8 @@ function BusPDP11(parmsBus, cpu, dbg)
      * It is managed by setIOPageRange().  reset() establishes the default (16).
      */
     this.nIOPageRange = 0;                  // zero means no IOPAGE access (yet)
-    this.prevIOPageBlocks = [];             // this saves any memory blocks we had to replace with IOPAGE blocks
-    this.realIOPageBlocks = null;           // this saves the memory blocks allocated for IOPAGE, so we can reuse them
+    this.aIOPrevBlocks = [];                // this saves any previous blocks we had to replace with IOPAGE blocks
+    this.aIOPageBlocks = null;              // this saves the memory blocks allocated for IOPAGE, so we can reuse them
 
     /*
      * Compute all BusPDP11 memory block parameters now, based on the width of the bus.
@@ -452,7 +452,7 @@ BusPDP11.prototype.setIOPageRange = function(nRange)
         var addr;
         if (this.nIOPageRange) {
             addr = (1 << this.nIOPageRange) - BusPDP11.IOPAGE_LENGTH;
-            this.setMemoryBlocks(addr, BusPDP11.IOPAGE_LENGTH, this.prevIOPageBlocks);
+            this.setMemoryBlocks(addr, BusPDP11.IOPAGE_LENGTH, this.aIOPrevBlocks);
             this.nIOPageRange = 0;
         }
         if (nRange) {
@@ -460,12 +460,12 @@ BusPDP11.prototype.setIOPageRange = function(nRange)
             addr = (1 << nRange);
             this.nBusLimit = this.nBusMask = (addr - 1);
             addr -= BusPDP11.IOPAGE_LENGTH;
-            this.prevIOPageBlocks = this.getMemoryBlocks(addr, BusPDP11.IOPAGE_LENGTH);
-            if (this.realIOPageBlocks) {
-                this.setMemoryBlocks(addr, BusPDP11.IOPAGE_LENGTH, this.realIOPageBlocks);
+            this.aIOPrevBlocks = this.getMemoryBlocks(addr, BusPDP11.IOPAGE_LENGTH);
+            if (this.aIOPageBlocks) {
+                this.setMemoryBlocks(addr, BusPDP11.IOPAGE_LENGTH, this.aIOPageBlocks);
             } else {
                 this.addMemory(addr, BusPDP11.IOPAGE_LENGTH, MemoryPDP11.TYPE.CONTROLLER, this);
-                this.realIOPageBlocks = this.getMemoryBlocks(addr, BusPDP11.IOPAGE_LENGTH);
+                this.aIOPageBlocks = this.getMemoryBlocks(addr, BusPDP11.IOPAGE_LENGTH);
             }
         }
     }
@@ -675,7 +675,14 @@ BusPDP11.prototype.zeroMemory = function(addr, size)
     var off = addr & this.nBlockLimit;
     var iBlock = addr >>> this.nBlockShift;
     while (size > 0 && iBlock < this.aMemBlocks.length) {
-        this.aMemBlocks[iBlock].zero(off, size);
+        var block = this.aMemBlocks[iBlock];
+        if (block.controller) {
+            if (this.aIOPageBlocks && this.aIOPageBlocks.length == this.aIOPrevBlocks.length) {
+                var i = this.aIOPageBlocks.indexOf(block);
+                if (i >= 0) block = this.aIOPrevBlocks[i];
+            }
+        }
+        if (block) block.zero(off, size);
         size -= this.nBlockSize;
         iBlock++;
         off = 0;
