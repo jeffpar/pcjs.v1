@@ -385,7 +385,7 @@ MemoryPDP11.prototype = {
         return false;
     },
     /**
-     * zero(off, len)
+     * zero(off, len, pattern)
      *
      * Zeros the block.  Supporting off and len parameters is probably overkill, and makes more
      * work in the non-TYPEDARRAY, non-BYTEARRAY case, but that's not the typical case.  The other
@@ -394,19 +394,21 @@ MemoryPDP11.prototype = {
      * @this {MemoryPDP11}
      * @param {number} [off] (optional starting byte offset within block)
      * @param {number} [len] (optional maximum number of bytes; default is the entire block)
+     * @param {number} [pattern]
      */
-    zero: function(off, len) {
+    zero: function(off, len, pattern) {
         var i;
         off = off || 0;
+        pattern &= 0xff;
         /*
          * NOTE: If len happens to be larger than the block, that's OK, because we also bounds-check the index.
          */
         if (len === undefined) len = this.size;
         Component.assert(off >= 0 && off < this.size);
         if ((TYPEDARRAYS || BYTEARRAYS) && this.ab) {
-            for (i = off; len-- && i < this.ab.length; i++) this.ab[i] = 0;
+            for (i = off; len-- && i < this.ab.length; i++) this.ab[i] = pattern;
         } else {
-            for (i = off; len-- && i < this.size; i++) this.writeByteDirect(off, 0, this.addr + off);
+            for (i = off; len-- && i < this.size; i++) this.writeByteDirect(off, pattern, this.addr + off);
         }
     },
     /**

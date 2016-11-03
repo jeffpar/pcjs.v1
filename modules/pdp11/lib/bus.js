@@ -664,13 +664,14 @@ BusPDP11.prototype.cleanMemory = function(addr, size)
 };
 
 /**
- * zeroMemory(addr, size)
+ * zeroMemory(addr, size, pattern)
  *
  * @this {BusPDP11}
  * @param {number} addr
  * @param {number} size
+ * @param {number} [pattern]
  */
-BusPDP11.prototype.zeroMemory = function(addr, size)
+BusPDP11.prototype.zeroMemory = function(addr, size, pattern)
 {
     var off = addr & this.nBlockLimit;
     var iBlock = addr >>> this.nBlockShift;
@@ -682,7 +683,7 @@ BusPDP11.prototype.zeroMemory = function(addr, size)
                 if (i >= 0) block = this.aIOPrevBlocks[i];
             }
         }
-        if (block) block.zero(off, size);
+        if (block) block.zero(off, size, pattern);
         size -= this.nBlockSize;
         iBlock++;
         off = 0;
