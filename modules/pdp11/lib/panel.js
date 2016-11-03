@@ -63,12 +63,16 @@ function PanelPDP11(parmsPanel)
     this.fDisplayLiveRegs = true;
 
     /*
-     * regSwitches contains the Console (Front Panel) Switch Register, which is also available as a
-     * read-only register at 177570 (but only the low 16 bits).
+     * regSwitches contains the Front Panel (aka Console) 'SWITCH' register, which is also available
+     * as a read-only register at 177570 (but only the low 16 bits).
      *
-     * regAddr is an internal register containing the contents of the Front Panel's ADDRESS display,
-     * and regData corresponds to the DATA display.  They are updated by setAddr() and setData(),
+     * regAddr is an internal register containing the contents of the Front Panel's 'ADDRESS' display,
+     * and regData corresponds to the 'DATA' display.  They are updated by setAddr() and setData(),
      * which in turn take care of calling setLEDArray().
+     *
+     * The state of ALL switches is maintained in this.switches, and likewise all LED states are
+     * maintained in this.leds, but for convenience, we also mirror some of those states in dedicated
+     * variables (eg, regSwitches for the 'SWITCH' register, fLEDTest for the 'TEST' switch, etc).
      */
     this.regSwitches = 0;
     this.regAddr = this.regData = 0;
@@ -82,7 +86,7 @@ function PanelPDP11(parmsPanel)
      * register (regData) [the equivalent of selecting 'DISPLAY REGISTER'] except when data is being
      * examined or deposited [the equivalent of selecting 'DATA PATHS'].
      */
-    this.fLampTest = false;             // lamp (LED) test in progress
+    this.fLEDTest = false;              // LED (lamp) test in progress
     this.fExamine = false;              // true if the previously pressed switch was the 'EXAM' switch
     this.fDeposit = false;              // true if the previously pressed switch was the 'DEP' switch
     this.nAddrSel = PanelPDP11.ADDRSEL.CONS_PHY;
@@ -107,11 +111,11 @@ function PanelPDP11(parmsPanel)
      *
      * initBus() will call displaySwitches() to ensure that every switch is the position represented below.
      *
-     * NOTE: Not all switches have the same "process" criteria.  For example, 'TEST' will perform a lamp test
-     * when it is momentarily pressed "up", whereas 'LOAD [ADRS]' will load the ADDRESS register from the SWITCH
-     * register when it is momentarily pressed "down".
+     * NOTE: Not all switches have the same "process" criteria.  For example, 'TEST' will perform a LED test
+     * when it is momentarily pressed "up", whereas 'LOAD [ADRS]' will load the 'ADDRESS' register from the
+     * 'SWITCH' register when it is momentarily pressed "down".
      *
-     * This means that processLampTest(value) must act when value == 1 ("up"), whereas processLoadAddr(value)
+     * This means that processLEDTest(value) must act when value == 1 ("up"), whereas processLoadAddr(value)
      * must act when value == 0 ("down").  You can infer all this from the table below, because the initial value
      * of any momentary switch is its "inactive" value, so the opposite is its "active" value.
      */
@@ -123,7 +127,7 @@ function PanelPDP11(parmsPanel)
         'DEP':      [0, true,  false, this.processDeposit],
         'EXAM':     [1, true,  false, this.processExamine],
         'LOAD':     [1, true,  false, this.processLoadAddr],
-        'TEST':     [0, true,  false, this.processLampTest]
+        'TEST':     [0, true,  false, this.processLEDTest]
     };
     for (var i = 0; i < 22; i++) {
         this.switches['S'+i] = [0, false, false, this.processSwitchReg, i];
@@ -203,10 +207,18 @@ PanelPDP11.prototype.getSwitch = function(name)
 /**
  * reset()
  *
+ * NOTE: Since we've registered our handler with the Bus component, we will be called twice whenever
+ * the entire machine is reset: once when the Computer's reset() handler calls the Bus's reset() handler,
+ * and again when the Computer's reset() handler calls us directly.  Multiple resets should be harmless.
+ *
  * @this {PanelPDP11}
  */
 PanelPDP11.prototype.reset = function()
 {
+    /*
+     * Simulate a call to our stop() handler, to update the panel's 'ADDRESS' register with the current PC.
+     */
+    this.stop();
 };
 
 /**
@@ -346,15 +358,9 @@ PanelPDP11.prototype.powerUp = function(data, fRepower)
          */
         PanelPDP11.init();
         /*
-         * TODO: Until we implement a restore() function, all we can do is reset(); however, that's
-         * currently unnecessary, since we've added reset() to the addResetHandler() list.
-         *
-         *      this.reset();
-         *
-         * In the meantime, simulate a call to our stop() handler, to update the panel's ADDRESS register
-         * with the new PC.
+         * TODO: Until we implement a restore() function, all we can do is reset()
          */
-        this.stop();
+        this.reset();
     }
     return true;
 };
@@ -491,8 +497,14 @@ PanelPDP11.prototype.pressSwitch = function(sBinding)
      */
     if (sw[3]) sw[3].call(this, sw[0], sw[4]);
 
-    this.fDeposit = (sBinding == PanelPDP11.SWITCH.DEP);
-    this.fExamine = (sBinding == PanelPDP11.SWITCH.EXAM);
+    /*
+     * This helps the next 'DEP' or 'EXAM' press determine if the previous press was the same,
+     * while also ignoring any intervening 'STEP' presses (see processStep() for why we do that).
+     */
+    if (sBinding != PanelPDP11.SWITCH.STEP) {
+        this.fDeposit = (sBinding == PanelPDP11.SWITCH.DEP);
+        this.fExamine = (sBinding == PanelPDP11.SWITCH.EXAM);
+    }
 };
 
 /**
@@ -562,8 +574,11 @@ PanelPDP11.prototype.processStart = function(value, index)
  * processStep(value, index)
  *
  * If value == 1 (our initial value), then the 'STEP' switch is set to "S INST" (step one instruction);
- * otherwise, it's set to "S BUS CYCLE" (step one bus cycle).  Note that we don't actually support the
- * latter.
+ * otherwise, it's set to "S BUS CYCLE" (step one bus cycle).
+ *
+ * However, since we can't currently support cycle-stepping, I've decided to change the meaning of this
+ * switch: the normal ("up") position means that successive 'EXAM' and 'DEP' operations will first add 2
+ * to the 'ADDRESS' register, while the opposite ("down") position means they will first subtract 2.
  *
  * @this {PanelPDP11}
  * @param {number} value
@@ -649,7 +664,7 @@ PanelPDP11.prototype.processContinue = function(value, index)
             }
 
             /*
-             * Simulate a call to our stop() handler, to update the panel's ADDRESS register with the new PC.
+             * Simulate a call to our stop() handler, to update the panel's 'ADDRESS' register with the new PC.
              */
             this.stop();
 
@@ -658,8 +673,8 @@ PanelPDP11.prototype.processContinue = function(value, index)
              * updateStatus() handlers will be called, including ours.
              *
              * NOTE: If we used the Debugger's stepCPU() function, then that includes a call to updateStatus();
-             * unfortunately, it will have happened BEFORE we called stop() to update the ADDRESS register, so we
-             * still need to call it again.
+             * unfortunately, it will have happened BEFORE we called stop() to update the 'ADDRESS' register, so
+             * we still need to call it again.
              */
             if (this.cmp) this.cmp.updateStatus();
         }
@@ -679,9 +694,7 @@ PanelPDP11.prototype.processContinue = function(value, index)
 PanelPDP11.prototype.processDeposit = function(value, index)
 {
     if (value && !this.cpu.isRunning()) {
-        if (this.fDeposit) {
-            this.setAddr(this.regAddr + 2);
-        }
+        if (this.fDeposit) this.advanceAddr();
         var w = this.setData(this.regSwitches);
         if (this.nAddrSel == PanelPDP11.ADDRSEL.CONS_PHY) {
             this.bus.setWordDirect(this.regAddr, w);
@@ -704,10 +717,8 @@ PanelPDP11.prototype.processDeposit = function(value, index)
 PanelPDP11.prototype.processExamine = function(value, index)
 {
     if (!value && !this.cpu.isRunning()) {
-        if (this.fExamine) {
-            this.setAddr(this.regAddr + 2);
-        }
         var w;
+        if (this.fExamine) this.advanceAddr();
         if (this.nAddrSel == PanelPDP11.ADDRSEL.CONS_PHY) {
             w = this.bus.getWordDirect(this.regAddr);
         } else {
@@ -735,15 +746,21 @@ PanelPDP11.prototype.processLoadAddr = function(value, index)
 };
 
 /**
- * processLampTest(value, index)
+ * processLEDTest(value, index)
  *
  * @this {PanelPDP11}
  * @param {number} value
  * @param {number} [index]
  */
-PanelPDP11.prototype.processLampTest = function(value, index)
+PanelPDP11.prototype.processLEDTest = function(value, index)
 {
-    this.displayLEDs(value || null);
+    if (value) {
+        this.fLEDTest = true;
+        this.displayLEDs(true);
+    } else {
+        this.fLEDTest = false;
+        this.displayLEDs();
+    }
 };
 
 /**
@@ -777,6 +794,20 @@ PanelPDP11.prototype.setAddr = function(value)
 };
 
 /**
+ * advanceAddr()
+ *
+ * @this {PanelPDP11}
+ * @return {number}
+ */
+PanelPDP11.prototype.advanceAddr = function()
+{
+    var inc = this.getSwitch(PanelPDP11.SWITCH.STEP)? 2 : -2;
+    this.regAddr = (this.regAddr + inc) & this.bus.nBusMask;
+    this.setLEDArray("A", this.regAddr, 22);
+    return this.regAddr;
+};
+
+/**
  * setData(value)
  *
  * @this {PanelPDP11}
@@ -801,7 +832,7 @@ PanelPDP11.prototype.setData = function(value)
 PanelPDP11.prototype.setLED = function(sBinding, value)
 {
     this.leds[sBinding] = value;
-    if (!this.fLampTest) this.displayLED(sBinding, value);
+    if (!this.fLEDTest) this.displayLED(sBinding, value);
     return value;
 };
 

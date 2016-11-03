@@ -744,6 +744,7 @@ ComputerPDP11.prototype.donePowerOn = function(aParms)
          * TODO: Do we not care about the return value here? (ie, is checking fRestoreError sufficient)?
          */
         this.powerRestore(this.cpu, stateComputer, fRepower, fRestore);
+        this.updateStatus();
         this.cpu.autoStart();
     }
 
@@ -955,26 +956,31 @@ ComputerPDP11.prototype.powerOff = function(fSave, fShutdown)
  * allocated the Bus object ourselves, after all the other components were allocated, it ends
  * up near the end of Component's list of components.  Hence the special case for this.bus below.
  *
+ * Ditto for the CPU, in part because if the Front Panel resets before the CPU, it will end up
+ * snapping/displaying the PC as of the last instruction executed, before the CPU resets the PC,
+ * causing the Front Panel to display a stale address when we call updateStatus() at the end.
+ *
  * @this {ComputerPDP11}
  */
 ComputerPDP11.prototype.reset = function()
 {
     if (this.bus && this.bus.reset) {
-        /*
-         * TODO: Why does WebStorm think that this.bus.type is undefined? The base class (Component)
-         * constructor defines it.
-         */
         this.printMessage("Resetting " + this.bus.type);
         this.bus.reset();
+    }
+    if (this.cpu && this.cpu.reset) {
+        this.printMessage("Resetting " + this.cpu.type);
+        this.cpu.reset();
     }
     var aComponents = Component.getComponents(this.id);
     for (var iComponent = 0; iComponent < aComponents.length; iComponent++) {
         var component = aComponents[iComponent];
-        if (component !== this && component !== this.bus && component.reset) {
+        if (component !== this && component !== this.bus && component !== this.cpu && component.reset) {
             this.printMessage("Resetting " + component.type);
             component.reset();
         }
     }
+    this.updateStatus(true);
 };
 
 /**
@@ -1025,6 +1031,44 @@ ComputerPDP11.prototype.stop = function(ms, nCycles)
         }
     }
     this.updateStatus(true);
+};
+
+/**
+ * updateStatus(fForce)
+ *
+ * TODO: Notify all (other) components with an updateStatus() method that the computer's state has changed.
+ *
+ * If any DOM controls were bound to the CPU, then we need to call its updateStatus() handler; if there are no
+ * such bindings, then cpu.updateStatus() does nothing.
+ *
+ * Similarly, if there's a Panel, then we need to call its updateStatus() handler, in case it created its own canvas
+ * and implemented its own register display (eg, dumpRegisters()); if not, then panel.updateStatus() also does nothing.
+ *
+ * In practice, there will *either* be a Panel with a custom canvas *or* a set of DOM controls bound to the CPU *or*
+ * neither.  In theory, there could be BOTH, but that would be unusual.
+ *
+ * TODO: Consider alternate approaches to these largely register-oriented display updates.  Ordinarily, we like to
+ * separate logic from presentation, and currently the CPUState contains both, since it's the component that intimately
+ * knows the names, number, sizes, etc, of all the active registers.  The Panel component is the logical candidate,
+ * but Panel is an optional component; it's often the case that only machines that include the Debugger also include
+ * Panel.
+ *
+ * @this {ComputerPDP11}
+ * @param {boolean} [fForce] (true will display registers even if the CPU is running and "live" registers are not enabled)
+  */
+ComputerPDP11.prototype.updateStatus = function(fForce)
+{
+    /*
+     * fForce is generally set to true whenever the CPU is transitioning to/from a running state, in which case
+     * cpu.updateStatus() will definitely want to hide/show register contents; however, at other times, when the
+     * CPU is running, constantly updating the DOM controls too frequently can adversely impact overall performance.
+     *
+     * So fForce serves as a hint to help cpu.updateStatus() make a more informed decision.  panel.updateStatus()
+     * currently doesn't care, on the theory that canvas updates should be significantly faster than DOM updates,
+     * but we still pass fForce on.
+     */
+    if (this.cpu) this.cpu.updateStatus(fForce);
+    if (this.panel) this.panel.updateStatus(fForce);
 };
 
 /**
@@ -1427,41 +1471,6 @@ ComputerPDP11.prototype.setFocus = function(fScroll)
             window.scrollTo(x, y);
         }
     }
-};
-
-/**
- * updateStatus(fForce)
- *
- * If any DOM controls were bound to the CPU, then we need to call its updateStatus() handler; if there are no
- * such bindings, then cpu.updateStatus() does nothing.
- *
- * Similarly, if there's a Panel, then we need to call its updateStatus() handler, in case it created its own canvas
- * and implemented its own register display (eg, dumpRegisters()); if not, then panel.updateStatus() also does nothing.
- *
- * In practice, there will *either* be a Panel with a custom canvas *or* a set of DOM controls bound to the CPU *or*
- * neither.  In theory, there could be BOTH, but that would be unusual.
- *
- * TODO: Consider alternate approaches to these largely register-oriented display updates.  Ordinarily, we like to
- * separate logic from presentation, and currently the CPUState contains both, since it's the component that intimately
- * knows the names, number, sizes, etc, of all the active registers.  The Panel component is the logical candidate,
- * but Panel is an optional component; generally, only machines that include Debugger also include Panel.
- *
- * @this {ComputerPDP11}
- * @param {boolean} [fForce] (true will display registers even if the CPU is running and "live" registers are not enabled)
-  */
-ComputerPDP11.prototype.updateStatus = function(fForce)
-{
-    /*
-     * fForce is generally set to true whenever the CPU is transitioning to/from a running state, in which case
-     * cpu.updateStatus() will definitely want to hide/show register contents; however, at other times, when the
-     * CPU is running, constantly updating the DOM controls too frequently can adversely impact overall performance.
-     *
-     * So fForce serves as a hint to help cpu.updateStatus() make a more informed decision.  panel.updateStatus()
-     * currently doesn't care, on the theory that canvas updates should be significantly faster than DOM updates,
-     * but we still pass fForce on.
-     */
-    if (this.cpu) this.cpu.updateStatus(fForce);
-    if (this.panel) this.panel.updateStatus(fForce);
 };
 
 /**

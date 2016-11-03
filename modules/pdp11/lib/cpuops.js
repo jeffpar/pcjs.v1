@@ -1413,9 +1413,8 @@ PDP11.opRESET = function(opCode)
     if (!(this.regPSW & PDP11.PSW.CMODE)) {
         this.bus.reset();
         this.resetRegs();
-        // display.data = this.regsGen[0];  // TODO: Review
     }
-    this.nStepCycles -= 667;                // TODO: Review (but it's definitely a big number)
+    this.nStepCycles -= 667;            // TODO: Review (but it's definitely a big number)
 };
 
 /**

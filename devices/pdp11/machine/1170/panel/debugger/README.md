@@ -13,13 +13,11 @@ machines:
 Toggle-Ins
 ----------
 
-From the [PDP-11/70 Maintenance Service Guide](http://archive.pcjs.org/pubs/dec/pdp11/1170/PDP1170_Maintenance_Service_Guide_Apr88.pdf),
-Chapter 4:
+As DEC explains in its [PDP-11/70 Maintenance Service Guide](http://archive.pcjs.org/pubs/dec/pdp11/1170/PDP1170_Maintenance_Service_Guide_Apr88.pdf),
+Chapter 4: "There are several useful toggle-ins that are probably not very well known."  Excerpts are listed below.
 
-	There are several useful toggle-ins that are probably not very well known. They are as follows:
-	
-	Memory Management
-	
+### Memory Management
+
 	Use the following toggle-in to verify the correct operation of Memory Management Relocation.
 	
 	200/012737          MOV #400,@#177572 (load maint. bit in MMRO)
@@ -79,10 +77,8 @@ which should produce these results:
 	>> dw 300 l1
 	000300  70707  
 
----
+### Unibus Map Checkout
 
-	Unibus Map Checkout
-	
 	Use the following console operating procedure to verify the correct operation of the Unibus Map.
 	
 	Load Address        500
