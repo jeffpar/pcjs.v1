@@ -299,12 +299,13 @@ RAM.
 
 As the **Maintenance Service Guide** goes on to say:
 
-	The program should halt when all of memory is cleared. If it doesn't halt, examine the CPU error, Memory system error
-	and HI/LO error address registers to determine the cause. Trap catchers can be used by depositing 200 in KIPAR 0 (17772340)
-	instead of zero, and setting up vector locations with their address + 2 and the Vector + 2 with a 0 (halt).
+	The program should halt when all of memory is cleared. If it doesn't halt, examine the CPU error,
+	Memory system error	and HI/LO error address registers to determine the cause.  Trap catchers can be
+	used by depositing 200 in KIPAR 0 (17772340) instead of zero, and setting up vector locations with
+	their address + 2 and the Vector + 2 with a 0 (halt).
 	
-	Note: When loading the program you must be in console physical [i.e., the ADDRESS select switch must be set to "CONS PHY",
-	which is the default setting of the PDPjs Front Panel].
+	Note: When loading the program you must be in console physical [i.e., the ADDRESS select switch
+	must be set to "CONS PHY", which is the default setting of the PDPjs Front Panel].
 
 Before running the above code, you should turn Bus messages off (ie, "m bus off"); otherwise, the quantity of messages will
 slow execution to a crawl.
