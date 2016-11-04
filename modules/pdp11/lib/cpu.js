@@ -505,26 +505,28 @@ CPUPDP11.prototype.setBinding = function(sType, sBinding, control, sValue)
 };
 
 /**
- * updateComputer(fForce)
+ * updateDisplays(nUpdate)
+ *
+ * Simpler wrapper around the Computer's updateDisplays() method.
  *
  * @this {CPUPDP11}
- * @param {boolean} [fForce]
+ * @param {number} [nUpdate] (1 for periodic, -1 for forced, 0 or undefined otherwise)
  */
-CPUPDP11.prototype.updateComputer = function(fForce)
+CPUPDP11.prototype.updateDisplays = function(nUpdate)
 {
-    if (this.cmp) this.cmp.updateStatus(fForce);
+    if (this.cmp) this.cmp.updateDisplays(nUpdate);
 };
 
 /**
- * updateStatus(fForce)
+ * updateDisplay(nUpdate)
  *
- * Some of the CPU bindings provide feedback and therefore need to be updated periodically.  This is called
- * via the Computer's updateStatus() handler several times per second; see YIELDS_PER_STATUS.
+ * Some of the CPU bindings provide feedback and therefore need to be updated periodically.
+ * However, this should be called via the Computer's updateDisplays() interface, not directly.
  *
  * @this {CPUPDP11}
- * @param {boolean} [fForce]
+ * @param {number} [nUpdate] (1 for periodic, -1 for forced, 0 or undefined otherwise)
  */
-CPUPDP11.prototype.updateStatus = function(fForce)
+CPUPDP11.prototype.updateDisplay = function(nUpdate)
 {
     var controlSpeed = this.bindings["speed"];
     if (controlSpeed) controlSpeed.textContent = this.getSpeedCurrent();
@@ -1101,7 +1103,7 @@ CPUPDP11.prototype.runCPU = function()
             if (this.nCyclesNextYield <= 0) {
                 this.nCyclesNextYield += this.nCyclesPerYield;
                 if (++this.nYieldsSinceStatusUpdate >= CPUPDP11.YIELDS_PER_STATUS) {
-                    this.updateComputer();
+                    this.updateDisplays();
                     this.nYieldsSinceStatusUpdate = 0;
                 }
                 break;
@@ -1216,7 +1218,7 @@ CPUPDP11.prototype.yieldCPU = function()
      * odd for those messages to show CPU state changes if the Control Panel, Video display, etc, does not,
      * so I've added this call to try to keep things looking synchronized.
      */
-    this.updateComputer();
+    this.updateDisplays();
 };
 
 if (NODE) module.exports = CPUPDP11;

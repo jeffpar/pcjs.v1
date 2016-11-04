@@ -744,7 +744,7 @@ ComputerPDP11.prototype.donePowerOn = function(aParms)
          * TODO: Do we not care about the return value here? (ie, is checking fRestoreError sufficient)?
          */
         this.powerRestore(this.cpu, stateComputer, fRepower, fRestore);
-        this.updateStatus();
+        this.updateDisplays();
         this.cpu.autoStart();
     }
 
@@ -958,7 +958,7 @@ ComputerPDP11.prototype.powerOff = function(fSave, fShutdown)
  *
  * Ditto for the CPU, in part because if the Front Panel resets before the CPU, it will end up
  * snapping/displaying the PC as of the last instruction executed, before the CPU resets the PC,
- * causing the Front Panel to display a stale address when we call updateStatus() at the end.
+ * causing the Front Panel to display a stale address when we call updateDisplays() at the end.
  *
  * @this {ComputerPDP11}
  */
@@ -980,7 +980,7 @@ ComputerPDP11.prototype.reset = function()
             component.reset();
         }
     }
-    this.updateStatus(true);
+    this.updateDisplays(-1);
 };
 
 /**
@@ -1005,7 +1005,7 @@ ComputerPDP11.prototype.start = function(ms, nCycles)
             component.start(ms, nCycles);
         }
     }
-    this.updateStatus(true);
+    this.updateDisplays(-1);
 };
 
 /**
@@ -1030,19 +1030,20 @@ ComputerPDP11.prototype.stop = function(ms, nCycles)
             component.stop(ms, nCycles);
         }
     }
-    this.updateStatus(true);
+    this.updateDisplays(-1);
 };
 
 /**
- * updateStatus(fForce)
+ * updateDisplays(nUpdate)
  *
- * TODO: Notify all (other) components with an updateStatus() method that the computer's state has changed.
+ * TODO: Notify all components with an updateDisplay() method that the computer's state has changed (not
+ * just the hard-coded ones below).
  *
- * If any DOM controls were bound to the CPU, then we need to call its updateStatus() handler; if there are no
- * such bindings, then cpu.updateStatus() does nothing.
+ * If any DOM controls were bound to the CPU, then we need to call its updateDisplay() handler; if there are no
+ * such bindings, then cpu.updateDisplay() does nothing.
  *
- * Similarly, if there's a Panel, then we need to call its updateStatus() handler, in case it created its own canvas
- * and implemented its own register display (eg, dumpRegisters()); if not, then panel.updateStatus() also does nothing.
+ * Similarly, if there's a Panel, then we need to call its updateDisplay() handler, in case it created its own canvas
+ * and implemented its own register display (eg, dumpRegisters()); if not, then panel.updateDisplay() also does nothing.
  *
  * In practice, there will *either* be a Panel with a custom canvas *or* a set of DOM controls bound to the CPU *or*
  * neither.  In theory, there could be BOTH, but that would be unusual.
@@ -1054,21 +1055,20 @@ ComputerPDP11.prototype.stop = function(ms, nCycles)
  * Panel.
  *
  * @this {ComputerPDP11}
- * @param {boolean} [fForce] (true will display registers even if the CPU is running and "live" registers are not enabled)
-  */
-ComputerPDP11.prototype.updateStatus = function(fForce)
+ * @param {number} [nUpdate] (1 for periodic, -1 for forced, 0 or undefined otherwise)
+ */
+ComputerPDP11.prototype.updateDisplays = function(nUpdate)
 {
     /*
-     * fForce is generally set to true whenever the CPU is transitioning to/from a running state, in which case
-     * cpu.updateStatus() will definitely want to hide/show register contents; however, at other times, when the
+     * nUpdate is generally set to -1 whenever the CPU is transitioning to/from a running state, in which case
+     * cpu.updateDisplay() will definitely want to hide/show register contents; however, at other times, when the
      * CPU is running, constantly updating the DOM controls too frequently can adversely impact overall performance.
      *
-     * So fForce serves as a hint to help cpu.updateStatus() make a more informed decision.  panel.updateStatus()
-     * currently doesn't care, on the theory that canvas updates should be significantly faster than DOM updates,
-     * but we still pass fForce on.
+     * nUpdate will also be -1 whenever the Debugger has modified the state of the machine, implying that we're
+     * not sure what, if anything, actually changed.
      */
-    if (this.cpu) this.cpu.updateStatus(fForce);
-    if (this.panel) this.panel.updateStatus(fForce);
+    if (this.cpu) this.cpu.updateDisplay(nUpdate);
+    if (this.panel) this.panel.updateDisplay(nUpdate);
 };
 
 /**

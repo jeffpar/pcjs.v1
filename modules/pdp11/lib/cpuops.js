@@ -1754,13 +1754,13 @@ PDP11.opWAIT = function(opCode)
      * NOTE: It's almost always a bad idea to add more checks to the inner stepCPU() loop, because every additional
      * check can have a measurable (negative) impact on performance.  Which is why it's important to use opFlags bits
      * whenever possible, since we can test for multiple (up to 32) exceptional conditions with a single check.
+     *
+     * Finally, we used to update the machine's displays whenever transitioning to the WAIT state.  However,
+     * it makes more sense to decouple display updates from specific instructions and rely on timers instead;
+     * the PDP-11 KW11 (60Hz Line Clock) timer is the perfect candidate.  See device.js.
+     *
+     *      if (!(this.opFlags & PDP11.OPFLAG.WAIT) && this.cmp) this.cmp.updateDisplays();
      */
-    if (!(this.opFlags & PDP11.OPFLAG.WAIT)) {
-        /*
-         * Since here we're actually transitioning to WAIT, let's update the Panel's LEDs (well, OK, among other things).
-         */
-        if (this.cmp) this.cmp.updateStatus();
-    }
     this.opFlags |= PDP11.OPFLAG.WAIT;
     this.advancePC(-2);
     this.nStepCycles -= 3;

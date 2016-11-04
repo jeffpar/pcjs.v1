@@ -60,7 +60,7 @@ function DevicePDP11(parmsDevice)
 {
     Component.call(this, "Device", parmsDevice, DevicePDP11, MessagesPDP11.DEVICE);
 
-    this.kw11 = {               // LW11 registers
+    this.kw11 = {               // KW11 registers
         csr:        0,
         timer:      -1          // initBus() will initialize this timer ID
     };
@@ -115,6 +115,7 @@ DevicePDP11.M9312 = [
 DevicePDP11.prototype.initBus = function(cmp, bus, cpu, dbg)
 {
     this.bus = bus;
+    this.cmp = cmp;
     this.cpu = cpu;
     this.dbg = dbg;
 
@@ -153,6 +154,7 @@ DevicePDP11.prototype.kw11_interrupt = function()
         this.cpu.setTrigger(this.kw11.trigger);
         this.cpu.setTimer(this.kw11.timer, 1000/60);
     }
+    if (this.cmp) this.cmp.updateDisplays(1);
 };
 
 /**

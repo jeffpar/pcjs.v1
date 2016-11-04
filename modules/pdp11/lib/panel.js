@@ -60,6 +60,8 @@ function PanelPDP11(parmsPanel)
      * TODO: Add some UI for fDisplayLiveRegs (either an XML property, or a UI checkbox, or both).
      */
     this.cLiveRegs = 0;
+    this.nPeriodicCount = 0;
+    this.nPeriodicLimit = 60;
     this.fDisplayLiveRegs = true;
 
     /*
@@ -672,14 +674,14 @@ PanelPDP11.prototype.processContinue = function(value, index)
             this.stop();
 
             /*
-             * Going through the normal channels (ie, the Computer's updateStatus() interface) ensures that ALL
-             * updateStatus() handlers will be called, including ours.
+             * Going through the normal channels (ie, the Computer's updateDisplays() interface) ensures that
+             * ALL updateDisplay() handlers will be called, including ours.
              *
-             * NOTE: If we used the Debugger's stepCPU() function, then that includes a call to updateStatus();
+             * NOTE: If we used the Debugger's stepCPU() function, then that includes a call to updateDisplay();
              * unfortunately, it will have happened BEFORE we called stop() to update the 'ADDRESS' register, so
              * we still need to call it again.
              */
-            if (this.cmp) this.cmp.updateStatus();
+            if (this.cmp) this.cmp.updateDisplays();
         }
         else {
             this.cpu.startCPU();
@@ -803,13 +805,26 @@ PanelPDP11.prototype.setAddr = function(value)
 /**
  * advanceAddr()
  *
+ * This should also take care of the following Front Panel behaviors when the accessing the general-purpose
+ * registers:
+ *
+ *      1) ADDRESS display incremented by 1 (instead of 2)
+ *      2) The STEP after the last register is 177700, such that the addresses are looped
+ *
+ * A third behavior is NOT emulated: preventing the ADDRESS from stepping to the first General Register (177700)
+ * from 177676.
+ *
  * @this {PanelPDP11}
  * @return {number}
  */
 PanelPDP11.prototype.advanceAddr = function()
 {
-    var inc = this.getSwitch(PanelPDP11.SWITCH.STEP)? 2 : -2;
-    this.regAddr = (this.regAddr + inc) & this.bus.nBusMask;
+    var nRegs = this.cpu.model < PDP11.MODEL_1145? 8 : 16;
+    var fGenRegs = (this.regAddr >= PDP11.UNIBUS.R0SET0 /*177700*/ && this.regAddr < PDP11.UNIBUS.R0SET0 + nRegs);
+    var inc = fGenRegs? 1 : 2;
+    var mask = fGenRegs? 0xf : this.bus.nBusMask;
+    if (!this.getSwitch(PanelPDP11.SWITCH.STEP)) inc = -inc;
+    this.regAddr = (this.regAddr & ~mask) | ((this.regAddr + inc) & mask);
     this.setLEDArray("A", this.regAddr, 22);
     return this.regAddr;
 };
@@ -906,26 +921,36 @@ PanelPDP11.prototype.stop = function(ms, nCycles)
 };
 
 /**
- * updateStatus(fForce)
+ * updateDisplay(nUpdate)
  *
- * Called by the Computer component at appropriate intervals to update any register displays, LEDs, etc.
+ * Called by the Computer component at intervals to update registers, LEDs, etc.
  *
  * @this {PanelPDP11}
- * @param {boolean} [fForce] (true will display registers even if the CPU is running and "live" registers are not enabled)
+ * @param {number} [nUpdate] (< 0 for forced, > 0 for periodic, undefined otherwise)
  */
-PanelPDP11.prototype.updateStatus = function(fForce)
+PanelPDP11.prototype.updateDisplay = function(nUpdate)
 {
     if (this.cLiveRegs) {
-        if (fForce || !this.cpu.isRunning() || this.fDisplayLiveRegs) {
-            for (var i = 0; i < this.cpu.regsGen.length; i++) {
-                this.displayValue('R'+i, this.cpu.regsGen[i]);
+        if (nUpdate < 0 || !this.cpu.isRunning() || this.fDisplayLiveRegs) {
+            /*
+             * We arbitrarily separate the display elements into two categories: cheap and expensive.
+             *
+             * LEDs are considered cheap, register displays are not.  So we'll skip the latter if this
+             * is a periodic update AND our periodic update counter hasn't reached the periodic update limit.
+             */
+            if (!(nUpdate > 0 && (this.nPeriodicCount += nUpdate) < this.nPeriodicLimit)) {
+                for (var i = 0; i < this.cpu.regsGen.length; i++) {
+                    this.displayValue('R'+i, this.cpu.regsGen[i]);
+                }
+                var regPSW = this.cpu.getPSW();
+                this.displayValue("PS", regPSW);
+                this.displayValue("NF", (regPSW & PDP11.PSW.NF)? 1 : 0, 1);
+                this.displayValue("ZF", (regPSW & PDP11.PSW.ZF)? 1 : 0, 1);
+                this.displayValue("VF", (regPSW & PDP11.PSW.VF)? 1 : 0, 1);
+                this.displayValue("CF", (regPSW & PDP11.PSW.CF)? 1 : 0, 1);
+                this.nPeriodicCount = 0;
             }
-            var regPSW = this.cpu.getPSW();
-            this.displayValue("PS", regPSW);
-            this.displayValue("NF", (regPSW & PDP11.PSW.NF)? 1 : 0, 1);
-            this.displayValue("ZF", (regPSW & PDP11.PSW.ZF)? 1 : 0, 1);
-            this.displayValue("VF", (regPSW & PDP11.PSW.VF)? 1 : 0, 1);
-            this.displayValue("CF", (regPSW & PDP11.PSW.CF)? 1 : 0, 1);
+
             this.setLEDArray("D", this.regData, 16);
             this.setLEDArray("A", this.regAddr, 22);
             /*

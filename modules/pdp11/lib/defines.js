@@ -569,7 +569,7 @@ var PDP11 = {
             DATA:   0x00FF      // Transmitted Data (W/O)       TODO: Determine why pdp11.js effectively defined this as 0x7F
         }
     },
-    KW11: {                     // KW11-L Line Time Clock
+    KW11: {                     // KW11-L Line Time Clock (60Hz; well, OK, or 50Hz, if you're in the UK, I suppose...)
         PRI:        6,
         VEC:        0o100,
         DELAY:      0,

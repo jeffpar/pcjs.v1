@@ -464,8 +464,8 @@ if (DEBUGGER) {
     DebuggerPDP11.prototype.initBus = function(cmp, bus, cpu, dbg)
     {
         this.bus = bus;
-        this.cpu = cpu;
         this.cmp = cmp;
+        this.cpu = cpu;
         this.panel = cmp.panel;
 
         /*
@@ -677,7 +677,7 @@ if (DEBUGGER) {
                 this.cpu.setByteDirect(addr, b);
             }
             if (inc) this.incAddr(dbgAddr, inc);
-            this.cmp.updateStatus(true);        // force a computer status update if, say, video memory was the target
+            this.cmp.updateDisplays(-1);
         }
     };
 
@@ -699,7 +699,7 @@ if (DEBUGGER) {
                 this.cpu.setWordDirect(addr, w);
             }
             if (inc) this.incAddr(dbgAddr, inc);
-            this.cmp.updateStatus(true);        // force a computer status update if, say, video memory was the target
+            this.cmp.updateDisplays(-1);
         }
     };
 
@@ -1313,15 +1313,15 @@ if (DEBUGGER) {
     };
 
     /**
-     * stepCPU(nCycles, fRegs, fUpdateStatus)
+     * stepCPU(nCycles, fRegs, fUpdateDisplays)
      *
      * @this {DebuggerPDP11}
      * @param {number} nCycles (0 for one instruction without checking breakpoints)
      * @param {boolean} [fRegs] is true to display registers after step (default is false)
-     * @param {boolean} [fUpdateStatus] is false to disable Computer status updates (default is true)
+     * @param {boolean} [fUpdateDisplays] is false to disable Computer display updates (default is true)
      * @return {boolean}
      */
-    DebuggerPDP11.prototype.stepCPU = function(nCycles, fRegs, fUpdateStatus)
+    DebuggerPDP11.prototype.stepCPU = function(nCycles, fRegs, fUpdateDisplays)
     {
         if (!this.checkCPU()) return false;
 
@@ -1363,15 +1363,11 @@ if (DEBUGGER) {
 
         /*
          * Because we called cpu.stepCPU() and not cpu.startCPU(), we must nudge the Computer's update code,
-         * and then update our own state.  Normally, the only time fUpdateStatus will be false is when doTrace()
-         * is calling us in a loop, in which case it will perform its own updateStatus() when it's done.
+         * and then update our own state.  Normally, the only time fUpdateDisplays will be false is when doTrace()
+         * is calling us in a loop, in which case it will perform its own updateDisplays() when it's done.
          */
-        if (fUpdateStatus !== false) {
-            /*
-             * Make an effort to keep any Front Panel in sync with us.
-             */
-            if (this.panel && this.panel.stop) this.panel.stop();
-            this.cmp.updateStatus();
+        if (fUpdateDisplays !== false) {
+            this.cmp.updateDisplays(-1);
         }
 
         this.updateStatus(fRegs || false);
@@ -2729,7 +2725,7 @@ if (DEBUGGER) {
         if (asArgs[2] === undefined) {
             this.println("begin assemble at " + this.toStrAddr(dbgAddr));
             this.fAssemble = true;
-            this.cmp.updateStatus();
+            this.cmp.updateDisplays();
             return;
         }
 
@@ -3438,7 +3434,7 @@ if (DEBUGGER) {
                 this.println("unknown register: " + sReg);
                 return;
             }
-            this.cmp.updateStatus();
+            this.cmp.updateDisplays();
             this.println("updated registers:");
         }
 
@@ -3682,13 +3678,13 @@ if (DEBUGGER) {
             },
             function onCountStepComplete() {
                 /*
-                 * We explicitly called stepCPU() with fUpdateStatus === false, because repeatedly
-                 * calling updateStatus() can be very slow, especially if a Control Panel is present
-                 * with displayLiveRegs enabled, so once the repeat count has been exhausted, we must
-                 * perform a final updateStatus().
+                 * We explicitly called stepCPU() with fUpdateDisplays set to false, because repeatedly
+                 * calling updateDisplays() can be very slow, especially if a Control Panel is present with
+                 * displayLiveRegs enabled, so once the repeat count has been exhausted, we must perform
+                 * a final updateDisplays().
                  */
                 if (dbg.panel && dbg.panel.stop) dbg.panel.stop();
-                dbg.cmp.updateStatus();
+                dbg.cmp.updateDisplays();
                 dbg.setBusy(false);
             }
         );
