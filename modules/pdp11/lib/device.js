@@ -305,78 +305,78 @@ DevicePDP11.prototype.writeUNIMAP = function(data, addr)
 };
 
 /**
- * readSISDR(addr)
+ * readSIPDR(addr)
  *
  * @this {DevicePDP11}
- * @param {number} addr (eg, PDP11.UNIBUS.SISDR0--SISDR7 or 172200--172216)
+ * @param {number} addr (eg, PDP11.UNIBUS.SIPDR0--SIPDR7 or 172200--172216)
  * @return {number}
  */
-DevicePDP11.prototype.readSISDR = function(addr)
+DevicePDP11.prototype.readSIPDR = function(addr)
 {
     var reg = (addr >> 1) & 7;
     return this.cpu.mmuPDR[1][reg];
 };
 
 /**
- * writeSISDR(data, addr)
+ * writeSIPDR(data, addr)
  *
  * @this {DevicePDP11}
  * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.SISDR0--SISDR7 or 172200--172216)
+ * @param {number} addr (eg, PDP11.UNIBUS.SIPDR0--SIPDR7 or 172200--172216)
  */
-DevicePDP11.prototype.writeSISDR = function(data, addr)
+DevicePDP11.prototype.writeSIPDR = function(data, addr)
 {
     var reg = (addr >> 1) & 7;
     this.cpu.mmuPDR[1][reg] = data & 0xff0f;
 };
 
 /**
- * readSDSDR(addr)
+ * readSDPDR(addr)
  *
  * @this {DevicePDP11}
- * @param {number} addr (eg, PDP11.UNIBUS.SDSDR0--SDSDR7 or 172220--172236)
+ * @param {number} addr (eg, PDP11.UNIBUS.SDPDR0--SDPDR7 or 172220--172236)
  * @return {number}
  */
-DevicePDP11.prototype.readSDSDR = function(addr)
+DevicePDP11.prototype.readSDPDR = function(addr)
 {
     var reg = ((addr >> 1) & 7) + 8;
     return this.cpu.mmuPDR[1][reg];
 };
 
 /**
- * writeSDSDR(data, addr)
+ * writeSDPDR(data, addr)
  *
  * @this {DevicePDP11}
  * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.SDSDR0--SDSDR7 or 172220--172236)
+ * @param {number} addr (eg, PDP11.UNIBUS.SDPDR0--SDPDR7 or 172220--172236)
  */
-DevicePDP11.prototype.writeSDSDR = function(data, addr)
+DevicePDP11.prototype.writeSDPDR = function(data, addr)
 {
     var reg = ((addr >> 1) & 7) + 8;
     this.cpu.mmuPDR[1][reg] = data & 0xff0f;
 };
 
 /**
- * readSISAR(addr)
+ * readSIPAR(addr)
  *
  * @this {DevicePDP11}
- * @param {number} addr (eg, PDP11.UNIBUS.SISAR0--SISAR7 or 172240--172256)
+ * @param {number} addr (eg, PDP11.UNIBUS.SIPAR0--SIPAR7 or 172240--172256)
  * @return {number}
  */
-DevicePDP11.prototype.readSISAR = function(addr)
+DevicePDP11.prototype.readSIPAR = function(addr)
 {
     var reg = (addr >> 1) & 7;
     return this.cpu.mmuPAR[1][reg];
 };
 
 /**
- * writeSISAR(data, addr)
+ * writeSIPAR(data, addr)
  *
  * @this {DevicePDP11}
  * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.SISAR0--SISAR7 or 172240--172256)
+ * @param {number} addr (eg, PDP11.UNIBUS.SIPAR0--SIPAR7 or 172240--172256)
  */
-DevicePDP11.prototype.writeSISAR = function(data, addr)
+DevicePDP11.prototype.writeSIPAR = function(data, addr)
 {
     var reg = (addr >> 1) & 7;
     this.cpu.mmuPAR[1][reg] = data;
@@ -385,26 +385,26 @@ DevicePDP11.prototype.writeSISAR = function(data, addr)
 };
 
 /**
- * readSDSAR(addr)
+ * readSDPAR(addr)
  *
  * @this {DevicePDP11}
- * @param {number} addr (eg, PDP11.UNIBUS.SDSAR0--SDSAR7 or 172260--172276)
+ * @param {number} addr (eg, PDP11.UNIBUS.SDPAR0--SDPAR7 or 172260--172276)
  * @return {number}
  */
-DevicePDP11.prototype.readSDSAR = function(addr)
+DevicePDP11.prototype.readSDPAR = function(addr)
 {
     var reg = ((addr >> 1) & 7) + 8;
     return this.cpu.mmuPAR[1][reg];
 };
 
 /**
- * writeSDSAR(data, addr)
+ * writeSDPAR(data, addr)
  *
  * @this {DevicePDP11}
  * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.SDSAR0--SDSAR7 or 172260--172276)
+ * @param {number} addr (eg, PDP11.UNIBUS.SDPAR0--SDPAR7 or 172260--172276)
  */
-DevicePDP11.prototype.writeSDSAR = function(data, addr)
+DevicePDP11.prototype.writeSDPAR = function(data, addr)
 {
     var reg = ((addr >> 1) & 7) + 8;
     this.cpu.mmuPAR[1][reg] = data;
@@ -412,78 +412,78 @@ DevicePDP11.prototype.writeSDSAR = function(data, addr)
 };
 
 /**
- * readKISDR(addr)
+ * readKIPDR(addr)
  *
  * @this {DevicePDP11}
- * @param {number} addr (eg, PDP11.UNIBUS.KISDR0--KISDR7 or 172300--172316)
+ * @param {number} addr (eg, PDP11.UNIBUS.KIPDR0--KIPDR7 or 172300--172316)
  * @return {number}
  */
-DevicePDP11.prototype.readKISDR = function(addr)
+DevicePDP11.prototype.readKIPDR = function(addr)
 {
     var reg = (addr >> 1) & 7;
     return this.cpu.mmuPDR[0][reg];
 };
 
 /**
- * writeKISDR(data, addr)
+ * writeKIPDR(data, addr)
  *
  * @this {DevicePDP11}
  * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.KISDR0--KISDR7 or 172300--172316)
+ * @param {number} addr (eg, PDP11.UNIBUS.KIPDR0--KIPDR7 or 172300--172316)
  */
-DevicePDP11.prototype.writeKISDR = function(data, addr)
+DevicePDP11.prototype.writeKIPDR = function(data, addr)
 {
     var reg = (addr >> 1) & 7;
     this.cpu.mmuPDR[0][reg] = data & 0xff0f;
 };
 
 /**
- * readKDSDR(addr)
+ * readKDPDR(addr)
  *
  * @this {DevicePDP11}
- * @param {number} addr (eg, PDP11.UNIBUS.KDSDR0--KDSDR7 or 172320--172336)
+ * @param {number} addr (eg, PDP11.UNIBUS.KDPDR0--KDPDR7 or 172320--172336)
  * @return {number}
  */
-DevicePDP11.prototype.readKDSDR = function(addr)
+DevicePDP11.prototype.readKDPDR = function(addr)
 {
     var reg = ((addr >> 1) & 7) + 8;
     return this.cpu.mmuPDR[0][reg];
 };
 
 /**
- * writeKDSDR(data, addr)
+ * writeKDPDR(data, addr)
  *
  * @this {DevicePDP11}
  * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.KDSDR0--KDSDR7 or 172320--172336)
+ * @param {number} addr (eg, PDP11.UNIBUS.KDPDR0--KDPDR7 or 172320--172336)
  */
-DevicePDP11.prototype.writeKDSDR = function(data, addr)
+DevicePDP11.prototype.writeKDPDR = function(data, addr)
 {
     var reg = ((addr >> 1) & 7) + 8;
     this.cpu.mmuPDR[0][reg] = data & 0xff0f;
 };
 
 /**
- * readKISAR(addr)
+ * readKIPAR(addr)
  *
  * @this {DevicePDP11}
- * @param {number} addr (eg, PDP11.UNIBUS.KISAR0--KISAR7 or 172340--172356)
+ * @param {number} addr (eg, PDP11.UNIBUS.KIPAR0--KIPAR7 or 172340--172356)
  * @return {number}
  */
-DevicePDP11.prototype.readKISAR = function(addr)
+DevicePDP11.prototype.readKIPAR = function(addr)
 {
     var reg = (addr >> 1) & 7;
     return this.cpu.mmuPAR[0][reg];
 };
 
 /**
- * writeKISAR(data, addr)
+ * writeKIPAR(data, addr)
  *
  * @this {DevicePDP11}
  * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.KISAR0--KISAR7 or 172340--172356)
+ * @param {number} addr (eg, PDP11.UNIBUS.KIPAR0--KIPAR7 or 172340--172356)
  */
-DevicePDP11.prototype.writeKISAR = function(data, addr)
+DevicePDP11.prototype.writeKIPAR = function(data, addr)
 {
     var reg = (addr >> 1) & 7;
     this.cpu.mmuPAR[0][reg] = data;
@@ -492,26 +492,26 @@ DevicePDP11.prototype.writeKISAR = function(data, addr)
 };
 
 /**
- * readKDSAR(addr)
+ * readKDPAR(addr)
  *
  * @this {DevicePDP11}
- * @param {number} addr (eg, PDP11.UNIBUS.KDSAR0--KDSAR7 or 172360--172376)
+ * @param {number} addr (eg, PDP11.UNIBUS.KDPAR0--KDPAR7 or 172360--172376)
  * @return {number}
  */
-DevicePDP11.prototype.readKDSAR = function(addr)
+DevicePDP11.prototype.readKDPAR = function(addr)
 {
     var reg = ((addr >> 1) & 7) + 8;
     return this.cpu.mmuPAR[0][reg];
 };
 
 /**
- * writeKDSAR(data, addr)
+ * writeKDPAR(data, addr)
  *
  * @this {DevicePDP11}
  * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.KDSAR0--KDSAR7 or 172360--172376)
+ * @param {number} addr (eg, PDP11.UNIBUS.KDPAR0--KDPAR7 or 172360--172376)
  */
-DevicePDP11.prototype.writeKDSAR = function(data, addr)
+DevicePDP11.prototype.writeKDPAR = function(data, addr)
 {
     var reg = ((addr >> 1) & 7) + 8;
     this.cpu.mmuPAR[0][reg] = data;
@@ -519,78 +519,78 @@ DevicePDP11.prototype.writeKDSAR = function(data, addr)
 };
 
 /**
- * readUISDR(addr)
+ * readUIPDR(addr)
  *
  * @this {DevicePDP11}
- * @param {number} addr (eg, PDP11.UNIBUS.UISDR0--UISDR7 or 177600--177616)
+ * @param {number} addr (eg, PDP11.UNIBUS.UIPDR0--UIPDR7 or 177600--177616)
  * @return {number}
  */
-DevicePDP11.prototype.readUISDR = function(addr)
+DevicePDP11.prototype.readUIPDR = function(addr)
 {
     var reg = (addr >> 1) & 7;
     return this.cpu.mmuPDR[3][reg];
 };
 
 /**
- * writeUISDR(data, addr)
+ * writeUIPDR(data, addr)
  *
  * @this {DevicePDP11}
  * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.UISDR0--UISDR7 or 177600--177616)
+ * @param {number} addr (eg, PDP11.UNIBUS.UIPDR0--UIPDR7 or 177600--177616)
  */
-DevicePDP11.prototype.writeUISDR = function(data, addr)
+DevicePDP11.prototype.writeUIPDR = function(data, addr)
 {
     var reg = (addr >> 1) & 7;
     this.cpu.mmuPDR[3][reg] = data & 0xff0f;
 };
 
 /**
- * readUDSDR(addr)
+ * readUDPDR(addr)
  *
  * @this {DevicePDP11}
- * @param {number} addr (eg, PDP11.UNIBUS.UDSDR0--UDSDR7 or 177620--177636)
+ * @param {number} addr (eg, PDP11.UNIBUS.UDPDR0--UDPDR7 or 177620--177636)
  * @return {number}
  */
-DevicePDP11.prototype.readUDSDR = function(addr)
+DevicePDP11.prototype.readUDPDR = function(addr)
 {
     var reg = ((addr >> 1) & 7) + 8;
     return this.cpu.mmuPDR[3][reg];
 };
 
 /**
- * writeUDSDR(data, addr)
+ * writeUDPDR(data, addr)
  *
  * @this {DevicePDP11}
  * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.UDSDR0--UDSDR7 or 177620--177636)
+ * @param {number} addr (eg, PDP11.UNIBUS.UDPDR0--UDPDR7 or 177620--177636)
  */
-DevicePDP11.prototype.writeUDSDR = function(data, addr)
+DevicePDP11.prototype.writeUDPDR = function(data, addr)
 {
     var reg = ((addr >> 1) & 7) + 8;
     this.cpu.mmuPDR[3][reg] = data & 0xff0f;
 };
 
 /**
- * readUISAR(addr)
+ * readUIPAR(addr)
  *
  * @this {DevicePDP11}
- * @param {number} addr (eg, PDP11.UNIBUS.UISAR0--UISAR7 or 177640--177656)
+ * @param {number} addr (eg, PDP11.UNIBUS.UIPAR0--UIPAR7 or 177640--177656)
  * @return {number}
  */
-DevicePDP11.prototype.readUISAR = function(addr)
+DevicePDP11.prototype.readUIPAR = function(addr)
 {
     var reg = (addr >> 1) & 7;
     return this.cpu.mmuPAR[3][reg];
 };
 
 /**
- * writeUISAR(data, addr)
+ * writeUIPAR(data, addr)
  *
  * @this {DevicePDP11}
  * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.UISAR0--UISAR7 or 177640--177656)
+ * @param {number} addr (eg, PDP11.UNIBUS.UIPAR0--UIPAR7 or 177640--177656)
  */
-DevicePDP11.prototype.writeUISAR = function(data, addr)
+DevicePDP11.prototype.writeUIPAR = function(data, addr)
 {
     var reg = (addr >> 1) & 7;
     this.cpu.mmuPAR[3][reg] = data;
@@ -599,26 +599,26 @@ DevicePDP11.prototype.writeUISAR = function(data, addr)
 };
 
 /**
- * readUDSAR(addr)
+ * readUDPAR(addr)
  *
  * @this {DevicePDP11}
- * @param {number} addr (eg, PDP11.UNIBUS.UDSAR0--UDSAR7 or 177660--177676)
+ * @param {number} addr (eg, PDP11.UNIBUS.UDPAR0--UDPAR7 or 177660--177676)
  * @return {number}
  */
-DevicePDP11.prototype.readUDSAR = function(addr)
+DevicePDP11.prototype.readUDPAR = function(addr)
 {
     var reg = ((addr >> 1) & 7) + 8;
     return this.cpu.mmuPAR[3][reg];
 };
 
 /**
- * writeUDSAR(data, addr)
+ * writeUDPAR(data, addr)
  *
  * @this {DevicePDP11}
  * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.UDSAR0--UDSAR7 or 177660--177676)
+ * @param {number} addr (eg, PDP11.UNIBUS.UDPAR0--UDPAR7 or 177660--177676)
  */
-DevicePDP11.prototype.writeUDSAR = function(data, addr)
+DevicePDP11.prototype.writeUDPAR = function(data, addr)
 {
     var reg = ((addr >> 1) & 7) + 8;
     this.cpu.mmuPAR[3][reg] = data;
@@ -1043,23 +1043,23 @@ DevicePDP11.prototype.writeIgnored = function(data, addr)
  */
 DevicePDP11.UNIBUS_IOTABLE = {
     [PDP11.UNIBUS.UNIMAP]:  /* 170200 */    [null, null, DevicePDP11.prototype.readUNIMAP,  DevicePDP11.prototype.writeUNIMAP,  "UNIMAP",   64, PDP11.MODEL_1170],
-    [PDP11.UNIBUS.SISDR0]:  /* 172200 */    [null, null, DevicePDP11.prototype.readSISDR,   DevicePDP11.prototype.writeSISDR,   "SISDR",    8,  PDP11.MODEL_1145],
-    [PDP11.UNIBUS.SDSDR0]:  /* 172220 */    [null, null, DevicePDP11.prototype.readSDSDR,   DevicePDP11.prototype.writeSDSDR,   "SDSDR",    8,  PDP11.MODEL_1145],
-    [PDP11.UNIBUS.SISAR0]:  /* 172240 */    [null, null, DevicePDP11.prototype.readSISAR,   DevicePDP11.prototype.writeSISAR,   "SISAR",    8,  PDP11.MODEL_1145],
-    [PDP11.UNIBUS.SDSAR0]:  /* 172260 */    [null, null, DevicePDP11.prototype.readSDSAR,   DevicePDP11.prototype.writeSDSAR,   "SDSAR",    8,  PDP11.MODEL_1145],
-    [PDP11.UNIBUS.KISDR0]:  /* 172300 */    [null, null, DevicePDP11.prototype.readKISDR,   DevicePDP11.prototype.writeKISDR,   "KISDR",    8,  PDP11.MODEL_1145],
-    [PDP11.UNIBUS.KDSDR0]:  /* 172320 */    [null, null, DevicePDP11.prototype.readKDSDR,   DevicePDP11.prototype.writeKDSDR,   "KDSDR",    8,  PDP11.MODEL_1145],
-    [PDP11.UNIBUS.KISAR0]:  /* 172340 */    [null, null, DevicePDP11.prototype.readKISAR,   DevicePDP11.prototype.writeKISAR,   "KISAR",    8,  PDP11.MODEL_1145],
-    [PDP11.UNIBUS.KDSAR0]:  /* 172360 */    [null, null, DevicePDP11.prototype.readKDSAR,   DevicePDP11.prototype.writeKDSAR,   "KDSAR",    8,  PDP11.MODEL_1145],
+    [PDP11.UNIBUS.SIPDR0]:  /* 172200 */    [null, null, DevicePDP11.prototype.readSIPDR,   DevicePDP11.prototype.writeSIPDR,   "SIPDR",    8,  PDP11.MODEL_1145],
+    [PDP11.UNIBUS.SDPDR0]:  /* 172220 */    [null, null, DevicePDP11.prototype.readSDPDR,   DevicePDP11.prototype.writeSDPDR,   "SDPDR",    8,  PDP11.MODEL_1145],
+    [PDP11.UNIBUS.SIPAR0]:  /* 172240 */    [null, null, DevicePDP11.prototype.readSIPAR,   DevicePDP11.prototype.writeSIPAR,   "SIPAR",    8,  PDP11.MODEL_1145],
+    [PDP11.UNIBUS.SDPAR0]:  /* 172260 */    [null, null, DevicePDP11.prototype.readSDPAR,   DevicePDP11.prototype.writeSDPAR,   "SDPAR",    8,  PDP11.MODEL_1145],
+    [PDP11.UNIBUS.KIPDR0]:  /* 172300 */    [null, null, DevicePDP11.prototype.readKIPDR,   DevicePDP11.prototype.writeKIPDR,   "KIPDR",    8,  PDP11.MODEL_1145],
+    [PDP11.UNIBUS.KDPDR0]:  /* 172320 */    [null, null, DevicePDP11.prototype.readKDPDR,   DevicePDP11.prototype.writeKDPDR,   "KDPDR",    8,  PDP11.MODEL_1145],
+    [PDP11.UNIBUS.KIPAR0]:  /* 172340 */    [null, null, DevicePDP11.prototype.readKIPAR,   DevicePDP11.prototype.writeKIPAR,   "KIPAR",    8,  PDP11.MODEL_1145],
+    [PDP11.UNIBUS.KDPAR0]:  /* 172360 */    [null, null, DevicePDP11.prototype.readKDPAR,   DevicePDP11.prototype.writeKDPAR,   "KDPAR",    8,  PDP11.MODEL_1145],
     [PDP11.UNIBUS.MMR3]:    /* 172516 */    [null, null, DevicePDP11.prototype.readMMR3,    DevicePDP11.prototype.writeMMR3,    "MMR3",     1,  PDP11.MODEL_1145],
     [PDP11.UNIBUS.LKS]:     /* 177546 */    [null, null, DevicePDP11.prototype.readLKS,     DevicePDP11.prototype.writeLKS,     "LKS"],
     [PDP11.UNIBUS.MMR0]:    /* 177572 */    [null, null, DevicePDP11.prototype.readMMR0,    DevicePDP11.prototype.writeMMR0,    "MMR0",     1,  PDP11.MODEL_1145],
     [PDP11.UNIBUS.MMR1]:    /* 177574 */    [null, null, DevicePDP11.prototype.readMMR1,    DevicePDP11.prototype.writeIgnored, "MMR1",     1,  PDP11.MODEL_1145],
     [PDP11.UNIBUS.MMR2]:    /* 177576 */    [null, null, DevicePDP11.prototype.readMMR2,    DevicePDP11.prototype.writeIgnored, "MMR2",     1,  PDP11.MODEL_1145],
-    [PDP11.UNIBUS.UISDR0]:  /* 177600 */    [null, null, DevicePDP11.prototype.readUISDR,   DevicePDP11.prototype.writeUISDR,   "UISDR",    8,  PDP11.MODEL_1145],
-    [PDP11.UNIBUS.UDSDR0]:  /* 177620 */    [null, null, DevicePDP11.prototype.readUDSDR,   DevicePDP11.prototype.writeUDSDR,   "UDSDR",    8,  PDP11.MODEL_1145],
-    [PDP11.UNIBUS.UISAR0]:  /* 177640 */    [null, null, DevicePDP11.prototype.readUISAR,   DevicePDP11.prototype.writeUISAR,   "UISAR",    8,  PDP11.MODEL_1145],
-    [PDP11.UNIBUS.UDSAR0]:  /* 177660 */    [null, null, DevicePDP11.prototype.readUDSAR,   DevicePDP11.prototype.writeUDSAR,   "UDSAR",    8,  PDP11.MODEL_1145],
+    [PDP11.UNIBUS.UIPDR0]:  /* 177600 */    [null, null, DevicePDP11.prototype.readUIPDR,   DevicePDP11.prototype.writeUIPDR,   "UIPDR",    8,  PDP11.MODEL_1145],
+    [PDP11.UNIBUS.UDPDR0]:  /* 177620 */    [null, null, DevicePDP11.prototype.readUDPDR,   DevicePDP11.prototype.writeUDPDR,   "UDPDR",    8,  PDP11.MODEL_1145],
+    [PDP11.UNIBUS.UIPAR0]:  /* 177640 */    [null, null, DevicePDP11.prototype.readUIPAR,   DevicePDP11.prototype.writeUIPAR,   "UIPAR",    8,  PDP11.MODEL_1145],
+    [PDP11.UNIBUS.UDPAR0]:  /* 177660 */    [null, null, DevicePDP11.prototype.readUDPAR,   DevicePDP11.prototype.writeUDPAR,   "UDPAR",    8,  PDP11.MODEL_1145],
     [PDP11.UNIBUS.R0SET0]:  /* 177700 */    [null, null, DevicePDP11.prototype.readRSET0,   DevicePDP11.prototype.writeRSET0,   "R0SET0"],
     [PDP11.UNIBUS.R1SET0]:  /* 177701 */    [null, null, DevicePDP11.prototype.readRSET0,   DevicePDP11.prototype.writeRSET0,   "R1SET0"],
     [PDP11.UNIBUS.R2SET0]:  /* 177702 */    [null, null, DevicePDP11.prototype.readRSET0,   DevicePDP11.prototype.writeRSET0,   "R2SET0"],

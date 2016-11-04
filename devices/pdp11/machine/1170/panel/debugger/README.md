@@ -134,7 +134,7 @@ which should produce these results:
 	>> d 17000500 l1
 	00017000500  070707  
 
-If you also want to see all the hardware register activity, use the Debugger's "m bus on" command to turn bus messages on:
+If you also want to see all the hardware register activity, use the Debugger's "m bus on" command to turn Bus messages on:
 
 	>> m bus on
 	messages on:  bus
@@ -162,12 +162,12 @@ If you also want to see all the hardware register activity, use the Debugger's "
 	
 	LOCATION        CONTENTS    INSTRUCTIONS & NOTES
 	
-	17772300        077406      KIPDR 0
-	17772316        077406      KIPDR 7 = I/O page for program
-	17772340        000000      KIPAR 0         ; Load 200 if using trap catchers
-	17772356        177600      KIPAR 7 = I/O page for program
+	17772300        077406      KIPDR0
+	17772316        077406      KIPDR7 = I/O page for program
+	17772340        000000      KIPAR0          ; Load 200 if using trap catchers
+	17772356        177600      KIPAR7 = I/O page for program
 	17777700        000000      R0 = Start Virtual Address
-	17777701        172340      R1 = KIPAR 0 Address
+	17777701        172340      R1 = KIPAR0 Address
 	17777702        177572      R2 = MMR0 Address
 	17777703        177760      R3 = System size register Address
 	17777704        172516      R4 = MMR3 Address
@@ -211,22 +211,22 @@ The above "toggle-in" can be entered with the PDPjs Debugger as follows:
 	e 17772260 000200 021311 003402 005000 000776 005312 000000;
 	r pc 172240
 
-which should produce the following results when bus messages are turned on ("m bus on"):
+which should produce the following results when Bus messages are turned on ("m bus on"):
 
 	>> m bus on
 	messages on:  bus
 	>> e 17772300 077406
 	changing 00017772300 to 077406
-	KISDR0.writeWord(00017772300,077406)
+	KIPDR0.writeWord(00017772300,077406)
 	>> e 17772316 077406
 	changing 00017772316 to 077406
-	KISDR7.writeWord(00017772316,077406)
+	KIPDR7.writeWord(00017772316,077406)
 	>> e 17772340 000000
 	changing 00017772340 to 000000
-	KISAR0.writeWord(00017772340,000000)
+	KIPAR0.writeWord(00017772340,000000)
 	>> e 17772356 177600
 	changing 00017772356 to 177600
-	KISAR7.writeWord(00017772356,177600)
+	KIPAR7.writeWord(00017772356,177600)
 	>> e 17777700 000000
 	changing 00017777700 to 000000
 	R0SET0.writeWord(00017777700,000000)
@@ -253,43 +253,58 @@ which should produce the following results when bus messages are turned on ("m b
 	PSW.writeWord(00017777776,000000)
 	>> e 17772240 012714 000020 005212 010520 020027 017776 003774 062711
 	changing 00017772240 to 012714
-	SISAR0.writeWord(00017772240,012714)
+	SIPAR0.writeWord(00017772240,012714)
 	changing 00017772242 to 000020
-	SISAR1.writeWord(00017772242,000020)
+	SIPAR1.writeWord(00017772242,000020)
 	changing 00017772244 to 005212
-	SISAR2.writeWord(00017772244,005212)
+	SIPAR2.writeWord(00017772244,005212)
 	changing 00017772246 to 010520
-	SISAR3.writeWord(00017772246,010520)
+	SIPAR3.writeWord(00017772246,010520)
 	changing 00017772250 to 020027
-	SISAR4.writeWord(00017772250,020027)
+	SIPAR4.writeWord(00017772250,020027)
 	changing 00017772252 to 017776
-	SISAR5.writeWord(00017772252,017776)
+	SIPAR5.writeWord(00017772252,017776)
 	changing 00017772254 to 003774
-	SISAR6.writeWord(00017772254,003774)
+	SIPAR6.writeWord(00017772254,003774)
 	changing 00017772256 to 062711
-	SISAR7.writeWord(00017772256,062711)
+	SIPAR7.writeWord(00017772256,062711)
 	>> e 17772260 000200 021311 003402 005000 000776 005312 000000
 	changing 00017772260 to 000200
-	SDSAR0.writeWord(00017772260,000200)
+	SDPAR0.writeWord(00017772260,000200)
 	changing 00017772262 to 021311
-	SDSAR1.writeWord(00017772262,021311)
+	SDPAR1.writeWord(00017772262,021311)
 	changing 00017772264 to 003402
-	SDSAR2.writeWord(00017772264,003402)
+	SDPAR2.writeWord(00017772264,003402)
 	changing 00017772266 to 005000
-	SDSAR3.writeWord(00017772266,005000)
+	SDPAR3.writeWord(00017772266,005000)
 	changing 00017772270 to 000776
-	SDSAR4.writeWord(00017772270,000776)
+	SDPAR4.writeWord(00017772270,000776)
 	changing 00017772272 to 005312
-	SDSAR5.writeWord(00017772272,005312)
+	SDPAR5.writeWord(00017772272,005312)
 	changing 00017772274 to 000000
-	SDSAR6.writeWord(00017772274,000000)
+	SDPAR6.writeWord(00017772274,000000)
 	>> r pc 172240
 	updated registers:
 	R0=000000 R1=172340 R2=177572 R3=177760 R4=172516 R5=123123 
 	SP=177676 PC=172240 PS=000000 SW=00000000 T0 N0 Z0 V0 C0 
-	SISAR0.readWord(172240): 012714
-	SISAR1.readWord(172242): 000020
-	SISAR0.readWord(172240): 012714
-	SISAR1.readWord(172242): 000020
+	SIPAR0.readWord(172240): 012714
+	SIPAR1.readWord(172242): 000020
+	SIPAR0.readWord(172240): 012714
+	SIPAR1.readWord(172242): 000020
 	172240: 012714 000020          MOV   #20,@R4
 
+All the "Supervisor I Page Address Register" (SIPAR) and "Supervisor D Page Address Register" (SDPAR) reads and writes
+merely reflect where the above code is being loaded and executed from; those registers are essentially being used as scratch
+RAM.
+
+As the **Maintenance Service Guide** goes on to say:
+
+	The program should halt when all of memory is cleared. If it doesn't halt, examine the CPU error, Memory system error
+	and HI/LO error address registers to determine the cause. Trap catchers can be used by depositing 200 in KIPAR 0 (17772340)
+	instead of zero, and setting up vector locations with their address + 2 and the Vector + 2 with a 0 (halt).
+	
+	Note: When loading the program you must be in console physical [i.e., the ADDRESS select switch must be set to "CONS PHY",
+	which is the default setting of the PDPjs Front Panel].
+
+Before running the above code, you should turn Bus messages off (ie, "m bus off"); otherwise, the quantity of messages will
+slow execution to a crawl.

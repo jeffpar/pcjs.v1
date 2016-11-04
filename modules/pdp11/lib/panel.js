@@ -268,11 +268,11 @@ PanelPDP11.prototype.setBinding = function(sType, sBinding, control, sValue)
 
     default:
         /*
-         * Square (default) or round LEDs are defined in machine XML files like so:
+         * Square ("led") or round ("rled") LEDs are defined in machine XML files like so:
          *
          *      <control type="rled" binding="A3" value="1" width="100%" container="center"/>
          *
-         * Only *type* and *binding* attributes are required; if *value* is omitted, the default value is 0 (off).
+         * Only *type* and *binding* attributes are required; if *value* is omitted, the default value is 0 ("off").
          */
         if (sType == "led" || sType == "rled") {
             this.bindings[sBinding] = control;
@@ -576,9 +576,12 @@ PanelPDP11.prototype.processStart = function(value, index)
  * If value == 1 (our initial value), then the 'STEP' switch is set to "S INST" (step one instruction);
  * otherwise, it's set to "S BUS CYCLE" (step one bus cycle).
  *
- * However, since we can't currently support cycle-stepping, I've decided to change the meaning of this
- * switch: the normal ("up") position means that successive 'EXAM' and 'DEP' operations will first add 2
- * to the 'ADDRESS' register, while the opposite ("down") position means they will first subtract 2.
+ * However, since we can't currently support cycle-stepping, I've decided to innovate a little and
+ * change the meaning of this switch: the normal ("up") position means that successive 'EXAM' and 'DEP'
+ * operations will first add 2 to the 'ADDRESS' register, while the opposite ("down") position means
+ * they will first subtract 2.
+ *
+ * See processLEDTest() for more of these exciting "innovations".  ;-)
  *
  * @this {PanelPDP11}
  * @param {number} value
@@ -760,6 +763,10 @@ PanelPDP11.prototype.processLEDTest = function(value, index)
     } else {
         this.fLEDTest = false;
         this.displayLEDs();
+        /*
+         * This is another one of my "innovations": when you're done testing the LEDs, all the switches reset as well.
+         */
+        this.setSwitches(0);
     }
 };
 
