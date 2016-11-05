@@ -4,8 +4,8 @@
 
 all: PDPJSMON.json
 
-PDPJSMON.lst: PDPJSMON.mac
-	macro11 PDPJSMON.mac -l PDPJSMON.lst
+PDPJSMON.txt: PDPJSMON.mac
+	macro11 PDPJSMON.mac -l PDPJSMON.txt
 
-PDPJSMON.json: PDPJSMON.lst
-	node ../../../../modules/filedump/bin/filedump --file=PDPJSMON.lst --format=octal --output=PDPJSMON.json --overwrite
+PDPJSMON.json: PDPJSMON.txt
+	node ../../../../modules/filedump/bin/filedump --file=PDPJSMON.txt --format=octal --output=PDPJSMON.json --overwrite

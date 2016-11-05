@@ -38,7 +38,8 @@ var MessagesPDP11 = {
     FAULT:      0x00000020,
     BUS:        0x00000040,
     MEMORY:     0x00000080,
-    DEVICE:     0x00000100,
+    ROM:        0x00000100,
+    DEVICE:     0x00000200,
     KEYBOARD:   0x00010000,
     KEYS:       0x00020000,
     DISK:       0x00200000,
@@ -71,6 +72,7 @@ MessagesPDP11.CATEGORIES = {
     "fault":    MessagesPDP11.FAULT,
     "bus":      MessagesPDP11.BUS,
     "memory":   MessagesPDP11.MEMORY,
+    "rom":      MessagesPDP11.ROM,
     "device":   MessagesPDP11.DEVICE,
     "keyboard": MessagesPDP11.KEYBOARD, // "kbd" is also allowed as shorthand for "keyboard"; see doMessages()
     "key":      MessagesPDP11.KEYS,     // using "key" instead of "keys", since the latter is a method on JavasScript objects

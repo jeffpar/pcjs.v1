@@ -4,8 +4,8 @@
 
 all: XCPA.json
 
-XCPA.lst: XCPA.mac
-	macro11 XCPA.mac -l XCPA.lst
+XCPA.txt: XCPA.mac
+	macro11 XCPA.mac -l XCPA.txt
 
-XCPA.json: XCPA.lst
-	node ../../../../modules/filedump/bin/filedump --file=XCPA.lst --format=octal --output=XCPA.json --overwrite
+XCPA.json: XCPA.txt
+	node ../../../../modules/filedump/bin/filedump --file=XCPA.txt --format=octal --output=XCPA.json --overwrite

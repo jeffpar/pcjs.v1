@@ -54,11 +54,11 @@ To run the above code, set the PC to 037744 and start the machine:
 Pre-loading DEC's Bootstrap Loader
 ----------------------------------
 
-I pasted the disassembled code (above) into a listing file, [BOOTSTRAP-16KB.lst](BOOTSTRAP-16KB.lst),
+I pasted the disassembled code (above) into a listing file, [BOOTSTRAP-16KB.txt](BOOTSTRAP-16KB.txt),
 and then ran [FileDump](/modules/filedump) to produce a [BOOTSTRAP-16KB.json](BOOTSTRAP-16KB.json) that can
 be automatically pre-loaded into any machine:
 
-	filedump --file=BOOTSTRAP-16KB.lst --format=octal --output=BOOTSTRAP-16KB.json
+	filedump --file=BOOTSTRAP-16KB.txt --format=octal --output=BOOTSTRAP-16KB.json
 
 For example, this [PDP-11/20 Bootstrap Loader Demo](/devices/pdp11/machine/1120/bootstrap/debugger/) pre-loads
 the **Bootstrap Loader** using the `<ram>` component's optional *file* attribute:

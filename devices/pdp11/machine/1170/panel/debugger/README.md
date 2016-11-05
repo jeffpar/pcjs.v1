@@ -10,11 +10,19 @@ machines:
 
 {% include machine.html id="test1170" %}
 
+Other interesting things to know about this machine:
+
+* It includes an [M9312 ROM](/devices/pdp11/rom/M9312/) at address 165000.  The exact ROM is [23-616F1](/devices/pdp11/rom/M9312/23-616F1.txt).
+
 Toggle-Ins
 ----------
 
 As DEC notes in the [PDP-11/70 Maintenance Service Guide](http://archive.pcjs.org/pubs/dec/pdp11/1170/PDP1170_Maintenance_Service_Guide_Apr88.pdf),
-Chapter 4: "There are several useful toggle-ins that are probably not very well known."  Excerpts are provided below.
+Chapter 4: "There are several useful toggle-ins that are probably not very well known."  Excerpts are provided below.  If you're
+not sure how "toggle in" code using a Front Panel, check out [Front Panel Basics](/devices/pdp11/machine/1170/panel/#front-panel-basics).
+
+However, since the above machine also includes the PDPjs Debugger, you'll find that it's much easier to use the Debugger commands
+described below to load and execute these "toggle-ins". 
 
 ### Memory Management
 
@@ -186,7 +194,7 @@ If you also want to see all the hardware register activity, use the Debugger's "
 	17772262        021311      CMP (R3),(R1)   ; Top of Memory?
 	17772264        003402      BLE 2$
 	17772266        005000      CLR R0          ; Start at Virtual Address 0
-	17772270        000766      BR  1$          ; [NOTE: DEC's guide incorrecly lists this opcode as 000776 --@jeffpar]
+	17772270        000766      BR  1$          ; [NOTE: DEC's guide incorrecly lists this opcode as 000776 --JP]
 	17772272        005312  2$: DEC (R2)        ; Disable Relocation
 	17772274        000000      HLT
 	
@@ -310,8 +318,8 @@ As the **Maintenance Service Guide** goes on to say:
 Before running the above code, you should turn Bus messages off (ie, "m bus off"); otherwise, the quantity of messages will
 slow execution to a crawl.
 
-If you want to set an execution breakpoint in the above code, make sure you use the appropriate virtual (16-bit) address,
-not one of the physical (22-bit) addresses shown above.  For example, to break on this instruction:
+If you want to set an execution breakpoint in the above code, make sure you use the appropriate virtual (16-bit) address.
+For example, to break on this instruction:
 
 	17772256        062711      ADD #200,(R1)   ; Step Page
 

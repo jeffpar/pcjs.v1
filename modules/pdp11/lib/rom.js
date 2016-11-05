@@ -33,12 +33,14 @@
 "use strict";
 
 if (NODE) {
-    var str          = require("../../shared/lib/strlib");
-    var web          = require("../../shared/lib/weblib");
-    var DumpAPI      = require("../../shared/lib/dumpapi");
-    var Component    = require("../../shared/lib/component");
-    var PDP11        = require("./defines");
-    var MemoryPDP11  = require("./memory");
+    var str           = require("../../shared/lib/strlib");
+    var web           = require("../../shared/lib/weblib");
+    var DumpAPI       = require("../../shared/lib/dumpapi");
+    var Component     = require("../../shared/lib/component");
+    var PDP11         = require("./defines");
+    var BusPDP11      = require("./bus");
+    var MemoryPDP11   = require("./memory");
+    var MessagesPDP11 = require("./messages");
 }
 
 /**
@@ -51,11 +53,11 @@ if (NODE) {
  *      alias: physical alias address (null if none)
  *      file: name of ROM data file
  *
- * NOTE: The ROM data will not be copied into place until the Bus is ready (see initBus()) AND the
- * ROM data file has finished loading (see doneLoad()).
+ * NOTE: The ROM data will not be copied into place until the Bus is ready (see initBus()) AND
+ * the ROM data file has finished loading (see doneLoad()).
  *
- * Also, while the size parameter may seem redundant, I consider it useful to confirm that the ROM you received
- * is the ROM you expected.
+ * Also, while the size parameter may seem redundant, I consider it useful to confirm that the ROM
+ * you received is the ROM you expected.
  *
  * @constructor
  * @extends Component
@@ -70,6 +72,7 @@ function ROMPDP11(parmsROM)
 
     this.addrROM = parmsROM['addr'];
     this.sizeROM = parmsROM['size'];
+    this.fRetainROM = false;
 
     /*
      * The new 'alias' property can now be EITHER a single physical address (like 'addr') OR an array of
@@ -260,7 +263,9 @@ ROMPDP11.prototype.initROM = function()
                  * whether they're ROM or RAM.  However, the only way to modify a machine's ROM is with the Debugger,
                  * and Debugger users should know better.
                  */
-                delete this.abInit;
+                if (!this.fRetainROM) {
+                    delete this.abInit;
+                }
             }
         }
         this.setReady();
@@ -276,7 +281,24 @@ ROMPDP11.prototype.initROM = function()
  */
 ROMPDP11.prototype.addROM = function(addr)
 {
-    if (this.bus.addMemory(addr, this.sizeROM, MemoryPDP11.TYPE.ROM)) {
+    this.status(this.sizeROM + "-byte ROM at " + str.toOct(addr));
+
+    if (addr >= BusPDP11.IOPAGE_16BIT && addr < BusPDP11.IOPAGE_16BIT + BusPDP11.IOPAGE_LENGTH) {
+        /*
+         * This code has been added as a work-around to effectively allow us to install small ROMs into portions
+         * of the IOPAGE address space, by installing I/O handlers for the entire range that return the corresponding
+         * bytes of the current ROM image on reads, and ignore any writes (which I'm only assuming is how a typical
+         * ROM "device" deals with writes; if we remove the write handler, then writes will cause a fault).
+         */
+        var IOTable = {
+            [addr]: [ROMPDP11.prototype.readROMByte, ROMPDP11.prototype.writeROMByte, null, null, null, this.sizeROM >> 1]
+        };
+        if (this.bus.addIOTable(this, IOTable, MessagesPDP11.ROM, this.idComponent)) {
+            this.fRetainROM = true;
+            return true;
+        }
+    }
+    else if (this.bus.addMemory(addr, this.sizeROM, MemoryPDP11.TYPE.ROM)) {
         if (DEBUG) this.log("addROM(): copying ROM to " + str.toHexLong(addr) + " (" + str.toHexLong(this.abInit.length) + " bytes)");
         var i;
         for (i = 0; i < this.abInit.length; i++) {
@@ -284,6 +306,7 @@ ROMPDP11.prototype.addROM = function(addr)
         }
         return true;
     }
+
     /*
      * We don't need to report an error here, because addMemory() already takes care of that.
      */
@@ -307,6 +330,30 @@ ROMPDP11.prototype.cloneROM = function(addr)
 {
     var aBlocks = this.bus.getMemoryBlocks(this.addrROM, this.sizeROM);
     this.bus.setMemoryBlocks(addr, this.sizeROM, aBlocks);
+};
+
+/**
+ * readROMByte(addr)
+ *
+ * @this {ROMPDP11}
+ * @param {number} addr
+ * @return {number}
+ */
+ROMPDP11.prototype.readROMByte = function(addr)
+{
+    var i = (addr - this.addrROM);
+    return this.abInit[i];
+};
+
+/**
+ * writeROMByte(data, addr)
+ *
+ * @this {ROMPDP11}
+ * @param {number} data
+ * @param {number} addr
+ */
+ROMPDP11.prototype.writeROMByte = function(data, addr)
+{
 };
 
 /**

@@ -665,7 +665,7 @@ BusPDP11.prototype.addMemory = function(addr, size, type, controller)
         if (type == MemoryPDP11.TYPE.RAM && !this.cbRAM) {
             this.cbRAM += size;
         }
-        this.status(str.toDec(size / 1024) + "Kb " + MemoryPDP11.TYPE_NAMES[type] + " at " + str.toOct(addr));
+        this.status((size >> 10) + "Kb " + MemoryPDP11.TYPE_NAMES[type] + " at " + str.toOct(addr));
         return true;
     }
 
@@ -1270,24 +1270,26 @@ BusPDP11.prototype.getMemorySize = function(type)
  * @param {function(number,number)|null|undefined} fnWriteByte
  * @param {function(number)|null|undefined} fnReadWord
  * @param {function(number,number)|null|undefined} fnWriteWord
- * @param {string} [sName]
  * @param {number} [msgCategory]
+ * @param {string} [sName]
+ * @return {boolean} (true if entire range successfully registered, false if any conflicts)
  */
-BusPDP11.prototype.addIOHandlers = function(start, end, fnReadByte, fnWriteByte, fnReadWord, fnWriteWord, sName, msgCategory)
+BusPDP11.prototype.addIOHandlers = function(start, end, fnReadByte, fnWriteByte, fnReadWord, fnWriteWord, msgCategory, sName)
 {
     for (var addr = start; addr <= end; addr += 2) {
         var off = addr & BusPDP11.IOPAGE_MASK;
         if (this.aIOHandlers[off] !== undefined) {
             Component.warning("I/O address already registered: " + str.toHexLong(addr));
-            continue;
+            return false;
         }
         this.aIOHandlers[off] = [fnReadByte, fnWriteByte, fnReadWord, fnWriteWord, sName || "unknown", msgCategory, false];
         if (MAXDEBUG) this.log("addIOHandlers(" + str.toHexLong(addr) + ")");
     }
+    return true;
 };
 
 /**
- * addIOTable(component, table, msgCategory)
+ * addIOTable(component, table, msgCategory, sName)
  *
  * Add I/O notification handlers from the specified table (a batch version of addIOHandlers).
  *
@@ -1295,8 +1297,10 @@ BusPDP11.prototype.addIOHandlers = function(start, end, fnReadByte, fnWriteByte,
  * @param {Component} component
  * @param {Object} table
  * @param {number} [msgCategory] (default is BUS)
+ * @param {string} [sName]
+ * @return {boolean} (true if entire range successfully registered, false if any conflicts)
  */
-BusPDP11.prototype.addIOTable = function(component, table, msgCategory)
+BusPDP11.prototype.addIOTable = function(component, table, msgCategory, sName)
 {
     for (var port in table) {
         var addr = +port;
@@ -1338,9 +1342,12 @@ BusPDP11.prototype.addIOTable = function(component, table, msgCategory)
         var sReg = afn[4];
         for (var iReg = 0; iReg < nRegs; iReg++, addr += 2) {
             if (sReg && nRegs > 1) sReg = afn[4] + iReg;
-            this.addIOHandlers(addr, addr, fnReadByte, fnWriteByte, fnReadWord, fnWriteWord, sReg, msgCategory || MessagesPDP11.BUS);
+            if (!this.addIOHandlers(addr, addr, fnReadByte, fnWriteByte, fnReadWord, fnWriteWord, msgCategory || MessagesPDP11.BUS, sReg || sName)) {
+                return false;
+            }
         }
     }
+    return true;
 };
 
 /**

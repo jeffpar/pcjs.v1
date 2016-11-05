@@ -7,4 +7,4 @@ permalink: /devices/pdp11/rom/
 PDP-11 ROM Images
 -----------------
 
-Any ROM images added to the project will be stored here.
+* [M9312](M9312/)

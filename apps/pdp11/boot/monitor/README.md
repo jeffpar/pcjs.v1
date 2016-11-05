@@ -13,7 +13,7 @@ PDP-11 Boot Monitor
 [Paul Nankervis](mailto:paulnank@hotmail.com).  It is used with all our PDP-11 test machines.
 
 [PDPJSMON.mac](PDPJSMON.mac) was cross-assembled with [MACRO11](https://github.com/shattered/macro11) to produce
-[PDPJSMON.lst](PDPJSMON.lst), which was then processed by [FileDump](/modules/filedump/) to produce
+[PDPJSMON.txt](PDPJSMON.txt), which was then processed by [FileDump](/modules/filedump/) to produce
 [PDPJSMON.json](PDPJSMON.json).
 
 To see the Boot Monitor in action, try the [PDP-11/70 Boot Monitor (with Debugger)](/devices/pdp11/machine/1170/monitor/debugger/).
