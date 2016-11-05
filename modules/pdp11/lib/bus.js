@@ -94,7 +94,7 @@ function BusPDP11(parmsBus, cpu, dbg)
      * as a result, our IOController functions assume that all incoming offsets are within a single 8Kb block.
      */
     this.addrTotal = 1 << this.nBusWidth;
-    this.nBusLimit = this.nBusMask = (this.addrTotal - 1);
+    this.nBusMask = (this.addrTotal - 1);
     this.nBlockSize = BusPDP11.IOPAGE_LENGTH;
     this.nBlockShift = Math.log2(this.nBlockSize);      // ES6 ALERT (alternatively: Math.log(this.nBlockSize) / Math.LN2)
     this.nBlockLen = this.nBlockSize >> 2;
@@ -135,6 +135,7 @@ function BusPDP11(parmsBus, cpu, dbg)
     this.fIOBreakAll = false;
     this.nDisableFaults = 0;
     this.fFault = false;
+    this.cbRAM = 0;
 
     /*
      * Array of RESET notification handlers registered by Device components.
@@ -242,21 +243,28 @@ BusPDP11.IOController = {
         var b = -1;
         var bus = this.controller;
         var afn = bus.aIOHandlers[off];
+
+        /*
+         * Since addr is primarily used to advise an I/O handler of the target IOPAGE address, and since we don't want
+         * our handlers to worry about the current IOPAGE location, we truncate addr to 16 bits (the IOPAGE's lowest location).
+         */
+        var addrMasked = addr & 0xffff;
+
         if (afn) {
             if (afn[BusPDP11.IOHANDLER.READ_BYTE]) {
-                b = afn[BusPDP11.IOHANDLER.READ_BYTE](addr);
+                b = afn[BusPDP11.IOHANDLER.READ_BYTE](addrMasked);
             } else if (afn[BusPDP11.IOHANDLER.READ_WORD]) {
-                if (!(addr & 0x1)) {
-                    b = afn[BusPDP11.IOHANDLER.READ_WORD](addr) & 0xff;
+                if (!(addrMasked & 0x1)) {
+                    b = afn[BusPDP11.IOHANDLER.READ_WORD](addrMasked) & 0xff;
                 } else {
-                    b = afn[BusPDP11.IOHANDLER.READ_WORD](addr & ~0x1) >> 8;
+                    b = afn[BusPDP11.IOHANDLER.READ_WORD](addrMasked & ~0x1) >> 8;
                 }
             }
-        } else if (addr & 0x1) {
+        } else if (addrMasked & 0x1) {
             afn = bus.aIOHandlers[off & ~0x1];
             if (afn) {
                 if (afn[BusPDP11.IOHANDLER.READ_WORD]) {
-                    b = afn[BusPDP11.IOHANDLER.READ_WORD](addr & ~0x1) >> 8;
+                    b = afn[BusPDP11.IOHANDLER.READ_WORD](addrMasked & ~0x1) >> 8;
                 }
             }
         }
@@ -288,12 +296,19 @@ BusPDP11.IOController = {
         var fWrite = false;
         var bus = this.controller;
         var afn = bus.aIOHandlers[off];
+
+        /*
+         * Since addr is primarily used to advise an I/O handler of the target IOPAGE address, and since we don't want
+         * our handlers to worry about the current IOPAGE location, we truncate addr to 16 bits (the IOPAGE's lowest location).
+         */
+        var addrMasked = addr & 0xffff;
+
         if (afn) {
             /*
              * If a writeByte() handler exists, call it; we're done.
              */
             if (afn[BusPDP11.IOHANDLER.WRITE_BYTE]) {
-                afn[BusPDP11.IOHANDLER.WRITE_BYTE](b, addr);
+                afn[BusPDP11.IOHANDLER.WRITE_BYTE](b, addrMasked);
                 fWrite = true;
             }
             /*
@@ -306,15 +321,15 @@ BusPDP11.IOController = {
              */
             else if (afn[BusPDP11.IOHANDLER.WRITE_WORD]) {
                 w = afn[BusPDP11.IOHANDLER.READ_WORD]? afn[BusPDP11.IOHANDLER.READ_WORD](0) : 0;
-                if (!(addr & 0x1)) {
-                    afn[BusPDP11.IOHANDLER.WRITE_WORD]((w & ~0xff) | b, addr);
+                if (!(addrMasked & 0x1)) {
+                    afn[BusPDP11.IOHANDLER.WRITE_WORD]((w & ~0xff) | b, addrMasked);
                     fWrite = true;
                 } else {
-                    afn[BusPDP11.IOHANDLER.WRITE_WORD]((w & 0xff) | (b << 8), addr & ~0x1);
+                    afn[BusPDP11.IOHANDLER.WRITE_WORD]((w & 0xff) | (b << 8), addrMasked & ~0x1);
                     fWrite = true;
                 }
             }
-        } else if (addr & 0x1) {
+        } else if (addrMasked & 0x1) {
             /*
              * If no handler existed, and this address was odd, then perhaps a handler exists for the even address;
              * if so, call the readWord() handler first to get the original data, then call writeWord() with the new
@@ -327,9 +342,9 @@ BusPDP11.IOController = {
             afn = bus.aIOHandlers[off & ~0x1];
             if (afn) {
                 if (afn[BusPDP11.IOHANDLER.WRITE_WORD]) {
-                    addr &= ~0x1;
+                    addrMasked &= ~0x1;
                     w = afn[BusPDP11.IOHANDLER.READ_WORD]? afn[BusPDP11.IOHANDLER.READ_WORD](0) : 0;
-                    afn[BusPDP11.IOHANDLER.WRITE_WORD]((w & 0xff) | (b << 8), addr);
+                    afn[BusPDP11.IOHANDLER.WRITE_WORD]((w & 0xff) | (b << 8), addrMasked);
                     fWrite = true;
                 }
             }
@@ -359,11 +374,18 @@ BusPDP11.IOController = {
         var w = -1;
         var bus = this.controller;
         var afn = bus.aIOHandlers[off];
+
+        /*
+         * Since addr is primarily used to advise an I/O handler of the target IOPAGE address, and since we don't want
+         * our handlers to worry about the current IOPAGE location, we truncate addr to 16 bits (the IOPAGE's lowest location).
+         */
+        var addrMasked = addr & 0xffff;
+
         if (afn) {
             if (afn[BusPDP11.IOHANDLER.READ_WORD]) {
-                w = afn[BusPDP11.IOHANDLER.READ_WORD](addr);
+                w = afn[BusPDP11.IOHANDLER.READ_WORD](addrMasked);
             } else if (afn[BusPDP11.IOHANDLER.READ_BYTE]) {
-                w = afn[BusPDP11.IOHANDLER.READ_BYTE](addr) | (afn[BusPDP11.IOHANDLER.READ_BYTE](addr + 1) << 8);
+                w = afn[BusPDP11.IOHANDLER.READ_BYTE](addrMasked) | (afn[BusPDP11.IOHANDLER.READ_BYTE](addrMasked + 1) << 8);
             }
         }
         if (w >= 0) {
@@ -393,13 +415,20 @@ BusPDP11.IOController = {
         var fWrite = false;
         var bus = this.controller;
         var afn = bus.aIOHandlers[off];
+
+        /*
+         * Since addr is primarily used to advise an I/O handler of the target IOPAGE address, and since we don't want
+         * our handlers to worry about the current IOPAGE location, we truncate addr to 16 bits (the IOPAGE's lowest location).
+         */
+        var addrMasked = addr & 0xffff;
+
         if (afn) {
             if (afn[BusPDP11.IOHANDLER.WRITE_WORD]) {
-                afn[BusPDP11.IOHANDLER.WRITE_WORD](w, addr);
+                afn[BusPDP11.IOHANDLER.WRITE_WORD](w, addrMasked);
                 fWrite = true;
             } else if (afn[BusPDP11.IOHANDLER.WRITE_BYTE]) {
-                afn[BusPDP11.IOHANDLER.WRITE_BYTE](w & 0xff, addr);
-                afn[BusPDP11.IOHANDLER.WRITE_BYTE](w >> 8, addr + 1);
+                afn[BusPDP11.IOHANDLER.WRITE_BYTE](w & 0xff, addrMasked);
+                afn[BusPDP11.IOHANDLER.WRITE_BYTE](w >> 8, addrMasked + 1);
                 fWrite = true;
             }
         }
@@ -458,7 +487,7 @@ BusPDP11.prototype.setIOPageRange = function(nRange)
         if (nRange) {
             this.nIOPageRange = nRange;
             addr = (1 << nRange);
-            this.nBusLimit = this.nBusMask = (addr - 1);
+            this.nBusMask = (addr - 1);
             addr -= BusPDP11.IOPAGE_LENGTH;
             this.aIOPrevBlocks = this.getMemoryBlocks(addr, BusPDP11.IOPAGE_LENGTH);
             if (this.aIOPageBlocks) {
@@ -633,6 +662,9 @@ BusPDP11.prototype.addMemory = function(addr, size, type, controller)
     }
 
     if (sizeLeft <= 0) {
+        if (type == MemoryPDP11.TYPE.RAM && !this.cbRAM) {
+            this.cbRAM += size;
+        }
         this.status(str.toDec(size / 1024) + "Kb " + MemoryPDP11.TYPE_NAMES[type] + " at " + str.toOct(addr));
         return true;
     }
@@ -1204,6 +1236,27 @@ BusPDP11.prototype.restoreMemory = function(a)
 };
 
 /**
+ * getMemorySize(type)
+ *
+ * NOTE: The original pdp11.js defined MAX_MEMORY as IOBASE_UNIBUS - 16384, where IOBASE_UNIBUS
+ * is 4Mb less 256Kb, and then subtracted another 16Kb so that BSD 2.9 could boot.
+ *
+ * @this {BusPDP11}
+ * @param {number} type is one of the MemoryPDP11.TYPE constants (only RAM is currently supported)
+ * @return {number} (size of initial allocation, in bytes)
+ */
+BusPDP11.prototype.getMemorySize = function(type)
+{
+    var cb = 0;
+    switch(type) {
+    case MemoryPDP11.TYPE.RAM:
+        cb = this.cbRAM;
+        break;
+    }
+    return cb;
+};
+
+/**
  * addIOHandlers(start, end, fnReadByte, fnWriteByte, fnReadWord, fnWriteWord, sName)
  *
  * Add I/O notification handlers to the master list (aIOHandlers).  The start and end addresses are typically
@@ -1331,7 +1384,7 @@ BusPDP11.prototype.fault = function(addr, err, access)
  * @this {BusPDP11}
  * @return {boolean}
  */
-BusPDP11.prototype.checkFault= function()
+BusPDP11.prototype.checkFault = function()
 {
     var f = this.fFault;
     this.fFault = false;

@@ -278,6 +278,9 @@ CPUStatePDP11.prototype.setMemoryAccess = function()
 /**
  * getMMR0()
  *
+ * 15 | 14 | 13 | 12 | 11 | 10 | 9 | 8 | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 MMR0
+ * nonr leng read trap unus unus ena mnt cmp  -mode- i/d  --page--   enable
+ *
  * @this {CPUStatePDP11}
  * @return {number}
  */
@@ -1257,6 +1260,11 @@ CPUStatePDP11.prototype.getTrapStatus = function()
  *      address are added to 22 bits of the selected mapping register to produce the 22-bit physical address.  The lowest
  *      order bit of all mapping registers is always a zero, since relocation is always on word boundaries.
  *
+ * Sadly, because these mappings occur at a word-granular level, we can't implement the mappings by simply shuffling
+ * the underlying block around in the Bus component; it would be much more efficient if we could.  That's EXACTLY how
+ * we move the IOPAGE in response to addressing changes.  If it turns out that block-granular addresses are commonly
+ * stored in the unibusMap registers, we could add code to detect that and perform block remapping in those cases.
+ *
  * @this {CPUStatePDP11}
  * @param {number} addr
  * @return {number}
@@ -1295,15 +1303,33 @@ CPUStatePDP11.prototype.mapUnibus = function(addr)
  * it again if all worked.  If however something happens to cause a trap then no restore is
  * done as setPSW() will have been invoked as part of the trap, which will resynchronize mmuMode.
  *
- * A PDP 11/70 is different to other PDP 11's in that the highest 18 bit space (017000000 & above)
+ * A PDP-11/70 is different from other PDP-11s in that the highest 18 bit space (017000000 & above)
  * maps directly to UNIBUS space - including low memory. This doesn't appear to be particularly
  * useful as it restricts maximum system memory - although it does appear to allow software
  * testing of the unibus map.  This feature also appears to confuse some OSes which test consecutive
  * memory locations to find maximum memory -- and on a full memory system find themselves accessing
  * low memory again at high addresses.
  *
- * 15 | 14 | 13 | 12 | 11 | 10 | 9 | 8 | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 MMR0
- * nonr leng read trap unus unus ena mnt cmp  -mode- i/d  --page--   enable
+ * Construction of a Physical Address
+ * ----------------------------------
+ *
+ *      Virtual Addr (VA)                                  12 11 10  9  8  7  6  5  4  3  2  1  0
+ *      Page Addr Field (PAF)   15 14 13 12 11 10  9  8  7  6  5  4  3  2  1  0
+ *                            + -----------------------------------------------------------------
+ *      Physical Addr (PA)      21 20 19 18 17 16 15 14 13 12 11 10  9  8  7  6  5  4  3  2  1  0
+ *
+ * The Page Address Field (PAF) comes from a Page Address Register (PAR) that is selected by Virtual Address (VA)
+ * bits 15-13.  You can see from the above alignments that the VA contributes to the low 13 bits, providing an 8Kb
+ * range.
+ *
+ * VA bits 0-5 pass directly through to the PA; those are also called the DIB (Displacement in Block) bits.
+ * VA bits 6-12 are added to the low 7 bits of the PAF and are also called the BN (Block Number) bits.
+ *
+ * You can also think of the entire PAF as a block number, where each block is 64 bytes.  This is consistent with
+ * the LSIZE register at 177760, which is supposed to contain the number of 64-byte blocks of memory installed.
+ *
+ * Note that if a PAR is initialized to zero, successively adding 0200 (0x80) to the PAR will advance the base
+ * physical address to the next 8Kb page.
  *
  * @this {CPUStatePDP11}
  * @param {number} virtualAddress

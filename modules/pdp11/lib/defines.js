@@ -518,7 +518,7 @@ var PDP11 = {
         UNDEF1:     0o177754,
         UNDEF2:     0o177756,
 
-        LSIZE:      0o177760,   //                                  Lower Size Register (last 32-word block)    (11/70 only)
+        LSIZE:      0o177760,   //                                  Lower Size Register (last 64-byte block #)  (11/70 only)
         HSIZE:      0o177762,   //                                  Upper Size Register (always zero)           (11/70 only)
         SYSID:      0o177764,   //                                  System ID Register                          (11/70 only)
         CPUERR:     0o177766,   //                                  CPU error                                   (11/70 only)

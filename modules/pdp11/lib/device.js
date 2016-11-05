@@ -38,6 +38,7 @@ if (NODE) {
     var Component     = require("../../shared/lib/component");
     var State         = require("../../shared/lib/state");
     var BusPDP11      = require("./bus");
+    var MemoryPDP11   = require("./memory");
     var MessagesPDP11 = require("./messages");
     var PC11          = require("./pc11");
     var RL11          = require("./rl11");
@@ -854,13 +855,24 @@ DevicePDP11.prototype.writeCTRL = function(data, addr)
 /**
  * readSIZE(addr)
  *
+ * We're adhering to DEC's documentation, which says:
+ *
+ *      This read-only register specifies the memory size of the system. It is defined to indicate the
+ *      last addressable block of 32 words in memory (bit 0 is equivalent to bit 6 of the Physical Address).
+ *
+ * Looking at the Memory Clear "toggle-in" code in /devices/pdp11/machine/1170/panel/debugger/README.md, the
+ * memory loop gives up when the block number stored in KIPAR0 is >= LSIZE, suggesting that LSIZE is actually
+ * the total number of 64-byte blocks, rather than the block number of the last block.  But that code is
+ * not conclusive, since it writes 8192 bytes at a time rather than 64, so it doesn't really matter if LSIZE
+ * is off by one.
+ *
  * @this {DevicePDP11}
  * @param {number} addr (eg, PDP11.UNIBUS.LSIZE--HSIZE or 177760--177762)
  * @return {number}
  */
 DevicePDP11.prototype.readSIZE = function(addr)
 {
-    return addr == PDP11.UNIBUS.LSIZE? ((BusPDP11.MAX_MEMORY >> 6) - 1) : 0;
+    return addr == PDP11.UNIBUS.LSIZE? ((this.bus.getMemorySize(MemoryPDP11.TYPE.RAM) >> 6) - 1) : 0;
 };
 
 /**

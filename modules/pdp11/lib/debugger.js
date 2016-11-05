@@ -770,7 +770,7 @@ if (DEBUGGER) {
      * done later, by getAddr(), which returns PDP11.ADDR_INVALID for invalid segments, out-of-range offsets,
      * etc.  The Debugger's low-level get/set memory functions verify all getAddr() results, but even if an
      * invalid address is passed through to the Bus memory interfaces, the address will simply be masked with
-     * BusPDP11.nBusLimit; in the case of PDP11.ADDR_INVALID, that will generally refer to the top of the physical
+     * bus.nBusMask; in the case of PDP11.ADDR_INVALID, that will generally refer to the top of the physical
      * address space.
      *
      * @this {DebuggerPDP11}
@@ -2013,64 +2013,59 @@ if (DEBUGGER) {
                 if (fTemporary && !dbgAddrBreak.fTemporary) continue;
 
                 /*
-                 * We used to calculate the linear address of the breakpoint at the time the
-                 * breakpoint was added, so that a breakpoint set in one mode (eg, in real-mode)
-                 * would still work as intended if the mode changed later (eg, to protected-mode).
-                 *
-                 * However, that created difficulties setting protected-mode breakpoints in segments
-                 * that might not be defined yet, or that could move in physical memory.
-                 *
-                 * If you want to create a real-mode breakpoint that will break regardless of mode,
-                 * use the physical address of the real-mode memory location instead.
+                 * Since we're checking an execution address, which is always virtual, and virtual
+                 * addresses are always restricted to 16 bits, let's mask the breakpoint address to match
+                 * (the user should know better, but we'll be nice).
                  */
-                var addrBreak = this.getAddr(dbgAddrBreak);
+                var addrBreak = this.getAddr(dbgAddrBreak) & 0xffff;
                 for (var n = 0; n < nb; n++) {
-                    if (addr + n == addrBreak) {
-                        var a;
-                        fBreak = true;
-                        if (dbgAddrBreak.fTemporary) {
-                            this.findBreakpoint(aBreak, dbgAddrBreak, true, true);
-                            fTemporary = true;
-                        }
-                        if (a = dbgAddrBreak.aCmds) {
-                            /*
-                             * When one or more commands are attached to a breakpoint, we don't halt by default.
-                             * Instead, we set fBreak to true only if, at the completion of all the commands, the
-                             * CPU is halted; in other words, you should include "h" as one of the breakpoint commands
-                             * if you want the breakpoint to stop execution.
-                             *
-                             * Another useful command is "if", which will return false if the expression is false,
-                             * at which point we'll jump ahead to the next "else" command, and if there isn't an "else",
-                             * we abort.
-                             */
-                            fBreak = false;
-                            for (var j = 0; j < a.length; j++) {
-                                if (!this.doCommand(a[j], true)) {
-                                    if (a[j].indexOf("if")) {
-                                        fBreak = true;          // the failed command wasn't "if", so abort
-                                        break;
-                                    }
-                                    var k = j + 1;
-                                    for (; k < a.length; k++) {
-                                        if (!a[k].indexOf("else")) break;
-                                        j++;
-                                    }
-                                    if (k == a.length) {        // couldn't find an "else" after the "if", so abort
-                                        fBreak = true;
-                                        break;
-                                    }
-                                    /*
-                                     * If we're still here, we'll execute the "else" command (which is just a no-op),
-                                     * followed by any remaining commands.
-                                     */
+
+                    if ((addr + n) != addrBreak) continue;
+
+                    var a;
+                    fBreak = true;
+                    if (dbgAddrBreak.fTemporary) {
+                        this.findBreakpoint(aBreak, dbgAddrBreak, true, true);
+                        fTemporary = true;
+                    }
+                    if (a = dbgAddrBreak.aCmds) {
+                        /*
+                         * When one or more commands are attached to a breakpoint, we don't halt by default.
+                         * Instead, we set fBreak to true only if, at the completion of all the commands, the
+                         * CPU is halted; in other words, you should include "h" as one of the breakpoint commands
+                         * if you want the breakpoint to stop execution.
+                         *
+                         * Another useful command is "if", which will return false if the expression is false,
+                         * at which point we'll jump ahead to the next "else" command, and if there isn't an "else",
+                         * we abort.
+                         */
+                        fBreak = false;
+                        for (var j = 0; j < a.length; j++) {
+                            if (!this.doCommand(a[j], true)) {
+                                if (a[j].indexOf("if")) {
+                                    fBreak = true;          // the failed command wasn't "if", so abort
+                                    break;
                                 }
+                                var k = j + 1;
+                                for (; k < a.length; k++) {
+                                    if (!a[k].indexOf("else")) break;
+                                    j++;
+                                }
+                                if (k == a.length) {        // couldn't find an "else" after the "if", so abort
+                                    fBreak = true;
+                                    break;
+                                }
+                                /*
+                                 * If we're still here, we'll execute the "else" command (which is just a no-op),
+                                 * followed by any remaining commands.
+                                 */
                             }
-                            if (!this.cpu.isRunning()) fBreak = true;
                         }
-                        if (fBreak) {
-                            if (!fTemporary) this.printBreakpoint(aBreak, i, "hit");
-                            break;
-                        }
+                        if (!this.cpu.isRunning()) fBreak = true;
+                    }
+                    if (fBreak) {
+                        if (!fTemporary) this.printBreakpoint(aBreak, i, "hit");
+                        break;
                     }
                 }
             }

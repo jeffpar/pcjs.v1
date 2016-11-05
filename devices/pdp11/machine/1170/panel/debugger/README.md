@@ -186,7 +186,7 @@ If you also want to see all the hardware register activity, use the Debugger's "
 	17772262        021311      CMP (R3),(R1)   ; Top of Memory?
 	17772264        003402      BLE 2$
 	17772266        005000      CLR R0          ; Start at Virtual Address 0
-	17772270        000776      BR  1$
+	17772270        000766      BR  1$          ; [NOTE: DEC's guide incorrecly lists this opcode as 000776 --@jeffpar]
 	17772272        005312  2$: DEC (R2)        ; Disable Relocation
 	17772274        000000      HLT
 	
@@ -208,7 +208,7 @@ The above "toggle-in" can be entered with the PDPjs Debugger as follows:
 	e 17777706 177676;
 	e 17777776 000000;
 	e 17772240 012714 000020 005212 010520 020027 017776 003774 062711;
-	e 17772260 000200 021311 003402 005000 000776 005312 000000;
+	e 17772260 000200 021311 003402 005000 000766 005312 000000;
 	r pc 172240
 
 which should produce the following results when Bus messages are turned on ("m bus on"):
@@ -268,7 +268,7 @@ which should produce the following results when Bus messages are turned on ("m b
 	SIPAR6.writeWord(00017772254,003774)
 	changing 00017772256 to 062711
 	SIPAR7.writeWord(00017772256,062711)
-	>> e 17772260 000200 021311 003402 005000 000776 005312 000000
+	>> e 17772260 000200 021311 003402 005000 000766 005312 000000
 	changing 00017772260 to 000200
 	SDPAR0.writeWord(00017772260,000200)
 	changing 00017772262 to 021311
@@ -277,8 +277,8 @@ which should produce the following results when Bus messages are turned on ("m b
 	SDPAR2.writeWord(00017772264,003402)
 	changing 00017772266 to 005000
 	SDPAR3.writeWord(00017772266,005000)
-	changing 00017772270 to 000776
-	SDPAR4.writeWord(00017772270,000776)
+	changing 00017772270 to 000766
+	SDPAR4.writeWord(00017772270,000766)
 	changing 00017772272 to 005312
 	SDPAR5.writeWord(00017772272,005312)
 	changing 00017772274 to 000000
@@ -309,3 +309,11 @@ As the **Maintenance Service Guide** goes on to say:
 
 Before running the above code, you should turn Bus messages off (ie, "m bus off"); otherwise, the quantity of messages will
 slow execution to a crawl.
+
+If you want to set an execution breakpoint in the above code, make sure you use the appropriate virtual (16-bit) address,
+not one of the physical (22-bit) addresses shown above.  For example, to break on this instruction:
+
+	17772256        062711      ADD #200,(R1)   ; Step Page
+
+use the command "bp 172256", because while the code *is* physically located at 17772256, it is being executed at virtual
+address 172256, and execution breakpoints operate on virtual addresses.
