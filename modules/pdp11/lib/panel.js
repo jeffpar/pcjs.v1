@@ -105,11 +105,12 @@ function PanelPDP11(parmsPanel)
     /*
      * Every switch has an array associated with it:
      *
-     *      [0]: initial/current value of switch (0 if "down", 1 if "up")
-     *      [1]: true if the switch is momentary, false if not
-     *      [2]: true if the switch is currently pressed, false if released
-     *      [3]: optional handler to call whenever the switch is pressed or released
-     *      [4]: optional switch index (used with CNSW switches 'S0' through 'S21')
+     *      [0]: initial value of switch (0 if "down", 1 if "up")
+     *      [1]: current value of switch
+     *      [2]: true if the switch is momentary, false if not
+     *      [3]: true if the switch is currently pressed, false if released
+     *      [4]: optional handler to call whenever the switch is pressed or released
+     *      [5]: optional switch index (used with CNSW switches 'S0' through 'S21')
      *
      * initBus() will call displaySwitches() to ensure that every switch is the position represented below.
      *
@@ -122,17 +123,17 @@ function PanelPDP11(parmsPanel)
      * of any momentary switch is its "inactive" value, so the opposite is its "active" value.
      */
     this.switches = {
-        'START':    [1, true,  false, this.processStart],
-        'STEP':     [1, false, false, this.processStep],
-        'ENABLE':   [1, false, false, this.processEnable],
-        'CONT':     [1, true,  false, this.processContinue],
-        'DEP':      [0, true,  false, this.processDeposit],
-        'EXAM':     [1, true,  false, this.processExamine],
-        'LOAD':     [1, true,  false, this.processLoadAddr],
-        'TEST':     [0, true,  false, this.processLEDTest]
+        'START':    [1, 1, true,  false, this.processStart],
+        'STEP':     [1, 1, false, false, this.processStep],
+        'ENABLE':   [1, 1, false, false, this.processEnable],
+        'CONT':     [1, 1, true,  false, this.processContinue],
+        'DEP':      [0, 0, true,  false, this.processDeposit],
+        'EXAM':     [1, 1, true,  false, this.processExamine],
+        'LOAD':     [1, 1, true,  false, this.processLoadAddr],
+        'TEST':     [0, 0, true,  false, this.processLEDTest]
     };
     for (var i = 0; i < 22; i++) {
-        this.switches['S'+i] = [0, false, false, this.processSwitchReg, i];
+        this.switches['S'+i] = [0, 0, false, false, this.processSwitchReg, i];
     }
 }
 
@@ -203,7 +204,7 @@ PanelPDP11.prototype.setSW = function(value)
  */
 PanelPDP11.prototype.getSwitch = function(name)
 {
-    return this.switches[name] && this.switches[name][0];
+    return this.switches[name] && this.switches[name][1];
 };
 
 /**
@@ -298,7 +299,7 @@ PanelPDP11.prototype.setBinding = function(sType, sBinding, control, sValue)
              * since only recognized switches will have handlers that perform the appropriate operations.
              */
             if (this.switches[sBinding] === undefined) {
-                this.switches[sBinding] = [sValue? 1 : 0];
+                this.switches[sBinding] = [sValue? 1 : 0, sValue? 1 : 0];
             }
             this.bindings[sBinding] = control;
             var parent = control.parentElement || control;
@@ -309,6 +310,17 @@ PanelPDP11.prototype.setBinding = function(sType, sBinding, control, sValue)
                 };
             }(this, sBinding);
             parent.onmouseup = parent.onmouseout = function(panel, sBinding) {
+                return function onReleaseSwitch() {
+                    panel.releaseSwitch(sBinding);
+                };
+            }(this, sBinding);
+            parent.ontouchstart = function(panel, sBinding) {
+                return function onPressSwitch(event) {
+                    panel.pressSwitch(sBinding);
+                    event.preventDefault();
+                };
+            }(this, sBinding);
+            parent.ontouchend = function(panel, sBinding) {
                 return function onReleaseSwitch() {
                     panel.releaseSwitch(sBinding);
                 };
@@ -435,7 +447,7 @@ PanelPDP11.prototype.displaySwitch = function(sBinding, value)
 PanelPDP11.prototype.displaySwitches = function()
 {
     for (var sBinding in this.switches) {
-        this.displaySwitch(sBinding, this.switches[sBinding][0]);
+        this.displaySwitch(sBinding, this.switches[sBinding][1]);
     }
 };
 
@@ -485,19 +497,19 @@ PanelPDP11.prototype.pressSwitch = function(sBinding)
     var sw = this.switches[sBinding];
 
     /*
-     * Set the new switch value in sw[0] and then immediately display it
+     * Set the new switch value in sw[1] and then immediately display it
      */
-    this.displaySwitch(sBinding, (sw[0] = 1 - sw[0]));
+    this.displaySwitch(sBinding, (sw[1] = 1 - sw[1]));
 
     /*
      * Mark the switch as "pressed"
      */
-    sw[2] = true;
+    sw[3] = true;
 
     /*
-     * Call the appropriate process handler with the current switch value (sw[0])
+     * Call the appropriate process handler with the current switch value (sw[1])
      */
-    if (sw[3]) sw[3].call(this, sw[0], sw[4]);
+    if (sw[4]) sw[4].call(this, sw[1], sw[5]);
 
     /*
      * This helps the next 'DEP' or 'EXAM' press determine if the previous press was the same,
@@ -518,30 +530,30 @@ PanelPDP11.prototype.pressSwitch = function(sBinding)
 PanelPDP11.prototype.releaseSwitch = function(sBinding)
 {
     /*
-     * pressSwitch() is simple: flip the switch's current value in sw[0] and marked it "pressed" in sw[2].
+     * pressSwitch() is simple: flip the switch's current value in sw[1] and marked it "pressed" in sw[3].
      *
      * releaseSwitch() is more complicated, because we must handle both mouseUp and mouseOut events.  The first time
-     * we receive EITHER of those events AND the switch is marked momentary (sw[1]) AND the switch is pressed (sw[2]),
+     * we receive EITHER of those events AND the switch is marked momentary (sw[2]) AND the switch is pressed (sw[3]),
      * then we must flip the switch back to its original value.
      *
-     * Otherwise, the only thing we have to do is mark the switch as "released" (ie, set sw[2] to false).
+     * Otherwise, the only thing we have to do is mark the switch as "released" (ie, set sw[3] to false).
      */
     var sw = this.switches[sBinding];
-    if (sw[1] && sw[2]) {
+    if (sw[2] && sw[3]) {
         /*
-         * Set the new switch value in sw[0] and then immediately display it
+         * Set the new switch value in sw[1] and then immediately display it
          */
-        this.displaySwitch(sBinding, (sw[0] = 1 - sw[0]));
+        this.displaySwitch(sBinding, (sw[1] = sw[0]));
 
         /*
-         * Call the appropriate process handler with the current switch value (sw[0])
+         * Call the appropriate process handler with the current switch value (sw[1])
          */
-        if (sw[3]) sw[3].call(this, sw[0], sw[4]);
+        if (sw[4]) sw[4].call(this, sw[1], sw[5]);
     }
     /*
      * Mark the switch as "released"
      */
-    sw[2] = false;
+    sw[3] = false;
 };
 
 /**
@@ -896,7 +908,7 @@ PanelPDP11.prototype.setSwitches = function(value)
     if (this.hasSwitches()) {
         this.regSwitches = value;
         for (var i = 0; i < 22; i++) {
-            this.switches['S'+i][0] = (value & (1 << i))? 1 : 0;
+            this.switches['S'+i][1] = (value & (1 << i))? 1 : 0;
         }
         this.displaySwitches();
     }
