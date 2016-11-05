@@ -1,11 +1,22 @@
 ---
 layout: page
-title: PDP-11 M9312 ROM Images
+title: PDP-11 M9312 ROMs
 permalink: /devices/pdp11/rom/M9312/
 ---
 
-PDP-11 M9312 ROM Images
------------------------
+PDP-11 M9312
+------------
+
+As this [PDP-11 website](http://www.pdp-11.nl/pdp11-34a/cpu/options/bootstrap-info.html) explains:
+
+> The M9312 Bootstrap/terminator module contains a complete set of UNIBUS termination resistors and 512 words of ROM that can
+be used for diagnostic routines, the console emulation routine and bootstrap programs. The module has 12 jumpers, W1 thu W12,
+and five sockets to put ROMs in. One socket is used for a diagnostic ROM for the PDP-11/60 or PDP-11/70, or for a ROM that
+contains the console emulation routine and diagnostics for all other PDP-11s. The other four sockets accept ROMs that contain
+bootstrap programs.
+
+PDP-11 M9312 ROMs
+-----------------
 
 An assortment of M9312 ROM images, source listings, etc, are available from Don North's [website](http://www.ak6dn.com/PDP-11/M9312/),
 some of which we have reproduced here.
@@ -28,14 +39,6 @@ DEC P/N [23-616F1](23-616F1.txt): "11/60,70 Diagnostic/Console", albeit with som
 	165406  012737  165714  000114  mov #N12,@#114      ; 165714 changed to 000714
 
 The unmodified [23-616F1](23-616F1.json) ROM can be seen at address 165000 when configured in a
-[PDP-11/70](/devices/pdp11/machine/1170/panel/debugger/) like so:
+[PDP-11/70](/devices/pdp11/machine/1170/panel/debugger/) as:
 
 	<rom id="m9312" addr="0xEA00" size="0x200" file="/devices/pdp11/rom/M9312/23-616F1.json"/>
-
-As this [PDP-11 website](http://www.pdp-11.nl/pdp11-34a/cpu/options/bootstrap-info.html) explains:
-
-> The M9312 Bootstrap/terminator module contains a complete set of UNIBUS termination resistors and 512 words of ROM that can
-be used for diagnostic routines, the console emulation routine and bootstrap programs. The module has 12 jumpers, W1 thu W12,
-and five sockets to put ROMs in. One socket is used for a diagnostic ROM for the PDP-11/60 or PDP-11/70, or for a ROM that
-contains the console emulation routine and diagnostics for all other PDP-11s. The other four sockets accept ROMs that contain
-bootstrap programs.
