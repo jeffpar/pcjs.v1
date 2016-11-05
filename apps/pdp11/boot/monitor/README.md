@@ -9,16 +9,16 @@ redirect_from:
 PDP-11 Boot Monitor
 -------------------
 
-[PDPJSMON.mac](PDPJSMON.mac) is a custom boot monitor/loader based on [boot.mac](http://skn.noip.me/pdp11/boot.mac) written by
+[BOOTMON.mac](BOOTMON.mac) is a custom boot monitor/loader based on [boot.mac](http://skn.noip.me/pdp11/boot.mac) written by
 [Paul Nankervis](mailto:paulnank@hotmail.com).  It is used with all our PDP-11 test machines.
 
-[PDPJSMON.mac](PDPJSMON.mac) was cross-assembled with [MACRO11](https://github.com/shattered/macro11) to produce
-[PDPJSMON.txt](PDPJSMON.txt), which was then processed by [FileDump](/modules/filedump/) to produce
-[PDPJSMON.json](PDPJSMON.json).
+[BOOTMON.mac](BOOTMON.mac) was cross-assembled with [MACRO11](https://github.com/shattered/macro11) to produce
+[BOOTMON.txt](BOOTMON.txt), which was then processed by [FileDump](/modules/filedump/) to produce
+[BOOTMON.json](BOOTMON.json).
 
 To see the Boot Monitor in action, try the [PDP-11/70 Boot Monitor (with Debugger)](/devices/pdp11/machine/1170/monitor/debugger/).
 
-The **PDPJSMON.mac** source code is shown below.
+The **BOOTMON.mac** source code is shown below.
 
 	; BOOT MONITOR
 	;

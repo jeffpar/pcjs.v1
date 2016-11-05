@@ -434,9 +434,9 @@ var PDP11 = {
 
         RLCS:       0o174400,   //                                  RL11 Control Status Register
         RLBA:       0o174402,   //                                  RL11 Bus Address Register
-        RLDA:       0o177404,   //                                  RL11 Disk Address Register
-        RLMP:       0o177406,   //                                  RL11 Multi-Purpose Register
-        RLBE:       0o177410,   //                                  RL11 Bus (Address) Extension Register (RLV12 controller only)
+        RLDA:       0o174404,   //                                  RL11 Disk Address Register
+        RLMP:       0o174406,   //                                  RL11 Multi-Purpose Register
+        RLBE:       0o174410,   //                                  RL11 Bus (Address) Extension Register (RLV12 controller only)
 
         LKS:        0o177546,   //                                  KW11-L Clock Status
 
