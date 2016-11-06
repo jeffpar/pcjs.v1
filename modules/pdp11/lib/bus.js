@@ -219,7 +219,7 @@ BusPDP11.IOHANDLER = {
  * Unlike regular Memory blocks, IOPAGE accesses permit word accesses on ODD addresses; that works
  * just fine by registering WORD handlers for the appropriate ODD addresses.  For BYTE accesses, it
  * depends.  For CPU register addresses, addIOHandlers() installs special byte handlers that perform
- * either a simple word read or write.  Other addresses must be handled on case-by-case basis.
+ * either a simple word read or write.  Other addresses must be handled on a case-by-case basis.
  *
  * TODO: Another small potential improvement would be for addIOHandlers() to install fallbacks for ALL
  * missing handlers, in both the ODD and EVEN cases, so there's never a need to check each function index
@@ -265,6 +265,13 @@ BusPDP11.IOController = {
             if (afn) {
                 if (afn[BusPDP11.IOHANDLER.READ_WORD]) {
                     b = afn[BusPDP11.IOHANDLER.READ_WORD](addrMasked & ~0x1) >> 8;
+                } else if (afn[BusPDP11.IOHANDLER.READ_BYTE]) {
+                    /*
+                     * WARNING: This is an unusual fall-back, because we're trying to read an ODD byte
+                     * access using a BYTE handler registered for EVEN bytes.  But if that's all we've got,
+                     * then presumably the handler is prepared for it (certainly, readROMByte() is).
+                     */
+                    b = afn[BusPDP11.IOHANDLER.READ_BYTE](addrMasked)
                 }
             }
         }
@@ -346,6 +353,13 @@ BusPDP11.IOController = {
                     w = afn[BusPDP11.IOHANDLER.READ_WORD]? afn[BusPDP11.IOHANDLER.READ_WORD](0) : 0;
                     afn[BusPDP11.IOHANDLER.WRITE_WORD]((w & 0xff) | (b << 8), addrMasked);
                     fWrite = true;
+                } else if (afn[BusPDP11.IOHANDLER.WRITE_BYTE]) {
+                    /*
+                     * WARNING: This is an unusual fall-back, because we're trying to write an ODD byte
+                     * access using a BYTE handler registered for EVEN bytes.  But if that's all we've got,
+                     * then presumably the handler is prepared for it (certainly, writeROMByte() is).
+                     */
+                    afn[BusPDP11.IOHANDLER.WRITE_BYTE](b, addrMasked);
                 }
             }
         }
@@ -1239,7 +1253,7 @@ BusPDP11.prototype.restoreMemory = function(a)
  * getMemorySize(type)
  *
  * NOTE: The original pdp11.js defined MAX_MEMORY as IOBASE_UNIBUS - 16384, where IOBASE_UNIBUS
- * is 4Mb less 256Kb, and then subtracted another 16Kb so that BSD 2.9 could boot.
+ * is 4Mb less 256Kb, and then it subtracted another 16Kb so that BSD 2.9 could boot.
  *
  * @this {BusPDP11}
  * @param {number} type is one of the MemoryPDP11.TYPE constants (only RAM is currently supported)
@@ -1262,6 +1276,11 @@ BusPDP11.prototype.getMemorySize = function(type)
  * Add I/O notification handlers to the master list (aIOHandlers).  The start and end addresses are typically
  * relative to the starting IOPAGE address, but they can also be absolute; we simply mask all addresses with
  * IOPAGE_MASK.
+ *
+ * CAVEATS: If a conflict is reported, a partial set of handlers may still have been added.  There is no mechanism
+ * for removing handlers, since this is considered an initialization function.  And finally, when a range of addresses
+ * is used, each successive address is advanced by 2, so if you really want to add a handler for a "+1" (usually odd)
+ * address, then you must add it individually.
  *
  * @this {BusPDP11}
  * @param {number} start address
@@ -1319,8 +1338,8 @@ BusPDP11.prototype.addIOTable = function(component, table, msgCategory, sName)
         var nRegs = afn[5] || 1;
 
         /*
-         * As discussed in the IOController comments above, when handlers are being registered for the following
-         * addresses, we must install different fallback handlers for all BYTE accesses.
+         * As discussed in the IOController comments above, when handlers are being registered for these
+         * BYTE-granular UNIBUS addresses, we must install custom fallback handlers for all BYTE accesses.
          */
         if (addr >= PDP11.UNIBUS.R0SET0 && addr <= PDP11.UNIBUS.R6USER) {
             if (!fnReadByte && fnReadWord) {

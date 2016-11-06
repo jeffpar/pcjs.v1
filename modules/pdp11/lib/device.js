@@ -835,7 +835,7 @@ DevicePDP11.prototype.writeR6USER = function(data, addr)
  */
 DevicePDP11.prototype.readCTRL = function(addr)
 {
-    var reg = (addr - PDP11.UNIBUS.LAERR) >> 1;
+    var reg = (addr - PDP11.UNIBUS.CTRL) >> 1;
     return this.cpu.regsControl[reg];
 };
 
@@ -848,7 +848,7 @@ DevicePDP11.prototype.readCTRL = function(addr)
  */
 DevicePDP11.prototype.writeCTRL = function(data, addr)
 {
-    var reg = (addr - PDP11.UNIBUS.LAERR) >> 1;
+    var reg = (addr - PDP11.UNIBUS.CTRL) >> 1;
     this.cpu.regsControl[reg] = data;
 };
 
@@ -1090,7 +1090,7 @@ DevicePDP11.UNIBUS_IOTABLE = {
     [PDP11.UNIBUS.R5SET1]:  /* 177715 */    [null, null, DevicePDP11.prototype.readRSET1,   DevicePDP11.prototype.writeRSET1,   "R5SET1",   1,  PDP11.MODEL_1145],
     [PDP11.UNIBUS.R6SUPER]: /* 177716 */    [null, null, DevicePDP11.prototype.readR6SUPER, DevicePDP11.prototype.writeR6SUPER, "R6SUPER",  1,  PDP11.MODEL_1145],
     [PDP11.UNIBUS.R6USER]:  /* 177717 */    [null, null, DevicePDP11.prototype.readR6USER,  DevicePDP11.prototype.writeR6USER,  "R6USER",   1,  PDP11.MODEL_1145],
-    [PDP11.UNIBUS.LAERR]:   /* 177740 */    [null, null, DevicePDP11.prototype.readCTRL,    DevicePDP11.prototype.writeCTRL,    "CTRL",     1,  PDP11.MODEL_1170],
+    [PDP11.UNIBUS.CTRL]:    /* 177740 */    [null, null, DevicePDP11.prototype.readCTRL,    DevicePDP11.prototype.writeCTRL,    "CTRL",     8,  PDP11.MODEL_1170],
     [PDP11.UNIBUS.LSIZE]:   /* 177760 */    [null, null, DevicePDP11.prototype.readSIZE,    DevicePDP11.prototype.writeSIZE,    "LSIZE",    1,  PDP11.MODEL_1170],
     [PDP11.UNIBUS.HSIZE]:   /* 177762 */    [null, null, DevicePDP11.prototype.readSIZE,    DevicePDP11.prototype.writeSIZE,    "HSIZE",    1,  PDP11.MODEL_1170],
     [PDP11.UNIBUS.SYSID]:   /* 177764 */    [null, null, DevicePDP11.prototype.readSYSID,   DevicePDP11.prototype.writeSYSID,   "SYSID",    1,  PDP11.MODEL_1170],
@@ -1100,14 +1100,6 @@ DevicePDP11.UNIBUS_IOTABLE = {
     [PDP11.UNIBUS.SL]:      /* 177774 */    [null, null, DevicePDP11.prototype.readSL,      DevicePDP11.prototype.writeSL,      "SL"],
     [PDP11.UNIBUS.PSW]:     /* 177776 */    [null, null, DevicePDP11.prototype.readPSW,     DevicePDP11.prototype.writePSW,     "PSW"]
 };
-
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.HAERR]  = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.LAERR];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.MEMERR] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.LAERR];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.CACHEC] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.LAERR];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.MAINT]  = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.LAERR];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.HITMISS]= DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.LAERR];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UNDEF1] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.LAERR];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UNDEF2] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.LAERR];
 
 /**
  * DevicePDP11.init()

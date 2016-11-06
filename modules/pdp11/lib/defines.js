@@ -507,8 +507,10 @@ var PDP11 = {
         R6USER:     0o177717,
 
         /*
-         * This next group of registers is largely ignored; all accesses are routed to regsControl[]
+         * This next group of registers is largely ignored; all accesses are routed to regsControl[],
+         * and therefore are managed as a block of 8 "CTRL" registers.
          */
+        CTRL:       0o177740,
         LAERR:      0o177740,   //                                  Low Address Error                           (11/70 only)
         HAERR:      0o177742,   //                                  High Address Error                          (11/70 only)
         MEMERR:     0o177744,   //                                  Memory System Error                         (11/70 only)

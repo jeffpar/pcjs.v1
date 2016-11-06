@@ -288,7 +288,7 @@ ROMPDP11.prototype.addROM = function(addr)
          * This code has been added as a work-around to effectively allow us to install small ROMs into portions
          * of the IOPAGE address space, by installing I/O handlers for the entire range that return the corresponding
          * bytes of the current ROM image on reads, and ignore any writes (which I'm only assuming is how a typical
-         * ROM "device" deals with writes; if we remove the write handler, then writes will cause a fault).
+         * ROM "device" deals with writes; if we remove the write handler, then writes will fault).
          */
         var IOTable = {
             [addr]: [ROMPDP11.prototype.readROMByte, ROMPDP11.prototype.writeROMByte, null, null, null, this.sizeROM >> 1]
@@ -347,6 +347,12 @@ ROMPDP11.prototype.readROMByte = function(addr)
 
 /**
  * writeROMByte(data, addr)
+ *
+ * This handler exists simply to ignore any writes, so that they don't cause faults.
+ *
+ * TODO: Another possible use for this would be to allow the Debugger to alter ROM contents,
+ * if the Debugger were to provide an interface indicating whether or not it was responsible
+ * for this write.
  *
  * @this {ROMPDP11}
  * @param {number} data
