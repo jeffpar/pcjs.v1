@@ -19,6 +19,7 @@ PCjs also includes a small collection of disk images in the [Disk Libraries](/di
 
 * [IBM PC](/disks/pcx86/)
 * [Challenger 1P](/disks/c1p/)
+* [DEC](/disks/dec/)
 
 ---
 

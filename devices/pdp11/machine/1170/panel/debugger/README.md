@@ -19,7 +19,7 @@ Toggle-Ins
 
 As DEC notes in the [PDP-11/70 Maintenance Service Guide](http://archive.pcjs.org/pubs/dec/pdp11/1170/PDP1170_Maintenance_Service_Guide_Apr88.pdf),
 Chapter 4: "There are several useful toggle-ins that are probably not very well known."  Excerpts are provided below.  If you're
-not sure how to "toggle in" code using a Front Panel, check out [Front Panel Basics](/devices/pdp11/machine/1170/panel/#front-panel-basics).
+not sure how to "toggle in" code using a Front Panel, check out [Front Panel Basics](/devices/pdp11/panel/1170/#front-panel-basics).
 
 However, since the above machine also includes the PDPjs Debugger, you'll find that it's much easier to use the Debugger commands
 described below to load and execute these "toggle-ins". 
