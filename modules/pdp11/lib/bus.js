@@ -80,43 +80,23 @@ function BusPDP11(parmsBus, cpu, dbg)
      * It is managed by setIOPageRange().  reset() establishes the default (16).
      */
     this.nIOPageRange = 0;                  // zero means no IOPAGE access (yet)
-    this.prevIOPageBlocks = [];             // this saves any memory blocks we had to replace with IOPAGE blocks
-    this.realIOPageBlocks = null;           // this saves the memory blocks allocated for IOPAGE, so we can reuse them
+    this.aIOPrevBlocks = [];                // this saves any previous blocks we had to replace with IOPAGE blocks
+    this.aIOPageBlocks = null;              // this saves the memory blocks allocated for IOPAGE, so we can reuse them
 
     /*
-     * Compute all BusPDP11 memory block parameters, based on the width of the bus.  The entire
-     * address space is divided into blocks, using a block size that is (hopefully) appropriate to
-     * the bus width.  The following table summarizes our (original) simplistic calculations:
+     * Compute all BusPDP11 memory block parameters now, based on the width of the bus.
      *
-     *      Bus Width                       Block Shift     Block Size
-     *      ---------                       -----------     ----------
-     *      16 bits (64Kb address space):   10              1Kb (64 maximum blocks)
-     *      18 bits (256Kb address space):  11              2Kb (128 maximum blocks)
-     *      20 bits (1Mb address space):    12              4Kb (256 maximum blocks)
-     *      22 bits (4Mb address space):    13              8Kb (512 maximum blocks)
-     *      24 bits (16Mb address space):   14              16Kb (1K maximum blocks)
-     *      32 bits (4Gb address space);    15              32Kb (128K maximum blocks)
+     * Note that all PCjs machines divide their address space into blocks, using a block size appropriate for
+     * the machine's bus width.  This allows us to efficiently allocate the entire address space, by reusing blocks
+     * as appropriate, and to define to different address behaviors on a block-granular level.
      *
-     * The coarser block granularities (ie, 16Kb and 32Kb) may cause problems for certain RAM and/or ROM
-     * allocations that are contiguous but are allocated out of order, or that have different controller
-     * requirements.  Your choices, for the moment, are either to ensure the allocations are performed in
-     * order, or to choose smaller nBlockShift values (at the expense of a generating a larger block array).
+     * For PDPjs machines, the ideal block size is 8Kb (IOPAGE_LENGTH), the size of the IOPAGE on all PDP-11 machines;
+     * as a result, our IOController functions assume that all incoming offsets are within a single 8Kb block.
      */
-    this.addrTotal = Math.pow(2, this.nBusWidth);
-    this.nBusLimit = this.nBusMask = (this.addrTotal - 1) | 0;
-
-    /*
-     * WARNING: Instead of dynamically calculating nBlockShift based on nBusWidth, as described above, we
-     * now force nBlockSize to IOPAGE_LENGTH, because that's what our IOController functions currently assume.
-     *
-     *      this.nBlockShift = (this.nBusWidth >> 1) + 2;
-     *      if (this.nBlockShift < 10) this.nBlockShift = 10;
-     *      if (this.nBlockShift > 15) this.nBlockShift = 15;
-     *      this.nBlockSize = 1 << this.nBlockShift;
-     */
+    this.addrTotal = 1 << this.nBusWidth;
+    this.nBusMask = (this.addrTotal - 1);
     this.nBlockSize = BusPDP11.IOPAGE_LENGTH;
     this.nBlockShift = Math.log2(this.nBlockSize);      // ES6 ALERT (alternatively: Math.log(this.nBlockSize) / Math.LN2)
-
     this.nBlockLen = this.nBlockSize >> 2;
     this.nBlockLimit = this.nBlockSize - 1;
     this.nBlockTotal = (this.addrTotal / this.nBlockSize) | 0;
@@ -137,14 +117,16 @@ function BusPDP11(parmsBus, cpu, dbg)
      * Memory access handlers must service the entire block; see the setAccess() function in the Memory
      * component for details.
      *
-     * Finally, for debugging purposes, if an I/O address has a symbolic name, it will be saved here:
+     * Finally, for debugging purposes, if an I/O address has a symbolic name and message category,
+     * they will be saved here:
      *
      *      [4]: symbolic name of I/O address
+     *      [5]: message category
      *
      * UPDATE: The Debugger wants to piggy-back on these arrays to indicate addresses for which it wants
      * notification.  In those cases, the following additional element will be set:
      *
-     *      [5]: true to break on I/O, false to ignore I/O
+     *      [6]: true to break on I/O, false to ignore I/O
      *
      * The false case is important if fIOBreakAll is set, because it allows the Debugger to selectively
      * ignore specific addresses.
@@ -152,6 +134,8 @@ function BusPDP11(parmsBus, cpu, dbg)
     this.aIOHandlers = [];
     this.fIOBreakAll = false;
     this.nDisableFaults = 0;
+    this.fFault = false;
+    this.cbRAM = 0;
 
     /*
      * Array of RESET notification handlers registered by Device components.
@@ -202,14 +186,16 @@ BusPDP11.IOHANDLER = {
     WRITE_BYTE:         1,
     READ_WORD:          2,
     WRITE_WORD:         3,
-    NAME:               4
+    NAME:               4,
+    MSG_CATEGORY:       5,
+    DBG_BREAK:          6
 };
 
 /*
  * These are our custom IOController functions for all IOPAGE accesses.  They look up the IOPAGE
  * offset in the aIOHandlers table, and if an entry exists, they use the appropriate IOHANDLER indexes
- * (above) to locate the registered read/write handlers.  If no handler is found, then unknownAccess()
- * is called, triggering a trap -- unless traps are disabled because direct access was requested
+ * (above) to locate the registered read/write handlers.  If no handler is found, then fault() will
+ * be called, triggering a trap -- unless traps are disabled because direct access was requested
  * (eg, by the Debugger).
  *
  * Handlers receive the original IOPAGE address that was used, although in most cases, it's ignored,
@@ -233,7 +219,7 @@ BusPDP11.IOHANDLER = {
  * Unlike regular Memory blocks, IOPAGE accesses permit word accesses on ODD addresses; that works
  * just fine by registering WORD handlers for the appropriate ODD addresses.  For BYTE accesses, it
  * depends.  For CPU register addresses, addIOHandlers() installs special byte handlers that perform
- * either a simple word read or write.  Other addresses must be handled on case-by-case basis.
+ * either a simple word read or write.  Other addresses must be handled on a case-by-case basis.
  *
  * TODO: Another small potential improvement would be for addIOHandlers() to install fallbacks for ALL
  * missing handlers, in both the ODD and EVEN cases, so there's never a need to check each function index
@@ -257,33 +243,48 @@ BusPDP11.IOController = {
         var b = -1;
         var bus = this.controller;
         var afn = bus.aIOHandlers[off];
+
+        /*
+         * Since addr is primarily used to advise an I/O handler of the target IOPAGE address, and since we don't want
+         * our handlers to worry about the current IOPAGE location, we truncate addr to 16 bits (the IOPAGE's lowest location).
+         */
+        var addrMasked = addr & 0xffff;
+
         if (afn) {
             if (afn[BusPDP11.IOHANDLER.READ_BYTE]) {
-                b = afn[BusPDP11.IOHANDLER.READ_BYTE](addr);
+                b = afn[BusPDP11.IOHANDLER.READ_BYTE](addrMasked);
             } else if (afn[BusPDP11.IOHANDLER.READ_WORD]) {
-                if (!(addr & 0x1)) {
-                    b = afn[BusPDP11.IOHANDLER.READ_WORD](addr) & 0xff;
+                if (!(addrMasked & 0x1)) {
+                    b = afn[BusPDP11.IOHANDLER.READ_WORD](addrMasked) & 0xff;
                 } else {
-                    b = afn[BusPDP11.IOHANDLER.READ_WORD](addr & ~0x1) >> 8;
+                    b = afn[BusPDP11.IOHANDLER.READ_WORD](addrMasked & ~0x1) >> 8;
                 }
             }
-        } else if (addr & 0x1) {
+        } else if (addrMasked & 0x1) {
             afn = bus.aIOHandlers[off & ~0x1];
             if (afn) {
                 if (afn[BusPDP11.IOHANDLER.READ_WORD]) {
-                    b = afn[BusPDP11.IOHANDLER.READ_WORD](addr & ~0x1) >> 8;
+                    b = afn[BusPDP11.IOHANDLER.READ_WORD](addrMasked & ~0x1) >> 8;
+                } else if (afn[BusPDP11.IOHANDLER.READ_BYTE]) {
+                    /*
+                     * WARNING: This is an unusual fall-back, because we're trying to read an ODD byte
+                     * access using a BYTE handler registered for EVEN bytes.  But if that's all we've got,
+                     * then presumably the handler is prepared for it (certainly, readROMByte() is).
+                     */
+                    b = afn[BusPDP11.IOHANDLER.READ_BYTE](addrMasked)
                 }
             }
         }
         if (b >= 0) {
-            if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS)) {
-                this.dbg.printMessage(afn[BusPDP11.IOHANDLER.NAME] + ".readByte(" + this.dbg.toStrBase(addr) + "): " + this.dbg.toStrBase(b), true, true);
+            if (DEBUGGER && this.dbg && this.dbg.messageEnabled(afn[BusPDP11.IOHANDLER.MSG_CATEGORY])) {
+                this.dbg.printMessage(afn[BusPDP11.IOHANDLER.NAME] + ".readByte(" + this.dbg.toStrBase(addr) + "): " + this.dbg.toStrBase(b), true, !bus.nDisableFaults);
             }
             return b;
         }
-        b = bus.unknownAccess(addr, true);
-        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS)) {
-            this.dbg.printMessage("warning: unconverted read access to byte @" + this.dbg.toStrBase(addr) + ": " + this.dbg.toStrBase(b), true, true);
+        bus.fault(addr, PDP11.CPUERR.TIMEOUT, PDP11.ACCESS.READ_BYTE);
+        b = 0xff;
+        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(afn[BusPDP11.IOHANDLER.MSG_CATEGORY])) {
+            this.dbg.printMessage("warning: unconverted read access to byte @" + this.dbg.toStrBase(addr) + ": " + this.dbg.toStrBase(b), true, !bus.nDisableFaults);
         }
         return b;
     },
@@ -302,12 +303,19 @@ BusPDP11.IOController = {
         var fWrite = false;
         var bus = this.controller;
         var afn = bus.aIOHandlers[off];
+
+        /*
+         * Since addr is primarily used to advise an I/O handler of the target IOPAGE address, and since we don't want
+         * our handlers to worry about the current IOPAGE location, we truncate addr to 16 bits (the IOPAGE's lowest location).
+         */
+        var addrMasked = addr & 0xffff;
+
         if (afn) {
             /*
              * If a writeByte() handler exists, call it; we're done.
              */
             if (afn[BusPDP11.IOHANDLER.WRITE_BYTE]) {
-                afn[BusPDP11.IOHANDLER.WRITE_BYTE](b, addr);
+                afn[BusPDP11.IOHANDLER.WRITE_BYTE](b, addrMasked);
                 fWrite = true;
             }
             /*
@@ -320,15 +328,15 @@ BusPDP11.IOController = {
              */
             else if (afn[BusPDP11.IOHANDLER.WRITE_WORD]) {
                 w = afn[BusPDP11.IOHANDLER.READ_WORD]? afn[BusPDP11.IOHANDLER.READ_WORD](0) : 0;
-                if (!(addr & 0x1)) {
-                    afn[BusPDP11.IOHANDLER.WRITE_WORD]((w & ~0xff) | b, addr);
+                if (!(addrMasked & 0x1)) {
+                    afn[BusPDP11.IOHANDLER.WRITE_WORD]((w & ~0xff) | b, addrMasked);
                     fWrite = true;
                 } else {
-                    afn[BusPDP11.IOHANDLER.WRITE_WORD]((w & 0xff) | (b << 8), addr & ~0x1);
+                    afn[BusPDP11.IOHANDLER.WRITE_WORD]((w & 0xff) | (b << 8), addrMasked & ~0x1);
                     fWrite = true;
                 }
             }
-        } else if (addr & 0x1) {
+        } else if (addrMasked & 0x1) {
             /*
              * If no handler existed, and this address was odd, then perhaps a handler exists for the even address;
              * if so, call the readWord() handler first to get the original data, then call writeWord() with the new
@@ -341,22 +349,29 @@ BusPDP11.IOController = {
             afn = bus.aIOHandlers[off & ~0x1];
             if (afn) {
                 if (afn[BusPDP11.IOHANDLER.WRITE_WORD]) {
-                    addr &= ~0x1;
+                    addrMasked &= ~0x1;
                     w = afn[BusPDP11.IOHANDLER.READ_WORD]? afn[BusPDP11.IOHANDLER.READ_WORD](0) : 0;
-                    afn[BusPDP11.IOHANDLER.WRITE_WORD]((w & 0xff) | (b << 8), addr);
+                    afn[BusPDP11.IOHANDLER.WRITE_WORD]((w & 0xff) | (b << 8), addrMasked);
                     fWrite = true;
+                } else if (afn[BusPDP11.IOHANDLER.WRITE_BYTE]) {
+                    /*
+                     * WARNING: This is an unusual fall-back, because we're trying to write an ODD byte
+                     * access using a BYTE handler registered for EVEN bytes.  But if that's all we've got,
+                     * then presumably the handler is prepared for it (certainly, writeROMByte() is).
+                     */
+                    afn[BusPDP11.IOHANDLER.WRITE_BYTE](b, addrMasked);
                 }
             }
         }
         if (fWrite) {
-            if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS)) {
-                this.dbg.printMessage(afn[BusPDP11.IOHANDLER.NAME] + ".writeByte(" + this.dbg.toStrBase(addr) + "," + this.dbg.toStrBase(b) + ")", true, true);
+            if (DEBUGGER && this.dbg && this.dbg.messageEnabled(afn[BusPDP11.IOHANDLER.MSG_CATEGORY])) {
+                this.dbg.printMessage(afn[BusPDP11.IOHANDLER.NAME] + ".writeByte(" + this.dbg.toStrBase(addr) + "," + this.dbg.toStrBase(b) + ")", true, !bus.nDisableFaults);
             }
             return;
         }
-        bus.unknownAccess(addr, true, b);
-        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS)) {
-            this.dbg.printMessage("warning: unconverted write access to byte @" + this.dbg.toStrBase(addr) + ": " + this.dbg.toStrBase(b), true, true);
+        bus.fault(addr, PDP11.CPUERR.TIMEOUT, PDP11.ACCESS.WRITE_BYTE);
+        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(afn[BusPDP11.IOHANDLER.MSG_CATEGORY])) {
+            this.dbg.printMessage("warning: unconverted write access to byte @" + this.dbg.toStrBase(addr) + ": " + this.dbg.toStrBase(b), true, !bus.nDisableFaults);
         }
     },
 
@@ -373,22 +388,30 @@ BusPDP11.IOController = {
         var w = -1;
         var bus = this.controller;
         var afn = bus.aIOHandlers[off];
+
+        /*
+         * Since addr is primarily used to advise an I/O handler of the target IOPAGE address, and since we don't want
+         * our handlers to worry about the current IOPAGE location, we truncate addr to 16 bits (the IOPAGE's lowest location).
+         */
+        var addrMasked = addr & 0xffff;
+
         if (afn) {
             if (afn[BusPDP11.IOHANDLER.READ_WORD]) {
-                w = afn[BusPDP11.IOHANDLER.READ_WORD](addr);
+                w = afn[BusPDP11.IOHANDLER.READ_WORD](addrMasked);
             } else if (afn[BusPDP11.IOHANDLER.READ_BYTE]) {
-                w = afn[BusPDP11.IOHANDLER.READ_BYTE](addr) | (afn[BusPDP11.IOHANDLER.READ_BYTE](addr + 1) << 8);
+                w = afn[BusPDP11.IOHANDLER.READ_BYTE](addrMasked) | (afn[BusPDP11.IOHANDLER.READ_BYTE](addrMasked + 1) << 8);
             }
         }
         if (w >= 0) {
-            if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS)) {
-                this.dbg.printMessage(afn[BusPDP11.IOHANDLER.NAME] + ".readWord(" + this.dbg.toStrBase(addr) + "): " + this.dbg.toStrBase(w), true, true);
+            if (DEBUGGER && this.dbg && this.dbg.messageEnabled(afn[BusPDP11.IOHANDLER.MSG_CATEGORY])) {
+                this.dbg.printMessage(afn[BusPDP11.IOHANDLER.NAME] + ".readWord(" + this.dbg.toStrBase(addr) + "): " + this.dbg.toStrBase(w), true, !bus.nDisableFaults);
             }
             return w;
         }
-        w = bus.unknownAccess(addr, false);
-        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS)) {
-            this.dbg.printMessage("warning: unconverted read access to word @" + this.dbg.toStrBase(addr) + ": " + this.dbg.toStrBase(w), true, true);
+        bus.fault(addr, PDP11.CPUERR.TIMEOUT, PDP11.ACCESS.READ_WORD);
+        w = 0xffff;
+        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(afn[BusPDP11.IOHANDLER.MSG_CATEGORY])) {
+            this.dbg.printMessage("warning: unconverted read access to word @" + this.dbg.toStrBase(addr) + ": " + this.dbg.toStrBase(w), true, !bus.nDisableFaults);
         }
         return w;
     },
@@ -406,25 +429,32 @@ BusPDP11.IOController = {
         var fWrite = false;
         var bus = this.controller;
         var afn = bus.aIOHandlers[off];
+
+        /*
+         * Since addr is primarily used to advise an I/O handler of the target IOPAGE address, and since we don't want
+         * our handlers to worry about the current IOPAGE location, we truncate addr to 16 bits (the IOPAGE's lowest location).
+         */
+        var addrMasked = addr & 0xffff;
+
         if (afn) {
             if (afn[BusPDP11.IOHANDLER.WRITE_WORD]) {
-                afn[BusPDP11.IOHANDLER.WRITE_WORD](w, addr);
+                afn[BusPDP11.IOHANDLER.WRITE_WORD](w, addrMasked);
                 fWrite = true;
             } else if (afn[BusPDP11.IOHANDLER.WRITE_BYTE]) {
-                afn[BusPDP11.IOHANDLER.WRITE_BYTE](w & 0xff, addr);
-                afn[BusPDP11.IOHANDLER.WRITE_BYTE](w >> 8, addr + 1);
+                afn[BusPDP11.IOHANDLER.WRITE_BYTE](w & 0xff, addrMasked);
+                afn[BusPDP11.IOHANDLER.WRITE_BYTE](w >> 8, addrMasked + 1);
                 fWrite = true;
             }
         }
         if (fWrite) {
-            if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS)) {
-                this.dbg.printMessage(afn[BusPDP11.IOHANDLER.NAME] + ".writeWord(" + this.dbg.toStrBase(addr) + "," + this.dbg.toStrBase(w) + ")", true, true);
+            if (DEBUGGER && this.dbg && this.dbg.messageEnabled(afn[BusPDP11.IOHANDLER.MSG_CATEGORY])) {
+                this.dbg.printMessage(afn[BusPDP11.IOHANDLER.NAME] + ".writeWord(" + this.dbg.toStrBase(addr) + "," + this.dbg.toStrBase(w) + ")", true, !bus.nDisableFaults);
             }
             return;
         }
-        bus.unknownAccess(addr, false, w);
-        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS)) {
-            this.dbg.printMessage("warning: unconverted write access to word @" + this.dbg.toStrBase(addr) + ": " + this.dbg.toStrBase(w), true, true);
+        bus.fault(addr, PDP11.CPUERR.TIMEOUT, PDP11.ACCESS.WRITE_WORD);
+        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(afn[BusPDP11.IOHANDLER.MSG_CATEGORY])) {
+            this.dbg.printMessage("warning: unconverted write access to word @" + this.dbg.toStrBase(addr) + ": " + this.dbg.toStrBase(w), true, !bus.nDisableFaults);
         }
     }
 };
@@ -465,18 +495,20 @@ BusPDP11.prototype.setIOPageRange = function(nRange)
         var addr;
         if (this.nIOPageRange) {
             addr = (1 << this.nIOPageRange) - BusPDP11.IOPAGE_LENGTH;
-            this.setMemoryBlocks(addr, BusPDP11.IOPAGE_LENGTH, this.prevIOPageBlocks);
+            this.setMemoryBlocks(addr, BusPDP11.IOPAGE_LENGTH, this.aIOPrevBlocks);
             this.nIOPageRange = 0;
         }
         if (nRange) {
             this.nIOPageRange = nRange;
-            addr = (1 << nRange) - BusPDP11.IOPAGE_LENGTH;
-            this.prevIOPageBlocks = this.getMemoryBlocks(addr, BusPDP11.IOPAGE_LENGTH);
-            if (this.realIOPageBlocks) {
-                this.setMemoryBlocks(addr, BusPDP11.IOPAGE_LENGTH, this.realIOPageBlocks);
+            addr = (1 << nRange);
+            this.nBusMask = (addr - 1);
+            addr -= BusPDP11.IOPAGE_LENGTH;
+            this.aIOPrevBlocks = this.getMemoryBlocks(addr, BusPDP11.IOPAGE_LENGTH);
+            if (this.aIOPageBlocks) {
+                this.setMemoryBlocks(addr, BusPDP11.IOPAGE_LENGTH, this.aIOPageBlocks);
             } else {
                 this.addMemory(addr, BusPDP11.IOPAGE_LENGTH, MemoryPDP11.TYPE.CONTROLLER, this);
-                this.realIOPageBlocks = this.getMemoryBlocks(addr, BusPDP11.IOPAGE_LENGTH);
+                this.aIOPageBlocks = this.getMemoryBlocks(addr, BusPDP11.IOPAGE_LENGTH);
             }
         }
     }
@@ -494,7 +526,7 @@ BusPDP11.prototype.setIOPageRange = function(nRange)
 BusPDP11.prototype.getControllerBuffer = function(addr)
 {
     /*
-     * No buffer is required for the IOPAGE; all accesses go to registered I/O handlers or to unknownAccess().
+     * No buffer is required for the IOPAGE; all accesses go to registered I/O handlers or to fault().
      */
     return [null, 0];
 };
@@ -536,32 +568,6 @@ BusPDP11.prototype.reset = function()
         this.afnReset[i]();
     }
     this.setIOPageRange(16);
-};
-
-/**
- * unknownAccess(addr, fByte, data)
- *
- * This is our default I/O handler, called when there's an IOPAGE access without a corresponding entry in aIOHandlers.
- *
- * @this {BusPDP11}
- * @param {number} addr (ie, an IOPAGE address)
- * @param {boolean} [fByte] (true if byte access, otherwise word)
- * @param {number} [data] (undefined if read, otherwise write)
- * @return {number}
- */
-BusPDP11.prototype.unknownAccess = function(addr, fByte, data)
-{
-    if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.WARN)) {
-        /*
-         * TODO: For 22-bit machines, let's display addr as a 3-byte value (for a total of 9 octal digits)
-         */
-        this.dbg.printMessage("warning: unknown I/O access (" + this.dbg.toStrBase(addr) + "," + this.dbg.toStrBase(data, fByte?1:2) + ")", true, true);
-        this.dbg.stopInstruction();
-    }
-    if (!this.nDisableFaults) {
-        this.cpu.trap(PDP11.TRAP.BUS_ERROR, addr);
-    }
-    return 0;
 };
 
 /**
@@ -670,7 +676,10 @@ BusPDP11.prototype.addMemory = function(addr, size, type, controller)
     }
 
     if (sizeLeft <= 0) {
-        this.status(str.toDec(size / 1024) + "Kb " + MemoryPDP11.TYPE_NAMES[type] + " at " + str.toOct(addr));
+        if (type == MemoryPDP11.TYPE.RAM) {
+            this.cbRAM += size;
+        }
+        this.status((size >> 10) + "Kb " + MemoryPDP11.TYPE_NAMES[type] + " at " + str.toOct(addr));
         return true;
     }
 
@@ -701,18 +710,26 @@ BusPDP11.prototype.cleanMemory = function(addr, size)
 };
 
 /**
- * zeroMemory(addr, size)
+ * zeroMemory(addr, size, pattern)
  *
  * @this {BusPDP11}
  * @param {number} addr
  * @param {number} size
+ * @param {number} [pattern]
  */
-BusPDP11.prototype.zeroMemory = function(addr, size)
+BusPDP11.prototype.zeroMemory = function(addr, size, pattern)
 {
     var off = addr & this.nBlockLimit;
     var iBlock = addr >>> this.nBlockShift;
     while (size > 0 && iBlock < this.aMemBlocks.length) {
-        this.aMemBlocks[iBlock].zero(off, size);
+        var block = this.aMemBlocks[iBlock];
+        if (block.controller) {
+            if (this.aIOPageBlocks && this.aIOPageBlocks.length == this.aIOPrevBlocks.length) {
+                var i = this.aIOPageBlocks.indexOf(block);
+                if (i >= 0) block = this.aIOPrevBlocks[i];
+            }
+        }
+        if (block) block.zero(off, size, pattern);
         size -= this.nBlockSize;
         iBlock++;
         off = 0;
@@ -911,13 +928,21 @@ BusPDP11.prototype.setMemoryBlocks = function(addr, size, aBlocks, type)
  */
 BusPDP11.prototype.getByte = function(addr)
 {
+    /*
+     * If bits 18-21 of addr are all set (which is implied by addr >= BusPDP11.IOPAGE_UNIBUS aka 0x3C0000),
+     * then we have a 22-bit address pointing to the top 256Kb range, so we must pass the address through the
+     * UNIBUS relocation map.
+     */
+    if (addr >= BusPDP11.IOPAGE_UNIBUS) {
+        addr = this.cpu.mapUnibus(addr);
+    }
     return this.aMemBlocks[(addr & this.nBusMask) >>> this.nBlockShift].readByte(addr & this.nBlockLimit, addr);
 };
 
 /**
  * getByteDirect(addr)
  *
- * This is useful for the Debugger and other components that want to bypass getByte() breakpoint detection.
+ * This is useful for the Debugger and other components that want to access physical memory without side-effects.
  *
  * @this {BusPDP11}
  * @param {number} addr is a physical address
@@ -925,6 +950,15 @@ BusPDP11.prototype.getByte = function(addr)
  */
 BusPDP11.prototype.getByteDirect = function(addr)
 {
+    /*
+     * If bits 18-21 of addr are all set (which is implied by addr >= BusPDP11.IOPAGE_UNIBUS aka 0x3C0000),
+     * then we have a 22-bit address pointing to the top 256Kb range, so we must pass the address through the
+     * UNIBUS relocation map.
+     */
+    if (addr >= BusPDP11.IOPAGE_UNIBUS) {
+        addr = this.cpu.mapUnibus(addr);
+    }
+    this.fFault = false;
     this.nDisableFaults++;
     var b = this.aMemBlocks[(addr & this.nBusMask) >>> this.nBlockShift].readByteDirect(addr & this.nBlockLimit, addr);
     this.nDisableFaults--;
@@ -940,6 +974,14 @@ BusPDP11.prototype.getByteDirect = function(addr)
  */
 BusPDP11.prototype.getWord = function(addr)
 {
+    /*
+     * If bits 18-21 of addr are all set (which is implied by addr >= BusPDP11.IOPAGE_UNIBUS aka 0x3C0000),
+     * then we have a 22-bit address pointing to the top 256Kb range, so we must pass the address through the
+     * UNIBUS relocation map.
+     */
+    if (addr >= BusPDP11.IOPAGE_UNIBUS) {
+        addr = this.cpu.mapUnibus(addr);
+    }
     var off = addr & this.nBlockLimit;
     var iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
     if (!PDP11.WORDBUS && off == this.nBlockLimit) {
@@ -959,9 +1001,18 @@ BusPDP11.prototype.getWord = function(addr)
  */
 BusPDP11.prototype.getWordDirect = function(addr)
 {
+    /*
+     * If bits 18-21 of addr are all set (which is implied by addr >= BusPDP11.IOPAGE_UNIBUS aka 0x3C0000),
+     * then we have a 22-bit address pointing to the top 256Kb range, so we must pass the address through the
+     * UNIBUS relocation map.
+     */
+    if (addr >= BusPDP11.IOPAGE_UNIBUS) {
+        addr = this.cpu.mapUnibus(addr);
+    }
     var w;
     var off = addr & this.nBlockLimit;
     var iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
+    this.fFault = false;
     this.nDisableFaults++;
     if (!PDP11.WORDBUS && off == this.nBlockLimit) {
         w = this.aMemBlocks[iBlock++].readByteDirect(off, addr) | (this.aMemBlocks[iBlock & this.nBlockMask].readByteDirect(0, addr + 1) << 8);
@@ -981,6 +1032,14 @@ BusPDP11.prototype.getWordDirect = function(addr)
  */
 BusPDP11.prototype.setByte = function(addr, b)
 {
+    /*
+     * If bits 18-21 of addr are all set (which is implied by addr >= BusPDP11.IOPAGE_UNIBUS aka 0x3C0000),
+     * then we have a 22-bit address pointing to the top 256Kb range, so we must pass the address through the
+     * UNIBUS relocation map.
+     */
+    if (addr >= BusPDP11.IOPAGE_UNIBUS) {
+        addr = this.cpu.mapUnibus(addr);
+    }
     this.aMemBlocks[(addr & this.nBusMask) >>> this.nBlockShift].writeByte(addr & this.nBlockLimit, b & 0xff, addr);
 };
 
@@ -996,6 +1055,15 @@ BusPDP11.prototype.setByte = function(addr, b)
  */
 BusPDP11.prototype.setByteDirect = function(addr, b)
 {
+    /*
+     * If bits 18-21 of addr are all set (which is implied by addr >= BusPDP11.IOPAGE_UNIBUS aka 0x3C0000),
+     * then we have a 22-bit address pointing to the top 256Kb range, so we must pass the address through the
+     * UNIBUS relocation map.
+     */
+    if (addr >= BusPDP11.IOPAGE_UNIBUS) {
+        addr = this.cpu.mapUnibus(addr);
+    }
+    this.fFault = false;
     this.nDisableFaults++;
     this.aMemBlocks[(addr & this.nBusMask) >>> this.nBlockShift].writeByteDirect(addr & this.nBlockLimit, b & 0xff, addr);
     this.nDisableFaults--;
@@ -1010,6 +1078,14 @@ BusPDP11.prototype.setByteDirect = function(addr, b)
  */
 BusPDP11.prototype.setWord = function(addr, w)
 {
+    /*
+     * If bits 18-21 of addr are all set (which is implied by addr >= BusPDP11.IOPAGE_UNIBUS aka 0x3C0000),
+     * then we have a 22-bit address pointing to the top 256Kb range, so we must pass the address through the
+     * UNIBUS relocation map.
+     */
+    if (addr >= BusPDP11.IOPAGE_UNIBUS) {
+        addr = this.cpu.mapUnibus(addr);
+    }
     var off = addr & this.nBlockLimit;
     var iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
     if (!PDP11.WORDBUS && off == this.nBlockLimit) {
@@ -1032,8 +1108,17 @@ BusPDP11.prototype.setWord = function(addr, w)
  */
 BusPDP11.prototype.setWordDirect = function(addr, w)
 {
+    /*
+     * If bits 18-21 of addr are all set (which is implied by addr >= BusPDP11.IOPAGE_UNIBUS aka 0x3C0000),
+     * then we have a 22-bit address pointing to the top 256Kb range, so we must pass the address through the
+     * UNIBUS relocation map.
+     */
+    if (addr >= BusPDP11.IOPAGE_UNIBUS) {
+        addr = this.cpu.mapUnibus(addr);
+    }
     var off = addr & this.nBlockLimit;
     var iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
+    this.fFault = false;
     this.nDisableFaults++;
     if (!PDP11.WORDBUS && off == this.nBlockLimit) {
         this.aMemBlocks[iBlock++].writeByteDirect(off, w & 0xff, addr);
@@ -1165,11 +1250,37 @@ BusPDP11.prototype.restoreMemory = function(a)
 };
 
 /**
+ * getMemorySize(type)
+ *
+ * NOTE: The original pdp11.js defined MAX_MEMORY as IOBASE_UNIBUS - 16384, where IOBASE_UNIBUS
+ * is 4Mb less 256Kb, and then it subtracted another 16Kb so that BSD 2.9 could boot.
+ *
+ * @this {BusPDP11}
+ * @param {number} type is one of the MemoryPDP11.TYPE constants (only RAM is currently supported)
+ * @return {number} (size of initial allocation, in bytes)
+ */
+BusPDP11.prototype.getMemorySize = function(type)
+{
+    var cb = 0;
+    switch(type) {
+    case MemoryPDP11.TYPE.RAM:
+        cb = this.cbRAM;
+        break;
+    }
+    return cb;
+};
+
+/**
  * addIOHandlers(start, end, fnReadByte, fnWriteByte, fnReadWord, fnWriteWord, sName)
  *
  * Add I/O notification handlers to the master list (aIOHandlers).  The start and end addresses are typically
  * relative to the starting IOPAGE address, but they can also be absolute; we simply mask all addresses with
  * IOPAGE_MASK.
+ *
+ * CAVEATS: If a conflict is reported, a partial set of handlers may still have been added.  There is no mechanism
+ * for removing handlers, since this is considered an initialization function.  And finally, when a range of addresses
+ * is used, each successive address is advanced by 2, so if you really want to add a handler for a "+1" (usually odd)
+ * address, then you must add it individually.
  *
  * @this {BusPDP11}
  * @param {number} start address
@@ -1178,31 +1289,37 @@ BusPDP11.prototype.restoreMemory = function(a)
  * @param {function(number,number)|null|undefined} fnWriteByte
  * @param {function(number)|null|undefined} fnReadWord
  * @param {function(number,number)|null|undefined} fnWriteWord
+ * @param {number} [msgCategory]
  * @param {string} [sName]
+ * @return {boolean} (true if entire range successfully registered, false if any conflicts)
  */
-BusPDP11.prototype.addIOHandlers = function(start, end, fnReadByte, fnWriteByte, fnReadWord, fnWriteWord, sName)
+BusPDP11.prototype.addIOHandlers = function(start, end, fnReadByte, fnWriteByte, fnReadWord, fnWriteWord, msgCategory, sName)
 {
     for (var addr = start; addr <= end; addr += 2) {
         var off = addr & BusPDP11.IOPAGE_MASK;
         if (this.aIOHandlers[off] !== undefined) {
             Component.warning("I/O address already registered: " + str.toHexLong(addr));
-            continue;
+            return false;
         }
-        this.aIOHandlers[off] = [fnReadByte, fnWriteByte, fnReadWord, fnWriteWord, sName || "unknown", false];
+        this.aIOHandlers[off] = [fnReadByte, fnWriteByte, fnReadWord, fnWriteWord, sName || "unknown", msgCategory, false];
         if (MAXDEBUG) this.log("addIOHandlers(" + str.toHexLong(addr) + ")");
     }
+    return true;
 };
 
 /**
- * addIOTable(component, table)
+ * addIOTable(component, table, msgCategory, sName)
  *
  * Add I/O notification handlers from the specified table (a batch version of addIOHandlers).
  *
  * @this {BusPDP11}
  * @param {Component} component
  * @param {Object} table
+ * @param {number} [msgCategory] (default is BUS)
+ * @param {string} [sName]
+ * @return {boolean} (true if entire range successfully registered, false if any conflicts)
  */
-BusPDP11.prototype.addIOTable = function(component, table)
+BusPDP11.prototype.addIOTable = function(component, table, msgCategory, sName)
 {
     for (var port in table) {
         var addr = +port;
@@ -1212,16 +1329,17 @@ BusPDP11.prototype.addIOTable = function(component, table)
          * Don't install (ie, ignore) handlers for I/O addresses that are defined with a model number
          * that is "greater than" than the current model.
          */
-        if (afn[5] && afn[5] > this.cpu.model) continue;
+        if (afn[6] && afn[6] > this.cpu.model) continue;
 
         var fnReadByte = afn[0]? afn[0].bind(component) : null;
         var fnWriteByte = afn[1]? afn[1].bind(component) : null;
         var fnReadWord = afn[2]? afn[2].bind(component) : null;
         var fnWriteWord = afn[3]? afn[3].bind(component) : null;
+        var nRegs = afn[5] || 1;
 
         /*
-         * As discussed in the IOController comments above, when handlers are being registered for the following
-         * addresses, we must install different fallback handlers for all BYTE accesses.
+         * As discussed in the IOController comments above, when handlers are being registered for these
+         * BYTE-granular UNIBUS addresses, we must install custom fallback handlers for all BYTE accesses.
          */
         if (addr >= PDP11.UNIBUS.R0SET0 && addr <= PDP11.UNIBUS.R6USER) {
             if (!fnReadByte && fnReadWord) {
@@ -1239,8 +1357,16 @@ BusPDP11.prototype.addIOTable = function(component, table)
                 }(fnWriteWord);
             }
         }
-        this.addIOHandlers(addr, addr, fnReadByte, fnWriteByte, fnReadWord, fnWriteWord, afn[4]);
+
+        var sReg = afn[4];
+        for (var iReg = 0; iReg < nRegs; iReg++, addr += 2) {
+            if (sReg && nRegs > 1) sReg = afn[4] + iReg;
+            if (!this.addIOHandlers(addr, addr, fnReadByte, fnWriteByte, fnReadWord, fnWriteWord, msgCategory || MessagesPDP11.BUS, sReg || sName)) {
+                return false;
+            }
+        }
     }
+    return true;
 };
 
 /**
@@ -1255,23 +1381,40 @@ BusPDP11.prototype.addResetHandler = function(fnReset)
 };
 
 /**
- * fault(addr, access)
+ * fault(addr, err, access)
  *
- * Memory interface for signaling alignment errors, invalid memory
+ * Bus interface for signaling alignment errors, invalid memory, etc.
  *
  * @this {BusPDP11}
  * @param {number} addr
+ * @param {number} [err]
  * @param {number} [access] (for diagnostic purposes only)
  */
-BusPDP11.prototype.fault = function(addr, access)
+BusPDP11.prototype.fault = function(addr, err, access)
 {
+    this.fFault = true;
     if (!this.nDisableFaults) {
-        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS)) {
+        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.FAULT)) {
             this.dbg.printMessage("memory fault (" + access + ") on address " + this.dbg.toStrBase(addr), true, true);
-            this.dbg.stopInstruction();
         }
+        if (err) this.cpu.regErr |= err;
         this.cpu.trap(PDP11.TRAP.BUS_ERROR, addr);
     }
+};
+
+/**
+ * checkFault()
+ *
+ * This also serves as a clearFault() function.
+ *
+ * @this {BusPDP11}
+ * @return {boolean}
+ */
+BusPDP11.prototype.checkFault = function()
+{
+    var f = this.fFault;
+    this.fFault = false;
+    return f;
 };
 
 /**

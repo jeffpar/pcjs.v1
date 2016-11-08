@@ -804,7 +804,7 @@ var SectorInfo;
  * for every disk loaded BEFORE the initBus() phase; any disk loaded AFTER that point will get its Debugger
  * reference, if any, from the disk controller passed to the Disk() constructor.
  *
- * @this {ChipSet}
+ * @this {Disk}
  * @param {Computer} cmp
  * @param {Bus} bus
  * @param {X86CPU} cpu
@@ -858,7 +858,7 @@ Disk.prototype.powerUp = function(data, fRepower) {
  *
  * This is a callback issued by the Disk component once the load() from powerUp() has finished.
  *
- * @this {HDC}
+ * @this {Disk}
  * @param {Object} drive
  * @param {Disk} disk is set if the disk was successfully mounted, null if not
  * @param {string} sDiskName
@@ -1106,13 +1106,13 @@ Disk.prototype.build = function(buffer, fModified)
 {
     var disk;
     var cbDiskData = buffer? buffer.byteLength : 0;
-    var disketteFormat = DiskAPI.DISKETTE_FORMATS[cbDiskData];
+    var diskFormat = DiskAPI.DISK_FORMATS[cbDiskData];
 
-    if (disketteFormat) {
-        this.nCylinders = disketteFormat[0];
-        this.nHeads = disketteFormat[1];
-        this.nSectors = disketteFormat[2];
-        this.cbSector = 512;
+    if (diskFormat) {
+        this.nCylinders = diskFormat[0];
+        this.nHeads = diskFormat[1];
+        this.nSectors = diskFormat[2];
+        this.cbSector = (diskFormat[3] || 512);
 
         var cdw = this.cbSector >> 2, dwPattern = 0, dwChecksum = 0;
         var ib = 0;
@@ -1138,7 +1138,7 @@ Disk.prototype.build = function(buffer, fModified)
         this.dwChecksum = dwChecksum;
         disk = this;
     } else {
-        this.notice("Unrecognized diskette format (" + cbDiskData + " bytes)");
+        this.notice("Unrecognized disk format (" + cbDiskData + " bytes)");
     }
 
     if (this.fnNotify) {
@@ -1481,6 +1481,8 @@ Disk.prototype.buildFileTable = function()
             else if (cbDisk == 320 * 1024 && this.getClusterEntry(dir, 0, 0) == DiskAPI.FAT.MEDIA_320KB) {
                 dir.lbaTotal = 640;
                 dir.nEntries = 112;
+                this.assert(this.nHeads == 2);
+                dir.nClusterSecs++;         // 320Kb disks use 2 sectors/cluster
                 fValid = true;
             }
             else {

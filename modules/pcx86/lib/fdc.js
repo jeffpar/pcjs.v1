@@ -470,7 +470,14 @@ FDC.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
                 }
             });
             for (i = 0; i < aOptions.length; i++)  {
-                control.options[i] = aOptions[i];
+                try {
+                    /*
+                     * TODO: Determine why this line blows up in IE8; are the properties of an options object not settable in IE8?
+                     */
+                    control.options[i] = aOptions[i];
+                } catch(e) {
+                    break;
+                }
             }
         }
 
@@ -547,7 +554,7 @@ FDC.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
         control.onclick = function onClickSaveDrive(event) {
             var controlDrives = fdc.bindings["listDrives"];
             if (controlDrives && controlDrives.options && fdc.aDrives) {
-                var iDriveSelected = str.parseInt(controlDrives.value, 10);
+                var iDriveSelected = str.parseInt(controlDrives.value, 10) || 0;
                 var drive = fdc.aDrives[iDriveSelected];
                 if (drive) {
                     /*
@@ -1069,17 +1076,17 @@ FDC.prototype.initDrive = function(drive, iDrive, data)
          * so all we have to do is mount a blank diskette and let disk.restore() do the rest; ie, there's nothing to
          * "load" (it's a purely synchronous operation).
          *
-         * Otherwise, we must call loadDiskette(); in the common case, loadDiskette() will have already "auto-mounted"
+         * Otherwise, we must call loadDrive(); in the common case, loadDrive() will have already "auto-mounted"
          * the diskette, so it will return true, and then we restore any deltas to the current image.
          *
-         * However, if loadDiskette() returns false, then it has initiated the load for a *different* disk image,
+         * However, if loadDrive() returns false, then it has initiated the load for a *different* disk image,
          * so we must mark ourselves as "not ready" again, and add another "wait for ready" test in Computer before
          * finally powering the CPU.
          */
         if (fLocal) {
-            this.mountDiskette(iDrive, sDisketteName, sDiskettePath);
+            this.mountDrive(iDrive, sDisketteName, sDiskettePath);
         }
-        else if (this.loadDiskette(iDrive, sDisketteName, sDiskettePath, true)) {
+        else if (this.loadDrive(iDrive, sDisketteName, sDiskettePath, true)) {
             if (drive.disk) {
                 if (sDiskettePath) {
                     this.addDiskHistory(sDisketteName, sDiskettePath, drive.disk);
@@ -1103,7 +1110,7 @@ FDC.prototype.initDrive = function(drive, iDrive, data)
     }
 
     /*
-     * TODO: If loadDiskette() returned true, then this can happen immediately.  Otherwise, loadDiskette()
+     * TODO: If loadDrive() returned true, then this can happen immediately.  Otherwise, loadDrive()
      * will have merely "queued up" the load request and drive.disk won't be ready yet, so figure out how/when
      * we can properly restore drive.sector in that case.
      */
@@ -1288,7 +1295,7 @@ FDC.prototype.autoMount = function(fRemount)
                  */
                 var iDrive = sDrive.charCodeAt(0) - 0x41;
                 if (iDrive >= 0 && iDrive < this.aDrives.length) {
-                    if (!this.loadDiskette(iDrive, sDisketteName, sDiskettePath, true) && fRemount) {
+                    if (!this.loadDrive(iDrive, sDisketteName, sDiskettePath, true) && fRemount) {
                         this.setReady(false);
                     }
                     continue;
@@ -1342,16 +1349,16 @@ FDC.prototype.loadSelectedDrive = function(sDisketteName, sDiskettePath, file)
 
         if (DEBUG) this.println("loading disk " + sDiskettePath + "...");
 
-        while (this.loadDiskette(iDrive, sDisketteName, sDiskettePath, false, file) < 0) {
+        while (this.loadDrive(iDrive, sDisketteName, sDiskettePath, false, file) < 0) {
             if (!window.confirm("Click OK to reload the original disk.\n(WARNING: All disk changes will be discarded)")) {
                 return;
             }
             /*
-             * So here's the story: loadDiskette() returned true, which it does ONLY if the specified disk is already
+             * So here's the story: loadDrive() returned true, which it does ONLY if the specified disk is already
              * mounted, AND the user clicked OK to reload the original disk image.  So we must toss any history we have
-             * for the disk, unload it, and then loop back around to loadDiskette().
+             * for the disk, unload it, and then loop back around to loadDrive().
              *
-             * loadDiskette() should NEVER return true the second time, since no disk is loaded. In other words,
+             * loadDrive() should NEVER return true the second time, since no disk is loaded. In other words,
              * this isn't really a loop so much as a one-time retry operation.
              */
             this.removeDiskHistory(sDisketteName, sDiskettePath);
@@ -1363,24 +1370,24 @@ FDC.prototype.loadSelectedDrive = function(sDisketteName, sDiskettePath, file)
 };
 
 /**
- * mountDiskette(iDrive, sDisketteName, sDiskettePath)
+ * mountDrive(iDrive, sDisketteName, sDiskettePath)
  *
  * @this {FDC}
  * @param {number} iDrive
  * @param {string} sDisketteName
  * @param {string} sDiskettePath
  */
-FDC.prototype.mountDiskette = function(iDrive, sDisketteName, sDiskettePath)
+FDC.prototype.mountDrive = function(iDrive, sDisketteName, sDiskettePath)
 {
     var drive = this.aDrives[iDrive];
     this.unloadDrive(iDrive, true, true);
     drive.fLocal = true;
     var disk = new Disk(this, drive, DiskAPI.MODE.PRELOAD);
-    this.doneLoadDiskette(drive, disk, sDisketteName, sDiskettePath, true);
+    this.doneLoadDrive(drive, disk, sDisketteName, sDiskettePath, true);
 };
 
 /**
- * loadDiskette(iDrive, sDisketteName, sDiskettePath, fAutoMount, file)
+ * loadDrive(iDrive, sDisketteName, sDiskettePath, fAutoMount, file)
  *
  * NOTE: If sDiskettePath is already loaded in the drive, nothing needs to be done.
  *
@@ -1392,7 +1399,7 @@ FDC.prototype.mountDiskette = function(iDrive, sDisketteName, sDiskettePath)
  * @param {File} [file] is set if there's an associated File object
  * @return {number} 1 if diskette loaded, 0 if queued up (or busy), -1 if already loaded
  */
-FDC.prototype.loadDiskette = function(iDrive, sDisketteName, sDiskettePath, fAutoMount, file)
+FDC.prototype.loadDrive = function(iDrive, sDisketteName, sDiskettePath, fAutoMount, file)
 {
     var drive = this.aDrives[iDrive];
     if (sDiskettePath) {
@@ -1419,7 +1426,7 @@ FDC.prototype.loadDiskette = function(iDrive, sDisketteName, sDiskettePath, fAut
             }
             drive.fLocal = !!file;
             var disk = new Disk(this, drive, DiskAPI.MODE.PRELOAD);
-            if (!disk.load(sDisketteName, sDiskettePath, file, this.doneLoadDiskette)) {
+            if (!disk.load(sDisketteName, sDiskettePath, file, this.doneLoadDrive)) {
                 return 0;
             }
             return 1;
@@ -1429,7 +1436,7 @@ FDC.prototype.loadDiskette = function(iDrive, sDisketteName, sDiskettePath, fAut
 };
 
 /**
- * doneLoadDiskette(drive, disk, sDisketteName, sDiskettePath, fAutoMount)
+ * doneLoadDrive(drive, disk, sDisketteName, sDiskettePath, fAutoMount)
  *
  * @this {FDC}
  * @param {Object} drive
@@ -1438,7 +1445,7 @@ FDC.prototype.loadDiskette = function(iDrive, sDisketteName, sDiskettePath, fAut
  * @param {string} sDiskettePath
  * @param {boolean} [fAutoMount]
  */
-FDC.prototype.doneLoadDiskette = function onFDCLoadNotify(drive, disk, sDisketteName, sDiskettePath, fAutoMount)
+FDC.prototype.doneLoadDrive = function onFDCLoadNotify(drive, disk, sDisketteName, sDiskettePath, fAutoMount)
 {
     var aDiskInfo;
 
@@ -1481,7 +1488,7 @@ FDC.prototype.doneLoadDiskette = function onFDCLoadNotify(drive, disk, sDiskette
         this.addDiskHistory(sDisketteName, sDiskettePath, disk);
 
         /*
-         * For a local disk (ie, one loaded via mountDiskette()), the disk.restore() performed by addDiskHistory()
+         * For a local disk (ie, one loaded via mountDrive()), the disk.restore() performed by addDiskHistory()
          * may have altered the disk geometry, so refresh the disk info.
          */
         aDiskInfo = disk.info();

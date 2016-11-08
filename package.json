@@ -1,6 +1,6 @@
 {
   "name": "pcjs",
-  "version": "1.30.2",
+  "version": "1.30.3",
   "description": "Node-enabled version of PCjs",
   "license": "GPL-3.0",
   "engine": "node ^6.7.0",
@@ -176,6 +176,7 @@
   ],
   "pdp11Files": [
     "./modules/shared/lib/defines.js",
+    "./modules/shared/lib/diskapi.js",
     "./modules/shared/lib/dumpapi.js",
     "./modules/shared/lib/reportapi.js",
     "./modules/shared/lib/userapi.js",
@@ -198,6 +199,8 @@
     "./modules/pdp11/lib/keyboard.js",
     "./modules/pdp11/lib/serialport.js",
     "./modules/pdp11/lib/pc11.js",
+    "./modules/pdp11/lib/disk.js",
+    "./modules/pdp11/lib/rl11.js",
     "./modules/shared/lib/debugger.js",
     "./modules/pdp11/lib/debugger.js",
     "./modules/pdp11/lib/computer.js",

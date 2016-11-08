@@ -60,12 +60,12 @@ screensaver-related mods to the ROM.
 Finally, I verified that reassembling [VT100.asm](VT100.asm) with [asm8080](https://github.com/begoon/asm8080) produced the
 original VT100.bin; after adding the correct number of `nop` instructions to the end to the source file, the binaries matched.
 
-The other advantage of reassembling the code is that the resulting [VT100.lst](VT100.lst) makes it easy to export comments
+The other advantage of reassembling the code is that the resulting [VT100.txt](VT100.txt) makes it easy to export comments
 and other symbolic information to [VT100.map](VT100.map), which can then be included in the [VT100.json](VT100.json) ROM dump
 and passed on to the PC8080 Debugger.  Here are the rebuild steps:
 
-	asm8080 -lVT100.lst VT100.asm
-	grep -E "[0-9]+ [0-9A-D]+.*;;" VT100.lst | sed -E "s/ *[0-9]+ ([0-9A-F]+).*;(;.*)/     \1   .   \2/" > VT100.map
+	asm8080 -lVT100.txt VT100.asm
+	grep -E "[0-9]+ [0-9A-D]+.*;;" VT100.txt | sed -E "s/ *[0-9]+ ([0-9A-F]+).*;(;.*)/     \1   .   \2/" > VT100.map
 	filedump --file=VT100.bin --format=bytes --output=VT100.json --comments --overwrite
 
 You can omit `--comments` from the filedump command to reduce the size of the [VT100.json](VT100.json) file.

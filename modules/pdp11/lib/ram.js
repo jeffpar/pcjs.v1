@@ -176,19 +176,19 @@ RAMPDP11.prototype.doneLoad = function(sURL, sData, nErrorCode)
 {
     if (nErrorCode) {
         this.notice("Unable to load RAM resource (error " + nErrorCode + ": " + sURL + ")");
-        return;
-    }
-
-    Component.addMachineResource(this.idMachine, sURL, sData);
-
-    var resource = web.parseMemoryResource(sURL, sData);
-    if (resource) {
-        this.abInit = resource.aBytes;
-        this.aSymbols = resource.aSymbols;
-        if (this.addrLoad == null) this.addrLoad = resource.addrLoad;
-        if (this.addrExec == null) this.addrExec = resource.addrExec;
-    } else {
         this.sFilePath = null;
+    }
+    else {
+        Component.addMachineResource(this.idMachine, sURL, sData);
+        var resource = web.parseMemoryResource(sURL, sData);
+        if (resource) {
+            this.abInit = resource.aBytes;
+            this.aSymbols = resource.aSymbols;
+            if (this.addrLoad == null) this.addrLoad = resource.addrLoad;
+            if (this.addrExec == null) this.addrExec = resource.addrExec;
+        } else {
+            this.sFilePath = null;
+        }
     }
     this.initRAM();
 };
@@ -239,7 +239,12 @@ RAMPDP11.prototype.initRAM = function()
 RAMPDP11.prototype.reset = function()
 {
     if (this.fAllocated) {
-        this.bus.zeroMemory(this.addrRAM, this.sizeRAM);
+        /*
+         * TODO: Add a configuration parameter for selecting the byte pattern on reset?
+         * Note that when memory blocks are originally created, they are currently always
+         * zero-initialized, so this would only affect resets.
+         */
+        this.bus.zeroMemory(this.addrRAM, this.sizeRAM, 0);
         if (this.abInit) {
             this.loadImage(this.abInit, this.addrLoad, this.addrExec, this.addrRAM, true);
         }

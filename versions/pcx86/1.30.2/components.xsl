@@ -421,7 +421,10 @@
 					</form>
 				</xsl:when>
 				<xsl:when test="@type = 'led' or @type = 'rled'">
-					<div class="{$APPCLASS}-binding {$CSSCLASS}-{@type}" data-value="{{{$type},{$binding}}}" style="display:inline-block;"><xsl:value-of select="."/></div>
+					<div class="{$APPCLASS}-binding {$CSSCLASS}-{@type}" data-value="{{{$type},{$binding},{$value}}}" style="display:inline-block;"><xsl:value-of select="."/></div>
+				</xsl:when>
+				<xsl:when test="@type = 'switch'">
+					<div class="{$APPCLASS}-binding {$CSSCLASS}-{@type}" data-value="{{{$type},{$binding},{$value}}}" style="display:inline-block;"><xsl:value-of select="."/></div>
 				</xsl:when>
 				<xsl:when test="@type = 'progress'">
 					<div class="{$APPCLASS}-binding {$CSSCLASS}-{@type}" style="-webkit-user-select:none;{$border}{$width}{$height}{$fontsize}{$style}" data-value="{{{$type},{$binding},{$value}}}">

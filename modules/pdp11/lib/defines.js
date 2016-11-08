@@ -296,11 +296,13 @@ var PDP11 = {
         DSPACE:     0x10000     // getVirtualByMode() sets bit 17 in any 16-bit virtual address that refers to D space (as opposed to I space)
     },
     /*
-     * Internal flags passed to writeByteByMode(), etc.
+     * Internal flags passed to writeDstByte()
+     *
+     * The BYTE and SBYTE values have been chosen so that they can be used directly as masks.
      */
     WRITE: {
-        NORMAL:     0x0,        // write byte or word normally
-        SIGNEXT:    0x1         // sign-extend a byte to a word
+        BYTE:       0xff,        // write byte normally
+        SBYTE:      0xffff       // sign-extend byte to word
     },
     CPUERR: {
         RED:        0x0004,     // red zone stack limit
@@ -316,7 +318,7 @@ var PDP11 = {
         PAGE_D:     0x0010,     // last fault occurred in D space
         PAGE_MODE:  0x0060,     // processor mode as of last fault
         COMPLETED:  0x0080,     // last instruction completed
-        DSTMODE:    0x0100,     // only destination mode references will be relocated (for diagnostic use)
+        DSTMODE:    0x0100,     // only destination mode references will be relocated (aka MAINT bit)
         MMU_TRAPS:  0x0200,     // enable MMU traps
         UNUSED:     0x0C00,
         TRAP_MMU:   0x1000,     // trap: MMU
@@ -364,72 +366,79 @@ var PDP11 = {
      * For more details: https://github.com/google/closure-compiler/wiki/ECMAScript6
      */
     UNIBUS: {       //16-bit       18-bit     22-bit         Hex    Description
-        SISDR0:     0o172200,   //                                  Supervisor I Space Descriptor Register 0
-        SISDR1:     0o172202,   //                                  Supervisor I Space Descriptor Register 1
-        SISDR2:     0o172204,   //                                  Supervisor I Space Descriptor Register 2
-        SISDR3:     0o172206,   //                                  Supervisor I Space Descriptor Register 3
-        SISDR4:     0o172210,   //                                  Supervisor I Space Descriptor Register 4
-        SISDR5:     0o172212,   //                                  Supervisor I Space Descriptor Register 5
-        SISDR6:     0o172214,   //                                  Supervisor I Space Descriptor Register 6
-        SISDR7:     0o172216,   //                                  Supervisor I Space Descriptor Register 7
-        SDSDR0:     0o172220,   //                                  Supervisor D Space Descriptor Register 0
-        SDSDR1:     0o172222,   //                                  Supervisor D Space Descriptor Register 1
-        SDSDR2:     0o172224,   //                                  Supervisor D Space Descriptor Register 2
-        SDSDR3:     0o172226,   //                                  Supervisor D Space Descriptor Register 3
-        SDSDR4:     0o172230,   //                                  Supervisor D Space Descriptor Register 4
-        SDSDR5:     0o172232,   //                                  Supervisor D Space Descriptor Register 5
-        SDSDR6:     0o172234,   //                                  Supervisor D Space Descriptor Register 6
-        SDSDR7:     0o172236,   //                                  Supervisor D Space Descriptor Register 7
-        SISAR0:     0o172240,   //                                  Supervisor I Space Address Register 0
-        SISAR1:     0o172242,   //                                  Supervisor I Space Address Register 1
-        SISAR2:     0o172244,   //                                  Supervisor I Space Address Register 2
-        SISAR3:     0o172246,   //                                  Supervisor I Space Address Register 3
-        SISAR4:     0o172250,   //                                  Supervisor I Space Address Register 4
-        SISAR5:     0o172252,   //                                  Supervisor I Space Address Register 5
-        SISAR6:     0o172254,   //                                  Supervisor I Space Address Register 6
-        SISAR7:     0o172256,   //                                  Supervisor I Space Address Register 7
-        SDSAR0:     0o172260,   //                                  Supervisor D Space Address Register 0
-        SDSAR1:     0o172262,   //                                  Supervisor D Space Address Register 1
-        SDSAR2:     0o172264,   //                                  Supervisor D Space Address Register 2
-        SDSAR3:     0o172266,   //                                  Supervisor D Space Address Register 3
-        SDSAR4:     0o172270,   //                                  Supervisor D Space Address Register 4
-        SDSAR5:     0o172272,   //                                  Supervisor D Space Address Register 5
-        SDSAR6:     0o172274,   //                                  Supervisor D Space Address Register 6
-        SDSAR7:     0o172276,   //                                  Supervisor D Space Address Register 7
-        KISDR0:     0o172300,   //                                  Kernel I Space Descriptor Register 0
-        KISDR1:     0o172302,   //                                  Kernel I Space Descriptor Register 1
-        KISDR2:     0o172304,   //                                  Kernel I Space Descriptor Register 2
-        KISDR3:     0o172306,   //                                  Kernel I Space Descriptor Register 3
-        KISDR4:     0o172310,   //                                  Kernel I Space Descriptor Register 4
-        KISDR5:     0o172312,   //                                  Kernel I Space Descriptor Register 5
-        KISDR6:     0o172314,   //                                  Kernel I Space Descriptor Register 6
-        KISDR7:     0o172316,   //                                  Kernel I Space Descriptor Register 7
-        KDSDR0:     0o172320,   //                                  Kernel D Space Descriptor Register 0
-        KDSDR1:     0o172322,   //                                  Kernel D Space Descriptor Register 1
-        KDSDR2:     0o172324,   //                                  Kernel D Space Descriptor Register 2
-        KDSDR3:     0o172326,   //                                  Kernel D Space Descriptor Register 3
-        KDSDR4:     0o172330,   //                                  Kernel D Space Descriptor Register 4
-        KDSDR5:     0o172332,   //                                  Kernel D Space Descriptor Register 5
-        KDSDR6:     0o172334,   //                                  Kernel D Space Descriptor Register 6
-        KDSDR7:     0o172336,   //                                  Kernel D Space Descriptor Register 7
-        KISAR0:     0o172340,   //                                  Kernel I Space Address Register 0
-        KISAR1:     0o172342,   //                                  Kernel I Space Address Register 1
-        KISAR2:     0o172344,   //                                  Kernel I Space Address Register 2
-        KISAR3:     0o172346,   //                                  Kernel I Space Address Register 3
-        KISAR4:     0o172350,   //                                  Kernel I Space Address Register 4
-        KISAR5:     0o172352,   //                                  Kernel I Space Address Register 5
-        KISAR6:     0o172354,   //                                  Kernel I Space Address Register 6
-        KISAR7:     0o172356,   //                                  Kernel I Space Address Register 7
-        KDSAR0:     0o172360,   //                                  Kernel D Space Address Register 0
-        KDSAR1:     0o172362,   //                                  Kernel D Space Address Register 1
-        KDSAR2:     0o172364,   //                                  Kernel D Space Address Register 2
-        KDSAR3:     0o172366,   //                                  Kernel D Space Address Register 3
-        KDSAR4:     0o172370,   //                                  Kernel D Space Address Register 4
-        KDSAR5:     0o172372,   //                                  Kernel D Space Address Register 5
-        KDSAR6:     0o172374,   //                                  Kernel D Space Address Register 6
-        KDSAR7:     0o172376,   //                                  Kernel D Space Address Register 7
+        UNIMAP:     0o170200,   //                                  UNIBUS Mapping Registers (0-31) 64 words (ends at 0o170372)
+        SIPDR0:     0o172200,   //                                  Supervisor I Page Descriptor Register 0
+        SIPDR1:     0o172202,   //                                  Supervisor I Page Descriptor Register 1
+        SIPDR2:     0o172204,   //                                  Supervisor I Page Descriptor Register 2
+        SIPDR3:     0o172206,   //                                  Supervisor I Page Descriptor Register 3
+        SIPDR4:     0o172210,   //                                  Supervisor I Page Descriptor Register 4
+        SIPDR5:     0o172212,   //                                  Supervisor I Page Descriptor Register 5
+        SIPDR6:     0o172214,   //                                  Supervisor I Page Descriptor Register 6
+        SIPDR7:     0o172216,   //                                  Supervisor I Page Descriptor Register 7
+        SDPDR0:     0o172220,   //                                  Supervisor D Page Descriptor Register 0
+        SDPDR1:     0o172222,   //                                  Supervisor D Page Descriptor Register 1
+        SDPDR2:     0o172224,   //                                  Supervisor D Page Descriptor Register 2
+        SDPDR3:     0o172226,   //                                  Supervisor D Page Descriptor Register 3
+        SDPDR4:     0o172230,   //                                  Supervisor D Page Descriptor Register 4
+        SDPDR5:     0o172232,   //                                  Supervisor D Page Descriptor Register 5
+        SDPDR6:     0o172234,   //                                  Supervisor D Page Descriptor Register 6
+        SDPDR7:     0o172236,   //                                  Supervisor D Page Descriptor Register 7
+        SIPAR0:     0o172240,   //                                  Supervisor I Page Address Register 0
+        SIPAR1:     0o172242,   //                                  Supervisor I Page Address Register 1
+        SIPAR2:     0o172244,   //                                  Supervisor I Page Address Register 2
+        SIPAR3:     0o172246,   //                                  Supervisor I Page Address Register 3
+        SIPAR4:     0o172250,   //                                  Supervisor I Page Address Register 4
+        SIPAR5:     0o172252,   //                                  Supervisor I Page Address Register 5
+        SIPAR6:     0o172254,   //                                  Supervisor I Page Address Register 6
+        SIPAR7:     0o172256,   //                                  Supervisor I Page Address Register 7
+        SDPAR0:     0o172260,   //                                  Supervisor D Page Address Register 0
+        SDPAR1:     0o172262,   //                                  Supervisor D Page Address Register 1
+        SDPAR2:     0o172264,   //                                  Supervisor D Page Address Register 2
+        SDPAR3:     0o172266,   //                                  Supervisor D Page Address Register 3
+        SDPAR4:     0o172270,   //                                  Supervisor D Page Address Register 4
+        SDPAR5:     0o172272,   //                                  Supervisor D Page Address Register 5
+        SDPAR6:     0o172274,   //                                  Supervisor D Page Address Register 6
+        SDPAR7:     0o172276,   //                                  Supervisor D Page Address Register 7
+        KIPDR0:     0o172300,   //                                  Kernel I Page Descriptor Register 0
+        KIPDR1:     0o172302,   //                                  Kernel I Page Descriptor Register 1
+        KIPDR2:     0o172304,   //                                  Kernel I Page Descriptor Register 2
+        KIPDR3:     0o172306,   //                                  Kernel I Page Descriptor Register 3
+        KIPDR4:     0o172310,   //                                  Kernel I Page Descriptor Register 4
+        KIPDR5:     0o172312,   //                                  Kernel I Page Descriptor Register 5
+        KIPDR6:     0o172314,   //                                  Kernel I Page Descriptor Register 6
+        KIPDR7:     0o172316,   //                                  Kernel I Page Descriptor Register 7
+        KDPDR0:     0o172320,   //                                  Kernel D Page Descriptor Register 0
+        KDPDR1:     0o172322,   //                                  Kernel D Page Descriptor Register 1
+        KDPDR2:     0o172324,   //                                  Kernel D Page Descriptor Register 2
+        KDPDR3:     0o172326,   //                                  Kernel D Page Descriptor Register 3
+        KDPDR4:     0o172330,   //                                  Kernel D Page Descriptor Register 4
+        KDPDR5:     0o172332,   //                                  Kernel D Page Descriptor Register 5
+        KDPDR6:     0o172334,   //                                  Kernel D Page Descriptor Register 6
+        KDPDR7:     0o172336,   //                                  Kernel D Page Descriptor Register 7
+        KIPAR0:     0o172340,   //                                  Kernel I Page Address Register 0
+        KIPAR1:     0o172342,   //                                  Kernel I Page Address Register 1
+        KIPAR2:     0o172344,   //                                  Kernel I Page Address Register 2
+        KIPAR3:     0o172346,   //                                  Kernel I Page Address Register 3
+        KIPAR4:     0o172350,   //                                  Kernel I Page Address Register 4
+        KIPAR5:     0o172352,   //                                  Kernel I Page Address Register 5
+        KIPAR6:     0o172354,   //                                  Kernel I Page Address Register 6
+        KIPAR7:     0o172356,   //                                  Kernel I Page Address Register 7
+        KDPAR0:     0o172360,   //                                  Kernel D Page Address Register 0
+        KDPAR1:     0o172362,   //                                  Kernel D Page Address Register 1
+        KDPAR2:     0o172364,   //                                  Kernel D Page Address Register 2
+        KDPAR3:     0o172366,   //                                  Kernel D Page Address Register 3
+        KDPAR4:     0o172370,   //                                  Kernel D Page Address Register 4
+        KDPAR5:     0o172372,   //                                  Kernel D Page Address Register 5
+        KDPAR6:     0o172374,   //                                  Kernel D Page Address Register 6
+        KDPAR7:     0o172376,   //                                  Kernel D Page Address Register 7
 
         MMR3:       0o172516,   // 772516   17772516
+
+        RLCS:       0o174400,   //                                  RL11 Control Status Register
+        RLBA:       0o174402,   //                                  RL11 Bus Address Register
+        RLDA:       0o174404,   //                                  RL11 Disk Address Register
+        RLMP:       0o174406,   //                                  RL11 Multi-Purpose Register
+        RLBE:       0o174410,   //                                  RL11 Bus (Address) Extension Register (RLV12 controller only)
 
         LKS:        0o177546,   //                                  KW11-L Clock Status
 
@@ -443,44 +452,44 @@ var PDP11 = {
         XCSR:       0o177564,   //                                  Display Terminal: Transmitter Status Register
         XBUF:       0o177566,   //                                  Display Terminal: Transmitter Data Buffer Register
 
-        CNSL:       0o177570,   //                                  Console Switch and Front Panel Display
+        CNSW:       0o177570,   //                                  Console (Front Panel) Switch Register
 
         MMR0:       0o177572,   // 777572   17777572
         MMR1:       0o177574,   // 777574   17777574
         MMR2:       0o177576,   // 777576   17777576
 
-        UISDR0:     0o177600,   //                                  User I Space Descriptor Register 0
-        UISDR1:     0o177602,   //                                  User I Space Descriptor Register 1
-        UISDR2:     0o177604,   //                                  User I Space Descriptor Register 2
-        UISDR3:     0o177606,   //                                  User I Space Descriptor Register 3
-        UISDR4:     0o177610,   //                                  User I Space Descriptor Register 4
-        UISDR5:     0o177612,   //                                  User I Space Descriptor Register 5
-        UISDR6:     0o177614,   //                                  User I Space Descriptor Register 6
-        UISDR7:     0o177616,   //                                  User I Space Descriptor Register 7
-        UDSDR0:     0o177620,   //                                  User D Space Descriptor Register 0
-        UDSDR1:     0o177622,   //                                  User D Space Descriptor Register 1
-        UDSDR2:     0o177624,   //                                  User D Space Descriptor Register 2
-        UDSDR3:     0o177626,   //                                  User D Space Descriptor Register 3
-        UDSDR4:     0o177630,   //                                  User D Space Descriptor Register 4
-        UDSDR5:     0o177632,   //                                  User D Space Descriptor Register 5
-        UDSDR6:     0o177634,   //                                  User D Space Descriptor Register 6
-        UDSDR7:     0o177636,   //                                  User D Space Descriptor Register 7
-        UISAR0:     0o177640,   //                                  User I Space Address Register 0
-        UISAR1:     0o177642,   //                                  User I Space Address Register 1
-        UISAR2:     0o177644,   //                                  User I Space Address Register 2
-        UISAR3:     0o177646,   //                                  User I Space Address Register 3
-        UISAR4:     0o177650,   //                                  User I Space Address Register 4
-        UISAR5:     0o177652,   //                                  User I Space Address Register 5
-        UISAR6:     0o177654,   //                                  User I Space Address Register 6
-        UISAR7:     0o177656,   //                                  User I Space Address Register 7
-        UDSAR0:     0o177660,   //                                  User D Space Address Register 0
-        UDSAR1:     0o177662,   //                                  User D Space Address Register 1
-        UDSAR2:     0o177664,   //                                  User D Space Address Register 2
-        UDSAR3:     0o177666,   //                                  User D Space Address Register 3
-        UDSAR4:     0o177670,   //                                  User D Space Address Register 4
-        UDSAR5:     0o177672,   //                                  User D Space Address Register 5
-        UDSAR6:     0o177674,   //                                  User D Space Address Register 6
-        UDSAR7:     0o177676,   //                                  User D Space Address Register 7
+        UIPDR0:     0o177600,   //                                  User I Page Descriptor Register 0
+        UIPDR1:     0o177602,   //                                  User I Page Descriptor Register 1
+        UIPDR2:     0o177604,   //                                  User I Page Descriptor Register 2
+        UIPDR3:     0o177606,   //                                  User I Page Descriptor Register 3
+        UIPDR4:     0o177610,   //                                  User I Page Descriptor Register 4
+        UIPDR5:     0o177612,   //                                  User I Page Descriptor Register 5
+        UIPDR6:     0o177614,   //                                  User I Page Descriptor Register 6
+        UIPDR7:     0o177616,   //                                  User I Page Descriptor Register 7
+        UDPDR0:     0o177620,   //                                  User D Page Descriptor Register 0
+        UDPDR1:     0o177622,   //                                  User D Page Descriptor Register 1
+        UDPDR2:     0o177624,   //                                  User D Page Descriptor Register 2
+        UDPDR3:     0o177626,   //                                  User D Page Descriptor Register 3
+        UDPDR4:     0o177630,   //                                  User D Page Descriptor Register 4
+        UDPDR5:     0o177632,   //                                  User D Page Descriptor Register 5
+        UDPDR6:     0o177634,   //                                  User D Page Descriptor Register 6
+        UDPDR7:     0o177636,   //                                  User D Page Descriptor Register 7
+        UIPAR0:     0o177640,   //                                  User I Page Address Register 0
+        UIPAR1:     0o177642,   //                                  User I Page Address Register 1
+        UIPAR2:     0o177644,   //                                  User I Page Address Register 2
+        UIPAR3:     0o177646,   //                                  User I Page Address Register 3
+        UIPAR4:     0o177650,   //                                  User I Page Address Register 4
+        UIPAR5:     0o177652,   //                                  User I Page Address Register 5
+        UIPAR6:     0o177654,   //                                  User I Page Address Register 6
+        UIPAR7:     0o177656,   //                                  User I Page Address Register 7
+        UDPAR0:     0o177660,   //                                  User D Page Address Register 0
+        UDPAR1:     0o177662,   //                                  User D Page Address Register 1
+        UDPAR2:     0o177664,   //                                  User D Page Address Register 2
+        UDPAR3:     0o177666,   //                                  User D Page Address Register 3
+        UDPAR4:     0o177670,   //                                  User D Page Address Register 4
+        UDPAR5:     0o177672,   //                                  User D Page Address Register 5
+        UDPAR6:     0o177674,   //                                  User D Page Address Register 6
+        UDPAR7:     0o177676,   //                                  User D Page Address Register 7
 
         R0SET0:     0o177700,
         R1SET0:     0o177701,
@@ -500,8 +509,10 @@ var PDP11 = {
         R6USER:     0o177717,
 
         /*
-         * This next group of registers is largely ignored; all accesses are routed to regsControl[]
+         * This next group of registers is largely ignored; all accesses are routed to regsControl[],
+         * and therefore are managed as a block of 8 "CTRL" registers.
          */
+        CTRL:       0o177740,
         LAERR:      0o177740,   //                                  Low Address Error                           (11/70 only)
         HAERR:      0o177742,   //                                  High Address Error                          (11/70 only)
         MEMERR:     0o177744,   //                                  Memory System Error                         (11/70 only)
@@ -511,7 +522,7 @@ var PDP11 = {
         UNDEF1:     0o177754,
         UNDEF2:     0o177756,
 
-        LSIZE:      0o177760,   //                                  Lower Size Register (last 32-word block)    (11/70 only)
+        LSIZE:      0o177760,   //                                  Lower Size Register (last 64-byte block #)  (11/70 only)
         HSIZE:      0o177762,   //                                  Upper Size Register (always zero)           (11/70 only)
         SYSID:      0o177764,   //                                  System ID Register                          (11/70 only)
         CPUERR:     0o177766,   //                                  CPU error                                   (11/70 only)
@@ -519,31 +530,6 @@ var PDP11 = {
         PIR:        0o177772,   //                                  Program Interrupt Request
         SL:         0o177774,   //                                  Stack Limit Register
         PSW:        0o177776    // 777776   17777776    0x3FFFFE    Processor Status Word
-    },
-    PC11: {                     // High Speed Reader & Punch (PR11 is a Reader-only unit)
-        PRI:        4,          // NOTE: reader has precedence over punch
-        RVEC:       0o70,       // reader vector
-        PVEC:       0o74,       // punch vector
-        PRS: {
-            RE:     0x0001,     // Reader Enable (W/O)
-            RIE:    0x0040,     // Reader Interrupt Enable (allows the DONE and ERROR bits to trigger an interrupt)
-            DONE:   0x0080,     // Done (R/O)
-            BUSY:   0x0800,     // Busy (R/O)
-            ERROR:  0x8000,     // Error (R/O)
-            CLEAR:  0x08C0,     // bits cleared on INIT
-            RMASK:  0xFFFE,     // bits readable (TODO: All I know for sure is that bit 0 is NOT readable; see readPRS())
-            WMASK:  0x0041,     // bits writable
-            BAUD:   3600
-        },
-        PRB: {
-            MASK:   0x00FF      // Data
-        },
-        PPS: {
-            /*
-             * TODO: Flesh this out if/when we add Paper Tape Punch support
-             */
-            BAUD:   600
-        },
     },
     DL11: {                     // Serial Line Interface (program compatible with the KL11 for control of console teleprinters)
         PRI:        4,
@@ -587,13 +573,133 @@ var PDP11 = {
             DATA:   0x00FF      // Transmitted Data (W/O)       TODO: Determine why pdp11.js effectively defined this as 0x7F
         }
     },
-    KW11: {                     // KW11-L Line Time Clock
+    KW11: {                     // KW11-L Line Time Clock (60Hz; well, OK, or 50Hz, if you're in the UK, I suppose...)
         PRI:        6,
         VEC:        0o100,
         DELAY:      0,
         LKS: {
             IE:     0x0040,     // Interrupt Enable
             MON:    0x0080      // Monitor
+        }
+    },
+    PC11: {                     // High Speed Reader & Punch (PR11 is a Reader-only unit)
+        PRI:        4,          // NOTE: reader has precedence over punch
+        RVEC:       0o70,       // reader vector
+        PVEC:       0o74,       // punch vector
+        PRS: {
+            RE:     0x0001,     // Reader Enable (W/O)
+            RIE:    0x0040,     // Reader Interrupt Enable (allows the DONE and ERROR bits to trigger an interrupt)
+            DONE:   0x0080,     // Done (R/O)
+            BUSY:   0x0800,     // Busy (R/O)
+            ERROR:  0x8000,     // Error (R/O)
+            CLEAR:  0x08C0,     // bits cleared on INIT
+            RMASK:  0xFFFE,     // bits readable (TODO: All I know for sure is that bit 0 is NOT readable; see readPRS())
+            WMASK:  0x0041,     // bits writable
+            BAUD:   3600
+        },
+        PRB: {
+            MASK:   0x00FF      // Data
+        },
+        PPS: {
+            /*
+             * TODO: Flesh this out if/when we add Paper Tape Punch support
+             */
+            BAUD:   600
+        },
+    },
+    RL11: {                     // RL11 Disk Controller
+        PRI:        5,
+        VEC:        0o160,
+        RLCS: {                 // Control Status Register (174400)
+            DRDY:   0x0001,     // Drive Ready (R/O)
+            FUNC:   0x000E,     // Function Code (F2,F1,F0) (R/W)
+            BAE:    0x0030,     // Bus Address Extension bits (BA17,BA16) (R/W)
+            IE:     0x0040,     // Interrupt Enable (R/W)
+            CRDY:   0x0080,     // Controller Ready (R/W)
+            DS:     0x0300,     // Drive Select (DS1,DS0) (R/W)
+            ERRC:   0x3C00,     // Error Code (R/O)
+            DE:     0x4000,     // Drive Error (R/O)
+            ERR:    0x8000,     // Composite Error (R/O)
+            CLEAR:  0x3F7E,     // bits cleared on INIT (bits 1-6 and 8-13 are cleared)
+            SET:    0x0080,     // bits set on INIT (bit 7 is set)
+            RMASK:  0xFFFF,     // no write-only bits
+            WMASK:  0x03FE,     // bits writable
+            SHIFT: {
+                FUNC:   1,
+                DS:     8
+            }
+        },
+        RLBA: {                 // Bus Address Register (174402)
+            WMASK:  0xFFFE      // bit 0 is effectively not writable (always zero)
+        },
+        /*
+         * This register has 3 formats: one for Seek, another for Read/Write, and a third for Get Status
+         */
+        RLDA: {                 // Disk Address Register (174404)
+            SEEK_CMD:   0x0001, // Seek: bit 0 must be set, bits 1 and 3 must be clear
+            SEEK_DIR:   0x0004, // Direction (clear to move heads away from spindle (lower cylinder), set to move to higher cylinder)
+            SEEK_HS:    0x0010, // Head Select (clear to select upper head, set to select lower head)
+            SEEK_CAD:   0xFF80, // Cylinder Address Difference
+            RW_SA:      0x003F, // Sector Address
+            RW_HS:      0x0040, // Head Select
+            RW_CA:      0xFF80, // Cylinder Address (RL01 has 256 cylinders, RL02 has 512)
+            GS_CMD:     0x0003, // Get Status: bit 0 must be set, bit 1 set, and bits 2 and 4-7 clear (bits 8-15 unused)
+            GS_RST:     0x0008, // Reset (when set, clears error register before sending status word to controller)
+            SHIFT: {
+                RW_HS:  6,
+                RW_CA:  7
+            }
+        },
+        /*
+         * This register has 3 formats: one for Read Header, another for Read/Write, and a third for Get Status
+         */
+        RLMP: {                 // Multi-Purpose Register (177406)
+            GS_ST: {            // Major State Code (of the drive)
+                LOADC:  0x0,    // Load Cartridge
+                SPINUP: 0x1,    // Spin-Up
+                BRUSHC: 0x2,    // Brush Cycle
+                LOADH:  0x3,    // Load Heads
+                SEEK:   0x4,    // Seek
+                LOCKON: 0x5,    // Lock On
+                UNLOADH:0x6,    // Unload Heads
+                SPINDN: 0x7     // Spin-Down
+            },
+            GS_BH:      0x0008, // Brushes Home
+            GS_HO:      0x0010, // Heads Out
+            GS_CO:      0x0020, // Cover Open (or dust cover is not in place)
+            GS_HS:      0x0040, // Head Selected (0 for upper head, 1 for lower head)
+            GS_DT:      0x0080, // Drive Type (0 for RL01, 1 for RL02)
+            GS_DSE:     0x0100, // Drive Select Error
+            GS_VC:      0x0200, // Volume Check (Set during transition from a head load state to a head-on-track state; cleared by execution of a Get Status command with Bit 3 asserted)
+            GS_WGE:     0x0400, // Write Gate Error
+            GS_SPE:     0x0800, // Spin Error
+            GS_SKTO:    0x1000, // Seek Time-Out
+            GS_WL:      0x2000, // Write Lock
+            GS_CHE:     0x4000, // Current Head Error
+            GS_WDE:     0x8000  // Write Data Error
+        },
+        RLBE: {                 // Bus (Address) Extension Register (174410)
+            MASK:   0x003F      // bits 5-0 correspond to bus address bits 21-16
+        },
+        ERRC: {                 // NOTE: These error codes are pre-shifted to read/write directly from/to RLCS.ERRC
+            OPI:    0x0400,     // Operation Incomplete
+            DCRC:   0x0800,     // Read Data CRC
+            WCE:    0x0800,     // Write Check Error
+            HCRC:   0x0C00,     // Header CRC
+            DLT:    0x1000,     // Data Late
+            HNF:    0x1400,     // Header Not Found
+            NXM:    0x2000,     // Non-Existent Memory
+            MPE:    0x2400      // Memory Parity Error (RLV12 only)
+        },
+        FUNC: {                 // NOTE: These function codes are pre-shifted to read/write directly from/to RLCS.FUNC
+            NOP:    0b0000,     // No-Op
+            WCHK:   0b0010,     // Write Check
+            STATUS: 0b0100,     // Get Status
+            SEEK:   0b0110,     // Seek
+            RHDR:   0b1000,     // Read Header
+            WDATA:  0b1010,     // Write Data
+            RDATA:  0b1100,     // Read Data
+            RDNC:   0b1110      // Read Data without Header Check
         }
     }
 };

@@ -70,20 +70,43 @@ var DiskAPI = {
 
 /*
  * Common (supported) diskette formats
+ *
+ * For no particular reason that I can recall, each entry in DISK_FORMATS is an array of values in "CHS" order:
+ *
+ *      [# cylinders, # heads, # sectors/track, # bytes/sector, media type]
+ *
+ * If the 4th value is omitted, the sector size is assumed to be 512.  The order of these "geometric" values mirrors
+ * the structure of our JSON-encoded disk images, which consist of an array of cylinders, each of which is an array of
+ * heads, each of which is an array of sector objects.
  */
-DiskAPI.DISKETTE_FORMATS = {
-    163840:  [40,1,8],          // media type 0xFE: 40 cylinders, 1 head (single-sided),   8 sectors/track, ( 320 total sectors x 512 bytes/sector ==  163840)
-    184320:  [40,1,9],          // media type 0xFC: 40 cylinders, 1 head (single-sided),   9 sectors/track, ( 360 total sectors x 512 bytes/sector ==  184320)
-    327680:  [40,2,8],          // media type 0xFF: 40 cylinders, 2 heads (double-sided),  8 sectors/track, ( 640 total sectors x 512 bytes/sector ==  327680)
-    368640:  [40,2,9],          // media type 0xFD: 40 cylinders, 2 heads (double-sided),  9 sectors/track, ( 720 total sectors x 512 bytes/sector ==  368640)
-    737280:  [80,2,9],          // media type 0xF9: 80 cylinders, 2 heads (double-sided),  9 sectors/track, (1440 total sectors x 512 bytes/sector ==  737280)
-    1228800: [80,2,15],         // media type 0xF9: 80 cylinders, 2 heads (double-sided), 15 sectors/track, (2400 total sectors x 512 bytes/sector == 1228800)
-    1474560: [80,2,18],         // media type 0xF0: 80 cylinders, 2 heads (double-sided), 18 sectors/track, (2880 total sectors x 512 bytes/sector == 1474560)
-    2949120: [80,2,36],         // media type 0xF0: 80 cylinders, 2 heads (double-sided), 36 sectors/track, (5760 total sectors x 512 bytes/sector == 2949120)
+DiskAPI.DISK_FORMATS = {
+    163840:  [40,1,8,,0xFE],    // media type 0xFE: 40 cylinders, 1 head (single-sided),   8 sectors/track, ( 320 total sectors x 512 bytes/sector ==  163840)
+    184320:  [40,1,9,,0xFC],    // media type 0xFC: 40 cylinders, 1 head (single-sided),   9 sectors/track, ( 360 total sectors x 512 bytes/sector ==  184320)
+    327680:  [40,2,8,,0xFF],    // media type 0xFF: 40 cylinders, 2 heads (double-sided),  8 sectors/track, ( 640 total sectors x 512 bytes/sector ==  327680)
+    368640:  [40,2,9,,0xFD],    // media type 0xFD: 40 cylinders, 2 heads (double-sided),  9 sectors/track, ( 720 total sectors x 512 bytes/sector ==  368640)
+    737280:  [80,2,9,,0xF9],    // media type 0xF9: 80 cylinders, 2 heads (double-sided),  9 sectors/track, (1440 total sectors x 512 bytes/sector ==  737280)
+    1228800: [80,2,15,,0xF9],   // media type 0xF9: 80 cylinders, 2 heads (double-sided), 15 sectors/track, (2400 total sectors x 512 bytes/sector == 1228800)
+    1474560: [80,2,18,,0xF0],   // media type 0xF0: 80 cylinders, 2 heads (double-sided), 18 sectors/track, (2880 total sectors x 512 bytes/sector == 1474560)
+    2949120: [80,2,36,,0xF0],   // media type 0xF0: 80 cylinders, 2 heads (double-sided), 36 sectors/track, (5760 total sectors x 512 bytes/sector == 2949120)
     /*
      * The following are common early hard drive sizes, which we explicitly map to CHS values, since the BPB can mislead us when attempting to calculate total cylinders
      */
-    21368320:[615,4,17]         // PC AT 20Mb hard drive (type 2)
+    21368320:[615,4,17],        // PC AT 20Mb hard drive (type 2)
+    /*
+     * Assorted DEC disk pack formats.
+     */
+    5242880: [256,2,40,256],    // RL01K single-platter disk cartridge: 256 tracks, 2 heads, 40 sectors/track, 256 bytes/sector, for a total of 5242880 bytes
+    10485760:[512,2,40,256]     // RL02K single-platter disk cartridge: 512 tracks, 2 heads, 40 sectors/track, 256 bytes/sector, for a total of 10485760 bytes
+};
+
+/*
+ * TODO: Eventually, our tools will need to support looking up disk formats by "model" rather than by raw disk size,
+ * because obviously multiple disk geometries can yield the same raw disk size.  For each conflict that arises, I'll
+ * probably create a fake (approximate) disk size entry above, and then create a mapping to that approximate size below.
+ */
+DiskAPI.DISK_MODELS = {
+    "RL01": 5242880,
+    "RL02": 10485760
 };
 
 DiskAPI.MBR = {

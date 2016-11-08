@@ -9,7 +9,7 @@ PDP-11 Boot Images
 
 The project contains the following PDP-11 boot images:
 
-* [PDP-11 Boot Test](test/)
+* [PDP-11 Boot Monitor](monitor/)
 * [DEC PDP-11 Bootstrap Loader](bootstrap/)
 
 Boot code can be pre-loaded into any machine by including a `<ram>` component in the machine XML configuration file
