@@ -854,6 +854,24 @@ PanelPDP11.prototype.setData = function(value)
 };
 
 /**
+ * setDataPath(value)
+ *
+ * This interface is for refreshing the Front Panel's "DATA PATH" display, which technically,
+ * is separate from the "DISPLAY REGISTER" (regData).  However, our Front Panel doesn't currently
+ * provide a toggle between "DISPLAY REGISTER" and "DATA PATH" views, so we use the same variable
+ * for both.
+ *
+ * Because this is a potentially high-frequency function, we do NOT update the LED array here.
+ *
+ * @this {PanelPDP11}
+ * @param {number} value
+ */
+PanelPDP11.prototype.setDataPath = function(value)
+{
+    this.regData = value;
+};
+
+/**
  * setLED(sBinding, value)
  *
  * @this {PanelPDP11}
@@ -983,8 +1001,8 @@ PanelPDP11.prototype.updateDisplay = function(nUpdate)
 /**
  * readCNSW(addr)
  *
- * If addr is set, then this a normal read, so we should return normal results (ie, switches);
- * if addr is NOT set, then this is a read-before-write, so we must return the value being updated.
+ * If addr is set, then this a normal read, so we should return normal results (ie, SWITCH register);
+ * if addr is NOT set, then this is a read-before-write, so we must return the DISPLAY register value.
  *
  * @this {PanelPDP11}
  * @param {number} addr (eg, PDP11.UNIBUS.CNSW or 177570)
@@ -997,6 +1015,9 @@ PanelPDP11.prototype.readCNSW = function(addr)
 
 /**
  * writeCNSW(value, addr)
+ *
+ * Handler for DISPLAY register writes.  Because this is a potentially high-frequency function,
+ * we do NOT update the LED array here.
  *
  * @this {PanelPDP11}
  * @param {number} value

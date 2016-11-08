@@ -1785,7 +1785,16 @@ PDP11.opWAIT = function(opCode)
      * the PDP-11 KW11 (60Hz Line Clock) timer is the perfect candidate.  See device.js.
      *
      *      if (!(this.opFlags & PDP11.OPFLAG.WAIT) && this.cmp) this.cmp.updateDisplays();
+     *
+     * However, that being said, it's been reported that the WAIT instruction puts the contents of R0 into the
+     * Front Panel's "DATA PATH".  However, I can't find any supporting documentation of that.  Another explanation
+     * would be that the data path is being updated constantly, and that when R0 is the last register to be updated
+     * before a WAIT instruction, it simply predominates the data being displayed.
+     *
+     * But for now, we'll go with popular lore and propagate R0 to the Panel's "DATA PATH" setting.
      */
+    if (this.panel) this.panel.setDataPath(this.regsGen[0]);
+
     this.opFlags |= PDP11.OPFLAG.WAIT;
     this.advancePC(-2);
     this.nStepCycles -= 3;
