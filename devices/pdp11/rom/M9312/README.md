@@ -23,7 +23,7 @@ some of which we have reproduced here.
 
 Initially, all we had was this [256-word ROM](M9312.json) obtained from Paul Nankervis' [website](http://skn.noip.me/pdp11/iopage.js).
 Cross-referencing that ROM with Don North's [M9312 PROM Files](http://www.ak6dn.com/PDP-11/M9312/) revealed that it came from
-DEC P/N [23-616F1](23-616F1.txt): "11/60,70 Diagnostic/Console", albeit with some unexpected changes:
+DEC P/N [23-616F1](23-616F1.txt), "11/60,70 Diagnostic/Console", albeit with a few modifications:
 
 	165322  022716  165320  L26:    cmp #N2,(sp)        ; 165320 changed to 000320
 	...
@@ -38,7 +38,7 @@ DEC P/N [23-616F1](23-616F1.txt): "11/60,70 Diagnostic/Console", albeit with som
 	...
 	165406  012737  165714  000114  mov #N12,@#114      ; 165714 changed to 000714
 
-The unmodified [23-616F1](23-616F1.json) ROM can be seen at address 165000 when configured in a
-[PDP-11/70](/devices/pdp11/machine/1170/panel/debugger/) as:
+The unmodified [23-616F1](23-616F1.json) ROM is loaded at address 165000 (0xEA00) in this
+[PDP-11/70](/devices/pdp11/machine/1170/panel/debugger/), using the following configuration:
 
 	<rom id="m9312" addr="0xEA00" size="0x200" file="/devices/pdp11/rom/M9312/23-616F1.json"/>

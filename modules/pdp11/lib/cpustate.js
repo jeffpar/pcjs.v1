@@ -2042,20 +2042,26 @@ CPUStatePDP11.prototype.updateDstWord = function(opCode, src, fnOp)
  * @this {CPUStatePDP11}
  * @param {number} opCode
  * @param {number} data
- * @param {number} [writeFlags]
+ * @param {number} writeFlags (WRITE.BYTE aka 0xff, or WRITE.SBYTE aka 0xffff)
  * @return {number}
  */
 CPUStatePDP11.prototype.writeDstByte = function(opCode, data, writeFlags)
 {
+    this.assert(writeFlags);
     var reg = this.dstReg = opCode & PDP11.OPREG.MASK;
     var mode = this.dstMode = (opCode & PDP11.OPMODE.MASK) >> PDP11.OPMODE.SHIFT;
     if (!mode) {
         if (!data) {
-            this.regsGen[reg] &= ~0xff; // TODO: Profile to determine if this is a win
-        } else if (writeFlags & PDP11.WRITE.SIGNEXT) {
-            this.regsGen[reg] = ((data << 24) >> 24) & 0xffff;
+            /*
+             * Potentially worthless optimization (but it looks good on "paper").
+             */
+            this.regsGen[reg] &= ~writeFlags;
         } else {
-            this.regsGen[reg] = (this.regsGen[reg] & ~0xff) | (data & 0xff);
+            /*
+             * Potentially worthwhile optimization: skipping the sign-extending data shifts
+             * if writeFlags is WRITE.BYTE (but that requires an extra test and separate code paths).
+             */
+            this.regsGen[reg] = (this.regsGen[reg] & ~writeFlags) | (((data << 24) >> 24) & writeFlags);
         }
     } else {
         this.writeByteToPhysical(this.getAddr(mode, reg, PDP11.ACCESS.WRITE_BYTE), data);

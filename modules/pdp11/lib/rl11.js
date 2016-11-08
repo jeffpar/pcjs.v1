@@ -939,7 +939,7 @@ RL11.prototype.processCommand = function()
     case PDP11.RL11.FUNC.WDATA:
         if (!fnReadWrite) fnReadWrite = this.writeData;
         iCylinder = this.dar >> PDP11.RL11.RLDA.SHIFT.RW_CA;
-        iHead = (this.dar & PDP11.RL11.RLDA.RW_HS)? 0 : 1;
+        iHead = (this.dar & PDP11.RL11.RLDA.RW_HS)? 1 : 0;
         iSector = this.dar & PDP11.RL11.RLDA.RW_SA;
         if (iCylinder >= drive.nCylinders || iSector >= drive.nSectors) {
             this.csr |= PDP11.RL11.ERRC.HNF | PDP11.RL11.RLCS.ERR;

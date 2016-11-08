@@ -676,7 +676,7 @@ BusPDP11.prototype.addMemory = function(addr, size, type, controller)
     }
 
     if (sizeLeft <= 0) {
-        if (type == MemoryPDP11.TYPE.RAM && !this.cbRAM) {
+        if (type == MemoryPDP11.TYPE.RAM) {
             this.cbRAM += size;
         }
         this.status((size >> 10) + "Kb " + MemoryPDP11.TYPE_NAMES[type] + " at " + str.toOct(addr));

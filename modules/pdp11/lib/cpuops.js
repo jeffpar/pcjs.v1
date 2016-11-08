@@ -884,7 +884,7 @@ PDP11.opCLR = function(opCode)
  */
 PDP11.opCLRB = function(opCode)
 {
-    this.updateAllFlags(this.writeDstByte(opCode, 0));
+    this.updateAllFlags(this.writeDstByte(opCode, 0, PDP11.WRITE.BYTE));
     this.nStepCycles -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
 };
 
@@ -1269,6 +1269,31 @@ PDP11.opMFPI = function(opCode)
     this.nStepCycles -= (10 + 1);
 };
 
+/**
+ * opMFPT(opCode)
+ *
+ *      000007  MFPT - Move From Processor Type
+ *
+ *      Loads R0 with a value indicating the processor type.
+ *
+ *      R0  Hardware
+ *       1  PDP-11/44
+ *       3  PDP-11/24 (should be 2)
+ *       3  PDP-11/23
+ *       4  SBC-11/21
+ *       5  All J11 chips including 11/73, 11/83, 11/93
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} opCode
+ */
+PDP11.opMFPT = function(opCode)
+{
+    /*
+     * TODO: Review
+     */
+    this.trap(PDP11.TRAP.RESERVED, PDP11.REASON.RESERVED);
+};
+
 PDP11.MOV_CYCLES = [
     2 + 1, 8 + 1, 8 + 1, 11 + 2, 9 + 1, 12 + 2, 10 + 2, 13 + 3,
     3 + 1, 8 + 1, 8 + 1, 11 + 2, 9 + 1, 12 + 2, 11 + 2, 14 + 3
@@ -1301,7 +1326,7 @@ PDP11.opMOV = function(opCode)
 PDP11.opMOVB = function(opCode)
 {
     var data = this.readSrcByte(opCode);
-    this.updateNZVFlags(this.writeDstByte(opCode, data, PDP11.WRITE.SIGNEXT) << 8);
+    this.updateNZVFlags(this.writeDstByte(opCode, data, PDP11.WRITE.SBYTE) << 8);
     this.nStepCycles -= (this.dstMode? (8 + 1) + (this.srcReg && this.dstReg >= 6? 1 : 0) : (this.srcMode? (3 + 2) : (2 + 1)) + (this.dstReg == 7? 2 : 0));
 };
 
@@ -2270,7 +2295,7 @@ PDP11.aOp000X_1145 = [
     PDP11.opIOT,                // 0x0004   000004          11/20+  9.3
     PDP11.opRESET,              // 0x0005   000005          11/20+  20ms
     PDP11.opRTT,                // 0x0006   000006          11/45+
-    PDP11.opUndefined,          // 0x0007
+    PDP11.opMFPT,               // 0x0007   000007          TBD
     PDP11.opUndefined,          // 0x0008
     PDP11.opUndefined,          // 0x0009
     PDP11.opUndefined,          // 0x000A

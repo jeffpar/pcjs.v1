@@ -296,11 +296,13 @@ var PDP11 = {
         DSPACE:     0x10000     // getVirtualByMode() sets bit 17 in any 16-bit virtual address that refers to D space (as opposed to I space)
     },
     /*
-     * Internal flags passed to writeByteByMode(), etc.
+     * Internal flags passed to writeDstByte()
+     *
+     * The BYTE and SBYTE values have been chosen so that they can be used directly as masks.
      */
     WRITE: {
-        NORMAL:     0x0,        // write byte or word normally
-        SIGNEXT:    0x1         // sign-extend a byte to a word
+        BYTE:       0xff,        // write byte normally
+        SBYTE:      0xffff       // sign-extend byte to word
     },
     CPUERR: {
         RED:        0x0004,     // red zone stack limit
