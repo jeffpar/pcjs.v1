@@ -7,6 +7,9 @@ permalink: /devices/pdp11/rl11/
 RL11 Disk Controller
 --------------------
 
+The RL11 Disk Controller controls up to four RL01 or RL02 disk drives, which in turn read/write RL01K or
+[RL02K](/disks/dec/rl02k/) disk cartridges.
+
 Machines containing the [RL11 Component](/modules/pdp11/lib/pc11.js) include:
 
 - [PDP-11/70 Boot Monitor](/devices/pdp11/machine/1170/monitor/) (with [Debugger](/devices/pdp11/machine/1170/monitor/debugger/))
@@ -30,7 +33,7 @@ used to control the device, such as choosing which disks should be "auto-mounted
 		<control type="container">
 			<control type="list" binding="listDrives"/>
 			<control type="list" binding="listDisks">
-				<disk id="rl3" name="XXDP Diagnostics" path="http://archive.pcjs.org/disks/dec/rl02k/RL02K-XXDP.json"/>
+				<disk id="rl3" name="XXDP+ Diagnostics" path="http://archive.pcjs.org/disks/dec/rl02k/RL02K-XXDP.json"/>
 			</control>
 			<control type="button" binding="loadDrive">Load</control>
 			<control type="description" binding="descDisk" padRight="8px"/>

@@ -10,8 +10,9 @@ PDP-11 Device Configurations
 [PDP-11 Machines](/devices/pdp11/machine/) rely on a variety of machine configuration files and resources, including:
  
 * [Control Panels](panel/)
-* [Serial Interface for Display Terminals (DL11)](dl11/)
-* [High-Speed Paper Tape Reader/Punch (PC11)](pc11/)
+* Serial Interface for Display Terminals [(DL11)](dl11/)
+* High-Speed Paper Tape Reader/Punch [(PC11)](pc11/)
+* Disk Controllers ([RL11](rl11/))
 * [ROM Images](rom/)
 
 Sample machines include a
