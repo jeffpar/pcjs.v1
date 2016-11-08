@@ -1007,6 +1007,11 @@ RL11.prototype.readData = function(drive, iCylinder, iHead, iSector, nWords, add
     var disk = drive.disk;
     var sector = null, ibSector;
 
+    if (!disk) {
+        err = PDP11.RL11.ERRC.HNF;      // TODO: Review
+        nWords = 0;
+    }
+
     while (nWords--) {
         if (!sector) {
             sector = drive.disk.seek(iCylinder, iHead, iSector + 1);
@@ -1062,6 +1067,11 @@ RL11.prototype.writeData = function(drive, iCylinder, iHead, iSector, nWords, ad
     var err = 0;
     var disk = drive.disk;
     var sector = null, ibSector;
+
+    if (!disk) {
+        err = PDP11.RL11.ERRC.HNF;      // TODO: Review
+        nWords = 0;
+    }
 
     while (nWords--) {
         var data = this.bus.getWord(addr);

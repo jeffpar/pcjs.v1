@@ -14,7 +14,8 @@ This machine is also available with our built-in [Debugger](debugger/).
 Front Panel Basics
 ------------------
 
-From the [PDP-11/70 Handbook (1979)](http://archive.pcjs.org/pubs/dec/pdp11/1170/PDP1170_Handbook_1979.pdf), Chapter 10, p. 325:
+From the [PDP-11/70 Handbook (1979)](http://archive.pcjs.org/pubs/dec/pdp11/1170/PDP1170_Handbook_1979.pdf), Chapter 10,
+p. 325:
 
 > ### CONSOLE OPERATION
 
@@ -24,13 +25,14 @@ and debugging. Lights and switches provide the facilities for monitoring operati
 Debugging and detailed tracing of operations can be accomplished by having the computer execute single instructions or
 single cycles. Contents of all locations can be examined, and data can be entered manually from the console switches.
 
-The PDPjs Front Panel replicates most (but not all) the features of a real PDP-11/70 Front Panel.  The switches, which
-PDPjs displays as green to make them stand out from the rest of the pink-and-magenta controls, are summarized below.
+The PDPjs Front Panel replicates most (but not all) the features of a real PDP-11/70 Console.  The switches, which
+PDPjs displays as green to make them stand out from the rest of the traditional pink-and-magenta controls, are summarized
+below.
 
-### 0-21
+### 0..21
 
-These control bits 0 to 21 of the SWITCH register.  The UP position represents a ONE, and the DOWN position
-represents a ZERO.   Once all the bits have been set, you can choose to load the contents of the SWITCH register into the
+Switches 0 to 21 control bits 0 to 21 of the SWITCH register.  The UP position represents a 1, and the DOWN position
+represents a 0.   Once all the bits have been set, you can choose to load the contents of the SWITCH register into the
 ADDRESS register (as displayed by the top row of LEDs), or directly into the memory location referenced by the ADDRESS
 register (where it will become the DATA displayed by the second row of LEDs).
 
@@ -46,7 +48,7 @@ and if you didn't realize that a particular light was "burned out", you could mi
 While the TEST switch is more "cute" than useful on a virtual Front Panel, we have added one "innovation" to the switch:
 pressing it also returns all the SWITCH register switches (0-21) to their DOWN position.
 
-### LOAD
+### LOAD [ADRS]
 
 This is a momentary switch that is normally in the UP position.  When pressed DOWN, it copies the SWITCH register to the
 ADDRESS register.
@@ -58,8 +60,8 @@ by the ADDRESS register and displays it in the DATA register.  If pressed repeat
 adds 2 to the ADDRESS register, making it easier to examine a series of words.  Note that if the CPU registers are being
 examined (starting at address 177700), the ADDRESS register will advance by 1 instead of 2.
 
-Another "innovation" unique to PDPjs: if the STEP switch is toggled from the UP to the DOWN position, repeated EXAM operations
-will decrease the ADDRESS register instead of increasing it.
+Another "innovation" unique to PDPjs: if the STEP switch is toggled from the UP to the DOWN position, repeated EXAM or DEP
+operations will decrease the ADDRESS register instead of increasing it.
 
 ### DEP
 
