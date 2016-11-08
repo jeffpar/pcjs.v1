@@ -140,7 +140,7 @@ DevicePDP11.prototype.initBus = function(cmp, bus, cpu, dbg)
  */
 DevicePDP11.prototype.reset = function()
 {
-    this.kw11.lks = 0;
+    this.kw11.lks = PDP11.KW11.LKS.MON;
     this.cpu.setTimer(this.kw11.timer, 1000/60, true);
 };
 
@@ -148,10 +148,9 @@ DevicePDP11.prototype.reset = function()
  * interruptKW11()
  *
  * We used to call this function only when the the KW11's "Interrupt Enable" bit was set,
- * but now we call it at 60Hz regardless.  In part, this was so we could piggy-back on
- * it to drive display updates, but more importantly, the KW11's "Monitor" bit is supposed
- * to be set at the "line frequency" independent of whether KW11 interrupts are enabled.
- * So we should actually be more compatible now.
+ * but now we call it at 60Hz regardless.  In part, this was so we could piggy-back on it
+ * to drive display updates, but more importantly, the KW11's "Monitor" bit is supposed to
+ * be set at the "line frequency" independent of whether KW11 interrupts are enabled or not.
  *
  * @this {DevicePDP11}
  */
@@ -174,9 +173,12 @@ DevicePDP11.prototype.interruptKW11 = function()
  */
 DevicePDP11.prototype.readLKS = function(addr)
 {
-    var result = this.kw11.lks;
-    this.kw11.lks &= ~PDP11.KW11.LKS.MON;
-    return result;
+    /*
+     * NOTE: The original code always cleared LKS.MON (bit 7) after snapping the value for the read,
+     * but based on DEC's "Non-Interrupt Mode" programming examples, it's clear that's not how LKS.MON
+     * operates; if the caller wants to clear it, they must explicitly clear it with a write.
+     */
+    return this.kw11.lks;
 };
 
 /**
@@ -188,7 +190,12 @@ DevicePDP11.prototype.readLKS = function(addr)
  */
 DevicePDP11.prototype.writeLKS = function(data, addr)
 {
-    this.kw11.lks = data & ~PDP11.KW11.LKS.MON;
+    /*
+     * NOTE: The original code always cleared LKS.MON (bit 7) as part of any write, but based on DEC's
+     * "Non-Interrupt Mode" programming examples, which explicitly CLRB after TSTB reveals LKS.MON is set,
+     * I think that was wrong, and that all a write should do is mask off all the other (non-writable) bits.
+     */
+    this.kw11.lks = data & PDP11.KW11.LKS.MASK;
 };
 
 /**

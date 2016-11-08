@@ -7,4 +7,7 @@ permalink: /disks/dec/rl02k/
 DEC RL02K Disk Images
 ---------------------
 
-* [XXDP Diagnostics](http://archive.pcjs.org/disks/dec/rl02k/RL02K-XXDP.json)
+RL02K disks are single-platter cartridges with 512 tracks per side, 40 sectors per track, and a sector size of 256 bytes,
+for a total capacity of 10Mb.  They are used with an [RL11 Disk Controller](/devices/pdp11/rl11/).
+
+* XXDP+ Diagnostics [[source](http://skn.noip.me/pdp11/)]

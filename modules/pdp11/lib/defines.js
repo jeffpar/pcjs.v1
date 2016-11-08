@@ -579,7 +579,8 @@ var PDP11 = {
         DELAY:      0,
         LKS: {
             IE:     0x0040,     // Interrupt Enable
-            MON:    0x0080      // Monitor
+            MON:    0x0080,     // Monitor
+            MASK:   0x00C0      // these are the only bits that can read or written
         }
     },
     PC11: {                     // High Speed Reader & Punch (PR11 is a Reader-only unit)
