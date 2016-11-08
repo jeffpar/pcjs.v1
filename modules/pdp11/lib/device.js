@@ -38,8 +38,10 @@ if (NODE) {
     var Component     = require("../../shared/lib/component");
     var State         = require("../../shared/lib/state");
     var BusPDP11      = require("./bus");
+    var MemoryPDP11   = require("./memory");
     var MessagesPDP11 = require("./messages");
     var PC11          = require("./pc11");
+    var RL11          = require("./rl11");
 }
 
 /**
@@ -48,7 +50,6 @@ if (NODE) {
  * The Device component implements the following "default" devices:
  *
  *      KW11 (KW11-L Line Time Clock)
- *      CNSL (Console Switch and Front Panel Display)
  *
  * as well providing access to all the MMU and CPU registers, PSW, etc.
  *
@@ -60,14 +61,7 @@ function DevicePDP11(parmsDevice)
 {
     Component.call(this, "Device", parmsDevice, DevicePDP11, MessagesPDP11.DEVICE);
 
-    this.console = {            // CNSL registers
-        data:       0,
-        address:    0,
-        misc:       0x14,
-        switches:   0
-    };
-
-    this.kw11 = {               // LW11 registers
+    this.kw11 = {               // KW11 registers
         csr:        0,
         timer:      -1          // initBus() will initialize this timer ID
     };
@@ -122,6 +116,7 @@ DevicePDP11.M9312 = [
 DevicePDP11.prototype.initBus = function(cmp, bus, cpu, dbg)
 {
     this.bus = bus;
+    this.cmp = cmp;
     this.cpu = cpu;
     this.dbg = dbg;
 
@@ -145,7 +140,6 @@ DevicePDP11.prototype.initBus = function(cmp, bus, cpu, dbg)
  */
 DevicePDP11.prototype.reset = function()
 {
-    this.console.misc = (this.console.misc & ~0x77) | 0x14; // kernel 16 bit
     this.kw11.lks = 0;
 };
 
@@ -161,6 +155,7 @@ DevicePDP11.prototype.kw11_interrupt = function()
         this.cpu.setTrigger(this.kw11.trigger);
         this.cpu.setTimer(this.kw11.timer, 1000/60);
     }
+    if (this.cmp) this.cmp.updateDisplays(1);
 };
 
 /**
@@ -194,33 +189,6 @@ DevicePDP11.prototype.writeLKS = function(data, addr)
 };
 
 /**
- * readCNSL(addr)
- *
- * If addr is set, then this a normal read, so we should return normal results (ie, switches);
- * if addr is NOT set, then this is a read-before-write, so we must return the value being updated (ie, data).
- *
- * @this {DevicePDP11}
- * @param {number} addr (eg, PDP11.UNIBUS.CNSL or 177570)
- * @return {number}
- */
-DevicePDP11.prototype.readCNSL = function(addr)
-{
-    return (addr? this.console.switches : this.console.data) & 0xffff;
-};
-
-/**
- * writeCNSL(data, addr)
- *
- * @this {DevicePDP11}
- * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.CNSL or 177570)
- */
-DevicePDP11.prototype.writeCNSL = function(data, addr)
-{
-    this.console.data = data;
-};
-
-/**
  * readMMR0(addr)
  *
  * @this {DevicePDP11}
@@ -242,7 +210,6 @@ DevicePDP11.prototype.readMMR0 = function(addr)
 DevicePDP11.prototype.writeMMR0 = function(data, addr)
 {
     this.cpu.setMMR0(data);
-    this.updateConsoleMode();
 };
 
 /**
@@ -303,96 +270,116 @@ DevicePDP11.prototype.readMMR3 = function(addr)
 DevicePDP11.prototype.writeMMR3 = function(data, addr)
 {
     this.cpu.setMMR3(data);
-    this.updateConsoleMode();
 };
 
 /**
- * updateConsoleMode()
+ * readUNIMAP(addr)
+ *
+ * NOTE: The UNIBUS map is 32 registers spread across 64 words, so we first calculate the word index.
  *
  * @this {DevicePDP11}
- */
-DevicePDP11.prototype.updateConsoleMode = function()
-{
-    /*
-     * Set bit to 1 (22-bit), 2 (18-bit), or 4 (16-bit)
-     */
-    var bit = this.cpu.mmuEnable? ((this.cpu.regMMR3 & PDP11.MMR3.MMU_22BIT)? 1 : 2) : 4;
-    this.console.misc = (this.console.misc & ~7) | bit;
-};
-
-/**
- * readSISDR(addr)
- *
- * @this {DevicePDP11}
- * @param {number} addr (eg, PDP11.UNIBUS.SISDR0--SISDR7 or 172200--172216)
+ * @param {number} addr (eg, PDP11.UNIBUS.UNIMAP)
  * @return {number}
  */
-DevicePDP11.prototype.readSISDR = function(addr)
+DevicePDP11.prototype.readUNIMAP = function(addr)
+{
+    var word = (addr >> 1) & 0x3f, reg = word >> 1;
+    var data = this.cpu.unibusMap[reg];
+    return (word & 1)? (data >> 16) : (data & 0xffff);
+};
+
+/**
+ * writeUNIMAP(data, addr)
+ *
+ * NOTE: The UNIBUS map is 32 registers spread across 64 words, so we first calculate the word index.
+ *
+ * @this {DevicePDP11}
+ * @param {number} data
+ * @param {number} addr (eg, PDP11.UNIBUS.UNIMAP)
+ */
+DevicePDP11.prototype.writeUNIMAP = function(data, addr)
+{
+    var word = (addr >> 1) & 0x3f, reg = word >> 1;
+    if (word & 1) {
+        this.cpu.unibusMap[reg] = (this.cpu.unibusMap[reg] & 0xffff) | ((data & 0x003f) << 16);
+    } else {
+        this.cpu.unibusMap[reg] = (this.cpu.unibusMap[reg] & ~0xffff) | (data & 0xfffe);
+    }
+};
+
+/**
+ * readSIPDR(addr)
+ *
+ * @this {DevicePDP11}
+ * @param {number} addr (eg, PDP11.UNIBUS.SIPDR0--SIPDR7 or 172200--172216)
+ * @return {number}
+ */
+DevicePDP11.prototype.readSIPDR = function(addr)
 {
     var reg = (addr >> 1) & 7;
     return this.cpu.mmuPDR[1][reg];
 };
 
 /**
- * writeSISDR(data, addr)
+ * writeSIPDR(data, addr)
  *
  * @this {DevicePDP11}
  * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.SISDR0--SISDR7 or 172200--172216)
+ * @param {number} addr (eg, PDP11.UNIBUS.SIPDR0--SIPDR7 or 172200--172216)
  */
-DevicePDP11.prototype.writeSISDR = function(data, addr)
+DevicePDP11.prototype.writeSIPDR = function(data, addr)
 {
     var reg = (addr >> 1) & 7;
     this.cpu.mmuPDR[1][reg] = data & 0xff0f;
 };
 
 /**
- * readSDSDR(addr)
+ * readSDPDR(addr)
  *
  * @this {DevicePDP11}
- * @param {number} addr (eg, PDP11.UNIBUS.SDSDR0--SDSDR7 or 172220--172236)
+ * @param {number} addr (eg, PDP11.UNIBUS.SDPDR0--SDPDR7 or 172220--172236)
  * @return {number}
  */
-DevicePDP11.prototype.readSDSDR = function(addr)
+DevicePDP11.prototype.readSDPDR = function(addr)
 {
     var reg = ((addr >> 1) & 7) + 8;
     return this.cpu.mmuPDR[1][reg];
 };
 
 /**
- * writeSDSDR(data, addr)
+ * writeSDPDR(data, addr)
  *
  * @this {DevicePDP11}
  * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.SDSDR0--SDSDR7 or 172220--172236)
+ * @param {number} addr (eg, PDP11.UNIBUS.SDPDR0--SDPDR7 or 172220--172236)
  */
-DevicePDP11.prototype.writeSDSDR = function(data, addr)
+DevicePDP11.prototype.writeSDPDR = function(data, addr)
 {
     var reg = ((addr >> 1) & 7) + 8;
     this.cpu.mmuPDR[1][reg] = data & 0xff0f;
 };
 
 /**
- * readSISAR(addr)
+ * readSIPAR(addr)
  *
  * @this {DevicePDP11}
- * @param {number} addr (eg, PDP11.UNIBUS.SISAR0--SISAR7 or 172240--172256)
+ * @param {number} addr (eg, PDP11.UNIBUS.SIPAR0--SIPAR7 or 172240--172256)
  * @return {number}
  */
-DevicePDP11.prototype.readSISAR = function(addr)
+DevicePDP11.prototype.readSIPAR = function(addr)
 {
     var reg = (addr >> 1) & 7;
     return this.cpu.mmuPAR[1][reg];
 };
 
 /**
- * writeSISAR(data, addr)
+ * writeSIPAR(data, addr)
  *
  * @this {DevicePDP11}
  * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.SISAR0--SISAR7 or 172240--172256)
+ * @param {number} addr (eg, PDP11.UNIBUS.SIPAR0--SIPAR7 or 172240--172256)
  */
-DevicePDP11.prototype.writeSISAR = function(data, addr)
+DevicePDP11.prototype.writeSIPAR = function(data, addr)
 {
     var reg = (addr >> 1) & 7;
     this.cpu.mmuPAR[1][reg] = data;
@@ -401,26 +388,26 @@ DevicePDP11.prototype.writeSISAR = function(data, addr)
 };
 
 /**
- * readSDSAR(addr)
+ * readSDPAR(addr)
  *
  * @this {DevicePDP11}
- * @param {number} addr (eg, PDP11.UNIBUS.SDSAR0--SDSAR7 or 172260--172276)
+ * @param {number} addr (eg, PDP11.UNIBUS.SDPAR0--SDPAR7 or 172260--172276)
  * @return {number}
  */
-DevicePDP11.prototype.readSDSAR = function(addr)
+DevicePDP11.prototype.readSDPAR = function(addr)
 {
     var reg = ((addr >> 1) & 7) + 8;
     return this.cpu.mmuPAR[1][reg];
 };
 
 /**
- * writeSDSAR(data, addr)
+ * writeSDPAR(data, addr)
  *
  * @this {DevicePDP11}
  * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.SDSAR0--SDSAR7 or 172260--172276)
+ * @param {number} addr (eg, PDP11.UNIBUS.SDPAR0--SDPAR7 or 172260--172276)
  */
-DevicePDP11.prototype.writeSDSAR = function(data, addr)
+DevicePDP11.prototype.writeSDPAR = function(data, addr)
 {
     var reg = ((addr >> 1) & 7) + 8;
     this.cpu.mmuPAR[1][reg] = data;
@@ -428,78 +415,78 @@ DevicePDP11.prototype.writeSDSAR = function(data, addr)
 };
 
 /**
- * readKISDR(addr)
+ * readKIPDR(addr)
  *
  * @this {DevicePDP11}
- * @param {number} addr (eg, PDP11.UNIBUS.KISDR0--KISDR7 or 172300--172316)
+ * @param {number} addr (eg, PDP11.UNIBUS.KIPDR0--KIPDR7 or 172300--172316)
  * @return {number}
  */
-DevicePDP11.prototype.readKISDR = function(addr)
+DevicePDP11.prototype.readKIPDR = function(addr)
 {
     var reg = (addr >> 1) & 7;
     return this.cpu.mmuPDR[0][reg];
 };
 
 /**
- * writeKISDR(data, addr)
+ * writeKIPDR(data, addr)
  *
  * @this {DevicePDP11}
  * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.KISDR0--KISDR7 or 172300--172316)
+ * @param {number} addr (eg, PDP11.UNIBUS.KIPDR0--KIPDR7 or 172300--172316)
  */
-DevicePDP11.prototype.writeKISDR = function(data, addr)
+DevicePDP11.prototype.writeKIPDR = function(data, addr)
 {
     var reg = (addr >> 1) & 7;
     this.cpu.mmuPDR[0][reg] = data & 0xff0f;
 };
 
 /**
- * readKDSDR(addr)
+ * readKDPDR(addr)
  *
  * @this {DevicePDP11}
- * @param {number} addr (eg, PDP11.UNIBUS.KDSDR0--KDSDR7 or 172320--172336)
+ * @param {number} addr (eg, PDP11.UNIBUS.KDPDR0--KDPDR7 or 172320--172336)
  * @return {number}
  */
-DevicePDP11.prototype.readKDSDR = function(addr)
+DevicePDP11.prototype.readKDPDR = function(addr)
 {
     var reg = ((addr >> 1) & 7) + 8;
     return this.cpu.mmuPDR[0][reg];
 };
 
 /**
- * writeKDSDR(data, addr)
+ * writeKDPDR(data, addr)
  *
  * @this {DevicePDP11}
  * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.KDSDR0--KDSDR7 or 172320--172336)
+ * @param {number} addr (eg, PDP11.UNIBUS.KDPDR0--KDPDR7 or 172320--172336)
  */
-DevicePDP11.prototype.writeKDSDR = function(data, addr)
+DevicePDP11.prototype.writeKDPDR = function(data, addr)
 {
     var reg = ((addr >> 1) & 7) + 8;
     this.cpu.mmuPDR[0][reg] = data & 0xff0f;
 };
 
 /**
- * readKISAR(addr)
+ * readKIPAR(addr)
  *
  * @this {DevicePDP11}
- * @param {number} addr (eg, PDP11.UNIBUS.KISAR0--KISAR7 or 172340--172356)
+ * @param {number} addr (eg, PDP11.UNIBUS.KIPAR0--KIPAR7 or 172340--172356)
  * @return {number}
  */
-DevicePDP11.prototype.readKISAR = function(addr)
+DevicePDP11.prototype.readKIPAR = function(addr)
 {
     var reg = (addr >> 1) & 7;
     return this.cpu.mmuPAR[0][reg];
 };
 
 /**
- * writeKISAR(data, addr)
+ * writeKIPAR(data, addr)
  *
  * @this {DevicePDP11}
  * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.KISAR0--KISAR7 or 172340--172356)
+ * @param {number} addr (eg, PDP11.UNIBUS.KIPAR0--KIPAR7 or 172340--172356)
  */
-DevicePDP11.prototype.writeKISAR = function(data, addr)
+DevicePDP11.prototype.writeKIPAR = function(data, addr)
 {
     var reg = (addr >> 1) & 7;
     this.cpu.mmuPAR[0][reg] = data;
@@ -508,26 +495,26 @@ DevicePDP11.prototype.writeKISAR = function(data, addr)
 };
 
 /**
- * readKDSAR(addr)
+ * readKDPAR(addr)
  *
  * @this {DevicePDP11}
- * @param {number} addr (eg, PDP11.UNIBUS.KDSAR0--KDSAR7 or 172360--172376)
+ * @param {number} addr (eg, PDP11.UNIBUS.KDPAR0--KDPAR7 or 172360--172376)
  * @return {number}
  */
-DevicePDP11.prototype.readKDSAR = function(addr)
+DevicePDP11.prototype.readKDPAR = function(addr)
 {
     var reg = ((addr >> 1) & 7) + 8;
     return this.cpu.mmuPAR[0][reg];
 };
 
 /**
- * writeKDSAR(data, addr)
+ * writeKDPAR(data, addr)
  *
  * @this {DevicePDP11}
  * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.KDSAR0--KDSAR7 or 172360--172376)
+ * @param {number} addr (eg, PDP11.UNIBUS.KDPAR0--KDPAR7 or 172360--172376)
  */
-DevicePDP11.prototype.writeKDSAR = function(data, addr)
+DevicePDP11.prototype.writeKDPAR = function(data, addr)
 {
     var reg = ((addr >> 1) & 7) + 8;
     this.cpu.mmuPAR[0][reg] = data;
@@ -535,78 +522,78 @@ DevicePDP11.prototype.writeKDSAR = function(data, addr)
 };
 
 /**
- * readUISDR(addr)
+ * readUIPDR(addr)
  *
  * @this {DevicePDP11}
- * @param {number} addr (eg, PDP11.UNIBUS.UISDR0--UISDR7 or 177600--177616)
+ * @param {number} addr (eg, PDP11.UNIBUS.UIPDR0--UIPDR7 or 177600--177616)
  * @return {number}
  */
-DevicePDP11.prototype.readUISDR = function(addr)
+DevicePDP11.prototype.readUIPDR = function(addr)
 {
     var reg = (addr >> 1) & 7;
     return this.cpu.mmuPDR[3][reg];
 };
 
 /**
- * writeUISDR(data, addr)
+ * writeUIPDR(data, addr)
  *
  * @this {DevicePDP11}
  * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.UISDR0--UISDR7 or 177600--177616)
+ * @param {number} addr (eg, PDP11.UNIBUS.UIPDR0--UIPDR7 or 177600--177616)
  */
-DevicePDP11.prototype.writeUISDR = function(data, addr)
+DevicePDP11.prototype.writeUIPDR = function(data, addr)
 {
     var reg = (addr >> 1) & 7;
     this.cpu.mmuPDR[3][reg] = data & 0xff0f;
 };
 
 /**
- * readUDSDR(addr)
+ * readUDPDR(addr)
  *
  * @this {DevicePDP11}
- * @param {number} addr (eg, PDP11.UNIBUS.UDSDR0--UDSDR7 or 177620--177636)
+ * @param {number} addr (eg, PDP11.UNIBUS.UDPDR0--UDPDR7 or 177620--177636)
  * @return {number}
  */
-DevicePDP11.prototype.readUDSDR = function(addr)
+DevicePDP11.prototype.readUDPDR = function(addr)
 {
     var reg = ((addr >> 1) & 7) + 8;
     return this.cpu.mmuPDR[3][reg];
 };
 
 /**
- * writeUDSDR(data, addr)
+ * writeUDPDR(data, addr)
  *
  * @this {DevicePDP11}
  * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.UDSDR0--UDSDR7 or 177620--177636)
+ * @param {number} addr (eg, PDP11.UNIBUS.UDPDR0--UDPDR7 or 177620--177636)
  */
-DevicePDP11.prototype.writeUDSDR = function(data, addr)
+DevicePDP11.prototype.writeUDPDR = function(data, addr)
 {
     var reg = ((addr >> 1) & 7) + 8;
     this.cpu.mmuPDR[3][reg] = data & 0xff0f;
 };
 
 /**
- * readUISAR(addr)
+ * readUIPAR(addr)
  *
  * @this {DevicePDP11}
- * @param {number} addr (eg, PDP11.UNIBUS.UISAR0--UISAR7 or 177640--177656)
+ * @param {number} addr (eg, PDP11.UNIBUS.UIPAR0--UIPAR7 or 177640--177656)
  * @return {number}
  */
-DevicePDP11.prototype.readUISAR = function(addr)
+DevicePDP11.prototype.readUIPAR = function(addr)
 {
     var reg = (addr >> 1) & 7;
     return this.cpu.mmuPAR[3][reg];
 };
 
 /**
- * writeUISAR(data, addr)
+ * writeUIPAR(data, addr)
  *
  * @this {DevicePDP11}
  * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.UISAR0--UISAR7 or 177640--177656)
+ * @param {number} addr (eg, PDP11.UNIBUS.UIPAR0--UIPAR7 or 177640--177656)
  */
-DevicePDP11.prototype.writeUISAR = function(data, addr)
+DevicePDP11.prototype.writeUIPAR = function(data, addr)
 {
     var reg = (addr >> 1) & 7;
     this.cpu.mmuPAR[3][reg] = data;
@@ -615,26 +602,26 @@ DevicePDP11.prototype.writeUISAR = function(data, addr)
 };
 
 /**
- * readUDSAR(addr)
+ * readUDPAR(addr)
  *
  * @this {DevicePDP11}
- * @param {number} addr (eg, PDP11.UNIBUS.UDSAR0--UDSAR7 or 177660--177676)
+ * @param {number} addr (eg, PDP11.UNIBUS.UDPAR0--UDPAR7 or 177660--177676)
  * @return {number}
  */
-DevicePDP11.prototype.readUDSAR = function(addr)
+DevicePDP11.prototype.readUDPAR = function(addr)
 {
     var reg = ((addr >> 1) & 7) + 8;
     return this.cpu.mmuPAR[3][reg];
 };
 
 /**
- * writeUDSAR(data, addr)
+ * writeUDPAR(data, addr)
  *
  * @this {DevicePDP11}
  * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.UDSAR0--UDSAR7 or 177660--177676)
+ * @param {number} addr (eg, PDP11.UNIBUS.UDPAR0--UDPAR7 or 177660--177676)
  */
-DevicePDP11.prototype.writeUDSAR = function(data, addr)
+DevicePDP11.prototype.writeUDPAR = function(data, addr)
 {
     var reg = ((addr >> 1) & 7) + 8;
     this.cpu.mmuPAR[3][reg] = data;
@@ -848,7 +835,7 @@ DevicePDP11.prototype.writeR6USER = function(data, addr)
  */
 DevicePDP11.prototype.readCTRL = function(addr)
 {
-    var reg = (addr - PDP11.UNIBUS.LAERR) >> 1;
+    var reg = (addr - PDP11.UNIBUS.CTRL) >> 1;
     return this.cpu.regsControl[reg];
 };
 
@@ -861,12 +848,23 @@ DevicePDP11.prototype.readCTRL = function(addr)
  */
 DevicePDP11.prototype.writeCTRL = function(data, addr)
 {
-    var reg = (addr - PDP11.UNIBUS.LAERR) >> 1;
+    var reg = (addr - PDP11.UNIBUS.CTRL) >> 1;
     this.cpu.regsControl[reg] = data;
 };
 
 /**
  * readSIZE(addr)
+ *
+ * We're adhering to DEC's documentation, which says:
+ *
+ *      This read-only register specifies the memory size of the system. It is defined to indicate the
+ *      last addressable block of 32 words in memory (bit 0 is equivalent to bit 6 of the Physical Address).
+ *
+ * Looking at the Memory Clear "toggle-in" code in /devices/pdp11/machine/1170/panel/debugger/README.md, the
+ * memory loop gives up when the block number stored in KIPAR0 is >= LSIZE, suggesting that LSIZE is actually
+ * the total number of 64-byte blocks, rather than the block number of the last block.  But that code is
+ * not conclusive, since it writes 8192 bytes at a time rather than 64, so it doesn't really matter if LSIZE
+ * is off by one.
  *
  * @this {DevicePDP11}
  * @param {number} addr (eg, PDP11.UNIBUS.LSIZE--HSIZE or 177760--177762)
@@ -874,7 +872,12 @@ DevicePDP11.prototype.writeCTRL = function(data, addr)
  */
 DevicePDP11.prototype.readSIZE = function(addr)
 {
-    return addr == PDP11.UNIBUS.LSIZE? ((BusPDP11.MAX_MEMORY >> 6) - 1) : 0;
+    /*
+     * TODO: getMemorySize() returns an aggregate total, so if there are multiple discontiguous
+     * chunks of RAM, this could return the wrong result; another interface, getHighestAddress(),
+     * might be required.
+     */
+    return addr == PDP11.UNIBUS.LSIZE? ((this.bus.getMemorySize(MemoryPDP11.TYPE.RAM) >> 6) - 1) : 0;
 };
 
 /**
@@ -1058,24 +1061,24 @@ DevicePDP11.prototype.writeIgnored = function(data, addr)
  * ES6 ALERT: As you can see below, I've finally started using computed property names.
  */
 DevicePDP11.UNIBUS_IOTABLE = {
-    [PDP11.UNIBUS.SISDR0]:  /* 172200 */    [null, null, DevicePDP11.prototype.readSISDR,   DevicePDP11.prototype.writeSISDR,   "SISDR",    PDP11.MODEL_1145],
-    [PDP11.UNIBUS.SDSDR0]:  /* 172220 */    [null, null, DevicePDP11.prototype.readSDSDR,   DevicePDP11.prototype.writeSDSDR,   "SDSDR",    PDP11.MODEL_1145],
-    [PDP11.UNIBUS.SISAR0]:  /* 172240 */    [null, null, DevicePDP11.prototype.readSISAR,   DevicePDP11.prototype.writeSISAR,   "SISAR",    PDP11.MODEL_1145],
-    [PDP11.UNIBUS.SDSAR0]:  /* 172260 */    [null, null, DevicePDP11.prototype.readSDSAR,   DevicePDP11.prototype.writeSDSAR,   "SDSAR",    PDP11.MODEL_1145],
-    [PDP11.UNIBUS.KISDR0]:  /* 172300 */    [null, null, DevicePDP11.prototype.readKISDR,   DevicePDP11.prototype.writeKISDR,   "KISDR",    PDP11.MODEL_1145],
-    [PDP11.UNIBUS.KDSDR0]:  /* 172320 */    [null, null, DevicePDP11.prototype.readKDSDR,   DevicePDP11.prototype.writeKDSDR,   "KDSDR",    PDP11.MODEL_1145],
-    [PDP11.UNIBUS.KISAR0]:  /* 172340 */    [null, null, DevicePDP11.prototype.readKISAR,   DevicePDP11.prototype.writeKISAR,   "KISAR",    PDP11.MODEL_1145],
-    [PDP11.UNIBUS.KDSAR0]:  /* 172360 */    [null, null, DevicePDP11.prototype.readKDSAR,   DevicePDP11.prototype.writeKDSAR,   "KDSAR",    PDP11.MODEL_1145],
-    [PDP11.UNIBUS.MMR3]:    /* 172516 */    [null, null, DevicePDP11.prototype.readMMR3,    DevicePDP11.prototype.writeMMR3,    "MMR3",     PDP11.MODEL_1145],
+    [PDP11.UNIBUS.UNIMAP]:  /* 170200 */    [null, null, DevicePDP11.prototype.readUNIMAP,  DevicePDP11.prototype.writeUNIMAP,  "UNIMAP",   64, PDP11.MODEL_1170],
+    [PDP11.UNIBUS.SIPDR0]:  /* 172200 */    [null, null, DevicePDP11.prototype.readSIPDR,   DevicePDP11.prototype.writeSIPDR,   "SIPDR",    8,  PDP11.MODEL_1145],
+    [PDP11.UNIBUS.SDPDR0]:  /* 172220 */    [null, null, DevicePDP11.prototype.readSDPDR,   DevicePDP11.prototype.writeSDPDR,   "SDPDR",    8,  PDP11.MODEL_1145],
+    [PDP11.UNIBUS.SIPAR0]:  /* 172240 */    [null, null, DevicePDP11.prototype.readSIPAR,   DevicePDP11.prototype.writeSIPAR,   "SIPAR",    8,  PDP11.MODEL_1145],
+    [PDP11.UNIBUS.SDPAR0]:  /* 172260 */    [null, null, DevicePDP11.prototype.readSDPAR,   DevicePDP11.prototype.writeSDPAR,   "SDPAR",    8,  PDP11.MODEL_1145],
+    [PDP11.UNIBUS.KIPDR0]:  /* 172300 */    [null, null, DevicePDP11.prototype.readKIPDR,   DevicePDP11.prototype.writeKIPDR,   "KIPDR",    8,  PDP11.MODEL_1145],
+    [PDP11.UNIBUS.KDPDR0]:  /* 172320 */    [null, null, DevicePDP11.prototype.readKDPDR,   DevicePDP11.prototype.writeKDPDR,   "KDPDR",    8,  PDP11.MODEL_1145],
+    [PDP11.UNIBUS.KIPAR0]:  /* 172340 */    [null, null, DevicePDP11.prototype.readKIPAR,   DevicePDP11.prototype.writeKIPAR,   "KIPAR",    8,  PDP11.MODEL_1145],
+    [PDP11.UNIBUS.KDPAR0]:  /* 172360 */    [null, null, DevicePDP11.prototype.readKDPAR,   DevicePDP11.prototype.writeKDPAR,   "KDPAR",    8,  PDP11.MODEL_1145],
+    [PDP11.UNIBUS.MMR3]:    /* 172516 */    [null, null, DevicePDP11.prototype.readMMR3,    DevicePDP11.prototype.writeMMR3,    "MMR3",     1,  PDP11.MODEL_1145],
     [PDP11.UNIBUS.LKS]:     /* 177546 */    [null, null, DevicePDP11.prototype.readLKS,     DevicePDP11.prototype.writeLKS,     "LKS"],
-    [PDP11.UNIBUS.CNSL]:    /* 177570 */    [null, null, DevicePDP11.prototype.readCNSL,    DevicePDP11.prototype.writeCNSL,    "CNSL"],
-    [PDP11.UNIBUS.MMR0]:    /* 177572 */    [null, null, DevicePDP11.prototype.readMMR0,    DevicePDP11.prototype.writeMMR0,    "MMR0",     PDP11.MODEL_1145],
-    [PDP11.UNIBUS.MMR1]:    /* 177574 */    [null, null, DevicePDP11.prototype.readMMR1,    DevicePDP11.prototype.writeIgnored, "MMR1",     PDP11.MODEL_1145],
-    [PDP11.UNIBUS.MMR2]:    /* 177576 */    [null, null, DevicePDP11.prototype.readMMR2,    DevicePDP11.prototype.writeIgnored, "MMR2",     PDP11.MODEL_1145],
-    [PDP11.UNIBUS.UISDR0]:  /* 177600 */    [null, null, DevicePDP11.prototype.readUISDR,   DevicePDP11.prototype.writeUISDR,   "UISDR",    PDP11.MODEL_1145],
-    [PDP11.UNIBUS.UDSDR0]:  /* 177620 */    [null, null, DevicePDP11.prototype.readUDSDR,   DevicePDP11.prototype.writeUDSDR,   "UDSDR",    PDP11.MODEL_1145],
-    [PDP11.UNIBUS.UISAR0]:  /* 177640 */    [null, null, DevicePDP11.prototype.readUISAR,   DevicePDP11.prototype.writeUISAR,   "UISAR",    PDP11.MODEL_1145],
-    [PDP11.UNIBUS.UDSAR0]:  /* 177660 */    [null, null, DevicePDP11.prototype.readUDSAR,   DevicePDP11.prototype.writeUDSAR,   "UDSAR",    PDP11.MODEL_1145],
+    [PDP11.UNIBUS.MMR0]:    /* 177572 */    [null, null, DevicePDP11.prototype.readMMR0,    DevicePDP11.prototype.writeMMR0,    "MMR0",     1,  PDP11.MODEL_1145],
+    [PDP11.UNIBUS.MMR1]:    /* 177574 */    [null, null, DevicePDP11.prototype.readMMR1,    DevicePDP11.prototype.writeIgnored, "MMR1",     1,  PDP11.MODEL_1145],
+    [PDP11.UNIBUS.MMR2]:    /* 177576 */    [null, null, DevicePDP11.prototype.readMMR2,    DevicePDP11.prototype.writeIgnored, "MMR2",     1,  PDP11.MODEL_1145],
+    [PDP11.UNIBUS.UIPDR0]:  /* 177600 */    [null, null, DevicePDP11.prototype.readUIPDR,   DevicePDP11.prototype.writeUIPDR,   "UIPDR",    8,  PDP11.MODEL_1145],
+    [PDP11.UNIBUS.UDPDR0]:  /* 177620 */    [null, null, DevicePDP11.prototype.readUDPDR,   DevicePDP11.prototype.writeUDPDR,   "UDPDR",    8,  PDP11.MODEL_1145],
+    [PDP11.UNIBUS.UIPAR0]:  /* 177640 */    [null, null, DevicePDP11.prototype.readUIPAR,   DevicePDP11.prototype.writeUIPAR,   "UIPAR",    8,  PDP11.MODEL_1145],
+    [PDP11.UNIBUS.UDPAR0]:  /* 177660 */    [null, null, DevicePDP11.prototype.readUDPAR,   DevicePDP11.prototype.writeUDPAR,   "UDPAR",    8,  PDP11.MODEL_1145],
     [PDP11.UNIBUS.R0SET0]:  /* 177700 */    [null, null, DevicePDP11.prototype.readRSET0,   DevicePDP11.prototype.writeRSET0,   "R0SET0"],
     [PDP11.UNIBUS.R1SET0]:  /* 177701 */    [null, null, DevicePDP11.prototype.readRSET0,   DevicePDP11.prototype.writeRSET0,   "R1SET0"],
     [PDP11.UNIBUS.R2SET0]:  /* 177702 */    [null, null, DevicePDP11.prototype.readRSET0,   DevicePDP11.prototype.writeRSET0,   "R2SET0"],
@@ -1084,128 +1087,24 @@ DevicePDP11.UNIBUS_IOTABLE = {
     [PDP11.UNIBUS.R5SET0]:  /* 177705 */    [null, null, DevicePDP11.prototype.readRSET0,   DevicePDP11.prototype.writeRSET0,   "R5SET0"],
     [PDP11.UNIBUS.R6KERNEL]:/* 177706 */    [null, null, DevicePDP11.prototype.readR6KERNEL,DevicePDP11.prototype.writeR6KERNEL,"R6KERNEL"],
     [PDP11.UNIBUS.R7KERNEL]:/* 177707 */    [null, null, DevicePDP11.prototype.readR7KERNEL,DevicePDP11.prototype.writeR7KERNEL,"R7KERNEL"],
-    [PDP11.UNIBUS.R0SET1]:  /* 177710 */    [null, null, DevicePDP11.prototype.readRSET1,   DevicePDP11.prototype.writeRSET1,   "R0SET1",   PDP11.MODEL_1145],
-    [PDP11.UNIBUS.R1SET1]:  /* 177711 */    [null, null, DevicePDP11.prototype.readRSET1,   DevicePDP11.prototype.writeRSET1,   "R1SET1",   PDP11.MODEL_1145],
-    [PDP11.UNIBUS.R2SET1]:  /* 177712 */    [null, null, DevicePDP11.prototype.readRSET1,   DevicePDP11.prototype.writeRSET1,   "R2SET1",   PDP11.MODEL_1145],
-    [PDP11.UNIBUS.R3SET1]:  /* 177713 */    [null, null, DevicePDP11.prototype.readRSET1,   DevicePDP11.prototype.writeRSET1,   "R3SET1",   PDP11.MODEL_1145],
-    [PDP11.UNIBUS.R4SET1]:  /* 177714 */    [null, null, DevicePDP11.prototype.readRSET1,   DevicePDP11.prototype.writeRSET1,   "R4SET1",   PDP11.MODEL_1145],
-    [PDP11.UNIBUS.R5SET1]:  /* 177715 */    [null, null, DevicePDP11.prototype.readRSET1,   DevicePDP11.prototype.writeRSET1,   "R5SET1",   PDP11.MODEL_1145],
-    [PDP11.UNIBUS.R6SUPER]: /* 177716 */    [null, null, DevicePDP11.prototype.readR6SUPER, DevicePDP11.prototype.writeR6SUPER, "R6SUPER",  PDP11.MODEL_1145],
-    [PDP11.UNIBUS.R6USER]:  /* 177717 */    [null, null, DevicePDP11.prototype.readR6USER,  DevicePDP11.prototype.writeR6USER,  "R6USER",   PDP11.MODEL_1145],
-    [PDP11.UNIBUS.LAERR]:   /* 177740 */    [null, null, DevicePDP11.prototype.readCTRL,    DevicePDP11.prototype.writeCTRL,    "CTRL",     PDP11.MODEL_1170],
-    [PDP11.UNIBUS.LSIZE]:   /* 177760 */    [null, null, DevicePDP11.prototype.readSIZE,    DevicePDP11.prototype.writeSIZE,    "LSIZE",    PDP11.MODEL_1170],
-    [PDP11.UNIBUS.HSIZE]:   /* 177762 */    [null, null, DevicePDP11.prototype.readSIZE,    DevicePDP11.prototype.writeSIZE,    "HSIZE",    PDP11.MODEL_1170],
-    [PDP11.UNIBUS.SYSID]:   /* 177764 */    [null, null, DevicePDP11.prototype.readSYSID,   DevicePDP11.prototype.writeSYSID,   "SYSID",    PDP11.MODEL_1170],
-    [PDP11.UNIBUS.CPUERR]:  /* 177766 */    [null, null, DevicePDP11.prototype.readCPUERR,  DevicePDP11.prototype.writeCPUERR,  "CPUERR",   PDP11.MODEL_1170],
-    [PDP11.UNIBUS.MB]:      /* 177770 */    [null, null, DevicePDP11.prototype.readMB,      DevicePDP11.prototype.writeMB,      "MB",       PDP11.MODEL_1170],
+    [PDP11.UNIBUS.R0SET1]:  /* 177710 */    [null, null, DevicePDP11.prototype.readRSET1,   DevicePDP11.prototype.writeRSET1,   "R0SET1",   1,  PDP11.MODEL_1145],
+    [PDP11.UNIBUS.R1SET1]:  /* 177711 */    [null, null, DevicePDP11.prototype.readRSET1,   DevicePDP11.prototype.writeRSET1,   "R1SET1",   1,  PDP11.MODEL_1145],
+    [PDP11.UNIBUS.R2SET1]:  /* 177712 */    [null, null, DevicePDP11.prototype.readRSET1,   DevicePDP11.prototype.writeRSET1,   "R2SET1",   1,  PDP11.MODEL_1145],
+    [PDP11.UNIBUS.R3SET1]:  /* 177713 */    [null, null, DevicePDP11.prototype.readRSET1,   DevicePDP11.prototype.writeRSET1,   "R3SET1",   1,  PDP11.MODEL_1145],
+    [PDP11.UNIBUS.R4SET1]:  /* 177714 */    [null, null, DevicePDP11.prototype.readRSET1,   DevicePDP11.prototype.writeRSET1,   "R4SET1",   1,  PDP11.MODEL_1145],
+    [PDP11.UNIBUS.R5SET1]:  /* 177715 */    [null, null, DevicePDP11.prototype.readRSET1,   DevicePDP11.prototype.writeRSET1,   "R5SET1",   1,  PDP11.MODEL_1145],
+    [PDP11.UNIBUS.R6SUPER]: /* 177716 */    [null, null, DevicePDP11.prototype.readR6SUPER, DevicePDP11.prototype.writeR6SUPER, "R6SUPER",  1,  PDP11.MODEL_1145],
+    [PDP11.UNIBUS.R6USER]:  /* 177717 */    [null, null, DevicePDP11.prototype.readR6USER,  DevicePDP11.prototype.writeR6USER,  "R6USER",   1,  PDP11.MODEL_1145],
+    [PDP11.UNIBUS.CTRL]:    /* 177740 */    [null, null, DevicePDP11.prototype.readCTRL,    DevicePDP11.prototype.writeCTRL,    "CTRL",     8,  PDP11.MODEL_1170],
+    [PDP11.UNIBUS.LSIZE]:   /* 177760 */    [null, null, DevicePDP11.prototype.readSIZE,    DevicePDP11.prototype.writeSIZE,    "LSIZE",    1,  PDP11.MODEL_1170],
+    [PDP11.UNIBUS.HSIZE]:   /* 177762 */    [null, null, DevicePDP11.prototype.readSIZE,    DevicePDP11.prototype.writeSIZE,    "HSIZE",    1,  PDP11.MODEL_1170],
+    [PDP11.UNIBUS.SYSID]:   /* 177764 */    [null, null, DevicePDP11.prototype.readSYSID,   DevicePDP11.prototype.writeSYSID,   "SYSID",    1,  PDP11.MODEL_1170],
+    [PDP11.UNIBUS.CPUERR]:  /* 177766 */    [null, null, DevicePDP11.prototype.readCPUERR,  DevicePDP11.prototype.writeCPUERR,  "CPUERR",   1,  PDP11.MODEL_1170],
+    [PDP11.UNIBUS.MB]:      /* 177770 */    [null, null, DevicePDP11.prototype.readMB,      DevicePDP11.prototype.writeMB,      "MB",       1,  PDP11.MODEL_1170],
     [PDP11.UNIBUS.PIR]:     /* 177772 */    [null, null, DevicePDP11.prototype.readPIR,     DevicePDP11.prototype.writePIR,     "PIR"],
     [PDP11.UNIBUS.SL]:      /* 177774 */    [null, null, DevicePDP11.prototype.readSL,      DevicePDP11.prototype.writeSL,      "SL"],
     [PDP11.UNIBUS.PSW]:     /* 177776 */    [null, null, DevicePDP11.prototype.readPSW,     DevicePDP11.prototype.writePSW,     "PSW"]
 };
-
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SISDR1] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SISDR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SISDR2] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SISDR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SISDR3] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SISDR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SISDR4] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SISDR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SISDR5] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SISDR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SISDR6] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SISDR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SISDR7] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SISDR0];
-
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SDSDR1] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SDSDR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SDSDR2] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SDSDR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SDSDR3] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SDSDR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SDSDR4] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SDSDR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SDSDR5] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SDSDR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SDSDR6] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SDSDR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SDSDR7] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SDSDR0];
-
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SISAR1] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SISAR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SISAR2] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SISAR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SISAR3] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SISAR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SISAR4] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SISAR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SISAR5] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SISAR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SISAR6] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SISAR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SISAR7] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SISAR0];
-
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SDSAR1] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SDSAR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SDSAR2] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SDSAR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SDSAR3] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SDSAR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SDSAR4] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SDSAR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SDSAR5] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SDSAR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SDSAR6] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SDSAR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SDSAR7] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.SDSAR0];
-
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KISDR1] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KISDR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KISDR2] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KISDR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KISDR3] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KISDR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KISDR4] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KISDR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KISDR5] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KISDR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KISDR6] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KISDR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KISDR7] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KISDR0];
-
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KDSDR1] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KDSDR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KDSDR2] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KDSDR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KDSDR3] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KDSDR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KDSDR4] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KDSDR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KDSDR5] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KDSDR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KDSDR6] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KDSDR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KDSDR7] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KDSDR0];
-
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KISAR1] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KISAR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KISAR2] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KISAR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KISAR3] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KISAR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KISAR4] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KISAR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KISAR5] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KISAR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KISAR6] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KISAR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KISAR7] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KISAR0];
-
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KDSAR1] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KDSAR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KDSAR2] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KDSAR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KDSAR3] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KDSAR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KDSAR4] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KDSAR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KDSAR5] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KDSAR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KDSAR6] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KDSAR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KDSAR7] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.KDSAR0];
-
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UISDR1] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UISDR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UISDR2] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UISDR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UISDR3] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UISDR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UISDR4] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UISDR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UISDR5] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UISDR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UISDR6] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UISDR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UISDR7] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UISDR0];
-
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UDSDR1] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UDSDR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UDSDR2] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UDSDR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UDSDR3] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UDSDR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UDSDR4] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UDSDR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UDSDR5] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UDSDR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UDSDR6] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UDSDR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UDSDR7] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UDSDR0];
-
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UISAR1] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UISAR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UISAR2] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UISAR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UISAR3] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UISAR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UISAR4] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UISAR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UISAR5] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UISAR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UISAR6] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UISAR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UISAR7] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UISAR0];
-
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UDSAR1] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UDSAR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UDSAR2] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UDSAR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UDSAR3] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UDSAR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UDSAR4] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UDSAR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UDSAR5] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UDSAR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UDSAR6] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UDSAR0];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UDSAR7] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UDSAR0];
-
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.HAERR]  = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.LAERR];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.MEMERR] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.LAERR];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.CACHEC] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.LAERR];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.MAINT]  = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.LAERR];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.HITMISS]= DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.LAERR];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UNDEF1] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.LAERR];
-DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.UNDEF2] = DevicePDP11.UNIBUS_IOTABLE[PDP11.UNIBUS.LAERR];
 
 /**
  * DevicePDP11.init()
@@ -1229,6 +1128,10 @@ DevicePDP11.init = function()
             break;
         case 'pc11':
             device = new PC11(parmsDevice);
+            Component.bindComponentControls(device, eDevice, PDP11.APPCLASS);
+            break;
+        case 'rl11':
+            device = new RL11(parmsDevice);
             Component.bindComponentControls(device, eDevice, PDP11.APPCLASS);
             break;
         }

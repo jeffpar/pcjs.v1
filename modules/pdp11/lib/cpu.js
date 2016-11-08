@@ -283,7 +283,6 @@ CPUPDP11.prototype.powerUp = function(data, fRepower)
      *
      *      this.flags.powered = true;
      */
-    this.cmp.updateStatus();
     return true;
 };
 
@@ -506,15 +505,28 @@ CPUPDP11.prototype.setBinding = function(sType, sBinding, control, sValue)
 };
 
 /**
- * updateStatus(fForce)
+ * updateDisplays(nUpdate)
  *
- * Some of the CPU bindings provide feedback and therefore need to be updated periodically.  This is called
- * via the Computer's updateStatus() handler several times per second; see YIELDS_PER_STATUS.
+ * Simpler wrapper around the Computer's updateDisplays() method.
  *
  * @this {CPUPDP11}
- * @param {boolean} [fForce]
+ * @param {number} [nUpdate] (1 for periodic, -1 for forced, 0 or undefined otherwise)
  */
-CPUPDP11.prototype.updateStatus = function(fForce)
+CPUPDP11.prototype.updateDisplays = function(nUpdate)
+{
+    if (this.cmp) this.cmp.updateDisplays(nUpdate);
+};
+
+/**
+ * updateDisplay(nUpdate)
+ *
+ * Some of the CPU bindings provide feedback and therefore need to be updated periodically.
+ * However, this should be called via the Computer's updateDisplays() interface, not directly.
+ *
+ * @this {CPUPDP11}
+ * @param {number} [nUpdate] (1 for periodic, -1 for forced, 0 or undefined otherwise)
+ */
+CPUPDP11.prototype.updateDisplay = function(nUpdate)
 {
     var controlSpeed = this.bindings["speed"];
     if (controlSpeed) controlSpeed.textContent = this.getSpeedCurrent();
@@ -1076,7 +1088,7 @@ CPUPDP11.prototype.runCPU = function()
             nCycles = this.endBurst(true);
 
             /*
-             * Add nCycles to nCyclesThisRun, as well as nRunCycles (the cycle count since the CPU first started).
+             * Add nCycles to nCyclesThisRun, as well as nRunCycles (the cycle count since the CPU started).
              */
             this.nCyclesThisRun += nCycles;
             this.nRunCycles += nCycles;
@@ -1091,7 +1103,7 @@ CPUPDP11.prototype.runCPU = function()
             if (this.nCyclesNextYield <= 0) {
                 this.nCyclesNextYield += this.nCyclesPerYield;
                 if (++this.nYieldsSinceStatusUpdate >= CPUPDP11.YIELDS_PER_STATUS) {
-                    if (this.cmp) this.cmp.updateStatus();
+                    this.updateDisplays();
                     this.nYieldsSinceStatusUpdate = 0;
                 }
                 break;
@@ -1206,7 +1218,7 @@ CPUPDP11.prototype.yieldCPU = function()
      * odd for those messages to show CPU state changes if the Control Panel, Video display, etc, does not,
      * so I've added this call to try to keep things looking synchronized.
      */
-    this.cmp.updateStatus();
+    this.updateDisplays();
 };
 
 if (NODE) module.exports = CPUPDP11;

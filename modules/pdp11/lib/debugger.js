@@ -43,8 +43,8 @@ if (DEBUGGER) {
         var State         = require("../../shared/lib/state");
         var PDP11         = require("./defines");
         var CPUPDP11      = require("./cpu");
-        var MessagesPDP11 = require("./messages");
         var MemoryPDP11   = require("./memory");
+        var MessagesPDP11 = require("./messages");
     }
 }
 
@@ -266,6 +266,7 @@ if (DEBUGGER) {
      * Register numbers 0-7 are reserved for cpu.regsGen, 8-15 are reserved for cpu.regsAlt, and 16-19 for cpu.regsStack.
      */
     DebuggerPDP11.REG_PSW       = 20;
+    DebuggerPDP11.REG_SW        = 21;
 
     /*
      * Operand type masks; anything that's not covered by OP_SRC or OP_DST must be a OP_OTHER value.
@@ -463,8 +464,9 @@ if (DEBUGGER) {
     DebuggerPDP11.prototype.initBus = function(cmp, bus, cpu, dbg)
     {
         this.bus = bus;
-        this.cpu = cpu;
         this.cmp = cmp;
+        this.cpu = cpu;
+        this.panel = cmp.panel;
 
         /*
          * Re-initialize Debugger message support if necessary
@@ -675,7 +677,7 @@ if (DEBUGGER) {
                 this.cpu.setByteDirect(addr, b);
             }
             if (inc) this.incAddr(dbgAddr, inc);
-            this.cmp.updateStatus(true);        // force a computer status update if, say, video memory was the target
+            this.cmp.updateDisplays(-1);
         }
     };
 
@@ -697,7 +699,7 @@ if (DEBUGGER) {
                 this.cpu.setWordDirect(addr, w);
             }
             if (inc) this.incAddr(dbgAddr, inc);
-            this.cmp.updateStatus(true);        // force a computer status update if, say, video memory was the target
+            this.cmp.updateDisplays(-1);
         }
     };
 
@@ -768,7 +770,7 @@ if (DEBUGGER) {
      * done later, by getAddr(), which returns PDP11.ADDR_INVALID for invalid segments, out-of-range offsets,
      * etc.  The Debugger's low-level get/set memory functions verify all getAddr() results, but even if an
      * invalid address is passed through to the Bus memory interfaces, the address will simply be masked with
-     * BusPDP11.nBusLimit; in the case of PDP11.ADDR_INVALID, that will generally refer to the top of the physical
+     * bus.nBusMask; in the case of PDP11.ADDR_INVALID, that will generally refer to the top of the physical
      * address space.
      *
      * @this {DebuggerPDP11}
@@ -1125,6 +1127,9 @@ if (DEBUGGER) {
         case "PC":
             iReg = 7;
             break;
+        case "SW":
+            iReg = 21;
+            break;
         default:
             if (sReg.charAt(0) == "R") {
                 iReg = +sReg.charAt(1);
@@ -1139,7 +1144,7 @@ if (DEBUGGER) {
      * getRegName(iReg)
      *
      * @this {DebuggerPDP11}
-     * @param {number} iReg
+     * @param {number} iReg (0-7; not used for other registers)
      * @return {string}
      */
     DebuggerPDP11.prototype.getRegName = function(iReg)
@@ -1151,7 +1156,7 @@ if (DEBUGGER) {
      * getRegValue(iReg)
      *
      * Register numbers 0-7 are reserved for cpu.regsGen, 8-15 are reserved for cpu.regsAlt,
-     * 16-19 for cpu.regsAltStack, and 20 for regPSW.
+     * 16-19 for cpu.regsAltStack, 20 for regPSW, and 21 for regSW.
      *
      * @this {DebuggerPDP11}
      * @param {number} iReg
@@ -1172,6 +1177,9 @@ if (DEBUGGER) {
             }
             else if (iReg == DebuggerPDP11.REG_PSW) {
                 value = this.cpu.getPSW();
+            }
+            else if (iReg == DebuggerPDP11.REG_SW && this.panel && this.panel.hasSwitches()) {
+                value = this.panel.getSW();
             }
         }
         return value;
@@ -1212,7 +1220,7 @@ if (DEBUGGER) {
         if (this.sMessagePrev && sMessage == this.sMessagePrev) return;
         this.sMessagePrev = sMessage;
 
-        if (this.bitsMessage & MessagesPDP11.HALT) {
+        if ((this.bitsMessage & MessagesPDP11.HALT) && this.cpu && this.cpu.isRunning()) {
             this.stopCPU();
             sMessage += " (cpu halted)";
         }
@@ -1239,7 +1247,7 @@ if (DEBUGGER) {
     DebuggerPDP11.prototype.init = function(fAutoStart)
     {
         this.fInit = true;
-        this.println("Type ? for help with PDP11 Debugger commands");
+        this.println("Type ? for help with PDPjs Debugger commands");
         this.updateStatus();
         if (!fAutoStart) this.setFocus();
         if (this.sInitCommands) {
@@ -1305,15 +1313,15 @@ if (DEBUGGER) {
     };
 
     /**
-     * stepCPU(nCycles, fRegs, fUpdateStatus)
+     * stepCPU(nCycles, fRegs, fUpdateDisplays)
      *
      * @this {DebuggerPDP11}
      * @param {number} nCycles (0 for one instruction without checking breakpoints)
      * @param {boolean} [fRegs] is true to display registers after step (default is false)
-     * @param {boolean} [fUpdateStatus] is false to disable Computer status updates (default is true)
+     * @param {boolean} [fUpdateDisplays] is false to disable Computer display updates (default is true)
      * @return {boolean}
      */
-    DebuggerPDP11.prototype.stepCPU = function(nCycles, fRegs, fUpdateStatus)
+    DebuggerPDP11.prototype.stepCPU = function(nCycles, fRegs, fUpdateDisplays)
     {
         if (!this.checkCPU()) return false;
 
@@ -1334,7 +1342,7 @@ if (DEBUGGER) {
             nCycles = this.cpu.getBurstCycles(nCycles);
             var nCyclesStep = this.cpu.stepCPU(nCycles);
             if (nCyclesStep > 0) {
-                this.cpu.updateTimers(nCycles);
+                this.cpu.updateTimers(nCyclesStep);
                 this.nCycles += nCyclesStep;
                 this.cpu.addCycles(nCyclesStep, true);
                 this.cpu.updateChecksum(nCyclesStep);
@@ -1355,10 +1363,12 @@ if (DEBUGGER) {
 
         /*
          * Because we called cpu.stepCPU() and not cpu.startCPU(), we must nudge the Computer's update code,
-         * and then update our own state.  Normally, the only time fUpdateStatus will be false is when doTrace()
-         * is calling us in a loop, in which case it will perform its own updateStatus() when it's done.
+         * and then update our own state.  Normally, the only time fUpdateDisplays will be false is when doTrace()
+         * is calling us in a loop, in which case it will perform its own updateDisplays() when it's done.
          */
-        if (fUpdateStatus !== false) this.cmp.updateStatus();
+        if (fUpdateDisplays !== false) {
+            this.cmp.updateDisplays(-1);
+        }
 
         this.updateStatus(fRegs || false);
         return (this.nCycles > 0);
@@ -2003,64 +2013,59 @@ if (DEBUGGER) {
                 if (fTemporary && !dbgAddrBreak.fTemporary) continue;
 
                 /*
-                 * We used to calculate the linear address of the breakpoint at the time the
-                 * breakpoint was added, so that a breakpoint set in one mode (eg, in real-mode)
-                 * would still work as intended if the mode changed later (eg, to protected-mode).
-                 *
-                 * However, that created difficulties setting protected-mode breakpoints in segments
-                 * that might not be defined yet, or that could move in physical memory.
-                 *
-                 * If you want to create a real-mode breakpoint that will break regardless of mode,
-                 * use the physical address of the real-mode memory location instead.
+                 * Since we're checking an execution address, which is always virtual, and virtual
+                 * addresses are always restricted to 16 bits, let's mask the breakpoint address to match
+                 * (the user should know better, but we'll be nice).
                  */
-                var addrBreak = this.getAddr(dbgAddrBreak);
+                var addrBreak = this.getAddr(dbgAddrBreak) & 0xffff;
                 for (var n = 0; n < nb; n++) {
-                    if (addr + n == addrBreak) {
-                        var a;
-                        fBreak = true;
-                        if (dbgAddrBreak.fTemporary) {
-                            this.findBreakpoint(aBreak, dbgAddrBreak, true, true);
-                            fTemporary = true;
-                        }
-                        if (a = dbgAddrBreak.aCmds) {
-                            /*
-                             * When one or more commands are attached to a breakpoint, we don't halt by default.
-                             * Instead, we set fBreak to true only if, at the completion of all the commands, the
-                             * CPU is halted; in other words, you should include "h" as one of the breakpoint commands
-                             * if you want the breakpoint to stop execution.
-                             *
-                             * Another useful command is "if", which will return false if the expression is false,
-                             * at which point we'll jump ahead to the next "else" command, and if there isn't an "else",
-                             * we abort.
-                             */
-                            fBreak = false;
-                            for (var j = 0; j < a.length; j++) {
-                                if (!this.doCommand(a[j], true)) {
-                                    if (a[j].indexOf("if")) {
-                                        fBreak = true;          // the failed command wasn't "if", so abort
-                                        break;
-                                    }
-                                    var k = j + 1;
-                                    for (; k < a.length; k++) {
-                                        if (!a[k].indexOf("else")) break;
-                                        j++;
-                                    }
-                                    if (k == a.length) {        // couldn't find an "else" after the "if", so abort
-                                        fBreak = true;
-                                        break;
-                                    }
-                                    /*
-                                     * If we're still here, we'll execute the "else" command (which is just a no-op),
-                                     * followed by any remaining commands.
-                                     */
+
+                    if ((addr + n) != addrBreak) continue;
+
+                    var a;
+                    fBreak = true;
+                    if (dbgAddrBreak.fTemporary) {
+                        this.findBreakpoint(aBreak, dbgAddrBreak, true, true);
+                        fTemporary = true;
+                    }
+                    if (a = dbgAddrBreak.aCmds) {
+                        /*
+                         * When one or more commands are attached to a breakpoint, we don't halt by default.
+                         * Instead, we set fBreak to true only if, at the completion of all the commands, the
+                         * CPU is halted; in other words, you should include "h" as one of the breakpoint commands
+                         * if you want the breakpoint to stop execution.
+                         *
+                         * Another useful command is "if", which will return false if the expression is false,
+                         * at which point we'll jump ahead to the next "else" command, and if there isn't an "else",
+                         * we abort.
+                         */
+                        fBreak = false;
+                        for (var j = 0; j < a.length; j++) {
+                            if (!this.doCommand(a[j], true)) {
+                                if (a[j].indexOf("if")) {
+                                    fBreak = true;          // the failed command wasn't "if", so abort
+                                    break;
                                 }
+                                var k = j + 1;
+                                for (; k < a.length; k++) {
+                                    if (!a[k].indexOf("else")) break;
+                                    j++;
+                                }
+                                if (k == a.length) {        // couldn't find an "else" after the "if", so abort
+                                    fBreak = true;
+                                    break;
+                                }
+                                /*
+                                 * If we're still here, we'll execute the "else" command (which is just a no-op),
+                                 * followed by any remaining commands.
+                                 */
                             }
-                            if (!this.cpu.isRunning()) fBreak = true;
                         }
-                        if (fBreak) {
-                            if (!fTemporary) this.printBreakpoint(aBreak, i, "hit");
-                            break;
-                        }
+                        if (!this.cpu.isRunning()) fBreak = true;
+                    }
+                    if (fBreak) {
+                        if (!fTemporary) this.printBreakpoint(aBreak, i, "hit");
+                        break;
                     }
                 }
             }
@@ -2384,6 +2389,9 @@ if (DEBUGGER) {
         else if (iReg == DebuggerPDP11.REG_PSW) {
             sReg = "PS=" + this.toStrBase(cpu.getPSW());
         }
+        else if (iReg == DebuggerPDP11.REG_SW && this.panel && this.panel.hasSwitches()) {
+            sReg = "SW=" + this.toStrBase(this.panel.getSW(), 3);
+        }
         if (sReg) sReg += ' ';
         return sReg;
     };
@@ -2407,7 +2415,8 @@ if (DEBUGGER) {
             sDump += this.getRegOutput(i);
         }
         sDump += '\n';
-        sDump += this.getRegOutput(PDP11.REG.SP) + this.getRegOutput(PDP11.REG.PC) + this.getRegOutput(DebuggerPDP11.REG_PSW);
+        sDump += this.getRegOutput(PDP11.REG.SP) + this.getRegOutput(PDP11.REG.PC);
+        sDump += this.getRegOutput(DebuggerPDP11.REG_PSW) + this.getRegOutput(DebuggerPDP11.REG_SW);
         sDump += this.getFlagOutput('T') + this.getFlagOutput('N') + this.getFlagOutput('Z') + this.getFlagOutput('V') + this.getFlagOutput('C');
         return sDump;
     };
@@ -2711,7 +2720,7 @@ if (DEBUGGER) {
         if (asArgs[2] === undefined) {
             this.println("begin assemble at " + this.toStrAddr(dbgAddr));
             this.fAssemble = true;
-            this.cmp.updateStatus();
+            this.cmp.updateDisplays();
             return;
         }
 
@@ -2849,8 +2858,8 @@ if (DEBUGGER) {
     /**
      * doDump(asArgs)
      *
-     * The length parameter is interpreted as a number of bytes (or words, or dwords) to dump, and it is
-     * interpreted using the current base.
+     * The length parameter is interpreted as a number of bytes (or words, or dwords) to dump,
+     * and it is interpreted using the current base.
      *
      * @this {DebuggerPDP11}
      * @param {Array.<string>} asArgs (formerly sCmd, [sAddr], [sLen] and [sBytes])
@@ -2923,7 +2932,7 @@ if (DEBUGGER) {
                     return;
                 }
             }
-            if (!sAddr) sCmd = this.sCmdDumpPrev || "db";
+            if (!sAddr) sCmd = this.sCmdDumpPrev || "dw";
         } else {
             this.sCmdDumpPrev = sCmd;
         }
@@ -2945,17 +2954,20 @@ if (DEBUGGER) {
             if (len > 0x10000) len = 0x10000;   // prevent bad user (or variable) input from producing excessive output
         }
 
-        var sDump = "";
-        var size = (sCmd == "dd"? 4 : (sCmd == "dw"? 2 : 1));
+        /*
+         * I've changed the code below to effectively make "dw" the default if only "d" is specified,
+         * since this is primarily a word-oriented machine.
+         */
+        var size = (sCmd == "dd"? 4 : (sCmd == "db"? 1 : 2));
         var nBytes = (size * len) || 128;
         var nLines = ((nBytes + 15) >> 4) || 1;
 
+        var sDump = "";
         while (nLines-- && nBytes > 0) {
-            var data = 0, shift = 0, i;
             var sData = "", sChars = "";
             sAddr = this.toStrAddr(dbgAddr);
             /*
-             * Dump 8 bytes per line when using base 8, and dump 16 bytes when using base 16 (or when dumping dwords).
+             * Dump 8 bytes per line when using base 8, and dump 16 bytes when using base 16.
              *
              * And while we used to always call getByte() and assemble them into words or dwords as appropriate, I've
              * changed the logic below to honor "dw" by calling getWord(), since the Bus interfaces have been updated
@@ -2963,8 +2975,10 @@ if (DEBUGGER) {
              *
              * Besides, it's nice for "db" and "dw" to generate the same Bus activity that typical byte and word reads do.
              */
-            for (i = (size == 4? 16 : this.nBase); i > 0 && nBytes > 0; i--) {
-                var n = 1;
+            var i, n;
+            var data = 0, shift = 0;
+            for (i = this.nBase; i > 0 && nBytes > 0; i -= n, nBytes -= n) {
+                n = 1;
                 var v = size == 1? this.getByte(dbgAddr, n) : this.getWord(dbgAddr, (n = 2));
                 data |= (v << (shift << 3));
                 shift += n;
@@ -2974,7 +2988,6 @@ if (DEBUGGER) {
                     data = shift = 0;
                 }
                 sChars += (v >= 32 && v < 128? String.fromCharCode(v) : '.');
-                nBytes -= n;
             }
             if (sDump) sDump += '\n';
             sDump += sAddr + "  " + sData + ((i == 0)? (' ' + sChars) : "");
@@ -3027,8 +3040,7 @@ if (DEBUGGER) {
             if (vNew & ~mask) {
                 this.println("warning: " + str.toHex(vNew) + " exceeds " + size + "-byte value");
             }
-            var vOld = fnGet.call(this, dbgAddr);
-            this.println("changing " + this.toStrAddr(dbgAddr) + " from " + this.toStrBase(vOld, size) + " to " + this.toStrBase(vNew, size));
+            this.println("changing " + this.toStrAddr(dbgAddr) + (this.messageEnabled(MessagesPDP11.BUS)? "" : (" from " + this.toStrBase(fnGet.call(this, dbgAddr), size))) + " to " + this.toStrBase(vNew, size));
             fnSet.call(this, dbgAddr, vNew, size);
         }
     };
@@ -3400,6 +3412,12 @@ if (DEBUGGER) {
             case "C":
                 if (w) cpu.setCF(); else cpu.clearCF();
                 break;
+            case "SW":
+                if (this.panel && this.panel.hasSwitches()) {
+                    this.panel.setSW(w);
+                    break;
+                }
+                /* falls through */
             default:
                 if (sRegMatch.charAt(0) == 'R') {
                     var iReg = +sRegMatch.charAt(1);
@@ -3411,7 +3429,7 @@ if (DEBUGGER) {
                 this.println("unknown register: " + sReg);
                 return;
             }
-            this.cmp.updateStatus();
+            this.cmp.updateDisplays();
             this.println("updated registers:");
         }
 
@@ -3655,12 +3673,13 @@ if (DEBUGGER) {
             },
             function onCountStepComplete() {
                 /*
-                 * We explicitly called stepCPU() with fUpdateStatus === false, because repeatedly
-                 * calling updateStatus() can be very slow, especially if a Control Panel is present
-                 * with displayLiveRegs enabled, so once the repeat count has been exhausted, we must
-                 * perform a final updateStatus().
+                 * We explicitly called stepCPU() with fUpdateDisplays set to false, because repeatedly
+                 * calling updateDisplays() can be very slow, especially if a Control Panel is present with
+                 * displayLiveRegs enabled, so once the repeat count has been exhausted, we must perform
+                 * a final updateDisplays().
                  */
-                dbg.cmp.updateStatus();
+                if (dbg.panel && dbg.panel.stop) dbg.panel.stop();
+                dbg.cmp.updateDisplays();
                 dbg.setBusy(false);
             }
         );

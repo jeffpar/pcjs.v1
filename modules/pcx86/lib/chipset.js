@@ -3461,7 +3461,10 @@ ChipSet.prototype.advanceDMA = function(channel, fInit)
                         }
                         if (!channel.masked) {
                             chipset.bus.setByte(addrCur, b);
-                            if (BACKTRACK) {
+                            /*
+                             * WARNING: Do NOT assume that obj is valid; if the sector data was not found, there will be no obj.
+                             */
+                            if (BACKTRACK && obj) {
                                 if (!off && obj.file) {
                                     if (chipset.messageEnabled(Messages.DISK)) {
                                         chipset.printMessage("loading " + obj.file.sPath + '[' + obj.offFile + "] at %" + str.toHex(addrCur), true);

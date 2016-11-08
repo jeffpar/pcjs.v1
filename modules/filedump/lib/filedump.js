@@ -252,7 +252,7 @@ FileDump.prototype.loadFile = function(sFile, iStart, nSkip, done)
 
     var encoding = null;
     var sExt = str.getExtension(sFile);
-    if (sExt == DumpAPI.FORMAT.JSON || sExt == DumpAPI.FORMAT.HEX || sExt == "lst") {
+    if (sExt == DumpAPI.FORMAT.JSON || sExt == DumpAPI.FORMAT.HEX || sExt == "lst" || sExt == "txt") {
         encoding = "utf8";
     }
     var options = {encoding: encoding};
@@ -343,7 +343,7 @@ FileDump.prototype.setData = function(buf, iStart, nSkip, sExt)
     var b, i, j, s;
     if (typeof buf == "string") {
         var ab = [];
-        if (sExt == "lst") {
+        if (sExt == "lst" || sExt == "txt") {
             ab = this.parseListing(buf);
         }
         else if (buf.indexOf('{') >= 0) {
@@ -488,7 +488,7 @@ FileDump.prototype.dumpBuffer = function(sKey, buf, len, cbItem, offDump, nWidth
          * correct load (and exec) addresses.  For now, we're simply inferring that the first address parsed
          * in parseListing() is both the load and exec address.
          */
-        var sAddr = str.toHexWord(this.addrLoad) + (nBase == 8? " /*" + str.toOct(this.addrLoad, 6) + "*/" : "");
+        var sAddr = str.toHexWord(this.addrLoad) + (nBase == 8? "/*" + str.toOct(this.addrLoad, 6) + "*/" : "");
         sDump += this.dumpLine(2, '"load":' + sAddr + ',"exec":' + sAddr + ',');
     }
     sDump += this.dumpLine(2, (sKey? '"' + sKey + '":' : "") + this.sJSONWhitespace + chOpen);
@@ -520,7 +520,7 @@ FileDump.prototype.dumpBuffer = function(sKey, buf, len, cbItem, offDump, nWidth
             if (cbItem > 2) {
                 sLine += v;
             } else {
-                sLine += str.toHexWord(v) + (nBase == 8? " /*" + str.toOct(v & 0xffff, 6) + "*/" : "");
+                sLine += str.toHexWord(v) + (nBase == 8? "/*" + str.toOct(v & 0xffff, 6) + "*/" : "");
             }
         }
         else {

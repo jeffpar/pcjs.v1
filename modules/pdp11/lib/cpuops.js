@@ -884,7 +884,7 @@ PDP11.opCLR = function(opCode)
  */
 PDP11.opCLRB = function(opCode)
 {
-    this.updateAllFlags(this.writeDstByte(opCode, 0));
+    this.updateAllFlags(this.writeDstByte(opCode, 0, PDP11.WRITE.BYTE));
     this.nStepCycles -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
 };
 
@@ -1269,6 +1269,31 @@ PDP11.opMFPI = function(opCode)
     this.nStepCycles -= (10 + 1);
 };
 
+/**
+ * opMFPT(opCode)
+ *
+ *      000007  MFPT - Move From Processor Type
+ *
+ *      Loads R0 with a value indicating the processor type.
+ *
+ *      R0  Hardware
+ *       1  PDP-11/44
+ *       3  PDP-11/24 (should be 2)
+ *       3  PDP-11/23
+ *       4  SBC-11/21
+ *       5  All J11 chips including 11/73, 11/83, 11/93
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} opCode
+ */
+PDP11.opMFPT = function(opCode)
+{
+    /*
+     * TODO: Review
+     */
+    this.trap(PDP11.TRAP.RESERVED, PDP11.REASON.RESERVED);
+};
+
 PDP11.MOV_CYCLES = [
     2 + 1, 8 + 1, 8 + 1, 11 + 2, 9 + 1, 12 + 2, 10 + 2, 13 + 3,
     3 + 1, 8 + 1, 8 + 1, 11 + 2, 9 + 1, 12 + 2, 11 + 2, 14 + 3
@@ -1301,7 +1326,7 @@ PDP11.opMOV = function(opCode)
 PDP11.opMOVB = function(opCode)
 {
     var data = this.readSrcByte(opCode);
-    this.updateNZVFlags(this.writeDstByte(opCode, data, PDP11.WRITE.SIGNEXT) << 8);
+    this.updateNZVFlags(this.writeDstByte(opCode, data, PDP11.WRITE.SBYTE) << 8);
     this.nStepCycles -= (this.dstMode? (8 + 1) + (this.srcReg && this.dstReg >= 6? 1 : 0) : (this.srcMode? (3 + 2) : (2 + 1)) + (this.dstReg == 7? 2 : 0));
 };
 
@@ -1411,11 +1436,10 @@ PDP11.opNOP = function(opCode)
 PDP11.opRESET = function(opCode)
 {
     if (!(this.regPSW & PDP11.PSW.CMODE)) {
-        this.resetRegs();
         this.bus.reset();
-        // display.data = this.regsGen[0];  // TODO: Review
+        this.resetRegs();
     }
-    this.nStepCycles -= 667;                // TODO: Review (but it's definitely a big number)
+    this.nStepCycles -= 667;            // TODO: Review (but it's definitely a big number)
 };
 
 /**
@@ -1755,13 +1779,13 @@ PDP11.opWAIT = function(opCode)
      * NOTE: It's almost always a bad idea to add more checks to the inner stepCPU() loop, because every additional
      * check can have a measurable (negative) impact on performance.  Which is why it's important to use opFlags bits
      * whenever possible, since we can test for multiple (up to 32) exceptional conditions with a single check.
+     *
+     * Finally, we used to update the machine's displays whenever transitioning to the WAIT state.  However,
+     * it makes more sense to decouple display updates from specific instructions and rely on timers instead;
+     * the PDP-11 KW11 (60Hz Line Clock) timer is the perfect candidate.  See device.js.
+     *
+     *      if (!(this.opFlags & PDP11.OPFLAG.WAIT) && this.cmp) this.cmp.updateDisplays();
      */
-    if (!(this.opFlags & PDP11.OPFLAG.WAIT)) {
-        /*
-         * Since here we're actually transitioning to WAIT, let's update the Panel's LEDs (well, OK, among other things).
-         */
-        this.cmp.updateStatus();
-    }
     this.opFlags |= PDP11.OPFLAG.WAIT;
     this.advancePC(-2);
     this.nStepCycles -= 3;
@@ -2271,7 +2295,7 @@ PDP11.aOp000X_1145 = [
     PDP11.opIOT,                // 0x0004   000004          11/20+  9.3
     PDP11.opRESET,              // 0x0005   000005          11/20+  20ms
     PDP11.opRTT,                // 0x0006   000006          11/45+
-    PDP11.opUndefined,          // 0x0007
+    PDP11.opMFPT,               // 0x0007   000007          TBD
     PDP11.opUndefined,          // 0x0008
     PDP11.opUndefined,          // 0x0009
     PDP11.opUndefined,          // 0x000A

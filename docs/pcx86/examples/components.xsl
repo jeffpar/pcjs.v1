@@ -14,11 +14,11 @@
 	<xsl:variable name="CSSCLASS">pcjs</xsl:variable>
 	<xsl:variable name="APPCLASS">pcx86</xsl:variable>
 	<xsl:variable name="APPNAME">PCx86</xsl:variable>
-	<xsl:variable name="APPVERSION">1.30.2</xsl:variable>
+	<xsl:variable name="APPVERSION">1.30.3</xsl:variable>
 	<xsl:variable name="SITEHOST">www.pcjs.org</xsl:variable>
 
 	<xsl:template name="componentStyles">
-		<link rel="stylesheet" type="text/css" href="/versions/pcx86/1.30.2/components.css"/>
+		<link rel="stylesheet" type="text/css" href="/versions/pcx86/1.30.3/components.css"/>
 	</xsl:template>
 
 	<xsl:template name="componentScripts">
@@ -421,7 +421,10 @@
 					</form>
 				</xsl:when>
 				<xsl:when test="@type = 'led' or @type = 'rled'">
-					<div class="{$APPCLASS}-binding {$CSSCLASS}-{@type}" data-value="{{{$type},{$binding}}}" style="display:inline-block;"><xsl:value-of select="."/></div>
+					<div class="{$APPCLASS}-binding {$CSSCLASS}-{@type}" data-value="{{{$type},{$binding},{$value}}}" style="display:inline-block;"><xsl:value-of select="."/></div>
+				</xsl:when>
+				<xsl:when test="@type = 'switch'">
+					<div class="{$APPCLASS}-binding {$CSSCLASS}-{@type}" data-value="{{{$type},{$binding},{$value}}}" style="display:inline-block;"><xsl:value-of select="."/></div>
 				</xsl:when>
 				<xsl:when test="@type = 'progress'">
 					<div class="{$APPCLASS}-binding {$CSSCLASS}-{@type}" style="-webkit-user-select:none;{$border}{$width}{$height}{$fontsize}{$style}" data-value="{{{$type},{$binding},{$value}}}">
