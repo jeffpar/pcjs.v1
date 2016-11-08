@@ -836,9 +836,7 @@ PanelPDP11.prototype.advanceAddr = function()
     var inc = fGenRegs? 1 : 2;
     var mask = fGenRegs? 0xf : this.bus.nBusMask;
     if (!this.getSwitch(PanelPDP11.SWITCH.STEP)) inc = -inc;
-    this.regAddr = (this.regAddr & ~mask) | ((this.regAddr + inc) & mask);
-    this.setLEDArray("A", this.regAddr, 22);
-    return this.regAddr;
+    return this.setAddr((this.regAddr & ~mask) | ((this.regAddr + inc) & mask));
 };
 
 /**
@@ -943,7 +941,9 @@ PanelPDP11.prototype.stop = function(ms, nCycles)
 PanelPDP11.prototype.updateDisplay = function(nUpdate)
 {
     if (this.cLiveRegs) {
-        if (nUpdate < 0 || !this.cpu.isRunning() || this.fDisplayLiveRegs) {
+        var fRunning = this.cpu.isRunning();
+        if (nUpdate < 0 || !fRunning || this.fDisplayLiveRegs) {
+
             /*
              * We arbitrarily separate the display elements into two categories: cheap and expensive.
              *
@@ -963,8 +963,12 @@ PanelPDP11.prototype.updateDisplay = function(nUpdate)
                 this.nPeriodicCount = 0;
             }
 
-            this.setLEDArray("D", this.regData, 16);
-            this.setLEDArray("A", this.regAddr, 22);
+            /*
+             * Update the ADDRESS and DATA LEDs by setting their values, which may or may not have changed....
+             */
+            this.setAddr(nUpdate > 0 && fRunning? this.cpu.getPC() : this.regAddr);
+            this.setData(this.regData);
+
             /*
              * Set bit to 1 (22-bit), 2 (18-bit), or 4 (16-bit)
              */

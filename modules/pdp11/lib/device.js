@@ -122,7 +122,7 @@ DevicePDP11.prototype.initBus = function(cmp, bus, cpu, dbg)
 
     var device = this;
     this.kw11.timer = cpu.addTimer(function() {
-        device.kw11_interrupt();
+        device.interruptKW11();
     });
 
     this.kw11.trigger = cpu.addTrigger(PDP11.KW11.VEC, PDP11.KW11.PRI);
@@ -141,21 +141,28 @@ DevicePDP11.prototype.initBus = function(cmp, bus, cpu, dbg)
 DevicePDP11.prototype.reset = function()
 {
     this.kw11.lks = 0;
+    this.cpu.setTimer(this.kw11.timer, 1000/60, true);
 };
 
 /**
- * kw11_interrupt()
+ * interruptKW11()
+ *
+ * We used to call this function only when the the KW11's "Interrupt Enable" bit was set,
+ * but now we call it at 60Hz regardless.  In part, this was so we could piggy-back on
+ * it to drive display updates, but more importantly, the KW11's "Monitor" bit is supposed
+ * to be set at the "line frequency" independent of whether KW11 interrupts are enabled.
+ * So we should actually be more compatible now.
  *
  * @this {DevicePDP11}
  */
-DevicePDP11.prototype.kw11_interrupt = function()
+DevicePDP11.prototype.interruptKW11 = function()
 {
     this.kw11.lks |= PDP11.KW11.LKS.MON;
     if (this.kw11.lks & PDP11.KW11.LKS.IE) {
         this.cpu.setTrigger(this.kw11.trigger);
-        this.cpu.setTimer(this.kw11.timer, 1000/60);
     }
     if (this.cmp) this.cmp.updateDisplays(1);
+    this.cpu.setTimer(this.kw11.timer, 1000/60);
 };
 
 /**
@@ -181,10 +188,6 @@ DevicePDP11.prototype.readLKS = function(addr)
  */
 DevicePDP11.prototype.writeLKS = function(data, addr)
 {
-    this.kw11.lks = data;
-    if (data & PDP11.KW11.LKS.IE) {
-        this.cpu.setTimer(this.kw11.timer, 1000/60);
-    }
     this.kw11.lks = data & ~PDP11.KW11.LKS.MON;
 };
 
