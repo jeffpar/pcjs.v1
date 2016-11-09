@@ -7,7 +7,7 @@ permalink: /disks/dec/rl02k/xxdp/
 DEC RL02K Disk Images: XXDP+
 ----------------------------
 
-To boot the "XXDP+ Diagnostics" disk, start a [PDP-11/70](devices/pdp11/machine/1170/panel/debugger/) machine and then select
+To boot the "XXDP+ Diagnostics" disk, start a [PDP-11/70](devices/pdp11/machine/1170/panel/debugger/) and select
 the "XXDP+ Diagnostics" disk from the "Disk Drive Controls", click "Load", and wait for the message:
 
 	Mounted disk "XXDP+ Diagnostics" in drive RL0
