@@ -190,6 +190,7 @@ var PDP11 = {
      */
     OPCODE: {
         HALT:       0x0000,
+        WAIT:       0x0001,
         INVALID:    0xFFFF      // far from the only invalid opcode, just a KNOWN invalid opcode
     },
     /*

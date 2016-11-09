@@ -1756,7 +1756,7 @@ PDP11.opWAIT = function(opCode)
     /*
      * The original PDP-11 emulation code would actually stop emulating instructions now, relying on assorted
      * setTimeout() callbacks, setInterval() callbacks, device XHR (XMLHttpRequest) callbacks, etc, to eventually
-     * call interrupt(), which would then transition the CPU of its "wait" state and kickstart emulate() again.
+     * call interrupt(), which would then transition the CPU out of its "wait" state and kickstart emulate() again.
      *
      * That approach isn't compatible with PCjs emulators, which prefer to rely on the simulated CPU clock to
      * drive all simulated device updates.  This means components should call the CPU's setTimer() function, which
@@ -1780,21 +1780,21 @@ PDP11.opWAIT = function(opCode)
      * check can have a measurable (negative) impact on performance.  Which is why it's important to use opFlags bits
      * whenever possible, since we can test for multiple (up to 32) exceptional conditions with a single check.
      *
-     * Finally, we used to update the machine's displays whenever transitioning to the WAIT state.  However,
-     * it makes more sense to decouple display updates from specific instructions and rely on timers instead;
-     * the PDP-11 KW11 (60Hz Line Clock) timer is the perfect candidate.  See device.js.
+     * We also used to update the machine's display(s) whenever transitioning to the WAIT state.  However, that
+     * caused this instruction to generate enormous overhead, and it's no longer necessary, since we now rely on
+     * a timer (the PDP-11's own KW11 60Hz Line Clock timer, to be precise) to generate periodic display updates.
      *
      *      if (!(this.opFlags & PDP11.OPFLAG.WAIT) && this.cmp) this.cmp.updateDisplays();
      *
-     * However, that being said, it's been reported that the WAIT instruction puts the contents of R0 into the
-     * Front Panel's "DATA PATH".  However, I can't find any supporting documentation of that.  Another explanation
-     * would be that the data path is being updated constantly, and that when R0 is the last register to be updated
-     * before a WAIT instruction, it simply predominates the data being displayed.
-     *
-     * But for now, we'll go with popular lore and propagate R0 to the Panel's "DATA PATH" setting.
+     * Finally, it's been noted several places online that the WAIT instruction puts the contents of R0 into the
+     * Front Panel's "DATA PATH" (and possibly even directly into the "DISPLAY REGISTER", making the DATASEL switch
+     * setting irrelevant).  I can't find any supporting DEC documentation regarding this, but for now, we'll go
+     * with popular lore and propagate R0 to the panel's "active" data register.
      */
-    if (this.panel) this.panel.setDataPath(this.regsGen[0]);
-
+    if (this.panel) {
+        this.panel.setAddr(this.regsGen[7], true);
+        this.panel.setData(this.regsGen[0], true);
+    }
     this.opFlags |= PDP11.OPFLAG.WAIT;
     this.advancePC(-2);
     this.nStepCycles -= 3;
