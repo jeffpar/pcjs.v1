@@ -1,13 +1,13 @@
 ---
 layout: page
-title: PDP-11 Boot Images
+title: PDP-11 Boot Software
 permalink: /apps/pdp11/boot/
 ---
 
-PDP-11 Boot Images
-------------------
+PDP-11 Boot Software
+--------------------
 
-The project contains the following PDP-11 boot images:
+The project contains the following PDP-11 boot code:
 
 * [PDP-11 Boot Monitor](monitor/)
 * [DEC PDP-11 Bootstrap Loader](bootstrap/)

@@ -65,17 +65,19 @@ function PanelPDP11(parmsPanel)
     this.fDisplayLiveRegs = true;
 
     /*
-     * regSwitches contains the Front Panel (aka Console) 'SWITCH' register, which is also available
-     * as a read-only register at 177570 (but only the low 16 bits).
+     * regSwitches contains the Front Panel (aka Console) SWITCH register, which is also available
+     * as a read-only register at 177570 (but only the low 16 bits).  regDisplay contains the DISPLAY
+     * register, a write-only register at the same address.
      *
-     * regAddr is an internal register containing the contents of the Front Panel's 'ADDRESS' display,
-     * and regData corresponds to the 'DATA' display.  They are updated by setAddr() and setData(),
-     * which in turn take care of calling setLEDArray().
+     * regAddr is an internal register containing the contents of the Front Panel's ADDRESS display,
+     * and regData corresponds to the DATA display.  They are updated by updateAddr() and updateData(),
+     * which in turn take care of calling updateLEDArray().
      *
      * The state of ALL switches is maintained in this.switches, and likewise all LED states are
      * maintained in this.leds, but for convenience, we also mirror some of those states in dedicated
-     * variables (eg, regSwitches for the 'SWITCH' register, fLEDTest for the 'TEST' switch, etc).
+     * variables (eg, regSwitches for the SWITCH register, fLEDTest for the 'TEST' switch, etc).
      */
+    this.regDisplay = 0;
     this.regSwitches = 0;
     this.regAddr = this.regData = 0;
 
@@ -84,8 +86,8 @@ function PanelPDP11(parmsPanel)
      * settings on a real Front Panel that we don't support (eg, stepping one cycle vs. one instruction).
      *
      * While my initial intent is to eventually support all the ADDRSEL switch settings, I probably
-     * won't bother with any DATASEL switch settings; instead, I will automatically display the data
-     * register (regData) [the equivalent of selecting 'DISPLAY REGISTER'] except when data is being
+     * won't bother with any DATASEL switch settings; instead, I will automatically display the DISPLAY
+     * register (regDisplay) [the equivalent of selecting 'DISPLAY REGISTER'] except when data is being
      * examined or deposited [the equivalent of selecting 'DATA PATHS'].
      */
     this.fLEDTest = false;              // LED (lamp) test in progress
@@ -115,8 +117,8 @@ function PanelPDP11(parmsPanel)
      * initBus() will call displaySwitches() to ensure that every switch is the position represented below.
      *
      * NOTE: Not all switches have the same "process" criteria.  For example, 'TEST' will perform a LED test
-     * when it is momentarily pressed "up", whereas 'LOAD [ADRS]' will load the 'ADDRESS' register from the
-     * 'SWITCH' register when it is momentarily pressed "down".
+     * when it is momentarily pressed "up", whereas 'LOAD [ADRS]' will load the ADDRESS register from the
+     * SWITCH register when it is momentarily pressed "down".
      *
      * This means that processLEDTest(value) must act when value == 1 ("up"), whereas processLoadAddr(value)
      * must act when value == 0 ("down").  You can infer all this from the table below, because the initial value
@@ -219,7 +221,7 @@ PanelPDP11.prototype.getSwitch = function(name)
 PanelPDP11.prototype.reset = function()
 {
     /*
-     * Simulate a call to our stop() handler, to update the panel's 'ADDRESS' register with the current PC.
+     * Simulate a call to our stop() handler, to update the panel's ADDRESS register with the current PC.
      */
     this.stop();
 };
@@ -592,7 +594,7 @@ PanelPDP11.prototype.processStart = function(value, index)
  *
  * However, since we can't currently support cycle-stepping, I've decided to innovate a little and
  * change the meaning of this switch: the normal ("up") position means that successive 'EXAM' and 'DEP'
- * operations will first add 2 to the 'ADDRESS' register, while the opposite ("down") position means
+ * operations will first add 2 to the ADDRESS register, while the opposite ("down") position means
  * they will first subtract 2.
  *
  * See processLEDTest() for more of these exciting "innovations".  ;-)
@@ -681,7 +683,7 @@ PanelPDP11.prototype.processContinue = function(value, index)
             }
 
             /*
-             * Simulate a call to our stop() handler, to update the panel's 'ADDRESS' register with the new PC.
+             * Simulate a call to our stop() handler, to update the panel's ADDRESS register with the new PC.
              */
             this.stop();
 
@@ -690,7 +692,7 @@ PanelPDP11.prototype.processContinue = function(value, index)
              * ALL updateDisplay() handlers will be called, including ours.
              *
              * NOTE: If we used the Debugger's stepCPU() function, then that includes a call to updateDisplay();
-             * unfortunately, it will have happened BEFORE we called stop() to update the 'ADDRESS' register, so
+             * unfortunately, it will have happened BEFORE we called stop() to update the ADDRESS register, so
              * we still need to call it again.
              */
             if (this.cmp) this.cmp.updateDisplays();
@@ -712,7 +714,7 @@ PanelPDP11.prototype.processDeposit = function(value, index)
 {
     if (value && !this.cpu.isRunning()) {
         if (this.fDeposit) this.advanceAddr();
-        var w = this.setData(this.regSwitches);
+        var w = this.updateData(this.regSwitches);
         if (this.nAddrSel == PanelPDP11.ADDRSEL.CONS_PHY) {
             this.bus.setWordDirect(this.regAddr, w);
         } else {
@@ -744,7 +746,7 @@ PanelPDP11.prototype.processExamine = function(value, index)
              */
             w = this.cpu.getWordDirect(this.regAddr);
         }
-        this.setData(w);
+        this.updateData(w);
     }
 };
 
@@ -758,7 +760,7 @@ PanelPDP11.prototype.processExamine = function(value, index)
 PanelPDP11.prototype.processLoadAddr = function(value, index)
 {
     if (!value && !this.cpu.isRunning()) {
-        this.setAddr(this.regSwitches);
+        this.updateAddr(this.regSwitches);
     }
 };
 
@@ -801,20 +803,6 @@ PanelPDP11.prototype.processSwitchReg = function(value, index)
 };
 
 /**
- * setAddr(value)
- *
- * @this {PanelPDP11}
- * @param {number} value
- * @return {number}
- */
-PanelPDP11.prototype.setAddr = function(value)
-{
-    this.regAddr = value & this.bus.nBusMask;
-    this.setLEDArray("A", this.regAddr, 22);
-    return this.regAddr;
-};
-
-/**
  * advanceAddr()
  *
  * This should also take care of the following Front Panel behaviors when the accessing the general-purpose
@@ -836,50 +824,46 @@ PanelPDP11.prototype.advanceAddr = function()
     var inc = fGenRegs? 1 : 2;
     var mask = fGenRegs? 0xf : this.bus.nBusMask;
     if (!this.getSwitch(PanelPDP11.SWITCH.STEP)) inc = -inc;
-    return this.setAddr((this.regAddr & ~mask) | ((this.regAddr + inc) & mask));
+    return this.updateAddr((this.regAddr & ~mask) | ((this.regAddr + inc) & mask));
 };
 
 /**
- * setData(value)
+ * updateAddr(value)
  *
  * @this {PanelPDP11}
  * @param {number} value
  * @return {number}
  */
-PanelPDP11.prototype.setData = function(value)
+PanelPDP11.prototype.updateAddr = function(value)
+{
+    this.regAddr = value & this.bus.nBusMask;
+    this.updateLEDArray("A", this.regAddr, 22);
+    return this.regAddr;
+};
+
+/**
+ * updateData(value)
+ *
+ * @this {PanelPDP11}
+ * @param {number} value
+ * @return {number}
+ */
+PanelPDP11.prototype.updateData = function(value)
 {
     this.regData = value & 0xffff;
-    this.setLEDArray("D", this.regData, 16);
+    this.updateLEDArray("D", this.regData, 16);
     return this.regData;
 };
 
 /**
- * setDataPath(value)
- *
- * This interface is for refreshing the Front Panel's "DATA PATH" display, which technically,
- * is separate from the "DISPLAY REGISTER" (regData).  However, our Front Panel doesn't currently
- * provide a toggle between "DISPLAY REGISTER" and "DATA PATH" views, so we use the same variable
- * for both.
- *
- * Because this is a potentially high-frequency function, we do NOT update the LED array here.
- *
- * @this {PanelPDP11}
- * @param {number} value
- */
-PanelPDP11.prototype.setDataPath = function(value)
-{
-    this.regData = value;
-};
-
-/**
- * setLED(sBinding, value)
+ * updateLED(sBinding, value)
  *
  * @this {PanelPDP11}
  * @param {string} sBinding
  * @param {number} value
  * @return {number}
  */
-PanelPDP11.prototype.setLED = function(sBinding, value)
+PanelPDP11.prototype.updateLED = function(sBinding, value)
 {
     this.leds[sBinding] = value;
     if (!this.fLEDTest) this.displayLED(sBinding, value);
@@ -887,18 +871,18 @@ PanelPDP11.prototype.setLED = function(sBinding, value)
 };
 
 /**
- * setLEDArray(sPrefix, value, nLEDs)
+ * updateLEDArray(sPrefix, value, nLEDs)
  *
  * @this {PanelPDP11}
  * @param {string} sPrefix
  * @param {number} value
  * @param {number} nLEDs
  */
-PanelPDP11.prototype.setLEDArray = function(sPrefix, value, nLEDs)
+PanelPDP11.prototype.updateLEDArray = function(sPrefix, value, nLEDs)
 {
     for (var i = 0; i < nLEDs; i++) {
         var sBinding = sPrefix + i;
-        this.setLED(sBinding, value & (1 << i));
+        this.updateLED(sBinding, value & (1 << i));
     }
 };
 
@@ -941,11 +925,41 @@ PanelPDP11.prototype.setSwitches = function(value)
  */
 PanelPDP11.prototype.stop = function(ms, nCycles)
 {
-    this.setAddr(this.cpu.regsGen[7]);
-    /*
-     * TODO: Consider an option to call setData() with the current opcode as well; presumably that wouldn't be
-     * normal Front Panel behavior, but it could be useful for debugging.
-     */
+    this.updateAddr(this.cpu.regsGen[7]);
+};
+
+/**
+ * setAddr(value, fActive)
+ *
+ * This interface is for passing new addresses to the Front Panel.  However, whether or not this will become the
+ * ADDRESS actually displayed will depend on other settings (see updateStatus() for details).
+ *
+ * @this {PanelPDP11}
+ * @param {number} value
+ * @param {boolean} [fActive] (true if this should become the "active" ADDRESS regardless of other settings)
+ */
+PanelPDP11.prototype.setAddr = function(value, fActive)
+{
+    this.regAddr = value;
+};
+
+/**
+ * setData(value, fActive)
+ *
+ * This interface is for passing new data to the Front Panel.  However, whether or not this will become the
+ * DATA actually displayed will depend on the Front Panel's DATASEL switch setting, as well as the fActive flag.
+ *
+ * @this {PanelPDP11}
+ * @param {number} value
+ * @param {boolean} [fActive] (true if this should become the "active" DATA regardless of the DATASEL switch setting)
+ */
+PanelPDP11.prototype.setData = function(value, fActive)
+{
+    if (!fActive) {
+        this.regData = value;
+    } else {
+        this.regDisplay = value;
+    }
 };
 
 /**
@@ -959,7 +973,10 @@ PanelPDP11.prototype.stop = function(ms, nCycles)
 PanelPDP11.prototype.updateDisplay = function(nUpdate)
 {
     if (this.cLiveRegs) {
+
         var fRunning = this.cpu.isRunning();
+        var fWaiting = this.cpu.isWaiting();
+
         if (nUpdate < 0 || !fRunning || this.fDisplayLiveRegs) {
 
             /*
@@ -982,18 +999,21 @@ PanelPDP11.prototype.updateDisplay = function(nUpdate)
             }
 
             /*
-             * Update the ADDRESS and DATA LEDs by setting their values, which may or may not have changed....
+             * Update the ADDRESS and DATA LEDs by selecting the appropriate values
+             *
+             * TODO: There is currently no mechanism for selecting regData over regDisplay;
+             * we are acting as if the DATASEL switch setting is locked to "DISPLAY REGISTER".
              */
-            this.setAddr(nUpdate > 0 && fRunning? this.cpu.getPC() : this.regAddr);
-            this.setData(this.regData);
+            this.updateAddr(nUpdate > 0 && fRunning && !fWaiting? this.cpu.getPC() : this.regAddr);
+            this.updateData(this.regDisplay);
 
             /*
              * Set bit to 1 (22-bit), 2 (18-bit), or 4 (16-bit)
              */
             var bit = this.cpu.mmuEnable? ((this.cpu.regMMR3 & PDP11.MMR3.MMU_22BIT)? 1 : 2) : 4;
-            this.setLED(PanelPDP11.LED.B22, bit & 1);
-            this.setLED(PanelPDP11.LED.B18, bit & 2);
-            this.setLED(PanelPDP11.LED.B16, bit & 4);
+            this.updateLED(PanelPDP11.LED.B22, bit & 1);
+            this.updateLED(PanelPDP11.LED.B18, bit & 2);
+            this.updateLED(PanelPDP11.LED.B16, bit & 4);
         }
     }
 };
@@ -1001,8 +1021,9 @@ PanelPDP11.prototype.updateDisplay = function(nUpdate)
 /**
  * readCNSW(addr)
  *
- * If addr is set, then this a normal read, so we should return normal results (ie, SWITCH register);
- * if addr is NOT set, then this is a read-before-write, so we must return the DISPLAY register value.
+ * If addr is set, then this a normal read, so we should return the SWITCH register (ie, regSwitches).
+ *
+ * if addr is NOT set, then this is a read-before-write, so we must return the DISPLAY register (ie, regDisplay).
  *
  * @this {PanelPDP11}
  * @param {number} addr (eg, PDP11.UNIBUS.CNSW or 177570)
@@ -1010,14 +1031,13 @@ PanelPDP11.prototype.updateDisplay = function(nUpdate)
  */
 PanelPDP11.prototype.readCNSW = function(addr)
 {
-    return (addr? this.regSwitches : this.regData) & 0xffff;
+    return (addr? this.regSwitches : this.regDisplay) & 0xffff;
 };
 
 /**
  * writeCNSW(value, addr)
  *
- * Handler for DISPLAY register writes.  Because this is a potentially high-frequency function,
- * we do NOT update the LED array here.
+ * Handles writes to the DISPLAY register (ie, regDisplay).
  *
  * @this {PanelPDP11}
  * @param {number} value
@@ -1025,7 +1045,7 @@ PanelPDP11.prototype.readCNSW = function(addr)
  */
 PanelPDP11.prototype.writeCNSW = function(value, addr)
 {
-    this.regData = value;
+    this.regDisplay = value;
 };
 
 PanelPDP11.UNIBUS_IOTABLE = {

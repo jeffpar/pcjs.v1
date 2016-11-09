@@ -832,6 +832,17 @@ CPUStatePDP11.prototype.dispatchInterrupt = function(vector, priority)
 };
 
 /**
+ * isWaiting()
+ *
+ * @this {CPUStatePDP11}
+ * @return {boolean} (true if OPFLAG.WAIT is set, false otherwise)
+ */
+CPUStatePDP11.prototype.isWaiting = function()
+{
+    return !!(this.opFlags & PDP11.OPFLAG.WAIT);
+};
+
+/**
  * getPSW()
  *
  * @this {CPUStatePDP11}
