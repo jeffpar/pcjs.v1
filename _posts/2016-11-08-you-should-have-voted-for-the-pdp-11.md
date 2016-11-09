@@ -30,7 +30,7 @@ The latest release, v1.30.3, adds the following features:
 To test RL11 support below, then select the "XXDP+ Diagnostics" disk from the "Disk Drive Controls",
 click "Load", and wait for the message:
 
-	Mounted disk "XXDP Diagnostics" in drive RL0
+	Mounted disk "XXDP+ Diagnostics" in drive RL0
 
 Then start the machine (click "Run") and make sure the following prompt has been displayed:
 
