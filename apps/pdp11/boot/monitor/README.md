@@ -35,7 +35,7 @@ The **BOOTMON.mac** source code is shown below.
 	
 	        .ASECT
 	        .=140000
-	START:  RESET                           ; 140000
+	START:  RESET
 	        CLR     @#PSW
 	        MOV     #START,SP
 	        CLR     @#DL11XCSR              ; CLEAR THE XCSR
@@ -62,19 +62,19 @@ The **BOOTMON.mac** source code is shown below.
 	LGHTON: .WORD 0
 	CLKTIC: .WORD 0
 	
-	CLKAST:                                 ; 140124
+	CLKAST:
 	        INC     CLKTIC
 	        RTI
 	
 	ONECHR:
-	        TSTB    @#DL11XCSR              ; 140132
+	        TSTB    @#DL11XCSR
 	        BPL     ONECHR
 	        MOVB    R0,@#177566
 	        RTS     PC
 	
-	PRTPTR: .WORD 0                         ; 140146
+	PRTPTR: .WORD 0
 	
-	PRINT:                                  ; 140150
+	PRINT:
 	        BITB    #100,@#DL11XCSR
 	        BNE     PRINT
 	        MOV     R0,PRTPTR
@@ -83,7 +83,7 @@ The **BOOTMON.mac** source code is shown below.
 	        BISB    #100,@#DL11XCSR
 	        RTS     PC
 	
-	PRTAST:                                 ; 140210
+	PRTAST:
 	        TSTB    @PRTPTR
 	        BEQ     2$
 	        MOVB    @PRTPTR,@#177566
@@ -96,14 +96,14 @@ The **BOOTMON.mac** source code is shown below.
 	LENGTH: .WORD   0                       ; INPUT BUFFER LENGTH
 	
 	INPUT:
-	        MOV     R0,BUFFER               ; 140244
+	        MOV     R0,BUFFER
 	        CLR     LENGTH
 	        MOV     #INPAST,@#60
 	        MOV     #200,@#62
 	        BISB    #100,@#177560
 	        RTS     PC
 	
-	INPAST:                                 ; 140300
+	INPAST:
 	        MOV     R0,-(SP)
 	        MOVB    @#177562,R0
 	        CMPB    R0,#15
@@ -146,7 +146,7 @@ The **BOOTMON.mac** source code is shown below.
 	9$:     MOV     (SP)+,R0
 	        RTI
 	
-	CMD:                                    ; 140506
+	CMD:
 	        CLR     @#177772                ; NO MORE PIR CALLS
 	        MOV     R0,-(SP)
 	        MOV     R1,-(SP)
@@ -209,25 +209,25 @@ The **BOOTMON.mac** source code is shown below.
 	        .BYTE   0
 	UNKMSG: .ASCIZ  'UNKNOWN COMMAND'<12><15>
 	BANNER: .ASCIZ  'PDP-11 MONITOR V1.0'<12><15><12><15>
-	;        'ADAPTED FROM CODE BY PAUL NANKERVIS <PAULNANK@HOTMAIL.COM>'<12><15><12><15>
+	;               'ADAPTED FROM CODE BY PAUL NANKERVIS <PAULNANK@HOTMAIL.COM>'<12><15><12><15>
 	PROMPT: .ASCIZ  'BOOT> '
 	BADBOO: .ASCIZ  'UNKNOWN BOOT DEVICE'<12><15>
 	PERMSG: .ASCIZ  '      CLOCK TICKS'<12><15>
 	
 	        .EVEN
 	
-	HELP:                                   ; 141244
+	HELP:
 	        MOV     #HLPMSG,R0
 	        JSR     PC,PRINT
 	        RTS     PC
 	
-	HALT:                                   ; 141260
+	HALT:
 	        HALT
 	        MOV     #EOL,R0
 	        JSR     PC,PRINT
 	        RTS     PC
 	
-	TEST:                                   ; 141272
+	TEST:
 	        CLR     CLKTIC
 	
 	        MOV     #15000,R5
@@ -249,7 +249,7 @@ The **BOOTMON.mac** source code is shown below.
 	        MOV     #PERMSG+5,R0
 	        MOV     CLKTIC,R3
 	
-	25$:    CLR     R2                      ; 141350
+	25$:    CLR     R2
 	        DIV     #10,R2
 	        ADD     #'0,R3
 	        MOVB    R3,-(R0)
@@ -265,7 +265,7 @@ The **BOOTMON.mac** source code is shown below.
 	MMR2=177576
 	MMR3=172516
 	
-	LIGHTS:                                 ; 141376
+	LIGHTS:
 	        MOV     #77406,R3               ; DEFAULT PDR
 	        CLR     R2
 	        CLR     R1
@@ -309,7 +309,7 @@ The **BOOTMON.mac** source code is shown below.
 	; TO BE COPIED TO SUPER #40200 AT PHYSICAL #170000
 	; #40000 TO #40200 FOR WAIT & JMP INSTRUCTIONS
 	;
-	SUPERS:                                 ; 141616
+	SUPERS:
 	        MOV     #37,R0                  ; LOAD PATTERN
 	        MOV     #174000,R1
 	        BIT     #1,@#177570
@@ -365,7 +365,7 @@ The **BOOTMON.mac** source code is shown below.
 	        BR      10$
 	SUPERE:
 	
-	BOOT:                                   ; 142062
+	BOOT:
 	        CLR     R3                      ; UNIT
 	1$:     MOVB    (R2)+,R1
 	        BEQ     BOOTRK                  ; DEFAULT DEVICE IS RK0
@@ -393,9 +393,9 @@ The **BOOTMON.mac** source code is shown below.
 	        BIS     R0,R3                   ; PUT DIGIT INTO UNIT
 	        BR      7$
 	9$:     CLR     R2
-	        MOV     #137,(R2)+
+	        MOV     #137,(R2)+              ; STORE "JMP @#140000" INSTRUCTION AT ADDRESS 0
 	        MOV     #START,(R2)+
-	        MOV     #START,(R2)+
+	        MOV     #START,(R2)+            ; STORE #140000 IN VECTOR 4, IN CASE OF TRAP TO 4
 	        CLR     (R2)+
 	        CMPB    R1,#'K
 	        BEQ     BOOTRK
@@ -409,7 +409,7 @@ The **BOOTMON.mac** source code is shown below.
 	        RTS     PC
 	
 	RLCS=174400
-	BOOTRL:                                 ; 142234
+	BOOTRL:
 	        RESET
 	        SWAB    R3                      ; UNIT NUMBER
 	        MOV     #RLCS,R1                ; CSR
@@ -450,7 +450,7 @@ The **BOOTMON.mac** source code is shown below.
 	RKDA=177412
 	READGO=5
 	BOOTRK:
-	        RESET                           ; 142402
+	        RESET
 	        SWAB    R3                      ; UNIT NUMBER
 	        ASL     R3
 	        ASL     R3
@@ -472,7 +472,7 @@ The **BOOTMON.mac** source code is shown below.
 	        CLR     PC
 	
 	RPCSR=0176700
-	BOOTRP:                                 ; 142460
+	BOOTRP:
 	        RESET
 	        MOV     #RPCSR, R1
 	        MOV     #0000040, 10(R1)        ; RESET
