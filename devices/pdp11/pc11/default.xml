@@ -30,7 +30,19 @@
 			<tape id="tape24" name="DUMPTT SA=XX7440 RA=XX7440" path="/apps/pdp11/tapes/dumptt/DEC-11-Y1PA-PO.json"/>
 			<tape id="tape25" name="DUMPTT SA=XXXXXX RA=XXXXXX" path="/apps/pdp11/tapes/dumptt/DEC-11-Y1PA-PB.json"/>
 			<tape id="tape26" name="DUMPAB SA=XXXXXX RA=XXXXXX" path="/apps/pdp11/tapes/dumpab/DEC-11-Y2PA-PB.json"/>
-			<tape id="tray02.tape04" name="11/70 CPU EXERCISER" path="/apps/pdp11/tapes/misc/MAINDEC-11-DEQKC-B1-PB.json"/>
+			<tape id="diags.tape01" name="MD-11 TEST 1 - BRANCH" path="/apps/pdp11/tapes/diags/MAINDEC-11-D0AA-PB.json"/>
+			<tape id="diags.tape02" name="MD-11 TEST 2 - COND BRANCH" path="/apps/pdp11/tapes/diags/MAINDEC-11-D0BA-PB.json"/>
+			<tape id="diags.tape03" name="MD-11 TEST 3 - UNARY" path="/apps/pdp11/tapes/diags/MAINDEC-11-D0CA-PB.json"/>
+			<tape id="diags.tape04" name="MD-11 TEST 4 - UNARY+BINARY" path="/apps/pdp11/tapes/diags/MAINDEC-11-D0DA-PB.json"/>
+			<tape id="diags.tape05" name="MD-11 TEST 5 - ROTATE+SHIFT" path="/apps/pdp11/tapes/diags/MAINDEC-11-D0EA-PB.json"/>
+			<tape id="diags.tape06" name="MD-11 TEST 6 - COMPARE" path="/apps/pdp11/tapes/diags/MAINDEC-11-D0FA-PB.json"/>
+			<tape id="diags.tape07" name="MD-11 TEST 7 - COMPARE NOT" path="/apps/pdp11/tapes/diags/MAINDEC-11-D0GA-PB.json"/>
+			<tape id="diags.tape08" name="MD-11 TEST 8 - MOVE" path="/apps/pdp11/tapes/diags/MAINDEC-11-D0HA-PB.json"/>
+			<tape id="diags.tape09" name="MD-11 TEST 9 - BIS+BIC+BIT" path="/apps/pdp11/tapes/diags/MAINDEC-11-D0IA-PB.json"/>
+			<tape id="diags.tape10" name="MD-11 TEST 10 - ADD" path="/apps/pdp11/tapes/diags/MAINDEC-11-D0JA-PB.json"/>
+			<tape id="diags.tape11" name="MD-11 TEST 11 - SUBTRACT" path="/apps/pdp11/tapes/diags/MAINDEC-11-D0KA-PB.json"/>
+			<tape id="diags.tape12" name="MD-11 TEST 12 - JUMP" path="/apps/pdp11/tapes/diags/MAINDEC-11-D0LA-PB.json"/>
+			<tape id="tray02.tape04" name="11/70 CPU EXERCISER" path="/apps/pdp11/tapes/diags/MAINDEC-11-DEQKC-B1-PB.json"/>
 		</control>
 		<control type="button" binding="attachTape">Attach</control>
 		<control type="button" binding="loadTape">Load</control>

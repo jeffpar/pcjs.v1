@@ -260,7 +260,7 @@ RAMPDP11.prototype.reset = function()
  * @this {RAMPDP11}
  * @param {Array|Uint8Array} aBytes
  * @param {number|null} [addrLoad]
- * @param {number|null} [addrExec]
+ * @param {number|null} [addrExec] (this CAN override any starting address INSIDE the image)
  * @param {number|null} [addrInit]
  * @param {boolean} [fReset]
  * @return {boolean} (true if loaded, false if not)
@@ -337,7 +337,7 @@ RAMPDP11.prototype.loadImage = function(aBytes, addrLoad, addrExec, addrInit, fR
                 if (addr & 0x1) {
                     this.cpu.stopCPU();
                 } else {
-                    this.cpu.setReset(addr, fReset);
+                    if (addrExec == null) addrExec = addr;
                 }
             } else {
                 while (cbData--) {
@@ -353,9 +353,19 @@ RAMPDP11.prototype.loadImage = function(aBytes, addrLoad, addrExec, addrInit, fR
             for (var i = 0; i < aBytes.length; i++) {
                 this.cpu.setByteDirect(addrLoad + i, aBytes[i]);
             }
-            if (addrExec != null) this.cpu.setReset(addrExec, fReset);
             fLoaded = true;
         }
+    }
+    if (fLoaded) {
+        /*
+         * Set the start address to whatever the caller provided, or failing that, whatever start
+         * address was specified inside the image.
+         *
+         * For example, the diagnostic "MAINDEC-11-D0AA-PB" doesn't include a start address inside
+         * the image, but because we know that the directions for that diagnostic say to "Start and
+         * Restart at 200", we have manually inserted an "exec":128 in the JSON containing the image.
+         */
+        if (addrExec != null) this.cpu.setReset(addrExec, fReset);
     }
     return fLoaded;
 };
