@@ -1400,7 +1400,7 @@ if (DEBUGGER) {
         var trapStatus = this.cpu.getTrapStatus();
         if (trapStatus) {
             var trapReason = trapStatus >> 8;
-            var sReason = trapReason? (" (" + this.toStrBase(trapReason) + ")") : "";
+            var sReason = trapReason? (" (" + trapReason + ")") : "";
             this.println("trapped to " + this.toStrBase(trapStatus & 0xff, 1) + sReason);
         }
 
@@ -1724,8 +1724,11 @@ if (DEBUGGER) {
      */
     DebuggerPDP11.prototype.undefinedInstruction = function(opCode)
     {
-        this.printMessage("undefined opcode " + this.toStrBase(opCode), true, true);
-        return this.stopInstruction();  // allow the caller to step over it if they really want a trap generated
+        if (this.messageEnabled(MessagesPDP11.CPU)) {
+            this.printMessage("undefined opcode " + this.toStrBase(opCode), true, true);
+            return this.stopInstruction();  // allow the caller to step over it if they really want a trap generated
+        }
+        return false;
     };
 
     /**

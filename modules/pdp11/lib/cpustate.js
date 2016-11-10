@@ -825,7 +825,7 @@ CPUStatePDP11.prototype.dispatchInterrupt = function(vector, priority)
             this.advancePC(2);
             this.opFlags &= ~PDP11.OPFLAG.WAIT;
         }
-        this.trap(vector, PDP11.REASON.INTERRUPT);
+        this.trap(vector, 0, PDP11.REASON.INTERRUPT);
         return true;
     }
     return false;
@@ -1083,6 +1083,13 @@ CPUStatePDP11.prototype.updateMulFlags = function(result)
     /*
      * NOTE: Technically, the MUL instruction doesn't need to worry about NO_FLAGS, because that instruction
      * doesn't write to the bus, and therefore can't modify the PSW directly.  But it doesn't hurt to be consistent.
+     *
+     * TODO: Conduct a review of all opcode handlers, because one possible alternative to all this NO_FLAGS nonsense
+     * would be to pass the appropriate flag update function to the writeDstByte()/writeDstWord() functions, and
+     * have them update the flags BEFORE the write occurs, thus allowing any subsequent write to the PSW to be honored.
+     *
+     * That already happens automatically with the updateDstByte()/updateDstWord() functions, since generally the
+     * specified modify function also updates the flags BEFORE the write occurs.
      */
     if (!(this.opFlags & PDP11.OPFLAG.NO_FLAGS)) {
         this.flagN = result >> 16;
@@ -1139,7 +1146,7 @@ CPUStatePDP11.prototype.panic = function(reason)
 };
 
 /**
- * trap(vector, reason)
+ * trap(vector, flag, reason)
  *
  * trap() handles all the trap/abort functions.  It reads the trap vector from kernel
  * D space, changes mode to reflect the new PSW and PC, and then pushes the old PSW and
@@ -1147,9 +1154,10 @@ CPUStatePDP11.prototype.panic = function(reason)
  *
  * @this {CPUStatePDP11}
  * @param {number} vector
+ * @param {number} flag
  * @param {number} [reason] (for diagnostic purposes only)
  */
-CPUStatePDP11.prototype.trap = function(vector, reason)
+CPUStatePDP11.prototype.trap = function(vector, flag, reason)
 {
     if (DEBUG && this.dbg) {
         if (this.messageEnabled(MessagesPDP11.TRAP)) {
@@ -1194,8 +1202,15 @@ CPUStatePDP11.prototype.trap = function(vector, reason)
     this.pushWord(this.regsGen[7]);
     this.setPC(newPC);
 
-    this.opFlags &= ~PDP11.OPFLAG.TRAP_MASK;    // lose interest in traps after an abort
-    this.trapPSW = -1;                          // reset flag that we have a trap within a trap
+    /*
+     * Since DEC's "TRAP TEST" triggers a RESERVED (instruction) trap with the stack deliberately
+     * set too low, and expects the stack overflow trap to be "sprung" immediately afterward, we only
+     * want to "lose interest" in TRAP flags that were set on entry.
+     *
+     *      this.opFlags &= ~PDP11.OPFLAG.TRAP_MASK;    // lose interest in traps after an abort
+     */
+    this.opFlags &= ~flag;
+    this.trapPSW = -1;                                  // reset flag that we have a trap within a trap
 
     /*
      * These next properties are purely an aid for the Debugger; see getTrapStatus()
@@ -1435,7 +1450,7 @@ CPUStatePDP11.prototype.mapVirtualToPhysical = function(virtualAddress, accessFl
             }
         }
         if (fTrap) {                                    // don't trap until the end, because it throws an exception
-            this.trap(PDP11.TRAP.MMU, PDP11.REASON.MAPERROR);
+            this.trap(PDP11.TRAP.MMU, 0, PDP11.REASON.MAPERROR);
         }
     }
     return physicalAddress;
@@ -1494,18 +1509,35 @@ CPUStatePDP11.prototype.pushWord = function(data)
     if (!(this.regMMR0 & 0xe000)) {
         this.regMMR1 = (this.regMMR1 << 8) | 0xf6;
     }
+    this.checkStackLimit(0, virtualAddress);
+    this.writeWord(virtualAddress, data);
+};
 
-    if ((!this.mmuMode) && virtualAddress <= this.regSL && virtualAddress > 4) {
-        if (virtualAddress <= this.regSL - 32) {
-            this.regErr |= PDP11.CPUERR.RED;
-            this.regsGen[6] = 4;
-            this.trap(PDP11.TRAP.BUS_ERROR, PDP11.REASON.PUSHERROR);
-        } else {
-            this.regErr |= PDP11.CPUERR.YELLOW;
-            this.opFlags |= 4;
+/**
+ * checkStackLimit(mode, addr)
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} mode (ie, the addressing mode; 0 if push)
+ * @param {number} addr
+ */
+CPUStatePDP11.prototype.checkStackLimit = function(mode, addr)
+{
+    if (!this.mmuMode && !(this.opFlags & PDP11.OPFLAG.TRAP_SP)) {
+        if (addr <= this.regSL && (mode || addr > 4) || mode && addr >= 0xfffe) {
+            if (this.model >= PDP11.MODEL_1145 && (addr <= this.regSL - 32 || mode == 1 && addr >= 0xfffe)) {
+                this.regErr |= PDP11.CPUERR.RED;
+                this.regsGen[6] = 4;
+                this.trap(PDP11.TRAP.BUS_ERROR, 0, PDP11.REASON.STACKMODE1);
+            } else {
+                /*
+                 * On older machines (eg, the PDP-11/20), the instruction is always allowed to complete,
+                 * so the trap must always be issued in this fashion.
+                 */
+                this.regErr |= PDP11.CPUERR.YELLOW;
+                this.opFlags |= PDP11.OPFLAG.TRAP_SP;
+            }
         }
     }
-    this.writeWord(virtualAddress, data);
 };
 
 /**
@@ -1532,6 +1564,15 @@ CPUStatePDP11.prototype.pushWord = function(data)
  * incremented and decremented so that the OS can reset and restart an instruction
  * if a page fault occurs.
  *
+ * Stack Overflow Traps
+ * --------------------
+ * On the PDP-11/20, stack overflow traps occur when an address below 400 is referenced
+ * by SP in either mode 4 (auto-decrement) or 5 (auto-decrement deferred).  The instruction
+ * is allowed to complete before the trap is issued.
+ *
+ * On the PDP-11/70, the stack limit register (177774) allows a variable boundary for the
+ * kernel stack.
+ *
  * @this {CPUStatePDP11}
  * @param {number} mode
  * @param {number} reg
@@ -1544,8 +1585,8 @@ CPUStatePDP11.prototype.getAddrByMode = function(mode, reg, accessFlags)
     var addrDSpace = (accessFlags & PDP11.ACCESS.VIRT)? 0 : this.addrDSpace;
 
     /*
-     * Modes that need to auto-increment or auto-decrement will break, in order to perform the
-     * update; others will return an address immediately.
+     * Modes that need to auto-increment or auto-decrement will break, in order to perform
+     * the update; others will return an address immediately.
      */
     switch (mode) {
     /*
@@ -1556,26 +1597,18 @@ CPUStatePDP11.prototype.getAddrByMode = function(mode, reg, accessFlags)
      * "cause an 'illegal' instruction" condition", which presumably means a BUS_ERROR trap.
      */
     case 0:
-        this.trap(PDP11.TRAP.BUS_ERROR, PDP11.REASON.NOREGADDR);
+        this.trap(PDP11.TRAP.BUS_ERROR, 0, PDP11.REASON.NOREGADDR);
         return 0;
 
     /*
      * Mode 1: (R)
      */
     case 1:
-        if (reg === 6 && (!this.mmuMode) && (accessFlags & PDP11.ACCESS.WRITE) &&
-            (this.regsGen[6] <= this.regSL || this.regsGen[6] >= 0xfffe)) {
-            if (this.regsGen[6] <= this.regSL - 32 || this.regsGen[6] >= 0xfffe) {
-                this.regErr |= PDP11.CPUERR.RED;
-                this.regsGen[6] = 4;
-                this.trap(PDP11.TRAP.BUS_ERROR, PDP11.REASON.STACKMODE1);
-            } else {
-                this.regErr |= PDP11.CPUERR.YELLOW;
-                this.opFlags |= PDP11.OPFLAG.TRAP_SP;
-            }
+        if (reg == 6 && (accessFlags & PDP11.ACCESS.WRITE)) {
+            this.checkStackLimit(mode, this.regsGen[6]);
         }
         this.nStepCycles -= (2 + 1);
-        return (reg === 7? this.regsGen[reg] : (this.regsGen[reg] | addrDSpace));
+        return (reg == 7? this.regsGen[reg] : (this.regsGen[reg] | addrDSpace));
 
     /*
      * Mode 2: (R)+
@@ -1583,7 +1616,7 @@ CPUStatePDP11.prototype.getAddrByMode = function(mode, reg, accessFlags)
     case 2:
         stepSize = 2;
         virtualAddress = this.regsGen[reg];
-        if (reg !== 7) {
+        if (reg != 7) {
             virtualAddress |= addrDSpace;
             if (reg < 6 && (accessFlags & PDP11.ACCESS.BYTE)) {
                 stepSize = 1;
@@ -1598,7 +1631,7 @@ CPUStatePDP11.prototype.getAddrByMode = function(mode, reg, accessFlags)
     case 3:
         stepSize = 2;
         virtualAddress = this.regsGen[reg];
-        if (reg !== 7) virtualAddress |= addrDSpace;
+        if (reg != 7) virtualAddress |= addrDSpace;
         virtualAddress = this.readWord(virtualAddress);
         virtualAddress |= addrDSpace;
         this.nStepCycles -= (5 + 2);
@@ -1611,7 +1644,7 @@ CPUStatePDP11.prototype.getAddrByMode = function(mode, reg, accessFlags)
         stepSize = -2;
         if (reg < 6 && (accessFlags & PDP11.ACCESS.BYTE)) stepSize = -1;
         virtualAddress = (this.regsGen[reg] + stepSize) & 0xffff;
-        if (reg !== 7) virtualAddress |= addrDSpace;
+        if (reg != 7) virtualAddress |= addrDSpace;
         this.nStepCycles -= (3 + 1);
         break;
 
@@ -1621,7 +1654,7 @@ CPUStatePDP11.prototype.getAddrByMode = function(mode, reg, accessFlags)
     case 5:
         stepSize = -2;
         virtualAddress = (this.regsGen[reg] - 2) & 0xffff;
-        if (reg !== 7) virtualAddress |= addrDSpace;
+        if (reg != 7) virtualAddress |= addrDSpace;
         virtualAddress = this.readWord(virtualAddress) | addrDSpace;
         this.nStepCycles -= (6 + 2);
         break;
@@ -1652,15 +1685,12 @@ CPUStatePDP11.prototype.getAddrByMode = function(mode, reg, accessFlags)
         this.regMMR1 = (this.regMMR1 << 8) | ((stepSize << 3) & 0xf8) | reg;
     }
 
-    if (reg == 6 && (!this.mmuMode) && (accessFlags & PDP11.ACCESS.WRITE) && stepSize <= 0 && (this.regsGen[6] <= this.regSL || this.regsGen[6] >= 0xfffe)) {
-        if (this.regsGen[6] <= this.regSL - 32) {
-            this.regErr |= PDP11.CPUERR.RED;
-            this.regsGen[6] = 4;
-            this.trap(PDP11.TRAP.BUS_ERROR, PDP11.REASON.STACKERROR);
-        } else {
-            this.regErr |= PDP11.CPUERR.YELLOW;
-            this.opFlags |= PDP11.OPFLAG.TRAP_SP;
-        }
+    /*
+     * NOTE: We had to eliminate the test for "(accessFlags & PDP11.ACCESS.WRITE)", because DEC's
+     * "TRAP TEST" expects "TST -(SP)" to trap when SP is 150.
+     */
+    if (reg == 6 && stepSize < 0) {
+        this.checkStackLimit(mode, this.regsGen[6]);
     }
     return virtualAddress;
 };
@@ -2191,23 +2221,23 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
             /*
              * Check for any pending traps.
              *
-             * I've moved this TRAP_MASK check BEFORE we decode the next instruction instead
-             * of immediately AFTER, because the last instruction may have thrown an exception,
-             * kicking us out before we reach the bottom of this loop.
+             * I've moved this TRAP_MASK check BEFORE we decode the next instruction instead of immediately AFTER,
+             * just in case the last instruction threw an exception that kicked us out before we reached the bottom
+             * of the stepCPU() loop.
+             *
+             * Note: I've swapped the order (priority) of the TF and SP traps, based on the PDP-11/20 Handbook.
+             * TODO: Determine if 1) the 11/20 Handbook was wrong, or 2) the 11/70 really has different priorities.
              */
             if (this.opFlags & PDP11.OPFLAG.TRAP_MASK) {
                 if (this.opFlags & PDP11.OPFLAG.TRAP_MMU) {
-                    this.trap(PDP11.TRAP.MMU, PDP11.REASON.TRAPMMU);            // MMU trap has priority
-                } else {
-                    if (this.opFlags & PDP11.OPFLAG.TRAP_SP) {
-                        this.trap(PDP11.TRAP.BUS_ERROR, PDP11.REASON.TRAPSP);   // then SP trap
-                    } else {
-                        if (this.opFlags & PDP11.OPFLAG.TRAP_TF) {
-                            this.trap(PDP11.TRAP.BPT, PDP11.REASON.TRAPTF);     // and finally a TF trap
-                        }
-                    }
+                    this.trap(PDP11.TRAP.MMU, PDP11.OPFLAG.TRAP_MMU, PDP11.REASON.TRAPMMU);
                 }
-                this.opFlags &= ~PDP11.OPFLAG.TRAP_MASK;
+                else if (this.opFlags & PDP11.OPFLAG.TRAP_TF) {
+                    this.trap(PDP11.TRAP.BPT, PDP11.OPFLAG.TRAP_TF, PDP11.REASON.TRAPTF);
+                }
+                else if (this.opFlags & PDP11.OPFLAG.TRAP_SP) {
+                    this.trap(PDP11.TRAP.BUS_ERROR, PDP11.OPFLAG.TRAP_SP, PDP11.REASON.TRAPSP);
+                }
             }
             /*
              * If we're in the INTQ or WAIT state, see if any interrupts can kick us out of that state.

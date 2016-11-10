@@ -1398,7 +1398,7 @@ BusPDP11.prototype.fault = function(addr, err, access)
             this.dbg.printMessage("memory fault (" + access + ") on address " + this.dbg.toStrBase(addr), true, true);
         }
         if (err) this.cpu.regErr |= err;
-        this.cpu.trap(PDP11.TRAP.BUS_ERROR, addr);
+        this.cpu.trap(PDP11.TRAP.BUS_ERROR, 0, addr);
     }
 };
 
