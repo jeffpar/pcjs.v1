@@ -43,8 +43,8 @@ p. 19:
 	
 	ABSTRACT
 	
-	This is a group of 12 tests that incrementally test and isolate simple malfunctions of the PDP-11. The tests
-	should be run in the indicated numerical sequence. The sequence is:
+	This is a group of 12 tests that incrementally test and isolate simple malfunctions of
+	the PDP-11. The tests should be run in the indicated numerical sequence. The sequence is:
 	
 	1. Branch
 	2. Conditional Branch
@@ -75,8 +75,8 @@ p. 19:
 	 
 	SWITCH REGISTER OPTIONS = No
 
-The code for "TEST 1 - BRANCH" is not terribly exciting.  Most of its 8Kb length is filled repeatedly with these
-three instructions:
+The code for "TEST 1 - BRANCH" is not terribly exciting.  Most of its 8Kb length is filled with these
+three repeated instructions:
 
 	000210: 060100                 ADD   R1,R0
 	000212: 000401                 BR    000216

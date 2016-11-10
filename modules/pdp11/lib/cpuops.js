@@ -140,7 +140,7 @@ PDP11.fnASR = function(src, dst)
  */
 PDP11.fnASRB = function(src, dst)
 {
-    var result = (dst & 0x800) | (dst >> 1) | (dst << 8);
+    var result = (dst & 0x80) | (dst >> 1) | (dst << 8);
     this.updateShiftFlags(result << 8);
     return result & 0xff;
 };

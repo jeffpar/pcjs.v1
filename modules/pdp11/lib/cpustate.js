@@ -2016,7 +2016,7 @@ CPUStatePDP11.prototype.updateDstByte = function(opCode, src, fnOp)
     var reg = this.dstReg = opCode & PDP11.OPREG.MASK;
     var mode = this.dstMode = (opCode & PDP11.OPMODE.MASK) >> PDP11.OPMODE.SHIFT;
     if (!mode) {
-        this.regsGen[reg] = (this.regsGen[reg] & 0xff00) | fnOp.call(this, src, this.regsGen[reg]);
+        this.regsGen[reg] = (this.regsGen[reg] & 0xff00) | fnOp.call(this, src, this.regsGen[reg] & 0xff);
     } else {
         var addr = this.dstAddr = this.getAddr(mode, reg, PDP11.ACCESS.UPDATE_BYTE);
         this.writeByteToPhysical(addr, fnOp.call(this, src, this.readByteFromPhysical(addr)));

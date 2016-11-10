@@ -959,9 +959,12 @@ CPUPDP11.prototype.setTimer = function(iTimer, ms, fReset)
              * We must now confront the following problem: if the CPU is currently executing a burst of cycles,
              * the number of cycles it has executed in that burst so far must NOT be charged against the cycle
              * timeout we're about to set.  The simplest way to resolve that is to immediately call endBurst()
-             * and bias the above cycle timeout by the number of cycles that the burst executed.
+             * and bias the cycle timeout by the number of cycles that the burst executed.
              */
-            this.aTimers[iTimer][0] = nCycles + this.endBurst();
+            if (this.flags.running) {
+                nCycles += this.endBurst();
+            }
+            this.aTimers[iTimer][0] = nCycles;
         }
     }
     return nCycles;
@@ -992,6 +995,7 @@ CPUPDP11.prototype.getBurstCycles = function(nCycles)
 {
     for (var i = this.aTimers.length - 1; i >= 0; i--) {
         var timer = this.aTimers[i];
+        this.assert(!isNaN(timer[0]));
         if (timer[0] < 0) continue;
         if (nCycles > timer[0]) {
             nCycles = timer[0];
@@ -1014,6 +1018,7 @@ CPUPDP11.prototype.updateTimers = function(nCycles)
 {
     for (var i = this.aTimers.length - 1; i >= 0; i--) {
         var timer = this.aTimers[i];
+        this.assert(!isNaN(timer[0]));
         if (timer[0] < 0) continue;
         timer[0] -= nCycles;
         if (timer[0] <= 0) {
