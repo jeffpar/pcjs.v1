@@ -1400,7 +1400,7 @@ if (DEBUGGER) {
         var trapStatus = this.cpu.getTrapStatus();
         if (trapStatus) {
             var trapReason = trapStatus >> 8;
-            var sReason = trapReason? (" (" + this.toStrBase(trapReason) + ")") : "";
+            var sReason = trapReason? (" (" + trapReason + ")") : "";
             this.println("trapped to " + this.toStrBase(trapStatus & 0xff, 1) + sReason);
         }
 
@@ -1724,8 +1724,11 @@ if (DEBUGGER) {
      */
     DebuggerPDP11.prototype.undefinedInstruction = function(opCode)
     {
-        this.printMessage("undefined opcode " + this.toStrBase(opCode), true, true);
-        return this.stopInstruction();  // allow the caller to step over it if they really want a trap generated
+        if (this.messageEnabled(MessagesPDP11.CPU)) {
+            this.printMessage("undefined opcode " + this.toStrBase(opCode), true, true);
+            return this.stopInstruction();  // allow the caller to step over it if they really want a trap generated
+        }
+        return false;
     };
 
     /**
@@ -2946,8 +2949,13 @@ if (DEBUGGER) {
         if (!dbgAddr) return;
 
         var len = 0;                            // 0 is not a default; it triggers the appropriate default below
+        var fRange = false;
+        var fJSON = (sCmd == "ds");
+
         if (sLen) {
+            fRange = true;
             if (sLen.charAt(0) == 'l') {
+                fRange = false;
                 sLen = sLen.substr(1) || sBytes;
             }
             len = this.parseValue(sLen) >>> 0;  // negative lengths not allowed
@@ -2959,8 +2967,9 @@ if (DEBUGGER) {
          * since this is primarily a word-oriented machine.
          */
         var size = (sCmd == "dd"? 4 : (sCmd == "db"? 1 : 2));
-        var nBytes = (size * len) || 128;
-        var nLines = ((nBytes + 15) >> 4) || 1;
+        var nBytes = (fRange? (len - dbgAddr.addr) : (size * len)) || 128;
+        var nBytesPerLine = fJSON? 16 : this.nBase;
+        var nLines = (((nBytes + nBytesPerLine - 1) / nBytesPerLine)|0) || 1;
 
         var sDump = "";
         while (nLines-- && nBytes > 0) {
@@ -2977,20 +2986,29 @@ if (DEBUGGER) {
              */
             var i, n;
             var data = 0, shift = 0;
-            for (i = this.nBase; i > 0 && nBytes > 0; i -= n, nBytes -= n) {
+            for (i = nBytesPerLine; i > 0 && nBytes > 0; i -= n, nBytes -= n) {
                 n = 1;
                 var v = size == 1? this.getByte(dbgAddr, n) : this.getWord(dbgAddr, (n = 2));
                 data |= (v << (shift << 3));
                 shift += n;
                 if (shift == size) {
-                    sData += this.toStrBase(data, size);
-                    sData += (size == 1? (i == 9? '-' : ' ') : "  ");
+                    if (fJSON) {
+                        if (sData) sData += ",";
+                        sData += "0x"+ str.toHex(data, size * 2);
+                    } else {
+                        sData += this.toStrBase(data, size);
+                        sData += (size == 1? (i == 9? '-' : ' ') : "  ");
+                    }
                     data = shift = 0;
                 }
                 sChars += (v >= 32 && v < 128? String.fromCharCode(v) : '.');
             }
-            if (sDump) sDump += '\n';
-            sDump += sAddr + "  " + sData + ((i == 0)? (' ' + sChars) : "");
+            if (sDump) sDump += "\n";
+            if (fJSON) {
+                sDump += sData + ",";
+            } else {
+                sDump += sAddr + "  " + sData + ((i == 0)? (' ' + sChars) : "");
+            }
         }
 
         if (sDump) this.println(sDump);

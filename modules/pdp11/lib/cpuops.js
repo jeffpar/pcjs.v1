@@ -140,7 +140,7 @@ PDP11.fnASR = function(src, dst)
  */
 PDP11.fnASRB = function(src, dst)
 {
-    var result = (dst & 0x800) | (dst >> 1) | (dst << 8);
+    var result = (dst & 0x80) | (dst >> 1) | (dst << 8);
     this.updateShiftFlags(result << 8);
     return result & 0xff;
 };
@@ -827,7 +827,7 @@ PDP11.opBPL = function(opCode)
  */
 PDP11.opBPT = function(opCode)
 {
-    this.trap(PDP11.TRAP.BPT, PDP11.REASON.BPT);
+    this.trap(PDP11.TRAP.BPT, 0, PDP11.REASON.BPT);
     this.nStepCycles -= (4 + 1);
 };
 
@@ -1101,7 +1101,7 @@ PDP11.opDIV = function(opCode)
  */
 PDP11.opEMT = function(opCode)
 {
-    this.trap(PDP11.TRAP.EMT, PDP11.REASON.EMT);
+    this.trap(PDP11.TRAP.EMT, 0, PDP11.REASON.EMT);
     this.nStepCycles -= (22 + 3);
 };
 
@@ -1115,8 +1115,11 @@ PDP11.opHALT = function(opCode)
 {
     if (this.regPSW & PDP11.PSW.CMODE) {
         this.regErr |= PDP11.CPUERR.BADHALT;
-        this.trap(PDP11.TRAP.BUS_ERROR, PDP11.REASON.HALT);
+        this.trap(PDP11.TRAP.BUS_ERROR, 0, PDP11.REASON.HALT);
     } else {
+        if (this.panel) {
+            this.panel.setData(this.regsGen[0], true);
+        }
         if (!this.dbg) {
             /*
              * This will leave the PC exactly where it's supposed to be: at the address of the HALT + 2.
@@ -1171,7 +1174,7 @@ PDP11.opINCB = function(opCode)
  */
 PDP11.opIOT = function(opCode)
 {
-    this.trap(PDP11.TRAP.IOT, PDP11.REASON.IOT);
+    this.trap(PDP11.TRAP.IOT, 0, PDP11.REASON.IOT);
     this.nStepCycles -= (22 + 3);
 };
 
@@ -1291,7 +1294,7 @@ PDP11.opMFPT = function(opCode)
     /*
      * TODO: Review
      */
-    this.trap(PDP11.TRAP.RESERVED, PDP11.REASON.RESERVED);
+    this.trap(PDP11.TRAP.RESERVED, 0, PDP11.REASON.RESERVED);
 };
 
 PDP11.MOV_CYCLES = [
@@ -1713,7 +1716,7 @@ PDP11.opSXT = function(opCode)
  */
 PDP11.opTRAP = function(opCode)
 {
-    this.trap(PDP11.TRAP.TRAP, PDP11.REASON.TRAP);
+    this.trap(PDP11.TRAP.TRAP, 0, PDP11.REASON.TRAP);
     this.nStepCycles -= (4 + 1);
 };
 
@@ -1823,7 +1826,7 @@ PDP11.opUndefined = function(opCode)
     if (DEBUGGER && this.dbg) {
         if (this.dbg.undefinedInstruction(opCode)) return;
     }
-    this.trap(PDP11.TRAP.RESERVED, PDP11.REASON.RESERVED);
+    this.trap(PDP11.TRAP.RESERVED, 0, PDP11.REASON.RESERVED);
 };
 
 /**

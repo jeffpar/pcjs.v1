@@ -73,13 +73,7 @@ available as paper tape image files, with the exception of PAL-11S and LINK-11S:
 
 Some additional information on DEC's Paper Tape Software is available at [retrotechnology.com](http://retrotechnology.com/pdp11/11_20_PTS.html).
 
-Newer Paper Tape Software (mid-1970s)
--------------------------------------
+Diagnostic Paper Tape Images
+----------------------------
 
-Thanks to the efforts of person(s) unknown, additional paper tape images have been uploaded to
-[bitsavers.org](http://bitsavers.trailing-edge.com/bits/DEC/pdp11/papertapeimages/).  It's not super organized, so for now,
-I'm just going to pick out selected tapes, archive them [here](misc/), and add them to the [Default PC11 Configuration](/devices/pdp11/pc11/).
-
-Try this [PDP-11/70](/devices/pdp11/machine/1170/panel/debugger/) to test the newer tapes. 
-
-- [MAINDEC-11-DEQKC-B1-PB 06/12/78; 11/70 cpu instruction; exerciser; (c)1975,76](misc/MAINDEC-11-DEQKC-B1-PB.json)
+We have also archived a collection of [Diagnostic Paper Tape Images](diags/).
