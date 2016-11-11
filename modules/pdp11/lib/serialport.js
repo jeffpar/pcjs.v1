@@ -655,10 +655,10 @@ SerialPortPDP11.prototype.readXCSR = function(addr)
 SerialPortPDP11.prototype.writeXCSR = function(data, addr)
 {
     /*
-     * If the device is READY, and IE is transitioning on, then request an interrupt.
+     * If the device is READY, and TIE is being set, then request an interrupt.
      */
-    if ((this.xcsr & (PDP11.DL11.XCSR.READY | PDP11.DL11.XCSR.TIE)) == PDP11.DL11.XCSR.READY && (data & PDP11.DL11.XCSR.TIE)) {
-        this.cpu.setTimer(this.timerTransmitInterrupt, this.getBaudTimeout(this.nBaudTransmit));
+    if ((this.xcsr & PDP11.DL11.XCSR.READY) && (data & PDP11.DL11.XCSR.TIE)) {
+        this.cpu.setTrigger(this.triggerTransmitInterrupt);
     }
     this.xcsr = (this.xcsr & ~PDP11.DL11.XCSR.WMASK) | (data & PDP11.DL11.XCSR.WMASK);
 };
