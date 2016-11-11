@@ -234,9 +234,15 @@
     }
     .pcjs-registers {
         width: 100% !important;
+        max-width: none !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
     }
     .pdp11-device {
-        width: 100% !important;
+        width: 98% !important;
         max-width: none !important;
+        margin-left: 8px !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
     }
 }

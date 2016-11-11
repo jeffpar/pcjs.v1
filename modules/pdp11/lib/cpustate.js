@@ -739,11 +739,12 @@ CPUStatePDP11.prototype.removeTrigger = function(trigger)
 CPUStatePDP11.prototype.setTrigger = function(trigger)
 {
     /*
-     * For now, we will not dispatch interrupts immediately, but always defer to checkInterrupts() instead.
+     * We COULD dispatch interrupts immediately, but there are compatibility reasons for ONLY doing so
+     * inside the stepCPU() loop; see that function for details.
      *
-    if (this.dispatchInterrupt(trigger.vector, trigger.priority)) {
-        return true;
-    }
+     *      if (this.dispatchInterrupt(trigger.vector, trigger.priority)) {
+     *          return true;
+     *      }
      */
     this.insertTrigger(trigger);
     this.opFlags |= PDP11.OPFLAG.INTQ;
@@ -829,6 +830,65 @@ CPUStatePDP11.prototype.dispatchInterrupt = function(vector, priority)
             this.opFlags &= ~PDP11.OPFLAG.WAIT;
         }
         this.trap(vector, 0, PDP11.REASON.INTERRUPT);
+        return true;
+    }
+    return false;
+};
+
+/**
+ * checkTraps()
+ *
+ * NOTE: The following code processes these "deferred" traps in priority order.  Unfortunately, that
+ * order seems to have changed since the 11/20.  For reference, here's the priority list for the 11/20:
+ *
+ *      1. Bus Errors
+ *      2. Instruction Traps
+ *      3. Trace Trap
+ *      4. Stack Overflow Trap
+ *      5. Power Failure Trap
+ *
+ * and for the 11/70:
+ *
+ *      1. HALT (Instruction, Switch, or Command)
+ *      2. MMU Faults
+ *      3. Parity Errors
+ *      4. Bus Errors (including stack overflow traps?)
+ *      5. Floating Point Traps
+ *      6. TRAP Instruction
+ *      7. TRACE Trap
+ *      8. OVFL Trap
+ *      9. Power Fail Trap
+ *     10. Console Bus Request (Front Panel Operation)
+ *     11. PIR 7, BR 7, PIR 6, BR 6, PIR 5, BR 5, PIR 4, BR 4, PIR 3, BR 3, PIR 2, PIR 1
+ *     12. WAIT Loop
+ *
+ * TODO: Determine 1) if the 11/20 Handbook was wrong, or 2) if the 11/70 really has different priorities.
+ *
+ * Also, as the PDP-11/20 Handbook (1971), p.100, notes:
+ *
+ *      If a bus error is caused by the trap process handling instruction traps, trace traps, stack overflow
+ *      traps, or a previous bus error, the processor is halted.
+ *
+ *      If a stack overflow is caused by the trap process in handling bus errors, instruction traps, or trace traps,
+ *      the process is completed and then the stack overflow trap is sprung.
+ *
+ * TODO: Based on the above notes, we should probably be halting the CPU when a bus error occurs during a trap.
+ *
+ * @this {CPUStatePDP11}
+ * @return {boolean} (true if dispatched, false if not)
+ */
+CPUStatePDP11.prototype.checkTraps = function()
+{
+    if (this.opFlags & PDP11.OPFLAG.TRAP_MMU) {
+        this.trap(PDP11.TRAP.MMU, PDP11.OPFLAG.TRAP_MMU, PDP11.REASON.TRAP);
+        return true;
+    }
+    if (this.opFlags & PDP11.OPFLAG.TRAP_SP) {
+        this.trap(PDP11.TRAP.BUS_ERROR, PDP11.OPFLAG.TRAP_SP, PDP11.REASON.STACK);
+        return true;
+    }
+    if (this.opFlags & PDP11.OPFLAG.TRAP_TF) {
+        this.trap(PDP11.TRAP.BPT, PDP11.OPFLAG.TRAP_TF, PDP11.REASON.TRACE);
         return true;
     }
     return false;
@@ -2257,42 +2317,14 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                 }
             }
             /*
-             * Check for any pending traps.
+             * Next, check for any pending traps (which, as noted above, must be done after checkInterrupts()).
              *
              * I've moved this TRAP_MASK check BEFORE we decode the next instruction instead of immediately AFTER,
              * just in case the last instruction threw an exception that kicked us out before we reached the bottom
              * of the stepCPU() loop.
-             *
-             * NOTE: The following code processes these "deferred" traps in priority order.  Unfortunately, that
-             * order seems to have changed since the 11/20.  For reference, here's the priority list for the 11/70:
-             *
-             *      1. HALT (Instruction, Switch, or Command)
-             *      2. MMU Faults
-             *      3. Parity Errors
-             *      4. Bus Errors (which includes stack overflow traps)
-             *      5. Floating Point Traps
-             *      6. TRAP Instruction
-             *      7. TRACE Trap
-             *      8. OVFL Trap
-             *      9. Power Fail Trap
-             *     10. Console Bus Request (Front Panel Operation)
-             *     11. PIR 7, BR 7, PIR 6, BR 6, PIR 5, BR 5, PIR 4, BR 4, PIR 3, BR 3, PIR 2, PIR 1
-             *     12. WAIT Loop
-             *
-             * TODO: Determine 1) if the 11/20 Handbook was wrong, or 2) if the 11/70 really has different priorities.
              */
             if (this.opFlags & PDP11.OPFLAG.TRAP_MASK) {
-                if (this.opFlags & PDP11.OPFLAG.TRAP_MMU) {
-                    this.trap(PDP11.TRAP.MMU, PDP11.OPFLAG.TRAP_MMU, PDP11.REASON.TRAP);
-                    if (nDebugState < 0) break;
-                }
-                else if (this.opFlags & PDP11.OPFLAG.TRAP_SP) {
-                    this.trap(PDP11.TRAP.BUS_ERROR, PDP11.OPFLAG.TRAP_SP, PDP11.REASON.STACK);
-                    if (nDebugState < 0) break;
-                }
-                else /* if (this.opFlags & PDP11.OPFLAG.TRAP_TF) */ {
-                    this.assert(this.opFlags & PDP11.OPFLAG.TRAP_TF);
-                    this.trap(PDP11.TRAP.BPT, PDP11.OPFLAG.TRAP_TF, PDP11.REASON.TRACE);
+                if (this.checkTraps()) {
                     if (nDebugState < 0) break;
                 }
             }
