@@ -202,8 +202,8 @@ var PDP11 = {
         WAIT:       0x04,       // WAIT operation in progress
         TRAP:       0x08,       // set if last operation was a trap (see trapLast for the vector, and trapReason for the reason)
         TRAP_TF:    0x10,       // aka PDP11.PSW.TF
-        TRAP_MMU:   0x20,
-        TRAP_SP:    0x40,       // set for a deferred BUS_ERROR trap (due to a "yellow" stack overflow condition)
+        TRAP_SP:    0x20,       // set for a deferred BUS_ERROR trap (due to a "yellow" stack overflow condition)
+        TRAP_MMU:   0x40,
         TRAP_MASK:  0x70,
         NO_FLAGS:   0x80,       // set whenever the PSW is written directly, requiring all updateXXXFlags() functions to leave flags unchanged
         PRESERVE:   0x07        // OPFLAG bits to preserve prior to the next instruction
@@ -261,28 +261,28 @@ var PDP11 = {
         MMU:        0xA8        // 250  MMU: aborts and traps
     },
     /*
-     * PDP-11 trap reasons (for diagnostic purposes only)
+     * PDP-11 trap reasons (largely for diagnostic purposes only)
      */
     REASON: {
-        BPT:        -1,
-        EMT:        -2,
-        HALT:       -3,
-        IOT:        -4,
-        TRAP:       -5,
-        RESERVED:   -6,
-        TRAPMMU:    -7,
-        TRAPSP:     -8,
-        TRAPTF:     -9,
-        ODDMEMADDR: -10,
-        NOMEMORY:   -11,
-        ODDMMUADDR: -12,
-        MAPERROR:   -13,
-        PUSHERROR:  -14,
-        NOREGADDR:  -15,
-        STACKMODE1: -16,
-        STACKERROR: -17,
-        INTERRUPT:  -18
+        UNKNOWN:     0,
+        TRAP:       -1,
+        HALT:       -2,
+        INTERRUPT:  -3,
+        TRACE:      -4,
+        STACK:      -5,
+        ILLEGAL:    -6,
+        ERROR:      -7,
     },
+    REASONS: [
+        "UNKNOWN",
+        "TRAP",
+        "HALT",
+        "INTERRUPT",
+        "TRACE",
+        "STACK",
+        "ILLEGAL",
+        "ERROR"
+    ],
     /*
      * Internal memory access flags
      */

@@ -1399,9 +1399,9 @@ if (DEBUGGER) {
 
         var trapStatus = this.cpu.getTrapStatus();
         if (trapStatus) {
-            var trapReason = trapStatus >> 8;
-            var sReason = trapReason? (" (" + trapReason + ")") : "";
-            this.println("trapped to " + this.toStrBase(trapStatus & 0xff, 1) + sReason);
+            var reason = trapStatus >> 8;
+            var sReason = reason < 0? PDP11.REASONS[-reason] : this.toStrBase(reason);
+            this.println("trapped to " + this.toStrBase(trapStatus & 0xff, 1) + " (" + sReason + ")");
         }
 
         this.dbgAddrNextCode = this.newAddr(this.cpu.getPC());
