@@ -42,7 +42,8 @@ var MessagesPDP11 = {
     DEVICE:     0x00000200,
     KEYBOARD:   0x00010000,
     KEYS:       0x00020000,
-    DISK:       0x00200000,
+    PAPER:      0x00100000,
+    DISK:       0x00400000,
     SERIAL:     0x00800000,
     SPEAKER:    0x02000000,
     COMPUTER:   0x04000000,
@@ -76,6 +77,7 @@ MessagesPDP11.CATEGORIES = {
     "device":   MessagesPDP11.DEVICE,
     "keyboard": MessagesPDP11.KEYBOARD, // "kbd" is also allowed as shorthand for "keyboard"; see doMessages()
     "key":      MessagesPDP11.KEYS,     // using "key" instead of "keys", since the latter is a method on JavasScript objects
+    "paper":    MessagesPDP11.PAPER,
     "disk":     MessagesPDP11.DISK,
     "serial":   MessagesPDP11.SERIAL,
     "speaker":  MessagesPDP11.SPEAKER,

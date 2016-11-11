@@ -1048,7 +1048,16 @@ DevicePDP11.prototype.readPSW = function(addr)
  */
 DevicePDP11.prototype.writePSW = function(data, addr)
 {
-    var maskDisallowed = PDP11.PSW.UNUSED | PDP11.PSW.TF;
+    /*
+     * pdp11.js disallowed PSW.TF in addition to PSW.UNUSED, but DEC's "TRAP TEST" expects the
+     * following instruction to trap:
+     *
+     *      004174: 052767 000020 173574   BIS   #20,177776
+     *
+     * Since that test was written for the PDP-11/20, it's possible that newer machines
+     * have a different behavior, but for now, we assume that all machines allow setting PSW.TF.
+     */
+    var maskDisallowed = PDP11.PSW.UNUSED;
     this.cpu.setPSW((data & ~maskDisallowed) | (this.cpu.getPSW() & maskDisallowed));
     this.cpu.opFlags |= PDP11.OPFLAG.NO_FLAGS;
 };

@@ -33,13 +33,14 @@
 "use strict";
 
 if (NODE) {
-    var str          = require("../../shared/lib/strlib");
-    var web          = require("../../shared/lib/weblib");
-    var DumpAPI      = require("../../shared/lib/dumpapi");
-    var Component    = require("../../shared/lib/component");
-    var State        = require("../../shared/lib/state");
-    var PDP11        = require("./defines");
-    var MemoryPDP11  = require("./memory");
+    var str           = require("../../shared/lib/strlib");
+    var web           = require("../../shared/lib/weblib");
+    var DumpAPI       = require("../../shared/lib/dumpapi");
+    var Component     = require("../../shared/lib/component");
+    var State         = require("../../shared/lib/state");
+    var PDP11         = require("./defines");
+    var MemoryPDP11   = require("./memory");
+    var MessagesPDP11 = require("./messages");
 }
 
 /**
@@ -254,13 +255,13 @@ RAMPDP11.prototype.reset = function()
 /**
  * loadImage(aBytes, addrLoad, addrExec, addrInit, fReset)
  *
- * If the array contains an image in the "Absolute Format," load it as specified by
- * the format; otherwise, load it as-is using the address(es) supplied.
+ * If the array contains a PAPER tape image in the "Absolute Format," load it as specified
+ * by the format; otherwise, load it as-is using the address(es) supplied.
  *
  * @this {RAMPDP11}
  * @param {Array|Uint8Array} aBytes
  * @param {number|null} [addrLoad]
- * @param {number|null} [addrExec]
+ * @param {number|null} [addrExec] (this CAN override any starting address INSIDE the image)
  * @param {number|null} [addrInit]
  * @param {boolean} [fReset]
  * @return {boolean} (true if loaded, false if not)
@@ -337,9 +338,11 @@ RAMPDP11.prototype.loadImage = function(aBytes, addrLoad, addrExec, addrInit, fR
                 if (addr & 0x1) {
                     this.cpu.stopCPU();
                 } else {
-                    this.cpu.setReset(addr, fReset);
+                    if (addrExec == null) addrExec = addr;
                 }
+                if (addrExec != null) this.printMessage("starting address: " + str.toHexWord(addrExec), MessagesPDP11.PAPER);
             } else {
+                this.printMessage("loading " + str.toHexWord(cbData) + " bytes at " + str.toHexWord(addr) + "-" + str.toHexWord(addr + cbData - 1), MessagesPDP11.PAPER);
                 while (cbData--) {
                     this.cpu.setByteDirect(addr++, aBytes[offData++] & 0xff);
                 }
@@ -353,9 +356,19 @@ RAMPDP11.prototype.loadImage = function(aBytes, addrLoad, addrExec, addrInit, fR
             for (var i = 0; i < aBytes.length; i++) {
                 this.cpu.setByteDirect(addrLoad + i, aBytes[i]);
             }
-            if (addrExec != null) this.cpu.setReset(addrExec, fReset);
             fLoaded = true;
         }
+    }
+    if (fLoaded) {
+        /*
+         * Set the start address to whatever the caller provided, or failing that, whatever start
+         * address was specified inside the image.
+         *
+         * For example, the diagnostic "MAINDEC-11-D0AA-PB" doesn't include a start address inside the
+         * image, but we know that the directions for that diagnostic say to "Start and Restart at 200",
+         * so we have manually inserted an "exec":128 in the JSON containing the image.
+         */
+        if (addrExec != null) this.cpu.setReset(addrExec, fReset);
     }
     return fLoaded;
 };
