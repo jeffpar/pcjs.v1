@@ -462,7 +462,7 @@ SerialPortPDP11.prototype.initState = function(data)
     this.rbuf = 0;
     this.rcsr = 0;
     this.xcsr = PDP11.DL11.XCSR.READY;
-    // this.abReceive = [];
+    this.abReceive = [];
     return true;
 };
 
