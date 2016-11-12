@@ -243,19 +243,7 @@ DevicePDP11.prototype.readMMR1 = function(addr)
  */
 DevicePDP11.prototype.readMMR2 = function(addr)
 {
-    return this.cpu.regMMR2;
-};
-
-/**
- * writeMMR2(data, addr)
- *
- * @this {DevicePDP11}
- * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.MMR2 or 177576)
- */
-DevicePDP11.prototype.writeMMR2 = function(data, addr)
-{
-    this.cpu.regMMR2 = data;
+    return this.cpu.getMMR2();
 };
 
 /**

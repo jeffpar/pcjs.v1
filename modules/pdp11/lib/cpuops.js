@@ -693,7 +693,9 @@ PDP11.opBISB = function(opCode)
  */
 PDP11.opBIT = function(opCode)
 {
-    this.updateNZVFlags(this.readSrcWord(opCode) & this.readDstWord(opCode));
+    var src = this.readSrcWord(opCode);
+    var dst = this.readDstWord(opCode);
+    this.updateNZVFlags((src < 0? this.regsGen[-src-1] : src) & dst);
     this.nStepCycles -= (this.dstMode? (3 + 1) + (this.srcReg && this.dstReg >= 6? 1 : 0) : (this.srcMode? (3 + 1) : (2 + 1)) + (this.dstReg == 7? 2 : 0));
 };
 
@@ -705,7 +707,9 @@ PDP11.opBIT = function(opCode)
  */
 PDP11.opBITB = function(opCode)
 {
-    this.updateNZVFlags((this.readSrcByte(opCode) & this.readDstByte(opCode)) << 8);
+    var src = this.readSrcByte(opCode);
+    var dst = this.readDstByte(opCode);
+    this.updateNZVFlags(((src < 0? (this.regsGen[-src-1] & 0xff) : src) & dst) << 8);
     this.nStepCycles -= (this.dstMode? (3 + 1) + (this.srcReg && this.dstReg >= 6? 1 : 0) : (this.srcMode? (3 + 1) : (2 + 1)) + (this.dstReg == 7? 2 : 0));
 };
 
@@ -964,7 +968,7 @@ PDP11.opCMP = function(opCode)
 {
     var src = this.readSrcWord(opCode);
     var dst = this.readDstWord(opCode);
-    var result = src - dst;
+    var result = (src = (src < 0? this.regsGen[-src-1] : src)) - dst;
     /*
      * NOTE: CMP calculates (src - dst) rather than (dst - src), so src and dst updateSubFlags() parms must be reversed.
      */
@@ -980,9 +984,9 @@ PDP11.opCMP = function(opCode)
  */
 PDP11.opCMPB = function(opCode)
 {
-    var src = this.readSrcByte(opCode) << 8;
-    var dst = this.readDstByte(opCode) << 8;
-    var result = src - dst;
+    var src = this.readSrcByte(opCode);
+    var dst = this.readDstByte(opCode);
+    var result = (src = (src < 0? (this.regsGen[-src-1] & 0xff): src) << 8) - (dst <<= 8);
     /*
      * NOTE: CMP calculates (src - dst) rather than (dst - src), so src and dst updateSubFlags() parms must be reversed.
      */
@@ -1667,7 +1671,7 @@ PDP11.opSPL = function(opCode)
     }
     if (!(this.regPSW & PDP11.PSW.CMODE)) {
         this.regPSW = (this.regPSW & ~(PDP11.PSW.UNUSED | PDP11.PSW.PRI)) | ((opCode & 0x7) << PDP11.PSW.SHIFT.PRI);
-        this.opFlags |= PDP11.OPFLAG.INTQ_SPL;
+        this.opFlags |= PDP11.OPFLAG.INTQ_CHK;
     }
     this.nStepCycles -= (4 + 1);
 };

@@ -242,6 +242,10 @@ CPUStatePDP11.prototype.resetRegs = function()
     this.mmuEnable = 0;         // MMU enabled for PDP11.ACCESS.READ or PDP11.ACCESS.WRITE
     this.mmuLastMode = 0;
     this.mmuMask = 0x3ffff;
+
+    this.lastAI = 0;            // last auto-incs and/or auto-decs; this gets propagated to MMR1
+    this.lastPC = 0;            // last PC at the time of getOpcode(); this get propagated to MMR2
+
     this.resetTriggers();
 
     if (this.bus) this.setMemoryAccess();
@@ -324,11 +328,28 @@ CPUStatePDP11.prototype.setMMR0 = function(newMMR0)
  */
 CPUStatePDP11.prototype.getMMR1 = function()
 {
+    if (!(this.regMMR0 & PDP11.MMR0.ABORT)) {
+        this.regMMR1 = this.lastAI & 0xffff;
+    }
     var result = this.regMMR1;
     if (result & 0xff00) {
         result = ((result << 8) | (result >> 8)) & 0xffff;
     }
     return result;
+};
+
+/**
+ * getMMR2()
+ *
+ * @this {CPUStatePDP11}
+ * @return {number}
+ */
+CPUStatePDP11.prototype.getMMR2 = function()
+{
+    if (!(this.regMMR0 & PDP11.MMR0.ABORT)) {
+        this.regMMR2 = this.lastPC;
+    }
+    return this.regMMR2;
 };
 
 /**
@@ -560,21 +581,22 @@ CPUStatePDP11.prototype.setNF = function()
 /**
  * getOpcode()
  *
- * TODO: Determine whether we can speed this up by *always* snapping PC into a shadow MMR2 register
- * and eliminating the ABORT test.
- *
  * @this {CPUStatePDP11}
  * @return {number}
  */
 CPUStatePDP11.prototype.getOpcode = function()
 {
     var pc = this.regsGen[PDP11.REG.PC];
-    if (!(this.regMMR0 & PDP11.MMR0.ABORT)) {
-        this.regMMR1 = 0;
-        this.regMMR2 = pc;
-    }
+    this.lastAI = 0;
+    this.lastPC = pc;
+    /*
+     * If PC is misaligned, a BUS_ERROR trap will be generated, and because it will generate an
+     * exception, the next line (the equivalent of advancePC(2)) will not be executed, ensuring that
+     * original misaligned PC will be pushed onto the stack by trap().
+     */
+    var op = this.readWord(pc);
     this.regsGen[PDP11.REG.PC] = (pc + 2) & 0xffff;
-    return this.readWord(pc);
+    return op;
 };
 
 /**
@@ -614,10 +636,7 @@ CPUStatePDP11.prototype.getPC = function()
  */
 CPUStatePDP11.prototype.getLastPC = function()
 {
-    /*
-     * As long as we're always snapping the PC into regMMR2 before every opcode, we might as well use it.
-     */
-    return this.regMMR2;
+    return this.lastPC;
 };
 
 /**
@@ -800,10 +819,10 @@ CPUStatePDP11.prototype.checkInterrupts = function()
             fInterrupt = true;
         }
     }
-    else if (this.opFlags & PDP11.OPFLAG.INTQ_SPL) {
+    else if (this.opFlags & PDP11.OPFLAG.INTQ_CHK) {
         /*
-         * We know that INTQ (bit 1) is clear, so since INTQ_SPL (bit 0) is set, incrementing opFlags
-         * will transform INTQ_SPL into INTQ, without affecting any other (higher) bits.
+         * We know that INTQ (bit 1) is clear, so since INTQ_CHK (bit 0) is set, incrementing opFlags
+         * will transform INTQ_CHK into INTQ, without affecting any other (higher) bits.
          */
         this.opFlags++;
     }
@@ -1246,10 +1265,8 @@ CPUStatePDP11.prototype.trap = function(vector, flag, reason)
         this.regsGen[6] = 4;
     }
 
-    if (!(this.regMMR0 & PDP11.MMR0.ABORT)) {
-        this.regMMR1 = 0xf6f6;
-        this.regMMR2 = vector;
-    }
+    this.lastPC = vector;
+    this.lastAI = 0;
 
     /*
      * Read from kernel D space
@@ -1273,8 +1290,32 @@ CPUStatePDP11.prototype.trap = function(vector, flag, reason)
      * only want to "lose interest" in the TRAP flag(s) that were set on entry, not ALL of them.
      *
      *      this.opFlags &= ~PDP11.OPFLAG.TRAP_MASK;    // lose interest in traps after an abort
+     *
+     * Well, OK, we're also supposed to "lose interest" in the TF flag, too; otherwise, DEC tests fail.
+     *
+     * Finally, setPSW() likes to always set INTQ, to force a check of hardware interrupts prior to
+     * the next instruction, just in case the PSW priority was lowered.  However, there are "TRAP TEST"
+     * tests like this one:
+     *
+     *      005640: 012706 007700          MOV   #7700,SP
+     *      005644: 012767 000340 172124   MOV   #340,177776
+     *      005652: 012767 000100 171704   MOV   #100,177564
+     *      005660: 012767 005712 172146   MOV   #5712,000034   ; set TRAP vector (its PSW is already zero)
+     *      005666: 012767 005714 172170   MOV   #5714,000064   ; set hardware interrupt vector (its PSW is already zero)
+     *      005674: 012767 005716 172116   MOV   #5716,000020   ; set IOT vector
+     *      005702: 012767 000340 172112   MOV   #340,000022    ; set IOT PSW
+     *      005710: 104400                 TRAP  000
+     *      005712: 000004                 IOT
+     *      005714: 000000                 HALT
+     *
+     * where, after "TRAP 000" has executed, a hardware interrupt will be acknowledged, and instead of
+     * executing the IOT, we'll execute the HALT and fail the test.  We avoid that by relying on the same
+     * trick that the SPL instruction uses: setting INTQ_CHK instead of INTQ, which effectively delays
+     * INTQ detection for one instruction, which is just long enough to allow the diagnostic to pass.
      */
-    this.opFlags &= ~flag;
+    this.opFlags &= ~(flag | PDP11.OPFLAG.TRAP_TF | PDP11.OPFLAG.INTQ);
+    this.opFlags |= PDP11.OPFLAG.INTQ_CHK;
+
     this.trapPSW = -1;                                  // reset flag that we have a trap within a trap
 
     /*
@@ -1543,7 +1584,7 @@ CPUStatePDP11.prototype.readByteFromPhysical = function(physicalAddress)
 CPUStatePDP11.prototype.writeByteToPhysical = function(physicalAddress, data)
 {
     if (physicalAddress & 1) this.nStepCycles--;
-    this.bus.setByte(physicalAddress, data & 0xff);
+    this.bus.setByte(physicalAddress, data);
 };
 
 /**
@@ -1568,12 +1609,8 @@ CPUStatePDP11.prototype.popWord = function()
 CPUStatePDP11.prototype.pushWord = function(data)
 {
     var virtualAddress = (this.regsGen[6] - 2) & 0xffff;
-
     this.regsGen[6] = virtualAddress;           // BSD needs SP updated before any fault :-(
-
-    if (!(this.regMMR0 & 0xe000)) {
-        this.regMMR1 = (this.regMMR1 << 8) | 0xf6;
-    }
+    this.lastAI = (this.lastAI << 8) | 0xf6;
     this.checkStackLimit(0, virtualAddress);
     this.writeWord(virtualAddress, data);
 };
@@ -1658,7 +1695,7 @@ CPUStatePDP11.prototype.checkStackLimit = function(mode, addr)
  */
 CPUStatePDP11.prototype.getAddrByMode = function(mode, reg, accessFlags)
 {
-    var virtualAddress, stepSize;
+    var virtualAddress, step;
     var addrDSpace = (accessFlags & PDP11.ACCESS.VIRT)? 0 : this.addrDSpace;
 
     /*
@@ -1692,12 +1729,12 @@ CPUStatePDP11.prototype.getAddrByMode = function(mode, reg, accessFlags)
      * Mode 2: (R)+
      */
     case 2:
-        stepSize = 2;
+        step = 2;
         virtualAddress = this.regsGen[reg];
         if (reg != 7) {
             virtualAddress |= addrDSpace;
             if (reg < 6 && (accessFlags & PDP11.ACCESS.BYTE)) {
-                stepSize = 1;
+                step = 1;
             }
         }
         this.nStepCycles -= (2 + 1);
@@ -1707,7 +1744,7 @@ CPUStatePDP11.prototype.getAddrByMode = function(mode, reg, accessFlags)
      * Mode 3: @(R)+
      */
     case 3:
-        stepSize = 2;
+        step = 2;
         virtualAddress = this.regsGen[reg];
         if (reg != 7) virtualAddress |= addrDSpace;
         virtualAddress = this.readWord(virtualAddress);
@@ -1719,9 +1756,9 @@ CPUStatePDP11.prototype.getAddrByMode = function(mode, reg, accessFlags)
      * Mode 4: -(R)
      */
     case 4:
-        stepSize = -2;
-        if (reg < 6 && (accessFlags & PDP11.ACCESS.BYTE)) stepSize = -1;
-        virtualAddress = (this.regsGen[reg] + stepSize) & 0xffff;
+        step = -2;
+        if (reg < 6 && (accessFlags & PDP11.ACCESS.BYTE)) step = -1;
+        virtualAddress = (this.regsGen[reg] + step) & 0xffff;
         if (reg != 7) virtualAddress |= addrDSpace;
         this.nStepCycles -= (3 + 1);
         break;
@@ -1730,7 +1767,7 @@ CPUStatePDP11.prototype.getAddrByMode = function(mode, reg, accessFlags)
      * Mode 5: @-(R)
      */
     case 5:
-        stepSize = -2;
+        step = -2;
         virtualAddress = (this.regsGen[reg] - 2) & 0xffff;
         if (reg != 7) virtualAddress |= addrDSpace;
         virtualAddress = this.readWord(virtualAddress) | addrDSpace;
@@ -1757,17 +1794,14 @@ CPUStatePDP11.prototype.getAddrByMode = function(mode, reg, accessFlags)
         return virtualAddress;
     }
 
-    this.regsGen[reg] = (this.regsGen[reg] + stepSize) & 0xffff;
-
-    if (addrDSpace && !(this.regMMR0 & 0xe000)) {
-        this.regMMR1 = (this.regMMR1 << 8) | ((stepSize << 3) & 0xf8) | reg;
-    }
+    this.regsGen[reg] = (this.regsGen[reg] + step) & 0xffff;
+    this.lastAI = (this.lastAI << 8) | ((step << 3) & 0xf8) | reg;
 
     /*
      * NOTE: We had to eliminate the test for "(accessFlags & PDP11.ACCESS.WRITE)", because DEC's
      * "TRAP TEST" expects "TST -(SP)" to trap when SP is 150.
      */
-    if (reg == 6 && stepSize < 0) {
+    if (reg == 6 && step < 0) {
         this.checkStackLimit(mode, this.regsGen[6]);
     }
     return virtualAddress;
@@ -1955,14 +1989,14 @@ CPUStatePDP11.prototype.writeWordToVirtual = function(virtualAddress, data)
  */
 CPUStatePDP11.prototype.readWordFromPrevSpace = function(opCode, accessFlags)
 {
-    var src;
+    var data;
     var reg = this.dstReg = opCode & PDP11.OPREG.MASK;
     var mode = this.dstMode = (opCode & PDP11.OPMODE.MASK) >> PDP11.OPMODE.SHIFT;
     if (!mode) {
         if (reg != 6 || ((this.regPSW >> 2) & PDP11.PSW.PMODE) === (this.regPSW & PDP11.PSW.PMODE)) {
-            src = this.regsGen[reg];
+            data = this.regsGen[reg];
         } else {
-            src = this.regsAltStack[(this.regPSW >> 12) & 3];
+            data = this.regsAltStack[(this.regPSW >> 12) & 3];
         }
     } else {
         var addr = this.getAddrByMode(mode, reg, PDP11.ACCESS.READ_WORD);
@@ -1970,10 +2004,10 @@ CPUStatePDP11.prototype.readWordFromPrevSpace = function(opCode, accessFlags)
             if ((this.regPSW & 0xf000) !== 0xf000) addr &= 0xffff;
         }
         this.mmuMode = (this.regPSW >> 12) & 3;
-        src = this.readWord(addr | (accessFlags & this.addrDSpace));
+        data = this.readWord(addr | (accessFlags & this.addrDSpace));
         this.mmuMode = (this.regPSW >> 14) & 3;
     }
-    return src;
+    return data;
 };
 
 /**
@@ -1986,9 +2020,7 @@ CPUStatePDP11.prototype.readWordFromPrevSpace = function(opCode, accessFlags)
  */
 CPUStatePDP11.prototype.writeWordToPrevSpace = function(opCode, accessFlags, data)
 {
-    if (!(this.regMMR0 & 0xe000)) {
-        this.regMMR1 = 0x16;
-    }
+    this.lastAI = 0x0016;
     var reg = this.dstReg = opCode & PDP11.OPREG.MASK;
     var mode = this.dstMode = (opCode & PDP11.OPMODE.MASK) >> PDP11.OPMODE.SHIFT;
     if (!mode) {
@@ -2016,6 +2048,11 @@ CPUStatePDP11.prototype.writeWordToPrevSpace = function(opCode, accessFlags, dat
 /**
  * readSrcByte(opCode)
  *
+ * WARNING: If the SRC operand is a register, we return a negative register number rather than the
+ * register value, because the final value of the register must be resolved AFTER the DST operand has
+ * been decoded and any pre-decrement or post-increment operations have been performed.  See readSrcWord()
+ * for more details.
+ *
  * @this {CPUStatePDP11}
  * @param {number} opCode
  * @return {number}
@@ -2027,7 +2064,7 @@ CPUStatePDP11.prototype.readSrcByte = function(opCode)
     var reg = this.srcReg = opCode & PDP11.OPREG.MASK;
     var mode = this.srcMode = (opCode & PDP11.OPMODE.MASK) >> PDP11.OPMODE.SHIFT;
     if (!mode) {
-        result = this.regsGen[reg] & 0xff;
+        result = -reg-1;
     } else {
         result = this.readByteFromPhysical(this.getAddr(mode, reg, PDP11.ACCESS.READ_BYTE));
     }
@@ -2036,6 +2073,26 @@ CPUStatePDP11.prototype.readSrcByte = function(opCode)
 
 /**
  * readSrcWord(opCode)
+ *
+ * WARNING: If the SRC operand is a register, we return a negative register number rather than the
+ * register value, because the final value of the register must be resolved AFTER the DST operand has
+ * been decoded and any pre-decrement or post-increment operations have been performed.
+ *
+ * Here's an example from DEC's "TRAP TEST":
+ *
+ *      007200: 012700 006340          MOV   #6340,R0
+ *      007204: 010020                 MOV   R0,(R0)+
+ *      007206: 026727 177126 006342   CMP   006340,#6342
+ *      007214: 001401                 BEQ   007220
+ *      007216: 000000                 HALT
+ *
+ * If we returned the value of R0 immediately, then "MOV R0,(R0)+" would write 6340 to the memory location,
+ * rather than 6342.
+ *
+ * Most callers don't need to worry about this, because if they pass the result from readSrcWord() directly
+ * to writeDstWord() or updateDstWord(), those functions will take care of converting any negative register
+ * number back into the proper register value.  The exceptions are opcodes that don't modify the DST operand
+ * (BIT, BITB, CMP, and CMPB); those opcode handlers must deal with negative register numbers themselves.
  *
  * @this {CPUStatePDP11}
  * @param {number} opCode
@@ -2048,7 +2105,7 @@ CPUStatePDP11.prototype.readSrcWord = function(opCode)
     var reg = this.srcReg = opCode & PDP11.OPREG.MASK;
     var mode = this.srcMode = (opCode & PDP11.OPMODE.MASK) >> PDP11.OPMODE.SHIFT;
     if (!mode) {
-        result = this.regsGen[reg];
+        result = -reg-1;
     } else {
         result = this.bus.getWord(this.getAddr(mode, reg, PDP11.ACCESS.READ_WORD));
     }
@@ -2110,46 +2167,55 @@ CPUStatePDP11.prototype.readDstWord = function(opCode)
 };
 
 /**
- * updateDstByte(opCode, src, fnOp)
+ * updateDstByte(opCode, data, fnOp)
  *
  * Used whenever the dst operand (as described by opCode) needs to be read before writing.
  *
  * @this {CPUStatePDP11}
  * @param {number} opCode
- * @param {number} src
+ * @param {number} data
  * @param {function(number,number)} fnOp
  */
-CPUStatePDP11.prototype.updateDstByte = function(opCode, src, fnOp)
+CPUStatePDP11.prototype.updateDstByte = function(opCode, data, fnOp)
 {
     var reg = this.dstReg = opCode & PDP11.OPREG.MASK;
     var mode = this.dstMode = (opCode & PDP11.OPMODE.MASK) >> PDP11.OPMODE.SHIFT;
     if (!mode) {
-        this.regsGen[reg] = (this.regsGen[reg] & 0xff00) | fnOp.call(this, src, this.regsGen[reg] & 0xff);
+        var dst = this.regsGen[reg];
+        data = (data < 0? (this.regsGen[-data-1] & 0xff) : data);
+        this.regsGen[reg] = (dst & 0xff00) | fnOp.call(this, data, dst & 0xff);
     } else {
         var addr = this.dstAddr = this.getAddr(mode, reg, PDP11.ACCESS.UPDATE_BYTE);
-        this.writeByteToPhysical(addr, fnOp.call(this, src, this.readByteFromPhysical(addr)));
+        data = (data < 0? (this.regsGen[-data-1] & 0xff) : data);
+        this.writeByteToPhysical(addr, fnOp.call(this, data, this.readByteFromPhysical(addr)));
     }
 };
 
 /**
- * updateDstWord(opCode, src, fnOp)
+ * updateDstWord(opCode, data, fnOp)
  *
  * Used whenever the dst operand (as described by opCode) needs to be read before writing.
  *
  * @this {CPUStatePDP11}
  * @param {number} opCode
- * @param {number} src
+ * @param {number} data
  * @param {function(number,number)} fnOp
  */
-CPUStatePDP11.prototype.updateDstWord = function(opCode, src, fnOp)
+CPUStatePDP11.prototype.updateDstWord = function(opCode, data, fnOp)
 {
     var reg = this.dstReg = opCode & PDP11.OPREG.MASK;
     var mode = this.dstMode = (opCode & PDP11.OPMODE.MASK) >> PDP11.OPMODE.SHIFT;
+
+    /*
+     * TODO: If callers are careful about masking data, then we don't need to mask it here or in bus.setWord().
+     */
+    this.assert(data < 0 && data >= -8 || !(data & ~0xffff));
+
     if (!mode) {
-        this.regsGen[reg] = fnOp.call(this, src, this.regsGen[reg]);
+        this.regsGen[reg] = fnOp.call(this, data < 0? this.regsGen[-data-1] : data, this.regsGen[reg]);
     } else {
         var addr = this.getAddr(mode, reg, PDP11.ACCESS.UPDATE_WORD);
-        this.bus.setWord(addr, fnOp.call(this, src, this.bus.getWord(addr)));
+        this.bus.setWord(addr, fnOp.call(this, data < 0? this.regsGen[-data-1] : data, this.bus.getWord(addr)));
     }
 };
 
@@ -2180,10 +2246,12 @@ CPUStatePDP11.prototype.writeDstByte = function(opCode, data, writeFlags)
              * Potentially worthwhile optimization: skipping the sign-extending data shifts
              * if writeFlags is WRITE.BYTE (but that requires an extra test and separate code paths).
              */
+            data = (data < 0? (this.regsGen[-data-1] & 0xff): data);
             this.regsGen[reg] = (this.regsGen[reg] & ~writeFlags) | (((data << 24) >> 24) & writeFlags);
         }
     } else {
-        this.writeByteToPhysical(this.getAddr(mode, reg, PDP11.ACCESS.WRITE_BYTE), data);
+        var addr = this.getAddr(mode, reg, PDP11.ACCESS.WRITE_BYTE);
+        this.writeByteToPhysical(addr, (data = data < 0? (this.regsGen[-data-1] & 0xff): data));
     }
     return data;
 };
@@ -2202,10 +2270,17 @@ CPUStatePDP11.prototype.writeDstWord = function(opCode, data)
 {
     var reg = this.dstReg = opCode & PDP11.OPREG.MASK;
     var mode = this.dstMode = (opCode & PDP11.OPMODE.MASK) >> PDP11.OPMODE.SHIFT;
+
+    /*
+     * TODO: If callers are careful about masking data, then we don't need to mask it here or in bus.setWord().
+     */
+    this.assert(data < 0 && data >= -8 || !(data & ~0xffff));
+
     if (!mode) {
-        this.regsGen[reg] = data & 0xffff;
+        this.regsGen[reg] = data < 0? this.regsGen[-data-1] : (data & 0xffff);
     } else {
-        this.bus.setWord(this.getAddr(mode, reg, PDP11.ACCESS.WRITE_WORD), data);
+        var addr = this.getAddr(mode, reg, PDP11.ACCESS.WRITE_WORD);
+        this.bus.setWord(addr, data < 0? this.regsGen[-data-1] : data);
     }
     return data;
 };
@@ -2304,7 +2379,7 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
              * an interrupt can trigger a TRAP_SP stack overflow condition, which must be dealt with BEFORE we
              * execute the first instruction of the interrupt handler.
              */
-            if ((this.opFlags & (PDP11.OPFLAG.INTQ_SPL | PDP11.OPFLAG.INTQ | PDP11.OPFLAG.WAIT)) /* && nDebugState >= 0 */) {
+            if ((this.opFlags & (PDP11.OPFLAG.INTQ_MASK | PDP11.OPFLAG.WAIT)) /* && nDebugState >= 0 */) {
                 if (this.checkInterrupts()) {
                     /*
                      * Since an interrupt was just dispatched, altering the normal flow of time and changing

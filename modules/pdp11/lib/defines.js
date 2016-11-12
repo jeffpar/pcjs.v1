@@ -161,19 +161,19 @@ var PDP11 = {
      * Processor Status flag definitions (stored in regPSW)
      */
     PSW: {
-        CF:         0x0001,     // bit  0: Carry Flag
-        VF:         0x0002,     // bit  1: Overflow Flag (aka OF on Intel processors)
-        ZF:         0x0004,     // bit  2: Zero Flag
-        NF:         0x0008,     // bit  3: Negative Flag (aka SF -- Sign Flag -- on Intel processors)
-        TF:         0x0010,     // bit  4: Trap Flag
-        PRI:        0x00E0,     // bits 5-7: Priority
-        UNUSED:     0x0700,     // bits 8-10: unused
+        CF:         0x0001,     // bit  0     (000001)  Carry Flag
+        VF:         0x0002,     // bit  1     (000002)  Overflow Flag (aka OF on Intel processors)
+        ZF:         0x0004,     // bit  2     (000004)  Zero Flag
+        NF:         0x0008,     // bit  3     (000010)  Negative Flag (aka SF -- Sign Flag -- on Intel processors)
+        TF:         0x0010,     // bit  4     (000020)  Trap Flag
+        PRI:        0x00E0,     // bits 5-7   (000340)  Priority
+        UNUSED:     0x0700,     // bits 8-10  (003400)  UNUSED
         /*
          * PSW bits above this point are unused on 11/20-class machines
          */
-        REGSET:     0x0800,     // bit  11: Register Set                        (
-        PMODE:      0x3000,     // bits 12-13: Prev Mode (see PDP11.MODE)
-        CMODE:      0xC000,     // bits 14-15: Curr Mode (see PDP11.MODE)
+        REGSET:     0x0800,     // bit  11    (004000)  Register Set
+        PMODE:      0x3000,     // bits 12-13 (030000)  Prev Mode (see PDP11.MODE)
+        CMODE:      0xC000,     // bits 14-15 (140000)  Curr Mode (see PDP11.MODE)
         SHIFT: {
             CF:     0,
             VF:     1,
@@ -197,8 +197,9 @@ var PDP11 = {
      * Internal operation state flags
      */
     OPFLAG: {
-        INTQ_SPL:   0x01,       // INTQ triggered by SPL
+        INTQ_CHK:   0x01,       // set INTQ on next check (set by SPL and assorted traps)
         INTQ:       0x02,       // call checkInterrupts()
+        INTQ_MASK:  0x03,
         WAIT:       0x04,       // WAIT operation in progress
         TRAP:       0x08,       // set if last operation was a trap (see trapLast for the vector, and trapReason for the reason)
         TRAP_TF:    0x10,       // aka PDP11.PSW.TF

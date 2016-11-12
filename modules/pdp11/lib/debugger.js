@@ -431,7 +431,7 @@ if (DEBUGGER) {
     DebuggerPDP11.OPNONE = [DebuggerPDP11.OPS.NONE];
 
     /*
-     * Table of opcodes that are specific to the 11/45 and higher
+     * Table of opcodes specific to the 11/45 and newer
      */
     DebuggerPDP11.OP1145 = [
         DebuggerPDP11.OPS.MARK,
