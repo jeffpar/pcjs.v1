@@ -2056,8 +2056,8 @@ CPUStatePDP11.prototype.writeWordToPrevSpace = function(opCode, accessFlags, dat
  *
  * WARNING: If the SRC operand is a register, we return a negative register number rather than the
  * register value, because the final value of the register must be resolved AFTER the DST operand has
- * been decoded and any pre-decrement or post-increment operations have been performed.  See readSrcWord()
- * for more details.
+ * been decoded and any pre-decrement or post-increment operations affecting the SRC register have
+ * been completed.  See readSrcWord() for more details.
  *
  * @this {CPUStatePDP11}
  * @param {number} opCode
@@ -2082,7 +2082,8 @@ CPUStatePDP11.prototype.readSrcByte = function(opCode)
  *
  * WARNING: If the SRC operand is a register, we return a negative register number rather than the
  * register value, because the final value of the register must be resolved AFTER the DST operand has
- * been decoded and any pre-decrement or post-increment operations have been performed.
+ * been decoded and any pre-decrement or post-increment operations affecting the SRC register have
+ * been completed.
  *
  * Here's an example from DEC's "TRAP TEST":
  *
@@ -2092,12 +2093,12 @@ CPUStatePDP11.prototype.readSrcByte = function(opCode)
  *      007214: 001401                 BEQ   007220
  *      007216: 000000                 HALT
  *
- * If we returned the value of R0 immediately, then "MOV R0,(R0)+" would write 6340 to the memory location,
- * rather than 6342.
+ * If this function returned the value of R0 for the SRC operand of "MOV R0,(R0)+", then the operation
+ * would write 6340 to the destination, rather than 6342.
  *
  * Most callers don't need to worry about this, because if they pass the result from readSrcWord() directly
  * to writeDstWord() or updateDstWord(), those functions will take care of converting any negative register
- * number back into the proper register value.  The exceptions are opcodes that don't modify the DST operand
+ * number back into the current register value.  The exceptions are opcodes that don't modify the DST operand
  * (BIT, BITB, CMP, and CMPB); those opcode handlers must deal with negative register numbers themselves.
  *
  * @this {CPUStatePDP11}
@@ -2175,7 +2176,7 @@ CPUStatePDP11.prototype.readDstWord = function(opCode)
 /**
  * updateDstByte(opCode, data, fnOp)
  *
- * Used whenever the dst operand (as described by opCode) needs to be read before writing.
+ * Used whenever the DST operand (as described by opCode) needs to be read before writing.
  *
  * @this {CPUStatePDP11}
  * @param {number} opCode
@@ -2200,7 +2201,7 @@ CPUStatePDP11.prototype.updateDstByte = function(opCode, data, fnOp)
 /**
  * updateDstWord(opCode, data, fnOp)
  *
- * Used whenever the dst operand (as described by opCode) needs to be read before writing.
+ * Used whenever the DST operand (as described by opCode) needs to be read before writing.
  *
  * @this {CPUStatePDP11}
  * @param {number} opCode
@@ -2229,7 +2230,7 @@ CPUStatePDP11.prototype.updateDstWord = function(opCode, data, fnOp)
 /**
  * writeDstByte(opCode, data, writeFlags)
  *
- * Used whenever the dst operand (as described by opCode) does NOT need to be read before writing.
+ * Used whenever the DST operand (as described by opCode) does NOT need to be read before writing.
  *
  * @this {CPUStatePDP11}
  * @param {number} opCode
@@ -2266,7 +2267,7 @@ CPUStatePDP11.prototype.writeDstByte = function(opCode, data, writeFlags)
 /**
  * writeDstWord(opCode, data)
  *
- * Used whenever the dst operand (as described by opCode) does NOT need to be read before writing.
+ * Used whenever the DST operand (as described by opCode) does NOT need to be read before writing.
  *
  * @this {CPUStatePDP11}
  * @param {number} opCode
