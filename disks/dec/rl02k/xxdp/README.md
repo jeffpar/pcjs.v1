@@ -1,6 +1,6 @@
 ---
 layout: page
-title: DEC RL02K Disk Images: XXDP+
+title: "DEC RL02K Disk Images: XXDP+"
 permalink: /disks/dec/rl02k/xxdp/
 ---
 

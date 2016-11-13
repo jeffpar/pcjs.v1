@@ -312,6 +312,8 @@ SerialPortPDP11.prototype.initBus = function(cmp, bus, cpu, dbg)
     });
 
     bus.addIOTable(this, SerialPortPDP11.UNIBUS_IOTABLE);
+    bus.addResetHandler(this.reset.bind(this));
+
     this.setReady();
 };
 
@@ -655,10 +657,10 @@ SerialPortPDP11.prototype.readXCSR = function(addr)
 SerialPortPDP11.prototype.writeXCSR = function(data, addr)
 {
     /*
-     * If the device is READY, and IE is transitioning on, then request an interrupt.
+     * If the device is READY, and TIE is being set, then request an interrupt.
      */
-    if ((this.xcsr & (PDP11.DL11.XCSR.READY | PDP11.DL11.XCSR.TIE)) == PDP11.DL11.XCSR.READY && (data & PDP11.DL11.XCSR.TIE)) {
-        this.cpu.setTimer(this.timerTransmitInterrupt, this.getBaudTimeout(this.nBaudTransmit));
+    if ((this.xcsr & PDP11.DL11.XCSR.READY) && (data & PDP11.DL11.XCSR.TIE)) {
+        this.cpu.setTrigger(this.triggerTransmitInterrupt);
     }
     this.xcsr = (this.xcsr & ~PDP11.DL11.XCSR.WMASK) | (data & PDP11.DL11.XCSR.WMASK);
 };
@@ -688,6 +690,11 @@ SerialPortPDP11.prototype.writeXBUF = function(data, addr)
     if (data) {
         this.transmitByte(data);
         this.xcsr &= ~PDP11.DL11.XCSR.READY;
+        /*
+         * NOTE: When debugging issues involving the SerialPort, such as debugging code between a pair of
+         * transmitted bytes, you can pass 0 instead of getBaudTimeout() to setTimer() to minimize the amount
+         * of time spent waiting for XCSR.READY to be set again.
+         */
         this.cpu.setTimer(this.timerTransmitInterrupt, this.getBaudTimeout(this.nBaudTransmit));
     }
 };
