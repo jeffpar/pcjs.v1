@@ -287,6 +287,7 @@ PC11.prototype.initBus = function(cmp, bus, cpu, dbg)
     });
 
     bus.addIOTable(this, PC11.UNIBUS_IOTABLE);
+    bus.addResetHandler(this.reset.bind(this));
 
     this.addTape("None", PC11.SOURCE.NONE, true);
     if (this.fLocalTapes) this.addTape("Local Tape", PC11.SOURCE.LOCAL);

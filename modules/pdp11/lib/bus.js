@@ -1395,10 +1395,10 @@ BusPDP11.prototype.fault = function(addr, err, access)
     this.fFault = true;
     if (!this.nDisableFaults) {
         if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.FAULT)) {
-            this.dbg.printMessage("memory fault (" + access + ") on address " + this.dbg.toStrBase(addr), true, true);
+            this.dbg.printMessage("memory fault (" + access + ") on " + this.dbg.toStrBase(addr), true, true);
         }
         if (err) this.cpu.regErr |= err;
-        this.cpu.trap(PDP11.TRAP.BUS_ERROR, 0, addr);
+        this.cpu.trap(PDP11.TRAP.BUS, 0, addr);
     }
 };
 

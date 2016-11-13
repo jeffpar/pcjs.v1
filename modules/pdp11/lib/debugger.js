@@ -431,7 +431,7 @@ if (DEBUGGER) {
     DebuggerPDP11.OPNONE = [DebuggerPDP11.OPS.NONE];
 
     /*
-     * Table of opcodes that are specific to the 11/45 and higher
+     * Table of opcodes specific to the 11/45 and newer
      */
     DebuggerPDP11.OP1145 = [
         DebuggerPDP11.OPS.MARK,
@@ -1220,7 +1220,7 @@ if (DEBUGGER) {
         if (this.sMessagePrev && sMessage == this.sMessagePrev) return;
         this.sMessagePrev = sMessage;
 
-        if ((this.bitsMessage & MessagesPDP11.HALT) && this.cpu && this.cpu.isRunning()) {
+        if ((this.bitsMessage & MessagesPDP11.HALT) && this.cpu && this.cpu.isRunning() || this.isBusy(true)) {
             this.stopCPU();
             sMessage += " (cpu halted)";
         }
@@ -1399,9 +1399,9 @@ if (DEBUGGER) {
 
         var trapStatus = this.cpu.getTrapStatus();
         if (trapStatus) {
-            var trapReason = trapStatus >> 8;
-            var sReason = trapReason? (" (" + trapReason + ")") : "";
-            this.println("trapped to " + this.toStrBase(trapStatus & 0xff, 1) + sReason);
+            var reason = trapStatus >> 8;
+            var sReason = reason < 0? PDP11.REASONS[-reason] : this.toStrBase(reason);
+            this.println("trapped to " + this.toStrBase(trapStatus & 0xff, 1) + " (" + sReason + ")");
         }
 
         this.dbgAddrNextCode = this.newAddr(this.cpu.getPC());
@@ -2984,10 +2984,10 @@ if (DEBUGGER) {
              *
              * Besides, it's nice for "db" and "dw" to generate the same Bus activity that typical byte and word reads do.
              */
-            var i, n;
+            var i = nBytesPerLine;
             var data = 0, shift = 0;
-            for (i = nBytesPerLine; i > 0 && nBytes > 0; i -= n, nBytes -= n) {
-                n = 1;
+            while (i > 0 && nBytes > 0) {
+                var n = 1;
                 var v = size == 1? this.getByte(dbgAddr, n) : this.getWord(dbgAddr, (n = 2));
                 data |= (v << (shift << 3));
                 shift += n;
@@ -3001,7 +3001,12 @@ if (DEBUGGER) {
                     }
                     data = shift = 0;
                 }
-                sChars += (v >= 32 && v < 128? String.fromCharCode(v) : '.');
+                i -= n; nBytes -= n;
+                while (n--) {
+                    var c = v & 0xff;
+                    sChars += (c >= 32 && c < 128? String.fromCharCode(c) : '.');
+                    v >>= 8;
+                }
             }
             if (sDump) sDump += "\n";
             if (fJSON) {
